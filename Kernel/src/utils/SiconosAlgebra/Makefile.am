@@ -6,8 +6,8 @@ include $(top_srcdir)/config/Make-rules
 	$(CXXCOMPILE) -c $< 
 
 
-lib_LIBRARIES = libSiconosMatrixVector.a
-libSiconosMatrixVector_a_SOURCES = SiconosVectorException.cpp SiconosMatrixException.cpp NewSiconosVector.cpp SimpleVector.cpp CompositeVector.cpp SiconosMatrix.cpp \
+lib_LIBRARIES = libSiconosAlgebra.a
+libSiconosAlgebra_a_SOURCES = SiconosVectorException.cpp SiconosMatrixException.cpp NewSiconosVector.cpp SimpleVector.cpp CompositeVector.cpp SiconosMatrix.cpp \
 				SiconosVectorException.h SiconosMatrixException.h NewSiconosVector.h SimpleVector.h CompositeVector.h SiconosMatrix.h
 include_HEADERS = SiconosVectorException.h SiconosMatrixException.h NewSiconosVector.h SimpleVector.h CompositeVector.h SiconosMatrix.h 
 

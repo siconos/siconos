@@ -537,8 +537,8 @@ AC_CONFIG_FILES([Makefile
                  src/plugin/Makefile
                  src/utils/Makefile
 		 src/utils/SiconosException/Makefile
-                 src/utils/NewSiconosVector/Makefile
-                 src/utils/NewSiconosVector/test/Makefile
+                 src/utils/SiconosAlgebra/Makefile
+                 src/utils/SiconosAlgebra/test/Makefile
                  src/utils/SiconosMemory/Makefile
                  src/utils/SiconosMemory/test/Makefile
                  src/utils/SiconosSharedLibrary/Makefile
