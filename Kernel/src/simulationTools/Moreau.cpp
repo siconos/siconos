@@ -110,8 +110,8 @@ void Moreau::integrate()
   double theta = this->theta;
 
   double h = this->timeDiscretisation->getH();
-  double t = 0.0;
-  double told = 0.0;
+  double t = this->timeDiscretisation->getStrategy()->getModel()->getCurrentT();
+  double told = t - h;
 
   if (this->ds->getType() == LNLDS)
   {
@@ -144,6 +144,7 @@ void Moreau::integrate()
     // or call the F77 function  MoreauLTIDS
 
     // Computation of the Residual term
+    cout << "@@@@@@@@@@@@ current time ==" << t << endl;
     d->computeFExt(t);
     SimpleVector FExt0 = d->getFExt();
     d->computeFExt(told);

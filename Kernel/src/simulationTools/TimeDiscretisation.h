@@ -54,6 +54,15 @@ public:
 
   ~TimeDiscretisation();
 
+  /** \fn Strategy* getStrategy(void)
+   *  \brief get the strategy
+   *  \return the strategy
+   */
+  inline Strategy* getStrategy(void) const
+  {
+    return this->strategy;
+  };
+
   /** \fn double getH(void)
    *  \brief get the time step
    *  \return the value of h

@@ -117,18 +117,10 @@ void Strategy::updateState()
 
   for (int i = 0; i < this->integratorVector.size(); i++)
   {
-    //    cout<<"### Strategy::updateState (Ufree) :"<<endl;
-    //    static_cast<LagrangianLinearTIDS*>(this->integratorVector[i]->getDynamicalSystem())->getQ().display();
-    //    static_cast<LagrangianLinearTIDS*>(this->integratorVector[i]->getDynamicalSystem())->getVelocity().display();
-
     this->integratorVector[i]->updateState();
-
-    //    cout<<"### Strategy::updateState (U) :"<<endl;
-    //    static_cast<LagrangianLinearTIDS*>(this->integratorVector[i]->getDynamicalSystem())->getQ().display();
-    //    static_cast<LagrangianLinearTIDS*>(this->integratorVector[i]->getDynamicalSystem())->getVelocity().display();
   }
-  //  cout<<"                    <<Press Enter>>"<<endl;
-  //  getchar();
+
+  this->model->setCurrentT(this->model->getCurrentT() + this->timeDiscretisation->getH());
 }
 
 void Strategy::initialize()
