@@ -5,8 +5,8 @@ include $(top_srcdir)/config/Make-rules
 .cpp.o:
 	$(CXXCOMPILE) -c $<
 
-lib_LIBRARIES = libModelFormalisation.a
-libModelFormalisation_a_SOURCES =  BoundaryCondition.cpp ComplementarityConditionNSL.cpp \
+lib_LIBRARIES = libModelingTools.a
+libModelingTools_a_SOURCES =  BoundaryCondition.cpp ComplementarityConditionNSL.cpp \
 		DSInputOutput.cpp DynamicalSystem.cpp EqualityConstraint.cpp Interaction.cpp \
 		LagrangianDSIO.cpp LagrangianEC.cpp LagrangianLinearR.cpp LagrangianNLDS.cpp LagrangianNonLinearR.cpp \
 		LagrangianTIDS.cpp LinearBC.cpp LinearDSIO.cpp LinearEC.cpp LinearSystemDS.cpp \

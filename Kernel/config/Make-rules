@@ -27,15 +27,15 @@ SICONOSXML_PATH = $(top_srcdir)/src/xml
 SICONOSXML_INC = $(SICONOSXML_PATH)
 SICONOSXML_LIB = -L$(SICONOSXML_PATH) -lSiconosXml
 
-#--- ModelFormalisation --------------------------------------
-MODELFORMALISATION_PATH = $(top_srcdir)/src/modelformalisation
-MODELFORMALISATION_INC = $(MODELFORMALISATION_PATH)
-MODELFORMALISATION_LIB = -L$(MODELFORMALISATION_PATH) -lModelFormalisation
+#--- ModelingTools --------------------------------------
+MODELINGTOOLS_PATH = $(top_srcdir)/src/modelingTools
+MODELINGTOOLS_INC = $(MODELINGTOOLS_PATH)
+MODELINGTOOLS_LIB = -L$(MODELINGTOOLS_PATH) -lModelingTools
 
-#--- ModelStrategy --------------------------------------
-MODELSTRATEGY_PATH = $(top_srcdir)/src/modelstrategy
-MODELSTRATEGY_INC = $(MODELSTRATEGY_PATH)
-MODELSTRATEGY_LIB = -L$(MODELSTRATEGY_PATH) -lModelStrategy
+#--- SimulationTools --------------------------------------
+SIMULATIONTOOLS_PATH = $(top_srcdir)/src/simulationTools
+SIMULATIONTOOLS_INC = $(SIMULATIONTOOLS_PATH)
+SIMULATIONTOOLS_LIB = -L$(SIMULATIONTOOLS_PATH) -lSimulationTools
 
 #--- Model --------------------------------------
 MODEL_PATH = $(top_srcdir)/src/model
@@ -46,14 +46,14 @@ MODEL_LIB = -L$(MODEL_PATH) -lModel
 
 #--- INCLUDE -----------------------------------
 SICONOS_INCLUDES = -I$(top_srcdir)/src/utils/ -I$(SICONOSEXCEPTION_INC) -I$(SICONOSSHAREDLIBRARY_INC) -I$(SICONOSALGEBRA_INC)  -I$(SICONOSMEMORY_INC) \
--I$(SICONOSXML_INC) -I$(MODELFORMALISATION_INC) -I$(MODELSTRATEGY_INC) -I$(MODEL_INC)
+-I$(SICONOSXML_INC) -I$(MODELINGTOOLS_INC) -I$(SIMULATIONTOOLS_INC) -I$(MODEL_INC)
 
 # COMPILE FLAGS
 INCLUDES = $(SICONOS_INCLUDES) $(SICONOS_EXT_INCLUDES)	
 CXXCOMPILE = $(CXX) $(CXXFLAGS) $(INCLUDES)
 
 # obligé sinon il met main_siconos.o en dernier dans la ligne et ça foire :(
-LIBS=$(MODEL_LIB) $(MODELSTRATEGY_LIB) $(MODELFORMALISATION_LIB) \
+LIBS=$(MODEL_LIB) $(SIMULATIONTOOLS_LIB) $(MODELINGTOOLS_LIB) \
 	$(SICONOSXML_LIB) $(SICONOSMEMORY_LIB) $(SICONOSALGEBRA_LIB) \
 	$(SICONOSSHAREDLIBRARY_LIB) $(SICONOSEXCEPTION_LIB) $(SICONOS_EXT_LDFLAGS)
 
