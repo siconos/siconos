@@ -16,7 +16,7 @@
 
 	<NSDS>
 		<DS_Definition>		
-			<LagrangianTIDS number='1'>
+			<LagrangianLinearTIDS number='1'>
 				<Id> Ball1 </Id>				
 				<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='3'>	1.0 0.0 0.0	</q0>
@@ -38,9 +38,9 @@
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 				</C>
-			</LagrangianTIDS>
+			</LagrangianLinearTIDS>
 			
-			<LagrangianTIDS number='2'>
+			<LagrangianLinearTIDS number='2'>
 				<Id> Ball2 </Id>				
 				<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='3'>	10.0 0.0 0.0	</q0>
@@ -62,9 +62,9 @@
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 				</C>
-			</LagrangianTIDS>
+			</LagrangianLinearTIDS>
 			
-			<LagrangianTIDS number='3'>
+			<LagrangianLinearTIDS number='3'>
 				<Id> Ball3 </Id>				
 				<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='3'>	20.0 0.0 0.0	</q0>
@@ -86,9 +86,9 @@
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 				</C>
-			</LagrangianTIDS>
+			</LagrangianLinearTIDS>
 			
-			<LagrangianTIDS number='4'> 
+			<LagrangianLinearTIDS number='4'> 
 				<Id> Ground </Id>
 				<n>2</n>
 				<StepsInMemory>1</StepsInMemory>				
@@ -96,7 +96,7 @@
 				<Velocity0 vectorSize='1'>	0.0	</Velocity0>
 				<Fext vectorPlugin="BallPlugin:groundFExt"/>
 				<M matrixRowSize='1' matrixColSize='1'>	
-					<row>1.0 </row>
+					<row>1000000.0 </row>
 				</M>			
 				<ndof>1</ndof>								
 				<K matrixRowSize='1' matrixColSize='1'>
@@ -105,9 +105,9 @@
 				<C matrixRowSize='1' matrixColSize='1'>
 					<row>0.0</row>
 				</C>
-			</LagrangianTIDS>
+			</LagrangianLinearTIDS>
 			
-			<LagrangianTIDS number='5'> 
+			<LagrangianLinearTIDS number='5'> 
 				<Id> Ceiling </Id>
 				<n>2</n>
 				<StepsInMemory>1</StepsInMemory>				
@@ -115,7 +115,7 @@
 				<Velocity0 vectorSize='1'>	0.0	</Velocity0>
 				<Fext vectorPlugin="BallPlugin:groundFExt"/>
 				<M matrixRowSize='1' matrixColSize='1'>	
-					<row>1.0 </row>
+					<row>1000000.0 </row>
 				</M>			
 				<ndof>1</ndof>								
 				<K matrixRowSize='1' matrixColSize='1'>
@@ -124,7 +124,7 @@
 				<C matrixRowSize='1' matrixColSize='1'>
 					<row>0.0</row>
 				</C>
-			</LagrangianTIDS>
+			</LagrangianLinearTIDS>
 		</DS_Definition>
 
 

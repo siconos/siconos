@@ -1,9 +1,5 @@
-
 #include "SiconosDOMTreeTools.h"
-
 #include "check.h"
-
-//#include "KernelDefaultConfig.h"
 
 
 SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNode * siconosVectorNode)
@@ -243,13 +239,11 @@ void SiconosDOMTreeTools::setSiconosMatrixValue(const xmlNode * siconosMatrixNod
    */
   if (xmlHasProp((xmlNodePtr)siconosMatrixNode, (xmlChar *)SDTT_MATRIXFILE.c_str())) //matrix is defined in a extern ascii file
   {
-    //    OUT("SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file\n");
     string file = getStringAttributeValue(siconosMatrixNode, SDTT_MATRIXFILE);
     matrix.write(file, /*ASCII*/ /*N_ASCII*/ FILE_STORAGE); //For the moment only ASCII file are managed
   }
   else
   {
-    //    OUT("SiconosDOMTreeTools::setSiconosMatrixValue - to XML file\n");
     //The matrix is precised in the XML DOM Tree
     //lineSize
     int matrixColSize = getIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXCOLSIZE);
@@ -296,22 +290,16 @@ void SiconosDOMTreeTools::setSiconosMatrixValue(const xmlNode * siconosMatrixNod
 
     string matrixName = (char*)siconosMatrixNode->name;
 
-    //cout<<"#####################"<<endl;
-    //matrix->display();
-    //cout<<"   ---"<<endl;
-    //cout<<matrixColSize<<" - "<<matrixRowSize<<endl;
-    //cout<<"/#####################"<<endl;
-
     if (matrixColSize != matrix->size(1))
     {
-      //XMLException::selfThrow("SiconosDOMTreeTools - setSiconosMatrixValue : the " + matrixName + " matrix col size you want to save is different of the col size defined for it in xml");
+      matrixColSize = matrix->size(1);
       cout << "SiconosDOMTreeTools - setSiconosMatrixValue : the " + matrixName + " matrix col size you want to save is different of the col size already defined." << endl;
       setIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXCOLSIZE, matrix->size(1));
     }
 
     if (matrixRowSize != matrix->size(0))
     {
-      //XMLException::selfThrow("SiconosDOMTreeTools - setSiconosMatrixValue : the " + matrixName + " matrix row size you want to save is different of the row size defined for it in xml");
+      matrixRowSize = matrix->size(0);
       cout << "SiconosDOMTreeTools - setSiconosMatrixValue : the " + matrixName + " matrix row size you want to save is different of the row size already defined." << endl;
       setIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXROWSIZE, matrix->size(0));
     }
@@ -327,77 +315,6 @@ void SiconosDOMTreeTools::setSiconosMatrixValue(const xmlNode * siconosMatrixNod
     }
   }
 }
-
-
-//void SiconosDOMTreeTools::setVectorMemoryValue(const xmlNode * memoryNode, const vector<SiconosVector*> memory)
-//{
-//    xmlNode *oldNode=SiconosDOMTreeTools::findNodeChild(memoryNode, SDTT_MEMORY);
-//  xmlNode *node;
-//  string stringValue;
-//  stringstream sstr;
-//  node=oldNode;
-//
-//  int i=0;
-//
-//  while ((node!=NULL)&&(i<memory.size()))
-//  {
-//    setSiconosVectorValue(node, *(memory[i]));
-//    oldNode=node;
-//    node=SiconosDOMTreeTools::findFollowNode(node, SDTT_MEMORY);
-//    i++;
-//  }
-//
-//  while (i<memory.size()) //not enought nodes in the DOM tree to save memory
-//  {
-//    node = xmlNewNode(NULL, BAD_CAST SDTT_MEMORY.c_str());
-//    //sstr << *memory[i];
-//    //sstr >> stringValue;
-//    stringValue = (*(memory[i])).toString();
-//    xmlNodeSetContent(node, (const xmlChar *)stringValue.c_str());
-//    oldNode->next=node;
-//    i++;
-//  }
-//}
-//
-//void SiconosDOMTreeTools::setMemoryValue( xmlNode * memoryNode, const SiconosMemory & memory)
-//{
-//  int i=0;
-//  xmlNode *oldNode;
-//  xmlNode *node, *parent;
-//  string stringValue;
-//
-//  if( memoryNode != NULL )
-//  {
-//    oldNode = SiconosDOMTreeTools::findNodeChild(memoryNode, SDTT_MEMORY);
-//    node=oldNode;
-//
-//    while ( (node!=NULL)&&(i<memory.getNbVectorsInMemory()) )
-//    {
-//      setSiconosVectorValue( node, memory.getSiconosVector(i) );
-//      oldNode = node;
-//      node = SiconosDOMTreeTools::findFollowNode(node, SDTT_MEMORY);
-//      i++;
-//    }
-//
-//    while ( (i<memory.getMemorySize()) && (i<memory.getNbVectorsInMemory()))  //not enought nodes in the DOM tree to save memory
-//    {
-//      node = xmlNewNode(NULL, BAD_CAST SDTT_MEMORY.c_str());
-//      stringValue = memory.getSiconosVector(i)->toString();
-//      xmlNodeSetContent(node, (const xmlChar *)stringValue.c_str());
-//      xmlAddChild( memoryNode, node );
-////      oldNode->next = node;
-////      oldNode = node;
-//      i++;
-//    }
-//    setIntegerAttributeValue( memoryNode, SDTT_MEMORYSIZE, memory.getMemorySize() );
-//  }
-//  else
-//  {
-//    XMLException::selfThrow("SiconosDOMTreeTools - setMemoryValue : memoryNode == NULL");
-//  }
-//
-//
-//}
 
 
 void SiconosDOMTreeTools::setStringAttributeValue(const xmlNode * node, const string attributeName, const string value)
@@ -527,7 +444,6 @@ xmlNode* SiconosDOMTreeTools::createMatrixNode(xmlNode* rootNode, const string n
   {
     rowNode = new xmlNode();
     rowNode = xmlNewNode(NULL, BAD_CAST SDTT_ROW.c_str());
-    //    rowNode = xmlNewChild(node, NULL, BAD_CAST SDTT_ROW.c_str(), NULL);
     setSiconosRowMatrixValue(rowNode, matrix->getRow(i), matrix->size(1));
     xmlAddChildList(node, rowNode);
   }
@@ -563,8 +479,6 @@ xmlNode* SiconosDOMTreeTools::createVectorNode(xmlNode* rootNode, const string n
     string file = name + ".dat"; // \todo : add a time stamp to make this file unique
     xmlNewProp(node, (xmlChar *)SDTT_VECTORFILE.c_str(), (xmlChar*) file.c_str());
 
-    //    v.write(file, /*ASCII*/ /*N_ASCII*/ DefaultFileStorage); //For the moment only ASCII file are managed
-
     setSiconosVectorValue(node, v);
 
     xmlAddChildList(rootNode, node);
@@ -578,44 +492,12 @@ xmlNode* SiconosDOMTreeTools::createVectorIntNode(xmlNode* rootNode, const strin
   xmlNode *node;
   node = xmlNewNode(NULL, BAD_CAST name.c_str());
 
-  //  string size;
-  //  stringstream sstr;
-  //
-  //  sstr << v.size();
-  //  sstr >> size;
-
   setVectorIntContentValue(node, v);
 
   xmlAddChildList(rootNode, node);
 
   return node;
 }
-
-//xmlNode* SiconosDOMTreeTools::createVectorMemoryNode(xmlNode* rootNode, const string name, vector<SiconosVector*> vect)
-//{
-//  /*
-//   * \todo if the SiconosVectors are too big, the SiconosVectors must be saved in an external files and only the name of these files must be written in the XML file
-//   */
-//  xmlNode *node;
-//
-//    /* \todo */
-//
-//  xmlAddChildList(rootNode, node);
-//  return node;
-//}
-
-//xmlNode* SiconosDOMTreeTools::createSiconosMemoryNode(xmlNode* rootNode, const string name, SiconosMemory* smem)
-//{
-//  /*
-//   * \todo if the SiconosVectors are too big, the SiconosVectors must be saved in an external files and only the name of these files must be written in the XML file
-//   */
-//  xmlNode *node;
-//
-//  /* \todo */
-//
-//  xmlAddChildList(rootNode, node);
-//  return node;
-//}
 
 xmlNode* SiconosDOMTreeTools::createDoubleNode(xmlNode* rootNode, const string name, const double d)
 {
@@ -921,102 +803,6 @@ int SiconosDOMTreeTools::getNodeChildrenNumber(const xmlNode *node)
       n = findFollowNode(n);
       res++;
     }
-
-    //    n = node->next;
-    //    while( n != NULL )
-    //    {
-    //      if (n->type == XML_ELEMENT_NODE) res++;
-    //      n = n->next;
-    //    }
   }
   return res;
 }
-
-//$Log: SiconosDOMTreeTools.cpp,v $
-//Revision 1.58  2005/03/23 15:03:56  jbarbier
-//- adaptation to the LMGC90 tags in non smooth dynamical system and strategy
-//
-//Revision 1.57  2005/03/22 15:55:05  jbarbier
-//- class NewtonImpactFriction non smooth law added to the kernel
-//
-//- xml schema modified for this new class
-//- xml schema modified to accept a "joker" for further use of a LMGC90 mechanical plugin
-//
-//- new test added for the loading/saving of a NewtonImpactFrictionNSL
-//
-//Revision 1.56  2005/02/15 15:15:33  charlety
-//
-//_ modified some very slow functions to increase performance
-//
-//Revision 1.55  2005/01/20 09:05:34  jbarbier
-//- configuration file available and usable
-//
-//- save of vectors and matrices into external files (version 0.1)
-//
-//Revision 1.54  2005/01/10 17:06:37  jbarbier
-//- attribute "size" is now unused in the code
-//
-//- xml schema v1.2 is in progress
-//
-//Revision 1.53  2004/12/08 12:49:39  jbarbier
-//- changes in the XML Schema, respect of the recommandations of the W3C
-//version 1.1
-//
-//- changes in all balises DS, Relation, NSLaw, OneStepIntegrator, OneStepNSProblem
-//in the XML files into specific names like LagrangianDS, LinearSystemDS, ...
-//for the DS
-//
-//Revision 1.52  2004/12/06 10:10:34  jbarbier
-//- integration of Numerics and use of Numerics on the bouncing ball sample
-//
-//- Numerics is now needed to run the bouncing ball sample!
-//
-//Revision 1.51  2004/09/21 11:49:10  jbarbier
-//- correction in the XML save for a manual construction of the platform :
-//    DS_Concerned of the Interaction
-//    DS_Concerned of the Integrator
-//
-//- test updated for these changes
-//
-//Revision 1.50  2004/09/14 13:24:54  charlety
-//
-//_ changes in the interface of SiconosVector
-//
-//Revision 1.49  2004/09/10 11:26:29  charlety
-//
-//_ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//
-//_ All the tests which worked with the previous version of the vector are OK with the new version.
-//
-//_ Example SICONOS and bouncingBall are OK
-//
-//_ some comments have still to be adapted to NewSiconosVector .
-//
-//_ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//
-//Revision 1.48  2004/08/23 14:30:03  jbarbier
-//- All the dynamical systems can be created in a comand program and added to a
-//NSDS. The save is OK, but the creation of the boundary conditions is not yet
-//finished.
-//
-//Revision 1.47  2004/08/20 07:34:23  jbarbier
-//- creation of Model, NSDS in comand program succeed in creating SiconosModelXML,
-//NSDSXML
-//
-//Revision 1.46  2004/08/11 14:43:45  jbarbier
-//- beginning of the mechanism of creation without XML input file of the objects of the platform with the
-//creatObjtect methods
-//
-//- function saveWToXML for Moreau integrator, and same specific functions to save
-//M,q and Q,p for LCP and QP
-//
-//- function to check coherency of the Model
-//
-//Revision 1.45  2004/08/10 14:51:49  jbarbier
-//- functions initialize() of the Lsodar and Adams OneStepIntegrator completed to
-//call the function initialize() of the base class
-//
-//Revision 1.44  2004/07/30 14:37:15  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianDSXML
-//
-//Revision 1.43  2004/07/29 14:25:45  jbarbier

@@ -17,7 +17,7 @@
 	
 		<!-- DSs defined in the problem -->
 		<DS_Definition>		
-			<LagrangianTIDS number='1'>
+			<LagrangianLinearTIDS number='1'>
 				<Id> Ball </Id>				
 				<n>6</n>
 				<StepsInMemory>1</StepsInMemory>				
@@ -44,9 +44,9 @@
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 				</C>
-			</LagrangianTIDS>
+			</LagrangianLinearTIDS>
 			
-			<LagrangianTIDS number='2'> 
+			<LagrangianLinearTIDS number='2'> 
 				<Id> Ground </Id>
 				<n>2</n>
 				<StepsInMemory>1</StepsInMemory>				
@@ -69,7 +69,7 @@
 					<row>0.0</row>
 				</C>			
 
-			</LagrangianTIDS>	
+			</LagrangianLinearTIDS>	
 		</DS_Definition>
 
 

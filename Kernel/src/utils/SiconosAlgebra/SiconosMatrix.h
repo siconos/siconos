@@ -55,10 +55,10 @@ private:
      */
   bool isPLUFactorized;
 
-  /** \var  bool isInversed;
+  /** \var  bool isPLUInversed;
      * \brief  Boolean = true if the Matrix is Inversed in Place
      */
-  bool isInversed;
+  bool isPLUInversed;
 
   /** \fn LaGenMatDouble getMatrix() const;
    *  \brief get the private member mat
@@ -195,6 +195,24 @@ public:
    *  \return true if the matrix is square
    */
   bool isSquare();
+
+  /** \fn bool isInversed()
+   *  \brief determines if the matrix has been inversed
+   *  \return true if the matrix is inversed
+   */
+  inline bool isInversed() const
+  {
+    return this->isPLUInversed;
+  }
+
+  /** \fn bool isfactorized()
+   *  \brief determines if the matrix has been factorized
+   *  \return true if the matrix is factorized
+   */
+  inline bool isFactorised() const
+  {
+    return this->isPLUFactorized;
+  }
 
   /** \fn bool addRow(int row, SiconosVector v)
    *  \brief fill values of a row in the matrix

@@ -16,7 +16,7 @@
 
 	<NSDS>
 		<DS_Definition>		
-			<LagrangianTIDS number='1'>
+			<LagrangianLinearTIDS number='1'>
 				<Id> Ball1 </Id>				
 				<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='3'>	0.0 0.0 0.0	</q0>
@@ -38,9 +38,9 @@
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 				</C>			
-			</LagrangianTIDS>
+			</LagrangianLinearTIDS>
 			
-			<LagrangianTIDS number='2'>
+			<LagrangianLinearTIDS number='2'>
 				<Id> Ball2 </Id>				
 				<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='3'>	0.0 10.0 0.0	</q0>
@@ -62,9 +62,9 @@
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 				</C>
-			</LagrangianTIDS>
+			</LagrangianLinearTIDS>
 			
-			<LagrangianTIDS number='3'>
+			<LagrangianLinearTIDS number='3'>
 				<Id> Ball3 </Id>				
 				<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='3'>	0.0 20.0 0.0	</q0>
@@ -86,9 +86,9 @@
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 				</C>
-			</LagrangianTIDS>
+			</LagrangianLinearTIDS>
 			
-<!--			<LagrangianTIDS number='4'> 
+<!--			<LagrangianLinearTIDS number='4'> 
 				<Id> Ground </Id>
 				<n>2</n>
 				
@@ -117,7 +117,7 @@
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 				</C>			
-			</LagrangianTIDS>	-->
+			</LagrangianLinearTIDS>	-->
 		</DS_Definition>
 
 

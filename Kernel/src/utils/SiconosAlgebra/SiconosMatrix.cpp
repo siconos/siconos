@@ -14,7 +14,7 @@ SiconosMatrix::SiconosMatrix()
   this->mat.resize(0, 0);
   this->ipiv = NULL;
   this ->isPLUFactorized = false;
-  this ->isInversed = false;
+  this ->isPLUInversed = false;
 }
 
 
@@ -24,7 +24,7 @@ SiconosMatrix::SiconosMatrix(int row, int col)
   this->mat.resize(row, col);
   this->ipiv = NULL;
   this ->isPLUFactorized = false;
-  this ->isInversed = false;
+  this ->isPLUInversed = false;
 }
 
 /****************** constructeur ******************/
@@ -34,7 +34,7 @@ SiconosMatrix::SiconosMatrix(const LaGenMatDouble m)
   this->mat = m;
   this->ipiv = NULL;
   this->isPLUFactorized = false;
-  this ->isInversed = false;
+  this->isPLUInversed = false;
 
 }
 
@@ -56,7 +56,7 @@ SiconosMatrix::SiconosMatrix(const LaVectorDouble v, int row, int col)
   }
   this->ipiv = NULL;
   this -> isPLUFactorized = false;
-  this ->isInversed = false;
+  this ->isPLUInversed = false;
 
 }
 
@@ -67,7 +67,7 @@ SiconosMatrix::SiconosMatrix(string file, bool ascii)
   else this->read(file, "binary");
   this->ipiv = NULL;
   this ->isPLUFactorized = false;
-  this ->isInversed = false;
+  this ->isPLUInversed = false;
 }
 
 
@@ -178,27 +178,6 @@ SiconosMatrix SiconosMatrix::multTranspose(SiconosMatrix &B)
 
   SiconosMatrix result(matResult);
 
-  //  SiconosMatrix Result(this->size(0),B.size(0));
-  //  Result.zero();
-  //  if (this->size(1)!=B.size(1))
-  //    SiconosMatrixException::selfThrow("Incompatible matrix dimension. Operation multTranspose is impossible");
-  //
-  //  for(int imat=0 ; imat < this->size(0);imat++)
-  //  {
-  //    for(int jmat=0 ; jmat < B.size(0);jmat++)
-  //    {
-  //      for (int k =0 ; k < this->size(1); k++)
-  //      {
-  //        Result(imat,jmat)+= (*this)(imat,k)* B(jmat,k) ;
-  //      }
-  //    }
-  //  }
-  //
-  //  cout<<"avec Blas : "<<endl;
-  //  result.display();
-  //  cout<<"sans Blas : "<<endl;
-  //  Result.display();
-
   return result;
 }
 
@@ -282,7 +261,7 @@ SiconosMatrix& SiconosMatrix::operator = (const SiconosMatrix& m)
 
   }
   this->isPLUFactorized = m.isPLUFactorized;
-  this->isInversed = m.isInversed;
+  this->isPLUInversed = m.isPLUInversed;
   return *this;
 }
 
@@ -507,6 +486,8 @@ void SiconosMatrix::verbose(string msg)
 void SiconosMatrix::display() const
 {
   cout << "| size : " << this->size(0) << ", " << this->size(1) << endl;
+  cout << "| isPLUInversed : " << this->isPLUInversed << endl;
+
   if ((this->size(0) <= MAXSIZEFORDISPLAY) || (this->size(1) <= MAXSIZEFORDISPLAY))
     cout << this->mat << endl;
   else
@@ -644,6 +625,7 @@ void  SiconosMatrix::PLUInverseInPlace()
   else
     SiconosMatrixException::selfThrow(" SiconosMatrix::PLUInverseInPlace : This Matrix is not LU Factorized   with Partial pivoting");
 
+
   long int info;
 
   int M = this->size(0);
@@ -675,7 +657,9 @@ void  SiconosMatrix::PLUInverseInPlace()
 
   if (info != 0)
     SiconosMatrixException::selfThrow(" SiconosMatrix::PLUInverseInPlace : Internal error in LAPACK: DGETRI ");
-  this->isInversed = true ;
+
+  this->isPLUInversed = true ;
+
   OUT(" SiconosMatrix::PLUInverseInPlace()\n");
 }
 

@@ -141,7 +141,7 @@ void LCP::compute(void)
       }
     }
   }
-
+  //cout<<"### quit LCP::compute"<<endl;
   OUT("LCP::compute(void)\n");
 }
 
@@ -159,6 +159,8 @@ void LCP::computeM(void)
   vector<Connection*> vCo;
 
   SiconosMatrix *W1, *W2;
+  //SiconosMatrix W1, W2;
+
   SiconosMatrix WW;
   SiconosMatrix orgH, connectedH;
   SiconosMatrix wTmp, Mtmp;
@@ -203,7 +205,15 @@ void LCP::computeM(void)
         {
           M1 = static_cast<Moreau*>(I);
           W1 = M1->getWPtr();
-          W1->PLUInverseInPlace();
+          if (!W1->isInversed())
+          {
+            W1->PLUInverseInPlace();
+            if (W1->isInversed()) cout << "KAPOUeeeeeee ########################################################" << endl;
+          }
+          W1->display();
+
+          //W1 = M1->getW();
+          //W1.PLUInverseInPlace();
         }
         else
           RuntimeException::selfThrow("LCP::computeA not yet implemented for Integrator of type " + I->getType());
@@ -214,7 +224,11 @@ void LCP::computeM(void)
         {
           M2 = static_cast<Moreau*>(I2);
           W2 = M2->getWPtr();
-          W2->PLUInverseInPlace();
+          if (!W2->isInversed()) W2->PLUInverseInPlace();
+          W2->display();
+
+          //W2 = M2->getW();
+          //W2.PLUInverseInPlace();
         }
         else
           RuntimeException::selfThrow("LCP::computeA not yet implemented for Integrator of type " + I->getType());
@@ -223,6 +237,9 @@ void LCP::computeM(void)
         v[0] = W1;
         v[1] = W2;
         WW = BlockMatrixAssemble(v);
+
+        // W1->PLUInverseInPlace();
+        // W2->PLUInverseInPlace();
       }
       else
         RuntimeException::selfThrow("LCP::computeA not yet implemented for one DS in a Interaction ");
@@ -290,12 +307,6 @@ void LCP::computeM(void)
     } // test on status
   }
 
-  //  if( activeInteraction > 0 )
-  //  {
-  //    this->M.display();
-  //    cout<<"<<enter>>"<<endl;
-  //    getchar();
-  //  }
   this->nLcp = activeInteraction;
   OUT("LCP::computeM(void)\n");
 }
@@ -448,4 +459,3 @@ LCP* LCP::convert(OneStepNSProblem* osnsp)
   LCP* lcp = dynamic_cast<LCP*>(osnsp);
   return lcp;
 }
-
