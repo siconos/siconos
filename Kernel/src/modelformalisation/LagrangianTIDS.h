@@ -1,4 +1,3 @@
-//$Id: LagrangianTIDS.h,v 1.32 2005/02/11 17:36:00 charlety Exp $
 #ifndef LAGRANGIANTIDS_H
 #define LAGRANGIANTIDS_H
 
@@ -19,14 +18,10 @@ class LagrangianTIDSXML;
 
 /** \class LagrangianTIDS
  *  \brief class of Lagrangian invariant time systems, inherited of LagrangianNLDS
- *  \author V. ACARY, JB. CHARLETY
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 29, 2004
  *
- * $Date: 2005/02/11 17:36:00 $
- * $Revision: 1.32 $
- * $Author: charlety $
- * $Source: /CVS/Siconos/SICONOS/src/modelformalisation/LagrangianTIDS.h,v $
  *
  * The class LagrangianTIDS  allows to define  and compute a generic ndof-dimensional
  * Lagrangian Linear Time Invariant Dynamical System of the form :
@@ -214,76 +209,3 @@ private:
 };
 
 #endif // LAGRANGIANTIDS_H
-//$Log: LagrangianTIDS.h,v $
-//Revision 1.32  2005/02/11 17:36:00  charlety
-//
-//_ little "inspection of code"
-//_ basic getters and setters passed inline
-//_ getters functions passed const
-//
-//Revision 1.31  2005/01/31 16:26:20  charlety
-//
-//_ Added a method named "convert" to classes which inherits from another. This is necessary for Python interface, in order to be able to use down-casting mechanism.
-//
-//Revision 1.30  2004/09/30 08:35:02  jbarbier
-//- fonction of the formalisation : fill..With...XML and link... are now
-//"protected" and no more "public"
-//
-//Revision 1.29  2004/09/22 11:16:28  charlety
-//
-//_ revision of Doxygen comments in modelformalisation
-//
-//Revision 1.28  2004/09/22 10:54:43  jbarbier
-//- light modification according to the attribute mass of the lagrangian dynamical
-//systems. The lagrangianNLDS take always an function from a plugin to compute the
-//mass, whereas the lagrangianTIDS needs only a matrix.
-//
-//- xml input files have been modified in consequence
-//
-//Revision 1.27  2004/09/10 11:26:14  charlety
-//
-//_ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//
-//_ All the tests which worked with the previous version of the vector are OK with the new version.
-//
-//_ Example SICONOS and bouncingBall are OK
-//
-//_ some comments have still to be adapted to NewSiconosVector .
-//
-//_ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//
-//Revision 1.26  2004/08/23 14:30:01  jbarbier
-//- All the dynamical systems can be created in a comand program and added to a
-//NSDS. The save is OK, but the creation of the boundary conditions is not yet
-//finished.
-//
-//Revision 1.25  2004/08/20 15:26:44  jbarbier
-//- creation of a Model and save in the XML is ok
-//- creation of a NSDS and save in the XML is ok
-//- creation of a NonLinearSystemDS and save in the XML is OK
-//
-//Revision 1.24  2004/08/17 15:12:38  jbarbier
-//- methods createDynamicalSystem, createBoundaryCondition, createInteraction,
-//createRelation and createNSLaw completed with the required attributes
-//
-//Revision 1.23  2004/08/12 11:55:14  jbarbier
-//- new methods createModel, createNSDS, createStrategy, ...
-//they now allow to make the link with upper objects of the platform
-//it will be used for the creation of the platform without XML input file
-//
-//- the createModel method is finished but the attributes of the other objects
-//of the platform are missing for the conctruction
-//
-//Revision 1.22  2004/07/23 14:39:25  jbarbier
-//- createModel, createNSDS, createDynamicalSystem, createBoundaryCondition OK
-//it's the first step, it do the same thing that before, but the process is
-//unified and it must simply add the traitment for the creation of the nodes in
-//the DOM tree
-//
-//Revision 1.21  2004/07/05 12:38:08  charlety
-//
-//try of false plugin developed in LagrangianTIDS. The Moreau integrator considers it like a LagrangianNLDS, but this is not the plugin which is used to compute the external strength, but a function of the LagrangianTIDS.
-//
-//Revision 1.20  2004/06/29 08:49:57  acary
-//Ajout des commentaires Doxygen et des tages CVS
-//

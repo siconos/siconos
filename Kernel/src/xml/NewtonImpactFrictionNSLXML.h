@@ -1,14 +1,9 @@
-//$Id: NewtonImpactFrictionNSLXML.h,v 1.1 2005/03/22 15:55:05 jbarbier Exp $
 /** \class NewtonImpactFrictionNSLXML
  *  \brief  This class manages NewtonImpactFrictionNSL data part
- *  \author Jean-Michel Barbier
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date (Creation) March 22, 2005
  *
- * $Date: 2005/03/22 15:55:05 $
- * $Revision: 1.1 $
- * $Author: jbarbier $
- * $Source: /CVS/Siconos/SICONOS/src/xml/NewtonImpactFrictionNSLXML.h,v $
  *
  *
  * NewtonImpactFrictionNSLXML allows to manage data of a NewtonImpactFrictionNSL DOM tree.
@@ -145,12 +140,3 @@ private:
 };
 
 #endif
-//$Log: NewtonImpactFrictionNSLXML.h,v $
-//Revision 1.1  2005/03/22 15:55:05  jbarbier
-//- class NewtonImpactFriction non smooth law added to the kernel
-//
-//- xml schema modified for this new class
-//- xml schema modified to accept a "joker" for further use of a LMGC90 mechanical plugin
-//
-//- new test added for the loading/saving of a NewtonImpactFrictionNSL
-//

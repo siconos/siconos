@@ -1,16 +1,11 @@
-//$Id: NLinearBCXML.h,v 1.6 2004/09/10 08:04:51 jbarbier Exp $
 
 /** \class NLinearBCXML
 *   \brief This class manages None Linear BC data part
-*   \author J. Blanc-Tranchant
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 05/25/2004
 *
 *
-* $Date: 2004/09/10 08:04:51 $
-* $Revision: 1.6 $
-* $Author: jbarbier $
-* $Source: /CVS/Siconos/SICONOS/src/xml/NLinearBCXML.h,v $
 *
 * NLinearBCXML allows to manage data of a NLinearBC DOM tree.
 */
@@ -55,8 +50,3 @@ public:
 //- XML save available for BoundaryCondition and Interaction
 //
 //Revision 1.5  2004/07/29 14:25:43  jbarbier
-//- $Log: NLinearBCXML.h,v $
-//- Revision 1.6  2004/09/10 08:04:51  jbarbier
-//- - XML save available for BoundaryCondition and Interaction
-//- and $Id: NLinearBCXML.h,v 1.6 2004/09/10 08:04:51 jbarbier Exp $ added
-//

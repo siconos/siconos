@@ -1,4 +1,3 @@
-//$Id: LagrangianLinearRXML.cpp,v 1.6 2004/09/14 13:49:58 jbarbier Exp $
 
 #include "LagrangianLinearRXML.h"
 
@@ -59,10 +58,3 @@ void LagrangianLinearRXML::setB(SiconosVector *vector)
 //- all the platform can now be saved in an XML file when it is created manually
 //
 //Revision 1.5  2004/07/29 14:25:42  jbarbier
-//- $Log: LagrangianLinearRXML.cpp,v $
-//- Revision 1.6  2004/09/14 13:49:58  jbarbier
-//- - files added in sample/ to run run the main_siconos test program
-//-
-//- - all the platform can now be saved in an XML file when it is created manually
-//- and $Id: LagrangianLinearRXML.cpp,v 1.6 2004/09/14 13:49:58 jbarbier Exp $ added
-//

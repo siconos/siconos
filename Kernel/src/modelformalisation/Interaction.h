@@ -1,4 +1,3 @@
-//$Id: Interaction.h,v 1.53 2005/03/22 15:55:05 jbarbier Exp $
 #ifndef INTERACTION_H
 #define INTERACTION_H
 
@@ -28,14 +27,10 @@ class InteractionXML;
 
 /** \class Interaction
  *  \brief link between dynamic systems, driven by relations and non-smooth laws.
- *  \author JB CHARLETY
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 29, 2004
  *
- * $Date: 2005/03/22 15:55:05 $
- * $Revision: 1.53 $
- * $Author: jbarbier $
- * $Source: /CVS/Siconos/SICONOS/src/modelformalisation/Interaction.h,v $
  *
  */
 class Interaction
@@ -596,104 +591,3 @@ private:
 //of the platform are missing for the conctruction
 //
 //Revision 1.35  2004/07/29 14:25:36  jbarbier
-//- $Log: Interaction.h,v $
-//- Revision 1.53  2005/03/22 15:55:05  jbarbier
-//- - class NewtonImpactFriction non smooth law added to the kernel
-//-
-//- - xml schema modified for this new class
-//- - xml schema modified to accept a "joker" for further use of a LMGC90 mechanical plugin
-//-
-//- - new test added for the loading/saving of a NewtonImpactFrictionNSL
-//-
-//- Revision 1.52  2005/03/10 12:55:19  jbarbier
-//- - implmentation of the EqualityConstraint and DSInputOutput classes in progress
-//-     attributes H (DSIO) et G (EC) added in XML and managed in XML objects
-//-
-//- Revision 1.51  2005/02/15 15:15:32  charlety
-//-
-//- _ modified some very slow functions to increase performance
-//-
-//- Revision 1.50  2005/02/10 10:35:18  jbarbier
-//- - new file regrouping all the const values of the model, modelingTools and numericalStrategy
-//-
-//- - new function in the LagrangianLinearR to get the H matrix corresponding to one of the 2 dynamical systems linked to the relation
-//-
-//- - new atribute of the OneStepNSProblem. A visibility table of the Interaction.
-//-
-//- Revision 1.49  2005/02/04 14:52:44  jbarbier
-//- - Rolling balls in progress (contact is detected)
-//-
-//- - time data is given in parameter for computInput and Output in the Relation. Parameter is sent by methods of the OneStepNSProblem
-//-
-//- Revision 1.48  2005/01/20 14:44:48  jbarbier
-//- - NSDS class renamed NonSmoothDynamicalSystem
-//-
-//- - code reduce, some comments remove
-//-
-//- Revision 1.47  2004/09/30 08:35:02  jbarbier
-//- - fonction of the formalisation : fill..With...XML and link... are now
-//- "protected" and no more "public"
-//-
-//- Revision 1.46  2004/09/28 08:21:27  jbarbier
-//-
-//- - manual creation of the BouncingBall example successful
-//-
-//- Revision 1.45  2004/09/23 14:09:23  jbarbier
-//- - modification of the integrators, the attribute r is always optional.
-//-
-//- - modification of the LagrangianNonLinearR. computeInput and computeOutput are
-//- required.
-//-
-//- Revision 1.44  2004/09/22 11:16:28  charlety
-//-
-//- _ revision of Doxygen comments in modelformalisation
-//-
-//- Revision 1.43  2004/09/21 11:49:09  jbarbier
-//- - correction in the XML save for a manual construction of the platform :
-//-     DS_Concerned of the Interaction
-//-     DS_Concerned of the Integrator
-//-
-//- - test updated for these changes
-//-
-//- Revision 1.42  2004/09/14 13:49:54  jbarbier
-//- - files added in sample/ to run run the main_siconos test program
-//-
-//- - all the platform can now be saved in an XML file when it is created manually
-//-
-//- Revision 1.41  2004/09/10 11:26:11  charlety
-//-
-//- _ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//-
-//- _ All the tests which worked with the previous version of the vector are OK with the new version.
-//-
-//- _ Example SICONOS and bouncingBall are OK
-//-
-//- _ some comments have still to be adapted to NewSiconosVector .
-//-
-//- _ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//-
-//- Revision 1.40  2004/09/10 08:04:46  jbarbier
-//- - XML save available for BoundaryCondition and Interaction
-//-
-//- Revision 1.39  2004/09/03 14:41:41  jbarbier
-//- - new functions to create the boundary condition of the dynamical systems
-//- - new functions to add an interaction to a NonSmoothDynamicalSystem
-//- - new functions to create the relation and the non-smooth law of an interaciton
-//-
-//- Revision 1.38  2004/08/18 14:37:18  jbarbier
-//- - creation of Model, NonSmoothDynamicalSystem, Strategy(TimeStepping and EventDriven) and
-//- DynamicalSystem available when the creation is in a command program
-//-
-//- Revision 1.37  2004/08/17 15:12:37  jbarbier
-//- - methods createDynamicalSystem, createBoundaryCondition, createInteraction,
-//- createRelation and createNSLaw completed with the required attributes
-//-
-//- Revision 1.36  2004/08/12 11:55:14  jbarbier
-//- - new methods createModel, createNSDS, createStrategy, ...
-//- they now allow to make the link with upper objects of the platform
-//- it will be used for the creation of the platform without XML input file
-//-
-//- - the createModel method is finished but the attributes of the other objects
-//- of the platform are missing for the conctruction
-//- and $Id: Interaction.h,v 1.53 2005/03/22 15:55:05 jbarbier Exp $ added
-//

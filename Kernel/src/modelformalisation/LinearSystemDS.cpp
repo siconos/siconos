@@ -1,4 +1,3 @@
-//$Id: LinearSystemDS.cpp,v 1.30 2005/02/11 17:36:01 charlety Exp $
 #include "LinearSystemDS.h"
 #include "check.h"
 
@@ -257,67 +256,3 @@ LinearSystemDS* LinearSystemDS::convert(DynamicalSystem* ds)
 //of the platform are missing for the conctruction
 //
 //Revision 1.22  2004/07/29 14:25:37  jbarbier
-//- $Log: LinearSystemDS.cpp,v $
-//- Revision 1.30  2005/02/11 17:36:01  charlety
-//-
-//- _ little "inspection of code"
-//- _ basic getters and setters passed inline
-//- _ getters functions passed const
-//-
-//- Revision 1.29  2005/02/10 10:35:19  jbarbier
-//- - new file regrouping all the const values of the model, modelingTools and numericalStrategy
-//-
-//- - new function in the LagrangianLinearR to get the H matrix corresponding to one of the 2 dynamical systems linked to the relation
-//-
-//- - new atribute of the OneStepNSProblem. A visibility table of the Interaction.
-//-
-//- Revision 1.28  2005/01/31 16:26:21  charlety
-//-
-//- _ Added a method named "convert" to classes which inherits from another. This is necessary for Python interface, in order to be able to use down-casting mechanism.
-//-
-//- Revision 1.27  2004/09/21 11:49:09  jbarbier
-//- - correction in the XML save for a manual construction of the platform :
-//-     DS_Concerned of the Interaction
-//-     DS_Concerned of the Integrator
-//-
-//- - test updated for these changes
-//-
-//- Revision 1.26  2004/09/10 11:26:14  charlety
-//-
-//- _ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//-
-//- _ All the tests which worked with the previous version of the vector are OK with the new version.
-//-
-//- _ Example SICONOS and bouncingBall are OK
-//-
-//- _ some comments have still to be adapted to NewSiconosVector .
-//-
-//- _ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//-
-//- Revision 1.25  2004/08/23 14:30:01  jbarbier
-//- - All the dynamical systems can be created in a comand program and added to a
-//- NSDS. The save is OK, but the creation of the boundary conditions is not yet
-//- finished.
-//-
-//- Revision 1.24  2004/08/13 11:26:58  jbarbier
-//- - function createNSDS complete
-//-
-//- - function createDynamicalSystem and createLinearSystemDS complete
-//-
-//- - function  createLagrangianNLDS in progress
-//-
-//- Revision 1.23  2004/08/12 11:55:14  jbarbier
-//- - new methods createModel, createNSDS, createStrategy, ...
-//- they now allow to make the link with upper objects of the platform
-//- it will be used for the creation of the platform without XML input file
-//-
-//- - the createModel method is finished but the attributes of the other objects
-//- of the platform are missing for the conctruction
-//- and $Id: LinearSystemDS.cpp,v 1.30 2005/02/11 17:36:01 charlety Exp $ added
-//
-//Revision 1.21  2004/07/23 14:39:25  jbarbier
-//- createModel, createNSDS, createDynamicalSystem, createBoundaryCondition OK
-//it's the first step, it do the same thing that before, but the process is
-//unified and it must simply add the traitment for the creation of the nodes in
-//the DOM tree
-//

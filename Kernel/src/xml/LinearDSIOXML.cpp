@@ -1,4 +1,3 @@
-//$Id: LinearDSIOXML.cpp,v 1.4 2005/03/10 12:55:21 jbarbier Exp $
 
 #include "LinearDSIOXML.h"
 
@@ -91,22 +90,3 @@ LinearDSIOXML::~LinearDSIOXML()
 //  else SiconosDOMTreeTools::setSiconosVectorValue(aNode, vector);
 //}
 
-//$Log: LinearDSIOXML.cpp,v $
-//Revision 1.4  2005/03/10 12:55:21  jbarbier
-//- implmentation of the EqualityConstraint and DSInputOutput classes in progress
-//    attributes H (DSIO) et G (EC) added in XML and managed in XML objects
-//
-//Revision 1.3  2005/03/09 15:30:37  jbarbier
-//- add of LagrangianEC class
-//
-//- in progress : implementation of the EqualityConstraint and DSInputOutput - create methods
-//
-//Revision 1.2  2005/01/26 13:50:40  jbarbier
-//
-//- loading of an XML input file now loads EqualityConstraints and DSInputOutputs
-//
-//Revision 1.1  2005/01/17 10:56:27  jbarbier
-//- classes EqualityConstraint and DSInputOutput added with inherited classes
-//
-//- classes EqualityConstraintXML and DSInputOutputXML added with inherited classes
-//

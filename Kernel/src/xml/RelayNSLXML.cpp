@@ -1,4 +1,3 @@
-//$Id: RelayNSLXML.cpp,v 1.5 2004/09/21 11:49:10 jbarbier Exp $
 
 #include "RelayNSLXML.h"
 
@@ -41,12 +40,3 @@ RelayNSLXML::RelayNSLXML(xmlNode * relayNSLawNode)
 //- test updated for these changes
 //
 //Revision 1.4  2004/07/29 14:25:45  jbarbier
-//- $Log: RelayNSLXML.cpp,v $
-//- Revision 1.5  2004/09/21 11:49:10  jbarbier
-//- - correction in the XML save for a manual construction of the platform :
-//-     DS_Concerned of the Interaction
-//-     DS_Concerned of the Integrator
-//-
-//- - test updated for these changes
-//- and $Id: RelayNSLXML.cpp,v 1.5 2004/09/21 11:49:10 jbarbier Exp $ added
-//

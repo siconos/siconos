@@ -1,14 +1,9 @@
-//$Id: LCPXML.h,v 1.15 2004/09/27 13:27:14 jbarbier Exp $
 /** \class LCPXML
 *   \brief This class manages Lagrangian LCP data
-*   \author J. Blanc-Tranchant
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 05/18/2004
 *
-* $Date: 2004/09/27 13:27:14 $
-* $Revision: 1.15 $
-* $Author: jbarbier $
-* $Source: /CVS/Siconos/SICONOS/src/xml/LCPXML.h,v $
 *
 *
 * LCPXML allows to manage data of a LCP DOM tree.
@@ -191,7 +186,6 @@ private:
 //- _ some comments have still to be adapted to NewSiconosVector .
 //-
 //- _ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//- and $Id: LCPXML.h,v 1.15 2004/09/27 13:27:14 jbarbier Exp $ added
 //
 //Revision 1.10  2004/07/29 14:04:00  jbarbier
 //- new test on SiconosMemoryXML
@@ -206,11 +200,4 @@ private:
 //
 //-function setSiconosVector/Matrix which take a SiconosVector/Matrix* in parameter to avoid
 //unnecessary vector and matrix copies
-//
-//-CVS $id and $log added in the xml files
-//
-//Revision 1.8  2004/06/29 15:12:02  acary
-//Change in the naming comvention for the LCP
-//The LCP Matrix is now denoted by M.
-//The LCP Vector is now denoted by q.
 //

@@ -1,4 +1,3 @@
-//$Id: MoreauXML.cpp,v 1.16 2004/09/23 14:09:24 jbarbier Exp $
 
 #include "MoreauXML.h"
 
@@ -47,6 +46,3 @@ MoreauXML::~MoreauXML()
 //during the creation process.
 //
 //Revision 1.14  2004/07/12 13:04:34  jbarbier
-//- $id$, $log$, $date$, ... added in the XML management files
-//- n id calculated with ndof for Lagrangian dynamical systems
-//

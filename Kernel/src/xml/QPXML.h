@@ -1,16 +1,11 @@
-//$Id: QPXML.h,v 1.15 2004/09/27 13:27:14 jbarbier Exp $
 
 /** \class QPXML
 *   \brief This class manages Lagrangian QP data
-*   \author J. Blanc-Tranchant
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 05/18/2004
 *
 *
-* $Date: 2004/09/27 13:27:14 $
-* $Revision: 1.15 $
-* $Author: jbarbier $
-* $Source: /CVS/Siconos/SICONOS/src/xml/QPXML.h,v $
 *
 * QPXML allows to manage data of a QP DOM tree.
 */
@@ -162,33 +157,3 @@ private:
 //_ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
 //
 //Revision 1.11  2004/07/29 14:25:45  jbarbier
-//- $Log: QPXML.h,v $
-//- Revision 1.15  2004/09/27 13:27:14  jbarbier
-//-
-//- - Siconos schema renamed : SiconosModelSchema-V1.0.xsd
-//-
-//- - new required tags of the model : title, author, description, date, xmlSchema.
-//- They replace previous attributes author, description and date of the Model.
-//-
-//- Revision 1.14  2004/09/27 08:24:26  charlety
-//-
-//- _ Modifications in doxygen comments.
-//-
-//- Revision 1.13  2004/09/14 13:49:59  jbarbier
-//- - files added in sample/ to run run the main_siconos test program
-//-
-//- - all the platform can now be saved in an XML file when it is created manually
-//-
-//- Revision 1.12  2004/09/10 11:26:29  charlety
-//-
-//- _ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//-
-//- _ All the tests which worked with the previous version of the vector are OK with the new version.
-//-
-//- _ Example SICONOS and bouncingBall are OK
-//-
-//- _ some comments have still to be adapted to NewSiconosVector .
-//-
-//- _ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//- and $Id: QPXML.h,v 1.15 2004/09/27 13:27:14 jbarbier Exp $ added
-//

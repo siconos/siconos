@@ -1,4 +1,3 @@
-//$Id: XMLTagsName.h,v 1.11 2005/03/23 15:03:56 jbarbier Exp $
 #ifndef __XMLTAGSNAME__
 #define __XMLTAGSNAME__
 
@@ -246,58 +245,3 @@ const string RELAY_TAG = "Relay";
 
 #endif
 
-//$Log: XMLTagsName.h,v $
-//Revision 1.11  2005/03/23 15:03:56  jbarbier
-//- adaptation to the LMGC90 tags in non smooth dynamical system and strategy
-//
-//Revision 1.10  2005/03/22 15:55:06  jbarbier
-//- class NewtonImpactFriction non smooth law added to the kernel
-//
-//- xml schema modified for this new class
-//- xml schema modified to accept a "joker" for further use of a LMGC90 mechanical plugin
-//
-//- new test added for the loading/saving of a NewtonImpactFrictionNSL
-//
-//Revision 1.9  2005/03/15 09:57:48  jbarbier
-//- EqualityConstraint save OK
-//
-//Revision 1.8  2005/03/10 12:55:22  jbarbier
-//- implmentation of the EqualityConstraint and DSInputOutput classes in progress
-//    attributes H (DSIO) et G (EC) added in XML and managed in XML objects
-//
-//Revision 1.7  2005/03/08 14:23:46  jbarbier
-//- modification of constant variables :
-//in the XML module, main tags of the XML objects of the strategy are in XMLTagsName.h
-//
-//in simualtion tools, some constants have been moved to SiconosConst.h
-//
-//Revision 1.6  2005/03/08 12:41:39  jbarbier
-//- constant variables files modified :
-//Some constants added in SiconosConst
-//
-//all global tag of the modeling tools are in XMLTagsName, other tags are specific to an XML class
-//
-//Revision 1.5  2005/03/07 13:17:21  jbarbier
-//- new test : Ball2D, with a ball moving in a 2D system
-//
-//- another constant variables moved/refactored in XMLTagsName
-//- making uniform the name of the constant variables
-//
-//Revision 1.4  2005/03/04 15:56:08  jbarbier
-//- model tests fixed because of suppression of mat3x3 and mat1x1 data files from the BounincgBall sample
-//
-//Revision 1.3  2005/03/04 15:35:28  jbarbier
-//- README files added for some samples
-//
-//- beginning of the refactoring of XML module constants
-//
-//Revision 1.2  2005/02/25 15:56:26  jbarbier
-//- grouping tags and attributes names
-//
-//Revision 1.1  2005/01/18 10:35:17  jbarbier
-//- attribute "r" no longer used for Moreau integrator
-//
-//- modificatoin in the tests for Moreau integrator
-//
-//- file XMLTagsName.h for further use to regroup all xml tags name...
-//

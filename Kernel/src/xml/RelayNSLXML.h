@@ -1,16 +1,11 @@
-//$Id: RelayNSLXML.h,v 1.6 2004/09/14 13:49:59 jbarbier Exp $
 
 /** \classRelayNSLawXML
 *   \brief This class manages RelayNSLaw data part
-*   \author J. Blanc-Tranchant
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 05/14/2004
 *
 *
-* $Date: 2004/09/14 13:49:59 $
-* $Revision: 1.6 $
-* $Author: jbarbier $
-* $Source: /CVS/Siconos/SICONOS/src/xml/RelayNSLXML.h,v $
 *
 * RelayNSLawXML allows to manage data of a RelayNSLaw DOM tree.
 */
@@ -104,10 +99,3 @@ private:
 //- all the platform can now be saved in an XML file when it is created manually
 //
 //Revision 1.5  2004/07/29 14:25:45  jbarbier
-//- $Log: RelayNSLXML.h,v $
-//- Revision 1.6  2004/09/14 13:49:59  jbarbier
-//- - files added in sample/ to run run the main_siconos test program
-//-
-//- - all the platform can now be saved in an XML file when it is created manually
-//- and $Id: RelayNSLXML.h,v 1.6 2004/09/14 13:49:59 jbarbier Exp $ added
-//

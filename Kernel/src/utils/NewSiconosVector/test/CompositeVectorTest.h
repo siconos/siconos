@@ -1,4 +1,3 @@
-//$Id $
 #ifndef __SiconosVectorTest__
 #define __SiconosVectorTest__
 
@@ -102,4 +101,3 @@ public:
 
 #endif
 
-//$Log $

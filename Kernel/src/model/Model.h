@@ -1,4 +1,3 @@
-//$Id: Model.h,v 1.59 2005/03/16 10:49:17 jbarbier Exp $
 #ifndef MODEL_H
 #define MODEL_H
 
@@ -27,14 +26,10 @@ class SiconosModelXML;
 
 /** \class Model
  *  \brief The Model regroups the high level functionnalities of the platform
- *  \author Jean-Michel Barbier
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 26, 2004
  *
- * $Date: 2005/03/16 10:49:17 $
- * $Revision: 1.59 $
- * $Author: jbarbier $
- * $Source: /CVS/Siconos/SICONOS/src/model/Model.h,v $
  *
  */
 class Model
@@ -462,4 +457,3 @@ private:
 
 #endif // MODEL_H
 
-//$log$

@@ -1,4 +1,3 @@
-//$Id: LagrangianEC.cpp,v 1.6 2005/03/15 14:44:03 jbarbier Exp $
 
 #include "LagrangianEC.h"
 #include "check.h"

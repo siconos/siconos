@@ -527,7 +527,6 @@ AC_SUBST(DOXYGEN_CFG)
 # output files
 AC_CONFIG_FILES([Makefile
                  config/Makefile
-                 ext/Makefile
 		 python/Makefile
                  siconos/Makefile
                  src/Makefile

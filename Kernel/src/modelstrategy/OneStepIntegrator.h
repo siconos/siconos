@@ -1,4 +1,3 @@
-//$Id: OneStepIntegrator.h,v 1.28 2005/02/14 09:52:23 charlety Exp $
 #ifndef ONESTEPINTEGRATOR_H
 #define ONESTEPINTEGRATOR_H
 
@@ -21,14 +20,10 @@ class OneStepIntegratorXML;
 
 /** \class OneStepIntegrator
  *  \brief It's the generic object which can integre a DynamicalSystem
- *  \author Jean-Michel Barbier
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 26, 2004
  *
- * $Date: 2005/02/14 09:52:23 $
- * $Revision: 1.28 $
- * $Author: charlety $
- * $Source: /CVS/Siconos/SICONOS/src/modelstrategy/OneStepIntegrator.h,v $
  *
  *
  */
@@ -203,71 +198,3 @@ protected:
 };
 
 #endif // ONESTEPINTEGRATOR_H
-//$Log: OneStepIntegrator.h,v $
-//Revision 1.28  2005/02/14 09:52:23  charlety
-//_ getters / setters put inline
-//
-//Revision 1.27  2005/02/10 10:35:19  jbarbier
-//- new file regrouping all the const values of the model, modelingTools and numericalStrategy
-//
-//- new function in the LagrangianLinearR to get the H matrix corresponding to one of the 2 dynamical systems linked to the relation
-//
-//- new atribute of the OneStepNSProblem. A visibility table of the Interaction.
-//
-//Revision 1.26  2004/09/23 14:09:24  jbarbier
-//- modification of the integrators, the attribute r is always optional.
-//
-//- modification of the LagrangianNonLinearR. computeInput and computeOutput are
-//required.
-//
-//Revision 1.25  2004/09/22 14:11:14  charlety
-//
-//  _ revision of Doxygen comments in modelstrategy
-//
-//Revision 1.24  2004/09/14 13:49:54  jbarbier
-//- files added in sample/ to run run the main_siconos test program
-//
-//- all the platform can now be saved in an XML file when it is created manually
-//
-//Revision 1.23  2004/09/10 11:26:16  charlety
-//
-//_ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//
-//_ All the tests which worked with the previous version of the vector are OK with the new version.
-//
-//_ Example SICONOS and bouncingBall are OK
-//
-//_ some comments have still to be adapted to NewSiconosVector .
-//
-//_ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//
-//Revision 1.22  2004/08/12 11:55:18  jbarbier
-//- new methods createModel, createNSDS, createStrategy, ...
-//they now allow to make the link with upper objects of the platform
-//it will be used for the creation of the platform without XML input file
-//
-//- the createModel method is finished but the attributes of the other objects
-//of the platform are missing for the conctruction
-//
-//Revision 1.21  2004/08/11 14:43:45  jbarbier
-//- beginning of the mechanism of creation without XML input file of the objects of the platform with the
-//creatObjtect methods
-//
-//- function saveWToXML for Moreau integrator, and same specific functions to save
-//M,q and Q,p for LCP and QP
-//
-//- function to check coherency of the Model
-//
-//Revision 1.20  2004/08/03 12:07:11  jbarbier
-//- all test on th eModel are successfull
-//
-//- new tests on the Model with the opening of XML file
-//
-//- link TimeDiscretisation -> Strategy
-//
-//- attribute T of the Model is now optional
-//
-//Revision 1.19  2004/06/29 10:38:39  acary
-//Ajout des Tag CVS ID et Log
-//Ajout de la gestion pas le constructeur XML de Theta
-//

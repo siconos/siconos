@@ -1,4 +1,3 @@
-//$Id: DynamicalSystem.cpp,v 1.77 2005/03/14 16:05:26 jbarbier Exp $
 #include "DynamicalSystem.h"
 
 #include "LinearBC.h"
@@ -618,43 +617,3 @@ BoundaryCondition* DynamicalSystem::createNLinearBC()
 //- integration of the Memory in the XML (vol.1)
 //
 //Revision 1.44  2004/07/12 13:04:33  jbarbier
-//- $id$, $log$, $date$, ... added in the XML management files
-//- n id calculated with ndof for Lagrangian dynamical systems
-//
-//Revision 1.43  2004/07/12 11:22:53  charlety
-//
-//_ the state vector x of the dynamical system is now plugged to q and the velocity when this system is a Lagrangian one.
-//
-//_ A function to force a SiconosVector to be composite has been written. This is a temporary solution. We should use the operator = and the constructor by copy instead. This problem will be fixed later in the summer.
-//
-//Revision 1.41  2004/07/09 14:18:55  jbarbier
-//-management of the optional attributes of the DynamicalSystem
-//-new node t for current time in the time of the NonSmoothDynamicalSystem
-//
-//Revision 1.40  2004/07/09 11:14:53  charlety
-//
-//_ Added a constructor by copy and an operator = in class SiconosMemory
-//_ the getters on memory in DynamicalSystems return now some pointers
-//
-//Revision 1.39  2004/07/05 12:38:08  charlety
-//
-//try of false plugin developed in LagrangianTIDS. The Moreau integrator considers it like a LagrangianNLDS, but this is not the plugin which is used to compute the external strength, but a function of the LagrangianTIDS.
-//
-//Revision 1.38  2004/07/02 14:48:28  acary
-//Added MACRO IN and OUT
-//
-//Revision 1.37  2004/07/02 14:40:20  jbarbier
-//some IN and OUT added
-//BoundaryConditon saveToXML ok
-//problem after, during the call of the destructors
-//
-//Revision 1.36  2004/06/30 13:08:21  jbarbier
-//DoxygenSiconos.cfg moved into config/
-//ICDLLSharedLibrary renamed SiconosSharedLibrary
-//
-//Revision 1.35  2004/06/29 15:05:53  acary
-//Change  in the Display method of the Dynamical system
-//
-//Revision 1.34  2004/06/29 08:49:57  acary
-//Ajout des commentaires Doxygen et des tages CVS
-//

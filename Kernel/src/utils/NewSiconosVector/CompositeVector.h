@@ -1,4 +1,3 @@
-//$Id: CompositeVector.h,v 1.9 2005/02/11 13:30:40 charlety Exp $
 
 #ifndef COMPOSITEVECTOR_H
 #define COMPOSITEVECTOR_H
@@ -173,38 +172,3 @@ private:
 
 
 #endif // COMPOSITEVECTOR_H
-//$Log: CompositeVector.h,v $
-//Revision 1.9  2005/02/11 13:30:40  charlety
-//_ added or modified some doxygen comments in SiconosMatrix.
-//_ the function "getArray" is vector is now pure virtual, and implemented in CompositeVector (it returns NULL if the vector is composite).
-//
-//Revision 1.8  2004/09/09 14:32:45  charlety
-//
-//_ New tests for operators of multiplication between vectors and matrices.
-//
-//Revision 1.7  2004/08/24 11:29:20  charlety
-//
-//_ methods replacing generic operators for mixed operations done.
-//
-//Revision 1.6  2004/08/24 07:35:07  charlety
-//
-//_ CompositeVector finished at 95%.
-//
-//TODO :
-//_ solve the problem of operators (gcc cannot choice between theoperators of simpleVector and compositeVector in mixed operations).
-//_ the behavior of specific operator= of CompositeVector is not ok. Should copy values only.
-//
-//Revision 1.5  2004/08/20 12:32:25  charlety
-//
-//_ operators for CompositeVector, read / write functions in file.
-//
-//Revision 1.4  2004/08/19 15:21:27  charlety
-//
-//_ SimpleVector and CompositeVector in progress.
-//_ for the operators, we prefer now using directly functions of Blas1++ instead
-//  of these of Blas++.h
-//
-//Revision 1.3  2004/08/18 14:53:21  charlety
-//
-//_ use of Lapack routines for operations on SimpleVector (in progress)
-//

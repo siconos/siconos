@@ -1,4 +1,3 @@
-//$Id: SiconosMatrix.cpp,v 1.8 2005/02/25 10:01:36 jbarbier Exp $
 #include "SiconosMatrix.h"
 
 // LAPACK F77 function not declared in lapack++.h
@@ -793,63 +792,3 @@ void SiconosMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 
 
 
-//$Log: SiconosMatrix.cpp,v $
-//Revision 1.8  2005/02/25 10:01:36  jbarbier
-//- tests of the blockMatrixCopy function
-//
-//Revision 1.7  2005/02/24 15:50:19  jbarbier
-//- LCP prepared to changes needed for several interactions
-//
-//- new function for the SiconosMatrices to copy a block matrix into another matrix
-//
-//- tag names of BoundaryConditionXML, DSInputOutputXML, DSXML, InteractionXML, LagrangianLinearRXML, LagrangianNLDSXML put in XMLTagNames.h
-//
-//Revision 1.6  2005/02/24 11:03:06  charlety
-//
-//_ New attempt with the autotools.
-//
-//_ /!\ THIS VERSION IS USABLE ONLY IF YOU HAVE INSTALLED THE EXTERNAL LIBRARIES (cppunit, libxml, lapack++, lapack, nana) in /usr/ or /usr/local.
-//
-//_ This version was only tested on Fedora core2 for the moment.
-//
-//Revision 1.5  2005/02/15 16:05:05  charlety
-//
-//_ SiconosMatrix::multTranspose(SiconosMatrix B) implemented with a lapack++ / BLAS routine Blas_Mat_Mat_Trans_Mult (the old bug in this function in lapack++ is now fixed)
-//
-//Revision 1.4  2005/02/15 15:15:33  charlety
-//
-//_ modified some very slow functions to increase performance
-//
-//Revision 1.3  2005/02/11 17:36:03  charlety
-//
-//_ little "inspection of code"
-//_ basic getters and setters passed inline
-//_ getters functions passed const
-//
-//Revision 1.2  2005/02/11 13:30:40  charlety
-//_ added or modified some doxygen comments in SiconosMatrix.
-//_ the function "getArray" is vector is now pure virtual, and implemented in CompositeVector (it returns NULL if the vector is composite).
-//
-//Revision 1.1  2004/09/10 10:00:20  charlety
-//
-//_ Added SiconosMatrix ans Exceptions in the NewSiconosVector directory
-//
-//Revision 1.17  2004/07/02 14:43:08  acary
-//Added method of Linear Algebra LAPACK
-//  void PLUFactorizationInPlace(void);
-//  SiconosMatrix PLUFactorization(void);
-//  SiconosMatrix  PLUInverse(void);
-//  void  PLUInverseInPlace(void);
-//  SiconosMatrix  PLUForwardBackward(SiconosMatrix &B);
-//    void  SiconosMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B);   SiconosVector  PLUForwardBackward(SiconosVector &B);
-//    void   PLUForwardBackwardInPlace(SiconosVector &B);
-//Added LaVectorLongInt ipiv
-//Added   bool isPLUFactorized;
-//Added bool isInversed;
-//
-//Revision 1.16  2004/06/29 15:16:49  acary
-//Added display method in the Vector and the matrix
-//
-//Revision 1.15  2004/06/29 10:42:10  acary
-//Ajout des tag CVS Id et Log
-//

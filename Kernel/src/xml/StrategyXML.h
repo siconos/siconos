@@ -1,16 +1,11 @@
-//$Id: StrategyXML.h,v 1.26 2005/03/08 14:23:46 jbarbier Exp $
 
 /** \class StrategyXML
 *   \brief This class manages Strategy data part
-*   \author J. Blanc-Tranchant
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 05/17/2004
 *
 *
-* $Date: 2005/03/08 14:23:46 $
-* $Revision: 1.26 $
-* $Author: jbarbier $
-* $Source: /CVS/Siconos/SICONOS/src/xml/StrategyXML.h,v $
 *
 * StrategyXML allows to get OneStepIntegratorXMLs and OneStepNSProblemXMLs from a DOM tree.
 */
@@ -247,45 +242,3 @@ private:
 //- NonLinearSystemDS is now available
 //
 //Revision 1.18  2004/07/29 14:25:48  jbarbier
-//- $Log: StrategyXML.h,v $
-//- Revision 1.26  2005/03/08 14:23:46  jbarbier
-//- - modification of constant variables :
-//- in the XML module, main tags of the XML objects of the strategy are in XMLTagsName.h
-//-
-//- in simualtion tools, some constants have been moved to SiconosConst.h
-//-
-//- Revision 1.25  2005/01/13 14:14:40  jbarbier
-//- - correction in the XML output about size attribute in tags DS_Concerned and Interactoin _Concerned
-//-
-//- - modifications in creation of XML objects when saving data with partial XML input file
-//-
-//- Revision 1.24  2004/09/16 11:35:26  jbarbier
-//- - save of the TimeDiscretisation in a XML file in manual creation of the
-//- platform which was forgotten is now available.
-//-
-//- - the save of the platform's data can be done when the platform is created with
-//- an XML input file and completed with dynmical systems, interactions, one-step
-//- non smooth problem and one-step integrator.
-//-
-//- Revision 1.23  2004/09/14 13:49:59  jbarbier
-//- - files added in sample/ to run run the main_siconos test program
-//-
-//- - all the platform can now be saved in an XML file when it is created manually
-//-
-//- Revision 1.22  2004/08/20 07:34:24  jbarbier
-//- - creation of Model, NSDS in comand program succeed in creating SiconosModelXML,
-//- NSDSXML
-//-
-//- Revision 1.21  2004/08/12 14:28:39  jbarbier
-//- - createTimeDiscretisation in progress
-//-
-//- Revision 1.20  2004/08/05 14:35:59  charlety
-//-
-//- _ LSODAR --> Lsodar (chapter 2)
-//-
-//- Revision 1.19  2004/08/05 12:44:45  jbarbier
-//- - loading XML file with no OneStepNSProblem succesfull
-//-
-//- - NonLinearSystemDS is now available
-//- and $Id: StrategyXML.h,v 1.26 2005/03/08 14:23:46 jbarbier Exp $ added
-//

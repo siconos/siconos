@@ -1,4 +1,3 @@
-//$Id: DynamicalSystem.h,v 1.61 2005/03/14 16:05:26 jbarbier Exp $
 #ifndef DYNAMICALSYSTEM_H
 #define DYNAMICALSYSTEM_H
 
@@ -31,14 +30,10 @@ class DSXML;
 
 /** \class DynamicalSystem
  *  \brief  Super class of the dynamical systems
- *  \author V. ACARY,  JB CHARLETY
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) April 29, 2004
  *
- *  $Date: 2005/03/14 16:05:26 $
- *  $Revision: 1.61 $
- *  $Author: jbarbier $
- *  $Source: /CVS/Siconos/SICONOS/src/modelformalisation/DynamicalSystem.h,v $
  *
  * The class DynamicalSystem allows to define and compute a generic n-dimensional
  * dynamical system of the form :
@@ -645,128 +640,3 @@ private :
 #endif // DYNAMICALSYSTEM_H
 
 
-//$Log: DynamicalSystem.h,v $
-//Revision 1.61  2005/03/14 16:05:26  jbarbier
-//- manual creation of DSInputOutput saving OK
-//
-//- in progress for EqualityConstraint
-//
-//Revision 1.60  2005/03/08 12:41:36  jbarbier
-//- constant variables files modified :
-//Some constants added in SiconosConst
-//
-//all global tag of the modeling tools are in XMLTagsName, other tags are specific to an XML class
-//
-//Revision 1.59  2005/03/07 13:17:19  jbarbier
-//- new test : Ball2D, with a ball moving in a 2D system
-//
-//- another constant variables moved/refactored in XMLTagsName
-//- making uniform the name of the constant variables
-//
-//Revision 1.58  2005/02/11 17:35:55  charlety
-//
-//_ little "inspection of code"
-//_ basic getters and setters passed inline
-//_ getters functions passed const
-//
-//Revision 1.57  2005/02/10 10:35:18  jbarbier
-//- new file regrouping all the const values of the model, modelingTools and numericalStrategy
-//
-//- new function in the LagrangianLinearR to get the H matrix corresponding to one of the 2 dynamical systems linked to the relation
-//
-//- new atribute of the OneStepNSProblem. A visibility table of the Interaction.
-//
-//Revision 1.56  2005/01/25 14:51:46  jbarbier
-//- attributes id, type and XML object added to EqualityConstraint
-//
-//Revision 1.55  2005/01/25 13:56:03  jbarbier
-//- link DynamicalSystem-DSInputOutput, NonSmoothDynamicalSystem-EqualityConstraint, EquaityConstraint-DSInputOutput and Relation-DSInputOutput available
-//
-//Revision 1.54  2005/01/20 14:44:48  jbarbier
-//- NSDS class renamed NonSmoothDynamicalSystem
-//
-//- code reduce, some comments remove
-//
-//Revision 1.53  2004/09/30 08:35:01  jbarbier
-//- fonction of the formalisation : fill..With...XML and link... are now
-//"protected" and no more "public"
-//
-//Revision 1.52  2004/09/22 11:16:28  charlety
-//
-//_ revision of Doxygen comments in modelformalisation
-//
-//Revision 1.51  2004/09/16 11:35:24  jbarbier
-//- save of the TimeDiscretisation in a XML file in manual creation of the
-//platform which was forgotten is now available.
-//
-//- the save of the platform's data can be done when the platform is created with
-//an XML input file and completed with dynmical systems, interactions, one-step
-//non smooth problem and one-step integrator.
-//
-//Revision 1.50  2004/09/10 11:26:07  charlety
-//
-//_ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//
-//_ All the tests which worked with the previous version of the vector are OK with the new version.
-//
-//_ Example SICONOS and bouncingBall are OK
-//
-//_ some comments have still to be adapted to NewSiconosVector .
-//
-//_ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//
-//Revision 1.49  2004/09/10 08:04:46  jbarbier
-//- XML save available for BoundaryCondition and Interaction
-//
-//Revision 1.48  2004/09/03 14:41:41  jbarbier
-//- new functions to create the boundary condition of the dynamical systems
-//- new functions to add an interaction to a NonSmoothDynamicalSystem
-//- new functions to create the relation and the non-smooth law of an interaciton
-//
-//Revision 1.47  2004/08/20 15:26:44  jbarbier
-//- creation of a Model and save in the XML is ok
-//- creation of a NonSmoothDynamicalSystem and save in the XML is ok
-//- creation of a NonLinearSystemDS and save in the XML is OK
-//
-//Revision 1.46  2004/08/17 15:12:37  jbarbier
-//- methods createDynamicalSystem, createBoundaryCondition, createInteraction,
-//createRelation and createNSLaw completed with the required attributes
-//
-//Revision 1.45  2004/08/13 11:26:58  jbarbier
-//- function createNSDS complete
-//
-//- function createDynamicalSystem and createLinearSystemDS complete
-//
-//- function  createLagrangianNLDS in progress
-//
-//Revision 1.44  2004/08/10 13:04:15  charlety
-//
-//_ try to pass a pointer of a C function of th eplugin to a numerical routine
-//
-//Revision 1.43  2004/08/05 12:44:40  jbarbier
-//- loading XML file with no OneStepNSProblem succesfull
-//
-//- NonLinearSystemDS is now available
-//
-//Revision 1.42  2004/07/23 14:39:25  jbarbier
-//- createModel, createNSDS, createDynamicalSystem, createBoundaryCondition OK
-//it's the first step, it do the same thing that before, but the process is
-//unified and it must simply add the traitment for the creation of the nodes in
-//the DOM tree
-//
-//Revision 1.41  2004/07/09 14:18:55  jbarbier
-//-management of the optional attributes of the DynamicalSystem
-//-new node t for current time in the time of the NonSmoothDynamicalSystem
-//
-//Revision 1.40  2004/07/09 11:14:53  charlety
-//
-//_ Added a constructor by copy and an operator = in class SiconosMemory
-//_ the getters on memory in DynamicalSystems return now some pointers
-//
-//Revision 1.39  2004/06/30 13:08:21  jbarbier
-//DoxygenSiconos.cfg moved into config/
-//ICDLLSharedLibrary renamed SiconosSharedLibrary
-//
-//Revision 1.38  2004/06/29 08:49:57  acary
-//Ajout des commentaires Doxygen et des tages CVS
-//

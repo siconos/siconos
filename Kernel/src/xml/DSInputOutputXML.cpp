@@ -1,4 +1,3 @@
-//$Id: DSInputOutputXML.cpp,v 1.8 2005/03/15 09:57:48 jbarbier Exp $
 
 #include "DSInputOutputXML.h"
 
@@ -120,42 +119,3 @@ void DSInputOutputXML::setDSConcerned(vector<int> dsConcerned)
   }
 }
 
-//$Log: DSInputOutputXML.cpp,v $
-//Revision 1.8  2005/03/15 09:57:48  jbarbier
-//- EqualityConstraint save OK
-//
-//Revision 1.7  2005/03/14 16:05:27  jbarbier
-//- manual creation of DSInputOutput saving OK
-//
-//- in progress for EqualityConstraint
-//
-//Revision 1.6  2005/03/10 12:55:20  jbarbier
-//- implmentation of the EqualityConstraint and DSInputOutput classes in progress
-//    attributes H (DSIO) et G (EC) added in XML and managed in XML objects
-//
-//Revision 1.5  2005/03/09 15:30:34  jbarbier
-//- add of LagrangianEC class
-//
-//- in progress : implementation of the EqualityConstraint and DSInputOutput - create methods
-//
-//Revision 1.4  2005/03/08 12:41:37  jbarbier
-//- constant variables files modified :
-//Some constants added in SiconosConst
-//
-//all global tag of the modeling tools are in XMLTagsName, other tags are specific to an XML class
-//
-//Revision 1.3  2005/03/07 13:17:21  jbarbier
-//- new test : Ball2D, with a ball moving in a 2D system
-//
-//- another constant variables moved/refactored in XMLTagsName
-//- making uniform the name of the constant variables
-//
-//Revision 1.2  2005/01/26 13:50:39  jbarbier
-//
-//- loading of an XML input file now loads EqualityConstraints and DSInputOutputs
-//
-//Revision 1.1  2005/01/17 10:56:26  jbarbier
-//- classes EqualityConstraint and DSInputOutput added with inherited classes
-//
-//- classes EqualityConstraintXML and DSInputOutputXML added with inherited classes
-//

@@ -1,8 +1,7 @@
-//$Id: SiconosMemory.h,v 1.8 2005/02/11 17:36:06 charlety Exp $
 
 /** \class SiconosException
 *   \brief This class allowa to store vectors of previous steps of the simulation
-*   \author JB Charlety
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date (Creation) 07/06/2004
 */
@@ -216,55 +215,3 @@ private:
 
 #endif // SICONOSMEMORY_H
 
-//$Log: SiconosMemory.h,v $
-//Revision 1.8  2005/02/11 17:36:06  charlety
-//
-//_ little "inspection of code"
-//_ basic getters and setters passed inline
-//_ getters functions passed const
-//
-//Revision 1.7  2004/09/10 11:26:25  charlety
-//
-//_ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//
-//_ All the tests which worked with the previous version of the vector are OK with the new version.
-//
-//_ Example SICONOS and bouncingBall are OK
-//
-//_ some comments have still to be adapted to NewSiconosVector .
-//
-//_ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//
-//Revision 1.6  2004/08/04 11:03:23  jbarbier
-//- about the SiconosMemory : when a SiconosMemory has a maxSize greater than the
-//number of steps in memory required by an integrator, the oldest SiconosVector
-//are deleted
-//
-//- the way to initialize the SiconosMemory by the integrator has been updated to
-//match with these changes
-//
-//Revision 1.5  2004/07/16 06:23:31  charlety
-//
-//_ modification of the operator = of SiconosVector : the left operand can now be a composite vector
-//
-//_ added functions to load / save a SiconosMemory in an XML file
-//
-//Revision 1.4  2004/07/13 12:44:53  jbarbier
-//- integration of the SiconosMemory to the plateform
-//- files SiconosMemoryXML added
-//
-//Revision 1.3  2004/07/09 11:14:53  charlety
-//
-//_ Added a constructor by copy and an operator = in class SiconosMemory
-//_ the getters on memory in DynamicalSystems return now some pointers
-//
-//Revision 1.2  2004/07/08 09:13:43  charlety
-//
-//_ creation of a Siconos exception dedicated to the class SiconosMemory
-//_ new tests for SiconosMemory
-//
-//Revision 1.1  2004/07/07 13:53:13  charlety
-//
-//_ First version of the memory object
-//_ some little bugs corrected otherwhere
-//

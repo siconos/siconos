@@ -1,16 +1,11 @@
-//$Id: DSInputOutputXML.h,v 1.10 2005/03/15 09:57:48 jbarbier Exp $
 
 /** \class DSInputOutputXML
 *   \brief This class manages Relation data part
-*   \author Jean-Michel Barbier
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 17/01/2005
 *
 *
-* $Date: 2005/03/15 09:57:48 $
-* $Revision: 1.10 $
-* $Author: jbarbier $
-* $Source: /CVS/Siconos/SICONOS/src/xml/DSInputOutputXML.h,v $
 *
 * DSInputOutputXML allows to manage data of a DSInputOutput DOM tree.
 */
@@ -240,56 +235,3 @@ private :
 
 
 #endif
-//$Log: DSInputOutputXML.h,v $
-//Revision 1.10  2005/03/15 09:57:48  jbarbier
-//- EqualityConstraint save OK
-//
-//Revision 1.9  2005/03/14 16:05:27  jbarbier
-//- manual creation of DSInputOutput saving OK
-//
-//- in progress for EqualityConstraint
-//
-//Revision 1.8  2005/03/10 12:55:21  jbarbier
-//- implmentation of the EqualityConstraint and DSInputOutput classes in progress
-//    attributes H (DSIO) et G (EC) added in XML and managed in XML objects
-//
-//Revision 1.7  2005/03/09 15:30:35  jbarbier
-//- add of LagrangianEC class
-//
-//- in progress : implementation of the EqualityConstraint and DSInputOutput - create methods
-//
-//Revision 1.6  2005/03/08 12:41:37  jbarbier
-//- constant variables files modified :
-//Some constants added in SiconosConst
-//
-//all global tag of the modeling tools are in XMLTagsName, other tags are specific to an XML class
-//
-//Revision 1.5  2005/03/07 13:17:21  jbarbier
-//- new test : Ball2D, with a ball moving in a 2D system
-//
-//- another constant variables moved/refactored in XMLTagsName
-//- making uniform the name of the constant variables
-//
-//Revision 1.4  2005/02/24 15:50:20  jbarbier
-//- LCP prepared to changes needed for several interactions
-//
-//- new function for the SiconosMatrices to copy a block matrix into another matrix
-//
-//- tag names of BoundaryConditionXML, DSInputOutputXML, DSXML, InteractionXML, LagrangianLinearRXML, LagrangianNLDSXML put in XMLTagNames.h
-//
-//Revision 1.3  2005/01/26 13:50:40  jbarbier
-//
-//- loading of an XML input file now loads EqualityConstraints and DSInputOutputs
-//
-//Revision 1.2  2005/01/18 10:35:17  jbarbier
-//- attribute "r" no longer used for Moreau integrator
-//
-//- modificatoin in the tests for Moreau integrator
-//
-//- file XMLTagsName.h for further use to regroup all xml tags name...
-//
-//Revision 1.1  2005/01/17 10:56:27  jbarbier
-//- classes EqualityConstraint and DSInputOutput added with inherited classes
-//
-//- classes EqualityConstraintXML and DSInputOutputXML added with inherited classes
-//

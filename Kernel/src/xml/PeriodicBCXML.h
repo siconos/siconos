@@ -1,16 +1,11 @@
-//$Id: PeriodicBCXML.h,v 1.6 2004/09/10 08:05:24 jbarbier Exp $
 
 /** \class PeriodicBCXML
 *   \brief This class manages Periodic BC data part
-*   \author J. Blanc-Tranchant
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 05/25/2004
 *
 *
-* $Date: 2004/09/10 08:05:24 $
-* $Revision: 1.6 $
-* $Author: jbarbier $
-* $Source: /CVS/Siconos/SICONOS/src/xml/PeriodicBCXML.h,v $
 *
 * PeriodicBCXML allows to manage data of a PeriodicBC DOM tree.
 */
@@ -55,8 +50,3 @@ public:
 //- XML save available for BoundaryCondition and Interaction
 //
 //Revision 1.5  2004/07/29 14:25:45  jbarbier
-//- $Log: PeriodicBCXML.h,v $
-//- Revision 1.6  2004/09/10 08:05:24  jbarbier
-//- - XML save available for BoundaryCondition and Interaction
-//- and $Id: PeriodicBCXML.h,v 1.6 2004/09/10 08:05:24 jbarbier Exp $ added
-//

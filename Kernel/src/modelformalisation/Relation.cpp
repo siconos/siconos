@@ -1,4 +1,3 @@
-//$Id: Relation.cpp,v 1.26 2005/02/04 14:52:44 jbarbier Exp $
 #include "Relation.h"
 
 #include "check.h"

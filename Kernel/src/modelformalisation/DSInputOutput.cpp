@@ -1,4 +1,3 @@
-//$Id: DSInputOutput.cpp,v 1.7 2005/03/14 16:05:26 jbarbier Exp $
 #include "DSInputOutput.h"
 
 #include "check.h"

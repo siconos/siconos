@@ -1,4 +1,3 @@
-//$Id: LagrangianECXML.h,v 1.2 2005/01/26 13:50:40 jbarbier Exp $
 #ifndef LAGRANGIANECXML_H
 #define LAGRANGIANECXML_H
 
@@ -6,14 +5,10 @@
 
 /** \class LagrangianECXML
  *  \brief object to manage XML data of an Lagrangian EqualityConstraint
- *  \author Jean-Michel Barbier
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date 17/01/2005
  *
- * $Date: 2005/01/26 13:50:40 $
- * $Revision: 1.2 $
- * $Author: jbarbier $
- * $Source: /CVS/Siconos/SICONOS/src/xml/LagrangianECXML.h,v $
  *
  */
 
@@ -34,4 +29,3 @@ public:
 
 #endif // LAGRANGIANECXML_H
 
-//$Log£

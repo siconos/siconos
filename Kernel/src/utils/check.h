@@ -1,4 +1,3 @@
-//$Id: check.h,v 1.6 2004/07/05 12:20:47 charlety Exp $
 /*
  * check.h - an assertion checking scheme similar to Eiffel,
  *     see pg 133 of the Eiffel book.

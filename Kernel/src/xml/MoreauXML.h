@@ -1,15 +1,10 @@
-//$Id: MoreauXML.h,v 1.19 2004/09/23 14:09:24 jbarbier Exp $
 
 /** \class MoreauXML
 *   \brief This class manages Moreau data part
-*   \author J. Blanc-Tranchant
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 05/17/2004
 *
-* $Date: 2004/09/23 14:09:24 $
-* $Revision: 1.19 $
-* $Author: jbarbier $
-* $Source: /CVS/Siconos/SICONOS/src/xml/MoreauXML.h,v $
 *
 * MoreauXML allows to manage data of a Moreau DOM tree.
 */
@@ -147,6 +142,3 @@ private:
 //- corrections in the test xml files
 //
 //Revision 1.16  2004/07/12 13:04:34  jbarbier
-//- $id$, $log$, $date$, ... added in the XML management files
-//- n id calculated with ndof for Lagrangian dynamical systems
-//

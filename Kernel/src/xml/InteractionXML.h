@@ -1,14 +1,9 @@
-//$Id: InteractionXML.h,v 1.39 2005/03/10 12:55:21 jbarbier Exp $
 /** \class InteractionXML
 *   \brief This class manages Interaction data part
-*   \author J. Blanc-Tranchant
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date (Creation) 04/12/2004
 *
-*  $Date: 2005/03/10 12:55:21 $
- * $Revision: 1.39 $
- * $Author: jbarbier $
- * $Source: /CVS/Siconos/SICONOS/src/xml/InteractionXML.h,v $
 
 *
 * InteractionXML allows to manage data of a Interaction DOM tree.
@@ -457,24 +452,4 @@ private:
 //
 //-function setSiconosVector/Matrix which take a SiconosVector/Matrix* in parameter to avoid
 //unnecessary vector and matrix copies
-//
-//-CVS $id and $log added in the xml files
-//
-//Revision 1.22  2004/07/06 14:54:49  acary
-//Renaming NSLaw into NonSmoothLaw
-//Renaming RelayNSLaw into RelayNSL
-//Renaming CCNSLaw into ComplementarityConditionNSL
-//Renaming NewtonImpactLaw into NewtonImpactLawNSL
-//
-//Revision 1.21  2004/07/06 11:48:10  acary
-//Renaming LTIRelation into LinearTIR
-//
-//Revision 1.20  2004/07/06 10:00:01  acary
-//Change naming of LagrangianLineaR
-//
-//Revision 1.19  2004/07/06 08:09:10  acary
-//Renaming Class LagrangianLinearR into LagrangianLinearR
-//
-//Revision 1.18  2004/06/30 09:44:35  acary
-//Added NewtonImpactLawNSL
 //

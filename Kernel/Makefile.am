@@ -2,7 +2,7 @@
 
 include $(top_srcdir)/config/Make-rules
 
-SUBDIRS = config  ext src siconos sample #src must be compiled before main program
+SUBDIRS = config src siconos sample #src must be compiled before main program
 EXTRA_DIST = siconos.csh doc
 
 

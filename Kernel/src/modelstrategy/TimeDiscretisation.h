@@ -1,4 +1,3 @@
-//$Id: TimeDiscretisation.h,v 1.27 2005/02/14 09:52:23 charlety Exp $
 #ifndef TIMEDISCRETISATION_H
 #define TIMEDISCRETISATION_H
 
@@ -21,14 +20,10 @@ using namespace std;
 
 /** \class TimeDiscretisation
  *  \brief It represents the main data of Strategy and Integrators
- *  \author Jean-Michel Barbier
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 26, 2004
  *
- * $Date: 2005/02/14 09:52:23 $
- * $Revision: 1.27 $
- * $Author: charlety $
- * $Source: /CVS/Siconos/SICONOS/src/modelstrategy/TimeDiscretisation.h,v $
  *
  * \todo Various constructors must be implemented for a constant TimeDiscretisation
  * giving for example one of the following triplet :
@@ -364,61 +359,3 @@ private:
 //- attribute T of the Model is now optional
 //
 //Revision 1.18  2004/07/29 14:25:41  jbarbier
-//- $Log: TimeDiscretisation.h,v $
-//- Revision 1.27  2005/02/14 09:52:23  charlety
-//- _ getters / setters put inline
-//-
-//- Revision 1.26  2004/09/22 14:11:14  charlety
-//-
-//-   _ revision of Doxygen comments in modelstrategy
-//-
-//- Revision 1.25  2004/09/10 11:26:20  charlety
-//-
-//- _ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//-
-//- _ All the tests which worked with the previous version of the vector are OK with the new version.
-//-
-//- _ Example SICONOS and bouncingBall are OK
-//-
-//- _ some comments have still to be adapted to NewSiconosVector .
-//-
-//- _ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//-
-//- Revision 1.24  2004/09/09 08:57:44  jbarbier
-//- - functions createLCP, createQP, createRelay, addMoreau, addAdams, addLsodar,
-//- createTimeDiscretisation of the Strategy done.
-//-
-//- => all functions to create manually the objects of the platform are done
-//-
-//- Revision 1.23  2004/08/18 14:37:19  jbarbier
-//- - creation of Model, NSDS, Strategy(TimeStepping and EventDriven) and
-//- DynamicalSystem available when the creation is in a command program
-//-
-//- Revision 1.22  2004/08/12 14:28:37  jbarbier
-//- - createTimeDiscretisation in progress
-//-
-//- Revision 1.21  2004/08/12 11:55:19  jbarbier
-//- - new methods createModel, createNSDS, createStrategy, ...
-//- they now allow to make the link with upper objects of the platform
-//- it will be used for the creation of the platform without XML input file
-//-
-//- - the createModel method is finished but the attributes of the other objects
-//- of the platform are missing for the conctruction
-//-
-//- Revision 1.20  2004/08/04 14:51:03  jbarbier
-//- - new test using xml_uncomplete7.xml, test with no interaction defined in the
-//- XML input file
-//-
-//- - for the TimeDiscretisation, the triplet (t0,T,h), (t0,T,N) or (t0,h,N) ids
-//- required, the missing element is now computed
-//-
-//- Revision 1.19  2004/08/03 12:07:12  jbarbier
-//- - all test on th eModel are successfull
-//-
-//- - new tests on the Model with the opening of XML file
-//-
-//- - link TimeDiscretisation -> Strategy
-//-
-//- - attribute T of the Model is now optional
-//- and $Id: TimeDiscretisation.h,v 1.27 2005/02/14 09:52:23 charlety Exp $ added
-//

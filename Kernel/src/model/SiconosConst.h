@@ -1,4 +1,3 @@
-//$Id: SiconosConst.h,v 1.5 2005/03/22 15:55:04 jbarbier Exp $
 #ifndef __SICONOSCONST__
 #define __SICONOSCONST__
 
@@ -64,37 +63,3 @@ const string LSODAR_INTEGRATOR = "LSODAR";
 
 #endif
 
-//$Log: SiconosConst.h,v $
-//Revision 1.5  2005/03/22 15:55:04  jbarbier
-//- class NewtonImpactFriction non smooth law added to the kernel
-//
-//- xml schema modified for this new class
-//- xml schema modified to accept a "joker" for further use of a LMGC90 mechanical plugin
-//
-//- new test added for the loading/saving of a NewtonImpactFrictionNSL
-//
-//Revision 1.4  2005/03/08 14:23:42  jbarbier
-//- modification of constant variables :
-//in the XML module, main tags of the XML objects of the strategy are in XMLTagsName.h
-//
-//in simualtion tools, some constants have been moved to SiconosConst.h
-//
-//Revision 1.3  2005/03/08 12:41:35  jbarbier
-//- constant variables files modified :
-//Some constants added in SiconosConst
-//
-//all global tag of the modeling tools are in XMLTagsName, other tags are specific to an XML class
-//
-//Revision 1.2  2005/03/07 13:17:18  jbarbier
-//- new test : Ball2D, with a ball moving in a 2D system
-//
-//- another constant variables moved/refactored in XMLTagsName
-//- making uniform the name of the constant variables
-//
-//Revision 1.1  2005/02/10 10:35:18  jbarbier
-//- new file regrouping all the const values of the model, modelingTools and numericalStrategy
-//
-//- new function in the LagrangianLinearR to get the H matrix corresponding to one of the 2 dynamical systems linked to the relation
-//
-//- new atribute of the OneStepNSProblem. A visibility table of the Interaction.
-//

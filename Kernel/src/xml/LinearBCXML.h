@@ -1,16 +1,11 @@
-//$Id: LinearBCXML.h,v 1.10 2004/09/27 08:24:26 charlety Exp $
 
 /** \class LinearBCXML
 *   \brief This class manages Linear BC data part
-*   \author J. Blanc-Tranchant
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 05/25/2004
 *
 *
-* $Date: 2004/09/27 08:24:26 $
-* $Revision: 1.10 $
-* $Author: charlety $
-* $Source: /CVS/Siconos/SICONOS/src/xml/LinearBCXML.h,v $
 *
 * LinearBCXML allows to manage data of a LinearBC DOM tree.
 */
@@ -166,24 +161,3 @@ private:
 //- XML save available for BoundaryCondition and Interaction
 //
 //Revision 1.7  2004/07/29 14:25:43  jbarbier
-//- $Log: LinearBCXML.h,v $
-//- Revision 1.10  2004/09/27 08:24:26  charlety
-//-
-//- _ Modifications in doxygen comments.
-//-
-//- Revision 1.9  2004/09/10 11:26:27  charlety
-//-
-//- _ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//-
-//- _ All the tests which worked with the previous version of the vector are OK with the new version.
-//-
-//- _ Example SICONOS and bouncingBall are OK
-//-
-//- _ some comments have still to be adapted to NewSiconosVector .
-//-
-//- _ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//-
-//- Revision 1.8  2004/09/10 08:04:50  jbarbier
-//- - XML save available for BoundaryCondition and Interaction
-//- and $Id: LinearBCXML.h,v 1.10 2004/09/27 08:24:26 charlety Exp $ added
-//

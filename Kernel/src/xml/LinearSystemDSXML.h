@@ -1,16 +1,11 @@
-//$Id: LinearSystemDSXML.h,v 1.16 2004/09/27 08:24:26 charlety Exp $
 
 /** \class LinearSystemDSXML
 *   \brief This class manages LinearSystem DS data
-*   \author J. Blanc-Tranchant
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 05/11/2004
 *
 *
-* $Date: 2004/09/27 08:24:26 $
-* $Revision: 1.16 $
-* $Author: charlety $
-* $Source: /CVS/Siconos/SICONOS/src/xml/LinearSystemDSXML.h,v $
 *
 * LinearSystemDSXML allows to manage data of a LinearSystemDS DOM tree.
 */
@@ -265,31 +260,3 @@ private:
 //- creation of a NonLinearSystemDS and save in the XML is OK
 //
 //Revision 1.12  2004/07/29 14:25:43  jbarbier
-//- $Log: LinearSystemDSXML.h,v $
-//- Revision 1.16  2004/09/27 08:24:26  charlety
-//-
-//- _ Modifications in doxygen comments.
-//-
-//- Revision 1.15  2004/09/10 11:26:27  charlety
-//-
-//- _ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//-
-//- _ All the tests which worked with the previous version of the vector are OK with the new version.
-//-
-//- _ Example SICONOS and bouncingBall are OK
-//-
-//- _ some comments have still to be adapted to NewSiconosVector .
-//-
-//- _ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//-
-//- Revision 1.14  2004/08/23 14:30:02  jbarbier
-//- - All the dynamical systems can be created in a comand program and added to a
-//- NSDS. The save is OK, but the creation of the boundary conditions is not yet
-//- finished.
-//-
-//- Revision 1.13  2004/08/20 15:26:45  jbarbier
-//- - creation of a Model and save in the XML is ok
-//- - creation of a NSDS and save in the XML is ok
-//- - creation of a NonLinearSystemDS and save in the XML is OK
-//- and $Id: LinearSystemDSXML.h,v 1.16 2004/09/27 08:24:26 charlety Exp $ added
-//

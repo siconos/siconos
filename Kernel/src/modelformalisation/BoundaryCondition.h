@@ -1,4 +1,3 @@
-//$Id: BoundaryCondition.h,v 1.19 2005/03/08 12:41:36 jbarbier Exp $
 #ifndef BOUNDARYCONDITION_H
 #define BOUNDARYCONDITION_H
 
@@ -23,14 +22,10 @@ class DynamicalSystem;
 
 /** \class BoundaryCondition
  *  \brief represents the boundary conditions for a NSDS BVP
- *  \author Jean-Michel Barbier
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) May 24, 2004
  *
- * $Date: 2005/03/08 12:41:36 $
- * $Revision: 1.19 $
- * $Author: jbarbier $
- * $Source: /CVS/Siconos/SICONOS/src/modelformalisation/BoundaryCondition.h,v $
  *
  */
 class BoundaryCondition
@@ -126,48 +121,3 @@ protected:
 //createRelation and createNSLaw completed with the required attributes
 //
 //Revision 1.11  2004/07/29 14:25:34  jbarbier
-//- $Log: BoundaryCondition.h,v $
-//- Revision 1.19  2005/03/08 12:41:36  jbarbier
-//- - constant variables files modified :
-//- Some constants added in SiconosConst
-//-
-//- all global tag of the modeling tools are in XMLTagsName, other tags are specific to an XML class
-//-
-//- Revision 1.18  2005/02/11 17:35:54  charlety
-//-
-//- _ little "inspection of code"
-//- _ basic getters and setters passed inline
-//- _ getters functions passed const
-//-
-//- Revision 1.17  2005/01/18 17:07:37  charlety
-//-
-//- _ added autotools makefiles for sample directory
-//-
-//- Revision 1.16  2004/09/30 08:35:01  jbarbier
-//- - fonction of the formalisation : fill..With...XML and link... are now
-//- "protected" and no more "public"
-//-
-//- Revision 1.15  2004/09/22 11:16:28  charlety
-//-
-//- _ revision of Doxygen comments in modelformalisation
-//-
-//- Revision 1.14  2004/09/10 11:26:07  charlety
-//-
-//- _ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//-
-//- _ All the tests which worked with the previous version of the vector are OK with the new version.
-//-
-//- _ Example SICONOS and bouncingBall are OK
-//-
-//- _ some comments have still to be adapted to NewSiconosVector .
-//-
-//- _ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//-
-//- Revision 1.13  2004/09/10 08:04:46  jbarbier
-//- - XML save available for BoundaryCondition and Interaction
-//-
-//- Revision 1.12  2004/08/17 15:12:37  jbarbier
-//- - methods createDynamicalSystem, createBoundaryCondition, createInteraction,
-//- createRelation and createNSLaw completed with the required attributes
-//- and $Id: BoundaryCondition.h,v 1.19 2005/03/08 12:41:36 jbarbier Exp $ added
-//

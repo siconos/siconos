@@ -1,4 +1,3 @@
-//$Id: OneStepNSProblemXML.cpp,v 1.27 2005/03/21 10:17:12 jbarbier Exp $
 
 #include "OneStepNSProblemXML.h"
 
@@ -367,72 +366,3 @@ void OneStepNSProblemXML::setSolver(string name, string methodName, string normT
 //- NonLinearSystemDS is now available
 //
 //Revision 1.14  2004/07/29 14:25:44  jbarbier
-//- $Log: OneStepNSProblemXML.cpp,v $
-//- Revision 1.27  2005/03/21 10:17:12  jbarbier
-//- - normType available after the modification in Numerics
-//-
-//- - searchDirection save fixed when default value was used
-//-
-//- Revision 1.26  2005/03/17 16:01:10  jbarbier
-//- - bug in xmlSchema attribute saving of the Model fixed
-//-
-//- - bug in overwriting solving algorithm fixed
-//-
-//- - nice indentation for new nodes added into input xml file removed because of limitation of libxml. The way to have the nice indentation was creating phantom tags.
-//-
-//- Revision 1.25  2005/03/08 14:23:45  jbarbier
-//- - modification of constant variables :
-//- in the XML module, main tags of the XML objects of the strategy are in XMLTagsName.h
-//-
-//- in simualtion tools, some constants have been moved to SiconosConst.h
-//-
-//- Revision 1.24  2005/02/23 13:52:40  jbarbier
-//- - new tests on optional attributes of Interaction and Strategy
-//-
-//- - modification on the OneStepNSProblem for attribute "n" (\todo : how to calculate this "n")
-//-
-//- Revision 1.23  2005/01/25 09:27:18  jbarbier
-//- - save of Solver tag in the OneStepNSProblem tag available when saving without XML input file and with partial XML input file
-//-
-//- Revision 1.22  2005/01/24 14:33:03  jbarbier
-//- - OneStepNSProblem > Solver tag is available and managed in the XML part
-//-
-//- - tests added on OneStepNSProblem > Solver tag
-//-
-//- Revision 1.21  2005/01/18 10:35:17  jbarbier
-//- - attribute "r" no longer used for Moreau integrator
-//-
-//- - modificatoin in the tests for Moreau integrator
-//-
-//- - file XMLTagsName.h for further use to regroup all xml tags name...
-//-
-//- Revision 1.20  2005/01/14 11:51:25  jbarbier
-//- - attribute "all" of the OneStepNSProblem terminated
-//- in OneStepIntegrator and Interaction the attribute is available
-//-
-//- Revision 1.19  2005/01/13 14:14:40  jbarbier
-//- - correction in the XML output about size attribute in tags DS_Concerned and Interactoin _Concerned
-//-
-//- - modifications in creation of XML objects when saving data with partial XML input file
-//-
-//- Revision 1.18  2005/01/10 17:06:37  jbarbier
-//- - attribute "size" is now unused in the code
-//-
-//- - xml schema v1.2 is in progress
-//-
-//- Revision 1.17  2004/09/15 13:23:14  jbarbier
-//- - corrections in the OneStepNSProblem, for the XML save. The list of interaction
-//- linked to the onestepnsproblem is now saved correctly. It is updated before
-//- during the creation process.
-//-
-//- Revision 1.16  2004/09/14 13:49:59  jbarbier
-//- - files added in sample/ to run run the main_siconos test program
-//-
-//- - all the platform can now be saved in an XML file when it is created manually
-//-
-//- Revision 1.15  2004/08/05 12:44:44  jbarbier
-//- - loading XML file with no OneStepNSProblem succesfull
-//-
-//- - NonLinearSystemDS is now available
-//- and $Id: OneStepNSProblemXML.cpp,v 1.27 2005/03/21 10:17:12 jbarbier Exp $ added
-//

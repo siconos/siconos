@@ -1,4 +1,3 @@
-//$Id: LCPXML.cpp,v 1.10 2005/02/04 14:52:44 jbarbier Exp $
 #include "LCPXML.h"
 
 LCPXML::LCPXML() : OneStepNSProblemXML()
@@ -51,27 +50,3 @@ void LCPXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
   OUT("LCPXML::updateOneStepNSProblemXML\n");
 }
 
-//$Log: LCPXML.cpp,v $
-//Revision 1.10  2005/02/04 14:52:44  jbarbier
-//- Rolling balls in progress (contact is detected)
-//
-//- time data is given in parameter for computInput and Output in the Relation. Parameter is sent by methods of the OneStepNSProblem
-//
-//Revision 1.9  2005/01/25 09:27:18  jbarbier
-//- save of Solver tag in the OneStepNSProblem tag available when saving without XML input file and with partial XML input file
-//
-//Revision 1.8  2005/01/24 14:33:03  jbarbier
-//- OneStepNSProblem > Solver tag is available and managed in the XML part
-//
-//- tests added on OneStepNSProblem > Solver tag
-//
-//Revision 1.7  2004/09/14 13:49:56  jbarbier
-//- files added in sample/ to run run the main_siconos test program
-//
-//- all the platform can now be saved in an XML file when it is created manually
-//
-//Revision 1.6  2004/06/29 15:12:02  acary
-//Change in the naming comvention for the LCP
-//The LCP Matrix is now denoted by M.
-//The LCP Vector is now denoted by q.
-//

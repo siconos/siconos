@@ -1,16 +1,11 @@
-//$Id: LagrangianTIDSXML.h,v 1.9 2004/09/10 11:26:27 charlety Exp $
 
 /** \class LagrangianTIDSXML
 *   \brief This class manages Lagrangian TIDS data
-*   \author J. Blanc-Tranchant
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 05/11/2004
 *
 *
-* $Date: 2004/09/10 11:26:27 $
-* $Revision: 1.9 $
-* $Author: charlety $
-* $Source: /CVS/Siconos/SICONOS/src/xml/LagrangianTIDSXML.h,v $
 *
 * LagrangianTIDSXML allows to manage data of a LagrangianTIDS DOM tree.
 */
@@ -144,22 +139,3 @@ private:
 //finished.
 //
 //Revision 1.7  2004/07/29 14:25:43  jbarbier
-//- $Log: LagrangianTIDSXML.h,v $
-//- Revision 1.9  2004/09/10 11:26:27  charlety
-//-
-//- _ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//-
-//- _ All the tests which worked with the previous version of the vector are OK with the new version.
-//-
-//- _ Example SICONOS and bouncingBall are OK
-//-
-//- _ some comments have still to be adapted to NewSiconosVector .
-//-
-//- _ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//-
-//- Revision 1.8  2004/08/23 14:30:02  jbarbier
-//- - All the dynamical systems can be created in a comand program and added to a
-//- NSDS. The save is OK, but the creation of the boundary conditions is not yet
-//- finished.
-//- and $Id: LagrangianTIDSXML.h,v 1.9 2004/09/10 11:26:27 charlety Exp $ added
-//

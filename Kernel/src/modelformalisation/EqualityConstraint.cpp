@@ -1,4 +1,3 @@
-//$Id: EqualityConstraint.cpp,v 1.10 2005/03/21 16:48:02 jbarbier Exp $
 #include "EqualityConstraint.h"
 
 EqualityConstraint::EqualityConstraint()
@@ -202,49 +201,3 @@ void EqualityConstraint::createEqualityConstraint(EqualityConstraintXML *ecXML,
   }
 }
 
-//$Log: EqualityConstraint.cpp,v $
-//Revision 1.10  2005/03/21 16:48:02  jbarbier
-//- EqualityConstraint : computeInput and computeOutput functions added (plugin funcitons)
-//
-//- link OneStepNSProblem - EqualityConstraint established
-//
-//- modification of OneStepNSProblem save according to change to normType[64] in SiconosNumerics.h
-//
-//Revision 1.9  2005/03/15 14:44:03  jbarbier
-//- pySiconos.i edited to remove local paths
-//
-//- checkCoherency checks whether the DSInputOutputs and EqualityConstraints have unique numbers
-//
-//Revision 1.8  2005/03/15 09:57:47  jbarbier
-//- EqualityConstraint save OK
-//
-//Revision 1.7  2005/03/14 16:05:27  jbarbier
-//- manual creation of DSInputOutput saving OK
-//
-//- in progress for EqualityConstraint
-//
-//Revision 1.6  2005/03/11 15:06:20  jbarbier
-//- save to XML methods of EqualityConstraint and DSInputOutput added
-//
-//- XML loading process modified : Model loads NSDS, then NSDS loads the DynamicalSystems, EqualityConstraints, Interactions; Modle loads Strategy, then Strategy loads TimeDiscretisation, then the Integrators, then the OneStepNSProblem
-//
-//Revision 1.5  2005/03/10 12:55:19  jbarbier
-//- implmentation of the EqualityConstraint and DSInputOutput classes in progress
-//    attributes H (DSIO) et G (EC) added in XML and managed in XML objects
-//
-//Revision 1.4  2005/03/09 15:30:25  jbarbier
-//- add of LagrangianEC class
-//
-//- in progress : implementation of the EqualityConstraint and DSInputOutput - create methods
-//
-//Revision 1.3  2005/01/25 14:51:46  jbarbier
-//- attributes id, type and XML object added to EqualityConstraint
-//
-//Revision 1.2  2005/01/25 13:56:03  jbarbier
-//- link DynamicalSystem-DSInputOutput, NonSmoothDynamicalSystem-EqualityConstraint, EquaityConstraint-DSInputOutput and Relation-DSInputOutput available
-//
-//Revision 1.1  2005/01/17 10:56:24  jbarbier
-//- classes EqualityConstraint and DSInputOutput added with inherited classes
-//
-//- classes EqualityConstraintXML and DSInputOutputXML added with inherited classes
-//

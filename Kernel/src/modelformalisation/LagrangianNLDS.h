@@ -1,4 +1,3 @@
-//$Id: LagrangianNLDS.h,v 1.55 2005/02/15 15:15:32 charlety Exp $
 #ifndef LAGRANGIANNLDS_H
 #define LAGRANGIANNLDS_H
 
@@ -19,14 +18,10 @@ class LagrangianNLDSXML;
 
 /** \class LagrangianNLDS
  *  \brief main class of Lagrangian dynamic systems
- *  \author V. ACARY,  JB CHARLETY
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 29, 2004
  *
- * $Date: 2005/02/15 15:15:32 $
- * $Revision: 1.55 $
- * $Author: charlety $
- * $Source: /CVS/Siconos/SICONOS/src/modelformalisation/LagrangianNLDS.h,v $
  *
  * The class LagrangianNLDS  allows to define  and compute a generic ndof-dimensional
  * Lagrangian Non Linear Dynamical System of the form :
@@ -870,104 +865,3 @@ protected:
 };
 
 #endif // LAGRANGIANNLDS_H
-//$Log: LagrangianNLDS.h,v $
-//Revision 1.55  2005/02/15 15:15:32  charlety
-//
-//_ modified some very slow functions to increase performance
-//
-//Revision 1.54  2005/02/11 17:36:00  charlety
-//
-//_ little "inspection of code"
-//_ basic getters and setters passed inline
-//_ getters functions passed const
-//
-//Revision 1.53  2005/01/31 16:26:19  charlety
-//
-//_ Added a method named "convert" to classes which inherits from another. This is necessary for Python interface, in order to be able to use down-casting mechanism.
-//
-//Revision 1.52  2004/09/30 08:35:02  jbarbier
-//- fonction of the formalisation : fill..With...XML and link... are now
-//"protected" and no more "public"
-//
-//Revision 1.51  2004/09/28 08:21:28  jbarbier
-//
-//- manual creation of the BouncingBall example successful
-//
-//Revision 1.50  2004/09/23 14:45:06  charlety
-//
-//_ Added a header file to main_siconos.cpp
-//_ modified plugin functions signatures in model formalisation
-//
-//Revision 1.49  2004/09/22 11:16:28  charlety
-//
-//_ revision of Doxygen comments in modelformalisation
-//
-//Revision 1.48  2004/09/10 11:26:13  charlety
-//
-//_ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//
-//_ All the tests which worked with the previous version of the vector are OK with the new version.
-//
-//_ Example SICONOS and bouncingBall are OK
-//
-//_ some comments have still to be adapted to NewSiconosVector .
-//
-//_ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//
-//Revision 1.47  2004/08/23 14:30:01  jbarbier
-//- All the dynamical systems can be created in a comand program and added to a
-//NSDS. The save is OK, but the creation of the boundary conditions is not yet
-//finished.
-//
-//Revision 1.46  2004/08/20 15:26:44  jbarbier
-//- creation of a Model and save in the XML is ok
-//- creation of a NSDS and save in the XML is ok
-//- creation of a NonLinearSystemDS and save in the XML is OK
-//
-//Revision 1.45  2004/08/17 15:12:38  jbarbier
-//- methods createDynamicalSystem, createBoundaryCondition, createInteraction,
-//createRelation and createNSLaw completed with the required attributes
-//
-//Revision 1.44  2004/08/13 11:26:58  jbarbier
-//- function createNSDS complete
-//
-//- function createDynamicalSystem and createLinearSystemDS complete
-//
-//- function  createLagrangianNLDS in progress
-//
-//Revision 1.43  2004/08/12 11:55:14  jbarbier
-//- new methods createModel, createNSDS, createStrategy, ...
-//they now allow to make the link with upper objects of the platform
-//it will be used for the creation of the platform without XML input file
-//
-//- the createModel method is finished but the attributes of the other objects
-//of the platform are missing for the conctruction
-//
-//Revision 1.42  2004/08/10 12:04:28  jbarbier
-//- save of the plugin's name for fInt
-//
-//Revision 1.41  2004/07/23 14:39:25  jbarbier
-//- createModel, createNSDS, createDynamicalSystem, createBoundaryCondition OK
-//it's the first step, it do the same thing that before, but the process is
-//unified and it must simply add the traitment for the creation of the nodes in
-//the DOM tree
-//
-//Revision 1.40  2004/07/09 11:14:53  charlety
-//
-//_ Added a constructor by copy and an operator = in class SiconosMemory
-//_ the getters on memory in DynamicalSystems return now some pointers
-//
-//Revision 1.39  2004/07/05 12:38:08  charlety
-//
-//try of false plugin developed in LagrangianTIDS. The Moreau integrator considers it like a LagrangianNLDS, but this is not the plugin which is used to compute the external strength, but a function of the LagrangianTIDS.
-//
-//Revision 1.38  2004/07/02 14:48:28  acary
-//Added MACRO IN and OUT
-//
-//Revision 1.37  2004/06/30 13:08:21  jbarbier
-//DoxygenSiconos.cfg moved into config/
-//ICDLLSharedLibrary renamed SiconosSharedLibrary
-//
-//Revision 1.36  2004/06/29 08:49:57  acary
-//Ajout des commentaires Doxygen et des tages CVS
-//

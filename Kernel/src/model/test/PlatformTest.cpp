@@ -594,4 +594,3 @@ void PlatformTest::testMainSiconos()
   printf("PlatformTest >>> testMainSiconos ................................ OK\n");
 }
 
-//$log$

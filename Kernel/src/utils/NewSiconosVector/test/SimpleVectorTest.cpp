@@ -1,4 +1,3 @@
-//$Id: SimpleVectorTest.cpp,v 1.12 2005/01/18 11:00:26 jbarbier Exp $
 
 #include "SimpleVectorTest.h"
 
@@ -966,51 +965,3 @@ void SimpleVectorTest::testExternalOperatorMultTransMat()
   cout << "SimpleVectorTest >>> testExternalOperatorMultTransMat ............................... OK\n ";
 }
 
-//$Log: SimpleVectorTest.cpp,v $
-//Revision 1.12  2005/01/18 11:00:26  jbarbier
-//- write wild fixed in simple vector test
-//
-//Revision 1.11  2005/01/13 09:06:17  charlety
-//
-//_ documentation is compilable again with : make documentation
-//_ xml tests are now available too
-//
-//Revision 1.10  2004/09/14 13:24:54  charlety
-//
-//_ changes in the interface of SiconosVector
-//
-//Revision 1.9  2004/09/09 14:32:50  charlety
-//
-//_ New tests for operators of multiplication between vectors and matrices.
-//
-//Revision 1.8  2004/08/23 09:29:01  charlety
-//
-//_ tests for compositeVector in progress
-//
-//Revision 1.7  2004/08/20 15:00:35  charlety
-//
-//_ Tests for operators of SimpleVector
-//
-//Revision 1.6  2004/08/19 15:21:28  charlety
-//
-//_ SimpleVector and CompositeVector in progress.
-//_ for the operators, we prefer now using directly functions of Blas1++ instead
-//  of these of Blas++.h
-//
-//Revision 1.5  2004/08/16 09:40:01  charlety
-//
-//_ new tests for the simpleVector
-//
-//Revision 1.4  2004/08/13 10:36:11  charlety
-//
-//_ tests for simpleVector in progress
-//
-//Revision 1.3  2004/08/11 14:16:08  charlety
-//
-//_ NewSiconosVector in progress...(NewSiconosVector is an abstract class and
-//  SimpleVector inherits of NewSiconosVector).
-//
-//Revision 1.2  2004/07/30 14:21:54  charlety
-//
-//_ new functions and tests for the new SiconosVector
-//

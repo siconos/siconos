@@ -1,14 +1,9 @@
-//$Id: SiconosVectorException.h,v 1.1 2004/09/10 10:00:22 charlety Exp $
 /** \class SiconosVectorException
 *   \brief This class represent an exeption causing by a SiconosMatrix
-*   \author A. Ravoux
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date (Creation) 05/25/2004
 *
-* $Date: 2004/09/10 10:00:22 $
-* $Revision: 1.1 $
-* $Author: charlety $
-* $Source: /CVS/Siconos/SICONOS/src/utils/NewSiconosVector/SiconosVectorException.h,v $
 *
 *
 * SiconosVectorException must be throws when an error is find in a SiconosVector

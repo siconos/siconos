@@ -1,4 +1,3 @@
-//$Id: Moreau.cpp,v 1.46 2005/03/08 14:23:44 jbarbier Exp $
 #include "Moreau.h"
 #include "MoreauXML.h"
 #include "LagrangianTIDS.h"
@@ -440,26 +439,4 @@ Moreau* Moreau::convert(OneStepIntegrator* osi)
 //
 //-function setSiconosVector/Matrix which take a SiconosVector/Matrix* in parameter to avoid
 //unnecessary vector and matrix copies
-//
-//-CVS $id and $log added in the xml files
-//
-//Revision 1.24  2004/07/05 12:45:13  jbarbier
-//optionnal Matrix and Vector attributes save ... ok
-//XML save  ok even without boundarycondition
-//
-//Revision 1.23  2004/07/05 12:38:32  charlety
-//
-//try of false plugin developed in LagrangianTIDS. The Moreau integrator considers it like a LagrangianNLDS, but this is not the plugin which is used to compute the external strength, but a function of the LagrangianTIDS.
-//
-//Revision 1.22  2004/07/02 14:50:31  acary
-//Added correct PLU factorization and Inversion of the Matrix
-//
-//Revision 1.21  2004/07/01 14:48:27  jbarbier
-//-correction of the indentation of the SiconosSchemaXML.xsd
-//-methods createMatrix/Vector/Double/Integer/String/VectorMemory/Boolean for
-//saving optional attributs
-//
-//Revision 1.20  2004/06/29 10:38:39  acary
-//Ajout des Tag CVS ID et Log
-//Ajout de la gestion pas le constructeur XML de Theta
 //

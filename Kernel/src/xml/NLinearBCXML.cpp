@@ -1,4 +1,3 @@
-//$Id: NLinearBCXML.cpp,v 1.7 2004/09/10 08:04:51 jbarbier Exp $
 
 #include "NLinearBCXML.h"
 
@@ -24,8 +23,3 @@ void NLinearBCXML::updateBoundaryConditionXML(xmlNode* node) //, BoundaryConditi
 //- XML save available for BoundaryCondition and Interaction
 //
 //Revision 1.6  2004/07/29 14:25:43  jbarbier
-//- $Log: NLinearBCXML.cpp,v $
-//- Revision 1.7  2004/09/10 08:04:51  jbarbier
-//- - XML save available for BoundaryCondition and Interaction
-//- and $Id: NLinearBCXML.cpp,v 1.7 2004/09/10 08:04:51 jbarbier Exp $ added
-//

@@ -39,4 +39,3 @@ private:
 
 #endif // SICONOSMEMORYXMLTEST_H
 
-//$log$

@@ -1,4 +1,3 @@
-//$Id: BoundaryConditionXML.h,v 1.12 2005/02/24 15:50:20 jbarbier Exp $
 #ifndef BOUNDARYCONDITIONXML_H
 #define BOUNDARYCONDITIONXML_H
 
@@ -15,14 +14,10 @@
 
 /** \class BoundaryConditionXML
  *  \brief describes the boundary conditions for a BVP NSDS
- *  \author Jean-Michel Barbier
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date May 24, 2004
  *
- * $Date: 2005/02/24 15:50:20 $
- * $Revision: 1.12 $
- * $Author: jbarbier $
- * $Source: /CVS/Siconos/SICONOS/src/xml/BoundaryConditionXML.h,v $
  */
 class BoundaryConditionXML
 {
@@ -82,33 +77,3 @@ protected:
 //- XML save available for BoundaryCondition and Interaction
 //
 //Revision 1.8  2004/07/29 14:25:41  jbarbier
-//- $Log: BoundaryConditionXML.h,v $
-//- Revision 1.12  2005/02/24 15:50:20  jbarbier
-//- - LCP prepared to changes needed for several interactions
-//-
-//- - new function for the SiconosMatrices to copy a block matrix into another matrix
-//-
-//- - tag names of BoundaryConditionXML, DSInputOutputXML, DSXML, InteractionXML, LagrangianLinearRXML, LagrangianNLDSXML put in XMLTagNames.h
-//-
-//- Revision 1.11  2005/01/18 10:35:17  jbarbier
-//- - attribute "r" no longer used for Moreau integrator
-//-
-//- - modificatoin in the tests for Moreau integrator
-//-
-//- - file XMLTagsName.h for further use to regroup all xml tags name...
-//-
-//- Revision 1.10  2005/01/11 17:08:30  jbarbier
-//- - last modification about the BoundaryCondition
-//- <BoundaryCondition>
-//-   <[type]>
-//-   <[type]/>
-//- <BoundaryCondition/>
-//-
-//- - modification of the xml files for this modification
-//-
-//- - version 1.2 of the xml schema
-//-
-//- Revision 1.9  2004/09/10 08:04:48  jbarbier
-//- - XML save available for BoundaryCondition and Interaction
-//- and $Id: BoundaryConditionXML.h,v 1.12 2005/02/24 15:50:20 jbarbier Exp $ added
-//

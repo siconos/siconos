@@ -1,15 +1,10 @@
-//$Id: SiconosDOMTreeTools.h,v 1.39 2005/01/20 09:05:35 jbarbier Exp $
 
 /** \class SiconosDOMTreeTools
 *   \brief This class is a sort of tools box to get and set elements from nodes DOM tree
-*   \author J. Blanc-Tranchant
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 04/06/2004
 *
-* $Date: 2005/01/20 09:05:35 $
-* $Revision: 1.39 $
-* $Author: jbarbier $
-* $Source: /CVS/Siconos/SICONOS/src/xml/SiconosDOMTreeTools.h,v $
 *
 * SiconosDOMTreeTools allows to manage data of Siconos nodes DOM tree, like set or get double, vector etc.
 */
@@ -494,57 +489,3 @@ private :
 };
 
 #endif
-//$Log: SiconosDOMTreeTools.h,v $
-//Revision 1.39  2005/01/20 09:05:35  jbarbier
-//- configuration file available and usable
-//
-//- save of vectors and matrices into external files (version 0.1)
-//
-//Revision 1.38  2005/01/10 17:06:37  jbarbier
-//- attribute "size" is now unused in the code
-//
-//- xml schema v1.2 is in progress
-//
-//Revision 1.37  2004/12/08 12:49:39  jbarbier
-//- changes in the XML Schema, respect of the recommandations of the W3C
-//version 1.1
-//
-//- changes in all balises DS, Relation, NSLaw, OneStepIntegrator, OneStepNSProblem
-//in the XML files into specific names like LagrangianNLDS, LinearSystemDS, ...
-//for the DS
-//
-//Revision 1.36  2004/09/21 11:49:10  jbarbier
-//- correction in the XML save for a manual construction of the platform :
-//    DS_Concerned of the Interaction
-//    DS_Concerned of the Integrator
-//
-//- test updated for these changes
-//
-//Revision 1.35  2004/09/10 11:26:29  charlety
-//
-//_ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//
-//_ All the tests which worked with the previous version of the vector are OK with the new version.
-//
-//_ Example SICONOS and bouncingBall are OK
-//
-//_ some comments have still to be adapted to NewSiconosVector .
-//
-//_ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//
-//Revision 1.34  2004/08/23 14:30:03  jbarbier
-//- All the dynamical systems can be created in a comand program and added to a
-//NSDS. The save is OK, but the creation of the boundary conditions is not yet
-//finished.
-//
-//Revision 1.33  2004/08/10 14:51:49  jbarbier
-//- functions initialize() of the Lsodar and Adams OneStepIntegrator completed to
-//call the function initialize() of the base class
-//
-//Revision 1.32  2004/07/30 14:37:16  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianNLDSXML
-//
-//Revision 1.31  2004/07/30 14:23:40  charlety
-//
-//_ bug found in SiconosDOMTreeTools
-//

@@ -1,4 +1,3 @@
-//$Id: NewtonImpactFrictionNSLXML.cpp,v 1.1 2005/03/22 15:55:05 jbarbier Exp $
 #include "NewtonImpactFrictionNSLXML.h"
 
 
@@ -42,12 +41,3 @@ NewtonImpactFrictionNSLXML::NewtonImpactFrictionNSLXML(xmlNode * nslNode)
   }
 
 }
-//$Log: NewtonImpactFrictionNSLXML.cpp,v $
-//Revision 1.1  2005/03/22 15:55:05  jbarbier
-//- class NewtonImpactFriction non smooth law added to the kernel
-//
-//- xml schema modified for this new class
-//- xml schema modified to accept a "joker" for further use of a LMGC90 mechanical plugin
-//
-//- new test added for the loading/saving of a NewtonImpactFrictionNSL
-//

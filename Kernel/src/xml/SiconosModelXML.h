@@ -1,16 +1,11 @@
-//$Id: SiconosModelXML.h,v 1.42 2005/03/08 14:23:46 jbarbier Exp $
 
 /** \class SiconosModelXML
 *   \brief This class allows to verify and download a Siconos XML data file, manage it data and save in a new Siconos XML data file
-*   \author J. Blanc-Tranchant
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 04/04/2004
 *
 *
-* $Date: 2005/03/08 14:23:46 $
-* $Revision: 1.42 $
-* $Author: jbarbier $
-* $Source: /CVS/Siconos/SICONOS/src/xml/SiconosModelXML.h,v $
 *
 * SiconosModelXML allows the verification of a Siconos XML data file thanks to an XML Schema.
 * All verifications can't be done with schema : others are done in the code, as the download of the XML file (download is stopped if error).
@@ -552,94 +547,3 @@ private:
 //- attribute T of the Model is now optional
 //
 //Revision 1.27  2004/07/29 14:25:45  jbarbier
-//- $Log: SiconosModelXML.h,v $
-//- Revision 1.42  2005/03/08 14:23:46  jbarbier
-//- - modification of constant variables :
-//- in the XML module, main tags of the XML objects of the strategy are in XMLTagsName.h
-//-
-//- in simualtion tools, some constants have been moved to SiconosConst.h
-//-
-//- Revision 1.41  2005/01/25 10:33:15  jbarbier
-//- - modifications for test purpose
-//-
-//- Revision 1.40  2005/01/20 14:44:49  jbarbier
-//- - NSDS class renamed NonSmoothDynamicalSystem
-//-
-//- - code reduce, some comments remove
-//-
-//- Revision 1.39  2005/01/20 09:05:35  jbarbier
-//- - configuration file available and usable
-//-
-//- - save of vectors and matrices into external files (version 0.1)
-//-
-//- Revision 1.38  2005/01/11 17:08:31  jbarbier
-//- - last modification about the BoundaryCondition
-//- <BoundaryCondition>
-//-   <[type]>
-//-   <[type]/>
-//- <BoundaryCondition/>
-//-
-//- - modification of the xml files for this modification
-//-
-//- - version 1.2 of the xml schema
-//-
-//- Revision 1.37  2005/01/10 14:07:42  jbarbier
-//- - file ChangeLog added for the autotools
-//-
-//- - xml schema corrected : BoundaryCondition modified without "choice"
-//-
-//- - new function of the Model to check at every moment the validity of an xml file according to the xml Schema
-//-
-//- Revision 1.36  2004/12/20 15:01:26  jbarbier
-//- - schema XML renamed V1.1
-//-
-//- - schema XML corrected about OneStepNSProblem:
-//-   tag OneStepNSProblem contains tags LCP, QP, ... and other tags to add
-//-   further
-//-
-//- Revision 1.35  2004/11/26 14:10:58  jbarbier
-//- - the xml schema used to check the xml file is the one given in the input xml
-//- file
-//-
-//- Revision 1.34  2004/09/27 13:27:14  jbarbier
-//-
-//- - Siconos schema renamed : SiconosModelSchema-V1.0.xsd
-//-
-//- - new required tags of the model : title, author, description, date, xmlSchema.
-//- They replace previous attributes author, description and date of the Model.
-//-
-//- Revision 1.33  2004/09/14 13:49:59  jbarbier
-//- - files added in sample/ to run run the main_siconos test program
-//-
-//- - all the platform can now be saved in an XML file when it is created manually
-//-
-//- Revision 1.32  2004/08/20 07:34:23  jbarbier
-//- - creation of Model, NSDS in comand program succeed in creating SiconosModelXML,
-//- NSDSXML
-//-
-//- Revision 1.31  2004/08/12 14:28:38  jbarbier
-//- - createTimeDiscretisation in progress
-//-
-//- Revision 1.30  2004/08/11 14:43:45  jbarbier
-//- - beginning of the mechanism of creation without XML input file of the objects of the platform with the
-//- creatObjtect methods
-//-
-//- - function saveWToXML for Moreau integrator, and same specific functions to save
-//- M,q and Q,p for LCP and QP
-//-
-//- - function to check coherency of the Model
-//-
-//- Revision 1.29  2004/08/10 14:51:49  jbarbier
-//- - functions initialize() of the Lsodar and Adams OneStepIntegrator completed to
-//- call the function initialize() of the base class
-//-
-//- Revision 1.28  2004/08/03 12:07:12  jbarbier
-//- - all test on th eModel are successfull
-//-
-//- - new tests on the Model with the opening of XML file
-//-
-//- - link TimeDiscretisation -> Strategy
-//-
-//- - attribute T of the Model is now optional
-//- and $Id: SiconosModelXML.h,v 1.42 2005/03/08 14:23:46 jbarbier Exp $ added
-//

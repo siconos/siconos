@@ -1,4 +1,3 @@
-//$Id: LinearBCXML.cpp,v 1.8 2004/09/10 08:04:50 jbarbier Exp $
 
 #include "LinearBCXML.h"
 
@@ -62,8 +61,3 @@ void LinearBCXML::updateBoundaryConditionXML(xmlNode* node) //, BoundaryConditio
 //- XML save available for BoundaryCondition and Interaction
 //
 //Revision 1.7  2004/07/29 14:25:43  jbarbier
-//- $Log: LinearBCXML.cpp,v $
-//- Revision 1.8  2004/09/10 08:04:50  jbarbier
-//- - XML save available for BoundaryCondition and Interaction
-//- and $Id: LinearBCXML.cpp,v 1.8 2004/09/10 08:04:50 jbarbier Exp $ added
-//

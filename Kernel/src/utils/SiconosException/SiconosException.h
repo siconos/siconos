@@ -1,14 +1,9 @@
-//$Id: SiconosException.h,v 1.1 2005/01/05 15:59:04 charlety Exp $
 /** \class SiconosException
 *   \brief This class represent all the exeption in the Siconos platform
-*   \author A. Ravoux
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date (Creation) 05/25/2004
 *
-*$Date: 2005/01/05 15:59:04 $
-* $Revision: 1.1 $
-* $Author: charlety $
-* $Source: /CVS/Siconos/SICONOS/src/utils/SiconosException/SiconosException.h,v $
 *
 * SiconosException should not be throws directly; prefer to use an inherit class
 * This exception can be catched by "catch(SiconosException)"

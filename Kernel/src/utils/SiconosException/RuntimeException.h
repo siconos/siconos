@@ -1,14 +1,9 @@
-//$Id: RuntimeException.h,v 1.1 2005/01/05 15:59:04 charlety Exp $
 /** \class RuntimeException
 *   \brief This class represent a runtime exeption causing by the plateforme
-*   \author A. Ravoux
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date (Creation) 05/25/2004
 *
-* $Date: 2005/01/05 15:59:04 $
-* $Revision: 1.1 $
-* $Author: charlety $
-* $Source: /CVS/Siconos/SICONOS/src/utils/SiconosException/RuntimeException.h,v $
 *
 * RuntimeException can be throws for example when a pointer is used but not allocated
 * This exception can be catched by "catch(RuntimeException)" or "catch(SiconosException)"

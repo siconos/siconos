@@ -1,14 +1,9 @@
-//$Id: NewtonImpactLawNSLXML.h,v 1.3 2004/07/29 14:04:00 jbarbier Exp $
 /** \class NewtonImpactLawNSLXML
  *  \brief  This class manages NewtonImpactLawNSL data part
- *  \author V. ACARY
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date (Creation) June 29, 2004
  *
- * $Date: 2004/07/29 14:04:00 $
- * $Revision: 1.3 $
- * $Author: jbarbier $
- * $Source: /CVS/Siconos/SICONOS/src/xml/NewtonImpactLawNSLXML.h,v $
  *
  *
  * NewtonImpactLawNSLXML allows to manage data of a NewtonImpactLawNSL DOM tree.
@@ -80,22 +75,3 @@ private:
 };
 
 #endif
-//$Log: NewtonImpactLawNSLXML.h,v $
-//Revision 1.3  2004/07/29 14:04:00  jbarbier
-//- new test on SiconosMemoryXML
-//
-//- last functions hasAttribute() in the XML part added
-//
-//Revision 1.2  2004/07/12 10:53:01  jbarbier
-//-attribute R added to the save of the Dynamical systems
-//-modifications of the xml schema to allow the use of R in the xml input file
-//
-//Revision 1.1  2004/07/06 14:54:49  acary
-//Renaming NSLaw into NonSmoothLaw
-//Renaming RelayNSLaw into RelayNSL
-//Renaming CCNSLaw into ComplementarityConditionNSL
-//Renaming NewtonImpactLaw into NewtonImpactLawNSL
-//
-//Revision 1.1  2004/06/30 09:44:35  acary
-//Added NewtonImpactLawNSL
-//

@@ -1,4 +1,3 @@
-//$Id: SiconosMemoryXML.h,v 1.6 2004/09/27 08:24:26 charlety Exp $
 
 #ifndef SICONOSMEMORYXML_H
 #define SICONOSMEMORYXML_H
@@ -15,15 +14,11 @@ using namespace std;
 
 /** \class SiconosMemoryXML
 *   \brief This class manages SiconosMemory data part
-*   \author J-M Barbier
+*  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 07/13/2004
 *
 *
-* $Date: 2004/09/27 08:24:26 $
-* $Revision: 1.6 $
-* $Author: charlety $
-* $Source: /CVS/Siconos/SICONOS/src/xml/SiconosMemoryXML.h,v $
 */
 
 
@@ -139,20 +134,3 @@ private:
 //- saving methods for DynamicalSystemXML and LagrangianNLDSXML
 //
 //Revision 1.3  2004/07/29 14:25:45  jbarbier
-//- $Log: SiconosMemoryXML.h,v $
-//- Revision 1.6  2004/09/27 08:24:26  charlety
-//-
-//- _ Modifications in doxygen comments.
-//-
-//- Revision 1.5  2004/08/04 11:03:23  jbarbier
-//- - about the SiconosMemory : when a SiconosMemory has a maxSize greater than the
-//- number of steps in memory required by an integrator, the oldest SiconosVector
-//- are deleted
-//-
-//- - the way to initialize the SiconosMemory by the integrator has been updated to
-//- match with these changes
-//-
-//- Revision 1.4  2004/07/30 14:37:16  jbarbier
-//- - saving methods for DynamicalSystemXML and LagrangianNLDSXML
-//- and $Id: SiconosMemoryXML.h,v 1.6 2004/09/27 08:24:26 charlety Exp $ added
-//

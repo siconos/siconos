@@ -1,4 +1,3 @@
-//$Id: BoundaryCondition.cpp,v 1.5 2004/07/29 14:25:34 jbarbier Exp $
 
 #include "BoundaryCondition.h"
 
@@ -24,7 +23,3 @@ void BoundaryCondition::fillBCWithBCXML()
   else RuntimeException::selfThrow("BoundaryCondition::fillBCWithBCXML - BoundaryConditionXML object not exists");
 }
 
-//$Log: BoundaryCondition.cpp,v $
-//Revision 1.5  2004/07/29 14:25:34  jbarbier
-//- $Log$ and $Id$ added
-//

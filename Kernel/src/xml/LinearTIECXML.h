@@ -1,4 +1,3 @@
-//$Id: LinearTIECXML.h,v 1.3 2005/01/26 13:50:40 jbarbier Exp $
 #ifndef LINEARTIECXML_H
 #define LINEARTIECXML_H
 
@@ -6,14 +5,10 @@
 
 /** \class LinearTIECXML
  *  \brief object to manage XML data of an Linear Time Invariant EqualityConstraint
- *  \author Jean-Michel Barbier
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date 17/01/2005
  *
- * $Date: 2005/01/26 13:50:40 $
- * $Revision: 1.3 $
- * $Author: jbarbier $
- * $Source: /CVS/Siconos/SICONOS/src/xml/LinearTIECXML.h,v $
  *
  */
 
@@ -34,16 +29,3 @@ public:
 
 #endif // LINEARTIECXML_H
 
-//$Log: LinearTIECXML.h,v $
-//Revision 1.3  2005/01/26 13:50:40  jbarbier
-//
-//- loading of an XML input file now loads EqualityConstraints and DSInputOutputs
-//
-//Revision 1.2  2005/01/17 14:09:34  jbarbier
-//- LagrangianECXML class added
-//
-//Revision 1.1  2005/01/17 10:56:27  jbarbier
-//- classes EqualityConstraint and DSInputOutput added with inherited classes
-//
-//- classes EqualityConstraintXML and DSInputOutputXML added with inherited classes
-//

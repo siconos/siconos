@@ -49,4 +49,3 @@ void SiconosMemoryXMLTest::testHasMemory()
   cout << "SiconosMemoryXMLTest::testHasMemory - test2 .........................OK" << endl;
 }
 
-//$log$
