@@ -37,5 +37,5 @@ libModelingTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_RE
 include_HEADERS = BoundaryCondition.h ComplementarityConditionNSL.h EqualityConstraint.h \
 		DSInputOutput.h DynamicalSystem.h Interaction.h LagrangianDSIO.h LagrangianEC.h LagrangianLinearEC.h LagrangianLinearR.h \
 		LagrangianDS.h LagrangianNonLinearR.h LagrangianLinearTIDS.h LinearBC.h LinearDSIO.h \
-		LinearEC.h LinearSystemDS.h LinearTIEC.h LinearTIR.h NewtonImpactLawNSL.h NewtonImpactFrictionNSL.cpp \
+		LinearEC.h LinearSystemDS.h LinearTIEC.h LinearTIR.h NewtonImpactLawNSL.h NewtonImpactFrictionNSL.h \
 		NLinearBC.h NonSmoothLaw.h NonSmoothDynamicalSystem.h PeriodicBC.h Relation.h RelayNSL.h
