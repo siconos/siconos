@@ -205,15 +205,14 @@ void LCP::computeM(void)
         {
           M1 = static_cast<Moreau*>(I);
           W1 = M1->getWPtr();
-          if (!W1->isInversed())
-          {
-            W1->PLUInverseInPlace();
-            if (W1->isInversed()) cout << "KAPOUeeeeeee ########################################################" << endl;
-          }
-          W1->display();
+          //  if( !W1->isInversed() )
+          //  {
+          W1->PLUInverseInPlace();
+          //    if( W1->isInversed() ) cout<<"KAPOUeeeeeee ########################################################"<<endl;
+          //  }
+          //  W1->display();
 
-          //W1 = M1->getW();
-          //W1.PLUInverseInPlace();
+
         }
         else
           RuntimeException::selfThrow("LCP::computeA not yet implemented for Integrator of type " + I->getType());
@@ -224,11 +223,11 @@ void LCP::computeM(void)
         {
           M2 = static_cast<Moreau*>(I2);
           W2 = M2->getWPtr();
-          if (!W2->isInversed()) W2->PLUInverseInPlace();
-          W2->display();
+          //if( !W2->isInversed() )
+          W2->PLUInverseInPlace();
+          // W2 ->display();
 
-          //W2 = M2->getW();
-          //W2.PLUInverseInPlace();
+
         }
         else
           RuntimeException::selfThrow("LCP::computeA not yet implemented for Integrator of type " + I->getType());
@@ -238,8 +237,8 @@ void LCP::computeM(void)
         v[1] = W2;
         WW = BlockMatrixAssemble(v);
 
-        // W1->PLUInverseInPlace();
-        // W2->PLUInverseInPlace();
+        W1->PLUInverseInPlace();
+        W2->PLUInverseInPlace();
       }
       else
         RuntimeException::selfThrow("LCP::computeA not yet implemented for one DS in a Interaction ");
