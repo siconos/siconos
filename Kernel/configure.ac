@@ -1,15 +1,25 @@
 dnl configure script for SICONOS
 dnl JB CHARLETY, 2005
 
-
 AC_PREREQ(2.57)
 AC_INIT(SICONOS, 1.0, www.siconos.com)
+
+dnl Checking host/target/build systems, for make, install etc.
+AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(SICONOS, 1.0)
 AC_CONFIG_SRCDIR([src/model/Model.h])
 AC_CONFIG_HEADER([config.h])
 
-dnl Checking host/target/build systems, for make, install etc.
-AC_CANONICAL_SYSTEM
+# checks for libtool
+AC_PROG_LIBTOOL
+
+# SO version of all siconos shared libraries
+SICONOS_SO_CURRENT=0
+SICONOS_SO_REVISION=1
+SICONOS_SO_AGE=0
+AC_SUBST(SICONOS_SO_CURRENT)
+AC_SUBST(SICONOS_SO_REVISION)
+AC_SUBST(SICONOS_SO_AGE)
 
 # Checks for programs.
 AC_PROG_CXX
@@ -24,7 +34,7 @@ case $CXX_VER in
 esac
 AC_MSG_RESULT([ok ($CXX_VER)])   
 AC_PROG_CC
-AC_PROG_RANLIB
+# AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
@@ -527,7 +537,8 @@ AC_SUBST(DOXYGEN_CFG)
 # output files
 AC_CONFIG_FILES([Makefile
                  config/Makefile
-                 siconos/Makefile
+		 config/xmlschema/Makefile
+		 siconos/Makefile
                  src/Makefile
                  src/model/Makefile
                  src/model/test/Makefile
@@ -542,11 +553,30 @@ AC_CONFIG_FILES([Makefile
                  src/utils/SiconosMemory/test/Makefile
                  src/utils/SiconosSharedLibrary/Makefile
                  src/xml/Makefile
-                 src/xml/test/Makefile
-		 sample/Makefile
-		 sample/BouncingBall/Makefile
-		 sample/RollingBalls/Makefile
-		 sample/DoubleContact/Makefile
-		 sample/UltraBalls/Makefile
-		 sample/Ball2D/Makefile])
+                 src/xml/test/Makefile])
 AC_OUTPUT
+#AC_CONFIG_FILES([Makefile
+#                 config/Makefile
+#                  siconos/Makefile
+#                 src/Makefile
+#                 src/model/Makefile
+#                 src/model/test/Makefile
+#                 src/modelingTools/Makefile
+#                 src/simulationTools/Makefile
+#                 src/plugin/Makefile
+#                 src/utils/Makefile
+#		 src/utils/SiconosException/Makefile
+#                 src/utils/SiconosAlgebra/Makefile
+#                 src/utils/SiconosAlgebra/test/Makefile
+#                 src/utils/SiconosMemory/Makefile
+#                 src/utils/SiconosMemory/test/Makefile
+#                 src/utils/SiconosSharedLibrary/Makefile
+#                 src/xml/Makefile
+#                 src/xml/test/Makefile
+#		 sample/Makefile
+#		 sample/BouncingBall/Makefile
+#		 sample/RollingBalls/Makefile
+#		 sample/DoubleContact/Makefile
+#		 sample/UltraBalls/Makefile
+#		 sample/Ball2D/Makefile])
+#AC_OUTPUT

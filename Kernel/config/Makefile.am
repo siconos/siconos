@@ -1,4 +1,4 @@
 # Makefile.am --- SICONOS
 
-SUBDIRS = 
+SUBDIRS = xmlschema
 EXTRA_DIST = 

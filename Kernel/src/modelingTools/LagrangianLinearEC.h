@@ -1,10 +1,10 @@
-#ifndef LAGRANGIANEC_H
-#define LAGRANGIANEC_H
+#ifndef LAGRANGIANLINEAREC_H
+#define LAGRANGIANLINEAREC_H
 
 #include "EqualityConstraint.h"
-#include "LagrangianECXML.h"
+#include "LagrangianLinearECXML.h"
 
-/** \class LagrangianEC
+/** \class LagrangianLinearEC
  *  \brief Lagrangian EqualityConstraint
 *  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
@@ -12,22 +12,22 @@
  *
  *
  */
-class LagrangianEC : public EqualityConstraint
+class LagrangianLinearEC : public EqualityConstraint
 {
 public:
 
-  /** \fn LagrangianEC(void);
+  /** \fn LagrangianLinearEC(void);
    * \brief default constructor
    */
-  LagrangianEC();
-  ~LagrangianEC();
+  LagrangianLinearEC();
+  ~LagrangianLinearEC();
 
-  LagrangianEC(EqualityConstraintXML*);
+  LagrangianLinearEC(EqualityConstraintXML*);
 
 
   /** \fn void createDSInputOutput(EqualityConstraintXML * ecXML)
    *  \brief allows to create the EqualityConstraint with an xml file, or the needed data
-   *  \param LagrangianECXML * : the XML object for this EqualityConstraint
+   *  \param LagrangianLinearECXML * : the XML object for this EqualityConstraint
    *  \exception RuntimeException
    */
   void createEqualityConstraint(EqualityConstraintXML * ecXML , int number = -1,
@@ -37,4 +37,4 @@ private:
 
 };
 
-#endif //LAGRANGIANEC_H
+#endif //LAGRANGIANLINEAREC_H 
