@@ -1,0 +1,99 @@
+\documentclass[a4paper,twoside,openright,makeidx,12pt]{book}
+%\usepackage{draftcopy}
+\input{../TeX-tools/macro.tex}
+
+\includeonly{}
+\usepackage{fancyheadings} 
+
+% package pour les images des use cases
+%\usepackage[dvips]{graphicx}
+
+\pagestyle{fancy} 
+\renewcommand{\chaptermark}[1]% 
+{\markboth{{Chap-- \thechapter.\ #1}}{}} 
+\renewcommand{\sectionmark}[1]% 
+{\markright{{\thesection.\ #1}}} 
+\setlength{\headrulewidth}{0.5pt} 
+\setlength{\footrulewidth}{0.5pt} 
+\newcommand{\helv}{% 
+\fontfamily{phv}\fontseries{b}\fontsize{9}{11}\selectfont} 
+\lhead[\helv \thepage]{\helv \rightmark} 
+\rhead[\helv \leftmark]{\helv \thepage} 
+\cfoot{Architectural Design Document -- \today}
+
+\makeindex
+
+\begin{document}
+\pagestyle{empty}
+\renewcommand{\arraystretch}{1.8}
+
+\input{coverADD.tex}
+
+\tableofcontents
+
+
+\pagestyle{fancy}
+%---------------------------------------------------------------------%
+\cleardoublepage
+
+\pagenumbering{arabic}
+\chapter{Introduction}
+\label{Sec:ADD-Intoduction}
+\input{Introduction}
+
+
+%---------------------------------------------------------------------------%
+\newpage
+\chapter{System overview}
+\label{Sec:ADD-SystemOverview}
+\input{SystemOverview}
+%---------------------------------------------------------------------------%
+
+\newpage
+\chapter{System context}
+\label{Sec:ADD-SystemContext}
+\input{SystemContext}
+
+\newpage
+%---------------------------------------------------------------------------%
+\chapter{Conceptual System design}
+\label{Sec:ADD-ConceptualSystemDesign}
+\input{ConceptualSystemDesign}
+
+
+
+\newpage
+%---------------------------------------------------------------------------%
+\chapter{Component description}
+\label{Sec:ADD-ComponentDescription}
+\input{ComponentDescription}
+
+
+\newpage
+%---------------------------------------------------------------------------%
+\chapter{Architecture implementation : methods and softwares}
+\label{Sec:ADD-ComponentImplementation}
+\input{ComponentImplementation}
+
+
+\newpage
+%---------------------------------------------------------------------------%
+%\chapter{Logical validation and verification}
+%\label{Sec:ADD-LogicalValidation}
+%\input{LogicalValidation}
+
+%\newpage
+%---------------------------------------------------------------------------%
+
+
+%\printglosstex(glo)[p]
+\printglosstex(acr)[p]
+
+
+\listoffigures
+%\listoftables
+%\cleardoublepage
+%\bibliographystyle{plainnat}
+%\bibliography{./Biblio/String,./Biblio/Cp.bib,./Biblio/Optim.bib,./Biblio/Contact.bib,./Biblio/NonSmooth.bib,./Biblio/Leger.bib,./Biblio/Petri.bib}
+\cleardoublepage
+\end{document} 

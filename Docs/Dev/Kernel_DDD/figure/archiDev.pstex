@@ -1,0 +1,316 @@
+%!PS-Adobe-2.0 EPSF-2.0
+%%Title: archiDev.pstex
+%%Creator: fig2dev Version 3.2 Patchlevel 3d
+%%CreationDate: Mon Apr 26 13:59:07 2004
+%%For: blanctra@milhaud (Jeremie Blanc-Tranchant)
+%%BoundingBox: 0 0 543 567
+%%Magnification: 1.0000
+%%EndComments
+/$F2psDict 200 dict def
+$F2psDict begin
+$F2psDict /mtrx matrix put
+/col-1 {0 setgray} bind def
+/col0 {0.000 0.000 0.000 srgb} bind def
+/col1 {0.000 0.000 1.000 srgb} bind def
+/col2 {0.000 1.000 0.000 srgb} bind def
+/col3 {0.000 1.000 1.000 srgb} bind def
+/col4 {1.000 0.000 0.000 srgb} bind def
+/col5 {1.000 0.000 1.000 srgb} bind def
+/col6 {1.000 1.000 0.000 srgb} bind def
+/col7 {1.000 1.000 1.000 srgb} bind def
+/col8 {0.000 0.000 0.560 srgb} bind def
+/col9 {0.000 0.000 0.690 srgb} bind def
+/col10 {0.000 0.000 0.820 srgb} bind def
+/col11 {0.530 0.810 1.000 srgb} bind def
+/col12 {0.000 0.560 0.000 srgb} bind def
+/col13 {0.000 0.690 0.000 srgb} bind def
+/col14 {0.000 0.820 0.000 srgb} bind def
+/col15 {0.000 0.560 0.560 srgb} bind def
+/col16 {0.000 0.690 0.690 srgb} bind def
+/col17 {0.000 0.820 0.820 srgb} bind def
+/col18 {0.560 0.000 0.000 srgb} bind def
+/col19 {0.690 0.000 0.000 srgb} bind def
+/col20 {0.820 0.000 0.000 srgb} bind def
+/col21 {0.560 0.000 0.560 srgb} bind def
+/col22 {0.690 0.000 0.690 srgb} bind def
+/col23 {0.820 0.000 0.820 srgb} bind def
+/col24 {0.500 0.190 0.000 srgb} bind def
+/col25 {0.630 0.250 0.000 srgb} bind def
+/col26 {0.750 0.380 0.000 srgb} bind def
+/col27 {1.000 0.500 0.500 srgb} bind def
+/col28 {1.000 0.630 0.630 srgb} bind def
+/col29 {1.000 0.750 0.750 srgb} bind def
+/col30 {1.000 0.880 0.880 srgb} bind def
+/col31 {1.000 0.840 0.000 srgb} bind def
+
+end
+save
+newpath 0 567 moveto 0 0 lineto 543 0 lineto 543 567 lineto closepath clip newpath
+-4.5 571.5 translate
+1 -1 scale
+
+/cp {closepath} bind def
+/ef {eofill} bind def
+/gr {grestore} bind def
+/gs {gsave} bind def
+/sa {save} bind def
+/rs {restore} bind def
+/l {lineto} bind def
+/m {moveto} bind def
+/rm {rmoveto} bind def
+/n {newpath} bind def
+/s {stroke} bind def
+/sh {show} bind def
+/slc {setlinecap} bind def
+/slj {setlinejoin} bind def
+/slw {setlinewidth} bind def
+/srgb {setrgbcolor} bind def
+/rot {rotate} bind def
+/sc {scale} bind def
+/sd {setdash} bind def
+/ff {findfont} bind def
+/sf {setfont} bind def
+/scf {scalefont} bind def
+/sw {stringwidth} bind def
+/tr {translate} bind def
+/tnt {dup dup currentrgbcolor
+  4 -2 roll dup 1 exch sub 3 -1 roll mul add
+  4 -2 roll dup 1 exch sub 3 -1 roll mul add
+  4 -2 roll dup 1 exch sub 3 -1 roll mul add srgb}
+  bind def
+/shd {dup dup currentrgbcolor 4 -2 roll mul 4 -2 roll mul
+  4 -2 roll mul srgb} bind def
+/$F2psBegin {$F2psDict begin /$F2psEnteredState save def} def
+/$F2psEnd {$F2psEnteredState restore end} def
+
+$F2psBegin
+10 setmiterlimit
+ 0.06000 0.06000 sc
+%
+% Fig objects follow
+%
+/Times-Roman ff 180.00 scf sf
+975 1350 m
+gs 1 -1 sc (Makefile) col0 sh gr
+% Polyline
+7.500 slw
+n 825 1275 m
+ 975 1275 l gs col0 s gr 
+% Polyline
+n 1650 1875 m
+ 1800 1875 l gs col0 s gr 
+% Polyline
+n 1650 2175 m
+ 1800 2175 l gs col0 s gr 
+% Polyline
+n 1650 1725 m
+ 1650 2250 l gs col0 s gr 
+/Times-Roman ff 180.00 scf sf
+1800 2250 m
+gs 1 -1 sc (api/) col0 sh gr
+% Polyline
+n 1650 450 m
+ 1650 825 l gs col0 s gr 
+% Polyline
+n 1650 525 m
+ 1800 525 l gs col0 s gr 
+% Polyline
+n 1650 750 m
+ 1800 750 l gs col0 s gr 
+/Times-Roman ff 180.00 scf sf
+1800 825 m
+gs 1 -1 sc (siconos) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+1725 600 m
+gs 1 -1 sc (  siconos.cpp) col0 sh gr
+% Polyline
+n 900 375 m
+ 1050 375 l gs col0 s gr 
+/Times-Roman ff 180.00 scf sf
+975 450 m
+gs 1 -1 sc (  siconos/) col0 sh gr
+% Polyline
+n 3225 6150 m
+ 3225 6450 l gs col0 s gr 
+% Polyline
+n 3225 6300 m
+ 3375 6300 l gs col0 s gr 
+/Times-Roman ff 180.00 scf sf
+2700 6150 m
+gs 1 -1 sc (matrix/) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+3375 6375 m
+gs 1 -1 sc (MyVelocityMatrix.mat) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+3375 6525 m
+gs 1 -1 sc ( ...) col0 sh gr
+% Polyline
+n 825 1650 m
+ 975 1650 l gs col0 s gr 
+% Polyline
+n 975 1650 m
+ 1275 1650 l gs col0 s gr 
+% Polyline
+n 825 150 m 825 5250 l
+ 825 5175 l gs col0 s gr 
+% Polyline
+n 825 2550 m
+ 1425 2550 l gs col0 s gr 
+% Polyline
+n 1725 2700 m
+ 1875 2700 l gs col0 s gr 
+% Polyline
+n 1650 2550 m
+ 1650 4275 l gs col0 s gr 
+% Polyline
+n 825 4575 m
+ 1425 4575 l gs col0 s gr 
+% Polyline
+n 1650 4650 m
+ 1650 5025 l gs col0 s gr 
+% Polyline
+n 1650 4725 m
+ 1875 4725 l gs col0 s gr 
+% Polyline
+n 3150 3675 m 3150 3750 l 3150 3825 l 3150 3900 l 3150 3975 l 3150 4050 l
+ 3150 4125 l
+ 3150 4200 l gs col0 s gr 
+% Polyline
+n 3150 3825 m
+ 3225 3825 l gs col0 s gr 
+% Polyline
+n 3150 4125 m
+ 3300 4125 l gs col0 s gr 
+% Polyline
+n 3150 2775 m
+ 3225 2775 l gs col0 s gr 
+% Polyline
+n 3150 3600 m
+ 3150 2700 l gs col0 s gr 
+% Polyline
+n 3150 3000 m
+ 3300 3000 l gs col0 s gr 
+% Polyline
+n 3150 3225 m
+ 3300 3225 l gs col0 s gr 
+% Polyline
+n 3150 3450 m
+ 3300 3450 l gs col0 s gr 
+% Polyline
+n 4500 3525 m
+ 4500 3900 l gs col0 s gr 
+% Polyline
+n 4500 3525 m
+ 4650 3525 l gs col0 s gr 
+% Polyline
+n 4500 3825 m
+ 4650 3825 l gs col0 s gr 
+% Polyline
+n 4500 3900 m
+ 4500 4050 l gs col0 s gr 
+% Polyline
+n 1200 1650 m
+ 1350 1650 l gs col0 s gr 
+% Polyline
+n 3150 3750 m 3150 3600 l
+ 3150 3375 l gs col0 s gr 
+% Polyline
+n 3150 2775 m
+ 3300 2775 l gs col0 s gr 
+% Polyline
+n 825 375 m
+ 900 375 l gs col0 s gr 
+% Polyline
+n 825 5175 m
+ 825 6975 l gs col0 s gr 
+% Polyline
+n 825 5325 m
+ 975 5325 l gs col0 s gr 
+% Polyline
+n 971 5325 m 979 5325 l gs col0 s gr
+% Polyline
+n 1650 5400 m
+ 1650 5925 l gs col0 s gr 
+% Polyline
+n 1650 5475 m
+ 1875 5475 l gs col0 s gr 
+% Polyline
+n 1650 5775 m
+ 1875 5775 l gs col0 s gr 
+% Polyline
+n 1650 5925 m
+ 1650 6225 l gs col0 s gr 
+% Polyline
+n 1650 6075 m
+ 2700 6075 l gs col0 s gr 
+/Times-Roman ff 180.00 scf sf
+75 225 m
+gs 1 -1 sc (SICONOS/  ) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+8925 9525 m
+gs 1 -1 sc ( ...) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+1275 2625 m
+gs 1 -1 sc (    lib/) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+1875 2775 m
+gs 1 -1 sc (xmlmanagement/) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+1725 4275 m
+gs 1 -1 sc ( ...) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+1425 4650 m
+gs 1 -1 sc (ext/) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+1725 5025 m
+gs 1 -1 sc ( ...) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+3225 3900 m
+gs 1 -1 sc ( samples/) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+3300 4200 m
+gs 1 -1 sc (Makefile) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+3225 2850 m
+gs 1 -1 sc ( src/) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+3225 3075 m
+gs 1 -1 sc ( test/) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+3300 3300 m
+gs 1 -1 sc (bin/) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+4575 4050 m
+gs 1 -1 sc ( ...) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+1050 1725 m
+gs 1 -1 sc (       doc/) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+3300 3525 m
+gs 1 -1 sc (systemsschema/) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+4650 3600 m
+gs 1 -1 sc (nldsschema.xsd ) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+4650 3900 m
+gs 1 -1 sc (nldsandtidsschema.xsd) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+3525 5550 m
+gs 1 -1 sc (  ) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+975 5400 m
+gs 1 -1 sc ( problem/) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+1875 5550 m
+gs 1 -1 sc (MyLagragianNLDSSystem.xml) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+1875 5850 m
+gs 1 -1 sc (MyLagragianNLDSAndTIDSSystem.xml) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+1725 1950 m
+gs 1 -1 sc (siconos.pdf) col0 sh gr
+/Times-Roman ff 180.00 scf sf
+1875 4800 m
+gs 1 -1 sc (libxml/) col0 sh gr
+$F2psEnd
+rs

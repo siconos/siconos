@@ -1,0 +1,58 @@
+\textit{This chapter precises methods and softwares who will be used to
+implement the criticals points of the conceptual architecture described in the before chapters.}
+
+\section{Plugin method}
+A simple prototype named BPP has been developped to validate some functionnalities used by the plugins mechanism, like dynamic loading of libraries or
+instantiation of objects encapsulated in a dynamic library. This prototype was also needed to verify portability of the libraries. \\
+Another point tried with success was the possibility during the instanciation of a dynamical systems too indicate to the platform which computation method
+(stored in a given library) has to be used. For example, for a lagrangien system, we can choose a particular function to compute the mass, etc. \\
+The next step is to put together this prototype and XML functionnalities in a new prototype to validate our general idea of the functionning of our software.
+
+\section{Fortran encapsulation}
+
+In the \ac{srd}, Corba has been chosen to allow to re-use functions/libraries of other softwares (like \ac{lmgc90}). After a study, it appears that it is possible to make communication between C++ and Fortran languages (a Corba distribution exists), but it is not free. Consequently, to make a LMGC plugin, who may be implemented in the first version of the platform (see \ac{op}), a wrapper will be used.
+
+
+%\section{C++ interpretor}
+% description, pouqruoi on l'a choisi, portabilité
+%A way to use the computation's platform is to write a program in C++ and to run it without compiling it. In order to do that, a C++ interpretor is needed. \ac{cint} is the most famous C++ interpretor found
+%on the web. We must insure that \ac{cint} answers our waitings.
+
+\textbf{\ac{cint} specifications}
+\begin{description}
+	\item[Portability :] \ac{cint} works on number of operating systems. Linux, HP-UX, SunOS, Solaris,
+	Windows-NT/95/98/Me, MacOS and with number of compilers, g++, HP-CC/aCC, Sun-CC/CC5, IBM-xlC,
+	Compac-cxx, SGI-CC, Visual-C++, Borland-C++.
+	\item[Features :] \ac{cint} covers about 95\% of ANSI C and 85\% of C++, supports the STL, allow to
+	use embedded compiled C/C++ library code as shared objects.
+	\item[Limitations :] \ac{cint} is not as powerfull as a C++ compiler. No "typedef" could be done, no
+	overloading for operators, support of an old version of the STL.
+\end{description}
+
+A prototype as been created to test the abilities of \ac{cint}. The use of static libraries, templates, and
+the STL in a prototype as shown that they can be used if libraries have simple headers (the use of
+"makecint" is adviced), the templates are simple and if we use basic functions of the STL.
+
+
+
+\section{\acs{xml} files management}
+
+In order to manage the \ac{xml} files (data input/output), the LibXML2 library have been chosen.\\
+
+LibXML2 is an \ac{xml} C parser and toolkit developed for the Gnome project (but usable outside of the Gnome platform). It is a free software available under MIT License. \\
+
+\textbf{Why LibXML2?}
+
+\begin{itemize}
+\item Portability : LibXML2 is known to be very portable, the library should build and work without serious troubles on a variety of systems (Linux, Unix, Windows, MacOS, MacOS X, RISC Os,
+ ...) ;
+\item LibXML2 passes all 1800+ tests from the \ac{oasis} XML Tests Suite ;
+\item Diversity : several APIs are implemented by LibXML2 like \ac{dom} or \ac{sax} ;
+
+\end{itemize}
+
+About the use and possibilities of LibXML2, it seems to be adapted and powerfull enought for our project : a prototype verifing, reading, and writing \ac{xml} files has been developed, and the
+results are encouraging. The library has only a negative point : modules, methods and structures are summarily documented/specified.
+
+\section{\acs{lmgc90} plugin}
+\ac{lmgc90} is an existing software for mechanical computations. The aim of this plugin is to use theirs complex contact detection functions, so that only low level external methods are used. Simulation mechanisms don't change. It consists in communications between the \acs{kernel} and the \ac{lmgc90} plugin. 

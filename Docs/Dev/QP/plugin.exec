@@ -1,0 +1,6 @@
+--------- Tests d'integration : plateforme <=> plugins ----------------
+Call of the function 'vectorField' of the basic plugin.
+Call of the function 'computeJacobianX' of the basic plugin.
+Call of the function 'computeQNLInertia' of the basic plugin.
+Call of the function 'computeFInt' of the basic plugin.
+Call of the function 'computeFEnt' of the basic plugin.

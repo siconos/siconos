@@ -1,0 +1,69 @@
+\documentclass[a4paper,twoside,openright,makeidx,12pt]{book}
+%\usepackage{draftcopy}
+%\input{../TeX-tools/macro.tex}
+\input{macro.tex}
+\usepackage{pifont}
+ \usepackage{lscape}
+
+
+
+\includeonly{}
+\usepackage{fancyheadings} 
+\usepackage{verbatim}
+
+% package pour les images des use cases
+%\usepackage[dvips]{graphicx}
+
+\pagestyle{fancy} 
+\renewcommand{\chaptermark}[1]% 
+{\markboth{{Chap-- \thechapter.\ #1}}{}} 
+\renewcommand{\sectionmark}[1]% 
+{\markright{{\thesection.\ #1}}} 
+\setlength{\headrulewidth}{0.5pt} 
+\setlength{\footrulewidth}{0.5pt} 
+\newcommand{\helv}{% 
+\fontfamily{phv}\fontseries{b}\fontsize{9}{11}\selectfont} 
+\lhead[\helv \thepage]{\helv \rightmark} 
+\rhead[\helv \leftmark]{\helv \thepage} 
+\cfoot{Detailled Design Document -- November 25, 2004}
+
+\makeindex
+
+\begin{document}
+\pagestyle{empty}
+\renewcommand{\arraystretch}{1.8}
+
+\input{coverDDD.tex}
+
+\tableofcontents
+
+
+\pagestyle{fancy}
+%---------------------------------------------------------------------%
+\cleardoublepage
+
+\pagenumbering{arabic}
+\chapter{Introduction}
+\label{Sec:DDD-Intoduction}
+\input{Introduction}
+
+%---------------------------------------------------------------------%
+\newpage
+\chapter{Component Design Specifications}
+\label{Sec:DDD-ComponentDesignSpecification}
+\input{ComponentDesignSpecification}
+
+%---------------------------------------------------------------------%
+
+\newpage
+\printglosstex(acr)[p]
+
+%===================================
+
+\listoffigures
+\listoftables
+\cleardoublepage
+%\bibliographystyle{plainnat}
+%\bibliography{./Biblio/String,./Biblio/Cp.bib,./Biblio/Optim.bib,./Biblio/Contact.bib,./Biblio/NonSmooth.bib,./Biblio/Leger.bib,./Biblio/Petri.bib}
+\cleardoublepage
+\end{document}

@@ -1,0 +1,29 @@
+
+This chapter allows to know how to launch the platform with the needed data.
+It is important to understand that all the users can do correspond to the API's methods.
+
+\section{Loading from an XML file}
+It is the simpliest way to use the platform. You only need to write a correct XML file (see \ref(XML)) and to call the XML file loading function. To do that, follow the next
+steps (the example given correspond to C++ language):
+\begin{itemize}
+	\item Declaration of a Model : \textbf{Model sample\_model;}
+	\item Loading an XML file : \textbf{sample\_model.createModel("xml\_input\_file");}
+\end{itemize}
+
+
+\section{Loading in a C++ program}
+We understand here that no file exists to load input data. The user must do these operations manually. The following example (in C++) show the way to create the platform :
+\begin{itemize}
+	\item Declaration of a Model : \textbf{Model sample\_model;}
+	\item Creation of the Model : \textbf{sample\_model.createModel(NULL}/*the XML file*/\textbf{, 0}/*current time t*/\textbf{, 0}/*initial time t0*/\textbf{, 10}/*final time T*/\textbf{);}
+	\item Creation of the NSDS : \textbf{NSDS* nsds = m.createNSDS( false} \textbf{/*determines if the NSDS is BVP or not*/);}
+	\item Add of a new dynamical system to the NSDS : \textbf{nsds->addNonLinearSystemDS( 1}/*the number of the dynamical system*/\textbf{, 2}/*the number of dimension of
+	the system*/\textbf{, x0}/*the x0 vector*/\textbf{, "BasicPlugin:vectorField"}/*the vector field plugin*/\textbf{ );}
+	\item \dots
+\end{itemize}
+
+
+\section{Loading using the two previous methods}
+It consists in using an XML file to load some of the data and to give more data in a program. For example, tha XML file can bring the data of the Model and all the model
+formalization informations (the data of the NSDS, the different dynamical systems, the interactions, \dots), whereas strategy informations are given at the continuation of the
+program (the TimeDiscretisation, the integrators, the OneStepNSProblem).

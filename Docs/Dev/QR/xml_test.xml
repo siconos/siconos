@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- SICONOS Model XML file -->
+
+<SiconosModel>
+
+	<Time>
+		<t0>654654.51567</t0>
+		<T>99999.32454</T>
+	</Time>
+
+	<NSDS bvp='true'>
+	
+		<!-- DSs defined in the problem -->
+		<DS_Definition>
+		
+
+			<DS number='1' type="LagrangianNLDS">
+				<!-- Commun at all DS -->
+				
+				<Id> toto </Id>
+				<n> 3 </n>
+				<x vectorSize='4'>
+					4.5454 454.5		8.5
+					4.95222
+				</x>
+				
+				<xDot vectorSize='4'>
+					4.5454 454.5		8.5
+					4.95222
+				</xDot>
+
+				<xMemory>				
+				  <Memory vectorFile='./siconos/vector.dat'/>
+				  <Memory vectorSize='2'>
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./siconos/vector.dat'/>				  				  
+				</xMemory>
+				  
+				<xDotMemory>
+				  <Memory vectorFile='./siconos/vector.dat'/>
+				  <Memory vectorSize='2'>
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./siconos/vector.dat'/>				  				  
+				</xDotMemory>
+				
+				<x0 vectorSize='4'>
+					4.5454 454.5		8.5
+					4.95222
+				</x0>
+
+				<StepsInMemory>8</StepsInMemory>				
+				
+				<!-- Specific to LagrangianNLDS-->
+				<QNLInertia vectorPlugin="BasicPlugin:computeQNLInertia"/>
+				
+				<q vectorFile='./siconos/vector.dat'/>
+				<q0 vectorFile='./siconos/vector.dat'/>
+			
+				<qMemory>
+				  <Memory vectorFile='./siconos/vector.dat'/>
+				  <Memory vectorSize='2'>
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./siconos/vector.dat'/>				  				  
+				</qMemory>								
+				
+				<Velocity vectorFile='./siconos/vector.dat'/>
+				<Velocity0 vectorFile='./siconos/vector.dat'/>
+				<VelocityMemory vectorFile='./siconos/vector.dat'/>								
+
+				<Fint vectorPlugin="BasicPlugin:computeFInt"/>
+				<Fext vectorPlugin="BasicPlugin:computeFExt"/>
+
+			  	<JacobianQFint matrixPlugin="BasicPlugin:computeJacobianQFInt"/>
+				<JacobianVelocityFint matrixPlugin="BasicPlugin:computeJacobianVelocityFInt"/>
+ 				<JacobianQQNLInertia matrixPlugin="BasicPlugin:computeJacobianQQNLInertia"/>
+ 				<JacobianVelocityQNLInertia matrixPlugin="BasicPlugin:computeJacobianVelocityQNLInertia"/>					  
+
+				<M matrixFile="./siconos/matrix.dat"/>
+				
+				<ndof>5</ndof>	
+
+				<!-- Optional : if NSDS is bvp -->				
+				<BoundaryCondition type="NLinear">					
+				</BoundaryCondition>				
+				
+			</DS>
+			
+			<DS number='2' type="LagrangianTIDS"> 
+				<!-- Commun at all DS -->
+				
+				<Id> toto </Id>
+				<n> 3 </n>
+				<x vectorFile='./siconos/vector.dat'/>
+				
+				<xDot vectorFile='./siconos/vector.dat'/>				
+				
+
+				<xMemory>				
+				  <Memory vectorFile='./siconos/vector.dat'/>
+				  <Memory vectorSize='2'>
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./siconos/vector.dat'/>				  				  
+				</xMemory>
+				  
+				<xDotMemory>
+				  <Memory vectorFile='./siconos/vector.dat'/>
+				  <Memory vectorSize="2">
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./siconos/vector.dat'/>				  				  
+				</xDotMemory>
+
+
+				<x0 vectorFile='./siconos/vector.dat'/>
+				
+				<StepsInMemory>8</StepsInMemory>				
+				
+				<!-- Specific to LagrangianTIDS-->
+
+				<QNLInertia vectorFile='./siconos/vector.dat'/>
+				
+				<q vectorFile='./siconos/vector.dat'/>
+				<q0 vectorFile='./siconos/vector.dat'/>
+
+				<qMemory>
+				  <Memory vectorFile='./siconos/vector.dat'/>
+				  <Memory vectorSize='2'>
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./siconos/vector.dat'/>				  				  
+				</qMemory>								
+				
+				<Velocity vectorFile='./siconos/vector.dat'/>
+				<Velocity0 vectorFile='./siconos/vector.dat'/>
+				<VelocityMemory vectorFile='./siconos/vector.dat'/>
+
+				<Fint vectorFile="./siconos/vector.dat"/>
+				<Fext vectorPlugin="BasicPlugin:computeFExt"/>
+
+			  	<JacobianQFint matrixFile="./siconos/matrix.dat"/>
+				<JacobianVelocityFint matrixFile="./siconos/matrix.dat"/>
+ 				<JacobianQQNLInertia matrixFile="./siconos/matrix.dat"/>
+ 				<JacobianVelocityQNLInertia matrixFile="./siconos/matrix.dat"/>					  
+
+				<M matrixFile='./siconos/matrix.dat'/>				
+				<ndof>5</ndof>								
+				<K matrixFile='./siconos/matrix.dat'/>
+				<C matrixFile='./siconos/matrix.dat'/>			
+
+				<!-- Optional : if NSDS is bvp -->
+				<BoundaryCondition type="Linear">
+					<Omega vectorFile='./siconos/vector.dat'/>
+					<Omega0 matrixFile='./siconos/matrix.dat'/>
+					<OmegaT matrixFile='./siconos/matrix.dat'/>				
+				</BoundaryCondition>							
+			</DS>		
+
+			<DS number='3' type="LinearSystemDS">
+				<!-- Commun at all DS -->
+				
+				<Id> tutu </Id>
+				<n> 3 </n>
+				<x vectorFile='./siconos/vector.dat'/>
+				
+				<xDot vectorFile='./siconos/vector.dat'/>				
+				
+				<xMemory>				
+				  <Memory vectorFile='./siconos/vector.dat'/>
+				  <Memory vectorSize="2">
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./siconos/vector.dat'/>				  				  
+				</xMemory>
+				  
+				<xDotMemory>
+				  <Memory vectorFile='./siconos/vector.dat'/>
+				  <Memory vectorSize="2">
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./siconos/vector.dat'/>				  				  
+				</xDotMemory>
+
+				<x0 vectorFile='./siconos/vector.dat'/>
+				
+				<StepsInMemory>8</StepsInMemory>				
+				
+				<!-- Specific to LinearSystemDS-->
+				<A matrixFile='./siconos/matrix.dat'/>
+				<B matrixFile='./siconos/matrix.dat'/>
+				
+				<u vectorFile='./siconos/vector.dat'/>								
+				<f vectorPlugin="BasicPlugin:computeF"/>				
+				
+				<!-- Optional : if NSDS is bvp -->
+				<BoundaryCondition type="Periodic">				
+				</BoundaryCondition>							
+				
+			</DS>		
+
+			
+		</DS_Definition>
+
+		<!-- Interactions defined in the problem -->		
+		<Interaction_Definition>
+
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
+			<Interaction number='1'>
+				
+				<Status>1</Status>
+				<Id>totu</Id>
+			
+				<!-- List of couple of DS concerned by this interaction -->			
+
+				<DS_Concerned size='2'>
+					<DS number='1' interactsWithDS_Number='2'/>			
+					<DS number='1' interactsWithDS_Number='3'/>
+				</DS_Concerned>					
+											
+				<!-- Relation of this interaction -->				
+
+				<Relation type="LTI">
+					<computeInput plugin="BasicPlugin:computeInput"/>
+					<computeOutput plugin="BasicPlugin:computeOutput"/>
+					<C matrixFile='./siconos/matrix.dat'/>
+					<D matrixFile='./siconos/matrix.dat'/>
+					<E matrixFile='./siconos/matrix.dat'/>
+					<a vectorFile='./siconos/vector.dat'/>
+				</Relation>			
+
+				<!-- NS Law of this interaction -->				
+				<NS_Law type="CCNSLaw"/>											
+					
+			</Interaction>				
+			
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
+			<Interaction number='2'>
+
+				<Status>1</Status>
+				<Id>twtu</Id>
+			
+				<!-- List of couple of DS concerned by this interaction -->			
+				<DS_Concerned size='2'>
+					<DS number='1' interactsWithDS_Number='2'/>		
+					<DS number='1' interactsWithDS_Number='3'/>				
+				</DS_Concerned>					
+			
+				<!-- RELATION of this interaction -->				
+				<Relation type="LL">
+					<computeInput plugin="BasicPlugin:computeInput"/>
+					<computeOutput plugin="BasicPlugin:computeOutput"/>
+					<H matrixFile='./siconos/matrix.dat'/>
+					<b vectorFile='./siconos/vector.dat'/>
+				</Relation>							
+
+				<!-- NS Law of this interaction -->				
+				<NS_Law type="RelayNSLaw">
+					<c>5.021</c>
+					<d>5456.65</d>					
+				</NS_Law>		
+					
+			</Interaction>							
+				
+
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
+			<Interaction number='3'>
+
+				<Status>5</Status>
+				<Id>tuto</Id>
+			
+				<!-- List of couple of DS concerned by this interaction -->			
+				<DS_Concerned size='2'>				
+					<DS number='1' interactsWithDS_Number='2'/>		
+					<DS number='1' interactsWithDS_Number='3'/>				
+				</DS_Concerned>
+			
+				<!-- Relation of this interaction -->				
+				<Relation type="LL">
+						<computeInput plugin="BasicPlugin:computeInput"/>
+						<computeOutput plugin="BasicPlugin:computeOutput"/>
+						<H matrixFile='./siconos/matrix.dat'/>
+						<b vectorFile='./siconos/vector.dat'/>
+					</Relation>
+				
+				<!-- NS Law of this interaction -->				
+				<NS_Law type="RelayNSLaw">
+					<c>5.021</c>
+					<d>5456.65</d>					
+				</NS_Law>		
+					
+			</Interaction>							
+
+		</Interaction_Definition>>		
+	
+	</NSDS>
+	
+	<!-- Strategy to use in order to solve the problem -->				
+	<Strategy type='TimeStepping'>
+
+		<TimeDiscretisation>	
+			<h isConstant='true'>0.65</h>
+			<N>52</N>
+			<tk vectorSize='2'>5.545 548.2</tk>
+			<hMin>54.534</hMin>
+			<hMax>105.54</hMax>
+		</TimeDiscretisation>				
+
+
+	
+		<!-- One Step Integrators -->				
+		<OneStepIntegrator_Definition>
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
+			<OneStepIntegrator type="Moreau">
+				<r>54</r>
+				<DS_Concerned size = '1'>
+					<DS number='2'/>			
+				</DS_Concerned>		
+			</OneStepIntegrator>					
+
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->					
+			<OneStepIntegrator type="Adams">
+				<r>44</r>
+				<DS_Concerned size = '1'>								
+					<DS number='1'/>
+				</DS_Concerned>			
+			</OneStepIntegrator>
+					
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->										
+			<OneStepIntegrator type="LSODAR">
+				<r>2</r>
+				<DS_Concerned size = '1'>
+					<DS number='3'/>
+				</DS_Concerned>
+			</OneStepIntegrator>
+
+		</OneStepIntegrator_Definition>
+
+		
+	 	<OneStepNSProblem type="LCP">
+			<!-- General for one step NS problem -->					
+			<n>8</n>			
+					
+			<!-- Specific at LCP -->						
+			<A matrixFile='./siconos/matrix.dat'/>
+			<b vectorFile='./siconos/vector.dat'/>
+			
+			<Interaction_Concerned size = '3'>												
+				<Interaction number='1'/>
+				<Interaction number='2'/>
+				<Interaction number='3'/>
+			</Interaction_Concerned>			
+			
+	 	</OneStepNSProblem>		
+		
+	</Strategy>	
+
+</SiconosModel>

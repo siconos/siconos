@@ -1,0 +1,66 @@
+\section{Introduction}
+\label{Sec:DDD-Intoduction}
+%\input{Introduction}
+
+\subsection{Purpose}
+\label{Sec:DDD-Purpose}
+
+The \ac{ddd} aims to specify completely the data structures of~\ac{siconos}. This document relies on the global architecture designed in the \ac{add}.
+It consists essentially in a class-diagram and a set of constraints on it to eliminate most of its ambiguities. Implementation choices will also be explained and justified here. 
+
+
+\subsection{Scope}
+\label{Sec:DDD-Scope}
+
+This project is a work-package of European project \ac{SICONOS}. \\
+Besides the standard features which are required for a software of scientific computing, the objectives of this project are of the following~:
+\begin{itemize}
+\item To provide a common framework (formalisms and solver tools) for non smooth problems present in various scientific fields : applied Mathematics, Mechanics, Robotics, Electrical networks, etc. 
+\item To be able to rely on existing developments. The platform will not re-implement the dedicated tools, which are already used for the modelling of specific systems in various fields, but will provide a framework to their integration.
+\item To support exchanges and comparisons of methods between researchers.
+\item To disseminate the know-how to other fields of research and industry.
+\item To take into account the diversity of users (end users, algorithms developers, framework builders, industrial).
+\item To set up standards in terms of modelling of such systems.
+\item To ensure software quality by the use of modern software design methods.
+\end{itemize}
+
+\subsection{References}
+\label{Sec:DDD-References}
+
+\begin{itemize}
+
+\item \textbf{"Guide to the software detailed design and production phase", PSS-05-05, ESA 1995}
+\item "Cours de Conduite de Projets Logiciels", Ioannis Parissis, Master 2 Pro GI 2003-2004.
+\item "Cours d'Ing\'enirie des mod\`eles", Jean-Marie Favre, Master 2 Pro GI 2003-2004.
+\item \ac{add}, April 2004.
+
+\end{itemize}
+
+
+
+\subsection{Overview}
+\label{Sec:DDD-Overview}
+
+This document specifies in detail the global architecture given in \ac{add}. It contains also development procedures and justifications of implementation choices.
+
+
+%---------------------------------------------------------------------------%
+%\newpage
+\section{Project standards, conventions and procedures}
+\label{Sec:DDD-ProjectStandards}
+%\input{ProjectStandards}
+
+These points are tackled in the \ac{paql}.\\
+
+To summarise it, the main pieces of information are :
+
+\begin{itemize}
+
+\item Design standard~: UML 1.4
+\item Documentation standard~: see \ac{adoc}
+\item Programming standard~: see \ac{anp}
+\item Programming language~: C++
+\item Integrated Development environnement~: Eclipse with C++ plugin (CDT).
+
+\end{itemize}
+%---------------------------------------------------------------------------%

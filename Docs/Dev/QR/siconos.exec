@@ -1,0 +1,392 @@
++---------------------------------------------------------------+
++                                                               +
++                        SICONOS / WP2                          +
++                       INRIA - 2004 (c)                        +
++                                                               +
++---------------------------------------------------------------+
+
+
+===================================
+
+-------------------------
+OUT::creation Model m2
+Model::readModel
+SiconosModelXML - Your XML model file : sample/xml_test.xml is correct
+/Model::readModel
+
+Model::linkModelXML
+	NSDS::fillNSDSWithNSDSXML
+	NSDS::linkNSDSXML
+
+DynamicalSystem::init
+LagrangianNLDS::init
+LagrangianNLDS::fillDSWithDSXML
+DynamicalSystem::fillDSWithDSXML
+-----------------------------------------------------
+____ data of the LangrangianNLDS 
+| number : 1
+| id :  toto 
+| n : 3
+| x0 size : 4 - 4.5454 454.5 8.5 4.95222 
+| x size : 4 - 4.5454 454.5 8.5 4.95222 
+| xDot size : 4 - 4.5454 454.5 8.5 4.95222 
+| stepsInMemory : 8
+| ndof : 5
+| q size :3 - 4 4 4 
+| q0 size :3 - 4 4 4 
+| velocity size :3 - 4 4 4 
+| velocity0 size :3 - 4 4 4 
+-----------------------------------------------------
+DynamicalSystem::linkDSXML
+NLinearBC::fillBCWithBCXML
+
+--------------
+
+DynamicalSystem::init
+LagrangianNLDS::init
+LagrangianTIDS::fillDSWithDSXML
+LagrangianNLDS::fillDSWithDSXML
+DynamicalSystem::fillDSWithDSXML
+-----------------------------------------------------
+____ data of the LangrangianNLDS 
+| number : 2
+| id :  toto 
+| n : 3
+| x0 size : 3 - 4 4 4 
+| x size : 3 - 4 4 4 
+| xDot size : 3 - 4 4 4 
+| stepsInMemory : 8
+| ndof : 5
+| q size :3 - 4 4 4 
+| q0 size :3 - 4 4 4 
+| velocity size :3 - 4 4 4 
+| velocity0 size :3 - 4 4 4 
+-----------------------------------------------------
+-----------------------------------------------------
+____ data of the LangrangianTIDS 
+-----------------------------------------------------
+____ data of the LangrangianNLDS 
+| number : 2
+| id :  toto 
+| n : 3
+| x0 size : 3 - 4 4 4 
+| x size : 3 - 4 4 4 
+| xDot size : 3 - 4 4 4 
+| stepsInMemory : 8
+| ndof : 5
+| q size :3 - 4 4 4 
+| q0 size :3 - 4 4 4 
+| velocity size :3 - 4 4 4 
+| velocity0 size :3 - 4 4 4 
+-----------------------------------------------------
+| K size : 2, 2 - 	3  4  
+					5  6  
+| C size : 2, 2 - 	3  4  
+					5  6  
+-----------------------------------------------------
+DynamicalSystem::linkDSXML
+LinearBC::fillBCWithBCXML
+
+--------------
+
+DynamicalSystem::init
+LinearSystemDS::init
+LinearSystemDS::fillDSWithDSXML
+DynamicalSystem::fillDSWithDSXML
+-----------------------------------------------------
+____ data of the LinearSystemDS 
+| number : 3
+| id :  tutu 
+| n : 3
+| x0 size : 3 - 4 4 4 
+| x size : 3 - 4 4 4 
+| xDot size : 3 - 4 4 4 
+| stepsInMemory : 8
+| A size : 2, 2 - 	3  4  
+					5  6  
+| B size : 2, 2 - 	3  4  
+					5  6  
+-----------------------------------------------------
+DynamicalSystem::linkDSXML
+PeriodicBC::fillBCWithBCXML
+
+--------------
+
+Interaction::fillInteractionWithInteractionXML
+-----------------------------------------------------
+____ data of the Interaction 
+| id : totu
+| number : 1
+| status : 1
+-----------------------------------------------------
+Interaction::linkInteractionXML
+Relation::init
+Relation::fillRelationWithRelationXML
+LTIRelation::fillRelationWithRelationXML
+---------------------------------------------------
+____ data of the LTIRelation 
+| C size : 2, 2 - 	3  4  
+					5  6  
+| D size : 2, 2 - 	3  4  
+					5  6  
+| E size : 2, 2 - 	3  4  
+					5  6  
+| a size : 3 - 4 4 4 
+____________________________
+---------------------------------------------------
+---------
+CCNSLaw::fillNSLawWithNSLawXML
+NSLaw::fillNSLawWithNSLawXML
+
+---------
+
+--------------
+Interaction::fillInteractionWithInteractionXML
+-----------------------------------------------------
+____ data of the Interaction 
+| id : twtu
+| number : 2
+| status : 1
+-----------------------------------------------------
+Interaction::linkInteractionXML
+Relation::init
+LLRelation::fillRelationWithRelationXML
+Relation::fillRelationWithRelationXML
+---------------------------------------------------
+____ data of the LLRelation 
+| h size : 2, 2 - 	3  4  
+					5  6  
+| b size : 3 - 4 4 4 
+____________________________
+---------------------------------------------------
+---------
+RelayNSLaw::fillNSLawWithNSLawXML
+NSLaw::fillNSLawWithNSLawXML
+------------------------------------
+____ data of the RelayNSLaw
+| c : 5.021
+| d : 5456.65
+____________________________
+------------------------------------
+
+---------
+
+--------------
+Interaction::fillInteractionWithInteractionXML
+-----------------------------------------------------
+____ data of the Interaction 
+| id : tuto
+| number : 3
+| status : 5
+-----------------------------------------------------
+Interaction::linkInteractionXML
+Relation::init
+LLRelation::fillRelationWithRelationXML
+Relation::fillRelationWithRelationXML
+---------------------------------------------------
+____ data of the LLRelation 
+| h size : 2, 2 - 	3  4  
+					5  6  
+| b size : 3 - 4 4 4 
+____________________________
+---------------------------------------------------
+---------
+RelayNSLaw::fillNSLawWithNSLawXML
+NSLaw::fillNSLawWithNSLawXML
+------------------------------------
+____ data of the RelayNSLaw
+| c : 5.021
+| d : 5456.65
+____________________________
+------------------------------------
+
+---------
+
+--------------
+Strategy::fillStrategyWithStrategyXML
+Strategy::linkStrategyXML
+TimeDiscretisation::fillTimeDiscretisationWithTimeDiscretisationXML
+-----------------------------------------------------
+____ data of the TimeDiscretisation 
+| h : 0.65
+| N : 52
+| tk size : 2 - 5.545 548.2 
+| hMin : 54.534
+| hMax : 105.54
+| constant : 1
+-----------------------------------------------------
+
+  - the DynamicalSystem Linked to this OneStepIntegrator has the number 2 and his id is  toto 
+Moreau::fillIntegratorWithIntegratorXML
+OneStepIntegrator::fillIntegratorWithIntegratorXML
+
+--------------
+  - the DynamicalSystem Linked to this OneStepIntegrator has the number 1 and his id is  toto 
+OneStepIntegrator::fillIntegratorWithIntegratorXML
+
+--------------
+  - the DynamicalSystem Linked to this OneStepIntegrator has the number 3 and his id is  tutu 
+OneStepIntegrator::fillIntegratorWithIntegratorXML
+
+--------------
+  - one of the Interactions Linked to the OneStepNSProblem (LCP) has the number 1 and his id is totu
+  - one of the Interactions Linked to the OneStepNSProblem (LCP) has the number 2 and his id is twtu
+  - one of the Interactions Linked to the OneStepNSProblem (LCP) has the number 3 and his id is tuto
+LCP::fillNSProblemWithNSProblemXML
+OneStepNSProblem::fillNSProblemWithNSProblemXML
+------------------------------------------------------
+____ data of the LCP 
+| A size : 2, 2 - 	3  4  
+					5  6  
+| b size : 3 - 4 4 4 
+____________________________
+
+
+------------------------------------------------------
+------------------------------------------------------
+Fin de la lecture et du remplissage des champs de la plateforme
+------------------------------------------------------
+------------------------------------------------------
+
+--------------
+Model::fillModelWithModelXML
+-------------------------
+Model::saveModel
+Model::saveToXML
+NSDS::saveNSDSToXML
+	DynamicalSystem::saveDSToXML
+	NLinearBC::saveBCToXML
+	SiconosDOMTreeTools::setSiconosVectorValue - to XML file
+	SiconosDOMTreeTools::setSiconosVectorValue - to XML file
+	SiconosDOMTreeTools::setSiconosVectorValue - to XML file
+		LagrangianNLDS::saveDSToXML
+		SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		SiconosDOMTreeTools::setSiconosVectorValue - to XML file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+
+	DynamicalSystem::saveDSToXML
+	LinearBC::saveBCToXML
+	SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+	SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+	SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+	SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+	SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+	SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		LagrangianNLDS::saveDSToXML
+		SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		SiconosDOMTreeTools::setSiconosVectorValue - to XML file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+		SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+		SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+		SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+			LagrangianTIDS::saveDSToXML
+			SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+			SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+
+	DynamicalSystem::saveDSToXML
+	PeriodicBC::saveBCToXML
+	SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+	SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+	SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+		LinearSystemDS::saveDSToXML
+		SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+		SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+		SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+
+
+	Interaction::saveInteractionToXML
+	SiconosVector 'y' from Interaction = 10 11 12 
+	SiconosVector 'lambda' from Interaction = 10 11 12 
+
+	Relation::saveRelationToXML
+		LTIRelation::saveRelationToXML
+---------------------------------------------------
+____ data of the LTIRelation 
+| C size : 2, 2 - 	3  4  
+					5  6  
+| D size : 2, 2 - 	3  4  
+					5  6  
+| E size : 2, 2 - 	3  4  
+					5  6  
+| a size : 3 - 4 4 4 
+____________________________
+---------------------------------------------------
+SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+
+	CCNSLaw::saveNSLawToXML
+		NSLaw::saveNSLawToXML
+
+	Interaction::saveInteractionToXML
+	SiconosVector 'y' from Interaction = 10 11 12 
+	SiconosVector 'lambda' from Interaction = 10 11 12 
+
+	LLRelation::saveRelationToXML
+		Relation::saveRelationToXML
+SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+---------------------------------------------------
+____ data of the LLRelation 
+| h size : 2, 2 - 	3  4  
+					5  6  
+| b size : 3 - 4 4 4 
+____________________________
+---------------------------------------------------
+
+	RelayNSLaw::fillNSLawWithNSLawXML
+		NSLaw::fillNSLawWithNSLawXML
+
+	Interaction::saveInteractionToXML
+	SiconosVector 'y' from Interaction = 10 11 12 
+	SiconosVector 'lambda' from Interaction = 10 11 12 
+
+	LLRelation::saveRelationToXML
+		Relation::saveRelationToXML
+SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+---------------------------------------------------
+____ data of the LLRelation 
+| h size : 2, 2 - 	3  4  
+					5  6  
+| b size : 3 - 4 4 4 
+____________________________
+---------------------------------------------------
+
+	RelayNSLaw::fillNSLawWithNSLawXML
+		NSLaw::fillNSLawWithNSLawXML
+	
+Strategy::saveStrategyToXML
+	Moreau::saveIntegratorToXML
+		OneStepIntegrator::saveIntegratorToXML
+
+	Adams::saveIntegratorToXML
+		OneStepIntegrator::saveIntegratorToXML
+
+	LSODAR::saveIntegratorToXML
+		OneStepIntegrator::saveIntegratorToXML
+
+
+	LCP::saveNSProblemToXML
+		OneStepNSProblem::saveNSProblemToXML
+SiconosDOMTreeTools::setSiconosMatrixValue - to Matrix file
+SiconosDOMTreeTools::setSiconosVectorValue - to Vector file
+
+/Model::saveModel
+-------------------------
+
+====================== THE END =========================

@@ -1,0 +1,62 @@
+%\subsection{\ac{siconos}/Numerics}
+\begin{longtable}{%
+    |>{\columncolor[gray]{.8}}p{0.1\textwidth}%
+    |>{\columncolor[gray]{.95}}p{0.9\textwidth}|}
+  \hline
+  \rowcolor[gray]{.8}   SR. Id. & Software requirements description \\
+  \hline 
+  \hline
+  & \textbf{General  requirements (\ac{siconos}/Numerics)}\\
+  \hline 
+  F.1.001 & The module \ac{siconos}/Numerics must provide basic algebra objects (vector, matrices, quaternions) \bf{ \sf relying on a matrix template library} \\
+  F.1.002 & The module \ac{siconos}/Numerics must provide  high performance methods for  basic vector and matrix operations\\
+  F.1.003 & The module \ac{siconos}/Numerics must support various storage methods for matrices:
+  \begin{enumerate}
+  \item Dense(full)
+  \item Band
+%fd sans interet  \item Skyline
+  \item Sparse
+  \end{enumerate}\\
+ \hline 
+ & \textbf{ Numerical functionalities  requirements (\ac{siconos}/Numerics)}\\
+  \hline
+  F.1.010 & The module  \ac{siconos}/Numerics has to perform basic linear algebra computations  relying on standard libraries for numerical computation (e.g. LAPACK):
+  \begin{enumerate}
+  \item Solution of linear system 
+  \item Eigenvalue and eigenvectors problem
+  \item Singular Value Decomposition
+  \end{enumerate}
+  \\
+  F.1.011 & The module \ac{siconos}/Numerics has to perform solution for mathematical programming problems:
+  \begin{enumerate}
+  \item Linear Complementarity Problem (LCP) (direct and iterative solutions)
+  \item Relay
+  \item Quadratic problem (QP)
+  \item Non Linear Complementarity Problem (NCP)
+    \begin{enumerate}
+      \item Implicit interaction problem (for example 3D friction) 
+      \item Non linear interaction problem (for example contact and friction)
+      \item Non linear smooth problem
+      \item A mix of the previous cases 
+    \end{enumerate}
+  \item Root finding for non smooth (generalized) equations
+  \item General non smooth optimization problem 
+  \end{enumerate} \\
+  F.1.012 & The module \ac{siconos}/Numerics has to perform basic computation for smooth time integration (one-step integration)  \\
+  F.1.013 & The module \ac{siconos}/Numerics has to perform root finding for non linear smooth equations (Newton's method)\\
+  F.1.014 & The module \ac{siconos}/Numerics has to perform numerical, analytical and automatic differentiation\\
+  \hline
+
+  & \textbf{Interface  requirements (\ac{siconos}/Numerics)}\\
+  \hline 
+   F.1.020 & The module \ac{siconos}/Numerics must provide a common interface to various methods dedicated to one specific type of numerical problem\\
+  \hline
+  \caption{\ac{siconos}/Engine. Software Requirements}\\
+\end{longtable}
+
+
+ 
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "../report"
+%%% End: 

@@ -1,0 +1,70 @@
+\section{\ac{lapack}}
+It consists in routines for solving systems of simultaneous linear equations, least-squares solutions of linear systems of equations, eigenvalue problems, and singular value problems. The associated matrix factorizations (LU, Cholesky, QR, SVD, Schur, generalized Schur) are also provided, as are related computations such as reordering of the Schur factorizations and estimating condition numbers. Dense and banded matrices are handled, but not general sparse matrices. In all areas, similar functionality is provided for real and complex matrices, in both single and double precision.
+
+\section{MP solver pack}
+%\begin{ndr}
+%	tell what we'll find in MP solver pack, the Primal Relay, DR, CFP, CFD, ...\\
+%	put here some parts of the \ac{tm}
+%\end{ndr}
+
+For more details you can refer to the \ac{tm}.
+
+\subsection{Definition of a \acs{lcp} problem}
+Let $M$ be a given $n\times n$ matrix, and let $q$ be a given $n$ vector. The linear complementary problem is to find vectors $z$ and $w$ such that
+\begin{eqnarray}
+M z - w = q \label{equi}\\
+z \ge 0, w \ge 0\label{comp}\\
+z \cdot w = 0 \label{pdt}
+\end{eqnarray}
+%
+Here, $(z_{i},w_{i})$ is a pair of complementary variables. A solution $(z,w)$ to the above system is called a complementary basic feasible solution if $(z,w)$ is a feasible%
+\footnote{A numerical vector that satisfies all the constraints and restrictions in the problem is said a feasible solution.}
+solution to $($\ref{equi}$)$ and $($\ref{comp}$)$ and if one variable of the pair $(z_{i},w_{i})$ is  basic% 
+\footnote{Consider the following system of linear equality constraints 
+\begin{eqnarray}
+A x = b \label{basis} \\
+x \geq 0
+\end{eqnarray}
+where $A$ is a given matrix of order $m\times n$ and $m$ is the rank of $A$.
+A basis B for \ref{basis} is a square matrix consisting of $m$ columns of A which is nonsingular; and the column vector of variables $x_{B}$ associated with the columns in $B$, arranged in the same order, is the basic vector corresponding to it.
+} 
+for $i=1,..,n.$
+
+
+
+
+\subsection{Definition of a \acs{cp} problem}
+The aim of generalized Non--smooth Newton methods is to provide numerical solutions of systems of nonsmooth equations of the form :
+\begin{eqnarray}
+  \label{eq:1}
+  H(x)=0
+\end{eqnarray}
+where $H:\Omega \subset \RR^n \mapsto \RR^n $ is locally Lipschitz on the open set $\Omega$. 
+
+If the function $H$ is differentiable on $\Omega$, classical Newton  methods and its variants may be used to solve the equation \eqref{eq:1} and several theorem of local convergence may be formulated. The non differentiability of $H$ gives rise to a lot of complications that invalidates the classical methods.
+
+
+
+
+\subsection{Definition of a Relay problem}
+The relay system can be written as a LCP by introducing extra variables. It is convenient to express a standard LCP using the convex analysis formalism:
+$$0\le z \perp w \ge 0 \iff -w \in \partial\psi_{[0,+\infty[}(z)$$
+Consequently a relay system is synthetically written as follows:
+\begin{eqnarray}
+Mz-w=q\label{relequi}\\
+-w \in \partial\psi_{[-s,s]}(z)\label{relcomp} 
+\end{eqnarray}
+
+By extension the set $[-s,s]$ is considered for vector valued problems as the cartesian product of intervals,\\
+$$ [-s,s]=\prod_{i=1}^{n}[-s_{i},s_{i}]$$
+Set $w^+$ and $w^-$ the positive part and the negative part of $w$, $w=w^+-w^-$ with $w^+=max(w,0)$, $w^-=max(-w,0)$. We introduce two extra variables defined as follows:\\
+$z^{p}=s+z ; z^{m}=s-z $ such that $z^{p}+z^{m}=2s$\\
+
+
+\subsection{Solving routines}
+MP solver pack provides solvers for the previous problems. In the one hand, the basics \ac{lcp} solvers for \ac{lcp} problems, and in the other hand extended solvers for \ac{pr}, \ac{dr}, \ac{cfp}, \ac{cfd} problems.
+
+
+
+\section{\ac{ode} pack}
+It consists of nine solvers, namely a basic solver called LSODE and eight variants of it -- LSODES, LSODA, LSODAR, LSODPK, LSODKR, LSODI, LSOIBT, and LSODIS. The collection is suitable for both stiff and nonstiff systems.  It includes solvers for systems given in explicit form, dy/dt = f(t,y), and also solvers for systems given in linearly implicit form,  A(t,y) dy/dt = g(t,y).  Two of the solvers use general sparse matrix solvers for the linear systems that arise.  Two others use iterative (preconditioned Krylov) methods instead of direct methods for these linear systems.  The most recent addition is LSODIS, which solves implicit problems with general sparse treatment of all matrices involved.

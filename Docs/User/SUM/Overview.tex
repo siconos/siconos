@@ -1,0 +1,13 @@
+The \ac{siconos} platform is dedicated to the modelling and simulation of \ac{nsds}. For modelling part, several canonical model for \ac{nsds}, relations and non-smooth laws can be used. For the simulation part, robust time integration method (time stepping, event driven) of the dynamics and numerical solvers for non smooth laws can be used.
+
+The \ac{siconos} platform can be used as a library.
+
+The numerical routine for computation is provide by plugin. Each user can develop his own plugin and use it
+
+The \ac{siconos} platform can take as input file an \ac{xml} file which describe the system. The platform can formalise the input file into canonical model, and analyse the coherence of the data. It can make an \ac{xml} file in order to save the state of the system during and / or after the simulation.
+
+Expert user can modify the platform and add some functionality, because this platform is open source. Some documents will help developers (\ac{ddd}, \ac{esd}, \ac{anp}, ...)
+
+\textbf{
+In this version of \ac{siconos}, for driving a simulation, the user have to write a command file (in C++). This file creates dynamical systems, interactions, \dots run the simulation and collect informations.
+}

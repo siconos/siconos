@@ -1,0 +1,30 @@
+Two deliverables can be distributed, corresponding to the two main uses of the platform~: a basic one for end-users, with only binaries, and a complete one with source files, to allow users to develop news functionalities for the software.
+Here we describe the architecture of the distribution for end users. Developers can refer to the \ac{ddd} for complete architecture.
+
+\section{Files and directories}
+The software \textit{siconos} will be a set of C++ libraries driven by a main program. This kind of libraries are named in the following as "internal libraries" (i.e. libraries developed in \ac{siconos}, in opposition to the "external libraries" which are for example libXML2 or Lapack++). \\
+
+In this distribution, the root directory is named \textit{SICONOS/}. It contains the following sub-directories and files~: 
+\begin{itemize}
+
+\item  \textit{config/} : contains the configuration files needed by the platform. The sub-dir \textit{xmlschema} holds the schema of the \ac{siconos} \ac{xml} files.
+
+\item  \textit{doc/} : contains this document in a pdf file \textit{siconos.pdf}. 
+
+\item \textit{ext/} : contains external libraries (like libXML2, Lapack++, \dots) needed by the platform. %(if the user has not already installed them on his computer).
+
+\item \textit{include/} : contains header files of internal libraries.
+
+\item \textit{lib/} : contains the internal libraries. Their name is libXXXX.a.
+
+\item \textit{sample/} : contains examples of uses of the platform, and it is the repertory where the user can put their files (see Instruction chapter).
+
+\item \textit{siconos/} : contains the executable file \textit{siconos}. This executable permits to launch a simulation.
+
+\item \textit{README.txt} : instructions to install the software, etc.
+
+\end{itemize}
+
+
+\section{User data}
+Each system which is simulated by the platform must have a particular workspace, which is a directory. The path of the directory should be given by the user. By default, simulations files (\ac{xml} files and vector / matrix data files) are placed in the \textit{samples} directory of the platform.

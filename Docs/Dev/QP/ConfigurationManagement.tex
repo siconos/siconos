@@ -1,0 +1,69 @@
+\section{Tools}
+
+This section gives an overview of the main tools used for the project developement.
+
+\subsection{CVS}
+
+As an introduction, this is a short presentation of CVS, quotated from CVS official web site  (https://www.cvshome.org/new\_users.html) :\\
+
+\textit{CVS is the Concurrent Versions System, the dominant open-source network-transparent version control system. CVS is useful for everyone from individual developers 
+  to large, distributed teams:
+  \begin{itemize}
+  \item Its client-server access method lets developers access the latest code from anywhere there's an Internet connection.
+  \item Its unreserved check-out model to version control avoids artificial conflicts common with the exclusive check-out model.
+  \item Its client tools are available on most platforms.
+  \end{itemize}
+}
+
+\textit{CVS is used by popular open-source projects like Mozilla, the GIMP, XEmacs, KDE, and GNOME.}\\
+
+This section is just a reminder of the particular rules of using CVS in \ac{siconos}. If you want to learn more about CVS, please see the following web-sites :
+http://www.cvshome.org and http://www.gnu.org.\\
+
+The following rules have to be respected by all users of \ac{siconos} CVS server :
+\begin{itemize}
+\item Write changing logs in english
+\item Except very particular cases, commit only sources which succesfully compiles (and pass tests for the code). This rule is valid as much for documents as source code. 
+\item Correct possible conflicts before committing your work.
+\item Official documents of WP2 are stored on CVS server, under a branch named by the code (e.g \ac{srd} is stored in directory SICONOS/SRD on CVS server).
+\end{itemize} 
+
+After each major release (every tasks of a milestone completed), the version of source code and the corresponding \textbf{updated} documentation must
+be tagged by team leaders. The documentation must then be available on \ac{siconos} WP2 web site.
+
+\section{Documents}
+
+The documents concerned by this section are official project documents, such as \ac{srd} or \ac{um}. These documents are written in english and the last 
+validated version must be downloadable on wp2-dev collaborative web site. 
+After each major update , a document must be validated by a team leader and its version number increased.
+The current version of these document is available on CVS project server.
+To get more details about Documents writing process, see \ac{cds}.
+
+\section{Code}
+
+% \subsection{Tools}
+
+% CVS, blabla
+
+% Tag, Who When, 
+
+\subsection{Distribution}
+
+%Sources : DEfinition
+
+%Libraries : definition
+
+%etc
+
+The last validated release must be distributed in a tar.gz version. Thanks to the use of GNU-autotools (automake, autoconf), configuration and installation will 
+be easy for users. The platform is distributed without external libraries (Lapack, libXml, etc.), which have to be installed by the user on his computer. \\
+
+The general structure of the distribution SICONOS is inspired from GNU standards :
+
+\begin{itemize}
+\item directory \textit{bin/} : contains executable files of the platform.
+\item directory \textit{lib/} : contains library files 
+\item directory \textit{src/} : contains source files. There is a subdirectory for each platform module.
+\item directory \textit{sample/} : contains plugin and application examples.
+\item directory \textit{doc/} : contains source code documentation.
+\end{itemize}

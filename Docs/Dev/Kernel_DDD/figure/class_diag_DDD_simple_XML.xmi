@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XMI xmlns:UML="org.omg/standards/UML" verified="false" timestamp="" xmi.version="1.2" >
+ <XMI.header>
+  <XMI.documentation>
+   <XMI.exporter>umbrello uml modeller http://uml.sf.net</XMI.exporter>
+   <XMI.exporterVersion>1.1</XMI.exporterVersion>
+  </XMI.documentation>
+  <XMI.model xmi.name="class_diag_DDD_simple_XML" href="/home/boulez/jbarbier/siconos/figures/classes/XML/class_diag_DDD_simple_XML.xmi" />
+  <XMI.metamodel xmi.name="UML" href="UML.xml" xmi.version="1.3" />
+ </XMI.header>
+ <XMI.content>
+  <docsettings viewid="1" documentation="" uniqueid="140" />
+  <umlobjects>
+   <UML:Class stereotype="" package="" xmi.id="2" abstract="0" documentation="" name="DSXML" static="0" scope="200" >
+    <UML:Operation stereotype="" package="" xmi.id="56" type="void" abstract="0" documentation="" name="computeVectorField" static="0" scope="200" />
+    <UML:Operation stereotype="" package="" xmi.id="57" type="void" abstract="0" documentation="" name="I/O XML" static="0" scope="200" />
+    <UML:Operation stereotype="" package="" xmi.id="58" type="void" abstract="0" documentation="" name="isTypeOf ??" static="0" scope="200" />
+    <UML:Operation stereotype="" package="" xmi.id="59" type="void" abstract="0" documentation="" name="computeGradientX" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="47" value="" type="string" abstract="0" documentation="" name="id" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="49" value="" type="vector" abstract="0" documentation="" name="x" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="51" value="" type="vector" abstract="0" documentation="" name="xDot" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="96" value="" type="vector" abstract="0" documentation="" name="xMemory" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="97" value="" type="vector" abstract="0" documentation="" name="xDotMemory" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="48" value="" type="vector" abstract="0" documentation="" name="R" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="50" value="" type="int" abstract="0" documentation="" name="n" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="52" value="" type="int" abstract="0" documentation="" name="x0" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="53" value="" type="matrix" abstract="0" documentation="" name="omega0" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="54" value="" type="matrix" abstract="0" documentation="" name="omegaT" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="55" value="" type="matrix" abstract="0" documentation="" name="gradient" static="0" scope="200" />
+   </UML:Class>
+   <UML:Class stereotype="" package="" xmi.id="3" abstract="0" documentation="" name="OneStepIntegratorXML" static="0" scope="200" >
+    <UML:Operation stereotype="" package="" xmi.id="115" type="void" abstract="0" documentation="" name="integre" static="0" scope="200" />
+    <UML:Operation stereotype="" package="" xmi.id="72" type="void" abstract="0" documentation="" name="I/O XML" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="116" value="" type="DS" abstract="0" documentation="" name="tabDS" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="117" value="" type="int" abstract="0" documentation="" name="r" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="118" value="" type="float" abstract="0" documentation="" name="h" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="119" value="" type="float" abstract="0" documentation="" name="hVar[]" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="120" value="" type="int" abstract="0" documentation="" name="N" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="121" value="" type="float" abstract="0" documentation="" name="hMin" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="122" value="" type="float" abstract="0" documentation="" name="hMax" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="69" value="" type="bool" abstract="0" documentation="" name="isTimeStepping" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="70" value="" type="bool" abstract="0" documentation="" name="isEventDriven" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="71" value="" type="bool" abstract="0" documentation="" name="isLagrangian" static="0" scope="200" />
+   </UML:Class>
+   <UML:Class stereotype="" package="" xmi.id="4" abstract="0" documentation="" name="NSDSXML" static="0" scope="200" >
+    <UML:Attribute stereotype="" package="" xmi.id="61" value="" type="DS" abstract="0" documentation="" name="tabDS" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="62" value="" type="Interaction" abstract="0" documentation="" name="tabInteraction" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="63" value="" type="NS Law" abstract="0" documentation="" name="tabNSLaw" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="64" value="" type="bool" abstract="0" documentation="" name="isBVP" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="65" value="" type="bool" abstract="0" documentation="" name="isIVP" static="0" scope="200" />
+   </UML:Class>
+   <UML:Class stereotype="" package="" xmi.id="6" abstract="0" documentation="" name="RelationXML" static="0" scope="200" >
+    <UML:Operation stereotype="" package="" xmi.id="88" type="void" abstract="0" documentation="" name="computeOutput" static="0" scope="200" />
+    <UML:Operation stereotype="" package="" xmi.id="89" type="void" abstract="0" documentation="" name="computeInput" static="0" scope="200" />
+   </UML:Class>
+   <UML:Class stereotype="" package="" xmi.id="7" abstract="0" documentation="" name="NSLawXML" static="0" scope="200" >
+    <UML:Operation stereotype="" package="" xmi.id="90" type="void" abstract="0" documentation="" name="isVerified" static="0" scope="200" />
+   </UML:Class>
+   <UML:Class stereotype="" package="" xmi.id="13" abstract="0" documentation="" name="LinearSystemDSXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="33" abstract="0" documentation="" name="StrategyXML" static="0" scope="200" >
+    <UML:Operation stereotype="" package="" xmi.id="105" type="void" abstract="0" documentation="" name="computeFreeState" static="0" scope="200" />
+    <UML:Operation stereotype="" package="" xmi.id="106" type="void" abstract="0" documentation="" name="increment" static="0" scope="200" />
+    <UML:Operation stereotype="" package="" xmi.id="107" type="void" abstract="0" documentation="" name="predictAndFormalise" static="0" scope="200" />
+    <UML:Operation stereotype="" package="" xmi.id="108" type="void" abstract="0" documentation="" name="computeOneStepNSProblem" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="98" value="" type="Integrator" abstract="0" documentation="" name="tabIntegrator" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="99" value="" type="Interaction Resolution" abstract="0" documentation="" name="tabInteractionResolution" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="100" value="" type="float" abstract="0" documentation="" name="h" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="101" value="" type="int" abstract="0" documentation="" name="N" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="102" value="" type="float" abstract="0" documentation="" name="hVar[]" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="103" value="" type="bool" abstract="0" documentation="" name="isSynchro" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="104" value="" type="bool" abstract="0" documentation="" name="isConstantTimeStep" static="0" scope="200" />
+   </UML:Class>
+   <UML:Class stereotype="" package="" xmi.id="43" abstract="0" documentation="" name="OneStepNSProblemXML" static="0" scope="200" >
+    <UML:Operation stereotype="" package="" xmi.id="112" type="void" abstract="0" documentation="" name="predictRelation" static="0" scope="200" />
+    <UML:Operation stereotype="" package="" xmi.id="113" type="void" abstract="0" documentation="" name="formaliseOneStepNSProblem" static="0" scope="200" />
+    <UML:Operation stereotype="" package="" xmi.id="114" type="void" abstract="0" documentation="" name="computeOneStepNSProblem" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="109" value="" type="Interaction" abstract="0" documentation="" name="tabInteraction" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="110" value="" type="int" abstract="0" documentation="" name="n" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="111" value="" type="bool" abstract="0" documentation="" name="isConstant" static="0" scope="200" />
+   </UML:Class>
+   <UML:Class stereotype="" package="" xmi.id="60" abstract="0" documentation="" name="ModelXML" static="0" scope="200" >
+    <UML:Attribute stereotype="" package="" xmi.id="93" value="" type="float" abstract="0" documentation="" name="t" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="94" value="" type="float" abstract="0" documentation="" name="t0" static="0" scope="200" />
+    <UML:Attribute stereotype="" package="" xmi.id="95" value="" type="float" abstract="0" documentation="" name="T" static="0" scope="200" />
+   </UML:Class>
+   <UML:Class stereotype="" package="" xmi.id="123" abstract="0" documentation="" name="LagrangianNLDSXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="124" abstract="0" documentation="" name="LagrangianTIDSXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="125" abstract="0" documentation="" name="LTIRelationXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="126" abstract="0" documentation="" name="LLRelationXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="127" abstract="0" documentation="" name="LNLRelationXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="128" abstract="0" documentation="" name="CCNSLawXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="129" abstract="0" documentation="" name="RelayXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="130" abstract="0" documentation="" name="LSODARXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="131" abstract="0" documentation="" name="MoreauXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="132" abstract="0" documentation="" name="LCPXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="133" abstract="0" documentation="" name="QPXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="134" abstract="0" documentation="" name="RelayNSLawXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="135" abstract="0" documentation="" name="TS" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="136" abstract="0" documentation="" name="ED" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="137" abstract="0" documentation="" name="TimeDiscretisation" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="138" abstract="0" documentation="" name="AdamsXML" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="139" abstract="0" documentation="" name="InteractionPossible" static="0" scope="200" />
+   <UML:Class stereotype="" package="" xmi.id="140" abstract="0" documentation="" name="InteractionXML" static="0" scope="200" />
+  </umlobjects>
+  <diagrams>
+   <diagram snapgrid="0" showattsig="1" fillcolor="#ffffc0" showgrid="0" showopsig="1" usefillcolor="1" snapx="10" snapy="10" showatts="1" xmi.id="1" documentation="" type="402" showops="1" showpackage="0" name="class diagram" localid="30000" showstereotype="0" showscope="1" font="Sans,10,-1,5,50,0,0,0,0,0" linecolor="#ff0000" >
+    <widgets>
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="63" showattsigs="603" usesdiagramusefillcolour="0" x="563" linecolour="#ff0000" y="193" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="2" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="170" showattsigs="603" usesdiagramusefillcolour="0" x="173" linecolour="#ff0000" y="188" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="3" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="82" showattsigs="603" usesdiagramusefillcolour="0" x="646" linecolour="#ff0000" y="54" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="4" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="101" showattsigs="603" usesdiagramusefillcolour="0" x="600" linecolour="#ff0000" y="427" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="6" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="91" showattsigs="603" usesdiagramusefillcolour="0" x="769" linecolour="#ff0000" y="429" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="7" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="101" showattsigs="603" usesdiagramusefillcolour="0" x="139" linecolour="#ff0000" y="54" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="33" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="178" showattsigs="603" usesdiagramusefillcolour="0" x="16" linecolour="#ff0000" y="356" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="43" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="86" showattsigs="603" usesdiagramusefillcolour="0" x="399" linecolour="#ff0000" y="0" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="60" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="156" showattsigs="603" usesdiagramusefillcolour="0" x="506" linecolour="#ff0000" y="293" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="13" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="160" showattsigs="603" usesdiagramusefillcolour="0" x="385" linecolour="#ff0000" y="248" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="123" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="154" showattsigs="603" usesdiagramusefillcolour="0" x="388" linecolour="#ff0000" y="329" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="124" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="123" showattsigs="603" usesdiagramusefillcolour="0" x="606" linecolour="#ff0000" y="546" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="125" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="119" showattsigs="603" usesdiagramusefillcolour="0" x="436" linecolour="#ff0000" y="546" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="126" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="129" showattsigs="603" usesdiagramusefillcolour="0" x="504" linecolour="#ff0000" y="585" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="127" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="111" showattsigs="603" usesdiagramusefillcolour="0" x="709" linecolour="#ff0000" y="511" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="128" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="103" showattsigs="603" usesdiagramusefillcolour="0" x="199" linecolour="#ff0000" y="300" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="130" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="95" showattsigs="603" usesdiagramusefillcolour="0" x="145" linecolour="#ff0000" y="265" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="131" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="72" showattsigs="603" usesdiagramusefillcolour="0" x="0" linecolour="#ff0000" y="453" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="132" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="64" showattsigs="603" usesdiagramusefillcolour="0" x="83" linecolour="#ff0000" y="453" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="133" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="129" showattsigs="603" usesdiagramusefillcolour="0" x="774" linecolour="#ff0000" y="547" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="134" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="82" showattsigs="603" usesdiagramusefillcolour="0" x="157" linecolour="#ff0000" y="453" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="129" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="91" showattsigs="603" usesdiagramusefillcolour="0" x="264" linecolour="#ff0000" y="266" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="138" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ConceptWidget usesdiagramfillcolour="0" width="118" showattsigs="603" usesdiagramusefillcolour="0" x="679" linecolour="#ff0000" y="356" showopsigs="603" usesdiagramlinecolour="0" fillcolour="#ffffc0" height="28" usefillcolor="1" showattributes="0" xmi.id="140" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,50,0,0,0,0,0" />
+    </widgets>
+    <messages/>
+    <associations>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="2" widgetbid="33" widgetaid="3" documentation="" type="510" >
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="227" linecolour="none" y="164" operation="" usesdiagramlinecolour="1" role="701" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="1..*" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="208" linecolour="none" y="84" operation="" usesdiagramlinecolour="1" role="702" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="232" linecolour="none" y="135" operation="" usesdiagramlinecolour="1" role="703" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <linepath>
+       <startpoint startx="258" starty="188" />
+       <endpoint endx="206" endy="82" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="33" widgetaid="43" documentation="" type="510" >
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="107" linecolour="none" y="332" operation="" usesdiagramlinecolour="1" role="701" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="0..1" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="162" linecolour="none" y="84" operation="" usesdiagramlinecolour="1" role="702" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="138" linecolour="none" y="219" operation="" usesdiagramlinecolour="1" role="703" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <linepath>
+       <startpoint startx="105" starty="356" />
+       <endpoint endx="172" endy="82" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="2" indexb="1" widgetbid="60" widgetaid="33" documentation="" type="510" >
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="191" linecolour="none" y="30" operation="" usesdiagramlinecolour="1" role="701" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="1" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="389" linecolour="none" y="16" operation="" usesdiagramlinecolour="1" role="702" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="294" linecolour="none" y="34" operation="" usesdiagramlinecolour="1" role="703" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <linepath>
+       <startpoint startx="189" starty="54" />
+       <endpoint endx="399" endy="14" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="2" widgetaid="3" documentation="" type="512" >
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="345" linecolour="none" y="204" operation="" usesdiagramlinecolour="1" role="701" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="1" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="532" linecolour="none" y="204" operation="" usesdiagramlinecolour="1" role="702" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="1..*" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="453" linecolour="none" y="202" operation="" usesdiagramlinecolour="1" role="703" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <linepath>
+       <startpoint startx="343" starty="202" />
+       <endpoint endx="563" endy="202" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="2" indexb="1" widgetbid="60" widgetaid="4" documentation="" type="510" >
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="628" linecolour="none" y="44" operation="" usesdiagramlinecolour="1" role="701" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="1" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="487" linecolour="none" y="16" operation="" usesdiagramlinecolour="1" role="702" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="565" linecolour="none" y="41" operation="" usesdiagramlinecolour="1" role="703" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <linepath>
+       <startpoint startx="646" starty="68" />
+       <endpoint endx="485" endy="14" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="4" widgetaid="2" documentation="" type="510" >
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="596" linecolour="none" y="169" operation="" usesdiagramlinecolour="1" role="701" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="1..*" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="663" linecolour="none" y="84" operation="" usesdiagramlinecolour="1" role="702" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="633" linecolour="none" y="137" operation="" usesdiagramlinecolour="1" role="703" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <linepath>
+       <startpoint startx="594" starty="193" />
+       <endpoint endx="673" endy="82" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="2" widgetaid="13" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="584" starty="293" />
+       <endpoint endx="584" endy="221" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="2" widgetbid="2" widgetaid="123" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="465" starty="248" />
+       <endpoint endx="563" endy="211" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="2" indexb="1" widgetbid="123" widgetaid="124" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="465" starty="329" />
+       <endpoint endx="465" endy="276" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="1" widgetbid="6" widgetaid="126" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="495" starty="546" />
+       <endpoint endx="625" endy="455" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="2" widgetbid="6" widgetaid="127" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="568" starty="585" />
+       <endpoint endx="650" endy="455" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="3" widgetbid="6" widgetaid="125" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="667" starty="546" />
+       <endpoint endx="675" endy="455" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="7" widgetaid="128" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="764" starty="511" />
+       <endpoint endx="799" endy="457" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="2" widgetbid="3" widgetaid="130" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="250" starty="300" />
+       <endpoint endx="258" endy="216" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="1" widgetbid="3" widgetaid="131" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="192" starty="265" />
+       <endpoint endx="215" endy="216" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="2" widgetbid="7" widgetaid="134" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="838" starty="547" />
+       <endpoint endx="829" endy="457" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="1" widgetbid="43" widgetaid="132" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="36" starty="453" />
+       <endpoint endx="60" endy="384" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="2" widgetbid="43" widgetaid="133" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="115" starty="453" />
+       <endpoint endx="105" endy="384" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="3" widgetbid="43" widgetaid="129" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="198" starty="453" />
+       <endpoint endx="149" endy="384" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="3" widgetbid="3" widgetaid="138" documentation="" type="500" >
+      <linepath>
+       <startpoint startx="309" starty="266" />
+       <endpoint endx="300" endy="216" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="3" indexa="1" totalcountb="3" indexb="2" widgetbid="2" widgetaid="140" documentation="" type="512" >
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="703" linecolour="none" y="332" operation="" usesdiagramlinecolour="1" role="701" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="*" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="607" linecolour="none" y="223" operation="" usesdiagramlinecolour="1" role="702" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="2" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="661" linecolour="none" y="288" operation="" usesdiagramlinecolour="1" role="703" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <linepath>
+       <startpoint startx="718" starty="356" />
+       <endpoint endx="605" endy="221" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="3" indexa="2" totalcountb="3" indexb="2" widgetbid="4" widgetaid="140" documentation="" type="510" >
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="742" linecolour="none" y="332" operation="" usesdiagramlinecolour="1" role="701" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="*" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="702" linecolour="none" y="84" operation="" usesdiagramlinecolour="1" role="702" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="728" linecolour="none" y="219" operation="" usesdiagramlinecolour="1" role="703" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <linepath>
+       <startpoint startx="757" starty="356" />
+       <endpoint endx="700" endy="82" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="2" indexb="1" widgetbid="140" widgetaid="43" documentation="" type="503" >
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="196" linecolour="none" y="372" operation="" usesdiagramlinecolour="1" role="701" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="1" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="648" linecolour="none" y="372" operation="" usesdiagramlinecolour="1" role="702" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="1..*" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="436" linecolour="none" y="370" operation="" usesdiagramlinecolour="1" role="703" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <linepath>
+       <startpoint startx="194" starty="370" />
+       <endpoint endx="679" endy="370" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="140" widgetaid="6" documentation="" type="510" >
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="652" linecolour="none" y="403" operation="" usesdiagramlinecolour="1" role="701" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="1" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="708" linecolour="none" y="386" operation="" usesdiagramlinecolour="1" role="702" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="684" linecolour="none" y="405" operation="" usesdiagramlinecolour="1" role="703" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <linepath>
+       <startpoint startx="650" starty="427" />
+       <endpoint endx="718" endy="384" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="2" widgetbid="140" widgetaid="7" documentation="" type="510" >
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="796" linecolour="none" y="405" operation="" usesdiagramlinecolour="1" role="701" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="1" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="759" linecolour="none" y="386" operation="" usesdiagramlinecolour="1" role="702" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="0" usesdiagramusefillcolour="1" x="785" linecolour="none" y="406" operation="" usesdiagramlinecolour="1" role="703" fillcolour="none" height="0" usefillcolor="1" seqnum="" xmi.id="-1" text="" font="Sans,10,-1,5,50,0,0,0,0,0" />
+      <linepath>
+       <startpoint startx="814" starty="429" />
+       <endpoint endx="757" endy="384" />
+      </linepath>
+     </UML:AssocWidget>
+    </associations>
+   </diagram>
+  </diagrams>
+  <listview>
+   <listitem open="1" type="800" id="-1" label="Views" >
+    <listitem open="1" type="801" id="-1" label="Logical View" >
+     <listitem open="1" type="813" id="138" label="AdamsXML" />
+     <listitem open="1" type="813" id="128" label="CCNSLawXML" />
+     <listitem open="0" type="807" id="1" label="class diagram" />
+     <listitem open="0" type="813" id="2" label="DSXML" >
+      <listitem open="0" type="815" id="59" label="computeGradientX" />
+      <listitem open="0" type="815" id="56" label="computeVectorField" />
+      <listitem open="0" type="814" id="55" label="gradient" />
+      <listitem open="0" type="814" id="47" label="id" />
+      <listitem open="0" type="815" id="57" label="I/O XML" />
+      <listitem open="0" type="815" id="58" label="isTypeOf ??" />
+      <listitem open="0" type="814" id="50" label="n" />
+      <listitem open="0" type="814" id="53" label="omega0" />
+      <listitem open="0" type="814" id="54" label="omegaT" />
+      <listitem open="0" type="814" id="48" label="R" />
+      <listitem open="0" type="814" id="49" label="x" />
+      <listitem open="0" type="814" id="52" label="x0" />
+      <listitem open="0" type="814" id="51" label="xDot" />
+      <listitem open="0" type="814" id="97" label="xDotMemory" />
+      <listitem open="0" type="814" id="96" label="xMemory" />
+     </listitem>
+     <listitem open="1" type="813" id="136" label="ED" />
+     <listitem open="1" type="813" id="139" label="InteractionPossible" />
+     <listitem open="1" type="813" id="140" label="InteractionXML" />
+     <listitem open="1" type="813" id="123" label="LagrangianNLDSXML" />
+     <listitem open="1" type="813" id="124" label="LagrangianTIDSXML" />
+     <listitem open="1" type="813" id="132" label="LCPXML" />
+     <listitem open="1" type="813" id="13" label="LinearSystemDSXML" />
+     <listitem open="1" type="813" id="126" label="LLRelationXML" />
+     <listitem open="1" type="813" id="127" label="LNLRelationXML" />
+     <listitem open="1" type="813" id="130" label="LSODARXML" />
+     <listitem open="1" type="813" id="125" label="LTIRelationXML" />
+     <listitem open="0" type="813" id="60" label="ModelXML" >
+      <listitem open="0" type="814" id="93" label="t" />
+      <listitem open="0" type="814" id="95" label="T" />
+      <listitem open="0" type="814" id="94" label="t0" />
+     </listitem>
+     <listitem open="1" type="813" id="131" label="MoreauXML" />
+     <listitem open="0" type="813" id="4" label="NSDSXML" >
+      <listitem open="0" type="814" id="64" label="isBVP" />
+      <listitem open="0" type="814" id="65" label="isIVP" />
+      <listitem open="0" type="814" id="61" label="tabDS" />
+      <listitem open="0" type="814" id="62" label="tabInteraction" />
+      <listitem open="0" type="814" id="63" label="tabNSLaw" />
+     </listitem>
+     <listitem open="0" type="813" id="7" label="NSLawXML" >
+      <listitem open="0" type="815" id="90" label="isVerified" />
+     </listitem>
+     <listitem open="0" type="813" id="3" label="OneStepIntegratorXML" >
+      <listitem open="0" type="814" id="118" label="h" />
+      <listitem open="0" type="814" id="122" label="hMax" />
+      <listitem open="0" type="814" id="121" label="hMin" />
+      <listitem open="0" type="814" id="119" label="hVar[]" />
+      <listitem open="0" type="815" id="115" label="integre" />
+      <listitem open="0" type="815" id="72" label="I/O XML" />
+      <listitem open="0" type="814" id="70" label="isEventDriven" />
+      <listitem open="0" type="814" id="71" label="isLagrangian" />
+      <listitem open="0" type="814" id="69" label="isTimeStepping" />
+      <listitem open="0" type="814" id="120" label="N" />
+      <listitem open="0" type="814" id="117" label="r" />
+      <listitem open="0" type="814" id="116" label="tabDS" />
+     </listitem>
+     <listitem open="0" type="813" id="43" label="OneStepNSProblemXML" >
+      <listitem open="0" type="815" id="114" label="computeOneStepNSProblem" />
+      <listitem open="0" type="815" id="113" label="formaliseOneStepNSProblem" />
+      <listitem open="0" type="814" id="111" label="isConstant" />
+      <listitem open="0" type="814" id="110" label="n" />
+      <listitem open="0" type="815" id="112" label="predictRelation" />
+      <listitem open="0" type="814" id="109" label="tabInteraction" />
+     </listitem>
+     <listitem open="1" type="813" id="133" label="QPXML" />
+     <listitem open="0" type="813" id="6" label="RelationXML" >
+      <listitem open="0" type="815" id="89" label="computeInput" />
+      <listitem open="0" type="815" id="88" label="computeOutput" />
+     </listitem>
+     <listitem open="1" type="813" id="134" label="RelayNSLawXML" />
+     <listitem open="1" type="813" id="129" label="RelayXML" />
+     <listitem open="0" type="813" id="33" label="StrategyXML" >
+      <listitem open="0" type="815" id="105" label="computeFreeState" />
+      <listitem open="0" type="815" id="108" label="computeOneStepNSProblem" />
+      <listitem open="0" type="814" id="100" label="h" />
+      <listitem open="0" type="814" id="102" label="hVar[]" />
+      <listitem open="0" type="815" id="106" label="increment" />
+      <listitem open="0" type="814" id="104" label="isConstantTimeStep" />
+      <listitem open="0" type="814" id="103" label="isSynchro" />
+      <listitem open="0" type="814" id="101" label="N" />
+      <listitem open="0" type="815" id="107" label="predictAndFormalise" />
+      <listitem open="0" type="814" id="98" label="tabIntegrator" />
+      <listitem open="0" type="814" id="99" label="tabInteractionResolution" />
+     </listitem>
+     <listitem open="1" type="813" id="137" label="TimeDiscretisation" />
+     <listitem open="1" type="813" id="135" label="TS" />
+    </listitem>
+    <listitem open="1" type="802" id="-1" label="Use Case View" />
+   </listitem>
+  </listview>
+ </XMI.content>
+</XMI>

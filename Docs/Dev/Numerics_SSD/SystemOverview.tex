@@ -1,0 +1,27 @@
+\section{Context and design of the system}
+\ac{numerics} will be used to make specific computations on non-smooth dynamical systems.\\
+
+It will be written in C and used as a library. But it will also use methods already written in Fortran.
+It's planned to be used through a the \ac{siconos} platform as a computation library, or as a standalone library.
+
+It may be decomposed in several parts according to future extensions~:
+  \begin{itemize}
+  	\item \ac{lapack}\\
+		Routines for solving systems of simultaneous linear equations.
+    \item MP solverpack\\
+		Non smooth problem solving.
+    \item \ac{ode} pack\\
+		Initial value problem solving for ordinary differential equation systems.
+	\item future extensions...\\
+  \end{itemize}
+  
+  
+%\section{Costs and benefits of the architecture}
+
+\section{Prototyping exercises}
+No prototypes are necessary to evaluate the architecture. There is no difficulty about the software, no technologies that have to be tested. \ac{numerics} is mainly know-how that physicists bring to the library.
+
+
+\section{External interfaces}
+The library will offer computation methods through interfaces encapsulating each used internal library.\\
+Each module such as MP solver pack, \ac{ode} pack, ... have to be encapsulated to give a C/C++ \ac{api} to unify the interfaces and to grant the access to these functions to \ac{siconos} platform.

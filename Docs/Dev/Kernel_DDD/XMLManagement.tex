@@ -1,0 +1,126 @@
+\section{XML Schema}
+The data of the XML files we can encounter must respect several rules conforming to the \ac{nsds}
+and there resolution. Each objects of the platform have specific attributes which are required
+or optional. The schema allows to check a lot of rules that are detailed in the \ac{sum}.
+To check each information, the schema regroups the defined attributes in several tags relating to
+Model, NSDS, DynamicalSystem, Interaction, Relation and NonSmoothLaw, Strategy, TimeDiscretisation,
+OneStepIntegrator, OneStepNSProblem.
+
+
+\section{XML platform}
+The management of the XML input/output is made by a set of classes based on the architecture of the
+\ac{siconos} platform.
+
+\subsection{Architecture}
+In the software, the XML Management uses a tree structure for the XML objects and a DOM tree where all
+the data are stored in memory. Each of these objects is linked to the DOM tree, and each object access
+only to the data relating to it.
+
+\subsubsection{The XML Management objects}
+The figure \ref{fig: Class diagram of the XML management} \& \ref{fig: Class diagram with the links between the platform and the XML part} shows the
+structure of the XML Management platform.
+The Model is linked to his SiconosModelXML, the NSDS to his NSDSXML, \dots
+So, the XML Management platform give to the \ac{siconos} platform the accessors towards the data of the XML DOM tree.
+\subsubsection{The data of the XML}
+Each XML object can access to the specific branch of the DOM tree which contains the data relating to
+the object of the platform. They give an interface to the platform, to manipulate the information of
+the DOM tree.
+The data stored in the XML Management platform are only used for input and output but never used during the
+computations. That's to say the information of the DOM tree are read when the software is launched (if a XML input file is
+defined) and data are stored to the DOM tree a the end of each time step of a simulation.
+\subsubsection{SiconosDOMTreeTools}
+It is a toolbox to manipulate the data of the platform to store them under XML format.
+
+
+\subsection{Unfolding of the creation of the platform}
+The two ways to construct the platform are using similar mechanisms, and especially the same creating
+method.
+\subsubsection{XML file loading}
+At first, when a XML file is loaded, the data of the file are copied in memory in a DOM tree. From
+there, the XML Management platform is built.\\
+The SiconosModelXML owns the DOM tree and create NSDSXML and StrategyXML objects. The created objects
+only know the branch of the DOM tree relating to them. Gradually, the NSDSXML will create the
+different XML objects of the dynamical systems (DSXML, LagrangianNLDSXML, LagrangianTIDSXML,
+LinearSystemDSXML), and the different interactions.\\
+Then, after all the XML objects have been created, the \ac{siconos} platform is built.\\
+The Model which has lead the construction of the XML platform begin the creation of the NSDS,
+DynamicalSystem, LagrangianNLDS, ..., Interaction, Relation, ..., NonSmoothLaw, ..., Strategy,
+TimeDiscretisation, OneStepIntegrator, Moreau, ..., OneStepNSProblem, LCP and QP by using the
+relating XML objects.\\
+The construction of each object of the platform is made by calling a
+"createXxxxx" method (createModel(...), createNSDS(...), createStrategy(...), ...). One parameter
+corresponding to the XML object is enough to give the right data to the platform's object for his
+construction.
+\subsubsection{Creating the platform without XML input file}
+Another way to build the platform is to do it manually.
+To do this, each object of the \ac{siconos} platform owns functions designed to create/add the
+platform's objects belonging to it. These functions must have in parameters all the required data for
+the C++ objects. Here are these methods :
+\begin{itemize}
+	\item In the Model class :
+	\begin{itemize}
+		\item createNSDS(attributes required for a NSDS : bool BVP)
+		\item createTimeStepping()
+		\item createEvenrDriven()
+	\end{itemize}
+	
+	\item In the NSDS class :
+	\begin{itemize}
+		\item addNonLinearSystemDS(number, n, x0, BasicPlugin:vectorField)
+		\item addLinearSystemDS(number, n, x0)
+		\item addLagrangianNLDS(number, ndof, q0, velocity0, BasicPlugin:computeMass,
+		BasicPlugin:computeFInt, BasicPlugin:computeFExt,
+		BasicPlugin:computeJacobianQFInt, BasicPlugin:computeJacobianVelocityFInt,
+		BasicPlugin:computeJacobianQQNLInertia,
+		BasicPlugin:computeJacobianVelocityQNLInertia, BasicPlugin:computeQNLInertia)
+		\item addLagrangianTIDS(number, ndof, q0, velocity0, BasicPlugin:computeMass, BasicPlugin:computeFExt, K, C)
+		\item addInteraction(number)
+	\end{itemize}
+	
+	\item In the DynamicalSystem class :
+	\begin{itemize}
+		\item createLinearBC()
+		\item createNLinearBC()
+		\item createPeriodicBC()
+	\end{itemize}
+	
+	\item In the Interaction class :
+	\begin{itemize}
+		\item createLagrangianLinearR()
+		\item createLagrangianNonLinearR()
+		\item createLinearTIR()
+		\item createNewtonImpactLawNSL()
+		\item createComplementaryConditionNSL()
+		\item createRelayNSL()
+	\end{itemize}
+	
+	\item In the Strategy class :
+	\begin{itemize}
+		\item createTimeDiscretisation()
+		\item addMoreau()
+		\item addLsodar()
+		\item addAdams()
+		\item addLCP()
+		\item addQP()
+	\end{itemize}
+	
+\end{itemize}
+All these functions are calling the createXxxx(...) function of the object to create.
+
+\subsection{Saving the data of the platform}
+The save of the platform's data is lead from the Model. The function which do this job is
+"saveToXMLFile". It has several things to do before saving tha data in a XML file :
+\begin{itemize}
+	\item checkXMLPlatform() : This first function will perfom verifications on the XML Management platform. It checks the
+	link between the platform's objects and the XML Management objects. If the XML Management
+	platform doesn't exist, it will be created and linked to the objects of the \ac{siconos}
+	platform. Otherwise, every link between the platform and the XML Management is checked to ensure
+	the availability of the XML platform objects.
+	\item savePlatformToXML() : Now, all the objects of the platform are linked to their XML Management object. Therefore,
+	it is possible to save the data of the platform to the XML DOM tree. The information
+	contained in the platform are saved in the DOM tree by using the specific functions given
+	by the XML object.
+	\item checkXMLDOMTree() : The data of the DOM tree is up to date. But It is important to check that these data still
+	respect the XML schema. 
+	\item saveSiconosModelInXMLFile(xmlFile) : The last action to be done is to write the data in memory to a file.
+\end{itemize}

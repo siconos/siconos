@@ -1,0 +1,51 @@
+There are two ways to give data to the platform, XML file and creating platform's object with
+the right data in a program. That we will see here is the management of the input data and the
+creation of the platform with these information.
+Each object of the platform has a "create" method used in the two cases.
+
+\section{XML input file}
+When a XML file bring the data needed by the platform, either all the data are given by the XML
+file or only required data. When the file contains partial data, that means it describe at least
+a SiconosModel with a NSDS (Non Smooth Dynamical System), composed of at least one Dynamical
+System.
+\subsection{XML file only}
+The reading of the file generate a DOM tree in memory with all the data. Then the creation of the XML management "platform" based on
+the DOM tree is based on this tree.
+The XML platform belongs to the Model, which is the main object of the platform. That's from the
+Model that the creation process is launched to build the platform.
+From this point, the Model creates the NSDS, which one creates the dynamical systems, ... The
+building is "top down" and gradually, with the Model at the top of the platform. 
+\begin{figure}
+\begin{center}
+	\includegraphics[scale=0.75, clip]{figure/platform_loading_XML.ps}
+	\caption{Sequence diagram of the platform's loading with XML file}
+	\label{fig: platform's loading1}
+\end{center}
+\end{figure}
+The "create" methods used are partially shown in the diagram \ref{fig: platform's loading1}.
+
+\subsection{Partial XML file}
+This means that the data read in the file are supplemented with information given in the command
+program.
+In this case, the XML file is similar to the previous case, then the way to create objects of
+the platform apart from a XML file will be detailed in the next section.
+
+\section{Whitout XML input file}
+It is possible to create the objects of the platform without a XML file by using the API of the platform.
+The methods given to the users allow the creation of each object of the platform. The
+unfolding of the building of the platform's architecture is described in the next sequence diagram.
+\begin{figure}
+\begin{center}
+	\includegraphics[scale=0.75, clip]{figure/platform_loading.ps}
+	\caption{Sequence diagram of the platform's loading without XML file}
+	\label{fig: platform's loading2}
+\end{center}
+\end{figure}
+
+The construction of the platform we can see in the diagram \ref{fig: platform's loading2} is lead by an user. And the same
+"createXxxxx" functions are used, like with a XML file.
+
+\section{The creation process}
+It is based on the "create" functions which aim to initialize the relating object. They fill its fields with XML data and
+link the objects belonging to it to their corresponding XML object, or, if the platform is manually built, only fill
+its fields with the data given in paramaters.

@@ -1,0 +1,121 @@
+%\begin{ndr}
+%Put therin the Unit test plan
+%\end{ndr}
+
+\section{Unit test tools}
+The tool used to do the unit tests is CppUnit. It allows to make test suites on each independant module which must be tested.
+
+\section{Unit test plan}
+The following module have been included into the unit test plan :
+\begin{itemize}
+	\item SiconosMatrix and SiconosVector
+	\item XML management module
+	\item \ac{numerics}
+\end{itemize}
+For each tested module, the unitary tests have to be performed successfully before validating changes in the software.
+
+
+\subsection{Objectives}
+The aim of these tests is to ensure that all the functions of the tested module are doing that they have to do and that they are doing that in the right way. The tests must show that the behaviour of each function is the one which  was expected.\\
+The Unitary tests ensures us of the correct functioning of low level operations that will be used at higher level.
+
+\subsubsection{Satisfaction criterion}
+The unitary tests have to ensure :
+\begin{itemize}
+\item The reliability (right behaviour of the tested functions)
+\item The robustness (exception management)
+\end{itemize}
+These criterion ensure us that basic functions behave as we expect.
+With CppUnit, each test suite ends with a summary of the passed and failed tests. To validate the modifications of the source code, it is required that no test failed.
+
+
+\subsection{Description of the tests}
+
+\subsubsection{SiconosMatrix and SiconosVector unitary tests}
+
+\begin{ndr}
+ JB c'est pour toi ça ;-) 
+\end{ndr}
+
+	\begin{enumerate}
+	\item Constructors and destructors :\\
+	
+	\item Comparison operator :\\
+%	Ce test v\'erifie que l'op\'erateur de comparaison fonctionne pour les diff\'erents types de vecteurs (cr\'eateur - cr\'eateur, 			cr\'eateur - non cr\'eateur, non cr\'eateur - non cr\'eateur).
+
+	\item Reading and writing in files :\\
+	A vector and a matrix are saved into a file, then they are read and the read values must be equal to the origin values. Binary and ASCII storages are tested.
+%	On sauvegarde un vecteur dans un fichier, on charge ce fichier dans un autre vecteur et on v\'erifie que le vecteur d'origine et le 		nouveau vecteur sont \'egaux. On r\'ealise ce test dans les 2 modes d'\'ecriture de fichiers support\'es par le vecteur~: ASCII et 			binaire.
+	
+	\item Add function :\\
+%	On v\'erifie que l'ajout d'un vecteur cr\'eateur dans un vecteur non-cr\'eateur se passe correctement.
+
+	\item Affectation operator :\\
+%	L'op\'erateur d'affectation \`a un comportement diff\'erent suivant les types de vecteurs. \\
+%	Pour les tests, nous avons comme base des vecteurs cr\'eateurs q et q'. La notation X(q) signifie que X est un vecteur non-cr\'eateur 	cr\'ee \`a partir de q. Il pointe alors sur les valeurs de q. Cependant, quand X est d\'etruit, q n'est pas affect\'e, alors que si q 	est d\'etruit, X devient incoh\'erent.\\
+	
+	\item "linear solve" function :\\
+%	Ce test va v\'erifier que cette fonction ne retourne pas d'exception, renvoie bien un SiconosVector, et que les param\`etres 				d'entr\'ee n'ont pas \'et\'e modifi\'es. On ne v\'erifie pas la valeur retourn\'ee, car elle est calcul\'ee par la librairie de 			calcul BLAS sens\'ee \^etre correcte.
+
+	\item Getter and Setter :\\
+%	Ce test v\'erifie que l'on peut modifier une ligne de la matrice avec un vecteur, et que l'on peut en r\'ecup\'erer une (sous forme 		de vecteur \'egalement).
+
+	\item Computation operators ( +, -, *, /, \^ ) :\\
+%	On v\'erifie que chaque op\'erateur fonctionne.
+	
+	\item blockMatrixCopy :\\
+	The block matrix must be well copied into the current matrix, wherever it is copied. Exception are rose when the copy would have been overflow.
+	
+	\item Exceptions :\\
+%	On v\'erifie que des exceptions de type SiconosMatrixException sont lanc\'ees dans tous les cas o\`u on les attend (dimensions 				incompatibles, fichier de matrice introuvable \dots).
+	\end{enumerate}
+
+\subsubsection{XML module unitary tests}
+	\begin{enumerate}
+	\item Get methods :\\
+	They are the basics operations of the module. For each class of the XML management module, getter functions must be able to read data from an \ac{xml} DOM tree. The reading of an XML file give us the way to tests getters and setters.
+	
+	\item Access to inherited objects :\\
+	The structure of the XML management module uses inheritance and polymorphism. The use of generic classes to store information must allow to grant the access to specific class attributes. Tests are trying to call specific methods of generic pointer using static casting, and polymorphism is tested by calling methods that are not implemented in parent class but only in child class.
+	
+	\item Exception management :\\
+	Bad manipulations of data structures have to launch exceptions. Each exception which could be launched has to be tested.
+	
+	\item XML toolbox (SiconosDOMTreeTools) :\\
+	Basic XML operations are managed with the SiconosDOMTreeTools "toolbox". Access to the DOM tree containing XML data read from an XML file is given with SiconosDOMTreeTools functions. These low level methods are very important for all the XML management module. Tests consists in manipulating the data of the DOM tree. So test suites are reading/writing in the DOM tree with getter and setter functions. Also the modification, add of new nodes and attributes with specific method are tested, and a tool function which transforms a string into a vector of double numbers. Alle these functions have to be tested unitarily.
+	\end{enumerate}
+
+
+\subsubsection{\ac{numerics}}
+The different solving methods are tested with at least two problems.
+\begin{ndr}
+ce qui reste à faire :\\
+* faire les tests qui manquent (nouveau problemes et resolution de problemes deja existant avec d'autres solveurs)\\
+* compléter le tableau correspondant aux tests effectués ( methode de resolution / probleme )\\
+* faire des tests qui doivent faire echouer les méthodes de resolution\\
+\end{ndr}
+
+%\pagebreak
+\begin{landscape}
+\renewcommand{\arraystretch}{0.95}
+\begin{longtable}{|l|l|l|l|l|l|l|l|l|}
+  \hline
+  \multicolumn{9}{|c|}{\textbf{\scriptsize \ac{numerics} : Unitary Tests}}\\
+  \hline
+  \rowcolor[gray]{.8} Solving method & Problem 1 & Problem 1 & Problem 1 & Problem 1 & Problem 1 & Problem 1 & Problem 1 & Problem 1 \\
+  \hline
+  \endhead
+  \hline 
+  method 1 &  &  &  &  &  &  &  & \\ \hline
+  method 1 &  &  &  &  &  &  &  & \\ \hline
+  method 1 &  &  &  &  &  &  &  & \\ \hline
+  method 1 &  &  &  &  &  &  &  & \\ \hline
+  method 1 &  &  &  &  &  &  &  & \\ \hline
+  method 1 &  &  &  &  &  &  &  & \\ \hline
+  method 1 &  &  &  &  &  &  &  & \\ \hline
+  method 1 &  &  &  &  &  &  &  & \\ \hline
+  \hline
+  \caption{Solving methods and problems}
+  \label{Tab:NumericsTests}
+\end{longtable}
+\end{landscape}

@@ -1,0 +1,41 @@
+%\begin{ndr}
+%  This section should briefly introduced  to the system context and design. The section may summarise the costs and benefits of the selected architecture, and may refer to prototyping exercises.
+%\end{ndr}
+
+
+\section{Context and design of the system}
+
+The \ac{siconos} will be used to simulate several classes of Non Smooth Dynamical Systems
+\acs{nsds} (see \ac{um}).\\
+
+The platform will be written in C++ and used as a library. It's planned to be used through a
+C++ program which can be compiled or interpreted, or through an external computation software (\ac{xxxlab}). For more details, we refer to the \ac{esd}\\
+
+The software may be decomposed in three parts~:
+  \begin{itemize}
+        \item \acs{numerics} for numerical computations~;
+        it contains routines for low level operations. 
+        \item \acs{engine} for high level description and numerical solving strategies of \ac{nsds};
+        it represents the core of the platform, that is to say the knowledge of the software. It is there that the end user will find (the expert user will add) models and algorithms to simulate \ac{nsds}. The  numerical part of the  \acs{engine} relies on \acs{numerics} routines. Indeed, the Engine  drives modelisation, simulation, input/output and plug-ins modules.
+        \item \acs{frontend} is the only part of the software which will be accessible by end
+	users and all the other users. It allows to use the functions of the Engine.
+  \end{itemize}
+  
+  
+\section{Costs and benefits of the architecture}
+The choice of the software design will have a cost for the overall performances in comparison to the original software written in Fortran
+(\ac{lmgc90} which is dedicated to mechanical problems). However, the loss of performance won't be so important because all the time consuming computations will be performed with optimised Fortran or C routines.
+  
+Otherwise the architecture will improve the flexibility and the couplability of the software. So the platform will be evolutionary.
+
+
+\section{Prototyping exercises}
+Some points must be evaluated so it will be useful to develop prototypes. For the following items, we will make prototypes~:
+\begin{itemize}
+        \item libXML prototype, to manipulate \ac{xml}~;
+        \item The plug-ins prototype, for input extensions~;
+        \item C++ interpreter prototype, which uses a library~;
+\end{itemize}
+
+With all these prototypes, another one will be built, regrouping these one. It will be in other words a prototype to see if the
+tools we will use can work together, a prototype to see the integration of the different modules.

@@ -1,0 +1,128 @@
+%$id$
+\section{The \ac{SICONOS} project}
+\ac{SICONOS} is the European Project  IST2001-37172, funded by the Commission of the European Communities, from September 1, 2002, to August 31, 2006.
+It is a project of the Information Society Technologies programme, fifth framework programme (FP5). This project's goal is the study of complementarity dynamical systems (a class of hybrid dynamical systems).
+
+
+It gathers scientists from various communities : Mechanics, Applied Mathematics, Systems and Control, and Numerical Analysis and from various European countries : United Kingdom, Netherlands, Italy, Switzerland, Spain and France. 
+
+The name \ac{SICONOS} comes from the title of the project : Modelling, Simulation and Control of Non-smooth Dynamical Systems. 
+
+For example, a Non Smooth Dynamical System could be a system that incorporates friction and/or impacts for a mechanical one, or switchings for an electrical one. 
+
+The strategic aim of this project is the development of novel algorithms and numerical routines for the qualitative analysis, simulation and feedback control of non-smooth complementarity dynamical systems. The output of \ac{SICONOS} will be an integrated numerical software package for the virtual prototyping of systems with discontinuities and development of novel control techniques for this class of dynamical systems. Therefore, this project is clearly focused on the development over 4 years of a user-friendly, versatile and computationally effective numerical tool for non-smooth systems, validated through its application to 3 key engineering problems : power electronic converters, walking robots and automotive systems. 
+
+This project is divided into 7 work-packages :
+\begin{itemize}
+\item WP1 - Mathematical Analysis.
+\item WP2 - Numerical Methods/Software Implementation. 
+\item WP3 - Modelling.
+\item WP4 - Bifurcation Analysis.
+\item WP5 - Stabilization of trajectories and control related issues.
+\item WP6 - Applications, Proof of Concept and Integration.
+\item WP7 - Project Management, Dissemination and Exploitation of Results.
+\end{itemize}
+
+\ac{lmgc}, \ac{inria} and more particularly BIPOP team, are involved in WP2. Originally, the objectives of the Work Package 2 were defined in the Annex 2 of the project as follows :
+\begin{enumerate}
+\item Development of numerical methods for:     
+        \begin{itemize}
+        \item Robust zero-crossing detection.
+        \item Time integration of complementarity systems.
+        \item Solution continuation and bifurcation detection for complementarity problems.
+        \item Control design and validation.
+        \end{itemize}
+\item Designing an object-oriented algorithm structure to get:
+        \begin{itemize}
+        \item Sufficient flexibility and potential incorporation of various classes of systems.
+        \item Real-time constraints for virtual reality applications.
+        \item Openness for easy insertion of new modules.
+        \item Link with other control applications.
+        \end{itemize}
+\end{enumerate}
+
+
+\section{Function and purpose}
+
+The \ac{siconos} software is dedicated to the Modelling, Simulation, Analysis and Control of non smooth dynamical systems, i.e., abstract evolution problem where the non smooth character is crucial. To put it more  precisely, six major sets of functionalities have been identified :
+\begin{enumerate}
+\item Low level numerical tools \textbf{\ac{siconos}/Numerics} \\
+This module is dedicated to the computation of basic well-identified problems (linear algebra, mathematical programming, ...). Besides dedicated development for Non Smooth dynamical systems it should call external libraries for scientific computing. Furthermore, this module should be encapsulated for standalone \ac{xxxlab} use (see \ref{Sec:SICONOS/Numerics}).
+
+\item Modelling and Simulation tools. \textbf{\ac{siconos}/Engine} \\
+  This module of the software is dedicated to the modelling and the simulation of  dynamical non smooth problems. For the modelling part, several canonical model, relevant from a numerical point of view will be defined for the dynamics of the system such as IVP and BVP coupled with a non smooth law (LCP, NCP, QP, AVI, ...). For the simulation part, robust time-integration method (Event driven, Time-stepping, ..) of the dynamics  and numerical solvers for non smooth laws  will be implemented. This module will only work on formalized models, i.e. canonical well identified models which represent the general abstract classes of \ac{nsds} (see the \ac{SICONOS} Theory Manual \textsf{\ac{siconos}/TM}). This module is the kernel of the software (see \ac{srd} SICONOS/Engine).
+
+\item Front End interface. \textbf{\ac{siconos}/Front-End} \\
+  The goal of this Front-End is to allow the users to implement  numerical resolution strategies and to drive numerical algorithms. It should be used through an interactive graphical interface or through standard scientific computing software such as \ac{matlab} or \ac{scilab} (see \ac{srd} SICONOS/Front-End). 
+\item Analysis tools. \textbf{\ac{siconos}/Analysis} \\
+ This module must be able to characterize the existence and stability of solution. Efficient methods and algorithms for the parametric continuation of solutions and identification of bifurcation are also needed (see \ac{srd} SICONOS/Analysis).
+
+\item Control tools. \textbf{\ac{siconos}/Control} \\
+ This module is for the design and the validation of control strategies for non smooth systems. This will contain standard functionalities of Control such as Feedback control with observers, trajectory planning, Optimal Control with state and control constraints, etc.(see \ac{srd} SICONOS/Control).
+
+\item Pre/Post-processing tools \textbf{\ac{siconos}/pre-post}
+ This module provides a  modelling and visualization environment for the \ac{siconos}/Engine (see \ac{srd} SICONOS/pre-post).
+\end{enumerate}
+
+The \textbf{\ac{siconos}/Numerics} module is the one concerned by this document.
+
+
+
+\section{Existing numerical routines and libraries}
+A lot of standard numerical libraries are already used to do standard computations in algebra (BLAS/LAPACK), numerical integration (Numerical recipes, LSODAR), numerical optimization. This standard tools are generally developed in C or Fortran 77 for efficiency constraints. The platform must be able to interface with such libraries.
+
+
+
+\section{General constraints}
+The following general constraints on software design have to be taken into account :
+\begin{itemize}
+\item Use of low level languages for numerical efficiency and parallelization in \ac{siconos}/Numerics. The application which are addressed requires computational efficiency in particular for large systems (for example in mechanics) or for real time applications. 
+\item Couplability with C++ to allow an easy use of the functionnalities.
+\end{itemize}
+
+
+
+\subsection{\ac{siconos}/Numerics. Low-level numerical tools}
+\label{Sec:SICONOS/Numerics}
+This module will provide classes and methods to instantiate algebraic objects (vector, matrix, ...), 
+with various storage formats (full, band, skyline ...). \\
+
+This module has to perform various numerical functionalities~:
+\begin{itemize}
+ \item Linear algebra: linear system, eigenvalue, svd, ... \footnote{see LAPACK},
+ \item Solver for non linear smooth algebraïc equation, i.e. root finding, (Newton's method, ...),
+ \item Solver for non smooth algebraic equation, (Generalized Newton Method, ...)
+ \item Time integrator, i.e. basic computation for smooth time integration (one step integration, ...)
+ \item Numerical, analytical or automatic differentiation,
+ \item Mathematical programming (LCP, QP, optimization, ...).
+\end{itemize}
+
+
+\section{General overview of \ac{siconos}/Numerics}
+Numerics should be used as a numerical library, at two different levels~:
+\begin{itemize}
+\item Integrated in the \ac{siconos} software through a C++ \ac{api}.
+\item In a standalone level, as a toolbox that other software can use (\ac{xxxlab}).
+\end{itemize}
+
+
+\subsection{Definition of an end user}
+\label{Sec:End-user}
+Numerics is used to make computations (see \ref{Sec:SICONOS/Numerics}) with default parameters.
+
+\subsection{Definition of an expert user}
+\label{Sec:Expert-user}
+Numerics is used to make computations (see \ref{Sec:SICONOS/Numerics}) with specific parameters to improve performances (tolerance, computation time, ...).
+
+
+\subsection{Definition of a developer user}
+\label{Sec:Developer}
+The developer is able to modify the toolbox (for its own need, or an other user's need (integration)).
+He is able to :
+        \begin{itemize}
+        \item Add functionalities with an existing numeric computation library.
+        \item Add / modify / remove functions in an existing library.
+        \item Implement a new computation library.
+        \end{itemize}
+
+\clearpage

@@ -1,0 +1,1184 @@
+This chapter allows to know how to understand and create Input/Output Siconos \ac{xml} files.
+
+\section{General type syntax}
+Certain Siconos \ac{xml} tags have complex types, we are going to see in this section.
+
+\subsection{Plugin type}
+Some tags are defined with a plugin type : it allows you to indicate functions you want to use in order to compute values.
+
+The syntax to indicate a plugin is always the same : first the name of the library (without it extension), then the function
+name ; separated with a double point.\\
+For example : 'libraryNameYouWantToUse\textbf{:}theLibraryFunctionYouWantToUse'\\
+
+The plugin tags have no content ; only an attribute to indicate the plugin to use, and which the name is \textit{plugin}.\\
+
+For example : <TagPlugin \textbf{plugin}='myLib:myFunction'/>\\
+
+
+\subsection{Matrix and Vector syntax}
+
+Several Siconos tags are vector double or matrix double type. In a Siconos \ac{xml} file, it exists several ways to represent a vector or a matrix. 
+ 
+A computed representation is even possible (using plugin).\\
+
+
+\subsubsection{Vector representation}
+
+In this section we consider that \textit{myVector} is a \ac{xml} tag with vector type.\\
+
+\begin{itemize}
+
+\item \textbf{Give directly a vector double values}\\
+
+If you want to give directly the values of a vector in a Siconos \ac{xml} file, you have just to precise double values in the content of the concerned
+ \ac{xml} tag, and indicate the vector size (positive integer value) in an attribute whose name is \textit{vectorSize}.\\
+
+
+For example : \\
+
+<myVector \textbf{vectorSize}='4'>\\
+\verb+  45.554 5465.5 99+ \\
+\verb+			54 +\\
+</myVector>\\
+
+
+Note that vector values must be separated with spaces, tabs, or broken lines.\\
+
+
+\item \textbf{Precise a file who contents vector values}\\
+
+You can also set a vector with a vector represented in a ASCII file.
+
+To precise a simple vector in a file, just write the 1 number (this first number represents the number of sub vector ; here one), then the size of your vector, and at last it double values (different values can/must be separated with spaces, tabs or
+broken lines). \\
+
+For example : \\
+\textit{myVectorFile.dat}
+\verb+1	5 +\\
+\verb+1.2 21. 5 2e5 4.5454+\\
+
+
+Therefore, you can use your file and precise it in a \ac{xml} tag ; just indicate in a \textit{vectorFile} attribute of the vector tag the name of the concerned file :\\
+
+<myVector \textbf{vectorFile}='myVectorFile.dat'/>\\
+
+
+\item \textbf{Precise a plugin who computes the vector value}\\
+
+A last solution consists to give a plugin which will compute the value of the vector. Just indicate the plugin in a \textit{vectorPlugin} attribute : \\
+
+<myVector \textbf{vectorPlugin}='myLib:myFunction'/>\\
+
+\end{itemize}
+
+\subsubsection{Matrix representation}
+
+In this section we consider that \textit{myMatrix} is a \ac{xml} tag with matrix type.\\
+
+\begin{itemize}
+
+\item \textbf{Give directly a matrix double values}\\
+
+If you want to give directly the values of a matrix in a Siconos \ac{xml} file, first you have to indicate the matrix size (positive integer values) in the following attributes : \textit{matrixRowSize} (the row size of the matrix) and
+ \textit{matrixColSize} (the column size of the matrix). Then, each row double values of the matrix have to be contained in a \textit{row} tag. \\
+
+
+For example : \\
+
+<myMatrix \textbf{matrixRowSize}='3' \textbf{matrixColSize}='2'>  \\
+\verb+	<row>45.554 5.08 </row>+\\
+\verb+	<row>95.4	-54 </row>+\\
+\verb+	<row>6e-4	4e-5 </row>+\\
+</myMatrix>\\
+
+
+Note that, like vector type, double values in row matrix content must be separated with spaces, tabs, or break lines.\\
+
+
+\item \textbf{Precise a file who contents matrix values}\\
+
+You can also set a matrix with a matrix represented in a ASCII file.
+For it, you have just to indicate in a \textit{matrixFile} attribute of the matrix tag, the name of the concerned file :\\\\
+
+<myMatrix \textbf{matrixFile}='myMatrixFile.dat'/>
+
+The syntax of matrix file is the following : 
+first indicate the row size, then the column size, and, at last, the matrix double values.\\
+
+For example : \\
+
+2 3\\
+\verb+5  	12.2 -1+\\
+\verb+.6 .7 6e-7 +\\
+
+
+\item \textbf{Precise a plugin who computes the matrix value}\\
+
+A last solution consists to give a plugin who will compute the value of the matrix. Just indicate the plugin in a \textit{matrixPlugin} attribute : \\
+
+<myMatrix \textbf{matrixPlugin}='myLib:myFunction'/>\\
+
+
+\end{itemize}
+
+\subsection{Memory syntax}
+
+Some tags contain \textit{Memory} tags which are themselves vector type (several representations are so allow). We say this kind of tag are memory type.
+This type serves to represent old values of an element.
+The first \textit{Memory} tag indicated is the oldest value, the last the youngest value.\\\\
+
+For example : \\\\
+
+<myVectorMemory>\\
+\verb+      <Memory vectorFile='myVectorMemory1.dat'/>+\\
+\verb+      <Memory vectorSize="2">+\\
+\verb+           54.54 5454212.5445456456+\\
+\verb+      </Memory>+\\
+\verb+      <Memory vectorFile='myVectorMemory3.dat'/>+\\		
+\verb+   +</myVectorMemory>
+
+\subsection{Siconos boolean type}
+
+Some attributes in a tag are boolean type and their values are 'true' or 'false', nothing else.
+
+
+
+
+
+\section{Siconos XML files syntax}
+
+
+%Note : \textbf{the order of the Siconos XML files tag are important} : you have to respect it!
+\subsection{Important remarks}
+\subsubsection{Order of the tags}
+You must respect the order of the tags in the XMl file like it is described further. However, there no
+order to respect for the tag of the dynamical systems, interactions, relations, non smooth laws, one-step
+integrators and one-step problem.
+
+\subsubsection{Factorization of the tags}
+Because of there's no order in most of the tags, XML schema is not able to allow us to make
+factorization (for example for the dynamical systems, relations and non smooth laws). Moreover, when
+factorization could have been done, it was impossible because some tags were common but have different
+cardinalities.
+
+
+\subsection{General structure}
+
+The general structure of a Siconos \ac{xml} file (see \ref{Sec:UM-XMLFile} for an sample file):\\
+
+
+\begin{verbatim}
+SiconosModel
+ |
+ +-- Time
+ |
+ +-- NSDS
+ |    |
+ |    +-- DS_Definition
+ |    |     |
+ |    |     +-- LinearSystemDS
+ |    |     |    |
+ |    |     |    +-- BoundaryCondition
+ |    |     |
+ |    |     +-- LagrangianNLDS
+ |    |     |    |
+ |    |     |    +-- BoundaryCondition
+ |    |     |
+ |    |     +-- ...
+ |    |
+ |    +--Interaction_Definition
+ |          |
+ |          +-- Interaction
+ |          |     |
+ |          |     +-- DS_Concerned
+ |          |     |
+ |          |     +-- Interaction_Content
+ |          |            |
+ |          |            +-- LinearTIR
+ |          |            |
+ |          |            +-- NewtonImpactLaw
+ |          |
+ |          +-- ...
+ |    
+ +-- Strategy
+      |
+      +-- TimeDiscretisation
+      |
+      +-- OneStepIntegrator_Definition
+      |     |
+      |     +-- Moreau
+      |     |     |
+      |     |     +-- DS_Concerned
+      |     |
+      |     +-- Adams
+      |     |     |
+      |     |     +-- DS_Concerned
+      |     |
+      |     +-- ...
+      |
+      +-- OneStepNSProblem
+            |
+            +-- LCP (or QP, Relay, ...)
+            |    |
+            |    +-- Interaction_Concerned
+            |
+            +-- Solver
+                 |
+                 +-- LcpSolving (or ContactFrictionPrimalSolving, ...)
+\end{verbatim}
+
+
+\subsection{Definition of each tag}
+
+
+
+\subsubsection{SiconosModel tag}
+
+This tag is the main tag of a Siconos \ac{xml} file. It has no attribute. Look \ref{tab-siconosModel} tab to see it content.
+The information about the model (Title, Author, Description, Date, SchemaXML) are required but can be left empty.
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{5cm}|p{2cm}|p{4cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+Title		  & Title of the model & String & None & Required \\
+\hline
+Author		  & Author of the model & String & None & Required \\
+\hline
+Description	  & Description of the model & String & None & Required \\
+\hline
+Date		  & Date of creation & String & None & Required \\
+\hline
+SchemaXML	  & Version of the XML schema used & String & None & Required \\
+\hline
+Time		  & Time data of the simulation & Abstract - see \ref{TimeTag} section & None & Required \\
+\hline
+NSDS	    & Non Smooth Dynamical System of the simulation & Abstract - see \ref{NSDSTag} section & \textit{bvp} : boolean type. This attribute must have 'true' value if the Non Smooth Dynamical System has boundaries conditions & Required \\
+\hline
+Strategy  & Strategy used in the simulation & Abstract - see \ref{StrategyTag} section & \textit{type} :
+can take 2 values ; 'TimeStepping' or 'EventDriven' according to the strategy you want to use & Optional \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of the main tag : \textit{SiconosModel}}
+\label{tab-siconosModel}
+\end{table}
+
+
+
+
+\subsubsection{Time tag}
+\label{TimeTag}
+
+This tag contains information about time of the simulation.
+Look \ref{tab-time} tab to see it content.
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{6cm}|p{2cm}|p{2cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} &\bf{Use}
+\\\hline
+\hline
+t0		  & Initial time of the simulation & Double & None & Required \\
+\hline
+T	          & Final time of the simulation & Double & None & Optional \\
+\hline
+t	          & Current time of the simulation & Double & None & Optional \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{Time}}
+\label{tab-time}
+\end{table}
+
+
+
+\subsubsection{NSDS tag}
+\label{NSDSTag}
+
+This tag contains the problem definition to simulate. Look \ref{tab-nsds} tab to see it content.
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{5cm}|p{2cm}|p{2cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+DS\_Definition		  & Contains the Dynamical Systems definition of the simulation & Abstract - see \ref{DSDefinitionTag} section&None&Required \\
+\hline
+Interaction\_Definition		  & Contains the Interactions definition of the simulation & Abstract - see \ref{InteractionDefinitionTag} section&None&Optional \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{NSDS}}
+\label{tab-nsds}
+\end{table}
+
+
+
+\subsubsection{DS\_Definition tag}
+\label{DSDefinitionTag}
+
+This tag content a list of tag defining Dynamical Systems. At least one Dynamical System (one \textit{DS} tag) must be declared inside it - see \ref{tab-DSDefinition} tab.\\
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{2.5cm}|p{2cm}|p{5cm}|p{1.5cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+LagrangianNLDS	& Content informations of a Dynamical System & Abstract - see \ref{DSDSDefinitionTag} section& \textit{number} : an
+unique positive integer number / key of a Dynamical System &  List - at least one \textit{DS} tag\\
+LagrangianTIDS	& Content informations of a Dynamical System & Abstract - see \ref{DSDSDefinitionTag} section& \textit{number} : an
+unique positive integer number / key of a Dynamical System &  List - at least one \textit{DS} tag\\
+NonLinearSystemDS	& Content informations of a Dynamical System & Abstract - see \ref{DSDSDefinitionTag} section& \textit{number} : an
+unique positive integer number / key of a Dynamical System &  List - at least one \textit{DS} tag\\
+LinearSystemDS	& Content informations of a Dynamical System & Abstract - see \ref{DSDSDefinitionTag} section& \textit{number} : an
+unique positive integer number / key of a Dynamical System &  List - at least one \textit{DS} tag\\
+%DS		  & Content informations of a Dynamical System & Abstract - see \ref{DSDSDefinitionTag} section& \textit{number} : an unique positive integer number / key of a Dynamical System - \textit{type} : value are 'LagrangianNLDS', 'LagrangianTIDS', 'NonLinearSystemDS' or 'LinearSystemDS' switch the Dynamical System type you want describe &  List - at least one \textit{DS} tag\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{DS\_Definition}}
+\label{tab-DSDefinition}
+\end{table}
+
+
+
+\subsubsection{DS tag contained in DS\_Definition tag}
+\label{DSDSDefinitionTag}
+
+The content of this tag is different according to their \textit{type} attribute value : 'LagrangianNLDS',
+'LagrangianTIDS', 'NonLinearSystemDS' or 'LinearSystemDS'.
+The DS\_Definition regroups all the declarations of the following dynamical systems :\textit{NonLinearSystemDS} (see \ref{tab-NLSDS}),
+\textit{LinearSystemDS} (see \ref{tab-LSDS}), \textit{LagrangianTIDS} (see \ref{tab-DSLTIDS}) and
+\textit{LagrangianNLDS} (see \ref{tab-DSLNLDS}).\\
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{6cm}|p{2cm}|p{2.5cm}|p{1.5cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+Id		  & Content an identifier of the Dynamical System & String & None &  Optional \\
+\hline
+n		  & The dimension of the system& Integer & None &  Required \\
+\hline
+x0	  	  & x at the initial state & Vector & See Vector type &  Required \\
+\hline
+x		  & The state of the Dynamical System & Vector & See Vector type &  Optional \\
+\hline
+xDot		  & The x derivative of the Dynamical System & Vector & See Vector type &  Optional \\
+\hline
+xMemory		  & The old x values & Memory & None &  Optional \\
+\hline
+xDotMemory	  & The old xDot values & Memory & None &  Optional \\
+\hline
+StepsInMemory	  & The number of values in memory & Positive Integer & None &  Optional \\
+\hline
+vectorField	  & The plugin used to compute the vectorField & String & None &  Required \\
+\hline
+computeJacobianX	  & The plugin used to compute the jacobianX & String & None &  Optional \\
+\hline
+R	  & The  input vector due to the non-smooth law & See Vector type & None &  Optional \\
+\hline
+RMemory	  & The old r values & Memory & None &  Optional \\
+\hline
+BoundaryCondition	  & The number of values in memory & Boundary Condition & see Boundary Condition type &  Optional \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{DS} for all Dynamical System type}
+\label{tab-NLSDS}
+\end{table}
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{6cm}|p{2cm}|p{2.5cm}|p{1.5cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+Id		  & Content an identifier of the Dynamical System & String & None &  Optional \\
+\hline
+n		  & The dimension of the system& Integer & None &  Required \\
+\hline
+x0	  	  & x at the initial state & Vector & See Vector type &  Required \\
+\hline
+x		  & The state of the Dynamical System & Vector & See Vector type &  Optional \\
+\hline
+xDot		  & The x derivative of the Dynamical System & Vector & See Vector type &  Optional \\
+\hline
+xMemory		  & The old x values & Memory & None &  Optional \\
+\hline
+xDotMemory	  & The old xDot values & Memory & None &  Optional \\
+\hline
+StepsInMemory	  & The number of values in memory & Positive Integer & None &  Optional \\
+\hline
+R	  & The  input vector due to the non-smooth law & See Vector type & None &  Optional \\
+\hline
+RMemory	  & The old r values & Memory & None &  Optional \\
+\hline
+A	          & Contains the A matrix & Matrix & See Matrix type &  Required \\
+\hline
+B	          & Contains B matrix & Matrix & See Matrix type &  Required \\
+\hline
+BoundaryCondition	  & The number of values in memory & Boundary Condition & see BoundaryCondition type &  Optional \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{DS} if it \textit{type} attribute is 'LinearSystemDS'}
+\label{tab-LSDS}
+\end{table}
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{5cm}|p{2cm}|p{3cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+Id		  & Content an identifier of the Dynamical System & String & None &  Optional \\
+\hline
+n		  & The dimension of the system& Integer & None &  Optional \\
+\hline
+x0	  	  & x at the initial state & Vector & See Vector type &  Optional \\
+\hline
+x		  & The state of the Dynamical System & Vector & See Vector type &  Optional \\
+\hline
+xDot		  & The x derivative of the Dynamical System & Vector & See Vector type &  Optional \\
+\hline
+xMemory		  & The old x values & Memory & None &  Optional \\
+\hline
+xDotMemory	  & The old xDot values & Memory & None &  Optional \\
+\hline
+StepsInMemory	  & The number of values in memory & Positive Integer & None &  Optional \\
+\hline
+R	  & The  input vector due to the non-smooth law & See Vector type & None &  Optional \\
+\hline
+RMemory	  & The old r values & Memory & None &  Optional \\
+\hline
+M	  	  & The mass of the Dynamical System & Matrix (plugin) & See Matrix type &  Required \\
+\hline
+ndof	          & The number of freedom degree & Integer & None &  Required \\
+\hline
+q	  	  & The actual Dynamical System coordinates & Vector & See Vector type &  Optional \\
+\hline
+q0	  	  & The initial Dynamical System coordinates & Vector & See Vector type &  Required \\
+\hline
+qMemory	  	  & The old Dynamical System coordinates values & Memory & None &  Optional \\
+\hline
+Velocity	  & The actual Dynamical System velocity & Vector & See Vector type &  Optional \\
+\hline
+Velocity0	  & The initial Dynamical System velocity & Vector & See Vector type &  Required \\
+\hline
+\end{tabular}
+\end{center}
+%\caption{Content of tag : \textit{DS} if it \textit{type} attribute is 'LagrangianNLDS'}
+\label{tab-DSLNLDS}
+\end{table}
+
+\begin{table}[htp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{1.8cm}|p{2.8cm}|p{1.8cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+...	   & Continuation of the tags of a 'LagrangianNLDS' &  &  &	   \\
+\hline
+VelocityMemory	  & The old Dynamical System velocity values & Vector & See Vector type &  Optional \\
+\hline
+Fint	  	  & The internal force & Vector & See Vector type &  Required \\
+\hline
+Fext	     	  &  The external force & Vector & See Vector type &  Required \\
+\hline
+JacobianQFint	  & The Jacobian internal force & Matrix & See Matrix type &  Required \\
+\hline
+JacobianVelocityFint  & The Jacobian internal force derivative & Matrix & See Matrix type &  Required \\
+\hline
+JacobianQQNLInertia	  & Contains the JacobianQQ matrix & Matrix & See Matrix type &  Required \\
+\hline
+JacobianVelocityQNLInertia	  & Contains the JacobianQQ derivative matrix & Matrix & See Matrix type &  Required \\
+\hline
+QNLInertia	  & The inertia vector & Vector & See Vector type &  Optional \\
+\hline
+BoundaryCondition	  & The number of values in memory & Boundary Condition & see BoundaryCondition type &  Optional \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{DS} if it \textit{type} attribute is 'LagrangianNLDS'}
+%\label{tab-DSLNLDS}
+\end{table}
+
+
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{3cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+Id		  & Content an identifier of the Dynamical System & String & None &  Optional \\
+\hline
+n		  & The dimension of the system& Integer & None &  Optional \\
+\hline
+x0	  	  & x at the initial state & Vector & See Vector type &  Optional \\
+\hline
+x		  & The state of the Dynamical System & Vector & See Vector type &  Optional \\
+\hline
+xDot		  & The x derivative of the Dynamical System & Vector & See Vector type &  Optional \\
+\hline
+xMemory		  & The old x values & Memory & None &  Optional \\
+\hline
+xDotMemory	  & The old xDot values & Memory & None &  Optional \\
+\hline
+StepsInMemory	  & The number of values in memory & Positive Integer & None &  Optional \\
+\hline
+R	  & The  input vector due to the non-smooth law & See Vector type & None &  Optional \\
+\hline
+RMemory	  & The old r values & Memory & None &  Optional \\
+\hline
+M	  	  & The mass of the Dynamical System & Matrix(not a plugin) & See Matrix type &  Required \\
+\hline
+ndof	          & The number of freedom degree & Integer & None &  Required \\
+\hline
+q	  	  & The actual Dynamical System coordinates & Vector & See Vector type &  Optional \\
+\hline
+q0	  	  & The initial Dynamical System coordinates & Vector & See Vector type &  Required \\
+\hline
+qMemory	  	  & The old Dynamical System coordinates values & Memory & None &  Optional \\
+\hline
+Velocity	  & The actual Dynamical System velocity & Vector & See Vector type &  Optional \\
+\hline
+Velocity0	  & The initial Dynamical System velocity & Vector & See Vector type &  Required \\
+\hline
+\end{tabular}
+\end{center}
+%\caption{Content of tag : \textit{DS} if it \textit{type} attribute is 'LagrangianTIDS'}
+\label{tab-DSLTIDS}
+\end{table}
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{3cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+...	   & Continuation of the tags of a 'LagrangianNLDS' &  &  &	   \\
+\hline
+VelocityMemory	  & The old Dynamical System velocity values & Vector & See Vector type &  Optional \\
+\hline
+Fext	     	  &  The external force & Vector & See Vector type &  Required \\
+\hline
+K		  & Contains the K matrix & Matrix & See Matrix type &  Required \\
+\hline
+C		  & Contains the C matrix & Matrix & See Matrix type &  Required \\
+\hline
+BoundaryCondition	  & The number of values in memory & Boundary-Condition & see BoundaryCondition type &  Optional \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{DS} if it \textit{type} attribute is 'LagrangianTIDS'}
+%\label{tab-DSLTIDS}
+\end{table}
+\clearpage
+
+
+
+If the Non Smooth Dynamical System is a boundary value problem (see the \textit{bvp} attribute of the \textit{NSDS} tag), a \textit{BoundaryCondition} tag must be added at the end of each
+ \textit{DS} tag content. \textit{BoundaryCondition} tag has attribute \textit{type} which can take the following values according to it nature : 'Linear', 'NLinear' (Not Linear), and 'Periodic'.
+Only one boundary condition type has content : 'Linear' ; see \ref{tab-BCL} tab.
+ 
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{6cm}|p{2cm}|p{3cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+Omega	          & Contains the Omega vector & Vector & See Vector type &  Required \\
+\hline
+Omega0	          & Contains the Omega0 vector & Matrix & See Matrix type &  Required \\
+\hline
+OmegaT	          & Contains the OmegaT vector & Matrix & See Matrix type &  Required \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{BoundaryCondition} if it \textit{type} attribute is 'Linear'}
+\label{tab-BCL}
+\end{table} 
+ 
+
+
+\subsubsection{Interaction\_Definition tag}
+\label{InteractionDefinitionTag}
+
+This abstract tag contains a list of tag describing interaction between Dynamical Systems ; a list (maybe empty) of \textit{Interaction} tags - see \ref{tab-IDefinition} tab.\\
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{6cm}|p{2cm}|p{3cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+Interaction		  & Contains information about an interaction & Abstract - see \ref{InteractionTag} section& \textit{number} : an single integer number / key of an InteractionNONE &  Required\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{Interaction\_Definition}}
+\label{tab-IDefinition}
+\end{table}
+
+
+
+\subsubsection{Interaction tag}
+\label{InteractionTag}
+This tag contains the properties of an interaction - see \ref{tab-Interaction} tab.\\
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{5cm}|p{2cm}|p{2.5cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+Status		  & Contains the status of the Interaction & Positive Integer & None &  Required \\
+\hline
+Id		  & Contains an identifier of the Interaction & String & None &  Required \\
+\hline
+DS\_Concerned	  & Contains a list of \textit{DS} tags which precise the couple of Dynamical Systems numbers concerned by the interaction & List none empty of \textit{DS} tag - see \ref{IDSConcernedTag} section & none &  Required \\
+\hline
+Interaction\_Content& Contains the Relation and the NonSmoothLaw of the Interaction & Abstract - see \ref{RelationTag} section and see \ref{NSLawTag} section & &  Required \\
+%Relation	  & Contains information about the Relation Interaction & Abstract - see \ref{RelationTag} section & \textit{type} : value is 'LinearTIR', 'LagranNonLinearR' or 'LagrangianLinearR' switch the Relation you want to describe &  Required \\
+%\hline
+%NS\_Law	 	  & Contains information about the Law Interaction & Abstract - see \ref{NSLawTag} section & \textit{type} : value is 'ComplementraityConditionNSL', 'NewtonImpactLawNSL' or 'RelayNSL' switch the Law you want to describe &  Required \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{Interaction}}
+\label{tab-Interaction}
+\end{table}
+
+\subsubsection{Interaction\_Content tag}
+\label{InteractionContentTag}
+This tag contains the properties of an interaction - see \ref{tab-InteractionContent} tab.\\
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4.8cm}|p{1.8cm}|p{1.8cm}|p{1.8cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+LinearTIR		& Contains information about the Relation Interaction & Abstract - see \ref{RelationTag} section & &  Required \\
+LagranNonLinearR	& Contains information about the Relation Interaction & Abstract - see \ref{RelationTag} section & &  Required \\
+LagrangianLinearR	& Contains information about the Relation Interaction & Abstract - see \ref{RelationTag} section & &  Required \\
+%Relation	  & Contains information about the Relation Interaction & Abstract - see \ref{RelationTag} section & \textit{type} : value is 'LinearTIR', 'LagranNonLinearR' or 'LagrangianLinearR' switch the Relation you want to describe &  Required \\
+\hline
+ComplementraityConditionNSL	& Contains information about the Law Interaction & Abstract - see \ref{NSLawTag} section & &  Required \\
+NewtonImpactLawNSL		& Contains information about the Law Interaction & Abstract - see \ref{NSLawTag} section & &  Required \\
+RelayNSL			& Contains information about the Law Interaction & Abstract - see \ref{NSLawTag} section & &  Required \\
+%NS\_Law	 	  & Contains information about the Law Interaction & Abstract - see \ref{NSLawTag} section & \textit{type} : value is 'ComplementraityConditionNSL', 'NewtonImpactLawNSL' or 'RelayNSL' switch the Law you want to describe &  Required \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{Interaction\_Content}}
+\label{tab-InteractionContent}
+\end{table}
+
+
+
+\subsubsection{DS\_Concerned tag contained in Interaction tag}
+\label{IDSConcernedTag}
+
+This tag allows to define the Dynamical Systems couples concerned by an Interaction.
+A couple is defined with 2 Dynamical Systems numbers inside a \textit{DS} tag (\textit{number} and \textit{interactsWithDS\_Number} attributes) - See \ref{tab-IDSConcerned} tab.\\
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{5cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+DS		  & Gives a couple of Dynamical Systems concerned by an Interaction & Empty & \textit{number} : a number of a Dynamical defined in \textit{DS\_Definition} tag
+- \textit{interactsWithDS\_Number} : a number of a
+Dynamical System defined in \textit{DS\_Definition} tag  &  List - at least one \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{DS\_Concerned tag contained in Interaction tag}}
+\label{tab-IDSConcerned}
+\end{table}
+
+\textbf{Be careful : the number of the Dynamical System given in the \textit{number} attribute must be lower than the number of the Dynamical System given in the \textit{interactsWithDS\_Number} attribute.}
+
+
+
+\subsubsection{Relation tag}
+\label{RelationTag}
+Switch the type of the relation (precised in the \textit{type} attribute), \textit{Relation} tag content is different.
+If you want a to define a 'LinearTIR' relation, see \ref{tab-RLTI} tab ; if you want define a 'LagrangianLinearR' relation see \ref{tab-RLL} tab; if you want define a
+'LagrangianNonLinearR' relation, the content of the \textit{Relation} tag is empty.
+
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{6cm}|p{2cm}|p{3cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+C	          & Contains the C matrix & Matrix & See Matrix type &  Required \\
+\hline
+D	          & Contains the D matrix  & Matrix & See Matrix type &  Required \\
+\hline
+E	          & Contains the E matrix & Matrix & See Matrix type &  Required \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{Relation} when the relation type is 'LinearTIR'}
+\label{tab-RLTI}
+\end{table}
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{6cm}|p{2cm}|p{3cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+H	          & Contains the H matrix & Matrix & See Matrix type &  Required \\
+\hline
+b	          & Contains the b vector & Vector & See Vector type &  Required \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{Relation}  when the relation type is 'LagrangianLinearR'}
+\label{tab-RLL}
+\end{table}
+
+
+
+\subsubsection{NS\_Law tag}
+\label{NSLawTag}
+
+Switch the type of the Law (precised in the \textit{type} attribute), \textit{NS\_Law} tag content is different.
+If you want a 'RelayNSL' Law, the content of the \textit{NS\_Law} tag is empty ; if you want a 'ComplementarityConditionNSL' relation see \ref{tab-CCNSLaw} tab; if you want
+a 'NewtonImpactLawNSL' relation see \ref{tab-NILNSLaw} tab.
+
+
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{6cm}|p{2cm}|p{3cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+c	          & Contains the value after the non smooth event & Double & None &  Required \\
+\hline
+d	          & Contains the value before the non smooth event & Double & None &  Required \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{NS\_Law} when the relation type is 'ComplementarityConditionNSL'}
+\label{tab-CCNSLaw}
+\end{table}
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{6cm}|p{2cm}|p{3cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+e	          & Contains the Newton coefficient of restitution & Double & None &  Required \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{NS\_Law} when the relation type is 'NewtonImpactLawNSL'}
+\label{tab-NILNSLaw}
+\end{table}
+
+
+\subsubsection{Strategy tag}
+\label{StrategyTag}
+
+This tag contains the strategy information to use in order to simulate the problem described in \textit{NSDS} tag. Look \ref{tab-Strategy} tab to see it content.\\
+Remark : if the \textit{OneStepNSProblem} tag is not defined, \textit{Interaction\_Definition} tag content should be empty.
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{2.5cm}|p{1.8cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+TimeDiscretisation 	      & Properties of the time discretisation & Abstract - see \ref{TDTag} section  & None & Required \\
+\hline
+OneStepIntegrator\_Definition & Contains the One Step Integrators definition of the strategy & Abstract - see \ref{OSIDefTag} section & None & Required \\
+\hline
+%LCP	& Contains the One Step Non Smooth Problem definition of the strategy & Abstract - see \ref{OSNSProbTag} section & & Optional \\
+%QP	& Contains the One Step Non Smooth Problem definition of the strategy & Abstract - see \ref{OSNSProbTag} section & & Optional \\
+%Relay	& Contains the One Step Non Smooth Problem definition of the strategy & Abstract - see \ref{OSNSProbTag} section & & Optional \\
+
+%OneStepNSProblem	      & Contains the One Step Non Smooth Problem definition of the strategy & Abstract - see \ref{OSNSProbTag} section  & \textit{type} : can take 2 values ; 'LCP' or 'QP' according to the One Step Non Smooth Problem you want to use & Optional \\
+
+OneStepNSProblem	      & Contains the One Step Non Smooth Problem definition of the strategy & Abstract - see \ref{OSNSProbTag} section  & none & Optional \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of the tag : \textit{Strategy}}
+\label{tab-Strategy}
+\end{table}
+
+
+
+\subsubsection{TimeDiscretisation}
+\label{TDTag}
+In this tag you can precise the Time Discretisation you want to use.
+Look \ref{tab-RLTI} tab to see it content.
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{6cm}|p{2cm}|p{3cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+h	          & Contains the h value & Positive Double & \textit{isConstant} : is boolean type to precise if \textit{h} is constant or not  &  Optional \\
+\hline
+N	          & Contains the N value & Positive Integer & None &  Optional \\
+\hline
+tk	          & Contains the tk value & Vector & None &  Optional \\
+\hline
+hMin	          & Contains the hMin value & Positive Double & None &  Optional \\
+\hline
+hMax	          & Contains the hMax & Positive Double & None &  Optional \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{TimeDiscretisation}}
+\label{tab-TD}
+\end{table}
+
+
+
+\subsubsection{OneStepIntegrator\_Definition tag}
+\label{OSIDefTag}
+
+This tag content a list of tag defining One Step Integrators. At least One Step Integrator (one \textit{OneStepIntegrator} tag) must be declared inside it - see \ref{tab-OSIDefinition}.\\
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{3.5cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+Adams	& Contains informations about a One Step Integrator & Abstract - \ref{OSITag} section & &  List - at least one \\
+Moreau	& Contains informations about a One Step Integrator & Abstract - \ref{OSITag} section & &  List - at least one \\
+LSODAR	& Contains informations about a One Step Integrator & Abstract - \ref{OSITag} section & &  List - at least one \\
+%OneStepIntegrator  & Contains informations about a One Step Integrator & Abstract - \ref{OSITag} section & \textit{type} : values are 'Moreau', 'Adams' or 'LSODAR' switch the One Step Integrator type you want describe &  List - at least one \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{OneStepIntegrator\_Definition}}
+\label{tab-OSIDefinition}
+\end{table}
+
+
+
+
+\subsubsection{OneStepIntegrator tag contained in OneStepIntegrator\_Definition tag}
+\label{OSITag}
+
+The content of this tag is the same for all the OneStepIntegrator types (precise in \textit{type} attribute) : 'Moreau', 'Adams' or 'LSODAR'.
+Look \ref{tab-OSI} tab in order to see it content.
+
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{6cm}|p{2cm}|p{3cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+r		  & Contains the r value & Integer & None &  Optional \\
+\hline
+DS\_Concerned	  & Contains a list of \textit{DS} tags which precise the couple of Dynamical Systems numbers concerned by the One Step Integrator & List none empty of \textit{DS} tag - see \ref{OSIDSConTag} section & none &  Required \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{OneStepIntegrator}}
+\label{tab-OSI}
+\end{table}
+
+
+
+
+\subsubsection{DS\_Concerned tag contained in OneStepIntegrator tag}
+\label{OSIDSConTag}
+
+This tag ables to indicate the Dynamical Systems concerned by a One Step Integrator - See \ref{tab-OSIDSConcerned} tab.\\
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{5cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+DS  & Ables to indicate a Dynamical System is concerned by a One Step Integrator & Empty & \textit{number} : a number of a Dynamical defined in \textit{DS\_Definition} tag &  List - at least one \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{DS\_Concerned tag contained in OneStepIntegrator tag}}
+\label{tab-OSIDSConcerned}
+\end{table}
+
+
+
+
+\subsubsection{OneStepNSProblem tag}
+\label{OSNSProbTag}
+
+This tag content information allowing to give the One Step Non Smooth Problem. According to the type of One Step Non Smooth Problem, the content of this tag is different, but some tags are even though common. You can see these common tags in \ref{tab-OSNSP} tab.
+The OneStepNSProblem tag is composed by 2 main tags. The one is a choice between LCP, QP and Relay, and the second is Solver, as we can see \ref{tab-OSNSP}.
+%In the case the One Step Non Smooth Problem \textit{type} attribute is 'QP' see \ref{tab-QPOSNSP} ; in the case you want to describe a 'LCP' One Step Non Smooth Problem, see \ref{tab-LCPOSNSP}.
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{2cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+LCP	  & Modeling tools used for the data of the OneStepNSProblem & Abstract - \ref{tab-LCPTag} section & None &  Choice (LCP, QP, Relay) \\
+%\hline
+QP	  & Modeling tools used for the data of the OneStepNSProblem & Abstract - \ref{tab-QPTag} section & None &  Choice (LCP, QP, Relay) \\
+%\hline
+Relay & Modeling tools used for the data of the OneStepNSProblem & Abstract - \ref{tab-RelayTag} section & None &  Choice (LCP, QP, Relay) \\
+\hline
+Solver & Solving strategy used for computations & Abstract - \ref{tab-SolverTag} section & \textit{lib} : the external library to use for computations (\textit{optional}) &  Required \\
+\hline
+%Interaction\_Concerned	  & Contains a list of \textit{Interaction} tags which precise the Interactions numbers concerned by the One Step Non Smooth Problem & List none empty of \textit{Interaction} tag - see \ref{OSNSPInteractionConTag} section& \textit{size} : the positive integer number of \textit{Interaction} tag &  Required \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{OneStepNSProblem}}
+\label{tab-OSNSP}
+\end{table}
+
+
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{2cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+n		  & Contains the n value & Positive Integer & None &  Optional \\
+\hline
+M		  & Contains the M matrix & Matrix & See Matrix type &  Optional \\
+\hline
+q		  & Contains the q vector & Vector & See Vector type &  Optional \\
+\hline
+Interaction\_Concerned	  & Contains a list of \textit{Interaction} tags which precise the Interactions numbers concerned by the One Step Non Smooth Problem & List none empty of \textit{Interaction} tag - see \ref{OSNSPInteractionConTag} section& none &  Required \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{LCP}}
+\label{tab-LCPTag}
+\end{table}
+
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{2cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+n		  & Contains the n value & Positive Integer & None &  Optional \\
+\hline
+Q		  & Contains the Q matrix & Matrix & See Matrix type &  Optional \\
+\hline
+p		  & Contains the p vector & Vector & See Vector type &  Optional \\
+\hline
+Interaction\_Concerned	  & Contains a list of \textit{Interaction} tags which precise the Interactions numbers concerned by the One Step Non Smooth Problem & List none empty of \textit{Interaction} tag - see \ref{OSNSPInteractionConTag} section& none &  Required \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{QP}}
+\label{tab-QPTag}
+\end{table}
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{2cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+Interaction\_Concerned	  & Contains a list of \textit{Interaction} tags which precise the Interactions numbers concerned by the One Step Non Smooth Problem & List none empty of \textit{Interaction} tag - see \ref{OSNSPInteractionConTag} section& none &  Required \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{Relay}}
+\label{tab-RelayTag}
+\end{table}
+
+
+
+\subsubsection{Interaction\_Concerned tag contained in LCP / QP / Relay tag}
+\label{OSNSPInteractionConTag}
+
+
+This tag ables to indicate the Interactions concerned by a One Step Non Smooth Problem - See \ref{tab-OSNSPInteractionConcerned} tab.\\
+
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{5cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+Interaction & Ables to indicate an Interaction is concerned by one of the OneStepNSProblem & Empty & \textit{number} : a number of an Interactiondefined in \textit{Interaction\_Definition tag} & List - at least one \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{Interaction\_Concerned tag contained in LCP / QP / Relay tag}}
+\label{tab-OSNSPInteractionConcerned}
+\end{table}
+
+
+
+\subsubsection{Solver tag contained in OneStepNSProblem tag}
+\label{OSNSPSolverTag}
+Only one of the tags (see \ref{tab-SolverTag}) must compose the Solver tag.
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{2cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+LcpSolving		  & Contains the data to solve the problem with LCP methods & Abstract - \ref{tab-LcpSolvingTag} section & None &  Choice \\
+%\hline
+RelayPrimalSolving	& Contains the data to solve the problem with Relay Primal methods & Abstract - \ref{tab-RelayPSolvingTag} section & none &  Choice \\
+%\hline
+RelayDualSolving	& Contains the data to solve the problem with Relay Dual methods & Abstract - \ref{tab-RelayDSolvingTag} section & none &  Choice \\
+%\hline
+ContactFrictionPrimalSolving  & Contains the data to solve the problem with Contact Friction Primal methods & Abstract - \ref{tab-CFPSolvingTag} section & none &  Choice \\
+%\hline
+ContactFritcionDualSolving	  & Contains the data to solve the problem with Contact Friction Dual methods & Abstract - \ref{tab-CFDSolvingTag} section & none &  Choice \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{Solver}}
+\label{tab-SolverTag}
+\end{table}
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{5cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+... &  &  &  &  \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{LcpSolving}}
+\label{tab-LcpSolvingTag}
+\end{table}
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{5cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+... &  &  &  &  \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{RelayPrimalSolving}}
+\label{tab-RelayPSolvingTag}
+\end{table}
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{5cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+... &  &  &  &  \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{RelayDualSolving}}
+\label{tab-RelayDSolvingTag}
+\end{table}
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{5cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+... &  &  &  &  \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{ContactFrictionPrimalSolving}}
+\label{tab-CFPSolvingTag}
+\end{table}
+
+\begin{table}[!hbp]
+\begin{center}
+\begin{tabular}{|c|p{4cm}|p{2cm}|p{5cm}|p{2cm}|}
+\hline
+\bf{Tag name} & \bf{Definition} & \bf{Content Type} & \bf{Attributes} & \bf{Use}
+\\\hline
+\hline
+... &  &  &  &  \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Content of tag : \textit{ContactFrictionDualSolving}}
+\label{tab-CFDSolvingTag}
+\end{table}

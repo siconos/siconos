@@ -1,0 +1,94 @@
+\documentclass[a4paper,twoside,openright,makeidx,12pt]{book}
+%\usepackage{draftcopy}
+%\input{../TeX-tools/macro.tex}
+\input{macro.tex}
+\usepackage{pifont}
+ \usepackage{lscape}
+
+
+
+\includeonly{}
+\usepackage{fancyheadings} 
+\usepackage{verbatim}
+
+% package pour les images des use cases
+%\usepackage[dvips]{graphicx}
+
+\pagestyle{fancy} 
+\renewcommand{\chaptermark}[1]% 
+{\markboth{{Chap-- \thechapter.\ #1}}{}} 
+\renewcommand{\sectionmark}[1]% 
+{\markright{{\thesection.\ #1}}} 
+\setlength{\headrulewidth}{0.5pt} 
+\setlength{\footrulewidth}{0.5pt} 
+\newcommand{\helv}{% 
+\fontfamily{phv}\fontseries{b}\fontsize{9}{11}\selectfont} 
+\lhead[\helv \thepage]{\helv \rightmark} 
+\rhead[\helv \leftmark]{\helv \thepage} 
+\cfoot{Software Specification Document -- November 25, 2004}
+
+\makeindex
+
+\begin{document}
+\pagestyle{empty}
+\renewcommand{\arraystretch}{1.8}
+
+\input{coverSSD.tex}
+
+\tableofcontents
+
+
+\pagestyle{fancy}
+%---------------------------------------------------------------------%
+\cleardoublepage
+
+\pagenumbering{arabic}
+\chapter{Introduction}
+\label{Sec:SSD-Intoduction}
+\input{Introduction}
+
+%---------------------------------------------------------------------%
+\newpage
+\chapter{General Description}
+\label{Sec:SSD-GeneralDescription}
+\input{GeneralDescription}
+
+%---------------------------------------------------------------------%
+\newpage
+\chapter{Specific requirements}
+\label{Sec:SSD-SpecificRequirements}
+\input{SpecificRequirements.tex}
+
+
+
+
+%---------------------------------------------------------------------%
+\newpage
+\chapter{System Overview}
+\label{Sec:SSD-SystemOverview}
+\input{SystemOverview}
+%---------------------------------------------------------------------%
+\newpage
+\chapter{Conceptual System Design}
+\label{Sec:SSD-ConceptualSystemDesign}
+\input{ConceptualSystemDesign}
+%---------------------------------------------------------------------%
+\newpage
+\chapter{Component Description}
+\label{Sec:SSD-ComponentDescription}
+\input{ComponentDescription}
+
+
+%---------------------------------------------------------------------%
+\newpage
+\printglosstex(acr)[p]
+
+%===================================
+
+\listoffigures
+\listoftables
+\cleardoublepage
+%\bibliographystyle{plainnat}
+%\bibliography{./Biblio/String,./Biblio/Cp.bib,./Biblio/Optim.bib,./Biblio/Contact.bib,./Biblio/NonSmooth.bib,./Biblio/Leger.bib,./Biblio/Petri.bib}
+\cleardoublepage
+\end{document}

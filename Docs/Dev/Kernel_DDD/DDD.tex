@@ -1,0 +1,143 @@
+\documentclass[a4paper,twoside,openright,makeidx,12pt]{book}
+%\usepackage{draftcopy}
+\input{macro.tex}
+
+\includeonly{}
+\usepackage{fancyheadings} 
+
+% package pour les images des use cases
+%\usepackage[dvips]{graphicx}
+
+\pagestyle{fancy} 
+\renewcommand{\chaptermark}[1]% 
+{\markboth{{Chap-- \thechapter.\ #1}}{}} 
+\renewcommand{\sectionmark}[1]% 
+{\markright{{\thesection.\ #1}}} 
+\setlength{\headrulewidth}{0.5pt} 
+\setlength{\footrulewidth}{0.5pt} 
+\newcommand{\helv}{% 
+\fontfamily{phv}\fontseries{b}\fontsize{9}{11}\selectfont} 
+\lhead[\helv \thepage]{\helv \rightmark} 
+\rhead[\helv \leftmark]{\helv \thepage} 
+\cfoot{Detailed Design Document -- \today}
+
+\makeindex
+
+\begin{document}
+\pagestyle{empty}
+\renewcommand{\arraystretch}{1.8}
+
+\input{coverDDD.tex}
+
+\tableofcontents
+
+
+\pagestyle{fancy}
+%---------------------------------------------------------------------%
+\clearpage
+
+%---------------------------------------------------------------------%
+%---------------------------------------------------------------------%
+\newpage
+\pagenumbering{arabic}
+\chapter{General description}
+\label{Sec:DDD-GeneralDescription}
+\input{GeneralDescription}
+%---------------------------------------------------------------------%
+
+%\pagenumbering{arabic}
+%\section{Introduction}
+%\label{Sec:DDD-Intoduction}
+%\input{Introduction}
+
+
+%---------------------------------------------------------------------------%
+%\newpage
+%\section{Project standards, conventions and procedures}
+%\label{Sec:DDD-ProjectStandards}
+%\input{ProjectStandards}
+%---------------------------------------------------------------------------%
+
+
+%---------------------------------------------------------------------%
+%---------------------------------------------------------------------%
+\newpage
+\chapter{Component design specifications}
+\label{Sec:DDD-ComponentDesignSpecifications}
+\input{ComponentDesignSpecifications}
+%---------------------------------------------------------------------%
+
+
+\newpage
+%---------------------------------------------------------------------------%
+\chapter{Platform loading}
+\label{Sec:DDD-Loading}
+\input{Loading}
+
+
+%---------------------------------------------------------------------%
+%---------------------------------------------------------------------%
+
+\newpage
+%---------------------------------------------------------------------------%
+\chapter{XML Management}
+\label{Sec:DDD-XMLManagement}
+\input{XMLManagement}
+
+%---------------------------------------------------------------------%
+%---------------------------------------------------------------------%
+
+\newpage
+%---------------------------------------------------------------------------%
+\chapter{Plugin system}
+\label{Sec:DDD-Pluginsystem}
+\input{PluginSystem}
+
+\newpage
+%---------------------------------------------------------------------------%
+\chapter{Python interface}
+\label{Sec:DDD-pyInterface}
+\input{pyInterface}
+%---------------------------------------------------------------------%
+%---------------------------------------------------------------------%
+%\newpage
+%\appendix
+%\chapter{Source code listing}
+%\label{Sec:DDD-SourceCodeListing}
+%\input{SourceCodeListing}
+%---------------------------------------------------------------------%
+
+
+%---------------------------------------------------------------------%
+%---------------------------------------------------------------------%
+\newpage
+\chapter{Software deliverables architecture}
+\label{Sec:DDD-SoftwareDeliverablesArchitecture}
+\input{architecture}
+%---------------------------------------------------------------------%
+
+
+%---------------------------------------------------------------------%
+%---------------------------------------------------------------------%
+%\newpage
+%\chapter{Software requirements\\ vs \\ Component Traceability matrix}
+%\label{Sec:DDD-SRvsCT}
+%\input{SRvsCT}
+%---------------------------------------------------------------------%
+
+
+\newpage
+%---------------------------------------------------------------------------%
+
+
+%\printglosstex(glo)[p]
+\printglosstex(acr)[p]
+
+
+%\listoffigures
+%\listoftables
+\cleardoublepage
+%\bibliographystyle{plainnat}
+%\bibliography{./Biblio/String,./Biblio/Cp.bib,./Biblio/Optim.bib,./Biblio/Contact.bib,./Biblio/NonSmooth.bib,./Biblio/Leger.bib,./Biblio/Petri.bib}
+
+\end{document} 
