@@ -2,5 +2,5 @@
 
 include $(top_srcdir)/config/Make-rules
 
-SUBDIRS = SiconosException SiconosSharedLibrary NewSiconosVector SiconosMemory
+SUBDIRS = SiconosException SiconosSharedLibrary SiconosAlgebra SiconosMemory
 EXTRA_DIST = check.h
