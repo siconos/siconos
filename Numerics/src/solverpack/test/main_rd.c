@@ -194,7 +194,7 @@ main()
 
   fclose(f2);
   fclose(f1);
-  fclose(f7);
+  fclose(f5);
   fclose(f6);
 
   free(M);
@@ -208,5 +208,3 @@ main()
   free(meth_rd.rd.a);
 
 }
-
-
