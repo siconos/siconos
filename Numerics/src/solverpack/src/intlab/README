@@ -1,0 +1,43 @@
+Matlab interface routines.
+
+
+
+
+
+The using procedure:
+
+0) Open a matlab session
+
+1) For compile the interface main_xxxlab.c and use the xxx type of problem, make:
+	  mex -DMEXFLAG main_xxxlab.c 
+   
+2) Example:
+  
+   We want to solve a LCP problem thanks to the Lemke solver:
+   
+   
+>> [z,w,info]=main_lcplab(M,q,itermax,tol,'Lemke',k_latin)
+
+
+LCP problem:
+
+	  M z - w = q
+	  0<= z , w => 0
+	  z' w = 0
+
+Inputs:
+   M is the matrix of the LCP
+   q is the vector of the LCP
+   itermax is the maximum of iterations required
+   tol is the tolerance value
+   'Lemke' the solver using for solve the LCP
+   k_latin is the search direction of the Latin method (optional for the others solvers)
+
+Outputs:
+
+   z and w the solution vectors of the LCP
+   info an integer that give you the termination reason (0: successful, 1 otherwise)
+
+
+
+	
