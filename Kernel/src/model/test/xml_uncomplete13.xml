@@ -124,12 +124,12 @@
 					<DS number='1' interactsWithDS_Number='3'/>
 				</DS_Concerned>					
 				<Interaction_Content>
-				<LTI>
+				<LinearTimeInvariant>
 					<C matrixFile='matrix.dat'/>
 					<D matrixFile='matrix.dat'/>
 					<E matrixFile='matrix.dat'/>
 					<a vectorFile='vector.dat'/>
-				</LTI>			
+				</LinearTimeInvariant>			
 				<ComplementarityCondition/>
 				</Interaction_Content>
 			</Interaction>				
@@ -143,10 +143,10 @@
 					<DS number='1' interactsWithDS_Number='3'/>				
 				</DS_Concerned>					
 				<Interaction_Content>
-				<LL>
+				<LagrangianLinear>
 					<H matrixFile='matrix.dat'/>
 					<b vectorFile='vector.dat'/>
-				</LL>							
+				</LagrangianLinear>							
 				<Relay>
 					<c>5.021</c>
 					<d>5456.65</d>					
@@ -163,10 +163,10 @@
 					<DS number='1' interactsWithDS_Number='3'/>				
 				</DS_Concerned>
 				<Interaction_Content>
-				<LL>
+				<LagrangianLinear>
 						<H matrixFile='matrix.dat'/>
 						<b vectorFile='vector.dat'/>
-					</LL>			
+					</LagrangianLinear>			
                	<NewtonImpactLaw>
 					<e>0.95</e>				
 				</NewtonImpactLaw>

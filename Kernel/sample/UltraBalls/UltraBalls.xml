@@ -138,12 +138,12 @@
 				</DS_Concerned>
 
 				<Interaction_Content>		
-					<LL>
+					<LagrangianLinear>
 						<H matrixRowSize='1' matrixColSize='6'>
 							<row> -1.0  0.0  0.0  1.0  0.0  0.0</row>
 						</H>
 						<b vectorSize='1'>	0.0	</b>
-					</LL>
+					</LagrangianLinear>
 	
 					<NewtonImpactLaw>
 						<e>0.9</e>				
@@ -160,12 +160,12 @@
 				</DS_Concerned>
 
 				<Interaction_Content>		
-					<LL>
+					<LagrangianLinear>
 						<H matrixRowSize='1' matrixColSize='6'>
 							<row> -1.0  0.0  0.0  1.0  0.0  0.0</row>
 						</H>
 						<b vectorSize='1'>	0.0	</b>
-					</LL>
+					</LagrangianLinear>
 	
 					<NewtonImpactLaw>
 						<e>0.9</e>				
@@ -182,12 +182,12 @@
 				</DS_Concerned>
 
 				<Interaction_Content>		
-					<LL>
+					<LagrangianLinear>
 						<H matrixRowSize='1' matrixColSize='6'>
 							<row> -1.0  0.0  0.0  1.0  0.0  0.0</row>
 						</H>
 						<b vectorSize='1'>	0.0	</b>
-					</LL>
+					</LagrangianLinear>
 	
 					<NewtonImpactLaw>
 						<e>0.9</e>				
@@ -204,12 +204,12 @@
 				</DS_Concerned>
 
 				<Interaction_Content>		
-					<LL>
+					<LagrangianLinear>
 						<H matrixRowSize='1' matrixColSize='4'>
 							<row> 1.0  0.0  0.0  -1.0</row>
 						</H>
 						<b vectorSize='1'>	0.0	</b>
-					</LL>
+					</LagrangianLinear>
 	
 					<NewtonImpactLaw>
 						<e>0.9</e>				
@@ -226,12 +226,12 @@
 				</DS_Concerned>
 
 				<Interaction_Content>		
-					<LL>
+					<LagrangianLinear>
 						<H matrixRowSize='1' matrixColSize='4'>
 							<row> -1.0  0.0  0.0  1.0</row>
 						</H>
 						<b vectorSize='1'>	0.0	</b>
-					</LL>
+					</LagrangianLinear>
 	
 					<NewtonImpactLaw>
 						<e>0.9</e>				

@@ -32,6 +32,7 @@ const string LINEAREC = "LinearEC";
 const string NLINEAREC = "NLinearEC";
 const string LINEARTIEC = "LinearTIEC";
 const string LAGRANGIANEC = "LagrangianEC";
+const string LAGRANGIANLINEAREC = "LagrangianLinearEC";
 
 // const found in the OneStepNSProblem
 const string LCP_OSNSP = "LCP";

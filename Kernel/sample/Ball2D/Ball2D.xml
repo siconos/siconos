@@ -87,7 +87,7 @@
 											
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
-					<LL>
+					<LagrangianLinear>
 						<H matrixRowSize='1' matrixColSize='4'>
 						<!-- <row> 1.0  0.0  0.0 -1.0</row> The right value if the Constraint on the plane is taken into account -->
 	                         <row> 1.0  0.0  0.0 -1.0</row>
@@ -95,7 +95,7 @@
 						<b vectorSize='1'>
 							0.0
 						</b>
-					</LL>			
+					</LagrangianLinear>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>
 						<e>0.9</e>				

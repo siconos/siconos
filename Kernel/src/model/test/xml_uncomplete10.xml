@@ -112,14 +112,14 @@
 											
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>
-				<LTI>
+				<LinearTimeInvariant>
 <!--					<computeInput plugin="BasicPlugin:computeInput"/>
 					<computeOutput plugin="BasicPlugin:computeOutput"/>
 -->					<C matrixFile='matrix.dat'/>
 					<D matrixFile='matrix.dat'/>
 					<E matrixFile='matrix.dat'/>
 					<a vectorFile='vector.dat'/>
-				</LTI>			
+				</LinearTimeInvariant>			
 
 				<!-- NS Law of this interaction -->				
 				<ComplementarityCondition/>
@@ -140,12 +140,12 @@
 			
 				<!-- RELATION of this interaction -->				
 				<Interaction_Content>
-				<LL>
+				<LagrangianLinear>
 <!--					<computeInput plugin="BasicPlugin:computeInput"/>
 					<computeOutput plugin="BasicPlugin:computeOutput"/>
 -->					<H matrixFile='matrix.dat'/>
 					<b vectorFile='vector.dat'/>
-				</LL>							
+				</LagrangianLinear>							
 
 				<!-- NS Law of this interaction -->				
 				<Relay>
@@ -170,12 +170,12 @@
 			
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>
-				<LL>
+				<LagrangianLinear>
 <!--					<computeInput plugin="BasicPlugin:computeInput"/>
 					<computeOutput plugin="BasicPlugin:computeOutput"/>
 -->						<H matrixFile='matrix.dat'/>
 						<b vectorFile='vector.dat'/>
-					</LL>			
+					</LagrangianLinear>			
 				<!-- NS Law of this interaction -->				
                          	<NewtonImpactLaw>
 					<e>0.95</e>				

@@ -74,7 +74,7 @@ extern "C" void ballFInt(int *sizeOfq, double *time, double *q, double *velocity
 extern "C" double FextFunction(double time)
 {
   double t = time;
-  printf("########## FextFunction time == %f\n", time);
+  //printf("########## FextFunction time == %f\n", time);
   double res = -0.0;
   return res;
 }

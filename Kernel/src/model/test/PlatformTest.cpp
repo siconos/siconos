@@ -107,7 +107,7 @@ void PlatformTest::testOptionalAttributes8()
    */
   Model m8;
   m8.createModel("xml_uncomplete7.xml");
-  m8.saveToXMLFile("xml_uncomplete7.save.xml");
+  //m8.saveToXMLFile("xml_uncomplete7.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes8 - XML file without Interaction ........................ OK\n ";
 }
@@ -117,9 +117,9 @@ void PlatformTest::testOptionalAttributes9()
   /*
    * test with no OneStepNSProblem
    */
-  Model m;
-  m.createModel("xml_uncomplete8.xml");
-  //m.saveToXMLFile("xml_uncomplete8.save.xml");
+  Model m9;
+  m9.createModel("xml_uncomplete8.xml");
+  m9.saveToXMLFile("xml_uncomplete8.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes9 - XML without OneStepNSProblem ........................... OK\n ";
 }
@@ -129,9 +129,9 @@ void PlatformTest::testOptionalAttributes10()
   /*
    * test with a NonLinearSystemDS
    */
-  Model m;
-  m.createModel("xml_uncomplete9.xml");
-  //m.saveToXMLFile("xml_uncomplete9.save.xml");
+  Model m10;
+  m10.createModel("xml_uncomplete9.xml");
+  m10.saveToXMLFile("xml_uncomplete9.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes10 - XML file with a NonLinearSystemDS ..................... OK\n ";
 }
@@ -141,8 +141,8 @@ void PlatformTest::testOptionalAttributes11()
   /*
    * test with no XML, but createModel with parameters
    */
-  Model m;
-  m.createModel(NULL, 1, 0);
+  Model m11;
+  m11.createModel(NULL, 1, 0);
 
   cout << "PlatformTest >>> testOptionalAttributes11 - createModel with parameters ....................... OK\n ";
 }
@@ -152,9 +152,9 @@ void PlatformTest::testOptionalAttributes12()
   /*
    * test with no x, xDot, q and velocity. Only initial data (data at t0)
    */
-  Model m;
-  m.createModel("xml_uncomplete10.xml");
-  m.saveToXMLFile("xml_uncomplete10.save.xml");
+  Model m12;
+  m12.createModel("xml_uncomplete10.xml");
+  m12.saveToXMLFile("xml_uncomplete10.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes12 - Only initial data (data at t0) ....................... OK\n ";
 }
@@ -164,9 +164,9 @@ void PlatformTest::testOptionalAttributes13()
   /*
    * test with no x definition for Lagrangian Systems
    */
-  Model m;
-  m.createModel("xml_uncomplete11.xml");
-  m.saveToXMLFile("xml_uncomplete11.save.xml");
+  Model m13;
+  m13.createModel("xml_uncomplete11.xml");
+  m13.saveToXMLFile("xml_uncomplete11.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes13 - no x definition for Lagrangian Systems ....................... OK\n ";
 }
@@ -176,9 +176,9 @@ void PlatformTest::testOptionalAttributes14()
   /*
    * test with no optional attributes for the DynamicalSystems
    */
-  Model m;
-  m.createModel("xml_uncomplete12.xml");
-  m.saveToXMLFile("xml_uncomplete12.save.xml");
+  Model m14;
+  m14.createModel("xml_uncomplete12.xml");
+  m14.saveToXMLFile("xml_uncomplete12.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes14 - no optional attributes for the DynamicalSystems ....................... OK\n ";
 }
@@ -188,9 +188,9 @@ void PlatformTest::testOptionalAttributes15()
   /*
    * test with no optional attributes for the Interactions
    */
-  Model m;
-  m.createModel("xml_uncomplete13.xml");
-  m.saveToXMLFile("xml_uncomplete13.save.xml");
+  Model m15;
+  m15.createModel("xml_uncomplete13.xml");
+  m15.saveToXMLFile("xml_uncomplete13.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes15 - no optional attributes for the Interactions ....................... OK\n ";
 }
@@ -200,9 +200,9 @@ void PlatformTest::testOptionalAttributes16()
   /*
    * test with no optional attributes for the Strategy
    */
-  Model m;
-  m.createModel("xml_uncomplete14.xml");
-  m.saveToXMLFile("xml_uncomplete14.save.xml");
+  Model m16;
+  m16.createModel("xml_uncomplete14.xml");
+  m16.saveToXMLFile("xml_uncomplete14.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes16 - no optional attributes for the Strategy ....................... OK\n ";
 }
@@ -314,7 +314,7 @@ void PlatformTest::testManualCreation2()
   SiconosMatrix mC(3, 3);
   mC.zero();
 
-  ds1 = nsds->addLagrangianLinearTIDS(1, 3, &q0, &v0, &mass, "../../../sample/BouncingBall/BallPlugin:ballFExt",
+  ds1 = nsds->addLagrangianLinearTIDS(1, 3, &q0, &v0, &mass, "BallPlugin:ballFExt",
                                       &K, &mC);
   //ds1->setQ()
 
@@ -333,7 +333,7 @@ void PlatformTest::testManualCreation2()
   SiconosMatrix C_(1, 1);
   C_.zero();
 
-  ds2 = nsds->addLagrangianLinearTIDS(2, 1, &q0_, &v0_, &mass_, "../../../sample/BouncingBall/BallPlugin:groundFExt",
+  ds2 = nsds->addLagrangianLinearTIDS(2, 1, &q0_, &v0_, &mass_, "BallPlugin:groundFExt",
                                       &K_, &C_);
 
   cout << "=== creation des Interactions ===" << endl;

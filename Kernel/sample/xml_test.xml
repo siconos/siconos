@@ -269,6 +269,13 @@
 				</DSInputOutput_Concerned>
 				<G matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</G>
 			</LagrangianEC>
+			
+			<LagrangianLinearEC number="4">
+				<DSInputOutput_Concerned all='false'>
+					<DSInputOutput number='3'/>
+				</DSInputOutput_Concerned>
+				<G matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</G>
+			</LagrangianLinearEC>
 		</EqualityConstraint_Definition>
 
 		<!-- Interactions defined in the problem -->		
@@ -289,12 +296,12 @@
 											
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>
-					<LTI>
+					<LinearTimeInvariant>
 						<C matrixFile='./sample/matrix.dat'/>
 						<D matrixFile='./sample/matrix.dat'/>
 						<E matrixFile='./sample/matrix.dat'/>
 						<a vectorFile='./sample/vector.dat'/>
-					</LTI>			
+					</LinearTimeInvariant>			
 	
 					<!-- NS Law of this interaction -->				
 					<ComplementarityCondition>
@@ -317,10 +324,10 @@
 			
 				<Interaction_Content>
 					<!-- RELATION of this interaction -->				
-					<LL>
+					<LagrangianLinear>
 						<H matrixFile='./sample/matrix.dat'/>
 						<b vectorFile='./sample/vector.dat'/>
-					</LL>							
+					</LagrangianLinear>
 	
 					<!-- NS Law of this interaction -->				
 					<Relay>
@@ -346,10 +353,10 @@
 			
 				<Interaction_Content>
 					<!-- Relation of this interaction -->				
-					<LNL>
+					<LagrangianNonLinear>
 							<computeInput plugin="BasicPlugin:computeInput"/>
 							<computeOutput plugin="BasicPlugin:computeOutput"/>
-					</LNL>
+					</LagrangianNonLinear>
 	
 					<!-- NS Law of this interaction -->				
 					<NewtonImpactLaw>
@@ -370,10 +377,10 @@
 			
 				<Interaction_Content>
 					<!-- Relation of this interaction -->				
-					<LNL>
+					<LagrangianNonLinear>
 							<computeInput plugin="BasicPlugin:computeInput"/>
 							<computeOutput plugin="BasicPlugin:computeOutput"/>
-					</LNL>
+					</LagrangianNonLinear>
 	
 					<!-- NS Law of this interaction -->				
 					<NewtonImpactFrictionLaw>

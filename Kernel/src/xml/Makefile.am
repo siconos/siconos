@@ -10,7 +10,7 @@ SUBDIRS = test
 
 lib_LIBRARIES = libSiconosXml.a
 libSiconosXml_a_SOURCES = AdamsXML.cpp BoundaryConditionXML.cpp \
-		ComplementarityConditionNSLXML.cpp DSInputOutputXML.cpp DSXML.cpp \
+		ComplementarityConditionNSLXML.cpp DSInputOutputXML.cpp DSXML.cpp LagrangianLinearRXML LagrangianLinearECXML.cpp\
 		EqualityConstraintXML.cpp InteractionXML.cpp LagrangianDSIOXML.cpp LagrangianECXML.cpp\
 		LagrangianLinearRXML.cpp LagrangianDSXML.cpp LagrangianNonLinearRXML.cpp \
 		LagrangianLinearTIDSXML.cpp LCPXML.cpp LinearBCXML.cpp LinearDSIOXML.cpp \
@@ -20,7 +20,7 @@ libSiconosXml_a_SOURCES = AdamsXML.cpp BoundaryConditionXML.cpp \
 		PeriodicBCXML.cpp QPXML.cpp RelationXML.cpp RelayNSLXML.cpp SiconosDOMTreeTools.cpp \
 		SiconosMemoryXML.cpp SiconosModelXML.cpp StrategyXML.cpp TimeDiscretisationXML.cpp \
 		AdamsXML.h BoundaryConditionXML.h ComplementarityConditionNSLXML.h DSInputOutputXML.h \
-		DSXML.h EqualityConstraintXML.h InteractionXML.h LagrangianDSIOXML.h LagrangianECXML.h\
+		DSXML.h EqualityConstraintXML.h InteractionXML.h LagrangianDSIOXML.h LagrangianECXML.h LagrangianLinearECXML.h\
 		LagrangianLinearRXML.h LagrangianDSXML.h LagrangianNonLinearRXML.h \
 		LagrangianLinearTIDSXML.h LCPXML.h LinearBCXML.h LinearDSIOXML.h LinearECXML.h \
 		LinearSystemDSXML.h LinearTIECXML.h LinearTIRXML.h LsodarXML.h MoreauXML.h \
@@ -31,7 +31,7 @@ libSiconosXml_a_SOURCES = AdamsXML.cpp BoundaryConditionXML.cpp \
 
 include_HEADERS = AdamsXML.h BoundaryConditionXML.h ComplementarityConditionNSLXML.h \
 		DSInputOutputXML.h DSXML.h EqualityConstraintXML.h InteractionXML.h \
-		LagrangianDSIOXML.h LagrangianECXML.h LagrangianLinearRXML.h LagrangianDSXML.h \
+		LagrangianDSIOXML.h LagrangianECXML.h LagrangianLinearRXML.h LagrangianDSXML.h LagrangianLinearECXML.h \
 		LagrangianNonLinearRXML.h LagrangianLinearTIDSXML.h LCPXML.h LinearBCXML.h \
 		LinearDSIOXML.h LinearECXML.h LinearSystemDSXML.h LinearTIECXML.h LinearTIRXML.h \
 		LsodarXML.h MoreauXML.h NewtonImpactLawNSLXML.h NewtonImpactFrictionNSLXML.h NLinearBCXML.h NonSmoothLawXML.h \

@@ -28,9 +28,9 @@
 
 <xsd:simpleType name="PossibleRelationValues">
   	<xsd:restriction base="xsd:string">
-		<xsd:enumeration value="LL"/>
-		<xsd:enumeration value="LNL"/>
-		<xsd:enumeration value="LTI"/>
+		<xsd:enumeration value="LagrangianLinear"/>
+		<xsd:enumeration value="LagrangianNonLinear"/>
+		<xsd:enumeration value="LinearTimeInvariant"/>
    	</xsd:restriction>
 </xsd:simpleType>
 
@@ -617,6 +617,17 @@
 									<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
 							</xsd:complexType>
 						</xsd:element>
+						<xsd:element name="LagrangianLinearEC">
+							<xsd:complexType>
+									<xsd:all>
+										<xsd:element name="DSInputOutput_Concerned" type="EC_DSIO_ConcernedType" minOccurs='1' maxOccurs="1"/>
+										<xsd:element name="G" type="matrix" minOccurs="0" maxOccurs="1"/>
+										<xsd:element name="computeInput" type="pluginDef" minOccurs="0" maxOccurs="1"/>
+										<xsd:element name="computeOutput" type="pluginDef" minOccurs="0" maxOccurs="1"/>
+									</xsd:all>
+									<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
+							</xsd:complexType>
+						</xsd:element>
 					</xsd:choice>
 				</xsd:sequence>
 			</xsd:complexType>
@@ -648,7 +659,16 @@
 					<xsd:complexType>
 					<xsd:sequence>
 						<xsd:choice minOccurs="1" maxOccurs="1">
-							<xsd:element name="LTI">
+							<xsd:element name="NonLinear">
+								<xsd:complexType>
+									<xsd:all>
+										<xsd:element name="computeInput" type="pluginDef" minOccurs='0' maxOccurs='0'/>
+										<xsd:element name="computeOutput" type="pluginDef" minOccurs='0' maxOccurs='0'/>
+									</xsd:all>
+								</xsd:complexType>
+							</xsd:element>
+							
+							<xsd:element name="LinearTimeInvariant">
 								<xsd:complexType>
 									<xsd:all>
 										<xsd:element name="computeInput" type="pluginDef" minOccurs='0' maxOccurs='0'/>
@@ -661,7 +681,7 @@
 								</xsd:complexType>
 							</xsd:element>
 		
-							<xsd:element name="LL">
+							<xsd:element name="LagrangianLinear">
 								<xsd:complexType>
 									<xsd:all>
 										<xsd:element name="computeInput" type="pluginDef" minOccurs='0' maxOccurs='0'/>
@@ -672,7 +692,7 @@
 								</xsd:complexType>
 							</xsd:element>
 							
-							<xsd:element name="LNL">
+							<xsd:element name="LagrangianNonLinear">
 								<xsd:complexType>
 									<xsd:all>
 										<xsd:element name="computeInput" type="pluginDef" minOccurs="1" maxOccurs="1"/>

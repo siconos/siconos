@@ -9,6 +9,7 @@
 #include "LinearEC.h"
 #include "LinearTIEC.h"
 #include "LagrangianEC.h"
+#include "LagrangianLinearEC.h"
 
 
 #include "check.h"
@@ -327,6 +328,12 @@ void NonSmoothDynamicalSystem::linkNSDSXML()
       this->ecVector.push_back(ec);
       (static_cast<LagrangianEC*>(ec))->createEqualityConstraint(this->nsdsxml->getEqualityConstraintXML(nbECtab[i]));
     }
+    else if ((this->nsdsxml->getEqualityConstraintXML(nbECtab[i]))->getType() == LAGRANGIAN_LINEAR_EC_TAG)
+    {
+      ec = new LagrangianLinearEC();
+      this->ecVector.push_back(ec);
+      (static_cast<LagrangianLinearEC*>(ec))->createEqualityConstraint(this->nsdsxml->getEqualityConstraintXML(nbECtab[i]));
+    }
     else RuntimeException::selfThrow("NonSmoothDynamicalSystem::LinkNSDSXML - bad kind of EqualityConstraint");
   }
 
@@ -382,6 +389,8 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
         this->ecVector[i]->saveEqualityConstraintToXML();
       else if (this->ecVector[i]->getType() == LAGRANGIANEC)
         (static_cast<LagrangianEC*>(this->ecVector[i]))->saveEqualityConstraintToXML();
+      else if (this->ecVector[i]->getType() == LAGRANGIANLINEAREC)
+        (static_cast<LagrangianLinearEC*>(this->ecVector[i]))->saveEqualityConstraintToXML();
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of EqualityConstraint");
     }
 

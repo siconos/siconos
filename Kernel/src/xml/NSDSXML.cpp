@@ -8,6 +8,7 @@
 #include "LinearECXML.h"
 #include "LinearTIECXML.h"
 #include "LagrangianECXML.h"
+#include "LagrangianLinearECXML.h"
 
 #include "check.h"
 
@@ -304,6 +305,20 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
 
               // creation of the DynamicalSystemXML
               static_cast<LagrangianECXML*>(ecXML)->updateEqualityConstraintXML(node, nsds->getEqualityConstraint(i));
+
+              this->equalityConstraintXMLMap[number] = ecXML;
+            }
+            else if (nsds->getEqualityConstraint(i)->getType() == LAGRANGIANLINEAREC)
+            {
+              node = xmlNewChild(ecDefinitionNode, NULL, (xmlChar*)LAGRANGIAN_LINEAR_EC_TAG.c_str(), NULL);
+              xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
+              ecXML = new LagrangianECXML();
+
+              // linkage between the DynamicalSystem and his DSXML
+              nsds->getEqualityConstraint(i)->setEqualityConstraintXML(ecXML);
+
+              // creation of the DynamicalSystemXML
+              static_cast<LagrangianLinearECXML*>(ecXML)->updateEqualityConstraintXML(node, nsds->getEqualityConstraint(i));
 
               this->equalityConstraintXMLMap[number] = ecXML;
             }

@@ -52,9 +52,10 @@ const string LMGC90_STRATEGY_TAG = "OneStepIntegrator_LMGC90";
 
 
 // Interaction
-const string LAGRANGIAN_LINEAR_RELATION_TAG = "LL";
-const string LAGRANGIAN_NON_LINEAR_RELATION_TAG = "LNL";
-const string LINEAR_TIME_INVARIANT_RELATION_TAG = "LTI";
+const string LAGRANGIAN_LINEAR_RELATION_TAG = "LagrangianLinear";
+const string LAGRANGIAN_NON_LINEAR_RELATION_TAG = "LagrangianNonLinear";
+const string LINEAR_TIME_INVARIANT_RELATION_TAG = "LinearTimeInvariant";
+const string NON_LINEAR_RELATION_TAG = "NonLinear";
 
 const string COMPLEMENTARITY_CONDITION_NSLAW_TAG = "ComplementarityCondition";
 const string RELAY_NSLAW_TAG = "Relay";
@@ -72,6 +73,7 @@ const string LINEAR_EC_TAG = "LinearEC";
 const string NON_LINEAR_EC_TAG = "NonLinearEC";
 const string LINEAR_TIME_INVARIANT_EC_TAG = "LinearTIEC";
 const string LAGRANGIAN_EC_TAG = "LagrangianEC";
+const string LAGRANGIAN_LINEAR_EC_TAG = "LagrangianLinearEC";
 
 
 const string DSIO_CONCERNED = "DSInputOutput_Concerned";

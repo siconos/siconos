@@ -35,7 +35,7 @@ void TimeDiscretisation::init(double t0, double T)
    */
   if ((t0 != -1) && (T != -1) && (this->h > 0))
   {
-    this->N = floor(T - t0) / (this->h);
+    this->N = floor((T - t0) / (this->h));
   }
   else if ((t0 != -1) && (T != -1) && (this->N > 0))
   {

@@ -16,7 +16,7 @@
 
 	<NSDS>
 		<DS_Definition>		
-			<LagrangianTIDS number='1'>
+			<LagrangianLinearTIDS number='1'>
 				<Id> Ball1 </Id>				
 				<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='3'>	0.0 0.0 0.0	</q0>
@@ -38,9 +38,9 @@
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 				</C>			
-			</LagrangianTIDS>
+			</LagrangianLinearTIDS>
 			
-			<LagrangianTIDS number='2'>
+			<LagrangianLinearTIDS number='2'>
 				<Id> Ball2 </Id>				
 				<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='3'>	0.0 3.0 0.0	</q0>
@@ -62,9 +62,9 @@
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 				</C>
-			</LagrangianTIDS>
+			</LagrangianLinearTIDS>
 			
-			<LagrangianTIDS number='3'>
+			<LagrangianLinearTIDS number='3'>
 				<Id> Ball3 </Id>				
 				<StepsInMemory>1</StepsInMemory>
 				<q0 vectorSize='3'>	0.0 6.0 0.0	</q0>
@@ -86,7 +86,7 @@
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
 				</C>
-			</LagrangianTIDS>
+			</LagrangianLinearTIDS>
 			
 <!--			<LagrangianTIDS number='4'> 
 				<Id> Ground </Id>
@@ -123,12 +123,12 @@
 				</DS_Concerned>
 
 				<Interaction_Content>		
-					<LL>
+					<LagrangianLinear>
 						<H matrixRowSize='1' matrixColSize='6'>
 							<row> 0.0  -1.0  0.0  0.0  1.0  0.0</row>
 						</H>
 						<b vectorSize='1'>	0.0	</b>
-					</LL>
+					</LagrangianLinear>
 	
 					<NewtonImpactLaw>
 						<e>0.9</e>				
@@ -145,12 +145,12 @@
 				</DS_Concerned>
 
 				<Interaction_Content>		
-					<LL>
+					<LagrangianLinear>
 						<H matrixRowSize='1' matrixColSize='6'>
 							<row> 0.0  -1.0  0.0  0.0  1.0  0.0</row>
 						</H>
 						<b vectorSize='1'>	0.0	</b>
-					</LL>
+					</LagrangianLinear>
 	
 					<NewtonImpactLaw>
 						<e>0.9</e>				
@@ -167,12 +167,12 @@
 				</DS_Concerned>
 
 				<Interaction_Content>		
-					<LL>
+					<LagrangianLinear>
 						<H matrixRowSize='1' matrixColSize='6'>
 							<row> 0.0  -1.0  0.0  0.0  1.0  0.0</row>
 						</H>
 						<b vectorSize='1'>	0.0	</b>
-					</LL>
+					</LagrangianLinear>
 	
 					<NewtonImpactLaw>
 						<e>0.9</e>				
