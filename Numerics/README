@@ -25,7 +25,6 @@
 
 
 
-
 INSTALLATION NOTES
 
 
@@ -42,3 +41,5 @@ INSTALLATION NOTES
 4)  build and run test
 
 > make buildtest ; make runtest
+
+5) test Gibolin
