@@ -40,18 +40,18 @@ public:
 
   /** \fn double getR()
   *   \brief Return the r of the OneStepIntegrator
-  *   \return double : the value of r
+  *   \return int : the value of r
   */
-  inline double getR(void) const
+  inline int getR(void) const
   {
     return this->r;
   }
 
-  /** \fn void setR(double r)
+  /** \fn void setR(int r)
   *   \brief Return the r of OneStepIntegrator
   *   \param double : the value to set r
   */
-  inline void setR(double r)
+  inline void setR(int r)
   {
     this->r = r;
   }

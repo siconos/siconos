@@ -156,7 +156,7 @@ public:
    */
   inline void setValue(const int row, const int col, const double d)
   {
-    this->mat(row, col) = d;
+    (*this)(row, col) = d;
   }
 
   /** \fn getValue(const int row, const int col)
@@ -167,7 +167,7 @@ public:
    */
   inline double getValue(const int row, const int col)
   {
-    return this->mat(row, col);
+    return (*this)(row, col);
   }
 
   /** \fn LaGenMatDouble getLaGenMatDouble()
