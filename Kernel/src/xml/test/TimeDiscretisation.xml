@@ -1,0 +1,9 @@
+<TimeDiscretisation isConstant='true'>	
+
+	<h>0.1</h>
+	<N>1</N>
+	<tk vectorSize='2'>5 -5</tk>
+	<hMin>0</hMin>
+	<hMax>5</hMax>
+	
+</TimeDiscretisation>		

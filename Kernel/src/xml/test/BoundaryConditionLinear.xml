@@ -1,0 +1,8 @@
+<!-- Optional : if NSDS is bvp -->
+<BoundaryCondition>
+	<Linear>
+	<Omega vectorFile='vector.dat'/>
+	<Omega0 matrixFile='matrix.dat'/>
+	<OmegaT matrixFile='matrix.dat'/>
+	</Linear>
+</BoundaryCondition>

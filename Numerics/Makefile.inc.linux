@@ -1,0 +1,95 @@
+#--------------------------------------------------
+#                  SICONOS PROJECT
+#--------------------------------------------------
+
+#--------------------------------------------------
+# Author(s)      : J-M BARBIER
+# Creation Date  :
+# Version        : 1.1
+# Copyright      : LMGC 2004
+#--------------------------------------------------
+
+
+MAKEFILEDEP = $(NUMERICSPATH)/Makefile.dep
+include $(MAKEFILEDEP)
+
+.SUFFIXES: .cpp .h .o .c
+
+#--- C++ compiler and platform --------------------
+#ARCH = Linux
+# OS : type of the system ???
+OS = 
+
+
+CC = gcc
+GCC = g++
+#FF = ifc
+FF = g77
+FC = pgf90
+FORTRAN  = g77
+
+CFLAGS = -g -fbounds-check -w -Wno-deprecated -fPIC
+CCFLAGS = -g -fbounds-check -w -fPIC
+FFLAGS =
+FOPTS = -funroll-all-loops -O3 -fno-emulate-complex -fomit-frame-pointer
+ARCH = ar
+ARCHFLAGS = cr
+RANLIB   = ranlib
+
+
+#--- DIRECTORY ------------------------------------
+NUMERICS_DIR = $(NUMERICSPATH)
+NUMERICS_LIB = $(NUMERICS_DIR)/lib
+NUMERICS_INC = $(NUMERICS_DIR)/include
+NUMERICS_EXT = $(NUMERICS_DIR)/ext
+NUMERICS_DOC = $(NUMERICS_DIR)/doc
+
+#--- EXE ------------------------------------------
+#NUMERICS_EXE = $(NUMERICS_DIR) 
+
+#--- CLEANER --------------------------------------
+RM = rm -f
+RMDIR = rm -rf
+
+#--- COPIER ---------------------------------------
+CP = cp -r
+
+#--- MOVE -----------------------------------------
+MV = mv -f
+
+#--- CREATE DIR -----------------------------------
+MKDIR = mkdir -p
+
+#--- MAKE -----------------------------------------
+MAKE = make
+
+#--- DOXYGEN --------------------------------------
+DOXYGEN = doxygen
+DOXYGEN_CFG = $(NUMERICSPATH)/config/DoxygenNumerics.cfg
+
+#--- LIBG2C -----------------------------------
+LIBG2C_DIR = -L/sw/lib
+LIBG2C_LIB = -lg2c
+LIBG2C_INC = -I/sw/include
+
+#--- CPPUNIT --------------------------------------
+CPPUNIT_PATH = /home0/barbier/siconos/LIB_EXTERNALISATION/ext_EXT/cppunit-1.10.2/cppunit
+#CPPUNIT_INC = `$(CPPUNIT_PATH)/bin/cppunit-config --cflags` -w
+#CPPUNIT_LIB = `$(CPPUNIT_PATH)/bin/cppunit-config --libs`
+#CPPUNIT_PATH = /home0/barbier/siconos/LIB_EXTERNALISATION/ext_EXT/cppunit-1.10.2
+CPPUNIT_INC = -I$(CPPUNIT_PATH)/include
+CPPUNIT_LIB_PATH = $(CPPUNIT_PATH)/lib
+CPPUNIT_LIB = -L$(CPPUNIT_LIB_PATH) -lcppunit
+
+#--- INCLUDE -----------------------------------
+INCLUDE = -I$(NUMERICS_INC)
+INCLUDE_EXT = -I$(LIBG2C_INC) -I$(CPPUNIT_INC)
+INCLUDE_DEP = -I$(NUMERICS_DIR)/src/odepack -I$(NUMERICS_DIR)/src/solverpack
+
+#--- LIB NAME ----------------------------------
+ODEPACKLIB    = libodepack$(OS).a
+
+#--- LIBS --------------------------------------
+LIBS =  $(LIBG2C_LIB)
+LIBS_IFC =  -lblas -lm
+#---------------[ end of makefile.inc.linux ]-----------------------

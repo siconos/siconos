@@ -1,0 +1,86 @@
+<LagrangianNLDS number='120'>
+			
+		<!-- Commun at all DS -->
+				
+		<Id>Ball</Id>				
+				
+		<n>6</n>
+		
+		<x vectorSize='6'>
+			1.0 0.0 0.0 0.0 0.0 0.0
+		</x>
+									  				  
+		<xDot vectorSize='6'>
+			1.0 0.0 0.0 0.0 0.0 0.0
+		</xDot>
+		
+		<x0 vectorSize='6'>
+			1.0 0.0 0.0 0.0 0.0 0.0
+		</x0>	
+
+<!--		<xMemory sizeMax='4'>						
+			<Memory vectorFile='vector.dat'/>
+			<Memory vectorSize='6'>
+				  	1.0 0.0 0.0 0.0 0.0 0.0
+			</Memory>
+			<Memory vectorFile='vector.dat'/>	
+								  				  
+		</xMemory>
+				
+		<xDotMemory sizeMax='4'/> 	
+-->						
+		<StepsInMemory>3</StepsInMemory>				
+		
+		<vectorField plugin="BasicPlugin:vectorField"/>
+		<computeJacobianX plugin="BasicPlugin:computeJacobianX"/>		
+		
+		<!-- Specific to LagrangianNLDS-->
+		
+		<QNLInertia vectorPlugin="BasicPlugin:computeQNLInertia"/>
+		
+		<q vectorSize='6'>
+			1.0 0.0 0.0 0.0 0.0 0.0
+		</q>
+		
+		<q0 vectorSize='6'>
+			1.0 0.0 0.0 0.0 0.0 0.0
+		</q0>
+	
+		<qMemory sizeMax='4'>
+			<Memory vectorFile='vector.dat'/>
+			<Memory vectorSize='6'>
+				  	1.0 0.0 0.0 0.0 0.0 0.0
+			</Memory>
+			<Memory vectorFile='vector.dat'/>							  				  
+		</qMemory>		
+		
+		<Velocity  vectorSize='6'>
+			1.0 0.0 0.0 0.0 0.0 0.0
+		</Velocity>
+		
+		<Velocity0  vectorSize='6'>
+			1.0 0.0 0.0 0.0 0.0 0.0
+		</Velocity0>
+		
+				  				  
+		<VelocityMemory sizeMax='4'>
+			<Memory vectorFile='vector.dat'/>
+			<Memory vectorSize='6'>
+				  	1.0 0.0 0.0 0.0 0.0 0.0
+			</Memory>
+			<Memory vectorFile='vector.dat'/>							  				  
+		</VelocityMemory>								
+
+		<Fint vectorPlugin="BasicPlugin:computeFInt"/>
+		<Fext vectorPlugin="BasicPlugin:computeFExt"/>
+
+		<JacobianQFint matrixPlugin="BasicPlugin:computeJacobianQFInt"/>
+		<JacobianVelocityFint matrixPlugin="BasicPlugin:computeJacobianVelocityFInt"/>
+ 		<JacobianQQNLInertia matrixPlugin="BasicPlugin:computeJacobianQQNLInertia"/>
+ 		<JacobianVelocityQNLInertia matrixPlugin="BasicPlugin:computeJacobianVelocityQNLInertia"/>					  
+
+		<M matrixFile="matrix.dat"/>	
+				
+		<ndof>3</ndof>						
+				
+</LagrangianNLDS>

@@ -1,0 +1,37 @@
+//$Id: LagrangianEC.cpp,v 1.6 2005/03/15 14:44:03 jbarbier Exp $
+
+#include "LagrangianEC.h"
+#include "check.h"
+
+LagrangianEC::LagrangianEC(): EqualityConstraint()
+{
+  this->type = LAGRANGIANEC;
+}
+
+LagrangianEC::LagrangianEC(EqualityConstraintXML *ecxml): EqualityConstraint(ecxml)
+{
+  this->type = LAGRANGIANEC;
+}
+
+LagrangianEC::~LagrangianEC()
+{}
+
+void LagrangianEC::createEqualityConstraint(EqualityConstraintXML *ecXML,
+    int number,  SiconosMatrix *G,
+    vector<DSInputOutput*> *dsioVector)
+{
+  if (ecXML != NULL)
+  {
+    this->ecXML = ecXML;
+    this->type = LAGRANGIANEC;
+    this->fillEqualityConstraintWithEqualityConstraintXML();
+  }
+  else
+  {
+    this->ecXML = NULL;
+    this->type = LAGRANGIANEC;
+    this->number = number;
+    this->G = *G;
+    this->dsioVector = *dsioVector;
+  }
+}

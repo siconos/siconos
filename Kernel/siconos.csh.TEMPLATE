@@ -1,0 +1,15 @@
+#! /bin/csh
+
+# this script sets up paths for SICONOS.
+
+setenv SICONOSPATH $PWD
+
+# in LD_LIBRARY_PATH, you must indicate the path of :
+# _ libxml
+# _ lapack++
+
+if ($?LD_LIBRARY_PATH) then
+	setenv LD_LIBRARY_PATH $SICONOSPATH/src/plugin:PATH TO LIBXML:PATH TO LAPACK++:$LD_LIBRARY_PATH
+else
+	setenv LD_LIBRARY_PATH $SICONOSPATH/src/plugin:PATH TO LIBXML:PATH TO LAPACK++
+endif

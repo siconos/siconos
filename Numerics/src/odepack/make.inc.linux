@@ -1,0 +1,66 @@
+#--------------------------------------------------
+#                  SICONOS PROJECT
+#--------------------------------------------------
+ 
+#--------------------------------------------------
+# Author(s)      : Vincent ACARY
+# Creation Date  :
+# Version        :
+# Copyright      : INRIA 2004
+#--------------------------------------------------
+# Description    : Makefile for ODEPACK 
+#--------------------------------------------------
+# Options        : _ all
+#                  _ clean
+#                  _ doc
+#                  _ test
+#--------------------------------------------------
+# Compiled files :
+#--------------------------------------------------
+# Modifications  : _
+#                  _
+#                  _
+# Date           :
+#--------------------------------------------------
+#
+SHELL = /bin/sh
+#
+#  The machine (platform) identifier to append to the library names
+#
+PLAT = 
+#  
+#  Modify the FORTRAN and OPTS definitions to refer to the
+#  compiler and desired compiler options for your machine.  NOOPT
+#  refers to the compiler options desired when NO OPTIMIZATION is
+#  selected.  Define LOADER and LOADOPTS to refer to the loader and 
+#  desired load options for your machine.
+#
+FORTRAN  = g77
+OPTS     = -funroll-all-loops -O3 -fno-emulate-complex -fomit-frame-pointer -malign-double -march=pentiumpro 
+
+DRVOPTS  = $(OPTS)
+NOOPT    = -u -f
+#NOOPT    = -u -f -mt
+LOADER   = f77
+#LOADOPTS = -mt
+LOADOPTS = -f -dalign -native -xO5 -xarch=v8plusa
+#
+#  The archiver and the flag(s) to use when building archive (library)
+#  If you system has no ranlib, set RANLIB = echo.
+#
+ARCH     = ar
+ARCHFLAGS= cr
+RANLIB   = echo
+#
+#  The location of the libraries to which you will link.  (The 
+#  machine-specific, optimized BLAS library should be used whenever
+#  possible.)
+#
+BLASLIB      = ../../blas$(PLAT).a
+#BLASLIB     = -xlic_lib=sunperf_mt
+#BLASLIB     = -xlic_lib=sunperf
+ODEPACKLIB    = odepack$(PLAT).a
+LAPACKLIB    = lapack$(PLAT).a
+TMGLIB       = tmglib$(PLAT).a
+EIGSRCLIB    = eigsrc$(PLAT).a
+LINSRCLIB    = linsrc$(PLAT).a

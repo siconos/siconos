@@ -1,0 +1,76 @@
+#--------------------------------------------------
+#                  SICONOS PROJECT
+#--------------------------------------------------
+
+#--------------------------------------------------
+# Author(s)      : J-M BARBIER
+# Creation Date  :
+# Version        : 1.1
+# Copyright      : LMGC 2004
+#--------------------------------------------------
+
+
+MAKEFILEDEP = $(NUMERICSPATH)/Makefile.dep
+include $(MAKEFILEDEP)
+
+.SUFFIXES: .cpp .h .o .c
+
+#--- C++ compiler and platform --------------------
+#ARCH = Linux
+CC = gcc
+GCC = g++
+#GCC = insure
+CFLAGS = -g -fbounds-check -w -Wno-deprecated -fPIC
+CCFLAGS = -g -fbounds-check -w -fPIC
+FORTRAN  = g77
+FF = g77
+FC = pgf90
+FOPTS     = -funroll-all-loops -O3 -fno-emulate-complex -fomit-frame-pointer
+ARCH     = ar
+ARCHFLAGS= cr
+#RANLIB   = echo
+RANLIB   = ranlib
+
+
+#--- DIRECTORY ------------------------------------
+NUMERICS_DIR = $(NUMERICSPATH)
+NUMERICS_LIB = $(NUMERICS_DIR)/lib
+NUMERICS_INC = $(NUMERICS_DIR)/include
+NUMERICS_EXT = $(NUMERICS_DIR)/ext
+NUMERICS_DOC = $(NUMERICS_DIR)/doc
+
+#--- EXE ------------------------------------------
+#NUMERICS_EXE = $(NUMERICS_DIR) 
+
+#--- CLEANER --------------------------------------
+RM = rm -f
+RMDIR = rm -rf
+
+#--- COPIER ---------------------------------------
+CP = cp -r
+
+#--- MOVE -----------------------------------------
+MV = mv -f
+
+#--- CREATE DIR -----------------------------------
+MKDIR = mkdir -p
+
+#--- MAKE -----------------------------------------
+MAKE = make
+
+
+#--- LIBG2C -----------------------------------
+LIBG2C_DIR = -L/sw/lib
+LIBG2C_LIB = -lg2c
+LIBG2C_INC = -I/sw/include
+
+
+
+#--- INCLUDE -----------------------------------
+INCLUDE = -I$(NUMERICS_INC)
+INCLUDE_EXT = -I$(LIBG2C_INC)
+INCLUDE_DEP = -I$(NUMERICS_DIR)/src/odepack
+
+#--- LIBS --------------------------------------
+#LIBS =  
+#---------------[ end of makefile.def ]-----------------------

@@ -1,0 +1,22 @@
+DoubleContact sample :
+
+This sample has been made to test multiple contacts between dynamical systems.
+There are 3 points of which 1 is static, and the 2 others are moving.
+All the movement are only on 1 axis!
+The 3 points are aligned. The 2 points that are moving are converging, and the convergence point correponds to the place of the third point.
+Interactions are defined between points 1 and 2, 2 and 3, 1 and 3.
+So we have one contact point where the 3 interactions are activated.
+
+o->    o    <-o
+
+  o->  o  <-o
+
+    o->o<-o
+	
+	  ooo
+	  
+    <-ooo->
+	
+  <-o  o  o->
+  
+<-o    o    o->

@@ -1,0 +1,59 @@
+# Put include $(top_srcdir)/config/Make-rules in your makefile.am
+
+# INTERNAL LIBRARIES
+
+#--- SiconosException --------------------------------------
+SICONOSEXCEPTION_PATH = $(top_srcdir)/src/utils/SiconosException
+SICONOSEXCEPTION_INC = $(SICONOSEXCEPTION_PATH)
+SICONOSEXCEPTION_LIB = -L$(SICONOSEXCEPTION_PATH) -lSiconosException
+
+#--- SiconosSharedLibrary --------------------------------------
+SICONOSSHAREDLIBRARY_PATH = $(top_srcdir)/src/utils/SiconosSharedLibrary
+SICONOSSHAREDLIBRARY_INC = $(SICONOSSHAREDLIBRARY_PATH)
+SICONOSSHAREDLIBRARY_LIB = -L$(SICONOSSHAREDLIBRARY_PATH) -lSiconosSharedLibrary
+
+#--- SiconosMatrixVector --------------------------------------
+SICONOSMATRIXVECTOR_PATH = $(top_srcdir)/src/utils/NewSiconosVector
+SICONOSMATRIXVECTOR_INC = $(SICONOSMATRIXVECTOR_PATH)
+SICONOSMATRIXVECTOR_LIB = -L$(SICONOSMATRIXVECTOR_PATH) -lSiconosMatrixVector
+
+#--- SiconosMemory --------------------------------------
+SICONOSMEMORY_PATH = $(top_srcdir)/src/utils/SiconosMemory
+SICONOSMEMORY_INC = $(SICONOSMEMORY_PATH)
+SICONOSMEMORY_LIB = -L$(SICONOSMEMORY_PATH) -lSiconosMemory
+
+#--- SiconosXml --------------------------------------
+SICONOSXML_PATH = $(top_srcdir)/src/xml
+SICONOSXML_INC = $(SICONOSXML_PATH)
+SICONOSXML_LIB = -L$(SICONOSXML_PATH) -lSiconosXml
+
+#--- ModelFormalisation --------------------------------------
+MODELFORMALISATION_PATH = $(top_srcdir)/src/modelformalisation
+MODELFORMALISATION_INC = $(MODELFORMALISATION_PATH)
+MODELFORMALISATION_LIB = -L$(MODELFORMALISATION_PATH) -lModelFormalisation
+
+#--- ModelStrategy --------------------------------------
+MODELSTRATEGY_PATH = $(top_srcdir)/src/modelstrategy
+MODELSTRATEGY_INC = $(MODELSTRATEGY_PATH)
+MODELSTRATEGY_LIB = -L$(MODELSTRATEGY_PATH) -lModelStrategy
+
+#--- Model --------------------------------------
+MODEL_PATH = $(top_srcdir)/src/model
+MODEL_INC = $(MODEL_PATH)
+MODEL_LIB = -L$(MODEL_PATH) -lModel
+
+# INCLUDES
+
+#--- INCLUDE -----------------------------------
+SICONOS_INCLUDES = -I$(top_srcdir)/src/utils/ -I$(SICONOSEXCEPTION_INC) -I$(SICONOSSHAREDLIBRARY_INC) -I$(SICONOSMATRIXVECTOR_INC)  -I$(SICONOSMEMORY_INC) \
+-I$(SICONOSXML_INC) -I$(MODELFORMALISATION_INC) -I$(MODELSTRATEGY_INC) -I$(MODEL_INC)
+
+# COMPILE FLAGS
+INCLUDES = $(SICONOS_INCLUDES) $(SICONOS_EXT_INCLUDES)	
+CXXCOMPILE = $(CXX) $(CXXFLAGS) $(INCLUDES)
+
+# obligé sinon il met main_siconos.o en dernier dans la ligne et ça foire :(
+LIBS=$(MODEL_LIB) $(MODELSTRATEGY_LIB) $(MODELFORMALISATION_LIB) \
+	$(SICONOSXML_LIB) $(SICONOSMEMORY_LIB) $(SICONOSMATRIXVECTOR_LIB) \
+	$(SICONOSSHAREDLIBRARY_LIB) $(SICONOSEXCEPTION_LIB) $(SICONOS_EXT_LDFLAGS)
+

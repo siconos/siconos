@@ -1,0 +1,11 @@
+blas.a
+lapack.a
+libblas++.a
+libf2c.a
+libf2c_addmain.c
+libg2c.a
+liblamatrix++.a
+liblapack++.a
+libnana.a
+libxml2.a
+list_files.txt

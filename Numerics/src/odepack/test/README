@@ -1,0 +1,25 @@
+#--------------------------------------------------
+#                  SICONOS PROJECT
+#--------------------------------------------------
+#--------------------------------------------------
+# Author(s)      : Vincent ACARY
+# Creation Date  :
+# Version        :
+# Copyright      : INRIA 2004
+#--------------------------------------------------
+# Description    : README TESTING ODEPACK
+#--------------------------------------------------
+# Modifications  : _
+#                  _
+#                  _
+# Date           : August 23, 2004
+#--------------------------------------------------
+ 
+The files DLSODE-test.f DLSODES-test.f DLSODA-test.f DLSODAR-test.f DLSODPK-test.f DLSODKR-test.f DLSODI-test.f DLSOIBT-test.f DLSODIS-test.f have been obtained by splitting the original opkddemos file of the distribution of ODEPACK.
+
+The files may be compiled (make all) and executed (make run)and the results are given in the .log file.
+
+Furthermore, DLSODE-test-funC.f funC.c test-funcC-inC.c are given to test the ODEPACK with external C function and the calling of the DLSODE solver trough a C function.
+
+The compatibility between C and Fortran types are ensured by the use of libf2c.
+

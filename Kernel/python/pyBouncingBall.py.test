@@ -1,0 +1,78 @@
+# SICONOS - PYTHON : bouncing ball example
+
+import pySiconos;
+from Numeric import *
+import Gnuplot
+gnuplot = Gnuplot.Gnuplot(debug=1);
+gnuplot.title("Python BouncingBall sample");
+
+model = pySiconos.Model("../sample/BouncingBall/BouncingBall_TIDS.xml");
+print "*** BouncingBall.xml loaded ***";
+s = model.getStrategy();	
+print "strategy will be initialized"; 
+s.initialize();
+print " **** the strategy is ready ****"; 
+t = s.getTimeDiscretisation();
+k = t.getK();
+N = t.getN();
+print " **** time management OK ****"; 
+
+# DS
+ball = pySiconos.LagrangianTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(0));
+ground = pySiconos.LagrangianTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(1));
+
+m = pySiconos.SiconosMatrix(N+1, 6);
+m.zero()
+#time
+tmp = k * t.getH();
+m.setValue(k, 0, tmp);
+# position
+m.setValue(k, 1, ball.getQ().getValue(0));
+# position
+m.setValue(k, 2, ball.getVelocity().getValue(0));
+m.setValue(k, 3, ground.getQ().getValue(0));
+# position
+m.setValue(k, 4, ground.getVelocity().getValue(0));
+m.setValue(k, 5, 0.0);
+# _________________________________________________
+
+print 'LET''S GO !!!';
+
+temps = pySiconos.doubleVector(N+1);
+position = pySiconos.doubleVector(N+1);
+	
+while k < N :
+	s.nextStep();
+	print 'NextStep done';
+	k = t.getK();				
+	print 'iteration : ', k;
+	s.computeFreeState();	
+	s.formaliseOneStepNSProblem();			
+	s.computeOneStepNSProblem();
+	s.updateState();			
+#	// Trace Values
+#	//time
+	m.setValue(k, 0, k*t.getH());
+	temps[k] = k*t.getH();
+	
+#	// position
+	ball = pySiconos.LagrangianTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(0));
+	ground = pySiconos.LagrangianTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(1));
+	m.setValue(k, 1, (ball.getQ()).getValue(0));
+	position[k] = (ball.getQ()).getValue(0);
+	
+#	// position
+	m.setValue(k, 2, (ball.getVelocity()).getValue(0));						
+	m.setValue(k, 3, (ground.getQ()).getValue(0));
+	m.setValue(k, 4, (ground.getVelocity()).getValue(0));			
+	m.setValue(k, 5, (model.getNonSmoothDynamicalSystem().getInteraction(0).getLambda()).getValue(0));    
+print 'iterations  done: ', k;
+m.write("result.dat", "ascii");		
+
+model.saveToXMLFile("./BouncingBall_TIDS.xml.output");
+
+print 'Gnuplot ...';
+d1=Gnuplot.Data(temps, position, title="toto");
+gnuplot.plot(d1);
+
+print '## END ##';

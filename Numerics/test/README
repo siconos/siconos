@@ -1,0 +1,5 @@
+Test with CPPUnit :
+
+Remarq : You need the CPPUnit software
+1. Each test must be a function in the TestNumerics class
+2. Each test function must be a system call to unitary tests of tests directory of each module of the src/ directory

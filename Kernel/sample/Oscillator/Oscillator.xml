@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- SICONOS Model XML file -->
+
+<SiconosModel>
+	<Title>title</Title>
+  <Author>author</Author>
+  <Description>description</Description>
+  <Date>date</Date>
+  <SchemaXML>/config/xmlschema/SiconosModelSchema-V1.2.xsd</SchemaXML>
+	<Time>
+		<t0>0.0</t0>
+		<T>1.0</T>
+	</Time>
+
+	<NSDS bvp='false'>
+	
+		<!-- DSs defined in the problem -->
+		<DS_Definition>		
+			<NonLinearSystemDS number='1'>
+			
+				<!-- Commun at all DS -->
+				
+				<Id> Oscillator </Id>				
+				
+				<n>2</n>
+				
+				<x vectorSize='2'>
+					0 1
+				</x>
+				
+				<x0 vectorSize='2'>
+					0 1
+				</x0>		
+								
+				<StepsInMemory>1</StepsInMemory>				
+				
+				<vectorField plugin="OscillatorPlugin:vectorField"/>
+				<computeJacobianX plugin="OscillatorPlugin:computeJacobianX"/>		
+				
+				
+			</NonLinearSystemDS>
+		</DS_Definition>
+
+
+		
+	
+	</NSDS>
+	
+	
+	<!-- Strategy to use in order to solve the problem -->	
+				
+	<Strategy type='TimeStepping'>
+
+		<TimeDiscretisation isConstant='true'>	
+		
+			<h>0.5</h>
+			<N>1</N>
+			<tk vectorSize='2'>0 0</tk>
+			<hMin>0</hMin>
+			<hMax>0</hMax>
+			
+		</TimeDiscretisation>				
+
+	
+		<!-- One Step Integrators -->				
+		
+		<OneStepIntegrator_Definition>
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
+			
+			<LSODAR>
+				<DS_Concerned size = '1'> <!-- Scaling -->
+				
+					<DS number='1'/>
+					
+				</DS_Concerned>		
+				<r>1</r>
+			</LSODAR>					
+		</OneStepIntegrator_Definition>
+
+		
+		<!-- One Step NS Problem of th Strategy-->
+				
+	</Strategy>	
+
+</SiconosModel>

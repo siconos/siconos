@@ -1,0 +1,44 @@
+#--------------------------------------------------
+#                  SICONOS PROJECT
+#--------------------------------------------------
+ 
+#--------------------------------------------------
+# Author(s)      : 
+# Creation Date  :
+# Version        :
+# Copyright      : INRIA 2004
+#--------------------------------------------------
+# Description    : README for Numerics
+#--------------------------------------------------
+# Options        : _ all
+#                  _ clean
+#                  _ doc
+#                  _ test
+#--------------------------------------------------
+# Compiled files :
+#--------------------------------------------------
+# Modifications  : _
+#                  _
+#                  _
+# Date           :
+#--------------------------------------------------
+
+
+
+
+INSTALLATION NOTES
+
+
+1) Set the environment variable NUMERICSPATH, for example in csh
+
+> setenv NUMERICSPATH /path/where/Numerics/is/located/
+
+2) Choose the right Makefile.inc according to the target platform
+
+3) Build library
+
+> make lib
+
+4)  build and run test
+
+> make buildtest ; make runtest

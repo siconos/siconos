@@ -1,0 +1,4 @@
+<!-- Optional : if NSDS is bvp -->
+<BoundaryCondition>
+	<NLinear/>
+</BoundaryCondition>

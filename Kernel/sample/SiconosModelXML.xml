@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SICONOS Model XML file -->
+
+<SiconosModel>
+<!-- xmlns="/home0/barbier/siconos/SICONOS/config/xmlschema/SiconosModelSchema-V1.0.xsd" -->
+	<Title>toto</Title>
+	<Author> personne</Author>
+	<Description> ... </Description>
+	<Date> today </Date>
+	<SchemaXML>/config/xmlschema/SiconosModelSchema-V1.2.xsd</SchemaXML>
+
+	<Time>
+		<t0>654654.51567</t0>
+		<T>99999.32454</T>
+	</Time>
+
+	<NSDS>
+<!--	<NSDS bvp='true'>  -->
+	
+		<!-- DSs defined in the problem -->
+		<DS_Definition>
+		
+
+			<LagrangianNLDS number='1'>
+				<Id> toto </Id>
+		<!--		<n> 6 </n>  -->
+				<x vectorSize='6'>
+					4.5454 454.5 5 5 5
+					4.95222
+				</x>
+				
+				<xDot vectorSize='6'>
+					4.5454 454.5 8 8 8
+					4.95222
+				</xDot>
+
+				<xMemory sizeMax='5'>				
+				  <Memory vectorFile='./sample/vector.dat'/>
+				  <Memory vectorSize='2'>
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./sample/vector.dat'/>				  				  
+				</xMemory>
+				  
+				<xDotMemory sizeMax='4'>
+				  <Memory vectorFile='./sample/vector.dat'/>
+				  <Memory vectorSize='2'>
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./sample/vector.dat'/>				  				  
+				</xDotMemory>
+				
+				<x0 vectorFile='./sample/vector2.dat'/>
+<!--				<x0 vectorSize='3'>4.5454   8.5   4.95222
+				</x0>
+-->
+				<StepsInMemory>8</StepsInMemory>
+				
+<!--				<vectorField plugin="BasicPlugin:vectorField"/>
+				<computeJacobianX plugin="BasicPlugin:computeJacobianX"/>
+-->				
+				<QNLInertia vectorPlugin="BasicPlugin:computeQNLInertia"/>
+				<q vectorFile='./sample/vector.dat'/>
+				<q0 vectorFile='./sample/vector.dat'/>
+			
+				<qMemory sizeMax='4'>
+				  <Memory vectorFile='./sample/vector.dat'/>
+				  <Memory vectorSize='2'>
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./sample/vector.dat'/>				  				  
+				</qMemory>								
+				
+				<Velocity vectorFile='./sample/vector.dat'/>
+				<Velocity0 vectorFile='./sample/vector.dat'/>
+				<VelocityMemory sizeMax='1'>
+					<Memory vectorFile='./sample/vector.dat'/>
+				</VelocityMemory>
+
+				<Fint vectorPlugin="BasicPlugin:computeFInt"/>
+				<Fext vectorPlugin="BasicPlugin:computeFExt"/>
+
+			  <JacobianQFint matrixPlugin="BasicPlugin:computeJacobianQFInt"/>
+				<JacobianVelocityFint matrixPlugin="BasicPlugin:computeJacobianVelocityFInt"/>
+ 				<JacobianQQNLInertia matrixPlugin="BasicPlugin:computeJacobianQQNLInertia"/>
+ 				<JacobianVelocityQNLInertia matrixPlugin="BasicPlugin:computeJacobianVelocityQNLInertia"/>					  
+
+<!--				<M matrixFile="./sample/matrix.dat"/>  -->
+				<M matrixPlugin="BasicPlugin:computeMass"/>
+				
+				<ndof>3</ndof>
+			
+				<!-- Optional : if NSDS is bvp -->				
+				<BoundaryCondition>					
+				<NLinear/>
+				</BoundaryCondition>
+			</LagrangianNLDS>
+			
+			<LagrangianTIDS number='2'>
+				<!-- Commun at all DS -->
+				
+				<Id> toto </Id>
+<!--				<n> 6 </n>  -->
+<!--				<x vectorFile='./sample/vector2.dat'/> -->
+				
+				<xDot vectorFile='./sample/vector2.dat'/>				
+				
+
+				<xMemory sizeMax='4'>				
+				  <Memory vectorFile='./sample/vector2.dat'/>
+				  <Memory vectorSize='2'>
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./sample/vector2.dat'/>				  				  
+				</xMemory>
+				  
+				<xDotMemory sizeMax='4'>
+				  <Memory vectorFile='./sample/vector2.dat'/>
+				  <Memory vectorSize="2">
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./sample/vector2.dat'/>				  				  
+				</xDotMemory>
+
+				<x0 vectorFile='./sample/vector2.dat'/>
+<!--				<x0 vectorSize='3'>
+					4.5454 	8.5
+					4.95222
+				</x0>
+-->				
+				<StepsInMemory>8</StepsInMemory>				
+				
+<!--				<vectorField plugin="BasicPlugin:vectorField"/>
+				<computeJacobianX plugin="BasicPlugin:computeJacobianX"/>				
+-->				
+				<!-- Specific to LagrangianTIDS-->
+				
+<!--				<QNLInertia vectorFile='./sample/vector.dat'/>
+-->				<q vectorFile='./sample/vector.dat'/>
+				<q0 vectorFile='./sample/vector.dat'/>
+
+				<qMemory sizeMax='4'>
+				  <Memory vectorFile='./sample/vector.dat'/>
+				  <Memory vectorSize='2'>
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./sample/vector.dat'/>				  				  
+				</qMemory>								
+				
+				<Velocity vectorFile='./sample/vector.dat'/>
+				<Velocity0 vectorFile='./sample/vector.dat'/>
+				<VelocityMemory sizeMax='1'>
+					<Memory vectorFile='./sample/vector.dat'/>
+				</VelocityMemory>
+
+<!--				<Fint vectorFile="./sample/vector.dat"/>
+-->				<Fext vectorPlugin="BasicPlugin:computeFExt"/>
+
+<!--			  <JacobianQFint matrixFile="matrix.dat"/>
+				<JacobianVelocityFint matrixFile="./sample/matrix.dat"/>
+ 				<JacobianQQNLInertia matrixFile="./sample/matrix.dat"/>
+ 				<JacobianVelocityQNLInertia matrixFile="./sample/matrix.dat"/>					  
+-->
+				<M matrixFile='./sample/matrix.dat'/>				
+				
+				<ndof>3</ndof>
+				
+				<K matrixFile='./sample/matrix.dat'/>
+				<C matrixFile='./sample/matrix.dat'/>			
+
+				<!-- Optional : if NSDS is bvp -->
+				<BoundaryCondition>
+				<Linear>
+					<Omega vectorFile='./sample/vector.dat'/>
+					<Omega0 matrixFile='./sample/matrix.dat'/>
+					<OmegaT matrixFile='./sample/matrix.dat'/>
+				</Linear>
+				</BoundaryCondition>
+			</LagrangianTIDS>		
+
+			<LinearSystemDS number='3'>
+				<!-- Commun at all DS -->
+				
+				<Id> tutu </Id>
+				<n> 3 </n>
+				<x vectorFile='./sample/vector.dat'/>
+				
+				<xDot vectorFile='./sample/vector.dat'/>				
+				
+				<xMemory sizeMax='4'>				
+				  <Memory vectorFile='./sample/vector.dat'/>
+				  <Memory vectorSize="2">
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./sample/vector.dat'/>				  				  
+				</xMemory>
+				  
+				<xDotMemory sizeMax='4'>
+				  <Memory vectorFile='./sample/vector.dat'/>
+				  <Memory vectorSize="2">
+				  	54.54 5454212.5445456456
+				  </Memory>
+				  <Memory vectorFile='./sample/vector.dat'/>				  				  
+				</xDotMemory>
+
+				<x0 vectorFile='./sample/vector.dat'/>
+				
+				<StepsInMemory>8</StepsInMemory>				
+				
+<!--				<vectorField plugin="BasicPlugin:vectorField"/>
+				<computeJacobianX plugin="BasicPlugin:computeJacobianX"/>				
+-->				
+				<!-- Specific to LinearSystemDS-->
+				<A matrixFile='./sample/matrix.dat'/>
+				<B matrixFile='./sample/matrix.dat'/>
+				
+				<u vectorFile='./sample/vector.dat'/>								
+				<f vectorPlugin="BasicPlugin:computeF"/>
+				
+				<!-- Optional : if NSDS is bvp -->
+				<BoundaryCondition>				
+				<Periodic/>
+				</BoundaryCondition>
+			</LinearSystemDS>		
+
+			
+		</DS_Definition>
+
+		<!-- Interactions defined in the problem -->		
+		<Interaction_Definition>
+
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
+			<Interaction number='1'>
+				
+				<Status>1</Status>
+				<Id>totu</Id>
+				<nInter>1</nInter>
+				<!-- List of couple of DS concerned by this interaction -->			
+
+				<DS_Concerned size='2'>
+					<DS number='1' interactsWithDS_Number='2'/>
+					<DS number='1' interactsWithDS_Number='3'/>
+				</DS_Concerned>					
+											
+				<!-- Relation of this interaction -->				
+				<Interaction_Content>
+					<LTI>
+						<C matrixFile='./sample/matrix.dat'/>
+						<D matrixFile='./sample/matrix.dat'/>
+						<E matrixFile='./sample/matrix.dat'/>
+						<a vectorFile='./sample/vector.dat'/>
+					</LTI>			
+	
+					<!-- NS Law of this interaction -->				
+					<ComplementarityCondition>
+					</ComplementarityCondition>
+				</Interaction_Content>
+					
+			</Interaction>
+			
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
+			<Interaction number='2'>
+
+				<Status>1</Status>
+				<Id>twtu</Id>
+				<nInter>1</nInter>
+				<!-- List of couple of DS concerned by this interaction -->			
+				<DS_Concerned size='2'>
+					<DS number='1' interactsWithDS_Number='2'/>		
+					<DS number='1' interactsWithDS_Number='3'/>				
+				</DS_Concerned>					
+			
+				<Interaction_Content>
+					<!-- RELATION of this interaction -->				
+					<LL>
+						<H matrixFile='./sample/matrix.dat'/>
+						<b vectorFile='./sample/vector.dat'/>
+					</LL>							
+	
+					<!-- NS Law of this interaction -->				
+					<Relay>
+						<c>5.021</c>
+						<d>5456.65</d>					
+					</Relay>
+				</Interaction_Content>
+					
+			</Interaction>							
+				
+
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
+			<Interaction number='3'>
+
+				<Status>5 8</Status>
+				<Id>tuto</Id>
+				<nInter>1</nInter>
+				<!-- List of couple of DS concerned by this interaction -->			
+				<DS_Concerned size='2'>				
+					<DS number='1' interactsWithDS_Number='2'/>		
+					<DS number='1' interactsWithDS_Number='3'/>				
+				</DS_Concerned>
+			
+				<Interaction_Content>
+					<!-- Relation of this interaction -->				
+					<LNL>
+							<computeInput plugin="BasicPlugin:computeInput"/>
+							<computeOutput plugin="BasicPlugin:computeOutput"/>
+					</LNL>
+	
+					<!-- NS Law of this interaction -->				
+					<NewtonImpactLaw>
+						<e>0.95</e>				
+					</NewtonImpactLaw>
+				</Interaction_Content>
+		                
+					
+			</Interaction>							
+
+		</Interaction_Definition>		
+	
+	</NSDS>
+	
+	<!-- Strategy to use in order to solve the problem -->				
+	<Strategy type='TimeStepping'>
+
+		<TimeDiscretisation isConstant='true'>	
+			<h>0.65</h>
+			<N>52</N>
+			<tk vectorSize='2'>5.545 548.2</tk>
+			<hMin>54.534</hMin>
+			<hMax>105.54</hMax>
+		</TimeDiscretisation>				
+
+
+	
+		<!-- One Step Integrators -->				
+		<OneStepIntegrator_Definition>
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
+			<Moreau>
+				<DS_Concerned size='1'>
+					<DS number='2'/>			
+<!--					<DS number='1'/>	-->
+				</DS_Concerned>
+<!--				<r>4</r> -->
+				<Theta> 0.5</Theta>
+			<!--	<W matrixFile = './sample/matrix.dat'/> -->
+				<W matrixColSize="0" matrixRowSize="0"/>
+			</Moreau>					
+
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->					
+			<Adams>
+				<DS_Concerned size='1'>								
+					<DS number='1'/>
+				</DS_Concerned>
+				<r>4</r>
+			</Adams>
+					
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->										
+			<LSODAR>
+				<DS_Concerned size='1'>
+					<DS number='3'/>
+				</DS_Concerned>
+				<r>4</r>
+			</LSODAR>
+
+		</OneStepIntegrator_Definition>
+
+		<OneStepNSProblem>
+		 	<LCP>
+				<!-- General for one step NS problem -->					
+				<n>8</n>			
+						
+				<!-- Specific at LCP -->						
+				<M matrixFile='./sample/matrix.dat'/>
+				<q vectorFile='./sample/vector.dat'/>
+				
+				<Interaction_Concerned size='3'>												
+					<Interaction number='1'/>
+					<Interaction number='2'/>
+					<Interaction number='3'/>
+				</Interaction_Concerned>			
+				
+		 	</LCP>
+		 	<Solver/>
+		 </OneStepNSProblem>
+		
+	</Strategy>
+
+</SiconosModel>

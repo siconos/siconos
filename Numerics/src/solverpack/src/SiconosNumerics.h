@@ -1,0 +1,349 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+
+/*!\file SiconosNumerics.h
+   \author Nineb Sheherazade and Dubois Frederic.
+
+*/
+
+/*!\struct methode_rp
+    \brief A type definition for a structure methode_rp.
+
+   \param char * : nom_method A pointer over characters, the name of the solver.
+   \param int : itermax The maximum iterations.
+   \param char* : the kind of norm used for this method
+   \param double : tol The tolerance value.
+   \param double * :a A pointer over doubles, the bound.
+   \param double : k_latin The latin coefficient.
+*/
+typedef struct
+{
+  char nom_method[64];
+  int itermax;
+  char normType[64];
+  double tol;
+  double *a;
+  double k_latin;
+} methode_rp;
+
+
+/*!\struct methode_rd
+   \brief A type definition for a structure methode_rd.
+
+   \param char* : nom_method A pointer over characters, the name of the solver.
+   \param int : itermax The maximum iterations
+   \param char* : the kind of norm used for this method
+   \param double : tol The tolerance value.
+   \param double* : a A pointer over doubles, the bound.
+   \param double : k_latin The latin coefficient
+*/
+typedef struct
+{
+  char nom_method[64];
+  int itermax;
+  char normType[64];
+  double tol;
+  double *a;
+  double k_latin;
+} methode_rd;
+
+/*!\struct methode_lcp
+   \brief A type definition for a structure methode_lcp.
+
+   \param char* : nom_method A pointer over characters, the name of the solver.
+   \param int : itermax The maximum iterations.
+   \param char* : the kind of norm used for this method
+   \param double : tol The tolerance value.
+   \param double : k_latin The latin coefficient
+*/
+typedef struct
+{
+  char nom_method[64];
+  int itermax;
+  char normType[64];
+  double tol;
+  double k_latin;
+} methode_lcp;
+
+
+/*!\struct methode_cfp
+   \brief A type definition for a structure methode_cfp.
+
+   \param char* : nom_method A pointer over characters, the name of the solver.
+   \param int : itermax The maximum iterations.
+   \param char* : the kind of norm used for this method
+   \param double : tol The tolerance value.
+   \param double : mu The friction coefficient.
+   \param double : k_latin The latin coefficient.
+
+*/
+typedef struct
+{
+  char nom_method[64];
+  int itermax;
+  char normType[64];
+  double tol;
+  double mu;
+  double k_latin;
+} methode_cfp;
+
+/*!\struct methode_cfd
+   \brief A type definition for a structure methode_cfd.
+
+   \param char* : nom_method A pointer over characters, the name of the solver.
+   \param int : itermax The maximum iterations.
+   \param char* : the kind of norm used for this method
+   \param double : tol The tolerance value.
+   \param double : mu The friction coefficient.
+   \param double : k_latin The latin coefficient
+*/
+typedef struct
+{
+  char nom_method[64];
+  int itermax;
+  char normType[64];
+  double tol;
+  double mu;
+  double k_latin;
+} methode_cfd;
+
+
+
+
+/*!\union methode
+   \brief A type definition for a union methode.
+
+
+   \param methode_rp : rp is a method_rp structure .
+   \param methode_rd : rd is a method_rd structure .
+   \param methode_lcp : lcp is a method_lpc structure .
+   \param methode_cfp : cfp is a method_cfp structure .
+   \param methode_cfd : cfd is a method_cfd structure .
+   \param methode_qp : qp is a method_qp structure .
+
+*/
+typedef union
+{
+  methode_rp rp;
+  methode_rd rd;
+  methode_lcp lcp;
+  methode_cfp cfp;
+  methode_cfd cfd;
+  /* \todo method_qp does not exist
+  */
+  //methode_qp qp;
+} methode;
+
+/*
+ * header for C++ compiling / and C compiling
+ */
+#ifdef __cplusplus
+//extern "C" {
+/* body of header */
+extern "C" int solve_lcp(double*, double*, int *, methode *, double [], double []);
+extern "C" int solve_rp(double*, double*, int *, methode *, double [], double []);
+extern "C" int solve_rd(double*, double*, int *, methode *, double [], double []);
+extern "C" int solve_cfp(double*, double*, int *, methode *, double [], double []);
+extern "C" int solve_cfd(double*, double*, int *, methode *, double [], double []);
+
+extern "C" int rp_latin(double [], double *, int *, double * , double *, int *, double *, double[], double [], int *, double *, int *)  ;
+extern "C" int rp_gsnl(double [], double *, int *, double *, int *, double *, double[], double [], int *, double *, int *)  ;
+extern "C" int rd_latin(double [], double *, int *, double * , double *, int *, double *, double[], double [], int *, double *, int *)  ;
+extern "C" void lemke_lcp(double [], double [], int *, int *, double[], double[], int *, double *, int *);
+extern "C" int gsnl_lcp(double [], double [], int *, int *, double *, double [], double [], int*, double *, int *);
+extern "C" int gcp_lcp(double [], double [], int *, int *, double *, double [], double[], int *, double *, int *);
+extern "C" int latin_lcp(double*, double*, int *, double *, int *, double *, double [], double[], int *, double *, int *);
+extern "C" int cfp_gsnl(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int*);
+extern "C" int cfp_gcp(double [], double [], int *, double *, int *, double *, double [], double [], int *, double *, int*);
+extern "C" int cfp_latin(double [], double [], int *, double *, double *, int *, double *, double [], double [], int *, double *, int*);
+extern "C" int cfd_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
+extern "C" void cfd_lcp(int *, double*, double[], double[], double[], double[]);
+extern "C" void lcp_cfd(int *, double[], double[], double[], double[]);
+//} /* closing brace for extern "C" */
+#endif
+
+
+
+
+
+#ifndef __cplusplus
+//extern {
+/**@defgroup group1 LCP (Linear Complementary Problem)
+   @{
+*/
+
+
+/** \fn int extern solve_lcp (double*,double*,int *, methode *,double [],double [])
+ *  \brief solve_lcp.c is a generic interface allowing the call of one of the @ref lcp solvers.
+ */
+/** @brief
+
+   solve_lcp.c is a generic interface allowing the call of one of the @ref lcp solvers.
+*/
+extern int solve_lcp(double*, double*, int *, methode *, double [], double []);
+
+/**@}*/
+
+
+/**@page lcp
+
+The C routines that solve LCP:
+
+gsnl_lcp.c
+
+gcp_lcp.c
+
+latin_lcp.c
+
+lemke_lcp.c
+*/
+
+
+/**@defgroup group2 PR (Primal Relay)
+   @{
+*/
+
+
+/** \fn int extern  solve_rp (double*,double*,int *,methode *, double [],double [])
+ *  \brief solve_rp() is a generic interface allowing the call of one of the @ref pr solvers.
+ */
+/** @brief
+
+    solve_rp() is a generic interface allowing the call of one of the @ref pr solvers.
+*/
+extern int solve_rp(double*, double*, int *, methode *, double [], double []);
+
+/**@}*/
+
+
+/**@page pr
+
+The C routines that solve PR:
+
+rp_latin.c
+
+rp_gsnl.c
+
+*/
+
+
+
+/**@defgroup group3 DR (Dual Relay)
+   @{
+*/
+
+
+/** \fn int extern  solve_rd (double*,double*,int *,methode *, double [],double [])
+ *  \brief solve_rd() is a generic interface allowing the call of one of the @ref dr solvers.
+ */
+/** @brief
+
+    solve_rd() is a generic interface allowing the call of one of the @ref dr solvers.
+*/
+extern int solve_rd(double*, double*, int *, methode *, double [], double []);
+
+/**@}*/
+
+
+/**@page dr
+
+The C routines that solve DR:
+
+rd_latin.c
+
+rd_gsnl.c
+
+*/
+
+
+
+
+/**@defgroup group4 PFC (Primal Frictional Contact)
+   @{
+*/
+
+
+/** \fn int extern  solve_cfp (double*,double*,int *,methode *, double [],double [])
+ *  \brief solve_cfp() is a generic interface allowing the call of one of the @ref pfc solvers.
+ */
+/** @brief
+
+    solve_cfp() is a generic interface allowing the call of one of the @ref pfc solvers.
+*/
+extern int solve_cfp(double*, double*, int *, methode *, double [], double []);
+
+/**@}*/
+
+
+/**@page pfc
+
+The C routines that solve PFC:
+
+cfp_latin.c
+
+cfp_gsnl.c
+
+cfp_gcp.c
+
+*/
+
+
+/**@defgroup group5 DFC (Dual Frictional Contact)
+   @{
+*/
+
+
+/** \fn int extern solve_cfd (double*,double*,int *, methode *,double [],double [])
+ *  \brief solve_cfd() is a generic interface allowing the call of one of the @ref dfc solvers.
+ */
+/** @brief
+
+    solve_cfd() is a generic interface allowing the call of one of the @ref dfc solvers.
+*/
+extern int solve_cfd(double*, double*, int *, methode *, double [], double []);
+
+/**@}*/
+
+
+/**@page dfc
+
+The C routines that solve DFC:
+
+cfd_latin.c
+
+*/
+
+/* \todo solve_qp does not exist
+*/
+//extern solve_qp (double [][maxcols],double [], int *, methode *, double [],double []);
+
+
+extern int rp_latin(double [], double *, int *, double * , double *, int *, double *, double[], double [], int *, double *, int *)  ;
+
+extern int rp_gsnl(double [], double *, int *, double *, int *, double *, double[], double [], int *, double *, int *)  ;
+
+extern int rd_latin(double [], double *, int *, double * , double *, int *, double *, double[], double [], int *, double *, int *)  ;
+
+extern void lemke_lcp(double [], double [], int *, int *, double[], double[], int *, double *, int *);
+
+extern int gsnl_lcp(double [], double [], int *, int *, double *, double [], double [], int*, double *, int *);
+
+extern int gcp_lcp(double [], double [], int *, int *, double *, double [], double[], int *, double *, int *);
+
+extern int latin_lcp(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int *);
+
+extern int cfp_gsnl(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int*);
+
+extern int cfp_gcp(double [], double [], int *, double *, int *, double *, double [], double [], int *, double *, int*);
+
+extern int cfp_latin(double [], double [], int *, double *, double *, int *, double *, double [], double [], int *, double *, int*);
+
+extern int cfd_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
+
+extern void cfd_lcp(int *, double*, double[], double[], double[], double[]);
+
+extern void lcp_cfd(int *, double[], double[], double[], double[]);
+//} /* closing brace for extern */
+#endif

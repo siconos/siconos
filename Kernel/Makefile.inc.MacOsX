@@ -1,0 +1,112 @@
+#--------------------------------------------------
+#                  SICONOS PROJECT
+#--------------------------------------------------
+
+#--------------------------------------------------
+# Author(s)      :
+# Creation Date  :
+# Version        :
+# Copyright      : INRIA 2004
+#--------------------------------------------------
+
+MAKEFILEDEP = $(SICONOSPATH)/Makefile.dep
+include $(MAKEFILEDEP)
+
+.SUFFIXES: .cpp .h .o .c
+
+#--- C++ compiler and platform --------------------
+#ARCH = Linux
+GCC = g++
+#GCC = insure
+CFLAGS = -g -fbounds-check  -Wno-deprecated -fPIC
+DYN_FLAGS =  -dynamiclib
+
+#--- LIBRARY -----------------------------------
+LIB_CREATE = echo "Creation of the Library : "
+LIB_ADD = ar crs  
+
+
+#--- DIRECTORY ------------------------------------
+SICONOS_DIR = $(SICONOSPATH)
+SICONOS_LIB = $(SICONOS_DIR)/lib
+SICONOS_INC = $(SICONOS_DIR)/include
+SICONOS_BIN = $(SICONOS_DIR)/bin
+SICONOS_EXT = $(SICONOS_DIR)/ext
+SICONOS_DOC = $(SICONOS_DIR)/doc
+
+#--- EXE ------------------------------------------
+SICONOS_EXE = $(SICONOS_DIR)/siconos/SICONOS
+
+#--- CLEANER --------------------------------------
+RM = rm -f
+RMDIR = rm -rf
+
+#--- COPIER ---------------------------------------
+CP = cp -r
+
+#--- MOVE -----------------------------------------
+MV = mv -f
+
+#--- CREATE DIR -----------------------------------
+MKDIR = mkdir -p
+
+#--- MAKE -----------------------------------------
+MAKE = make
+
+#--- CPPUNIT --------------------------------------
+CPPUNIT_PATH = $(SICONOS_EXT)/cppunit
+CPPUNIT_INC = `$(CPPUNIT_PATH)/bin/cppunit-config --cflags` -w
+CPPUNIT_LIB = `$(CPPUNIT_PATH)/bin/cppunit-config --libs`
+
+#--- DOXYGEN --------------------------------------
+DOXYGEN = doxygen
+DOXYGEN_CFG = $(SICONOS_DIR)/config/DoxygenSiconos.cfg
+
+#--- NANA -----------------------------------------
+NANA_DIR = $(SICONOS_EXT)/nana
+NANA_INC = -I$(NANA_DIR)
+NANA_LIB = $(NANA_DIR)/libnana.a
+INCLUDENANA = $(NANA_INC)
+WITHOUTNANA = -DWITHOUT_NANA
+NANA_HOST = --host=powerpc-apple-machten7.5.0
+
+
+#--- LIBF2C -----------------------------------
+LIBF2C_DIR = $(SICONOS_EXT)/libf2c
+LIBF2C_LIB = $(LIBF2C_DIR)/libf2c.a
+
+#--- LIBG2C -----------------------------------
+LIBG2C_DIR = -L/sw/lib
+LIBG2C_LIB = -lg2c
+LIBG2C_INC = -I/sw/include
+
+#--- LIBXML -----------------------------------
+LIBXML_DIR = $(SICONOS_EXT)/libxml2
+LIBXML_INC = `$(LIBXML_DIR)/bin/xml2-config --cflags`
+LIBXML_LIB = `$(LIBXML_DIR)/bin/xml2-config --libs`
+
+#--- LAPACK++ -----------------------------------
+LAPACKPP_DIR = $(SICONOS_EXT)/lapack++
+LAPACKPP_INC = -I$(LAPACKPP_DIR)/include
+LAPACKPP_LIB = $(LAPACKPP_DIR)/liblapack++.a $(LAPACKPP_DIR)/libblas++.a $(LAPACKPP_DIR)/liblamatrix++.a
+
+#--- LAPACK ------------------------------------
+LAPACK_DIR = $(SICONOS_EXT)/LAPACK
+LAPACK_LIB = $(LAPACK_DIR)/lapack.a $(LAPACK_DIR)/blas.a
+#LAPACK_DIR = /sw/lib
+#LAPACK_LIB = $(LAPACK_DIR)/liblapack.a $(LAPACK_DIR)/libf77blas.a
+
+#--- ODEPACK ------------------------------------
+ODEPACK_DIR = $(SICONOS_EXT)/ODEPACK
+ODEPACK_LIB = $(ODEPACK_DIR)/odepack.a
+
+#--- INCLUDE -----------------------------------
+INCLUDE = -I$(SICONOS_INC) $(LIBXML_INC) $(LAPACKPP_INC) $(NANA_INC)
+INCLUDE_EXT = -I$(SICONOS_INC) $(LIBXML_INC) $(LAPACKPP_INC) $(NANA_INC)
+INCLUDE_DEP = -I$(SICONOS_DIR)/src/model -I$(SICONOS_DIR)/src/modelformalisation -I$(SICONOS_DIR)/src/modelstrategy \
+			-I$(SICONOS_DIR)/src/utils -I$(SICONOS_DIR)/src/utils/SiconosSharedLibrary \
+			-I$(SICONOS_DIR)/src/utils/SiconosMemory -I$(SICONOS_DIR)/src/utils/NewSiconosVector -I$(SICONOS_DIR)/src/xml
+
+#--- LIBS --------------------------------------
+LIBS = -ldl $(NANA_LIB) $(LAPACKPP_LIB) $(LAPACK_LIB) $(ODEPACK_LIB) $(LIBF2C_LIB) $(LIBXML_LIB) 
+#---------------[ end of makefile.def ]-----------------------

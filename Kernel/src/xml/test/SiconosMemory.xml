@@ -1,0 +1,11 @@
+<SiconosModel>
+	<test1 sizeMax='4'>				
+	  <Memory vectorFile='vector.dat'/>
+	  <Memory vectorSize='2'>
+	  	54.54 5454212.5445456456
+	  </Memory>
+	  <Memory vectorFile='vector.dat'/>				  				  
+	</test1>
+	
+	<test2 sizeMax='4'/>				
+</SiconosModel>

@@ -1,0 +1,23 @@
+<LTI>
+	
+<!--	<computeInput plugin="BasicPlugin:computeInput"/>
+	
+	<computeOutput plugin="BasicPlugin:computeOutput"/>
+-->	
+	<C matrixRowSize="2" matrixColSize="3">
+		<row>1 2 3</row>
+		<row>4 5 6</row>
+	</C>
+	
+	<D matrixFile="matrix.dat"/>
+	
+	<E matrixColSize="3">
+		<row>1 2 3</row>
+		<row>4 5 6</row>
+	</E>	
+					
+	<a vectorSize='8'>
+		0.0  5.555  -5.555  0.0  0.0  0.0  0.0  0.0
+	</a>
+							
+</LTI>

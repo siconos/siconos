@@ -1,0 +1,33 @@
+# Makefile.am --- SICONOS
+
+include $(top_srcdir)/config/Make-rules
+
+check_PROGRAMS = test1
+TESTS = $(check_PROGRAMS)
+test1_SOURCES = BoundaryConditionXMLTest.cpp LagrangianNLDSXMLTest.cpp OneStepIntegratorXMLTest.cpp SiconosMemoryXMLTest.cpp \
+		DynamicalSystemXMLTest.cpp LinearSystemDSXMLTest.cpp RelayNSLXMLTest.cpp InteractionXMLTest.cpp LinearTIRXMLTest.cpp \
+		SiconosDOMTreeToolsTest.cpp TimeDiscretisationXMLTest.cpp TestMain.cpp
+include_HEADERS = BoundaryConditionXMLTest.h LagrangianNLDSXMLTest.h OneStepIntegratorXMLTest.h SiconosMemoryXMLTest.h \
+		DynamicalSystemXMLTest.h LinearSystemDSXMLTest.h RelayNSLXMLTest.h InteractionXMLTest.h LinearTIRXMLTest.h \
+		SiconosDOMTreeToolsTest.h TimeDiscretisationXMLTest.h  
+
+#test1_INCLUDES = -I$(CPPUNIT_INC) $(SICONOS_INCLUDES)
+#test1_LDFLAGS =  $(CPPUNIT_LIB_PATH) $(SICONOS_LDFLAGS)
+#test1_LDADD = $(CPPUNIT_LIB) $(SICONOS_LDADD) -lModel -lModelStrategy \
+# $(SICONOSNUMERICS_LIB) -lModelFormalisation -lSiconosMemory -lSiconosMatrixVector -lSiconosSharedLibrary
+
+test1_INCLUDES = $(CPPUNIT_INCLUDES)
+test1_LDFLAGS = $(CPPUNIT_LIBRARIES)
+
+#LIBS = $(SICONOSMATRIXVECTOR_LIB) $(SICONOSMEMORY_LIB) $(SICONOSXML_LIB) \
+#	$(SICONOSEXCEPTION_LIB) $(SICONOS_EXT_LDFLAGS) $(MODELFORMALISATION_LIB) $(MODELSTRATEGY_LIB) $(MODEL_LIB) 
+
+LIBS=$(MODEL_LIB) $(MODELSTRATEGY_LIB) $(MODELFORMALISATION_LIB) \
+	$(SICONOSXML_LIB) $(SICONOSMEMORY_LIB) $(SICONOSMATRIXVECTOR_LIB) \
+	$(SICONOSSHAREDLIBRARY_LIB) $(SICONOSEXCEPTION_LIB) $(SICONOS_EXT_LDFLAGS) \
+	$(MODEL_LIB) $(MODELSTRATEGY_LIB) $(SICONOSNUMERICS_LIBRARIES)  \
+	$(MODELFORMALISATION_LIB) $(SICONOSMEMORY_LIB) $(SICONOSMATRIXVECTOR_LIB) $(SICONOSSHAREDLIBRARY_LIB)
+
+#LIBS=$(MODEL_LIB) $(MODELSTRATEGY_LIB) $(MODELFORMALISATION_LIB) \
+#	$(SICONOSXML_LIB) $(SICONOSMEMORY_LIB) $(SICONOSMATRIXVECTOR_LIB) \
+#	$(SICONOSSHAREDLIBRARY_LIB) $(SICONOSEXCEPTION_LIB) $(SICONOS_EXT_LDFLAGS)

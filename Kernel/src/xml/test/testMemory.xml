@@ -1,0 +1,6 @@
+<test>
+	<Mem sizeMax='1'>				
+		<Memory vectorFile='testVector.dat'/>
+		<Memory vectorSize='2'>-2 2</Memory>
+	</Mem>
+</test>
