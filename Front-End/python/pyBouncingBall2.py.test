@@ -35,7 +35,7 @@ mC.setValue(0,0, 0.0);mC.setValue(0,1, 0.0);mC.setValue(0,2, 0.0);
 mC.setValue(1,0, 0.0);mC.setValue(1,1, 0.0);mC.setValue(1,2, 0.0);
 mC.setValue(2,0, 0.0);mC.setValue(2,1, 0.0);mC.setValue(2,2, 0.0);
 
-ds1 = nsds.addLagrangianTIDS(1, 3, q0, v0, mass,"../sample/BouncingBall/BallPlugin:ballFExt", K, mC);
+ds1 = nsds.addLagrangianLinearTIDS(1, 3, q0, v0, mass,"../sample/BouncingBall/BallPlugin:ballFExt", K, mC);
 
 q0_ = pySiconos.SimpleVector(1);
 q0_.zero();
@@ -47,7 +47,7 @@ mass_ = pySiconos.SiconosMatrix(1,1); mass_.setValue(0,0, 1.0);
 K_ = pySiconos.SiconosMatrix(1, 1); K_.setValue(0,0, 0.0);
 C_ = pySiconos.SiconosMatrix(1, 1); C_.setValue(0,0, 0.0);
 
-ds2 = nsds.addLagrangianTIDS(2, 1, q0_, v0_, mass_,"../sample/BouncingBall/BallPlugin:groundFExt", K_, C_);
+ds2 = nsds.addLagrangianLinearTIDS(2, 1, q0_, v0_, mass_,"../sample/BouncingBall/BallPlugin:groundFExt", K_, C_);
 
 print"=== creation des Interactions ===";
 vect = pySiconos.intVector(1);
@@ -90,8 +90,8 @@ lcp.setQ(b);
 #===============================
 
 # DS
-ball = pySiconos.LagrangianTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(0));
-ground = pySiconos.LagrangianTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(1));
+ball = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(0));
+ground = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(1));
 
 
 #s = model.getStrategy();	
@@ -134,8 +134,8 @@ while k < N :
 #	//time
 	m.setValue(k, 0, k*t.getH());
 #	// position
-	ball = pySiconos.LagrangianTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(0));
-	ground = pySiconos.LagrangianTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(1));
+	ball = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(0));
+	ground = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(1));
 	m.setValue(k, 1, (ball.getQ()).getValue(0));
 #	// position
 	m.setValue(k, 2, (ball.getVelocity()).getValue(0));						
