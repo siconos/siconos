@@ -54,7 +54,7 @@ void LinearSystemDSXML::loadLinearSystemDSProperties()
   }
   else
   {
-    XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LSDS_U + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LSDS_U + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LSDS_F)) != NULL)
@@ -63,7 +63,7 @@ void LinearSystemDSXML::loadLinearSystemDSProperties()
   }
   else
   {
-    XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LSDS_F + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LSDS_F + " not found.");
   }
 }
 

@@ -46,7 +46,7 @@ class LinearSystemDSXML : public DSXML
 public:
   LinearSystemDSXML();
 
-  /** \fn LinearSystemDSXML(xmlNode * LagrangianNLDSNode, bool isBVP)
+  /** \fn LinearSystemDSXML(xmlNode * LagrangianDSNode, bool isBVP)
   *   \brief Build a LinearSystemDSXML object from a DOM tree describing a DS
   *   \param xmlNode * linearSystemDSNode : the linearSystemDS DOM tree
   *   \param bool isBVP : if NSDS is BVP, linearSystemDS has boundary condition

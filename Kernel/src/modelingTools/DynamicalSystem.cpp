@@ -551,7 +551,7 @@ BoundaryCondition* DynamicalSystem::createNLinearBC()
 //
 //- function createDynamicalSystem and createLinearSystemDS complete
 //
-//- function  createLagrangianNLDS in progress
+//- function  createLagrangianDS in progress
 //
 //Revision 1.56  2004/08/10 12:04:27  jbarbier
 //- save of the plugin's name for fInt
@@ -597,7 +597,7 @@ BoundaryCondition* DynamicalSystem::createNLinearBC()
 //SiconosVector
 //
 //Revision 1.49  2004/07/30 14:37:14  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianNLDSXML
+//- saving methods for DynamicalSystemXML and LagrangianDSXML
 //
 //Revision 1.48  2004/07/28 14:13:48  charlety
 //

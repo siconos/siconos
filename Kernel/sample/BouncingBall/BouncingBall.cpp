@@ -2,9 +2,9 @@
 #include "Model.h"
 #include "check.h"
 
-#include "LagrangianNLDS.h"
+#include "LagrangianDS.h"
 #include "LinearSystemDS.h"
-#include "LagrangianTIDS.h"
+#include "LagrangianLinearTIDS.h"
 #include "LagrangianNonLinearR.h"
 
 #include <libxml/parser.h>
@@ -66,11 +66,11 @@ int main(int argc, char* argv[])
     //time
     m(k, 0) = k * t->getH();
     // position
-    LagrangianNLDS* ball = static_cast<LagrangianNLDS*>(bouncingBall.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
+    LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
     m(k, 1) = (ball->getQ())(0);
     // position
     m(k, 2) = (ball->getVelocity())(0);
-    LagrangianNLDS* ground = static_cast<LagrangianNLDS*>(bouncingBall.getNonSmoothDynamicalSystem()->getDynamicalSystem(1));
+    LagrangianDS* ground = static_cast<LagrangianDS*>(bouncingBall.getNonSmoothDynamicalSystem()->getDynamicalSystem(1));
     m(k, 3) = (ground->getQ())(0);
     // position
     m(k, 4) = (ground->getVelocity())(0);
@@ -122,7 +122,7 @@ int main(int argc, char* argv[])
       //time
       m(k, 0) = k * t->getH();
       // position
-      LagrangianNLDS* ball = static_cast<LagrangianNLDS*>(bouncingBall.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
+      LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
       m(k, 1) = (ball->getQ())(0);
       // position
       m(k, 2) = (ball->getVelocity())(0);

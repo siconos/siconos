@@ -1,8 +1,8 @@
 #include "Model.h"
 
 #include "DynamicalSystem.h"
-#include "LagrangianNLDS.h"
-#include "LagrangianTIDS.h"
+#include "LagrangianDS.h"
+#include "LagrangianLinearTIDS.h"
 #include "LinearSystemDS.h"
 
 #include "TimeStepping.h"
@@ -161,9 +161,9 @@ void Model::savePlatformToXML()
   //  for(i = 0; i<size; i++)
   //    {
   //      if( this->nsds->getDynamicalSystem(i)->getType() == LNLDS )
-  //  (static_cast<LagrangianNLDS*>(this->nsds->getDynamicalSystem(i)))->saveDSToXML();
+  //  (static_cast<LagrangianDS*>(this->nsds->getDynamicalSystem(i)))->saveDSToXML();
   //      else if( this->nsds->getDynamicalSystem(i)->getType() == LTIDS )
-  //  (static_cast<LagrangianTIDS*>(this->nsds->getDynamicalSystem(i)))->saveDSToXML();
+  //  (static_cast<LagrangianLinearTIDS*>(this->nsds->getDynamicalSystem(i)))->saveDSToXML();
   //      else if( this->nsds->getDynamicalSystem(i)->getType() == LSDS )
   //  (static_cast<LinearSystemDS*>(this->nsds->getDynamicalSystem(i)))->saveDSToXML();
   //      else if( this->nsds->getDynamicalSystem(i)->getType() == NLSDS )

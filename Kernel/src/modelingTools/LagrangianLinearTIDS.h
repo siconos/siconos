@@ -1,8 +1,8 @@
 #ifndef LAGRANGIANTIDS_H
 #define LAGRANGIANTIDS_H
 
-#include "LagrangianNLDS.h"
-#include "LagrangianTIDSXML.h"
+#include "LagrangianDS.h"
+#include "LagrangianLinearTIDSXML.h"
 
 #include "SiconosMatrix.h"
 //#include "SiconosVector.h"
@@ -14,16 +14,16 @@
 using namespace std;
 
 
-class LagrangianTIDSXML;
+class LagrangianLinearTIDSXML;
 
-/** \class LagrangianTIDS
- *  \brief class of Lagrangian invariant time systems, inherited of LagrangianNLDS
+/** \class LagrangianLinearTIDS
+ *  \brief class of Lagrangian invariant time systems, inherited of LagrangianDS
 *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 29, 2004
  *
  *
- * The class LagrangianTIDS  allows to define  and compute a generic ndof-dimensional
+ * The class LagrangianLinearTIDS  allows to define  and compute a generic ndof-dimensional
  * Lagrangian Linear Time Invariant Dynamical System of the form :
  * \f[
  * M \ddot q + C \dot q + K q =  F_{Ext}( q , t) + p,
@@ -49,14 +49,14 @@ class LagrangianTIDSXML;
  * One word on the bilateral constraint
  *
  *
- * The master Class LagrangianNLDS is specified as follows :
+ * The master Class LagrangianDS is specified as follows :
  *    -  \f$ M(q) = M q \f$
  *    -  \f$ Q(\dot q, q) = 0 \f$
  *    -  \f$ F_{Int}(\dot q , q , t) = -C \dot q - K q \f$
  *
  *
  *
- * As for the master Class LagrangianNLDS, the state of the master class DynamicalSystem is defined by \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$ and then \f$ n= 2 ndof \f$ and the VectorField
+ * As for the master Class LagrangianDS, the state of the master class DynamicalSystem is defined by \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$ and then \f$ n= 2 ndof \f$ and the VectorField
  * is specified as :
  * \f[
  * f(x,t) = \left[\begin{array}{cc}
@@ -69,25 +69,25 @@ class LagrangianTIDSXML;
  * r = \left[\begin{array}{c}0 \\ p \end{array}\right]
  * \f]
  *
- * \todo Automatically, specify the function of LagrangianNLDS such as
+ * \todo Automatically, specify the function of LagrangianDS such as
  *          Mass, QNL Inertia , FInt = K q +c velocity,
  */
-class LagrangianTIDS : public LagrangianNLDS
+class LagrangianLinearTIDS : public LagrangianDS
 {
 public:
 
-  /** \fn LagrangianTIDS()
+  /** \fn LagrangianLinearTIDS()
    *  \brief default constructor
    */
-  LagrangianTIDS();
+  LagrangianLinearTIDS();
 
-  /** \fn LagrangianTIDS(DSXML*)
-   *  \brief constructor with XML object of the LagrangianTIDS
+  /** \fn LagrangianLinearTIDS(DSXML*)
+   *  \brief constructor with XML object of the LagrangianLinearTIDS
    *  \param DSXML* : the XML object corresponding
    */
-  LagrangianTIDS(DSXML*);
+  LagrangianLinearTIDS(DSXML*);
 
-  ~LagrangianTIDS();
+  ~LagrangianLinearTIDS();
 
   // getter/setter
   /** \fn SiconosMatrix getK(void)
@@ -185,21 +185,21 @@ public:
                              //        string QNLlInertia="BasicPlugin:computeQNLInertia",
                              SiconosMatrix* K = NULL, SiconosMatrix* C = NULL); //, NSDS * nsds = NULL);
 
-  static LagrangianTIDS* convert(DynamicalSystem* ds);
+  static LagrangianLinearTIDS* convert(DynamicalSystem* ds);
 
 protected :
   /** \fn void fillDSWithDSXML()
-   *  \brief overload of the function for a LagrangianTIDS
+   *  \brief overload of the function for a LagrangianLinearTIDS
    *  \exception RuntimeException
    */
   void fillDSWithDSXML();
 
 
 private:
-  /** specific matrix for a LagrangianTIDS */
+  /** specific matrix for a LagrangianLinearTIDS */
   SiconosMatrix K;
 
-  /** specific matrix for a LagrangianTIDS */
+  /** specific matrix for a LagrangianLinearTIDS */
   SiconosMatrix C;
 
   /*

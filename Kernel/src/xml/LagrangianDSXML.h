@@ -1,5 +1,5 @@
 
-/** \class LagrangianNLDSXML
+/** \class LagrangianDSXML
 *   \brief This class manages Lagrangian NLDS data
 *  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
@@ -7,7 +7,7 @@
 *
 *
 *
-* LagrangianNLDSXML allows to manage data of a LagrangianNLDS DOM tree.
+* LagrangianDSXML allows to manage data of a LagrangianDS DOM tree.
 */
 
 
@@ -58,22 +58,22 @@ const string LNLDS_VECTORPLUGIN = "vectorPlugin";
 //#include "XMLTagsName.h"
 
 
-class LagrangianNLDSXML : public DSXML
+class LagrangianDSXML : public DSXML
 {
 public:
-  LagrangianNLDSXML();
-  ~LagrangianNLDSXML();
+  LagrangianDSXML();
+  ~LagrangianDSXML();
 
-  /** \fn LagrangianNLDSXML(xmlNode * LagrangianNLDSNode, bool isBVP)
-  *   \brief Build a LagrangianNLDSXML object from a DOM tree describing a DS
-  *   \param xmlNode * LagrangianNLDSNode : the LagrangianNLDS DOM tree
-  *   \param bool isBVP : if NSDS is BVP LagrangianNLDS have boundary condition
+  /** \fn LagrangianDSXML(xmlNode * LagrangianDSNode, bool isBVP)
+  *   \brief Build a LagrangianDSXML object from a DOM tree describing a DS
+  *   \param xmlNode * LagrangianDSNode : the LagrangianDS DOM tree
+  *   \param bool isBVP : if NSDS is BVP LagrangianDS have boundary condition
   */
-  LagrangianNLDSXML(xmlNode * LagrangianNLDSNode, bool isBVP);
+  LagrangianDSXML(xmlNode * LagrangianDSNode, bool isBVP);
 
   /** \fn SimpleVector getQ()
-  *   \brief Return  q vector of the LagrangianNLDSXML
-  *   \return SimpleVector : q vector of the LagrangianNLDSXML
+  *   \brief Return  q vector of the LagrangianDSXML
+  *   \return SimpleVector : q vector of the LagrangianDSXML
   */
   inline /*SiconosVector*/ SimpleVector getQ()
   {
@@ -81,7 +81,7 @@ public:
   }
 
   /** \fn void setQ(SiconosVector *v)
-  *   \brief allows to save the q of the LagrangianNLDSXML
+  *   \brief allows to save the q of the LagrangianDSXML
   *   \param The q SiconosVector to save
   */
   inline void setQ(SiconosVector *v)
@@ -94,8 +94,8 @@ public:
   }
 
   /** \fn SimpleVector getQ0()
-  *   \brief Return q0 vector of the LagrangianNLDSXML
-  *   \return SimpleVector : q0 vector of the LagrangianNLDSXML
+  *   \brief Return q0 vector of the LagrangianDSXML
+  *   \return SimpleVector : q0 vector of the LagrangianDSXML
   */
   inline SimpleVector getQ0()
   {
@@ -103,7 +103,7 @@ public:
   }
 
   /** \fn void  setQ0(SiconosVector *v)
-  *   \brief allows to save the q0 of the LagrangianNLDSXML
+  *   \brief allows to save the q0 of the LagrangianDSXML
   *   \param The q0 SiconosVector to save
   */
   inline void  setQ0(SiconosVector *v)
@@ -130,7 +130,7 @@ public:
   }
 
   /** \fn void setQMemory(SiconosMemory* smem)
-  *   \brief allows to save the qMemory of the LagrangianNLDSXML
+  *   \brief allows to save the qMemory of the LagrangianDSXML
   *   \param SiconosMemory* : SiconosMemory to save
   */
   inline void setQMemory(SiconosMemory* smem)
@@ -151,8 +151,8 @@ public:
   }
 
   /** \fn SimpleVector getVelocity()
-  *   \brief Return the velocity of the LagrangianNLDSXML
-  *   \return SimpleVector :  velocity vector of the LagrangianNLDSXML
+  *   \brief Return the velocity of the LagrangianDSXML
+  *   \return SimpleVector :  velocity vector of the LagrangianDSXML
   */
   inline SimpleVector getVelocity()
   {
@@ -160,7 +160,7 @@ public:
   }
 
   /** \fn void setVelocity(SiconosVector *v)
-  *   \brief allows to save the velocity of the LagrangianNLDSXML
+  *   \brief allows to save the velocity of the LagrangianDSXML
   *   \param The velocity SiconosVector to save
   */
   inline void setVelocity(SiconosVector *v)
@@ -174,8 +174,8 @@ public:
   }
 
   /** \fn SimpleVector getVelocity0()
-  *   \brief Return the initial velocity of the LagrangianNLDSXML
-  *   \return SimpleVector : The velocity0 SiconosVector of the LagrangianNLDSXML
+  *   \brief Return the initial velocity of the LagrangianDSXML
+  *   \return SimpleVector : The velocity0 SiconosVector of the LagrangianDSXML
   */
   inline SimpleVector getVelocity0()
   {
@@ -183,7 +183,7 @@ public:
   }
 
   /** \fn void setVelocity0(SiconosVector *v)
-  *   \brief allows to save the velocity0 of the LagrangianNLDSXML
+  *   \brief allows to save the velocity0 of the LagrangianDSXML
   *   \param The celocity0 SiconosVector to save
   */
   inline void setVelocity0(SiconosVector *v)
@@ -200,8 +200,8 @@ public:
   }
 
   //    /** \fn SiconosMemory getVelocityMemory()
-  //    *   \brief Return the velocityMemory of the LagrangianNLDSXML
-  //    *   \return SiconosMemory velocityMemory of the LagrangianNLDSXML
+  //    *   \brief Return the velocityMemory of the LagrangianDSXML
+  //    *   \return SiconosMemory velocityMemory of the LagrangianDSXML
   //    */
   //    SiconosMemory getVelocityMemory();
 
@@ -215,7 +215,7 @@ public:
   }
 
   /** \fn void setVelocityMemory(SiconosMemory* smem)
-  *   \brief allows to save the velocityMemory of the LagrangianNLDSXML
+  *   \brief allows to save the velocityMemory of the LagrangianDSXML
   *   \param SiconosMemory* : SiconosMemory to save
   */
   inline void setVelocityMemory(SiconosMemory* smem)
@@ -236,8 +236,8 @@ public:
   }
 
   /** \fn inline string getQNLInertiaPlugin()
-  *   \brief Return the QNLInertia Plugin name of the LagrangianNLDSXML
-  *   \return The QNLInertia Plugin name of the LagrangianNLDSXML
+  *   \brief Return the QNLInertia Plugin name of the LagrangianDSXML
+  *   \return The QNLInertia Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
   inline string getQNLInertiaPlugin()
@@ -245,24 +245,24 @@ public:
     if (this->isQNLInertiaPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->QNLInertiaNode, LNLDS_VECTORPLUGIN);
     else
-      XMLException::selfThrow("LagrangianNLDSXML - getQNLInertiaPlugin : QNLInertia is not calculated from a plugin ; QNLInertia vector is given");
+      XMLException::selfThrow("LagrangianDSXML - getQNLInertiaPlugin : QNLInertia is not calculated from a plugin ; QNLInertia vector is given");
   };
 
   /** \fn SimpleVector getQNLInertiaVector()
-  *   \brief Return the QNLInertia vector of the LagrangianNLDSXML
-  *   \return SimpleVector : QNLInertia vector of the LagrangianNLDSXML
+  *   \brief Return the QNLInertia vector of the LagrangianDSXML
+  *   \return SimpleVector : QNLInertia vector of the LagrangianDSXML
   *  \exception XMLException
   */
   inline SimpleVector getQNLInertiaVector()
   {
     if (this->isQNLInertiaPlugin())
-      XMLException::selfThrow("LagrangianNLDSXML - getQNLInertiaVector : QNLInertia vector is not given ; QNLInertia is calculated from a plugin");
+      XMLException::selfThrow("LagrangianDSXML - getQNLInertiaVector : QNLInertia vector is not given ; QNLInertia is calculated from a plugin");
 
     return  SiconosDOMTreeTools::getSiconosVectorValue(this->QNLInertiaNode);
   }
 
   /** \fn void setQNLInertiaPlugin(string plugin)
-  *   \brief allows to save the QNLInertia plugin of the LagrangianNLDSXML
+  *   \brief allows to save the QNLInertia plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
   inline void setQNLInertiaPlugin(string plugin)
@@ -276,7 +276,7 @@ public:
   }
 
   /** \fn void setQNLInertiaVector(SiconosVector *v)
-  *   \brief allows to save the QNLInertia vector of the LagrangianNLDSXML
+  *   \brief allows to save the QNLInertia vector of the LagrangianDSXML
   *   \return The QNLInertia SiconosVector to save
   */
   inline void setQNLInertiaVector(SiconosVector *v)
@@ -294,32 +294,32 @@ public:
 
 
   /** \fn inline string getFintPlugin()
-  *   \brief Return the Fint Plugin name of the LagrangianNLDSXML
-  *   \return The Fint Plugin name of the LagrangianNLDSXML
+  *   \brief Return the Fint Plugin name of the LagrangianDSXML
+  *   \return The Fint Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
   inline string getFintPlugin()
   {
     if (this->isFintPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->FintNode, LNLDS_VECTORPLUGIN);
-    XMLException::selfThrow("LagrangianNLDSXML - getFintPlugin : Fint is not calculated from a plugin ; Fint vector is given");
+    XMLException::selfThrow("LagrangianDSXML - getFintPlugin : Fint is not calculated from a plugin ; Fint vector is given");
   }
 
   /** \fn SimpleVector getFintVector()
-  *   \brief Return the internal forces vector of the LagrangianNLDSXML
-  *   \return SimpleVector : Fint SiconosVector of the LagrangianNLDSXML
+  *   \brief Return the internal forces vector of the LagrangianDSXML
+  *   \return SimpleVector : Fint SiconosVector of the LagrangianDSXML
   *   \exception XMLException
   */
   inline SimpleVector getFintVector()
   {
     if (this->isFintPlugin())
-      XMLException::selfThrow("LagrangianNLDSXML - getFintVector : Fint vector is not given ; Fint is calculated from a plugin");
+      XMLException::selfThrow("LagrangianDSXML - getFintVector : Fint vector is not given ; Fint is calculated from a plugin");
 
     return  SiconosDOMTreeTools::getSiconosVectorValue(this->FintNode);
   }
 
   /** \fn void setFintVector(SiconosVector *v)
-  *   \brief allows to save the Fint vector of the LagrangianNLDSXML
+  *   \brief allows to save the Fint vector of the LagrangianDSXML
   *   \param The Fint SiconosVector to save
   */
   inline void setFintVector(SiconosVector *v)
@@ -332,7 +332,7 @@ public:
   }
 
   /** \fn void setFextPlugin(string plugin)
-  *   \brief allows to save the Fext plugin of the LagrangianNLDSXML
+  *   \brief allows to save the Fext plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
   inline void setFintPlugin(string plugin)
@@ -346,32 +346,32 @@ public:
   }
 
   /** \fn inline string getFextPlugin()
-  *   \brief Return the Fext Plugin name of the LagrangianNLDSXML
-  *   \return The Fext Plugin name of the LagrangianNLDSXML
+  *   \brief Return the Fext Plugin name of the LagrangianDSXML
+  *   \return The Fext Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
   inline string getFextPlugin()
   {
     if (this->isFextPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->FextNode, LNLDS_VECTORPLUGIN);
-    XMLException::selfThrow("LagrangianNLDSXML - getFextPlugin : Fext is not calculated from a plugin ; Fext vector is given");
+    XMLException::selfThrow("LagrangianDSXML - getFextPlugin : Fext is not calculated from a plugin ; Fext vector is given");
   }
 
   /** \fn SimpleVector getFextVector()
-  *   \brief Return the external forces vector of the LagrangianNLDSXML
-  *   \return SimpleVector : Fext vector of the LagrangianNLDSXML
+  *   \brief Return the external forces vector of the LagrangianDSXML
+  *   \return SimpleVector : Fext vector of the LagrangianDSXML
   *  \exception XMLException
   */
   inline SimpleVector getFextVector()
   {
     if (this->isFextPlugin())
-      XMLException::selfThrow("LagrangianNLDSXML - getFextVector : Fext matrix is not given ; Fext is calculated from a plugin");
+      XMLException::selfThrow("LagrangianDSXML - getFextVector : Fext matrix is not given ; Fext is calculated from a plugin");
 
     return  SiconosDOMTreeTools::getSiconosVectorValue(this->FextNode);
   }
 
   /** \fn void setFextVector(SiconosVector *v)
-  *   \brief allows to save the Fint vector of the LagrangianNLDSXML
+  *   \brief allows to save the Fint vector of the LagrangianDSXML
   *   \param The Fint SiconosVector to save
   */
   inline void setFextVector(SiconosVector *v)
@@ -381,7 +381,7 @@ public:
   }
 
   /** \fn void setFextPlugin(string plugin)
-  *   \brief allows to save the Fext plugin of the LagrangianNLDSXML
+  *   \brief allows to save the Fext plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
   inline void setFextPlugin(string plugin)
@@ -398,32 +398,32 @@ public:
   }
 
   /** \fn inline string getJacobianQFintPlugin()
-  *   \brief Return the JacobianQFint Plugin name of the LagrangianNLDSXML
-  *   \return The JacobianQFint Plugin name of the LagrangianNLDSXML
+  *   \brief Return the JacobianQFint Plugin name of the LagrangianDSXML
+  *   \return The JacobianQFint Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
   inline string getJacobianQFintPlugin()
   {
     if (this->isJacobianQFintPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->jacobianQFintNode, LNLDS_MATRIXPLUGIN);
-    XMLException::selfThrow("LagrangianNLDSXML - getJacobianQFintPlugin : JacobianQFint is not calculated from a plugin ; JacobianQFint matrix is given");
+    XMLException::selfThrow("LagrangianDSXML - getJacobianQFintPlugin : JacobianQFint is not calculated from a plugin ; JacobianQFint matrix is given");
   }
 
   /** \fn SiconosMatrix getJacobianQFintMatrix()
-  *   \brief Return the JacobianQFint matrix of the LagrangianNLDSXML
-  *   \return The JacobianQFint SiconosMatrix of the LagrangianNLDSXML
+  *   \brief Return the JacobianQFint matrix of the LagrangianDSXML
+  *   \return The JacobianQFint SiconosMatrix of the LagrangianDSXML
   *  \exception XMLException
   */
   inline SiconosMatrix getJacobianQFintMatrix()
   {
     if (this->isJacobianQFintPlugin())
-      XMLException::selfThrow("LagrangianNLDSXML - getJacobianQFintMatrix : JacobianQFint matrix is not given ; JacobianQFint is calculated from a plugin");
+      XMLException::selfThrow("LagrangianDSXML - getJacobianQFintMatrix : JacobianQFint matrix is not given ; JacobianQFint is calculated from a plugin");
 
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->jacobianQFintNode);
   }
 
   /** \fn void setJacobianQFintPlugin(string plugin)
-  *   \brief allows to save the jacobianQFint plugin of the LagrangianNLDSXML
+  *   \brief allows to save the jacobianQFint plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
   inline void setJacobianQFintPlugin(string plugin)
@@ -437,7 +437,7 @@ public:
   }
 
   /** \fn void setJacobianQFintMatrix(SiconosMatrix *m)
-  *   \brief allows to save the JacobianQFint matrix of the LagrangianNLDSXML
+  *   \brief allows to save the JacobianQFint matrix of the LagrangianDSXML
   *   \return The JacobianQFint SiconosMatrix to save
   */
   inline void setJacobianQFintMatrix(SiconosMatrix *m)
@@ -446,32 +446,32 @@ public:
   }
 
   /** \fn inline string getJacobianVelocityFintPlugin()
-  *   \brief Return the JacobianVelocityFint Plugin name of the LagrangianNLDSXML
-  *   \return The JacobianVelocityFint Plugin name of the LagrangianNLDSXML
+  *   \brief Return the JacobianVelocityFint Plugin name of the LagrangianDSXML
+  *   \return The JacobianVelocityFint Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
   inline string getJacobianVelocityFintPlugin()
   {
     if (this->isJacobianVelocityFintPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->jacobianVelocityFintNode, LNLDS_MATRIXPLUGIN);
-    XMLException::selfThrow("LagrangianNLDSXML - getJacobianVelocityFintPlugin : JacobianVelocityFint is not calculated from a plugin ; JacobianVelocityFint matrix is given");
+    XMLException::selfThrow("LagrangianDSXML - getJacobianVelocityFintPlugin : JacobianVelocityFint is not calculated from a plugin ; JacobianVelocityFint matrix is given");
   }
 
   /** \fn SiconosMatrix getJacobianVelocityFintMatrix()
-  *   \brief Return the JacobianVelocityFint matrix of the LagrangianNLDSXML
-  *   \return The JacobianVelocityFint SiconosMatrix of the LagrangianNLDSXML
+  *   \brief Return the JacobianVelocityFint matrix of the LagrangianDSXML
+  *   \return The JacobianVelocityFint SiconosMatrix of the LagrangianDSXML
   *  \exception XMLException
   */
   inline SiconosMatrix getJacobianVelocityFintMatrix()
   {
     if (this->isJacobianVelocityFintPlugin())
-      XMLException::selfThrow("LagrangianNLDSXML - getJacobianVelocityFintMatrix : JacobianVelocityFint matrix is not given ; JacobianVelocityFint is calculated from a plugin");
+      XMLException::selfThrow("LagrangianDSXML - getJacobianVelocityFintMatrix : JacobianVelocityFint matrix is not given ; JacobianVelocityFint is calculated from a plugin");
 
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->jacobianVelocityFintNode);
   }
 
   /** \fn void setJacobianVelocityFintPlugin(string plugin)
-  *   \brief allows to save the jacobianVelocityFint plugin of the LagrangianNLDSXML
+  *   \brief allows to save the jacobianVelocityFint plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
   inline void setJacobianVelocityFintPlugin(string plugin)
@@ -485,7 +485,7 @@ public:
   }
 
   /** \fn void setJacobianVelocityFintMatrix(SiconosMatrix *m)
-  *   \brief allows to save the JacobianVelocityFint matrix of the LagrangianNLDSXML
+  *   \brief allows to save the JacobianVelocityFint matrix of the LagrangianDSXML
   *   \return The JacobianVelocityFint SiconosMatrix to save
   */
   inline void setJacobianVelocityFintMatrix(SiconosMatrix *m)
@@ -495,32 +495,32 @@ public:
   }
 
   /** \fn inline string getJacobianQQPlugin()
-  *   \brief Return the JacobianQQ Plugin name of the LagrangianNLDSXML
-  *   \return The JacobianQQ Plugin name of the LagrangianNLDSXML
+  *   \brief Return the JacobianQQ Plugin name of the LagrangianDSXML
+  *   \return The JacobianQQ Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
   inline string getJacobianQQNLInertiaPlugin()
   {
     if (this->isJacobianQQNLInertiaPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->jacobianQQNLInertiaNode, LNLDS_MATRIXPLUGIN);
-    XMLException::selfThrow("LagrangianNLDSXML - getJacobianQQNLInertiaPlugin : JacobianQQNLInertia is not calculated from a plugin ; JacobianQQNLInertia matrix is given");
+    XMLException::selfThrow("LagrangianDSXML - getJacobianQQNLInertiaPlugin : JacobianQQNLInertia is not calculated from a plugin ; JacobianQQNLInertia matrix is given");
   }
 
   /** \fn SiconosMatrix getJacobianQQMatrix()
-  *   \brief Return the JacobianQQ matrix of the LagrangianNLDSXML
-  *   \return The JacobianQQ SiconosMatrix of the LagrangianNLDSXML
+  *   \brief Return the JacobianQQ matrix of the LagrangianDSXML
+  *   \return The JacobianQQ SiconosMatrix of the LagrangianDSXML
   *  \exception XMLException
   */
   inline SiconosMatrix getJacobianQQNLInertiaMatrix()
   {
     if (this->isJacobianQQNLInertiaPlugin())
-      XMLException::selfThrow("LagrangianNLDSXML - getJacobianQQNLInertiaMatrix : JacobianQQNLInertia matrix is not given ; JacobianQQNLInertia is calculated from a plugin");
+      XMLException::selfThrow("LagrangianDSXML - getJacobianQQNLInertiaMatrix : JacobianQQNLInertia matrix is not given ; JacobianQQNLInertia is calculated from a plugin");
 
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->jacobianQQNLInertiaNode);
   }
 
   /** \fn void setJacobianQQNLInertiaPlugin(string plugin)
-  *   \brief allows to save the jacobianQQNLInertia plugin of the LagrangianNLDSXML
+  *   \brief allows to save the jacobianQQNLInertia plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
   inline void setJacobianQQNLInertiaPlugin(string plugin)
@@ -534,7 +534,7 @@ public:
   }
 
   /** \fn void setJacobianQQMatrix(SiconosMatrix *m)
-  *   \brief allows to save the JacobianQQ matrix of the LagrangianNLDSXML
+  *   \brief allows to save the JacobianQQ matrix of the LagrangianDSXML
   *   \return The JacobianQQ SiconosMatrix to save
   */
   inline void setJacobianQQNLInertiaMatrix(SiconosMatrix *m)
@@ -544,32 +544,32 @@ public:
   }
 
   /** \fn inline string getJacobianVelocityQNLInertiaPlugin()
-  *   \brief Return the JacobianVelocityQNLInertia Plugin name of the LagrangianNLDSXML
-  *   \return The JacobianVelocityQNLInertia Plugin name of the LagrangianNLDSXML
+  *   \brief Return the JacobianVelocityQNLInertia Plugin name of the LagrangianDSXML
+  *   \return The JacobianVelocityQNLInertia Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
   inline string getJacobianVelocityQNLInertiaPlugin()
   {
     if (this->isJacobianVelocityQNLInertiaPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->jacobianVelocityQNLInertiaNode, LNLDS_MATRIXPLUGIN);
-    XMLException::selfThrow("LagrangianNLDSXML - getJacobianVelocityQNLInertiaPlugin : JacobianVelocityQNLInertia is not calculated from a plugin ; JacobianVelocityQNLInertia matrix is given");
+    XMLException::selfThrow("LagrangianDSXML - getJacobianVelocityQNLInertiaPlugin : JacobianVelocityQNLInertia is not calculated from a plugin ; JacobianVelocityQNLInertia matrix is given");
   }
 
   /** \fn SiconosMatrix getJacobianVelocityQNLInertiaMatrix()
-  *   \brief Return the JacobianVelocityQNLInertia matrix of the LagrangianNLDSXML
-  *   \return The JacobianVelocityQNLInertia SiconosMatrix of the LagrangianNLDSXML
+  *   \brief Return the JacobianVelocityQNLInertia matrix of the LagrangianDSXML
+  *   \return The JacobianVelocityQNLInertia SiconosMatrix of the LagrangianDSXML
   *  \exception XMLException
   */
   inline SiconosMatrix getJacobianVelocityQNLInertiaMatrix()
   {
     if (this->isJacobianVelocityQNLInertiaPlugin())
-      XMLException::selfThrow("LagrangianNLDSXML - getJacobianVelocityQNLInertiaMatrix : JacobianVelocityQNLInertia matrix is not given ; JacobianVelocityQNLInertia is calculated from a plugin");
+      XMLException::selfThrow("LagrangianDSXML - getJacobianVelocityQNLInertiaMatrix : JacobianVelocityQNLInertia matrix is not given ; JacobianVelocityQNLInertia is calculated from a plugin");
 
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->jacobianVelocityQNLInertiaNode);
   }
 
   /** \fn void setJacobianVelocityQNLInertiaPlugin(string plugin)
-  *   \brief allows to save the jacobianVelocityQNLInertiaPlugin plugin of the LagrangianNLDSXML
+  *   \brief allows to save the jacobianVelocityQNLInertiaPlugin plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
   inline void setJacobianVelocityQNLInertiaPlugin(string plugin)
@@ -583,7 +583,7 @@ public:
   }
 
   /** \fn void setJacobianVelocityQNLInertiaMatrix(SiconosMatrix *m)
-  *   \brief allows to save the JacobianVelocityQNLInertia matrix of the LagrangianNLDSXML
+  *   \brief allows to save the JacobianVelocityQNLInertia matrix of the LagrangianDSXML
   *   \return The JacobianVelocityQNLInertia SiconosMatrix to save
   */
   inline void setJacobianVelocityQNLInertiaMatrix(SiconosMatrix *m)
@@ -592,32 +592,32 @@ public:
   }
 
   /** \fn inline string getMPlugin()
-  *   \brief Return the M Plugin name of the LagrangianNLDSXML
-  *   \return The M Plugin name of the LagrangianNLDSXML
+  *   \brief Return the M Plugin name of the LagrangianDSXML
+  *   \return The M Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
   inline string getMPlugin()
   {
     if (this->isMPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->MNode, LNLDS_MATRIXPLUGIN);
-    XMLException::selfThrow("LagrangianNLDSXML - getMPlugin : M is not calculated from a plugin ; M matrix is given");
+    XMLException::selfThrow("LagrangianDSXML - getMPlugin : M is not calculated from a plugin ; M matrix is given");
   }
 
   /** \fn SiconosMatrix getMMatrix()
-  *   \brief Return the M matrix of the LagrangianNLDSXML
-  *   \return The M SiconosMatrix of the LagrangianNLDSXML
+  *   \brief Return the M matrix of the LagrangianDSXML
+  *   \return The M SiconosMatrix of the LagrangianDSXML
   *  \exception XMLException
   */
   inline SiconosMatrix getMMatrix()
   {
     if (this->isMPlugin())
-      XMLException::selfThrow("LagrangianNLDSXML - getMMatrix : M matrix is not given ; M is calculated from a plugin");
+      XMLException::selfThrow("LagrangianDSXML - getMMatrix : M matrix is not given ; M is calculated from a plugin");
 
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->MNode);
   }
 
   /** \fn void setMPlugin(string plugin)
-  *   \brief allows to save the jacobianVelocityQNLInertiaPlugin plugin of the LagrangianNLDSXML
+  *   \brief allows to save the jacobianVelocityQNLInertiaPlugin plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
   inline void setMPlugin(string plugin)
@@ -642,7 +642,7 @@ public:
   }
 
   /** \fn void setMMatrix(SiconosMatrix *m)
-  *   \brief allows to save the M matrix of the LagrangianNLDSXML
+  *   \brief allows to save the M matrix of the LagrangianDSXML
   *   \return The M SiconosMatrix to save
   */
   inline void setMMatrix(SiconosMatrix *m)
@@ -656,8 +656,8 @@ public:
 
 
   /** \fn int getNdof()
-  *   \brief Return the ndof for the LagrangianNLDSXML
-  *   \return The ndof integer for the LagrangianNLDSXML
+  *   \brief Return the ndof for the LagrangianDSXML
+  *   \return The ndof integer for the LagrangianDSXML
   */
   inline int getNdof()
   {
@@ -665,7 +665,7 @@ public:
   }
 
   /** \fn void setNdof(int i)
-  *   \brief allows to save the ndof for the LagrangianNLDSXML
+  *   \brief allows to save the ndof for the LagrangianDSXML
   *   \return The ndof integer to save
   */
   inline void setNdof(int i)
@@ -909,16 +909,16 @@ protected:
 
   //Methods
 
-  /** \fn loadLagrangianNLDSProperties()
-  *   \brief load the different properties of a LagrangianNLDS
-  *   \exception XMLException : if a property of the LagrangianNLDS lacks in the DOM tree
+  /** \fn loadLagrangianDSProperties()
+  *   \brief load the different properties of a LagrangianDS
+  *   \exception XMLException : if a property of the LagrangianDS lacks in the DOM tree
   */
-  void loadLagrangianNLDSProperties();
+  void loadLagrangianDSProperties();
 
 };
 
 #endif
-//$Log: LagrangianNLDSXML.h,v $
+//$Log: LagrangianDSXML.h,v $
 //Revision 1.42  2005/03/08 12:41:38  jbarbier
 //- constant variables files modified :
 //Some constants added in SiconosConst
@@ -930,7 +930,7 @@ protected:
 //
 //- new function for the SiconosMatrices to copy a block matrix into another matrix
 //
-//- tag names of BoundaryConditionXML, DSInputOutputXML, DSXML, InteractionXML, LagrangianLinearRXML, LagrangianNLDSXML put in XMLTagNames.h
+//- tag names of BoundaryConditionXML, DSInputOutputXML, DSXML, InteractionXML, LagrangianLinearRXML, LagrangianDSXML put in XMLTagNames.h
 //
 //Revision 1.40  2005/01/18 10:35:17  jbarbier
 //- attribute "r" no longer used for Moreau integrator
@@ -997,6 +997,6 @@ protected:
 //match with these changes
 //
 //Revision 1.30  2004/07/30 14:37:15  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianNLDSXML
+//- saving methods for DynamicalSystemXML and LagrangianDSXML
 //
 //Revision 1.29  2004/07/29 14:25:42  jbarbier

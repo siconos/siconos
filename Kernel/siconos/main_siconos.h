@@ -11,9 +11,9 @@
 #include "EventDriven.h"
 
 #include "DynamicalSystem.h"
-#include "LagrangianNLDS.h"
+#include "LagrangianDS.h"
 #include "LinearSystemDS.h"
-#include "LagrangianTIDS.h"
+#include "LagrangianLinearTIDS.h"
 #include "LagrangianNonLinearR.h"
 #include "LCP.h"
 

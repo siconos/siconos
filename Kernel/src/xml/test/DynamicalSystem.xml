@@ -1,4 +1,4 @@
-<LagrangianNLDS number='120'>
+<LagrangianDS number='120'>
 			
 		<!-- Commun at all DS -->
 				
@@ -34,7 +34,7 @@
 		<vectorField plugin="BasicPlugin:vectorField"/>
 		<computeJacobianX plugin="BasicPlugin:computeJacobianX"/>		
 		
-		<!-- Specific to LagrangianNLDS-->
+		<!-- Specific to LagrangianDS-->
 		
 		<QNLInertia vectorPlugin="BasicPlugin:computeQNLInertia"/>
 		
@@ -83,4 +83,4 @@
 				
 		<ndof>3</ndof>						
 				
-</LagrangianNLDS>
+</LagrangianDS>

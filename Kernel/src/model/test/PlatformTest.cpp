@@ -226,15 +226,15 @@ void PlatformTest::testManualCreation()
   ds2 = nsds->addLinearSystemDS(2, 5, &sv);
   ds2->createNLinearBC();
 
-  ds3 = nsds->addLagrangianNLDS(3, 2, &sv, &sv, "BasicPlugin:computeMass",
-                                "BasicPlugin:computeFInt", "BasicPlugin:computeFExt", "BasicPlugin:computeJacobianQFInt",
-                                "BasicPlugin:computeJacobianVelocityFInt", "BasicPlugin:computeJacobianQQNLInertia",
-                                "BasicPlugin:computeJacobianVelocityQNLInertia", "BasicPlugin:computeQNLInertia");
+  ds3 = nsds->addLagrangianDS(3, 2, &sv, &sv, "BasicPlugin:computeMass",
+                              "BasicPlugin:computeFInt", "BasicPlugin:computeFExt", "BasicPlugin:computeJacobianQFInt",
+                              "BasicPlugin:computeJacobianVelocityFInt", "BasicPlugin:computeJacobianQQNLInertia",
+                              "BasicPlugin:computeJacobianVelocityQNLInertia", "BasicPlugin:computeQNLInertia");
   ds3->createPeriodicBC();
 
   SiconosMatrix sm;
-  ds4 = nsds->addLagrangianTIDS(4, 8, &sv, &sv, &sm, "BasicPlugin:computeFExt",
-                                &sm, &sm);
+  ds4 = nsds->addLagrangianLinearTIDS(4, 8, &sv, &sv, &sm, "BasicPlugin:computeFExt",
+                                      &sm, &sm);
   ds4->createLinearBC(&sv, &sm, &sm);
 
   vector<int> vect(2);
@@ -314,8 +314,8 @@ void PlatformTest::testManualCreation2()
   SiconosMatrix mC(3, 3);
   mC.zero();
 
-  ds1 = nsds->addLagrangianTIDS(1, 3, &q0, &v0, &mass, "../../../sample/BouncingBall/BallPlugin:ballFExt",
-                                &K, &mC);
+  ds1 = nsds->addLagrangianLinearTIDS(1, 3, &q0, &v0, &mass, "../../../sample/BouncingBall/BallPlugin:ballFExt",
+                                      &K, &mC);
   //ds1->setQ()
 
 
@@ -333,8 +333,8 @@ void PlatformTest::testManualCreation2()
   SiconosMatrix C_(1, 1);
   C_.zero();
 
-  ds2 = nsds->addLagrangianTIDS(2, 1, &q0_, &v0_, &mass_, "../../../sample/BouncingBall/BallPlugin:groundFExt",
-                                &K_, &C_);
+  ds2 = nsds->addLagrangianLinearTIDS(2, 1, &q0_, &v0_, &mass_, "../../../sample/BouncingBall/BallPlugin:groundFExt",
+                                      &K_, &C_);
 
   cout << "=== creation des Interactions ===" << endl;
   vector<int> vect(1);
@@ -401,13 +401,13 @@ void PlatformTest::testManualCreation3()
 
   ds = nsds->addNonLinearSystemDS(1, 2, &sv, "BasicPlugin:vectorField");
   ds2 = nsds->addLinearSystemDS(2, 5, &sv);
-  ds3 = nsds->addLagrangianNLDS(3, 2, &sv, &sv, "BasicPlugin:computeMass",
-                                "BasicPlugin:computeFInt", "BasicPlugin:computeFExt", "BasicPlugin:computeJacobianQFInt",
-                                "BasicPlugin:computeJacobianVelocityFInt", "BasicPlugin:computeJacobianQQNLInertia",
-                                "BasicPlugin:computeJacobianVelocityQNLInertia", "BasicPlugin:computeQNLInertia");
+  ds3 = nsds->addLagrangianDS(3, 2, &sv, &sv, "BasicPlugin:computeMass",
+                              "BasicPlugin:computeFInt", "BasicPlugin:computeFExt", "BasicPlugin:computeJacobianQFInt",
+                              "BasicPlugin:computeJacobianVelocityFInt", "BasicPlugin:computeJacobianQQNLInertia",
+                              "BasicPlugin:computeJacobianVelocityQNLInertia", "BasicPlugin:computeQNLInertia");
   SiconosMatrix sm;
-  ds4 = nsds->addLagrangianTIDS(4, 8, &sv, &sv, &sm, "BasicPlugin:computeFExt",
-                                &sm, &sm);
+  ds4 = nsds->addLagrangianLinearTIDS(4, 8, &sv, &sv, &sm, "BasicPlugin:computeFExt",
+                                      &sm, &sm);
 
   vector<int> vect(2);
   vector<DynamicalSystem*> dsVect;

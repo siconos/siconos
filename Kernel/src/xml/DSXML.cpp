@@ -579,6 +579,6 @@ void DSXML::loadDSInputOutputXML(xmlNode * rootdsioNode)
 //- attribute T of the Model is now optional
 //
 //Revision 1.30  2004/07/30 14:37:15  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianNLDSXML
+//- saving methods for DynamicalSystemXML and LagrangianDSXML
 //
 //Revision 1.29  2004/07/29 14:25:42  jbarbier

@@ -1,6 +1,6 @@
 #include "Moreau.h"
 #include "MoreauXML.h"
-#include "LagrangianTIDS.h"
+#include "LagrangianLinearTIDS.h"
 
 #include "check.h"
 
@@ -48,7 +48,7 @@ void Moreau::initialize()
   else if (this->ds->getType() == LTIDS)
   {
     VL(("Moreau::initialize -- LTIDS\n"));
-    LagrangianTIDS* d = static_cast<LagrangianTIDS*>(this->ds);
+    LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(this->ds);
     d ->display();
     M = d->getMassPtr();
 
@@ -86,7 +86,7 @@ void Moreau::computeFreeState()
   {
     VL(("Moreau::computeFreeState -- LTIDS\n"));
 
-    LagrangianTIDS* d = static_cast<LagrangianTIDS*>(this->ds);
+    LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(this->ds);
 
 
     SiconosVector *p = d->getPPtr();
@@ -121,7 +121,7 @@ void Moreau::integrate()
   else if (this->ds->getType() == LTIDS)
   {
     VL(("Moreau::integrate -- LTIDS\n"));
-    LagrangianTIDS* d = static_cast<LagrangianTIDS*>(this->ds);
+    LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(this->ds);
     SimpleVector* vold, *qold;
     SimpleVector *v, *q, *p, *x ;
     SiconosMatrix* M, *K, *C, *W;

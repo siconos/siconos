@@ -18,7 +18,7 @@
 	<NSDS>
 		<DS_Definition>
 
-			<LagrangianNLDS number='1'>
+			<LagrangianDS number='1'>
 				<Id> toto </Id>
 				<x vectorSize='6'>
 					4.5454 454.5 5 5 5
@@ -56,9 +56,9 @@
 
 				<M matrixPlugin="BasicPlugin:computeMass"/>
 				<ndof>3</ndof>
-			</LagrangianNLDS>
+			</LagrangianDS>
 			
-			<LagrangianTIDS number='2'>
+			<LagrangianLinearTIDS number='2'>
 				<Id> toto </Id>
 				<x vectorFile='vector2.dat'/>
 				<xDot vectorFile='vector2.dat'/>				
@@ -94,7 +94,7 @@
 				<ndof>3</ndof>
 				<K matrixFile='matrix.dat'/>
 				<C matrixFile='matrix.dat'/>			
-			</LagrangianTIDS>		
+			</LagrangianLinearTIDS>		
 
 			<LinearSystemDS number='3'>
 				<Id> tutu </Id>

@@ -1,10 +1,10 @@
 #include "NonSmoothDynamicalSystem.h"
 
-#include "LagrangianNLDS.h"
-#include "LagrangianTIDS.h"
+#include "LagrangianDS.h"
+#include "LagrangianLinearTIDS.h"
 #include "LinearSystemDS.h"
-//#include "LagrangianNLDSXML.h"
-//#include "LagrangianTIDSXML.h"
+//#include "LagrangianDSXML.h"
+//#include "LagrangianLinearTIDSXML.h"
 //#include "LinearSystemDSXML.h"
 #include "LinearEC.h"
 #include "LinearTIEC.h"
@@ -166,13 +166,13 @@ void NonSmoothDynamicalSystem::addDynamicalSystem(DynamicalSystem *ds)//, Bounda
   //
   //  if( ds->getType() == LNLDS )
   //  {
-  //    dsTmp = new LagrangianNLDS();
+  //    dsTmp = new LagrangianDS();
   //    *dsTmp = *ds;
   //    this->DSVector.push_back( dsTmp );
   //  }
   //  else if( ds->getType() == LTIDS )
   //  {
-  //    dsTmp = new LagrangianTIDS();
+  //    dsTmp = new LagrangianLinearTIDS();
   //    *dsTmp = *ds;
   //    this->DSVector.push_back( dsTmp );
   //    this->DSVector.push_back( ds );
@@ -237,20 +237,20 @@ void NonSmoothDynamicalSystem::linkNSDSXML()
     DynamicalSystem *ds;
     // with the data of the XML object, we know the type of DynamicalSystem, so we can instanciate the right type of DynamicalSystem
 
-    // DynamicalSystem - LagrangianNLDS
+    // DynamicalSystem - LagrangianDS
     if ((this->nsdsxml->getDSXML(nbDStab[i]))->getType() == LAGRANGIAN_NON_LINEARDS_TAG)
     {
-      // creation of the LagrangianNLDS with this constructor and call of a method to fill
-      ds = new LagrangianNLDS();
+      // creation of the LagrangianDS with this constructor and call of a method to fill
+      ds = new LagrangianDS();
       this->DSVector.push_back(ds);
-      (static_cast<LagrangianNLDS*>(ds))->createDynamicalSystem(this->nsdsxml->getDSXML(nbDStab[i]));
+      (static_cast<LagrangianDS*>(ds))->createDynamicalSystem(this->nsdsxml->getDSXML(nbDStab[i]));
       ds->setNSDS(this);
     }
     else if ((this->nsdsxml->getDSXML(nbDStab[i]))->getType() == LAGRANGIAN_TIME_INVARIANTDS_TAG)
     {
-      ds = new LagrangianTIDS();
+      ds = new LagrangianLinearTIDS();
       this->DSVector.push_back(ds);
-      (static_cast<LagrangianTIDS*>(ds))->createDynamicalSystem(this->nsdsxml->getDSXML(nbDStab[i]));
+      (static_cast<LagrangianLinearTIDS*>(ds))->createDynamicalSystem(this->nsdsxml->getDSXML(nbDStab[i]));
       ds->setNSDS(this);
     }
     else if ((this->nsdsxml->getDSXML(nbDStab[i]))->getType() == LINEAR_SYSTEMDS_TAG)
@@ -271,7 +271,7 @@ void NonSmoothDynamicalSystem::linkNSDSXML()
 
     // for the other DS, we must have the xxxDSXML.h .cpp objects needed, and the objects in the DynamicalSystems inherited of the platform
     /*
-     *  other "if" to create LagrangianTIDS and LinearSystemDS
+     *  other "if" to create LagrangianLinearTIDS and LinearSystemDS
      *
      */
   }
@@ -361,9 +361,9 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
     for (i = 0; i < size; i++)
     {
       if (this->DSVector[i]->getType() == LNLDS)
-        (static_cast<LagrangianNLDS*>(this->DSVector[i]))->saveDSToXML();
+        (static_cast<LagrangianDS*>(this->DSVector[i]))->saveDSToXML();
       else if (this->DSVector[i]->getType() == LTIDS)
-        (static_cast<LagrangianTIDS*>(this->DSVector[i]))->saveDSToXML();
+        (static_cast<LagrangianLinearTIDS*>(this->DSVector[i]))->saveDSToXML();
       else if (this->DSVector[i]->getType() == LSDS)
         (static_cast<LinearSystemDS*>(this->DSVector[i]))->saveDSToXML();
       else if (this->DSVector[i]->getType() == NLSDS)
@@ -474,7 +474,7 @@ DynamicalSystem* NonSmoothDynamicalSystem::addLinearSystemDS(int number, int n,
   }
 }
 
-DynamicalSystem* NonSmoothDynamicalSystem::addLagrangianNLDS(int number, int ndof,
+DynamicalSystem* NonSmoothDynamicalSystem::addLagrangianDS(int number, int ndof,
     SiconosVector* q0, SiconosVector* velocity0,
     string mass, string fInt, string fExt,
     string jacobianQFInt, string jacobianVelocityFInt,
@@ -485,8 +485,8 @@ DynamicalSystem* NonSmoothDynamicalSystem::addLagrangianNLDS(int number, int ndo
   {
     DynamicalSystem* dsTmp;
 
-    dsTmp = new LagrangianNLDS();
-    static_cast<LagrangianNLDS*>(dsTmp)->createDynamicalSystem(NULL, number, ndof,
+    dsTmp = new LagrangianDS();
+    static_cast<LagrangianDS*>(dsTmp)->createDynamicalSystem(NULL, number, ndof,
         q0, velocity0, mass, fInt, fExt,
         jacobianQFInt, jacobianVelocityFInt,
         jacobianQQNLInertia, jacobianVelocityQNLInertia,
@@ -501,12 +501,12 @@ DynamicalSystem* NonSmoothDynamicalSystem::addLagrangianNLDS(int number, int ndo
     char n[50];
     sprintf(n, "%i", number);
     string num = n;
-    string msg = "NonSmoothDynamicalSystem::addLagrangianNLDS : ERROR - The DynamicalSystem number " + num + " is already declared!";
+    string msg = "NonSmoothDynamicalSystem::addLagrangianDS : ERROR - The DynamicalSystem number " + num + " is already declared!";
     RuntimeException::selfThrow(msg);
   }
 }
 
-DynamicalSystem* NonSmoothDynamicalSystem::addLagrangianTIDS(int number, int ndof,
+DynamicalSystem* NonSmoothDynamicalSystem::addLagrangianLinearTIDS(int number, int ndof,
     SiconosVector* q0, SiconosVector* velocity0,
     SiconosMatrix* mass, string fExt,
     SiconosMatrix* K, SiconosMatrix* C)
@@ -515,8 +515,8 @@ DynamicalSystem* NonSmoothDynamicalSystem::addLagrangianTIDS(int number, int ndo
   {
     DynamicalSystem* dsTmp;
 
-    dsTmp = new LagrangianTIDS();
-    static_cast<LagrangianTIDS*>(dsTmp)->createDynamicalSystem(NULL, number, ndof,
+    dsTmp = new LagrangianLinearTIDS();
+    static_cast<LagrangianLinearTIDS*>(dsTmp)->createDynamicalSystem(NULL, number, ndof,
         q0, velocity0, mass, fExt, K, C);
     this->DSVector.push_back(dsTmp);
     dsTmp->setNSDS(this);
@@ -528,7 +528,7 @@ DynamicalSystem* NonSmoothDynamicalSystem::addLagrangianTIDS(int number, int ndo
     char n[50];
     sprintf(n, "%i", number);
     string num = n;
-    string msg = "NonSmoothDynamicalSystem::addLagrangianTIDS : ERROR - The DynamicalSystem number " + num + " is already declared!";
+    string msg = "NonSmoothDynamicalSystem::addLagrangianLinearTIDS : ERROR - The DynamicalSystem number " + num + " is already declared!";
     RuntimeException::selfThrow(msg);
   }
 }

@@ -18,7 +18,7 @@
 	<NSDS>
 		<DS_Definition>
 
-			<LagrangianNLDS number='1'>
+			<LagrangianDS number='1'>
 				<QNLInertia vectorPlugin="BasicPlugin:computeQNLInertia"/>
 				<q0 vectorFile='vector.dat'/>
 				<Velocity0 vectorFile='vector.dat'/>
@@ -32,9 +32,9 @@
 
 				<M matrixPlugin="BasicPlugin:computeMass"/>
 				<ndof>3</ndof>
-			</LagrangianNLDS>
+			</LagrangianDS>
 			
-			<LagrangianTIDS number='2'>
+			<LagrangianLinearTIDS number='2'>
 				<q0 vectorFile='vector.dat'/>
 				<Velocity0 vectorFile='vector.dat'/>
 				<Fext vectorPlugin="BasicPlugin:computeFExt"/>
@@ -42,7 +42,7 @@
 				<ndof>3</ndof>
 				<K matrixFile='matrix.dat'/>
 				<C matrixFile='matrix.dat'/>			
-			</LagrangianTIDS>		
+			</LagrangianLinearTIDS>		
 
 			<LinearSystemDS number='3'>
 				<n> 3 </n>

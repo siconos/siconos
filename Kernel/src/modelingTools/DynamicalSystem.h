@@ -58,7 +58,7 @@ class DSXML;
  *
  *
  * Particular cases such as linear system (LinearSystemDS) or
- * Lagrangian Non Linear System (LagrangianNLDS)  are specialization of this class.
+ * Lagrangian Non Linear System (LagrangianDS)  are specialization of this class.
  *
  * \todo Add a pointer to an object Constraint .
  */
@@ -550,7 +550,7 @@ protected:
    */
   virtual void linkDSXML();
 
-  /** the type of the DS : LagrangianNLDS, LagrangianTIDS, LinearSystemDS */
+  /** the type of the DS : LagrangianDS, LagrangianLinearTIDS, LinearSystemDS */
   string DSType;
 
   /** NonSmoothDynamicalSystem owner of this DynamicalSystem */

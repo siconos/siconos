@@ -1,8 +1,8 @@
 
 #include "NSDSXML.h"
 
-#include "LagrangianNLDSXML.h"
-#include "LagrangianTIDSXML.h"
+#include "LagrangianDSXML.h"
+#include "LagrangianLinearTIDSXML.h"
 #include "LinearSystemDSXML.h"
 
 #include "LinearECXML.h"
@@ -172,13 +172,13 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
             {
               node = xmlNewChild(dsDefinitionNode, NULL, (xmlChar*)LAGRANGIAN_NON_LINEARDS_TAG.c_str(), NULL);
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
-              dsxml = new LagrangianNLDSXML();
+              dsxml = new LagrangianDSXML();
 
               // linkage between the DynamicalSystem and his DSXML
               nsds->getDynamicalSystem(i)->setDynamicalSystemXML(dsxml);
 
               // creation of the DynamicalSystemXML
-              static_cast<LagrangianNLDSXML*>(dsxml)->updateDynamicalSystemXML(node, nsds->getDynamicalSystem(i));
+              static_cast<LagrangianDSXML*>(dsxml)->updateDynamicalSystemXML(node, nsds->getDynamicalSystem(i));
 
               this->DSXMLMap[number] = dsxml;
             }
@@ -186,13 +186,13 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
             {
               node = xmlNewChild(dsDefinitionNode, NULL, (xmlChar*)LAGRANGIAN_TIME_INVARIANTDS_TAG.c_str(), NULL);
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
-              dsxml = new LagrangianTIDSXML();
+              dsxml = new LagrangianLinearTIDSXML();
 
               // linkage between the DynamicalSystem and his DSXML
               nsds->getDynamicalSystem(i)->setDynamicalSystemXML(dsxml);
 
               // creation of the DynamicalSystemXML
-              static_cast<LagrangianTIDSXML*>(dsxml)->updateDynamicalSystemXML(node, nsds->getDynamicalSystem(i));
+              static_cast<LagrangianLinearTIDSXML*>(dsxml)->updateDynamicalSystemXML(node, nsds->getDynamicalSystem(i));
 
               this->DSXMLMap[number] = dsxml;
             }
@@ -424,12 +424,12 @@ void NSDSXML::loadDSXML(xmlNode * rootDSNode)
 
       if (type == LAGRANGIAN_NON_LINEARDS_TAG)
       {
-        dsxml = new LagrangianNLDSXML((xmlNode *)node, isBVP);
+        dsxml = new LagrangianDSXML((xmlNode *)node, isBVP);
         this->DSXMLMap[number] = dsxml;
       }
       else if (type == LAGRANGIAN_TIME_INVARIANTDS_TAG)
       {
-        dsxml = new LagrangianTIDSXML((xmlNode *)node, isBVP);
+        dsxml = new LagrangianLinearTIDSXML((xmlNode *)node, isBVP);
         this->DSXMLMap[number] = dsxml;
       }
       else if (type == LINEAR_SYSTEMDS_TAG)
@@ -579,7 +579,7 @@ void NSDSXML::updateNSDSXML(xmlNode* node, NonSmoothDynamicalSystem* nsds)
 //version 1.1
 //
 //- changes in all balises DS, Relation, NSLaw, OneStepIntegrator, OneStepNSProblem
-//in the XML files into specific names like LagrangianNLDS, LinearSystemDS, ...
+//in the XML files into specific names like LagrangianDS, LinearSystemDS, ...
 //for the DS
 //
 //Revision 1.36  2004/09/16 11:35:25  jbarbier
@@ -625,6 +625,6 @@ void NSDSXML::updateNSDSXML(xmlNode* node, NonSmoothDynamicalSystem* nsds)
 //- NonLinearSystemDS is now available
 //
 //Revision 1.29  2004/07/30 14:37:15  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianNLDSXML
+//- saving methods for DynamicalSystemXML and LagrangianDSXML
 //
 //Revision 1.28  2004/07/29 14:25:44  jbarbier

@@ -3,7 +3,7 @@
 #include "Moreau.h"
 #include "Lsodar.h"
 #include "Adams.h"
-#include "LagrangianTIDS.h"
+#include "LagrangianLinearTIDS.h"
 
 #include "LCP.h"
 #include "QP.h"
@@ -118,14 +118,14 @@ void Strategy::updateState()
   for (int i = 0; i < this->integratorVector.size(); i++)
   {
     //    cout<<"### Strategy::updateState (Ufree) :"<<endl;
-    //    static_cast<LagrangianTIDS*>(this->integratorVector[i]->getDynamicalSystem())->getQ().display();
-    //    static_cast<LagrangianTIDS*>(this->integratorVector[i]->getDynamicalSystem())->getVelocity().display();
+    //    static_cast<LagrangianLinearTIDS*>(this->integratorVector[i]->getDynamicalSystem())->getQ().display();
+    //    static_cast<LagrangianLinearTIDS*>(this->integratorVector[i]->getDynamicalSystem())->getVelocity().display();
 
     this->integratorVector[i]->updateState();
 
     //    cout<<"### Strategy::updateState (U) :"<<endl;
-    //    static_cast<LagrangianTIDS*>(this->integratorVector[i]->getDynamicalSystem())->getQ().display();
-    //    static_cast<LagrangianTIDS*>(this->integratorVector[i]->getDynamicalSystem())->getVelocity().display();
+    //    static_cast<LagrangianLinearTIDS*>(this->integratorVector[i]->getDynamicalSystem())->getQ().display();
+    //    static_cast<LagrangianLinearTIDS*>(this->integratorVector[i]->getDynamicalSystem())->getVelocity().display();
   }
   //  cout<<"                    <<Press Enter>>"<<endl;
   //  getchar();

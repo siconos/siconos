@@ -1,5 +1,5 @@
-#ifndef __LagrangianNLDSXMLTest__
-#define __LagrangianNLDSXMLTest__
+#ifndef __LagrangianDSXMLTest__
+#define __LagrangianDSXMLTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -7,12 +7,12 @@
 #include <cstdlib>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-#include "LagrangianNLDSXML.h"
+#include "LagrangianDSXML.h"
 
 
 
 
-class LagrangianNLDSXMLTest : public CppUnit::TestFixture
+class LagrangianDSXMLTest : public CppUnit::TestFixture
 {
 
 
@@ -20,14 +20,14 @@ private:
 
   xmlDoc *doc;
   xmlNode *root;
-  LagrangianNLDSXML ds;
+  LagrangianDSXML ds;
   SiconosMatrix matrixRef;
   /*SiconosVector*/
   SimpleVector vectorRef;
 
 
   // on nomme la suite de tests
-  CPPUNIT_TEST_SUITE(LagrangianNLDSXMLTest);
+  CPPUNIT_TEST_SUITE(LagrangianDSXMLTest);
 
   // on ajoute les tests a effectuer
 

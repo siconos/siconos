@@ -101,8 +101,8 @@ void EqualityConstraint::computeOutput(double time)
   //      ds2=vDS[1];
   //      if (((ds1->getType() == LNLDS) || (ds1->getType() == LTIDS)) && ((ds2->getType() == LNLDS) || (ds2->getType() == LTIDS)))
   //      {
-  //        LagrangianNLDS *d1 = static_cast<LagrangianNLDS*> (ds1);
-  //        LagrangianNLDS *d2 = static_cast<LagrangianNLDS*> (ds2);
+  //        LagrangianDS *d1 = static_cast<LagrangianDS*> (ds1);
+  //        LagrangianDS *d2 = static_cast<LagrangianDS*> (ds2);
   //
   //        CompositeVector q;
   //        q.add(*(d1->getQPtr()));

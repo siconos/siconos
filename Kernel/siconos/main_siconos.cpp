@@ -19,7 +19,7 @@ extern "C" void essai_plugin(Model *m)
 {
   OUT("--------- Tests d'integration : plateforme <=> plugins ----------------\n");
   m->getNonSmoothDynamicalSystem()->getDynamicalSystemOnNumber(1)->vectorField(123.3541);
-  //  static_cast<LagrangianNLDS*>(m->getNonSmoothDynamicalSystem()->getDynamicalSystemOnNumber(1))->computeQNLInertia();
+  //  static_cast<LagrangianDS*>(m->getNonSmoothDynamicalSystem()->getDynamicalSystemOnNumber(1))->computeQNLInertia();
   OUT("-------------------------\n");
 }
 
@@ -157,8 +157,8 @@ extern "C" void essai_model_XML(char  xmlFile[])
     mC(2, 2) = 0.0;
 
 
-    ds1 = nsds->addLagrangianTIDS(1, 3, &q0, &v0, &mass, "sample/BouncingBall/BallPlugin:ballFExt",
-                                  &K, &mC);
+    ds1 = nsds->addLagrangianLinearTIDS(1, 3, &q0, &v0, &mass, "sample/BouncingBall/BallPlugin:ballFExt",
+                                        &K, &mC);
     //ds1->setQ()
 
 
@@ -175,10 +175,10 @@ extern "C" void essai_model_XML(char  xmlFile[])
     SiconosMatrix C_(1, 1);
     C_(0, 0) = 0.0;
 
-    //    ds2 = nsds->addLagrangianTIDS(2, 1, &q0_, &v0_, &mass_,"sample/BouncingBall/BallPlugin:groundFExt",
+    //    ds2 = nsds->addLagrangianLinearTIDS(2, 1, &q0_, &v0_, &mass_,"sample/BouncingBall/BallPlugin:groundFExt",
     //        &K_, &C_);
-    ds2 = new LagrangianTIDS();
-    static_cast<LagrangianTIDS*>(ds2)->createDynamicalSystem(NULL, 2, 1,
+    ds2 = new LagrangianLinearTIDS();
+    static_cast<LagrangianLinearTIDS*>(ds2)->createDynamicalSystem(NULL, 2, 1,
         &q0_, &v0_, &mass_,
         "sample/BouncingBall/BallPlugin:groundFExt",
         &K_, &C_);
@@ -246,11 +246,11 @@ extern "C" void essai_model_XML(char  xmlFile[])
             //time
             mat(k, 0) = k*td->getH();
             // position
-            LagrangianNLDS* ball = static_cast<LagrangianNLDS*> (m.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
+            LagrangianDS* ball = static_cast<LagrangianDS*> (m.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
             mat(k, 1) = (ball->getQ())(0);
                   // position
             mat(k, 2) = (ball->getVelocity())(0);
-            LagrangianNLDS* ground = static_cast<LagrangianNLDS*> (m.getNonSmoothDynamicalSystem()->getDynamicalSystem(1));
+            LagrangianDS* ground = static_cast<LagrangianDS*> (m.getNonSmoothDynamicalSystem()->getDynamicalSystem(1));
             mat(k, 3) = (ground->getQ())(0);
                   // position
             mat(k, 4) = (ground->getVelocity())(0);
@@ -278,7 +278,7 @@ extern "C" void essai_model_XML(char  xmlFile[])
                 //time
                 mat(k, 0) = k*td->getH();
                 // position
-                //LagrangianNLDS* ball = static_cast<LagrangianNLDS*> (bouncingBall.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
+                //LagrangianDS* ball = static_cast<LagrangianDS*> (bouncingBall.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
                 mat(k, 1) = (ball->getQ())(0);
                       // position
                 mat(k, 2) = (ball->getVelocity())(0);
@@ -347,10 +347,10 @@ extern "C" void essai_model_XML(char  xmlFile[])
     ds2 = nsds->addLinearSystemDS(2, 5, &sv);
     ds2->createNLinearBC();
 
-    ds3 = nsds->addLagrangianNLDS(3, 2, &sv, &sv, "BasicPlugin:computeMass",
-                                  "BasicPlugin:computeFInt", "BasicPlugin:computeFExt", "BasicPlugin:computeJacobianQFInt",
-                                  "BasicPlugin:computeJacobianVelocityFInt", "BasicPlugin:computeJacobianQQNLInertia",
-                                  "BasicPlugin:computeJacobianVelocityQNLInertia", "BasicPlugin:computeQNLInertia");
+    ds3 = nsds->addLagrangianDS(3, 2, &sv, &sv, "BasicPlugin:computeMass",
+                                "BasicPlugin:computeFInt", "BasicPlugin:computeFExt", "BasicPlugin:computeJacobianQFInt",
+                                "BasicPlugin:computeJacobianVelocityFInt", "BasicPlugin:computeJacobianQQNLInertia",
+                                "BasicPlugin:computeJacobianVelocityQNLInertia", "BasicPlugin:computeQNLInertia");
     ds3->createPeriodicBC();
 
     SiconosMatrix sm_(2, 2);
@@ -367,10 +367,10 @@ extern "C" void essai_model_XML(char  xmlFile[])
 
 
     SiconosMatrix sm;
-    //    ds4 = nsds->addLagrangianTIDS(4, 8, &sv, &sv, &sm,"BasicPlugin:computeFExt",
+    //    ds4 = nsds->addLagrangianLinearTIDS(4, 8, &sv, &sv, &sm,"BasicPlugin:computeFExt",
     //        &sm, &sm);
-    ds4 = new LagrangianTIDS();
-    static_cast<LagrangianTIDS*>(ds4)->createDynamicalSystem(NULL, 4, 8,
+    ds4 = new LagrangianLinearTIDS();
+    static_cast<LagrangianLinearTIDS*>(ds4)->createDynamicalSystem(NULL, 4, 8,
         &sv, &sv, &sm, "BasicPlugin:computeFExt", &sm, &sm);
     nsds->addDynamicalSystem(ds4);
     ds4->createLinearBC(&sv, &sm, &sm);

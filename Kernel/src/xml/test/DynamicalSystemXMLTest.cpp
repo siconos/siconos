@@ -56,7 +56,7 @@ void DynamicalSystemXMLTest::testGetNumber()
 
 void DynamicalSystemXMLTest::testGetType()
 {
-  CPPUNIT_ASSERT_MESSAGE("testGetType : ", ds.getType() == "LagrangianNLDS");
+  CPPUNIT_ASSERT_MESSAGE("testGetType : ", ds.getType() == "LagrangianDS");
   cout << "DynamicalSystemXMLTest >>> testGetType .............................. OK\n ";
 }
 

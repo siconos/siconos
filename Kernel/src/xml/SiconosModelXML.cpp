@@ -640,7 +640,7 @@ int SiconosModelXML::validateXmlFile(string xmlFile, string xmlSchema)
 //version 1.1
 //
 //- changes in all balises DS, Relation, NSLaw, OneStepIntegrator, OneStepNSProblem
-//in the XML files into specific names like LagrangianNLDS, LinearSystemDS, ...
+//in the XML files into specific names like LagrangianDS, LinearSystemDS, ...
 //for the DS
 //
 //Revision 1.60  2004/12/06 14:10:59  jbarbier
@@ -707,7 +707,7 @@ int SiconosModelXML::validateXmlFile(string xmlFile, string xmlSchema)
 //
 //- function createDynamicalSystem and createLinearSystemDS complete
 //
-//- function  createLagrangianNLDS in progress
+//- function  createLagrangianDS in progress
 //
 //Revision 1.48  2004/08/12 14:28:37  jbarbier
 //- createTimeDiscretisation in progress
@@ -748,6 +748,6 @@ int SiconosModelXML::validateXmlFile(string xmlFile, string xmlSchema)
 //- attribute T of the Model is now optional
 //
 //Revision 1.42  2004/07/30 14:37:16  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianNLDSXML
+//- saving methods for DynamicalSystemXML and LagrangianDSXML
 //
 //Revision 1.41  2004/07/29 14:25:45  jbarbier

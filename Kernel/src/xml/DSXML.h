@@ -42,8 +42,8 @@ using namespace std;
 class DynamicalSystem;
 class BoundaryCondition;
 class DSInputOutputXML;
-//class LagrangianNLDS;
-//class LagrangianTIDS;
+//class LagrangianDS;
+//class LagrangianLinearTIDS;
 //class LinearSystemDS;
 
 //Tags
@@ -650,7 +650,7 @@ private:
 //
 //- new function for the SiconosMatrices to copy a block matrix into another matrix
 //
-//- tag names of BoundaryConditionXML, DSInputOutputXML, DSXML, InteractionXML, LagrangianLinearRXML, LagrangianNLDSXML put in XMLTagNames.h
+//- tag names of BoundaryConditionXML, DSInputOutputXML, DSXML, InteractionXML, LagrangianLinearRXML, LagrangianDSXML put in XMLTagNames.h
 //
 //Revision 1.43  2005/01/18 17:07:44  charlety
 //
@@ -668,7 +668,7 @@ private:
 //version 1.1
 //
 //- changes in all balises DS, Relation, NSLaw, OneStepIntegrator, OneStepNSProblem
-//in the XML files into specific names like LagrangianNLDS, LinearSystemDS, ...
+//in the XML files into specific names like LagrangianDS, LinearSystemDS, ...
 //for the DS
 //
 //Revision 1.40  2004/09/27 08:24:26  charlety
@@ -726,6 +726,6 @@ private:
 //SiconosVector
 //
 //Revision 1.31  2004/07/30 14:37:15  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianNLDSXML
+//- saving methods for DynamicalSystemXML and LagrangianDSXML
 //
 //Revision 1.30  2004/07/29 14:25:42  jbarbier

@@ -3,8 +3,8 @@
 
 
 // const found in the DynamicalSystem
-const string LNLDS = "LagrangianNLDS";
-const string LTIDS = "LagrangianTIDS";
+const string LNLDS = "LagrangianDS";
+const string LTIDS = "LagrangianLinearTIDS";
 const string LSDS = "LinearSystemDS";
 const string NLSDS = "NonLinearSystemDS";
 

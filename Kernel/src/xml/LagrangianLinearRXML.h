@@ -103,7 +103,7 @@ private:
 //
 //- new function for the SiconosMatrices to copy a block matrix into another matrix
 //
-//- tag names of BoundaryConditionXML, DSInputOutputXML, DSXML, InteractionXML, LagrangianLinearRXML, LagrangianNLDSXML put in XMLTagNames.h
+//- tag names of BoundaryConditionXML, DSInputOutputXML, DSXML, InteractionXML, LagrangianLinearRXML, LagrangianDSXML put in XMLTagNames.h
 //
 //Revision 1.9  2005/01/18 10:35:17  jbarbier
 //- attribute "r" no longer used for Moreau integrator

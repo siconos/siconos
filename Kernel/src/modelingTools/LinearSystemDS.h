@@ -339,7 +339,7 @@ private :
 //
 //- function createDynamicalSystem and createLinearSystemDS complete
 //
-//- function  createLagrangianNLDS in progress
+//- function  createLagrangianDS in progress
 //
 //Revision 1.31  2004/08/12 11:55:15  jbarbier
 //- new methods createModel, createNSDS, createStrategy, ...

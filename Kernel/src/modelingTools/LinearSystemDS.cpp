@@ -245,7 +245,7 @@ LinearSystemDS* LinearSystemDS::convert(DynamicalSystem* ds)
 //
 //- function createDynamicalSystem and createLinearSystemDS complete
 //
-//- function  createLagrangianNLDS in progress
+//- function  createLagrangianDS in progress
 //
 //Revision 1.23  2004/08/12 11:55:14  jbarbier
 //- new methods createModel, createNSDS, createStrategy, ...

@@ -314,12 +314,12 @@ public:
   DynamicalSystem* addLinearSystemDS(int number = -1, int n = -1,
                                      SiconosVector* x0 = NULL);
 
-  /** \fn DynamicalSystem* addLagrangianNLDS( int number, int ndof,
+  /** \fn DynamicalSystem* addLagrangianDS( int number, int ndof,
         SiconosVector* q0, SiconosVector* velocity0,
         string mass, string fInt, string fExt, string jacobianQFInt,
         string jacobianVelocityFInt, string jacobianQQNLInertia,
         string jacobianVelocityQNLInertia, string QNLInertia)
-   *  \brief allow to add a LagrangianNLDS to the NonSmoothDynamicalSystem
+   *  \brief allow to add a LagrangianDS to the NonSmoothDynamicalSystem
    *  \param int : the number of the DynamicalSystem
    *  \param int : the degree of freedom of the DynamicalSystem
    *  \param SiconosVector* : the q0 vector of the DynamicalSystem
@@ -333,20 +333,20 @@ public:
    *  \param string : the plugin name and the function name to link to compute the jacobianVelocityQNLInertia
    *  \param string : the plugin name and the function name to link to compute the QNLInertia
    */
-  DynamicalSystem* addLagrangianNLDS(int number = -1, int ndof = -1,
-                                     SiconosVector* q0 = NULL, SiconosVector* velocity0 = NULL,
-                                     string mass = "BasicPlugin:computeMass",
-                                     string fInt = "BasicPlugin:computeFInt", string fExt = "BasicPlugin:computeFExt",
-                                     string jacobianQFInt = "BasicPlugin:computeJacobianQFInt",
-                                     string jacobianVelocityFInt = "BasicPlugin:computeJacobianVelocityFInt",
-                                     string jacobianQQNLInertia = "BasicPlugin:computeJacobianQQNLInertia",
-                                     string jacobianVelocityQNLInertia = "BasicPlugin:computeJacobianVelocityQNLInertia",
-                                     string QNLInertia = "BasicPlugin:computeQNLInertia");
+  DynamicalSystem* addLagrangianDS(int number = -1, int ndof = -1,
+                                   SiconosVector* q0 = NULL, SiconosVector* velocity0 = NULL,
+                                   string mass = "BasicPlugin:computeMass",
+                                   string fInt = "BasicPlugin:computeFInt", string fExt = "BasicPlugin:computeFExt",
+                                   string jacobianQFInt = "BasicPlugin:computeJacobianQFInt",
+                                   string jacobianVelocityFInt = "BasicPlugin:computeJacobianVelocityFInt",
+                                   string jacobianQQNLInertia = "BasicPlugin:computeJacobianQQNLInertia",
+                                   string jacobianVelocityQNLInertia = "BasicPlugin:computeJacobianVelocityQNLInertia",
+                                   string QNLInertia = "BasicPlugin:computeQNLInertia");
 
-  /** \fn DynamicalSystem* addLagrangianTIDS( int number, int ndof,
+  /** \fn DynamicalSystem* addLagrangianLinearTIDS( int number, int ndof,
         SiconosVector* q0, SiconosVector* velocity0,
         string mass, string fExt, SiconosMatrix* K, SiconosMatrix* C)
-   *  \brief allow to add a LagrangianTIDS to the NonSmoothDynamicalSystem
+   *  \brief allow to add a LagrangianLinearTIDS to the NonSmoothDynamicalSystem
    *  \param int : the number of the DynamicalSystem
    *  \param int : the degree of freedom of the DynamicalSystem
    *  \param SiconosVector* : the q0 vector of the DynamicalSystem
@@ -356,12 +356,12 @@ public:
    *  \param SiconosMatrix* : the K matrix of the lagrangianTIDS
    *  \param SiconosMatrix* : the C matrix of the lagrangianTIDS
    */
-  DynamicalSystem* addLagrangianTIDS(int number = -1, int ndof = -1,
-                                     SiconosVector* q0 = NULL, SiconosVector* velocity0 = NULL,
-                                     /*string mass="BasicPlugin:computeMass",*/
-                                     SiconosMatrix* mass = NULL,
-                                     string fExt = "BasicPlugin:computeFExt",
-                                     SiconosMatrix* K = NULL, SiconosMatrix* C = NULL);
+  DynamicalSystem* addLagrangianLinearTIDS(int number = -1, int ndof = -1,
+      SiconosVector* q0 = NULL, SiconosVector* velocity0 = NULL,
+      /*string mass="BasicPlugin:computeMass",*/
+      SiconosMatrix* mass = NULL,
+      string fExt = "BasicPlugin:computeFExt",
+      SiconosMatrix* K = NULL, SiconosMatrix* C = NULL);
 
   /** \fn Interaction* addInteraction(int number, int nInter, vector<int>* status, vector<DynamicalSystem*>*)
    *  \brief allow to add an Interaction to the NonSmoothDynamicalSystem

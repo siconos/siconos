@@ -2,8 +2,8 @@
 #include "LagrangianLinearR.h"
 
 #include "DynamicalSystem.h"
-#include "LagrangianNLDS.h"
-#include "LagrangianTIDS.h"
+#include "LagrangianDS.h"
+#include "LagrangianLinearTIDS.h"
 #include "LinearSystemDS.h"
 
 #include "check.h"
@@ -53,7 +53,7 @@ SiconosMatrix LagrangianLinearR::getHRelatingToDS(int position)
   {
     int row, col, gap;
     row = this->h.size(0);
-    col = static_cast<LagrangianNLDS*>(this->interaction->getDynamicalSystems()[ position ])->getNdof();
+    col = static_cast<LagrangianDS*>(this->interaction->getDynamicalSystems()[ position ])->getNdof();
 
     SiconosMatrix H(row, col);
 
@@ -93,8 +93,8 @@ void LagrangianLinearR::computeOutput(double time)
     ds2 = vDS[1];
     if (((ds1->getType() == LNLDS) || (ds1->getType() == LTIDS)) && ((ds2->getType() == LNLDS) || (ds2->getType() == LTIDS)))
     {
-      LagrangianNLDS *d1 = static_cast<LagrangianNLDS*>(ds1);
-      LagrangianNLDS *d2 = static_cast<LagrangianNLDS*>(ds2);
+      LagrangianDS *d1 = static_cast<LagrangianDS*>(ds1);
+      LagrangianDS *d2 = static_cast<LagrangianDS*>(ds2);
 
       CompositeVector q;
       q.add(*(d1->getQPtr()));
@@ -119,7 +119,7 @@ void LagrangianLinearR::computeOutput(double time)
     ds1 = vDS[0];
     if ((ds1->getType() == LNLDS) || (ds1->getType() == LTIDS))
     {
-      LagrangianNLDS *d1 = static_cast<LagrangianNLDS*>(ds1);
+      LagrangianDS *d1 = static_cast<LagrangianDS*>(ds1);
       /*SiconosVector*/
       SimpleVector q(*(d1->getQPtr())/*, false*/);
 
@@ -163,8 +163,8 @@ void LagrangianLinearR::computeFreeOutput(double time)
     ds2 = vDS[1];
     if (((ds1->getType() == LNLDS) || (ds1->getType() == LTIDS)) && ((ds2->getType() == LNLDS) || (ds2->getType() == LTIDS)))
     {
-      LagrangianNLDS *d1 = static_cast<LagrangianNLDS*>(ds1);
-      LagrangianNLDS *d2 = static_cast<LagrangianNLDS*>(ds2);
+      LagrangianDS *d1 = static_cast<LagrangianDS*>(ds1);
+      LagrangianDS *d2 = static_cast<LagrangianDS*>(ds2);
       //        SiconosVector qfree(*(d1->getQFreePtr()), false);
       CompositeVector qfree;
       qfree.add(*(d1->getQFreePtr()));
@@ -190,7 +190,7 @@ void LagrangianLinearR::computeFreeOutput(double time)
     ds1 = vDS[0];
     if ((ds1->getType() == LNLDS) || (ds1->getType() == LTIDS))
     {
-      LagrangianNLDS *d1 = static_cast<LagrangianNLDS*>(ds1);
+      LagrangianDS *d1 = static_cast<LagrangianDS*>(ds1);
       //        SiconosVector qfree(*(d1->getQFreePtr()), false);
       SimpleVector *qfree = d1->getVelocityFreePtr();
       *y = (this->h * *qfree) + this->b;
@@ -231,8 +231,8 @@ void LagrangianLinearR::computeInput(double time)
     ds2 = vDS[1];
     if (((ds1->getType() == LNLDS) || (ds1->getType() == LTIDS)) && ((ds2->getType() == LNLDS) || (ds2->getType() == LTIDS)))
     {
-      LagrangianNLDS *d1 = static_cast<LagrangianNLDS*>(ds1);
-      LagrangianNLDS *d2 = static_cast<LagrangianNLDS*>(ds2);
+      LagrangianDS *d1 = static_cast<LagrangianDS*>(ds1);
+      LagrangianDS *d2 = static_cast<LagrangianDS*>(ds2);
 
       CompositeVector p;
       p.add(*(d1->getPPtr()));
@@ -255,7 +255,7 @@ void LagrangianLinearR::computeInput(double time)
     ds1 = vDS[0];
     if ((ds1->getType() == LNLDS) || (ds1->getType() == LTIDS))
     {
-      LagrangianNLDS *d1 = static_cast<LagrangianNLDS*>(ds1);
+      LagrangianDS *d1 = static_cast<LagrangianDS*>(ds1);
       //        SiconosVector p(*(d1->getPPtr()), false);
       SimpleVector p(*(d1->getPPtr()));
       //r = (this->h).multTranspose(*lambda);
@@ -410,7 +410,7 @@ LagrangianLinearR* LagrangianLinearR::convert(Relation *r)
 //version 1.1
 //
 //- changes in all balises DS, Relation, NSLaw, OneStepIntegrator, OneStepNSProblem
-//in the XML files into specific names like LagrangianNLDS, LinearSystemDS, ...
+//in the XML files into specific names like LagrangianDS, LinearSystemDS, ...
 //for the DS
 //
 //Revision 1.9  2004/09/16 11:35:24  jbarbier

@@ -22,7 +22,7 @@
 		<DS_Definition>
 		
 
-			<LagrangianNLDS number='1'>
+			<LagrangianDS number='1'>
 		<!--		<n> 6 </n>  -->
 				<x vectorSize='6'>
 					4.5454 454.5 5 5 5
@@ -86,9 +86,9 @@
 				
 				<ndof>3</ndof>
 			
-			</LagrangianNLDS>
+			</LagrangianDS>
 			
-			<LagrangianTIDS number='2'>
+			<LagrangianLinearTIDS number='2'>
 				<!-- Commun at all DS -->
 				
 <!--				<n> 6 </n>  -->
@@ -121,7 +121,7 @@
 -->				
 				<StepsInMemory>8</StepsInMemory>				
 				
-				<!-- Specific to LagrangianTIDS-->
+				<!-- Specific to LagrangianLinearTIDS-->
 				
 				<q vectorFile='vector.dat'/>
 				<q0 vectorFile='vector.dat'/>
@@ -149,7 +149,7 @@
 				<K matrixFile='matrix.dat'/>
 				<C matrixFile='matrix.dat'/>			
 
-			</LagrangianTIDS>		
+			</LagrangianLinearTIDS>		
 
 			<LinearSystemDS number='3'>
 				<!-- Commun at all DS -->

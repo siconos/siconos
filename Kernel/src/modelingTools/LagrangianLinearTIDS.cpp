@@ -1,102 +1,102 @@
-#include "LagrangianTIDS.h"
+#include "LagrangianLinearTIDS.h"
 
 #include "check.h"
 
 
-LagrangianTIDS::LagrangianTIDS()
+LagrangianLinearTIDS::LagrangianLinearTIDS()
 {
-  IN("LagrangianTIDS::LagrangianTIDS()\n");
+  IN("LagrangianLinearTIDS::LagrangianLinearTIDS()\n");
   this->DSType = LTIDS;
-  LagrangianNLDS::init();
+  LagrangianDS::init();
   this->init();
   this->K = SiconosMatrix::SiconosMatrix();
   this->C = SiconosMatrix::SiconosMatrix();
   this->DSType = LTIDS;
-  OUT("LagrangianTIDS::LagrangianTIDS()\n");
+  OUT("LagrangianLinearTIDS::LagrangianLinearTIDS()\n");
 }
 
-LagrangianTIDS::LagrangianTIDS(DSXML* dsxml): LagrangianNLDS(dsxml)
+LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML* dsxml): LagrangianDS(dsxml)
 {
-  IN("LagrangianTIDS::LagrangianTIDS(DSXML* dsxml):LagrangianNLDS(dsxml)\n");
+  IN("LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML* dsxml):LagrangianDS(dsxml)\n");
 
   this->init();
   this->K = SiconosMatrix::SiconosMatrix();
   this->C = SiconosMatrix::SiconosMatrix();
   this->DSType = LTIDS;
 
-  OUT("LagrangianTIDS::LagrangianTIDS(DSXML* dsxml):LagrangianNLDS(dsxml)\n");
+  OUT("LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML* dsxml):LagrangianDS(dsxml)\n");
 }
 
 
-LagrangianTIDS::~LagrangianTIDS()
+LagrangianLinearTIDS::~LagrangianLinearTIDS()
 {
-  IN("LagrangianTIDS::~LagrangianTIDS()\n");
+  IN("LagrangianLinearTIDS::~LagrangianLinearTIDS()\n");
 
-  OUT("LagrangianTIDS::~LagrangianTIDS()\n");
+  OUT("LagrangianLinearTIDS::~LagrangianLinearTIDS()\n");
 }
 
-SiconosMatrix* LagrangianTIDS::getKPtr(void)
+SiconosMatrix* LagrangianLinearTIDS::getKPtr(void)
 {
   return &this->K;
 }
 
-SiconosMatrix* LagrangianTIDS::getCPtr(void)
+SiconosMatrix* LagrangianLinearTIDS::getCPtr(void)
 {
   return &this->C;
 }
 
 
-void LagrangianTIDS::init()
+void LagrangianLinearTIDS::init()
 {
-  IN("LagrangianTIDS::init\n");
-  //LagrangianNLDS::init();
+  IN("LagrangianLinearTIDS::init\n");
+  //LagrangianDS::init();
   this->computeFExtPtr = LTIDSComputeFExt;
-  OUT("LagrangianTIDS::init\n");
+  OUT("LagrangianLinearTIDS::init\n");
 }
 
 
-void LagrangianTIDS::fillDSWithDSXML()
+void LagrangianLinearTIDS::fillDSWithDSXML()
 {
-  IN("LagrangianTIDS::fillDSWithDSXML\n");
+  IN("LagrangianLinearTIDS::fillDSWithDSXML\n");
 
   if (this->dsxml != NULL)
   {
-    this->K = (static_cast <LagrangianTIDSXML*>(this->dsxml))->getK();
-    this->C = (static_cast <LagrangianTIDSXML*>(this->dsxml))->getC();
+    this->K = (static_cast <LagrangianLinearTIDSXML*>(this->dsxml))->getK();
+    this->C = (static_cast <LagrangianLinearTIDSXML*>(this->dsxml))->getC();
     //this->init();
     //    this->display();
   }
-  else RuntimeException::selfThrow("LagrangianTIDS::fillDSWithDSXML - object DSXML does not exist");
-  OUT("LagrangianTIDS::fillDSWithDSXML\n");
+  else RuntimeException::selfThrow("LagrangianLinearTIDS::fillDSWithDSXML - object DSXML does not exist");
+  OUT("LagrangianLinearTIDS::fillDSWithDSXML\n");
 }
 
-void LagrangianTIDS::display() const
+void LagrangianLinearTIDS::display() const
 {
-  IN("LagrangianTIDS::display\n");
+  IN("LagrangianLinearTIDS::display\n");
 
   cout << "-----------------------------------------------------" << endl;
   cout << "____ data of the LangrangianTIDS " << endl;
-  LagrangianNLDS::display();
+  LagrangianDS::display();
   cout << "| Stiffness Matrix K : " << endl;
   K.display();
   cout << "| Viscosity Matrix C : " << endl;
   C.display();
   cout << "-----------------------------------------------------" << endl << endl;
-  OUT("LagrangianTIDS::display\n");
+  OUT("LagrangianLinearTIDS::display\n");
 }
 
-void LagrangianTIDS::saveDSToXML()
+void LagrangianLinearTIDS::saveDSToXML()
 {
-  IN("LagrangianTIDS::saveDSToXML\n");
-  LagrangianNLDS::saveDSToXML();
+  IN("LagrangianLinearTIDS::saveDSToXML\n");
+  LagrangianDS::saveDSToXML();
 
   if (this->dsxml != NULL)
   {
-    (static_cast <LagrangianTIDSXML*>(this->dsxml))->setK(&(this->K));
-    (static_cast <LagrangianTIDSXML*>(this->dsxml))->setC(&(this->C));
+    (static_cast <LagrangianLinearTIDSXML*>(this->dsxml))->setK(&(this->K));
+    (static_cast <LagrangianLinearTIDSXML*>(this->dsxml))->setC(&(this->C));
   }
-  else RuntimeException::selfThrow("LagrangianTIDS::saveDSToXML - object DSXML does not exist");
-  OUT("LagrangianTIDS::saveDSToXML\n");
+  else RuntimeException::selfThrow("LagrangianLinearTIDS::saveDSToXML - object DSXML does not exist");
+  OUT("LagrangianLinearTIDS::saveDSToXML\n");
 }
 
 
@@ -110,12 +110,12 @@ extern "C" double FextFunction(double time)
 
 void LTIDSComputeFExt(int* sizeOfq, double* time, double* qPtr, double* fExt)
 {
-  IN("LagrangianTIDS : friend LTIDSComputeFInt\n");
+  IN("LagrangianLinearTIDS : friend LTIDSComputeFInt\n");
 
   const double m = 1; // ball mass
   const double g = 9.8; // gravity
 
-  cout << " /!\\!!! POUET !!!! [LagrangianTIDS : friend LTIDSComputeFInt]" << endl;
+  cout << " /!\\!!! POUET !!!! [LagrangianLinearTIDS : friend LTIDSComputeFInt]" << endl;
   getchar();
 
   int i;
@@ -128,18 +128,18 @@ void LTIDSComputeFExt(int* sizeOfq, double* time, double* qPtr, double* fExt)
   }
 
   fExt[0] = -m * g + FextFunction(t);
-  OUT("LagrangianTIDS : friend LTIDSComputeFInt\n");
+  OUT("LagrangianLinearTIDS : friend LTIDSComputeFInt\n");
 }
 
-void LagrangianTIDS::createDynamicalSystem(DSXML * dsXML, int number, int ndof,
+void LagrangianLinearTIDS::createDynamicalSystem(DSXML * dsXML, int number, int ndof,
     SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass,
     string fExt, SiconosMatrix* K, SiconosMatrix* C) //,NSDS * nsds)
 {
   if (dsXML != NULL)
   {
-    LagrangianNLDS::createDynamicalSystem(dsXML);
+    LagrangianDS::createDynamicalSystem(dsXML);
     //this->init();
-    LagrangianNLDS::fillDSWithDSXML();
+    LagrangianDS::fillDSWithDSXML();
     this->fillDSWithDSXML();
     this->linkDSXML();
     this->DSType = LTIDS;
@@ -149,14 +149,14 @@ void LagrangianTIDS::createDynamicalSystem(DSXML * dsXML, int number, int ndof,
     this->number = number;
     this->ndof = ndof;
 
-    LagrangianNLDS::SiconosVectorSizeInit();
+    LagrangianDS::SiconosVectorSizeInit();
 
     this->q0 = *q0;
     this->q = *q0;
     this->velocity0 = *velocity0;
     this->velocity = *velocity0;
 
-    LagrangianNLDS::CompositeVectorInit();
+    LagrangianDS::CompositeVectorInit();
 
     //this->setComputeMassFunction(this->cShared.getPluginName( mass ), this->cShared.getPluginFunctionName( mass ));
     this->mass = *mass;
@@ -177,10 +177,10 @@ void LagrangianTIDS::createDynamicalSystem(DSXML * dsXML, int number, int ndof,
 }
 
 
-LagrangianTIDS* LagrangianTIDS::convert(DynamicalSystem* ds)
+LagrangianLinearTIDS* LagrangianLinearTIDS::convert(DynamicalSystem* ds)
 {
-  cout << "LagrangianTIDS::convert (DynamicalSystem* ds)" << endl;
-  LagrangianTIDS* ltids = dynamic_cast<LagrangianTIDS*>(ds);
+  cout << "LagrangianLinearTIDS::convert (DynamicalSystem* ds)" << endl;
+  LagrangianLinearTIDS* ltids = dynamic_cast<LagrangianLinearTIDS*>(ds);
   return ltids;
 }
 

@@ -19,8 +19,8 @@
 
 <xsd:simpleType name="PossibleDSValues">
    	<xsd:restriction base="xsd:string">
-		<xsd:enumeration value="LagrangianNLDS"/>
-		<xsd:enumeration value="LagrangianTIDS"/>
+		<xsd:enumeration value="LagrangianDS"/>
+		<xsd:enumeration value="LagrangianLinearTIDS"/>
 		<xsd:enumeration value="LinearSystemDS"/>
 		<xsd:enumeration value="NonLinearSystemDS"/>
 	</xsd:restriction>
@@ -309,7 +309,7 @@
 						</xsd:all>
 					</xsd:group>
 						
-						<xsd:group name="LagrangianTIDS">
+						<xsd:group name="LagrangianLinearTIDS">
 							<xsd:all>
 								<xsd:element name="Id" type="xsd:string" minOccurs='0' maxOccurs='1'/>
 								<xsd:element name="n" type="xsd:positiveInteger" minOccurs='0' maxOccurs='1'/>
@@ -353,7 +353,7 @@
 							</xsd:all>
 						</xsd:group>
 						
-						<xsd:group name="LagrangianNLDS">
+						<xsd:group name="LagrangianDS">
 							<xsd:all>
 								<xsd:element name="Id" type="xsd:string" minOccurs='0' maxOccurs='1'/>
 								<xsd:element name="n" type="xsd:positiveInteger" minOccurs='0' maxOccurs='1'/>

@@ -17,7 +17,7 @@
 
 	<NSDS>
 		<DS_Definition>
-			<LagrangianNLDS number='1'>
+			<LagrangianDS number='1'>
 				<Id> toto </Id>
 				<x0 vectorFile='vector2.dat'/>
 				<StepsInMemory>8</StepsInMemory>
@@ -36,9 +36,9 @@
 				<M matrixPlugin="BasicPlugin:computeMass"/>
 				
 				<ndof>3</ndof>
-			</LagrangianNLDS>
+			</LagrangianDS>
 			
-			<LagrangianTIDS number='2'>
+			<LagrangianLinearTIDS number='2'>
 				<Id> toto </Id>
 				<x0 vectorFile='vector2.dat'/>
 <!--				<x0 vectorSize='3'>
@@ -48,7 +48,7 @@
 -->				
 				<StepsInMemory>8</StepsInMemory>				
 				
-				<!-- Specific to LagrangianTIDS-->
+				<!-- Specific to LagrangianLinearTIDS-->
 				
 				<q vectorFile='vector.dat'/>
 				<q0 vectorFile='vector.dat'/>
@@ -75,7 +75,7 @@
 				
 				<K matrixFile='matrix.dat'/>
 				<C matrixFile='matrix.dat'/>			
-			</LagrangianTIDS>		
+			</LagrangianLinearTIDS>		
 
 			<LinearSystemDS number='3'>
 				<Id> tutu </Id>

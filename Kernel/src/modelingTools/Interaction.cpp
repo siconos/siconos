@@ -501,7 +501,7 @@ NonSmoothLaw* Interaction::createNewtonImpactFrictionNSL(double en, double et, d
 //version 1.1
 //
 //- changes in all balises DS, Relation, NSLaw, OneStepIntegrator, OneStepNSProblem
-//in the XML files into specific names like LagrangianNLDS, LinearSystemDS, ...
+//in the XML files into specific names like LagrangianDS, LinearSystemDS, ...
 //for the DS
 //
 //Revision 1.47  2004/09/28 08:21:27  jbarbier

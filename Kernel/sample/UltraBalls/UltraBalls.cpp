@@ -2,9 +2,9 @@
 #include "Model.h"
 #include "check.h"
 
-#include "LagrangianNLDS.h"
+#include "LagrangianDS.h"
 #include "LinearSystemDS.h"
-#include "LagrangianTIDS.h"
+#include "LagrangianLinearTIDS.h"
 #include "LagrangianNonLinearR.h"
 
 #include <libxml/parser.h>
@@ -73,27 +73,27 @@ int main(int argc, char* argv[])
     m(k, 0) = k * t->getH();
 
     // position
-    LagrangianTIDS* ball = static_cast<LagrangianTIDS*>(uBalls.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
+    LagrangianLinearTIDS* ball = static_cast<LagrangianLinearTIDS*>(uBalls.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
     m(k, 1) = (ball->getQ())(0);
     m(k, 2) = (ball->getVelocity())(0);
 
     // position
-    LagrangianTIDS* ball2 = static_cast<LagrangianTIDS*>(uBalls.getNonSmoothDynamicalSystem()->getDynamicalSystem(1));
+    LagrangianLinearTIDS* ball2 = static_cast<LagrangianLinearTIDS*>(uBalls.getNonSmoothDynamicalSystem()->getDynamicalSystem(1));
     m(k, 3) = (ball2->getQ())(0);
     m(k, 4) = (ball2->getVelocity())(0);
 
     // position
-    LagrangianTIDS* ball3 = static_cast<LagrangianTIDS*>(uBalls.getNonSmoothDynamicalSystem()->getDynamicalSystem(2));
+    LagrangianLinearTIDS* ball3 = static_cast<LagrangianLinearTIDS*>(uBalls.getNonSmoothDynamicalSystem()->getDynamicalSystem(2));
     m(k, 5) = (ball3->getQ())(0);
     m(k, 6) = (ball3->getVelocity())(0);
 
     // position
-    LagrangianTIDS* ground = static_cast<LagrangianTIDS*>(uBalls.getNonSmoothDynamicalSystem()->getDynamicalSystem(3));
+    LagrangianLinearTIDS* ground = static_cast<LagrangianLinearTIDS*>(uBalls.getNonSmoothDynamicalSystem()->getDynamicalSystem(3));
     m(k, 7) = (ground->getQ())(0);
     m(k, 8) = (ground->getVelocity())(0);
 
     // position
-    LagrangianTIDS* ceiling = static_cast<LagrangianTIDS*>(uBalls.getNonSmoothDynamicalSystem()->getDynamicalSystem(4));
+    LagrangianLinearTIDS* ceiling = static_cast<LagrangianLinearTIDS*>(uBalls.getNonSmoothDynamicalSystem()->getDynamicalSystem(4));
     m(k, 9) = (ceiling->getQ())(0);
     m(k, 10) = (ceiling->getVelocity())(0);
 
@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
       m(k, 0) = k * t->getH();
 
       // position
-      LagrangianNLDS* ball = static_cast<LagrangianNLDS*>(uBalls.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
+      LagrangianDS* ball = static_cast<LagrangianDS*>(uBalls.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
       m(k, 1) = (ball->getQ())(0);
       m(k, 2) = (ball->getVelocity())(0);
 

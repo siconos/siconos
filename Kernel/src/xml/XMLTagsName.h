@@ -26,8 +26,8 @@ const string NON_LINEARBC_TAG = "NLinear";
 const string PERIODICBC_TAG = "Periodic";
 
 // DynamicalSystem tags
-const string LAGRANGIAN_TIME_INVARIANTDS_TAG = "LagrangianTIDS"; // LL
-const string LAGRANGIAN_NON_LINEARDS_TAG = "LagrangianNLDS"; // LNL
+const string LAGRANGIAN_TIME_INVARIANTDS_TAG = "LagrangianLinearTIDS"; // LL
+const string LAGRANGIAN_NON_LINEARDS_TAG = "LagrangianDS"; // LNL
 const string LINEAR_SYSTEMDS_TAG = "LinearSystemDS"; // LTI
 const string NON_LINEAR_SYSTEMDS_TAG = "NonLinearSystemDS";
 
@@ -236,8 +236,8 @@ const string RELAY_TAG = "Relay";
 
 
 /*Types of DS defined*/
-//const string NSDS_LAGRANGIANNLDS = "LagrangianNLDS";
-//const string NSDS_LAGRANGIANTIDS = "LagrangianTIDS";
+//const string NSDS_LAGRANGIANNLDS = "LagrangianDS";
+//const string NSDS_LAGRANGIANTIDS = "LagrangianLinearTIDS";
 //const string NSDS_LINEARSYSTEM = "LinearSystemDS";
 //const string NSDS_NONLINEARSYSTEM = "NonLinearSystemDS";
 

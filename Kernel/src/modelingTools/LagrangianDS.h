@@ -2,7 +2,7 @@
 #define LAGRANGIANNLDS_H
 
 #include "DynamicalSystem.h"
-#include "LagrangianNLDSXML.h"
+#include "LagrangianDSXML.h"
 
 #include "SiconosMatrix.h"
 #include "NewSiconosVector.h"
@@ -14,16 +14,16 @@
 using namespace std;
 
 
-class LagrangianNLDSXML;
+class LagrangianDSXML;
 
-/** \class LagrangianNLDS
+/** \class LagrangianDS
  *  \brief main class of Lagrangian dynamic systems
 *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 29, 2004
  *
  *
- * The class LagrangianNLDS  allows to define  and compute a generic ndof-dimensional
+ * The class LagrangianDS  allows to define  and compute a generic ndof-dimensional
  * Lagrangian Non Linear Dynamical System of the form :
  * \f[
  * M(q) \ddot q + Q(\dot q, q) = F_{Int}(\dot q , q , t)+F_{Ext}( q , t) + p,
@@ -71,24 +71,24 @@ class LagrangianNLDSXML;
  *   -# Nothing is given : Plug the Basic Plugin and print a help message.
  *
  * \warning :  A constant Mass Matrix was loaded from the XML. For the moment ,  constant Mass Matrix
- * is dedicated to LagrangianTIDS
+ * is dedicated to LagrangianLinearTIDS
  */
-class LagrangianNLDS : public DynamicalSystem
+class LagrangianDS : public DynamicalSystem
 {
 public:
 
-  /** \fn LagrangianNLDS()
+  /** \fn LagrangianDS()
    *  \brief Default constructor
    */
-  LagrangianNLDS();
+  LagrangianDS();
 
-  /** \fn LagrangianNLDS(DSXML*)
-   *  \brief constructor with XML object of the LagrangianNLDS
+  /** \fn LagrangianDS(DSXML*)
+   *  \brief constructor with XML object of the LagrangianDS
    *  \param DSXML* : the XML object corresponding
    */
-  LagrangianNLDS(DSXML*);
+  LagrangianDS(DSXML*);
 
-  virtual ~LagrangianNLDS();
+  virtual ~LagrangianDS();
 
   /** \fn void initMemory(int steps) ;
    *  \brief initialize the SiconosMemory objects with a positive size.
@@ -525,7 +525,7 @@ public:
 
 
   /** \fn void fillDSWithDSXML()
-   *  \brief overload of the function for a LagrangianNLDS
+   *  \brief overload of the function for a LagrangianDS
    *  \exception RuntimeException
    */
   virtual void fillDSWithDSXML();
@@ -714,12 +714,12 @@ public:
                              string QNLlInertia = "BasicPlugin:computeQNLInertia");
   //,NSDS * nsds = NULL);
 
-  /** \fn LagrangianNLDS* convert (DynamicalSystem* ds)
+  /** \fn LagrangianDS* convert (DynamicalSystem* ds)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param DynamicalSystem* : the system which must be converted
    * \return a pointer on the system if it is of the right type, NULL otherwise
    */
-  static LagrangianNLDS* convert(DynamicalSystem* ds);
+  static LagrangianDS* convert(DynamicalSystem* ds);
 
 protected:
 
@@ -790,7 +790,7 @@ protected:
   SiconosMatrix jacobianVelocityQNLInertia;
 
   //  /**  */
-  //  LagrangianNLDSXML *lnldsxml;
+  //  LagrangianDSXML *lnldsxml;
 
   /** class for manage plugin (open, close librairy...) */
   SiconosSharedLibrary cShared;

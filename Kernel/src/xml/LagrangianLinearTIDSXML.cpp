@@ -1,27 +1,27 @@
 
-#include "LagrangianTIDSXML.h"
+#include "LagrangianLinearTIDSXML.h"
 
-LagrangianTIDSXML::LagrangianTIDSXML()
-  : LagrangianNLDSXML()
+LagrangianLinearTIDSXML::LagrangianLinearTIDSXML()
+  : LagrangianDSXML()
 {
   this->KNode = NULL;
   this->CNode = NULL;
 }
 
-LagrangianTIDSXML::LagrangianTIDSXML(xmlNode * LagrangianTIDSNode, bool isBVP)
-// : LagrangianNLDSXML(LagrangianTIDSNode, isBVP)
+LagrangianLinearTIDSXML::LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSNode, bool isBVP)
+// : LagrangianDSXML(LagrangianLinearTIDSNode, isBVP)
 {
   this->KNode = NULL;
   this->CNode = NULL;
   this->boundaryConditionXML = NULL;
-  this->rootDSXMLNode = LagrangianTIDSNode;
+  this->rootDSXMLNode = LagrangianLinearTIDSNode;
   this->parentNode = NULL;
 
-  this->loadLagrangianTIDSProperties(isBVP);
+  this->loadLagrangianLinearTIDSProperties(isBVP);
 }
 
 
-void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
+void LagrangianLinearTIDSXML::loadLagrangianLinearTIDSProperties(bool isBVP)
 {
   xmlNode *node;
 
@@ -33,9 +33,9 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    cout << "LagrangianTIDSXML - loadLagrangianTIDSProperties Warning : tag " << LNLDS_Q << " not found, it must be optional." << endl;
+    cout << "LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties Warning : tag " << LNLDS_Q << " not found, it must be optional." << endl;
     this->qNode = NULL;
-    //XMLException::selfThrow("LagrangianTIDSXML - loadLagrangianTIDSProperties error : tag " + LNLDS_Q + " not found.");
+    //XMLException::selfThrow("LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties error : tag " + LNLDS_Q + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LNLDS_Q0)) != NULL)
@@ -44,7 +44,7 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    XMLException::selfThrow("LagrangianTIDSXML - loadLagrangianTIDSProperties error : tag " + LNLDS_Q0 + " not found.");
+    XMLException::selfThrow("LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties error : tag " + LNLDS_Q0 + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LNLDS_QMEMORY)) != NULL)
@@ -54,8 +54,8 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    //XMLException::selfThrow("LagrangianTIDSXML - loadLagrangianTIDSProperties error : tag " + LNLDS_QMEMORY + " not found.");
-    cout << "LagrangianTIDSXML - loadLagrangianTIDSProperties warning : tag " << LNLDS_QMEMORY << " not found, it is an optional attribute." << endl;
+    //XMLException::selfThrow("LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties error : tag " + LNLDS_QMEMORY + " not found.");
+    cout << "LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties warning : tag " << LNLDS_QMEMORY << " not found, it is an optional attribute." << endl;
     this->qMemoryNode = NULL;
     this->qMemoryXML = NULL;
   }
@@ -67,9 +67,9 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    cout << "LagrangianTIDSXML - loadLagrangianTIDSProperties Warning : tag " << LNLDS_VELOCITY << " not found, it must be optional." << endl;
+    cout << "LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties Warning : tag " << LNLDS_VELOCITY << " not found, it must be optional." << endl;
     this->velocityNode = NULL;
-    //XMLException::selfThrow("LagrangianTIDSXML - loadLagrangianTIDSProperties error : tag " + LNLDS_VELOCITY + " not found.");
+    //XMLException::selfThrow("LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties error : tag " + LNLDS_VELOCITY + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LNLDS_VELOCITY0)) != NULL)
@@ -78,7 +78,7 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    XMLException::selfThrow("LagrangianTIDSXML - loadLagrangianTIDSProperties error : tag " + LNLDS_VELOCITY0 + " not found.");
+    XMLException::selfThrow("LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties error : tag " + LNLDS_VELOCITY0 + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LNLDS_VELOCITYMEMORY)) != NULL)
@@ -88,8 +88,8 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    //XMLException::selfThrow("LagrangianTIDSXML - loadLagrangianTIDSProperties error : tag " + LNLDS_VELOCITYMEMORY + " not found.");
-    cout << "LagrangianTIDSXML - loadLagrangianTIDSProperties warning : tag " << LNLDS_VELOCITYMEMORY << " not found, it is an optional attribute." << endl;
+    //XMLException::selfThrow("LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties error : tag " + LNLDS_VELOCITYMEMORY + " not found.");
+    cout << "LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties warning : tag " << LNLDS_VELOCITYMEMORY << " not found, it is an optional attribute." << endl;
     this->velocityMemoryNode = NULL;
     this->velocityMemoryXML = NULL;
   }
@@ -100,7 +100,7 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    cout << "LagrangianTIDSXML - loadLagrangianTIDSProperties Warning : tag " << LNLDS_QNLINERTIA << " not found, it must be optional." << endl;
+    cout << "LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties Warning : tag " << LNLDS_QNLINERTIA << " not found, it must be optional." << endl;
     this->QNLInertiaNode = NULL;
   }
 
@@ -110,7 +110,7 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    cout << "LagrangianTIDSXML - loadLagrangianTIDSProperties Warning : tag " << LNLDS_FINT << " not found, it must be optional." << endl;
+    cout << "LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties Warning : tag " << LNLDS_FINT << " not found, it must be optional." << endl;
     this->FintNode = NULL;
   }
 
@@ -120,7 +120,7 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    XMLException::selfThrow("LagrangianTIDSXML - loadLagrangianTIDSProperties error : tag " + LNLDS_FEXT + " not found.");
+    XMLException::selfThrow("LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties error : tag " + LNLDS_FEXT + " not found.");
   }
 
 
@@ -130,7 +130,7 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    cout << "LagrangianTIDSXML - loadLagrangianTIDSProperties Warning : tag " << LNLDS_JACOBIANQFINT << " not found, it must be optional." << endl;
+    cout << "LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties Warning : tag " << LNLDS_JACOBIANQFINT << " not found, it must be optional." << endl;
     this->jacobianQFintNode = NULL;
   }
 
@@ -140,7 +140,7 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    cout << "LagrangianTIDSXML - loadLagrangianTIDSProperties Warning : tag " << LNLDS_JACOBIANVELOCITYFINT << " not found, it must be optional." << endl;
+    cout << "LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties Warning : tag " << LNLDS_JACOBIANVELOCITYFINT << " not found, it must be optional." << endl;
     this->jacobianVelocityFintNode = NULL;
   }
 
@@ -150,7 +150,7 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    cout << "LagrangianTIDSXML - loadLagrangianTIDSProperties Warning : tag " << LNLDS_JACOBIANQQNLINERTIA << " not found, it must be optional." << endl;
+    cout << "LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties Warning : tag " << LNLDS_JACOBIANQQNLINERTIA << " not found, it must be optional." << endl;
     this->jacobianQQNLInertiaNode = NULL;
   }
 
@@ -160,7 +160,7 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    cout << "LagrangianTIDSXML - loadLagrangianTIDSProperties Warning : tag " << LNLDS_JACOBIANVELOCITYQNLINERTIA << " not found, it must be optional." << endl;
+    cout << "LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties Warning : tag " << LNLDS_JACOBIANVELOCITYQNLINERTIA << " not found, it must be optional." << endl;
     this->jacobianVelocityQNLInertiaNode = NULL;
   }
 
@@ -172,7 +172,7 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    XMLException::selfThrow("LagrangianTIDSXML - loadLagrangianTIDSProperties error : tag " + LNLDS_M + " not found.");
+    XMLException::selfThrow("LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties error : tag " + LNLDS_M + " not found.");
   }
 
 
@@ -182,7 +182,7 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    XMLException::selfThrow("LagrangianTIDSXML - loadLagrangianTIDSProperties error : tag " + LNLDS_NDOF + " not found.");
+    XMLException::selfThrow("LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties error : tag " + LNLDS_NDOF + " not found.");
   }
   /*--------------------------------------------------------------------*/
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LTIDS_K)) != NULL)
@@ -191,7 +191,7 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    XMLException::selfThrow("LagrangianTIDSXML - loadLagrangianTIDSProperties error : tag " + LTIDS_K + " not found.");
+    XMLException::selfThrow("LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties error : tag " + LTIDS_K + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LTIDS_C)) != NULL)
@@ -200,19 +200,19 @@ void LagrangianTIDSXML::loadLagrangianTIDSProperties(bool isBVP)
   }
   else
   {
-    XMLException::selfThrow("LagrangianTIDSXML - loadLagrangianTIDSProperties error : tag " + LTIDS_C + " not found.");
+    XMLException::selfThrow("LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties error : tag " + LTIDS_C + " not found.");
   }
 }
 
-void LagrangianTIDSXML::updateDynamicalSystemXML(xmlNode* rootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)
+void LagrangianLinearTIDSXML::updateDynamicalSystemXML(xmlNode* rootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)
 {
-  IN("LagrangianTIDSXML::updateDynamicalSystemXML\n");
+  IN("LagrangianLinearTIDSXML::updateDynamicalSystemXML\n");
   this->rootDSXMLNode = rootDSXMLNode;
   this->loadDS(ds);
-  OUT("LagrangianTIDSXML::updateDynamicalSystemXML\n");
+  OUT("LagrangianLinearTIDSXML::updateDynamicalSystemXML\n");
 }
 
-//$Log: LagrangianTIDSXML.cpp,v $
+//$Log: LagrangianLinearTIDSXML.cpp,v $
 //Revision 1.12  2005/02/02 15:54:52  jbarbier
 //- sample RollingBalls added
 //
@@ -227,6 +227,6 @@ void LagrangianTIDSXML::updateDynamicalSystemXML(xmlNode* rootDSXMLNode, Dynamic
 //finished.
 //
 //Revision 1.9  2004/07/30 14:37:15  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianNLDSXML
+//- saving methods for DynamicalSystemXML and LagrangianDSXML
 //
 //Revision 1.8  2004/07/29 14:25:43  jbarbier

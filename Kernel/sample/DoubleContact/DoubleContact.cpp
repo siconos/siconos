@@ -2,9 +2,9 @@
 #include "Model.h"
 #include "check.h"
 
-#include "LagrangianNLDS.h"
+#include "LagrangianDS.h"
 #include "LinearSystemDS.h"
-#include "LagrangianTIDS.h"
+#include "LagrangianLinearTIDS.h"
 #include "LagrangianNonLinearR.h"
 
 #include <libxml/parser.h>
@@ -73,17 +73,17 @@ int main(int argc, char* argv[])
     m(k, 0) = k * t->getH();
 
     // position
-    LagrangianTIDS* ball = static_cast<LagrangianTIDS*>(doubleContact.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
+    LagrangianLinearTIDS* ball = static_cast<LagrangianLinearTIDS*>(doubleContact.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
     m(k, 1) = (ball->getQ())(1);
     m(k, 2) = (ball->getVelocity())(1);
 
     // position
-    LagrangianTIDS* ball2 = static_cast<LagrangianTIDS*>(doubleContact.getNonSmoothDynamicalSystem()->getDynamicalSystem(1));
+    LagrangianLinearTIDS* ball2 = static_cast<LagrangianLinearTIDS*>(doubleContact.getNonSmoothDynamicalSystem()->getDynamicalSystem(1));
     m(k, 3) = (ball2->getQ())(1);
     m(k, 4) = (ball2->getVelocity())(1);
 
     // position
-    LagrangianTIDS* ball3 = static_cast<LagrangianTIDS*>(doubleContact.getNonSmoothDynamicalSystem()->getDynamicalSystem(2));
+    LagrangianLinearTIDS* ball3 = static_cast<LagrangianLinearTIDS*>(doubleContact.getNonSmoothDynamicalSystem()->getDynamicalSystem(2));
     m(k, 5) = (ball3->getQ())(1);
     m(k, 6) = (ball3->getVelocity())(1);
 
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
       m(k, 0) = k * t->getH();
 
       // position
-      LagrangianNLDS* ball = static_cast<LagrangianNLDS*>(doubleContact.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
+      LagrangianDS* ball = static_cast<LagrangianDS*>(doubleContact.getNonSmoothDynamicalSystem()->getDynamicalSystem(0));
       m(k, 1) = (ball->getQ())(1);
       m(k, 2) = (ball->getVelocity())(1);
 

@@ -12,8 +12,8 @@ lib_LIBRARIES = libSiconosXml.a
 libSiconosXml_a_SOURCES = AdamsXML.cpp BoundaryConditionXML.cpp \
 		ComplementarityConditionNSLXML.cpp DSInputOutputXML.cpp DSXML.cpp \
 		EqualityConstraintXML.cpp InteractionXML.cpp LagrangianDSIOXML.cpp LagrangianECXML.cpp\
-		LagrangianLinearRXML.cpp LagrangianNLDSXML.cpp LagrangianNonLinearRXML.cpp \
-		LagrangianTIDSXML.cpp LCPXML.cpp LinearBCXML.cpp LinearDSIOXML.cpp \
+		LagrangianLinearRXML.cpp LagrangianDSXML.cpp LagrangianNonLinearRXML.cpp \
+		LagrangianLinearTIDSXML.cpp LCPXML.cpp LinearBCXML.cpp LinearDSIOXML.cpp \
 		LinearSystemDSXML.cpp LinearECXML.cpp LinearTIECXML.cpp LinearTIRXML.cpp\
 		LsodarXML.cpp MoreauXML.cpp NewtonImpactLawNSLXML.cpp NewtonImpactFrictionNSLXML.cpp NLinearBCXML.cpp \
 		NonSmoothLawXML.cpp NSDSXML.cpp OneStepIntegratorXML.cpp OneStepNSProblemXML.cpp \
@@ -21,8 +21,8 @@ libSiconosXml_a_SOURCES = AdamsXML.cpp BoundaryConditionXML.cpp \
 		SiconosMemoryXML.cpp SiconosModelXML.cpp StrategyXML.cpp TimeDiscretisationXML.cpp \
 		AdamsXML.h BoundaryConditionXML.h ComplementarityConditionNSLXML.h DSInputOutputXML.h \
 		DSXML.h EqualityConstraintXML.h InteractionXML.h LagrangianDSIOXML.h LagrangianECXML.h\
-		LagrangianLinearRXML.h LagrangianNLDSXML.h LagrangianNonLinearRXML.h \
-		LagrangianTIDSXML.h LCPXML.h LinearBCXML.h LinearDSIOXML.h LinearECXML.h \
+		LagrangianLinearRXML.h LagrangianDSXML.h LagrangianNonLinearRXML.h \
+		LagrangianLinearTIDSXML.h LCPXML.h LinearBCXML.h LinearDSIOXML.h LinearECXML.h \
 		LinearSystemDSXML.h LinearTIECXML.h LinearTIRXML.h LsodarXML.h MoreauXML.h \
 		NewtonImpactLawNSLXML.h NewtonImpactFrictionNSLXML.h NLinearBCXML.h NonSmoothLawXML.h NSDSXML.h \
 		OneStepIntegratorXML.h OneStepNSProblemXML.h PeriodicBCXML.h QPXML.h RelationXML.h \
@@ -31,8 +31,8 @@ libSiconosXml_a_SOURCES = AdamsXML.cpp BoundaryConditionXML.cpp \
 
 include_HEADERS = AdamsXML.h BoundaryConditionXML.h ComplementarityConditionNSLXML.h \
 		DSInputOutputXML.h DSXML.h EqualityConstraintXML.h InteractionXML.h \
-		LagrangianDSIOXML.h LagrangianECXML.h LagrangianLinearRXML.h LagrangianNLDSXML.h \
-		LagrangianNonLinearRXML.h LagrangianTIDSXML.h LCPXML.h LinearBCXML.h \
+		LagrangianDSIOXML.h LagrangianECXML.h LagrangianLinearRXML.h LagrangianDSXML.h \
+		LagrangianNonLinearRXML.h LagrangianLinearTIDSXML.h LCPXML.h LinearBCXML.h \
 		LinearDSIOXML.h LinearECXML.h LinearSystemDSXML.h LinearTIECXML.h LinearTIRXML.h \
 		LsodarXML.h MoreauXML.h NewtonImpactLawNSLXML.h NewtonImpactFrictionNSLXML.h NLinearBCXML.h NonSmoothLawXML.h \
 		NSDSXML.h OneStepIntegratorXML.h OneStepNSProblemXML.h PeriodicBCXML.h QPXML.h \

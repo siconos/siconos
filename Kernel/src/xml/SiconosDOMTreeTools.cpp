@@ -963,7 +963,7 @@ int SiconosDOMTreeTools::getNodeChildrenNumber(const xmlNode *node)
 //version 1.1
 //
 //- changes in all balises DS, Relation, NSLaw, OneStepIntegrator, OneStepNSProblem
-//in the XML files into specific names like LagrangianNLDS, LinearSystemDS, ...
+//in the XML files into specific names like LagrangianDS, LinearSystemDS, ...
 //for the DS
 //
 //Revision 1.52  2004/12/06 10:10:34  jbarbier
@@ -1017,6 +1017,6 @@ int SiconosDOMTreeTools::getNodeChildrenNumber(const xmlNode *node)
 //call the function initialize() of the base class
 //
 //Revision 1.44  2004/07/30 14:37:15  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianNLDSXML
+//- saving methods for DynamicalSystemXML and LagrangianDSXML
 //
 //Revision 1.43  2004/07/29 14:25:45  jbarbier

@@ -217,6 +217,6 @@ void SiconosMemoryXML::deleteUnusedMemoryNodes(int nbGoodNode)
 //SiconosVector
 //
 //Revision 1.3  2004/07/30 14:37:16  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianNLDSXML
+//- saving methods for DynamicalSystemXML and LagrangianDSXML
 //
 //Revision 1.2  2004/07/29 14:25:45  jbarbier

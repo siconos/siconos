@@ -22,7 +22,7 @@
 		<DS_Definition>
 		
 
-			<LagrangianNLDS number='1'>
+			<LagrangianDS number='1'>
 				<Id> toto </Id>
 		<!--		<n> 6 </n>  -->
 				<x vectorSize='6'>
@@ -91,9 +91,9 @@
 				<BoundaryCondition>
 				<NLinear/>
 				</BoundaryCondition>
-			</LagrangianNLDS>
+			</LagrangianDS>
 			
-			<LagrangianTIDS number='2'>
+			<LagrangianLinearTIDS number='2'>
 				<!-- Commun at all DS -->
 				
 				<Id> toto </Id>
@@ -127,7 +127,7 @@
 -->				
 				<StepsInMemory>8</StepsInMemory>				
 				
-				<!-- Specific to LagrangianTIDS-->
+				<!-- Specific to LagrangianLinearTIDS-->
 				
 				<q vectorFile='vector.dat'/>
 				<q0 vectorFile='vector.dat'/>
@@ -163,7 +163,7 @@
 					<OmegaT matrixFile='matrix.dat'/>
 				</Linear>
 				</BoundaryCondition>
-			</LagrangianTIDS>		
+			</LagrangianLinearTIDS>		
 
 			<NonLinearSystemDS number='3'>
 				<!-- Commun at all DS -->

@@ -1,47 +1,47 @@
-#include "LagrangianNLDS.h"
-//#include "LagrangianNLDSXML.h"
+#include "LagrangianDS.h"
+//#include "LagrangianDSXML.h"
 
 #include "check.h"
 
 
-LagrangianNLDS::LagrangianNLDS()/*:DynamicalSystem()*/
+LagrangianDS::LagrangianDS()/*:DynamicalSystem()*/
 {
-  IN("LagrangianNLDS::LagrangianNLDS()\n");
+  IN("LagrangianDS::LagrangianDS()\n");
   this->DSType = LNLDS;
   this->init();
   this->DSType = LNLDS;
 
-  OUT("LagrangianNLDS::LagrangianNLDS()\n");
+  OUT("LagrangianDS::LagrangianDS()\n");
 }
 
-LagrangianNLDS::LagrangianNLDS(DSXML* dsxml) /*:DynamicalSystem(dsxml)*/
+LagrangianDS::LagrangianDS(DSXML* dsxml) /*:DynamicalSystem(dsxml)*/
 {
-  IN("LagrangianNLDS::LagrangianNLDS( DSXML* dsxml)\n");
+  IN("LagrangianDS::LagrangianDS( DSXML* dsxml)\n");
 
   this->init();
   this->DSType = LNLDS;
   this->dsxml = dsxml;
 
-  OUT("LagrangianNLDS::LagrangianNLDS( DSXML* dsxml)\n");
+  OUT("LagrangianDS::LagrangianDS( DSXML* dsxml)\n");
 }
 
 
-LagrangianNLDS::~LagrangianNLDS()
+LagrangianDS::~LagrangianDS()
 {
-  IN("LagrangianNLDS::~LagrangianNLDS()\n");
+  IN("LagrangianDS::~LagrangianDS()\n");
 
   //  if (this->x != NULL) delete x;
   //  if (this->x0 != NULL) delete x0;
   //  if (this->xDot != NULL) delete xDot;
   //  if (this->xFree != NULL) delete xFree;
   //
-  OUT("LagrangianNLDS::~LagrangianNLDS()\n");
+  OUT("LagrangianDS::~LagrangianDS()\n");
 }
 
 
-void LagrangianNLDS::initMemory(int steps)
+void LagrangianDS::initMemory(int steps)
 {
-  IN("LagrangianNLDS::initMemory\n");
+  IN("LagrangianDS::initMemory\n");
   DynamicalSystem::initMemory(steps);
 
   //qMemory = SiconosMemory::SiconosMemory(steps);
@@ -49,13 +49,13 @@ void LagrangianNLDS::initMemory(int steps)
   qMemory = SiconosMemory::SiconosMemory(steps, this->qMemory.getSiconosMemoryXML());
   velocityMemory = SiconosMemory::SiconosMemory(steps, this->velocityMemory.getSiconosMemoryXML());
 
-  OUT("LagrangianNLDS::initMemory\n");
+  OUT("LagrangianDS::initMemory\n");
 }
 
 
-void LagrangianNLDS::swapInMemory(void)
+void LagrangianDS::swapInMemory(void)
 {
-  IN("LagrangianNLDS::swapInMemory(void)\n");
+  IN("LagrangianDS::swapInMemory(void)\n");
 
   // This operation should be made only if necessary. See todo note.
 
@@ -67,12 +67,12 @@ void LagrangianNLDS::swapInMemory(void)
   // initialization of the reaction force due to the non smooth law at the beginning of each time step
   this->p.zero();
 
-  OUT("LagrangianNLDS::swapInMemory(void)\n");
+  OUT("LagrangianDS::swapInMemory(void)\n");
 }
 
 
 
-SiconosMatrix* LagrangianNLDS::getMassPtr(void)
+SiconosMatrix* LagrangianDS::getMassPtr(void)
 {
   return &(this->mass);
 }
@@ -80,74 +80,74 @@ SiconosMatrix* LagrangianNLDS::getMassPtr(void)
 
 
 
-/*SiconosVector*/SimpleVector* LagrangianNLDS::getQPtr(void)
+/*SiconosVector*/SimpleVector* LagrangianDS::getQPtr(void)
 {
   return &this->q;
 }
 
-/*SiconosVector*/SimpleVector* LagrangianNLDS::getQ0Ptr(void)
+/*SiconosVector*/SimpleVector* LagrangianDS::getQ0Ptr(void)
 {
   return &this->q0;
 }
 
 
-SiconosMemory* LagrangianNLDS::getQMemories(void)
+SiconosMemory* LagrangianDS::getQMemories(void)
 {
   return &this->qMemory;
 }
 
 
 
-/*SiconosVector*/SimpleVector* LagrangianNLDS::getVelocityPtr(void)
+/*SiconosVector*/SimpleVector* LagrangianDS::getVelocityPtr(void)
 {
   return &this->velocity;
 }
 
-/*SiconosVector*/SimpleVector* LagrangianNLDS::getVelocity0Ptr(void)
+/*SiconosVector*/SimpleVector* LagrangianDS::getVelocity0Ptr(void)
 {
   return &this->velocity0;
 }
 
 
-SiconosMemory* LagrangianNLDS::getVelocityMemories(void)
+SiconosMemory* LagrangianDS::getVelocityMemories(void)
 {
   return &this->velocityMemory;
 }
 
 
-/*SiconosVector*/SimpleVector* LagrangianNLDS::getFIntPtr(void)
+/*SiconosVector*/SimpleVector* LagrangianDS::getFIntPtr(void)
 {
   return &this->fInt;
 }
 
-/*SiconosVector*/SimpleVector* LagrangianNLDS::getFExtPtr(void)
+/*SiconosVector*/SimpleVector* LagrangianDS::getFExtPtr(void)
 {
   return &this->fExt;
 }
 
 
-/*SiconosVector*/SimpleVector* LagrangianNLDS::getQNLInertiaPtr(void)
+/*SiconosVector*/SimpleVector* LagrangianDS::getQNLInertiaPtr(void)
 {
   return &this->QNLInertia;
 }
 
 
-SiconosMatrix* LagrangianNLDS::getJacobianQFIntPtr(void)
+SiconosMatrix* LagrangianDS::getJacobianQFIntPtr(void)
 {
   return &this->jacobianQFInt;
 }
 
-SiconosMatrix* LagrangianNLDS::getJacobianVelocityFIntPtr(void)
+SiconosMatrix* LagrangianDS::getJacobianVelocityFIntPtr(void)
 {
   return &this->jacobianVelocityFInt;
 }
 
-SiconosMatrix* LagrangianNLDS::getJacobianQQNLInertiaPtr(void)
+SiconosMatrix* LagrangianDS::getJacobianQQNLInertiaPtr(void)
 {
   return &this->jacobianQQNLInertia;
 }
 
-SiconosMatrix* LagrangianNLDS::getJacobianVelocityQNLInertiaPtr(void)
+SiconosMatrix* LagrangianDS::getJacobianVelocityQNLInertiaPtr(void)
 {
   return &this->jacobianVelocityQNLInertia;
 }
@@ -157,7 +157,7 @@ SiconosMatrix* LagrangianNLDS::getJacobianVelocityQNLInertiaPtr(void)
 
 //////////////////////////
 
-void LagrangianNLDS::computeMass(double time)
+void LagrangianDS::computeMass(double time)
 {
   if (computeMassPtr == NULL)
     RuntimeException::selfThrow("computeMass() is not linked to a plugin function");
@@ -166,7 +166,7 @@ void LagrangianNLDS::computeMass(double time)
   this->computeMassPtr(&size, &time, &q(0), &mass(0, 0));
 }
 
-void LagrangianNLDS::computeFInt(double time)
+void LagrangianDS::computeFInt(double time)
 {
   if (computeFIntPtr == NULL)
     RuntimeException::selfThrow("computeFInt() is not linked to a plugin function");
@@ -175,9 +175,9 @@ void LagrangianNLDS::computeFInt(double time)
   this->computeFIntPtr(&size, &time, &this->q(0), &this->velocity(0), &this->fInt(0));
 }
 
-void LagrangianNLDS::computeFExt(double time)
+void LagrangianDS::computeFExt(double time)
 {
-  IN("LagrangianNLDS::computeFExt(double time)\n");
+  IN("LagrangianDS::computeFExt(double time)\n");
   if (computeFExtPtr == NULL)
     RuntimeException::selfThrow("computeFExt() is not linked to a plugin function");
 
@@ -185,11 +185,11 @@ void LagrangianNLDS::computeFExt(double time)
 
   this->computeFExtPtr(&size, &time, &q(0), &fExt(0));
 
-  OUT("LagrangianNLDS::computeFExt(double time)\n");
+  OUT("LagrangianDS::computeFExt(double time)\n");
 
 }
 
-void LagrangianNLDS::computeQNLInertia()
+void LagrangianDS::computeQNLInertia()
 {
   if (computeQNLInertiaPtr == NULL)
     RuntimeException::selfThrow("computeQ() is not linked to a plugin function");
@@ -198,7 +198,7 @@ void LagrangianNLDS::computeQNLInertia()
   this->computeQNLInertiaPtr(&size, &q(0), &velocity(0), &QNLInertia(0));
 }
 
-void LagrangianNLDS::computeJacobianQFInt(double time)
+void LagrangianDS::computeJacobianQFInt(double time)
 {
   if (computeJacobianQFIntPtr == NULL)
     RuntimeException::selfThrow("computeJacobianQFInt() is not linked to a plugin function");
@@ -207,7 +207,7 @@ void LagrangianNLDS::computeJacobianQFInt(double time)
   this->computeJacobianQFIntPtr(&size, &time, &q(0), &velocity(0), &jacobianQFInt(0, 0));
 }
 
-void LagrangianNLDS::computeJacobianVelocityFInt(double time)
+void LagrangianDS::computeJacobianVelocityFInt(double time)
 {
   if (computeJacobianVelocityFIntPtr == NULL)
     RuntimeException::selfThrow("computeJacobianVelocityFInt() is not linked to a plugin function");
@@ -216,7 +216,7 @@ void LagrangianNLDS::computeJacobianVelocityFInt(double time)
   //this->computeJacobianVelocityFIntPtr();
 }
 
-void LagrangianNLDS::computeJacobianQQNLInertia(double time)
+void LagrangianDS::computeJacobianQQNLInertia(double time)
 {
   if (computeJacobianQQNLInertiaPtr == NULL)
     RuntimeException::selfThrow("computeJacobianQQNLInertia() is not linked to a plugin function");
@@ -225,7 +225,7 @@ void LagrangianNLDS::computeJacobianQQNLInertia(double time)
   //this->computeJacobianQQPtr(time);
 }
 
-void LagrangianNLDS::computeJacobianVelocityQNLInertia(double time)
+void LagrangianDS::computeJacobianVelocityQNLInertia(double time)
 {
   if (computeJacobianVelocityQNLInertiaPtr == NULL)
     RuntimeException::selfThrow("computeJacobianVelocityQNLInertia() is not linked to a plugin function");
@@ -238,9 +238,9 @@ void LagrangianNLDS::computeJacobianVelocityQNLInertia(double time)
 //////
 
 
-void LagrangianNLDS::setComputeMassFunction(string pluginPath, string functionName)
+void LagrangianDS::setComputeMassFunction(string pluginPath, string functionName)
 {
-  IN("LagrangianNLDS::setComputeMassFunction\n");
+  IN("LagrangianDS::setComputeMassFunction\n");
   this->computeMassPtr = NULL;
   cShared.setFunction(&computeMassPtr, pluginPath, functionName);
 
@@ -248,13 +248,13 @@ void LagrangianNLDS::setComputeMassFunction(string pluginPath, string functionNa
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   this->massFunctionName = plugin + ":" + functionName;
 
-  OUT("LagrangianNLDS::setComputeMassFunction\n");
+  OUT("LagrangianDS::setComputeMassFunction\n");
 
 }
 
-void LagrangianNLDS::setComputeFIntFunction(string pluginPath, string functionName)
+void LagrangianDS::setComputeFIntFunction(string pluginPath, string functionName)
 {
-  IN("LagrangianNLDS::setComputeFIntFunction\n");
+  IN("LagrangianDS::setComputeFIntFunction\n");
   this->computeFIntPtr = NULL;
   cShared.setFunction(&computeFIntPtr, pluginPath, functionName);
 
@@ -262,12 +262,12 @@ void LagrangianNLDS::setComputeFIntFunction(string pluginPath, string functionNa
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   this->fIntFunctionName = plugin + ":" + functionName;
 
-  OUT("LagrangianNLDS::setComputeFIntFunction\n");
+  OUT("LagrangianDS::setComputeFIntFunction\n");
 }
 
-void LagrangianNLDS::setComputeFExtFunction(string pluginPath, string functionName)
+void LagrangianDS::setComputeFExtFunction(string pluginPath, string functionName)
 {
-  IN("LagrangianNLDS::setComputeFExtFunction\n");
+  IN("LagrangianDS::setComputeFExtFunction\n");
   this->computeFExtPtr = NULL;
   cShared.setFunction(&computeFExtPtr, pluginPath, functionName);
 
@@ -275,12 +275,12 @@ void LagrangianNLDS::setComputeFExtFunction(string pluginPath, string functionNa
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   this->fExtFunctionName = plugin + ":" + functionName;
 
-  OUT("LagrangianNLDS::setComputeFExtFunction\n");
+  OUT("LagrangianDS::setComputeFExtFunction\n");
 }
 
-void LagrangianNLDS::setComputeQNLInertiaFunction(string pluginPath, string functionName)
+void LagrangianDS::setComputeQNLInertiaFunction(string pluginPath, string functionName)
 {
-  IN("LagrangianNLDS::setComputeQNLInertiaFunction\n");
+  IN("LagrangianDS::setComputeQNLInertiaFunction\n");
   this->computeQNLInertiaPtr = NULL;
   cShared.setFunction(&computeQNLInertiaPtr, pluginPath, functionName);
 
@@ -288,12 +288,12 @@ void LagrangianNLDS::setComputeQNLInertiaFunction(string pluginPath, string func
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   this->QNLInertiaFunctionName = plugin + ":" + functionName;
 
-  OUT("LagrangianNLDS::setComputeQNLInertiaFunction\n");
+  OUT("LagrangianDS::setComputeQNLInertiaFunction\n");
 }
 
-void LagrangianNLDS::setComputeJacobianQFIntFunction(string pluginPath, string functionName)
+void LagrangianDS::setComputeJacobianQFIntFunction(string pluginPath, string functionName)
 {
-  IN("LagrangianNLDS::setComputeJacobianQFIntFunction\n");
+  IN("LagrangianDS::setComputeJacobianQFIntFunction\n");
   this->computeJacobianQFIntPtr = NULL;
   cShared.setFunction(&computeJacobianQFIntPtr, pluginPath, functionName);
 
@@ -301,12 +301,12 @@ void LagrangianNLDS::setComputeJacobianQFIntFunction(string pluginPath, string f
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   this->jacobianQFIntFunctionName = plugin + ":" + functionName;
 
-  OUT("LagrangianNLDS::setComputeJacobianQFIntFunction\n");
+  OUT("LagrangianDS::setComputeJacobianQFIntFunction\n");
 }
 
-void LagrangianNLDS::setComputeJacobianVelocityFIntFunction(string pluginPath, string functionName)
+void LagrangianDS::setComputeJacobianVelocityFIntFunction(string pluginPath, string functionName)
 {
-  IN("LagrangianNLDS::setComputeMassFunction\n");
+  IN("LagrangianDS::setComputeMassFunction\n");
   this->computeJacobianVelocityFIntPtr = NULL;
   cShared.setFunction(&computeJacobianVelocityFIntPtr, pluginPath, functionName);
 
@@ -314,12 +314,12 @@ void LagrangianNLDS::setComputeJacobianVelocityFIntFunction(string pluginPath, s
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   this->jacobianVelocityFIntFunctionName = plugin + ":" + functionName;
 
-  OUT("LagrangianNLDS::setComputeMassFunction\n");
+  OUT("LagrangianDS::setComputeMassFunction\n");
 }
 
-void LagrangianNLDS::setComputeJacobianQQNLInertiaFunction(string pluginPath, string functionName)
+void LagrangianDS::setComputeJacobianQQNLInertiaFunction(string pluginPath, string functionName)
 {
-  IN("LagrangianNLDS::setComputeJacobianQQNLInertiaFunction\n");
+  IN("LagrangianDS::setComputeJacobianQQNLInertiaFunction\n");
   this->computeJacobianQQNLInertiaPtr = NULL;
   cShared.setFunction(&computeJacobianQQNLInertiaPtr, pluginPath, functionName);
 
@@ -327,12 +327,12 @@ void LagrangianNLDS::setComputeJacobianQQNLInertiaFunction(string pluginPath, st
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   this->jacobianQQNLInertiaFunctionName = plugin + ":" + functionName;
 
-  OUT("LagrangianNLDS::setComputeJacobianQQNLInertiaFunction\n");
+  OUT("LagrangianDS::setComputeJacobianQQNLInertiaFunction\n");
 }
 
-void LagrangianNLDS::setComputeJacobianVelocityQNLInertiaFunction(string pluginPath, string functionName)
+void LagrangianDS::setComputeJacobianVelocityQNLInertiaFunction(string pluginPath, string functionName)
 {
-  IN("LagrangianNLDS::setComputeJacobianVelocityQNLInertiaFunction\n");
+  IN("LagrangianDS::setComputeJacobianVelocityQNLInertiaFunction\n");
   this->computeJacobianVelocityQNLInertiaPtr = NULL;
   cShared.setFunction(&computeJacobianVelocityQNLInertiaPtr, pluginPath, functionName);
 
@@ -340,22 +340,22 @@ void LagrangianNLDS::setComputeJacobianVelocityQNLInertiaFunction(string pluginP
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   this->jacobianVelocityQNLInertiaFunctionName = plugin + ":" + functionName;
 
-  OUT("LagrangianNLDS::setComputeJacobianVelocityQNLInertiaFunction\n");
+  OUT("LagrangianDS::setComputeJacobianVelocityQNLInertiaFunction\n");
 }
 
 
 //////////////////////////
 
 
-void LagrangianNLDS::fillDSWithDSXML()
+void LagrangianDS::fillDSWithDSXML()
 {
   string plugin;
 
-  IN("LagrangianNLDS::fillDSWithDSXML\n");
+  IN("LagrangianDS::fillDSWithDSXML\n");
   //DynamicalSystem::fillDSWithDSXML();
   if (this->dsxml != NULL)
   {
-    LagrangianNLDSXML* lgptr = static_cast <LagrangianNLDSXML*>(this->dsxml);
+    LagrangianDSXML* lgptr = static_cast <LagrangianDSXML*>(this->dsxml);
 
     this->ndof = lgptr->getNdof();
     this->n = 2 * this->ndof;
@@ -378,13 +378,13 @@ void LagrangianNLDS::fillDSWithDSXML()
 
 
     // Mass
-    if ((static_cast <LagrangianNLDSXML*>(this->dsxml))->isMPlugin())
+    if ((static_cast <LagrangianDSXML*>(this->dsxml))->isMPlugin())
     {
       plugin = lgptr->getMPlugin();
       this->setComputeMassFunction(this->cShared.getPluginName(plugin), this->cShared.getPluginFunctionName(plugin));
     }
     // \warning : VA:  It is a very good idea to take the constant Mass Matrix, but for the moment a constant
-    //  Mass Matrix is only read by a LagrangianTIDS
+    //  Mass Matrix is only read by a LagrangianLinearTIDS
     else this->mass = lgptr->getMMatrix();
 
     this->q0 = lgptr->getQ0();
@@ -431,7 +431,7 @@ void LagrangianNLDS::fillDSWithDSXML()
       else
       {
         this->fInt = /*SiconosVector*/SimpleVector::SimpleVector();
-        cout << "Warning : Fint is not defined in this LagrangianNLDS ( " << this->DSType << " )." << endl;
+        cout << "Warning : Fint is not defined in this LagrangianDS ( " << this->DSType << " )." << endl;
       }
 
       // JacobianQFInt
@@ -514,16 +514,16 @@ void LagrangianNLDS::fillDSWithDSXML()
     if (this->dsxml->hasStepsInMemory() == true) this->stepsInMemory = this->dsxml->getStepsInMemory();
     else cout << "Warning : stepsInMemory is not defined in the XML " << endl;
   }
-  else RuntimeException::selfThrow("LagrangianNLDS::fillDSWithDSXML - object DSXML does not exist");
-  OUT("LagrangianNLDS::fillDSWithDSXML\n");
+  else RuntimeException::selfThrow("LagrangianDS::fillDSWithDSXML - object DSXML does not exist");
+  OUT("LagrangianDS::fillDSWithDSXML\n");
 }
 
-void LagrangianNLDS::display() const
+void LagrangianDS::display() const
 {
-  IN("LagrangianNLDS::display\n");
+  IN("LagrangianDS::display\n");
 
   cout << "-----------------------------------------------------" << endl;
-  cout << "____ data of the LagrangianNLDS " << endl;
+  cout << "____ data of the LagrangianDS " << endl;
   DynamicalSystem::display();
   cout << "| ndof : " << this->ndof << endl;
   cout << "| q " << endl;
@@ -542,13 +542,13 @@ void LagrangianNLDS::display() const
   this->p.display();
   cout << "-----------------------------------------------------" << endl << endl;
 
-  OUT("LagrangianNLDS::display\n");
+  OUT("LagrangianDS::display\n");
 }
 
 
-void LagrangianNLDS::init()
+void LagrangianDS::init()
 {
-  IN("LagrangianNLDS::init\n");
+  IN("LagrangianDS::init\n");
 
   this->r = SimpleVector::SimpleVector();
   this->BC = NULL;
@@ -578,17 +578,17 @@ void LagrangianNLDS::init()
     this->setComputeJacobianVelocityQNLInertiaFunction("BasicPlugin.so", "computeJacobianVelocityQNLInertia");
   }
 
-  OUT("LagrangianNLDS::init\n");
+  OUT("LagrangianDS::init\n");
 }
 
-void LagrangianNLDS::saveDSToXML()
+void LagrangianDS::saveDSToXML()
 {
-  IN("LagrangianNLDS::saveDSToXML\n");
+  IN("LagrangianDS::saveDSToXML\n");
   DynamicalSystem::saveDSToXML();
 
   if (this->dsxml != NULL)
   {
-    LagrangianNLDSXML* lgptr = static_cast <LagrangianNLDSXML*>(this->dsxml);
+    LagrangianDSXML* lgptr = static_cast <LagrangianDSXML*>(this->dsxml);
     lgptr->setNdof(this->ndof);
 
     if (this->DSType == LTIDS)
@@ -621,7 +621,7 @@ void LagrangianNLDS::saveDSToXML()
       lgptr->setFextPlugin(this->fExtFunctionName);
     }
 
-    if (this->DSType != LTIDS)  // for a LagrangianTIDS, these plugin must not be saved
+    if (this->DSType != LTIDS)  // for a LagrangianLinearTIDS, these plugin must not be saved
     {
       // FInt
       if (lgptr->hasFint())
@@ -704,11 +704,11 @@ void LagrangianNLDS::saveDSToXML()
       }
     }
   }
-  else RuntimeException::selfThrow("LagrangianNLDS::saveDSToXML - object DSXML does not exist");
-  OUT("LagrangianNLDS::saveDSToXML\n");
+  else RuntimeException::selfThrow("LagrangianDS::saveDSToXML - object DSXML does not exist");
+  OUT("LagrangianDS::saveDSToXML\n");
 }
 
-void LagrangianNLDS::createDynamicalSystem(DSXML * dsXML, int number, int ndof,
+void LagrangianDS::createDynamicalSystem(DSXML * dsXML, int number, int ndof,
     SiconosVector* q0, SiconosVector* velocity0, string mass,
     string fInt, string fExt,
     string jacobianQFInt, string jacobianVelocityFInt,
@@ -756,7 +756,7 @@ void LagrangianNLDS::createDynamicalSystem(DSXML * dsXML, int number, int ndof,
   }
 }
 
-void LagrangianNLDS::SiconosVectorSizeInit()
+void LagrangianDS::SiconosVectorSizeInit()
 {
   /*
    * initilaisation of the SiconosVectors size
@@ -778,7 +778,7 @@ void LagrangianNLDS::SiconosVectorSizeInit()
   this->QNLInertia =  /*SiconosVector*/SimpleVector(this->ndof);
 }
 
-void LagrangianNLDS::CompositeVectorInit()
+void LagrangianDS::CompositeVectorInit()
 {
   /*
    * initialisation of the CompositeVectors
@@ -791,14 +791,14 @@ void LagrangianNLDS::CompositeVectorInit()
 }
 
 
-LagrangianNLDS* LagrangianNLDS::convert(DynamicalSystem* ds)
+LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
 {
-  cout << "LagrangianNLDS::convert (DynamicalSystem* ds)" << endl;
-  LagrangianNLDS* lnlds = dynamic_cast<LagrangianNLDS*>(ds);
+  cout << "LagrangianDS::convert (DynamicalSystem* ds)" << endl;
+  LagrangianDS* lnlds = dynamic_cast<LagrangianDS*>(ds);
   return lnlds;
 }
 
-//$Log: LagrangianNLDS.cpp,v $
+//$Log: LagrangianDS.cpp,v $
 //Revision 1.68  2005/02/28 16:22:33  jbarbier
 //- rolling balls sample almost finished
 //
@@ -878,7 +878,7 @@ LagrangianNLDS* LagrangianNLDS::convert(DynamicalSystem* ds)
 //
 //- function createDynamicalSystem and createLinearSystemDS complete
 //
-//- function  createLagrangianNLDS in progress
+//- function  createLagrangianDS in progress
 //
 //Revision 1.54  2004/08/12 11:55:14  jbarbier
 //- new methods createModel, createNSDS, createStrategy, ...
@@ -927,7 +927,7 @@ LagrangianNLDS* LagrangianNLDS::convert(DynamicalSystem* ds)
 //SiconosVector
 //
 //Revision 1.47  2004/07/30 14:37:14  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianNLDSXML
+//- saving methods for DynamicalSystemXML and LagrangianDSXML
 //
 //Revision 1.46  2004/07/28 08:23:19  charlety
 //

@@ -18,7 +18,7 @@
 	<NSDS>
 		<DS_Definition>
 
-			<LagrangianNLDS number='1'>
+			<LagrangianDS number='1'>
 				<Id> toto </Id>
 				<StepsInMemory>8</StepsInMemory>
 				<QNLInertia vectorPlugin="BasicPlugin:computeQNLInertia"/>
@@ -37,9 +37,9 @@
 				<M matrixPlugin="BasicPlugin:computeMass"/>
 				
 				<ndof>3</ndof>
-			</LagrangianNLDS>
+			</LagrangianDS>
 			
-			<LagrangianTIDS number='2'>
+			<LagrangianLinearTIDS number='2'>
 				<Id> toto </Id>
 				<StepsInMemory>8</StepsInMemory>				
 				<q vectorFile='vector.dat'/>
@@ -67,7 +67,7 @@
 				
 				<K matrixFile='matrix.dat'/>
 				<C matrixFile='matrix.dat'/>			
-			</LagrangianTIDS>		
+			</LagrangianLinearTIDS>		
 
 			<LinearSystemDS number='3'>
 				<!-- Commun at all DS -->

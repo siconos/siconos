@@ -1,10 +1,10 @@
 
-#include "LagrangianNLDSXML.h"
+#include "LagrangianDSXML.h"
 
 #include "check.h"
 
 
-LagrangianNLDSXML::LagrangianNLDSXML() : DSXML()
+LagrangianDSXML::LagrangianDSXML() : DSXML()
 {
   this->qMemoryXML = NULL;
   this->velocityMemoryXML = NULL;
@@ -28,23 +28,23 @@ LagrangianNLDSXML::LagrangianNLDSXML() : DSXML()
   this->ndofNode = NULL;
 }
 
-LagrangianNLDSXML::LagrangianNLDSXML(xmlNode * LagrangianNLDSNode, bool isBVP)
-  : DSXML(LagrangianNLDSNode, isBVP)
+LagrangianDSXML::LagrangianDSXML(xmlNode * LagrangianDSNode, bool isBVP)
+  : DSXML(LagrangianDSNode, isBVP)
 {
   this->qMemoryXML = NULL;
   this->velocityMemoryXML = NULL;
 
-  this->loadLagrangianNLDSProperties();
+  this->loadLagrangianDSProperties();
   this->parentNode = NULL;
 }
 
-LagrangianNLDSXML::~LagrangianNLDSXML()
+LagrangianDSXML::~LagrangianDSXML()
 {
   //  if( this->qMemoryXML != NULL ) delete this->qMemoryXML;
   //  if( this->velocityMemoryXML != NULL ) delete this->velocityMemoryXML;
 }
 
-void LagrangianNLDSXML::loadLagrangianNLDSProperties()
+void LagrangianDSXML::loadLagrangianDSProperties()
 {
   xmlNode *node;
 
@@ -54,9 +54,9 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    cout << "LagrangianNLDSXML - loadLagrangianNLDSProperties Warning : tag " << LNLDS_Q << " not found, it must be optional." << endl;
+    cout << "LagrangianDSXML - loadLagrangianDSProperties Warning : tag " << LNLDS_Q << " not found, it must be optional." << endl;
     this->qNode = NULL;
-    //XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_Q + " not found.");
+    //XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_Q + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LNLDS_Q0)) != NULL)
@@ -65,7 +65,7 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_Q0 + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_Q0 + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LNLDS_QMEMORY)) != NULL)
@@ -75,8 +75,8 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    //XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_QMEMORY + " not found.");
-    cout << "LagrangianNLDSXML - loadLagrangianNLDSProperties warning : tag " << LNLDS_QMEMORY << " not found, it is an optional attribute." << endl;
+    //XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_QMEMORY + " not found.");
+    cout << "LagrangianDSXML - loadLagrangianDSProperties warning : tag " << LNLDS_QMEMORY << " not found, it is an optional attribute." << endl;
     this->qMemoryNode = NULL;
     this->qMemoryXML = NULL;
   }
@@ -88,9 +88,9 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    cout << "LagrangianNLDSXML - loadLagrangianNLDSProperties Warning : tag " << LNLDS_VELOCITY << " not found, it must be optional." << endl;
+    cout << "LagrangianDSXML - loadLagrangianDSProperties Warning : tag " << LNLDS_VELOCITY << " not found, it must be optional." << endl;
     this->velocityNode = NULL;
-    //XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_VELOCITY + " not found.");
+    //XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_VELOCITY + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LNLDS_VELOCITY0)) != NULL)
@@ -99,7 +99,7 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_VELOCITY0 + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_VELOCITY0 + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LNLDS_VELOCITYMEMORY)) != NULL)
@@ -109,8 +109,8 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    //XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_VELOCITYMEMORY + " not found.");
-    cout << "LagrangianNLDSXML - loadLagrangianNLDSProperties warning : tag " << LNLDS_VELOCITYMEMORY << " not found, it is an optional attribute." << endl;
+    //XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_VELOCITYMEMORY + " not found.");
+    cout << "LagrangianDSXML - loadLagrangianDSProperties warning : tag " << LNLDS_VELOCITYMEMORY << " not found, it is an optional attribute." << endl;
     this->velocityMemoryNode = NULL;
     this->velocityMemoryXML = NULL;
   }
@@ -121,7 +121,7 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_QNLINERTIA + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_QNLINERTIA + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LNLDS_FINT)) != NULL)
@@ -130,8 +130,8 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    //XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_FINT + " not found.");
-    cout << "LagrangianNLDSXML - loadLagrangianNLDSProperties warning : tag " << LNLDS_FINT << " not found, it is an optional attribute." << endl;
+    //XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_FINT + " not found.");
+    cout << "LagrangianDSXML - loadLagrangianDSProperties warning : tag " << LNLDS_FINT << " not found, it is an optional attribute." << endl;
     this->FintNode = NULL;
   }
 
@@ -141,7 +141,7 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_FEXT + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_FEXT + " not found.");
   }
 
 
@@ -151,7 +151,7 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_JACOBIANQFINT + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_JACOBIANQFINT + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LNLDS_JACOBIANVELOCITYFINT)) != NULL)
@@ -160,7 +160,7 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_JACOBIANVELOCITYFINT + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_JACOBIANVELOCITYFINT + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LNLDS_JACOBIANQQNLINERTIA)) != NULL)
@@ -169,7 +169,7 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_JACOBIANQQNLINERTIA + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_JACOBIANQQNLINERTIA + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LNLDS_JACOBIANVELOCITYQNLINERTIA)) != NULL)
@@ -178,7 +178,7 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_JACOBIANVELOCITYQNLINERTIA + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_JACOBIANVELOCITYQNLINERTIA + " not found.");
   }
 
 
@@ -189,7 +189,7 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_M + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_M + " not found.");
   }
 
 
@@ -199,43 +199,43 @@ void LagrangianNLDSXML::loadLagrangianNLDSProperties()
   }
   else
   {
-    XMLException::selfThrow("LagrangianNLDSXML - loadLagrangianNLDSProperties error : tag " + LNLDS_NDOF + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_NDOF + " not found.");
   }
 }
 
-void LagrangianNLDSXML::updateDynamicalSystemXML(xmlNode* rootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)
+void LagrangianDSXML::updateDynamicalSystemXML(xmlNode* rootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)
 {
-  IN("LagrangianNLDSXML::updateDynamicalSystemXML\n");
+  IN("LagrangianDSXML::updateDynamicalSystemXML\n");
   this->rootDSXMLNode = rootDSXMLNode;
   this->loadDS(ds);
-  OUT("LagrangianNLDSXML::updateDynamicalSystemXML\n");
+  OUT("LagrangianDSXML::updateDynamicalSystemXML\n");
 }
 
-//SiconosMemory LagrangianNLDSXML::getQMemory()
+//SiconosMemory LagrangianDSXML::getQMemory()
 //{
-//  IN("SiconosMemory LagrangianNLDSXML::getQMemory()\n");
+//  IN("SiconosMemory LagrangianDSXML::getQMemory()\n");
 //
 //  SiconosMemoryXML smemXML(this->qMemoryNode, this->parentNode, LNLDS_QMEMORY);
 //  SiconosMemory smem(&smemXML);
 //
-//  OUT("SiconosMemory LagrangianNLDSXML::getQMemory()\n");
+//  OUT("SiconosMemory LagrangianDSXML::getQMemory()\n");
 //
 //  return  smem;
 //}
 //
-//SiconosMemory LagrangianNLDSXML::getVelocityMemory()
+//SiconosMemory LagrangianDSXML::getVelocityMemory()
 //{
-//  IN("SiconosMemory LagrangianNLDSXML::getVelocityMemory()\n");
+//  IN("SiconosMemory LagrangianDSXML::getVelocityMemory()\n");
 //
 //  SiconosMemoryXML smemXML(this->velocityMemoryNode, this->parentNode, LNLDS_VELOCITYMEMORY);
 //  SiconosMemory smem(&smemXML);
 //
-//  OUT("SiconosMemory LagrangianNLDSXML::getVelocityMemory()\n");
+//  OUT("SiconosMemory LagrangianDSXML::getVelocityMemory()\n");
 //
 //  return  smem;
 //}
 
-//$Log: LagrangianNLDSXML.cpp,v $
+//$Log: LagrangianDSXML.cpp,v $
 //Revision 1.29  2005/02/02 15:54:52  jbarbier
 //- sample RollingBalls added
 //
@@ -285,6 +285,6 @@ void LagrangianNLDSXML::updateDynamicalSystemXML(xmlNode* rootDSXMLNode, Dynamic
 //- attribute T of the Model is now optional
 //
 //Revision 1.21  2004/07/30 14:37:15  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianNLDSXML
+//- saving methods for DynamicalSystemXML and LagrangianDSXML
 //
 //Revision 1.20  2004/07/29 14:25:42  jbarbier
