@@ -13,12 +13,12 @@
 //  here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional
 //  vector and w an n-dimensional vector.
 //
-//  This system of equations and inequalities is solved thanks to d_subroutine_cf:
+//  This system of equations and inequalities is solved thanks to cfd_subroutine:
 //        cfd_latin (M,q,n,k_latin,mu,itermax,tol,z,w,it_end,res,info)
 //        ....
 //        ....
 //  or thanks to LCP (Linear Complementary Problem) routines after a new
-//  formulation of this problem in the shape of LCP due to the d_lcp_cf and d_cf_lcp routines:
+//  formulation of this problem in the shape of LCP due to the cfd_lcp and lcp_cfd routines:
 //
 //       cfd_lcp (nc,mu,M,q,Mtel,qtel)
 //       lcp_cfd (nc,ztel,wtel,z,w)
@@ -67,35 +67,47 @@
 #include "SiconosNumerics.h"
 
 
+
+double ddot_(int *, double [], int *, double [], int*);
+void dpotri_(char *, int *, double * , int *, int *);
+
+
+
 main()
 
 {
-  FILE *f1, *f2, *f3, *f4, *f5, *f6;
-  int i, j, nl, nc, nll, it, info, n = 50, dimM = n;
-  double *q, *z, *w, *vec;
-  double(*M)[n];
-  double qi, Mij;
-  char val[14], vall[14];
+  FILE *f1, *f2, *f3, *f4, *f5, *f6, *f7;
+  int i, j, nl, nc, nll, it, n = 596, dimM = n, dim_i = 529, dim_n = 25, dim_tt = 25, dim_c = 50, info = -7;
+  int *ddl_i, *ddl_tt, *ddl_n, *ddl_c, m, *dim_nn, taille_i, taille_F1;
+  double *q, *z, *w, *vec, *K1, *J1, *F1, *U2, *F2;
+  double(*M)[n], *MM;
+  double qi, Mij, mumu;
+  char val[14], vall[14], *name = "Gsnl"; //Cfd_latin";//Gsnl";//Lemke";
+  methode *pt;
+  methode meth_cfd;
+
+  meth_cfd.cfd.nom_method = name;
+  meth_cfd.cfd.itermax = 1000;
+  meth_cfd.cfd.tol = 0.000001;
+  meth_cfd.cfd.mu = 0.5;
+  meth_cfd.cfd.k_latin = 0.6;
+  meth_cfd.cfd.dim_i = dim_i;
+  meth_cfd.cfd.dim_n = dim_n;
+  meth_cfd.cfd.dim_tt = dim_tt;
+  meth_cfd.cfd.dim_c = dim_c;
 
 
-  //////////////////////////////////////////
-  // first test ///////////////////////////
-  //////////////////////////////////////////
 
-  static methode_cfd meth_cfd  = {"Latin", 101, 0.0001, 0.5, 7};
-  //  static methode_cfd meth_cfd  = {"gsnl_lcp",501, 0.0001,0.5,7};
-  //  static methode_cfd meth_cfd  = {"gcp_lcp",501, 0.0001,0.5,7};
-
-  if ((f1 = fopen("MM_mmc_mu.dat", "r")) == NULL)
+  if ((f1 = fopen("K1_mu.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
   }
 
 
-  //  f3=fopen("aff_M.dat","w+");
   M = malloc(dimM * dimM * sizeof(double));
   vec = (double*)malloc(dimM * dimM * sizeof(double));
+  K1 = (double*)malloc(dimM * dimM * sizeof(double));
 
   while (!feof(f1))
   {
@@ -105,88 +117,6 @@ main()
     Mij = atof(val);
 
     /////////////       on met la transpos       ////////////////
-    /*   fprintf(f3,"%d %d %.14e\n",nc,nl,Mij);
-    fscanf(f3,"%d %d %.14e\n", &nc, &nl, &Mij);*/
-    //*(*(M+nc-1)+nl-1)=Mij;
-
-    *(*(M + nl - 1) + nc - 1) = Mij;
-    //////////////         fin transpos         ////////////////////
-
-  }
-
-
-  //// valeurs du tableau dans vec (compatibilite allocation memoire f90)///
-  /* for (i=0;i<dimM;i++)
-     {for (j=0;j<dimM;j++){
-  vec[j*dimM+i]= M[i][j];
-     }}
-     */
-  ////////////////////////////////////////////////////////////////////////
-
-
-  if ((f2 = fopen("qq_mmc_mu.dat", "r")) == NULL)
-  {
-    perror("fopen 2");
-    exit(2);
-  }
-
-
-  //  f4=fopen("aff_q.dat","w+");
-  q = malloc(dimM * sizeof(double));
-  z = malloc(dimM * sizeof(double));
-  w = malloc(dimM * sizeof(double));
-
-  while (!feof(f2))
-  {
-    fscanf(f2, "%d", &nll);
-    fscanf(f2, "%s", vall);
-    qi = atof(vall);
-    //fprintf(f4,"%d %.14e\n",nll,qi);
-    *(q + nll - 1) = qi;
-  }
-
-
-  printf("\n\n  we go in the function\n\n");
-
-  info = solve_cfd(/*vec*/M, q, &n, &meth_cfd, z, w);
-
-  printf("\n\n we go out the function and info is %d\n", info);
-
-  fclose(f2);
-  fclose(f1);
-
-  free(w);
-  free(q);
-  free(z);
-  free(vec);
-  free(M);
-
-
-  //////////////////////////////////////////
-  // second test ///////////////////////////
-  //////////////////////////////////////////
-  static methode_cfd meth_cfd1  = {"Gsnl", 101, 0.0001, 0.5, 7};
-  if ((f1 = fopen("MM_mmc_mu.dat", "r")) == NULL)
-  {
-    perror("fopen 1");
-    exit(1);
-  }
-
-
-  //  f3=fopen("aff_M.dat","w+");
-  M = malloc(dimM * dimM * sizeof(double));
-  vec = (double*)malloc(dimM * dimM * sizeof(double));
-
-  while (!feof(f1))
-  {
-    fscanf(f1, "%d", &nl);
-    fscanf(f1, "%d", &nc);
-    fscanf(f1, "%s", val);
-    Mij = atof(val);
-
-    /////////////       on met la transpos       ////////////////
-    /*   fprintf(f3,"%d %d %.14e\n",nc,nl,Mij);
-    fscanf(f3,"%d %d %.14e\n", &nc, &nl, &Mij);*/
     *(*(M + nc - 1) + nl - 1) = Mij;
     //////////////         fin transpos         ////////////////////
 
@@ -199,137 +129,181 @@ main()
     for (j = 0; j < dimM; j++)
     {
       vec[j * dimM + i] = M[i][j];
+      K1[j * dimM + i] = M[i][j];
     }
   }
-  ////////////////////////////////////////////////////////////////////////
-
-
-  if ((f2 = fopen("qq_mmc_mu.dat", "r")) == NULL)
-  {
-    perror("fopen 2");
-    exit(2);
-  }
-
-
-  //  f4=fopen("aff_q.dat","w+");
-  q = malloc(dimM * sizeof(double));
-  z = malloc(dimM * sizeof(double));
-  w = malloc(dimM * sizeof(double));
-
-  while (!feof(f2))
-  {
-    fscanf(f2, "%d", &nll);
-    fscanf(f2, "%s", vall);
-    qi = atof(vall);
-    //fprintf(f4,"%d %.14e\n",nll,qi);
-    *(q + nll - 1) = qi;
-  }
-
-
-  printf("\n\n  we go in the function\n\n");
-
-  info = solve_cfd(vec, q, &n, &meth_cfd1, z, w);
-
-  printf("\n\n we go out the function and info is %d\n", info);
-
-  fclose(f2);
-  fclose(f1);
-
-  free(w);
-  free(q);
-  free(z);
-  free(vec);
-  free(M);
-
-
-
-
-
-
-  //////////////////////////////////////////
-  // third test ///////////////////////////
-  //////////////////////////////////////////
-  static methode_cfd meth_cfd2  = {"Gcp", 101, 0.0001, 0.5, 7};
-  if ((f1 = fopen("MM_mmc_mu.dat", "r")) == NULL)
-  {
-    perror("fopen 1");
-    exit(1);
-  }
-
-
-  //  f3=fopen("aff_M.dat","w+");
-  M = malloc(dimM * dimM * sizeof(double));
-  vec = (double*)malloc(dimM * dimM * sizeof(double));
-
-  while (!feof(f1))
-  {
-    fscanf(f1, "%d", &nl);
-    fscanf(f1, "%d", &nc);
-    fscanf(f1, "%s", val);
-    Mij = atof(val);
-
-    /////////////       on met la transpos       ////////////////
-    /*   fprintf(f3,"%d %d %.14e\n",nc,nl,Mij);
-    fscanf(f3,"%d %d %.14e\n", &nc, &nl, &Mij);*/
-    *(*(M + nc - 1) + nl - 1) = Mij;
-    //////////////         fin transpos         ////////////////////
-
-  }
-
-
   //// valeurs du tableau dans vec (compatibilite allocation memoire f90)///
-  for (i = 0; i < dimM; i++)
-  {
-    for (j = 0; j < dimM; j++)
-    {
-      vec[j * dimM + i] = M[i][j];
-    }
-  }
-  ////////////////////////////////////////////////////////////////////////
 
 
-  if ((f2 = fopen("qq_mmc_mu.dat", "r")) == NULL)
+
+  if ((f2 = fopen("J1_mu.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);
   }
 
 
-  //  f4=fopen("aff_q.dat","w+");
-  q = malloc(dimM * sizeof(double));
-  z = malloc(dimM * sizeof(double));
-  w = malloc(dimM * sizeof(double));
+
+
+  meth_cfd.cfd.J1 = (double *) malloc(dimM * sizeof(double));
+  F1 = (double *) malloc(dimM * sizeof(double));
+  meth_cfd.cfd.ddl_i = (int*)malloc(dim_i * sizeof(int));
+  meth_cfd.cfd.ddl_n = (int*)malloc(dim_n * sizeof(int));
+  meth_cfd.cfd.ddl_tt = (int*)malloc(dim_tt * sizeof(int));
+  meth_cfd.cfd.ddl_c = (int*)malloc(dim_c * sizeof(int));
+
+
 
   while (!feof(f2))
   {
     fscanf(f2, "%d", &nll);
     fscanf(f2, "%s", vall);
     qi = atof(vall);
-    //fprintf(f4,"%d %.14e\n",nll,qi);
-    *(q + nll - 1) = qi;
+    *(meth_cfd.cfd.J1 + nll - 1) = qi;
   }
 
 
-  printf("\n\n  we go in the function\n\n");
 
-  info = solve_cfd(vec, q, &n, &meth_cfd2, z, w);
+  if ((f3 = fopen("F1_mu.dat", "r")) == NULL)
+  {
+    perror("fopen 3");
+    exit(3);
+  }
+
+
+  while (!feof(f3))
+  {
+    fscanf(f3, "%d", &nll);
+    fscanf(f3, "%s", vall);
+    qi = atof(vall);
+    *(F1 + nll - 1) = qi;
+  }
+
+
+
+  if ((f4 = fopen("ddl_i_mu.dat", "r")) == NULL)
+  {
+    perror("fopen 4");
+    exit(4);
+  }
+
+
+  while (!feof(f4))
+  {
+    fscanf(f4, "%d", &nll);
+    fscanf(f4, "%s", &vall);
+    qi = atof(vall);
+    m = qi;
+    *(meth_cfd.cfd.ddl_i + nll - 1) = m - 1;
+
+  }
+
+
+
+  if ((f5 = fopen("ddl_n_mu.dat", "r")) == NULL)
+  {
+    perror("fopen 5");
+    exit(5);
+  }
+
+
+  while (!feof(f5))
+  {
+    fscanf(f5, "%d", &nll);
+    fscanf(f5, "%s", &vall);
+    qi = atof(vall);
+    m = qi;
+    *(meth_cfd.cfd.ddl_n + nll - 1) = m - 1;
+  }
+
+
+
+  if ((f6 = fopen("ddl_t_mu.dat", "r")) == NULL)
+  {
+    perror("fopen 6");
+    exit(6);
+  }
+
+
+  while (!feof(f6))
+  {
+    fscanf(f6, "%d", &nll);
+    fscanf(f6, "%s", &vall);
+    qi = atof(vall);
+    m = qi;
+    *(meth_cfd.cfd.ddl_tt + nll - 1) = m - 1;
+
+  }
+
+
+
+  if ((f7 = fopen("ddl_c_mu.dat", "r")) == NULL)
+  {
+    perror("fopen 7");
+    exit(7);
+  }
+
+
+  while (!feof(f7))
+  {
+    fscanf(f7, "%d", &nll);
+    fscanf(f7, "%s", &vall);
+    qi = atof(vall);
+    m = qi;
+    *(meth_cfd.cfd.ddl_c + nll - 1) = m - 1;
+  }
+
+
+
+
+  U2 = malloc(n * sizeof(double));
+  F2 = malloc(n * sizeof(double));
+
+
+  printf("\n\n  we go in the function name %s\n\n", name);
+
+
+
+  info = solve_cfd(K1, F1, &dimM, &meth_cfd, U2, F2);
+
 
   printf("\n\n we go out the function and info is %d\n", info);
 
-  fclose(f2);
-  fclose(f1);
 
-  free(w);
-  free(q);
-  free(z);
+
+
+
+
+  for (i = 0; i < 20; i++)
+    printf("z %g w %g \n", U2[i], F2[i]);
+
+
+
+  fclose(f1);
+  fclose(f2);
+  fclose(f3);
+  fclose(f4);
+  fclose(f5);
+  fclose(f6);
+  fclose(f7);
+
+
   free(vec);
   free(M);
+  free(K1);
+  free(F1);
+
+
+  free(U2);
+  free(F2);
+  free(meth_cfd.cfd.ddl_i);
+  free(meth_cfd.cfd.ddl_tt);
+  free(meth_cfd.cfd.ddl_n);
+  free(meth_cfd.cfd.ddl_c);
+  free(meth_cfd.cfd.J1);
+
+
 }
-
-
-
-
-
 
 
 

@@ -54,18 +54,19 @@
 void test1(void)
 {
   FILE *f1, *f2, *f3, *f4, *f5, *f6, *f7, *f8, *f9;
-  int i, j, nl, nc, nll, it, info, n = 40, dimM = n, incx, incy;
+  int i, j, nl, nc, nll, it, n = 40, dimM = n, incx, incy;
   double *q, *z, *w, *vec, *a, *b, *c, *qqt, *zt;
-  double(*M)[n], (*Mt)[n];
+  int info;
+  double(*M)[n];
   double qi, Mij, alpha, beta;
   char val[14], vall[14];
   methode meth_rp;
   char trans;
 
-  //  meth_rp.rp.nom_method="latin";
+
   strcpy(meth_rp.rp.nom_method, "Gsnl");
-  meth_rp.rp.itermax = 50;
-  meth_rp.rp.tol = 0.001;
+  meth_rp.rp.itermax = 100000;
+  meth_rp.rp.tol = 0.0000001;
   meth_rp.rp.k_latin = 0.003; //0.00005;
 
 
@@ -79,7 +80,6 @@ void test1(void)
 
 
   M = malloc(dimM * dimM * sizeof(double));
-  Mt = malloc(dimM * dimM * sizeof(double));
   vec = (double*)malloc(dimM * dimM * sizeof(double));
 
 
@@ -93,7 +93,6 @@ void test1(void)
     /////////////       on met la transpos       ////////////////
 
     *(*(M + nc - 1) + nl - 1) = Mij;
-    *(*(Mt + nl - 1) + nc - 1) = Mij;
 
     //////////////         fin transpos         ////////////////////
 
@@ -136,13 +135,12 @@ void test1(void)
 
 
   q = malloc(dimM * sizeof(double));
-  qqt = malloc(dimM * sizeof(double));
   z = malloc(dimM * sizeof(double));
   zt = malloc(dimM * sizeof(double));
   w = malloc(dimM * sizeof(double));
   a = malloc(dimM * sizeof(double));
   b = malloc(dimM * sizeof(double));
-  c = malloc(dimM * sizeof(double));
+
 
 
 
@@ -176,49 +174,21 @@ void test1(void)
   }
 
 
-  for (i = 0; i < dimM; i++)
-  {
-    c[i] = (-b[i] - a[i]) / 2;
-    qqt[i] = q[i];
-  }
 
-
-  trans = 'T';
-  alpha = 1.;
-  beta = 1.;
-  incx = 1;
-  incy = 1;
-
-
-  dgemv_(&trans, &n, &n, &alpha, M, &n, c, &incx, &beta, qqt, &incy);
 
   meth_rp.rp.a = (double*)malloc(dimM * sizeof(double));
+  meth_rp.rp.b = (double*)malloc(dimM * sizeof(double));
 
   for (i = 0; i <= n - 1; i++)
   {
-    meth_rp.rp.a[i] = a[i] + c[i] ;
+    meth_rp.rp.a[i] = a[i];
+    meth_rp.rp.b[i] = -b[i];
   }
 
 
   printf("\n\n we go in the function \n\n");
 
-  info = solve_rp(vec, qqt, &n, &meth_rp, zt, w);
-
-
-  f7 = fopen("res.dat", "w+");
-
-
-
-  for (i = 0; i < n; i++)
-  {
-    z[i] = zt[i] - c[i] ;
-  }
-
-
-  for (i = 0; i < n; i++)
-  {
-    fprintf(f7, "%d  %g  %g  %g  %g  \n", i, z[i], w[i], a[i], b[i]);
-  }
+  info = solve_rp(vec, q, &n, &meth_rp, zt, w);
 
 
   printf("\n\n we go out the function and info is %d\n", info);
@@ -227,37 +197,34 @@ void test1(void)
   fclose(f6);
   fclose(f1);
   fclose(f5);
-  fclose(f7);
 
 
   free(M);
-  free(Mt);
   free(vec);
   free(q);
-  free(qqt);
   free(z);
   free(zt);
   free(w);
   free(a);
   free(b);
-  free(c);
   free(meth_rp.rp.a);
 }
 
 void test2(void)
 {
   FILE *f1, *f2, *f3, *f4, *f5, *f6, *f7, *f8, *f9;
-  int i, j, nl, nc, nll, it, info, n = 40, dimM = n, incx, incy;
+  int i, j, nl, nc, nll, it, n = 40, dimM = n, incx, incy;
   double *q, *z, *w, *vec, *a, *b, *c, *qqt, *zt;
-  double(*M)[n], (*Mt)[n];
+  int info;
+  double(*M)[n];
   double qi, Mij, alpha, beta;
   char val[14], vall[14];
   methode meth_rp;
   char trans;
 
   strcpy(meth_rp.rp.nom_method, "Latin");
-  meth_rp.rp.itermax = 50;
-  meth_rp.rp.tol = 0.001;
+  meth_rp.rp.itermax = 1000;
+  meth_rp.rp.tol = 0.0001;
   meth_rp.rp.k_latin = 0.003; //0.00005;
 
 
@@ -271,7 +238,6 @@ void test2(void)
 
 
   M = malloc(dimM * dimM * sizeof(double));
-  Mt = malloc(dimM * dimM * sizeof(double));
   vec = (double*)malloc(dimM * dimM * sizeof(double));
 
 
@@ -285,7 +251,7 @@ void test2(void)
     /////////////       on met la transpos       ////////////////
 
     *(*(M + nc - 1) + nl - 1) = Mij;
-    *(*(Mt + nl - 1) + nc - 1) = Mij;
+    //*(*(M+nl-1)+nc-1)=Mij;
 
     //////////////         fin transpos         ////////////////////
 
@@ -328,13 +294,12 @@ void test2(void)
 
 
   q = malloc(dimM * sizeof(double));
-  qqt = malloc(dimM * sizeof(double));
   z = malloc(dimM * sizeof(double));
   zt = malloc(dimM * sizeof(double));
   w = malloc(dimM * sizeof(double));
   a = malloc(dimM * sizeof(double));
   b = malloc(dimM * sizeof(double));
-  c = malloc(dimM * sizeof(double));
+
 
 
 
@@ -368,27 +333,14 @@ void test2(void)
   }
 
 
-  for (i = 0; i < dimM; i++)
-  {
-    c[i] = (-b[i] - a[i]) / 2;
-    qqt[i] = q[i];
-  }
-
-
-  trans = 'T';
-  alpha = 1.;
-  beta = 1.;
-  incx = 1;
-  incy = 1;
-
-
-  dgemv_(&trans, &n, &n, &alpha, M, &n, c, &incx, &beta, qqt, &incy);
 
   meth_rp.rp.a = (double*)malloc(dimM * sizeof(double));
+  meth_rp.rp.b = (double*)malloc(dimM * sizeof(double));
 
   for (i = 0; i <= n - 1; i++)
   {
-    meth_rp.rp.a[i] = a[i] + c[i] ;
+    meth_rp.rp.a[i] = a[i];
+    meth_rp.rp.b[i] = -b[i];
   }
 
 
@@ -397,361 +349,28 @@ void test2(void)
   info = solve_rp(vec, qqt, &n, &meth_rp, zt, w);
 
 
-  f7 = fopen("res.dat", "w+");
-
-
-
-  for (i = 0; i < n; i++)
-  {
-    z[i] = zt[i] - c[i] ;
-  }
-
-
-  for (i = 0; i < n; i++)
-  {
-    fprintf(f7, "%d  %g  %g  %g  %g  \n", i, z[i], w[i], a[i], b[i]);
-  }
-
-
   printf("\n\n we go out the function and info is %d\n", info);
 
   fclose(f2);
   fclose(f6);
   fclose(f1);
   fclose(f5);
-  fclose(f7);
 
 
   free(M);
-  free(Mt);
   free(vec);
   free(q);
-  free(qqt);
   free(z);
   free(zt);
   free(w);
   free(a);
   free(b);
-  free(c);
   free(meth_rp.rp.a);
 }
 
 
 int main(void)
 {
-  /*  FILE *f1,*f2,*f3,*f4,*f5,*f6,*f7,*f8,*f9;
-    int i,j,nl,nc,nll,it,info,n=40,dimM=n,incx,incy;
-    double *q,*z,*w,*vec,*a,*b,*c,*qqt,*zt;
-    double (*M)[n],(*Mt)[n];
-    double qi,Mij,alpha,beta;
-    char val[14],vall[14];
-    methode meth_rp;
-    char trans;
-
-    //  meth_rp.rp.nom_method="latin";
-    strcpy( meth_rp.rp.nom_method, "Gsnl");
-    meth_rp.rp.itermax=50;
-    meth_rp.rp.tol=0.001;
-    meth_rp.rp.k_latin=0.003;//0.00005;
-
-
-
-    if ((f1=fopen("M_relay.dat","r"))==NULL){
-    perror("fopen 1");
-    exit(1);
-    }
-
-
-
-    M=malloc(dimM*dimM*sizeof(double));
-    Mt=malloc(dimM*dimM*sizeof(double));
-    vec=(double*)malloc(dimM*dimM*sizeof(double));
-
-
-    while (!feof(f1)){
-      fscanf(f1,"%d",&nl);
-      fscanf(f1,"%d",&nc);
-      fscanf(f1,"%s",val);
-      Mij=atof(val);
-
-   /////////////       on met la transpos       ////////////////
-
-     *(*(M+nc-1)+nl-1)=Mij;
-     *(*(Mt+nl-1)+nc-1)=Mij;
-
-   //////////////         fin transpos         ////////////////////
-
-     }
-
-    //// valeurs du tableau dans vec (compatibilite allocation memoire f90)///
-      for (i=0;i<dimM;i++)
-        {for (j=0;j<dimM;j++){
-    vec[j*dimM+i]= M[i][j];
-
-        }}
-    ////////////////////////////////////////////////////////////////////////
-
-
-
-
-    if ((f2=fopen("q_relay.dat","r"))==NULL){
-    perror("fopen 2");
-    exit(2);
-    }
-
-
-    if ((f5=fopen("a_relay.dat","r"))==NULL){
-    perror("fopen 5");
-    exit(5);
-    }
-
-
-    if ((f6=fopen("b_relay.dat","r"))==NULL){
-    perror("fopen 6");
-    exit(6);
-    }
-
-
-
-    q=malloc(dimM*sizeof(double));
-    qqt=malloc(dimM*sizeof(double));
-    z=malloc(dimM*sizeof(double));
-    zt=malloc(dimM*sizeof(double));
-    w=malloc(dimM*sizeof(double));
-    a=malloc(dimM*sizeof(double));
-    b=malloc(dimM*sizeof(double));
-    c=malloc(dimM*sizeof(double));
-
-
-
-
-    while (!feof(f2)){
-      fscanf(f2,"%d",&nll);
-      fscanf(f2,"%s",vall);
-      qi=atof(vall);
-      *(q+nll-1)=qi;
-   }
-
-
-    while (!feof(f5)){
-      fscanf(f5,"%d",&nll);
-      fscanf(f5,"%s",vall);
-      qi=atof(vall);
-      fprintf(f5,"%d %.14e\n",nll,qi);
-      *(a+nll-1)=qi;
-   }
-
-
-    while (!feof(f6)){
-      fscanf(f6,"%d",&nll);
-      fscanf(f6,"%s",vall);
-      qi=atof(vall);
-      fprintf(f6,"%d %.14e\n",nll,qi);
-      *(b+nll-1)=qi;
-   }
-
-
-    for(i=0;i<dimM;i++){
-      c[i]=(-b[i]-a[i])/2;
-      qqt[i]=q[i];
-    }
-
-
-     trans='T';
-     alpha=1.;
-     beta=1.;
-     incx=1;
-     incy=1;
-
-
-    dgemv_(&trans,&n,&n,&alpha,M,&n,c,&incx,&beta,qqt,&incy);
-
-    meth_rp.rp.a=(double*)malloc(dimM*sizeof(double));
-
-    for (i=0;i<=n-1;i++){
-      meth_rp.rp.a[i]=a[i]+c[i] ;
-    }
-
-
-    printf("\n\n we go in the function \n\n");
-
-    info=solve_rp (vec,qqt,&n,&meth_rp,zt,w);
-
-
-    f7=fopen("res.dat","w+");
-
-
-
-    for (i=0;i<n;i++){
-      z[i]=zt[i]-c[i] ;}
-
-
-    for(i=0;i<n;i++){
-      fprintf(f7,"%d  %g  %g  %g  %g  \n",i,z[i],w[i],a[i],b[i]);
-    }
-
-
-    printf("\n\n we go out the function and info is %d\n",info);
-
-    fclose(f2);fclose(f6);fclose(f1);fclose(f5);fclose(f7);
-
-
-    free(M);  free(Mt);  free(vec);  free(q);  free(qqt);  free(z);  free(zt);  free(w);  free(a);  free(b);  free(c);  free(meth_rp.rp.a);
-
-
-
-  /////////////////////////////////////
-  // second test
-  ////////////////////////////////////
-    strcpy( meth_rp.rp.nom_method, "Latin");
-    meth_rp.rp.itermax=50;
-    meth_rp.rp.tol=0.001;
-    meth_rp.rp.k_latin=0.003;//0.00005;
-
-
-
-    if ((f1=fopen("M_relay.dat","r"))==NULL){
-    perror("fopen 1");
-    exit(1);
-    }
-
-
-
-    M=malloc(dimM*dimM*sizeof(double));
-    Mt=malloc(dimM*dimM*sizeof(double));
-    vec=(double*)malloc(dimM*dimM*sizeof(double));
-
-
-    while (!feof(f1)){
-      fscanf(f1,"%d",&nl);
-      fscanf(f1,"%d",&nc);
-      fscanf(f1,"%s",val);
-      Mij=atof(val);
-
-   /////////////       on met la transpos       ////////////////
-
-     *(*(M+nc-1)+nl-1)=Mij;
-     *(*(Mt+nl-1)+nc-1)=Mij;
-
-   //////////////         fin transpos         ////////////////////
-
-     }
-
-    //// valeurs du tableau dans vec (compatibilite allocation memoire f90)///
-      for (i=0;i<dimM;i++)
-        {for (j=0;j<dimM;j++){
-    vec[j*dimM+i]= M[i][j];
-
-        }}
-    ////////////////////////////////////////////////////////////////////////
-
-
-
-
-    if ((f2=fopen("q_relay.dat","r"))==NULL){
-    perror("fopen 2");
-    exit(2);
-    }
-
-
-    if ((f5=fopen("a_relay.dat","r"))==NULL){
-    perror("fopen 5");
-    exit(5);
-    }
-
-
-    if ((f6=fopen("b_relay.dat","r"))==NULL){
-    perror("fopen 6");
-    exit(6);
-    }
-
-
-
-    q=malloc(dimM*sizeof(double));
-    qqt=malloc(dimM*sizeof(double));
-    z=malloc(dimM*sizeof(double));
-    zt=malloc(dimM*sizeof(double));
-    w=malloc(dimM*sizeof(double));
-    a=malloc(dimM*sizeof(double));
-    b=malloc(dimM*sizeof(double));
-    c=malloc(dimM*sizeof(double));
-
-
-
-
-    while (!feof(f2)){
-      fscanf(f2,"%d",&nll);
-      fscanf(f2,"%s",vall);
-      qi=atof(vall);
-      *(q+nll-1)=qi;
-   }
-
-
-    while (!feof(f5)){
-      fscanf(f5,"%d",&nll);
-      fscanf(f5,"%s",vall);
-      qi=atof(vall);
-      fprintf(f5,"%d %.14e\n",nll,qi);
-      *(a+nll-1)=qi;
-   }
-
-
-    while (!feof(f6)){
-      fscanf(f6,"%d",&nll);
-      fscanf(f6,"%s",vall);
-      qi=atof(vall);
-      fprintf(f6,"%d %.14e\n",nll,qi);
-      *(b+nll-1)=qi;
-   }
-
-
-    for(i=0;i<dimM;i++){
-      c[i]=(-b[i]-a[i])/2;
-      qqt[i]=q[i];
-    }
-
-
-     trans='T';
-     alpha=1.;
-     beta=1.;
-     incx=1;
-     incy=1;
-
-
-    dgemv_(&trans,&n,&n,&alpha,M,&n,c,&incx,&beta,qqt,&incy);
-
-    meth_rp.rp.a=(double*)malloc(dimM*sizeof(double));
-
-    for (i=0;i<=n-1;i++){
-      meth_rp.rp.a[i]=a[i]+c[i] ;
-    }
-
-
-    printf("\n\n we go in the function \n\n");
-
-    info=solve_rp (vec,qqt,&n,&meth_rp,zt,w);
-
-
-    f7=fopen("res.dat","w+");
-
-
-
-    for (i=0;i<n;i++){
-      z[i]=zt[i]-c[i] ;}
-
-
-    for(i=0;i<n;i++){
-      fprintf(f7,"%d  %g  %g  %g  %g  \n",i,z[i],w[i],a[i],b[i]);
-    }
-
-
-    printf("\n\n we go out the function and info is %d\n",info);
-
-    fclose(f2);fclose(f6);fclose(f1);fclose(f5);fclose(f7);
-
-
-    free(M);  free(Mt);  free(vec);  free(q);  free(qqt);  free(z);  free(zt);  free(w);  free(a);  free(b);  free(c);  free(meth_rp.rp.a);
-  */
   test1();
   test2();
   return 1;

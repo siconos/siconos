@@ -25,7 +25,7 @@ here M is an n by n  matrix, q an n-dimensional vector, w an n-dimensional  vect
 double ddot_(int *, double [], int *, double [], int*);
 
 
-/*!\fn int gsnl_lcp(double vec[],double *qq,int *nn,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
+/*!\fn  gsnl_lcp(double vec[],double *qq,int *nn,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
 
 
 gsnl_lcp is a basic gsnl (Gauss-Seidel Non Linear) solver for LCP.
@@ -40,69 +40,54 @@ gsnl_lcp is a basic gsnl (Gauss-Seidel Non Linear) solver for LCP.
 \param z On return double vector, the solution of the problem.
 \param w On return double vector, the solution of the problem.
 \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
-\return int : \todo tell whiwh result is good
+
 \author Nineb Sheherazade.
 */
-int gsnl_lcp(double vec[], double *qq, int *nn, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
+
+
+
+gsnl_lcp(double vec[], double *qq, int *nn, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
 {
-  FILE *f13;
-  int i, j, kk, iter1, k;
-  int n = *nn, incx, incy;
-  double errmax = *tol, alpha, beta, mina, maxa, bb, aa;
+  int i, j, kk, iter1, k, itt = *itermax;
+  int n = *nn, incx = 1, incy = 1;
+  double errmax = *tol, alpha, beta;
   double err1, num11, num, den, avn, avt, apn, apt, xn;
-  double *q, *zz, *ww, *Mz, *zi, *wi, *y, *yy, *zt, *wnum1;
-  char trans;
+  double *q, *zz, *ww, *y;
+  char trans = 'T';
   double M[n][n];
 
 
-  q = (double*)malloc(n * sizeof(double));
-
-  for (i = 0; i < n; i++)
-    q[i] = qq[i];
 
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
-      M[i][j] = vec[i * n + j];
+      M[i][j] = vec[i * n + j]; /* vec has a F90 storage and M has a C storage*/
 
-  yy = (double*)malloc(n * sizeof(double));
-  wi = (double*)malloc(n * sizeof(double));
-  zi = (double*)malloc(n * sizeof(double));
+
+
   ww = (double*)malloc(n * sizeof(double));
-  wnum1 = (double*)malloc(n * sizeof(double));
-  Mz = (double*)malloc(n * sizeof(double));
   y = (double*)malloc(n * sizeof(double));
-  zt = (double*)malloc(n * sizeof(double));
+
 
 
   for (i = 0; i < n; i++)
   {
     y[i] = 0.;
-    zi[i] = 0.;
-    wi[i] = 0.;
     w[i] = 0.;
     z[i] = 0.;
-    Mz[i] = 0.;
-    zt[i] = 0.;
-    yy[i] = 0.;
     ww[i] = 0.;
   }
 
   iter1 = 0;
   err1 = 1.;
 
-  while ((iter1 < *itermax) && (err1 > errmax))
+  while ((iter1 < itt) && (err1 > errmax))
   {
-    //   !linear stage (zc,wc) -> (z,w)
     iter1 = iter1 + 1;
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, q, &incx, y, &incy);
+    dcopy_(&n, qq, &incx, y, &incy);
 
-    trans = 'T';
+
     alpha = 1.;
     beta = -1.;
-    incx = 1;
-    incy = 1;
     dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, y, &incy);
     dcopy_(&n, y, &incx, ww, &incy);
 
@@ -117,7 +102,7 @@ int gsnl_lcp(double vec[], double *qq, int *nn, int * itermax, double * tol, dou
       for (k = i + 1; k < n; k++)
         apn = apn + M[i][k] * z[k];
 
-      xn = q[i] - avn - apn;
+      xn = qq[i] - avn - apn;
 
       if (xn > 0.0)
       {
@@ -131,65 +116,35 @@ int gsnl_lcp(double vec[], double *qq, int *nn, int * itermax, double * tol, dou
       }
     }
 
+
     /* ///////// Criterium convergence ///////////// */
 
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, ww, &incx, y, &incy);
+
     alpha = -1.;
-    daxpy_(&n, &alpha, w, &incx, y, &incy);
-    dcopy_(&n, y, &incx, wnum1, &incy);
-    num = ddot_(&n, wnum1, &incx, wnum1, &incy);
-    den = ddot_(&n, ww, &incx, ww, &incy);
-
-
-    /*  // verif equi
-    incx=1;
-    incy=1;
-    dcopy_(&n,q,&incx,y,&incy);
-    alpha = 1.;
-    daxpy_(&n,&alpha,w,&incx,y,&incy);
-    alpha = 1.;
-    beta = -1.;
-    dgemv_(&trans,&n,&n,&alpha,M,&n,z,&incx,&beta,y,&incy);
-
-    /*    for (i=0;i<n;i++){
-    printf("voici zero (%d) = % g \n",i,y[i]);
-    }//*/
-
-    //fin verif equi */
-
+    daxpy_(&n, &alpha, w, &incx, ww, &incy);
+    num = ddot_(&n, ww, &incx, ww, &incy);
+    den = ddot_(&n, qq, &incx, qq, &incy);
 
     err1 = sqrt(num) / sqrt(den);
-    it_end = &iter1;
-    res = &err1;
+    *it_end = iter1;
+    *res = err1;
 
-    printf("iteration numbers %d and error evaluation %e \n ", iter1, err1);
   }
 
 
   if (err1 > errmax)
   {
     printf("no convergence after %d iterations, the residue is %g\n", iter1, err1);
+    *info = 1;
   }
-
-
-  if (err1 < errmax)
+  else
   {
     printf("there is convergence after %d iterations, the residue is %g \n", iter1, err1);
+    *info = 0;
   }
 
-  if (err1 < errmax) *info = 0;
-  else *info = 1;
 
-  free(Mz);
-  free(yy);
-  free(wi);
-  free(zi);
+
   free(ww);
-  free(wnum1);
   free(y);
-  free(q);
-  free(zt);
-  return *info;
 }

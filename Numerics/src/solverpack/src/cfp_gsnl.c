@@ -28,7 +28,7 @@ M z- w=q\\
 double ddot_(int *, double [], int *, double [], int*);
 
 
-/*!\fn int cfp_gsnl(double vec[],double *qq,int *nn,double *mumu,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
+/*!\fn  cfp_gsnl(double vec[],double *qq,int *nn,double *mumu,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
 
    cfp_gsnl is a specific gsnl (Gauss Seidel Non Linear) solver for primal contact problem with friction.
 
@@ -43,48 +43,38 @@ double ddot_(int *, double [], int *, double [], int*);
    \param z On return double vector, the solution of the problem.
    \param w On return double vector, the solution of the problem.
    \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
-\return int : \todo tell whiwh result is good
+
    \author Nineb Sheherazade.
 
  */
-int cfp_gsnl(double vec[], double *qq, int *nn, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
+
+cfp_gsnl(double vec[], double *q, int *nn, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
 {
-  FILE *f13;
   double errmax = *tol, alpha, beta, mu = *mumu;
-  double num1;
-  int maxit = *itermax;
-  double den1;
-  double *q, *y;
-  int n = *nn, incx, incy, nc = n / 2, i, j, k;
-  double M[n][n];
-  double fric1[nc], fric[nc], zn, zt, wt[nc];
-  double yy[n], Az[n], Azz[n], detM[nc], ww[n], av_z[n], num, den;
-  double zz[n][maxit], resvecgs[maxit + 1], normr, normM, epsM, eps;
-  int status[nc], iter, ss[nc][maxit];
-  char trans;
-  double avn, avt, apn, apt, equi;
+  int n = *nn, incx = 1, incy = 1, nc = n / 2, i, j, k, iter, maxit = *itermax;
+  double M[n][n], *y;
+  double fric1[nc], fric[nc], ww[n];
+  double normr, eps, avn, avt, apn, apt, zn , zt, den1, num1;
+  char trans = 'T';
+
 
 
   iter = 0;
   eps = 1.e-08;
 
-  q = (double*)malloc(n * sizeof(double));
-  y = (double*)malloc(n * sizeof(double));
+
+  y = (double*) malloc(n * sizeof(double));
 
   for (i = 0; i < n; i++)
   {
     z[i] = 0.0;
     w[i] = 0.0;
-    Az[i] = 0.0;
-    ww[i] = w[i];
-    av_z[i] = z[i];
-    q[i] = qq[i];
+    ww[i] = 0.0;
   }
 
   for (i = 0; i < nc; i++)
   {
     fric1[i] = 1.0;
-    status[i] = 0;
     fric[i] = mu * fric1[i];
   }
 
@@ -94,46 +84,14 @@ int cfp_gsnl(double vec[], double *qq, int *nn, double *mumu, int * itermax, dou
       M[i][j] = vec[i * n + j];
 
 
-  incx = 1;
-  incy = 1;
-  dcopy_(&n, w, &incx, y, &incy);
-
-  trans = 'T';
-  alpha = -1.;
-  incx = 1;
-  incy = 1;
-  daxpy_(&n, &alpha, Az, &incx, y, &incy);
-  alpha = 1.;
-  daxpy_(&n, &alpha, q, &incx, y, &incy);
-
-  num = ddot_(&n, y, &incx, y, &incy);
-  den = ddot_(&n, q, &incx, q, &incy);
-
-  normr = sqrt(num / den);
-
-  resvecgs[1] = normr;
-
-  //  normr=1.;
-  //  normM=1.;
-  //  espM=0.0001;
-
-
+  normr = 1.;
 
   while ((iter < maxit) && (normr > errmax))
   {
 
     iter = iter + 1;
 
-    printf("iteration numbers %d and error evaluation %e \n ", iter, normr);
-
-
-    for (i = 0; i < n; i++)
-    {
-      ww[i] = w[i];
-      av_z[i] = z[i];
-    }
-
-    //  loop over contacts
+    /*//  loop over contacts*/
 
     for (i = 0; i < nc; i++)
     {
@@ -158,69 +116,43 @@ int cfp_gsnl(double vec[], double *qq, int *nn, double *mumu, int * itermax, dou
       zn = q[2 * i] - avn - apn;
       zt = q[2 * i + 1] - avt - apt;
 
-
-      detM[i] = M[2 * i][2 * i] * M[2 * i + 1][2 * i + 1] - M[2 * i + 1][2 * i] * M[2 * i][2 * i + 1];
-
-
-
-      z[2 * i] = 0.;
-      w[2 * i] = -zn;
-      z[2 * i + 1] = 0.;
-      w[2 * i + 1] = -zt;
-
-      if (w[2 * i] > eps) status[i] = 1; // no contact
-      else
+      if (zn > eps)
       {
-        w[2 * i] = 0.0;
-        w[2 * i + 1] = 0.0;
-        z[2 * i] = (M[2 * i + 1][2 * i + 1] * zn - M[2 * i][2 * i + 1] * zt) / detM[i];
-        z[2 * i + 1] = (-M[2 * i + 1][2 * i] * zn + M[2 * i][2 * i] * zt) / detM[i];
-
-
-        if ((z[2 * i] > eps) && (fabs(z[2 * i + 1]) - mu * z[2 * i]) < eps)
+        z[2 * i] = zn / M[2 * i][2 * i];
+        w[2 * i] = 0.;
+        z[2 * i + 1] = zt / M[2 * i + 1][2 * i + 1];
+        w[2 * i + 1] = 0.;
+        if (z[2 * i + 1] > fric[i]*z[2 * i])
         {
-          status[i] = 2; // adherent status
+          z[2 * i + 1] = fric[i] * z[2 * i];
+          w[2 * i + 1] = -zt + M[2 * i + 1][2 * i + 1] * z[2 * i + 1];
         }
-        else
+        else if (z[2 * i + 1] < -fric[i]*z[2 * i])
         {
-          z[2 * i] = zn / (M[2 * i][2 * i] + mu * M[2 * i][2 * i + 1]);
-          z[2 * i + 1] = mu * z[2 * i];
-          w[2 * i] = 0.;
-          w[2 * i + 1] = -zt + ((M[2 * i][2 * i + 1] + mu * M[2 * i + 1][2 * i + 1]) / (M[2 * i][2 * i] + mu * M[2 * i][2 * i + 1])) * zn;
-
-          if (z[2 * i] > eps && w[2 * i + 1] > eps)
-          {
-            status[i] = 3; // G+ status
-          }
-          else
-          {
-            z[2 * i] = zn / (M[2 * i][2 * i] - mu * M[2 * i][2 * i + 1]);
-            w[2 * i] = 0.;
-            z[2 * i + 1] = -mu * z[2 * i];
-            w[2 * i + 1] = -zt + zn * ((M[2 * i][2 * i + 1] - mu * M[2 * i + 1][2 * i + 1]) / (M[2 * i][2 * i] + mu * M[2 * i][2 * i + 1]));
-            status[i] = 4; // G- status
-          }
+          z[2 * i + 1] = -fric[i] * z[2 * i];
+          w[2 * i + 1] = -zt + M[2 * i + 1][2 * i + 1] * z[2 * i + 1];
         }
       }
+      else
+      {
+        z[2 * i] = 0.0;
+        w[2 * i] = -zn;
+        z[2 * i + 1] = 0.;
+        w[2 * i + 1] = -zt;
 
+      }
     }
 
 
-    // convergence criterium
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, z, &incx, y, &incy);
-    trans = 'T';
-    alpha = -1.;
-    daxpy_(&n, &alpha, av_z, &incx, y, &incy);
+    dcopy_(&n, q, &incx, y, &incy);
     alpha = 1.;
-    beta = 0.;
-    dgemv_(&trans, &n, &n, &alpha, M, &n, y, &incx, &beta, y, &incy);
-    dcopy_(&n, y, &incx, Azz, &incy);
+    beta = -1.;
+    dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, y, &incy);
+    dcopy_(&n, y, &incx, ww, &incy);
 
 
-    dcopy_(&n, ww, &incx, y, &incy);
-    trans = 'T';
+    /*    // convergence criterium*/
+
     alpha = -1.;
     daxpy_(&n, &alpha, w, &incx, y, &incy);
 
@@ -229,73 +161,22 @@ int cfp_gsnl(double vec[], double *qq, int *nn, double *mumu, int * itermax, dou
     den1 = ddot_(&n, w, &incx, w, &incy);
 
     normr = sqrt(num1 / den1);
+    *it_end = iter;
+    *res = normr;
 
-    dcopy_(&n, z, &incx, y, &incy);
-    trans = 'T';
-    alpha = -1.;
-    daxpy_(&n, &alpha, av_z, &incx, y, &incy);
-
-    num1 = ddot_(&n, y, &incx, Azz, &incy);
-
-    dcopy_(&n, z, &incx, y, &incy);
-    trans = 'T';
-    alpha = 1.;
-    daxpy_(&n, &alpha, av_z, &incx, y, &incy);
-
-    alpha = 1.;
-    beta = 0.;
-    dgemv_(&trans, &n, &n, &alpha, M, &n, y, &incx, &beta, y, &incy);
-
-    den1 = ddot_(&n, y, &incx, y, &incy);
-
-    normM = sqrt(num1 / den1);
-
-    resvecgs[iter] = normr;
-
-    for (i = 0; i < n; i++)
-      zz[i][iter] = z[i];
-
-    for (i = 0; i < nc; i++)
-      ss[i][iter] = status[i];
   }
-
 
   if (normr > errmax)
   {
     printf("no convergence after %d iterations, the residue is %g\n", iter, normr);
+    *info = 1;
   }
-
-
-  if (normr < errmax)
+  else
   {
     printf("there is convergence after %d iterations, the residue is %g \n", iter, normr);
+    *info = 0;
   }
 
-  it_end = &iter;
-
-  /*  verification equilibre  */
-  dcopy_(&n, q, &incx, y, &incy);
-  trans = 'T';
-  alpha = -1.;
-  beta = 1.;
-  dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, y, &incy);
-
-  alpha = 1.;
-  daxpy_(&n, &alpha, w, &incx, y, &incy);
-
-
-  num1 = ddot_(&n, y, &incx, y, &incy);
-  den1 = ddot_(&n, q, &incx, q, &incy);
-
-  equi = sqrt(num1 / den1);
-
-  printf("equilibrium is %g \n", equi);
-  /* fin verification equilibre */
-
-  if (normr < errmax) *info = 0;
-  else *info = 1;
-
-  free(q);
   free(y);
-  return *info ;
+
 }

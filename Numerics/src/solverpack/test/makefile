@@ -31,9 +31,9 @@ TESTEXE = ./TEST
 
 #--- OBJ ------------------------------------------
 OBJ =  $(NUMERICSPATH)/src/solverpack/src/*.o
-TESTOBJ = main_rp.o main_cfd.o main_cfp.o main_lcp.o #TestNumerics.o
+TESTOBJ = main_rp.o main_rd.o main_cfd.o main_cfp.o main_lcp.o #TestNumerics.o
 SRC = $(wildcard *.cpp)
-LIB_LAPACK = $(NUMERICSPATH)/src/LAPACK/*.a
+#LIB_LAPACK = $(NUMERICSPATH)/src/LAPACK/*.a
 
 all: buildtest runtest
 
@@ -50,6 +50,8 @@ buildtest :
 #	$(GCC) $(INCLUDE) $(CPPUNIT_INC) -c $(GCCFLAGS) TestNumerics.cpp $(LIB_LAPACK)
 	$(CC) $(INCLUDE) -c $(CCFLAGS) main_lcp.c
 	$(FF) -o test_lcp main_lcp.o $(NUMERICS_LIB)/*.a $(LIBS_IFC)
+	$(CC) $(INCLUDE) -c $(CCFLAGS) main_rd.c
+	$(FF) -o test_rd main_rd.o $(NUMERICS_LIB)/*.a $(LIBS_IFC)
 	$(CC) $(INCLUDE) -c $(CCFLAGS) main_rp.c
 	$(FF) -o test_rp main_rp.o $(NUMERICS_LIB)/*.a $(LIBS_IFC)
 	$(CC) $(INCLUDE) -c $(CCFLAGS) main_cfd.c
@@ -64,6 +66,8 @@ runtest :
 	@ echo "## test_cfd done. ##"
 	./test_rp
 	@ echo "## test_rp done. ##"
+	./test_rd
+	@ echo "## test_rd done. ##"
 	./test_lcp
 	@ echo "## test_lcp done. ##"
 	

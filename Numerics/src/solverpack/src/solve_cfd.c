@@ -23,8 +23,10 @@ M z- w=q\\
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#ifndef MEXFLAG
 #include "SiconosNumerics.h"
-
+#endif
 
 /*!\fn  int solve_cfd (double *vec,double *q,int *n,methode *pt,double z[],double w[])
 
@@ -40,62 +42,154 @@ M z- w=q\\
 
    \author Nineb Sheherazade.
 */
-int solve_cfd(double *vec, double *q, int *n, methode *pt, double z[], double w[])
-{
-  int info = -1, choix, it_end, fail, i, j;
-  const char mot1[10] = "Latin", mot2[10] = "Lemke", mot3[10] = "Gsnl", mot4[10] = "Gcp";
-  double res, Mij, *vtel;
-  int nn = *n;
-  int nc = nn / 2;
-  int nc3 = 3 * nc;
-  double *Mtel, *Mteltoto;
-  double qtel[3 * nc], ztel[3 * nc], wtel[3 * nc], qteltoto[3 * nc];
 
-  vtel = (double*)malloc(3 * nc * 3 * nc * sizeof(double));
-  Mtel = (double*)malloc(3 * nc * 3 * nc * sizeof(double));
-  Mteltoto = (double*)malloc(3 * nc * 3 * nc * sizeof(double));
+
+int solve_cfd(double *K1, double *F1, int *n, methode *pt, double U2[], double F2[])
+{
+
+  const char mot1[10] = "Cfd_latin", mot2[10] = "Lemke", mot3[10] = "Gsnl", mot4[10] = "Gcp";
+  double res;
+  int info = -1, it_end;
+  double info1 = -1, it_end1, itt;
+  int aa, b = 3;
+  int nn = *n, tail1, tail2, tail3;
+  int *dim_nn, dim_MM, dim_q, tempo = 87;
+  int ddim_i, ddim_c, ddim_tt, ddim_n;
+  int *ddl_i, *ddl_n, *ddl_tt, *ddl_c, dim_i, dim_tt, dim_n, dim_c, i;
+  double *MM, *q, *z, *w;
+  clock_t t1, t2;
+
+
+
 
   if (strcmp(pt->cfd.nom_method, mot1) == 0)
-    cfd_latin(vec, q, &nn, & pt->cfd.k_latin, & pt->cfd.mu, & pt->cfd.itermax, & pt->cfd.tol, z, w, & it_end, &res, &info);
+  {
+    dim_MM = 4 * pt->cfd.dim_tt * pt->cfd.dim_tt;
+    dim_q = 2 * pt->cfd.dim_tt;
+    MM =  malloc(dim_MM * sizeof(double));
+    q =  malloc(dim_q * sizeof(double));
+
+
+
+    aa = cfd_lcp(&tempo, & pt->cfd.mu, pt, K1,  pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_n, &pt->cfd.dim_n,  pt->cfd.ddl_tt, &pt->cfd.dim_tt, pt->cfd.ddl_c, &pt->cfd.dim_c,  pt->cfd.J1, F1, &nn, MM, q);
+
+
+    z = (double *) malloc((2 * pt->cfd.dim_tt) * sizeof(double));
+    w = (double *) malloc((2 * pt->cfd.dim_tt) * sizeof(double));
+
+
+
+    t1 = clock();
+
+    cfd_latin(MM, q, &tempo, & pt->cfd.k_latin, & pt->cfd.mu, & pt->cfd.itermax, & pt->cfd.tol, z, w, & it_end, &res, &info);
+
+    t2 = clock();
+
+    printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
+
+    aa = lcp_cfd(&tempo , z, w, pt, K1, F1, &nn, pt->cfd.J1, pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_c, &pt->cfd.dim_c, pt->cfd.ddl_n, pt->cfd.ddl_tt, &pt->cfd.dim_tt, U2, F2);
+
+    free(MM);
+    free(q);
+    free(z);
+    free(w);
+
+  }
+
   else if (strcmp(pt->cfd.nom_method, mot2) == 0)
   {
-    //    cfd_lcp (&nc,& pt->cfd.mu,vec,q,Mtel,qtel);
-    //    //// valeurs du tableau dans vtel (compatibilite allocation memoire f90)///
-    //    for (i=0;i<3*nc;i++)
-    //      for (j=0;j<3*nc;j++)
-    //        vtel[j*3*nc+i]= Mtel[i][j];
-    //
-    //    lemke_lcp_(vtel,qtel,&nc3,& pt->cfd.itermax,ztel,wtel,&it_end,&res,&info);
-    //    lcp_cfd (&nc,ztel,wtel,z,w);
+
+    dim_MM = 9 * pt->cfd.dim_tt * pt->cfd.dim_tt;
+    dim_q = 3 * pt->cfd.dim_tt;
+    MM =  malloc(dim_MM * sizeof(double));
+    q =  malloc(dim_q * sizeof(double));
+
+    aa = cfd_lcp(&tempo, & pt->cfd.mu, pt, K1,  pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_n, &pt->cfd.dim_n,  pt->cfd.ddl_tt, &pt->cfd.dim_tt, pt->cfd.ddl_c, &pt->cfd.dim_c,  pt->cfd.J1, F1, &nn, MM, q);
+
+    z = (double *) malloc((3 * pt->cfd.dim_tt) * sizeof(double));
+    w = (double *) malloc((3 * pt->cfd.dim_tt) * sizeof(double));
+
+    t1 = clock();
+
+    lemke_lcp(MM, q, &tempo, & pt->cfd.itermax, z, w, &it_end, &res, &info);
+
+    t2 = clock();
+
+    printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
+
+    aa = lcp_cfd(&tempo , z, w, pt, K1, F1, &nn, pt->cfd.J1, pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_c, &pt->cfd.dim_c, pt->cfd.ddl_n, pt->cfd.ddl_tt, &pt->cfd.dim_tt, U2, F2);
+
+
+    free(MM);
+    free(q);
+    free(z);
+    free(w);
+
+
+
   }
   else if (strcmp(pt->cfd.nom_method, mot3) == 0)
   {
-    cfd_lcp(&nc, & pt->cfd.mu, vec, q, Mtel, qtel);
 
-    //// valeurs du tableau dans vtel (compatibilite allocation memoire f90/C)///
-    for (i = 0; i < 3 * nc; i++)
-      for (j = 0; j < 3 * nc; j++)
-        vtel[3 * nc * i + j] = Mtel[i + 3 * nc * j];
+    dim_MM = 9 * pt->cfd.dim_tt * pt->cfd.dim_tt;
+    dim_q = 3 * pt->cfd.dim_tt;
+    MM =  malloc(dim_MM * sizeof(double));
+    q =  malloc(dim_q * sizeof(double));
 
-    gsnl_lcp(vtel, qtel, &nc3, & pt->cfd.itermax, & pt->cfd.tol, ztel, wtel, &it_end, &res, &info);
-    lcp_cfd(&nc, ztel, wtel, z, w);
+    aa = cfd_lcp(&tempo, & pt->cfd.mu, pt, K1,  pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_n, &pt->cfd.dim_n,  pt->cfd.ddl_tt, &pt->cfd.dim_tt, pt->cfd.ddl_c, &pt->cfd.dim_c,  pt->cfd.J1, F1, &nn, MM, q);
+
+    z = (double *) malloc((3 * pt->cfd.dim_tt) * sizeof(double));
+    w = (double *) malloc((3 * pt->cfd.dim_tt) * sizeof(double));
+
+    t1 = clock();
+
+    gsnl_lcp(MM, q,  &tempo, & pt->cfd.itermax, & pt->cfd.tol, z, w, &it_end, &res, &info);
+
+    t2 = clock();
+
+    printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
+
+    aa = lcp_cfd(&tempo , z, w, pt, K1, F1, &nn, pt->cfd.J1, pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_c, &pt->cfd.dim_c, pt->cfd.ddl_n, pt->cfd.ddl_tt, &pt->cfd.dim_tt, U2, F2);
+
+
+    free(MM);
+    free(q);
+    free(z);
+    free(w);
+
   }
   else if (strcmp(pt->cfd.nom_method, mot4) == 0)
   {
-    cfd_lcp(&nc, & pt->cfd.mu, vec, q, Mtel, qtel);
 
-    //// valeurs du tableau dans vtel (compatibilite allocation memoire f90/C)///
-    for (i = 0; i < 3 * nc; i++)
-      for (j = 0; j < 3 * nc; j++)
-        vtel[3 * nc * i + j] = Mtel[i + 3 * nc * j];
+    dim_MM = (3 * pt->cfd.dim_tt) * (3 * pt->cfd.dim_tt);
+    dim_q = (3 * pt->cfd.dim_tt);
+    MM =  malloc(dim_MM * sizeof(double));
+    q =  malloc(dim_q * sizeof(double));
 
-    gcp_lcp(vtel, qtel, &nc3, & pt->cfd.itermax, & pt->cfd.tol, ztel, wtel, &it_end, &res, &info);
-    lcp_cfd(&nc, ztel, wtel, z, w);
+    aa = cfd_lcp(&tempo, & pt->cfd.mu, pt, K1,  pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_n, &pt->cfd.dim_n,  pt->cfd.ddl_tt, &pt->cfd.dim_tt, pt->cfd.ddl_c, &pt->cfd.dim_c,  pt->cfd.J1, F1, &nn, MM, q);
+
+    z = (double *) malloc((3 * pt->cfd.dim_tt) * sizeof(double));
+    w = (double *) malloc((3 * pt->cfd.dim_tt) * sizeof(double));
+
+    t1 = clock();
+
+    gcp_lcp(MM, q, &tempo, & pt->cfd.itermax, & pt->cfd.tol, z, w, &it_end, &res, &info);
+
+    t2 = clock();
+    printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
+
+    aa = lcp_cfd(&tempo , z, w, pt, K1, F1, &nn, pt->cfd.J1, pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_c, &pt->cfd.dim_c, pt->cfd.ddl_n, pt->cfd.ddl_tt, &pt->cfd.dim_tt, U2, F2);
+
+    free(MM);
+    free(q);
+    free(z);
+    free(w);
+
   }
   else printf("Warning : Unknown solving method : %s\n", pt->cfd.nom_method);
 
-  free(vtel);
-  free(Mteltoto);
-  free(Mtel);
+
+
   return info;
 }
+

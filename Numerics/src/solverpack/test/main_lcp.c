@@ -45,29 +45,32 @@ main()
 
 {
   FILE *f1, *f2, *f3, *f4, *f5, *f6;
-  int i, j, nl, nc, nll, it, info, n = 31, dimM = n;
+  int i, j, nl, nc, nll, it,/*info,*/n = 78, dimM = n;
   double *q, *z, *w, *vec;
+  int info;
   double(*M)[n];
   double qi, Mij;
   char val[14], vall[14];
 
-  static methode_lcp meth_lcp  = {"Gcp", 101, 0.0001, 0.6};
+  static methode_lcp meth_lcp  = {"Gsnl", 1001, 0.000001, 0.6};
 
-  if ((f1 = fopen("MM_mmc.dat", "r")) == NULL)
+  if ((f1 = fopen("MM_mmc_mu2.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
   }
 
-  if ((f2 = fopen("qq_mmc.dat", "r")) == NULL)
+  if ((f2 = fopen("qq_mmc_mu2.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);
   }
 
-  //  f3=fopen("aff_M.dat","w+");
+
   M = malloc(dimM * dimM * sizeof(double));
   vec = (double*)malloc(dimM * dimM * sizeof(double));
+
+
 
   for (i = 0; i < dimM; i++)
     for (j = 0; j < dimM; j++)
@@ -85,26 +88,27 @@ main()
       fscanf(f3,"%d %d %.14e\n", &nc, &nl, &Mij);*/
     *(*(M + nc - 1) + nl - 1) = Mij;
     //////////////         fin transpos         ////////////////////
+
   }
 
 
   //// valeurs du tableau dans vec (compatibilite allocation memoire f90)///
   for (i = 0; i < dimM; i++)
+  {
     for (j = 0; j < dimM; j++)
+    {
       vec[j * dimM + i] = M[i][j];
-  //       printf("vec(%d) = %.14e \n",i*dimM+j,M[i][j]);}
+      //       printf("vec(%d) = %.14e \n",i*dimM+j,M[i][j]);}
+    }
+  }
   ////////////////////////////////////////////////////////////////////////
 
 
 
-  if ((f2 = fopen("qq_mmc.dat", "r")) == NULL)
-  {
-    perror("fopen 2");
-    exit(2);
-  }
 
 
-  //  f4=fopen("aff_q.dat","w+");
+
+
   q = malloc(dimM * sizeof(double));
   z = malloc(dimM * sizeof(double));
   w = malloc(dimM * sizeof(double));
@@ -114,14 +118,19 @@ main()
     fscanf(f2, "%d", &nll);
     fscanf(f2, "%s", vall);
     qi = atof(vall);
-    //fprintf(f4,"%d %.14e\n",nll,qi);
+
     *(q + nll - 1) = -qi;
   }
 
 
-  printf("\n we go in the function\n");
+  printf("\n we go in the function solve\n");
+
 
   info = solve_lcp(vec, q, &n, &meth_lcp, z, w);
+
+  for (i = 0; i < n; i++)
+    printf("z %g w %g\n", z[i], w[i]);
+
 
   printf("\n we go out the function and info is %d\n", info);
 
@@ -137,21 +146,21 @@ main()
   /////////////////////////////////
   // second test //////////////////
   /////////////////////////////////
-  static methode_lcp meth_lcp2  = {"Gsnl", 101, 0.0001, 0.6};
+  static methode_lcp meth_lcp2  = {"Gcp", 1000, -0.0000001, 0.6};
 
-  if ((f1 = fopen("MM_mmc.dat", "r")) == NULL)
+  if ((f1 = fopen("MM_mmc_mu2.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
   }
 
-  if ((f2 = fopen("qq_mmc.dat", "r")) == NULL)
+  if ((f2 = fopen("qq_mmc_mu2.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);
   }
 
-  //  f3=fopen("aff_M.dat","w+");
+
   M = malloc(dimM * dimM * sizeof(double));
   vec = (double*)malloc(dimM * dimM * sizeof(double));
 
@@ -192,14 +201,7 @@ main()
 
 
 
-  if ((f2 = fopen("qq_mmc.dat", "r")) == NULL)
-  {
-    perror("fopen 2");
-    exit(2);
-  }
 
-
-  //  f4=fopen("aff_q.dat","w+");
   q = malloc(dimM * sizeof(double));
   z = malloc(dimM * sizeof(double));
   w = malloc(dimM * sizeof(double));
@@ -209,14 +211,17 @@ main()
     fscanf(f2, "%d", &nll);
     fscanf(f2, "%s", vall);
     qi = atof(vall);
-    //fprintf(f4,"%d %.14e\n",nll,qi);
     *(q + nll - 1) = -qi;
   }
 
 
-  printf("\n we go in the function\n");
+  printf("\n we go in the function solve\n");
 
   info = solve_lcp(vec, q, &n, &meth_lcp2, z, w);
+
+  for (i = 0; i < n; i++)
+    printf("z %g w %g\n", z[i], w[i]);
+
 
   printf("\n we go out the function and info is %d\n", info);
 
@@ -234,21 +239,21 @@ main()
   /////////////////////////////////
   // third test //////////////////
   /////////////////////////////////
-  static methode_lcp meth_lcp3  = {"Latin", 101, 0.0001, 0.6};
+  static methode_lcp meth_lcp3  = {"Latin", 1000, -0.0000001, 0.7};
 
-  if ((f1 = fopen("MM_mmc.dat", "r")) == NULL)
+  if ((f1 = fopen("MM_mmc_mu2.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
   }
 
-  if ((f2 = fopen("qq_mmc.dat", "r")) == NULL)
+  if ((f2 = fopen("qq_mmc_mu2.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);
   }
 
-  //  f3=fopen("aff_M.dat","w+");
+
   M = malloc(dimM * dimM * sizeof(double));
   vec = (double*)malloc(dimM * dimM * sizeof(double));
 
@@ -270,33 +275,25 @@ main()
     /////////////       on met la transpos       ////////////////
     /*fprintf(f3,"%d %d %.14e\n",nc,nl,Mij);
       fscanf(f3,"%d %d %.14e\n", &nc, &nl, &Mij);*/
-    //*(*(M+nc-1)+nl-1)=Mij;
-
-    // pas de transposée maintenant
-    *(*(M + nl - 1) + nc - 1) = Mij;
+    *(*(M + nc - 1) + nl - 1) = Mij;
     //////////////         fin transpos         ////////////////////
 
   }
 
 
   //// valeurs du tableau dans vec (compatibilite allocation memoire f90)///
-  //    for (i=0;i<dimM;i++)
-  //      {for (j=0;j<dimM;j++){
-  //  vec[j*dimM+i]= M[i][j];
-  //  //       printf("vec(%d) = %.14e \n",i*dimM+j,M[i][j]);}
-  //      }}
+  for (i = 0; i < dimM; i++)
+  {
+    for (j = 0; j < dimM; j++)
+    {
+      vec[j * dimM + i] = M[i][j];
+      //       printf("vec(%d) = %.14e \n",i*dimM+j,M[i][j]);}
+    }
+  }
   ////////////////////////////////////////////////////////////////////////
 
 
 
-  if ((f2 = fopen("qq_mmc.dat", "r")) == NULL)
-  {
-    perror("fopen 2");
-    exit(2);
-  }
-
-
-  //  f4=fopen("aff_q.dat","w+");
   q = malloc(dimM * sizeof(double));
   z = malloc(dimM * sizeof(double));
   w = malloc(dimM * sizeof(double));
@@ -306,14 +303,109 @@ main()
     fscanf(f2, "%d", &nll);
     fscanf(f2, "%s", vall);
     qi = atof(vall);
-    //fprintf(f4,"%d %.14e\n",nll,qi);
     *(q + nll - 1) = -qi;
   }
 
 
   printf("\n we go in the function\n");
 
-  info = solve_lcp(/*vec*/M, q, &n, &meth_lcp3, z, w);
+  info = solve_lcp(M, q, &n, &meth_lcp3, z, w);
+
+  for (i = 0; i < n; i++)
+    printf("z %g w %g\n", z[i], w[i]);
+
+
+
+  printf("\n we go out the function and info is %d\n", info);
+
+  fclose(f2);
+  fclose(f1);
+
+  free(M);
+  free(vec);
+  free(q);
+  free(z);
+  free(w);
+
+  /////////////////////////////////
+  // Lemke test //////////////////
+  /////////////////////////////////
+  static methode_lcp meth_lcp4 = {"Lemke", 1000, -0.0000001, 0.7};
+
+  if ((f1 = fopen("MM_mmc_mu2.dat", "r")) == NULL)
+  {
+    perror("fopen 1");
+    exit(1);
+  }
+
+  if ((f2 = fopen("qq_mmc_mu2.dat", "r")) == NULL)
+  {
+    perror("fopen 2");
+    exit(2);
+  }
+
+
+  M = malloc(dimM * dimM * sizeof(double));
+  vec = (double*)malloc(dimM * dimM * sizeof(double));
+
+  for (i = 0; i < dimM; i++)
+  {
+    for (j = 0; j < dimM; j++)
+    {
+      M[i][j] = 0.;
+    }
+  }
+
+  while (!feof(f1))
+  {
+    fscanf(f1, "%d", &nl);
+    fscanf(f1, "%d", &nc);
+    fscanf(f1, "%s", val);
+    Mij = atof(val);
+
+    /////////////       on met la transpos       ////////////////
+    /*fprintf(f3,"%d %d %.14e\n",nc,nl,Mij);
+      fscanf(f3,"%d %d %.14e\n", &nc, &nl, &Mij);*/
+    *(*(M + nc - 1) + nl - 1) = Mij;
+    //////////////         fin transpos         ////////////////////
+
+  }
+
+
+  //// valeurs du tableau dans vec (compatibilite allocation memoire f90)///
+  for (i = 0; i < dimM; i++)
+  {
+    for (j = 0; j < dimM; j++)
+    {
+      vec[j * dimM + i] = M[i][j];
+      //       printf("vec(%d) = %.14e \n",i*dimM+j,M[i][j]);}
+    }
+  }
+  ////////////////////////////////////////////////////////////////////////
+
+
+
+  q = malloc(dimM * sizeof(double));
+  z = malloc(dimM * sizeof(double));
+  w = malloc(dimM * sizeof(double));
+
+  while (!feof(f2))
+  {
+    fscanf(f2, "%d", &nll);
+    fscanf(f2, "%s", vall);
+    qi = atof(vall);
+    *(q + nll - 1) = -qi;
+  }
+
+
+  printf("\n we go in the function\n");
+
+  info = solve_lcp(M, q, &n, &meth_lcp4, z, w);
+
+  for (i = 0; i < n; i++)
+    printf("z %g w %g\n", z[i], w[i]);
+
+
 
   printf("\n we go out the function and info is %d\n", info);
 
@@ -326,6 +418,7 @@ main()
   free(z);
   free(w);
 }
+
 
 
 

@@ -91,5 +91,5 @@ ODEPACKLIB    = libodepack$(OS).a
 
 #--- LIBS --------------------------------------
 LIBS =  $(LIBG2C_LIB)
-LIBS_IFC =  -lblas -lm
+LIBS_IFC =  -llapack -lblas -lm
 #---------------[ end of makefile.inc.linux ]-----------------------

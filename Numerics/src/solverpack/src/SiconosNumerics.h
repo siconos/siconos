@@ -25,6 +25,7 @@ typedef struct
   char normType[64];
   double tol;
   double *a;
+  double *b;
   double k_latin;
 } methode_rp;
 
@@ -46,6 +47,7 @@ typedef struct
   char normType[64];
   double tol;
   double *a;
+  double *b;
   double k_latin;
 } methode_rd;
 
@@ -101,12 +103,21 @@ typedef struct
 */
 typedef struct
 {
-  char nom_method[64];
+  char *nom_method/*[64]*/;
   int itermax;
   char normType[64];
   double tol;
   double mu;
   double k_latin;
+  double *J1;
+  int *ddl_i;
+  int *ddl_n;
+  int *ddl_tt;
+  int *ddl_c;
+  int dim_i;
+  int dim_c;
+  int dim_tt;
+  int dim_n;
 } methode_cfd;
 
 
@@ -148,20 +159,21 @@ extern "C" int solve_rd(double*, double*, int *, methode *, double [], double []
 extern "C" int solve_cfp(double*, double*, int *, methode *, double [], double []);
 extern "C" int solve_cfd(double*, double*, int *, methode *, double [], double []);
 
-extern "C" int rp_latin(double [], double *, int *, double * , double *, int *, double *, double[], double [], int *, double *, int *)  ;
-extern "C" int rp_gsnl(double [], double *, int *, double *, int *, double *, double[], double [], int *, double *, int *)  ;
-extern "C" int rd_latin(double [], double *, int *, double * , double *, int *, double *, double[], double [], int *, double *, int *)  ;
+extern "C" void rp_latin(double [], double *, int *, double *, double [], double [], int *, double *, double [], double [], int *, double *, int *);
+//void rp_latin(double [],double *,int *, double *,double *,double *,int *, double *,double[],double [],int *,double *,int *)  ;
+extern "C" void rp_gsnl(double [], double *, int *, double *, double *, int *, double *, double[], double [], int *, double *, int *)  ;
+extern "C" void rd_latin(double [], double *, int *, double * , double *, int *, double *, double[], double [], int *, double *, int *)  ;
 extern "C" void lemke_lcp(double [], double [], int *, int *, double[], double[], int *, double *, int *);
-extern "C" int gsnl_lcp(double [], double [], int *, int *, double *, double [], double [], int*, double *, int *);
-extern "C" int gcp_lcp(double [], double [], int *, int *, double *, double [], double[], int *, double *, int *);
-extern "C" int latin_lcp(double*, double*, int *, double *, int *, double *, double [], double[], int *, double *, int *);
-extern "C" int cfp_gsnl(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int*);
-extern "C" int cfp_gcp(double [], double [], int *, double *, int *, double *, double [], double [], int *, double *, int*);
-extern "C" int cfp_latin(double [], double [], int *, double *, double *, int *, double *, double [], double [], int *, double *, int*);
-extern "C" int cfd_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
-extern "C" void cfd_lcp(int *, double*, double[], double[], double[], double[]);
-extern "C" void lcp_cfd(int *, double[], double[], double[], double[]);
-//} /* closing brace for extern "C" */
+extern "C" void gsnl_lcp(double [], double [], int *, int *, double *, double [], double [], int*, double *, int *);
+extern "C" void gcp_lcp(double [], double [], int *, int *, double *, double [], double[], int *, double *, int *);
+extern "C" void latin_lcp(double*, double*, int *, double *, int *, double *, double [], double[], int *, double *, int *);
+extern "C" void cfp_gsnl(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int*);
+extern "C"  void cfp_gcp(double [], double [], int *, double *, int *, double *, double [], double [], int *, double *, int *);
+
+extern "C" void cfp_latin(double [], double [], int *, double *, double *, int *, double *, double [], double [], int *, double *, int*);
+extern "C" void cfd_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
+extern "C" int cfd_lcp(int *, double *, methode *, double *, int *, int *, int * , int *, int *, int *, int *, int *, double * , double * , int *, double *, double *);
+extern "C" int lcp_cfd(int *, double *, double *, methode *, double *, double *, int *, double *, int *, int *, int *, int *,  int *, int *, int *, double *, double *);
 #endif
 
 
@@ -303,6 +315,9 @@ cfp_gcp.c
     solve_cfd() is a generic interface allowing the call of one of the @ref dfc solvers.
 */
 extern int solve_cfd(double*, double*, int *, methode *, double [], double []);
+//extern double solve_cfd2 (double*, double*,int *, methode *,double [],double []);
+//extern double solve_cfd3 (double*, double*,int *, methode *,double [],double []);
+
 
 /**@}*/
 
@@ -320,30 +335,68 @@ cfd_latin.c
 //extern solve_qp (double [][maxcols],double [], int *, methode *, double [],double []);
 
 
-extern int rp_latin(double [], double *, int *, double * , double *, int *, double *, double[], double [], int *, double *, int *)  ;
+//extern int rp_latin(double [],double *,int *, double * ,double *,int *, double *,double[],double [],int *,double *,int *)  ;
+extern void rp_latin(double [], double *, int *, double *, double [], double [], int *, double *, double [], double [], int *, double *, int *);
 
-extern int rp_gsnl(double [], double *, int *, double *, int *, double *, double[], double [], int *, double *, int *)  ;
+extern int rp_gsnl(double [], double *, int *, double *, double *, int *, double *, double[], double [], int *, double *, int *)  ;
 
-extern int rd_latin(double [], double *, int *, double * , double *, int *, double *, double[], double [], int *, double *, int *)  ;
+extern int rd_latin(double [], double *, int *, double * , double *, double *, int *, double *, double[], double [], int *, double *, int *)  ;
 
-extern void lemke_lcp(double [], double [], int *, int *, double[], double[], int *, double *, int *);
+extern lemke_lcp(double [], double [], int *, int *, double[], double[], int *, double *, int *);
+//lemke_lcp2 (double [],double [],int *,double *,double[],double[],double *, double *,double *);
 
-extern int gsnl_lcp(double [], double [], int *, int *, double *, double [], double [], int*, double *, int *);
+extern gsnl_lcp(double [], double [], int *, int *, double *, double [], double [], int*, double *, int *);
+//gsnl_lcp (double [],double [],int *,double *,double *,double [],double [],double*,double *,double *);
 
-extern int gcp_lcp(double [], double [], int *, int *, double *, double [], double[], int *, double *, int *);
+//extern gcp_lcp2 (double [],double [],int *,int *,double *,double [],double[],int *,double *,int *);
 
-extern int latin_lcp(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int *);
+extern gcp_lcp(double [], double [], int *, int *, double *, double [], double[], int *, double *, int *);
 
-extern int cfp_gsnl(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int*);
+extern latin_lcp(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int *);
 
-extern int cfp_gcp(double [], double [], int *, double *, int *, double *, double [], double [], int *, double *, int*);
 
-extern int cfp_latin(double [], double [], int *, double *, double *, int *, double *, double [], double [], int *, double *, int*);
+extern cfp_gsnl(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int*);
+//extern cfp_gsnl (double [],double [],int *,double *,double *,double *, double [],double[],double *,double *,double*);
 
-extern int cfd_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
 
-extern void cfd_lcp(int *, double*, double[], double[], double[], double[]);
 
-extern void lcp_cfd(int *, double[], double[], double[], double[]);
+extern cfp_gcp(double [], double [], int *, double *, int *, double *, double [], double [], int *, double *, int *);
+//extern cfp_gcp (double [],double [],int *,double *,double *,double *, double [],double [],double*,double *,double*);
+
+
+
+extern cfp_latin(double [], double [], int *, double *, double *, int *, double *, double [], double [], int *, double *, int*);
+
+//extern cfp_latin (double [],double [],int *,double *,double *,double *,double *,double [],double [], double *,double *,double*);
+
+//extern cfd_latin2 (double[],double[],int *,double*,double*,double *,double*,double[],double[], double *,double*,double*);
+
+extern  cfd_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
+
+//extern cfd_latin (double[],double[],int *,double*,double*,int *,double*,double[],double[], int *,double*,int*);
+
+//extern cfd_lcp (int *,double*,double[],double[],double[],double[]);
+//extern void cfd_lcp (int *,double *, methode *,double *,int *,int *,int *,int *,double *, double *, double *,double *);
+
+
+
+//extern void cfd_lcp (int *,double *, methode *,double *,int *, int * ,int *,int * ,int *, int *, int *,int *,double *, double *, int *, double *,double *);
+
+
+extern int cfd_lcp(int *, double *, methode *, double *, int *, int *, int * , int *, int *, int *, int *, int *, double * , double * , int *, double *, double *);
+
+//extern int cfd_lcp26 (int *,double *, methode *,double *,int *, int *,int * ,int *,int *, int *, int *,int *,double * , double * ,int *, double *,double *);
+
+//extern void cfd_lcpfin (int *,double *, methode *,double *,int *, int *,int * ,int *,int *, int *, int *,int *,double * , double * ,int *, double *,double *);
+
+//extern lcp_cfd (int *,double[],double[],double[],double[]);
+
+
+
+//extern void lcp_cfd (int *,double *,double *,methode *,double *, double *, double *,int *, int *, int *, int *, double *,double *);
+
+extern int lcp_cfd(int *, double *, double *, methode *, double *, double *, int *, double *, int *, int *, int *, int *,  int *, int *, int *, double *, double *);
+
+//extern int lcp_cfd26 (int *,double *,double *,methode *,double *, double *, int *, double *,int *, int *, int *, int *,  int *, int *, int *, double *,double *);
 //} /* closing brace for extern */
 #endif

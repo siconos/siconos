@@ -26,12 +26,12 @@ M z- w=q\\
 double ddot_(int *, double [], int *, double [], int*);
 
 
-/*!\fn int gcp_lcp(double vec[],double *qq,int *nn,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
+/*!\fn  gcp_lcp(double vec[],double *q,int *nn,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
 
    gcp_lcp is a basic gcp (gradient conjugated projected) solver for LCP.
 
    \param vec On enter a pointer over doubles containing the components of the double matrix with a fortran90 allocation.
-   \param qq On enter a pointer over doubles containing the components of the double vector.
+   \param q On enter a pointer over doubles containing the components of the double vector.
    \param nn On enter a pointer over integers, the dimension of the second member.
    \param itermax On enter a pointer over integers, the maximum iterations required.
    \param tol On enter a pointer over doubles, the tolerance required.
@@ -40,45 +40,40 @@ double ddot_(int *, double [], int *, double [], int*);
    \param z On return double vector, the solution of the problem.
    \param w On return double vector, the solution of the problem.
    \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
-\return int : \todo tell whiwh result is good
+
    \author Nineb Sheherazade.
  */
-int gcp_lcp(double vec[], double *qq, int *nn, int * itermax, double * tol, double z[], double wsol[], int *it_end, double * res, int *info)
+
+
+
+
+
+gcp_lcp(double vec[], double *q, int *nn, int * itermax, double * tol, double z[], double *vv, int *it_end, double * res, int *info)
 {
-  FILE *f13;
-  int i, j, kk, iter1, k;
-  int n = *nn, incx, incy;
-  double errmax = *tol, alpha, beta, mina, maxa, bb, aa, rp;
-  double err1, num11, num, den, avn, avt, apn, apt, xn, pmp, alpha1, beta1;
-  double *q, *zz, *ww, *Mz, *zi, *wi, *y, *p, *zt, *wnum1, *r, *w, *Mp, *v;
-  char trans;
+  int i, j, iter1;
+  int n = *nn, incx = 1, incy = 1, itt = *itermax;
+  double errmax = *tol, alpha, beta, rp;
+  double err1, pMp, alpha1, beta1, comp;
+  double *zz, *y, *p, *r, *w, *Mp;
+  char trans = 'T';
   double M[n][n];
 
 
 
-  q = (double*)malloc(n * sizeof(double));
-  w = (double*)malloc(n * sizeof(double));
-  r = (double*)malloc(n * sizeof(double));
-  v = (double*)malloc(n * sizeof(double));
 
 
-
-  for (i = 0; i < n; i++)
-    q[i] = qq[i];
 
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
       M[i][j] = vec[i * n + j];
 
+
+
+  w = (double*)malloc(n * sizeof(double));
+  r = (double*)malloc(n * sizeof(double));
   p = (double*)malloc(n * sizeof(double));
   zz = (double*)malloc(n * sizeof(double));
-  wi = (double*)malloc(n * sizeof(double));
-  zi = (double*)malloc(n * sizeof(double));
-  ww = (double*)malloc(n * sizeof(double));
-  wnum1 = (double*)malloc(n * sizeof(double));
-  Mz = (double*)malloc(n * sizeof(double));
   y = (double*)malloc(n * sizeof(double));
-  zt = (double*)malloc(n * sizeof(double));
   Mp = (double*)malloc(n * sizeof(double));
 
 
@@ -87,187 +82,145 @@ int gcp_lcp(double vec[], double *qq, int *nn, int * itermax, double * tol, doub
   {
     y[i] = 0.;
     zz[i] = 0.;
-    zi[i] = 0.;
-    wi[i] = 0.;
     w[i] = 0.;
     z[i] = 0.;
     r[i] = 0.;
-    wsol[i] = 0.;
-    v[i] = 0.;
-    Mz[i] = 0.;
-    zt[i] = 0.;
+    vv[i] = 0.;
     p[i] = 0.;
     Mp[i] = 0.;
-    ww[i] = 0.;
   }
 
-  incx = 1;
-  incy = 1;
+
   dcopy_(&n, q, &incx, y, &incy);
 
-  trans = 'T';
+
   alpha = -1.;
   beta = 1.;
-  dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, y, &incy);
+  dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, y, &incy); /*//r*/
   dcopy_(&n, y, &incx, r, &incy);
 
 
-  incx = 1;
-  incy = 1;
-  dcopy_(&n, r, &incx, w, &incy);
 
-
-  incx = 1;
-  incy = 1;
   dcopy_(&n, r, &incx, p, &incy);
 
-  trans = 'T';
+
   alpha = 1.;
   beta = 0.;
-  dgemv_(&trans, &n, &n, &alpha, M, &n, p, &incx, &beta, y, &incy);
-  dcopy_(&n, y, &incx, Mp, &incy);
+  dgemv_(&trans, &n, &n, &alpha, M, &n, p, &incx, &beta, Mp, &incy);
 
-  pmp = ddot_(&n, p, &incx, Mp, &incy);
+  pMp = ddot_(&n, p, &incx, Mp, &incy);
+
+  rp = ddot_(&n, p, &incx, r, &incy);
 
   iter1 = 0;
-  err1 = 1.;
+  err1 = pMp;
 
-  while ((iter1 < *itermax) && (err1 > errmax))
+  while ((iter1 < itt) && (err1 >= errmax))
   {
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, r, &incx, v, &incy);
 
     iter1 = iter1 + 1;
-    if (pmp == 0.)
+
+    if (pMp == 0.)
     {
       printf("operation other alpha not conform at the iteration %d", iter1);
       return (*info = 3) ;
     }
 
-    // alpha1 = r.p / pmp
-    rp = ddot_(&n, p, &incx, r, &incy);
-    alpha1 = rp / pmp;
 
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, z, &incx, y, &incy);
+    alpha1 = rp / pMp;
+
+
 
     alpha = alpha1;
-    daxpy_(&n, &alpha, p, &incx, y, &incy);
-    dcopy_(&n, y, &incx, zi, &incy);
+    daxpy_(&n, &alpha, p, &incx, z, &incy);
 
 
     for (j = 0; j < n; j++)
-      if (zi[j] <= 0.) z[j] = 0.;
-      else z[j] = zi[j];
+      if (z[j] <= 0.) z[j] = 0.;
 
-    incx = 1;
-    incy = 1;
+
     dcopy_(&n, q, &incx, y, &incy);
 
-    trans = 'T';
     alpha = -1.;
     beta = 1.;
     dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, y, &incy);
     dcopy_(&n, y, &incx, r, &incy);
-
+    dcopy_(&n, r, &incx, w, &incy);
+    dcopy_(&n, p, &incx, zz, &incy);
 
     for (j = 0; j < n; j++)
     {
-      if (z[j] <= 0.)
+      if (z[j] == 0. && w[j] < 0)
       {
-        if (r[j] <= 0.) w[j] = 0.;
-        else w[j] = r[j];
-      }
-      else
-      {
-        w[j] = r[j];
+        w[j] = 0.;
+        zz[j] = 0.;
       }
     }
 
 
-
-    for (j = 0; j < n; j++)
-    {
-      if (z[j] <= 0.)
-      {
-        if (p[j] <= 0.) zz[j] = 0.;
-        else zz[j] = p[j];
-      }
-      else zz[j] = p[j];
-    }
-
-    // beta = -w.Mp / pmp
-
+    /*   beta = -w.Mp / pMp  */
     rp = ddot_(&n, w, &incx, Mp, &incy);
-    beta1 = -rp / pmp;
+    beta1 = -rp / pMp;
 
 
-    dcopy_(&n, w, &incx, y, &incy);
+
     alpha = beta1;
-    daxpy_(&n, &alpha, zz, &incx, y, &incy);
-    dcopy_(&n, y, &incx, p, &incy);
+    daxpy_(&n, &alpha, zz, &incx, w, &incy);
+    dcopy_(&n, w, &incx, p, &incy);
 
 
-    trans = 'T';
+
     alpha = 1.;
     beta = 0.;
-    dgemv_(&trans, &n, &n, &alpha, M, &n, p, &incx, &beta, y, &incy);
-    dcopy_(&n, y, &incx, Mp, &incy);
-
-    pmp = ddot_(&n, p, &incx, Mp, &incy);
+    dgemv_(&trans, &n, &n, &alpha, M, &n, p, &incx, &beta, Mp, &incy);
 
 
-    /* ///////// Criterium convergenc ///////////// */
-    // normr=sqrt(dot_product(r(:)-v(:),r(:)-v(:)))/sqrt(dot_product(v(:),v(:)))
+    pMp = ddot_(&n, p, &incx, Mp, &incy);
 
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, r, &incx, y, &incy);
-    alpha = -1.;
-    daxpy_(&n, &alpha, v, &incx, y, &incy);
-    dcopy_(&n, y, &incx, wnum1, &incy);
-    num = ddot_(&n, wnum1, &incx, wnum1, &incy);
-    den = ddot_(&n, v, &incx, v, &incy);
-    err1 = sqrt(num) / sqrt(den);
 
-    it_end = &iter1;
-    res = &err1;
+    /* ///////// Criterium convergence : err1= pMp ///////////// */
 
-    alpha = -1.;
-    daxpy_(&n, &alpha, r, &incx, y, &incy);
-    dcopy_(&n, y, &incx, wsol, &incy);
 
-    printf("iteration numbers %d and error evaluation %e \n ", iter1, err1);
 
-    if (err1 > errmax)
-    {
-      printf("no convergence after %d iterations, the residue is %g\n", iter1, err1);
-    }
+    err1 = pMp;
 
-    if (err1 < errmax)
-    {
-      printf("there is convergence after %d iterations, the residue is %g \n", iter1, err1);
-    }
 
-    if (err1 < errmax) *info = 0;
-    else *info = 1;
+    dcopy_(&n, q, &incx, y, &incy);
+    alpha = 1.;
+    beta = -1.;
+    dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, y, &incy);
+    dcopy_(&n, y, &incx, vv, &incy);
+    rp = ddot_(&n, p, &incx, r, &incy);
+
+    *it_end = iter1;
+    *res = err1;
+
+
+    /*    printf("iteration numbers %d and error evaluation %g \n ",iter1,err1);   */
   }
 
-  free(q);
+
+  if (err1 >= errmax)
+  {
+    printf("no convergence after %d iterations, the residue is %g\n", iter1, err1);
+    *info = 1;
+  }
+  else
+  {
+    printf("there is convergence after %d iterations, the residue is %g \n", iter1, err1);
+    comp = ddot_(&n, z, &incx, vv, &incy);
+    printf(" the complementarity %g\n", comp);
+    *info = 0;
+  }
+
+
+
   free(w);
   free(r);
-  free(v);
   free(Mp);
   free(p);
   free(zz);
-  free(wi);
-  free(zi);
-  free(ww);
-  free(wnum1);
-  free(Mz);
   free(y);
-  free(zt);
-  return *info;
+
+
 }

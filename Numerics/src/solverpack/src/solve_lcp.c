@@ -24,7 +24,10 @@ M z- w=q\\
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#ifndef MEXFLAG
 #include "SiconosNumerics.h"
+#endif
 
 
 /*!\fn int solve_lcp (double *vec, double *q, int * nn, methode *pt,double z[], double w[])
@@ -38,28 +41,38 @@ M z- w=q\\
    \param double[] : z On return double vector, the solution of the problem.
    \param double[] : w On return double vector, the solution of the problem.
 
-  \return On return integer, the termination reason (0 is successful otherwise 1).
+   \return On return integer, the termination reason (0 is successful otherwise 1).
 
    \author Nineb Sheherazade.
  */
 int solve_lcp(double *vec, double *q, int *nn, methode *pt, double z[], double w[])
 {
-  int info = -1, it_end, fail;
   const char mot1[10] = "Lemke", mot2[10] = "Gsnl", mot3[10] = "Gcp", mot4[10] = "Latin";
   double res;
+  int info1 = -1, it_end, info;
   int n = *nn;
+
+  clock_t t1 = clock();
+
+
+
 
   if (strcmp(pt->lcp.nom_method, mot1) == 0)
   {
-    //    lemke_lcp_(vec,q,&n,& pt->lcp.itermax,z,w,&it_end,&res,&info);
+    lemke_lcp(vec, q, &n, & pt->lcp.itermax, z, w, &it_end, &res, &info1);
   }
   else if (strcmp(pt->lcp.nom_method, mot2) == 0)
-    gsnl_lcp(vec, q, &n, & pt->lcp.itermax, & pt->lcp.tol, z, w, &it_end, &res, &info);
+    gsnl_lcp(vec, q, &n, & pt->lcp.itermax, & pt->lcp.tol, z, w, &it_end, &res, &info1);
   else if (strcmp(pt->lcp.nom_method, mot3) == 0)
-    gcp_lcp(vec, q, &n, & pt->lcp.itermax, & pt->lcp.tol, z, w, &it_end, &res, &info);
+    gcp_lcp(vec, q, &n, & pt->lcp.itermax, & pt->lcp.tol, z, w, &it_end, &res, &info1);
   else if (strcmp(pt->lcp.nom_method, mot4) == 0)
-    latin_lcp(vec, q, &n, & pt->lcp.k_latin, & pt->lcp.itermax, & pt->lcp.tol, z, w, &it_end, &res, &info);
+    latin_lcp(vec, q, &n, & pt->lcp.k_latin, & pt->lcp.itermax, & pt->lcp.tol, z, w, &it_end, &res, &info1);
   else printf("Warning : Unknown solving method : %s\n", pt->lcp.nom_method);
+
+  clock_t t2 = clock();
+  printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
+
+  info = info1;
 
   return info;
 }

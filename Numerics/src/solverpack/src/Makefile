@@ -30,17 +30,15 @@
 #-----------------------------------------------
 include $(NUMERICSPATH)/Makefile.inc
 
-OBJETS_LCP=gcp_lcp.o gsnl_lcp.o latin_lcp.o solve_lcp.o minf.o maxf.o
-#a venir lemke_lcp.o
+OBJETS_LCP= gcp_lcp.o gsnl_lcp.o latin_lcp.o lemke_lcp.o solve_lcp.o
 
-#a venir OBJETS_QP=qp.o solve_qp.o
-OBJETS_CFP= cfp_gsnl.o cfp_latin.o minf.o maxf.o solve_cfp.o cfp_gcp.o projc.o projf.o
+OBJETS_CFP= cfp_gsnl.o cfp_latin.o solve_cfp.o cfp_gcp.o projc.o projf.o
 
-OBJETS_CFD=gcp_lcp.o gsnl_lcp.o cfd_lcp.o cfd_latin.o lcp_cfd.o minf.o maxf.o solve_cfd.o 
+OBJETS_CFD= cfd_lcp.o cfd_latin.o lcp_cfd.o gcp_lcp.o gsnl_lcp.o latin_lcp.o lemke_lcp.o solve_cfd.o
 
-OBJETS_RP=rp_latin.o rp_gsnl.o solve_rp.o maxf.o minf.o
+OBJETS_RP= rp_latin.o rp_gsnl.o solve_rp.o
 
-OBJETS_RD=solve_rd.o maxf.o minf.o
+OBJETS_RD= rd_latin.o solve_rd.o
 
 
 all : build lib

@@ -22,10 +22,12 @@ M z- w=q\\
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef MEXFLAG
 #include "SiconosNumerics.h"
+#endif
+#include <time.h>
 
-
-/*!\fn   int solve_rp (double vec[],double *q,int *nn, methode *pt,double z[],double w[])
+/*!\fn int solve_rp (double vec[],double *q,int *nn, methode *pt,double z[],double w[])
 
    solve_rp is a generic interface allowing the call of one of the PR solvers.
 
@@ -36,7 +38,7 @@ M z- w=q\\
    \param double[] : z On return real vector, the solution of the problem.
    \param double[] : w On return real vector, the solution of the problem.
 
-  \return  On return integer, the termination reason (0 is successful otherwise 1).
+  \return  On return int, the termination reason (0 is successful otherwise 1).
 
    \author Nineb Sheherazade.
  */
@@ -45,17 +47,23 @@ int solve_rp(double *vec, double *q, int *nn, methode *pt, double z[], double w[
   int info = -1, choix, it_end, fail;
   char mot1[10] = "Gsnl", mot2[10] = "Gcp", mot3[10] = "Latin";
   double res;
-  int n = *nn;
+  int n = *nn, i;
+
+  clock_t t1 = clock();
+
 
   if (strcmp(pt->rp.nom_method, mot1) == 0)
-    rp_gsnl(vec, q, &n, pt->rp.a, & pt->rp.itermax, & pt->rp.tol, z, w, &it_end, &res, &info);
+    rp_gsnl(vec, q, &n, pt->rp.a, pt->rp.b, & pt->rp.itermax, & pt->rp.tol, z, w, &it_end, &res, &info);
   else if (strcmp(pt->rp.nom_method, mot2) == 0)
   {
-    //    cfp_gcp_(vec,q,&n,& pt->cfp.mu,& pt->cfp.itermax,& pt->cfp.tol,z,w,&it_end,&res,&info);
+    /*    cfp_gcp_(vec,q,&n,& pt->cfp.mu,& pt->cfp.itermax,& pt->cfp.tol,z,w,&it_end,&res,&info);*/
   }
   else if (strcmp(pt->rp.nom_method, mot3) == 0)
-    rp_latin(vec, q, &n, & pt->rp.k_latin, pt->rp.a, & pt->rp.itermax, & pt->rp.tol, z, w, &it_end, &res, &info);
+    rp_latin(vec, q, &n, &pt->rp.k_latin, pt->rp.a, pt->rp.b, &pt->rp.itermax, &pt->rp.tol, z, w, &it_end, &res, &info);
   else printf("Warning : Unknown solving method : %s\n", pt->rp.nom_method);
+
+  clock_t t2 = clock();
+  printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
   return info;
 }

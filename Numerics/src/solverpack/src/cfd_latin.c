@@ -25,7 +25,7 @@ M z- w=q\\
 double ddot_(int *, double [], int *, double [], int*);
 
 
-/*!\fn   int cfd_latin(double vec[],double *qq,int *nn, double * k_latin,double *mumu,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
+/*!\fn  cfd_latin(double vec[],double *qq,int *nn, double * k_latin,double *mumu,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
 
    cfd_latin  is a specific latin solver for dual contact problem with friction.
 
@@ -41,45 +41,31 @@ double ddot_(int *, double [], int *, double [], int*);
    \param int* : it_end On enter a pointer over integers, the number of iterations carried out.
    \param double* : res On return a pointer over doubles, the error value.
    \param int* : info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
-\return int : \todo tell whiwh result is good
+
    \author Nineb Sheherazade.
  */
-int cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
+
+
+
+
+cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
 {
-  FILE *f13;
   int i, j, kk, iter1, ino, ddl;
-  int n = *nn, incx, incy, nc = n / 2, idim, jdim, nbno;
+  int n = *nn, incx = 1, incy = 1, nc = n / 2, idim, jdim, nbno, itt = *itermax;
   int taille, taillet, taillen;
-  double errmax = *tol, alpha, beta, mina, maxa, bb, cc, zw, aa, nt, wn, tc, zc0, mu = *mumu;
+  double errmax = *tol, alpha, beta, maxa, zw, aa, nt, wn, tc, zc0, mu = *mumu;
   double rr, rrr, r1, r2, r3, invR0, invRT0, err1, z0, num11, err0, invRTinvR0;
   double den11, den22, vv, knz0, ktz0, ktz[nc], wf[nc];
-  double /**q,*/ *resveclat, *wc, *zc, *kinvden1, *kinvden2, *wt, *maxwt, *y, *wnum1, *znum1;
-  double *zt, *maxzt, *num1, *kinvnum1, *den1, *den2, *wden1, *zden1;
+  double *wc, *zc, *maxwt, *wnum1, *znum1;
   double kn[nc][nc], kt[nc][nc];
-  char trans;
-  double k[n][n],/* Mtp[n][n], M[n][n],*/ A[n][n], R[n][n];
+  char trans = 'T';
+  double k[n][n], A[n][n], R[n][n];
   double RT[n][n], invRT[n][n], invR[n][n], kf[n][n], kninv[nc][nc];
-  double invRTinvR[n][n], kinv[n][n], xx[n][*itermax];
+  double invRTinvR[n][n];
   double kinvwden1[n], kzden1[n], kfinv[n][n], knz[nc], wtnc[nc];
   int ddln[nc];
   int ddlt[nc], vectnt[n];
 
-
-  /*  q=(double*)malloc(n*sizeof(double));
-
-    for (i=0;i<n;i++)
-      q[i]=-qq[i];
-  */
-  /*  for (i=0;i<n;i++)
-      for (j=0;j<n;j++)
-      {
-        //M[i][j]=vec[i*n+j];
-        //Mtp[i][j]=0.;
-      }
-  */
-  /*  for (i=0;i<n;i++)
-      Mtp[i][i]= M[i][i];
-  */
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
     {
@@ -124,7 +110,8 @@ int cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu,
   if (idim != 2)
   {
     printf("case not yet treated\n");
-    return (*info = 3);
+    /*return (*info=3);*/
+    *info = 3;
   }
 
 
@@ -138,7 +125,7 @@ int cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu,
   for (i = 0; i < nc; i++)
   {
     kf[ddln[i]][ddln[i]] = kn[i][i];
-    kf[ddlt[i]][ddlt[i]] = kt[i][i];
+    kf[ddlt[i]][ddlt[i]] = kt[i][i]; /* k in the matlab routine*/
   }
 
 
@@ -148,15 +135,17 @@ int cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu,
   for (i = 0; i < nc; i++)
     kninv[i][i] = 1 / kn[i][i];
 
-  // get C storage format for matrice
+  /* get C storage format for matrice*/
+
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
     {
-      A[i][j] = vec[i * n + j] + k[i][j]; //A[i][j]= M[i][j]+ k[i][j];
+      A[i][j] = vec[i * n + j] + kf[i][j]; /*! kf et non k//A[i][j]= M[i][j]+ k[i][j];*/
       R[i][j] = 0.;
     }
 
-  // !!!!!!!!!!!!!!!!!!!!!Cholesky!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  /*// !!!!!!!!!!!!!!!!!!!!!Cholesky!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
   R[0][0] = sqrt(A[0][0]);
 
 
@@ -191,18 +180,20 @@ int cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu,
       R[i][i] = sqrt(A[i][i] - rrr);
     }
   }
-  // !!!!!end of cholesky!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  /* !!!!!end of cholesky!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
-  //  !determination of the R tranposeted
+  /*//  !determination of the R tranposeted*/
+
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
     {
       RT[i][j] = R[j][i];
-      invRT[i][j] = 0.;// !inverse of R and RT
+      invRT[i][j] = 0.;
       invR[i][j] = 0.;
     }
 
-  // !!!!!!!!!inversion of the inf triangular matrix!!!!!!!!!!!!!
+  /*// !!!!!!!!!inversion of the inf triangular matrix!!!!!!!!!!!!!*/
+
   for (i = 0; i < n; i++)
   {
     for (j = 0; j < n; j++)
@@ -219,9 +210,10 @@ int cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu,
       }
     }
   }
-  // !!!!!!!!!!!!!!!!!!!end of inversion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  // !!!!!!!!!!!!!!!!!!!!!!inversion of the sup triangular matrix!!!!!!!
+  /*// !!!!!!!!!!!!!!!!!!!end of inversion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
+  /*// !!!!!!!!!!!!!!!!!!!!!!inversion of the sup triangular matrix!!!!!!!*/
   for (i = 0; i < n; i++)
     invRT[i][i] = 1 / RT[i][i];
 
@@ -237,59 +229,35 @@ int cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu,
       }
     }
   }
-  // !!!!!!!!!!!!!!!!!!!end of inversion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  resveclat = (double*)malloc(*itermax * sizeof(double));
+  /*// !!!!!!!!!!!!!!!!!!!end of inversion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
-  for (i = 0; i < n; i++)
-    resveclat[i] = 0.;
 
-  //  ! initialisation  s^ = 0
+  /*//  ! initialisation  s^ = 0*/
   wc = (double*)malloc(n * sizeof(double));
-  y = (double*)malloc(n * sizeof(double));
   zc = (double*)malloc(n * sizeof(double));
   znum1 = (double*)malloc(n * sizeof(double));
   wnum1 = (double*)malloc(n * sizeof(double));
-  kinvden1 = (double*)malloc(n * sizeof(double));
-  kinvden2 = (double*)malloc(n * sizeof(double));
-  wt = (double*)malloc(n * sizeof(double));
   maxwt = (double*)malloc(nc * sizeof(double));
-  zt = (double*)malloc(nc * sizeof(double));
-  maxzt = (double*)malloc(n * sizeof(double));
-  num1 = (double*)malloc(n * sizeof(double));
-  kinvnum1 = (double*)malloc(n * sizeof(double));
-  den1 = (double*)malloc(n * sizeof(double));
-  den2 = (double*)malloc(n * sizeof(double));
-  wden1 = (double*)malloc(n * sizeof(double));
-  zden1 = (double*)malloc(n * sizeof(double));
+
 
 
 
   for (i = 0; i < n; i++)
   {
-    resveclat[i] = 0.;
+
     wc[i] = 0.0;
-    y[i] = 0.;
     zc[i] = 0.;
     z[i] = 0.;
     w[i] = 0.;
     znum1[i] = 0.;
     wnum1[i] = 0.;
-    kinvden1[i] = 0.;
-    kinvden2[i] = 0.;
-    wt[i] = 0.;
-    maxzt[i] = 0.;
-    num1[i] = 0.;
-    kinvnum1[i] = 0.;
-    den1[i] = 0.;
-    den2[i] = 0.;
   }
 
 
   for (i = 0; i < nc; i++)
   {
     maxwt[i] = 0.;
-    zt[i] = 0.;
     knz[i] = 0.;
     ktz[i] = 0.;
     wf[i] = 0.;
@@ -301,48 +269,36 @@ int cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu,
     for (j = 0; j < n; j++)
     {
       invRTinvR[i][j] = 0.;
-      kinv[i][j] = 0.;
     }
 
 
-  //  !iteration loops
+  for (i = 0; i < n; i++)
+    for (j = 0; j < n; j++)
+    {
+      invRTinvR0 = 0.;
+      for (kk = 0; kk < n; kk++)
+      {
+        invRTinvR[i][j] = invRT[i][kk] * invR[kk][j] + invRTinvR0;
+        invRTinvR0 = invRTinvR[i][j];
+      }
+    }
+
+
+
+  /*    //  !iteration loops*/
+
   iter1 = 0;
   err1 = 1.;
 
-  while ((iter1 < *itermax) && (err1 > errmax))
+  while ((iter1 < itt) && (err1 > errmax))
   {
-    printf("iteration numbers %d and error evaluation %e \n ", iter1, err1);
 
-    //   !linear stage (zc,wc) -> (z,w)
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, wc, &incx, y, &incy);
+    /*   linear stage (zc,wc) -> (z,w)*/
 
-    trans = 'T';
+
     alpha = 1.;
     beta = 1.;
-    incx = 1;
-    incy = 1;
-
-    dgemv_(&trans, &n, &n, &alpha, kf, &n, zc, &incx, &beta, y, &incy);
-
-
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, y, &incx, wt, &incy);
-
-
-    for (i = 0; i < n; i++)
-      for (j = 0; j < n; j++)
-      {
-        invRTinvR0 = 0.;
-        for (kk = 0; kk < n; kk++)
-        {
-          invRTinvR[i][j] = invRT[i][kk] * invR[kk][j] + invRTinvR0;
-          invRTinvR0 = invRTinvR[i][j];
-        }
-      }
-
+    dgemv_(&trans, &n, &n, &alpha, kf, &n, zc, &incx, &beta,  wc, &incy);
 
     for (i = 0; i < n; i++)
     {
@@ -350,44 +306,28 @@ int cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu,
       vv = 0.;
       for (j = 0; j < n; j++)
       {
-        vv = wt[j] - (-qq[j]);
+        vv = wc[j] - (-qq[j]);
         z[i] = invRTinvR[i][j] * vv + z0;
         z0 = z[i];
       }
     }
 
 
-    for (i = 0; i < n; i++)
-    {
-      xx[i][iter1] = z[i];
-    }
-
-
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, wt, &incx, y, &incy);
-
-
-
-    trans = 'T';
     alpha = -1.;
     beta = 1.;
-    incx = 1;
-    incy = 1;
+    dgemv_(&trans, &n, &n, &alpha, kf, &n, z, &incx, &beta, wc, &incy);
+    dcopy_(&n, wc, &incx, w, &incy);
 
-    dgemv_(&trans, &n, &n, &alpha, kf, &n, z, &incx, &beta, y, &incy);
-    dcopy_(&n, y, &incx, w, &incy);
+    /* Local stage (z,w)->(zc,wc)*/
 
-
-
-    // Local stage (z,w)->(zc,wc)
     for (i = 0; i < n; i++)
     {
       zc[i] = 0.;
       wc[i] = 0.0;
     }
 
-    // normal party
+    /*// normal party  */
+
     for (i = 0; i < nc; i++)
     {
       knz0 = 0.;
@@ -402,18 +342,27 @@ int cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu,
 
     for (i = 0; i < nc; i++)
     {
-      bb = 0.0;
-      maxf(&wtnc[i], &bb, &maxa);
-      wc[ddln[i]] = maxa;
+      if (wtnc[i] < 0.0)
+      {
+        wc[ddln[i]] = 0.0;
+      }
+      else
+      {
+        wc[ddln[i]] = wtnc[i];
+      }
     }
 
 
     for (i = 0; i < nc; i++)
     {
-      bb = 0.0;
-      aa = -wtnc[i];
-      maxf(&aa, &bb, &maxa);
-      maxwt[i] = maxa;
+      if (-wtnc[i] < 0.0)
+      {
+        maxwt[i] = 0.0;
+      }
+      else
+      {
+        maxwt[i] = -wtnc[i];
+      }
     }
 
 
@@ -428,7 +377,8 @@ int cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu,
     }
 
 
-    // tangential party
+    /*      // tangential party */
+
     for (i = 0; i < nc; i++)
     {
       ktz0 = 0.;
@@ -440,101 +390,82 @@ int cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu,
       wf[i] = w[ddlt[i]] - ktz[i];
     }
 
-    //  loop other nodes
+    /*      //  loop other nodes*/
+
     for (ino = 0; ino < nbno; ino++)
     {
       ddl = ddlt[ino];
       nt = fabs(wf[ino]);
-      //  tangential vector
+      /*  //  tangential vector*/
 
       if (nt < 1.e-8) tc = 0.;
       else tc = wf[ino] / nt;
 
-      //   !composante selon le vecteur tangentiel
-      wn = wc[ddln[ino]];// !force normale
-      bb = 0.0;
+      /*  !composante selon le vecteur tangentiel*/
+      wn = wc[ddln[ino]];
       aa = nt - mu * wn;
-      maxf(&aa, &bb, &maxa);
-
+      if (aa < 0.0)
+      {
+        maxa = 0.0;
+      }
+      else
+      {
+        maxa = aa;
+      }
       zc[ddl] = (maxa / (-1 * kt[ino][ino])) * tc;
-      bb = 0.0;
       aa = -nt + mu * wn;
-      maxf(&aa, &bb, &maxa);
+      if (aa < 0.0)
+      {
+        maxa = 0.0;
+      }
+      else
+      {
+        maxa = aa;
+      }
       wc[ddl] = (mu * wn - maxa) * tc;
     }
 
 
-    // convergence criterium
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, z, &incx, y, &incy);
+    /*      // convergence criterium */
+
+    dcopy_(&n, z, &incx, znum1, &incy);
     alpha = -1.;
-    daxpy_(&n, &alpha, zc, &incx, y, &incy);
-    dcopy_(&n, y, &incx, znum1, &incy);
-    dcopy_(&n, w, &incx, y, &incy);
-    daxpy_(&n, &alpha, wc, &incx, y, &incy);
-    dcopy_(&n, y, &incx, wnum1, &incy);
-
-
-    dcopy_(&n, wnum1, &incx, y, &incy);
-    trans = 'T';
+    daxpy_(&n, &alpha, zc, &incx, znum1, &incy);
+    dcopy_(&n, w, &incx, wnum1, &incy);
+    daxpy_(&n, &alpha, wc, &incx, wnum1, &incy);
     alpha = 1.;
     beta = 1.;
-    dgemv_(&trans, &n, &n, &alpha, kfinv, &n, znum1, &incx, &beta, y, &incy);
-    dcopy_(&n, y, &incx, num1, &incy);
-
+    dgemv_(&trans, &n, &n, &alpha, kf, &n, znum1, &incx, &beta, wnum1, &incy);
     num11 = 0.;
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, num1, &incx, y, &incy);
-    trans = 'T';
     alpha = 1.;
     beta = 0.;
-    dgemv_(&trans, &n, &n, &alpha, kfinv, &n, num1, &incx, &beta, y, &incy);
-    dcopy_(&n, y, &incx, kinvnum1, &incy);
+    dgemv_(&trans, &n, &n, &alpha, kfinv, &n, wnum1, &incx, &beta, znum1, &incy);
+    num11 = ddot_(&n, wnum1, &incx, znum1, &incy);
 
-    num11 = ddot_(&n, num1, &incx, kinvnum1, &incy);
-
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, w, &incx, y, &incy);
-    trans = 'T';
+    dcopy_(&n, z, &incx, znum1, &incy);
     alpha = 1.;
-    beta = 1.;
-    dgemv_(&trans, &n, &n, &alpha, kf, &n, z, &incx, &beta, y, &incy);
-    dcopy_(&n, y, &incx, den1, &incy);
-
-
-
-    trans = 'T';
-    alpha = 1.;
+    daxpy_(&n, &alpha, zc, &incx, znum1, &incy);
     beta = 0.;
-    dgemv_(&trans, &n, &n, &alpha, kfinv, &n, den1, &incx, &beta, y, &incy);
-    den11 = ddot_(&n, y, &incx, den1, &incy);
-
-
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, wc, &incx, y, &incy);
-    trans = 'T';
     alpha = 1.;
-    beta = 1.;
-    dgemv_(&trans, &n, &n, &alpha, kf, &n, zc, &incx, &beta, y, &incy);
-    dcopy_(&n, y, &incx, den2, &incy);
+    dgemv_(&trans, &n, &n, &alpha, kf, &n, znum1, &incx, &beta, wnum1, &incy);
+    den11 = ddot_(&n, znum1, &incx, wnum1, &incy);
 
-    trans = 'T';
+
+    dcopy_(&n, w, &incx, wnum1, &incy);
     alpha = 1.;
+    daxpy_(&n, &alpha, wc, &incx, wnum1, &incy);
     beta = 0.;
-    dgemv_(&trans, &n, &n, &alpha, kfinv, &n, den2, &incx, &beta, y, &incy);
-    den22 = ddot_(&n, y, &incx, den2, &incy);
+    alpha = 1.;
+    dgemv_(&trans, &n, &n, &alpha, kfinv, &n, wnum1, &incx, &beta, znum1, &incy);
+
+    den22 = ddot_(&n, wnum1, &incx, znum1, &incy);
 
 
     err0 = num11 / (den11 + den22);
     err1 = sqrt(err0);
-    resveclat[iter1] = err1;
+    *res = err1;
     iter1 = iter1 + 1;
-    it_end = &iter1;
-    printf("voici iter1 %d  et err1 %g\n", iter1, err1);
+    *it_end = iter1;
   }
 
 
@@ -549,25 +480,11 @@ int cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu,
     *info = 0;
   }
 
-  // free(q);
-  free(resveclat);
   free(wc);
-  free(y);
   free(zc);
   free(znum1);
   free(wnum1);
-  free(kinvden1);
-  free(kinvden2);
-  free(wt);
   free(maxwt);
-  free(zt);
-  free(maxzt);
-  free(num1);
-  free(kinvnum1);
-  free(den1);
-  free(den2);
-  free(wden1);
-  free(zden1);
-  return *info ;
+
 }
 

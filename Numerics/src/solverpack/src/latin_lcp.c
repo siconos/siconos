@@ -23,12 +23,12 @@ M z- w=q\\
 */
 
 
-//extern ddotf_(int *,double [],double [],double*);
+/*//extern ddotf_(int *,double [],double [],double*);*/
 
 double ddot_(int *, double [], int *, double [], int*);
 
 
-/*!\fn int latin_lcp(double vec[],double *qq,int *nn, double * k_latin,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
+/*!\fn  latin_lcp(double vec[],double *qq,int *nn, double * k_latin,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
 
    latin_lcp is a basic latin solver for LCP.
 
@@ -43,24 +43,28 @@ double ddot_(int *, double [], int *, double [], int*);
    \param res On return a pointer over doubles, the error value.
    \param z On return double vector, the solution of the problem.
    \param w On return double vector, the solution of the problem.
-   \param info
-
-   \return On return a pointer over integers, the termination reason (0 is successful otherwise 1).
+   \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
    \author Nineb Sheherazade.
 */
-int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
+
+
+
+latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int *itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
 {
-  //  FILE *f13;
   int i, j, kk, iter1;
-  int n = *nn, incx, incy;
-  double errmax = *tol, alpha, beta; //,mina,maxa,bb,cc,zw;
-  double rr, rrr, r1, r2, r3, invR0, invRT0, err1, invRTinvR0, z0, num11, err0;
+  int n = *nn, incx = 1, incy = 1, itt = *itermax;
+  double errmax = *tol, alpha, beta;
+  double rr, rrr, r1, r2, r3, invR0, invRT0, err1, z0, num11, err0, invRTinvR0;
   double den11, den22, vv;
-  double  *resveclat, *wc, *zc, *kinvden1, *kinvden2, *wnum1, *znum1, *wt, *maxwt;
-  double *zt, *maxzt, *num1, *kinvnum1, *den1, *den2, *wden1, *zden1;
-  char trans;
+  double  *wc, *zc, *kinvden1, *kinvden2, *wt, *maxwt, *wnum1, *znum1, *ww, *zz;
+  double *num1, *kinvnum1, *den1, *den2, *wden1, *zden1;
+  char trans = 'T';
   double k[n][n], A[n][n], R[n][n], RT[n][n], invRT[n][n], invR[n][n];
-  double invRTinvR[n][n], kinv[n][n], xx[n][*itermax], kzden1[n], kinvwden1[n];
+  double invRTinvR[n][n], kinv[n][n], xx[n][itt], kinvwden1[n], kzden1[n];
+
+
+
+
 
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
@@ -71,7 +75,8 @@ int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax,
   for (i = 0; i < n; i++)
     k[i][i] = *k_latin * vec[i * n + i];
 
-  // get C storage format for matrice
+  /*// get C storage format for matrix*/
+
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
     {
@@ -80,7 +85,8 @@ int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax,
     }
 
 
-  // !!!!!!!!!!!!!!!!!!!!!Cholesky!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  /*    // !!!!!!!!!!!!!!!!!!!!!Cholesky!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
   R[0][0] = sqrt(A[0][0]);
 
 
@@ -115,15 +121,18 @@ int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax,
       R[i][i] = sqrt(A[i][i] - rrr);
     }
   }
-  // !!!!!end of cholesky!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  /*    // !!!!!end of cholesky!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 
-  //  !determination of the R tranposeted
+  /*   //  !determination of the R tranposeted*/
+
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
       RT[i][j] = R[j][i];
 
-  // !inverse of R and RT
+  /*   // !inverse of R and RT*/
+
   for (i = 0; i < n; i++)
   {
     for (j = 0; j < n; j++)
@@ -133,7 +142,8 @@ int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax,
     }
   }
 
-  // !!!!!!!!!inversion of the inf triangular matrix!!!!!!!!!!!!!
+  /*   // !!!!!!!!!inversion of the inf triangular matrix!!!!!!!!!!!!!*/
+
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
     {
@@ -148,9 +158,11 @@ int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax,
         }
       }
     }
-  // !!!!!!!!!!!!!!!!!!!end of inversion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  // !!!!!!!!!!!!!!!!!!!!!!inversion of the sup triangular matrix!!!!!!!
+  /*   // !!!!!!!!!!!!!!!!!!!end of inversion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
+  /*  // !!!!!!!!!!!!!!!!!!!!!!inversion of the sup triangular matrix!!!!!!!*/
+
   for (i = 0; i < n; i++)
   {
     invRT[i][i] = 1 / RT[i][i];
@@ -169,37 +181,33 @@ int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax,
       }
     }
   }
-  // !!!!!!!!!!!!!!!!!!!end of inversion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  resveclat = (double*)malloc(*itermax * sizeof(double));
-
-  for (i = 0; i < n; i++)
-    resveclat[i] = 0.;
+  /*  // !!!!!!!!!!!!!!!!!!!end of inversion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 
-  //  ! initialisation  s^ = 0
-  wc = (double*)malloc(n * sizeof(double));
-  zc = (double*)malloc(n * sizeof(double));
-  znum1 = (double*)malloc(n * sizeof(double));
-  wnum1 = (double*)malloc(n * sizeof(double));
-  kinvden1 = (double*)malloc(n * sizeof(double));
-  kinvden2 = (double*)malloc(n * sizeof(double));
-  wt = (double*)malloc(n * sizeof(double));
-  maxwt = (double*)malloc(n * sizeof(double));
-  zt = (double*)malloc(n * sizeof(double));
-  maxzt = (double*)malloc(n * sizeof(double));
-  num1 = (double*)malloc(n * sizeof(double));
-  kinvnum1 = (double*)malloc(n * sizeof(double));
-  den1 = (double*)malloc(n * sizeof(double));
-  den2 = (double*)malloc(n * sizeof(double));
-  wden1 = (double*)malloc(n * sizeof(double));
-  zden1 = (double*)malloc(n * sizeof(double));
 
+
+  ww = (double*) malloc(n * sizeof(double));
+  zz = (double*) malloc(n * sizeof(double));
+  wc = (double*) malloc(n * sizeof(double));
+  zc = (double*) malloc(n * sizeof(double));
+  znum1 = (double*) malloc(n * sizeof(double));
+  wnum1 = (double*) malloc(n * sizeof(double));
+  kinvden1 = (double*) malloc(n * sizeof(double));
+  kinvden2 = (double*) malloc(n * sizeof(double));
+  wt = (double*) malloc(n * sizeof(double));
+  maxwt = (double*) malloc(n * sizeof(double));
+  num1 = (double*) malloc(n * sizeof(double));
+  kinvnum1 = (double*) malloc(n * sizeof(double));
+  den1 = (double*) malloc(n * sizeof(double));
+  den2 = (double*) malloc(n * sizeof(double));
+  wden1 = (double*) malloc(n * sizeof(double));
+  zden1 = (double*) malloc(n * sizeof(double));
 
 
   for (i = 0; i < n; i++)
   {
-    resveclat[i] = 0.;
+
     wc[i] = 0.0;
     zc[i] = 0.;
     z[i] = 0.;
@@ -209,9 +217,7 @@ int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax,
     kinvden1[i] = 0.;
     kinvden2[i] = 0.;
     wt[i] = 0.;
-    maxzt[i] = 0.;
     maxwt[i] = 0.;
-    zt[i] = 0.;
     num1[i] = 0.;
     kinvnum1[i] = 0.;
     den1[i] = 0.;
@@ -225,42 +231,47 @@ int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax,
       kinv[i][j] = 0.;
     }
 
-  //  !iteration loops
-  iter1 = 1;
+
+
+  for (i = 0; i < n; i++)
+    kinv[i][i] = 1 / k[i][i];
+
+
+  for (i = 0; i < n; i++)
+  {
+    for (j = 0; j < n; j++)
+    {
+      invRTinvR0 = 0.0;
+      for (kk = 0; kk < n; kk++)
+      {
+        invRTinvR[i][j] = invRT[i][kk] * invR[kk][j] + invRTinvR0;
+        invRTinvR0 = invRTinvR[i][j];
+      }
+    }
+  }
+
+
+  /*    //  !iteration loops*/
+
+  iter1 = 0;
   err1 = 1.;
 
 
 
-  while ((iter1 < *itermax) && (err1 > errmax))
+
+  while ((iter1 < itt) && (err1 > errmax))
   {
-    //printf("iteration numbers %d and error evaluation %e \n ",iter1,err1);
 
-    //   !linear stage (zc,wc) -> (z,w)
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, wc, &incx, wt, &incy);
+    /*      //   !linear stage (zc,wc) -> (z,w)*/
 
-    trans = 'T';
+
+
     alpha = 1.;
     beta = 1.;
-    incx = 1;
-    incy = 1;
-    dgemv_(&trans, &n, &n, &alpha, k, &n, zc, &incx, &beta, wt, &incy);
 
 
-    //    wt(:) = wc(:) + matmul(k,zc)
-    for (i = 0; i < n; i++)
-    {
-      for (j = 0; j < n; j++)
-      {
-        invRTinvR0 = 0.0;
-        for (kk = 0; kk < n; kk++)
-        {
-          invRTinvR[i][j] = invRT[i][kk] * invR[kk][j] + invRTinvR0;
-          invRTinvR0 = invRTinvR[i][j];
-        }
-      }
-    }
+    dgemv_(&trans, &n, &n, &alpha, k, &n, zc, &incx, &beta, /*wt*/ wc, &incy);
+
 
     for (i = 0; i < n; i++)
     {
@@ -268,7 +279,7 @@ int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax,
       vv = 0.;
       for (j = 0; j < n; j++)
       {
-        vv = wt[j] - (-qq[j]);
+        vv = wc[j] - (-qq[j]);
         z[i] = invRTinvR[i][j] * vv + z0;
         z0 = z[i];
       }
@@ -277,29 +288,24 @@ int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax,
     for (i = 0; i < n; i++)
       xx[i][iter1] = z[i];
 
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, wt, &incx, w, &incy);
 
-    trans = 'T';
+
     alpha = -1.;
     beta = 1.;
-    incx = 1;
-    incy = 1;
+    dgemv_(&trans, &n, &n, &alpha, k, &n, z, &incx, &beta, wc, &incy);
 
-    dgemv_(&trans, &n, &n, &alpha, k, &n, z, &incx, &beta, w, &incy);
+    dcopy_(&n, wc, &incx, w, &incy);
 
-    //   w(:) = wt(:)-matmul(k(:,:),z(:))
-    // Local stage (z,w)->(zc,wc)
-    for (i = 0; i < n; i++)
-      kinv[i][i] = 1 / k[i][i];
+
+
+
+    /*Local Stage*/
 
     dcopy_(&n, w, &incx, wt, &incy);
     alpha = -1.;
     beta = 1.;
-    incx = 1;
-    incy = 1;
     dgemv_(&trans, &n, &n, &alpha, k, &n, z, &incx, &beta, wt, &incy);
+
 
     for (i = 0; i < n; i++)
     {
@@ -310,80 +316,77 @@ int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax,
 
     for (i = 0; i < n; i++)
     {
-      if (wt[i] < 0.0) maxwt[i] = -wt[i];
-      else maxwt[i] = 0.0;
+      if (-wt[i] < 0.0) zc[i] = 0.;
+      else zc[i] = -wt[i] / k[i][i];
     }
 
-    dcopy_(&n, maxwt, &incx, zc, &incy);
 
-    trans = 'T';
-    alpha = 1.;
-    beta = 0.;
-    dgemv_(&trans, &n, &n, &alpha, kinv, &n, maxwt, &incx, &beta, zc, &incy);
 
-    // convergence criterium
-    incx = 1;
-    incy = 1;
+    /*      // convergence criterium */
+
+
     dcopy_(&n, w, &incx, wnum1, &incy);
     alpha = -1.;
     daxpy_(&n, &alpha, wc, &incx, wnum1, &incy);
 
+
     dcopy_(&n, z, &incx, znum1, &incy);
     daxpy_(&n, &alpha, zc, &incx, znum1, &incy);
 
-    dcopy_(&n, wnum1, &incx, num1, &incy);
-    trans = 'T';
+
+
     alpha = 1.;
     beta = 1.;
-    dgemv_(&trans, &n, &n, &alpha, k, &n, znum1, &incx, &beta, num1, &incy);
+    dgemv_(&trans, &n, &n, &alpha, k, &n, znum1, &incx, &beta, wnum1, &incy);
 
 
-    //    num1(:) =(w(:)-wc(:))+matmul( k(:,:),(z(:)-zc(:)))
-    num11 = 0.;
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, num1, &incx, kinvnum1, &incy);
-    trans = 'T';
+    /*      //    wnum1(:) =(w(:)-wc(:))+matmul( k(:,:),(z(:)-zc(:)))*/
+
+
+
     alpha = 1.;
     beta = 0.;
-    dgemv_(&trans, &n, &n, &alpha, kinv, &n, num1, &incx, &beta, kinvnum1, &incy);
+    dgemv_(&trans, &n, &n, &alpha, kinv, &n, wnum1, &incx, &beta, kinvnum1, &incy);
 
 
-    num11 = ddot_(&n, num1, &incx, kinvnum1, &incy);
+    num11 = ddot_(&n, wnum1, &incx, kinvnum1, &incy);
 
-    // rectif ici
-    incx = 1;
-    incy = 1;
-    dcopy_(&n, w, &incx, wden1, &incy);
+
+    /*     rectif ici*/
+
+
+    dcopy_(&n, z, &incx, zz, &incy);
+    dcopy_(&n, w, &incx, ww, &incy);
+
     alpha = 1.;
-    daxpy_(&n, &alpha, wc, &incx, wden1, &incy);
+    daxpy_(&n, &alpha, wc, &incx, ww, &incy);
 
-    dcopy_(&n, z, &incx, zden1, &incy);
-    daxpy_(&n, &alpha, zc, &incx, zden1, &incy);
+    daxpy_(&n, &alpha, zc, &incx, zz, &incy);
 
-    dcopy_(&n, wden1, &incx, kzden1, &incy);
     beta = 0.;
     alpha = 1.;
-    dgemv_(&trans, &n, &n, &alpha, k, &n, zden1, &incx, &beta, kzden1, &incy);
+    dgemv_(&trans, &n, &n, &alpha, k, &n, zz, &incx, &beta, kzden1, &incy);
 
 
-    //    ddotf_(&n,zden1,kzden1,&den22);
-    den22 = ddot_(&n, zden1, &incx, kzden1, &incy);
+    den22 = ddot_(&n, zz, &incx, kzden1, &incy);
 
-    dcopy_(&n, wden1, &incx, kinvwden1, &incy);
     beta = 0.;
     alpha = 1.;
-    dgemv_(&trans, &n, &n, &alpha, kinv, &n, wden1, &incx, &beta, kinvwden1, &incy);
+    dgemv_(&trans, &n, &n, &alpha, kinv, &n, ww, &incx, &beta, kinvwden1, &incy);
 
-    //ddotf_(&n,wden1,kinvwden1,&den11);
-    den11 = ddot_(&n, wden1, &incx, kinvwden1, &incy);
+    den11 = ddot_(&n, ww, &incx, kinvwden1, &incy);
 
-    //// rectif ici
+
+    /*     end rectif ici */
+
+
     err0 = num11 / (den11 + den22);
     err1 = sqrt(err0);
-    resveclat[iter1] = err1;
     iter1 = iter1 + 1;
-    it_end = &iter1;
+    *it_end = iter1;
+    *res = err1;
+
+    /*printf("iter %d err %g\n",iter1,err1);*/
   }
 
   if (err1 > errmax)
@@ -391,14 +394,19 @@ int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax,
     printf("no convergence after %d iterations, the residue is %g\n", iter1, err1);
     *info = 1;
   }
-  else if (err1 < errmax)
+  else
   {
     printf("there is convergence after %d iterations, the residue is %g \n", iter1, err1);
     *info = 0;
   }
 
-  free(resveclat);
+
+
+
+
   free(wc);
+  free(zz);
+  free(ww);
   free(zc);
   free(znum1);
   free(wnum1);
@@ -406,13 +414,11 @@ int latin_lcp(double *vec, double *qq, int *nn, double * k_latin, int * itermax,
   free(kinvden2);
   free(wt);
   free(maxwt);
-  free(zt);
-  free(maxzt);
   free(num1);
   free(kinvnum1);
   free(den1);
   free(den2);
   free(wden1);
   free(zden1);
-  return *info ;
+
 }
