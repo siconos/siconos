@@ -246,6 +246,13 @@
 				</DS_Concerned>
 				<H matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</H>
 			</LagrangianDSIO>
+			
+			<LagrangianLinearDSIO number="4">
+				<DS_Concerned all='false'>
+					<DS number='3'/>
+				</DS_Concerned>
+				<H matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</H>
+			</LagrangianLinearDSIO>
 		</DSInputOutput_Definition>
 		
 		<EqualityConstraint_Definition>

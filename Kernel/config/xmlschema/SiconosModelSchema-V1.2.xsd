@@ -518,11 +518,11 @@
 				</xsd:sequence> 
 			</xsd:complexType>
 
-			<xsd:key name="DSKey">
-		        <xsd:selector xpath='LagrangianDS|LagrangianLinearTIDS|LinearSystemDS|NonLinearSystemDS'/>
-		        <xsd:field xpath='@number'/>
-				<xsd:field xpath='@number'/>
-		     </xsd:key>
+			<xsd:unique name="DSKey">
+		        <xsd:selector xpath='.//LagrangianDS|.//LagrangianLinearTIDS|.//LinearSystemDS|.//NonLinearSystemDS'/>
+		        <xsd:field xpath='./@number'/>
+				<!--<xsd:field xpath='@number'/>-->
+		     </xsd:unique>
 		</xsd:element>
 	</xsd:choice>
 
@@ -550,6 +550,15 @@
 							</xsd:complexType>
 						</xsd:element>
 						<xsd:element name="LagrangianDSIO">
+							<xsd:complexType>
+									<xsd:all>
+										<xsd:element name="DS_Concerned" type="DSIO_DS_ConcernedType" minOccurs='1' maxOccurs="1"/>
+										<xsd:element name="H" type="matrix" minOccurs="1" maxOccurs="1"/>
+									</xsd:all>
+									<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
+							</xsd:complexType>
+						</xsd:element>
+						<xsd:element name="LagrangianLinearDSIO">
 							<xsd:complexType>
 									<xsd:all>
 										<xsd:element name="DS_Concerned" type="DSIO_DS_ConcernedType" minOccurs='1' maxOccurs="1"/>
@@ -749,10 +758,10 @@
 <!--			  		<xsd:attribute name="isActive" type="boolean" use="optional"/>  -->
 				</xsd:complexType>
 		
-		     <xsd:key name="InteractionKey">
-		        <xsd:selector xpath='.'/>
-		        <xsd:field xpath='@number'/>
-		     </xsd:key>
+		     <xsd:unique name="InteractionKey">
+		        <xsd:selector xpath='.//Interaction'/>
+		        <xsd:field xpath='./@number'/>
+		     </xsd:unique>
 
 				</xsd:element>
 			</xsd:sequence>

@@ -26,6 +26,7 @@ const string NEWTONIMPACTFRICTIONNSLAW = "NewtonImpactFrictionNSL";
 const string LINEARDSIO = "LinearDSIO";
 const string NLINEARDSIO = "NLinearDSIO";
 const string LAGRANGIANDSIO = "LagrangianDSIO";
+const string LAGRANGIANLINEARDSIO = "LagrangianLinearDSIO";
 
 // const for EqualitySonctraint
 const string LINEAREC = "LinearEC";

@@ -67,6 +67,7 @@ const string NEWTON_IMPACT_FRICTION_NSLAW_TAG = "NewtonImpactFrictionLaw";
 const string LINEAR_DSIO_TAG = "LinearDSIO";
 const string NON_LINEAR_DSIO_TAG = "NonLinearDSIO";
 const string LAGRANGIAN_DSIO_TAG = "LagrangianDSIO";
+const string LAGRANGIAN_LINEAR_DSIO_TAG = "LagrangianLinearDSIO";
 
 // EqualityConstraint
 const string LINEAR_EC_TAG = "LinearEC";
