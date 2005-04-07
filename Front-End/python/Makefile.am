@@ -1,7 +1,7 @@
 # Makefile.am --- SICONOS
 
 include $(top_srcdir)/config/Make-rules
-# include $(SICONOSPATH)/share/SICONOS/Make-rules
+include $(SICONOSPATH)/share/SICONOS/KernelConfig.sh
 EXTRA_DIST = pySiconos.i createLibSiconos.sh
 
 all:swig_interface lib
@@ -13,7 +13,7 @@ pySiconos_wrap.cxx:pySiconos.i
 	./correctif.sh;
 
 pySiconos_wrap.o:pySiconos_wrap.cxx
-	g++ -c $(CXXFLAGS) -I$(SICONOS_INSTALLED_INCLUDES) $(SICONOS_EXT_INCLUDES) pySiconos_wrap.cxx $(PYTHON_CPPFLAGS)
+	g++ -c $(CXXFLAGS) -I$(SICONOS_INSTALLED_INCLUDES) $(LIBEXT_INCLUDES) pySiconos_wrap.cxx $(PYTHON_CPPFLAGS)
 
 #wrap: libsiconos runswig pySiconos_wrap.o lib
 
@@ -32,7 +32,7 @@ pySiconos_wrap.o:pySiconos_wrap.cxx
 lib:_pySiconos.so
 
 _pySiconos.so:pySiconos_wrap.o
-	$(CXX) $(CXX_DYNLIB)  $(SICONOS_INSTALLED_LIBS) $(SICONOS_EXT_LDFLAGS) pySiconos_wrap.o -o _pySiconos.so
+	$(CXX) $(CXX_DYNLIB)  $(SICONOS_INSTALLED_LIBS) $(LIBEXT_LDFLAGS) pySiconos_wrap.o -o _pySiconos.so
 
 #	g++ -shared $(SICONOS_LDFLAGS) $(SICONOS_LDADD) $(LIBS) libSiconos.so pySiconos_wrap.o -o _pySiconos.so 
 
