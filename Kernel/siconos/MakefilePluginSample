@@ -1,0 +1,36 @@
+include $(SICONOSPATH)/share/SICONOS/KernelConfig.sh
+
+SAMPLE_SOURCES = $(OBJ)
+SAMPLE_OBJ  = $(patsubst %.cpp,%.o,  $(SAMPLE_SOURCES))
+SAMPLE_EXE  = $(patsubst %.cpp,%_EXE,  $(SAMPLE_SOURCES))
+
+sample:$(SAMPLE_OBJ) $(SAMPLE_EXE)
+	
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $(LIBEXT_INCLUDES) -I $(SICONOSPATH)/include $<
+
+$(SAMPLE_EXE):$(SAMPLE_OBJ)
+	echo "$(SAMPLE_EXE):"
+	$(CXX) -o $@ $< -L$(SICONOSPATH)/lib $(SICONOS_LIBS) $(LIBEXT_LDFLAGS)
+
+run:$(SAMPLE_EXE) 
+	./$(SAMPLE_EXE)
+
+cleansample:
+	rm -f *_EXE;
+
+
+PLUGIN_SOURCES = $(wildcard *Plugin.c)
+PLUGIN_OBJ  = $(patsubst %.c,%.o,  $(PLUGIN_SOURCES))
+PLUGIN_LIB = $(patsubst %.c,%.so,  $(PLUGIN_SOURCES))
+
+plugin:$(PLUGIN_OBJ) $(PLUGIN_LIB)
+	
+.c.o:
+	$(CXX) -c $<
+
+%.so:%.c
+	$(CXX) $(CXX_DYNLIB) $< -o $@
+
+cleanplugin:
+	rm -f $(PLUGIN_OBJ) $(PLUGIN_LIB)

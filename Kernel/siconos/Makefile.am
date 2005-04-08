@@ -10,6 +10,9 @@
 #SICONOS_SOURCES = main_siconos.cpp main_siconos.h
 #HEADER_LIST = main_siconos.h
 
+pkgdata_DATA = MakefilePluginSample
+#MakefilePlugin MakefileSample
+
 bin_SCRIPTS = test-script
 test-script:test.in
 	sed -e 's/whatever//' < $(srcdir)/test.in > test-script

@@ -1,4 +1,97 @@
 #!/bin/sh
 
-echo "TEST !!!!"
+#-----------
+# Variables
+#-----------
+
+DIR=`pwd`;
+
+#-----------
+# functions
+#-----------
+
+function compilePlugins() {
+    listdir=`find . -type d`;
+    echo "listdir = $listdir";
+    for dir in $listdir; do
+	cd $dir;
+	if test "`ls *Plugin.c 2>/dev/null`" != ""; then
+	    echo "plugin dans $dir !";      
+	    # make -f $SICONOSPATH/share/SICONOS/MakefilePlugin plugin
+	    make -f $SICONOSPATH/share/SICONOS/MakefilePluginSample plugin
+	    if test "$LD_LIBRARY_PATH" = ""; then
+		export LD_LIBRARY_PATH=$PWD;
+	    else
+		export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH; 
+	    fi;	  
+	fi;
+	cd $DIR;
+    done;
+    echo "LD_LIBRARY_PATH = $LD_LIBRARY_PATH";
+}
+
+function cartridge() {
+    echo "";
+    echo "+---- SICONOS ----+";
+    echo "|                 |";
+    echo "| (c) INRIA CNRS  |";
+    echo "|                 |";
+    echo "+-----------------+"; 
+    echo "";
+}
+
+#------
+# main
+#------
+
+cartridge;
+
+# parameters and paths
+if test "$SICONOSPATH" = ""; then
+    echo "SICONOSPATH undefined. stop";
+    exit 1;
+fi;
+
+export LD_LIBRARY_PATH=$SICONOSPATH/lib:$LD_LIBRARY_PATH; 
+
+# test if there are one argument. if not, exit
+if [ $# -ne 1 ]; then
+    echo "$0 : Bad number of argument";
+    exit 1;
+fi;
+	
+# test if command file exist. if not, exit
+if [ ! -f $1 ]; then
+    echo "$1 file not found.";
+    exit 1;
+fi;
+
+
+#while getopts c OPTION
+#do
+#	case "$OPTION" in
+#		c) clean=true;;
+#	esac
+#done
+#
+#if "$clean" = "true"; then
+    
+
+# plugin compilation
+compilePlugins;
+
+# sample compilation
+echo "dir of sample is `dirname $1`";
+DIR_SAMPLE=`dirname $1`;
+
+if [ ! -d $DIR_SAMPLE ]; then
+    echo "the sample dir is not correct";
+    exit 1;
+else
+    cd $DIR_SAMPLE;
+    #make -f $SICONOSPATH/share/SICONOS/MakefileSample OBJ=`basename $1` sample run
+    make -f $SICONOSPATH/share/SICONOS/MakefilePluginSample OBJ=`basename $1` sample run
+    cd $DIR;
+fi;
+
 exit 0;
