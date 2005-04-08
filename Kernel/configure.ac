@@ -555,28 +555,3 @@ AC_CONFIG_FILES([Makefile
                  src/xml/Makefile
                  src/xml/test/Makefile])
 AC_OUTPUT
-#AC_CONFIG_FILES([Makefile
-#                 config/Makefile
-#                  siconos/Makefile
-#                 src/Makefile
-#                 src/model/Makefile
-#                 src/model/test/Makefile
-#                 src/modelingTools/Makefile
-#                 src/simulationTools/Makefile
-#                 src/plugin/Makefile
-#                 src/utils/Makefile
-#		 src/utils/SiconosException/Makefile
-#                 src/utils/SiconosAlgebra/Makefile
-#                 src/utils/SiconosAlgebra/test/Makefile
-#                 src/utils/SiconosMemory/Makefile
-#                 src/utils/SiconosMemory/test/Makefile
-#                 src/utils/SiconosSharedLibrary/Makefile
-#                 src/xml/Makefile
-#                 src/xml/test/Makefile
-#		 sample/Makefile
-#		 sample/BouncingBall/Makefile
-#		 sample/RollingBalls/Makefile
-#		 sample/DoubleContact/Makefile
-#		 sample/UltraBalls/Makefile
-#		 sample/Ball2D/Makefile])
-#AC_OUTPUT
