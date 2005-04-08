@@ -230,21 +230,24 @@
 				<DS_Concerned all='false'>
 					<DS number='3'/>
 				</DS_Concerned>
-				<H matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</H>
+				<A matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</A>
+				<B matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</B>
 			</LinearDSIO>
 			
 			<NonLinearDSIO number="2">
 				<DS_Concerned all='false'>
 					<DS number='3'/>
 				</DS_Concerned>
-				<H matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</H>
+				<computeInput plugin="BasicPlugin:computeInput"/>
+				<computeOutput plugin="BasicPlugin:computeOutput"/>
 			</NonLinearDSIO>
 			
 			<LagrangianDSIO number="3">
 				<DS_Concerned all='false'>
 					<DS number='3'/>
 				</DS_Concerned>
-				<H matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</H>
+				<computeInput plugin="BasicPlugin:computeInput"/>
+				<computeOutput plugin="BasicPlugin:computeOutput"/>
 			</LagrangianDSIO>
 			
 			<LagrangianLinearDSIO number="4">
@@ -252,6 +255,7 @@
 					<DS number='3'/>
 				</DS_Concerned>
 				<H matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</H>
+				<b vectorFile='./sample/vector.dat'/>
 			</LagrangianLinearDSIO>
 		</DSInputOutput_Definition>
 		

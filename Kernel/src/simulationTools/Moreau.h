@@ -133,8 +133,7 @@ public:
   void display() const;
 
   /** \fn void createOneStepIntegrator(OneStepIntegratorXML * osiXML,
-      TimeDiscretisation* td, DynamicalSystem* ds,
-      int r, double theta)
+      TimeDiscretisation* td, DynamicalSystem* ds, double theta)
    *  \brief allows to create the Integrator Moreau with an xml file, or the needed data
    *  \param OneStepNSProblemXML * : the XML object for this OneStepIntegrator
    *  \param double :  the value for theta of this OneStepIntegrator

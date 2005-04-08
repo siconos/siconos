@@ -4,25 +4,29 @@
 
 DSInputOutputXML::DSInputOutputXML()
 {
-  //  this->computeInputNode = NULL;
-  //  this->computeOutputNode = NULL;
-  this->HNode = NULL;
+  this->computeInputNode = NULL;
+  this->computeOutputNode = NULL;
+  //  this->HNode = NULL;
 }
 
 DSInputOutputXML::DSInputOutputXML(xmlNode *dsioNode/*, vector<int> definedDSNumbers*/)
 {
   IN("DSInputOutputXML::DSInputOutputXML(xmlNode*)\n");
   xmlNode *node;
-  //string type ( (char*)dsioNode->name );
+  string type((char*)dsioNode->name);
   this->rootDSIOXMLNode = dsioNode;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSIOXMLNode, DSINPUTOUTPUT_H)) != NULL)
+  if (type == NON_LINEAR_DSIO_TAG || type == LAGRANGIAN_DSIO_TAG)
   {
-    this->HNode = node;
-  }
-  else
-  {
-    XMLException::selfThrow("DSInputOutputXML - DSInputOutputXML(xmlNode *dsioNode) error : tag " + DSINPUTOUTPUT_H + " not found.");
+    if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSIOXMLNode, COMPUTE_INPUT_TAG)) != NULL)
+      this->computeInputNode = node;
+    else
+      XMLException::selfThrow("DSInputOutputXML - DSInputOutputXML(xmlNode *dsioNode) error : tag " + COMPUTE_INPUT_TAG + " not found.");
+
+    if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSIOXMLNode, COMPUTE_OUTPUT_TAG)) != NULL)
+      this->computeOutputNode = node;
+    else
+      XMLException::selfThrow("DSInputOutputXML - DSInputOutputXML(xmlNode *dsioNode) error : tag " + COMPUTE_OUTPUT_TAG + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSIOXMLNode, DS_CONCERNED)) != NULL)

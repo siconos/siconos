@@ -542,12 +542,18 @@ public:
     return this->definedDSInputOutputNumbers;
   }
 
-  /** \fn void loadDSInputOutputXML(xmlNode * )
-  *   \brief Builds DSInputOutputXML objects from a DOM tree describing DSInputOutputs
-  *   \param xmlNode* : the DSInputOutputs DOM tree
-  *   \exception XMLException : if a number relating to an DSInputOutput declares in the NSDS is already used
+  /** \fn inline vector<int> getDSInputOutputNumbers()
+  *   \brief Allows to know the defined DSInputOutputs
+  *   \return vector DSInputOutputs integer numbers
   */
-  void loadDSInputOutputXML(xmlNode * rootdsioNode);
+  void setDSInputOutputXML(map<int, DSInputOutputXML*> m);
+
+  //    /** \fn void loadDSInputOutputXML(xmlNode * )
+  //    *   \brief Builds DSInputOutputXML objects from a DOM tree describing DSInputOutputs
+  //    *   \param xmlNode* : the DSInputOutputs DOM tree
+  //    *   \exception XMLException : if a number relating to an DSInputOutput declares in the NSDS is already used
+  //    */
+  //    void loadDSInputOutputXML(xmlNode * rootdsioNode);
 
 
 protected:

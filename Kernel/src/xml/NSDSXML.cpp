@@ -9,6 +9,9 @@
 #include "LinearTIECXML.h"
 #include "LagrangianECXML.h"
 #include "LagrangianLinearECXML.h"
+#include "LinearDSIOXML.h"
+#include "LagrangianDSIOXML.h"
+#include "LagrangianLinearDSIOXML.h"
 
 #include "check.h"
 
@@ -98,8 +101,16 @@ EqualityConstraintXML* NSDSXML::getEqualityConstraintXML(int number)
 void NSDSXML::loadNonSmoothDynamicalSystem()
 {
   xmlNode *node;
+  xmlNode *childNode;
+
   if ((node = SiconosDOMTreeTools::findNodeChild(NSDSNode, LMGC90_NSDS_TAG)) == NULL)
   {
+    // at first, we load the DSInputOutputs because we need them to load properly the DSXML
+    if ((node = SiconosDOMTreeTools::findNodeChild(NSDSNode, DSINPUTOUTPUT_DEFINITION_TAG)) != NULL)
+      this->loadDSInputOutputXML(node);
+    else
+      cout << "DSXML - loadNSDS WARNING : tag " << DSINPUTOUTPUT_DEFINITION_TAG << " not found,\nDefining DS InputOutput is optional." << endl;
+
     if ((node = SiconosDOMTreeTools::findNodeChild(NSDSNode, DYNAMICAL_SYSTEM_DEFINITION_TAG)) != NULL)
       this->loadDSXML(node);
     else
@@ -429,33 +440,33 @@ void NSDSXML::loadDSXML(xmlNode * rootDSNode)
     // we can only add a DS if his number is not already defined
     if (i == this->DSXMLMap.end())
     {
-      //type = SiconosDOMTreeTools::getStringAttributeValue(node,NSDS_TYPE);
-      /*
-       * for XML Schema v1.1 :
-       */
       type = (char*)node->name;
-
+      cout << "#~#~ Loading DynamicalSystem number : " << number << " - " << type << endl;
       this->definedDSNumbers.push_back(number);
 
       if (type == LAGRANGIAN_NON_LINEARDS_TAG)
       {
         dsxml = new LagrangianDSXML((xmlNode *)node, isBVP);
         this->DSXMLMap[number] = dsxml;
+        dsxml->setDSInputOutputXML(this->getDSInputOutputXMLRelatingToDS(number));
       }
       else if (type == LAGRANGIAN_TIME_INVARIANTDS_TAG)
       {
         dsxml = new LagrangianLinearTIDSXML((xmlNode *)node, isBVP);
         this->DSXMLMap[number] = dsxml;
+        dsxml->setDSInputOutputXML(this->getDSInputOutputXMLRelatingToDS(number));
       }
       else if (type == LINEAR_SYSTEMDS_TAG)
       {
         dsxml = new LinearSystemDSXML((xmlNode *)node, isBVP);
         this->DSXMLMap[number] = dsxml;
+        dsxml->setDSInputOutputXML(this->getDSInputOutputXMLRelatingToDS(number));
       }
       else if (type == NON_LINEAR_SYSTEMDS_TAG)
       {
         dsxml = new DSXML((xmlNode *)node, isBVP);
         this->DSXMLMap[number] = dsxml;
+        dsxml->setDSInputOutputXML(this->getDSInputOutputXMLRelatingToDS(number));
       }
       else
       {
@@ -471,6 +482,29 @@ void NSDSXML::loadDSXML(xmlNode * rootDSNode)
   }
 }
 
+map<int, DSInputOutputXML*> NSDSXML::getDSInputOutputXMLRelatingToDS(int number)
+{
+  int i;
+  map<int, DSInputOutputXML*> m;
+  vector<int> v;
+
+  map<int, DSInputOutputXML*>::iterator iter;
+  for (iter = dsInputOutputXMLMap.begin(); iter != dsInputOutputXMLMap.end(); iter++)
+  {
+    v = (*iter).second->getDSConcerned();
+    for (i = 0; i < v.size(); i++)
+    {
+      cout << "** NSDSXML::getDSInputOutputXMLRelatingToDS v[" << i << "] == " << v[i] << endl;
+      if (v[i] == number)
+      {
+        m[(*iter).first] = (*iter).second;
+        cout << "** NSDSXML::getDSInputOutputXMLRelatingToDS ==> " << (*iter).first << " - " << (*iter).second->getType() << endl;
+      }
+    }
+  }
+
+  return m;
+}
 
 void NSDSXML::loadInteractionXML(xmlNode * rootInteractionNode)
 {
@@ -530,6 +564,66 @@ void NSDSXML::loadEqualityConstraintXML(xmlNode * rootECNode)
     else
     {
       XMLException::selfThrow("NSDSXML - loadEqualityConstraintXML error : wrong EQUALITYCONSTRAINT number : already exists.");
+    }
+
+    node = SiconosDOMTreeTools::findFollowNode(node);
+  }
+}
+
+void NSDSXML::loadDSInputOutputXML(xmlNode * rootdsioNode)
+{
+  xmlNode *node;
+  int number;
+  string type;
+  map<int, DSInputOutputXML*>::iterator i;
+  DSInputOutputXML *dsioxml;
+
+  node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)rootdsioNode);
+
+
+  while (node != NULL)
+  {
+    number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
+    type = (char*)node->name;
+    cout << "#~#~ Loading DSInputOutput number : " << number << " - " << type << endl;
+
+    i = dsInputOutputXMLMap.find(number);
+    if (i == dsInputOutputXMLMap.end())
+    {
+      if (type == LINEAR_DSIO_TAG)
+      {
+        this->definedDSInputOutputNumbers.push_back(number);
+        dsioxml = new LinearDSIOXML((xmlNode *)node/*, this->definedDSNumbers*/);
+        this->dsInputOutputXMLMap[number] = dsioxml;
+      }
+      else if (type == NON_LINEAR_DSIO_TAG)
+      {
+        this->definedDSInputOutputNumbers.push_back(number);
+        dsioxml = new DSInputOutputXML((xmlNode *)node/*, this->definedDSNumbers*/);
+        this->dsInputOutputXMLMap[number] = dsioxml;
+      }
+      else if (type == LAGRANGIAN_DSIO_TAG)
+      {
+        this->definedDSInputOutputNumbers.push_back(number);
+        dsioxml = new LagrangianDSIOXML((xmlNode *)node/*, this->definedDSNumbers*/);
+        this->dsInputOutputXMLMap[number] = dsioxml;
+      }
+      else if (type == LAGRANGIAN_LINEAR_DSIO_TAG)
+      {
+        this->definedDSInputOutputNumbers.push_back(number);
+        dsioxml = new LagrangianLinearDSIOXML((xmlNode *)node/*, this->definedDSNumbers*/);
+        this->dsInputOutputXMLMap[number] = dsioxml;
+      }
+      else
+        XMLException::selfThrow("NSDSXML - loadDSInputOutputXML error : wrong DSInputOutput number : already exists.");
+
+      this->definedDSInputOutputNumbers.push_back(number);
+      dsioxml = new DSInputOutputXML((xmlNode *)node/*, this->definedDSNumbers*/);
+      this->dsInputOutputXMLMap[number] = dsioxml;
+    }
+    else
+    {
+      XMLException::selfThrow("NSDSXML - loadDSInputOutputXML error : wrong DSINPUTOUTPUT number : already exists.");
     }
 
     node = SiconosDOMTreeTools::findFollowNode(node);

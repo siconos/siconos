@@ -68,16 +68,16 @@ void DSXML::loadDSProperties(bool isBVP)
     this->boundaryConditionNode = NULL;
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, DSINPUTOUTPUT_DEFINITION_TAG)) != NULL)
-  {
-    this->loadDSInputOutputXML(node);
-    this->dsInputOutputNode = node;
-  }
-  else
-  {
-    cout << "DSXML - loadNSDS WARNING : tag " << DSINPUTOUTPUT_DEFINITION_TAG << " not found,\nDefining DS InputOutput is optional." << endl;
-    this->dsInputOutputNode = NULL;
-  }
+  //    if ((node=SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, DSINPUTOUTPUT_DEFINITION_TAG)) !=NULL)
+  //    {
+  //    this->loadDSInputOutputXML(node);
+  //    this->dsInputOutputNode = node;
+  //    }
+  //    else
+  //    {
+  //    cout<<"DSXML - loadNSDS WARNING : tag "<<DSINPUTOUTPUT_DEFINITION_TAG<<" not found,\nDefining DS InputOutput is optional."<<endl;
+  //    this->dsInputOutputNode = NULL;
+  //    }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, ID_ATTRIBUTE)) != NULL)
   {
@@ -409,6 +409,7 @@ void DSXML::loadDS(DynamicalSystem* ds)
 
 DSInputOutputXML* DSXML::getDSInputOutputXML(int number)
 {
+  cout << "~~DSXML::getDSInputOutputXML~~" << endl;
   map<int, DSInputOutputXML*>::iterator it;
 
   it = this->dsInputOutputXMLMap.find(number);
@@ -417,81 +418,54 @@ DSInputOutputXML* DSXML::getDSInputOutputXML(int number)
     cout << "DSXML::getDSInputOutputXML - Error : the DSInputOutputXML number " << number << " does not exist!" << endl;
     return NULL;
   }
+  cout << "~~DSXML::getDSInputOutputXML~~ returns == " << this->dsInputOutputXMLMap[number]->getType() << endl;
   return this->dsInputOutputXMLMap[number];
 }
 
-void DSXML::loadDSInputOutputXML(xmlNode * rootdsioNode)
+void DSXML::setDSInputOutputXML(map<int, DSInputOutputXML*> m)
 {
-  xmlNode *node;
-  int number; //Number of an EqualityCopnstraint
-  map<int, DSInputOutputXML*>::iterator i;
+  this->definedDSInputOutputNumbers.clear();
 
-  node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)rootdsioNode);
-
-  while (node != NULL)
+  map<int, DSInputOutputXML*>::iterator iter;
+  for (iter = m.begin(); iter != m.end(); iter++)
   {
-    DSInputOutputXML *ecxml;
-
-    number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
-
-    cout << "CHARGEMENT DSInputOutput number" << number << endl;
-
-    i = dsInputOutputXMLMap.find(number);
-    if (i == dsInputOutputXMLMap.end())
-    {
-      this->definedDSInputOutputNumbers.push_back(number);
-      ecxml = new DSInputOutputXML((xmlNode *)node/*, this->definedDSNumbers*/);
-      this->dsInputOutputXMLMap[number] = ecxml;
-    }
-    else
-    {
-      XMLException::selfThrow("DSXML - loadDSInputOutputXML error : wrong DSINPUTOUTPUT number : already exists.");
-    }
-
-    node = SiconosDOMTreeTools::findFollowNode(node);
+    this->definedDSInputOutputNumbers.push_back((*iter).first);
+    //cout<<"** DSXML::setDSInputOutputXML ==> "<<(*iter).first<<" - "<<(*iter).second->getType()<<endl;
   }
+
+  this->dsInputOutputXMLMap = m;
 }
 
-//SiconosMemory DSXML::getXMemory()
+//void DSXML::loadDSInputOutputXML(xmlNode * rootdsioNode)
 //{
-//  IN("SiconosMemory DSXML::getXMemory() \n");
+//  xmlNode *node;
+//    int number; //Number of an EqualityCopnstraint
+//  map<int, DSInputOutputXML*>::iterator i;
 //
-//  //SiconosMemoryXML smemXML(this->xMemoryNode, this->parentNode, DS_XMEMORY);
-//  //SiconosMemory smem(&smemXML);
+//    node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)rootdsioNode);
 //
-//  SiconosMemory smem( this->xMemoryXML );
+//  while(node!=NULL)
+//    {
+//      DSInputOutputXML *ecxml;
 //
-//  OUT("SiconosMemory DSXML::getXMemory() \n");
+//    number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
 //
-//  return  smem;
-//}
+//    cout<<"CHARGEMENT DSInputOutput number"<<number<<endl;
 //
-//SiconosMemory DSXML::getXDotMemory()
-//{
-//  IN("SiconosMemory DSXML::getXDotMemory() \n");
+//    i = dsInputOutputXMLMap.find(number);
+//    if (i == dsInputOutputXMLMap.end())
+//    {
+//      this->definedDSInputOutputNumbers.push_back(number);
+//      ecxml = new DSInputOutputXML((xmlNode *)node/*, this->definedDSNumbers*/);
+//      this->dsInputOutputXMLMap[number] = ecxml;
+//      }
+//      else
+//      {
+//      XMLException::selfThrow("DSXML - loadDSInputOutputXML error : wrong DSINPUTOUTPUT number : already exists.");
+//    }
 //
-//  //SiconosMemoryXML smemXML(this->xDotMemoryNode, this->parentNode, DS_XDOTMEMORY);
-//  //SiconosMemory smem(&smemXML);
-//
-//  SiconosMemory smem( this->xDotMemoryXML );
-//
-//  OUT("SiconosMemory DSXML::getXDotMemory() \n");
-//
-//  return  smem;
-//}
-//
-//SiconosMemory DSXML::getRMemory()
-//{
-//  IN("SiconosMemory DSXML::getRMemory() \n");
-//
-//  //SiconosMemoryXML smemXML(this->rMemoryNode, this->parentNode, DS_RMEMORY);
-//  //SiconosMemory smem(&smemXML);
-//
-//  SiconosMemory smem( this->rMemoryXML );
-//
-//  OUT("SiconosMemory DSXML::getRMemory() \n");
-//
-//  return  smem;
+//      node = SiconosDOMTreeTools::findFollowNode(node);
+//   }
 //}
 
 

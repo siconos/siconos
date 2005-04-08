@@ -7,27 +7,19 @@ LagrangianLinearDSIOXML::LagrangianLinearDSIOXML(): DSInputOutputXML()
 }
 
 LagrangianLinearDSIOXML::LagrangianLinearDSIOXML(xmlNode * dsioNode)
-  : DSInputOutputXML(dsioNode)
+// : DSInputOutputXML(dsioNode)
 {
   xmlNode *node;
-
+  this->rootDSIOXMLNode = dsioNode;
   if ((node = SiconosDOMTreeTools::findNodeChild(dsioNode, LLDSIO_H)) != NULL)
-  {
     this->HNode = node;
-  }
   else
-  {
     XMLException::selfThrow("LagrangianLinearDSIOXML - constructor error : tag " + LLDSIO_H + " not found.");
-  }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(dsioNode, LLDSIO_B)) != NULL)
-  {
     this->bNode = node;
-  }
   else
-  {
     XMLException::selfThrow("LagrangianLinearDSIOXML - constructor error : tag " + LLDSIO_B + " not found.");
-  }
 }
 
 LagrangianLinearDSIOXML::~LagrangianLinearDSIOXML()

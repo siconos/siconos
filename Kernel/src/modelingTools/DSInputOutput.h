@@ -3,6 +3,7 @@
 
 #include "DynamicalSystem.h"
 #include "DSInputOutputXML.h"
+#include "SiconosSharedLibrary.h"
 
 #include "SiconosConst.h"
 
@@ -12,11 +13,15 @@ class Interaction;
 class DynamicalSystem;
 class DSInputOutputXML;
 
+extern string DefaultComputeInput;
+extern string DefaultComputeOutput;
+
+
 /** \class DSInputOutput
  *  \brief this class contains data for a specific DynamicalSystem about
  *         { y = H(x, t)
- *         { R = G(r)
-*  \author SICONOS Development Team - copyright INRIA
+ *         { R = G(lambda)
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Jan 14, 2005
  *
@@ -147,6 +152,22 @@ public:
     this->dsVector = dsVect;
   } ;
 
+  /** \fn void setComputeOutputFunction(string pluginPath, string functionName)
+   *  \brief allow to set a specified function to compute output
+   *  \param string : the complete path to the plugin
+   *  \param string : the function name to use in this plugin
+   *  \exception SiconosSharedLibraryException
+   */
+  virtual void setComputeOutputFunction(std::string pluginPath, std::string functionName);
+
+  /** \fn void setComputeInputFunction(string pluginPath, string functionName)
+   *  \brief allow to set a specified function to compute output
+   *  \param string : the complete path to the plugin
+   *  \param string : the function name to use in this plugin
+   *  \exception SiconosSharedLibraryException
+   */
+  virtual void setComputeInputFunction(std::string pluginPath, std::string functionName);
+
   ///////////////////////
 
   /** \fn void saveDSInputOutputToXML()
@@ -161,7 +182,8 @@ public:
    *  \exception RuntimeException
    */
   void createDSInputOutput(DSInputOutputXML * dsioXML, int number = -1,
-                           SiconosMatrix *H = NULL);
+                           string computeInput = DefaultComputeInput,
+                           string computeOutput = DefaultComputeOutput);
 
 
 protected:
@@ -192,31 +214,31 @@ protected:
   /** the object linked this Relation to read XML data */
   DSInputOutputXML *dsioxml;
 
-  //  /** class for manage plugin (open, close librairy...) */
-  //  SiconosSharedLibrary cShared;
-  //
-  //  /* contains the name of the plugin used for computeInput */
-  //  string computeInputName;
-  //  /* contains the name of the plugin used for computeOutput */
-  //  string computeOutputName;
-  //
-  //  /** \fn void (*computeOutputPtr)(double* xPtr, double* time, double* lambdaPtr, double* yPtr)
-  //   *  \brief computes y
-  //   *  \param double* xPtr : the pointer to the first element of the vector x
-  //   *  \param double* time : the current time
-  //   *  \param double* lambdaPtr : the pointer to the first element of the vector lambda
-  //   *  \param double* yPtr : the pointer to the first element of the vector y (in-out parameter)
-  //   */
-  //  void (*computeOutputPtr)(double* xPtr, double* time, double* lambdaPtr, double* yPtr);
-  //
-  //  /** \fn void (*computeInputPtr)(double* xPtr, double* time, double* lambdaPtr, double* rPtr)
-  //   *  \brief computes r
-  //   *  \param double* xPtr : the pointer to the first element of the vector x
-  //   *  \param double* time : the current time
-  //   *  \param double* lambdaPtr : the pointer to the first element of the vector lambda
-  //   *  \param double* rPtr : the pointer to the first element of the vector r (in-out parameter)
-  //   */
-  //  void (*computeInputPtr)(double* xPtr, double* time, double* lambdaPtr, double* rPtr);
+  /** class for manage plugin (open, close librairy...) */
+  SiconosSharedLibrary cShared;
+
+  /* contains the name of the plugin used for computeInput */
+  string computeInputName;
+  /* contains the name of the plugin used for computeOutput */
+  string computeOutputName;
+
+  /** \fn void (*computeOutputPtr)(double* xPtr, double* time, double* lambdaPtr, double* yPtr)
+   *  \brief computes y
+   *  \param double* xPtr : the pointer to the first element of the vector x
+   *  \param double* time : the current time
+   *  \param double* lambdaPtr : the pointer to the first element of the vector lambda
+   *  \param double* yPtr : the pointer to the first element of the vector y (in-out parameter)
+   */
+  void (*computeOutputPtr)(double* xPtr, double* time, double* lambdaPtr, double* yPtr);
+
+  /** \fn void (*computeInputPtr)(double* xPtr, double* time, double* lambdaPtr, double* rPtr)
+   *  \brief computes r
+   *  \param double* xPtr : the pointer to the first element of the vector x
+   *  \param double* time : the current time
+   *  \param double* lambdaPtr : the pointer to the first element of the vector lambda
+   *  \param double* rPtr : the pointer to the first element of the vector r (in-out parameter)
+   */
+  void (*computeInputPtr)(double* xPtr, double* time, double* lambdaPtr, double* rPtr);
 
   /** \fn void init()
    *  \brief initialise value of a Relation

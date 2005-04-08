@@ -15,12 +15,7 @@
 	</Time>
 
 	<NSDS>
-<!--	<NSDS bvp='true'>  -->
-	
-		<!-- DSs defined in the problem -->
 		<DS_Definition>
-		
-
 			<LagrangianDS number='1'>
 				<Id> toto </Id>
 		<!--		<n> 6 </n>  -->
@@ -187,10 +182,7 @@
 				
 				<u vectorFile='vector.dat'/>								
 				<f vectorPlugin="BasicPlugin:computeF"/>
-				
-			</LinearSystemDS>		
-
-			
+			</LinearSystemDS>
 		</DS_Definition>
 
 		<DSInputOutput_Definition>
@@ -198,20 +190,33 @@
 				<DS_Concerned all='false'>
 					<DS number='3'/>
 				</DS_Concerned>
-				<H matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</H>
+				<A matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</A>
+				<B matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</B>
 			</LinearDSIO>
+			
 			<NonLinearDSIO number="2">
 				<DS_Concerned all='false'>
 					<DS number='3'/>
 				</DS_Concerned>
-				<H matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</H>
+				<computeInput plugin="BasicPlugin:computeInput"/>
+				<computeOutput plugin="BasicPlugin:computeOutput"/>
 			</NonLinearDSIO>
+			
 			<LagrangianDSIO number="3">
 				<DS_Concerned all='false'>
 					<DS number='3'/>
 				</DS_Concerned>
-				<H matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</H>
+				<computeInput plugin="BasicPlugin:computeInput"/>
+				<computeOutput plugin="BasicPlugin:computeOutput"/>
 			</LagrangianDSIO>
+			
+			<LagrangianLinearDSIO number="4">
+				<DS_Concerned all='false'>
+					<DS number='3'/>
+				</DS_Concerned>
+				<H matrixRowSize='1' matrixColSize='1'>	<row>1.0 </row>	</H>
+				<b vectorFile='./sample/vector.dat'/>
+			</LagrangianLinearDSIO>
 		</DSInputOutput_Definition>
 		
 		<EqualityConstraint_Definition>

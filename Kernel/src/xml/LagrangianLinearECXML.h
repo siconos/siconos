@@ -28,8 +28,8 @@
 using namespace std;
 
 
-const string LLR_H = "H";
-const string LLR_B = "b";
+const string LLEC_H = "H";
+const string LLEC_B = "b";
 //#include "XMLTagsName.h"
 
 

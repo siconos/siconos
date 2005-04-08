@@ -6,6 +6,7 @@
 
 #include "LinearDSIO.h"
 #include "LagrangianDSIO.h"
+#include "LagrangianLinearDSIO.h"
 
 
 DynamicalSystem::DynamicalSystem()
@@ -232,31 +233,38 @@ void DynamicalSystem::linkDSXML()
   }
   else this->BC = NULL;
 
+  DSInputOutput *dsio;
   vector<int> nbDSIOtab = this->dsxml->getDSInputOutputNumbers();
+  //cout<<"DS == "<<this->DSType<<" || size of DSIputOutput == "<<nbDSIOtab.size()<<endl;
   for (int i = 0; i < nbDSIOtab.size(); i++)
   {
-    DSInputOutput *dsio;
+    cout << "DynamicalSystem => linkDS, DSIputOutputNumbers == " << nbDSIOtab[i] << endl;
     if (this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LINEAR_DSIO_TAG)
     {
       dsio = new LinearDSIO();
       this->dsioVector.push_back(dsio);
       static_cast<LinearDSIO*>(dsio)->createDSInputOutput(this->dsxml->getDSInputOutputXML(nbDSIOtab[i]));
     }
-
     else if (this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == NON_LINEAR_DSIO_TAG)
     {
       dsio = new DSInputOutput();
       this->dsioVector.push_back(dsio);
       static_cast<DSInputOutput*>(dsio)->createDSInputOutput(this->dsxml->getDSInputOutputXML(nbDSIOtab[i]));
     }
-
     else if (this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LAGRANGIAN_DSIO_TAG)
     {
       dsio = new LagrangianDSIO();
       this->dsioVector.push_back(dsio);
       static_cast<LagrangianDSIO*>(dsio)->createDSInputOutput(this->dsxml->getDSInputOutputXML(nbDSIOtab[i]));
     }
+    else if (this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LAGRANGIAN_LINEAR_DSIO_TAG)
+    {
+      dsio = new LagrangianDSIO();
+      this->dsioVector.push_back(dsio);
+      static_cast<LagrangianLinearDSIO*>(dsio)->createDSInputOutput(this->dsxml->getDSInputOutputXML(nbDSIOtab[i]));
+    }
     else RuntimeException::selfThrow("DynamicalSystem::linkDSXML - bad kind of BoundaryCondition : " + this->dsxml->getBoundaryConditionXML()->getType());
+    cout << ">>>>> DSIO created !" << endl;
   }
   OUT("DynamicalSystem::linkDSXML\n");
 }

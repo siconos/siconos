@@ -1,4 +1,3 @@
-
 #include "LinearDSIO.h"
 #include "check.h"
 
@@ -16,14 +15,37 @@ LinearDSIO::~LinearDSIO()
 {}
 
 
-//void LinearDSIO::fillDSInputOutputWithDSInputOutputXML()
-//{}
-//
-//void LinearDSIO::saveDSInputOutputToXML()
-//{}
+void LinearDSIO::fillDSInputOutputWithDSInputOutputXML()
+{
+  cout << "LinearDSIO::fillDSInputOutputWithDSInputOutputXML" << endl;
+  cout << "this->dsioxml == " << this->dsioxml << endl;
+  if (this->dsioxml != NULL)
+  {
+    this->number = this->dsioxml->getNumber();
+    cout << "." << endl;
+    this->A = static_cast<LinearDSIOXML*>(this->dsioxml)->getA();
+    cout << ".." << endl;
+    this->B = static_cast<LinearDSIOXML*>(this->dsioxml)->getB();
+    cout << "..." << endl;
+  }
+  else RuntimeException::selfThrow("DSInputOutput::fillDSInputOutputWithDSInputOutputXML - object DSInputOutputXML does not exist");
+}
+
+void LinearDSIO::saveDSInputOutputToXML()
+{
+  if (this->dsioxml != NULL)
+  {
+    /*
+     * these attributes are only required for LagrangianNonLinear DSInputOutput !
+     */
+    static_cast<LinearDSIOXML*>(this->dsioxml)->setA(&(this->A));
+    static_cast<LinearDSIOXML*>(this->dsioxml)->setB(&(this->B));
+  }
+  else RuntimeException::selfThrow("DSInputOutput::saveDSInputOutputToXML - object DSInputOutputXML does not exist");
+}
 
 void LinearDSIO::createDSInputOutput(DSInputOutputXML * dsioXML, int number,
-                                     SiconosMatrix *H)
+                                     SiconosMatrix *A, SiconosMatrix *B)
 {
   if (dsioXML != NULL)
   {
@@ -37,12 +59,8 @@ void LinearDSIO::createDSInputOutput(DSInputOutputXML * dsioXML, int number,
     //this->dsioxml = dsioXML;
     this->dsioType = LINEARDSIO;
     this->number = number;
-    this->H = *H;
-    // computeInput
-    //    this->setComputeInputFunction(this->cShared.getPluginName( computeInput ), this->cShared.getPluginFunctionName( computeInput ));
-    //
-    //    // computeOutput
-    //    this->setComputeOutputFunction(this->cShared.getPluginName( computeOutput ), this->cShared.getPluginFunctionName( computeOutput ));
+    this->A = *A;
+    this->B = *B;
   }
 }
 

@@ -30,6 +30,7 @@ extern "C" void essai_model()
 
   Model m2;
   m2.createModel("sample/xml_test.xml");
+  OUT("-----------end createModel--------------\n");
   //m2.createModel("/home0/barbier/siconos/SICONOS/src/model/test/xml_schemaAttributeA.xml");
   m2.checkModelCoherency();
 
@@ -360,7 +361,7 @@ extern "C" void essai_model_XML(char  xmlFile[])
     sm_(1, 1) = 1.0;
     DSInputOutput *dsio_;
     dsio_ = new LagrangianDSIO();
-    static_cast<LagrangianDSIO*>(dsio_)->createDSInputOutput(NULL, 1, &sm_);
+    static_cast<LagrangianDSIO*>(dsio_)->createDSInputOutput(NULL, 1);//, &sm_);
     ds3->addDSInputOutput(dsio_);
 
 
@@ -377,7 +378,7 @@ extern "C" void essai_model_XML(char  xmlFile[])
 
     DSInputOutput *dsio;
     dsio = new DSInputOutput();
-    dsio->createDSInputOutput(NULL, 2, &sm);
+    dsio->createDSInputOutput(NULL, 2);//, &sm);
     ds4->addDSInputOutput(dsio);
 
     vector<DSInputOutput*> dsioVec(2);

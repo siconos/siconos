@@ -13,6 +13,16 @@ using namespace std;
 const string LLDSIO_H = "H";
 const string LLDSIO_B = "b";
 
+/** \class LagrangianLinearDSIOXML
+*   \brief This class manages LagrangianLinear DSInputOutput data
+*   \author SICONOS Development Team - copyright INRIA
+*   \version 1.0
+*   \date 05/25/2004
+*
+*
+*
+* LagrangianLinearDSIOXML allows to manage data of a LagrangianLinearDSIO DOM tree.
+*/
 class LagrangianLinearDSIOXML : public DSInputOutputXML
 {
 public:

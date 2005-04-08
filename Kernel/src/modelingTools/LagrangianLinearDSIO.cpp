@@ -260,8 +260,6 @@ void LagrangianLinearDSIO::saveDSInputOutputToXML()
   {
     (static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->setH(&(this->H));
     (static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->setB(&(this->b));
-
-    //    this->display();
   }
   else RuntimeException::selfThrow("LagrangianLinearDSIO::saveDSInputOutputToXML - object DSInputOutputXML does not exist");
   OUT("LagrangianLinearDSIO::saveDSInputOutputToXML\n");

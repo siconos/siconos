@@ -22,6 +22,8 @@ double  DefaultAlgoTolerance = -1.0;
 int   DefaultAlgoMaxIter = -1;
 double  DefaultAlgoSearchDirection = -1.0;
 
+string DefaultComputeInput = "BasicPlugin:computeInput";
+string DefaultComputeOutput = "BasicPlugin:computeOutput";
 
 //#else
 //

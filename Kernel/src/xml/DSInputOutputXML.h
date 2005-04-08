@@ -18,14 +18,9 @@
 #include <libxml/tree.h>
 #include "SiconosDOMTreeTools.h"
 #include "DSInputOutput.h"
-
 #include "XMLTagsName.h"
 
-
 using namespace std;
-
-const string DSINPUTOUTPUT_H = "H";
-//const string DSINPUTOUTPUT_DS_CONCERNED = "DS_Concerned";
 
 
 class DSInputOutput;
@@ -44,96 +39,96 @@ public:
   DSInputOutputXML(xmlNode*/*, vector<int>*/);
   ~DSInputOutputXML();
 
-  //    /** \fn inline string getComputeInputPlugin()
-  //    *   \brief Return the computeInput Plugin name of the DSInputOutputXML
-  //    *   \return The computeInput Plugin name of the DSInputOutputXML
-  //    *  \exception XMLException
-  //    */
-  //    inline string getComputeInputPlugin()
-  //    {
-  //      if (this->isComputeInputPlugin())
-  //        return  SiconosDOMTreeTools::getStringAttributeValue(this->computeInputNode, PLUGIN_ATTRIBUTE);
-  //      XMLException::selfThrow("DSInputOutputXML - getComputeInputPlugin : computeInput is not calculated from a plugin ; Fint vector is given");
-  //    }
-  //
-  //    /** \fn inline string getComputeOutputPlugin()
-  //    *   \brief Return the computeOutput Plugin name of the DSInputOutputXML
-  //    *   \return The computeOutput Plugin name of the DSInputOutputXML
-  //    *  \exception XMLException
-  //    */
-  //    inline string getComputeOutputPlugin()
-  //    {
-  //      if (this->isComputeOutputPlugin())
-  //        return  SiconosDOMTreeTools::getStringAttributeValue(this->computeOutputNode, PLUGIN_ATTRIBUTE);
-  //      XMLException::selfThrow("DSInputOutputXML - getComputeOutputPlugin : computeOutput is not calculated from a plugin ; Fint vector is given");
-  //    }
-  //
-  //    /** \fn void setComputeInputPlugin(string plugin)
-  //    *   \brief sets the computeInput Plugin name of the DSInputOutputXML
-  //    *   \param string :  The computeInput Plugin name of the DSInputOutputXML
-  //    *  \exception XMLException
-  //    */
-  //    inline void setComputeInputPlugin(string plugin)
-  //    {
-  //      if( this->computeInputNode == NULL )
-  //      {
-  //        this->computeInputNode = SiconosDOMTreeTools::createSingleNode(this->rootDSIOXMLNode, COMPUTE_INPUT_TAG);
-  //        xmlNewProp(this->computeInputNode, (xmlChar*)(PLUGIN_ATTRIBUTE.c_str()), (xmlChar*)plugin.c_str() );
-  //      }
-  //      else SiconosDOMTreeTools::setStringAttributeValue(this->computeInputNode, PLUGIN_ATTRIBUTE, plugin);
-  //    }
-  //
-  //    /** \fn void setComputeOutputPlugin(string plugin)
-  //    *   \brief sets the computeOutput Plugin name of the DSInputOutputXML
-  //    *   \param string :  The computeOutput Plugin name of the DSInputOutputXML
-  //    *  \exception XMLException
-  //    */
-  //    inline void setComputeOutputPlugin(string plugin)
-  //    {
-  //      if( this->computeOutputNode == NULL )
-  //      {
-  //        this->computeOutputNode = SiconosDOMTreeTools::createSingleNode(this->rootDSIOXMLNode, COMPUTE_OUTPUT_TAG);
-  //        xmlNewProp(this->computeOutputNode, (xmlChar*)(PLUGIN_ATTRIBUTE.c_str()), (xmlChar*)plugin.c_str() );
-  //      }
-  //      else SiconosDOMTreeTools::setStringAttributeValue(this->computeOutputNode, PLUGIN_ATTRIBUTE, plugin);
-  //    }
-  //
-  //    /** \fn bool isComputeInputPlugin()
-  //    *   \brief Return true if computeInput is calculated from a plugin
-  //    *   \return True if computeInput is calculated from plugin
-  //    */
-  //    inline bool isComputeInputPlugin()
-  //    {
-  //      return xmlHasProp((xmlNodePtr)computeInputNode,(xmlChar *) PLUGIN_ATTRIBUTE.c_str());
-  //    }
-  //
-  //    /** \fn bool isComputeOutputPlugin()
-  //    *   \brief Return true if computeOutput is calculated from a plugin
-  //    *   \return True if computOutput is calculated from plugin
-  //    */
-  //    inline bool isComputeOutputPlugin()
-  //    {
-  //      return xmlHasProp((xmlNodePtr)computeOutputNode,(xmlChar *) PLUGIN_ATTRIBUTE.c_str());
-  //    }
-  //
-  //
-  //    /** \fn bool hasComputeInput()
-  //     *  \brief return true if computeInputNode is defined
-  //     *  \return true if computeInputNode is defined
-  //     */
-  //    inline bool hasComputeInput()
-  //    {
-  //      return (this->computeInputNode!=NULL);
-  //    }
-  //
-  //    /** \fn bool hasComputeOutput()
-  //     *  \brief return true if computeOutputNode is defined
-  //     *  \return true if computeOutputNode is defined
-  //     */
-  //    inline bool hasComputeOutput()
-  //    {
-  //      return (this->computeOutputNode!=NULL);
-  //    }
+  /** \fn inline string getComputeInputPlugin()
+  *   \brief Return the computeInput Plugin name of the DSInputOutputXML
+  *   \return The computeInput Plugin name of the DSInputOutputXML
+  *  \exception XMLException
+  */
+  inline string getComputeInputPlugin()
+  {
+    if (this->isComputeInputPlugin())
+      return  SiconosDOMTreeTools::getStringAttributeValue(this->computeInputNode, PLUGIN_ATTRIBUTE);
+    XMLException::selfThrow("DSInputOutputXML - getComputeInputPlugin : computeInput is not calculated from a plugin ; Fint vector is given");
+  }
+
+  /** \fn inline string getComputeOutputPlugin()
+  *   \brief Return the computeOutput Plugin name of the DSInputOutputXML
+  *   \return The computeOutput Plugin name of the DSInputOutputXML
+  *  \exception XMLException
+  */
+  inline string getComputeOutputPlugin()
+  {
+    if (this->isComputeOutputPlugin())
+      return  SiconosDOMTreeTools::getStringAttributeValue(this->computeOutputNode, PLUGIN_ATTRIBUTE);
+    XMLException::selfThrow("DSInputOutputXML - getComputeOutputPlugin : computeOutput is not calculated from a plugin ; Fint vector is given");
+  }
+
+  /** \fn void setComputeInputPlugin(string plugin)
+  *   \brief sets the computeInput Plugin name of the DSInputOutputXML
+  *   \param string :  The computeInput Plugin name of the DSInputOutputXML
+  *  \exception XMLException
+  */
+  inline void setComputeInputPlugin(string plugin)
+  {
+    if (this->computeInputNode == NULL)
+    {
+      this->computeInputNode = SiconosDOMTreeTools::createSingleNode(this->rootDSIOXMLNode, COMPUTE_INPUT_TAG);
+      xmlNewProp(this->computeInputNode, (xmlChar*)(PLUGIN_ATTRIBUTE.c_str()), (xmlChar*)plugin.c_str());
+    }
+    else SiconosDOMTreeTools::setStringAttributeValue(this->computeInputNode, PLUGIN_ATTRIBUTE, plugin);
+  }
+
+  /** \fn void setComputeOutputPlugin(string plugin)
+  *   \brief sets the computeOutput Plugin name of the DSInputOutputXML
+  *   \param string :  The computeOutput Plugin name of the DSInputOutputXML
+  *  \exception XMLException
+  */
+  inline void setComputeOutputPlugin(string plugin)
+  {
+    if (this->computeOutputNode == NULL)
+    {
+      this->computeOutputNode = SiconosDOMTreeTools::createSingleNode(this->rootDSIOXMLNode, COMPUTE_OUTPUT_TAG);
+      xmlNewProp(this->computeOutputNode, (xmlChar*)(PLUGIN_ATTRIBUTE.c_str()), (xmlChar*)plugin.c_str());
+    }
+    else SiconosDOMTreeTools::setStringAttributeValue(this->computeOutputNode, PLUGIN_ATTRIBUTE, plugin);
+  }
+
+  /** \fn bool isComputeInputPlugin()
+  *   \brief Return true if computeInput is calculated from a plugin
+  *   \return True if computeInput is calculated from plugin
+  */
+  inline bool isComputeInputPlugin()
+  {
+    return xmlHasProp((xmlNodePtr)computeInputNode, (xmlChar *) PLUGIN_ATTRIBUTE.c_str());
+  }
+
+  /** \fn bool isComputeOutputPlugin()
+  *   \brief Return true if computeOutput is calculated from a plugin
+  *   \return True if computOutput is calculated from plugin
+  */
+  inline bool isComputeOutputPlugin()
+  {
+    return xmlHasProp((xmlNodePtr)computeOutputNode, (xmlChar *) PLUGIN_ATTRIBUTE.c_str());
+  }
+
+
+  /** \fn bool hasComputeInput()
+   *  \brief return true if computeInputNode is defined
+   *  \return true if computeInputNode is defined
+   */
+  inline bool hasComputeInput()
+  {
+    return (this->computeInputNode != NULL);
+  }
+
+  /** \fn bool hasComputeOutput()
+   *  \brief return true if computeOutputNode is defined
+   *  \return true if computeOutputNode is defined
+   */
+  inline bool hasComputeOutput()
+  {
+    return (this->computeOutputNode != NULL);
+  }
 
 
   /** \fn int getNumber()
@@ -165,27 +160,27 @@ public:
   }
 
 
-  /** \fn SiconosMatrix getH()
-  *   \brief Return H matrix of the DSInputOutputXML
-  *   \return SiconosMatrix : the H matrix of the DSInputOutputXML
-  */
-  inline SiconosMatrix getH()
-  {
-    return SiconosDOMTreeTools::getSiconosMatrixValue(this->HNode);
-  }
-
-  /** \fn void setH(SiconosMatrix *H)
-  *   \brief allows to save the H matrix of the DSInputOutputXML
-  *   \param SiconosMatrix* : the H to save
-  */
-  inline void setH(SiconosMatrix *H)
-  {
-    if (this->HNode == NULL)
-    {
-      this->HNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSIOXMLNode, DSINPUTOUTPUT_H, H);
-    }
-    else SiconosDOMTreeTools::setSiconosMatrixValue(this->HNode, H);
-  }
+  //    /** \fn SiconosMatrix getH()
+  //    *   \brief Return H matrix of the DSInputOutputXML
+  //    *   \return SiconosMatrix : the H matrix of the DSInputOutputXML
+  //    */
+  //    inline SiconosMatrix getH()
+  //    {
+  //      return SiconosDOMTreeTools::getSiconosMatrixValue(this->HNode);
+  //    }
+  //
+  //    /** \fn void setH(SiconosMatrix *H)
+  //    *   \brief allows to save the H matrix of the DSInputOutputXML
+  //    *   \param SiconosMatrix* : the H to save
+  //    */
+  //    inline void setH(SiconosMatrix *H)
+  //    {
+  //      if( this->HNode == NULL )
+  //      {
+  //        this->HNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSIOXMLNode, DSINPUTOUTPUT_H, H);
+  //      }
+  //      else SiconosDOMTreeTools::setSiconosMatrixValue(this->HNode, H);
+  //    }
 
   /** \fn void updateDSInputOutputXML( xmlNode* node, DSInputOutput* dsio );
   *   \brief makes the operations to create the DSInputOutput of the DynamicalSystem
@@ -213,10 +208,10 @@ public:
 protected:
   xmlNode * rootDSIOXMLNode;
 
-  xmlNode * HNode;
+  //    xmlNode * HNode;
   xmlNode * dsConcernedNode;
-  //    xmlNode * computeInputNode;
-  //    xmlNode * computeOutputNode;
+  xmlNode * computeInputNode;
+  xmlNode * computeOutputNode;
 
   /* vector of DS numbers*/
   vector<int> definedDSNumbers;

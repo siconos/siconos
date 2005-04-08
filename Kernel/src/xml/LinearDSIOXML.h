@@ -27,10 +27,8 @@
 using namespace std;
 
 
-const string LINEARDSIO_C = "C";
-const string LINEARDSIO_D = "D";
-const string LINEARDSIO_E = "E";
-const string LINEARDSIO_A = "a";
+const string LINEARDSIO_A = "A";
+const string LINEARDSIO_B = "B";
 
 
 class LinearDSIOXML : public DSInputOutputXML
@@ -46,24 +44,26 @@ public:
   LinearDSIOXML(xmlNode * dsioNode/*, vector<int> definedDSNumbers */);
   ~LinearDSIOXML();
 
-  //    /** \fn SiconosMatrix getC()
-  //    *   \brief Return the C of the LinearDSIOXML
-  //    *   \return The C SiconosMatrix of the LinearDSIOXML
-  //    */
-  //    inline SiconosMatrix getC()
-  //    {
-  //      return SiconosDOMTreeTools::getSiconosMatrixValue(this->CNode);
-  //    }
-  //
-  //    /** \fn SiconosMatrix getD()
-  //    *   \brief Return the D of the LinearDSIOXML
-  //    *   \return The D SiconosMatrix of the LinearDSIOXML
-  //    */
-  //    inline SiconosMatrix getD()
-  //    {
-  //      return SiconosDOMTreeTools::getSiconosMatrixValue(this->DNode);
-  //    }
-  //
+  /** \fn SiconosMatrix getA()
+  *   \brief Return the A of the LinearDSIOXML
+  *   \return The A SiconosMatrix of the LinearDSIOXML
+  */
+  inline SiconosMatrix getA()
+  {
+    cout << "LinearDSIO::getA - ANode == " << this->ANode << endl;
+    if (this->ANode == NULL) cout << "LinearDSIO::getA - ERROR !!! ANode == NULL" << endl;
+    return SiconosDOMTreeTools::getSiconosMatrixValue(this->ANode);
+  }
+
+  /** \fn SiconosMatrix getB()
+  *   \brief Return the B of the LinearDSIOXML
+  *   \return The B SiconosMatrix of the LinearDSIOXML
+  */
+  inline SiconosMatrix getB()
+  {
+    return SiconosDOMTreeTools::getSiconosMatrixValue(this->BNode);
+  }
+
   //    /** \fn SiconosMatrix getE()
   //    *   \brief Return the E of the LinearDSIOXML
   //    *   \return The E SiconosMatrix of the LinearDSIOXML
@@ -93,25 +93,25 @@ public:
   //    *   \param SiconosMatrix matrix : the new value for D matrix
   //    */
   //    void setD(SiconosMatrix *matrix);
-  //
-  //
-  //    /** \fn void setE(SiconosMatrix *matrix)
-  //    *   \brief Change the E matrix values (in xml file or external data file switch his origin position)
-  //    *   \param SiconosMatrix matrix : the new value for E matrix
-  //    */
-  //    void setE(SiconosMatrix *matrix);
-  //
-  //    /** \fn void setA(SiconosVector *vector)
-  //    *   \brief Change the a Vector values (in xml file or external data file switch his origin position)
-  //    *   \param SiconosVector *vector : new value of a
-  //    */
-  //    void setA(SiconosVector *vector);
+
+
+  /** \fn void setA(SiconosMatrix *matrix)
+  *   \brief Change the A matrix values (in xml file or external data file switch his origin position)
+  *   \param SiconosMatrix matrix : the new value for A matrix
+  */
+  void setA(SiconosMatrix *matrix);
+
+  /** \fn void setB(SiconosMatrix *matrix)
+  *   \brief Change the B matrix values (in xml file or external data file switch his origin position)
+  *   \param SiconosMatrix matrix : the new value for B matrix
+  */
+  void setB(SiconosMatrix *matrix);
 
 
 private:
   //Nodes
-  //    xmlNode * CNode;
-  //    xmlNode * DNode;
+  xmlNode * ANode;
+  xmlNode * BNode;
   //    xmlNode * ENode;
   //    xmlNode * aNode;
 };

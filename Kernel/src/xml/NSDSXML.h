@@ -25,7 +25,7 @@
 #include "DSXML.h"
 #include "InteractionXML.h"
 #include "EqualityConstraintXML.h"
-//#include "DSInputOutputXML.h"
+#include "DSInputOutputXML.h"
 #include "SiconosDOMTreeTools.h"
 
 #include "XMLTagsName.h"
@@ -39,6 +39,7 @@ class SiconosModelXML;
 class DSXML;
 class InteractionXML;
 class EqualityConstraintXML;
+class DSInputOutputXML;
 
 
 const string NSDS_BVP = "bvp";
@@ -176,6 +177,12 @@ private:
   /* Map of EqualityConstraints */
   map<int, EqualityConstraintXML*> equalityConstraintXMLMap;
 
+  /* Map of DSInputOutputs */
+  map<int, DSInputOutputXML*> dsInputOutputXMLMap;
+
+
+  /* vector of DSInputOutput numbers*/
+  vector<int> definedDSInputOutputNumbers;
 
   /* vector of DS numbers*/
   vector<int> definedDSNumbers;
@@ -213,6 +220,19 @@ private:
   *   \exception XMLException : if a number relating to an EqualityConstraint declares in the NSDS is already used
   */
   void loadEqualityConstraintXML(xmlNode * rootECNode);
+
+  /** \fn void loadDSInputOutputXML(xmlNode * )
+  *   \brief Builds DSInputOutputXML objects from a DOM tree describing DSInputOutputs
+  *   \param xmlNode* : the DSInputOutputs DOM tree
+  *   \exception XMLException : if a number relating to an DSInputOutput declares in the NSDS is already used
+  */
+  void loadDSInputOutputXML(xmlNode * rootdsioNode);
+
+  /** \fn map<int, DSInputOutputXML*> getDSInputOutputXMLRelatingToDS( int number )
+  *   \brief selects the DSInputOutputXML objects relating to a specific DynamicalSystem
+  *   \param map<int, DSInputOutputXML*> : the map containing the DSInputOutputXML for a specific DynamicalSystem
+  */
+  map<int, DSInputOutputXML*> getDSInputOutputXMLRelatingToDS(int number);
 
 };
 
