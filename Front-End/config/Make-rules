@@ -5,6 +5,4 @@
 SICONOS_INSTALLED_LIBS_PATH = $(SICONOSPATH)/lib
 SICONOS_INSTALLED_INCLUDES = $(SICONOSPATH)/include
 
-SICONOS_INSTALLED_LIBS = -L$(SICONOS_INSTALLED_LIBS_PATH) -lSiconosException -lSiconosSharedLibrary -lSiconosAlgebra -lSiconosMemory \
-	-lSiconosXml -lModelingTools -lSimulationTools -lModel
-
+SICONOS_INSTALLED_LIBS = -L$(SICONOS_INSTALLED_LIBS_PATH) $(SICONOS_LIBS)
