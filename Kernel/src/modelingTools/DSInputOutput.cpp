@@ -107,7 +107,6 @@ void DSInputOutput::saveDSInputOutputToXML()
      */
     this->dsioxml->setComputeInputPlugin(this->computeInputName);
     this->dsioxml->setComputeOutputPlugin(this->computeOutputName);
-    //this->dsioxml->setH( &(this->H) );
   }
   else RuntimeException::selfThrow("DSInputOutput::saveDSInputOutputToXML - object DSInputOutputXML does not exist");
   OUT("DSInputOutput::saveDSInputOutputToXML\n");

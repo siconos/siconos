@@ -409,16 +409,13 @@ void DSXML::loadDS(DynamicalSystem* ds)
 
 DSInputOutputXML* DSXML::getDSInputOutputXML(int number)
 {
-  cout << "~~DSXML::getDSInputOutputXML~~" << endl;
   map<int, DSInputOutputXML*>::iterator it;
 
   it = this->dsInputOutputXMLMap.find(number);
   if (it == this->dsInputOutputXMLMap.end())
   {
-    cout << "DSXML::getDSInputOutputXML - Error : the DSInputOutputXML number " << number << " does not exist!" << endl;
     return NULL;
   }
-  cout << "~~DSXML::getDSInputOutputXML~~ returns == " << this->dsInputOutputXMLMap[number]->getType() << endl;
   return this->dsInputOutputXMLMap[number];
 }
 

@@ -50,8 +50,6 @@ public:
   */
   inline SiconosMatrix getA()
   {
-    cout << "LinearDSIO::getA - ANode == " << this->ANode << endl;
-    if (this->ANode == NULL) cout << "LinearDSIO::getA - ERROR !!! ANode == NULL" << endl;
     return SiconosDOMTreeTools::getSiconosMatrixValue(this->ANode);
   }
 

@@ -264,7 +264,6 @@ void DynamicalSystem::linkDSXML()
       static_cast<LagrangianLinearDSIO*>(dsio)->createDSInputOutput(this->dsxml->getDSInputOutputXML(nbDSIOtab[i]));
     }
     else RuntimeException::selfThrow("DynamicalSystem::linkDSXML - bad kind of BoundaryCondition : " + this->dsxml->getBoundaryConditionXML()->getType());
-    cout << ">>>>> DSIO created !" << endl;
   }
   OUT("DynamicalSystem::linkDSXML\n");
 }

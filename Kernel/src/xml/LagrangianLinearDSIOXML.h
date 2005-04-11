@@ -45,6 +45,7 @@ public:
   */
   inline SiconosMatrix getH()
   {
+    cout << "@@@@@@@@@@@@@@@@@ LagrangianLinearDSIOXML.h => SiconosMatrix getH()" << endl;
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->HNode);
   }
 

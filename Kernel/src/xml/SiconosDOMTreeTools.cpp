@@ -80,7 +80,8 @@ SiconosMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNode * siconos
   }
   else
   {
-    cout << "getSiconosMatrixValue - siconosMatrixNode == NULL, node not found in the DOM tree, perhaps this attribute is only optional" << endl;
+    //XMLException::selfThrow("SiconosDOMTreeTools - getSiconosMatrixValue : siconosMatrixNode == NULL");
+    cout << "WARNING !  getSiconosMatrixValue - siconosMatrixNode == NULL, node not found in the DOM tree, perhaps this attribute is only optional" << endl;
     SiconosMatrix m;
     return  m;
   }

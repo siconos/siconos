@@ -17,16 +17,11 @@ LinearDSIO::~LinearDSIO()
 
 void LinearDSIO::fillDSInputOutputWithDSInputOutputXML()
 {
-  cout << "LinearDSIO::fillDSInputOutputWithDSInputOutputXML" << endl;
-  cout << "this->dsioxml == " << this->dsioxml << endl;
   if (this->dsioxml != NULL)
   {
     this->number = this->dsioxml->getNumber();
-    cout << "." << endl;
     this->A = static_cast<LinearDSIOXML*>(this->dsioxml)->getA();
-    cout << ".." << endl;
     this->B = static_cast<LinearDSIOXML*>(this->dsioxml)->getB();
-    cout << "..." << endl;
   }
   else RuntimeException::selfThrow("DSInputOutput::fillDSInputOutputWithDSInputOutputXML - object DSInputOutputXML does not exist");
 }

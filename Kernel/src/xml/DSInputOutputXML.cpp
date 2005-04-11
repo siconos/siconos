@@ -28,6 +28,11 @@ DSInputOutputXML::DSInputOutputXML(xmlNode *dsioNode/*, vector<int> definedDSNum
     else
       XMLException::selfThrow("DSInputOutputXML - DSInputOutputXML(xmlNode *dsioNode) error : tag " + COMPUTE_OUTPUT_TAG + " not found.");
   }
+  else
+  {
+    this->computeInputNode = NULL;
+    this->computeOutputNode = NULL;
+  }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSIOXMLNode, DS_CONCERNED)) != NULL)
   {

@@ -136,7 +136,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem()
 
 void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
 {
-  IN("NSDSXML::loadNSDS( NonSmoothDynamicalSystem* nsds )\n");
+  IN("NSDSXML::loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* nsds )\n");
   string type;
   string tmp;
   xmlNode* node, *ecDsioNode;
@@ -409,8 +409,8 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
       }
     }
   }
-  else XMLException::selfThrow("NSDSXML - loadNSDS( NSDS* nsds ) Error : no NSDSNode is defined.");
-  OUT("NSDSXML::loadNSDS( NonSmoothDynamicalSystem* nsds )\n");
+  else XMLException::selfThrow("NSDSXML - loadNonSmoothDynamicalSystem( NSDS* nsds ) Error : no NSDSNode is defined.");
+  OUT("NSDSXML::loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* nsds )\n");
 }
 
 
@@ -494,11 +494,11 @@ map<int, DSInputOutputXML*> NSDSXML::getDSInputOutputXMLRelatingToDS(int number)
     v = (*iter).second->getDSConcerned();
     for (i = 0; i < v.size(); i++)
     {
-      cout << "** NSDSXML::getDSInputOutputXMLRelatingToDS v[" << i << "] == " << v[i] << endl;
+      //      cout<<"** NSDSXML::getDSInputOutputXMLRelatingToDS v["<<i<<"] == "<<v[i]<<endl;
       if (v[i] == number)
       {
         m[(*iter).first] = (*iter).second;
-        cout << "** NSDSXML::getDSInputOutputXMLRelatingToDS ==> " << (*iter).first << " - " << (*iter).second->getType() << endl;
+        //        cout<<"** NSDSXML::getDSInputOutputXMLRelatingToDS ==> "<<(*iter).first<<" - "<<(*iter).second->getType()<<endl;
       }
     }
   }
@@ -616,10 +616,6 @@ void NSDSXML::loadDSInputOutputXML(xmlNode * rootdsioNode)
       }
       else
         XMLException::selfThrow("NSDSXML - loadDSInputOutputXML error : wrong DSInputOutput number : already exists.");
-
-      this->definedDSInputOutputNumbers.push_back(number);
-      dsioxml = new DSInputOutputXML((xmlNode *)node/*, this->definedDSNumbers*/);
-      this->dsInputOutputXMLMap[number] = dsioxml;
     }
     else
     {

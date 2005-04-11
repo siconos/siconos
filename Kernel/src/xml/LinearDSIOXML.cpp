@@ -2,11 +2,13 @@
 #include "LinearDSIOXML.h"
 
 LinearDSIOXML::LinearDSIOXML(): DSInputOutputXML()
-{}
+{
+}
 
 LinearDSIOXML::LinearDSIOXML(xmlNode * dsioNode): DSInputOutputXML(dsioNode/*, definedDSNumbers */)
 {
   xmlNode *node;
+
   this->rootDSIOXMLNode = dsioNode;
   if ((node = SiconosDOMTreeTools::findNodeChild(dsioNode, LINEARDSIO_A)) != NULL)
     this->ANode = node;
