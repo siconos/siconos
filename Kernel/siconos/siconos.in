@@ -83,21 +83,22 @@ if "$clean" = "true"; then
 fi;
 
 
-sample="false"
+sample="false";
 # test if there are one argument. if not, exit
 if [ $# -gt 1 ]; then
     echo "$0 : Bad number of argument";
-    sample="true";
     exit 1;
 fi;
 	
 # test if command file exist. if not, exit
-if [ ! -f $1 ]; then
-    echo "$1 file not found.";
-    sample="false"
-    exit 1;
-else
-    sample="true"
+if [ $# -eq 1 ]; then
+    if [ ! -f $1 ]; then
+	echo "$1 file not found.";
+	sample="false"
+	exit 1;
+    else
+	sample="true"
+    fi;
 fi;
     
 
