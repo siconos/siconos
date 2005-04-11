@@ -1,107 +1,130 @@
+\section{Model Loading Strategy}
+\label{Sec:LoadingStrategy}
 
 
-There are two major ways  to perform the loading of a model, i.e., to provide  the platform with data :
-\begin{itemize}
-\item Loading a XML data file containing the complete model
-\item Creating a model through the various API in C++ or C \footnote{This mode of creation a model will be automatically extend to the user interfac in Ptyhon and in xxxlab} and possibly save it into a XML data file.  
-\end{itemize}
-It might also possible to adopt a mixed strategy to load a model. In all of this case, the question of the validity of a model is raised.
+\subsection{Model loading from an  XML data file}
 
-In this chapter, we describe the management of the input data and the
-creation of the Model with these information.
+The reading of the file generate a DOM tree in memory with all the data. After that,  the creation of the SiconosModelXML tree is  based on this DOM tree.  The SiconosModelXML belongs to the SiconosModel object, which is the main object of the platform. From the SiconosModel,  the creation process is launched to build  all of the model. From this point, the Model creates the NSDS, which one creates the dynamical systems, ... The building is "top down" and gradually, with the Model at the top of the platform. 
 
 
-Each object of the platform has a "create" method used in the two cases.
+
+
+
+\subsection{Creating and loading model through the API}
+
+It is also  possible to create the objects of the platform without a XML file by using the API of the platform. The methods given to the users allow the creation of each object of the platform thanks to the constructors of each objects.
+
+
+\subsection{Mixed strategies}
+
+
+\section{Definition of three major types of construtors for the Siconosmodel objects.}
+
+%% \subsection{The "create" methods}
+%% The "create" functions have for goal to initialize the relating object. They fill its fields with XML data and link the objects belonging to it to their corresponding XML object, or, if the platform is manually built, only fill its fields with the data given in paramaters.
+
+
+
+\subsection{Default Constructor {\tt Object::Object() } }
+
+The default constructor performs the following operations :
+\begin{verbatim}
+Object::Object()
+   {
+   this->type = type ;       // Type definition 
+   this->objectXML = NULL ;  // ObjectXML pointer
+
+   // Default Constructor (if any) and/or  initialization to default Values
+   //  of the other attributes
+
+   // Simple Type Attribute
+   attribute1 = DefaultvalueAttribute1();
+   ....
+   attributeN = DefaultvalueAttributeN();
+
+   //Object attributes : call  the default constructor of each attributes, 
+   // with new if needed
+   attributeObject1 = new AttributeObject1type();
+   ...
+   attributeObjectN = new AttributeObjectNtype();
+   }
+\end{verbatim} 
+
 \begin{ndr}
-  Really a good thing ?
+  \begin{enumerate}
+  \item Remove init() method !!!! This is the role of the Default constructor.
+  \item Do we need to use the new operator hwn size of the object are not defined 
+  \end{enumerate}
+
 \end{ndr}
 
-This first  part of chapter which explains  the model loadinr form the user poiut of view  must be reported in the \ac{sum}. 
+\subsection{Constructor from the mininal data {\small \tt Object::Object(AttributeType1 data1,...,AttributeTypeN dataN ) }}
 
-\section{Model Loading Strategy}
+This constructor performs  the contruction of a object through given a minimal set of data.  It is composed of the following operations :
 
-\subsection{Loading XML data file}
+\begin{verbatim}
+Object::object(AttributeType1 data1,...,AttributeTypeN dataN )
+   {
+   Object(); // Default constructor
 
-When a XML file bring the data needed by the platform, either all the data are given by the XML
-file or only required data. When the file contains partial data, that means it describe at least
-a SiconosModel with a NSDS (Non Smooth Dynamical System), composed of at least one Dynamical
-System.
+   // Loading of Simple type attributes
+   this->attribute1 = data1 ; //loading of the attributes
+   ....
+   this->attributeN = dataN ;
 
+   //Object attributes
 
-\subsubsection{XML file only}
+   // if data are present for this object call the specific constructor
+   attributeObject1 = new AttributeObject1type(data11, data 1N);
 
-The reading of the file generate a DOM tree in memory with all the data. Then the creation of the XML management "platform" based on
-the DOM tree is based on this tree.
-The XML platform belongs to the Model, which is the main object of the platform. That's from the
-Model that the creation process is launched to build the platform.
-From this point, the Model creates the NSDS, which one creates the dynamical systems, ... The
-building is "top down" and gradually, with the Model at the top of the platform. 
-\begin{figure}
-\begin{center}
-        \includegraphics[scale=0.75, clip]{figure/platform_loading_XML.ps}
-        \caption{Sequence diagram of the platform's loading with XML file}
-        \label{fig: platform's loading1}
-\end{center}
-\end{figure}
-The "create"methods used are partially shown in the diagram \ref{fig: platform's loading1}.
+   // if not, do we need to call the default constructor (new needed ?)
+   attributeObject1 = new AttributeObject1type();
+   // XML Management, node creation, and link downwards ? see NDR below
+   }
+\end{verbatim} 
 
-\subsubsection{Partial XML file}
-This means that the data read in the file are supplemented with information given in the command
-program.
-In this case, the XML file is similar to the previous case, then the way to create objects of
-the platform apart from a XML file will be detailed in the next section.
-
-\subsection{Creating model through the API}
-
-
-It is also  possible to create the objects of the platform without a XML file by using the API of the platform. The methods given to the users allow the creation of each object of the platform. The unfolding of the building of the platform's architecture is described in the next sequence diagram.
-\begin{figure}
-\begin{center}
-        \includegraphics[scale=0.75, clip]{figure/platform_loading.ps}
-        \caption{Sequence diagram of the platform's loading without XML file}
-        \label{fig: platform's loading2}
-\end{center}
-\end{figure}
-
-The construction of the platform we can see in the diagram \ref{fig: platform's loading2} is lead by an user. And the same "createXxxxx" functions are used, like with a XML file.
-
-\section{The "create" methods}
-The "create" functions have for goal to initialize the relating object. They fill its fields with XML data and link the objects belonging to it to their corresponding XML object, or, if the platform is manually built, only fill its fields with the data given in paramaters.
+ \begin{ndr}
+   \begin{enumerate}
+   \item Define the procedure for the XML management :
+     \begin{itemize}
+     \item  Where  is the constructor of the assciated ObjectXML ? 
+     \item  Use of the SaveObjectXML ?
+     \item  Creation of XML sub -tree ? Advantages : Don't need to know what is the father node to fullfill a node at the moment of construction
+     \end{itemize}
+   \item Define if the object in attributes must created now of after and then link
+   \end{enumerate}
+ \end{ndr}
 
 
-\section{Definition of three majors types of construtors}
+\subsection{Constructor from the ObjectXML of the SiconosModelXML tree {\small \tt Object::object(ObjectXML objectxml) }}
 
-\subsection{Default Constructor}
-
-
-{\tt void Object::object() }
-
-This default constructor performs the following operations :
-\begin{enumerate}
-\item Type definition : \\
-  {\tt this->type = type ; }
-\item Initilization if the attributes (new, set pointer to NULL) \\
-  {\tt this->init(); }
-\item Set the pointer to the XML node to NULL \\
-  {\tt this->objectxml =  NULL; }
-\end{enumerate}
-
-\subsection{Constructor from the mininal data}
-
-This constructor performs  the contruction of a object through given a minimal set of date through :
-
-{\tt void Object::object(AttributeType1 attribute1,...,AttributeTypeN attributeN ) }
-
+This constructor performs  the contruction of a object given a XML node. there is two steps in this type of contruction  based on the two-associted objetcs, i.e, Object, ObjectXML (for instance, DynamicalSystem and DynamicalSystemXML). The first one is the loading of the ObjectXML from the XML node.Tis step will be detailed in the section \ref{Sec:XMLnode}. The second  step is the loading of the attributes of the object from the ObjectXML.
 
 
  It is composed of the following operations :
-\begin{enumerate}
-\item Type definition : \\
-  {\tt this->type = type ; }
-\item Initialization of the attributes (new, set pointer to NULL) \\
-  {\tt this->Att(); }
-\item Loading of the attribute 
-\end{enumerate}
+
+\begin{verbatim}
+Object::Object(ObjectXML objectxml)
+   {
+    Object(); // Default constructor
+    this->objectxml = objectXML;        
+    this->fillObjectWithDSXML(); // Loading of the attribute from the ObjectXML
+    this->linkObjectXML();       // Link downwards
+   }
+\end{verbatim} 
 
 
-The question of the XML management after this type of creation must be explained.
+
+ \begin{ndr}
+   \begin{enumerate}
+   \item Define the procedure for the XML management of the child :
+     \begin{itemize}
+     \item  Where  is the constructor of the childXML ?
+     \end{itemize}
+   \item Perhaps rename the method fill and link
+   \end{enumerate}
+ \end{ndr}
+
+
+
+\clearpage

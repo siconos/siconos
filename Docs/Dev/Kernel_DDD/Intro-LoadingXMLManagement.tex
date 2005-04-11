@@ -1,0 +1,43 @@
+
+There are two major ways  to perform the loading of a model, i.e., to provide  the platform with data :
+\begin{itemize}
+\item Loading a XML data file containing the complete or a part of the model
+\item Creating a complete or a part of a model through the various API in C++ or C
+\end{itemize}
+It might also possible to adopt a mixed strategy to load a model. 
+
+
+\begin{ndr}
+  In all of these case, the question of the validity of a model is  posed. 
+What is the validation procedure ?
+\end{ndr}
+
+These functionnalities are based of the implementation of two adjoint trees of object classes :
+\begin{itemize}
+\item The first tree, \texttt{SiconosModel}  is the core of the modelingTools and simulationsTools.
+\item The second class tree \texttt{siconosModelXML} is devoted the XML Management and interfaces the external  library which implements the API DOM (libxml2).
+\end{itemize}
+This choice has been justified by the independance with  the external librairy of the XML management and the ability to extend easily the I/O for new derived object types.
+
+\begin{ndr}
+  Improve the justification of the choice of implementation 
+\end{ndr}
+
+In this chapter, we describe the implementation and the technical choices for the management of the input user's data and the creation of the model with these information. Particularly, the following are (must be) defined :
+\begin{itemize}
+\item Creation of the objects inside the class tree SiconosModel
+\item Loading of the SiconosModel objects from the minimal data input
+\item Linking of the object with the father and the child in the class tree SiconosModel 
+\item Linking and loading of the SiconosModel objects from the SiconosModelXML
+\item Creation of the objects inside the class tree SiconosModelXML
+\item Loading of the SiconosModel objects from the XML data file
+\item Linking of the object with the father and the child in the class tree SiconosModelXML
+\item Description of some mixed loading Strategy (recall of the \ac{esd} normally !!) \S \ref{Sec:LoadingStrategy}
+\item Save strategy of the SiconosModel tree
+\item Save strategy of the SiconosModelXML tree
+\item Validation strategy of the SiconosModel tree
+\item Validation strategy of the SiconosModelXML tree
+\end{itemize}
+
+
+This first  part of chapter which explains  the model loading form the user poiut of view  must be reported in the \ac{sum}. 
