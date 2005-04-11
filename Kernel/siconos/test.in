@@ -54,15 +54,18 @@ fi;
 
 export LD_LIBRARY_PATH=$SICONOSPATH/lib:$LD_LIBRARY_PATH; 
 
+sample="false"
 # test if there are one argument. if not, exit
-if [ $# -ne 1 ]; then
+if [ $# -gt 1 ]; then
     echo "$0 : Bad number of argument";
+    sample="true";
     exit 1;
 fi;
 	
 # test if command file exist. if not, exit
 if [ ! -f $1 ]; then
     echo "$1 file not found.";
+    sample="false"
     exit 1;
 fi;
 
@@ -80,18 +83,20 @@ fi;
 # plugin compilation
 compilePlugins;
 
+if "$sample" = "true"; then
 # sample compilation
-echo "dir of sample is `dirname $1`";
-DIR_SAMPLE=`dirname $1`;
+    echo "dir of sample is `dirname $1`";
+    DIR_SAMPLE=`dirname $1`;
 
-if [ ! -d $DIR_SAMPLE ]; then
-    echo "the sample dir is not correct";
-    exit 1;
-else
-    cd $DIR_SAMPLE;
+    if [ ! -d $DIR_SAMPLE ]; then
+	echo "the sample dir is not correct";
+	exit 1;
+    else
+	cd $DIR_SAMPLE;
     #make -f $SICONOSPATH/share/SICONOS/MakefileSample OBJ=`basename $1` sample run
-    make -f $SICONOSPATH/share/SICONOS/MakefilePluginSample OBJ=`basename $1` sample run
-    cd $DIR;
+	make -f $SICONOSPATH/share/SICONOS/MakefilePluginSample OBJ=`basename $1` sample run
+	cd $DIR;
+    fi;
 fi;
 
 exit 0;
