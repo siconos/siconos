@@ -114,7 +114,6 @@ if "$sample" = "true"; then
 	exit 1;
     else
 	cd $DIR_SAMPLE;
-    #make -f $SICONOSPATH/share/SICONOS/MakefileSample OBJ=`basename $1` sample run
 	make -f $SICONOSPATH/share/SICONOS/MakefilePluginSample OBJ=`basename $1` sample run
 	cd $DIR;
     fi;
