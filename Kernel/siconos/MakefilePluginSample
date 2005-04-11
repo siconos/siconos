@@ -16,8 +16,8 @@ $(SAMPLE_EXE):$(SAMPLE_OBJ)
 run:$(SAMPLE_EXE) 
 	./$(SAMPLE_EXE)
 
-cleansample:
-	rm -f *_EXE;
+#cleansample:
+#	rm -f *_EXE *.o *.output;
 
 
 PLUGIN_SOURCES = $(wildcard *Plugin.c)
@@ -32,5 +32,10 @@ plugin:$(PLUGIN_OBJ) $(PLUGIN_LIB)
 %.so:%.c
 	$(CXX) $(CXX_DYNLIB) $< -o $@
 
-cleanplugin:
-	rm -f $(PLUGIN_OBJ) $(PLUGIN_LIB)
+#cleanplugin:
+#	rm -f $(PLUGIN_OBJ) $(PLUGIN_LIB)
+
+
+#clean:cleansample cleanplugin
+clean:	
+	rm -f *_EXE *.o *.output *.so;

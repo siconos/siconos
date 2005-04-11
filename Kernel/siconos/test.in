@@ -30,6 +30,16 @@ function compilePlugins() {
     echo "LD_LIBRARY_PATH = $LD_LIBRARY_PATH";
 }
 
+function cleanAll() {
+    listdir=`find . -type d`;
+    echo "listdir = $listdir";
+    for dir in $listdir; do
+	cd $dir;
+	make -f $SICONOSPATH/share/SICONOS/MakefilePluginSample clean	    
+	cd $DIR;
+    done;
+}
+
 function cartridge() {
     echo "";
     echo "+---- SICONOS ----+";
@@ -54,6 +64,25 @@ fi;
 
 export LD_LIBRARY_PATH=$SICONOSPATH/lib:$LD_LIBRARY_PATH; 
 
+clean="false";
+while getopts ch OPTION
+  do
+  case "$OPTION" in
+      c) clean=true;;
+      h) echo "Path to a sample source file : compiles, links and runs this sample";
+	 echo "-c : cleans the current repertory (deletes binary files, etc.)";
+	 echo "-h : prints this help and exits";
+	 exit 0;
+	 ;;
+  esac
+done
+
+if "$clean" = "true"; then
+    cleanAll;
+    exit 0;
+fi;
+
+
 sample="false"
 # test if there are one argument. if not, exit
 if [ $# -gt 1 ]; then
@@ -67,17 +96,9 @@ if [ ! -f $1 ]; then
     echo "$1 file not found.";
     sample="false"
     exit 1;
+else
+    sample="true"
 fi;
-
-
-#while getopts c OPTION
-#do
-#	case "$OPTION" in
-#		c) clean=true;;
-#	esac
-#done
-#
-#if "$clean" = "true"; then
     
 
 # plugin compilation
