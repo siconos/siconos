@@ -103,7 +103,7 @@ typedef struct
 */
 typedef struct
 {
-  char *nom_method/*[64]*/;
+  char nom_method[64];
   int itermax;
   char normType[64];
   double tol;
