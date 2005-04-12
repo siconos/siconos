@@ -12,7 +12,7 @@
 //#include "KernelDefaultConfig.h"
 
 
-using namespace std;
+//using namespace std;
 
 extern int MATRIX_MAX_SIZE;
 extern int VECTOR_MAX_SIZE;

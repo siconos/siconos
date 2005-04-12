@@ -29,7 +29,7 @@ extern "C" void essai_model()
   OUT("OUT::creation Model m2\n");
 
   Model m2;
-  m2.createModel("sample/xml_test.xml");
+  m2.createModel("xml_test.xml");
   OUT("-----------end createModel--------------\n");
   //m2.createModel("/home0/barbier/siconos/SICONOS/src/model/test/xml_schemaAttributeA.xml");
   m2.checkModelCoherency();
@@ -37,7 +37,7 @@ extern "C" void essai_model()
   //static methode_lcp meth_lcp  = {"gcp",101, 0.0001,0.6};
 
   OUT("-------------------------\n");
-  m2.saveToXMLFile("sample/xml_save.xml");
+  m2.saveToXMLFile("xml_save.xml");
   OUT("-------------------------\n");
   cout << endl << "===================== THE END ========================" << endl;
 }
@@ -61,7 +61,7 @@ extern "C" void essai_model_XML(char  xmlFile[])
   }
   else if (strcmp(xmlFile, "lmgc90") == 0)
   {
-    m.createModel("sample/lmgc90.xml");
+    m.createModel("lmgc90.xml");
     char* saveFile = xmlFile;
     strcat(saveFile, ".save.xml");
     cout << "saveFile == " << saveFile << endl;
@@ -70,7 +70,7 @@ extern "C" void essai_model_XML(char  xmlFile[])
   else if (strcmp(xmlFile, "mixte") == 0)
   {
     cout << "*** essai_model - creation de la plateforme avec fichier XML ET fichier de commande ***" << endl;
-    m.createModel("sample/xml_test.xml");
+    m.createModel("xml_test.xml");
 
     NonSmoothDynamicalSystem* nsds;
     DynamicalSystem *ds, *ds2;
@@ -158,7 +158,7 @@ extern "C" void essai_model_XML(char  xmlFile[])
     mC(2, 2) = 0.0;
 
 
-    ds1 = nsds->addLagrangianLinearTIDS(1, 3, &q0, &v0, &mass, "sample/BouncingBall/BallPlugin:ballFExt",
+    ds1 = nsds->addLagrangianLinearTIDS(1, 3, &q0, &v0, &mass, "BallPlugin:ballFExt",
                                         &K, &mC);
     //ds1->setQ()
 
@@ -181,7 +181,7 @@ extern "C" void essai_model_XML(char  xmlFile[])
     ds2 = new LagrangianLinearTIDS();
     static_cast<LagrangianLinearTIDS*>(ds2)->createDynamicalSystem(NULL, 2, 1,
         &q0_, &v0_, &mass_,
-        "sample/BouncingBall/BallPlugin:groundFExt",
+        "BallPlugin:groundFExt",
         &K_, &C_);
     nsds->addDynamicalSystem(ds2);
 
@@ -323,7 +323,7 @@ extern "C" void essai_model_XML(char  xmlFile[])
   else if (strcmp(xmlFile, "check") == 0)
   {
     cout << "##############################" << endl;
-    m.xmlSchemaValidated("sample/xml_test.xml", "config/xmlschema/SiconosModelSchema-V1.2.xsd");
+    m.xmlSchemaValidated("xml_test.xml", "config/xmlschema/SiconosModelSchema-V1.2.xsd");
     cout << "##############################" << endl;
   }
   else
@@ -450,9 +450,9 @@ extern "C" void test_schema()
 {
   IN("-------------------------\n");
   OUT("OUT::creation Model m\n");
-  Model m2("sample/test_schema.xml");
+  Model m2("test_schema.xml");
   OUT("-------------------------\n");
-  m2.saveToXMLFile("sample/xml_save.xml");
+  m2.saveToXMLFile("sxml_save.xml");
   OUT("-------------------------\n");
   cout << endl << "===================== THE END ========================" << endl;
 }
@@ -463,6 +463,7 @@ void test_xmlfile(char * xmlFile)
   m.createModel(xmlFile);
   strcat(xmlFile, ".save.xml");
   m.saveToXMLFile(xmlFile);
+  cout << " #_#_# file tested saved: " << xmlFile << endl;
 }
 
 

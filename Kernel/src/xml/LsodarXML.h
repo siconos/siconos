@@ -19,7 +19,7 @@
 #include "OneStepIntegratorXML.h"
 
 
-using namespace std;
+//using namespace std;
 
 const string LSODAR_R = "r";
 

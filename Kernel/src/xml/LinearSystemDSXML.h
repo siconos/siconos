@@ -28,7 +28,7 @@
 #include "SiconosDOMTreeTools.h"
 
 
-using namespace std;
+//using namespace std;
 
 
 const string LSDS_A = "A";

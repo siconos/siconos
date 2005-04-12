@@ -10,7 +10,7 @@
 #include "NewSiconosVector.h"
 
 
-using namespace std;
+//using namespace std;
 
 /** \class TimeStepping
  *  \brief It's a way to drive a simulation, where the resolution is only managed by the time

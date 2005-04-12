@@ -8,7 +8,7 @@
 //#include "SiconosVector.h"
 #include "NewSiconosVector.h"
 
-using namespace std;
+//using namespace std;
 
 /** \class Relay
  *  \brief It's a way to solve NSDS. It's used in electronics

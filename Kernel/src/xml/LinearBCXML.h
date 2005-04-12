@@ -26,7 +26,7 @@
 #include "BoundaryConditionXML.h"
 
 
-using namespace std;
+//using namespace std;
 
 //Tags
 const string LINEARBC_OMEGA = "Omega";

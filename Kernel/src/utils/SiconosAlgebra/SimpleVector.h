@@ -5,7 +5,7 @@
 #include "SiconosMatrix.h"
 #include <string>
 
-using namespace std;
+//using namespace std;
 
 class SiconosMatrix;
 

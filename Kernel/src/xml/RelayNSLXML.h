@@ -21,7 +21,7 @@
 #include "NonSmoothLawXML.h"
 #include "SiconosDOMTreeTools.h"
 
-using namespace std;
+//using namespace std;
 
 const string RNSL_C = "c";
 const string RNSL_D = "d";

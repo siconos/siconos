@@ -95,7 +95,7 @@ void PlatformTest::testOptionalAttributes7()
    */
   Model m7;
   m7.createModel("xml_uncomplete6.xml");
-  m7.saveToXMLFile("xml_uncomplete6.save.xml");
+  //m7.saveToXMLFile("xml_uncomplete6.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes7 - XML file without t and T ........................ OK\n ";
 }
@@ -577,20 +577,35 @@ void PlatformTest::testOSNSP5()
   cout << "PlatformTest >>> testOSNSP5 - XML file with OneStepNSProblem : LCP + ContactFrictionDualSolving + latin ..................... OK\n ";
 }
 
+void PlatformTest::testLmgc90()
+{
+  /*
+   * test with OneStepNSProblem : LCP + ContactFrictionDualSolving + latin
+   */
+  Model m;
+  m.createModel("lmgc90.xml");
+
+  cout << "PlatformTest >>> testLmgc90 - XML file with lmgc90 joker flags : ..................... OK\n ";
+}
+
 void PlatformTest::testMainSiconos()
 {
-  int i = system("cd ../../..; ./siconos/SICONOS");
-  CPPUNIT_ASSERT_MESSAGE("test SICONOS ", i != -1);
+  /*
+   *  unused tests
+   */
 
-  i = system("cd ../../..; ./siconos/SICONOS creation2");
-  CPPUNIT_ASSERT_MESSAGE("test SICONOS creation2 ", i != -1);
+  /*  int i = system ("cd ../../..; ./siconos/SICONOS");
+    CPPUNIT_ASSERT_MESSAGE("test SICONOS ", i != -1);
 
-  i = system("cd ../../..; ./siconos/SICONOS mixte");
-  CPPUNIT_ASSERT_MESSAGE("test SICONOS mixte ", i != -1);
+    i = system ("cd ../../..; ./siconos/SICONOS creation2");
+    CPPUNIT_ASSERT_MESSAGE("test SICONOS creation2 ", i != -1);
 
-  i = system("cd ../../..; ./siconos/SICONOS lmgc90");
-  CPPUNIT_ASSERT_MESSAGE("test SICONOS lmgc90 ", i != -1);
+    i = system ("cd ../../..; ./siconos/SICONOS mixte");
+    CPPUNIT_ASSERT_MESSAGE("test SICONOS mixte ", i != -1);
 
+    i = system ("cd ../../..; ./siconos/SICONOS lmgc90");
+    CPPUNIT_ASSERT_MESSAGE("test SICONOS lmgc90 ", i != -1);
+  */
   printf("PlatformTest >>> testMainSiconos ................................ OK\n");
 }
 

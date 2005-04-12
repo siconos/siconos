@@ -10,7 +10,7 @@
 #include "XMLException.h"
 
 
-using namespace std;
+//using namespace std;
 
 /** \class SiconosMemoryXML
 *   \brief This class manages SiconosMemory data part

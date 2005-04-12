@@ -15,7 +15,7 @@
 #include "SiconosMemoryException.h"
 #include "SiconosMemoryXML.h"
 
-using namespace std;
+//using namespace std;
 
 class SiconosMemory
 {

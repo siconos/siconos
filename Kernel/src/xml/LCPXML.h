@@ -28,7 +28,7 @@
 #include "SiconosMatrix.h"
 
 
-using namespace std;
+//using namespace std;
 
 class OneStepNSProblem;
 

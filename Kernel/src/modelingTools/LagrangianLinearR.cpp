@@ -90,6 +90,7 @@ void LagrangianLinearR::computeOutput(double time)
   {
     ds1 = vDS[0];
     ds2 = vDS[1];
+    // \todo : pretty strange to use LNLDS with H and b !
     if (((ds1->getType() == LNLDS) || (ds1->getType() == LTIDS)) && ((ds2->getType() == LNLDS) || (ds2->getType() == LTIDS)))
     {
       LagrangianDS *d1 = static_cast<LagrangianDS*>(ds1);

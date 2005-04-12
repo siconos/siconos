@@ -14,7 +14,7 @@
 #include "Model.h"
 
 
-using namespace std;
+//using namespace std;
 
 class Model;
 class OneStepIntegrator;

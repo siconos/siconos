@@ -12,7 +12,7 @@
 
 //#include "C_file_for_Lsodar.h"
 
-using namespace std;
+//using namespace std;
 
 /** \class Lsodar
  *  \brief It's a kind of single-step Integrator

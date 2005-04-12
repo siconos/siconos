@@ -366,7 +366,9 @@
 	<xsd:choice minOccurs='1' maxOccurs='1'>
 		<xsd:element name="DS_LMGC90" minOccurs="1" maxOccurs="1">
 			<xsd:complexType>
-				<xsd:sequence/>
+				<xsd:sequence>
+				<xsd:element name="empty" type="xsd:string" minOccurs='0' maxOccurs='1'/>
+				</xsd:sequence>
 			</xsd:complexType>
 		</xsd:element>
 		
@@ -801,7 +803,9 @@
 		<xsd:choice minOccurs='1' maxOccurs='1'>
 			<xsd:element name="OneStepIntegrator_LMGC90" minOccurs="1" maxOccurs="1">
 				<xsd:complexType>
-					<xsd:sequence/>
+					<xsd:sequence>
+					<xsd:element name="empty" type="xsd:string" minOccurs='0' maxOccurs='1'/>
+					</xsd:sequence>
 				</xsd:complexType>
 			</xsd:element>
 			

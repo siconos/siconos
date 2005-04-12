@@ -31,7 +31,7 @@
 #include "XMLTagsName.h"
 
 
-using namespace std;
+//using namespace std;
 
 
 class NonSmoothDynamicalSystem;

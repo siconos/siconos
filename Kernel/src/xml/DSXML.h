@@ -37,7 +37,7 @@
 
 #include "XMLException.h"
 
-using namespace std;
+//using namespace std;
 
 class DynamicalSystem;
 class BoundaryCondition;

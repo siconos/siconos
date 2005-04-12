@@ -24,7 +24,7 @@
 #include "SiconosDOMTreeTools.h"
 
 
-using namespace std;
+//using namespace std;
 
 
 

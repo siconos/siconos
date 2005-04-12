@@ -27,7 +27,7 @@
 #include "SiconosDOMTreeTools.h"
 
 
-using namespace std;
+//using namespace std;
 
 
 const string LTIDS_K = "K";

@@ -16,7 +16,7 @@
 class Strategy;
 class OneStepIntegrator;
 
-using namespace std;
+//using namespace std;
 
 /** \class TimeDiscretisation
  *  \brief It represents the main data of Strategy and Integrators

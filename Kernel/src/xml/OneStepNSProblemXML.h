@@ -27,7 +27,7 @@
 
 //#include "KernelDefaultConfig.h"
 
-using namespace std;
+//using namespace std;
 
 //Tags
 const string OSNSP_N = "n";

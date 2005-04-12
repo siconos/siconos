@@ -9,7 +9,7 @@
 #include "NewSiconosVector.h"
 #include "AdamsXML.h"
 
-using namespace std;
+//using namespace std;
 
 /** \class Adams
  *  \brief Adams is a kind of multi-step integrator.

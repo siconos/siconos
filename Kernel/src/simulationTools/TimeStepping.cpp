@@ -28,8 +28,8 @@ void TimeStepping::createStrategy(StrategyXML * strategyXML, Model * model)//,  
   if (strategyXML != NULL)
   {
     //this->timeDiscretisation = NULL;
-    this->timeDiscretisation = timeDiscretisation;
-    if (timeDiscretisation != NULL) this->timeDiscretisation->setStrategy(this);
+    //    this->timeDiscretisation = timeDiscretisation;
+    //    if( timeDiscretisation != NULL ) this->timeDiscretisation->setStrategy( this );
 
     this->integratorVector.clear();
     this->nsProblem = NULL;

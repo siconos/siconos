@@ -11,7 +11,7 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
+//using namespace std;
 
 
 class LagrangianLinearTIDSXML;

@@ -21,7 +21,7 @@
 #include "NonSmoothLaw.h"
 
 
-using namespace std;
+//using namespace std;
 
 class NonSmoothLaw;
 

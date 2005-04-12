@@ -13,7 +13,7 @@
 #include "SiconosConst.h"
 #include "SiconosNumerics.h"
 
-using namespace std;
+//using namespace std;
 
 class Strategy;
 class Interaction;
@@ -250,7 +250,7 @@ public:
   *   \param string : the kind of solving method
   *   \param double : the *tolerance* maxIter parameter
   */
-  void setLemkeAlgorithm(string, double = /*DefaultAlgoTolerance*/ DefaultAlgoMaxIter);
+  virtual void setLemkeAlgorithm(string, double = /*DefaultAlgoTolerance*/ DefaultAlgoMaxIter);
 
   /** \fn void setGsnlAlgorithm( double, string, int)
   *   \brief sets the parameters for the gsnl solfing algorithm in the solvingMethod structure
@@ -258,8 +258,8 @@ public:
   *   \param double : the tolerance parameter
   *   \param string : the norm type paramater
   */
-  void setGsnlAlgorithm(string, double = DefaultAlgoTolerance, string = DefaultAlgoNormType,
-                        int = DefaultAlgoMaxIter);
+  virtual void setGsnlAlgorithm(string, double = DefaultAlgoTolerance, string = DefaultAlgoNormType,
+                                int = DefaultAlgoMaxIter);
 
   /** \fn void setGcpAlgorithm( double, string, int )
   *   \brief sets the parameters for the gcp solfing algorithm in the solvingMethod structure
@@ -268,8 +268,8 @@ public:
   *   \param string : the norm type paramater
   *   \param int : the iterMax parameter
   */
-  void setGcpAlgorithm(string, double = DefaultAlgoTolerance, string = DefaultAlgoNormType,
-                       int = DefaultAlgoMaxIter);
+  virtual void setGcpAlgorithm(string, double = DefaultAlgoTolerance, string = DefaultAlgoNormType,
+                               int = DefaultAlgoMaxIter);
 
   /** \fn void setLatinAlgorithm( double, string, int, double )
   *   \brief sets the parameters for the lcp solfing algorithm in the solvingMethod structure
@@ -279,8 +279,8 @@ public:
   *   \param int : the iterMax parameter
   *   \param double : the search direction parameter
   */
-  void setLatinAlgorithm(string, double = DefaultAlgoTolerance, string = DefaultAlgoNormType,
-                         int = DefaultAlgoMaxIter, double = DefaultAlgoSearchDirection);
+  virtual void setLatinAlgorithm(string, double = DefaultAlgoTolerance, string = DefaultAlgoNormType,
+                                 int = DefaultAlgoMaxIter, double = DefaultAlgoSearchDirection);
 
 
   /** \fn void updateConnectedInteractionMap()

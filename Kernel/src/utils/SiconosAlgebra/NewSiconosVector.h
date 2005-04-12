@@ -10,7 +10,7 @@
 #include "SiconosVectorException.h"
 #include "check.h"
 
-using namespace std;
+//using namespace std;
 
 const string N_ASCII = "ascii";
 const string N_BINARY = "binary";

@@ -18,7 +18,7 @@
 #include "OneStepIntegratorXML.h"
 
 
-using namespace std;
+//using namespace std;
 
 
 const string MOREAU_R = "r";

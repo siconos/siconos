@@ -7,7 +7,7 @@
 
 #include "SiconosConst.h"
 
-using namespace std;
+//using namespace std;
 
 class Interaction;
 class DynamicalSystem;

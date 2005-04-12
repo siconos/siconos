@@ -17,7 +17,7 @@
 #include "OneStepIntegratorXML.h"
 
 
-using namespace std;
+//using namespace std;
 
 //const string ADAMS_R = "r";
 

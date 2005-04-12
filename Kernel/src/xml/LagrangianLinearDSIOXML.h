@@ -8,7 +8,7 @@
 #include "SimpleVector.h"
 #include "SiconosDOMTreeTools.h"
 
-using namespace std;
+//using namespace std;
 
 const string LLDSIO_H = "H";
 const string LLDSIO_B = "b";

@@ -146,6 +146,17 @@ void Interaction::check(double time)
       }
     }
   }
+  else if (this->nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
+  {
+    this->relation->computeOutput(time);
+    for (i = 0; i < this->nInteraction; i++)
+    {
+      if (((this->yOld)(i) < 0.0) || (this->status[i] == 1))
+      {
+        this->status[i] = 1;
+      }
+    }
+  }
   else
     RuntimeException::selfThrow("Interaction::check - not yet implemented for this NSLAW type :" + nslaw->getType());
 
@@ -170,6 +181,16 @@ void Interaction::update(double time)
     }
   }
   else if (this->nslaw->getType() == NEWTONIMPACTLAWNSLAW)
+  {
+    for (i = 0; i < this->nInteraction; i++)
+    {
+      if ((status[i] == 1) && ((this->yDot)(i) > 0.0))
+      {
+        this->status[i] = 0;
+      }
+    }
+  }
+  else if (this->nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
   {
     for (i = 0; i < this->nInteraction; i++)
     {

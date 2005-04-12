@@ -20,7 +20,7 @@
 #include "NonSmoothLawXML.h"
 #include "SiconosDOMTreeTools.h"
 
-using namespace std;
+//using namespace std;
 
 const string NEWTON_EN = "en";
 const string NEWTON_ET = "et";

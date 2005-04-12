@@ -52,7 +52,8 @@ private:
   CPPUNIT_TEST(testOSNSP3);
   CPPUNIT_TEST(testOSNSP4);
   CPPUNIT_TEST(testOSNSP5);
-  CPPUNIT_TEST(testMainSiconos);
+  CPPUNIT_TEST(testLmgc90);
+  //CPPUNIT_TEST( testMainSiconos );
 
 
   // on termine
@@ -91,6 +92,7 @@ private:
   void testOSNSP3();
   void testOSNSP4();
   void testOSNSP5();
+  void testLmgc90();
 
   void testMainSiconos();
   //void testFail();

@@ -12,7 +12,7 @@
 
 class interaction;
 
-using namespace std;
+//using namespace std;
 
 /** \class QP
  *  \brief It's a way to solve NSDS. It's used in mechanics

@@ -18,7 +18,7 @@ typedef HMODULE PluginHandle;
 typedef void* PluginHandle;
 #endif
 
-using namespace std;
+//using namespace std;
 
 // --------------------------------------------------------------------------
 class SiconosSharedLibrary

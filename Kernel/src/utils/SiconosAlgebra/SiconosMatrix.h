@@ -26,7 +26,7 @@
 #include "SiconosMatrixException.h"
 #include "check.h"
 
-using namespace std;
+//using namespace std;
 
 const bool printVerbose = true;
 

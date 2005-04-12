@@ -29,7 +29,7 @@
 
 #include "XMLException.h"
 
-using namespace std;
+//using namespace std;
 
 const string SDTT_VECTOR = "Vector";
 const string SDTT_MATRIX = "Matrix";
@@ -49,7 +49,7 @@ const string SDTT_ROW = "row";
 extern int MATRIX_MAX_SIZE;
 extern int VECTOR_MAX_SIZE;
 extern string FILE_STORAGE;
-extern string XML_SCHEMA;
+//extern string XML_SCHEMA;
 
 
 

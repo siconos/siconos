@@ -13,7 +13,7 @@
 
 const int MOREAUSTEPSINMEMORY = 1;
 
-using namespace std;
+//using namespace std;
 
 /** \class Moreau
  *  \brief It's a kind of single-step Integrator

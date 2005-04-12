@@ -16,7 +16,7 @@
 
 #include "SiconosConst.h"
 
-using namespace std;
+//using namespace std;
 
 
 enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};

@@ -9,7 +9,7 @@
 //#include "SiconosVector.h"
 #include "NewSiconosVector.h"
 
-using namespace std;
+//using namespace std;
 
 /** \class EventDriven
  *  \brief It's a way to manage a simulation, where the event a more important than the time
