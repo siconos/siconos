@@ -205,11 +205,11 @@ void LCP::computeM(void)
         {
           M1 = static_cast<Moreau*>(I);
           W1 = M1->getWPtr();
-          //  if( !W1->isInversed() )
-          //  {
-          W1->PLUInverseInPlace();
-          //    if( W1->isInversed() ) cout<<"KAPOUeeeeeee ########################################################"<<endl;
-          //  }
+          if (!W1->isInversed())
+          {
+            W1->PLUInverseInPlace();
+            if (W1->isInversed()) cout << "KAPOUeeeeeee ########################################################" << endl;
+          }
           //  W1->display();
 
 
@@ -223,8 +223,7 @@ void LCP::computeM(void)
         {
           M2 = static_cast<Moreau*>(I2);
           W2 = M2->getWPtr();
-          //if( !W2->isInversed() )
-          W2->PLUInverseInPlace();
+          if (!W2->isInversed()) W2->PLUInverseInPlace();
           // W2 ->display();
 
 

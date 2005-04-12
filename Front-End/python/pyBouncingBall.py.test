@@ -40,7 +40,8 @@ print 'LET''S GO !!!';
 
 temps = pySiconos.doubleVector(N+1);
 position = pySiconos.doubleVector(N+1);
-	
+plot = 0
+
 while k < N :
 	s.nextStep();
 	print 'NextStep done';
@@ -66,13 +67,18 @@ while k < N :
 	m.setValue(k, 3, (ground.getQ()).getValue(0));
 	m.setValue(k, 4, (ground.getVelocity()).getValue(0));			
 	m.setValue(k, 5, (model.getNonSmoothDynamicalSystem().getInteraction(0).getLambda()).getValue(0));    
+	if plot == 10 :
+		d1=Gnuplot.Data(temps, position, title="Ball position");
+		gnuplot.plot(d1);
+		plot = 0;
+	else :
+		plot = plot + 1
 print 'iterations  done: ', k;
 m.write("result.dat", "ascii");		
 
 model.saveToXMLFile("./BouncingBall_TIDS.xml.output");
 
 print 'Gnuplot ...';
-d1=Gnuplot.Data(temps, position, title="toto");
-gnuplot.plot(d1);
+
 
 print '## END ##';
