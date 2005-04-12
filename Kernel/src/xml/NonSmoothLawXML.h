@@ -69,24 +69,3 @@ protected:
 
 
 #endif
-//$Log: NonSmoothLawXML.h,v $
-//Revision 1.7  2005/03/08 12:41:39  jbarbier
-//- constant variables files modified :
-//Some constants added in SiconosConst
-//
-//all global tag of the modeling tools are in XMLTagsName, other tags are specific to an XML class
-//
-//Revision 1.6  2004/12/08 12:49:39  jbarbier
-//- changes in the XML Schema, respect of the recommandations of the W3C
-//version 1.1
-//
-//- changes in all balises DS, Relation, NSLaw, OneStepIntegrator, OneStepNSProblem
-//in the XML files into specific names like LagrangianDS, LinearSystemDS, ...
-//for the DS
-//
-//Revision 1.5  2004/09/14 13:49:58  jbarbier
-//- files added in sample/ to run run the main_siconos test program
-//
-//- all the platform can now be saved in an XML file when it is created manually
-//
-//Revision 1.4  2004/07/29 14:25:44  jbarbier

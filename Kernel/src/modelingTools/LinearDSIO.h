@@ -8,7 +8,7 @@
  *  \brief Linear DSInputOutput
  *         { y = A.x
  *         { R = B.lambda
- *  \author SICONOS Development Team - copyright INRIA
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date Apr 27, 2004
  *

@@ -21,7 +21,7 @@ extern string DefaultComputeOutput;
  *  \brief this class contains data for a specific DynamicalSystem about
  *         { y = H(x, t)
  *         { R = G(lambda)
- *  \author SICONOS Development Team - copyright INRIA
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Jan 14, 2005
  *

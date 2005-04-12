@@ -92,10 +92,3 @@ private:
 };
 
 #endif
-//$Log: RelayNSLXML.h,v $
-//Revision 1.6  2004/09/14 13:49:59  jbarbier
-//- files added in sample/ to run run the main_siconos test program
-//
-//- all the platform can now be saved in an XML file when it is created manually
-//
-//Revision 1.5  2004/07/29 14:25:45  jbarbier

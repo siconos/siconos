@@ -10,7 +10,7 @@
  *  \brief Lagrangian DSInputOutput
  *         { y = H.q + b
  *         { R = Ht
- *  \author SICONOS Development Team - copyright INRIA
+*  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date 17/01/2005
  *

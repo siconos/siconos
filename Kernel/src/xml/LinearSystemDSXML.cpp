@@ -79,18 +79,3 @@ void LinearSystemDSXML::updateDynamicalSystemXML(xmlNode* rootDSXMLNode, Dynamic
   OUT("LinearSystemDynamicalSystem::updateDynamicalSystemXML\n");
 }
 
-//$Log: LinearSystemDSXML.cpp,v $
-//Revision 1.14  2004/09/10 08:04:50  jbarbier
-//- XML save available for BoundaryCondition and Interaction
-//
-//Revision 1.13  2004/08/23 14:30:02  jbarbier
-//- All the dynamical systems can be created in a comand program and added to a
-//NSDS. The save is OK, but the creation of the boundary conditions is not yet
-//finished.
-//
-//Revision 1.12  2004/08/20 15:26:45  jbarbier
-//- creation of a Model and save in the XML is ok
-//- creation of a NSDS and save in the XML is ok
-//- creation of a NonLinearSystemDS and save in the XML is OK
-//
-//Revision 1.11  2004/07/29 14:25:43  jbarbier

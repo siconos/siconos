@@ -47,25 +47,3 @@ void QPXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
   OUT("LCPXML::updateOneStepNSProblemXML\n");
 }
 
-//$Log: QPXML.cpp,v $
-//Revision 1.11  2005/01/25 09:27:18  jbarbier
-//- save of Solver tag in the OneStepNSProblem tag available when saving without XML input file and with partial XML input file
-//
-//Revision 1.10  2005/01/24 14:33:03  jbarbier
-//- OneStepNSProblem > Solver tag is available and managed in the XML part
-//
-//- tests added on OneStepNSProblem > Solver tag
-//
-//Revision 1.9  2004/09/27 13:27:14  jbarbier
-//
-//- Siconos schema renamed : SiconosModelSchema-V1.0.xsd
-//
-//- new required tags of the model : title, author, description, date, xmlSchema.
-//They replace previous attributes author, description and date of the Model.
-//
-//Revision 1.8  2004/09/14 13:49:59  jbarbier
-//- files added in sample/ to run run the main_siconos test program
-//
-//- all the platform can now be saved in an XML file when it is created manually
-//
-//Revision 1.7  2004/07/29 14:25:45  jbarbier

@@ -117,20 +117,3 @@ private:
 };
 
 #endif // SICONOSMEMORYXML_H
-//$Log: SiconosMemoryXML.h,v $
-//Revision 1.6  2004/09/27 08:24:26  charlety
-//
-//_ Modifications in doxygen comments.
-//
-//Revision 1.5  2004/08/04 11:03:23  jbarbier
-//- about the SiconosMemory : when a SiconosMemory has a maxSize greater than the
-//number of steps in memory required by an integrator, the oldest SiconosVector
-//are deleted
-//
-//- the way to initialize the SiconosMemory by the integrator has been updated to
-//match with these changes
-//
-//Revision 1.4  2004/07/30 14:37:16  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianDSXML
-//
-//Revision 1.3  2004/07/29 14:25:45  jbarbier

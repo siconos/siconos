@@ -212,21 +212,3 @@ void LagrangianLinearTIDSXML::updateDynamicalSystemXML(xmlNode* rootDSXMLNode, D
   OUT("LagrangianLinearTIDSXML::updateDynamicalSystemXML\n");
 }
 
-//$Log: LagrangianLinearTIDSXML.cpp,v $
-//Revision 1.12  2005/02/02 15:54:52  jbarbier
-//- sample RollingBalls added
-//
-//- function getArray() added to SimpleVector to return the pointer on the array of double values
-//
-//Revision 1.11  2004/09/10 08:04:50  jbarbier
-//- XML save available for BoundaryCondition and Interaction
-//
-//Revision 1.10  2004/08/23 14:30:02  jbarbier
-//- All the dynamical systems can be created in a comand program and added to a
-//NSDS. The save is OK, but the creation of the boundary conditions is not yet
-//finished.
-//
-//Revision 1.9  2004/07/30 14:37:15  jbarbier
-//- saving methods for DynamicalSystemXML and LagrangianDSXML
-//
-//Revision 1.8  2004/07/29 14:25:43  jbarbier

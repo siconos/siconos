@@ -83,24 +83,3 @@ void TimeDiscretisationXML::updateTimeDiscretisationXML(xmlNode* node, TimeDiscr
   OUT("TimeDiscretisation::updateTimeDiscretisationXML\n");
 }
 
-//$Log: TimeDiscretisationXML.cpp,v $
-//Revision 1.13  2004/09/16 11:35:26  jbarbier
-//- save of the TimeDiscretisation in a XML file in manual creation of the
-//platform which was forgotten is now available.
-//
-//- the save of the platform's data can be done when the platform is created with
-//an XML input file and completed with dynmical systems, interactions, one-step
-//non smooth problem and one-step integrator.
-//
-//Revision 1.12  2004/09/15 13:23:14  jbarbier
-//- corrections in the OneStepNSProblem, for the XML save. The list of interaction
-//linked to the onestepnsproblem is now saved correctly. It is updated before
-//during the creation process.
-//
-//Revision 1.11  2004/08/05 09:31:38  jbarbier
-//- test successfull on the TimeDiscretisation for the triplet (T, t0, N),
-//...
-//
-//- cjecking of this triplet in the createTimeDiscretisation method
-//
-//Revision 1.10  2004/07/29 14:25:49  jbarbier

@@ -56,8 +56,3 @@ void LinearBCXML::updateBoundaryConditionXML(xmlNode* node) //, BoundaryConditio
   OUT("LinearBCXML::updateBoundaryConditionXML\n");
 }
 
-//$Log: LinearBCXML.cpp,v $
-//Revision 1.8  2004/09/10 08:04:50  jbarbier
-//- XML save available for BoundaryCondition and Interaction
-//
-//Revision 1.7  2004/07/29 14:25:43  jbarbier

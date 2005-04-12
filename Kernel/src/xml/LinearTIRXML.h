@@ -122,26 +122,3 @@ private:
 
 
 #endif
-//$Log: LinearTIRXML.h,v $
-//Revision 1.7  2004/09/27 08:24:26  charlety
-//
-//_ Modifications in doxygen comments.
-//
-//Revision 1.6  2004/09/14 13:49:58  jbarbier
-//- files added in sample/ to run run the main_siconos test program
-//
-//- all the platform can now be saved in an XML file when it is created manually
-//
-//Revision 1.5  2004/09/10 11:26:28  charlety
-//
-//_ Integration of the new version of the SiconosVector in the platform. the class simpleVector is used mostly to replace old SiconosVector. When a vector can be composite or simple, like the state of a dynamical system, a pointer on SiconosVector is used, and the vector is initialized simple or composite when the system is initialized.
-//
-//_ All the tests which worked with the previous version of the vector are OK with the new version.
-//
-//_ Example SICONOS and bouncingBall are OK
-//
-//_ some comments have still to be adapted to NewSiconosVector .
-//
-//_ This version of NewSiconosVector could be called 0.9. some details have to be fixed, it will be done before the end of September.
-//
-//Revision 1.4  2004/07/29 14:25:43  jbarbier

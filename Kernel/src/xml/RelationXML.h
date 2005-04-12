@@ -173,30 +173,3 @@ protected:
 
 
 #endif
-//$Log: RelationXML.h,v $
-//Revision 1.16  2005/03/07 13:17:21  jbarbier
-//- new test : Ball2D, with a ball moving in a 2D system
-//
-//- another constant variables moved/refactored in XMLTagsName
-//- making uniform the name of the constant variables
-//
-//Revision 1.15  2004/12/08 12:49:39  jbarbier
-//- changes in the XML Schema, respect of the recommandations of the W3C
-//version 1.1
-//
-//- changes in all balises DS, Relation, NSLaw, OneStepIntegrator, OneStepNSProblem
-//in the XML files into specific names like LagrangianDS, LinearSystemDS, ...
-//for the DS
-//
-//Revision 1.14  2004/09/23 14:09:24  jbarbier
-//- modification of the integrators, the attribute r is always optional.
-//
-//- modification of the LagrangianNonLinearR. computeInput and computeOutput are
-//required.
-//
-//Revision 1.13  2004/09/14 13:49:59  jbarbier
-//- files added in sample/ to run run the main_siconos test program
-//
-//- all the platform can now be saved in an XML file when it is created manually
-//
-//Revision 1.12  2004/07/29 14:25:45  jbarbier

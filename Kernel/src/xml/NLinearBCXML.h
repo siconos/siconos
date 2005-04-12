@@ -45,8 +45,3 @@ public:
 
 
 #endif
-//$Log: NLinearBCXML.h,v $
-//Revision 1.6  2004/09/10 08:04:51  jbarbier
-//- XML save available for BoundaryCondition and Interaction
-//
-//Revision 1.5  2004/07/29 14:25:43  jbarbier
