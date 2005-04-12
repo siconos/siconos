@@ -6,7 +6,7 @@ import Gnuplot
 gnuplot = Gnuplot.Gnuplot(debug=1);
 gnuplot.title("Python BouncingBall sample");
 
-model = pySiconos.Model("../sample/BouncingBall/BouncingBall_TIDS.xml");
+model = pySiconos.Model("../../Kernel/sample/BouncingBall/BouncingBall_TIDS.xml");
 print "*** BouncingBall.xml loaded ***";
 s = model.getStrategy();	
 print "strategy will be initialized"; 
@@ -18,8 +18,8 @@ N = t.getN();
 print " **** time management OK ****"; 
 
 # DS
-ball = pySiconos.LagrangianTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(0));
-ground = pySiconos.LagrangianTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(1));
+ball = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(0));
+ground = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(1));
 
 m = pySiconos.SiconosMatrix(N+1, 6);
 m.zero()
@@ -56,8 +56,8 @@ while k < N :
 	temps[k] = k*t.getH();
 	
 #	// position
-	ball = pySiconos.LagrangianTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(0));
-	ground = pySiconos.LagrangianTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(1));
+	ball = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(0));
+	ground = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(1));
 	m.setValue(k, 1, (ball.getQ()).getValue(0));
 	position[k] = (ball.getQ()).getValue(0);
 	

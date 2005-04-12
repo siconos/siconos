@@ -19,7 +19,6 @@
 #include "SiconosMemory.h"
 #include "SiconosMemoryException.h"
 
-
 #include "SiconosDOMTreeTools.h"
 #include "SiconosMemoryXML.h"
 #include "RelationXML.h"
@@ -45,6 +44,7 @@
 #include "OneStepNSProblemXML.h"
 #include "QPXML.h"
 #include "LCPXML.h"
+#include "CFDXML.h"
 #include "OneStepIntegratorXML.h"
 #include "AdamsXML.h"
 #include "MoreauXML.h"
@@ -53,12 +53,15 @@
 #include "DSInputOutputXML.h"
 #include "EqualityConstraintXML.h"
 #include "LagrangianDSIOXML.h"
+#include "LagrangianLinearDSIOXML.h"
+#include "LagrangianLinearECXML.h"
 #include "LagrangianECXML.h"
 #include "LinearDSIOXML.h"
 #include "LinearECXML.h"
 #include "LinearTIECXML.h"
 #include "SiconosModelXML.h"
 #include "XMLTagsName.h"
+
 
 #include "Relation.h"
 #include "LagrangianLinearR.h"
@@ -80,9 +83,11 @@
 #include "LagrangianLinearTIDS.h"
 #include "DSInputOutput.h"
 #include "LagrangianDSIO.h"
+#include "LagrangianLinearDSIO.h"
 #include "LinearDSIO.h"
 #include "EqualityConstraint.h"
 #include "LagrangianEC.h"
+#include "LagrangianLinearEC.h"
 #include "LinearEC.h"
 #include "LinearTIEC.h"
 #include "NonSmoothDynamicalSystem.h"
@@ -92,6 +97,7 @@
 #include "OneStepNSProblem.h"
 #include "Relay.h"
 #include "LCP.h"
+#include "CFD.h"
 #include "QP.h"
 #include "OneStepIntegrator.h"
 #include "Moreau.h"
@@ -115,22 +121,14 @@ $1 = string(PyString_AsString($input));
 %rename(assign) *::operator=;
 
 
-
 // Parse the original header file
+
 // strings
 %include "std_string.i"
-
 // vector of the C++ STL
 %include "std_vector.i"
 
 
-
-
-
-//namespace std {
-//   %template(intVector) vector<int>;
-//   %template(doubleVector) vector<double>;
-//};
 
 
 // --- Utils ---
@@ -190,6 +188,7 @@ $1 = string(PyString_AsString($input));
 %include "OneStepNSProblemXML.h"
 %include "QPXML.h"
 %include "LCPXML.h"
+%include "CFDXML.h"
 // ---
 %include "OneStepIntegratorXML.h"
 %include "AdamsXML.h"
@@ -202,6 +201,8 @@ $1 = string(PyString_AsString($input));
 %include "DSInputOutputXML.h"
 %include "EqualityConstraintXML.h"
 %include "LagrangianDSIOXML.h"
+%include "LagrangianLinearDSIOXML.h"
+%include "LagrangianLinearECXML.h"
 %include "LagrangianECXML.h"
 %include "LinearDSIOXML.h"
 %include "LinearECXML.h"
@@ -239,10 +240,12 @@ $1 = string(PyString_AsString($input));
 // ---
 %include "DSInputOutput.h"
 %include "LagrangianDSIO.h"
+%include "LagrangianLinearDSIO.h"
 %include "LinearDSIO.h"
 // ---
 %include "EqualityConstraint.h"
 %include "LagrangianEC.h"
+%include "LagrangianLinearEC.h"
 %include "LinearEC.h"
 %include "LinearTIEC.h"
 // ---
@@ -256,6 +259,7 @@ $1 = string(PyString_AsString($input));
 %include "OneStepNSProblem.h"
 %include "Relay.h"
 %include "LCP.h"
+%include "CFD.h"
 %include "QP.h"
 // ---
 %include "OneStepIntegrator.h"
@@ -274,10 +278,10 @@ $1 = string(PyString_AsString($input));
 %include "SiconosConst.h"
 
 namespace std {
-   %template(intVector) vector<int>;
+  %template(intVector) vector<int>;
   %template(doubleVector) vector<double>;
   %template(dsioVector) vector<DSInputOutput*>;
-   %template(dsVector) vector<DynamicalSystem*>;
-   %template(ecVector) vector<EqualityConstraint*>;
-   %template(osiVector) vector<OneStepIntegrator*>;
+  %template(dsVector) vector<DynamicalSystem*>;
+  %template(ecVector) vector<EqualityConstraint*>;
+  %template(osiVector) vector<OneStepIntegrator*>;
 };

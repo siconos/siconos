@@ -103,6 +103,7 @@ const string ADAMS_TAG = "Adams";
 
 /*Types of OneStepNSProblem defined*/
 const string LCP_TAG = "LCP";
+const string CFD_TAG = "CFD";
 const string QP_TAG = "QP";
 const string RELAY_TAG = "Relay";
 

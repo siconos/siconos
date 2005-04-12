@@ -4,6 +4,7 @@
 #include "LsodarXML.h"
 #include "AdamsXML.h"
 #include "LCPXML.h"
+#include "CFDXML.h"
 #include "QPXML.h"
 //#include "RelayXML.h"  /* not yet created */
 
@@ -199,6 +200,10 @@ void StrategyXML::loadOneStepNSProblemXML(xmlNode * rootOneStepNSProblemNode)
     {
       this->oneStepNSProblemXML= new RelayXML(rootOneStepNSProblemNode, definedNumberInteractionVector);
     }*/
+    else if (type == CFD_TAG)
+    {
+      this->oneStepNSProblemXML = new CFDXML(rootOneStepNSProblemNode, definedNumberInteractionVector);
+    }
     else
     {
       XMLException::selfThrow("StrategyXML : undefined OneStepNSProblem type : " + type);

@@ -189,7 +189,7 @@ void Model::savePlatformToXML()
       (static_cast<TimeStepping*>(this->strategy))->saveStrategyToXML();
     else if (this->strategy->getType() == EVENTDRIVEN_STRATEGY)
       (static_cast<EventDriven*>(this->strategy))->saveStrategyToXML();
-    else RuntimeException::selfThrow("Model::saveToXML - bad kind of Strategy");
+    else RuntimeException::selfThrow("Model::savePlatformToXML - bad kind of Strategy");
 
     //    size = this->strategy->getOneStepIntegratorVectorSize();
     //    for(i = 0; i<size; i++)

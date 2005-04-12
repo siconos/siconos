@@ -37,6 +37,7 @@ const string LAGRANGIANLINEAREC = "LagrangianLinearEC";
 
 // const found in the OneStepNSProblem
 const string LCP_OSNSP = "LCP";
+const string CFD_OSNSP = "CFD";
 const string QP_OSNSP = "QP";
 const string RELAY_OSNSP = "Relay";
 //const string NSPB_LCPSOLVING = "LcpSolving";

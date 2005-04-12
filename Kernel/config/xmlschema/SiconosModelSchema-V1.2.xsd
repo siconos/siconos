@@ -61,6 +61,7 @@
 <xsd:simpleType name="PossibleOneStepNSProblemValues">
    <xsd:restriction base="xsd:string">
 	<xsd:enumeration value="LCP"/>
+	<xsd:enumeration value="CFD"/>
 	<xsd:enumeration value="QP"/>
 	<xsd:enumeration value="Relay"/>
    </xsd:restriction>
@@ -856,6 +857,17 @@
 		<xsd:sequence>
 	 		<xsd:choice minOccurs="1" maxOccurs="1">
 				<xsd:element name="LCP">
+					<xsd:complexType>
+						<xsd:all>
+							<xsd:element name="n" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="Interaction_Concerned" type="InteractionConcernedType" minOccurs="1" maxOccurs="1"/>
+						</xsd:all>
+					</xsd:complexType>
+				</xsd:element>
+				
+				<xsd:element name="CFD">
 					<xsd:complexType>
 						<xsd:all>
 							<xsd:element name="n" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>

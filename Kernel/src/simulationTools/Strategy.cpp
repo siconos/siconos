@@ -6,6 +6,7 @@
 #include "LagrangianLinearTIDS.h"
 
 #include "LCP.h"
+#include "CFD.h"
 #include "QP.h"
 #include "Relay.h"
 
@@ -250,6 +251,16 @@ void Strategy::linkStrategyXML()
         this->nsProblem->addInteraction(this->model->getNonSmoothDynamicalSystem()->getInteractionOnNumber(interactionNumbers[i]));
       this->nsProblem->setStrategy(this);
     }
+    // OneStepNSProblem - CFD
+    else if (this->strategyxml->getOneStepNSProblemXML()->getType() == CFD_TAG)
+    {
+      // creation of the CFD OneStepNSProblem with this constructor and call of a method to fill
+      this->nsProblem = new CFD();
+      static_cast<CFD*>(this->nsProblem)->createOneStepNSProblem(this->strategyxml->getOneStepNSProblemXML());
+      for (i = 0; i < interactionNumbers.size(); i++)
+        this->nsProblem->addInteraction(this->model->getNonSmoothDynamicalSystem()->getInteractionOnNumber(interactionNumbers[i]));
+      this->nsProblem->setStrategy(this);
+    }
     // OneStepNSProblem - QP
     else if (this->strategyxml->getOneStepNSProblemXML()->getType() == QP_TAG)
     {
@@ -304,18 +315,21 @@ void Strategy::saveStrategyToXML()
         (static_cast<Adams*>(this->integratorVector[i]))->saveIntegratorToXML();
       else if (this->integratorVector[i]->getType() == LSODAR_INTEGRATOR)
         (static_cast<Lsodar*>(this->integratorVector[i]))->saveIntegratorToXML();
-      else RuntimeException::selfThrow("Model::saveToXML - bad kind of OneStepIntegrator");
+      else RuntimeException::selfThrow("Strategy::saveStrategyToXML - bad kind of OneStepIntegrator");
     }
 
     if (this->getStrategyXML()->hasOneStepNSProblemXML())
     {
       if (this->nsProblem->getType() == LCP_OSNSP)
         (static_cast<LCP*>(this->nsProblem))->saveNSProblemToXML();
+      else if (this->nsProblem->getType() == CFD_OSNSP)
+        (static_cast<CFD*>(this->nsProblem))->saveNSProblemToXML();
       else if (this->nsProblem->getType() == QP_OSNSP)
         (static_cast<QP*>(this->nsProblem))->saveNSProblemToXML();
       else if (this->nsProblem->getType() == RELAY_OSNSP)
         (static_cast<Relay*>(this->nsProblem))->saveNSProblemToXML();
-      else RuntimeException::selfThrow("Model::saveToXML - bad kind of OneStepNSProblem");
+      else
+        RuntimeException::selfThrow("Strategy::saveStrategyToXML - bad kind of OneStepNSProblem");
     }
   }
   else RuntimeException::selfThrow("Strategy::saveStrategyToXML - StrategyXML object not exists");
