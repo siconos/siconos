@@ -1,12 +1,32 @@
-
+\clearpage
 \section{Definition of three major types of construtors for the SiconosmodelXML objects.}
 
 
 \subsection{Default constructor}
 
+\begin{verbatim}
+ObjectXML::ObjectXML() 
+{
+
+}
+\end{verbatim}
+\ac{tbd}
+
+
+
 \subsection{Constructor from an XML node}
 
 
+\begin{verbatim}
+
+
+ObjectXML::ObjectXML( xmlNode* rootNodeOfTheObjectXML ) 
+{
+
+}
+\end{verbatim}
+\ac{tbd}
+\clearpage
 \section{Detailed implementation of the Model Loading : Unfolding of the creation of the platform}
 The two ways to construct the platform are using similar mechanisms, and especially the same creating
 method.
@@ -106,21 +126,18 @@ Model::Model();
 Model::setNSDS(NonSmoothDynamicalSystem nsds)
 Model::setStrategy(Strategy s)
 \end{verbatim}
-
  \item In the NonSmoothDynamicalSystem class :
-
 \begin{verbatim}
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(bool BVP)
 NonSmoothDynamicalSystem::addDS(DynamicalSystem ds1) // push_back in the vector of pointer on DS
 NonSmoothDynamicalSystem::addInteraction(Interaction in1) 
-\end{verbatim}
-        
-        \item In the DynamicalSystem class :
+\end{verbatim}  
+ \item In the DynamicalSystem class :
 \begin{verbatim}
 DynamicalSystem::DynamicalSystem(number, n, x0, BasicPlugin:vectorField)
 DynamicalSystem::setBC()
 \end{verbatim}
-          \item In derived class of DynamicalSystem :
+ \item In derived class of DynamicalSystem :
 \begin{verbatim}
 LinearDS::LinearDS(number, n, x0, A)
 LagrangianDS::LagrangianDS(number, ndof, q0, velocity0, BasicPlugin:computeMass,
@@ -148,13 +165,15 @@ Relation::Relation(number,BasicPlugin:computeInput,,BasicPlugin:computeOutput)
 NSLaw::NSLaw()
 \end{verbatim}
  \item In the Strategy class :
- \begin{verbatim}
+\begin{verbatim}
  Strategy::Strategy()
  setTimeDiscretisation(TimeDiscretisation td)
- addOneStepIntegrator(OneStepIntegrator osi)     
- \end{verbatim}
-        
-\end{itemize}
+ addOneStepIntegrator(OneStepIntegrator osi) 
+\end{verbatim}    
+\item ....
+ \end{itemize}
+
+
 
 
 %%  The unfolding of the building of the platform's architecture is described in the next sequence diagram.
@@ -165,17 +184,28 @@ NSLaw::NSLaw()
 %%         \label{fig: platform's loading2}
 %% \end{center}
 %% \end{figure}
-%% \section{Validation of data}
 
 
-%% When a XML file bring the data needed by the platform, either all the data are given by the XML file or only required data. When the file contains partial data, that means it describe at least a SiconosModel with a NSDS (Non Smooth Dynamical System), composed of at least one Dynamical System.
 \subsection{Mixed strategies}
 This means that the data read in the file are supplemented with information given in the command
 program.
 In this case, the XML file is similar to the previous case, then the way to create objects of
 the platform apart from a XML file will be detailed in the next section.
 
+\clearpage
+ \section{Validation of data}
+\subsection{XML schema validation}
+When a XML file bring the data needed by the platform, either all the data are given by the XML file or only required data. When the file contains partial data, that means it describe at least a SiconosModel with a NSDS (Non Smooth Dynamical System), composed of at least one Dynamical System.
+
+\subsection{Check member functions}
+
+
+
+\clearpage
 \section{Saving the data of the platform in a XML file}
+
+
+
 The save of the platform's data is lead from the Model. The function which do this job is
 "saveToXMLFile". It has several things to do before saving tha data in a XML file :
 \begin{itemize}
