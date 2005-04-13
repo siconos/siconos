@@ -16,27 +16,6 @@ method.
 \subsection{Model loading form an XML file}
 
 
-
-
-\begin{figure}
-\begin{center}
-        \includegraphics[scale=0.75, clip]{figure/platform_loading_XML.ps}
-        \caption{Sequence diagram of the platform's loading with XML file}
-        \label{fig: platform's loading1}
-\end{center}
-\end{figure}
-
-The "create"methods used are partially shown in the diagram \ref{fig: platform's loading1}.
-
-\paragraph{Partial XML file}
-This means that the data read in the file are supplemented with information given in the command
-program.
-In this case, the XML file is similar to the previous case, then the way to create objects of
-the platform apart from a XML file will be detailed in the next section.
-
-
-
-
 At first, when a XML file is loaded, the data of the file are copied in memory in a DOM tree. From
 there, the XML Management platform is built.\\
 The SiconosModelXML owns the DOM tree and create NSDSXML and StrategyXML objects. The created objects
@@ -54,80 +33,147 @@ corresponding to the XML object is enough to give the right data to the platform
 construction.
 
 
-\subsection{Creating model through the API}
- The unfolding of the building of the platform's architecture is described in the next sequence diagram.
 \begin{figure}
 \begin{center}
-        \includegraphics[scale=0.75, clip]{figure/platform_loading.ps}
-        \caption{Sequence diagram of the platform's loading without XML file}
-        \label{fig: platform's loading2}
+        \includegraphics[scale=0.75, clip]{figure/platform_loading_XML.ps}
+        \caption{Sequence diagram of the platform's loading with XML file}
+        \label{fig: platform's loading1}
 \end{center}
 \end{figure}
 
-The construction of the platform we can see in the diagram \ref{fig: platform's loading2} is lead by an user. And the same "createXxxxx" functions are used, like with a XML file.
+The "create"methods used are partially shown in the diagram \ref{fig: platform's loading1}.
 
 
 
-Another way to build the platform is to do it manually.
-To do this, each object of the \ac{siconos} platform owns functions designed to create/add the
-platform's objects belonging to it. These functions must have in parameters all the required data for
-the C++ objects. Here are these methods :
-\begin{itemize}
-        \item In the Model class :
-        \begin{itemize}
-                \item createNSDS(attributes required for a NSDS : bool BVP)
-                \item createTimeStepping()
-                \item createEvenrDriven()
-        \end{itemize}
+
+
+
+
+\subsection{Creating model through the API}
+
+
+The construction of the platform we can see in the diagram \ref{fig: platform's loading2} is lead by an user. The user calls a constructor of the object that he want to create and after that adds the object to the SiconosModel of necessary. For instance, the following sequence can be invoked for creating a model with a DynamicalSystem of the type LagrangianLinearTIDS :
+
+\begin{verbatim}
+  Model model1; // Default Constructor of a Model
+  NonSmoothDynamicalSystem nsds1( false ) ;// Constructor with minimal data 
+  model1.setNonSmoothDynamicalSystem(nsds1) ;
         
-        \item In the NSDS class :
-        \begin{itemize}
-                \item addNonLinearSystemDS(number, n, x0, BasicPlugin:vectorField)
-                \item addLinearSystemDS(number, n, x0)
-                \item addLagrangianNLDS(number, ndof, q0, velocity0, BasicPlugin:computeMass,
+  SimpleVector q0(3);
+  q0.zero();
+  q0(0) = 1.0;
+                
+  SimpleVector v0(3);
+  v0.zero();      
+        
+  SiconosMatrix mass(3, 3);
+  mass.eye();
+
+  SiconosMatrix K(3, 3);
+  K.zero();
+                
+  SiconosMatrix C(3, 3);
+  C.zero();
+
+  LagrangianLinearTIDS lltids1(1, 3, &q0, &v0, &mass,"BasicPlugin:FExt",&K, &C);
+
+  nsds1.addDS(&lltids1);
+
+\end{verbatim}
+
+
+\begin{ndr}
+  Due to the fact that the destructor of the nsds delete actually the DynamicalSystem which are contained in it, we need to declare a pointer on a DS in  order to avois a doucle delete at the end of the run :
+\begin{verbatim}
+  LagrangianLinearTIDS *lltids1;
+  lltids1 = new LagrangianLinearTIDS(1, 3, &q0, &v0, &mass,"BasicPlugin:FExt",&K, &C);
+  nsds1.addDS(lltids1);
+\end{verbatim}
+
+We need to define precisely a rule for the constructor/destructor with new/delete
+
+\end{ndr}
+
+
+In the same way,  a complete model may be constructed using the specific constructor of each object. After this operation, we can use either the member function \texttt{setAttributeObject} for pointing or  a member function  \texttt{addAttributeObject} in the case of a vector attribute
+
+ Here are a non exhaustive list of such methods
+
+ \begin{itemize}
+ \item In the Model class :
+\begin{verbatim}
+Model::Model();
+Model::setNSDS(NonSmoothDynamicalSystem nsds)
+Model::setStrategy(Strategy s)
+\end{verbatim}
+
+ \item In the NonSmoothDynamicalSystem class :
+
+\begin{verbatim}
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(bool BVP)
+NonSmoothDynamicalSystem::addDS(DynamicalSystem ds1) // push_back in the vector of pointer on DS
+NonSmoothDynamicalSystem::addInteraction(Interaction in1) 
+\end{verbatim}
+        
+        \item In the DynamicalSystem class :
+\begin{verbatim}
+DynamicalSystem::DynamicalSystem(number, n, x0, BasicPlugin:vectorField)
+DynamicalSystem::setBC()
+\end{verbatim}
+          \item In derived class of DynamicalSystem :
+\begin{verbatim}
+LinearDS::LinearDS(number, n, x0, A)
+LagrangianDS::LagrangianDS(number, ndof, q0, velocity0, BasicPlugin:computeMass,
                 BasicPlugin:computeFInt, BasicPlugin:computeFExt,
                 BasicPlugin:computeJacobianQFInt, BasicPlugin:computeJacobianVelocityFInt,
                 BasicPlugin:computeJacobianQQNLInertia,
                 BasicPlugin:computeJacobianVelocityQNLInertia, BasicPlugin:computeQNLInertia)
-                \item addLagrangianTIDS(number, ndof, q0, velocity0, BasicPlugin:computeMass, BasicPlugin:computeFExt, K, C)
-                \item addInteraction(number)
-        \end{itemize}
-        
-        \item In the DynamicalSystem class :
-        \begin{itemize}
-                \item createLinearBC()
-                \item createNLinearBC()
-                \item createPeriodicBC()
-        \end{itemize}
-        
-        \item In the Interaction class :
-        \begin{itemize}
-                \item createLagrangianLinearR()
-                \item createLagrangianNonLinearR()
-                \item createLinearTIR()
-                \item createNewtonImpactLawNSL()
-                \item createComplementaryConditionNSL()
-                \item createRelayNSL()
-        \end{itemize}
-        
-        \item In the Strategy class :
-        \begin{itemize}
-                \item createTimeDiscretisation()
-                \item addMoreau()
-                \item addLsodar()
-                \item addAdams()
-                \item addLCP()
-                \item addQP()
-        \end{itemize}
+LagrangianLinearTIDS::LagrangianLinearTIDS(number, ndof, q0, velocity0, BasicPlugin:computeMass, BasicPlugin:computeFExt, K, C)
+\end{verbatim}
+
+   
+          \item In the Interaction class :
+\begin{verbatim}
+Interaction::Interaction(number)
+addDS(DynamicalSystem * dsi )
+setRelation(Relation r)
+setNSLaw(Relation r)
+\end{verbatim}
+          \item In the Relation class :
+\begin{verbatim}
+Relation::Relation(number,BasicPlugin:computeInput,,BasicPlugin:computeOutput)
+\end{verbatim}
+          \item In the NSLaw class :
+\begin{verbatim}
+NSLaw::NSLaw()
+\end{verbatim}
+ \item In the Strategy class :
+ \begin{verbatim}
+ Strategy::Strategy()
+ setTimeDiscretisation(TimeDiscretisation td)
+ addOneStepIntegrator(OneStepIntegrator osi)     
+ \end{verbatim}
         
 \end{itemize}
-All these functions are calling the createXxxx(...) function of the object to create.
 
 
-\section{Validation of data}
+%%  The unfolding of the building of the platform's architecture is described in the next sequence diagram.
+%% \begin{figure}
+%% \begin{center}
+%%         \includegraphics[scale=0.75, clip]{figure/platform_loading.ps}
+%%         \caption{Sequence diagram of the platform's loading without XML file}
+%%         \label{fig: platform's loading2}
+%% \end{center}
+%% \end{figure}
+%% \section{Validation of data}
 
 
-When a XML file bring the data needed by the platform, either all the data are given by the XML file or only required data. When the file contains partial data, that means it describe at least a SiconosModel with a NSDS (Non Smooth Dynamical System), composed of at least one Dynamical System.
+%% When a XML file bring the data needed by the platform, either all the data are given by the XML file or only required data. When the file contains partial data, that means it describe at least a SiconosModel with a NSDS (Non Smooth Dynamical System), composed of at least one Dynamical System.
+\subsection{Mixed strategies}
+This means that the data read in the file are supplemented with information given in the command
+program.
+In this case, the XML file is similar to the previous case, then the way to create objects of
+the platform apart from a XML file will be detailed in the next section.
 
 \section{Saving the data of the platform in a XML file}
 The save of the platform's data is lead from the Model. The function which do this job is
