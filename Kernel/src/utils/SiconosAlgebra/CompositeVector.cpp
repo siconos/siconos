@@ -258,13 +258,13 @@ bool CompositeVector::write(string fileName, string mode) const
 
   bool res = false;
   if ((mode != "binary") && (mode != "ascii"))
-    SiconosVectorException::selfThrow("SimpleVector::write : unknown mode");
+    SiconosVectorException::selfThrow("CompositeVector::write : unknown mode");
 
   // open the file
   ofstream outFile(fileName.c_str());           // don't forget to check that it opened
 
   if (!outFile.is_open())
-    SiconosVectorException::selfThrow("SimpleVector::write : : Fail to open file \"" + fileName + "\"");
+    SiconosVectorException::selfThrow("CompositeVector::write : : Fail to open file \"" + fileName + "\"");
 
   int nbVectors = this->svref.size();
 

@@ -1,6 +1,8 @@
 // pySiconos.i - SWIG interface
 %module pySiconos
 %{
+//#include "SiconosNumerics.h"
+
 #include "SiconosException.h"
 #include "RuntimeException.h"
 #include "XMLException.h"
@@ -130,9 +132,10 @@ $1 = string(PyString_AsString($input));
 
 
 
+// -- Numerics ---
+//%include "SiconosNumerics.h"
 
 // --- Utils ---
-
 %include "SiconosException.h"
 %include "RuntimeException.h"
 %include "XMLException.h"
@@ -149,8 +152,6 @@ $1 = string(PyString_AsString($input));
 
 
 // --- Xml ---
-
-//--------
 %include "SiconosDOMTreeTools.h"
 
 // Xml - utils

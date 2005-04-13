@@ -114,6 +114,7 @@ void Interaction::swapInMemory(void)
   yOld = y;
   lambdaOld = lambda;
   yDotOld = yDot;
+  //cout<<"Interaction::swapInMemory Done"<<endl;
   OUT("Interaction::swapInMemory(void)\n");
 }
 

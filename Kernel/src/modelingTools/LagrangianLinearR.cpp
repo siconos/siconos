@@ -99,6 +99,10 @@ void LagrangianLinearR::computeOutput(double time)
       CompositeVector q;
       q.add(*(d1->getQPtr()));
       q.add(*(d2->getQPtr()));
+      //    cout<<"LagrangianLinearR::computeOutput ###### H then q ################"<<endl;
+      //    this->h.display();
+      //    q.display();
+      //    cout<<"/LagrangianLinearR::computeOutput ##################################"<<endl;
       *y = (this->h * q) + this->b;
 
       CompositeVector vel;

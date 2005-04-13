@@ -32,7 +32,7 @@
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 1.0</row>
-				</M>			
+				</M>
 				<ndof>3</ndof>								
 				<K matrixRowSize='3' matrixColSize='3'>
 					<row>0.0 0.0 0.0</row>
@@ -50,23 +50,29 @@
 				<Id> Ground </Id>
 				<n>2</n>
 				<StepsInMemory>1</StepsInMemory>				
-				<q0 vectorSize='1'>
-					0.0
+				<q0 vectorSize='3'>
+					0.0 0.0 0.0
 				</q0>	
-				<Velocity0 vectorSize='1'>
-					0.0
+				<Velocity0 vectorSize='3'>
+					0.0 0.0 0.0
 				</Velocity0>
 				<Fext vectorPlugin="BallPlugin:groundFExt"/>
-				<M matrixRowSize='1' matrixColSize='1'>	
-					<row>1000000.0 </row>
+				<M matrixRowSize='3' matrixColSize='3'>	
+					<row>1000000.0       0.0       0.0</row>
+					<row>      0.0 1000000.0       0.0</row>
+					<row>      0.0       0.0 1000000.0</row>
 				</M>			
 				
-				<ndof>1</ndof>								
-				<K matrixRowSize='1' matrixColSize='1'>
-					<row>0.0</row>
+				<ndof>3</ndof>								
+				<K matrixRowSize='3' matrixColSize='3'>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
 				</K>
-				<C matrixRowSize='1' matrixColSize='1'>
-					<row>0.0</row>
+				<C matrixRowSize='3' matrixColSize='3'>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
 				</C>			
 
 			</LagrangianLinearTIDS>	
@@ -88,12 +94,13 @@
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
 					<LagrangianLinear>
-						<H matrixRowSize='1' matrixColSize='4'>
+						<H matrixRowSize='2' matrixColSize='6'>
 						<!-- <row> 1.0  0.0  0.0 -1.0</row> The right value if the Constraint on the plane is taken into account -->
-	                         <row> 1.0  0.0  0.0 -1.0</row>
+							<row> 1.0  0.0  0.0 -1.0  0.0 0.0</row>
+							<row> 0.0  1.0  0.0  0.0 -1.0 0.0</row>
 						</H>
-						<b vectorSize='1'>
-							0.0
+						<b vectorSize='2'>
+							0.0 0.0
 						</b>
 					</LagrangianLinear>			
 					<!-- NS Law of this interaction	-->
@@ -131,14 +138,14 @@
 				<DS_Concerned size='1'>				
 					<DS number='2'/>
 				</DS_Concerned>
-				<Theta> 0.5</Theta>
+				<Theta> 1.0</Theta>
 			</Moreau>					
 
 		</OneStepIntegrator_Definition>
 
 		<!-- One Step NS Problem of th Strategy-->
 		<OneStepNSProblem>
-		 	<LCP>
+		 	<CFD>
 				<n>1</n>			
 				<M matrixRowSize='1' matrixColSize='1'>
 					<row> 1.0 </row>
@@ -147,7 +154,7 @@
 				<Interaction_Concerned>
 					<Interaction number='1'/>
 				</Interaction_Concerned>			
-		 	</LCP>
+		 	</CFD>
 		 	<Solver>
 				<LcpSolving>
 <!--					<Gsnl maxIter="101" tolerance="0.0001" normType="max"/> -->

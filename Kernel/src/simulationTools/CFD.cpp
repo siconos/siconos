@@ -48,10 +48,10 @@ void CFD::formalize(double time)
     this->interactionVector[i]->check(time);
   }
   this->updateConnectedInteractionMap();
-
+  cout << " #~ CFD::updateConnectedInteractionMap done" << endl;
   this->w = SimpleVector::SimpleVector(0);
   this->z = SimpleVector::SimpleVector(0);
-
+  cout << " #~ CFD::next : computeM, computeQ" << endl;
   this->computeM();
   this->computeQ(time);
 
@@ -158,7 +158,8 @@ void CFD::computeM(void)
     if (this->connectedInteractionMap.find(this->interactionVector[i]) != this->connectedInteractionMap.end())
       activeInteraction++;
   }
-  this->M = SiconosMatrix::SiconosMatrix(activeInteraction, activeInteraction);
+  // ?????? size of the M matrix in Contact Friction Dual ?????
+  this->M = SiconosMatrix::SiconosMatrix(activeInteraction/**2*/, activeInteraction/**2*/);
   this->M.zero();
 
   // \todo using the visibility table instead of the interaction vector !!!!!
@@ -211,6 +212,9 @@ void CFD::computeM(void)
         H = LLR->getHPtr();
         Mtmp = *H * WW.multTranspose(*H);
         cout << "#_# " << currentActiveInteraction << " - " << currentActiveInteraction << endl;
+        this->M.display();
+        Mtmp.display();
+        cout << "___________________" << endl;
         this->M.blockMatrixCopy(Mtmp, currentActiveInteraction, currentActiveInteraction);
       }
       else

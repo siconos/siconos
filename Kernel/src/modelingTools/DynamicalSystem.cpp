@@ -117,7 +117,7 @@ void DynamicalSystem::swapInMemory(void)
   xMemory.swap(this->x);
   xDotMemory.swap(&this->xDot);
   rMemory.swap(&r);
-
+  //cout<<"DynamicalSystem::swapInMemory Done..."<<endl;
   OUT("DynamicalSystem::swapInMemory\n ");
 }
 

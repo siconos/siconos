@@ -69,7 +69,7 @@ void LCP::compute(void)
 {
   IN("LCP::compute(void)\n");
 
-  cout << " #%#% use of Numerics" << endl;
+  //cout<<" #%#% use of Numerics"<<endl;
   /***********************************
    * integration of Siconos/Numerics *
    ***********************************/
@@ -248,7 +248,7 @@ void LCP::computeM(void)
         LLR = static_cast<LagrangianLinearR*>(R);
         H = LLR->getHPtr();
         Mtmp = *H * WW.multTranspose(*H);
-        cout << "#_# " << currentActiveInteraction << " - " << currentActiveInteraction << endl;
+        //cout<<"#_# "<<currentActiveInteraction<<" - "<<currentActiveInteraction<<endl;
         this->M.blockMatrixCopy(Mtmp, currentActiveInteraction, currentActiveInteraction);
       }
       else
@@ -295,7 +295,7 @@ void LCP::computeM(void)
           if (interConnectedNumber == currentActiveInteraction)
             interConnectedNumber++;
 
-          cout << "#_# " << currentActiveInteraction << " - " << interConnectedNumber << endl;
+          //cout<<"#_# "<<currentActiveInteraction<<" - "<<interConnectedNumber<<endl;
           this->M.blockMatrixCopy(Mtmp, currentActiveInteraction, interConnectedNumber);
           interConnectedNumber++;
         }

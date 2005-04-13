@@ -100,22 +100,23 @@ int main(int argc, char* argv[])
     {
       s->nextStep();
       cout << "NextStep done" << endl;
+
       k = t->getK();
-
       cout << "iteration : " << k << endl;
-      s->computeFreeState();
 
+      s->computeFreeState();
+      cout << "computeFreeState done" << endl;
 
 
       s->formaliseOneStepNSProblem();
-
+      cout << "formaliseOneStepNSProblem done" << endl;
 
 
       s->computeOneStepNSProblem();
-
+      cout << "computeOneStepNSProblem done" << endl;
 
       s->updateState();
-
+      cout << "updateState done" << endl;
 
 
       // Trace Values

@@ -156,6 +156,10 @@ void Moreau::integrate()
     *v /= h;
     *v += (1.0 - this->theta) * FExt0;
     *v += (this->theta * FExt1);
+    //    cout<<"Moreau::integrate ###### K then vold ################"<<endl;
+    //    K->display();
+    //    vold->display();
+    //    cout<<"/Moreau::integrate ##################################"<<endl;
     *v -= h * this->theta * (*K * *vold);
     *v -= (*K * *qold);
     *v -= (*C * *vold);
