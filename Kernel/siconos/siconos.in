@@ -17,9 +17,8 @@ function compilePlugins() {
 	cd $dir;
 	if test "`ls *Plugin.c 2>/dev/null`" != ""; then
 	    echo "plugin dans $dir !";      
-	    # make -f $SICONOSPATH/share/SICONOS/MakefilePlugin plugin
 	    make -f $SICONOSPATH/share/SICONOS/MakefilePluginSample plugin
-	    if test "$LD_LIBRARY_PATH" = ""; then
+	    if test "${LD_LIBRARY_PATH}test" = "test"; then
 		export LD_LIBRARY_PATH=$PWD;
 	    else
 		export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH; 
@@ -62,7 +61,11 @@ if test "$SICONOSPATH" = ""; then
     exit 1;
 fi;
 
-export LD_LIBRARY_PATH=$SICONOSPATH/lib:$LD_LIBRARY_PATH; 
+if test "${LD_LIBRARY_PATH}test" = "test"; then
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib;  
+else
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$LD_LIBRARY_PATH; 
+fi;	 
 
 clean="false";
 while getopts ch OPTION
@@ -76,10 +79,23 @@ while getopts ch OPTION
 	 ;;
   esac
 done
-
+echo "$# $0 $1 $2"
 if "$clean" = "true"; then
-    cleanAll;
-    exit 0;
+    if [ $# -eq 2 ]; then
+	if [ ! -d $2 ]; then
+	    echo "$2 no such file or directory.";
+	    exit 1;
+	else
+	    echo "OK";
+	    cd $2;
+	    cleanAll;
+	    cd ..;
+	    exit 0;
+	fi;	    
+    else	
+	cleanAll;
+	exit 0;
+    fi;
 fi;
 
 
