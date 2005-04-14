@@ -32,7 +32,9 @@ INSTALLATION NOTES
 
 > setenv NUMERICSPATH /path/where/Numerics/is/located/
 
-2) Choose the right Makefile.inc according to the target platform
+2) Choose the right Makefile.inc according to the target platform, for example
+
+> cp Makefile.inc.linux Makefile.inc
 
 3) Build library
 

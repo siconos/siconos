@@ -46,7 +46,7 @@ all : build lib
 build : $(OBJETS_LCP) $(OBJETS_RP) $(OBJETS_CFP) $(OBJETS_CFD) $(OBJETS_RD)
 
 lib : NumericsSolvers_lcp.a NumericsSolvers_rp.a NumericsSolvers_cfp.a \
-		NumericsSolvers_cfd.a NumericsSolvers_rd.a
+		NumericsSolvers_cfd.a NumericsSolvers_rd.a libSolvers.so
 	cp *.a $(NUMERICS_LIB)
 
 NumericsSolvers_lcp.a: $(OBJETS_LCP)
@@ -63,6 +63,10 @@ NumericsSolvers_cfd.a: $(OBJETS_CFD)
 
 NumericsSolvers_rd.a: $(OBJETS_RD)
 	ar cr libNumericsSolvers_rd.a $(OBJETS_RD)
+
+libSolvers.so:$(OBJETS_LCP) $(OBJETS_RP) $(OBJETS_CFP) $(OBJETS_CFD) $(OBJETS_RD)
+	gcc -shared $(OBJETS_LCP) $(OBJETS_RP) $(OBJETS_CFP) $(OBJETS_CFD) $(OBJETS_RD) -o libSolvers.so
+
 clean:
 	rm -f *.o *.a
 

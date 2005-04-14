@@ -1,0 +1,26 @@
+
+
+Installation:
+
+> reconf.sh
+> configure 
+options of configure:
+--help to see all options
+--prefix
+by default the path installation is /usr/local/, to define it use --prefix
+  --prefix=/siconos_path_install
+
+if you do not want to run unitary test suites, and have not installed cppUnit, use flag '--disable-cppunit'
+
+> make
+
+> make install
+
+
+> set the shell variable SICONOSPATH
+
+export PATH=$PATH:$SICONOSPATH/bin
+
+> siconos -h
+
+> siconos BouncingBall/BouncingBall.cpp
