@@ -515,12 +515,12 @@ case "$target" in
 esac
 AC_SUBST(SICONOS_EXT_LDFLAGS)
 
-CXXFLAGS_BASIC="-fbounds-check -w -Wno-deprecated -fPIC"
+CXXFLAGS_BASIC="-fbounds-check -Wno-deprecated -fPIC"
 CXXFLAGS_DEBUG="-g"
 
 case "$target" in
     *-linux*)
-      CXXFLAGS="$CXXFLAGS_DEBUG $CXXFLAGS_BASIC $CXX_WITHOUTNANA_FLAG $CXX_LAPACKPP_FLAG"
+      CXXFLAGS="$CXXFLAGS_DEBUG $CXXFLAGS_BASIC $CXX_WITHOUTNANA_FLAG $CXX_LAPACKPP_FLAG -w "
       CXX_DYNLIB="-shared"
       ;;
     *-apple-darwin*)
