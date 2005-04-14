@@ -4,7 +4,8 @@
 
 \includeonly{}
 \usepackage{fancyheadings} 
-
+\usepackage{listings}
+\lstset{language=[GNU]C++}
 % package pour les images des use cases
 %\usepackage[dvips]{graphicx}
 
@@ -66,20 +67,17 @@
 \label{Sec:DDD-ComponentDesignSpecifications}
 \input{ComponentDesignSpecifications}
 %---------------------------------------------------------------------%
-
-
 \newpage
 %---------------------------------------------------------------------------%
-\chapter{Model loading and Saving}
-
-\input{Intro-LoadingXMLManagement}
-
-\label{Sec:DDD-Loading}
-\input{Loading}
+\chapter{XML Management}
 \label{Sec:DDD-XMLManagement}
 \input{XMLManagement}
-\label{Sec:DDD-XMLLoading}
-\input{XMLloading}
+\newpage
+%---------------------------------------------------------------------------%
+\chapter{Model loading, Saving and Validation}
+\label{Sec:DDD-ModelLoading}
+\input{ModelLoading}
+
 
 %---------------------------------------------------------------------%
 %---------------------------------------------------------------------%
@@ -95,9 +93,14 @@
 
 \newpage
 %---------------------------------------------------------------------------%
-\chapter{Plugin system}
-\label{Sec:DDD-Pluginsystem}
-\input{PluginSystem}
+\chapter{End-User Plugin system}
+\label{Sec:DDD-EndUserPluginsystem}
+\input{EndUserPluginSystem}
+\newpage
+%---------------------------------------------------------------------------%
+\chapter{Expert-User Plugin system}
+\label{Sec:DDD-ExpertUser-Pluginsystem}
+\input{ExpertUserPluginSystem}
 
 \newpage
 %---------------------------------------------------------------------------%

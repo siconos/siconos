@@ -1,9 +1,9 @@
-\section{The XML management}
+
 
 The management of the XML input/output is made by a set of classes based on the architecture of the
 \ac{siconos} platform.
 
-\subsection{XML Schema}
+\section{Validation of a XML file : The XML Schema}
 The data of the XML files we can encounter must respect several rules conforming to the \ac{nsds}
 and there resolution. Each objects of the platform have specific attributes which are required
 or optional. The schema allows to check a lot of rules that are detailed in the \ac{sum}.
@@ -11,25 +11,25 @@ To check each information, the schema regroups the defined attributes in several
 Model, NSDS, DynamicalSystem, Interaction, Relation and NonSmoothLaw, Strategy, TimeDiscretisation,
 OneStepIntegrator, OneStepNSProblem.
 
-\subsection{Architecture}
+\section{Architecture}
 In the software, the XML Management uses a tree structure for the XML objects and a DOM tree where all the data are stored in memory. Each of these objects is linked to the DOM tree, and each object access only to the data relating to it.
 
 \begin{ndr}
   Is it necessary to link directly towards a node of the gloabl XML DOM tree ?
 \end{ndr}
 
-\subsubsection{The XML Management objects}
+\subsection{The XML Management objects}
 The figure \ref{fig: Class diagram of the XML management} \& \ref{fig: Class diagram with the links between the platform and the XML part} shows the
 structure of the XML Management platform.
 The Model is linked to his SiconosModelXML, the NSDS to his NSDSXML, \dots
 So, the XML Management platform give to the \ac{siconos} platform the accessors towards the data of the XML DOM tree.
-\subsubsection{The data of the XML}
+\subsection{The data of the XML}
 Each XML object can access to the specific branch of the DOM tree which contains the data relating to
 the object of the platform. They give an interface to the platform, to manipulate the information of
 the DOM tree.
 The data stored in the XML Management platform are only used for input and output but never used during the
 computations. That's to say the information of the DOM tree are read when the software is launched (if a XML input file is
 defined) and data are stored to the DOM tree a the end of each time step of a simulation.
-\subsubsection{SiconosDOMTreeTools}
+\subsection{SiconosDOMTreeTools}
 It is a toolbox to manipulate the data of the platform to store them under XML format.
 

@@ -69,52 +69,54 @@ The "create"methods used are partially shown in the diagram \ref{fig: platform's
 
 
 
-\subsection{Creating model through the API}
+\subsection{Creating a model through the API C++}
 
 
-The construction of the platform we can see in the diagram \ref{fig: platform's loading2} is lead by an user. The user calls a constructor of the object that he want to create and after that adds the object to the SiconosModel of necessary. For instance, the following sequence can be invoked for creating a model with a DynamicalSystem of the type LagrangianLinearTIDS :
+The construction of the platform we can see in the diagram \ref{fig: platform's loading2} is lead by an user. The user calls a constructor of the object that he want to create and after that adds the object to the SiconosModel of necessary. For instance, the sequence in the listing \ref{Lst:Creating} can be invoked for creating a model with a DynamicalSystem of the type LagrangianLinearTIDS.
 
-\begin{verbatim}
-  Model model1; // Default Constructor of a Model
-  NonSmoothDynamicalSystem nsds1( false ) ;// Constructor with minimal data 
+\begin{lstlisting}[frame=single, caption={Creating a model through the API C++,label={Lst:Creating}}]
+  // Default Constructor of a Model
+  Model model1; 
+  // Constructor of a nsds with minimal data 
+  NonSmoothDynamicalSystem nsds1( false );
+  // Set the NonSmoothDynamicalSystem of the Model
   model1.setNonSmoothDynamicalSystem(nsds1) ;
         
   SimpleVector q0(3);
-  q0.zero();
-  q0(0) = 1.0;
-                
+  q0.zero();  q0(0) = 1.0;                
   SimpleVector v0(3);
-  v0.zero();      
-        
+  v0.zero();             
   SiconosMatrix mass(3, 3);
   mass.eye();
-
   SiconosMatrix K(3, 3);
-  K.zero();
-                
+  K.zero();                
   SiconosMatrix C(3, 3);
   C.zero();
 
-  LagrangianLinearTIDS lltids1(1, 3, &q0, &v0, &mass,"BasicPlugin:FExt",&K, &C);
+  // Constructor of a LagrangianLinearTIDS with minimal data 
+  LagrangianLinearTIDS lltids1(1, 3, &q0, &v0, &mass,
+                               "BasicPlugin:FExt",&K, &C);
 
   nsds1.addDS(&lltids1);
 
-\end{verbatim}
+\end{lstlisting}
 
 
-\begin{ndr}
-  Due to the fact that the destructor of the nsds delete actually the DynamicalSystem which are contained in it, we need to declare a pointer on a DS in  order to avois a doucle delete at the end of the run :
-\begin{verbatim}
+
+
+
+ Due to the fact that the destructor of the nsds delete actually the DynamicalSystem which are contained in it, we need to declare a pointer on a DS in  order to avois a doucle delete at the end of the run, see Listing \ref{Lst:Creatingbis}
+
+\begin{lstlisting}[frame=single, caption={Creating a model through the API C++, bis},label={Lst:Creatingbis}]
   LagrangianLinearTIDS *lltids1;
-  lltids1 = new LagrangianLinearTIDS(1, 3, &q0, &v0, &mass,"BasicPlugin:FExt",&K, &C);
+  // Constructor of a LagrangianLinearTIDS with minimal data 
+  lltids1 = new LagrangianLinearTIDS(1, 3, &q0, &v0, &mass,
+                                     "BasicPlugin:FExt",&K, &C);
   nsds1.addDS(lltids1);
-\end{verbatim}
-
+\end{lstlisting}
+\begin{ndr}
 We need to define precisely a rule for the constructor/destructor with new/delete
-
 \end{ndr}
-
-
 In the same way,  a complete model may be constructed using the specific constructor of each object. After this operation, we can use either the member function \texttt{setAttributeObject} for pointing or  a member function  \texttt{addAttributeObject} in the case of a vector attribute
 
  Here are a non exhaustive list of such methods

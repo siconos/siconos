@@ -1,3 +1,48 @@
+
+
+There are two major ways  to perform the loading of a model, i.e., to provide  the platform with data :
+\begin{itemize}
+\item Loading a XML data file containing the complete or a part of the model
+\item Creating a complete or a part of a model through the various API in C++ or C
+\end{itemize}
+It might also possible to adopt a mixed strategy to load a model. 
+
+
+\begin{ndr}
+  In all of these case, the question of the validity of a model is  posed. 
+What is the validation procedure ?
+\end{ndr}
+
+These functionnalities are based of the implementation of two adjoint trees of object classes :
+\begin{itemize}
+\item The first tree, \texttt{SiconosModel}  is the core of the modelingTools and simulationsTools.
+\item The second class tree \texttt{siconosModelXML} is devoted the XML Management and interfaces the external  library which implements the API DOM (libxml2).
+\end{itemize}
+This choice has been justified by the independance with  the external librairy of the XML management and the ability to extend easily the I/O for new derived object types.
+
+\begin{ndr}
+  Improve the justification of the choice of implementation 
+\end{ndr}
+
+In this chapter, we describe the implementation and the technical choices for the management of the input user's data and the creation of the model with these information. Particularly, the following are (must be) defined :
+\begin{itemize}
+\item Creation of the objects inside the class tree SiconosModel
+\item Loading of the SiconosModel objects from the minimal data input
+\item Linking of the object with the father and the child in the class tree SiconosModel 
+\item Linking and loading of the SiconosModel objects from the SiconosModelXML
+\item Creation of the objects inside the class tree SiconosModelXML
+\item Loading of the SiconosModel objects from the XML data file
+\item Linking of the object with the father and the child in the class tree SiconosModelXML
+\item Description of some mixed loading Strategy (recall of the \ac{esd} normally !!) \S \ref{Sec:LoadingStrategy}
+\item Save strategy of the SiconosModel tree
+\item Save strategy of the SiconosModelXML tree
+\item Validation strategy of the SiconosModel tree
+\item Validation strategy of the SiconosModelXML tree
+\end{itemize}
+
+
+This first  part of chapter which explains  the model loading form the user poiut of view  must be reported in the \ac{sum}. 
+
 \section{Model Loading Strategy}
 \label{Sec:LoadingStrategy}
 
@@ -85,8 +130,7 @@ Object::object(AttributeType1 data1,...,AttributeTypeN dataN )
    \begin{enumerate}
    \item Be careful of the conflict between the new in the Default Constructor and in this constructor :
      \begin{itemize}
-     \item if the new is called in the default constructor, we must use the operator delete before to do a new operation a second time
-     \item if the new is not called in the default constructor, 
+     \item if the new is called in the default Constructor
      \end{itemize}
    \item Define the procedure for the XML management :
      \begin{itemize}
@@ -139,3 +183,49 @@ Object::Object(ObjectXML objectxml)
 \end{ndr}
 \ac{tbd}
 \clearpage
+
+
+\section{Object Factories}
+
+\subsection{Purpose}
+
+\subsection{Implementation}
+
+\clearpage
+
+
+
+\label{Sec:DDD-XMLLoading}
+\input{ModelLoadingfromXML}
+
+
+\clearpage
+ \section{Validation of data}
+\subsection{XML schema validation}
+When a XML file bring the data needed by the platform, either all the data are given by the XML file or only required data. When the file contains partial data, that means it describe at least a SiconosModel with a NSDS (Non Smooth Dynamical System), composed of at least one Dynamical System.
+
+\subsection{Check member functions}
+
+
+
+\clearpage
+\section{Saving the data of the platform in a XML file}
+
+
+
+The save of the platform's data is lead from the Model. The function which do this job is
+"saveToXMLFile". It has several things to do before saving tha data in a XML file :
+\begin{itemize}
+        \item checkXMLPlatform() : This first function will perfom verifications on the XML Management platform. It checks the
+        link between the platform's objects and the XML Management objects. If the XML Management
+        platform doesn't exist, it will be created and linked to the objects of the \ac{siconos}
+        platform. Otherwise, every link between the platform and the XML Management is checked to ensure
+        the availability of the XML platform objects.
+        \item savePlatformToXML() : Now, all the objects of the platform are linked to their XML Management object. Therefore,
+        it is possible to save the data of the platform to the XML DOM tree. The information
+        contained in the platform are saved in the DOM tree by using the specific functions given
+        by the XML object.
+        \item checkXMLDOMTree() : The data of the DOM tree is up to date. But It is important to check that these data still
+        respect the XML schema. 
+        \item saveSiconosModelInXMLFile(xmlFile) : The last action to be done is to write the data in memory to a file.
+\end{itemize}
