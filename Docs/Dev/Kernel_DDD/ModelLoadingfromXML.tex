@@ -194,36 +194,6 @@ program.
 In this case, the XML file is similar to the previous case, then the way to create objects of
 the platform apart from a XML file will be detailed in the next section.
 
-\clearpage
- \section{Validation of data}
-\subsection{XML schema validation}
-When a XML file bring the data needed by the platform, either all the data are given by the XML file or only required data. When the file contains partial data, that means it describe at least a SiconosModel with a NSDS (Non Smooth Dynamical System), composed of at least one Dynamical System.
-
-\subsection{Check member functions}
-
-
-
-\clearpage
-\section{Saving the data of the platform in a XML file}
-
-
-
-The save of the platform's data is lead from the Model. The function which do this job is
-"saveToXMLFile". It has several things to do before saving tha data in a XML file :
-\begin{itemize}
-        \item checkXMLPlatform() : This first function will perfom verifications on the XML Management platform. It checks the
-        link between the platform's objects and the XML Management objects. If the XML Management
-        platform doesn't exist, it will be created and linked to the objects of the \ac{siconos}
-        platform. Otherwise, every link between the platform and the XML Management is checked to ensure
-        the availability of the XML platform objects.
-        \item savePlatformToXML() : Now, all the objects of the platform are linked to their XML Management object. Therefore,
-        it is possible to save the data of the platform to the XML DOM tree. The information
-        contained in the platform are saved in the DOM tree by using the specific functions given
-        by the XML object.
-        \item checkXMLDOMTree() : The data of the DOM tree is up to date. But It is important to check that these data still
-        respect the XML schema. 
-        \item saveSiconosModelInXMLFile(xmlFile) : The last action to be done is to write the data in memory to a file.
-\end{itemize}
 
 
 
