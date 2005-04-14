@@ -22,7 +22,7 @@ function compilePlugins() {
 		export LD_LIBRARY_PATH=$PWD;
 	    else
 		export LD_LIBRARY_PATH=$PWD:$LD_LIBRARY_PATH; 
-	    fi;	  
+	    fi;
 	fi;
 	cd $DIR;
     done;
@@ -62,9 +62,9 @@ if test "$SICONOSPATH" = ""; then
 fi;
 
 if test "${LD_LIBRARY_PATH}test" = "test"; then
-   export LD_LIBRARY_PATH=$SICONOSPATH/lib;  
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS;  
 else
-   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$LD_LIBRARY_PATH; 
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS:$LD_LIBRARY_PATH; 
 fi;	 
 
 clean="false";

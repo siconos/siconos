@@ -16,7 +16,6 @@ BasicPlugin.so: BasicPlugin.o
 clean:
 	$(RM) -f BasicPlugin.o BasicPlugin.so
 
-
-
+pkgdata_DATA = BasicPlugin.so
 
 
