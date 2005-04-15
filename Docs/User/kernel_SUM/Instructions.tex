@@ -1,33 +1,96 @@
 \section{Installation of the platform}
 
-First of all, download the platform sources from CVS. Then, in order to install the external libraries needed by the platform, run in the root directory (\textit{SICONOS/})~:
+\subsection{get sources of the platform}
+
+You have to download the sources from our SCN server (see http://gforge.inria.fr/projects/siconos for instructions).
+
+\subsection{External libraries}
+
+The platform needs some external libraries to compile:
+\begin{itemize}
+
+\item Siconos Numerics
+
+\item libxml2
+
+\item lapack++
+
+\item lapack and blas
+
+\item nana
+\end{itemize}
+
+To know the required versions and where these libraries are available on the web, please look at the siconos gforge site (http://gforge.inria.fr/projects/siconos).
+
+
+\subsection{Generation of configure script}
+
+The platform version of SVN is a developer version and is not ready to be installed. You have to run a script to generate configuration script.
+This script is situated in Kernel directory.
 \begin{verbatim}
-  make instext
-\end{verbatim}
-And to compile the platform~:
-\begin{verbatim}
-  make all
+% ./reconf.sh
 \end{verbatim}
 
+
+\subsection{Run configure script}
+By default, the platform is installed in /usr/local (you must be logged as root to be allowed to write some files in this directory).
+\begin{verbatim}
+% ./configure
+\end{verbatim} 
+
+To set another installation directory, use --prefix=path flag. for example :
+\begin{verbatim}
+% ./configure --prefix=/home/User/Siconos
+\end{verbatim} 
+
+There may be some parameters to set; to know them, run 
+\begin{verbatim}
+% configure --help 
+\end{verbatim}
+
+If an external library is not installed in /usr or /usr/local, you have to give its path to configure script by the flag : --with-local[\textit{library name}]=[\textit{path of this library}].
+
+For example : 
+\begin{verbatim}
+% ./configure --with-localnana=/home/User/nana-2.5
+\end{verbatim}
+
+\textit{\textbf{Nota:} you have only to run configure script once, you can specify several flags together. }
+
+\subsection{compiling the platform}
+\begin{verbatim}
+% make
+\end{verbatim}
+This command compiles the platform and creates libraries.
+
+\subsection{Installing the platform}
+\begin{verbatim}
+% make install
+\end{verbatim}
+this command installs the platform in /usr/local by default, or in the directory specified during configure running.
+
+
+
+
 \section{Launch the platform}\label{run}
-First of all, you have to set a \verb+SICONOSPATH+ environment variable to the complete path of the siconos root directory\footnote{for example "\$HOME/SICONOS" ; you can run "source siconos.csh"}. After, put your input files in the directory \textit{sample}. The input files are~:
+First of all, you have to set a \verb+SICONOSPATH+ environment variable to the complete path of the siconos install directory\footnote{for example "\$HOME/SICONOS" }. 
+The input files are :
 \begin{itemize}
 \item a command file in C++(like \textit{command.cpp}) which lead the execution\footnote{too see an example of command file report to Annexe A}~;
 \item an \ac{xml} file which describes your system\footnote{it is optional. Anyway, you can put it in another directory}.
-\item all the plugin you want to use in a C file (like \textit{myPlugin.c}).
+\item all the plugin you want to use in a C file (like \textit{myPlugin.c}). Its name must finish by ¨Plugin.c¨
 \end{itemize}
-Run the command~: 
+Run the command (we assume you are in the directory containing your command file): 
 \begin{verbatim}
-  siconos yourCommandFile.cpp
+%  siconos yourCommandFile.cpp
 \end{verbatim}
 This will compile your plugins (if there are), your command file and link it to the platform.
 In your command file, you can for example create a model using an \ac{xml} file place in the \textit{sample} directory.\\
 
 Remark :
 \begin{enumerate}
-\item The siconos executable are in  \verb+$SICONOSPATH/siconos/+ directory.\\
-\item If you want to use a plugin which is not in the directory \textit{sample} or in the directory \textit{src/plugin}, you must modify the \verb+LD_LIBRARY_PATH+ environment variable. It tell where to find libraries and plugins, so don't forget to add the path to this plugin in this environment variable (see \ref{plugin}).
-\item The platform create a temporary file \textit{.siconos} in your directory. You have to be at least 20Mo of free space in your disk.  
+\item The siconos executable are placed in the same directory of your command file. If you want to run this file without the siconos script, you have to specify in environment variable \verb+LD_LIBRARY_PATH+ the paths of the shared libraries needed by the platform : plugins, lib directory of your siconos installation. \\
+\item If you want to use a plugin which is not in the directory \textit{sample} or in the directory \textit{src/plugin}, you must modify the \verb+LD_LIBRARY_PATH+ environment variable. It tell where to find libraries and plugins, so don't forget to add the path to this plugin in this environment variable (see \ref{plugin}) Note that this plugin will NOT be compiled automatically by the siconos script.
 \end{enumerate}
 
 
@@ -35,28 +98,24 @@ Remark :
 If you have the source files of the platform, you can modify them.
 After that, you must re-compile the platform with~:
 \begin{verbatim}
-  make all
+%  make
 \end{verbatim}
 
 \section{Test the platform} 
-If you modify the platform, you should run test to validate your modification. Do~:
+If you modify the platform, you should run test to validate your modification. Do (cppUnit must be installed):
 \begin{verbatim}
-  make buildtest
-  make runtest
+%  make check
 \end{verbatim}
 
 This will launch a test suite with CppUnit.
 If you add a class or a function, don't forget to make a test class.
-After doing this, you can clean all the test data and binary file by~:
-\begin{verbatim}
-  make cleantest
-\end{verbatim}
 
-All commands can be launch on the root directory (build, run or clean all the test) or in a specified directory.
+All commands can be launch on the root directory (all, clean, check) or in a specified directory.
 
 \section{Make a plugin}\label{plugin}
 
-To make a plugin, create a file \textit{MyPlugin.c} and declare your functions with \verb+extern "C"+. Example for a vector field function~:
+
+To make a plugin, create a file \textit{MyPlugin.c} and declare your functions with \verb+extern "C"+. The name of the plugin file must end by \textit{Plugin.c} : myPlugin.c, electronical\_Plugin.c are correct, error\_plugin.c or badName.c are not. If the name of your plugin does not respect this rule, the siconos script will not automatically compile and add it to \verb+LD_LIBRARY_PATH+ before running. Example for a vector field function~:
 \begin{verbatim}
 extern "C" void vectorField(int sizeOfX, double time, double& xPtr, double& xdotPtr)
 {
@@ -69,13 +128,14 @@ extern "C" void vectorField(int sizeOfX, double time, double& xPtr, double& xdot
 }
 \end{verbatim}
 You must respect the parameter order for each function you declare. You can look at the \textit{BasicPlugin.c} file in \textit{src/plugin} directory to see examples.
-To compile the plugin, do~:
+If you do not use the siconos script to compile the plugin :
+To compile the plugin, do (we assume tou have g++ 3.*.* and your OS is Linux):
 \begin{verbatim}
-  g++ -fPic -c myPlugin.c -o myPlugin.o
-  g++ -fPic -shared -W -O myPlugin.o -o myPlugin.so
+%  g++ -c myPlugin.c
+%  g++ -shared  myPlugin.o -o myPlugin.so
 \end{verbatim}
 The plugin \textit{myPlugin.so} is now created.
 To use it, you have to precise its name and the function name in the \ac{xml} file (see xml part).
 You can add the complete plugin path to the \verb+LD_LIBRARY_PATH+ environment variable. If you don't do this, you have to precise it in the \ac{siconos} \ac{xml} file.
 
-Another way is to put the file \textit{MyPlugin.c} in the sample directory and run the siconos executable (see \ref{run}).
+

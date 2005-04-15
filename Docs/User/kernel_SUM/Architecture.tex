@@ -7,24 +7,16 @@ The software \textit{siconos} will be a set of C++ libraries driven by a main pr
 In this distribution, the root directory is named \textit{SICONOS/}. It contains the following sub-directories and files~: 
 \begin{itemize}
 
-\item  \textit{config/} : contains the configuration files needed by the platform. The sub-dir \textit{xmlschema} holds the schema of the \ac{siconos} \ac{xml} files.
-
-\item  \textit{doc/} : contains this document in a pdf file \textit{siconos.pdf}. 
-
-\item \textit{ext/} : contains external libraries (like libXML2, Lapack++, \dots) needed by the platform. %(if the user has not already installed them on his computer).
+\item  \textit{bin/} : contains binaries of the platform.
 
 \item \textit{include/} : contains header files of internal libraries.
 
-\item \textit{lib/} : contains the internal libraries. Their name is libXXXX.a.
+\item \textit{lib/} : contains the libraries of the platform.
 
-\item \textit{sample/} : contains examples of uses of the platform, and it is the repertory where the user can put their files (see Instruction chapter).
-
-\item \textit{siconos/} : contains the executable file \textit{siconos}. This executable permits to launch a simulation.
-
-\item \textit{README.txt} : instructions to install the software, etc.
+\item \textit{share/} : contains some configuration files, necessary ton run a simulation with the platform : \acs{xml} schema, ...
 
 \end{itemize}
 
 
-\section{User data}
-Each system which is simulated by the platform must have a particular workspace, which is a directory. The path of the directory should be given by the user. By default, simulations files (\ac{xml} files and vector / matrix data files) are placed in the \textit{samples} directory of the platform.
+%\section{User data}
+%Each system which is simulated by the platform must have a particular workspace, which is a directory. The path of the directory should be given by the user. By default, simulations files (\ac{xml} files and vector / matrix data files) are placed in the \textit{samples} directory of the platform.
