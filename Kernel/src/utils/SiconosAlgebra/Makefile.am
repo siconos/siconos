@@ -1,4 +1,4 @@
-# Makefile.am --- SICONOS
+# Makefile.am --- SICONOS - SiconosAlgebra
 
 include $(top_srcdir)/config/Make-rules
 
@@ -7,13 +7,7 @@ include $(top_srcdir)/config/Make-rules
 
 SUBDIRS = test 
 
-#lib_LIBRARIES = libSiconosAlgebra.a
-#libSiconosAlgebra_a_SOURCES = SiconosVectorException.cpp SiconosMatrixException.cpp NewSiconosVector.cpp SimpleVector.cpp CompositeVector.cpp SiconosMatrix.cpp \
-#				SiconosVectorException.h SiconosMatrixException.h NewSiconosVector.h SimpleVector.h CompositeVector.h SiconosMatrix.h
-#include_HEADERS = SiconosVectorException.h SiconosMatrixException.h NewSiconosVector.h SimpleVector.h CompositeVector.h SiconosMatrix.h 
-
-
-lib_LTLIBRARIES = libSiconosAlgebra.la
+noinst_LTLIBRARIES = libSiconosAlgebra.la
 libSiconosAlgebra_la_SOURCES = SiconosVectorException.cpp SiconosMatrixException.cpp NewSiconosVector.cpp SimpleVector.cpp CompositeVector.cpp SiconosMatrix.cpp \
 				SiconosVectorException.h SiconosMatrixException.h NewSiconosVector.h SimpleVector.h CompositeVector.h SiconosMatrix.h
 include_HEADERS = SiconosVectorException.h SiconosMatrixException.h NewSiconosVector.h SimpleVector.h CompositeVector.h SiconosMatrix.h 

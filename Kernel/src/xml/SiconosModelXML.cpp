@@ -12,7 +12,7 @@
 SiconosModelXML::SiconosModelXML()
 {
   IN("SiconosModelXML::SiconosModelXML()\n");
-  //xmlKeepBlanksDefault(0);
+
   if (getenv("SICONOSPATH") == NULL)
     RuntimeException::selfThrow("Environment variable SICONOSPATH is not defined.");
 
@@ -46,12 +46,6 @@ SiconosModelXML::SiconosModelXML()
   // the default schema will be used
   xmlSchemaFile = XML_SCHEMA;//DEFAULT_XMLSCHEMA;
 
-  //  // creation of the time node
-  //  this->timeNode = xmlNewChild(this->rootNode, NULL, (xmlChar*)SM_TIME.c_str(), NULL);
-  //
-  //  // we must construct the NSDSXML which is required
-  //  this->nsdsXML = new NSDSXML( xmlNewChild(this->rootNode, NULL, (xmlChar*)SM_STRATEGY.c_str(), NULL) );
-
   OUT("SiconosModelXML::SiconosModelXML()\n");
 }
 
@@ -78,30 +72,9 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath)
 
   if (siconosModelXMLFilePath != NULL)
   {
-    //    string schemaFile = getenv("SICONOSPATH") + XML_SCHEMA_FILE;
     //      LIBXML_TEST_VERSION
 
     this->doc = NULL;
-
-    //----------Load Schema--------//
-    /*
-    xmlSchemaParserCtxtPtr ctxt = xmlSchemaNewParserCtxt(schemaFile.c_str());
-    xmlSchemaSetParserErrors(ctxt,(xmlSchemaValidityErrorFunc) fprintf,(xmlSchemaValidityWarningFunc) fprintf, stderr);
-    */
-
-    //----------Verifify the Schema validity------------//
-    /*
-     xmlSchemaPtr schema = xmlSchemaParse(ctxt);
-     xmlSchemaFreeParserCtxt(ctxt);
-
-     if (schema == NULL)
-     XMLException::selfThrow("SiconosModelXML - please correct the xml schema : " + schemaFile + ".");
-
-     xmlSchemaValidCtxtPtr validctxt = xmlSchemaNewValidCtxt(schema);
-
-     xmlSchemaSetValidErrors(validctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
-    */
-
 
     //----------Loads the XML input file------------//
     this->doc = xmlParseFile(siconosModelXMLFilePath);
@@ -199,8 +172,6 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath)
 
     //----------Verififys the XML file respects the schema------------//
 
-    // CORRECTION POUR EVITER seg fault sur fedora core 2 --- 06/01/2005
-    //int xmlValid = 0;
     int xmlValid = xmlSchemaValidateDoc(validctxt, doc);
 
 
@@ -208,22 +179,11 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath)
     xmlSchemaFree(schema);
 
     if (xmlValid == 0) cout << "SiconosModelXML - Your XML model file : " << siconosModelXMLFilePath << " is valid with respect to the schema" << endl;
-    //     if (xmlValid == 0) printf("SiconosModelXML - Your XML model file : %s is valid with respect to the schema %s \n", siconosModelXMLFilePath,schemaFile);
     else if (xmlValid == -1)
       XMLException::selfThrow("SiconosModelXML - Internal or API error to verify your XML model file : " + (string)siconosModelXMLFilePath + ".");
     else //positive error code number returned
       XMLException::selfThrow("SiconosModelXML - Your XML model file " + (string)siconosModelXMLFilePath + " doesn't respect the siconos schema.");
 
-    //------------Verify if the root element node exists----------//
-    /*      xmlNode *rootNode = xmlDocGetRootElement(doc);
-
-    if (rootNode==NULL)
-    {
-    xmlFreeDoc(doc);
-    XMLException::selfThrow("SiconosModelXML - Internal error : get the root node.");
-    }
-    else this->rootNode = rootNode;
-    */
     //-------------------Load NSDSXML, StrategyXML and to and T ---------------------//
     this->loadModel(rootNode);
   }
@@ -365,7 +325,6 @@ void SiconosModelXML::loadModel(Model * model)
       model->getNonSmoothDynamicalSystem()->setNSDSXML(this->nsdsXML);
 
       // creation of the nodes of the NSDS with the right data
-      //this->nsdsXML->loadNSDS( model->getNSDS() );
       node = xmlNewChild(this->rootNode, NULL, (xmlChar*)NSDS_TAG.c_str(), NULL);
       this->nsdsXML->updateNSDSXML(node, model->getNonSmoothDynamicalSystem());
     }
@@ -459,7 +418,6 @@ bool SiconosModelXML::checkSiconosDOMTree()
       this->saveSiconosModelInXMLFile("invalidDOMtree.xml");
       cout << "Invalid DOM tree saved in \"invalidDOMtree.xml\" file." << endl;
       XMLException::selfThrow("SiconosModelXML - The DOM tree in memory doesn't respect the XML schema.");
-      //cout<<"WARNING : SiconosModelXML - The DOM tree in memory doesn't respect the XML schema."<<endl;
     }
   }
   cout << "<< SiconosModelXML::checkSiconosDOMTree()" << endl;

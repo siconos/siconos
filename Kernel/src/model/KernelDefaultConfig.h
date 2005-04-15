@@ -13,7 +13,7 @@ int   VECTOR_MAX_SIZE = 10;
 string  FILE_STORAGE = N_ASCII; // N_ASCII or N_BINARY
 
 /*const*/
-string  XML_SCHEMA = "/config/xmlschema/SiconosModelSchema-V1.2.xsd";
+string  XML_SCHEMA = "/share/SICONOS/SiconosModelSchema-V1.2.xsd";
 
 string  DefaultSolver = "default";
 string  DefaultAlgoName = "default";
@@ -24,20 +24,6 @@ double  DefaultAlgoSearchDirection = -1.0;
 
 string DefaultComputeInput = "BasicPlugin:computeInput";
 string DefaultComputeOutput = "BasicPlugin:computeOutput";
-
-//#else
-//
-//extern int MATRIX_MAX_SIZE;
-//extern int VECTOR_MAX_SIZE;
-//extern string FILE_STORAGE;
-//extern string XML_SCHEMA;
-//
-//extern string   DefaultSolver;
-//extern string   DefaultAlgoName;
-//extern string   DefaultAlgoNormType;
-//extern double   DefaultAlgoTolerance;
-//extern int    DefaultAlgoMaxIter;
-//extern double   DefaultAlgoSearchDirection;
 
 
 #endif

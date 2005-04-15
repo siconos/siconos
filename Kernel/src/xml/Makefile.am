@@ -1,4 +1,4 @@
-# Makefile.am --- SICONOS
+# Makefile.am --- SICONOS - xml
 
 include $(top_srcdir)/config/Make-rules
 
@@ -6,9 +6,9 @@ include $(top_srcdir)/config/Make-rules
 	$(CXXCOMPILE) -c $<
 
 SUBDIRS = test
-#EXTRA_DIST =
 
-lib_LTLIBRARIES = libSiconosXml.la
+
+noinst_LTLIBRARIES = libSiconosXml.la
 libSiconosXml_la_SOURCES = AdamsXML.cpp BoundaryConditionXML.cpp CFDXML.cpp \
 		ComplementarityConditionNSLXML.cpp DSInputOutputXML.cpp DSXML.cpp \
 		EqualityConstraintXML.cpp InteractionXML.cpp LagrangianDSIOXML.cpp LagrangianECXML.cpp LagrangianLinearDSIOXML.cpp \

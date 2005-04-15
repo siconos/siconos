@@ -163,8 +163,8 @@ for ac_dir in		\
     ; \
 do  if test -r "$ac_dir/libNumericsSolvers_lcp.a" ; then
        SiconosNumerics_lib="yes"
-       # SICONOSNUMERICS_LIBRARIES="-L$ac_dir -lNumericsSolvers_cfd -lNumericsSolvers_lcp -lNumericsSolvers_rp -lNumericsSolvers_cfp -lNumericsSolvers_rd -lodepack"
-       SICONOSNUMERICS_LIBRARIES="-L$ac_dir -lNumericsSolvers_cfd -lNumericsSolvers_lcp -lNumericsSolvers_rp -lNumericsSolvers_cfp -lNumericsSolvers_rd"
+       #SICONOSNUMERICS_LIBRARIES="-L$ac_dir -lNumericsSolvers_cfd -lNumericsSolvers_lcp -lNumericsSolvers_rp -lNumericsSolvers_cfp -lNumericsSolvers_rd"
+       SICONOSNUMERICS_LIBRARIES="-L$ac_dir -lNumerics"
        AC_MSG_RESULT([yes])
        break	
     fi
