@@ -3,5 +3,4 @@ LIBEXT_LDFLAGS=@SICONOS_EXT_LDFLAGS@
 CXX=@CXX@
 CXXFLAGS=@CXXFLAGS@
 CXX_DYNLIB=@CXX_DYNLIB@
-SICONOS_LIBS = -lSiconosException -lSiconosSharedLibrary -lSiconosAlgebra -lSiconosMemory -lSiconosXml -lModelingTools -lSimulationTools -lModel
-
+SICONOS_LIBS = -lSiconosKernel
