@@ -21,17 +21,13 @@
 #include "check.h"
 
 
-Model::Model()
+Model::Model():
+  // initialisation to pass through READ_UNINIT_MEM
+  t(0.0), t0(0.0), T(0.0)
 {
   this->strategy = NULL;
   this->modelxml = NULL;
   this->nsds = NULL;
-
-  // initialisation to pass through READ_UNINIT_MEM
-  this->t = 0.0;
-  this->t0 = 0.0;
-  this->T = 0.0;
-
 }
 
 //Model::Model(char *xmlFile, float t, float t0, float T, NonSmoothDynamicalSystem* nsds, Strategy* strategy)
@@ -79,6 +75,7 @@ Model::Model(char *xmlFile, /*float t,*/ float t0, float T, string title, string
   this->strategy = NULL;
   this->modelxml = NULL;
   this->nsds = NULL;
+
   if (xmlFile != NULL)
   {
     /*
@@ -127,41 +124,23 @@ Model::Model(char *xmlFile, /*float t,*/ float t0, float T, string title, string
   OUT("Model::Model\n");
 }
 
-Model::Model(float t0, float T, string title, string author, string description, string date, string schema)
+Model::Model(float t0, float T, string title, string author, string description, string date, string schema):
+  t(t0), t0(t0), T(T), title(title), author(author), description(description), date(date), xmlSchema(schema)
 {
   IN("Model::Model\n");
   cout << "Model::Model" << endl;
-  this->strategy = NULL;
-  this->modelxml = NULL;
-  this->nsds = NULL;
   /*
    * in this case, needed data are given in parameters
-   */
-  /*
    * no xml file in input
    * the DOM tree must be created
    * no "linkModelXML" to do
    */
-
-  /** T final */
-  this->T  = T;
-
-  /** t0 initial time */
-  this->t0 = t0;
-
   if (T < t0 || T < 0)
     RuntimeException::selfThrow("Model::createModel - T and/or t0 value not suitable for the simulation.");
-
-  /** t current id optionnal, the default value is t0 which is required */
-  this->t = t0;
-
-  this->title = title;
-  this->author  = author;
-  this->description = description;
-  this->date  = date;
   if (schema == "none") this->xmlSchema = XML_SCHEMA; //xmlSchema;
-  else this->xmlSchema = schema;
-
+  this->strategy = NULL;
+  this->modelxml = NULL;
+  this->nsds = NULL;
   OUT("Model::Model\n");
 }
 
