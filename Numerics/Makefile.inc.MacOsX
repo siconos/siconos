@@ -22,6 +22,7 @@ GCC = g++
 #GCC = insure
 CFLAGS = -g -fbounds-check -w -Wno-deprecated -fPIC
 CCFLAGS = -g -fbounds-check -w -fPIC
+SHAREDFLAG = -dynamiclib
 FORTRAN  = g77
 FF = g77
 FC = pgf90
@@ -58,19 +59,31 @@ MKDIR = mkdir -p
 #--- MAKE -----------------------------------------
 MAKE = make
 
+#--- DOXYGEN --------------------------------------
+DOXYGEN = doxygen
+DOXYGEN_CFG = $(NUMERICSPATH)/config/DoxygenNumerics.cfg
 
 #--- LIBG2C -----------------------------------
 LIBG2C_DIR = -L/sw/lib
 LIBG2C_LIB = -lg2c
 LIBG2C_INC = -I/sw/include
 
-
+#--- CPPUNIT --------------------------------------
+#CPPUNIT_PATH = /home0/barbier/siconos/LIB_EXTERNALISATION/ext_EXT/cppunit-1.10.2/cppunit
+#CPPUNIT_INC = -I$(CPPUNIT_PATH)/include
+#CPPUNIT_LIB_PATH = $(CPPUNIT_PATH)/lib
+#CPPUNIT_LIB = -L$(CPPUNIT_LIB_PATH) -lcppunit
 
 #--- INCLUDE -----------------------------------
 INCLUDE = -I$(NUMERICS_INC)
-INCLUDE_EXT = -I$(LIBG2C_INC)
-INCLUDE_DEP = -I$(NUMERICS_DIR)/src/odepack
+INCLUDE_EXT = -I$(LIBG2C_INC) -I$(CPPUNIT_INC)
+INCLUDE_DEP = -I$(NUMERICS_DIR)/src/odepack -I$(NUMERICS_DIR)/src/solverpack
+
+#--- LIB NAME ----------------------------------
+ODEPACKLIB    = libodepack$(OS).a
+SOLVERPACKLIB    = libSolverpack.a
+LIBDYN_NUMERICS = libNumerics.so
 
 #--- LIBS --------------------------------------
 #LIBS =  
-#---------------[ end of makefile.def ]-----------------------
+#---------------[ end of makefile.inc.MacOsX ]-----------------------

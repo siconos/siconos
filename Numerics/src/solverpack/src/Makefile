@@ -40,32 +40,37 @@ OBJETS_RP= rp_latin.o rp_gsnl.o solve_rp.o
 
 OBJETS_RD= rd_latin.o solve_rd.o
 
+OBJETS = cfd_latin.o  cfp_gsnl.o   gsnl_lcp.o   lemke_lcp.o  projc.o      rp_gsnl.o    solve_cfp.o  solve_rp.o \
+	 cfd_lcp.o    cfp_latin.o  latin_lcp.o  projf.o      rp_latin.o   solve_lcp.o \
+	 cfp_gcp.o    gcp_lcp.o    lcp_cfd.o    rd_latin.o   solve_cfd.o  solve_rd.o
 
 all : build lib
 
 build : $(OBJETS_LCP) $(OBJETS_RP) $(OBJETS_CFP) $(OBJETS_CFD) $(OBJETS_RD)
 
 lib : NumericsSolvers_lcp.a NumericsSolvers_rp.a NumericsSolvers_cfp.a \
-		NumericsSolvers_cfd.a NumericsSolvers_rd.a libSolvers.so
+		NumericsSolvers_cfd.a NumericsSolvers_rd.a libSolverpack.a
 	cp *.a $(NUMERICS_LIB)
+#	cp *.so $(NUMERICS_LIB)
 
 NumericsSolvers_lcp.a: $(OBJETS_LCP)
-	ar cr libNumericsSolvers_lcp.a $(OBJETS_LCP)
+	$(ARCH) cr libNumericsSolvers_lcp.a $(OBJETS_LCP)
 
 NumericsSolvers_rp.a: $(OBJETS_RP)
-	ar cr libNumericsSolvers_rp.a $(OBJETS_RP)
+	$(ARCH) cr libNumericsSolvers_rp.a $(OBJETS_RP)
 
 NumericsSolvers_cfp.a: $(OBJETS_CFP)
-	ar cr libNumericsSolvers_cfp.a $(OBJETS_CFP)
+	$(ARCH) cr libNumericsSolvers_cfp.a $(OBJETS_CFP)
 
 NumericsSolvers_cfd.a: $(OBJETS_CFD)
-	ar cr libNumericsSolvers_cfd.a $(OBJETS_CFD)
+	$(ARCH) cr libNumericsSolvers_cfd.a $(OBJETS_CFD)
 
 NumericsSolvers_rd.a: $(OBJETS_RD)
-	ar cr libNumericsSolvers_rd.a $(OBJETS_RD)
+	$(ARCH) cr libNumericsSolvers_rd.a $(OBJETS_RD)
 
-libSolvers.so:$(OBJETS_LCP) $(OBJETS_RP) $(OBJETS_CFP) $(OBJETS_CFD) $(OBJETS_RD)
-	gcc -shared $(OBJETS_LCP) $(OBJETS_RP) $(OBJETS_CFP) $(OBJETS_CFD) $(OBJETS_RD) -o libSolvers.so
+libSolverpack.a:$(OBJETS)
+	$(ARCH) cr libSolverpack.a $(OBJETS)
+#	gcc $(SHAREDFLAG) $(OBJETS) -o libSolvers.so
 
 clean:
 	rm -f *.o *.a

@@ -31,6 +31,7 @@ FORTRAN  = g77
 CFLAGS = -g -fbounds-check -w -Wno-deprecated -fPIC
 CCFLAGS = -g -fbounds-check -w -fPIC
 FFLAGS =
+SHAREDFLAG = -shared
 FOPTS = -funroll-all-loops -O3 -fno-emulate-complex -fomit-frame-pointer
 ARCH = ar
 ARCHFLAGS = cr
@@ -73,13 +74,10 @@ LIBG2C_LIB = -lg2c
 LIBG2C_INC = -I/sw/include
 
 #--- CPPUNIT --------------------------------------
-CPPUNIT_PATH = /home0/barbier/siconos/LIB_EXTERNALISATION/ext_EXT/cppunit-1.10.2/cppunit
-#CPPUNIT_INC = `$(CPPUNIT_PATH)/bin/cppunit-config --cflags` -w
-#CPPUNIT_LIB = `$(CPPUNIT_PATH)/bin/cppunit-config --libs`
-#CPPUNIT_PATH = /home0/barbier/siconos/LIB_EXTERNALISATION/ext_EXT/cppunit-1.10.2
-CPPUNIT_INC = -I$(CPPUNIT_PATH)/include
-CPPUNIT_LIB_PATH = $(CPPUNIT_PATH)/lib
-CPPUNIT_LIB = -L$(CPPUNIT_LIB_PATH) -lcppunit
+#CPPUNIT_PATH = /home0/barbier/siconos/LIB_EXTERNALISATION/ext_EXT/cppunit-1.10.2/cppunit
+#CPPUNIT_INC = -I$(CPPUNIT_PATH)/include
+#CPPUNIT_LIB_PATH = $(CPPUNIT_PATH)/lib
+#CPPUNIT_LIB = -L$(CPPUNIT_LIB_PATH) -lcppunit
 
 #--- INCLUDE -----------------------------------
 INCLUDE = -I$(NUMERICS_INC)
@@ -88,6 +86,8 @@ INCLUDE_DEP = -I$(NUMERICS_DIR)/src/odepack -I$(NUMERICS_DIR)/src/solverpack
 
 #--- LIB NAME ----------------------------------
 ODEPACKLIB    = libodepack$(OS).a
+SOLVERPACKLIB    = libSolverpack.a
+LIBDYN_NUMERICS = libNumerics.so
 
 #--- LIBS --------------------------------------
 LIBS =  $(LIBG2C_LIB)
