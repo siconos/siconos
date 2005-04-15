@@ -1,0 +1,40 @@
+{\ttfamily \raggedright \small
+\#include\ "{}SiconosObject.h"{}\\
+\#include\ <{}iostream>{}\\
+\ \\
+\ \\
+ObjectSiconos::ObjectSiconos():\\
+\ \ \textsl{//\ Construtors\ of\ the\ Base\ Class}\\
+\ \ \ \ BaseObjectSiconos(),\\
+\ \ \textsl{//\ Constructors\ of\ the\ Built-{}in\ types}\\
+\ \ \ \ type("{}OBJECTSICONOS\underline\ TYPE"{}),att(0),\\
+\ \ \textsl{//\ Constructors\ of\ the\ object\ members\ (composition)}\\
+\ \ \ \ compositionObject()\\
+\{\\
+\ \ cout\ <{}<{}\ "{}ObjectSiconos\ -{}-{}\ \textbf{default}\ Constructor"{}\ <{}<{}\ endl;\\
+\ \ \\
+\ \ \textsl{//\ Initialization\ of\ pointers\ on\ external\ objects}\\
+\ \ objectsiconosxml\ =0;\\
+\ \ externalObject\ =0;\\
+\ \ \\
+\ \ \textsl{//\ Do\ we\ need\ to\ call\ the\ new\ operator\ ?}\\
+\ \ \textsl{//\ externalObject\ =\ new\ ExternalObject();}\\
+\}\\
+\ \\
+BaseObjectSiconos::BaseObjectSiconos():i(0),type("{}BASE\underline\ TYPE"{})\\
+\ \ \ \ \{\ \\
+\ \ \ \ \ \ cout\ <{}<{}\ "{}BaseObjectSiconos\ -{}-{}\ \textbf{default}\ Constructor"{}\ <{}<{}\ endl;\\
+\ \ \ \ \}\\
+\ \\
+CompositionObject::CompositionObject():i(0)\\
+\ \ \ \ \{\\
+\ \ \ \ \};\\
+\ \\
+ExternalObject::ExternalObject():i(0)\\
+\ \ \ \ \{\\
+\ \ \ \ \}\\
+\ \\
+\ \\
+ }
+\normalfont\normalsize
+

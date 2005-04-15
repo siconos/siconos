@@ -1,0 +1,43 @@
+{\ttfamily \raggedright \small
+\ \\
+\ \\
+\ \\
+\ \\
+\ \\
+\ \\
+\ \\
+\ \\
+\ \\
+\ \\
+\ \\
+\ \\
+\ \\
+\ \\
+\ \\
+\ \\
+\ \\
+\#include\ "{}SiconosObject.h"{}\\
+\#include\ <{}iostream>{}\\
+\ \\
+ObjectSiconos::ObjectSiconos(\textbf{int}\ aatt,\ string\ ttype):BaseObjectSiconos(),type(ttype),att(aatt),\ compositionObject()\\
+\{\\
+\ \ cout\ <{}<{}\ "{}ObjectSiconos\ -{}-{}\ Constructor\ with\ minimal\ data"{}\ <{}<{}\ endl;\\
+\ \ ObjectSiconos();\ \textsl{//\ Fix\ the\ order\ ??}\\
+\ \ externalObject\ =\ \textbf{new}\ ExternalObject(aatt);\\
+\}\\
+\ \\
+CompositionObject::CompositionObject(\textbf{int}\ ii)\\
+\ \ \ \ \{\\
+\ \ \ \ \ \ i\ =ii;\\
+\ \ \ \ \};\\
+\ \\
+\ \\
+ExternalObject::ExternalObject(\textbf{int}\ ii)\\
+\ \ \ \ \{\\
+\ \ \ \ \ \ i=\ ii;\\
+\ \ \ \ \}\\
+\ \\
+\ \\
+ }
+\normalfont\normalsize
+
