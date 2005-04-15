@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- SICONOS Model XML file -->
+
+<SiconosModel>
+	<Title>title</Title>
+  <Author>author</Author>
+  <Description>description</Description>
+  <Date>date</Date>
+  <SchemaXML>/config/xmlschema/SiconosModelSchema-V1.2.xsd</SchemaXML>
+	<Time>
+		<t0>0.0</t0>
+		<T>10.0</T>
+	</Time>
+
+	<NSDS bvp='false'>
+	
+		<!-- DSs defined in the problem -->
+		<DS_Definition>		
+			<LagrangianLinearTIDS number='1'>
+				<Id> Ball </Id>				
+				<n>6</n>
+				<StepsInMemory>1</StepsInMemory>				
+				<q0 vectorSize='3'>
+					1.0 0.0 0.0
+				</q0>
+				<Velocity0  vectorSize='3'>
+					0.0 0.0 0.0
+				</Velocity0>
+				<Fext vectorPlugin="BallPlugin:ballFExt"/>
+				<M matrixRowSize='3' matrixColSize='3'>	
+					<row>1.0 0.0 0.0</row>
+					<row>0.0 1.0 0.0</row>
+					<row>0.0 0.0 1.0</row>
+				</M>			
+				<ndof>3</ndof>								
+				<K matrixRowSize='3' matrixColSize='3'>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+				</K>
+				<C matrixRowSize='3' matrixColSize='3'>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+				</C>
+			</LagrangianLinearTIDS>
+			
+			<LagrangianLinearTIDS number='2'> 
+				<Id> Ground </Id>
+				<n>2</n>
+				<StepsInMemory>1</StepsInMemory>				
+				<q0 vectorSize='1'>
+					0.0
+				</q0>	
+				<Velocity0 vectorSize='1'>
+					0.0
+				</Velocity0>
+				<Fext vectorPlugin="BallPlugin:groundFExt"/>
+				<M matrixRowSize='1' matrixColSize='1'>	
+					<row>1.0 </row>
+				</M>			
+				
+				<ndof>1</ndof>								
+				<K matrixRowSize='1' matrixColSize='1'>
+					<row>0.0</row>
+				</K>
+				<C matrixRowSize='1' matrixColSize='1'>
+					<row>0.0</row>
+				</C>			
+
+			</LagrangianLinearTIDS>	
+		</DS_Definition>
+
+
+		<!-- Interactions defined in the problem -->		
+		<Interaction_Definition>
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
+			<Interaction number='1'>
+				<Status>0</Status>
+				<Id>Ball-Ground</Id>
+				<nInter> 1 </nInter>
+				<!-- List of couple of DS concerned by this interaction -->			
+				<DS_Concerned>
+					<DS number='1' interactsWithDS_Number='2'/>			
+				</DS_Concerned>									
+											
+				<!-- Relation of this interaction -->				
+				<Interaction_Content>		
+					<LagrangianLinear>
+						<H matrixRowSize='1' matrixColSize='4'>
+						<!-- <row> 1.0  0.0  0.0 -1.0</row> The right value if the Constraint on the plane is taken into account -->
+	                         <row> 1.0  0.0  0.0 -0.0</row>
+						</H>
+						<b vectorSize='1'>
+							0.0
+						</b>
+					</LagrangianLinear>			
+					<!-- NS Law of this interaction	-->
+					<NewtonImpactLaw>
+						<e>0.9</e>				
+					</NewtonImpactLaw>
+				</Interaction_Content>	
+			</Interaction>				
+
+		</Interaction_Definition>		
+	
+	</NSDS>
+	<!-- Strategy to use in order to solve the problem -->	
+	<Strategy type='TimeStepping'>
+
+		<TimeDiscretisation isConstant='true'>	
+			<h>0.005</h>
+			<tk vectorSize='2'>0 0</tk>
+			<hMin>0</hMin>
+			<hMax>0</hMax>
+		</TimeDiscretisation>				
+
+		<!-- One Step Integrators -->				
+		<OneStepIntegrator_Definition>
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
+			<Moreau>
+				<DS_Concerned size='1'> <!-- Scaling -->
+					<DS number='1'/>
+				</DS_Concerned>		
+				<Theta> 1.0</Theta>
+			</Moreau>					
+
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
+			<Moreau>
+				<DS_Concerned size='1'>				
+					<DS number='2'/>
+				</DS_Concerned>
+				<Theta> 0.5</Theta>
+			</Moreau>					
+
+		</OneStepIntegrator_Definition>
+
+		<!-- One Step NS Problem of th Strategy-->
+		<OneStepNSProblem>
+		 	<LCP>
+				<n>1</n>			
+<!--				<M matrixRowSize='1' matrixColSize='1'>
+					<row> 1.0 </row>
+				</M>
+				<q vectorSize='1'> 1.0</q> -->
+				<Interaction_Concerned>
+					<Interaction number='1'/>
+				</Interaction_Concerned>			
+		 	</LCP>
+		 	<Solver>
+				<LcpSolving>
+<!--					<Gsnl maxIter="101" tolerance="0.0001" normType="max"/> -->
+<!--					<Latin maxIter="101" tolerance="0.0001" normType="max" searchDirection="0.6"/> -->
+<!--					<Lemke maxIter="101"/> -->
+					<Gcp maxIter="101" tolerance="0.0001" normType="max"/>
+				</LcpSolving>
+			</Solver>
+		 </OneStepNSProblem>
+	</Strategy>	
+</SiconosModel>

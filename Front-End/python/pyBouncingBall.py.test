@@ -6,7 +6,7 @@ import Gnuplot
 gnuplot = Gnuplot.Gnuplot(debug=1);
 gnuplot.title("Python BouncingBall sample");
 
-model = pySiconos.Model("../../Kernel/sample/BouncingBall/BouncingBall_TIDS.xml");
+model = pySiconos.Model("BouncingBall_TIDS.xml");
 print "*** BouncingBall.xml loaded ***";
 s = model.getStrategy();	
 print "strategy will be initialized"; 

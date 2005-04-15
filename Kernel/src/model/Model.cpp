@@ -34,43 +34,169 @@ Model::Model()
 
 }
 
-Model::Model(char *xmlFile, float t, float t0, float T, NonSmoothDynamicalSystem* nsds, Strategy* strategy)
+//Model::Model(char *xmlFile, float t, float t0, float T, NonSmoothDynamicalSystem* nsds, Strategy* strategy)
+//{
+//  this->strategy = NULL;
+//  this->modelxml = NULL;
+//  this->nsds = NULL;
+//
+//  // initialisation to pass through READ_UNINIT_MEM
+//  this->t = 0.0;
+//  this->t0 = 0.0;
+//  this->T = 0.0;
+//
+//  if( xmlFile != NULL )
+//    {
+//      this->readModel(xmlFile);
+//      this->linkModelXML();
+//      this->fillModelWithModelXML();
+//    }
+//  else
+//    {
+//      /*
+//       * no xml file in input
+//       * the DOM tree must be created
+//       * no "linkModelXML" to do
+//       *
+//       * the call to the readModel function which must create the SiconosModelXML
+//       */
+//      this->readModel(xmlFile);
+//
+//      /*
+//       * construction of the NonSmoothDynamicalSystem and the Strategy
+//       */
+//    }
+//
+//  if( T  != -1 ) this->T  = T;
+//  if( t0 != -1 ) this->t0 = t0;
+//  if( t  != -1 ) this->t  = t;
+//}
+
+Model::Model(char *xmlFile, /*float t,*/ float t0, float T, string title, string author, string description, string date, string schema)
 {
+  IN("Model::Model\n");
+  cout << "Model::Model" << endl;
   this->strategy = NULL;
   this->modelxml = NULL;
   this->nsds = NULL;
-
-  // initialisation to pass through READ_UNINIT_MEM
-  this->t = 0.0;
-  this->t0 = 0.0;
-  this->T = 0.0;
-
   if (xmlFile != NULL)
   {
+    /*
+     * load of the data from a xml file
+     * if values are given for t, t0 and T ( != -1 ), these values will be saved
+     */
     this->readModel(xmlFile);
-    this->linkModelXML();
     this->fillModelWithModelXML();
+    this->linkModelXML();
+
+    if (title  != "title") this->title = title;
+    if (author  != "author") this->author  = author;
+    if (description != "description") this->description = description;
+    if (date  != "date") this->date  = date;
+    if ((schema != "none") && (schema  != XML_SCHEMA)) this->xmlSchema = schema;
   }
   else
   {
     /*
+     * in this case, needed data are given in parameters
+     */
+    /*
      * no xml file in input
      * the DOM tree must be created
      * no "linkModelXML" to do
-     *
-     * the call to the readModel function which must create the SiconosModelXML
      */
-    this->readModel(xmlFile);
 
-    /*
-     * construction of the NonSmoothDynamicalSystem and the Strategy
-     */
+    /** T final */
+    if (T  != -1) this->T  = T;
+    else this->T = -1;
+
+    /** t0 initial time */
+    if (t0 != -1) this->t0 = t0;
+    else RuntimeException::selfThrow("Model::createModel - a value for t0 must be given");
+
+    /** t current id optionnal, the default value is t0 which is required */
+    this->t = t0;
+
+    this->title = title;
+    this->author  = author;
+    this->description = description;
+    this->date  = date;
+    if (schema == "none") this->xmlSchema = XML_SCHEMA; //xmlSchema;
+    else this->xmlSchema = schema;
   }
-
-  if (T  != -1) this->T  = T;
-  if (t0 != -1) this->t0 = t0;
-  if (t  != -1) this->t  = t;
+  OUT("Model::Model\n");
 }
+
+Model::Model(float t0, float T, string title, string author, string description, string date, string schema)
+{
+  IN("Model::Model\n");
+  cout << "Model::Model" << endl;
+  this->strategy = NULL;
+  this->modelxml = NULL;
+  this->nsds = NULL;
+  /*
+   * in this case, needed data are given in parameters
+   */
+  /*
+   * no xml file in input
+   * the DOM tree must be created
+   * no "linkModelXML" to do
+   */
+
+  /** T final */
+  this->T  = T;
+
+  /** t0 initial time */
+  this->t0 = t0;
+
+  if (T < t0 || T < 0)
+    RuntimeException::selfThrow("Model::createModel - T and/or t0 value not suitable for the simulation.");
+
+  /** t current id optionnal, the default value is t0 which is required */
+  this->t = t0;
+
+  this->title = title;
+  this->author  = author;
+  this->description = description;
+  this->date  = date;
+  if (schema == "none") this->xmlSchema = XML_SCHEMA; //xmlSchema;
+  else this->xmlSchema = schema;
+
+  OUT("Model::Model\n");
+}
+
+//Model::Model(float t0, float T, string title, string author, string description, string date, string xmlSchema)
+//{
+//  IN("Model::Model\n");
+//  /*
+//   * in this case, needed data are given in parameters
+//   */
+//  /*
+//   * no xml file in input
+//   * the DOM tree must be created
+//   * no "linkModelXML" to do
+//   */
+//
+//  /** T final */
+//  if( T  != -1 ) this->T  = T;
+//  else this->T = -1;
+//
+//  /** t0 initial time */
+//  if( t0 != -1 ) this->t0 = t0;
+//  else RuntimeException::selfThrow("Model::Model - a value for t0 must be given");
+//
+//  /** t current id optionnal, the default value is t0 which is required */
+//  this->t = t0;
+//
+//  this->title = title;
+//  this->author  = author;
+//  this->description = description;
+//  this->date  = date;
+//  if(xmlSchema == "none") this->xmlSchema = XML_SCHEMA;//xmlSchema;
+//  else this->xmlSchema = xmlSchema;
+//
+//  OUT("Model::Model\n");
+//}
 
 Model::~Model()
 {
@@ -241,7 +367,11 @@ void Model::linkModelXML(void)
         static_cast<EventDriven*>(this->strategy)->createStrategy(this->modelxml->getStrategyXML(), this);
       }
     }
-    else cout << "Warning - No Strategy is defined." << endl;
+    else
+    {
+      cout << "Warning - No Strategy is defined." << endl;
+      this->strategy = NULL;
+    }
   }
   else RuntimeException::selfThrow("Model::linkModelXML - modelxml == NULL");
 
@@ -288,104 +418,104 @@ void Model::doOneStep(void)
   OUT("Model::doOneStep\n");
 }
 
-void Model::createModel(char *xmlFile, /*float t,*/ float t0, float T, string title, string author, string description, string date, string schema)
-{
-  IN("Model::createModel\n");
-  cout << "Model::createModel" << endl;
-  if (xmlFile != NULL)
-  {
-    /*
-     * load of the data from a xml file
-     * if values are given for t, t0 and T ( != -1 ), these values will be saved
-     */
-    this->readModel(xmlFile);
-    cout << "Model read" << endl;
-    this->fillModelWithModelXML();
-    cout << "Model filled" << endl;
-    this->linkModelXML();
-    cout << "Model linked" << endl;
-
-    if (title  != "title") this->title = title;
-    if (author  != "author") this->author  = author;
-    if (description != "description") this->description = description;
-    if (date  != "date") this->date  = date;
-    if ((schema != "none") && (schema  != XML_SCHEMA)) this->xmlSchema = schema;
-
-    //this->getStrategy()->getTimeDiscretisation()->checkTimeDiscretisation();
-  }
-  else
-  {
-    /*
-     * in this case, needed data are given in parameters
-     */
-
-    /*
-     * no xml file in input
-     * the DOM tree must be created
-     * no "linkModelXML" to do
-     */
-
-    /** T final */
-    if (T  != -1)
-    {
-      this->T  = T;
-    }
-    else this->T = -1;
-
-    /** t0 initial time */
-    if (t0 != -1) this->t0 = t0;
-    else RuntimeException::selfThrow("Model::createModel - a value for t0 must be given");
-
-    /** t current id optionnal, the default value is t0 which is required */
-    this->t = t0;
-
-    this->title = title;
-    this->author  = author;
-    this->description = description;
-    this->date  = date;
-    if (schema == "none") this->xmlSchema = XML_SCHEMA; //xmlSchema;
-    else this->xmlSchema = schema;
-  }
-  OUT("Model::createModel\n");
-}
-
-void Model::createModel(float t0, float T, string title, string author, string description, string date, string xmlSchema)
-{
-  IN("Model::createModel\n");
-  cout << "Model::createModel" << endl;
-  /*
-   * in this case, needed data are given in parameters
-   */
-
-  /*
-   * no xml file in input
-   * the DOM tree must be created
-   * no "linkModelXML" to do
-   */
-
-  /** T final */
-  if (T  != -1)
-  {
-    this->T  = T;
-  }
-  else this->T = -1;
-
-  /** t0 initial time */
-  if (t0 != -1) this->t0 = t0;
-  else RuntimeException::selfThrow("Model::createModel - a value for t0 must be given");
-
-  /** t current id optionnal, the default value is t0 which is required */
-  this->t = t0;
-
-  this->title = title;
-  this->author  = author;
-  this->description = description;
-  this->date  = date;
-  if (xmlSchema == "none") this->xmlSchema = XML_SCHEMA; //xmlSchema;
-  else this->xmlSchema = xmlSchema;
-
-  OUT("Model::createModel\n");
-}
+//void Model::createModel(char *xmlFile, /*float t,*/ float t0, float T, string title, string author, string description, string date, string schema)
+//{
+//  IN("Model::createModel\n");
+//  cout<<"Model::createModel"<<endl;
+//  if( xmlFile != NULL )
+//    {
+//      /*
+//       * load of the data from a xml file
+//       * if values are given for t, t0 and T ( != -1 ), these values will be saved
+//       */
+//      this->readModel(xmlFile);
+//      cout<<"Model read"<<endl;
+//      this->fillModelWithModelXML();
+//      cout<<"Model filled"<<endl;
+//      this->linkModelXML();
+//      cout<<"Model linked"<<endl;
+//
+//    if( title  != "title" ) this->title = title;
+//    if( author  != "author" ) this->author  = author;
+//    if( description != "description" ) this->description = description;
+//    if( date  != "date" ) this->date  = date;
+//    if( (schema != "none") && (schema  != XML_SCHEMA) ) this->xmlSchema = schema;
+//
+//    //this->getStrategy()->getTimeDiscretisation()->checkTimeDiscretisation();
+//  }
+//  else
+//  {
+//    /*
+//     * in this case, needed data are given in parameters
+//     */
+//
+//    /*
+//     * no xml file in input
+//     * the DOM tree must be created
+//     * no "linkModelXML" to do
+//     */
+//
+//    /** T final */
+//    if( T  != -1 )
+//    {
+//      this->T  = T;
+//    }
+//    else this->T = -1;
+//
+//    /** t0 initial time */
+//    if( t0 != -1 ) this->t0 = t0;
+//    else RuntimeException::selfThrow("Model::createModel - a value for t0 must be given");
+//
+//    /** t current id optionnal, the default value is t0 which is required */
+//    this->t = t0;
+//
+//    this->title = title;
+//    this->author  = author;
+//    this->description = description;
+//    this->date  = date;
+//    if(schema == "none") this->xmlSchema = XML_SCHEMA;//xmlSchema;
+//    else this->xmlSchema = schema;
+//  }
+//  OUT("Model::createModel\n");
+//}
+//
+//void Model::createModel(float t0, float T, string title, string author, string description, string date, string xmlSchema)
+//{
+//  IN("Model::createModel\n");
+//  cout<<"Model::createModel"<<endl;
+//  /*
+//   * in this case, needed data are given in parameters
+//   */
+//
+//  /*
+//   * no xml file in input
+//   * the DOM tree must be created
+//   * no "linkModelXML" to do
+//   */
+//
+//  /** T final */
+//  if( T  != -1 )
+//  {
+//    this->T  = T;
+//  }
+//  else this->T = -1;
+//
+//  /** t0 initial time */
+//  if( t0 != -1 ) this->t0 = t0;
+//  else RuntimeException::selfThrow("Model::createModel - a value for t0 must be given");
+//
+//  /** t current id optionnal, the default value is t0 which is required */
+//  this->t = t0;
+//
+//  this->title = title;
+//  this->author  = author;
+//  this->description = description;
+//  this->date  = date;
+//  if(xmlSchema == "none") this->xmlSchema = XML_SCHEMA;//xmlSchema;
+//  else this->xmlSchema = xmlSchema;
+//
+//  OUT("Model::createModel\n");
+//}
 
 void Model::checkModelCoherency()
 {

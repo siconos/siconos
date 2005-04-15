@@ -40,16 +40,47 @@ public:
    */
   Model();
 
-  /** \fn Model(char *xmlFile, float t=-1, float t0=-1, float T=-1, NonSmoothDynamicalSystem* nsds=NULL, Strategy* strategy=NULL)
-   *  \brief constructor which creates the XML structure by reading the xml file given in parameter
-   *  \param char * : the input XML file
-   *  \param float : the value for t (optional parameter)
+  //  /** \fn Model(char *xmlFile, float t=-1, float t0=-1, float T=-1, NonSmoothDynamicalSystem* nsds=NULL, Strategy* strategy=NULL)
+  //   *  \brief constructor which creates the XML structure by reading the xml file given in parameter
+  //   *  \param char * : the input XML file
+  //   *  \param float : the value for t (optional parameter)
+  //   *  \param float : the value for t0 (optional parameter)
+  //   *  \param float : the value for T (optional parameter)
+  //   *  \param NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem linked to the Model (optional parameter)
+  //   *  \param Strategy* : the Strategy linked to the Model (optional parameter)
+  //   */
+  //  Model(char *xmlFile, float t=-1, float t0=-1, float T=-1, NonSmoothDynamicalSystem* nsds=NULL, Strategy* strategy=NULL);
+
+  /** \fn Model(char *xmlFile, float t0, float T, string title, string author, string description, string date, string xmlSchema)
+   *  \brief allows to create the Model with an xml file, or the needed data
+   *  \param char * : the input XML file (optional parameter)
    *  \param float : the value for t0 (optional parameter)
    *  \param float : the value for T (optional parameter)
-   *  \param NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem linked to the Model (optional parameter)
-   *  \param Strategy* : the Strategy linked to the Model (optional parameter)
+   *  \param string : the title of the Model (optional parameter)
+   *  \param string : the author of the Model (optional parameter)
+   *  \param string : the description of the Model (optional parameter)
+   *  \param string : the date of the Model (optional parameter)
+   *  \param string : the xml schema of the Model (optional parameter)
+   *  \exception RuntimeException
    */
-  Model(char *xmlFile, float t = -1, float t0 = -1, float T = -1, NonSmoothDynamicalSystem* nsds = NULL, Strategy* strategy = NULL);
+  Model(char *xmlFile, /*float t = -1.0,*/ float t0 = -1.0, float T = -1.0,
+        string title = "title", string author = "author", string description = "description",
+        string date = "date", string xmlSchema =/*DEFAULT_XMLSCHEMA*/ "none");
+
+  /** \fn Model(cfloat t0, float T, string title, string author, string description, string date, string xmlSchema)
+   *  \brief allows to create the Model with an xml file, or the needed data
+   *  \param float : the value for t0 (optional parameter)
+   *  \param float : the value for T (optional parameter)
+   *  \param string : the title of the Model (optional parameter)
+   *  \param string : the author of the Model (optional parameter)
+   *  \param string : the description of the Model (optional parameter)
+   *  \param string : the date of the Model (optional parameter)
+   *  \param string : the xml schema of the Model (optional parameter)
+   *  \exception RuntimeException
+   */
+  Model(float t0, float T,
+        string title = "title", string author = "author", string description = "description",
+        string date = "date", string xmlSchema =/*DEFAULT_XMLSCHEMA*/ "none");
 
   ~Model();
 
@@ -293,36 +324,36 @@ public:
    */
   void savePlatformToXML();
 
-  /** \fn void createModel(char *xmlFile, float t0, float T, string title, string author, string description, string date, string xmlSchema)
-   *  \brief allows to create the Model with an xml file, or the needed data
-   *  \param char * : the input XML file (optional parameter)
-   *  \param float : the value for t0 (optional parameter)
-   *  \param float : the value for T (optional parameter)
-   *  \param string : the title of the Model (optional parameter)
-   *  \param string : the author of the Model (optional parameter)
-   *  \param string : the description of the Model (optional parameter)
-   *  \param string : the date of the Model (optional parameter)
-   *  \param string : the xml schema of the Model (optional parameter)
-   *  \exception RuntimeException
-   */
-  void createModel(char *xmlFile = NULL, /*float t = -1.0,*/ float t0 = -1.0, float T = -1.0,
-                   string title = "title", string author = "author", string description = "description",
-                   string date = "date", string xmlSchema =/*DEFAULT_XMLSCHEMA*/ "none");
-
-  /** \fn void createModel(char *xmlFile, float t0, float T, string title, string author, string description, string date, string xmlSchema)
-   *  \brief allows to create the Model with an xml file, or the needed data
-   *  \param float : the value for t0 (optional parameter)
-   *  \param float : the value for T (optional parameter)
-   *  \param string : the title of the Model (optional parameter)
-   *  \param string : the author of the Model (optional parameter)
-   *  \param string : the description of the Model (optional parameter)
-   *  \param string : the date of the Model (optional parameter)
-   *  \param string : the xml schema of the Model (optional parameter)
-   *  \exception RuntimeException
-   */
-  void createModel(float t0 /*= -1.0*/, float T /*= -1.0*/,
-                   string title = "title", string author = "author", string description = "description",
-                   string date = "date", string xmlSchema =/*DEFAULT_XMLSCHEMA*/ "none");
+  //  /** \fn void createModel(char *xmlFile, float t0, float T, string title, string author, string description, string date, string xmlSchema)
+  //   *  \brief allows to create the Model with an xml file, or the needed data
+  //   *  \param char * : the input XML file (optional parameter)
+  //   *  \param float : the value for t0 (optional parameter)
+  //   *  \param float : the value for T (optional parameter)
+  //   *  \param string : the title of the Model (optional parameter)
+  //   *  \param string : the author of the Model (optional parameter)
+  //   *  \param string : the description of the Model (optional parameter)
+  //   *  \param string : the date of the Model (optional parameter)
+  //   *  \param string : the xml schema of the Model (optional parameter)
+  //   *  \exception RuntimeException
+  //   */
+  //  void createModel(char *xmlFile=NULL, /*float t = -1.0,*/ float t0 = -1.0, float T = -1.0,
+  //          string title="title", string author="author", string description="description",
+  //          string date="date", string xmlSchema=/*DEFAULT_XMLSCHEMA*/ "none");
+  //
+  //  /** \fn void createModel(char *xmlFile, float t0, float T, string title, string author, string description, string date, string xmlSchema)
+  //   *  \brief allows to create the Model with an xml file, or the needed data
+  //   *  \param float : the value for t0 (optional parameter)
+  //   *  \param float : the value for T (optional parameter)
+  //   *  \param string : the title of the Model (optional parameter)
+  //   *  \param string : the author of the Model (optional parameter)
+  //   *  \param string : the description of the Model (optional parameter)
+  //   *  \param string : the date of the Model (optional parameter)
+  //   *  \param string : the xml schema of the Model (optional parameter)
+  //   *  \exception RuntimeException
+  //   */
+  //  void createModel(float t0 /*= -1.0*/, float T /*= -1.0*/,
+  //          string title="title", string author="author", string description="description",
+  //          string date="date", string xmlSchema=/*DEFAULT_XMLSCHEMA*/ "none");
 
   /** \fn bool checkXMLDOMTree()
    *  \brief check if the DOM tree respect the XML schema

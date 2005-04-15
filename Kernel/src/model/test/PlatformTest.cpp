@@ -21,8 +21,7 @@ void PlatformTest::testOptionalAttributes1()
   /*
    * test with all the attributes
    */
-  Model m;
-  m.createModel("xml_test.xml");
+  Model m("xml_test.xml");
   m.saveToXMLFile("xml_test.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes1 - XML file with all the attributes ......................... OK\n ";
@@ -33,8 +32,7 @@ void PlatformTest::testOptionalAttributes2()
   /*
    * test without unnecessary memory objects
    */
-  Model m2;
-  m2.createModel("xml_uncomplete1.xml");
+  Model m2("xml_uncomplete1.xml");
   m2.saveToXMLFile("xml_uncomplete1.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes2 - XML file with no memory objects ........................ OK\n ";
@@ -45,8 +43,7 @@ void PlatformTest::testOptionalAttributes3()
   /*
    * test with no attribute 'id' for DynamicalSystem and Interaction
    */
-  Model m3;
-  m3.createModel("xml_uncomplete2.xml");
+  Model m3("xml_uncomplete2.xml");
   m3.saveToXMLFile("xml_uncomplete2.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes3 - XML file with no object's id ........................ OK\n ";
@@ -57,8 +54,7 @@ void PlatformTest::testOptionalAttributes4()
   /*
    * test without Strategy
    */
-  Model m4;
-  m4.createModel("xml_uncomplete3.xml");
+  Model m4("xml_uncomplete3.xml");
   m4.saveToXMLFile("xml_uncomplete3.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes4 - XML file without Strategy ....................... OK\n ";
@@ -69,8 +65,7 @@ void PlatformTest::testOptionalAttributes5()
   /*
    * test without 'computeInput' and 'computeOutput' for the Relations
    */
-  Model m5;
-  m5.createModel("xml_uncomplete4.xml");
+  Model m5("xml_uncomplete4.xml");
   m5.saveToXMLFile("xml_uncomplete4.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes5 - XML without computeInput and computeOutput ................... OK\n ";
@@ -81,8 +76,7 @@ void PlatformTest::testOptionalAttributes6()
   /*
    * test with empty SiconosMemory
    */
-  Model m6;
-  m6.createModel("xml_uncomplete5.xml");
+  Model m6("xml_uncomplete5.xml");
   m6.saveToXMLFile("xml_uncomplete5.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes6 - XML file with empty SiconosMemory ....................... OK\n ";
@@ -93,8 +87,7 @@ void PlatformTest::testOptionalAttributes7()
   /*
    * test without t (current time), and T (final time for the simulation)
    */
-  Model m7;
-  m7.createModel("xml_uncomplete6.xml");
+  Model m7("xml_uncomplete6.xml");
   //m7.saveToXMLFile("xml_uncomplete6.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes7 - XML file without t and T ........................ OK\n ";
@@ -105,8 +98,7 @@ void PlatformTest::testOptionalAttributes8()
   /*
    * test without interactions
    */
-  Model m8;
-  m8.createModel("xml_uncomplete7.xml");
+  Model m8("xml_uncomplete7.xml");
   //m8.saveToXMLFile("xml_uncomplete7.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes8 - XML file without Interaction ........................ OK\n ";
@@ -117,8 +109,7 @@ void PlatformTest::testOptionalAttributes9()
   /*
    * test with no OneStepNSProblem
    */
-  Model m9;
-  m9.createModel("xml_uncomplete8.xml");
+  Model m9("xml_uncomplete8.xml");
   m9.saveToXMLFile("xml_uncomplete8.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes9 - XML without OneStepNSProblem ........................... OK\n ";
@@ -129,8 +120,7 @@ void PlatformTest::testOptionalAttributes10()
   /*
    * test with a NonLinearSystemDS
    */
-  Model m10;
-  m10.createModel("xml_uncomplete9.xml");
+  Model m10("xml_uncomplete9.xml");
   m10.saveToXMLFile("xml_uncomplete9.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes10 - XML file with a NonLinearSystemDS ..................... OK\n ";
@@ -141,8 +131,7 @@ void PlatformTest::testOptionalAttributes11()
   /*
    * test with no XML, but createModel with parameters
    */
-  Model m11;
-  m11.createModel(NULL, 1, 0);
+  Model m11(NULL, 1, 0);
 
   cout << "PlatformTest >>> testOptionalAttributes11 - createModel with parameters ....................... OK\n ";
 }
@@ -152,8 +141,7 @@ void PlatformTest::testOptionalAttributes12()
   /*
    * test with no x, xDot, q and velocity. Only initial data (data at t0)
    */
-  Model m12;
-  m12.createModel("xml_uncomplete10.xml");
+  Model m12("xml_uncomplete10.xml");
   m12.saveToXMLFile("xml_uncomplete10.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes12 - Only initial data (data at t0) ....................... OK\n ";
@@ -164,8 +152,7 @@ void PlatformTest::testOptionalAttributes13()
   /*
    * test with no x definition for Lagrangian Systems
    */
-  Model m13;
-  m13.createModel("xml_uncomplete11.xml");
+  Model m13("xml_uncomplete11.xml");
   m13.saveToXMLFile("xml_uncomplete11.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes13 - no x definition for Lagrangian Systems ....................... OK\n ";
@@ -176,8 +163,7 @@ void PlatformTest::testOptionalAttributes14()
   /*
    * test with no optional attributes for the DynamicalSystems
    */
-  Model m14;
-  m14.createModel("xml_uncomplete12.xml");
+  Model m14("xml_uncomplete12.xml");
   m14.saveToXMLFile("xml_uncomplete12.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes14 - no optional attributes for the DynamicalSystems ....................... OK\n ";
@@ -188,8 +174,7 @@ void PlatformTest::testOptionalAttributes15()
   /*
    * test with no optional attributes for the Interactions
    */
-  Model m15;
-  m15.createModel("xml_uncomplete13.xml");
+  Model m15("xml_uncomplete13.xml");
   m15.saveToXMLFile("xml_uncomplete13.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes15 - no optional attributes for the Interactions ....................... OK\n ";
@@ -200,8 +185,7 @@ void PlatformTest::testOptionalAttributes16()
   /*
    * test with no optional attributes for the Strategy
    */
-  Model m16;
-  m16.createModel("xml_uncomplete14.xml");
+  Model m16("xml_uncomplete14.xml");
   m16.saveToXMLFile("xml_uncomplete14.save.xml");
 
   cout << "PlatformTest >>> testOptionalAttributes16 - no optional attributes for the Strategy ....................... OK\n ";
@@ -209,8 +193,7 @@ void PlatformTest::testOptionalAttributes16()
 
 void PlatformTest::testManualCreation()
 {
-  Model m;
-  m.createModel(NULL, 0, 10);
+  Model m(NULL, 0, 10);
   m.display();
 
   NonSmoothDynamicalSystem* nsds;
@@ -276,8 +259,7 @@ void PlatformTest::testManualCreation()
 
 void PlatformTest::testManualCreation2()
 {
-  Model m;
-  m.createModel(NULL, 0, 10);
+  Model m(NULL, 0, 10);
   m.display();
 
   NonSmoothDynamicalSystem* nsds;
@@ -388,8 +370,7 @@ void PlatformTest::testManualCreation2()
 
 void PlatformTest::testManualCreation3()
 {
-  Model m;
-  m.createModel(NULL, 0, 10);
+  Model m(NULL, 0, 10);
   m.display();
 
   NonSmoothDynamicalSystem* nsds;
@@ -442,9 +423,7 @@ void PlatformTest::testCheckXMLPlatform()
 
 void PlatformTest::testMixteCreation()
 {
-  Model m;
-
-  m.createModel("xml_test.xml");
+  Model m("xml_test.xml");
 
   NonSmoothDynamicalSystem* nsds;
   DynamicalSystem *ds, *ds2;
@@ -476,8 +455,7 @@ void PlatformTest::testXMLSchemaAttributeGood()
   /*
    * test with a good xml schema attribute
    */
-  Model m;
-  m.createModel("xml_schemaAttribute.xml");
+  Model m("xml_schemaAttribute.xml");
 
   cout << "PlatformTest >>> testXMLSchemaAttributeGood - XML file with a good xml schema attribute file name ..................... OK\n ";
 }
@@ -487,8 +465,7 @@ void PlatformTest::testXMLSchemaAttributeGood2()
   /*
    * test with a good xml schema attribute
    */
-  Model m;
-  m.createModel("xml_schemaAttributeA.xml");
+  Model m("xml_schemaAttributeA.xml");
 
   cout << "PlatformTest >>> testXMLSchemaAttributeGood2 - XML file with a good xml schema attribute file name (with spaces in the string) ..................... OK\n ";
 }
@@ -498,8 +475,7 @@ void PlatformTest::testXMLSchemaAttributeBad1()
   /*
    * test with a bad xml schema attribute
    */
-  Model m;
-  m.createModel("xml_schemaAttribute2.xml");
+  Model m("xml_schemaAttribute2.xml");
 
   cout << "PlatformTest >>> testXMLSchemaAttributeGBad1 - XML file with a bad xml schema attribute (empty field) ..................... OK\n ";
 }
@@ -509,16 +485,14 @@ void PlatformTest::testXMLSchemaAttributeBad2()
   /*
    * test with a bad xml schema attribute
    */
-  Model m;
-  m.createModel("xml_schemaAttribute3.xml");
+  Model m("xml_schemaAttribute3.xml");
 
   cout << "PlatformTest >>> testXMLSchemaAttributeBad2 - XML file with a bad xml schema attribute 2 (unexisting file) ..................... OK\n ";
 }
 
 void PlatformTest::testPlatformException()
 {
-  Model m;
-  m.createModel();
+  Model m(NULL);
   cout << "PlatformTest >>> testPlatformException - creation that must launch an exception ..................... OK\n ";
 }
 
@@ -527,8 +501,7 @@ void PlatformTest::testOSNSP1()
   /*
    * test with OneStepNSProblem : LCP + LcpSolving + gsnl
    */
-  Model m;
-  m.createModel("xml_osnsp1.xml");
+  Model m("xml_osnsp1.xml");
 
   cout << "PlatformTest >>> testOSNSP1 - XML file with OneStepNSProblem : LCP + LcpSolving + gsnl ..................... OK\n ";
 }
@@ -538,8 +511,7 @@ void PlatformTest::testOSNSP2()
   /*
    * test with OneStepNSProblem : LCP + RelayPrimalSolving + gcp
    */
-  Model m;
-  m.createModel("xml_osnsp2.xml");
+  Model m("xml_osnsp2.xml");
 
   cout << "PlatformTest >>> testOSNSP2 - XML file with OneStepNSProblem : LCP + RelayPrimalSolving + gcp ..................... OK\n ";
 }
@@ -549,8 +521,7 @@ void PlatformTest::testOSNSP3()
   /*
    * test with OneStepNSProblem : LCP + RelayDualSolving + lemke
    */
-  Model m;
-  m.createModel("xml_osnsp3.xml");
+  Model m("xml_osnsp3.xml");
 
   cout << "PlatformTest >>> testOSNSP3 - XML file with OneStepNSProblem : LCP + RelayDualSolving + lemke ..................... OK\n ";
 }
@@ -560,8 +531,7 @@ void PlatformTest::testOSNSP4()
   /*
    * test with OneStepNSProblem : LCP + ContactFrictionPrimalSolving + gcp
    */
-  Model m;
-  m.createModel("xml_osnsp4.xml");
+  Model m("xml_osnsp4.xml");
 
   cout << "PlatformTest >>> testOSNSP4 - XML file with OneStepNSProblem : LCP + ContactFrictionPrimalSolving + gcp ..................... OK\n ";
 }
@@ -571,8 +541,7 @@ void PlatformTest::testOSNSP5()
   /*
    * test with OneStepNSProblem : LCP + ContactFrictionDualSolving + latin
    */
-  Model m;
-  m.createModel("xml_osnsp5.xml");
+  Model m("xml_osnsp5.xml");
 
   cout << "PlatformTest >>> testOSNSP5 - XML file with OneStepNSProblem : LCP + ContactFrictionDualSolving + latin ..................... OK\n ";
 }
@@ -582,8 +551,7 @@ void PlatformTest::testLmgc90()
   /*
    * test with OneStepNSProblem : LCP + ContactFrictionDualSolving + latin
    */
-  Model m;
-  m.createModel("lmgc90.xml");
+  Model m("lmgc90.xml");
 
   cout << "PlatformTest >>> testLmgc90 - XML file with lmgc90 joker flags : ..................... OK\n ";
 }
