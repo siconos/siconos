@@ -8,7 +8,10 @@ using\ \textbf{namespace}\ std;\\
 \textbf{class}\ BaseObjectSiconos\ \{\\
 \textbf{public}:\\
 \ \ \ \ BaseObjectSiconos();\\
+\ \ \ \ BaseObjectSiconos(\textbf{int}\ ii);\\
 \ \ \ \ \textbf{void}\ display();\\
+\ \ \ \ \textbf{void}\ fillObjectWithObjectXML();\\
+\ \ \ \ \textbf{void}\ linkObjectXML();\\
 \textbf{private}\ :\\
 \ \ \textbf{int}\ i;\\
 \ \ string\ type;\ \\
@@ -50,7 +53,10 @@ using\ \textbf{namespace}\ std;\\
 \textbf{public}\ :\\
 ObjectSiconos();\\
 ObjectSiconos(\textbf{int}\ aatt,string\ ttype);\\
+ObjectSiconos(ObjectSiconosXML\ $\ast$oxml);\\
 \textbf{void}\ display();\\
+\textbf{void}\ fillObjectWithObjectXML();\\
+\textbf{void}\ linkObjectXML();\\
 \ \\
 \textbf{private}\ :\\
 \textsl{//\ Built-{}in\ types\ attributes\ (int,\ char,\ float,\ ..)}\\

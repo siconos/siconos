@@ -8,7 +8,10 @@ class BaseObjectSiconos
 {
 public:
   BaseObjectSiconos();
+  BaseObjectSiconos(int ii);
   void display();
+  void fillObjectWithObjectXML();
+  void linkObjectXML();
 private :
   int i;
   string type;
@@ -50,7 +53,10 @@ class ObjectSiconos : BaseObjectSiconos
 public :
   ObjectSiconos();
   ObjectSiconos(int aatt, string ttype);
+  ObjectSiconos(ObjectSiconosXML *oxml);
   void display();
+  void fillObjectWithObjectXML();
+  void linkObjectXML();
 
 private :
   // Built-in types attributes (int, char, float, ..)

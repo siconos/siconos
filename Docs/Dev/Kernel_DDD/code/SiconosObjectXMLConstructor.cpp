@@ -1,20 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #include "SiconosObject.h"
 #include <iostream>
 
