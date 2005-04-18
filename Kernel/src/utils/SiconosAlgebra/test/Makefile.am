@@ -7,5 +7,5 @@ TESTS = $(check_PROGRAMS)
 test1_SOURCES = CompositeVectorTest.cpp SimpleVectorTest.cpp SiconosMatrixTest.cpp TestMain.cpp
 include_HEADERS = CompositeVectorTest.h SimpleVectorTest.h SiconosMatrixTest.h
 test1_INCLUDES = $(CPPUNIT_INCLUDES)
-test1_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(SICONOS_LIBS)
+test1_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
 
