@@ -26,6 +26,7 @@ void PeriodicBC::fillBCWithBCXML()
 
 void PeriodicBC::saveBCToXML()
 {
+  cout << "PeriodicBC::saveBCToXML - " << this->bcXML << endl;
   if (this->bcXML != NULL)
   {
     OUT("PeriodicBC::saveBCToXML\n");
@@ -52,4 +53,3 @@ PeriodicBC* PeriodicBC::convert(BoundaryCondition* bc)
   PeriodicBC* pbc = dynamic_cast<PeriodicBC*>(bc);
   return pbc;
 }
-

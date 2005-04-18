@@ -175,6 +175,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
           sprintf(num, "%d", number);
           this->definedDSNumbers.push_back(number);
 
+
           // verifies if this Dynamical System has a number which not used
           it = this->DSXMLMap.find(number);
           if (it == this->DSXMLMap.end())
@@ -249,12 +250,15 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
             XMLException::selfThrow("NSDSXML - loadNSDS | Error : the Dynamical System number : " + tmp + " already exists!");
           }
         }
+        else
+          cout << "## /!\\ the DynamicalSystem : " << nsds->getDynamicalSystem(i)->getType() << " number " << nsds->getDynamicalSystem(i)->getNumber() <<
+               ", has already an XML object." << endl;
       }
     }
     else
     {
       // the LMGC90 tag for DS definition is in the XML file
-      //  => specific treatments todo
+      // \todo !!!!!!  => specific treatments todo
     }
 
 

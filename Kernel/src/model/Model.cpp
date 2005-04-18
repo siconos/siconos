@@ -30,45 +30,8 @@ Model::Model():
   this->nsds = NULL;
 }
 
-//Model::Model(char *xmlFile, float t, float t0, float T, NonSmoothDynamicalSystem* nsds, Strategy* strategy)
-//{
-//  this->strategy = NULL;
-//  this->modelxml = NULL;
-//  this->nsds = NULL;
-//
-//  // initialisation to pass through READ_UNINIT_MEM
-//  this->t = 0.0;
-//  this->t0 = 0.0;
-//  this->T = 0.0;
-//
-//  if( xmlFile != NULL )
-//    {
-//      this->readModel(xmlFile);
-//      this->linkModelXML();
-//      this->fillModelWithModelXML();
-//    }
-//  else
-//    {
-//      /*
-//       * no xml file in input
-//       * the DOM tree must be created
-//       * no "linkModelXML" to do
-//       *
-//       * the call to the readModel function which must create the SiconosModelXML
-//       */
-//      this->readModel(xmlFile);
-//
-//      /*
-//       * construction of the NonSmoothDynamicalSystem and the Strategy
-//       */
-//    }
-//
-//  if( T  != -1 ) this->T  = T;
-//  if( t0 != -1 ) this->t0 = t0;
-//  if( t  != -1 ) this->t  = t;
-//}
 
-Model::Model(char *xmlFile, /*float t,*/ float t0, float T, string title, string author, string description, string date, string schema)
+Model::Model(char *xmlFile)
 {
   IN("Model::Model\n");
   cout << "Model::Model" << endl;
@@ -86,40 +49,15 @@ Model::Model(char *xmlFile, /*float t,*/ float t0, float T, string title, string
     this->fillModelWithModelXML();
     this->linkModelXML();
 
-    if (title  != "title") this->title = title;
-    if (author  != "author") this->author  = author;
-    if (description != "description") this->description = description;
-    if (date  != "date") this->date  = date;
-    if ((schema != "none") && (schema  != XML_SCHEMA)) this->xmlSchema = schema;
+    this->title = "title";
+    this->author  = "author";
+    this->description = "description";
+    this->date  = "date";
+    this->xmlSchema = XML_SCHEMA;
   }
   else
   {
-    /*
-     * in this case, needed data are given in parameters
-     */
-    /*
-     * no xml file in input
-     * the DOM tree must be created
-     * no "linkModelXML" to do
-     */
-
-    /** T final */
-    if (T  != -1) this->T  = T;
-    else this->T = -1;
-
-    /** t0 initial time */
-    if (t0 != -1) this->t0 = t0;
-    else RuntimeException::selfThrow("Model::createModel - a value for t0 must be given");
-
-    /** t current id optionnal, the default value is t0 which is required */
-    this->t = t0;
-
-    this->title = title;
-    this->author  = author;
-    this->description = description;
-    this->date  = date;
-    if (schema == "none") this->xmlSchema = XML_SCHEMA; //xmlSchema;
-    else this->xmlSchema = schema;
+    cout << ("Model::createModel - paramater missing : xmlFile");
   }
   OUT("Model::Model\n");
 }
@@ -128,7 +66,6 @@ Model::Model(float t0, float T, string title, string author, string description,
   t(t0), t0(t0), T(T), title(title), author(author), description(description), date(date), xmlSchema(schema)
 {
   IN("Model::Model\n");
-  cout << "Model::Model" << endl;
   /*
    * in this case, needed data are given in parameters
    * no xml file in input
@@ -143,39 +80,6 @@ Model::Model(float t0, float T, string title, string author, string description,
   this->nsds = NULL;
   OUT("Model::Model\n");
 }
-
-//Model::Model(float t0, float T, string title, string author, string description, string date, string xmlSchema)
-//{
-//  IN("Model::Model\n");
-//  /*
-//   * in this case, needed data are given in parameters
-//   */
-//  /*
-//   * no xml file in input
-//   * the DOM tree must be created
-//   * no "linkModelXML" to do
-//   */
-//
-//  /** T final */
-//  if( T  != -1 ) this->T  = T;
-//  else this->T = -1;
-//
-//  /** t0 initial time */
-//  if( t0 != -1 ) this->t0 = t0;
-//  else RuntimeException::selfThrow("Model::Model - a value for t0 must be given");
-//
-//  /** t current id optionnal, the default value is t0 which is required */
-//  this->t = t0;
-//
-//  this->title = title;
-//  this->author  = author;
-//  this->description = description;
-//  this->date  = date;
-//  if(xmlSchema == "none") this->xmlSchema = XML_SCHEMA;//xmlSchema;
-//  else this->xmlSchema = xmlSchema;
-//
-//  OUT("Model::Model\n");
-//}
 
 Model::~Model()
 {
@@ -262,26 +166,6 @@ void Model::savePlatformToXML()
    */
   this->nsds->saveNSDSToXML();
 
-  //  size = this->nsds->getDSVectorSize();
-  //  for(i = 0; i<size; i++)
-  //    {
-  //      if( this->nsds->getDynamicalSystem(i)->getType() == LNLDS )
-  //  (static_cast<LagrangianDS*>(this->nsds->getDynamicalSystem(i)))->saveDSToXML();
-  //      else if( this->nsds->getDynamicalSystem(i)->getType() == LTIDS )
-  //  (static_cast<LagrangianLinearTIDS*>(this->nsds->getDynamicalSystem(i)))->saveDSToXML();
-  //      else if( this->nsds->getDynamicalSystem(i)->getType() == LSDS )
-  //  (static_cast<LinearSystemDS*>(this->nsds->getDynamicalSystem(i)))->saveDSToXML();
-  //      else if( this->nsds->getDynamicalSystem(i)->getType() == NLSDS )
-  //  this->nsds->getDynamicalSystem(i)->saveDSToXML();
-  //      else RuntimeException::selfThrow("Model::saveToXML - bad kind of DS");
-  //    }
-  //
-  //  size = this->nsds->getInteractionVectorSize();
-  //  for(i = 0; i<size; i++)
-  //    {
-  //      this->nsds->getInteraction(i)->saveInteractionToXML();
-  //    }
-
   /*
    * save of the Strategy
    */
@@ -295,29 +179,6 @@ void Model::savePlatformToXML()
     else if (this->strategy->getType() == EVENTDRIVEN_STRATEGY)
       (static_cast<EventDriven*>(this->strategy))->saveStrategyToXML();
     else RuntimeException::selfThrow("Model::savePlatformToXML - bad kind of Strategy");
-
-    //    size = this->strategy->getOneStepIntegratorVectorSize();
-    //    for(i = 0; i<size; i++)
-    //    {
-    //      if( this->strategy->getOneStepIntegrator(i)->getType() == MOREAU_INTEGRATOR )
-    //        (static_cast<Moreau*>(this->strategy->getOneStepIntegrator(i)))->saveIntegratorToXML();
-    //      else if( this->strategy->getOneStepIntegrator(i)->getType() == ADAMS_INTEGRATOR )
-    //        (static_cast<Adams*>(this->strategy->getOneStepIntegrator(i)))->saveIntegratorToXML();
-    //      else if( this->strategy->getOneStepIntegrator(i)->getType() == LSODAR_INTEGRATOR )
-    //        (static_cast<Lsodar*>(this->strategy->getOneStepIntegrator(i)))->saveIntegratorToXML();
-    //      else RuntimeException::selfThrow("Model::saveToXML - bad kind of OneStepIntegrator");
-    //    }
-    //
-    //    if( this->strategy->getStrategyXML()->hasOneStepNSProblemXML() )
-    //    {
-    //      if( this->strategy->getOneStepNSProblem()->getType() == LCP_OSNSP )
-    //        (static_cast<LCP*>(this->strategy->getOneStepNSProblem()))->saveNSProblemToXML();
-    //      else if( this->strategy->getOneStepNSProblem()->getType() == QP_OSNSP )
-    //        (static_cast<QP*>(this->strategy->getOneStepNSProblem()))->saveNSProblemToXML();
-    //      else if( this->strategy->getOneStepNSProblem()->getType() == RELAY_OSNSP )
-    //        (static_cast<Relay*>(this->strategy->getOneStepNSProblem()))->saveNSProblemToXML();
-    //      else RuntimeException::selfThrow("Model::saveToXML - bad kind of OneStepNSProblem");
-    //    }
   }
   else //RuntimeException::selfThrow("Model::saveToXML - object StrategyXML does not exist");
     cout << "Model::saveToXML - Warnig : No Strategy is defined" << endl;
@@ -330,8 +191,7 @@ void Model::linkModelXML(void)
   IN("Model::linkModelXML\n");
   if (this->modelxml != NULL)
   {
-    this->nsds = new NonSmoothDynamicalSystem();
-    this->nsds->createNonSmoothDynamicalSystem(this->modelxml->getNSDSXML());
+    this->nsds = new NonSmoothDynamicalSystem(this->modelxml->getNSDSXML());
 
     if (this->modelxml->hasStrategy())
     {
@@ -396,105 +256,6 @@ void Model::doOneStep(void)
   IN("Model::doOneStep\n");
   OUT("Model::doOneStep\n");
 }
-
-//void Model::createModel(char *xmlFile, /*float t,*/ float t0, float T, string title, string author, string description, string date, string schema)
-//{
-//  IN("Model::createModel\n");
-//  cout<<"Model::createModel"<<endl;
-//  if( xmlFile != NULL )
-//    {
-//      /*
-//       * load of the data from a xml file
-//       * if values are given for t, t0 and T ( != -1 ), these values will be saved
-//       */
-//      this->readModel(xmlFile);
-//      cout<<"Model read"<<endl;
-//      this->fillModelWithModelXML();
-//      cout<<"Model filled"<<endl;
-//      this->linkModelXML();
-//      cout<<"Model linked"<<endl;
-//
-//    if( title  != "title" ) this->title = title;
-//    if( author  != "author" ) this->author  = author;
-//    if( description != "description" ) this->description = description;
-//    if( date  != "date" ) this->date  = date;
-//    if( (schema != "none") && (schema  != XML_SCHEMA) ) this->xmlSchema = schema;
-//
-//    //this->getStrategy()->getTimeDiscretisation()->checkTimeDiscretisation();
-//  }
-//  else
-//  {
-//    /*
-//     * in this case, needed data are given in parameters
-//     */
-//
-//    /*
-//     * no xml file in input
-//     * the DOM tree must be created
-//     * no "linkModelXML" to do
-//     */
-//
-//    /** T final */
-//    if( T  != -1 )
-//    {
-//      this->T  = T;
-//    }
-//    else this->T = -1;
-//
-//    /** t0 initial time */
-//    if( t0 != -1 ) this->t0 = t0;
-//    else RuntimeException::selfThrow("Model::createModel - a value for t0 must be given");
-//
-//    /** t current id optionnal, the default value is t0 which is required */
-//    this->t = t0;
-//
-//    this->title = title;
-//    this->author  = author;
-//    this->description = description;
-//    this->date  = date;
-//    if(schema == "none") this->xmlSchema = XML_SCHEMA;//xmlSchema;
-//    else this->xmlSchema = schema;
-//  }
-//  OUT("Model::createModel\n");
-//}
-//
-//void Model::createModel(float t0, float T, string title, string author, string description, string date, string xmlSchema)
-//{
-//  IN("Model::createModel\n");
-//  cout<<"Model::createModel"<<endl;
-//  /*
-//   * in this case, needed data are given in parameters
-//   */
-//
-//  /*
-//   * no xml file in input
-//   * the DOM tree must be created
-//   * no "linkModelXML" to do
-//   */
-//
-//  /** T final */
-//  if( T  != -1 )
-//  {
-//    this->T  = T;
-//  }
-//  else this->T = -1;
-//
-//  /** t0 initial time */
-//  if( t0 != -1 ) this->t0 = t0;
-//  else RuntimeException::selfThrow("Model::createModel - a value for t0 must be given");
-//
-//  /** t current id optionnal, the default value is t0 which is required */
-//  this->t = t0;
-//
-//  this->title = title;
-//  this->author  = author;
-//  this->description = description;
-//  this->date  = date;
-//  if(xmlSchema == "none") this->xmlSchema = XML_SCHEMA;//xmlSchema;
-//  else this->xmlSchema = xmlSchema;
-//
-//  OUT("Model::createModel\n");
-//}
 
 void Model::checkModelCoherency()
 {
@@ -612,67 +373,9 @@ void Model::checkXMLPlatform()
     if (this->modelxml->getNSDSXML() != NULL)
     {
       /*
-       * we must check if each DynamicalSystem has an DynamicalSystemXML
-       */
-      //    vector<DynamicalSystem*> vectDS = this->nsds->getDynamicalSystems();
-      //    for(i=0; i<vectDS.size(); i++)
-      //      {
-      //        //if( this->modelxml->getNSDSXML()->getDSXML( vectDS[i]->getNumber() ) == NULL )
-      //        if( vectDS[i]->getDynamicalSystemXML() == NULL )
-      //    {
-      /*
        * we must create/update the DSXMLs
        */
       this->nsds->getNSDSXML()->updateNSDSXML(this->modelxml->getNSDSXML()->getNSDSXMLNode(), this->nsds);
-      //    }
-      //      }
-
-      /*
-       * we must check if each Interaction has an InteractionXML
-       */
-      //    vector<Interaction*> vectInter = this->nsds->getInteractions();
-      //    for(i=0; i<vectInter.size(); i++)
-      //      {
-      //        //if( this->modelxml->getNSDSXML()->getInteractionXML( vectInter[i]->getNumber() ) == NULL )
-      //        if( vectInter[i]->getInteractionXML() == NULL )
-      //    {
-      /*
-       * we must create/update the InteractionXMLs
-       */
-      //      this->nsds->getNSDSXML()->updateNSDSXML( this->modelxml->getNSDSXML()->getNSDSXMLNode(), this->nsds );
-      //    }
-      //        else
-      //    {
-      //      /*
-      //       * we must check if the Interaction contains
-      //       * a Relation and his RelationXML
-      //       * and and NonSmoothLaw with his NonSmoothLawXML
-      //       */
-      //      if( vectInter[i]->getRelation() != NULL )
-      //        {
-      //          if( vectInter[i]->getRelation()->getRelationXML() == NULL )
-      //      {
-      //        /*
-      //         * creation of the RelationXML for this Relation
-      //         */
-      //        vectInter[i]->getInteractionXML()->updateInteractionXML( this->modelxml->getNSDSXML()->getInteractionXML(vectInter[i]->getNumber())->getInteractionXMLNode(), vectInter[i] );
-      //      }
-      //        }
-      //      else RuntimeException::selfThrow("Model::checkXMLPlatform - There's no Relation in this Interaction, the XML platform can't be built");
-      //
-      //      if( vectInter[i]->getNonSmoothLaw() != NULL )
-      //        {
-      //          if( vectInter[i]->getNonSmoothLaw()->getNonSmoothLawXML() == NULL )
-      //      {
-      //        /*
-      //         * creation of the NonSmoothLawXML for this NonSmoothLaw
-      //         */
-      //        vectInter[i]->getInteractionXML()->updateInteractionXML( this->modelxml->getNSDSXML()->getInteractionXML(vectInter[i]->getNumber())->getInteractionXMLNode(), vectInter[i] );
-      //      }
-      //        }
-      //      else RuntimeException::selfThrow("Model::checkXMLPlatform - There's no NonSmoothLaw in this Interaction, the XML platform can't be built");
-      //    }
-      //      }
     }
     else if (this->nsds != NULL)
     {
@@ -684,7 +387,7 @@ void Model::checkXMLPlatform()
     }
     else RuntimeException::selfThrow("Model::checkXMLPlatform - There's no NonSmoothDynamicalSystem in the Platform, the XML platform can't be built");
 
-    if ((this->strategy != NULL)) //&& (this->modelxml->getStrategyXML() != NULL) )
+    if ((this->strategy != NULL))
     {
       if (this->modelxml->getStrategyXML() == NULL)
       {
@@ -731,10 +434,7 @@ void Model::checkXMLPlatform()
 
 NonSmoothDynamicalSystem* Model::createNonSmoothDynamicalSystem(bool bvp)
 {
-  this->nsds = new NonSmoothDynamicalSystem();
-  //  this->nsds->setBVP( bvp );
-  this->nsds->createNonSmoothDynamicalSystem(NULL, bvp);//, NULL);
-
+  this->nsds = new NonSmoothDynamicalSystem(bvp);
   return this->nsds;
 }
 

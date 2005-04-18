@@ -15,16 +15,46 @@ LagrangianLinearTIDS::LagrangianLinearTIDS()
   OUT("LagrangianLinearTIDS::LagrangianLinearTIDS()\n");
 }
 
-LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML* dsxml): LagrangianDS(dsxml)
+LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML * dsXML)//:LagrangianDS(dsXML)
 {
-  IN("LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML* dsxml):LagrangianDS(dsxml)\n");
+  if (dsXML != NULL)
+  {
+    this->dsxml = dsXML;
+    // /!\ not very good, to see if we can do better !!!
+    LagrangianDS::LagrangianDS(dsXML);
+    LagrangianDS::fillDSWithDSXML();
+    this->fillDSWithDSXML();
+    this->linkDSXML();
+    this->DSType = LTIDS;
+  }
+  else
+  {
+    cout << "LagrangianLinearTIDS::LagrangianLinearTIDS - DSXML paramater musn't be NULL" << endl;
+  }
+}
 
-  this->init();
-  this->K = SiconosMatrix::SiconosMatrix();
-  this->C = SiconosMatrix::SiconosMatrix();
+LagrangianLinearTIDS::LagrangianLinearTIDS(int number, int ndof,
+    SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass,
+    string fExt, SiconosMatrix* K, SiconosMatrix* C)
+{
+  this->number = number;
+  this->ndof = ndof;
+
+  LagrangianDS::SiconosVectorSizeInit();
+
+  this->q0 = *q0;
+  this->q = *q0;
+  this->velocity0 = *velocity0;
+  this->velocity = *velocity0;
+
+  LagrangianDS::CompositeVectorInit();
+
+  this->mass = *mass;
+
+  this->setComputeFExtFunction(this->cShared.getPluginName(fExt), this->cShared.getPluginFunctionName(fExt));
+  this->K = *K;
+  this->C = *C;
   this->DSType = LTIDS;
-
-  OUT("LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML* dsxml):LagrangianDS(dsxml)\n");
 }
 
 
@@ -63,8 +93,6 @@ void LagrangianLinearTIDS::fillDSWithDSXML()
   {
     this->K = (static_cast <LagrangianLinearTIDSXML*>(this->dsxml))->getK();
     this->C = (static_cast <LagrangianLinearTIDSXML*>(this->dsxml))->getC();
-    //this->init();
-    //    this->display();
   }
   else RuntimeException::selfThrow("LagrangianLinearTIDS::fillDSWithDSXML - object DSXML does not exist");
   OUT("LagrangianLinearTIDS::fillDSWithDSXML\n");
@@ -130,52 +158,6 @@ void LTIDSComputeFExt(int* sizeOfq, double* time, double* qPtr, double* fExt)
   fExt[0] = -m * g + FextFunction(t);
   OUT("LagrangianLinearTIDS : friend LTIDSComputeFInt\n");
 }
-
-void LagrangianLinearTIDS::createDynamicalSystem(DSXML * dsXML, int number, int ndof,
-    SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass,
-    string fExt, SiconosMatrix* K, SiconosMatrix* C) //,NSDS * nsds)
-{
-  if (dsXML != NULL)
-  {
-    LagrangianDS::createDynamicalSystem(dsXML);
-    //this->init();
-    LagrangianDS::fillDSWithDSXML();
-    this->fillDSWithDSXML();
-    this->linkDSXML();
-    this->DSType = LTIDS;
-  }
-  else
-  {
-    this->number = number;
-    this->ndof = ndof;
-
-    LagrangianDS::SiconosVectorSizeInit();
-
-    this->q0 = *q0;
-    this->q = *q0;
-    this->velocity0 = *velocity0;
-    this->velocity = *velocity0;
-
-    LagrangianDS::CompositeVectorInit();
-
-    //this->setComputeMassFunction(this->cShared.getPluginName( mass ), this->cShared.getPluginFunctionName( mass ));
-    this->mass = *mass;
-
-    this->setComputeFExtFunction(this->cShared.getPluginName(fExt), this->cShared.getPluginFunctionName(fExt));
-
-    //    this->setComputeJacobianQFIntFunction(this->cShared.getPluginName( jacobianQFInt ), this->cShared.getPluginFunctionName( jacobianQFInt ));
-    //    this->setComputeJacobianVelocityFIntFunction(this->cShared.getPluginName( jacobianVelocityFInt ), this->cShared.getPluginFunctionName( jacobianQFInt ));
-    //    this->setComputeJacobianQQNLInertiaFunction(this->cShared.getPluginName( jacobianQQNLInertia ), this->cShared.getPluginFunctionName( jacobianQQNLInertia ));
-    //    this->setComputeJacobianVelocityQNLInertiaFunction(this->cShared.getPluginName( jacobianVelocityQNLInertia ), this->cShared.getPluginFunctionName( jacobianVelocityQNLInertia ));
-    //
-    //    this->setComputeQNLInertiaFunction(this->cShared.getPluginName( QNLInertia ), this->cShared.getPluginFunctionName( QNLInertia ));
-
-    this->K = *K;
-    this->C = *C;
-    this->DSType = LTIDS;
-  }
-}
-
 
 LagrangianLinearTIDS* LagrangianLinearTIDS::convert(DynamicalSystem* ds)
 {

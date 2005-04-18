@@ -2,6 +2,10 @@
 
 #include "PlatformTest.h"
 
+#include "LinearSystemDS.h"
+#include "LagrangianDS.h"
+#include "LagrangianLinearTIDS.h"
+
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
 
@@ -131,7 +135,7 @@ void PlatformTest::testOptionalAttributes11()
   /*
    * test with no XML, but createModel with parameters
    */
-  Model m11(NULL, 1, 0);
+  Model m11(0, 10);
 
   cout << "PlatformTest >>> testOptionalAttributes11 - createModel with parameters ....................... OK\n ";
 }
@@ -193,32 +197,44 @@ void PlatformTest::testOptionalAttributes16()
 
 void PlatformTest::testManualCreation()
 {
-  Model m(NULL, 0, 10);
+  Model m(0, 10);
   m.display();
 
   NonSmoothDynamicalSystem* nsds;
+  nsds = new NonSmoothDynamicalSystem(true);
+  m.setNonSmoothDynamicalSystem(nsds);
 
-  nsds = m.createNonSmoothDynamicalSystem(true);
   DynamicalSystem *ds, *ds2, *ds3, *ds4;
   SimpleVector sv;
 
-
-  ds = nsds->addNonLinearSystemDS(1, 2, &sv, "BasicPlugin:vectorField");
+  ds = new DynamicalSystem(1, 2, &sv, "BasicPlugin:vectorField");
+  //ds = nsds->addNonLinearSystemDS( 1, 2, &sv, "BasicPlugin:vectorField" );
   ds->createPeriodicBC();
+  nsds->addDynamicalSystem(ds);
 
-  ds2 = nsds->addLinearSystemDS(2, 5, &sv);
+  //ds2 = nsds->addLinearSystemDS( 2, 5, &sv );
+  ds2 = new LinearSystemDS(2, 5, &sv);
   ds2->createNLinearBC();
+  nsds->addDynamicalSystem(ds2);
 
-  ds3 = nsds->addLagrangianDS(3, 2, &sv, &sv, "BasicPlugin:computeMass",
-                              "BasicPlugin:computeFInt", "BasicPlugin:computeFExt", "BasicPlugin:computeJacobianQFInt",
-                              "BasicPlugin:computeJacobianVelocityFInt", "BasicPlugin:computeJacobianQQNLInertia",
-                              "BasicPlugin:computeJacobianVelocityQNLInertia", "BasicPlugin:computeQNLInertia");
+  /*  ds3 = nsds->addLagrangianDS(3, 2, &sv, &sv, "BasicPlugin:computeMass",
+        "BasicPlugin:computeFInt","BasicPlugin:computeFExt","BasicPlugin:computeJacobianQFInt",
+        "BasicPlugin:computeJacobianVelocityFInt","BasicPlugin:computeJacobianQQNLInertia",
+        "BasicPlugin:computeJacobianVelocityQNLInertia", "BasicPlugin:computeQNLInertia");
+  */
+  ds3 = new LagrangianDS(3, 2, &sv, &sv, "BasicPlugin:computeMass",
+                         "BasicPlugin:computeFInt", "BasicPlugin:computeFExt", "BasicPlugin:computeJacobianQFInt",
+                         "BasicPlugin:computeJacobianVelocityFInt", "BasicPlugin:computeJacobianQQNLInertia",
+                         "BasicPlugin:computeJacobianVelocityQNLInertia", "BasicPlugin:computeQNLInertia");
   ds3->createPeriodicBC();
+  nsds->addDynamicalSystem(ds3);
 
   SiconosMatrix sm;
-  ds4 = nsds->addLagrangianLinearTIDS(4, 8, &sv, &sv, &sm, "BasicPlugin:computeFExt",
-                                      &sm, &sm);
+  //  ds4 = nsds->addLagrangianLinearTIDS(4, 8, &sv, &sv, &sm,"BasicPlugin:computeFExt",
+  //      &sm, &sm);
+  ds4 = new LagrangianLinearTIDS(4, 8, &sv, &sv, &sm, "BasicPlugin:computeFExt", &sm, &sm);
   ds4->createLinearBC(&sv, &sm, &sm);
+  nsds->addDynamicalSystem(ds4);
 
   vector<int> vect(2);
   vector<DynamicalSystem*> dsVect;
@@ -259,13 +275,14 @@ void PlatformTest::testManualCreation()
 
 void PlatformTest::testManualCreation2()
 {
-  Model m(NULL, 0, 10);
+  Model m(0, 10);
   m.display();
 
   NonSmoothDynamicalSystem* nsds;
-
   nsds = m.createNonSmoothDynamicalSystem(false);
   nsds->display();
+  m.setNonSmoothDynamicalSystem(nsds);
+
   cout << "=== creation des DSs ===" << endl;
   DynamicalSystem *ds1, *ds2;
   /*SiconosVector*/
@@ -296,8 +313,9 @@ void PlatformTest::testManualCreation2()
   SiconosMatrix mC(3, 3);
   mC.zero();
 
-  ds1 = nsds->addLagrangianLinearTIDS(1, 3, &q0, &v0, &mass, "BallPlugin:ballFExt",
-                                      &K, &mC);
+  //  ds1 = nsds->addLagrangianLinearTIDS(1, 3, &q0, &v0, &mass,"BallPlugin:ballFExt", &K, &mC);
+  ds1 = new LagrangianLinearTIDS(1, 3, &q0, &v0, &mass, "BallPlugin:ballFExt", &K, &mC);
+  nsds->addDynamicalSystem(ds1);
   //ds1->setQ()
 
 
@@ -315,8 +333,9 @@ void PlatformTest::testManualCreation2()
   SiconosMatrix C_(1, 1);
   C_.zero();
 
-  ds2 = nsds->addLagrangianLinearTIDS(2, 1, &q0_, &v0_, &mass_, "BallPlugin:groundFExt",
-                                      &K_, &C_);
+  //  ds2 = nsds->addLagrangianLinearTIDS(2, 1, &q0_, &v0_, &mass_,"BallPlugin:groundFExt", &K_, &C_);
+  ds2 = new LagrangianLinearTIDS(2, 1, &q0_, &v0_, &mass_, "BallPlugin:groundFExt", &K_, &C_);
+  nsds->addDynamicalSystem(ds2);
 
   cout << "=== creation des Interactions ===" << endl;
   vector<int> vect(1);
@@ -370,25 +389,30 @@ void PlatformTest::testManualCreation2()
 
 void PlatformTest::testManualCreation3()
 {
-  Model m(NULL, 0, 10);
-  m.display();
+  Model mo(0, 10);
+  mo.display();
 
   NonSmoothDynamicalSystem* nsds;
+  nsds = mo.createNonSmoothDynamicalSystem(false);
+  mo.setNonSmoothDynamicalSystem(nsds);
 
-  nsds = m.createNonSmoothDynamicalSystem(false);
   DynamicalSystem *ds, *ds2, *ds3, *ds4;
   SimpleVector sv;
 
 
-  ds = nsds->addNonLinearSystemDS(1, 2, &sv, "BasicPlugin:vectorField");
-  ds2 = nsds->addLinearSystemDS(2, 5, &sv);
-  ds3 = nsds->addLagrangianDS(3, 2, &sv, &sv, "BasicPlugin:computeMass",
-                              "BasicPlugin:computeFInt", "BasicPlugin:computeFExt", "BasicPlugin:computeJacobianQFInt",
-                              "BasicPlugin:computeJacobianVelocityFInt", "BasicPlugin:computeJacobianQQNLInertia",
-                              "BasicPlugin:computeJacobianVelocityQNLInertia", "BasicPlugin:computeQNLInertia");
+  ds = new DynamicalSystem(1, 2, &sv, "BasicPlugin:vectorField");
+  ds2 = new LinearSystemDS(2, 5, &sv);
+  ds3 = new LagrangianDS(3, 2, &sv, &sv, "BasicPlugin:computeMass",
+                         "BasicPlugin:computeFInt", "BasicPlugin:computeFExt", "BasicPlugin:computeJacobianQFInt",
+                         "BasicPlugin:computeJacobianVelocityFInt", "BasicPlugin:computeJacobianQQNLInertia",
+                         "BasicPlugin:computeJacobianVelocityQNLInertia", "BasicPlugin:computeQNLInertia");
   SiconosMatrix sm;
-  ds4 = nsds->addLagrangianLinearTIDS(4, 8, &sv, &sv, &sm, "BasicPlugin:computeFExt",
-                                      &sm, &sm);
+  ds4 = new LagrangianLinearTIDS(4, 8, &sv, &sv, &sm, "BasicPlugin:computeFExt", &sm, &sm);
+
+  nsds->addDynamicalSystem(ds);
+  nsds->addDynamicalSystem(ds2);
+  nsds->addDynamicalSystem(ds3);
+  nsds->addDynamicalSystem(ds4);
 
   vector<int> vect(2);
   vector<DynamicalSystem*> dsVect;
@@ -396,7 +420,7 @@ void PlatformTest::testManualCreation3()
   dsVect.push_back(ds2);
 
   Strategy* str;
-  str = m.createTimeStepping();
+  str = mo.createTimeStepping();
 
   TimeDiscretisation* td;
   td = str->createTimeDiscretisation(1.0, 1, &sv, 1.0, 1.0, true);
@@ -406,8 +430,8 @@ void PlatformTest::testManualCreation3()
   osi = str->addLsodar(td, ds2);
   osi = str->addMoreau(td, ds3, 1.0);
 
-  m.saveToDOMTree();
-  if (!m.checkXMLDOMTree()) exit(0);
+  mo.saveToDOMTree();
+  if (!mo.checkXMLDOMTree()) exit(0);
   cout << "PlatformTest >>> testManualCreation3 - manual construction of the platform ..................... OK\n ";
 }
 
@@ -430,8 +454,10 @@ void PlatformTest::testMixteCreation()
   SimpleVector sv;
   SiconosMatrix sm;
   nsds = m.getNonSmoothDynamicalSystem();
-  ds = nsds->addNonLinearSystemDS(11, 2, &sv, "BasicPlugin:vectorField");
+  //ds = nsds->addNonLinearSystemDS( 11, 2, &sv, "BasicPlugin:vectorField" );
+  ds = new DynamicalSystem(11, 2, &sv, "BasicPlugin:vectorField");
   ds->createPeriodicBC();
+  nsds->addDynamicalSystem(ds);
 
   Interaction* inter;
   vector<int> vect(2);
@@ -492,7 +518,7 @@ void PlatformTest::testXMLSchemaAttributeBad2()
 
 void PlatformTest::testPlatformException()
 {
-  Model m(NULL);
+  Model m(10, 0);
   cout << "PlatformTest >>> testPlatformException - creation that must launch an exception ..................... OK\n ";
 }
 

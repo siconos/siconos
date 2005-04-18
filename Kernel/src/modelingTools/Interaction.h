@@ -42,6 +42,15 @@ public:
    */
   Interaction();
 
+  /** \fn Interaction(Interaction*)
+   *  \brief copy constructor
+   *  \param Interaction* : the object to copy
+   */
+  Interaction(Interaction *inter)
+  {
+    *this = *inter;
+  };
+
   /** \fn Interaction(InteractionXML*)
    *  \brief constructor with XML object of the Interaction
    *  \param InteractionXML* : the XML object corresponding

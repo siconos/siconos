@@ -339,7 +339,6 @@ void Interaction::linkInteractionWithInteractionXML()
 void Interaction::saveInteractionToXML()
 {
   IN("Interaction::saveInteractionToXML\n");
-  cout << "##### Interaction::saveInteractionToXML" << endl;;
   /*
    * save the data of the Interaction
    */
@@ -372,8 +371,6 @@ void Interaction::saveInteractionToXML()
    * save the data of the NonSmoothLaw
    */
 
-  cout << "    save of the NSLaw : " << this->nslaw << endl;
-  cout << nslaw->getType() << endl;
   if (this->nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW)
     (static_cast<ComplementarityConditionNSL*>(this->nslaw))->saveNonSmoothLawToXML();
   else if (this->nslaw->getType() == RELAYNSLAW)

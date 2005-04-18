@@ -388,7 +388,7 @@
 						<xsd:element name="xMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="xDotMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="x0" type="vector" minOccurs='1' maxOccurs='1'/>
-						<xsd:element name="StepsInMemory" type="xsd:positiveInteger" minOccurs='0' maxOccurs='1'/>
+						<xsd:element name="StepsInMemory" type="xsd:nonNegativeInteger" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="vectorField" type="pluginDef" minOccurs='1' maxOccurs='1'/>
 						<xsd:element name="computeJacobianX" type="pluginDef" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="R" type="vector" minOccurs="0" maxOccurs="1"/>
@@ -410,7 +410,7 @@
 						<xsd:element name="xMemory" type="memory" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="xDotMemory" type="memory" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="x0" type="vector" minOccurs="1" maxOccurs="1"/>
-						<xsd:element name="StepsInMemory" type="xsd:positiveInteger" minOccurs='0' maxOccurs='1'/>
+						<xsd:element name="StepsInMemory" type="xsd:nonNegativeInteger" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="vectorField" type="pluginDef" minOccurs="0" maxOccurs="0"/>
 						<xsd:element name="computeJacobianX" type="pluginDef" minOccurs="0" maxOccurs="0"/>
 						<xsd:element name="R" type="vector" minOccurs="0" maxOccurs="1"/>
@@ -437,7 +437,7 @@
 						<xsd:element name="xMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="xDotMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="x0" type="vector" minOccurs='0' maxOccurs='1'/>
-						<xsd:element name="StepsInMemory" type="xsd:positiveInteger" minOccurs='0' maxOccurs='1'/>
+						<xsd:element name="StepsInMemory" type="xsd:nonNegativeInteger" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="vectorField" type="pluginDef" minOccurs='0' maxOccurs='0'/>
 						<xsd:element name="computeJacobianX" type="pluginDef" minOccurs='0' maxOccurs='0'/>
 						<xsd:element name="R" type="vector" minOccurs="0" maxOccurs="1"/>
@@ -484,7 +484,7 @@
 						<xsd:element name="xMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="xDotMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="x0" type="vector" minOccurs='0' maxOccurs='1'/>
-						<xsd:element name="StepsInMemory" type="xsd:positiveInteger" minOccurs='0' maxOccurs='1'/>
+						<xsd:element name="StepsInMemory" type="xsd:nonNegativeInteger" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="vectorField" type="pluginDef" minOccurs='0' maxOccurs='0'/>
 						<xsd:element name="computeJacobianX" type="pluginDef" minOccurs='0' maxOccurs='0'/>
 

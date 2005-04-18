@@ -1,4 +1,4 @@
-SICONOSPATH=/local_home/charlety/DEV_LOC/SICONOS_INSTALLED
+SICONOSPATH=@prefix@
 include $(SICONOSPATH)/share/SICONOS/KernelConfig.sh
 
 SAMPLE_SOURCES = $(OBJ)

@@ -53,6 +53,7 @@ private:
   CPPUNIT_TEST(testOSNSP4);
   CPPUNIT_TEST(testOSNSP5);
   CPPUNIT_TEST(testLmgc90);
+
   //CPPUNIT_TEST( testMainSiconos );
 
 

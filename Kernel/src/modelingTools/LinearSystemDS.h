@@ -5,7 +5,6 @@
 #include "DynamicalSystem.h"
 
 #include "SiconosMatrix.h"
-//#include "SiconosVector.h"
 #include "NewSiconosVector.h"
 #include <iostream>
 #include <vector>
@@ -51,11 +50,23 @@ public:
    */
   LinearSystemDS();
 
-  /** \fn LinearSystemDS(DSXML*)
-   *  \brief constructor with XML object of the LinearSystemDS
-   *  \param DSXML* : the XML object corresponding
+  /** \fn LinearSystemDS(DSXML * nsdsXML)
+   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+   *  \param DSXML * : the XML object for this DynamicalSystem
+   *  \exception RuntimeException
    */
-  LinearSystemDS(DSXML*);
+  LinearSystemDS(DSXML * dsXML);
+
+  /** \fn LinearSystemDS(int number, int n,
+                      SiconosVector* x0, NSDS * nsds)
+   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+   *  \param int : the number for this DynamicalSystem
+   *  \param int : the dimension of this DynamicalSystem
+   *  \param SiconosVector* : the initial state of this DynamicalSystem
+   *  \exception RuntimeException
+   */
+  LinearSystemDS(int number, int n, SiconosVector* x0);
+
   ~LinearSystemDS();
 
   // getter and setter
@@ -90,12 +101,6 @@ public:
    */
   SiconosMatrix* getBPtr(void);
 
-  /** \fn int getSizeU (void)
-   *  \brief allow to get the size of the SiconosVector u
-   *  \return the size of the SiconosVector u
-   */
-  //int getSizeU (void);
-
   /** \fn SimpleVector getU (void)
    *  \brief get the vector u
    *  \return SimpleVector : value of u
@@ -118,14 +123,12 @@ public:
    *  \brief allow to get the SiconosVector u
    *  \return the SiconosVector* u of the LinearSystemDS
    */
-  /*SiconosVector*/
   SimpleVector* getUPtr(void);
 
   /** \fn SiconosVector* getFPtr (void)
    *  \brief get vector f
    *  \return SimpleVector* : pointer on f of the LinearSystemDS
    */
-  /*SiconosVector*/
   SimpleVector* getFPtr(void);
 
 
@@ -151,7 +154,7 @@ public:
    *  \brief set vector u
    *  \param SimpleVector& : new value of u
    */
-  inline void setU(/*SiconosVector*/SimpleVector &u)
+  inline void setU(SimpleVector &u)
   {
     this->u = u;
   };
@@ -160,7 +163,7 @@ public:
    *  \brief set vector f
    *  \param SimpleVector& : new value of f
    */
-  inline void setF(/*SiconosVector*/SimpleVector &f)
+  inline void setF(SimpleVector &f)
   {
     this->f = f;
   };
@@ -210,19 +213,6 @@ public:
    */
   void display() const;
 
-  /** \fn void createDynamicalSystem(DSXML * nsdsXML, int number, int n,
-                      SiconosVector* x0, NSDS * nsds)
-   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
-   *  \param DSXML * : the XML object for this DynamicalSystem
-   *  \param int : the number for this DynamicalSystem
-   *  \param int : the dimension of this DynamicalSystem
-   *  \param SiconosVector* : the initial state of this DynamicalSystem
-  //  *  \param NSDS * : The NSDS which contains this DynamicalSystem
-   *  \exception RuntimeException
-   */
-  void createDynamicalSystem(DSXML * dsXML, int number = -1, int n = -1,
-                             SiconosVector* x0 = NULL);//, NSDS * nsds = NULL);
-
   /** \fn LinearSystemDS* convert (DynamicalSystem* ds)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param DynamicalSystem* : the system which must be converted
@@ -246,10 +236,8 @@ private:
   /** size of vector u */
   int uSize;
   /** vector specific to the LinearSystemDS */
-  /*SiconosVector*/
   SimpleVector u;
   /** strength vector */
-  /*SiconosVector*/
   SimpleVector f;
 
   /* contains the name of the plugin for u */
@@ -259,18 +247,6 @@ private:
 
   /** class for manage plugin (open, close librairy...) */
   SiconosSharedLibrary cShared;
-
-  //  /** \fn void (*vectorFieldPtr)(double time)
-  //   * \brief compute the state
-  //   * \param double : the time to make the computations
-  //   */
-  //  void (*vectorFieldPtr)(double time);
-
-  //  /** \fn void (*computeJacobianPtr)(double time)
-  //   * \brief compute the gradient of the state
-  //   * \param double : the time to make the computations
-  //   */
-  //  void (*computeJacobianPtr)(double time);
 
   /** \fn void (*computeFPtr)(int sizeOfF, double* fPtr,double time)
     *  \brief compute vector F

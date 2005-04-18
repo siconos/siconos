@@ -5,7 +5,6 @@
 #include "LagrangianLinearTIDSXML.h"
 
 #include "SiconosMatrix.h"
-//#include "SiconosVector.h"
 #include "NewSiconosVector.h"
 
 #include <iostream>
@@ -81,11 +80,34 @@ public:
    */
   LagrangianLinearTIDS();
 
-  /** \fn LagrangianLinearTIDS(DSXML*)
-   *  \brief constructor with XML object of the LagrangianLinearTIDS
-   *  \param DSXML* : the XML object corresponding
+  /** \fn LagrangianLinearTIDS(DSXML * dsXML, int number, int ndof,
+        SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass,
+        string fExt,SiconosMatrix* K, SiconosMatrix* C)
+   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+   *  \param DSXML * : the XML object for this DynamicalSystem
+   *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(DSXML*);
+  LagrangianLinearTIDS(DSXML * dsXML);
+
+  /** \fn LagrangianLinearTIDS(int number, int ndof,
+        SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass,
+        string fExt,SiconosMatrix* K, SiconosMatrix* C)
+   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+   *  \param int : the number for this DynamicalSystem
+   *  \param int : the dimension of this DynamicalSystem
+   *  \param SiconosVector* : the initial coordinates of this DynamicalSystem
+   *  \param SiconosVector* : the initial velocity of this DynamicalSystem
+   *  \param SiconosMatrix* : the mass of this DynamicalSystem
+   *  \param string : the indiaction needed to locate and use the fExt plugin
+   *  \param SiconosMatrix* : the matrix K of this DynamicalSystem
+   *  \param SiconosMatrix* : the matrix C of this DynamicalSystem
+   *  \exception RuntimeException
+   */
+  LagrangianLinearTIDS(int number, int ndof,
+                       SiconosVector* q0, SiconosVector* velocity0,
+                       SiconosMatrix* mass,
+                       string fExt,
+                       SiconosMatrix* K, SiconosMatrix* C);
 
   ~LagrangianLinearTIDS();
 
@@ -156,34 +178,6 @@ public:
    *  \brief print the data to the screen
    */
   void display() const;
-
-
-  /** \fn void createDynamicalSystem(DSXML * dsXML, int number, int ndof,
-        SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass,
-        string fExt,SiconosMatrix* K, SiconosMatrix* C)
-   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
-   *  \param DSXML * : the XML object for this DynamicalSystem
-   *  \param int : the number for this DynamicalSystem
-   *  \param int : the dimension of this DynamicalSystem
-   *  \param SiconosVector* : the initial coordinates of this DynamicalSystem
-   *  \param SiconosVector* : the initial velocity of this DynamicalSystem
-   *  \param SiconosMatrix* : the mass of this DynamicalSystem
-   *  \param string : the indiaction needed to locate and use the fExt plugin
-   *  \param SiconosMatrix* : the matrix K of this DynamicalSystem
-   *  \param SiconosMatrix* : the matrix C of this DynamicalSystem
-  //  *  \param NSDS * : The NSDS which contains this DynamicalSystem
-   *  \exception RuntimeException
-   */
-  void createDynamicalSystem(DSXML * dsXML, int number = -1, int ndof = -1,
-                             SiconosVector* q0 = NULL, SiconosVector* velocity0 = NULL,
-                             SiconosMatrix* mass = NULL,
-                             string fExt = "BasicPlugin:computeFExt",
-                             //        string jacobianQFInt="BasicPlugin:computeJacobianQFInt",
-                             //        string jacobianVelocityFInt="BasicPlugin:computeJacobianVelocityFInt",
-                             //        string jacobianQQNLInertia="BasicPlugin:computeJacobianQQNLInertia",
-                             //        string jacobianVelocityQNLInertia="BasicPlugin:computeJacobianVelocityQNLInertia",
-                             //        string QNLlInertia="BasicPlugin:computeQNLInertia",
-                             SiconosMatrix* K = NULL, SiconosMatrix* C = NULL); //, NSDS * nsds = NULL);
 
   static LagrangianLinearTIDS* convert(DynamicalSystem* ds);
 

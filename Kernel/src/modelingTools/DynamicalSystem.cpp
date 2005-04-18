@@ -16,13 +16,41 @@ DynamicalSystem::DynamicalSystem()
   this->dsxml = NULL;
 }
 
-DynamicalSystem::DynamicalSystem(DSXML *dsxml)
+DynamicalSystem::DynamicalSystem(DSXML * dsXML)
 {
-  IN("DynamicalSystem::DynamicalSystem(DSXML *dsxml)\n");
-  this->init();
+  IN("DynamicalSystem::DynamicalSystem\n");
+  if (dsXML != NULL)
+  {
+    this->DSType = NLSDS;
+    this->init();
+    this->dsxml = dsXML;
+
+    this->fillDSWithDSXML();
+    this->linkDSXML();
+  }
+  else
+  {
+    cout << "DynamicalSystem::DynamicalSystem - DSXML paramater musn't be NULL" << endl;
+  }
+  OUT("DynamicalSystem::DynamicalSystem\n");
+}
+
+DynamicalSystem::DynamicalSystem(int number, int n,
+                                 SiconosVector* x0, string vectorFieldPlugin)
+{
   this->DSType = NLSDS;
-  this->dsxml = dsxml;
-  OUT("DynamicalSystem::DynamicalSystem(DSXML *dsxml)\n");
+  this->dsxml = NULL;
+  this->number = number;
+  this->n = n;
+
+  this->x0 = new SimpleVector(n);
+  this->x = new SimpleVector(n);
+  this->xDot = /*new*/ SimpleVector::SimpleVector(n);
+  this->xFree = new SimpleVector(n);
+
+  *(this->x0) = *x0;
+  this->setVectorFieldFunction(this->cShared.getPluginName(vectorFieldPlugin), this->cShared.getPluginFunctionName(vectorFieldPlugin));
+  OUT("DynamicalSystem::DynamicalSystem\n");
 }
 
 DynamicalSystem::~DynamicalSystem()
@@ -63,10 +91,6 @@ void DynamicalSystem::setDSInputOutputs(vector<DSInputOutput*> dsioVect)
 
 void DynamicalSystem::addDSInputOutput(DSInputOutput* dsio)
 {
-  //  DSInputOutput* dsioTmp;
-  //  dsioTmp = new DSInputOutput();
-  //  *dsioTmp = *dsio;
-  //  this->dsioVector.push_back( dsioTmp );
   this->dsioVector.push_back(dsio);
 }
 
@@ -208,7 +232,6 @@ void DynamicalSystem::linkDSXML()
   IN("DynamicalSystem::linkDSXML\n");
   if (this->dsxml->getBoundaryConditionXML() != NULL)
   {
-    //cout<<"#DynamicalSystem::linkDSXML - BC type == "<< this->dsxml->getBoundaryConditionXML()->getType() <<endl;
     if (this->dsxml->getBoundaryConditionXML()->getType() == LINEARBC_TAG)
     {
       // creation of the LinearBC with this constructor and call of a method to fill
@@ -235,10 +258,8 @@ void DynamicalSystem::linkDSXML()
 
   DSInputOutput *dsio;
   vector<int> nbDSIOtab = this->dsxml->getDSInputOutputNumbers();
-  //cout<<"DS == "<<this->DSType<<" || size of DSIputOutput == "<<nbDSIOtab.size()<<endl;
   for (int i = 0; i < nbDSIOtab.size(); i++)
   {
-    cout << "DynamicalSystem => linkDS, DSIputOutputNumbers == " << nbDSIOtab[i] << endl;
     if (this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LINEAR_DSIO_TAG)
     {
       dsio = new LinearDSIO();
@@ -272,7 +293,6 @@ void DynamicalSystem::linkDSXML()
 void DynamicalSystem::init()
 {
   IN("DynamicalSystem::init\n");
-  //this->nsds = NULL;
   this->number = 0;
   this->id = "none";
   this->n = 0;
@@ -380,42 +400,14 @@ void DynamicalSystem::saveDSToXML()
     if (this->DSType == NLSDS)
     {
       this->dsxml->setVectorFieldPlugin(this->vectorFieldFunctionName);
-      this->dsxml->setComputeJacobianXPlugin(this->computeJacobianXFunctionName);
+      if (this->computeJacobianXFunctionName != "")
+        this->dsxml->setComputeJacobianXPlugin(this->computeJacobianXFunctionName);
+      else
+        this->dsxml->setComputeJacobianXPlugin("BasicPlugin:computeJacobianX");
     }
   }
   else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DSXML object doesn't exists");
   OUT("DynamicalSystem::saveDSToXML\n");
-}
-
-void DynamicalSystem::createDynamicalSystem(DSXML * dsXML, int number, int n,
-    SiconosVector* x0, string vectorFieldPlugin)//, NonSmoothDynamicalSystem * nsds, BoundaryCondition* bc)
-{
-  IN("DynamicalSystem::createDynamicalSystem\n");
-  if (dsXML != NULL)
-  {
-    this->DSType = NLSDS;
-    //this->init();
-    this->dsxml = dsXML;
-
-    this->fillDSWithDSXML();
-    this->linkDSXML();
-  }
-  else
-  {
-    this->DSType = NLSDS;
-    this->number = number;
-    this->n = n;
-
-    this->x0 = new SimpleVector(n);
-    this->x = new SimpleVector(n);
-    this->xDot = /*new*/ SimpleVector::SimpleVector(n);
-    this->xFree = new SimpleVector(n);
-
-    *(this->x0) = *x0;
-    this->setVectorFieldFunction(this->cShared.getPluginName(vectorFieldPlugin), this->cShared.getPluginFunctionName(vectorFieldPlugin));
-
-  }
-  OUT("DynamicalSystem::createDynamicalSystem\n");
 }
 
 BoundaryCondition* DynamicalSystem::createPeriodicBC()
@@ -438,4 +430,3 @@ BoundaryCondition* DynamicalSystem::createNLinearBC()
   static_cast<NLinearBC*>(this->BC)->createBoundaryCondition(NULL);
   return this->BC;
 }
-

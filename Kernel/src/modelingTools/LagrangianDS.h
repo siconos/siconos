@@ -82,11 +82,43 @@ public:
    */
   LagrangianDS();
 
-  /** \fn LagrangianDS(DSXML*)
-   *  \brief constructor with XML object of the LagrangianDS
-   *  \param DSXML* : the XML object corresponding
+  /** \fn LagrangianDS(DSXML * nsdsXML)
+   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+   *  \param DSXML * : the XML object for this DynamicalSystem
+   *  \exception RuntimeException
    */
-  LagrangianDS(DSXML*);
+  LagrangianDS(DSXML * dsXML);
+
+  /** \fn LagrangianDS(int number, int ndof,
+          SiconosVector* q0, SiconosVector* velocity0,
+          string fInt, string fExt,
+          string jacobianQFInt, string jacobianVelocityFInt,
+          string jacobianQQNLInertia, string jacobianVelocityQNLInertia,
+          NSDS * nsds)
+   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+   *  \param int : the number for this DynamicalSystem
+   *  \param int : the dimension of this DynamicalSystem
+   *  \param SiconosVector* : the initial coordinates of this DynamicalSystem
+   *  \param SiconosVector* : the initial velocity of this DynamicalSystem
+   *  \param NSDS * : The NSDS which contains this DynamicalSystem
+   *  \param string : the indiaction needed to locate and use the fInt plugin
+   *  \param string : the indiaction needed to locate and use the fExt plugin
+   *  \param string : the indiaction needed to locate and use the jacobianQFInt plugin
+   *  \param string : the indiaction needed to locate and use the jacobianVelocityFInt plugin
+   *  \param string : the indiaction needed to locate and use the jacobianQQNLInertia plugin
+   *  \param string : the indiaction needed to locate and use the jacobianVelocityQNLInertia plugin
+   *  \param NSDS * : The NSDS which contains this DynamicalSystem
+   *  \exception RuntimeException
+   */
+  LagrangianDS(int number, int ndof,
+               SiconosVector* q0, SiconosVector* velocity0,
+               string mass = "BasicPlugin:computeMass",
+               string fInt = "BasicPlugin:computeFInt", string fExt = "BasicPlugin:computeFExt",
+               string jacobianQFInt = "BasicPlugin:computeJacobianQFInt",
+               string jacobianVelocityFInt = "BasicPlugin:computeJacobianVelocityFInt",
+               string jacobianQQNLInertia = "BasicPlugin:computeJacobianQQNLInertia",
+               string jacobianVelocityQNLInertia = "BasicPlugin:computeJacobianVelocityQNLInertia",
+               string QNLlInertia = "BasicPlugin:computeQNLInertia");
 
   virtual ~LagrangianDS();
 
@@ -680,39 +712,6 @@ public:
   void setComputeJacobianVelocityQNLInertiaFunction(string pluginPath, string functionName);
 
   ////////////////////////////////////////
-
-  /** \fn void createDynamicalSystem(DSXML * nsdsXML, int number, int ndof,
-          SiconosVector* q0, SiconosVector* velocity0,
-          string fInt, string fExt,
-          string jacobianQFInt, string jacobianVelocityFInt,
-          string jacobianQQNLInertia, string jacobianVelocityQNLInertia,
-          NSDS * nsds)
-   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
-   *  \param DSXML * : the XML object for this DynamicalSystem
-   *  \param int : the number for this DynamicalSystem
-   *  \param int : the dimension of this DynamicalSystem
-   *  \param SiconosVector* : the initial coordinates of this DynamicalSystem
-   *  \param SiconosVector* : the initial velocity of this DynamicalSystem
-   *  \param NSDS * : The NSDS which contains this DynamicalSystem
-   *  \param string : the indiaction needed to locate and use the fInt plugin
-   *  \param string : the indiaction needed to locate and use the fExt plugin
-   *  \param string : the indiaction needed to locate and use the jacobianQFInt plugin
-   *  \param string : the indiaction needed to locate and use the jacobianVelocityFInt plugin
-   *  \param string : the indiaction needed to locate and use the jacobianQQNLInertia plugin
-   *  \param string : the indiaction needed to locate and use the jacobianVelocityQNLInertia plugin
-   *  \param NSDS * : The NSDS which contains this DynamicalSystem
-   *  \exception RuntimeException
-   */
-  void createDynamicalSystem(DSXML * dsXML, int number = -1, int ndof = -1,
-                             SiconosVector* q0 = NULL, SiconosVector* velocity0 = NULL,
-                             string mass = "BasicPlugin:computeMass",
-                             string fInt = "BasicPlugin:computeFInt", string fExt = "BasicPlugin:computeFExt",
-                             string jacobianQFInt = "BasicPlugin:computeJacobianQFInt",
-                             string jacobianVelocityFInt = "BasicPlugin:computeJacobianVelocityFInt",
-                             string jacobianQQNLInertia = "BasicPlugin:computeJacobianQQNLInertia",
-                             string jacobianVelocityQNLInertia = "BasicPlugin:computeJacobianVelocityQNLInertia",
-                             string QNLlInertia = "BasicPlugin:computeQNLInertia");
-  //,NSDS * nsds = NULL);
 
   /** \fn LagrangianDS* convert (DynamicalSystem* ds)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.

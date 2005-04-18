@@ -48,6 +48,12 @@ public:
    */
   NonSmoothDynamicalSystem();
 
+  /** \fn NonSmoothDynamicalSystem(NSDSXML*)
+   *  \brief constructor with XML object of the NonSmoothDynamicalSystem
+   *  \param  const NonSmoothDynamicalSystem* : the XML object corresponding to the NonSmoothDynamicalSystem
+   */
+  NonSmoothDynamicalSystem(NSDSXML*);
+
   /** \fn NonSmoothDynamicalSystem(bool)
    *  \brief constructor with indication concerning boundary conditions
    *  \param const bool : if true, the systems has boundary conditions
@@ -59,12 +65,6 @@ public:
    *  \param  const NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem object which must be copied
    */
   NonSmoothDynamicalSystem(NonSmoothDynamicalSystem*);
-
-  /** \fn NonSmoothDynamicalSystem(NSDSXML*)
-   *  \brief constructor with XML object of the NonSmoothDynamicalSystem
-   *  \param  const NonSmoothDynamicalSystem* : the XML object corresponding to the NonSmoothDynamicalSystem
-   */
-  NonSmoothDynamicalSystem(NSDSXML*);
 
   /** \fn NonSmoothDynamicalSystem(string)
    *  \brief constructs the object with is type (IVP or BVP)
@@ -198,13 +198,6 @@ public:
     this->DSVector = dsVect;
   } ;
 
-  /** \fn void addDynamicalSystem(DynamicalSystem*)
-   *  \brief allows to add the DynamicalSystem to the NonSmoothDynamicalSystem
-   *  \param DynamicalSystem* : the DynamicalSystem to add
-  //  *  \param BoundaryCondition* : the BoundaryCondition of the Ds if the NonSmoothDynamicalSystem is BVP
-   */
-  void addDynamicalSystem(DynamicalSystem*);//, BoundaryCondition*);
-
   /** \fn void setInteractions(vector<Interaction*>)
    *  \brief allows to set all the Interactions of the NonSmoothDynamicalSystem
    *  \param vector<Interaction> : the vector to set
@@ -213,13 +206,6 @@ public:
   {
     this->interactionVector = interVect;
   };
-
-  /** \fn void addInteraction(Interaction*)
-   *  \brief allows to add the Interaction of the NonSmoothDynamicalSystem
-   *  \param Interaction : the Interaction to add
-   */
-  void addInteraction(Interaction*);
-
 
   /** \fn inline NSDSXML* getNSDSXML()
    *  \brief allows to get the NSDSXML* of the NonSmoothDynamicalSystem problem
@@ -279,89 +265,22 @@ public:
    */
   void saveNSDSToXML();
 
-  /** \fn void createNonSmoothDynamicalSystem(NSDSXML* nsdsXML, bool bvp = false)
-   *  \brief allows to create the NonSmoothDynamicalSystem with an xml file, or the needed data
-   *  \param NSDSXML * : the XML object which contains data for the NonSmooth Dynamical System
-   *  \param bool : an optional value which determines if the NonSmoothDynamicalSystem has boundary condition or not
-   *  \exception RuntimeException
-   */
-  void createNonSmoothDynamicalSystem(NSDSXML* nsdsXML, bool bvp = false);//, Model* model = NULL);
-
   /** \fn void display()
    *  \brief display the data of the Non Smooth Dynamical System
    */
   void display() const;
 
-  /** \fn DynamicalSystem* addNonLinearSystemDS( int number, int n,
-            SiconosVector* x0,
-            string vectorFieldPlugin)
-   *  \brief allow to add a NonLinearSystemDS to the NonSmoothDynamicalSystem
-   *  \param int : the number of the DynamicalSystem
-   *  \param int : the dimension of the DynamicalSystem
-   *  \param SiconosVector* : the x0 vector of the DynamicalSystem
-   *  \param string : the vector field plugin of the DynamicalSystem
+  /** \fn void addDynamicalSystem(DynamicalSystem*)
+   *  \brief allows to add the DynamicalSystem to the NonSmoothDynamicalSystem
+   *  \param DynamicalSystem* : the DynamicalSystem to add
    */
-  DynamicalSystem* addNonLinearSystemDS(int number = -1, int n = -1,
-                                        SiconosVector* x0 = NULL,
-                                        string vectorFieldPlugin = "BasicPlugin:vectorField");
+  void addDynamicalSystem(DynamicalSystem*);//, BoundaryCondition*);
 
-  /** \fn DynamicalSystem* addLinearSystemDS( int number, int n, SiconosVector* x0)
-   *  \brief allow to add a LinearSystemDS to the NonSmoothDynamicalSystem
-   *  \param int : the number of the DynamicalSystem
-   *  \param int : the dimension of the DynamicalSystem
-   *  \param SiconosVector* : the x0 vector of the DynamicalSystem
+  /** \fn void addInteraction(Interaction*)
+   *  \brief allows to add the Interaction of the NonSmoothDynamicalSystem
+   *  \param Interaction : the Interaction to add
    */
-  DynamicalSystem* addLinearSystemDS(int number = -1, int n = -1,
-                                     SiconosVector* x0 = NULL);
-
-  /** \fn DynamicalSystem* addLagrangianDS( int number, int ndof,
-        SiconosVector* q0, SiconosVector* velocity0,
-        string mass, string fInt, string fExt, string jacobianQFInt,
-        string jacobianVelocityFInt, string jacobianQQNLInertia,
-        string jacobianVelocityQNLInertia, string QNLInertia)
-   *  \brief allow to add a LagrangianDS to the NonSmoothDynamicalSystem
-   *  \param int : the number of the DynamicalSystem
-   *  \param int : the degree of freedom of the DynamicalSystem
-   *  \param SiconosVector* : the q0 vector of the DynamicalSystem
-   *  \param SiconosVector* : the velocity0 vector of the DynamicalSystem
-   *  \param string : the plugin name and the function name to link to compute the mass
-   *  \param string : the plugin name and the function name to link to compute the fInt
-   *  \param string : the plugin name and the function name to link to compute the fExt
-   *  \param string : the plugin name and the function name to link to compute the jacobianQFInt
-   *  \param string : the plugin name and the function name to link to compute the jacobianVelocityFInt
-   *  \param string : the plugin name and the function name to link to compute the jacobianQQNLInertia
-   *  \param string : the plugin name and the function name to link to compute the jacobianVelocityQNLInertia
-   *  \param string : the plugin name and the function name to link to compute the QNLInertia
-   */
-  DynamicalSystem* addLagrangianDS(int number = -1, int ndof = -1,
-                                   SiconosVector* q0 = NULL, SiconosVector* velocity0 = NULL,
-                                   string mass = "BasicPlugin:computeMass",
-                                   string fInt = "BasicPlugin:computeFInt", string fExt = "BasicPlugin:computeFExt",
-                                   string jacobianQFInt = "BasicPlugin:computeJacobianQFInt",
-                                   string jacobianVelocityFInt = "BasicPlugin:computeJacobianVelocityFInt",
-                                   string jacobianQQNLInertia = "BasicPlugin:computeJacobianQQNLInertia",
-                                   string jacobianVelocityQNLInertia = "BasicPlugin:computeJacobianVelocityQNLInertia",
-                                   string QNLInertia = "BasicPlugin:computeQNLInertia");
-
-  /** \fn DynamicalSystem* addLagrangianLinearTIDS( int number, int ndof,
-        SiconosVector* q0, SiconosVector* velocity0,
-        string mass, string fExt, SiconosMatrix* K, SiconosMatrix* C)
-   *  \brief allow to add a LagrangianLinearTIDS to the NonSmoothDynamicalSystem
-   *  \param int : the number of the DynamicalSystem
-   *  \param int : the degree of freedom of the DynamicalSystem
-   *  \param SiconosVector* : the q0 vector of the DynamicalSystem
-   *  \param SiconosVector* : the velocity0 vector of the DynamicalSystem
-   *  \param SiconosMatrix* : the mass of the dynamical system
-   *  \param string : the plugin name and the function name to link to compute the fExt
-   *  \param SiconosMatrix* : the K matrix of the lagrangianTIDS
-   *  \param SiconosMatrix* : the C matrix of the lagrangianTIDS
-   */
-  DynamicalSystem* addLagrangianLinearTIDS(int number = -1, int ndof = -1,
-      SiconosVector* q0 = NULL, SiconosVector* velocity0 = NULL,
-      /*string mass="BasicPlugin:computeMass",*/
-      SiconosMatrix* mass = NULL,
-      string fExt = "BasicPlugin:computeFExt",
-      SiconosMatrix* K = NULL, SiconosMatrix* C = NULL);
+  void addInteraction(Interaction*);
 
   /** \fn Interaction* addInteraction(int number, int nInter, vector<int>* status, vector<DynamicalSystem*>*)
    *  \brief allow to add an Interaction to the NonSmoothDynamicalSystem

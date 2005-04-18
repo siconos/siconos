@@ -68,11 +68,25 @@ public:
 
   DynamicalSystem();
 
-  /** \fn DynamicalSystem( DSXML* )
-   *  \brief constructor with XML object of the DynamicalSystem
-   *  \param DSXML* : the XML object corresponding to the DynamicalSystem
+  /** \fn DynamicalSystem(DSXML * nsdsXML)
+   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+   *  \param DSXML* : the XML object for this DynamicalSystem
+   *  \exception RuntimeException
    */
-  DynamicalSystem(DSXML*);
+  DynamicalSystem(DSXML * dsXML);
+
+  /** \fn DynamicalSystem(DSXML * nsdsXML, int number, int n,
+      SiconosVector* x0, string vectorFieldPlugin, NonSmoothDynamicalSystem * nsds, BoundaryCondition* bc)
+   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+   *  \param int : the number for this DynamicalSystem
+   *  \param int : the dimension of this DynamicalSystem
+   *  \param SiconosVector* : the initial state of this DynamicalSystem
+   *  \param string : the plugin name for vectorField of this DynamicalSystem
+   *  \exception RuntimeException
+   */
+  DynamicalSystem(int number, int n,
+                  SiconosVector* x0, string vectorFieldPlugin = "BasicPlugin:vectorField");
+
 
   virtual ~DynamicalSystem();
 
@@ -198,7 +212,7 @@ public:
    *  \brief allow to get the vector r
    *  \return SimpleVector r
    */
-  inline /*SiconosVector*/SimpleVector getR(void) const
+  inline SimpleVector getR(void) const
   {
     return this->r;
   }
@@ -486,20 +500,6 @@ public:
    *  \brief print the data of the dynamical system on the standard output
    */
   void display() const;
-
-  /** \fn void createDynamicalSystem(DSXML * nsdsXML, int number, int n,
-      SiconosVector* x0, string vectorFieldPlugin, NonSmoothDynamicalSystem * nsds, BoundaryCondition* bc)
-   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
-   *  \param DSXML* : the XML object for this DynamicalSystem
-   *  \param int : the number for this DynamicalSystem
-   *  \param int : the dimension of this DynamicalSystem
-   *  \param SiconosVector* : the initial state of this DynamicalSystem
-   *  \param string : the plugin name for vectorField of this DynamicalSystem
-   *  \exception RuntimeException
-   */
-  void createDynamicalSystem(DSXML * dsXML, int number = -1, int n = -1,
-                             SiconosVector* x0 = NULL, string vectorFieldPlugin = "BasicPlugin:vectorField");
-  //, NonSmoothDynamicalSystem * nsds = NULL, BoundaryCondition* bc=NULL);
 
   /** \fn BoundaryCondition* createPeriodicBC()
    *  \brief create the Periodic Boundary Condition of this DynamicalSystem

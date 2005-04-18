@@ -8,10 +8,29 @@ LinearSystemDS::LinearSystemDS(): DynamicalSystem()
   this->init();
 }
 
-LinearSystemDS::LinearSystemDS(DSXML* dsxml): DynamicalSystem(dsxml)
+LinearSystemDS::LinearSystemDS(DSXML * dsXML)
+{
+  if (dsXML != NULL)
+  {
+    this->DSType = LSDS;
+    DynamicalSystem::init();
+    this->dsxml = dsXML;
+
+    this->fillDSWithDSXML();
+    this->linkDSXML();
+  }
+  else
+  {
+    cout << "LinearSystemDS::LinearSystemDS - DSXML paramater musn't be NULL" << endl;
+  }
+}
+
+LinearSystemDS::LinearSystemDS(int number, int n, SiconosVector* x0)
 {
   this->DSType = LSDS;
-  this->init();
+  this->number = number;
+  this->n = n;
+  *(this->x0) = *x0;
 }
 
 LinearSystemDS::~LinearSystemDS()
@@ -27,12 +46,12 @@ SiconosMatrix* LinearSystemDS::getBPtr(void)
   return &this->B;
 }
 
-/*SiconosVector*/SimpleVector* LinearSystemDS::getUPtr(void)
+SimpleVector* LinearSystemDS::getUPtr(void)
 {
   return &this->u;
 }
 
-/*SiconosVector*/SimpleVector* LinearSystemDS::getFPtr(void)
+SimpleVector* LinearSystemDS::getFPtr(void)
 {
   return &this->f;
 }
@@ -168,27 +187,6 @@ void LinearSystemDS::saveDSToXML()
   else RuntimeException::selfThrow("LinearSystemDS::saveDSToXML - The DSXML object doesn't exists");
 
   OUT("LinearSystemDS::saveDSToXML\n");
-}
-
-void LinearSystemDS::createDynamicalSystem(DSXML * dsXML, int number, int n,
-    SiconosVector* x0)//, NSDS * nsds)
-{
-  if (dsXML != NULL)
-  {
-    this->DSType = LSDS;
-    DynamicalSystem::init();
-    this->dsxml = dsXML;
-
-    this->fillDSWithDSXML();
-    this->linkDSXML();
-  }
-  else
-  {
-    this->DSType = LSDS;
-    this->number = number;
-    this->n = n;
-    *(this->x0) = *x0;
-  }
 }
 
 LinearSystemDS* LinearSystemDS::convert(DynamicalSystem* ds)

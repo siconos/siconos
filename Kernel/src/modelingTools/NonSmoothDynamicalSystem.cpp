@@ -3,9 +3,6 @@
 #include "LagrangianDS.h"
 #include "LagrangianLinearTIDS.h"
 #include "LinearSystemDS.h"
-//#include "LagrangianDSXML.h"
-//#include "LagrangianLinearTIDSXML.h"
-//#include "LinearSystemDSXML.h"
 #include "LinearEC.h"
 #include "LinearTIEC.h"
 #include "LagrangianEC.h"
@@ -20,14 +17,9 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem()
   this->BVP = false;
 }
 
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(bool bvp)
-{
-  this->nsdsxml = NULL;
-  this->BVP = bvp;
-}
-
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
 {
+  this->nsdsxml = NULL;
   this->BVP = nsds->isBVP();
   this->DSVector = nsds->getDynamicalSystems();
   this->interactionVector = nsds->getInteractions();
@@ -38,6 +30,15 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NSDSXML* nsdsxml)
 {
   this->BVP = false;
   this->nsdsxml = nsdsxml;
+
+  this->fillNSDSWithNSDSXML();
+  this->linkNSDSXML();
+}
+
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(bool bvp):
+  BVP(bvp)
+{
+  this->nsdsxml = NULL;
 }
 
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(string type)
@@ -155,56 +156,6 @@ bool NonSmoothDynamicalSystem::hasInteractionNumber(int nb)
   return false;
 }
 
-
-void NonSmoothDynamicalSystem::addDynamicalSystem(DynamicalSystem *ds)//, BoundaryCondition* bc)
-{
-  IN("NonSmoothDynamicalSystem::addDynamicalSystem\n");
-
-  ds->setNSDS(this);
-  this->DSVector.push_back(ds);
-
-  //  DynamicalSystem* dsTmp;
-  //
-  //  if( ds->getType() == LNLDS )
-  //  {
-  //    dsTmp = new LagrangianDS();
-  //    *dsTmp = *ds;
-  //    this->DSVector.push_back( dsTmp );
-  //  }
-  //  else if( ds->getType() == LTIDS )
-  //  {
-  //    dsTmp = new LagrangianLinearTIDS();
-  //    *dsTmp = *ds;
-  //    this->DSVector.push_back( dsTmp );
-  //    this->DSVector.push_back( ds );
-  //  }
-  //  else if( ds->getType() == LSDS )
-  //  {
-  //    dsTmp = new LinearSystemDS();
-  //    *dsTmp = *ds;
-  //    this->DSVector.push_back( dsTmp );
-  //  }
-  //  else if( ds->getType() == NLSDS )
-  //  {
-  //    dsTmp = new DynamicalSystem();
-  //    *dsTmp = *ds;
-  //    this->DSVector.push_back( dsTmp );
-  //  }
-  //  else RuntimeException::selfThrow("NonSmoothDynamicalSystem::addDynamicalSystem - bad kind of DynamicalSystem");
-
-  OUT("NonSmoothDynamicalSystem::addDynamicalSystem\n");
-}
-
-
-void NonSmoothDynamicalSystem::addInteraction(Interaction *inter)
-{
-  Interaction* interTmp;
-  interTmp = new Interaction();
-  *interTmp = *inter;
-  this->interactionVector.push_back(interTmp);
-}
-
-
 EqualityConstraint* NonSmoothDynamicalSystem::getEqualityConstraint(int i)
 {
   if (i < this->ecVector.size())
@@ -212,15 +163,6 @@ EqualityConstraint* NonSmoothDynamicalSystem::getEqualityConstraint(int i)
     return this->ecVector[i];
   }
   RuntimeException::selfThrow("NonSmoothDynamicalSystem - getEqualityConstraint : \'i\' is out of range");
-}
-
-
-void NonSmoothDynamicalSystem::addEqualityConstraint(EqualityConstraint* ec)
-{
-  EqualityConstraint* ecTmp;
-  ecTmp = new EqualityConstraint();
-  *ecTmp = *ec;
-  this->ecVector.push_back(ecTmp);
 }
 
 ////////////////////////
@@ -242,30 +184,26 @@ void NonSmoothDynamicalSystem::linkNSDSXML()
     if ((this->nsdsxml->getDSXML(nbDStab[i]))->getType() == LAGRANGIAN_NON_LINEARDS_TAG)
     {
       // creation of the LagrangianDS with this constructor and call of a method to fill
-      ds = new LagrangianDS();
+      ds = new LagrangianDS(this->nsdsxml->getDSXML(nbDStab[i]));
       this->DSVector.push_back(ds);
-      (static_cast<LagrangianDS*>(ds))->createDynamicalSystem(this->nsdsxml->getDSXML(nbDStab[i]));
       ds->setNSDS(this);
     }
     else if ((this->nsdsxml->getDSXML(nbDStab[i]))->getType() == LAGRANGIAN_TIME_INVARIANTDS_TAG)
     {
-      ds = new LagrangianLinearTIDS();
+      ds = new LagrangianLinearTIDS(this->nsdsxml->getDSXML(nbDStab[i]));
       this->DSVector.push_back(ds);
-      (static_cast<LagrangianLinearTIDS*>(ds))->createDynamicalSystem(this->nsdsxml->getDSXML(nbDStab[i]));
       ds->setNSDS(this);
     }
     else if ((this->nsdsxml->getDSXML(nbDStab[i]))->getType() == LINEAR_SYSTEMDS_TAG)
     {
-      ds = new LinearSystemDS();
+      ds = new LinearSystemDS(this->nsdsxml->getDSXML(nbDStab[i]));
       this->DSVector.push_back(ds);
-      (static_cast<LinearSystemDS*>(ds))->createDynamicalSystem(this->nsdsxml->getDSXML(nbDStab[i]));
       ds->setNSDS(this);
     }
     else if ((this->nsdsxml->getDSXML(nbDStab[i]))->getType() == NON_LINEAR_SYSTEMDS_TAG)
     {
-      ds = new DynamicalSystem();
+      ds = new DynamicalSystem(this->nsdsxml->getDSXML(nbDStab[i]));
       this->DSVector.push_back(ds);
-      ds->createDynamicalSystem(this->nsdsxml->getDSXML(nbDStab[i]));
       ds->setNSDS(this);
     }
     else RuntimeException::selfThrow("NonSmoothDynamicalSystem::LinkNSDSXML - bad kind of DynamicalSystem");
@@ -404,25 +342,6 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
   OUT("NonSmoothDynamicalSystem::saveNSDSToXML\n");
 }
 
-void NonSmoothDynamicalSystem::createNonSmoothDynamicalSystem(NSDSXML * nsdsXML, bool bvp)//, Model * model)//, xmlNode * rootDOMTreeNode)
-{
-  if (nsdsXML != NULL)
-  {
-    /*
-     * if bvp is true, it is not used, data of the DOM tree are more important
-     */
-    this->nsdsxml = nsdsXML;
-    this->fillNSDSWithNSDSXML();
-    cout << "NonSmoothDynamicalSystem filled" << endl;
-    this->linkNSDSXML();
-    cout << "NonSmoothDynamicalSystem linked" << endl;
-  }
-  else
-  {
-    this->BVP = bvp;
-  }
-}
-
 void NonSmoothDynamicalSystem::display() const
 {
   IN("NonSmoothDynamicalSystem::display\n");
@@ -435,111 +354,28 @@ void NonSmoothDynamicalSystem::display() const
   OUT("NonSmoothDynamicalSystem::display\n");
 }
 
-DynamicalSystem* NonSmoothDynamicalSystem::addNonLinearSystemDS(int number, int n,
-    SiconosVector* x0, string vectorFieldPlugin)
+////////////////////////////////
+////////////////////////////////
+
+void NonSmoothDynamicalSystem::addDynamicalSystem(DynamicalSystem *ds)//, BoundaryCondition* bc)
 {
-  if (!this->hasDynamicalSystemNumber(number))
-  {
-    DynamicalSystem* dsTmp;
-
-    dsTmp = new DynamicalSystem();
-    dsTmp->createDynamicalSystem(NULL, number, n, x0, vectorFieldPlugin);
-    this->DSVector.push_back(dsTmp);
-    dsTmp->setNSDS(this);
-
-    return dsTmp;
-  }
-  else
-  {
-    char n[50];
-    sprintf(n, "%i", number);
-    string num = n;
-    string msg = "NonSmoothDynamicalSystem::addNonLinearSystemDS : ERROR - The DynamicalSystem number " + num + " is already declared!";
-    RuntimeException::selfThrow(msg);
-  }
+  IN("NonSmoothDynamicalSystem::addDynamicalSystem\n");
+  ds->setNSDS(this);
+  this->DSVector.push_back(ds);
+  OUT("NonSmoothDynamicalSystem::addDynamicalSystem\n");
 }
 
-DynamicalSystem* NonSmoothDynamicalSystem::addLinearSystemDS(int number, int n,
-    SiconosVector* x0)
+
+void NonSmoothDynamicalSystem::addInteraction(Interaction *inter)
 {
-  if (!this->hasDynamicalSystemNumber(number))
-  {
-    DynamicalSystem* dsTmp;
-
-    dsTmp = new LinearSystemDS();
-    static_cast<LinearSystemDS*>(dsTmp)->createDynamicalSystem(NULL, number, n, x0);
-    this->DSVector.push_back(dsTmp);
-    dsTmp->setNSDS(this);
-
-    return dsTmp;
-  }
-  else
-  {
-    char n[50];
-    sprintf(n, "%i", number);
-    string num = n;
-    string msg = "NonSmoothDynamicalSystem::addLinearSystemDS : ERROR - The DynamicalSystem number " + num + " is already declared!";
-    RuntimeException::selfThrow(msg);
-  }
+  Interaction* interTmp;
+  interTmp = new Interaction(interTmp);
+  this->interactionVector.push_back(interTmp);
 }
 
-DynamicalSystem* NonSmoothDynamicalSystem::addLagrangianDS(int number, int ndof,
-    SiconosVector* q0, SiconosVector* velocity0,
-    string mass, string fInt, string fExt,
-    string jacobianQFInt, string jacobianVelocityFInt,
-    string jacobianQQNLInertia, string jacobianVelocityQNLInertia,
-    string QNLInertia)
+void NonSmoothDynamicalSystem::addEqualityConstraint(EqualityConstraint* ec)
 {
-  if (!this->hasDynamicalSystemNumber(number))
-  {
-    DynamicalSystem* dsTmp;
-
-    dsTmp = new LagrangianDS();
-    static_cast<LagrangianDS*>(dsTmp)->createDynamicalSystem(NULL, number, ndof,
-        q0, velocity0, mass, fInt, fExt,
-        jacobianQFInt, jacobianVelocityFInt,
-        jacobianQQNLInertia, jacobianVelocityQNLInertia,
-        QNLInertia);
-    this->DSVector.push_back(dsTmp);
-    dsTmp->setNSDS(this);
-
-    return dsTmp;
-  }
-  else
-  {
-    char n[50];
-    sprintf(n, "%i", number);
-    string num = n;
-    string msg = "NonSmoothDynamicalSystem::addLagrangianDS : ERROR - The DynamicalSystem number " + num + " is already declared!";
-    RuntimeException::selfThrow(msg);
-  }
-}
-
-DynamicalSystem* NonSmoothDynamicalSystem::addLagrangianLinearTIDS(int number, int ndof,
-    SiconosVector* q0, SiconosVector* velocity0,
-    SiconosMatrix* mass, string fExt,
-    SiconosMatrix* K, SiconosMatrix* C)
-{
-  if (!this->hasDynamicalSystemNumber(number))
-  {
-    DynamicalSystem* dsTmp;
-
-    dsTmp = new LagrangianLinearTIDS();
-    static_cast<LagrangianLinearTIDS*>(dsTmp)->createDynamicalSystem(NULL, number, ndof,
-        q0, velocity0, mass, fExt, K, C);
-    this->DSVector.push_back(dsTmp);
-    dsTmp->setNSDS(this);
-
-    return dsTmp;
-  }
-  else
-  {
-    char n[50];
-    sprintf(n, "%i", number);
-    string num = n;
-    string msg = "NonSmoothDynamicalSystem::addLagrangianLinearTIDS : ERROR - The DynamicalSystem number " + num + " is already declared!";
-    RuntimeException::selfThrow(msg);
-  }
+  this->ecVector.push_back(ec);
 }
 
 Interaction* NonSmoothDynamicalSystem::addInteraction(int number, int nInter, vector<int>* status, vector<DynamicalSystem*>* dsConcerned)
@@ -562,4 +398,3 @@ Interaction* NonSmoothDynamicalSystem::addInteraction(int number, int nInter, ve
     RuntimeException::selfThrow(msg);
   }
 }
-

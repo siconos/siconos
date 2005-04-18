@@ -7,22 +7,64 @@
 LagrangianDS::LagrangianDS()/*:DynamicalSystem()*/
 {
   IN("LagrangianDS::LagrangianDS()\n");
-  this->DSType = LNLDS;
   this->init();
   this->DSType = LNLDS;
 
   OUT("LagrangianDS::LagrangianDS()\n");
 }
 
-LagrangianDS::LagrangianDS(DSXML* dsxml) /*:DynamicalSystem(dsxml)*/
+LagrangianDS::LagrangianDS(DSXML * dsXML)
 {
-  IN("LagrangianDS::LagrangianDS( DSXML* dsxml)\n");
+  if (dsXML != NULL)
+  {
+    this->init();
+    this->DSType = LNLDS;
+    this->dsxml = dsXML;
+    this->fillDSWithDSXML();
+    this->linkDSXML();
+  }
+  else
+  {
+    cout << "LagrangianDS::LagrangianDS - DSXML paramater musn't be NULL" << endl;
+  }
+}
+
+LagrangianDS::LagrangianDS(int number, int ndof,
+                           SiconosVector* q0, SiconosVector* velocity0, string mass,
+                           string fInt, string fExt,
+                           string jacobianQFInt, string jacobianVelocityFInt,
+                           string jacobianQQNLInertia, string jacobianVelocityQNLInertia,
+                           string QNLInertia)
+{
+  this->dsxml = NULL;
+
+  this->DSType = LNLDS;
+  this->number = number;
+  this->ndof = ndof;
+  this->n = 2 * this->ndof;
 
   this->init();
-  this->DSType = LNLDS;
-  this->dsxml = dsxml;
+  SiconosVectorSizeInit();
 
-  OUT("LagrangianDS::LagrangianDS( DSXML* dsxml)\n");
+  this->q0 = *q0;
+  this->q = *q0;
+  this->velocity0 = *velocity0;
+  this->velocity = *velocity0;
+
+
+  CompositeVectorInit();
+
+  this->setComputeMassFunction(this->cShared.getPluginName(mass), this->cShared.getPluginFunctionName(mass));
+
+  this->setComputeFIntFunction(this->cShared.getPluginName(fInt), this->cShared.getPluginFunctionName(fInt));
+  this->setComputeFExtFunction(this->cShared.getPluginName(fExt), this->cShared.getPluginFunctionName(fExt));
+
+  this->setComputeJacobianQFIntFunction(this->cShared.getPluginName(jacobianQFInt), this->cShared.getPluginFunctionName(jacobianQFInt));
+  this->setComputeJacobianVelocityFIntFunction(this->cShared.getPluginName(jacobianVelocityFInt), this->cShared.getPluginFunctionName(jacobianQFInt));
+  this->setComputeJacobianQQNLInertiaFunction(this->cShared.getPluginName(jacobianQQNLInertia), this->cShared.getPluginFunctionName(jacobianQQNLInertia));
+  this->setComputeJacobianVelocityQNLInertiaFunction(this->cShared.getPluginName(jacobianVelocityQNLInertia), this->cShared.getPluginFunctionName(jacobianVelocityQNLInertia));
+
+  this->setComputeQNLInertiaFunction(this->cShared.getPluginName(QNLInertia), this->cShared.getPluginFunctionName(QNLInertia));
 }
 
 
@@ -44,8 +86,6 @@ void LagrangianDS::initMemory(int steps)
   IN("LagrangianDS::initMemory\n");
   DynamicalSystem::initMemory(steps);
 
-  //qMemory = SiconosMemory::SiconosMemory(steps);
-  //velocityMemory = SiconosMemory::SiconosMemory(steps);
   qMemory = SiconosMemory::SiconosMemory(steps, this->qMemory.getSiconosMemoryXML());
   velocityMemory = SiconosMemory::SiconosMemory(steps, this->velocityMemory.getSiconosMemoryXML());
 
@@ -58,7 +98,6 @@ void LagrangianDS::swapInMemory(void)
   IN("LagrangianDS::swapInMemory(void)\n");
 
   // This operation should be made only if necessary. See todo note.
-
   DynamicalSystem::swapInMemory();
 
   this->qMemory.swap(&q);
@@ -77,15 +116,12 @@ SiconosMatrix* LagrangianDS::getMassPtr(void)
   return &(this->mass);
 }
 
-
-
-
-/*SiconosVector*/SimpleVector* LagrangianDS::getQPtr(void)
+SimpleVector* LagrangianDS::getQPtr(void)
 {
   return &this->q;
 }
 
-/*SiconosVector*/SimpleVector* LagrangianDS::getQ0Ptr(void)
+SimpleVector* LagrangianDS::getQ0Ptr(void)
 {
   return &this->q0;
 }
@@ -98,12 +134,12 @@ SiconosMemory* LagrangianDS::getQMemories(void)
 
 
 
-/*SiconosVector*/SimpleVector* LagrangianDS::getVelocityPtr(void)
+SimpleVector* LagrangianDS::getVelocityPtr(void)
 {
   return &this->velocity;
 }
 
-/*SiconosVector*/SimpleVector* LagrangianDS::getVelocity0Ptr(void)
+SimpleVector* LagrangianDS::getVelocity0Ptr(void)
 {
   return &this->velocity0;
 }
@@ -115,18 +151,18 @@ SiconosMemory* LagrangianDS::getVelocityMemories(void)
 }
 
 
-/*SiconosVector*/SimpleVector* LagrangianDS::getFIntPtr(void)
+SimpleVector* LagrangianDS::getFIntPtr(void)
 {
   return &this->fInt;
 }
 
-/*SiconosVector*/SimpleVector* LagrangianDS::getFExtPtr(void)
+SimpleVector* LagrangianDS::getFExtPtr(void)
 {
   return &this->fExt;
 }
 
 
-/*SiconosVector*/SimpleVector* LagrangianDS::getQNLInertiaPtr(void)
+SimpleVector* LagrangianDS::getQNLInertiaPtr(void)
 {
   return &this->QNLInertia;
 }
@@ -151,9 +187,6 @@ SiconosMatrix* LagrangianDS::getJacobianVelocityQNLInertiaPtr(void)
 {
   return &this->jacobianVelocityQNLInertia;
 }
-
-
-
 
 //////////////////////////
 
@@ -352,7 +385,6 @@ void LagrangianDS::fillDSWithDSXML()
   string plugin;
 
   IN("LagrangianDS::fillDSWithDSXML\n");
-  //DynamicalSystem::fillDSWithDSXML();
   if (this->dsxml != NULL)
   {
     LagrangianDSXML* lgptr = static_cast <LagrangianDSXML*>(this->dsxml);
@@ -360,21 +392,21 @@ void LagrangianDS::fillDSWithDSXML()
     this->ndof = lgptr->getNdof();
     this->n = 2 * this->ndof;
 
-    this->r = /*SiconosVector*/SimpleVector(this->n);
+    this->r = SimpleVector(this->n);
 
-    this->q = /*SiconosVector*/SimpleVector(this->ndof);
-    this->q0 =  /*SiconosVector*/SimpleVector(this->ndof);
-    this->qFree =  /*SiconosVector*/SimpleVector(this->ndof);
+    this->q = SimpleVector(this->ndof);
+    this->q0 =  SimpleVector(this->ndof);
+    this->qFree =  SimpleVector(this->ndof);
 
-    this->velocity =  /*SiconosVector*/SimpleVector(this->ndof);
-    this->velocity0 =  /*SiconosVector*/SimpleVector(this->ndof);
-    this->velocityFree =  /*SiconosVector*/SimpleVector(this->ndof);
+    this->velocity =  SimpleVector(this->ndof);
+    this->velocity0 =  SimpleVector(this->ndof);
+    this->velocityFree =  SimpleVector(this->ndof);
 
-    this->p =  /*SiconosVector*/SimpleVector(this->ndof);
+    this->p =  SimpleVector(this->ndof);
 
-    this->fExt =  /*SiconosVector*/SimpleVector(this->ndof);
-    this->fInt =  /*SiconosVector*/SimpleVector(this->ndof);
-    this->QNLInertia =  /*SiconosVector*/SimpleVector(this->ndof);
+    this->fExt =  SimpleVector(this->ndof);
+    this->fInt =  SimpleVector(this->ndof);
+    this->QNLInertia =  SimpleVector(this->ndof);
 
 
     // Mass
@@ -556,8 +588,8 @@ void LagrangianDS::init()
   this->setVectorFieldFunction("BasicPlugin.so", "vectorField");
   this->setComputeJacobianXFunction("BasicPlugin.so", "computeJacobianX");
 
-  velocityFree = /*SiconosVector()*/SimpleVector::SimpleVector();
-  qFree = /*SiconosVector()*/SimpleVector::SimpleVector();
+  velocityFree = SimpleVector::SimpleVector();
+  qFree = SimpleVector::SimpleVector();
 
   this->x = new CompositeVector();
   this->x0 = new CompositeVector();
@@ -708,74 +740,26 @@ void LagrangianDS::saveDSToXML()
   OUT("LagrangianDS::saveDSToXML\n");
 }
 
-void LagrangianDS::createDynamicalSystem(DSXML * dsXML, int number, int ndof,
-    SiconosVector* q0, SiconosVector* velocity0, string mass,
-    string fInt, string fExt,
-    string jacobianQFInt, string jacobianVelocityFInt,
-    string jacobianQQNLInertia, string jacobianVelocityQNLInertia,
-    string QNLInertia)
-//,NSDS * nsds)
-{
-  if (dsXML != NULL)
-  {
-    this->DSType = LNLDS;
-    //DynamicalSystem::init();
-    //this->init();
-    this->dsxml = dsXML;
-    this->fillDSWithDSXML();
-    this->linkDSXML();
-  }
-  else
-  {
-    this->DSType = LNLDS;
-    this->number = number;
-    this->ndof = ndof;
-    this->n = 2 * this->ndof;
-
-    SiconosVectorSizeInit();
-
-    this->q0 = *q0;
-    this->q = *q0;
-    this->velocity0 = *velocity0;
-    this->velocity = *velocity0;
-
-
-    CompositeVectorInit();
-
-    this->setComputeMassFunction(this->cShared.getPluginName(mass), this->cShared.getPluginFunctionName(mass));
-
-    this->setComputeFIntFunction(this->cShared.getPluginName(fInt), this->cShared.getPluginFunctionName(fInt));
-    this->setComputeFExtFunction(this->cShared.getPluginName(fExt), this->cShared.getPluginFunctionName(fExt));
-
-    this->setComputeJacobianQFIntFunction(this->cShared.getPluginName(jacobianQFInt), this->cShared.getPluginFunctionName(jacobianQFInt));
-    this->setComputeJacobianVelocityFIntFunction(this->cShared.getPluginName(jacobianVelocityFInt), this->cShared.getPluginFunctionName(jacobianQFInt));
-    this->setComputeJacobianQQNLInertiaFunction(this->cShared.getPluginName(jacobianQQNLInertia), this->cShared.getPluginFunctionName(jacobianQQNLInertia));
-    this->setComputeJacobianVelocityQNLInertiaFunction(this->cShared.getPluginName(jacobianVelocityQNLInertia), this->cShared.getPluginFunctionName(jacobianVelocityQNLInertia));
-
-    this->setComputeQNLInertiaFunction(this->cShared.getPluginName(QNLInertia), this->cShared.getPluginFunctionName(QNLInertia));
-  }
-}
-
 void LagrangianDS::SiconosVectorSizeInit()
 {
   /*
    * initilaisation of the SiconosVectors size
    */
-  this->r = /*SiconosVector*/SimpleVector(this->n);
+  this->r = SimpleVector(this->n);
 
-  this->q = /*SiconosVector*/SimpleVector(this->ndof);
-  this->q0 =  /*SiconosVector*/SimpleVector(this->ndof);
-  this->qFree =  /*SiconosVector*/SimpleVector(this->ndof);
+  this->q = SimpleVector(this->ndof);
+  this->q0 =  SimpleVector(this->ndof);
+  this->qFree =  SimpleVector(this->ndof);
 
-  this->velocity =  /*SiconosVector*/SimpleVector(this->ndof);
-  this->velocity0 =  /*SiconosVector*/SimpleVector(this->ndof);
-  this->velocityFree =  /*SiconosVector*/SimpleVector(this->ndof);
+  this->velocity =  SimpleVector(this->ndof);
+  this->velocity0 =  SimpleVector(this->ndof);
+  this->velocityFree =  SimpleVector(this->ndof);
 
-  this->p =  /*SiconosVector*/SimpleVector(this->ndof);
+  this->p =  SimpleVector(this->ndof);
 
-  this->fExt =  /*SiconosVector*/SimpleVector(this->ndof);
-  this->fInt =  /*SiconosVector*/SimpleVector(this->ndof);
-  this->QNLInertia =  /*SiconosVector*/SimpleVector(this->ndof);
+  this->fExt =  SimpleVector(this->ndof);
+  this->fInt =  SimpleVector(this->ndof);
+  this->QNLInertia =  SimpleVector(this->ndof);
 }
 
 void LagrangianDS::CompositeVectorInit()
@@ -783,11 +767,13 @@ void LagrangianDS::CompositeVectorInit()
   /*
    * initialisation of the CompositeVectors
    */
+  cout << "LagrangianDS::CompositeVectorInit()" << endl;
   static_cast<CompositeVector*>(this->x)->add(this->q);
   static_cast<CompositeVector*>(this->x)->add(this->velocity);
 
   static_cast<CompositeVector*>(this->x0)->add(this->q0);
   static_cast<CompositeVector*>(this->x0)->add(this->velocity0);
+  cout << "/LagrangianDS::CompositeVectorInit()" << endl;
 }
 
 

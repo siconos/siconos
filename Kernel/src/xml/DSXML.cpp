@@ -284,7 +284,6 @@ void DSXML::loadDS(DynamicalSystem* ds)
   {
     type = ds->getBoundaryCondition()->getType();
     node = xmlNewChild(rootDSXMLNode, NULL, (xmlChar*)BOUNDARYCONDITION_TAG.c_str(), NULL);
-
     if (type == NLINEARBC)
     {
       //xmlNewProp( node, (xmlChar*)TYPE_ATTRIBUTE.c_str(), (xmlChar*)NON_LINEARBC_TAG.c_str() );
@@ -464,5 +463,3 @@ void DSXML::setDSInputOutputXML(map<int, DSInputOutputXML*> m)
 //      node = SiconosDOMTreeTools::findFollowNode(node);
 //   }
 //}
-
-
