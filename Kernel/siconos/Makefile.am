@@ -10,8 +10,8 @@ siconos:siconos.in Makefile
 	&& mv siconos.tmp siconos
 	chmod +x siconos
 
-MakefilePluginSample:Makefile
+MakefilePluginSample:MakefilePluginSample.in Makefile
 	sed -e 's?\@prefix\@?$(prefix)?g' \
             -e 's/whatever//' \
-	    < $(srcdir)/MakefilePluginSample >MakefilePluginSample.tmp \
+	    < $(srcdir)/MakefilePluginSample.in >MakefilePluginSample.tmp \
 	&& mv MakefilePluginSample.tmp MakefilePluginSample
