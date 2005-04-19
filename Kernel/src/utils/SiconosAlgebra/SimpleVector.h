@@ -166,7 +166,7 @@ public:
   friend SimpleVector operator / (const SimpleVector&  v, const double d);
   friend SimpleVector operator + (const SimpleVector& v1, const SimpleVector& v2);
   friend SimpleVector operator - (const SimpleVector& v1, const SimpleVector& v2);
-  friend SimpleVector operator * (/*const*/ SiconosMatrix &m, /*const*/ SimpleVector &v);
+  friend SimpleVector operator * (const SiconosMatrix &m, const SimpleVector &v);
 
   friend SimpleVector matTransVecMult(SiconosMatrix &m, SimpleVector &v);
 

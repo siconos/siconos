@@ -8,7 +8,7 @@ LagrangianDS::LagrangianDS()/*:DynamicalSystem()*/
 {
   IN("LagrangianDS::LagrangianDS()\n");
   this->init();
-  this->DSType = LNLDS;
+  // this->DSType = LNLDS;
 
   OUT("LagrangianDS::LagrangianDS()\n");
 }
@@ -199,6 +199,15 @@ void LagrangianDS::computeMass(double time)
   this->computeMassPtr(&size, &time, &q(0), &mass(0, 0));
 }
 
+void LagrangianDS::computeMass(double time, SimpleVector *q)
+{
+  if (computeMassPtr == NULL)
+    RuntimeException::selfThrow("computeMass() is not linked to a plugin function");
+
+  int size = q->size();
+  this->computeMassPtr(&size, &time, &(*q)(0), &mass(0, 0));
+}
+
 void LagrangianDS::computeFInt(double time)
 {
   if (computeFIntPtr == NULL)
@@ -206,6 +215,14 @@ void LagrangianDS::computeFInt(double time)
 
   int size = this->q.size();
   this->computeFIntPtr(&size, &time, &this->q(0), &this->velocity(0), &this->fInt(0));
+}
+void LagrangianDS::computeFInt(double time, SimpleVector *q, SimpleVector *velocity)
+{
+  if (computeFIntPtr == NULL)
+    RuntimeException::selfThrow("computeFInt() is not linked to a plugin function");
+
+  int size = q->size();
+  this->computeFIntPtr(&size, &time, &(*q)(0), &(*velocity)(0), &this->fInt(0));
 }
 
 void LagrangianDS::computeFExt(double time)
@@ -216,8 +233,8 @@ void LagrangianDS::computeFExt(double time)
 
   int size = q.size();
 
-  this->computeFExtPtr(&size, &time, &q(0), &fExt(0));
-
+  //this->computeFExtPtr(&size, &time, &q(0), &fExt(0));
+  this->computeFExtPtr(&size, &time, &fExt(0));
   OUT("LagrangianDS::computeFExt(double time)\n");
 
 }
@@ -231,6 +248,15 @@ void LagrangianDS::computeQNLInertia()
   this->computeQNLInertiaPtr(&size, &q(0), &velocity(0), &QNLInertia(0));
 }
 
+void LagrangianDS::computeQNLInertia(SimpleVector *q, SimpleVector *velocity)
+{
+  if (computeQNLInertiaPtr == NULL)
+    RuntimeException::selfThrow("computeQ() is not linked to a plugin function");
+
+  int size = q->size();
+  this->computeQNLInertiaPtr(&size, &(*q)(0), &(*velocity)(0), &QNLInertia(0));
+}
+
 void LagrangianDS::computeJacobianQFInt(double time)
 {
   if (computeJacobianQFIntPtr == NULL)
@@ -240,22 +266,49 @@ void LagrangianDS::computeJacobianQFInt(double time)
   this->computeJacobianQFIntPtr(&size, &time, &q(0), &velocity(0), &jacobianQFInt(0, 0));
 }
 
+void LagrangianDS::computeJacobianQFInt(double time, SimpleVector *q, SimpleVector *velocity)
+{
+  if (computeJacobianQFIntPtr == NULL)
+    RuntimeException::selfThrow("computeJacobianQFInt() is not linked to a plugin function");
+
+  int size = q->size();
+  this->computeJacobianQFIntPtr(&size, &time, &(*q)(0), &(*velocity)(0), &jacobianQFInt(0, 0));
+}
+
 void LagrangianDS::computeJacobianVelocityFInt(double time)
 {
   if (computeJacobianVelocityFIntPtr == NULL)
     RuntimeException::selfThrow("computeJacobianVelocityFInt() is not linked to a plugin function");
 
-  // to do
-  //this->computeJacobianVelocityFIntPtr();
+  int size = this->q.size();
+  this->computeJacobianVelocityFIntPtr(&size, &time, &this->q(0), &this->velocity(0), &jacobianVelocityFInt(0, 0));
 }
+void LagrangianDS::computeJacobianVelocityFInt(double time, SimpleVector *q, SimpleVector *velocity)
+{
+  if (computeJacobianVelocityFIntPtr == NULL)
+    RuntimeException::selfThrow("computeJacobianVelocityFInt() is not linked to a plugin function");
+
+  int size = q->size();
+  this->computeJacobianVelocityFIntPtr(&size, &time, &(*q)(0), &(*velocity)(0), &jacobianVelocityFInt(0, 0));
+}
+
 
 void LagrangianDS::computeJacobianQQNLInertia(double time)
 {
   if (computeJacobianQQNLInertiaPtr == NULL)
     RuntimeException::selfThrow("computeJacobianQQNLInertia() is not linked to a plugin function");
 
-  //to do
-  //this->computeJacobianQQPtr(time);
+  int size = this->q.size();
+  this->computeJacobianQQNLInertiaPtr(&size, &this->q(0), &this->velocity(0), &this->jacobianQQNLInertia(0, 0));
+}
+
+void LagrangianDS::computeJacobianQQNLInertia(double time, SimpleVector *q, SimpleVector *velocity)
+{
+  if (computeJacobianQQNLInertiaPtr == NULL)
+    RuntimeException::selfThrow("computeJacobianQQNLInertia() is not linked to a plugin function");
+
+  int size = q->size();
+  this->computeJacobianQQNLInertiaPtr(&size, &(*q)(0), &(*velocity)(0), &jacobianQQNLInertia(0, 0));
 }
 
 void LagrangianDS::computeJacobianVelocityQNLInertia(double time)
@@ -263,8 +316,16 @@ void LagrangianDS::computeJacobianVelocityQNLInertia(double time)
   if (computeJacobianVelocityQNLInertiaPtr == NULL)
     RuntimeException::selfThrow("computeJacobianVelocityQNLInertia() is not linked to a plugin function");
 
-  //to do
-  //this->computeJacobianVelocityQNLInertiaPtr(time);
+  int size = this->q.size();
+  this->computeJacobianVelocityQNLInertiaPtr(&size, &this->q(0), &this->velocity(0), &this->jacobianVelocityQNLInertia(0, 0));
+}
+void LagrangianDS::computeJacobianVelocityQNLInertia(double time, SimpleVector *q, SimpleVector *velocity)
+{
+  if (computeJacobianVelocityQNLInertiaPtr == NULL)
+    RuntimeException::selfThrow("computeJacobianVelocityQNLInertia() is not linked to a plugin function");
+
+  int size = q->size();
+  this->computeJacobianVelocityQNLInertiaPtr(&size, &(*q)(0), &(*velocity)(0), &jacobianVelocityQNLInertia(0, 0));
 }
 
 

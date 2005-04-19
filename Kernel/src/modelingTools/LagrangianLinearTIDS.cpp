@@ -136,7 +136,8 @@ extern "C" double FextFunction(double time)
   return res;
 }
 
-void LTIDSComputeFExt(int* sizeOfq, double* time, double* qPtr, double* fExt)
+//void LTIDSComputeFExt(int* sizeOfq, double* time, double* qPtr, double* fExt)
+void LTIDSComputeFExt(int* sizeOfq, double* time, double* fExt)
 {
   IN("LagrangianLinearTIDS : friend LTIDSComputeFInt\n");
 

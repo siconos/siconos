@@ -27,9 +27,10 @@ void TimeStepping::createStrategy(StrategyXML * strategyXML, Model * model)//,  
   IN("TimeStepping::createStrategy(StrategyXML * strategyXML, Model * model)\n");
   if (strategyXML != NULL)
   {
-    //this->timeDiscretisation = NULL;
-    //    this->timeDiscretisation = timeDiscretisation;
-    //    if( timeDiscretisation != NULL ) this->timeDiscretisation->setStrategy( this );
+    // this->timeDiscretisation = NULL;
+    // \warning where does ¨timeDiscretisation comes from ????  => comment the 2 next lines
+    // this->timeDiscretisation = timeDiscretisation;
+    // if( timeDiscretisation != NULL ) this->timeDiscretisation->setStrategy( this );
 
     this->integratorVector.clear();
     this->nsProblem = NULL;

@@ -596,6 +596,13 @@ public:
    */
   virtual void computeMass(double time);
 
+  /** \fn void computeMass(double time, SimpleVector *q)
+   *  \brief function to compute the mass
+   *  \param double time : the current time, SimpleVector*: pointer on the state vector q
+   *  \exception RuntimeException
+   */
+  virtual void computeMass(double time, SimpleVector *q);
+
   /** \fn void computeFInt(double time)
    *  \brief default function to compute the internal strengths
    *  \param double time : the current time
@@ -603,13 +610,20 @@ public:
    */
   virtual void computeFInt(double time);
 
+  /** \fn void computeFInt(double time, SimpleVector q, SimpleVector velocity)
+   *  \brief function to compute the internal strengths
+   *  \param double time : the current time, SimpleVector*: pointers on the state vectors q and velocity (\dot q)
+   *  \exception RuntimeException
+   */
+  virtual void computeFInt(double time, SimpleVector *q, SimpleVector *velocity);
+
   /** \fn void computeFExt(double time)
    *  \brief default function to compute the external strengths
    *  \param double time : the current time
    *  \exception RuntimeException
    */
-  virtual void computeFExt(double time);
 
+  virtual void computeFExt(double time);
 
   /** \fn void computeQNLInertia();
    *  \brief default function to compute the inertia
@@ -617,33 +631,67 @@ public:
    */
   virtual void computeQNLInertia();
 
+  /** \fn void computeQNLInertia(SimpleVector q, SimpleVector velocity);
+   *  \brief function to compute the inertia
+         *  \param SimpleVector*: pointers on the state vectors q and velocity (\dot q)
+   *  \exception RuntimeException
+   */
+  virtual void computeQNLInertia(SimpleVector *q, SimpleVector *velocity);
+
   /** \fn void computeJacobianQFInt(double time)
-   *  \brief default function to compute the gradient of the internal strength compared to the state
+   *  \brief default function to compute the gradient of the internal strengths compared to the state
    *  \param double time : the current time
    *  \exception RuntimeException
    */
   virtual void computeJacobianQFInt(double time);
 
+  /** \fn void computeJacobianQFInt(double time,SimpleVector q, SimpleVector velocity)
+   *  \brief function to compute the gradient of the internal strengths compared to state q
+   *  \param double time : the current time, SimpleVector*: pointers on the state vectors q and velocity (\dot q)
+   *  \exception RuntimeException
+   */
+  virtual void computeJacobianQFInt(double time, SimpleVector *q, SimpleVector *velocity);
+
   /** \fn void computeJacobianVelocityFInt(double time)
-   *  \brief default function to compute the gradient of the internal strength compared to the velocity
+   *  \brief function to compute the gradient of the internal strengths compared to velocity
    *  \param double time : the current time
    *  \exception RuntimeException
    */
   virtual void computeJacobianVelocityFInt(double time);
 
+  /** \fn void computeJacobianVelocityFInt(double time, SimpleVector q, SimpleVector velocity)
+   *  \brief function to compute the gradient of the internal strengths compared to velocity
+   *  \param double time : the current time, SimpleVector*: pointers on the state vectors q and velocity (\dot q)
+   *  \exception RuntimeException
+   */
+  virtual void computeJacobianVelocityFInt(double time, SimpleVector *q, SimpleVector *velocity);
+
   /** \fn void computeJacobianQQNLInertia(double time)
-   *  \brief default function to compute the gradient of the external strength compared to the state
+   *  \brief function to compute the gradient of the inertia strengths compared to the state q
    *  \param double time : the current time
    *  \exception RuntimeException
    */
   virtual void computeJacobianQQNLInertia(double time);
 
-  /** \fn void computeJacobianVelocityQNLInertia(double time)
-   *  \brief default function to compute the gradient of the external strength compared to the velocity
+  /** \fn void computeJacobianQQNLInertia(double time,SimpleVector q, SimpleVector velocity)
+   *  \brief function to compute the gradient of the inertia strengths compared to the state q
+   *  \param double time : the current time, SimpleVector*: pointers on the state vectors q and velocity (\dot q)
+   *  \exception RuntimeException
+   */
+  virtual void computeJacobianQQNLInertia(double time, SimpleVector *q, SimpleVector *velocity);
+
+  /** \fn void computeJacobianVelocityQNLInertia(double time )
+   *  \brief function to compute the gradient of the inertia strengths compared to velocity
    *  \param double time : the current time
    *  \exception RuntimeException
    */
   virtual void computeJacobianVelocityQNLInertia(double time);
+  /** \fn void computeJacobianVelocityQNLInertia(double time, SimpleVector q, SimpleVector velocity )
+   *  \brief function to compute the gradient of the inertia strengths compared to velocity
+   *  \param double time : the current time, SimpleVector*: pointers on the state vectors q and velocity (\dot q)
+   *  \exception RuntimeException
+   */
+  virtual void computeJacobianVelocityQNLInertia(double time, SimpleVector *q, SimpleVector *velocity);
 
   ////////////////////////////////////////////
 
@@ -818,11 +866,11 @@ protected:
   /** \fn void (*computeFExtPtr)(double* time, double* qPtr, int* sizeOfq, double* fExtPtr)
    *  \brief computes the external strengths
    *  \param int* sizeOfq : the size of the vector q
-   *  \param double* time : the current time
-   *  \param double* qPtr : the pointer to the first element of the vector q
+   *      \param double* time : the current time
    *  \param double* fExtPtr : the pointer to the first element of the vector FInt (in-out parameter)
    */
-  void (*computeFExtPtr)(int* sizeOfq, double* time, double* qPtr, double* fExtPtr);
+  //void (*computeFExtPtr)(int* sizeOfq, double* time, double* qPtr, double* fExtPtr);
+  void (*computeFExtPtr)(int* sizeOfq, double* time, double* fExtPtr);
 
   /** \fn void (*computeQNLInertiaPtr)(int* sizeOfq, double* qPtr, double* velocityPtr, double* QNLInertiaPtr)
    *  \brief computes the inertia

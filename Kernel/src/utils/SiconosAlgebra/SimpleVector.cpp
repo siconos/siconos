@@ -673,7 +673,7 @@ SimpleVector operator - (const SimpleVector& v1, const SimpleVector& v2)
 }
 
 
-SimpleVector operator * (/*const*/ SiconosMatrix &m, /*const*/ SimpleVector &v)
+SimpleVector operator * (const SiconosMatrix &m, const SimpleVector &v)
 {
   SimpleVector sv(m.size(0));
   Blas_Mat_Vec_Mult(m.getLaGenMatDouble(), v.lavd, sv.lavd, 1.0, 0.0);

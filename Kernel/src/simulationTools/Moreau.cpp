@@ -42,8 +42,8 @@ void Moreau::initialize()
 
   if (this->ds->getType() == LNLDS)
   {
-    VL(("Moreau::initialize -- LNLDS\n"));
-    RuntimeException::selfThrow("Moreau::initialize - not yet implemented for Dynamical system type :" + ds->getType());
+    //    VL(("Moreau::initialize -- LNLDS\n"));
+    //    RuntimeException::selfThrow("Moreau::initialize - not yet implemented for Dynamical system type :"+ds->getType());
   }
   else if (this->ds->getType() == LTIDS)
   {
@@ -80,14 +80,65 @@ void Moreau::computeFreeState()
   if (this->ds->getType() == LNLDS)
   {
     VL(("Moreau::computeFreeState -- LNLDS\n"));
-    RuntimeException::selfThrow("Moreau::computeFreeState - not yet implemented for Dynamical system type :" + ds->getType());
+    // ------- Wk calculous -------------
+    // Get the DS
+    LagrangianDS* d = static_cast<LagrangianDS*>(this->ds);
+    // compute Mass matrix for state i,k
+    double t = this->timeDiscretisation->getStrategy()->getModel()->getCurrentT();
+    d->computeMass(t);
+    SiconosMatrix *M = d->getMassPtr();
+    // compute Kt matrix for state i,k
+    d->computeJacobianQFInt(t);
+    SiconosMatrix *JacoQFInt = d->getJacobianQFIntPtr();
+    d->computeJacobianQQNLInertia(t);
+    SiconosMatrix *JacoQQNL = d->getJacobianQQNLInertiaPtr();
+    // compute Ct matrix for state i,k
+    d->computeJacobianVelocityFInt(t);
+    SiconosMatrix *JacoVFInt = d->getJacobianVelocityFIntPtr();
+    d->computeJacobianVelocityQNLInertia(t);
+    SiconosMatrix *JacoVQNL = d->getJacobianVelocityQNLInertiaPtr();
+    // calculate Wk
+    double theta = this->theta;
+    double h = this->timeDiscretisation->getH();
+    this->W = *M + h * theta * ((*JacoVFInt) + (*JacoVQNL) + h * theta * (*JacoQFInt) + (*JacoQQNL));
+
+    // -------- RESfree calculous --------
+    // Get state i (previous time step)
+    SimpleVector* vold, *qold;
+    qold = static_cast<SimpleVector*>(d->getQMemories()->getSiconosVector(0));
+    vold = static_cast<SimpleVector*>(d->getVelocityMemories()->getSiconosVector(0));
+    // Compute QNL, Fint and Fext for state i
+    double told = t - h;
+    d->computeQNLInertia(qold, vold);
+    SimpleVector QNL0 = d->getQNLInertia();
+    d->computeFInt(told, qold, vold);
+    SimpleVector FInt0 = d->getFInt();
+    d->computeFExt(told);
+    SimpleVector FExt0 = d->getFExt();
+    // Compute QNL, Fint and Fext for present state
+    d->computeQNLInertia();
+    SimpleVector QNL1 = d->getQNLInertia();
+    d->computeFInt(t);
+    SimpleVector FInt1 = d->getFInt();
+    d->computeFExt(t);
+    SimpleVector FExt1 = d->getFExt();
+    // RESfree ...
+    SimpleVector *v = d->getVelocityPtr();
+    SimpleVector *RESfree = new SimpleVector(FExt1.size());
+    *RESfree = *M * (*v - *vold) + h * ((1 - theta) * (QNL0 + FInt0 - FExt0) + theta * (QNL1 + FInt1 - FExt1));
+
+    // ------- velocity free -------------
+    // Solution of Wk(v-vfree)=RESfree
+    SimpleVector *vfree = d->getVelocityFreePtr();
+    *vfree = *v - this->W.PLUForwardBackward((*RESfree));
+    delete RESfree;
+
   }
   else if (this->ds->getType() == LTIDS)
   {
     VL(("Moreau::computeFreeState -- LTIDS\n"));
 
     LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(this->ds);
-
 
     SiconosVector *p = d->getPPtr();
     p->zero();
@@ -116,7 +167,7 @@ void Moreau::integrate()
   if (this->ds->getType() == LNLDS)
   {
     VL(("Moreau::integrate -- LNLDS\n"));
-    RuntimeException::selfThrow("Moreau::integrate - not yet implemented for Dynamical system type :" + ds->getType());
+    // We do not use integrate() for LNDS
   }
   else if (this->ds->getType() == LTIDS)
   {
@@ -144,9 +195,9 @@ void Moreau::integrate()
     // or call the F77 function  MoreauLTIDS
 
     // Computation of the Residual term
-    d->computeFExt(t);
-    SimpleVector FExt0 = d->getFExt();
     d->computeFExt(told);
+    SimpleVector FExt0 = d->getFExt();
+    d->computeFExt(t);
     SimpleVector FExt1 = d->getFExt();  //
 
     //    *v = -h * (*C * *vold) -h * (*K * *qold) - h * h * this->theta * ( *K * *vold)
@@ -156,10 +207,6 @@ void Moreau::integrate()
     *v /= h;
     *v += (1.0 - this->theta) * FExt0;
     *v += (this->theta * FExt1);
-    //    cout<<"Moreau::integrate ###### K then vold ################"<<endl;
-    //    K->display();
-    //    vold->display();
-    //    cout<<"/Moreau::integrate ##################################"<<endl;
     *v -= h * this->theta * (*K * *vold);
     *v -= (*K * *qold);
     *v -= (*C * *vold);

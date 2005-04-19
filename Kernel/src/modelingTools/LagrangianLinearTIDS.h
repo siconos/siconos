@@ -199,7 +199,7 @@ private:
   /*
    * fake of plugin ^^
    */
-  friend void LTIDSComputeFExt(int* sizeOfq, double* time, double* qPtr, double* fExt);
+  friend void LTIDSComputeFExt(int* sizeOfq, double* time,  double* fExt);
 };
 
 #endif // LAGRANGIANTIDS_H
