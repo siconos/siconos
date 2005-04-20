@@ -17,9 +17,7 @@ if you do not want to run unitary test suites, and have not installed cppUnit, u
 > make install
 
 
-> set the shell variable SICONOSPATH
-
-export PATH=$PATH:$SICONOSPATH/bin
+export PATH=$PATH:/siconos_path_install/bin
 
 > siconos -h
 

@@ -57,7 +57,7 @@ function cartridge() {
 cartridge;
 
 echo "SICONOSPATH= $SICONOSPATH"
-export SICONOSPATH $SICONOSPATH;
+export SICONOSPATH=$SICONOSPATH;
 # parameters and paths
 if test "$SICONOSPATH" = ""; then
     echo "SICONOSPATH undefined. stop";
