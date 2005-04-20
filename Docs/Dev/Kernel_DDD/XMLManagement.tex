@@ -3,6 +3,7 @@
 The management of the XML input/output is made by a set of classes based on the architecture of the
 \ac{siconos} platform.
 
+
 \section{Validation of a XML file : The XML Schema}
 The data of the XML files we can encounter must respect several rules conforming to the \ac{nsds}
 and there resolution. Each objects of the platform have specific attributes which are required
@@ -11,25 +12,43 @@ To check each information, the schema regroups the defined attributes in several
 Model, NSDS, DynamicalSystem, Interaction, Relation and NonSmoothLaw, Strategy, TimeDiscretisation,
 OneStepIntegrator, OneStepNSProblem.
 
+
 \section{Architecture}
 In the software, the XML Management uses a tree structure for the XML objects and a DOM tree where all the data are stored in memory. Each of these objects is linked to the DOM tree, and each object access only to the data relating to it.
 
 \begin{ndr}
-  Is it necessary to link directly towards a node of the gloabl XML DOM tree ?
+  Is it necessary to link directly towards a node of the global XML DOM tree ?
 \end{ndr}
 
 \subsection{The XML Management objects}
-The figure \ref{fig: Class diagram of the XML management} \& \ref{fig: Class diagram with the links between the platform and the XML part} shows the
-structure of the XML Management platform.
-The Model is linked to his SiconosModelXML, the NSDS to his NSDSXML, \dots
-So, the XML Management platform give to the \ac{siconos} platform the accessors towards the data of the XML DOM tree.
+The figure \ref{fig: Class diagram of the XML management} \& \ref{fig: Class diagram with the links between the platform and the XML part} shows the structure of the XML Management platform.
+The Model is linked to his SiconosModelXML, the NSDS to his NSDSXML, \dots~
+ So, the XML Management platform gives to the \ac{siconos} platform the accessors towards the data of the XML DOM tree.
+
 \subsection{The data of the XML}
 Each XML object can access to the specific branch of the DOM tree which contains the data relating to
-the object of the platform. They give an interface to the platform, to manipulate the information of
+the corresponding object of the Kernel. They give an interface to the platform, to manipulate the information of
 the DOM tree.
 The data stored in the XML Management platform are only used for input and output but never used during the
 computations. That's to say the information of the DOM tree are read when the software is launched (if a XML input file is
-defined) and data are stored to the DOM tree a the end of each time step of a simulation.
+defined) and data are stored to the DOM tree a the end a simulation or when the user asks to do it.
+
 \subsection{SiconosDOMTreeTools}
 It is a toolbox to manipulate the data of the platform to store them under XML format.
+\begin{itemize}
+	\item Load SiconosVector and SiconosMatrix functions from the \ac{xml} DOM tree.
+	\item Save SiconosVector and SiconosMatrix functions to the \ac{xml} DOM tree.
+	\item Getter and setter for boolean, integer, double and string values.
+	\item xmlNode creation functions for SiconocVector, SiconosMatrix, boolean, integer, double and string values.
+	\item Advanced DOM tree navigation functions.
+\end{itemize}
 
+
+\section{Loading and saving}
+The loading of the XML management tree begins in the SiconosModel by calling the SiconosModel constructor with an XML file as parameter.\\
+Then the XML tree is to be created. Each XML object initializes his attributes and launches the creation process which will create its XML children objects. We have the following sequence :\\
+XML Object constructor -> global load of XML children -> load of each XML child object with call of the XML object constructor.\\
+It's important to keep in mind that the SiconosModelXML constructor needs an XML file as parameter, whereas all the other XML objects constructors only need an XML node from the DOM tree, that corresponds to the sub-tree relating to each specific XML object.\\
+The saving of the tree is in two parts.\\
+In the one hand, XML objects are updated. At first, the XML tree is checked with the Kernel tree, to create missing XML object (when the user has added some new Kernel objects). Then Kernel data are copied in the DOM tree with all the XML objects.
+In the other hand, the DOM tree is saved to a file.

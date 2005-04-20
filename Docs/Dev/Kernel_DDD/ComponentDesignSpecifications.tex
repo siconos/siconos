@@ -18,7 +18,7 @@ The following schemas (\ref{fig: Class diagram of the platform}, \ref{fig: Class
 	
 	\begin{figure}
 	\begin{center}
-	\includegraphics[scale=1.6, clip]{figure/platform.eps}
+	\includegraphics[scale=1.2, clip]{figure/platform.eps}
 	\caption{Class diagram with the links between the platform and the XML part}
 	\label{fig: Class diagram with the links between the platform and the XML part}
 	\end{center}
@@ -33,7 +33,7 @@ The following schemas (\ref{fig: Class diagram of the platform}, \ref{fig: Class
 The \ref{fig: Class diagram of DSInputOutput and EqualityConstraint added} class diagram represents the EqualityConstraint and DSInputOutput classes (and inherited classes).
 	\begin{figure}
 	\begin{center}
-	\includegraphics[scale=0.9, clip]{figure/EC.eps}
+	\includegraphics[scale=0.85, clip]{figure/EC.eps}
 	\caption{Class diagram of DSInputOutput and EqualityConstraint added}
 	\label{fig: Class diagram of DSInputOutput and EqualityConstraint added}
 	\end{center}
@@ -62,7 +62,7 @@ The attributes of the class are :
 
 The class SiconosMemory is designed to avoid useless copies of SiconosVectors. For the storage of a SiconosVector, there is only one copy : when it enters in the SiconosMemory. Next, the moves of position in the Memory are only done with adresses of pointers. \\
  
-we have designed the SiconosMemory to be used preferably with a constant maximum size. In fact, the size is generally known before the initialization of the memory, because each kind of integrator needs a constant number of values of previous steps of the simulation to integrate a system. \\
+We have designed the SiconosMemory to be used preferably with a constant maximum size. In fact, the size is generally known before the initialization of the memory, because each kind of integrator needs a constant number of values of previous steps of the simulation to integrate a system. \\
 
 The management of the relation between SiconosMemory and the \ac{xml} file is the classical one used in the plateform. There are two functions in the SiconosMemory to load or save it in the \ac{xml} DOM tree. The object SiconosMemoryXML realizes this transfer of data.
 We chose this method, with a specified \ac{xml} object instead of saving directly the memory with functions in SiconosDOMTreeTools in order to respect the philosophy defined in the global architecture. Only the basic objects of the platform, like numbers, vectors and matrices have not a xml manager. %In fact, if we had chosen to load and save directly the SiconosMemory in the DOM tree, why could we not do the same with eveything ? \\

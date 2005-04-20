@@ -18,7 +18,7 @@ These functionnalities are based of the implementation of two adjoint trees of o
 \item The first tree, \texttt{SiconosModel}  is the core of the modelingTools and simulationsTools.
 \item The second class tree \texttt{siconosModelXML} is devoted the XML Management and interfaces the external  library which implements the API DOM (libxml2).
 \end{itemize}
-This choice has been justified by the independance with  the external librairy of the XML management and the ability to extend easily the I/O for new derived object types.
+This choice has been justified by the independance with  the external library of the XML management and the ability to extend easily the I/O for new derived object types. It also avoid the overload of the Kernel source code. Moreover, Kernel objects are functionnal without any link to XML objects.
 
 \begin{ndr}
   Improve the justification of the choice of implementation 
@@ -48,7 +48,6 @@ This first  part of chapter which explains  the model loading form the user poiu
 
 
 \subsection{Model loading from an  XML data file}
-
 The reading of the file generate a DOM tree in memory with all the data. After that,  the creation of the SiconosModelXML tree is  based on this DOM tree.  The SiconosModelXML belongs to the SiconosModel object, which is the main object of the platform. From the SiconosModel,  the creation process is launched to build  all of the model. From this point, the Model creates the NSDS, which one creates the dynamical systems, ... The building is "top down" and gradually, with the Model at the top of the platform. 
 
 
@@ -56,15 +55,15 @@ The reading of the file generate a DOM tree in memory with all the data. After t
 
 
 \subsection{Creating and loading model through the API}
-
-It is also  possible to create the objects of the platform without a XML file by using the API of the platform. The methods given to the users allow the creation of each object of the platform thanks to the constructors of each objects.
-
+It is also  possible to create the objects of the platform without an XML file by using the API of the platform. The methods given to the users allow the creation of each object of the platform thanks to the constructors of each objects.
 
 \subsection{Mixed strategies}
-
+\label{mixed strategies}
+It is possible to create a simulation by loading an XML file and then to add new information in the Kernel.\\
+However, the opposite is not recommanded (creating manually some objects, and then loading an XMl file, you would have several SiconosModel in memory).\\
+So, by loading some data from an input file, the creation process will build the platform with these data. And then you can manipulate the loaded information and also add dynamical systems, interactions, ...
 
 \section{Definition of three major types of construtors for the Siconosmodel objects.}
-
 %% \subsection{The "create" methods}
 %% The "create" functions have for goal to initialize the relating object. They fill its fields with XML data and link the objects belonging to it to their corresponding XML object, or, if the platform is manually built, only fill its fields with the data given in paramaters.
 
@@ -136,9 +135,9 @@ The default constructor performs the following operations :
 
 \end{ndr}
 
-\subsection{Constructor from the mininal data}
+\subsection{Constructor with the mininal data}
 
-This constructor performs  the contruction of a object through given a minimal set of data.  It is composed of the following operations :
+This constructor performs  the contruction of a object through given a minimal set of data that corresponds to required data for each created object.  It is composed of the following operations :
 \input{./code/SiconosObjectOtherConstructor.cpp.tex}
 %% \begin{lstlisting}[frame=single,caption={Constructor from the mininal data}]
 %% Object::object(AttributeType1 data1,...,AttributeTypeN dataN )
@@ -175,9 +174,9 @@ This constructor performs  the contruction of a object through given a minimal s
  \end{ndr}
 
 
-\subsection{Constructor from the ObjectXML of the SiconosModelXML tree}
+\subsection{Constructor with the ObjectXML of the SiconosModelXML tree}
 
-This constructor performs  the contruction of a object given a XML node. there is two steps in this type of contruction  based on the two-associted objetcs, i.e, Object, ObjectXML (for instance, DynamicalSystem and DynamicalSystemXML). The first one is the loading of the ObjectXML from the XML node.Tis step will be detailed in the section \ref{Sec:XMLnode}. The second  step is the loading of the attributes of the object from the ObjectXML. The operations are described in the Listing~\ref{ConstructorObjectXML}.
+This constructor performs  the contruction of a object given a XML node. There is two steps in this type of contruction  based on the two-associated objetcs, i.e, Object, ObjectXML (for instance, DynamicalSystem and DynamicalSystemXML). The first one is the loading of the ObjectXML from the XML node.This step will be detailed in the section \ref{Sec:XMLnode}. The second  step is the loading of the attributes of the object from the ObjectXML. The operations are described in the Listing~\ref{ConstructorObjectXML}.
 
 \input{./code/SiconosObjectConstructorfromXML.cpp}
 %% \begin{lstlisting}[frame=single,caption={Constructor from the ObjectXML of the SiconosModelXML tree }, label={ConstructorObjectXML}]
@@ -189,6 +188,9 @@ This constructor performs  the contruction of a object given a XML node. there i
 %%     this->linkObjectXML();       // Link downwards
 %%    }
 %% \end{lstlisting} 
+
+\textbf{\textit{Remark :}} The SiconosModel owns the only constructor that needs a string corresponding to an XML file, instead of an XML object.\\
+\textbf{\textit{Remark :}} About the DSInputOutput. In the XML file, they are defined a the same level than the dynamical system, whereas they are linked to these dynamical systems. This position is due to the fact one DSInputOutput can be used by several dynamical systems. So, during the loading of the NSDSXML,  DSIOXML objects have to be loaded before DSXML objects to be able to link the DSXML with there DSIOXML.\\
 
 
 

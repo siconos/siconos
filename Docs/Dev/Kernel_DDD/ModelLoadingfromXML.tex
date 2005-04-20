@@ -40,22 +40,19 @@ At first, when a XML file is loaded, the data of the file are copied in memory i
 there, the XML Management platform is built.\\
 The SiconosModelXML owns the DOM tree and create NSDSXML and StrategyXML objects. The created objects
 only know the branch of the DOM tree relating to them. Gradually, the NSDSXML will create the
-different XML objects of the dynamical systems (DSXML, LagrangianNLDSXML, LagrangianTIDSXML,
-LinearSystemDSXML), and the different interactions.\\
-Then, after all the XML objects have been created, the \ac{siconos} platform is built.\\
+different XML objects depending of it : the dynamical systems (DSXML, LagrangianNLDSXML, LagrangianTIDSXML,
+LinearSystemDSXML), and the interactions.\\
+Then, after all the XML objects have been created, the \ac{siconos} platform is going to be built.\\
 The Model which has lead the construction of the XML platform begin the creation of the NSDS,
 DynamicalSystem, LagrangianNLDS, ..., Interaction, Relation, ..., NonSmoothLaw, ..., Strategy,
 TimeDiscretisation, OneStepIntegrator, Moreau, ..., OneStepNSProblem, LCP and QP by using the
 relating XML objects.\\
-The construction of each object of the platform is made by calling a
-"createXxxxx" method (createModel(...), createNSDS(...), createStrategy(...), ...). One parameter
-corresponding to the XML object is enough to give the right data to the platform's object for his
-construction.
+The construction of each object of the platform is made by calling advanced constructors of the Kernel's objects. The used constructor is the one which takes an XML object in parameter.\\
 
 
 \begin{figure}
 \begin{center}
-        \includegraphics[scale=0.75, clip]{figure/platform_loading_XML.ps}
+        \includegraphics[scale=0.85, clip]{figure/platform_loading_XML.ps}
         \caption{Sequence diagram of the platform's loading with XML file}
         \label{fig: platform's loading1}
 \end{center}
@@ -72,7 +69,7 @@ The "create"methods used are partially shown in the diagram \ref{fig: platform's
 \subsection{Creating a model through the API C++}
 
 
-The construction of the platform we can see in the diagram \ref{fig: platform's loading2} is lead by an user. The user calls a constructor of the object that he want to create and after that adds the object to the SiconosModel of necessary. For instance, the sequence in the listing \ref{Lst:Creating} can be invoked for creating a model with a DynamicalSystem of the type LagrangianLinearTIDS.
+The construction of the platform we can see in the diagram \ref{fig: platform's loading2} is lead by an user. The user calls a constructor of the object that he want to create and after that adds the object to the SiconosModel of necessary. For instance, the sequence in the listing \ref{Lst:Creating} can be invoked for creating a model with a DynamicalSystem of the type LagrangianLinearTIDS.\\
 \input{./code/ModelLoadingfromXML.cpp.tex}
 %% \begin{lstlisting}[frame=single, caption={Creating a model through the API C++,label={Lst:Creating}}]
 %%   // Default Constructor of a Model
@@ -105,7 +102,7 @@ The construction of the platform we can see in the diagram \ref{fig: platform's 
 
 
 
- Due to the fact that the destructor of the nsds delete actually the DynamicalSystem which are contained in it, we need to declare a pointer on a DS in  order to avois a doucle delete at the end of the run, see Listing \ref{Lst:Creatingbis}
+ Due to the fact that the destructor of the nsds delete actually the DynamicalSystem which are contained in it, we need to declare a pointer on a DS in  order to avoid a doucle delete at the end of the run, see Listing \ref{Lst:Creatingbis}
 \input{./code/ModelLoadingfromXMLbis.cpp.tex}
 
 %% \begin{lstlisting}[frame=single, caption={Creating a model through the API C++, bis},label={Lst:Creatingbis}]
@@ -116,7 +113,7 @@ The construction of the platform we can see in the diagram \ref{fig: platform's 
 %%   nsds1.addDS(lltids1);
 %% \end{lstlisting}
 \begin{ndr}
-We need to define precisely a rule for the constructor/destructor with new/delete
+We need to define precisely a rule for the constructor/destructor with new/delete => Factories ?!?
 \end{ndr}
 In the same way,  a complete model may be constructed using the specific constructor of each object. After this operation, we can use either the member function \texttt{setAttributeObject} for pointing or  a member function  \texttt{addAttributeObject} in the case of a vector attribute
 
@@ -193,7 +190,7 @@ NSLaw::NSLaw()
 This means that the data read in the file are supplemented with information given in the command
 program.
 In this case, the XML file is similar to the previous case, then the way to create objects of
-the platform apart from a XML file will be detailed in the next section.
+the platform apart from a XML file is detailed here : \ref{mixed strategies}.
 
 
 
