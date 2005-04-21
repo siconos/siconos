@@ -32,22 +32,18 @@ void Moreau::initialize()
 {
   IN("Moreau::initialize\n");
 
-
-
   OneStepIntegrator::initialize();
   this->display();
 
-  SiconosMatrix *M;
-  double h = this->timeDiscretisation->getH();
-
   if (this->ds->getType() == LNLDS)
   {
-    //    VL(("Moreau::initialize -- LNLDS\n"));
-    //    RuntimeException::selfThrow("Moreau::initialize - not yet implemented for Dynamical system type :"+ds->getType());
+    // nothing to do ??
   }
   else if (this->ds->getType() == LTIDS)
   {
     VL(("Moreau::initialize -- LTIDS\n"));
+    SiconosMatrix *M;
+    double h = this->timeDiscretisation->getH();
     LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(this->ds);
     d ->display();
     M = d->getMassPtr();
@@ -76,10 +72,10 @@ void Moreau::computeFreeState()
 {
   IN("Moreau::computeFreeState\n");
 
-
   if (this->ds->getType() == LNLDS)
   {
     VL(("Moreau::computeFreeState -- LNLDS\n"));
+
     // ------- Wk calculous -------------
     // Get the DS
     LagrangianDS* d = static_cast<LagrangianDS*>(this->ds);
@@ -101,6 +97,8 @@ void Moreau::computeFreeState()
     double theta = this->theta;
     double h = this->timeDiscretisation->getH();
     this->W = *M + h * theta * ((*JacoVFInt) + (*JacoVQNL) + h * theta * (*JacoQFInt) + (*JacoQQNL));
+    // LU factorization of W
+    this->W.PLUFactorizationInPlace();
 
     // -------- RESfree calculous --------
     // Get state i (previous time step)
@@ -166,7 +164,7 @@ void Moreau::integrate()
 
   if (this->ds->getType() == LNLDS)
   {
-    VL(("Moreau::integrate -- LNLDS\n"));
+    //VL(("Moreau::integrate -- LNLDS\n"));
     // We do not use integrate() for LNDS
   }
   else if (this->ds->getType() == LTIDS)

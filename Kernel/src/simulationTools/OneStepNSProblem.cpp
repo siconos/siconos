@@ -536,6 +536,7 @@ void OneStepNSProblem::updateConnectedInteractionMap()
                 hasActiveConnection = true;
                 dsvect1 = this->interactionVector[i]->getDynamicalSystems();
                 dsvect2 = this->interactionVector[j]->getDynamicalSystems();
+
                 if ((dsvect1[0] == dsvect2[0]) || (dsvect1[0] == dsvect2[1]))
                 {
                   // the interaction i and j are connected

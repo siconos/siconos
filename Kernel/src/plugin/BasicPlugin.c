@@ -63,7 +63,7 @@ extern "C" void computeFInt(int *sizeOfq, double *time, double *q, double *veloc
 
 }
 
-extern "C" void computeFExt(int *sizeOfq, double *time, double *q, double *fExt)
+extern "C" void computeFExt(int *sizeOfq, double *time, double *fExt)
 {
   /* input parameter : sizeOfq (size of the vector q); time; q (pointer to q vector);
    * output parameter : fExt (pointer to Fext vector)

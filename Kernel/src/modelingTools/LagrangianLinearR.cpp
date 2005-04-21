@@ -80,17 +80,13 @@ void LagrangianLinearR::computeOutput(double time)
   vector<DynamicalSystem*> vDS = this->interaction->getDynamicalSystems();
 
   DynamicalSystem *ds1 , *ds2;
-  /*SiconosVector*/
   SimpleVector *y = this->interaction->getYPtr();
-
-  /*SiconosVector*/
   SimpleVector *yDot = this->interaction->getYDotPtr();
 
   if (vDS.size() == 2)
   {
     ds1 = vDS[0];
     ds2 = vDS[1];
-    // \todo : pretty strange to use LNLDS with H and b !
     if (((ds1->getType() == LNLDS) || (ds1->getType() == LTIDS)) && ((ds2->getType() == LNLDS) || (ds2->getType() == LTIDS)))
     {
       LagrangianDS *d1 = static_cast<LagrangianDS*>(ds1);
@@ -112,8 +108,8 @@ void LagrangianLinearR::computeOutput(double time)
     }
     else
     {
-      //      SiconosVector x(*(vDS[0]->getXPtr()), false);
-      //      x.add(*( vDS[1]->getXPtr()));
+      //    SiconosVector x(*(vDS[0]->getXPtr()), false);
+      //    x.add(*( vDS[1]->getXPtr()));
       // To be Finished
       RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for this type of dynamical system " + vDS[0]->getType());
     }
@@ -152,14 +148,11 @@ void LagrangianLinearR::computeFreeOutput(double time)
 {
   IN("LagrangianLinearR::computeFreeOutput\n");
 
-
-
   vector<DynamicalSystem*> vDS = this->interaction->getDynamicalSystems();
 
   DynamicalSystem *ds1 , *ds2;
   SiconosVector *y = this->interaction->getYPtr();
   SiconosVector *yDot = this->interaction->getYDotPtr();
-
 
   if (vDS.size() == 2)
   {
@@ -211,9 +204,6 @@ void LagrangianLinearR::computeFreeOutput(double time)
   }
   else RuntimeException::selfThrow("The interaction doesn't contain the right number of Dynamical Systems");
 
-
-
-
   OUT("LagrangianLinearR::computeFreeOutput\n");
 }
 
@@ -224,10 +214,7 @@ void LagrangianLinearR::computeInput(double time)
   vector<DynamicalSystem*> vDS = this->interaction->getDynamicalSystems();
 
   DynamicalSystem *ds1 , *ds2;
-  //SiconosVector r;
   SiconosVector *lambda = this->interaction->getLambdaPtr();
-
-
 
   if (vDS.size() == 2)
   {
@@ -242,16 +229,11 @@ void LagrangianLinearR::computeInput(double time)
       p.add(*(d1->getPPtr()));
       p.add(*(d2->getPPtr()));
       p += matTransVecMult(this->h, *lambda);
-
-      //        cout<<" ### LagrangianLinearR::computeInput => 'p'"<<endl;
-      //        p.display();
-      //p = matTransVecMult(this->h, *lambda);
     }
     else
     {
       // To be Finished
       RuntimeException::selfThrow("LagrangianLinearR::computeInput not yet implemented for this type of dynamical system " + vDS[0]->getType());
-
     }
   }
   else if (vDS.size() == 1)
@@ -260,10 +242,7 @@ void LagrangianLinearR::computeInput(double time)
     if ((ds1->getType() == LNLDS) || (ds1->getType() == LTIDS))
     {
       LagrangianDS *d1 = static_cast<LagrangianDS*>(ds1);
-      //        SiconosVector p(*(d1->getPPtr()), false);
       SimpleVector p(*(d1->getPPtr()));
-      //r = (this->h).multTranspose(*lambda);
-      //p = lambda->matTransVecMult(this->h);
       p = matTransVecMult(this->h, *lambda);
     }
     else
