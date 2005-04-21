@@ -55,7 +55,6 @@ function cartridge() {
 #------
 
 cartridge;
-
 echo "SICONOSPATH= $SICONOSPATH"
 export SICONOSPATH=$SICONOSPATH;
 # parameters and paths
@@ -63,11 +62,16 @@ if test "$SICONOSPATH" = ""; then
     echo "SICONOSPATH undefined. stop";
     exit 1;
 fi;
+# parameters and paths
+if test "$NUMERICSPATH" = ""; then
+    echo "NUMERICSPATH undefined. stop";
+    exit 1;
+fi;
 
 if test "${LD_LIBRARY_PATH}test" = "test"; then
-   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS;  
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS:$NUMERICSPATH/lib;  
 else
-   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS:$LD_LIBRARY_PATH; 
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS:$LD_LIBRARY_PATH:$NUMERICSPATH/lib; 
 fi;	 
 
 clean="false";
