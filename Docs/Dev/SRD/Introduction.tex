@@ -1,4 +1,3 @@
-%$Id: Introduction.tex,v 1.15 2004/03/31 11:49:25 fdubois Exp $$
 \section{Purpose and scope of this document}
 \label{Sec:SRD-Purpose-Scope}
 The \ac{srd} is a contractual document which aims to define precisely the software to realize. It describes functionalities and characteristics of the product and constraints of development and exploitation. It is addressed to users and software framework builders. \\
@@ -15,61 +14,17 @@ This document will be used as basis :
 \end{itemize}
 
 
-%% \section{[Master2ProGi] Context}
-%% This training course takes place in the alpine site (near Grenoble ) of a French public research center named \ac{inria}. We work under the responsibility of Vincent Acary, a researcher of the \ac{bipop} Team.
-%% This team is concerned with non-smooth dynamical systems, also known as complementarity dynamical systems. The main areas of application are: automotive systems, aerospace applications, electro-mechanical systems (mechatronics), robotics, etc. There are still many open fields of theoretical research (in systems theory: controllability, observability, stabilization, trajectory tracking; in mechanical modelling: multiple impacts modelling, non-monotone contact laws, Painlevé paradoxes), as well as on a more applied level (numerical simulation and software development). The biped robot of the INRIA is a privileged application for control. An important biomedical application concerns paraplegic rehabilitation by electro-stimulation.
-
-
 \section{Context of the \ac{siconos} platform}
 \label{Sec:SRD-Context}
 
 
 \subsection{Scope}
 \label{Sec:SRD-Scope}
-This project is a work-package of European project \ac{SICONOS}. \\
-Besides the standard features which are required for a software of scientific computing, the objectives of this project are of the following :
-\begin{itemize}
-\item To provide a common framework (formalisms and solver tools) for non smooth problems present in various scientific fields : applied Mathematics, Mechanics, Robotics, Electrical networks, etc. 
-\item To be able to rely on existing developments. The platform will not re-implement the dedicated tools, which are already used  for the modelling of specific systems in various fields,but will provide a framework to their integration.
-\item To support exchanges and comparisons of methods between researchers.
-\item To disseminate the know-how to other fields of research and industry.
-\item To take into account the diversity of users (end users, algorithms developers, framework builders, industrial ).
-\item To set up standards in terms of modelling of such systems.
-\item To ensure software quality by the use of modern software design methods.
-\end{itemize}
-
-%% One  problem, this project attempt to tackle, is the lack of communication and disseminating of know-how between research teams (and fields of science). Roughly, today, when somebody wants to study a particular non-smooth system, he programs a simulator in his corner (« dans son coin ? On his own ?», on peut mettre ça dans un CDC ?). In the best case, he will write an article about it. Unfortunately, some years later, if another researcher has to study same types of systems, he will probably have to write again a program.Why ?
-
-%% Maybe because the sources have been (were ?) lost, or because the version of the compiler has changed and we cannot migrate it, or...  
-%% Scientists like physicists or mathematicians are rarely computer scientists too; they possess basis of programming, but they don't use techniques of software engineering. As a result, their work is not easy to reuse and maintain.
 
 
-\subsection{Exploitation context}
-The \ac{siconos} platform should be used as well in research teams as in industry. The project has some important industrial partners like Schneider Electric or Ford. \\
-In a first time, our platform will be usable through two types of interface:
-\begin{itemize}
-\item its own interface, for instance a C++ API used through an interpretor, 
-\item an \ac{xxxlab} interface, for instance \ac{scilab}, a free scientific software package for numerical computations developed at \ac{inria} too and similar to \ac{matlab}. 
-\end{itemize}
+This \ac{srd} concerns the \ac{kernel} and the \ac{imse}.
 
 
-
-%% \section{Definitions, acronyms and abbreviations}
-%% \label{Sec:SRD-Glossary}
-%% \begin{itemize}
-
-%% \item INRIA :   Institut National de Recherche en Informatique et Automatique.
-%% \item LMGC :    Laboratoire de Mécanique et  Génie civil de Montpellier
-%% \item \matlab :  "MATrix LABoratory" : computer program for people doing numerical computation, especially linear algebra (matrices).
-%% \item NSDS :    Non-smooth dynamical system.
-%% \item \scilab :  scientific software package for numerical computations providing a powerful open computing environment for engineering and                                      scientific applications.
-%% \item \siconos : Modelling, Simulation and control of Non-smooth dynamical systems. 
-%% \item SRD :     Software requirements document.
-%% \item s/w :     software.
-%% \item WP :      Work Package.
-%% \item XML :     eXtended Markup Language.
-
-%% \end{itemize}
 
 
 \section{References}
@@ -100,10 +55,8 @@ In a first time, our platform will be usable through two types of interface:
 %\end{ndrva}
 This specification of requirements is composed of two phases :
 \begin{enumerate}
-
-\item A general description of the project. This part explains the purpose of this project and its integration into European project \ac{SICONOS}.
+\item A general description of the project. This part explains the purpose of this project and its integration into European project \ac{SICONOS}. is can be found in the \ac{gpd} document.
 \item The problem definition phase. The scope of the software must be defined. Specific user requirements must be identified and documented. The section has to provide a general description of what the user expects the software to do. It should state the specific user requirements as clearly and consistently as possible. 
-
 \end{enumerate}
 
 

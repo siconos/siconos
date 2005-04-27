@@ -3,7 +3,7 @@
 \documentclass[a4paper,twoside,openright,makeidx,12pt]{book}
 \usepackage{draftcopy}
 %% Faire un checkout sur le module TeX-tools pour obtenir les fichiers partagés
-\input{../TeX-tools/macro.tex}
+\input{macro.tex}
 
 \usepackage{fancyheadings} 
 \usepackage{lastpage}
@@ -41,14 +41,14 @@
 
 % ---------------------------------------------------------------------------------------%
 % %
-% CHAPTER																%
+% CHAPTER                                                                                                                               %
 % %
 % ---------------------------------------------------------------------------------------%
 
 \chapter{Using context}
 
 % ---------------------------------------------------------------------------------------%
-% section                                          					%
+% section                                                                               %
 % ---------------------------------------------------------------------------------------%
 \section{Users}
 
@@ -59,20 +59,20 @@ One of the most important requirements in the distribution of the software is th
 Finally, for the users which come from the industry or the private company, the software must be compatible with standard softwares of scientific computing already used in the industry. 
 
 % ---------------------------------------------------------------------------------------%
-% section                                          					%
+% section                                                                               %
 % ---------------------------------------------------------------------------------------%
 \section{Hardware}
 
 This software must be a portable platform on the most widespread system (Unix/Linux, Windows). Most of work stations are under Linux or UNIX, but MacOS X and Windows will be also supported to reach a wider community of users. In a very general way, the standard version of the   \acs{siconos} platform has to be independent of the hardware. For the numerical efficiency, the use of specific tuned softwares for a given hardware (e.g. ATLAS, http://www.netlib.org/atlas/) may be needed. This tuned version must be an external, or a optional part of the platform.
 
 % ---------------------------------------------------------------------------------------%
-% section                                          					%
+% section                                                                               %
 % ---------------------------------------------------------------------------------------%
 \section{Software}
 This software is a scientific computing  platform, based on existing modules and external interfaces. The platform will use some existing libraries to make basic computations. The front-end gives the user an API to \ac{scilab} and/or to programs in C++.
 
 % ---------------------------------------------------------------------------------------%
-% section                                          					%
+% section                                                                               %
 % ---------------------------------------------------------------------------------------%
 \section{Purpose}
 The aim of this software is to make simulation of \ac{nsds}. To do this, the platform takes input data, then makes the
@@ -82,14 +82,14 @@ computations, following a model of simulation, and finally gives the results of 
 
 % ---------------------------------------------------------------------------------------%
 % %
-% CHAPTER																%
+% CHAPTER                                                                                                                               %
 % %
 % ---------------------------------------------------------------------------------------%
 
 \chapter{Use case diagrams}
 
 % ---------------------------------------------------------------------------------------%
-% section                                          					%
+% section                                                                               %
 % ---------------------------------------------------------------------------------------%
 \section{Various kind of  users}
 
@@ -106,7 +106,7 @@ Three kind of users has been identified :
 
 More Details are given on this aspects in the \ac{srd}.
 
-% ----------------	sub-section		----------------------------------------------------%
+% ----------------      sub-section             ----------------------------------------------------%
 \subsection{Definition of an end user}
 \label{Sec:End-user}
 In the first place, the \ac{siconos} platform  is  built and designed for the end-user. The end user has no particular skills in computer science. He should use the software as a blackbox. He will use it for the following tasks 
@@ -140,7 +140,7 @@ In the first place, the \ac{siconos} platform  is  built and designed for the en
 \end{figure}
 
 % \clearpage
-% ----------------	sub-section		--------------------------------------------------- %
+% ----------------      sub-section             --------------------------------------------------- %
 \subsection{Definition of an expert user}
 \label{Sec:Expert-user}
 The expert user is also an end user, but he is more aware in numerical modelling and simulation of \ac{nsds}. He is able  to propose new numerical strategies and methods and to implement them in the platform. He is skilled in computer science and knows programming in C++. Therefore, he can use the Python interface or the C++ API of the platform to drive simulations. So, he can (see Figure \ref{Fig:Use case diagram - Expert user}):
@@ -162,7 +162,7 @@ The expert user is also an end user, but he is more aware in numerical modelling
 
 \clearpage
 
-% ----------------	sub-section		----------------------------------------------------%
+% ----------------      sub-section             ----------------------------------------------------%
 \subsection{Definition of a developer}
 \label{Sec:Developer}
 The developer  is able to define or to modify the architecture of the platform. He is skilled in computer science and knows very well the platform's architecture. He may access every parts of the program, and can (see Figure \ref{Fig:Use case diagram - Developer}):
@@ -187,7 +187,7 @@ The developer  is able to define or to modify the architecture of the platform. 
 
 \clearpage
 
-% ----------------	sub-section		----------------------------------------------------%
+% ----------------      sub-section             ----------------------------------------------------%
 \subsection{Users use case}
 This case shows how the users can take advantage of the software to run a simulation (see Figure \ref{Fig:Use case diagram - User}).
 \begin{figure}[hb]
@@ -198,7 +198,7 @@ This case shows how the users can take advantage of the software to run a simula
   \label{Fig:Use case diagram - User}
 \end{figure}
 
-% ----------------	sub-section		----------------------------------------------------%
+% ----------------      sub-section             ----------------------------------------------------%
 \subsection{Scenarii}
 These are some examples of scenarii in accordance with every users and their using contexts :
 \subsubsection{End user}
@@ -220,7 +220,7 @@ These are some examples of scenarii in accordance with every users and their usi
 
 % ---------------------------------------------------------------------------------------%
 % %
-% CHAPTER																%
+% CHAPTER                                                                                                                               %
 % %
 % ---------------------------------------------------------------------------------------%
 
@@ -229,11 +229,11 @@ These are some examples of scenarii in accordance with every users and their usi
 This chapter deals with the interfaces of the platform. Two types of interfaces are planned, the first one is a ``command-line'' interface given by \ac{frontend}. The other one will be a graphical one included in \ac{prepost}.
 
 % ---------------------------------------------------------------------------------------%
-% section                                          					%
+% section                                                                               %
 % ---------------------------------------------------------------------------------------%
 \section{The module \acs{frontend}}
 
-% ----------------	sub-section		----------------------------------------------------%
+% ----------------      sub-section             ----------------------------------------------------%
 \subsection{\acs{api} C++ }
 
 This so called \acs{api} C++ will contain :
@@ -248,13 +248,13 @@ This API could be used in two different ways :
 \item Python interface based on the C++ \ac{api}
 \end{itemize}
 
-% ----------------	sub-section		----------------------------------------------------%
+% ----------------      sub-section             ----------------------------------------------------%
 \subsection{\acs{api} for \ac{xxxlab}}
 
 This \acs{api} will interface the high level methods of the platform to allow the command of the platform trough \ac{xxxlab}.
 
 % ---------------------------------------------------------------------------------------%
-% section                                          					%
+% section                                                                               %
 % ---------------------------------------------------------------------------------------%
 \section{The module \acs{imse}}
 
@@ -263,14 +263,14 @@ The contents of this module is not yet defined. The key idea is to develop a gra
 
 % ---------------------------------------------------------------------------------------%
 % %
-% CHAPTER																%
+% CHAPTER                                                                                                                               %
 % %
 % ---------------------------------------------------------------------------------------%
 
 \chapter{Input and output data}
 
 % ---------------------------------------------------------------------------------------%
-% section                                          					%
+% section                                                                               %
 % ---------------------------------------------------------------------------------------%
 \section{Input data}
 
@@ -292,17 +292,17 @@ computations with consistant information. He can also use an XML input file and 
 \ac{api}.
 
 % ---------------------------------------------------------------------------------------%
-% section                                          					%
+% section                                                                               %
 % ---------------------------------------------------------------------------------------%
 \section{Output data}
 
 Two types of output data for the \ac{engine} may be defined: the output on the standard output and the output in specific data files.
 
-% ----------------	sub-section		----------------------------------------------------%
+% ----------------      sub-section             ----------------------------------------------------%
 \subsection{Standard output}
 On the standard output (screen or log file), the user will find some information about the unfolding of the simulation. Particularly, each functions of the \ac{api} could write informations on the standard output during the simulation. The users will choose the verbose level (all informations on the screen, some messages or none).
 
-% ----------------	sub-section		----------------------------------------------------%
+% ----------------      sub-section             ----------------------------------------------------%
 \subsection{Output data files}
 Two types of output in the output data files are required:
 \begin{itemize}
@@ -321,7 +321,7 @@ Two types of output in the output data files are required:
 
 % ---------------------------------------------------------------------------------------%
 % %
-% CHAPTER																%
+% CHAPTER                                                                                                                               %
 % %
 % ---------------------------------------------------------------------------------------%
 
@@ -330,7 +330,7 @@ There are two main types of errors in the platform. In one hand, the input data 
 Each error message must explain when and why it appears.
 
 % ---------------------------------------------------------------------------------------%
-% section                                          					%
+% section                                                                               %
 % ---------------------------------------------------------------------------------------%
 \section{Input files errors}
 The input file can be an \ac{xml} file, or a plugin.
@@ -341,7 +341,7 @@ The input file can be an \ac{xml} file, or a plugin.
 \end{itemize}
 
 % ---------------------------------------------------------------------------------------%
-% section                                          					%
+% section                                                                               %
 % ---------------------------------------------------------------------------------------%
 \section{Input users errors}
 \begin{itemize}
@@ -351,7 +351,7 @@ The input file can be an \ac{xml} file, or a plugin.
 \end{itemize}
 
 % ---------------------------------------------------------------------------------------%
-% section                                          					%
+% section                                                                               %
 % ---------------------------------------------------------------------------------------%
 \section{Errors during the computations}
 If the simulation abort during the computations, errors messages must help to determine where and why a failure occurs. It will be important to give error messages which will be clear and concise. These errors can be mathematical errors (division by 0, matrix dimensions incompatible, \dots) or errors if the program trys to read a data which not exists (trying to access an element in a vector with an index greater than the vector size, \dots).

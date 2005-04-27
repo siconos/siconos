@@ -1,9 +1,13 @@
 \documentclass[a4paper,twoside,openright,makeidx,12pt]{book}
 %\usepackage{draftcopy}
+%% Faire un checkout sur le module TeX-tools pour obtenir les fichiers partagés
 \input{macro.tex}
 
 \includeonly{}
 \usepackage{fancyheadings} 
+\usepackage{lastpage}
+
+
 
 % package pour les images des use cases
 %\usepackage[dvips]{graphicx}
@@ -18,8 +22,9 @@
 \newcommand{\helv}{% 
 \fontfamily{phv}\fontseries{b}\fontsize{9}{11}\selectfont} 
 \lhead[\helv \thepage]{\helv \rightmark} 
-\rhead[\helv \leftmark]{\helv \thepage} 
-\cfoot{Architectural Design Document -- \today}
+\lhead[\helv \thepage/\pageref{LastPage}]{\helv \rightmark}
+\rhead[\helv \leftmark]{\helv \thepage/\pageref{LastPage}} 
+\cfoot{Siconos Platform -- General Project Description -- \today}
 
 \makeindex
 
@@ -27,7 +32,7 @@
 \pagestyle{empty}
 \renewcommand{\arraystretch}{1.8}
 
-\input{coverADD.tex}
+\input{coverGPD.tex}
 
 \tableofcontents
 
@@ -38,62 +43,35 @@
 
 \pagenumbering{arabic}
 \chapter{Introduction}
-\label{Sec:ADD-Intoduction}
+\label{Sec:GPD-Intoduction}
 \input{Introduction}
-
-
 %---------------------------------------------------------------------------%
 \newpage
-\chapter{System overview}
-\label{Sec:ADD-SystemOverview}
-\input{SystemOverview}
+\chapter{General description of the project}
+\label{Sec:GPD-GeneralDescription}
+\input{GeneralDescription}
 %---------------------------------------------------------------------------%
-
-\newpage
-\chapter{System context}
-\label{Sec:ADD-SystemContext}
-\input{SystemContext}
-
-\newpage
 %---------------------------------------------------------------------------%
-\chapter{Conceptual System design}
-\label{Sec:ADD-ConceptualSystemDesign}
-\input{ConceptualSystemDesign}
-
+\newpage
+\chapter{Organisation of the documents inside the Siconos software project}
+\label{Sec:GPD-DocumentOrganisation}
+\input{DocumentOrganisation}
+%---------------------------------------------------------------------------%
 
 
 \newpage
 %---------------------------------------------------------------------------%
-\chapter{Component description}
-\label{Sec:ADD-ComponentDescription}
-\input{ComponentDescription}
-
-
-\newpage
-%---------------------------------------------------------------------------%
-\chapter{Architecture implementation : methods and softwares}
-\label{Sec:ADD-ComponentImplementation}
-\input{ComponentImplementation}
-
-
-\newpage
-%---------------------------------------------------------------------------%
-%\chapter{Logical validation and verification}
-%\label{Sec:ADD-LogicalValidation}
-%\input{LogicalValidation}
-
-%\newpage
-%---------------------------------------------------------------------------%
-
+\pagestyle{empty}
 
 %\printglosstex(glo)[p]
 \printglosstex(acr)[p]
 
 
+
 \listoffigures
-%\listoftables
-%\cleardoublepage
-%\bibliographystyle{plainnat}
-%\bibliography{./Biblio/String,./Biblio/Cp.bib,./Biblio/Optim.bib,./Biblio/Contact.bib,./Biblio/NonSmooth.bib,./Biblio/Leger.bib,./Biblio/Petri.bib}
+\listoftables
+\cleardoublepage
+\bibliographystyle{plainnat}
+\bibliography{./Biblio/String,./Biblio/Cp.bib,./Biblio/Optim.bib,./Biblio/Contact.bib,./Biblio/NonSmooth.bib,./Biblio/Leger.bib,./Biblio/Petri.bib}
 \cleardoublepage
 \end{document} 

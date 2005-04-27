@@ -36,9 +36,10 @@ The teams for the design and the development are defined as follows :
 \begin{enumerate}
 \item Team INRIA (C01):
   \begin{list}{-}{}
-  \item Vincent Acary (VA) (Team Leader, designer, programmer)
-  \item Roger Pissard--Gibollet (RPG) (Software quality leader)
+  \item Vincent Acary (VA) (Team Leader, designer, programmer) Vincent.Acary@inrialpes.fr
+  \item Roger Pissard--Gibollet (RPG) (Software quality leader) 
   \item Jean--Baptiste Charlety (JBC) (programmer, test engineer , software librarian)
+  \item Franck Pérignon (FP) (programmer, test engineer , numerical algorithms)
   \end{list}
 \item  Team LMGC (AC2):
   \begin{list}{-}{}
@@ -46,10 +47,34 @@ The teams for the design and the development are defined as follows :
   \item Jean--Michel Barbier (JMB) (programmer, test engineer, software librarian)
   \item Shéherazade Nineb (SN) (programmer)
   \end{list}
-\item Team ``Bristol'' (CR6),\hfill\ac{tbd} 
-  \begin{list}{-}{}
-  \item Petri Piiroinen (PP) (Team Leader, designer)
-  \end{list}
+\item Team Analysis (CR6,CR4,CR9,AC5,CR7,AC12,CR8),
+  \begin{itemize}
+  \item Key developers
+    \begin{description}
+    \item[Gustavo Osorio (GA):] gosorio@unina.it
+    \item[Ivan Merillas (IM):] merillas@mat.upc.edu
+    \item[Petri Piiroinen (PP) (Team Leader, designer):] petri.piiroinen@bristol.ac.uk
+    \end{description}
+  \item Developers
+    \begin{description}
+    \item[Fabiola Angulo (FA):] fangulo@nevado.manizales.unal.edu.co
+    \item[Alan Champneys (AC):]     a.r.champneys@bristol.ac.uk             
+    \item[Enric Fossas (EF):] enric.fossas@upc.edu
+    \item[Gino Iannelli (GI):] luigi.iannelli@unisannio.it
+    \item[Arne Nordmark (AN):] nordmark@mech.kth.se
+    \item[Gerard Olivar (GO):] gerard@mat.upc.edu
+    \end{description}
+    
+  \item Testing team
+    \begin{description}
+    \item[Mario {di Bernardo} (MdB):] m.dibernardo@bristol.ac.uk
+    \item[Kanat Camlibel (KC):] k.camlibel@uvt.nl
+    \item[Ugo Galvanetto (UG):] u.galvanetto@imperial.ac.uk
+    \item[Stefania Santini (SS):] stsantini@unina.it
+    \item[David Wagg (DW):] david.wagg@bristol.ac.uk
+    \item[Nathan van der Wouw (NW):] n.v.d.wouw@tue.nl               
+    \end{description}       
+  \end{itemize}
 \item Team "Control", \hfill  \ac{tbd} 
 \item Team \acs{imse}, \hfill \ac{tbd} 
 \end{enumerate}
@@ -73,9 +98,6 @@ The roles and responsabilities are roughly distributed in the table~\ref{Tab:Rol
 \end{table}
 
 
-\begin{ndr}
-  Team Bristol and Team Control must be defined asap
-\end{ndr}
 \subsection{Organisational interfaces.}
 
 The initiators of the project are the members of the Work Package 2.  The end users of the platform are the whole community of SICONOS, at least, for the first release. Then further distributions of the software will take into account the requirements of a wider scientific community, and then,  of the  industrial partners.
@@ -655,12 +677,117 @@ Environment (IDE) Eclipse.
 \end{itemize}
 \paragraph{\ding{85} 4000 Siconos/Analysis Software Production \ac{tbd}}
 \begin{itemize}
-\item 4100 Software Requirements phase SRD 
-\item 4200 Architectural Design phase ADD
-\item 4300 Detailed Design phase 
-\item 4400 Unit testing
-\item 4500 Transfer phase Acceptance testing
-\end{itemize}
+        \item 4100 Software requirements phase SRD
+                \begin{itemize}
+                        \item 4110 First Increment Production           
+                                \begin{itemize}
+                                        \item 4111 Requirements elicitation
+                                        \item 4112 Prototyping and Logical Model
+                                        \item 4113 Anaylys/SRD draft
+                                                                           
+                                \end{itemize}
+                        \item 4120 Second Increment Production
+                                \begin{itemize}
+                                        \item 4121 Update Analysis/SRD according to academical users feedback
+                                \end{itemize}                   
+                        \item 4130 Third Increment Production
+                                \begin{itemize}
+                                        \item 4131 Update Analysis/SRD according to industrial users feedback
+                                \end{itemize}                   
+                \end{itemize}
+        \item 4200 External Specification phase 
+                \begin{itemize}
+                        \item 4210 First Increment Production
+                                \begin{itemize}
+                                        \item 4211 Specify software using context
+                                        \item 4212 Specify interfaces
+                                        \item 4213 Input/Output data description
+                                        \item 4214 Error cases                                                          
+                                \end{itemize}                                   
+                        \item 4220 Second Increment Production
+                        \item 4230 Third Increment Production
+                \end{itemize}
+        \item 4300 Architectural Design phase ADD
+                \begin{itemize}
+                        \item 4310 First Increment Production           
+                                \begin{itemize}
+                                        \item 4312 Prototyping and Physical Model
+                                        \item 4313 Analysis/ADD draft
+                                        \item 4314 Analysis/ADD final                                                             
+                                                \begin{itemize}
+                                                        \item 4314.1 SA/SD method application
+                                                        \item 4313.2 Unit descriptions
+                                                        \item 4314.3 Simuation course                                                           
+                                        \end{itemize}
+                                \end{itemize}
+                        \item 4320 Second Increment Production
+                        \item 4330 Third Increment Production
+                \end{itemize}
+        \item 4400 Detailed design phase
+                \begin{itemize}
+                        \item 4410 First Increment Production           
+                                \begin{itemize}
+                                        \item 4411 First increments of the anlysis/ADD
+                                                \begin{itemize}
+                                                        \item 4411.1 Brute-force Bifurcation diagrams
+                                                        \item 4411.2 Domain of attraction calculations
+                                                \end{itemize}                                   
+                                        \item 4412 First version of the code
+                                \end{itemize}
+                        \item 4420 Second Increment Production          
+                                \begin{itemize}
+                                        \item 4421 Addition to the Analysis/ADD
+                                                \begin{itemize}
+                                                        \item 4421.1 Location of fixed points
+                                                        \item 4421.2 Location of limit cycles
+                                                        \item 4421.3 Continuation of fixed points
+                                                        \item 4421.4 Continuation of limit cycles
+                                                \end{itemize}                                   
+                                        \item 4422 Updated version of the code
+                                \end{itemize}
+                        \item 4430 Third Increment Production           
+                                \begin{itemize}
+                                        \item 4431 Addition to the Analysis/DDD
+                                                \begin{itemize}
+                                                        \item 4431.1 Location of standard bifurcations of limit cycles
+                                                        \item 4431.2 Location of nonsmooth bifurcations of limit cycles
+                                                        \item 4431.3 Continuation of standard bifurcations of limit cycles
+                                                        \item 4431.4 Continuation of nonsmooth bifurcations of limit cycles
+                                                \end{itemize}                                   
+                                        \item 4432 Updated version of the code
+                                \end{itemize}
+                \end{itemize}
+        \item 4500 Unit testing
+                \begin{itemize}
+                        \item 4510 First Increment Testing
+                                \begin{itemize}
+                                        \item 4511 Template systems and benchmark definitions
+                                        \item 4512 Integration Testing                                  
+                                        \item 4513 System Testing                                       
+                                        \item 4514 Acceptance Testing
+                                \end{itemize}
+                        \item 4520 Second Increment Testing                                     
+                                \begin{itemize}
+                                        \item 4521 Template systems and benchmark definitions
+                                        \item 4522 Integration Testing                                  
+                                        \item 4523 System Testing                                       
+                                        \item 4524 Acceptance Testing
+                                \end{itemize}
+                        \item 4530 Third Increment Testing
+                                \begin{itemize}
+                                        \item 4531 Template systems and benchmark definitions
+                                        \item 4532 Integration Testing                                  
+                                        \item 4533 System Testing                                       
+                                        \item 4534 Acceptance Testing
+                                \end{itemize}
+                \end{itemize}   
+        \item 4600 Transfer phase Acceptance testing                    
+                \begin{itemize}
+                        \item 4610 First Increment Testing
+                        \item 4620 Second Increment Testing                                     
+                        \item 4630 Third Increment Testing
+                \end{itemize}
+\end{itemize}   
 \paragraph{\ding{85} 5000 Siconos/Control Software Production \ac{tbd}}
 \begin{itemize}
 \item 5100 Software Requirements phase SRD 
@@ -783,10 +910,7 @@ The two following tables present the general planning of SICONOS/WP2.
   % & \textsf{0000 }&\\
   & ---            Kernel 1 : API C and C++  &  \\
   % & \textsf{0000 }&\\
-  & ---           Kernel 2 : Numerics integration, Numerical and model formalisation  &  \\
-  % & \textsf{0000 }&\\
-  & ---           Analysis : SRD Draft \ac{tbc} & January 2005 \\
-  % & \textsf{4100 }&\\
+  & ---           Kernel 2 : Numerics integration, Numerical and model formalisation  & January 2005 \\
   \hline
   \textsf{M3.b} 
   & --- Numerics : Second increment complete &  \\
@@ -795,9 +919,7 @@ The two following tables present the general planning of SICONOS/WP2.
   % & \textsf{0000}&\\
   & ---           Kernel 2 : coupling LMGC90 to the platform & \\
   % & \textsf{0000}&\\
-  & ---           Kernel 3 : First Benchmarks and Demonstation examples &  \\
-  % & \textsf{0000}&\\
-  & ---            Analysis : \ac{tbd} & March 2005 \\
+  & ---           Kernel 3 : First Benchmarks and Demonstation examples &  March 2005 \\
   % & \textsf{0000}&\\
   \hline
   \textsf{M4.a} 
@@ -805,20 +927,27 @@ The two following tables present the general planning of SICONOS/WP2.
   % & \textsf{3320; 3420 }&\\
   & ---            Model Plugin Library (Benchmarks and Demonstation examples)  &  \\
   % & \textsf{0000 }&\\
-  & ---           Analysis : development complete \ac{tbc}   & June 2005  \\
+  & ---          Analysis : Evaluation of the Kernel and Numerics (T1)  & June 2005  \\
   % & \textsf{4300; 4400; 4500 }&\\
   \hline
   \textsf{M4.b} 
   
-  & --- Numerics : Third increment complete   & September 2005 \\ 
+  & --- Numerics : Third increment complete   & \\ 
   & --- Kernel : First distribution version with Scilab and Python Interfaces    &  \\
+  & --- Analysis : First development increment complete  (T2 \& T3)  &  September 2005 \\
+  % &  \textsf{0000}&\\
+  \hline
+  \textsf{M4.c} 
+  & --- Analysis : First validation increment complete  (E2 \& E3)  &  December 2005 \\
   % &  \textsf{0000}&\\
   \hline
   \textsf{M5} 
-  & ---    First increment of \ac{control} complete \ac{tbc} & March 2006 \\
+  & ---    Analysis : Second  development increment complete  (T4 \& T5)&  \\
+  & ---    Control : First increment complete \ac{tbc} & March 2006 \\
   % & \textsf{5000}&\\   
   \hline
   \textsf{M6} 
+  & ---    Analysis : Second validation increment complete  (E4 \& E4 \& E6)   & September 2006 \\
   & ---    Implementation of the \ac{imse} complete \ac{tbc} & September 2006 \\
   % & \textsf{6000}&\\    
   \hline

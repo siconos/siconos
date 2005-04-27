@@ -1,52 +1,3 @@
-\subsection{\ac{siconos}/Numerics}
-\begin{longtable}{%
-    |>{\columncolor[gray]{.8}}p{0.1\textwidth}%
-    |>{\columncolor[gray]{.95}}p{0.9\textwidth}|}
-  \hline
-  \rowcolor[gray]{.8}   SR. Id. & Software requirements description \\
-  \hline 
-  \hline
-  & \textbf{General  requirements (\ac{siconos}/Numerics)}\\
-  \hline 
-  F.1.001 & The module \ac{siconos}/Numerics must provide basic algebra objects (vector, matrices, quaternions) relying on a matrix template library \\
-  F.1.002 & The module \ac{siconos}/Numerics must provide  high performance methods for  basic vector and matrix operations\\
-  F.1.003 & The module \ac{siconos}/Numerics must provide various storage methods for matrices:
-  \begin{enumerate}
-  \item Dense(full)
-  \item Band
-  \item Skyline
-  \item Sparse
-  \end{enumerate}\\
- \hline 
- & \textbf{ Numerical functionalities  requirements (\ac{siconos}/Numerics)}\\
-  \hline
-  F.1.010 & The module  \ac{siconos}/Numerics has to perform basic linear algebra computations  relying on standard libraries for numerical computation (e.g. LAPACK):
-  \begin{enumerate}
-  \item Solution of linear system 
-  \item Eigenvalue and eigenvectors problem
-  \item Singular Value Decomposition
-  \end{enumerate}
-  \\
-  F.1.011 & The module \ac{siconos}/Numerics has to perform solution for mathematical programming problems:
-  \begin{enumerate}
-  \item Linear Complementarity Problem (LCP) (direct and iterative solutions) 
-  \item Quadratic problem (QP) 
-  \item Non Linear  Complementarity Problem (NCP) 
-  \item General non smooth optimization problem
-  \end{enumerate}\\
-  F.1.012 & The module \ac{siconos}/Numerics has to perform basic computation for smooth time integration (one-step integration)  \\
-  F.1.013 & The module \ac{siconos}/Numerics has to perform root finding for non linear smooth equations (Newton's method)\\
-  F.1.014 & The module \ac{siconos}/Numerics has to perform root finding for non smooth (generalized) equations  \\
-  F.1.015 & The module \ac{siconos}/Numerics has to perform numerical, analytical and automatic differentiation\\
-  \hline
-
-  & \textbf{Interface  requirements (\ac{siconos}/Numerics)}\\
-  \hline 
-   F.1.020 & The module \ac{siconos}/Numerics must provide a common interface to various methods dedicated to one specific type of numerical problem\\
-  \hline
-  \caption{\ac{siconos}/Engine. Software Requirements}\\
-\end{longtable}
-
 
 
 %-------------------------------------------------------------------------------------------------------------------------------%
@@ -152,36 +103,7 @@
 \hline
 \caption{\ac{siconos}/Front-End. Software Requirements}\\
 \end{longtable}
-\subsection{SICONOS/Control.}
 
-The specific requirements for the \ac{siconos}/Control will be defined later. 
-\begin{longtable}{%
-|>{\columncolor[gray]{.8}}p{0.1\textwidth}%
-|>{\columncolor[gray]{.95}}p{0.9\textwidth}|}
-\hline
-\rowcolor[gray]{.8}   SR. Id. & Software requirements description \\
-\hline 
-   & \textbf{ General requirements (\ac{siconos}/Control.)}\\
-   \hline
-   F.4.000 & \\
-\hline
-\caption{\ac{siconos}/Control. Software Requirements}\\
-\end{longtable}
-\subsection{\ac{siconos}/Analysis.}
-
-The specific requirements for the \ac{siconos}/Analysis will be defined later.
-\begin{longtable}{%
-|>{\columncolor[gray]{.8}}p{0.1\textwidth}%
-|>{\columncolor[gray]{.95}}p{0.9\textwidth}|}
-\hline
-\rowcolor[gray]{.8}   SR. Id. & Software requirements description \\
-\hline 
-   & \textbf{ General requirements (\ac{siconos}/Analysis.)}\\
-   \hline
-   F.5.000 & \\
-\hline
-\caption{\ac{siconos}/Analysis. Software Requirements}\\
-\end{longtable}
 \subsection{\ac{siconos}/IMSE.}
 The specific requirements for the \ac{siconos}/IMSE will be defined later.
 
