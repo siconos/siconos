@@ -6,3 +6,5 @@ siconos.so:siconos.cpp
 	g++  $(CFLAGS) -c siconos.cpp
 	g++  $(DYNFLAGS) -o siconos.so siconos.o
 
+clean:
+	rm siconos.so siconos.o

@@ -38,7 +38,50 @@ void cartouche()
   cout << endl;
 }
 
+//
+// On pourrait rajouter une fonction avec 1 tableau et 1 id
+//
+Model GLOB_MODEL;
+Strategy *GLOB_STRATEGIE;
 
+extern "C" void sicLoadModel(int ret, char ModelXmlFile[])
+{
+  printf("sicLoadModel::%s", ModelXmlFile);
+
+  GLOB_MODEL = Model(ModelXmlFile);
+
+  ret = 0;
+}
+
+extern "C" void sicInitStrategy()
+{
+  cout << "\n *** BouncingBall.xml loaded ***" << endl;// getchar();
+  *GLOB_STRATEGIE = GLOB_MODEL.getStrategy();
+
+  cout << "the strategy will be initialized" << endl;
+  GLOB_STRATEGIE->initialize();
+  cout << "\n **** the strategy is ready ****" << endl;
+
+}
+
+extern "C" void sicGetStartTime()
+{
+
+}
+
+extern "C" void  sicGetEndTime()
+{
+
+}
+extern "C" void  sicNextStep()
+{
+
+}
+
+extern "C" void sicComputeFreeState()
+{
+
+}
 
 extern "C" void  simul()
 {
