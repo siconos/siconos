@@ -123,6 +123,13 @@ public:
    */
   double* getArray();
 
+
+  /** \fn double norm()
+   *  \brief return the Euclidian norm of the vector
+   *  \return a double
+   */
+  double SimpleVector::norm();
+
   // internal generic operators
   SimpleVector &operator+=(const SiconosVector &) ;
   SimpleVector &operator-=(const SiconosVector &) ;

@@ -270,7 +270,7 @@ void StrategyXML::loadStrategy(Strategy* str)
        */
       for (i = 0; i < str->getOneStepIntegratorVectorSize(); i++)
       {
-        if (str->getOneStepIntegrator(i)->getOneStepIntegratorXML() == NULL)
+        if (str->getOneStepIntegrator(i)->getOneStepIntegratorXMLPtr() == NULL)
         {
           type = str->getOneStepIntegrator(i)->getType();
           //node = xmlNewChild( integratorDefinitionNode, NULL, (xmlChar*)STRATEGY_ONESTEPINTEGRATOR.c_str(), NULL );
@@ -281,7 +281,7 @@ void StrategyXML::loadStrategy(Strategy* str)
             osixml = new MoreauXML();
 
             // linkage between the OneStepIntegrator and his OneStepIntegratorXML
-            str->getOneStepIntegrator(i)->setOneStepIntegratorXML(osixml);
+            str->getOneStepIntegrator(i)->setOneStepIntegratorXMLPtr(osixml);
 
             // creation of the OneStepIntegratorXML
             static_cast<MoreauXML*>(osixml)->updateOneStepIntegratorXML(node, str->getOneStepIntegrator(i));
@@ -295,7 +295,7 @@ void StrategyXML::loadStrategy(Strategy* str)
             osixml = new LsodarXML();
 
             // linkage between the OneStepIntegrator and his OneStepIntegratorXML
-            str->getOneStepIntegrator(i)->setOneStepIntegratorXML(osixml);
+            str->getOneStepIntegrator(i)->setOneStepIntegratorXMLPtr(osixml);
 
             // creation of the OneStepIntegratorXML
             static_cast<LsodarXML*>(osixml)->updateOneStepIntegratorXML(node, str->getOneStepIntegrator(i));
@@ -309,7 +309,7 @@ void StrategyXML::loadStrategy(Strategy* str)
             osixml = new AdamsXML();
 
             // linkage between the OneStepIntegrator and his OneStepIntegratorXML
-            str->getOneStepIntegrator(i)->setOneStepIntegratorXML(osixml);
+            str->getOneStepIntegrator(i)->setOneStepIntegratorXMLPtr(osixml);
 
             // creation of the OneStepIntegratorXML
             static_cast<AdamsXML*>(osixml)->updateOneStepIntegratorXML(node, str->getOneStepIntegrator(i));

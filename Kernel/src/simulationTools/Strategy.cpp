@@ -15,12 +15,12 @@
 Strategy::Strategy()
 {
   IN("Strategy::Strategy()\n");
-  this->timeDiscretisation = NULL;
+  this->timeDiscretisation = 0;
   this->integratorVector.clear();
-  this->nsProblem = NULL;
+  this->nsProblem = 0;
 
-  this->strategyxml = NULL;
-  this->model = NULL;
+  this->strategyxml = 0;
+  this->model = 0;
   OUT("Strategy::Strategy()\n");
 }
 
@@ -38,9 +38,9 @@ Strategy::Strategy(Strategy* str)
 
 Strategy::Strategy(StrategyXML* strxml, Model *model)
 {
-  this->timeDiscretisation = NULL;
+  this->timeDiscretisation = 0;
   this->integratorVector.clear();
-  this->nsProblem = NULL;
+  this->nsProblem = 0;
 
   this->strategyxml = strxml;
   this->model = model;
@@ -48,7 +48,7 @@ Strategy::Strategy(StrategyXML* strxml, Model *model)
 
 Strategy::~Strategy()
 {
-  if (this->nsProblem != NULL) delete this->nsProblem;
+  if (this->nsProblem != 0) delete this->nsProblem;
   if (this->integratorVector.size() > 0)
   {
     for (int i = 0; i < this->integratorVector.size(); i++)
@@ -57,7 +57,7 @@ Strategy::~Strategy()
     }
     this->integratorVector.clear();
   }
-  if (this->timeDiscretisation != NULL)
+  if (this->timeDiscretisation != 0)
     delete this->timeDiscretisation;
 }
 
@@ -75,7 +75,6 @@ OneStepIntegrator* Strategy::getOneStepIntegrator(int nb) const
 void Strategy::computeFreeState(void)
 {
   IN("Strategy::computeFreeState\n");
-  //cout<<"this->integratorVector.size()" <<this->integratorVector.size()<<endl;
   for (int i = 0; i < this->integratorVector.size(); i++)
   {
     this->integratorVector[i]->computeFreeState();
@@ -92,7 +91,7 @@ void Strategy::nextStep(void)
   {
     this->integratorVector[i]->nextStep();
   }
-  if (this->nsProblem != NULL)
+  if (this->nsProblem != 0)
     this->nsProblem->nextStep();
 
 }
@@ -101,19 +100,19 @@ void Strategy::nextStep(void)
 void Strategy::formaliseOneStepNSProblem()
 {
   // formalise the OneStepNSProblem
-  if (this->nsProblem != NULL)this->nsProblem->formalize(this->model->getCurrentT());
+  if (this->nsProblem != 0)this->nsProblem->formalize(this->model->getCurrentT());
 }
 
 void Strategy::computeOneStepNSProblem(void)
 {
   // compute the OneStepNSProblem
-  if (this->nsProblem != NULL)this->nsProblem->compute();
+  if (this->nsProblem != 0)this->nsProblem->compute();
 }
 
 void Strategy::updateState()
 {
   // compute the OneStepNSProblem
-  if (this->nsProblem != NULL)this->nsProblem->updateState();
+  if (this->nsProblem != 0)this->nsProblem->updateState();
 
 
   for (int i = 0; i < this->integratorVector.size(); i++)
@@ -138,12 +137,8 @@ void Strategy::initialize()
 
 
   // initialization of the OneStepNSProblem
-  if (this->nsProblem != NULL)
+  if (this->nsProblem != 0)
     this->nsProblem->initialize();
-
-  cout << "timediscretisation after init" << endl;
-  this->timeDiscretisation->display();
-
 }
 
 
@@ -152,13 +147,13 @@ OneStepIntegrator* Strategy::getIntegratorOfDS(int numberDS)
 {
   for (int i = 0; i < this->integratorVector.size(); i++)
   {
-    if (this->integratorVector[i]->getDynamicalSystem()->getNumber() == numberDS)
+    if (this->integratorVector[i]->getDynamicalSystemPtr()->getNumber() == numberDS)
     {
       return this->integratorVector[i];
       break;
     }
   }
-  return NULL;
+  return 0;
 }
 
 
@@ -197,28 +192,28 @@ void Strategy::linkStrategyXML()
     vector<DynamicalSystem*> vds = this->model->getNonSmoothDynamicalSystem()->getDynamicalSystems();
 
     dsPtr = this->model->getNonSmoothDynamicalSystem()->getDynamicalSystemOnNumber(dsNb);
-    if (dsPtr == NULL)
-      RuntimeException::selfThrow("Strategy::linkStrategyXML - dsPtr NULL");
+    if (dsPtr == 0)
+      RuntimeException::selfThrow("Strategy::linkStrategyXML - dsPtr 0");
     // OneStepIntegrator - Moreau
     if (osiXMLVector[i]->getType() == MOREAU_TAG)
     {
       // creation of the Moreau OneStepIntegrator with this constructor and call of a method to fill
-      integrator = new Moreau();
-      static_cast<Moreau*>(integrator)->createOneStepIntegrator(osiXMLVector[i], this->timeDiscretisation, dsPtr);
+      integrator = new Moreau(osiXMLVector[i], this->timeDiscretisation, dsPtr);
+      //static_cast<Moreau*>(integrator)->createOneStepIntegrator( osiXMLVector[i], this->timeDiscretisation, dsPtr );
       this->integratorVector.push_back(integrator);
     }
     // OneStepIntegrator - Lsodar
     else if (osiXMLVector[i]->getType() == LSODAR_TAG)
     {
-      integrator = new Lsodar();
-      static_cast<Lsodar*>(integrator)->createOneStepIntegrator(osiXMLVector[i], this->timeDiscretisation, dsPtr);
+      integrator = new Lsodar(osiXMLVector[i]);
+      //static_cast<Lsodar*>(integrator)->createOneStepIntegrator( osiXMLVector[i], this->timeDiscretisation, dsPtr );
       this->integratorVector.push_back(integrator);
     }
     // OneStepIntegrator - Adams
     else if (osiXMLVector[i]->getType() == ADAMS_TAG)
     {
-      integrator = new Adams();
-      static_cast<Adams*>(integrator)->createOneStepIntegrator(osiXMLVector[i], this->timeDiscretisation, dsPtr);
+      integrator = new Adams(osiXMLVector[i]);
+      //static_cast<Adams*>(integrator)->createOneStepIntegrator( osiXMLVector[i], this->timeDiscretisation, dsPtr );
       this->integratorVector.push_back(integrator);
     }
     else RuntimeException::selfThrow("Strategy::linkStrategyXML - bad kind of Integrator");
@@ -293,7 +288,7 @@ void Strategy::linkStrategyXML()
 void Strategy::fillStrategyWithStrategyXML()
 {
   IN("Strategy::fillStrategyWithStrategyXML\n");
-  if (this->strategyxml != NULL)
+  if (this->strategyxml != 0)
   {}
   else RuntimeException::selfThrow("Strategy::fillStrategyWithStrategyXML - StrategyXML object not exists");
   OUT("Strategy::fillStrategyWithStrategyXML\n");
@@ -302,7 +297,7 @@ void Strategy::fillStrategyWithStrategyXML()
 void Strategy::saveStrategyToXML()
 {
   IN("Strategy::saveStrategyToXML\n");
-  if (this->strategyxml != NULL)
+  if (this->strategyxml != 0)
   {
     int size, i;
 
@@ -340,7 +335,7 @@ TimeDiscretisation* Strategy::createTimeDiscretisation(double h, int N, SimpleVe
     double hMin, double hMax, bool constant)
 {
   this->timeDiscretisation = new TimeDiscretisation();
-  this->timeDiscretisation->createTimeDiscretisation(NULL, h, N, tk, hMin, hMax, constant, this);
+  this->timeDiscretisation->createTimeDiscretisation(0, h, N, tk, hMin, hMax, constant, this);
   return this->timeDiscretisation;
 }
 
@@ -348,21 +343,21 @@ TimeDiscretisation* Strategy::createTimeDiscretisation(double h, int N, SimpleVe
 OneStepNSProblem* Strategy::createLCP()
 {
   this->nsProblem = new LCP();
-  static_cast<LCP*>(this->nsProblem)->createOneStepNSProblem(NULL, this);
+  static_cast<LCP*>(this->nsProblem)->createOneStepNSProblem(0, this);
   return this->nsProblem;
 }
 
 OneStepNSProblem* Strategy::createQP()
 {
   this->nsProblem = new QP();
-  static_cast<QP*>(this->nsProblem)->createOneStepNSProblem(NULL, this);
+  static_cast<QP*>(this->nsProblem)->createOneStepNSProblem(0, this);
   return this->nsProblem;
 }
 
 OneStepNSProblem* Strategy::createRelay()
 {
   this->nsProblem = new Relay();
-  static_cast<Relay*>(this->nsProblem)->createOneStepNSProblem(NULL, this);
+  static_cast<Relay*>(this->nsProblem)->createOneStepNSProblem(0, this);
   return this->nsProblem;
 }
 
@@ -371,22 +366,19 @@ OneStepIntegrator* Strategy::addAdams(TimeDiscretisation* td, DynamicalSystem* d
   if (!this->hasDynamicalSystemIntegrator(ds))
   {
     OneStepIntegrator* osi;
-    osi = new Adams();
-    static_cast<Adams*>(osi)->createOneStepIntegrator(NULL, td, ds);//, this);
+    osi = new Adams(td, ds);
     this->integratorVector.push_back(osi);
     return osi;
   }
   else RuntimeException::selfThrow("Strategy::addAdams : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
 }
 
-OneStepIntegrator* Strategy::addMoreau(TimeDiscretisation* td, DynamicalSystem* ds,
-                                       /*int r,*/ double theta)
+OneStepIntegrator* Strategy::addMoreau(TimeDiscretisation* td, DynamicalSystem* ds, double theta)
 {
   if (!this->hasDynamicalSystemIntegrator(ds))
   {
     OneStepIntegrator* osi;
-    osi = new Moreau();
-    static_cast<Moreau*>(osi)->createOneStepIntegrator(NULL, td, ds/*, r*/, theta);//, this);
+    osi = new Moreau(td, ds, theta);
     this->integratorVector.push_back(osi);
     return osi;
   }
@@ -398,8 +390,7 @@ OneStepIntegrator* Strategy::addLsodar(TimeDiscretisation* td, DynamicalSystem* 
   if (!this->hasDynamicalSystemIntegrator(ds))
   {
     OneStepIntegrator* osi;
-    osi = new Lsodar();
-    static_cast<Lsodar*>(osi)->createOneStepIntegrator(NULL, td, ds);//, this);
+    osi = new Lsodar(td, ds);
     this->integratorVector.push_back(osi);
     return osi;
   }
@@ -410,7 +401,76 @@ bool Strategy::hasDynamicalSystemIntegrator(DynamicalSystem* ds)
 {
   for (int i = 0; i < integratorVector.size(); i++)
   {
-    if (ds == integratorVector[i]->getDynamicalSystem()) return true;
+    if (ds == integratorVector[i]->getDynamicalSystemPtr()) return true;
   }
   return false;
 }
+
+void Strategy::newtonSolve(double criterion, int maxStep)
+{
+
+  bool isNewtonConverge = false;
+  long nbNewtonStep = 0; // number of Newton iterations
+  while ((!isNewtonConverge) && (nbNewtonStep <= maxStep))
+  {
+    //s->newtonNextStep();
+    nbNewtonStep++;
+    cout << "nbStep:" << nbNewtonStep << endl ;
+    cout << "Cest parti1"  << endl;
+    computeFreeState();
+    cout << "Cest parti2"  << endl;
+    formaliseOneStepNSProblem();
+    cout << "Cest parti3"  << endl;
+    computeOneStepNSProblem();
+    cout << "Cest parti4"  << endl;
+    newtonUpdateState();
+    cout << "Cest parti5"  << endl;
+    isNewtonConverge = newtonCheckConvergence(criterion);
+    cout << "Cest parti6"  << endl;
+  }
+  if (isNewtonConverge)
+    cout << "Newton process: convergence reached after " << nbNewtonStep << " Newtons steps" << endl;
+  else
+    cout << "Newton process stopped: reach max step number" << endl ;
+
+
+  // time step increment
+  this->model->setCurrentT(this->model->getCurrentT() + this->timeDiscretisation->getH());
+}
+
+void Strategy::newtonNextStep()
+{
+}
+
+
+void Strategy::newtonUpdateState()
+{
+  IN("Strategy::newtonUpdateState\n");
+  // update NonSmooth problem
+  if (this->nsProblem != 0)this->nsProblem->updateState();
+
+  // update OneStep Integrators
+  for (int i = 0; i < this->integratorVector.size(); i++)
+  {
+    this->integratorVector[i]->updateState();
+  }
+
+  OUT("Strategy::newtonUpdateState\n");
+
+}
+
+bool Strategy::newtonCheckConvergence(double criterion)
+{
+  bool checkConvergence = false;
+
+  // get the non smooth dynamical system
+  NonSmoothDynamicalSystem* nsds = this->model-> getNonSmoothDynamicalSystem();
+
+  // get the nsds indicator of convergence
+  double nsdsConverge = nsds -> nsdsConvergenceIndicator();
+  if (nsdsConverge < criterion) checkConvergence = true ;
+
+  return(checkConvergence);
+}
+
+

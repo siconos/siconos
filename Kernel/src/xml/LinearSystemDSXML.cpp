@@ -29,41 +29,41 @@ void LinearSystemDSXML::loadLinearSystemDSProperties()
 {
   xmlNode *node;
 
-  node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LSDS_A);
+  node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LDS_A);
   if (node != NULL)
   {
     this->ANode = node;
   }
   else
   {
-    XMLException::selfThrow("LinearSystemDSXML - loadLinearSystemDSProperties error : tag " + LSDS_A + " not found.");
+    XMLException::selfThrow("LinearSystemDSXML - loadLinearSystemDSProperties error : tag " + LDS_A + " not found.");
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LSDS_B)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LDS_B)) != NULL)
   {
     this->BNode = node;
   }
   else
   {
-    XMLException::selfThrow("LinearSystemDSXML - loadLinearSystemDSProperties error : tag " + LSDS_B + " not found.");
+    XMLException::selfThrow("LinearSystemDSXML - loadLinearSystemDSProperties error : tag " + LDS_B + " not found.");
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LSDS_U)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LDS_U)) != NULL)
   {
     this->uNode = node;
   }
   else
   {
-    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LSDS_U + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LDS_U + " not found.");
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LSDS_F)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(this->rootDSXMLNode, LDS_F)) != NULL)
   {
     this->fNode = node;
   }
   else
   {
-    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LSDS_F + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LDS_F + " not found.");
   }
 }
 

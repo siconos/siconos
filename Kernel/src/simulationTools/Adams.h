@@ -13,7 +13,7 @@
 
 /** \class Adams
  *  \brief Adams is a kind of multi-step integrator.
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 26, 2004
  *
@@ -23,37 +23,37 @@
 class Adams : public OneStepIntegrator
 {
 public:
-  /** \fn Adams()
-   *  \brief default constructor
-   */
-  Adams();
 
-  /** \fn Adams(OneStepIntegratorXML*, TimeDiscretisation*, DynamicalSystem* )
-   *  \brief constructor with XML object of the Adams
+  /** \fn Adams(OneStepIntegratorXML*)
+   *  \brief constructor from xml file
    *  \param OneStepIntegratorXML* : the XML object corresponding
+   */
+  Adams(OneStepIntegratorXML*);
+  /** \fn Adams(OneStepIntegratorXML*, TimeDiscretisation*, DynamicalSystem* )
+   *  \brief constructor from a minimum set of data
    *  \param TimeDiscretisation* : the TimeDiscretisation of the OneStepIntegrator
    *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
    */
-  Adams(OneStepIntegratorXML*, TimeDiscretisation*, DynamicalSystem*);
+  Adams(TimeDiscretisation*, DynamicalSystem*);
 
   ~Adams();
 
-  /** \fn double getR()
-  *   \brief Return the r of the OneStepIntegrator
-  *   \return int : the value of r
-  */
-  inline int getR(void) const
+  /** \fn double const getR() const
+   *   \brief Return the r of the OneStepIntegrator
+   *   \return int : the value of r
+   */
+  inline const int getR(void) const
   {
     return this->r;
   }
 
-  /** \fn void setR(int r)
-  *   \brief Return the r of OneStepIntegrator
-  *   \param double : the value to set r
-  */
-  inline void setR(int r)
+  /** \fn void setR(const int& r)
+   *   \brief Return the r of OneStepIntegrator
+   *   \param double : the value to set r
+   */
+  inline void setR(const int& newR)
   {
-    this->r = r;
+    r = newR;
   }
 
 
@@ -62,24 +62,10 @@ public:
    */
   void saveIntegratorToXML();
 
-  /** \fn void createOneStepIntegrator(OneStepIntegratorXML * osiXML, TimeDiscretisation*, DynamicalSystem*)
-   *  \brief allows to create the Integrator Adams with an xml file, or the needed data
-   *  \param OneStepNSProblemXML * : the XML object for this OneStepIntegrator
-   *  \param TimeDiscretisation * : The NSDS which contains this OneStepIntegrator
-   *  \exception RuntimeException
-   */
-  void createOneStepIntegrator(OneStepIntegratorXML * osiXML, TimeDiscretisation* td, DynamicalSystem* ds);//, Strategy * strategy = NULL);
-
   /** \fn void initialize()
-  *  \brief initialization of the Adams integrator
-  */
-  void initialize();
-
-  /** \fn void fillIntegratorWithIntegratorXML()
-   *  \brief uses the OneStepIntegratorXML of the Adams Integrator to fill the fields of this Integrator
-   *  \exception RuntimeException
+   *  \brief initialization of the Adams integrator
    */
-  void fillIntegratorWithIntegratorXML();
+  void initialize();
 
   /** \fn Adams* convert (OneStepIntegrator* osi)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
@@ -89,6 +75,11 @@ public:
   static Adams* convert(OneStepIntegrator* osi);
 
 private:
+  /** \fn Adams()
+   *  \brief default constructor
+   */
+  Adams();
+
   /**  */
   int r;
 

@@ -3,7 +3,6 @@
 
 #include "LinearSystemDSXML.h"
 #include "DynamicalSystem.h"
-
 #include "SiconosMatrix.h"
 #include "NewSiconosVector.h"
 #include <iostream>
@@ -11,12 +10,11 @@
 
 //using namespace std;
 
-
 class LinearSystemDSXML;
 
 /** \class LinearSystemDS
  *  \brief class of dynamic systems, inherited of DynamicalSystem
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 29, 2004
  *
@@ -45,21 +43,15 @@ class LinearSystemDS : public DynamicalSystem
 {
 public:
 
-  /** \fn LinearSystemDS()
-   *  \brief default constructor
-   */
-  LinearSystemDS();
-
   /** \fn LinearSystemDS(DSXML * nsdsXML)
-   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+   *  \brief create the DynamicalSystem with an xml file
    *  \param DSXML * : the XML object for this DynamicalSystem
    *  \exception RuntimeException
    */
   LinearSystemDS(DSXML * dsXML);
 
-  /** \fn LinearSystemDS(int number, int n,
-                      SiconosVector* x0, NSDS * nsds)
-   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+  /** \fn LinearSystemDS(int number, int n, SiconosVector* x0, NSDS * nsds)
+   *  \brief create the DynamicalSystem with a minimum set of data
    *  \param int : the number for this DynamicalSystem
    *  \param int : the dimension of this DynamicalSystem
    *  \param SiconosVector* : the initial state of this DynamicalSystem
@@ -69,147 +61,206 @@ public:
 
   ~LinearSystemDS();
 
-  // getter and setter
+  // --- getter and setter ---
 
-  /** \fn SiconosMatrix getA (void)
-   *  \brief allow to get the size of the SiconosMatrix A
-   *  \return the SiconosMatrix A of the LinearSystemDS
+  // --- A ---
+  /** \fn  const SiconosMatrix getA(void) const
+   *  \brief get the value of A
+   *  \return SiconosMatrix
    */
-  inline SiconosMatrix getA(void) const
+  inline const SiconosMatrix getA(void) const
   {
-    return this->A;
-  };
+    return *A;
+  }
 
-  /** \fn SiconosMatrix getB (void)
-   *  \brief allow to get the size of the SiconosMatrix B
-   *  \return the SiconosMatrix B of the LinearSystemDS
+  /** \fn SiconosMatrix* getAPtr(void) const
+   *  \brief get A
+   *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix getB(void) const
+  inline SiconosMatrix* getAPtr(void) const
   {
-    return this->B;
-  };
+    return A;
+  }
 
-  /** \fn SiconosMatrix* getAPtr (void)
-   *  \brief allow to get the size of the SiconosMatrix A
-   *  \return the SiconosMatrix* A of the LinearSystemDS
+  /** \fn void setA (const SiconosMatrix& newValue)
+   *  \brief set the value of A to newValue
+   *  \param SiconosMatrix newValue
    */
-  SiconosMatrix* getAPtr(void);
+  inline void setA(const SiconosMatrix& newValue)
+  {
+    *A = newValue;
+  }
 
-  /** \fn SiconosMatrix* getBPtr (void)
-   *  \brief allow to get the size of the SiconosMatrix B
-   *  \return the SiconosMatrix* B of the LinearSystemDS
+  /** \fn void setAPtr(SiconosMatrix* newPtr)
+   *  \brief set A to pointer newPtr
+   *  \param SiconosMatrix * newPtr
    */
-  SiconosMatrix* getBPtr(void);
+  inline void setAPtr(SiconosMatrix *newPtr)
+  {
+    delete A ;
+    A = 0;
+    A = newPtr;
+  }
 
-  /** \fn SimpleVector getU (void)
-   *  \brief get the vector u
-   *  \return SimpleVector : value of u
+  // --- B ---
+  /** \fn  const SiconosMatrix getB(void) const
+   *  \brief get the value of B
+   *  \return SiconosMatrix
    */
-  inline /*SiconosVector*/SimpleVector getU(void) const
+  inline const SiconosMatrix getB(void) const
+  {
+    return *B;
+  }
+
+  /** \fn SiconosMatrix* getBPtr(void) const
+   *  \brief get B
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getBPtr(void) const
+  {
+    return B;
+  }
+
+  /** \fn void setB (const SiconosMatrix& newValue)
+   *  \brief set the value of B to newValue
+   *  \param SiconosMatrix newValue
+   */
+  inline void setB(const SiconosMatrix& newValue)
+  {
+    *B = newValue;
+  }
+
+  /** \fn void setBPtr(SiconosMatrix* newPtr)
+   *  \brief set B to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  inline void setBPtr(SiconosMatrix *newPtr)
+  {
+    delete B;
+    B = 0 ;
+    B = newPtr;
+  }
+
+  // --- u ---
+
+  /** \fn  const SimpleVector getU(void) const
+  *  \brief get the value of u
+  *  \return SimpleVector
+  */
+  inline const SimpleVector getU(void) const
+  {
+    return *(this->u);
+  }
+
+  /** \fn SimpleVector* getUPtr(void) const
+   *  \brief get u
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getUPtr(void) const
   {
     return this->u;
-  };
+  }
 
-  /** \fn SimpleVector getF (void)
-   *  \brief get vector f
-   *  \return SimpleVector : value of f
+  /** \fn void setU (const SimpleVector& newValue)
+   *  \brief set the value of u to newValue
+   *  \param SimpleVector newValue
    */
-  inline /*SiconosVector*/SimpleVector getF(void) const
+  inline void setU(const SimpleVector& newValue)
   {
-    return this->f;
-  };
+    *(this->u) = newValue;
+  }
 
-  /** \fn SimpleVector* getUPtr (void)
-   *  \brief allow to get the SiconosVector u
-   *  \return the SiconosVector* u of the LinearSystemDS
+  /** \fn void setUPtr(SimpleVector* newPtr)
+   *  \brief set U to pointer newPtr
+   *  \param SimpleVector * newPtr
    */
-  SimpleVector* getUPtr(void);
-
-  /** \fn SiconosVector* getFPtr (void)
-   *  \brief get vector f
-   *  \return SimpleVector* : pointer on f of the LinearSystemDS
-   */
-  SimpleVector* getFPtr(void);
-
-
-  /** \fn void setA (SiconosMatrix)
-   *  \brief allow to set the SiconosMatrix A
-   *  \param a SiconosMatrix to set A
-   */
-  inline void setA(SiconosMatrix &A)
+  inline void setUPtr(SimpleVector *newPtr)
   {
-    this->A = A;
-  };
+    delete u;
+    u = 0 ;
+    u = newPtr;
+  }
 
-  /** \fn void setB (SiconosMatrix)
-   *  \brief allow to set the SiconosMatrix B
-   *  \param a SiconosMatrix to set B
+  // --- f ---
+
+  /** \fn  const SimpleVector getF(void) const
+   *  \brief get the value of f
+   *  \return SimpleVector
    */
-  inline void setB(SiconosMatrix &B)
+  inline const SimpleVector getF(void) const
   {
-    this->B = B;
-  };
+    return *f;
+  }
 
-  /** \fn void setU (SimpleVector&)
-   *  \brief set vector u
-   *  \param SimpleVector& : new value of u
+  /** \fn SimpleVector* getFPtr(void) const
+   *  \brief get f
+   *  \return pointer on a SimpleVector
    */
-  inline void setU(SimpleVector &u)
+  inline SimpleVector* getFPtr(void) const
   {
-    this->u = u;
-  };
+    return f;
+  }
 
-  /** \fn void setF (SimpleVector&)
-   *  \brief set vector f
-   *  \param SimpleVector& : new value of f
+  /** \fn void setF (const SimpleVector& newValue)
+   *  \brief set the value of f to newValue
+   *  \param SimpleVector newValue
    */
-  inline void setF(SimpleVector &f)
+  inline void setF(const SimpleVector& newValue)
   {
-    this->f = f;
-  };
+    *f = newValue;
+  }
 
-  ////////////////////////////
+  /** \fn void setFPtr(SimpleVector* newPtr)
+   *  \brief set F to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setFPtr(SimpleVector *newPtr)
+  {
+    delete f;
+    f = 0;
+    f = newPtr;
+  }
 
-  /** \fn void setComputeUFunction(string libPath, string functionName)
-   *  \brief allow to set a specified function to compute the vector U
+  // --- plugins related functions
+
+  /** \fn void setComputeUFunction(const string& libPath,const string& functionName)
+   *  \brief set a specified function to compute the vector U
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeUFunction(string pluginPath, string functionName);
+  void setComputeUFunction(const string& pluginPath, const string& functionName);
 
-  /** \fn void setComputeFFunction(string libPath, string functionName);
-   *  \brief allow to set a specified function to compute the vector F
+  /** \fn void setComputeFFunction(const string& libPath,const string& functionName);
+   *  \brief set a specified function to compute the vector F
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeFFunction(string pluginPath, string functionName);
+  void setComputeFFunction(const string& pluginPath, const string& functionName);
 
-
-  /** \fn void computeF(double time)
+  /** \fn void computeF(const double& time)
    *  \brief default function to compute vector F
    *  \exception RuntimeException
    */
-  void computeF(double time);
+  void computeF(const double& time);
 
-  /** \fn void computeU(double time)
+  /** \fn void computeU(const double& time)
    *  \brief default function to compute vector U
    *  \exception RuntimeException
    */
-  void computeU(double time);
-
+  void computeU(const double& time);
 
   ////////////////////
 
   /** \fn void saveDSToXML()
-   *  \brief copy the data of the DS to the XML tree
+   *  \brief copy the data of the DS into the XML tree
    *  \exception RuntimeException
    */
   void saveDSToXML();
 
   /** \fn void display()
-   *  \brief print the data to the screen
+   *  \brief data display on screen
    */
   void display() const;
 
@@ -220,25 +271,23 @@ public:
    */
   static LinearSystemDS* convert(DynamicalSystem* ds);
 
-protected:
-  /** \fn void fillDSWithDSXML()
-   *  \brief overload of the function for a LinearSystemDS
-   *  \exception RuntimeException
-   */
-  void fillDSWithDSXML();
-
-
 private:
+
+  /** \fn LinearSystemDS()
+   *  \brief default constructor
+   */
+  LinearSystemDS();
+
   /** matrix specific to the LinearSystemDS \f$ A \in R^{n \times n}  \f$*/
-  SiconosMatrix A;
+  SiconosMatrix *A;
   /** matrix specific to the LinearSystemDS \f$ B \in R^{n \times uSize}  \f$ */
-  SiconosMatrix B;
+  SiconosMatrix *B;
   /** size of vector u */
   int uSize;
   /** vector specific to the LinearSystemDS */
-  SimpleVector u;
+  SimpleVector *u;
   /** strength vector */
-  SimpleVector f;
+  SimpleVector *f;
 
   /* contains the name of the plugin for u */
   string uFunctionName;
@@ -249,9 +298,9 @@ private:
   SiconosSharedLibrary cShared;
 
   /** \fn void (*computeFPtr)(int sizeOfF, double* fPtr,double time)
-    *  \brief compute vector F
-    *  \param double : the time to make the computations
-    */
+   *  \brief compute vector F
+   *  \param double : the time to make the computations
+   */
   void (*computeFPtr)(int* sizeOfF, double* fPtr, double* time);
 
   /** \fn void (*computeUPtr)(int sizeOfU, double* uPtr,double time)
@@ -262,10 +311,6 @@ private:
 
 private :
 
-  /** \fn void init()
-   *  \brief initialise value of a LinearSystemDS
-   */
-  void init();
 };
 
 #endif // LINEARSYSTEMDS_H

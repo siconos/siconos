@@ -54,7 +54,7 @@ const string DS_XDOT = "xDot";
 const string DS_R = "R";
 const string DS_XMEMORY = "xMemory";
 const string DS_XDOTMEMORY = "xDotMemory";
-const string DS_RMEMORY = "rMemory";
+const string DS_RMEMORY = "RMemory";
 const string DS_STEPSINMEMORY = "StepsInMemory";
 const string DS_VECTORFIELD = "vectorField";
 const string DS_COMPUTEJACOBIANX = "computeJacobianX";
@@ -272,11 +272,11 @@ public:
     }
   }
 
-  /** \fn void setR(SiconosVector *r)
+  /** \fn void setR(SimpleVector *r)
   *   \brief allows to save the R of the DSXML
   *   \param SiconosVector R of the DSXML
   */
-  inline void setR(SiconosVector *r)
+  inline void setR(SimpleVector *r)
   {
     if (this->hasR() == false)
     {

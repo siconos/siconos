@@ -24,40 +24,22 @@ class Lsodar : public OneStepIntegrator
 {
 public:
 
-  /** \fn Lsodar()
-   *  \brief default constructor
-   */
-  Lsodar();
 
-  /** \fn Lsodar(OneStepIntegratorXML*, TimeDiscretisation*, DynamicalSystem* )
-   *  \brief constructor with XML object of the Lsodar
-   *  \param OneStepIntegratorXML* : the XML object corresponding
+  /** \fn Lsodar(OneStepIntegratorXML*)
+   *  \brief constructor from xml file
+   *  \param OneStepIntegratorXML* : the XML object
+   */
+  Lsodar(OneStepIntegratorXML*);
+
+  /** \fn Lsodar(TimeDiscretisation*, DynamicalSystem* )
+   *  \brief constructor from a minimum set of data
    *  \param TimeDiscretisation* : the TimeDiscretisation of the OneStepIntegrator
    *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
    Integrator
    */
-  Lsodar(OneStepIntegratorXML*, TimeDiscretisation*, DynamicalSystem*);
+  Lsodar(TimeDiscretisation*, DynamicalSystem*);
 
   ~Lsodar();
-
-
-  /** \fn double getR()
-  *   \brief Return the r of the OneStepIntegrator
-  *   \return int : the value of r
-  */
-  inline int getR(void) const
-  {
-    return this->r;
-  }
-
-  /** \fn void setR(int r)
-  *   \brief Return the r of OneStepIntegrator
-  *   \param double : the value to set r
-  */
-  inline void setR(const int r)
-  {
-    this->r = r;
-  }
 
   /** \fn void computeFreeState()
   *   \brief compute the free state of the dynamical system
@@ -74,24 +56,10 @@ public:
    */
   void saveIntegratorToXML();
 
-  /** \fn void createOneStepIntegrator(OneStepIntegratorXML * osiXML, TimeDiscretisation*, DynamicalSystem*)
-   *  \brief allows to create the Integrator Lsodar with an xml file, or the needed data
-   *  \param OneStepNSProblemXML * : the XML object for this OneStepIntegrator
-   *  \param TimeDiscretisation * : The NSDS which contains this OneStepIntegrator
-   *  \exception RuntimeException
-   */
-  void createOneStepIntegrator(OneStepIntegratorXML * osiXML, TimeDiscretisation* td, DynamicalSystem* ds);//, Strategy * strategy = NULL);
-
   /** \fn void initialize()
   *  \brief initialization of the Lsodar integrator
   */
   void initialize();
-
-  /** \fn void fillIntegratorWithIntegratorXML()
-   *  \brief uses the OneStepIntegratorXML of the Lsodar Integrator to fill the fields of this Integrator
-   *  \exception RuntimeException
-   */
-  void fillIntegratorWithIntegratorXML();
 
   /** \fn Lsodar* convert (OneStepIntegrator* osi)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
@@ -100,6 +68,11 @@ public:
    */
   static Lsodar* convert(OneStepIntegrator* osi);
 
+private:
+  /** \fn Lsodar()
+   *  \brief default constructor
+   */
+  Lsodar();
 };
 typedef void (* fctPtr)(int *sizeOfX, double *time, double *x, double *xdot);
 extern "C" void tryfunction(fctPtr);

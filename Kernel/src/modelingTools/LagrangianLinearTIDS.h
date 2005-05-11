@@ -17,7 +17,7 @@ class LagrangianLinearTIDSXML;
 
 /** \class LagrangianLinearTIDS
  *  \brief class of Lagrangian invariant time systems, inherited of LagrangianDS
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 29, 2004
  *
@@ -25,13 +25,13 @@ class LagrangianLinearTIDSXML;
  * The class LagrangianLinearTIDS  allows to define  and compute a generic ndof-dimensional
  * Lagrangian Linear Time Invariant Dynamical System of the form :
  * \f[
- * M \ddot q + C \dot q + K q =  F_{Ext}( q , t) + p,
+ * M \ddot q + C \dot q + K q =  F_{Ext}(t) + p,
  * \f]
  * where
  *    - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
  *    - \f$ \dot q  \in R^{ndof} \f$  the velocity, i. e. the time derivative of the  generalized coordinates.
  *    - \f$ \ddot q  \in R^{ndof} \f$  the acceleration, i. e. the second time derivative of the  generalized coordinates.
- *    - \f$ p  \in R^{ndof} \f$  the forces due to the Non Smooth Interaction. In particular case of Non Smooth evolution,  the variable p stored the impulse and not the force.
+ *    - \f$ p  \in R^{ndof} \f$  the forces due to the Non Smooth Interaction. In particular case of Non Smooth evolution,  the variable p contains the impulse and not the force.
  *    -  \f$ M \in  R^{ndof \times ndof} \f$ is Mass matrix stored in the SiconosMatrix mass.
  *    -  \f$ K \in  R^{ndof \times ndof} \f$ is the stiffness matrix stored in the SiconosMatrix K.
  *    -  \f$ C \in  R^{ndof \times ndof} \f$ is the viscosity matrix stored in the SiconosMatrix C.
@@ -39,8 +39,8 @@ class LagrangianLinearTIDSXML;
  *
  *
  *
-  *    -  \f$ F_{Int}(\dot q , q , t)\f$ the internal forces stored in the SiconosVector fExt.
- *    -  \f$ F_{Ext}( q , t) \f$ the external forces stored in the SiconosVector fInt.
+ *    -  \f$ F_{Int}(\dot q , q , t)\f$ the internal forces stored in the SimpleVector fExt.
+ *    -  \f$ F_{Ext}(t) \f$ the external forces stored in the SimpleVector fInt.
  *
  *
  * One word on the initial condition.
@@ -75,40 +75,34 @@ class LagrangianLinearTIDS : public LagrangianDS
 {
 public:
 
-  /** \fn LagrangianLinearTIDS()
-   *  \brief default constructor
-   */
-  LagrangianLinearTIDS();
-
-  /** \fn LagrangianLinearTIDS(DSXML * dsXML, int number, int ndof,
-        SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass,
-        string fExt,SiconosMatrix* K, SiconosMatrix* C)
-   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+  /** \fn LagrangianLinearTIDS(DSXML * dsXML)
+   *  \brief constructor from an xml file
    *  \param DSXML * : the XML object for this DynamicalSystem
    *  \exception RuntimeException
    */
   LagrangianLinearTIDS(DSXML * dsXML);
 
   /** \fn LagrangianLinearTIDS(int number, int ndof,
-        SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass,
-        string fExt,SiconosMatrix* K, SiconosMatrix* C)
-   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
-   *  \param int : the number for this DynamicalSystem
-   *  \param int : the dimension of this DynamicalSystem
-   *  \param SiconosVector* : the initial coordinates of this DynamicalSystem
-   *  \param SiconosVector* : the initial velocity of this DynamicalSystem
-   *  \param SiconosMatrix* : the mass of this DynamicalSystem
-   *  \param string : the indiaction needed to locate and use the fExt plugin
-   *  \param SiconosMatrix* : the matrix K of this DynamicalSystem
-   *  \param SiconosMatrix* : the matrix C of this DynamicalSystem
-   *  \exception RuntimeException
-   */
+      SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass,
+      string fExt,SiconosMatrix* K, SiconosMatrix* C)
+      *  \brief constructor from a minimum set of data
+      *  \param int : the number for this DynamicalSystem
+      *  \param int : dimension of this DynamicalSystem
+      *  \param SiconosVector* : initial coordinates of this DynamicalSystem
+      *  \param SiconosVector* : initial velocity of this DynamicalSystem
+      *  \param SiconosMatrix* : mass of this DynamicalSystem
+      *  \param string : fExt plugin name and location
+      *  \param SiconosMatrix* : matrix K of this DynamicalSystem
+      *  \param SiconosMatrix* : matrix C of this DynamicalSystem
+      *  \exception RuntimeException
+      */
   LagrangianLinearTIDS(int number, int ndof,
                        SiconosVector* q0, SiconosVector* velocity0,
                        SiconosMatrix* mass,
                        string fExt,
                        SiconosMatrix* K, SiconosMatrix* C);
 
+  // destructor
   ~LagrangianLinearTIDS();
 
   // getter/setter
@@ -116,57 +110,88 @@ public:
    *  \brief allow to get the SiconosMatrix K
    *  \return the SiconosMatrix K
    */
-  inline SiconosMatrix getK(void) const
+
+  // --- GETTERS AND SETTERS ---
+
+  // -- K --
+  /** \fn  const SiconosMatrix getK(void) const
+   *  \brief get the value of K
+   *  \return SiconosMatrix
+   */
+  inline const SiconosMatrix getK(void) const
   {
-    return this->K;
-  };
+    return *K;
+  }
 
-  /** \fn SiconosMatrix getC(void)
-   *  \brief allow to get the SiconosMatrix C
-   *  \return the SiconosMatrix C
+  /** \fn SiconosMatrix* getKPtr(void) const
+   *  \brief get K
+   *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix getC(void) const
+  inline SiconosMatrix* getKPtr(void) const
   {
-    return this->C;
-  };
+    return K;
+  }
 
-  /** \fn SiconosMatrix* getKPtr(void)
-   *  \brief allow to get the SiconosMatrix K
-   *  \return the SiconosMatrix* K
+  /** \fn void setK (const SiconosMatrix& newValue)
+   *  \brief set the value of K to newValue
+   *  \param SiconosMatrix newValue
    */
-  SiconosMatrix* getKPtr(void);
-
-  /** \fn SiconosMatrix* getCPtr(void)
-   *  \brief allow to get the SiconosMatrix C
-   *  \return the SiconosMatrix* C
-   */
-  SiconosMatrix* getCPtr(void);
-
-  /** \fn void setK(SiconosMatrix)
-   *  \brief allow to set the SiconosMatrix K
-   *  \param the SiconosMatrix to set K
-   */
-  inline void setK(const SiconosMatrix &K)
+  inline void setK(const SiconosMatrix& newValue)
   {
-    this->K = K;
-  };
+    *K = newValue;
+  }
 
-  /** \fn void setC(SiconosMatrix)
-   *  \brief allow to set the SiconosMatrix C
-   *  \param the SiconosMatrix to set C
+  /** \fn void setKPtr(SiconosMatrix* newPtr)
+   *  \brief set K to pointer newPtr
+   *  \param SiconosMatrix * newPtr
    */
-  inline void setC(const SiconosMatrix &C)
+  inline void setKPtr(SiconosMatrix *newPtr)
   {
-    this->C = C;
-  };
+    delete K;
+    K = 0;
+    K = newPtr;
+  }
 
-
-  //////////////////////////
-
-  /** \fn void init()
-   *  \brief initialise value of a Lagrangian TIDS
+  // -- C --
+  /** \fn  const SiconosMatrix getC(void) const
+   *  \brief get the value of C
+   *  \return SiconosMatrix
    */
-  virtual void init();
+  inline const SiconosMatrix getC(void) const
+  {
+    return *C;
+  }
+
+  /** \fn SiconosMatrix* getCPtr(void) const
+   *  \brief get C
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getCPtr(void) const
+  {
+    return C;
+  }
+
+  /** \fn void setC (const SiconosMatrix& newValue)
+   *  \brief set the value of C to newValue
+   *  \param SiconosMatrix newValue
+   */
+  inline void setC(const SiconosMatrix& newValue)
+  {
+    *C = newValue;
+  }
+
+  /** \fn void setCPtr(SiconosMatrix* newPtr)
+   *  \brief set C to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  inline void setCPtr(SiconosMatrix *newPtr)
+  {
+    delete C;
+    C = 0;
+    C = newPtr;
+  }
+
+  // --- Miscellaneous ---
 
   /** \fn void saveDSToXML()
    *  \brief copy the data of the DS to the XML tree
@@ -175,31 +200,24 @@ public:
   void saveDSToXML();
 
   /** \fn void display()
-   *  \brief print the data to the screen
+   *  \brief print the data onto the screen
    */
   void display() const;
 
   static LagrangianLinearTIDS* convert(DynamicalSystem* ds);
 
-protected :
-  /** \fn void fillDSWithDSXML()
-   *  \brief overload of the function for a LagrangianLinearTIDS
-   *  \exception RuntimeException
-   */
-  void fillDSWithDSXML();
-
-
 private:
-  /** specific matrix for a LagrangianLinearTIDS */
-  SiconosMatrix K;
 
-  /** specific matrix for a LagrangianLinearTIDS */
-  SiconosMatrix C;
-
-  /*
-   * fake of plugin ^^
+  /** \fn LagrangianLinearTIDS()
+   *  \brief default constructor
    */
-  friend void LTIDSComputeFExt(int* sizeOfq, double* time,  double* fExt);
+  LagrangianLinearTIDS();
+
+  /** specific matrix for a LagrangianLinearTIDS */
+  SiconosMatrix *K;
+
+  /** specific matrix for a LagrangianLinearTIDS */
+  SiconosMatrix *C;
 };
 
 #endif // LAGRANGIANTIDS_H

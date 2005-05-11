@@ -291,6 +291,11 @@ public:
   Interaction* addInteraction(int number = -1, int nInter = -1, vector<int>* status = NULL,
                               vector<DynamicalSystem*>* dsConcerned = NULL);
 
+  /** \fn double nsdsConvergenceIndicator() const
+   *  \brief calculate an indicator that gives convergence information for the DSs
+   *  \return a double
+   */
+  double nsdsConvergenceIndicator() const ;
 
 protected:
   /** \fn void linkNSDSXML()

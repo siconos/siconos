@@ -82,7 +82,6 @@ SimpleVector::~SimpleVector()
 void SimpleVector::display() const
 {
   IN("SimpleVector::display() \n");
-
   cout << "| size : " << this->size() << endl;
   cout << "| isComposite : " << this->isComposite() << endl;
   if (this->size() <= M_MAXSIZEFORDISPLAY)
@@ -92,7 +91,6 @@ void SimpleVector::display() const
     cout << endl;
   }
   else cout << "Display SiconosVector : vector too large" << endl;
-
   OUT("SimpleVector::display() \n");
 }
 
@@ -294,9 +292,16 @@ double* SimpleVector::getArray()
   return this->lavd.addr();
 }
 
+
+
+double SimpleVector::norm()
+{
+  return  Blas_Norm2(this->lavd);
+}
+
 /*******************************************************************************
-*         GENERIC INTERNAL OPERATORS                                 *
-*******************************************************************************/
+ *          GENERIC INTERNAL OPERATORS                                 *
+ *******************************************************************************/
 
 SimpleVector &SimpleVector::operator+=(const SiconosVector &v)
 {
@@ -400,8 +405,8 @@ bool SimpleVector::operator != (const SiconosVector& v) const
 
 
 /*******************************************************************************
-*         SPECIFIC INTERNAL OPERATORS                                *
-*******************************************************************************/
+ *          SPECIFIC INTERNAL OPERATORS                                *
+ *******************************************************************************/
 SimpleVector& SimpleVector::operator = (const SimpleVector& v)
 {
   /*
@@ -489,7 +494,7 @@ SimpleVector &SimpleVector::operator/=(const double d)
 }
 
 /*******************************************************************************
-*         GENERIC EXTERNAL OPERATORS                                 *
+ *          GENERIC EXTERNAL OPERATORS                                 *
 /******************************************************************************/
 
 SimpleVector operator + (const SiconosVector& v1, const SiconosVector& v2)
@@ -536,7 +541,7 @@ SimpleVector operator - (const SiconosVector& v1, const SiconosVector& v2)
 }
 
 /*******************************************************************************
-*         GENERIC INTERNAL FUNCTIONS FOR MIXED OPERATIONS            *
+ *          GENERIC INTERNAL FUNCTIONS FOR MIXED OPERATIONS            *
 /******************************************************************************/
 
 SimpleVector SimpleVector::addition(const SiconosVector& v) const
@@ -582,8 +587,8 @@ SimpleVector SimpleVector::subtraction(const SiconosVector& v) const
 
 
 /*******************************************************************************
-*         SPECIFIC EXTERNAL OPERATORS                                *
-*******************************************************************************/
+ *          SPECIFIC EXTERNAL OPERATORS                                *
+ *******************************************************************************/
 SimpleVector operator * (const SimpleVector& v, const double d)
 {
   IN(" SimpleVector operator * (const SimpleVector& v, const double d)  \n");
@@ -687,6 +692,5 @@ SimpleVector matTransVecMult(SiconosMatrix &m, SimpleVector &v)
   Blas_Mat_Trans_Vec_Mult(m.getLaGenMatDouble(), v.lavd, sv.lavd, 1.0, 0.0);
   return sv;
 }
-
 
 

@@ -8,7 +8,7 @@ Extern  "C"
 }
 
 
-/****************** constructeur ******************/
+/****************** constructor ******************/
 SiconosMatrix::SiconosMatrix()
 {
   this->mat.resize(0, 0);
@@ -18,7 +18,7 @@ SiconosMatrix::SiconosMatrix()
 }
 
 
-/****************** constructeur ******************/
+/****************** constructor ******************/
 SiconosMatrix::SiconosMatrix(int row, int col)
 {
   this->mat.resize(row, col);
@@ -27,7 +27,7 @@ SiconosMatrix::SiconosMatrix(int row, int col)
   this ->isPLUInversed = false;
 }
 
-/****************** constructeur ******************/
+/****************** constructor ******************/
 SiconosMatrix::SiconosMatrix(const LaGenMatDouble m)
 {
   this->mat.resize(m.size(0), m.size(1));
@@ -38,7 +38,7 @@ SiconosMatrix::SiconosMatrix(const LaGenMatDouble m)
 
 }
 
-/****************** constructeur ******************/
+/****************** constructor ******************/
 SiconosMatrix::SiconosMatrix(const LaVectorDouble v, int row, int col)
 {
   if (v.size() != row * col)
@@ -60,7 +60,7 @@ SiconosMatrix::SiconosMatrix(const LaVectorDouble v, int row, int col)
 
 }
 
-/****************** constructeur ******************/
+/****************** constructor ******************/
 SiconosMatrix::SiconosMatrix(string file, bool ascii)
 {
   if (ascii) this->read(file, "ascii");
@@ -500,10 +500,10 @@ void SiconosMatrix::zero()
 
   for (int i = 0; i < this->size(0); i++)
   {
-    for (int j = 0; j < this->size(1); j++)
-    {
-      (*this)(i, j) = 0.0;
-    }
+  for (int j = 0; j < this->size(1); j++)
+  {
+  (*this)(i, j) = 0.0;
+  }
   }
   *
   **/

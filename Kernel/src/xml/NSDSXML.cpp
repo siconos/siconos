@@ -168,7 +168,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
        */
       for (i = 0; i < nsds->getDSVectorSize(); i++)
       {
-        if (nsds->getDynamicalSystem(i)->getDynamicalSystemXML() == NULL)
+        if (nsds->getDynamicalSystem(i)->getDynamicalSystemXMLPtr() == NULL)
         {
           type = nsds->getDynamicalSystem(i)->getType();
           number = nsds->getDynamicalSystem(i)->getNumber();
@@ -188,7 +188,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               dsxml = new LagrangianDSXML();
 
               // linkage between the DynamicalSystem and his DSXML
-              nsds->getDynamicalSystem(i)->setDynamicalSystemXML(dsxml);
+              nsds->getDynamicalSystem(i)->setDynamicalSystemXMLPtr(dsxml);
 
               // creation of the DynamicalSystemXML
               static_cast<LagrangianDSXML*>(dsxml)->updateDynamicalSystemXML(node, nsds->getDynamicalSystem(i));
@@ -202,14 +202,14 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               dsxml = new LagrangianLinearTIDSXML();
 
               // linkage between the DynamicalSystem and his DSXML
-              nsds->getDynamicalSystem(i)->setDynamicalSystemXML(dsxml);
+              nsds->getDynamicalSystem(i)->setDynamicalSystemXMLPtr(dsxml);
 
               // creation of the DynamicalSystemXML
               static_cast<LagrangianLinearTIDSXML*>(dsxml)->updateDynamicalSystemXML(node, nsds->getDynamicalSystem(i));
 
               this->DSXMLMap[number] = dsxml;
             }
-            else if (type == LSDS)
+            else if (type == LDS)
             {
               node = xmlNewChild(dsDefinitionNode, NULL, (xmlChar*)LINEAR_SYSTEMDS_TAG.c_str(), NULL);
               //xmlNewProp( node, (xmlChar*)NSDS_TYPE.c_str(), (xmlChar*)NSDS_LINEARSYSTEM.c_str() );
@@ -217,7 +217,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               dsxml = new LinearSystemDSXML();
 
               // linkage between the DynamicalSystem and his DSXML
-              nsds->getDynamicalSystem(i)->setDynamicalSystemXML(dsxml);
+              nsds->getDynamicalSystem(i)->setDynamicalSystemXMLPtr(dsxml);
 
               // creation of the DynamicalSystemXML
               static_cast<LinearSystemDSXML*>(dsxml)->updateDynamicalSystemXML(node, nsds->getDynamicalSystem(i));
@@ -225,14 +225,14 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               this->DSXMLMap[number] = dsxml;
 
             }
-            else if (type == NLSDS)
+            else if (type == NLDS)
             {
               node = xmlNewChild(dsDefinitionNode, NULL, (xmlChar*)NON_LINEAR_SYSTEMDS_TAG.c_str(), NULL);
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               dsxml = new DSXML();
 
               // linkage between the DynamicalSystem and his DSXML
-              nsds->getDynamicalSystem(i)->setDynamicalSystemXML(dsxml);
+              nsds->getDynamicalSystem(i)->setDynamicalSystemXMLPtr(dsxml);
 
               // creation of the DynamicalSystemXML
               dsxml->updateDynamicalSystemXML(node, nsds->getDynamicalSystem(i));

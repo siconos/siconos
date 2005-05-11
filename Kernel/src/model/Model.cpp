@@ -153,14 +153,11 @@ void Model::savePlatformToXML()
   this->modelxml->setT0(this->t0);
   this->modelxml->setT(this->T);
   this->modelxml->setTCurrent(this->t);
-
   this->modelxml->setTitle(this->title);
   this->modelxml->setAuthor(this->author);
   this->modelxml->setDescription(this->description);
   this->modelxml->setDate(this->date);
   this->modelxml->setXMLSchema(this->xmlSchema);
-
-
   /*
    * save of the NonSmoothDynamicalSystem
    */

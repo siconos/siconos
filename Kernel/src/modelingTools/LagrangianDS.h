@@ -18,25 +18,25 @@ class LagrangianDSXML;
 
 /** \class LagrangianDS
  *  \brief main class of Lagrangian dynamic systems
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 29, 2004
  *
  *
- * The class LagrangianDS  allows to define  and compute a generic ndof-dimensional
+ * The class LagrangianDS  defines  and computes a generic ndof-dimensional
  * Lagrangian Non Linear Dynamical System of the form :
  * \f[
- * M(q) \ddot q + Q(\dot q, q) = F_{Int}(\dot q , q , t)+F_{Ext}( q , t) + p,
+ * M(q) \ddot q + Q(\dot q, q) = F_{Int}(\dot q , q , t)+F_{Ext}(t) + p,
  * \f]
  * where
  *    - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
  *    - \f$ \dot q  \in R^{ndof} \f$  the velocity, i. e. the time derivative of the  generalized coordinates.
  *    - \f$ \ddot q  \in R^{ndof} \f$  the acceleration, i. e. the second time derivative of the  generalized coordinates.
- *    - \f$ p  \in R^{ndof} \f$  the forces due to the Non Smooth Interaction. In particular case of Non Smooth evolution,  the variable p stored the impulse and not the force.
- *    -  \f$ M(q)  \in  R^{ndof \times ndof}  \f$ is the inertia term stored in the SiconosMatrix mass.
- *    -  \f$ Q(\dot q, q)  \in R^{ndof}\f$ the non linear inertia term stored in the SiconosVector QNLInertia.
- *    -  \f$ F_{Int}(\dot q , q , t)  \in R^{ndof} \f$ the internal forces stored in the SiconosVector fInt.
- *    -  \f$ F_{Ext}( q , t)  \in R^{ndof}  \f$ the external forces stored in the SiconosVector fExt.
+ *    - \f$ p  \in R^{ndof} \f$  the forces due to the Non Smooth Interaction. In the particular case of Non Smooth evolution, the variable p contains the impulse and not the force.
+ *    -  \f$ M(q)  \in  R^{ndof \times ndof}  \f$ is the inertia term saved in the SiconosMatrix mass.
+ *    -  \f$ Q(\dot q, q)  \in R^{ndof}\f$ is the non linear inertia term saved in the SiconosVector QNLInertia.
+ *    -  \f$ F_{Int}(\dot q , q , t)  \in R^{ndof} \f$ are the internal forces saved in the SiconosVector fInt.
+ *    -  \f$ F_{Ext}(t)  \in R^{ndof}  \f$ are the external forces saved in the SiconosVector fExt.
  *
  *
  * One word on the initial condition.
@@ -77,39 +77,34 @@ class LagrangianDS : public DynamicalSystem
 {
 public:
 
-  /** \fn LagrangianDS()
-   *  \brief Default constructor
-   */
-  LagrangianDS();
-
   /** \fn LagrangianDS(DSXML * nsdsXML)
-   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+   *  \brief constructor from an xml file
    *  \param DSXML * : the XML object for this DynamicalSystem
    *  \exception RuntimeException
    */
   LagrangianDS(DSXML * dsXML);
 
   /** \fn LagrangianDS(int number, int ndof,
-          SiconosVector* q0, SiconosVector* velocity0,
-          string fInt, string fExt,
-          string jacobianQFInt, string jacobianVelocityFInt,
-          string jacobianQQNLInertia, string jacobianVelocityQNLInertia,
-          NSDS * nsds)
-   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
-   *  \param int : the number for this DynamicalSystem
-   *  \param int : the dimension of this DynamicalSystem
-   *  \param SiconosVector* : the initial coordinates of this DynamicalSystem
-   *  \param SiconosVector* : the initial velocity of this DynamicalSystem
-   *  \param NSDS * : The NSDS which contains this DynamicalSystem
-   *  \param string : the indiaction needed to locate and use the fInt plugin
-   *  \param string : the indiaction needed to locate and use the fExt plugin
-   *  \param string : the indiaction needed to locate and use the jacobianQFInt plugin
-   *  \param string : the indiaction needed to locate and use the jacobianVelocityFInt plugin
-   *  \param string : the indiaction needed to locate and use the jacobianQQNLInertia plugin
-   *  \param string : the indiaction needed to locate and use the jacobianVelocityQNLInertia plugin
-   *  \param NSDS * : The NSDS which contains this DynamicalSystem
-   *  \exception RuntimeException
-   */
+      SiconosVector* q0, SiconosVector* velocity0,
+      string fInt, string fExt,
+      string jacobianQFInt, string jacobianVelocityFInt,
+      string jacobianQQNLInertia, string jacobianVelocityQNLInertia,
+      NSDS * nsds)
+      *  \brief constructor from a minimum set of data
+      *  \param int : the number for this DynamicalSystem
+      *  \param int : the dimension of this DynamicalSystem
+      *  \param SiconosVector* : initial coordinates of this DynamicalSystem
+      *  \param SiconosVector* : initial velocity of this DynamicalSystem
+      *  \param NSDS * : The NSDS which contains this DynamicalSystem
+      *  \param string : fInt plugin name and location
+      *  \param string : fExt plugin name and location
+      *  \param string : jacobianQFInt plugin name and location
+      *  \param string : jacobianVelocityFInt plugin name and location
+      *  \param string : jacobianQQNLInertia plugin name and location
+      *  \param string : jacobianVelocityQNLInertia plugin name and location
+      *  \param NSDS * : The NSDS which contains this DynamicalSystem
+      *  \exception RuntimeException
+      */
   LagrangianDS(int number, int ndof,
                SiconosVector* q0, SiconosVector* velocity0,
                string mass = "BasicPlugin:computeMass",
@@ -122,472 +117,687 @@ public:
 
   virtual ~LagrangianDS();
 
-  /** \fn void initMemory(int steps) ;
-   *  \brief initialize the SiconosMemory objects with a positive size.
-   *  \param the size of the SiconosMemory. must be >= 0
-   */
-  void initMemory(int steps);
+  // --- GETTERS AND SETTERS ---
 
-  /** \fn virtual void swapInMemory(void);
-   * \brief push the current values of x, xDot and r in the stored previous values
-   *  xMemory, xDotMemory, rMemory,
-   * \todo Modify the function swapIn Memory with the new Object Memory
-   */
-  void swapInMemory(void);
-
-  // getter/setter
-  /** \fn int getNdof(void)
+  /** \fn const int getNdof(void) const
    *  \brief allows to get the value of ndof
    *  \return the value of ndof
    */
-  inline int getNdof(void) const
+  inline const int getNdof(void) const
   {
     return this->ndof;
   };
 
-  /** \fn SiconosMatrix getMass(void)
-   *  \brief allows to get the SiconosMatrix mass
-   *  \return the SiconosMatrix mass
-   */
-  inline SiconosMatrix getMass(void) const
-  {
-    return this->mass;
-  };
-
-  /** \fn SimpleVector getQ(void)
-   *  \brief allows to get the SiconosVector q
-   *  \return SimpleVector : value of q
-   */
-  inline SimpleVector const getQ(void)
-  {
-    return this->q;
-  };
-
-  /** \fn SimpleVector getQ0(void)
-   *  \brief allows to get the SiconosVector q0
-   *  \return SimpleVector : value of q0
-   */
-  inline SimpleVector const getQ0(void)
-  {
-    return this->q0;
-  };
-
-  /** \fn SiconosMatrix* getMassPtr(void)
-   *  \brief allows to get the SiconosMatrix* mass
-   *  \return the SiconosMatrix* mass
-   */
-  SiconosMatrix* getMassPtr(void);
-
-  /** \fn SimpleVector* getQPtr(void)
-   *  \brief allows to get the SiconosVector* q
-   *  \return SimpleVector* : pointer on q
-   */
-  SimpleVector* getQPtr(void);
-
-  /** \fn SimpleVector* getQ0Ptr(void)
-   *  \brief allows to get the SiconosVector* q0
-   *  \return SimpleVector* : pointer on q0
-   */
-  SimpleVector* getQ0Ptr(void);
-
-  /** \fn SiconosMemory* getQMemories(void)
-   *  \brief allows to get all the value of old q
-   *  \return the memory object containing previous values of q
-   */
-  SiconosMemory* getQMemories(void);
-
-  /** \fn SimpleVector getVelocity(void)
-   *  \brief allows to get the SiconosVector velocity
-   *  \return SimpleVector : value of velocity
-   */
-  inline SimpleVector const getVelocity(void)
-  {
-    return this->velocity;
-  };
-
-  /** \fn SimpleVector getVelocity0(void)
-   *  \brief allows to get the initial velocity
-   *  \return SimpleVector : initial value of velocity
-   */
-  inline SimpleVector const getVelocity0(void)
-  {
-    return this->velocity0;
-  };
-
-  /** \fn SimpleVector* getVelocityPtr(void)
-   *  \brief allows to get the SiconosVector* velocity
-   *  \return SimpleVector* : pointer on velocity
-   */
-  SimpleVector* getVelocityPtr(void);
-
-  /** \fn SimpleVector* getVelocity0Ptr(void)
-   *  \brief allows to get the SiconosVector velocity0 Pointer
-   *  \return SimpleVector* : pointer on initial velocity
-   */
-  SimpleVector* getVelocity0Ptr(void);
-
-  /** \fn SiconosMemory* getVelocityMemories(void)
-   *  \brief allows to get all the value of old velocity Pointer
-   *  \return the memory object containing previous values of velocity
-   */
-  SiconosMemory* getVelocityMemories(void);
-
-  /** \fn SimpleVector* getVelocityFreePtr(void)
-   *  \brief get the SimpleVector* velocityFree
-   *  \return SimpleVector* : pointer on velocityFree
-   */
-  inline SimpleVector* getVelocityFreePtr(void)
-  {
-    return (&(this->velocityFree));
-  }
-
-  /** \fn SimpleVector getVelocityFree(void)
-   *  \brief get the free velocity
-   *  \return SimpleVector : value of velocityFree
-   */
-  inline SimpleVector getVelocityFree(void) const
-  {
-    return this->velocityFree;
-  }
-
-  /** \fn void setVelocityFree(const SimpleVector& velocityFree)
-   *  \brief set the free velocity
-   *  \param SimpleVector& : new value of velocityFree
-   */
-  inline void setVelocityFree(const SimpleVector& velocityFree)
-  {
-    this->velocityFree = velocityFree;
-  }
-
-  /** \fn SimpleVector* getQFreePtr(void)
-   *  \brief get the free state
-   *  \return SimpleVector* : pointer on qFree
-   */
-  inline SimpleVector* getQFreePtr(void)
-  {
-    return (&(this->qFree));
-  }
-
-  /** \fn SimpleVector getQFree(void)
-   *  \brief get the free state qFree
-   *  \return SimpleVector : value of qFree
-   */
-  inline SimpleVector getQFree(void)
-  {
-    return this->qFree;
-  }
-
-  /** \fn void setQFree(const SimpleVector& qFree)
-   *  \brief set the free state qFree
-   *  \param SimpleVector& : new value of qFree
-   */
-  inline void setQFree(const SimpleVector &qFree)
-  {
-    this->qFree = qFree;
-  }
-
-  /** \fn SimpleVector* getPPtr(void)
-   *  \brief get the vector p
-   *  \return SimpleVector* : pointer on p
-   */
-  inline SimpleVector* getPPtr(void)
-  {
-    return (&(this->p));
-  }
-
-  /** \fn SimpleVector getP(void)
-   *  \brief get the vector p
-   *  \return SimpleVector : value of p
-   */
-  inline SimpleVector getP(void)
-  {
-    return this->p;
-  }
-
-  /** \fn void setP(const SimpleVector& p)
-   *  \brief set the vector p
-   *  \param SimpleVector&  : new value of p
-   */
-  inline void setP(const SimpleVector& p)
-  {
-    this->p = p;
-  }
-
-  /** \fn SimpleVector getFInt(void)
-   *  \brief get vector of internal forces
-   *  \return SimpleVector : value of fInt
-   */
-  inline SimpleVector getFInt(void)
-  {
-    return this->fInt;
-  };
-
-  /** \fn SimpleVector* getFIntPtr(void)
-   *  \brief get vector of internal forces
-   *  \return SimpleVector* : pointer on fInt
-   */
-  SimpleVector* getFIntPtr(void);
-
-  /** \fn SimpleVector getFExt(void)
-   *  \brief get vector of external forces
-   *  \return SimpleVector : value of fExt
-   */
-  inline SimpleVector getFExt(void) const
-  {
-    return this->fExt;
-  };
-
-  /** \fn SimpleVector* getFExtPtr(void)
-   *  \brief get vector of external forces
-   *  \return SimpleVector* : pointer on fExt
-   */
-  SimpleVector* getFExtPtr(void);
-
-  /** \fn SimpleVector getQNLInertia(void)
-   *  \brief get the inertia
-   *  \return SimpleVector : value of QNLInertia
-   */
-  inline SimpleVector getQNLInertia(void) const
-  {
-    return this->QNLInertia;
-  };
-
-  /** \fn SimpleVector* getQNLInertiaPtr(void)
-   *  \brief get the inertia
-   *  \return SimpleVector* : pointer on QNLInertia
-   */
-  SimpleVector* getQNLInertiaPtr(void);
-
-  /** \fn SiconosMatrix getJacobianQFInt(void)
-   *  \brief allows to get the SiconosMatrix jacobianQFIntMat
-   *  \return the SiconosMatrix jacobianQFIntMat
-   */
-  inline SiconosMatrix getJacobianQFInt(void) const
-  {
-    return this->jacobianQFInt;
-  };
-
-  /** \fn SiconosMatrix getJacobianVelocityFInt(void)
-   *  \brief allows to get  the SiconosMatrix jacobianVelocityFIntMat
-   *  \return the SiconosMatrix jacobianVelocityFIntMat
-   */
-  SiconosMatrix getJacobianVelocityFInt(void) const
-  {
-    return this->jacobianQFInt;
-  };
-
-  /** \fn SiconosMatrix getJacobianQQNLInertia(void)
-   *  \brief allows to get the SiconosMatrix JacobianQQNLInertiaMat
-   *  \return the SiconosMatrix JacobianQQNLInertiaMat
-   */
-  SiconosMatrix getJacobianQQNLInertia(void) const
-  {
-    return this->jacobianQQNLInertia;
-  };
-
-  /** \fn SiconosMatrix getJacobianVelocityQNLInertia(void)
-   *  \brief allows to get the SiconosMatrix jacobianVelocityQNLInertiaMat
-   *  \return the SiconosMatrix jacobianVelocityQNLInertiaMat
-   */
-  SiconosMatrix getJacobianVelocityQNLInertia(void) const
-  {
-    return this->jacobianVelocityQNLInertia;
-  };
-
-  /** \fn SiconosMatrix* getJacobianQFIntPtr(void)
-   *  \brief allows to get the SiconosMatrix* jacobianQFIntMat
-   *  \return the SiconosMatrix* jacobianQFIntMat
-   */
-  SiconosMatrix* getJacobianQFIntPtr(void);
-
-  /** \fn SiconosMatrix* getJacobianVelocityFIntPtr(void)
-   *  \brief allows to get  the SiconosMatrix* jacobianVelocityFIntMat
-   *  \return the SiconosMatrix* jacobianVelocityFIntMat
-   */
-  SiconosMatrix* getJacobianVelocityFIntPtr(void);
-
-  /** \fn SiconosMatrix* getJacobianQQNLInertiaPtr(void)
-   *  \brief allows to get the SiconosMatrix* JacobianQQNLInertiaMat
-   *  \return the SiconosMatrix* JacobianQQNLInertiaMat
-   */
-  SiconosMatrix* getJacobianQQNLInertiaPtr(void);
-
-  /** \fn SiconosMatrix* getJacobianVelocityQNLInertiaPtr(void)
-   *  \brief allows to get the SiconosMatrix* jacobianVelocityQNLInertiaMat
-   *  \return the SiconosMatrix* jacobianVelocityQNLInertiaMat
-   */
-  SiconosMatrix* getJacobianVelocityQNLInertiaPtr(void);
-
-  /** \fn void setNdof(int)
+  /** \fn void setNdof(const int&)
    *  \brief allows to set ndof
    *  \param int ndof : the value to set ndof
    */
-  inline void setNdof(const int ndof)
+  inline void setNdof(const int& newNdof)
   {
-    this->ndof = ndof;
+    ndof = newNdof;
   };
 
-  /** \fn void setMass(SiconosMatrix)
-   *  \brief allows to set Mass
-   *  \param SiconosMatrix mass : the SiconosMatrix to set Mass
+  // -- q --
+
+  /** \fn  const SimpleVector getQ(void) const
+   *  \brief get the value of q
+   *  \return SimpleVector
    */
-  inline void setMass(const SiconosMatrix &mass)
+  inline const SimpleVector getQ(void) const
   {
-    this->mass = mass;
-  };
+    return *q;
+  }
 
-  /** \fn void setQ(SimpleVector&)
-   *  \brief set the state q
-   *  \param SimpleVector& : new value of q
+  /** \fn SimpleVector* getQPtr(void) const
+   *  \brief get q
+   *  \return pointer on a SimpleVector
    */
-  inline void setQ(const SimpleVector& q)
+  inline SimpleVector* getQPtr(void) const
   {
-    this->q = q;
-  };
+    return q;
+  }
 
-  /** \fn void setQ0(SimpleVector&)
-   *  \brief set the initial state q0
-   *  \param SimpleVector& : value of initial state q0
+  /** \fn void setQ (const SimpleVector& newValue)
+   *  \brief set the value of q to newValue
+   *  \param SimpleVector newValue
    */
-  inline void setQ0(const SimpleVector& q0)
+  inline void setQ(const SimpleVector& newValue)
   {
-    this->q0 = q0;
-  };
+    *q = newValue;
+  }
 
-  /** \fn void setQMemories(SiconosMemory&)
-   *  \brief set the memory object of previous values of state q
-   *  \param SiconosMemory& : memory object
+  /** \fn void setQPtr(SimpleVector* newPtr)
+   *  \brief set Q to pointer newPtr
+   *  \param SimpleVector * newPtr
    */
-  inline void setQMemories(const SiconosMemory &mem)
+  inline void setQPtr(SimpleVector *newPtr)
   {
-    this->qMemory = qMemory;
-  };
+    delete q;
+    q = 0;
+    q = newPtr;
+  }
 
-  /** \fn void setVelocity(SimpleVector&)
-   *  \brief set velocity
-   *  \param SimpleVector& : new value of velocity
+  // -- q0 --
+
+  /** \fn  const SimpleVector getQ0(void) const
+   *  \brief get the value of q0
+   *  \return SimpleVector
    */
-  inline void setVelocity(const SimpleVector& velocity)
+  inline const SimpleVector getQ0(void) const
   {
-    this->velocity = velocity;
-  };
+    return *q0;
+  }
 
-  /** \fn void setVelocity0(SimpleVector&)
-   *  \brief set initial velocity
-   *  \param SimpleVector& : value of velocity0
+  /** \fn SimpleVector* getQ0Ptr(void) const
+   *  \brief get q0
+   *  \return pointer on a SimpleVector
    */
-  inline void setVelocity0(const SimpleVector& velocity0)
+  inline SimpleVector* getQ0Ptr(void) const
   {
-    this->velocity0 = velocity0;
-  };
+    return q0;
+  }
 
-  /** \fn void setVelocityMemories(SiconosMemory&)
-   *  \brief set the memory object of previous values of velocity
-   *  \param SiconosMemory& : memory object
+  /** \fn void setQ0 (const SimpleVector& newValue)
+   *  \brief set the value of q0 to newValue
+   *  \param SimpleVector newValue
    */
-  inline void setVelocityMemories(const SiconosMemory& mem)
+  inline void setQ0(const SimpleVector& newValue)
   {
-    this->velocityMemory = mem;
-  };
+    *q0 = newValue;
+  }
 
-
-  /** \fn void setFInt(SimpleVector&)
-   *  \brief set internal forces fInt
-   *  \param SimpleVector& : new value of fint
+  /** \fn void setQ0Ptr(SimpleVector* newPtr)
+   *  \brief set Q0 to pointer newPtr
+   *  \param SimpleVector * newPtr
    */
-  inline void setFInt(const SimpleVector& fint)
+  inline void setQ0Ptr(SimpleVector *newPtr)
   {
-    this->fInt = fint;
-  };
+    delete q0;
+    q0 = 0;
+    q0 = newPtr;
+  }
 
-  /** \fn void setFExt(SimpleVector&)
-   *  \brief set external forces fExt
-   *  \param SimpleVector& : new value of fext
+  // -- qFree --
+
+  /** \fn  const SimpleVector getQFree(void) const
+   *  \brief get the value of qFree
+   *  \return SimpleVector
    */
-  inline void setFExt(const SimpleVector& fext)
+  inline const SimpleVector getQFree(void) const
   {
-    this->fExt = fext;
-  };
+    return *qFree;
+  }
 
-  /** \fn void setQNLInertia(SimpleVector&)
-   *  \brief set inertia
-   *  \param SimpleVector& : new value of QNLInertia
+  /** \fn SimpleVector* getQFreePtr(void) const
+   *  \brief get qFree
+   *  \return pointer on a SimpleVector
    */
-  inline void setQNLInertia(const SimpleVector& QNLInertia)
+  inline SimpleVector* getQFreePtr(void) const
   {
-    this->QNLInertia = QNLInertia;
-  };
+    return qFree;
+  }
 
-
-  /** \fn void setJacobianQFInt(SiconosMatrix)
-   *  \brief allows to set jacobianQFIntMat
-   *  \param SiconosMatrix jacob : the SiconosMatrix to set jacobianQFIntMat
+  /** \fn void setQFree (const SimpleVector& newValue)
+   *  \brief set the value of qFree to newValue
+   *  \param SimpleVector newValue
    */
-  inline void setJacobianQFInt(const SiconosMatrix &jacob)
+  inline void setQFree(const SimpleVector& newValue)
   {
-    this->jacobianQFInt = jacob;
-  };
+    *qFree = newValue;
+  }
 
-  /** \fn void setJacobianVelocityFInt(SiconosMatrix)
-   *  \brief allows to set jacobianVelocityFIntMat
-   *  \param SiconosMatrix jacob : the SiconosMatrix to set jacobianVelocityFIntMat
+  /** \fn void setQFreePtr(SimpleVector* newPtr)
+   *  \brief set QFree to pointer newPtr
+   *  \param SimpleVector * newPtr
    */
-  inline void setJacobianVelocityFInt(const SiconosMatrix &jacob)
+  inline void setQFreePtr(SimpleVector *newPtr)
   {
-    this->jacobianVelocityFInt = jacob;
-  };
+    delete qFree;
+    qFree = 0;
+    qFree = newPtr;
+  }
 
-  /** \fn void setJacobianVelocityFInt(SiconosMatrix)
-   *  \brief allows to set JacobianQQNLInertiaMat
-   *  \param SiconosMatrix jacob : the SiconosMatrix to set JacobianQQNLInertiaMat
+  // -- velocity --
+
+  /** \fn  const SimpleVector getVelocity(void) const
+   *  \brief get the value of velocity
+   *  \return SimpleVector
    */
-  inline void setJacobianQQNLInertia(const SiconosMatrix &jacob)
+  inline const SimpleVector getVelocity(void) const
   {
-    this->jacobianQQNLInertia = jacob;
-  };
+    return *velocity;
+  }
 
-  /** \fn void setJacobianVelocityQNLInertia(SiconosMatrix)
-   *  \brief allows to set jacobianVelocityQNLInertiaMat
-   *  \param SiconosMatrix jacob : the SiconosMatrix to set jacobianVelocityQNLInertiaMat
+  /** \fn SimpleVector* getVelocityPtr(void) const
+   *  \brief get velocity
+   *  \return pointer on a SimpleVector
    */
-  inline void setJacobianVelocityQNLInertia(const SiconosMatrix &jacob)
+  inline SimpleVector* getVelocityPtr(void) const
   {
-    this->jacobianVelocityQNLInertia = jacob;
-  };
+    return velocity;
+  }
 
-
-  /** \fn void fillDSWithDSXML()
-   *  \brief overload of the function for a LagrangianDS
-   *  \exception RuntimeException
+  /** \fn void setVelocity (const SimpleVector& newValue)
+   *  \brief set the value of velocity to newValue
+   *  \param SimpleVector newValue
    */
-  virtual void fillDSWithDSXML();
+  inline void setVelocity(const SimpleVector& newValue)
+  {
+    *velocity = newValue;
+  }
 
-  /** \fn void SiconosVectorSizeInit()
-   *  \brief Initialisation of all the vector of the dynamical system with the right size
-   *  \exception RuntimeException
+  /** \fn void setVelocityPtr(SimpleVector* newPtr)
+   *  \brief set Velocity to pointer newPtr
+   *  \param SimpleVector * newPtr
    */
-  virtual void SiconosVectorSizeInit();
+  inline void setVelocityPtr(SimpleVector *newPtr)
+  {
+    delete velocity;
+    velocity = 0;
+    velocity = newPtr;
+  }
 
-  /** \fn void CompositeVectorInit()
-   *  \brief Initialisation of all the composite vector of the dynamical system with different SiconosVector composing each composite
-   *  \exception RuntimeException
+  // -- velocity0 --
+
+  /** \fn  const SimpleVector getVelocity0(void) const
+   *  \brief get the value of velocity0
+   *  \return SimpleVector
    */
-  virtual void CompositeVectorInit();
+  inline const SimpleVector getVelocity0(void) const
+  {
+    return *velocity0;
+  }
 
-
-  /** \fn void saveDSToXML()
-   *  \brief copy the data of the DS to the XML tree
-   *  \exception RuntimeException
+  /** \fn SimpleVector* getVelocity0Ptr(void) const
+   *  \brief get velocity0
+   *  \return pointer on a SimpleVector
    */
-  virtual void saveDSToXML();
+  inline SimpleVector* getVelocity0Ptr(void) const
+  {
+    return velocity0;
+  }
 
-  /** \fn void display()
-   *  \brief print the data to the screen
+  /** \fn void setVelocity0 (const SimpleVector& newValue)
+   *  \brief set the value of velocity0 to newValue
+   *  \param SimpleVector newValue
    */
-  virtual void display() const;
+  inline void setVelocity0(const SimpleVector& newValue)
+  {
+    *velocity0 = newValue;
+  }
 
-  //////////////////////////////////////
+  /** \fn void setVelocity0Ptr(SimpleVector* newPtr)
+   *  \brief set Velocity0 to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setVelocity0Ptr(SimpleVector *newPtr)
+  {
+    delete velocity0;
+    velocity0 = 0;
+    velocity0 = newPtr;
+  }
 
+  // -- velocityFree --
+
+  /** \fn  const SimpleVector getVelocityFree(void) const
+   *  \brief get the value of velocityFree
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getVelocityFree(void) const
+  {
+    return *velocityFree;
+  }
+
+  /** \fn SimpleVector* getVelocityFreePtr(void) const
+   *  \brief get velocityFree
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getVelocityFreePtr(void) const
+  {
+    return velocityFree;
+  }
+
+  /** \fn void setVelocityFree (const SimpleVector& newValue)
+   *  \brief set the value of velocityFree to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setVelocityFree(const SimpleVector& newValue)
+  {
+    *velocityFree = newValue;
+  }
+
+  /** \fn void setVelocityFreePtr(SimpleVector* newPtr)
+   *  \brief set VelocityFree to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setVelocityFreePtr(SimpleVector *newPtr)
+  {
+    delete velocityFree;
+    velocityFree = 0;
+    velocityFree = newPtr;
+  }
+
+  // -- p --
+
+  /** \fn  const SimpleVector getP(void) const
+   *  \brief get the value of p
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getP(void) const
+  {
+    return *p;
+  }
+
+  /** \fn SimpleVector* getPPtr(void) const
+   *  \brief get p
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getPPtr(void) const
+  {
+    return p;
+  }
+
+  /** \fn void setP (const SimpleVector& newValue)
+   *  \brief set the value of p to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setP(const SimpleVector& newValue)
+  {
+    *p = newValue;
+  }
+
+  /** \fn void setPPtr(SimpleVector* newPtr)
+   *  \brief set P to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setPPtr(SimpleVector *newPtr)
+  {
+    delete p;
+    p = 0;
+    p = newPtr;
+  }
+
+  // --- Memory ---
+
+  // -- q memory --
+
+  /** \fn  const SiconosMemory getQMemory(void) const
+   *  \brief get the value of qMemory
+   *  \return a SiconosMemory
+   */
+  inline const SiconosMemory getQMemory(void) const
+  {
+    return qMemory;
+  }
+
+  /** \fn SiconosMemory getQMemoryPtr(void) const
+   *  \brief get all the values of the state vector q stored in memory
+   *  \return the memory object which stores previous values of q
+   */
+  inline SiconosMemory* getQMemoryPtr(void)
+  {
+    return &qMemory;
+  }
+
+  /** \fn void setQMemory(const SiconosMemory &)
+   *  \brief set the value of qMemory
+   *  \param a ref on a SiconosMemory
+   */
+  inline void setQMemory(const SiconosMemory& qMem)
+  {
+    qMemory = qMem;
+  }
+
+  // -- velocity memory --
+
+  /** \fn  const SiconosMemory getVelocityMemory(void) const
+   *  \brief get the value of velocityMemory
+   *  \return a SiconosMemory
+   */
+  inline const SiconosMemory getVelocityMemory(void) const
+  {
+    return velocityMemory;
+  }
+
+  /** \fn SiconosMemory getVelocityMemoryPtr(void) const
+   *  \brief get all the values of the state vector velocity stored in memory
+   *  \return the memory object which stores previous values of velocity
+   */
+  inline SiconosMemory* getVelocityMemoryPtr(void)
+  {
+    return &velocityMemory;
+  }
+
+  /** \fn void setVelocityMemory(const SiconosMemory &)
+   *  \brief set the value of velocityMemory
+   *  \param a ref on a SiconosMemory
+   */
+  inline void setVelocityMemory(const SiconosMemory& velocityMem)
+  {
+    velocityMemory = velocityMem;
+  }
+
+  // -- Mass --
+
+  /** \fn  const SiconosMatrix getMass(void) const
+   *  \brief get the value of Mass
+   *  \return SiconosMatrix
+   */
+  inline const SiconosMatrix getMass(void) const
+  {
+    return *(this->mass);
+  }
+
+  /** \fn SiconosMatrix* getMassPtr(void) const
+   *  \brief get Mass
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getMassPtr(void) const
+  {
+    return this->mass;
+  }
+
+  /** \fn void setMass (const SiconosMatrix& newValue)
+   *  \brief set the value of Mass to newValue
+   *  \param SiconosMatrix newValue
+   */
+  inline void setMass(const SiconosMatrix& newValue)
+  {
+    *(this->mass) = newValue;
+  }
+
+  /** \fn void setMassPtr(SiconosMatrix* newPtr)
+   *  \brief set Mass to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  inline void setMassPtr(SiconosMatrix *newPtr)
+  {
+    delete mass;
+    mass = 0;
+    mass = newPtr;
+  }
+
+  // -- FInt --
+
+  /** \fn  const SimpleVector getFInt(void) const
+   *  \brief get the value of fInt
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getFInt(void) const
+  {
+    return *fInt;
+  }
+
+  /** \fn SimpleVector* getFIntPtr(void) const
+   *  \brief get fInt
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getFIntPtr(void) const
+  {
+    return fInt;
+  }
+
+  /** \fn void setFInt (const SimpleVector& newValue)
+   *  \brief set the value of fInt to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setFInt(const SimpleVector& newValue)
+  {
+    *fInt = newValue;
+  }
+
+  /** \fn void setFIntPtr(SimpleVector* newPtr)
+   *  \brief set FInt to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setFIntPtr(SimpleVector *newPtr)
+  {
+    delete fInt;
+    fInt = 0;
+    fInt = newPtr;
+  }
+
+  // -- Fext --
+
+  /** \fn  const SimpleVector getFExt(void) const
+   *  \brief get the value of fExt
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getFExt(void) const
+  {
+    return *fExt;
+  }
+
+  /** \fn SimpleVector* getFExtPtr(void) const
+   *  \brief get fExt
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getFExtPtr(void) const
+  {
+    return fExt;
+  }
+
+  /** \fn void setFExt (const SimpleVector& newValue)
+   *  \brief set the value of fExt to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setFExt(const SimpleVector& newValue)
+  {
+    *fExt = newValue;
+  }
+
+  /** \fn void setFExtPtr(SimpleVector* newPtr)
+   *  \brief set FExt to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setFExtPtr(SimpleVector *newPtr)
+  {
+    delete fExt;
+    fExt = 0;
+    fExt = newPtr;
+  }
+
+  // -- QNLInertia --
+
+  /** \fn  const SimpleVector getQNLInertia(void) const
+   *  \brief get the value of QNLInertia
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getQNLInertia(void) const
+  {
+    return *QNLInertia;
+  }
+
+  /** \fn SimpleVector* getQNLInertiaPtr(void) const
+   *  \brief get QNLInertia
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getQNLInertiaPtr(void) const
+  {
+    return QNLInertia;
+  }
+
+  /** \fn void setQNLInertia (const SimpleVector& newValue)
+   *  \brief set the value of QNLInertia to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setQNLInertia(const SimpleVector& newValue)
+  {
+    *QNLInertia = newValue;
+  }
+
+  /** \fn void setQNLInertiaPtr(SimpleVector* newPtr)
+   *  \brief set QNLInertia to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setQNLInertiaPtr(SimpleVector *newPtr)
+  {
+    delete QNLInertia;
+    QNLInertia = 0;
+    QNLInertia = newPtr;
+  }
+
+  // -- Jacobian Q Fint --
+
+  /** \fn  const SiconosMatrix getJacobianQFInt(void) const
+   *  \brief get the value of JacobianQFInt
+   *  \return SiconosMatrix
+   */
+  inline const SiconosMatrix getJacobianQFInt(void) const
+  {
+    return *(this->jacobianQFInt);
+  }
+
+  /** \fn SiconosMatrix* getJacobianQFIntPtr(void) const
+   *  \brief get JacobianQFInt
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getJacobianQFIntPtr(void) const
+  {
+    return this->jacobianQFInt;
+  }
+
+  /** \fn void setJacobianQFInt (const SiconosMatrix& newValue)
+   *  \brief set the value of JacobianQFInt to newValue
+   *  \param SiconosMatrix newValue
+   */
+  inline void setJacobianQFInt(const SiconosMatrix& newValue)
+  {
+    *(this->jacobianQFInt) = newValue;
+  }
+
+  /** \fn void setJacobianQFIntPtr(SiconosMatrix* newPtr)
+   *  \brief set JacobianQFInt to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  inline void setJacobianQFIntPtr(SiconosMatrix *newPtr)
+  {
+    delete jacobianQFInt;
+    jacobianQFInt = 0;
+    jacobianQFInt = newPtr;
+  }
+
+  // -- Jacobian velocity Fint --
+
+  /** \fn  const SiconosMatrix getJacobianVelocityFInt(void) const
+   *  \brief get the value of JacobianVelocityFInt
+   *  \return SiconosMatrix
+   */
+  inline const SiconosMatrix getJacobianVelocityFInt(void) const
+  {
+    return *(this->jacobianVelocityFInt);
+  }
+
+  /** \fn SiconosMatrix* getJacobianVelocityFIntPtr(void) const
+   *  \brief get JacobianVelocityFInt
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getJacobianVelocityFIntPtr(void) const
+  {
+    return this->jacobianVelocityFInt;
+  }
+
+  /** \fn void setJacobianVelocityFInt (const SiconosMatrix& newValue)
+   *  \brief set the value of JacobianVelocityFInt to newValue
+   *  \param SiconosMatrix newValue
+   */
+  inline void setJacobianVelocityFInt(const SiconosMatrix& newValue)
+  {
+    *(this->jacobianVelocityFInt) = newValue;
+  }
+
+  /** \fn void setJacobianVelocityFIntPtr(SiconosMatrix* newPtr)
+   *  \brief set JacobianVelocityFInt to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  inline void setJacobianVelocityFIntPtr(SiconosMatrix *newPtr)
+  {
+    delete jacobianVelocityFInt;
+    jacobianVelocityFInt = 0;
+    jacobianVelocityFInt = newPtr;
+  }
+
+  // -- Jacobian Q QNLInertia --
+
+  /** \fn  const SiconosMatrix getJacobianQQNLInertia(void) const
+   *  \brief get the value of JacobianQQNLInertia
+   *  \return SiconosMatrix
+   */
+  inline const SiconosMatrix getJacobianQQNLInertia(void) const
+  {
+    return *(this->jacobianQQNLInertia);
+  }
+
+  /** \fn SiconosMatrix* getJacobianQQNLInertiaPtr(void) const
+   *  \brief get JacobianQQNLInertia
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getJacobianQQNLInertiaPtr(void) const
+  {
+    return this->jacobianQQNLInertia;
+  }
+
+  /** \fn void setJacobianQQNLInertia (const SiconosMatrix& newValue)
+   *  \brief set the value of JacobianQQNLInertia to newValue
+   *  \param SiconosMatrix newValue
+   */
+  inline void setJacobianQQNLInertia(const SiconosMatrix& newValue)
+  {
+    *(this->jacobianQQNLInertia) = newValue;
+  }
+
+  /** \fn void setJacobianQQNLInertiaPtr(SiconosMatrix* newPtr)
+   *  \brief set JacobianQQNLInertia to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  inline void setJacobianQQNLInertiaPtr(SiconosMatrix *newPtr)
+  {
+    delete jacobianQQNLInertia;
+    jacobianQQNLInertia = 0;
+    jacobianQQNLInertia = newPtr;
+  }
+
+  // -- Jacobian velocity QNLInertia --
+
+  /** \fn  const SiconosMatrix getJacobianVelocityQNLInertia(void) const
+   *  \brief get the value of JacobianVelocityQNLInertia
+   *  \return SiconosMatrix
+   */
+  inline const SiconosMatrix getJacobianVelocityQNLInertia(void) const
+  {
+    return *(this->jacobianVelocityQNLInertia);
+  }
+
+  /** \fn SiconosMatrix* getJacobianVelocityQNLInertiaPtr(void) const
+   *  \brief get JacobianVelocityQNLInertia
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getJacobianVelocityQNLInertiaPtr(void) const
+  {
+    return this->jacobianVelocityQNLInertia;
+  }
+
+  /** \fn void setJacobianVelocityQNLInertia (const SiconosMatrix& newValue)
+   *  \brief set the value of JacobianVelocityQNLInertia to newValue
+   *  \param SiconosMatrix newValue
+   */
+  inline void setJacobianVelocityQNLInertia(const SiconosMatrix& newValue)
+  {
+    *(this->jacobianVelocityQNLInertia) = newValue;
+  }
+
+  /** \fn void setJacobianVelocityQNLInertiaPtr(SiconosMatrix* newPtr)
+   *  \brief set JacobianVelocityQNLInertia to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  inline void setJacobianVelocityQNLInertiaPtr(SiconosMatrix *newPtr)
+  {
+    delete jacobianVelocityQNLInertia;
+    jacobianVelocityQNLInertia = 0;
+    jacobianVelocityQNLInertia = newPtr;
+  }
+
+  // --- PLUGINS RELATED FUNCTIONS ---
 
   /** \fn void computeMass(double time)
    *  \brief default function to compute the mass
@@ -633,7 +843,7 @@ public:
 
   /** \fn void computeQNLInertia(SimpleVector q, SimpleVector velocity);
    *  \brief function to compute the inertia
-         *  \param SimpleVector*: pointers on the state vectors q and velocity (\dot q)
+   *  \param SimpleVector*: pointers on the state vectors q and velocity (\dot q)
    *  \exception RuntimeException
    */
   virtual void computeQNLInertia(SimpleVector *q, SimpleVector *velocity);
@@ -693,73 +903,107 @@ public:
    */
   virtual void computeJacobianVelocityQNLInertia(double time, SimpleVector *q, SimpleVector *velocity);
 
-  ////////////////////////////////////////////
-
-  /** \fn void setComputeMassFunction(string pluginPath, string functionName)
+  /** \fn void setComputeMassFunction(const string pluginPath, const string functionName&)
    *  \brief allow to set a specified function to compute the mass
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeMassFunction(string pluginPath, string functionName);
+  void setComputeMassFunction(const string& pluginPath, const string& functionName);
 
-  /** \fn void setComputeFIntFunction(string pluginPath, string functionName)
+  /** \fn void setComputeFIntFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute Fint
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeFIntFunction(string pluginPath, string functionName);
+  void setComputeFIntFunction(const string& pluginPath, const string& functionName);
 
-  /** \fn void setComputeFExtFunction(string pluginPath, string functionName)
+  /** \fn void setComputeFExtFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute Fext
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    *  \exception ICDLL_CSharedLibraryException
    */
-  void setComputeFExtFunction(string pluginPath, string functionName);
+  void setComputeFExtFunction(const string& pluginPath, const string& functionName);
 
-  /** \fn void setComputeQNLInertiaFunction(string pluginPath, string functionName)
+  /** \fn void setComputeQNLInertiaFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the inertia
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosCSharedLibraryException
    */
-  void setComputeQNLInertiaFunction(string pluginPath, string functionName);
+  void setComputeQNLInertiaFunction(const string& pluginPath, const string& functionName);
 
-  /** \fn void setComputeJacobianQFIntFunction(string pluginPath, string functionName)
+  /** \fn void setComputeJacobianQFIntFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the gradient of the internal strength compared to the state
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianQFIntFunction(string pluginPath, string functionName);
+  void setComputeJacobianQFIntFunction(const string& pluginPath, const string& functionName);
 
-  /** \fn void setComputeJacobianVelocityFIntFunction(string pluginPath, string functionName)
+  /** \fn void setComputeJacobianVelocityFIntFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the internal strength compared to the velocity
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianVelocityFIntFunction(string pluginPath, string functionName);
+  void setComputeJacobianVelocityFIntFunction(const string& pluginPath, const string& functionName);
 
-  /** \fn void setComputeJacobianQQNLInertiaFunction(string pluginPath, string functionName)
+  /** \fn void setComputeJacobianQQNLInertiaFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the gradient of the the external strength compared to the state
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianQQNLInertiaFunction(string pluginPath, string functionName);
+  void setComputeJacobianQQNLInertiaFunction(const string& pluginPath, const string& functionName);
 
-  /** \fn void setComputeJacobianVelocityQNLInertiaFunction(string pluginPath, string functionName)
+  /** \fn void setComputeJacobianVelocityQNLInertiaFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the external strength compared to the velocity
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianVelocityQNLInertiaFunction(string pluginPath, string functionName);
+  void setComputeJacobianVelocityQNLInertiaFunction(const string& pluginPath, const string& functionName);
 
-  ////////////////////////////////////////
+  // --- miscellaneous ---
+
+  /** \fn void SiconosVectorSizeInit()
+   *  \brief Initialisation of all the vector of the dynamical system with the right size
+   *  \exception RuntimeException
+   */
+  //virtual void SiconosVectorSizeInit();
+
+  /** \fn void CompositeVectorInit()
+   *  \brief Initialisation of all the composite vector of the dynamical system with different SiconosVector composing each composite
+   *  \exception RuntimeException
+   */
+  //virtual void CompositeVectorInit();
+
+  /** \fn void saveDSToXML()
+   *  \brief copy the data of the DS to the XML tree
+   *  \exception RuntimeException
+   */
+  virtual void saveDSToXML();
+
+  /** \fn void display()
+   *  \brief print the data to the screen
+   */
+  virtual void display() const;
+
+  /** \fn void initMemory(const int& steps) ;
+   *  \brief initialize the SiconosMemory objects with a positive size.
+   *  \param the size of the SiconosMemory. must be >= 0
+   */
+  void initMemory(const int& steps);
+
+  /** \fn virtual void swapInMemory(void);
+   * \brief push the current values of x, xDot and r in the stored previous values
+   *  xMemory, xDotMemory, rMemory,
+   * \todo Modify the function swapIn Memory with the new Object Memory
+   */
+  void swapInMemory(void);
 
   /** \fn LagrangianDS* convert (DynamicalSystem* ds)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
@@ -768,45 +1012,48 @@ public:
    */
   static LagrangianDS* convert(DynamicalSystem* ds);
 
+  /** \fn double dsConvergenceIndicator()
+   *  \brief compute $\frac{|\dot q_{i+1} - \dot qi|}{|\dot q_i|}$ where $\dot q_{i+1}$ represents the present state and $\dot q_i$ the previous one
+   * \return a double
+   */
+  double LagrangianDS::dsConvergenceIndicator() const ;
+
 protected:
 
-  /** \fn void init()
-   *  \brief initialise value of a Lagrangian NLDS
+  // -- DEFAULT CONSTRUCTOR --
+  /** \fn LagrangianDS()
+   *  \brief Default constructor
    */
-  virtual void init();
+  LagrangianDS();
 
-
+  // -- MEMBERS --
   /** number of degrees of freedom of the system */
   int ndof;
-  /** mass of the system */
-  SiconosMatrix mass;
   /** coordinates of the system */
-  SimpleVector q;
+  SimpleVector *q;
   /** initial coordinates of the system */
-  SimpleVector q0;
+  SimpleVector *q0;
   /** free coordinate */
-  SimpleVector qFree;
-
-
+  SimpleVector *qFree;
   /** memory of previous coordinates of the system */
   SiconosMemory qMemory;
   /** velocity of the system */
-  SimpleVector velocity;
+  SimpleVector *velocity;
   /** initial velocity of the system */
-  SimpleVector velocity0;
+  SimpleVector *velocity0;
+  /** free Velocity */
+  SimpleVector *velocityFree;
   /** memory of previous velocity of the system */
   SiconosMemory velocityMemory;
-  /** free Velocity */
-  SimpleVector velocityFree;
   /** Reaction due to the non smooth law */
-  SimpleVector p;
+  SimpleVector *p;
 
-
+  /** mass of the system */
+  SiconosMatrix *mass;
   /** internal strength of the system */
-  SimpleVector fInt;
+  SimpleVector *fInt;
   /** external strength of the system */
-  SimpleVector fExt;
-
+  SimpleVector *fExt;
   /* contains the name of the plugin used to compute fInt */
   string fIntFunctionName;
   /* contains the name of the plugin used to compute fExt */
@@ -823,21 +1070,16 @@ protected:
   string jacobianVelocityQNLInertiaFunctionName;
   /* contains the name of the plugin used to compute QNLInertia */
   string QNLInertiaFunctionName;
-
   /** non-linear inertia term of the system */
-  SimpleVector QNLInertia;
-
+  SimpleVector *QNLInertia;
   /** jacobian/coordinates of internal strength */
-  SiconosMatrix jacobianQFInt;
+  SiconosMatrix *jacobianQFInt;
   /** jacobian/velocity of internal strength */
-  SiconosMatrix jacobianVelocityFInt;
+  SiconosMatrix *jacobianVelocityFInt;
   /** jacobian/coordinates of inertia */
-  SiconosMatrix jacobianQQNLInertia;
+  SiconosMatrix *jacobianQQNLInertia;
   /** jacobian/velocity of inertie */
-  SiconosMatrix jacobianVelocityQNLInertia;
-
-  //  /**  */
-  //  LagrangianDSXML *lnldsxml;
+  SiconosMatrix *jacobianVelocityQNLInertia;
 
   /** class for manage plugin (open, close librairy...) */
   SiconosSharedLibrary cShared;

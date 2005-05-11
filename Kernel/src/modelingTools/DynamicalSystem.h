@@ -30,7 +30,7 @@ class DSXML;
 
 /** \class DynamicalSystem
  *  \brief  Super class of the dynamical systems
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) April 29, 2004
  *
@@ -66,380 +66,547 @@ class DynamicalSystem
 {
 public:
 
-  DynamicalSystem();
+  // --- Constructors ---
 
   /** \fn DynamicalSystem(DSXML * nsdsXML)
    *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
    *  \param DSXML* : the XML object for this DynamicalSystem
    *  \exception RuntimeException
    */
+
   DynamicalSystem(DSXML * dsXML);
 
   /** \fn DynamicalSystem(DSXML * nsdsXML, int number, int n,
       SiconosVector* x0, string vectorFieldPlugin, NonSmoothDynamicalSystem * nsds, BoundaryCondition* bc)
-   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
-   *  \param int : the number for this DynamicalSystem
-   *  \param int : the dimension of this DynamicalSystem
-   *  \param SiconosVector* : the initial state of this DynamicalSystem
-   *  \param string : the plugin name for vectorField of this DynamicalSystem
-   *  \exception RuntimeException
-   */
+      *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+      *  \param int : the number for this DynamicalSystem
+      *  \param int : the dimension of this DynamicalSystem
+      *  \param SiconosVector* : the initial state of this DynamicalSystem
+      *  \param string : the plugin name for vectorField of this DynamicalSystem
+      *  \exception RuntimeException
+      */
+
   DynamicalSystem(int number, int n,
                   SiconosVector* x0, string vectorFieldPlugin = "BasicPlugin:vectorField");
 
+  // --- Destructor ---
 
   virtual ~DynamicalSystem();
 
-  /*getter et setter*/
+  // ---  Getters and setters ---
 
-  /** \fn NonSmoothDynamicalSystem* getNSDS(void);
-   *  \brief allows to get the NonSmoothDynamicalSystem containing the DynamicalSystem
-   *  \return NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem containing the DynamicalSystem
+  /** \fn NonSmoothDynamicalSystem* getNSDSPtr(void) const;
+   *  \brief get the NonSmoothDynamicalSystem containing this DynamicalSystem
+   *  \return NonSmoothDynamicalSystem*
    */
-  inline NonSmoothDynamicalSystem* getNSDS(void) const
+  inline NonSmoothDynamicalSystem* getNSDSPtr(void) const
   {
     return this->nsds;
   }
 
-  /** \fn int getNumber(void);
+  /** \fn void setNSDSPtr(NonSmoothDynamicalSystem*);
+   *  \brief set the NonSmoothDynamicalSystem containing the DynamicalSystem
+   *  \param NonSmoothDynamicalSystem*
+   */
+  inline void setNSDSPtr(NonSmoothDynamicalSystem *newNsds)
+  {
+    nsds = newNsds;
+  }
+
+  /** \fn const int getNumber(void) const;
    *  \brief allows to get the number of the DynamicalSystem
    *  \return the value of number
    */
-  inline int getNumber(void) const
+  inline const int getNumber(void) const
   {
     return this->number;
   }
 
-  /** \fn string getId(void)
+  /** \fn void setNumber(const int&)
+   *  \brief allows to set the value of number
+   *  \param an integer to set the value of number
+   */
+  inline void setNumber(const int& newNumber)
+  {
+    this->number = newNumber;
+  }
+
+  /** \fn const string getId(void) const
    *  \brief allows to get the id of the DynamicalSystem
    *  \return the value of ths id
    */
-  inline string getId(void) const
+  inline const string getId(void) const
   {
     return this->id;
   }
 
-  /** \fn int getN(void);
+  /** \fn void setId(const string&)
+   *  \brief allows to set the value of id
+   *  \param a string to set the value of id
+   */
+  inline void setId(const string& newId)
+  {
+    this->id = newId;
+  }
+
+  /** \fn const int getN(void) const;
    *  \brief allow to get n, the dimension, i.e. the size of the state x of the DynamicalSystem
    *  \return the value of n
    */
-  inline int getN(void) const
+  inline const int getN(void) const
   {
     return this->n;
   }
 
-
-  /** \fn SiconosVector* getX0(void)
-   *  \brief allows to get x0, the state at the initial time t0 of the DynamicalSystem
-   *  \return pointer on x0
+  /** \fn void setN(const int&)
+   *  \brief allows to set the value of n
+   *  \param an integer to set the value of n
    */
-  inline SiconosVector* getX0(void) const
+  inline void setN(const int& newN)
+  {
+    this->n = newN;
+  }
+
+  // --- X0 ---
+
+  /** \fn  const SimpleVector getX0(void) const
+   *  \brief get the value of x0, the initial state of the DynamicalSystem
+   *  \return SimpleVector
+   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   */
+  inline const SimpleVector getX0() const
+  {
+    return *(this->x0);
+  }
+
+  /** \fn SiconosVector* getX0Ptr(void) const
+   *  \brief get x0, the initial state of the DynamicalSystem
+   *  \return pointer on a SiconosVector
+   */
+  inline SiconosVector* getX0Ptr(void) const
   {
     return this->x0;
   }
 
-  /** \fn SiconosVector* getX(void)
-   *  \brief allows to get the state vector x of the dynamical system
-   *  \return pointer on vector x
+  /** \fn void setX0(const SiconosVector& newValue)
+   *  \brief set the value of x0 to newValue
+   *  \param SiconosVector newValue
    */
-  inline SiconosVector* getX(void) const
+  inline void setX0(const SiconosVector& newValue)
+  {
+    *(this->x0) = newValue;
+  }
+
+  /** \fn void setX0Ptr(SiconosVector* newPtr)
+   *  \brief set x0 to pointer newPtr
+   *  \param SiconosVector * newPtr
+   */
+  inline void setX0Ptr(SiconosVector* newPtr)
+  {
+    delete x0;
+    x0 = 0;
+    this->x0 = newPtr;
+  }
+
+  // --- X ---
+
+  /** \fn const SimpleVector getX(void) const
+   *  \brief get the value of x, the state of the DynamicalSystem
+   *  \return SimpleVector
+    * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+  */
+  inline const SimpleVector getX(void) const
+  {
+    return *(this->x);
+  }
+
+  /** \fn SiconosVector* getXPtr(void) const
+   *  \brief get x, the state of the DynamicalSystem
+   *  \return pointer on a SiconosVector
+   */
+  inline SiconosVector* getXPtr(void) const
   {
     return this->x;
   }
 
-  /** \fn SiconosMemory* getXMemories(void)
-   *  \brief allows to get all the values of the state vector x stored in memory
-   *  \return the memory object which stores previous values of x
+  /** \fn void setX (const SiconosVector& newValue)
+   *  \brief set the value of x to newValue
+   *  \param SiconosVector newValue
    */
-  inline SiconosMemory* getXMemories(void)
+  inline void setX(const SiconosVector& newValue)
   {
-    return &this->xMemory;
+    *(this->x) = newValue;
   }
 
-  /** \fn SiconosVector& getXDotPtr(void)
-   *  \brief allow to get the memory adress of vector xDot
-   *  \exception to be defined
-   *  \return SiconosVector* xDot
-   *  \warning such type of method dont have to be included in the final API
+  /** \fn void setXPtr(SiconosVector* newPtr)
+   *  \brief set x to pointer newPtr
+   *  \param SiconosVector * newPtr
    */
-  inline SiconosVector* getXDotPtr(void)
+  inline void setXPtr(SiconosVector *newPtr)
   {
-    return &(this->xDot);
+    delete x ;
+    x = 0 ;
+    this->x = newPtr;
   }
 
-  /** \fn SimpleVector getXDot(void)
-   *  \brief allows to get the vector xDot
-   *  \return a SimpleVector
+  // ---  XDot ---
+
+  /** \fn  const SimpleVector getXDot(void) const
+   *  \brief get the value of xDot derivative of the state of the DynamicalSystem
+   *  \return SimpleVector
+   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
    */
-  inline SimpleVector getXDot(void) const
+  inline const SimpleVector getXDot(void) const
+  {
+    return *(this->xDot);
+  }
+
+  /** \fn SiconosVector* getXDotPtr(void) const
+   *  \brief get xDot, the derivative of the state of the DynamicalSystem
+   *  \return pointer on a SiconosVector
+   */
+  inline SiconosVector* getXDotPtr(void) const
   {
     return this->xDot;
   }
 
-  /** \fn SiconosMemory* getXDotMemories(void)
-   *  \brief allows to get all the values of old xDot vectors
-   *  \return the memory object which stores previous values of xDot
+  /** \fn void setXDot (const SiconosVector& newValue)
+   *  \brief set the value of xDot to newValue
+   *  \param SiconosVector newValue
    */
-  inline SiconosMemory* getXDotMemories(void)
+  inline void setXDot(const SiconosVector& newValue)
   {
-    return &this->xDotMemory;
+    *(this->xDot) = newValue;
   }
 
-
-  /** \fn SiconosVector* getXFree(void)
-   *  \brief allows to get the vector xFree
-   *  \return pointer on SiconosVector xFree
+  /** \fn void setXDotPtr(SiconosVector* newPtr)
+   *  \brief set xDot to pointer newPtr
+   *  \param SiconosVector * newPtr
    */
-  inline SiconosVector* getXFree(void)
+  inline void setXDotPtr(SiconosVector *newPtr)
+  {
+    delete xDot;
+    xDot = 0;
+    this->xDot = newPtr;
+  }
+
+  // --- XFree ---
+
+  /** \fn  const SimpleVector getXFree(void) const
+   *  \brief get the value of xFree
+   *  \return SimpleVector
+   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   */
+  inline const SimpleVector getXFree(void) const
+  {
+    return *(this->xFree);
+  }
+
+  /** \fn SiconosVector* getXFreePtr(void) const
+   *  \brief get xFree
+   *  \return pointer on a SiconosVector
+   */
+  inline SiconosVector* getXFreePtr(void) const
   {
     return this->xFree;
   }
 
-
-  /** \fn SiconosVector* getRPtr(void)
-   *  \brief allow to get the memory adress of vector r
-   *  \exception to be defined
-   *  \return SiconosVector* r
-   *  \warning such type of method dont have to be included in the final API
+  /** \fn void setXFree (const SiconosVector& newValue)
+   *  \brief set the value of xFree to newValue
+   *  \param SiconosVector newValue
    */
-  inline SiconosVector* getRPtr(void)
+  inline void setXFree(const SiconosVector& newValue)
   {
-    return &(this->r);
+    *(this->xFree) = newValue;
   }
 
-
-  /** \fn SimpleVector getR(void)
-   *  \brief allow to get the vector r
-   *  \return SimpleVector r
+  /** \fn void setXFreePtr(SiconosVector* newPtr)
+   *  \brief set xFree to pointer newPtr
+   *  \param SiconosVector * newPtr
    */
-  inline SimpleVector getR(void) const
+  inline void setXFreePtr(SiconosVector *newPtr)
+  {
+    delete xFree;
+    xFree = 0;
+    this->xFree = newPtr;
+  }
+
+  // --- R ---
+
+  /** \fn  const SimpleVector getR(void) const
+   *  \brief get the value of r
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getR(void) const
+  {
+    return *(this->r);
+  }
+
+  /** \fn SimpleVector* getRPtr(void) const
+   *  \brief get r
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getRPtr(void) const
   {
     return this->r;
   }
 
-  /** \fn SiconosMemory* getRMemories(void)
-   *  \brief allows to get all the values of old r vectors
-   *  \return the memory object which stores previous values of r
+  /** \fn void setR (const SimpleVector& newValue)
+   *  \brief set the value of r to newValue
+   *  \param SimpleVector newValue
    */
-  inline SiconosMemory* getRMemories(void)
+  inline void setR(const SimpleVector& newValue)
   {
-    return &this->rMemory;
+    *(this->r) = newValue;
   }
 
-
-  /** \fn SiconosMatrix getJacobianX(void)
-   *  \brief allows to get the SiconosMatrix jacobianXMat
-   *  \return the SiconosMatrix jacobianXMat
+  /** \fn void setRPtr(SimpleVector* newPtr)
+   *  \brief set R to pointer newPtr
+   *  \param SimpleVector * newPtr
    */
-  inline SiconosMatrix getJacobianX(void) const
+  inline void setRPtr(SimpleVector *newPtr)
   {
-    return this->jacobianX;
+    delete r;
+    r = 0;
+    this->r = newPtr;
   }
 
-  /** \fn int getStepsInMemory(void)
+  // --- Memory ---
+
+  /** \fn const int getStepsInMemory(void) const
    *  \brief allows to get the value of stepsInMemory
    *  \return the value of stepsInMemory
    */
-  inline int getStepsInMemory(void) const
+  inline const int getStepsInMemory(void) const
   {
     return this->stepsInMemory;
   }
 
-  /** \fn BoundaryCondition PeriodicBCXML(void)
-   *  \brief allows to get the BoundaryCondition
-   *  \return a pointer on the BoundaryCondition object
-   */
-  inline BoundaryCondition* getBoundaryCondition(void)
-  {
-    return this->BC;
-  }
-
-
-
-  /** \fn void setNSDS(NonSmoothDynamicalSystem*);
-   *  \brief allows to set the NonSmoothDynamicalSystem containing the DynamicalSystem
-   *  \param NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem containing the DynamicalSystem
-   */
-  inline void setNSDS(NonSmoothDynamicalSystem*nsds)
-  {
-    this->nsds = nsds;
-  }
-
-  /** \fn void setNumber(int)
-   *  \brief allows to set the value of number
-   *  \param int number : an integer to set the value of number
-   */
-  inline void setNumber(int number)
-  {
-    this->number = number;
-  }
-
-  /** \fn void setId(string)
-   *  \brief allows to set the value of id
-   *  \param string id : a string to set the value of id
-   */
-  inline void setId(string id)
-  {
-    this->id = id;
-  }
-
-  /** \fn void setN(int)
-   *  \brief allows to set the value of n
-   *  \param int n : an integer to set the value of n
-   */
-  inline void setN(int n)
-  {
-    this->n = n;
-  }
-
-  /** \fn void setX0(SiconosVector*)
-   *  \brief allows to set the value of x0
-   *  \param SiconosVector* x0 : a pointer on vector to set the value of x0
-   */
-  inline void setX0(SiconosVector *x0)
-  {
-    this->x0 = x0;
-  }
-
-  /** \fn void setX(SiconosVector*)
-   *  \brief allows to set the value of x
-   *  \param SiconosVector x : a vector to set the value of x
-   */
-  inline void setX(SiconosVector *x)
-  {
-    this->x = x;
-  }
-
-  /** \fn void setXMemories(SiconosMemory &)
-   *  \brief allows to set the value of xMemory
-   *  \param SiconosMemory & xMem : a memory object.
-   */
-  inline void setXMemories(SiconosMemory &xMem)
-  {
-    this->xMemory = xMem;
-  }
-
-  /** \fn void setXDot(SimpleVector &)
-   *  \brief allows to set the value of xDot
-   *  \param SimpleVector & xDot : a SimpleVector to set the value of xDot
-   */
-  inline void setXDot(SimpleVector &xDot)
-  {
-    this->xDot = xDot;
-  }
-
-  /** \fn void setXDotMemories(SiconosMemory &)
-   *  \brief allows to set the value of xDotMemory
-   *  \param SiconosMemory &xDotMem : a memory object.
-   */
-  inline void setXDotMemories(SiconosMemory &xDotMem)
-  {
-    this->xDotMemory = xDotMem;
-  }
-
-  /** \fn void setXFree(SiconosVector*)
-   *  \brief allows to set the value of xFree
-   *  \param SiconosVector *xFree : a pointer on SiconosVector to set the value of xFree
-   */
-  inline void setXFree(SiconosVector *xFree)
-  {
-    this->xFree = xFree;
-  }
-
-  /** \fn void setR(SimpleVector)
-   *  \brief allows to set the value of r
-   *  \param SiconosVector &r : a SimpleVector to set the value of r
-   */
-  inline void setR(SimpleVector &r)
-  {
-    this->r = r;
-  }
-
-  /** \fn void setRMemories(SiconosMemory &)
-   *  \brief allows to set the value of rMemory
-   *  \param SiconosMemory &rMem : a memory object
-   */
-  inline void setRMemories(SiconosMemory &rMem)
-  {
-    this->rMemory = rMem;
-  }
-
-  /** \fn void setJacobianX(SiconosMatrix)
-   *  \brief allows to set the SiconosMatrix jacobianXMat
-   *  \param SiconosMatrix jacobian : the matrix to set jacobianX
-   */
-  inline void setJacobianX(SiconosMatrix jacobian)
-  {
-    this->jacobianX = jacobian;
-  }
-
-  /** \fn void setStepsInMemory(int)
+  /** \fn void setStepsInMemory(const int&)
    *  \brief allows to set the value of stepsInMemory
    *  \param int steps : the value to set stepsInMemory
    */
-  inline void setStepsInMemory(int steps)
+  inline void setStepsInMemory(const int& steps)
   {
     this->stepsInMemory = steps;
   }
 
-  /** \fn void setBoundaryCondition(BoundaryCondition*)
-   *  \brief allows to set the BoundaryCondition
-   *  \param BoundaryCondition *bc : the BoundaryCondition to set BC
+  // X memory
+
+  /** \fn  const SiconosMemory getXMemory(void) const
+   *  \brief get the value of xMemory
+   *  \return a SiconosMemory
    */
-  inline void setBoundaryCondition(BoundaryCondition *bc)
+  inline const SiconosMemory getXMemory(void) const
   {
-    this->BC = bc;
+    return this->xMemory;
   }
 
-  /** \fn inline DSXML* getDynamicalSystemXML()
-   *  \brief allows to get the object DSXML of the DynamicalSystem
+  /** \fn SiconosMemory getXMemoryPtr(void) const
+   *  \brief allows to get all the values of the state vector x stored in memory
+   *  \return the memory object which stores previous values of x
+   */
+  inline SiconosMemory* getXMemoryPtr(void)
+  {
+    return &(this->xMemory);
+  }
+
+  /** \fn void setXMemory(const SiconosMemory &)
+   *  \brief set the value of xMemory
+   *  \param a ref on a SiconosMemory
+   */
+  inline void setXMemory(const SiconosMemory& xMem)
+  {
+    this->xMemory = xMem;
+  }
+
+  // xDot memory
+
+  /** \fn  const SiconosMemory getXDotMemory(void) const
+   *  \brief get the value of xDotMemory
+   *  \return a SiconosMemory
+   */
+  inline const SiconosMemory getXDotMemory(void) const
+  {
+    return this->xDotMemory;
+  }
+
+  /** \fn SiconosMemory* getXDotMemoryPtr(void)
+   *  \brief get all the values of old xDot vectors
+   *  \return a pointer on the memory object which contains previous values of xDot
+   */
+  inline SiconosMemory* getXDotMemoryPtr(void)
+  {
+    return &(this->xDotMemory);
+  }
+
+  /** \fn void setXDotMemory(const SiconosMemory &)
+   *  \brief set the value of xDotMemory
+   *  \param SiconosMemory &xDotMem : a memory object.
+   */
+  inline void setXDotMemory(const SiconosMemory& xDotMem)
+  {
+    this->xDotMemory = xDotMem;
+  }
+
+  // r memory
+  /** \fn  const SiconosMemory getRMemory(void) const
+   *  \brief get the value of RMemory
+   *  \return a SiconosMemory
+   */
+  inline const SiconosMemory getRMemory(void) const
+  {
+    return this->rMemory;
+  }
+
+  /** \fn SiconosMemory* getRMemoryPtr(void)
+   *  \brief get all the values of old r vectors
+   *  \return the memory object which contains previous values of r
+   */
+  inline SiconosMemory* getRMemoryPtr(void)
+  {
+    return &(this->rMemory);
+  }
+
+  /** \fn void setRMemory(const SiconosMemory &)
+   *  \brief set the value of rMemory
+   *  \param a ref on a SiconosMemory
+   */
+  inline void setRMemory(const SiconosMemory& rMem)
+  {
+    this->rMemory = rMem;
+  }
+
+  // --- JacobianX ---
+
+  /** \fn  const SiconosMatrix getJacobianX(void) const
+   *  \brief get the value of JacobianX
+   *  \return SiconosMatrix
+   */
+  inline const SiconosMatrix getJacobianX(void) const
+  {
+    return *(this->jacobianX);
+  }
+
+  /** \fn SiconosMatrix* getJacobianXPtr(void) const
+   *  \brief get JacobianX
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getJacobianXPtr(void) const
+  {
+    return this->jacobianX;
+  }
+
+  /** \fn void setJacobianX (const SiconosMatrix& newValue)
+   *  \brief set the value of JacobianX to newValue
+   *  \param SiconosMatrix newValue
+   */
+  inline void setJacobianX(const SiconosMatrix& newValue)
+  {
+    *(this->jacobianX) = newValue;
+  }
+
+  /** \fn void setJacobianXPtr(SiconosMatrix* newPtr)
+   *  \brief set JacobianX to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  inline void setJacobianXPtr(SiconosMatrix *newPtr)
+  {
+    delete jacobianX;
+    jacobianX = 0;
+    jacobianX = newPtr;
+  }
+
+  // --- Boundary Conditions ---
+  //\todo : getter and setter to be reviewed when implement BC correctly
+  /** \fn  const BoundaryCondition getBoundaryCondition(void) const
+   *  \brief get the value of BoundaryCondition
+   *  \return an object BoundaryCondition
+   */
+  //  inline BoundaryCondition getBoundaryCondition(void) { return &(this->BC); }
+
+  /** \fn BoundaryCondition getBoundaryConditionPtr(void) const
+   *  \brief get the BoundaryCondition
+   *  \return a pointer on the BoundaryCondition object
+   */
+  inline BoundaryCondition* getBoundaryConditionPtr(void) const
+  {
+    return this->BC;
+  }
+
+  /** \fn void setBoundaryCondition(const BoundaryCondition&)
+   *  \brief set the Boundary Conditions
+   *  \param ref on an object BoundaryCondition
+   */
+  //inline void setBoundaryCondition(const BoundaryCondition& newBC) {*(this->BC) = newBC; }
+
+  /** \fn void setBoundaryConditionPtr(BoundaryCondition*)
+   *  \brief set the BoundaryCondition pointer
+   *  \param BoundaryCondition *bc : the BoundaryCondition to set BC
+   */
+  inline void setBoundaryConditionPtr(BoundaryCondition *newBC)
+  {
+    delete BC;
+    BC = 0;
+    BC = newBC;
+  }
+
+  // --- dsxml ---
+  /** \fn inline const DSXML* getDynamicalSystemXMLPtr() const
+   *  \brief get the object DSXML of the DynamicalSystem
    *  \return a pointer on the DSXML of the DynamicalSystem
    */
-  inline DSXML* getDynamicalSystemXML() const
+  inline const DSXML* getDynamicalSystemXMLPtr() const
   {
     return this->dsxml;
   }
 
-  /** \fn inline void getDynamicalSystemXML(DSXML *dsxml)
-   *  \brief allows to set the DSXML of the DynamicalSystem
+  /** \fn inline void setDynamicalSystemXMLPtr(DSXML *dsxml)
+   *  \brief set the DSXML of the DynamicalSystem
    *  \param DSXML* dsxml : the address of theDSXML to set
    */
-  inline void setDynamicalSystemXML(DSXML *dsxml)
+  inline void setDynamicalSystemXMLPtr(DSXML *newDsxml)
   {
-    this->dsxml = dsxml;
+    dsxml = newDsxml;
   }
 
-  /** \fn void setVectorFieldFunction(string, string)
+
+  // --- Vector field ---
+  /** \fn void setVectorFieldFunction(const string&, const string&)
    *  \brief allow to set a specified function to compute vector field
    *  \param string pluginPath : the complete path to the plugin
    *  \param string functionName : the function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  void setVectorFieldFunction(string pluginPath, string functionName);
+  void setVectorFieldFunction(const string& pluginPath, const string& functionName);
 
-  /** \fn void setComputeJacobianXFunction(string, string)
+  /** \fn void setComputeJacobianXFunction(const string&, const string&)
    *  \brief allow to set a specified function to compute jacobianX
    *  \param string pluginPath : the complete path to the plugin
    *  \param the string functionName : function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianXFunction(string pluginPath, string functionName);
+  void setComputeJacobianXFunction(const string& pluginPath, const string& functionName);
 
-
+  // --- type of DS ---
   /** \fn inline string getType()
    *  \brief allows to get the type of a DynamicalSystem
    *  \return string : the type of the DynamicalSystem
    */
-  inline string getType() const
+  inline const string getType() const
   {
     return this->DSType;
   }
 
+  // --- DS input-output ---
   /** \fn vector<DSInputOutput*> getDSInputOutputs(void)
    *  \brief allows to get all the DSInputOutput of the DynamicalSystem
    *  \return the vector of DSInputOutput
    */
-  vector<DSInputOutput*> getDSInputOutputs(void);
+  inline vector<DSInputOutput*> getDSInputOutputs(void)
+  {
+    return dsioVector;
+  }
 
   /** \fn DSInputOutput* getDSInputOutput(int)
    *  \brief allows to get one specific DSInputOutput, with its place in the vector of DSInputOutput
@@ -452,21 +619,27 @@ public:
    *  \brief allows to set all the DSInputOutputs of the DynamicalSystem
    *  \param vector<DSInputOutput*> : the vector to set
    */
-  void setDSInputOutputs(vector<DSInputOutput*>);
+  inline void setDSInputOutputs(vector<DSInputOutput*> newDsioVect)
+  {
+    this->dsioVector = newDsioVect;
+  }
 
   /** \fn void addDSInputOutput(DSInputOutput*)
    *  \brief allows to add the DSInputOutput to the DynamicalSystem
    *  \param DSInputOutput* : the DSInputOutput to add
    */
-  void addDSInputOutput(DSInputOutput*);
+  void addDSInputOutput(DSInputOutput* dsio)
+  {
+    this->dsioVector.push_back(dsio);
+  }
 
-  ////////////////////////////////////
+  // --- ---
 
-  /** \fn void initMemory(int steps) ;
+  /** \fn void initMemory(const int& steps) ;
    *  \brief initialize the SiconosMemory objects with a positive size.
    *  \param the size of the SiconosMemory. must be >= 0
    */
-  virtual void initMemory(int steps) ;
+  virtual void initMemory(const int& steps) ;
 
   /** \fn virtual void swapInMemory(void);
    * \brief push the current values of x, xDot and r in the stored previous values
@@ -475,26 +648,44 @@ public:
    */
   virtual void swapInMemory(void);
 
-  /** \fn void vectorField (double time)
+  /** \fn void vectorField (const double& time)
    * \brief Default function for computing the vector field \f$ f: (x,t) \in R^{n} \times R  \mapsto  R^{n}\f$
    * \param double time : the time for the computation
    *  \exception RuntimeException
    */
-  virtual void vectorField(double time);
+  virtual void vectorField(const double& time);
 
-  /** \fn static void computeJacobianX (double time)
+  /** \fn static void computeJacobianX (const double& time)
    *  \brief Default function for computing the gradient of the vector field with the respect
    *  to the state  \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param double time : the time for the computation
    *  \exception RuntimeException
    */
-  virtual void computeJacobianX(double time);
+  virtual void computeJacobianX(const double& time);
 
   /** \fn void saveDSToXML()
-   *  \brief copy the data of the DS to the XML tree
+   *  \brief copy the data of the DS in the XML tree
    *  \exception RuntimeException
    */
   virtual void saveDSToXML();
+
+  /** \fn void saveDSDataToXML()
+   *  \brief copy the data common to each system in the XML tree
+   *  \exception RuntimeException
+   */
+  virtual void saveDSDataToXML();
+
+  /** \fn void saveBCToXML()
+   *  \brief copy the Boundary Conditions data in the XML tree
+   *  \exception RuntimeException
+   */
+  virtual void saveBCToXML();
+
+  /** \fn void saveDSIOToXML()
+   *  \brief copy the DS Input-Output data in the XML tree
+   *  \exception RuntimeException
+   */
+  virtual void saveDSIOToXML();
 
   /** \fn void display()
    *  \brief print the data of the dynamical system on the standard output
@@ -512,8 +703,8 @@ public:
    *  \param SiconosMatrix* : the omega0 matrix of this boundary condition
    *  \param SiconosMatrix* : the omegaT matrix of this boundary condition
    */
-  BoundaryCondition* createLinearBC(SiconosVector* omega = NULL,
-                                    SiconosMatrix* omega0 = NULL, SiconosMatrix* omegaT = NULL);
+  BoundaryCondition* createLinearBC(SiconosVector* omega = 0,
+                                    SiconosMatrix* omega0 = 0, SiconosMatrix* omegaT = 0);
 
   /** \fn BoundaryCondition* createNLinearBC()
    *  \brief create the NLinear Boundary Condition of this DynamicalSystem
@@ -537,20 +728,31 @@ public:
     return *vectorFieldPtr;
   }
 
+  /** \fn double dsConvergenceIndicator()
+   *  \brief Default function for computing an indicator of convergence
+   *   \brief return a double
+   */
+  virtual double dsConvergenceIndicator() const ;
 
 protected:
-  /** \fn void fillDSWithDSXML()
-   *  \brief uses the DSXML of the DynamicalSystem to fill the field of this DynamicalSystem
+
+  // Default constructor
+  DynamicalSystem();
+
+  /** \fn void fillBoundaryConditionsFromXml()
+   *  \brief uses the DSXML of the DynamicalSystem to fill BoundaryCondition fields
    *  \exception RuntimeException
    */
-  virtual void fillDSWithDSXML();
+  virtual void fillBoundaryConditionsFromXml();
 
-  /** \fn void linkDSXML()
-   *  \brief makes the links between the BoundaryConditionXML of the DSXML of the DynamicalSystem and the BoundaryCondition
+  /** \fn void fillDsioFromXml()
+   *  \brief uses the DSXML of the DynamicalSystem to fill DSIO vector
+   *  \exception RuntimeException
    */
-  virtual void linkDSXML();
+  virtual void fillDsioFromXml();
 
-  /** the type of the DS : LagrangianDS, LagrangianLinearTIDS, LinearSystemDS */
+  /** Dynamical System type: General Dynamical System (NLDS) LagrangianDS (LNLDS),
+      LagrangianLinearTIDS (LTIDS), LinearSystemDS (LDS)*/
   string DSType;
 
   /** NonSmoothDynamicalSystem owner of this DynamicalSystem */
@@ -565,76 +767,67 @@ protected:
   /** the dimension of the system (i.e. size of the state vector x, or the vector r, ...)*/
   int n;
 
-  /** x0 the value of the state at the initial time t0 */
+  /** initial state of the system */
   SiconosVector *x0;
 
-  /** the state vector of the system, \f$  x \in R^{n}\f$ */
+  /** state of the system, \f$  x \in R^{n}\f$ */
   SiconosVector *x;
 
   /** the  previous state vectors stored in memory*/
-  SiconosMemory xMemory; //vector< SiconosVector* > xMemory;
+  SiconosMemory xMemory;
 
   /** the time derivative of the state x (the velocity) */
-  /*SiconosVector*/
-  SimpleVector xDot;
+  SiconosVector *xDot;
 
-  /** the  previous vector of the time derivative of the state x  */
-  SiconosMemory xDotMemory; //vector< SiconosVector* > xDotMemory;
+  /** the  previous xDot vectors */
+  SiconosMemory xDotMemory;
 
-  /** the  free state vector (the state vector for r=0) */
+  /** the  free state vector (state vector for r=0) */
   SiconosVector *xFree;
 
   /** the  input vector due to the non-smooth law \f$  r \in R^{n}\f$ (multiplier, force, ...)*/
-  /*SiconosVector*/
-  SimpleVector r;
+  SimpleVector *r;
 
-  /**  the previous vectors, r, stored in memory */
-  SiconosMemory rMemory; //vector< SiconosVector* > rMemory;
+  /**  the previous r vectors */
+  SiconosMemory rMemory;
 
   /** number of previous states stored in memory */
   int stepsInMemory;
 
-  /* contains the name of the plugin used to compute the vectorField */
+  /* the name of the plugin used to compute the vectorField */
   string vectorFieldFunctionName;
-  /* contains the name of the plugin used to compute the JacobianX */
+
+  /* the name of the plugin used to compute the JacobianX */
   string computeJacobianXFunctionName;
 
-  /** Gradient of the vectorfield \f$ f(x,t) \f$ with the respect to \f$ x\f$*/
-  SiconosMatrix jacobianX;
+  /** Gradient of the vectorfield \f$ f(x,t) \f$ with respect to \f$ x\f$*/
+  SiconosMatrix *jacobianX;
 
-  /** the boundary conditions defined if the DynamicalSystem has boundary conditions */
+  /** boundary conditions defined if the DynamicalSystem has some */
   BoundaryCondition *BC;
 
-  /** the XML object linked to the DynamicalSystem to read xML data */
+  /** the XML object linked to the DynamicalSystem  */
   DSXML *dsxml;
 
-  /** class for manage plugin (open, close librairy...) */
+  /** class for plugin managing (open, close librairy...) */
   SiconosSharedLibrary cShared;
 
-  /** adress of the plugin function computing vectorfield */
+  /** adress of the plugin function that computes vectorfield */
   vfPtr vectorFieldPtr;
 
-
-  /** contains a link to the DSInputOutput of the DynamicalSystems */
+  /** vector of the DS Inputs-Outputs of the Dynamical System */
   vector<DSInputOutput*> dsioVector;
 
   /** \fn void (*computeJacobianXPtr) (int* sizeOfX, double* time, double* xPtr, double* jacobianXPtr)
-   *  \brief  Pointer on function for computing the gradient of the vector field with the respect to the state  \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
-   *  \param int* sizeOfX : the size of the vector X
-   *  \param double* time : the time for the computation
-   *  \param double* xPtr : the pointer to the first element of the vector X
-   *  \param double* jacobianXPtr : the pointer to the first element of the matrix jacobianX (in-out parameter)
+   *  \brief  Pointer on function to compute the gradient of the vector field with the respect to the state  \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
+   *  \param int* sizeOfX : size of vector X
+   *  \param double* time : time for computation
+   *  \param double* xPtr : pointer to the first element of X
+   *  \param double* jacobianXPtr : pointer to the first element of jacobianX matrix (in-out parameter)
    */
   void (*computeJacobianXPtr)(int* sizeOfX, double* time, double* xPtr, double* jacobianXPtr);
 
-  /** \fn void init()
-   *  \brief initialise value of a Dynamical System
-   */
-  virtual void init();
-
-
 private :
-
 };
 
 #endif // DYNAMICALSYSTEM_H

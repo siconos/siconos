@@ -77,7 +77,8 @@ public:
    *  \exception SiconosVectorException
    *  \return bool : true if no error
    */
-  void add(const SiconosVector& v) ;
+  void add(const SiconosVector &v) ;
+  void add(SiconosVector *v) ;
 
   /** \fn void setValues(const vector<double> v)
    *  \brief set the values of the vector to a new set of value

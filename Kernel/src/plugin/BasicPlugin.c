@@ -89,7 +89,7 @@ extern "C" void computeJacobianQFInt(int *sizeOfq, double *time, double *q, doub
    * output parameter : jacob (pointer to JacobianCoordFint *matrix)
    */
 
-  printf("Call of the function 'computeJacobianCoordFInt' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeJacobianQFInt' of the basic plugin.\nYou have to implement this function.\n");
 }
 
 extern "C" void computeJacobianVelocityFInt(int *sizeOfq, double *time, double *q, double *velocity, double *jacob)
@@ -99,12 +99,12 @@ extern "C" void computeJacobianVelocityFInt(int *sizeOfq, double *time, double *
 
 extern "C" void computeJacobianQQNLInertia(int *sizeOfq, double *q, double *velocity, double *jacob)
 {
-  printf("Call of the function 'computeJacobianCoordQ' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeJacobianQQNLInertia' of the basic plugin.\nYou have to implement this function.\n");
 }
 
 extern "C" void computeJacobianVelocityQNLInertia(int *sizeOfq, double *q, double *velocity, double *jacob)
 {
-  printf("Call of the function 'computeJacobianVelocityQ' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeJacobianVelocityQNLInertia' of the basic plugin.\nYou have to implement this function.\n");
 }
 
 extern "C" void computeOutput(int *sizeOfX, double* x, double *time, double* lambda, double* y)

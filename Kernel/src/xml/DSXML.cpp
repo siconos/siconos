@@ -280,9 +280,9 @@ void DSXML::loadDS(DynamicalSystem* ds)
   string type;
   xmlNode* node;
 
-  if (ds->getBoundaryCondition() != NULL)
+  if (ds->getBoundaryConditionPtr() != NULL)
   {
-    type = ds->getBoundaryCondition()->getType();
+    type = ds->getBoundaryConditionPtr()->getType();
     node = xmlNewChild(rootDSXMLNode, NULL, (xmlChar*)BOUNDARYCONDITION_TAG.c_str(), NULL);
     if (type == NLINEARBC)
     {
@@ -291,7 +291,7 @@ void DSXML::loadDS(DynamicalSystem* ds)
       this->boundaryConditionXML = new NLinearBCXML();
 
       // linkage between the DynamicalSystem and his DSXML
-      ds->getBoundaryCondition()->setBoundaryConditionXML(this->boundaryConditionXML);
+      ds->getBoundaryConditionPtr()->setBoundaryConditionXML(this->boundaryConditionXML);
 
       // creation of the DynamicalSystemXML
       static_cast<NLinearBCXML*>(this->boundaryConditionXML)->updateBoundaryConditionXML(node);  //, ds->getBoundaryCondition() );
@@ -303,7 +303,7 @@ void DSXML::loadDS(DynamicalSystem* ds)
       this->boundaryConditionXML = new LinearBCXML();
 
       // linkage between the DynamicalSystem and his DSXML
-      ds->getBoundaryCondition()->setBoundaryConditionXML(this->boundaryConditionXML);
+      ds->getBoundaryConditionPtr()->setBoundaryConditionXML(this->boundaryConditionXML);
 
       // creation of the DynamicalSystemXML
       static_cast<LinearBCXML*>(this->boundaryConditionXML)->updateBoundaryConditionXML(node); //, ds->getBoundaryCondition() );
@@ -315,7 +315,7 @@ void DSXML::loadDS(DynamicalSystem* ds)
       this->boundaryConditionXML = new PeriodicBCXML();
 
       // linkage between the DynamicalSystem and his DSXML
-      ds->getBoundaryCondition()->setBoundaryConditionXML(this->boundaryConditionXML);
+      ds->getBoundaryConditionPtr()->setBoundaryConditionXML(this->boundaryConditionXML);
 
       // creation of the DynamicalSystemXML
       static_cast<PeriodicBCXML*>(this->boundaryConditionXML)->updateBoundaryConditionXML(node); //, ds->getBoundaryCondition() );
@@ -334,7 +334,7 @@ void DSXML::loadDS(DynamicalSystem* ds)
     xmlNode *dsioDefinitionNode, *nsdsNode;
     DSInputOutputXML *dsioXML;
 
-    nsdsNode = ds->getNSDS()->getNSDSXML()->getNSDSXMLNode();
+    nsdsNode = ds->getNSDSPtr()->getNSDSXML()->getNSDSXMLNode();
     dsioDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)nsdsNode, DSINPUTOUTPUT_DEFINITION_TAG);
     if (dsioDefinitionNode == NULL)
       dsioDefinitionNode = xmlNewChild(nsdsNode, NULL, (xmlChar*)DSINPUTOUTPUT_DEFINITION_TAG.c_str(), NULL);

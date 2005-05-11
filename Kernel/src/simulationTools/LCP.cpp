@@ -170,13 +170,10 @@ void LCP::computeM(void)
   this->M = SiconosMatrix::SiconosMatrix(activeInteraction, activeInteraction);
   this->M.zero();
 
-  // --- For each interaction in the Map ... ---
+  // --- For each interaction in the Map (ie active interaction) ... ---
   map<Interaction* , vector <Connection*> >::iterator iter;
   for (iter = this->connectedInteractionMap.begin(); iter != this->connectedInteractionMap.end(); ++iter)
-    //for (i = 0; i < this->interactionVector.size(); i++)
   {
-    //if( this->connectedInteractionMap.find( this->interactionVector[i] ) != this->connectedInteractionMap.end() )
-    //{
     Interaction *CurrentInteraction ;
     CurrentInteraction = iter->first;
     WW = SiconosMatrix::SiconosMatrix(0, 0); // strange !!??
@@ -184,11 +181,9 @@ void LCP::computeM(void)
 
     // --- Check if W matrix of Moreau's integrator is already inversed ---
 
-    //vDS = this->interactionVector[i]->getDynamicalSystems();
     vDS = CurrentInteraction ->getDynamicalSystems();
     if (vDS.size() == 2)
     {
-
       n = vDS[0]->getNumber();
       I = this->strategy->getIntegratorOfDS(n);
       if (I->getType() == MOREAU_INTEGRATOR)
@@ -211,11 +206,10 @@ void LCP::computeM(void)
       else
         RuntimeException::selfThrow("LCP::computeA not yet implemented for Integrator of type " + I->getType());
 
-      // Assemble of W
+      // Assembly of W
       v[0] = W1;
       v[1] = W2;
       WW = BlockMatrixAssemble(v);
-
       // Why a new PLUinversion ? Already done in the previous loops.
       W1->PLUInverseInPlace();
       W2->PLUInverseInPlace();
@@ -225,7 +219,6 @@ void LCP::computeM(void)
 
     // --- Get the relation parameters and compute M ---
 
-    //R = this->interactionVector[i]->getRelation();
     R = CurrentInteraction->getRelation();
     if (R->getType() == LAGRANGIANLINEARRELATION)
     {
@@ -233,7 +226,6 @@ void LCP::computeM(void)
       LLR = static_cast<LagrangianLinearR*>(R);
       H = LLR->getHPtr();
       Mtmp = *H * WW.multTranspose(*H);
-      //cout<<"#_# "<<currentActiveInteraction<<" - "<<currentActiveInteraction<<endl;
       this->M.blockMatrixCopy(Mtmp, currentActiveInteraction, currentActiveInteraction);
     }
     else
@@ -243,23 +235,19 @@ void LCP::computeM(void)
 
     interConnectedNumber = 0;
     if (iter ->second[0] != NULL)
-      //if( connectedInteractionMap[this->interactionVector[i]][0] != NULL )
     {
       // get from the map the connexion vector of the current interaction
       vCo = iter -> second ;
-      //vCo = connectedInteractionMap[this->interactionVector[i]];
       for (int k = 0; k < vCo.size(); k++)
-        //for(int k = 0; k<connectedInteractionMap[this->interactionVector[i]].size(); k++)
       {
         orgDSRank = vCo[k]->originInteractionDSRank;
         connectedDSRank = vCo[k]->connectedInteractionDSRank;
 
-        // getting the right W
+        // get W(Moreau) of common DS
         wTmp = *v[orgDSRank];
 
-        // getting H matrix of the common DS
+        // get H matrix of the common DS
         // /!\ we supose that all the DS have the same size !!!!
-        //this->interactionVector[i].getDynamicalSystem( orgDSRank );
         if (R->getType() == LAGRANGIANLINEARRELATION)
         {
           LLR = static_cast<LagrangianLinearR*>(R);
@@ -269,6 +257,7 @@ void LCP::computeM(void)
         else
           RuntimeException::selfThrow("LCP::computeM [level2] not yet implemented for relation of type " + R->getType());
 
+        // get H matrix of the connected DS
         RConnected = vCo[k]->connected->getRelation();
         if (RConnected->getType() == LAGRANGIANLINEARRELATION)
         {
@@ -293,7 +282,6 @@ void LCP::computeM(void)
     }
     // incrementation of the number of active interaction for the M creation
     currentActiveInteraction++;
-    //} // test on status
   }
 
   this->nLcp = activeInteraction;
@@ -310,7 +298,6 @@ void LCP::computeQ(double time)
 
   double e;
   SimpleVector qLCPtmp;
-
   /*
    * \warning : initialisation of "q" removed! It seems that that BouncingBall sample
    * is still running good ...
@@ -320,47 +307,40 @@ void LCP::computeQ(double time)
   this->q = SimpleVector::SimpleVector(qSize);
   this->q.zero();
 
-  for (int i = 0; i < this->interactionVector.size(); i++)
+  // --- For each interaction in the Map (ie active interaction) ... ---
+  map<Interaction* , vector <Connection*> >::iterator iter;
+  for (iter = this->connectedInteractionMap.begin(); iter != this->connectedInteractionMap.end(); ++iter)
   {
-    if (this->connectedInteractionMap.find(this->interactionVector[i]) != this->connectedInteractionMap.end())
+    Interaction *CurrentInteraction ;
+    CurrentInteraction = iter->first;
+    R = CurrentInteraction->getRelation();
+    nslaw = CurrentInteraction->getNonSmoothLaw();
+    if (R->getType() == LAGRANGIANLINEARRELATION)
     {
-      R = this->interactionVector[i]->getRelation();
-      nslaw = this->interactionVector[i]->getNonSmoothLaw();
-      if (R->getType() == LAGRANGIANLINEARRELATION)
+      LLR = static_cast<LagrangianLinearR*>(R);
+      if (nslaw->getType() == NEWTONIMPACTLAWNSLAW)
       {
-        LLR = static_cast<LagrangianLinearR*>(R);
+        newton = static_cast<NewtonImpactLawNSL*>(nslaw);
+        e = newton->getE();
+        LLR->computeFreeOutput(time);
+        qLCPtmp = CurrentInteraction -> getYDot();
+        qLCPtmp += e * CurrentInteraction -> getYDotOld();
+        // Assemble q
+        //this->q = (-1)*qLCPtmp;
 
-        if (nslaw->getType() == NEWTONIMPACTLAWNSLAW)
-        {
-          newton = static_cast<NewtonImpactLawNSL*>(nslaw);
-          e = newton->getE();
-          LLR->computeFreeOutput(time);
-          qLCPtmp = this->interactionVector[i]->getYDot();
-
-          qLCPtmp += e * this->interactionVector[i]->getYDotOld();
-
-          // Assemble q
-          //this->q = (-1)*qLCPtmp;
-
-          /*
-           * in a LCP problem the contribution of each interaction
-           * to the vector 'q' is only a vector of dimension 1
-           * so for the moment the assemblage of the q vector will be the copy
-           * of 1 double value into 'q' for each active interaction
-           */
-          this->q(qPos++) = -qLCPtmp(0);
-
-          //            cout<<"### computeQ - LCP (Ufree, Uold) :"<<endl;
-          //            this->interactionVector[i]->getYDot().display();
-          //            this->interactionVector[i]->getYDotOld().display();
-        }
-        else
-          RuntimeException::selfThrow("LCP::computeQ not yet implemented for NSlaw of type " + nslaw->getType() + "and for relation of type " + R->getType());
+        /*
+         * in a LCP problem the contribution of each interaction
+         * to the vector 'q' is only a vector of dimension 1
+         * so for the moment the assemblage of the q vector will be the copy
+         * of 1 double value into 'q' for each active interaction
+         */
+        this->q(qPos++) = -qLCPtmp(0);
       }
       else
-        RuntimeException::selfThrow("LCP::computeQ not yet implemented for relation of type " + R->getType());
+        RuntimeException::selfThrow("LCP::computeQ not yet implemented for NSlaw of type " + nslaw->getType() + "and for relation of type " + R->getType());
     }
-    //    }
+    else
+      RuntimeException::selfThrow("LCP::computeQ not yet implemented for relation of type " + R->getType());
   }
   OUT("LCP::computeQ(void)\n");
 }

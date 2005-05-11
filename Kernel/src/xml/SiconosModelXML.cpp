@@ -396,7 +396,6 @@ bool SiconosModelXML::checkSiconosDOMTree()
 
     if (schema == NULL)
       XMLException::selfThrow("SiconosModelXML - please correct the xml schema : " + schemaFile + ".");
-
     xmlSchemaValidCtxtPtr validctxt = xmlSchemaNewValidCtxt(schema);
     xmlSchemaSetValidErrors(validctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
 

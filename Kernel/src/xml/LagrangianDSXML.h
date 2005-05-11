@@ -75,7 +75,7 @@ public:
   *   \brief Return  q vector of the LagrangianDSXML
   *   \return SimpleVector : q vector of the LagrangianDSXML
   */
-  inline /*SiconosVector*/ SimpleVector getQ()
+  inline SimpleVector getQ()
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(this->qNode);
   }
@@ -93,7 +93,7 @@ public:
     else SiconosDOMTreeTools::setSiconosVectorValue(this->qNode, v);
   }
 
-  /** \fn SimpleVector getQ0()
+  /** \fn SimpleVector getQ()
   *   \brief Return q0 vector of the LagrangianDSXML
   *   \return SimpleVector : q0 vector of the LagrangianDSXML
   */

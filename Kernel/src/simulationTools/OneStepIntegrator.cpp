@@ -3,22 +3,29 @@
 
 #include "check.h"
 
-OneStepIntegrator::OneStepIntegrator()
+// --- Xml constructor ---
+OneStepIntegrator::OneStepIntegrator(OneStepIntegratorXML* osixml): integratorType("none"), ds(0), r(1), timeDiscretisation(0), integratorxml(osixml)
 {
-  this->integratorxml = NULL;
-  this->timeDiscretisation = NULL;
-  this->ds = NULL;
-  this->r = 1;
+  if (this->integratorxml != 0)
+  {
+    if (this->integratorxml->hasR()) this->r = this->integratorxml->getR();
+  }
+  else RuntimeException::selfThrow("OneStepIntegrator::fillIntegratorWithIntegratorXML - OneStepIntegratorXML object not exists");
 }
 
-OneStepIntegrator::OneStepIntegrator(OneStepIntegratorXML* osixml, TimeDiscretisation* td, DynamicalSystem* ds)
+// --- Constructor from a minimum set of data ---
+OneStepIntegrator::OneStepIntegrator(TimeDiscretisation* td, DynamicalSystem* newDs): integratorType("none"), ds(newDs), r(1), timeDiscretisation(td), integratorxml(0)
 {
-  this->integratorxml = osixml;
-  this->timeDiscretisation = td;
-  this->ds = ds;
-  cout << "  - the DynamicalSystem Linked to this OneStepIntegrator has the number " << this->ds->getNumber() << " and his id is " << this->ds->getId() << endl;
+  //to complete ...
 }
 
+/*OneStepIntegrator::OneStepIntegrator(OneStepIntegratorXML* osixml,TimeDiscretisation* td, DynamicalSystem* newDs): integratorType("none"), ds(newDs), r(1), timeDiscretisation(td), integratorxml(osixml)
+{
+  if(integratorxml != 0) if( this->integratorxml->hasR() ) this->r = this->integratorxml->getR();
+  else RuntimeException::selfThrow("OneStepIntegrator::OneStepIntegrator() - xml constructor + data - OneStepIntegratorXML object not exists");
+}
+*/
+// --- Destructor ---
 OneStepIntegrator::~OneStepIntegrator()
 {}
 
@@ -67,29 +74,14 @@ void OneStepIntegrator::display() const
   cout << "| ds : " << this->ds->getId() << endl;
   if (this->integratorType != MOREAU_INTEGRATOR)
     cout << "| r : " << this->r << endl;
-  this->timeDiscretisation->display();
+  if (timeDiscretisation != 0) this->timeDiscretisation->display();
   cout << "-----------------------------------------------------" << endl << endl;
-}
-
-
-
-void OneStepIntegrator::fillIntegratorWithIntegratorXML()
-{
-  IN("OneStepIntegrator::fillIntegratorWithIntegratorXML\n");
-  if (this->integratorxml != NULL)
-  {
-    if (this->integratorxml->hasR()) this->r = this->integratorxml->getR();
-    else cout << "Warning : the r value of the OneStepIntegrator is not defined, optional attribute." << endl;
-  }
-  else RuntimeException::selfThrow("OneStepIntegrator::fillIntegratorWithIntegratorXML - OneStepIntegratorXML object not exists");
-  OUT("OneStepIntegrator::fillIntegratorWithIntegratorXML\n");
-
 }
 
 void OneStepIntegrator::saveIntegratorToXML()
 {
   IN("OneStepIntegrator::saveIntegratorToXML\n");
-  if (this->integratorxml != NULL)
+  if (this->integratorxml != 0)
   {
     vector<int> dsConcerned;
     dsConcerned.push_back(this->ds->getNumber());
@@ -102,3 +94,7 @@ void OneStepIntegrator::saveIntegratorToXML()
   OUT("OneStepIntegrator::saveIntegratorToXML\n");
 
 }
+
+//-- Default constructor --
+OneStepIntegrator::OneStepIntegrator(): integratorType("none"), ds(0), r(1), timeDiscretisation(0), integratorxml(0)
+{}

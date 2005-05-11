@@ -8,70 +8,178 @@
 #include "LagrangianDSIO.h"
 #include "LagrangianLinearDSIO.h"
 
+// --- Constructors ---
 
-DynamicalSystem::DynamicalSystem()
-{
-  this->init();
-  this->DSType = NLSDS;
-  this->dsxml = NULL;
-}
 
-DynamicalSystem::DynamicalSystem(DSXML * dsXML)
+// From XML file
+DynamicalSystem::DynamicalSystem(DSXML * dsXML):  DSType(NLDS), nsds(0), number(0), id("none"), n(0), x0(0), x(0), xDot(0), xFree(0), r(0),
+  stepsInMemory(1), jacobianX(0), BC(0), dsxml(dsXML), vectorFieldPtr(0)
 {
-  IN("DynamicalSystem::DynamicalSystem\n");
-  if (dsXML != NULL)
+  IN("DynamicalSystem::DynamicalSystem - XML constructor\n");
+  // --- get values in xml file ---
+  if (dsXML != 0)
   {
-    this->DSType = NLSDS;
-    this->init();
-    this->dsxml = dsXML;
+    this->number = this->dsxml->getNumber();
+    if (this->dsxml->hasId() == true) this->id = this->dsxml->getId();
+    if (this->dsxml->hasN() == true) this->n = this->dsxml->getN();
 
-    this->fillDSWithDSXML();
-    this->linkDSXML();
+    // --- Memory allocation for vector and matrix members ---
+    this->x0 = new SimpleVector(n);
+    this->x = new SimpleVector(n);
+    this->xDot = new SimpleVector(n);
+    this->xFree = new SimpleVector(n);
+    this->r = new SimpleVector(this->n);
+    this->jacobianX = new SiconosMatrix(this->n, this->n);
+
+    // xml loading of vector and matrix members
+    if (this->dsxml->hasX0() == true) *(this->x0) = this->dsxml->getX0();
+    if (this->dsxml->hasX() == true) *(this->x) = this->dsxml->getX();
+    if (this->dsxml->hasXMemory() == true) this->xMemory = SiconosMemory::SiconosMemory(this->dsxml->getXMemoryXML()); //this->dsxml->getXMemory();
+    if (this->dsxml->hasXDot() == true) *(this->xDot) = this->dsxml->getXDot();
+    if (this->dsxml->hasXDotMemory() == true) this->xDotMemory = SiconosMemory::SiconosMemory(this->dsxml->getXDotMemoryXML()); //this->dsxml->getXDotMemory();
+    if (this->dsxml->hasStepsInMemory() == true) this->stepsInMemory = this->dsxml->getStepsInMemory();
+
+    // --- Plugins ---
+    string plugin;
+    // VectorField
+    if (this->dsxml->hasVectorFieldPlugin() == true)
+    {
+      plugin = this->dsxml->getVectorFieldPlugin();
+      this->setVectorFieldFunction(this->cShared.getPluginName(plugin), this->cShared.getPluginFunctionName(plugin));
+    }
+    // JacobianX
+    if (this->dsxml->hasComputeJacobianXPlugin() == true)
+    {
+      plugin = this->dsxml->getComputeJacobianXPlugin();
+      this->setComputeJacobianXFunction(this->cShared.getPluginName(plugin), this->cShared.getPluginFunctionName(plugin));
+    }
+    // --- Boundary conditions ---
+    fillBoundaryConditionsFromXml();
+
+    // --- DS input-output ---
+    fillDsioFromXml();
   }
   else
   {
-    cout << "DynamicalSystem::DynamicalSystem - DSXML paramater musn't be NULL" << endl;
+    cout << "DynamicalSystem::DynamicalSystem - DSXML paramater must not be 0" << endl;
   }
-  OUT("DynamicalSystem::DynamicalSystem\n");
+  OUT("DynamicalSystem::DynamicalSystem - XML constructor\n");
 }
 
-DynamicalSystem::DynamicalSystem(int number, int n,
-                                 SiconosVector* x0, string vectorFieldPlugin)
+// From a minimum set of data
+DynamicalSystem::DynamicalSystem(int number, int n, SiconosVector* x0, string vectorFieldPlugin):
+  DSType(NLDS), nsds(0), number(0), id("none"), n(n), x0(0), x(0), xDot(0), xFree(0), r(0),
+  stepsInMemory(1), jacobianX(0), BC(0), dsxml(0), vectorFieldPtr(0)
 {
-  this->DSType = NLSDS;
-  this->dsxml = NULL;
-  this->number = number;
-  this->n = n;
-
+  IN("DynamicalSystem::DynamicalSystem - Minimum data constructor\n");
   this->x0 = new SimpleVector(n);
   this->x = new SimpleVector(n);
-  this->xDot = /*new*/ SimpleVector::SimpleVector(n);
+  this->xDot = new SimpleVector(n);
   this->xFree = new SimpleVector(n);
-
+  this->r = new SimpleVector(n);
+  this->jacobianX = new SiconosMatrix(this->n, this->n);
   *(this->x0) = *x0;
   this->setVectorFieldFunction(this->cShared.getPluginName(vectorFieldPlugin), this->cShared.getPluginFunctionName(vectorFieldPlugin));
-  OUT("DynamicalSystem::DynamicalSystem\n");
+  this->setComputeJacobianXFunction("BasicPlugin.so", "computeJacobianX");
+  OUT("DynamicalSystem::DynamicalSystem - Minimum data constructor\n");
 }
 
+// --- Destructor ---
 DynamicalSystem::~DynamicalSystem()
 {
-
   IN("DynamicalSystem::~DynamicalSystem()\n");
-
-  if (this->x != NULL) delete x;
-  if (this->x0 != NULL) delete x0;
-  if (this->xFree != NULL) delete xFree;
+  delete x0;
+  x0 = 0 ;
+  delete x;
+  x = 0;
+  delete xDot;
+  xDot = 0;
+  delete xFree;
+  xFree = 0;
+  delete r;
+  r = 0;
+  delete jacobianX;
+  jacobianX = 0;
   for (int i = 0; i < this->dsioVector.size(); i++)
-    if (this->dsioVector[i] != NULL) delete this->dsioVector[i];
-
+  {
+    delete this->dsioVector[i];
+    dsioVector[i] = 0;
+  }
+  delete BC;
+  BC = 0;
   OUT("DynamicalSystem::~DynamicalSystem()\n");
 }
-////////////////////////////
 
-
-vector<DSInputOutput*> DynamicalSystem::getDSInputOutputs(void)
+// Boundary conditions built-in (called from constructors)
+void DynamicalSystem::fillBoundaryConditionsFromXml()
 {
-  return dsioVector;
+  IN("DynamicalSystem::fillBoundaryConditionsFromXml\n");
+  if (this->dsxml->getBoundaryConditionXML() != 0)
+  {
+    if (this->dsxml->getBoundaryConditionXML()->getType() == LINEARBC_TAG)
+    {
+      //  Linear BC
+      this->BC = new LinearBC();
+      static_cast<LinearBC*>(this->BC)->createBoundaryCondition(this->dsxml->getBoundaryConditionXML());
+    }
+    else if (this->dsxml->getBoundaryConditionXML()->getType() == NON_LINEARBC_TAG)
+    {
+      // Non linear BC
+      this->BC = new NLinearBC();
+      static_cast<NLinearBC*>(this->BC)->createBoundaryCondition(this->dsxml->getBoundaryConditionXML());
+    }
+
+    else if (this->dsxml->getBoundaryConditionXML()->getType() == PERIODICBC_TAG)
+    {
+      // Periodic BC
+      this->BC = new PeriodicBC();
+      static_cast<PeriodicBC*>(this->BC)->createBoundaryCondition(this->dsxml->getBoundaryConditionXML());
+    }
+    else RuntimeException::selfThrow("DynamicalSystem::linkDSXML - bad kind of BoundaryCondition : " + this->dsxml->getBoundaryConditionXML()->getType());
+  }
+  OUT("DynamicalSystem::fillBoundaryConditionsFromXml\n");
+}
+
+// DSIO built-in (called from constructors)
+void DynamicalSystem::fillDsioFromXml()
+{
+  IN("DynamicalSystem::fillDsioFromXml\n");
+  DSInputOutput *dsio;
+  // get the numbers of DSIO
+  vector<int> nbDSIOtab = this->dsxml->getDSInputOutputNumbers();
+  for (int i = 0; i < nbDSIOtab.size(); i++)
+  {
+    if (this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LINEAR_DSIO_TAG)
+    {
+      // Linear DSIO
+      dsio = new LinearDSIO();
+      this->dsioVector.push_back(dsio);
+      static_cast<LinearDSIO*>(dsio)->createDSInputOutput(this->dsxml->getDSInputOutputXML(nbDSIOtab[i]));
+    }
+    else if (this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == NON_LINEAR_DSIO_TAG)
+    {
+      // Non linear DSIO
+      dsio = new DSInputOutput();
+      this->dsioVector.push_back(dsio);
+      static_cast<DSInputOutput*>(dsio)->createDSInputOutput(this->dsxml->getDSInputOutputXML(nbDSIOtab[i]));
+    }
+    else if (this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LAGRANGIAN_DSIO_TAG)
+    {
+      // Lagrangian DSIO
+      dsio = new LagrangianDSIO();
+      this->dsioVector.push_back(dsio);
+      static_cast<LagrangianDSIO*>(dsio)->createDSInputOutput(this->dsxml->getDSInputOutputXML(nbDSIOtab[i]));
+    }
+    else if (this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LAGRANGIAN_LINEAR_DSIO_TAG)
+    {
+      // Linear lagrangian DSIO
+      dsio = new LagrangianDSIO();
+      this->dsioVector.push_back(dsio);
+      static_cast<LagrangianLinearDSIO*>(dsio)->createDSInputOutput(this->dsxml->getDSInputOutputXML(nbDSIOtab[i]));
+    }
+    else RuntimeException::selfThrow("DynamicalSystem::linkDSXML - bad kind of DSInputOutput: " + this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType());
+  }
+  OUT("DynamicalSystem::fillDsioFromXml\n");
 }
 
 DSInputOutput* DynamicalSystem::getDSInputOutput(int i)
@@ -80,25 +188,14 @@ DSInputOutput* DynamicalSystem::getDSInputOutput(int i)
   {
     return this->dsioVector[i];
   }
-  //cout<<"# i = "<<i<<endl;
-  RuntimeException::selfThrow("EqualityConstraint - getDSInputOutput : \'i\' is out of range");
-}
-
-void DynamicalSystem::setDSInputOutputs(vector<DSInputOutput*> dsioVect)
-{
-  this->dsioVector = dsioVect;
-}
-
-void DynamicalSystem::addDSInputOutput(DSInputOutput* dsio)
-{
-  this->dsioVector.push_back(dsio);
+  else RuntimeException::selfThrow("DS - getDSInputOutput : \'i\' is out of range");
 }
 
 ////////////////////////////
 
-void DynamicalSystem::setVectorFieldFunction(string pluginPath, string functionName)
+void DynamicalSystem::setVectorFieldFunction(const string& pluginPath, const string& functionName)
 {
-  this->vectorFieldPtr = NULL;
+  this->vectorFieldPtr = 0;
   cShared.setFunction(&vectorFieldPtr, pluginPath, functionName);
 
   string plugin;
@@ -106,9 +203,9 @@ void DynamicalSystem::setVectorFieldFunction(string pluginPath, string functionN
   this->vectorFieldFunctionName = plugin + ":" + functionName;
 }
 
-void DynamicalSystem::setComputeJacobianXFunction(string pluginPath, string functionName)
+void DynamicalSystem::setComputeJacobianXFunction(const string& pluginPath, const string& functionName)
 {
-  this->computeJacobianXPtr = NULL;
+  this->computeJacobianXPtr = 0;
   cShared.setFunction(&computeJacobianXPtr, pluginPath, functionName);
 
   string plugin;
@@ -116,22 +213,24 @@ void DynamicalSystem::setComputeJacobianXFunction(string pluginPath, string func
   this->computeJacobianXFunctionName = plugin + ":" + functionName;
 }
 
-void DynamicalSystem::vectorField(double time)
+void DynamicalSystem::vectorField(const double& time)
 {
-  if (vectorFieldPtr == NULL)
+  if (vectorFieldPtr == 0)
     RuntimeException::selfThrow("vectorField() is not linked to a plugin function");
 
   int size = x->size();
-  this->vectorFieldPtr(&size, &time, &(*x)(0) , &xDot(0));
+  // const_cast to be deleted: problem const in C function signature? To see ...
+  this->vectorFieldPtr(&size, const_cast<double*>(&time), &(*x)(0) , &(*xDot)(0));
 }
 
-void DynamicalSystem::computeJacobianX(double time)
+void DynamicalSystem::computeJacobianX(const double& time)
 {
-  if (computeJacobianXPtr == NULL)
+  if (computeJacobianXPtr == 0)
     RuntimeException::selfThrow("computeJacobianX() is not linked to a plugin function");
 
   int size = x->size();
-  this->computeJacobianXPtr(&size, &time, &(*x)(0), &jacobianX(0, 0));
+  // const_cast to be deleted: problem const in C function signature? To see ...
+  this->computeJacobianXPtr(&size, const_cast<double*>(&time), &(*x)(0), &(*jacobianX)(0, 0));
 }
 
 
@@ -139,70 +238,9 @@ void DynamicalSystem::swapInMemory(void)
 {
   IN("DynamicalSystem::swapInMemory\n ");
   xMemory.swap(this->x);
-  xDotMemory.swap(&this->xDot);
-  rMemory.swap(&r);
-  //cout<<"DynamicalSystem::swapInMemory Done..."<<endl;
+  xDotMemory.swap(this->xDot);
+  rMemory.swap(this->r);
   OUT("DynamicalSystem::swapInMemory\n ");
-}
-
-
-void DynamicalSystem::fillDSWithDSXML()
-{
-  IN("DynamicalSystem::fillDSWithDSXML\n");
-  if (this->dsxml != NULL)
-  {
-    this->number = this->dsxml->getNumber();
-
-    if (this->dsxml->hasId() == true) this->id = this->dsxml->getId();
-    else cout << "Warning : Id is not defined in the XML " << endl;
-
-    if (this->dsxml->hasN() == true) this->n = this->dsxml->getN();
-    else cout << "Warning : n is not defined in the XML " << endl;
-
-    if (this->dsxml->hasX0() == true)
-      *(this->x0) = this->dsxml->getX0();
-    else cout << "Warning : x0 is not defined in the XML " << endl;
-
-    if (this->dsxml->hasX() == true)
-    {
-      *(this->x) = this->dsxml->getX();
-    }
-    else cout << "Warning : x is not defined in the XML " << endl;
-
-    if (this->dsxml->hasXDot() == true)(this->xDot) = this->dsxml->getXDot();
-    else cout << "Warning : xDot is not defined in the XML " << endl;
-
-    if (this->dsxml->hasXMemory() == true) this->xMemory = SiconosMemory::SiconosMemory(this->dsxml->getXMemoryXML()); //this->dsxml->getXMemory();
-    else cout << "Warning : xMemory is not defined in the XML " << endl;
-
-    if (this->dsxml->hasXDotMemory() == true) this->xDotMemory = SiconosMemory::SiconosMemory(this->dsxml->getXDotMemoryXML()); //this->dsxml->getXDotMemory();
-    else cout << "Warning : xDotMemory is not defined in the XML " << endl;
-
-    if (this->dsxml->hasStepsInMemory() == true) this->stepsInMemory = this->dsxml->getStepsInMemory();
-    else cout << "Warning : stepsInMemory is not defined in the XML " << endl;
-
-    string plugin;
-    // vectorField
-    if (this->dsxml->hasVectorFieldPlugin() == true)
-    {
-      plugin = this->dsxml->getVectorFieldPlugin();
-      this->setVectorFieldFunction(this->cShared.getPluginName(plugin), this->cShared.getPluginFunctionName(plugin));
-    }
-    else cout << "Warning : vectorFieldPlugin is not defined in the XML " << endl;
-
-
-    // computeJacobianX
-    if (this->dsxml->hasComputeJacobianXPlugin() == true)
-    {
-      plugin = this->dsxml->getComputeJacobianXPlugin();
-      this->setComputeJacobianXFunction(this->cShared.getPluginName(plugin), this->cShared.getPluginFunctionName(plugin));
-    }
-    else cout << "Warning : computeJacobianXPlugin is not defined in the XML " << endl;
-
-    this->r = SimpleVector(this->n);
-  }
-  else RuntimeException::selfThrow("DynamicalSystem::fillDSWithDSXML - DSXML object not exists");
-  OUT("DynamicalSystem::fillDSWithDSXML\n");
 }
 
 void DynamicalSystem::display() const
@@ -213,110 +251,28 @@ void DynamicalSystem::display() const
   cout << "| id : " << this->id << endl;
   cout << "| n : " << this->n << endl;
   cout << "| x " << endl;
-  this->x->display();
+  if (x != 0) this->x->display();
+  else cout << "-> 0" << endl;
   cout << "| x0 " << endl;
-  this->x0->display();
+  if (x0 != 0) this->x0->display();
+  else cout << "-> 0" << endl;
   cout << "| xFree " << endl;
-  this->xFree->display();
+  if (xFree != 0) this->xFree->display();
+  else cout << "-> 0" << endl;
   cout << "| xDot " << endl;
-  this->xDot.display();
+  if (xDot != 0) this->xDot->display();
+  else cout << "-> 0" << endl;
   cout << "| stepsInMemory : " << this->stepsInMemory << endl;
   cout << "| r " << endl;
-  this->r.display();
+  if (r != 0) this->r->display();
+  else cout << "-> 0" << endl;
+  cout << "| VectorField plugin: " << this->vectorFieldFunctionName << endl;
+  cout << "| JacobianX plugin: " << this->computeJacobianXFunctionName << endl;
   OUT("DynamicalSystem::display\n");
 
 }
 
-void DynamicalSystem::linkDSXML()
-{
-  IN("DynamicalSystem::linkDSXML\n");
-  if (this->dsxml->getBoundaryConditionXML() != NULL)
-  {
-    if (this->dsxml->getBoundaryConditionXML()->getType() == LINEARBC_TAG)
-    {
-      // creation of the LinearBC with this constructor and call of a method to fill
-      this->BC = new LinearBC();
-      static_cast<LinearBC*>(this->BC)->createBoundaryCondition(this->dsxml->getBoundaryConditionXML());
-    }
-
-    else if (this->dsxml->getBoundaryConditionXML()->getType() == NON_LINEARBC_TAG)
-    {
-      // creation of the NLinearBC with this constructor and call of a method to fill
-      this->BC = new NLinearBC();
-      static_cast<NLinearBC*>(this->BC)->createBoundaryCondition(this->dsxml->getBoundaryConditionXML());
-    }
-
-    else if (this->dsxml->getBoundaryConditionXML()->getType() == PERIODICBC_TAG)
-    {
-      // creation of the PeriodicBC with this constructor and call of a method to fill
-      this->BC = new PeriodicBC();
-      static_cast<PeriodicBC*>(this->BC)->createBoundaryCondition(this->dsxml->getBoundaryConditionXML());
-    }
-    else RuntimeException::selfThrow("DynamicalSystem::linkDSXML - bad kind of BoundaryCondition : " + this->dsxml->getBoundaryConditionXML()->getType());
-  }
-  else this->BC = NULL;
-
-  DSInputOutput *dsio;
-  vector<int> nbDSIOtab = this->dsxml->getDSInputOutputNumbers();
-  for (int i = 0; i < nbDSIOtab.size(); i++)
-  {
-    if (this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LINEAR_DSIO_TAG)
-    {
-      dsio = new LinearDSIO();
-      this->dsioVector.push_back(dsio);
-      static_cast<LinearDSIO*>(dsio)->createDSInputOutput(this->dsxml->getDSInputOutputXML(nbDSIOtab[i]));
-    }
-    else if (this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == NON_LINEAR_DSIO_TAG)
-    {
-      dsio = new DSInputOutput();
-      this->dsioVector.push_back(dsio);
-      static_cast<DSInputOutput*>(dsio)->createDSInputOutput(this->dsxml->getDSInputOutputXML(nbDSIOtab[i]));
-    }
-    else if (this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LAGRANGIAN_DSIO_TAG)
-    {
-      dsio = new LagrangianDSIO();
-      this->dsioVector.push_back(dsio);
-      static_cast<LagrangianDSIO*>(dsio)->createDSInputOutput(this->dsxml->getDSInputOutputXML(nbDSIOtab[i]));
-    }
-    else if (this->dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LAGRANGIAN_LINEAR_DSIO_TAG)
-    {
-      dsio = new LagrangianDSIO();
-      this->dsioVector.push_back(dsio);
-      static_cast<LagrangianLinearDSIO*>(dsio)->createDSInputOutput(this->dsxml->getDSInputOutputXML(nbDSIOtab[i]));
-    }
-    else RuntimeException::selfThrow("DynamicalSystem::linkDSXML - bad kind of BoundaryCondition : " + this->dsxml->getBoundaryConditionXML()->getType());
-  }
-  OUT("DynamicalSystem::linkDSXML\n");
-}
-
-
-void DynamicalSystem::init()
-{
-  IN("DynamicalSystem::init\n");
-  this->number = 0;
-  this->id = "none";
-  this->n = 0;
-
-  this->x0 = new SimpleVector();
-  this->x = new SimpleVector();
-  this->xDot = SimpleVector::SimpleVector();
-  this->xFree = new SimpleVector();
-
-  this->r = SimpleVector::SimpleVector();
-  this->BC = NULL;
-
-  this->jacobianX = SiconosMatrix::SiconosMatrix();
-
-  this->stepsInMemory = 1;
-  this->setVectorFieldFunction("BasicPlugin.so", "vectorField");
-  this->setComputeJacobianXFunction("BasicPlugin.so", "computeJacobianX");
-  this->dsxml = NULL;
-
-  OUT("DynamicalSystem::init\n");
-}
-
-
-void DynamicalSystem::initMemory(int steps)
+void DynamicalSystem::initMemory(const int& steps)
 {
   IN("DynamicalSystem::initMemory\n");
   if (steps < 0)
@@ -326,13 +282,13 @@ void DynamicalSystem::initMemory(int steps)
     this->stepsInMemory = steps;
 
     /*
-     ** we made the initialization of the memories
-     *
-     * for rMemory, we don't need to load data for the DOM tree because there are no data saved in the XML for r
-     *
-     * the other memories are resized with the first parameter 'steps', and data are reloaded from the DOM tree
-     * only if there are data in the DOM tree
-     */
+    ** we made the initialization of the memories
+    *
+    * for rMemory, we don't need to load data for the DOM tree because there are no data saved in the XML for r
+    *
+    * the other memories are resized with the first parameter 'steps', and data are reloaded from the DOM tree
+    * only if there are data in the DOM tree
+    */
 
     this->rMemory = SiconosMemory::SiconosMemory(steps);
     this->xMemory = SiconosMemory::SiconosMemory(steps, this->xMemory.getSiconosMemoryXML());
@@ -347,10 +303,50 @@ void DynamicalSystem::saveDSToXML()
 {
   IN("DynamicalSystem::saveDSToXML\n");
 
-  /*
-   * save of the BoundariesConditions
-   */
-  if (this->BC != NULL)
+  // --- general DS data ---
+  saveDSDataToXML();
+
+  // --- other data ---
+  if (this->dsxml != 0)
+  {
+    this->dsxml->setN(this->n);
+    this->dsxml->setVectorFieldPlugin(this->vectorFieldFunctionName);
+    if (this->computeJacobianXFunctionName != "")
+      this->dsxml->setComputeJacobianXPlugin(this->computeJacobianXFunctionName);
+    else
+      this->dsxml->setComputeJacobianXPlugin("BasicPlugin:computeJacobianX");
+  }
+  else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DSXML object doesn't exists");
+  OUT("DynamicalSystem::saveDSToXML\n");
+}
+
+// Save data common to each system into the xml file
+void DynamicalSystem::saveDSDataToXML()
+{
+  //--- Boundary conditions ---
+  saveBCToXML();
+  // --- DS input-output ---
+  saveDSIOToXML();
+  if (this->dsxml != 0)
+  {
+    this->dsxml->setId(this->id);
+    this->dsxml->setX0(this->x0);
+    this->dsxml->setX(this->x);
+    this->dsxml->setXMemory(&(this->xMemory));
+    this->dsxml->setXDot(this->xDot);
+    this->dsxml->setXDotMemory(&(this->xDotMemory));
+    this->dsxml->setStepsInMemory(this->stepsInMemory);
+    this->dsxml->setR(this->r);
+  }
+  else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DSXML object doesn't exists");
+  OUT("DynamicalSystem::saveDSToXML\n");
+
+}
+
+// Save boundary conditions to xml file
+void DynamicalSystem::saveBCToXML()
+{
+  if (this->BC != 0)
   {
     if (this->BC->getType() == LINEARBC)
       (static_cast<LinearBC*>(this->BC))->saveBCToXML();
@@ -360,7 +356,11 @@ void DynamicalSystem::saveDSToXML()
       (static_cast<PeriodicBC*>(this->BC))->saveBCToXML();
     else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - bad kind of BoundaryCondition");
   }
+}
 
+// Save DS Input-Output to xml file
+void DynamicalSystem::saveDSIOToXML()
+{
   if (this->dsioVector.size() != 0)
   {
     for (int i = 0; i < this->dsioVector.size(); i++)
@@ -374,59 +374,41 @@ void DynamicalSystem::saveDSToXML()
       else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - bad kind of DSInputOuput");
     }
   }
-
-  if (this->dsxml != NULL)
-  {
-    this->dsxml->setId(this->id);
-    if ((this->dsxml->getType() != LNLDS)
-        && (this->dsxml->getType() != LTIDS))
-      this->dsxml->setN(this->n);
-
-    this->dsxml->setX0(this->x0);
-
-    this->dsxml->setX(this->x);
-    this->dsxml->setXMemory(&(this->xMemory));
-
-    this->dsxml->setXDot(&this->xDot);
-    this->dsxml->setXDotMemory(&(this->xDotMemory));
-
-    this->dsxml->setStepsInMemory(this->stepsInMemory);
-
-    this->dsxml->setR(&(this->r));
-
-    /*
-     * vectorField and computeJacobianX function must be saved only for NonLinearSystemDS
-     */
-    if (this->DSType == NLSDS)
-    {
-      this->dsxml->setVectorFieldPlugin(this->vectorFieldFunctionName);
-      if (this->computeJacobianXFunctionName != "")
-        this->dsxml->setComputeJacobianXPlugin(this->computeJacobianXFunctionName);
-      else
-        this->dsxml->setComputeJacobianXPlugin("BasicPlugin:computeJacobianX");
-    }
-  }
-  else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DSXML object doesn't exists");
-  OUT("DynamicalSystem::saveDSToXML\n");
 }
 
 BoundaryCondition* DynamicalSystem::createPeriodicBC()
 {
   this->BC = new PeriodicBC();
-  static_cast<PeriodicBC*>(this->BC)->createBoundaryCondition(NULL);
+  static_cast<PeriodicBC*>(this->BC)->createBoundaryCondition(0);
   return this->BC;
 }
 
 BoundaryCondition* DynamicalSystem::createLinearBC(SiconosVector* omega, SiconosMatrix* omega0, SiconosMatrix* omegaT)
 {
   this->BC = new LinearBC();
-  static_cast<LinearBC*>(this->BC)->createBoundaryCondition(NULL, omega, omega0, omegaT);
+  static_cast<LinearBC*>(this->BC)->createBoundaryCondition(0, omega, omega0, omegaT);
   return this->BC;
 }
 
 BoundaryCondition* DynamicalSystem::createNLinearBC()
 {
   this->BC = new NLinearBC();
-  static_cast<NLinearBC*>(this->BC)->createBoundaryCondition(NULL);
+  static_cast<NLinearBC*>(this->BC)->createBoundaryCondition(0);
   return this->BC;
+}
+
+double DynamicalSystem::dsConvergenceIndicator() const
+{
+  RuntimeException::selfThrow("DynamicalSystem:dsConvergenceIndicator - not yet implemented for Dynamical system type :" + this->DSType);
+}
+
+// Default constructor
+DynamicalSystem::DynamicalSystem(): DSType(NLDS), nsds(0), number(0), id("none"), n(0), x0(0), x(0), xDot(0), xFree(0), r(0),
+  stepsInMemory(1), jacobianX(0), BC(0), dsxml(0), vectorFieldPtr(0)
+{
+  IN("DynamicalSystem::DynamicalSystem - Default constructor\n");
+  // --- plugins -> connected to  "false" plugin
+  this->setVectorFieldFunction("BasicPlugin.so", "vectorField");
+  this->setComputeJacobianXFunction("BasicPlugin.so", "computeJacobianX");
+  OUT("DynamicalSystem::DynamicalSystem - Default constructor\n");
 }

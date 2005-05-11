@@ -31,14 +31,14 @@
 //using namespace std;
 
 
-const string LSDS_A = "A";
-const string LSDS_B = "B";
+const string LDS_A = "A";
+const string LDS_B = "B";
 
-const string LSDS_U = "u";
-const string LSDS_F = "f";
+const string LDS_U = "u";
+const string LDS_F = "f";
 
-const string LSDS_MATRIXPLUGIN = "matrixPlugin";
-const string LSDS_VECTORPLUGIN = "vectorPlugin";
+const string LDS_MATRIXPLUGIN = "matrixPlugin";
+const string LDS_VECTORPLUGIN = "vectorPlugin";
 
 
 class LinearSystemDSXML : public DSXML
@@ -86,7 +86,7 @@ public:
     }
     else
     {
-      this->ANode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LSDS_A, m);
+      this->ANode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LDS_A, m);
     }
   }
 
@@ -101,7 +101,7 @@ public:
       //SiconosDOMTreeTools::setSiconosMatrixValue(this->BNode, *m);
       SiconosDOMTreeTools::setSiconosMatrixValue(this->BNode, m);
     }
-    else this->BNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LSDS_B, m);
+    else this->BNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LDS_B, m);
   }
   /////////////////////////////
 
@@ -113,7 +113,7 @@ public:
   inline string getUPlugin()
   {
     if (this->isUPlugin())
-      return  SiconosDOMTreeTools::getStringAttributeValue(this->uNode, LSDS_VECTORPLUGIN);
+      return  SiconosDOMTreeTools::getStringAttributeValue(this->uNode, LDS_VECTORPLUGIN);
     XMLException::selfThrow("LinearSystemDSXML - getUPlugin : u is not calculated from a plugin ; u vector is given");
   }
 
@@ -141,7 +141,7 @@ public:
       //SiconosDOMTreeTools::setSiconosVectorValue(this->uNode, *v);
       SiconosDOMTreeTools::setSiconosVectorValue(this->uNode, v);
     }
-    else this->uNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LSDS_U, v);
+    else this->uNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LDS_U, v);
   }
 
   /** \fn inline string getFPlugin()
@@ -152,7 +152,7 @@ public:
   inline string getFPlugin()
   {
     if (this->isFPlugin())
-      return  SiconosDOMTreeTools::getStringAttributeValue(this->fNode, LSDS_VECTORPLUGIN);
+      return  SiconosDOMTreeTools::getStringAttributeValue(this->fNode, LDS_VECTORPLUGIN);
     XMLException::selfThrow("LinearSystemDSXML - getUPlugin : f is not calculated from a plugin ; f vector is given");
   }
 
@@ -180,7 +180,7 @@ public:
       //SiconosDOMTreeTools::setSiconosVectorValue(this->fNode, *v);
       SiconosDOMTreeTools::setSiconosVectorValue(this->fNode, v);
     }
-    else this->fNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LSDS_F, v);
+    else this->fNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LDS_F, v);
   }
 
 
@@ -190,7 +190,7 @@ public:
   */
   inline bool isUPlugin()
   {
-    return xmlHasProp((xmlNodePtr)uNode, (xmlChar *) LSDS_VECTORPLUGIN.c_str());
+    return xmlHasProp((xmlNodePtr)uNode, (xmlChar *) LDS_VECTORPLUGIN.c_str());
   }
 
   /** \fn bool isFPlugin()
@@ -199,7 +199,7 @@ public:
   */
   inline bool isFPlugin()
   {
-    return xmlHasProp((xmlNodePtr)fNode, (xmlChar *) LSDS_VECTORPLUGIN.c_str());
+    return xmlHasProp((xmlNodePtr)fNode, (xmlChar *) LDS_VECTORPLUGIN.c_str());
   }
 
 

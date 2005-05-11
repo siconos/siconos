@@ -257,6 +257,7 @@ public:
   TimeDiscretisation* createTimeDiscretisation(double h, int N, SimpleVector * tk,
       double hMin, double hMax, bool constant);
 
+
   //===========================================
   /** \fn OneStepNSProblem* createLCP()
    *  \brief allows to create a LCP
@@ -308,6 +309,29 @@ public:
    *  \return bool : false if the DynamicalSystem has no OneStepIntegrator, else true
    */
   bool hasDynamicalSystemIntegrator(DynamicalSystem* ds);
+
+
+  /** \fn void newtonSolve(double criterion , int maxStep)
+   *  \brief newton algorithm
+   *  \param double criterion: convergence criterion, int maxStep: maximum number of Newton steps
+   */
+  void newtonSolve(double criterion , int maxStep);
+
+  /** */
+  void Strategy::newtonNextStep();
+
+
+  /** \fn newtonUpdateState()
+   *  \brief update the state of the dynamical system at the end of Newton step
+   */
+
+  void Strategy::newtonUpdateState();
+
+
+  /** \fn newtonCheckConvergence(double criterion);
+   *  \brief check the convergence of Newton algorithm
+   */
+  bool Strategy::newtonCheckConvergence(double criterion);
 
 
 protected:

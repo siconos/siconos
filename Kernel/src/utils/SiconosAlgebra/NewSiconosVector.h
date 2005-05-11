@@ -142,6 +142,14 @@ public:
    */
   virtual double* getArray() = 0;
 
+
+  /** \fn double norm()
+   *  \brief return the Euclidian norm of the vector
+   *  \return a double
+   */
+  //virtual double norm() = 0;
+
+
   // OPERATORS ---------------------------------------------------------------
 
   // internes

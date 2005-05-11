@@ -186,25 +186,25 @@ void NonSmoothDynamicalSystem::linkNSDSXML()
       // creation of the LagrangianDS with this constructor and call of a method to fill
       ds = new LagrangianDS(this->nsdsxml->getDSXML(nbDStab[i]));
       this->DSVector.push_back(ds);
-      ds->setNSDS(this);
+      ds->setNSDSPtr(this);
     }
     else if ((this->nsdsxml->getDSXML(nbDStab[i]))->getType() == LAGRANGIAN_TIME_INVARIANTDS_TAG)
     {
       ds = new LagrangianLinearTIDS(this->nsdsxml->getDSXML(nbDStab[i]));
       this->DSVector.push_back(ds);
-      ds->setNSDS(this);
+      ds->setNSDSPtr(this);
     }
     else if ((this->nsdsxml->getDSXML(nbDStab[i]))->getType() == LINEAR_SYSTEMDS_TAG)
     {
       ds = new LinearSystemDS(this->nsdsxml->getDSXML(nbDStab[i]));
       this->DSVector.push_back(ds);
-      ds->setNSDS(this);
+      ds->setNSDSPtr(this);
     }
     else if ((this->nsdsxml->getDSXML(nbDStab[i]))->getType() == NON_LINEAR_SYSTEMDS_TAG)
     {
       ds = new DynamicalSystem(this->nsdsxml->getDSXML(nbDStab[i]));
       this->DSVector.push_back(ds);
-      ds->setNSDS(this);
+      ds->setNSDSPtr(this);
     }
     else RuntimeException::selfThrow("NonSmoothDynamicalSystem::LinkNSDSXML - bad kind of DynamicalSystem");
 
@@ -296,10 +296,11 @@ void NonSmoothDynamicalSystem::fillNSDSWithNSDSXML()
 void NonSmoothDynamicalSystem::saveNSDSToXML()
 {
   IN("NonSmoothDynamicalSystem::saveNSDSToXML\n");
-  int size, i;
 
   if (this->nsdsxml != NULL)
   {
+    int size, i;
+
     this->nsdsxml->setBVP(this->BVP);// no need to change the value of BVP, it mustn't change anyway
 
     size = this->DSVector.size();
@@ -309,9 +310,9 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
         (static_cast<LagrangianDS*>(this->DSVector[i]))->saveDSToXML();
       else if (this->DSVector[i]->getType() == LTIDS)
         (static_cast<LagrangianLinearTIDS*>(this->DSVector[i]))->saveDSToXML();
-      else if (this->DSVector[i]->getType() == LSDS)
+      else if (this->DSVector[i]->getType() == LDS)
         (static_cast<LinearSystemDS*>(this->DSVector[i]))->saveDSToXML();
-      else if (this->DSVector[i]->getType() == NLSDS)
+      else if (this->DSVector[i]->getType() == NLDS)
         this->DSVector[i]->saveDSToXML();
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of DynamicalSystem");
     }
@@ -335,7 +336,6 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
     size = this->interactionVector.size();
     for (i = 0; i < size; i++)
       this->interactionVector[i]->saveInteractionToXML();
-
   }
   else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveNSDSToXML - The NSDSXML object doesn't exists");
 
@@ -360,7 +360,7 @@ void NonSmoothDynamicalSystem::display() const
 void NonSmoothDynamicalSystem::addDynamicalSystem(DynamicalSystem *ds)//, BoundaryCondition* bc)
 {
   IN("NonSmoothDynamicalSystem::addDynamicalSystem\n");
-  ds->setNSDS(this);
+  ds->setNSDSPtr(this);
   this->DSVector.push_back(ds);
   OUT("NonSmoothDynamicalSystem::addDynamicalSystem\n");
 }
@@ -397,4 +397,21 @@ Interaction* NonSmoothDynamicalSystem::addInteraction(int number, int nInter, ve
     string msg = "NonSmoothDynamicalSystem::addInteraction : ERROR - The Interaction number " + num + " is already declared!";
     RuntimeException::selfThrow(msg);
   }
+}
+
+double NonSmoothDynamicalSystem::nsdsConvergenceIndicator() const
+{
+  // calculate the max value of all DS convergence indicators
+
+  double convergenceIndicator = (* this->DSVector.begin())->dsConvergenceIndicator();
+  vector <DynamicalSystem*>::iterator iter;
+  for (iter = this->DSVector.begin(); iter != this->DSVector.end(); ++iter)
+  {
+    double dsIndic = (*iter)->dsConvergenceIndicator();
+    if (convergenceIndicator > dsIndic) convergenceIndicator == dsIndic;
+  }
+
+  cout << " CVG INDIC " << convergenceIndicator << endl;
+
+  return(convergenceIndicator);
 }

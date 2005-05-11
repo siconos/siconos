@@ -1,115 +1,30 @@
 #include "LinearSystemDS.h"
 #include "check.h"
 
+// --- Constructors ---
 
-LinearSystemDS::LinearSystemDS(): DynamicalSystem()
+// From xml file
+LinearSystemDS::LinearSystemDS(DSXML * dsXML): DynamicalSystem(dsXML), A(0), B(0), uSize(1), u(0), f(0)
 {
-  this->DSType = LSDS;
-  this->init();
-}
-
-LinearSystemDS::LinearSystemDS(DSXML * dsXML)
-{
-  if (dsXML != NULL)
+  IN("LinearSystemDS::LinearSystemDS - XML constructor\n");
+  if (dsXML != 0)
   {
-    this->DSType = LSDS;
-    DynamicalSystem::init();
-    this->dsxml = dsXML;
+    this->DSType = LDS;
+    // size of u
+    // \warning: nothing available in LinearSystemDSXML to load uSize
+    //if ( this->dsxml->hasUSize()==true) this->uSize = this->dsxml->getUSize();
+    uSize = this->n;
+    // --- vector and matrix members memory allocation ---
+    // only those specific to LinearDS
+    this->A = new SiconosMatrix(this->n, this->n);
+    this->B = new SiconosMatrix(this->uSize, this->uSize);
+    this->u = new SimpleVector(this->uSize);
+    this->f = new SimpleVector(this->n);
 
-    this->fillDSWithDSXML();
-    this->linkDSXML();
-  }
-  else
-  {
-    cout << "LinearSystemDS::LinearSystemDS - DSXML paramater musn't be NULL" << endl;
-  }
-}
-
-LinearSystemDS::LinearSystemDS(int number, int n, SiconosVector* x0)
-{
-  this->DSType = LSDS;
-  this->number = number;
-  this->n = n;
-  *(this->x0) = *x0;
-}
-
-LinearSystemDS::~LinearSystemDS()
-{}
-
-SiconosMatrix* LinearSystemDS::getAPtr(void)
-{
-  return &this->A;
-}
-
-SiconosMatrix* LinearSystemDS::getBPtr(void)
-{
-  return &this->B;
-}
-
-SimpleVector* LinearSystemDS::getUPtr(void)
-{
-  return &this->u;
-}
-
-SimpleVector* LinearSystemDS::getFPtr(void)
-{
-  return &this->f;
-}
-
-
-/////////////////////////////
-
-
-void LinearSystemDS::setComputeFFunction(string pluginPath, string functionName)
-{
-  cShared.setFunction(&computeFPtr, pluginPath, functionName);
-
-  string plugin;
-  plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  this->fFunctionName = plugin + ":" + functionName;
-}
-
-void LinearSystemDS::setComputeUFunction(string pluginPath, string functionName)
-{
-  cShared.setFunction(&computeUPtr, pluginPath, functionName);
-
-  string plugin;
-  plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  this->uFunctionName = plugin + ":" + functionName;
-}
-
-void LinearSystemDS::computeF(double time)
-{
-  if (computeFPtr == NULL)
-    RuntimeException::selfThrow("computeF() is not linked to a plugin function");
-
-  int size = f.size();
-  this->computeFPtr(&size, &f(0), &time);
-}
-
-void LinearSystemDS::computeU(double time)
-{
-  if (computeUPtr == NULL)
-    RuntimeException::selfThrow("computeU() is not linked to a plugin function");
-
-  int size = u.size();
-  this->computeUPtr(&size, &u(0), &time);
-}
-
-///////////////////////////////
-
-void LinearSystemDS::fillDSWithDSXML()
-{
-  IN("LinearSystemDS::fillDSWithDSXML\n");
-
-  string plugin;
-
-  DynamicalSystem::fillDSWithDSXML();
-  if (this->dsxml != NULL)
-  {
-    this->A = (static_cast <LinearSystemDSXML*>(this->dsxml))->getA();
-    this->B = (static_cast <LinearSystemDSXML*>(this->dsxml))->getB();
-
+    // --- xml loading and plugins ---
+    string plugin;
+    *this->A = (static_cast <LinearSystemDSXML*>(this->dsxml))->getA();
+    *this->B = (static_cast <LinearSystemDSXML*>(this->dsxml))->getB();
     // u
     if ((static_cast <LinearSystemDSXML*>(this->dsxml))->isUPlugin())
     {
@@ -118,9 +33,9 @@ void LinearSystemDS::fillDSWithDSXML()
     }
     else
     {
-      this->u = (static_cast <LinearSystemDSXML*>(this->dsxml))->getUVector();
+      this->setComputeUFunction("BasicPlugin.so", "computeU");
+      *this->u = (static_cast <LinearSystemDSXML*>(this->dsxml))->getUVector();
     }
-
     // f
     if ((static_cast <LinearSystemDSXML*>(this->dsxml))->isFPlugin())
     {
@@ -129,13 +44,80 @@ void LinearSystemDS::fillDSWithDSXML()
     }
     else
     {
-      this->f = (static_cast <LinearSystemDSXML*>(this->dsxml))->getFVector();
+      this->setComputeFFunction("BasicPlugin.so", "computeF");
+      *this->f = (static_cast <LinearSystemDSXML*>(this->dsxml))->getFVector();
     }
-
   }
-  else RuntimeException::selfThrow("LinearSystemDS::fillDSWithDSXML - The DSXML object doesn't exists");
+  else
+  {
+    cout << "LinearSystemDS::LinearSystemDS - DSXML paramater musn't be 0" << endl;
+  }
+  OUT("LinearSystemDS::LinearSystemDS - XML constructor\n");
 
-  OUT("LinearSystemDS::fillDSWithDSXML\n");
+}
+
+// From a minimum set of data
+LinearSystemDS::LinearSystemDS(int number, int n, SiconosVector* x0): DynamicalSystem(number, n, x0, "BasicPlugin:vectorField")
+{
+  this->DSType = LDS;
+  this->A = new SiconosMatrix(this->n, this->n);
+  this->B = new SiconosMatrix(this->n, this->n);
+  this->u = new SimpleVector(this->n);
+  this->f = new SimpleVector(this->n);
+
+  // --- plugins ---
+  this->setComputeFFunction("BasicPlugin.so", "computeF");
+  this->setComputeUFunction("BasicPlugin.so", "computeU");
+}
+
+LinearSystemDS::~LinearSystemDS()
+{
+  delete A;
+  A = 0 ;
+  delete B;
+  B = 0;
+  delete u;
+  u = 0;
+  delete f;
+  f = 0;
+}
+
+void LinearSystemDS::setComputeFFunction(const string& pluginPath, const string& functionName)
+{
+  cShared.setFunction(&computeFPtr, pluginPath, functionName);
+
+  string plugin;
+  plugin = pluginPath.substr(0, pluginPath.length() - 3);
+  this->fFunctionName = plugin + ":" + functionName;
+}
+
+void LinearSystemDS::setComputeUFunction(const string& pluginPath, const string& functionName)
+{
+  cShared.setFunction(&computeUPtr, pluginPath, functionName);
+
+  string plugin;
+  plugin = pluginPath.substr(0, pluginPath.length() - 3);
+  this->uFunctionName = plugin + ":" + functionName;
+}
+
+void LinearSystemDS::computeF(const double& time)
+{
+  if (computeFPtr == 0)
+    RuntimeException::selfThrow("computeF() is not linked to a plugin function");
+
+  int size = f->size();
+  // const_cast to be deleted: problem const in C function signature? To see ...
+  this->computeFPtr(&size, &(*f)(0), const_cast<double*>(&time));
+}
+
+void LinearSystemDS::computeU(const double& time)
+{
+  if (computeUPtr == 0)
+    RuntimeException::selfThrow("computeU() is not linked to a plugin function");
+
+  int size = u->size();
+  // const_cast to be deleted: problem const in C function signature? To see ...
+  this->computeUPtr(&size, &(*u)(0), const_cast<double*>(&time));
 }
 
 void LinearSystemDS::display() const
@@ -144,44 +126,43 @@ void LinearSystemDS::display() const
   cout << "____ data of the LinearSystemDS " << endl;
   DynamicalSystem::display();
   cout << "| A " << endl;
-  this->A.display();
+  if (A != 0) this->A->display();
+  else cout << "-> 0" << endl;
   cout << "| B " << endl;
-  this->B.display();
+  if (B != 0) this->B->display();
+  else cout << "-> 0" << endl;
   cout << "| u " << endl;
-  this->u.display();
+  if (u != 0) this->u->display();
+  else cout << "-> 0" << endl;
   cout << "| f " << endl;
-  this->f.display();
+  if (f != 0) this->f->display();
+  else cout << "-> 0" << endl;
   cout << "-----------------------------------------------------" << endl << endl;
-}
-
-void LinearSystemDS::init()
-{
-  IN("LinearSystemDS::init\n");
-  this->setComputeFFunction("BasicPlugin.so", "computeF");
-  this->setComputeUFunction("BasicPlugin.so", "computeU");
-  OUT("LinearSystemDS::init\n");
 }
 
 void LinearSystemDS::saveDSToXML()
 {
   IN("LinearSystemDS::saveDSToXML\n");
-  DynamicalSystem::saveDSToXML();
 
-  if (this->dsxml != NULL)
+  //--- Common data ---
+  saveDSDataToXML();
+  // --- other data ---
+  if (this->dsxml != 0)
   {
-    static_cast<LinearSystemDSXML*>(this->dsxml)->setA(&(this->A));
-    static_cast<LinearSystemDSXML*>(this->dsxml)->setB(&(this->B));
+    this->dsxml->setN(this->n);
+    static_cast<LinearSystemDSXML*>(this->dsxml)->setA(this->A);
+    static_cast<LinearSystemDSXML*>(this->dsxml)->setB(this->B);
 
     // u
     if (!(static_cast <LinearSystemDSXML*>(this->dsxml))->isUPlugin())
     {
-      static_cast<LinearSystemDSXML*>(this->dsxml)->setUVector(&(this->u));
+      static_cast<LinearSystemDSXML*>(this->dsxml)->setUVector(this->u);
     }
 
     // f
     if (!(static_cast <LinearSystemDSXML*>(this->dsxml))->isFPlugin())
     {
-      static_cast<LinearSystemDSXML*>(this->dsxml)->setFVector(&(this->f));
+      static_cast<LinearSystemDSXML*>(this->dsxml)->setFVector(this->f);
     }
   }
   else RuntimeException::selfThrow("LinearSystemDS::saveDSToXML - The DSXML object doesn't exists");
@@ -196,3 +177,12 @@ LinearSystemDS* LinearSystemDS::convert(DynamicalSystem* ds)
   return lsds;
 }
 
+// Default constructor
+LinearSystemDS::LinearSystemDS(): DynamicalSystem(), A(0), B(0), uSize(0), u(0), f(0)
+{
+  IN("LinearSystemDS::LinearSystemDS - Default constructor\n");
+  this->DSType = LDS;
+  this->setComputeFFunction("BasicPlugin.so", "computeF");
+  this->setComputeUFunction("BasicPlugin.so", "computeU");
+  OUT("LinearSystemDS::LinearSystemDS - Default constructor\n");
+}

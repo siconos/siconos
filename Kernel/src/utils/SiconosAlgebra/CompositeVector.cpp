@@ -145,7 +145,7 @@ double CompositeVector::operator()(const int unsigned index) const
 }
 
 
-void CompositeVector::add(const SiconosVector& v)
+void CompositeVector::add(const SiconosVector &v)
 {
   //IN("CompositeVector::add(const SiconosVector& v)  \n");
 
@@ -155,6 +155,19 @@ void CompositeVector::add(const SiconosVector& v)
     this->tabindex.push_back(this->tabindex[this->tabindex.size() - 1] + v.size());
   else
     this->tabindex.push_back(v.size());
+
+
+  //OUT("CompositeVector::add(const SiconosVector& v)  \n");
+}
+void CompositeVector::add(SiconosVector *v)
+{
+  //IN("CompositeVector::add(const SiconosVector& v)  \n");
+
+  this->svref.push_back(v);
+  if (this->tabindex.size() > 0)
+    this->tabindex.push_back(this->tabindex[this->tabindex.size() - 1] + v->size());
+  else
+    this->tabindex.push_back(v->size());
 
 
   //OUT("CompositeVector::add(const SiconosVector& v)  \n");

@@ -2,12 +2,16 @@
 #include "Lsodar.h"
 #include "AdamsXML.h"
 
-Lsodar::Lsodar(): OneStepIntegrator()
+
+Lsodar::Lsodar(OneStepIntegratorXML* osiXML): OneStepIntegrator(osiXML)
 {
   this->integratorType = LSODAR_INTEGRATOR;
+  if (osiXML != 0)
+  {}
+  else RuntimeException::selfThrow("Lsodar::Lsodar() - xml constructor - OneStepIntegratorXML object not exists");
 }
 
-Lsodar::Lsodar(OneStepIntegratorXML* osixml, TimeDiscretisation* td, DynamicalSystem* ds): OneStepIntegrator(osixml, td, ds)
+Lsodar::Lsodar(TimeDiscretisation* td, DynamicalSystem* ds): OneStepIntegrator(td, ds)
 {
   this->integratorType = LSODAR_INTEGRATOR;
 }
@@ -39,34 +43,13 @@ void Lsodar::saveIntegratorToXML()
 {
   IN("Lsodar::saveIntegratorToXML\n");
   OneStepIntegrator::saveIntegratorToXML();
-  if (this->integratorxml != NULL)
+  if (this->integratorxml != 0)
   {
     //(static_cast<LsodarXML*>(this->integratorxml))->setR( this->r );
   }
   else RuntimeException::selfThrow("Adams::saveIntegratorToXML - IntegratorXML object not exists");
   OUT("Lsodar::saveIntegratorToXML\n");
 }
-
-void Lsodar::createOneStepIntegrator(OneStepIntegratorXML * osiXML, TimeDiscretisation*td, DynamicalSystem* ds)//, Strategy * strategy)
-{
-  if (osiXML != NULL)
-  {
-    this->integratorxml = osiXML;
-    this->timeDiscretisation = td;
-    this->ds = ds;
-
-    this->fillIntegratorWithIntegratorXML();
-  }
-  else
-  {
-    this->integratorxml = NULL;
-    this->integratorType = LSODAR_INTEGRATOR;
-    this->timeDiscretisation = td;
-    this->ds = ds;
-  }
-}
-
-
 
 void tryfunction(fctPtr f)
 {
@@ -104,25 +87,6 @@ void tryfunction(fctPtr f)
 }
 
 
-void Lsodar::fillIntegratorWithIntegratorXML()
-{
-  IN("Lsodar::fillIntegratorWithIntegratorXML\n");
-  OneStepIntegrator::fillIntegratorWithIntegratorXML();
-  if (this->integratorxml != NULL)
-  {
-    if ((static_cast<LsodarXML*>(this->integratorxml))->hasR() == true)
-    {
-      this->r = (static_cast<AdamsXML*>(this->integratorxml))->getR();
-    }
-    else
-    {
-      cout << "Warning :  r is not defined in the XML file" << endl;
-    }
-  }
-  else RuntimeException::selfThrow("Adams::fillIntegratorWithIntegratorXML - IntegratorXML object not exists");
-  OUT("Lsodar::fillIntegratorWithIntegratorXML\n");
-}
-
 void Lsodar::initialize()
 {
   IN("Lsodar::initialize\n");
@@ -138,3 +102,7 @@ Lsodar* Lsodar::convert(OneStepIntegrator* osi)
 }
 
 
+Lsodar::Lsodar(): OneStepIntegrator()
+{
+  this->integratorType = LSODAR_INTEGRATOR;
+}

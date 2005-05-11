@@ -20,7 +20,7 @@ class OneStepIntegratorXML;
 
 /** \class OneStepIntegrator
  *  \brief It's the generic object which can integre a DynamicalSystem
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 26, 2004
  *
@@ -30,116 +30,119 @@ class OneStepIntegratorXML;
 class OneStepIntegrator
 {
 public:
-  /** \fn OneStepIntegrator()
-   *  \brief default constructor
-   */
-  OneStepIntegrator();
 
-  /** \fn OneStepIntegrator(OneStepIntegratorXML*, TimeDiscretisation*, DynamicalSystem* )
-   *  \brief constructor with XML object of the OneStepIntegrator
+  /** \fn OneStepIntegrator(OneStepIntegratorXML*)
+   *  \brief constructor from xml file
    *  \param OneStepIntegratorXML* : the XML object corresponding
+   */
+  OneStepIntegrator(OneStepIntegratorXML*);
+
+  /** \fn OneStepIntegrator(TimeDiscretisation*, DynamicalSystem* )
+   *  \brief constructor from a minimum set of data
    *  \param TimeDiscretisation* : the TimeDiscretisation of the OneStepIntegrator
    *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
    */
-  OneStepIntegrator(OneStepIntegratorXML*, TimeDiscretisation*, DynamicalSystem*);
+  OneStepIntegrator(TimeDiscretisation*, DynamicalSystem*);
+
+  //OneStepIntegrator(OneStepIntegratorXML*,TimeDiscretisation*, DynamicalSystem* );
 
   virtual ~OneStepIntegrator();
 
   // getter/setter
 
-  /** \fn int getR(void)
-   *  \brief allow to get r form the OneStepIntegrator
-   *  \return the value of r
+  /** \fn const int getR() const
+   *  \brief get r value
+   *  \return an int
    */
-  inline int getR(void) const
+  inline const int getR() const
   {
-    return this->r;
+    return r;
   };
 
-  /** \fn TimeDiscretisation* getTimeDiscretisation(void)
-   *  \brief allow to get the TimeDiscretisation
+  /** \fn void setR(const int&)
+   *  \brief set r
+   *  \param a ref on an int
+   */
+  inline void setR(const int& newR)
+  {
+    r = newR;
+  };
+
+  /** \fn TimeDiscretisation* getTimeDiscretisationPtr()
+   *  \brief get the TimeDiscretisation pointer
    *  \return a pointer on the TimeDiscretisation
    */
-  inline TimeDiscretisation* getTimeDiscretisation(void) const
+  inline TimeDiscretisation* getTimeDiscretisationPtr() const
   {
     return this->timeDiscretisation;
   };
 
-  /** \fn void setR(int)
-   *  \brief allow to set r
-   *  \param the value to set r
-   */
-  inline void setR(const int R)
-  {
-    this->r = r;
-  };
-
-  /** \fn void setTimeDiscretisation(TimeDiscretisation*)
-   *  \brief allow to set the TimeDiscretisation of the OneStepIntegrator
+  /** \fn void setTimeDiscretisationPtr(TimeDiscretisation*)
+   *  \brief set the TimeDiscretisation pointer
    *  \param a pointer on a TimeDiscretisation
    */
-  inline void setTimeDiscretisation(TimeDiscretisation* td)
+  inline void setTimeDiscretisationPtr(TimeDiscretisation* td)
   {
     this->timeDiscretisation = td;
   };
 
-  /** \fn DynamicalSystem* getDynamicalSystem(void)
-   *  \brief allow to get the DynamicalSystem of the Integrator
-   *  \return the DtnamicalSystem attached to this Integrator
+  /** \fn DynamicalSystem* getDynamicalSystemptr()
+   *  \brief get the DynamicalSystem associated with the Integrator
+   *  \return a DS
    */
-  inline DynamicalSystem* getDynamicalSystem(void) const
+  inline DynamicalSystem* getDynamicalSystemPtr() const
   {
-    return this->ds;
+    return ds;
   };
 
-  /** \fn void setDynamicalSystem(DynamicalSystem*)
-   *  \brief allow to set the DynamicalSystem of this Integrator
-   *  \param DynamicalSystem : the DynamicalSystem used to set the DynamicalSystem ds
+  /** \fn void setDynamicalSystemPtr(DynamicalSystem*)
+   *  \brief set the DynamicalSystem of this Integrator
+   *  \param a pointer on DynamicalSystem
    */
-  inline void setDynamicalSystem(DynamicalSystem* ds)
+  inline void setDynamicalSystemPtr(DynamicalSystem* newDs)
   {
-    this->ds = ds;
+    ds = newDs;
   };
 
-  /** \fn inline OneStepIntegratorXML* getOneStepIntegratorXML()
-   *  \brief allows to get the OneStepIntegratorXML of the OneStepIntegrator
+  /** \fn inline OneStepIntegratorXML* getOneStepIntegratorXMLPtr()
+   *  \brief get the OneStepIntegratorXML of the OneStepIntegrator
    *  \return a pointer on the OneStepIntegratorXML of the OneStepIntegrator
    */
-  inline OneStepIntegratorXML* getOneStepIntegratorXML()
+  inline OneStepIntegratorXML* getOneStepIntegratorXMLPtr() const
   {
-    return this->integratorxml;
+    return integratorxml;
   }
 
-  /** \fn inline void setOneStepIntegratorXML(OneStepIntegratorXML* integratorxml)
-   *  \brief allows to set the OneStepIntegratorXML of the OneStepIntegrator
+  /** \fn inline void setOneStepIntegratorXMLPtr(OneStepIntegratorXML* integratorxml)
+   *  \brief set the OneStepIntegratorXML of the OneStepIntegrator
    *  \param OneStepIntegratorXML* : the pointer to set the OneStepIntegratorXML
    */
-  inline void setOneStepIntegratorXML(OneStepIntegratorXML* integratorxml)
+  inline void setOneStepIntegratorXMLPtr(OneStepIntegratorXML* newIntegratorxml)
   {
-    this->integratorxml = integratorxml;
+    integratorxml = newIntegratorxml;
   }
 
-  /** \fn inline string getType()
-   *  \brief allows to get the type of the OneStepIntegrator
+  /** \fn inline const string getType() const
+   *  \brief get the type of the OneStepIntegrator
    *  \return string : the type of the OneStepIntegrator
    */
-  inline string getType()
+  inline const string getType() const
   {
-    return this->integratorType;
+    return integratorType;
   }
 
   ///////////////////////////////
 
-  /** \fn void initialize(bool)
-  *  \brief initialise the integrator
-  */
+  /** \fn void initialize()
+   *  \brief initialise the integrator
+   */
   virtual void initialize();
 
   /** \fn void computeFreeState(bool)
-  *  \brief set r = 0 and integrates the DS
-  *  \exception RuntimeException if the integration method for this type of DS is not implemented
-  *  \return void
-  */
+   *  \brief set r = 0 and integrates the DS
+   *  \exception RuntimeException if the integration method for this type of DS is not implemented
+   *  \return void
+   */
   virtual void computeFreeState();
 
   /** \fn void integrate(bool)
@@ -167,12 +170,6 @@ public:
    */
   virtual  void display() const;
 
-  /** \fn void fillIntegratorWithIntegratorXML()
-   *  \brief uses the OneStepIntegratorXML of the OneStepIntegrator to fill the fields of this OneStepIntegrator
-   *  \exception RuntimeException
-   */
-  virtual void fillIntegratorWithIntegratorXML();
-
   /** \fn void saveIntegratorToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree
    *  \exception RuntimeException
@@ -180,6 +177,13 @@ public:
   virtual void saveIntegratorToXML();
 
 protected:
+
+  // -- Default constructor --
+  /** \fn OneStepIntegrator()
+   *  \brief default constructor
+   */
+  OneStepIntegrator();
+
   /** type of the Integrator */
   string integratorType;
 
