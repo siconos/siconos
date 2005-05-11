@@ -1,0 +1,22 @@
+%
+% This file was automatically produced at Nov  5 1998, 12:43:56 by
+% c++2latex example_ref1.cpp
+%
+\expandafter\ifx\csname indentation\endcsname\relax%
+\newlength{\indentation}\fi
+\setlength{\indentation}{0.5em}
+\begin{flushleft}
+{\bf class} X ();\mbox{}\\
+\mbox{}\\
+X f() \{{\bf return} X(); \} {$//$\it{} return by value {}\mbox{}\\
+}\mbox{}\\
+{\bf void} g1(X\&) \{\} {$//$\it{} Pass by non-const reference {}\mbox{}\\
+}\mbox{}\\
+{\bf void} g2({\bf const} X\&) \{\} {$//$\it{} Pass by const reference{}\mbox{}\\
+}\mbox{}\\
+{\bf int} main()\mbox{}\\
+\{\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} g1(f()); Error: const temporary created by f(){}\mbox{}\\
+}\hspace*{2\indentation}g2(f()); {$//$\it{} ok {}\mbox{}\\
+}\}\mbox{}\\
+\end{flushleft}

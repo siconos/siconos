@@ -1,0 +1,22 @@
+%
+% This file was automatically produced at Nov  5 1998, 12:43:56 by
+% c++2latex constructor_list.cpp
+%
+\expandafter\ifx\csname indentation\endcsname\relax%
+\newlength{\indentation}\fi
+\setlength{\indentation}{0.5em}
+\begin{flushleft}
+\mbox{}\\
+{$//$\it{} The constructor list for members initialisation ...{}\mbox{}\\
+}BaseClass::BaseClass():  objectMemberA(initValue), objectMemberB(initValue), size(valSize), objectPtr(0), $\ldots$ \mbox{}\\
+\{\mbox{}\\
+$\ldots$\mbox{}\\
+{$//$\it{} Memory allocation{}\mbox{}\\
+}\hspace*{1\indentation}objectPtr = {\bf new} TypeObjectPtr(size); {$//$\it{} ok {}\mbox{}\\
+}\hspace*{1\indentation}\mbox{}\\
+{$//$\it{}  objectPtr $=$ new TypeObjectPtr(); // no!  {}\mbox{}\\
+}$\ldots$\mbox{}\\
+\}\mbox{}\\
+\mbox{}\\
+\mbox{}\\
+\end{flushleft}

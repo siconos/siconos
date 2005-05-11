@@ -1,0 +1,131 @@
+%
+% This file was automatically produced at Nov  5 1998, 12:43:56 by
+% c++2latex reference_file_h.h
+%
+\expandafter\ifx\csname indentation\endcsname\relax%
+\newlength{\indentation}\fi
+\setlength{\indentation}{0.5em}
+\begin{flushleft}
+{$//$\it{}$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$ BASE CLASS $=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=${}\mbox{}\\
+}{\tt \#ifndef} CLASS\_NAME\_H\mbox{}\\
+{\tt \#define} CLASS\_NAME\_H\mbox{}\\
+\mbox{}\\
+{$//$\it{} include ...{}\mbox{}\\
+}\mbox{}\\
+{\bf class} BaseClassName\mbox{}\\
+\mbox{}\\
+\{\mbox{}\\
+\hspace*{1\indentation}{\bf public}:\mbox{}\\
+\hspace*{2\indentation}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} --- CONSTRUCTORS ---{}\mbox{}\\
+}\hspace*{2\indentation}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} From XML {}\mbox{}\\
+}\hspace*{2\indentation}BaseClass::BaseClass(DSXML $\ast$ dsXML);\mbox{}\\
+\hspace*{2\indentation}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} From a minimum set of data{}\mbox{}\\
+}\hspace*{2\indentation}BaseClass::BaseClass(typeObject A, typeObject$\ast$ B);\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} --- DESTRUCTOR --- {}\mbox{}\\
+}\hspace*{2\indentation}{\bf virtual} BaseClass::$\sim$BaseClass();\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} --- GETTERS AND SETTERS ---{}\mbox{}\\
+}\hspace*{2\indentation}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} get sizeB{}\mbox{}\\
+}\hspace*{2\indentation}{\bf inline} {\bf const} {\bf int} getSizeB() {\bf const} \{ {\bf return} sizeB;\}\mbox{}\\
+\hspace*{8\indentation}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} assign newValue to sizeB{}\mbox{}\\
+}\hspace*{2\indentation}{\bf inline} {\bf void} setSizeB({\bf const} {\bf int}\& newValue) \{ sizeB = newValue; \}\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} get the value of objectMemberB{}\mbox{}\\
+}\hspace*{2\indentation}{\bf inline} {\bf const} Type getObjectMemberB() {\bf const} \{ {\bf return} $\ast$objectMemberB; \}\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} get the pointer {}\mbox{}\\
+}\hspace*{2\indentation}{\bf inline} Type$\ast$ getObjectMemberBPtr() {\bf const} \{ {\bf return} objectMemberB; \}\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} set the value of the pointed object{}\mbox{}\\
+}\hspace*{2\indentation}{\bf inline} {\bf void} setObjectMemberB({\bf const} Type\& newValue) \{ $\ast$objectMemberB = newValue; \}\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} set the pointer {}\mbox{}\\
+}\hspace*{2\indentation}{\bf inline} {\bf void} setObjectMemberBPtr(Type$\ast$ newPtr) \{ {\bf delete} objectMemberB; objectMemberB=0; objectMemberB = newPtr; \}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} ...{}\mbox{}\\
+}\hspace*{2\indentation}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} --- OTHER FUNCTIONS --- {}\mbox{}\\
+}\hspace*{2\indentation}{$//$\it{} able to change data members{}\mbox{}\\
+}\hspace*{2\indentation}returnType func1($\ldots$) ;\mbox{}\\
+\hspace*{2\indentation}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} which is not supposed to modify data members{}\mbox{}\\
+}\hspace*{2\indentation}returnType func2($\ldots$) {\bf const} ;\mbox{}\\
+\hspace*{2\indentation}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} which can not modify input arguments{}\mbox{}\\
+}\hspace*{2\indentation}returnType func3({\bf const} typeInput\& inputArg); \mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} with return argument that can not be modified $=$$>$ can not be set as an lValue{}\mbox{}\\
+}\hspace*{2\indentation}{\bf const} returnType func4($\ldots$); \mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} and combinations of these previous cases ...{}\mbox{}\\
+}\hspace*{4\indentation}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} --- PRIVATE/PROTECTED MEMBERS ---{}\mbox{}\\
+}\mbox{}\\
+\hspace*{1\indentation}{\bf protected}:\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} -- Default constructor --{}\mbox{}\\
+}\hspace*{2\indentation}BaseClass::BaseClass();\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} -- data members --{}\mbox{}\\
+}\hspace*{2\indentation}typeObject ObjectMemberA ;\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}typeObject $\ast$ObjectMemberB;\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{\bf int} sizeB; \mbox{}\\
+\hspace*{2\indentation}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} ...{}\mbox{}\\
+}\mbox{}\\
+\};\mbox{}\\
+\mbox{}\\
+{\tt \#endif} \mbox{}\\
+\mbox{}\\
+{$//$\it{}$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$ DERIVED CLASS $=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=$$=${}\mbox{}\\
+}\mbox{}\\
+{$//$\it{} warning !! Implemented in a different file !!{}\mbox{}\\
+}\mbox{}\\
+{\tt \#ifndef} DERIVED\_CLASS\_NAME\_H\mbox{}\\
+{\tt \#define} DERIVED\_CLASS\_NAME\_H\mbox{}\\
+\mbox{}\\
+{$//$\it{} include ...{}\mbox{}\\
+}\mbox{}\\
+{\bf class} DerivedClassName: {\bf public} BaseClassName\mbox{}\\
+\{\mbox{}\\
+\hspace*{1\indentation}{\bf public}:\mbox{}\\
+\hspace*{2\indentation}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} --- CONSTRUCTORS ---{}\mbox{}\\
+}\hspace*{2\indentation}{$//$\it{} From XML {}\mbox{}\\
+}\hspace*{2\indentation}DerivedClass::DerivedClass(DSXML $\ast$ dsXML);\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} From a minimum set of data{}\mbox{}\\
+}\hspace*{2\indentation}DerivedClass::DerivedClass(typeObject A, typeObject$\ast$ B);\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} --- DESTRUCTOR --- {}\mbox{}\\
+}\hspace*{2\indentation}DerivedClass::$\sim$DerivedClass();\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} --- GETTERS AND SETTERS ---{}\mbox{}\\
+}\hspace*{2\indentation}{$//$\it{} ...{}\mbox{}\\
+}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} --- OTHER FUNCTIONS --- {}\mbox{}\\
+}\hspace*{2\indentation}{$//$\it{} ...{}\mbox{}\\
+}\hspace*{2\indentation}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} --- PRIVATE/PROTECTED MEMBERS ---{}\mbox{}\\
+}\hspace*{2\indentation}\mbox{}\\
+\hspace*{1\indentation}{\bf protected}:\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} -- Default constructor --{}\mbox{}\\
+}\hspace*{2\indentation}DerivedClass::DerivedClass();\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} -- data members --{}\mbox{}\\
+}\hspace*{2\indentation}typeObject $\ast$ObjectMemberC ;\mbox{}\\
+\mbox{}\\
+\hspace*{2\indentation}{\bf int} sizeC; \mbox{}\\
+\hspace*{2\indentation}\mbox{}\\
+\hspace*{2\indentation}{$//$\it{} ...{}\mbox{}\\
+}\mbox{}\\
+\};\mbox{}\\
+\mbox{}\\
+{\tt \#endif} \mbox{}\\
+\end{flushleft}

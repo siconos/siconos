@@ -13,7 +13,7 @@ It might also possible to adopt a mixed strategy to load a model.
 What is the validation procedure ?
 \end{ndr}
 
-These functionnalities are based of the implementation of two adjoint trees of object classes :
+These functionnalities are based on the implementation of two adjoint trees of object classes :
 \begin{itemize}
 \item The first tree, \texttt{SiconosModel}  is the core of the modelingTools and simulationsTools.
 \item The second class tree \texttt{siconosModelXML} is devoted the XML Management and interfaces the external  library which implements the API DOM (libxml2).
@@ -63,14 +63,15 @@ It is possible to create a simulation by loading an XML file and then to add new
 However, the opposite is not recommanded (creating manually some objects, and then loading an XMl file, you would have several SiconosModel in memory).\\
 So, by loading some data from an input file, the creation process will build the platform with these data. And then you can manipulate the loaded information and also add dynamical systems, interactions, ...
 
-\section{Definition of three major types of construtors for the Siconosmodel objects.}
+
+%\section{Definition of three major types of construtors for the Siconosmodel objects.}
 %% \subsection{The "create" methods}
 %% The "create" functions have for goal to initialize the relating object. They fill its fields with XML data and link the objects belonging to it to their corresponding XML object, or, if the platform is manually built, only fill its fields with the data given in paramaters.
 
 
-In this section, we define three majors types of constructors which must be defined and used in all classes of the platfrom for the creation of objects. In order to fix ideas, we consider a template objects of the form :
+%In this section, we define three majors types of constructors which must be defined and used in all classes of the platfrom for the creation of objects. In order to fix ideas, we consider a template objects of the form :
 
-  \input{./code/SiconosObject.h.tex}
+ % \input{./code/SiconosObject.h.tex}
 %% \begin{lstlisting}[frame=single,caption={Template objects}]
 %% Class ObjectSiconos: BaseObjectSiconos
 %% {
@@ -100,13 +101,10 @@ In this section, we define three majors types of constructors which must be defi
 
 
 
-\subsection{The Default Constructor}
+%\subsection{The Default Constructor}
 
-The default constructor performs the following operations :
-\input{./code/SiconosObjectDefaultConstructor.cpp.tex}
-
-
-
+%The default constructor performs the following operations :
+%\input{./code/SiconosObjectDefaultConstructor.cpp.tex}
 
 %% \begin{lstlisting}[frame=single,caption={Default Constructor}]
 %% ObjectSiconos::ObjectSiconos() :
@@ -127,18 +125,18 @@ The default constructor performs the following operations :
 %%    }
 %% \end{lstlisting} 
 
-\begin{ndr}
-  \begin{enumerate}
-  \item Remove init() method !!!! This is the role of the Default constructor.
-  \item Do we need to use the new operator if the sizes of the object are not defined ? What is the interest to call the Default constructor with a new ?
-  \end{enumerate}
+%\begin{ndr}
+%  \begin{enumerate}
+%  \item Remove init() method !!!! This is the role of the Default constructor.
+%  \item Do we need to use the new operator if the sizes of the object are not defined ? What is the interest to call the Default constructor with a new ?
+%  \end{enumerate}
 
-\end{ndr}
+%\end{ndr}
 
-\subsection{Constructor with the mininal data}
+%\subsection{Constructor with the mininal data}
 
-This constructor performs  the contruction of a object through given a minimal set of data that corresponds to required data for each created object.  It is composed of the following operations :
-\input{./code/SiconosObjectOtherConstructor.cpp.tex}
+%This constructor performs  the contruction of a object through given a minimal set of data that corresponds to required data for each created object.  It is composed of the following operations :
+%\input{./code/SiconosObjectOtherConstructor.cpp.tex}
 %% \begin{lstlisting}[frame=single,caption={Constructor from the mininal data}]
 %% Object::object(AttributeType1 data1,...,AttributeTypeN dataN )
 %%    {
@@ -160,25 +158,25 @@ This constructor performs  the contruction of a object through given a minimal s
 %%    }
 %% \end{lstlisting} 
 
- \begin{ndr}
-   \begin{enumerate}
-   \item Be careful of the conflict between the new in the Default Constructor and in this constructor, if a new is called in the default Constructor
-   \item Define if the object in attributes must created now of after and then link
-   \item Define the procedure for the XML management :
-     \begin{itemize}
-     \item  Where  is the constructor of the assciated ObjectXML ? 
-     \item  Use of the SaveObjectXML ?
-     \item  Creation of XML sub -tree ? Advantages : Don't need to know what is the father node to fullfill a node at the moment of construction
-     \end{itemize}
-   \end{enumerate}
- \end{ndr}
+% \begin{ndr}
+%   \begin{enumerate}
+%   \item Be careful of the conflict between the new in the Default Constructor and in this constructor, if a new is called in the default Constructor
+%   \item Define if the object in attributes must created now of after and then link
+%   \item Define the procedure for the XML management :
+%     \begin{itemize}
+%     \item  Where  is the constructor of the assciated ObjectXML ? 
+%     \item  Use of the SaveObjectXML ?
+%     \item  Creation of XML sub -tree ? Advantages : Don't need to know what is the father node to fullfill a node at the moment of construction
+%     \end{itemize}
+%   \end{enumerate}
+% \end{ndr}
 
 
-\subsection{Constructor with the ObjectXML of the SiconosModelXML tree}
+%\section{Constructor with the ObjectXML of the SiconosModelXML tree}\label{xml_constructor}
 
-This constructor performs  the contruction of a object given a XML node. There is two steps in this type of contruction  based on the two-associated objetcs, i.e, Object, ObjectXML (for instance, DynamicalSystem and DynamicalSystemXML). The first one is the loading of the ObjectXML from the XML node.This step will be detailed in the section \ref{Sec:XMLnode}. The second  step is the loading of the attributes of the object from the ObjectXML. The operations are described in the Listing~\ref{ConstructorObjectXML}.
+%This constructor performs  the contruction of a object given a XML node. There is two steps in this type of contruction  based on the two-associated objetcs, i.e, Object, ObjectXML (for instance, DynamicalSystem and DynamicalSystemXML). The first one is the loading of the ObjectXML from the XML node.This step will be detailed in the section \ref{Sec:XMLnode}. The second  step is the loading of the attributes of the object from the ObjectXML. The operations are described in the Listing~\ref{ConstructorObjectXML}.
 
-\input{./code/SiconosObjectConstructorfromXML.cpp}
+%\input{./code/SiconosObjectConstructorfromXML.cpp}
 %% \begin{lstlisting}[frame=single,caption={Constructor from the ObjectXML of the SiconosModelXML tree }, label={ConstructorObjectXML}]
 %% Object::Object(ObjectXML objectxml)
 %%    {
@@ -189,22 +187,8 @@ This constructor performs  the contruction of a object given a XML node. There i
 %%    }
 %% \end{lstlisting} 
 
-\textbf{\textit{Remark :}} The SiconosModel owns the only constructor that needs a string corresponding to an XML file, instead of an XML object.\\
-\textbf{\textit{Remark :}} About the DSInputOutput. In the XML file, they are defined a the same level than the dynamical system, whereas they are linked to these dynamical systems. This position is due to the fact one DSInputOutput can be used by several dynamical systems. So, during the loading of the NSDSXML,  DSIOXML objects have to be loaded before DSXML objects to be able to link the DSXML with there DSIOXML.\\
 
-
-
- \begin{ndr}
-   \begin{enumerate}
-   \item Define the procedure for the XML management of the child :
-     \begin{itemize}
-     \item The constructor for the Child Object (Externalobject) is in the link ?
-     \end{itemize}
-   \item Perhaps rename the method fill and link, or include it directly in the constructor ?
-   \end{enumerate}
- \end{ndr}
-
-\clearpage
+%\clearpage
 
 %\input{SiconosObject.cpp.tex}
 
@@ -212,20 +196,20 @@ This constructor performs  the contruction of a object given a XML node. There i
 
 
 
-\subsection{On the use of the operator new and delete in the constructors and the destructors}
+%\subsection{On the use of the operator new and delete in the constructors and the destructors}
 
 
-\begin{ndr}
-  \begin{enumerate}
-  \item Define a rule on the use  operator new and delete in the constructors and the destructors. For instance, 
-    \begin{itemize}
-    \item Should we delete objects in the destructor which have been created with a new in a Constructor ?
-    \end{itemize}
-  \item A question, which is also related, is  the use of a pointer rather than directly a object in the attributes of a Object. (Example in DynamicalSystem, difference between x and r ?)
-  \end{enumerate}
-\end{ndr}
-\ac{tbd}
-\clearpage
+%\begin{ndr}
+%  \begin{enumerate}
+%  \item Define a rule on the use  operator new and delete in the constructors and the destructors. For instance, 
+%    \begin{itemize}
+%    \item Should we delete objects in the destructor which have been created with a new in a Constructor ?
+%    \end{itemize}
+%  \item A question, which is also related, is  the use of a pointer rather than directly a object in the attributes of a Object. (Example in DynamicalSystem, difference between x and r ?)
+%  \end{enumerate}
+%\end{ndr}
+%\ac{tbd}
+%\clearpage
 
 
 \section{Object Factories}

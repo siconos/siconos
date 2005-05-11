@@ -1,0 +1,13 @@
+
+// The constructor list for members initialisation ...
+BaseClass::BaseClass():  objectMemberA(initValue), objectMemberB(initValue), size(valSize), objectPtr(0), ...
+{
+  ...
+  // Memory allocation
+  objectPtr = new TypeObjectPtr(size); // ok
+
+  //  objectPtr = new TypeObjectPtr(); // no!
+  ...
+}
+
+
