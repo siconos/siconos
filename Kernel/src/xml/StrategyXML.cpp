@@ -240,19 +240,19 @@ void StrategyXML::loadStrategy(Strategy* str)
   if (this->strategyNode != NULL)
   {
     // creation of the TimeDiscretisation node
-    if (str->getTimeDiscretisation()->getTimeDiscretisationXML() == NULL)
+    if (str->getTimeDiscretisationPtr()->getTimeDiscretisationXML() == NULL)
     {
       node = xmlNewChild(this->strategyNode, NULL, (xmlChar*)TIMEDISCRETISATION_TAG.c_str(), NULL);
-      if (str->getTimeDiscretisation()->isConstant())
+      if (str->getTimeDiscretisationPtr()->isConstant())
         xmlNewProp(node, (xmlChar*)TD_ISCONSTANT.c_str(), (xmlChar*)"true");
 
       tdxml = new TimeDiscretisationXML();
 
       // linkage between the TimeDiscretisation and his TimeDiscretisationXML
-      str->getTimeDiscretisation()->setTimeDiscretisationXML(tdxml);
+      str->getTimeDiscretisationPtr()->setTimeDiscretisationXML(tdxml);
 
       // creation of the TimeDiscretisationXML
-      tdxml->updateTimeDiscretisationXML(node, str->getTimeDiscretisation());
+      tdxml->updateTimeDiscretisationXML(node, str->getTimeDiscretisationPtr());
 
       this->timeDiscretisationXML = tdxml;
     }

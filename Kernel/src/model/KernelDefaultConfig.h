@@ -25,6 +25,10 @@ double  DefaultAlgoSearchDirection = -1.0;
 string DefaultComputeInput = "BasicPlugin:computeInput";
 string DefaultComputeOutput = "BasicPlugin:computeOutput";
 
+// To initialize pointers:
+#ifndef NULL
+extern const int NULL = 0;
+#endif
 
 #endif
 

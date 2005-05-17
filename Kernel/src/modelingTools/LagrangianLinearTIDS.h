@@ -106,7 +106,7 @@ public:
   ~LagrangianLinearTIDS();
 
   // getter/setter
-  /** \fn SiconosMatrix getK(void)
+  /** \fn SiconosMatrix getK()
    *  \brief allow to get the SiconosMatrix K
    *  \return the SiconosMatrix K
    */
@@ -114,20 +114,20 @@ public:
   // --- GETTERS AND SETTERS ---
 
   // -- K --
-  /** \fn  const SiconosMatrix getK(void) const
+  /** \fn  const SiconosMatrix getK() const
    *  \brief get the value of K
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getK(void) const
+  inline const SiconosMatrix getK() const
   {
     return *K;
   }
 
-  /** \fn SiconosMatrix* getKPtr(void) const
+  /** \fn SiconosMatrix* getKPtr() const
    *  \brief get K
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getKPtr(void) const
+  inline SiconosMatrix* getKPtr() const
   {
     return K;
   }
@@ -148,25 +148,24 @@ public:
   inline void setKPtr(SiconosMatrix *newPtr)
   {
     delete K;
-    K = 0;
     K = newPtr;
   }
 
   // -- C --
-  /** \fn  const SiconosMatrix getC(void) const
+  /** \fn  const SiconosMatrix getC() const
    *  \brief get the value of C
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getC(void) const
+  inline const SiconosMatrix getC() const
   {
     return *C;
   }
 
-  /** \fn SiconosMatrix* getCPtr(void) const
+  /** \fn SiconosMatrix* getCPtr() const
    *  \brief get C
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getCPtr(void) const
+  inline SiconosMatrix* getCPtr() const
   {
     return C;
   }
@@ -187,7 +186,6 @@ public:
   inline void setCPtr(SiconosMatrix *newPtr)
   {
     delete C;
-    C = 0;
     C = newPtr;
   }
 

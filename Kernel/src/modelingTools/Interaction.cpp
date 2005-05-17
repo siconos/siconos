@@ -1,4 +1,3 @@
-
 #include "Interaction.h"
 
 // include here the Relations for the static_casts
@@ -95,13 +94,12 @@ void Interaction::initialize()
 {
   IN("Interaction::initialize()\n");
 
-  this->y = SimpleVector(this->nInteraction);
-  this->lambda = SimpleVector(this->nInteraction);
-  this->yOld = SimpleVector(this->nInteraction);
-  this->yDot = SimpleVector(this->nInteraction);
-  this->yDotOld = SimpleVector(this->nInteraction);
-  this->lambdaOld = SimpleVector(this->nInteraction);
-
+  y = SimpleVector(this->nInteraction);
+  lambda = SimpleVector(this->nInteraction);
+  yOld = SimpleVector(this->nInteraction);
+  yDot = SimpleVector(this->nInteraction);
+  yDotOld = SimpleVector(this->nInteraction);
+  lambdaOld = SimpleVector(this->nInteraction);
   this->display();
 
   OUT("Interaction::initialize()\n");
@@ -121,92 +119,47 @@ void Interaction::swapInMemory(void)
 
 
 
-void Interaction::check(double time)
+void Interaction::check(const double& time, const double& pasH)
 {
   IN("Interaction::check(void)\n");
   int i;
-  if (this->nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW)
+  relation->computeOutput(time);
+
+  // Compute yp, predicted value for constrained variable, for contact detection
+  SimpleVector *yDetection = new SimpleVector(y.size());
+  relation->computePredictedOutput(pasH, yDetection);
+
+  if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW || nslaw->getType() == NEWTONIMPACTLAWNSLAW || nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
   {
-    this->relation->computeOutput(time);
-    for (i = 0; i < this->nInteraction; i++)
+    for (i = 0; i < nInteraction; i++)
     {
-      if (((this->yOld)(i) < 0.0) || (this->status[i] == 1))
-      {
-        this->status[i] = 1;
-      }
-    }
-  }
-  else if (this->nslaw->getType() == NEWTONIMPACTLAWNSLAW)
-  {
-    this->relation->computeOutput(time);
-    for (i = 0; i < this->nInteraction; i++)
-    {
-      if (((this->yOld)(i) < 0.0) || (this->status[i] == 1))
-      {
-        this->status[i] = 1;
-      }
-    }
-  }
-  else if (this->nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
-  {
-    this->relation->computeOutput(time);
-    for (i = 0; i < this->nInteraction; i++)
-    {
-      if (((this->yOld)(i) < 0.0) || (this->status[i] == 1))
-      {
-        this->status[i] = 1;
-      }
+      if ((*yDetection)(i) < 0.0) status[i] = 1;
     }
   }
   else
     RuntimeException::selfThrow("Interaction::check - not yet implemented for this NSLAW type :" + nslaw->getType());
-
-
+  delete yDetection;
   OUT("Interaction::checkInteraction(void)\n");
 }
 
 
-void Interaction::update(double time)
+void Interaction::update(const double& time, const double& pasH)
 {
   IN("Interaction::update(void)\n");
   int i;
   // Status update
-  if (this->nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW)
+  SimpleVector *yDetection = new SimpleVector(y.size());
+  relation->computePredictedOutput(pasH, yDetection);
+  if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW || nslaw->getType() == NEWTONIMPACTLAWNSLAW || nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
   {
     for (i = 0; i < this->nInteraction; i++)
     {
-      if ((status[i] == 1) && ((this->yDot)(i) > 0.0))
-      {
-        this->status[i] = 0;
-      }
+      if ((status[i] == 1) && ((*yDetection)(i) > 0.0)) status[i] = 0;
     }
   }
-  else if (this->nslaw->getType() == NEWTONIMPACTLAWNSLAW)
-  {
-    for (i = 0; i < this->nInteraction; i++)
-    {
-      if ((status[i] == 1) && ((this->yDot)(i) > 0.0))
-      {
-        this->status[i] = 0;
-      }
-    }
-  }
-  else if (this->nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
-  {
-    for (i = 0; i < this->nInteraction; i++)
-    {
-      if ((status[i] == 1) && ((this->yDot)(i) > 0.0))
-      {
-        this->status[i] = 0;
-      }
-    }
-  }
-
-  /*
-   * only done when the interaction is active
-   */
-  // Input update
-  //this->relation->computeInput( time );
+  else
+    RuntimeException::selfThrow("Interaction::update - not yet implemented for this NSLAW type :" + nslaw->getType());
+  delete yDetection;
   OUT("Interaction::update(void)\n");
 }
 

@@ -28,7 +28,7 @@ Strategy::Strategy(Strategy* str)
 {
   IN("Strategy::Strategy( Strategy* str )\n");
   this->strategyType = str->getType();
-  this->timeDiscretisation = str->getTimeDiscretisation();
+  this->timeDiscretisation = str->getTimeDiscretisationPtr();
   this->integratorVector = str->getOneStepIntegrators();
   this->nsProblem = str->getOneStepNSProblem();
   this->strategyxml = str->getStrategyXML();
@@ -416,17 +416,11 @@ void Strategy::newtonSolve(double criterion, int maxStep)
     //s->newtonNextStep();
     nbNewtonStep++;
     cout << "nbStep:" << nbNewtonStep << endl ;
-    cout << "Cest parti1"  << endl;
     computeFreeState();
-    cout << "Cest parti2"  << endl;
     formaliseOneStepNSProblem();
-    cout << "Cest parti3"  << endl;
     computeOneStepNSProblem();
-    cout << "Cest parti4"  << endl;
     newtonUpdateState();
-    cout << "Cest parti5"  << endl;
     isNewtonConverge = newtonCheckConvergence(criterion);
-    cout << "Cest parti6"  << endl;
   }
   if (isNewtonConverge)
     cout << "Newton process: convergence reached after " << nbNewtonStep << " Newtons steps" << endl;

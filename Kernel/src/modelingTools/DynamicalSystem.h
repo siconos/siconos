@@ -99,9 +99,9 @@ public:
    *  \brief get the NonSmoothDynamicalSystem containing this DynamicalSystem
    *  \return NonSmoothDynamicalSystem*
    */
-  inline NonSmoothDynamicalSystem* getNSDSPtr(void) const
+  inline NonSmoothDynamicalSystem* getNSDSPtr() const
   {
-    return this->nsds;
+    return nsds;
   }
 
   /** \fn void setNSDSPtr(NonSmoothDynamicalSystem*);
@@ -117,9 +117,9 @@ public:
    *  \brief allows to get the number of the DynamicalSystem
    *  \return the value of number
    */
-  inline const int getNumber(void) const
+  inline const int getNumber() const
   {
-    return this->number;
+    return number;
   }
 
   /** \fn void setNumber(const int&)
@@ -128,16 +128,16 @@ public:
    */
   inline void setNumber(const int& newNumber)
   {
-    this->number = newNumber;
+    number = newNumber;
   }
 
   /** \fn const string getId(void) const
    *  \brief allows to get the id of the DynamicalSystem
    *  \return the value of ths id
    */
-  inline const string getId(void) const
+  inline const string getId() const
   {
-    return this->id;
+    return id;
   }
 
   /** \fn void setId(const string&)
@@ -146,7 +146,7 @@ public:
    */
   inline void setId(const string& newId)
   {
-    this->id = newId;
+    id = newId;
   }
 
   /** \fn const int getN(void) const;
@@ -155,7 +155,7 @@ public:
    */
   inline const int getN(void) const
   {
-    return this->n;
+    return n;
   }
 
   /** \fn void setN(const int&)
@@ -164,7 +164,7 @@ public:
    */
   inline void setN(const int& newN)
   {
-    this->n = newN;
+    n = newN;
   }
 
   // --- X0 ---
@@ -176,16 +176,16 @@ public:
    */
   inline const SimpleVector getX0() const
   {
-    return *(this->x0);
+    return *x0;
   }
 
   /** \fn SiconosVector* getX0Ptr(void) const
    *  \brief get x0, the initial state of the DynamicalSystem
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVector* getX0Ptr(void) const
+  inline SiconosVector* getX0Ptr() const
   {
-    return this->x0;
+    return x0;
   }
 
   /** \fn void setX0(const SiconosVector& newValue)
@@ -194,7 +194,7 @@ public:
    */
   inline void setX0(const SiconosVector& newValue)
   {
-    *(this->x0) = newValue;
+    *x0 = newValue;
   }
 
   /** \fn void setX0Ptr(SiconosVector* newPtr)
@@ -204,8 +204,7 @@ public:
   inline void setX0Ptr(SiconosVector* newPtr)
   {
     delete x0;
-    x0 = 0;
-    this->x0 = newPtr;
+    x0 = newPtr;
   }
 
   // --- X ---
@@ -215,18 +214,18 @@ public:
    *  \return SimpleVector
     * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
   */
-  inline const SimpleVector getX(void) const
+  inline const SimpleVector getX() const
   {
-    return *(this->x);
+    return *x;
   }
 
   /** \fn SiconosVector* getXPtr(void) const
    *  \brief get x, the state of the DynamicalSystem
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVector* getXPtr(void) const
+  inline SiconosVector* getXPtr() const
   {
-    return this->x;
+    return x;
   }
 
   /** \fn void setX (const SiconosVector& newValue)
@@ -235,7 +234,7 @@ public:
    */
   inline void setX(const SiconosVector& newValue)
   {
-    *(this->x) = newValue;
+    *x = newValue;
   }
 
   /** \fn void setXPtr(SiconosVector* newPtr)
@@ -245,8 +244,7 @@ public:
   inline void setXPtr(SiconosVector *newPtr)
   {
     delete x ;
-    x = 0 ;
-    this->x = newPtr;
+    x = newPtr;
   }
 
   // ---  XDot ---
@@ -256,18 +254,18 @@ public:
    *  \return SimpleVector
    * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
    */
-  inline const SimpleVector getXDot(void) const
+  inline const SimpleVector getXDot() const
   {
-    return *(this->xDot);
+    return *xDot;
   }
 
   /** \fn SiconosVector* getXDotPtr(void) const
    *  \brief get xDot, the derivative of the state of the DynamicalSystem
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVector* getXDotPtr(void) const
+  inline SiconosVector* getXDotPtr() const
   {
-    return this->xDot;
+    return xDot;
   }
 
   /** \fn void setXDot (const SiconosVector& newValue)
@@ -276,7 +274,7 @@ public:
    */
   inline void setXDot(const SiconosVector& newValue)
   {
-    *(this->xDot) = newValue;
+    *xDot = newValue;
   }
 
   /** \fn void setXDotPtr(SiconosVector* newPtr)
@@ -286,8 +284,7 @@ public:
   inline void setXDotPtr(SiconosVector *newPtr)
   {
     delete xDot;
-    xDot = 0;
-    this->xDot = newPtr;
+    xDot = newPtr;
   }
 
   // --- XFree ---
@@ -297,18 +294,18 @@ public:
    *  \return SimpleVector
    * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
    */
-  inline const SimpleVector getXFree(void) const
+  inline const SimpleVector getXFree() const
   {
-    return *(this->xFree);
+    return *xFree;
   }
 
   /** \fn SiconosVector* getXFreePtr(void) const
    *  \brief get xFree
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVector* getXFreePtr(void) const
+  inline SiconosVector* getXFreePtr() const
   {
-    return this->xFree;
+    return xFree;
   }
 
   /** \fn void setXFree (const SiconosVector& newValue)
@@ -317,7 +314,7 @@ public:
    */
   inline void setXFree(const SiconosVector& newValue)
   {
-    *(this->xFree) = newValue;
+    *xFree = newValue;
   }
 
   /** \fn void setXFreePtr(SiconosVector* newPtr)
@@ -327,8 +324,7 @@ public:
   inline void setXFreePtr(SiconosVector *newPtr)
   {
     delete xFree;
-    xFree = 0;
-    this->xFree = newPtr;
+    xFree = newPtr;
   }
 
   // --- R ---
@@ -337,18 +333,18 @@ public:
    *  \brief get the value of r
    *  \return SimpleVector
    */
-  inline const SimpleVector getR(void) const
+  inline const SimpleVector getR() const
   {
-    return *(this->r);
+    return *r;
   }
 
   /** \fn SimpleVector* getRPtr(void) const
    *  \brief get r
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getRPtr(void) const
+  inline SimpleVector* getRPtr() const
   {
-    return this->r;
+    return r;
   }
 
   /** \fn void setR (const SimpleVector& newValue)
@@ -357,7 +353,7 @@ public:
    */
   inline void setR(const SimpleVector& newValue)
   {
-    *(this->r) = newValue;
+    *r = newValue;
   }
 
   /** \fn void setRPtr(SimpleVector* newPtr)
@@ -367,8 +363,7 @@ public:
   inline void setRPtr(SimpleVector *newPtr)
   {
     delete r;
-    r = 0;
-    this->r = newPtr;
+    r = newPtr;
   }
 
   // --- Memory ---
@@ -377,9 +372,9 @@ public:
    *  \brief allows to get the value of stepsInMemory
    *  \return the value of stepsInMemory
    */
-  inline const int getStepsInMemory(void) const
+  inline const int getStepsInMemory() const
   {
-    return this->stepsInMemory;
+    return stepsInMemory;
   }
 
   /** \fn void setStepsInMemory(const int&)
@@ -388,7 +383,7 @@ public:
    */
   inline void setStepsInMemory(const int& steps)
   {
-    this->stepsInMemory = steps;
+    stepsInMemory = steps;
   }
 
   // X memory
@@ -397,18 +392,18 @@ public:
    *  \brief get the value of xMemory
    *  \return a SiconosMemory
    */
-  inline const SiconosMemory getXMemory(void) const
+  inline const SiconosMemory getXMemory() const
   {
-    return this->xMemory;
+    return xMemory;
   }
 
   /** \fn SiconosMemory getXMemoryPtr(void) const
    *  \brief allows to get all the values of the state vector x stored in memory
    *  \return the memory object which stores previous values of x
    */
-  inline SiconosMemory* getXMemoryPtr(void)
+  inline SiconosMemory* getXMemoryPtr()
   {
-    return &(this->xMemory);
+    return &xMemory;
   }
 
   /** \fn void setXMemory(const SiconosMemory &)
@@ -417,7 +412,7 @@ public:
    */
   inline void setXMemory(const SiconosMemory& xMem)
   {
-    this->xMemory = xMem;
+    xMemory = xMem;
   }
 
   // xDot memory
@@ -426,18 +421,18 @@ public:
    *  \brief get the value of xDotMemory
    *  \return a SiconosMemory
    */
-  inline const SiconosMemory getXDotMemory(void) const
+  inline const SiconosMemory getXDotMemory() const
   {
-    return this->xDotMemory;
+    return xDotMemory;
   }
 
   /** \fn SiconosMemory* getXDotMemoryPtr(void)
    *  \brief get all the values of old xDot vectors
    *  \return a pointer on the memory object which contains previous values of xDot
    */
-  inline SiconosMemory* getXDotMemoryPtr(void)
+  inline SiconosMemory* getXDotMemoryPtr()
   {
-    return &(this->xDotMemory);
+    return &xDotMemory;
   }
 
   /** \fn void setXDotMemory(const SiconosMemory &)
@@ -446,7 +441,7 @@ public:
    */
   inline void setXDotMemory(const SiconosMemory& xDotMem)
   {
-    this->xDotMemory = xDotMem;
+    xDotMemory = xDotMem;
   }
 
   // r memory
@@ -454,18 +449,18 @@ public:
    *  \brief get the value of RMemory
    *  \return a SiconosMemory
    */
-  inline const SiconosMemory getRMemory(void) const
+  inline const SiconosMemory getRMemory() const
   {
-    return this->rMemory;
+    return rMemory;
   }
 
   /** \fn SiconosMemory* getRMemoryPtr(void)
    *  \brief get all the values of old r vectors
    *  \return the memory object which contains previous values of r
    */
-  inline SiconosMemory* getRMemoryPtr(void)
+  inline SiconosMemory* getRMemoryPtr()
   {
-    return &(this->rMemory);
+    return &rMemory;
   }
 
   /** \fn void setRMemory(const SiconosMemory &)
@@ -474,7 +469,7 @@ public:
    */
   inline void setRMemory(const SiconosMemory& rMem)
   {
-    this->rMemory = rMem;
+    rMemory = rMem;
   }
 
   // --- JacobianX ---
@@ -483,18 +478,18 @@ public:
    *  \brief get the value of JacobianX
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getJacobianX(void) const
+  inline const SiconosMatrix getJacobianX() const
   {
-    return *(this->jacobianX);
+    return *jacobianX;
   }
 
   /** \fn SiconosMatrix* getJacobianXPtr(void) const
    *  \brief get JacobianX
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianXPtr(void) const
+  inline SiconosMatrix* getJacobianXPtr() const
   {
-    return this->jacobianX;
+    return jacobianX;
   }
 
   /** \fn void setJacobianX (const SiconosMatrix& newValue)
@@ -503,7 +498,7 @@ public:
    */
   inline void setJacobianX(const SiconosMatrix& newValue)
   {
-    *(this->jacobianX) = newValue;
+    *jacobianX = newValue;
   }
 
   /** \fn void setJacobianXPtr(SiconosMatrix* newPtr)
@@ -513,7 +508,6 @@ public:
   inline void setJacobianXPtr(SiconosMatrix *newPtr)
   {
     delete jacobianX;
-    jacobianX = 0;
     jacobianX = newPtr;
   }
 
@@ -529,9 +523,9 @@ public:
    *  \brief get the BoundaryCondition
    *  \return a pointer on the BoundaryCondition object
    */
-  inline BoundaryCondition* getBoundaryConditionPtr(void) const
+  inline BoundaryCondition* getBoundaryConditionPtr() const
   {
-    return this->BC;
+    return BC;
   }
 
   /** \fn void setBoundaryCondition(const BoundaryCondition&)
@@ -547,7 +541,6 @@ public:
   inline void setBoundaryConditionPtr(BoundaryCondition *newBC)
   {
     delete BC;
-    BC = 0;
     BC = newBC;
   }
 
@@ -558,7 +551,7 @@ public:
    */
   inline const DSXML* getDynamicalSystemXMLPtr() const
   {
-    return this->dsxml;
+    return dsxml;
   }
 
   /** \fn inline void setDynamicalSystemXMLPtr(DSXML *dsxml)
@@ -595,7 +588,7 @@ public:
    */
   inline const string getType() const
   {
-    return this->DSType;
+    return DSType;
   }
 
   // --- DS input-output ---
@@ -621,7 +614,7 @@ public:
    */
   inline void setDSInputOutputs(vector<DSInputOutput*> newDsioVect)
   {
-    this->dsioVector = newDsioVect;
+    dsioVector = newDsioVect;
   }
 
   /** \fn void addDSInputOutput(DSInputOutput*)
@@ -630,7 +623,7 @@ public:
    */
   void addDSInputOutput(DSInputOutput* dsio)
   {
-    this->dsioVector.push_back(dsio);
+    dsioVector.push_back(dsio);
   }
 
   // --- ---
@@ -646,7 +639,7 @@ public:
    *  xMemory, xDotMemory, rMemory,
    * \todo Modify the function swapIn Memory with the new Object Memory
    */
-  virtual void swapInMemory(void);
+  virtual void swapInMemory();
 
   /** \fn void vectorField (const double& time)
    * \brief Default function for computing the vector field \f$ f: (x,t) \in R^{n} \times R  \mapsto  R^{n}\f$
@@ -703,8 +696,8 @@ public:
    *  \param SiconosMatrix* : the omega0 matrix of this boundary condition
    *  \param SiconosMatrix* : the omegaT matrix of this boundary condition
    */
-  BoundaryCondition* createLinearBC(SiconosVector* omega = 0,
-                                    SiconosMatrix* omega0 = 0, SiconosMatrix* omegaT = 0);
+  BoundaryCondition* createLinearBC(SiconosVector* omega = NULL,
+                                    SiconosMatrix* omega0 = NULL, SiconosMatrix* omegaT = NULL);
 
   /** \fn BoundaryCondition* createNLinearBC()
    *  \brief create the NLinear Boundary Condition of this DynamicalSystem

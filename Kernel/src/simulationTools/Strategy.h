@@ -62,16 +62,16 @@ public:
    */
   inline Model* getModel() const
   {
-    return this->model;
+    return model;
   }
 
-  /** \fn TimeDiscretisation* getTimeDiscretisation(void)
+  /** \fn TimeDiscretisation* getTimeDiscretisationPtr()
    *  \brief allows to get the TimeDiscretisation of the Strategy
    *  \return the TimeDiscretisation
    */
-  inline TimeDiscretisation* getTimeDiscretisation(void) const
+  inline TimeDiscretisation* getTimeDiscretisationPtr() const
   {
-    return this->timeDiscretisation;
+    return timeDiscretisation;
   };
 
   /** \fn inline int getOneStepIntegratorVectorSize()

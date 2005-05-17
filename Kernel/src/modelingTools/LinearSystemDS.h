@@ -64,20 +64,20 @@ public:
   // --- getter and setter ---
 
   // --- A ---
-  /** \fn  const SiconosMatrix getA(void) const
+  /** \fn  const SiconosMatrix getA() const
    *  \brief get the value of A
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getA(void) const
+  inline const SiconosMatrix getA() const
   {
     return *A;
   }
 
-  /** \fn SiconosMatrix* getAPtr(void) const
+  /** \fn SiconosMatrix* getAPtr() const
    *  \brief get A
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getAPtr(void) const
+  inline SiconosMatrix* getAPtr() const
   {
     return A;
   }
@@ -98,25 +98,24 @@ public:
   inline void setAPtr(SiconosMatrix *newPtr)
   {
     delete A ;
-    A = 0;
     A = newPtr;
   }
 
   // --- B ---
-  /** \fn  const SiconosMatrix getB(void) const
+  /** \fn  const SiconosMatrix getB() const
    *  \brief get the value of B
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getB(void) const
+  inline const SiconosMatrix getB() const
   {
     return *B;
   }
 
-  /** \fn SiconosMatrix* getBPtr(void) const
+  /** \fn SiconosMatrix* getBPtr() const
    *  \brief get B
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getBPtr(void) const
+  inline SiconosMatrix* getBPtr() const
   {
     return B;
   }
@@ -137,28 +136,27 @@ public:
   inline void setBPtr(SiconosMatrix *newPtr)
   {
     delete B;
-    B = 0 ;
     B = newPtr;
   }
 
   // --- u ---
 
-  /** \fn  const SimpleVector getU(void) const
+  /** \fn  const SimpleVector getU() const
   *  \brief get the value of u
   *  \return SimpleVector
   */
-  inline const SimpleVector getU(void) const
+  inline const SimpleVector getU() const
   {
-    return *(this->u);
+    return *u;
   }
 
-  /** \fn SimpleVector* getUPtr(void) const
+  /** \fn SimpleVector* getUPtr() const
    *  \brief get u
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getUPtr(void) const
+  inline SimpleVector* getUPtr() const
   {
-    return this->u;
+    return u;
   }
 
   /** \fn void setU (const SimpleVector& newValue)
@@ -167,7 +165,7 @@ public:
    */
   inline void setU(const SimpleVector& newValue)
   {
-    *(this->u) = newValue;
+    *u = newValue;
   }
 
   /** \fn void setUPtr(SimpleVector* newPtr)
@@ -177,26 +175,25 @@ public:
   inline void setUPtr(SimpleVector *newPtr)
   {
     delete u;
-    u = 0 ;
     u = newPtr;
   }
 
   // --- f ---
 
-  /** \fn  const SimpleVector getF(void) const
+  /** \fn  const SimpleVector getF() const
    *  \brief get the value of f
    *  \return SimpleVector
    */
-  inline const SimpleVector getF(void) const
+  inline const SimpleVector getF() const
   {
     return *f;
   }
 
-  /** \fn SimpleVector* getFPtr(void) const
+  /** \fn SimpleVector* getFPtr() const
    *  \brief get f
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getFPtr(void) const
+  inline SimpleVector* getFPtr() const
   {
     return f;
   }
@@ -217,7 +214,6 @@ public:
   inline void setFPtr(SimpleVector *newPtr)
   {
     delete f;
-    f = 0;
     f = newPtr;
   }
 

@@ -12,12 +12,12 @@
 
 
 // From XML file
-DynamicalSystem::DynamicalSystem(DSXML * dsXML):  DSType(NLDS), nsds(0), number(0), id("none"), n(0), x0(0), x(0), xDot(0), xFree(0), r(0),
-  stepsInMemory(1), jacobianX(0), BC(0), dsxml(dsXML), vectorFieldPtr(0)
+DynamicalSystem::DynamicalSystem(DSXML * dsXML):  DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
+  stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(dsXML), vectorFieldPtr(NULL)
 {
   IN("DynamicalSystem::DynamicalSystem - XML constructor\n");
   // --- get values in xml file ---
-  if (dsXML != 0)
+  if (dsXML != NULL)
   {
     this->number = this->dsxml->getNumber();
     if (this->dsxml->hasId() == true) this->id = this->dsxml->getId();
@@ -61,15 +61,15 @@ DynamicalSystem::DynamicalSystem(DSXML * dsXML):  DSType(NLDS), nsds(0), number(
   }
   else
   {
-    cout << "DynamicalSystem::DynamicalSystem - DSXML paramater must not be 0" << endl;
+    cout << "DynamicalSystem::DynamicalSystem - DSXML paramater must not be NULL" << endl;
   }
   OUT("DynamicalSystem::DynamicalSystem - XML constructor\n");
 }
 
 // From a minimum set of data
 DynamicalSystem::DynamicalSystem(int number, int n, SiconosVector* x0, string vectorFieldPlugin):
-  DSType(NLDS), nsds(0), number(0), id("none"), n(n), x0(0), x(0), xDot(0), xFree(0), r(0),
-  stepsInMemory(1), jacobianX(0), BC(0), dsxml(0), vectorFieldPtr(0)
+  DSType(NLDS), nsds(NULL), number(0), id("none"), n(n), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
+  stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(NULL), vectorFieldPtr(NULL)
 {
   IN("DynamicalSystem::DynamicalSystem - Minimum data constructor\n");
   this->x0 = new SimpleVector(n);
@@ -89,24 +89,24 @@ DynamicalSystem::~DynamicalSystem()
 {
   IN("DynamicalSystem::~DynamicalSystem()\n");
   delete x0;
-  x0 = 0 ;
+  x0 = NULL ;
   delete x;
-  x = 0;
+  x = NULL;
   delete xDot;
-  xDot = 0;
+  xDot = NULL;
   delete xFree;
-  xFree = 0;
+  xFree = NULL;
   delete r;
-  r = 0;
+  r = NULL;
   delete jacobianX;
-  jacobianX = 0;
+  jacobianX = NULL;
   for (int i = 0; i < this->dsioVector.size(); i++)
   {
     delete this->dsioVector[i];
-    dsioVector[i] = 0;
+    dsioVector[i] = NULL;
   }
   delete BC;
-  BC = 0;
+  BC = NULL;
   OUT("DynamicalSystem::~DynamicalSystem()\n");
 }
 
@@ -195,7 +195,7 @@ DSInputOutput* DynamicalSystem::getDSInputOutput(int i)
 
 void DynamicalSystem::setVectorFieldFunction(const string& pluginPath, const string& functionName)
 {
-  this->vectorFieldPtr = 0;
+  this->vectorFieldPtr = NULL;
   cShared.setFunction(&vectorFieldPtr, pluginPath, functionName);
 
   string plugin;
@@ -205,7 +205,7 @@ void DynamicalSystem::setVectorFieldFunction(const string& pluginPath, const str
 
 void DynamicalSystem::setComputeJacobianXFunction(const string& pluginPath, const string& functionName)
 {
-  this->computeJacobianXPtr = 0;
+  this->computeJacobianXPtr = NULL;
   cShared.setFunction(&computeJacobianXPtr, pluginPath, functionName);
 
   string plugin;
@@ -215,7 +215,7 @@ void DynamicalSystem::setComputeJacobianXFunction(const string& pluginPath, cons
 
 void DynamicalSystem::vectorField(const double& time)
 {
-  if (vectorFieldPtr == 0)
+  if (vectorFieldPtr == NULL)
     RuntimeException::selfThrow("vectorField() is not linked to a plugin function");
 
   int size = x->size();
@@ -225,7 +225,7 @@ void DynamicalSystem::vectorField(const double& time)
 
 void DynamicalSystem::computeJacobianX(const double& time)
 {
-  if (computeJacobianXPtr == 0)
+  if (computeJacobianXPtr == NULL)
     RuntimeException::selfThrow("computeJacobianX() is not linked to a plugin function");
 
   int size = x->size();
@@ -251,21 +251,21 @@ void DynamicalSystem::display() const
   cout << "| id : " << this->id << endl;
   cout << "| n : " << this->n << endl;
   cout << "| x " << endl;
-  if (x != 0) this->x->display();
-  else cout << "-> 0" << endl;
+  if (x != NULL) this->x->display();
+  else cout << "-> NULL" << endl;
   cout << "| x0 " << endl;
-  if (x0 != 0) this->x0->display();
-  else cout << "-> 0" << endl;
+  if (x0 != NULL) this->x0->display();
+  else cout << "-> NULL" << endl;
   cout << "| xFree " << endl;
-  if (xFree != 0) this->xFree->display();
-  else cout << "-> 0" << endl;
+  if (xFree != NULL) this->xFree->display();
+  else cout << "-> NULL" << endl;
   cout << "| xDot " << endl;
-  if (xDot != 0) this->xDot->display();
-  else cout << "-> 0" << endl;
+  if (xDot != NULL) this->xDot->display();
+  else cout << "-> NULL" << endl;
   cout << "| stepsInMemory : " << this->stepsInMemory << endl;
   cout << "| r " << endl;
-  if (r != 0) this->r->display();
-  else cout << "-> 0" << endl;
+  if (r != NULL) this->r->display();
+  else cout << "-> NULL" << endl;
   cout << "| VectorField plugin: " << this->vectorFieldFunctionName << endl;
   cout << "| JacobianX plugin: " << this->computeJacobianXFunctionName << endl;
   OUT("DynamicalSystem::display\n");
@@ -307,7 +307,7 @@ void DynamicalSystem::saveDSToXML()
   saveDSDataToXML();
 
   // --- other data ---
-  if (this->dsxml != 0)
+  if (this->dsxml != NULL)
   {
     this->dsxml->setN(this->n);
     this->dsxml->setVectorFieldPlugin(this->vectorFieldFunctionName);
@@ -327,7 +327,7 @@ void DynamicalSystem::saveDSDataToXML()
   saveBCToXML();
   // --- DS input-output ---
   saveDSIOToXML();
-  if (this->dsxml != 0)
+  if (this->dsxml != NULL)
   {
     this->dsxml->setId(this->id);
     this->dsxml->setX0(this->x0);
@@ -346,7 +346,7 @@ void DynamicalSystem::saveDSDataToXML()
 // Save boundary conditions to xml file
 void DynamicalSystem::saveBCToXML()
 {
-  if (this->BC != 0)
+  if (this->BC != NULL)
   {
     if (this->BC->getType() == LINEARBC)
       (static_cast<LinearBC*>(this->BC))->saveBCToXML();
@@ -403,8 +403,8 @@ double DynamicalSystem::dsConvergenceIndicator() const
 }
 
 // Default constructor
-DynamicalSystem::DynamicalSystem(): DSType(NLDS), nsds(0), number(0), id("none"), n(0), x0(0), x(0), xDot(0), xFree(0), r(0),
-  stepsInMemory(1), jacobianX(0), BC(0), dsxml(0), vectorFieldPtr(0)
+DynamicalSystem::DynamicalSystem(): DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
+  stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(NULL), vectorFieldPtr(NULL)
 {
   IN("DynamicalSystem::DynamicalSystem - Default constructor\n");
   // --- plugins -> connected to  "false" plugin

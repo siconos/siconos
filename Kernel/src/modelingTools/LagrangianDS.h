@@ -119,13 +119,13 @@ public:
 
   // --- GETTERS AND SETTERS ---
 
-  /** \fn const int getNdof(void) const
+  /** \fn const int getNdof() const
    *  \brief allows to get the value of ndof
    *  \return the value of ndof
    */
-  inline const int getNdof(void) const
+  inline const int getNdof() const
   {
-    return this->ndof;
+    return ndof;
   };
 
   /** \fn void setNdof(const int&)
@@ -139,20 +139,20 @@ public:
 
   // -- q --
 
-  /** \fn  const SimpleVector getQ(void) const
+  /** \fn  const SimpleVector getQ() const
    *  \brief get the value of q
    *  \return SimpleVector
    */
-  inline const SimpleVector getQ(void) const
+  inline const SimpleVector getQ() const
   {
     return *q;
   }
 
-  /** \fn SimpleVector* getQPtr(void) const
+  /** \fn SimpleVector* getQPtr() const
    *  \brief get q
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getQPtr(void) const
+  inline SimpleVector* getQPtr() const
   {
     return q;
   }
@@ -173,26 +173,25 @@ public:
   inline void setQPtr(SimpleVector *newPtr)
   {
     delete q;
-    q = 0;
     q = newPtr;
   }
 
   // -- q0 --
 
-  /** \fn  const SimpleVector getQ0(void) const
+  /** \fn  const SimpleVector getQ0() const
    *  \brief get the value of q0
    *  \return SimpleVector
    */
-  inline const SimpleVector getQ0(void) const
+  inline const SimpleVector getQ0() const
   {
     return *q0;
   }
 
-  /** \fn SimpleVector* getQ0Ptr(void) const
+  /** \fn SimpleVector* getQ0Ptr() const
    *  \brief get q0
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getQ0Ptr(void) const
+  inline SimpleVector* getQ0Ptr() const
   {
     return q0;
   }
@@ -213,26 +212,25 @@ public:
   inline void setQ0Ptr(SimpleVector *newPtr)
   {
     delete q0;
-    q0 = 0;
     q0 = newPtr;
   }
 
   // -- qFree --
 
-  /** \fn  const SimpleVector getQFree(void) const
+  /** \fn  const SimpleVector getQFree() const
    *  \brief get the value of qFree
    *  \return SimpleVector
    */
-  inline const SimpleVector getQFree(void) const
+  inline const SimpleVector getQFree() const
   {
     return *qFree;
   }
 
-  /** \fn SimpleVector* getQFreePtr(void) const
+  /** \fn SimpleVector* getQFreePtr() const
    *  \brief get qFree
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getQFreePtr(void) const
+  inline SimpleVector* getQFreePtr() const
   {
     return qFree;
   }
@@ -253,26 +251,25 @@ public:
   inline void setQFreePtr(SimpleVector *newPtr)
   {
     delete qFree;
-    qFree = 0;
     qFree = newPtr;
   }
 
   // -- velocity --
 
-  /** \fn  const SimpleVector getVelocity(void) const
+  /** \fn  const SimpleVector getVelocity() const
    *  \brief get the value of velocity
    *  \return SimpleVector
    */
-  inline const SimpleVector getVelocity(void) const
+  inline const SimpleVector getVelocity() const
   {
     return *velocity;
   }
 
-  /** \fn SimpleVector* getVelocityPtr(void) const
+  /** \fn SimpleVector* getVelocityPtr() const
    *  \brief get velocity
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getVelocityPtr(void) const
+  inline SimpleVector* getVelocityPtr() const
   {
     return velocity;
   }
@@ -293,26 +290,25 @@ public:
   inline void setVelocityPtr(SimpleVector *newPtr)
   {
     delete velocity;
-    velocity = 0;
     velocity = newPtr;
   }
 
   // -- velocity0 --
 
-  /** \fn  const SimpleVector getVelocity0(void) const
+  /** \fn  const SimpleVector getVelocity0() const
    *  \brief get the value of velocity0
    *  \return SimpleVector
    */
-  inline const SimpleVector getVelocity0(void) const
+  inline const SimpleVector getVelocity0() const
   {
     return *velocity0;
   }
 
-  /** \fn SimpleVector* getVelocity0Ptr(void) const
+  /** \fn SimpleVector* getVelocity0Ptr() const
    *  \brief get velocity0
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getVelocity0Ptr(void) const
+  inline SimpleVector* getVelocity0Ptr() const
   {
     return velocity0;
   }
@@ -333,26 +329,25 @@ public:
   inline void setVelocity0Ptr(SimpleVector *newPtr)
   {
     delete velocity0;
-    velocity0 = 0;
     velocity0 = newPtr;
   }
 
   // -- velocityFree --
 
-  /** \fn  const SimpleVector getVelocityFree(void) const
+  /** \fn  const SimpleVector getVelocityFree() const
    *  \brief get the value of velocityFree
    *  \return SimpleVector
    */
-  inline const SimpleVector getVelocityFree(void) const
+  inline const SimpleVector getVelocityFree() const
   {
     return *velocityFree;
   }
 
-  /** \fn SimpleVector* getVelocityFreePtr(void) const
+  /** \fn SimpleVector* getVelocityFreePtr() const
    *  \brief get velocityFree
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getVelocityFreePtr(void) const
+  inline SimpleVector* getVelocityFreePtr() const
   {
     return velocityFree;
   }
@@ -373,26 +368,25 @@ public:
   inline void setVelocityFreePtr(SimpleVector *newPtr)
   {
     delete velocityFree;
-    velocityFree = 0;
     velocityFree = newPtr;
   }
 
   // -- p --
 
-  /** \fn  const SimpleVector getP(void) const
+  /** \fn  const SimpleVector getP() const
    *  \brief get the value of p
    *  \return SimpleVector
    */
-  inline const SimpleVector getP(void) const
+  inline const SimpleVector getP() const
   {
     return *p;
   }
 
-  /** \fn SimpleVector* getPPtr(void) const
+  /** \fn SimpleVector* getPPtr() const
    *  \brief get p
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getPPtr(void) const
+  inline SimpleVector* getPPtr() const
   {
     return p;
   }
@@ -413,7 +407,6 @@ public:
   inline void setPPtr(SimpleVector *newPtr)
   {
     delete p;
-    p = 0;
     p = newPtr;
   }
 
@@ -421,20 +414,20 @@ public:
 
   // -- q memory --
 
-  /** \fn  const SiconosMemory getQMemory(void) const
+  /** \fn  const SiconosMemory getQMemory() const
    *  \brief get the value of qMemory
    *  \return a SiconosMemory
    */
-  inline const SiconosMemory getQMemory(void) const
+  inline const SiconosMemory getQMemory() const
   {
     return qMemory;
   }
 
-  /** \fn SiconosMemory getQMemoryPtr(void) const
+  /** \fn SiconosMemory getQMemoryPtr() const
    *  \brief get all the values of the state vector q stored in memory
    *  \return the memory object which stores previous values of q
    */
-  inline SiconosMemory* getQMemoryPtr(void)
+  inline SiconosMemory* getQMemoryPtr()
   {
     return &qMemory;
   }
@@ -450,20 +443,20 @@ public:
 
   // -- velocity memory --
 
-  /** \fn  const SiconosMemory getVelocityMemory(void) const
+  /** \fn  const SiconosMemory getVelocityMemory() const
    *  \brief get the value of velocityMemory
    *  \return a SiconosMemory
    */
-  inline const SiconosMemory getVelocityMemory(void) const
+  inline const SiconosMemory getVelocityMemory() const
   {
     return velocityMemory;
   }
 
-  /** \fn SiconosMemory getVelocityMemoryPtr(void) const
+  /** \fn SiconosMemory getVelocityMemoryPtr() const
    *  \brief get all the values of the state vector velocity stored in memory
    *  \return the memory object which stores previous values of velocity
    */
-  inline SiconosMemory* getVelocityMemoryPtr(void)
+  inline SiconosMemory* getVelocityMemoryPtr()
   {
     return &velocityMemory;
   }
@@ -479,22 +472,22 @@ public:
 
   // -- Mass --
 
-  /** \fn  const SiconosMatrix getMass(void) const
+  /** \fn  const SiconosMatrix getMass() const
    *  \brief get the value of Mass
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getMass(void) const
+  inline const SiconosMatrix getMass() const
   {
-    return *(this->mass);
+    return *mass;
   }
 
-  /** \fn SiconosMatrix* getMassPtr(void) const
+  /** \fn SiconosMatrix* getMassPtr() const
    *  \brief get Mass
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getMassPtr(void) const
+  inline SiconosMatrix* getMassPtr() const
   {
-    return this->mass;
+    return mass;
   }
 
   /** \fn void setMass (const SiconosMatrix& newValue)
@@ -503,7 +496,7 @@ public:
    */
   inline void setMass(const SiconosMatrix& newValue)
   {
-    *(this->mass) = newValue;
+    *mass = newValue;
   }
 
   /** \fn void setMassPtr(SiconosMatrix* newPtr)
@@ -513,26 +506,25 @@ public:
   inline void setMassPtr(SiconosMatrix *newPtr)
   {
     delete mass;
-    mass = 0;
     mass = newPtr;
   }
 
   // -- FInt --
 
-  /** \fn  const SimpleVector getFInt(void) const
+  /** \fn  const SimpleVector getFInt() const
    *  \brief get the value of fInt
    *  \return SimpleVector
    */
-  inline const SimpleVector getFInt(void) const
+  inline const SimpleVector getFInt() const
   {
     return *fInt;
   }
 
-  /** \fn SimpleVector* getFIntPtr(void) const
+  /** \fn SimpleVector* getFIntPtr() const
    *  \brief get fInt
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getFIntPtr(void) const
+  inline SimpleVector* getFIntPtr() const
   {
     return fInt;
   }
@@ -553,26 +545,25 @@ public:
   inline void setFIntPtr(SimpleVector *newPtr)
   {
     delete fInt;
-    fInt = 0;
     fInt = newPtr;
   }
 
   // -- Fext --
 
-  /** \fn  const SimpleVector getFExt(void) const
+  /** \fn  const SimpleVector getFExt() const
    *  \brief get the value of fExt
    *  \return SimpleVector
    */
-  inline const SimpleVector getFExt(void) const
+  inline const SimpleVector getFExt() const
   {
     return *fExt;
   }
 
-  /** \fn SimpleVector* getFExtPtr(void) const
+  /** \fn SimpleVector* getFExtPtr() const
    *  \brief get fExt
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getFExtPtr(void) const
+  inline SimpleVector* getFExtPtr() const
   {
     return fExt;
   }
@@ -593,26 +584,25 @@ public:
   inline void setFExtPtr(SimpleVector *newPtr)
   {
     delete fExt;
-    fExt = 0;
     fExt = newPtr;
   }
 
   // -- QNLInertia --
 
-  /** \fn  const SimpleVector getQNLInertia(void) const
+  /** \fn  const SimpleVector getQNLInertia() const
    *  \brief get the value of QNLInertia
    *  \return SimpleVector
    */
-  inline const SimpleVector getQNLInertia(void) const
+  inline const SimpleVector getQNLInertia() const
   {
     return *QNLInertia;
   }
 
-  /** \fn SimpleVector* getQNLInertiaPtr(void) const
+  /** \fn SimpleVector* getQNLInertiaPtr() const
    *  \brief get QNLInertia
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getQNLInertiaPtr(void) const
+  inline SimpleVector* getQNLInertiaPtr() const
   {
     return QNLInertia;
   }
@@ -633,28 +623,27 @@ public:
   inline void setQNLInertiaPtr(SimpleVector *newPtr)
   {
     delete QNLInertia;
-    QNLInertia = 0;
     QNLInertia = newPtr;
   }
 
   // -- Jacobian Q Fint --
 
-  /** \fn  const SiconosMatrix getJacobianQFInt(void) const
+  /** \fn  const SiconosMatrix getJacobianQFInt() const
    *  \brief get the value of JacobianQFInt
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getJacobianQFInt(void) const
+  inline const SiconosMatrix getJacobianQFInt() const
   {
-    return *(this->jacobianQFInt);
+    return *jacobianQFInt;
   }
 
-  /** \fn SiconosMatrix* getJacobianQFIntPtr(void) const
+  /** \fn SiconosMatrix* getJacobianQFIntPtr() const
    *  \brief get JacobianQFInt
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianQFIntPtr(void) const
+  inline SiconosMatrix* getJacobianQFIntPtr() const
   {
-    return this->jacobianQFInt;
+    return jacobianQFInt;
   }
 
   /** \fn void setJacobianQFInt (const SiconosMatrix& newValue)
@@ -663,7 +652,7 @@ public:
    */
   inline void setJacobianQFInt(const SiconosMatrix& newValue)
   {
-    *(this->jacobianQFInt) = newValue;
+    *jacobianQFInt = newValue;
   }
 
   /** \fn void setJacobianQFIntPtr(SiconosMatrix* newPtr)
@@ -673,28 +662,27 @@ public:
   inline void setJacobianQFIntPtr(SiconosMatrix *newPtr)
   {
     delete jacobianQFInt;
-    jacobianQFInt = 0;
     jacobianQFInt = newPtr;
   }
 
   // -- Jacobian velocity Fint --
 
-  /** \fn  const SiconosMatrix getJacobianVelocityFInt(void) const
+  /** \fn  const SiconosMatrix getJacobianVelocityFInt() const
    *  \brief get the value of JacobianVelocityFInt
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getJacobianVelocityFInt(void) const
+  inline const SiconosMatrix getJacobianVelocityFInt() const
   {
-    return *(this->jacobianVelocityFInt);
+    return *jacobianVelocityFInt;
   }
 
-  /** \fn SiconosMatrix* getJacobianVelocityFIntPtr(void) const
+  /** \fn SiconosMatrix* getJacobianVelocityFIntPtr() const
    *  \brief get JacobianVelocityFInt
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianVelocityFIntPtr(void) const
+  inline SiconosMatrix* getJacobianVelocityFIntPtr() const
   {
-    return this->jacobianVelocityFInt;
+    return jacobianVelocityFInt;
   }
 
   /** \fn void setJacobianVelocityFInt (const SiconosMatrix& newValue)
@@ -703,7 +691,7 @@ public:
    */
   inline void setJacobianVelocityFInt(const SiconosMatrix& newValue)
   {
-    *(this->jacobianVelocityFInt) = newValue;
+    *jacobianVelocityFInt = newValue;
   }
 
   /** \fn void setJacobianVelocityFIntPtr(SiconosMatrix* newPtr)
@@ -713,28 +701,27 @@ public:
   inline void setJacobianVelocityFIntPtr(SiconosMatrix *newPtr)
   {
     delete jacobianVelocityFInt;
-    jacobianVelocityFInt = 0;
     jacobianVelocityFInt = newPtr;
   }
 
   // -- Jacobian Q QNLInertia --
 
-  /** \fn  const SiconosMatrix getJacobianQQNLInertia(void) const
+  /** \fn  const SiconosMatrix getJacobianQQNLInertia() const
    *  \brief get the value of JacobianQQNLInertia
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getJacobianQQNLInertia(void) const
+  inline const SiconosMatrix getJacobianQQNLInertia() const
   {
-    return *(this->jacobianQQNLInertia);
+    return *jacobianQQNLInertia;
   }
 
-  /** \fn SiconosMatrix* getJacobianQQNLInertiaPtr(void) const
+  /** \fn SiconosMatrix* getJacobianQQNLInertiaPtr() const
    *  \brief get JacobianQQNLInertia
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianQQNLInertiaPtr(void) const
+  inline SiconosMatrix* getJacobianQQNLInertiaPtr() const
   {
-    return this->jacobianQQNLInertia;
+    return jacobianQQNLInertia;
   }
 
   /** \fn void setJacobianQQNLInertia (const SiconosMatrix& newValue)
@@ -743,7 +730,7 @@ public:
    */
   inline void setJacobianQQNLInertia(const SiconosMatrix& newValue)
   {
-    *(this->jacobianQQNLInertia) = newValue;
+    *jacobianQQNLInertia = newValue;
   }
 
   /** \fn void setJacobianQQNLInertiaPtr(SiconosMatrix* newPtr)
@@ -759,22 +746,22 @@ public:
 
   // -- Jacobian velocity QNLInertia --
 
-  /** \fn  const SiconosMatrix getJacobianVelocityQNLInertia(void) const
+  /** \fn  const SiconosMatrix getJacobianVelocityQNLInertia() const
    *  \brief get the value of JacobianVelocityQNLInertia
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getJacobianVelocityQNLInertia(void) const
+  inline const SiconosMatrix getJacobianVelocityQNLInertia() const
   {
-    return *(this->jacobianVelocityQNLInertia);
+    return *jacobianVelocityQNLInertia;
   }
 
-  /** \fn SiconosMatrix* getJacobianVelocityQNLInertiaPtr(void) const
+  /** \fn SiconosMatrix* getJacobianVelocityQNLInertiaPtr() const
    *  \brief get JacobianVelocityQNLInertia
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianVelocityQNLInertiaPtr(void) const
+  inline SiconosMatrix* getJacobianVelocityQNLInertiaPtr() const
   {
-    return this->jacobianVelocityQNLInertia;
+    return jacobianVelocityQNLInertia;
   }
 
   /** \fn void setJacobianVelocityQNLInertia (const SiconosMatrix& newValue)
@@ -783,7 +770,7 @@ public:
    */
   inline void setJacobianVelocityQNLInertia(const SiconosMatrix& newValue)
   {
-    *(this->jacobianVelocityQNLInertia) = newValue;
+    *jacobianVelocityQNLInertia = newValue;
   }
 
   /** \fn void setJacobianVelocityQNLInertiaPtr(SiconosMatrix* newPtr)
@@ -793,7 +780,6 @@ public:
   inline void setJacobianVelocityQNLInertiaPtr(SiconosMatrix *newPtr)
   {
     delete jacobianVelocityQNLInertia;
-    jacobianVelocityQNLInertia = 0;
     jacobianVelocityQNLInertia = newPtr;
   }
 
@@ -1003,7 +989,7 @@ public:
    *  xMemory, xDotMemory, rMemory,
    * \todo Modify the function swapIn Memory with the new Object Memory
    */
-  void swapInMemory(void);
+  void swapInMemory();
 
   /** \fn LagrangianDS* convert (DynamicalSystem* ds)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.

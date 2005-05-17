@@ -94,6 +94,14 @@ public:
 
   ////////////////////////////
 
+  /** \fn void computePredictedOutput(const double&);
+   *  \brief compute yp, predicted value for constrained variables
+   *  \param double : current time step
+   *  \param SimpleVector *: the vector to compute
+   *  \exception RuntimeException
+   */
+  void computePredictedOutput(const double&, SimpleVector*);
+
   /** \fn void computeFreeOutput(double time);
    *  \brief default function to compute y for the free state
    *  \param double : current time

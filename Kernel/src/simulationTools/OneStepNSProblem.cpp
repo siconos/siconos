@@ -58,11 +58,11 @@ void OneStepNSProblem::updateState(void)
   Interaction *inter;
   vector<Interaction*>::iterator it;
   double currentTime = this->strategy->getModel()->getCurrentT();
-
+  double pasH = strategy->getTimeDiscretisationPtr()->getH();
   for (it = this->interactionVector.begin(); it != this->interactionVector.end(); ++it)
   {
     inter = *it;
-    inter->update(currentTime);
+    inter->update(currentTime, pasH);
 
     if (this->connectedInteractionMap.find(inter) != this->connectedInteractionMap.end())
       inter->getRelation()->computeInput(currentTime);
@@ -87,10 +87,11 @@ void OneStepNSProblem::checkInteraction(void)
   // predict all the relations to see which ones have an effect
   Interaction *inter;
   vector<Interaction*>::iterator it;
+  double pasH = strategy->getTimeDiscretisationPtr()->getH();
   for (it = this->interactionVector.begin(); it != this->interactionVector.end(); ++it)
   {
     inter = *it;
-    inter->check(this->strategy->getModel()->getCurrentT());
+    inter->check(this->strategy->getModel()->getCurrentT(), pasH);
   }
 }
 

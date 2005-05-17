@@ -80,9 +80,9 @@ public:
    *  \brief allows to get the type of the Relation
    *  \return string : the type of the Relation
    */
-  inline string getType() const
+  inline const string getType() const
   {
-    return this->relationType;
+    return relationType;
   }
 
   /** \fn vector<DSInputOutput*> getDSInputOutputs(void)
@@ -118,6 +118,14 @@ public:
    *  \exception RuntimeException
    */
   virtual void computeOutput(double time);
+
+  /** \fn void computePredictedOutput(const double&);
+   *  \brief compute yp, predicted value for constrained variables
+   *  \param double : current time step
+   *  \param SimpleVector* : the vector to compute
+   *  \exception RuntimeException
+   */
+  virtual void computePredictedOutput(const double&, SimpleVector*);
 
   /** \fn void computeFreeOutput(double time);
    *  \brief default function to compute y for the free state

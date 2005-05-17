@@ -40,25 +40,23 @@ SimpleVector* LCP::getQPtr(void)
 void LCP::formalize(double time)
 {
   IN("LCP::formalize(void)\n");
-
-  // check status of the interactions
-  for (int i = 0; i < this->interactionVector.size(); i++)
+  // --- check and update status of the interactions ---
+  // get time step
+  double pasH = strategy->getTimeDiscretisationPtr()->getH();
+  for (int i = 0; i < interactionVector.size(); i++)
   {
-    this->interactionVector[i]->check(time);
+    interactionVector[i]->check(time, pasH);
   }
-  this->updateConnectedInteractionMap();
+  updateConnectedInteractionMap();
 
   // compute M and q operators for LCP problem
-  this->computeM();
-  this->computeQ(time);
+  computeM();
+  computeQ(time);
 
-  this->w = SimpleVector::SimpleVector(this->nLcp);
-  this->z = SimpleVector::SimpleVector(this->nLcp);
+  w = SimpleVector::SimpleVector(nLcp);
+  z = SimpleVector::SimpleVector(nLcp);
 
   OUT("LCP::formalize(void)\n");
-
-  // formalisations specific to LCP problem
-  // ...
 }
 
 

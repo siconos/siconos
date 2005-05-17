@@ -21,7 +21,7 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml): Relation(relxml)
 {
   //  this->h = NULL;
   //  this->b = NULL;
-  this->relationType = LAGRANGIANLINEARRELATION;
+  relationType = LAGRANGIANLINEARRELATION;
 }
 
 LagrangianLinearR::~LagrangianLinearR()
@@ -30,17 +30,15 @@ LagrangianLinearR::~LagrangianLinearR()
   OUT("LagrangianLinearR::~LagrangianLinearR()\n");
 }
 
-LagrangianLinearR::LagrangianLinearR(SiconosMatrix h, SimpleVector b)
+LagrangianLinearR::LagrangianLinearR(SiconosMatrix newH, SimpleVector newB): h(newH), b(newB)
 {
-  this->h = h;
-  this->b = b;
-  this->relationType = LAGRANGIANLINEARRELATION;
+  relationType = LAGRANGIANLINEARRELATION;
 }
 
 
 SiconosMatrix* LagrangianLinearR::getHPtr(void)
 {
-  return &this->h;
+  return &h;
 }
 
 SiconosMatrix LagrangianLinearR::getHRelatingToDS(int position)
@@ -77,11 +75,11 @@ void LagrangianLinearR::computeOutput(double time)
 {
   IN("LagrangianLinearR::computeOutput\n");
 
-  vector<DynamicalSystem*> vDS = this->interaction->getDynamicalSystems();
+  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
 
   DynamicalSystem *ds1 , *ds2;
-  SimpleVector *y = this->interaction->getYPtr();
-  SimpleVector *yDot = this->interaction->getYDotPtr();
+  SimpleVector *y = interaction->getYPtr();
+  SimpleVector *yDot = interaction->getYDotPtr();
 
   if (vDS.size() == 2)
   {
@@ -142,7 +140,34 @@ void LagrangianLinearR::computeOutput(double time)
   OUT("LagrangianLinearR::computeOutput\n");
 }
 
-
+// compute predicted state for constrained variables: yp = yi + h/2 ydot_i
+// Warning: state 'i' depends on what is saved in present state for q/qdot
+void LagrangianLinearR::computePredictedOutput(const double& pasH, SimpleVector *yPrediction)
+{
+  IN("LagrangianLinearR::computePredictedOutput\n");
+  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+  DynamicalSystem *ds1 , *ds2;
+  if (vDS.size() == 2)
+  {
+    ds1 = vDS[0];
+    ds2 = vDS[1];
+    if (((ds1->getType() == LNLDS) || (ds1->getType() == LTIDS)) && ((ds2->getType() == LNLDS) || (ds2->getType() == LTIDS)))
+    {
+      LagrangianDS *d1 = static_cast<LagrangianDS*>(ds1);
+      LagrangianDS *d2 = static_cast<LagrangianDS*>(ds2);
+      // Time step
+      CompositeVector q, vel;
+      q.add(*(d1->getQPtr()));
+      q.add(*(d2->getQPtr()));
+      vel.add(*(d1->getVelocityPtr()));
+      vel.add(*(d2->getVelocityPtr()));
+      *yPrediction = (h * q) + b + 0.5 * pasH * (h * vel);
+    }
+    else RuntimeException::selfThrow("LagrangianLinearR::computePredictedOutput not yet implemented for this type of dynamical system " + vDS[0]->getType());
+  }
+  else RuntimeException::selfThrow("The interaction doesn't contain the right number of Dynamical Systems");
+  OUT("LagrangianLinearR::computeOutput\n");
+}
 
 void LagrangianLinearR::computeFreeOutput(double time)
 {
@@ -264,10 +289,8 @@ void LagrangianLinearR::fillRelationWithRelationXML()
   Relation::fillRelationWithRelationXML();
   if (this->relationxml != NULL)
   {
-    this->h = (static_cast<LagrangianLinearRXML*>(this->relationxml))->getH();
-    this->b = (static_cast<LagrangianLinearRXML*>(this->relationxml))->getB();
-
-    //    this->display();
+    h = (static_cast<LagrangianLinearRXML*>(relationxml))->getH();
+    b = (static_cast<LagrangianLinearRXML*>(relationxml))->getB();
   }
   else RuntimeException::selfThrow("LagrangianLinearR::fillRelationWithRelationXML - object RelationXML does not exist");
 }

@@ -89,6 +89,13 @@ void Relation::computeOutput(double time)
   //      RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for this type of dynamical system "+vDS[0]->getType());
   //    }
 }
+
+void Relation::computePredictedOutput(const double& pasH, SimpleVector* yPrediction)
+{
+  RuntimeException::selfThrow("Relation::computePredictedOutput - not yet implemented for this kind of relation: " + getType());
+}
+
+
 void Relation::computeFreeOutput(double time)
 {
   if (computeOutputPtr == NULL) RuntimeException::selfThrow("computeFreeOutput() is not linked to a plugin function");

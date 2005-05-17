@@ -295,7 +295,7 @@ public:
    *  \brief calculate an indicator that gives convergence information for the DSs
    *  \return a double
    */
-  double nsdsConvergenceIndicator() const ;
+  double nsdsConvergenceIndicator() ;
 
 protected:
   /** \fn void linkNSDSXML()

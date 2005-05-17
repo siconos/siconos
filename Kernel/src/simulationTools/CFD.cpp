@@ -42,10 +42,11 @@ void CFD::formalize(double time)
   IN("CFD::formalize(void)\n");
   OneStepNSProblem::formalize(time);
 
+  double pasH = strategy->getTimeDiscretisationPtr()->getH();
   //cout<<"## CFD::formalize - interactionVector.size() == "<<this->interactionVector.size()<<endl;
   for (int i = 0; i < this->interactionVector.size(); i++)
   {
-    this->interactionVector[i]->check(time);
+    this->interactionVector[i]->check(time, pasH);
   }
   this->updateConnectedInteractionMap();
   cout << " #~ CFD::updateConnectedInteractionMap done" << endl;

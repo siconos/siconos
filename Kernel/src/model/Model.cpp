@@ -169,7 +169,7 @@ void Model::savePlatformToXML()
 
   if (this->strategy != NULL)
   {
-    this->strategy->getTimeDiscretisation()->saveTimeDiscretisationToXML();
+    this->strategy->getTimeDiscretisationPtr()->saveTimeDiscretisationToXML();
 
     if (this->strategy->getType() == TIMESTEPPING_STRATEGY)
       (static_cast<TimeStepping*>(this->strategy))->saveStrategyToXML();

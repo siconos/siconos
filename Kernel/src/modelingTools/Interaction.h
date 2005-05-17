@@ -347,17 +347,19 @@ public:
    */
   void swapInMemory(void);
 
-  /** \fn void check(double time)
+  /** \fn void check(const double& time, const double& pasH)
    * \brief compares the output of the relation with respect to the NonSmoothLaw and set the status
    * \param double : current time
+   * \param double : current time step
    */
-  void check(double time);
+  void check(const double& time, const double& pasH);
 
-  /** \fn void update(double time)
+  /** \fn void update(const double& time, const double& pasH)
    *  \brief set the status after the computation
    *  \param double : current time
+   * \param double : current time step
    */
-  void update(double time);
+  void update(const double& time, const double& pasH);
 
   /** \fn void saveInteractionToXML()
    *  \brief copy the data of the Interaction to the XML tree

@@ -399,7 +399,7 @@ Interaction* NonSmoothDynamicalSystem::addInteraction(int number, int nInter, ve
   }
 }
 
-double NonSmoothDynamicalSystem::nsdsConvergenceIndicator() const
+double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
 {
   // calculate the max value of all DS convergence indicators
 
@@ -410,8 +410,5 @@ double NonSmoothDynamicalSystem::nsdsConvergenceIndicator() const
     double dsIndic = (*iter)->dsConvergenceIndicator();
     if (convergenceIndicator > dsIndic) convergenceIndicator == dsIndic;
   }
-
-  cout << " CVG INDIC " << convergenceIndicator << endl;
-
   return(convergenceIndicator);
 }
