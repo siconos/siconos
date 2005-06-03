@@ -2,26 +2,31 @@ AC_DEFUN([ACX_CHECK_BLAS], [
 AC_PREREQ(2.57)
 
 # Blas: no include files (FORTRAN libraries)
-
 if test "$with_localblas" = no -o "$with_localblas" = yes -o "$with_localblas" = ""; then
+    AC_MSG_RESULT(option --with-localblas not selected : installed blas used)
     with_localblas=no
+   case "$target" in
+    *-apple-darwin*)
+      list_dir="/usr/local/lib /sw/lib /usr/lib "  
+      ;;
+    *-linux*)
+      list_dir="/usr/lib /usr/local/lib"  
+      ;;
+esac     
+else
+   AC_MSG_RESULT(option  --with-localblas selected :locally installed blas used)
+   list_dir="$with_localblas $with_localblas/lib"
 fi
 
 case "$target" in
     *-apple-darwin*)
       libsuffix="dylib"
-      list_dir="/sw/lib /usr/lib /usr/local/lib"  
       ;;
     *-linux*)
       libsuffix="so"
-      list_dir="/usr/lib /usr/local/lib"  
       ;;
 esac     
 
-
-if test "$with_localblas" != "no"; then
-    list_dir="$with_localblas $with_localblas/lib"
-fi
 
 blas_lib="no"
 

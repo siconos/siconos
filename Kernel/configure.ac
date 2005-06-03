@@ -129,8 +129,12 @@ LIBXML_VER="2.6.17"
 LAPACKPP_VER="1.5.1"
 CPPUNIT_VER="1.10.2"
 
-#AC_MSG_CHECKING([Blas])
+AC_MSG_CHECKING([Blas])
 ACX_CHECK_BLAS([AC_SUBST(BLAS_LIBRARIES)], [AC_MSG_ERROR([Blas not found])])
+# exit 1;
+
+AC_MSG_CHECKING([Lapack])
+ACX_CHECK_LAPACK([AC_SUBST(LAPACK_LIBRARIES)], [AC_MSG_ERROR([Lapack not found])])
 # exit 1;
 
 # Numerics
@@ -150,7 +154,7 @@ do  if test -r "$ac_dir/SiconosNumerics.h" ; then
     fi
 done
 if test "$SiconosNumerics_inc" = "" ; then
-    AC_MSG_ERROR(Cannot find SICONOS Numerics header files (SiconosNumerics.h). Please install SICONOS Numerics.)
+    AC_MSG_ERROR(Cannot find SICONOS Numerics header files (SiconosNumerics.h). Please install SICONOS Numerics or set the environment variable NUMERICSPATH)
     exit 1;
 fi
 AC_SUBST(SICONOSNUMERICS_INCLUDES)
@@ -177,54 +181,6 @@ AC_SUBST(SICONOSNUMERICS_LIBRARIES)
 
 
 
-
-# Lapack: no include files (FORTRAN libraries)
-
-AC_MSG_CHECKING([local lapack installation])
-if test "$with_locallapack" = no -o "$with_locallapack" = yes -o "$with_locallapack" = ""; then
-   AC_MSG_RESULT(option --with-locallapack not selected : installed lapack used)
-   with_locallapack=no
-else
-   AC_MSG_RESULT(option  --with-locallapack selected :locally installed lapack used)
-fi
-
-AC_MSG_CHECKING([Lapack])
-
-if test "$with_locallapack" = no; then
-   list_dir="/usr/lib /usr/local/lib"
-else
-   list_dir="$with_locallapack $with_locallapack/lib"
-fi
-
-for ac_dir in $list_dir;
-
-do  if test -r "$ac_dir/liblapack.so" ; then
-       checkLibraryVersion $ac_dir/liblapack.so $LAPACK_VER
-       if test $? -eq 0; then
-	  AC_MSG_ERROR(Lapack library (liblapack.so) : the minimal required version is $LAPACK_VER)
-	  exit 1;
-       fi
-       lapack_lib="yes"
-       LAPACK_LIBRARIES="-L$ac_dir -llapack"
-       AC_MSG_RESULT([yes])
-       break	
-    fi
-done
-
-# test static library
-if test "$lapack_lib" = "" ; then
-    for ac_dir in $list_dir;
-    do  if test -r "$ac_dir/liblapack.a" ; then
-	   lapack_lib="yes"
-	   LAPACK_LIBRARIES="-L$ac_dir -llapack"
-	   AC_MSG_RESULT([yes - found only a static version])
-	   break
-	else
-	   AC_MSG_ERROR(Cannot find Lapack library. Please install Lapack.)
-	   exit 1;
-	fi
-    done
-fi
 AC_SUBST(LAPACK_LIBRARIES)
 
 # Lapack++
@@ -270,7 +226,7 @@ do  if test -r "$ac_dir/lapackpp/lapackpp.h" ; then
     fi
 done
 if test "$lapackpp_inc" = "" ; then
-    AC_MSG_ERROR(Cannot find Lapack++ header files (lapackpp.h). Please install Lapack++.)
+    AC_MSG_ERROR(Cannot find Lapack++ header files (lapackpp.h). Please install Lapack++ or use the option --with-locallapackpp.)
     exit 1;
 fi
 AC_SUBST(LAPACKPP_INCLUDES)
@@ -307,6 +263,7 @@ fi
 AC_SUBST(LAPACKPP_LIBRARIES)
 
 CXX_LAPACKPP_FLAG="-DLA_COMPLEX_SUPPORT" 
+CXX_LAPACKPP_FLAG="" 
 AC_SUBST(CXX_LAPACKPP_FLAG)
 
 # Nana
@@ -373,79 +330,9 @@ AC_SUBST(NANA_LIBRARIES)
 
 CXX_WITHOUTNANA_FLAG="-DWITHOUT_NANA"
 
-# Libxml2
-
-AC_MSG_CHECKING([local libxml installation])
-if test "$with_locallibxml" = no -o "$with_locallibxml" = yes -o "$with_locallibxml" = ""; then
-   AC_MSG_RESULT(option --with-locallibxml not selected : installed libxml used)
-   with_locallibxml=no
-else
-   AC_MSG_RESULT(option  --with-locallibxml selected :locally installed libxml used)
-fi
-
-AC_MSG_CHECKING([libxml2])
-
-if test "$with_locallibxml" = no; then
-   list_dir="/usr/bin /usr/local/bin"
-else
-   list_dir="$with_locallibxml/bin"
-fi
-echo list_dir is $list_dir
-for ac_dir in $list_dir;
-
-#for ac_dir in		\
-#    /usr/bin		\
-#    /usr/local/bin	\
-#    ; \
-do  if test -r "$ac_dir/xml2-config" ; then
-       libxml2_config="yes"
-# don't work on debussy, it uses the bad xml2-config which is in /usr/local !
-#       if test "$ac_dir" != "/usr/bin" ; then
-#	  LIBXML2_INCLUDES="`$ac_dir/xml2-config --cflags`"
-#	  LIBXML2_LIBRARIES="`$ac_dir/xml2-config --libs`"
-#       else 
-#	  LIBXML2_INCLUDES="`xml2-config --cflags`" 
-#	  LIBXML2_LIBRARIES="`xml2-config --libs`"
-#       fi
-       checkLibraryVersionNumber `$ac_dir/xml2-config --version` $LIBXML_VER
-       if test $? -eq 0; then
-	  AC_MSG_ERROR(Libxml library  : the minimal required version is $LIBXML_VER)
-	  exit 1;
-	  break;
-       fi
-       LIBXML2_INCLUDES="`$ac_dir/xml2-config --cflags`"
-       LIBXML2_LIBRARIES="`$ac_dir/xml2-config --libs`"
-       AC_MSG_RESULT([yes])       
-       break	
-    fi
-done
-#if test "$libxml2_config" = "" ; then
-#    AC_MSG_ERROR(Cannot find libxml2 (xml2-config). Please install libxml2.)
-#    exit 1;
-#fi
-# test static library
-if test "$libxml2_config" = "" ; then
-    if test "$with_locallibxml" = no; then
-       list_dir="/usr/lib /usr/local/lib"
-    else
-       list_dir="$with_locallibxml/lib"
-    fi
-    echo list_dir is $list_dir
-    for ac_dir in $list_dir;
-    do  if test -r "$ac_dir/libxml2.a" ; then
-	   libxml2_lib="yes"
-	   LIBXML2_LIBRARIES="-L$ac_dir -llibxml2"
-	   AC_MSG_RESULT([yes - found only a static version])
-	   break
-	else
-	   AC_MSG_ERROR(Cannot find Libxml2 library. Please install Libxml2.)
-	   exit 1;
-	fi
-    done
-fi
-
-AC_SUBST(LIBXML2_INCLUDES)
-AC_SUBST(LIBXML2_LIBRARIES)
+AC_MSG_CHECKING([Libxml2])
+ACX_CHECK_LIBXML2([AC_SUBST(LIBXML2_INCLUDES) AC_SUBST(LIBXML2_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Libxml2 in a good version. Please install Libxml2, version >= $LIBXML_VER  or use the option --with-locallibxml.])])
+# exit 1;
 
 # cppunit
 
