@@ -1,4 +1,5 @@
 #include "LinearTIECXML.h"
+using namespace std;
 
 LinearTIECXML::LinearTIECXML(): LinearECXML()
 {}

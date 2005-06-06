@@ -1,6 +1,6 @@
 
 #include "LinearBC.h"
-#include "check.h"
+using namespace std;
 
 LinearBC::LinearBC(): BoundaryCondition()
 {

@@ -15,9 +15,6 @@
 
 #include <string>
 
-using namespace std;
-
-// --------------------------------------------------------------------------
 class SiconosException
 {
 public:
@@ -29,33 +26,32 @@ public:
   SiconosException();
 
   /**
-   * \fn SiconosException(string report)
+   * \fn SiconosException(const string&)
    * \brief constructor with a report
    * \param string report : exception description
    */
-  SiconosException(string report);
+  SiconosException(const std::string&);
 
   /**
    * \fn ~SiconosException()
    * \brief destructor
    */
-  ~SiconosException();
+  virtual ~SiconosException();
 
   /**
    * \fn string report()
    * \brief return the report of the exception
    * \return string report : exception description
    */
-  inline string report()
+  inline std::string report() const
   {
-    return this->reportMsg;
-  }
+    return reportMsg;
+  } ;
 
 
 protected:
   /** report message which describe the exception */
-  string reportMsg;
-
+  std::string reportMsg;
 };
 
 #endif //__SiconosException__

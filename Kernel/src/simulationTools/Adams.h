@@ -2,14 +2,7 @@
 #define ADAMS_H
 
 #include "OneStepIntegrator.h"
-#include <iostream>
-#include <vector>
-#include "SiconosMatrix.h"
-//#include "SiconosVector.h"
-#include "NewSiconosVector.h"
 #include "AdamsXML.h"
-
-//using namespace std;
 
 /** \class Adams
  *  \brief Adams is a kind of multi-step integrator.
@@ -42,9 +35,9 @@ public:
    *   \brief Return the r of the OneStepIntegrator
    *   \return int : the value of r
    */
-  inline const int getR(void) const
+  inline const int getR() const
   {
-    return this->r;
+    return r;
   }
 
   /** \fn void setR(const int& r)
@@ -55,17 +48,6 @@ public:
   {
     r = newR;
   }
-
-
-  /** \fn void saveIntegratorToXML()
-   *  \brief copy the data of the OneStepNSProblem to the XML tree
-   */
-  void saveIntegratorToXML();
-
-  /** \fn void initialize()
-   *  \brief initialization of the Adams integrator
-   */
-  void initialize();
 
   /** \fn Adams* convert (OneStepIntegrator* osi)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.

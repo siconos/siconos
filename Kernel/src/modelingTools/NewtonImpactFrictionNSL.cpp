@@ -1,29 +1,29 @@
 #include "NewtonImpactFrictionNSL.h"
+using namespace std;
 
-#include "check.h"
-
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(): NonSmoothLaw()
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL():
+  NonSmoothLaw(), en(0.0), et(0.0), mu(0.0)
 {
-  this->en = 0.0;
-  this->et = 0.0;
-  this->mu = 0.0;
-  this->nsLawType = NEWTONIMPACTFRICTIONNSLAW;
+  nsLawType = NEWTONIMPACTFRICTIONNSLAW;
 }
 
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(NonSmoothLawXML* nslawxml): NonSmoothLaw(nslawxml)
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(NonSmoothLawXML* nslawxml):
+  NonSmoothLaw(nslawxml), en(0.0), et(0.0), mu(0.0)
 {
-  this->en = 0.0;
-  this->et = 0.0;
-  this->mu = 0.0;
-  this->nsLawType = NEWTONIMPACTFRICTIONNSLAW;
+  nsLawType = NEWTONIMPACTFRICTIONNSLAW;
+  if (nslawxml != NULL)
+  {
+    en = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getEn();
+    et = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getEt();
+    mu = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getMu();
+  }
+  else RuntimeException::selfThrow("NewtonImpactFrictionNSL:: xml constructor, xml file=NULL");
 }
 
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(double en, double et, double mu)
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(const double& newEn, const double& newEt, const double& newMu):
+  NonSmoothLaw(), en(newEn), et(newEt), mu(newMu)
 {
-  this->en = en;
-  this->et = et;
-  this->mu = mu;
-  this->nsLawType = NEWTONIMPACTFRICTIONNSLAW;
+  nsLawType = NEWTONIMPACTFRICTIONNSLAW;
 }
 
 NewtonImpactFrictionNSL::~NewtonImpactFrictionNSL()
@@ -32,36 +32,17 @@ NewtonImpactFrictionNSL::~NewtonImpactFrictionNSL()
 bool NewtonImpactFrictionNSL::isVerified(void) const
 {
   bool res = false;
-
   // to do
-
   return res;
-}
-
-
-void NewtonImpactFrictionNSL::fillNonSmoothLawWithNonSmoothLawXML()
-{
-  IN("NewtonImpactFrictionNSL::fillNonSmoothLawWithNonSmoothLawXML\n");
-  NonSmoothLaw::fillNonSmoothLawWithNonSmoothLawXML();
-  if (this->nslawxml != NULL)
-  {
-    this->en = (static_cast<NewtonImpactFrictionNSLXML*>(this->nslawxml))->getEn();
-    this->et = (static_cast<NewtonImpactFrictionNSLXML*>(this->nslawxml))->getEt();
-    this->mu = (static_cast<NewtonImpactFrictionNSLXML*>(this->nslawxml))->getMu();
-    //    this->display();
-  }
-  else RuntimeException::selfThrow("NewtonImpactFrictionNSL::fillNonSmoothLawWithNonSmoothLawXML - object NonSmoothLawXML does not exist");
-  OUT("NewtonImpactFrictionNSL::fillNonSmoothLawWithNonSmoothLawXML\n");
-
 }
 
 void NewtonImpactFrictionNSL::display() const
 {
   cout << "------------------------------------" << endl;
   cout << "____ data of the NewtonImpactFrictionNSL" << endl;
-  cout << "| The normal Newton coefficient of restitution en : " << this->en << endl;
-  cout << "| The tangential Newton coefficient of restitution et : " << this->et << endl;
-  cout << "| The friction coefficient mu : " << this->mu << endl;
+  cout << "| The normal Newton coefficient of restitution en : " << en << endl;
+  cout << "| The tangential Newton coefficient of restitution et : " << et << endl;
+  cout << "| The friction coefficient mu : " << mu << endl;
   cout << "____________________________" << endl;
   cout << "------------------------------------" << endl;
 }
@@ -69,31 +50,11 @@ void NewtonImpactFrictionNSL::display() const
 void NewtonImpactFrictionNSL::saveNonSmoothLawToXML()
 {
   IN("NewtonImpactFrictionNSL::saveNonSmoothLawToXML\n");
-  static_cast<NewtonImpactFrictionNSLXML*>(this->nslawxml)->setEn(this->en);
-  static_cast<NewtonImpactFrictionNSLXML*>(this->nslawxml)->setEt(this->et);
-  static_cast<NewtonImpactFrictionNSLXML*>(this->nslawxml)->setMu(this->mu);
+  static_cast<NewtonImpactFrictionNSLXML*>(nslawxml)->setEn(en);
+  static_cast<NewtonImpactFrictionNSLXML*>(nslawxml)->setEt(et);
+  static_cast<NewtonImpactFrictionNSLXML*>(nslawxml)->setMu(mu);
   OUT("NewtonImpactFrictionNSL::saveNonSmoothLawToXML\n");
 }
-
-void NewtonImpactFrictionNSL::createNonSmoothLaw(NewtonImpactFrictionNSLXML * nslawXML, double en, double et, double mu)
-{
-  if (nslawXML != NULL)
-  {
-    this->nslawxml = nslawXML;
-    this->nsLawType = NEWTONIMPACTFRICTIONNSLAW;
-    this->en = 0.0;
-    this->et = 0.0;
-    this->mu = 0.0;
-    this->fillNonSmoothLawWithNonSmoothLawXML();
-  }
-  else
-  {
-    this->en = en;
-    this->et = et;
-    this->mu = mu;
-  }
-}
-
 
 NewtonImpactFrictionNSL* NewtonImpactFrictionNSL::convert(NonSmoothLaw* nsl)
 {

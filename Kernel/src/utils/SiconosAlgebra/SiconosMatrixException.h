@@ -28,11 +28,11 @@ public:
   SiconosMatrixException();
 
   /**
-   * \fn SiconosMatrixException(string report)
+   * \fn SiconosMatrixException(const std::string& report)
    * \brief constructor with a report
-   * \param string report : exception description
+   * \param std::string report : exception description
    */
-  SiconosMatrixException(string report);
+  SiconosMatrixException(const std::string& report);
 
   /**
    * \fn ~SiconosMatrixException()
@@ -45,15 +45,15 @@ public:
    * \brief static function which throw a SiconosMatrixException
    * \exception SiconosMatrixException
    */
-  static void selfThrow();
+  static void selfThrow()  ;
 
   /**
-   * \fn static void selfThrow(string report)
+   * \fn static void selfThrow(const std::string& report)
    * \brief static function which throw a SiconosMatrixException with a report
-   * \param string report : exception description
+   * \param std::string report : exception description
    * \exception SiconosMatrixException
    */
-  static void selfThrow(string report);
+  static void selfThrow(const std::string& report) ;
 
 
 };

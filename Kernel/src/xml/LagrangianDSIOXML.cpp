@@ -1,6 +1,5 @@
-
 #include "LagrangianDSIOXML.h"
-
+using namespace std;
 
 LagrangianDSIOXML::LagrangianDSIOXML(): DSInputOutputXML()
 {}

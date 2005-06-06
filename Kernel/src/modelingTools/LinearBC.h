@@ -3,6 +3,7 @@
 
 #include "BoundaryCondition.h"
 #include "LinearBCXML.h"
+#include "check.h"
 
 /** \class LinearBC
  *  \brief kind of BoundaryCondition

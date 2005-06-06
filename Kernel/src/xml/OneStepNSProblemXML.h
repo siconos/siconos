@@ -14,51 +14,39 @@
 #ifndef __OneStepNSProblemXML__
 #define __OneStepNSProblemXML__
 
-
-#include <vector>
-#include <string>
-#include <map>
-#include <libxml/tree.h>
-
-//#include "SiconosVector.h"
-#include "NewSiconosVector.h"
-#include "SiconosMatrix.h"
 #include "SiconosDOMTreeTools.h"
-
-//#include "KernelDefaultConfig.h"
-
-//using namespace std;
+#include "OneStepNSProblem.h"
 
 //Tags
-const string OSNSP_N = "n";
-const string OSNSP_INTERACTION_CONCERNED = "Interaction_Concerned";
-const string OSNSP_SOLVER = "Solver";
+const std::string OSNSP_N = "n";
+const std::string  OSNSP_INTERACTION_CONCERNED = "Interaction_Concerned";
+const std::string  OSNSP_SOLVER = "Solver";
 
-const string OSNSP_TOLERANCE = "tolerance";
-const string OSNSP_MAXITER = "maxIter";
-const string OSNSP_NORMTYPE = "normType";
-const string OSNSP_SEARCHDIRECTION = "searchDirection";
+const std::string  OSNSP_TOLERANCE = "tolerance";
+const std::string  OSNSP_MAXITER = "maxIter";
+const std::string  OSNSP_NORMTYPE = "normType";
+const std::string  OSNSP_SEARCHDIRECTION = "searchDirection";
 
-const string OSNSP_LCPSOLVING = "LcpSolving";
-const string OSNSP_RPSOLVING = "RelayPrimalSolving";
-const string OSNSP_RDSOLVING = "RelayDualSolving";
-const string OSNSP_CFPSOLVING = "ContactFrictionPrimalSolving";
-const string OSNSP_CFDSOLVING = "ContactFrictionDualSolving";
-const string OSNSP_LEMKE = "Lemke";
-const string OSNSP_GSNL = "Gsnl";
-const string OSNSP_GCP = "Gcp";
-const string OSNSP_LATIN = "Latin";
-//const string OSNSP_lemke = "lemke";
-//const string OSNSP_gsnl = "gsnl";
-//const string OSNSP_gcp = "gcp";
-//const string OSNSP_latin = "latin";
+const std::string  OSNSP_LCPSOLVING = "LcpSolving";
+const std::string  OSNSP_RPSOLVING = "RelayPrimalSolving";
+const std::string  OSNSP_RDSOLVING = "RelayDualSolving";
+const std::string  OSNSP_CFPSOLVING = "ContactFrictionPrimalSolving";
+const std::string  OSNSP_CFDSOLVING = "ContactFrictionDualSolving";
+const std::string  OSNSP_LEMKE = "Lemke";
+const std::string  OSNSP_GSNL = "Gsnl";
+const std::string  OSNSP_GCP = "Gcp";
+const std::string  OSNSP_LATIN = "Latin";
+//const std::string  OSNSP_lemke = "lemke";
+//const std::string  OSNSP_gsnl = "gsnl";
+//const std::string  OSNSP_gcp = "gcp";
+//const std::string  OSNSP_latin = "latin";
 
 #include "XMLTagsName.h"
 
 
-extern string   DefaultSolver;
-extern string   DefaultAlgoName;
-extern string   DefaultAlgoNormType;
+extern std::string    DefaultSolver;
+extern std::string    DefaultAlgoName;
+extern std::string    DefaultAlgoNormType;
 extern double   DefaultAlgoTolerance;
 extern int    DefaultAlgoMaxIter;
 extern double   DefaultAlgoSearchDirection;
@@ -76,8 +64,9 @@ public:
   *   \param vector<int> definedInteractionNumbers : the Interaction numbers effectivly defined in the model
   *   \exception XMLException : if a property of the OneStepNSProblemXML lacks in the DOM tree
   */
-  OneStepNSProblemXML(xmlNode * oneStepNSProblemXMLNode, vector<int> definedInteractionNumbers);
+  OneStepNSProblemXML(xmlNode * oneStepNSProblemXMLNode, std::vector<int> definedInteractionNumbers);
 
+  virtual ~OneStepNSProblemXML();
 
   /** \fn int getN()
   *   \brief Return the n value of the OneStepNSProblemXML
@@ -115,7 +104,7 @@ public:
   *   \brief Return the Interaction numbers of the OneStepNSProblem
   *   \return The Interaction numbers vector of the OneStepNSProblem
   */
-  inline vector<int> getInteractionConcerned()
+  inline std::vector<int> getInteractionConcerned()
   {
     return this->interactionNumbersVector;
   }
@@ -128,16 +117,16 @@ public:
   *   \param vectir<int> : The Interaction numbers vector to save
   *   \param bool : defines if all the interaction of the nsds are concerned by this OneStepNSProblem. Default value is false.
   */
-  void setInteractionConcerned(vector<int>, bool all = false);
+  void setInteractionConcerned(std::vector<int>, bool = false);
 
   /** \fn int getType()
   *   \brief Return the type of the OneStepNSProblemXML
   *   \return The string type of the OneStepNSProblemXML
   */
-  inline string getType()
+  inline std::string  getType()
   {
     //return SiconosDOMTreeTools::getStringAttributeValue(this->rootNSProblemXMLNode, OSNSP_TYPE);
-    string type((char*)this->rootNSProblemXMLNode->name);
+    std::string  type((char*)this->rootNSProblemXMLNode->name);
     return type;
   }
 
@@ -179,12 +168,12 @@ public:
   *   \brief Return the kind of solver of the OneStepNSProblem (LcpSolving, RelayDualSolving, ...)
   *   \return string : the type of solver
   */
-  inline string getSolver()
+  inline std::string  getSolver()
   {
     if (this->solverNode != NULL)
     {
       xmlNode *node = SiconosDOMTreeTools::findNodeChild(this->solverNode);
-      string type((char*)node->name);
+      std::string  type((char*)node->name);
       return type;
     }
     /*
@@ -198,16 +187,16 @@ public:
   *   \brief Return the kind of algorithm of the solver used
   *   \return string : the type of algorithm, "default" is returned if no algorithm is defined
   */
-  inline string getSolverAlgorithmName()
+  inline std::string  getSolverAlgorithmName()
   {
     if (this->solverAlgorithmNode != NULL)
     {
-      string type((char*)this->solverAlgorithmNode->name);
+      std::string type((char*)this->solverAlgorithmNode->name);
       return type;
     }
     else
     {
-      cout << "Warning : No algorithm defined for the Solver." << endl;
+      std::cout << "Warning : No algorithm defined for the Solver." << std::endl;
       return DefaultAlgoName;
     }
   }
@@ -222,11 +211,11 @@ public:
     if ((this->solverAlgorithmNode != NULL)
         && xmlHasProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_TOLERANCE.c_str()))
     {
-      string type = SiconosDOMTreeTools::getStringAttributeValue(this->solverAlgorithmNode, OSNSP_TOLERANCE);
+      std::string  type = SiconosDOMTreeTools::getStringAttributeValue(this->solverAlgorithmNode, OSNSP_TOLERANCE);
       res = atof(type.c_str());
     }
     else
-      cout << "Warning : No tolerance defined for the Solver." << endl;
+      std::cout << "Warning : No tolerance defined for the Solver." << std::endl;
 
     return res;
   }
@@ -242,7 +231,7 @@ public:
         && xmlHasProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_MAXITER.c_str()))
       res = SiconosDOMTreeTools::getIntegerAttributeValue(this->solverAlgorithmNode, OSNSP_MAXITER);
     else
-      cout << "Warning : No maxIter defined for the Solver." << endl;
+      std::cout << "Warning : No maxIter defined for the Solver." << std::endl;
 
     return res;
   }
@@ -258,7 +247,7 @@ public:
         && xmlHasProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_SEARCHDIRECTION.c_str()))
       res = SiconosDOMTreeTools::getDoubleAttributeValue(this->solverAlgorithmNode, OSNSP_SEARCHDIRECTION);
     else
-      cout << "Warning : No search direction defined for the Solver." << endl;
+      std::cout << "Warning : No search direction defined for the Solver." << std::endl;
 
     return res;
   }
@@ -267,14 +256,14 @@ public:
   *   \brief Return the snorm type of the latin algorithm used
   *   \return double : the norm type of the algorithm, "default" is returned if no algorithm is defined
   */
-  inline string getSolverAlgorithmNormType()
+  inline std::string  getSolverAlgorithmNormType()
   {
-    string res = DefaultAlgoNormType;
+    std::string  res = DefaultAlgoNormType;
     if ((this->solverAlgorithmNode != NULL)
         && xmlHasProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_NORMTYPE.c_str()))
       res = SiconosDOMTreeTools::getStringAttributeValue(this->solverAlgorithmNode, OSNSP_NORMTYPE);
     else
-      cout << "Warning : No norm type defined for the Solver." << endl;
+      std::cout << "Warning : No norm type defined for the Solver." << std::endl;
 
     return res;
   }
@@ -307,7 +296,7 @@ public:
   *   \param int : the maximum iteration parameter used by the solver
   *   \param double : the search direction parameter used by the solver
   */
-  void setSolver(string name, string methodName, string normType,
+  void setSolver(std::string  name, std::string  methodName, std::string  normType,
                  double tolerance, int maxIter, double searchDirection);
 
 
@@ -340,7 +329,7 @@ private:
   xmlNode * nNode;
 
   //Interactions (Interaction numbers)
-  vector<int> interactionNumbersVector;
+  std::vector<int> interactionNumbersVector;
 
   //Methods
 
@@ -350,7 +339,7 @@ private:
   *   \param vector<int> definedInteractionNumbers : the Interaction numbers effectivly defined in the model
   *   \exception XMLException
   */
-  void loadOneStepNSProblemConcernedInteraction(xmlNode * interactionConcernedNode, vector<int> definedInteractionNumbers);
+  void loadOneStepNSProblemConcernedInteraction(xmlNode * interactionConcernedNode, std::vector<int> definedInteractionNumbers);
 };
 
 

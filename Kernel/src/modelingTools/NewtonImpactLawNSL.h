@@ -39,12 +39,11 @@ public:
    */
   NewtonImpactLawNSL(NonSmoothLawXML*);
 
-  /** \fn NewtonImpactLawNSL(double c, double d)
+  /** \fn NewtonImpactLawNSL(const double &e)
    *  \brief constructor with the value of the NewtonImpactLawNSL attributes
-   *  \param a double value c
-   *  \param a double value d
+   *  \param a double value e
    */
-  NewtonImpactLawNSL(double e);
+  NewtonImpactLawNSL(const double&);
 
   ~NewtonImpactLawNSL();
 
@@ -54,22 +53,22 @@ public:
    */
   bool isVerified(void) const;
 
-  /** \fn double getE(void)
+  /** \fn const double getE(void) const
    *  \brief getter of e
    *  \return the value of e
    */
-  inline double getE(void) const
+  inline const double getE() const
   {
-    return this->e;
+    return e;
   };
 
   /** \fn void setE(double)
    *  \brief setter of e
    *  \param a double to set e
    */
-  inline void setE(const double E)
+  inline void setE(const double& newVal)
   {
-    this->e = E;
+    e = newVal;
   };
 
   //////////////////////
@@ -84,29 +83,12 @@ public:
    */
   void display() const;
 
-  /** \fn void createNonSmoothLaw(NewtonImpactLawNSLXML * nslawXML, double e)
-   *  \brief allows to create the NSLaw with an xml file, or the needed data
-   *  \param NewtonImpactLawNSLXML * : the XML object for this NSLaw
-   *  \param double : the value of e for this NSLaw
-   *  \exception RuntimeException
-   */
-  void createNonSmoothLaw(NewtonImpactLawNSLXML * nslawXML, double e = -1); //, Interaction * interaction = NULL);
-
-
   /** \fn NewtonImpactLawNSL* convert (NonSmoothLaw* nsl)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param NonSmoothLaw* : the law which must be converted
    * \return a pointer on the law if it is of the right type, NULL otherwise
    */
   static NewtonImpactLawNSL* convert(NonSmoothLaw* nsl);
-
-protected:
-  /** \fn void fillNonSmoothLawWithNonSmoothLawXML()
-   *  \brief uses the NewtonImpactLawNSLXML of the ComplementarityConditionNSL to fill the fields of this ComplementarityConditionNSL
-   *  \exception RuntimeException
-   */
-  void fillNonSmoothLawWithNonSmoothLawXML();
-
 
 private:
   /**  \brief The Newton coefficient of restitution

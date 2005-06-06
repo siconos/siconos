@@ -1,4 +1,5 @@
 #include "CFDXML.h"
+using namespace std;
 
 CFDXML::CFDXML() : OneStepNSProblemXML()
 {

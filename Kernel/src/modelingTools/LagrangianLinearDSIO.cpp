@@ -1,11 +1,5 @@
 #include "LagrangianLinearDSIO.h"
-#include "DynamicalSystem.h"
-#include "LagrangianDS.h"
-#include "LagrangianLinearTIDS.h"
-#include "LinearSystemDS.h"
-
-#include "check.h"
-
+using namespace std;
 
 LagrangianLinearDSIO::LagrangianLinearDSIO()
 {

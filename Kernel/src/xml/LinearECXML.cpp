@@ -1,4 +1,5 @@
 #include "LinearECXML.h"
+using namespace std;
 
 LinearECXML::LinearECXML(): EqualityConstraintXML()
 {}

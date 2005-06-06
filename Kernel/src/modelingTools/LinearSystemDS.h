@@ -5,10 +5,9 @@
 #include "DynamicalSystem.h"
 #include "SiconosMatrix.h"
 #include "NewSiconosVector.h"
+#include "check.h"
 #include <iostream>
 #include <vector>
-
-//using namespace std;
 
 class LinearSystemDSXML;
 
@@ -225,7 +224,7 @@ public:
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeUFunction(const string& pluginPath, const string& functionName);
+  void setComputeUFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void setComputeFFunction(const string& libPath,const string& functionName);
    *  \brief set a specified function to compute the vector F
@@ -233,7 +232,7 @@ public:
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeFFunction(const string& pluginPath, const string& functionName);
+  void setComputeFFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void computeF(const double& time)
    *  \brief default function to compute vector F
@@ -286,9 +285,9 @@ private:
   SimpleVector *f;
 
   /* contains the name of the plugin for u */
-  string uFunctionName;
+  std::string  uFunctionName;
   /* contains the name of the plugin for f */
-  string fFunctionName;
+  std::string  fFunctionName;
 
   /** class for manage plugin (open, close librairy...) */
   SiconosSharedLibrary cShared;

@@ -3,9 +3,10 @@
 
 #include "DSInputOutput.h"
 #include "LagrangianDSIOXML.h"
+#include "check.h"
 
-extern string DefaultComputeInput;
-extern string DefaultComputeOutput;
+extern std::string  DefaultComputeInput;
+extern std::string  DefaultComputeOutput;
 
 
 /** \class LagrangianDSIO

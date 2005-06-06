@@ -1,4 +1,5 @@
 #include "LagrangianLinearECXML.h"
+using namespace std;
 
 LagrangianLinearECXML::LagrangianLinearECXML(): EqualityConstraintXML()
 {

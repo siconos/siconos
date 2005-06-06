@@ -6,13 +6,17 @@
 
 #include "SiconosMatrix.h"
 #include "NewSiconosVector.h"
-#include <iostream>
-#include <vector>
 
 #include "SiconosSharedLibrary.h"
-
-//using namespace std;
-
+#include "check.h"
+#include "LinearBC.h"
+#include "NLinearBC.h"
+#include "PeriodicBC.h"
+#include "LinearDSIO.h"
+#include "LagrangianDSIO.h"
+#include "LagrangianLinearDSIO.h"
+#include <iostream>
+#include <vector>
 
 class LagrangianDSXML;
 
@@ -107,13 +111,13 @@ public:
       */
   LagrangianDS(int number, int ndof,
                SiconosVector* q0, SiconosVector* velocity0,
-               string mass = "BasicPlugin:computeMass",
-               string fInt = "BasicPlugin:computeFInt", string fExt = "BasicPlugin:computeFExt",
-               string jacobianQFInt = "BasicPlugin:computeJacobianQFInt",
-               string jacobianVelocityFInt = "BasicPlugin:computeJacobianVelocityFInt",
-               string jacobianQQNLInertia = "BasicPlugin:computeJacobianQQNLInertia",
-               string jacobianVelocityQNLInertia = "BasicPlugin:computeJacobianVelocityQNLInertia",
-               string QNLlInertia = "BasicPlugin:computeQNLInertia");
+               std::string  mass = "BasicPlugin:computeMass",
+               std::string  fInt = "BasicPlugin:computeFInt", std::string  fExt = "BasicPlugin:computeFExt",
+               std::string  jacobianQFInt = "BasicPlugin:computeJacobianQFInt",
+               std::string  jacobianVelocityFInt = "BasicPlugin:computeJacobianVelocityFInt",
+               std::string  jacobianQQNLInertia = "BasicPlugin:computeJacobianQQNLInertia",
+               std::string  jacobianVelocityQNLInertia = "BasicPlugin:computeJacobianVelocityQNLInertia",
+               std::string  QNLlInertia = "BasicPlugin:computeQNLInertia");
 
   virtual ~LagrangianDS();
 
@@ -895,7 +899,7 @@ public:
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeMassFunction(const string& pluginPath, const string& functionName);
+  void setComputeMassFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void setComputeFIntFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute Fint
@@ -903,7 +907,7 @@ public:
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeFIntFunction(const string& pluginPath, const string& functionName);
+  void setComputeFIntFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void setComputeFExtFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute Fext
@@ -911,7 +915,7 @@ public:
    *  \param string : the name of the function to use in this plugin
    *  \exception ICDLL_CSharedLibraryException
    */
-  void setComputeFExtFunction(const string& pluginPath, const string& functionName);
+  void setComputeFExtFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void setComputeQNLInertiaFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the inertia
@@ -919,7 +923,7 @@ public:
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosCSharedLibraryException
    */
-  void setComputeQNLInertiaFunction(const string& pluginPath, const string& functionName);
+  void setComputeQNLInertiaFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void setComputeJacobianQFIntFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the gradient of the internal strength compared to the state
@@ -927,7 +931,7 @@ public:
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianQFIntFunction(const string& pluginPath, const string& functionName);
+  void setComputeJacobianQFIntFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void setComputeJacobianVelocityFIntFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the internal strength compared to the velocity
@@ -935,7 +939,7 @@ public:
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianVelocityFIntFunction(const string& pluginPath, const string& functionName);
+  void setComputeJacobianVelocityFIntFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void setComputeJacobianQQNLInertiaFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the gradient of the the external strength compared to the state
@@ -943,7 +947,7 @@ public:
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianQQNLInertiaFunction(const string& pluginPath, const string& functionName);
+  void setComputeJacobianQQNLInertiaFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void setComputeJacobianVelocityQNLInertiaFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the external strength compared to the velocity
@@ -951,7 +955,7 @@ public:
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianVelocityQNLInertiaFunction(const string& pluginPath, const string& functionName);
+  void setComputeJacobianVelocityQNLInertiaFunction(const std::string & pluginPath, const std::string & functionName);
 
   // --- miscellaneous ---
 
@@ -1002,7 +1006,7 @@ public:
    *  \brief compute $\frac{|\dot q_{i+1} - \dot qi|}{|\dot q_i|}$ where $\dot q_{i+1}$ represents the present state and $\dot q_i$ the previous one
    * \return a double
    */
-  double LagrangianDS::dsConvergenceIndicator() const ;
+  double LagrangianDS::dsConvergenceIndicator();
 
 protected:
 
@@ -1041,21 +1045,21 @@ protected:
   /** external strength of the system */
   SimpleVector *fExt;
   /* contains the name of the plugin used to compute fInt */
-  string fIntFunctionName;
+  std::string  fIntFunctionName;
   /* contains the name of the plugin used to compute fExt */
-  string fExtFunctionName;
+  std::string  fExtFunctionName;
   /* contains the name of the plugin used to compute the mass */
-  string massFunctionName;
+  std::string  massFunctionName;
   /* contains the name of the plugin used to compute jacobianQFInt */
-  string jacobianQFIntFunctionName;
+  std::string  jacobianQFIntFunctionName;
   /* contains the name of the plugin used to compute jacobianQQNLInertia */
-  string jacobianQQNLInertiaFunctionName;
+  std::string  jacobianQQNLInertiaFunctionName;
   /* contains the name of the plugin used to compute jacobianVelocityFInt */
-  string jacobianVelocityFIntFunctionName;
+  std::string  jacobianVelocityFIntFunctionName;
   /* contains the name of the plugin used to compute jacobianVelocityQNLInertia */
-  string jacobianVelocityQNLInertiaFunctionName;
+  std::string  jacobianVelocityQNLInertiaFunctionName;
   /* contains the name of the plugin used to compute QNLInertia */
-  string QNLInertiaFunctionName;
+  std::string  QNLInertiaFunctionName;
   /** non-linear inertia term of the system */
   SimpleVector *QNLInertia;
   /** jacobian/coordinates of internal strength */

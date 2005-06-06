@@ -1,43 +1,33 @@
-
 #ifndef SICONOSMEMORYXML_H
 #define SICONOSMEMORYXML_H
 
-//#include "SiconosMemory.h"
-#include <string>
-#include <libxml/tree.h>
 #include "SiconosDOMTreeTools.h"
 
-#include "XMLException.h"
-
-
-//using namespace std;
-
 /** \class SiconosMemoryXML
-*   \brief This class manages SiconosMemory data part
-*  \author SICONOS Development Team - copyright INRIA
-*   \version 1.0
-*   \date 07/13/2004
-*
-*
-*/
+ *   \brief This class manages SiconosMemory data part
+ *  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.0
+ *   \date 07/13/2004
+ *
+ *
+ */
 
-
-const string SM_MEMORYSIZE = "sizeMax";
-const string SM_MEMORY = "Memory";
+const std::string SM_MEMORYSIZE = "sizeMax";
+const std::string SM_MEMORY = "Memory";
 
 class SiconosMemoryXML
 {
 public:
 
   SiconosMemoryXML();
-  SiconosMemoryXML(xmlNode* memoryNode, xmlNode* parentNode = NULL, string name = "default");
+  SiconosMemoryXML(xmlNode* memoryNode, xmlNode* parentNode = NULL, std::string name = "default");
   ~SiconosMemoryXML();
 
   /** \fn vector<SiconosVector*> getSiconosMemoryVector()
    *  \brief allows to get the vector of SiconosVector from a SiconosMemory in the XML
    *  \return vector<SiconosVector*>
    */
-  inline vector<SiconosVector*> getSiconosMemoryVector()
+  inline std::vector<SiconosVector*> getSiconosMemoryVector()
   {
     return getVectorMemoryValue();
   }
@@ -55,7 +45,7 @@ public:
    *  \brief allows to set the vector of SiconosVector of a SiconosMemory in the XML
    *  \param vector<SiconosVector*> to set
    */
-  inline void setSiconosMemoryVector(vector<SiconosVector*> v)
+  inline void setSiconosMemoryVector(std::vector<SiconosVector*> v)
   {
     this->setVectorMemoryValue(v);
   }
@@ -98,19 +88,19 @@ public:
 private:
 
   /** \fn vector<SiconosVector*> getVectorMemoryValue()
-  *   \brief Return a vector of SiconosVector computed from a memory node
-  *   \param memoryNode : the memory node you want to get in a vector of SiconosVector type
-  *   \return A  vector of SiconosVector
-  */
-  vector<SiconosVector*> getVectorMemoryValue();
+   *   \brief Return a vector of SiconosVector computed from a memory node
+   *   \param memoryNode : the memory node you want to get in a vector of SiconosVector type
+   *   \return A  vector of SiconosVector
+   */
+  std::vector<SiconosVector*> getVectorMemoryValue();
 
   /** \fn void setVectorMemoryValue(vector<SiconosVector*> memory)
-  *   \brief Change values of a memoryNode from a vector<SiconosVector>
-  *   \param memoryNode : the memory node you want to set
-  *   \param memory : the memory you want to copy the value in the memoryNode
-  *   \exception XMLException
-  */
-  void setVectorMemoryValue(const vector<SiconosVector*> memory);
+   *   \brief Change values of a memoryNode from a vector<SiconosVector>
+   *   \param memoryNode : the memory node you want to set
+   *   \param memory : the memory you want to copy the value in the memoryNode
+   *   \exception XMLException
+   */
+  void setVectorMemoryValue(const std::vector<SiconosVector*> memory);
 
   xmlNode * memoryNode;
   xmlNode * parentNode;

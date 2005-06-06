@@ -6,13 +6,12 @@
 
 /** \class NewtonImpactFrictionNSL
  *  \brief Specific NonSmoothLaw for the Newton impact friction model
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date (Creation) March 22, 2005
  *
  *
  */
-
 
 class NewtonImpactFrictionNSL : public NonSmoothLaw
 {
@@ -30,13 +29,13 @@ public:
    */
   NewtonImpactFrictionNSL(NonSmoothLawXML*);
 
-  /** \fn NewtonImpactFrictionNSL(double en, double et, double mu)
+  /** \fn NewtonImpactFrictionNSL(const double& en, const double& et, const double& mu)
    *  \brief constructor with the value of the NewtonImpactFrictionNSL attributes
    *  \param double : normal e coefficient
    *  \param double : tangent e coefficient
    *  \param double : friction coefficient
    */
-  NewtonImpactFrictionNSL(double en, double et, double mu);
+  NewtonImpactFrictionNSL(const double&, const double&, const double&);
 
   ~NewtonImpactFrictionNSL();
 
@@ -46,61 +45,63 @@ public:
    */
   bool isVerified(void) const;
 
-  /** \fn double getEn(void)
+  // GETTERS/SETTERS
+
+  /** \fn const double getEn(void)
    *  \brief getter of en
    *  \return the value of en
    */
-  inline double getEn(void) const
+  inline const double getEn() const
   {
-    return this->en;
+    return en;
   };
 
-  /** \fn void setEn(double)
+  /** \fn void setEn(const double&)
    *  \brief setter of en
    *  \param a double to set en
    */
-  inline void setEn(const double En)
+  inline void setEn(const double& newVal)
   {
-    this->en = En;
+    en = newVal;
   };
 
-  /** \fn double getEt(void)
+  /** \fn const  double getEt()
    *  \brief getter of et
    *  \return the value of et
    */
-  inline double getEt(void) const
+  inline const double getEt() const
   {
-    return this->et;
+    return et;
   };
 
-  /** \fn void setEt(double)
+  /** \fn void setEt(const double&)
    *  \brief setter of et
    *  \param a double to set et
    */
-  inline void setEt(const double Et)
+  inline void setEt(const double& newVal)
   {
-    this->en = Et;
+    et = newVal;
   };
 
-  /** \fn double getMu(void)
+  /** \fn const double getMu()
    *  \brief getter of mu
    *  \return the value of mu
    */
-  inline double getMu(void) const
+  inline const double getMu(void) const
   {
-    return this->mu;
+    return mu;
   };
 
-  /** \fn void setMu(double)
+  /** \fn void setMu(const double&)
    *  \brief setter of mu
    *  \param a double to set mu
    */
-  inline void setMu(const double Mu)
+  inline void setMu(const double& newVal)
   {
-    this->mu = Mu;
+    mu = newVal;
   };
 
-  //////////////////////
+  // OTHER FUNCTIONS
 
   /** \fn void saveNonSmoothLawToXML()
    *  \brief copy the data of the NonSmoothLaw in the XML tree
@@ -112,29 +113,12 @@ public:
    */
   void display() const;
 
-  /** \fn void createNonSmoothLaw(NewtonImpactFrictionNSLXML * nslawXML, double en, double et, double mu)
-   *  \brief allows to create the NSLaw with an xml file, or the needed data
-   *  \param NewtonImpactLawNSLXML * : the XML object for this NSLaw
-   *  \param double : the value of e for this NSLaw
-   *  \exception RuntimeException
-   */
-  void createNonSmoothLaw(NewtonImpactFrictionNSLXML * nslawXML, double en = -1, double et = -1.0, double mu = -1.0);
-
-
   /** \fn NewtonImpactFrictionNSL* convert (NonSmoothLaw* nsl)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param NonSmoothLaw* : the law which must be converted
    * \return a pointer on the law if it is of the right type, NULL otherwise
    */
   static NewtonImpactFrictionNSL* convert(NonSmoothLaw* nsl);
-
-protected:
-  /** \fn void fillNonSmoothLawWithNonSmoothLawXML()
-   *  \brief uses the NewtonImpactLawNSLXML of the ComplementarityConditionNSL to fill the fields of this ComplementarityConditionNSL
-   *  \exception RuntimeException
-   */
-  void fillNonSmoothLawWithNonSmoothLawXML();
-
 
 private:
   /**  \brief The Newton coefficient of restitution

@@ -1,6 +1,6 @@
 
 #include "LagrangianDSIO.h"
-#include "check.h"
+using namespace std;
 
 LagrangianDSIO::LagrangianDSIO()
 {

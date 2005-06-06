@@ -16,6 +16,7 @@
 #define __XMLException__
 
 #include "SiconosException.h"
+#include <iostream>
 
 // --------------------------------------------------------------------------
 class XMLException: public SiconosException
@@ -29,11 +30,11 @@ public:
   XMLException();
 
   /**
-   * \fn XMLException(string report)
+   * \fn XMLException(const std::string& report)
    * \brief constructor with a report
-   * \param string report : exception description
+   * \param std::string report : exception description
    */
-  XMLException(string report);
+  XMLException(const std::string& report);
 
   /**
    * \fn ~XMLException()
@@ -46,15 +47,15 @@ public:
    * \brief static function which throw a XMLException
    * \exception XMLException
    */
-  static void selfThrow();
+  static void selfThrow() ;
 
   /**
-   * \fn static void selfThrow(string report)
+   * \fn static void selfThrow(const std::string& report)
    * \brief static function which throw a XMLException with a report
-   * \param string report : exception description
+   * \param std::string report : exception description
    * \exception XMLException
    */
-  static void selfThrow(string report);
+  static void selfThrow(const std::string& report) ;
 
 };
 

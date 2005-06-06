@@ -1,209 +1,222 @@
-
 #include "TimeDiscretisation.h"
+using namespace std;
 
-#include "check.h"
+// --- CONSTRUCTORS ---
 
-TimeDiscretisation::TimeDiscretisation()
+// IO Constructors -> XML
+TimeDiscretisation::TimeDiscretisation(TimeDiscretisationXML * tdXML, Strategy* str):
+  h(0.0), nSteps(0), tk(NULL), hMin(0.0), hMax(0.0), constant(0), timeDiscretisationXML(tdXML),
+  k(0), strategy(str)
 {
-  this->timeDiscretisationXML = NULL;
-  this->k = 0;
-  this->N = 0;
-  this->h = 0.0;
-  this->strategy = NULL;
-  this->constant = NULL;
-}
-
-TimeDiscretisation::TimeDiscretisation(TimeDiscretisationXML *tdxml)
-{
-  this->timeDiscretisationXML = tdxml;
-  this->strategy = NULL;
-  this->k = 0;
-}
-
-TimeDiscretisation::~TimeDiscretisation()
-{ }
-
-
-
-void TimeDiscretisation::init(double t0, double T)
-{
-  IN("TimeDiscretisation::init\n");
-  /* giving for example one of the following triplet :
-   *    -  t0,T,h  --> Compute N
-   *    -  t0,T,N --> Compute h
-   *    -  t0,N,h --> Compute T
-   */
-  if ((t0 != -1) && (T != -1) && (this->h > 0))
+  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
+  if (timeDiscretisationXML != NULL)
   {
-    this->N = floor((T - t0) / (this->h));
-  }
-  else if ((t0 != -1) && (T != -1) && (this->N > 0))
-  {
+    // --- Check what are the given data ---
+    bool hasNSteps = timeDiscretisationXML->hasN();
+    bool hasH = timeDiscretisationXML->hasH();
+    bool hasTk = timeDiscretisationXML->hasTk();
 
-  }
-  else if ((t0 != -1) && (this->N != -1) && (this->h > 0))
-  {
+    // --- Read the data ---
+    if (hasH) h = timeDiscretisationXML->getH();
+    if (hasNSteps) nSteps = timeDiscretisationXML->getN();
+    if (timeDiscretisationXML->hasHMin()) hMin = timeDiscretisationXML->getHMin();
+    if (timeDiscretisationXML->hasHMax()) hMax = timeDiscretisationXML->getHMax();
+    constant = timeDiscretisationXML->isConstant();
 
-  }
-  else
-    RuntimeException::selfThrow("TimeDiscretisation::init(to, T) - insufficient data to init completely the time manager object");
-  OUT("TimeDiscretisation::init\n");
-}
-
-void TimeDiscretisation::fillTimeDiscretisationWithTimeDiscretisationXML()
-{
-  IN("TimeDiscretisation::fillTimeDiscretisationWithTimeDiscretisationXML\n");
-  if (this->timeDiscretisationXML != NULL)
-  {
-    /* \todo : check the coherency of the data */
-    if (this->timeDiscretisationXML->hasH()) this->h = this->timeDiscretisationXML->getH();
-    if (this->timeDiscretisationXML->hasN()) this->N = this->timeDiscretisationXML->getN();
-    if (this->timeDiscretisationXML->hasTk())
+    // --- Check if given data are coherent and switch to the right case ---
+    int tdCase = checkTimeDiscretisationCase(hasTk, hasH, hasNSteps, hasT());
+    // --- Compute the corresponding time discretisation scheme ---
+    if (tdCase == 1 || tdCase == 2)
     {
-      this->tk = SimpleVector::SimpleVector();
-      this->tk = *(this->timeDiscretisationXML->getTk());
+      tk = new SimpleVector(timeDiscretisationXML->getTk().size());
+      *tk = timeDiscretisationXML->getTk();
     }
-    if (this->timeDiscretisationXML->hasHMin()) this->hMin = this->timeDiscretisationXML->getHMin();
-    if (this->timeDiscretisationXML->hasHMax()) this->hMax = this->timeDiscretisationXML->getHMax();
-    this->constant = this->timeDiscretisationXML->isConstant();
+    computeTimeDiscretisation(tdCase);
   }
-  else RuntimeException::selfThrow("TimeDiscretisation::fillTimeDiscretisationWithTimeDiscretisationXML - TimeDiscretisationXML object not exists");
-  OUT("TimeDiscretisation::fillTimeDiscretisationWithTimeDiscretisationXML\n");
+  else RuntimeException::selfThrow("TimeDiscretisation: xml constructor - TimeDiscretisationXML = NULL");
 }
+
+// --- Straightforward constructors ---
+
+// Provide tk and strategy
+TimeDiscretisation::TimeDiscretisation(SimpleVector *newTk, Strategy* str):
+  h(0), nSteps(0), tk(NULL), hMin(0), hMax(0), constant(1),
+  timeDiscretisationXML(NULL), k(0), strategy(str)
+{
+  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
+  // Allocate memory for tk and fill it
+  tk = new SimpleVector(newTk->size());
+  *tk = *newTk;
+  int tdCase = checkTimeDiscretisationCase(1, 0, 0, hasT());
+  computeTimeDiscretisation(tdCase);
+}
+
+// Provide h and nSteps, calculate tk
+TimeDiscretisation::TimeDiscretisation(const double& newH, const int& newNSteps, Strategy* str):
+  h(newH), nSteps(newNSteps), tk(NULL), hMin(newH), hMax(newH), constant(1),
+  timeDiscretisationXML(NULL), k(0), strategy(str)
+{
+  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
+  int tdCase = checkTimeDiscretisationCase(0, 1, 1, hasT());
+  computeTimeDiscretisation(tdCase);
+}
+
+// Provide nSteps, calculate h and tk
+TimeDiscretisation::TimeDiscretisation(const int& newNSteps, Strategy* str):
+  h(0), nSteps(newNSteps), tk(NULL), hMin(0), hMax(0), constant(1),
+  timeDiscretisationXML(NULL), k(0), strategy(str)
+{
+  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
+  int tdCase = checkTimeDiscretisationCase(0, 0, 1, hasT());
+  computeTimeDiscretisation(tdCase);
+}
+
+// Provide h, calculate nSteps and tk
+TimeDiscretisation::TimeDiscretisation(const double& newH, Strategy* str):
+  h(newH), nSteps(0), tk(NULL), hMin(newH), hMax(newH), constant(1),
+  timeDiscretisationXML(NULL), k(0), strategy(str)
+{
+  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
+  int tdCase = checkTimeDiscretisationCase(0, 1, 0, hasT());
+  computeTimeDiscretisation(tdCase);
+}
+
+// --- Destructor ---
+TimeDiscretisation::~TimeDiscretisation()
+{
+  delete tk;
+  tk = NULL;
+}
+
+// --- Constructors related functions ---
+const int TimeDiscretisation::checkTimeDiscretisationCase(const bool& hasTk, const bool& hasH, const bool& hasNSteps, const bool& hasT) const
+{
+  int tdCase;
+  if (hasTk && ! hasH && ! hasNSteps && ! hasT) tdCase = 1;
+  else if (hasTk && ! hasH && ! hasNSteps &&  hasT) tdCase = 2;
+  else if (! hasTk && hasH &&  hasNSteps && ! hasT) tdCase = 3;
+  else if (! hasTk && hasH &&  ! hasNSteps &&  hasT) tdCase = 4;
+  else if (! hasTk && ! hasH &&  hasNSteps &&  hasT) tdCase = 5;
+  else if (hasTk &&  hasH &&  hasNSteps &&  hasT) tdCase = 6;
+  else tdCase = 0;
+  return(tdCase);
+}
+
+void TimeDiscretisation::computeTimeDiscretisation(const int& tdCase)
+{
+  // load time min value from the model
+  double t0 = getT0();
+  double T, diff;
+  switch (tdCase)
+  {
+  case 1: // Given: tk - Compute h, nSteps and T
+    //assert((*tk)(0) == t0);
+    if ((*tk)(0) != t0) RuntimeException::selfThrow("TimeDiscretisation::constructor - t0 and tk(0) are different");
+    nSteps = tk->size() - 1;
+    setT((*tk)(nSteps));
+    h = (*tk)(1) - (*tk)(0);
+    break;
+  case 2: // Given: tk, T - Compute h, nSteps
+    T = getT();
+    if ((*tk)(0) != t0) RuntimeException::selfThrow("TimeDiscretisation::constructor - t0 and tk(0) are different");
+    if (tk->lavd(tk->size() - 1) != T) RuntimeException::selfThrow("TimeDiscretisation::constructor - T and tk(N) are different");
+    nSteps = tk->size() - 1;
+    h = (*tk)(1) - (*tk)(0);
+    break;
+  case 3: // Given: nSteps, h - Compute T, tk
+    setT(t0 + ((double)nSteps)* h);
+    tk = new SimpleVector(nSteps + 1);
+    (*tk)(0) = t0;
+    (*tk)(nSteps) = getT();
+    for (int i = 1; i < nSteps; i++)(*tk)(i) = t0 + i * h;
+    break;
+  case 4: // Given: h, T - Compute nSteps, tk
+    T  = getT();
+    nSteps = floor((T - t0) / (h));
+    if ((t0 + h * nSteps) != T) cout << " Warning, nSteps x steps differs from final T" << endl;
+    tk = new SimpleVector(nSteps + 1);
+    (*tk)(0) = t0;
+    (*tk)(nSteps) = getT();
+    for (int i = 1; i < nSteps; i++)(*tk)(i) = t0 + i * h;
+    break;
+  case 5: // Given: nSteps, T - Compute h, tk
+    T  = getT();
+    h = (T - t0) / ((double)nSteps);
+    tk = new SimpleVector(nSteps + 1);
+    (*tk)(0) = t0;
+    (*tk)(nSteps) = getT();
+    for (int i = 1; i < nSteps; i++)(*tk)(i) = t0 + i * h;
+    break;
+  case 6: // all the data are known. Just check they are coherent.
+    if ((*tk)(0) != t0) RuntimeException::selfThrow("TimeDiscretisation::constructor - incompatible data");
+    if (tk->lavd(tk->size() - 1) != T) RuntimeException::selfThrow("TimeDiscretisation::constructor - incompatible data");
+    if ((t0 + h * nSteps) != T)  RuntimeException::selfThrow("TimeDiscretisation::constructor - incompatible data");
+    if (h != (*tk)(1) - (*tk)(0)) RuntimeException::selfThrow("TimeDiscretisation::constructor - incompatible data");
+    if (nSteps != tk->size() - 1)  RuntimeException::selfThrow("TimeDiscretisation::constructor - incompatible data");
+    break;
+  default:
+    RuntimeException::selfThrow("TimeDiscretisation::constructor - wrong scheme, wrong number of data");
+  }
+}
+
+// --- Functions to manage t0 and T (data of the model)
+const double TimeDiscretisation::getT0() const
+{
+  return strategy->getModelPtr()->getT0();
+}
+
+const bool TimeDiscretisation::hasT() const
+{
+  // When the model is filled, T is set to negative value if not given by user.
+  if (getT() < 0) return(0);
+  else return (1);
+}
+
+const double TimeDiscretisation::getT() const
+{
+  return strategy->getModelPtr()->getFinalT();
+}
+
+inline void TimeDiscretisation::setT(const double& newValue)
+{
+  strategy->getModelPtr()->setFinalT(newValue);
+}
+
+// --- Other functions ---
 
 void TimeDiscretisation::display() const
 {
   cout << "-----------------------------------------------------" << endl;
   cout << "____ data of the TimeDiscretisation " << endl;
-  cout << "| h : " << this->h << endl;
-  cout << "| N : " << this->N << endl;
-  //cout<<"| tk size : "<<this->tk->size() <<" - "<<*(this->tk) <<endl;
+  cout << "| h : " << h << endl;
+  cout << "| nSteps : " << nSteps << endl;
   cout << "| tk " << endl;
-  this->tk.display();
-  cout << "| hMin : " << this->hMin << endl;
-  cout << "| hMax : " << this->hMax << endl;
-  cout << "| constant : " << this->constant << endl;
+  if (tk != NULL) tk->display();
+  else cout << "-> NULL" << endl;
+  cout << "| hMin : " << hMin << endl;
+  cout << "| hMax : " << hMax << endl;
+  cout << "| constant : " << constant << endl;
   cout << "-----------------------------------------------------" << endl << endl;
 }
+
+// --- XML functions ---
 
 void TimeDiscretisation::saveTimeDiscretisationToXML()
 {
   IN("TimeDiscretisation::saveTimeDiscretisationToXML\n");
-  if (this->timeDiscretisationXML != NULL)
+  if (timeDiscretisationXML != NULL)
   {
-    this->timeDiscretisationXML->setH(this->h);
-    this->timeDiscretisationXML->setN(this->N);
-    this->timeDiscretisationXML->setTk(&(this->tk));
-    this->timeDiscretisationXML->setHMin(this->hMin);
-    this->timeDiscretisationXML->setHMax(this->hMax);
+    timeDiscretisationXML->setH(h);
+    timeDiscretisationXML->setN(nSteps);
+    timeDiscretisationXML->setTkNode(*tk);
+    timeDiscretisationXML->setHMin(hMin);
+    timeDiscretisationXML->setHMax(hMax);
   }
   else RuntimeException::selfThrow("TimeDiscretisation::saveTimeDiscretisationToXML - TimeDiscretisationXML object not exists");
   OUT("TimeDiscretisation::saveTimeDiscretisationToXML\n");
 }
 
-void TimeDiscretisation::createTimeDiscretisation(TimeDiscretisationXML * tdXML, double h, int N,
-    SimpleVector *tk, double hMin, double hMax, bool constant, Strategy* str)//, OneStepIntegrator* osi)
-//void TimeDiscretisation::createTimeDiscretisation(TimeDiscretisationXML * tdXML, Strategy* str)
-{
-  if (tdXML != NULL)
-  {
-    this->timeDiscretisationXML = tdXML;
-    //  this->strategy = str;
-    this->k = 0;
-
-    this->fillTimeDiscretisationWithTimeDiscretisationXML();
-    if (this->strategy != NULL) this->checkTimeDiscretisation();
-    else RuntimeException::selfThrow("TimeDiscretisation::createTimeDiscretisation - no Strategy is defined for the TimeDiscretisation !");
-  }
-  else
-  {
-    if (str == NULL)
-      RuntimeException::selfThrow("TimeDiscretisation::createTimeDiscretisation - The TimeDiscretisation belongs to no Strategy and no OneStepIntegrator !");
-    else
-    {
-      /*
-       * there's no required attributes to build the TimeDiscretisation
-       */
-
-      this->k = 0;
-      this->h = h;
-      this->N = N;
-
-      this->tk = *tk;
-
-      this->hMin = hMin;
-      this->hMax = hMax;
-      this->constant = constant;
-
-
-      /*
-       * to complete the TimeDiscretisation, we must know the node of the DOM tree
-       * where we can build it
-       */
-      if (str != NULL)
-      {
-        this->strategy = str;
-      }
-      //      else
-      //      {
-      //        /*
-      //         * \todo : the problem is for Mutli-Step Integrators
-      //         */
-      //      }
-    }
-  }
-}
-
-void TimeDiscretisation::checkTimeDiscretisation()
-{
-  IN("TimeDiscretisation::checkTimeDiscretisation\n");
-  /* giving for example one of the following triplet :
-   *    -  t0,T,h --> Compute N
-   *    -  t0,T,N --> Compute h
-   *    -  t0,N,h --> Compute T
-   */
-
-  double t0, T;
-
-  t0 = this->strategy->getModel()->getT0();
-  T  = this->strategy->getModel()->getFinalT();
-
-  // T, N and h are optional attributes, whereas t0 is required
-  bool hasT = false, hasT0 = true, hasN = false, hasH = false;
-
-  hasT = this->strategy->getModel()->getSiconosModelXML()->hasT();
-  hasN = this->timeDiscretisationXML->hasN();
-  hasH = this->timeDiscretisationXML->hasH();
-
-  if (!hasT0 || !hasT || !hasN || !hasH)
-  {
-    if (hasT0 && hasT && hasH)
-    {
-      /*
-       *  N must be computed
-       */
-      this->N = floor(T - t0) / (this->h);
-      //      cout<<"N == "<<floor(T - t0)/(this->h)<<"                press ENTER"<<endl;getchar();
-    }
-    else if (hasT0 && hasT && hasN)
-    {
-      /*
-       *  h must be computed
-       */
-      this->h = floor(T - t0) / ((double)N);
-      //      cout<<"h == "<<floor(T-t0) / ((double)N)<<"                press ENTER"<<endl;getchar();
-    }
-    else if (hasT0 && hasN && hasH)
-    {
-      /*
-       *  T must be computed
-       */
-      this->strategy->getModel()->setFinalT(t0 + ((double)this->N) * (this->h));
-      //      cout<<"T == "<<t0 + ((double)this->N) * (this->h)<<"                press ENTER"<<endl;getchar();
-    }
-    else
-      RuntimeException::selfThrow("TimeDiscretisation::checkTimeDiscretisation - insufficient data to init completely the time manager object, you need : (t0,T,h), (t0,T,N) or (t0,h,N)");
-  }
-  // \todo : void TimeDiscretisation::checkTimeDiscretisation() - checking the coherency of the data given
-  OUT("TimeDiscretisation::checkTimeDiscretisation\n");
-}
+// --- Default (private) constructor ---
+TimeDiscretisation::TimeDiscretisation(): h(0.0), nSteps(0), tk(NULL), hMin(0.0), hMax(0.0), constant(0),
+  timeDiscretisationXML(NULL), k(0), strategy(NULL)
+{}

@@ -1,33 +1,17 @@
-
 #include "MoreauXML.h"
+using namespace std;
 
-MoreauXML::MoreauXML()
-{
-  this->WNode = NULL;
-  this->ThetaNode = NULL;
-}
+MoreauXML::MoreauXML(): OneStepIntegratorXML(), WNode(NULL), ThetaNode(NULL)
+{}
 
-MoreauXML::MoreauXML(xmlNode * MoreauNode, map<int, bool> definedDSNumbers)
-  : OneStepIntegratorXML(MoreauNode, definedDSNumbers)
+MoreauXML::MoreauXML(xmlNode * MoreauNode, map<int, bool> definedDSNumbers):
+  OneStepIntegratorXML(MoreauNode, definedDSNumbers), WNode(NULL), ThetaNode(NULL)
 {
   xmlNode *node;
   if ((node = SiconosDOMTreeTools::findNodeChild(MoreauNode, MOREAU_W)) != NULL)
-  {
-    this->WNode = node;
-  }
-  else
-  {
-    this->WNode = NULL;
-  }
-
+    WNode = node;
   if ((node = SiconosDOMTreeTools::findNodeChild(MoreauNode, MOREAU_THETA)) != NULL)
-  {
-    this->ThetaNode = node;
-  }
-  else
-  {
-    this->ThetaNode = NULL;
-  }
+    ThetaNode = node;
 }
 
 MoreauXML::~MoreauXML()

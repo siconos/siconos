@@ -1,4 +1,5 @@
 #include "QPXML.h"
+using namespace std;
 
 QPXML::QPXML() : OneStepNSProblemXML()
 {
@@ -37,6 +38,8 @@ QPXML::QPXML(xmlNode * QPNode, vector<int> definedInteractionNumbers)
   }
 
 }
+
+QPXML::~QPXML() {}
 
 void QPXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
 {

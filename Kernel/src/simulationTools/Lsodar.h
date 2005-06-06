@@ -2,17 +2,7 @@
 #define Lsodar_H
 
 #include "OneStepIntegrator.h"
-#include <iostream>
-#include <vector>
-#include "SiconosMatrix.h"
-//#include "SiconosVector.h"
-#include "NewSiconosVector.h"
 #include "LsodarXML.h"
-#include "check.h"
-
-//#include "C_file_for_Lsodar.h"
-
-//using namespace std;
 
 /** \class Lsodar
  *  \brief It's a kind of single-step Integrator
@@ -51,16 +41,6 @@ public:
   */
   void integrate();
 
-  /** \fn void saveIntegratorToXML()
-   *  \brief copy the data of the OneStepNSProblem to the XML tree
-   */
-  void saveIntegratorToXML();
-
-  /** \fn void initialize()
-  *  \brief initialization of the Lsodar integrator
-  */
-  void initialize();
-
   /** \fn Lsodar* convert (OneStepIntegrator* osi)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param OneStepIntegrator* : the integrator which must be converted
@@ -74,6 +54,8 @@ private:
    */
   Lsodar();
 };
+
+
 typedef void (* fctPtr)(int *sizeOfX, double *time, double *x, double *xdot);
 extern "C" void tryfunction(fctPtr);
 

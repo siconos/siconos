@@ -1,253 +1,200 @@
 
 #include "OneStepNSProblem.h"
-#include "check.h"
+using namespace std;
 
-OneStepNSProblem::OneStepNSProblem()
-{
-  this->onestepnspbxml = NULL;
-  this->n = -1;
-  this->solver = "";
-}
+// --- CONSTRUCTORS/DESTRUCTOR ---
 
-OneStepNSProblem::OneStepNSProblem(OneStepNSProblemXML* osnspbxml)
+OneStepNSProblem::OneStepNSProblem():
+  nspbType("none"), n(-1), solver(""), strategy(NULL), onestepnspbxml(NULL)
+{}
+
+OneStepNSProblem::OneStepNSProblem(OneStepNSProblemXML* osnspbxml, Strategy* newStrat):
+  nspbType("none"), n(-1), solver(""), strategy(newStrat), onestepnspbxml(osnspbxml)
 {
-  this->onestepnspbxml = osnspbxml;
-  this->solver = "";
+  if (onestepnspbxml != NULL)
+  {
+    if (onestepnspbxml->hasN()) n = onestepnspbxml->getN();
+    if (onestepnspbxml->hasSolver())
+    {
+      solver = onestepnspbxml->getSolver();
+      if (onestepnspbxml->hasSolverAlgorithm())
+        fillSolvingMethod();
+    }
+  }
+  else RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file=NULL");
+  if (strategy != NULL)
+  {
+    interactionVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+    ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
+    // Default value for n
+    n = interactionVector[0]->getNInteraction();
+  }
+  else cout << "OneStepNSPb xml-constructor - Warning: no strategy linked to OneStepPb" << endl;
 }
 
 OneStepNSProblem::~OneStepNSProblem()
 {}
 
-
-Interaction* OneStepNSProblem::getInteraction(const int nb)
+Interaction* OneStepNSProblem::getInteractionPtr(const int& nb)
 {
-  if (nb < this->interactionVector.size())
-    return this->interactionVector[nb];
+  if (nb < interactionVector.size())
+    return interactionVector[nb];
   else RuntimeException::selfThrow("OneStepNSProblem::getInteraction(const int nb) - number greater than size of interaction vector");
 }
 
 
 void OneStepNSProblem::addInteraction(Interaction *interaction)
 {
-  this->interactionVector.push_back(interaction);
-  //  cout<<"  - one of the Interactions Linked to the OneStepNSProblem ("<<this->nspbType<<") has the number "<<this->interactionVector[interactionVector.size()-1]->getNumber()<<" and his id is "<<this->interactionVector[interactionVector.size()-1]->getId()<<endl;
-  //  cout<<" % the relation of the linked Interaction is : "<<this->interactionVector[interactionVector.size()-1]->getRelation()->getType()<<endl;
-  //  cout<<" % this relation is linked to his XML object : "<<this->interactionVector[interactionVector.size()-1]->getRelation()->getRelationXML()<<endl;
+  interactionVector.push_back(interaction);
 }
-
-
-//////////////////////////////
-
-void OneStepNSProblem::initialize(void)
-{
-  // predict all the relations to see which ones have an effect
-  Interaction *inter;
-  vector<Interaction*>::iterator it;
-  for (it = this->interactionVector.begin(); it != this->interactionVector.end(); ++it)
-  {
-    inter = *it;
-    inter->initialize();
-  }
-}
-
-
 
 void OneStepNSProblem::updateState(void)
 {
-  // predict all the relations to see which ones have an effect
-  Interaction *inter;
   vector<Interaction*>::iterator it;
-  double currentTime = this->strategy->getModel()->getCurrentT();
+  double currentTime = strategy->getModelPtr()->getCurrentT();
   double pasH = strategy->getTimeDiscretisationPtr()->getH();
-  for (it = this->interactionVector.begin(); it != this->interactionVector.end(); ++it)
+  for (it = interactionVector.begin(); it != interactionVector.end(); ++it)
   {
-    inter = *it;
-    inter->update(currentTime, pasH);
-
-    if (this->connectedInteractionMap.find(inter) != this->connectedInteractionMap.end())
-      inter->getRelation()->computeInput(currentTime);
+    (*it)->update(currentTime, pasH);
+    if (connectedInteractionMap.find(*it) != connectedInteractionMap.end())
+      (*it)->getRelationPtr() -> computeInput(currentTime);
   }
 }
 
 
 void OneStepNSProblem::nextStep(void)
 {
-  // predict all the relations to see which ones have an effect
-  Interaction *inter;
   vector<Interaction*>::iterator it;
-  for (it = this->interactionVector.begin(); it != this->interactionVector.end(); ++it)
-  {
-    inter = *it;
-    inter->swapInMemory();
-  }
+  for (it = interactionVector.begin(); it != interactionVector.end(); ++it)
+    (*it)->swapInMemory();
 }
 
-void OneStepNSProblem::checkInteraction(void)
+void OneStepNSProblem::checkInteraction()
 {
-  // predict all the relations to see which ones have an effect
-  Interaction *inter;
+  // --- check and update status of the interactions ---
   vector<Interaction*>::iterator it;
   double pasH = strategy->getTimeDiscretisationPtr()->getH();
-  for (it = this->interactionVector.begin(); it != this->interactionVector.end(); ++it)
-  {
-    inter = *it;
-    inter->check(this->strategy->getModel()->getCurrentT(), pasH);
-  }
+  for (it = interactionVector.begin(); it != interactionVector.end(); ++it)
+    (*it)->check(strategy->getModelPtr()->getCurrentT(), pasH);
+  updateConnectedInteractionMap();
 }
 
-void OneStepNSProblem::formalize(double time)
+void OneStepNSProblem::formalize(const double& time)
 {
-  //  Interaction *inter;
-  //  vector<Interaction*>::iterator it;
-  //  for( it = this->interactionVector.begin(); it != this->interactionVector.end(); ++it )
-  //  {
-  //    inter = *it;
-  //    if( inter->isActive() )
-  //    {
-  //      /*
-  //      inter->computeA();
-  //      inter->computeB();
-  //      */
-  //    }
-  //  }
+  RuntimeException::selfThrow("OneStepNSProblem::formalize - not yet implemented for problem type =" + getType());
 }
+
 
 void OneStepNSProblem::compute(void)
 {
-  // to do with NUMERICS
-}
-
-void OneStepNSProblem::fillNSProblemWithNSProblemXML()
-{
-  IN("OneStepNSProblem::fillNSProblemWithNSProblemXML\n");
-  if (this->onestepnspbxml != NULL)
-  {
-    if (this->onestepnspbxml->hasN())
-      this->n = this->onestepnspbxml->getN();
-    else
-    {
-      //this->n =
-      // \todo :  calculate the number "n" of the OneStepNSProblem
-    }
-
-    if (this->onestepnspbxml->hasSolver())
-    {
-      this->solver = this->onestepnspbxml->getSolver();
-      if (this->onestepnspbxml->hasSolverAlgorithm())
-      {
-        // filling of the right method imported from Numerics
-        this->fillSolvingMethod();
-      }
-    }
-  }
-  else RuntimeException::selfThrow("OneStepNSProblem::fillNSProblemWithNSProblemXML - OneStepNSProblemXML object not exists");
-  OUT("OneStepNSProblem::fillNSProblemWithNSProblemXML\n");
+  RuntimeException::selfThrow("OneStepNSProblem::compute - not yet implemented for problem type =" + getType());
 }
 
 void OneStepNSProblem::fillSolvingMethod()
 {
-  if (this->solver == OSNSP_LCPSOLVING)
-    strcpy(this->solvingMethod.lcp.nom_method, this->onestepnspbxml->getSolverAlgorithmName().c_str());
-  else if (this->solver == OSNSP_RPSOLVING)
-    strcpy(this->solvingMethod.rp.nom_method, this->onestepnspbxml->getSolverAlgorithmName().c_str());
-  else if (this->solver == OSNSP_RDSOLVING)
-    strcpy(this->solvingMethod.rd.nom_method, this->onestepnspbxml->getSolverAlgorithmName().c_str());
-  else if (this->solver == OSNSP_CFPSOLVING)
-    strcpy(this->solvingMethod.cfp.nom_method, this->onestepnspbxml->getSolverAlgorithmName().c_str());
-  else if (this->solver == OSNSP_CFDSOLVING)
-    strcpy(this->solvingMethod.cfd.nom_method, this->onestepnspbxml->getSolverAlgorithmName().c_str());
+  if (solver == OSNSP_LCPSOLVING)
+    strcpy(solvingMethod.lcp.nom_method, onestepnspbxml->getSolverAlgorithmName().c_str());
+  else if (solver == OSNSP_RPSOLVING)
+    strcpy(solvingMethod.rp.nom_method, onestepnspbxml->getSolverAlgorithmName().c_str());
+  else if (solver == OSNSP_RDSOLVING)
+    strcpy(solvingMethod.rd.nom_method, onestepnspbxml->getSolverAlgorithmName().c_str());
+  else if (solver == OSNSP_CFPSOLVING)
+    strcpy(solvingMethod.cfp.nom_method, onestepnspbxml->getSolverAlgorithmName().c_str());
+  else if (solver == OSNSP_CFDSOLVING)
+    strcpy(solvingMethod.cfd.nom_method, onestepnspbxml->getSolverAlgorithmName().c_str());
 
 
-  if (this->onestepnspbxml->getSolverAlgorithmName() == OSNSP_LEMKE)
+  if (onestepnspbxml->getSolverAlgorithmName() == OSNSP_LEMKE)
   {
-    this->setLemkeAlgorithm(this->solver,
-                            /*this->onestepnspbxml->getSolverAlgorithmTolerance()*/
-                            this->onestepnspbxml->getSolverAlgorithmMaxIter());
+    setLemkeAlgorithm(solver,
+                      /*onestepnspbxml->getSolverAlgorithmTolerance()*/
+                      onestepnspbxml->getSolverAlgorithmMaxIter());
   }
-  else if (this->onestepnspbxml->getSolverAlgorithmName() == OSNSP_GSNL)
+  else if (onestepnspbxml->getSolverAlgorithmName() == OSNSP_GSNL)
   {
-    this->setGsnlAlgorithm(this->solver,
-                           this->onestepnspbxml->getSolverAlgorithmTolerance(),
-                           this->onestepnspbxml->getSolverAlgorithmNormType(),
-                           this->onestepnspbxml->getSolverAlgorithmMaxIter());
+    setGsnlAlgorithm(solver,
+                     onestepnspbxml->getSolverAlgorithmTolerance(),
+                     onestepnspbxml->getSolverAlgorithmNormType(),
+                     onestepnspbxml->getSolverAlgorithmMaxIter());
   }
-  else if (this->onestepnspbxml->getSolverAlgorithmName() == OSNSP_GCP)
+  else if (onestepnspbxml->getSolverAlgorithmName() == OSNSP_GCP)
   {
-    this->setGcpAlgorithm(this->solver,
-                          this->onestepnspbxml->getSolverAlgorithmTolerance(),
-                          this->onestepnspbxml->getSolverAlgorithmNormType(),
-                          this->onestepnspbxml->getSolverAlgorithmMaxIter());
+    setGcpAlgorithm(solver,
+                    onestepnspbxml->getSolverAlgorithmTolerance(),
+                    onestepnspbxml->getSolverAlgorithmNormType(),
+                    onestepnspbxml->getSolverAlgorithmMaxIter());
   }
-  else if (this->onestepnspbxml->getSolverAlgorithmName() == OSNSP_LATIN)
+  else if (onestepnspbxml->getSolverAlgorithmName() == OSNSP_LATIN)
   {
-    this->setLatinAlgorithm(this->solver,
-                            this->onestepnspbxml->getSolverAlgorithmTolerance(),
-                            this->onestepnspbxml->getSolverAlgorithmNormType(),
-                            this->onestepnspbxml->getSolverAlgorithmMaxIter(),
-                            this->onestepnspbxml->getSolverAlgorithmSearchDirection());
+    setLatinAlgorithm(solver,
+                      onestepnspbxml->getSolverAlgorithmTolerance(),
+                      onestepnspbxml->getSolverAlgorithmNormType(),
+                      onestepnspbxml->getSolverAlgorithmMaxIter(),
+                      onestepnspbxml->getSolverAlgorithmSearchDirection());
   }
 }
 
 void OneStepNSProblem::saveNSProblemToXML()
 {
   IN("OneStepNSProblem::saveNSProblemToXML\n");
-  if (this->onestepnspbxml != NULL)
+  if (onestepnspbxml != NULL)
   {
-    this->onestepnspbxml->setN(this->n);
+    cout << " n===================== " << n << endl;
+    onestepnspbxml->setN(n);
 
     vector<int> v;
-    for (int i = 0; i < this->interactionVector.size(); i++)
-      v.push_back(this->interactionVector[i]->getNumber());
-    this->onestepnspbxml->setInteractionConcerned(v, this->allInteractionConcerned());
+    for (int i = 0; i < interactionVector.size(); i++)
+      v.push_back(interactionVector[i]->getNumber());
+    onestepnspbxml->setInteractionConcerned(v, allInteractionConcerned());
 
     /*
      * save of the solving method to XML
      */
-    if (this->solver != "")
+    if (solver != "")
     {
       string methodName, normType;
       int maxIter;
       double tolerance, searchDirection;
 
-      if (this->solver == OSNSP_LCPSOLVING)
+      if (solver == OSNSP_LCPSOLVING)
       {
-        methodName = this->solvingMethod.lcp.nom_method;
-        normType = this->solvingMethod.lcp.normType;
-        maxIter = this->solvingMethod.lcp.itermax;
-        tolerance = this->solvingMethod.lcp.tol;
-        searchDirection = this->solvingMethod.lcp.k_latin;
+        methodName = solvingMethod.lcp.nom_method;
+        normType = solvingMethod.lcp.normType;
+        maxIter = solvingMethod.lcp.itermax;
+        tolerance = solvingMethod.lcp.tol;
+        searchDirection = solvingMethod.lcp.k_latin;
       }
-      else if (this->solver == OSNSP_RPSOLVING)
+      else if (solver == OSNSP_RPSOLVING)
       {
-        methodName = this->solvingMethod.rp.nom_method;
-        normType = this->solvingMethod.rp.normType;
-        maxIter = this->solvingMethod.rp.itermax;
-        tolerance = this->solvingMethod.rp.tol;
-        searchDirection = this->solvingMethod.rp.k_latin;
+        methodName = solvingMethod.rp.nom_method;
+        normType = solvingMethod.rp.normType;
+        maxIter = solvingMethod.rp.itermax;
+        tolerance = solvingMethod.rp.tol;
+        searchDirection = solvingMethod.rp.k_latin;
       }
-      else if (this->solver == OSNSP_RDSOLVING)
+      else if (solver == OSNSP_RDSOLVING)
       {
-        methodName = this->solvingMethod.rd.nom_method;
-        normType = this->solvingMethod.rd.normType;
-        maxIter = this->solvingMethod.rd.itermax;
-        tolerance = this->solvingMethod.rd.tol;
-        searchDirection = this->solvingMethod.rd.k_latin;
+        methodName = solvingMethod.rd.nom_method;
+        normType = solvingMethod.rd.normType;
+        maxIter = solvingMethod.rd.itermax;
+        tolerance = solvingMethod.rd.tol;
+        searchDirection = solvingMethod.rd.k_latin;
       }
-      else if (this->solver == OSNSP_CFPSOLVING)
+      else if (solver == OSNSP_CFPSOLVING)
       {
-        methodName = this->solvingMethod.cfp.nom_method;
-        normType = this->solvingMethod.cfp.normType;
-        maxIter = this->solvingMethod.cfp.itermax;
-        tolerance = this->solvingMethod.cfp.tol;
-        searchDirection = this->solvingMethod.cfp.k_latin;
+        methodName = solvingMethod.cfp.nom_method;
+        normType = solvingMethod.cfp.normType;
+        maxIter = solvingMethod.cfp.itermax;
+        tolerance = solvingMethod.cfp.tol;
+        searchDirection = solvingMethod.cfp.k_latin;
       }
-      else if (this->solver == OSNSP_CFDSOLVING)
+      else if (solver == OSNSP_CFDSOLVING)
       {
-        methodName = this->solvingMethod.cfd.nom_method;
-        normType = this->solvingMethod.cfd.normType;
-        maxIter = this->solvingMethod.cfd.itermax;
-        tolerance = this->solvingMethod.cfd.tol;
-        searchDirection = this->solvingMethod.cfd.k_latin;
+        methodName = solvingMethod.cfd.nom_method;
+        normType = solvingMethod.cfd.normType;
+        maxIter = solvingMethod.cfd.itermax;
+        tolerance = solvingMethod.cfd.tol;
+        searchDirection = solvingMethod.cfd.k_latin;
       }
 
       //      /*
@@ -274,12 +221,12 @@ void OneStepNSProblem::saveNSProblemToXML()
       //      }
       //      cout<<"OneStepNSproblem::saveNSProblemToXML => methodName == "<<methodName<<endl;
 
-      this->onestepnspbxml->setSolver(this->solver,
-                                      methodName,
-                                      normType,
-                                      tolerance,
-                                      maxIter,
-                                      searchDirection);
+      onestepnspbxml->setSolver(solver,
+                                methodName,
+                                normType,
+                                tolerance,
+                                maxIter,
+                                searchDirection);
     }
     else
     {
@@ -290,212 +237,194 @@ void OneStepNSProblem::saveNSProblemToXML()
   OUT("OneStepNSProblem::saveNSProblemToXML\n");
 }
 
-
-void OneStepNSProblem::fillInteractionVector()
-{
-  this->interactionVector = this->strategy->getModel()->getNonSmoothDynamicalSystem()->getInteractions();
-  this->ecVector = this->strategy->getModel()->getNonSmoothDynamicalSystem()->getEqualityConstraints();
-}
-
-void OneStepNSProblem::init()
-{
-  if ((this->onestepnspbxml == NULL) || (! this->onestepnspbxml->hasN()))
-  {
-    /*
-     * n is initialized with the value nInteraction of the first interaction of the NonSmoothDynamicalSystem
-     */
-    this->n = interactionVector[0]->getNInteraction();
-  }
-}
-
 bool OneStepNSProblem::allInteractionConcerned()
 {
   bool res = false;
 
-  if (this->interactionVector == this->getStrategy()->getModel()->getNonSmoothDynamicalSystem()->getInteractions())
+  if (interactionVector == getStrategyPtr()->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions())
     res = true;
 
   return res;
 }
 
-void OneStepNSProblem::setLemkeAlgorithm(string meth, double t)
+void OneStepNSProblem::setLemkeAlgorithm(const string& meth,  const double& t)
 {
-  this->solver = meth;
+  solver = meth;
 
   if (meth == OSNSP_LCPSOLVING)
   {
-    strcpy(this->solvingMethod.lcp.nom_method, OSNSP_LEMKE.c_str());
-    this->solvingMethod.lcp.tol = /*t*/ DefaultAlgoTolerance;
-    strcpy(this->solvingMethod.lcp.normType, DefaultAlgoNormType.c_str());
-    this->solvingMethod.lcp.itermax = /*DefaultAlgoMaxIter*/ t;
-    this->solvingMethod.lcp.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.lcp.nom_method, OSNSP_LEMKE.c_str());
+    solvingMethod.lcp.tol = /*t*/ DefaultAlgoTolerance;
+    strcpy(solvingMethod.lcp.normType, DefaultAlgoNormType.c_str());
+    solvingMethod.lcp.itermax = /*DefaultAlgoMaxIter*/ t;
+    solvingMethod.lcp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_CFDSOLVING)
   {
-    strcpy(this->solvingMethod.cfd.nom_method, OSNSP_LEMKE.c_str());
-    this->solvingMethod.cfd.tol = /*t*/ DefaultAlgoTolerance;
-    strcpy(this->solvingMethod.cfd.normType, DefaultAlgoNormType.c_str());
-    this->solvingMethod.cfd.itermax = /*DefaultAlgoMaxIter*/ t;
-    this->solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.cfd.nom_method, OSNSP_LEMKE.c_str());
+    solvingMethod.cfd.tol = /*t*/ DefaultAlgoTolerance;
+    strcpy(solvingMethod.cfd.normType, DefaultAlgoNormType.c_str());
+    solvingMethod.cfd.itermax = /*DefaultAlgoMaxIter*/ t;
+    solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
-void OneStepNSProblem::setGsnlAlgorithm(string meth, double t, string norm, int iter)
+void OneStepNSProblem::setGsnlAlgorithm(const string& meth,  const double& t,  const string& norm,  const int& iter)
 {
-  this->solver = meth;
+  solver = meth;
 
   if (meth == OSNSP_LCPSOLVING)
   {
-    strcpy(this->solvingMethod.lcp.nom_method, OSNSP_GSNL.c_str());
-    this->solvingMethod.lcp.tol = t;
+    strcpy(solvingMethod.lcp.nom_method, OSNSP_GSNL.c_str());
+    solvingMethod.lcp.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.lcp.normType, norm.c_str());
-    this->solvingMethod.lcp.itermax = iter;
-    this->solvingMethod.lcp.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.lcp.normType, norm.c_str());
+    solvingMethod.lcp.itermax = iter;
+    solvingMethod.lcp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_RPSOLVING)
   {
-    strcpy(this->solvingMethod.rp.nom_method, OSNSP_GSNL.c_str());
-    this->solvingMethod.rp.tol = t;
+    strcpy(solvingMethod.rp.nom_method, OSNSP_GSNL.c_str());
+    solvingMethod.rp.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.rp.normType, norm.c_str());
-    this->solvingMethod.rp.itermax = iter;
-    this->solvingMethod.rp.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.rp.normType, norm.c_str());
+    solvingMethod.rp.itermax = iter;
+    solvingMethod.rp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_RDSOLVING)
   {
-    strcpy(this->solvingMethod.rd.nom_method, OSNSP_GSNL.c_str());
-    this->solvingMethod.rd.tol = t;
+    strcpy(solvingMethod.rd.nom_method, OSNSP_GSNL.c_str());
+    solvingMethod.rd.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.rd.normType, norm.c_str());
-    this->solvingMethod.rd.itermax = iter;
-    this->solvingMethod.rd.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.rd.normType, norm.c_str());
+    solvingMethod.rd.itermax = iter;
+    solvingMethod.rd.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_CFPSOLVING)
   {
-    strcpy(this->solvingMethod.cfp.nom_method, OSNSP_GSNL.c_str());
-    this->solvingMethod.cfp.tol = t;
+    strcpy(solvingMethod.cfp.nom_method, OSNSP_GSNL.c_str());
+    solvingMethod.cfp.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.cfp.normType, norm.c_str());
-    this->solvingMethod.cfp.itermax = iter;
-    this->solvingMethod.cfp.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.cfp.normType, norm.c_str());
+    solvingMethod.cfp.itermax = iter;
+    solvingMethod.cfp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_CFDSOLVING)
   {
-    strcpy(this->solvingMethod.cfd.nom_method, OSNSP_GSNL.c_str());
-    this->solvingMethod.cfd.tol = t;
+    strcpy(solvingMethod.cfd.nom_method, OSNSP_GSNL.c_str());
+    solvingMethod.cfd.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.cfd.normType, norm.c_str());
-    this->solvingMethod.cfd.itermax = iter;
-    this->solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.cfd.normType, norm.c_str());
+    solvingMethod.cfd.itermax = iter;
+    solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
-void OneStepNSProblem::setGcpAlgorithm(string meth, double t, string norm, int iter)
+void OneStepNSProblem::setGcpAlgorithm(const string& meth,  const double& t,  const string& norm,  const int& iter)
 {
-  this->solver = meth;
+  solver = meth;
 
   if (meth == OSNSP_LCPSOLVING)
   {
-    strcpy(this->solvingMethod.lcp.nom_method, OSNSP_GCP.c_str());
-    this->solvingMethod.lcp.tol = t;
+    strcpy(solvingMethod.lcp.nom_method, OSNSP_GCP.c_str());
+    solvingMethod.lcp.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.lcp.normType, norm.c_str());
-    this->solvingMethod.lcp.itermax = iter;
-    this->solvingMethod.lcp.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.lcp.normType, norm.c_str());
+    solvingMethod.lcp.itermax = iter;
+    solvingMethod.lcp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_RPSOLVING)
   {
-    strcpy(this->solvingMethod.rp.nom_method, OSNSP_GCP.c_str());
-    this->solvingMethod.rp.tol = t;
+    strcpy(solvingMethod.rp.nom_method, OSNSP_GCP.c_str());
+    solvingMethod.rp.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.rp.normType, norm.c_str());
-    this->solvingMethod.rp.itermax = iter;
-    this->solvingMethod.rp.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.rp.normType, norm.c_str());
+    solvingMethod.rp.itermax = iter;
+    solvingMethod.rp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_RDSOLVING)
   {
-    strcpy(this->solvingMethod.rd.nom_method, OSNSP_GCP.c_str());
-    this->solvingMethod.rd.tol = t;
+    strcpy(solvingMethod.rd.nom_method, OSNSP_GCP.c_str());
+    solvingMethod.rd.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.rd.normType, norm.c_str());
-    this->solvingMethod.rd.itermax = iter;
-    this->solvingMethod.rd.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.rd.normType, norm.c_str());
+    solvingMethod.rd.itermax = iter;
+    solvingMethod.rd.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_CFPSOLVING)
   {
-    strcpy(this->solvingMethod.cfp.nom_method, OSNSP_GCP.c_str());
-    this->solvingMethod.cfp.tol = t;
+    strcpy(solvingMethod.cfp.nom_method, OSNSP_GCP.c_str());
+    solvingMethod.cfp.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.cfp.normType, norm.c_str());
-    this->solvingMethod.cfp.itermax = iter;
-    this->solvingMethod.cfp.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.cfp.normType, norm.c_str());
+    solvingMethod.cfp.itermax = iter;
+    solvingMethod.cfp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_CFDSOLVING)
   {
-    strcpy(this->solvingMethod.cfd.nom_method, OSNSP_GCP.c_str());
-    this->solvingMethod.cfd.tol = t;
+    strcpy(solvingMethod.cfd.nom_method, OSNSP_GCP.c_str());
+    solvingMethod.cfd.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.cfd.normType, norm.c_str());
-    this->solvingMethod.cfd.itermax = iter;
-    this->solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.cfd.normType, norm.c_str());
+    solvingMethod.cfd.itermax = iter;
+    solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
-void OneStepNSProblem::setLatinAlgorithm(string meth, double t, string norm, int iter, double searchdirection)
+void OneStepNSProblem::setLatinAlgorithm(const string& meth, const double& t, const string& norm, const int& iter, const double& searchdirection)
 {
-  this->solver = meth;
+  solver = meth;
 
   if (meth == OSNSP_LCPSOLVING)
   {
-    strcpy(this->solvingMethod.lcp.nom_method, OSNSP_LATIN.c_str());
-    this->solvingMethod.lcp.tol = t;
+    strcpy(solvingMethod.lcp.nom_method, OSNSP_LATIN.c_str());
+    solvingMethod.lcp.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.lcp.normType, norm.c_str());
-    this->solvingMethod.lcp.itermax = iter;
-    this->solvingMethod.lcp.k_latin = searchdirection;
+    strcpy(solvingMethod.lcp.normType, norm.c_str());
+    solvingMethod.lcp.itermax = iter;
+    solvingMethod.lcp.k_latin = searchdirection;
   }
   else if (meth == OSNSP_RPSOLVING)
   {
-    strcpy(this->solvingMethod.rp.nom_method, OSNSP_LATIN.c_str());
-    this->solvingMethod.rp.tol = t;
+    strcpy(solvingMethod.rp.nom_method, OSNSP_LATIN.c_str());
+    solvingMethod.rp.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.rd.normType, norm.c_str());
-    this->solvingMethod.rp.itermax = iter;
-    this->solvingMethod.rp.k_latin = searchdirection;
+    strcpy(solvingMethod.rd.normType, norm.c_str());
+    solvingMethod.rp.itermax = iter;
+    solvingMethod.rp.k_latin = searchdirection;
   }
   else if (meth == OSNSP_RDSOLVING)
   {
-    strcpy(this->solvingMethod.rd.nom_method, OSNSP_LATIN.c_str());
-    this->solvingMethod.rd.tol = t;
+    strcpy(solvingMethod.rd.nom_method, OSNSP_LATIN.c_str());
+    solvingMethod.rd.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.rd.normType, norm.c_str());
-    this->solvingMethod.rd.itermax = iter;
-    this->solvingMethod.rd.k_latin = searchdirection;
+    strcpy(solvingMethod.rd.normType, norm.c_str());
+    solvingMethod.rd.itermax = iter;
+    solvingMethod.rd.k_latin = searchdirection;
   }
   else if (meth == OSNSP_CFPSOLVING)
   {
-    strcpy(this->solvingMethod.cfp.nom_method, OSNSP_LATIN.c_str());
-    this->solvingMethod.cfp.tol = t;
+    strcpy(solvingMethod.cfp.nom_method, OSNSP_LATIN.c_str());
+    solvingMethod.cfp.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.cfp.normType, norm.c_str());
-    this->solvingMethod.cfp.itermax = iter;
-    this->solvingMethod.cfp.k_latin = searchdirection;
+    strcpy(solvingMethod.cfp.normType, norm.c_str());
+    solvingMethod.cfp.itermax = iter;
+    solvingMethod.cfp.k_latin = searchdirection;
   }
   else if (meth == OSNSP_CFDSOLVING)
   {
-    strcpy(this->solvingMethod.cfd.nom_method, OSNSP_LATIN.c_str());
-    this->solvingMethod.cfd.tol = t;
+    strcpy(solvingMethod.cfd.nom_method, OSNSP_LATIN.c_str());
+    solvingMethod.cfd.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(this->solvingMethod.cfd.normType, norm.c_str());
-    this->solvingMethod.cfd.itermax = iter;
-    this->solvingMethod.cfd.k_latin = searchdirection;
+    strcpy(solvingMethod.cfd.normType, norm.c_str());
+    solvingMethod.cfd.itermax = iter;
+    solvingMethod.cfd.k_latin = searchdirection;
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
@@ -508,26 +437,25 @@ void OneStepNSProblem::updateConnectedInteractionMap()
   vector<int> status, status2;
   Connection *co;
 
+  connectedInteractionMap.clear();
 
-  this->connectedInteractionMap.clear();
-
-  for (int i = 0; i < this->interactionVector.size(); i++)
+  for (int i = 0; i < interactionVector.size(); i++)
   {
-    //    for(int k=0; k<this->connectedInteractionMap[ interactionVector[i] ].size(); k++)
-    //      delete this->connectedInteractionMap[ interactionVector[i] ][k];
-    //    this->connectedInteractionMap[ interactionVector[i] ].clear();
+    //    for(int k=0; k<connectedInteractionMap[ interactionVector[i] ].size(); k++)
+    //      delete connectedInteractionMap[ interactionVector[i] ][k];
+    //    connectedInteractionMap[ interactionVector[i] ].clear();
 
     // we only put in the visibility table, the active interactions
-    status = this->interactionVector[i]->getStatus();
+    status = interactionVector[i]->getStatus();
     for (int k = 0; k < status.size(); k++)
       if (status[k] == 1)
       {
         cout << "# interaction " << i << " is active !" << endl;
         hasActiveConnection = false;
-        for (int j = 0; j < this->interactionVector.size(); j++)
+        for (int j = 0; j < interactionVector.size(); j++)
         {
           // we only put in the visibility table, the active interactions
-          status2 = this->interactionVector[j]->getStatus();
+          status2 = interactionVector[j]->getStatus();
           for (int l = 0; l < status2.size(); l++)
           {
             if (status2[l] == 1)
@@ -535,8 +463,8 @@ void OneStepNSProblem::updateConnectedInteractionMap()
               if (i != j)
               {
                 hasActiveConnection = true;
-                dsvect1 = this->interactionVector[i]->getDynamicalSystems();
-                dsvect2 = this->interactionVector[j]->getDynamicalSystems();
+                dsvect1 = interactionVector[i]->getDynamicalSystems();
+                dsvect2 = interactionVector[j]->getDynamicalSystems();
 
                 if ((dsvect1[0] == dsvect2[0]) || (dsvect1[0] == dsvect2[1]))
                 {
@@ -548,7 +476,7 @@ void OneStepNSProblem::updateConnectedInteractionMap()
                   else co->connectedInteractionDSRank = 1;
                   co->connected = interactionVector[j];
 
-                  this->connectedInteractionMap[ interactionVector[i] ].push_back(co);
+                  connectedInteractionMap[ interactionVector[i] ].push_back(co);
                 }
                 else if ((dsvect1[1] == dsvect2[0]) || (dsvect1[1] == dsvect2[1]))
                 {
@@ -560,7 +488,7 @@ void OneStepNSProblem::updateConnectedInteractionMap()
                   else co->connectedInteractionDSRank = 1;
                   co->connected = interactionVector[j];
 
-                  this->connectedInteractionMap[ interactionVector[i] ].push_back(co);
+                  connectedInteractionMap[ interactionVector[i] ].push_back(co);
                 }
               }
             }
@@ -574,12 +502,12 @@ void OneStepNSProblem::updateConnectedInteractionMap()
            * with an empty vector of Connection
            */
           //co = new Connection();
-          this->connectedInteractionMap[ interactionVector[i] ].push_back(NULL);
+          connectedInteractionMap[ interactionVector[i] ].push_back(NULL);
         }
       }
   }
-  //    this->displayConnectedInteractionMap();
-  //    cout<<"#_#_  "<<this->connectedInteractionMap[ interactionVector[0] ].size()<<endl;
+  //    displayConnectedInteractionMap();
+  //    cout<<"#_#_  "<<connectedInteractionMap[ interactionVector[0] ].size()<<endl;
   //    cout<<"updateConnectedInteractionMap  <<press enter>>"<<endl;
   //    getchar();
 }
@@ -589,7 +517,7 @@ void OneStepNSProblem::displayConnectedInteractionMap()
   map< Interaction*, vector<Connection*> >::iterator iter;
 
   //cout<<"#------OneStepNSProblem::displayConnectedInteractionMap-----------"<<endl;
-  for (iter = this->connectedInteractionMap.begin(); iter != this->connectedInteractionMap.end(); ++iter)
+  for (iter = connectedInteractionMap.begin(); iter != connectedInteractionMap.end(); ++iter)
   {
     cout << "#-----------------" << endl;
     cout << "| Origin Interaction " << iter->first << endl;

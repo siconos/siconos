@@ -1,19 +1,11 @@
 #include "NewSiconosVector.h"
+using namespace std;
 
 SiconosVector::SiconosVector()
-{
-  //IN("SiconosVector::SiconosVector() \n");
-
-  //OUT("SiconosVector::SiconosVector() \n");
-}
+{}
 
 SiconosVector::~SiconosVector()
-{
-  //IN("SiconosVector::~SiconosVector() \n");
-
-  //OUT("SiconosVector::~SiconosVector() \n");
-}
-
+{}
 
 SiconosVector& SiconosVector::operator = (const SiconosVector& v)
 {
@@ -42,20 +34,14 @@ SiconosVector& SiconosVector::operator = (const SiconosVector& v)
 
 void SiconosVector::zero()
 {
-  //IN("SiconosVector::zero() \n");
-
   const int size = this->size();
   for (int i = 0; i < size; i++)
     (*this)(i) = 0.0;
-
-  //OUT("SiconosVector::zero() \n");
 }
 
 
 string SiconosVector::toString()
 {
-  //IN("SiconosVector::toString() \n");
-
   char element[100];
   int i = 0, end = 0;
   string vectorContent = "";
@@ -71,8 +57,6 @@ string SiconosVector::toString()
     else vectorContent = element;
     i++;
   }
-
-  //OUT("SiconosVector::toString() \n");
   return vectorContent;
 }
 

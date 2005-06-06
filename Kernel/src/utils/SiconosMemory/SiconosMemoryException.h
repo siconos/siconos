@@ -15,18 +15,18 @@ public:
 
   /**
    * constructor
-   * @param string which describe the exception
+   * @param std::string which describe the exception
    */
-  SiconosMemoryException(string report);
+  SiconosMemoryException(const std::string& report);
 
   /**
    * destructor
    */
   ~SiconosMemoryException();
 
-  static void selfThrow();
+  static void selfThrow() ;
 
-  static void selfThrow(string report);
+  static void selfThrow(const std::string& report) ;
 
 };
 

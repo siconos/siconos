@@ -6,12 +6,10 @@
 
 #include "SiconosMatrix.h"
 #include "NewSiconosVector.h"
+#include "check.h"
 
 #include <iostream>
 #include <vector>
-
-//using namespace std;
-
 
 class LagrangianLinearTIDSXML;
 
@@ -99,7 +97,7 @@ public:
   LagrangianLinearTIDS(int number, int ndof,
                        SiconosVector* q0, SiconosVector* velocity0,
                        SiconosMatrix* mass,
-                       string fExt,
+                       std::string  fExt,
                        SiconosMatrix* K, SiconosMatrix* C);
 
   // destructor
@@ -203,6 +201,11 @@ public:
   void display() const;
 
   static LagrangianLinearTIDS* convert(DynamicalSystem* ds);
+
+  double dsConvergenceIndicator()
+  {
+    return 0.0;
+  }
 
 private:
 

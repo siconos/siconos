@@ -2,6 +2,7 @@
 #define LINEAREC_H
 
 #include "EqualityConstraint.h"
+#include "LinearECXML.h"
 
 /** \class LinearEC
  *  \brief Linear Equality Constraint
@@ -30,7 +31,7 @@ public:
    *  \exception RuntimeException
    */
   void createEqualityConstraint(EqualityConstraintXML * ecXML , int number = -1,
-                                SiconosMatrix *G = NULL, vector<DSInputOutput*> *dsioVector = NULL);
+                                SiconosMatrix *G = NULL, std::vector<DSInputOutput*> *dsioVector = NULL);
 };
 
 #endif // LINEAREC_H

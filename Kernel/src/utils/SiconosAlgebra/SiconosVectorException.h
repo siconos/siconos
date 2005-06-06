@@ -28,11 +28,11 @@ public:
   SiconosVectorException();
 
   /**
-   * \fn SiconosVectorException(string report)
+   * \fn SiconosVectorException(const std::string& report)
    * \brief constructor with a report
-   * \param string report : exception description
+   * \param std::string report : exception description
    */
-  SiconosVectorException(string report);
+  SiconosVectorException(const std::string& report);
 
   /**
    * \fn ~SiconosVectorException()
@@ -45,15 +45,15 @@ public:
    * \brief static function which throw a SiconosVectorException
    * \exception SiconosVectorException
    */
-  static void selfThrow();
+  static void selfThrow()  ;
 
   /**
-   * \fn static void selfThrow(string report)
+   * \fn static void selfThrow(const std::string& report)
    * \brief static function which throw a SiconosVectorException with a report
-   * \param string report : exception description
+   * \param std::string report : exception description
    * \exception SiconosVectorException
    */
-  static void selfThrow(string report);
+  static void selfThrow(const std::string& report) ;
 
 };
 

@@ -1,25 +1,27 @@
-
 #include "NSDSXML.h"
 
+//---  Following includes to be suppressed thanks to factory (?) ---
+
+// DS
 #include "LagrangianDSXML.h"
 #include "LagrangianLinearTIDSXML.h"
 #include "LinearSystemDSXML.h"
-
+// EC
 #include "LinearECXML.h"
 #include "LinearTIECXML.h"
 #include "LagrangianECXML.h"
 #include "LagrangianLinearECXML.h"
+// DSIO
 #include "LinearDSIOXML.h"
 #include "LagrangianDSIOXML.h"
 #include "LagrangianLinearDSIOXML.h"
 
-#include "check.h"
+using namespace std;
 
 
-NSDSXML::NSDSXML()
+NSDSXML::NSDSXML(): NSDSNode(NULL)
 {
-  this->NSDSNode = NULL;
-  this->DSXMLMap.clear();
+  DSXMLMap.clear();
 }
 
 NSDSXML::NSDSXML(xmlNode * rootNSDSNode)
@@ -27,8 +29,8 @@ NSDSXML::NSDSXML(xmlNode * rootNSDSNode)
   IN("NSDSXML::NSDSXML(xmlNode * rootNSDSNode)\n");
   if (rootNSDSNode != NULL)
   {
-    this->NSDSNode = rootNSDSNode;
-    this->DSXMLMap.clear();
+    NSDSNode = rootNSDSNode;
+    DSXMLMap.clear();
     loadNonSmoothDynamicalSystem();
   }
   OUT("NSDSXML::NSDSXML(xmlNode * rootNSDSNode)\n");
@@ -168,10 +170,10 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
        */
       for (i = 0; i < nsds->getDSVectorSize(); i++)
       {
-        if (nsds->getDynamicalSystem(i)->getDynamicalSystemXMLPtr() == NULL)
+        if (nsds->getDynamicalSystemPtr(i)->getDynamicalSystemXMLPtr() == NULL)
         {
-          type = nsds->getDynamicalSystem(i)->getType();
-          number = nsds->getDynamicalSystem(i)->getNumber();
+          type = nsds->getDynamicalSystemPtr(i)->getType();
+          number = nsds->getDynamicalSystemPtr(i)->getNumber();
           sprintf(num, "%d", number);
           this->definedDSNumbers.push_back(number);
 
@@ -188,10 +190,10 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               dsxml = new LagrangianDSXML();
 
               // linkage between the DynamicalSystem and his DSXML
-              nsds->getDynamicalSystem(i)->setDynamicalSystemXMLPtr(dsxml);
+              nsds->getDynamicalSystemPtr(i)->setDynamicalSystemXMLPtr(dsxml);
 
               // creation of the DynamicalSystemXML
-              static_cast<LagrangianDSXML*>(dsxml)->updateDynamicalSystemXML(node, nsds->getDynamicalSystem(i));
+              static_cast<LagrangianDSXML*>(dsxml)->updateDynamicalSystemXML(node, nsds->getDynamicalSystemPtr(i));
 
               this->DSXMLMap[number] = dsxml;
             }
@@ -202,10 +204,10 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               dsxml = new LagrangianLinearTIDSXML();
 
               // linkage between the DynamicalSystem and his DSXML
-              nsds->getDynamicalSystem(i)->setDynamicalSystemXMLPtr(dsxml);
+              nsds->getDynamicalSystemPtr(i)->setDynamicalSystemXMLPtr(dsxml);
 
               // creation of the DynamicalSystemXML
-              static_cast<LagrangianLinearTIDSXML*>(dsxml)->updateDynamicalSystemXML(node, nsds->getDynamicalSystem(i));
+              static_cast<LagrangianLinearTIDSXML*>(dsxml)->updateDynamicalSystemXML(node, nsds->getDynamicalSystemPtr(i));
 
               this->DSXMLMap[number] = dsxml;
             }
@@ -217,10 +219,10 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               dsxml = new LinearSystemDSXML();
 
               // linkage between the DynamicalSystem and his DSXML
-              nsds->getDynamicalSystem(i)->setDynamicalSystemXMLPtr(dsxml);
+              nsds->getDynamicalSystemPtr(i)->setDynamicalSystemXMLPtr(dsxml);
 
               // creation of the DynamicalSystemXML
-              static_cast<LinearSystemDSXML*>(dsxml)->updateDynamicalSystemXML(node, nsds->getDynamicalSystem(i));
+              static_cast<LinearSystemDSXML*>(dsxml)->updateDynamicalSystemXML(node, nsds->getDynamicalSystemPtr(i));
 
               this->DSXMLMap[number] = dsxml;
 
@@ -232,10 +234,10 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               dsxml = new DSXML();
 
               // linkage between the DynamicalSystem and his DSXML
-              nsds->getDynamicalSystem(i)->setDynamicalSystemXMLPtr(dsxml);
+              nsds->getDynamicalSystemPtr(i)->setDynamicalSystemXMLPtr(dsxml);
 
               // creation of the DynamicalSystemXML
-              dsxml->updateDynamicalSystemXML(node, nsds->getDynamicalSystem(i));
+              dsxml->updateDynamicalSystemXML(node, nsds->getDynamicalSystemPtr(i));
 
               this->DSXMLMap[number] = dsxml;
             }
@@ -251,7 +253,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
           }
         }
         else
-          cout << "## /!\\ the DynamicalSystem : " << nsds->getDynamicalSystem(i)->getType() << " number " << nsds->getDynamicalSystem(i)->getNumber() <<
+          cout << "## /!\\ the DynamicalSystem : " << nsds->getDynamicalSystemPtr(i)->getType() << " number " << nsds->getDynamicalSystemPtr(i)->getNumber() <<
                ", has already an XML object." << endl;
       }
     }
@@ -271,9 +273,9 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
 
       for (i = 0; i < nsds->getEqualityConstraints().size(); i++)
       {
-        if (nsds->getEqualityConstraint(i)->getEqualityConstraintXML() == NULL)
+        if (nsds->getEqualityConstraintPtr(i)->getEqualityConstraintXML() == NULL)
         {
-          number = nsds->getEqualityConstraint(i)->getNumber();
+          number = nsds->getEqualityConstraintPtr(i)->getNumber();
           sprintf(num, "%d", number);
           this->definedEqualityConstraintNumbers.push_back(number);
 
@@ -281,84 +283,84 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
           itec = this->equalityConstraintXMLMap.find(number);
           if (itec == this->equalityConstraintXMLMap.end())
           {
-            if (nsds->getEqualityConstraint(i)->getType() == LINEAREC)
+            if (nsds->getEqualityConstraintPtr(i)->getType() == LINEAREC)
             {
               node = xmlNewChild(ecDefinitionNode, NULL, (xmlChar*)LINEAR_EC_TAG.c_str(), NULL);
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               ecXML = new LinearECXML();
 
               // linkage between the DynamicalSystem and his DSXML
-              nsds->getEqualityConstraint(i)->setEqualityConstraintXML(ecXML);
+              nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML(ecXML);
 
               // creation of the DynamicalSystemXML
-              static_cast<LinearECXML*>(ecXML)->updateEqualityConstraintXML(node, nsds->getEqualityConstraint(i));
+              static_cast<LinearECXML*>(ecXML)->updateEqualityConstraintXML(node, nsds->getEqualityConstraintPtr(i));
 
               this->equalityConstraintXMLMap[number] = ecXML;
             }
-            else if (nsds->getEqualityConstraint(i)->getType() == LINEARTIEC)
+            else if (nsds->getEqualityConstraintPtr(i)->getType() == LINEARTIEC)
             {
               node = xmlNewChild(ecDefinitionNode, NULL, (xmlChar*)LINEAR_TIME_INVARIANT_EC_TAG.c_str(), NULL);
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               ecXML = new LinearTIECXML();
 
               // linkage between the DynamicalSystem and his DSXML
-              nsds->getEqualityConstraint(i)->setEqualityConstraintXML(ecXML);
+              nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML(ecXML);
 
               // creation of the DynamicalSystemXML
-              static_cast<LinearTIECXML*>(ecXML)->updateEqualityConstraintXML(node, nsds->getEqualityConstraint(i));
+              static_cast<LinearTIECXML*>(ecXML)->updateEqualityConstraintXML(node, nsds->getEqualityConstraintPtr(i));
 
               this->equalityConstraintXMLMap[number] = ecXML;
             }
-            else if (nsds->getEqualityConstraint(i)->getType() == LAGRANGIANEC)
+            else if (nsds->getEqualityConstraintPtr(i)->getType() == LAGRANGIANEC)
             {
               node = xmlNewChild(ecDefinitionNode, NULL, (xmlChar*)LAGRANGIAN_EC_TAG.c_str(), NULL);
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               ecXML = new LagrangianECXML();
 
               // linkage between the DynamicalSystem and his DSXML
-              nsds->getEqualityConstraint(i)->setEqualityConstraintXML(ecXML);
+              nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML(ecXML);
 
               // creation of the DynamicalSystemXML
-              static_cast<LagrangianECXML*>(ecXML)->updateEqualityConstraintXML(node, nsds->getEqualityConstraint(i));
+              static_cast<LagrangianECXML*>(ecXML)->updateEqualityConstraintXML(node, nsds->getEqualityConstraintPtr(i));
 
               this->equalityConstraintXMLMap[number] = ecXML;
             }
-            else if (nsds->getEqualityConstraint(i)->getType() == LAGRANGIANLINEAREC)
+            else if (nsds->getEqualityConstraintPtr(i)->getType() == LAGRANGIANLINEAREC)
             {
               node = xmlNewChild(ecDefinitionNode, NULL, (xmlChar*)LAGRANGIAN_LINEAR_EC_TAG.c_str(), NULL);
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               ecXML = new LagrangianECXML();
 
               // linkage between the DynamicalSystem and his DSXML
-              nsds->getEqualityConstraint(i)->setEqualityConstraintXML(ecXML);
+              nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML(ecXML);
 
               // creation of the DynamicalSystemXML
-              static_cast<LagrangianLinearECXML*>(ecXML)->updateEqualityConstraintXML(node, nsds->getEqualityConstraint(i));
+              static_cast<LagrangianLinearECXML*>(ecXML)->updateEqualityConstraintXML(node, nsds->getEqualityConstraintPtr(i));
 
               this->equalityConstraintXMLMap[number] = ecXML;
             }
-            else if (nsds->getEqualityConstraint(i)->getType() == NLINEAREC)
+            else if (nsds->getEqualityConstraintPtr(i)->getType() == NLINEAREC)
             {
               node = xmlNewChild(ecDefinitionNode, NULL, (xmlChar*)NON_LINEAR_EC_TAG.c_str(), NULL);
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               ecXML = new EqualityConstraintXML();
 
               // linkage between the DynamicalSystem and his DSXML
-              nsds->getEqualityConstraint(i)->setEqualityConstraintXML(ecXML);
+              nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML(ecXML);
 
               // creation of the DynamicalSystemXML
-              ecXML->updateEqualityConstraintXML(node, nsds->getEqualityConstraint(i));
+              ecXML->updateEqualityConstraintXML(node, nsds->getEqualityConstraintPtr(i));
 
               this->equalityConstraintXMLMap[number] = ecXML;
             }
-            else XMLException::selfThrow("NSDSXML - loadNSDS | Error : the EqualityConstraint type : " + nsds->getEqualityConstraint(i)->getType() + " doesn't exist!");
+            else XMLException::selfThrow("NSDSXML - loadNSDS | Error : the EqualityConstraint type : " + nsds->getEqualityConstraintPtr(i)->getType() + " doesn't exist!");
 
             /*  end of the save : saving the DynamicalSystem linked to this DSInputOutput */
             ecDsioNode = xmlNewChild(node, NULL, (xmlChar*)DSIO_CONCERNED.c_str(), NULL);
-            for (int j = 0; j < nsds->getEqualityConstraint(i)->getDSInputOutputs().size(); j++)
+            for (int j = 0; j < nsds->getEqualityConstraintPtr(i)->getDSInputOutputs().size(); j++)
             {
               node = xmlNewChild(ecDsioNode, NULL, (xmlChar*)DSINPUTOUTPUT_TAG.c_str(), NULL);
-              number = nsds->getEqualityConstraint(i)->getDSInputOutput(j)->getNumber();
+              number = nsds->getEqualityConstraintPtr(i)->getDSInputOutput(j)->getNumber();
               sprintf(num, "%d", number);
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
             }
@@ -382,9 +384,9 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
 
       for (i = 0; i < nsds->getInteractionVectorSize(); i++)
       {
-        if (nsds->getInteraction(i)->getInteractionXML() == NULL)
+        if (nsds->getInteractionPtr(i)->getInteractionXMLPtr() == NULL)
         {
-          number = nsds->getInteraction(i)->getNumber();
+          number = nsds->getInteractionPtr(i)->getNumber();
           sprintf(num, "%d", number);
           this->definedInteractionNumbers.push_back(number);
 
@@ -397,12 +399,12 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
             interactionXML = new InteractionXML();
 
             // linkage between the DynamicalSystem and his DSXML
-            nsds->getInteraction(i)->setInteractionXML(interactionXML);
+            nsds->getInteractionPtr(i)->setInteractionXMLPtr(interactionXML);
 
             // creation of the DynamicalSystemXML
-            interactionXML->updateInteractionXML(node, nsds->getInteraction(i));
+            interactionXML->updateInteractionXML(node, nsds->getInteractionPtr(i));
 
-            this->interactionXMLMap[number] = interactionXML;
+            interactionXMLMap[number] = interactionXML;
           }
           else
           {
@@ -524,8 +526,6 @@ void NSDSXML::loadInteractionXML(xmlNode * rootInteractionNode)
 
     number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
 
-    cout << "CHARGEMENT INTERACTION number" << number << endl;
-
     i = interactionXMLMap.find(number);
     if (i == interactionXMLMap.end())
     {
@@ -555,8 +555,6 @@ void NSDSXML::loadEqualityConstraintXML(xmlNode * rootECNode)
     EqualityConstraintXML *ecxml;
 
     number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
-
-    cout << "CHARGEMENT EqualityConstraint number" << number << endl;
 
     i = equalityConstraintXMLMap.find(number);
     if (i == equalityConstraintXMLMap.end())

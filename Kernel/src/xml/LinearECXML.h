@@ -23,8 +23,8 @@ public:
   *   \param xmlNode* : the EqualityConstraint DOM tree
   *   \param vector<int>  : vector of DSXML numbers to verify DS concerned by the EqualityConstraint (identified by number) exists
   */
-  LinearECXML(xmlNode*, vector<int>);
-  ~LinearECXML();
+  LinearECXML(xmlNode*, std::vector<int>);
+  virtual ~LinearECXML();
 };
 
 #endif // LINEARECXML_H

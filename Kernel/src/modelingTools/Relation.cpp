@@ -1,20 +1,38 @@
 #include "Relation.h"
+using namespace std;
 
-#include "check.h"
-
-
-Relation::Relation()
+Relation::Relation(): relationType("none"), interaction(NULL), relationxml(NULL),
+  computeInputName("none"), computeOutputName("none")
 {
-  this->init();
-  this->relationxml = NULL;
-  this->interaction = NULL;
+  setComputeOutputFunction("BasicPlugin.so", "computeOutput");
+  setComputeInputFunction("BasicPlugin.so", "computeInput");
 }
 
-Relation::Relation(RelationXML* relxml)
+Relation::Relation(RelationXML* relxml): relationType("none"), interaction(NULL),
+  relationxml(relxml), computeInputName("none"),
+  computeOutputName("none")
+
 {
-  this->init();
-  this->relationxml = relxml;
-  this->interaction = NULL;
+  setComputeOutputFunction("BasicPlugin.so", "computeOutput");
+  setComputeInputFunction("BasicPlugin.so", "computeInput");
+  if (relationxml != NULL)
+  {
+    string plugin;
+
+    // computeInput
+    if (relationxml->hasComputeInput())
+    {
+      plugin = (relationxml)->getComputeInputPlugin();
+      setComputeInputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+    }
+    // computeOutput
+    if (relationxml->hasComputeOutput())
+    {
+      plugin = (relationxml)->getComputeOutputPlugin();
+      setComputeOutputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+    }
+  }
+  else RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
 }
 
 Relation::~Relation()
@@ -26,18 +44,16 @@ vector<DSInputOutput*> Relation::getDSInputOutputs(void)
   return dsioVector;
 }
 
-DSInputOutput* Relation::getDSInputOutput(int i)
+DSInputOutput* Relation::getDSInputOutput(const int& i)
 {
-  if (i < this->dsioVector.size())
-  {
-    return this->dsioVector[i];
-  }
-  RuntimeException::selfThrow("Relation - getDSInputOutput : \'i\' is out of range");
+  if (i < dsioVector.size())
+    return dsioVector[i];
+  else RuntimeException::selfThrow("Relation - getDSInputOutput : \'i\' is out of range");
 }
 
 void Relation::setDSInputOutputs(vector<DSInputOutput*> dsioVect)
 {
-  this->dsioVector = dsioVect;
+  dsioVector = dsioVect;
 }
 
 void Relation::addDSInputOutput(DSInputOutput* dsio)
@@ -46,22 +62,22 @@ void Relation::addDSInputOutput(DSInputOutput* dsio)
    *  in EqualityConstraint class, we don't create new objects in the DSInputOutput vector
    *    => we only save a link (pointer) on the DSInputOutputs of the DynamicalSystems !!
    */
-  this->dsioVector.push_back(dsio);
+  dsioVector.push_back(dsio);
 }
 
 
 
-void Relation::computeOutput(double time)
+void Relation::computeOutput(const double& time)
 {
   if (computeOutputPtr == NULL) RuntimeException::selfThrow("computeOutput() is not linked to a plugin function");
 
   //to do
-  //this->computeOutputPtr(&x(0), &time, &lambdaPtr(0), &y(0));
-  //  vector<DynamicalSystem*> vDS = this->interaction->getDynamicalSystems();
+  //computeOutputPtr(&x(0), &time, &lambdaPtr(0), &y(0));
+  //  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
   //
   //  DynamicalSystem *ds1 ,*ds2;
-  //  SiconosVector *y = this->interaction->getYPtr();
-  //  SiconosVector *yDot = this->interaction->getYDotPtr();
+  //  SiconosVector *y = interaction->getYPtr();
+  //  SiconosVector *yDot = interaction->getYDotPtr();
   //  if (vDS.size() == 2)
   //  {
   //      ds1=vDS[0];
@@ -74,14 +90,14 @@ void Relation::computeOutput(double time)
   //        CompositeVector q;
   //        q.add(*(d1->getQPtr()));
   //      q.add(*(d2->getQPtr()));
-  //        //*y = (this->h * q) + this->b;
+  //        //*y = (h * q) + b;
   //
   //      CompositeVector vel;
   //      vel.add(*(d1->getVelocityPtr()));
   //      vel.add(*(d2->getVelocityPtr()));
-  //      *yDot = (this->h * vel);
+  //      *yDot = (h * vel);
   //
-  //      this->computeOutputPtr(*q, 0.0, this->lambda, y);
+  //      computeOutputPtr(*q, 0.0, lambda, y);
   //      }
   //    else
   //    {
@@ -90,95 +106,39 @@ void Relation::computeOutput(double time)
   //    }
 }
 
-void Relation::computePredictedOutput(const double& pasH, SimpleVector* yPrediction)
-{
-  RuntimeException::selfThrow("Relation::computePredictedOutput - not yet implemented for this kind of relation: " + getType());
-}
-
-
-void Relation::computeFreeOutput(double time)
+void Relation::computeFreeOutput(const double& time)
 {
   if (computeOutputPtr == NULL) RuntimeException::selfThrow("computeFreeOutput() is not linked to a plugin function");
 
   //to do
-  //this->computeOutputPtr(&xFree(0), &time, &lambdaPtr(0), &y(0));
+  //computeOutputPtr(&xFree(0), &time, &lambdaPtr(0), &y(0));
 }
 
-void Relation::computeInput(double time)
+void Relation::computeInput(const double& time)
 {
   if (computeInputPtr == NULL) RuntimeException::selfThrow("computeInput() is not linked to a plugin function");
 
   //to do
-  //this->computeInputPtr(&x(0), &time, &lambdaPtr(0), &r(0));
+  //computeInputPtr(&x(0), &time, &lambdaPtr(0), &r(0));
 }
 
-void Relation::setComputeOutputFunction(std::string pluginPath, std::string functionName)
+void Relation::setComputeOutputFunction(const string& pluginPath, const string& functionName)
 {
-  this->computeOutputPtr = NULL;
+  computeOutputPtr = NULL;
   cShared.setFunction(&computeOutputPtr, pluginPath, functionName);
 
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  this->computeOutputName = plugin + ":" + functionName;
+  computeOutputName = plugin + ":" + functionName;
 }
 
-void Relation::setComputeInputFunction(std::string pluginPath, std::string functionName)
+void Relation::setComputeInputFunction(const string& pluginPath, const string& functionName)
 {
-  this->computeInputPtr = NULL;
+  computeInputPtr = NULL;
   cShared.setFunction(&computeInputPtr, pluginPath, functionName);
 
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  this->computeInputName = plugin + ":" + functionName;
+  computeInputName = plugin + ":" + functionName;
 }
 
-void Relation::fillRelationWithRelationXML()
-{
-  IN("Relation::fillRelationWithRelationXML\n");
-  if (this->relationxml != NULL)
-  {
-    string plugin;
-
-    // computeInput
-    if (this->relationxml->hasComputeInput())
-    {
-      cout << "RelationPluginType == " << this->relationType << endl;
-      plugin = (this->relationxml)->getComputeInputPlugin();
-      this->setComputeInputFunction(this->cShared.getPluginName(plugin), this->cShared.getPluginFunctionName(plugin));
-    }
-    else cout << "Warning - No computeInput method is defined in a Relation " << this->getType() << endl;
-
-    // computeOutput
-    if (this->relationxml->hasComputeOutput())
-    {
-      cout << "RelationPluginType == " << this->relationType << endl;
-      plugin = (this->relationxml)->getComputeOutputPlugin();
-      this->setComputeOutputFunction(this->cShared.getPluginName(plugin), this->cShared.getPluginFunctionName(plugin));
-    }
-    else cout << "Warning - No computeOutput method is defined in a Relation " << this->getType() << endl;
-  }
-  else RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
-
-  OUT("Relation::fillRelationWithRelationXML\n");
-}
-
-void Relation::init()
-{
-  IN("Relation::init\n");
-  this->setComputeOutputFunction("BasicPlugin.so", "computeOutput");
-  this->setComputeInputFunction("BasicPlugin.so", "computeInput");
-  OUT("Relation::init\n");
-}
-
-void Relation::saveRelationToXML()
-{
-  IN("Relation::saveRelationToXML\n");
-  if (this->relationxml != NULL)
-  {
-    /*
-     * these attributes are only required for LagrangianNonLinear relation !
-     */
-  }
-  else RuntimeException::selfThrow("Relation::saveRelationToXML - object RelationXML does not exist");
-  OUT("Relation::saveRelationToXML\n");
-}

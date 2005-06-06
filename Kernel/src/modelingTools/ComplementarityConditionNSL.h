@@ -4,7 +4,6 @@
 #include "NonSmoothLaw.h"
 #include "ComplementarityConditionNSLXML.h"
 
-
 /** \class ComplementarityConditionNSL
  *  \brief NonSmoothLaw for complementarity models
 *  \author SICONOS Development Team - copyright INRIA
@@ -42,15 +41,7 @@ public:
    *  \brief copy the data of the NonSmoothLaw to the XML tree
    *  \exception RuntimeException
    */
-  void saveNonSmoothLawToXML();
-
-  /** \fn void createNonSmoothLaw(ComplementaryConditionNSLXML * nslawXML)
-   *  \brief allows to create the NSLaw with an xml file, or the needed data
-   *  \param ComplementarityConditionNSLXML * : the XML object for this NSLaw
-   *  \exception RuntimeException
-   */
-  void createNonSmoothLaw(ComplementarityConditionNSLXML * nslawXML);//, Interaction * interaction = NULL);
-
+  //  void saveNonSmoothLawToXML();
 
   /** \fn ComplementarityConditionNSL* convert (NonSmoothLaw* nsl)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
@@ -58,15 +49,6 @@ public:
    * \return a pointer on the law if it is of the right type, NULL otherwise
    */
   static ComplementarityConditionNSL* convert(NonSmoothLaw* nsl);
-
-
-protected:
-  /** \fn void fillNonSmoothLawWithNonSmoothLawXML()
-   *  \brief uses the ComplementarityConditionNSLXML of the ComplementarityConditionNSL to fill the fields of this ComplementarityConditionNSL
-   *  \exception RuntimeException
-   */
-  void fillNonSmoothLawWithNonSmoothLawXML();
-
 };
 
 #endif // COMPLEMENTARITYCONDITIONNSLAW_H

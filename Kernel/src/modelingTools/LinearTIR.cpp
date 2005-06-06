@@ -1,47 +1,72 @@
-
 #include "LinearTIR.h"
-#include "check.h"
+using namespace std;
 
-LinearTIR::LinearTIR(): Relation()
+
+LinearTIR::LinearTIR(): Relation(), C(NULL), D(NULL), E(NULL), a(NULL),
+  isCAllocatedIn(false), isDAllocatedIn(false), isEAllocatedIn(false),
+  isAAllocatedIn(false)
 {
-  this->relationType = LINEARTIRELATION;//"LinearTIR";
+  relationType = LINEARTIRELATION;
 }
 
-LinearTIR::LinearTIR(RelationXML* relxml): Relation(relxml)
+LinearTIR::LinearTIR(RelationXML* relxml): Relation(relxml), C(NULL), D(NULL), E(NULL), a(NULL),
+  isCAllocatedIn(true), isDAllocatedIn(true), isEAllocatedIn(true),
+  isAAllocatedIn(true)
 {
-  this->relationType = LINEARTIRELATION;//"LinearTIR";
+  relationType = LINEARTIRELATION;
+  if (relationxml != NULL)
+  {
+    int row = ((static_cast<LinearTIRXML*>(relationxml))->getC()).size(0);
+    int col = ((static_cast<LinearTIRXML*>(relationxml))->getC()).size(1);
+    C = new SiconosMatrix(row, col);
+    *C = (static_cast<LinearTIRXML*>(relationxml))->getC();
+    row = ((static_cast<LinearTIRXML*>(relationxml))->getD()).size(0);
+    col = ((static_cast<LinearTIRXML*>(relationxml))->getD()).size(1);
+    D = new SiconosMatrix(row, col);
+    *D = (static_cast<LinearTIRXML*>(relationxml))->getD();
+    row = ((static_cast<LinearTIRXML*>(relationxml))->getE()).size(0);
+    col = ((static_cast<LinearTIRXML*>(relationxml))->getE()).size(1);
+    E = new SiconosMatrix(row, col);
+    *E = (static_cast<LinearTIRXML*>(relationxml))->getE();
+    a = new SimpleVector(((static_cast<LinearTIRXML*>(relationxml))->getA()).size());
+    *a = (static_cast<LinearTIRXML*>(relationxml))->getA();
+  }
+  else RuntimeException::selfThrow("LinearTIR::xml constructor, xml file=NULL");
+}
+
+LinearTIR::LinearTIR(SiconosMatrix* newC, SiconosMatrix* newD,
+                     SiconosMatrix* newE, SiconosVector* newA):
+  Relation(), C(NULL), D(NULL), E(NULL), a(NULL), isCAllocatedIn(true),
+  isDAllocatedIn(true), isEAllocatedIn(true), isAAllocatedIn(true)
+{
+  relationType = LINEARTIRELATION;
+  C = new SiconosMatrix(newC->size(0), newC->size(1));
+  D = new SiconosMatrix(newD->size(0), newD->size(1));
+  E = new SiconosMatrix(newE->size(0), newE->size(1));
+  a = new SimpleVector(newA->size());
+  *C = *newC;
+  *D = *newD;
+  *E = *newE;
+  *a = *newA;
 }
 
 LinearTIR::~LinearTIR()
-{}
-
-
-SiconosMatrix* LinearTIR::getCPtr(void)
 {
-  return &this->C;
+  if (isCAllocatedIn) delete C;
+  C = NULL;
+  if (isDAllocatedIn) delete D;
+  D = NULL;
+  if (isEAllocatedIn) delete E;
+  E = NULL;
+  if (isAAllocatedIn) delete a;
+  a = NULL;
 }
-
-SiconosMatrix* LinearTIR::getDPtr(void)
-{
-  return &this->D;
-}
-
-SiconosMatrix* LinearTIR::getEPtr(void)
-{
-  return &this->E;
-}
-
-SiconosVector* LinearTIR::getAPtr(void)
-{
-  return &this->a;
-}
-
 
 void LinearTIR::computeOutput()
 {
   IN("LinearTIR::computeOutput\n");
 
-  vector<DynamicalSystem*> vDS = this->interaction->getDynamicalSystems();
+  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
   if (vDS.size() == 2)
   {
     /*
@@ -70,72 +95,37 @@ void LinearTIR::computeOutput()
   OUT("LinearTIR::computeOutput\n");
 }
 
-
-
-void LinearTIR::fillRelationWithRelationXML()
-{
-  Relation::fillRelationWithRelationXML();
-  OUT("LinearTIR::fillRelationWithRelationXML\n");
-  if (this->relationxml != NULL)
-  {
-    this->C = (static_cast<LinearTIRXML*>(this->relationxml))->getC();
-    this->D = (static_cast<LinearTIRXML*>(this->relationxml))->getD();
-    this->E = (static_cast<LinearTIRXML*>(this->relationxml))->getE();
-    this->a = (static_cast<LinearTIRXML*>(this->relationxml))->getA();
-  }
-}
-
 void LinearTIR::display() const
 {
   cout << "---------------------------------------------------" << endl;
   cout << "____ data of the LinearTIR " << endl;
   cout << "| C " << endl;
-  this->C.display();
+  if (C != NULL) C->display();
+  else cout << "->NULL" << endl;
   cout << "| D " << endl;
-  this->D.display();
+  if (D != NULL) D->display();
+  else cout << "->NULL" << endl;
   cout << "| E " << endl;
-  this->E.display();
+  if (E != NULL) E->display();
+  else cout << "->NULL" << endl;
   cout << "| a " << endl;
-  this->a.display();
+  if (a != NULL) a->display();
+  else cout << "->NULL" << endl;
   cout << "____________________________" << endl;
   cout << "---------------------------------------------------" << endl;
 }
 
 void LinearTIR::saveRelationToXML()
 {
-  Relation::saveRelationToXML();
   OUT("LinearTIR::saveRelationToXML\n");
-  if (this->relationxml != NULL)
+  if (relationxml != NULL)
   {
-    //    this->display();
-
-    (static_cast<LinearTIRXML*>(this->relationxml))->setC(&(this->C));
-    (static_cast<LinearTIRXML*>(this->relationxml))->setD(&(this->D));
-    (static_cast<LinearTIRXML*>(this->relationxml))->setE(&(this->E));
-    (static_cast<LinearTIRXML*>(this->relationxml))->setA(&(this->a));
+    (static_cast<LinearTIRXML*>(relationxml))->setC(*C);
+    (static_cast<LinearTIRXML*>(relationxml))->setD(*D);
+    (static_cast<LinearTIRXML*>(relationxml))->setE(*E);
+    (static_cast<LinearTIRXML*>(relationxml))->setA(*a);
   }
 }
-
-void LinearTIR::createRelation(LinearTIRXML * relationXML,
-                               SiconosMatrix* C, SiconosMatrix* D,
-                               SiconosMatrix* E, SiconosVector* a)//, Interaction * interaction)
-{
-  if (relationXML != NULL)
-  {
-    this->init();
-    this->relationxml = relationXML;
-    this->relationType = LINEARTIRELATION;//"LinearTIR";
-    this->fillRelationWithRelationXML();
-  }
-  else
-  {
-    this->C = *C;
-    this->D = *D;
-    this->E = *E;
-    this->a = *a;
-  }
-}
-
 
 LinearTIR* LinearTIR::convert(Relation *r)
 {

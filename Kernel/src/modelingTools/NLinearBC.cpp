@@ -1,6 +1,6 @@
 
 #include "NLinearBC.h"
-#include "check.h"
+using namespace std;
 
 NLinearBC::NLinearBC(): BoundaryCondition()
 {

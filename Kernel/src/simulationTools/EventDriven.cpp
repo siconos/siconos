@@ -1,44 +1,28 @@
 
 #include "EventDriven.h"
+using namespace std;
 
-EventDriven::EventDriven()
+// --- Default constructor ---
+EventDriven::EventDriven(): Strategy()
 {
-  this->strategyType = EVENTDRIVEN_STRATEGY;
+  strategyType = EVENTDRIVEN_STRATEGY;
 }
 
-EventDriven::EventDriven(StrategyXML* strxml, Model *model): Strategy(strxml,
-      model)
+// --- XML constructor ---
+EventDriven::EventDriven(StrategyXML* strxml, Model *newModel): Strategy(strxml, newModel)
 {
-  this->strategyType = EVENTDRIVEN_STRATEGY;
+  strategyType = EVENTDRIVEN_STRATEGY;
 }
 
+// --- Destructor ---
 EventDriven::~EventDriven()
 {}
 
-void EventDriven::createStrategy(StrategyXML * strategyXML, Model * model)//, TimeDiscretisation * timediscretisation)
+void EventDriven::createStrategy(StrategyXML * newStrategyXML, Model * newModel)
 {
-  if (strategyXML != NULL)
-  {
-    //this->timeDiscretisation = NULL;
-    this->timeDiscretisation = timeDiscretisation;
-    if (timeDiscretisation != NULL) this->timeDiscretisation->setStrategy(this);
-
-    this->integratorVector.clear();
-    this->nsProblem = NULL;
-
-    this->strategyxml = strategyXML;
-    //  this->nsds = nsds;
-    this->model = model;
-
-    this->fillStrategyWithStrategyXML();
-    this->linkStrategyXML();
-  }
-  else
-  {
-    this->strategyxml = NULL;
-    this->strategyType = EVENTDRIVEN_STRATEGY;
-    this->model = model;
-  }
+  strategyxml = NULL;
+  strategyType = EVENTDRIVEN_STRATEGY;
+  model = newModel;
 }
 
 

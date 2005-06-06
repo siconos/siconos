@@ -14,24 +14,10 @@
 #ifndef _LagrangianLinearECXML_
 #define _LagrangianLinearECXML_
 
-
-#include <libxml/tree.h>
-
 #include "EqualityConstraintXML.h"
-#include "LagrangianLinearECXML.h"
-#include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
-#include "SimpleVector.h"
-#include "SiconosDOMTreeTools.h"
 
-
-//using namespace std;
-
-
-const string LLEC_H = "H";
-const string LLEC_B = "b";
-//#include "XMLTagsName.h"
-
+const std::string LLEC_H = "H";
+const std::string LLEC_B = "b";
 
 class LagrangianLinearECXML : public EqualityConstraintXML
 {
@@ -44,7 +30,7 @@ public:
   *   \param xmlNode* : the EqualityConstraint DOM tree
   *   \param vector<int>  : vector of DSXML numbers to verify DS concerned by the EqualityConstraint (identified by number) exists
   */
-  LagrangianLinearECXML(xmlNode*, vector<int>);
+  LagrangianLinearECXML(xmlNode*, std::vector<int>);
 
   ~LagrangianLinearECXML();
 

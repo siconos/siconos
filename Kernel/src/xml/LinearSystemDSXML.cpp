@@ -1,8 +1,5 @@
-
 #include "LinearSystemDSXML.h"
-
-#include "check.h"
-
+using namespace std;
 
 LinearSystemDSXML::LinearSystemDSXML() : DSXML()
 {

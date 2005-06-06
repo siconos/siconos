@@ -1,6 +1,5 @@
 #include "DSInputOutput.h"
-
-#include "check.h"
+using namespace std;
 
 
 DSInputOutput::DSInputOutput()

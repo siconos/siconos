@@ -1,5 +1,5 @@
-
 #include "LagrangianLinearTIDSXML.h"
+using namespace std;
 
 LagrangianLinearTIDSXML::LagrangianLinearTIDSXML()
   : LagrangianDSXML()

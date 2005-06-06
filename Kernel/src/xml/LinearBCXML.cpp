@@ -1,5 +1,5 @@
-
 #include "LinearBCXML.h"
+using namespace std;
 
 LinearBCXML::LinearBCXML() : BoundaryConditionXML()
 {

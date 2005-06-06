@@ -1,11 +1,12 @@
 #include "BoundaryConditionXML.h"
+using namespace std;
 
 BoundaryConditionXML::BoundaryConditionXML()
 {}
 
 BoundaryConditionXML::BoundaryConditionXML(xmlNode * rootBCNode)
 {
-  this->rootBCNode = rootBCNode;
+  rootBCNode = rootBCNode;
 }
 
 BoundaryConditionXML::~BoundaryConditionXML()

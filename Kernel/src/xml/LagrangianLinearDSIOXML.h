@@ -2,16 +2,9 @@
 #define LAGRANGIANLINEARDSIOXML_H
 
 #include "DSInputOutputXML.h"
-#include <libxml/tree.h>
-#include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
-#include "SimpleVector.h"
-#include "SiconosDOMTreeTools.h"
 
-//using namespace std;
-
-const string LLDSIO_H = "H";
-const string LLDSIO_B = "b";
+const std::string LLDSIO_H = "H";
+const std::string LLDSIO_B = "b";
 
 /** \class LagrangianLinearDSIOXML
 *   \brief This class manages LagrangianLinear DSInputOutput data
@@ -45,7 +38,6 @@ public:
   */
   inline SiconosMatrix getH()
   {
-    cout << "@@@@@@@@@@@@@@@@@ LagrangianLinearDSIOXML.h => SiconosMatrix getH()" << endl;
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->HNode);
   }
 

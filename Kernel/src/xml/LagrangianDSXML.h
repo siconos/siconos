@@ -10,59 +10,43 @@
 * LagrangianDSXML allows to manage data of a LagrangianDS DOM tree.
 */
 
-
 #ifndef __LAGRANGIANNLDSXML__
 #define __LAGRANGIANNLDSXML__
 
-
-#include <vector>
-#include <string>
-#include <libxml/tree.h>
-
 #include "DSXML.h"
-//#include "SiconosVector.h"
-#include "NewSiconosVector.h"
-#include "SimpleVector.h"
-#include "SiconosMatrix.h"
-#include "SiconosMemory.h"
-#include "XMLException.h"
-#include "SiconosDOMTreeTools.h"
-
-
-//using namespace std;
-
 
 class DSXML;
 
-const string LNLDS_Q = "q";
-const string LNLDS_Q0 = "q0";
-const string LNLDS_QMEMORY = "qMemory";
+const std::string LNLDS_Q = "q";
+const std::string LNLDS_Q0 = "q0";
+const std::string LNLDS_QMEMORY = "qMemory";
 
-const string LNLDS_VELOCITY = "Velocity";
-const string LNLDS_VELOCITY0 = "Velocity0";
-const string LNLDS_VELOCITYMEMORY = "VelocityMemory";
+const std::string LNLDS_VELOCITY = "Velocity";
+const std::string LNLDS_VELOCITY0 = "Velocity0";
+const std::string LNLDS_VELOCITYMEMORY = "VelocityMemory";
 
-const string LNLDS_QNLINERTIA = "QNLInertia";
-const string LNLDS_FINT = "Fint";
-const string LNLDS_FEXT = "Fext";
+const std::string LNLDS_QNLINERTIA = "QNLInertia";
+const std::string LNLDS_FINT = "Fint";
+const std::string LNLDS_FEXT = "Fext";
 
-const string LNLDS_JACOBIANQFINT = "JacobianQFint";
-const string LNLDS_JACOBIANVELOCITYFINT = "JacobianVelocityFint";
-const string LNLDS_JACOBIANQQNLINERTIA = "JacobianQQNLInertia";
-const string LNLDS_JACOBIANVELOCITYQNLINERTIA = "JacobianVelocityQNLInertia";
+const std::string LNLDS_JACOBIANQFINT = "JacobianQFint";
+const std::string LNLDS_JACOBIANVELOCITYFINT = "JacobianVelocityFint";
+const std::string LNLDS_JACOBIANQQNLINERTIA = "JacobianQQNLInertia";
+const std::string LNLDS_JACOBIANVELOCITYQNLINERTIA = "JacobianVelocityQNLInertia";
 
-const string LNLDS_M = "M";
-const string LNLDS_NDOF = "ndof";
-const string LNLDS_MATRIXPLUGIN = "matrixPlugin";
-const string LNLDS_VECTORPLUGIN = "vectorPlugin";
+const std::string LNLDS_M = "M";
+const std::string LNLDS_NDOF = "ndof";
+const std::string LNLDS_MATRIXPLUGIN = "matrixPlugin";
+const std::string LNLDS_VECTORPLUGIN = "vectorPlugin";
 //#include "XMLTagsName.h"
 
+#include "check.h"
 
 class LagrangianDSXML : public DSXML
 {
 public:
   LagrangianDSXML();
-  ~LagrangianDSXML();
+  virtual ~LagrangianDSXML();
 
   /** \fn LagrangianDSXML(xmlNode * LagrangianDSNode, bool isBVP)
   *   \brief Build a LagrangianDSXML object from a DOM tree describing a DS
@@ -88,9 +72,9 @@ public:
   {
     if (this->hasQ() == false)
     {
-      this->qNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LNLDS_Q, v);
+      this->qNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LNLDS_Q, *v);
     }
-    else SiconosDOMTreeTools::setSiconosVectorValue(this->qNode, v);
+    else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->qNode, *v);
   }
 
   /** \fn SimpleVector getQ()
@@ -110,12 +94,12 @@ public:
   {
     if (this->q0Node == NULL)
     {
-      this->q0Node = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LNLDS_Q0, v);
+      this->q0Node = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LNLDS_Q0, *v);
     }
     else
     {
       //SiconosDOMTreeTools::setSiconosVectorValue(this->q0Node, *v);
-      SiconosDOMTreeTools::setSiconosVectorValue(this->q0Node, v);
+      SiconosDOMTreeTools::setSiconosVectorNodeValue(this->q0Node, *v);
     }
   }
 
@@ -167,9 +151,9 @@ public:
   {
     if (this->hasVelocity() == false)
     {
-      this->velocityNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LNLDS_VELOCITY, v);
+      this->velocityNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LNLDS_VELOCITY, *v);
     }
-    else SiconosDOMTreeTools::setSiconosVectorValue(this->velocityNode, v);
+    else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->velocityNode, *v);
     //SiconosDOMTreeTools::setSiconosVectorValue(this->velocityNode, v);
   }
 
@@ -190,12 +174,12 @@ public:
   {
     if (this->velocity0Node == NULL)
     {
-      this->velocity0Node = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LNLDS_VELOCITY0, v);
+      this->velocity0Node = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LNLDS_VELOCITY0, *v);
     }
     else
     {
       //SiconosDOMTreeTools::setSiconosVectorValue(this->velocity0Node, *v);
-      SiconosDOMTreeTools::setSiconosVectorValue(this->velocity0Node, v);
+      SiconosDOMTreeTools::setSiconosVectorNodeValue(this->velocity0Node, *v);
     }
   }
 
@@ -240,7 +224,7 @@ public:
   *   \return The QNLInertia Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
-  inline string getQNLInertiaPlugin()
+  inline std::string getQNLInertiaPlugin()
   {
     if (this->isQNLInertiaPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->QNLInertiaNode, LNLDS_VECTORPLUGIN);
@@ -265,7 +249,7 @@ public:
   *   \brief allows to save the QNLInertia plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
-  inline void setQNLInertiaPlugin(string plugin)
+  inline void setQNLInertiaPlugin(std::string plugin)
   {
     if (this->QNLInertiaNode == NULL)
     {
@@ -283,12 +267,12 @@ public:
   {
     if (this->QNLInertiaNode == NULL)
     {
-      this->QNLInertiaNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LNLDS_QNLINERTIA, v);
+      this->QNLInertiaNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LNLDS_QNLINERTIA, *v);
     }
     else
     {
       //SiconosDOMTreeTools::setSiconosVectorValue(this->QNLInertiaNode, *v);
-      SiconosDOMTreeTools::setSiconosVectorValue(this->QNLInertiaNode, v);
+      SiconosDOMTreeTools::setSiconosVectorNodeValue(this->QNLInertiaNode, *v);
     }
   }
 
@@ -298,7 +282,7 @@ public:
   *   \return The Fint Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
-  inline string getFintPlugin()
+  inline std::string getFintPlugin()
   {
     if (this->isFintPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->FintNode, LNLDS_VECTORPLUGIN);
@@ -326,16 +310,16 @@ public:
   {
     if (this->hasFint())
     {
-      this->FintNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LNLDS_FINT, v);
+      this->FintNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LNLDS_FINT, *v);
     }
-    else SiconosDOMTreeTools::setSiconosVectorValue(this->FintNode, v);
+    else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->FintNode, *v);
   }
 
   /** \fn void setFextPlugin(string plugin)
   *   \brief allows to save the Fext plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
-  inline void setFintPlugin(string plugin)
+  inline void setFintPlugin(std::string plugin)
   {
     if (this->FintNode == NULL)
     {
@@ -350,7 +334,7 @@ public:
   *   \return The Fext Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
-  inline string getFextPlugin()
+  inline std::string getFextPlugin()
   {
     if (this->isFextPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->FextNode, LNLDS_VECTORPLUGIN);
@@ -377,14 +361,14 @@ public:
   inline void setFextVector(SiconosVector *v)
   {
     //SiconosDOMTreeTools::setSiconosVectorValue(this->FextNode, *v);
-    SiconosDOMTreeTools::setSiconosVectorValue(this->FextNode, v);
+    SiconosDOMTreeTools::setSiconosVectorNodeValue(this->FextNode, *v);
   }
 
   /** \fn void setFextPlugin(string plugin)
   *   \brief allows to save the Fext plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
-  inline void setFextPlugin(string plugin)
+  inline void setFextPlugin(std::string plugin)
   {
     if (this->FextNode == NULL)
     {
@@ -402,7 +386,7 @@ public:
   *   \return The JacobianQFint Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
-  inline string getJacobianQFintPlugin()
+  inline std::string getJacobianQFintPlugin()
   {
     if (this->isJacobianQFintPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->jacobianQFintNode, LNLDS_MATRIXPLUGIN);
@@ -426,7 +410,7 @@ public:
   *   \brief allows to save the jacobianQFint plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
-  inline void setJacobianQFintPlugin(string plugin)
+  inline void setJacobianQFintPlugin(std::string plugin)
   {
     if (this->jacobianQFintNode == NULL)
     {
@@ -442,7 +426,7 @@ public:
   */
   inline void setJacobianQFintMatrix(SiconosMatrix *m)
   {
-    SiconosDOMTreeTools::setSiconosMatrixValue(this->jacobianQFintNode, m);
+    SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->jacobianQFintNode, *m);
   }
 
   /** \fn inline string getJacobianVelocityFintPlugin()
@@ -450,7 +434,7 @@ public:
   *   \return The JacobianVelocityFint Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
-  inline string getJacobianVelocityFintPlugin()
+  inline std::string getJacobianVelocityFintPlugin()
   {
     if (this->isJacobianVelocityFintPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->jacobianVelocityFintNode, LNLDS_MATRIXPLUGIN);
@@ -474,7 +458,7 @@ public:
   *   \brief allows to save the jacobianVelocityFint plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
-  inline void setJacobianVelocityFintPlugin(string plugin)
+  inline void setJacobianVelocityFintPlugin(std::string plugin)
   {
     if (this->jacobianVelocityFintNode == NULL)
     {
@@ -491,7 +475,7 @@ public:
   inline void setJacobianVelocityFintMatrix(SiconosMatrix *m)
   {
     //SiconosDOMTreeTools::setSiconosMatrixValue(this->jacobianVelocityFintNode, *m);
-    SiconosDOMTreeTools::setSiconosMatrixValue(this->jacobianVelocityFintNode, m);
+    SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->jacobianVelocityFintNode, *m);
   }
 
   /** \fn inline string getJacobianQQPlugin()
@@ -499,7 +483,7 @@ public:
   *   \return The JacobianQQ Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
-  inline string getJacobianQQNLInertiaPlugin()
+  inline std::string getJacobianQQNLInertiaPlugin()
   {
     if (this->isJacobianQQNLInertiaPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->jacobianQQNLInertiaNode, LNLDS_MATRIXPLUGIN);
@@ -523,7 +507,7 @@ public:
   *   \brief allows to save the jacobianQQNLInertia plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
-  inline void setJacobianQQNLInertiaPlugin(string plugin)
+  inline void setJacobianQQNLInertiaPlugin(std::string plugin)
   {
     if (this->jacobianQQNLInertiaNode == NULL)
     {
@@ -540,7 +524,7 @@ public:
   inline void setJacobianQQNLInertiaMatrix(SiconosMatrix *m)
   {
     //SiconosDOMTreeTools::setSiconosMatrixValue(this->jacobianQQNLInertiaNode, *m);
-    SiconosDOMTreeTools::setSiconosMatrixValue(this->jacobianQQNLInertiaNode, m);
+    SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->jacobianQQNLInertiaNode, *m);
   }
 
   /** \fn inline string getJacobianVelocityQNLInertiaPlugin()
@@ -548,7 +532,7 @@ public:
   *   \return The JacobianVelocityQNLInertia Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
-  inline string getJacobianVelocityQNLInertiaPlugin()
+  inline std::string getJacobianVelocityQNLInertiaPlugin()
   {
     if (this->isJacobianVelocityQNLInertiaPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->jacobianVelocityQNLInertiaNode, LNLDS_MATRIXPLUGIN);
@@ -572,7 +556,7 @@ public:
   *   \brief allows to save the jacobianVelocityQNLInertiaPlugin plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
-  inline void setJacobianVelocityQNLInertiaPlugin(string plugin)
+  inline void setJacobianVelocityQNLInertiaPlugin(std::string plugin)
   {
     if (this->jacobianVelocityQNLInertiaNode == NULL)
     {
@@ -588,7 +572,7 @@ public:
   */
   inline void setJacobianVelocityQNLInertiaMatrix(SiconosMatrix *m)
   {
-    SiconosDOMTreeTools::setSiconosMatrixValue(this->jacobianVelocityQNLInertiaNode, m);
+    SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->jacobianVelocityQNLInertiaNode, *m);
   }
 
   /** \fn inline string getMPlugin()
@@ -596,7 +580,7 @@ public:
   *   \return The M Plugin name of the LagrangianDSXML
   *  \exception XMLException
   */
-  inline string getMPlugin()
+  inline std::string getMPlugin()
   {
     if (this->isMPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->MNode, LNLDS_MATRIXPLUGIN);
@@ -620,7 +604,7 @@ public:
   *   \brief allows to save the jacobianVelocityQNLInertiaPlugin plugin of the LagrangianDSXML
   *   \param string : ths string which contains the name and the location of the plugin
   */
-  inline void setMPlugin(string plugin)
+  inline void setMPlugin(std::string plugin)
   {
     if (this->MNode == NULL)
     {
@@ -649,9 +633,9 @@ public:
   {
     if (this->MNode == NULL)
     {
-      this->MNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LNLDS_M, m);
+      this->MNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LNLDS_M, *m);
     }
-    else SiconosDOMTreeTools::setSiconosMatrixValue(this->MNode, m);
+    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->MNode, *m);
   }
 
 

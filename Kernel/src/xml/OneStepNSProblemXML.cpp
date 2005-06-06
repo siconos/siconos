@@ -1,7 +1,7 @@
 
 #include "OneStepNSProblemXML.h"
+using namespace std;
 
-#include "check.h"
 
 OneStepNSProblemXML::OneStepNSProblemXML()
 {
@@ -87,6 +87,10 @@ OneStepNSProblemXML::OneStepNSProblemXML(xmlNode * oneStepNSProblemXMLNode, vect
   //      cout<<"Warning : optional tag not found : OneStepNSProblemXML - constructor, tag "<<OSNSP_SOLVER<<" not found."<<endl;
   //    //XMLException::selfThrow("OneStepNSProblemXML - constructor : tag " + OSNSP_SOLVER + " not found.");
 }
+
+OneStepNSProblemXML::~OneStepNSProblemXML()
+{}
+
 
 void OneStepNSProblemXML::loadOneStepNSProblemConcernedInteraction(xmlNode * interactionConcernedNode, vector<int> definedInteractionNumbers)
 {

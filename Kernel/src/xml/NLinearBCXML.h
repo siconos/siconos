@@ -16,8 +16,6 @@
 #ifndef __NLINEARBCXML__
 #define __NLINEARBCXML__
 
-#include <libxml/tree.h>
-
 #include "BoundaryConditionXML.h"
 
 class NLinearBCXML : public BoundaryConditionXML

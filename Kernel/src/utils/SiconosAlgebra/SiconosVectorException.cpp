@@ -1,11 +1,11 @@
 #include "SiconosVectorException.h"
-
+using namespace std;
 
 SiconosVectorException::SiconosVectorException() :
   SiconosException("Siconos Vector Exception") {}
 
 
-SiconosVectorException::SiconosVectorException(string report) :
+SiconosVectorException::SiconosVectorException(const string& report) :
   SiconosException("Siconos Vector Exception : " + report) {}
 
 
@@ -18,7 +18,7 @@ void SiconosVectorException::selfThrow()
 }
 
 
-void SiconosVectorException::selfThrow(string report)
+void SiconosVectorException::selfThrow(const string& report)
 {
   throw SiconosVectorException(report);
 }

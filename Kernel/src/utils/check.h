@@ -36,7 +36,7 @@ extern "C" {
 #endif
 
 #include <nana.h>
-#include <string.h>
+#include <string>
 
   /*
    * EIFFEL_CHECK_LEVEL - this defines the various levels of checking.

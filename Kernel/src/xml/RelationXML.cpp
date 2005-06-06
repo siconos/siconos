@@ -1,48 +1,29 @@
-
 #include "RelationXML.h"
+using namespace std;
 
+RelationXML::RelationXML():
+  rootRelationXMLNode(NULL), computeInputNode(NULL), computeOutputNode(NULL)
+{}
 
-RelationXML::RelationXML()
-{
-  this->computeInputNode = NULL;
-  this->computeOutputNode = NULL;
-}
-
-RelationXML::RelationXML(xmlNode *relationNode)
+RelationXML::RelationXML(xmlNode *relationNode):
+  rootRelationXMLNode(relationNode), computeInputNode(NULL), computeOutputNode(NULL)
 {
   IN("RelationXML::RelationXML(xmlNode*)\n");
   xmlNode *node;
   string type((char*)relationNode->name);
-  this->rootRelationXMLNode = relationNode;
-
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootRelationXMLNode, COMPUTE_INPUT_TAG)) != NULL)
-  {
-    this->computeInputNode = node;
-  }
+    computeInputNode = node;
   else
   {
-    //if( SiconosDOMTreeTools::getStringAttributeValue(this->rootRelationXMLNode, RELATION_TYPE) == RELATION_LNL )
     if (LAGRANGIAN_NON_LINEAR_RELATION_TAG == type)
-    {
       XMLException::selfThrow("RelationXML - RelationXML::RelationXML(xmlNode *relationNode) error : tag " + COMPUTE_INPUT_TAG + " not found.");
-    }
-    //else cout<< "RelationXML - RelationXML::RelationXML(xmlNode *relationNode) Warning : tag " << RELATION_INPUT << " not found. This is attribute is optional for this relation" <<endl;
-    this->computeInputNode = NULL;
   }
-
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootRelationXMLNode, COMPUTE_OUTPUT_TAG)) != NULL)
-  {
-    this->computeOutputNode = node;
-  }
+    computeOutputNode = node;
   else
   {
-    //if( SiconosDOMTreeTools::getStringAttributeValue(this->rootRelationXMLNode, RELATION_TYPE) == RELATION_LNL )
     if (LAGRANGIAN_NON_LINEAR_RELATION_TAG == type)
-    {
       XMLException::selfThrow("RelationXML - RelationXML::RelationXML(xmlNode *relationNode) error : tag " + COMPUTE_OUTPUT_TAG + " not found.");
-    }
-    //else cout<< "RelationXML - RelationXML::RelationXML(xmlNode *relationNode) Warning : tag " << RELATION_OUTPUT << " not found. This is attribute is optional for this relation" <<endl;
-    this->computeOutputNode = NULL;
   }
   OUT("RelationXML::RelationXML(xmlNode*)\n");
 }
@@ -50,10 +31,43 @@ RelationXML::RelationXML(xmlNode *relationNode)
 RelationXML::~RelationXML()
 {}
 
+
+void RelationXML::setComputeInputPlugin(const string&  plugin)
+{
+  if (computeInputNode == NULL)
+  {
+    computeInputNode = SiconosDOMTreeTools::createSingleNode(rootRelationXMLNode, COMPUTE_INPUT_TAG);
+    xmlNewProp(computeInputNode, (xmlChar*)(PLUGIN_ATTRIBUTE.c_str()), (xmlChar*)plugin.c_str());
+  }
+  else SiconosDOMTreeTools::setStringAttributeValue(computeInputNode, PLUGIN_ATTRIBUTE, plugin);
+}
+
+void RelationXML::setComputeOutputPlugin(const string&  plugin)
+{
+  if (computeOutputNode == NULL)
+  {
+    computeOutputNode = SiconosDOMTreeTools::createSingleNode(rootRelationXMLNode, COMPUTE_OUTPUT_TAG);
+    xmlNewProp(computeOutputNode, (xmlChar*)(PLUGIN_ATTRIBUTE.c_str()), (xmlChar*)plugin.c_str());
+  }
+  else SiconosDOMTreeTools::setStringAttributeValue(computeOutputNode, PLUGIN_ATTRIBUTE, plugin);
+}
+
 void RelationXML::updateRelationXML(xmlNode* node, Relation* rel)
 {
   IN("RelationXML::updateRelationXML\n");
-  this->rootRelationXMLNode = node;
+  rootRelationXMLNode = node;
   OUT("RelationXML::updateRelationXML\n");
 }
 
+string RelationXML::getComputeInputPlugin() const
+{
+  if (isComputeInputPlugin())
+    return  SiconosDOMTreeTools::getStringAttributeValue(computeInputNode, PLUGIN_ATTRIBUTE);
+  XMLException::selfThrow("RelationXML - getComputeInputPlugin : computeInput is not calculated from a plugin ; Fint vector is given");
+}
+string RelationXML::getComputeOutputPlugin() const
+{
+  if (isComputeOutputPlugin())
+    return  SiconosDOMTreeTools::getStringAttributeValue(computeOutputNode, PLUGIN_ATTRIBUTE);
+  XMLException::selfThrow("RelationXML - getComputeOutputPlugin : computeOutput is not calculated from a plugin ; Fint vector is given");
+}

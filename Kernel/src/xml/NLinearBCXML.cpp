@@ -1,5 +1,5 @@
-
 #include "NLinearBCXML.h"
+using namespace std;
 
 NLinearBCXML::NLinearBCXML()
 {}

@@ -5,7 +5,11 @@
 #include "DSInputOutput.h"
 #include "EqualityConstraintXML.h"
 
+#include "SiconosSharedLibrary.h"
+#include "SiconosMatrix.h"
 #include "SiconosConst.h"
+#include "check.h"
+#include <iostream>
 
 /** \class EqualityConstraint
  *  \brief \todo
@@ -18,6 +22,8 @@
 
 class EqualityConstraintXML;
 class DSInputOutput;
+class SiconosMatrix;
+class SiconosSharedLibrary;
 
 class EqualityConstraint
 {
@@ -41,7 +47,7 @@ public:
    *  \brief allows to get the id of the EqualityConstraint
    *  \return the value of ths id
    */
-  inline string getId(void)
+  inline std::string  getId(void)
   {
     return this->id;
   }
@@ -50,7 +56,7 @@ public:
    *  \brief allows to get the type of a EqualityConstraint
    *  \return string : the type of the EqualityConstraint
    */
-  inline string getType()
+  inline std::string  getType()
   {
     return this->type;
   }
@@ -68,7 +74,7 @@ public:
    *  \brief allows to set the value of id
    *  \param string id : a string to set the value of id
    */
-  inline void setId(string id)
+  inline void setId(std::string  id)
   {
     this->id = id;
   }
@@ -78,7 +84,7 @@ public:
    *  \brief allows to get all the DSInputOutput of the EqualityConstraint
    *  \return the vector of DSInputOutput
    */
-  vector<DSInputOutput*> getDSInputOutputs(void);
+  std::vector<DSInputOutput*> getDSInputOutputs(void);
 
   /** \fn DSInputOutput* getDSInputOutput(int)
    *  \brief allows to get one specific DSInputOutput, with its place in the vector of DSInputOutput
@@ -91,7 +97,7 @@ public:
    *  \brief allows to set all the DSInputOutputs of the EqualityConstraint
    *  \param vector<DSInputOutput*> : the vector to set
    */
-  void setDSInputOutputs(vector<DSInputOutput*>);
+  void setDSInputOutputs(std::vector<DSInputOutput*>);
 
   /** \fn void addDSInputOutput(DSInputOutput*)
    *  \brief allows to add the DSInputOutput to the EqualityConstraint
@@ -143,7 +149,7 @@ public:
    *  \exception RuntimeException
    */
   void createEqualityConstraint(EqualityConstraintXML * ecXML , int number = -1,
-                                SiconosMatrix *G = NULL, vector<DSInputOutput*> *dsioVector = NULL);
+                                SiconosMatrix *G = NULL, std::vector<DSInputOutput*> *dsioVector = NULL);
 
   /** \fn void saveEqualityConstraintToXML()
    *  \brief copy the data of the EqualityConstraint to the XML tree
@@ -177,7 +183,7 @@ public:
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  virtual void setComputeOutputFunction(std::string pluginPath, std::string functionName);
+  virtual void setComputeOutputFunction(std::string  pluginPath, std::string functionName);
 
   /** \fn void setComputeInputFunction(string pluginPath, string functionName)
    *  \brief allow to set a specified function to compute output
@@ -198,16 +204,16 @@ protected :
   void fillEqualityConstraintWithEqualityConstraintXML();
 
   /** the type of the EqualityConstraint : LinearEC, LinerTIEC, LagrangianEC */
-  string type;
+  std::string  type;
 
   /** this number defines in a single way the EqualityConstraint */
   int number;
 
   /** the name of the EqualityConstraint*/
-  string id;
+  std::string  id;
 
   /** contains a link to the DSInputOutput of the DynamicalSystems */
-  vector<DSInputOutput*> dsioVector;
+  std::vector<DSInputOutput*> dsioVector;
 
   /** the XML object of this EqualityContraint */
   EqualityConstraintXML *ecXML;
@@ -229,9 +235,9 @@ protected :
 
   ////////////////////////
   /* contains the name of the plugin used for computeInput */
-  string computeInputName;
+  std::string  computeInputName;
   /* contains the name of the plugin used for computeOutput */
-  string computeOutputName;
+  std::string  computeOutputName;
 
   /** \fn void (*computeOutputPtr)(double* xPtr, double* time, double* lambdaPtr, double* yPtr)
    *  \brief computes y

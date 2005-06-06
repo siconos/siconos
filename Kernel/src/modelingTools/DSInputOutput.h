@@ -1,27 +1,33 @@
 #ifndef DSIO_H
 #define DSIO_H
 
+
+#include "SiconosSharedLibrary.h"
+#include "SiconosMatrix.h"
+#include "SiconosConst.h"
+#include "check.h"
+#include "NewSiconosVector.h"
+#include "SimpleVector.h"
+#include "CompositeVector.h"
+
 #include "DynamicalSystem.h"
 #include "DSInputOutputXML.h"
-#include "SiconosSharedLibrary.h"
 
-#include "SiconosConst.h"
+#include<string>
+#include<iostream>
 
-//using namespace std;
-
-class Interaction;
 class DynamicalSystem;
 class DSInputOutputXML;
+class SiconosMatrix;
 
-extern string DefaultComputeInput;
-extern string DefaultComputeOutput;
-
+extern std::string  DefaultComputeInput;
+extern std::string  DefaultComputeOutput;
 
 /** \class DSInputOutput
  *  \brief this class contains data for a specific DynamicalSystem about
  *         { y = H(x, t)
  *         { R = G(lambda)
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Jan 14, 2005
  *
@@ -60,7 +66,7 @@ public:
    *  \brief allows to get the id of the EqualityConstraint
    *  \return the value of ths id
    */
-  inline string getId(void) const
+  inline std::string  getId(void) const
   {
     return this->id;
   }
@@ -78,7 +84,7 @@ public:
    *  \brief allows to set the value of id
    *  \param string id : a string to set the value of id
    */
-  inline void setId(const string id)
+  inline void setId(const std::string  id)
   {
     this->id = id;
   }
@@ -105,7 +111,7 @@ public:
    *  \brief allows to get the type of the DSInputOutput
    *  \return string : the type of the DSInputOutput
    */
-  inline string getType() const
+  inline std::string  getType() const
   {
     return this->dsioType;
   }
@@ -138,7 +144,7 @@ public:
    *  \brief allows to get all the DynamicalSystem of the DSInputOutput
    *  \return the vector of DS
    */
-  inline vector<DynamicalSystem*> getDynamicalSystems(void) const
+  inline std::vector<DynamicalSystem*> getDynamicalSystems(void) const
   {
     return this->dsVector;
   };
@@ -147,7 +153,7 @@ public:
    *  \brief allows to set all the DynamicalSystems of the DSInputOutput
    *  \param vector<DynamicalSystem> : the vector to set
    */
-  inline void setDynamicalSystems(const vector<DynamicalSystem*> dsVect)
+  inline void setDynamicalSystems(const std::vector<DynamicalSystem*> dsVect)
   {
     this->dsVector = dsVect;
   } ;
@@ -158,7 +164,7 @@ public:
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  virtual void setComputeOutputFunction(std::string pluginPath, std::string functionName);
+  virtual void setComputeOutputFunction(std::string  pluginPath, std::string  functionName);
 
   /** \fn void setComputeInputFunction(string pluginPath, string functionName)
    *  \brief allow to set a specified function to compute output
@@ -182,8 +188,8 @@ public:
    *  \exception RuntimeException
    */
   void createDSInputOutput(DSInputOutputXML * dsioXML, int number = -1,
-                           string computeInput = DefaultComputeInput,
-                           string computeOutput = DefaultComputeOutput);
+                           std::string computeInput = DefaultComputeInput,
+                           std::string computeOutput = DefaultComputeOutput);
 
 
 protected:
@@ -196,20 +202,19 @@ protected:
 
 
   /** the type of the DSInputOutput : LinearDSIO, LagrangianDSIO */
-  string dsioType;
+  std::string dsioType;
 
   /** this number defines in a single way the DSInputOutput */
   int number;
 
   /** the name of the DSInputOutput*/
-  string id;
+  std::string id;
 
   /** the matrix H */
   SiconosMatrix H;
 
   /** the DSs connected to this DSInputOuput */
-  vector<DynamicalSystem*> dsVector;
-
+  std::vector<DynamicalSystem*> dsVector;
 
   /** the object linked this Relation to read XML data */
   DSInputOutputXML *dsioxml;
@@ -218,9 +223,9 @@ protected:
   SiconosSharedLibrary cShared;
 
   /* contains the name of the plugin used for computeInput */
-  string computeInputName;
+  std::string computeInputName;
   /* contains the name of the plugin used for computeOutput */
-  string computeOutputName;
+  std::string computeOutputName;
 
   /** \fn void (*computeOutputPtr)(double* xPtr, double* time, double* lambdaPtr, double* yPtr)
    *  \brief computes y

@@ -1,6 +1,5 @@
 #include "SiconosDOMTreeTools.h"
-#include "check.h"
-
+using namespace std;
 
 SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNode * siconosVectorNode)
 {
@@ -32,7 +31,7 @@ SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNode * siconosV
   }
   else
   {
-    cout << "getSiconosVectorValue - siconosVectorNode == NULL, node not found in the DOM tree, perhaps this attribute is only optional" << endl;
+    //cout<<"getSiconosVectorValue - siconosVectorNode == NULL, node not found in the DOM tree, perhaps this attribute is only optional"<<endl;
     SimpleVector v;
     return  v;
   }
@@ -81,7 +80,7 @@ SiconosMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNode * siconos
   else
   {
     //XMLException::selfThrow("SiconosDOMTreeTools - getSiconosMatrixValue : siconosMatrixNode == NULL");
-    cout << "WARNING !  getSiconosMatrixValue - siconosMatrixNode == NULL, node not found in the DOM tree, perhaps this attribute is only optional" << endl;
+    //cout<<"WARNING !  getSiconosMatrixValue - siconosMatrixNode == NULL, node not found in the DOM tree, perhaps this attribute is only optional"<<endl;
     SiconosMatrix m;
     return  m;
   }
@@ -180,7 +179,7 @@ vector<int> SiconosDOMTreeTools::getVectorIntContentValue(const xmlNode * vector
 }
 
 
-void SiconosDOMTreeTools::setSiconosVectorValue(const xmlNode * siconosVectorNode, const SiconosVector& v)
+void SiconosDOMTreeTools::setSiconosVectorNodeValue(const xmlNode * siconosVectorNode, const SiconosVector& v)
 {
   /*
    * if vector size > vectorMaxSize then put the vector in a file linked to the XML file
@@ -198,7 +197,7 @@ void SiconosDOMTreeTools::setSiconosVectorValue(const xmlNode * siconosVectorNod
 
     string vectorName = (char*)siconosVectorNode->name;
     if (size != v.size())
-      XMLException::selfThrow("SiconosDOMTreeTools - setSiconosVectorValue : the size of the " + vectorName +
+      XMLException::selfThrow("SiconosDOMTreeTools - setSiconosVectorNodeValue : the size of the " + vectorName +
                               " vector you want to save is different of the size defined the Kernel\ncheck the size of your DynamicalSystem");
 
     SimpleVector sv(v);
@@ -206,34 +205,7 @@ void SiconosDOMTreeTools::setSiconosVectorValue(const xmlNode * siconosVectorNod
   }
 }
 
-void SiconosDOMTreeTools::setSiconosVectorValue(const xmlNode * siconosVectorNode, SiconosVector *v)
-{
-  /*
-   * if vector size > vectorMaxSize then put the vector in a file linked to the XML file
-   */
-  if (xmlHasProp((xmlNodePtr)siconosVectorNode, (xmlChar *)SDTT_VECTORFILE.c_str())) //vector is defined in a extern ascii file
-  {
-    string file = getStringAttributeValue(siconosVectorNode, SDTT_VECTORFILE);
-    v->write(file, /*ASCII*/ /*N_ASCII*/ FILE_STORAGE); //For the moment only ASCII file are managed
-  }
-  else
-  {
-    //The vector is defined in the XML DOM Tree
-    //Size
-    int size = getIntegerAttributeValue(siconosVectorNode, SDTT_VECTORSIZE);
-
-    string vectorName = (char*)siconosVectorNode->name;
-
-    if (size != v->size())
-      XMLException::selfThrow("SiconosDOMTreeTools - setSiconosVectorValue : the size of the " + vectorName +
-                              " vector you want to save is different of the size defined the Kernel\ncheck the size of your DynamicalSystem");
-
-    xmlNodeSetContent((xmlNodePtr)siconosVectorNode, (xmlChar *)(v->toString().c_str()));
-  }
-}
-
-
-void SiconosDOMTreeTools::setSiconosMatrixValue(const xmlNode * siconosMatrixNode, SiconosMatrix matrix)
+void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNode * siconosMatrixNode, const SiconosMatrix& matrix)
 {
   /*
    * if matrix size > xxx then put the matrix in a file linked to the XML file
@@ -270,53 +242,6 @@ void SiconosDOMTreeTools::setSiconosMatrixValue(const xmlNode * siconosMatrixNod
     }
   }
 }
-
-void SiconosDOMTreeTools::setSiconosMatrixValue(const xmlNode * siconosMatrixNode, SiconosMatrix *matrix)
-{
-  /*
-   * if matrix size > xxx then put the matrix in a file linked to the XML file
-   */
-  if (xmlHasProp((xmlNodePtr)siconosMatrixNode, (xmlChar *)SDTT_MATRIXFILE.c_str())) //matrix is defined in a extern ascii file
-  {
-    string file = getStringAttributeValue(siconosMatrixNode, SDTT_MATRIXFILE);
-    matrix->write(file, /*ASCII*/ /*N_ASCII*/ FILE_STORAGE); //For the moment only ASCII file are managed
-  }
-  else
-  {
-    //The matrix is precised in the XML DOM Tree
-    //lineSize
-    int matrixColSize = getIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXCOLSIZE);
-    //rowSize
-    int matrixRowSize = getIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXROWSIZE);
-
-    string matrixName = (char*)siconosMatrixNode->name;
-
-    if (matrixColSize != matrix->size(1))
-    {
-      matrixColSize = matrix->size(1);
-      cout << "SiconosDOMTreeTools - setSiconosMatrixValue : the " + matrixName + " matrix col size you want to save is different of the col size already defined." << endl;
-      setIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXCOLSIZE, matrix->size(1));
-    }
-
-    if (matrixRowSize != matrix->size(0))
-    {
-      matrixRowSize = matrix->size(0);
-      cout << "SiconosDOMTreeTools - setSiconosMatrixValue : the " + matrixName + " matrix row size you want to save is different of the row size already defined." << endl;
-      setIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXROWSIZE, matrix->size(0));
-    }
-
-    xmlNode *node = SiconosDOMTreeTools::findNodeChild(siconosMatrixNode, SDTT_ROW);
-
-    int i = 0;
-    while ((node != NULL) && (i < matrixRowSize))
-    {
-      setSiconosRowMatrixValue(node, matrix->getRow(i), matrixColSize);
-      node = SiconosDOMTreeTools::findFollowNode(node, SDTT_ROW);
-      i++;
-    }
-  }
-}
-
 
 void SiconosDOMTreeTools::setStringAttributeValue(const xmlNode * node, const string attributeName, const string value)
 {
@@ -420,7 +345,7 @@ void SiconosDOMTreeTools::setVectorIntContentValue(const xmlNode * vectorNode, c
 
 // -----------------
 
-xmlNode* SiconosDOMTreeTools::createMatrixNode(xmlNode* rootNode, const string name, SiconosMatrix* matrix)
+xmlNode* SiconosDOMTreeTools::createMatrixNode(xmlNode* rootNode, const string& name, const SiconosMatrix& matrix)
 {
   /*
    * \todo if the SiconosMatrix is too big, the SiconosMatrix must be saved in an extern file and only the name of this file must be written in the XML file
@@ -432,20 +357,20 @@ xmlNode* SiconosDOMTreeTools::createMatrixNode(xmlNode* rootNode, const string n
   string col, row;
   stringstream sstr, sstr2;
 
-  sstr << matrix->size(1);
+  sstr << matrix.size(1);
   sstr >> col;
-  sstr2 << matrix->size(0);
+  sstr2 << matrix.size(0);
   sstr2 >> row;
 
   xmlNode* rowNode;
 
   xmlNewProp(node, (xmlChar*)(SDTT_MATRIXCOLSIZE.c_str()), (xmlChar*)col.c_str());
   xmlNewProp(node, (xmlChar*)(SDTT_MATRIXROWSIZE.c_str()), (xmlChar*)row.c_str());
-  for (int i = 0; i < matrix->size(0); i++)
+  for (int i = 0; i < matrix.size(0); i++)
   {
     rowNode = new xmlNode();
     rowNode = xmlNewNode(NULL, BAD_CAST SDTT_ROW.c_str());
-    setSiconosRowMatrixValue(rowNode, matrix->getRow(i), matrix->size(1));
+    setSiconosRowMatrixValue(rowNode, matrix.getRow(i), matrix.size(1));
     xmlAddChildList(node, rowNode);
   }
   xmlAddChildList(rootNode, node);
@@ -453,23 +378,23 @@ xmlNode* SiconosDOMTreeTools::createMatrixNode(xmlNode* rootNode, const string n
   return node;
 }
 
-xmlNode* SiconosDOMTreeTools::createVectorNode(xmlNode* rootNode, const string name, SiconosVector* v)
+xmlNode* SiconosDOMTreeTools::createVectorNode(xmlNode* rootNode, const string& name, const  SiconosVector& v)
 {
   xmlNode *node;
 
-  if (v->size() < VECTOR_MAX_SIZE)
+  if (v.size() < VECTOR_MAX_SIZE)
   {
     node = xmlNewNode(NULL, BAD_CAST name.c_str());
 
     string size;
     stringstream sstr;
 
-    sstr << v->size();
+    sstr << v.size();
     sstr >> size;
 
     xmlNewProp(node, (xmlChar*)(SDTT_VECTORSIZE.c_str()), (xmlChar*)size.c_str());
 
-    setSiconosVectorValue(node, v);
+    setSiconosVectorNodeValue(node, v);
 
 
     xmlAddChildList(rootNode, node);
@@ -480,7 +405,7 @@ xmlNode* SiconosDOMTreeTools::createVectorNode(xmlNode* rootNode, const string n
     string file = name + ".dat"; // \todo : add a time stamp to make this file unique
     xmlNewProp(node, (xmlChar *)SDTT_VECTORFILE.c_str(), (xmlChar*) file.c_str());
 
-    setSiconosVectorValue(node, v);
+    setSiconosVectorNodeValue(node, v);
 
     xmlAddChildList(rootNode, node);
   }

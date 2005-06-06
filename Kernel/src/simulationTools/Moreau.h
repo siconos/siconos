@@ -2,18 +2,9 @@
 #define MOREAU_H
 
 #include "OneStepIntegrator.h"
-#include <iostream>
-#include <vector>
-#include "SiconosMatrix.h"
-//#include "SiconosVector.h"
-#include "NewSiconosVector.h"
 #include "MoreauXML.h"
-#include "check.h"
-
 
 const int MOREAUSTEPSINMEMORY = 1;
-
-//using namespace std;
 
 /** \class Moreau
  *  \brief It's a kind of single-step Integrator
@@ -58,7 +49,7 @@ public:
    */
   inline const SiconosMatrix getW(void) const
   {
-    return *(this->W);
+    return *W;
   }
 
   /** \fn SiconosMatrix* getWPtr(void) const
@@ -67,7 +58,7 @@ public:
    */
   inline SiconosMatrix* getWPtr(void) const
   {
-    return this->W;
+    return W;
   }
 
   /** \fn void setW (const SiconosMatrix& newValue)
@@ -76,7 +67,7 @@ public:
    */
   inline void setW(const SiconosMatrix& newValue)
   {
-    *(this->W) = newValue;
+    *W = newValue;
   }
 
   /** \fn void setWPtr(SiconosMatrix* newPtr)
@@ -85,9 +76,9 @@ public:
    */
   inline void setWPtr(SiconosMatrix *newPtr)
   {
-    delete W;
-    W = 0;
+    if (isWAllocatedIn) delete W;
     W = newPtr;
+    isWAllocatedIn = false;
   }
 
   // -- theta --
@@ -118,6 +109,12 @@ public:
    */
   void initialize();
 
+  /** \fn void computeW(const double& t)
+   *  \brief compute W Moreau matrix at time t
+   *  \param the time (double)
+   */
+  void computeW(const double&);
+
   /** \fn void computeFreeState()
    *  \brief integrates the Dynamical System linked to this integrator without boring the constraints
    */
@@ -145,13 +142,6 @@ public:
    */
   void saveWToXML();
 
-
-  /** \fn void fillIntegratorWithIntegratorXML()
-   *  \brief uses the OneStepIntegratorXML of the Moreau Integrator to fill the fields of this Integrator
-   *  \exception RuntimeException
-   */
-  void fillIntegratorWithIntegratorXML();
-
   /** \fn display()
    *  \brief Displays the data of the Moreau's integrator
    */
@@ -173,6 +163,7 @@ private:
   /** a specific matrix of the Moreau Integrator */
   SiconosMatrix *W;
 
+  bool isWAllocatedIn;
   /** parameter of the theta method */
   double theta;
 };

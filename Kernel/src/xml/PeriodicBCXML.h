@@ -10,14 +10,8 @@
 * PeriodicBCXML allows to manage data of a PeriodicBC DOM tree.
 */
 
-
-
-
 #ifndef __PERIODICBCXML__
 #define __PERIODICBCXML__
-
-#include <libxml/tree.h>
-
 #include "BoundaryConditionXML.h"
 
 class PeriodicBCXML : public BoundaryConditionXML

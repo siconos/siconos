@@ -1,8 +1,5 @@
 #include "LagrangianLinearEC.h"
-#include "DSInputOutput.h"
-
-#include "check.h"
-
+using namespace std;
 
 LagrangianLinearEC::LagrangianLinearEC()
 {

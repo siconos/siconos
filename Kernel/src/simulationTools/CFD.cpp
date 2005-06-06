@@ -1,64 +1,72 @@
 #include "CFD.h"
-#include "CFDXML.h"
-#include "check.h"
+using namespace std;
 
-
-#include "Interaction.h"
-// hazardous dependency
-#include "Moreau.h"
-#include "LagrangianLinearR.h"
-#include "NewtonImpactLawNSL.h"
-#include <stdio.h>
-
-
-CFD::CFD(): OneStepNSProblem()
+CFD::CFD(): OneStepNSProblem(), nCfd(0), w(NULL), z(NULL), M(NULL), q(NULL),
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
 {
-  this->nspbType = CFD_OSNSP;
+  nspbType = CFD_OSNSP;
 }
 
-CFD::CFD(OneStepNSProblemXML* osnspbxml): OneStepNSProblem(osnspbxml)
+CFD::CFD(OneStepNSProblemXML* osnspbxml, Strategy * newStrat):
+  OneStepNSProblem(osnspbxml, newStrat), nCfd(0), w(NULL), z(NULL), M(NULL), q(NULL),
+  isWAllocatedIn(true), isZAllocatedIn(true), isMAllocatedIn(true), isQAllocatedIn(true)
 {
-  this->nspbType = CFD_OSNSP;
+  nspbType = CFD_OSNSP;
+  if (osnspbxml != NULL)
+  {
+    // no getter-xml for nCfd ...
+    nCfd = ((static_cast<CFDXML*>(onestepnspbxml))->getQ()).size();
+    n = nCfd;
+    w = new SimpleVector(nCfd);
+    z = new SimpleVector(nCfd);
+    M = new SiconosMatrix(nCfd, nCfd);
+    q = new SimpleVector(nCfd);
+    *M = (static_cast<CFDXML*>(onestepnspbxml))->getM();
+    *q = (static_cast<CFDXML*>(onestepnspbxml))->getQ();
+  }
+  else RuntimeException::selfThrow("CFD: xml constructor, xml file=NULL");
 }
 
 CFD::~CFD()
-{}
-
-
-
-SiconosMatrix* CFD::getMPtr(void)
 {
-  return &this->M;
+  if (isWAllocatedIn)
+  {
+    delete w;
+    w = NULL;
+  }
+  if (isZAllocatedIn)
+  {
+    delete z;
+    z = NULL;
+  }
+  if (isMAllocatedIn)
+  {
+    delete M;
+    M = NULL;
+  }
+  if (isQAllocatedIn)
+  {
+    delete q;
+    q = NULL;
+  }
 }
 
-SimpleVector* CFD::getQPtr(void)
-{
-  return &this->q;
-}
-
-
-void CFD::formalize(double time)
+void CFD::formalize(const double& time)
 {
   IN("CFD::formalize(void)\n");
   OneStepNSProblem::formalize(time);
 
   double pasH = strategy->getTimeDiscretisationPtr()->getH();
   //cout<<"## CFD::formalize - interactionVector.size() == "<<this->interactionVector.size()<<endl;
-  for (int i = 0; i < this->interactionVector.size(); i++)
+  for (int i = 0; i < interactionVector.size(); i++)
   {
-    this->interactionVector[i]->check(time, pasH);
+    interactionVector[i]->check(time, pasH);
   }
-  this->updateConnectedInteractionMap();
+  updateConnectedInteractionMap();
   cout << " #~ CFD::updateConnectedInteractionMap done" << endl;
-  this->w = SimpleVector::SimpleVector(0);
-  this->z = SimpleVector::SimpleVector(0);
   cout << " #~ CFD::next : computeM, computeQ" << endl;
-  this->computeM();
-  this->computeQ(time);
-
-  this->w = SimpleVector::SimpleVector(this->nCfd);
-  this->z = SimpleVector::SimpleVector(this->nCfd);
-
+  computeM();
+  computeQ(time);
   OUT("CFD::formalize(void)\n");
 
   // formalisations specific to CFD problem
@@ -76,40 +84,40 @@ void CFD::compute(void)
    ***********************************/
   // now we'll use Numerics !!
   int res, i, j;
-  int nn = this->nCfd;//this->n;
+  int nn = nCfd;//n;
 
-  if (this->nCfd == 0)
+  if (nCfd == 0)
   {}
-  else //if( this->nCfd == 1 )
+  else //if( nCfd == 1 )
   {
-    res = solve_lcp(/*vec*/this->M.getArray(), /*q*/(this->q.getArray()), &nn, &(this->solvingMethod), this->z.getArray(), this->w.getArray());
+    res = solve_lcp(/*vec*/M->getArray(), /*q*/(q->getArray()), &nn, &(solvingMethod), z->getArray(), w->getArray());
   }
 
   // Update the relation
   SiconosVector *yDot, *lambda;
   int activeInteraction = 0;
 
-  yDot = this->interactionVector[0]->getYDotPtr();
-  lambda = this->interactionVector[0]->getLambdaPtr();
+  yDot = interactionVector[0]->getYDotPtr();
+  lambda = interactionVector[0]->getLambdaPtr();
 
-  if (this->nCfd == 0)
+  if (nCfd == 0)
   {
     lambda->zero();
   }
   else
   {
-    for (int i = 0; i < this->interactionVector.size(); i++)
+    for (int i = 0; i < interactionVector.size(); i++)
     {
-      lambda = this->interactionVector[i]->getLambdaPtr();
+      lambda = interactionVector[i]->getLambdaPtr();
       lambda->zero();
 
-      if (this->connectedInteractionMap.find(this->interactionVector[i]) != this->connectedInteractionMap.end())
+      if (connectedInteractionMap.find(interactionVector[i]) != connectedInteractionMap.end())
       {
-        yDot = this->interactionVector[i]->getYDotPtr();
-        lambda = this->interactionVector[i]->getLambdaPtr();
+        yDot = interactionVector[i]->getYDotPtr();
+        lambda = interactionVector[i]->getLambdaPtr();
 
-        (*yDot)(0) = this->w(activeInteraction);
-        (*lambda)(0) = this->z(activeInteraction);
+        (*yDot)(0) = (*w)(activeInteraction);
+        (*lambda)(0) = (*z)(activeInteraction);
 
         activeInteraction++;
       }
@@ -146,35 +154,35 @@ void CFD::computeM(void)
   LagrangianLinearR *LLR;
 
   /* temporary creation of the matrix M, not good for other example than the BouncingBall */
-  //this->M = SiconosMatrix::SiconosMatrix(0, 0);
-  this->nCfd = 0;
+  //M = SiconosMatrix::SiconosMatrix(0, 0);
+  nCfd = 0;
 
   /* New initialisation that will be good */
   /*
    * we count the number of interaction that have a status == 1
    */
   int activeInteraction = 0;
-  for (i = 0; i < this->interactionVector.size(); i++)
+  for (i = 0; i < interactionVector.size(); i++)
   {
-    if (this->connectedInteractionMap.find(this->interactionVector[i]) != this->connectedInteractionMap.end())
+    if (connectedInteractionMap.find(interactionVector[i]) != connectedInteractionMap.end())
       activeInteraction++;
   }
   // ?????? size of the M matrix in Contact Friction Dual ?????
-  this->M = SiconosMatrix::SiconosMatrix(activeInteraction/**2*/, activeInteraction/**2*/);
-  this->M.zero();
+  //  M = SiconosMatrix::SiconosMatrix(activeInteraction/**2*/, activeInteraction/**2*/);
+  M->zero();
 
   // \todo using the visibility table instead of the interaction vector !!!!!
-  for (i = 0; i < this->interactionVector.size(); i++)
+  for (i = 0; i < interactionVector.size(); i++)
   {
-    if (this->connectedInteractionMap.find(this->interactionVector[i]) != this->connectedInteractionMap.end())
+    if (connectedInteractionMap.find(interactionVector[i]) != connectedInteractionMap.end())
     {
       WW = SiconosMatrix::SiconosMatrix(0, 0);
       vDS.clear();
-      vDS = this->interactionVector[i]->getDynamicalSystems();
+      vDS = interactionVector[i]->getDynamicalSystems();
       if (vDS.size() == 2)
       {
         n = vDS[0]->getNumber();
-        I = this->strategy->getIntegratorOfDS(n);
+        I = strategy->getIntegratorOfDSPtr(n);
         if (I->getType() == MOREAU_INTEGRATOR)
         {
           M1 = static_cast<Moreau*>(I);
@@ -185,7 +193,7 @@ void CFD::computeM(void)
           RuntimeException::selfThrow("CFD::computeA not yet implemented for Integrator of type " + I->getType());
 
         n = vDS[1]->getNumber();
-        I2 = this->strategy->getIntegratorOfDS(n);
+        I2 = strategy->getIntegratorOfDSPtr(n);
         if (I2->getType() == MOREAU_INTEGRATOR)
         {
           M2 = static_cast<Moreau*>(I2);
@@ -206,27 +214,27 @@ void CFD::computeM(void)
       else
         RuntimeException::selfThrow("CFD::computeA not yet implemented for one DS in a Interaction ");
 
-      R = this->interactionVector[i]->getRelation();
+      R = interactionVector[i]->getRelationPtr();
       if (R->getType() == LAGRANGIANLINEARRELATION)
       {
         LLR = static_cast<LagrangianLinearR*>(R);
         H = LLR->getHPtr();
         Mtmp = *H * WW.multTranspose(*H);
         cout << "#_# " << currentActiveInteraction << " - " << currentActiveInteraction << endl;
-        this->M.display();
+        M->display();
         Mtmp.display();
         cout << "___________________" << endl;
-        this->M.blockMatrixCopy(Mtmp, currentActiveInteraction, currentActiveInteraction);
+        M->blockMatrixCopy(Mtmp, currentActiveInteraction, currentActiveInteraction);
       }
       else
         RuntimeException::selfThrow("CFD::computeM [level1] not yet implemented for relation of type " + R->getType());
 
       interConnectedNumber = 0;
-      if (connectedInteractionMap[this->interactionVector[i]][0] != NULL)
+      if (connectedInteractionMap[interactionVector[i]][0] != NULL)
       {
-        for (int k = 0; k < connectedInteractionMap[this->interactionVector[i]].size(); k++)
+        for (int k = 0; k < connectedInteractionMap[interactionVector[i]].size(); k++)
         {
-          vCo = connectedInteractionMap[this->interactionVector[i]];
+          vCo = connectedInteractionMap[interactionVector[i]];
           orgDSRank = vCo[k]->originInteractionDSRank;
           connectedDSRank = vCo[k]->connectedInteractionDSRank;
 
@@ -244,7 +252,7 @@ void CFD::computeM(void)
           else
             RuntimeException::selfThrow("CFD::computeM [level2] not yet implemented for relation of type " + R->getType());
 
-          RConnected = vCo[k]->connected->getRelation();
+          RConnected = vCo[k]->connected->getRelationPtr();
           if (RConnected->getType() == LAGRANGIANLINEARRELATION)
           {
             LLR = static_cast<LagrangianLinearR*>(RConnected);
@@ -262,7 +270,7 @@ void CFD::computeM(void)
             interConnectedNumber++;
 
           cout << "#_# " << currentActiveInteraction << " - " << interConnectedNumber << endl;
-          this->M.blockMatrixCopy(Mtmp, currentActiveInteraction, interConnectedNumber);
+          M->blockMatrixCopy(Mtmp, currentActiveInteraction, interConnectedNumber);
           interConnectedNumber++;
         }
       }
@@ -271,11 +279,11 @@ void CFD::computeM(void)
     } // test on status
   }
 
-  this->nCfd = activeInteraction;
+  nCfd = activeInteraction;
   OUT("CFD::computeM(void)\n");
 }
 
-void CFD::computeQ(double time)
+void CFD::computeQ(const double& time)
 {
   IN("CFD::computeQ(void)\n");
   Relation *R;
@@ -290,17 +298,17 @@ void CFD::computeQ(double time)
    * \warning : initialisation of "q" removed! It seems that that BouncingBall sample
    * is still running good ...
    */
-  int qSize = this->nCfd;
+  int qSize = nCfd;
   int qPos = 0;
-  this->q = SimpleVector::SimpleVector(qSize);
-  this->q.zero();
+  //q = SimpleVector::SimpleVector(qSize);
+  q->zero();
 
-  for (int i = 0; i < this->interactionVector.size(); i++)
+  for (int i = 0; i < interactionVector.size(); i++)
   {
-    if (this->connectedInteractionMap.find(this->interactionVector[i]) != this->connectedInteractionMap.end())
+    if (connectedInteractionMap.find(interactionVector[i]) != connectedInteractionMap.end())
     {
-      R = this->interactionVector[i]->getRelation();
-      nslaw = this->interactionVector[i]->getNonSmoothLaw();
+      R = interactionVector[i]->getRelationPtr();
+      nslaw = interactionVector[i]->getNonSmoothLawPtr();
       if (R->getType() == LAGRANGIANLINEARRELATION)
       {
         LLR = static_cast<LagrangianLinearR*>(R);
@@ -310,12 +318,12 @@ void CFD::computeQ(double time)
           newton = static_cast<NewtonImpactLawNSL*>(nslaw);
           e = newton->getE();
           LLR->computeFreeOutput(time);
-          qCFDtmp = this->interactionVector[i]->getYDot();
+          qCFDtmp = interactionVector[i]->getYDot();
 
-          qCFDtmp += e * this->interactionVector[i]->getYDotOld();
+          qCFDtmp += e * interactionVector[i]->getYDotOld();
 
           // Assemble q
-          //this->q = (-1)*qLCPtmp;
+          //q = (-1)*qLCPtmp;
 
           /*
            * in a CFD problem the contribution of each interaction
@@ -323,11 +331,11 @@ void CFD::computeQ(double time)
            * so for the moment the assemblage of the q vector will be the copy
            * of 1 double value into 'q' for each active interaction
            */
-          this->q(qPos++) = -qCFDtmp(0);
+          (*q)(qPos++) = -qCFDtmp(0);
 
           //            cout<<"### computeQ - CFD (Ufree, Uold) :"<<endl;
-          //            this->interactionVector[i]->getYDot().display();
-          //            this->interactionVector[i]->getYDotOld().display();
+          //            interactionVector[i]->getYDot().display();
+          //            interactionVector[i]->getYDotOld().display();
         }
         else
           RuntimeException::selfThrow("CFD::computeQ not yet implemented for NSlaw of type " + nslaw->getType() + "and for relation of type " + R->getType());
@@ -340,27 +348,17 @@ void CFD::computeQ(double time)
   OUT("CFD::computeQ(void)\n");
 }
 
-void CFD::fillNSProblemWithNSProblemXML()
-{
-  OUT("CFD::fillNSProblemWithNSProblemXML\n");
-  OneStepNSProblem::fillNSProblemWithNSProblemXML();
-  if (this->onestepnspbxml != NULL)
-  {
-    this->M = (static_cast<CFDXML*>(this->onestepnspbxml))->getM();
-    this->q = (static_cast<CFDXML*>(this->onestepnspbxml))->getQ();
-  }
-  else RuntimeException::selfThrow("CFD::fillNSProblemWithNSProblemXML - OneStepNSProblemXML object not exists");
-}
-
 void CFD::display() const
 {
   cout << "------------------------------------------------------" << endl;
   cout << "____ data of the CFD " << endl;
-  cout << "| nCfd : " << this->nCfd << endl;
+  cout << "| nCfd : " << nCfd << endl;
   cout << "| CFD Matrix M  : " << endl;
-  M.display();
+  if (M != NULL) M->display();
+  else cout << "-> NULL" << endl;
   cout << "| CFD vector q : " << endl;
-  q.display();
+  if (q != NULL) q->display();
+  else cout << "-> NULL" << endl;
   cout << "____________________________" << endl;
   cout << "------------------------------------------------------" << endl;
 }
@@ -369,10 +367,10 @@ void CFD::saveNSProblemToXML()
 {
   IN("CFD::saveNSProblemToXML\n");
   OneStepNSProblem::saveNSProblemToXML();
-  if (this->onestepnspbxml != NULL)
+  if (onestepnspbxml != NULL)
   {
-    (static_cast<CFDXML*>(this->onestepnspbxml))->setM(&(this->M));
-    (static_cast<CFDXML*>(this->onestepnspbxml))->setQ(&(this->q));
+    (static_cast<CFDXML*>(onestepnspbxml))->setM(*M);
+    (static_cast<CFDXML*>(onestepnspbxml))->setQ(*q);
   }
   else RuntimeException::selfThrow("CFD::saveNSProblemToXML - OneStepNSProblemXML object not exists");
   OUT("CFD::saveNSProblemToXML\n");
@@ -381,9 +379,9 @@ void CFD::saveNSProblemToXML()
 void CFD::saveMToXML()
 {
   IN("CFD::saveMToXML\n");
-  if (this->onestepnspbxml != NULL)
+  if (onestepnspbxml != NULL)
   {
-    (static_cast<CFDXML*>(this->onestepnspbxml))->setM(&(this->M));
+    (static_cast<CFDXML*>(onestepnspbxml))->setM(*M);
   }
   else RuntimeException::selfThrow("CFD::saveMToXML - OneStepNSProblemXML object not exists");
   OUT("CFD::saveMToXML\n");
@@ -392,30 +390,13 @@ void CFD::saveMToXML()
 void CFD::saveQToXML()
 {
   IN("CFD::saveQToXML\n");
-  if (this->onestepnspbxml != NULL)
+  if (onestepnspbxml != NULL)
   {
-    (static_cast<CFDXML*>(this->onestepnspbxml))->setQ(&(this->q));
+    (static_cast<CFDXML*>(onestepnspbxml))->setQ(*q);
   }
   else RuntimeException::selfThrow("CFD::saveQToXML - OneStepNSProblemXML object not exists");
   OUT("CFD::saveQToXML\n");
 }
-
-void CFD::createOneStepNSProblem(OneStepNSProblemXML * osnspbXML, Strategy * strategy)
-{
-  if (osnspbXML != NULL)
-  {
-    this->onestepnspbxml = osnspbXML;
-    this->fillNSProblemWithNSProblemXML();
-  }
-  else
-  {
-    this->strategy = strategy;
-    this->nspbType = CFD_OSNSP;
-    this->fillInteractionVector();
-  }
-  this->init();
-}
-
 
 CFD* CFD::convert(OneStepNSProblem* osnsp)
 {

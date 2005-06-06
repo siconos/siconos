@@ -2,6 +2,7 @@
 #define NLINEARBC_H
 
 #include "BoundaryCondition.h"
+#include "check.h"
 
 /** \class NLinearBC
  *  \brief kind of BoundaryCondition

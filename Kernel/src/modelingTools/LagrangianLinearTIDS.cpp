@@ -1,6 +1,5 @@
 #include "LagrangianLinearTIDS.h"
-#include "check.h"
-
+using namespace std;
 
 // --- Constructor from an xml file ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML * dsXML): LagrangianDS(dsXML), K(NULL), C(NULL)

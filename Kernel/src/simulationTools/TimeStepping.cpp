@@ -1,56 +1,32 @@
 
 #include "TimeStepping.h"
+using namespace std;
 
-#include "check.h"
-
-TimeStepping::TimeStepping()
+// --- Default constructor ---
+TimeStepping::TimeStepping(): Strategy()
 {
-  IN("TimeStepping::TimeStepping()\n");
-  this->strategyType = TIMESTEPPING_STRATEGY;
-  OUT("TimeStepping::TimeStepping()\n");
+  cout << "CONSTR TIMESTEP" << endl;
+  strategyType = TIMESTEPPING_STRATEGY;
 }
 
-TimeStepping::TimeStepping(StrategyXML* strxml, Model *model): Strategy(strxml,
-      model)
+// --- XML constructor ---
+TimeStepping::TimeStepping(StrategyXML* strxml, Model *newModel): Strategy(strxml, newModel)
 {
-  IN("TimeStepping::TimeStepping(StrategyXML* strxml, Model *model)\n");
-  this->strategyType = TIMESTEPPING_STRATEGY;
-  OUT("TimeStepping::TimeStepping(StrategyXML* strxml, Model *model)\n");
+  strategyType = TIMESTEPPING_STRATEGY;
 }
 
+// --- Destructor ---
 TimeStepping::~TimeStepping()
 {}
 
-
-void TimeStepping::createStrategy(StrategyXML * strategyXML, Model * model)//,  TimeDiscretisation * timediscretisation)
+void TimeStepping::createStrategy(StrategyXML * newStrategyXML, Model * newModel)
 {
   IN("TimeStepping::createStrategy(StrategyXML * strategyXML, Model * model)\n");
-  if (strategyXML != NULL)
-  {
-    // this->timeDiscretisation = NULL;
-    // \warning where does ¨timeDiscretisation comes from ????  => comment the 2 next lines
-    // this->timeDiscretisation = timeDiscretisation;
-    // if( timeDiscretisation != NULL ) this->timeDiscretisation->setStrategy( this );
-
-    this->integratorVector.clear();
-    this->nsProblem = NULL;
-
-    this->strategyxml = strategyXML;
-    //  this->nsds = nsds;
-    this->model = model;
-
-    this->fillStrategyWithStrategyXML();
-    this->linkStrategyXML();
-  }
-  else
-  {
-    this->strategyType = TIMESTEPPING_STRATEGY;
-    this->strategyxml = NULL;
-    this->model = model;
-  }
+  strategyType = TIMESTEPPING_STRATEGY;
+  strategyxml = NULL;
+  model = newModel;
   OUT("TimeStepping::createStrategy(StrategyXML * strategyXML, Model * model)\n");
 }
-
 
 TimeStepping* TimeStepping::convert(Strategy *str)
 {

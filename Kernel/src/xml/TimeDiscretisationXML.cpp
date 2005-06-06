@@ -1,7 +1,6 @@
 
 #include "TimeDiscretisationXML.h"
-
-#include "check.h"
+using namespace std;
 
 
 TimeDiscretisationXML::TimeDiscretisationXML()

@@ -2,17 +2,10 @@
 #define RELAY_H
 
 #include "OneStepNSProblem.h"
-#include <iostream>
-#include <vector>
-#include "SiconosMatrix.h"
-//#include "SiconosVector.h"
-#include "NewSiconosVector.h"
-
-//using namespace std;
 
 /** \class Relay
  *  \brief It's a way to solve NSDS. It's used in electronics
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 26, 2004
  *
@@ -27,32 +20,19 @@ public:
    */
   Relay();
 
-  /** \fn Relay(OneStepNSProblemXML*)
-   *  \brief constructor with XML object of the Relay
-   *  \param OneStepNSProblemXML* : the XML object corresponding
+  /** \fn Relay(OneStepNSProblemXML*, Strategy*=NULL)
+   *  \brief xml constructor
+   *  \param OneStepNSProblemXML* : the XML linked-object
+   *  \param Strategy *: the strategy that owns the problem (optional)
    */
-  Relay(OneStepNSProblemXML*);
+  Relay(OneStepNSProblemXML*, Strategy * = NULL);
 
   ~Relay();
-
-  /** \fn void fillNSProblemWithNSProblemXML()
-   *  \brief uses the OneStepNSProblemXML of the OneStepNSProblem to fill
-   the fields of this OneStepNSProblem
-   */
-  void fillNSProblemWithNSProblemXML();
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree
    */
   void saveNSProblemToXML();
-
-  /** \fn void createOneStepNSProblem( OneStepNSProblemXML * osiXML, Strategy * strategy )
-   *  \brief allows to create the OneStepNSProblem LCP with an xml file, or the needed data
-   *  \param OneStepNSProblemXML * : the XML object for this OneStepNSProblem
-   *  \param Strategy * : The NSDS which contains this OneStepNSProblem
-   *  \exception RuntimeException
-   */
-  void createOneStepNSProblem(OneStepNSProblemXML * osiXML, Strategy * strategy = NULL);
 
   /** \fn Relay* convert (OneStepNSProblem* ds)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.

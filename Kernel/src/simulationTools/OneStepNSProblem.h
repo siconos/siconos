@@ -4,16 +4,16 @@
 #include "Strategy.h"
 #include "Interaction.h"
 #include "EqualityConstraint.h"
-#include <iostream>
-#include <vector>
 #include "SiconosMatrix.h"
 #include "NewSiconosVector.h"
+#include "SimpleVector.h"
 #include "OneStepNSProblemXML.h"
 
 #include "SiconosConst.h"
 #include "SiconosNumerics.h"
-
-//using namespace std;
+#include "check.h"
+#include <iostream>
+#include <vector>
 
 class Strategy;
 class Interaction;
@@ -21,9 +21,9 @@ class EqualityConstraint;
 
 class OneStepNSProblemXML;
 
-extern string   DefaultSolver;
-extern string   DefaultAlgoName;
-extern string   DefaultAlgoNormType;
+extern std::string  DefaultSolver;
+extern std::string  DefaultAlgoName;
+extern std::string  DefaultAlgoNormType;
 extern double   DefaultAlgoTolerance;
 extern int    DefaultAlgoMaxIter;
 extern double   DefaultAlgoSearchDirection;
@@ -54,7 +54,7 @@ typedef struct
 
 /** \class OneStepNSProblem
  *  \brief It's the part of the Strategy which solve the Interactions
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 26, 2004
  *
@@ -64,155 +64,192 @@ class OneStepNSProblem
 {
 public:
 
+  // --- CONSTRUCTORS/DESTRUCTOR ---
+
   /** \fn OneStepNSProblem()
    *  \brief default constructor
    */
   OneStepNSProblem();
 
-  /** \fn OneStepNSProblem(OneStepNSProblemXML*)
-   *  \brief constructor with XML object of the OneStepNSProblem
-   *  \param OneStepNSProblemXML* : the XML object corresponding
+  /** \fn OneStepNSProblem(OneStepNSProblemXML*, Strategy*=NULL)
+   *  \brief xml constructor
+   *  \param OneStepNSProblemXML* : the XML linked-object
+   *  \param Strategy *: the strategy that owns the problem (optional)
    */
-  OneStepNSProblem(OneStepNSProblemXML*);
+  OneStepNSProblem(OneStepNSProblemXML*, Strategy * = NULL);
 
   virtual ~OneStepNSProblem();
 
-  // getter/setter
-  /** \fn int getN()
-   *  \brief allow to get the value of n
-   *  \return the value of n
-   */
-  inline int getN() const
-  {
-    return this->n;
-  };
+  // --- GETTERS/SETTERS ---
 
-  /** \fn Strategy* getStrategy()
-   *  \brief allow to get the Strategy
-   *  \return the Strategy
+  /** \fn inline const string getType() const
+   *  \brief to get the type of the OneStepNSProblem
+   *  \return string
    */
-  inline Strategy* getStrategy() const
+  inline std::string getType() const
   {
-    return this->strategy;
+    return nspbType;
+  }
+
+  /** \fn inline void setType(const string&)
+   *  \brief set the type of the OneStepNSProblem
+   *  \param: string
+   */
+  inline void setType(const std::string & newVal)
+  {
+    nspbType = newVal;
+  }
+
+  /** \fn const int getN() const
+   *  \brief get the value of n
+   *  \return an int
+   */
+  inline const int getN() const
+  {
+    return n;
+  }
+
+  /** \fn void setN(const int&)
+   *  \brief set the value of n
+   *  \param an int
+   */
+  inline void setN(const int& newVal)
+  {
+    n = newVal;
   }
 
   /** \fn vector< Interaction* > getInteractions()
-   *  \brief allow to get the the vector of Interaction
-   *  \return the vector interactionVector
+   *  \brief get the the vector of Interaction
+   *  \return a vector stl
    */
-  inline vector< Interaction* > getInteractions() const
+  inline const std::vector< Interaction* > getInteractions() const
   {
-    return this->interactionVector;
-  };
+    return interactionVector;
+  }
 
-  /** \fn Interaction* getInteraction(int)
-   *  \brief allow to get a specific Interaction
+  /** \fn Interaction* getInteractionPtr(const int&)
+   *  \brief get a specific Interaction
    *  \param int the position of a specific Interaction in the vector of Interaction
-   *  \return the specified Interaction
+   *  \return a pointer on Interaction
    */
-  Interaction* getInteraction(const int);
-
-
-  /** \fn void setN(int)
-   *  \brief allow to set the value of n
-   *  \param int : the value to set n
-   */
-  inline void setN(const int N)
-  {
-    this->n = N;
-  };
+  Interaction* getInteractionPtr(const int&);
 
   /** \fn void setInteractions(vector< Interaction* >)
-   *  \brief allow to set the vector of Interactoin of the OneStepNSProblem
-   *  \param vector<Interaction*> : the vector to set interactionVector
-   */
-  inline void setInteractions(const vector< Interaction* > interactions)
+    *  \brief set the vector of Interaction
+    *  \param vector<Interaction*> : a vector stl
+    */
+  inline void setInteractions(const std::vector< Interaction* >& newVec)
   {
-    this->interactionVector = interactions;
-  };
+    interactionVector = newVec;
+  }
+
+  /** \fn vector< EqualityConstraint* > getEqualityConstraints()
+   *  \brief get the the vector of EqualityConstraint
+   *  \return a vector stl
+   */
+  inline const std::vector< EqualityConstraint* > getEqualityConstraints() const
+  {
+    return ecVector;
+  }
+
+  /** \fn void setEqualityConstraints(vector< EqualityConstraint* >)
+    *  \brief set the vector of EqualityConstraint
+    *  \param vector<EqualityConstraint*> : a vector stl
+    */
+  inline void setEqualityConstraints(const std::vector< EqualityConstraint* >& newVec)
+  {
+    ecVector = newVec;
+  }
+
+  /** \fn inline const string getSolver() const
+   *  \brief to get the solver of the OneStepNSProblem
+   *  \return string
+   */
+  inline std::string getSolver() const
+  {
+    return solver;
+  }
+
+  /** \fn inline void setSolver(const string&)
+   *  \brief set the solver of the OneStepNSProblem
+   *  \param: string
+   */
+  inline void setSolver(const std::string & newVal)
+  {
+    solver = newVal;
+  }
+
+  /** \fn Strategy* getStrategyPtr()
+   *  \brief get the Strategy
+   *  \return a pointer on Strategy
+   */
+  inline Strategy* getStrategyPtr() const
+  {
+    return strategy;
+  }
+
+  /** \fn void setStrategyPtr(Strategy*)
+   *  \brief set the Strategy of the OneStepNSProblem
+   *  \param: a pointer on Strategy
+   */
+  inline void setStrategy(Strategy* str)
+  {
+    strategy = str;
+  }
+
+  /** \fn inline OneStepNSProblemXML* getOneStepNSProblemXML()
+   *  \brief get the OneStepNSProblemXML
+   *  \return a pointer on OneStepNSProblemXML
+   */
+  inline OneStepNSProblemXML* getOneStepNSProblemXML() const
+  {
+    return onestepnspbxml;
+  }
+
+  /** \fn inline void setOneStepNSProblemXML(OneStepNSProblemXML* osnspb)
+   *  \brief set the OneStepNSProblemXML
+   *  \param a pointer on OneStepNSProblemXML
+   */
+  inline void setOneStepNSProblemXML(OneStepNSProblemXML* osnspb)
+  {
+    onestepnspbxml = osnspb;
+  }
+
+  // --- OTHER FUNCTIONS ---
 
   /** \fn void addInteraction(Interaction*)
-   *  \brief allow to add an Interaction to the OneStepNSProblem
+   *  \brief add an Interaction to the OneStepNSProblem
    *  \param Interaction* : the Interaction to add to the vector of Interaction
    */
   void addInteraction(Interaction*);
 
-  /** \fn inline OneStepNSProblemXML* getOneStepNSProblemXML()
-   *  \brief allows to get the OneStepNSProblemXML of the OneStepNSProblem
-   *  \return a pointer on the OneStepNSProblemXML of the OneStepNSProblem
-   */
-  inline OneStepNSProblemXML* getOneStepNSProblemXML() const
-  {
-    return this->onestepnspbxml;
-  }
-
-  /** \fn inline void setOneStepNSProblemXML(OneStepNSProblemXML* osnspb)
-   *  \brief allows to set the OneStepNSProblemXML of the OneStepNSProblem
-   *  \param OneStepNSProblemXML* : the pointer to set OneStepNSProblemXML
-   */
-  inline void setOneStepNSProblemXML(OneStepNSProblemXML* osnspb)
-  {
-    this->onestepnspbxml = osnspb;
-  }
-
-  /** \fn void setStrategy(Strategy*)
-   *  \brief allow to set the Strategy of the OneStepNSProblem
-   *  \return the Strategy*
-   */
-  inline void setStrategy(Strategy* str)
-  {
-    this->strategy = str;
-  }
-
-  /** \fn inline string getType()
-   *  \brief allows to get the type of the OneStepNSProblem
-   *  \return string : the type of the OneStepNSProblem
-   */
-  inline string getType() const
-  {
-    return this->nspbType;
-  }
-
-  /////////////////////////////
-
-  /** \fn void initialize(void)
-  *  \brief initializes the OneStepNSProblem  and its interactions before doing the first step
-  */
-  virtual void initialize(void);
-
   /** \fn void nextStep(void)
-  *  \brief prepares the Interaction for the next time step push y and lambda in Memory
-  *  \exception to be defined
-  *  \return void
-  */
+   *  \brief prepares the Interaction for the next time step push y and lambda in Memory
+   *  \exception to be defined
+   *  \return void
+   */
   virtual void nextStep(void);
 
   /** \fn void updateState(void)
    *  \brief predict all the relations before updating state of the problem
-  */
+   */
   virtual void updateState(void);
 
   /** \fn void checkInteraction(void)
-   *  \brief predict all the relations to see which ones have an effect
+   *  \brief check and update status of the interactions
    */
-  virtual void checkInteraction(void);
+  virtual void checkInteraction();
 
   /** \fn void formalize(void)
    *  \brief transform the discretised problem in a problem under numerical form
    *  param double : current time
    */
-  virtual void formalize(double time);
+  virtual void formalize(const double&);
 
   /** \fn void compute(void)
    *  \brief make the computation so solve the NS problem
    */
   virtual void compute(void);
-
-  /** \fn void fillNSProblemWithNSProblemXML()
-   *  \brief uses the OneStepNSProblemXML of the OneStepNSProblem to fill the fields of this OneStepNSProblem
-   *  \exception RuntimeException
-   */
-  virtual void fillNSProblemWithNSProblemXML();
 
   /** \fn void fillSolvingMethod()
    *  \brief fills the fields of the solvingMethod object with data read in the XML DOM tree
@@ -226,102 +263,94 @@ public:
    */
   virtual void saveNSProblemToXML();
 
-  /** \fn void fillInteractionVector()
-   *  \brief fill the interactionVector to store the Interactions concerned by this OneStepNSProblem
-   *  This method is called when the platform is manually built and all the Interactions of the NonSmoothDynamicalSystem will be added to the interactionVector
-   *  \exception RuntimeException
-   */
-  void fillInteractionVector();
-
-  /** \fn void init(void)
-   *  \brief initialize the value nInteraction if the input data don't do it. This value correspond to the size of the y vector
-   */
-  void init(void);
-
   /** \fn bool allInteractionConcerned()
-  *   \brief defines if the vector of Interaction concerned by this OneStepNSProblem
-  *          contains all the Interactions of the NonSmoothDynamicalSystem
-  *   \return bool : true if the vector of Interaction of the OneStepNSProblem and the NonSmoothDynamicalSystem have the same size
-  */
+   *   \brief defines if the vector of Interaction concerned by this OneStepNSProblem
+   *          contains all the Interactions of the NonSmoothDynamicalSystem
+   *   \return bool : true if the vector of Interaction of the OneStepNSProblem and the NonSmoothDynamicalSystem have the same size
+   */
   bool allInteractionConcerned();
 
-  /** \fn void setLemkeAlgorithm( double )
-  *   \brief sets the parameters for the lemke solfing algorithm in the solvingMethod structure
-  *   \param string : the kind of solving method
-  *   \param double : the *tolerance* maxIter parameter
-  */
-  virtual void setLemkeAlgorithm(string, double = /*DefaultAlgoTolerance*/ DefaultAlgoMaxIter);
+  /** \fn void setLemkeAlgorithm(const std::string&, const double& = DefaultAlgoMaxIter)
+   *   \brief sets the parameters for the lemke solfing algorithm in the solvingMethod structure
+   *   \param string : the solving method
+   *   \param double : the *tolerance* maxIter parameter
+   */
+  virtual void setLemkeAlgorithm(const std::string&, const double& = DefaultAlgoMaxIter);
 
-  /** \fn void setGsnlAlgorithm( double, string, int)
-  *   \brief sets the parameters for the gsnl solfing algorithm in the solvingMethod structure
-  *   \param string : the kind of solving method
-  *   \param double : the tolerance parameter
-  *   \param string : the norm type paramater
-  */
-  virtual void setGsnlAlgorithm(string, double = DefaultAlgoTolerance, string = DefaultAlgoNormType,
-                                int = DefaultAlgoMaxIter);
+  /** \fn void setGsnlAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
+   *                            const int& = DefaultAlgoMaxIter)
+   *   \brief sets the parameters for the gsnl solfing algorithm in the solvingMethod structure
+   *   \param string : the solving method
+   *   \param double : the tolerance parameter
+   *   \param string : the norm type paramater
+   *   \param inte   : maxIter
+   */
+  virtual void setGsnlAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
+                                const int& = DefaultAlgoMaxIter);
 
-  /** \fn void setGcpAlgorithm( double, string, int )
-  *   \brief sets the parameters for the gcp solfing algorithm in the solvingMethod structure
-  *   \param string : the kind of solving method
-  *   \param double : the tolerance parameter
-  *   \param string : the norm type paramater
-  *   \param int : the iterMax parameter
-  */
-  virtual void setGcpAlgorithm(string, double = DefaultAlgoTolerance, string = DefaultAlgoNormType,
-                               int = DefaultAlgoMaxIter);
+  /** \fn void setGcpAlgorithm( const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
+   *                            const int& = DefaultAlgoMaxIter )
+   *   \brief sets the parameters for the gcp solfing algorithm in the solvingMethod structure
+   *   \param string : the kind of solving method
+   *   \param double : the tolerance parameter
+   *   \param string : the norm type paramater
+   *   \param int : the iterMax parameter
+   */
+  virtual void setGcpAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
+                               const int& = DefaultAlgoMaxIter);
 
-  /** \fn void setLatinAlgorithm( double, string, int, double )
-  *   \brief sets the parameters for the lcp solfing algorithm in the solvingMethod structure
-  *   \param string : the kind of solving method
-  *   \param double : the tolerance parameter
-  *   \param string : the norm type paramater
-  *   \param int : the iterMax parameter
-  *   \param double : the search direction parameter
-  */
-  virtual void setLatinAlgorithm(string, double = DefaultAlgoTolerance, string = DefaultAlgoNormType,
-                                 int = DefaultAlgoMaxIter, double = DefaultAlgoSearchDirection);
+  /** \fn void setLatinAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
+   *         const int& = DefaultAlgoMaxIter, const double& = DefaultAlgoSearchDirection)
+   *   \brief sets the parameters for the lcp solfing algorithm in the solvingMethod structure
+   *   \param string : the kind of solving method
+   *   \param double : the tolerance parameter
+   *   \param string : the norm type paramater
+   *   \param int : the iterMax parameter
+   *   \param double : the search direction parameter
+   */
+  virtual void setLatinAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
+                                 const int& = DefaultAlgoMaxIter, const double& = DefaultAlgoSearchDirection);
 
 
   /** \fn void updateConnectedInteractionMap()
-  *   \brief mofifies the connectedInteractions map according to the interactions of the OneStepNSProblem
-  */
+   *   \brief mofifies the connectedInteractions map according to the interactions of the OneStepNSProblem
+   */
   void updateConnectedInteractionMap();
 
   /** \fn void displayConnectedInteractionMap()
-  *   \brief display the map of the connected interactions
-  */
+   *   \brief display the map of the connected interactions
+   */
   void displayConnectedInteractionMap();
-
 
 protected:
   /** type of the OneStepNSProblem */
-  string nspbType;
+  std::string nspbType;
 
-  /** contains the size of the problem to solve */
+  /** size of the problem to solve */
   int n;
 
-  Strategy *strategy;
-
   /** all the Interaction known by the OneStepNSProblem */
-  vector < Interaction* > interactionVector;
+  std::vector< Interaction* > interactionVector;
 
   /** all the EqualityConstraint known by the OneStepNSProblem */
-  vector < EqualityConstraint* > ecVector;
-
-  /** the XML object linked to the OneStepNSProblem to read XML data */
-  OneStepNSProblemXML* onestepnspbxml;
+  std::vector< EqualityConstraint* > ecVector;
 
   /** structure containing the structures of the numerous solving methods */
   methode solvingMethod;
 
   /** name of the solver to use */
-  string solver;
+  std::string solver;
 
   /** array of the connected interactions
    * in this map, we put all the active interactions (status = 1)
    * If an active interaction has no connection, the associated vector<Connection*> is empty */
-  map< Interaction*, vector<Connection*> > connectedInteractionMap;
+  std::map< Interaction*, std::vector<Connection*> > connectedInteractionMap;
+
+  /** link to the strategy that owns the NSPb */
+  Strategy *strategy;
+
+  /** the XML object linked to the OneStepNSProblem to read XML data */
+  OneStepNSProblemXML* onestepnspbxml;
 };
 
 #endif // ONESTEPNSPROBLEM_H

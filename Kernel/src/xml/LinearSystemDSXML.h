@@ -10,35 +10,19 @@
 * LinearSystemDSXML allows to manage data of a LinearSystemDS DOM tree.
 */
 
-
 #ifndef __LINEARSYSTEMDSXML__
 #define __LINEARSYSTEMDSXML__
 
-
-#include <vector>
-#include <string>
-#include <libxml/tree.h>
-
 #include "DSXML.h"
-//#include "SiconosVector.h"
-#include "NewSiconosVector.h"
-#include "SimpleVector.h"
-#include "SiconosMatrix.h"
 
-#include "SiconosDOMTreeTools.h"
+const std::string LDS_A = "A";
+const std::string LDS_B = "B";
 
+const std::string LDS_U = "u";
+const std::string LDS_F = "f";
 
-//using namespace std;
-
-
-const string LDS_A = "A";
-const string LDS_B = "B";
-
-const string LDS_U = "u";
-const string LDS_F = "f";
-
-const string LDS_MATRIXPLUGIN = "matrixPlugin";
-const string LDS_VECTORPLUGIN = "vectorPlugin";
+const std::string LDS_MATRIXPLUGIN = "matrixPlugin";
+const std::string LDS_VECTORPLUGIN = "vectorPlugin";
 
 
 class LinearSystemDSXML : public DSXML
@@ -82,11 +66,11 @@ public:
     if (this->ANode != NULL)
     {
       //SiconosDOMTreeTools::setSiconosMatrixValue(this->ANode, *m);
-      SiconosDOMTreeTools::setSiconosMatrixValue(this->ANode, m);
+      SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->ANode, *m);
     }
     else
     {
-      this->ANode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LDS_A, m);
+      this->ANode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LDS_A, *m);
     }
   }
 
@@ -99,9 +83,9 @@ public:
     if (this->BNode != NULL)
     {
       //SiconosDOMTreeTools::setSiconosMatrixValue(this->BNode, *m);
-      SiconosDOMTreeTools::setSiconosMatrixValue(this->BNode, m);
+      SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->BNode, *m);
     }
-    else this->BNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LDS_B, m);
+    else this->BNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LDS_B, *m);
   }
   /////////////////////////////
 
@@ -110,7 +94,7 @@ public:
   *   \return The u Plugin name of the LinearSystemDSXML
   *  \exception XMLException
   */
-  inline string getUPlugin()
+  inline std::string getUPlugin()
   {
     if (this->isUPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->uNode, LDS_VECTORPLUGIN);
@@ -139,9 +123,9 @@ public:
     if (this->uNode != NULL)
     {
       //SiconosDOMTreeTools::setSiconosVectorValue(this->uNode, *v);
-      SiconosDOMTreeTools::setSiconosVectorValue(this->uNode, v);
+      SiconosDOMTreeTools::setSiconosVectorNodeValue(this->uNode, *v);
     }
-    else this->uNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LDS_U, v);
+    else this->uNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LDS_U, *v);
   }
 
   /** \fn inline string getFPlugin()
@@ -149,7 +133,7 @@ public:
   *   \return The f Plugin name of the LinearSystemDSXML
   *  \exception XMLException
   */
-  inline string getFPlugin()
+  inline std::string getFPlugin()
   {
     if (this->isFPlugin())
       return  SiconosDOMTreeTools::getStringAttributeValue(this->fNode, LDS_VECTORPLUGIN);
@@ -178,9 +162,9 @@ public:
     if (this->fNode != NULL)
     {
       //SiconosDOMTreeTools::setSiconosVectorValue(this->fNode, *v);
-      SiconosDOMTreeTools::setSiconosVectorValue(this->fNode, v);
+      SiconosDOMTreeTools::setSiconosVectorNodeValue(this->fNode, *v);
     }
-    else this->fNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LDS_F, v);
+    else this->fNode = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, LDS_F, *v);
   }
 
 

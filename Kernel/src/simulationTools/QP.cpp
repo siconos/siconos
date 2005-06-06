@@ -1,69 +1,54 @@
 
 #include "QP.h"
-#include "QPXML.h"
-#include "check.h"
+using namespace std;
 
-QP::QP(): OneStepNSProblem()
+
+QP::QP(OneStepNSProblemXML* osnspbxml, Strategy* newStrat):
+  OneStepNSProblem(osnspbxml, newStrat), Q(NULL), p(NULL),
+  isQAllocatedIn(true), isPAllocatedIn(true)
 {
-  this->nspbType = QP_OSNSP;
+  nspbType = QP_OSNSP;
+  if (onestepnspbxml != NULL)
+  {
+    int size = ((static_cast<QPXML*>(onestepnspbxml))->getP()).size();
+    n = size;
+    Q = new SiconosMatrix(size, size);
+    p = new SimpleVector(size);
+    *Q = (static_cast<QPXML*>(onestepnspbxml))->getQ();
+    *p = (static_cast<QPXML*>(onestepnspbxml))->getP();
+  }
+  else RuntimeException::selfThrow("QP::xml constructor, xml file=NULL");
 }
-
-QP::QP(OneStepNSProblemXML* osnspbxml): OneStepNSProblem(osnspbxml)
-{
-  this->nspbType = QP_OSNSP;
-}
-
 
 QP::~QP()
+{
+  if (isQAllocatedIn)
+  {
+    delete Q;
+    Q = NULL;
+  }
+  if (isPAllocatedIn)
+  {
+    delete p;
+    p = NULL;
+  }
+}
+void QP::formalise(const double& time)
 {}
 
-
-SiconosMatrix* QP::getQPtr(void)
-{
-  return &this->Q;
-}
-
-SimpleVector* QP::getPPtr(void)
-{
-  return &this->p;
-}
-
-
-
-void QP::formalise(double time)
-{
-  //OUT("QP::formaliseOneStepNSProblem\n");
-}
-
-
 void QP::compute(void)
-{
-  //OUT("QP::computeOneStepNSProblem\n");
-}
-
-
-void QP::fillNSProblemWithNSProblemXML()
-{
-  OUT("QP::fillNSProblemWithNSProblemXML");
-  OneStepNSProblem::fillNSProblemWithNSProblemXML();
-  if (this->onestepnspbxml != NULL)
-  {
-    this->Q = (static_cast<QPXML*>(this->onestepnspbxml))->getQ();
-    this->p = (static_cast<QPXML*>(this->onestepnspbxml))->getP();
-
-    //    this->display();
-  }
-  else RuntimeException::selfThrow("QP::fillNSProblemWithNSProblemXML - the OneStepNSProblemXML object does not exist");
-}
+{}
 
 void QP::display() const
 {
   cout << "------------------------------------------------------" << endl;
   cout << "____ data of the DynamicalSystem read from a XML file" << endl;
   cout << "| Q " << endl;
-  this->Q.display();
+  if (Q != NULL) Q->display();
+  else cout << "->NULL" << endl;
   cout << "| p " << endl ;
-  this->p.display();
+  if (p != NULL) p->display();
+  else cout << "->NULL" << endl;
   cout << "____________________________" << endl;
   cout << "------------------------------------------------------" << endl;
 }
@@ -72,23 +57,17 @@ void QP::saveNSProblemToXML()
 {
   OUT("QP::saveNSProblemToXML");
   OneStepNSProblem::saveNSProblemToXML();
-  if (this->onestepnspbxml != NULL)
-  {
-    /*
-     * the Q et p of the LCP can be saved by calling the saveQToXML() and savePToXML()
-     */
-    //(static_cast<QPXML*>(this->onestepnspbxml))->setQ( &(this->Q) );
-    //(static_cast<QPXML*>(this->onestepnspbxml))->setP( &(this->p) );
-  }
+  if (onestepnspbxml != NULL)
+  {}
   else RuntimeException::selfThrow("QP::saveNSProblemToXML - the OneStepNSProblemXML object does not exist");
 }
 
 void QP::savePToXML()
 {
   IN("QP::savePToXML\n");
-  if (this->onestepnspbxml != NULL)
+  if (onestepnspbxml != NULL)
   {
-    (static_cast<QPXML*>(this->onestepnspbxml))->setP(&(this->p));
+    (static_cast<QPXML*>(onestepnspbxml))->setP(*p);
   }
   else RuntimeException::selfThrow("QP::savePToXML - OneStepNSProblemXML object not exists");
   OUT("QP::savePToXML\n");
@@ -97,32 +76,13 @@ void QP::savePToXML()
 void QP::saveQToXML()
 {
   IN("QP::saveQToXML\n");
-  if (this->onestepnspbxml != NULL)
+  if (onestepnspbxml != NULL)
   {
-    (static_cast<QPXML*>(this->onestepnspbxml))->setQ(&(this->Q));
+    (static_cast<QPXML*>(onestepnspbxml))->setQ(*Q);
   }
   else RuntimeException::selfThrow("QP::saveQToXML - OneStepNSProblemXML object not exists");
   OUT("QP::saveQToXML\n");
 }
-
-void QP::createOneStepNSProblem(OneStepNSProblemXML * osnspbXML, Strategy * strategy)
-{
-  if (osnspbXML != NULL)
-  {
-    this->onestepnspbxml = osnspbXML;
-    this->nspbType = QP_OSNSP;
-
-    this->fillNSProblemWithNSProblemXML();
-  }
-  else
-  {
-    this->strategy = strategy;
-    this->nspbType = QP_OSNSP;
-    this->fillInteractionVector();
-  }
-  this->init();
-}
-
 
 QP* QP::convert(OneStepNSProblem* osnsp)
 {
@@ -131,3 +91,9 @@ QP* QP::convert(OneStepNSProblem* osnsp)
   return qp;
 }
 
+// Default private constructor
+QP::QP(): OneStepNSProblem(), Q(NULL), p(NULL),
+  isQAllocatedIn(false), isPAllocatedIn(false)
+{
+  nspbType = QP_OSNSP;
+}

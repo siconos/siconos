@@ -1,14 +1,16 @@
-
 #include "StrategyXML.h"
-#include "MoreauXML.h"
+
+// includes to be deleted thanks to factories
 #include "LsodarXML.h"
 #include "AdamsXML.h"
+#include "MoreauXML.h"
 #include "LCPXML.h"
-#include "CFDXML.h"
 #include "QPXML.h"
-//#include "RelayXML.h"  /* not yet created */
+#include "CFDXML.h"
 
-#include "check.h"
+
+using namespace std;
+
 
 
 //map<int, bool> convertVectorToMap(vector<int> v)
@@ -110,8 +112,8 @@ void StrategyXML::loadStrategyXML()
   else
   {
     /*
-       * the OneStepNSProblem is optional, it's needed only when at least an Interaction is defined
-       */
+     * the OneStepNSProblem is optional, it's needed only when at least an Interaction is defined
+     */
     cout << "StrategyXML - loadStrategyXML Warning : tag " << ONESTEPNSPROBLEM_TAG << " not found. The OneStepNSProblem is optional" << endl;
     this->oneStepNSProblemXML = NULL;
   }
@@ -174,12 +176,12 @@ void StrategyXML::loadOneStepNSProblemXML(xmlNode * rootOneStepNSProblemNode)
   {
     xmlNode *node = NULL;
     /*
-    * selection of the good kind of model for the OnsStepMSProblem
-    * we get the first node after the OneStepNSProblem node
-    * => it's the solving model node (LcpSolving, ...) ==> it's good
-    * or
-    * => it's the Solver node ==> the solving model node must be the following node
-    */
+     * selection of the good kind of model for the OnsStepMSProblem
+     * we get the first node after the OneStepNSProblem node
+     * => it's the solving model node (LcpSolving, ...) ==> it's good
+     * or
+     * => it's the Solver node ==> the solving model node must be the following node
+     */
     if (SiconosDOMTreeTools::findNodeChild(rootOneStepNSProblemNode) != NULL)
       node = SiconosDOMTreeTools::findNodeChild(rootOneStepNSProblemNode);
 
@@ -194,15 +196,15 @@ void StrategyXML::loadOneStepNSProblemXML(xmlNode * rootOneStepNSProblemNode)
     }
     else if (type == QP_TAG)
     {
-      this->oneStepNSProblemXML = new QPXML(rootOneStepNSProblemNode, definedNumberInteractionVector);
+      oneStepNSProblemXML = new QPXML(rootOneStepNSProblemNode, definedNumberInteractionVector);
     }
     /*else if (type == RELAY_TAG) //--Not implemented for the moment
     {
-      this->oneStepNSProblemXML= new RelayXML(rootOneStepNSProblemNode, definedNumberInteractionVector);
+    this->oneStepNSProblemXML= new RelayXML(rootOneStepNSProblemNode, definedNumberInteractionVector);
     }*/
     else if (type == CFD_TAG)
     {
-      this->oneStepNSProblemXML = new CFDXML(rootOneStepNSProblemNode, definedNumberInteractionVector);
+      oneStepNSProblemXML = new CFDXML(rootOneStepNSProblemNode, definedNumberInteractionVector);
     }
     else
     {
@@ -240,7 +242,7 @@ void StrategyXML::loadStrategy(Strategy* str)
   if (this->strategyNode != NULL)
   {
     // creation of the TimeDiscretisation node
-    if (str->getTimeDiscretisationPtr()->getTimeDiscretisationXML() == NULL)
+    if (str->getTimeDiscretisationPtr()->getTimeDiscretisationXMLPtr() == NULL)
     {
       node = xmlNewChild(this->strategyNode, NULL, (xmlChar*)TIMEDISCRETISATION_TAG.c_str(), NULL);
       if (str->getTimeDiscretisationPtr()->isConstant())
@@ -249,7 +251,7 @@ void StrategyXML::loadStrategy(Strategy* str)
       tdxml = new TimeDiscretisationXML();
 
       // linkage between the TimeDiscretisation and his TimeDiscretisationXML
-      str->getTimeDiscretisationPtr()->setTimeDiscretisationXML(tdxml);
+      str->getTimeDiscretisationPtr()->setTimeDiscretisationXMLPtr(tdxml);
 
       // creation of the TimeDiscretisationXML
       tdxml->updateTimeDiscretisationXML(node, str->getTimeDiscretisationPtr());
@@ -331,7 +333,7 @@ void StrategyXML::loadStrategy(Strategy* str)
     /*
      * now, creation of the OneStepNSProblemXML object if the OneStepNSProblem exists
      */
-    if (str->getOneStepNSProblem() != NULL)
+    if (str->getOneStepNSProblemPtr() != NULL)
     {
       if (!this->hasOneStepNSProblemXML())
       {
@@ -341,9 +343,9 @@ void StrategyXML::loadStrategy(Strategy* str)
         node = xmlNewChild(this->strategyNode, NULL, (xmlChar*)ONESTEPNSPROBLEM_TAG.c_str(), NULL);
       }
 
-      if (str->getOneStepNSProblem()->getOneStepNSProblemXML() == NULL)
+      if (str->getOneStepNSProblemPtr()->getOneStepNSProblemXML() == NULL)
       {
-        type = str->getOneStepNSProblem()->getType();
+        type = str->getOneStepNSProblemPtr()->getType();
         //node = xmlNewChild( this->strategyNode, NULL, (xmlChar*)STRATEGY_ONESTEPNSPROBLEM.c_str(), NULL );
         if (type == LCP_TAG)
         {
@@ -352,10 +354,10 @@ void StrategyXML::loadStrategy(Strategy* str)
           osnspbxml = new LCPXML();
 
           // linkage between the OneStepNSProblem and his OneStepNSProblemXML
-          str->getOneStepNSProblem()->setOneStepNSProblemXML(osnspbxml);
+          str->getOneStepNSProblemPtr()->setOneStepNSProblemXML(osnspbxml);
 
           // creation of the OneStepNSProblemXML
-          static_cast<LCPXML*>(osnspbxml)->updateOneStepNSProblemXML(node, str->getOneStepNSProblem());
+          static_cast<LCPXML*>(osnspbxml)->updateOneStepNSProblemXML(node, str->getOneStepNSProblemPtr());
 
           this->oneStepNSProblemXML = osnspbxml;
         }
@@ -366,10 +368,10 @@ void StrategyXML::loadStrategy(Strategy* str)
           osnspbxml = new QPXML();
 
           // linkage between the OneStepNSProblem and his OneStepNSProblemXML
-          str->getOneStepNSProblem()->setOneStepNSProblemXML(osnspbxml);
+          str->getOneStepNSProblemPtr()->setOneStepNSProblemXML(osnspbxml);
 
           // creation of the OneStepNSProblemXML
-          static_cast<QPXML*>(osnspbxml)->updateOneStepNSProblemXML(node, str->getOneStepNSProblem());
+          static_cast<QPXML*>(osnspbxml)->updateOneStepNSProblemXML(node, str->getOneStepNSProblemPtr());
 
           this->oneStepNSProblemXML = osnspbxml;
         }

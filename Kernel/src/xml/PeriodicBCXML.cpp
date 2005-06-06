@@ -1,5 +1,5 @@
-
 #include "PeriodicBCXML.h"
+using namespace std;
 
 PeriodicBCXML::PeriodicBCXML()
 {

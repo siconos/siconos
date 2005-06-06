@@ -2,6 +2,7 @@
 #define PERIODICBC_H
 
 #include "BoundaryCondition.h"
+#include "check.h"
 
 /** \class PeriodicBC
  *  \brief kind of BoundaryCondition

@@ -1,123 +1,253 @@
 #include "Interaction.h"
 
-// include here the Relations for the static_casts
+// includes to be deleted thanks to factories
 #include "LinearTIR.h"
 #include "LagrangianLinearR.h"
 #include "LagrangianNonLinearR.h"
-
-// include here the NonSmoothLaws for the static_casts
 #include "ComplementarityConditionNSL.h"
 #include "RelayNSL.h"
 #include "NewtonImpactLawNSL.h"
 #include "NewtonImpactFrictionNSL.h"
 
-#include "check.h"
+using namespace std;
 
-Interaction::Interaction()
+// --- CONSTRUCTORS ---
+
+// Copy constructor
+Interaction::Interaction(const Interaction& newI):
+  id(newI.getId()), number(newI.getNumber()), nInteraction(newI.getNInteraction()),
+  y(NULL), yDot(NULL), lambda(NULL), yOld(NULL), yDotOld(NULL), lambdaOld(NULL),
+  nslaw(NULL), relation(NULL), interactionxml(NULL), isYAllocatedIn(true), isYDotAllocatedIn(true),
+  isLambdaAllocatedIn(true), isYOldAllocatedIn(true), isYDotOldAllocatedIn(true), isLambdaOldAllocatedIn(true),
+  isRelationAllocatedIn(true), isNsLawAllocatedIn(true)
 {
-  this->id = "none";
-  this->nInteraction = 0;
+  // Memory allocation and copy for simple vectors
+  y = new SimpleVector(nInteraction);
+  yDot = new SimpleVector(nInteraction);
+  lambda = new SimpleVector(nInteraction);
+  yOld = new SimpleVector(nInteraction);
+  yDotOld = new SimpleVector(nInteraction);
+  lambdaOld = new SimpleVector(nInteraction);
+  *y = *newI.getYPtr();
+  *yDot = *newI.getYDotPtr();
+  *lambda = *newI.getLambdaPtr();
+  *yOld = *newI.getYOldPtr();
+  *yDotOld = *newI.getYDotOldPtr();
+  *lambdaOld = *newI.getLambdaOldPtr();
 
-  this->vectorDS.clear();
-  this->nslaw = NULL;
-  this->relation = NULL;
+  status = newI.getStatus();
 
-  this->interactionxml = NULL;
+  vectorDS.clear();
+  vectorDS = newI.getDynamicalSystems();
+
+  // Nslaw (warning! nslaw is an abstract class)
+  string NslawType = newI.getNonSmoothLawPtr()->getType();
+  if (NslawType ==  COMPLEMENTARITYCONDITIONNSLAW)
+    nslaw = new ComplementarityConditionNSL();
+  else if (NslawType == NEWTONIMPACTLAWNSLAW)
+    nslaw = new NewtonImpactLawNSL();
+  else if (NslawType == NEWTONIMPACTFRICTIONNSLAW)
+    nslaw = new NewtonImpactFrictionNSL();
+  else if (NslawType == RELAYNSLAW)
+    nslaw = new  RelayNSL();
+  else RuntimeException::selfThrow("Interaction::copy constructor, unknown NSLAW type :" + nslaw->getType());
+
+  *nslaw = *newI.getNonSmoothLawPtr();
+
+  // Relation
+  string relationType = newI.getRelationPtr()->getType();
+  if (relationType == LINEARTIRELATION)
+    relation = new LinearTIR();
+  else if (relationType == LAGRANGIANLINEARRELATION)
+    relation = new LagrangianLinearR();
+  else if (relationType == LAGRANGIANNONLINEARRELATION)
+    relation = new LagrangianNonLinearR();
+  else RuntimeException::selfThrow("Interaction::copy constructor, unknown relation type " + relation->getType());
+  *relation = *newI.getRelationPtr();
+
+  // Remark (FP): no link with newI xml object -> useless and avoid new/delete bugs
 }
 
-Interaction::Interaction(InteractionXML* interxml)
+// --- XML constructor ---
+Interaction::Interaction(InteractionXML* interxml):
+  id("none"), number(0), nInteraction(0), y(NULL), yDot(NULL), lambda(NULL), yOld(NULL),
+  yDotOld(NULL), lambdaOld(NULL), nslaw(NULL), relation(NULL), interactionxml(interxml),
+  isYAllocatedIn(true), isYDotAllocatedIn(true), isLambdaAllocatedIn(true), isYOldAllocatedIn(true),
+  isYDotOldAllocatedIn(true), isLambdaOldAllocatedIn(true), isRelationAllocatedIn(true), isNsLawAllocatedIn(true)
 {
-  this->id = "none";
-  this->nInteraction = 0;
+  if (interactionxml != NULL)
+  {
+    vectorDS.clear();
+    if (interactionxml->hasId()) id = interactionxml->getId();
+    number = interactionxml->getNumber();
+    nInteraction = interactionxml->getNInter();
+    // Memory allocation for simple vectors
+    y = new SimpleVector(nInteraction);
+    yDot = new SimpleVector(nInteraction);
+    lambda = new SimpleVector(nInteraction);
+    yOld = new SimpleVector(nInteraction);
+    yDotOld = new SimpleVector(nInteraction);
+    lambdaOld = new SimpleVector(nInteraction);
+    if (interactionxml->hasY()) *y = interactionxml->getY();
+    if (interactionxml->hasLambda()) *lambda = interactionxml->getLambda();
+    // Remark: no yDot in xml
 
-  this->vectorDS.clear();
-  this->nslaw = NULL;
-  this->relation = NULL;
+    // Old values are initialized with current values
+    swapInMemory();
 
-  this->interactionxml = interxml;
+    // --- Status ---
+    status.resize(nInteraction);
+    status = interactionxml->getStatus();
+
+    // --- Dynamical Systems ---
+    // do nothing. The way DS are loaded from xml is to be reviewed
+
+    // --- Non smooth law ---
+    string NslawType = interactionxml->getNonSmoothLawXML()->getType();
+    // ComplementarityConditionNSL
+    if (NslawType == COMPLEMENTARITY_CONDITION_NSLAW_TAG)
+      nslaw = new ComplementarityConditionNSL(interactionxml->getNonSmoothLawXML());
+    // RelayNSL
+    else if (NslawType == RELAY_NSLAW_TAG)
+      nslaw = new RelayNSL(interactionxml->getNonSmoothLawXML());
+    // NewtonImpactLawNSL
+    else if (NslawType == NEWTON_IMPACT_LAW_NSLAW_TAG)
+      nslaw = new NewtonImpactLawNSL(interactionxml->getNonSmoothLawXML());
+    // Newton impact friction law
+    else if (NslawType == NEWTON_IMPACT_FRICTION_NSLAW_TAG)
+      nslaw = new NewtonImpactFrictionNSL(interactionxml->getNonSmoothLawXML());
+    else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type :" + nslaw->getType());
+
+    // --- Relation ---
+    string relationType = interactionxml->getRelationXML()->getType();
+    // Linear relation
+    if (relationType == LINEAR_TIME_INVARIANT_RELATION_TAG)
+    {
+      relation = new LinearTIR(interactionxml->getRelationXML());
+      relation->setInteraction(this);
+    }
+    // Lagrangian linear relation
+    else if (relationType == LAGRANGIAN_LINEAR_RELATION_TAG)
+    {
+      relation = new LagrangianLinearR(interactionxml->getRelationXML());
+      relation->setInteraction(this);
+    }
+    // Lagrangian non-linear relation
+    else if (relationType == LAGRANGIAN_NON_LINEAR_RELATION_TAG)
+    {
+      relation = new LagrangianNonLinearR(interactionxml->getRelationXML());
+      relation->setInteraction(this);
+    }
+    else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + relation->getType());
+  }
+  else RuntimeException::selfThrow("Interaction::xml constructor, xmlfile = NULL");
 }
 
+// --- Constructor from a set of data ---
+
+Interaction::Interaction(const string& newId, const int& newNumber, const int& nInter,
+                         vector<int>* newStatus,
+                         vector<DynamicalSystem*> *dsConcerned):
+  id(newId), number(newNumber), nInteraction(nInter), y(NULL), yDot(NULL),
+  lambda(NULL), yOld(NULL), yDotOld(NULL), lambdaOld(NULL), nslaw(NULL),
+  relation(NULL), interactionxml(NULL), isYAllocatedIn(true), isYDotAllocatedIn(true),
+  isLambdaAllocatedIn(true), isYOldAllocatedIn(true), isYDotOldAllocatedIn(true),
+  isLambdaOldAllocatedIn(true), isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
+{
+  // Memory allocation and copy for simple vectors
+  y = new SimpleVector(nInteraction);
+  yDot = new SimpleVector(nInteraction);
+  lambda = new SimpleVector(nInteraction);
+  yOld = new SimpleVector(nInteraction);
+  yDotOld = new SimpleVector(nInteraction);
+  lambdaOld = new SimpleVector(nInteraction);
+
+  status.clear();
+  status = *newStatus;
+
+  vectorDS.clear();
+  if (dsConcerned != NULL) vectorDS = *dsConcerned;
+  else RuntimeException::selfThrow("Interaction::createInteraction - The dsConcerned are not given");
+
+  // Remark(FP): neither nslaw nor relation are created in this constructor -> todo?
+}
+
+// --- DESTRUCTOR ---
 Interaction::~Interaction()
 {
-  if (relation != NULL)
+  if (isYAllocatedIn)
+  {
+    delete y;
+    y = NULL;
+  }
+  if (isYDotAllocatedIn)
+  {
+    delete yDot;
+    yDot = NULL;
+  }
+  if (isLambdaAllocatedIn)
+  {
+    delete lambda;
+    lambda = NULL;
+  }
+  if (isYOldAllocatedIn)
+  {
+    delete yOld;
+    yOld = NULL;
+  }
+  if (isYDotOldAllocatedIn)
+  {
+    delete yDotOld;
+    yDotOld = NULL;
+  }
+  if (isLambdaOldAllocatedIn)
+  {
+    delete lambdaOld;
+    lambdaOld = NULL;
+  }
+  if (isRelationAllocatedIn)
   {
     delete relation;
+    relation = NULL;
   }
-  if (nslaw != NULL)
+  if (isNsLawAllocatedIn)
   {
     delete nslaw;
+    nslaw = NULL;
   }
 }
 
-
-SimpleVector* Interaction::getYPtr(void)
-{
-  return &this->y;
-}
-
-
-SimpleVector* Interaction::getLambdaPtr(void)
-{
-  return &this->lambda;
-}
-
-SimpleVector* Interaction::getYOldPtr(void)
-{
-  return &this->yOld;
-}
-
-SimpleVector* Interaction::getLambdaOldPtr(void)
-{
-  return &this->lambdaOld;
-}
-
-
-DynamicalSystem* Interaction::getDynamicalSystem(int number)
-{
-  if (this->vectorDS[0]->getNumber() == number) return this->vectorDS[0];
-  else if (this->vectorDS[1]->getNumber() == number) return this->vectorDS[1];
-  else return NULL;
-
-}
-
+// --- GETTERS/SETTERS ---
 void Interaction::setDynamicalSystems(DynamicalSystem* ds1, DynamicalSystem* ds2)
 {
-  this->vectorDS.clear();
-  this->vectorDS.push_back(ds1);
-  this->vectorDS.push_back(ds2);
+  vectorDS.clear();
+  vectorDS.push_back(ds1);
+  vectorDS.push_back(ds2);
 }
 
-
-////////////////////////
-
-void Interaction::initialize()
+DynamicalSystem* Interaction::getDynamicalSystemPtr(const int& number)
 {
-  IN("Interaction::initialize()\n");
-
-  y = SimpleVector(this->nInteraction);
-  lambda = SimpleVector(this->nInteraction);
-  yOld = SimpleVector(this->nInteraction);
-  yDot = SimpleVector(this->nInteraction);
-  yDotOld = SimpleVector(this->nInteraction);
-  lambdaOld = SimpleVector(this->nInteraction);
-  this->display();
-
-  OUT("Interaction::initialize()\n");
+  if (vectorDS[0]->getNumber() == number) return vectorDS[0];
+  else if (vectorDS[1]->getNumber() == number) return vectorDS[1];
+  else return NULL;
 }
 
+DynamicalSystem Interaction::getDynamicalSystem(const int& number)
+{
+  if (number == 0 || number == 1) return *vectorDS[number];
+  else RuntimeException::selfThrow("Interaction: getDynamicalSystem, unknown DS number");
+}
 
-void Interaction::swapInMemory(void)
+// --- OTHER FUNCTIONS ---
+
+void Interaction::swapInMemory()
 {
   IN("Interaction::swapInMemory(void)\n");
-  yOld = y;
-  lambdaOld = lambda;
-  yDotOld = yDot;
-  //cout<<"Interaction::swapInMemory Done"<<endl;
+  *yOld = *y;
+  *lambdaOld = *lambda;
+  *yDotOld = *yDot;
   OUT("Interaction::swapInMemory(void)\n");
 }
-
-
-
 
 void Interaction::check(const double& time, const double& pasH)
 {
@@ -126,19 +256,19 @@ void Interaction::check(const double& time, const double& pasH)
   relation->computeOutput(time);
 
   // Compute yp, predicted value for constrained variable, for contact detection
-  SimpleVector *yDetection = new SimpleVector(y.size());
-  relation->computePredictedOutput(pasH, yDetection);
 
   if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW || nslaw->getType() == NEWTONIMPACTLAWNSLAW || nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
   {
+    SimpleVector *yDetection = new SimpleVector(yOld->size());
+    *yDetection = *yOld + pasH * *yDotOld;
     for (i = 0; i < nInteraction; i++)
     {
       if ((*yDetection)(i) < 0.0) status[i] = 1;
     }
+    delete yDetection;
   }
   else
     RuntimeException::selfThrow("Interaction::check - not yet implemented for this NSLAW type :" + nslaw->getType());
-  delete yDetection;
   OUT("Interaction::checkInteraction(void)\n");
 }
 
@@ -148,53 +278,27 @@ void Interaction::update(const double& time, const double& pasH)
   IN("Interaction::update(void)\n");
   int i;
   // Status update
-  SimpleVector *yDetection = new SimpleVector(y.size());
-  relation->computePredictedOutput(pasH, yDetection);
   if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW || nslaw->getType() == NEWTONIMPACTLAWNSLAW || nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
   {
-    for (i = 0; i < this->nInteraction; i++)
+    SimpleVector *yDetection = new SimpleVector(y->size());
+    *yDetection = *yOld + pasH * *yDotOld;
+    for (i = 0; i < nInteraction; i++)
     {
       if ((status[i] == 1) && ((*yDetection)(i) > 0.0)) status[i] = 0;
     }
+    delete yDetection;
   }
   else
     RuntimeException::selfThrow("Interaction::update - not yet implemented for this NSLAW type :" + nslaw->getType());
-  delete yDetection;
   OUT("Interaction::update(void)\n");
-}
-
-
-void Interaction::fillInteractionWithInteractionXML()
-{
-  IN("Interaction::fillInteractionWithInteractionXML\n");
-  if (this->interactionxml != NULL)
-  {
-    if (this->interactionxml->hasId()) this->id = this->interactionxml->getId();
-    this->number = this->interactionxml->getNumber();
-
-    this->nInteraction = this->interactionxml->getNInter();
-
-    this->status.resize(this->nInteraction);
-    this->status = this->interactionxml->getStatus();
-
-    if (this->interactionxml->hasY()) this->y = this->interactionxml->getY();
-    else this->y = /*SiconosVector*/SimpleVector(this->nInteraction);
-
-    if (this->interactionxml->hasLambda()) this->lambda = this->interactionxml->getLambda();
-    else this->lambda = /*SiconosVector*/SimpleVector(this->nInteraction);
-
-    //this->display();
-  }
-  else RuntimeException::selfThrow("Interaction::fillInteractionWithInteractionXML - InteractionXML object not exists");
-  OUT("Interaction::fillInteractionWithInteractionXML\n");
 }
 
 void Interaction::display() const
 {
   cout << "-----------------------------------------------------" << endl;
   cout << "____ data of the Interaction " << endl;
-  cout << "| id : " << this->id << endl;
-  cout << "| number : " << this->number << endl;
+  cout << "| id : " << id << endl;
+  cout << "| number : " << number << endl;
   cout << "| status : ";
   for (int i = 0; i < nInteraction; i++) cout << status[i] << " ";
   cout << endl;
@@ -202,92 +306,71 @@ void Interaction::display() const
   for (int i = 0; i < nInteraction; i++) cout << vectorDS[i]->getNumber() << " ";
   cout << endl;
   cout << "| y : " << endl;
-  this->y.display();
+  if (y != NULL) y->display();
+  else cout << "->NULL" << endl;
   cout << "| yDot : " << endl;
-  this->yDot.display();
+  if (yDot != NULL) yDot->display();
+  else cout << "->NULL" << endl;
   cout << "| yOld : " << endl;
-  this->yOld.display();
+  if (yOld != NULL) yOld->display();
+  else cout << "->NULL" << endl;
   cout << "| yDotOld : " << endl;
-  this->yDotOld.display();
+  if (yDotOld != NULL) yDotOld->display();
+  else cout << "->NULL" << endl;
   cout << "| lambda : " << endl;
-  this->lambda.display();
+  if (lambda != NULL) lambda->display();
+  else cout << "->NULL" << endl;
   cout << "-----------------------------------------------------" << endl << endl;
 }
 
-void Interaction::linkInteractionWithInteractionXML()
+Relation* Interaction::createLagrangianLinearR(SiconosMatrix* H, SimpleVector* b)
 {
-  IN("Interaction::linkInteractionXML\n");
-  // get the RelationXML object then create the Relation for this RelationXML and add this Relation to the Interaction
-
-  // with the data of the XML object, we know the type of Relation, so we can instanciate the right type of Relation
-  // Relation - LinearTIR
-  if (this->interactionxml->getRelationXML()->getType() == LINEAR_TIME_INVARIANT_RELATION_TAG)
-  {
-    cout << "Interaction - Relation LTI ..." << endl;
-    // creation of the LinearTIR with this constructor and call of a method to fill
-    this->relation = new LinearTIR();
-    static_cast<LinearTIR*>(this->relation)->createRelation(static_cast<LinearTIRXML*>(this->interactionxml->getRelationXML()));
-    this->relation->setInteraction(this);
-  }
-  // Relation - LagrangianLinearR
-  else if (this->interactionxml->getRelationXML()->getType() == LAGRANGIAN_LINEAR_RELATION_TAG)
-  {
-    cout << "Interaction - Relation LagrangianLinear ..." << endl;
-    // creation of the LagrangianLinearR with this constructor and call of a method to fill
-    this->relation = new LagrangianLinearR();
-    static_cast<LagrangianLinearR*>(this->relation)->createRelation(static_cast<LagrangianLinearRXML*>(this->interactionxml->getRelationXML()));
-    this->relation->setInteraction(this);
-  }
-
-  // Relation - LagrangianNonLinearR
-  else if (this->interactionxml->getRelationXML()->getType() == LAGRANGIAN_NON_LINEAR_RELATION_TAG)
-  {
-    cout << "Interaction - Relation LagrangianNonLinear ..." << endl;
-    // creation of the LagrangianNonLinearR with this constructor and call of a method to fill
-    this->relation = new LagrangianNonLinearR();
-    static_cast<LagrangianNonLinearR*>(this->relation)->createRelation(static_cast<LagrangianNonLinearRXML*>(this->interactionxml->getRelationXML()));
-    this->relation->setInteraction(this);
-  }
-
-  // for the other Relation, we must have the xxxRelationXML.h .cpp objects needed, and the objects in the Relations inherited of the platform
-  /*
-   *  other "if" to create LagrangianNonLinearR and LagrangianLinearR
-   *
-   */
-
-  /* ================================================ */
-
-  // with the data of the XML object, we know the type of NonSmoothLaw, so we can instanciate the right type of NonSmoothLaw
-
-  // NonSmoothLaw - ComplementarityConditionNSL
-  if (this->interactionxml->getNonSmoothLawXML()->getType() == COMPLEMENTARITY_CONDITION_NSLAW_TAG)
-  {
-    // creation of the ComplementarityConditionNSL with this constructor and call of a method to fill
-    this->nslaw = new ComplementarityConditionNSL();
-    static_cast<ComplementarityConditionNSL*>(this->nslaw)->createNonSmoothLaw(static_cast<ComplementarityConditionNSLXML*>(this->interactionxml->getNonSmoothLawXML()));
-  }
-  // NonSmoothLaw - RelayNSL
-  else if (this->interactionxml->getNonSmoothLawXML()->getType() == RELAY_NSLAW_TAG)
-  {
-    // creation of the RelayNSL with this constructor and call of a method to fill
-    this->nslaw = new RelayNSL();
-    static_cast<RelayNSL*>(this->nslaw)->createNonSmoothLaw(static_cast<RelayNSLXML*>(this->interactionxml->getNonSmoothLawXML()));
-  }
-  // NonSmoothLaw - NewtonImpactLawNSL
-  else if (this->interactionxml->getNonSmoothLawXML()->getType() == NEWTON_IMPACT_LAW_NSLAW_TAG)
-  {
-    // creation of the RelayNSL with this constructor and call of a method to fill
-    this->nslaw = new NewtonImpactLawNSL();
-    static_cast<NewtonImpactLawNSL*>(this->nslaw)->createNonSmoothLaw(static_cast<NewtonImpactLawNSLXML*>(this->interactionxml->getNonSmoothLawXML()));
-  }
-  else if (this->interactionxml->getNonSmoothLawXML()->getType() == NEWTON_IMPACT_FRICTION_NSLAW_TAG)
-  {
-    // creation of the RelayNSL with this constructor and call of a method to fill
-    this->nslaw = new NewtonImpactFrictionNSL();
-    static_cast<NewtonImpactFrictionNSL*>(this->nslaw)->createNonSmoothLaw(static_cast<NewtonImpactFrictionNSLXML*>(this->interactionxml->getNonSmoothLawXML()));
-  }
-  OUT("Interaction::linkInteractionXML\n");
+  relation = new LagrangianLinearR(H, b);
+  relation->setInteraction(this);
+  return relation;
 }
+
+Relation* Interaction::createLagrangianNonLinearR(const string& computeInput, const string& computeOutput)
+{
+  relation = new LagrangianNonLinearR(computeInput, computeOutput);
+  relation->setInteraction(this);
+  return relation;
+}
+
+Relation* Interaction::createLinearTIR(SiconosMatrix* C, SiconosMatrix* D,
+                                       SiconosMatrix* E, SiconosVector* a)
+{
+  relation = new LinearTIR(C, D, E, a);
+  relation->setInteraction(this);
+  return relation;
+}
+
+
+NonSmoothLaw* Interaction::createComplementarityConditionNSL()
+{
+  nslaw = new ComplementarityConditionNSL();
+  return nslaw;
+}
+
+NonSmoothLaw* Interaction::createRelayNSL(const double& c, const double& d)
+{
+  nslaw = new RelayNSL(c, d);
+  return nslaw;
+}
+
+NonSmoothLaw* Interaction::createNewtonImpactLawNSL(const double& e)
+{
+  nslaw = new NewtonImpactLawNSL(e);
+  return nslaw;
+}
+
+NonSmoothLaw* Interaction::createNewtonImpactFrictionNSL(const double& en, const double& et, const double& mu)
+{
+  nslaw = new NewtonImpactFrictionNSL(en, et, mu);
+  return nslaw;
+}
+
+// --- XML RELATED FUNCTIONS ---
 
 void Interaction::saveInteractionToXML()
 {
@@ -295,129 +378,51 @@ void Interaction::saveInteractionToXML()
   /*
    * save the data of the Interaction
    */
-  if (this->interactionxml != NULL)
+  if (interactionxml != NULL)
   {
-    this->interactionxml->setDSConcerned(this->vectorDS);
+    interactionxml->setDSConcerned(vectorDS);
 
-    this->interactionxml->setId(this->id);
-    this->interactionxml->setNumber(this->number);
-    //this->interactionxml->setStatus( this->status[0] );
-    this->interactionxml->setStatus(this->status);
-    this->interactionxml->setNInter(this->nInteraction);
+    interactionxml->setId(id);
+    interactionxml->setNumber(number);
+    interactionxml->setStatus(status);
+    interactionxml->setNInter(nInteraction);
 
-    this->interactionxml->setY(&(this->y));
-    this->interactionxml->setLambda(&(this->lambda));
+    interactionxml->setY(*y);
+    interactionxml->setLambda(*lambda);
   }
   else RuntimeException::selfThrow("Interaction::saveInteractionToXML - object InteractionXML does not exist");
 
   /*
    * save the data of the Relation
    */
-  if (this->relation->getType() == LINEARTIRELATION)
-    (static_cast<LinearTIR*>(this->relation))->saveRelationToXML();
-  else if (this->relation->getType() == LAGRANGIANLINEARRELATION)
-    (static_cast<LagrangianLinearR*>(this->relation))->saveRelationToXML();
-  else if (this->relation->getType() == LAGRANGIANNONLINEARRELATION)
-    (static_cast<LagrangianNonLinearR*>(this->relation))->saveRelationToXML();
-  else RuntimeException::selfThrow("Interaction::saveInteractionToXML - bad kind of Relation :" + this->relation->getType());
+  if (relation->getType() == LINEARTIRELATION)
+    (static_cast<LinearTIR*>(relation))->saveRelationToXML();
+  else if (relation->getType() == LAGRANGIANLINEARRELATION)
+    (static_cast<LagrangianLinearR*>(relation))->saveRelationToXML();
+  else if (relation->getType() == LAGRANGIANNONLINEARRELATION)
+    (static_cast<LagrangianNonLinearR*>(relation))->saveRelationToXML();
+  else RuntimeException::selfThrow("Interaction::saveInteractionToXML - bad kind of Relation :" + relation->getType());
   /*
    * save the data of the NonSmoothLaw
    */
 
-  if (this->nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW)
-    (static_cast<ComplementarityConditionNSL*>(this->nslaw))->saveNonSmoothLawToXML();
-  else if (this->nslaw->getType() == RELAYNSLAW)
-    (static_cast<RelayNSL*>(this->nslaw))->saveNonSmoothLawToXML();
-  else if (this->nslaw->getType() == NEWTONIMPACTLAWNSLAW)
-    (static_cast<NewtonImpactLawNSL*>(this->nslaw))->saveNonSmoothLawToXML();
-  else if (this->nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
-    (static_cast<NewtonImpactFrictionNSL*>(this->nslaw))->saveNonSmoothLawToXML();
-  else RuntimeException::selfThrow("Interaction::saveInteractionToXML - bad kind of NonSmoothLaw : " + this->nslaw->getType());
+  if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW)
+    (static_cast<ComplementarityConditionNSL*>(nslaw))->saveNonSmoothLawToXML();
+  else if (nslaw->getType() == RELAYNSLAW)
+    (static_cast<RelayNSL*>(nslaw))->saveNonSmoothLawToXML();
+  else if (nslaw->getType() == NEWTONIMPACTLAWNSLAW)
+    (static_cast<NewtonImpactLawNSL*>(nslaw))->saveNonSmoothLawToXML();
+  else if (nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
+    (static_cast<NewtonImpactFrictionNSL*>(nslaw))->saveNonSmoothLawToXML();
+  else RuntimeException::selfThrow("Interaction::saveInteractionToXML - bad kind of NonSmoothLaw : " + nslaw->getType());
 
   OUT("Interaction::saveInteractionToXML\n");
 }
 
-void Interaction::createInteraction(InteractionXML * interactionXML, int number, int nInter,
-                                    vector<int>* status, vector<DynamicalSystem*>* dsConcerned)//, NonSmoothDynamicalSystem * nsds)
-{
-  IN("Interaction::createInteraction\n");
-  if (interactionXML != NULL)
-  {
-    this->id = "none";
-    this->nInteraction = 0;
-
-    this->vectorDS.clear();
-    this->nslaw = NULL;
-    this->relation = NULL;
-
-    this->interactionxml = interactionXML;
-
-    this->fillInteractionWithInteractionXML();
-    this->linkInteractionWithInteractionXML();
-  }
-  else
-  {
-    this->number = number;
-    this->nInteraction = nInter;
-    this->status = *status;
-    if (dsConcerned != NULL) this->vectorDS = *dsConcerned;
-    else RuntimeException::selfThrow("Interaction::createInteraction - The dsConcerned are not given");
-  }
-  OUT("Interaction::createInteraction\n");
-}
-
-
-Relation* Interaction::createLagrangianLinearR(SiconosMatrix* H, SiconosVector* b)
-{
-  this->relation = new LagrangianLinearR();
-  static_cast<LagrangianLinearR*>(this->relation)->createRelation(NULL, H, b);
-  this->relation->setInteraction(this);
-  return this->relation;
-}
-
-Relation* Interaction::createLagrangianNonLinearR(string computeInput, string computeOutput)
-{
-  this->relation = new LagrangianNonLinearR();
-  static_cast<LagrangianNonLinearR*>(this->relation)->createRelation(NULL, computeInput, computeOutput);
-  this->relation->setInteraction(this);
-  return this->relation;
-}
-
-Relation* Interaction::createLinearTIR(SiconosMatrix* C, SiconosMatrix* D,
-                                       SiconosMatrix* E, SiconosVector* a)
-{
-  this->relation = new LinearTIR();
-  static_cast<LinearTIR*>(this->relation)->createRelation(NULL, C, D, E, a);
-  this->relation->setInteraction(this);
-  return this->relation;
-}
-
-
-NonSmoothLaw* Interaction::createComplementarityConditionNSL()
-{
-  this->nslaw = new ComplementarityConditionNSL();
-  static_cast<ComplementarityConditionNSL*>(this->nslaw)->createNonSmoothLaw(NULL);
-  return this->nslaw;
-}
-
-NonSmoothLaw* Interaction::createRelayNSL(double c, double d)
-{
-  this->nslaw = new RelayNSL();
-  static_cast<RelayNSL*>(this->nslaw)->createNonSmoothLaw(NULL, c, d);
-  return this->nslaw;
-}
-
-NonSmoothLaw* Interaction::createNewtonImpactLawNSL(double e)
-{
-  this->nslaw = new NewtonImpactLawNSL();
-  static_cast<NewtonImpactLawNSL*>(this->nslaw)->createNonSmoothLaw(NULL, e);
-  return this->nslaw;
-}
-
-NonSmoothLaw* Interaction::createNewtonImpactFrictionNSL(double en, double et, double mu)
-{
-  this->nslaw = new NewtonImpactFrictionNSL();
-  static_cast<NewtonImpactFrictionNSL*>(this->nslaw)->createNonSmoothLaw(NULL, en, et, mu);
-  return this->nslaw;
-}
-
+// Default (private) constructor
+Interaction::Interaction():
+  id("none"), number(0), nInteraction(0), y(NULL), yDot(NULL), lambda(NULL), yOld(NULL),
+  yDotOld(NULL), lambdaOld(NULL), nslaw(NULL), relation(NULL), interactionxml(NULL),  isYAllocatedIn(false), isYDotAllocatedIn(false),
+  isLambdaAllocatedIn(false), isYOldAllocatedIn(false), isYDotOldAllocatedIn(false), isLambdaOldAllocatedIn(false),
+  isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
+{}

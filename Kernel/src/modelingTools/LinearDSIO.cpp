@@ -1,5 +1,5 @@
 #include "LinearDSIO.h"
-#include "check.h"
+using namespace std;
 
 LinearDSIO::LinearDSIO(): DSInputOutput()
 {

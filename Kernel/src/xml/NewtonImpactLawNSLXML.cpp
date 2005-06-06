@@ -1,5 +1,5 @@
 #include "NewtonImpactLawNSLXML.h"
-
+using namespace std;
 
 NewtonImpactLawNSLXML::NewtonImpactLawNSLXML()
 {

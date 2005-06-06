@@ -1,6 +1,6 @@
 
 #include "PeriodicBC.h"
-#include "check.h"
+using namespace std;
 
 PeriodicBC::PeriodicBC(): BoundaryCondition()
 {

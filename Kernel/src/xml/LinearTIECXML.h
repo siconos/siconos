@@ -23,7 +23,7 @@ public:
   *   \param xmlNode* : the EqualityConstraint DOM tree
   *   \param vector<int>  : vector of DSXML numbers to verify DS concerned by the EqualityConstraint (identified by number) exists
   */
-  LinearTIECXML(xmlNode*, vector<int>);
+  LinearTIECXML(xmlNode*, std::vector<int>);
   ~LinearTIECXML();
 };
 

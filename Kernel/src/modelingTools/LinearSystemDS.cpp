@@ -1,5 +1,5 @@
 #include "LinearSystemDS.h"
-#include "check.h"
+using namespace std;
 
 // --- Constructors ---
 

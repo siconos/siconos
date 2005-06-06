@@ -1,24 +1,18 @@
-
 #include "OneStepIntegratorXML.h"
+using namespace std;
 
-#include "check.h"
+OneStepIntegratorXML::OneStepIntegratorXML():
+  rootIntegratorXMLNode(NULL), rNode(NULL), DSConcernedNode(NULL)
+{}
 
-
-OneStepIntegratorXML::OneStepIntegratorXML()
-{
-  this->rootIntegratorXMLNode = NULL;
-  this->rNode = NULL;
-  this->DSConcernedNode = NULL;
-}
-
-OneStepIntegratorXML::OneStepIntegratorXML(xmlNode * OneStepIntegratorNode, map<int, bool> definedDSNumbers)
+OneStepIntegratorXML::OneStepIntegratorXML(xmlNode * OneStepIntegratorNode, map<int, bool> definedDSNumbers):
+  rootIntegratorXMLNode(OneStepIntegratorNode), rNode(NULL), DSConcernedNode(NULL)
 {
   xmlNode * node;
-  this->rootIntegratorXMLNode = OneStepIntegratorNode;
   if ((node = SiconosDOMTreeTools::findNodeChild(OneStepIntegratorNode, OSI_DS_CONCERNED)) != NULL)
   {
-    this->DSConcernedNode = node;
-    this->loadOneStepIntegratorConcernedDS(node, definedDSNumbers);
+    DSConcernedNode = node;
+    loadOneStepIntegratorConcernedDS(node, definedDSNumbers);
   }
   else
   {
@@ -26,21 +20,18 @@ OneStepIntegratorXML::OneStepIntegratorXML(xmlNode * OneStepIntegratorNode, map<
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(OneStepIntegratorNode, OSI_R)) != NULL)
-  {
-    this->rNode = node;
-  }
+    rNode = node;
   else
   {
     //XMLException::selfThrow("OneStepIntegratorXML - Constructor error : tag " + OSI_R + " not found.");
     cout << "OneStepIntegratorXML - Constructor : Warning : tag " << OSI_R << " not found." << endl;
-    this->rNode = NULL;
+    rNode = NULL;
   }
 }
 
 OneStepIntegratorXML::~OneStepIntegratorXML()
 {
 }
-
 
 void OneStepIntegratorXML::loadOneStepIntegratorConcernedDS(xmlNode * DSConcernedNode, map<int, bool> definedDSNumbers)
 {

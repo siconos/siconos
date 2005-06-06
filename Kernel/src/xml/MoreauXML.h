@@ -1,29 +1,21 @@
-
 /** \class MoreauXML
-*   \brief This class manages Moreau data part
-*  \author SICONOS Development Team - copyright INRIA
-*   \version 1.0
-*   \date 05/17/2004
-*
-*
-* MoreauXML allows to manage data of a Moreau DOM tree.
-*/
+ *   \brief This class manages Moreau data part
+ *  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.0
+ *   \date 05/17/2004
+ *
+ *
+ * MoreauXML allows to manage data of a Moreau DOM tree.
+ */
 
 #ifndef __MOREAUXML__
 #define __MOREAUXML__
 
-
-#include <libxml/tree.h>
-
 #include "OneStepIntegratorXML.h"
 
-
-//using namespace std;
-
-
-const string MOREAU_R = "r";
-const string MOREAU_W = "W";
-const string MOREAU_THETA = "Theta";
+const std::string MOREAU_R = "r";
+const std::string MOREAU_W = "W";
+const std::string MOREAU_THETA = "Theta";
 
 class MoreauXML : public OneStepIntegratorXML
 {
@@ -31,18 +23,14 @@ public:
   MoreauXML();
 
   /** \fn MoreauXML(xmlNode * MoreauNode)
-  *   \brief Build a MoreauXML object from a DOM tree describing Moreau OneStepIntegrator
-  *   \param xmlNode * MoreauNode : the Moreau DOM tree
-  *   \param map<int, bool> definedDSNumbers : to know if DS numbers are not used by another OneStepIntegrator
-  *   \exception XMLException : if the W property of the Moreau lacks in the DOM tree
-  */
-  MoreauXML(xmlNode * MoreauNode, map<int, bool> definedDSNumbers);
+   *   \brief Build a MoreauXML object from a DOM tree describing Moreau OneStepIntegrator
+   *   \param xmlNode * MoreauNode : the Moreau DOM tree
+   *   \param map<int, bool> definedDSNumbers : to know if DS numbers are not used by another OneStepIntegrator
+   *   \exception XMLException : if the W property of the Moreau lacks in the DOM tree
+   */
+  MoreauXML(xmlNode * MoreauNode, std::map<int, bool> definedDSNumbers);
 
-  /** \fn SiconosMatrix getW()
-  *   \brief Return the W of the MoreauXML
-  *   \return The W SiconosMatrix of the MoreauXML
-  */
-
+  // Destructor
   ~MoreauXML();
 
 
@@ -52,30 +40,29 @@ public:
    */
   inline bool hasW()
   {
-    return (this->WNode != NULL);
+    return (WNode != NULL);
   }
 
   /** \fn SiconosMatrix getW()
-  *   \brief Return the w of the OneStepIntegratorXML
-  *   \return SiconosMatrix : the w of the OneStepIntegratorXML
-  */
+   *   \brief Return the w of the OneStepIntegratorXML
+   *   \return SiconosMatrix : the w of the OneStepIntegratorXML
+   */
   inline SiconosMatrix getW()
   {
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(this->WNode);
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(WNode);
   }
 
   /** \fn void setW(SiconosMatrix *m)
-  *   \brief allows to save the w of the OneStepIntegratorXML
-  *   \param SiconosMatrix* : the w to save
-  */
+   *   \brief allows to save the w of the OneStepIntegratorXML
+   *   \param SiconosMatrix* : the w to save
+   */
   inline void setW(SiconosMatrix *m)
   {
-    if (this->hasW() == false)
+    if (hasW() == false)
     {
-      this->WNode = SiconosDOMTreeTools::createMatrixNode(this->rootIntegratorXMLNode, MOREAU_W, m);
+      WNode = SiconosDOMTreeTools::createMatrixNode(rootIntegratorXMLNode, MOREAU_W, *m);
     }
-    //else SiconosDOMTreeTools::setSiconosMatrixValue(this->WNode, *m);
-    else SiconosDOMTreeTools::setSiconosMatrixValue(this->WNode, m);
+    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(WNode, *m);
   }
 
   /** \fn bool hasTheta()
@@ -84,32 +71,30 @@ public:
    */
   inline bool hasTheta()
   {
-    return (this->ThetaNode != NULL);
+    return (ThetaNode != NULL);
   }
 
   /** \fn SiconosMatrix getTheta()
-  *   \brief Return the theta of the OneStepIntegratorXML
-  *   \return SiconosMatrix : the theta of the OneStepIntegratorXML
-  */
-  inline double getTheta()
+   *   \brief Return the theta of the OneStepIntegratorXML
+   *   \return SiconosMatrix : the theta of the OneStepIntegratorXML
+   */
+  inline const double getTheta() const
   {
-    return  SiconosDOMTreeTools::getDoubleContentValue(this->ThetaNode);
+    return  SiconosDOMTreeTools::getDoubleContentValue(ThetaNode);
   }
 
   /** \fn void setTheta(double t)
-  *   \brief allows to save  Theta of the OneStepIntegratorXML
-  *   \param double t : the Theta to save
-  */
-  inline void setTheta(double t)
+   *   \brief allows to save  Theta of the OneStepIntegratorXML
+   *   \param double t : the Theta to save
+   */
+  inline void setTheta(const double& t)
   {
-    if (this->hasTheta() == false)
+    if (hasTheta() == false)
     {
-      this->ThetaNode = SiconosDOMTreeTools::createDoubleNode(this->rootIntegratorXMLNode, MOREAU_THETA, t);
+      ThetaNode = SiconosDOMTreeTools::createDoubleNode(rootIntegratorXMLNode, MOREAU_THETA, t);
     }
-    else SiconosDOMTreeTools::setDoubleContentValue(this->ThetaNode, t);
+    else SiconosDOMTreeTools::setDoubleContentValue(ThetaNode, t);
   }
-
-
 private:
 
   //Nodes

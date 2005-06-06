@@ -15,7 +15,6 @@
 
 #include "SiconosException.h"
 
-// --------------------------------------------------------------------------
 class RuntimeException: public SiconosException
 {
 public:
@@ -27,11 +26,11 @@ public:
   RuntimeException();
 
   /**
-   * \fn RuntimeException(string report)
+   * \fn RuntimeException(const string& report)
    * \brief constructor with a report
    * \param string report : exception description
    */
-  RuntimeException(string report);
+  RuntimeException(const std::string& report);
 
   /**
    * \fn ~RuntimeException()
@@ -44,7 +43,7 @@ public:
    * \brief static function which throw a RuntimeException
    * \exception RuntimeException
    */
-  static void selfThrow();
+  static void selfThrow() ;
 
   /**
    * \fn static void selfThrow(string report)
@@ -52,7 +51,7 @@ public:
    * \param string report : exception description
    * \exception RuntimeException
    */
-  static void selfThrow(string report);
+  static void selfThrow(const std::string& report) ;
 
 };
 

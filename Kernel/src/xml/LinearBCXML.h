@@ -10,28 +10,15 @@
 * LinearBCXML allows to manage data of a LinearBC DOM tree.
 */
 
-
 #ifndef __LINEARBCXML__
 #define __LINEARBCXML__
 
-
-#include <libxml/tree.h>
-
-//#include "SiconosVector.h"
-#include "NewSiconosVector.h"
-#include "SimpleVector.h"
-#include "SiconosMatrix.h"
-#include "SiconosDOMTreeTools.h"
-
 #include "BoundaryConditionXML.h"
 
-
-//using namespace std;
-
 //Tags
-const string LINEARBC_OMEGA = "Omega";
-const string LINEARBC_OMEGA0 = "Omega0";
-const string LINEARBC_OMEGAT = "OmegaT";
+const std::string LINEARBC_OMEGA = "Omega";
+const std::string LINEARBC_OMEGA0 = "Omega0";
+const std::string LINEARBC_OMEGAT = "OmegaT";
 
 
 class LinearBCXML : public BoundaryConditionXML
@@ -83,9 +70,9 @@ public:
   {
     if (this->omegaNode == NULL)
     {
-      this->omegaNode = SiconosDOMTreeTools::createVectorNode(this->rootBCNode, LINEARBC_OMEGA, v);
+      this->omegaNode = SiconosDOMTreeTools::createVectorNode(this->rootBCNode, LINEARBC_OMEGA, *v);
     }
-    else SiconosDOMTreeTools::setSiconosVectorValue(this->omegaNode, v);
+    else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->omegaNode, *v);
   }
 
   /** \fn void setOmega0(SiconosMatrix *m)
@@ -96,9 +83,9 @@ public:
   {
     if (this->omega0Node == NULL)
     {
-      this->omega0Node = SiconosDOMTreeTools::createMatrixNode(this->rootBCNode, LINEARBC_OMEGA0, m);
+      this->omega0Node = SiconosDOMTreeTools::createMatrixNode(this->rootBCNode, LINEARBC_OMEGA0, *m);
     }
-    else SiconosDOMTreeTools::setSiconosMatrixValue(this->omega0Node, m);
+    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->omega0Node, *m);
   }
 
   /** \fn void setOmegaT(SiconosMatrix *m)
@@ -109,9 +96,9 @@ public:
   {
     if (this->omegaTNode == NULL)
     {
-      this->omegaTNode = SiconosDOMTreeTools::createMatrixNode(this->rootBCNode, LINEARBC_OMEGAT, m);
+      this->omegaTNode = SiconosDOMTreeTools::createMatrixNode(this->rootBCNode, LINEARBC_OMEGAT, *m);
     }
-    else SiconosDOMTreeTools::setSiconosMatrixValue(this->omegaTNode, m);
+    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->omegaTNode, *m);
   }
 
 

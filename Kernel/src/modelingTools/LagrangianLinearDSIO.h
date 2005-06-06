@@ -3,14 +3,12 @@
 
 #include "DSInputOutput.h"
 #include "LagrangianLinearDSIOXML.h"
-#include "SimpleVector.h"
-#include "CompositeVector.h"
 
 /** \class LagrangianLinearDSIO
  *  \brief Lagrangian DSInputOutput
  *         { y = H.q + b
  *         { R = Ht
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date 17/01/2005
  *
@@ -117,13 +115,13 @@ public:
   void display() const;
 
   /** \fn void createDSInputOutput(DSInputOutputXML * dsioXML,
-            SiconosMatrix* H, SiconosVector* b)
-   *  \brief allows to create the DSInputOutput with an xml file, or the needed data
-   *  \param DSInputOutputXML * : the XML object for this DSInputOutput
-   *  \param SiconosMatrix* : the matrix H of this DSInputOutput
-   *  \param SiconosVector* : the vector b of this DSInputOutput
-   *  \exception RuntimeException
-   */
+      SiconosMatrix* H, SiconosVector* b)
+      *  \brief allows to create the DSInputOutput with an xml file, or the needed data
+      *  \param DSInputOutputXML * : the XML object for this DSInputOutput
+      *  \param SiconosMatrix* : the matrix H of this DSInputOutput
+      *  \param SiconosVector* : the vector b of this DSInputOutput
+      *  \exception RuntimeException
+      */
   void createDSInputOutput(DSInputOutputXML * dsioXML,
                            SiconosMatrix* H = NULL, SiconosVector* b = NULL);
 

@@ -1,93 +1,72 @@
-
 #include "LinearTIRXML.h"
+using namespace std;
 
-LinearTIRXML::LinearTIRXML(): RelationXML()
-{
-  this->CNode = NULL;
-  this->DNode = NULL;
-  this->ENode = NULL;
-  this->aNode = NULL;
-}
+LinearTIRXML::LinearTIRXML():
+  RelationXML(), CNode(NULL), DNode(NULL), ENode(NULL), aNode(NULL)
+{}
 
 LinearTIRXML::LinearTIRXML(xmlNode * LTIRelationNode)
-  : RelationXML(LTIRelationNode)
+  : RelationXML(LTIRelationNode), CNode(NULL), DNode(NULL), ENode(NULL), aNode(NULL)
 {
   xmlNode *node;
-
   if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_C)) != NULL)
-  {
-    this->CNode = node;
-  }
+    CNode = node;
   else
-  {
     XMLException::selfThrow("LTIRelationXML - constructor error : tag " + LTIR_C + " not found.");
-  }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_D)) != NULL)
-  {
-    this->DNode = node;
-  }
+    DNode = node;
   else
-  {
     XMLException::selfThrow("LTIRelationXML - constructor error : tag " + LTIR_D + " not found.");
-  }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_E)) != NULL)
-  {
-    this->ENode = node;
-  }
+    ENode = node;
   else
-  {
     XMLException::selfThrow("LTIRelationXML - constructor error : tag " + LTIR_E + " not found.");
-  }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_A)) != NULL)
-  {
-    this->aNode = node;
-  }
+    aNode = node;
   else
-  {
     XMLException::selfThrow("LTIRelationXML - constructor error : tag " + LTIR_A + " not found.");
-  }
 }
 
 LinearTIRXML::~LinearTIRXML()
 {
 }
 
-void LinearTIRXML::setC(SiconosMatrix *matrix)
+void LinearTIRXML::setC(const SiconosMatrix& matrix)
 {
-  if (this->CNode == NULL)
+  if (CNode == NULL)
   {
-    this->CNode = SiconosDOMTreeTools::createMatrixNode(this->rootRelationXMLNode, LTIR_C, matrix);
+    CNode = SiconosDOMTreeTools::createMatrixNode(rootRelationXMLNode, LTIR_C, matrix);
   }
-  else SiconosDOMTreeTools::setSiconosMatrixValue(CNode, matrix);
+  else SiconosDOMTreeTools::setSiconosMatrixNodeValue(CNode, matrix);
 }
 
-void LinearTIRXML::setD(SiconosMatrix *matrix)
+void LinearTIRXML::setD(const SiconosMatrix& matrix)
 {
-  if (this->DNode == NULL)
+  if (DNode == NULL)
   {
-    this->DNode = SiconosDOMTreeTools::createMatrixNode(this->rootRelationXMLNode, LTIR_D, matrix);
+    DNode = SiconosDOMTreeTools::createMatrixNode(rootRelationXMLNode, LTIR_D, matrix);
   }
-  else SiconosDOMTreeTools::setSiconosMatrixValue(DNode, matrix);
+  else SiconosDOMTreeTools::setSiconosMatrixNodeValue(DNode, matrix);
 }
 
-void LinearTIRXML::setE(SiconosMatrix *matrix)
+void LinearTIRXML::setE(const SiconosMatrix &matrix)
 {
-  if (this->ENode == NULL)
+  if (ENode == NULL)
   {
-    this->ENode = SiconosDOMTreeTools::createMatrixNode(this->rootRelationXMLNode, LTIR_E, matrix);
+    ENode = SiconosDOMTreeTools::createMatrixNode(rootRelationXMLNode, LTIR_E, matrix);
   }
-  else SiconosDOMTreeTools::setSiconosMatrixValue(ENode, matrix);
+  else SiconosDOMTreeTools::setSiconosMatrixNodeValue(ENode, matrix);
 }
 
-void LinearTIRXML::setA(SiconosVector *vector)
+void LinearTIRXML::setA(const SiconosVector& vec)
 {
-  if (this->aNode == NULL)
+  if (aNode == NULL)
   {
-    this->aNode = SiconosDOMTreeTools::createVectorNode(this->rootRelationXMLNode, LTIR_A, vector);
+    aNode = SiconosDOMTreeTools::createVectorNode(rootRelationXMLNode, LTIR_A, vec);
   }
-  else SiconosDOMTreeTools::setSiconosVectorValue(aNode, vector);
+  else SiconosDOMTreeTools::setSiconosVectorNodeValue(aNode, vec);
 }
 

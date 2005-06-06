@@ -1,4 +1,5 @@
 #include "EqualityConstraintXML.h"
+using namespace std;
 
 EqualityConstraintXML::EqualityConstraintXML()
 {

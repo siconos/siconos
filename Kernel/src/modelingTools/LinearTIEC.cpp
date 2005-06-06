@@ -1,4 +1,5 @@
 #include "LinearTIEC.h"
+using namespace std;
 
 LinearTIEC::LinearTIEC(): LinearEC()
 {

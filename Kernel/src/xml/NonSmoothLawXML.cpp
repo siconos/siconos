@@ -1,6 +1,5 @@
-
 #include "NonSmoothLawXML.h"
-
+using namespace std;
 
 NonSmoothLawXML::NonSmoothLawXML()
 {}

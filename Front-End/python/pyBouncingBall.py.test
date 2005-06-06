@@ -6,20 +6,20 @@ import Gnuplot
 gnuplot = Gnuplot.Gnuplot(debug=1);
 gnuplot.title("Python BouncingBall sample");
 
-model = pySiconos.Model("BouncingBall_TIDS.xml");
+model = pySiconos.Model("./BouncingBall_TIDS.xml");
 print "*** BouncingBall.xml loaded ***";
-s = model.getStrategy();	
+s = model.getStrategyPtr();	
 print "strategy will be initialized"; 
 s.initialize();
 print " **** the strategy is ready ****"; 
-t = s.getTimeDiscretisation();
+t = s.getTimeDiscretisationPtr();
 k = t.getK();
-N = t.getN();
+N = t.getNSteps();
 print " **** time management OK ****"; 
 
 # DS
-ball = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(0));
-ground = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(1));
+ball = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystemPtr().getDynamicalSystemPtr(0));
+ground = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystemPtr().getDynamicalSystemPtr(1));
 
 m = pySiconos.SiconosMatrix(N+1, 6);
 m.zero()
@@ -57,8 +57,8 @@ while k < N :
 	temps[k] = k*t.getH();
 	
 #	// position
-	ball = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(0));
-	ground = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystem().getDynamicalSystem(1));
+	ball = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystemPtr().getDynamicalSystemPtr(0));
+	ground = pySiconos.LagrangianLinearTIDS.convert(model.getNonSmoothDynamicalSystemPtr().getDynamicalSystemPtr(1));
 	m.setValue(k, 1, (ball.getQ()).getValue(0));
 	position[k] = (ball.getQ()).getValue(0);
 	
@@ -66,7 +66,7 @@ while k < N :
 	m.setValue(k, 2, (ball.getVelocity()).getValue(0));						
 	m.setValue(k, 3, (ground.getQ()).getValue(0));
 	m.setValue(k, 4, (ground.getVelocity()).getValue(0));			
-	m.setValue(k, 5, (model.getNonSmoothDynamicalSystem().getInteraction(0).getLambda()).getValue(0));    
+	m.setValue(k, 5, (model.getNonSmoothDynamicalSystemPtr().getInteractionPtr(0).getLambda()).getValue(0));    
 	if plot == 10 :
 		d1=Gnuplot.Data(temps, position, title="Ball position");
 		gnuplot.plot(d1);

@@ -1,6 +1,5 @@
-
 #include "DSInputOutputXML.h"
-
+using namespace std;
 
 DSInputOutputXML::DSInputOutputXML()
 {

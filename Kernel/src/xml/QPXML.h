@@ -14,26 +14,12 @@
 #ifndef __QPXMLDEF__
 #define __QPXMLDEF__
 
-
-
-#include <string>
-#include <libxml/tree.h>
-
 #include "OneStepNSProblemXML.h"
-#include "OneStepNSProblem.h"
-
-#include "SiconosDOMTreeTools.h"
-//#include "SiconosVector.h"
-#include "NewSiconosVector.h"
-#include "SimpleVector.h"
-#include "SiconosMatrix.h"
-
-//using namespace std;
 
 class OneStepNSProblem;
 
-const string QP_Q = "Q";
-const string QP_P = "p";
+const std::string  QP_Q = "Q";
+const std::string  QP_P = "p";
 
 
 class QPXML : public OneStepNSProblemXML
@@ -47,7 +33,9 @@ public:
   *   \param vector<int> definedInteractionNumbers : the Interaction numbers effectivly defined in the model
   *   \exception XMLException : if a property of the QP lacks in the DOM tree
   */
-  QPXML(xmlNode * QPNode, vector<int> definedInteractionNumbers);
+  QPXML(xmlNode * QPNode, std::vector<int> definedInteractionNumbers);
+
+  ~QPXML();
 
   /** \fn SiconosMatrix getQ()
   *   \brief Return Q
@@ -67,30 +55,30 @@ public:
     return SiconosDOMTreeTools::getSiconosVectorValue(this->pNode);
   }
 
-  /** \fn void setQ(SiconosMatrix *m)
+  /** \fn void setQ(const SiconosMatrix& m)
   *   \brief allows  to save Q
   *   \param The Q SiconosMatrix to save
   */
-  inline void setQ(SiconosMatrix *m)
+  inline void setQ(const SiconosMatrix& m)
   {
     if (this->hasQ() == false)
     {
       this->QNode = SiconosDOMTreeTools::createMatrixNode(this->rootNSProblemXMLNode, QP_Q, m);
     }
-    else SiconosDOMTreeTools::setSiconosMatrixValue(this->QNode, m);
+    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->QNode, m);
   }
 
-  /** \fn void setP(SiconosVector *v)
+  /** \fn void setP(const SiconosVector&v)
   *   \brief allows to save p
   *   \param SimpleVector* : vector p to save
   */
-  inline void setP(SiconosVector *v)
+  inline void setP(const SiconosVector&v)
   {
     if (this->hasP() == false)
     {
       this->pNode = SiconosDOMTreeTools::createVectorNode(this->rootNSProblemXMLNode, QP_P, v);
     }
-    else SiconosDOMTreeTools::setSiconosVectorValue(this->pNode, v);
+    else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->pNode, v);
   }
 
   /** \fn bool hasP()

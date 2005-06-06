@@ -1,4 +1,3 @@
-
 /** \class NSLawXML
 *   \brief This class manages NSLaw data part
 *  \author SICONOS Development Team - copyright INRIA
@@ -14,36 +13,27 @@
 #ifndef __NSLawXML__
 #define __NSLawXML__
 
-#include <string>
-#include <libxml/tree.h>
 #include "SiconosDOMTreeTools.h"
-
 #include "NonSmoothLaw.h"
-
-
-//using namespace std;
 
 class NonSmoothLaw;
 
 //const string NSLAW_TYPE = "type";
-#include "XMLTagsName.h"
-
-
 class NonSmoothLawXML
 {
 public:
   NonSmoothLawXML();
   NonSmoothLawXML(xmlNode*);
-  ~NonSmoothLawXML();
+  virtual ~NonSmoothLawXML();
 
   /** \fn int getType()
   *   \brief Return the type of the NSLawXML
   *   \return The string type of the NSLawXML
   */
-  inline string getType()
+  inline std::string getType()
   {
     //return SiconosDOMTreeTools::getStringAttributeValue(this->rootNSLawXMLNode, NSLAW_TYPE);
-    string type((char*)this->rootNSLawXMLNode->name);
+    std::string type((char*) rootNSLawXMLNode->name);
     return type;
   }
 
@@ -53,7 +43,7 @@ public:
   */
   inline xmlNode* getNode() const
   {
-    return this->rootNSLawXMLNode;
+    return rootNSLawXMLNode;
   }
 
   /** \fn void updateNonSmoothLawXML( xmlNode* node, NonSmoothLaw* nsl )

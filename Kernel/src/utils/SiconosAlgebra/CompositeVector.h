@@ -1,9 +1,10 @@
-
 #ifndef COMPOSITEVECTOR_H
 #define COMPOSITEVECTOR_H
 
 #include "NewSiconosVector.h"
 #include "SimpleVector.h"
+
+class SimpleVector;
 
 class CompositeVector : public SiconosVector
 {
@@ -11,14 +12,14 @@ public:
 
   CompositeVector();
 
-  CompositeVector(const string file, const bool ascii);
+  CompositeVector(const std::string&, const bool&);
 
   /** \fn CompositeVector(const vector<double> v)
   *  \brief contructor with a vector
   *  \param vector<double> v
   *  \return CompositeVector
   */
-  CompositeVector(const vector<double> v);
+  CompositeVector(const std::vector<double>&);
 
   /** \fn CompositeVector(const SiconosVector& v)
    *  \brief contructor with a SiconosVector
@@ -26,8 +27,8 @@ public:
    *  \exception SiconosVectorException
    *  \return CompositeVector
    */
-  CompositeVector(const SiconosVector& v);
-  CompositeVector(const CompositeVector& v);
+  CompositeVector(const SiconosVector&);
+  CompositeVector(const CompositeVector&);
 
   /** \fn CompositeVector(const int size)
    *  \brief contructor with a size given in parameter. All the elements are initialized to 0.0
@@ -35,7 +36,7 @@ public:
    *  \exception SiconosVectorException if size < 0
    *  \return CompositeVector
    */
-  CompositeVector(const int size);
+  CompositeVector(const int&);
 
   /** \fn ~SiconosVector ()
    *  \brief destructor
@@ -44,9 +45,9 @@ public:
 
   /********************************************************************************************/
 
-  inline vector<SiconosVector*> getSvref()
+  inline std::vector<SiconosVector*> getSvref()
   {
-    return this->getSvref();
+    return getSvref();
   };
 
   /** \fn void display();
@@ -84,7 +85,7 @@ public:
    *  \brief set the values of the vector to a new set of value
    *  \param vector<double> v
    */
-  void setValues(const vector<double> v) ;
+  void setValues(const std::vector<double>& v) ;
 
   /** \fn int size() const
    *  \brief get the vector size
@@ -93,30 +94,30 @@ public:
    */
   int size() const  ;
 
-  /** \fn bool read(string fileName, string mode = ASCII)
+  /** \fn bool read(const std::string& fileName,const std::string& mode = ASCII)
    *  \brief write the vector in a file
-   *  \param string fileName : the file to read
-   *  \param string mode : ASCII or BINARY
+   *  \param std::string fileName : the file to read
+   *  \param std::string mode : ASCII or BINARY
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  bool read(string fileName, string mode = N_ASCII) ;
+  bool read(const std::string &, const std::string& = N_ASCII) ;
 
-  /** \fn bool write(string fileName, string mode = ASCII)
+  /** \fn bool write(const string& fileName,const string& mode = ASCII)
    *  \brief write the vector in a file
    *  \param string fileName : the file to read
    *  \param string mode : ASCII or BINARY
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  bool write(string fileName, string mode = N_ASCII) const  ;
+  bool write(const std::string& , const std::string& = N_ASCII) const  ;
 
   /** \fn double* getArray()
   *  \brief return the array of double values of the vector
   *  \exception SiconosVectorException
   *  \return double* : the pointer on the array
   */
-  double* getArray();
+  double* getArray() const;
 
 
   // generic internal operators
@@ -159,14 +160,14 @@ public:
   friend CompositeVector operator / (const CompositeVector&  v, const double d);
   friend CompositeVector operator + (const CompositeVector& v1, const CompositeVector& v2);
   friend CompositeVector operator - (const CompositeVector& v1, const CompositeVector& v2);
-  friend SimpleVector operator * (/*const*/ SiconosMatrix &m, /*const*/ CompositeVector &v);
+  friend SimpleVector operator * (const SiconosMatrix &m, const CompositeVector &v);
 
   friend SimpleVector matTransVecMult(SiconosMatrix &m, SiconosVector &v);
 
   //
 private:
-  vector<SiconosVector*> svref;
-  vector<int> tabindex;
+  std::vector<SiconosVector*> svref;
+  std::vector<int> tabindex;
 
 };
 

@@ -1,32 +1,32 @@
 #ifndef DYNAMICALSYSTEM_H
 #define DYNAMICALSYSTEM_H
 
-#include <string>
-#include <vector>
-
-#include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
-#include "SimpleVector.h"
-#include "CompositeVector.h"
-#include "SiconosMemory.h"
-#include "SiconosSharedLibrary.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "DSInputOutput.h"
-#include "BoundaryCondition.h"
-#include "DSXML.h"
 #include "SiconosConst.h"
 #include "RuntimeException.h"
 #include "check.h"
 
-//#include "XMLTagsName.h"
+#include "SiconosMatrix.h"
+#include "NewSiconosVector.h"
+#include "SiconosMemory.h"
+#include "SiconosSharedLibrary.h"
 
-//using namespace std;
+#include "NonSmoothDynamicalSystem.h"
+#include "DSInputOutput.h"
+#include "BoundaryCondition.h"
+#include "DSXML.h"
+
+
+#include <string>
+#include <vector>
 
 class NonSmoothDynamicalSystem;
 class BoundaryCondition;
 class DSInputOutput;
-
 class DSXML;
+class SiconosVector;
+class SiconosMatrix;
+class SiconosMemory;
+class SiconosSharedLibrary;
 
 /** \class DynamicalSystem
  *  \brief  Super class of the dynamical systems
@@ -87,7 +87,7 @@ public:
       */
 
   DynamicalSystem(int number, int n,
-                  SiconosVector* x0, string vectorFieldPlugin = "BasicPlugin:vectorField");
+                  SiconosVector* x0, std::string  vectorFieldPlugin = "BasicPlugin:vectorField");
 
   // --- Destructor ---
 
@@ -135,7 +135,7 @@ public:
    *  \brief allows to get the id of the DynamicalSystem
    *  \return the value of ths id
    */
-  inline const string getId() const
+  inline const std::string  getId() const
   {
     return id;
   }
@@ -144,7 +144,7 @@ public:
    *  \brief allows to set the value of id
    *  \param a string to set the value of id
    */
-  inline void setId(const string& newId)
+  inline void setId(const std::string & newId)
   {
     id = newId;
   }
@@ -563,7 +563,6 @@ public:
     dsxml = newDsxml;
   }
 
-
   // --- Vector field ---
   /** \fn void setVectorFieldFunction(const string&, const string&)
    *  \brief allow to set a specified function to compute vector field
@@ -571,7 +570,7 @@ public:
    *  \param string functionName : the function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  void setVectorFieldFunction(const string& pluginPath, const string& functionName);
+  void setVectorFieldFunction(const std::string & pluginPath, const std::string& functionName);
 
   /** \fn void setComputeJacobianXFunction(const string&, const string&)
    *  \brief allow to set a specified function to compute jacobianX
@@ -579,14 +578,14 @@ public:
    *  \param the string functionName : function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianXFunction(const string& pluginPath, const string& functionName);
+  void setComputeJacobianXFunction(const std::string & pluginPath, const std::string & functionName);
 
   // --- type of DS ---
   /** \fn inline string getType()
    *  \brief allows to get the type of a DynamicalSystem
    *  \return string : the type of the DynamicalSystem
    */
-  inline const string getType() const
+  inline const std::string  getType() const
   {
     return DSType;
   }
@@ -596,7 +595,7 @@ public:
    *  \brief allows to get all the DSInputOutput of the DynamicalSystem
    *  \return the vector of DSInputOutput
    */
-  inline vector<DSInputOutput*> getDSInputOutputs(void)
+  inline std::vector<DSInputOutput*> getDSInputOutputs(void)
   {
     return dsioVector;
   }
@@ -612,7 +611,7 @@ public:
    *  \brief allows to set all the DSInputOutputs of the DynamicalSystem
    *  \param vector<DSInputOutput*> : the vector to set
    */
-  inline void setDSInputOutputs(vector<DSInputOutput*> newDsioVect)
+  inline void setDSInputOutputs(std::vector<DSInputOutput*> newDsioVect)
   {
     dsioVector = newDsioVect;
   }
@@ -624,6 +623,62 @@ public:
   void addDSInputOutput(DSInputOutput* dsio)
   {
     dsioVector.push_back(dsio);
+  }
+
+  /** \fn  std::map<std::string , SimpleVector*> getTmpWorkVector()
+   *  \brief get the vector of temporary saved vector
+   *  \return a std vector
+   */
+  inline std::map<const std::string , SimpleVector*> getTmpWorkVector()
+  {
+    return tmpWorkVector;
+  }
+
+  /** \fn  SimpleVector getTmpWorkVector(const std::string& id)
+   *  \brief get a temporary saved vector, ref by id
+   *  \return a std vector
+   */
+  inline SimpleVector* getTmpWorkVector(const std::string & id)
+  {
+    return tmpWorkVector[id];
+  }
+
+  /** \fn void set(map<std::string , SimpleVector*>)
+   *  \brief set TmpWorkVector
+   *  \param a map<std::string , SimpleVector*>
+   */
+  inline void setTmpWorkVector(std::map<const std::string , SimpleVector*> newVect)
+  {
+    tmpWorkVector = newVect;
+  }
+
+  /** \fn void addTmpWorkVector(SimpleVector*, const string&)
+  *  \brief to add a temporary vector
+  *  \param a SimpleVector*
+  *  \param a string id
+  */
+  void addTmpWorkVector(SimpleVector* newVal, const std::string& id)
+  {
+    *tmpWorkVector[id] = *newVal;
+  }
+
+  /** \fn void allocateTmpWorkVector(const std::string&, const int&)
+   *  \brief to allocate memory for a new vector in tmp map
+   *  \param the id of the SimpleVector
+   *  \param an int to set the size
+   */
+  void allocateTmpWorkVector(const std::string& id, const int& size)
+  {
+    tmpWorkVector[id] = new SimpleVector(size);
+  }
+
+  /** \fn freeTmpWorkVector(const std::string& )
+   *  \brief to free memory in the map
+   *  \param the id of the SimpleVector to free
+   */
+  void freeTmpWorkVector(const std::string& id)
+  {
+    delete tmpWorkVector[id];
   }
 
   // --- ---
@@ -725,7 +780,7 @@ public:
    *  \brief Default function for computing an indicator of convergence
    *   \brief return a double
    */
-  virtual double dsConvergenceIndicator() const ;
+  virtual double dsConvergenceIndicator()  ;
 
 protected:
 
@@ -746,7 +801,7 @@ protected:
 
   /** Dynamical System type: General Dynamical System (NLDS) LagrangianDS (LNLDS),
       LagrangianLinearTIDS (LTIDS), LinearSystemDS (LDS)*/
-  string DSType;
+  std::string  DSType;
 
   /** NonSmoothDynamicalSystem owner of this DynamicalSystem */
   NonSmoothDynamicalSystem* nsds;
@@ -755,7 +810,7 @@ protected:
   int number;
 
   /** the name of the DS ("ball", "solid1254", etc.)*/
-  string id;
+  std::string  id;
 
   /** the dimension of the system (i.e. size of the state vector x, or the vector r, ...)*/
   int n;
@@ -787,11 +842,14 @@ protected:
   /** number of previous states stored in memory */
   int stepsInMemory;
 
+  /** A container of vectors to save temporary values (for Newton convergence computation for example)*/
+  std::map<const std::string, SimpleVector*> tmpWorkVector;
+
   /* the name of the plugin used to compute the vectorField */
-  string vectorFieldFunctionName;
+  std::string  vectorFieldFunctionName;
 
   /* the name of the plugin used to compute the JacobianX */
-  string computeJacobianXFunctionName;
+  std::string  computeJacobianXFunctionName;
 
   /** Gradient of the vectorfield \f$ f(x,t) \f$ with respect to \f$ x\f$*/
   SiconosMatrix *jacobianX;
@@ -809,7 +867,7 @@ protected:
   vfPtr vectorFieldPtr;
 
   /** vector of the DS Inputs-Outputs of the Dynamical System */
-  vector<DSInputOutput*> dsioVector;
+  std::vector<DSInputOutput*> dsioVector;
 
   /** \fn void (*computeJacobianXPtr) (int* sizeOfX, double* time, double* xPtr, double* jacobianXPtr)
    *  \brief  Pointer on function to compute the gradient of the vector field with the respect to the state  \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$

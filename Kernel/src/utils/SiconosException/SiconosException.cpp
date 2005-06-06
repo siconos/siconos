@@ -1,13 +1,10 @@
 #include "SiconosException.h"
+using namespace std;
 
-SiconosException::SiconosException()
-{
-  this->reportMsg = "Siconos Exception";
-}
+SiconosException::SiconosException(): reportMsg("Siconos Exception")
+{}
 
-SiconosException::SiconosException(string report)
-{
-  this->reportMsg = report;
-}
+SiconosException::SiconosException(const string& report): reportMsg(report)
+{}
 
 SiconosException::~SiconosException() {}

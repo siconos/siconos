@@ -1,22 +1,16 @@
 #ifndef BOUNDARYCONDITION_H
 #define BOUNDARYCONDITION_H
 
-#include <string>
-#include <vector>
 #include "DynamicalSystem.h"
 #include "SiconosMatrix.h"
-//#include "SiconosVector.h"
 #include "NewSiconosVector.h"
 #include "BoundaryConditionXML.h"
 #include "RuntimeException.h"
 #include "SiconosConst.h"
 
 #include "check.h"
-
-
-
-//using namespace std;
-
+#include <string>
+#include <vector>
 
 class DynamicalSystem;
 
@@ -49,7 +43,7 @@ public:
    *  \brief allows to get the type of the BoundaryCondition
    *  \return string : the type of the BoundaryCondition
    */
-  inline string getType() const
+  inline std::string  getType() const
   {
     return this->boundaryType;
   }
@@ -70,7 +64,7 @@ protected:
   virtual void fillBCWithBCXML();
 
   /** type of condition : linear, non linear, etc. */
-  string boundaryType;
+  std::string  boundaryType;
   BoundaryConditionXML* bcXML;
 
 };

@@ -3,12 +3,13 @@
 
 #include "Relation.h"
 #include "LagrangianLinearRXML.h"
+
 #include "SimpleVector.h"
 #include "CompositeVector.h"
 
 /** \class LagrangianLinearR
  *  \brief Lagrangian Linear Relation
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 27, 2004
  *
@@ -29,99 +30,122 @@ public:
    */
   LagrangianLinearR(RelationXML*);
 
-  /** \fn LagrangianLinearR(SiconosMatrix, SiconosVector)
+  /** \fn LagrangianLinearR(SiconosMatrix*, SiconosVector*)
    *  \brief constructor with in parameters, the data needed to build this Relation
-   *  \param a SiconosMatrix to set h
-   *  \param e SiconosVector to set b
+   *  \param a SiconosMatrix to set H
+   *  \param a SiconosVector to set b
    */
-  LagrangianLinearR(SiconosMatrix, SimpleVector);
+  LagrangianLinearR(SiconosMatrix*, SimpleVector*);
   ~LagrangianLinearR();
 
-  /** \fn SiconosMatrix getH(void)
-   *  \brief getter of the SiconosMatrix h
-   *  \return a pointer on the SiconosMatrix h
-   */
-  inline SiconosMatrix getH(void) const
-  {
-    return this->h;
-  } ;
+  // --- GETTERS/SETTERS
+  // -- H --
 
-  /** \fn SimpleVector getB(void)
-   *  \brief getter of the SiconosVector b
-   *  \return SimpleVector : value of b
+  /** \fn  const SiconosMatrix getH() const
+   *  \brief get the value of H
+   *  \return SiconosMatrix
    */
-  inline /*SiconosVector*/SimpleVector getB(void) const
+  inline const SiconosMatrix getH() const
   {
-    return this->b;
-  };
+    return *H;
+  }
 
-  /** \fn SiconosMatrix* getHPtr(void)
-   *  \brief getter of the SiconosMatrix* h
-   *  \return a pointer on the SiconosMatrix* h
+  /** \fn SiconosMatrix* getHPtr() const
+   *  \brief get H
+   *  \return pointer on a SiconosMatrix
    */
-  SiconosMatrix* getHPtr(void);
+  inline SiconosMatrix* getHPtr() const
+  {
+    return H;
+  }
+
+  /** \fn void setH (const SiconosMatrix& newValue)
+   *  \brief set the value of H to newValue
+   *  \param SiconosMatrix newValue
+   */
+  inline void setH(const SiconosMatrix& newValue)
+  {
+    *H = newValue;
+  }
+
+  /** \fn void setHPtr(SiconosMatrix* newPtr)
+   *  \brief set H to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  inline void setHPtr(SiconosMatrix *newPtr)
+  {
+    if (isHAllocatedIn) delete H;
+    H = newPtr;
+    isHAllocatedIn = false;
+  }
+  // -- b --
+
+  /** \fn  const SimpleVector getB() const
+   *  \brief get the value of b
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getB() const
+  {
+    return *b;
+  }
+
+  /** \fn SimpleVector* getBPtr() const
+   *  \brief get b
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getBPtr() const
+  {
+    return b;
+  }
+
+  /** \fn void setB (const SimpleVector& newValue)
+   *  \brief set the value of b to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setB(const SimpleVector& newValue)
+  {
+    *b = newValue;
+  }
+
+  /** \fn void setBPtr(SimpleVector* newPtr)
+   *  \brief set B to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setBPtr(SimpleVector *newPtr)
+  {
+    if (isBAllocatedIn) delete b;
+    b = newPtr;
+    isBAllocatedIn = false;
+  }
 
   /** \fn SiconosMatrix getHPtrRelatingToDS(int position)
    *  \brief getter of the SiconosMatrix H relating to one (the one at the given position in the dsVector of the interaction) of the 2 specific Dynamical System of of the Interaction
    *  \return SiconosMatrix : the H for a DS
    */
-  SiconosMatrix getHRelatingToDS(int position);
+  SiconosMatrix getHRelatingToDS(const int&);
 
-  /** \fn SiconosVector* getBPtr(void)
-   *  \brief getter of the SiconosVector* b
-   *  \return a pointer on the SiconosVector b
-   */
-  SiconosVector* getBPtr(void);
-
-  /** \fn void setH(SiconosMatrix)
-   *  \brief setter on the SiconosMatrix h
-   *  \param a SiconosMatrix to set h
-   */
-  inline void setH(const SiconosMatrix &H)
-  {
-    this->h = H;
-  };
-
-  /** \fn void setH(SimpleVector&)
-   *  \brief set the vector b
-   *  \param SimpleVector& : new value of b
-   */
-  inline void setB(/*SiconosVector*/SimpleVector& B)
-  {
-    this->b = B;
-  };
-
-
-  ////////////////////////////
-
-  /** \fn void computePredictedOutput(const double&);
-   *  \brief compute yp, predicted value for constrained variables
-   *  \param double : current time step
-   *  \param SimpleVector *: the vector to compute
-   *  \exception RuntimeException
-   */
-  void computePredictedOutput(const double&, SimpleVector*);
+  // --- OTHER FUNCTIONS ---
 
   /** \fn void computeFreeOutput(double time);
    *  \brief default function to compute y for the free state
    *  \param double : current time
    *  \exception RuntimeException
    */
-  void computeFreeOutput(double time);
+  void computeFreeOutput(const double& time);
 
   /** \fn void computeOutput(double time);
    *  \brief default function to compute y
    *  \param double : current time
    *  \exception RuntimeException
    */
-  void computeOutput(double time);
+  void computeOutput(const double& time);
 
   /** \fn void computeInput(double time);
    *  \brief default function to compute lambda
    *  \param double : current time
    *  \exception RuntimeException
    */
-  void computeInput(double time);
+  void computeInput(const double& time);
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the Relation to the XML tree
@@ -134,18 +158,6 @@ public:
    */
   void display() const;
 
-  /** \fn void createRelation(LagrangianLinearRXML * relationXML,
-            SiconosMatrix* H, SiconosVector* b,
-            Interaction * interaction)
-   *  \brief allows to create the Relation with an xml file, or the needed data
-   *  \param LagrangianLinearRXML * : the XML object for this Relation
-   *  \param SiconosMatrix* : the matrix H of this Relation
-   *  \param SiconosVector* : the vector h of this Relation
-   *  \exception RuntimeException
-   */
-  void createRelation(LagrangianLinearRXML * relationXML,
-                      SiconosMatrix* H = NULL, SiconosVector* b = NULL);
-
   /** \fn LagrangianLinearR* convert (Relation *r)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation * : the relation which must be converted
@@ -153,23 +165,18 @@ public:
    */
   static LagrangianLinearR* convert(Relation *r);
 
-
-
-protected:
-  /** \fn void fillRelationWithRelationXML()
-   *  \brief uses the RelationXML of the LagrangianLinearR to fill the fields of this Relation
-   *  \exception RuntimeException
-   */
-  void fillRelationWithRelationXML();
-
-
 private:
   /** a specific matrix to the LagrangianLinearR */
-  SiconosMatrix h;
+  SiconosMatrix* H;
 
   /** a specific vector to the LagrangianLinearR */
-  /*SiconosVector*/
-  SimpleVector b;
+  SimpleVector* b;
+
+  /* Flags to control where pointers have been allocated (in or out constructors)*/
+  bool isHAllocatedIn;
+  bool isBAllocatedIn;
+
+
 };
 
 #endif // LAGRANGIANLINEARRELATION_H

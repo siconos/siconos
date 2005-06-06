@@ -3,12 +3,12 @@
 
 #include "NonSmoothLawXML.h"
 #include "Interaction.h"
-
 #include "SiconosConst.h"
+#include "check.h"
 
 /** \class NonSmoothLaw
  *  \brief this class contains non-smooth law
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date (Creation) May 05, 2004
  *
@@ -43,30 +43,39 @@ public:
   virtual bool isVerified(void) const = 0;
 
   /** \fn inline NonSmoothLawXML* getNonSmoothLawXML()
-   *  \brief allows to get the NonSmoothLawXML of the NonSmoothLaw
+   *  \brief get the NonSmoothLawXML of the NonSmoothLaw
    *  \return the pointer on the NonSmoothLawXML of the NonSmoothLaw
    */
   inline NonSmoothLawXML* getNonSmoothLawXML()
   {
-    return this->nslawxml;
+    return nslawxml;
   }
 
   /** \fn inline void setNonSmoothLawXML( NonSmoothLawXML* nslawxml )
-   *  \brief allows to set the NonSmoothLawXML of the NonSmoothLaw
+   *  \brief set the NonSmoothLawXML of the NonSmoothLaw
    *  \param NonSmoothLawXML* : the pointer to set nslawxml
    */
-  inline void setNonSmoothLawXML(NonSmoothLawXML* nslawxml)
+  inline void setNonSmoothLawXML(NonSmoothLawXML* newNslawxml)
   {
-    this->nslawxml = nslawxml;
+    nslawxml = newNslawxml;
   }
 
   /** \fn inline string getType()
    *  \brief allows to get the type of the NonSmoothLaw
    *  \return string : the type of the NonSmoothLaw
    */
-  inline string getType() const
+  inline const std::string getType() const
   {
-    return this->nsLawType;
+    return nsLawType;
+  }
+
+  /** \fn inline string setType(const string &)
+   *  \brief set the type of the NonSmoothLaw
+   *  \param: string, the type of the NonSmoothLaw
+   */
+  inline void setType(const std::string& newType)
+  {
+    nsLawType = newType;
   }
 
   /////////////////////
@@ -83,17 +92,8 @@ public:
    */
   virtual void display() const;
 
-
-protected:
-  /** \fn void fillNonSmoothLawWithNonSmoothLawXML()
-   *  \brief uses the NonSmoothLawXML of the NonSmoothLaw to fill the fields of this NonSmoothLaw
-   *  \exception RuntimeException
-   */
-  virtual void fillNonSmoothLawWithNonSmoothLawXML();
-
-
   /** type of the NonSmoothLaw */
-  string nsLawType;
+  std::string nsLawType;
 
   /** the XML pbject linked to the NonSmoothLaw to read XML data */
   NonSmoothLawXML *nslawxml;

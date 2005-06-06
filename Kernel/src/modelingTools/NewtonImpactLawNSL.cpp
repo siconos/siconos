@@ -1,57 +1,41 @@
 #include "NewtonImpactLawNSL.h"
+using namespace std;
 
-#include "check.h"
-
-NewtonImpactLawNSL::NewtonImpactLawNSL(): NonSmoothLaw()
+NewtonImpactLawNSL::NewtonImpactLawNSL(): NonSmoothLaw(), e(0.0)
 {
-  this->e = 0.0;
-  this->nsLawType = NEWTONIMPACTLAWNSLAW;
+  nsLawType = NEWTONIMPACTLAWNSLAW;
 }
 
-NewtonImpactLawNSL::NewtonImpactLawNSL(NonSmoothLawXML* nslawxml): NonSmoothLaw(nslawxml)
+NewtonImpactLawNSL::NewtonImpactLawNSL(NonSmoothLawXML* nslawxml):
+  NonSmoothLaw(nslawxml), e(0.0)
 {
-  this->e = 0.0;
-  this->nsLawType = NEWTONIMPACTLAWNSLAW;
+  nsLawType = NEWTONIMPACTLAWNSLAW;
+  if (nslawxml != NULL)
+    e = (static_cast<NewtonImpactLawNSLXML*>(nslawxml))->getE();
+  else RuntimeException::selfThrow("NewtonImpactLawNSL:: xml constructor, xml file=NULL");
 }
 
-NewtonImpactLawNSL::NewtonImpactLawNSL(double e)
+NewtonImpactLawNSL::NewtonImpactLawNSL(const double& newE):
+  NonSmoothLaw(), e(newE)
 {
-  this->e = e;
-  this->nsLawType = NEWTONIMPACTLAWNSLAW;
+  nsLawType = NEWTONIMPACTLAWNSLAW;
 }
 
 NewtonImpactLawNSL::~NewtonImpactLawNSL()
 {}
 
-bool NewtonImpactLawNSL::isVerified(void) const
+bool NewtonImpactLawNSL::isVerified() const
 {
   bool res = false;
-
   // to do
-
   return res;
-}
-
-
-void NewtonImpactLawNSL::fillNonSmoothLawWithNonSmoothLawXML()
-{
-  IN("NewtonImpactLawNSL::fillNonSmoothLawWithNonSmoothLawXML\n");
-  NonSmoothLaw::fillNonSmoothLawWithNonSmoothLawXML();
-  if (this->nslawxml != NULL)
-  {
-    this->e = (static_cast<NewtonImpactLawNSLXML*>(this->nslawxml))->getE();
-    //    this->display();
-  }
-  else RuntimeException::selfThrow("NewtonImpactLawNSL::fillNonSmoothLawWithNonSmoothLawXML - object NonSmoothLawXML does not exist");
-  OUT("NewtonImpactLawNSL::fillNonSmoothLawWithNonSmoothLawXML\n");
-
 }
 
 void NewtonImpactLawNSL::display() const
 {
   cout << "------------------------------------" << endl;
   cout << "____ data of the NewtonImpactLawNSL" << endl;
-  cout << "| The Newton coefficient of restitution e : " << this->e << endl;
+  cout << "| The Newton coefficient of restitution e : " << e << endl;
   cout << "____________________________" << endl;
   cout << "------------------------------------" << endl;
 }
@@ -59,25 +43,9 @@ void NewtonImpactLawNSL::display() const
 void NewtonImpactLawNSL::saveNonSmoothLawToXML()
 {
   IN("NewtonImpactLawNSL::saveNonSmoothLawToXML\n");
-  static_cast<NewtonImpactLawNSLXML*>(this->nslawxml)->setE(this->e);
+  static_cast<NewtonImpactLawNSLXML*>(this->nslawxml)->setE(e);
   OUT("NewtonImpactLawNSL::saveNonSmoothLawToXML\n");
 }
-
-void NewtonImpactLawNSL::createNonSmoothLaw(NewtonImpactLawNSLXML * nslawXML, double e)//, Interaction * interaction)
-{
-  if (nslawXML != NULL)
-  {
-    this->nslawxml = nslawXML;
-    this->nsLawType = NEWTONIMPACTLAWNSLAW;
-    this->e = 0.0;
-    this->fillNonSmoothLawWithNonSmoothLawXML();
-  }
-  else
-  {
-    this->e = e;
-  }
-}
-
 
 NewtonImpactLawNSL* NewtonImpactLawNSL::convert(NonSmoothLaw* nsl)
 {

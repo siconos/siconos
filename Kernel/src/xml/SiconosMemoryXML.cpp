@@ -1,5 +1,5 @@
-
 #include "SiconosMemoryXML.h"
+using namespace std;
 
 SiconosMemoryXML::SiconosMemoryXML()
 {}
@@ -92,7 +92,7 @@ void SiconosMemoryXML::setVectorMemoryValue(const vector<SiconosVector*> memory)
   {
     while ((node != NULL) && (i < memory.size()))
     {
-      SiconosDOMTreeTools::setSiconosVectorValue(node, *(memory[i]));
+      SiconosDOMTreeTools::setSiconosVectorNodeValue(node, *(memory[i]));
       oldNode = node;
       node = SiconosDOMTreeTools::findFollowNode(node, SM_MEMORY);
       i++;

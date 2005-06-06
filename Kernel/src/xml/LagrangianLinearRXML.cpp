@@ -1,53 +1,43 @@
-
 #include "LagrangianLinearRXML.h"
+using namespace std;
 
-LagrangianLinearRXML::LagrangianLinearRXML(): RelationXML()
-{
-  this->HNode = NULL;
-  this->bNode = NULL;
-}
+LagrangianLinearRXML::LagrangianLinearRXML():
+  RelationXML(), HNode(NULL), bNode(NULL)
+{}
 
 LagrangianLinearRXML::LagrangianLinearRXML(xmlNode * LLRelationNode)
-  : RelationXML(LLRelationNode)
+  : RelationXML(LLRelationNode), HNode(NULL), bNode(NULL)
 {
   xmlNode *node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, LLR_H)) != NULL)
-  {
-    this->HNode = node;
-  }
+    HNode = node;
   else
-  {
     XMLException::selfThrow("LLRelationXML - constructor error : tag " + LLR_H + " not found.");
-  }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, LLR_B)) != NULL)
-  {
-    this->bNode = node;
-  }
+    bNode = node;
   else
-  {
     XMLException::selfThrow("LLRelationXML - constructor error : tag " + LLR_B + " not found.");
-  }
 }
 
 LagrangianLinearRXML::~LagrangianLinearRXML()
 {}
 
-void LagrangianLinearRXML::setH(SiconosMatrix *matrix)
+void LagrangianLinearRXML::setH(const SiconosMatrix& matrix)
 {
-  if (this->HNode == NULL)
+  if (HNode == NULL)
   {
-    this->HNode = SiconosDOMTreeTools::createMatrixNode(this->rootRelationXMLNode, LLR_H, matrix);
+    HNode = SiconosDOMTreeTools::createMatrixNode(rootRelationXMLNode, LLR_H, matrix);
   }
-  else SiconosDOMTreeTools::setSiconosMatrixValue(this->HNode, matrix);
+  else SiconosDOMTreeTools::setSiconosMatrixNodeValue(HNode, matrix);
 }
 
-void LagrangianLinearRXML::setB(SiconosVector *vector)
+void LagrangianLinearRXML::setB(const SiconosVector &vec)
 {
-  if (this->bNode == NULL)
+  if (bNode == NULL)
   {
-    this->bNode = SiconosDOMTreeTools::createVectorNode(this->rootRelationXMLNode, LLR_B, vector);
+    bNode = SiconosDOMTreeTools::createVectorNode(rootRelationXMLNode, LLR_B, vec);
   }
-  else SiconosDOMTreeTools::setSiconosVectorValue(this->bNode, vector);
+  else SiconosDOMTreeTools::setSiconosVectorNodeValue(bNode, vec);
 }

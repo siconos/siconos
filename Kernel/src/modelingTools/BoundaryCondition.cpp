@@ -1,5 +1,6 @@
 
 #include "BoundaryCondition.h"
+using namespace std;
 
 BoundaryCondition::BoundaryCondition()
 {

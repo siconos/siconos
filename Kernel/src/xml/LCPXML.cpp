@@ -1,4 +1,5 @@
 #include "LCPXML.h"
+using namespace std;
 
 LCPXML::LCPXML() : OneStepNSProblemXML()
 {
@@ -40,6 +41,9 @@ LCPXML::LCPXML(xmlNode * LCPNode, vector<int> definedInteractionNumbers)
     cout << "LCPXML - constructor : tag " << LCP_Q << " not found. Optional attribute." << endl;
   }
 }
+
+
+LCPXML::~LCPXML() {}
 
 void LCPXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
 {

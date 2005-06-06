@@ -16,7 +16,6 @@
 
 #include "NonSmoothLawXML.h"
 
-
 class ComplementarityConditionNSLXML : public NonSmoothLawXML
 {
 public:

@@ -1,33 +1,34 @@
 #ifndef INTERACTION_H
 #define INTERACTION_H
 
-#include <vector>
-#include <string>
-
+// for composition ...
 #include "DynamicalSystem.h"
 #include "NonSmoothLaw.h"
 #include "Relation.h"
+#include "RelationXML.h"
 
+// IO (XML)
 #include "InteractionXML.h"
 
-//#include "SiconosVector.h"
+// tools
 #include "NewSiconosVector.h"
 #include "SimpleVector.h"
 
+// const
 #include "SiconosConst.h"
 
-
-//using namespace std;
+#include <vector>
+#include <string>
 
 class DynamicalSystem;
 class Relation;
 class NonSmoothLaw;
 
-class InteractionXML;
+//class InteractionXML;
 
 /** \class Interaction
  *  \brief link between dynamic systems, driven by relations and non-smooth laws.
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 29, 2004
  *
@@ -37,19 +38,11 @@ class Interaction
 {
 public:
 
-  /** \fn Interaction()
-   *  \brief default constructor : initialize pointers to NULL, integers to 0, etc.
-   */
-  Interaction();
-
-  /** \fn Interaction(Interaction*)
+  /** \fn Interaction(const Interaction&)
    *  \brief copy constructor
    *  \param Interaction* : the object to copy
    */
-  Interaction(Interaction *inter)
-  {
-    *this = *inter;
-  };
+  Interaction(const Interaction& inter);
 
   /** \fn Interaction(InteractionXML*)
    *  \brief constructor with XML object of the Interaction
@@ -57,295 +50,428 @@ public:
    */
   Interaction(InteractionXML*);
 
+
+  /** \fn Interaction(const string&, const int& number,const int& nInter, vector<int>* status,
+      vector<DynamicalSystem*>* dsConcerned)
+  *  \brief constructor with a set of data
+  *  \param string: the id of this Interaction
+  *  \param int : the number of this Interaction (optional)
+  *  \param int : the value of nInter for this Interaction (optional)
+  *  \param vector<int>* : the status of this Interaction (optional)
+  *  \param vector<DynamicalSystem*>* : the Dynamical Systems concerned by this interaction (optional)
+  *  \exception RuntimeException
+  */
+  Interaction(const std::string&, const int& = -1 , const int& = -1, std::vector<int>* = NULL, std::vector<DynamicalSystem*>* = NULL);
+
   ~Interaction();
 
-  // getter et setter
+  // --- GETTERS/SETTERS ---
 
-  /** \fn string getId(void)
-   *  \brief allows to get the id of this Interaction
+  /** \fn const string getId() const
+   *  \brief get the id of this Interaction
    *  \return the string, id of this Interaction
    */
-  inline string getId(void) const
+  inline const std::string  getId() const
   {
-    return this->id;
-  };
-
-  /** \fn int getNInteraction(void)
-   *  \brief allows to get the number nInteraction of this Interaction
-   *  \return the value of nInteraction
-   */
-  inline int getNInteraction(void) const
-  {
-    return this->nInteraction;
-  };
-
-  /** \fn SimpleVector getY(void)
-   *  \brief allows to get the SiconosVector y of this Interaction
-   *  \return SimpleVector, y of this Interaction
-   */
-  inline SimpleVector getY(void) const
-  {
-    return this->y;
-  };
-
-  /** \fn SiconosVector* getYPtr(void)
-   *  \brief allows to get the SiconosVector* y of this Interaction
-   *  \return SiconosVector*, y of this Interaction
-   */
-  SimpleVector* getYPtr(void);
-
-  /** \fn SimpleVector getLambda(void)
-   *  \brief allows to get the SiconosVector lambda of this Interaction
-   *  \return SimpleVector, lambda of this Interaction
-   */
-  inline SimpleVector getLambda(void) const
-  {
-    return this->lambda;
-  };
-
-  /** \fn SiconosVector* getLambdaPtr(void)
-   *  \brief allows to get the SiconosVector* lambda of this Interaction
-   *  \return SiconosVector*, lambda of this Interaction
-   */
-  SimpleVector* getLambdaPtr(void);
-
-  /** \fn SimpleVector getYOld(void)
-   *  \brief allows to get the SiconosVector yOld of this Interaction
-   *  \return SimpleVector, yOld of this Interaction
-   */
-  inline SimpleVector getYOld(void) const
-  {
-    return this->yOld;
-  };
-
-  /** \fn SimpleVector* getYOldPtr(void)
-   *  \brief allows to get the SimpleVector* yOld of this Interaction
-   *  \return SimpleVector*, yOld of this Interaction
-   */
-  SimpleVector* getYOldPtr(void);
-
-  /** \fn inline void setYDot(SimpleVector &yDot)
-   *  \brief set yDot of this Interaction
-   *  \param SimpleVector &yDot : new value of yDot
-   */
-  inline void setYDot(const SimpleVector &yDot)
-  {
-    this->yDot = yDot;
-  };
-
-  /** \fn inline SimpleVector getYDot(void)
-   *  \brief get yDot of this Interaction
-   *  \return SimpleVector, yDot of this Interaction
-   */
-  inline  SimpleVector getYDot(void) const
-  {
-    return this->yDot;
-  };
-
-  /** \fn inline SimpleVector* getYDotPtr(void)
-   *  \brief get yDot of this Interaction
-   *  \return SimpleVector*, pointer on yDot of this Interaction
-   */
-  inline SimpleVector* getYDotPtr(void)
-  {
-    return &(this->yDot);
-  };
-
-  /** \fn inline void setYDotOld(SimpleVector &yDot)
-   *  \brief set previous value of yDot of this Interaction
-   *  \param SimpleVector &yDotOld : previous value of yDot
-   */
-  inline void setYDotOld(const SimpleVector& yDotOld)
-  {
-    this->yDotOld = yDotOld;
-  };
-
-  /** \fn inline SimpleVector getYDotOld(void)
-   *  \brief get previous value of yDot of this Interaction
-   *  \return SimpleVector, previous value of yDot of this Interaction
-   */
-  inline  SimpleVector getYDotOld(void) const
-  {
-    return this->yDotOld;
-  };
-
-  /** \fn inline SimpleVector* getYDotOldPtr(void)
-   *  \brief get previous value of yDot of this Interaction
-   *  \return SimpleVector*, pointer on previous value of yDot of this Interaction
-   */
-  inline SimpleVector* getYDotOldPtr(void)
-  {
-    return &(this->yDotOld);
-  };
-
-  /** \fn SimpleVector getLambdaOld(void)
-   *  \brief get the SimpleVector lambdaOld of this Interaction
-   *  \return SimpleVector, lambdaOld of this Interaction
-   */
-  inline SimpleVector getLambdaOld(void) const
-  {
-    return this->lambdaOld;
-  };
-
-  /** \fn SimpleVector* getLambdaOldPtr(void)
-   *  \brief get the SimpleVector* lambdaOld of this Interaction
-   *  \return SimpleVector*, lambdaOld of this Interaction
-   */
-  SimpleVector* getLambdaOldPtr(void);
-
-  /** \fn vector<int> getStatus(void)
-   *  \brief allows to get the status of this Interaction
-   *  \return the value of status for this Interaction
-   */
-  inline vector<int> getStatus(void) const
-  {
-    return this->status;
-  };
-
-  /** \fn vector<DynamicalSystem*> getDynamicalSystems(void)
-   *  \brief allows to get the 2 DynamicalSystem of this Interaction
-   *  \return vector<DynamicalSystem*> : a vector of DS, with 2 DynamicalSystem
-   */
-  inline vector<DynamicalSystem*> getDynamicalSystems(void)
-  {
-    return this->vectorDS;
-  };
-
-  /** \fn DynamicalSystem* getDynamicalSystem(int)
-   *  \brief allows to get a specific DynamicalSystem
-   *  \param the identification number of the wanted DynamicalSystem
-   *  \return null if there's no DS corresponding else the right DynamicalSystem
-   */
-  DynamicalSystem* getDynamicalSystem(int);
-
-  /** \fn Relation* getRelation(void)
-   *  \brief allows to get the Relation of this Interaction
-   *  \return a pointer on this Relation
-   */
-  inline Relation* getRelation(void) const
-  {
-    return this->relation;
-  };
-
-  /** \fn NonSmoothLaw* getNonSmoothLaw(void)
-   *  \brief allows to get the NonSmoothLaw of this Interaction
-   *  \return a pointer on this NonSmoothLaw
-   */
-  inline NonSmoothLaw* getNonSmoothLaw(void) const
-  {
-    return this->nslaw;
-  };
-
-  /** \fn int getNumber()
-   *  \brief allows to get the value of number
-   *  \return the value of number
-   */
-  inline int getNumber() const
-  {
-    return this->number;
-  };
-
-  /** \fn void setNumber(int)
-   *  \brief allows to modify the value of number
-   *  \param int : the value to set for number
-   */
-  inline void setNumber(const int nb)
-  {
-    this->number = nb;
-  };
+    return id;
+  }
 
   /** \fn void setId(int)
-   *  \brief allows to set the id of this Interaction
+   *  \brief set the id of this Interaction
    *  \param the integer to set the id
    */
-  inline void setId(const int id)
+  inline void setId(const int& newId)
   {
-    this->id = id;
-  };
+    id = newId;
+  }
 
-  /** \fn void setNInteraction(int)
+  /** \fn const int getNumber() const
+   *  \brief get the value of number
+   *  \return the value of number
+   */
+  inline const int getNumber() const
+  {
+    return number;
+  }
+
+  /** \fn void setNumber(const int&)
+   *  \brief set number
+   *  \param int number : the value to set number
+   */
+  inline void setNumber(const int& newNumber)
+  {
+    number = newNumber;
+  }
+
+  /** \fn const int getNInteraction() const
+   *  \brief get the number nInteraction of this Interaction
+   *  \return the value of nInteraction
+   */
+  inline const int getNInteraction() const
+  {
+    return nInteraction;
+  }
+
+  /** \fn void setNInteraction(const int&)
    *  \brief allows to set the value of nInteraction
    *  \param the integer to set the nInteraction
    */
-  inline void setNInteraction(const int nInter)
+  inline void setNInteraction(const int& nInter)
   {
-    this->nInteraction = nInter;
-  };
+    nInteraction = nInter;
+  }
 
-  /** \fn void setLambda(SimpleVector)
-   *  \brief allows to set the SimpleVector lambda
-   *  \param SimpleVector : new value of lambda
+  // -- y --
+
+  /** \fn  const SimpleVector getY() const
+   *  \brief get the value of y
+   *  \return SimpleVector
    */
-  inline void setLambda(const SimpleVector& lambda)
+  inline const SimpleVector getY() const
   {
-    this->lambda = lambda;
-  };
+    return *y;
+  }
+
+  /** \fn SimpleVector* getYPtr() const
+   *  \brief get y
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getYPtr() const
+  {
+    return y;
+  }
+
+  /** \fn void setY (const SimpleVector& newValue)
+   *  \brief set the value of y to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setY(const SimpleVector& newValue)
+  {
+    *y = newValue;
+  }
+
+  /** \fn void setYPtr(SimpleVector* newPtr)
+   *  \brief set Y to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setYPtr(SimpleVector *newPtr)
+  {
+    if (isYAllocatedIn) delete y;
+    y = newPtr;
+    isYAllocatedIn = false;
+  }
+
+  // -- yDot --
+
+  /** \fn  const SimpleVector getYDot() const
+   *  \brief get the value of yDot
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getYDot() const
+  {
+    return *yDot;
+  }
+
+  /** \fn SimpleVector* getYDotPtr() const
+   *  \brief get yDot
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getYDotPtr() const
+  {
+    return yDot;
+  }
+
+  /** \fn void setYDot (const SimpleVector& newValue)
+   *  \brief set the value of yDot to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setYDot(const SimpleVector& newValue)
+  {
+    *yDot = newValue;
+  }
+
+  /** \fn void setYDotPtr(SimpleVector* newPtr)
+   *  \brief set YDot to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setYDotPtr(SimpleVector *newPtr)
+  {
+    if (isYDotAllocatedIn) delete yDot;
+    yDot = newPtr;
+    isYDotAllocatedIn = false;
+  }
+
+  // -- lambda --
+
+  /** \fn  const SimpleVector getLambda() const
+   *  \brief get the value of lambda
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getLambda() const
+  {
+    return *lambda;
+  }
+
+  /** \fn SimpleVector* getLambdaPtr() const
+   *  \brief get lambda
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getLambdaPtr() const
+  {
+    return lambda;
+  }
+
+  /** \fn void setLambda (const SimpleVector& newValue)
+   *  \brief set the value of lambda to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setLambda(const SimpleVector& newValue)
+  {
+    *lambda = newValue;
+  }
+
+  /** \fn void setLambdaPtr(SimpleVector* newPtr)
+   *  \brief set Lambda to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setLambdaPtr(SimpleVector *newPtr)
+  {
+    if (isLambdaAllocatedIn) delete lambda;
+    lambda = newPtr;
+    isLambdaAllocatedIn = false;
+  }
+
+  // -- yOld --
+
+  /** \fn  const SimpleVector getYOld() const
+   *  \brief get the value of yOld
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getYOld() const
+  {
+    return *yOld;
+  }
+
+  /** \fn SimpleVector* getYOldPtr() const
+   *  \brief get yOld
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getYOldPtr() const
+  {
+    return yOld;
+  }
+
+  /** \fn void setYOld (const SimpleVector& newValue)
+   *  \brief set the value of yOld to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setYOld(const SimpleVector& newValue)
+  {
+    *yOld = newValue;
+  }
+
+  /** \fn void setYOldPtr(SimpleVector* newPtr)
+   *  \brief set YOld to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setYOldPtr(SimpleVector *newPtr)
+  {
+    if (isYOldAllocatedIn) delete yOld;
+    yOld = newPtr;
+    isYOldAllocatedIn = false;
+  }
+
+  // -- yDotOld --
+
+  /** \fn  const SimpleVector getYDotOld() const
+   *  \brief get the value of yDotOld
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getYDotOld() const
+  {
+    return *yDotOld;
+  }
+
+  /** \fn SimpleVector* getYDotOldPtr() const
+   *  \brief get yDotOld
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getYDotOldPtr() const
+  {
+    return yDotOld;
+  }
+
+  /** \fn void setYDotOld (const SimpleVector& newValue)
+   *  \brief set the value of yDotOld to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setYDotOld(const SimpleVector& newValue)
+  {
+    *yDotOld = newValue;
+  }
+
+  /** \fn void setYDotOldPtr(SimpleVector* newPtr)
+   *  \brief set YDotOld to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setYDotOldPtr(SimpleVector *newPtr)
+  {
+    if (isYDotOldAllocatedIn) delete yDotOld;
+    yDotOld = newPtr;
+    isYDotOldAllocatedIn = false;
+  }
+
+  // -- lambdaOld --
+
+  /** \fn  const SimpleVector getLambdaOld() const
+   *  \brief get the value of lambdaOld
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getLambdaOld() const
+  {
+    return *lambdaOld;
+  }
+
+  /** \fn SimpleVector* getLambdaOldPtr() const
+   *  \brief get lambdaOld
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getLambdaOldPtr() const
+  {
+    return lambdaOld;
+  }
+
+  /** \fn void setLambdaOld (const SimpleVector& newValue)
+   *  \brief set the value of lambdaOld to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setLambdaOld(const SimpleVector& newValue)
+  {
+    *lambdaOld = newValue;
+  }
+
+  /** \fn void setLambdaOldPtr(SimpleVector* newPtr)
+   *  \brief set LambdaOld to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setLambdaOldPtr(SimpleVector *newPtr)
+  {
+    if (isLambdaOldAllocatedIn) delete lambdaOld;
+    lambdaOld = newPtr;
+    isLambdaOldAllocatedIn = false;
+  }
+
+  /** \fn vector<int> getStatus(void)
+   *  \brief get the status of this Interaction
+   *  \return the value of status for this Interaction
+   */
+  inline const std::vector<int> getStatus() const
+  {
+    return status;
+  }
 
   /** \fn void setStatus(vector<int>)
-   *  \brief allows to set the status of this Interaction
+   *  \brief set the status of this Interaction
    *  \param the vector of integer to set the status
    */
-  inline void setStatus(vector<int> vs)
+  inline void setStatus(const std::vector<int>& vs)
   {
-    this->status = vs;
-  };
+    status = vs;
+  }
+
+  /** \fn vector<DynamicalSystem*> getDynamicalSystems()
+   *  \brief get the 2 DynamicalSystem of this Interaction
+   *  \return vector<DynamicalSystem*> : a vector of DS, with 2 DynamicalSystem
+   */
+  inline std::vector<DynamicalSystem*> getDynamicalSystems() const
+  {
+    return vectorDS;
+  }
 
   /** \fn void setDynamicalSystems(DynamicalSystem*, DynamicalSystem*)
-   *  \brief allows to set the 2 DS of this Interaction
+   *  \brief set the 2 DS of this Interaction
    *  \param the first DS* to set in the Interaction
    *  \param the second DS* to set in the Interaction
    */
   void setDynamicalSystems(DynamicalSystem*, DynamicalSystem*);
 
-  /** \fn void setRelation(Relation*)
-   *  \brief allows to set the Relation of this Interaction
-   *  \param the Relation* to set
+  /** \fn DynamicalSystem* getDynamicalSystemPtr(const int&)
+   *  \brief get a specific DynamicalSystem
+   *  \param the identification number of the wanted DynamicalSystem
+   *  \return null if there's no DS corresponding
    */
-  inline void setRelation(Relation*)
-  {
-    this->relation = relation;
-  };
+  DynamicalSystem* getDynamicalSystemPtr(const int&);
 
-  /** \fn void setNonSmoothLaw(NonSmoothLaw*)
-   *  \brief allows to set the NonSmoothLaw of this Interaction
+  /** \fn DynamicalSystem getDynamicalSystem(const int&)
+   *  \brief get a specific DynamicalSystem
+   *  \param 0 or 1 -> first or second DS concerned by interaction
+   */
+  DynamicalSystem getDynamicalSystem(const int&);
+
+  /** \fn Relation* getRelationPtr(void)
+   *  \brief get the Relation of this Interaction
+   *  \return a pointer on this Relation
+   */
+  inline Relation* getRelationPtr() const
+  {
+    return relation;
+  }
+
+  /** \fn void setRelationPtr(Relation*)
+   *  \brief set the Relation of this Interaction
+   *  \param the relation* to set
+   */
+  inline void setRelationPtr(Relation* newRelation)
+  {
+    if (isRelationAllocatedIn) delete relation;
+    relation = newRelation;
+    isRelationAllocatedIn = false;
+  }
+
+  /** \fn NonSmoothLaw* getNonSmoothLawPtr(void)
+   *  \brief get the NonSmoothLaw of this Interaction
+   *  \return a pointer on this NonSmoothLaw
+   */
+  inline NonSmoothLaw* getNonSmoothLawPtr() const
+  {
+    return nslaw;
+  }
+
+  /** \fn void setNonSmoothLawPtr(NonSmoothLaw*)
+   *  \brief set the NonSmoothLaw of this Interaction
    *  \param the NonSmoothLaw* to set
    */
-  inline void setNonSmoothLaw(NonSmoothLaw*)
+  inline void setNonSmoothLawPtr(NonSmoothLaw* newNslaw)
   {
-    this->nslaw = nslaw;
-  };
+    if (isNsLawAllocatedIn) delete nslaw;
+    nslaw = newNslaw;
+    isNsLawAllocatedIn = false;
+  }
 
-  /** \fn inline InteractionXML* getInteractionXML()
-   *  \brief allows to get the InteractionXML* of the Interaction
+  /** \fn inline InteractionXML* getInteractionXMLPtr()
+   *  \brief get the InteractionXML* of the Interaction
    *  \return InteractionXML* : the pointer on the InteractionXML
    */
-  inline InteractionXML* getInteractionXML()
+  inline InteractionXML* getInteractionXMLPtr() const
   {
-    return this->interactionxml;
+    return interactionxml;
   }
 
-  /** \fn inline void setInteractionXML(InteractionXML* interxml)
-   *  \brief allows to set the InteractionXML* of the Interaction
+  /** \fn inline void setInteractionXMLPtr(InteractionXML* interxml)
+   *  \brief set the InteractionXML* of the Interaction
    *  \param InteractionXML* :  the pointer to set
    */
-  inline void setInteractionXML(InteractionXML* interxml)
+  inline void setInteractionXMLPtr(InteractionXML* interxml)
   {
-    this->interactionxml = interxml;
+    interactionxml = interxml;
   }
 
-
-  ////////////////////////////////
-
-  /** \fn   void initialize(void);
-   * \brief   initialization of the interaction
-   * \warning : this function does nothing apart displaying data of the Interaction
-   */
-  void initialize();
+  // --- OTHER FUNCTIONS ---
 
   /** \fn   void swapInMemory(void);
    * \brief   put values of y in yOld, the same for lambda
    */
-  void swapInMemory(void);
+  void swapInMemory();
 
   /** \fn void check(const double& time, const double& pasH)
    * \brief compares the output of the relation with respect to the NonSmoothLaw and set the status
@@ -361,133 +487,112 @@ public:
    */
   void update(const double& time, const double& pasH);
 
-  /** \fn void saveInteractionToXML()
-   *  \brief copy the data of the Interaction to the XML tree
-   *  \exception RuntimeException
-   */
-  void saveInteractionToXML();
-
   /** \fn void display()
    *  \brief print the data to the screen
    */
   void display() const;
 
-
-  /** \fn void createInteraction(InteractionXML * interactionXML, int number, int nInter,
-              vector<int>* status, vector<DynamicalSystem*>* dsConcerned)
-   *  \brief allows to create the Interaction with an xml file, or the needed data
-   *  \param InteractionXML * : the XML object for this Interaction
-   *  \param int : the number of this Interaction
-   *  \param int : the value of nInter of this Interaction
-   *  \param vector<int>* : the status of this Interaction
-   *  \param vectir<DynamicalSystem*>* : the Dynamical Systems concerned by this interaction
-   *  \exception RuntimeException
-   */
-  void createInteraction(InteractionXML * interactionXML, int number = -1, int nInter = -1,
-                         vector<int>* status = NULL, vector<DynamicalSystem*>* dsConcerned = NULL); //, NonSmoothDynamicalSystem * nsds = NULL);
-
-  /** \fn Relation* createLagrangianLinearR(SiconosMatrix* H, SiconosVector* b)
+  /** \fn Relation* createLagrangianLinearR(SiconosMatrix* H, SimpleVector* b)
    *  \brief allows to create a LagrangianLinearR relation for this Interaction
    *  \param SiconosMatrix* : the H matrix
    *  \param SiconosVector* : the b vector
-   *  \return Relation* : the relation created
+   *  \return Relation* : the relation allocated
    */
-  Relation* createLagrangianLinearR(SiconosMatrix* H = NULL, SiconosVector* b = NULL);
+  Relation* createLagrangianLinearR(SiconosMatrix* H = NULL, SimpleVector* b = NULL);
 
   /** \fn Relation* createLagrangianNonLinearR()
    *  \brief allows to create a LagrangianNonLinearR relation for this Interaction
    *  \param string : the name of the computeInput plugin
    *  \param string : the name of the computeOutput plugin
-   *  \return Relation* : the relation created
+   *  \return Relation* : the relation allocated
    */
-  Relation* createLagrangianNonLinearR(string computeInput, string computeOutput);
+  Relation* createLagrangianNonLinearR(const std::string&, const std::string&);
 
   /** \fn Relation* createLinearTIR(SiconosMatrix* C, SiconosMatrix* D,
-                    SiconosMatrix* E, SiconosVector* a)
-   *  \brief allows to create a LinearTIR relation for this Interaction
-   *  \param SiconosMatrix* : the C matrix
-   *  \param SiconosMatrix* : the D matrix
-   *  \param SiconosMatrix* : the E matrix
-   *  \param SiconosVector* : the a vector
-   *  \return Relation* : the relation created
-   */
+      SiconosMatrix* E, SiconosVector* a)
+      *  \brief allows to create a LinearTIR relation for this Interaction
+      *  \param SiconosMatrix* : the C matrix
+      *  \param SiconosMatrix* : the D matrix
+      *  \param SiconosMatrix* : the E matrix
+      *  \param SiconosVector* : the a vector
+      *  \return Relation* : the relation allocated
+      */
   Relation* createLinearTIR(SiconosMatrix* C = NULL, SiconosMatrix* D = NULL,
                             SiconosMatrix* E = NULL, SiconosVector* a = NULL);
 
 
   /** \fn NonSmoothLaw* createComplementarityConditionNSL()
    *  \brief allows to create a ComplementarityConditionNSL non-smooth law for this Interaction
-   *  \return NonSmoothLaw* : the non-smooth law created
+   *  \return NonSmoothLaw* : the non-smooth law allocated
    */
   NonSmoothLaw* createComplementarityConditionNSL();
 
-  /** \fn NonSmoothLaw* createRelayNSL(double c, double d)
+  /** \fn NonSmoothLaw* createRelayNSL(const double& c, const double& d)
    *  \brief allows to create a RelayNSL non-smooth law for this Interaction
    *  \param double : the c value
    *  \param double : the d value
-   *  \return NonSmoothLaw* : the non-smooth law created
+   *  \return NonSmoothLaw* : the non-smooth law allocated
    */
-  NonSmoothLaw* createRelayNSL(double c, double d);
+  NonSmoothLaw* createRelayNSL(const double&, const double&);
 
-  /** \fn NonSmoothLaw* createNewtonImpactLawNSL(double e)
+  /** \fn NonSmoothLaw* createNewtonImpactLawNSL(const double& e)
    *  \brief allows to create a NewtonImpactLawNSL non-smooth law for this Interaction
    *  \param double : the e value
    *  \return NonSmoothLaw* : the non-smooth law created
    */
-  NonSmoothLaw* createNewtonImpactLawNSL(double e);
+  NonSmoothLaw* createNewtonImpactLawNSL(const double&);
 
-  /** \fn NonSmoothLaw* createNewtonImpactLawNSL(double e)
+  /** \fn NonSmoothLaw* createNewtonImpactLawNSL(const double& en, const double& et, const double& mu)
    *  \brief allows to create a NewtonImpactLawNSL non-smooth law for this Interaction
    *  \param double : the en value
    *  \param double : the et value
    *  \param double : the mu value
    *  \return NonSmoothLaw* : the non-smooth law created
    */
-  NonSmoothLaw* createNewtonImpactFrictionNSL(double en, double et, double mu);
+  NonSmoothLaw* createNewtonImpactFrictionNSL(const double&, const double&, const double&);
 
+  // --- XML RELATED FUNCTIONS ---
 
-protected:
-  /** \fn void fillInteractionWithInteractionXML()
-   *  \brief uses the InteractionXML of the Interaction to fill the fields of this Interaction
+  /** \fn void saveInteractionToXML()
+   *  \brief copy the data of the Interaction to the XML tree
    *  \exception RuntimeException
    */
-  void fillInteractionWithInteractionXML();
-
-  /** \fn void linkInteractionWithInteractionXML()
-   *  \brief makes the links between the RelationXMLs, NonSmoothLawXMLs of the InteractionXML of the Interaction and the Relations, NonSmoothLaws
-   */
-  void linkInteractionWithInteractionXML();
-
+  void saveInteractionToXML();
 
 private:
+  /** \fn Interaction()
+   *  \brief default constructor
+   */
+  Interaction();
+
+
   /** name of the Interaction */
-  string id;
+  std::string  id;
   /** unique number specific to each Interaction */
   int number;
   /** size of the the vector y */
   int nInteraction;
   /** relation between constrained variables and states variables */
-  SimpleVector y;
+  SimpleVector* y;
+  /** relation between constrained variables and states variables */
+  SimpleVector* yDot;
   /** result of the computeInput function */
-  SimpleVector lambda;
+  SimpleVector* lambda;
   /** relation between constrained variables and states variables */
-  SimpleVector yOld;
+  SimpleVector* yOld;
   /** relation between constrained variables and states variables */
-  SimpleVector yDot;
-  /** relation between constrained variables and states variables */
-  SimpleVector yDotOld;
+  SimpleVector* yDotOld;
   /** result of the computeInput function */
-  SimpleVector lambdaOld;
-
+  SimpleVector* lambdaOld;
 
   /** shows the status of the Interaction */
-  vector<int> status;
+  std::vector<int> status;
 
   /** the Dynamical Systems concerned by this relation
    * dynamical systems are given by pair :
    * the vector (ds1, ds2, ds3, ds4, ds5, ds6)
    * means ds1 interacts with ds2, ds3 interacts with ds4, ds5 interacts with ds6*/
-  vector<DynamicalSystem*> vectorDS;
+  std::vector<DynamicalSystem*> vectorDS;
 
   /** the Non-smooth Law of the interaction*/
   NonSmoothLaw *nslaw;
@@ -498,6 +603,16 @@ private:
   /** the XML object linked to the Interaction to read XML data */
   InteractionXML *interactionxml;
 
+  /** Flags to know if pointers have been allocated inside constructors or not */
+
+  bool isYAllocatedIn;
+  bool isYDotAllocatedIn;
+  bool isLambdaAllocatedIn;
+  bool isYOldAllocatedIn;
+  bool isYDotOldAllocatedIn;
+  bool isLambdaOldAllocatedIn;
+  bool isRelationAllocatedIn;
+  bool isNsLawAllocatedIn;
 };
 
 #endif // INTERACTION_H

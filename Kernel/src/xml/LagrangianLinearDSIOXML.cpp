@@ -1,4 +1,5 @@
 #include "LagrangianLinearDSIOXML.h"
+using namespace std;
 
 LagrangianLinearDSIOXML::LagrangianLinearDSIOXML(): DSInputOutputXML()
 {
@@ -29,16 +30,16 @@ void LagrangianLinearDSIOXML::setH(SiconosMatrix *matrix)
 {
   if (this->HNode == NULL)
   {
-    this->HNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSIOXMLNode, LLDSIO_H, matrix);
+    this->HNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSIOXMLNode, LLDSIO_H, *matrix);
   }
-  else SiconosDOMTreeTools::setSiconosMatrixValue(this->HNode, matrix);
+  else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->HNode, *matrix);
 }
 
 void LagrangianLinearDSIOXML::setB(SiconosVector *vector)
 {
   if (this->bNode == NULL)
   {
-    this->bNode = SiconosDOMTreeTools::createVectorNode(this->rootDSIOXMLNode, LLDSIO_B, vector);
+    this->bNode = SiconosDOMTreeTools::createVectorNode(this->rootDSIOXMLNode, LLDSIO_B, *vector);
   }
-  else SiconosDOMTreeTools::setSiconosVectorValue(this->bNode, vector);
+  else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->bNode, *vector);
 }

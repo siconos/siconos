@@ -1,4 +1,5 @@
 #include "LinearEC.h"
+using namespace std;
 
 LinearEC::LinearEC(): EqualityConstraint()
 {

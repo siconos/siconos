@@ -1,9 +1,10 @@
 #include "XMLException.h"
-#include <iostream>
+using namespace std;
+
 XMLException::XMLException():
   SiconosException("XML Exception") {}
 
-XMLException::XMLException(string report):
+XMLException::XMLException(const string& report):
   SiconosException("XML Exception : " + report) {}
 
 XMLException::~XMLException() {}
@@ -13,8 +14,7 @@ void XMLException::selfThrow()
   throw XMLException();
 }
 
-void XMLException::selfThrow(string report)
+void XMLException::selfThrow(const string& report)
 {
-  //std::cout << report ; exit(0);
   throw XMLException(report);
 }

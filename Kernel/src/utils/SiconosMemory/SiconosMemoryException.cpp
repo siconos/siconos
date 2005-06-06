@@ -1,9 +1,10 @@
 #include "SiconosMemoryException.h"
+using namespace std;
 
 SiconosMemoryException::SiconosMemoryException() :
   SiconosException("Siconos Memory Exception  (saved values of previous states of simulation)") {}
 
-SiconosMemoryException::SiconosMemoryException(string report) :
+SiconosMemoryException::SiconosMemoryException(const string& report) :
   SiconosException("Siconos Memory Exception (saved values of previous states of simulation): " + report) {}
 
 SiconosMemoryException::~SiconosMemoryException() {}
@@ -14,7 +15,7 @@ void SiconosMemoryException::selfThrow()
 }
 
 
-void SiconosMemoryException::selfThrow(string report)
+void SiconosMemoryException::selfThrow(const string& report)
 {
   throw SiconosMemoryException(report);
 }

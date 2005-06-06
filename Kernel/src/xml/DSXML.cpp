@@ -1,10 +1,14 @@
 #include "DSXML.h"
-#include "NSDSXML.h"
 
+// to be deleted thanks to factories:
+#include "NLinearBCXML.h"
+#include "LinearBCXML.h"
+#include "PeriodicBCXML.h"
 #include "LinearDSIOXML.h"
 #include "LagrangianDSIOXML.h"
 
-#include "check.h"
+using namespace std;
+
 
 
 DSXML::DSXML()
@@ -63,8 +67,6 @@ void DSXML::loadDSProperties(bool isBVP)
   }
   else
   {
-    //XMLException::selfThrow("DSXML - loadDSPropertiesXML error : tag " +BOUNDARYCONDITION_TAG+ " not found whereas NSDS is BVP.");
-    cout << "DSXML - loadDSProperties warning : tag " << BOUNDARYCONDITION_TAG << " not found, it is an optional attribute." << endl;
     this->boundaryConditionNode = NULL;
   }
 
@@ -86,7 +88,6 @@ void DSXML::loadDSProperties(bool isBVP)
   else
   {
     //XMLException::selfThrow("DSXML - loadDSProperties error : tag " +DS_ID+ " not found.");
-    cout << "DSXML - loadDSProperties warning : tag " << ID_ATTRIBUTE << " not found, it is an optional attribute." << endl;
     this->idNode = NULL;
   }
 
@@ -98,7 +99,6 @@ void DSXML::loadDSProperties(bool isBVP)
   {
     if ((this->getType() == LAGRANGIAN_NON_LINEARDS_TAG) || (this->getType() == LAGRANGIAN_TIME_INVARIANTDS_TAG))
     {
-      cout << "DSXML - loadDSProperties warning : tag " << DS_N << " not found, it is an optional attribute." << endl;
       this->nNode = NULL;
     }
     else XMLException::selfThrow("DSXML - loadDSProperties error : tag " + DS_N + " not found.");
@@ -111,7 +111,6 @@ void DSXML::loadDSProperties(bool isBVP)
   else
   {
     //XMLException::selfThrow("DSXML - loadDSProperties error : tag " +DS_X0+ " not found.");
-    cout << "DSXML - loadDSProperties warning : tag " << DS_X0 << " not found, it is an optional attribute." << endl;
     this->x0Node = NULL;
   }
 
@@ -122,7 +121,6 @@ void DSXML::loadDSProperties(bool isBVP)
   else
   {
     //XMLException::selfThrow("DSXML - loadDSProperties error : tag " + DS_X + " not found.");
-    cout << "DSXML - loadDSProperties warning : tag " << DS_X << " not found, it is an optional attribute." << endl;
     this->xNode = NULL;
   }
 
@@ -133,7 +131,6 @@ void DSXML::loadDSProperties(bool isBVP)
   else
   {
     //XMLException::selfThrow("DSXML - loadDSProperties error : tag " + DS_XDOT + " not found.");
-    cout << "DSXML - loadDSProperties warning : tag " << DS_XDOT << " not found, it is an optional attribute." << endl;
     this->xDotNode = NULL;
   }
 
@@ -145,7 +142,6 @@ void DSXML::loadDSProperties(bool isBVP)
   else
   {
     //XMLException::selfThrow("DSXML - loadDSProperties error : tag " + DS_XMEMORY + " not found.");
-    cout << "DSXML - loadDSProperties warning : tag " << DS_XMEMORY << " not found, it is an optional attribute." << endl;
     this->xMemoryNode = NULL;
   }
 
@@ -157,7 +153,6 @@ void DSXML::loadDSProperties(bool isBVP)
   else
   {
     //XMLException::selfThrow("DSXML - loadDSProperties error : tag " + DS_XDOTMEMORY + " not found.");
-    cout << "DSXML - loadDSProperties warning : tag " << DS_XDOTMEMORY << " not found, it is an optional attribute." << endl;
     this->xDotMemoryNode = NULL;
   }
 
@@ -187,7 +182,6 @@ void DSXML::loadDSProperties(bool isBVP)
   else
   {
     //XMLException::selfThrow("DSXML - loadDSProperties error : tag " + DS_STEPSINMEMORY + " not found.");
-    cout << "DSXML - loadDSProperties warning : tag " << DS_STEPSINMEMORY << " not found, it is an optional attribute." << endl;
     this->stepsInMemoryNode = NULL;
   }
 
@@ -197,7 +191,6 @@ void DSXML::loadDSProperties(bool isBVP)
   }
   else
   {
-    cout << "DSXML - loadDSProperties warning : tag " << DS_R << " not found, it is an optional attribute." << endl;
     this->rNode = NULL;
   }
 
@@ -209,7 +202,6 @@ void DSXML::loadDSProperties(bool isBVP)
   else
   {
     //XMLException::selfThrow("DSXML - loadDSProperties error : tag " + DS_RMEMORY + " not found.");
-    cout << "DSXML - loadDSProperties warning : tag " << DS_RMEMORY << " not found, it is an optional attribute." << endl;
     this->rMemoryNode = NULL;
   }
 
@@ -220,7 +212,6 @@ void DSXML::loadDSProperties(bool isBVP)
   else
   {
     //XMLException::selfThrow("DSXML - loadDSProperties error : tag " + DS_VECTORFIELD + " not found.");
-    cout << "DSXML - loadDSProperties warning : tag " << DS_VECTORFIELD << " not found, it is an optional attribute." << endl;
     this->vectorFieldNode = NULL;
   }
 
@@ -231,7 +222,6 @@ void DSXML::loadDSProperties(bool isBVP)
   else
   {
     //XMLException::selfThrow("DSXML - loadDSProperties error : tag " + DS_COMPUTEJACOBIANX + " not found.");
-    cout << "DSXML - loadDSProperties warning : tag " << DS_COMPUTEJACOBIANX << " not found, it is an optional attribute." << endl;
     this->computeJacobianXNode = NULL;
   }
 }
@@ -334,7 +324,7 @@ void DSXML::loadDS(DynamicalSystem* ds)
     xmlNode *dsioDefinitionNode, *nsdsNode;
     DSInputOutputXML *dsioXML;
 
-    nsdsNode = ds->getNSDSPtr()->getNSDSXML()->getNSDSXMLNode();
+    nsdsNode = ds->getNSDSPtr()->getNSDSXMLPtr()->getNSDSXMLNode();
     dsioDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)nsdsNode, DSINPUTOUTPUT_DEFINITION_TAG);
     if (dsioDefinitionNode == NULL)
       dsioDefinitionNode = xmlNewChild(nsdsNode, NULL, (xmlChar*)DSINPUTOUTPUT_DEFINITION_TAG.c_str(), NULL);

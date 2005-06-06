@@ -1,5 +1,5 @@
-
 #include "LsodarXML.h"
+using namespace std;
 
 LsodarXML::LsodarXML() : OneStepIntegratorXML()
 {}

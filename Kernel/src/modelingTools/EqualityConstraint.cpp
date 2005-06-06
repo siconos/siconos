@@ -1,4 +1,5 @@
 #include "EqualityConstraint.h"
+using namespace std;
 
 EqualityConstraint::EqualityConstraint()
 {

@@ -1,32 +1,28 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-
-#include <iostream>
-#include <vector>
 #include "SiconosModelXML.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "Strategy.h"
 
+#include "check.h"
 #include "SiconosConst.h"
-//#include "KernelDefaultConfig.h"
 
-
-//using namespace std;
+#include <iostream>
+#include <vector>
 
 extern int MATRIX_MAX_SIZE;
 extern int VECTOR_MAX_SIZE;
-extern string FILE_STORAGE;
-extern string XML_SCHEMA;
+extern std::string  FILE_STORAGE;
+extern std::string  XML_SCHEMA;
 
 class NonSmoothDynamicalSystem;
 class Strategy;
-
 class SiconosModelXML;
 
 /** \class Model
  *  \brief The Model regroups the high level functionnalities of the platform
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 26, 2004
  *
@@ -35,22 +31,18 @@ class SiconosModelXML;
 class Model
 {
 public:
-  /** \fn Model()
-   *  \brief constructor by default. Put pointers to NULL.
-   */
-  Model();
 
   /** \fn Model(char *xmlFile)
-   *  \brief allows to create the Model with an xml file, or the needed data
+   *  \brief create the Model from an xml file
    *  \param char * : the input XML file (optional parameter)
    *  \exception RuntimeException
    */
   Model(char *xmlFile);
 
-  /** \fn Model(cfloat t0, float T, string title, string author, string description, string date, string xmlSchema)
-   *  \brief allows to create the Model with an xml file, or the needed data
-   *  \param float : the value for t0 (optional parameter)
-   *  \param float : the value for T (optional parameter)
+  /** \fn Model(double t0, double T, string title, string author, string description, string date, string xmlSchema)
+   *  \brief create the Model from a set of data
+   *  \param double : the value for t0
+   *  \param double : the value for T (optional parameter)
    *  \param string : the title of the Model (optional parameter)
    *  \param string : the author of the Model (optional parameter)
    *  \param string : the description of the Model (optional parameter)
@@ -58,224 +50,239 @@ public:
    *  \param string : the xml schema of the Model (optional parameter)
    *  \exception RuntimeException
    */
-  Model(float t0, float T,
-        string title = "title", string author = "author", string description = "description",
-        string date = "date", string xmlSchema = XML_SCHEMA);
+  Model(double t0, double T = -1, std::string  title = "none", std::string  author = "nobody",
+        std::string  description = "none", std::string  date = "none",
+        std::string  xmlSchema = "none");
 
+  /** \fn Model(double t0, double T, string title, string author, string description, string date, string xmlSchema)
+   *  \brief create the Model from a set of data
+   *  \param double : the value for t0
+   *  \param string : the type of strategy to be used
+   *  \param double : the value for T (optional parameter)
+   *  \param string : the title of the Model (optional parameter)
+   *  \param string : the author of the Model (optional parameter)
+   *  \param string : the description of the Model (optional parameter)
+   *  \param string : the date of the Model (optional parameter)
+   *  \param string : the xml schema of the Model (optional parameter)
+   *  \exception RuntimeException
+   */
+  /*Model(double t0, string strategy_name, double T = -1, string title="none", string author="nobody",
+    string description="none", string date="none",
+    string xmlSchema="none");
+  */
+  /** \fn Model(double t0, double T, string title, string author, string description, string date, string xmlSchema)
+   *  \brief create the Model from a set of data
+   *  \param double : the value for t0
+   *  \param strategy : the predefined strategy to use
+   *  \param double : the value for T (optional parameter)
+   *  \param string : the title of the Model (optional parameter)
+   *  \param string : the author of the Model (optional parameter)
+   *  \param string : the description of the Model (optional parameter)
+   *  \param string : the date of the Model (optional parameter)
+   *  \param string : the xml schema of the Model (optional parameter)
+   *  \exception RuntimeException
+   */
+  /*Model(double t0, string strategy_name, double T = -1, string title="none", string author="nobody",
+    string description="none", string date="none",
+    string xmlSchema="none");
+  */
   ~Model();
 
-  // getter/setter
+  // --- GETTERS/SETTERS
+
+  /** \fn inline const double getCurrentT()
+   *  \brief get the current time
+   *  \return a double
+   */
+  inline const double getCurrentT() const
+  {
+    return t;
+  }
+
+  /** \fn inline void setCurrentT(const double&)
+   *  \brief set the current time
+   *  \param a double
+   */
+  inline void setCurrentT(const double& newValue)
+  {
+    t = newValue;
+  }
+
+  /** \fn inline const double getT0()
+   *  \brief get initial time
+   *  \return a double
+   */
+  inline const double getT0() const
+  {
+    return t0;
+  }
+
+  /** \fn inline void setT0(const double&)
+   *  \brief set initial time
+   *  \param a double
+   */
+  inline void setT0(const double& newValue)
+  {
+    t0 = newValue;
+  }
+
+  /** \fn inline const double getFinalT()
+   *  \brief get final time
+   *  \return a double
+   */
+  inline const double getFinalT() const
+  {
+    return T;
+  }
+
+  /** \fn inline void setFinalT(const double&)
+   *  \brief set final time
+   *  \param a double
+   */
+  inline void setFinalT(const double& newValue)
+  {
+    T = newValue;
+  }
+
+  /** \fn inline Strategy* getStrategyPtr() const
+   *  \brief get the Strategy of the Model
+   *  \return a pointer on Strategy
+   */
+  inline Strategy* getStrategyPtr() const
+  {
+    return strat;
+  }
+
+  /** \fn void setStrategyPtr(Strategy *str)
+   *  \brief set the Strategy of the Model
+   *  \param a pointer on Strategy
+   */
+  void setStrategyPtr(Strategy * newPtr);
+
+
+  //  void linkModelToStrategy(model *, strategy *)
+
+  /** \fn inline NonSmoothDynamicalSystem* getNonSmoothDynamicalSystemPtr() const
+   *  \brief get the NonSmoothDynamicalSystem of the Model
+   *  \return a pointer on NonSmoothDynamicalSystem
+   */
+  inline NonSmoothDynamicalSystem* getNonSmoothDynamicalSystemPtr() const
+  {
+    return nsds;
+  }
+
+  /** \fn void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem *newPtr)
+   *  \brief set the NonSmoothDynamicalSystem of the Model
+   *  \param a pointer on NonSmoothDynamicalSystem
+   */
+  void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem *newPtr);
+
+  /** \fn inline SiconosModelXML* getSiconosModelXMLPtr() const
+   *  \brief get the SiconosModelXML of the Model
+   *  \return a pointer on SiconosModelXML
+   */
+  inline SiconosModelXML* getSiconosModelXMLPtr() const
+  {
+    return modelxml;
+  }
+
+  /** \fn void setSiconosModelXMLPtr(SiconosModelXML *newPtr)
+   *  \brief set the SiconosModelXML of the Model
+   *  \param a pointer on SiconosModelXML
+   */
+  void setSiconosModelXMLPtr(SiconosModelXML *newPtr);
+
   /** \fn inline string getTitle()
-   *  \brief allows to get the title of the simulation
+   *  \brief get the title of the simulation
    *  \return string : the title
    */
-  inline string getTitle() const
+  inline const std::string  getTitle() const
   {
-    return this->title;
+    return title;
+  }
+
+  /** \fn inline void setTitle(const string& s)
+   *  \brief set the title of the simulation
+   *  \param string : the title
+   */
+  inline void setTitle(const std::string & s)
+  {
+    title = s;
   }
 
   /** \fn inline string getAuthor()
-   *  \brief allows to get the author of the simulation
+   *  \brief get the author of the simulation
    *  \return string : the author
    */
-  inline string getAuthor() const
+  inline const std::string  getAuthor() const
   {
-    return this->author;
+    return author;
   }
 
-  /** \fn inline string getDescription()
+  /** \fn inline void setAuthor(const string& s)
+   *  \brief set the author of the simulation
+   *  \param string : the author
+   */
+  inline void setAuthor(const std::string & s)
+  {
+    author = s;
+  }
+
+  /** \fn inline const string getDescription()
    *  \brief allows to get the description of the simulation
    *  \return string : the description
    */
-  inline string getDescription() const
+  inline const std::string  getDescription() const
   {
-    return this->description;
+    return description;
   }
 
-  /** \fn inline string getDate()
+  /** \fn inline void setDescription(const string& s)
+   *  \brief set the author of the simulation
+   *  \param string : the author
+   */
+  inline void setDescription(const std::string & s)
+  {
+    description = s;
+  }
+
+  /** \fn inline const string getDate()
    *  \brief allows to get the date of the simulation
    *  \return string : the date
    */
-  inline string getDate() const
+  inline const std::string  getDate() const
   {
-    return this->date;
+    return date;
   }
 
-  /** \fn inline string getXMLSchema()
-   *  \brief allows to get the xml schema of the simulation
-   *  \return string : the xml schema
-   */
-  inline string getXMLSchema() const
-  {
-    return this->xmlSchema;
-  }
-
-  /** \fn inline void setTitle(string s)
-   *  \brief allows to set the title of the simulation
-   *  \param string : the title
-   */
-  inline void setTitle(const string s)
-  {
-    this->title = s;
-  }
-
-  /** \fn inline void setAuthor(string s)
-   *  \brief allows to set the author of the simulation
+  /** \fn inline void setDate(const string& s)
+   *  \brief set the author of the simulation
    *  \param string : the author
    */
-  inline void setAuthor(const string s)
+  inline void setDate(const std::string & s)
   {
-    this->author = s;
+    date = s;
   }
 
-  /** \fn inline void setDescription(string s)
-   *  \brief allows to set the description of the simulation
-   *  \param string : the description
+  /** \fn inline const string getXmlSchema()
+   *  \brief allows to get the xmlSchema of the simulation
+   *  \return string : the xmlSchema
    */
-  inline void setDescription(const string s)
+  inline const std::string  getXmlSchema() const
   {
-    this->description = s;
+    return xmlSchema;
   }
 
-  /** \fn inline void setDate(string s)
-   *  \brief allows to set the date of the simulation
-   *  \param string : the date
+  /** \fn inline void setXmlSchema(const string& s)
+   *  \brief set the author of the simulation
+   *  \param string : the author
    */
-  inline void setDate(const string s)
+  inline void setXmlSchema(const std::string & s)
   {
-    this->date = s;
+    xmlSchema = s;
   }
 
-  /** \fn void setXMLSchema(string)
-   *  \brief allows to set the XML Schema to use to parse XML file of the platform
-   *  \param string : the name of the XML Schema file
-   */
-  void setXMLSchema(const string str);
-
-
-  /** \fn inline double getCurrentT()
-   *  \brief allows to get the current time of the simulation : t
-   *  \return double : the value of the curent time
-   */
-  inline double getCurrentT() const
-  {
-    return this->t;
-  }
-
-  /** \fn inline double getT0()
-   *  \brief allows to get the the initial time  of the simulation: t0
-   *  \return double : the value of the initial time
-   */
-  inline double getT0() const
-  {
-    return this->t0;
-  }
-
-  /** \fn inline double getFinalT()
-   *  \brief allows to get the final time of the simulation : T
-   *  \return double : the value of the final time
-   */
-  inline double getFinalT() const
-  {
-    return this->T;
-  }
-
-
-  /** \fn inline void setCurrentT(double)
-   *  \brief allows to set the current time of the simulation
-   *  \param double t : the value to set the current time
-   */
-  inline void setCurrentT(const double t)
-  {
-    this->t = t;
-  }
-
-  /** \fn inline void setT0(double)
-   *  \brief allow to set the initial time  of the simulation
-   *  \param double t0: the value to set the initial time
-   */
-  inline void setT0(const double t0)
-  {
-    this->t0 = t0;
-  }
-
-  /** \fn inline void setFinalT(double)
-   *  \brief allows to set the final time
-   *  \param double T : the value to set the final time
-   */
-  inline void setFinalT(const double T)
-  {
-    this->T = T;
-  }
-
-  /** \fn inline NonSmoothDynamicalSystem* getNonSmoothDynamicalSystem(void)
-   *  \brief allows to get the NonSmoothDynamicalSystem of the Model
-   *  \return the NonSmoothDynamicalSystem of the Model
-   */
-  inline NonSmoothDynamicalSystem* getNonSmoothDynamicalSystem(void) const
-  {
-    return this->nsds;
-  }
-
-  /** \fn inline Strategy getStrategy(void)
-   *  \brief allows to get the Strategy of the Model
-   *  \return the Strategy of the Model
-   */
-  inline Strategy* getStrategy(void) const
-  {
-    return this->strategy;
-  }
-
-
-  /** \fn inline void setNonSmoothDynamicalSystem(NonSmoothDynamicalSystem *nsds)
-   *  \brief allows to set the NonSmoothDynamicalSystem of the Model
-   *  \param NonSmoothDynamicalSystem nsds : the NonSmoothDynamicalSystem to set
-   */
-  inline void setNonSmoothDynamicalSystem(NonSmoothDynamicalSystem *nsds)
-  {
-    this->nsds = nsds;
-  };
-
-  /** \fn inline void setStrategy(Strategy *str)
-   *  \brief allows to set the Strategy of the Model
-   *  \param Strategy *str : the Strategy to set
-   */
-  inline void setStrategy(Strategy *str)
-  {
-    this->strategy = str;
-  };
-
-  /** \fn inline SiconosModelXML getSiconosModelXML()
-   *  \brief allows to get the SiconosModelXML of the Model
-   *  \return SiconosModelXML : the object SiconosModelXML of the Model
-   */
-  inline SiconosModelXML* getSiconosModelXML() const
-  {
-    return this->modelxml;
-  }
-
-  /** \fn inline void setSiconosModelXML(SiconosModelXML *modelxml)
-   *  \brief allows to set the SiconosModelXML of the Model
-   *  \param SiconosModelXML *modelxml : the SiconosModelXML to set
-   */
-  inline void setSiconosModelXML(SiconosModelXML *modelxml)
-  {
-    this->modelxml = modelxml;
-  }
-
-  /////////////////////////////
-
-  /** \fn bool isModelComplete(void)
-   *  \brief determines if there are enough data to formalise and solve the problem
-   *  \return tru if the Model is complete
-   */
-  bool isModelComplete(void);
-
-  /** \fn readModel(char*)
-   *  \brief reads input file to fill the formalisation of the system
-   *  \param char* : the data file which must be read
-   */
-  void readModel(char*);
+  // --- XML related functions ---
 
   /** \fn saveToXMLFile(char*)
    *  \brief saves into output file the data of the system
@@ -287,16 +294,6 @@ public:
    *  \brief saves into the DOM tree all the data of the system
    */
   void saveToDOMTree();
-
-  /** \fn void runSimulation(void)
-   *  \brief launches the simulation
-   */
-  void runSimulation(void);
-
-  /** \fn void doOneStep(void)
-   *  \brief makes the simulation go on in time
-   */
-  void doOneStep(void);
 
   /** \fn void savePlatformToXML()
    *  \brief copy the data of the plateform to the XML DOM tree
@@ -323,19 +320,36 @@ public:
    */
   void checkModelCoherency();
 
-  /** \fn void display()
-   *  \brief display the data of the Model
-   */
-  void display() const ;
-
   /** \fn int xmlSchemaValidated(string xmlFile, string xmlSchema)
    *  \brief checks if the xmlFile given respects the xmlSchema given
    *  \param string : the xml input file to check
    *  \param string : the xml schema
    *  \return int : 1 if the xml file respects the schema
    */
-  int xmlSchemaValidated(string xmlFile, string xmlSchema = "");
+  int xmlSchemaValidated(std::string  xmlFile, std::string  xmlSchema = "");
 
+  // --- OTHER FUNCTIONS ---
+
+  /** \fn bool isModelComplete(void)
+   *  \brief determines if there are enough data to formalise and solve the problem
+   *  \return tru if the Model is complete
+   */
+  //bool isModelComplete();
+
+  /** \fn void runSimulation(void)
+   *  \brief launches the simulation
+   */
+  //void runSimulation(void){};
+
+  /** \fn void doOneStep(void)
+   *  \brief makes the simulation go on in time
+   */
+  //void doOneStep(void);
+
+  /** \fn void display()
+   *  \brief display the data of the Model
+   */
+  void display() const ;
 
   /*******************************************************
    *
@@ -352,12 +366,11 @@ public:
    */
   NonSmoothDynamicalSystem* createNonSmoothDynamicalSystem(bool bvp = false);
 
-
   /** \fn Strategy* createStrategy(string type)
    *  \brief allows to create a Strategy (EventDriven or TimeStepping)
    *  \return Strategy* : the Strategy created
    */
-  Strategy* createStrategy(string type);
+  Strategy* createStrategy(std::string  type);
 
   /** \fn Strategy* createTimeStepping()
    *  \brief allows to create a Strategy : TimeStepping
@@ -371,68 +384,59 @@ public:
    */
   Strategy* createTimeEventDriven();
 
-
-
-  /******************************
-   * Configuration functions :
-   ******************************/
-
   /** \fn void setMatrixMaxSize( int max )
    *  \brief allows to change the value MatrixMaxSize which determines the bound over between
    * external file storing and xml input/outpout file storing
    *  \param int :  the value to assign to MatrixMaxSize
    */
-  void setMatrixMaxSize(const int max);
+  void setMatrixMaxSize(const int& max);
 
   /** \fn void setVectorMaxSize( int max )
    *  \brief allows to change the value VectorMaxSize which determines the bound over between
    * external file storing and xml input/outpout file storing
    *  \param int :  the value to assign to VectorMaxSize
    */
-  void setVectorMaxSize(const int max);
+  void setVectorMaxSize(const int& max);
 
   /** \fn void setFileStorage( string fs )
    *  \brief allows to change the value fileStorage which determines the format
    * of external file save (binary or ascii)
    *  \param string :  the value to assign to fileStorage
    */
-  void setFileStorage(const string fs);
-
-
-protected:
-  /** \fn linkModelXML
-   *  \brief set the link between each entities of the plateform and the ...XML object corresponding
-   */
-  void linkModelXML(void);
-
-  /** \fn void fillModelWithModelXML()
-   *  \brief uses the ModelXML of the Model to fill the fields of the Model
-   *  \exception RuntimeException
-   */
-  void fillModelWithModelXML();
-
+  void setFileStorage(const std::string & fs);
 
 private:
-  /** contains the current time of the simulation */
+  /** \fn Model()
+   *  \brief default constructor
+   */
+  Model();
+
+  /** current time of the simulation */
   double t;
 
-  /** contains the time of the start of the simulation */
+  /** initial time of the simulation */
   double t0;
 
-  /** contains the time of the end of the simulation */
+  /** final time of the simulation */
   double T;
 
-  /** contains the strategy to solve the NonSmoothDynamicalSystem */
-  Strategy *strategy;
+  /** The strategy to solve the NonSmoothDynamicalSystem */
+  Strategy *strat;
 
-  /** contains the NonSmoothDynamicalSystem of the simulation */
+  /** The NonSmoothDynamicalSystem of the simulation */
   NonSmoothDynamicalSystem * nsds;
 
   /** XML object linked to the Model */
   SiconosModelXML *modelxml;
 
-  /** information about the Model */
-  string title, author, description, date, xmlSchema;
+  /** information concerning the Model */
+  std::string  title, author, description, date, xmlSchema;
+
+  /** Flags to check wheter pointers were allocated in class constructors or not */
+  bool isNsdsAllocatedIn;
+  bool isStrategyAllocatedIn;
+  bool isModelXmlAllocatedIn;
+
 };
 
 #endif // MODEL_H

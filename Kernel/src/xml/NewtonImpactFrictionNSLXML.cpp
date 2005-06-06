@@ -1,5 +1,5 @@
 #include "NewtonImpactFrictionNSLXML.h"
-
+using namespace std;
 
 NewtonImpactFrictionNSLXML::NewtonImpactFrictionNSLXML()
 {

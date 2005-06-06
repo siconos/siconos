@@ -1,36 +1,32 @@
 #include "SimpleVector.h"
+using namespace std;
 
 SimpleVector::SimpleVector()
 {
   IN("SimpleVector() \n");
-
-  this->composite = false;
+  composite = false;
   lavd = LaVectorDouble();
-
   OUT("SimpleVector() \n");
 }
 
 
-SimpleVector::SimpleVector(const string file, const bool ascii)
+SimpleVector::SimpleVector(const string& file, const bool& ascii)
 {
   IN("SimpleVector(const string file, const bool ascii) \n");
+  composite = false;
   string mode;
-  this->composite = false;
   if (ascii) mode = "ascii";
   else mode = "binary";
-  this->read(file, mode);
-
+  read(file, mode);
   OUT("SimpleVector(const string file, const bool ascii) \n");
 }
 
 
-SimpleVector::SimpleVector(const vector<double> v)
+SimpleVector::SimpleVector(const vector<double>& v)
 {
   IN("SimpleVector(const vector<double> v) \n");
-
-  this->composite = false;
-  this->setValues(v);
-
+  composite = false;
+  setValues(v);
   OUT("SimpleVector(const vector<double> v) \n");
 }
 
@@ -38,10 +34,8 @@ SimpleVector::SimpleVector(const vector<double> v)
 SimpleVector::SimpleVector(const SiconosVector& v)
 {
   IN("SimpleVector(const SiconosVector& v) \n");
-
-  this->composite = false;
+  composite = false;
   *this = v;
-
   OUT("SimpleVector(const SiconosVector& v) \n");
 }
 
@@ -49,31 +43,26 @@ SimpleVector::SimpleVector(const SiconosVector& v)
 SimpleVector::SimpleVector(const SimpleVector& v)
 {
   IN("SimpleVector(const SiconosVector& v) \n");
-
-  this->composite = false;
+  composite = false;
   *this = v;
-
   OUT("SimpleVector(const SiconosVector& v) \n");
 }
 
-SimpleVector::SimpleVector(const int size)
+SimpleVector::SimpleVector(const int& size)
 {
   IN("SimpleVector (const int size) \n");
+  composite = false;
   if (size < 0)
-    SiconosVectorException::selfThrow(" SimpleVector::SimpleVector(const int size)   -- can't initialize a simpleVector with a negative size");
-
-  this->composite = false;
+    SiconosVectorException::selfThrow(" SimpleVector::SimpleVector(const int& size)   -- can't initialize a simpleVector with a negative size");
   LaVectorDouble lvd(size);
   lavd.resize(lvd);
   lavd = lvd;
-
   OUT("SimpleVector (const int size) \n");
 }
 
 SimpleVector::~SimpleVector()
 {
   IN("~SimpleVector() \n");
-
   OUT("~SimpleVector() \n");
 }
 
@@ -82,11 +71,11 @@ SimpleVector::~SimpleVector()
 void SimpleVector::display() const
 {
   IN("SimpleVector::display() \n");
-  cout << "| size : " << this->size() << endl;
-  cout << "| isComposite : " << this->isComposite() << endl;
-  if (this->size() <= M_MAXSIZEFORDISPLAY)
+  cout << "| size : " << size() << endl;
+  cout << "| isComposite : " << isComposite() << endl;
+  if (size() <= M_MAXSIZEFORDISPLAY)
   {
-    for (int i = 0; i < this->size(); i++)
+    for (int i = 0; i < size(); i++)
       cout << lavd(i) << " ";
     cout << endl;
   }
@@ -99,11 +88,11 @@ double& SimpleVector::operator()(const int unsigned index)
 {
   IN("SimpleVector::operator()(int unsigned index) \n");
 
-  if (index >= this->lavd.size())
+  if (index >= lavd.size())
     SiconosVectorException::selfThrow(" SimpleVector::operator()   -- index greater than vector size");
 
   OUT("SimpleVector::operator()(int unsigned index) \n");
-  return (this->lavd)(index);
+  return (lavd)(index);
 }
 
 
@@ -111,15 +100,23 @@ double SimpleVector::operator()(const int unsigned index) const
 {
   IN("SimpleVector::operator() \n");
 
-  if (index >= this->lavd.size())
+  if (index >= lavd.size())
     SiconosVectorException::selfThrow(" SimpleVector::operator()   -- index greater than vector size");
 
   OUT("SimpleVector::operator()\n");
-  return  this->lavd(index);
+  return  lavd(index);
 }
 
 
-void SimpleVector::setValues(const vector<double> v)
+void SimpleVector::zero()
+{
+  double *array = lavd.addr();
+  const int sizeV = size();
+  for (int i = 0; i < sizeV; i++)
+    array[i] = 0.0;
+}
+
+void SimpleVector::setValues(const vector<double>& v)
 {
   IN(" void SimpleVector::setValues(const vector<double> v)  \n");
 
@@ -130,35 +127,27 @@ void SimpleVector::setValues(const vector<double> v)
   LaVectorDouble lvd(v.size());
   for (i = 0; i < v.size(); i++)
     lvd(i) = v[i];
-  this->lavd.resize(lvd);
-  this->lavd = lvd;
+  lavd.resize(lvd);
+  lavd = lvd;
 
   OUT(" void SimpleVector::setValues(const vector<double> v)  \n");
-}
-
-void SimpleVector::zero()
-{
-  double *array = this->lavd.addr();
-  const int size = this->size();
-  for (int i = 0; i < size; i++)
-    array[i] = 0.0;
 }
 
 
 int SimpleVector::size() const
 {
   IN("int SimpleVector::size() \n");
-  OUT("int SimpleVector::size() \n");
   return lavd.size();
+  OUT("int SimpleVector::size() \n");
 }
 
 
-bool SimpleVector::read(string fileName, string mode)
+bool SimpleVector::read(const string& fileName, const string& mode)
 {
   IN(" SimpleVector::read(string fileName, string mode) \n");
 
   bool res = false;
-  //this->lavd = LaVectorDouble();
+  //lavd = LaVectorDouble();
 
   if (mode == "binary")
   {
@@ -177,12 +166,12 @@ bool SimpleVector::read(string fileName, string mode)
         LaVectorDouble lvd(size);
         for (int i = 0; i < size; i++)
           fread((char*) & ((lvd))(i), sizeof(double), 1, inFile); // read a double
-        this->lavd.resize(lvd);
-        this->lavd = lvd;
+        lavd.resize(lvd);
+        lavd = lvd;
       }
       else if (size == 0)
       {
-        this->lavd =  LaVectorDouble();
+        lavd =  LaVectorDouble();
       }
       else
       {
@@ -231,7 +220,7 @@ bool SimpleVector::read(string fileName, string mode)
       }
     }
 
-    this->setValues(vect);
+    setValues(vect);
 
     inFile.close();
     res = true;
@@ -241,7 +230,7 @@ bool SimpleVector::read(string fileName, string mode)
 }
 
 
-bool SimpleVector::write(string fileName, string mode) const
+bool SimpleVector::write(const string& fileName, const string& mode) const
 {
   IN("SimpleVector::write(string fileName, string mode) \n");
 
@@ -260,19 +249,19 @@ bool SimpleVector::write(string fileName, string mode) const
   if (mode == "binary")
   {
     outFile.write((char*)&nbVectors, sizeof(int));
-    int size = this->size();
-    outFile.write((char*)&size, sizeof(int));
-    for (int i = 0; i < size; i++)
-      outFile.write((char*) & (this->lavd)(i), sizeof(double));
+    int sizeV = size();
+    outFile.write((char*)&sizeV, sizeof(int));
+    for (int i = 0; i < sizeV; i++)
+      outFile.write((char*) & (lavd)(i), sizeof(double));
     res = true;
   }
   else if (mode == "ascii")
   {
     outFile << nbVectors;
 
-    int size = this->size();
-    outFile << endl << size << endl;
-    for (int i = 0; i < size; i++)
+    int sizeV = size();
+    outFile << endl << sizeV << endl;
+    for (int i = 0; i < sizeV; i++)
     {
       /* WARNING this buffer is dangerous, the size is machine dependant*/
       char buffer[30];
@@ -287,16 +276,14 @@ bool SimpleVector::write(string fileName, string mode) const
   return res;
 }
 
-double* SimpleVector::getArray()
+double* SimpleVector::getArray() const
 {
-  return this->lavd.addr();
+  return lavd.addr();
 }
 
-
-
-double SimpleVector::norm()
+double SimpleVector::norm() const
 {
-  return  Blas_Norm2(this->lavd);
+  return  Blas_Norm2(lavd);
 }
 
 /*******************************************************************************
@@ -307,12 +294,12 @@ SimpleVector &SimpleVector::operator+=(const SiconosVector &v)
 {
   IN(" SimpleVector::operator+=(const SiconosVector &) \n");
   cout << "SimpleVector::operator+=(const SiconosVector &)" << endl;
-  if (this->size() != v.size())
+  if (size() != v.size())
     SiconosVectorException::selfThrow(" SimpleVector::operator+=   -- the vectors have not the same size");
 
   /*  Basic implementation*/
 
-  *this = /* *this + v*/ this->addition(v);
+  *this = addition(v);
 
   OUT(" SimpleVector::operator+=(const SiconosVector &) \n");
   return *this;
@@ -324,11 +311,11 @@ SimpleVector &SimpleVector::operator-=(const SiconosVector &v)
   IN(" SimpleVector::operator-=(const SiconosVector &) \n");
   //cout<<"SimpleVector::operator-=(const SiconosVector &)"<<endl;
 
-  if (this->size() != v.size())
+  if (size() != v.size())
     SiconosVectorException::selfThrow(" SimpleVector::operator-=   -- the vectors have not the same size");
 
   /*  Basic implementation*/
-  *this = /* *this - v */ this->subtraction(v);
+  *this = /* *this - v */ subtraction(v);
 
   OUT(" SimpleVector::operator-=(const SiconosVector &) \n");
   return *this;
@@ -371,12 +358,12 @@ bool SimpleVector::operator == (const SiconosVector& v) const
   bool res = true;
   if (this != &v)
   {
-    const int size = this->size();
-    if (size == v.size())
+    const int sizeV = size();
+    if (sizeV == v.size())
     {
-      if (size == 0)
+      if (sizeV == 0)
         res = true;
-      else for (int i = 0; i < size; i++)
+      else for (int i = 0; i < sizeV; i++)
         {
           if ((*this)(i) != v(i))
           {
@@ -419,7 +406,7 @@ SimpleVector& SimpleVector::operator = (const SimpleVector& v)
   {
     /* BLAS - LAPACK routine */
     //    cout<<"call of Lapack routine for affectation of simple vector"<<endl;
-    this->lavd.copy(v.lavd);
+    lavd.copy(v.lavd);
   }
 
   OUT("SimpleVector::operator = SPECIFIC\n");
@@ -433,12 +420,12 @@ SimpleVector &SimpleVector::operator+=(const SimpleVector &v)
   IN(" SimpleVector::operator+=(const SimpleVector &) \n");
   //cout<<" SimpleVector::operator+=(const SimpleVector &) \n";
 
-  if (this->size() != v.size())
+  if (size() != v.size())
     SiconosVectorException::selfThrow(" SimpleVector::operator+=   -- the vectors have not the same size");
 
   /* BLAS - LAPACK routine */
-  //this->lavd = this->lavd + v.lavd;
-  Blas_Add_Mult(this->lavd, 1.0, v.lavd);
+  //lavd = lavd + v.lavd;
+  Blas_Add_Mult(lavd, 1.0, v.lavd);
 
   OUT(" SimpleVector::operator+=(const SimpleVector &) \n");
   return *this;
@@ -451,12 +438,12 @@ SimpleVector &SimpleVector::operator-=(const SimpleVector &v)
   IN(" SimpleVector::operator-=(const SimpleVector &) \n");
   //cout<<" SimpleVector::operator-=(const SimpleVector &) \n";
 
-  if (this->size() != v.size())
+  if (size() != v.size())
     SiconosVectorException::selfThrow(" SimpleVector::operator-=   -- the vectors have not the same size");
 
   /* BLAS - LAPACK routine */
 
-  Blas_Add_Mult(this->lavd, -1.0, v.lavd);
+  Blas_Add_Mult(lavd, -1.0, v.lavd);
 
   OUT(" SimpleVector::operator-=(const SimpleVector &) \n");
   return *this;
@@ -470,7 +457,7 @@ SimpleVector &SimpleVector::operator*=(const double d)
   /* BLAS - LAPACK routine */
 
   //  cout<<"call of Lapack routine for multiplication of simple vector"<<endl;
-  this->lavd = this->lavd * d;
+  lavd = lavd * d;
 
   OUT(" SimpleVector::operator*=(const double d) \n");
   return *this;
@@ -487,7 +474,7 @@ SimpleVector &SimpleVector::operator/=(const double d)
   /* BLAS - LAPACK routine */
 
   //  cout<<"call of Lapack routine for division of simple vector"<<endl;
-  this->lavd = this->lavd * (1 / d);
+  lavd = lavd * (1 / d);
 
   OUT(" SimpleVector::operator/=(const double d) \n");
   return *this;
@@ -548,7 +535,7 @@ SimpleVector SimpleVector::addition(const SiconosVector& v) const
 {
   IN(" SimpleVector::addition(const SiconosVector& v) GENERIC \n");
 
-  const int svSize = this->size();
+  const int svSize = size();
 
   if (svSize != v.size())
     SiconosVectorException::selfThrow(" SimpleVector::addition(const SiconosVector& v) --- the vectors have not the same size");
@@ -558,7 +545,7 @@ SimpleVector SimpleVector::addition(const SiconosVector& v) const
 
   SimpleVector sv(svSize);
   for (int i = 0; i < svSize; i++)
-    sv.lavd(i) = this->lavd(i) + v(i);
+    sv.lavd(i) = lavd(i) + v(i);
 
   OUT(" SimpleVector::addition(const SiconosVector& v) GENERIC \n");
   return sv;
@@ -569,7 +556,7 @@ SimpleVector SimpleVector::subtraction(const SiconosVector& v) const
 {
   IN(" SimpleVector::subtraction(const SiconosVector& v) GENERIC \n");
 
-  const int svSize = this->size();
+  const int svSize = size();
 
   if (svSize != v.size())
     SiconosVectorException::selfThrow(" SimpleVector::subtraction(const SiconosVector& v) --- the vectors have not the same size");
@@ -579,7 +566,7 @@ SimpleVector SimpleVector::subtraction(const SiconosVector& v) const
 
   SimpleVector sv(svSize);
   for (int i = 0; i < svSize; i++)
-    sv.lavd(i) = this->lavd(i) - v(i);
+    sv.lavd(i) = lavd(i) - v(i);
 
   OUT(" SimpleVector::subtraction(const SiconosVector& v) GENERIC \n");
   return sv;

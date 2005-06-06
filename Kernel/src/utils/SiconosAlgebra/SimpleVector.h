@@ -5,8 +5,6 @@
 #include "SiconosMatrix.h"
 #include <string>
 
-//using namespace std;
-
 class SiconosMatrix;
 
 class SimpleVector : public SiconosVector
@@ -22,20 +20,20 @@ public:
    */
   SimpleVector();
 
-  /** \fn SimpleVector (string file, bool ascii)
+  /** \fn SimpleVector (std::string file, bool ascii)
    *  \brief contructor with an input file
-   *  \param a string which contain the file path
+   *  \param a std::string which contain the file path
    *  \param a boolean to indicate if the file is in ascii
    *  \return SimpleVector
    */
-  SimpleVector(const string file, const bool ascii);
+  SimpleVector(const std::string& , const bool&);
 
-  /** \fn SimpleVector(const vector<double> v)
+  /** \fn SimpleVector(const std::vector<double> v)
    *  \brief contructor with a vector
    *  \param vector<double> v
    *  \return SimpleVector
    */
-  SimpleVector(const vector<double> v);
+  SimpleVector(const std::vector<double>&);
 
   /** \fn SimpleVector(const SiconosVector& v)
    *  \brief contructor with a SiconosVector
@@ -52,7 +50,7 @@ public:
    *  \exception SiconosVectorException if size < 0
    *  \return SimpleVector
    */
-  SimpleVector(const int size);
+  SimpleVector(const int& size);
 
   /** \fn ~SiconosVector ()
    *  \brief destructor
@@ -60,7 +58,6 @@ public:
   ~SimpleVector();
 
   /********************************************************************************************/
-
 
   void display() const  ;
 
@@ -83,13 +80,13 @@ public:
   /** \fn void zero();
    *  \brief set the values to 0.0
    */
-  virtual void zero();
+  void zero();
 
   /** \fn void setValues(const vector<double> v)
    *  \brief set the values of the vector to a new set of value
    *  \param vector<double> v
    */
-  void setValues(const vector<double> v) ;
+  void setValues(const std::vector<double>& v) ;
 
   /** \fn int size() const
    *  \brief get the vector size
@@ -98,37 +95,36 @@ public:
    */
   int size() const  ;
 
-  /** \fn bool read(string fileName, string mode = ASCII)
+  /** \fn bool read(std::string fileName, std::string mode = ASCII)
    *  \brief write the vector in a file
-   *  \param string fileName : the file to read
-   *  \param string mode : ASCII or BINARY
+   *  \param std::string fileName : the file to read
+   *  \param std::string mode : ASCII or BINARY
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  bool read(string fileName, string mode = N_ASCII) ;
+  bool read(const std::string&, const std::string& = N_ASCII) ;
 
-  /** \fn bool write(string fileName, string mode = ASCII)
+  /** \fn bool write(std::string fileName, std::string mode = ASCII)
    *  \brief write the vector in a file
-   *  \param string fileName : the file to read
-   *  \param string mode : ASCII or BINARY
+   *  \param std::string fileName : the file to read
+   *  \param std::string mode : ASCII or BINARY
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  bool write(string fileName, string mode = N_ASCII) const  ;
+  bool write(const std::string& , const std::string& = N_ASCII) const  ;
 
   /** \fn double* getArray()
    *  \brief return the array of double values of the vector
    *  \exception SiconosVectorException
    *  \return double* : the pointer on the array
    */
-  double* getArray();
-
+  double* getArray() const;
 
   /** \fn double norm()
    *  \brief return the Euclidian norm of the vector
    *  \return a double
    */
-  double SimpleVector::norm();
+  double norm() const ;
 
   // internal generic operators
   SimpleVector &operator+=(const SiconosVector &) ;

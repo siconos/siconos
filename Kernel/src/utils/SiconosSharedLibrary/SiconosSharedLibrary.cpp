@@ -1,6 +1,5 @@
 #include "SiconosSharedLibrary.h"
-
-#include <dlfcn.h>
+using namespace std;
 
 //*************************************************************************
 //
@@ -12,7 +11,7 @@
 //
 // loadPlugin
 //
-PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath)
+PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath) const
 {
   PluginHandle HandleRes;
   cout << "PluginPath   :  " << pluginPath << endl;
@@ -63,7 +62,7 @@ void  SiconosSharedLibrary::closePlugin(PluginHandle plugin)
 //
 // getSharedLibraryExtension
 //
-string SiconosSharedLibrary::getSharedLibraryExtension()
+const string SiconosSharedLibrary::getSharedLibraryExtension() const
 {
 #ifdef _SYS_WNT
   return ".dll";
@@ -77,7 +76,7 @@ string SiconosSharedLibrary::getSharedLibraryExtension()
 //
 // link a function
 //
-void SiconosSharedLibrary::setFunction(void* fPtr, string pluginPath, string fName)
+void SiconosSharedLibrary::setFunction(void* fPtr, const string& pluginPath, const string& fName)
 {
   // load the library
   PluginHandle handle = loadPlugin(pluginPath.c_str());
@@ -89,7 +88,7 @@ void SiconosSharedLibrary::setFunction(void* fPtr, string pluginPath, string fNa
 //
 // new functions for the plugins
 //
-string SiconosSharedLibrary::getPluginName(string s)
+const string SiconosSharedLibrary::getPluginName(const string& s) const
 {
   string res;
 
@@ -113,7 +112,7 @@ string SiconosSharedLibrary::getPluginName(string s)
   }
 }
 
-string SiconosSharedLibrary::getPluginFunctionName(string s)
+const string SiconosSharedLibrary::getPluginFunctionName(const string& s) const
 {
   string res;
 

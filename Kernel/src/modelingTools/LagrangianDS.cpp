@@ -1,12 +1,5 @@
 #include "LagrangianDS.h"
-#include "check.h"
-#include "LinearBC.h"
-#include "NLinearBC.h"
-#include "PeriodicBC.h"
-#include "LinearDSIO.h"
-#include "LagrangianDSIO.h"
-#include "LagrangianLinearDSIO.h"
-
+using namespace std;
 
 // --- Constructor from an xml file ---
 LagrangianDS::LagrangianDS(DSXML * dsXML): DynamicalSystem(), ndof(0), q(NULL), q0(NULL), qFree(NULL), velocity(NULL), velocity0(NULL),
@@ -681,10 +674,8 @@ void LagrangianDS::initMemory(const int& steps)
 {
   IN("LagrangianDS::initMemory\n");
   DynamicalSystem::initMemory(steps);
-
   qMemory = SiconosMemory::SiconosMemory(steps, qMemory.getSiconosMemoryXML());
   velocityMemory = SiconosMemory::SiconosMemory(steps, velocityMemory.getSiconosMemoryXML());
-
   OUT("LagrangianDS::initMemory\n");
 }
 
@@ -692,16 +683,11 @@ void LagrangianDS::initMemory(const int& steps)
 void LagrangianDS::swapInMemory(void)
 {
   IN("LagrangianDS::swapInMemory(void)\n");
-
-  // This operation should be made only if necessary. See todo note.
   DynamicalSystem::swapInMemory();
-
   qMemory.swap(q);
   velocityMemory.swap(velocity);
-
   // initialization of the reaction force due to the non smooth law
   p->zero();
-
   OUT("LagrangianDS::swapInMemory(void)\n");
 }
 
@@ -712,15 +698,18 @@ LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
   return lnlds;
 }
 
-double LagrangianDS::dsConvergenceIndicator() const
+double LagrangianDS::dsConvergenceIndicator()
 {
   double dsCvgIndic;
   // Velocity is used to calculate the indicator.
-  // Remember that free state contains the previous Newton step
   SimpleVector *diff = new SimpleVector(velocity->size());
   // Compute difference between present and previous Newton steps
-  *diff =  *(getVelocityPtr()) - *(getVelocityFreePtr());
-  dsCvgIndic = diff->norm(); // / velocityFree->norm();
+  SimpleVector * valRef = tmpWorkVector["LagNLDSMoreau"];
+  *diff =  *(getVelocityPtr()) - *valRef;
+  if (valRef->norm() != 0)
+    dsCvgIndic = diff->norm() / (valRef->norm());
+  else
+    dsCvgIndic = diff->norm();
   delete diff;
   return (dsCvgIndic);
 }

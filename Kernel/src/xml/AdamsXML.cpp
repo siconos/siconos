@@ -1,4 +1,5 @@
 #include "AdamsXML.h"
+using namespace std;
 
 AdamsXML::AdamsXML() : OneStepIntegratorXML()
 {}

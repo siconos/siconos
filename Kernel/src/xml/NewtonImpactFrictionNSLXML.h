@@ -13,19 +13,11 @@
 #ifndef __NewtonImpactFrictionNSLXML__
 #define __NewtonImpactFrictionNSLXML__
 
-
-#include <libxml/tree.h>
-#include <string>
-
 #include "NonSmoothLawXML.h"
-#include "SiconosDOMTreeTools.h"
 
-//using namespace std;
-
-const string NEWTON_EN = "en";
-const string NEWTON_ET = "et";
-const string NEWTON_MU = "mu";
-
+const std::string NEWTON_EN = "en";
+const std::string NEWTON_ET = "et";
+const std::string NEWTON_MU = "mu";
 
 class NewtonImpactFrictionNSLXML : public NonSmoothLawXML
 {

@@ -1,5 +1,5 @@
-
 #include "LinearDSIOXML.h"
+using namespace std;
 
 LinearDSIOXML::LinearDSIOXML(): DSInputOutputXML()
 {
@@ -28,18 +28,18 @@ void LinearDSIOXML::setA(SiconosMatrix *matrix)
 {
   if (this->ANode == NULL)
   {
-    this->ANode = SiconosDOMTreeTools::createMatrixNode(this->rootDSIOXMLNode, LINEARDSIO_A, matrix);
+    this->ANode = SiconosDOMTreeTools::createMatrixNode(this->rootDSIOXMLNode, LINEARDSIO_A, *matrix);
   }
-  else SiconosDOMTreeTools::setSiconosMatrixValue(ANode, matrix);
+  else SiconosDOMTreeTools::setSiconosMatrixNodeValue(ANode, *matrix);
 }
 
 void LinearDSIOXML::setB(SiconosMatrix *matrix)
 {
   if (this->BNode == NULL)
   {
-    this->BNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSIOXMLNode, LINEARDSIO_B, matrix);
+    this->BNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSIOXMLNode, LINEARDSIO_B, *matrix);
   }
-  else SiconosDOMTreeTools::setSiconosMatrixValue(BNode, matrix);
+  else SiconosDOMTreeTools::setSiconosMatrixNodeValue(BNode, *matrix);
 }
 
 //void LinearDSIOXML::setE(SiconosMatrix *matrix)

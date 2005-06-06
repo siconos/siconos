@@ -1,19 +1,15 @@
-
 #ifndef __NewSiconosVector__
 #define __NewSiconosVector__
 
+#include "SiconosVectorException.h"
+#include "check.h"
 #include <iostream>
 #include <lapack++.h>
 #include <fstream>
-#include <stdio.h>
 #include <vector>
-#include "SiconosVectorException.h"
-#include "check.h"
 
-//using namespace std;
-
-const string N_ASCII = "ascii";
-const string N_BINARY = "binary";
+const std::string N_ASCII = "ascii";
+const std::string N_BINARY = "binary";
 const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ MACHINE DEPENDE
 
 const short M_MAXSIZEFORDISPLAY = 10;
@@ -38,7 +34,7 @@ public:
    *  \param vector<double> v
    *  \return SiconosVector
    */
-  SiconosVector(const vector<double> v);
+  //SiconosVector(const std::vector<double> v);
 
 
   /** \fn ~SiconosVector ()
@@ -50,7 +46,7 @@ public:
 
   inline bool isComposite() const
   {
-    return this->composite;
+    return composite;
   }
 
   /** \fn void zero();
@@ -58,11 +54,10 @@ public:
    */
   virtual void zero();
 
-
-  /** \fn string toString();
-  *  \brief put datas of the vector in a string
-  */
-  string toString();
+  /** \fn std::string toString();
+   *  \brief put datas of the vector in a std::string
+   */
+  virtual std::string toString();
 
   /** \fn void display();
    *  \brief display data on standard output
@@ -90,7 +85,7 @@ public:
    *  \param double d : the new value
    *  \param int index : the position of the element which is set
    */
-  inline void setValue(const int unsigned index, const double d)
+  inline void setValue(const int unsigned& index, const double& d)
   {
     (*this)(index) = d;
   }
@@ -99,7 +94,7 @@ public:
    *  \brief get the value of one element of the vector
    *  \param int index : the position of the element
    */
-  inline double getValue(const int unsigned index) const
+  inline const double getValue(const int unsigned& index) const
   {
     return (*this)(index);
   }
@@ -108,7 +103,7 @@ public:
    *  \brief set the values of the vector to a new set of value
    *  \param vector<double> v
    */
-  virtual void setValues(const vector<double> v) = 0;
+  virtual void setValues(const std::vector<double>& v) = 0;
 
   /** \fn int size() const
    *  \brief get the vector size
@@ -117,38 +112,30 @@ public:
    */
   virtual int size() const = 0 ;
 
-  /** \fn bool read(string fileName, string mode = ASCII)
+  /** \fn bool read(std::string fileName, std::string mode = ASCII)
    *  \brief write the vector in a file
-   *  \param string fileName : the file to read
-   *  \param string mode : ASCII or BINARY
+   *  \param std::string fileName : the file to read
+   *  \param std::string mode : ASCII or BINARY
    *  \exception SiconosVectorException
    *  \return true if no error
    */
-  virtual bool read(string fileName, string mode = N_ASCII) = 0;
+  virtual bool read(const std::string& , const std::string& = N_ASCII) = 0;
 
-  /** \fn bool write(string fileName, string mode = ASCII)
+  /** \fn bool write(std::string fileName, std::string mode = ASCII)
    *  \brief write the vector in a file
-   *  \param string fileName : the file to read
-   *  \param string mode : ASCII (default mode) or BINARY
+   *  \param std::string fileName : the file to read
+   *  \param std::string mode : ASCII (default mode) or BINARY
    *  \exception SiconosVectorException
    *  \return true if no error
    */
-  virtual bool write(string fileName, string mode = N_ASCII) const = 0 ;
+  virtual bool write(const std::string& , const std::string& = N_ASCII) const  = 0 ;
 
   /** \fn double* getArray()
    *  \brief return the array of double values of the vector
    *  \exception SiconosVectorException
    *  \return double* : the pointer on the array
    */
-  virtual double* getArray() = 0;
-
-
-  /** \fn double norm()
-   *  \brief return the Euclidian norm of the vector
-   *  \return a double
-   */
-  //virtual double norm() = 0;
-
+  virtual double* getArray() const = 0;
 
   // OPERATORS ---------------------------------------------------------------
 

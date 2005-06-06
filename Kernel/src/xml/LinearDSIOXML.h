@@ -14,21 +14,13 @@
 #ifndef __LinearDSIOXML__
 #define __LinearDSIOXML__
 
-
-#include <libxml/tree.h>
-
 #include "DSInputOutputXML.h"
-#include "NewSiconosVector.h"
-#include "SimpleVector.h"
-#include "SiconosMatrix.h"
-#include "SiconosDOMTreeTools.h"
+
+class SiconosMatrix;
 
 
-//using namespace std;
-
-
-const string LINEARDSIO_A = "A";
-const string LINEARDSIO_B = "B";
+const std::string LINEARDSIO_A = "A";
+const std::string LINEARDSIO_B = "B";
 
 
 class LinearDSIOXML : public DSInputOutputXML
@@ -50,7 +42,7 @@ public:
   */
   inline SiconosMatrix getA()
   {
-    return SiconosDOMTreeTools::getSiconosMatrixValue(this->ANode);
+    return SiconosDOMTreeTools::getSiconosMatrixValue(ANode);
   }
 
   /** \fn SiconosMatrix getB()
@@ -59,7 +51,7 @@ public:
   */
   inline SiconosMatrix getB()
   {
-    return SiconosDOMTreeTools::getSiconosMatrixValue(this->BNode);
+    return SiconosDOMTreeTools::getSiconosMatrixValue(BNode);
   }
 
   //    /** \fn SiconosMatrix getE()

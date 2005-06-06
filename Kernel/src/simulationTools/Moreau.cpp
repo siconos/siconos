@@ -1,87 +1,116 @@
 #include "Moreau.h"
-#include "MoreauXML.h"
+// includes to be deleted thanks to factories:
 #include "LagrangianLinearTIDS.h"
+#include "LagrangianDS.h"
 
-#include "check.h"
+using namespace std;
+
 
 // --- xml constructor ---
-Moreau::Moreau(OneStepIntegratorXML *osiXML, TimeDiscretisation* td, DynamicalSystem* ds) : OneStepIntegrator(td, ds), W(0), theta(0.1)
+Moreau::Moreau(OneStepIntegratorXML *osiXML, TimeDiscretisation* td, DynamicalSystem* ds) :
+  OneStepIntegrator(td, ds), W(NULL), theta(0.1), isWAllocatedIn(true)
 {
-  integratorxml = osiXML;
+  integratorXml = osiXML;
   integratorType = MOREAU_INTEGRATOR;
   // Memory allocation for W
-  int sizeW = ds->getXPtr()->size();
-  cout << " TAILLE W" << sizeW << endl;
+  int sizeW = (static_cast<LagrangianDS*>(ds))->getQPtr()->size();
   W = new SiconosMatrix(sizeW, sizeW);
 
   // xml loading
-  if (osiXML != 0)
+  if (osiXML != NULL)
   {
-    if ((static_cast<MoreauXML*>(this->integratorxml))->hasW() == true)
+    if ((static_cast<MoreauXML*>(integratorXml))->hasW() == true)
     {
-      *this->W = (static_cast<MoreauXML*>(this->integratorxml))->getW();
+      *W = (static_cast<MoreauXML*>(integratorXml))->getW();
     }
-    if ((static_cast<MoreauXML*>(this->integratorxml))->hasTheta() == true)
+    if ((static_cast<MoreauXML*>(integratorXml))->hasTheta() == true)
     {
-      this->theta = (static_cast<MoreauXML*>(this->integratorxml))->getTheta();
+      theta = (static_cast<MoreauXML*>(integratorXml))->getTheta();
     }
   }
   else RuntimeException::selfThrow("Moreau::Moreau() - xml constructor - IntegratorXML object not exists");
 }
 
 // --- constructor from a minimum set of data ---
-Moreau::Moreau(TimeDiscretisation* td, DynamicalSystem* ds, const double& newTheta): OneStepIntegrator(td, ds), W(0), theta(newTheta)
+Moreau::Moreau(TimeDiscretisation* td, DynamicalSystem* ds, const double& newTheta):
+  OneStepIntegrator(td, ds), W(NULL), theta(newTheta), isWAllocatedIn(true)
 {
   integratorType = MOREAU_INTEGRATOR;
   // Memory allocation for W
-  int sizeW = ds->getXPtr()->size();
-  cout << " TAILLE W" << sizeW << endl;
+  int sizeW = (static_cast<LagrangianDS*>(ds))->getQPtr()->size();
   W = new SiconosMatrix(sizeW, sizeW);
 }
 
 Moreau::~Moreau()
 {
-  delete W;
-  W = 0;
+  if (isWAllocatedIn)
+  {
+    delete W;
+    W = NULL;
+  }
+  if (ds->getType() == LNLDS) ds->freeTmpWorkVector("LagNLDSMoreau");
 }
 
 void Moreau::initialize()
 {
   IN("Moreau::initialize\n");
   OneStepIntegrator::initialize();
-
-  // General Lagrangian system
-  if (this->ds->getType() == LNLDS)
-  {
-    // nothing to do: W is computed at each step
-  }
-  // Lagrangian linear time invariant system: computation of W Moreau's iteration matrix
-  else if (this->ds->getType() == LTIDS)
-  {
-    VL(("Moreau::initialize -- LTIDS\n"));
-    // get the ds
-    LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(this->ds);
-    // get pointer on mass matrix
-    SiconosMatrix *M;
-    M = d->getMassPtr();
-    // get K and C pointers
-    SiconosMatrix* K = d->getKPtr();
-    SiconosMatrix* C = d->getCPtr();
-    // get time step
-    double h = this->timeDiscretisation->getH();
-
-    // --- Computation of W ---
-    *W = *M + (h * this->theta) * (*C + (h * this->theta) * (*K));
-
-    //\todo Taking into account of the Constraints
-
-    // LU factorization of W with partial Pivoting
-    // Warning :  The result of the factorisatoin is return in W (InPlace)
-
-    W->PLUFactorizationInPlace();
-  }
-  else RuntimeException::selfThrow("Moreau::initialize - not yet implemented for Dynamical system type :" + ds->getType());
+  // Get initial time
+  double t0 = timeDiscretisation->getT0();
+  // Compute W
+  computeW(t0);
+  if (ds->getType() == LNLDS)
+    ds->allocateTmpWorkVector("LagNLDSMoreau", W->size(0));
   OUT("Moreau::initialize\n");
+}
+
+void Moreau::computeW(const double& t)
+{
+  SiconosMatrix *M;      // mass matrix
+  SiconosMatrix *K, *C ;
+  double h = timeDiscretisation->getH(); // time step
+
+  // Memory allocation
+  LagrangianDS* d = static_cast<LagrangianDS*>(ds);
+  int size = d->getQPtr()->size();
+  K = new SiconosMatrix(size, size);
+  C = new SiconosMatrix(size, size);
+  // Check if W is allocated
+  if (W == NULL)
+  {
+    W = new SiconosMatrix(size, size);
+    isWAllocatedIn = true;
+  }
+  // === Lagrangian dynamical system ===
+  if (ds->getType() == LNLDS)
+  {
+    // Compute Mass matrix
+    d->computeMass(t);
+    // Compute and get Jacobian:
+    d->computeJacobianQFInt(t);
+    d->computeJacobianVelocityFInt(t);
+    d->computeJacobianQQNLInertia(t);
+    d->computeJacobianVelocityQNLInertia(t);
+    *K = *(d->getJacobianQFIntPtr()) + *(d->getJacobianQQNLInertiaPtr());
+    *C = *(d->getJacobianVelocityFIntPtr()) + *(d->getJacobianVelocityQNLInertiaPtr());
+  }
+  // === Lagrangian linear time invariant system ===
+  else if (ds->getType() == LTIDS)
+  {
+    // Get K and C
+    *K = *((static_cast<LagrangianLinearTIDS*>(d))->getKPtr());
+    *C = *((static_cast<LagrangianLinearTIDS*>(d))->getCPtr());
+  }
+  // === ===
+  else RuntimeException::selfThrow("Moreau::computeW - not yet implemented for Dynamical system type :" + ds->getType());
+  // Get Mass matrix
+  M = d->getMassPtr();
+  // Compute W
+  *W = *M + h * theta * (*C + h * theta* *K);
+  // LU factorization of W
+  W->PLUFactorizationInPlace();
+  delete K;
+  delete C;
 }
 
 
@@ -89,42 +118,11 @@ void Moreau::computeFreeState()
 {
   IN("Moreau::computeFreeState\n");
   // get current time, theta and time step
-  double t = timeDiscretisation->getStrategy()->getModel()->getCurrentT();
+  double t = timeDiscretisation->getStrategyPtr()->getModelPtr()->getCurrentT();
   double h = timeDiscretisation->getH();
 
   // -- Get the DS --
   LagrangianDS* d = static_cast<LagrangianDS*>(ds);
-  // Mass matrix
-  SiconosMatrix *M;
-  // --- General Lagrangian system: computing of Moreau's matrix of iteration ---
-  if (ds->getType() == LNLDS)
-  {
-    VL(("Moreau::computeFreeState -- LNLDS\n"));
-    // State i+1: present time step
-    // index k corresponds to Newton known step => actual saved state in DS
-
-
-    // --- Computing of Moreau's matrix of iteration ---
-    //
-    // compute Mass matrix for state i+1,k
-    d->computeMass(t);
-    M = d->getMassPtr();
-    // compute Kt matrix for state i+1,k
-    d->computeJacobianQFInt(t);
-    SiconosMatrix *JacoQFInt = d->getJacobianQFIntPtr();
-    d->computeJacobianQQNLInertia(t);
-    SiconosMatrix *JacoQQNL = d->getJacobianQQNLInertiaPtr();
-    // compute Ct matrix for state i+1,k
-    d->computeJacobianVelocityFInt(t);
-    SiconosMatrix *JacoVFInt = d->getJacobianVelocityFIntPtr();
-    d->computeJacobianVelocityQNLInertia(t);
-    SiconosMatrix *JacoVQNL = d->getJacobianVelocityQNLInertiaPtr();
-    // calculate Wk
-    *W = *M + h * theta * ((*JacoVFInt) + (*JacoVQNL) + h * theta * (*JacoQFInt) + (*JacoQQNL));
-    // LU factorization of W
-    W->PLUFactorizationInPlace();
-  }
-  // --- for Linear system, W is already saved in object member w
 
   // --- RESfree calculus ---
   //
@@ -141,7 +139,6 @@ void Moreau::computeFreeState()
   SimpleVector FExt0 = d->getFExt();
   d->computeFExt(t);
   SimpleVector FExt1 = d->getFExt();
-
   // RESfree ...
   SimpleVector *v = d->getVelocityPtr();
   SimpleVector *RESfree = new SimpleVector(FExt1.size());
@@ -152,20 +149,21 @@ void Moreau::computeFreeState()
   // For general Lagrangian system:
   if (ds->getType() == LNLDS)
   {
+    // Get Mass (remark: M is computed for present state during computeW(t) )
+    SiconosMatrix *M = d -> getMassPtr();
     // Compute Qint and Fint
     // for state i
     // warning: get values and not pointers
     d->computeQNLInertia(qold, vold);
-    SimpleVector QNL0 = d->getQNLInertia();
     d->computeFInt(told, qold, vold);
+    SimpleVector QNL0 = d->getQNLInertia();
     SimpleVector FInt0 = d->getFInt();
     // for present state
     // warning: get values and not pointers
     d->computeQNLInertia();
-    SimpleVector QNL1 = d->getQNLInertia();
     d->computeFInt(t);
+    SimpleVector QNL1 = d->getQNLInertia();
     SimpleVector FInt1 = d->getFInt();
-
     // Compute ResFree and vfree solution of Wk(v-vfree)=RESfree
     *RESfree = *M * (*v - *vold) + h * ((1.0 - theta) * (QNL0 + FInt0 - FExt0) + theta * (QNL1 + FInt1 - FExt1));
     *vfree = *v - W->PLUForwardBackward((*RESfree));
@@ -174,10 +172,8 @@ void Moreau::computeFreeState()
   else if (ds->getType() == LTIDS)
   {
     // get K, M and C mass pointers
-    SiconosMatrix *K, *C;
-    M = static_cast<LagrangianLinearTIDS*>(d)->getMassPtr();
-    K = static_cast<LagrangianLinearTIDS*>(d)->getKPtr();
-    C = static_cast<LagrangianLinearTIDS*>(d)->getCPtr();
+    SiconosMatrix * K = static_cast<LagrangianLinearTIDS*>(d)->getKPtr();
+    SiconosMatrix * C = static_cast<LagrangianLinearTIDS*>(d)->getCPtr();
     // Compute ResFree and vfree
     *RESfree = -h * (theta * FExt1 + (1.0 - theta) * FExt0 - (*C * *vold) - (*K * *qold) - h * theta * (*K * *vold));
     *vfree =  *vold - W->PLUForwardBackward((*RESfree));
@@ -195,21 +191,20 @@ void Moreau::integrate()
 {
   IN("Moreau::integrate()\n");
 
-  double theta = this->theta;
-  double h = this->timeDiscretisation->getH();
-  double t = this->timeDiscretisation->getStrategy()->getModel()->getCurrentT();
+  double h = timeDiscretisation->getH();
+  double t = timeDiscretisation->getStrategyPtr()->getModelPtr()->getCurrentT();
   double told = t - h;
 
-  if (this->ds->getType() == LNLDS)
+  if (ds->getType() == LNLDS)
   {
     //VL(("Moreau::integrate -- LNLDS\n"));
     // We do not use integrate() for LNDS
   }
-  else if (this->ds->getType() == LTIDS)
+  else if (ds->getType() == LTIDS)
   {
     VL(("Moreau::integrate -- LTIDS\n"));
     // get the ds
-    LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(this->ds);
+    LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(ds);
     // get q and velocity pointers for current time step
     SimpleVector *v, *q, *vold, *qold;
     q = d->getQPtr();
@@ -225,26 +220,21 @@ void Moreau::integrate()
     // get p pointer
     SimpleVector  *p;
     p = d->getPPtr();
-
     // Inline Version
     // The method computeFExt does not allow to compute directly
     // as a function.  To do that, you have to call directly the function of the plugin
     // or call the F77 function  MoreauLTIDS
-
     // Computation of the external forces
     d->computeFExt(told);
     SimpleVector FExt0 = d->getFExt();
     d->computeFExt(t);
     SimpleVector FExt1 = d->getFExt();
-
     // velocity computation
-    *v = h * (this->theta * FExt1 + (1.0 - this->theta) * FExt0 - (*C * *vold) - (*K * *qold) - h * this->theta * (*K * *vold)) + *p;
+    *v = h * (theta * FExt1 + (1.0 - theta) * FExt0 - (*C * *vold) - (*K * *qold) - h * theta * (*K * *vold)) + *p;
     W->PLUForwardBackwardInPlace((*v));
     *v +=  *vold;
-
     // q computation
-    *q = (*qold) + h * ((this->theta * (*v)) + (1.0 - this->theta) * (*vold));
-
+    *q = (*qold) + h * ((theta * (*v)) + (1.0 - theta) * (*vold));
     // Right Way  : Fortran 77 version with BLAS call
     // F77NAME(MoreauLTIDS)(told,t,theta
     //                      ndof, &qold(0),&vold(0),
@@ -259,41 +249,33 @@ void Moreau::integrate()
 void Moreau::updateState()
 {
   IN("Moreau::updateState\n");
-  // general Lagrangian system
-  if (this->ds->getType() == LNLDS)
+  // get dynamical system
+  LagrangianDS* d = static_cast<LagrangianDS*>(ds);
+  // get velocity free, p, velocity and q pointers
+  SimpleVector *vfree = d->getVelocityFreePtr();
+  SimpleVector *p = d->getPPtr();
+  SimpleVector *v = d->getVelocityPtr();
+  SimpleVector *q = d->getQPtr();
+  // Save value of q and v in stateTmp for future convergence computation
+  if (ds->getType() == LNLDS)
+    ds->addTmpWorkVector(v, "LagNLDSMoreau");
+  // Compute velocity
+  double h = timeDiscretisation->getH();
+  *v = *vfree +  W->PLUForwardBackward((*p));
+  // Compute q
+  //  -> get previous time step state
+  SimpleVector *vold = static_cast<SimpleVector*>(d->getVelocityMemoryPtr()->getSiconosVector(0));
+  SimpleVector *qold = static_cast<SimpleVector*>(d->getQMemoryPtr()->getSiconosVector(0));
+  *q = *qold + h * (theta * *v + (1.0 - theta)* *vold);
+  // set reaction to zero
+  p->zero();
+  // --- Update W for general Lagrangian system
+  if (ds->getType() == LNLDS)
   {
-    VL(("Moreau::updateState -- LNLDS\n"));
-    // get dynamical system
-    LagrangianDS* d = static_cast<LagrangianDS*>(this->ds);
-    // get velocity free, p, velocity and q pointers
-    SimpleVector *vfree = d->getVelocityFreePtr();
-    SimpleVector *p = d->getPPtr();
-    SimpleVector *v = d->getVelocityPtr();
-    SimpleVector *q = d->getQPtr();
-    // temp temporary vector to save state k for velocity
-    SimpleVector *temp = new SimpleVector((*v).size());
-    *temp = *v ;
-    // get time step
-    double h = this->timeDiscretisation->getH();
-    // compute state k+1 for velocity
-    *v = *vfree + h * (*W) * (*p);
-    // save state k in free state
-    d->setQFree(d->getQ());
-    d->setVelocityFree(*temp);
-    delete temp;
-    // get previous time step (i) state
-    SimpleVector* vold, *qold;
-    qold = static_cast<SimpleVector*>(d->getQMemoryPtr()->getSiconosVector(0));
-    vold = static_cast<SimpleVector*>(d->getVelocityMemoryPtr()->getSiconosVector(0));
-    // compute state k+1 for q
-    *q = *qold + h * (theta * *v + (1.0 - theta)* *vold);
+    double t = timeDiscretisation->getStrategyPtr()->getModelPtr()->getCurrentT();
+    computeW(t);
   }
-  else if (this->ds->getType() == LTIDS)
-  {
-    VL(("Moreau::updateState -- LTIDS\n"));
-    this->integrate();
-  }
-  else RuntimeException::selfThrow("Moreau::updateState - not yet implemented for Dynamical system type :" + ds->getType());
+  // Remark: for Linear system, W is already saved in object member w
   OUT("Moreau::updateState\n");
 }
 
@@ -305,20 +287,20 @@ void Moreau::display() const
   cout << "-----------------------------------------------------" << endl;
   cout << "____ data of the Moreau Integrator " << endl;
   cout << "| W " << endl;
-  this->W->display();
-  cout << "| theta : " << this->theta << endl;
+  if (W != NULL) W->display();
+  else cout << "-> NULL" << endl;
+  cout << "| theta : " << theta << endl;
   cout << "-----------------------------------------------------" << endl << endl;
 }
-
 
 void Moreau::saveIntegratorToXML()
 {
   IN("Moreau::saveIntegratorToXML\n");
   OneStepIntegrator::saveIntegratorToXML();
-  if (this->integratorxml != 0)
+  if (integratorXml != NULL)
   {
-    (static_cast<MoreauXML*>(this->integratorxml))->setTheta(this->theta);
-    (static_cast<MoreauXML*>(this->integratorxml))->setW(this->W);
+    (static_cast<MoreauXML*>(integratorXml))->setTheta(theta);
+    (static_cast<MoreauXML*>(integratorXml))->setW(W);
   }
   else RuntimeException::selfThrow("Moreau::saveIntegratorToXML - IntegratorXML object not exists");
   OUT("Moreau::saveIntegratorToXML\n");
@@ -327,15 +309,13 @@ void Moreau::saveIntegratorToXML()
 void Moreau::saveWToXML()
 {
   IN("Moreau::saveWToXML\n");
-  if (this->integratorxml != 0)
+  if (integratorXml != NULL)
   {
-    (static_cast<MoreauXML*>(this->integratorxml))->setW(this->W);
+    (static_cast<MoreauXML*>(integratorXml))->setW(W);
   }
   else RuntimeException::selfThrow("Moreau::saveIntegratorToXML - IntegratorXML object not exists");
   OUT("Moreau::saveWToXML\n");
 }
-
-
 
 Moreau* Moreau::convert(OneStepIntegrator* osi)
 {
@@ -345,7 +325,7 @@ Moreau* Moreau::convert(OneStepIntegrator* osi)
 }
 
 // --- Default constructor ---
-Moreau::Moreau(): OneStepIntegrator(), W(0), theta(0.1)
+Moreau::Moreau(): OneStepIntegrator(), W(NULL), theta(0.1), isWAllocatedIn(false)
 {
-  this->integratorType = MOREAU_INTEGRATOR;
+  integratorType = MOREAU_INTEGRATOR;
 }

@@ -1,16 +1,13 @@
 #ifndef BOUNDARYCONDITIONXML_H
 #define BOUNDARYCONDITIONXML_H
 
-
-#include <libxml/tree.h>
 #include "SiconosDOMTreeTools.h"
-
+//#include "BoundaryCondition.h"
 
 //const string BC_TYPE = "type";
 //const string BC_NLINEAR = "NLinear";
 //const string BC_LINEAR = "Linear";
 //const string BC_PERIODIC = "Periodic";
-#include "XMLTagsName.h"
 
 /** \class BoundaryConditionXML
  *  \brief describes the boundary conditions for a BVP NSDS
@@ -31,9 +28,9 @@ public:
    *  \brief Return the type of the BoundaryConditionXML
    *  \return The string type of the BoundaryConditionXML
    */
-  inline string getType()
+  inline std::string getType()
   {
-    string type((char*)rootBCNode->name);
+    std::string type((char*)rootBCNode->name);
     return type;
     //return SiconosDOMTreeTools::getStringAttributeValue(this->rootBCNode, BC_TYPE);
   }

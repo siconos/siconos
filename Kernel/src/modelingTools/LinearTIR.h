@@ -2,12 +2,11 @@
 #define LINEARTIRELATION_H
 
 #include "Relation.h"
-//#include "RelationXML.h"
 #include "LinearTIRXML.h"
 
 /** \class LinearTIR
  *  \brief Linear Time Invariant Relation
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date Apr 27, 2004
  *
@@ -38,118 +37,183 @@ public:
    */
   LinearTIR(RelationXML*);
 
+  /** \fn void LinearTIR(SiconosMatrix* C, SiconosMatrix* D,
+                         SiconosMatrix* E, SiconosVector* a,
+   *  \brief create the Relation from a set of data
+   *  \param SiconosMatrix* : the matrix C
+   *  \param SiconosMatrix* : the matrix D (optional)
+   *  \param SiconosMatrix* : the matrix E (optional)
+   *  \param SiconosVector* : the vector a (optional)
+   *  \exception RuntimeException
+      */
+  LinearTIR(SiconosMatrix* C, SiconosMatrix* D = NULL,
+            SiconosMatrix* E = NULL, SiconosVector* a = NULL);
+
   ~LinearTIR();
 
-  /** \fn SiconosMatrix getC(void)
-   *  \brief allows to get the matrix h of the Relation
-   *  \exception to be defined
-   *  \return the SiconosMatrix h of the Relation
+  // GETTERS/SETTERS
+
+  // -- C --
+
+  /** \fn  const SiconosMatrix getC() const
+   *  \brief get the value of C
+   *  \return SiconosMatrix
    */
-  inline SiconosMatrix getC(void) const
+  inline const SiconosMatrix getC() const
   {
-    return this->C;
-  };
+    return *C;
+  }
 
-  /** \fn SiconosMatrix getD(void)
-   *  \brief allows to get the matrix d of the Relation
-   *  \exception to be defined
-   *  \return the SiconosMatrix d of the Relation
+  /** \fn SiconosMatrix* getCPtr() const
+   *  \brief get C
+   *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix getD(void) const
+  inline SiconosMatrix* getCPtr() const
   {
-    return this->D;
-  };
+    return C;
+  }
 
-  /** \fn SiconosMatrix getE(void)
-   *  \brief allows to get the matrix E of the Relation
-   *  \exception to be defined
-   *  \return the SiconosMatrix E of the Relation
+  /** \fn void setC (const SiconosMatrix& newValue)
+   *  \brief set the value of C to newValue
+   *  \param SiconosMatrix newValue
    */
-  inline SiconosMatrix getE(void) const
+  inline void setC(const SiconosMatrix& newValue)
   {
-    return this->E;
-  };
+    *C = newValue;
+  }
 
-  /** \fn SimpleVector getA(void)
-   *  \brief get vector a of the Relation
-   *  \exception to be defined
-   *  \return SimpleVector : value of a
+  /** \fn void setCPtr(SiconosMatrix* newPtr)
+   *  \brief set C to pointer newPtr
+   *  \param SiconosMatrix * newPtr
    */
-  inline /*SiconosVector*/SimpleVector getA(void) const
+  inline void setCPtr(SiconosMatrix *newPtr)
   {
-    return this->a;
-  };
+    if (isCAllocatedIn) delete C;
+    C = newPtr;
+    isCAllocatedIn = false;
+  }
 
+  // -- D --
 
-  /** \fn SiconosMatrix* getCPtr(void)
-   *  \brief allows to get the SiconosMatrix* h of the Relation
-   *  \exception to be defined
-   *  \return the SiconosMatrix* h of the Relation
+  /** \fn  const SiconosMatrix getD() const
+   *  \brief get the value of D
+   *  \return SiconosMatrix
    */
-  SiconosMatrix* getCPtr(void);
-
-  /** \fn SiconosMatrix* getDPtr(void)
-   *  \brief allows to get the SiconosMatrix* d of the Relation
-   *  \exception to be defined
-   *  \return the SiconosMatrix* d of the Relation
-   */
-  SiconosMatrix* getDPtr(void);
-
-  /** \fn SiconosMatrix* getEPtr(void)
-   *  \brief allows to get the SiconosMatrix* E of the Relation
-   *  \exception to be defined
-   *  \return the SiconosMatrix* E of the Relation
-   */
-  SiconosMatrix* getEPtr(void);
-
-  /** \fn SiconosVector* getAPtr(void)
-   *  \brief allows to get the SiconosVector* a of the Relation
-   *  \exception to be defined
-   *  \return the SiconosVector* a of the Relation
-   */
-  SiconosVector* getAPtr(void);
-
-  /** \fn void setC(SiconosMatrix)
-   *  \brief allows to set the matrix C of the Relation
-   *  \param the matrix to set
-   *  \exception to be defined
-   */
-  inline void setC(SiconosMatrix &C)
+  inline const SiconosMatrix getD() const
   {
-    this->C = C;
-  };
+    return *D;
+  }
 
-  /** \fn void setD(SiconosMatrix)
-   *  \brief allows to set the matrix D of the Relation
-   *  \param the matrix to set
-   *  \exception to be defined
+  /** \fn SiconosMatrix* getDPtr() const
+   *  \brief get D
+   *  \return pointer on a SiconosMatrix
    */
-  inline void setD(SiconosMatrix &D)
+  inline SiconosMatrix* getDPtr() const
   {
-    this->D = D;
-  };
+    return D;
+  }
 
-  /** \fn void setE(SiconosMatrix)
-   *  \brief allows to set the matrix E of the Relation
-   *  \param the matrix to set
-   *  \exception to be defined
+  /** \fn void setD (const SiconosMatrix& newValue)
+   *  \brief set the value of D to newValue
+   *  \param SiconosMatrix newValue
    */
-  inline void setE(SiconosMatrix &E)
+  inline void setD(const SiconosMatrix& newValue)
   {
-    this->E = E;
-  };
+    *D = newValue;
+  }
 
-  /** \fn void setA(SimpleVector&)
-   *  \brief set vector A of the Relation
-   *  \param SimpleVector& : new value of A
-   *  \exception to be defined
+  /** \fn void setDPtr(SiconosMatrix* newPtr)
+   *  \brief set D to pointer newPtr
+   *  \param SiconosMatrix * newPtr
    */
-  inline void setA(/*SiconosVector*/SimpleVector &a)
+  inline void setDPtr(SiconosMatrix *newPtr)
   {
-    this->a = a;
-  };
+    if (isDAllocatedIn) delete D;
+    D = newPtr;
+    isDAllocatedIn = false;
+  }
 
-  ////////////////////////////
+  // -- E --
+
+  /** \fn  const SiconosMatrix getE() const
+   *  \brief get the value of E
+   *  \return SiconosMatrix
+   */
+  inline const SiconosMatrix getE() const
+  {
+    return *E;
+  }
+
+  /** \fn SiconosMatrix* getEPtr() const
+   *  \brief get E
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getEPtr() const
+  {
+    return E;
+  }
+
+  /** \fn void setE (const SiconosMatrix& newValue)
+   *  \brief set the value of E to newValue
+   *  \param SiconosMatrix newValue
+   */
+  inline void setE(const SiconosMatrix& newValue)
+  {
+    *E = newValue;
+  }
+
+  /** \fn void setEPtr(SiconosMatrix* newPtr)
+   *  \brief set E to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  inline void setEPtr(SiconosMatrix *newPtr)
+  {
+    if (isEAllocatedIn) delete E;
+    E = newPtr;
+    isEAllocatedIn = false;
+  }
+
+  // -- a --
+
+  /** \fn  const SimpleVector getA() const
+   *  \brief get the value of a
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getA() const
+  {
+    return *a;
+  }
+
+  /** \fn SimpleVector* getAPtr() const
+   *  \brief get a
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getAPtr() const
+  {
+    return a;
+  }
+
+  /** \fn void setA (const SimpleVector& newValue)
+   *  \brief set the value of a to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setA(const SimpleVector& newValue)
+  {
+    *a = newValue;
+  }
+
+  /** \fn void setAPtr(SimpleVector* newPtr)
+   *  \brief set A to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setAPtr(SimpleVector *newPtr)
+  {
+    if (isAAllocatedIn) delete a;
+    a = newPtr;
+    isAAllocatedIn = false;
+  }
+
+  // --- OTHER FUNCTIONS ---
 
   /** \fn void computeOutput()
    *  \brief computes y
@@ -166,22 +230,6 @@ public:
    */
   void display() const;
 
-  /** \fn void createRelation(LinearTIRXML * relationXML,
-            SiconosMatrix* C, SiconosMatrix* D,
-            SiconosMatrix* E, SiconosVector* a,
-            Interaction * interaction)
-   *  \brief allows to create the Relation with an xml file, or the needed data
-   *  \param LinearTIRXML * : the XML object for this Relation
-   *  \param SiconosMatrix* : the matrix C of this Relation
-   *  \param SiconosMatrix* : the matrix D of this Relation
-   *  \param SiconosMatrix* : the matrix E of this Relation
-   *  \param SiconosVector* : the vector a of this Relation
-   *  \exception RuntimeException
-   */
-  void createRelation(LinearTIRXML * relationXML,
-                      SiconosMatrix* C = NULL, SiconosMatrix* D = NULL,
-                      SiconosMatrix* E = NULL, SiconosVector* a = NULL);
-
   /** \fn LinearTIR* convert (Relation *r)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation * : the relation which must be converted
@@ -189,23 +237,22 @@ public:
    */
   static LinearTIR* convert(Relation *r);
 
-protected:
-  /** \fn void fillRelationWithRelationXML()
-   *  \brief uses the RelationXML of the LinearTIR to fill the fields of this Relation
-   */
-  void fillRelationWithRelationXML();
-
-
 private:
   /** a matrix specific to the LinearTIR \f$ y= C x + D \lambda + a \f$*/
-  SiconosMatrix C;
+  SiconosMatrix* C;
   /** a matrix specific to the LinearTIR \f$ y= C x + D \lambda + a \f$*/
-  SiconosMatrix D;
+  SiconosMatrix* D;
   /** a matrix specific to the LinearTIR \f$ r= B \lambda \f$*/
-  SiconosMatrix E;
+  SiconosMatrix* E;
   /** a vector specific to the LinearTIR \f$ y= C x + D \lambda + a \f$*/
-  /*SiconosVector*/
-  SimpleVector a;
+  SimpleVector* a;
+
+  /** Flags to know if pointers have been allocated in constructors or not*/
+  bool isCAllocatedIn;
+  bool isDAllocatedIn;
+  bool isEAllocatedIn;
+  bool isAAllocatedIn;
+
 
   //  /** the XML object linked to the LinearTIR to read XML data */
   //  LinearTIRXML *ltirelationxml;

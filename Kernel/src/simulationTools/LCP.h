@@ -2,24 +2,14 @@
 #define LCP_H
 
 #include "OneStepNSProblem.h"
-//#include "LCPStructure.h"
-
-#include "SiconosMatrix.h"
-//#include "SiconosVector.h"
-#include "NewSiconosVector.h"
-#include "SimpleVector.h"
-//#include "LCPXML.h"
-
-
-//using namespace std;
-
+#include "LCPXML.h"
 
 class OneStepNSProbem;
 
 /** \class LCP
  *  \brief This class is devoted to the formalization and the resolution of the
  * Linear Complementarity Problem (LCP)
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 26, 2004
  *
@@ -42,159 +32,228 @@ class OneStepNSProbem;
 class LCP : public OneStepNSProblem
 {
 public:
+
   /** \fn LCP()
    *  \brief default constructor
    */
   LCP();
 
-  /** \fn LCP(OneStepNSProblemXML*)
-   *  \brief constructor with XML object of the LCP
-   *  \param OneStepNSProblemXML* : the XML object corresponding
+  /** \fn LCP(OneStepNSProblemXML*, Strategy*=NULL)
+   *  \brief xml constructor
+   *  \param OneStepNSProblemXML* : the XML linked-object
+   *  \param Strategy *: the strategy that owns the problem (optional)
    */
-  LCP(OneStepNSProblemXML*);
+  LCP(OneStepNSProblemXML*, Strategy* = NULL);
 
+  // --- Destructror ---
   ~LCP();
 
-  // getter/setter
-
-  /** \fn SimpleVector getW(void)
-   *  \brief get vector w of the LCP
-   *  \return SimpleVector : value of w
-   */
-  inline SimpleVector getW(void) const
-  {
-    return this->w;
-  };
-
-  /** \fn SimpleVector getZ(void)
-   *  \brief get vector z of the LCP
-   *  \return SimpleVector : value of z
-   */
-  inline SimpleVector getZ(void) const
-  {
-    return this->z;
-  };
-
-
+  // GETTERS/SETTERS
 
   /** \fn int getNLcp(void)
-   *  \brief allow to get the size nLcp of the LCP
-   *  \return the size nLcp
+   *  \brief get the size nLcp of the LCP
+   *  \return an int
    */
-  inline int getNLcp(void) const
+  inline const int getNLcp(void) const
   {
-    return this->nLcp;
-  };
+    return nLcp;
+  }
 
-  /** \fn SiconosMatrix getM(void)
-   *  \brief allow to get the SiconosMatrix M of the LCP
-   *  \return the SiconosMatrix M
-   */
-  inline SiconosMatrix getM(void) const
-  {
-    return this->M;
-  };
-
-  /** \fn SimpleVector getQ(void)
-   *  \brief get vector q of the LCP
-   *  \return SimpleVector : value of q
-   */
-  inline SimpleVector getQ(void) const
-  {
-    return this->q;
-  };
-
-  /** \fn SiconosMatrix* getMPtr(void)
-  *  \brief allow to get the SiconosMatrix* M of the LCP
-  *  \return the SiconosMatrix* M
-  */
-  SiconosMatrix* getMPtr(void);
-
-  /** \fn SimpleVector* getQPtr(void)
-   *  \brief get vector q of the LCP
-   *  \return SimpleVector* : pointer on q
-   */
-  SimpleVector* getQPtr(void);
-
-
-  /** \fn void setNLcp(int)
+  /** \fn void setNLcp(const int&)
    *  \brief set the size of the LCP
    *  \param the size
    */
-  inline void setNLcp(const int nLcp)
+  inline void setNLcp(const int& newValue)
   {
-    this->nLcp = nLcp;
-  };
+    nLcp = newValue;
+  }
 
-  /** \fn void setM(SiconosMatrix*)
-   *  \brief allow to set the SiconosMatrix M
-   *  \param the SiconosMatrix to set M
+  // --- W ---
+  /** \fn  const SimpleVector getW(void) const
+   *  \brief get the value of w, the initial state of the DynamicalSystem
+   *  \return SimpleVector
+   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
    */
-  inline void setM(const SiconosMatrix& M)
+  inline const SimpleVector getW() const
   {
-    this->M = M;
-  };
+    return *w;
+  }
 
-  /** \fn void setq(SimpleVector&)
-   *  \brief set vector q
-   *  \param SimpleVector& : new value of q
+  /** \fn SimpleVector* getWPtr(void) const
+   *  \brief get w, the initial state of the DynamicalSystem
+   *  \return pointer on a SimpleVector
    */
-  inline void setQ(const SimpleVector& Q)
+  inline SimpleVector* getWPtr() const
   {
-    this->q = Q;
-  };
+    return w;
+  }
 
-  /** \fn void setW(SimpleVector&)
-   *  \brief set vector w
-   *  \param SimpleVector& : new value of w
+  /** \fn void setW(const SimpleVector& newValue)
+   *  \brief set the value of w to newValue
+   *  \param SimpleVector newValue
    */
-  inline void setW(const SimpleVector& W)
+  inline void setW(const SimpleVector& newValue)
   {
-    this->w = W;
-  };
+    *w = newValue;
+  }
 
-  /** \fn void setZ(SimpleVector&)
-   *  \brief set vector z
-   *  \param SimpleVector& : new value of z
+  /** \fn void setWPtr(SimpleVector* newPtr)
+   *  \brief set w to pointer newPtr
+   *  \param SimpleVector * newPtr
    */
-  inline void setZ(const SimpleVector& Z)
+  inline void setWPtr(SimpleVector* newPtr)
   {
-    this->z = Z;
-  };
+    if (isWAllocatedIn) delete w;
+    w = newPtr;
+    isWAllocatedIn = false;
+  }
 
-  /////////////////////////////////
+  // --- Z ---
+  /** \fn  const SimpleVector getZ(void) const
+   *  \brief get the value of z, the initial state of the DynamicalSystem
+   *  \return SimpleVector
+   *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
+   */
+  inline const SimpleVector getZ() const
+  {
+    return *z;
+  }
 
-  /** \fn void formalize(void)
+  /** \fn SimpleVector* getZPtr(void) const
+   *  \brief get z, the initial state of the DynamicalSystem
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getZPtr() const
+  {
+    return z;
+  }
+
+  /** \fn void setZ(const SimpleVector& newValue)
+   *  \brief set the value of z to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setZ(const SimpleVector& newValue)
+  {
+    *z = newValue;
+  }
+
+  /** \fn void setZPtr(SimpleVector* newPtr)
+   *  \brief set z to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setZPtr(SimpleVector* newPtr)
+  {
+    if (isZAllocatedIn) delete z;
+    z = newPtr;
+    isZAllocatedIn = false;
+  }
+
+  // --- M ---
+
+  /** \fn  const SiconosMatrix getM(void) const
+   *  \brief get the value of M
+   *  \return SiconosMatrix
+   */
+  inline const SiconosMatrix getM() const
+  {
+    return *M;
+  }
+
+  /** \fn SiconosMatrix* getMPtr(void) const
+   *  \brief get M
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getMPtr() const
+  {
+    return M;
+  }
+
+  /** \fn void setM (const SiconosMatrix& newValue)
+   *  \brief set the value of M to newValue
+   *  \param SiconosMatrix newValue
+   */
+  inline void setM(const SiconosMatrix& newValue)
+  {
+    *M = newValue;
+  }
+
+  /** \fn void setMPtr(SiconosMatrix* newPtr)
+   *  \brief set M to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  inline void setMPtr(SiconosMatrix *newPtr)
+  {
+    if (isMAllocatedIn) delete M;
+    M = newPtr;
+    isMAllocatedIn = false;
+  }
+
+  // --- Q ---
+  /** \fn  const SimpleVector getQ(void) const
+   *  \brief get the value of q, the initial state of the DynamicalSystem
+   *  \return SimpleVector
+   *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
+   */
+  inline const SimpleVector getQ() const
+  {
+    return *q;
+  }
+
+  /** \fn SimpleVector* getQPtr(void) const
+   *  \brief get q, the initial state of the DynamicalSystem
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getQPtr() const
+  {
+    return q;
+  }
+
+  /** \fn void setQ(const SimpleVector& newValue)
+   *  \brief set the value of q to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setQ(const SimpleVector& newValue)
+  {
+    *q = newValue;
+  }
+
+  /** \fn void setQPtr(SimpleVector* newPtr)
+   *  \brief set q to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setQPtr(SimpleVector* newPtr)
+  {
+    if (isQAllocatedIn) delete q;
+    q = newPtr;
+    isQAllocatedIn = false;
+  }
+
+  // --- Others functions ---
+
+  /** \fn void formalize(const double&)
    *  \brief Build the matrix M and the vector b from the OneStep integrator (Problem
    * discretized in time) and the set of interactions.
    *  \param double : current time
    *  \return void
    */
-  void formalize(double time);
-
+  void formalize(const double& time);
 
   /** \fn void compute(void)
    *  \brief Compute the unknown z and w and update the Interaction (y and lambda )
    *  \return void
    */
-  void compute(void);
+  void compute();
 
   /** \fn void computeM (void)
-   *  \brief make the computation of matrix M
+   *  \brief compute matrix M
    */
-  void computeM(void);
+  void computeM();
 
   /** \fn void computeQ (void)
-   *  \brief make the computation of the SiconosVector q
+   *  \brief compute vector q
    *  \param double : current time
    */
-  void computeQ(double time);
-
-  /** \fn void fillNSProblemWithNSProblemXML()
-   *  \brief uses the OneStepNSProblemXML of the OneStepNSProblem to fill the fields of this OneStepNSProblem
-   *  \exception RuntimeException
-   */
-  void fillNSProblemWithNSProblemXML();
+  void computeQ(const double& time);
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree
@@ -219,14 +278,6 @@ public:
    */
   void display() const;
 
-  /** \fn void createOneStepNSProblem( OneStepNSProblemXML * osiXML, Strategy * strategy )
-   *  \brief allows to create the OneStepNSProblem LCP with an xml file, or the needed data
-   *  \param OneStepNSProblemXML * : the XML object for this OneStepNSProblem
-   *  \param Strategy * : The NSDS which contains this OneStepNSProblem
-   *  \exception RuntimeException
-   */
-  void createOneStepNSProblem(OneStepNSProblemXML * osiXML, Strategy * strategy = NULL);
-
   /** \fn LCP* convert (OneStepNSProblem* ds)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param OneStepNSProblem* : the one step problem which must be converted
@@ -240,25 +291,28 @@ private:
   int nLcp;
 
   /** contains the vector w of a LCP system */
-  /*SiconosVector*/
-  SimpleVector w;
+  SimpleVector *w;
 
   /** contains the vector z of a LCP system */
-  /*SiconosVector*/
-  SimpleVector z;
+  SimpleVector *z;
 
   /** contains the matrix M of a LCP system */
-  SiconosMatrix M;
+  SiconosMatrix *M;
 
   /** contains the vector q of a LCP system */
-  /*SiconosVector*/
-  SimpleVector q;
+  SimpleVector *q;
 
   //  /** contains the data of the LCP, according to siconos/numerics */
   //  LCPStructure LCPMethod;
 
   //  /** C structure which gives the informations to the solve function */
   //  methode_lcp meth_lcp;
+
+  /** Flags to check wheter pointers were allocated in class constructors or not */
+  bool isWAllocatedIn;
+  bool isZAllocatedIn;
+  bool isMAllocatedIn;
+  bool isQAllocatedIn;
 
 };
 

@@ -31,7 +31,7 @@ public:
    *  \exception RuntimeException
    */
   void createEqualityConstraint(EqualityConstraintXML * ecXML , int number = -1,
-                                SiconosMatrix *G = NULL, vector<DSInputOutput*> *dsioVector = NULL);
+                                SiconosMatrix *G = NULL, std::vector<DSInputOutput*> *dsioVector = NULL);
 
 private:
 

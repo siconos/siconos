@@ -1,4 +1,3 @@
-
 /** \class LagrangianLinearTIDSXML
 *   \brief This class manages Lagrangian TIDS data
 *  \author SICONOS Development Team - copyright INRIA
@@ -14,24 +13,10 @@
 #ifndef __LAGRANGIANTIDSXML__
 #define __LAGRANGIANTIDSXML__
 
-
-#include <vector>
-#include <string>
-#include <libxml/tree.h>
-
 #include "LagrangianDSXML.h"
-//#include "SiconosVector.h"
-#include "NewSiconosVector.h"
-#include "SiconosMatrix.h"
 
-#include "SiconosDOMTreeTools.h"
-
-
-//using namespace std;
-
-
-const string LTIDS_K = "K";
-const string LTIDS_C = "C";
+const std::string LTIDS_K = "K";
+const std::string LTIDS_C = "C";
 
 
 class LagrangianLinearTIDSXML : public LagrangianDSXML
@@ -63,9 +48,9 @@ public:
   {
     if (this->KNode == NULL)
     {
-      this->KNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LTIDS_K, m);
+      this->KNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LTIDS_K, *m);
     }
-    else SiconosDOMTreeTools::setSiconosMatrixValue(this->KNode, m);
+    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->KNode, *m);
   }
 
   /** \fn SiconosMatrix getC()
@@ -85,9 +70,9 @@ public:
   {
     if (this->CNode == NULL)
     {
-      this->CNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LTIDS_C, m);
+      this->CNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LTIDS_C, *m);
     }
-    else SiconosDOMTreeTools::setSiconosMatrixValue(this->CNode, m);
+    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->CNode, *m);
   }
 
 

@@ -1,48 +1,31 @@
 #include "Adams.h"
-#include "check.h"
+using namespace std;
 
-
+// --- xml constructor ---
 Adams::Adams(OneStepIntegratorXML* osixml): OneStepIntegrator(osixml), r(-1)
 {
-  this->integratorType = ADAMS_INTEGRATOR;
-  if (osixml != 0)
+  integratorType = ADAMS_INTEGRATOR;
+  if (osixml != NULL)
   {
-    if ((static_cast<AdamsXML*>(this->integratorxml))->hasR() == true)
+    if ((static_cast<AdamsXML*>(integratorXml))->hasR() == true)
     {
-      this->r = (static_cast<AdamsXML*>(this->integratorxml))->getR();
+      r = (static_cast<AdamsXML*>(integratorXml))->getR();
     }
   }
   else RuntimeException::selfThrow("Adams::Adams() - xml constructor - IntegratorXML object not exists");
 }
 
+// --- Minimum data constructor ---
 Adams::Adams(TimeDiscretisation* td, DynamicalSystem* ds): OneStepIntegrator(td, ds), r(-1)
 {
-  this->integratorType = ADAMS_INTEGRATOR;
+  integratorType = ADAMS_INTEGRATOR;
 }
 
+// --- Destructor ---
 Adams::~Adams()
 {}
 
-void Adams::saveIntegratorToXML()
-{
-  IN("Adams::saveIntegratorToXML\n");
-  OneStepIntegrator::saveIntegratorToXML();
-  if (this->integratorxml != 0)
-  {
-    //(static_cast<AdamsXML*>(this->integratorxml))->setR( this->r );
-  }
-  else RuntimeException::selfThrow("Adams::saveIntegratorToXML - IntegratorXML object not exists");
-  OUT("Adams::saveIntegratorToXML\n");
-}
-
-void Adams::initialize()
-{
-  IN("Adams::initialize\n");
-  OneStepIntegrator::initialize();
-  OUT("Adams::initialize\n");
-}
-
-
+// --- Casting for Python ---
 Adams* Adams::convert(OneStepIntegrator* osi)
 {
   cout << "Adams::convert (OneStepIntegrator* osi)" << endl;
@@ -50,8 +33,8 @@ Adams* Adams::convert(OneStepIntegrator* osi)
   return adams;
 }
 
-// Default constructor
+// --- Default constructor ---
 Adams::Adams(): OneStepIntegrator(), r(-1)
 {
-  this->integratorType = ADAMS_INTEGRATOR;
+  integratorType = ADAMS_INTEGRATOR;
 }

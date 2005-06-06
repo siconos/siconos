@@ -17,16 +17,16 @@ public:
    * constructor
    * @param string which describe the exception
    */
-  SiconosSharedLibraryException(string report);
+  SiconosSharedLibraryException(const std::string& report);
 
   /**
    * destructor
    */
   ~SiconosSharedLibraryException();
 
-  static void selfThrow();
+  static void selfThrow() ;
 
-  static void selfThrow(string report);
+  static void selfThrow(const std::string& report) ;
 
 };
 

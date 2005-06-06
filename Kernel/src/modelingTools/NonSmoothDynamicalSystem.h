@@ -1,46 +1,39 @@
 #ifndef NSDS_H
 #define NSDS_H
 
-#include <iostream>
-#include <vector>
-#include <string>
-#include <typeinfo>
-#include <libxml/tree.h>
+#include "SiconosConst.h"
 
-#include "Model.h"
 #include "DynamicalSystem.h"
-#include "BoundaryCondition.h"
 #include "Interaction.h"
 #include "EqualityConstraint.h"
 #include "NSDSXML.h"
 
-#include "SiconosConst.h"
-
-//using namespace std;
-
+#include "check.h"
+#include <iostream>
+#include <vector>
+#include <string>
 
 enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
 
-class Model;
 class Interaction;
 class DynamicalSystem;
-class BoundaryCondition;
 class EqualityConstraint;
 class NSDSXML;
 
 /** \class NonSmoothDynamicalSystem
- *  \brief This class contains the formalization of the Non Smooth Dynamical System (NonSmoothDynamicalSystem)
-*  \author SICONOS Development Team - copyright INRIA
+ *  \brief This class describes the Non Smooth Dynamical System (NonSmoothDynamicalSystem)
+ * composed with some dynamical systems, some algebraic constraints and some interactions between those systems
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date (Creation) Apr 23, 2004
  *
- *
- *
- *   \warning
  */
+
 class NonSmoothDynamicalSystem
 {
 public:
+
+  // --- CONSTRUCTORS/DESTRUCTOR ---
 
   /** \fn NonSmoothDynamicalSystem()
    *  \brief default constructor
@@ -48,9 +41,15 @@ public:
    */
   NonSmoothDynamicalSystem();
 
+  /** \fn NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&)
+   *  \brief copy constructor
+   *  \param  a ref to the NonSmoothDynamicalSystem to be copied
+   */
+  NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&);
+
   /** \fn NonSmoothDynamicalSystem(NSDSXML*)
-   *  \brief constructor with XML object of the NonSmoothDynamicalSystem
-   *  \param  const NonSmoothDynamicalSystem* : the XML object corresponding to the NonSmoothDynamicalSystem
+   *  \brief xml constructor
+   *  \param: the XML object corresponding to the NonSmoothDynamicalSystem
    */
   NonSmoothDynamicalSystem(NSDSXML*);
 
@@ -58,206 +57,176 @@ public:
    *  \brief constructor with indication concerning boundary conditions
    *  \param const bool : if true, the systems has boundary conditions
    */
-  NonSmoothDynamicalSystem(bool);
+  NonSmoothDynamicalSystem(const bool&);
 
-  /** \fn NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem*)
-   *  \brief constructor by copy
-   *  \param  const NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem object which must be copied
-   */
-  NonSmoothDynamicalSystem(NonSmoothDynamicalSystem*);
 
-  /** \fn NonSmoothDynamicalSystem(string)
-   *  \brief constructs the object with is type (IVP or BVP)
+  /** \fn NonSmoothDynamicalSystem(const string&)
+   *  \brief constructs the object with his type (IVP or BVP)
    *  \param a string value which determines if the problem is BVP or IVP
    */
-  NonSmoothDynamicalSystem(string);
+  NonSmoothDynamicalSystem(const std::string&);
 
   ~NonSmoothDynamicalSystem();
 
-  /** \fn bool isBVP(void)
-   *  \brief determines if the NonSmoothDynamicalSystem is a Boundary Value Problem (BVP)
-   *  \return the value of BVP
-   */
-  inline bool isBVP(void) const
-  {
-    return this->BVP;
-  };
+  // --- GETTERS/SETTERS ---
 
-  /** \fn bool isIVP(void)
-   *  \brief determines if the NonSmoothDynamicalSystem is an Initial Value Problem (IVP)
-   *  \return the value of IVP
+  /** \fn const bool isBVP(void)
+   *  \brief get problem type (true if BVP)
+   *  \return a bool
    */
-  inline bool isIVP(void) const
+  inline const bool isBVP() const
   {
-    return !this->BVP;
-  };
+    return BVP;
+  }
 
-  /** \fn inline int getDSVectorSize()
-   *  \brief allows to get the size of the vector of Dynamical Systems
+  /** \fn const bool isIVP(void)
+   *  \brief get problem type (true if IVP)
+   *  \return a bool
+   */
+  inline const bool isIVP() const
+  {
+    return !BVP;
+  }
+
+  /** \fn void setBVP(const bool&)
+   *  \brief set the NonSmoothDynamicalSystem to BVP, else it is IVP
+   *  \param bool : true if BVP, false otherwise
+   */
+  inline void setBVP(const bool& newBvp)
+  {
+    BVP = newBvp;
+  }
+
+  /** \fn inline const int getDSVectorSize() const
+   *  \brief get the size of the vector of Dynamical Systems
    *  \return int : the size of DSVector
    */
-  inline int getDSVectorSize() const
+  inline const int getDSVectorSize() const
   {
-    return this->DSVector.size();
+    return DSVector.size();
   }
 
-  /** \fn vector<DynamicalSystem*> getDynamicalSystems(void)
-   *  \brief allows to get all the DynamicalSystem of the NonSmoothDynamicalSystem problem
+  /** \fn const vector<DynamicalSystem*> getDynamicalSystems()
+   *  \brief get all the DynamicalSystem of the NonSmoothDynamicalSystem problem
    *  \return the vector of DS
    */
-  inline vector<DynamicalSystem*> getDynamicalSystems(void) const
+  inline const std::vector<DynamicalSystem*> getDynamicalSystems() const
   {
-    return this->DSVector;
-  };
+    return DSVector;
+  }
 
-  /** \fn DynamicalSystem* getDynamicalSystem(int)
-   *  \brief allows to get one specific DynamicalSystem, with its place in the DSVector
-   *  \param the number in the vector of DynamicalSystem to get
-   *  \return the DynamicalSystem at the right place in the DSVector
+  /** \fn DynamicalSystem* getDynamicalSystemPtr(const int& position)
+   *  \brief get DynamicalSystem at indix position in vector
+   *  \param an int
+   *  \return a pointer on DynamicalSystem
    */
-  DynamicalSystem* getDynamicalSystem(int);
+  DynamicalSystem* getDynamicalSystemPtr(const int&) const ;
 
-  /** \fn DynamicalSystem* getDynamicalSystemOnNumber(int)
-   *  \brief allows to get one specific DynamicalSystem, with the only identifier of this Dynamical System
+  /** \fn DynamicalSystem* getDynamicalSystemPtrNumber(const int& I)
+   *  \brief get Dynamical system number I
    *  \param the identifier of the DynamicalSystem to get
-   *  \return the DS having as identifier
+   *  \return a pointer on DynamicalSystem
    */
-  DynamicalSystem* getDynamicalSystemOnNumber(int);
+  DynamicalSystem* getDynamicalSystemPtrNumber(const int&) const ;
 
-  /** \fn bool hasDynamicalSystemNumber(int)
-   *  \brief determines if the DynamicalSystem which number is given in parameter exists
-   *  \param the identifier of the DynamicalSystem to get
-   *  \return bool
+  /** \fn void setDynamicalSystems(const vector<DynamicalSystem*>&)
+   *  \brief set the vector of DynamicalSystems
+   *  \param vector<DynamicalSystem> : the new value for the vector
    */
-  bool hasDynamicalSystemNumber(int);
+  void setDynamicalSystems(const std::vector<DynamicalSystem*>&) ;
 
-  /** \fn inline int getInteractionVectorSize()
-   *  \brief allows to get the size of the vector of Interactions
-   *  \return int : the size of interactionVector
+  /** \fn inline const int getInteractionVectorSize()  const
+   *  \brief get the size of the vector of Interactions
+   *  \return int
    */
-  inline int getInteractionVectorSize() const
+  inline const int getInteractionVectorSize() const
   {
-    return this->interactionVector.size();
+    return interactionVector.size();
   }
 
-  /** \fn vector<Interaction*> getInteractions(void)
-   *  \brief allows to get all the Interaction of the NonSmoothDynamicalSystem problem
-   *  \return the vector of Interaction
+  /** \fn const vector<Interaction*> getInteractions() const
+   *  \brief get the vector of interactions
+   *  \return a vector
    */
-  inline vector<Interaction*> getInteractions(void) const
+  inline std::vector<Interaction*> getInteractions() const
   {
-    return this->interactionVector;
-  };
-
-  /** \fn Interaction* getInteraction(int)
-   *  \brief allows to get one specific Interaction, with the only identifier of this Interaction
-   *  \param the identifier of the Interaction to get
-   *  \return the Interaction having as identifier, the string given in parameter
-   */
-  Interaction* getInteraction(int);
-
-  /** \fn Interaction* getInteractionOnNumber(int)
-   *  \brief allows to get one specific Interaction, with his place in the interactionVector
-   *  \param the identifier of the Interaction to get
-   *  \return the Interaction at the right place in the interactionVector
-   */
-  Interaction* getInteractionOnNumber(int);
-
-  /** \fn bool hasInteractionNumber(int)
-   *  \brief determines if the Interaction which number is given in parameter exists
-   *  \param the identifier of the Interaction to get
-   *  \return bool
-   */
-  bool hasInteractionNumber(int);
-
-
-  /** \fn void setBVP(bool)
-   *  \brief allows to set the NonSmoothDynamicalSystem to BVP, else it is IVP
-   *  \param bool : the value to set to BVP
-   */
-  inline void setBVP(const bool bvp)
-  {
-    this->BVP = bvp;
-  };
-
-  /** \fn void setBVP(bool)
-   *  \brief allows to set the NonSmoothDynamicalSystem to IVP, else it is BVP
-   *  \param bool : the value to set to IVP
-   */
-  inline void setIVP(const bool ivp)
-  {
-    this->BVP = !ivp;
-  };
-
-  /** \fn void setDynamicalSystems(vector<DynamicalSystem*>)
-   *  \brief allows to set all the DynamicalSystems of the NonSmoothDynamicalSystem
-   *  \param vector<DynamicalSystem> : the vector to set
-   */
-  inline void setDynamicalSystems(const vector<DynamicalSystem*> dsVect)
-  {
-    this->DSVector = dsVect;
-  } ;
-
-  /** \fn void setInteractions(vector<Interaction*>)
-   *  \brief allows to set all the Interactions of the NonSmoothDynamicalSystem
-   *  \param vector<Interaction> : the vector to set
-   */
-  inline void setInteractions(const vector<Interaction*> interVect)
-  {
-    this->interactionVector = interVect;
-  };
-
-  /** \fn inline NSDSXML* getNSDSXML()
-   *  \brief allows to get the NSDSXML* of the NonSmoothDynamicalSystem problem
-   *  \return the pointer on NSDSXML of the NonSmoothDynamicalSystem
-   */
-  inline NSDSXML* getNSDSXML() const
-  {
-    return this->nsdsxml;
+    return interactionVector;
   }
 
-  /** \fn inline void setNSDSXML( NSDSXML *nsdsxml )
-   *  \brief allows to set the NSDSXML* of the NonSmoothDynamicalSystem
-   *  \param NSDSXML* : the pointer on NSDSXML* to set
+  /** \fn Interaction* getInteractionPtr(const int& N) const
+   *  \brief get interaction at position N in vectorInteraction
+   *  \param the position of the Interaction to get
+   *  \return a pointer on interaction
    */
-  inline void setNSDSXML(NSDSXML *nsdsxml)
-  {
-    this->nsdsxml = nsdsxml;
-  }
+  Interaction* getInteractionPtr(const int&) const ;
 
+  /** \fn Interaction* getInteractionPtrNumber(const int& N) const
+   *  \brief get interaction number N
+   *  \param the identifier of the Interaction to get
+   *  \return a pointer on interaction
+   */
+  Interaction* getInteractionPtrNumber(const int&) const ;
+
+  /** \fn void setInteractions(const vector<Interaction*>&)
+   *  \brief set the vector of interactions
+   *  \param vector<Interaction> : the new value for the vector
+   */
+  void setInteractions(const std::vector<Interaction*>&) ;
 
   /** \fn vector<EqualityConstraint*> getEqualityConstraints(void)
-   *  \brief allows to get all the EqualityConstraint of the NonSmoothDynamicalSystem problem
-   *  \return the vector of EqualityConstraint
+   *  \brief get the vector of algebraic constraints
+   *  \return vector of EqualityConstraint
    */
-  inline vector<EqualityConstraint*> getEqualityConstraints(void) const
+  inline const std::vector<EqualityConstraint*> getEqualityConstraints(void) const
   {
-    return this->ecVector;
-  };
+    return ecVector;
+  }
 
-  /** \fn EqualityConstraint* getEqualityConstraint(int)
-   *  \brief allows to get one specific EqualityConstraint, with its place in the vector of EqualityConstraint
-   *  \param int : the place of the EqualityConstraint in the vector of EqualityConstraint of the NonSmoothDynamicalSystem
-   *  \return EqualityConstraint* : ecVector[ i ] EqualityConstraint
+  /** \fn EqualityConstraint* getEqualityConstraintPtr(const int& N) const
+   *  \brief get algebraic constraint at position N in vectorEc
+   *  \param int : the position of the ec to get
+   *  \return a pointer on EC
    */
-  EqualityConstraint* getEqualityConstraint(int);
+  EqualityConstraint* getEqualityConstraintPtr(const int&) const;
 
-  /** \fn void setEqualityConstraints(vector<EqualityConstraint*>)
-   *  \brief allows to set all the EqualityConstraints of the NonSmoothDynamicalSystem
-   *  \param vector<EqualityConstraint*> : the vector to set
+  /** \fn void setEqualityConstraints(const vector<EqualityConstraint*>& )
+   *  \brief set the vector of algebraic constraints
+   *  \param vector<EqualityConstraint*> : new value for the vector
    */
-  inline void setEqualityConstraints(const vector<EqualityConstraint*> ecVect)
+  void setEqualityConstraints(const std::vector<EqualityConstraint*>& newEcVect) ;
+
+  /** \fn inline NSDSXML* getNSDSXMLPtr()
+   *  \brief get the xml linked object
+   *  \return a pointer on NSDSXML
+   */
+  inline NSDSXML* getNSDSXMLPtr() const
   {
-    this->ecVector = ecVect;
-  };
+    return nsdsxml;
+  }
 
-  /** \fn void addEqualityConstraint(EqualityConstraint*)
-   *  \brief allows to add the EqualityConstraint of the NonSmoothDynamicalSystem
-   *  \param EqualityConstraint* : the EqualityConstraint to add
+  /** \fn inline void setNSDSXMLPtr( NSDSXML *nsdsxml )
+   *  \brief set the xml linked object
+   *  \param NSDSXML* : a pointer on NSDSXML* to link
    */
-  void addEqualityConstraint(EqualityConstraint*);
+  inline void setNSDSXMLPtr(NSDSXML *newNsdsxml)
+  {
+    nsdsxml = newNsdsxml;
+  }
 
-  /////////////////////////
+  // --- OTHER FUNCTIONS ---
+
+  /** \fn bool hasDynamicalSystemNumber(const int& N)  const
+   *  \brief check if DynamicalSystem number N exists
+   *  \param the identifier of the DynamicalSystem to get
+   *  \return bool
+   */
+  bool hasDynamicalSystemNumber(const int&) const ;
+  /** \fn bool hasInteractionNumber(const int& N)
+   *  \brief check if Interaction number N exists
+   *  \param the identifier of the Interaction to get
+   *  \return bool
+   */
+  bool hasInteractionNumber(const int&) const;
 
   /** \fn void saveNSDSToXML()
    *  \brief copy the data of the NonSmoothDynamicalSystem to the XML tree
@@ -271,25 +240,30 @@ public:
   void display() const;
 
   /** \fn void addDynamicalSystem(DynamicalSystem*)
-   *  \brief allows to add the DynamicalSystem to the NonSmoothDynamicalSystem
+   *  \brief add a DynamicalSystem to the NonSmoothDynamicalSystem
    *  \param DynamicalSystem* : the DynamicalSystem to add
    */
-  void addDynamicalSystem(DynamicalSystem*);//, BoundaryCondition*);
+  void addDynamicalSystem(DynamicalSystem*);
 
   /** \fn void addInteraction(Interaction*)
-   *  \brief allows to add the Interaction of the NonSmoothDynamicalSystem
+   *  \brief add an Interaction to the NonSmoothDynamicalSystem
    *  \param Interaction : the Interaction to add
    */
   void addInteraction(Interaction*);
 
-  /** \fn Interaction* addInteraction(int number, int nInter, vector<int>* status, vector<DynamicalSystem*>*)
-   *  \brief allow to add an Interaction to the NonSmoothDynamicalSystem
+  /** \fn Interaction* addInteraction(const int& number, const int& nInter, vector<int>* status, vector<DynamicalSystem*>*)
+   *  \brief add an Interaction to the NonSmoothDynamicalSystem
    *  \param int : the number of the Interaction
    *  \param int : the size of the y vector of the Interaction
    *  \param vector<int> : the status of the interaction
    */
-  Interaction* addInteraction(int number = -1, int nInter = -1, vector<int>* status = NULL,
-                              vector<DynamicalSystem*>* dsConcerned = NULL);
+  Interaction* addInteraction(const int& = -1, const int& = -1, std::vector<int>* = NULL, std::vector<DynamicalSystem*>* = NULL);
+
+  /** \fn void addEqualityConstraint(EqualityConstraint*)
+   *  \brief add an EqualityConstraint to the NonSmoothDynamicalSystem
+   *  \param EqualityConstraint* : the EqualityConstraint to add
+   */
+  void addEqualityConstraint(EqualityConstraint*);
 
   /** \fn double nsdsConvergenceIndicator() const
    *  \brief calculate an indicator that gives convergence information for the DSs
@@ -297,34 +271,27 @@ public:
    */
   double nsdsConvergenceIndicator() ;
 
-protected:
-  /** \fn void linkNSDSXML()
-   *  \brief makes the links between the DSXMLs, InteractionXMLs of the NSDSXML of the NonSmoothDynamicalSystem and the DynamicalSystems, Interactions
-   */
-  void linkNSDSXML();
-
-  /** \fn void fillNSDSWithNSDSXML()
-   *  \brief uses the NSDSXML of the NonSmoothDynamicalSystem to fill the fields of this NonSmoothDynamicalSystem
-   *  \exception RuntimeException
-   */
-  void fillNSDSWithNSDSXML();
-
-
 private:
   /** TRUE if the NonSmoothDynamicalSystem is a boundary value problem*/
   bool BVP;
 
   /** contains Dynamic systems of the simulation */
-  vector<DynamicalSystem*> DSVector;
+  std::vector<DynamicalSystem*> DSVector;
 
   /** contains the Interactions */
-  vector<Interaction*> interactionVector;
+  std::vector<Interaction*> interactionVector;
 
   /** contains the EqualityConstraints */
-  vector<EqualityConstraint*> ecVector;
+  std::vector<EqualityConstraint*> ecVector;
 
   /** the XML object linked to the NonSmoothDynamicalSystem to read XML data */
   NSDSXML *nsdsxml;
+
+  /** Flags to check wheter pointers were allocated in class constructors or not */
+  std::vector<bool> isDSVectorAllocatedIn;
+  std::vector<bool> isInteractionVectorAllocatedIn;
+  std::vector<bool> isEcVectorAllocatedIn;
 };
 
-#endif
+#endif      M->getStrategyPtr()
+

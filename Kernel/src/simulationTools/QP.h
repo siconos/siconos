@@ -2,21 +2,11 @@
 #define QP_H
 
 #include "OneStepNSProblem.h"
-//#include "QPStructure.h"
-#include "SiconosMatrix.h"
-//#include "SiconosVector.h"
-#include "NewSiconosVector.h"
-//#include "QPXML.h"
-#include <iostream>
-#include <vector>
-
-class interaction;
-
-//using namespace std;
+#include "QPXML.h"
 
 /** \class QP
  *  \brief It's a way to solve NSDS. It's used in mechanics
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 26, 2004
  *
@@ -27,88 +17,108 @@ class QP : public OneStepNSProblem
 {
 public:
 
-  /** \fn QP()
-   *  \brief default constructor
+  /** \fn QP(OneStepNSProblemXML*, Strategy*=NULL)
+   *  \brief xml constructor
+   *  \param OneStepNSProblemXML* : the XML linked-object
+   *  \param Strategy *: the strategy that owns the problem (optional)
    */
-  QP();
-
-  /** \fn QP(OneStepNSProblemXML*)
-   *  \brief constructor with XML object of the QP
-   *  \param OneStepNSProblemXML* : the XML object corresponding
-   */
-  QP(OneStepNSProblemXML*);
+  QP(OneStepNSProblemXML*, Strategy * = NULL);
 
   ~QP();
 
-  // getter/setter
-  /** \fn SiconosMatrix getQ(void)
-   *  \brief allow to get the SiconosMatrix Q of the QP
-   *  \return the SiconosMatrix Q
+  // --- GETTERS/SETTERS ---
+
+  // --- Q ---
+  /** \fn  const SiconosMatrix getQ(void) const
+   *  \brief get the value of Q
+   *  \return SiconosMatrix
    */
-  inline SiconosMatrix getQ(void) const
+  inline const SiconosMatrix getQ() const
   {
-    return this->Q;
-  };
+    return *Q;
+  }
 
-  /** \fn SimpleVector getP(void)
-   *  \brief get vector p of the QP
-   *  \return SimpleVector : value of p
+  /** \fn SiconosMatrix* getQPtr(void) const
+   *  \brief get Q
+   *  \return pointer on a SiconosMatrix
    */
-  inline SimpleVector getP(void) const
+  inline SiconosMatrix* getQPtr() const
   {
-    return this->p;
-  };
+    return Q;
+  }
 
-  /** \fn SiconosMatrix* getQPtr(void)
-  *  \brief allow to get the SiconosMatrix* Q of the QP
-  *  \return the SiconosMatrix* Q
-  */
-  SiconosMatrix* getQPtr(void);
-
-  /** \fn SiconosVector* getPPtr(void)
-   *  \brief allow to get the SiconosVector* p of the QP
-   *  \return the SiconosVector* p
+  /** \fn void setQ (const SiconosMatrix& newValue)
+   *  \brief set the value of Q to newValue
+   *  \param SiconosMatrix newValue
    */
-  SimpleVector* getPPtr(void);
-
-
-  /** \fn void setQ(SiconosMatrix)
-   *  \brief allow to set the SiconosMatrix Q
-   *  \param the SiconosMatrix to set Q
-   */
-  inline void setQ(const SiconosMatrix& Q)
+  inline void setQ(const SiconosMatrix& newValue)
   {
-    this->Q = Q;
-  };
+    *Q = newValue;
+  }
 
-  /** \fn void setP(SimpleVector&)
-   *  \brief set vector p
-   *  \param SimpleVector& : new value of p
+  /** \fn void setQPtr(SiconosMatrix* newPtr)
+   *  \brief set Q to pointer newPtr
+   *  \param SiconosMatrix * newPtr
    */
-  inline void setP(const SimpleVector& P)
+  inline void setQPtr(SiconosMatrix *newPtr)
   {
-    this->p = p;
-  };
+    if (isQAllocatedIn) delete Q;
+    Q = newPtr;
+    isQAllocatedIn = false;
+  }
 
+  // --- P ---
+  /** \fn  const SimpleVector getP(void) const
+   *  \brief get the value of p, the initial state of the DynamicalSystem
+   *  \return SimpleVector
+   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   */
+  inline const SimpleVector getP() const
+  {
+    return *p;
+  }
 
-  /////////////////////////////
+  /** \fn SimpleVector* getPPtr(void) const
+   *  \brief get p, the initial state of the DynamicalSystem
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getPPtr() const
+  {
+    return p;
+  }
 
-  /** \fn formaliseO(double time)
+  /** \fn void setP(const SimpleVector& newValue)
+   *  \brief set the value of p to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setP(const SimpleVector& newValue)
+  {
+    *p = newValue;
+  }
+
+  /** \fn void setPPtr(SimpleVector* newPtr)
+   *  \brief set p to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  inline void setPPtr(SimpleVector* newPtr)
+  {
+    if (isPAllocatedIn) delete p;
+    p = newPtr;
+    isPAllocatedIn = false;
+  }
+
+  // --- OTHER FUNCTIONS ---
+
+  /** \fn formaliseO(const double& time)
    *  \brief transform the discretised problem in a problem under numerical form
    *  \param double : current time
    */
-  void formalise(double time);
+  void formalise(const double& time);
 
   /** \fn compute()
    *  \brief make the computation so solve the NS problem
    */
-  void compute(void);
-
-  /** \fn void fillNSProblemWithNSProblemXML()
-   *  \brief uses the OneStepNSProblemXML of the OneStepNSProblem to fill the fields of this OneStepNSProblem
-   *  \exception RuntimeException
-   */
-  void fillNSProblemWithNSProblemXML();
+  void compute();
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree
@@ -133,14 +143,6 @@ public:
    */
   void display() const;
 
-  /** \fn void createOneStepNSProblem( OneStepNSProblemXML * osiXML, Strategy * strategy )
-   *  \brief allows to create the OneStepNSProblem LCP with an xml file, or the needed data
-   *  \param OneStepNSProblemXML * : the XML object for this OneStepNSProblem
-   *  \param Strategy * : The NSDS which contains this OneStepNSProblem
-   *  \exception RuntimeException
-   */
-  void createOneStepNSProblem(OneStepNSProblemXML * osiXML, Strategy * strategy = NULL);
-
   /** \fn QP* convert (OneStepNSProblem* ds)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param OneStepNSProblem* : the one step problem which must be converted
@@ -149,15 +151,23 @@ public:
   static QP* convert(OneStepNSProblem* osnsp);
 
 private:
+  /** \fn QP()
+   *  \brief default constructor
+   */
+  QP();
+
   /** contains the Q matrix of a QP problem */
-  SiconosMatrix Q;
+  SiconosMatrix* Q;
 
   /** contains the p vector of a QP problem */
-  SimpleVector p;
+  SimpleVector* p;
 
   //  /** contains the data of the QP, according to siconos/numerics */
   //  QPStructure QPMethod;
 
+  /** Flags to check wheter pointers were allocated in class constructors or not */
+  bool isQAllocatedIn;
+  bool isPAllocatedIn;
 };
 
 #endif // QP_H

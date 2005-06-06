@@ -14,16 +14,9 @@
 #ifndef __NewtonImpactLawNSLXML__
 #define __NewtonImpactLawNSLXML__
 
-
-#include <libxml/tree.h>
-#include <string>
-
 #include "NonSmoothLawXML.h"
-#include "SiconosDOMTreeTools.h"
 
-//using namespace std;
-
-const string NEWTON_E = "e";
+const std::string NEWTON_E = "e";
 
 
 class NewtonImpactLawNSLXML : public NonSmoothLawXML

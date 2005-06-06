@@ -1,6 +1,5 @@
-
 #include "ComplementarityConditionNSLXML.h"
-
+using namespace std;
 
 ComplementarityConditionNSLXML::ComplementarityConditionNSLXML(): NonSmoothLawXML()
 {}

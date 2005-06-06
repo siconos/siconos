@@ -14,19 +14,7 @@
 #ifndef __LNLRelationXML__
 #define __LNLRelationXML__
 
-
-#include <libxml/tree.h>
-
 #include "DSInputOutputXML.h"
-#include "SiconosMatrix.h"
-//#include "SiconosVector.h"
-#include "NewSiconosVector.h"
-#include "SiconosDOMTreeTools.h"
-
-
-//using namespace std;
-
-
 
 class LagrangianDSIOXML : public DSInputOutputXML
 {

@@ -1,8 +1,5 @@
-
 #include "LagrangianDSXML.h"
-
-#include "check.h"
-
+using namespace std;
 
 LagrangianDSXML::LagrangianDSXML() : DSXML()
 {

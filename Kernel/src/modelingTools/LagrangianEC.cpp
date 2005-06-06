@@ -1,6 +1,6 @@
 
 #include "LagrangianEC.h"
-#include "check.h"
+using namespace std;
 
 LagrangianEC::LagrangianEC(): EqualityConstraint()
 {
