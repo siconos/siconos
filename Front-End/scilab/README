@@ -1,0 +1,101 @@
+#--------------------------------------------------
+#                  SICONOS PROJECT
+#--------------------------------------------------
+
+#--------------------------------------------------
+# Author(s)      : RPG
+# Creation Date  : 06 June 2005
+# Version        :
+# Copyright      : INRIA 2005
+#--------------------------------------------------
+
+Introduction
+-------------
+
+The directory scilab/ contains a prototype of siconos interface with
+scilab. It allows a 'high-level' interaction with the siconos platform
+with around 20 scilab functions. It allows flat acces without having
+deep siconos tree acces like proposed with python interface.
+
+This interface consists in :
+ 
+ siconos.cpp : a C++ module with global objects (Model and Strategy)
+ and "C" functions which uses it.
+
+ siconos.sci : interface "C" functions of siconos.cpp in scilab
+function. It uses the simplest mechanism : scilab link and scilab
+call.
+
+Scilab function implemented:
+ sicLink()  // Load siconos platform
+ sicLoadModel(ModelXml) // Load a Xml model
+ sicTimeGetH()
+ sicTimeGetK()
+ sicTimeGetN()
+ sicInitStrategy()
+ sicSTNextStep()
+ sicSTComputeFreeState()
+ sicSTformalisePb()
+ sicSTcomputePb()
+ sicSTupdateState()
+ sicModelgetQ(index)
+
+
+BouncingBall Execution
+-----------------------
+variables of environnement to set (example):
+
+export SICONOSPATH=/local_home/pissard/Workspace/siconos-user/
+export NUMERICSPATH=/local_home/pissard/Workspace/siconos/trunk/Numerics/
+
+export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS:$NUMERICSPATH
+/lib:.
+
+copy the xml file (BouncingBall_TIDS.xml) in the current directory
+
+scilab -f sample.sci : scilab example of the "famous" BouncingBall execution
+
+scilab> BouncingBall();
+
+normally, you will see during the simulation the ball animation; and
+after the simulation the plot of y(t)
+
+Limitations 
+----------- 
+
+The goal of this prototype is to validate and illustrate the scilab
+interface mechanism. We implement only scilab function required to
+bouncing ball simulation.
+
+TODO by RPG
+------------
+It remains some work to validate scilab mechanism:
+ - use a scilab function for a siconos simulation like a 'C' plugin
+ - solve the bug with DGETRI call (on parameter 6) which has been fixed with a
+simple silab catch error !
+
+
+TODO for a complete toolbox
+----------------------------
+ - robustify the prototype (test pointers values before calling, test if some requiered functions have been called before others,...)
+ - doxygen code documentation
+ - complete scilab function like (non exhaustive)
+  sicModelgetVelocity
+  sicModelgetLambda
+  sicModel(all parameters)
+  sicInteractionDisplay
+  sicModelSaveXMLfile
+  sicIsModelComplete
+  sicCreateModel
+  all setters
+  sicDSgetNumber
+  and so on...
+
+ - is it necessary to use a global object to encapsulate the use of
+siconos objects ?
+
+ - scilab 'C' Gateway to replace call ?
+
+ - Packaging toolbox (compilation, loading and documentation)
+
+ 
