@@ -105,7 +105,7 @@ build : inc #ext
 lib :	build
 	$(MKDIR) $(NUMERICS_LIB)
 	for i in $(SUBDIRSLIBS); do (cd $$i; $(MAKE) lib); done
-	cd lib; $(MKDIR) tmp; cd tmp; $(ARCH) x ../$(ODEPACKLIB); $(ARCH) x ../$(SOLVERPACKLIB); cd ..\
+	cd lib; $(MKDIR) tmp; cd tmp; $(ARCH) x ../$(ODEPACKLIB); $(ARCH) x ../$(SOLVERPACKLIB); cd ..;\
 	 gcc $(SHAREDFLAG) ./tmp/*.o -o $(LIBDYN_NUMERICS); $(RMDIR) tmp
 	@ echo "  "
 	@ echo "%% lib done %%"
