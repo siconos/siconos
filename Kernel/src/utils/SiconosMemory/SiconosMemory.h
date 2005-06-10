@@ -213,5 +213,5 @@ private:
 
 };
 
-#endif // SICONOSMEMORY_H
+#endif
 

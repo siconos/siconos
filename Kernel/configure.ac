@@ -13,6 +13,40 @@ AC_CONFIG_HEADER([config.h])
 # checks for libtool
 AC_PROG_LIBTOOL
 
+##############################################
+# sh function to verify shared library version
+##############################################
+
+# function checkLibraryVersion ()
+# $1 : absolute path of the library (ex. : /usr/lib/liblapack.so)
+# $2 : minimum version (ex. : 3.0.3)
+
+function checkLibraryVersion () { 
+     lib=$1; 
+     ver=$2;
+     vers=`ls -l $lib | awk '{ print $NF}' |  awk 'BEGIN {FS = "."; } { printf "%d", ($3 * 1000 + $4) * 1000 + $5;}'`
+     verReq=`expr $ver  | awk 'BEGIN {FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
+     if test -n "$vers" && test "$vers" -ge $verReq ; then
+	return 1;
+     else
+	return 0;
+     fi	     
+}
+
+# function checkLibraryVersionNumber ()
+# $1 : version number ex. : 3.2.1)
+# $2 : minimum version (ex. : 3.0.3)
+
+function checkLibraryVersionNumber () { 
+     vers=`expr $1 |  awk 'BEGIN {FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
+     verReq=`expr $2  | awk 'BEGIN {FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
+     if test -n "$vers" && test "$vers" -ge $verReq ; then
+	return 1;
+     else
+	return 0;
+     fi	     
+}
+
 # SO version of all siconos shared libraries
 SICONOS_SO_CURRENT=0
 SICONOS_SO_REVISION=1
@@ -70,58 +104,33 @@ AC_CHECK_FUNCS([floor gettimeofday])
 ## all the --enable-* argument help
 ###################################
 
-AC_ARG_ENABLE(cppunit,[  --enable-cppunit              use cppunit to pass unitary tests ])
+AC_ARG_ENABLE(cppunit,[  --enable-cppunit              use cppunit to pass unitary tests, default=no ])
+AC_ARG_ENABLE(debug,  [  --enable-debug              compiling with debugging symbols (-g), default=no ])
+AC_ARG_ENABLE(optimisation,  [  --enable-optimisation              compiling with optimiation symbols (O2), default=no ])
+AC_ARG_ENABLE(warnings,[  --enable-warnings            enable compilation warnings, default=yes])
+AC_ARG_ENABLE(error-on-warning,[  --enable-erroronwarning     treat all compile warnings as errors, default=no])
 
 #################################
 ## all the --with-* argument help
 #################################
-
+AC_ARG_WITH(localnumerics,	
+	[  --with-localnumerics=path        indicates a local path of numerics lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
 AC_ARG_WITH(localnana,			
-	[  --with-localnana=path        indicates a local path of nana lib if the library is not installed in /usr or /usr/local ])
+	[  --with-localnana=path        indicates a local path of nana lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
 AC_ARG_WITH(localblas,			
-	[  --with-localblas=path	indicates a local path of blas lib if the library is not installed in /usr or /usr/local])
+	[  --with-localblas=path	indicates a local path of blas lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
 AC_ARG_WITH(locallapack,			  
-	[  --with-locallapack=path      indicates a local path of lapack lib if the library is not installed in /usr or /usr/local])
+	[  --with-locallapack=path      indicates a local path of lapack lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
 AC_ARG_WITH(locallapackpp,		
-	[  --with-locallapackpp=path	indicates a local path of lapackpp lib if the library is not installed in /usr or /usr/local])
+	[  --with-locallapackpp=path	indicates a local path of lapackpp lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
 AC_ARG_WITH(locallibxml,		
-	[  --with-locallibxml=path	indicates a local path of libxml lib if the library is not installed in /usr or /usr/local])
+	[  --with-locallibxml=path	indicates a local path of libxml lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
 
-##############################################
-# sh function to verify shared library version
-##############################################
+#################################
+## Checks for external libraries
+#################################
 
-# function checkLibraryVersion ()
-# $1 : absolute path of the library (ex. : /usr/lib/liblapack.so)
-# $2 : minimum version (ex. : 3.0.3)
-
-function checkLibraryVersion () { 
-     lib=$1; 
-     ver=$2;
-     vers=`ls -l $lib | awk '{ print $NF}' |  awk 'BEGIN {FS = "."; } { printf "%d", ($3 * 1000 + $4) * 1000 + $5;}'`
-     verReq=`expr $ver  | awk 'BEGIN {FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
-     if test -n "$vers" && test "$vers" -ge $verReq ; then
-	return 1;
-     else
-	return 0;
-     fi	     
-}
-
-# function checkLibraryVersionNumber ()
-# $1 : version number ex. : 3.2.1)
-# $2 : minimum version (ex. : 3.0.3)
-
-function checkLibraryVersionNumber () { 
-     vers=`expr $1 |  awk 'BEGIN {FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
-     verReq=`expr $2  | awk 'BEGIN {FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
-     if test -n "$vers" && test "$vers" -ge $verReq ; then
-	return 1;
-     else
-	return 0;
-     fi	     
-}
-
-# Checks for external libraries
+# required version of the libraries
 
 LAPACK_VER="3.0.3"
 BLAS_VER="3.0."
@@ -138,288 +147,130 @@ ACX_CHECK_LAPACK([AC_SUBST(LAPACK_LIBRARIES)], [AC_MSG_ERROR([Lapack not found])
 # exit 1;
 
 # Numerics
-AC_MSG_CHECKING([SICONOS Numerics - headers])
-for ac_dir in		\
-    /usr/include	\
-    /usr/local/include	\
-   $NUMERICSPATH/include	\
-    ; \
-do  if test -r "$ac_dir/SiconosNumerics.h" ; then
-       SiconosNumerics_inc="yes"
-       if test "$ac_dir" != "/usr/include" ; then
-	  SICONOSNUMERICS_INCLUDES="-I$ac_dir"
-	  AC_MSG_RESULT([yes])
-       fi       
-       break	
-    fi
-done
-if test "$SiconosNumerics_inc" = "" ; then
-    AC_MSG_ERROR(Cannot find SICONOS Numerics header files (SiconosNumerics.h). Please install SICONOS Numerics or set the environment variable NUMERICSPATH)
-    exit 1;
-fi
-AC_SUBST(SICONOSNUMERICS_INCLUDES)
-
-AC_MSG_CHECKING([SICONOS Numerics - libraries])
-for ac_dir in		\
-    /usr/lib		\
-    /usr/local/lib	\
-    $NUMERICSPATH/lib	\
-    ; \
-do  if test -r "$ac_dir/libNumericsSolvers_lcp.a" ; then
-       SiconosNumerics_lib="yes"
-       #SICONOSNUMERICS_LIBRARIES="-L$ac_dir -lNumericsSolvers_cfd -lNumericsSolvers_lcp -lNumericsSolvers_rp -lNumericsSolvers_cfp -lNumericsSolvers_rd"
-       SICONOSNUMERICS_LIBRARIES="-L$ac_dir -lNumerics"
-       AC_MSG_RESULT([yes])
-       break	
-    fi
-done
-if test "$SiconosNumerics_lib" = "" ; then
-    AC_MSG_ERROR(Cannot find SICONOS Numerics library (libNumericsSolvers_lcp.a). Please install SICONOS Numerics.)
-    exit 1;
-fi
-AC_SUBST(SICONOSNUMERICS_LIBRARIES)
-
-
-
-AC_SUBST(LAPACK_LIBRARIES)
+AC_MSG_CHECKING([SICONOS Numerics])
+ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-locallapackpp.])])
 
 # Lapack++
+AC_MSG_CHECKING([Lapack++])
+ACX_CHECK_LAPACKPP([AC_SUBST(LAPACKPP_INCLUDES) AC_SUBST(LAPCKPP_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Lapack++ in a good version. Please install Lapack++, version >= $LAPACKPP_VER  or use the option --with-localnumerics.])])
+#
 
-case "$target" in
-    *-linux*)
-      libname="liblapack++.so"
-      ;;
-    *-apple-darwin*)
-      libname="liblapack++.dylib"  
-      ;;
-esac     
-
-AC_MSG_CHECKING([local lapackpp installation])
-if test "$with_locallapackpp" = no -o "$with_locallapackpp" = yes -o "$with_locallapackpp" = ""; then
-   AC_MSG_RESULT(option --with-locallapackpp not selected : installed lapackpp used)
-   with_locallapackpp=no
-else
-   AC_MSG_RESULT(option  --with-locallapackpp selected :locally installed lapackpp used)
-fi
-
-AC_MSG_CHECKING([Lapackpp - headers])
-
-if test "$with_locallapackpp" = no; then
-   list_dir="/usr/include /usr/local/include"
-else
-   list_dir="$with_locallapackpp/include"
-fi
-
-for ac_dir in $list_dir;
-
-#for ac_dir in		\
-#    /usr/include	\
-#    /usr/local/include	\
-#    ; \
-do  if test -r "$ac_dir/lapackpp/lapackpp.h" ; then
-       lapackpp_inc="yes"
-       if test "$ac_dir" != "/usr/include" ; then
-	  LAPACKPP_INCLUDES="-I$ac_dir/lapackpp"
-	  AC_MSG_RESULT([yes])
-       fi       
-       break	
-    fi
-done
-if test "$lapackpp_inc" = "" ; then
-    AC_MSG_ERROR(Cannot find Lapack++ header files (lapackpp.h). Please install Lapack++ or use the option --with-locallapackpp.)
-    exit 1;
-fi
-AC_SUBST(LAPACKPP_INCLUDES)
-
-AC_MSG_CHECKING([Lapackpp - libraries])
-
-if test "$with_locallapackpp" = no; then
-   list_dir="/usr/lib /usr/local/lib"
-else
-   list_dir="$with_locallapackpp/lib"
-fi
-
-for ac_dir in $list_dir;
-#for ac_dir in		\
-#    /usr/lib		\
-#    /usr/local/lib	\
-#    ; \
-do  if test -r "$ac_dir/$libname" ; then
-       checkLibraryVersion $ac_dir/$libname $LAPACKPP_VER
-       if test $? -eq 0; then
-	  AC_MSG_ERROR(Lapack++ library ($libname) : the minimal required version is $LAPACKPP_VER)
-	  exit 1;
-       fi
-       lapackpp_lib="yes"
-       LAPACKPP_LIBRARIES="-L$ac_dir -llapack++ -llamatrix++ -lblas++"
-       AC_MSG_RESULT([yes])
-       break	
-    fi
-done
-if test "$lapackpp_lib" = "" ; then
-    AC_MSG_ERROR(Cannot find Lapack++ library ($libname). Please install Lapack++.)
-    exit 1;
-fi
-AC_SUBST(LAPACKPP_LIBRARIES)
-
-CXX_LAPACKPP_FLAG="-DLA_COMPLEX_SUPPORT" 
-CXX_LAPACKPP_FLAG="" 
+CXX_LAPACKPP_FLAG="-DLA_COMPLEX_SUPPORT"  
 AC_SUBST(CXX_LAPACKPP_FLAG)
 
 # Nana
-AC_MSG_CHECKING([local nana installation])
-if test "$with_localnana" = no -o "$with_localnana" = yes -o "$with_localnana" = ""; then
-   AC_MSG_RESULT(option --with-localnana not selected : installed nana used)
-   with_localnana=no
-else
-   AC_MSG_RESULT(option  --with-localnana selected :locally installed nana used)
-fi
-
-AC_MSG_CHECKING([nana - headers])
-
-### TRY OF CONDITIONNAL CHECK
-if test "$with_localnana" = no; then
-   list_dir="/usr/include /usr/local/include"
-else
-   list_dir="$with_localnana/include"
-fi
-#echo list_dir is $list_dir
-for ac_dir in $list_dir;
-#for ac_dir in		\
-#    /usr/include	\
-#    /usr/local/include	\
-#    ; \
-do  if test -r "$ac_dir/nana.h" ; then
-       nana_inc="yes"
-       if test "$ac_dir" != "/usr/include" ; then
-	  NANA_INCLUDES="-I$ac_dir"
-	  AC_MSG_RESULT([yes])
-       fi       
-       break	
-    fi
-done
-if test "$nana_inc" = "" ; then
-    AC_MSG_ERROR(Cannot find nana header files (nana.h). Please install nana.)
-    exit 1;
-fi
-AC_SUBST(NANA_INCLUDES)
-
-AC_MSG_CHECKING([nana - libraries])
-if test "$with_localnana" = no; then
-   list_dir="/usr/lib /usr/local/lib"
-else
-   list_dir="$with_localnana/lib"
-fi
-for ac_dir in $list_dir;
-#for ac_dir in		\
-#    /usr/lib		\
-#    /usr/local/lib	\
-#    ; \
-do  if test -r "$ac_dir/libnana.a" ; then
-       nana_lib="yes"
-       NANA_LIBRARIES="-L$ac_dir -lnana"
-       AC_MSG_RESULT([yes])
-       break	
-    fi
-done
-if test "$nana_lib" = "" ; then
-    AC_MSG_ERROR(Cannot find nana library (libnana.a). Please install nana.)
-    exit 1;
-fi
-AC_SUBST(NANA_LIBRARIES)
-
+AC_MSG_CHECKING([Nana])
+ACX_CHECK_NANA([AC_SUBST(NANA_INCLUDES) AC_SUBST(NANA_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Nana. Please install Nana  or use the option --with-localnana.])])
+#
 CXX_WITHOUTNANA_FLAG="-DWITHOUT_NANA"
 
+# exit 1;
 AC_MSG_CHECKING([Libxml2])
 ACX_CHECK_LIBXML2([AC_SUBST(LIBXML2_INCLUDES) AC_SUBST(LIBXML2_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Libxml2 in a good version. Please install Libxml2, version >= $LIBXML_VER  or use the option --with-locallibxml.])])
-# exit 1;
+# cppunit : Warning :  By default we skip ccpunit
 
-# cppunit
-
-AC_MSG_CHECKING([if cppunit is enabled])
-if test "$enable_cppunit" = no; then
-   AC_MSG_RESULT(option --enable-cppunit not selected : Unable to run test suite)
+AC_MSG_CHECKING([cppunit])
+if test "$enable_cppunit" = yes; then
+AC_MSG_RESULT(option --enable-cppunit selected : able to run test suite)       
+ACX_CHECK_CPPUNIT([AC_SUBST(CPPUNIT_INCLUDES) AC_SUBST(CPPUNIT_LIBRARIES)], [AC_MSG_ERROR([Cannot find  cppunit in a good version. Please install cppunit, version >= $CPPUNIT_VER.])])
 else
-   AC_MSG_RESULT(option --enable-cppunit selected : able to run test suite)
-   
-   AC_MSG_CHECKING([local cppunit installation])
-   if test "$with_localcppunit" = no -o "$with_localcppunit" = yes -o "$with_localcppunit" = ""; then
-      AC_MSG_RESULT(option --with-localcppunit not selected : installed cppunit used)
-      with_localcppunit=no
-   else
-	AC_MSG_RESULT(option  --with-localcppunit selected :locally installed cppunit used)
-   fi   
-
-   AC_MSG_CHECKING([cppunit])
-   
-   if test "$with_localcppunit" = no; then
-      list_dir="/usr/bin /usr/local/bin"
-   else
-	list_dir="$with_localcppunit/bin"
-   fi
-   #echo list_dir is $list_dir
-   for ac_dir in $list_dir;
-
-   #for ac_dir in		\
-   #    /usr/bin		\
-   #    /usr/local/bin	\
-   #    ; \
-   do  if test -r "$ac_dir/cppunit-config" ; then
-	  checkLibraryVersionNumber `$ac_dir/cppunit-config --version` $CPPUNIT_VER
-	  if test $? -eq 0; then
-	     AC_MSG_ERROR(Cppunit library  : the minimal required version is $CPPUNIT_VER)
-	     exit 1;
-	  fi   
-	  cppunit_config="yes"
-	  CPPUNIT_INCLUDES="`$ac_dir/cppunit-config --cflags` -w"
-	  CPPUNIT_LIBRARIES="`$ac_dir/cppunit-config --libs`"
-	  AC_MSG_RESULT([yes])       
-	  break	
-       fi
-   done
-   if test "$cppunit_config" = "" ; then
-      AC_MSG_ERROR(Cannot find cppunit (cppunit-config). Please install cppunit.)
-      exit 1;
-   fi
-   AC_SUBST(CPPUNIT_INCLUDES)
-   AC_SUBST(CPPUNIT_LIBRARIES)
+ AC_MSG_RESULT(option --enable-cppunit not selected : Warning : unable to run test suite)  
 fi
 
 
+#################################
+## COMPILE FLAGS CXXFLAGS
+#################################
 
-# COMPILE FLAGS
+# Default Flag
+if test "$enable_warnings" = no; then
+CXXFLAGS="-fPIC"
+else
+CXXFLAGS="-Wall -fPIC"
+fi
 
-SICONOS_EXT_INCLUDES="$SICONOSNUMERICS_INCLUDES $NANA_INCLUDES $LAPACKPP_INCLUDES $BLAS_INCLUDES $LAPACK_INCLUDES $LIBXML2_INCLUDES"
-AC_SUBST(SICONOS_EXT_INCLUDES)
+#Optional flag
+if test "$enable_erroronwarning" = yes; then
+   AC_MSG_RESULT(option --enable-erroronwarning selected : compiling with the -Werror option)
+   CXXFLAGS="-Werror $CXXFLAGS"
+fi
 
+
+if test "$enable_debug" = yes; then
+   AC_MSG_RESULT(option --enable-debug selected : compiling with the -g option)
+   CXXFLAGS="-g -fbounds-check $CXXFLAGS"
+fi
+
+if test "$enable_optimisation" = yes; then
+   AC_MSG_RESULT(option --enable-optimisation selected : compiling with the -02 option)
+   CXXFLAGS="-O2 $CXXFLAGS"
+fi
+
+
+#Special Compiler flag for system type
+
+AC_MSG_CHECKING([Special Compiler flag for system type])
 case "$target" in
+    *-mingw32*)
+      ARCH="WIN32"
+      ;;
     *-linux*)
-      SICONOS_EXT_LDFLAGS="$SICONOSNUMERICS_LIBRARIES $NANA_LIBRARIES $LAPACKPP_LIBRARIES $BLAS_LIBRARIES $LAPACK_LIBRARIES $LIBXML2_LIBRARIES -lg2c"
+      CXXFLAGS="$CXXFLAGS"
+      CXX_DYNLIB="-shared"
+      ARCH="Linux"
       ;;
     *-apple-darwin*)
-      SICONOS_EXT_LDFLAGS="$SICONOSNUMERICS_LIBRARIES $NANA_LIBRARIES $LAPACKPP_LIBRARIES $BLAS_LIBRARIES $LAPACK_LIBRARIES $LIBXML2_LIBRARIES -L/sw/lib -lg2c"
+      CXXFLAGS="$CXXFLAGS -flat_namespace"
+      CXX_DYNLIB="-dynamiclib -flat_namespace -single-module -undefined suppress"
+      ARCH="Apple-Darwin"
+      ;; 
+    *)
+      CXXFLAGS="$CXXFLAGS"
+      CXX_DYNLIB="-shared"
+      ARCH="OS_${target_os}"
+      ;;
+esac
+AC_MSG_RESULT("Architecture $ARCH  Compilation flag CXXFLAGS= $CXXFLAGS  Linking flag CXX_DYNLIB = $CXX_DYNLIB")
+
+CXXFLAGS="$CXXFLAGS $CXX_WITHOUTNANA_FLAG $CXX_LAPACKPP_FLAG"
+AC_SUBST(CXX_DYNLIB)
+
+#################################
+## LINK FLAGS
+#################################
+
+#SICONOS_EXT_LDFLAGS
+SICONOS_EXT_INCLUDES="$SICONOSNUMERICS_INCLUDES $NANA_INCLUDES $LAPACKPP_INCLUDES $BLAS_INCLUDES $LAPACK_INCLUDES $LIBXML2_INCLUDES"
+AC_SUBST(SICONOS_EXT_INCLUDES)
+SICONOS_EXT_LDFLAGS="$SICONOSNUMERICS_LIBRARIES $NANA_LIBRARIES $LAPACKPP_LIBRARIES $BLAS_LIBRARIES $LAPACK_LIBRARIES $LIBXML2_LIBRARIES"
+case "$target" in
+    *-linux*)
+      SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS -lg2c"
+      ;;
+    *-apple-darwin*)
+      SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS -L/sw/lib -lg2c"
       ;;
 esac
 AC_SUBST(SICONOS_EXT_LDFLAGS)
 
-CXXFLAGS_BASIC="-fbounds-check -Wno-deprecated -fPIC"
-CXXFLAGS_DEBUG="-g"
+LDFLAGS= "$CXX_DYNLIB $SICONOS_EXT_LDFLAGS"
+AC_SUBST(LDFLAGS)
 
-case "$target" in
-    *-linux*)
-      CXXFLAGS="$CXXFLAGS_DEBUG $CXXFLAGS_BASIC $CXX_WITHOUTNANA_FLAG $CXX_LAPACKPP_FLAG -w "
-      CXX_DYNLIB="-shared"
-      ;;
-    *-apple-darwin*)
-      CXXFLAGS="$CXXFLAGS_DEBUG $CXXFLAGS_BASIC $CXX_WITHOUTNANA_FLAG $CXX_LAPACKPP_FLAG -flat_namespace"
-      CXX_DYNLIB="-dynamiclib"
-      ;;
-esac
-AC_SUBST(CXX_DYNLIB)
 
-# Doxygen
+
+
+
+#################################
+## DOXYGEN 
+#################################
+
 DOXYGEN_CFG=$srcdir/config/DoxygenSiconos.cfg
 AC_SUBST(DOXYGEN_CFG)
+
+
+#################################
+## OUTPUT FILES
+#################################
 
 # output files
 AC_CONFIG_FILES([Makefile
@@ -442,3 +293,5 @@ AC_CONFIG_FILES([Makefile
                  src/xml/Makefile
                  src/xml/test/Makefile])
 AC_OUTPUT
+
+

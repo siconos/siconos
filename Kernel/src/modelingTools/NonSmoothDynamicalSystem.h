@@ -293,5 +293,5 @@ private:
   std::vector<bool> isEcVectorAllocatedIn;
 };
 
-#endif      M->getStrategyPtr()
+#endif
 

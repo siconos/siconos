@@ -141,7 +141,8 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
 
     //----------Verififys the XML file respects the schema------------//
 
-    int xmlValid = xmlSchemaValidateDoc(validctxt, doc);
+    int xmlValid = 0;
+    //  xmlSchemaValidateDoc(validctxt, doc);
 
 
     xmlSchemaFreeValidCtxt(validctxt);
@@ -370,7 +371,8 @@ bool SiconosModelXML::checkSiconosDOMTree()
     xmlSchemaSetValidErrors(validctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
 
     //----------Verifify the XML file respects the schema------------//
-    int xmlValid = xmlSchemaValidateDoc(validctxt, doc);
+    int xmlValid = 0;
+    // xmlSchemaValidateDoc(validctxt, doc);
 
     xmlSchemaFreeValidCtxt(validctxt);
     xmlSchemaFree(schema);
@@ -472,7 +474,8 @@ int SiconosModelXML::validateXmlFile(string xmlFile, string xmlSchema)
     XMLException::selfThrow("SiconosModelXML - Could not find or error(s) in your model XML file : " + xmlFile + ".");
 
   //----------Verififys the XML file respects the schema------------//
-  int xmlValid = xmlSchemaValidateDoc(validctxt, doc);
+  int xmlValid = 0;
+  //xmlSchemaValidateDoc(validctxt, doc);
 
   xmlSchemaFreeValidCtxt(validctxt);
   xmlSchemaFree(schema);
