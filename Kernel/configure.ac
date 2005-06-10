@@ -290,6 +290,7 @@ AC_CONFIG_FILES([Makefile
                  src/utils/SiconosMemory/Makefile
                  src/utils/SiconosMemory/test/Makefile
                  src/utils/SiconosSharedLibrary/Makefile
+                 src/utils/contract/Makefile
                  src/xml/Makefile
                  src/xml/test/Makefile])
 AC_OUTPUT
