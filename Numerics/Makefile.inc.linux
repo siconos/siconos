@@ -45,6 +45,10 @@ NUMERICS_INC = $(NUMERICS_DIR)/include
 NUMERICS_EXT = $(NUMERICS_DIR)/ext
 NUMERICS_DOC = $(NUMERICS_DIR)/doc
 
+#--- INSTALL DIRECTORY ------------------------------------
+INSTALL_DIR = /usr/local
+
+
 #--- EXE ------------------------------------------
 #NUMERICS_EXE = $(NUMERICS_DIR) 
 
@@ -74,7 +78,7 @@ LIBG2C_LIB = -lg2c
 LIBG2C_INC = -I/sw/include
 
 #--- CPPUNIT --------------------------------------
-#CPPUNIT_PATH = /home0/barbier/siconos/LIB_EXTERNALISATION/ext_EXT/cppunit-1.10.2/cppunit
+#CPPUNIT_PATH = /usr/bin/cppunit
 #CPPUNIT_INC = -I$(CPPUNIT_PATH)/include
 #CPPUNIT_LIB_PATH = $(CPPUNIT_PATH)/lib
 #CPPUNIT_LIB = -L$(CPPUNIT_LIB_PATH) -lcppunit
@@ -87,7 +91,7 @@ INCLUDE_DEP = -I$(NUMERICS_DIR)/src/odepack -I$(NUMERICS_DIR)/src/solverpack
 #--- LIB NAME ----------------------------------
 ODEPACKLIB    = libodepack$(OS).a
 SOLVERPACKLIB    = libSolverpack.a
-LIBDYN_NUMERICS = libNumerics.so
+LIBDYN_NUMERICS = libSiconosNumerics.so
 
 #--- LIBS --------------------------------------
 LIBS =  $(LIBG2C_LIB)

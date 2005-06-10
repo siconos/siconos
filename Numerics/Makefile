@@ -105,11 +105,15 @@ build : inc #ext
 lib :	build
 	$(MKDIR) $(NUMERICS_LIB)
 	for i in $(SUBDIRSLIBS); do (cd $$i; $(MAKE) lib); done
-	cd lib; $(MKDIR) tmp; cd tmp; $(ARCH) x ../$(ODEPACKLIB); $(ARCH) x ../$(SOLVERPACKLIB); \
-	 gcc $(SHAREDFLAG) *.o -o $(LIBDYN_NUMERICS); cd ..; mv tmp/$(LIBDYN_NUMERICS) .; $(RMDIR) tmp
+	cd lib; $(MKDIR) tmp; cd tmp; $(ARCH) x ../$(ODEPACKLIB); $(ARCH) x ../$(SOLVERPACKLIB); cd ..\
+	 gcc $(SHAREDFLAG) *.o -o $(LIBDYN_NUMERICS); $(RMDIR) tmp
 	@ echo "  "
 	@ echo "%% lib done %%"
 	@ echo "  "
+
+install : 
+	$(CP) $(NUMERICS_LIB)/$(LIBDYN_NUMERICS) $(INSTALL_DIR)/lib;\
+	$(CP) $(NUMERICS_INC)/*.h $(INSTALL_DIR)/include
 
 #--------------------------------------------------
 run :
@@ -149,6 +153,6 @@ cppunit : buildtest
 	@ echo "  "
 	@ echo "     %% build cppunit tests... done %%"
 	@ echo "  "
-	
+
 runcppunit : cppunit
 	cd test; $(MAKE) runcppunit
