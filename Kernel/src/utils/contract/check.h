@@ -35,7 +35,16 @@
 extern "C" {
 #endif
 
+#ifdef WITHOUT_NANA
+#include <fake_nana.h>
+#endif
+
+
+#ifndef WITHOUT_NANA
 #include <nana.h>
+#endif
+
+
 #include <string>
 
   /*

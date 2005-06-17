@@ -22,6 +22,10 @@ SICONOSMEMORY_PATH = $(top_srcdir)/src/utils/SiconosMemory
 SICONOSMEMORY_INC = $(SICONOSMEMORY_PATH)
 SICONOSMEMORY_LIB = -L$(SICONOSMEMORY_PATH) -lSiconosMemory
 
+#--- contract --------------------------------------
+SICONOSCONTRACT_PATH = $(top_srcdir)/src/utils/contract
+SICONOSCONTRACT_INC = $(SICONOSCONTRACT_PATH)
+
 #--- SiconosXml --------------------------------------
 SICONOSXML_PATH = $(top_srcdir)/src/xml
 SICONOSXML_INC = $(SICONOSXML_PATH)
@@ -45,7 +49,7 @@ MODEL_LIB = -L$(MODEL_PATH) -lModel
 # INCLUDES
 
 #--- INCLUDE -----------------------------------
-SICONOS_INCLUDES = -I$(top_srcdir)/src/utils/ -I$(SICONOSEXCEPTION_INC) -I$(SICONOSSHAREDLIBRARY_INC) -I$(SICONOSALGEBRA_INC)  -I$(SICONOSMEMORY_INC) \
+SICONOS_INCLUDES = -I$(top_srcdir)/src/utils/ -I$(SICONOSEXCEPTION_INC) -I$(SICONOSSHAREDLIBRARY_INC) -I$(SICONOSALGEBRA_INC)  -I$(SICONOSMEMORY_INC) -I$(SICONOSCONTRACT_INC) \
 -I$(SICONOSXML_INC) -I$(MODELINGTOOLS_INC) -I$(SIMULATIONTOOLS_INC) -I$(MODEL_INC)
 
 # COMPILE FLAGS

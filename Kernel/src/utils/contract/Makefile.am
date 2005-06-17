@@ -2,7 +2,7 @@
 
 include $(top_srcdir)/config/Make-rules
 
-.cpp.o:
-	$(CXXCOMPILE) -c $< 
+EXTRA_DIST = check.h fake_nana.h
 
-include_HEADERS = check.h nana.h
+include_HEADERS = check.h fake_nana.h
+

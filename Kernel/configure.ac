@@ -105,6 +105,7 @@ AC_CHECK_FUNCS([floor gettimeofday])
 ###################################
 
 AC_ARG_ENABLE(cppunit,[  --enable-cppunit              use cppunit to pass unitary tests, default=no ])
+AC_ARG_ENABLE(nana,[  --enable-nana              use nana to design by contract to pass unitary tests, default=no ])
 AC_ARG_ENABLE(debug,  [  --enable-debug              compiling with debugging symbols (-g), default=no ])
 AC_ARG_ENABLE(optimisation,  [  --enable-optimisation              compiling with optimiation symbols (O2), default=no ])
 AC_ARG_ENABLE(warnings,[  --enable-warnings            enable compilation warnings, default=yes])
@@ -160,9 +161,16 @@ AC_SUBST(CXX_LAPACKPP_FLAG)
 
 # Nana
 AC_MSG_CHECKING([Nana])
+if test "$enable_nana" = yes; then
 ACX_CHECK_NANA([AC_SUBST(NANA_INCLUDES) AC_SUBST(NANA_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Nana. Please install Nana  or use the option --with-localnana.])])
-#
+CXX_WITHOUTNANA_FLAG=""
+else
+ AC_MSG_RESULT(option --enable-nana not selected : Warning : do not use nana)  
 CXX_WITHOUTNANA_FLAG="-DWITHOUT_NANA"
+fi
+
+
+
 
 # exit 1;
 AC_MSG_CHECKING([Libxml2])
@@ -253,10 +261,8 @@ case "$target" in
 esac
 AC_SUBST(SICONOS_EXT_LDFLAGS)
 
-echo $SICONOS_EXT_LDFLAGS 
+AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
 
-LDFLAGS= "$CXX_DYNLIB $SICONOS_EXT_LDFLAGS"
-AC_SUBST(LDFLAGS)
 
 
 
@@ -292,6 +298,7 @@ AC_CONFIG_FILES([Makefile
                  src/utils/SiconosMemory/Makefile
                  src/utils/SiconosMemory/test/Makefile
                  src/utils/SiconosSharedLibrary/Makefile
+                 src/utils/contract/Makefile
                  src/xml/Makefile
                  src/xml/test/Makefile])
 AC_OUTPUT
