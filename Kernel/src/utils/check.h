@@ -119,28 +119,11 @@ extern "C" {
    *   I'll build it; personally I find termination the least of my problems!
    */
 
-
-  /*
-   * OUT(e) - verbose output
-   */
-
-
-  //#define OUT(e) \
-  //VL(("OUT : "));VL((e))
-  //#define IN(e) \
-  //VL(("IN  : "));VL((e))
-
 #define OUT(e) \
 VL(("<<<<< "));VL((e))
 
-
 #define IN(e) \
 VL((">>>>> "));VL((e))
-
-
-
-
-
 
 #ifndef __cplusplus
 }
