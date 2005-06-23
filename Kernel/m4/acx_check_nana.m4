@@ -46,11 +46,13 @@ if test "$nana_lib" = "no" ; then
     for ac_dir in $list_dir;
     do  AC_MSG_CHECKING([for libnana.a in $ac_dir/lib])
         if test -r "$ac_dir/lib/libnana.a"  && test -r "$ac_dir/include/nana.h" ;  then
-	    nana_lib="yes"       
+	    nana_lib="yes"
+            NANA_INCLUDES="-I$ac_dir/include"       
 	    NANA_LIBRARIES="-L$ac_dir/lib -lnana"
+	    AC_MSG_RESULT([Found  a static library $ac_dir/lib/libnana.a])
+            
         break
 	fi
-	AC_MSG_RESULT([Found  a static library $ac_dir/lib/libnana.a])
     done
 fi
 
