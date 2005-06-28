@@ -15,29 +15,40 @@ AC_CONFIG_HEADER([config.h])
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_RANLIB
+
+# Checks for python.
 AC_PYTHON_DEVEL
+AC_MSG_CHECKING([Python Checking])
+#ACX_CHECK_PYTHON([AC_SUBST(pythondir) AC_SUBST(PYTHON_DIR)], [AC_MSG_ERROR([Python problem])])
+#echo $pythondir
+#echo $PYTHON_SIR
+
+
+# Checks for swig-python.
 AC_PROG_SWIG(1.3.21)
 SWIG_ENABLE_CXX
 SWIG_PYTHON
 
 # Checks for kernel & Numerics paths
 
-# SICONOSPATH
-AC_MSG_CHECKING([SICONOS Kernel Installation])
-if test "$SICONOSPATH" != ""; then
-	AC_MSG_RESULT([yes]);	
-else	
-	AC_MSG_ERROR(Cannot find SICONOS Kernel. Please install SICONOS Kernel or set SICONOSPATH environment variable.)
-	exit 1;
-fi
 
-AC_MSG_CHECKING([SICONOS Numerics Installation])
-if test "$NUMERICSPATH" != ""; then
-	AC_MSG_RESULT([yes]);	
-else	
-	AC_MSG_ERROR(Cannot find SICONOS NUMERICS. Please install SICONOS Numerics or set NUMERICSPATH environment variable)
-	exit 1;
-fi
+#################################
+## all the --with-* argument help
+#################################
+AC_ARG_WITH(localnumerics,	
+	[  --with-localnumerics=path        indicates a local path of numerics lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
+AC_ARG_WITH(localkernel,	
+	[  --with-localkernel=path        indicates a local path of kernel lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
+
+# Numerics
+AC_MSG_CHECKING([SICONOS Numerics])
+ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Siconos Numerics. Please install it or use the option --with-localnumerics.])])
+echo $NUMERICS_PATH
+# kernel
+AC_MSG_CHECKING([SICONOS Kernel])
+ACX_CHECK_KERNEL([AC_SUBST(KERNEL_INCLUDES) AC_SUBST(KERNEL_LIBRARIES) AC_SUBST(KERNEL_PATH)], [AC_MSG_ERROR([Cannot find  Siconos Kernel. Please install it or use the option --with-localkernel.])])
+echo $KERNEL_PATH
+
 
 # Checks for libraries.
 
@@ -49,5 +60,6 @@ fi
 
 AC_CONFIG_FILES([Makefile
 		 config/Makefile
-		 python/Makefile])
+		 python/Makefile]
+		 python/pySiconos/Makefile)
 AC_OUTPUT

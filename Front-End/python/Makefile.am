@@ -1,7 +1,9 @@
 # Makefile.am --- SICONOS
 
+SUBDIRS = pySiconos
+
 include $(top_srcdir)/config/Make-rules
-include $(SICONOSPATH)/share/SICONOS/KernelConfig.sh
+include $(KERNEL_PATH)/share/SICONOS/KernelConfig.sh
 EXTRA_DIST = pySiconos.i createLibSiconos.sh
 
 all:swig_interface lib
@@ -10,7 +12,8 @@ swig_interface:pySiconos.i
 
 pySiconos_wrap.cxx:pySiconos.i
 	$(SWIG) $(SWIG_PYTHON_OPT) -I$(SICONOS_INSTALLED_INCLUDES) pySiconos.i;
-	./correctif.sh;
+	sed "s/SWIG_append_msg/SWIG_append_errmsg/g" pySiconos_wrap.cxx > pySiconos_wrap.cxx.res ;
+	mv pySiconos_wrap.cxx.res pySiconos_wrap.cxx;
 
 pySiconos_wrap.o:pySiconos_wrap.cxx
 	g++ -c $(CXXFLAGS) -I$(SICONOS_INSTALLED_INCLUDES) $(LIBEXT_INCLUDES) pySiconos_wrap.cxx $(PYTHON_CPPFLAGS)
@@ -38,3 +41,7 @@ _pySiconos.so:pySiconos_wrap.o
 
 clean:
 	rm -f pySiconos_wrap.o _pySiconos.so pySiconos_wrap.cxx pySiconos.py pySiconos.pyc
+
+install-data-am:
+	@INSTALL@ -m 0644 _pySiconos.so $(PYTHON_SITE_PKG)
+	@INSTALL@ -m 0644 pySiconos.py $(PYTHON_SITE_PKG)
