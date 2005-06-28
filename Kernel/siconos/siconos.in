@@ -6,7 +6,7 @@
 
 DIR=`pwd`;
 SICONOSPATH=@prefix@
-
+NUMERICSPATH=@numericspath@
 #-----------
 # functions
 #-----------
@@ -55,14 +55,16 @@ function cartridge() {
 #------
 
 cartridge;
+# parameters and paths
 echo "SICONOSPATH= $SICONOSPATH"
 export SICONOSPATH=$SICONOSPATH;
-# parameters and paths
 if test "$SICONOSPATH" = ""; then
     echo "SICONOSPATH undefined. stop";
     exit 1;
 fi;
-# parameters and paths
+
+echo "NUMERICSPATH= $NUMERICSPATH"
+export NUMERICSPATH=$NUMERICSPATH;
 if test "$NUMERICSPATH" = ""; then
     echo "NUMERICSPATH undefined. stop";
     exit 1;

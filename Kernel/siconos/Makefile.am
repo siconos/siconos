@@ -6,8 +6,11 @@ bin_SCRIPTS = siconos
 siconos:siconos.in Makefile
 	sed -e 's?\@prefix\@?$(prefix)?g' \
             -e 's/whatever//' \
-	    < $(srcdir)/siconos.in > siconos.tmp \
-	&& mv siconos.tmp siconos
+	    < $(srcdir)/siconos.in > siconos.tmp
+	sed -e 's?\@numericspath\@?$(NUMERICS_PATH)?g' \
+            -e 's/whatever//' \
+	    < $(srcdir)/siconos.tmp > siconos.tmp2 \
+	&& mv siconos.tmp2 siconos
 	chmod +x siconos
 
 MakefilePluginSample:MakefilePluginSample.in Makefile

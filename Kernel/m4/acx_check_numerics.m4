@@ -15,7 +15,7 @@ if test "$with_localnumerics" = no -o "$with_localnumerics" = yes -o "$with_loca
 esac     
 else
    AC_MSG_RESULT(option  --with-localnumerics selected :locally installed numerics used)
-   list_dir="$with_locallapack $with_localnumerics"
+   list_dir="$with_localnumerics"
 fi
 
 case "$target" in
@@ -35,6 +35,7 @@ do  AC_MSG_CHECKING([for libSiconosNumerics.$libsuffix in $ac_dir])
 	   if test -r "$ac_dir/lib/libSiconosNumerics.$libsuffix" && test -r "$ac_dir/include/SiconosNumerics.h" ; then
        		NUMERICS_INCLUDES="-I$ac_dir/include/"
        		NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics"
+       		NUMERICS_PATH="$ac_dir/"
        		numerics_lib="yes"
 		dynlib="yes"
        		AC_MSG_RESULT([Library $ac_dir/lib/libSiconosNumerics.$libsuffix selected]) 
@@ -49,7 +50,8 @@ if test "$numerics_lib" = "no" ; then
         if test -r "$ac_dir/lib/libSiconosNumerics.a" ; then
 	    	numerics_lib="yes"
 		NUMERICS_INCLUDES="-I$ac_dir/include/"
-       		NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics"	    	   
+       		NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics"
+       		NUMERICS_PATH="$ac_dir/"	    	   
 	    	AC_MSG_RESULT([Library $ac_dir/lib/libNumerics.a selected])
 	    break
 	fi
