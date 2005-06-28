@@ -1,24 +1,128 @@
+---+ Little help to install the platform (Numerics, Kernel, Front-End):
+
+---++ Required external libraries
+
+   * libxml2
+      * actual version used with the platform : 2.6.17
+      * last version : 2.6.17 
+      * known problems : none
+      * location : http://www.xmlsoft.org/downloads.html
+
+   * lapack++
+      * actual version used with the platform: 2.1.2
+      * last version : 2.1.2
+      * known problems : with version 2.1.0, the platform crashs during the linking => fixed in 2.1.2
+      * location : http://sourceforge.net/projects/lapackpp
+
+   * nana
+      * actual version used with the platform: 2.5
+      * last version : 2.5
+      * known problems : compilation problems
+      * location : Gforge
+
+   * cppunit
+      * actual version used with the platform: 1.10.2
+      * last version : 1.10.2
+      * known problems : none
+      * location : http://cppunit.sourceforge.net/cgi-bin/moin.cgi
 
 
-Installation:
+---++ Getting the sources
 
-> reconf.sh
-> configure 
-options of configure:
---help to see all options
---prefix
-by default the path installation is /usr/local/, to define it use --prefix
-  --prefix=/siconos_path_install
-
-if you do not want to run unitary test suites, and have not installed cppUnit, use flag '--disable-cppunit'
-
-> make
-
-> make install
+   * Through the svn server (acess required)
+       svn checkout svn+ssh://dveloppeur@scm.gforge.inria.fr/svn/siconos
+       for more explanation see http://gforge.inria.fr/scm/?group_id=9
+   * Download the source packages on the Gforge   
 
 
-export PATH=$PATH:/siconos_path_install/bin
+---++ Numerics installation
 
-> siconos -h
+   * Change directory to your source directory <br>
+   =% cd /path/to/your/source/code/=
 
-> siconos BouncingBall/BouncingBall.cpp
+   * Set environnement variable NUMERICSPATH to your path of Numerics directory <br>
+   =% setenv NUMERICSPATH /path/to/your/source/code/Numerics=
+
+   * create a symbolic link on the Makefile.inc corresponding to your OS (Linux or MacOs X) <br>
+   =% ln -s Makefile.inc Makefile.inc.[Linux or Macosx]=
+  
+   * Command to compile and create Numerics libraries : make lib
+   =% make lib=
+   
+   * Edit the file Makefile.inc to set the INSTALL_DIR variable
+   =% make install (as root if necessary)
+
+
+---++ Kernel installation (for developers)
+   
+   * Change directory to your source directory <br>
+   =% cd /path/to/your/source/code/Kernel=
+
+---+++ Creation of the configure script and run it
+
+On SVN server, the platform is distributed in a developer version. To get a version "ready-to-install", autotools need to be configured. The script reconf.sh do this operation. It creates the script configure and Makefiles of the platform.
+
+   * Run bash script reconf.sh
+   <br>
+   =% ./reconf.sh=
+
+   * Run configure script 
+   <br>
+   =% ./configure --prefix="the path where you want to install the platform"= 
+
+   * *I advise you for the moment to install the platform in the directory retrieved from SVN. C++ compiler, System libraries, external libraries, etc. are tested...
+
+   * If you have a local installation of an external library, you can give its path to configure with the option --with-local[library name]. You can get the possible options typing =%configure --help=. 
+
+   * =% ./configure --help provides you with the others options
+
+---+++ Compilation and installation of the Kernel
+
+
+   * Compilation of the platform : <br>
+   =% make=
+
+   * Installation of the platform : <br>
+   =% make install= (as root of neccesary)
+
+      
+---+++ Is the installation of the Kernel OK ?
+   * You can try to run : cd /path/to/your/source/code/sample/BouncingBall ; siconos BouncingBall.cpp
+
+---+++ Compilation and installation of the Front-End
+
+   * Change directory to your source directory <br>
+   =% cd /path/to/your/source/code/Front-End=
+
+---+++ Creation of the configure script and run it
+
+   * Run bash script reconf.sh
+   <br>
+   =% ./reconf.sh=
+
+   * Run configure script 
+   <br>
+   =% ./configure --prefix="the path where you want to install the platform"= 
+
+   * *I advise you for the moment to install the platform in the directory retrieved from SVN. C++ compiler, System libraries, external libraries, etc. are tested...
+
+   * If you have a local installation of an external library, you can give its path to configure with the option --with-local[library name]. You can get the possible options typing =%configure --help=. 
+
+   * =% ./configure --help provides you with the others options
+
+---+++ Compilation and installation of the Kernel
+
+
+   * Compilation of the Front-End : <br>
+   =% make=
+
+   * Installation of the Front-End : <br>
+   =% make install= (as root of neccesary)
+
+---+++ Is the installation of the Font-End OK ?
+   * You can try to run : cd /path/to/your/source/code/sample/BouncingBall ; pySiconos BouncingBall.py
+
+
+
+-- Main.VincentAcary - 28 Jun 2005
+
