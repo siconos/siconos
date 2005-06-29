@@ -2,6 +2,7 @@
 #define SICONOSMEMORYXML_H
 
 #include "SiconosDOMTreeTools.h"
+#include<deque>
 
 /** \class SiconosMemoryXML
  *   \brief This class manages SiconosMemory data part
@@ -20,14 +21,14 @@ class SiconosMemoryXML
 public:
 
   SiconosMemoryXML();
-  SiconosMemoryXML(xmlNode* memoryNode, xmlNode* parentNode = NULL, std::string name = "default");
+  SiconosMemoryXML(xmlNode* memoryNode, xmlNode* parentNode = NULL, const std::string& name = "default");
   ~SiconosMemoryXML();
 
-  /** \fn vector<SiconosVector*> getSiconosMemoryVector()
-   *  \brief allows to get the vector of SiconosVector from a SiconosMemory in the XML
-   *  \return vector<SiconosVector*>
+  /** \fn deque<SiconosVector*> getSiconosMemoryVector()
+   *  \brief allows to get the deque of SiconosVector from a SiconosMemory in the XML
+   *  \return deque<SiconosVector*>
    */
-  inline std::vector<SiconosVector*> getSiconosMemoryVector()
+  inline std::deque<SiconosVector*> getSiconosMemoryVector()
   {
     return getVectorMemoryValue();
   }
@@ -38,25 +39,25 @@ public:
    */
   inline int getSiconosMemorySize()
   {
-    return SiconosDOMTreeTools::getIntegerAttributeValue(this->memoryNode, SM_MEMORYSIZE);
+    return SiconosDOMTreeTools::getIntegerAttributeValue(memoryNode, SM_MEMORYSIZE);
   }
 
-  /** \fn void setSiconosMemoryVector(vector<SiconosVector*> v)
+  /** \fn void setSiconosMemoryVector(deque<SiconosVector*> v)
    *  \brief allows to set the vector of SiconosVector of a SiconosMemory in the XML
-   *  \param vector<SiconosVector*> to set
+   *  \param deque<SiconosVector*> to set
    */
-  inline void setSiconosMemoryVector(std::vector<SiconosVector*> v)
+  inline void setSiconosMemoryVector(const std::deque<SiconosVector*>& v)
   {
-    this->setVectorMemoryValue(v);
+    setVectorMemoryValue(v);
   }
 
   /** \fn void setSiconosMemorySize(int s)
    *  \brief allows to set the value of the max size of the SiconosMemory
    *  \param int : the value to set
    */
-  inline void setSiconosMemorySize(int s)
+  inline void setSiconosMemorySize(const unsigned int& s)
   {
-    SiconosDOMTreeTools::setIntegerAttributeValue(this->memoryNode, SM_MEMORYSIZE, s);
+    SiconosDOMTreeTools::setIntegerAttributeValue(memoryNode, SM_MEMORYSIZE, s);
   }
 
   /** \fn bool hasMemory()
@@ -66,7 +67,7 @@ public:
   inline bool hasMemory()
   {
     bool res = false;
-    if (SiconosDOMTreeTools::findNodeChild(this->memoryNode, SM_MEMORY) != NULL) res = true;
+    if (SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY) != NULL) res = true;
     return res;
   }
 
@@ -76,31 +77,31 @@ public:
    */
   inline xmlNode* getSiconosMemoryXMLNode()
   {
-    return this->memoryNode;
+    return memoryNode;
   }
 
 
   /** \fn void deleteUnusedMemoryNodes( int nbGoodNode )
    *  \brief deletes the nodes which won't be used (when there's more than maxSize = nbGoodNode SiconosVector in the SiconosMemory)
    */
-  void deleteUnusedMemoryNodes(int nbGoodNode);
+  void deleteUnusedMemoryNodes(const int&);
 
 private:
 
-  /** \fn vector<SiconosVector*> getVectorMemoryValue()
+  /** \fn deque<SiconosVector*> getVectorMemoryValue()
    *   \brief Return a vector of SiconosVector computed from a memory node
    *   \param memoryNode : the memory node you want to get in a vector of SiconosVector type
-   *   \return A  vector of SiconosVector
+   *   \return A  deque of SiconosVector
    */
-  std::vector<SiconosVector*> getVectorMemoryValue();
+  std::deque<SiconosVector*> getVectorMemoryValue();
 
-  /** \fn void setVectorMemoryValue(vector<SiconosVector*> memory)
-   *   \brief Change values of a memoryNode from a vector<SiconosVector>
+  /** \fn void setVectorMemoryValue(deque<SiconosVector*>& memory)
+   *   \brief Change values of a memoryNode from a deque<SiconosVector>
    *   \param memoryNode : the memory node you want to set
    *   \param memory : the memory you want to copy the value in the memoryNode
    *   \exception XMLException
    */
-  void setVectorMemoryValue(const std::vector<SiconosVector*> memory);
+  void setVectorMemoryValue(const std::deque<SiconosVector*>& memory);
 
   xmlNode * memoryNode;
   xmlNode * parentNode;

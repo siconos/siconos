@@ -32,9 +32,9 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NSDSXML* newNsdsxml):
   BVP(false), nsdsxml(newNsdsxml)
 {
-  if (this->nsdsxml != NULL)
+  if (nsdsxml != NULL)
   {
-    int i = 0;
+    unsigned int i = 0;
     // DS Vector fill-in
     vector<int> nbDStab = nsdsxml->getDSNumbers();
     for (i = 0; i < nbDStab.size(); i++)
@@ -71,20 +71,17 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NSDSXML* newNsdsxml):
       }
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::xml constructor, wrong Dynamical System type" + ((nsdsxml->getDSXML(nbDStab[i]))->getType()));
     }
+
     // Interaction vector fill-in
     vector<int> nbInteractionTab = nsdsxml->getInteractionNumbers();
-    int ds1, ds2;
+    //int ds1, ds2;
     for (i = 0; i < nbInteractionTab.size(); i++)
     {
-      // the creation of the Interaction with this constructor call a method to fill
-      Interaction * inter = new Interaction(nsdsxml->getInteractionXML(nbInteractionTab[i]));
-      ds1 = (nsdsxml->getInteractionXML(nbInteractionTab[i])->getDSConcerned()[0])[0];
-      ds2 = (nsdsxml->getInteractionXML(nbInteractionTab[i])->getDSConcerned()[0])[1];
-      inter->setDynamicalSystems(getDynamicalSystemPtrNumber(ds1), getDynamicalSystemPtrNumber(ds2));
-      interactionVector.push_back(inter);
+      // Creation of the Interaction
+      interactionVector.push_back(new Interaction(nsdsxml->getInteractionXML(nbInteractionTab[i]), this));
       isInteractionVectorAllocatedIn.push_back(true);
     }
-    if (nbInteractionTab.size() == 0) cout << "Warning : No Interaction defined." << endl;
+    if (nbInteractionTab.size() == 0) cout << "Warning : no Interaction defined." << endl;
 
     // Algebraic constraints fill-in
     // get all the EqualityConstraintXML objects then create the EqualityConstraint for this EqualityConstraintXML
@@ -151,7 +148,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const string& type):
 NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 {
   IN("NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem\n");
-  int i;
+  unsigned int i;
 
   if (DSVector.size() > 0)
   {
@@ -186,29 +183,26 @@ NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystemPtr(const int& nb) const
 {
   IN("DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystem(int nb)\n");
-  if (nb < DSVector.size())
-  {
-    OUT("DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystem(int nb)\n");
-    return DSVector[nb];
-  }
-  RuntimeException::selfThrow("NonSmoothDynamicalSystem - getDynamicalSystem : \'nb\' is out of range");
+  if ((unsigned int)nb >= DSVector.size())
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem - getDynamicalSystem : \'nb\' is out of range");
+  return DSVector[nb];
 }
 
 DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystemPtrNumber(const int& nb) const
 {
-  for (unsigned int i = 0; i < DSVector.size(); i++)
+  unsigned int i = 0;
+  while (DSVector[i]->getNumber() != nb && i < DSVector.size())
   {
-    if (DSVector[i]->getNumber() == nb)
-    {
-      return DSVector[i];
-    }
+    i++ ;
   }
-  RuntimeException::selfThrow("NonSmoothDynamicalSystem::getDynamicalSystemOnNumber : DSVector[i] == NULL");
+  if (i > DSVector.size())
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem::getDynamicalSystemOnNumber, out of range or chosen DSVector == NULL");
+  return DSVector[i];
 }
 
 void NonSmoothDynamicalSystem::setDynamicalSystems(const std::vector<DynamicalSystem*>& newVect)
 {
-  for (int i = 0; i < DSVector.size(); i++)
+  for (unsigned int i = 0; i < DSVector.size(); i++)
   {
     if (isDSVectorAllocatedIn[i]) delete DSVector[i];
   }
@@ -219,11 +213,9 @@ void NonSmoothDynamicalSystem::setDynamicalSystems(const std::vector<DynamicalSy
 
 Interaction* NonSmoothDynamicalSystem::getInteractionPtr(const int& nb) const
 {
-  if (nb < interactionVector.size())
-  {
-    return interactionVector[nb];
-  }
-  RuntimeException::selfThrow("NonSmoothDynamicalSystem - getInteraction : \'nb\' is out of range");
+  if ((unsigned int)nb >= interactionVector.size())
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem - getInteraction : \'nb\' is out of range");
+  return interactionVector[nb];
 }
 
 Interaction* NonSmoothDynamicalSystem::getInteractionPtrNumber(const int& nb) const
@@ -242,7 +234,7 @@ Interaction* NonSmoothDynamicalSystem::getInteractionPtrNumber(const int& nb) co
 
 void NonSmoothDynamicalSystem::setInteractions(const std::vector<Interaction*>& newVect)
 {
-  for (int i = 0; i < interactionVector.size(); i++)
+  for (unsigned int i = 0; i < interactionVector.size(); i++)
   {
     if (isInteractionVectorAllocatedIn[i]) delete interactionVector[i];
   }
@@ -253,16 +245,14 @@ void NonSmoothDynamicalSystem::setInteractions(const std::vector<Interaction*>& 
 
 EqualityConstraint* NonSmoothDynamicalSystem::getEqualityConstraintPtr(const int& i) const
 {
-  if (i < ecVector.size())
-  {
-    return ecVector[i];
-  }
-  RuntimeException::selfThrow("NonSmoothDynamicalSystem - getEqualityConstraint : \'i\' is out of range");
+  if ((unsigned int)i >= ecVector.size())
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem - getEqualityConstraint : \'i\' is out of range");
+  return ecVector[i];
 }
 
 void NonSmoothDynamicalSystem::setEqualityConstraints(const std::vector<EqualityConstraint*>& newVect)
 {
-  for (int i = 0; i < ecVector.size(); i++)
+  for (unsigned int i = 0; i < ecVector.size(); i++)
   {
     if (isEcVectorAllocatedIn[i]) delete ecVector[i];
   }
@@ -337,7 +327,6 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
         (static_cast<LagrangianLinearEC*>(ecVector[i]))->saveEqualityConstraintToXML();
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of EqualityConstraint");
     }
-
     size = interactionVector.size();
     for (i = 0; i < size; i++)
       interactionVector[i]->saveInteractionToXML();
@@ -354,6 +343,12 @@ void NonSmoothDynamicalSystem::display() const
   cout << "| this = " << this << endl;
   cout << "| BVP = " << BVP << endl;
   cout << "| &nsdsxml = " << nsdsxml << endl;
+  cout << " List of interactions:" << endl;
+  for (unsigned int i = 0; i < interactionVector.size(); i++)
+  {
+    cout << "| &interaction = " << endl;
+    interactionVector[i]->display();
+  }
   cout << "|===========================" << endl;
 
   OUT("NonSmoothDynamicalSystem::display\n");
@@ -371,23 +366,18 @@ void NonSmoothDynamicalSystem::addDynamicalSystem(DynamicalSystem *ds)//, Bounda
 
 void NonSmoothDynamicalSystem::addInteraction(Interaction *inter)
 {
-  Interaction* interTmp;
-  interTmp = new Interaction(*inter);
-  interactionVector.push_back(interTmp);
+  interactionVector.push_back(new Interaction(*inter));
   isInteractionVectorAllocatedIn.push_back(true);
 }
 
 Interaction* NonSmoothDynamicalSystem::addInteraction(const int& number, const int& nInter, vector<int>* status, vector<DynamicalSystem*>* dsConcerned)
 {
-  if (!hasInteractionNumber(number))
-  {
-    Interaction *interTmp = new Interaction("noId", number, nInter, status, dsConcerned);
-    interactionVector.push_back(interTmp);
-    isInteractionVectorAllocatedIn.push_back(true);
-    return interTmp;
-  }
-  else
+  if (hasInteractionNumber(number))
     RuntimeException::selfThrow("NonSmoothDynamicalSystem::addInteraction : Interaction already declared; number: " + number);
+
+  interactionVector.push_back(new Interaction("noId", number, nInter, status, dsConcerned));
+  isInteractionVectorAllocatedIn.push_back(true);
+  return interactionVector[ interactionVector.size() - 1 ];
 }
 
 void NonSmoothDynamicalSystem::addEqualityConstraint(EqualityConstraint* ec)
@@ -405,7 +395,7 @@ double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
   for (iter = DSVector.begin(); iter != DSVector.end(); ++iter)
   {
     double dsIndic = (*iter)->dsConvergenceIndicator();
-    if (convergenceIndicator > dsIndic) convergenceIndicator == dsIndic;
+    if (convergenceIndicator > dsIndic) convergenceIndicator = dsIndic;
   }
   return(convergenceIndicator);
 }

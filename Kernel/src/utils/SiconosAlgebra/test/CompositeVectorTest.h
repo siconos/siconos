@@ -8,7 +8,6 @@
 #include "SiconosMatrix.h"
 
 #include <math.h>
-//#include "SiconosMatrix.h"
 
 using namespace std;
 
@@ -18,80 +17,63 @@ class CompositeVectorTest : public CppUnit::TestFixture
 
 private:
 
-  // on nomme la suite de tests
+  // test suite
   CPPUNIT_TEST_SUITE(CompositeVectorTest);
 
-  // on ajoute les tests a effectuer :
-
-  // les tests qui doivent passer
+  // test list
   CPPUNIT_TEST(testBuildCompositeVector);
   CPPUNIT_TEST(testBuildCompositeVector1);
   CPPUNIT_TEST(testOperatorAccess);
+  CPPUNIT_TEST(testSetValue);
+  CPPUNIT_TEST(testGetValue);
+  CPPUNIT_TEST(testGetValues);
+  CPPUNIT_TEST(testSetValues);
   CPPUNIT_TEST(testAdd);
   CPPUNIT_TEST(testSize);
-  CPPUNIT_TEST(testWrite);
-  CPPUNIT_TEST(testRead);
-
-  CPPUNIT_TEST(testOperatorPlusEqualGEN);
-  CPPUNIT_TEST(testOperatorSubEqualGEN);
-  CPPUNIT_TEST(testOperatorEqualGEN);
+  CPPUNIT_TEST(testReadWrite);
+  CPPUNIT_TEST(testOperatorPlusEqual);
+  CPPUNIT_TEST(testOperatorEqual);
   CPPUNIT_TEST(testOperatorComp);
-  CPPUNIT_TEST(testOperatorCompDiff);
-  CPPUNIT_TEST(testOperatorPlusEqualSPC);
-  CPPUNIT_TEST(testOperatorSubEqualSPC);
-  CPPUNIT_TEST(testOperatorMultEqualSPC);
-  CPPUNIT_TEST(testOperatorDivEqualSPC);
-  CPPUNIT_TEST(testOperatorEqualSPC);
-  CPPUNIT_TEST(testExternalOperatorPlusGEN);
-  CPPUNIT_TEST(testExternalOperatorSubGEN);
-  CPPUNIT_TEST(testExternalOperatorMultDoubleSPC);
-  CPPUNIT_TEST(testExternalOperatorDivDoubleSPC);
-  CPPUNIT_TEST(testExternalOperatorPlusSPC);
-  CPPUNIT_TEST(testExternalOperatorSubSPC);
+  CPPUNIT_TEST(testOperatorMultDivEqual);
+  CPPUNIT_TEST(testAddition);
+  CPPUNIT_TEST(testSubtraction);
+  CPPUNIT_TEST(testExternalOperatorPlusMoins);
+  CPPUNIT_TEST(testExternalOperatorMultDiv);
   CPPUNIT_TEST(testExternalOperatorMultMat);
-  CPPUNIT_TEST(testExternalOperatorMultTransMat);
+  CPPUNIT_TEST(testExternalOperatorMatTransMult);
 
-
-
-  // les tests qui doivent echouer
-  //CPPUNIT_TEST_FAIL(testFail);
-
-  // on termine
   CPPUNIT_TEST_SUITE_END();
 
-
-
-  // declaration de fonctions de test
   void testBuildCompositeVector();
   void testBuildCompositeVector1();
   void testOperatorAccess();
+  void testSetValue();
+  void testGetValue();
+  void testSetValues();
+  void testGetValues();
   void testAdd();
   void testSize();
-  void testWrite();
-  void testRead();
+  void testReadWrite();
 
-  void testOperatorPlusEqualGEN();
-  void testOperatorSubEqualGEN();
-  void testOperatorEqualGEN();
+  void testOperatorPlusEqual();
+  void testOperatorEqual();
   void testOperatorComp();
-  void testOperatorCompDiff();
-  void testOperatorPlusEqualSPC();
-  void testOperatorSubEqualSPC();
-  void testOperatorMultEqualSPC();
-  void testOperatorDivEqualSPC();
-  void testOperatorEqualSPC();
-  void testExternalOperatorPlusGEN();
-  void testExternalOperatorSubGEN();
-  void testExternalOperatorMultDoubleSPC();
-  void testExternalOperatorDivDoubleSPC();
-  void testExternalOperatorPlusSPC();
-  void testExternalOperatorSubSPC();
+  void testOperatorMultDivEqual();
+  void testAddition();
+  void testSubtraction();
+  void testExternalOperatorPlusMoins();
+  void testExternalOperatorMultDiv();
   void testExternalOperatorMultMat();
-  void testExternalOperatorMultTransMat();
+  void testExternalOperatorMatTransMult();
+  // \todo exception test
 
-  // declararion des variables de tests
-  SimpleVector q;
-  SimpleVector dotq;
+  SimpleVector * q;
+  SiconosVector * compVect, *r;
+  SiconosVector * simpleVect;
+  std::vector<double> vq;
+  std::vector<double> vdotq;
+  CompositeVector * CV, *tmp;
+
 
 public:
   void setUp();
@@ -100,4 +82,6 @@ public:
 };
 
 #endif
+
+
 

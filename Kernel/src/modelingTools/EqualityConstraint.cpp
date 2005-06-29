@@ -1,40 +1,34 @@
 #include "EqualityConstraint.h"
 using namespace std;
 
-EqualityConstraint::EqualityConstraint()
-{
-  this->ecXML = NULL;
-  this->type = NLINEAREC;
-}
+EqualityConstraint::EqualityConstraint():
+  type(NLINEAREC), number(0), id("none"), ecXML(NULL), computeInputName("none"),
+  computeOutputName("none"), computeOutputPtr(NULL), computeInputPtr(NULL)
+{}
 
-EqualityConstraint::EqualityConstraint(EqualityConstraintXML* ecXML)
-{
-  this->ecXML = ecXML;
-  this->type = NLINEAREC;
-}
+EqualityConstraint::EqualityConstraint(EqualityConstraintXML* newEcXML):
+  type(NLINEAREC), number(0), id("none"), ecXML(newEcXML), computeInputName("none"),
+  computeOutputName("none"), computeOutputPtr(NULL), computeInputPtr(NULL)
+{}
 
 EqualityConstraint::~EqualityConstraint()
 {}
-
-
 
 vector<DSInputOutput*> EqualityConstraint::getDSInputOutputs(void)
 {
   return dsioVector;
 }
 
-DSInputOutput* EqualityConstraint::getDSInputOutput(int i)
+DSInputOutput* EqualityConstraint::getDSInputOutput(const unsigned int& i)
 {
-  if (i < this->dsioVector.size())
-  {
-    return this->dsioVector[i];
-  }
-  RuntimeException::selfThrow("EqualityConstraint - getDSInputOutput : \'i\' is out of range");
+  if (i >= dsioVector.size())
+    RuntimeException::selfThrow("EqualityConstraint - getDSInputOutput : \'i\' is out of range");
+  return dsioVector[i];
 }
 
 void EqualityConstraint::setDSInputOutputs(vector<DSInputOutput*> dsioVect)
 {
-  this->dsioVector = dsioVect;
+  dsioVector = dsioVect;
 }
 
 void EqualityConstraint::addDSInputOutput(DSInputOutput* dsio)
@@ -47,20 +41,20 @@ void EqualityConstraint::addDSInputOutput(DSInputOutput* dsio)
    *  in EqualityConstraint class, we don't create new objects in the DSInputOutput vector
    *    => we only save a link (pointer) on the DSInputOutputs of the DynamicalSystems !!
    */
-  this->dsioVector.push_back(dsio);
+  dsioVector.push_back(dsio);
 }
 
 void EqualityConstraint::saveEqualityConstraintToXML()
 {
   IN("EqualityConstraint::saveEqualityConstraintToXML\n");
-  if (this->ecXML != NULL)
+  if (ecXML != NULL)
   {
     /*
      * these attributes are only required for LagrangianNonLinear DSInputOutput !
      */
-    //    this->disoxml->setComputeInputPlugin( this->computeInputName );
-    //    this->dsioxml->setComputeOutputPlugin( this->computeOutputName );
-    this->ecXML->setG(&this->G);
+    //    disoxml->setComputeInputPlugin( computeInputName );
+    //    dsioxml->setComputeOutputPlugin( computeOutputName );
+    ecXML->setG(&G);
   }
   else RuntimeException::selfThrow("EqualityConstraint::saveEqualityConstraintToXML - object EqualityConstraintXML does not exist");
   OUT("EqualityConstraint::saveEqualityConstraintToXML\n");
@@ -70,18 +64,18 @@ void EqualityConstraint::display() const
 {
   cout << "-----------------------------------------------------" << endl;
   cout << "____ data of the EqualityConstraint " << endl;
-  cout << "| id : " << this->id << endl;
-  cout << "| number : " << this->number << endl;
+  cout << "| id : " << id << endl;
+  cout << "| number : " << number << endl;
   cout << "| G : " << endl;
-  this->G.display();
+  G.display();
   cout << "-----------------------------------------------------" << endl << endl;
 }
 
 void EqualityConstraint::init()
 {
-  this->number = 0;
-  this->id = "none";
-  this->ecXML = NULL;
+  number = 0;
+  id = "none";
+  ecXML = NULL;
 }
 
 ////////////////////////////////
@@ -90,12 +84,12 @@ void EqualityConstraint::computeOutput(double time)
   if (computeOutputPtr == NULL) RuntimeException::selfThrow("computeOutput() is not linked to a plugin function");
 
   //to do
-  //this->computeOutputPtr(&x(0), &time, &lambdaPtr(0), &y(0));
-  //  vector<DynamicalSystem*> vDS = this->interaction->getDynamicalSystems();
+  //computeOutputPtr(&x(0), &time, &lambdaPtr(0), &y(0));
+  //  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
   //
   //  DynamicalSystem *ds1 ,*ds2;
-  //  SiconosVector *y = this->interaction->getYPtr();
-  //  SiconosVector *yDot = this->interaction->getYDotPtr();
+  //  SiconosVector *y = interaction->getYPtr();
+  //  SiconosVector *yDot = interaction->getYDotPtr();
   //  if (vDS.size() == 2)
   //  {
   //      ds1=vDS[0];
@@ -108,14 +102,14 @@ void EqualityConstraint::computeOutput(double time)
   //        CompositeVector q;
   //        q.add(*(d1->getQPtr()));
   //      q.add(*(d2->getQPtr()));
-  //        //*y = (this->h * q) + this->b;
+  //        //*y = (h * q) + b;
   //
   //      CompositeVector vel;
   //      vel.add(*(d1->getVelocityPtr()));
   //      vel.add(*(d2->getVelocityPtr()));
-  //      *yDot = (this->h * vel);
+  //      *yDot = (h * vel);
   //
-  //      this->computeOutputPtr(*q, 0.0, this->lambda, y);
+  //      computeOutputPtr(*q, 0.0, lambda, y);
   //      }
   //    else
   //    {
@@ -129,76 +123,76 @@ void EqualityConstraint::computeInput(double time)
   if (computeInputPtr == NULL) RuntimeException::selfThrow("computeInput() is not linked to a plugin function");
 
   //to do
-  //this->computeInputPtr(&x(0), &time, &lambdaPtr(0), &r(0));
+  //computeInputPtr(&x(0), &time, &lambdaPtr(0), &r(0));
 }
 
 void EqualityConstraint::setComputeOutputFunction(std::string pluginPath, std::string functionName)
 {
-  this->computeOutputPtr = NULL;
+  computeOutputPtr = NULL;
   cShared.setFunction(&computeOutputPtr, pluginPath, functionName);
 
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  this->computeOutputName = plugin + ":" + functionName;
+  computeOutputName = plugin + ":" + functionName;
 }
 
 void EqualityConstraint::setComputeInputFunction(std::string pluginPath, std::string functionName)
 {
-  this->computeInputPtr = NULL;
+  computeInputPtr = NULL;
   cShared.setFunction(&computeInputPtr, pluginPath, functionName);
 
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  this->computeInputName = plugin + ":" + functionName;
+  computeInputName = plugin + ":" + functionName;
 }
 ///////////////////////////////
 
 void EqualityConstraint::fillEqualityConstraintWithEqualityConstraintXML()
 {
-  if (this->ecXML != NULL)
+  if (ecXML != NULL)
   {
     string plugin;
     // computeInput
-    if (this->ecXML->hasComputeInput())
+    if (ecXML->hasComputeInput())
     {
-      cout << "EqualityConstraintPluginType == " << this->type << endl;
-      plugin = (this->ecXML)->getComputeInputPlugin();
-      this->setComputeInputFunction(this->cShared.getPluginName(plugin), this->cShared.getPluginFunctionName(plugin));
+      cout << "EqualityConstraintPluginType == " << type << endl;
+      plugin = (ecXML)->getComputeInputPlugin();
+      setComputeInputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
     }
-    else cout << "Warning - No computeInput method is defined in a EqualityConstraint " << this->getType() << endl;
+    else cout << "Warning - No computeInput method is defined in a EqualityConstraint " << getType() << endl;
 
     // computeOutput
-    if (this->ecXML->hasComputeOutput())
+    if (ecXML->hasComputeOutput())
     {
-      cout << "EqualityConstraintPluginType == " << this->type << endl;
-      plugin = (this->ecXML)->getComputeOutputPlugin();
-      this->setComputeOutputFunction(this->cShared.getPluginName(plugin), this->cShared.getPluginFunctionName(plugin));
+      cout << "EqualityConstraintPluginType == " << type << endl;
+      plugin = (ecXML)->getComputeOutputPlugin();
+      setComputeOutputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
     }
-    else cout << "Warning - No computeOutput method is defined in a Relation " << this->getType() << endl;
+    else cout << "Warning - No computeOutput method is defined in a Relation " << getType() << endl;
 
-    this->number = this->ecXML->getNumber();
-    this->G = this->ecXML->getG();
+    number = ecXML->getNumber();
+    G = ecXML->getG();
   }
   //else RuntimeException::selfThrow("EqualityConstraint::fillEqualityConstraintWithEqualityConstraintXML - object EqualityConstraintXML does not exist");
 }
 
-void EqualityConstraint::createEqualityConstraint(EqualityConstraintXML *ecXML,
-    int number,  SiconosMatrix *G,
-    vector<DSInputOutput*> *dsioVector)
+void EqualityConstraint::createEqualityConstraint(EqualityConstraintXML *newEcXML,
+    int newNumber, SiconosMatrix *newG,
+    vector<DSInputOutput*> *newDsioVector)
 {
   if (ecXML != NULL)
   {
-    this->ecXML = ecXML;
-    this->type = NLINEAREC;
-    this->fillEqualityConstraintWithEqualityConstraintXML();
+    ecXML = newEcXML;
+    type = NLINEAREC;
+    fillEqualityConstraintWithEqualityConstraintXML();
   }
   else
   {
-    this->ecXML = NULL;
-    this->type = NLINEAREC;
-    this->number = number;
-    this->G = *G;
-    this->dsioVector = *dsioVector;
+    ecXML = NULL;
+    type = NLINEAREC;
+    number = newNumber;
+    G = *newG;
+    dsioVector = *newDsioVector;
   }
 }
 

@@ -13,232 +13,152 @@
 using namespace std;
 
 
-InteractionXML::InteractionXML()
-{
-  this->idNode = NULL;
-  this->nInterNode = NULL;
-  this->statusNode = NULL;
-  this->yNode = NULL;
-  this->lambdaNode = NULL;
-  this->isActiveNode = NULL;
-  this->dsConcernedNode = NULL;
-}
+InteractionXML::InteractionXML():
+  rootInteractionXMLNode(NULL), idNode(NULL), nInterNode(NULL),
+  statusNode(NULL),  yNode(NULL),   lambdaNode(NULL), isActiveNode(NULL),
+  dsConcernedNode(NULL), dsListNode(NULL),  relationXML(NULL), nSLawXML(NULL),
+  isRelationXMLAllocatedIn(false), isNsLawXMLAllocatedIn(false)
+{}
 
-InteractionXML::InteractionXML(xmlNode * interactionNode, vector<int> definedNumbers)
+InteractionXML::InteractionXML(xmlNode * interactionNode, vector<int> definedNumbers):
+  rootInteractionXMLNode(interactionNode), idNode(NULL), nInterNode(NULL),
+  statusNode(NULL),  yNode(NULL),   lambdaNode(NULL), isActiveNode(NULL),
+  dsConcernedNode(NULL), dsListNode(NULL), relationXML(NULL), nSLawXML(NULL),
+  isRelationXMLAllocatedIn(false), isNsLawXMLAllocatedIn(false)
 {
-  this->idNode = NULL;
-  this->nInterNode = NULL;
-  this->statusNode = NULL;
-  this->yNode = NULL;
-  this->lambdaNode = NULL;
-  this->isActiveNode = NULL;
-  this->dsConcernedNode = NULL;
-  this->rootInteractionXMLNode = interactionNode;
-
   loadInteractionProperties(interactionNode, definedNumbers);
 }
 
 InteractionXML::~InteractionXML()
 {
-  //  if(this->relationXML != NULL) delete this->relationXML;
-  //  if(this->nSLawXML != NULL) delete this->nSLawXML;
+  if (isRelationXMLAllocatedIn)
+  {
+    delete relationXML;
+    relationXML = NULL;
+  }
+  if (isNsLawXMLAllocatedIn)
+  {
+    delete nSLawXML;
+    nSLawXML = NULL;
+  }
+
 }
 
 void InteractionXML::loadInteractionProperties(xmlNode * interactionNode, vector<int> definedNumbers)
 {
   IN("InteractionXML::loadInteractionProperties\n ");
-  xmlNode *node;
+  xmlNode *node, *node2;
   string type;
 
+  // id
   if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, ID_ATTRIBUTE)) != NULL)
-  {
-    this->idNode = node;
-  }
-  else
-  {
-    //XMLException::selfThrow("InteractionXML - loadInteractionProperties error : tag " + INTERACTION_ID + " not found.");
-    cout << "InteractionXML - loadInteractionProperties WARNING : tag " << ID_ATTRIBUTE << " not found, this attribute is optional." << endl;
-    this->idNode = NULL;
-  }
+    idNode = node;
+  // nInter
   if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, INTERACTION_NINTER)) != NULL)
-  {
-    this->nInterNode = node;
-  }
+    nInterNode = node;
   else
-  {
     XMLException::selfThrow("InteractionXML - loadInteractionProperties error : tag " + INTERACTION_NINTER + " not found.");
-  }
+  // status
   if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, INTERACTION_STATUS)) != NULL)
-  {
-    this->statusNode = node;
-  }
+    statusNode = node;
   else
-  {
     XMLException::selfThrow("InteractionXML - loadInteractionProperties error : tag " + INTERACTION_STATUS + " not found.");
-  }
-
-
+  // y
   if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, INTERACTION_Y)) != NULL)
-  {
-    this->yNode = node;
-  }
-  else
-  {
-    cout << "InteractionXML - loadInteractionProperties WARNING : tag " << INTERACTION_Y << " not found, this attribute is optional." << endl;
-    this->yNode = NULL;
-  }
-
-
+    yNode = node;
+  // lambda
   if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, INTERACTION_LAMBDA)) != NULL)
-  {
-    this->lambdaNode = node;
-  }
-  else
-  {
-    cout << "InteractionXML - loadInteractionProperties WARNING : tag " << INTERACTION_LAMBDA << " not found, this attribute is optional." << endl;
-    this->lambdaNode = NULL;
-  }
-  //    if ((node=SiconosDOMTreeTools::findNodeChild(interactionNode, INTERACTION_ISACTIVE)) !=NULL)
-  //    {
-  //    this->isActiveNode=node;
-  //    }
-  //    else
-  //    {
-  //    //XMLException::selfThrow("InteractionXML - loadInteractionProperties error : tag " + INTERACTION_ISACTIVE + " not found.");
-  //    this->isActiveNode=NULL;
-  //    }
-
+    lambdaNode = node;
+  // dsConcerned
   if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, INTERACTION_DS_CONCERNED)) != NULL)
   {
-    this->dsConcernedNode = node;
-    loadInteractionConcernedDS(node, definedNumbers);
+    dsConcernedNode = node;
+    // Check if all ds are concerned or not
+    if (! hasAll())
+    {
+      // Get the DSList node
+      if (SiconosDOMTreeTools::findNodeChild(dsConcernedNode, INTERACTION_DS_LIST) != NULL)
+        dsListNode = SiconosDOMTreeTools::findNodeChild(dsConcernedNode, INTERACTION_DS_LIST);
+      else
+        XMLException::selfThrow("tag DSlist not found.");
+    }
   }
   else
-  {
-    XMLException::selfThrow("InteractionXML - loadInteractionProperties error : tag " + INTERACTION_DS_CONCERNED + " not found.");
-  }
+    XMLException::selfThrow("InteractionXML - xml constructor, tag " + INTERACTION_DS_CONCERNED + " not found.");
 
-  node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)interactionNode, INTERACTION_CONTENT_TAG);
-  //if ((node=SiconosDOMTreeTools::findNodeChild(interactionNode, INTERACTION_RELATION)) !=NULL)
-  if (node != NULL)
+  //  node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)interactionNode, INTERACTION_CONTENT_TAG);
+  if ((node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)interactionNode, INTERACTION_CONTENT_TAG)) != NULL)
   {
-    /*
-     * the first child is the Relation
-     */
-    node = SiconosDOMTreeTools::findNodeChild(node);
-    if (node != NULL)
+    // the first child is the Relation
+    if ((node2 = SiconosDOMTreeTools::findNodeChild(node)) != NULL)
     {
-      //string type = SiconosDOMTreeTools::getStringAttributeValue(node,INTERACTION_TYPE); //type of Relation
-      type = (char*)node->name;
+      // get Relation type
+      type = (char*)node2->name;
       if (type == LINEAR_TIME_INVARIANT_RELATION_TAG)
-      {
-        relationXML = new LinearTIRXML(node);
-      }
+        relationXML = new LinearTIRXML(node2);
       else if (type == LAGRANGIAN_NON_LINEAR_RELATION_TAG)
-      {
-        relationXML = new LagrangianNonLinearRXML(node);
-      }
+        relationXML = new LagrangianNonLinearRXML(node2);
       else if (type == LAGRANGIAN_LINEAR_RELATION_TAG)
-      {
-        relationXML = new LagrangianLinearRXML(node);
-      }
+        relationXML = new LagrangianLinearRXML(node2);
       else
-      {
         XMLException::selfThrow("InteractionXML : undefined Relation type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?)");
-      }
+      isRelationXMLAllocatedIn = true;
     }
     else
-    {
       XMLException::selfThrow("InteractionXML - loadInteractionProperties error : Relation not found.");
-    }
 
-    /*
-     * the second child is the NonSmoothLaw
-     */
-    node = SiconosDOMTreeTools::findFollowNode(node);
-    //if ((node=SiconosDOMTreeTools::findNodeChild(interactionNode, INTERACTION_NS_LAW)) !=NULL)
+    // the second child is the NonSmoothLaw
+    node = SiconosDOMTreeTools::findFollowNode(node2);
     if (node != NULL)
     {
-      //string type = SiconosDOMTreeTools::getStringAttributeValue(node,INTERACTION_TYPE); //type of Relation
+      // Non smooth law type
       type = (char*)node->name;
       if (type == COMPLEMENTARITY_CONDITION_NSLAW_TAG)
-      {
-        this->nSLawXML = new ComplementarityConditionNSLXML(node);
-      }
+        nSLawXML = new ComplementarityConditionNSLXML(node);
       else if (type == RELAY_NSLAW_TAG)
-      {
-        this->nSLawXML = new RelayNSLXML(node);
-      }
+        nSLawXML = new RelayNSLXML(node);
       else if (type == NEWTON_IMPACT_LAW_NSLAW_TAG)
-      {
-        this->nSLawXML = new NewtonImpactLawNSLXML(node);
-      }
+        nSLawXML = new NewtonImpactLawNSLXML(node);
       else if (type == NEWTON_IMPACT_FRICTION_NSLAW_TAG)
-      {
-        this->nSLawXML = new NewtonImpactFrictionNSLXML(node);
-      }
+        nSLawXML = new NewtonImpactFrictionNSLXML(node);
       else
-      {
         XMLException::selfThrow("InteractionXML : undefined NonSmoothLaw type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?)");
-      }
+      isNsLawXMLAllocatedIn = true;
     }
     else
-    {
       XMLException::selfThrow("InteractionXML - loadInteractionProperties error : NonSmoothLaw not found.");
-    }
   }
-
   OUT("InteractionXML::loadInteractionProperties\n ");
-
 }
 
 
 void InteractionXML::loadInteractionConcernedDS(xmlNode * DSConcernedNode, vector<int> definedDSNumbers)
 {
-  IN("InteractionXML::loadInteractionConcernedDS\n ");
-
   xmlNode *DSnode;
   int number1, number2;
   //int size = SiconosDOMTreeTools::getIntegerAttributeValue(DSConcernedNode, INTERACTION_SIZE);
-  int size = 0;
-  int i = 0;
+  unsigned int size = 0;
+  unsigned int i = 0;
   vector<int> vtmp;
 
   if ((DSnode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)DSConcernedNode, DYNAMICAL_SYSTEM_TAG)) == NULL)
-  {
-    XMLException::selfThrow("InteractionXML - loadInteractionConcernedDS error : at least one couple of " + DYNAMICAL_SYSTEM_TAG + " must be declared in " + INTERACTION_DS_CONCERNED + " tag.");
-  }
+    XMLException::selfThrow("InteractionXML - loadInteractionConcernedDS error : no " + DYNAMICAL_SYSTEM_TAG + " declared in " + INTERACTION_DS_CONCERNED + " tag.");
 
   size = SiconosDOMTreeTools::getNodeChildrenNumber(DSConcernedNode);
-  //  cout<<"number of children = "<<size<<endl;
-  //  cout<<"# Press <<ENTER>> !!"<<endl;
-  //  getchar();
-
   while ((DSnode != NULL) && (i < size))
   {
     if ((number1 = SiconosDOMTreeTools::getIntegerAttributeValue(DSnode, NUMBER_ATTRIBUTE)) >= (number2 = SiconosDOMTreeTools::getIntegerAttributeValue(DSnode, INTERACTION_INTERACTWITHDS_NUMBER)))
-    {
-      XMLException::selfThrow("InteractionXML - loadInteractionConcernedDS error : in a tag " + INTERACTION_DS_CONCERNED + " a " + NUMBER_ATTRIBUTE + " is < to a " + INTERACTION_INTERACTWITHDS_NUMBER + " attribute.");
-    }
-
-    //  cout<<"number1 = "<<number1<<"  --   number2 = "<<number2<<endl;
-    //  cout<<"# Press <<ENTER>> !!"<<endl;
-    //  getchar();
-
+      XMLException::selfThrow("InteractionXML - loadInteractionConcernedDS error : in tag " + INTERACTION_DS_CONCERNED + " a " + NUMBER_ATTRIBUTE + " is < to a " + INTERACTION_INTERACTWITHDS_NUMBER + " attribute.");
 
     //Verifying DS numbers couple exist
-    int j = 0;
+    unsigned int j = 0;
     while ((j < definedDSNumbers.size()) && (definedDSNumbers[j] != number1))
     {
       j++;
     }
 
     if (j == definedDSNumbers.size())
-    {
-      char errorMsg[1024];
-      sprintf(errorMsg, "InteractionXML - loadInteractionConcernedDS error : in a tag %s you define couple of DS with a DS number who doesn't exist : %d.", INTERACTION_DS_CONCERNED.c_str(), number1);
-      XMLException::selfThrow(errorMsg);
-    }
+      XMLException::selfThrow("InteractionXML - loadInteractionConcernedDS error : in tag" + INTERACTION_DS_CONCERNED + " undefined DS number");
     j = 0;
     while ((j < definedDSNumbers.size()) && (definedDSNumbers[j] != number2))
     {
@@ -246,12 +166,7 @@ void InteractionXML::loadInteractionConcernedDS(xmlNode * DSConcernedNode, vecto
     }
 
     if (i == definedDSNumbers.size())
-    {
-      char errorMsg[1024];
-      sprintf(errorMsg, "InteractionXML - loadInteractionConcernedDS error : in a tag %s you define couple of DS with a DS number who doesn't exist : %d.", INTERACTION_DS_CONCERNED.c_str(), number2);
-      XMLException::selfThrow(errorMsg);
-    }
-
+      XMLException::selfThrow("InteractionXML - loadInteractionConcernedDS error : in tag" + INTERACTION_DS_CONCERNED + " undefined DS number");
 
     vtmp.clear();
     vtmp.push_back(number1);
@@ -263,43 +178,12 @@ void InteractionXML::loadInteractionConcernedDS(xmlNode * DSConcernedNode, vecto
       XMLException::selfThrow("InteractionXML - loadInteractionConcernedDS error : in a tag " + INTERACTION_DS_CONCERNED + " a " + NUMBER_ATTRIBUTE + " is < to a" + INTERACTION_INTERACTWITHDS_NUMBER + " attribute.");
     }
 
-    //    //Verifying DS numbers couple exist
-    //    j=0;
-    //    while ((j<definedDSNumbers.size()) && (definedDSNumbers[j]!=number1))
-    //    {
-    //      j++;
-    //    }
-    //    if (j==definedDSNumbers.size())
-    //    {
-    //      char errorMsg[1024];
-    //      sprintf(errorMsg, "InteractionXML - loadInteractionConcernedDS error : in a tag %s you define couple of DS with a DS number who doesn't exist : %d.", INTERACTION_DS_CONCERNED.c_str(), number1);
-    //      XMLException::selfThrow(errorMsg);
-    //    }
-    //
-    //    j=0;
-    //    while ((j<definedDSNumbers.size()) && (definedDSNumbers[j]!=number2))
-    //    {
-    //      j++;
-    //    }
-    //    if (i==definedDSNumbers.size())
-    //    {
-    //      char errorMsg[1024];
-    //      sprintf(errorMsg, "InteractionXML - loadInteractionConcernedDS error : in a tag %s you define couple of DS with a DS number who doesn't exist : %d.", INTERACTION_DS_CONCERNED.c_str(), number2);
-    //      XMLException::selfThrow(errorMsg);
-    //    }
-    //
-    //      this->DSCouples[i][0]=number1;
-    //    this->DSCouples[i][1]=number2;
-
     DSnode = SiconosDOMTreeTools::findFollowNode(DSnode, DYNAMICAL_SYSTEM_TAG);
-
     i++;
   }
 
   if (i < size)
-  {
-    XMLException::selfThrow("InteractionXML - loadInteractionConcernedDS error : the size attribute given in the tag " + INTERACTION_DS_CONCERNED + " is not correct.");
-  }
+    XMLException::selfThrow("InteractionXML - loadInteractionConcernedDS error : wrong size attribute in the tag " + INTERACTION_DS_CONCERNED);
   OUT("InteractionXML::loadInteractionConcernedDS\n ");
 }
 
@@ -319,8 +203,6 @@ void InteractionXML::loadInteraction(Interaction* inter)
   xmlNode* node;
   RelationXML* newRelationXml;
   NonSmoothLawXML* nslxml;
-  int number, i;
-  char num[32];
 
   if (this->rootInteractionXMLNode != NULL)
   {
@@ -461,8 +343,8 @@ void InteractionXML::setDSConcerned(vector<DynamicalSystem*> dsConcerned)
 {
   if (this->dsConcernedNode == NULL)
   {
-    int i;
-    int number1, number2;
+    unsigned int i;
+    unsigned int number1, number2;
     vector<int> vtmp;
     xmlNode* node;
 
@@ -515,5 +397,24 @@ void InteractionXML::setDSConcerned(vector<DynamicalSystem*> dsConcerned)
   {
     /* \todo : when interaction have been given in the XML input file and that the user has added new ones */
   }
+}
+
+
+bool InteractionXML::hasAll() const
+{
+  if (SiconosDOMTreeTools::hasAttributeValue(dsConcernedNode, ALL_ATTRIBUTE))
+    return SiconosDOMTreeTools::getBooleanAttributeValue(dsConcernedNode, ALL_ATTRIBUTE);
+  else return false;
+}
+
+void InteractionXML::setAll(const bool& all)
+{
+  if (hasAll() == false)
+  {
+    if (all == true)
+      xmlNewProp(dsConcernedNode, (xmlChar*)ALL_ATTRIBUTE.c_str(), (xmlChar*)"true");
+  }
+  else if (all == false)
+    xmlRemoveProp(xmlHasProp(dsConcernedNode, (xmlChar*)INTERACTION_DS_CONCERNED.c_str()));
 }
 

@@ -38,22 +38,22 @@ NSDSXML::NSDSXML(xmlNode * rootNSDSNode)
 
 NSDSXML::~NSDSXML()
 {
-  if (this->DSXMLMap.size() > 0)
+  if (DSXMLMap.size() > 0)
   {
-    for (int i = 0; i < this->DSXMLMap.size(); i++)
+    for (unsigned int i = 0; i < DSXMLMap.size(); i++)
     {
-      delete this->DSXMLMap[i];
+      delete DSXMLMap[i];
     }
-    this->DSXMLMap.clear();
+    DSXMLMap.clear();
   }
 
-  if (this->interactionXMLMap.size() > 0)
+  if (interactionXMLMap.size() > 0)
   {
-    for (int i = 0; i < this->interactionXMLMap.size(); i++)
+    for (unsigned int i = 0; i < interactionXMLMap.size(); i++)
     {
-      delete this->interactionXMLMap[i];
+      delete interactionXMLMap[i];
     }
-    this->interactionXMLMap.clear();
+    interactionXMLMap.clear();
   }
 }
 
@@ -63,13 +63,13 @@ DSXML* NSDSXML::getDSXML(int number)
 {
   map<int, DSXML*>::iterator it;
 
-  it = this->DSXMLMap.find(number);
-  if (it == this->DSXMLMap.end())
+  it = DSXMLMap.find(number);
+  if (it == DSXMLMap.end())
   {
     cout << "NSDSXML::getDSXML - Error : the DSXML number " << number << " does not exist!" << endl;
     return NULL;
   }
-  return this->DSXMLMap[number];
+  return DSXMLMap[number];
 }
 
 
@@ -77,13 +77,13 @@ InteractionXML* NSDSXML::getInteractionXML(int number)
 {
   map<int, InteractionXML*>::iterator it;
 
-  it = this->interactionXMLMap.find(number);
-  if (it == this->interactionXMLMap.end())
+  it = interactionXMLMap.find(number);
+  if (it == interactionXMLMap.end())
   {
     cout << "NSDSXML::getInteractionXML - Error : the InteractionXML number " << number << " does not exist!" << endl;
     return NULL;
   }
-  return this->interactionXMLMap[number];
+  return interactionXMLMap[number];
 }
 
 EqualityConstraintXML* NSDSXML::getEqualityConstraintXML(int number)
@@ -103,15 +103,12 @@ EqualityConstraintXML* NSDSXML::getEqualityConstraintXML(int number)
 void NSDSXML::loadNonSmoothDynamicalSystem()
 {
   xmlNode *node;
-  xmlNode *childNode;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(NSDSNode, LMGC90_NSDS_TAG)) == NULL)
   {
     // at first, we load the DSInputOutputs because we need them to load properly the DSXML
     if ((node = SiconosDOMTreeTools::findNodeChild(NSDSNode, DSINPUTOUTPUT_DEFINITION_TAG)) != NULL)
       this->loadDSInputOutputXML(node);
-    else
-      cout << "DSXML - loadNSDS WARNING : tag " << DSINPUTOUTPUT_DEFINITION_TAG << " not found,\nDefining DS InputOutput is optional." << endl;
 
     if ((node = SiconosDOMTreeTools::findNodeChild(NSDSNode, DYNAMICAL_SYSTEM_DEFINITION_TAG)) != NULL)
       this->loadDSXML(node);
@@ -119,19 +116,10 @@ void NSDSXML::loadNonSmoothDynamicalSystem()
       XMLException::selfThrow("NSDSXML - loadNSDS error : tag " + DYNAMICAL_SYSTEM_DEFINITION_TAG + " not found.");
 
     if ((node = SiconosDOMTreeTools::findNodeChild(NSDSNode, INTERACTION_DEFINITION_TAG)) != NULL)
-    {
       this->loadInteractionXML(node);
-    }
-    else
-      //XMLException::selfThrow("NSDSXML - loadNSDS error : tag " + NSDS_INTERACTION_DEFINITION + " not found.");
-      cout << "NSDSXML - loadNSDS WARNING : tag " << INTERACTION_DEFINITION_TAG << " not found,\nDefining interactions is optional." << endl;
 
     if ((node = SiconosDOMTreeTools::findNodeChild(NSDSNode, EQUALITYCONSTRAINT_DEFINITION_TAG)) != NULL)
-    {
       this->loadEqualityConstraintXML(node);
-    }
-    else
-      cout << "NSDSXML - loadNSDS WARNING : tag " << EQUALITYCONSTRAINT_DEFINITION_TAG << " not found,\nDefining equality constraints is optional." << endl;
   }
   else cout << "NSDSXML - loadNSDS : no dynamical systems defined, use of LMGC90 tag." << endl;
 }
@@ -147,7 +135,8 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
   DSXML* dsxml;
   InteractionXML* interactionXML;
   EqualityConstraintXML *ecXML;
-  int number, i;
+  int number;
+  unsigned int i;
   char num[32];
   map<int, DSXML*>::iterator it;
   map<int, InteractionXML*>::iterator itinter;
@@ -168,7 +157,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
       /*
        * now, creation of the DynamicalSystemXML objects
        */
-      for (i = 0; i < nsds->getDSVectorSize(); i++)
+      for (i = 0; int(i) < nsds->getDSVectorSize(); i++)
       {
         if (nsds->getDynamicalSystemPtr(i)->getDynamicalSystemXMLPtr() == NULL)
         {
@@ -357,7 +346,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
 
             /*  end of the save : saving the DynamicalSystem linked to this DSInputOutput */
             ecDsioNode = xmlNewChild(node, NULL, (xmlChar*)DSIO_CONCERNED.c_str(), NULL);
-            for (int j = 0; j < nsds->getEqualityConstraintPtr(i)->getDSInputOutputs().size(); j++)
+            for (unsigned int j = 0; j < nsds->getEqualityConstraintPtr(i)->getDSInputOutputs().size(); j++)
             {
               node = xmlNewChild(ecDsioNode, NULL, (xmlChar*)DSINPUTOUTPUT_TAG.c_str(), NULL);
               number = nsds->getEqualityConstraintPtr(i)->getDSInputOutput(j)->getNumber();
@@ -382,7 +371,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
       if (interactionDefinitionNode == NULL)
         interactionDefinitionNode = xmlNewChild(this->NSDSNode, NULL, (xmlChar*)INTERACTION_DEFINITION_TAG.c_str(), NULL);
 
-      for (i = 0; i < nsds->getInteractionVectorSize(); i++)
+      for (i = 0; int(i) < nsds->getInteractionVectorSize(); i++)
       {
         if (nsds->getInteractionPtr(i)->getInteractionXMLPtr() == NULL)
         {
@@ -490,7 +479,6 @@ void NSDSXML::loadDSXML(xmlNode * rootDSNode)
 
 map<int, DSInputOutputXML*> NSDSXML::getDSInputOutputXMLRelatingToDS(int number)
 {
-  int i;
   map<int, DSInputOutputXML*> m;
   vector<int> v;
 
@@ -498,14 +486,10 @@ map<int, DSInputOutputXML*> NSDSXML::getDSInputOutputXMLRelatingToDS(int number)
   for (iter = dsInputOutputXMLMap.begin(); iter != dsInputOutputXMLMap.end(); iter++)
   {
     v = (*iter).second->getDSConcerned();
-    for (i = 0; i < v.size(); i++)
+    for (unsigned int i = 0; i < v.size(); i++)
     {
-      //      cout<<"** NSDSXML::getDSInputOutputXMLRelatingToDS v["<<i<<"] == "<<v[i]<<endl;
       if (v[i] == number)
-      {
         m[(*iter).first] = (*iter).second;
-        //        cout<<"** NSDSXML::getDSInputOutputXMLRelatingToDS ==> "<<(*iter).first<<" - "<<(*iter).second->getType()<<endl;
-      }
     }
   }
 

@@ -57,7 +57,7 @@ void DSInputOutputXML::loadDSIOConcernedDS(xmlNode * DSConcernedNode/*, vector<i
   int number;
   //int size = SiconosDOMTreeTools::getIntegerAttributeValue(DSConcernedNode, INTERACTION_SIZE);
   int size = 0;
-  int i = 0, j = 0;
+  int i = 0;
 
   if ((DSnode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)DSConcernedNode, DYNAMICAL_SYSTEM_TAG)) == NULL)
   {
@@ -102,8 +102,6 @@ void DSInputOutputXML::setDSConcerned(vector<int> dsConcerned)
 {
   if (this->dsConcernedNode == NULL)
   {
-    int i;
-    int number;
     xmlNode* node;
 
     //save in the DOM tree
@@ -114,7 +112,7 @@ void DSInputOutputXML::setDSConcerned(vector<int> dsConcerned)
      */
     this->dsConcernedNode = xmlNewChild(this->rootDSIOXMLNode, NULL, (xmlChar*)DS_CONCERNED.c_str(), NULL);
 
-    for (i = 0; i < this->definedDSNumbers.size(); i++)
+    for (unsigned int i = 0; i < this->definedDSNumbers.size(); i++)
     {
       node = xmlNewChild(this->dsConcernedNode, NULL, (xmlChar*)DYNAMICAL_SYSTEM_TAG.c_str(), NULL);
       sprintf(num, "%i", this->definedDSNumbers[i]);

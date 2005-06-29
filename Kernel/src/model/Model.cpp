@@ -51,7 +51,7 @@ Model::Model(char *xmlFile):
 // -> without precision on strategy ... (usefull ?)
 Model::Model(double newT0, double newT, string newTitle, string newAuthor,
              string newDescription, string newDate, string newSchema):
-  t(newT0), t0(newT0), T(-1), title(newTitle), strat(NULL), nsds(NULL), modelxml(NULL) ,
+  t(newT0), t0(newT0), T(-1), strat(NULL), nsds(NULL), modelxml(NULL), title(newTitle),
   author(newAuthor), description(newDescription), date(newDate), xmlSchema(newSchema),
   isNsdsAllocatedIn(false), isStrategyAllocatedIn(false), isModelXmlAllocatedIn(false)
 {
@@ -67,35 +67,36 @@ Model::Model(double newT0, double newT, string newTitle, string newAuthor,
   t(newT0),t0(newT0),T(-1),title(newTitle), strat(NULL), nsds(NULL), modelxml(NULL) ,
   author(newAuthor), description(newDescription),date(newDate),xmlSchema(newSchema)
 {
-  IN("Model::constructor from min data\n");
-  // check time boundaries ...
-  if( newT > t0 ) T = newT;
-  //  else cout << "Model::constructor from min data: Warning, wrong new value for final T -> ignored"<< endl;
-  // Memory allocation for strategy object
-  /*  if(strategy_name == TIMESTEPPING_TAG )
-    strat = new TimeStepping(this);
-  else if(strategy_name == EVENTDRIVEN_TAG )
-    strat = new EventDriven(this);
-  else RuntimeException::selfThrow("Model: constructor from min data, wrong strategy type");
-  OUT("Model::constructor from min data\n");
-}
-*/
-/*
+  IN("Model::constructor from min data\n");*/
+// check time boundaries ...
+//if( newT > t0 ) T = newT;
+//  else cout << "Model::constructor from min data: Warning, wrong new value for final T -> ignored"<< endl;
+// Memory allocation for strategy object
+//  if(strategy_name == TIMESTEPPING_TAG )
+//  strat = new TimeStepping(this);
+//else if(strategy_name == EVENTDRIVEN_TAG )
+//  strat = new EventDriven(this);
+//else RuntimeException::selfThrow("Model: constructor from min data, wrong strategy type");
+//OUT("Model::constructor from min data\n");
+//}
+
+
 // -> with a clear strategy given wtih a pointer
-Model::Model(double newT0, Strategy * newStrategy, double newT, string newTitle, string newAuthor,
-       string newDescription, string newDate, string newSchema):
-  t(newT0),t0(newT0),T(-1),title(newTitle), strat(newStrategy), nsds(NULL), modelxml(NULL) ,
-  author(newAuthor), description(newDescription),date(newDate),xmlSchema(newSchema)
-{
-  IN("Model::constructor from min data\n");
-  // check time boundaries ...
-  if( newT > t0 ) T = newT;
-  else cout << "Model::constructor from min data: Warning, wrong new value for final T -> ignored"<< endl;
-  // link with model object in strategy
-  //  newStrategy->setModelPtr(this);
-  /*  OUT("Model::constructor from min data\n");
-}
-*/
+
+//Model::Model(double newT0, Strategy * newStrategy, double newT, string newTitle, string newAuthor,
+//       string newDescription, string newDate, string newSchema):
+//  t(newT0),t0(newT0),T(-1),title(newTitle), strat(newStrategy), nsds(NULL), modelxml(NULL) ,
+//  author(newAuthor), description(newDescription),date(newDate),xmlSchema(newSchema)
+//{
+//  IN("Model::constructor from min data\n");
+// check time boundaries ...
+//  if( newT > t0 ) T = newT;
+//  else cout << "Model::constructor from min data: Warning, wrong new value for final T -> ignored"<< endl;
+// link with model object in strategy
+//  newStrategy->setModelPtr(this);
+//  OUT("Model::constructor from min data\n");
+//}
+
 Model::~Model()
 {
   IN("Model::~Model()\n");
@@ -149,19 +150,19 @@ void Model::saveToXMLFile(char* xmlFile)
   IN("Model::saveToXMLFile\n");
 
   cout << "## Model->checkXMLPlatform()" << endl;
-  /*   * the first operation to do is to check the XML objects   */
+  //   the first operation to do is to check the XML objects
   checkXMLPlatform();
 
   cout << "## Model->savePlatformToXML()" << endl;
-  /*   * copy the values of the platform to the DOM tree   */
+  //   copy the values of the platform to the DOM tree
   savePlatformToXML();
 
   cout << "## Model->checkXMLDOMTree()" << endl;
-  /*   * verifies that the DOM tree respects the XML schema   */
+  //   verifies that the DOM tree respects the XML schema
   checkXMLDOMTree();
 
   cout << "## Model->saveSiconosModelInXMLFile()" << endl;
-  /*   * saves in a file the DOM tree   */
+  //   saves in a file the DOM tree
   modelxml->saveSiconosModelInXMLFile(xmlFile);
   OUT("Model::saveToXMLFile\n");
 }
@@ -177,12 +178,9 @@ void Model::saveToDOMTree()
 
 void Model::savePlatformToXML()
 {
-  int size, i;
-
   IN("Model::savePlatformToXML\n");
-  /*
-   * update of the data of the Model
-   */
+
+  // update of the data of the Model
   modelxml->setT0(t0);
   modelxml->setT(T);
   modelxml->setTCurrent(t);
@@ -191,14 +189,11 @@ void Model::savePlatformToXML()
   modelxml->setDescription(description);
   modelxml->setDate(date);
   modelxml->setXMLSchema(xmlSchema);
-  /*
-   * save of the NonSmoothDynamicalSystem
-   */
+
+  // save of the NonSmoothDynamicalSystem
   nsds->saveNSDSToXML();
 
-  /*
-   * save of the Strategy
-   */
+  // save of the Strategy
 
   if (strat != NULL)
   {
@@ -211,7 +206,7 @@ void Model::savePlatformToXML()
     else RuntimeException::selfThrow("Model::savePlatformToXML - bad kind of Strategy");
   }
   else //RuntimeException::selfThrow("Model::saveToXML - object StrategyXML does not exist");
-    cout << "Model::saveToXML - Warnig : No Strategy is defined" << endl;
+    cout << "Model::saveToXML - Warning : No Strategy is defined" << endl;
 
   OUT("Model::savePlatformToXML\n");
 }
@@ -231,21 +226,16 @@ void Model::checkXMLPlatform()
 {
   IN("Model::checkXMLPlatform\n");
 
-  int i;
   if (modelxml != NULL)
   {
     if (modelxml->getNSDSXML() != NULL)
     {
-      /*
-       * we must create/update the DSXMLs
-       */
+      // we must create/update the DSXMLs
       nsds->getNSDSXMLPtr()->updateNSDSXML(modelxml->getNSDSXML()->getNSDSXMLNode(), nsds);
     }
     else if (nsds != NULL)
     {
-      /*
-       * creation of the NSDSXML and of all the DynamicalSystemXML and InteractionXML
-       */
+      // creation of the NSDSXML and of all the DynamicalSystemXML and InteractionXML
       modelxml->loadModel(this);
       // \todo to be tested !!
     }
@@ -255,15 +245,13 @@ void Model::checkXMLPlatform()
     {
       if (modelxml->getStrategyXML() == NULL)
       {
-        /*
-         * no StrategyXML already exists, so no TimeDiscretisationXML, OneStepIntegratorXML and OneStepNSProblemXML are existing
-         * because these objects are required when a Strategy is defined in the XML input file
-         */
+        //
+        // no StrategyXML already exists, so no TimeDiscretisationXML, OneStepIntegratorXML and OneStepNSProblemXML are existing
+        // because these objects are required when a Strategy is defined in the XML input file
 
-        /*
-         * we must update all the Model to do
-         * the creation of the StrategyXML and of all the OneStepIntegratorXML and OneStepNSProblemXML
-         */
+        // we must update all the Model to do
+        // the creation of the StrategyXML and of all the OneStepIntegratorXML and OneStepNSProblemXML
+        //
         modelxml->loadModel(this);
         // \todo to be tested !!
       }
@@ -275,13 +263,11 @@ void Model::checkXMLPlatform()
   }
   else
   {
-    /*
-     * in this case, we must create all the XML objects
-     * SiconosModelXML, NSDSXML, StrategyXML, ...
-     *
-     * to build all the XML objects, we must fold all the objects of the platform
-     *
-     */
+    // in this case, we must create all the XML objects
+    // SiconosModelXML, NSDSXML, StrategyXML, ...
+
+    // to build all the XML objects, we must fold all the objects of the platform
+
     modelxml = new SiconosModelXML();
     modelxml->loadModel(this);
   }
@@ -293,22 +279,19 @@ void Model::checkXMLPlatform()
 void Model::checkModelCoherency()
 {
   int number;
-  int i, j, k, cpt;
+  unsigned int i, j, k, cpt;
   char num[32];
   string error;
 
-  /*
-   * at first, checking the XML
-   * if matrix and vector are well defined by example
-   * if DynamicalSystems have BoundaryConditions when the NonSmoothDynamicalSystem is BVP by example
-   * ...
-   */
+
+  // at first, checking the XML
+  // if matrix and vector are well defined by example
+  // if DynamicalSystems have BoundaryConditions when the NonSmoothDynamicalSystem is BVP for example
+
   if (modelxml->checkSiconosDOMTreeCoherency() == true) cout << "Data of the XML DOM tree are coherent." << endl;
   else cout << "Warning : Data of the XML DOM tree are not coherent." << endl;
 
-  /*
-   * we can check here other properties that the platform must have
-   */
+  // we can check here other properties that the platform must have
   // the number of each EqualityConstraint must be unique
   for (i = 0; i < nsds->getEqualityConstraints().size(); i++)
   {
@@ -327,10 +310,10 @@ void Model::checkModelCoherency()
   }
 
   // the number of each DSInputOutput must be unique
-  /*
-   * we get all the DSInputOutput numbers from all the DynamicalSystems
-   * and we can check if there are redundant numbers
-   */
+
+  // we get all the DSInputOutput numbers from all the DynamicalSystems
+  // and we can check if there are redundant numbers
+
   cpt = 0; // cpt corresponds to the size of 'vec'
   vector<int> vec;
   for (i = 0; i < nsds->getDynamicalSystems().size(); i++)
@@ -404,14 +387,15 @@ void Model::display() const
 
 
 
-/*******************************************************
- *
- * function to create the platform from a C++ programm
- *
- *//////////////////////////////////////////////////////
+//=======================================================
+//
+// function to create the platform from a C++ programm
+//
+//=======================================================
 
 NonSmoothDynamicalSystem* Model::createNonSmoothDynamicalSystem(bool bvp)
 {
+  if (isNsdsAllocatedIn) delete nsds;
   nsds = new NonSmoothDynamicalSystem(bvp);
   isNsdsAllocatedIn = true;
   return nsds;
@@ -420,27 +404,26 @@ NonSmoothDynamicalSystem* Model::createNonSmoothDynamicalSystem(bool bvp)
 
 Strategy* Model::createStrategy(string type)
 {
+  if (isStrategyAllocatedIn) delete strat;
+  isStrategyAllocatedIn = false;
+  strat = NULL;
   if (type == TIMESTEPPING_STRATEGY || type == "timestepping" || type == "Timestepping")
   {
     strat = new TimeStepping(NULL, this);
-    return strat;
     isStrategyAllocatedIn = true ;
   }
   else if (type == EVENTDRIVEN_STRATEGY || type == "Eventdriven" || type == "eventdriven")
   {
     strat = new EventDriven(NULL, this);
-    return strat;
     isStrategyAllocatedIn = true ;
   }
-  else
-  {
-    cout << "Warning, Model:createStrategy, wrong type of strategy:" + type << endl;
-    return NULL;
-  }
+  else RuntimeException::selfThrow("Model::create Strategy:wrong type of strategy:" + type);
+  return strat;
 }
 
 Strategy* Model::createTimeStepping()
 {
+  if (isStrategyAllocatedIn) delete strat;
   strat = new TimeStepping(NULL, this);
   isStrategyAllocatedIn = true ;
   return strat;
@@ -448,6 +431,7 @@ Strategy* Model::createTimeStepping()
 
 Strategy* Model::createTimeEventDriven()
 {
+  if (isStrategyAllocatedIn) delete strat;
   strat = new EventDriven(NULL, this);
   isStrategyAllocatedIn = true ;
   return strat;

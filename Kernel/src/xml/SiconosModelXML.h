@@ -25,8 +25,8 @@
 #include <libxml/xmlschemas.h>
 
 
-extern int MATRIX_MAX_SIZE;
-extern int VECTOR_MAX_SIZE;
+extern unsigned int MATRIX_MAX_SIZE;
+extern unsigned int VECTOR_MAX_SIZE;
 extern std::string  FILE_STORAGE;
 extern std::string  XML_SCHEMA;
 
@@ -141,7 +141,7 @@ public:
    */
   inline double getT()
   {
-    return  SiconosDOMTreeTools::getDoubleContentValue(this->TNode);
+    return SiconosDOMTreeTools::getDoubleContentValue(this->TNode);
   }
 
   /** \fn void setT0(double)
@@ -385,13 +385,11 @@ public:
 
 private:
 
-  //string XML_SCHEMA_FILE = "/config/xmlschema/SiconosModelSchema-V1.0.xsd";
-  std::string  xmlSchemaFile;// = "/config/xmlschema/SiconosModelSchema-V1.0.xsd";
+  std::string  xmlSchemaFile;
 
   NSDSXML *nsdsXML;
   StrategyXML *strategyXML;
 
-  /*Time*/
   xmlNode * tNode;
   xmlNode * t0Node;
   xmlNode * TNode;
@@ -406,7 +404,6 @@ private:
   xmlNode * timeNode;
 
   xmlDoc * doc;
-
 
   /** \fn loadModel(xmlNode *)
    *   \brief Loads the model : Time (to and T) and the NSDSXML and StrategyXML of the model in order to manage NSDS and Strategy data of the simulation

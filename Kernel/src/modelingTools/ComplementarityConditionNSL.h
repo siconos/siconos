@@ -41,7 +41,7 @@ public:
    *  \brief copy the data of the NonSmoothLaw to the XML tree
    *  \exception RuntimeException
    */
-  //  void saveNonSmoothLawToXML();
+  inline void saveNonSmoothLawToXML() {};
 
   /** \fn ComplementarityConditionNSL* convert (NonSmoothLaw* nsl)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.

@@ -1,7 +1,8 @@
 #include "SimpleVector.h"
 using namespace std;
 
-SimpleVector::SimpleVector()
+// default
+SimpleVector::SimpleVector(): SiconosVector()
 {
   IN("SimpleVector() \n");
   composite = false;
@@ -9,8 +10,8 @@ SimpleVector::SimpleVector()
   OUT("SimpleVector() \n");
 }
 
-
-SimpleVector::SimpleVector(const string& file, const bool& ascii)
+SimpleVector::SimpleVector(const string& file, const bool& ascii):
+  SiconosVector()
 {
   IN("SimpleVector(const string file, const bool ascii) \n");
   composite = false;
@@ -21,42 +22,52 @@ SimpleVector::SimpleVector(const string& file, const bool& ascii)
   OUT("SimpleVector(const string file, const bool ascii) \n");
 }
 
-
-SimpleVector::SimpleVector(const vector<double>& v)
+// copy from a std vector
+SimpleVector::SimpleVector(const vector<double>& v):
+  SiconosVector()
 {
-  IN("SimpleVector(const vector<double> v) \n");
   composite = false;
   setValues(v);
-  OUT("SimpleVector(const vector<double> v) \n");
 }
 
-
-SimpleVector::SimpleVector(const SiconosVector& v)
+// copy
+SimpleVector::SimpleVector(const SimpleVector& v):
+  SiconosVector()
 {
   IN("SimpleVector(const SiconosVector& v) \n");
   composite = false;
-  *this = v;
+  lavd = v.getValues();
   OUT("SimpleVector(const SiconosVector& v) \n");
 }
 
-
-SimpleVector::SimpleVector(const SimpleVector& v)
+// copy from SiconosVector
+SimpleVector::SimpleVector(const SiconosVector& v):
+  SiconosVector()
 {
-  IN("SimpleVector(const SiconosVector& v) \n");
-  composite = false;
-  *this = v;
-  OUT("SimpleVector(const SiconosVector& v) \n");
+  if (!v.isComposite())
+  {
+    composite = false;
+    lavd = v.getValues();
+  }
+  else
+  {
+    composite = false;
+    unsigned int size = v.size();
+    lavd.resize(size, 1);
+    for (unsigned int i = 0; i < size; i++)
+      lavd(i) = v.getValue(i);
+  }
 }
 
-SimpleVector::SimpleVector(const int& size)
+// with size
+SimpleVector::SimpleVector(const int unsigned& size):
+  SiconosVector()
 {
   IN("SimpleVector (const int size) \n");
   composite = false;
   if (size < 0)
-    SiconosVectorException::selfThrow(" SimpleVector::SimpleVector(const int& size)   -- can't initialize a simpleVector with a negative size");
-  LaVectorDouble lvd(size);
-  lavd.resize(lvd);
-  lavd = lvd;
+    SiconosVectorException::selfThrow(" SimpleVector:: constructor, negative size");
+  lavd.resize(size, 1);
   OUT("SimpleVector (const int size) \n");
 }
 
@@ -75,7 +86,7 @@ void SimpleVector::display() const
   cout << "| isComposite : " << isComposite() << endl;
   if (size() <= M_MAXSIZEFORDISPLAY)
   {
-    for (int i = 0; i < size(); i++)
+    for (unsigned int i = 0; i < size(); i++)
       cout << lavd(i) << " ";
     cout << endl;
   }
@@ -83,28 +94,32 @@ void SimpleVector::display() const
   OUT("SimpleVector::display() \n");
 }
 
-
-double& SimpleVector::operator()(const int unsigned index)
-{
-  IN("SimpleVector::operator()(int unsigned index) \n");
-
-  if (index >= lavd.size())
-    SiconosVectorException::selfThrow(" SimpleVector::operator()   -- index greater than vector size");
-
-  OUT("SimpleVector::operator()(int unsigned index) \n");
-  return (lavd)(index);
-}
-
-
-double SimpleVector::operator()(const int unsigned index) const
+double& SimpleVector::operator()(const int unsigned& index) const
 {
   IN("SimpleVector::operator() \n");
 
-  if (index >= lavd.size())
+  if ((int)index >= lavd.size())
     SiconosVectorException::selfThrow(" SimpleVector::operator()   -- index greater than vector size");
 
   OUT("SimpleVector::operator()\n");
-  return  lavd(index);
+
+  return const_cast<double&>(lavd(index));
+}
+
+vector<SiconosVector*> SimpleVector::getSvref() const
+{
+  SiconosVectorException::selfThrow(" SimpleVector::getSvref()  -- do not use this function for simple vector");
+  // return to avoid warning ...
+  vector<SiconosVector*> tmp;
+  tmp.push_back(NULL);
+  return tmp;
+}
+
+std::vector<int> SimpleVector::getTabIndex() const
+{
+  vector<int> tmp;
+  tmp.push_back(size());
+  return tmp;
 }
 
 
@@ -116,112 +131,109 @@ void SimpleVector::zero()
     array[i] = 0.0;
 }
 
-void SimpleVector::setValues(const vector<double>& v)
+string SimpleVector::toString() const
 {
-  IN(" void SimpleVector::setValues(const vector<double> v)  \n");
+  char element[100];
+  unsigned int i = 0;
+  string vectorContent = "";
+  while (i < size())
+  {
+    strcpy(element, "");
+    sprintf(element, N_DOUBLE_PRECISION, (*this)(i));
+    if (i > 0)
+    {
+      vectorContent += " ";
+      vectorContent += element;
+    }
+    else vectorContent = element;
+    i++;
+  }
+  return vectorContent;
+}
 
+void SimpleVector::setValue(const int unsigned& index, const double& newVal)
+{
+  if (index < 0 || (int)index > (lavd.size() - 1))
+    SiconosVectorException::selfThrow("SimpleVector::setValue - wrong index value");
+  lavd(index) = newVal;
+}
+
+void SimpleVector::setValues(const vector<double>& v, const int unsigned& index)
+{
   if (v.size() < 0)
-    SiconosVectorException::selfThrow("SimpleVector::setValues(const vector<double> v)  -- cannot set values : the size of v is negative");
+    SiconosVectorException::selfThrow("SimpleVector::setValues - negative vector size");
 
-  int i;
-  LaVectorDouble lvd(v.size());
-  for (i = 0; i < v.size(); i++)
-    lvd(i) = v[i];
-  lavd.resize(lvd);
-  lavd = lvd;
-
-  OUT(" void SimpleVector::setValues(const vector<double> v)  \n");
+  lavd.resize(v.size(), 1);
+  for (unsigned int i = 0; i < v.size(); i++)
+    lavd(i) = v[i];
 }
 
-
-int SimpleVector::size() const
+const double SimpleVector::getValue(const int unsigned& index) const
 {
-  IN("int SimpleVector::size() \n");
-  return lavd.size();
-  OUT("int SimpleVector::size() \n");
+  if (index < 0 || (int)index > (lavd.size() - 1))
+    SiconosVectorException::selfThrow("SimpleVector::setValue - wrong index value");
+  return lavd(index);
 }
 
+unsigned int SimpleVector::size(const unsigned int& i) const
+{
+  if (i != 0)  SiconosVectorException::selfThrow("SimpleVector::size(i) - i!=0 -> not available");
+  return lavd.size();
+}
 
 bool SimpleVector::read(const string& fileName, const string& mode)
 {
   IN(" SimpleVector::read(string fileName, string mode) \n");
 
   bool res = false;
-  //lavd = LaVectorDouble();
+  int size, nbVectors;
 
+  // Binary file
   if (mode == "binary")
   {
     FILE * inFile = fopen(fileName.c_str(), "rb");    // open the input file in binary mode
     if (inFile == NULL)
-    {
       SiconosVectorException::selfThrow(" SimpleVector::read : Fail to open file \"" + fileName + "\"");
-    }
-    int size, nbVectors;
     fread((char *) &nbVectors, sizeof(int), 1, inFile);   // read nbVectors
-    if (nbVectors == 1)
-    {
-      fread((char *) &size, sizeof(int), 1, inFile);   // read size
-      if (size > 0)
-      {
-        LaVectorDouble lvd(size);
-        for (int i = 0; i < size; i++)
-          fread((char*) & ((lvd))(i), sizeof(double), 1, inFile); // read a double
-        lavd.resize(lvd);
-        lavd = lvd;
-      }
-      else if (size == 0)
-      {
-        lavd =  LaVectorDouble();
-      }
-      else
-      {
-        SiconosVectorException::selfThrow(" SimpleVector::read : try to read a vector with a negative size");
-      }
-    }
-    else if (nbVectors > 1)
-    {
-      SiconosVectorException::selfThrow(" SimpleVector::read : try to read a file saved by a composite vector");
-    }
-    else SiconosVectorException::selfThrow(" SimpleVector::read : nbVectors < 0");
+    if (nbVectors <= 0)
+      SiconosVectorException::selfThrow(" SimpleVector::read : negative number of vectors!");
+    if (nbVectors != 1)
+      cout << "SimpleVector:: read; Warning: only the first vector will be read in the file" << endl;
+    fread((char *) &size, sizeof(int), 1, inFile);   // read size
+    if (size < 0)
+      SiconosVectorException::selfThrow(" SimpleVector::read : try to read a vector with a negative size");
+    lavd.resize(size, 1);
+    for (int i = 0; i < size; i++)
+      fread((char*) & (lavd)(i), sizeof(double), 1, inFile); // read a double
 
     fclose(inFile);
     res = true;
   }
+  // Ascii file
   else if (mode == "ascii")
   {
     ifstream inFile(fileName.c_str(),  ifstream::in);
-
     if (inFile == NULL)
-    {
       SiconosVectorException::selfThrow(" SimpleVector::read : Fail to open file \"" + fileName + "\"");
-    }
-
-    int size, nbVectors;
     double tmp;
-
     inFile >> nbVectors;
-    if (nbVectors < 0)
-      SiconosVectorException::selfThrow(" SimpleVector::read : try to read a vector with a negative size");
-
+    if (nbVectors <= 0)
+      SiconosVectorException::selfThrow(" SimpleVector::read : negative number of vectors!");
+    if (nbVectors != 1)
+      cout << "SimpleVector:: read; Warning: only the first vector will be read in the file" << endl;
     // get values
     vector<double> vect;
-    for (int cpt = 0; cpt < nbVectors; cpt ++)
+    inFile >> size; // read size
+    if (size < 0)
+      SiconosVectorException::selfThrow(" SimpleVector::read : try to read a vector with a negative size");
+    LaVectorDouble lvd(size);
+    for (int i = 0; i < size; i++)
     {
-      inFile >> size; // read size
-      if (size > 0)
-      {
-        LaVectorDouble lvd(size);
-
-        for (int i = 0; i < size; i++)
-        {
-          inFile >> tmp; // read a double
-          vect.push_back(tmp);
-        }
-      }
+      inFile >> tmp;
+      vect.push_back(tmp);
     }
 
     setValues(vect);
-
     inFile.close();
     res = true;
   }
@@ -239,35 +251,37 @@ bool SimpleVector::write(const string& fileName, const string& mode) const
     SiconosVectorException::selfThrow("SimpleVector::write : unknown mode");
 
   // open the file
-  ofstream outFile(fileName.c_str());           // don't forget to check that it opened
+  ofstream outFile(fileName.c_str());
 
   if (!outFile.is_open())
     SiconosVectorException::selfThrow("SimpleVector::write : : Fail to open file \"" + fileName + "\"");
 
-  int nbVectors = 1;
+  unsigned int nbVectors = 1;
 
   if (mode == "binary")
   {
     outFile.write((char*)&nbVectors, sizeof(int));
-    int sizeV = size();
+    unsigned int sizeV = size();
     outFile.write((char*)&sizeV, sizeof(int));
-    for (int i = 0; i < sizeV; i++)
+    for (unsigned int i = 0; i < sizeV; i++)
       outFile.write((char*) & (lavd)(i), sizeof(double));
     res = true;
   }
   else if (mode == "ascii")
   {
-    outFile << nbVectors;
+    outFile << nbVectors << endl;;
 
     int sizeV = size();
-    outFile << endl << sizeV << endl;
-    for (int i = 0; i < sizeV; i++)
-    {
-      /* WARNING this buffer is dangerous, the size is machine dependant*/
-      char buffer[30];
-      sprintf(buffer, "%1.17e ", (*this)(i));
-      outFile << buffer;
-    }
+    outFile << sizeV << endl;
+    //for (int i = 0; i < sizeV; i++)
+    //{
+    /* WARNING this buffer is dangerous, the size is machine dependant*/
+    // char buffer[30];
+    // sprintf(buffer,"%1.17e ",(*this)(i));
+    // outFile << buffer;
+    outFile << lavd;
+    cout << endl;
+    //}
     res = true;
   }
   outFile.close();
@@ -293,15 +307,13 @@ double SimpleVector::norm() const
 SimpleVector &SimpleVector::operator+=(const SiconosVector &v)
 {
   IN(" SimpleVector::operator+=(const SiconosVector &) \n");
-  cout << "SimpleVector::operator+=(const SiconosVector &)" << endl;
-  if (size() != v.size())
-    SiconosVectorException::selfThrow(" SimpleVector::operator+=   -- the vectors have not the same size");
+  unsigned int sizeV = size();
+  if (sizeV != v.size())
+    SiconosVectorException::selfThrow(" SimpleVector::operator-=   -- the vectors have not the same size");
 
-  /*  Basic implementation*/
-
-  *this = addition(v);
-
-  OUT(" SimpleVector::operator+=(const SiconosVector &) \n");
+  for (unsigned int i = 0; i < sizeV; i++)
+    (*this)(i) += v(i);
+  OUT(" SimpleVector::operator-=(const SiconosVector &) \n");
   return *this;
 }
 
@@ -309,14 +321,12 @@ SimpleVector &SimpleVector::operator+=(const SiconosVector &v)
 SimpleVector &SimpleVector::operator-=(const SiconosVector &v)
 {
   IN(" SimpleVector::operator-=(const SiconosVector &) \n");
-  //cout<<"SimpleVector::operator-=(const SiconosVector &)"<<endl;
-
-  if (size() != v.size())
+  unsigned int sizeV = size();
+  if (sizeV != v.size())
     SiconosVectorException::selfThrow(" SimpleVector::operator-=   -- the vectors have not the same size");
 
-  /*  Basic implementation*/
-  *this = /* *this - v */ subtraction(v);
-
+  for (unsigned int i = 0; i < sizeV; i++)
+    (*this)(i) -= v(i);
   OUT(" SimpleVector::operator-=(const SiconosVector &) \n");
   return *this;
 }
@@ -325,45 +335,66 @@ SimpleVector &SimpleVector::operator-=(const SiconosVector &v)
 SimpleVector& SimpleVector::operator = (const SiconosVector& v)
 {
   IN("SimpleVector::operator = GENERIC\n");
-
-  //cout<<"SimpleVector::operator = GENERIC\n";
   if (this != &v)
   {
-    // avoid the creation of a new LaVectorDouble
-    const SimpleVector *simple = dynamic_cast<const SimpleVector*>(&v);
-    if (simple != NULL)
-    {
-      *this = *simple; // use the specific operator
-    }
+    unsigned int sizeV = size();
+    if (sizeV != v.size())
+      SiconosVectorException::selfThrow(" SimpleVector::operator = GENERIC  -- inconsistent sizes");
+
     else
     {
-      const int vSize = v.size();
-      LaVectorDouble lvd(vSize);
-      lavd.resize(lvd);
-      lavd = lvd;
-      for (int i = 0; i < vSize; i++)
+      for (unsigned int i = 0; i < sizeV; i++)
         (*this)(i) = v(i);
     }
   }
-
   OUT("SimpleVector::operator = GENERIC\n");
   return *this;
 }
 
-
 bool SimpleVector::operator == (const SiconosVector& v) const
 {
   IN(" SimpleVector::operator == \n");
-
   bool res = true;
+
+  if (v.isComposite()) res = false;
+  else
+  {
+    if (this != &v)
+    {
+      unsigned int sizeV = size();
+      if (sizeV == v.size())
+      {
+        if (sizeV == 0)
+          res = true;
+        else for (unsigned int i = 0; i < sizeV; i++)
+          {
+            if ((*this)(i) != v(i))
+            {
+              res = false;
+              break;
+            }
+          }
+      }
+      else res =  false;
+    }
+  }
+  OUT(" SimpleVector::operator == \n");
+  return res;
+}
+
+bool SimpleVector::operator == (const SimpleVector& v) const
+{
+  IN(" SimpleVector::operator == \n");
+  bool res = true;
+
   if (this != &v)
   {
-    const int sizeV = size();
+    unsigned int sizeV = size();
     if (sizeV == v.size())
     {
       if (sizeV == 0)
         res = true;
-      else for (int i = 0; i < sizeV; i++)
+      else for (unsigned int i = 0; i < sizeV; i++)
         {
           if ((*this)(i) != v(i))
           {
@@ -374,74 +405,56 @@ bool SimpleVector::operator == (const SiconosVector& v) const
     }
     else res =  false;
   }
-
   OUT(" SimpleVector::operator == \n");
   return res;
 }
 
-
-
 bool SimpleVector::operator != (const SiconosVector& v) const
 {
-  IN(" SimpleVector::operator != \n");
-
   return !(*this == v);
-
-  OUT(" SimpleVector::operator != \n");
 }
 
+bool SimpleVector::operator != (const SimpleVector& v) const
+{
+  return !(*this == v);
+}
 
 /*******************************************************************************
  *          SPECIFIC INTERNAL OPERATORS                                *
  *******************************************************************************/
 SimpleVector& SimpleVector::operator = (const SimpleVector& v)
 {
-  /*
-   * Could be faster without the constness of v
-   */
-
   IN("SimpleVector::operator = SPECIFIC\n");
-  //  cout<<"SimpleVector::operator = SPECIFIC\n";
+  if (v.size() != size())
+    SiconosVectorException::selfThrow("SimpleVector::operator= inconsistent sizes");
+
   if (this != &v)
-  {
-    /* BLAS - LAPACK routine */
-    //    cout<<"call of Lapack routine for affectation of simple vector"<<endl;
     lavd.copy(v.lavd);
-  }
 
   OUT("SimpleVector::operator = SPECIFIC\n");
   return *this;
-
 }
 
 
 SimpleVector &SimpleVector::operator+=(const SimpleVector &v)
 {
   IN(" SimpleVector::operator+=(const SimpleVector &) \n");
-  //cout<<" SimpleVector::operator+=(const SimpleVector &) \n";
 
   if (size() != v.size())
     SiconosVectorException::selfThrow(" SimpleVector::operator+=   -- the vectors have not the same size");
 
-  /* BLAS - LAPACK routine */
-  //lavd = lavd + v.lavd;
   Blas_Add_Mult(lavd, 1.0, v.lavd);
 
   OUT(" SimpleVector::operator+=(const SimpleVector &) \n");
   return *this;
-
 }
 
 
 SimpleVector &SimpleVector::operator-=(const SimpleVector &v)
 {
   IN(" SimpleVector::operator-=(const SimpleVector &) \n");
-  //cout<<" SimpleVector::operator-=(const SimpleVector &) \n";
-
   if (size() != v.size())
     SiconosVectorException::selfThrow(" SimpleVector::operator-=   -- the vectors have not the same size");
-
-  /* BLAS - LAPACK routine */
 
   Blas_Add_Mult(lavd, -1.0, v.lavd);
 
@@ -450,56 +463,39 @@ SimpleVector &SimpleVector::operator-=(const SimpleVector &v)
 }
 
 
-SimpleVector &SimpleVector::operator*=(const double d)
+SimpleVector &SimpleVector::operator*=(const double& d)
 {
   IN(" SimpleVector::operator*=(const double d) \n");
-
-  /* BLAS - LAPACK routine */
-
-  //  cout<<"call of Lapack routine for multiplication of simple vector"<<endl;
   lavd = lavd * d;
-
   OUT(" SimpleVector::operator*=(const double d) \n");
   return *this;
 }
 
 
-SimpleVector &SimpleVector::operator/=(const double d)
+SimpleVector &SimpleVector::operator/=(const double& d)
 {
   IN(" SimpleVector::operator/=(const double d) \n");
-
   if (d == 0)
     SiconosVectorException::selfThrow(" SimpleVector::operator/ =   --division by 0");
-
-  /* BLAS - LAPACK routine */
-
-  //  cout<<"call of Lapack routine for division of simple vector"<<endl;
-  lavd = lavd * (1 / d);
-
+  lavd = lavd * (1.0 / d);
   OUT(" SimpleVector::operator/=(const double d) \n");
   return *this;
 }
 
-/*******************************************************************************
- *          GENERIC EXTERNAL OPERATORS                                 *
-/******************************************************************************/
+//==================================================================================
+//      GENERIC EXTERNAL OPERATORS
+//==================================================================================
+
 
 SimpleVector operator + (const SiconosVector& v1, const SiconosVector& v2)
 {
   IN(" SimpleVector operator +  (const SimpleVector& , const SiconosVector&) GENERIC \n");
 
-  const int svSize = v1.size();
-
-  if (svSize != v2.size())
+  if (v1.size() != v2.size())
     SiconosVectorException::selfThrow(" SimpleVector operator + --- the vectors have not the same size");
 
-  /*  Basic implementation*/
-  cout << "WARNING - generic addition of SiconosVector" << endl;
-
-  SimpleVector sv(svSize);
-
-  //sv = v1.addition(v2);
-  for (int i = 0; i < svSize; i++) sv(i) = v1(i) + v2(i);
+  SimpleVector sv(v1);
+  sv += v2;
 
   OUT(" SimpleVector operator +  (const SimpleVector& , const SiconosVector&) GENERIC \n");
   return sv;
@@ -510,43 +506,28 @@ SimpleVector operator - (const SiconosVector& v1, const SiconosVector& v2)
 {
   IN(" SimpleVector operator -  (const SimpleVector& , const SiconosVector&) GENERIC \n");
 
-  const int svSize = v1.size();
-
-  if (svSize != v2.size())
+  if (v1.size() != v2.size())
     SiconosVectorException::selfThrow(" SimpleVector operator - --- the vectors have not the same size");
 
-  /*  Basic implementation*/
-  cout << "WARNING -  generic subtraction of SiconosVector" << endl;
-
-  SimpleVector sv(svSize);
-
-  //sv = v1.subtraction(v2);
-  for (int i = 0; i < svSize; i++) sv(i) = v1(i) - v2(i);
-
+  SimpleVector sv(v1);
+  sv -= v2;
   OUT(" SimpleVector operator -  (const SimpleVector& , const SiconosVector&) GENERIC \n");
   return sv;
 }
 
-/*******************************************************************************
- *          GENERIC INTERNAL FUNCTIONS FOR MIXED OPERATIONS            *
-/******************************************************************************/
+//==================================================================================
+//      GENERIC INTERNAL FUNCTIONS FOR MIXED OPERATIONS
+//==================================================================================
 
 SimpleVector SimpleVector::addition(const SiconosVector& v) const
 {
   IN(" SimpleVector::addition(const SiconosVector& v) GENERIC \n");
 
-  const int svSize = size();
-
-  if (svSize != v.size())
+  if (size() != v.size())
     SiconosVectorException::selfThrow(" SimpleVector::addition(const SiconosVector& v) --- the vectors have not the same size");
 
-  /*  Basic implementation*/
-  cout << "WARNING - addition of a simpleVector with a SiconosVector" << endl;
-
-  SimpleVector sv(svSize);
-  for (int i = 0; i < svSize; i++)
-    sv.lavd(i) = lavd(i) + v(i);
-
+  SimpleVector sv(*this);
+  sv += v;
   OUT(" SimpleVector::addition(const SiconosVector& v) GENERIC \n");
   return sv;
 }
@@ -556,17 +537,11 @@ SimpleVector SimpleVector::subtraction(const SiconosVector& v) const
 {
   IN(" SimpleVector::subtraction(const SiconosVector& v) GENERIC \n");
 
-  const int svSize = size();
-
-  if (svSize != v.size())
+  if (size() != v.size())
     SiconosVectorException::selfThrow(" SimpleVector::subtraction(const SiconosVector& v) --- the vectors have not the same size");
 
-  /*  Basic implementation*/
-  cout << "WARNING - subtraction of a simpleVector with a SiconosVector" << endl;
-
-  SimpleVector sv(svSize);
-  for (int i = 0; i < svSize; i++)
-    sv.lavd(i) = lavd(i) - v(i);
+  SimpleVector sv(*this);
+  sv -= v;
 
   OUT(" SimpleVector::subtraction(const SiconosVector& v) GENERIC \n");
   return sv;
@@ -576,34 +551,18 @@ SimpleVector SimpleVector::subtraction(const SiconosVector& v) const
 /*******************************************************************************
  *          SPECIFIC EXTERNAL OPERATORS                                *
  *******************************************************************************/
-SimpleVector operator * (const SimpleVector& v, const double d)
+SimpleVector operator * (const SimpleVector& v, const double& d)
 {
   IN(" SimpleVector operator * (const SimpleVector& v, const double d)  \n");
 
-  /**
-   * WARNING : try of different implemetations. Direct call to Blas is faster
-   */
-
-  //  // uses LaVectorDouble operator * based on a simple loop
-  //  SimpleVector sv(v.size());
-  //  sv.lavd = v.lavd * d;
-  //  return sv;
-
-  // call of Blas_Scale : needs a copy before multiplication
   SimpleVector sv(v);
   Blas_Scale(d, sv.lavd);
   OUT(" SimpleVector operator * (const SimpleVector& v, const double d)  \n");
   return sv;
-
-  //  // uses LaVectorDouble operator * based on a simple loop
-  //  const int svsize = v.size();
-  //  SimpleVector sv(svsize);
-  //  for (int i = 0; i < svsize; i++) sv(i) = v(i) * d;
-  //  return sv;
 }
 
 
-SimpleVector operator * (const double d, const SimpleVector& v)
+SimpleVector operator * (const double& d, const SimpleVector& v)
 {
   IN(" SimpleVector::operator *  (const SimpleVector& v, const double d) \n");
 
@@ -615,7 +574,7 @@ SimpleVector operator * (const double d, const SimpleVector& v)
 }
 
 
-SimpleVector operator / (const SimpleVector& v, const double d)
+SimpleVector operator / (const SimpleVector& v, const double& d)
 {
   IN(" SimpleVector operator /  (const SimpleVector& v, const double d) \n");
 
@@ -629,15 +588,13 @@ SimpleVector operator / (const SimpleVector& v, const double d)
   return sv;
 }
 
-
+/*
 SimpleVector operator + (const SimpleVector& v1, const SimpleVector& v2)
 {
   IN(" SimpleVector operator +  (const SimpleVector& , const SimpleVector&) \n");
 
-  const int svSize = v1.size();
-
-  if (svSize != v2.size())
-    SiconosVectorException::selfThrow(" SimpleVector operator + --- the 2 vectors have not the same size");
+  if (v1.size() != v2.size())
+    SiconosVectorException::selfThrow(" SimpleVector operator + --- vectors have not the same size");
 
   SimpleVector sv(v1);
   Blas_Add_Mult(sv.lavd, 1.0, v2.lavd);
@@ -652,9 +609,7 @@ SimpleVector operator - (const SimpleVector& v1, const SimpleVector& v2)
 {
   IN(" SimpleVector operator -  (const SimpleVector& , const SimpleVector&) \n");
 
-  const int svSize = v1.size();
-
-  if (svSize != v2.size())
+  if (v1.size() != v2.size())
     SiconosVectorException::selfThrow(" SimpleVector operator - --- the 2 vectors have not the same size");
 
   SimpleVector sv(v1);
@@ -663,7 +618,7 @@ SimpleVector operator - (const SimpleVector& v1, const SimpleVector& v2)
   OUT("SimpleVector operator -  (const SimpleVector& , const SimpleVector&)  \n");
   return sv;
 }
-
+*/
 
 SimpleVector operator * (const SiconosMatrix &m, const SimpleVector &v)
 {
@@ -671,7 +626,14 @@ SimpleVector operator * (const SiconosMatrix &m, const SimpleVector &v)
   Blas_Mat_Vec_Mult(m.getLaGenMatDouble(), v.lavd, sv.lavd, 1.0, 0.0);
   return sv;
 }
-
+SimpleVector operator * (const SiconosMatrix &m, const SiconosVector &v)
+{
+  SimpleVector sv(m.size(0));
+  // "transform" v (which is simple or composite) into a simple
+  SimpleVector tmp(v);
+  Blas_Mat_Vec_Mult(m.getLaGenMatDouble(), tmp.lavd, sv.lavd, 1.0, 0.0);
+  return sv;
+}
 
 SimpleVector matTransVecMult(SiconosMatrix &m, SimpleVector &v)
 {
@@ -680,4 +642,17 @@ SimpleVector matTransVecMult(SiconosMatrix &m, SimpleVector &v)
   return sv;
 }
 
+SimpleVector matTransVecMult(SiconosMatrix &m, SiconosVector &v)
+{
+  SimpleVector sv(m.size(1));
+  if (v.isComposite())
+  {
+    SimpleVector tmp(v);
+    Blas_Mat_Trans_Vec_Mult(m.getLaGenMatDouble(), tmp.lavd, sv.lavd, 1.0, 0.0);
+  }
+  else
+    Blas_Mat_Trans_Vec_Mult(m.getLaGenMatDouble(), v.getValues(), sv.lavd, 1.0, 0.0);
+
+  return sv;
+}
 

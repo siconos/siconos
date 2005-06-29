@@ -4,7 +4,6 @@
 #include "NonSmoothLawXML.h"
 #include "Interaction.h"
 #include "SiconosConst.h"
-#include "check.h"
 
 /** \class NonSmoothLaw
  *  \brief this class contains non-smooth law
@@ -78,19 +77,19 @@ public:
     nsLawType = newType;
   }
 
-  /////////////////////
-
   /** \fn void saveNonSmoothLawToXML()
    *  \brief copy the data of the NonSmoothLaw to the XML tree
    *  \exception RuntimeException
    */
-  virtual void saveNonSmoothLawToXML();
+  virtual void saveNonSmoothLawToXML() = 0;
 
   /** \fn void display()
    *  \brief display the data of the NonSmoothLaw on the standard output
    *  \exception RuntimeException
    */
   virtual void display() const;
+
+protected:
 
   /** type of the NonSmoothLaw */
   std::string nsLawType;
@@ -100,4 +99,4 @@ public:
 
 };
 
-#endif // NSLAW_H
+#endif

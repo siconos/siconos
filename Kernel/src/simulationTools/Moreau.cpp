@@ -8,8 +8,9 @@ using namespace std;
 
 // --- xml constructor ---
 Moreau::Moreau(OneStepIntegratorXML *osiXML, TimeDiscretisation* td, DynamicalSystem* ds) :
-  OneStepIntegrator(td, ds), W(NULL), theta(0.1), isWAllocatedIn(true)
+  OneStepIntegrator(td, ds), W(NULL), isWAllocatedIn(true), theta(0.1)
 {
+
   integratorXml = osiXML;
   integratorType = MOREAU_INTEGRATOR;
   // Memory allocation for W
@@ -19,6 +20,7 @@ Moreau::Moreau(OneStepIntegratorXML *osiXML, TimeDiscretisation* td, DynamicalSy
   // xml loading
   if (osiXML != NULL)
   {
+    if (integratorXml->hasR()) sizeMem = integratorXml->getR();
     if ((static_cast<MoreauXML*>(integratorXml))->hasW() == true)
     {
       *W = (static_cast<MoreauXML*>(integratorXml))->getW();
@@ -33,7 +35,7 @@ Moreau::Moreau(OneStepIntegratorXML *osiXML, TimeDiscretisation* td, DynamicalSy
 
 // --- constructor from a minimum set of data ---
 Moreau::Moreau(TimeDiscretisation* td, DynamicalSystem* ds, const double& newTheta):
-  OneStepIntegrator(td, ds), W(NULL), theta(newTheta), isWAllocatedIn(true)
+  OneStepIntegrator(td, ds), W(NULL), isWAllocatedIn(true), theta(newTheta)
 {
   integratorType = MOREAU_INTEGRATOR;
   // Memory allocation for W
@@ -284,13 +286,13 @@ void Moreau::display() const
 {
   OneStepIntegrator::display();
 
-  cout << "-----------------------------------------------------" << endl;
+  cout << "====== Moreau OSI display ======" << endl;
   cout << "____ data of the Moreau Integrator " << endl;
   cout << "| W " << endl;
   if (W != NULL) W->display();
   else cout << "-> NULL" << endl;
   cout << "| theta : " << theta << endl;
-  cout << "-----------------------------------------------------" << endl << endl;
+  cout << "================================" << endl;
 }
 
 void Moreau::saveIntegratorToXML()
@@ -325,7 +327,7 @@ Moreau* Moreau::convert(OneStepIntegrator* osi)
 }
 
 // --- Default constructor ---
-Moreau::Moreau(): OneStepIntegrator(), W(NULL), theta(0.1), isWAllocatedIn(false)
+Moreau::Moreau(): OneStepIntegrator(), W(NULL), isWAllocatedIn(false), theta(0.1)
 {
   integratorType = MOREAU_INTEGRATOR;
 }

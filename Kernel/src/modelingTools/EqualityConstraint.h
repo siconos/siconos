@@ -86,12 +86,12 @@ public:
    */
   std::vector<DSInputOutput*> getDSInputOutputs(void);
 
-  /** \fn DSInputOutput* getDSInputOutput(int)
+  /** \fn DSInputOutput* getDSInputOutput(const int&)
    *  \brief allows to get one specific DSInputOutput, with its place in the vector of DSInputOutput
    *  \param int : the place of the DSInputOutput in the vector of DSInputOutput of the EqualityConstraint
    *  \return DSInputOutput* : dsioVector[ i ] DSInputOutput
    */
-  DSInputOutput* getDSInputOutput(int);
+  DSInputOutput* getDSInputOutput(const unsigned int&);
 
   /** \fn void setDSInputOutputs(vector<DSInputOutput*>)
    *  \brief allows to set all the DSInputOutputs of the EqualityConstraint

@@ -11,40 +11,20 @@ using namespace std;
 
 
 
-DSXML::DSXML()
+DSXML::DSXML():
+  rootDSXMLNode(NULL), parentNode(NULL), boundaryConditionXML(NULL), xMemoryXML(NULL), xDotMemoryXML(NULL), rMemoryXML(NULL),
+  idNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL), xDotNode(NULL), xMemoryNode(NULL), xDotMemoryNode(NULL),
+  stepsInMemoryNode(NULL), vectorFieldNode(NULL), computeJacobianXNode(NULL), boundaryConditionNode(NULL),
+  dsInputOutputNode(NULL),  rNode(NULL), rMemoryNode(NULL)
+{}
+
+
+DSXML::DSXML(xmlNode * DSNode, const bool& isBVP):
+  rootDSXMLNode(DSNode), parentNode(NULL), boundaryConditionXML(NULL), xMemoryXML(NULL), xDotMemoryXML(NULL), rMemoryXML(NULL),
+  idNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL), xDotNode(NULL), xMemoryNode(NULL), xDotMemoryNode(NULL),
+  stepsInMemoryNode(NULL), vectorFieldNode(NULL), computeJacobianXNode(NULL), boundaryConditionNode(NULL),
+  dsInputOutputNode(NULL),  rNode(NULL), rMemoryNode(NULL)
 {
-  this->boundaryConditionXML = NULL;
-  this->parentNode = NULL;
-  this->rMemoryXML = NULL;
-  this->xDotMemoryXML = NULL;
-  this->xMemoryXML = NULL;
-
-  this->idNode = NULL;
-  this->nNode = NULL;
-  this->x0Node = NULL;
-  this->xNode = NULL;
-  this->xDotNode = NULL;
-  this->xMemoryNode = NULL;
-  this->xDotMemoryNode = NULL;
-  this->stepsInMemoryNode = NULL;
-  this->vectorFieldNode = NULL;
-  this->computeJacobianXNode = NULL;
-  this->boundaryConditionNode = NULL;
-  this->rNode = NULL;
-  this->rMemoryNode = NULL;
-}
-
-
-DSXML::DSXML(xmlNode * DSNode, bool isBVP)
-{
-  this->boundaryConditionXML = NULL;
-
-  this->rMemoryXML = NULL;
-  this->xDotMemoryXML = NULL;
-  this->xMemoryXML = NULL;
-
-  this->rootDSXMLNode = DSNode;
-  this->parentNode = NULL;
   loadDSProperties(isBVP);
 }
 
@@ -56,7 +36,7 @@ DSXML::~DSXML()
   if (this->xDotMemoryXML != NULL) delete this->xDotMemoryXML;
 }
 
-void DSXML::loadDSProperties(bool isBVP)
+void DSXML::loadDSProperties(const bool& isBVP)
 {
   xmlNode *node;
 
@@ -77,7 +57,6 @@ void DSXML::loadDSProperties(bool isBVP)
   //    }
   //    else
   //    {
-  //    cout<<"DSXML - loadNSDS WARNING : tag "<<DSINPUTOUTPUT_DEFINITION_TAG<<" not found,\nDefining DS InputOutput is optional."<<endl;
   //    this->dsInputOutputNode = NULL;
   //    }
 
@@ -329,7 +308,7 @@ void DSXML::loadDS(DynamicalSystem* ds)
     if (dsioDefinitionNode == NULL)
       dsioDefinitionNode = xmlNewChild(nsdsNode, NULL, (xmlChar*)DSINPUTOUTPUT_DEFINITION_TAG.c_str(), NULL);
 
-    for (int i = 0; i < ds->getDSInputOutputs().size(); i++)
+    for (unsigned int i = 0; i < ds->getDSInputOutputs().size(); i++)
     {
       if (ds->getDSInputOutput(i)->getDSInputOutputXML() == NULL)
       {
@@ -414,10 +393,7 @@ void DSXML::setDSInputOutputXML(map<int, DSInputOutputXML*> m)
 
   map<int, DSInputOutputXML*>::iterator iter;
   for (iter = m.begin(); iter != m.end(); iter++)
-  {
     this->definedDSInputOutputNumbers.push_back((*iter).first);
-    //cout<<"** DSXML::setDSInputOutputXML ==> "<<(*iter).first<<" - "<<(*iter).second->getType()<<endl;
-  }
 
   this->dsInputOutputXMLMap = m;
 }

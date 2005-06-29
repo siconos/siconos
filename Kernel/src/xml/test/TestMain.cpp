@@ -1,22 +1,35 @@
-
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
-
+#include "SiconosException.h"
+#include <iostream>
 using namespace std;
 
-#include <iostream>
 int main()
 {
-  // on déclare un runner
-  CppUnit::TextUi::TestRunner runner;
+  try
+  {
+    // The object to run tests
+    CppUnit::TextUi::TestRunner runner;
 
-  // on récupère les classes de tests déclarées dans le registry.
-  // chaque classe de test doit bien sur se referencer dans le registry
-  CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
+    // Get test classes that have been registered
+    CppUnit::TestFactoryRegistry &registry = CppUnit::TestFactoryRegistry::getRegistry();
 
-  // on ajoute tous les tests dans le runner
-  runner.addTest(registry.makeTest());
+    // Put tests into the runner
+    runner.addTest(registry.makeTest());
 
-  // on lance les tests
-  runner.run("", false, true, false);
+    // Run tests
+    bool wasSucessful = runner.run("", false);
+    return wasSucessful;
+  }
+
+  // --- Exceptions handling ---
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+  }
+  catch (...)
+  {
+    cout << "Exception caught" << endl;
+  }
 }
+

@@ -2,23 +2,36 @@
 #define __NewSiconosVector__
 
 #include "SiconosVectorException.h"
+//#include "SiconosMatrix.h"
 #include "check.h"
 #include <iostream>
 #include <lapack++.h>
 #include <fstream>
 #include <vector>
+#include <string>
 
 const std::string N_ASCII = "ascii";
 const std::string N_BINARY = "binary";
 const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ MACHINE DEPENDE
 
-const short M_MAXSIZEFORDISPLAY = 10;
+const unsigned int M_MAXSIZEFORDISPLAY = 10;
 
+/** \class SiconosVector
+ *  \brief This is an abstract class to provide interface for vector handling
+ *  vector can be either a SimpleVector or a CompositeVector, ie a container of several SimpleVector
+ *  See documentation of these derivated classes for more details
+ *  \author SICONOS Development Team - copyright INRIA
+ *  \version 0.1
+ *
+ */
+
+class SiconosMatrix;
 
 class SiconosVector
 {
 protected:
 
+  // true if composite
   bool composite;
 
 public:
@@ -29,13 +42,10 @@ public:
    */
   SiconosVector();
 
-  /** \fn SiconosVector(const vector<double> v)
-   *  \brief contructor with a vector
-   *  \param vector<double> v
-   *  \return SiconosVector
+  /** \fn SiconosVector (const SiconosVector & );
+   *  \brief copy contructor
    */
-  //SiconosVector(const std::vector<double> v);
-
+  SiconosVector::SiconosVector(const SiconosVector &);
 
   /** \fn ~SiconosVector ()
    *  \brief destructor
@@ -44,73 +54,87 @@ public:
 
   /***********************************************************************************************/
 
+  /** \fn bool isComposite()
+   *  \brief test whether the present vector is composite or not
+   * \return a bool
+   */
   inline bool isComposite() const
   {
     return composite;
   }
 
-  /** \fn void zero();
-   *  \brief set the values to 0.0
+  // !!! WARNING : all the following functions are to be implemented in derivated classes !!!
+
+  /** \fn std::vector<SiconosVector*> getSvref() const
+   *  \brief get svref (usefull only for composite, should not be used for simple) => avoid downcast
+   * \return a standard vector of SiconosVector
    */
-  virtual void zero();
+  virtual std::vector<SiconosVector*> getSvref() const = 0;
+
+  /** \fn std::vector<int> getTabIndex() const
+   *  \brief get the index tab (usefull only for composite, should not be used for simple) => avoid downcast
+   * \return a standard vector of int
+   */
+  virtual std::vector<int> getTabIndex() const = 0;
 
   /** \fn std::string toString();
-   *  \brief put datas of the vector in a std::string
+   *  \brief put data of the vector into a string
    */
-  virtual std::string toString();
+  virtual std::string toString() const = 0;
 
   /** \fn void display();
    *  \brief display data on standard output
    */
   virtual void display() const = 0 ;
 
-  /** \fn operator (int index)
-   *  \brief set the element vector[i]
-   *  \param an integer i
-   *  \exception SiconosVectorException
-   *  \return the element vector[i]
-   */
-  virtual double& operator()(const int unsigned index) = 0;
+  // Note: in the following functions, index is a general one;
+  // that means that for a SimpleVector v, v(i) is index i element but
+  // for a CompositeVector w that contains 2 SiconosVector of size 3
+  // w(4) corresponds to the first element of the second vector.
 
   /** \fn operator (int index)
-   *  \brief get the element vector[i]
+   *  \brief get the element at position i in the vector
    *  \param an integer i
    *  \exception SiconosVectorException
-   *  \return the element vector[i]
+   *  \return a double
    */
-  virtual double operator()(const int unsigned index) const = 0 ;
+  virtual double& operator()(const int unsigned&) const = 0;
 
   /** \fn void setValue(const int unsigned index, const double d)
    *  \brief set the value of one element of the vector
    *  \param double d : the new value
    *  \param int index : the position of the element which is set
    */
-  inline void setValue(const int unsigned& index, const double& d)
-  {
-    (*this)(index) = d;
-  }
+  virtual void setValue(const int unsigned&, const double&) = 0 ;
 
-  /** \fn double getValue(const int unsigned index)
-   *  \brief get the value of one element of the vector
+  /** \fn double getValue(const int unsigned i)
+   *  \brief get the value of index i element of the vector
    *  \param int index : the position of the element
    */
-  inline const double getValue(const int unsigned& index) const
-  {
-    return (*this)(index);
-  }
+  virtual const double getValue(const int unsigned& index) const = 0;
 
-  /** \fn void setValues(const vector<double> v)
+  /** \fn void setValues(const vector<double> v, const int& = 0)
    *  \brief set the values of the vector to a new set of value
    *  \param vector<double> v
+   *  \param optional, only for composite, to set values of vector number i
    */
-  virtual void setValues(const std::vector<double>& v) = 0;
+  virtual void setValues(const std::vector<double>& v, const unsigned int& = 0) = 0;
 
-  /** \fn int size() const
-   *  \brief get the vector size
-   *  \exception to be defined
-   *  \return int : the vector size
+  /** \fn const LaVectorDouble getValues(const int& i) const
+   *  \brief get the values saved in vector (depends on vector type)
+   *  \param optional, only for composite, to get values of vector number i
+   *  \return a LaVectorDouble
    */
-  virtual int size() const = 0 ;
+  virtual const LaVectorDouble getValues(const int unsigned& = 0) const = 0;
+
+  /** \fn unsigned int size() const
+   *  \brief get the vector size, ie the total number of (double)
+   *  elements in the vector
+   * \param (optional). =0 -> number of element in the vector
+   *                    =1 -> number of subvectors if composite
+   *  \return int
+   */
+  virtual unsigned int size(const unsigned int& = 0) const = 0 ;
 
   /** \fn bool read(std::string fileName, std::string mode = ASCII)
    *  \brief write the vector in a file
@@ -139,7 +163,7 @@ public:
 
   // OPERATORS ---------------------------------------------------------------
 
-  // internes
+  // internal
   /** \fn operator+=(const SiconosVector &)
    *  \brief add a vector to the current one
    *  \param a SiconosVector
@@ -162,7 +186,7 @@ public:
    *  \exception SiconosVectorException
    *  \return the result of the multiplication in the current vector
    */
-  virtual SiconosVector &operator*=(const double) = 0;
+  virtual SiconosVector &operator*=(const double&) = 0;
 
   /** \fn operator/=(const double)
    *  \brief divide the current vector with a double
@@ -170,7 +194,7 @@ public:
    *  \exception SiconosVectorException
    *  \return the result of the division in the current vector
    */
-  virtual SiconosVector &operator/=(const double) = 0;
+  virtual SiconosVector &operator/=(const double&) = 0;
 
   // affectation operation
   /** \fn operator=(const SiconosVector& v)

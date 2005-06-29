@@ -174,11 +174,7 @@ public:
    *  \brief set Q to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setQPtr(SimpleVector *newPtr)
-  {
-    delete q;
-    q = newPtr;
-  }
+  void setQPtr(SimpleVector *newPtr);
 
   // -- q0 --
 
@@ -213,11 +209,7 @@ public:
    *  \brief set Q0 to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setQ0Ptr(SimpleVector *newPtr)
-  {
-    delete q0;
-    q0 = newPtr;
-  }
+  void setQ0Ptr(SimpleVector *newPtr);
 
   // -- qFree --
 
@@ -252,11 +244,42 @@ public:
    *  \brief set QFree to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setQFreePtr(SimpleVector *newPtr)
+  void setQFreePtr(SimpleVector *newPtr);
+
+  // Q memory
+
+  /** \fn  const SiconosMemory getQMemory(void) const
+   *  \brief get the value of qMemory
+   *  \return a SiconosMemory
+   */
+  inline const SiconosMemory getQMemory() const
   {
-    delete qFree;
-    qFree = newPtr;
+    return *qMemory;
   }
+
+  /** \fn SiconosMemory getQMemoryPtr(void) const
+   *  \brief get all the values of the state vector q stored in memory
+   *  \return a memory
+   */
+  inline SiconosMemory* getQMemoryPtr() const
+  {
+    return qMemory;
+  }
+
+  /** \fn void setQMemory(const SiconosMemory &)
+   *  \brief set the value of qMemory
+   *  \param a ref on a SiconosMemory
+   */
+  inline void setQMemory(const SiconosMemory& newValue)
+  {
+    *qMemory = newValue;
+  }
+
+  /** \fn void setQMemory(SiconosMemory * newPtr)
+   *  \brief set qMemory to pointer newPtr
+   *  \param a ref on a SiconosMemory
+   */
+  void setQMemoryPtr(SiconosMemory *);
 
   // -- velocity --
 
@@ -291,11 +314,7 @@ public:
    *  \brief set Velocity to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setVelocityPtr(SimpleVector *newPtr)
-  {
-    delete velocity;
-    velocity = newPtr;
-  }
+  void setVelocityPtr(SimpleVector *newPtr);
 
   // -- velocity0 --
 
@@ -330,11 +349,7 @@ public:
    *  \brief set Velocity0 to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setVelocity0Ptr(SimpleVector *newPtr)
-  {
-    delete velocity0;
-    velocity0 = newPtr;
-  }
+  void setVelocity0Ptr(SimpleVector *newPtr) ;
 
   // -- velocityFree --
 
@@ -369,11 +384,42 @@ public:
    *  \brief set VelocityFree to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setVelocityFreePtr(SimpleVector *newPtr)
+  void setVelocityFreePtr(SimpleVector *newPtr);
+
+  // Velocity memory
+
+  /** \fn  const SiconosMemory getVelocityMemory(void) const
+   *  \brief get the value of velocityMemory
+   *  \return a SiconosMemory
+   */
+  inline const SiconosMemory getVelocityMemory() const
   {
-    delete velocityFree;
-    velocityFree = newPtr;
+    return *velocityMemory;
   }
+
+  /** \fn SiconosMemory getVelocityMemoryPtr(void) const
+   *  \brief get all the values of the state vector velocity stored in memory
+   *  \return a memory
+   */
+  inline SiconosMemory* getVelocityMemoryPtr() const
+  {
+    return velocityMemory;
+  }
+
+  /** \fn void setVelocityMemory(const SiconosMemory &)
+   *  \brief set the value of velocityMemory
+   *  \param a ref on a SiconosMemory
+   */
+  inline void setVelocityMemory(const SiconosMemory& newValue)
+  {
+    *velocityMemory = newValue;
+  }
+
+  /** \fn void setVelocityMemory(SiconosMemory * newPtr)
+   *  \brief set velocityMemory to pointer newPtr
+   *  \param a ref on a SiconosMemory
+   */
+  void setVelocityMemoryPtr(SiconosMemory *);
 
   // -- p --
 
@@ -408,71 +454,7 @@ public:
    *  \brief set P to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setPPtr(SimpleVector *newPtr)
-  {
-    delete p;
-    p = newPtr;
-  }
-
-  // --- Memory ---
-
-  // -- q memory --
-
-  /** \fn  const SiconosMemory getQMemory() const
-   *  \brief get the value of qMemory
-   *  \return a SiconosMemory
-   */
-  inline const SiconosMemory getQMemory() const
-  {
-    return qMemory;
-  }
-
-  /** \fn SiconosMemory getQMemoryPtr() const
-   *  \brief get all the values of the state vector q stored in memory
-   *  \return the memory object which stores previous values of q
-   */
-  inline SiconosMemory* getQMemoryPtr()
-  {
-    return &qMemory;
-  }
-
-  /** \fn void setQMemory(const SiconosMemory &)
-   *  \brief set the value of qMemory
-   *  \param a ref on a SiconosMemory
-   */
-  inline void setQMemory(const SiconosMemory& qMem)
-  {
-    qMemory = qMem;
-  }
-
-  // -- velocity memory --
-
-  /** \fn  const SiconosMemory getVelocityMemory() const
-   *  \brief get the value of velocityMemory
-   *  \return a SiconosMemory
-   */
-  inline const SiconosMemory getVelocityMemory() const
-  {
-    return velocityMemory;
-  }
-
-  /** \fn SiconosMemory getVelocityMemoryPtr() const
-   *  \brief get all the values of the state vector velocity stored in memory
-   *  \return the memory object which stores previous values of velocity
-   */
-  inline SiconosMemory* getVelocityMemoryPtr()
-  {
-    return &velocityMemory;
-  }
-
-  /** \fn void setVelocityMemory(const SiconosMemory &)
-   *  \brief set the value of velocityMemory
-   *  \param a ref on a SiconosMemory
-   */
-  inline void setVelocityMemory(const SiconosMemory& velocityMem)
-  {
-    velocityMemory = velocityMem;
-  }
+  void setPPtr(SimpleVector *newPtr);
 
   // -- Mass --
 
@@ -507,11 +489,7 @@ public:
    *  \brief set Mass to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setMassPtr(SiconosMatrix *newPtr)
-  {
-    delete mass;
-    mass = newPtr;
-  }
+  void setMassPtr(SiconosMatrix *newPtr);
 
   // -- FInt --
 
@@ -546,11 +524,7 @@ public:
    *  \brief set FInt to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setFIntPtr(SimpleVector *newPtr)
-  {
-    delete fInt;
-    fInt = newPtr;
-  }
+  void setFIntPtr(SimpleVector *newPtr);
 
   // -- Fext --
 
@@ -585,11 +559,7 @@ public:
    *  \brief set FExt to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setFExtPtr(SimpleVector *newPtr)
-  {
-    delete fExt;
-    fExt = newPtr;
-  }
+  void setFExtPtr(SimpleVector *newPtr);
 
   // -- QNLInertia --
 
@@ -624,11 +594,7 @@ public:
    *  \brief set QNLInertia to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setQNLInertiaPtr(SimpleVector *newPtr)
-  {
-    delete QNLInertia;
-    QNLInertia = newPtr;
-  }
+  void setQNLInertiaPtr(SimpleVector *newPtr);
 
   // -- Jacobian Q Fint --
 
@@ -663,11 +629,7 @@ public:
    *  \brief set JacobianQFInt to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setJacobianQFIntPtr(SiconosMatrix *newPtr)
-  {
-    delete jacobianQFInt;
-    jacobianQFInt = newPtr;
-  }
+  void setJacobianQFIntPtr(SiconosMatrix *newPtr);
 
   // -- Jacobian velocity Fint --
 
@@ -702,11 +664,7 @@ public:
    *  \brief set JacobianVelocityFInt to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setJacobianVelocityFIntPtr(SiconosMatrix *newPtr)
-  {
-    delete jacobianVelocityFInt;
-    jacobianVelocityFInt = newPtr;
-  }
+  void setJacobianVelocityFIntPtr(SiconosMatrix *newPtr);
 
   // -- Jacobian Q QNLInertia --
 
@@ -741,12 +699,7 @@ public:
    *  \brief set JacobianQQNLInertia to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setJacobianQQNLInertiaPtr(SiconosMatrix *newPtr)
-  {
-    delete jacobianQQNLInertia;
-    jacobianQQNLInertia = 0;
-    jacobianQQNLInertia = newPtr;
-  }
+  void setJacobianQQNLInertiaPtr(SiconosMatrix *newPtr);
 
   // -- Jacobian velocity QNLInertia --
 
@@ -781,11 +734,7 @@ public:
    *  \brief set JacobianVelocityQNLInertia to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setJacobianVelocityQNLInertiaPtr(SiconosMatrix *newPtr)
-  {
-    delete jacobianVelocityQNLInertia;
-    jacobianVelocityQNLInertia = newPtr;
-  }
+  void setJacobianVelocityQNLInertiaPtr(SiconosMatrix *newPtr);
 
   // --- PLUGINS RELATED FUNCTIONS ---
 
@@ -982,15 +931,15 @@ public:
    */
   virtual void display() const;
 
-  /** \fn void initMemory(const int& steps) ;
+  /** \fn void initMemory(const unsigned int& steps) ;
    *  \brief initialize the SiconosMemory objects with a positive size.
    *  \param the size of the SiconosMemory. must be >= 0
    */
-  void initMemory(const int& steps);
+  void initMemory(const unsigned int& steps);
 
   /** \fn virtual void swapInMemory(void);
-   * \brief push the current values of x, xDot and r in the stored previous values
-   *  xMemory, xDotMemory, rMemory,
+   * \brief push the current values of x, q and r in the stored previous values
+   *  xMemory, qMemory, rMemory,
    * \todo Modify the function swapIn Memory with the new Object Memory
    */
   void swapInMemory();
@@ -1026,7 +975,7 @@ protected:
   /** free coordinate */
   SimpleVector *qFree;
   /** memory of previous coordinates of the system */
-  SiconosMemory qMemory;
+  SiconosMemory *qMemory;
   /** velocity of the system */
   SimpleVector *velocity;
   /** initial velocity of the system */
@@ -1034,7 +983,7 @@ protected:
   /** free Velocity */
   SimpleVector *velocityFree;
   /** memory of previous velocity of the system */
-  SiconosMemory velocityMemory;
+  SiconosMemory *velocityMemory;
   /** Reaction due to the non smooth law */
   SimpleVector *p;
 
@@ -1073,6 +1022,21 @@ protected:
 
   /** class for manage plugin (open, close librairy...) */
   SiconosSharedLibrary cShared;
+
+  /** Flags to know if pointers have been allocated inside constructors or not */
+
+  // for vectors related to q (q, q0, qFree, qMemory)
+  std::vector<bool> isQAllocatedIn;
+  // the same for velocity
+  std::vector<bool> isVelocityAllocatedIn;
+  // p
+  bool isPAllocatedIn;
+  // Mass
+  bool isMassAllocatedIn;
+  // Forces: fInt, fExt, QNLInertia
+  std::vector<bool> areForcesAllocatedIn;
+  // Jacobian: jacobianQFInt, jacobianVelocityFInt, jacobianQQNLInertia, jacobianVelocityQNLInertia
+  std::vector<bool> isJacobianAllocatedIn;
 
   //////////////////////////////////////
 

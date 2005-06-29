@@ -1,5 +1,3 @@
-//$id$
-
 #include "PlatformTest.h"
 
 #include "LinearSystemDS.h"
@@ -9,7 +7,7 @@
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
 
-// on place cette classe de test dans le registry
+// Class test registration
 CPPUNIT_TEST_SUITE_REGISTRATION(PlatformTest);
 
 void PlatformTest::setUp()

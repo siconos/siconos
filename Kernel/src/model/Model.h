@@ -11,8 +11,8 @@
 #include <iostream>
 #include <vector>
 
-extern int MATRIX_MAX_SIZE;
-extern int VECTOR_MAX_SIZE;
+extern unsigned int MATRIX_MAX_SIZE;
+extern unsigned int VECTOR_MAX_SIZE;
 extern std::string  FILE_STORAGE;
 extern std::string  XML_SCHEMA;
 

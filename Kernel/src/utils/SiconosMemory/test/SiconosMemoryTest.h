@@ -74,8 +74,14 @@ private:
   // declaration des variables de tests
 
   //SiconosVector *A, *B, *C;
-  vector<SiconosVector*> V;
-
+  vector<SiconosVector*> V1;
+  vector<SiconosVector*> V2;
+  SiconosVector * q1;
+  SiconosVector * q2;
+  SiconosVector * q3;
+  SiconosVector *c1;
+  SiconosVector *c2;
+  unsigned int sizeMem;
 public:
   void setUp();
   void tearDown();

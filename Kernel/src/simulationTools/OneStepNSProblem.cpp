@@ -37,11 +37,10 @@ OneStepNSProblem::~OneStepNSProblem()
 
 Interaction* OneStepNSProblem::getInteractionPtr(const int& nb)
 {
-  if (nb < interactionVector.size())
-    return interactionVector[nb];
-  else RuntimeException::selfThrow("OneStepNSProblem::getInteraction(const int nb) - number greater than size of interaction vector");
+  if ((unsigned int)nb >= interactionVector.size())
+    RuntimeException::selfThrow("OneStepNSProblem::getInteraction(const int nb) - number greater than size of interaction vector");
+  return interactionVector[nb];
 }
-
 
 void OneStepNSProblem::addInteraction(Interaction *interaction)
 {
@@ -139,11 +138,9 @@ void OneStepNSProblem::saveNSProblemToXML()
   IN("OneStepNSProblem::saveNSProblemToXML\n");
   if (onestepnspbxml != NULL)
   {
-    cout << " n===================== " << n << endl;
     onestepnspbxml->setN(n);
-
     vector<int> v;
-    for (int i = 0; i < interactionVector.size(); i++)
+    for (unsigned int i = 0; i < interactionVector.size(); i++)
       v.push_back(interactionVector[i]->getNumber());
     onestepnspbxml->setInteractionConcerned(v, allInteractionConcerned());
 
@@ -256,7 +253,7 @@ void OneStepNSProblem::setLemkeAlgorithm(const string& meth,  const double& t)
     strcpy(solvingMethod.lcp.nom_method, OSNSP_LEMKE.c_str());
     solvingMethod.lcp.tol = /*t*/ DefaultAlgoTolerance;
     strcpy(solvingMethod.lcp.normType, DefaultAlgoNormType.c_str());
-    solvingMethod.lcp.itermax = /*DefaultAlgoMaxIter*/ t;
+    solvingMethod.lcp.itermax = /*DefaultAlgoMaxIter*/(int)t;
     solvingMethod.lcp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_CFDSOLVING)
@@ -264,7 +261,7 @@ void OneStepNSProblem::setLemkeAlgorithm(const string& meth,  const double& t)
     strcpy(solvingMethod.cfd.nom_method, OSNSP_LEMKE.c_str());
     solvingMethod.cfd.tol = /*t*/ DefaultAlgoTolerance;
     strcpy(solvingMethod.cfd.normType, DefaultAlgoNormType.c_str());
-    solvingMethod.cfd.itermax = /*DefaultAlgoMaxIter*/ t;
+    solvingMethod.cfd.itermax = /*DefaultAlgoMaxIter*/(int)t;
     solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
   }
   else
@@ -439,24 +436,23 @@ void OneStepNSProblem::updateConnectedInteractionMap()
 
   connectedInteractionMap.clear();
 
-  for (int i = 0; i < interactionVector.size(); i++)
+  // -- loop over the interactions --
+  for (unsigned int i = 0; i < interactionVector.size(); i++)
   {
-    //    for(int k=0; k<connectedInteractionMap[ interactionVector[i] ].size(); k++)
-    //      delete connectedInteractionMap[ interactionVector[i] ][k];
-    //    connectedInteractionMap[ interactionVector[i] ].clear();
-
-    // we only put in the visibility table, the active interactions
+    // warning: only active interactions are put into the visibility table
     status = interactionVector[i]->getStatus();
-    for (int k = 0; k < status.size(); k++)
+
+    // -- loop over the status of the current interaction --
+    for (unsigned int k = 0; k < status.size(); k++)
       if (status[k] == 1)
       {
         cout << "# interaction " << i << " is active !" << endl;
         hasActiveConnection = false;
-        for (int j = 0; j < interactionVector.size(); j++)
+        for (unsigned int j = 0; j < interactionVector.size(); j++)
         {
           // we only put in the visibility table, the active interactions
           status2 = interactionVector[j]->getStatus();
-          for (int l = 0; l < status2.size(); l++)
+          for (unsigned int l = 0; l < status2.size(); l++)
           {
             if (status2[l] == 1)
             {
@@ -523,7 +519,7 @@ void OneStepNSProblem::displayConnectedInteractionMap()
     cout << "| Origin Interaction " << iter->first << endl;
     //cout<<"@ size of the second part of the map "<<iter->second.size()<<endl;
     if (iter->second[0] != NULL)
-      for (int i = 0; i < iter->second.size(); i++)
+      for (unsigned int i = 0; i < iter->second.size(); i++)
       {
         cout << "|   + Connected Interaction " << iter->second[i]->connected << endl;
         cout << "|     status = " << iter->second[i]->status;

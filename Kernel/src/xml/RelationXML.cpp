@@ -61,13 +61,13 @@ void RelationXML::updateRelationXML(xmlNode* node, Relation* rel)
 
 string RelationXML::getComputeInputPlugin() const
 {
-  if (isComputeInputPlugin())
-    return  SiconosDOMTreeTools::getStringAttributeValue(computeInputNode, PLUGIN_ATTRIBUTE);
-  XMLException::selfThrow("RelationXML - getComputeInputPlugin : computeInput is not calculated from a plugin ; Fint vector is given");
+  if (!isComputeInputPlugin())
+    XMLException::selfThrow("RelationXML - getComputeInputPlugin : computeInput is not calculated from a plugin");
+  return  SiconosDOMTreeTools::getStringAttributeValue(computeInputNode, PLUGIN_ATTRIBUTE);
 }
 string RelationXML::getComputeOutputPlugin() const
 {
-  if (isComputeOutputPlugin())
-    return  SiconosDOMTreeTools::getStringAttributeValue(computeOutputNode, PLUGIN_ATTRIBUTE);
-  XMLException::selfThrow("RelationXML - getComputeOutputPlugin : computeOutput is not calculated from a plugin ; Fint vector is given");
+  if (!isComputeOutputPlugin())
+    XMLException::selfThrow("RelationXML - getComputeOutputPlugin : computeOutput is not calculated from a plugin");
+  return  SiconosDOMTreeTools::getStringAttributeValue(computeOutputNode, PLUGIN_ATTRIBUTE);
 }

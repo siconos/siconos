@@ -148,8 +148,6 @@ protected:
 
 private:
 
-
-
   //DSs (DS numbers)
   std::vector<int> DSNumbersVector;
 

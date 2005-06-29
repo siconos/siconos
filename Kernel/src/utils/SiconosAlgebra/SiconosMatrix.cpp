@@ -76,11 +76,11 @@ SiconosMatrix::~SiconosMatrix()
 
 // --- FUNCTIONS TO GET INFO ABOUT THE MATRIX ---
 
-int SiconosMatrix::size(const int& d) const
+unsigned int SiconosMatrix::size(const unsigned int& d) const
 {
   if ((d != 0) && (d != 1))
     SiconosMatrixException::selfThrow("function size() : Index out of range");
-  return mat.size(d);
+  return (unsigned int)mat.size(d);
 }
 
 bool SiconosMatrix::isSquare() const
@@ -101,10 +101,10 @@ LaGenMatDouble& SiconosMatrix::getLaGenMatDouble()
   return mat;
 }
 
-bool SiconosMatrix::addRow(const int& row, const SiconosVector &v)
+bool SiconosMatrix::addRow(const unsigned int& row, const SiconosVector &v)
 {
   bool res = true;
-  if (v.size() != mat.size(1))
+  if ((int)v.size() != mat.size(1))
     res = false;
 
   else
@@ -116,23 +116,23 @@ bool SiconosMatrix::addRow(const int& row, const SiconosVector &v)
 
 SimpleVector SiconosMatrix::getRow(const int& index) const
 {
-  if (index >= mat.size(0))
+  const int rowSize = mat.size(1);
+  SimpleVector res(mat.size(1));
+  if (index >= mat.size(0) || index < 0)
     SiconosMatrixException::selfThrow("getRow : Index out of range");
   else
   {
-    const int rowSize = mat.size(1);
-    SimpleVector res(rowSize);
     for (int i = 0; i < rowSize; i++)
       res(i) = mat(index, i);
-
-    return res;
   }
+  return res;
 }
 
 // --- READ, WRITE ... ---
 
 bool SiconosMatrix::read(const string& fileName, const string& mode)
 {
+  bool tmp = false;
   if (mode == "binary")
   {
     FILE * inFile = fopen(fileName.c_str(), "rb");    // open the input file in binary mode
@@ -148,10 +148,10 @@ bool SiconosMatrix::read(const string& fileName, const string& mode)
         fread((char*)&mat(i, j), sizeof(double), 1, inFile); // read a double
 
     fclose(inFile);
-    return true;
+    tmp = true;
   }
 
-  if (mode == "ascii")
+  else if (mode == "ascii")
   {
     ifstream inFile(fileName.c_str(),  ifstream::in);
 
@@ -168,10 +168,11 @@ bool SiconosMatrix::read(const string& fileName, const string& mode)
       for (int j = 0; j < n; j++)
         inFile >> mat(i, j);
     inFile.close();
-    return true;
+    tmp = true;
   }
   else
     SiconosMatrixException::selfThrow("Incorrect mode for reading");
+  return tmp;
 }
 
 bool SiconosMatrix::write(const string& fileName, const string& mode) const
@@ -257,20 +258,20 @@ SiconosMatrix SiconosMatrix::multTranspose(SiconosMatrix &B)
   return result;
 }
 
-void SiconosMatrix::blockMatrixCopy(SiconosMatrix &blockMat, const int& xPos, const int& yPos)
+void SiconosMatrix::blockMatrixCopy(SiconosMatrix &blockMat, const unsigned int& xPos, const unsigned int& yPos)
 {
-  if (xPos > mat.size(0) || yPos > mat.size(1))
+  if ((int)xPos > mat.size(0) || (int)yPos > mat.size(1))
   {
     SiconosMatrixException::selfThrow("ERROR. SiconosMatrix::blockMatrixCopy : Cannot copy block matrix into specified matrix [block matrix to copy is too big]");
   }
-  else if ((xPos + blockMat.size(0)) > mat.size(0) || (yPos + blockMat.size(1)) > mat.size(1))
+  else if ((int)(xPos + blockMat.size(0)) > mat.size(0) || (int)(yPos + blockMat.size(1)) > mat.size(1))
   {
     SiconosMatrixException::selfThrow("ERROR. SiconosMatrix::blockMatrixCopy : Cannot copy block matrix into specified matrix [bad position for the copy of the block matrix]");
   }
   else
   {
-    for (int i = 0; i < blockMat.size(0); i++)
-      for (int j = 0; j < blockMat.size(1); j++)
+    for (unsigned int i = 0; i < blockMat.size(0); i++)
+      for (unsigned int j = 0; j < blockMat.size(1); j++)
         mat(i + xPos, j + yPos) = blockMat(i, j);
   }
 }
@@ -325,7 +326,7 @@ SiconosMatrix& SiconosMatrix::operator = (const SiconosMatrix& m)
     if (ipiv != NULL)
     {
       delete ipiv;
-      ipiv == NULL;
+      ipiv = NULL;
     }
   }
   else
@@ -356,13 +357,13 @@ SiconosMatrix& SiconosMatrix::operator = (const SiconosMatrix& m)
 bool operator == (const SiconosMatrix& m1, const SiconosMatrix& m2)
 {
   SiconosMatrix::verbose("WARNING : operator == and != not performed by Blas.");
-  int m = m1.size(0);
-  int n = m1.size(1);
+  unsigned int m = m1.size(0);
+  unsigned int n = m1.size(1);
 
   if ((m != m2.size(0)) || (n != m2.size(1)))
     return false;
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j < n; j++)
+  for (unsigned int i = 0; i < m; i++)
+    for (unsigned int j = 0; j < n; j++)
       if ((double)m1.mat(i, j) != (double)m2.mat(i, j))
         return false;
   return true;
@@ -391,22 +392,19 @@ SiconosMatrix operator * (const SiconosMatrix& m1, const SiconosMatrix& m2)
 /*************************************************/
 SiconosMatrix operator + (const SiconosMatrix& m1, const SiconosMatrix& m2)
 {
-  if ((m1.mat.size(0) == m2.mat.size(0)) && (m1.mat.size(1) == m2.mat.size(1)))
-    return (m1.mat + m2.mat);
-  else
-    SiconosMatrixException::selfThrow("Incompatible matrix dimension. Addition is impossible");
+  if ((m1.mat.size(0) != m2.mat.size(0)) || (m1.mat.size(1) != m2.mat.size(1)))
+    SiconosMatrixException::selfThrow("Matrix addition: inconsistent sizes");
+  return (m1.mat + m2.mat);
 }
 
 
 /*************************************************/
 SiconosMatrix operator - (const SiconosMatrix& m1, const SiconosMatrix& m2)
 {
-  if ((m1.mat.size(0) == m2.mat.size(0)) && (m1.mat.size(1) == m2.mat.size(1)))
-    return (m1.mat - m2.mat);
-  else
-    SiconosMatrixException::selfThrow("Incompatible matrix dimension. Subtraction is impossible");
+  if ((m1.mat.size(0) != m2.mat.size(0)) || (m1.mat.size(1) != m2.mat.size(1)))
+    SiconosMatrixException::selfThrow("Matrices substraction : inconsistent sizes");
+  return (m1.mat - m2.mat);
 }
-
 
 /*************************************************/
 SiconosMatrix operator * (const SiconosMatrix& mat, const double& d)
@@ -428,8 +426,7 @@ SiconosMatrix operator / (const SiconosMatrix& m, const double d)
 {
   if (d == 0.0)
     SiconosMatrixException::selfThrow("Operator '/' : try to divide by 0");
-  else
-    return (m * (1 / d));
+  return (m * (1 / d));
 }
 
 /*************************************************/
@@ -554,7 +551,7 @@ void  SiconosMatrix::PLUInverseInPlace()
   F77NAME(dgetri)(&nbRow, &(mat(0, 0)), &lda, &((*(ipiv))(0)), &(work(0, 0)), &lwork, &info);
 
   // Second step :  allocation of the Workspace and computtuaion of the inverse.
-  lwork = work(0, 0);
+  lwork = static_cast<long int>(work(0, 0));
   work.mat.resize(lwork, lwork);
 
   F77NAME(dgetri)(&nbRow, &(mat(0, 0)), &lda, &((*(ipiv))(0)), &(work(0, 0)), &lwork, &info);
@@ -685,7 +682,7 @@ SiconosMatrix  BlockMatrixAssemble(vector<SiconosMatrix*> VM)
 {
   IN("SiconosMatrix BlockMatrixAssemble\n");
   // compute the size of the result
-  int i, size = 0;
+  unsigned int i, size = 0;
   SiconosMatrix res;
 
 
@@ -697,19 +694,16 @@ SiconosMatrix  BlockMatrixAssemble(vector<SiconosMatrix*> VM)
   res.zero();
 
   // assemble the blocks
-  int start = 0;
-  int sizeOfBlock = 0;
+  unsigned int start = 0;
+  unsigned int sizeOfBlock = 0;
 
-  for (int k = 0; k < VM.size(); k++)
+  for (unsigned int k = 0; k < VM.size(); k++)
   {
     sizeOfBlock = VM[k]->size(0);
-    for (int i = start; i < start + sizeOfBlock; i++)
+    for (unsigned int i = start; i < start + sizeOfBlock; i++)
     {
-      for (int j = start; j < start + sizeOfBlock; j++)
-      {
+      for (unsigned int j = start; j < start + sizeOfBlock; j++)
         res(i, j) = (*VM[k])(i - start, j - start);
-        //cout<<i<<" "<<j<<endl;
-      }
     }
     start += sizeOfBlock;
   }

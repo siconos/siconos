@@ -3,14 +3,10 @@
 using namespace std;
 
 
-OneStepNSProblemXML::OneStepNSProblemXML()
-{
-  this->rootNSProblemXMLNode = NULL;
-  this->nNode = NULL;
-  this->interactionConcernedNode = NULL;
-  this->solverNode = NULL;
-  this->solverAlgorithmNode = NULL;
-}
+OneStepNSProblemXML::OneStepNSProblemXML():
+  rootNSProblemXMLNode(NULL), rootNode(NULL), interactionConcernedNode(NULL),
+  solverNode(NULL), solverAlgorithmNode(NULL), nNode(NULL)
+{}
 
 OneStepNSProblemXML::OneStepNSProblemXML(xmlNode * oneStepNSProblemXMLNode, vector<int> definedInteractionNumbers)
 {
@@ -96,8 +92,8 @@ void OneStepNSProblemXML::loadOneStepNSProblemConcernedInteraction(xmlNode * int
 {
   xmlNode *interactionNode;
   int number;
-  int size = 0;
-  int i = 0, j = 0;
+  int size = 0, i = 0;
+  unsigned int j = 0;
 
   interactionNumbersVector.clear();
 
@@ -139,7 +135,7 @@ void OneStepNSProblemXML::loadOneStepNSProblemConcernedInteraction(xmlNode * int
 
 void OneStepNSProblemXML::setInteractionConcerned(vector<int> v, bool all)
 {
-  int i;
+  unsigned int i;
   xmlNode* node;
   xmlNode* interactionNode;
   char num[32];
@@ -202,8 +198,6 @@ void OneStepNSProblemXML::setInteractionConcerned(vector<int> v, bool all)
 void OneStepNSProblemXML::setSolver(string name, string methodName, string normType,
                                     double tolerance, int maxIter, double searchDirection)
 {
-  int tmpInt;
-  double tmpDouble;
   char tmpChar[128];
   xmlNode *node;
 

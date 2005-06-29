@@ -13,14 +13,6 @@ NonSmoothLaw::NonSmoothLaw(NonSmoothLawXML* newNsLawXml): nsLawType("none"), nsl
 NonSmoothLaw::~NonSmoothLaw()
 {}
 
-void NonSmoothLaw::saveNonSmoothLawToXML()
-{
-  IN("NonSmoothLaw::saveNonSmoothLawToXML\n");
-  if (nslawxml == NULL)
-    RuntimeException::selfThrow("NonSmoothLaw::saveNonSmoothLawToXML - The NonSmoothLawXML object doesn't exists");
-  OUT("NonSmoothLaw::saveNonSmoothLawToXML\n");
-}
-
 void NonSmoothLaw::display() const
 {
   IN("NonSmoothLaw::display\n");

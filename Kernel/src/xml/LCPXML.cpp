@@ -24,22 +24,14 @@ LCPXML::LCPXML(xmlNode * LCPNode, vector<int> definedInteractionNumbers)
     this->MNode = node;
   }
   else
-  {
-    //XMLException::selfThrow("LCPXML - constructor : tag " + LCP_M + " not found.");
     this->MNode = NULL;
-    cout << "LCPXML - constructor : tag " << LCP_M << " not found. Optional attribute." << endl;
-  }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(lcpModelNode, LCP_Q)) != NULL)
   {
     this->qNode = node;
   }
   else
-  {
-    //XMLException::selfThrow("LCPXML - constructor : tag " + LCP_Q + " not found.");
     this->qNode = NULL;
-    cout << "LCPXML - constructor : tag " << LCP_Q << " not found. Optional attribute." << endl;
-  }
 }
 
 

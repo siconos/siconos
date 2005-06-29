@@ -76,7 +76,7 @@ void EqualityConstraintXML::loadECConcernedDSIO(xmlNode * DSIOConcernedNode/*, v
   int number;
   //int size = SiconosDOMTreeTools::getIntegerAttributeValue(DSConcernedNode, INTERACTION_SIZE);
   int size = 0;
-  int i = 0, j = 0;
+  int i = 0;
 
   if ((DSIOnode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)DSIOConcernedNode, DSINPUTOUTPUT_TAG)) == NULL)
   {
@@ -114,8 +114,6 @@ void EqualityConstraintXML::setDSIOConcerned(vector<int> dsioConcerned)
 {
   if (this->dsioConcernedNode == NULL)
   {
-    int i;
-    int number;
     xmlNode* node;
 
     //    // conversion of the vector<DynamicalSystem*> in vector< vector<int> >
@@ -134,7 +132,7 @@ void EqualityConstraintXML::setDSIOConcerned(vector<int> dsioConcerned)
      */
     this->dsioConcernedNode = xmlNewChild(this->rootNode, NULL, (xmlChar*)EQUALITYCONSTRAINT_DSIO_CONCERNED.c_str(), NULL);
 
-    for (i = 0; i < this->definedDSIONumbers.size(); i++)
+    for (unsigned int i = 0; i < this->definedDSIONumbers.size(); i++)
     {
       node = xmlNewChild(this->dsioConcernedNode, NULL, (xmlChar*)DSINPUTOUTPUT_TAG.c_str(), NULL);
       sprintf(num, "%i", this->definedDSIONumbers[i]);

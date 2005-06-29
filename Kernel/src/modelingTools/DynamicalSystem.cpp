@@ -14,8 +14,11 @@ using namespace std;
 
 
 // From XML file
-DynamicalSystem::DynamicalSystem(DSXML * dsXML):  DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
-  stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(dsXML), vectorFieldPtr(NULL)
+DynamicalSystem::DynamicalSystem(DSXML * dsXML):
+  DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
+  stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(dsXML), vectorFieldPtr(NULL),
+  isX0AllocatedIn(true), isXAllocatedIn(true), isXMemoryAllocatedIn(false), isXDotAllocatedIn(true), isXDotMemoryAllocatedIn(false),
+  isXFreeAllocatedIn(true), isRAllocatedIn(true), isRMemoryAllocatedIn(false), isJacobianXAllocatedIn(true), isBCAllocatedIn(false)
 {
   IN("DynamicalSystem::DynamicalSystem - XML constructor\n");
   // --- get values in xml file ---
@@ -36,10 +39,18 @@ DynamicalSystem::DynamicalSystem(DSXML * dsXML):  DSType(NLDS), nsds(NULL), numb
     // xml loading of vector and matrix members
     if (dsxml->hasX0() == true) *(x0) = dsxml->getX0();
     if (dsxml->hasX() == true) *(x) = dsxml->getX();
-    if (dsxml->hasXMemory() == true) xMemory = SiconosMemory::SiconosMemory(dsxml->getXMemoryXML()); //dsxml->getXMemory();
     if (dsxml->hasXDot() == true) *(xDot) = dsxml->getXDot();
-    if (dsxml->hasXDotMemory() == true) xDotMemory = SiconosMemory::SiconosMemory(dsxml->getXDotMemoryXML()); //dsxml->getXDotMemory();
     if (dsxml->hasStepsInMemory() == true) stepsInMemory = dsxml->getStepsInMemory();
+    if (dsxml->hasXMemory() == true)
+    {
+      xMemory = new SiconosMemory(dsxml->getXMemoryXML());
+      isXMemoryAllocatedIn = true;
+    }
+    if (dsxml->hasXDotMemory() == true)
+    {
+      xDotMemory = new SiconosMemory(dsxml->getXDotMemoryXML());
+      isXDotMemoryAllocatedIn = true;
+    }
 
     // --- Plugins ---
     string plugin;
@@ -62,16 +73,16 @@ DynamicalSystem::DynamicalSystem(DSXML * dsXML):  DSType(NLDS), nsds(NULL), numb
     fillDsioFromXml();
   }
   else
-  {
     cout << "DynamicalSystem::DynamicalSystem - DSXML paramater must not be NULL" << endl;
-  }
   OUT("DynamicalSystem::DynamicalSystem - XML constructor\n");
 }
 
 // From a minimum set of data
 DynamicalSystem::DynamicalSystem(int newNumber, int newN, SiconosVector* newX0, string vectorFieldPlugin):
   DSType(NLDS), nsds(NULL), number(newNumber), id("none"), n(newN), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
-  stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(NULL), vectorFieldPtr(NULL)
+  stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(NULL), vectorFieldPtr(NULL),
+  isX0AllocatedIn(true), isXAllocatedIn(true), isXMemoryAllocatedIn(false), isXDotAllocatedIn(true), isXDotMemoryAllocatedIn(false),
+  isXFreeAllocatedIn(true), isRAllocatedIn(true), isRMemoryAllocatedIn(false), isJacobianXAllocatedIn(true), isBCAllocatedIn(false)
 {
   IN("DynamicalSystem::DynamicalSystem - Minimum data constructor\n");
   x0 = new SimpleVector(n);
@@ -90,25 +101,64 @@ DynamicalSystem::DynamicalSystem(int newNumber, int newN, SiconosVector* newX0, 
 DynamicalSystem::~DynamicalSystem()
 {
   IN("DynamicalSystem::~DynamicalSystem()\n");
-  delete x0;
-  x0 = NULL ;
-  delete x;
-  x = NULL;
-  delete xDot;
-  xDot = NULL;
-  delete xFree;
-  xFree = NULL;
-  delete r;
-  r = NULL;
-  delete jacobianX;
-  jacobianX = NULL;
-  for (int i = 0; i < dsioVector.size(); i++)
+  if (isX0AllocatedIn)
   {
-    delete dsioVector[i];
-    dsioVector[i] = NULL;
+    delete x0;
+    x0 = NULL ;
   }
-  delete BC;
-  BC = NULL;
+  if (isXAllocatedIn)
+  {
+    delete x;
+    x = NULL;
+  }
+  if (isXMemoryAllocatedIn)
+  {
+    delete xMemory;
+    xMemory = NULL;
+  }
+  if (isXDotAllocatedIn)
+  {
+    delete xDot;
+    xDot = NULL;
+  }
+  if (isXDotMemoryAllocatedIn)
+  {
+    delete xDotMemory;
+    xDotMemory = NULL;
+  }
+  if (isXFreeAllocatedIn)
+  {
+    delete xFree;
+    xFree = NULL;
+  }
+  if (isRAllocatedIn)
+  {
+    delete r;
+    r = NULL;
+  }
+  if (isRMemoryAllocatedIn)
+  {
+    delete rMemory;
+    rMemory = NULL;
+  }
+  if (isJacobianXAllocatedIn)
+  {
+    delete jacobianX;
+    jacobianX = NULL;
+  }
+  for (unsigned int i = 0; i < dsioVector.size(); i++)
+  {
+    if (isDsioAllocatedIn[i])
+    {
+      delete dsioVector[i];
+      dsioVector[i] = NULL;
+    }
+  }
+  if (isBCAllocatedIn)
+  {
+    delete BC;
+    BC = NULL;
+  }
   OUT("DynamicalSystem::~DynamicalSystem()\n");
 }
 
@@ -123,12 +173,14 @@ void DynamicalSystem::fillBoundaryConditionsFromXml()
       //  Linear BC
       BC = new LinearBC();
       static_cast<LinearBC*>(BC)->createBoundaryCondition(dsxml->getBoundaryConditionXML());
+      isBCAllocatedIn = true;
     }
     else if (dsxml->getBoundaryConditionXML()->getType() == NON_LINEARBC_TAG)
     {
       // Non linear BC
       BC = new NLinearBC();
       static_cast<NLinearBC*>(BC)->createBoundaryCondition(dsxml->getBoundaryConditionXML());
+      isBCAllocatedIn = true;
     }
 
     else if (dsxml->getBoundaryConditionXML()->getType() == PERIODICBC_TAG)
@@ -136,6 +188,7 @@ void DynamicalSystem::fillBoundaryConditionsFromXml()
       // Periodic BC
       BC = new PeriodicBC();
       static_cast<PeriodicBC*>(BC)->createBoundaryCondition(dsxml->getBoundaryConditionXML());
+      isBCAllocatedIn = true;
     }
     else RuntimeException::selfThrow("DynamicalSystem::linkDSXML - bad kind of BoundaryCondition : " + dsxml->getBoundaryConditionXML()->getType());
   }
@@ -149,13 +202,14 @@ void DynamicalSystem::fillDsioFromXml()
   DSInputOutput *dsio;
   // get the numbers of DSIO
   vector<int> nbDSIOtab = dsxml->getDSInputOutputNumbers();
-  for (int i = 0; i < nbDSIOtab.size(); i++)
+  for (unsigned int i = 0; i < nbDSIOtab.size(); i++)
   {
     if (dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LINEAR_DSIO_TAG)
     {
       // Linear DSIO
       dsio = new LinearDSIO();
       dsioVector.push_back(dsio);
+      isDsioAllocatedIn.push_back(true);
       static_cast<LinearDSIO*>(dsio)->createDSInputOutput(dsxml->getDSInputOutputXML(nbDSIOtab[i]));
     }
     else if (dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == NON_LINEAR_DSIO_TAG)
@@ -163,6 +217,7 @@ void DynamicalSystem::fillDsioFromXml()
       // Non linear DSIO
       dsio = new DSInputOutput();
       dsioVector.push_back(dsio);
+      isDsioAllocatedIn.push_back(true);
       static_cast<DSInputOutput*>(dsio)->createDSInputOutput(dsxml->getDSInputOutputXML(nbDSIOtab[i]));
     }
     else if (dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LAGRANGIAN_DSIO_TAG)
@@ -170,6 +225,7 @@ void DynamicalSystem::fillDsioFromXml()
       // Lagrangian DSIO
       dsio = new LagrangianDSIO();
       dsioVector.push_back(dsio);
+      isDsioAllocatedIn.push_back(true);
       static_cast<LagrangianDSIO*>(dsio)->createDSInputOutput(dsxml->getDSInputOutputXML(nbDSIOtab[i]));
     }
     else if (dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LAGRANGIAN_LINEAR_DSIO_TAG)
@@ -177,6 +233,7 @@ void DynamicalSystem::fillDsioFromXml()
       // Linear lagrangian DSIO
       dsio = new LagrangianDSIO();
       dsioVector.push_back(dsio);
+      isDsioAllocatedIn.push_back(true);
       static_cast<LagrangianLinearDSIO*>(dsio)->createDSInputOutput(dsxml->getDSInputOutputXML(nbDSIOtab[i]));
     }
     else RuntimeException::selfThrow("DynamicalSystem::linkDSXML - bad kind of DSInputOutput: " + dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType());
@@ -184,16 +241,83 @@ void DynamicalSystem::fillDsioFromXml()
   OUT("DynamicalSystem::fillDsioFromXml\n");
 }
 
-DSInputOutput* DynamicalSystem::getDSInputOutput(int i)
+
+void DynamicalSystem::setX0Ptr(SiconosVector* newPtr)
 {
-  if (i < dsioVector.size())
-  {
-    return dsioVector[i];
-  }
-  else RuntimeException::selfThrow("DS - getDSInputOutput : \'i\' is out of range");
+  if (isX0AllocatedIn) delete x0;
+  x0 = newPtr;
+  isX0AllocatedIn = false;
 }
 
-////////////////////////////
+void DynamicalSystem::setXPtr(SiconosVector* newPtr)
+{
+  if (isXAllocatedIn) delete x;
+  x = newPtr;
+  isXAllocatedIn = false;
+}
+
+void DynamicalSystem::setXMemoryPtr(SiconosMemory * newPtr)
+{
+  if (isXMemoryAllocatedIn) delete xMemory;
+  xMemory = newPtr;
+  isXMemoryAllocatedIn = false;
+}
+
+void DynamicalSystem::setXDotPtr(SiconosVector* newPtr)
+{
+  if (isXDotAllocatedIn) delete xDot;
+  xDot = newPtr;
+  isXDotAllocatedIn = false;
+}
+
+void DynamicalSystem::setXDotMemoryPtr(SiconosMemory * newPtr)
+{
+  if (isXDotMemoryAllocatedIn) delete xDotMemory;
+  xDotMemory = newPtr;
+  isXDotMemoryAllocatedIn = false;
+}
+
+void DynamicalSystem::setXFreePtr(SiconosVector* newPtr)
+{
+  if (isXFreeAllocatedIn) delete xFree;
+  xFree = newPtr;
+  isXFreeAllocatedIn = false;
+}
+
+void DynamicalSystem::setRPtr(SimpleVector *newPtr)
+{
+  if (isRAllocatedIn) delete r;
+  r = newPtr;
+  isRAllocatedIn = false;
+}
+
+void DynamicalSystem::setRMemoryPtr(SiconosMemory * newPtr)
+{
+  if (isRMemoryAllocatedIn) delete rMemory;
+  rMemory = newPtr;
+  isRMemoryAllocatedIn = false;
+}
+
+void DynamicalSystem::setJacobianXPtr(SiconosMatrix *newPtr)
+{
+  if (isJacobianXAllocatedIn) delete jacobianX;
+  jacobianX = newPtr;
+  isJacobianXAllocatedIn = false;
+}
+
+DSInputOutput* DynamicalSystem::getDSInputOutput(const unsigned int& i)
+{
+  if (i >= dsioVector.size())
+    RuntimeException::selfThrow("DS - getDSInputOutput : \'i\' is out of range");
+  return dsioVector[i];
+}
+
+void DynamicalSystem::setBoundaryConditionPtr(BoundaryCondition *newBC)
+{
+  if (isBCAllocatedIn) delete BC;
+  BC = newBC;
+  isBCAllocatedIn = false;
+}
 
 void DynamicalSystem::setVectorFieldFunction(const string& pluginPath, const string& functionName)
 {
@@ -239,9 +363,9 @@ void DynamicalSystem::computeJacobianX(const double& time)
 void DynamicalSystem::swapInMemory(void)
 {
   IN("DynamicalSystem::swapInMemory\n ");
-  xMemory.swap(x);
-  xDotMemory.swap(xDot);
-  rMemory.swap(r);
+  xMemory->swap(*x);
+  xDotMemory->swap(*xDot);
+  rMemory->swap(*r);
   OUT("DynamicalSystem::swapInMemory\n ");
 }
 
@@ -274,27 +398,26 @@ void DynamicalSystem::display() const
 
 }
 
-void DynamicalSystem::initMemory(const int& steps)
+void DynamicalSystem::initMemory(const unsigned int& steps)
 {
   IN("DynamicalSystem::initMemory\n");
-  if (steps < 0)
-    RuntimeException::selfThrow("DynamicalSystem::initMemory(int steps) - steps < 0");
+  if (steps == 0)
+    cout << "Warning : DynamicalSystem::initMemory with size equal to zero" << endl;
   else
   {
+    // \warning FP: explicit call to xml; what about other cases (without xml)? To be reviewed
     stepsInMemory = steps;
-
-    /*
-    ** we made the initialization of the memories
-    *
-    * for rMemory, we don't need to load data for the DOM tree because there are no data saved in the XML for r
-    *
-    * the other memories are resized with the first parameter 'steps', and data are reloaded from the DOM tree
-    * only if there are data in the DOM tree
-    */
-
-    rMemory = SiconosMemory::SiconosMemory(steps);
-    xMemory = SiconosMemory::SiconosMemory(steps, xMemory.getSiconosMemoryXML());
-    xDotMemory = SiconosMemory::SiconosMemory(steps, xDotMemory.getSiconosMemoryXML());
+    if (isXMemoryAllocatedIn) delete rMemory;
+    //xMemory = new SiconosMemory(steps, xMemory.getSiconosMemoryXML() );
+    xMemory = new SiconosMemory(steps);
+    isXMemoryAllocatedIn = true;
+    if (isXDotMemoryAllocatedIn) delete rMemory;
+    //xDotMemory = new SiconosMemory(steps, xDotMemory.getSiconosMemoryXML());
+    xDotMemory = new SiconosMemory(steps);
+    isXDotMemoryAllocatedIn = true;
+    if (isRMemoryAllocatedIn) delete rMemory;
+    rMemory = new SiconosMemory(steps);
+    isRMemoryAllocatedIn = true;
   }
 
   OUT("DynamicalSystem::initMemory\n");
@@ -334,9 +457,9 @@ void DynamicalSystem::saveDSDataToXML()
     dsxml->setId(id);
     dsxml->setX0(x0);
     dsxml->setX(x);
-    dsxml->setXMemory(&(xMemory));
+    dsxml->setXMemory(xMemory);
     dsxml->setXDot(xDot);
-    dsxml->setXDotMemory(&(xDotMemory));
+    dsxml->setXDotMemory(xDotMemory);
     dsxml->setStepsInMemory(stepsInMemory);
     dsxml->setR(r);
   }
@@ -365,7 +488,7 @@ void DynamicalSystem::saveDSIOToXML()
 {
   if (dsioVector.size() != 0)
   {
-    for (int i = 0; i < dsioVector.size(); i++)
+    for (unsigned int i = 0; i < dsioVector.size(); i++)
     {
       if (dsioVector[i]->getType() == LINEARDSIO)
         (static_cast<LinearDSIO*>(dsioVector[i]))->saveDSInputOutputToXML();
@@ -381,6 +504,7 @@ void DynamicalSystem::saveDSIOToXML()
 BoundaryCondition* DynamicalSystem::createPeriodicBC()
 {
   BC = new PeriodicBC();
+  isBCAllocatedIn = true;
   static_cast<PeriodicBC*>(BC)->createBoundaryCondition(0);
   return BC;
 }
@@ -388,6 +512,7 @@ BoundaryCondition* DynamicalSystem::createPeriodicBC()
 BoundaryCondition* DynamicalSystem::createLinearBC(SiconosVector* omega, SiconosMatrix* omega0, SiconosMatrix* omegaT)
 {
   BC = new LinearBC();
+  isBCAllocatedIn = true;
   static_cast<LinearBC*>(BC)->createBoundaryCondition(0, omega, omega0, omegaT);
   return BC;
 }
@@ -395,6 +520,7 @@ BoundaryCondition* DynamicalSystem::createLinearBC(SiconosVector* omega, Siconos
 BoundaryCondition* DynamicalSystem::createNLinearBC()
 {
   BC = new NLinearBC();
+  isBCAllocatedIn = true;
   static_cast<NLinearBC*>(BC)->createBoundaryCondition(0);
   return BC;
 }
@@ -402,15 +528,19 @@ BoundaryCondition* DynamicalSystem::createNLinearBC()
 double DynamicalSystem::dsConvergenceIndicator()
 {
   RuntimeException::selfThrow("DynamicalSystem:dsConvergenceIndicator - not yet implemented for Dynamical system type :" + DSType);
+  return 0;
 }
 
 // Default constructor
-DynamicalSystem::DynamicalSystem(): DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
-  stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(NULL), vectorFieldPtr(NULL)
+DynamicalSystem::DynamicalSystem():
+  DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
+  stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(NULL), vectorFieldPtr(NULL), isX0AllocatedIn(false),
+  isXAllocatedIn(false), isXMemoryAllocatedIn(false), isXDotAllocatedIn(false), isXDotMemoryAllocatedIn(false),
+  isXFreeAllocatedIn(false), isRAllocatedIn(false), isRMemoryAllocatedIn(false), isJacobianXAllocatedIn(false),
+  isBCAllocatedIn(false)
+
 {
-  IN("DynamicalSystem::DynamicalSystem - Default constructor\n");
   // --- plugins -> connected to  "false" plugin
   setVectorFieldFunction("BasicPlugin.so", "vectorField");
   setComputeJacobianXFunction("BasicPlugin.so", "computeJacobianX");
-  OUT("DynamicalSystem::DynamicalSystem - Default constructor\n");
 }

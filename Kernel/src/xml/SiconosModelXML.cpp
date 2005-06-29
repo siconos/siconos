@@ -45,21 +45,29 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
   if (siconosModelXMLFilePath != NULL)
   {
     //      LIBXML_TEST_VERSION
-    //----------Loads the XML input file------------//
+
+    //---------- XML input file loading ------------//
     doc = xmlParseFile(siconosModelXMLFilePath);
 
     if (doc == NULL)
-      XMLException::selfThrow("SiconosModelXML - Could not find or error(s) in your model XML file : " + (string)siconosModelXMLFilePath + ".");
+      XMLException::selfThrow("SiconosModelXML - Document " + (string)siconosModelXMLFilePath + " not parsed successfully.");
 
-    //------------Verify if the root element node exists----------//
+    //------------ Retrieve the document's root element ----------//
     xmlNode *newRootNode = xmlDocGetRootElement(doc);
 
     if (newRootNode == NULL)
     {
       xmlFreeDoc(doc);
-      XMLException::selfThrow("SiconosModelXML - Internal error : get the root node.");
+      XMLException::selfThrow("SiconosModelXML - Empty xml document");
     }
     else rootNode = newRootNode;
+
+    //------------- Check document is of the right type (SiconosModel) ----- //
+    if (xmlStrcmp(rootNode->name, (const xmlChar *) "SiconosModel"))
+    {
+      XMLException::selfThrow("SiconosModelXML - Wrong xml document type, root node !=SiconosModel.");
+      xmlFreeDoc(doc);
+    }
 
     //----------Loads the XML schema------------//
     /* 1- gets the value of the node which contains the tag "XMLSchema"
@@ -71,8 +79,7 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
     {
       xmlSchemaFile = SiconosDOMTreeTools::getStringContentValue(xmlSchemaGiven);
       // checks if the path of the file is well formed
-      int cpt = 0;
-      bool wellFormed = false;
+      unsigned int cpt = 0;
       bool goodFile = true;
 
       /*
@@ -400,7 +407,7 @@ bool SiconosModelXML::checkSiconosDOMTreeCoherency()
   bool res = true;
   //  string errormsg;
   char errormsg[256];
-  int i;
+  unsigned int i;
   IN("SiconosModelXML::checkSiconosDOMTreeCoherency\n");
   /*
    * Matrices and Vector can come from the XML file, an external file or a plugin,

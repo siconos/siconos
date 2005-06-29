@@ -106,9 +106,9 @@ public:
     */
   inline std::string getComputeInputPlugin()
   {
-    if (this->isComputeInputPlugin())
-      return  SiconosDOMTreeTools::getStringAttributeValue(this->computeInputNode, PLUGIN_ATTRIBUTE);
-    XMLException::selfThrow("EqualityConstraintXML - getComputeInputPlugin : computeInput is not calculated from a plugin ; Fint vector is given");
+    if (!isComputeInputPlugin())
+      XMLException::selfThrow("EqualityConstraintXML - getComputeInputPlugin : computeInput is not calculated from a plugin ; Fint vector is given");
+    return  SiconosDOMTreeTools::getStringAttributeValue(this->computeInputNode, PLUGIN_ATTRIBUTE);
   }
 
   /** \fn inline string getComputeOutputPlugin()
@@ -118,9 +118,9 @@ public:
   */
   inline std::string getComputeOutputPlugin()
   {
-    if (this->isComputeOutputPlugin())
-      return  SiconosDOMTreeTools::getStringAttributeValue(this->computeOutputNode, PLUGIN_ATTRIBUTE);
-    XMLException::selfThrow("EqualityConstraintXML - getComputeOutputPlugin : computeOutput is not calculated from a plugin ; Fint vector is given");
+    if (!isComputeOutputPlugin())
+      XMLException::selfThrow("EqualityConstraintXML - getComputeOutputPlugin : computeOutput is not calculated from a plugin ; Fint vector is given");
+    return  SiconosDOMTreeTools::getStringAttributeValue(this->computeOutputNode, PLUGIN_ATTRIBUTE);
   }
 
   /** \fn void setComputeInputPlugin(string plugin)
@@ -130,7 +130,7 @@ public:
   */
   inline void setComputeInputPlugin(std::string plugin)
   {
-    if (this->computeInputNode == NULL)
+    if (computeInputNode == NULL)
     {
       this->computeInputNode = SiconosDOMTreeTools::createSingleNode(this->rootNode, COMPUTE_INPUT_TAG);
       xmlNewProp(this->computeInputNode, (xmlChar*)(PLUGIN_ATTRIBUTE.c_str()), (xmlChar*)plugin.c_str());

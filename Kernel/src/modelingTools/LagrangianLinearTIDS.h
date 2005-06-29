@@ -143,11 +143,7 @@ public:
    *  \brief set K to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setKPtr(SiconosMatrix *newPtr)
-  {
-    delete K;
-    K = newPtr;
-  }
+  void setKPtr(SiconosMatrix *newPtr);
 
   // -- C --
   /** \fn  const SiconosMatrix getC() const
@@ -181,11 +177,7 @@ public:
    *  \brief set C to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setCPtr(SiconosMatrix *newPtr)
-  {
-    delete C;
-    C = newPtr;
-  }
+  void setCPtr(SiconosMatrix *newPtr) ;
 
   // --- Miscellaneous ---
 
@@ -219,6 +211,10 @@ private:
 
   /** specific matrix for a LagrangianLinearTIDS */
   SiconosMatrix *C;
+
+  /** Flags to know if pointers have been allocated inside constructors or not */
+  bool isKAllocatedIn;
+  bool isCAllocatedIn;
 };
 
 #endif // LAGRANGIANTIDS_H

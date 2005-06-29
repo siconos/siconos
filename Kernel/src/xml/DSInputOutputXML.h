@@ -37,9 +37,9 @@ public:
    */
   inline std::string getComputeInputPlugin()
   {
-    if (this->isComputeInputPlugin())
-      return  SiconosDOMTreeTools::getStringAttributeValue(this->computeInputNode, PLUGIN_ATTRIBUTE);
-    XMLException::selfThrow("DSInputOutputXML - getComputeInputPlugin : computeInput is not calculated from a plugin ; Fint vector is given");
+    if (!isComputeInputPlugin())
+      XMLException::selfThrow("DSInputOutputXML - getComputeInputPlugin : computeInput is not calculated from a plugin ; Fint vector is given");
+    return  SiconosDOMTreeTools::getStringAttributeValue(this->computeInputNode, PLUGIN_ATTRIBUTE);
   }
 
   /** \fn inline string getComputeOutputPlugin()
@@ -49,9 +49,9 @@ public:
    */
   inline std::string getComputeOutputPlugin()
   {
-    if (this->isComputeOutputPlugin())
-      return  SiconosDOMTreeTools::getStringAttributeValue(this->computeOutputNode, PLUGIN_ATTRIBUTE);
-    XMLException::selfThrow("DSInputOutputXML - getComputeOutputPlugin : computeOutput is not calculated from a plugin ; Fint vector is given");
+    if (!isComputeOutputPlugin())
+      XMLException::selfThrow("DSInputOutputXML - getComputeOutputPlugin : computeOutput is not calculated from a plugin ; Fint vector is given");
+    return  SiconosDOMTreeTools::getStringAttributeValue(this->computeOutputNode, PLUGIN_ATTRIBUTE);
   }
 
   /** \fn void setComputeInputPlugin(string plugin)

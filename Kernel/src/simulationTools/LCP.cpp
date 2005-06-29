@@ -8,7 +8,7 @@
 using namespace std;
 
 
-// Default (private) constructor
+// Default constructor
 LCP::LCP(): OneStepNSProblem(), nLcp(0), w(NULL), z(NULL), M(NULL), q(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
 
@@ -24,14 +24,20 @@ LCP::LCP(OneStepNSProblemXML* osNsPbXml, Strategy* newStrat):
   nspbType = LCP_OSNSP;
   if (osNsPbXml != NULL)
   {
+    LCPXML * xmllcp = (static_cast<LCPXML*>(osNsPbXml));
     // no getter-xml for nlcp ...
-    nLcp = ((static_cast<LCPXML*>(onestepnspbxml))->getQ()).size();
+    if (xmllcp->hasQ())
+      nLcp = (xmllcp->getQ()).size();
+    else
+      nLcp = n; // size of the OneStepNSProblem
     w = new SimpleVector(nLcp);
     z = new SimpleVector(nLcp);
     M = new SiconosMatrix(nLcp, nLcp);
     q = new SimpleVector(nLcp);
-    *M = (static_cast<LCPXML*>(onestepnspbxml))->getM();
-    *q = (static_cast<LCPXML*>(onestepnspbxml))->getQ();
+    if (xmllcp->hasM())
+      *M = xmllcp->getM();
+    if (xmllcp->hasQ())
+      *q = xmllcp->getQ();
   }
   else RuntimeException::selfThrow("LCP: xml constructor, xml file=NULL");
 }
@@ -68,7 +74,7 @@ void LCP::formalize(const double& time)
   computeM();
   computeQ(time);
 
-  // check if size w and z are allright
+  // check if size w and z are allright; if not, reallocate.
   if ((isWAllocatedIn) && (w->size() != q->size()))
   {
     delete w;
@@ -85,7 +91,7 @@ void LCP::formalize(const double& time)
 void LCP::compute()
 {
   IN("LCP::compute(void)\n");
-  int res, i, j;
+  int res;
 
   // Call Numerics solver
   if (nLcp == 0)
@@ -94,7 +100,7 @@ void LCP::compute()
     res = solve_lcp(M->getArray(), q->getArray(), &nLcp, &solvingMethod, z->getArray(), w->getArray());
 
   // Update the relation
-  SiconosVector *yDot, *lambda;
+  SimpleVector *yDot, *lambda;
   int activeInteraction = 0;
 
   yDot = interactionVector[0]->getYDotPtr();
@@ -103,7 +109,7 @@ void LCP::compute()
   if (nLcp == 0) lambda->zero();
   else //if (nLcp == 1)
   {
-    for (int i = 0; i < interactionVector.size(); i++)
+    for (unsigned int i = 0; i < interactionVector.size(); i++)
     {
       lambda = interactionVector[i]->getLambdaPtr();
       lambda->zero();
@@ -125,22 +131,22 @@ void LCP::compute()
 void LCP::computeM()
 {
   IN("LCP::computeM(void)\n");
-  int i, j, number;
+  int number;
   int orgDSRank, connectedDSRank;
   int currentActiveInteraction = 0;
   int interConnectedNumber = 0;
   vector<int> status;
-  vector<SiconosMatrix*> v(2);
+  vector<SiconosMatrix*> v;
   vector<DynamicalSystem*> vDS;
   vector<Connection*> vCo;
-  vector<OneStepIntegrator*> OsiV(2);
-  vector<Moreau *> MoreauV(2);
-  SiconosMatrix /*W1, *W2,*/ *H, *WW ;
+  vector<OneStepIntegrator*> OsiV;
+  vector<Moreau *> MoreauV;
+  SiconosMatrix *H, *WW ;
   bool isWWAllocatedIn = false;
   SiconosMatrix orgH, connectedH, wTmp, Mtmp;
   Relation *R, *RConnected;
   LagrangianLinearR *LLR;
-
+  unsigned int i;
   // --- Count the number of active interactions ---
   nLcp = connectedInteractionMap.size();
 
@@ -149,37 +155,44 @@ void LCP::computeM()
   isMAllocatedIn = true;
   M->zero();
 
+  // \todo improve WW organization (WW block-structured)
+
   // --- For each interaction in the Map (ie active interaction) ... ---
   map<Interaction* , vector <Connection*> >::iterator iter;
   for (iter = connectedInteractionMap.begin(); iter != connectedInteractionMap.end(); ++iter)
   {
     Interaction *CurrentInteraction = iter->first;
     vDS.clear();
+    OsiV.clear();
+    MoreauV.clear();
+    v.clear();
 
     // --- Check if W matrix of Moreau's integrator is already inversed ---
     vDS = CurrentInteraction ->getDynamicalSystems();
-    if (vDS.size() == 2)
+    unsigned int sizeDS = vDS.size();
+
+    // Get W matrix of each DS concerned by the interaction
+    for (i = 0; i < sizeDS; i++)
     {
-      for (i = 0; i < 2; i++)
+      number = vDS[i]->getNumber();
+      OsiV.push_back(strategy->getIntegratorOfDSPtr(number));
+      if (OsiV[i]->getType() == MOREAU_INTEGRATOR)
       {
-        number = vDS[i]->getNumber();
-        OsiV[i] = strategy->getIntegratorOfDSPtr(number);
-        if (OsiV[i]->getType() == MOREAU_INTEGRATOR)
-        {
-          MoreauV[i] = static_cast<Moreau*>(OsiV[i]);
-          v[i] = MoreauV[i]->getWPtr();
-          if (!v[i]->isInversed()) v[i]->PLUInverseInPlace();
-        }
-        else
-          RuntimeException::selfThrow("LCP::computeM not yet implemented for Integrator of type " + OsiV[i]->getType());
+        MoreauV.push_back(static_cast<Moreau*>(OsiV[i]));
+        v.push_back(MoreauV[i]->getWPtr());
+        if (!v[i]->isInversed()) v[i]->PLUInverseInPlace();
       }
-      int size = v[0]->size(0) + v[1]->size(0);
-      WW = new SiconosMatrix(size, size);
-      isWWAllocatedIn = true;
-      *WW = BlockMatrixAssemble(v);
+      else
+        RuntimeException::selfThrow("LCP::computeM not yet implemented for Integrator of type " + OsiV[i]->getType());
     }
-    else
-      RuntimeException::selfThrow("LCP::computeM not yet implemented for one DS in an Interaction ");
+
+    // Built block matrix WW with all the W previously saved in v..
+    unsigned int size = v[0]->size(0);
+    for (i = 1; i < sizeDS; i++)
+      size += v[i]->size(0);
+    WW = new SiconosMatrix(size, size);
+    isWWAllocatedIn = true;
+    *WW = BlockMatrixAssemble(v);
 
     // --- Get the relation parameters and compute M ---
     R = CurrentInteraction->getRelationPtr();
@@ -195,13 +208,12 @@ void LCP::computeM()
       RuntimeException::selfThrow("LCP::computeM [level1] not yet implemented for relation of type " + R->getType());
 
     // --- Compute M for connected interactions ---
-
     interConnectedNumber = 0;
     if (iter ->second[0] != NULL)
     {
       // get from the map the connexion vector of the current interaction
       vCo = iter -> second ;
-      for (int k = 0; k < vCo.size(); k++)
+      for (unsigned int k = 0; k < vCo.size(); k++)
       {
         orgDSRank = vCo[k]->originInteractionDSRank;
         connectedDSRank = vCo[k]->connectedInteractionDSRank;
@@ -256,7 +268,8 @@ void LCP::computeQ(const double& time)
   NonSmoothLaw *nslaw;
   NewtonImpactLawNSL * newton;
 
-  SimpleVector qLCPtmp;
+  SimpleVector *qLCPtmp = new SimpleVector(nLcp);
+
   int qPos = 0;
   if (isQAllocatedIn) delete q;
   q = new SimpleVector(nLcp);
@@ -280,8 +293,8 @@ void LCP::computeQ(const double& time)
         newton = static_cast<NewtonImpactLawNSL*>(nslaw);
         double e = newton->getE();
         LLR->computeFreeOutput(time);
-        qLCPtmp = CurrentInteraction -> getYDot();
-        qLCPtmp += e * CurrentInteraction -> getYDotOld();
+        *qLCPtmp = CurrentInteraction -> getYDot();
+        *qLCPtmp += e * CurrentInteraction -> getYDotOld();
         // Assemble q
         //q = (-1)*qLCPtmp;
 
@@ -291,7 +304,7 @@ void LCP::computeQ(const double& time)
          * so for the moment the assemblage of the q vector will be the copy
          * of 1 double value into 'q' for each active interaction
          */
-        (*q)(qPos++) = -qLCPtmp(0);
+        (*q)(qPos++) = -(*qLCPtmp)(0);
       }
       else
         RuntimeException::selfThrow("LCP::computeQ not yet implemented for NSlaw of type " + nslaw->getType() + "and for relation of type " + R->getType());
@@ -299,12 +312,13 @@ void LCP::computeQ(const double& time)
     else
       RuntimeException::selfThrow("LCP::computeQ not yet implemented for relation of type " + R->getType());
   }
+  delete qLCPtmp;
   OUT("LCP::computeQ(void)\n");
 }
 
 void LCP::display() const
 {
-  cout << "------------------------------------------------------" << endl;
+  cout << "======= LCP display ======" << endl;
   cout << "____ data of the LCP " << endl;
   cout << "| nLcp : " << nLcp << endl;
   cout << "| LCP Matrix M  : " << endl;
@@ -313,8 +327,8 @@ void LCP::display() const
   cout << "| LCP vector q : " << endl;
   if (q != NULL) q->display();
   else cout << "-> NULL" << endl;
-  cout << "____________________________" << endl;
-  cout << "------------------------------------------------------" << endl;
+  cout << "==========================" << endl;
+
 }
 
 void LCP::saveNSProblemToXML()

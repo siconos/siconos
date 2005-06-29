@@ -27,10 +27,10 @@ using namespace std;
 
 StrategyXML::StrategyXML()
 {
-  this->DSAvailabilityMap.clear();
+  DSAvailabilityMap.clear();
 
-  this->oneStepNSProblemXML = NULL;
-  this->timeDiscretisationXML = NULL;
+  oneStepNSProblemXML = NULL;
+  timeDiscretisationXML = NULL;
   /*
    * creation of the node of the TimeDiscretisation, OneStepIntegrators and the OneStepNSProblem
    */
@@ -52,28 +52,26 @@ StrategyXML::~StrategyXML()
   if (oneStepNSProblemXML != NULL)
     delete oneStepNSProblemXML;
 
-  if (this->oneStepIntegratorXMLVector.size() > 0)
+  if (oneStepIntegratorXMLVector.size() > 0)
   {
-    for (int i = 0; i < this->oneStepIntegratorXMLVector.size(); i++)
+    for (unsigned int i = 0; i < oneStepIntegratorXMLVector.size(); i++)
     {
-      delete this->oneStepIntegratorXMLVector[i];
+      delete oneStepIntegratorXMLVector[i];
     }
-    this->oneStepIntegratorXMLVector.clear();
+    oneStepIntegratorXMLVector.clear();
   }
 }
 
 
 StrategyXML::StrategyXML(xmlNode * rootStrategyNode, vector<int> definedNumberDS, vector<int> definedNumberInteraction)
 {
-  this->strategyNode = rootStrategyNode;
-  this->DSAvailabilityMap.clear();
+  strategyNode = rootStrategyNode;
+  DSAvailabilityMap.clear();
   // Fill map of available DS
-  for (int i = 0; i < (definedNumberDS.size()); i++)
-  {
-    this->DSAvailabilityMap[definedNumberDS[i]] = true; //available
-  }
+  for (unsigned int i = 0; i < (definedNumberDS.size()); i++)
+    DSAvailabilityMap[definedNumberDS[i]] = true; //available
 
-  this->definedNumberInteractionVector = definedNumberInteraction;
+  definedNumberInteractionVector = definedNumberInteraction;
 
   loadStrategyXML();
 }
@@ -86,7 +84,7 @@ void StrategyXML::loadStrategyXML()
   if ((node = SiconosDOMTreeTools::findNodeChild(strategyNode, LMGC90_STRATEGY_TAG)) == NULL)
   {
     if ((node = SiconosDOMTreeTools::findNodeChild(strategyNode, ONESTEPINTEGRATOR_DEFINITION_TAG)) != NULL)
-      this->loadOneStepIntegratorXML(node);
+      loadOneStepIntegratorXML(node);
     else
       XMLException::selfThrow("StrategyXML - loadStrategyXML ERROR : tag " + ONESTEPINTEGRATOR_DEFINITION_TAG + " not found.");
   }
@@ -110,13 +108,7 @@ void StrategyXML::loadStrategyXML()
     //      }
   }
   else
-  {
-    /*
-     * the OneStepNSProblem is optional, it's needed only when at least an Interaction is defined
-     */
-    cout << "StrategyXML - loadStrategyXML Warning : tag " << ONESTEPNSPROBLEM_TAG << " not found. The OneStepNSProblem is optional" << endl;
     this->oneStepNSProblemXML = NULL;
-  }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(strategyNode, TIMEDISCRETISATION_TAG)) != NULL)
     this->loadTimeDiscretisationXML(node);
@@ -140,23 +132,23 @@ void StrategyXML::loadOneStepIntegratorXML(xmlNode * rootOneStepIntegratorNode)
 
     //type = SiconosDOMTreeTools::getStringAttributeValue(node,STRATEGY_TYPE);
     type = (char*)node->name;
-    cout << "** loadOneStepIntegratorXML cpt = " << cpt << "   type = " << type << endl;
+    cout << "** loadOneStepIntegratorXML  " << cpt << "   type = " << type << endl;
     cpt++;
     if (type == MOREAU_TAG)
     {
-      integratorxml = new MoreauXML(node, this->DSAvailabilityMap);
-      this->oneStepIntegratorXMLVector.push_back(integratorxml);
+      integratorxml = new MoreauXML(node, DSAvailabilityMap);
+      oneStepIntegratorXMLVector.push_back(integratorxml);
     }
 
     else if (type == LSODAR_TAG)
     {
-      integratorxml = new LsodarXML(node, this->DSAvailabilityMap);
-      this->oneStepIntegratorXMLVector.push_back(integratorxml);
+      integratorxml = new LsodarXML(node, DSAvailabilityMap);
+      oneStepIntegratorXMLVector.push_back(integratorxml);
     }
     else if (type == ADAMS_TAG)
     {
-      integratorxml = new AdamsXML(node, this->DSAvailabilityMap);
-      this->oneStepIntegratorXMLVector.push_back(integratorxml);
+      integratorxml = new AdamsXML(node, DSAvailabilityMap);
+      oneStepIntegratorXMLVector.push_back(integratorxml);
     }
     else
       XMLException::selfThrow("StrategyXML : undefined OneStepIntegrator type : " + type);

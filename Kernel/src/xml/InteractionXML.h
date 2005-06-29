@@ -31,6 +31,7 @@ const std::string INTERACTION_LAMBDA = "lambda";
 const std::string INTERACTION_NINTER = "nInter";
 const std::string INTERACTION_DS_CONCERNED = "DS_Concerned";
 const std::string INTERACTION_INTERACTWITHDS_NUMBER = "interactsWithDS_Number";
+const std::string INTERACTION_DS_LIST = "DSList";
 
 class InteractionXML
 {
@@ -62,7 +63,7 @@ public:
    */
   inline int getNumber()
   {
-    return SiconosDOMTreeTools::getIntegerAttributeValue(this->rootInteractionXMLNode, NUMBER_ATTRIBUTE);
+    return SiconosDOMTreeTools::getIntegerAttributeValue(rootInteractionXMLNode, NUMBER_ATTRIBUTE);
   }
 
   /** \fn void setNumber(int i)
@@ -71,7 +72,7 @@ public:
    */
   inline void setNumber(int i)
   {
-    SiconosDOMTreeTools::setIntegerAttributeValue(this->rootInteractionXMLNode, NUMBER_ATTRIBUTE, i);
+    SiconosDOMTreeTools::setIntegerAttributeValue(rootInteractionXMLNode, NUMBER_ATTRIBUTE, i);
   }
 
   /** \fn bool hasId()
@@ -80,7 +81,7 @@ public:
    */
   inline bool hasId()
   {
-    return (this->idNode != NULL);
+    return (idNode != NULL);
   }
 
   /** \fn string getId()
@@ -89,7 +90,7 @@ public:
    */
   inline std::string getId()
   {
-    return SiconosDOMTreeTools::getStringContentValue(this->idNode);
+    return SiconosDOMTreeTools::getStringContentValue(idNode);
   }
 
   /** \fn void setId(string s)
@@ -100,9 +101,9 @@ public:
   {
     if (hasId() == false)
     {
-      idNode = SiconosDOMTreeTools::createStringNode(this->rootInteractionXMLNode, ID_ATTRIBUTE, s);
+      idNode = SiconosDOMTreeTools::createStringNode(rootInteractionXMLNode, ID_ATTRIBUTE, s);
     }
-    else SiconosDOMTreeTools::setStringContentValue(this->idNode, s);
+    else SiconosDOMTreeTools::setStringContentValue(idNode, s);
   }
 
   /** \fn int getNumber()
@@ -111,7 +112,7 @@ public:
    */
   inline int getNInter()
   {
-    return SiconosDOMTreeTools::getIntegerContentValue(this->nInterNode);
+    return SiconosDOMTreeTools::getIntegerContentValue(nInterNode);
   }
 
   /** \fn void setNumber(int i)
@@ -120,11 +121,11 @@ public:
    */
   inline void setNInter(int nInter)
   {
-    if (this->nInterNode == false)
+    if (nInterNode == false)
     {
-      this->nInterNode = SiconosDOMTreeTools::createIntegerNode(this->rootInteractionXMLNode, INTERACTION_NINTER, nInter);
+      nInterNode = SiconosDOMTreeTools::createIntegerNode(rootInteractionXMLNode, INTERACTION_NINTER, nInter);
     }
-    else SiconosDOMTreeTools::setIntegerContentValue(this->nInterNode, nInter);
+    else SiconosDOMTreeTools::setIntegerContentValue(nInterNode, nInter);
   }
 
   /** \fn vector<int> getStatus()
@@ -133,7 +134,7 @@ public:
    */
   inline std::vector<int> getStatus()
   {
-    return SiconosDOMTreeTools::getVectorIntContentValue(this->statusNode);
+    return SiconosDOMTreeTools::getVectorIntContentValue(statusNode);
   }
 
   /** \fn void setStatus(vector<int> i)
@@ -142,11 +143,11 @@ public:
    */
   inline void setStatus(std::vector<int> i)
   {
-    if (this->statusNode == false)
+    if (statusNode == false)
     {
-      this->statusNode = SiconosDOMTreeTools::createVectorIntNode(this->rootInteractionXMLNode, INTERACTION_STATUS, i);
+      statusNode = SiconosDOMTreeTools::createVectorIntNode(rootInteractionXMLNode, INTERACTION_STATUS, i);
     }
-    else SiconosDOMTreeTools::setVectorIntContentValue(this->statusNode, i);
+    else SiconosDOMTreeTools::setVectorIntContentValue(statusNode, i);
   }
 
   /** \fn bool hasY()
@@ -155,7 +156,7 @@ public:
    */
   inline bool hasY()
   {
-    return (this->yNode != NULL);
+    return (yNode != NULL);
   }
 
   /** \fn SimpleVector getY()
@@ -164,7 +165,7 @@ public:
    */
   inline /*SiconosVector*/SimpleVector getY()
   {
-    return SiconosDOMTreeTools::getSiconosVectorValue(this->yNode);
+    return SiconosDOMTreeTools::getSiconosVectorValue(yNode);
   }
 
   /** \fn void setY(const SiconosVector *v)
@@ -177,7 +178,7 @@ public:
     {
       yNode = SiconosDOMTreeTools::createVectorNode(rootInteractionXMLNode, INTERACTION_Y, v);
     }
-    else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->yNode, v);
+    else SiconosDOMTreeTools::setSiconosVectorNodeValue(yNode, v);
   }
 
   /** \fn bool hasLambda()
@@ -186,7 +187,7 @@ public:
    */
   inline bool hasLambda()
   {
-    return (this->lambdaNode != NULL);
+    return (lambdaNode != NULL);
   }
 
   /** \fn SimpleVector getLambda()
@@ -195,7 +196,7 @@ public:
    */
   inline /*SiconosVector*/ SimpleVector getLambda()
   {
-    return SiconosDOMTreeTools::getSiconosVectorValue(this->lambdaNode);
+    return SiconosDOMTreeTools::getSiconosVectorValue(lambdaNode);
   }
 
   /** \fn void setLambda(const SiconosVector& v)
@@ -205,8 +206,8 @@ public:
   inline void setLambda(const SiconosVector& v)
   {
     if (hasLambda() == false)
-      lambdaNode = SiconosDOMTreeTools::createVectorNode(this->rootInteractionXMLNode, INTERACTION_LAMBDA, v);
-    else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->lambdaNode, v);
+      lambdaNode = SiconosDOMTreeTools::createVectorNode(rootInteractionXMLNode, INTERACTION_LAMBDA, v);
+    else SiconosDOMTreeTools::setSiconosVectorNodeValue(lambdaNode, v);
   }
 
 
@@ -216,7 +217,7 @@ public:
    */
   inline std::vector< std::vector<int> > getDSConcerned()
   {
-    return this->DSCouples;
+    return DSCouples;
   }
 
   /** \fn void setDSConcerned( vector<DynamicalSystem*> )
@@ -225,6 +226,20 @@ public:
    */
   void setDSConcerned(std::vector<DynamicalSystem*>);
 
+  /** \fn SimpleVector getDSConcernedVector()
+   *   \brief Return the DSs concerned by the InteractionXML
+   *   \return a simple vector which contains a list of DS number
+   */
+  inline SimpleVector getDSConcernedVector()
+  {
+    return SiconosDOMTreeTools::getSiconosVectorValue(dsListNode);
+  }
+
+  /** \fn SimpleVector setDSConcernedVector()
+   *   \brief set the DSs concerned by the InteractionXML
+   *   \param a SimpleVector which contains a list of DS number
+   */
+  //\todo inline SimpleVector setDSConcernedVector(){};
 
   /** \fn RelationXML* getRelationXML()
    *   \brief Return the relationXML of the InteractionXML
@@ -234,7 +249,6 @@ public:
   {
     return relationXML;
   }
-
 
   /** \fn NonSmoothLawXML* getNonSmoothLawXML()
    *   \brief Return the NonSmoothLawXML of the InteractionXML
@@ -262,31 +276,13 @@ public:
    *  \brief All is an attribute of the DS_Concerned tag
    *  \return bool : true if attribute all is defined
    */
-  inline bool hasAll()
-  {
-    if (SiconosDOMTreeTools::hasAttributeValue(this->dsConcernedNode, ALL_ATTRIBUTE))
-      return SiconosDOMTreeTools::getBooleanAttributeValue(this->dsConcernedNode, ALL_ATTRIBUTE);
-    else return false;
-  }
+  bool hasAll() const;
 
   /** \fn void setAll(bool all)
-   *   \brief Allows to modify the attribute "all" of the DS_concerned tag
+   *   \brief modify the attribute "all" of the DS_concerned tag
    *   \param bool : the value to assign to the attribute
    */
-  inline void setAll(bool all)
-  {
-    if (this->hasAll() == false)
-    {
-      if (all == true)
-        xmlNewProp(this->dsConcernedNode, (xmlChar*)ALL_ATTRIBUTE.c_str(), (xmlChar*)"true");
-    }
-    else
-    {
-      if (all == false)
-        xmlRemoveProp(xmlHasProp(this->dsConcernedNode, (xmlChar*)INTERACTION_DS_CONCERNED.c_str()));
-    }
-  }
-
+  void setAll(const bool&) ;
 
 private:
 
@@ -300,6 +296,8 @@ private:
   xmlNode * lambdaNode;
   xmlNode * isActiveNode;
   xmlNode * dsConcernedNode;
+  // Node that contains a list (vector) of the ds concerned by this interaction
+  xmlNode * dsListNode;
 
   //Couples of DSs (DS numbers)
   std::vector< std::vector<int> > DSCouples;
@@ -309,6 +307,11 @@ private:
 
   //NSLAW
   NonSmoothLawXML *nSLawXML;
+
+  /** Flags to know if pointers have been allocated inside constructors or not */
+
+  bool isRelationXMLAllocatedIn;
+  bool isNsLawXMLAllocatedIn;
 
   //Methods
 

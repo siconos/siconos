@@ -179,8 +179,9 @@ public:
    */
   inline void setTkPtr(SimpleVector *newPtr)
   {
-    delete tk;
+    if (isTkAllocatedIn = true) delete tk;
     tk = newPtr;
+    isTkAllocatedIn = false;
   }
 
   /** \fn const double getHMin() const
@@ -371,6 +372,9 @@ private:
 
   /* the strategy of simulation */
   Strategy* strategy;
+
+  /** Flags to know if pointers have been allocated inside constructors or not */
+  bool isTkAllocatedIn;
 };
 
 #endif // TIMEDISCRETISATION_H

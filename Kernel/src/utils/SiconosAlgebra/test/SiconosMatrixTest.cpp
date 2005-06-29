@@ -52,8 +52,8 @@ void SiconosMatrixTest::tearDown()
 
 void SiconosMatrixTest::testConstructor1()
 {
-  int row = 120;
-  int col = 500;
+  unsigned int row = 120;
+  unsigned int col = 500;
   SiconosMatrix X(row, col);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : X.size(0) == row", X.size(0), row);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : X.size(1) == col", X.size(1), col);

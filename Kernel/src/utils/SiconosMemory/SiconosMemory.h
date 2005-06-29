@@ -1,5 +1,7 @@
 /** \class SiconosException
- *   \brief This class allowa to store vectors of previous steps of the simulation
+ *   \brief This class is used to save vectors for several steps
+ *  There is a max number of saved vector (memorySize) and all the vector (simple or composite)
+ * should have the same size.
  *  \author SICONOS Development Team - copyright INRIA
  *   \version 1.0
  *   \date (Creation) 07/06/2004
@@ -8,11 +10,11 @@
 #ifndef SICONOSMEMORY_H
 #define SICONOSMEMORY_H
 
-#include "NewSiconosVector.h"
+#include "CompositeVector.h"
 #include "SiconosMemoryException.h"
 #include "SiconosMemoryXML.h"
 #include "check.h"
-#include <vector>
+#include <deque>
 
 class SiconosMemory
 {
@@ -20,55 +22,37 @@ class SiconosMemory
 public:
 
   /**
-   * \fn SiconosMemory()
-   * \brief basic constructor.
-   * memorySize and nbVectorsinMemory are set to 0. No allocation of memory for the pointers on siconosVector of vectorMemory.
-   */
-  SiconosMemory();
-
-  /**
    * \fn SiconosMemory(int)
    * \brief constructor with size parameter.
    * \param int : the size of the memory
    * memorySize is set with the parameter, and the memory is allocated for this number of SiconosVector
    */
-  SiconosMemory(const int&);
+  SiconosMemory(const unsigned int&);
 
   /**
-   * \fn SiconosMemory(int)
-   * \brief constructor with size parameter and the DOM tree.
-   * \param int : the size of the memory
+   * \fn SiconosMemory(SiconosMemoryXML *, const unsigned int&=0)
+   * \brief xml constructor + (optional) size of memory; if not set, size is read in xml file.
    * \param SiconosMemoryXML * : the XML object which contains the data of the memory
-   * memorySize is set with the parameter, and the memory is allocated for this number of SiconosVector
-   * and reload the data of the DOM tree.
-   * This constructor uses the data of the SiconosMemoryXML but the maxSize of the SiconosMemory will be the one defined in the first parameter
+   * \param unsigned int : the size of the memory (OPTIONAL)
    */
-  SiconosMemory(const int&, SiconosMemoryXML *);
+  SiconosMemory(SiconosMemoryXML *, const unsigned int& = 1);
 
   /**
-   * \fn SiconosMemory(SiconosMemoryXML *)
-   * \brief constructor with the DOM tree.
-   * \param SiconosMemoryXML * : the XML object which contains the data of the memory
-   * memorySize is set with the parameter, and the memory is allocated for this number of SiconosVector
+   * \fn SiconosMemory(deque<SiconosVector*>)
+   * \brief constructor with deque parameter.
+   * \param deque<SiconosVector*> : the deque of siconosVector which must be stored
+   * memorySize is set to the size of the deque given in parameters
    */
-  SiconosMemory(SiconosMemoryXML *);
+  SiconosMemory(const std::deque<SiconosVector*>&);
 
   /**
-   * \fn SiconosMemory(vector<SiconosVector*>)
-   * \brief constructor with vector parameter.
-   * \param vector<SiconosVector*> : the vector of siconosVector which must be stored
-   * memorySize is set to the size of the vector given in parameters
-   */
-  SiconosMemory(const std::vector<SiconosVector*>&);
-
-  /**
-   * \fn SiconosMemory(int, vector<SiconosVector*>)
-   * \brief constructor with size and vector parameter.
+   * \fn SiconosMemory(int, deque<SiconosVector*>)
+   * \brief constructor with size and deque parameter.
    * \param int : the size of the memory
-   * \param vector<SiconosVector*> : the vector of siconosVector which must be stored
-   * this constructor is useful if the vector given in parameters has a size lower than the normal size of the memory
+   * \param deque<SiconosVector*> : the deque of siconosVector which must be stored
+   * this constructor is useful if the deque given in parameters has a size lower than the normal size of the memory
    */
-  SiconosMemory(const int&, const std::vector<SiconosVector*>&);
+  SiconosMemory(const unsigned int&, const std::deque<SiconosVector*>&);
 
   /**
    * \fn SiconosMemory(SiconosMemory&)
@@ -88,19 +72,10 @@ public:
   /**
    * \fn void setVectorMemory(vector<SiconosVector*>)
    * \brief fill the memory with a vector of siconosVector
-   * \param vector<SiconosVector*>
-   * memorySize is set to the size of the vector given in parameters
+   * \param deque<SiconosVector*>
+   * memorySize is set to the size of the deque given in parameters
    */
-  void setVectorMemory(const std::vector<SiconosVector*>&);
-
-  /**
-   * \fn void setVectorMemory(vector<SiconosVector*>)
-   * \brief fill the memory with a vector of siconosVector
-   * \pram int : the size of the memory
-   * \param vector<SiconosVector*>
-   * this function is useful if the vector given in parameters has a size lower than the normal size of the memory
-   */
-  void setVectorMemory(const int&, const std::vector<SiconosVector*>&);
+  void setVectorMemory(const std::deque<SiconosVector*>&);
 
   /**
    * \fn SiconosVector* getSiconosVector(int)
@@ -108,14 +83,14 @@ public:
    * \param int the position in the memory of the wanted SiconosVector
    * \return SiconosVector* if the parameter has its value in [0, nbVectorsInMemory[
    */
-  SiconosVector* getSiconosVector(const int&) const;
+  SiconosVector* getSiconosVector(const unsigned int&) const;
 
   /**
    * \fn int getMemorySize()
    * \brief gives the size of the memory
    * \return int >= 0
    */
-  inline const int getMemorySize() const
+  inline const unsigned int getMemorySize() const
   {
     return memorySize;
   };
@@ -125,9 +100,9 @@ public:
    * \brief set the max size of the SiconosMemory
    * \param int : the max size for this SiconosMemory
    */
-  inline void setSiconosMemorySize(const int& max)
+  inline void setSiconosMemorySize(const unsigned int& max)
   {
-    this->memorySize = max;
+    memorySize = max;
   };
 
   /**
@@ -135,23 +110,20 @@ public:
    * \brief gives the numbers of SiconosVectors currently stored in the memory
    * \return int >= 0
    */
-  inline const int getNbVectorsInMemory() const
+  inline const unsigned int getNbVectorsInMemory() const
   {
     return nbVectorsInMemory;
   };
 
   /**
-   * \fn vector<SiconosVector*> getVectorMemory()
+   * \fn deque<SiconosVector*> getVectorMemory()
    * \brief gives the vector of SiconosVectors of the memory
-   * \return stl vector od siconosVector
+   * \return stl deque od siconosVector
    */
-  inline std::vector<SiconosVector*> getVectorMemory() const
+  inline std::deque<SiconosVector*> getVectorMemory() const
   {
     return vectorMemory;
   };
-
-
-  /**
 
   /** \fn inline SiconosModelXML getSiconosModelXML()
    *  \brief allows to get the SiconosMemoryXML of the SiconosMemory
@@ -163,25 +135,19 @@ public:
   }
 
   /**
-   * \fn void swap(SiconosVector*)
+   * \fn void swap(const SiconosVector&)
    * \brief puts a SiconosVector in the memory
    * \param SiconosVector* : the SiconosVector we want to put in memory
    * this function moves older SiconosVectors of vectorMemory of one position (this operation handles only pointers)
    * and COPIES (the values of) the SiconosVector given in parameter in the position 0 of vectorMemory
    */
-  void swap(SiconosVector*);
+  void swap(const SiconosVector&);
 
   /**
    * \fn void swap(SiconosVector*)
    * \brief displays the data of the memory object
    */
   void display() const;
-
-  /** \fn void fillMemoryWithMemoryXML()
-   *  \brief uses the SiconosMemoryXML of the SiconosMemory to fill the fields of the SiconosMemory
-   *  \exception SiconosMemoryException
-   */
-  void fillMemoryWithMemoryXML();
 
   /** \fn void saveMemorySizeToXML()
    *  \brief copy the max size of the SiconosMemory to the XML DOM tree
@@ -190,7 +156,7 @@ public:
   inline void saveMemorySizeToXML()
   {
     IN("void SiconosMemory::saveMemorySizeToXML()\n");
-    if (this->memoryXML != NULL) this->memoryXML->setSiconosMemorySize(this->memorySize);
+    if (memoryXML != NULL) memoryXML->setSiconosMemorySize(memorySize);
     else SiconosMemoryException::selfThrow("SiconosMemory::saveMemorySizeToXML() - memoryXML object == NULL");
     OUT("void SiconosMemory::saveMemorySizeToXML()\n");
   }
@@ -199,14 +165,24 @@ public:
 
 
 private:
+  /**
+  * \fn SiconosMemory()
+  * \brief default constructor.
+  */
+  SiconosMemory();
+
   /** the maximum size of the memory (i.e the max numbers of SiconosVectors it can store) */
-  int memorySize;
+  unsigned int memorySize;
 
-  /** the real number of SiconosVectors currently stored in the Memory. This number is less than or equal to memorysize */
-  int nbVectorsInMemory;
+  /** the real number of SiconosVectors saved in the Memory (ie the ones for which memory has been allocated) */
+  unsigned int nbVectorsInMemory;
 
-  /** the stl vector which contains the SiconosVectors kept in memory */
-  std::vector<SiconosVector*> vectorMemory;
+  /** the stl deque which contains the SiconosVectors kept in memory */
+  /** we use deque rather than vector to access to push_front function */
+  std::deque<SiconosVector*> vectorMemory;
+
+  /** stl vector to provides info about memory allocation */
+  std::deque<bool> isVectorMemoryAllocated;
 
   /** link to the XML for SiconosMemory objects */
   SiconosMemoryXML * memoryXML;

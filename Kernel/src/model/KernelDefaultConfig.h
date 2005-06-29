@@ -6,9 +6,9 @@
 #include "NewSiconosVector.h" // for N_ASCII (...??)
 
 /* A matrix is saved in the XML output file if his size is not higher then MatrixMaxSize */
-/*const*/ int   MATRIX_MAX_SIZE = 10;
+/*const*/ unsigned int    MATRIX_MAX_SIZE = 10;
 /*const*/
-int   VECTOR_MAX_SIZE = 10;
+unsigned int    VECTOR_MAX_SIZE = 10;
 /*const*/
 std::string   FILE_STORAGE = N_ASCII; // N_ASCII or N_BINARY
 

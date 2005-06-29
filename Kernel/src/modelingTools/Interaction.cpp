@@ -64,12 +64,11 @@ Interaction::Interaction(const Interaction& newI):
     relation = new LagrangianNonLinearR();
   else RuntimeException::selfThrow("Interaction::copy constructor, unknown relation type " + relation->getType());
   *relation = *newI.getRelationPtr();
-
-  // Remark (FP): no link with newI xml object -> useless and avoid new/delete bugs
+  // \remark FP: we do not link xml object in the copy
 }
 
 // --- XML constructor ---
-Interaction::Interaction(InteractionXML* interxml):
+Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * nsds):
   id("none"), number(0), nInteraction(0), y(NULL), yDot(NULL), lambda(NULL), yOld(NULL),
   yDotOld(NULL), lambdaOld(NULL), nslaw(NULL), relation(NULL), interactionxml(interxml),
   isYAllocatedIn(true), isYDotAllocatedIn(true), isLambdaAllocatedIn(true), isYOldAllocatedIn(true),
@@ -77,6 +76,7 @@ Interaction::Interaction(InteractionXML* interxml):
 {
   if (interactionxml != NULL)
   {
+    //vectorDS.clear();
     vectorDS.clear();
     if (interactionxml->hasId()) id = interactionxml->getId();
     number = interactionxml->getNumber();
@@ -96,11 +96,25 @@ Interaction::Interaction(InteractionXML* interxml):
     swapInMemory();
 
     // --- Status ---
-    status.resize(nInteraction);
+    status.reserve(nInteraction);
     status = interactionxml->getStatus();
 
     // --- Dynamical Systems ---
-    // do nothing. The way DS are loaded from xml is to be reviewed
+
+    if (nsds != NULL)
+    {
+      // Get a list of DS concerned from xml
+      if (interactionxml->hasAll())
+        vectorDS = nsds->getDynamicalSystems();
+      else
+      {
+        SimpleVector listOfDsConcerned = interactionxml->getDSConcernedVector();
+        unsigned int size = listOfDsConcerned.size();
+        for (unsigned int i = 0; i < size; i++)
+          vectorDS.push_back(nsds->getDynamicalSystemPtrNumber((int)listOfDsConcerned(i)));
+      }
+    }
+    else cout << "Interaction constructor, warning: no dynamical systems linked to the interaction!" << endl;
 
     // --- Non smooth law ---
     string NslawType = interactionxml->getNonSmoothLawXML()->getType();
@@ -218,24 +232,41 @@ Interaction::~Interaction()
 }
 
 // --- GETTERS/SETTERS ---
-void Interaction::setDynamicalSystems(DynamicalSystem* ds1, DynamicalSystem* ds2)
+void Interaction::setDynamicalSystems(const std::vector<DynamicalSystem*>& newVector)
 {
   vectorDS.clear();
-  vectorDS.push_back(ds1);
-  vectorDS.push_back(ds2);
+  vectorDS = newVector;
 }
 
 DynamicalSystem* Interaction::getDynamicalSystemPtr(const int& number)
 {
-  if (vectorDS[0]->getNumber() == number) return vectorDS[0];
-  else if (vectorDS[1]->getNumber() == number) return vectorDS[1];
-  else return NULL;
+  DynamicalSystem * tmpDS;
+  tmpDS = NULL;
+  vector<DynamicalSystem*>::iterator it;
+  for (it = vectorDS.begin(); it != vectorDS.end(); ++it)
+    if ((*it)->getNumber() == number) tmpDS = (*it);
+  return tmpDS;
 }
 
 DynamicalSystem Interaction::getDynamicalSystem(const int& number)
 {
-  if (number == 0 || number == 1) return *vectorDS[number];
-  else RuntimeException::selfThrow("Interaction: getDynamicalSystem, unknown DS number");
+  if (number != 0 && number != 1)
+    RuntimeException::selfThrow("Interaction: getDynamicalSystem, unknown DS number");
+  return *vectorDS[number];
+}
+
+void Interaction::setRelationPtr(Relation* newRelation)
+{
+  if (isRelationAllocatedIn) delete relation;
+  relation = newRelation;
+  isRelationAllocatedIn = false;
+}
+
+void Interaction::setNonSmoothLawPtr(NonSmoothLaw* newNslaw)
+{
+  if (isNsLawAllocatedIn) delete nslaw;
+  nslaw = newNslaw;
+  isNsLawAllocatedIn = false;
 }
 
 // --- OTHER FUNCTIONS ---
@@ -256,6 +287,7 @@ void Interaction::check(const double& time, const double& pasH)
   relation->computeOutput(time);
 
   // Compute yp, predicted value for constrained variable, for contact detection
+  // if contact (yp<0), status=1, else equal 0.
 
   if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW || nslaw->getType() == NEWTONIMPACTLAWNSLAW || nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
   {
@@ -295,16 +327,14 @@ void Interaction::update(const double& time, const double& pasH)
 
 void Interaction::display() const
 {
-  cout << "-----------------------------------------------------" << endl;
-  cout << "____ data of the Interaction " << endl;
+  cout << "======= Interaction display =======" << endl;
   cout << "| id : " << id << endl;
   cout << "| number : " << number << endl;
   cout << "| status : ";
   for (int i = 0; i < nInteraction; i++) cout << status[i] << " ";
   cout << endl;
-  cout << "| DS linked to this Interaction : ";
-  for (int i = 0; i < nInteraction; i++) cout << vectorDS[i]->getNumber() << " ";
-  cout << endl;
+  cout << "| Dynamical Systems linked to this Interaction : " << endl;
+  for (unsigned int i = 0; i < vectorDS.size() ; i++) cout << vectorDS[i] << endl;
   cout << "| y : " << endl;
   if (y != NULL) y->display();
   else cout << "->NULL" << endl;
@@ -320,7 +350,7 @@ void Interaction::display() const
   cout << "| lambda : " << endl;
   if (lambda != NULL) lambda->display();
   else cout << "->NULL" << endl;
-  cout << "-----------------------------------------------------" << endl << endl;
+  cout << "===================================" << endl;
 }
 
 Relation* Interaction::createLagrangianLinearR(SiconosMatrix* H, SimpleVector* b)
@@ -378,15 +408,14 @@ void Interaction::saveInteractionToXML()
   /*
    * save the data of the Interaction
    */
+
   if (interactionxml != NULL)
   {
-    interactionxml->setDSConcerned(vectorDS);
-
+    //  interactionxml->setDSConcerned( vectorDS );
     interactionxml->setId(id);
     interactionxml->setNumber(number);
     interactionxml->setStatus(status);
     interactionxml->setNInter(nInteraction);
-
     interactionxml->setY(*y);
     interactionxml->setLambda(*lambda);
   }
@@ -422,7 +451,7 @@ void Interaction::saveInteractionToXML()
 // Default (private) constructor
 Interaction::Interaction():
   id("none"), number(0), nInteraction(0), y(NULL), yDot(NULL), lambda(NULL), yOld(NULL),
-  yDotOld(NULL), lambdaOld(NULL), nslaw(NULL), relation(NULL), interactionxml(NULL),  isYAllocatedIn(false), isYDotAllocatedIn(false),
+  yDotOld(NULL), lambdaOld(NULL), nslaw(NULL), relation(NULL), interactionxml(NULL), isYAllocatedIn(false), isYDotAllocatedIn(false),
   isLambdaAllocatedIn(false), isYOldAllocatedIn(false), isYDotOldAllocatedIn(false), isLambdaOldAllocatedIn(false),
   isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
 {}

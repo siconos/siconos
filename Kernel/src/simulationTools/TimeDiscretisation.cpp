@@ -6,7 +6,7 @@ using namespace std;
 // IO Constructors -> XML
 TimeDiscretisation::TimeDiscretisation(TimeDiscretisationXML * tdXML, Strategy* str):
   h(0.0), nSteps(0), tk(NULL), hMin(0.0), hMax(0.0), constant(0), timeDiscretisationXML(tdXML),
-  k(0), strategy(str)
+  k(0), strategy(str), isTkAllocatedIn(false)
 {
   if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
   if (timeDiscretisationXML != NULL)
@@ -29,6 +29,7 @@ TimeDiscretisation::TimeDiscretisation(TimeDiscretisationXML * tdXML, Strategy* 
     if (tdCase == 1 || tdCase == 2)
     {
       tk = new SimpleVector(timeDiscretisationXML->getTk().size());
+      isTkAllocatedIn = true;
       *tk = timeDiscretisationXML->getTk();
     }
     computeTimeDiscretisation(tdCase);
@@ -41,7 +42,7 @@ TimeDiscretisation::TimeDiscretisation(TimeDiscretisationXML * tdXML, Strategy* 
 // Provide tk and strategy
 TimeDiscretisation::TimeDiscretisation(SimpleVector *newTk, Strategy* str):
   h(0), nSteps(0), tk(NULL), hMin(0), hMax(0), constant(1),
-  timeDiscretisationXML(NULL), k(0), strategy(str)
+  timeDiscretisationXML(NULL), k(0), strategy(str), isTkAllocatedIn(true)
 {
   if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
   // Allocate memory for tk and fill it
@@ -54,7 +55,7 @@ TimeDiscretisation::TimeDiscretisation(SimpleVector *newTk, Strategy* str):
 // Provide h and nSteps, calculate tk
 TimeDiscretisation::TimeDiscretisation(const double& newH, const int& newNSteps, Strategy* str):
   h(newH), nSteps(newNSteps), tk(NULL), hMin(newH), hMax(newH), constant(1),
-  timeDiscretisationXML(NULL), k(0), strategy(str)
+  timeDiscretisationXML(NULL), k(0), strategy(str), isTkAllocatedIn(false)
 {
   if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
   int tdCase = checkTimeDiscretisationCase(0, 1, 1, hasT());
@@ -64,7 +65,7 @@ TimeDiscretisation::TimeDiscretisation(const double& newH, const int& newNSteps,
 // Provide nSteps, calculate h and tk
 TimeDiscretisation::TimeDiscretisation(const int& newNSteps, Strategy* str):
   h(0), nSteps(newNSteps), tk(NULL), hMin(0), hMax(0), constant(1),
-  timeDiscretisationXML(NULL), k(0), strategy(str)
+  timeDiscretisationXML(NULL), k(0), strategy(str), isTkAllocatedIn(false)
 {
   if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
   int tdCase = checkTimeDiscretisationCase(0, 0, 1, hasT());
@@ -74,7 +75,7 @@ TimeDiscretisation::TimeDiscretisation(const int& newNSteps, Strategy* str):
 // Provide h, calculate nSteps and tk
 TimeDiscretisation::TimeDiscretisation(const double& newH, Strategy* str):
   h(newH), nSteps(0), tk(NULL), hMin(newH), hMax(newH), constant(1),
-  timeDiscretisationXML(NULL), k(0), strategy(str)
+  timeDiscretisationXML(NULL), k(0), strategy(str), isTkAllocatedIn(false)
 {
   if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
   int tdCase = checkTimeDiscretisationCase(0, 1, 0, hasT());
@@ -84,8 +85,11 @@ TimeDiscretisation::TimeDiscretisation(const double& newH, Strategy* str):
 // --- Destructor ---
 TimeDiscretisation::~TimeDiscretisation()
 {
-  delete tk;
-  tk = NULL;
+  if (isTkAllocatedIn)
+  {
+    delete tk;
+    tk = NULL;
+  }
 }
 
 // --- Constructors related functions ---
@@ -106,7 +110,8 @@ void TimeDiscretisation::computeTimeDiscretisation(const int& tdCase)
 {
   // load time min value from the model
   double t0 = getT0();
-  double T, diff;
+  double T;
+  double tol = 1e-15;
   switch (tdCase)
   {
   case 1: // Given: tk - Compute h, nSteps and T
@@ -119,22 +124,24 @@ void TimeDiscretisation::computeTimeDiscretisation(const int& tdCase)
   case 2: // Given: tk, T - Compute h, nSteps
     T = getT();
     if ((*tk)(0) != t0) RuntimeException::selfThrow("TimeDiscretisation::constructor - t0 and tk(0) are different");
-    if (tk->lavd(tk->size() - 1) != T) RuntimeException::selfThrow("TimeDiscretisation::constructor - T and tk(N) are different");
+    if (tk->getValue(tk->size() - 1) != T) RuntimeException::selfThrow("TimeDiscretisation::constructor - T and tk(N) are different");
     nSteps = tk->size() - 1;
     h = (*tk)(1) - (*tk)(0);
     break;
   case 3: // Given: nSteps, h - Compute T, tk
-    setT(t0 + ((double)nSteps)* h);
+    setT(t0 + nSteps * h);
     tk = new SimpleVector(nSteps + 1);
+    isTkAllocatedIn = true;
     (*tk)(0) = t0;
     (*tk)(nSteps) = getT();
     for (int i = 1; i < nSteps; i++)(*tk)(i) = t0 + i * h;
     break;
   case 4: // Given: h, T - Compute nSteps, tk
     T  = getT();
-    nSteps = floor((T - t0) / (h));
-    if ((t0 + h * nSteps) != T) cout << " Warning, nSteps x steps differs from final T" << endl;
+    nSteps = (int)floor((T - t0) / h);
+    if ((t0 + (h * nSteps) - T) >= tol) cout << " Warning, (nSteps x step size) seems to differ from final T?" << endl;
     tk = new SimpleVector(nSteps + 1);
+    isTkAllocatedIn = true;
     (*tk)(0) = t0;
     (*tk)(nSteps) = getT();
     for (int i = 1; i < nSteps; i++)(*tk)(i) = t0 + i * h;
@@ -143,16 +150,17 @@ void TimeDiscretisation::computeTimeDiscretisation(const int& tdCase)
     T  = getT();
     h = (T - t0) / ((double)nSteps);
     tk = new SimpleVector(nSteps + 1);
+    isTkAllocatedIn = true;
     (*tk)(0) = t0;
     (*tk)(nSteps) = getT();
     for (int i = 1; i < nSteps; i++)(*tk)(i) = t0 + i * h;
     break;
   case 6: // all the data are known. Just check they are coherent.
     if ((*tk)(0) != t0) RuntimeException::selfThrow("TimeDiscretisation::constructor - incompatible data");
-    if (tk->lavd(tk->size() - 1) != T) RuntimeException::selfThrow("TimeDiscretisation::constructor - incompatible data");
+    if (tk->getValue(tk->size() - 1) != T) RuntimeException::selfThrow("TimeDiscretisation::constructor - incompatible data");
     if ((t0 + h * nSteps) != T)  RuntimeException::selfThrow("TimeDiscretisation::constructor - incompatible data");
     if (h != (*tk)(1) - (*tk)(0)) RuntimeException::selfThrow("TimeDiscretisation::constructor - incompatible data");
-    if (nSteps != tk->size() - 1)  RuntimeException::selfThrow("TimeDiscretisation::constructor - incompatible data");
+    if (nSteps != (int)(tk->size()) - 1)  RuntimeException::selfThrow("TimeDiscretisation::constructor - incompatible data");
     break;
   default:
     RuntimeException::selfThrow("TimeDiscretisation::constructor - wrong scheme, wrong number of data");
@@ -218,5 +226,5 @@ void TimeDiscretisation::saveTimeDiscretisationToXML()
 
 // --- Default (private) constructor ---
 TimeDiscretisation::TimeDiscretisation(): h(0.0), nSteps(0), tk(NULL), hMin(0.0), hMax(0.0), constant(0),
-  timeDiscretisationXML(NULL), k(0), strategy(NULL)
+  timeDiscretisationXML(NULL), k(0), strategy(NULL), isTkAllocatedIn(false)
 {}

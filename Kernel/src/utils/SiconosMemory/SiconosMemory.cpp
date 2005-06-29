@@ -1,239 +1,220 @@
 #include "SiconosMemory.h"
 using namespace std;
 
-SiconosMemory::SiconosMemory(): memorySize(0), nbVectorsInMemory(0),
-  memoryXML(NULL)
-{
-  IN("SiconosMemory()\n");
-  vectorMemory.resize(memorySize);
-  OUT("SiconosMemory()\n");
-}
+// --- CONSTRUCTORS ---
 
-SiconosMemory::SiconosMemory(const int& newValue):
+
+// from data: memorySize
+SiconosMemory::SiconosMemory(const unsigned int& newValue):
   memorySize(newValue), nbVectorsInMemory(0), memoryXML(NULL)
-{
-  IN("SiconosMemory(int memorySize)\n");
-  vectorMemory.clear();
-  vectorMemory.resize(memorySize);
-  for (int i = 0; i < memorySize; i++)
-    (vectorMemory)[i] = new SimpleVector();
-  OUT("SiconosMemory(int memorySize)\n");
-}
+{}
 
-SiconosMemory::SiconosMemory(const int& newMemorySize, SiconosMemoryXML *memXML):
+// from xml file + optional value of memorySize
+SiconosMemory::SiconosMemory(SiconosMemoryXML *memXML, const unsigned int& newMemorySize):
   memorySize(newMemorySize), nbVectorsInMemory(0), memoryXML(memXML)
 {
   IN("SiconosMemory(int memorySize, SiconosMemoryXML *memoryXML)\n");
-  vectorMemory.clear();
-  vectorMemory.resize(memorySize);
-  for (int i = 0; i < memorySize; i++)
-    (vectorMemory)[i] = new SimpleVector();
+  if (memoryXML != NULL)
+  {
+    // Convention: memorySize==1 (default value) means read its value in xml file (only for this constructor)
+    // if hasMemory() is true.
+    if (memorySize == 1 && memoryXML->hasMemory())
+      memorySize = memoryXML->getSiconosMemorySize();
 
-  if (memoryXML != NULL) setVectorMemory(memorySize, memoryXML->getSiconosMemoryVector());
+    // get memory from xml file
+    deque<SiconosVector*> V;
+    bool vAllocated = false; // true if memory is allocated for vector reading in SiconosMemoryXML::getSiconosMemoryVector()
+    if (memoryXML->hasMemory())
+    {
+      V =  memoryXML->getSiconosMemoryVector();
+      vAllocated = true;
+    }
+    // if size of V overpass memorysize:
+    if (memorySize < V.size())
+    {
+      cout << "Warning: xml SiconosMemory constructor, size of V(xml) greater than memory size, excess values will be lost" << endl;
+      // unused nodes of the DOM tree are deleted
+      memoryXML->deleteUnusedMemoryNodes(memorySize);
+      nbVectorsInMemory = memorySize;
+    }
+    else
+      nbVectorsInMemory = V.size();
 
+    unsigned int i;
+    for (i = 0; i < nbVectorsInMemory ; i++)
+    {
+      if (V[i]->isComposite())
+        vectorMemory.push_back(new CompositeVector(V[i]->size()));
+      else
+        vectorMemory.push_back(new SimpleVector(V[i]->size()));
+      isVectorMemoryAllocated.push_back(true);
+      *(vectorMemory[i]) = *(V[i]);
+    }
+
+    if (vAllocated)
+    {
+      deque<SiconosVector*>::iterator it;
+      for (it = V.begin(); it != V.end(); it++)
+        delete(*it);
+    }
+  }
+  else
+    SiconosMemoryException::selfThrow("SiconosMemory, xml constructor: xml file==NULL");
   OUT("SiconosMemory(int memorySize, SiconosMemoryXML *memoryXML)\n");
 }
 
-SiconosMemory::SiconosMemory(SiconosMemoryXML *memXML):
-  memorySize(0), nbVectorsInMemory(0), memoryXML(memXML)
-{
-  IN("SiconosMemory(SiconosMemoryXML *memoryXML)\n");
-  vectorMemory.resize(memorySize);
-  setVectorMemory(memoryXML->getSiconosMemorySize(), memoryXML->getSiconosMemoryVector());
-  memoryXML = memoryXML;
-  OUT("SiconosMemory(SiconosMemoryXML *memoryXML)\n");
-}
-
-
-SiconosMemory::SiconosMemory(const vector<SiconosVector*>& V):
-  memorySize(V.size()), nbVectorsInMemory(memorySize), memoryXML(NULL)
+// copy of a std::vector of siconos vectors
+SiconosMemory::SiconosMemory(const deque<SiconosVector*>& V):
+  memorySize(V.size()), nbVectorsInMemory(V.size()), memoryXML(NULL)
 {
   IN("SiconosMemory(vector<SiconosVector*> V)\n");
-  vectorMemory.clear();
-  vectorMemory.resize(memorySize);
-  for (int i = 0; i < memorySize; i++)
+  unsigned int sizeV = V.size();
+
+  memorySize = sizeV;
+  nbVectorsInMemory = sizeV;
+  for (unsigned int i = 0; i < V.size(); i++)
   {
-    (vectorMemory)[i] = new SimpleVector();
+    if (V[i]->isComposite())
+      vectorMemory.push_back(new CompositeVector(V[i]->size()));
+    else
+      vectorMemory.push_back(new SimpleVector(V[i]->size()));
+    isVectorMemoryAllocated.push_back(true);
     *(vectorMemory[i]) = *(V[i]);
   }
+
   OUT("SiconosMemory(vector<SiconosVector*> V)\n");
 }
 
-SiconosMemory::SiconosMemory(const int& newMemorySize, const  vector<SiconosVector*>& V):
+// copy of a std::vector of siconos vectors  + memorySize
+SiconosMemory::SiconosMemory(const unsigned int& newMemorySize, const  deque<SiconosVector*>& V):
   memorySize(newMemorySize), nbVectorsInMemory(V.size()), memoryXML(NULL)
 {
   IN("SiconosMemory(int memorySize, vector<SiconosVector*> V)\n");
   if (newMemorySize < V.size())
-  {
-    // exception : out of range
     SiconosMemoryException::selfThrow("SiconosMemory(int memorySize, vector<SiconosVector*> V) : V.size > memorySize");
-  }
   else
   {
-    vectorMemory.clear();
-    vectorMemory.resize(memorySize);
-    for (int i = 0; i < memorySize; i++)
+    for (unsigned int i = 0; i < V.size(); i++)
     {
-      (vectorMemory)[i] = new SimpleVector();
-      if (i < nbVectorsInMemory)
-        *(vectorMemory[i]) = *(V[i]);
+      if (V[i]->isComposite())
+        vectorMemory.push_back(new CompositeVector(V[i]->size()));
+      else
+        vectorMemory.push_back(new SimpleVector(V[i]->size()));
+      isVectorMemoryAllocated.push_back(true);
+      *(vectorMemory[i]) = *(V[i]);
     }
   }
   OUT("SiconosMemory(int memorySize, vector<SiconosVector*> V)\n");
 }
 
+// copy
 SiconosMemory::SiconosMemory(const SiconosMemory&  source):
   memorySize(source.memorySize), nbVectorsInMemory(source.nbVectorsInMemory), memoryXML(NULL)
 {
   IN("SiconosMemory(const SiconosMemory&  source) \n");
-  int i;
-  vectorMemory.clear();
-  vectorMemory.resize(memorySize);
-  for (i = 0; i < memorySize; i++)
-    if (i < nbVectorsInMemory)
-      (vectorMemory)[i] = new SimpleVector(*(source.vectorMemory[i]));
+  for (unsigned int i = 0; i < nbVectorsInMemory; i++)
+  {
+    if (source.vectorMemory[i]->isComposite())
+      vectorMemory.push_back(new CompositeVector(*(source.vectorMemory[i])));
     else
-      (vectorMemory)[i] = new SimpleVector();
+      vectorMemory.push_back(new SimpleVector(*(source.vectorMemory[i])));
+    isVectorMemoryAllocated.push_back(true);
+  }
+
   OUT("SiconosMemory(const SiconosMemory&  source) \n");
 }
 
-
+// Destructor
 SiconosMemory::~SiconosMemory()
 {
   IN("~SiconosMemory()\n");
-  for (int i = 0; i < memorySize; i++)
-    delete(vectorMemory)[i];
+  for (unsigned int i = 0; i < nbVectorsInMemory; i++)
+  {
+    if (isVectorMemoryAllocated[i])
+    {
+      delete vectorMemory[i];
+      vectorMemory[i] = 0;
+    }
+  }
   vectorMemory.clear();
+  isVectorMemoryAllocated.clear();
   OUT("~SiconosMemory()\n");
 }
 
+// --- GETTERS/SETTERS ---
 
-/* ********************************************** */
-
-void SiconosMemory::setVectorMemory(const vector<SiconosVector*>& V)
+void SiconosMemory::setVectorMemory(const deque<SiconosVector*>& V)
 {
   IN("SiconosMemory::setVectorMemory(vector<SiconosVector*> V)\n");
 
-  for (int i = 0; i < memorySize; i++)
-    delete(vectorMemory)[i];
+  for (unsigned int i = 0; i < vectorMemory.size(); i++)
+    if (isVectorMemoryAllocated[i])
+    {
+      delete vectorMemory[i];
+      vectorMemory[i] = 0;
+    }
 
-  memorySize = V.size();
-  nbVectorsInMemory = memorySize;
+  unsigned int sizeV = V.size();
+
+  memorySize = sizeV;
+  nbVectorsInMemory = sizeV;
   vectorMemory.clear();
-  vectorMemory.resize(memorySize);
-  for (int i = 0; i < memorySize; i++)
+  isVectorMemoryAllocated.clear();
+  for (unsigned int i = 0; i < V.size(); i++)
   {
-    (vectorMemory)[i] = new SimpleVector();
+    if (V[i]->isComposite())
+      vectorMemory.push_back(new CompositeVector(V[i]->size()));
+    else
+      vectorMemory.push_back(new SimpleVector(V[i]->size()));
+    isVectorMemoryAllocated.push_back(true);
     *(vectorMemory[i]) = *(V[i]);
   }
 
   OUT("SiconosMemory::setVectorMemory(vector<SiconosVector*> V)\n");
 }
 
-void SiconosMemory::setVectorMemory(const int& mSize, const vector<SiconosVector*>& V)
+SiconosVector* SiconosMemory::getSiconosVector(const unsigned int& index) const
 {
-  IN("SiconosMemory::setVectorMemory(int mSize, vector<SiconosVector*> V)\n");
-
-  if (mSize < V.size())
-  {
-    // exception : out of range
-    //SiconosMemoryException::selfThrow("setVectorMemory(int mSize, vector<SiconosVector*> V) : V.size > mSize");
-    cout << "setVectorMemory(int mSize, vector<SiconosVector*> V) : V.size > mSize.\nThe saved SiconosVector which position in the vector of SiconosVector is greater than mSize, will be lost." << endl;
-
-    /*
-     * the node in the DOM tree which are unused will be deleted
-     */
-    if (memoryXML != NULL)
-      memoryXML->deleteUnusedMemoryNodes(mSize);
-    else SiconosMemoryException::selfThrow("setVectorMemory(int mSize, vector<SiconosVector*> V) : V.size > mSize");
-  }
-  else
-  {
-    int i;
-
-    if (memorySize != mSize)
-    {
-      for (i = 0; i < memorySize; i++)
-        delete(vectorMemory)[i];
-      memorySize = mSize;
-
-      vectorMemory.clear();
-      vectorMemory.resize(memorySize);
-      for (i = 0; i < memorySize; i++)
-        (vectorMemory)[i] = new SimpleVector();
-    }
-
-    nbVectorsInMemory = V.size();
-    for (i = 0; i < memorySize; i++)
-    {
-      if (i < nbVectorsInMemory)
-        *(vectorMemory[i]) = *(V[i]);
-    }
-  }
-
-  OUT("SiconosMemory::setVectorMemory(int mSize, vector<SiconosVector*> V)\n");
+  if (index >= nbVectorsInMemory)
+    SiconosMemoryException::selfThrow("getSiconosVector(index) : inconsistent index value");
+  return vectorMemory[index];
 }
 
 
-SiconosVector* SiconosMemory::getSiconosVector(const int& index) const
-{
-  IN("SiconosMemory::getSiconosVector(int index) const\n");
-
-  if ((index < 0) || (index >= memorySize))
-  {
-    // exception : out of range
-    SiconosMemoryException::selfThrow("getSiconosVector(int index) : index > memorySize");
-  }
-  else if (index >= nbVectorsInMemory)
-  {
-    // Warning : not significant value
-    cout << "WARNING --- SiconosMemory::getSiconosVector(int index) : index > nbVectorsInMemory" << endl;
-    OUT("SiconosMemory::getSiconosVector(int index) const\n");
-    return NULL;
-  }
-  else
-  {
-    OUT("SiconosMemory::getSiconosVector(int index) const\n");
-    return (vectorMemory)[index];
-  }
-}
-
-
-void SiconosMemory::swap(SiconosVector* v)
+void SiconosMemory::swap(const SiconosVector& v)
 {
   IN("SiconosMemory::swap(SiconosVector* v)\n");
-  int i;
+  unsigned int i;
   SiconosVector* tmp;
+  double tmp2;
 
-  // we add always in head of vectorMemory
-  // direct swapping
+  // if it remains in the vector
   if (nbVectorsInMemory < memorySize)
   {
-    nbVectorsInMemory ++;
-  }
-  else if (memorySize <= 0)
-  {
-    // exception : out of range
-    SiconosMemoryException::selfThrow("swap(SiconosVector* v) : memorySize <= 0");
-  }
-
-  tmp = (vectorMemory)[nbVectorsInMemory - 1];
-
-  for (i = nbVectorsInMemory - 1; i >= 0; i--)
-  {
-    if (i == 0)
-    {
-      // where we put v (we copy it)
-      (vectorMemory)[i] = tmp;
-      *(vectorMemory)[i] = *v;
-    }
+    // allocate memory for the new vector
+    if (v.isComposite())
+      vectorMemory.push_front(new CompositeVector(v));
     else
-    {
-      // we move the old vectors in memory
-      (vectorMemory)[i] = (vectorMemory)[i - 1];
-    }
+      vectorMemory.push_front(new SimpleVector(v));
+    isVectorMemoryAllocated.push_front(true);
+    nbVectorsInMemory ++;
+    *vectorMemory[0] = v;
   }
-
+  else
+  {
+    *vectorMemory[nbVectorsInMemory - 1] = v;
+    // Permutations to reorganise the vector
+    tmp = vectorMemory[nbVectorsInMemory - 1];
+    tmp2 = isVectorMemoryAllocated[nbVectorsInMemory - 1];
+    for (i = nbVectorsInMemory - 1; i > 0; i--)
+    {
+      vectorMemory[i] = vectorMemory[i - 1];
+      isVectorMemoryAllocated[i] = isVectorMemoryAllocated[i - 1];
+    }
+    // copy of v into the first position
+    vectorMemory[0] = tmp;
+    isVectorMemoryAllocated[0] = tmp2;
+  }
   OUT("SiconosMemory::swap(SiconosVector* v)\n");
 }
 
@@ -241,54 +222,53 @@ void SiconosMemory::swap(SiconosVector* v)
 
 void SiconosMemory::display() const
 {
+  cout << " ====== Memory vector display ======= " << endl;
   cout << "| memorySize : " << memorySize << endl;
   cout << "| nbVectorsInMemory : " << nbVectorsInMemory << endl;
   cout << "| vectorMemory size : " << vectorMemory.size() << endl;
-  for (int i = 0; i < nbVectorsInMemory; i++)
-    //for (int i = 0; i < memorySize; i++)
+  for (unsigned int i = 0; i < nbVectorsInMemory; i++)
   {
-    cout << "Memory " << i << " >>> " << (vectorMemory)[i] << " | ";
+    cout << "vector number " << i << ": adress = " << vectorMemory[i] << " | " << endl; ;
     vectorMemory[i]->display();
   }
+  cout << " ===================================== " << endl;
 }
 
-
+// operator =
+// Warning: memory vectors should have the same memorySize
+// Warning: no memory allocation is required.
+// If necessary, use copy constructor instead
 SiconosMemory& SiconosMemory::operator = (const SiconosMemory& source)
 {
   IN("SiconosMemory::operator = (const SiconosMemory& source)\n");
 
-  int i;
+  // error if vector have not the same size
+  if (memorySize != source.memorySize)
+    SiconosMemoryException::selfThrow("SiconosMemory, operator =, vectors have not the same size.");
 
-  for (i = 0; i < memorySize; i++)
-    delete(vectorMemory)[i];
+  // clean memory before assignment
+  for (unsigned int i = 0; i < nbVectorsInMemory ; i++)
+    if (isVectorMemoryAllocated[i])
+    {
+      delete vectorMemory[i];
+      vectorMemory[i] = 0;
+      isVectorMemoryAllocated[i] = false;
+    }
 
-  memorySize = source.memorySize;
-
-  vectorMemory.clear();
-  vectorMemory.resize(memorySize);
-  for (i = 0; i < memorySize; i++)
-    (vectorMemory)[i] = new SimpleVector();
-
+  isVectorMemoryAllocated.resize(source.isVectorMemoryAllocated.size());
+  vectorMemory.resize(source.vectorMemory.size());
   nbVectorsInMemory = source.nbVectorsInMemory;
-  for (i = 0; i < memorySize; i++)
-  {
-    if (i < nbVectorsInMemory)
-      *(vectorMemory[i]) = *(source.vectorMemory[i]);
-  }
+
+  // !! no memory allocation !!
+  vectorMemory = source.vectorMemory;
+  // Warning: do not copy isVectorMemoryAllocatedIn to avoid double memory deallocation
   memoryXML = source.memoryXML;
 
   OUT("SiconosMemory::operator = (const SiconosMemory& source)\n");
   return *this;
 }
 
-
-void SiconosMemory::fillMemoryWithMemoryXML()
-{
-  IN("SiconosMemory::fillMemoryWithMemoryXML()\n");
-  int size = memoryXML->getSiconosMemorySize();
-  vector<SiconosVector*> v = memoryXML->getSiconosMemoryVector();
-  setVectorMemory(size, v);
-  OUT("SiconosMemory::fillMemoryWithMemoryXML()\n");
-}
-
-
+// default (private) constructor
+SiconosMemory::SiconosMemory(): memorySize(0), nbVectorsInMemory(0),
+  memoryXML(NULL)
+{}

@@ -92,16 +92,6 @@ private:
   xmlNode * KNode;
   xmlNode * CNode;
 
-
-  //Methods
-
-  /** \fn loadLagrangianLinearTIDSProperties( bool )
-  *   \brief load the different properties of a LagrangianLinearTIDS
-  *   \param bool : value which determines if the Dynamical System is BVP or not
-  *   \exception XMLException : if a property of the LagrangianLinearTIDS lacks in the DOM tree
-  */
-  void loadLagrangianLinearTIDSProperties(bool);
-
 };
 
 #endif

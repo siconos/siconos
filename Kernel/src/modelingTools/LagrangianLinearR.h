@@ -119,7 +119,8 @@ public:
   }
 
   /** \fn SiconosMatrix getHPtrRelatingToDS(int position)
-   *  \brief getter of the SiconosMatrix H relating to one (the one at the given position in the dsVector of the interaction) of the 2 specific Dynamical System of of the Interaction
+   *  \brief get the SiconosMatrix H relating to one
+   * (the one at the given position in the dsVector of the interaction) of the 2 specific Dynamical System of of the Interaction
    *  \return SiconosMatrix : the H for a DS
    */
   SiconosMatrix getHRelatingToDS(const int&);

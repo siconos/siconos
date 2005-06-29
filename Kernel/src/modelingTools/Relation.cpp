@@ -44,11 +44,11 @@ vector<DSInputOutput*> Relation::getDSInputOutputs(void)
   return dsioVector;
 }
 
-DSInputOutput* Relation::getDSInputOutput(const int& i)
+DSInputOutput* Relation::getDSInputOutput(const unsigned int& i)
 {
-  if (i < dsioVector.size())
-    return dsioVector[i];
-  else RuntimeException::selfThrow("Relation - getDSInputOutput : \'i\' is out of range");
+  if (i >= dsioVector.size())
+    RuntimeException::selfThrow("Relation - getDSInputOutput : \'i\' is out of range");
+  return dsioVector[i];
 }
 
 void Relation::setDSInputOutputs(vector<DSInputOutput*> dsioVect)
@@ -69,57 +69,21 @@ void Relation::addDSInputOutput(DSInputOutput* dsio)
 
 void Relation::computeOutput(const double& time)
 {
-  if (computeOutputPtr == NULL) RuntimeException::selfThrow("computeOutput() is not linked to a plugin function");
-
   //to do
-  //computeOutputPtr(&x(0), &time, &lambdaPtr(0), &y(0));
-  //  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-  //
-  //  DynamicalSystem *ds1 ,*ds2;
-  //  SiconosVector *y = interaction->getYPtr();
-  //  SiconosVector *yDot = interaction->getYDotPtr();
-  //  if (vDS.size() == 2)
-  //  {
-  //      ds1=vDS[0];
-  //      ds2=vDS[1];
-  //      if (((ds1->getType() == LNLDS) || (ds1->getType() == LTIDS)) && ((ds2->getType() == LNLDS) || (ds2->getType() == LTIDS)))
-  //      {
-  //        LagrangianDS *d1 = static_cast<LagrangianDS*> (ds1);
-  //        LagrangianDS *d2 = static_cast<LagrangianDS*> (ds2);
-  //
-  //        CompositeVector q;
-  //        q.add(*(d1->getQPtr()));
-  //      q.add(*(d2->getQPtr()));
-  //        //*y = (h * q) + b;
-  //
-  //      CompositeVector vel;
-  //      vel.add(*(d1->getVelocityPtr()));
-  //      vel.add(*(d2->getVelocityPtr()));
-  //      *yDot = (h * vel);
-  //
-  //      computeOutputPtr(*q, 0.0, lambda, y);
-  //      }
-  //    else
-  //    {
-  //      // To be Finished
-  //      RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for this type of dynamical system "+vDS[0]->getType());
-  //    }
+  RuntimeException::selfThrow("Relation - computeOutput: not yet implemented for relation of type" + getType());
 }
 
 void Relation::computeFreeOutput(const double& time)
 {
-  if (computeOutputPtr == NULL) RuntimeException::selfThrow("computeFreeOutput() is not linked to a plugin function");
-
+  RuntimeException::selfThrow("Relation - computeFreeOutput: not yet implemented for relation of type" + getType());
   //to do
-  //computeOutputPtr(&xFree(0), &time, &lambdaPtr(0), &y(0));
 }
 
 void Relation::computeInput(const double& time)
 {
-  if (computeInputPtr == NULL) RuntimeException::selfThrow("computeInput() is not linked to a plugin function");
-
   //to do
-  //computeInputPtr(&x(0), &time, &lambdaPtr(0), &r(0));
+  RuntimeException::selfThrow("Relation - computeIntput: not yet implemented for relation of type" + getType());
+
 }
 
 void Relation::setComputeOutputFunction(const string& pluginPath, const string& functionName)

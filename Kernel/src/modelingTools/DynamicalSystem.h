@@ -15,7 +15,6 @@
 #include "BoundaryCondition.h"
 #include "DSXML.h"
 
-
 #include <string>
 #include <vector>
 
@@ -201,11 +200,7 @@ public:
    *  \brief set x0 to pointer newPtr
    *  \param SiconosVector * newPtr
    */
-  inline void setX0Ptr(SiconosVector* newPtr)
-  {
-    delete x0;
-    x0 = newPtr;
-  }
+  void setX0Ptr(SiconosVector*);
 
   // --- X ---
 
@@ -241,11 +236,42 @@ public:
    *  \brief set x to pointer newPtr
    *  \param SiconosVector * newPtr
    */
-  inline void setXPtr(SiconosVector *newPtr)
+  void setXPtr(SiconosVector *);
+
+  // X memory
+
+  /** \fn  const SiconosMemory getXMemory(void) const
+   *  \brief get the value of xMemory
+   *  \return a SiconosMemory
+   */
+  inline const SiconosMemory getXMemory() const
   {
-    delete x ;
-    x = newPtr;
+    return *xMemory;
   }
+
+  /** \fn SiconosMemory getXMemoryPtr(void) const
+   *  \brief get all the values of the state vector x stored in memory
+   *  \return a memory
+   */
+  inline SiconosMemory* getXMemoryPtr() const
+  {
+    return xMemory;
+  }
+
+  /** \fn void setXMemory(const SiconosMemory &)
+   *  \brief set the value of xMemory
+   *  \param a ref on a SiconosMemory
+   */
+  inline void setXMemory(const SiconosMemory& newValue)
+  {
+    *xMemory = newValue;
+  }
+
+  /** \fn void setXMemory(SiconosMemory * newPtr)
+   *  \brief set xMemory to pointer newPtr
+   *  \param a ref on a SiconosMemory
+   */
+  void setXMemoryPtr(SiconosMemory *);
 
   // ---  XDot ---
 
@@ -281,11 +307,42 @@ public:
    *  \brief set xDot to pointer newPtr
    *  \param SiconosVector * newPtr
    */
-  inline void setXDotPtr(SiconosVector *newPtr)
+  void setXDotPtr(SiconosVector *);
+
+  // XDot memory
+
+  /** \fn  const SiconosMemory getXDotMemory(void) const
+   *  \brief get the value of xDotMemory
+   *  \return a SiconosMemory
+   */
+  inline const SiconosMemory getXDotMemory() const
   {
-    delete xDot;
-    xDot = newPtr;
+    return *xDotMemory;
   }
+
+  /** \fn SiconosMemory getXDotMemoryPtr(void) const
+   *  \brief get all the values of the state vector xDot stored in memory
+   *  \return a memory
+   */
+  inline SiconosMemory* getXDotMemoryPtr() const
+  {
+    return xDotMemory;
+  }
+
+  /** \fn void setXDotMemory(const SiconosMemory &)
+   *  \brief set the value of xDotMemory
+   *  \param a ref on a SiconosMemory
+   */
+  inline void setXDotMemory(const SiconosMemory& newValue)
+  {
+    *xDotMemory = newValue;
+  }
+
+  /** \fn void setXDotMemory(SiconosMemory * newPtr)
+   *  \brief set xDotMemory to pointer newPtr
+   *  \param a ref on a SiconosMemory
+   */
+  void setXDotMemoryPtr(SiconosMemory *);
 
   // --- XFree ---
 
@@ -321,11 +378,7 @@ public:
    *  \brief set xFree to pointer newPtr
    *  \param SiconosVector * newPtr
    */
-  inline void setXFreePtr(SiconosVector *newPtr)
-  {
-    delete xFree;
-    xFree = newPtr;
-  }
+  void setXFreePtr(SiconosVector *);
 
   // --- R ---
 
@@ -360,16 +413,47 @@ public:
    *  \brief set R to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setRPtr(SimpleVector *newPtr)
+  void setRPtr(SimpleVector *);
+
+  // r memory
+
+  /** \fn  const SiconosMemory getRMemory(void) const
+   *  \brief get the value of rMemory
+   *  \return a SiconosMemory
+   */
+  inline const SiconosMemory getRMemory() const
   {
-    delete r;
-    r = newPtr;
+    return *rMemory;
   }
 
-  // --- Memory ---
+  /** \fn SiconosMemory getRMemoryPtr(void) const
+   *  \brief get all the values of the state vector r stored in memory
+   *  \return a memory
+   */
+  inline SiconosMemory* getRMemoryPtr() const
+  {
+    return rMemory;
+  }
+
+  /** \fn void setRMemory(const SiconosMemory &)
+   *  \brief set the value of rMemory
+   *  \param a ref on a SiconosMemory
+   */
+  inline void setRMemory(const SiconosMemory& newValue)
+  {
+    *rMemory = newValue;
+  }
+
+  /** \fn void setRMemory(SiconosMemory * newPtr)
+   *  \brief set rMemory to pointer newPtr
+   *  \param a ref on a SiconosMemory
+   */
+  void setRMemoryPtr(SiconosMemory *);
+
+  // --- Steps in memory ---
 
   /** \fn const int getStepsInMemory(void) const
-   *  \brief allows to get the value of stepsInMemory
+   *  \brief get the value of stepsInMemory
    *  \return the value of stepsInMemory
    */
   inline const int getStepsInMemory() const
@@ -378,98 +462,12 @@ public:
   }
 
   /** \fn void setStepsInMemory(const int&)
-   *  \brief allows to set the value of stepsInMemory
+   *  \brief set the value of stepsInMemory
    *  \param int steps : the value to set stepsInMemory
    */
   inline void setStepsInMemory(const int& steps)
   {
     stepsInMemory = steps;
-  }
-
-  // X memory
-
-  /** \fn  const SiconosMemory getXMemory(void) const
-   *  \brief get the value of xMemory
-   *  \return a SiconosMemory
-   */
-  inline const SiconosMemory getXMemory() const
-  {
-    return xMemory;
-  }
-
-  /** \fn SiconosMemory getXMemoryPtr(void) const
-   *  \brief allows to get all the values of the state vector x stored in memory
-   *  \return the memory object which stores previous values of x
-   */
-  inline SiconosMemory* getXMemoryPtr()
-  {
-    return &xMemory;
-  }
-
-  /** \fn void setXMemory(const SiconosMemory &)
-   *  \brief set the value of xMemory
-   *  \param a ref on a SiconosMemory
-   */
-  inline void setXMemory(const SiconosMemory& xMem)
-  {
-    xMemory = xMem;
-  }
-
-  // xDot memory
-
-  /** \fn  const SiconosMemory getXDotMemory(void) const
-   *  \brief get the value of xDotMemory
-   *  \return a SiconosMemory
-   */
-  inline const SiconosMemory getXDotMemory() const
-  {
-    return xDotMemory;
-  }
-
-  /** \fn SiconosMemory* getXDotMemoryPtr(void)
-   *  \brief get all the values of old xDot vectors
-   *  \return a pointer on the memory object which contains previous values of xDot
-   */
-  inline SiconosMemory* getXDotMemoryPtr()
-  {
-    return &xDotMemory;
-  }
-
-  /** \fn void setXDotMemory(const SiconosMemory &)
-   *  \brief set the value of xDotMemory
-   *  \param SiconosMemory &xDotMem : a memory object.
-   */
-  inline void setXDotMemory(const SiconosMemory& xDotMem)
-  {
-    xDotMemory = xDotMem;
-  }
-
-  // r memory
-  /** \fn  const SiconosMemory getRMemory(void) const
-   *  \brief get the value of RMemory
-   *  \return a SiconosMemory
-   */
-  inline const SiconosMemory getRMemory() const
-  {
-    return rMemory;
-  }
-
-  /** \fn SiconosMemory* getRMemoryPtr(void)
-   *  \brief get all the values of old r vectors
-   *  \return the memory object which contains previous values of r
-   */
-  inline SiconosMemory* getRMemoryPtr()
-  {
-    return &rMemory;
-  }
-
-  /** \fn void setRMemory(const SiconosMemory &)
-   *  \brief set the value of rMemory
-   *  \param a ref on a SiconosMemory
-   */
-  inline void setRMemory(const SiconosMemory& rMem)
-  {
-    rMemory = rMem;
   }
 
   // --- JacobianX ---
@@ -505,11 +503,7 @@ public:
    *  \brief set JacobianX to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setJacobianXPtr(SiconosMatrix *newPtr)
-  {
-    delete jacobianX;
-    jacobianX = newPtr;
-  }
+  void setJacobianXPtr(SiconosMatrix *newPtr);
 
   // --- Boundary Conditions ---
   //\todo : getter and setter to be reviewed when implement BC correctly
@@ -538,11 +532,7 @@ public:
    *  \brief set the BoundaryCondition pointer
    *  \param BoundaryCondition *bc : the BoundaryCondition to set BC
    */
-  inline void setBoundaryConditionPtr(BoundaryCondition *newBC)
-  {
-    delete BC;
-    BC = newBC;
-  }
+  void setBoundaryConditionPtr(BoundaryCondition *newBC);
 
   // --- dsxml ---
   /** \fn inline const DSXML* getDynamicalSystemXMLPtr() const
@@ -605,7 +595,7 @@ public:
    *  \param int : the place of the DSInputOutput in the vector of DSInputOutput of the DynamicalSystem
    *  \return DSInputOutput* : dsioVector[ i ] DSInputOutput
    */
-  DSInputOutput* getDSInputOutput(int);
+  DSInputOutput* getDSInputOutput(const unsigned int&);
 
   /** \fn void setDSInputOutputs(vector<DSInputOutput*>)
    *  \brief allows to set all the DSInputOutputs of the DynamicalSystem
@@ -687,7 +677,7 @@ public:
    *  \brief initialize the SiconosMemory objects with a positive size.
    *  \param the size of the SiconosMemory. must be >= 0
    */
-  virtual void initMemory(const int& steps) ;
+  virtual void initMemory(const unsigned int& steps) ;
 
   /** \fn virtual void swapInMemory(void);
    * \brief push the current values of x, xDot and r in the stored previous values
@@ -822,13 +812,13 @@ protected:
   SiconosVector *x;
 
   /** the  previous state vectors stored in memory*/
-  SiconosMemory xMemory;
+  SiconosMemory *xMemory;
 
   /** the time derivative of the state x (the velocity) */
   SiconosVector *xDot;
 
   /** the  previous xDot vectors */
-  SiconosMemory xDotMemory;
+  SiconosMemory *xDotMemory;
 
   /** the  free state vector (state vector for r=0) */
   SiconosVector *xFree;
@@ -837,7 +827,7 @@ protected:
   SimpleVector *r;
 
   /**  the previous r vectors */
-  SiconosMemory rMemory;
+  SiconosMemory *rMemory;
 
   /** number of previous states stored in memory */
   int stepsInMemory;
@@ -878,7 +868,19 @@ protected:
    */
   void (*computeJacobianXPtr)(int* sizeOfX, double* time, double* xPtr, double* jacobianXPtr);
 
-private :
+  /** Flags to know if pointers have been allocated inside constructors or not */
+
+  bool isX0AllocatedIn;
+  bool isXAllocatedIn;
+  bool isXMemoryAllocatedIn;
+  bool isXDotAllocatedIn;
+  bool isXDotMemoryAllocatedIn;
+  bool isXFreeAllocatedIn;
+  bool isRAllocatedIn;
+  bool isRMemoryAllocatedIn;
+  bool isJacobianXAllocatedIn;
+  bool isBCAllocatedIn;
+  std::vector<bool> isDsioAllocatedIn;
 };
 
 #endif // DYNAMICALSYSTEM_H

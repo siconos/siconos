@@ -160,10 +160,10 @@ public:
   }
 
 
-  /*============================================================
-   *      Solver tags and attributes of the OneStepNSProblem
-   *               ( according to SICONOS/Numerics )
-   * ===========================================================/
+  //============================================================
+  //      Solver tags and attributes of the OneStepNSProblem
+  //               ( according to SICONOS/Numerics )
+  //============================================================
   /** \fn string getSolver()
   *   \brief Return the kind of solver of the OneStepNSProblem (LcpSolving, RelayDualSolving, ...)
   *   \return string : the type of solver

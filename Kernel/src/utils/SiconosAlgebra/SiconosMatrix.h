@@ -14,7 +14,6 @@
 #ifndef __SiconosMatrix__
 #define __SiconosMatrix__
 
-#include "NewSiconosVector.h"
 #include "SimpleVector.h"
 #include "SiconosMatrixException.h"
 #include "check.h"
@@ -26,9 +25,9 @@
 const bool printVerbose = true;
 
 // This constant set the maximum allowed size for displaying a Matrix on standard output (see function display())
-const int MAXSIZEFORDISPLAY = 10;
+const unsigned int MAXSIZEFORDISPLAY = 10;
 
-class siconosVector;
+class SiconosVector;
 class SimpleVector;
 
 class SiconosMatrix
@@ -120,13 +119,13 @@ public:
    */
   ~SiconosMatrix();
 
-  /** \fn int size (int)
+  /** \fn  unsigned int size (const unsigned int&)
    *  \brief get the dimension of the matrix
    *  \param the dimension to get (0 to get the number of rows or 1 to get the number of columns)
    *  \exception SiconosMatrixException
    *  \return the a dimension of the matrix
    */
-  int size(const int&) const;
+  unsigned int size(const unsigned int&) const;
 
   /** \fn bool isSquare()
    *  \brief determines if the matrix is square
@@ -194,14 +193,14 @@ public:
    *  \param SiconosVector v : the values which have to be copied in the row
    *  \return true if no error
    */
-  bool addRow(const int&, const SiconosVector&);
+  bool addRow(const unsigned int&, const SiconosVector&);
 
   /** \fn SiconosVector& getRow(int index)
    *  \brief get a row of the matrix
    *  \return a SiconosVector which represent the row
    *  \WARNING 11 Feb 2005 : possible memory problem ? (dynamical allocation without delete...)
    */
-  SimpleVector getRow(const int& index) const;
+  SimpleVector getRow(const int&) const;
 
   /** \fn double* getArray()
    *  \brief return the adress of the array of double values of the matrix
@@ -259,7 +258,7 @@ public:
    *  \param int : the line position to start the copy of the blockmatrix
    *  \param int : the column position to start the copy of the blockmatrix
    */
-  void blockMatrixCopy(SiconosMatrix &, const int&, const int&);
+  void blockMatrixCopy(SiconosMatrix &, const unsigned int&, const unsigned int&);
 
   // Io-stream operators
   friend std::istream& operator >> (std::istream& i, SiconosMatrix& m);

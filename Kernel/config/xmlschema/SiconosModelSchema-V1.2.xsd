@@ -114,7 +114,7 @@
 		<xsd:extension base="doubleList">
 	     
 		<!--Vector is defined in the tag -->
-		<xsd:attribute name="vectorSize" type="xsd:nonNegativeInteger" use="optional"/>
+		<xsd:attribute name="vectorSize" type="xsd:nonNegativeInteger" use="optional" default ="1"/>
 		<!--Vector is defined in a file -->
 		<xsd:attribute name="vectorFile" type="xsd:string" use="optional"/>
 		<!--Vector is calculated with a plugin function -->
@@ -248,7 +248,7 @@
 <!--~~~~~~ DS_Concerned for Interaction~~~~~~~~-->
 <xsd:complexType name="Interaction_DS_ConcernedType">
 	<xsd:sequence>
-	<!--~~~ Couples of DS ~~~~-->
+	<!--~~~  DS ~~~~-->
 		<xsd:element name="DS" minOccurs="1" maxOccurs="unbounded">
 		<xsd:complexType>
 			<xsd:attribute name="number" type="xsd:positiveInteger" use="required"/>
@@ -265,7 +265,13 @@
 	<xsd:attribute name="all" type="boolean" use="optional"/>
 </xsd:complexType>
 
-
+<!--~~~~~~ special type to provide a list of DS (for interaction, OSI ...) ~~~~~~~~-->
+<xsd:complexType name="list_of_DS">
+	<xsd:sequence>
+		<xsd:element name="DSList" minOccurs="0" maxOccurs="unbounded" type="vector"/>
+	</xsd:sequence>
+	<xsd:attribute name="all" type="boolean" use="optional" default="false"/>
+</xsd:complexType>
 
 <!--~~~~~~ DS_Concerned for OneStepIntegrator~~~~~~~~-->
 <xsd:complexType name="OSI_DS_ConcernedType">
@@ -668,7 +674,7 @@
 						<xsd:element name="y" type="vector" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="lambda" type="vector" minOccurs='0' maxOccurs='1'/>
 						<!--~~~~~~ DS_Concerned ~~~~~~-->
-						<xsd:element name="DS_Concerned" type="Interaction_DS_ConcernedType" minOccurs='1' maxOccurs="1"/>
+						<xsd:element name="DS_Concerned" type="list_of_DS" minOccurs='1' maxOccurs="1"/>
 						
 				<!--~~~~~~~~ Relation ~~~~~~~~-->
 				<xsd:element name="Interaction_Content" minOccurs="1" maxOccurs="1">

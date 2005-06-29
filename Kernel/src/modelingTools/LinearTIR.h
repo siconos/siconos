@@ -242,7 +242,7 @@ private:
   SiconosMatrix* C;
   /** a matrix specific to the LinearTIR \f$ y= C x + D \lambda + a \f$*/
   SiconosMatrix* D;
-  /** a matrix specific to the LinearTIR \f$ r= B \lambda \f$*/
+  /** a matrix specific to the LinearTIR \f$ r= E \lambda \f$*/
   SiconosMatrix* E;
   /** a vector specific to the LinearTIR \f$ y= C x + D \lambda + a \f$*/
   SimpleVector* a;

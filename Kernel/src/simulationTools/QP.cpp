@@ -10,12 +10,15 @@ QP::QP(OneStepNSProblemXML* osnspbxml, Strategy* newStrat):
   nspbType = QP_OSNSP;
   if (onestepnspbxml != NULL)
   {
-    int size = ((static_cast<QPXML*>(onestepnspbxml))->getP()).size();
+    QPXML * xmlqp = (static_cast<QPXML*>(onestepnspbxml));
+    int size = (xmlqp->getP()).size();
     n = size;
     Q = new SiconosMatrix(size, size);
     p = new SimpleVector(size);
-    *Q = (static_cast<QPXML*>(onestepnspbxml))->getQ();
-    *p = (static_cast<QPXML*>(onestepnspbxml))->getP();
+    if (xmlqp->hasQ())
+      *Q = (static_cast<QPXML*>(onestepnspbxml))->getQ();
+    if (xmlqp->hasP())
+      *p = (static_cast<QPXML*>(onestepnspbxml))->getP();
   }
   else RuntimeException::selfThrow("QP::xml constructor, xml file=NULL");
 }

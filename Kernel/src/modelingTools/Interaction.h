@@ -6,6 +6,7 @@
 #include "NonSmoothLaw.h"
 #include "Relation.h"
 #include "RelationXML.h"
+#include "NonSmoothDynamicalSystem.h"
 
 // IO (XML)
 #include "InteractionXML.h"
@@ -20,18 +21,17 @@
 #include <vector>
 #include <string>
 
+class NonSmoothLaw;
 class DynamicalSystem;
 class Relation;
-class NonSmoothLaw;
-
-//class InteractionXML;
+class NonSmoothDynamicalSystem;
 
 /** \class Interaction
- *  \brief link between dynamic systems, driven by relations and non-smooth laws.
+ *  \brief this class describes interaction between some dynamical systems (DS) (from 1 to NumberOfDS)
+ *  Each interaction owns local variables and some relations between them, plus a non smooth law
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 29, 2004
- *
  *
  */
 class Interaction
@@ -47,9 +47,9 @@ public:
   /** \fn Interaction(InteractionXML*)
    *  \brief constructor with XML object of the Interaction
    *  \param InteractionXML* : the XML object corresponding
+   *  \param NonSmoothDynamicalSystem : the nsds that owns this strategy (optional)
    */
-  Interaction(InteractionXML*);
-
+  Interaction(InteractionXML*, NonSmoothDynamicalSystem* = NULL);
 
   /** \fn Interaction(const string&, const int& number,const int& nInter, vector<int>* status,
       vector<DynamicalSystem*>* dsConcerned)
@@ -388,12 +388,11 @@ public:
     return vectorDS;
   }
 
-  /** \fn void setDynamicalSystems(DynamicalSystem*, DynamicalSystem*)
-   *  \brief set the 2 DS of this Interaction
-   *  \param the first DS* to set in the Interaction
-   *  \param the second DS* to set in the Interaction
+  /** \fn void setDynamicalSystems(const std::vector<DynamicalSystem*>&)
+   *  \brief set the ds vector
+   *  \param a std vector of DynamicalSystem*>
    */
-  void setDynamicalSystems(DynamicalSystem*, DynamicalSystem*);
+  void setDynamicalSystems(const std::vector<DynamicalSystem*>&) ;
 
   /** \fn DynamicalSystem* getDynamicalSystemPtr(const int&)
    *  \brief get a specific DynamicalSystem
@@ -402,7 +401,7 @@ public:
    */
   DynamicalSystem* getDynamicalSystemPtr(const int&);
 
-  /** \fn DynamicalSystem getDynamicalSystem(const int&)
+  /** \fn DynamicalSystem getDynamicalSystemNumber(const int& nb)
    *  \brief get a specific DynamicalSystem
    *  \param 0 or 1 -> first or second DS concerned by interaction
    */
@@ -421,12 +420,7 @@ public:
    *  \brief set the Relation of this Interaction
    *  \param the relation* to set
    */
-  inline void setRelationPtr(Relation* newRelation)
-  {
-    if (isRelationAllocatedIn) delete relation;
-    relation = newRelation;
-    isRelationAllocatedIn = false;
-  }
+  void setRelationPtr(Relation* newRelation) ;
 
   /** \fn NonSmoothLaw* getNonSmoothLawPtr(void)
    *  \brief get the NonSmoothLaw of this Interaction
@@ -441,12 +435,7 @@ public:
    *  \brief set the NonSmoothLaw of this Interaction
    *  \param the NonSmoothLaw* to set
    */
-  inline void setNonSmoothLawPtr(NonSmoothLaw* newNslaw)
-  {
-    if (isNsLawAllocatedIn) delete nslaw;
-    nslaw = newNslaw;
-    isNsLawAllocatedIn = false;
-  }
+  void setNonSmoothLawPtr(NonSmoothLaw* newNslaw) ;
 
   /** \fn inline InteractionXML* getInteractionXMLPtr()
    *  \brief get the InteractionXML* of the Interaction
@@ -565,10 +554,10 @@ private:
    */
   Interaction();
 
-
+  // --- MEMBERS ---
   /** name of the Interaction */
   std::string  id;
-  /** unique number specific to each Interaction */
+  /** number specific to each Interaction */
   int number;
   /** size of the the vector y */
   int nInteraction;
@@ -588,10 +577,8 @@ private:
   /** shows the status of the Interaction */
   std::vector<int> status;
 
-  /** the Dynamical Systems concerned by this relation
-   * dynamical systems are given by pair :
-   * the vector (ds1, ds2, ds3, ds4, ds5, ds6)
-   * means ds1 interacts with ds2, ds3 interacts with ds4, ds5 interacts with ds6*/
+  /** the Dynamical Systems concerned by this interaction
+   *  their number is between 1 and NumberOfDs */
   std::vector<DynamicalSystem*> vectorDS;
 
   /** the Non-smooth Law of the interaction*/

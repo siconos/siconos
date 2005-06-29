@@ -93,7 +93,7 @@ Strategy::Strategy(StrategyXML* strxml, Model *newModel): strategyType("none"), 
       vector<OneStepIntegratorXML*> osiXMLVector = strategyxml->getOneStepIntegratorXML();
 
       // For each OSI ...
-      for (int i = 0; i < osiXMLVector.size(); i++)
+      for (unsigned int i = 0; i < osiXMLVector.size(); i++)
       {
         // Get the number of the DynamicalSystem concerned
         dsNb = (osiXMLVector[i]->getDSConcerned())[0];
@@ -124,27 +124,20 @@ Strategy::Strategy(StrategyXML* strxml, Model *newModel): strategyType("none"), 
       }
 
       // OneStepNSProblem
-
       if (strategyxml->hasOneStepNSProblemXML())
       {
         // we get all the numbers of the Interactions to link
         vector<int> interactionNumbers = strategyxml->getOneStepNSProblemXMLPtr()->getInteractionConcerned();
 
-        // OneStepNSProblem - LCP
+        // OneStepNSProblem - LCP memory allocation/construction
         if (strategyxml->getOneStepNSProblemXMLPtr()->getType() == LCP_TAG)
-        {
-          // LCP memory allocation/construction
-          nsProblem = new LCP(strategyxml->getOneStepNSProblemXMLPtr());
-          for (int i = 0; i < interactionNumbers.size(); i++)
-            nsProblem->addInteraction(model->getNonSmoothDynamicalSystemPtr()->getInteractionPtrNumber(interactionNumbers[i]));
-          nsProblem->setStrategy(this);
-        }
+          nsProblem = new LCP(strategyxml->getOneStepNSProblemXMLPtr(), this);
         // OneStepNSProblem - CFD
         else if (strategyxml->getOneStepNSProblemXMLPtr()->getType() == CFD_TAG)
         {
           // CFD memory allocation/construction
           nsProblem = new CFD(strategyxml->getOneStepNSProblemXMLPtr());
-          for (int i = 0; i < interactionNumbers.size(); i++)
+          for (unsigned int i = 0; i < interactionNumbers.size(); i++)
             nsProblem->addInteraction(model->getNonSmoothDynamicalSystemPtr()->getInteractionPtrNumber(interactionNumbers[i]));
           nsProblem->setStrategy(this);
         }
@@ -153,7 +146,7 @@ Strategy::Strategy(StrategyXML* strxml, Model *newModel): strategyType("none"), 
         {
           // QP memory allocation/construction
           nsProblem = new QP(strategyxml->getOneStepNSProblemXMLPtr());
-          for (int i = 0; i < interactionNumbers.size(); i++)
+          for (unsigned int i = 0; i < interactionNumbers.size(); i++)
             nsProblem->addInteraction(model->getNonSmoothDynamicalSystemPtr()->getInteractionPtrNumber(interactionNumbers[i]));
           nsProblem->setStrategy(this);
         }
@@ -162,7 +155,7 @@ Strategy::Strategy(StrategyXML* strxml, Model *newModel): strategyType("none"), 
         {
           // relay memory allocation/construction
           nsProblem = new Relay(strategyxml->getOneStepNSProblemXMLPtr());
-          for (int i = 0; i < interactionNumbers.size(); i++)
+          for (unsigned int i = 0; i < interactionNumbers.size(); i++)
             nsProblem->addInteraction(model->getNonSmoothDynamicalSystemPtr()->getInteractionPtrNumber(interactionNumbers[i]));
           nsProblem->setStrategy(this);
         }
@@ -190,7 +183,7 @@ Strategy::~Strategy()
   }
   if (integratorVector.size() > 0)
   {
-    for (int i = 0; i < integratorVector.size(); i++)
+    for (unsigned int i = 0; i < integratorVector.size(); i++)
     {
       if (isIntegratorVectorAllocatedIn[i])
       {
@@ -237,7 +230,7 @@ void Strategy::setOneStepNSProblemPtr(OneStepNSProblem* nspb)
 
 void Strategy::setOneStepIntegrators(const vector<OneStepIntegrator*> vOSI)
 {
-  for (int i = 0; i < integratorVector.size(); i++)
+  for (unsigned int i = 0; i < integratorVector.size(); i++)
   {
     if (isIntegratorVectorAllocatedIn[i])
     {
@@ -253,17 +246,15 @@ void Strategy::setOneStepIntegrators(const vector<OneStepIntegrator*> vOSI)
 
 OneStepIntegrator* Strategy::getOneStepIntegrator(const int& nb) const
 {
-  if (nb < integratorVector.size())
-  {
-    return integratorVector[nb];
-  }
-  RuntimeException::selfThrow("Strategy - getIntegrator : \'nb\' is out of range");
+  if ((unsigned int)nb >= integratorVector.size())
+    RuntimeException::selfThrow("Strategy - getIntegrator : \'nb\' is out of range");
+  return integratorVector[nb];
 }
 
 void Strategy::computeFreeState()
 {
   IN("Strategy::computeFreeState\n");
-  for (int i = 0; i < integratorVector.size(); i++)
+  for (unsigned int i = 0; i < integratorVector.size(); i++)
   {
     integratorVector[i]->computeFreeState();
   }
@@ -273,15 +264,15 @@ void Strategy::computeFreeState()
 void Strategy::nextStep()
 {
   timeDiscretisation->increment();
-  for (int i = 0; i < integratorVector.size(); i++)
-  {
+
+  for (unsigned int i = 0; i < integratorVector.size(); i++)
     integratorVector[i]->nextStep();
-  }
   if (nsProblem != NULL)
   {
     nsProblem->nextStep();
     nsProblem->checkInteraction();
   }
+
   // increment time step
   model->setCurrentT(model->getCurrentT() + timeDiscretisation->getH());
 }
@@ -299,7 +290,7 @@ void Strategy::computeOneStepNSProblem()
 void Strategy::updateState()
 {
   if (nsProblem != NULL)nsProblem->updateState();
-  for (int i = 0; i < integratorVector.size(); i++)
+  for (unsigned int i = 0; i < integratorVector.size(); i++)
   {
     integratorVector[i]->updateState();
   }
@@ -308,7 +299,7 @@ void Strategy::updateState()
 void Strategy::initialize()
 {
   // initialization of the OneStepIntegrators
-  for (int i = 0; i < integratorVector.size(); i++)
+  for (unsigned int i = 0; i < integratorVector.size(); i++)
   {
     integratorVector[i]->initialize();
   }
@@ -316,7 +307,7 @@ void Strategy::initialize()
 
 OneStepIntegrator* Strategy::getIntegratorOfDSPtr(const int& numberDS)
 {
-  for (int i = 0; i < integratorVector.size(); i++)
+  for (unsigned int i = 0; i < integratorVector.size(); i++)
   {
     if (integratorVector[i]->getDynamicalSystemPtr()->getNumber() == numberDS)
     {
@@ -357,7 +348,7 @@ void Strategy::newtonUpdateState()
   if (nsProblem != NULL)nsProblem->updateState();
 
   // update OneStep Integrators
-  for (int i = 0; i < integratorVector.size(); i++)
+  for (unsigned int i = 0; i < integratorVector.size(); i++)
   {
     integratorVector[i]->updateState();
   }
@@ -412,80 +403,42 @@ void Strategy::saveStrategyToXML()
   OUT("Strategy::saveStrategyToXML\n");
 }
 
-TimeDiscretisation* Strategy::createTimeDiscretisationPtr(const double& h, const int& N, SimpleVector * tk,
-    const double& hMin, const double& hMax, const bool& constant)
-{
-
-  timeDiscretisation = new TimeDiscretisation(h, this);
-  isTimeDiscrAllocatedIn = true;
-  //timeDiscretisation->createTimeDiscretisation(0, h, N, tk, hMin, hMax, constant, this);
-  return timeDiscretisation;
-}
-
-//=========================================================
-OneStepNSProblem* Strategy::createLCP()
-{
-  nsProblem = new LCP(NULL, this);
-  isNsPbAllocatedIn = true;
-  return nsProblem;
-}
-
-OneStepNSProblem* Strategy::createQP()
-{
-  nsProblem = new QP(NULL, this);
-  isNsPbAllocatedIn = true;
-  return nsProblem;
-}
-
-OneStepNSProblem* Strategy::createRelay()
-{
-  nsProblem = new Relay(NULL, this);
-  isNsPbAllocatedIn = true;
-  return nsProblem;
-}
-
 OneStepIntegrator* Strategy::addAdams(TimeDiscretisation* td, DynamicalSystem* ds)
 {
-  if (!hasDynamicalSystemIntegrator(ds))
-  {
-    OneStepIntegrator* osi;
-    osi = new Adams(td, ds);
-    integratorVector.push_back(osi);
-    isIntegratorVectorAllocatedIn.push_back(true);
-    return osi;
-  }
-  else RuntimeException::selfThrow("Strategy::addAdams : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
+  if (hasDynamicalSystemIntegrator(ds))
+    RuntimeException::selfThrow("Strategy::addAdams : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
+  OneStepIntegrator* osi;
+  osi = new Adams(td, ds);
+  integratorVector.push_back(osi);
+  isIntegratorVectorAllocatedIn.push_back(true);
+  return osi;
 }
 
 OneStepIntegrator* Strategy::addMoreau(TimeDiscretisation* td, DynamicalSystem* ds, const double& theta)
 {
-  if (!hasDynamicalSystemIntegrator(ds))
-  {
-    OneStepIntegrator* osi;
-    osi = new Moreau(td, ds, theta);
-    integratorVector.push_back(osi);
-    isIntegratorVectorAllocatedIn.push_back(true);
-    return osi;
-  }
-  else RuntimeException::selfThrow("Strategy::addAdams : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
+  if (hasDynamicalSystemIntegrator(ds))
+    RuntimeException::selfThrow("Strategy::addAdams : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
+  OneStepIntegrator* osi;
+  osi = new Moreau(td, ds, theta);
+  integratorVector.push_back(osi);
+  isIntegratorVectorAllocatedIn.push_back(true);
+  return osi;
 }
 
 OneStepIntegrator* Strategy::addLsodar(TimeDiscretisation* td, DynamicalSystem* ds)
 {
-  if (!hasDynamicalSystemIntegrator(ds))
-  {
-    OneStepIntegrator* osi;
-    osi = new Lsodar(td, ds);
-    integratorVector.push_back(osi);
-    isIntegratorVectorAllocatedIn.push_back(true);
-    return osi;
-  }
-  else RuntimeException::selfThrow("Strategy::addAdams : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
+  if (hasDynamicalSystemIntegrator(ds))
+    RuntimeException::selfThrow("Strategy::addAdams : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
+  OneStepIntegrator* osi;
+  osi = new Lsodar(td, ds);
+  integratorVector.push_back(osi);
+  isIntegratorVectorAllocatedIn.push_back(true);
+  return osi;
 }
 
 bool Strategy::hasDynamicalSystemIntegrator(DynamicalSystem* ds) const
 {
-  for (int i = 0; i < integratorVector.size(); i++)
+  for (unsigned int i = 0; i < integratorVector.size(); i++)
   {
     if (ds == integratorVector[i]->getDynamicalSystemPtr()) return true;
   }

@@ -93,7 +93,7 @@ public:
    *  \param int : the place of the DSInputOutput in the vector of DSInputOutput of the Relation
    *  \return DSInputOutput* : dsioVector[ i ] DSInputOutput
    */
-  DSInputOutput* getDSInputOutput(const int&);
+  DSInputOutput* getDSInputOutput(const unsigned int&);
 
   /** \fn void setDSInputOutputs(vector<DSInputOutput*>)
    *  \brief allows to set all the DSInputOutputs of the Relation

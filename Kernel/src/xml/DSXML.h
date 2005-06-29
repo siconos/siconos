@@ -52,7 +52,7 @@ public:
    *   \param xmlNode * DSNode : the DS DOM tree
    *   \param bool isBVP : if NSDS is IBP DS have boundary condition
    */
-  DSXML(xmlNode * DSNode, bool isBVP);
+  DSXML(xmlNode * DSNode, const bool&);
 
   /** \fn int getNumber()
    *   \brief Return the number of the DSXML
@@ -136,11 +136,9 @@ public:
    */
   inline void setX0(SiconosVector *v)
   {
-    if (this->hasX0() == false)
-    {
-      this->x0Node = SiconosDOMTreeTools::createVectorNode(this->rootDSXMLNode, DS_X0, *v);
-    }
-    else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->x0Node, *v);
+    if (!hasX0())
+      x0Node = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, DS_X0, *v);
+    else SiconosDOMTreeTools::setSiconosVectorNodeValue(x0Node, *v);
   }
 
   /** \fn SimpleVector getX()
@@ -547,7 +545,7 @@ protected:
    *   \param bool isBVP : if NSDS is BVP DS have boundary condition
    *   \exception XMLException : if a property of the DS lacks in the DOM tree
    */
-  void loadDSProperties(bool isBVP);
+  void loadDSProperties(const bool& isBVP);
 
 
   /** \fn void loadBoundaryConditionXML(xmlNode * rootBoundaryConditionNode)

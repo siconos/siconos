@@ -58,7 +58,7 @@ void CFD::formalize(const double& time)
 
   double pasH = strategy->getTimeDiscretisationPtr()->getH();
   //cout<<"## CFD::formalize - interactionVector.size() == "<<this->interactionVector.size()<<endl;
-  for (int i = 0; i < interactionVector.size(); i++)
+  for (unsigned int i = 0; i < interactionVector.size(); i++)
   {
     interactionVector[i]->check(time, pasH);
   }
@@ -83,7 +83,7 @@ void CFD::compute(void)
    * integration of Siconos/Numerics *
    ***********************************/
   // now we'll use Numerics !!
-  int res, i, j;
+  int res;
   int nn = nCfd;//n;
 
   if (nCfd == 0)
@@ -94,7 +94,7 @@ void CFD::compute(void)
   }
 
   // Update the relation
-  SiconosVector *yDot, *lambda;
+  SimpleVector *yDot, *lambda;
   int activeInteraction = 0;
 
   yDot = interactionVector[0]->getYDotPtr();
@@ -106,7 +106,7 @@ void CFD::compute(void)
   }
   else
   {
-    for (int i = 0; i < interactionVector.size(); i++)
+    for (unsigned int i = 0; i < interactionVector.size(); i++)
     {
       lambda = interactionVector[i]->getLambdaPtr();
       lambda->zero();
@@ -130,7 +130,7 @@ void CFD::compute(void)
 void CFD::computeM(void)
 {
   IN("CFD::computeM(void)\n");
-  int i, j, n;
+  unsigned int i, n;
   int orgDSRank, connectedDSRank;
   int currentActiveInteraction = 0;
   int interConnectedNumber = 0;
@@ -232,7 +232,7 @@ void CFD::computeM(void)
       interConnectedNumber = 0;
       if (connectedInteractionMap[interactionVector[i]][0] != NULL)
       {
-        for (int k = 0; k < connectedInteractionMap[interactionVector[i]].size(); k++)
+        for (unsigned int k = 0; k < connectedInteractionMap[interactionVector[i]].size(); k++)
         {
           vCo = connectedInteractionMap[interactionVector[i]];
           orgDSRank = vCo[k]->originInteractionDSRank;
@@ -298,12 +298,11 @@ void CFD::computeQ(const double& time)
    * \warning : initialisation of "q" removed! It seems that that BouncingBall sample
    * is still running good ...
    */
-  int qSize = nCfd;
   int qPos = 0;
   //q = SimpleVector::SimpleVector(qSize);
   q->zero();
 
-  for (int i = 0; i < interactionVector.size(); i++)
+  for (unsigned int i = 0; i < interactionVector.size(); i++)
   {
     if (connectedInteractionMap.find(interactionVector[i]) != connectedInteractionMap.end())
     {

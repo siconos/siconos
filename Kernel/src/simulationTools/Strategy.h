@@ -296,39 +296,7 @@ public:
 
   // --- FUNCTIONS TO CREATE OR ADD VARIOUS OBJECTS ---
 
-  /** \fn void createTimeDiscretisationPtr(const double& h, const int& N, SimpleVector * tk,
-      const double& hMin, const double& hMax, const bool& constant
-      *  \brief allows to create the TimeDiscretisation of the Strategy
-      *  \param double : the h value
-      *  \param int : the N value
-      *  \param SiconosVector* : the tk vector
-      *  \param double : the hMin value
-      *  \param double : the hMax value
-      *  \param bool : the boolean which determines if the TimeDiscretisation is constant
-      *  \return TimeDiscretisation* : the TimeDiscretisation created
-      *  \exception RuntimeException
-      */
-  TimeDiscretisation* createTimeDiscretisationPtr(const double& h, const int& N, SimpleVector * tk,
-      const double& hMin, const double& hMax, const bool& constant);
-
   //===========================================
-  /** \fn OneStepNSProblem* createLCP()
-   *  \brief allows to create a LCP
-   *  \return OneStepNSProblem* : the OneStepNSProblem created
-   */
-  OneStepNSProblem* createLCP();
-
-  /** \fn OneStepNSProblem* createQP()
-   *  \brief allows to create a QP
-   *  \return OneStepNSProblem* : the OneStepNSProblem created
-   */
-  OneStepNSProblem* createQP();
-
-  /** \fn OneStepNSProblem* createRelay()
-   *  \brief allows to create a Relay NSProblem
-   *  \return OneStepNSProblem* : the OneStepNSProblem created
-   */
-  OneStepNSProblem* createRelay();
 
   /** \fn OneStepIntegrator* addAdams(TimeDiscretisation* td, DynamicalSystem* ds)
    *  \brief allows to add an Adams integrator to the Strategy

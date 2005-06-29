@@ -2,7 +2,8 @@
 using namespace std;
 
 // --- Constructor from an xml file ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML * dsXML): LagrangianDS(dsXML), K(NULL), C(NULL)
+LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML * dsXML): LagrangianDS(dsXML), K(NULL), C(NULL),
+  isKAllocatedIn(true), isCAllocatedIn(true)
 {
   IN("LagrangianLinearTIDS::LagrangianLinearTIDS() - Xml constructor\n");
   DSType = LTIDS;
@@ -24,7 +25,7 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(int newNumber, int newNdof,
   LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, "BasicPlugin:computeMass", "BasicPlugin:computeFInt", fExt,
                "BasicPlugin:computeJacobianQFInt", "BasicPlugin:computeJacobianVelocityFInt",
                "BasicPlugin:computeJacobianQQNLInertia", "BasicPlugin:computeJacobianVelocityQNLInertia",
-               "BasicPlugin:computeQNLInertia"), K(NULL), C(NULL)
+               "BasicPlugin:computeQNLInertia"), K(NULL), C(NULL), isKAllocatedIn(true), isCAllocatedIn(true)
 {
   IN("LagrangianLinearTIDS::LagrangianLinearTIDS -  Constructor from a minimum set of data\n");
   K = new SiconosMatrix(ndof, ndof);
@@ -40,11 +41,31 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(int newNumber, int newNdof,
 LagrangianLinearTIDS::~LagrangianLinearTIDS()
 {
   IN("LagrangianLinearTIDS::~LagrangianLinearTIDS()\n");
-  delete K;
-  K = NULL;
-  delete C;
-  C = NULL;
+  if (isKAllocatedIn)
+  {
+    delete K;
+    K = NULL;
+  }
+  if (isCAllocatedIn)
+  {
+    delete C;
+    C = NULL;
+  }
   OUT("LagrangianLinearTIDS::~LagrangianLinearTIDS()\n");
+}
+
+void LagrangianLinearTIDS::setKPtr(SiconosMatrix *newPtr)
+{
+  if (isKAllocatedIn) delete mass;
+  K = newPtr;
+  isKAllocatedIn = false;
+}
+
+void LagrangianLinearTIDS::setCPtr(SiconosMatrix *newPtr)
+{
+  if (isCAllocatedIn) delete mass;
+  C = newPtr;
+  isCAllocatedIn = false;
 }
 
 void LagrangianLinearTIDS::display() const
@@ -79,10 +100,10 @@ void LagrangianLinearTIDS::saveDSToXML()
     lgptr->setMMatrix(mass);
     lgptr->setQ(q);
     lgptr->setQ0(q0);
-    lgptr->setQMemory(&(qMemory));
+    lgptr->setQMemory(qMemory);
     lgptr->setVelocity(velocity);
     lgptr->setVelocity0(velocity0);
-    lgptr->setVelocityMemory(&(velocityMemory));
+    lgptr->setVelocityMemory(velocityMemory);
 
     // FExt
     if (lgptr->hasFext())
@@ -111,10 +132,8 @@ LagrangianLinearTIDS* LagrangianLinearTIDS::convert(DynamicalSystem* ds)
 }
 
 // --- Default constructor ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(): LagrangianDS(), K(NULL), C(NULL)
+LagrangianLinearTIDS::LagrangianLinearTIDS(): LagrangianDS(), K(NULL), C(NULL), isKAllocatedIn(false), isCAllocatedIn(false)
 {
-  IN("LagrangianLinearTIDS::LagrangianLinearTIDS() - Default constructor \n");
   DSType = LTIDS;
-  OUT("LagrangianLinearTIDS::LagrangianLinearTIDS() - Default constructor \n");
 }
 

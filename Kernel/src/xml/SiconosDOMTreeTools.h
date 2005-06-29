@@ -28,7 +28,6 @@
 
 const std::string SDTT_VECTOR = "Vector";
 const std::string SDTT_MATRIX = "Matrix";
-//const std::string SDTT_MEMORY = "Memory";
 const std::string SDTT_VECTORSIZE = "vectorSize";
 const std::string SDTT_MATRIXSIZE = "matrixSize";
 const std::string SDTT_MATRIXCOLSIZE = "matrixColSize";
@@ -36,14 +35,10 @@ const std::string SDTT_MATRIXROWSIZE = "matrixRowSize";
 const std::string SDTT_VECTORFILE = "vectorFile";
 const std::string SDTT_MATRIXFILE = "matrixFile";
 const std::string SDTT_ROW = "row";
-//const std::string SDTT_MEMORYSIZE = "sizeMax";
 
-//const char DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ MACHINE DEPENDENT
-
-extern int MATRIX_MAX_SIZE;
-extern int VECTOR_MAX_SIZE;
+extern unsigned int MATRIX_MAX_SIZE;
+extern unsigned int VECTOR_MAX_SIZE;
 extern std::string FILE_STORAGE;
-//extern std::string XML_SCHEMA;
 
 class SiconosDOMTreeTools
 {
@@ -56,7 +51,6 @@ public:
    */
   //static SiconosVector getSiconosVectorValue(const xmlNode * siconosVectorNode);
   static SimpleVector getSiconosVectorValue(const xmlNode * siconosVectorNode);
-
 
   /** \fn static SiconosMatrix getSiconosMatrixValue(xmlNode * siconosMatrixNode)
    *   \brief Return a SiconosMatrix computed from a siconos matrix node
@@ -91,7 +85,7 @@ public:
    *   \param attributeName : the attribute of the node you want to know if it exists
    *   \return true if the attribute exists, otherwise false
    */
-  static bool hasAttributeValue(const xmlNode * node, const std::string attributeName);
+  static bool hasAttributeValue(const xmlNode * node, const std::string& attributeName);
 
 
   /** \fn static string getStringAttributeValue(xmlNode * node, string attributeName)
@@ -100,7 +94,7 @@ public:
    *   \param attributeName : the attribute of the node you want to have the int value
    *   \return The string value of the attribute attributeName contents in the node node
    */
-  static std::string getStringAttributeValue(const xmlNode * node, const std::string attributeName);
+  static std::string getStringAttributeValue(const xmlNode * node, const std::string& attributeName);
 
   /** \fn static int getIntegeAttributerValue(xmlNode * node, string attributeName)
    *   \brief Return the int value of the attribute attributeName of the node node
@@ -108,7 +102,7 @@ public:
    *   \param attributeName : the attribute of the node you want to have the int value
    *   \return The int value of the attribute attributeName contents in the node node
    */
-  static int getIntegerAttributeValue(const xmlNode * node, const std::string attributeName);
+  static int getIntegerAttributeValue(const xmlNode * node, const std::string& attributeName);
 
   /** \fn static double getDoubleAttributeValue(xmlNode * node, string attributeName)
    *   \brief Return the double value of the attribute attributeName of the node node
@@ -116,7 +110,7 @@ public:
    *   \param attributeName : the attribute of the node you want to have the double value
    *   \return The double value of the attribute attributeName contents in the node node
    */
-  static double getDoubleAttributeValue(const xmlNode * node, const std::string attributeName);
+  static double getDoubleAttributeValue(const xmlNode * node, const std::string& attributeName);
 
   /** \fn static bool getBooleanAttributeValue(xmlNode * node, string attributeName)
    *   \brief Return the boolean value of the attribute attributeName of the node node
@@ -124,7 +118,7 @@ public:
    *   \param attributeName : the attribute of the node you want to have the boolean value
    *   \return The boolean value of the attribute attributeName contents in the node node
    */
-  static bool getBooleanAttributeValue(const xmlNode * node, const std::string attributeName);
+  static bool getBooleanAttributeValue(const xmlNode * node, const std::string& attributeName);
 
 
   /** \fn static string getStringContentValue(xmlNode * node)
@@ -361,7 +355,7 @@ public:
    *  \param string : the string to save in the XML file
    *  \return xmlNode* : the node created
    */
-  static xmlNode* createStringAttribute(xmlNode*, const std::string, const std::string);
+  static void createStringAttribute(xmlNode*, const std::string, const std::string);
 
   /** \fn static void createBooleanAttribute(xmlNode*, const string, const bool)
    *  \brief adds an attribute to a node in the DOM tree to save a boolean value
@@ -380,7 +374,7 @@ public:
    *   \param childNodeName : the name of the node you search
    *   \return the xmlNode or NULL if not found
    */
-  static xmlNode * findNodeChild(const xmlNode * node, const std::string childNodeName);
+  static xmlNode * findNodeChild(const xmlNode * node, const std::string& childNodeName);
 
   /** \fn static xmlNode * findNodeChild(xmlNode * node)
    *   \brief Find the child node childNodeName of the node 'node'
@@ -395,7 +389,7 @@ public:
    *   \param const string followNodeName : the name of the node you search
    *   \return the first xmlNode or NULL if not found
    */
-  static xmlNode * findFollowNode(const xmlNode * node, const std::string followNodeName);
+  static xmlNode * findFollowNode(const xmlNode * node, const std::string& followNodeName);
 
   /** \fn static xmlNode * findFollowNode(xmlNode * startNode)
    *   \brief Find the first node with name followNodeName since the startNode node
@@ -419,7 +413,7 @@ private :
    *   \param int start : the index in the string where we start the research.
    *   \return int : the position of the next figure, -1 if not found.
    */
-  static int findNextfigureIndex(const std::string s, int start);
+  static int findNextfigureIndex(const std::string& s, const int& start);
 
   /** \fn int findNextBlankIndex(const string s, int start)
    *   \brief string function, which returns the position in the string of the next space char.
@@ -427,7 +421,7 @@ private :
    *   \param int start : the index in the string where we start the research.
    *   \return int : the position of the next space, -1 if not found
    */
-  static int findNextBlankIndex(const std::string s, int start);
+  static int findNextBlankIndex(const std::string& s, const int& start);
 
   /** \fn vector<double> string2Vector(const string vectorContent, int size)
    *   \brief Return a vector object which values are content in a char array
@@ -435,7 +429,7 @@ private :
    *   \param int size : the number of elements contain in vectorContent (the size of the vector to build)
    *   \return vector : the vector computes
    */
-  static std::vector<double> string2Vector(const std::string vectorContent, int size);
+  static std::vector<double> string2Vector(const std::string& vectorContent, const int& size);
 
   /** \fn vector<int> string2Vector(const string vectorContent)
    *   \brief Return a vector object which values are content in a char array
@@ -443,7 +437,7 @@ private :
    *   \param int size : the number of elements contain in vectorContent (the size of the vector to build)
    *   \return vector : the vector computes
    */
-  static std::vector<int> string2Vector(const std::string vectorContent);
+  static std::vector<int> string2Vector(const std::string& vectorContent);
 
   /** \fn static SiconosVector getSiconosRowMatrixValue(const xmlNode * matrixRowNode, int rowSize)
    *   \brief Return a SiconosVector computed from a row of a matrix
@@ -451,7 +445,7 @@ private :
    *   \param int rowSize : the size of the row
    *   \return A SiconosVector
    */
-  static SimpleVector getSiconosRowMatrixValue(const xmlNode * matrixRowNode, int rowSize);
+  static SimpleVector getSiconosRowMatrixValue(const xmlNode * matrixRowNode, const int& rowSize);
 
   /** \fn static void setSiconosRowMatrixValue(const xmlNode * matrixRowNode,  SiconosVector v, int colSize)
    *   \brief Set the row describes by matrixRowNode  of a matrix of col size colSize to v vector
@@ -459,7 +453,7 @@ private :
    *   \param SiconosVector v : the new value of the row
    *   \param int colSize : the col size of the matrix who contains the row
    */
-  static void setSiconosRowMatrixValue(const xmlNode * matrixRowNode,  const SiconosVector &v, int colSize);
+  static void setSiconosRowMatrixValue(const xmlNode *,  const SiconosVector &, const unsigned int&);
 };
 
 #endif

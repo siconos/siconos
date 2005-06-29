@@ -13,7 +13,7 @@ extern std::string  DefaultComputeOutput;
  *  \brief Lagrangian DSInputOutput
  *         { y = H(q, t)
  *         { R = G(lambda)
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date 17/01/2005
  *
