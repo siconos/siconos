@@ -38,7 +38,7 @@ OneStepNSProblem::~OneStepNSProblem()
 Interaction* OneStepNSProblem::getInteractionPtr(const int& nb)
 {
   if ((unsigned int)nb >= interactionVector.size())
-    RuntimeException::selfThrow("OneStepNSProblem::getInteraction(const int nb) - number greater than size of interaction vector");
+    RuntimeException::selfThrow("OneStepNSProblem::getInteractionPtr(const int& nb) - number greater than size of interaction vector");
   return interactionVector[nb];
 }
 
@@ -318,7 +318,7 @@ void OneStepNSProblem::setGsnlAlgorithm(const string& meth,  const double& t,  c
     solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
   }
   else
-    RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
+    RuntimeException::selfThrow("OneStepNSProblem::setGsnlAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
 void OneStepNSProblem::setGcpAlgorithm(const string& meth,  const double& t,  const string& norm,  const int& iter)
@@ -371,7 +371,7 @@ void OneStepNSProblem::setGcpAlgorithm(const string& meth,  const double& t,  co
     solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
   }
   else
-    RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
+    RuntimeException::selfThrow("OneStepNSProblem::setGcpAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
 void OneStepNSProblem::setLatinAlgorithm(const string& meth, const double& t, const string& norm, const int& iter, const double& searchdirection)
@@ -424,7 +424,7 @@ void OneStepNSProblem::setLatinAlgorithm(const string& meth, const double& t, co
     solvingMethod.cfd.k_latin = searchdirection;
   }
   else
-    RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
+    RuntimeException::selfThrow("OneStepNSProblem::setLatinAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
 void OneStepNSProblem::updateConnectedInteractionMap()
