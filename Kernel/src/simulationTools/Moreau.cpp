@@ -35,12 +35,19 @@ Moreau::Moreau(OneStepIntegratorXML *osiXML, TimeDiscretisation* td, DynamicalSy
 
 // --- constructor from a minimum set of data ---
 Moreau::Moreau(TimeDiscretisation* td, DynamicalSystem* ds, const double& newTheta):
-  OneStepIntegrator(td, ds), W(NULL), isWAllocatedIn(true), theta(newTheta)
+  OneStepIntegrator(td, ds), W(NULL), isWAllocatedIn(false), theta(newTheta)
 {
   integratorType = MOREAU_INTEGRATOR;
   // Memory allocation for W
-  int sizeW = (static_cast<LagrangianDS*>(ds))->getQPtr()->size();
-  W = new SiconosMatrix(sizeW, sizeW);
+  string type = ds->getType();
+  if (type == LNLDS)
+  {
+    int sizeW = (static_cast<LagrangianDS*>(ds))->getQPtr()->size();
+    W = new SiconosMatrix(sizeW, sizeW);
+    isWAllocatedIn = true;
+  }
+  else
+    RuntimeException::selfThrow("Moreau::Moreau() - constructor from data - Not yet implemented for ds type " + type);
 }
 
 Moreau::~Moreau()
