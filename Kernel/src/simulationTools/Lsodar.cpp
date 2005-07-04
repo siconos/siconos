@@ -26,7 +26,7 @@ void Lsodar::computeFreeState()
 void Lsodar::integrate()
 {
   IN("Lsodar::integrate\n");
-  tryfunction(ds->getVectorFieldPtr());
+  //tryfunction(ds->getVectorFieldPtr());
   OUT("Lsodar::integrate\n");
 }
 

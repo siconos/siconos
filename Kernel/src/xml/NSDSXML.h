@@ -1,4 +1,3 @@
-
 /** \class NSDSXML
  *   \brief This class manages NSDS data part
  *  \author SICONOS Development Team - copyright INRIA
@@ -178,11 +177,6 @@ private:
   /* vector of EqualityConstraint numbers*/
   std::vector<int> definedEqualityConstraintNumbers;
 
-
-  /** \fn loadNonSmoothDynamicalSystem()
-   *   \brief Load the NonSmoothDynamicalSystem : Interactions and DSs
-   *  \exception XMLException
-   */
   void loadNonSmoothDynamicalSystem();
 
   /** \fn loadDSXML(xmlNode * rootDSNode)

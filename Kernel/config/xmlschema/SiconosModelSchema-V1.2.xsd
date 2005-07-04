@@ -21,8 +21,8 @@
    	<xsd:restriction base="xsd:string">
 		<xsd:enumeration value="LagrangianDS"/>
 		<xsd:enumeration value="LagrangianLinearTIDS"/>
-		<xsd:enumeration value="LinearSystemDS"/>
-		<xsd:enumeration value="NonLinearSystemDS"/>
+		<xsd:enumeration value="LinearDS"/>
+		<xsd:enumeration value="NonLinearDS"/>
 	</xsd:restriction>
 </xsd:simpleType>
 
@@ -384,7 +384,7 @@
 				<xsd:sequence>
 		  <!--~~~~~~~~~~~~~~~~~ DS ~~~~~~~~~~~~~~~~~-->
 		<xsd:choice minOccurs='0' maxOccurs='unbounded'>
-			<xsd:element name="NonLinearSystemDS">
+			<xsd:element name="NonLinearDS">
 				<xsd:complexType>
 					<xsd:all>
 						<xsd:element name="Id" type="xsd:string" minOccurs='0' maxOccurs='1'/>
@@ -406,7 +406,7 @@
 				</xsd:complexType>
 			</xsd:element>
 						
-			<xsd:element name="LinearSystemDS">
+			<xsd:element name="LinearDS">
 				<xsd:complexType>
 					<xsd:all>
 						<xsd:element name="Id" type="xsd:string" minOccurs='0' maxOccurs='1'/>
@@ -528,7 +528,7 @@
 			</xsd:complexType>
 
 			<xsd:unique name="DSKey">
-		        <xsd:selector xpath='.//LagrangianDS|.//LagrangianLinearTIDS|.//LinearSystemDS|.//NonLinearSystemDS'/>
+		        <xsd:selector xpath='.//LagrangianDS|.//LagrangianLinearTIDS|.//LinearDS|.//NonLinearDS'/>
 		        <xsd:field xpath='./@number'/>
 				<!--<xsd:field xpath='@number'/>-->
 		     </xsd:unique>

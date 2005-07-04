@@ -78,7 +78,7 @@ DynamicalSystem::DynamicalSystem(DSXML * dsXML):
 }
 
 // From a minimum set of data
-DynamicalSystem::DynamicalSystem(int newNumber, int newN, SiconosVector* newX0, string vectorFieldPlugin):
+DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN, const SiconosVector& newX0, const string& vectorFieldPlugin):
   DSType(NLDS), nsds(NULL), number(newNumber), id("none"), n(newN), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
   stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(NULL), vectorFieldPtr(NULL),
   isX0AllocatedIn(true), isXAllocatedIn(true), isXMemoryAllocatedIn(false), isXDotAllocatedIn(true), isXDotMemoryAllocatedIn(false),
@@ -91,7 +91,7 @@ DynamicalSystem::DynamicalSystem(int newNumber, int newN, SiconosVector* newX0, 
   xFree = new SimpleVector(n);
   r = new SimpleVector(n);
   jacobianX = new SiconosMatrix(n, n);
-  *(x0) = *newX0;
+  *(x0) = newX0;
   setVectorFieldFunction(cShared.getPluginName(vectorFieldPlugin), cShared.getPluginFunctionName(vectorFieldPlugin));
   setComputeJacobianXFunction("BasicPlugin.so", "computeJacobianX");
   OUT("DynamicalSystem::DynamicalSystem - Minimum data constructor\n");
@@ -339,14 +339,13 @@ void DynamicalSystem::setComputeJacobianXFunction(const string& pluginPath, cons
   computeJacobianXFunctionName = plugin + ":" + functionName;
 }
 
-void DynamicalSystem::vectorField(const double& time)
+void DynamicalSystem::computeVectorField(const double& time)
 {
   if (vectorFieldPtr == NULL)
     RuntimeException::selfThrow("vectorField() is not linked to a plugin function");
 
-  int size = x->size();
-  // const_cast to be deleted: problem const in C function signature? To see ...
-  vectorFieldPtr(&size, const_cast<double*>(&time), &(*x)(0) , &(*xDot)(0));
+  unsigned int size = x->size();
+  vectorFieldPtr(&size, &time, &(*x)(0) , &(*xDot)(0));
 }
 
 void DynamicalSystem::computeJacobianX(const double& time)
@@ -354,13 +353,11 @@ void DynamicalSystem::computeJacobianX(const double& time)
   if (computeJacobianXPtr == NULL)
     RuntimeException::selfThrow("computeJacobianX() is not linked to a plugin function");
 
-  int size = x->size();
-  // const_cast to be deleted: problem const in C function signature? To see ...
-  computeJacobianXPtr(&size, const_cast<double*>(&time), &(*x)(0), &(*jacobianX)(0, 0));
+  unsigned int size = x->size();
+  computeJacobianXPtr(&size, &time, &(*x)(0), &(*jacobianX)(0, 0));
 }
 
-
-void DynamicalSystem::swapInMemory(void)
+void DynamicalSystem::swapInMemory()
 {
   IN("DynamicalSystem::swapInMemory\n ");
   xMemory->swap(*x);
@@ -372,28 +369,29 @@ void DynamicalSystem::swapInMemory(void)
 void DynamicalSystem::display() const
 {
   IN("DynamicalSystem::display\n");
-  cout << "____ data of the Dynamical System " << endl;
-  cout << "| number : " << number << endl;
-  cout << "| id : " << id << endl;
-  cout << "| n : " << n << endl;
-  cout << "| x " << endl;
+  cout << " ===== General dynamical system display =====" << endl;
+  cout << "- number : " << number << endl;
+  cout << "- id : " << id << endl;
+  cout << "- n (size) : " << n << endl;
+  cout << "- x " << endl;
   if (x != NULL) x->display();
   else cout << "-> NULL" << endl;
-  cout << "| x0 " << endl;
+  cout << "- x0 " << endl;
   if (x0 != NULL) x0->display();
   else cout << "-> NULL" << endl;
-  cout << "| xFree " << endl;
+  cout << "- xFree " << endl;
   if (xFree != NULL) xFree->display();
   else cout << "-> NULL" << endl;
-  cout << "| xDot " << endl;
+  cout << "- xDot " << endl;
   if (xDot != NULL) xDot->display();
   else cout << "-> NULL" << endl;
-  cout << "| stepsInMemory : " << stepsInMemory << endl;
-  cout << "| r " << endl;
+  cout << "- stepsInMemory : " << stepsInMemory << endl;
+  cout << "- r " << endl;
   if (r != NULL) r->display();
   else cout << "-> NULL" << endl;
-  cout << "| VectorField plugin: " << vectorFieldFunctionName << endl;
-  cout << "| JacobianX plugin: " << computeJacobianXFunctionName << endl;
+  //  cout<<"- VectorField plugin: "<<vectorFieldFunctionName <<endl;
+  //  cout<<"- JacobianX plugin: "<<computeJacobianXFunctionName <<endl;
+  cout << " ============================================" << endl;
   OUT("DynamicalSystem::display\n");
 
 }
@@ -405,16 +403,15 @@ void DynamicalSystem::initMemory(const unsigned int& steps)
     cout << "Warning : DynamicalSystem::initMemory with size equal to zero" << endl;
   else
   {
-    // \warning FP: explicit call to xml; what about other cases (without xml)? To be reviewed
     stepsInMemory = steps;
     if (isXMemoryAllocatedIn) delete rMemory;
-    //xMemory = new SiconosMemory(steps, xMemory.getSiconosMemoryXML() );
     xMemory = new SiconosMemory(steps);
     isXMemoryAllocatedIn = true;
+
     if (isXDotMemoryAllocatedIn) delete rMemory;
-    //xDotMemory = new SiconosMemory(steps, xDotMemory.getSiconosMemoryXML());
     xDotMemory = new SiconosMemory(steps);
     isXDotMemoryAllocatedIn = true;
+
     if (isRMemoryAllocatedIn) delete rMemory;
     rMemory = new SiconosMemory(steps);
     isRMemoryAllocatedIn = true;
@@ -499,30 +496,6 @@ void DynamicalSystem::saveDSIOToXML()
       else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - bad kind of DSInputOuput");
     }
   }
-}
-
-BoundaryCondition* DynamicalSystem::createPeriodicBC()
-{
-  BC = new PeriodicBC();
-  isBCAllocatedIn = true;
-  static_cast<PeriodicBC*>(BC)->createBoundaryCondition(0);
-  return BC;
-}
-
-BoundaryCondition* DynamicalSystem::createLinearBC(SiconosVector* omega, SiconosMatrix* omega0, SiconosMatrix* omegaT)
-{
-  BC = new LinearBC();
-  isBCAllocatedIn = true;
-  static_cast<LinearBC*>(BC)->createBoundaryCondition(0, omega, omega0, omegaT);
-  return BC;
-}
-
-BoundaryCondition* DynamicalSystem::createNLinearBC()
-{
-  BC = new NLinearBC();
-  isBCAllocatedIn = true;
-  static_cast<NLinearBC*>(BC)->createBoundaryCondition(0);
-  return BC;
 }
 
 double DynamicalSystem::dsConvergenceIndicator()

@@ -3,7 +3,7 @@
 // includes to be deleted thanks to factories
 #include "LagrangianDS.h"
 #include "LagrangianLinearTIDS.h"
-#include "LinearSystemDS.h"
+#include "LinearDS.h"
 #include "LinearEC.h"
 #include "LinearTIEC.h"
 #include "LagrangianEC.h"
@@ -57,7 +57,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NSDSXML* newNsdsxml):
       }
       else if ((nsdsxml->getDSXML(nbDStab[i]))->getType() == LINEAR_SYSTEMDS_TAG)
       {
-        ds = new LinearSystemDS(nsdsxml->getDSXML(nbDStab[i]));
+        ds = new LinearDS(nsdsxml->getDSXML(nbDStab[i]));
         DSVector.push_back(ds);
         isDSVectorAllocatedIn.push_back(true);
         ds->setNSDSPtr(this);
@@ -306,7 +306,7 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
       else if (DSVector[i]->getType() == LTIDS)
         (static_cast<LagrangianLinearTIDS*>(DSVector[i]))->saveDSToXML();
       else if (DSVector[i]->getType() == LDS)
-        (static_cast<LinearSystemDS*>(DSVector[i]))->saveDSToXML();
+        (static_cast<LinearDS*>(DSVector[i]))->saveDSToXML();
       else if (DSVector[i]->getType() == NLDS)
         DSVector[i]->saveDSToXML();
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of DynamicalSystem");

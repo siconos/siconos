@@ -28,8 +28,8 @@ const std::string PERIODICBC_TAG = "Periodic";
 // DynamicalSystem tags
 const std::string LAGRANGIAN_TIME_INVARIANTDS_TAG = "LagrangianLinearTIDS"; // LL
 const std::string LAGRANGIAN_NON_LINEARDS_TAG = "LagrangianDS"; // LNL
-const std::string LINEAR_SYSTEMDS_TAG = "LinearSystemDS"; // LTI
-const std::string NON_LINEAR_SYSTEMDS_TAG = "NonLinearSystemDS";
+const std::string LINEAR_SYSTEMDS_TAG = "LinearDS"; // LTI
+const std::string NON_LINEAR_SYSTEMDS_TAG = "NonLinearDS";
 
 const std::string BOUNDARYCONDITION_TAG = "BoundaryCondition";
 const std::string INTERACTION_TAG = "Interaction";
@@ -242,8 +242,8 @@ const std::string RELAY_TAG = "Relay";
 /*Types of DS defined*/
 //const std::string NSDS_LAGRANGIANNLDS = "LagrangianDS";
 //const std::string NSDS_LAGRANGIANTIDS = "LagrangianLinearTIDS";
-//const std::string NSDS_LINEARSYSTEM = "LinearSystemDS";
-//const std::string NSDS_NONLINEARSYSTEM = "NonLinearSystemDS";
+//const std::string NSDS_LINEARSYSTEM = "LinearDS";
+//const std::string NSDS_NONLINEARSYSTEM = "NonLinearDS";
 
 
 

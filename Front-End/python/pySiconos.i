@@ -40,7 +40,7 @@
 #include "DSXML.h"
 #include "LagrangianDSXML.h"
 #include "LagrangianLinearTIDSXML.h"
-#include "LinearSystemDSXML.h"
+#include "LinearDSXML.h"
 #include "NSDSXML.h"
 #include "TimeDiscretisationXML.h"
 #include "OneStepNSProblemXML.h"
@@ -80,7 +80,7 @@
 #include "LinearBC.h"
 #include "Interaction.h"
 #include "DynamicalSystem.h"
-#include "LinearSystemDS.h"
+#include "LinearDS.h"
 #include "LagrangianDS.h"
 #include "LagrangianLinearTIDS.h"
 #include "DSInputOutput.h"
@@ -179,7 +179,7 @@ $1 = string(PyString_AsString($input));
 %include "DSXML.h"
 %include "LagrangianDSXML.h"
 %include "LagrangianLinearTIDSXML.h"
-%include "LinearSystemDSXML.h"
+%include "LinearDSXML.h"
 // ---
 %include "NSDSXML.h"
 
@@ -235,7 +235,7 @@ $1 = string(PyString_AsString($input));
 %include "Interaction.h"
 // ---
 %include "DynamicalSystem.h"
-%include "LinearSystemDS.h"
+%include "LinearDS.h"
 %include "LagrangianDS.h"
 %include "LagrangianLinearTIDS.h"
 // ---

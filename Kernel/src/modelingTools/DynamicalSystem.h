@@ -28,13 +28,13 @@ class SiconosMemory;
 class SiconosSharedLibrary;
 
 /** \class DynamicalSystem
- *  \brief  Super class of the dynamical systems
+ *  \brief  General first order non linear dynamical systems
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) April 29, 2004
  *
  *
- * The class DynamicalSystem allows to define and compute a generic n-dimensional
+ * This class defines and computes a generic n-dimensional
  * dynamical system of the form :
  * \f[
  * \dot x = f(x,t)+r,
@@ -47,16 +47,16 @@ class SiconosSharedLibrary;
  *
  *
  * By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
- * and the initial condition is given by
+ * and the initial conditions are given by
  *  * \f[
  *  x(t_0)=x_0
  * \f]
  * To define an boundary Value Problem, the pointer on  a BoundaryCondition must be set.
  *
- * One word on the bilateral constraint
+ * \todo One word on the bilateral constraint
  *
  *
- * Particular cases such as linear system (LinearSystemDS) or
+ * Particular cases such as linear system (LinearDS) or
  * Lagrangian Non Linear System (LagrangianDS)  are specialization of this class.
  *
  * \todo Add a pointer to an object Constraint .
@@ -68,28 +68,25 @@ public:
   // --- Constructors ---
 
   /** \fn DynamicalSystem(DSXML * nsdsXML)
-   *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
+   *  \brief xml constructor
    *  \param DSXML* : the XML object for this DynamicalSystem
    *  \exception RuntimeException
    */
-
   DynamicalSystem(DSXML * dsXML);
 
-  /** \fn DynamicalSystem(DSXML * nsdsXML, int number, int n,
-      SiconosVector* x0, string vectorFieldPlugin, NonSmoothDynamicalSystem * nsds, BoundaryCondition* bc)
-      *  \brief allows to create the DynamicalSystem with an xml file, or the needed data
-      *  \param int : the number for this DynamicalSystem
-      *  \param int : the dimension of this DynamicalSystem
-      *  \param SiconosVector* : the initial state of this DynamicalSystem
-      *  \param string : the plugin name for vectorField of this DynamicalSystem
+  /** \fn DynamicalSystem(DSXML * nsdsXML, const unsigned int& number, const unsigned int& n,
+      const SiconosVector& x0, const string& vectorFieldPlugin)
+      *  \brief constructor from a set of data
+      *  \param int : reference number for this DynamicalSystem
+      *  \param int : dimension of this DynamicalSystem
+      *  \param SiconosVector : initial state of this DynamicalSystem
+      *  \param string : plugin name for vectorField of this DynamicalSystem
       *  \exception RuntimeException
       */
-
-  DynamicalSystem(int number, int n,
-                  SiconosVector* x0, std::string  vectorFieldPlugin = "BasicPlugin:vectorField");
+  DynamicalSystem(const int&, const unsigned int&,
+                  const SiconosVector&, const std::string& = "BasicPlugin:vectorField");
 
   // --- Destructor ---
-
   virtual ~DynamicalSystem();
 
   // ---  Getters and setters ---
@@ -506,12 +503,13 @@ public:
   void setJacobianXPtr(SiconosMatrix *newPtr);
 
   // --- Boundary Conditions ---
-  //\todo : getter and setter to be reviewed when implement BC correctly
+
+  /*\todo: to be finished when BC class will be allright */
   /** \fn  const BoundaryCondition getBoundaryCondition(void) const
    *  \brief get the value of BoundaryCondition
    *  \return an object BoundaryCondition
    */
-  //  inline BoundaryCondition getBoundaryCondition(void) { return &(this->BC); }
+  //inline BoundaryCondition getBoundaryCondition() const { return *BC; }
 
   /** \fn BoundaryCondition getBoundaryConditionPtr(void) const
    *  \brief get the BoundaryCondition
@@ -526,7 +524,7 @@ public:
    *  \brief set the Boundary Conditions
    *  \param ref on an object BoundaryCondition
    */
-  //inline void setBoundaryCondition(const BoundaryCondition& newBC) {*(this->BC) = newBC; }
+  //inline void setBoundaryCondition(const BoundaryCondition& newBC) {*BC = newBC; }
 
   /** \fn void setBoundaryConditionPtr(BoundaryCondition*)
    *  \brief set the BoundaryCondition pointer
@@ -572,12 +570,21 @@ public:
 
   // --- type of DS ---
   /** \fn inline string getType()
-   *  \brief allows to get the type of a DynamicalSystem
+   *  \brief get the type of a DynamicalSystem
    *  \return string : the type of the DynamicalSystem
    */
   inline const std::string  getType() const
   {
     return DSType;
+  }
+
+  /** \fn inline string setType()
+  *  \brief set the type of a DynamicalSystem
+  *  \param string : the type of the DynamicalSystem
+  */
+  inline void getType(const std::string newType)
+  {
+    DSType = newType;
   }
 
   // --- DS input-output ---
@@ -675,9 +682,9 @@ public:
 
   /** \fn void initMemory(const int& steps) ;
    *  \brief initialize the SiconosMemory objects with a positive size.
-   *  \param the size of the SiconosMemory. must be >= 0
+   *  \param the size of the SiconosMemory
    */
-  virtual void initMemory(const unsigned int& steps) ;
+  virtual void initMemory(const unsigned int&) ;
 
   /** \fn virtual void swapInMemory(void);
    * \brief push the current values of x, xDot and r in the stored previous values
@@ -691,7 +698,7 @@ public:
    * \param double time : the time for the computation
    *  \exception RuntimeException
    */
-  virtual void vectorField(const double& time);
+  virtual void computeVectorField(const double&);
 
   /** \fn static void computeJacobianX (const double& time)
    *  \brief Default function for computing the gradient of the vector field with the respect
@@ -699,7 +706,7 @@ public:
    *  \param double time : the time for the computation
    *  \exception RuntimeException
    */
-  virtual void computeJacobianX(const double& time);
+  virtual void computeJacobianX(const double&);
 
   /** \fn void saveDSToXML()
    *  \brief copy the data of the DS in the XML tree
@@ -728,26 +735,7 @@ public:
   /** \fn void display()
    *  \brief print the data of the dynamical system on the standard output
    */
-  void display() const;
-
-  /** \fn BoundaryCondition* createPeriodicBC()
-   *  \brief create the Periodic Boundary Condition of this DynamicalSystem
-   */
-  BoundaryCondition* createPeriodicBC();
-
-  /** \fn BoundaryCondition* createLinearBC( SiconosMatrix*, SiconosMatrix*, SiconosMatrix* )
-   *  \brief create the Linear Boundary Condition of this DynamicalSystem
-   *  \param SiconosVector* : the omega vector of this boundary condition
-   *  \param SiconosMatrix* : the omega0 matrix of this boundary condition
-   *  \param SiconosMatrix* : the omegaT matrix of this boundary condition
-   */
-  BoundaryCondition* createLinearBC(SiconosVector* omega = NULL,
-                                    SiconosMatrix* omega0 = NULL, SiconosMatrix* omegaT = NULL);
-
-  /** \fn BoundaryCondition* createNLinearBC()
-   *  \brief create the NLinear Boundary Condition of this DynamicalSystem
-   */
-  BoundaryCondition* createNLinearBC();
+  virtual void display() const;
 
   /** \var typedef void (*vfPtr) (int* sizeOfX, double* time, double* xPtr, double* xdotPtr);
    *  \brief signature of plugin function computing the vectorfield
@@ -756,7 +744,7 @@ public:
    *  \param double* xPtr : the pointer to the first element of the vector X
    *  \param double* jacobianXPtr : the pointer to the first element of the matrix jacobianX (in-out parameter)
    */
-  typedef void (*vfPtr)(int* sizeOfX, double* time, double* xPtr, double* xdotPtr);
+  typedef void (*vfPtr)(unsigned int* sizeOfX, const double* time, double* xPtr, double* xdotPtr);
 
   /** \fn vfPtr getVectorFieldPtr()
    *  \brief return the function adress of the plugin computing vectorfield
@@ -790,7 +778,7 @@ protected:
   virtual void fillDsioFromXml();
 
   /** Dynamical System type: General Dynamical System (NLDS) LagrangianDS (LNLDS),
-      LagrangianLinearTIDS (LTIDS), LinearSystemDS (LDS)*/
+      LagrangianLinearTIDS (LTIDS), LinearDS (LDS)*/
   std::string  DSType;
 
   /** NonSmoothDynamicalSystem owner of this DynamicalSystem */
@@ -803,7 +791,7 @@ protected:
   std::string  id;
 
   /** the dimension of the system (i.e. size of the state vector x, or the vector r, ...)*/
-  int n;
+  unsigned int n;
 
   /** initial state of the system */
   SiconosVector *x0;
@@ -830,7 +818,7 @@ protected:
   SiconosMemory *rMemory;
 
   /** number of previous states stored in memory */
-  int stepsInMemory;
+  unsigned int stepsInMemory;
 
   /** A container of vectors to save temporary values (for Newton convergence computation for example)*/
   std::map<const std::string, SimpleVector*> tmpWorkVector;
@@ -853,8 +841,14 @@ protected:
   /** class for plugin managing (open, close librairy...) */
   SiconosSharedLibrary cShared;
 
-  /** adress of the plugin function that computes vectorfield */
-  vfPtr vectorFieldPtr;
+  /** \fn void (*vectorFieldPtr) (int* sizeOfX, double* time, double* xPtr, double* xdotPtr)
+   *  \brief pointer on function to compute vectorfield
+   *  \param int* sizeOfX : the size of the vector x
+   *  \param double* time : current time
+   *  \param double* xPtr : the pointer to the first element of the vector x
+   *  \param double* xdotPtr : the pointer to the first element of the vector xDot
+   */
+  void (*vectorFieldPtr)(unsigned int* sizeOfX, const double* time, double* xPtr, double* xdotPtr);
 
   /** vector of the DS Inputs-Outputs of the Dynamical System */
   std::vector<DSInputOutput*> dsioVector;
@@ -866,7 +860,7 @@ protected:
    *  \param double* xPtr : pointer to the first element of X
    *  \param double* jacobianXPtr : pointer to the first element of jacobianX matrix (in-out parameter)
    */
-  void (*computeJacobianXPtr)(int* sizeOfX, double* time, double* xPtr, double* jacobianXPtr);
+  void (*computeJacobianXPtr)(unsigned int* sizeOfX, const double* time, double* xPtr, double* jacobianXPtr);
 
   /** Flags to know if pointers have been allocated inside constructors or not */
 
