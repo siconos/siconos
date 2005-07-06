@@ -18,7 +18,9 @@
 
 const std::string  LTIR_C = "C";
 const std::string  LTIR_D = "D";
-const std::string  LTIR_E = "E";
+const std::string  LTIR_F = "F";
+const std::string  LTIR_E = "e";
+const std::string  LTIR_B = "B";
 const std::string  LTIR_A = "a";
 
 class LinearTIRXML : public RelationXML
@@ -41,7 +43,7 @@ public:
    */
   inline SiconosMatrix getC()
   {
-    return SiconosDOMTreeTools::getSiconosMatrixValue(this->CNode);
+    return SiconosDOMTreeTools::getSiconosMatrixValue(CNode);
   }
 
   /** \fn SiconosMatrix getD()
@@ -50,25 +52,43 @@ public:
    */
   inline SiconosMatrix getD()
   {
-    return SiconosDOMTreeTools::getSiconosMatrixValue(this->DNode);
+    return SiconosDOMTreeTools::getSiconosMatrixValue(DNode);
   }
 
-  /** \fn SiconosMatrix getE()
-   *   \brief Return the E of the LTIRelationXML
-   *   \return The E SiconosMatrix of the LTIRelationXML
+  /** \fn SiconosMatrix getF()
+   *   \brief Return the F of the LTIRelationXML
+   *   \return The F SiconosMatrix of the LTIRelationXML
    */
-  inline SiconosMatrix getE()
+  inline SiconosMatrix getF()
   {
-    return SiconosDOMTreeTools::getSiconosMatrixValue(this->ENode);
+    return SiconosDOMTreeTools::getSiconosMatrixValue(FNode);
+  }
+
+  /** \fn SimpleVector getE()
+   *   \brief Return e of the LTIRelationXML
+   *   \return SimpleVector : e of LTIRelationXML
+   */
+  inline SimpleVector getE()
+  {
+    return SiconosDOMTreeTools::getSiconosVectorValue(eNode);
+  }
+
+  /** \fn SiconosMatrix getB()
+   *   \brief Return the B of the LTIRelationXML
+   *   \return The B SiconosMatrix of the LTIRelationXML
+   */
+  inline SiconosMatrix getB()
+  {
+    return SiconosDOMTreeTools::getSiconosMatrixValue(BNode);
   }
 
   /** \fn SimpleVector getA()
    *   \brief Return a of the LTIRelationXML
    *   \return SimpleVector : a of LTIRelationXML
    */
-  inline /*SiconosVector*/SimpleVector getA()
+  inline SimpleVector getA()
   {
-    return SiconosDOMTreeTools::getSiconosVectorValue(this->aNode);
+    return SiconosDOMTreeTools::getSiconosVectorValue(aNode);
   }
 
   /** \fn void setC(SiconosMatrix )
@@ -83,12 +103,23 @@ public:
    */
   void setD(const SiconosMatrix&);
 
-
-  /** \fn void setE(SiconosMatrix )
-   *   \brief Change the E matrix values (in xml file or external data file switch his origin position)
-   *   \param SiconosMatrix matrix : the new value for E matrix
+  /** \fn void setF(SiconosMatrix )
+   *   \brief Change the F matrix values (in xml file or external data file switch his origin position)
+   *   \param SiconosMatrix matrix : the new value for F matrix
    */
-  void setE(const SiconosMatrix&);
+  void setF(const SiconosMatrix&);
+
+  /** \fn void setE(SiconosVector )
+   *   \brief Change the e Vector values (in xml file or external data file switch his origin position)
+   *   \param SiconosVector *vector : new value of e
+   */
+  void setE(const SiconosVector&);
+
+  /** \fn void setB(SiconosMatrix )
+    *   \brief Change the B matrix values (in xml file or external data file switch his origin position)
+    *   \param SiconosMatrix matrix : the new value for B matrix
+    */
+  void setB(const SiconosMatrix&);
 
   /** \fn void setA(SiconosVector )
    *   \brief Change the a Vector values (in xml file or external data file switch his origin position)
@@ -96,14 +127,41 @@ public:
    */
   void setA(const SiconosVector&);
 
+  /** \fn bool hasXX()
+   * \brief return true if XXnode exists */
+  inline bool hasC() const
+  {
+    return (CNode != NULL);
+  }
+  inline bool hasD() const
+  {
+    return (DNode != NULL);
+  }
+  inline bool hasF() const
+  {
+    return (FNode != NULL);
+  }
+  inline bool hasE() const
+  {
+    return (eNode != NULL);
+  }
+  inline bool hasB() const
+  {
+    return (BNode != NULL);
+  }
+  inline bool hasA() const
+  {
+    return (aNode != NULL);
+  }
 
 private:
-
 
   //Nodes
   xmlNode * CNode;
   xmlNode * DNode;
-  xmlNode * ENode;
+  xmlNode * FNode;
+  xmlNode * eNode;
+  xmlNode * BNode;
   xmlNode * aNode;
 
 };

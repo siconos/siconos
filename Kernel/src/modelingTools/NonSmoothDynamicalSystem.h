@@ -173,6 +173,41 @@ public:
    */
   void setInteractions(const std::vector<Interaction*>&) ;
 
+  // -- RelativeDegree --
+
+  /** \fn  const SimpleVector getRelativeDegree() const
+   *  \brief get the value of RelativeDegree
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getRelativeDegree() const
+  {
+    return *relativeDegree;
+  }
+
+  /** \fn SimpleVector* getRelativeDegreePtr() const
+   *  \brief get RelativeDegree
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getRelativeDegreePtr() const
+  {
+    return relativeDegree;
+  }
+
+  /** \fn void setRelativeDegree (const SimpleVector& newValue)
+   *  \brief set the value of RelativeDegree to newValue
+   *  \param SimpleVector newValue
+   */
+  inline void setRelativeDegree(const SimpleVector& newValue)
+  {
+    *relativeDegree = newValue;
+  }
+
+  /** \fn void setRelativeDegreePtr(SimpleVector* newPtr)
+   *  \brief set RelativeDegree to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  void setRelativeDegreePtr(SimpleVector *newPtr);
+
   /** \fn vector<EqualityConstraint*> getEqualityConstraints(void)
    *  \brief get the vector of algebraic constraints
    *  \return vector of EqualityConstraint
@@ -281,6 +316,9 @@ private:
   /** contains the Interactions */
   std::vector<Interaction*> interactionVector;
 
+  /** vector of the relative degrees of the system */
+  SimpleVector * relativeDegree;
+
   /** contains the EqualityConstraints */
   std::vector<EqualityConstraint*> ecVector;
 
@@ -291,6 +329,7 @@ private:
   std::vector<bool> isDSVectorAllocatedIn;
   std::vector<bool> isInteractionVectorAllocatedIn;
   std::vector<bool> isEcVectorAllocatedIn;
+  bool isRelativeDegreeAllocatedIn;
 };
 
 #endif

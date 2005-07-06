@@ -8,7 +8,8 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include "DSXML.h"
-
+#include<iostream>
+#include<vector>
 
 
 class DynamicalSystemXMLTest : public CppUnit::TestFixture

@@ -20,7 +20,7 @@ class LinearDSXML;
  *
  *  This class represents first order linear systems of the form:
  * \f[
- * \dot x = A(t)x(t)+B(t)u(t)+f(t)+r,
+ * \dot x = A(t)x(t)+E(t)u(t)+b(t)+r,
  *  x(t_0)=x_0
  * \f]
  * where
@@ -29,9 +29,16 @@ class LinearDSXML;
  *
  *  The  VectorField is specialized by
  *    - \f$A \in R^{n\times n} \f$
- *    - \f$f \in R^{n} \f$
+ *    - \f$b \in R^{n} \f$
  *    - \f$u \in R^{uSize} \f$
- *    - \f$B \in R^{n\times uSize} \f$
+ *    - \f$E \in R^{n\times uSize} \f$
+ *
+ * The "minimal" form is
+ * \f[
+ * \dot x = A(t)x(t),
+ *  x(t_0)=x_0
+ * \f]
+ * and so A should always be specified.
  *
  *  \todo Automatically, specify the function of DynamicalSystem such as
  *          VectorField.
@@ -41,6 +48,8 @@ class LinearDSXML;
 class LinearDS : public DynamicalSystem
 {
 public:
+
+  /** === CONSTRUCTORS/DESTRUCTOR === */
 
   /** \fn LinearDS(DSXML * nsdsXML)
    *  \brief xml constructor
@@ -112,37 +121,37 @@ public:
    */
   void setAPtr(SiconosMatrix *);
 
-  // --- f ---
+  // --- b ---
 
-  /** \fn  const SimpleVector getF() const
-   *  \brief get the value of f
+  /** \fn  const SimpleVector getB() const
+   *  \brief get the value of b
    *  \return SimpleVector
    */
-  inline const SimpleVector getF() const
+  inline const SimpleVector getB() const
   {
-    return *f;
+    return *b;
   }
 
-  /** \fn SimpleVector* getFPtr() const
-   *  \brief get f
+  /** \fn SimpleVector* getBPtr() const
+   *  \brief get b
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getFPtr() const
+  inline SimpleVector* getBPtr() const
   {
-    return f;
+    return b;
   }
 
-  /** \fn void setF (const SimpleVector& newValue)
-   *  \brief set the value of f to newValue
+  /** \fn void setB (const SimpleVector& newValue)
+   *  \brief set the value of b to newValue
    *  \param SimpleVector newValue
    */
-  void setF(const SimpleVector&);
+  void setB(const SimpleVector&);
 
-  /** \fn void setFPtr(SimpleVector* newPtr)
-   *  \brief set F to pointer newPtr
+  /** \fn void setBPtr(SimpleVector* newPtr)
+   *  \brief set b to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  void setFPtr(SimpleVector *);
+  void setBPtr(SimpleVector *);
 
   // uSize
 
@@ -193,36 +202,36 @@ public:
    */
   void setUPtr(SimpleVector *);
 
-  // --- B ---
-  /** \fn  const SiconosMatrix getB() const
-   *  \brief get the value of B
+  // --- E ---
+  /** \fn  const SiconosMatrix getE() const
+   *  \brief get the value of E
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getB() const
+  inline const SiconosMatrix getE() const
   {
-    return *B;
+    return *E;
   }
 
-  /** \fn SiconosMatrix* getBPtr() const
-   *  \brief get B
+  /** \fn SiconosMatrix* getEPtr() const
+   *  \brief get E
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getBPtr() const
+  inline SiconosMatrix* getEPtr() const
   {
-    return B;
+    return E;
   }
 
-  /** \fn void setB (const SiconosMatrix& newValue)
-   *  \brief set the value of B to newValue
+  /** \fn void setE (const SiconosMatrix& newValue)
+   *  \brief set the value of E to newValue
    *  \param SiconosMatrix newValue
    */
-  void setB(const SiconosMatrix&);
+  void setE(const SiconosMatrix&);
 
-  /** \fn void setBPtr(SiconosMatrix* newPtr)
-   *  \brief set B to pointer newPtr
+  /** \fn void setEPtr(SiconosMatrix* newPtr)
+   *  \brief set E to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  void setBPtr(SiconosMatrix *);
+  void setEPtr(SiconosMatrix *);
 
   // --- plugins related functions
 
@@ -234,29 +243,29 @@ public:
    */
   void setComputeAFunction(const std::string &, const std::string &);
 
-  /** \fn void setComputeFFunction(const string& libPath,const string& functionName);
-   *  \brief set a specified function to compute the vector F
+  /** \fn void setComputeBFunction(const string& libPath,const string& functionName);
+   *  \brief set a specified function to compute the vector b
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeFFunction(const std::string &, const std::string &);
+  void setComputeBFunction(const std::string &, const std::string &);
 
   /** \fn void setComputeUFunction(const string& libPath,const string& functionName)
-   *  \brief set a specified function to compute the vector U
+   *  \brief set a specified function to compute the vector u
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
   void setComputeUFunction(const std::string &, const std::string &);
 
-  /** \fn void setComputeBFunction(const string& libPath,const string& functionName);
-   *  \brief set a specified function to compute the matrix B
+  /** \fn void setComputeEFunction(const string& libPath,const string& functionName);
+   *  \brief set a specified function to compute the matrix E
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeBFunction(const std::string &, const std::string &);
+  void setComputeEFunction(const std::string &, const std::string &);
 
   /** \fn void computeA(const double& time)
    *  \brief default function to compute matrix A
@@ -264,11 +273,11 @@ public:
    */
   void computeA(const double&);
 
-  /** \fn void computeF(const double& time)
-   *  \brief default function to compute vector F
+  /** \fn void computeB(const double& time)
+   *  \brief default function to compute vector b
    *  \exception RuntimeException
    */
-  void computeF(const double&);
+  void computeB(const double&);
 
   /** \fn void computeU(const double& time)
    *  \brief default function to compute vector U
@@ -276,11 +285,11 @@ public:
    */
   void computeU(const double&);
 
-  /** \fn void computeB(const double& time)
-   *  \brief default function to compute matrix B
+  /** \fn void computeE(const double& time)
+   *  \brief default function to compute matrix E
    *  \exception RuntimeException
    */
-  void computeB(const double&);
+  void computeE(const double&);
 
   // --- xml related functions ---
 
@@ -312,37 +321,37 @@ private:
   /** matrix specific to the LinearDS \f$ A \in R^{n \times n}  \f$*/
   SiconosMatrix *A;
   /** strength vector */
-  SimpleVector *f;
+  SimpleVector *b;
   /** size of vector u = number of columns in B*/
   unsigned int uSize;
   /** vector specific to the LinearDS */
   SimpleVector *u;
   /** matrix specific to the LinearDS \f$ B \in R^{n \times uSize}  \f$ */
-  SiconosMatrix *B;
+  SiconosMatrix *E;
 
   /* contains the name of the plugin for A */
   std::string  AFunctionName;
-  /* contains the name of the plugin for f */
-  std::string  fFunctionName;
+  /* contains the name of the plugin for b */
+  std::string  bFunctionName;
   /* contains the name of the plugin for u */
   std::string  uFunctionName;
-  /* contains the name of the plugin for B */
-  std::string  BFunctionName;
+  /* contains the name of the plugin for E */
+  std::string  EFunctionName;
 
-  /** class for manage plugin (open, close librairy...) */
+  /** class for plugin management (open, close library...) */
   SiconosSharedLibrary cShared;
 
-  /** \fn void (*computeAPtr)(int sizeOfA, double* fPtr,double time)
+  /** \fn void (*computeAPtr)(int sizeOfA, double* APtr,double time)
    *  \brief compute matrix A
    *  \param double : the time to make the computations
    */
   void (*computeAPtr)(unsigned int* sizeOfA, double* APtr, const double* time);
 
-  /** \fn void (*computeFPtr)(int sizeOfF, double* fPtr,double time)
-   *  \brief compute vector F
+  /** \fn void (*computeBPtr)(int sizeOfB, double* bPtr,double time)
+   *  \brief compute vector b
    *  \param double : the time to make the computations
    */
-  void (*computeFPtr)(unsigned int* sizeOfF, double* fPtr, const double* time);
+  void (*computeBPtr)(unsigned int* sizeOfB, double* bPtr, const double* time);
 
   /** \fn void (*computeUPtr)(int sizeOfU, double* uPtr,double time)
    *  \brief compute vector U
@@ -350,21 +359,21 @@ private:
    */
   void (*computeUPtr)(unsigned int* sizeOfU, double* uPtr, const double* time);
 
-  /** \fn void (*computeUPtr)(int rowsOfB, int colOfB, double* BPtr,double time)
-   *  \brief compute matrix B
+  /** \fn void (*computeEPtr)(int rowsOfE, int colOfE, double* EPtr,double time)
+   *  \brief compute matrix E
    *  \param double : the time to make the computations
    */
-  void (*computeBPtr)(unsigned int* rowsOfB, unsigned int* colOfB, double* BPtr, const double* time);
+  void (*computeEPtr)(unsigned int* rowsOfE, unsigned int* colOfE, double* EPtr, const double* time);
 
-  /** vector of bool to check if A, f, u, B (in this order!) are loaded from a plugin or not */
+  /** vector of bool to check if A, b, u, E (in this order!) are loaded from a plugin or not */
   std::vector<bool> isPlugin;
 
   /** Flags to know if pointers have been allocated inside constructors or not */
 
   bool isAAllocatedIn;
-  bool isFAllocatedIn;
-  bool isUAllocatedIn;
   bool isBAllocatedIn;
+  bool isUAllocatedIn;
+  bool isEAllocatedIn;
 };
 
 #endif // LINEARDS_H

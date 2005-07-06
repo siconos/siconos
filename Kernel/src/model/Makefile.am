@@ -1,15 +1,11 @@
-# Makefile.am --- SICONOS - Model
+# Makefile.am --- SICONOS
 
 include $(top_srcdir)/config/Make-rules
 
-SUBDIRS = test
 
-.cpp.o:
-	$(CXXCOMPILE) -c $<
-
-#lib_LIBRARIES = libModel.a
-#libModel_a_SOURCES = Model.cpp KernelDefaultConfig.cpp Model.h KernelDefaultConfig.h
-
-noinst_LTLIBRARIES = libModel.la
-libModel_la_SOURCES = Model.cpp KernelDefaultConfig.cpp Model.h KernelDefaultConfig.h
-include_HEADERS = Model.h KernelDefaultConfig.h SiconosConst.h
+check_PROGRAMS = test1
+TESTS = $(check_PROGRAMS)
+test1_SOURCES = PlatformTest.cpp TestMain.cpp
+include_HEADERS = PlatformTest.h 
+test1_INCLUDES = $(CPPUNIT_INCLUDES)
+test1_LDFLAGS = $(CPPUNIT_LIBRARIES) $(SICONOS_LIBS)  $(SICONOS_EXT_LDFLAGS)

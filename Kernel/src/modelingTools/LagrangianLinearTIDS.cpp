@@ -9,34 +9,31 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML * dsXML): LagrangianDS(dsXML), 
   DSType = LTIDS;
   if (dsXML != NULL)
   {
+    LagrangianLinearTIDSXML * lltidsxml = (static_cast <LagrangianLinearTIDSXML*>(dsxml));
     K = new SiconosMatrix(ndof, ndof);
     C = new SiconosMatrix(ndof, ndof);
-    *K = (static_cast <LagrangianLinearTIDSXML*>(dsxml))->getK();
-    *C = (static_cast <LagrangianLinearTIDSXML*>(dsxml))->getC();
+    *K = lltidsxml->getK();
+    *C = lltidsxml->getC();
   }
   else RuntimeException::selfThrow("LagrangianLinearTIDS::LagrangianLinearTIDS - DSXML paramater must not be NULL");
   OUT("LagrangianLinearTIDS::LagrangianLinearTIDS() - Xml constructor\n");
 }
 
 // --- Constructor from a minimum set of data ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(int newNumber, int newNdof,
-    SiconosVector* newQ0, SiconosVector* newVelocity0, SiconosMatrix* newMass,
-    string fExt, SiconosMatrix* newK, SiconosMatrix* newC):
-  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, "BasicPlugin:computeMass", "BasicPlugin:computeFInt", fExt,
-               "BasicPlugin:computeJacobianQFInt", "BasicPlugin:computeJacobianVelocityFInt",
-               "BasicPlugin:computeJacobianQQNLInertia", "BasicPlugin:computeJacobianVelocityQNLInertia",
-               "BasicPlugin:computeQNLInertia"), K(NULL), C(NULL), isKAllocatedIn(true), isCAllocatedIn(true)
+LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
+    const SimpleVector& newQ0, const SimpleVector& newVelocity0,
+    const SiconosMatrix& newMass,
+    const std::string& fExt, const SiconosMatrix& newK, const SiconosMatrix& newC):
+  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, newMass), K(NULL), C(NULL), isKAllocatedIn(true), isCAllocatedIn(true)
 {
   IN("LagrangianLinearTIDS::LagrangianLinearTIDS -  Constructor from a minimum set of data\n");
   K = new SiconosMatrix(ndof, ndof);
   C = new SiconosMatrix(ndof, ndof);
   DSType = LTIDS;
-  *mass = *newMass;
-  *K = *newK;
-  *C = *newC;
+  *K = newK;
+  *C = newC;
   OUT("LagrangianLinearTIDS::LagrangianLinearTIDS - Constructor from a minimum set of data\n");
 }
-
 
 LagrangianLinearTIDS::~LagrangianLinearTIDS()
 {
@@ -56,14 +53,14 @@ LagrangianLinearTIDS::~LagrangianLinearTIDS()
 
 void LagrangianLinearTIDS::setKPtr(SiconosMatrix *newPtr)
 {
-  if (isKAllocatedIn) delete mass;
+  if (isKAllocatedIn) delete K;
   K = newPtr;
   isKAllocatedIn = false;
 }
 
 void LagrangianLinearTIDS::setCPtr(SiconosMatrix *newPtr)
 {
-  if (isCAllocatedIn) delete mass;
+  if (isCAllocatedIn) delete C;
   C = newPtr;
   isCAllocatedIn = false;
 }
@@ -72,17 +69,15 @@ void LagrangianLinearTIDS::display() const
 {
   IN("LagrangianLinearTIDS::display\n");
 
-  cout << "-----------------------------------------------------" << endl;
   LagrangianDS::display();
-  cout << "-----------------------------------------------------" << endl;
-  cout << "____ data of the LangrangianTIDS " << endl;
-  cout << "| Stiffness Matrix K : " << endl;
+  cout << "===== Lagrangian Linear Time Invariant System display ===== " << endl;
+  cout << "- Stiffness Matrix K : " << endl;
   if (K != NULL) K->display();
   else cout << "-> NULL" << endl;
-  cout << "| Viscosity Matrix C : " << endl;
+  cout << "- Viscosity Matrix C : " << endl;
   if (C != NULL) C->display();
   else cout << "-> NULL" << endl;
-  cout << "-----------------------------------------------------" << endl << endl;
+  cout << "=========================================================== " << endl;
   OUT("LagrangianLinearTIDS::display\n");
 }
 
@@ -131,7 +126,7 @@ LagrangianLinearTIDS* LagrangianLinearTIDS::convert(DynamicalSystem* ds)
   return ltids;
 }
 
-// --- Default constructor ---
+// --- Default (private) constructor ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(): LagrangianDS(), K(NULL), C(NULL), isKAllocatedIn(false), isCAllocatedIn(false)
 {
   DSType = LTIDS;

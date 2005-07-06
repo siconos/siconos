@@ -98,8 +98,8 @@ void Moreau::computeW(const double& t)
     // Compute and get Jacobian:
     d->computeJacobianQFInt(t);
     d->computeJacobianVelocityFInt(t);
-    d->computeJacobianQQNLInertia(t);
-    d->computeJacobianVelocityQNLInertia(t);
+    d->computeJacobianQQNLInertia();
+    d->computeJacobianVelocityQNLInertia();
     *K = *(d->getJacobianQFIntPtr()) + *(d->getJacobianQQNLInertiaPtr());
     *C = *(d->getJacobianVelocityFIntPtr()) + *(d->getJacobianVelocityQNLInertiaPtr());
   }

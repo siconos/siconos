@@ -15,11 +15,11 @@
  * This class defines and computes the Linear Time Invariant Relation defined by,
  * for the input \f$ y \f$,
  * \f[
- * y= C x + D \lambda + a
+ * y= C x + Fu + D \lambda + e
  * \f]
  * and for the output \f$ r\f$ defined by
  * \f[
- * r= B \lambda
+ * r= B \lambda +a
  * \f]
  */
 class LinearTIR : public Relation
@@ -27,27 +27,39 @@ class LinearTIR : public Relation
 public:
 
   /** \fn LinearTIR();
-   *  \brief Basic constructor
+   *  \brief Default constructor
    */
   LinearTIR();
 
   /** \fn LinearTIR(RelationXML*)
-   *  \brief constructor with XML object of the LinearTIR
-   *  \param RelationXML* : the XML object corresponding
+   *  \brief xml constructor
+   *  \param LinearTIRXML* : the XML object corresponding
    */
   LinearTIR(RelationXML*);
 
-  /** \fn void LinearTIR(SiconosMatrix* C, SiconosMatrix* D,
-                         SiconosMatrix* E, SiconosVector* a,
+  /** \fn void LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB)
    *  \brief create the Relation from a set of data
-   *  \param SiconosMatrix* : the matrix C
-   *  \param SiconosMatrix* : the matrix D (optional)
-   *  \param SiconosMatrix* : the matrix E (optional)
-   *  \param SiconosVector* : the vector a (optional)
+   *  \param SiconosMatrix : the matrix C
+   *  \param SiconosMatrix : the matrix B
    *  \exception RuntimeException
       */
-  LinearTIR(SiconosMatrix* C, SiconosMatrix* D = NULL,
-            SiconosMatrix* E = NULL, SiconosVector* a = NULL);
+  LinearTIR(const SiconosMatrix& , const SiconosMatrix&);
+
+  /** \fn void LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
+   *                     const SiconosMatrix& newF, const SimpleVector& newE,
+   *                     const SiconosMatrix& newB, const SimpleVector& newA)
+   *  \brief create the Relation from a set of data
+   *  \param SiconosMatrix : C
+   *  \param SiconosMatrix : D
+   *  \param SiconosMatrix : F
+   *  \param SimpleVectorx : e
+   *  \param SiconosMatrix : B
+   *  \param SimpleVector : a
+   *  \exception RuntimeException
+   */
+  LinearTIR(const SiconosMatrix& , const SiconosMatrix& ,
+            const SiconosMatrix& , const SimpleVector& ,
+            const SiconosMatrix& , const SimpleVector&);
 
   ~LinearTIR();
 
@@ -77,21 +89,13 @@ public:
    *  \brief set the value of C to newValue
    *  \param SiconosMatrix newValue
    */
-  inline void setC(const SiconosMatrix& newValue)
-  {
-    *C = newValue;
-  }
+  void setC(const SiconosMatrix&);
 
   /** \fn void setCPtr(SiconosMatrix* newPtr)
    *  \brief set C to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setCPtr(SiconosMatrix *newPtr)
-  {
-    if (isCAllocatedIn) delete C;
-    C = newPtr;
-    isCAllocatedIn = false;
-  }
+  void setCPtr(SiconosMatrix *);
 
   // -- D --
 
@@ -117,61 +121,109 @@ public:
    *  \brief set the value of D to newValue
    *  \param SiconosMatrix newValue
    */
-  inline void setD(const SiconosMatrix& newValue)
-  {
-    *D = newValue;
-  }
+  void setD(const SiconosMatrix&);
 
   /** \fn void setDPtr(SiconosMatrix* newPtr)
    *  \brief set D to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setDPtr(SiconosMatrix *newPtr)
-  {
-    if (isDAllocatedIn) delete D;
-    D = newPtr;
-    isDAllocatedIn = false;
-  }
+  void setDPtr(SiconosMatrix *);
 
-  // -- E --
+  // -- F --
 
-  /** \fn  const SiconosMatrix getE() const
-   *  \brief get the value of E
+  /** \fn  const SiconosMatrix getF() const
+   *  \brief get the value of F
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getE() const
+  inline const SiconosMatrix getF() const
   {
-    return *E;
+    return *F;
   }
 
-  /** \fn SiconosMatrix* getEPtr() const
-   *  \brief get E
+  /** \fn SiconosMatrix* getFPtr() const
+   *  \brief get F
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getEPtr() const
+  inline SiconosMatrix* getFPtr() const
   {
-    return E;
+    return F;
   }
 
-  /** \fn void setE (const SiconosMatrix& newValue)
-   *  \brief set the value of E to newValue
+  /** \fn void setF (const SiconosMatrix& newValue)
+   *  \brief set the value of F to newValue
    *  \param SiconosMatrix newValue
    */
-  inline void setE(const SiconosMatrix& newValue)
-  {
-    *E = newValue;
-  }
+  void setF(const SiconosMatrix&);
 
-  /** \fn void setEPtr(SiconosMatrix* newPtr)
-   *  \brief set E to pointer newPtr
+  /** \fn void setFPtr(SiconosMatrix* newPtr)
+   *  \brief set F to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setEPtr(SiconosMatrix *newPtr)
+  void setFPtr(SiconosMatrix *) ;
+
+  // -- e --
+
+  /** \fn  const SimpleVector getE() const
+   *  \brief get the value of e
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getE() const
   {
-    if (isEAllocatedIn) delete E;
-    E = newPtr;
-    isEAllocatedIn = false;
+    return *e;
   }
+
+  /** \fn SimpleVector* getEPtr() const
+   *  \brief get e
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getEPtr() const
+  {
+    return e;
+  }
+
+  /** \fn void setE (const SimpleVector& newValue)
+   *  \brief set the value of e to newValue
+   *  \param SimpleVector newValue
+   */
+  void setE(const SimpleVector&);
+
+  /** \fn void setEPtr(SimpleVector* newPtr)
+   *  \brief set E to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  void setEPtr(SimpleVector *);
+
+  // -- B --
+
+  /** \fn  const SiconosMatrix getB() const
+   *  \brief get the value of B
+   *  \return SiconosMatrix
+   */
+  inline const SiconosMatrix getB() const
+  {
+    return *B;
+  }
+
+  /** \fn SiconosMatrix* getBPtr() const
+   *  \brief get B
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getBPtr() const
+  {
+    return B;
+  }
+
+  /** \fn void setB (const SiconosMatrix& newValue)
+   *  \brief set the value of B to newValue
+   *  \param SiconosMatrix newValue
+   */
+  void setB(const SiconosMatrix&);
+
+  /** \fn void setBPtr(SiconosMatrix* newPtr)
+   *  \brief set B to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  void setBPtr(SiconosMatrix *) ;
 
   // -- a --
 
@@ -197,21 +249,13 @@ public:
    *  \brief set the value of a to newValue
    *  \param SimpleVector newValue
    */
-  inline void setA(const SimpleVector& newValue)
-  {
-    *a = newValue;
-  }
+  void setA(const SimpleVector&);
 
   /** \fn void setAPtr(SimpleVector* newPtr)
-   *  \brief set A to pointer newPtr
+   *  \brief set a to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setAPtr(SimpleVector *newPtr)
-  {
-    if (isAAllocatedIn) delete a;
-    a = newPtr;
-    isAAllocatedIn = false;
-  }
+  void setAPtr(SimpleVector *);
 
   // --- OTHER FUNCTIONS ---
 
@@ -219,6 +263,13 @@ public:
    *  \brief computes y
    */
   void computeOutput();
+
+  /** \fn void computeInput(double time);
+   *  \brief default function to compute lambda
+   *  \param double : current time
+   *  \exception RuntimeException
+   */
+  void computeInput();
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the Relation to the XML tree
@@ -238,24 +289,26 @@ public:
   static LinearTIR* convert(Relation *r);
 
 private:
-  /** a matrix specific to the LinearTIR \f$ y= C x + D \lambda + a \f$*/
+  /** Relation is given by: \f$ y= C x + D \lambda + Fu + e \f$*/
+  /** and \f$ r = B\lambda\f$ */
+  /** */
   SiconosMatrix* C;
-  /** a matrix specific to the LinearTIR \f$ y= C x + D \lambda + a \f$*/
+  /** */
   SiconosMatrix* D;
-  /** a matrix specific to the LinearTIR \f$ r= E \lambda \f$*/
-  SiconosMatrix* E;
-  /** a vector specific to the LinearTIR \f$ y= C x + D \lambda + a \f$*/
+  /** */
+  SiconosMatrix* F;
+  /** */
+  SimpleVector* e;
+  /** */
+  SiconosMatrix* B;
+  /** */
   SimpleVector* a;
-
   /** Flags to know if pointers have been allocated in constructors or not*/
-  bool isCAllocatedIn;
-  bool isDAllocatedIn;
-  bool isEAllocatedIn;
-  bool isAAllocatedIn;
+  /* the order is the one of members list above (C,D,F,e,B,a)  */
+  std::vector<bool> isAllocatedIn;
 
-
-  //  /** the XML object linked to the LinearTIR to read XML data */
-  //  LinearTIRXML *ltirelationxml;
+  /** the XML object linked to the LinearTIR to read XML data */
+  // LinearTIRXML * lTIRxml;
 };
 
 #endif // LINEARTIRELATION_H

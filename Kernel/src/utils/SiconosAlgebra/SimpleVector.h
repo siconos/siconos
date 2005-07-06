@@ -163,6 +163,26 @@ public:
    */
   double* getArray() const;
 
+  /** \fn bool add(const SiconosVector& v)
+   *  \brief add a sub Vector in this vector
+   *  \param SiconosVector& v : the vector to add
+   *  \exception SiconosVectorException
+   */
+  inline void add(const SiconosVector &v)
+  {
+    SiconosVectorException::selfThrow(" SimpleVector::add function should not be used for SimpleVector");
+  }
+
+  /** \fn bool addPtr(SiconosVector* v)
+   *  \brief add a sub Vector in this vector
+   *  \param SiconosVector*
+   *  \exception SiconosVectorException
+   */
+  inline void addPtr(SiconosVector *v)
+  {
+    SiconosVectorException::selfThrow(" SimpleVector::add function should not be used for SimpleVector");
+  }
+
   /** \fn double norm()
    *  \brief return the Euclidian norm of the vector
    *  \return a double

@@ -1,5 +1,5 @@
 #include "DynamicalSystemXMLTest.h"
-
+using namespace std;
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);

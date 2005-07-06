@@ -1,5 +1,5 @@
 #include "LinearTIRXMLTest.h"
-
+using namespace std;
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -81,7 +81,7 @@ void LinearTIRXMLTest::testGeta()
 void LinearTIRXMLTest::testIfAttributeNotPresent()
 {
   SiconosMatrix m;
-  m = LinearTIR.getE();
+  m = LinearTIR.getF();
 }
 
 

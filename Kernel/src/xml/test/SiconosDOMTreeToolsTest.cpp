@@ -323,7 +323,7 @@ void SiconosDOMTreeToolsTest::testSetSiconosVectorValue()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetSiconosVectorValue : v1", v1(3) == 4, true);
 
   v1(3) = 3.1415;
-  SiconosDOMTreeTools::setSiconosVectorValue(child, v1 /*, 5*/);
+  SiconosDOMTreeTools::setSiconosVectorNodeValue(child, v1 /*, 5*/);
   /*SiconosVector*/
   SimpleVector vv;
   vv = SiconosDOMTreeTools::getSiconosVectorValue(child);
@@ -332,7 +332,7 @@ void SiconosDOMTreeToolsTest::testSetSiconosVectorValue()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetSiconosVectorValue : vv", v1 == vv, true);
 
   v1(3) = 4;
-  SiconosDOMTreeTools::setSiconosVectorValue(child, v1 /*, 5*/);
+  SiconosDOMTreeTools::setSiconosVectorNodeValue(child, v1 /*, 5*/);
 
   cout << "SiconosDOMTreeToolsTest >>> testSetSiconosVectorValue ............... OK\n ";
 }
@@ -351,7 +351,7 @@ void SiconosDOMTreeToolsTest::testSetSiconosMatrixValue()
 
   double newVal = -0.2548;
   m(0, 2) = newVal;
-  SiconosDOMTreeTools::setSiconosMatrixValue(child, m);
+  SiconosDOMTreeTools::setSiconosMatrixNodeValue(child, m);
 
   SiconosMatrix m2;
   m2 = SiconosDOMTreeTools::getSiconosMatrixValue(child);
@@ -419,7 +419,7 @@ void SiconosDOMTreeToolsTest::testCreateMatrixNode()
   child = child->next;
 
   SiconosMatrix mat("matrix.dat", true);
-  xmlNode* node = SiconosDOMTreeTools::createMatrixNode(root, "TestMatrix", &mat);
+  xmlNode* node = SiconosDOMTreeTools::createMatrixNode(root, "TestMatrix", mat);
 
   SiconosMatrix matRes;
   matRes = SiconosDOMTreeTools::getSiconosMatrixValue(node);
@@ -441,7 +441,7 @@ void SiconosDOMTreeToolsTest::testCreateVectorNode()
   /*SiconosVector*/
   SimpleVector vect("vector.dat", true);
 
-  xmlNode* node = SiconosDOMTreeTools::createVectorNode(root, "TestVector", &vect);
+  xmlNode* node = SiconosDOMTreeTools::createVectorNode(root, "TestVector", vect);
 
   /*SiconosVector*/
   SimpleVector vectRes;
@@ -477,7 +477,7 @@ void SiconosDOMTreeToolsTest::testCreateIntegerNode()
   child = root->children;
   child = child->next;
 
-  int i = 3.1415;
+  int i = 3;
 
   xmlNode* node = SiconosDOMTreeTools::createIntegerNode(root, "TestInteger", i);
 
@@ -551,7 +551,8 @@ void SiconosDOMTreeToolsTest::testGetIntegerAttributeValueException()
   child = root->children;
   child = child->next;
 
-  int i = SiconosDOMTreeTools::getIntegerAttributeValue(child, "badAttribute");
+  int i ;
+  i = SiconosDOMTreeTools::getIntegerAttributeValue(child, "badAttribute");
 }
 
 void SiconosDOMTreeToolsTest::testGetDoubleAttributeValueException()
@@ -561,7 +562,8 @@ void SiconosDOMTreeToolsTest::testGetDoubleAttributeValueException()
   child = root->children;
   child = child->next;
 
-  double d = SiconosDOMTreeTools::getDoubleAttributeValue(child, "badAttribute");
+  double d;
+  d = SiconosDOMTreeTools::getDoubleAttributeValue(child, "badAttribute");
 }
 
 
@@ -572,7 +574,8 @@ void SiconosDOMTreeToolsTest::testGetBooleanAttributeValueException()
   child = root->children;
   child = child->next;
 
-  bool b = SiconosDOMTreeTools::getBooleanAttributeValue(child, "badAttribute");
+  bool b;
+  b = SiconosDOMTreeTools::getBooleanAttributeValue(child, "badAttribute");
 }
 
 

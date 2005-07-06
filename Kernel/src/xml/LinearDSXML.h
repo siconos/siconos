@@ -16,10 +16,9 @@
 #include "DSXML.h"
 
 const std::string LDS_A = "A";
-const std::string LDS_B = "B";
-
+const std::string LDS_B = "b";
+const std::string LDS_E = "E";
 const std::string LDS_U = "u";
-const std::string LDS_F = "f";
 
 const std::string LDS_MATRIXPLUGIN = "matrixPlugin";
 const std::string LDS_VECTORPLUGIN = "vectorPlugin";
@@ -45,6 +44,8 @@ public:
    */
   inline const SiconosMatrix getA() const
   {
+    if (isAPlugin())
+      XMLException::selfThrow("LinearDSXML - getA: A is not given but calculated from a plugin");
     return  SiconosDOMTreeTools::getSiconosMatrixValue(ANode);
   }
 
@@ -71,35 +72,37 @@ public:
       ANode = SiconosDOMTreeTools::createMatrixNode(rootDSXMLNode, LDS_A, m);
   }
 
-  /** \fn SiconosMatrix getB()
-   *   \brief Return the B of the LinearDSXML
-   *   \return The B SiconosMatrix of the LinearDSXML
+  /** \fn SiconosMatrix getE()
+   *   \brief Return the E of the LinearDSXML
+   *   \return The E SiconosMatrix of the LinearDSXML
    */
-  inline const SiconosMatrix getB() const
+  inline const SiconosMatrix getE() const
   {
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(BNode);
+    if (isEPlugin())
+      XMLException::selfThrow("LinearDSXML - getE: E is not given but calculated from a plugin");
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(ENode);
   }
 
-  /** \fn inline string getBPlugin()
-   *   \brief Return the B Plugin name of the LinearDSXML
+  /** \fn inline string getEPlugin()
+   *   \brief Return the E Plugin name of the LinearDSXML
    *  \exception XMLException
    */
-  inline const std::string getBPlugin() const
+  inline const std::string getEPlugin() const
   {
-    if (!isBPlugin())
-      XMLException::selfThrow("LinearDSXML - getAPlugin : A is not loaded from a plugin");
-    return  SiconosDOMTreeTools::getStringAttributeValue(BNode, LDS_MATRIXPLUGIN);
+    if (!isEPlugin())
+      XMLException::selfThrow("LinearDSXML - getAPlugin : E is not loaded from a plugin");
+    return  SiconosDOMTreeTools::getStringAttributeValue(ENode, LDS_MATRIXPLUGIN);
   }
 
-  /** \fn void setB(SiconosMatrix *m)
-   *   \brief allows to save the B of the LinearDSXML
-   *   \return The B SiconosMatrix to save
+  /** \fn void setE(SiconosMatrix *m)
+   *   \brief allows to save the E of the LinearDSXML
+   *   \return The E SiconosMatrix to save
    */
-  inline void setB(const SiconosMatrix &m)
+  inline void setE(const SiconosMatrix &m)
   {
-    if (BNode != NULL)
-      SiconosDOMTreeTools::setSiconosMatrixNodeValue(BNode, m);
-    else BNode = SiconosDOMTreeTools::createMatrixNode(rootDSXMLNode, LDS_B, m);
+    if (ENode != NULL)
+      SiconosDOMTreeTools::setSiconosMatrixNodeValue(ENode, m);
+    else ENode = SiconosDOMTreeTools::createMatrixNode(rootDSXMLNode, LDS_E, m);
   }
 
   /** \fn int getUSize()
@@ -148,40 +151,40 @@ public:
     else uNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LDS_U, v);
   }
 
-  /** \fn inline string getFPlugin()
-   *   \brief Return the f Plugin name of the LinearDSXML
-   *   \return The f Plugin name of the LinearDSXML
+  /** \fn inline string getBPlugin()
+   *   \brief Return the b Plugin name of the LinearDSXML
+   *   \return The b Plugin name of the LinearDSXML
    *  \exception XMLException
    */
-  inline const std::string getFPlugin() const
+  inline const std::string getBPlugin() const
   {
-    if (!isFPlugin())
-      XMLException::selfThrow("LinearDSXML - getUPlugin : f is not calculated from a plugin ; f vector is given");
-    return  SiconosDOMTreeTools::getStringAttributeValue(fNode, LDS_VECTORPLUGIN);
+    if (!isBPlugin())
+      XMLException::selfThrow("LinearDSXML - getUPlugin : b is not calculated from a plugin ; b vector is given");
+    return  SiconosDOMTreeTools::getStringAttributeValue(bNode, LDS_VECTORPLUGIN);
   }
 
-  /** \fn inline SimpleVector getFVector()
-   *   \brief Return f vector of the LinearDSXML
-   *   \return SimpleVector : value of f of LinearDSXML
+  /** \fn inline SimpleVector getBVector()
+   *   \brief Return b vector of the LinearDSXML
+   *   \return SimpleVector : value of b of LinearDSXML
    *  \exception XMLException
    */
-  inline const SimpleVector getFVector() const
+  inline const SimpleVector getBVector() const
   {
-    if (isFPlugin())
-      XMLException::selfThrow("LinearDSXML - getFVector : f vector is not given ; f is calculated from a plugin");
+    if (isBPlugin())
+      XMLException::selfThrow("LinearDSXML - getBVector : b vector is not given ; b is calculated from a plugin");
 
-    return  SiconosDOMTreeTools::getSiconosVectorValue(fNode);
+    return  SiconosDOMTreeTools::getSiconosVectorValue(bNode);
   }
 
-  /** \fn inline void setFVector(SiconosVector *v)
-   *   \brief allows to save the f vector of the LinearDSXML
-   *   \return The f SimpleVector to save
+  /** \fn inline void setBVector(SiconosVector *v)
+   *   \brief allows to save the b vector of the LinearDSXML
+   *   \return The b SimpleVector to save
    */
-  inline void setFVector(const SiconosVector& v)
+  inline void setBVector(const SiconosVector& v)
   {
-    if (fNode != NULL)
-      SiconosDOMTreeTools::setSiconosVectorNodeValue(fNode, v);
-    else fNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LDS_F, v);
+    if (bNode != NULL)
+      SiconosDOMTreeTools::setSiconosVectorNodeValue(bNode, v);
+    else bNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LDS_B, v);
   }
 
   /** \fn bool isAPlugin()
@@ -192,12 +195,12 @@ public:
     return xmlHasProp((xmlNodePtr)ANode, (xmlChar *) LDS_MATRIXPLUGIN.c_str());
   }
 
-  /** \fn bool isFPlugin()
-   *   \brief Return true if f is calculated from a plugin
+  /** \fn bool isBPlugin()
+   *   \brief Return true if b is calculated from a plugin
    */
-  inline bool isFPlugin() const
+  inline bool isBPlugin() const
   {
-    return xmlHasProp((xmlNodePtr)fNode, (xmlChar *) LDS_VECTORPLUGIN.c_str());
+    return xmlHasProp((xmlNodePtr)bNode, (xmlChar *) LDS_VECTORPLUGIN.c_str());
   }
   /** \fn bool isUPlugin()
    *   \brief Return true if u is calculated from a plugin
@@ -207,12 +210,12 @@ public:
     return xmlHasProp((xmlNodePtr)uNode, (xmlChar *) LDS_VECTORPLUGIN.c_str());
   }
 
-  /** \fn bool isBPlugin()
-   *   \brief Return true if B is calculated from a plugin
+  /** \fn bool isEPlugin()
+   *   \brief Return true if E is calculated from a plugin
    */
-  inline bool isBPlugin() const
+  inline bool isEPlugin() const
   {
-    return xmlHasProp((xmlNodePtr)BNode, (xmlChar *) LDS_MATRIXPLUGIN.c_str());
+    return xmlHasProp((xmlNodePtr)ENode, (xmlChar *) LDS_MATRIXPLUGIN.c_str());
   }
 
   /** \fn bool hasXX()
@@ -221,9 +224,9 @@ public:
   {
     return (ANode != NULL);
   }
-  inline bool hasF() const
+  inline bool hasB() const
   {
-    return (fNode != NULL);
+    return (bNode != NULL);
   }
   inline bool hasUSize() const
   {
@@ -233,9 +236,9 @@ public:
   {
     return (uNode != NULL);
   }
-  inline bool hasB() const
+  inline bool hasE() const
   {
-    return (BNode != NULL);
+    return (ENode != NULL);
   }
 
 
@@ -252,10 +255,10 @@ private:
 
   //Nodes
   xmlNode * ANode;
-  xmlNode * fNode;
+  xmlNode * bNode;
   xmlNode * uSizeNode;
   xmlNode * uNode;
-  xmlNode * BNode;
+  xmlNode * ENode;
 };
 
 #endif

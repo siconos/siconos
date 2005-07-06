@@ -15,12 +15,12 @@ using namespace std;
 
 // Default constructor
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem():
-  BVP(false), nsdsxml(NULL)
+  BVP(false), relativeDegree(NULL), nsdsxml(NULL), isRelativeDegreeAllocatedIn(false)
 {}
 
 // copy constructor
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem& nsds):
-  BVP(false), nsdsxml(NULL)
+  BVP(false), relativeDegree(NULL), nsdsxml(NULL), isRelativeDegreeAllocatedIn(false)
 {
   BVP = nsds.isBVP();
   DSVector = nsds.getDynamicalSystems();
@@ -30,7 +30,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
 
 // xml constuctor
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NSDSXML* newNsdsxml):
-  BVP(false), nsdsxml(newNsdsxml)
+  BVP(false), relativeDegree(NULL), nsdsxml(newNsdsxml), isRelativeDegreeAllocatedIn(false)
 {
   if (nsdsxml != NULL)
   {
@@ -135,11 +135,11 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NSDSXML* newNsdsxml):
 
 // Other constructors
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const bool& bvp):
-  BVP(bvp), nsdsxml(NULL)
+  BVP(bvp), relativeDegree(NULL), nsdsxml(NULL), isRelativeDegreeAllocatedIn(false)
 {}
 
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const string& type):
-  BVP(false), nsdsxml(NULL)
+  BVP(false), relativeDegree(NULL), nsdsxml(NULL), isRelativeDegreeAllocatedIn(false)
 {
   if (type == "BVP")
     BVP = true; // else default value = IVP
@@ -174,6 +174,11 @@ NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
       }
     }
     interactionVector.clear();
+  }
+  if (isRelativeDegreeAllocatedIn)
+  {
+    delete relativeDegree;
+    relativeDegree = NULL;
   }
   OUT("NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem\n");
 }
@@ -241,6 +246,13 @@ void NonSmoothDynamicalSystem::setInteractions(const std::vector<Interaction*>& 
   interactionVector = newVect;
   isInteractionVectorAllocatedIn.clear();
   isInteractionVectorAllocatedIn.resize(newVect.size(), false);
+}
+
+void NonSmoothDynamicalSystem::setRelativeDegreePtr(SimpleVector *newPtr)
+{
+  if (isRelativeDegreeAllocatedIn) delete relativeDegree;
+  relativeDegree = newPtr;
+  isRelativeDegreeAllocatedIn = false;
 }
 
 EqualityConstraint* NonSmoothDynamicalSystem::getEqualityConstraintPtr(const int& i) const

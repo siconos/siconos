@@ -8,7 +8,7 @@
 #include <libxml/parser.h>
 #include "NewSiconosVector.h"
 #include "SiconosMatrix.h"
-#include "LinearSystemDSXML.h"
+#include "LinearDSXML.h"
 
 using namespace std;
 

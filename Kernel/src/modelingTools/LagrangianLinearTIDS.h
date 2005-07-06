@@ -14,7 +14,7 @@
 class LagrangianLinearTIDSXML;
 
 /** \class LagrangianLinearTIDS
- *  \brief class of Lagrangian invariant time systems, inherited of LagrangianDS
+ *  \brief class of Lagrangian systems with time invariant coefficients - Derived from LagrangianDS
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 29, 2004
@@ -86,19 +86,19 @@ public:
       *  \brief constructor from a minimum set of data
       *  \param int : the number for this DynamicalSystem
       *  \param int : dimension of this DynamicalSystem
-      *  \param SiconosVector* : initial coordinates of this DynamicalSystem
-      *  \param SiconosVector* : initial velocity of this DynamicalSystem
-      *  \param SiconosMatrix* : mass of this DynamicalSystem
+      *  \param SimpleVector: initial coordinates of this DynamicalSystem
+      *  \param SimpleVector : initial velocity of this DynamicalSystem
+      *  \param SiconosMatrix : mass of this DynamicalSystem
       *  \param string : fExt plugin name and location
-      *  \param SiconosMatrix* : matrix K of this DynamicalSystem
-      *  \param SiconosMatrix* : matrix C of this DynamicalSystem
+      *  \param SiconosMatrix : matrix K of this DynamicalSystem
+      *  \param SiconosMatrix : matrix C of this DynamicalSystem
       *  \exception RuntimeException
       */
-  LagrangianLinearTIDS(int number, int ndof,
-                       SiconosVector* q0, SiconosVector* velocity0,
-                       SiconosMatrix* mass,
-                       std::string  fExt,
-                       SiconosMatrix* K, SiconosMatrix* C);
+  LagrangianLinearTIDS(const int&, const unsigned int& ndof,
+                       const SimpleVector&, const SimpleVector&,
+                       const SiconosMatrix&,
+                       const std::string&  fExt,
+                       const SiconosMatrix&, const SiconosMatrix&);
 
   // destructor
   ~LagrangianLinearTIDS();

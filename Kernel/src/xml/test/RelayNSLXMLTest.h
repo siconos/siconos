@@ -9,7 +9,7 @@
 #include <libxml/tree.h>
 #include "RelayNSLXML.h"
 #include "XMLException.h"
-
+#include<iostream>
 
 
 

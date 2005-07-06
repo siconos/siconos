@@ -1,5 +1,5 @@
 #include "TimeDiscretisationXMLTest.h"
-
+using namespace std;
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -65,7 +65,7 @@ void TimeDiscretisationXMLTest::testGetTk()
 
   //cout<<"td.getTk() : "<< *(td.getTk()) <<endl<<" - vectorRef : "<< vectorRef <<endl;
 
-  CPPUNIT_ASSERT_MESSAGE("test tk value", *(td.getTk()) == vectorRef);
+  CPPUNIT_ASSERT_MESSAGE("test tk value", td.getTk() == vectorRef);
 
   cout << "TimeDiscretisationXMLTest >>> testGetTk ............................. OK\n ";
 }

@@ -161,6 +161,20 @@ public:
    */
   virtual double* getArray() const = 0;
 
+  /** \fn bool add(const SiconosVector& v)
+   *  \brief add a sub Vector in this vector - Usefull only for composite
+   *  \param SiconosVector& v : the vector to add
+   *  \exception SiconosVectorException
+   */
+  //virtual void add(const SiconosVector &) = 0 ;
+
+  /** \fn bool addPtr(SiconosVector* v)
+   *  \brief add a pointer to sub Vector in this vector - Usefull only for composite
+   *  \param SiconosVector*
+   *  \exception SiconosVectorException
+   */
+  //virtual void addPtr(SiconosVector *) = 0 ;
+
   // OPERATORS ---------------------------------------------------------------
 
   // internal

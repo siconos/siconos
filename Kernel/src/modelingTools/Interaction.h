@@ -497,19 +497,6 @@ public:
    */
   Relation* createLagrangianNonLinearR(const std::string&, const std::string&);
 
-  /** \fn Relation* createLinearTIR(SiconosMatrix* C, SiconosMatrix* D,
-      SiconosMatrix* E, SiconosVector* a)
-      *  \brief allows to create a LinearTIR relation for this Interaction
-      *  \param SiconosMatrix* : the C matrix
-      *  \param SiconosMatrix* : the D matrix
-      *  \param SiconosMatrix* : the E matrix
-      *  \param SiconosVector* : the a vector
-      *  \return Relation* : the relation allocated
-      */
-  Relation* createLinearTIR(SiconosMatrix* C = NULL, SiconosMatrix* D = NULL,
-                            SiconosMatrix* E = NULL, SiconosVector* a = NULL);
-
-
   /** \fn NonSmoothLaw* createComplementarityConditionNSL()
    *  \brief allows to create a ComplementarityConditionNSL non-smooth law for this Interaction
    *  \return NonSmoothLaw* : the non-smooth law allocated

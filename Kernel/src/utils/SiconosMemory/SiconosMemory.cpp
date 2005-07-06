@@ -72,7 +72,7 @@ SiconosMemory::SiconosMemory(const deque<SiconosVector*>& V):
 
   memorySize = sizeV;
   nbVectorsInMemory = sizeV;
-  for (unsigned int i = 0; i < V.size(); i++)
+  for (unsigned int i = 0; i < sizeV; i++)
   {
     if (V[i]->isComposite())
       vectorMemory.push_back(new CompositeVector(V[i]->size()));
@@ -188,7 +188,7 @@ void SiconosMemory::swap(const SiconosVector& v)
   SiconosVector* tmp;
   double tmp2;
 
-  // if it remains in the vector
+  // if it remains space in the vector
   if (nbVectorsInMemory < memorySize)
   {
     // allocate memory for the new vector

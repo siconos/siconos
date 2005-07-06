@@ -10,6 +10,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include "SiconosMemoryXML.h"
+#include <iostream>
 
 class SiconosMemoryXMLTest : public CppUnit::TestFixture
 {

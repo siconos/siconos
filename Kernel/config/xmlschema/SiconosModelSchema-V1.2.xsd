@@ -423,9 +423,9 @@
 						<xsd:element name="RMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						
 						<xsd:element name="A" type="matrix" minOccurs="1" maxOccurs="1"/>
-						<xsd:element name="B" type="matrix" minOccurs="1" maxOccurs="1"/>
+						<xsd:element name="E" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="u" type="vector" minOccurs="1" maxOccurs="1"/>
-						<xsd:element name="f" type="vector" minOccurs="1" maxOccurs="1"/>
+						<xsd:element name="b" type="vector" minOccurs="1" maxOccurs="1"/>
 						
 						<xsd:element name="BoundaryCondition" type="BoundaryCondition" minOccurs='0' maxOccurs='1'/>
 					</xsd:all>

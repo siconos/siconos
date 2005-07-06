@@ -45,6 +45,8 @@ const std::string LNLDS_VECTORPLUGIN = "vectorPlugin";
 class LagrangianDSXML : public DSXML
 {
 public:
+
+  // === Constructors - Destructor ===
   LagrangianDSXML();
 
   virtual ~LagrangianDSXML();
@@ -56,6 +58,9 @@ public:
    */
   LagrangianDSXML(xmlNode * LagrangianDSNode, bool isBVP);
 
+  // Functions for members loading/setting
+
+  // === q ===
   /** \fn SimpleVector getQ()
    *   \brief Return  q vector of the LagrangianDSXML
    *   \return SimpleVector : q vector of the LagrangianDSXML
@@ -71,13 +76,12 @@ public:
    */
   inline void setQ(SiconosVector *v)
   {
-    if (hasQ() == false)
-    {
+    if (!hasQ())
       qNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LNLDS_Q, *v);
-    }
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(qNode, *v);
   }
 
+  // === q0 ===
   /** \fn SimpleVector getQ()
    *   \brief Return q0 vector of the LagrangianDSXML
    *   \return SimpleVector : q0 vector of the LagrangianDSXML
@@ -94,17 +98,12 @@ public:
   inline void  setQ0(SiconosVector *v)
   {
     if (q0Node == NULL)
-    {
       q0Node = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LNLDS_Q0, *v);
-    }
     else
-    {
-      //SiconosDOMTreeTools::setSiconosVectorValue(q0Node, *v);
       SiconosDOMTreeTools::setSiconosVectorNodeValue(q0Node, *v);
-    }
   }
 
-
+  // === qMemory ===
   /** \fn SiconosMemoryXML* getQMemoryXML()
    *   \brief Returns the qMemoryXML* of the DSXML
    *   \return SiconosMemoryXML*
@@ -118,27 +117,14 @@ public:
    *   \brief allows to save the qMemory of the LagrangianDSXML
    *   \param SiconosMemory* : SiconosMemory to save
    */
-  inline void setQMemory(SiconosMemory* smem)
-  {
-    if (hasQMemory() == false)
-    {
-      qMemoryXML = new SiconosMemoryXML(NULL, rootDSXMLNode, LNLDS_QMEMORY);
-      qMemoryNode = qMemoryXML->getSiconosMemoryXMLNode();
-
-      qMemoryXML->setSiconosMemorySize(smem->getMemorySize());
-      qMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
-    }
-    else
-    {
-      qMemoryXML->setSiconosMemorySize(smem->getMemorySize());
-      qMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
-    }
-  }
+  void setQMemory(SiconosMemory* smem);
 
   /** \fn SimpleVector getVelocity()
    *   \brief Return the velocity of the LagrangianDSXML
    *   \return SimpleVector :  velocity vector of the LagrangianDSXML
    */
+
+  // === Velocity ===
   inline SimpleVector getVelocity()
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(velocityNode);
@@ -150,14 +136,12 @@ public:
    */
   inline void setVelocity(SiconosVector *v)
   {
-    if (hasVelocity() == false)
-    {
+    if (!hasVelocity())
       velocityNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LNLDS_VELOCITY, *v);
-    }
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(velocityNode, *v);
-    //SiconosDOMTreeTools::setSiconosVectorValue(velocityNode, v);
   }
 
+  // === Velocity0 ===
   /** \fn SimpleVector getVelocity0()
    *   \brief Return the initial velocity of the LagrangianDSXML
    *   \return SimpleVector : The velocity0 SiconosVector of the LagrangianDSXML
@@ -184,12 +168,7 @@ public:
     }
   }
 
-  //    /** \fn SiconosMemory getVelocityMemory()
-  //    *   \brief Return the velocityMemory of the LagrangianDSXML
-  //    *   \return SiconosMemory velocityMemory of the LagrangianDSXML
-  //    */
-  //    SiconosMemory getVelocityMemory();
-
+  // === VelocityMemory ===
   /** \fn SiconosMemoryXML* getVelocityMemoryXML()
    *   \brief Returns the velocityMemoryXML* of the DSXML
    *   \return SiconosMemoryXML*
@@ -203,23 +182,9 @@ public:
    *   \brief allows to save the velocityMemory of the LagrangianDSXML
    *   \param SiconosMemory* : SiconosMemory to save
    */
-  inline void setVelocityMemory(SiconosMemory* smem)
-  {
-    if (hasVelocityMemory() == false)
-    {
-      velocityMemoryXML = new SiconosMemoryXML(NULL, rootDSXMLNode, LNLDS_VELOCITYMEMORY);
-      velocityMemoryNode = velocityMemoryXML->getSiconosMemoryXMLNode();
+  void setVelocityMemory(SiconosMemory* smem);
 
-      velocityMemoryXML->setSiconosMemorySize(smem->getMemorySize());
-      velocityMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
-    }
-    else
-    {
-      velocityMemoryXML->setSiconosMemorySize(smem->getMemorySize());
-      velocityMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
-    }
-  }
-
+  // === QNLInertia ===
   /** \fn inline string getQNLInertiaPlugin()
    *   \brief Return the QNLInertia Plugin name of the LagrangianDSXML
    *   \return The QNLInertia Plugin name of the LagrangianDSXML
@@ -269,13 +234,10 @@ public:
       QNLInertiaNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LNLDS_QNLINERTIA, *v);
     }
     else
-    {
-      //SiconosDOMTreeTools::setSiconosVectorValue(QNLInertiaNode, *v);
       SiconosDOMTreeTools::setSiconosVectorNodeValue(QNLInertiaNode, *v);
-    }
   }
 
-
+  // === FInt ===
   /** \fn inline string getFintPlugin()
    *   \brief Return the Fint Plugin name of the LagrangianDSXML
    *   \return The Fint Plugin name of the LagrangianDSXML
@@ -327,6 +289,7 @@ public:
     else SiconosDOMTreeTools::setStringAttributeValue(FintNode, LNLDS_VECTORPLUGIN, plugin);
   }
 
+  // === Fext ===
   /** \fn inline string getFextPlugin()
    *   \brief Return the Fext Plugin name of the LagrangianDSXML
    *   \return The Fext Plugin name of the LagrangianDSXML
@@ -876,15 +839,6 @@ protected:
 
   xmlNode * MNode;
   xmlNode * ndofNode;
-
-
-  //Methods
-
-  /** \fn loadLagrangianDSProperties()
-   *   \brief load the different properties of a LagrangianDS
-   *   \exception XMLException : if a property of the LagrangianDS lacks in the DOM tree
-   */
-  void loadLagrangianDSProperties();
 
 };
 

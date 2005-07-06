@@ -2,11 +2,11 @@
 using namespace std;
 
 LinearDSXML::LinearDSXML() :
-  DSXML(), ANode(NULL), fNode(NULL), uNode(NULL), BNode(NULL)
+  DSXML(), ANode(NULL), bNode(NULL), uNode(NULL), ENode(NULL)
 {}
 
 LinearDSXML::LinearDSXML(xmlNode * LinearDSNode, const bool& isBVP):
-  DSXML(LinearDSNode, isBVP), ANode(NULL), fNode(NULL), uNode(NULL), BNode(NULL)
+  DSXML(LinearDSNode, isBVP), ANode(NULL), bNode(NULL), uNode(NULL), ENode(NULL)
 {
   xmlNode *node;
   // The only required node is A
@@ -15,12 +15,12 @@ LinearDSXML::LinearDSXML(xmlNode * LinearDSNode, const bool& isBVP):
     ANode = node;
   else
     XMLException::selfThrow("LinearDSXML - loadLinearDSProperties error : tag " + LDS_A + " not found.");
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LDS_F)) != NULL)
-    fNode = node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LDS_B)) != NULL)
+    bNode = node;
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, "uSize")) != NULL)
     uSizeNode = node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LDS_B)) != NULL)
-    BNode = node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LDS_E)) != NULL)
+    ENode = node;
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LDS_U)) != NULL)
     uNode = node;
 
@@ -33,8 +33,8 @@ void LinearDSXML::updateDynamicalSystemXML(xmlNode* rootDSXMLNode, DynamicalSyst
 {
   IN("LinearSystemDynamicalSystem::updateDynamicalSystemXML\n");
   ANode = NULL;
-  BNode = NULL;
-  fNode = NULL;
+  ENode = NULL;
+  bNode = NULL;
   uNode = NULL;
   rootDSXMLNode = rootDSXMLNode;
   loadDS(ds);

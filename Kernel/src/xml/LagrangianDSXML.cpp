@@ -12,17 +12,6 @@ LagrangianDSXML::LagrangianDSXML(xmlNode * LagrangianDSNode, bool isBVP)
     velocity0Node(NULL), velocityMemoryNode(NULL), QNLInertiaNode(NULL), FintNode(NULL), FextNode(NULL), jacobianQFintNode(NULL),
     jacobianVelocityFintNode(NULL), jacobianQQNLInertiaNode(NULL), jacobianVelocityQNLInertiaNode(NULL), MNode(NULL), ndofNode(NULL)
 {
-  loadLagrangianDSProperties();
-}
-
-LagrangianDSXML::~LagrangianDSXML()
-{
-  //  if( this->qMemoryXML != NULL ) delete this->qMemoryXML;
-  //  if( this->velocityMemoryXML != NULL ) delete this->velocityMemoryXML;
-}
-
-void LagrangianDSXML::loadLagrangianDSProperties()
-{
   xmlNode *node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LNLDS_Q)) != NULL)
@@ -85,6 +74,41 @@ void LagrangianDSXML::loadLagrangianDSProperties()
     ndofNode = node;
   else
     XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_NDOF + " not found.");
+}
+
+LagrangianDSXML::~LagrangianDSXML()
+{}
+
+void LagrangianDSXML::setQMemory(SiconosMemory* smem)
+{
+  if (!hasQMemory())
+  {
+    qMemoryXML = new SiconosMemoryXML(NULL, rootDSXMLNode, LNLDS_QMEMORY);
+    qMemoryNode = qMemoryXML->getSiconosMemoryXMLNode();
+    qMemoryXML->setSiconosMemorySize(smem->getMemorySize());
+    qMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
+  }
+  else
+  {
+    qMemoryXML->setSiconosMemorySize(smem->getMemorySize());
+    qMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
+  }
+}
+void LagrangianDSXML::setVelocityMemory(SiconosMemory* smem)
+{
+  if (hasVelocityMemory() == false)
+  {
+    velocityMemoryXML = new SiconosMemoryXML(NULL, rootDSXMLNode, LNLDS_VELOCITYMEMORY);
+    velocityMemoryNode = velocityMemoryXML->getSiconosMemoryXMLNode();
+
+    velocityMemoryXML->setSiconosMemorySize(smem->getMemorySize());
+    velocityMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
+  }
+  else
+  {
+    velocityMemoryXML->setSiconosMemorySize(smem->getMemorySize());
+    velocityMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
+  }
 }
 
 void LagrangianDSXML::updateDynamicalSystemXML(xmlNode* newRootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)

@@ -1,4 +1,4 @@
-#include "LinearSystemDSXMLTest.h"
+#include "LinearDSXMLTest.h"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
@@ -11,7 +11,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LinearsystemDSXMLTest);
 
 void LinearsystemDSXMLTest::setUp()
 {
-  doc = xmlParseFile("LinearSystemDS.xml");
+  doc = xmlParseFile("LinearDS.xml");
   root = xmlDocGetRootElement(doc);
   child = NULL;
   matrixRef = SiconosMatrix("matrix.dat", true);
@@ -27,13 +27,13 @@ void LinearsystemDSXMLTest::tearDown()
 void LinearsystemDSXMLTest::testGetAB()
 {
   //  try{
-  LinearSystemDSXML lsdsxml(root, false);
-  SiconosMatrix A, B;
+  LinearDSXML lsdsxml(root, false);
+  SiconosMatrix A, E;
   A = lsdsxml.getA();
-  B = lsdsxml.getB();
+  E = lsdsxml.getE();
 
   CPPUNIT_ASSERT_MESSAGE("testGetAB : A == matrixRef", A == matrixRef);
-  CPPUNIT_ASSERT_MESSAGE("testGetAB : B == matrixRef", B == matrixRef);
+  CPPUNIT_ASSERT_MESSAGE("testGetAB : E == matrixRef", E == matrixRef);
   //  }
   //  catch(SiconosException e)
   //  {
@@ -46,12 +46,12 @@ void LinearsystemDSXMLTest::testGetAB()
 
 void LinearsystemDSXMLTest::testGetUF()
 {
-  LinearSystemDSXML lsdsxml(root, false);
+  LinearDSXML lsdsxml(root, false);
   /*SiconosVector*/
-  SimpleVector U, F;
+  SimpleVector U, b;
   U = lsdsxml.getUVector();
-  F = lsdsxml.getFVector();
+  b = lsdsxml.getBVector();
   CPPUNIT_ASSERT_MESSAGE("testGetUF : U == vectorRef", U == vectorRef);
-  CPPUNIT_ASSERT_MESSAGE("testGetUF : F == vectorRef", F == vectorRef);
+  CPPUNIT_ASSERT_MESSAGE("testGetUF : b == vectorRef", b == vectorRef);
   cout << " LinearsystemDSXMLTest >>> testGetUF ................................ OK\n ";
 }

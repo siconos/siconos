@@ -367,14 +367,6 @@ Relation* Interaction::createLagrangianNonLinearR(const string& computeInput, co
   return relation;
 }
 
-Relation* Interaction::createLinearTIR(SiconosMatrix* C, SiconosMatrix* D,
-                                       SiconosMatrix* E, SiconosVector* a)
-{
-  relation = new LinearTIR(C, D, E, a);
-  relation->setInteraction(this);
-  return relation;
-}
-
 
 NonSmoothLaw* Interaction::createComplementarityConditionNSL()
 {

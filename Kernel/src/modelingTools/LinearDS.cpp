@@ -5,9 +5,9 @@ using namespace std;
 
 // From xml file
 LinearDS::LinearDS(DSXML * dsXML):
-  DynamicalSystem(dsXML), A(NULL), f(NULL), uSize(0), u(NULL), B(NULL),
-  computeAPtr(NULL), computeFPtr(NULL), computeUPtr(NULL), computeBPtr(NULL),
-  isAAllocatedIn(true), isFAllocatedIn(false),  isUAllocatedIn(false), isBAllocatedIn(false)
+  DynamicalSystem(dsXML), A(NULL), b(NULL), uSize(0), u(NULL), E(NULL),
+  computeAPtr(NULL), computeBPtr(NULL), computeUPtr(NULL), computeEPtr(NULL),
+  isAAllocatedIn(true), isBAllocatedIn(false),  isUAllocatedIn(false), isEAllocatedIn(false)
 {
   IN("LinearDS::LinearDS - XML constructor\n");
   if (dsXML != NULL)
@@ -27,24 +27,24 @@ LinearDS::LinearDS(DSXML * dsXML):
     if (ldsxml->isAPlugin())
     {
       plugin = ldsxml->getAPlugin();
-      setComputeFFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+      setComputeAFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
       isPlugin[0] = true;
     }
     else
       *A = ldsxml->getA();
 
-    if (ldsxml->hasF())
+    if (ldsxml->hasB())
     {
-      f = new SimpleVector(n);
-      isFAllocatedIn = true;
-      if (ldsxml->isFPlugin())
+      b = new SimpleVector(n);
+      isBAllocatedIn = true;
+      if (ldsxml->isBPlugin())
       {
-        plugin = ldsxml->getFPlugin();
-        setComputeFFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+        plugin = ldsxml->getBPlugin();
+        setComputeBFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
         isPlugin[1] = true;
       }
       else
-        *f = ldsxml->getFVector();
+        *b = ldsxml->getBVector();
     }
 
     if (ldsxml->hasU())
@@ -69,25 +69,25 @@ LinearDS::LinearDS(DSXML * dsXML):
       }
     }
 
-    if (ldsxml->hasB())
+    if (ldsxml->hasE())
     {
-      if (ldsxml->isBPlugin())
+      if (ldsxml->isEPlugin())
       {
         if (!ldsxml->hasUSize())
           RuntimeException::selfThrow("LinearDS - xml constructor needs uSize in xml file!!");
         uSize = ldsxml->getUSize();
-        B = new SiconosMatrix(n, uSize);
-        isBAllocatedIn = true;
-        plugin = ldsxml->getBPlugin();
-        setComputeBFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+        E = new SiconosMatrix(n, uSize);
+        isEAllocatedIn = true;
+        plugin = ldsxml->getEPlugin();
+        setComputeEFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
         isPlugin[3] = true;
       }
       else
       {
-        uSize = ldsxml->getUVector().size();
-        B = new SiconosMatrix(n, uSize);
-        isBAllocatedIn = true;
-        *B = ldsxml->getB();
+        uSize = ldsxml->getE().size(1);
+        E = new SiconosMatrix(n, uSize);
+        isEAllocatedIn = true;
+        *E = ldsxml->getE();
       }
     }
   }
@@ -98,16 +98,16 @@ LinearDS::LinearDS(DSXML * dsXML):
 
 }
 
-// For the following constructors, only A is required. If necessary f, u and B can be defined thanks
+// For the following constructors, only A is required. If necessary b, u and E can be defined thanks
 // to set or setCompute, depending on they are plugins or not.
 
 // From a minimum set of data, A from a plugin
 LinearDS::LinearDS(const int& newNumber, const unsigned int& newN, const SiconosVector& newX0,
                    const string& pluginPath, const string& functionName):
   DynamicalSystem(newNumber, newN, newX0, "BasicPlugin:vectorField"),
-  A(NULL), f(NULL), uSize(0), u(NULL), B(NULL),
-  computeAPtr(NULL), computeFPtr(NULL), computeUPtr(NULL), computeBPtr(NULL),
-  isAAllocatedIn(true), isFAllocatedIn(false),  isUAllocatedIn(false), isBAllocatedIn(false)
+  A(NULL), b(NULL), uSize(0), u(NULL), E(NULL),
+  computeAPtr(NULL), computeBPtr(NULL), computeUPtr(NULL), computeEPtr(NULL),
+  isAAllocatedIn(true), isBAllocatedIn(false),  isUAllocatedIn(false), isEAllocatedIn(false)
 {
   DSType = LDS;
   isPlugin.resize(4, false);
@@ -121,9 +121,9 @@ LinearDS::LinearDS(const int& newNumber, const unsigned int& newN, const Siconos
 LinearDS::LinearDS(const int& newNumber, const SiconosVector& newX0,
                    const SiconosMatrix& newA):
   DynamicalSystem(newNumber, newA.size(0), newX0, "BasicPlugin:vectorField"),
-  A(NULL), f(NULL), uSize(0), u(NULL), B(NULL),
-  computeAPtr(NULL), computeFPtr(NULL), computeUPtr(NULL), computeBPtr(NULL),
-  isAAllocatedIn(true), isFAllocatedIn(false), isUAllocatedIn(false), isBAllocatedIn(false)
+  A(NULL), b(NULL), uSize(0), u(NULL), E(NULL),
+  computeAPtr(NULL), computeBPtr(NULL), computeUPtr(NULL), computeEPtr(NULL),
+  isAAllocatedIn(true), isBAllocatedIn(false), isUAllocatedIn(false), isEAllocatedIn(false)
 {
   if (newA.size(0) != n || newA.size(1) != n)
     RuntimeException::selfThrow("LinearDS - constructor(3): inconsistent dimensions with problem size for input matrix A");
@@ -141,20 +141,20 @@ LinearDS::~LinearDS()
     delete A;
     A = NULL ;
   }
-  if (isBAllocatedIn)
+  if (isEAllocatedIn)
   {
-    delete B;
-    B = NULL;
+    delete E;
+    E = NULL;
   }
   if (isUAllocatedIn)
   {
     delete u;
     u = NULL;
   }
-  if (isFAllocatedIn)
+  if (isBAllocatedIn)
   {
-    delete f;
-    f = NULL;
+    delete b;
+    b = NULL;
   }
 }
 
@@ -166,25 +166,25 @@ void LinearDS::setAPtr(SiconosMatrix *newPtr)
   isPlugin[0] = false;
 }
 
-void LinearDS::setF(const SimpleVector& newValue)
+void LinearDS::setB(const SimpleVector& newValue)
 {
   if (newValue.size() != n)
-    RuntimeException::selfThrow("LinearDS - setF: inconsistent dimensions with problem size for input vector f");
+    RuntimeException::selfThrow("LinearDS - setB: inconsistent dimensions with problem size for input vector b");
 
-  if (f == NULL)
+  if (b == NULL)
   {
-    f = new SimpleVector(n);
-    isFAllocatedIn = true;
+    b = new SimpleVector(n);
+    isBAllocatedIn = true;
   }
-  *f = newValue;
+  *b = newValue;
   isPlugin[1] = false;
 }
 
-void LinearDS::setFPtr(SimpleVector *newPtr)
+void LinearDS::setBPtr(SimpleVector *newPtr)
 {
-  if (isFAllocatedIn) delete f;
-  f = newPtr;
-  isFAllocatedIn = false;
+  if (isBAllocatedIn) delete b;
+  b = newPtr;
+  isBAllocatedIn = false;
   isPlugin[1] = false;
 }
 
@@ -192,9 +192,9 @@ void LinearDS::setUSize(const unsigned int& newUSize)
 {
   uSize = newUSize;
   if (isUAllocatedIn) delete u;
-  if (isBAllocatedIn) delete B;
+  if (isEAllocatedIn) delete E;
   u = new SimpleVector(uSize);
-  B = new SiconosMatrix(n, uSize);
+  E = new SiconosMatrix(n, uSize);
 }
 
 void LinearDS::setU(const SimpleVector& newValue)
@@ -223,30 +223,30 @@ void LinearDS::setUPtr(SimpleVector *newPtr)
   isPlugin[2] = false;
 }
 
-void LinearDS::setB(const SiconosMatrix& newValue)
+void LinearDS::setE(const SiconosMatrix& newValue)
 {
   if (newValue.size(0) != n)
-    RuntimeException::selfThrow("LinearDS - setF: inconsistent dimensions with problem size for input matrix B");
+    RuntimeException::selfThrow("LinearDS - setE: inconsistent dimensions with problem size for input matrix E");
 
-  if (B == NULL)
+  if (E == NULL)
   {
     uSize = newValue.size(1);
-    B = new SiconosMatrix(n, uSize);
-    isBAllocatedIn = true;
+    E = new SiconosMatrix(n, uSize);
+    isEAllocatedIn = true;
   }
   else if (uSize != newValue.size(1))
-    RuntimeException::selfThrow("LinearDS - setB: inconsistent dimensions with already allocated B for new input matrix");
+    RuntimeException::selfThrow("LinearDS - setE: inconsistent dimensions with already allocated E for new input matrix");
 
-  *B = newValue;
+  *E = newValue;
   isPlugin[3] = false;
 }
 
-void LinearDS::setBPtr(SiconosMatrix *newPtr)
+void LinearDS::setEPtr(SiconosMatrix *newPtr)
 {
-  if (isBAllocatedIn) delete B;
-  B = newPtr;
+  if (isEAllocatedIn) delete E;
+  E = newPtr;
   uSize = newPtr->size(1);
-  isBAllocatedIn = false;
+  isEAllocatedIn = false;
   isPlugin[3] = false;
 }
 
@@ -254,7 +254,7 @@ void LinearDS::setComputeAFunction(const string& pluginPath, const string& funct
 {
   IN("LinearDS::setComputeAFunction\n");
   cShared.setFunction(&computeAPtr, pluginPath, functionName);
-
+  cout << " COMPUTEA PTR " << computeAPtr << endl;
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   AFunctionName = plugin + ":" + functionName;
@@ -262,13 +262,13 @@ void LinearDS::setComputeAFunction(const string& pluginPath, const string& funct
   OUT("LinearDS::setComputeAFunction\n");
 
 }
-void LinearDS::setComputeFFunction(const string& pluginPath, const string& functionName)
+void LinearDS::setComputeBFunction(const string& pluginPath, const string& functionName)
 {
-  cShared.setFunction(&computeFPtr, pluginPath, functionName);
+  cShared.setFunction(&computeBPtr, pluginPath, functionName);
 
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  fFunctionName = plugin + ":" + functionName;
+  bFunctionName = plugin + ":" + functionName;
   isPlugin[1] = true;
 }
 
@@ -281,16 +281,16 @@ void LinearDS::setComputeUFunction(const string& pluginPath, const string& funct
   uFunctionName = plugin + ":" + functionName;
   isPlugin[2] = true;
 }
-void LinearDS::setComputeBFunction(const string& pluginPath, const string& functionName)
+void LinearDS::setComputeEFunction(const string& pluginPath, const string& functionName)
 {
-  IN("LinearDS::setComputeBFunction\n");
-  cShared.setFunction(&computeBPtr, pluginPath, functionName);
+  IN("LinearDS::setComputeEFunction\n");
+  cShared.setFunction(&computeEPtr, pluginPath, functionName);
 
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  BFunctionName = plugin + ":" + functionName;
+  EFunctionName = plugin + ":" + functionName;
   isPlugin[3] = true;
-  OUT("LinearDS::setComputeBFunction\n");
+  OUT("LinearDS::setComputeEFunction\n");
 
 }
 
@@ -301,13 +301,13 @@ void LinearDS::computeA(const double& time)
   computeAPtr(&n, &(*A)(0, 0), &time);
 }
 
-void LinearDS::computeF(const double& time)
+void LinearDS::computeB(const double& time)
 {
-  if (computeFPtr == NULL)
-    RuntimeException::selfThrow("computeF() is not linked to a plugin function");
+  if (computeBPtr == NULL)
+    RuntimeException::selfThrow("computeB() is not linked to a plugin function");
 
-  unsigned int size = f->size();
-  computeFPtr(&size, &(*f)(0), &time);
+  unsigned int size = b->size();
+  computeBPtr(&size, &(*b)(0), &time);
 }
 
 void LinearDS::computeU(const double& time)
@@ -319,11 +319,11 @@ void LinearDS::computeU(const double& time)
   computeUPtr(&size, &(*u)(0), &time);
 }
 
-void LinearDS::computeB(const double& time)
+void LinearDS::computeE(const double& time)
 {
-  if (computeBPtr == NULL)
-    RuntimeException::selfThrow("computeB() is not linked to a plugin function");
-  computeBPtr(&n, &uSize, &(*B)(0, 0), &time);
+  if (computeEPtr == NULL)
+    RuntimeException::selfThrow("computeE() is not linked to a plugin function");
+  computeEPtr(&n, &uSize, &(*E)(0, 0), &time);
 }
 
 void LinearDS::display() const
@@ -333,14 +333,14 @@ void LinearDS::display() const
   cout << "- A " << endl;
   if (A != NULL) A->display();
   else cout << "-> NULL" << endl;
-  cout << "- f " << endl;
-  if (f != NULL) f->display();
+  cout << "- b " << endl;
+  if (b != NULL) b->display();
   else cout << "-> NULL" << endl;
   cout << "- u " << endl;
   if (u != NULL) u->display();
   else cout << "-> NULL" << endl;
-  cout << "- B " << endl;
-  if (B != NULL) B->display();
+  cout << "- E " << endl;
+  if (E != NULL) E->display();
   else cout << "-> NULL" << endl;
   cout << "=============================" << endl;
 }
@@ -356,7 +356,7 @@ void LinearDS::saveDSToXML()
   {
     dsxml->setN(n);
     static_cast<LinearDSXML*>(dsxml)->setA(*A);
-    static_cast<LinearDSXML*>(dsxml)->setB(*B);
+    static_cast<LinearDSXML*>(dsxml)->setE(*E);
 
     // u
     if (!(static_cast <LinearDSXML*>(dsxml))->isUPlugin())
@@ -364,10 +364,10 @@ void LinearDS::saveDSToXML()
       static_cast<LinearDSXML*>(dsxml)->setUVector(*u);
     }
 
-    // f
-    if (!(static_cast <LinearDSXML*>(dsxml))->isFPlugin())
+    // b
+    if (!(static_cast <LinearDSXML*>(dsxml))->isBPlugin())
     {
-      static_cast<LinearDSXML*>(dsxml)->setFVector(*f);
+      static_cast<LinearDSXML*>(dsxml)->setBVector(*b);
     }
   }
   else RuntimeException::selfThrow("LinearDS::saveDSToXML - The DSXML object doesn't exists");
@@ -384,9 +384,9 @@ LinearDS* LinearDS::convert(DynamicalSystem* ds)
 
 // Default constructor
 LinearDS::LinearDS():
-  DynamicalSystem(NULL), A(NULL), f(NULL), uSize(0), u(NULL), B(NULL),
-  computeAPtr(NULL), computeFPtr(NULL), computeUPtr(NULL), computeBPtr(NULL),
-  isAAllocatedIn(true), isFAllocatedIn(false), isUAllocatedIn(false), isBAllocatedIn(false)
+  DynamicalSystem(NULL), A(NULL), b(NULL), uSize(0), u(NULL), E(NULL),
+  computeAPtr(NULL), computeBPtr(NULL), computeUPtr(NULL), computeEPtr(NULL),
+  isAAllocatedIn(true), isBAllocatedIn(false), isUAllocatedIn(false), isEAllocatedIn(false)
 {
   IN("LinearDS::LinearDS - Default constructor\n");
   DSType = LDS;
@@ -400,30 +400,30 @@ LinearDS::LinearDS():
   if(isPlugin[0])
     computeA(time);
   // if necessary, compute the required functions from plugins
-  // Warning: B != NULL means u!=NULL
+  // Warning: E != NULL means u!=NULL
   if(isPlugin[0])
     computeA(time)
 
-  if(f!=NULL)
+  if(b!=NULL)
     {
       if(isPlugin[1])
-  computeF(time);
+  computeB(time);
     }
-  if(B!=NULL)
+  if(E!=NULL)
     {
       if(isPlugin[2])
   computeU(time);
       if(isPlugin[3])
-  computeB(time);
+  computeE(time);
     }
 
   // compute vectorField
-  if(f!=NULL && B==NULL)
-    vectorField = *A * *x + *f;
-  else if(f!=NULL && B!=NULL)
-    vectorField = *A * *x + *f + *B * *u;
-  else if(f==NULL && B!= NULL)
-    vectorField = *A * *x + *B * *u;
+  if(b!=NULL && E==NULL)
+    vectorField = *A * *x + *b;
+  else if(b!=NULL && E!=NULL)
+    vectorField = *A * *x + *b + *E * *u;
+  else if(b==NULL && E!= NULL)
+    vectorField = *A * *x + *E * *u;
   else
     vectorField = *A * *x;
 

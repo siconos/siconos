@@ -200,7 +200,7 @@ void PlatformTest::testManualCreation()
 
   NonSmoothDynamicalSystem* nsds;
   nsds = new NonSmoothDynamicalSystem(true);
-  m.setNonSmoothDynamicalSystem(nsds);
+  m.setNonSmoothDynamicalSystemPtr(nsds);
 
   DynamicalSystem *ds, *ds2, *ds3, *ds4;
   SimpleVector sv;

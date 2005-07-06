@@ -1,5 +1,7 @@
+
 #include <cppunit/extensions/TestFactoryRegistry.h>
 #include <cppunit/ui/text/TestRunner.h>
+#include <iostream>
 using namespace std;
 
 int main()
@@ -14,7 +16,5 @@ int main()
   runner.addTest(registry.makeTest());
 
   // Run tests
-  bool wasSucessful = runner.run("", false);
-  return wasSucessful;
+  runner.run("", false, true, false);
 }
-

@@ -8,7 +8,8 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include "TimeDiscretisationXML.h"
-
+#include <iostream>
+#include<vector>
 
 class TimeDiscretisationXMLTest : public CppUnit::TestFixture
 {

@@ -9,7 +9,7 @@
 #include <libxml/tree.h>
 #include "LinearTIRXML.h"
 #include "XMLException.h"
-
+#include <iostream>
 
 class LinearTIRXMLTest : public CppUnit::TestFixture
 {
