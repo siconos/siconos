@@ -1,0 +1,13 @@
+=== This directory contains files to test LinearDS class ===
+
+- testsLinearDS.cpp : main file
+- LDSPlugin.c : plugin functions to compute A, f, u and B
+- LinearDS_test.xml: xml input file
+
+To run test: 
+
+siconos testsLinearDS.cpp
+
+In testsLinearDS.cpp, a LinearDS object is created calling successively each constructor, and then displayed. 
+
+Todo -> convert it to cppunit ? 

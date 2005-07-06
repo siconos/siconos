@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- SICONOS Model XML file -->
+
+<SiconosModel>
+	<NSDS bvp='false'>
+	
+		<!-- DSs defined in the problem -->
+		<DS_Definition>		
+			<LinearDS number='1'>
+				<Id> Ball </Id>				
+				<n>3</n>
+				<StepsInMemory>1</StepsInMemory>				
+				<x0 vectorSize='3'>
+					1.0 0.0 0.0
+				</x0>
+				<E matrixPlugin='LDSPlugin:computeE'/>
+				<u vectorSize='2'>
+                                         1.0  2.0
+                                </u>
+		                <uSize> 2 </uSize>  
+		                <b vectorPlugin='LDSPlugin:computeB'/>
+				<A matrixRowSize='3' matrixColSize='3'>
+					<row>0.0 1.0 1.0</row>
+					<row>3.0 0.0 1.0</row>
+					<row>0.0 4.0 1.0</row>
+				</A>
+			</LinearDS>
+	     </DS_Definition>
+	</NSDS>
+</SiconosModel>

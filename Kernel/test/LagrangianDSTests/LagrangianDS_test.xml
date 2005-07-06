@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- SICONOS Model XML file -->
+
+<SiconosModel>
+	<NSDS bvp='false'>
+	
+		<!-- DSs defined in the problem -->
+		<DS_Definition>		
+			<LagrangianDS number='1'>
+				<Id> Ball </Id>				
+				<StepsInMemory>1</StepsInMemory>				
+                                <M matrixPlugin="LagPlugin:computeMass"/>
+				<ndof>3</ndof>								
+				<q0 vectorSize='3'>
+					1.0 0.0 0.0
+				</q0>
+				<Velocity0  vectorSize='3'>
+					0.0 0.0 0.0
+				</Velocity0>
+				<Fint vectorPlugin="LagPlugin:computeFInt"/>
+                                <Fext vectorPlugin="LagPlugin:computeFExt"/>
+				<JacobianQFint matrixPlugin="LagPlugin:computeJacobianQFInt"/>
+ 				<JacobianVelocityFint matrixPlugin="LagPlugin:computeJacobianVelocityFInt"/>
+ 				<JacobianQQNLInertia matrixPlugin="LagPlugin:computeJacobianQQNLInertia"/>
+ 				<JacobianVelocityQNLInertia matrixPlugin="LagPlugin:computeJacobianVelocityQNLInertia"/>
+				<QNLInertia vectorPlugin="LagPlugin:computeQNLInertia"/>
+ 			</LagrangianDS>
+	     </DS_Definition>
+	</NSDS>
+</SiconosModel>

@@ -1,0 +1,13 @@
+=== This directory contains files to test LagrangianDS class ===
+
+- testsLagrangianDS.cpp : main file
+- LagPlugin.c : plugin functions to compute Mass, FInt ...
+- LagrangianDS_test.xml: xml input file
+
+To run test: 
+
+siconos testsLagrangianDS.cpp
+
+In testsLagrangianDS.cpp, a LagrangianDS object is created, calling successively each constructor, and then displayed. 
+
+Todo -> convert it to cppunit ? 
