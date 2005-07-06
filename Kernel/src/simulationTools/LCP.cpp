@@ -4,6 +4,7 @@
 #include "Moreau.h"
 #include "LagrangianLinearR.h"
 #include "NewtonImpactLawNSL.h"
+#include "LinearTIR.h"
 
 using namespace std;
 
@@ -203,6 +204,12 @@ void LCP::computeM()
       H = LLR->getHPtr();
       Mtmp = *H * WW->multTranspose(*H);
       M->blockMatrixCopy(Mtmp, currentActiveInteraction, currentActiveInteraction);
+    }
+    else if (R->getType() == LINEARTIRELATION)
+    {
+      LinearTIR *LTIR = static_cast<LinearTIR*>(R);
+
+
     }
     else
       RuntimeException::selfThrow("LCP::computeM [level1] not yet implemented for relation of type " + R->getType());

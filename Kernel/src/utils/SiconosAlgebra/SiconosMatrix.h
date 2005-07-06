@@ -237,6 +237,11 @@ public:
    */
   void zero();
 
+  /** \fn void eye();
+   *  \brief set an identity matrix
+   */
+  void eye();
+
   /** \fn void display();
    *  \brief display data on standard output
    */

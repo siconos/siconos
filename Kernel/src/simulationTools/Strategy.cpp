@@ -417,7 +417,7 @@ OneStepIntegrator* Strategy::addAdams(TimeDiscretisation* td, DynamicalSystem* d
 OneStepIntegrator* Strategy::addMoreau(TimeDiscretisation* td, DynamicalSystem* ds, const double& theta)
 {
   if (hasDynamicalSystemIntegrator(ds))
-    RuntimeException::selfThrow("Strategy::addAdams : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
+    RuntimeException::selfThrow("Strategy::addMoreau : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
   OneStepIntegrator* osi;
   osi = new Moreau(td, ds, theta);
   integratorVector.push_back(osi);
@@ -428,7 +428,7 @@ OneStepIntegrator* Strategy::addMoreau(TimeDiscretisation* td, DynamicalSystem* 
 OneStepIntegrator* Strategy::addLsodar(TimeDiscretisation* td, DynamicalSystem* ds)
 {
   if (hasDynamicalSystemIntegrator(ds))
-    RuntimeException::selfThrow("Strategy::addAdams : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
+    RuntimeException::selfThrow("Strategy::addLsodar : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
   OneStepIntegrator* osi;
   osi = new Lsodar(td, ds);
   integratorVector.push_back(osi);

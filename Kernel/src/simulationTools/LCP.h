@@ -4,7 +4,7 @@
 #include "OneStepNSProblem.h"
 #include "LCPXML.h"
 
-class OneStepNSProbem;
+class OneStepNSProblem;
 
 /** \class LCP
  *  \brief This class is devoted to the formalization and the resolution of the

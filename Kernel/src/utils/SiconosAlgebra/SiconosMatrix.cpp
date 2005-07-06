@@ -240,6 +240,19 @@ void SiconosMatrix::zero()
     array[i] = 0.0;
 }
 
+void SiconosMatrix::eye()
+{
+  unsigned int sizeMin;
+  sizeMin = size(0);
+  if (sizeMin > size(1)) sizeMin = size(1);
+
+  zero();
+
+  for (unsigned int j = 0; j < sizeMin; j++) mat(j, j) = 1.0;
+
+}
+
+
 // --- MATRICES HANDLING AND OPERATORS ---
 
 
