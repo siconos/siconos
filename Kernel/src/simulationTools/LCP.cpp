@@ -215,11 +215,13 @@ void LCP::compute()
     res = solve_lcp(M->getArray(), q->getArray(), (int*)&nLcp, &solvingMethod, z->getArray(), w->getArray());
 
   // Update the relation
-  SimpleVector *yDot, *lambda;
+  SimpleVector *yDot, *lambda, *ynew;
   int activeInteraction = 0;
 
   yDot = interactionVector[0]->getYDotPtr();
   lambda = interactionVector[0]->getLambdaPtr();
+  ynew = interactionVector[0]->getYPtr();
+
 
   if (nLcp == 0) lambda->zero();
   else //if (nLcp == 1)
@@ -235,8 +237,15 @@ void LCP::compute()
       {
         yDot = (*it)->getYDotPtr();
         lambda = (*it)->getLambdaPtr();
+        ynew = (*it)-> getYPtr();
 
-        (*yDot)(0) = (*w)(activeInteraction);
+        Relation *R = (*it)->getRelationPtr();
+        if (R->getType() == LAGRANGIANLINEARRELATION)
+          (*yDot)(0) = (*w)(activeInteraction);
+        else if (R->getType() == LINEARTIRELATION)
+          (*ynew)(0) = (*w)(activeInteraction);
+        else
+          RuntimeException::selfThrow("LCP::compute not yet implemented for relation of type " + R->getType());
         (*lambda)(0) = (*z)(activeInteraction);
         activeInteraction++;
       }
@@ -325,7 +334,15 @@ void LCP::computeM()
     }
     else if (R->getType() == LINEARTIRELATION)
     {
-      //LinearTIR *LTIR = static_cast<LinearTIR*>(R);
+      LinearTIR *LTIR = static_cast<LinearTIR*>(R);
+      SiconosMatrix* Bloc = LTIR->getBPtr();
+      SiconosMatrix* Cloc = LTIR->getCPtr();
+      SiconosMatrix* Dloc = LTIR->getDPtr();
+      double h = strategy->getTimeDiscretisationPtr()->getH(); // time step
+      unsigned int sizeMtmp = Dloc->size(0);
+      SiconosMatrix Mtmp(sizeMtmp, sizeMtmp);
+      Mtmp = (*Cloc * *WW * *Bloc) + ((1.0 / h) * *Dloc);
+      M->blockMatrixCopy(Mtmp, currentActiveInteraction, currentActiveInteraction);
     }
     else
       RuntimeException::selfThrow("LCP::computeM [level1] not yet implemented for relation of type " + R->getType());
@@ -430,6 +447,19 @@ void LCP::computeQ(const double& time)
          * of 1 double value into 'q' for each active interaction
          */
         (*q)(qPos++) = -(*qLCPtmp)(0);
+      }
+      else
+        RuntimeException::selfThrow("LCP::computeQ not yet implemented for NSlaw of type " + nslaw->getType() + "and for relation of type " + R->getType());
+    }
+    else if (R->getType() == LINEARTIRELATION)
+    {
+      LinearTIR *LTIR = static_cast<LinearTIR*>(R);
+      if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW)
+      {
+        SiconosMatrix* Cloc = LTIR->getCPtr();
+        //  intermediate version : only one dynamical system is handled
+        SiconosVector* xfreeloc = CurrentInteraction->getDynamicalSystemPtr(0)->getXFreePtr();
+        (*q)(qPos++) = (*Cloc * *xfreeloc)(0);
       }
       else
         RuntimeException::selfThrow("LCP::computeQ not yet implemented for NSlaw of type " + nslaw->getType() + "and for relation of type " + R->getType());
