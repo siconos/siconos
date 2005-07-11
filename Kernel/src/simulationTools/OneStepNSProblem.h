@@ -78,6 +78,22 @@ public:
    */
   OneStepNSProblem(OneStepNSProblemXML*, Strategy * = NULL);
 
+  /** \fn OneStepNSProblem(Strategy*, const string& solverName, const string& newSolvingMethod, const int& maxIter,
+   *                       const double & Tolerance=0, const string & NormType="none",
+   *                       const double & SearchDirection=0)
+   *  \brief constructor from data
+   *  \param Strategy *: the strategy that owns this problem
+   *  \param string: solver name (optional)
+   *  \param string: name of the solving method (optional but required if a solver is given)
+   *  \param int : MaxIter (optional) required if a solver is given
+   *  \param double : Tolerance (optional) -> for Gsnl, Gcp, Latin
+   *  \param string : NormType (optional) -> for Gsnl, Gcp, Latin
+   *  \param double : SearchDirection (optional) -> for Latin
+   */
+  OneStepNSProblem(Strategy * , const std::string& = "none", const std::string& = "none",
+                   const int& = 0, const double& = 0, const std::string & = "none",
+                   const double & = 0);
+
   virtual ~OneStepNSProblem();
 
   // --- GETTERS/SETTERS ---
@@ -104,7 +120,7 @@ public:
    *  \brief get the value of n
    *  \return an int
    */
-  inline const int getN() const
+  inline const unsigned int getN() const
   {
     return n;
   }
@@ -113,7 +129,7 @@ public:
    *  \brief set the value of n
    *  \param an int
    */
-  inline void setN(const int& newVal)
+  inline void setN(const unsigned int& newVal)
   {
     n = newVal;
   }
@@ -132,7 +148,7 @@ public:
    *  \param int the position of a specific Interaction in the vector of Interaction
    *  \return a pointer on Interaction
    */
-  Interaction* getInteractionPtr(const int&);
+  Interaction* getInteractionPtr(const unsigned int&);
 
   /** \fn void setInteractions(vector< Interaction* >)
     *  \brief set the vector of Interaction
@@ -228,12 +244,12 @@ public:
    *  \exception to be defined
    *  \return void
    */
-  virtual void nextStep(void);
+  virtual void nextStep();
 
   /** \fn void updateState(void)
    *  \brief predict all the relations before updating state of the problem
    */
-  virtual void updateState(void);
+  virtual void updateState();
 
   /** \fn void checkInteraction(void)
    *  \brief check and update status of the interactions
@@ -249,13 +265,22 @@ public:
   /** \fn void compute(void)
    *  \brief make the computation so solve the NS problem
    */
-  virtual void compute(void);
+  virtual void compute();
 
-  /** \fn void fillSolvingMethod()
-   *  \brief fills the fields of the solvingMethod object with data read in the XML DOM tree
+  /** \fn void fillSolvingMethod(const string& newSolvingMethod, const int& maxIter,
+   *                             const double & Tolerance=0, const string & NormType="none",
+   *                             const double & SearchDirection=0)
+   *  \brief to fill the fields of the solvingMethod object
+   *  \param string: name of the solving method
+   *  \param int : MaxIter
+   *  \param double : Tolerance (optional) -> for Gsnl, Gcp, Latin
+   *  \param string : NormType (optional) -> for Gsnl, Gcp, Latin
+   *  \param double : SearchDirection (optional) -> for Latin
    *  \exception RuntimeException
    */
-  void fillSolvingMethod();
+  void fillSolvingMethod(const std::string&, const int& ,
+                         const double& = 0, const std::string & = "none",
+                         const double & = 0);
 
   /** \fn void saveNSProblemToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree
@@ -322,12 +347,14 @@ public:
    */
   void displayConnectedInteractionMap();
 
+  bool isOneStepNsProblemComplete();
+
 protected:
   /** type of the OneStepNSProblem */
   std::string nspbType;
 
   /** size of the problem to solve */
-  int n;
+  unsigned int n;
 
   /** all the Interaction known by the OneStepNSProblem */
   std::vector< Interaction* > interactionVector;

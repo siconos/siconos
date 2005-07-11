@@ -1,20 +1,19 @@
 #include "Relation.h"
 using namespace std;
 
-Relation::Relation(): relationType("none"), interaction(NULL), relationxml(NULL),
-  computeInputName("none"), computeOutputName("none")
-{
-  setComputeOutputFunction("BasicPlugin.so", "computeOutput");
-  setComputeInputFunction("BasicPlugin.so", "computeInput");
-}
 
-Relation::Relation(RelationXML* relxml): relationType("none"), interaction(NULL),
+// Default constructor with optional interaction parameter
+Relation::Relation(Interaction* inter): relationType("none"), interaction(inter), relationxml(NULL),
+  computeInputName("none"), computeOutputName("none"),
+  computeOutputPtr(NULL), computeInputPtr(NULL)
+{}
+
+// xml constructor
+Relation::Relation(RelationXML* relxml, Interaction* inter): relationType("none"), interaction(inter),
   relationxml(relxml), computeInputName("none"),
   computeOutputName("none")
 
 {
-  setComputeOutputFunction("BasicPlugin.so", "computeOutput");
-  setComputeInputFunction("BasicPlugin.so", "computeInput");
   if (relationxml != NULL)
   {
     string plugin;
@@ -34,6 +33,18 @@ Relation::Relation(RelationXML* relxml): relationType("none"), interaction(NULL)
   }
   else RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
 }
+
+// copy constructor
+Relation::Relation(const Relation& newRel):
+  relationType(newRel.getType()), interaction(NULL), relationxml(NULL),
+  computeInputName(newRel.getComputeInputName()), computeOutputName(newRel.getComputeOutputName()),
+  computeOutputPtr(NULL), computeInputPtr(NULL)
+{
+  // \warning:  interaction, relationxml and dsioVector are not copied !
+  // \todo: manage dsio copy when this class will be well implemented
+}
+
+
 
 Relation::~Relation()
 {}
@@ -88,7 +99,6 @@ void Relation::computeInput(const double& time)
 
 void Relation::setComputeOutputFunction(const string& pluginPath, const string& functionName)
 {
-  computeOutputPtr = NULL;
   cShared.setFunction(&computeOutputPtr, pluginPath, functionName);
 
   string plugin;
@@ -98,7 +108,6 @@ void Relation::setComputeOutputFunction(const string& pluginPath, const string& 
 
 void Relation::setComputeInputFunction(const string& pluginPath, const string& functionName)
 {
-  computeInputPtr = NULL;
   cShared.setFunction(&computeInputPtr, pluginPath, functionName);
 
   string plugin;

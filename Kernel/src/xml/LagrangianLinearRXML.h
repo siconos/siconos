@@ -69,6 +69,14 @@ public:
   void setB(const SiconosVector&);
 
 
+  /** \fn bool hasB() const
+   *   \brief return true if b is given in xmlfile
+   */
+  inline bool hasB() const
+  {
+    return (!(bNode == NULL));
+  }
+
 private:
 
 

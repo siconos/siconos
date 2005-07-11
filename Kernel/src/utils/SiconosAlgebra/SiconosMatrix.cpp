@@ -592,17 +592,11 @@ void  SiconosMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
 {
   IN(" SiconosMatrix::PLUForwardBackwardInPlace()\n");
 
-  if ((isPLUFactorized))
-  {
-  }
-  else
+  if (!isPLUFactorized)
     SiconosMatrixException::selfThrow(" SiconosMatrix::PLUForwardBackwardInPlace : This Matrix is not LU Factorized   with Partial pivoting");
-
 
   if (mat.inc(0) != 1 || mat.inc(1) != 1)
     SiconosMatrixException::selfThrow(" SiconosMatrix::PLUForwardBackwardInPlace : This Matrix is non-contiguous. ");
-
-
 
   if (size(0) != size(1))
     SiconosMatrixException::selfThrow(" SiconosMatrix::PLUForwardBackwardInPlace :Square matrix expected.\n");

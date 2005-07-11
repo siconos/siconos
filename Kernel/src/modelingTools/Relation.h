@@ -25,17 +25,28 @@ class Relation
 {
 public:
 
-  /** \fn Relation()
+  /** \fn Relation(Interaction* =NULL)
    *  \brief default constructor
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    */
-  Relation();
+  Relation(Interaction* = NULL);
 
   /** \fn Relation(RelationXML*)
-   *  \brief constructor with XML object of the Relation
+   *  \brief xml constructor
    *  \param RelationXML* : the XML object corresponding
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    */
-  Relation(RelationXML*);
+  Relation(RelationXML*, Interaction* = NULL);
 
+  /** \fn Relation(const Relation&)
+   *  \brief copy constructor
+   *  \param a relation to copy
+   */
+  Relation(const Relation&);
+
+  /** \fn ~Relation()
+   *  \brief destructor
+   */
   virtual ~Relation();
 
   /** \fn inline RelationXML* getRelationXML()
@@ -56,19 +67,19 @@ public:
     relationxml = rxml;
   }
 
-  /** \fn Interaction* getInteraction(void)
+  /** \fn Interaction* getInteractionPtr()
    *  \brief allows to get the Interaction which contains this Relation
    *  \return a pointer on an Interaction
    */
-  inline Interaction* getInteraction(void) const
+  inline Interaction* getInteractionPtr() const
   {
     return interaction;
   }
 
-  /** \fn void setInteraction(Interaction* i)
+  /** \fn void setInteractionPtr(Interaction* i)
    *  \brief allows to set the Interaction which contains this Relation
    */
-  inline void setInteraction(Interaction* i)
+  inline void setInteractionPtr(Interaction* i)
   {
     interaction = i;
   }
@@ -80,6 +91,24 @@ public:
   inline const std::string  getType() const
   {
     return relationType;
+  }
+
+  /** \fn inline string getComputeInputName()
+   *  \brief get the name of computeInput function
+   *  \return a string
+   */
+  inline const std::string  getComputeInputName() const
+  {
+    return computeInputName;
+  }
+
+  /** \fn inline string getComputeOutputName()
+   *  \brief get the name of computeOutput function
+   *  \return a string
+   */
+  inline const std::string  getComputeOutputName() const
+  {
+    return computeOutputName;
   }
 
   /** \fn vector<DSInputOutput*> getDSInputOutputs(void)

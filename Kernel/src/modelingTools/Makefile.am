@@ -5,6 +5,8 @@ include $(top_srcdir)/config/Make-rules
 .cpp.o:
 	$(CXXCOMPILE) -c $<
 
+SUBDIRS = test 
+
 noinst_LTLIBRARIES = libModelingTools.la
 libModelingTools_la_SOURCES =  BoundaryCondition.cpp ComplementarityConditionNSL.cpp \
 		DSInputOutput.cpp DynamicalSystem.cpp EqualityConstraint.cpp Interaction.cpp \

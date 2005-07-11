@@ -5,7 +5,7 @@ include $(top_srcdir)/config/Make-rules
 .cpp.o:
 	$(CXXCOMPILE) -c $<
 
-SUBDIRS = test
+#SUBDIRS = test
 
 
 noinst_LTLIBRARIES = libSiconosXml.la

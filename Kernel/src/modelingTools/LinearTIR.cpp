@@ -2,56 +2,67 @@
 using namespace std;
 
 
-// Default constructor
-LinearTIR::LinearTIR():
-  Relation(), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
-{
-  relationType = LINEARTIRELATION;
-}
-
 // xml constructor
-LinearTIR::LinearTIR(RelationXML* relxml):
-  Relation(relxml), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
+LinearTIR::LinearTIR(RelationXML* relxml, Interaction * inter):
+  Relation(relxml, inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
 {
   relationType = LINEARTIRELATION;
   if (relationxml != NULL)
   {
     LinearTIRXML * lTIRxml = static_cast<LinearTIRXML *>(relationxml);
     isAllocatedIn.resize(6, false);
-
-    // get size of vector y
-    unsigned int size = interaction->getNInteraction();
+    unsigned int sizeY, sizeX; // size of vector y and of vector x
     if (lTIRxml->hasC())
     {
-      C = new SiconosMatrix(size, size);
-      isAllocatedIn[0] = true;
-      *C = lTIRxml->getC();
+      sizeY = lTIRxml->getC().size(0);
+      sizeX = lTIRxml->getC().size(1);
     }
     else
       RuntimeException::selfThrow("LinearTIR:: xml constructor: input matrix C is missing in xml file ");
 
+    if (inter != NULL)
+    {
+      // get size of vector y from linked interaction
+      unsigned int size = interaction->getNInteraction();
+      if (size != sizeY)
+        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between C and y vector");
+    }
+
+    C = new SiconosMatrix(sizeY, sizeX);
+    isAllocatedIn[0] = true;
+    *C = lTIRxml->getC();
+
     if (lTIRxml->hasD())
     {
-      D = new SiconosMatrix(size, size);
+      if (lTIRxml->getD().size(0) != sizeY || lTIRxml->getD().size(0) != sizeY)
+        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between D and C");
+      D = new SiconosMatrix(sizeY, sizeY);
       isAllocatedIn[1] = true;
       *D = lTIRxml->getD();
     }
     if (lTIRxml->hasF())
     {
       unsigned int uSize = lTIRxml->getF().size(1);
-      F = new SiconosMatrix(size, uSize);
+      if (lTIRxml->getF().size(0) != sizeY)
+        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between F and C");
+      F = new SiconosMatrix(sizeY, uSize);
       isAllocatedIn[2] = true;
       *F = lTIRxml->getF();
     }
     if (lTIRxml->hasE())
+
     {
-      e = new SimpleVector(size);
+      if (lTIRxml->getE().size() != sizeY)
+        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between e and C");
+      e = new SimpleVector(sizeY);
       isAllocatedIn[3] = true;
       *e = lTIRxml->getE();
     }
     if (lTIRxml->hasB())
     {
-      B = new SiconosMatrix(size, size);
+      if (lTIRxml->getB().size(0) != sizeX || lTIRxml->getB().size(1) != sizeY)
+        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between B and ds vector");
+      B = new SiconosMatrix(sizeX, sizeY);
       isAllocatedIn[4] = true;
       *B = lTIRxml->getB();
     }
@@ -60,7 +71,9 @@ LinearTIR::LinearTIR(RelationXML* relxml):
 
     if (lTIRxml->hasA())
     {
-      a = new SimpleVector(size);
+      if (lTIRxml->getA().size() != sizeX)
+        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between a and B");
+      a = new SimpleVector(sizeX);
       isAllocatedIn[5] = true;
       *a = lTIRxml->getA();
     }
@@ -69,17 +82,26 @@ LinearTIR::LinearTIR(RelationXML* relxml):
 }
 
 // Minimum data (C, B) constructor
-LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB):
-  Relation(), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
+LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB, Interaction* inter):
+  Relation(inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
 {
   relationType = LINEARTIRELATION;
-  // get size of vector y
-  unsigned int size = interaction->getNInteraction();
-  if (newC.size(0) != size || newC.size(1) != size || newB.size(0) != size || newB.size(1) != size)
-    RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size with y vector for input vector or matrix");
+  unsigned int sizeY, sizeX;
+  sizeY = newC.size(0);
+  sizeX = newC.size(1);
+  if (newB.size(0) != sizeX || newB.size(1) != sizeY)
+    RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between C and B");
 
-  C = new SiconosMatrix(newC.size(0), newC.size(1));
-  B = new SiconosMatrix(newB.size(0), newB.size(1));
+  if (inter != NULL)
+  {
+    // get size of vector y
+    unsigned int size = interaction->getNInteraction();
+    if (sizeY != size)
+      RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size with y vector for input vector or matrix");
+  }
+
+  C = new SiconosMatrix(sizeY, sizeX);
+  B = new SiconosMatrix(sizeX, sizeY);
   *C = newC;
   *B = newB;
   isAllocatedIn.resize(6, false);
@@ -90,33 +112,100 @@ LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB):
 // Constructor from a complete set of data
 LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
                      const SiconosMatrix& newF, const SimpleVector& newE,
-                     const SiconosMatrix& newB, const SimpleVector& newA):
-  Relation(), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
+                     const SiconosMatrix& newB, const SimpleVector& newA, Interaction* inter):
+  Relation(inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
 {
   relationType = LINEARTIRELATION;
+  unsigned int sizeY, sizeX; // size of vector y and of vector x
 
-  // get size of vector y
-  unsigned int size = interaction->getNInteraction();
+  sizeY = newC.size(0);
+  sizeX = newC.size(1);
 
-  if (newC.size(0) != size || newC.size(1) != size || newD.size(0) != size || newD.size(1) != size || newF.size(0) != size
-      || newE.size() != size || newB.size(0) != size || newB.size(1) != size || newA.size() != size)
-    RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size with y vector for input vector or matrix");
+  if (inter != NULL)
+  {
+    unsigned int size = interaction->getNInteraction();
+    if (size != sizeY)
+      RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between C and y vector");
+  }
 
-  C = new SiconosMatrix(size, size);
-  D = new SiconosMatrix(size, size);
-  // \todo check newF.size(1) = size of u and that the ds type is well adapted to this kind of relation
-  F = new SiconosMatrix(size, newF.size(1));
-  e = new SimpleVector(size);
-  B = new SiconosMatrix(size, size);
-  a = new SimpleVector(size);
+  C = new SiconosMatrix(sizeY, sizeX);
   *C = newC;
+
+  if (newD.size(0) != sizeY || newD.size(1) != sizeY)
+    RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between C and D");
+  D = new SiconosMatrix(sizeY, sizeY);
   *D = newD;
+
+  // \todo check newF.size(1) = size of u and that the ds type is well adapted to this kind of relation
+  if (newF.size(0) != sizeY)
+    RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between F and C");
+  F = new SiconosMatrix(sizeY, newF.size(1));
   *F = newF;
+
+  if (newE.size(0) != sizeY)
+    RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between e and C");
+  e = new SimpleVector(sizeY);
   *e = newE;
+
+  if (newB.size(0) != sizeX || newB.size(1) != sizeY)
+    RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between C and B");
+  B = new SiconosMatrix(sizeX, sizeY);
   *B = newB;
+
+  if (newA.size(0) != sizeX)
+    RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between a and B");
+  a = new SimpleVector(sizeX);
   *a = newA;
+
   isAllocatedIn.resize(6, true);
 }
+
+// Copy constructor
+LinearTIR::LinearTIR(const Relation & newLTIR):
+  Relation(newLTIR), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
+{
+  if (relationType != LINEARTIRELATION)
+    RuntimeException::selfThrow("LinearTIR:: copy constructor, inconsistent relation types for copy");
+
+  // Warning: the interaction link is not copyed!!!
+
+  const LinearTIR * ltir = static_cast<const LinearTIR*>(&newLTIR);
+  isAllocatedIn.resize(6, false);
+
+  // Since this is a copy, we suppose that various sizes of members of newLTIR are consistent alltogether
+  // -> no more tests on that subject.
+
+  C = new SiconosMatrix(ltir->getC());
+  B = new SiconosMatrix(ltir->getB());
+
+  isAllocatedIn[0] = true; // C
+  isAllocatedIn[4] = true; // B
+
+  if (ltir->getDPtr() != NULL)
+  {
+    D = new SiconosMatrix(ltir->getD());
+    isAllocatedIn[1] = true;
+
+  }
+  if (ltir->getFPtr() != NULL)
+  {
+    F = new SiconosMatrix(ltir->getF());
+    isAllocatedIn[2] = true;
+
+  }
+  if (ltir->getEPtr() != NULL)
+  {
+    e = new SimpleVector(ltir->getE());
+    isAllocatedIn[3] = true;
+
+  }
+  if (ltir->getAPtr() != NULL)
+  {
+    a = new SimpleVector(ltir->getA());
+    isAllocatedIn[5] = true;
+  }
+}
+
 
 LinearTIR::~LinearTIR()
 {
@@ -156,125 +245,217 @@ LinearTIR::~LinearTIR()
 
 void LinearTIR::setC(const SiconosMatrix& newValue)
 {
-  unsigned int n = interaction->getNInteraction();
-  if (newValue.size(0) != n || newValue.size(1) != n)
-    RuntimeException::selfThrow("LinearTIR - setC: inconsistent dimensions with problem size for input matrix C");
+  unsigned int sizeY;
+  if (interaction != NULL)
+  {
+    sizeY = interaction->getNInteraction();
+    if (newValue.size(0) != sizeY)
+      RuntimeException::selfThrow("LinearTIR - setC: inconsistent dimensions with problem size for input matrix C");
+  }
 
   if (C == NULL)
   {
-    C = new SiconosMatrix(n, n);
+    C = new SiconosMatrix(newValue);
     isAllocatedIn[0] = true;
   }
-  *C = newValue;
+  else
+  {
+    if (newValue.size(1) == C->size(1))
+      *C = newValue;
+    else
+      RuntimeException::selfThrow("LinearTIR - setC: inconsistent dimensions with problem size for input matrix C");
+  }
 }
 
 void LinearTIR::setCPtr(SiconosMatrix *newPtr)
 {
   if (isAllocatedIn[0]) delete C;
+  if (interaction != NULL)
+  {
+    unsigned int sizeY = interaction->getNInteraction();
+    if (newPtr->size(0) != sizeY)
+      RuntimeException::selfThrow("LinearTIR - setCPtr: inconsistent dimensions with problem size for input matrix C");
+  }
+
   C = newPtr;
   isAllocatedIn[0] = false;
 }
 
 void LinearTIR::setD(const SiconosMatrix& newValue)
 {
-  unsigned int n = interaction->getNInteraction();
-  if (newValue.size(0) != n || newValue.size(1) != n)
-    RuntimeException::selfThrow("LinearTIR - setD: inconsistent dimensions with problem size for input matrix D");
+  unsigned int sizeY = newValue.size(0);
+  if (sizeY != newValue.size(1))
+    RuntimeException::selfThrow("LinearTIR - setD:  D is not square!!");
+
+  if (interaction != NULL)
+  {
+    unsigned int size = interaction->getNInteraction();
+    if (size != sizeY)
+      RuntimeException::selfThrow("LinearTIR - setD: inconsistent dimensions with problem size for input matrix D");
+  }
 
   if (D == NULL)
   {
-    D = new SiconosMatrix(n, n);
+    D = new SiconosMatrix(newValue);
     isAllocatedIn[1] = true;
   }
-  *D = newValue;
+  else
+  {
+    if (sizeY == D->size(0))
+      *D = newValue;
+    else
+      RuntimeException::selfThrow("LinearTIR - setD: inconsistent dimensions with problem size for input matrix D");
+  }
 }
 
 void LinearTIR::setDPtr(SiconosMatrix *newPtr)
 {
   if (isAllocatedIn[1])  delete D;
+  if (interaction != NULL)
+  {
+    unsigned int sizeY = interaction->getNInteraction();
+    if (newPtr->size(0) != sizeY || newPtr->size(1) != sizeY)
+      RuntimeException::selfThrow("LinearTIR - setDPtr: inconsistent dimensions with problem size for input matrix D");
+  }
   D = newPtr;
   isAllocatedIn[1] = false;
 }
 
 void LinearTIR::setF(const SiconosMatrix& newValue)
 {
-  unsigned int n = interaction->getNInteraction();
-  if (newValue.size(0) != n)
-    RuntimeException::selfThrow("LinearTIR - setF: inconsistent dimensions with problem size for input matrix F");
+  unsigned int sizeY = newValue.size(0);
+  if (interaction != NULL)
+  {
+    unsigned int size = interaction->getNInteraction();
+    if (size != sizeY)
+      RuntimeException::selfThrow("LinearTIR - setF: inconsistent dimensions with problem size for input matrix F");
+  }
 
-  unsigned int uSize = newValue.size(1);
   if (F == NULL)
   {
-    F = new SiconosMatrix(n, uSize);
+    F = new SiconosMatrix(newValue);
     isAllocatedIn[2] = true;
   }
-  else if (uSize != F->size(1))
-    RuntimeException::selfThrow("LinearTIR - setF: inconsistent dimensions with problem size for input matrix F");
-
-  *F = newValue;
+  else
+  {
+    if (newValue.size(1) == F->size(1))
+      *F = newValue;
+    else
+      RuntimeException::selfThrow("LinearTIR - setF: inconsistent dimensions with problem size for input matrix F");
+  }
 }
 
 void LinearTIR::setFPtr(SiconosMatrix *newPtr)
 {
   if (isAllocatedIn[2]) delete F;
+  if (interaction != NULL)
+  {
+    unsigned int sizeY = interaction->getNInteraction();
+    if (newPtr->size(0) != sizeY)
+      RuntimeException::selfThrow("LinearTIR - setFPtr: inconsistent dimensions with problem size for input matrix F");
+  }
   F = newPtr;
   isAllocatedIn[2] = false;
 }
 
 void LinearTIR::setE(const SimpleVector& newValue)
 {
-  unsigned int n = interaction->getNInteraction();
-  if (newValue.size() != n)
-    RuntimeException::selfThrow("LinearTIR - setE: inconsistent dimensions with problem size for input vector e");
+  unsigned int sizeY = newValue.size();
+  if (interaction != NULL)
+  {
+    unsigned int size = interaction->getNInteraction();
+    if (size != sizeY)
+      RuntimeException::selfThrow("LinearTIR - setE: inconsistent dimensions with problem size for input vector e");
+  }
 
   if (e == NULL)
   {
-    e = new SimpleVector(n);
+    e = new SimpleVector(newValue);
     isAllocatedIn[3] = true;
   }
-  *e = newValue;
+  else
+  {
+    if (sizeY == e->size())
+      *e = newValue;
+    else
+      RuntimeException::selfThrow("LinearTIR - setE: inconsistent dimensions with problem size for input vector e");
+  }
 }
 
 void LinearTIR::setEPtr(SimpleVector *newPtr)
 {
   if (isAllocatedIn[3]) delete e;
+  if (interaction != NULL)
+  {
+    unsigned int sizeY = interaction->getNInteraction();
+    if (newPtr->size() != sizeY)
+      RuntimeException::selfThrow("LinearTIR - setEPtr: inconsistent dimensions with problem size for input matrix E");
+  }
   e = newPtr;
   isAllocatedIn[3] = false;
 }
 
 void LinearTIR::setB(const SiconosMatrix& newValue)
 {
-  unsigned int n = interaction->getNInteraction();
-  if (newValue.size(0) != n || newValue.size(1) != n)
-    RuntimeException::selfThrow("LinearTIR - setB: inconsistent dimensions with problem size for input matrix B");
+  unsigned int sizeY = newValue.size(1);
+  unsigned int sizeX = newValue.size(0);
+
+  if (interaction != NULL)
+  {
+    unsigned int size = interaction->getNInteraction();
+    if (size != sizeY)
+      RuntimeException::selfThrow("LinearTIR - setB: inconsistent dimensions with problem size for input matrix B");
+  }
 
   if (B == NULL)
   {
-    B = new SiconosMatrix(n, n);
+    B = new SiconosMatrix(newValue);
     isAllocatedIn[4] = true;
   }
-  *B = newValue;
+  else
+  {
+    if (sizeX == B->size(0))
+      *B = newValue;
+    else
+      RuntimeException::selfThrow("LinearTIR - setB: inconsistent dimensions with problem size for input matrix B");
+  }
 }
 
 void LinearTIR::setBPtr(SiconosMatrix *newPtr)
 {
   if (isAllocatedIn[4]) delete B;
+  if (interaction != NULL)
+  {
+    unsigned int sizeY = interaction->getNInteraction();
+    if (newPtr->size(1) != sizeY)
+      RuntimeException::selfThrow("LinearTIR - setBPtr: inconsistent dimensions with problem size for input matrix B");
+  }
   B = newPtr;
   isAllocatedIn[4] = false;
 }
 
 void LinearTIR::setA(const SimpleVector& newValue)
 {
-  unsigned int n = interaction->getNInteraction();
-  if (newValue.size() != n)
-    RuntimeException::selfThrow("LinearTIR - setA: inconsistent dimensions with problem size for input vector a");
+  unsigned int sizeY = newValue.size();
+  if (interaction != NULL)
+  {
+    unsigned int size = interaction->getNInteraction();
+    if (size != sizeY)
+      RuntimeException::selfThrow("LinearTIR - setA: inconsistent dimensions with problem size for input vector a");
+  }
 
   if (a == NULL)
   {
-    a = new SimpleVector(n);
+    a = new SimpleVector(newValue);
     isAllocatedIn[5] = true;
   }
-  *a = newValue;
+  else
+  {
+    if (sizeY == a->size())
+      *a = newValue;
+    else
+      RuntimeException::selfThrow("LinearTIR - setA: inconsistent dimensions with problem size for input vector a");
+  }
 }
 
 void LinearTIR::setAPtr(SimpleVector *newPtr)
@@ -287,25 +468,72 @@ void LinearTIR::setAPtr(SimpleVector *newPtr)
 void LinearTIR::computeOutput()
 {
   IN("LinearTIR::computeOutput\n");
-  /*
-    vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-    if (vDS.size() == 2)
-    {
-    \todo
-    }
-    else if (vDS.size() == 1)
-    {
-    \todo
-    }
-    else RuntimeException::selfThrow("The interaction doesn't contain the right number of Dynamical Systems");
-  */
-  RuntimeException::selfThrow("LinearTIR::computeOutput not yet implemented");
+  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+  CompositeVector *xTmp = new CompositeVector();
+  CompositeVector *uTmp = new CompositeVector();
+  vector<DynamicalSystem*>::iterator it;
+  for (it = vDS.begin(); it != vDS.end(); it++)
+  {
+    // Put x and u of each DS into a composite
+    // Warning: use copy constructors, no link between pointers
+    if ((*it)->getType() != LDS)
+      RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented for DS type " + (*it)->getType());
+
+    xTmp->add((*it)->getX());
+    uTmp->add(*((*it)->getUPtr()));
+  }
+
+  SimpleVector *y = interaction->getYPtr();
+  SimpleVector *lambda = interaction->getLambdaPtr();
+
+  // compute y
+  if (D == NULL && F == NULL && e == NULL)
+    *y = *C * *xTmp;
+
+  else if (D != NULL && F == NULL && e == NULL)
+    *y = *C * *xTmp + *D * *lambda;
+
+  else if (D != NULL && F != NULL && e == NULL)
+    *y = *C * *xTmp + *F * *uTmp + *D * *lambda;
+
+  else if (D != NULL && F != NULL && e != NULL)
+    *y = *C * *xTmp + *F * *uTmp + *D * *lambda + *e;
+
+  else if (D != NULL  && F == NULL && e != NULL)
+    *y = *C * *xTmp + *D * *lambda + *e;
+
+  else if (D == NULL  && F != NULL && e == NULL)
+    *y = *C * *xTmp + *F * *uTmp;
+
+  else if (D == NULL  && F != NULL && e != NULL)
+    *y = *C * *xTmp + *F * *uTmp + *D * *lambda + *e;
+
+  else // if (D == NULL  && F == NULL && e!= NULL)
+    *y = *C * *xTmp + *e;
+
+  // free memory
+  delete xTmp;
+  delete uTmp;
   OUT("LinearTIR::computeOutput\n");
 }
 
 void LinearTIR::computeInput()
 {
-  RuntimeException::selfThrow("LinearTIR::computeInput not yet implemented");
+  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+  CompositeVector *r = new CompositeVector();
+  vector<DynamicalSystem*>::iterator it;
+  for (it = vDS.begin(); it != vDS.end(); it++)
+  {
+    // Put r of each DS into a composite
+    // Warning: use addPtr -> link between pointers
+    r->addPtr((*it)->getRPtr());
+  }
+  SimpleVector *lambda = interaction->getLambdaPtr();
+
+  if (a == NULL)
+    *r = *B * *lambda;
+  else
+    *r = *B * *lambda + *a;
 }
 
 void LinearTIR::display() const
@@ -352,5 +580,13 @@ LinearTIR* LinearTIR::convert(Relation *r)
   cout << "LinearTIR::convert (Relation *r)" << endl;
   LinearTIR* ltir = dynamic_cast<LinearTIR*>(r);
   return ltir;
+}
+
+// Default (private) constructor
+LinearTIR::LinearTIR():
+  Relation(), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
+{
+  relationType = LINEARTIRELATION;
+  isAllocatedIn.resize(6, false);
 }
 

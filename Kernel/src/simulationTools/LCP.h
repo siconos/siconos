@@ -26,8 +26,7 @@ class OneStepNSProblem;
  *    - \f$w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknown,
  *    - \f$A \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
  *
- * \todo Correct the computation of A with a correct concatenation process
- * \warning W is directly used in the computation of A instead of W^{-1}
+ * \todo Correct the computation of M with a correct concatenation process
  */
 class LCP : public OneStepNSProblem
 {
@@ -45,6 +44,22 @@ public:
    */
   LCP(OneStepNSProblemXML*, Strategy* = NULL);
 
+  /** \fn LCP(Strategy*, const string& solverName, const string& newSolvingMethod, const int& maxIter,
+   *          const double & Tolerance=0, const string & NormType="none",
+   *          const double & SearchDirection=0)
+   *  \brief constructor from data
+   *  \param Strategy *: the strategy that owns this problem
+   *  \param string: solver name (optional)
+   *  \param string: name of the solving method (optional but required if a solver is given)
+   *  \param int : MaxIter (optional) required if a solver is given
+   *  \param double : Tolerance (optional) -> for Gsnl, Gcp, Latin
+   *  \param string : NormType (optional) -> for Gsnl, Gcp, Latin
+   *  \param double : SearchDirection (optional) -> for Latin
+   */
+  LCP(Strategy * , const std::string& = "none", const std::string& = "none",
+      const int& = 0, const double& = 0, const std::string & = "none",
+      const double & = 0);
+
   // --- Destructror ---
   ~LCP();
 
@@ -54,7 +69,7 @@ public:
    *  \brief get the size nLcp of the LCP
    *  \return an int
    */
-  inline const int getNLcp(void) const
+  inline const unsigned int getNLcp() const
   {
     return nLcp;
   }
@@ -63,7 +78,7 @@ public:
    *  \brief set the size of the LCP
    *  \param the size
    */
-  inline void setNLcp(const int& newValue)
+  inline void setNLcp(const unsigned int& newValue)
   {
     nLcp = newValue;
   }
@@ -92,21 +107,13 @@ public:
    *  \brief set the value of w to newValue
    *  \param SimpleVector newValue
    */
-  inline void setW(const SimpleVector& newValue)
-  {
-    *w = newValue;
-  }
+  void setW(const SimpleVector&);
 
   /** \fn void setWPtr(SimpleVector* newPtr)
    *  \brief set w to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setWPtr(SimpleVector* newPtr)
-  {
-    if (isWAllocatedIn) delete w;
-    w = newPtr;
-    isWAllocatedIn = false;
-  }
+  void setWPtr(SimpleVector*);
 
   // --- Z ---
   /** \fn  const SimpleVector getZ(void) const
@@ -132,21 +139,13 @@ public:
    *  \brief set the value of z to newValue
    *  \param SimpleVector newValue
    */
-  inline void setZ(const SimpleVector& newValue)
-  {
-    *z = newValue;
-  }
+  void setZ(const SimpleVector&);
 
   /** \fn void setZPtr(SimpleVector* newPtr)
    *  \brief set z to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setZPtr(SimpleVector* newPtr)
-  {
-    if (isZAllocatedIn) delete z;
-    z = newPtr;
-    isZAllocatedIn = false;
-  }
+  void setZPtr(SimpleVector*) ;
 
   // --- M ---
 
@@ -172,21 +171,13 @@ public:
    *  \brief set the value of M to newValue
    *  \param SiconosMatrix newValue
    */
-  inline void setM(const SiconosMatrix& newValue)
-  {
-    *M = newValue;
-  }
+  void setM(const SiconosMatrix&);
 
   /** \fn void setMPtr(SiconosMatrix* newPtr)
    *  \brief set M to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setMPtr(SiconosMatrix *newPtr)
-  {
-    if (isMAllocatedIn) delete M;
-    M = newPtr;
-    isMAllocatedIn = false;
-  }
+  void setMPtr(SiconosMatrix *);
 
   // --- Q ---
   /** \fn  const SimpleVector getQ(void) const
@@ -212,21 +203,13 @@ public:
    *  \brief set the value of q to newValue
    *  \param SimpleVector newValue
    */
-  inline void setQ(const SimpleVector& newValue)
-  {
-    *q = newValue;
-  }
+  void setQ(const SimpleVector&);
 
   /** \fn void setQPtr(SimpleVector* newPtr)
    *  \brief set q to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setQPtr(SimpleVector* newPtr)
-  {
-    if (isQAllocatedIn) delete q;
-    q = newPtr;
-    isQAllocatedIn = false;
-  }
+  void setQPtr(SimpleVector*);
 
   // --- Others functions ---
 
@@ -288,7 +271,7 @@ public:
 private:
 
   /** Size of the LCP */
-  int nLcp;
+  unsigned int nLcp;
 
   /** contains the vector w of a LCP system */
   SimpleVector *w;

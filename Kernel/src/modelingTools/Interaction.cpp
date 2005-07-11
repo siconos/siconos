@@ -56,14 +56,25 @@ Interaction::Interaction(const Interaction& newI):
 
   // Relation
   string relationType = newI.getRelationPtr()->getType();
+  // -> call copy constructor
   if (relationType == LINEARTIRELATION)
-    relation = new LinearTIR();
+  {
+    relation = new LinearTIR(*(newI.getRelationPtr()));
+    relation->setInteractionPtr(this);
+  }
   else if (relationType == LAGRANGIANLINEARRELATION)
-    relation = new LagrangianLinearR();
+  {
+    LagrangianLinearR *tmp = static_cast<LagrangianLinearR*>(newI.getRelationPtr());
+    relation = new LagrangianLinearR(*tmp);
+    relation->setInteractionPtr(this);
+  }
   else if (relationType == LAGRANGIANNONLINEARRELATION)
-    relation = new LagrangianNonLinearR();
+  {
+    relation = new LagrangianNonLinearR(*(newI.getRelationPtr()));
+    relation->setInteractionPtr(this);
+  }
   else RuntimeException::selfThrow("Interaction::copy constructor, unknown relation type " + relation->getType());
-  *relation = *newI.getRelationPtr();
+
   // \remark FP: we do not link xml object in the copy
 }
 
@@ -138,19 +149,19 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
     if (relationType == LINEAR_TIME_INVARIANT_RELATION_TAG)
     {
       relation = new LinearTIR(interactionxml->getRelationXML());
-      relation->setInteraction(this);
+      relation->setInteractionPtr(this);
     }
     // Lagrangian linear relation
     else if (relationType == LAGRANGIAN_LINEAR_RELATION_TAG)
     {
       relation = new LagrangianLinearR(interactionxml->getRelationXML());
-      relation->setInteraction(this);
+      relation->setInteractionPtr(this);
     }
     // Lagrangian non-linear relation
     else if (relationType == LAGRANGIAN_NON_LINEAR_RELATION_TAG)
     {
       relation = new LagrangianNonLinearR(interactionxml->getRelationXML());
-      relation->setInteraction(this);
+      relation->setInteractionPtr(this);
     }
     else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + relation->getType());
   }
@@ -352,21 +363,6 @@ void Interaction::display() const
   else cout << "->NULL" << endl;
   cout << "===================================" << endl;
 }
-
-Relation* Interaction::createLagrangianLinearR(SiconosMatrix* H, SimpleVector* b)
-{
-  relation = new LagrangianLinearR(H, b);
-  relation->setInteraction(this);
-  return relation;
-}
-
-Relation* Interaction::createLagrangianNonLinearR(const string& computeInput, const string& computeOutput)
-{
-  relation = new LagrangianNonLinearR(computeInput, computeOutput);
-  relation->setInteraction(this);
-  return relation;
-}
-
 
 NonSmoothLaw* Interaction::createComplementarityConditionNSL()
 {

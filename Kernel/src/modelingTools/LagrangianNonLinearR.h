@@ -23,20 +23,28 @@ public:
    */
   LagrangianNonLinearR();
 
-  /** \fn void LagrangianNonLinearR(RelationXML*)
+  /** \fn void LagrangianNonLinearR(RelationXML*, Interaction* =NULL)
    *  \brief constructor from xml file
    *  \param relationXML
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  \exception RuntimeException
    */
-  LagrangianNonLinearR(RelationXML*);
+  LagrangianNonLinearR(RelationXML*, Interaction* = NULL);
 
-  /** \fn void LagrangianNonLinearR(const string& computeInput,const string& computeOutput)
+  /** \fn void LagrangianNonLinearR(const string& computeInput,const string& computeOutput, Interaction* =NULL)
    *  \brief constructor from a set of data
    *  \param string : the name of the plugin for computeInput
    *  \param string : the name of the plugin for computeOutput
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  \exception RuntimeException
    */
-  LagrangianNonLinearR(const std::string&, const std::string&);
+  LagrangianNonLinearR(const std::string&, const std::string&, Interaction* = NULL);
+
+  /** \fn LagrangianNonLinearR(const Relation&)
+   *  \brief copy constructor
+   *  \param a relation to copy
+   */
+  LagrangianNonLinearR(const Relation &);
 
   ~LagrangianNonLinearR();
 

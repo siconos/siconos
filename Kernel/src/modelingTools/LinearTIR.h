@@ -26,24 +26,21 @@ class LinearTIR : public Relation
 {
 public:
 
-  /** \fn LinearTIR();
-   *  \brief Default constructor
-   */
-  LinearTIR();
-
-  /** \fn LinearTIR(RelationXML*)
+  /** \fn LinearTIR(RelationXML*, Interaction* =NULL)
    *  \brief xml constructor
    *  \param LinearTIRXML* : the XML object corresponding
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    */
-  LinearTIR(RelationXML*);
+  LinearTIR(RelationXML*, Interaction* = NULL);
 
   /** \fn void LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB)
    *  \brief create the Relation from a set of data
    *  \param SiconosMatrix : the matrix C
    *  \param SiconosMatrix : the matrix B
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  \exception RuntimeException
       */
-  LinearTIR(const SiconosMatrix& , const SiconosMatrix&);
+  LinearTIR(const SiconosMatrix& , const SiconosMatrix&, Interaction* = NULL);
 
   /** \fn void LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
    *                     const SiconosMatrix& newF, const SimpleVector& newE,
@@ -55,12 +52,22 @@ public:
    *  \param SimpleVectorx : e
    *  \param SiconosMatrix : B
    *  \param SimpleVector : a
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  \exception RuntimeException
    */
   LinearTIR(const SiconosMatrix& , const SiconosMatrix& ,
             const SiconosMatrix& , const SimpleVector& ,
-            const SiconosMatrix& , const SimpleVector&);
+            const SiconosMatrix& , const SimpleVector& , Interaction* = NULL);
 
+  /** \fn LinearTIR(const Relation&)
+   *  \brief copy constructor
+   *  \param a relation to copy
+   */
+  LinearTIR(const Relation &);
+
+  /** \fn ~LinearTIR()
+   *  \brief destructor
+   */
   ~LinearTIR();
 
   // GETTERS/SETTERS
@@ -289,6 +296,11 @@ public:
   static LinearTIR* convert(Relation *r);
 
 private:
+  /** \fn LinearTIR();
+   *  \brief Default (private) constructor
+   */
+  LinearTIR();
+
   /** Relation is given by: \f$ y= C x + D \lambda + Fu + e \f$*/
   /** and \f$ r = B\lambda\f$ */
   /** */

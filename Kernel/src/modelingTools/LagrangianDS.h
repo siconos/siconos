@@ -718,6 +718,16 @@ public:
    */
   void setJacobianVelocityQNLInertiaPtr(SiconosMatrix *newPtr);
 
+  /** \fn const bool getIsLDSPlugin(unsigned int& n) const
+   *  \brief allows to get a bool to check if member number n is loaded from a plugin or not
+   *  to know which member corresponds to n see private member list below.
+   *  \return a bool
+   */
+  inline bool getIsLDSPlugin(const unsigned int& n) const
+  {
+    return isLDSPlugin[n];
+  };
+
   // --- PLUGINS RELATED FUNCTIONS ---
 
   /** \fn void computeMass(const double &)

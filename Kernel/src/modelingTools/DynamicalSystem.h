@@ -149,7 +149,7 @@ public:
    *  \brief allow to get n, the dimension, i.e. the size of the state x of the DynamicalSystem
    *  \return the value of n
    */
-  inline const int getN(void) const
+  inline const unsigned int getN(void) const
   {
     return n;
   }
@@ -376,6 +376,15 @@ public:
    *  \param SiconosVector * newPtr
    */
   void setXFreePtr(SiconosVector *);
+
+  /** \fn  const SimpleVector* getUPtr(void) const
+   *  \brief get the value of u -> since u is not yet implemented in DS, this is only an interface for LinearDS
+   *  \return SimpleVector
+   */
+  virtual inline SimpleVector* getUPtr() const
+  {
+    return NULL;
+  }
 
   // --- R ---
 

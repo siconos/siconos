@@ -481,22 +481,6 @@ public:
    */
   void display() const;
 
-  /** \fn Relation* createLagrangianLinearR(SiconosMatrix* H, SimpleVector* b)
-   *  \brief allows to create a LagrangianLinearR relation for this Interaction
-   *  \param SiconosMatrix* : the H matrix
-   *  \param SiconosVector* : the b vector
-   *  \return Relation* : the relation allocated
-   */
-  Relation* createLagrangianLinearR(SiconosMatrix* H = NULL, SimpleVector* b = NULL);
-
-  /** \fn Relation* createLagrangianNonLinearR()
-   *  \brief allows to create a LagrangianNonLinearR relation for this Interaction
-   *  \param string : the name of the computeInput plugin
-   *  \param string : the name of the computeOutput plugin
-   *  \return Relation* : the relation allocated
-   */
-  Relation* createLagrangianNonLinearR(const std::string&, const std::string&);
-
   /** \fn NonSmoothLaw* createComplementarityConditionNSL()
    *  \brief allows to create a ComplementarityConditionNSL non-smooth law for this Interaction
    *  \return NonSmoothLaw* : the non-smooth law allocated

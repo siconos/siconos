@@ -19,23 +19,35 @@ class LagrangianLinearR : public Relation
 {
 public:
 
-  /** \fn LagrangianLinearR()
-   *  \brief Default constructor
-   */
-  LagrangianLinearR();
-
-  /** \fn LagrangianLinearR(RelationXML*)
+  /** \fn LagrangianLinearR(RelationXML*, Interaction* =NULL)
    *  \brief constructor with XML object of the parent class Relation
    *  \param RelationXML* : the XML object corresponding
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    */
-  LagrangianLinearR(RelationXML*);
+  LagrangianLinearR(RelationXML*, Interaction* = NULL);
 
-  /** \fn LagrangianLinearR(SiconosMatrix*, SiconosVector*)
+  /** \fn LagrangianLinearR(const SiconosMatrix& , const SimpleVector& , Interaction* = NULL);
    *  \brief constructor with in parameters, the data needed to build this Relation
    *  \param a SiconosMatrix to set H
    *  \param a SiconosVector to set b
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    */
-  LagrangianLinearR(SiconosMatrix*, SimpleVector*);
+  LagrangianLinearR(const SiconosMatrix&, const SimpleVector&, Interaction* = NULL);
+
+
+  /** \fn LagrangianLinearR(const SiconosMatrix& , Interaction* = NULL);
+   *  \brief constructor with in parameters, the data needed to build this Relation
+   *  \param a SiconosMatrix to set H
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
+   */
+  LagrangianLinearR(const SiconosMatrix&, Interaction* = NULL);
+
+  /** \fn LagrangianLinearR(const Relation&)
+   *  \brief copy constructor
+   *  \param a relation to copy
+   */
+  LagrangianLinearR(const Relation &);
+
   ~LagrangianLinearR();
 
   // --- GETTERS/SETTERS
@@ -167,6 +179,12 @@ public:
   static LagrangianLinearR* convert(Relation *r);
 
 private:
+
+  /** \fn LagrangianLinearR()
+   *  \brief Default constructor
+   */
+  LagrangianLinearR();
+
   /** a specific matrix to the LagrangianLinearR */
   SiconosMatrix* H;
 

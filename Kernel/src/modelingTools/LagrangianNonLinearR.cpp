@@ -11,15 +11,15 @@ LagrangianNonLinearR::LagrangianNonLinearR(): Relation()
 }
 
 // xml constructor
-LagrangianNonLinearR::LagrangianNonLinearR(RelationXML* relxml):
-  Relation(relxml), computeJacobianPtr(NULL), computeHPtr(NULL)
+LagrangianNonLinearR::LagrangianNonLinearR(RelationXML* relxml, Interaction* inter):
+  Relation(relxml, inter), computeJacobianPtr(NULL), computeHPtr(NULL)
 {
   relationType = LAGRANGIANNONLINEARRELATION;
 }
 
 // constructor from a set of data
-LagrangianNonLinearR::LagrangianNonLinearR(const string& computeInput, const string& computeOutput):
-  Relation(), computeJacobianPtr(NULL), computeHPtr(NULL)
+LagrangianNonLinearR::LagrangianNonLinearR(const string& computeInput, const string& computeOutput, Interaction* inter):
+  Relation(inter), computeJacobianPtr(NULL), computeHPtr(NULL)
 {
   relationType = LAGRANGIANNONLINEARRELATION;
   // computeInput
@@ -27,6 +27,19 @@ LagrangianNonLinearR::LagrangianNonLinearR(const string& computeInput, const str
   // computeOutput
   setComputeOutputFunction(cShared.getPluginName(computeOutput), cShared.getPluginFunctionName(computeOutput));
 }
+
+// copy constructor
+LagrangianNonLinearR::LagrangianNonLinearR(const Relation & newLNLR):
+  Relation(newLNLR)
+{
+  if (relationType !=  LAGRANGIANNONLINEARRELATION)
+    RuntimeException::selfThrow("LagrangianNonLinearR:: copy constructor, inconsistent relation types for copy");
+
+  //const LagrangianNonLinearR * lnlr = static_cast<const LagrangianNonLinearR*>(&newLNLR);
+  // \todo
+
+}
+
 
 LagrangianNonLinearR::~LagrangianNonLinearR()
 {}

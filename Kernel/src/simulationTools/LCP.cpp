@@ -12,7 +12,6 @@ using namespace std;
 // Default constructor
 LCP::LCP(): OneStepNSProblem(), nLcp(0), w(NULL), z(NULL), M(NULL), q(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
-
 {
   nspbType = LCP_OSNSP;
 }
@@ -20,27 +19,42 @@ LCP::LCP(): OneStepNSProblem(), nLcp(0), w(NULL), z(NULL), M(NULL), q(NULL),
 // xml constructor
 LCP::LCP(OneStepNSProblemXML* osNsPbXml, Strategy* newStrat):
   OneStepNSProblem(osNsPbXml, newStrat), nLcp(0), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(true), isZAllocatedIn(true), isMAllocatedIn(true), isQAllocatedIn(true)
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
 {
   nspbType = LCP_OSNSP;
   if (osNsPbXml != NULL)
   {
     LCPXML * xmllcp = (static_cast<LCPXML*>(osNsPbXml));
     // no getter-xml for nlcp ...
-    if (xmllcp->hasQ())
-      nLcp = (xmllcp->getQ()).size();
-    else
-      nLcp = n; // size of the OneStepNSProblem
-    w = new SimpleVector(nLcp);
-    z = new SimpleVector(nLcp);
-    M = new SiconosMatrix(nLcp, nLcp);
-    q = new SimpleVector(nLcp);
     if (xmllcp->hasM())
+    {
+      nLcp = (xmllcp->getM()).size(0);
+      M = new SiconosMatrix(nLcp, nLcp);
+      isMAllocatedIn = true;
       *M = xmllcp->getM();
+    }
     if (xmllcp->hasQ())
+    {
+      nLcp = (xmllcp->getQ()).size(0);
+      q = new SimpleVector(nLcp);
+      isQAllocatedIn = true;
       *q = xmllcp->getQ();
+    }
+    if (xmllcp->hasQ() && xmllcp->hasM() && ((xmllcp->getM()).size(0) != (xmllcp->getQ()).size(0)))
+      RuntimeException::selfThrow("LCP: xml constructor, inconsistent sizes between given q and M");
   }
   else RuntimeException::selfThrow("LCP: xml constructor, xml file=NULL");
+}
+
+// Constructor from a set of data
+LCP::LCP(Strategy* newStrat, const string& newSolver, const string& newSolvingMethod,
+         const int& MaxIter, const double & Tolerance, const string & NormType,
+         const double & SearchDirection):
+  OneStepNSProblem(newStrat, newSolver, newSolvingMethod, MaxIter, Tolerance, NormType, SearchDirection),
+  nLcp(0), w(NULL), z(NULL), M(NULL), q(NULL),
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
+{
+  nspbType = LCP_OSNSP;
 }
 
 // destructor
@@ -88,17 +102,117 @@ void LCP::formalize(const double& time)
   OUT("LCP::formalize(void)\n");
 }
 
+// Setters
+
+void LCP::setW(const SimpleVector& newValue)
+{
+  if (nLcp != newValue.size())
+    RuntimeException::selfThrow("LCP: setW, inconsistent size between given w size and problem size. You should set nLcp before");
+
+  if (!isWAllocatedIn)
+  {
+    w = new SimpleVector(nLcp);
+    isWAllocatedIn = true;
+  }
+
+  *w = newValue;
+}
+
+void LCP::setWPtr(SimpleVector* newPtr)
+{
+  if (isWAllocatedIn) delete w;
+  w = newPtr;
+  isWAllocatedIn = false;
+}
+
+
+void LCP::setZ(const SimpleVector& newValue)
+{
+  if (nLcp != newValue.size())
+    RuntimeException::selfThrow("LCP: setZ, inconsistent size between given z size and problem size. You should set nLcp before");
+
+  if (!isZAllocatedIn)
+  {
+    z = new SimpleVector(nLcp);
+    isZAllocatedIn = true;
+  }
+
+  *z = newValue;
+}
+
+void LCP::setZPtr(SimpleVector* newPtr)
+{
+  if (isZAllocatedIn) delete z;
+  z = newPtr;
+  isZAllocatedIn = false;
+}
+
+void LCP::setM(const SiconosMatrix& newValue)
+{
+  if (nLcp != newValue.size(0) || nLcp != newValue.size(1))
+    RuntimeException::selfThrow("LCP: setM, inconsistent size between given M size and problem size. You should set nLcp before");
+
+  if (!isMAllocatedIn)
+  {
+    M = new SiconosMatrix(nLcp, nLcp);
+    isMAllocatedIn = true;
+  }
+
+  *M = newValue;
+}
+
+void LCP::setMPtr(SiconosMatrix* newPtr)
+{
+  if (isMAllocatedIn) delete M;
+  M = newPtr;
+  isMAllocatedIn = false;
+}
+
+
+void LCP::setQ(const SimpleVector& newValue)
+{
+  if (nLcp != newValue.size())
+    RuntimeException::selfThrow("LCP: setQ, inconsistent size between given q size and problem size. You should set nLcp before");
+
+  if (!isQAllocatedIn)
+  {
+    q = new SimpleVector(nLcp);
+    isQAllocatedIn = true;
+  }
+
+  *q = newValue;
+}
+
+void LCP::setQPtr(SimpleVector* newPtr)
+{
+  if (isQAllocatedIn) delete q;
+  q = newPtr;
+  isQAllocatedIn = false;
+}
 
 void LCP::compute()
 {
   IN("LCP::compute(void)\n");
   int res;
 
+  // --- Check that nLcp corresponds to the number of active interactions ---
+  if (nLcp != connectedInteractionMap.size())
+    RuntimeException::selfThrow("LCP: compute(), LCP problem size differs from active interaction number");
+
+  if (!isWAllocatedIn)
+  {
+    w = new SimpleVector(nLcp);
+    isWAllocatedIn = true;
+  }
+  if (!isZAllocatedIn)
+  {
+    z = new SimpleVector(nLcp);
+    isZAllocatedIn = true ;
+  }
+
   // Call Numerics solver
-  if (nLcp == 0)
-  {}
-  else //if( nLcp == 1 )
-    res = solve_lcp(M->getArray(), q->getArray(), &nLcp, &solvingMethod, z->getArray(), w->getArray());
+  if (nLcp != 0)
+    res = solve_lcp(M->getArray(), q->getArray(), (int*)&nLcp, &solvingMethod, z->getArray(), w->getArray());
 
   // Update the relation
   SimpleVector *yDot, *lambda;
@@ -110,15 +224,17 @@ void LCP::compute()
   if (nLcp == 0) lambda->zero();
   else //if (nLcp == 1)
   {
-    for (unsigned int i = 0; i < interactionVector.size(); i++)
+    vector<Interaction*>::iterator it;
+    for (it = interactionVector.begin(); it != interactionVector.end(); it++)
     {
-      lambda = interactionVector[i]->getLambdaPtr();
+      lambda = (*it) ->getLambdaPtr();
       lambda->zero();
 
-      if (connectedInteractionMap.find(interactionVector[i]) != connectedInteractionMap.end())
+      // if the current interaction is in the connected interaction map, set yDot and lambda to w and z
+      if (connectedInteractionMap.find(*it) != connectedInteractionMap.end())
       {
-        yDot = interactionVector[i]->getYDotPtr();
-        lambda = interactionVector[i]->getLambdaPtr();
+        yDot = (*it)->getYDotPtr();
+        lambda = (*it)->getLambdaPtr();
 
         (*yDot)(0) = (*w)(activeInteraction);
         (*lambda)(0) = (*z)(activeInteraction);
@@ -169,6 +285,8 @@ void LCP::computeM()
     v.clear();
 
     // --- Check if W matrix of Moreau's integrator is already inversed ---
+    // At the time, W is inversed in initialize of Moreau.cpp
+    // -> \todo improve this step using forward-backward to compute inverse of Mlcp blocks rather than W
     vDS = CurrentInteraction ->getDynamicalSystems();
     unsigned int sizeDS = vDS.size();
 
@@ -181,7 +299,7 @@ void LCP::computeM()
       {
         MoreauV.push_back(static_cast<Moreau*>(OsiV[i]));
         v.push_back(MoreauV[i]->getWPtr());
-        if (!v[i]->isInversed()) v[i]->PLUInverseInPlace();
+        // if( !v[i]->isInversed() ) v[i]->PLUInverseInPlace();
       }
       else
         RuntimeException::selfThrow("LCP::computeM not yet implemented for Integrator of type " + OsiV[i]->getType());
@@ -207,9 +325,7 @@ void LCP::computeM()
     }
     else if (R->getType() == LINEARTIRELATION)
     {
-      LinearTIR *LTIR = static_cast<LinearTIR*>(R);
-
-
+      //LinearTIR *LTIR = static_cast<LinearTIR*>(R);
     }
     else
       RuntimeException::selfThrow("LCP::computeM [level1] not yet implemented for relation of type " + R->getType());
@@ -271,11 +387,13 @@ void LCP::computeQ(const double& time)
 {
   IN("LCP::computeQ(void)\n");
   Relation *R;
-  LagrangianLinearR *LLR;
   NonSmoothLaw *nslaw;
-  NewtonImpactLawNSL * newton;
 
   SimpleVector *qLCPtmp = new SimpleVector(nLcp);
+
+  // --- Count the number of active interactions ---
+  // (Although it is supposed to be already done in computeM() -> only to be cautious)
+  nLcp = connectedInteractionMap.size();
 
   int qPos = 0;
   if (isQAllocatedIn) delete q;
@@ -294,10 +412,10 @@ void LCP::computeQ(const double& time)
     nslaw = CurrentInteraction->getNonSmoothLawPtr();
     if (R->getType() == LAGRANGIANLINEARRELATION)
     {
-      LLR = static_cast<LagrangianLinearR*>(R);
+      LagrangianLinearR *LLR = static_cast<LagrangianLinearR*>(R);
       if (nslaw->getType() == NEWTONIMPACTLAWNSLAW)
       {
-        newton = static_cast<NewtonImpactLawNSL*>(nslaw);
+        NewtonImpactLawNSL * newton = static_cast<NewtonImpactLawNSL*>(nslaw);
         double e = newton->getE();
         LLR->computeFreeOutput(time);
         *qLCPtmp = CurrentInteraction -> getYDot();

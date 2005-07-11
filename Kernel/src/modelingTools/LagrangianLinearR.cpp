@@ -4,39 +4,96 @@
 
 using namespace std;
 
-LagrangianLinearR::LagrangianLinearR():
-  Relation(), H(NULL), b(NULL), isHAllocatedIn(false), isBAllocatedIn(false)
-{
-  relationType = LAGRANGIANLINEARRELATION;
-}
-
-LagrangianLinearR::LagrangianLinearR(RelationXML* relxml):
-  Relation(relxml), H(NULL), b(NULL),
+// Xml constructor
+LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
+  Relation(relxml, inter), H(NULL), b(NULL),
   isHAllocatedIn(true), isBAllocatedIn(true)
 {
   relationType = LAGRANGIANLINEARRELATION;
   if (relxml != NULL)
   {
-    // nothing about sizeH or sizeB in xml ... to review
-    int row = ((static_cast<LagrangianLinearRXML*>(relationxml))->getH()).size(0);
-    int col = ((static_cast<LagrangianLinearRXML*>(relationxml))->getH()).size(1);
+    LagrangianLinearRXML* LLRxml = (static_cast<LagrangianLinearRXML*>(relationxml));
+    unsigned int row = LLRxml->getH().size(0);
+    unsigned int col = LLRxml->getH().size(1);
+
+    if (inter != NULL)
+    {
+      // get size of vector y
+      unsigned int size = interaction->getNInteraction();
+      if (row != size)
+        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size with y vector for input vector or matrix");
+    }
     H = new SiconosMatrix(row, col);
-    *H = (static_cast<LagrangianLinearRXML*>(relationxml))->getH();
-    int size = ((static_cast<LagrangianLinearRXML*>(relationxml))->getB()).size();
-    b = new SimpleVector(size);
-    *b = (static_cast<LagrangianLinearRXML*>(relationxml))->getB();
+    *H = LLRxml->getH();
+    if (LLRxml->hasB())
+    {
+      unsigned int rowB = LLRxml->getB().size();
+      if (row != rowB)
+        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between b and H");
+      b = new SimpleVector(rowB);
+      *b = LLRxml->getB();
+    }
   }
   else RuntimeException::selfThrow("LagrangianLinearR::xml constructor xml file=NULL");
 }
 
-LagrangianLinearR::LagrangianLinearR(SiconosMatrix* newH, SimpleVector* newB):
-  Relation(), H(NULL), b(NULL), isHAllocatedIn(true), isBAllocatedIn(true)
+// Constructor from data: H, b and interaction (optional)
+LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVector& newB, Interaction* inter):
+  Relation(inter), H(NULL), b(NULL), isHAllocatedIn(true), isBAllocatedIn(true)
 {
   relationType = LAGRANGIANLINEARRELATION;
-  H = new SiconosMatrix(newH->size(0), newH->size(1));
-  *H = *newH;
-  b = new SimpleVector(newB->size());
-  *b = *newB;
+  unsigned int size;
+  if (inter != NULL)
+  {
+    // get size of vector y
+    size = interaction->getNInteraction();
+    if (newH.size(0) != size || newB.size(0) != size)
+      RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size with y vector for input vector or matrix");
+  }
+  else
+    size = newH.size(0);
+
+  H = new SiconosMatrix(size, newH.size(1));
+  *H = newH;
+  b = new SimpleVector(size);
+  *b = newB;
+}
+
+// Constructor from data: H and interaction (optional)
+LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, Interaction* inter):
+  Relation(inter), H(NULL), b(NULL), isHAllocatedIn(true), isBAllocatedIn(true)
+{
+  relationType = LAGRANGIANLINEARRELATION;
+  unsigned int size;
+  if (inter != NULL)
+  {
+    // get size of vector y
+    size = interaction->getNInteraction();
+    if (newH.size(0) != size)
+      RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size with y vector for input vector or matrix");
+  }
+  else
+    size = newH.size(0);
+
+  H = new SiconosMatrix(size, newH.size(1));
+  *H = newH;
+}
+
+// copy constructor
+LagrangianLinearR::LagrangianLinearR(const Relation & newLLR):
+  Relation(newLLR), H(NULL), b(NULL), isHAllocatedIn(true), isBAllocatedIn(true)
+{
+  if (relationType !=  LAGRANGIANLINEARRELATION)
+    RuntimeException::selfThrow("LagrangianLinearR:: copy constructor, inconsistent relation types for copy");
+
+  const LagrangianLinearR *  llr = static_cast<const LagrangianLinearR*>(&newLLR);
+  H = new SiconosMatrix(llr->getH());
+  isHAllocatedIn = true;
+  if (llr->getBPtr() != NULL)
+  {
+    b = new SimpleVector(llr->getB());
+    isBAllocatedIn = true;
+  }
 }
 
 LagrangianLinearR::~LagrangianLinearR()
@@ -92,7 +149,11 @@ void LagrangianLinearR::computeOutput(const double& time)
   SimpleVector *y = interaction->getYPtr();
   SimpleVector *yDot = interaction->getYDotPtr();
   // compute y and yDot
-  *y = (*H * *qTmp) + *b;
+  if (b != NULL)
+    *y = (*H * *qTmp) + *b;
+  else
+    *y = (*H * *qTmp) ;
+
   *yDot = (*H * *velocityTmp);
 
   // free memory
@@ -127,7 +188,11 @@ void LagrangianLinearR::computeFreeOutput(const double& time)
   SimpleVector *yDot = interaction->getYDotPtr();
 
   // compute y and yDot
-  *y = (*H * *qFreeTmp) + *b;
+  if (b != NULL)
+    *y = (*H * *qFreeTmp) + *b;
+  else
+    *y = (*H * *qFreeTmp);
+
   *yDot = (*H * *velocityFreeTmp);
 
   // free memory
@@ -152,14 +217,14 @@ void LagrangianLinearR::computeInput(const double& time)
     if (vDS[i]->getType() != LTIDS && vDS[i]->getType() != LNLDS)
       RuntimeException::selfThrow("LagrangianLinearR::computeInput not yet implemented for this type of dynamical system " + vDS[i]->getType());
     // Put p each DS into a composite
-    // Warning: use copy constructors, no link between pointers
+    // Warning: use addPtr -> link between pointers
     p->addPtr(vLDS[i]->getPPtr());
   }
   SimpleVector *lambda = interaction->getLambdaPtr();
-  if (size == 1)
-    *p = matTransVecMult(*H, *lambda);
-  else
-    *p += matTransVecMult(*H, *lambda);
+  // if(size==1)
+  //  *p = matTransVecMult(*H, *lambda);
+  //else
+  *p += matTransVecMult(*H, *lambda);
   OUT("LagrangianLinearR::computeInput\n");
 
 }
@@ -195,4 +260,11 @@ LagrangianLinearR* LagrangianLinearR::convert(Relation *r)
   cout << "LagrangianLinearR::convert (Relation *r)" << endl;
   LagrangianLinearR* llr = dynamic_cast<LagrangianLinearR*>(r);
   return llr;
+}
+
+// Default (private) constructor
+LagrangianLinearR::LagrangianLinearR():
+  Relation(), H(NULL), b(NULL), isHAllocatedIn(false), isBAllocatedIn(false)
+{
+  relationType = LAGRANGIANLINEARRELATION;
 }
