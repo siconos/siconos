@@ -76,29 +76,81 @@ public:
   /** \fn LagrangianLinearTIDS(DSXML * dsXML)
    *  \brief constructor from an xml file
    *  \param DSXML * : the XML object for this DynamicalSystem
+   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
    *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(DSXML * dsXML);
+  LagrangianLinearTIDS(DSXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
   /** \fn LagrangianLinearTIDS(int number, int ndof,
-      SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass,
-      string fExt,SiconosMatrix* K, SiconosMatrix* C)
-      *  \brief constructor from a minimum set of data
-      *  \param int : the number for this DynamicalSystem
-      *  \param int : dimension of this DynamicalSystem
-      *  \param SimpleVector: initial coordinates of this DynamicalSystem
-      *  \param SimpleVector : initial velocity of this DynamicalSystem
-      *  \param SiconosMatrix : mass of this DynamicalSystem
-      *  \param string : fExt plugin name and location
-      *  \param SiconosMatrix : matrix K of this DynamicalSystem
-      *  \param SiconosMatrix : matrix C of this DynamicalSystem
-      *  \exception RuntimeException
-      */
+   *   SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass,
+   *   SiconosMatrix* K, SiconosMatrix* C)
+   *  \brief constructor from a set of data
+   *  \param int : the number for this DynamicalSystem
+   *  \param int : dimension of this DynamicalSystem
+   *  \param SimpleVector: initial coordinates of this DynamicalSystem
+   *  \param SimpleVector : initial velocity of this DynamicalSystem
+   *  \param SiconosMatrix : mass of this DynamicalSystem
+   *  \param SiconosMatrix : matrix K of this DynamicalSystem
+   *  \param SiconosMatrix : matrix C of this DynamicalSystem
+   *  \exception RuntimeException
+   */
   LagrangianLinearTIDS(const int&, const unsigned int& ndof,
                        const SimpleVector&, const SimpleVector&,
                        const SiconosMatrix&,
-                       const std::string&  fExt,
                        const SiconosMatrix&, const SiconosMatrix&);
+
+  /** \fn LagrangianLinearTIDS(int number, int ndof,
+   *  SiconosVector* q0, SiconosVector* velocity0,
+   *   string massName, SiconosMatrix* K, SiconosMatrix* C)
+   *  \brief constructor from a set of data
+   *  \param int : the number for this DynamicalSystem
+   *  \param int : dimension of this DynamicalSystem
+   *  \param SimpleVector: initial coordinates of this DynamicalSystem
+   *  \param SimpleVector : initial velocity of this DynamicalSystem
+   *  \param string : name of the mass plugin
+   *  \param SiconosMatrix : matrix K of this DynamicalSystem
+   *  \param SiconosMatrix : matrix C of this DynamicalSystem
+   *  \exception RuntimeException
+   */
+  LagrangianLinearTIDS(const int&, const unsigned int& ndof,
+                       const SimpleVector&, const SimpleVector&,
+                       const std::string&,  const SiconosMatrix&,
+                       const SiconosMatrix&);
+
+  /** \fn LagrangianLinearTIDS(int number, int ndof,
+   *   SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass)
+   *  \brief constructor from a set of data
+   *  \param int : the number for this DynamicalSystem
+   *  \param int : dimension of this DynamicalSystem
+   *  \param SimpleVector: initial coordinates of this DynamicalSystem
+   *  \param SimpleVector : initial velocity of this DynamicalSystem
+   *  \param SiconosMatrix : mass of this DynamicalSystem
+   *  \exception RuntimeException
+   */
+  LagrangianLinearTIDS(const int&, const unsigned int& ndof,
+                       const SimpleVector&, const SimpleVector&,
+                       const SiconosMatrix&);
+
+  /** \fn LagrangianLinearTIDS(int number, int ndof,
+   *  SiconosVector* q0, SiconosVector* velocity0,
+   *   string massName, SiconosMatrix* K, SiconosMatrix* C)
+   *  \brief constructor from a set of data
+   *  \param int : the number for this DynamicalSystem
+   *  \param int : dimension of this DynamicalSystem
+   *  \param SimpleVector: initial coordinates of this DynamicalSystem
+   *  \param SimpleVector : initial velocity of this DynamicalSystem
+   *  \param string : name of the mass plugin
+   *  \exception RuntimeException
+   */
+  LagrangianLinearTIDS(const int&, const unsigned int& ndof,
+                       const SimpleVector&, const SimpleVector&,
+                       const std::string&);
+
+  /** \fn LagrangianLinearTIDS(const DynamicalSystem &)
+   *  \brief copy constructor
+   *  \param a Dynamical system to copy
+   */
+  LagrangianLinearTIDS(const DynamicalSystem &);
 
   // destructor
   ~LagrangianLinearTIDS();
@@ -194,6 +246,10 @@ public:
 
   static LagrangianLinearTIDS* convert(DynamicalSystem* ds);
 
+  /** \fn double dsConvergenceIndicator()
+   *  \brief overload LagrangianDS corresponding function
+   * \return a double, always zero.
+   */
   double dsConvergenceIndicator()
   {
     return 0.0;

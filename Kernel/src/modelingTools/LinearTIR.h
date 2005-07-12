@@ -5,7 +5,7 @@
 #include "LinearTIRXML.h"
 
 /** \class LinearTIR
- *  \brief Linear Time Invariant Relation
+ *  \brief Linear Time Invariant Relation, derived from class Relation
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date Apr 27, 2004
@@ -266,17 +266,18 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** \fn void computeOutput()
+  /** \fn void computeOutput(const double& time)
    *  \brief computes y
+   *  \param double : current time
    */
-  void computeOutput();
+  void computeOutput(const double&);
 
   /** \fn void computeInput(double time);
    *  \brief default function to compute lambda
    *  \param double : current time
    *  \exception RuntimeException
    */
-  void computeInput();
+  void computeInput(const double&);
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the Relation to the XML tree

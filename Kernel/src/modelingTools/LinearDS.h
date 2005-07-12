@@ -54,9 +54,10 @@ public:
   /** \fn LinearDS(DSXML * nsdsXML)
    *  \brief xml constructor
    *  \param DSXML * : the XML object for this DynamicalSystem
+   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
    *  \exception RuntimeException
    */
-  LinearDS(DSXML * dsXML);
+  LinearDS(DSXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
   /** \fn LinearDS(int number, int n, SiconosVector* x0, NSDS * nsds)
    *  \brief constructor from a set of data
@@ -70,7 +71,8 @@ public:
   LinearDS(const int&, const unsigned int&, const SiconosVector&,
            const std::string& = "BasicPlugin.so", const std::string& = "computeA");
 
-  /** \fn LinearDS()
+  /** \fn LinearDS( const int& newNumber, const SiconosVector& newX0,
+   *                const SiconosMatrix& newA)
    *  \brief constructor from a set of data
    *  \param int : reference number of the DynamicalSystem
    *  \param SiconosVector : the initial state of this DynamicalSystem
@@ -79,6 +81,12 @@ public:
    */
   LinearDS(const int& newNumber, const SiconosVector& newX0,
            const SiconosMatrix& newA);
+
+  /** \fn LinearDS(const DynamicalSystem &)
+   *  \brief copy constructor
+   *  \param a Dynamical system to copy
+   */
+  LinearDS(const DynamicalSystem &);
 
   /** \fn ~LinearDS()
    *  \brief destructor */
@@ -234,6 +242,51 @@ public:
   void setEPtr(SiconosMatrix *);
 
   // --- plugins related functions
+
+  /** \fn  std::vector<bool> getIsPlugin() const
+   *  \brief get boolean vector that checks if members are loaded from plugin or not
+   *  \return a vector of bool
+   */
+  inline const std::vector<bool> getIsPlugin() const
+  {
+    return isPlugin;
+  }
+
+  /** \fn  std::string getAFunctionName() const
+  *  \brief get name of function that computes A (if A from plugin)
+  *  \return a string
+  */
+  inline const std::string getAFunctionName() const
+  {
+    return AFunctionName;
+  }
+
+  /** \fn  std::string getBFunctionName() const
+  *  \brief get name of function that computes b (if b from plugin)
+  *  \return a string
+  */
+  inline const std::string getBFunctionName() const
+  {
+    return bFunctionName;
+  }
+
+  /** \fn  std::string getUFunctionName() const
+  *  \brief get name of function that computes u (if u from plugin)
+  *  \return a string
+  */
+  inline const std::string getUFunctionName() const
+  {
+    return uFunctionName;
+  }
+
+  /** \fn  std::string getEFunctionName() const
+  *  \brief get name of function that computes E (if E from plugin)
+  *  \return a string
+  */
+  inline const std::string getEFunctionName() const
+  {
+    return EFunctionName;
+  }
 
   /** \fn void setComputeAFunction(const string& libPath,const string& functionName)
    *  \brief set a specified function to compute the matrix A

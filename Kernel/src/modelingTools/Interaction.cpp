@@ -251,19 +251,20 @@ void Interaction::setDynamicalSystems(const std::vector<DynamicalSystem*>& newVe
 
 DynamicalSystem* Interaction::getDynamicalSystemPtr(const int& number)
 {
-  DynamicalSystem * tmpDS;
-  tmpDS = NULL;
+  DynamicalSystem * tmpDS = NULL;
   vector<DynamicalSystem*>::iterator it;
   for (it = vectorDS.begin(); it != vectorDS.end(); ++it)
     if ((*it)->getNumber() == number) tmpDS = (*it);
+
+  if (tmpDS == NULL)
+    RuntimeException::selfThrow("Interaction::getDynamicalSystemPtr(number), there is no DS which number is" + number);
+
   return tmpDS;
 }
 
 DynamicalSystem Interaction::getDynamicalSystem(const int& number)
 {
-  if (number != 0 && number != 1)
-    RuntimeException::selfThrow("Interaction: getDynamicalSystem, unknown DS number");
-  return *vectorDS[number];
+  return *getDynamicalSystemPtr(number);
 }
 
 void Interaction::setRelationPtr(Relation* newRelation)

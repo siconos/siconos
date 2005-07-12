@@ -67,12 +67,13 @@ public:
 
   // --- Constructors ---
 
-  /** \fn DynamicalSystem(DSXML * nsdsXML)
+  /** \fn DynamicalSystem(DSXML * nsdsXML, NonSmoothDynamicalSystem* =NULL)
    *  \brief xml constructor
    *  \param DSXML* : the XML object for this DynamicalSystem
+   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
    *  \exception RuntimeException
    */
-  DynamicalSystem(DSXML * dsXML);
+  DynamicalSystem(DSXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
   /** \fn DynamicalSystem(DSXML * nsdsXML, const unsigned int& number, const unsigned int& n,
       const SiconosVector& x0, const string& vectorFieldPlugin)
@@ -85,6 +86,12 @@ public:
       */
   DynamicalSystem(const int&, const unsigned int&,
                   const SiconosVector&, const std::string& = "BasicPlugin:vectorField");
+
+  /** \fn DynamicalSystem(const DynamicalSystem &)
+   *  \brief copy constructor
+   *  \param a Dynamical system to copy
+   */
+  DynamicalSystem(const DynamicalSystem &);
 
   // --- Destructor ---
   virtual ~DynamicalSystem();
@@ -379,7 +386,7 @@ public:
 
   /** \fn  const SimpleVector* getUPtr(void) const
    *  \brief get the value of u -> since u is not yet implemented in DS, this is only an interface for LinearDS
-   *  \return SimpleVector
+   *  \return pointer on SimpleVector
    */
   virtual inline SimpleVector* getUPtr() const
   {
@@ -510,6 +517,24 @@ public:
    *  \param SiconosMatrix * newPtr
    */
   void setJacobianXPtr(SiconosMatrix *newPtr);
+
+  /** \fn  std::string getVectorFieldFunctionName() const
+   *  \brief get name of function that computes vectorField (if vectorField from plugin)
+   *  \return a string
+   */
+  inline const std::string getVectorFieldFunctionName() const
+  {
+    return vectorFieldFunctionName;
+  }
+
+  /** \fn  std::string getComputeJacobianXFunctionName() const
+   *  \brief get name of function that computes computeJacobianX (if computeJacobianX from plugin)
+   *  \return a string
+   */
+  inline const std::string getComputeJacobianXFunctionName() const
+  {
+    return computeJacobianXFunctionName;
+  }
 
   // --- Boundary Conditions ---
 
@@ -832,14 +857,14 @@ protected:
   /** A container of vectors to save temporary values (for Newton convergence computation for example)*/
   std::map<const std::string, SimpleVector*> tmpWorkVector;
 
+  /** Gradient of the vectorfield \f$ f(x,t) \f$ with respect to \f$ x\f$*/
+  SiconosMatrix *jacobianX;
+
   /* the name of the plugin used to compute the vectorField */
   std::string  vectorFieldFunctionName;
 
   /* the name of the plugin used to compute the JacobianX */
   std::string  computeJacobianXFunctionName;
-
-  /** Gradient of the vectorfield \f$ f(x,t) \f$ with respect to \f$ x\f$*/
-  SiconosMatrix *jacobianX;
 
   /** boundary conditions defined if the DynamicalSystem has some */
   BoundaryCondition *BC;

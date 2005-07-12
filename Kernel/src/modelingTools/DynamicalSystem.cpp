@@ -13,9 +13,9 @@ using namespace std;
 // --- Constructors ---
 
 
-// From XML file
-DynamicalSystem::DynamicalSystem(DSXML * dsXML):
-  DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
+// From XML file (warning: newNsds is optional)
+DynamicalSystem::DynamicalSystem(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
+  DSType(NLDS), nsds(newNsds), number(0), id("none"), n(0), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
   stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(dsXML), vectorFieldPtr(NULL),
   isX0AllocatedIn(true), isXAllocatedIn(true), isXMemoryAllocatedIn(false), isXDotAllocatedIn(true), isXDotMemoryAllocatedIn(false),
   isXFreeAllocatedIn(true), isRAllocatedIn(true), isRMemoryAllocatedIn(false), isJacobianXAllocatedIn(true), isBCAllocatedIn(false)
@@ -91,11 +91,64 @@ DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN,
   xFree = new SimpleVector(n);
   r = new SimpleVector(n);
   jacobianX = new SiconosMatrix(n, n);
+  if (n != newX0.size())
+    RuntimeException::selfThrow("DynamicalSystem::constructor from data, inconsistent sizes between problem size and x0.");
   *(x0) = newX0;
   setVectorFieldFunction(cShared.getPluginName(vectorFieldPlugin), cShared.getPluginFunctionName(vectorFieldPlugin));
   setComputeJacobianXFunction("BasicPlugin.so", "computeJacobianX");
   OUT("DynamicalSystem::DynamicalSystem - Minimum data constructor\n");
 }
+
+// copy constructor
+DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
+  DSType(NLDS), nsds(newDS.getNSDSPtr()), number(newDS.getNumber()), id(newDS.getId()), n(newDS.getN()),
+  x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
+  stepsInMemory(newDS.getStepsInMemory()), jacobianX(NULL), BC(NULL), dsxml(NULL), vectorFieldPtr(NULL),
+  isX0AllocatedIn(true), isXAllocatedIn(true), isXMemoryAllocatedIn(false), isXDotAllocatedIn(true), isXDotMemoryAllocatedIn(false),
+  isXFreeAllocatedIn(true), isRAllocatedIn(true), isRMemoryAllocatedIn(false), isJacobianXAllocatedIn(true), isBCAllocatedIn(false)
+{
+  x0 = new SimpleVector(newDS.getX0());
+  x = new SimpleVector(newDS.getX());
+  xDot = new SimpleVector(newDS.getXDot());
+  xFree = new SimpleVector(newDS.getXFree());
+  r = new SimpleVector(newDS.getR());
+  jacobianX = new SiconosMatrix(newDS.getJacobianX());
+
+  if (newDS.getXMemoryPtr() != NULL)
+  {
+    xMemory = new SiconosMemory(newDS.getXMemory());
+    isXMemoryAllocatedIn = true;
+  }
+
+  if (newDS.getXDotMemoryPtr() != NULL)
+  {
+    xDotMemory = new SiconosMemory(newDS.getXDotMemory());
+    isXDotMemoryAllocatedIn = true;
+  }
+
+  if (newDS.getRMemoryPtr() != NULL)
+  {
+    rMemory = new SiconosMemory(newDS.getRMemory());
+    isRMemoryAllocatedIn = true;
+  }
+
+  string pluginPath, functionName;
+
+  vectorFieldFunctionName =  newDS.getVectorFieldFunctionName();
+  functionName = cShared.getPluginFunctionName(vectorFieldFunctionName);
+  pluginPath  = cShared.getPluginName(vectorFieldFunctionName);
+  setVectorFieldFunction(pluginPath, functionName);
+
+  computeJacobianXFunctionName = newDS. getVectorFieldFunctionName();
+  functionName = cShared.getPluginFunctionName(computeJacobianXFunctionName);
+  pluginPath  = cShared.getPluginName(computeJacobianXFunctionName);
+  setComputeJacobianXFunction(pluginPath, functionName);
+
+  // \todo: manage copy of dsio and boundary conditions when these classes will be well implemented.
+
+  // xml link is not copied.
+}
+
 
 // --- Destructor ---
 DynamicalSystem::~DynamicalSystem()

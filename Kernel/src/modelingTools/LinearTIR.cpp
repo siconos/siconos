@@ -465,7 +465,7 @@ void LinearTIR::setAPtr(SimpleVector *newPtr)
   isAllocatedIn[5] = false;
 }
 
-void LinearTIR::computeOutput()
+void LinearTIR::computeOutput(const double& time)
 {
   IN("LinearTIR::computeOutput\n");
   vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
@@ -480,7 +480,8 @@ void LinearTIR::computeOutput()
       RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented for DS type " + (*it)->getType());
 
     xTmp->add((*it)->getX());
-    uTmp->add(*((*it)->getUPtr()));
+    if ((*it)->getUPtr() != NULL)
+      uTmp->add(*((*it)->getUPtr())) ;
   }
 
   SimpleVector *y = interaction->getYPtr();
@@ -517,7 +518,7 @@ void LinearTIR::computeOutput()
   OUT("LinearTIR::computeOutput\n");
 }
 
-void LinearTIR::computeInput()
+void LinearTIR::computeInput(const double& time)
 {
   vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
   CompositeVector *r = new CompositeVector();

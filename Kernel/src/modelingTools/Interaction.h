@@ -380,8 +380,8 @@ public:
   }
 
   /** \fn vector<DynamicalSystem*> getDynamicalSystems()
-   *  \brief get the 2 DynamicalSystem of this Interaction
-   *  \return vector<DynamicalSystem*> : a vector of DS, with 2 DynamicalSystem
+   *  \brief get the DynamicalSystems of this Interaction
+   *  \return vector<DynamicalSystem*> : a vector of DS
    */
   inline std::vector<DynamicalSystem*> getDynamicalSystems() const
   {
@@ -397,14 +397,15 @@ public:
   /** \fn DynamicalSystem* getDynamicalSystemPtr(const int&)
    *  \brief get a specific DynamicalSystem
    *  \param the identification number of the wanted DynamicalSystem
-   *  \return null if there's no DS corresponding
+   *  \return a pointer on Dynamical System
    */
   DynamicalSystem* getDynamicalSystemPtr(const int&);
 
   /** \fn DynamicalSystem getDynamicalSystemNumber(const int& nb)
    *  \brief get a specific DynamicalSystem
-   *  \param 0 or 1 -> first or second DS concerned by interaction
-   */
+   *  \param the identification number of the wanted DynamicalSystem
+   *  \return a Dynamical System
+  */
   DynamicalSystem getDynamicalSystem(const int&);
 
   /** \fn Relation* getRelationPtr(void)

@@ -35,11 +35,11 @@ public:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
-  /** \fn NonSmoothDynamicalSystem()
+  /** \fn NonSmoothDynamicalSystem(const bool&)
    *  \brief default constructor
-   *  \param NSDSXML* : the XML object corresponding to the NonSmoothDynamicalSystem
+   *  \param (optional) a bool which determines if the problem is BVP (true) or IVP (false)
    */
-  NonSmoothDynamicalSystem();
+  NonSmoothDynamicalSystem(const bool& = false);
 
   /** \fn NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&)
    *  \brief copy constructor
@@ -52,19 +52,6 @@ public:
    *  \param: the XML object corresponding to the NonSmoothDynamicalSystem
    */
   NonSmoothDynamicalSystem(NSDSXML*);
-
-  /** \fn NonSmoothDynamicalSystem(bool)
-   *  \brief constructor with indication concerning boundary conditions
-   *  \param const bool : if true, the systems has boundary conditions
-   */
-  NonSmoothDynamicalSystem(const bool&);
-
-
-  /** \fn NonSmoothDynamicalSystem(const string&)
-   *  \brief constructs the object with his type (IVP or BVP)
-   *  \param a string value which determines if the problem is BVP or IVP
-   */
-  NonSmoothDynamicalSystem(const std::string&);
 
   ~NonSmoothDynamicalSystem();
 
@@ -285,14 +272,6 @@ public:
    *  \param Interaction : the Interaction to add
    */
   void addInteraction(Interaction*);
-
-  /** \fn Interaction* addInteraction(const int& number, const int& nInter, vector<int>* status, vector<DynamicalSystem*>*)
-   *  \brief add an Interaction to the NonSmoothDynamicalSystem
-   *  \param int : the number of the Interaction
-   *  \param int : the size of the y vector of the Interaction
-   *  \param vector<int> : the status of the interaction
-   */
-  Interaction* addInteraction(const int& = -1, const int& = -1, std::vector<int>* = NULL, std::vector<DynamicalSystem*>* = NULL);
 
   /** \fn void addEqualityConstraint(EqualityConstraint*)
    *  \brief add an EqualityConstraint to the NonSmoothDynamicalSystem

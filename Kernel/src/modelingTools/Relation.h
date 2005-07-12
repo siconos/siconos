@@ -143,21 +143,21 @@ public:
    *  \param double : current time
    *  \exception RuntimeException
    */
-  virtual void computeOutput(const double& time);
+  virtual void computeOutput(const double&);
 
   /** \fn void computeFreeOutput(double time);
    *  \brief default function to compute y for the free state
    *  \param double : current time
    *  \exception RuntimeException
    */
-  virtual void computeFreeOutput(const double& time);
+  virtual void computeFreeOutput(const double&);
 
   /** \fn void computeInput(double time);
    *  \brief default function to compute r
    *  \param double : current time
    *  \exception RuntimeException
    */
-  virtual void computeInput(const double& time);
+  virtual void computeInput(const double&);
 
   /** \fn void setComputeOutputFunction(string pluginPath, string functionName)
    *  \brief allow to set a specified function to compute output

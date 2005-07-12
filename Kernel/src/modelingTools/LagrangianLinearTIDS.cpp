@@ -1,12 +1,15 @@
 #include "LagrangianLinearTIDS.h"
 using namespace std;
 
-// --- Constructor from an xml file ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML * dsXML): LagrangianDS(dsXML), K(NULL), C(NULL),
+// --- Constructor from an xml file (newNsds is optional) ---
+LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML * dsXML,  NonSmoothDynamicalSystem* newNsds):
+  LagrangianDS(dsXML), K(NULL), C(NULL),
   isKAllocatedIn(true), isCAllocatedIn(true)
 {
   IN("LagrangianLinearTIDS::LagrangianLinearTIDS() - Xml constructor\n");
   DSType = LTIDS;
+  if (newNsds != NULL) nsds = newNsds;
+
   if (dsXML != NULL)
   {
     LagrangianLinearTIDSXML * lltidsxml = (static_cast <LagrangianLinearTIDSXML*>(dsxml));
@@ -19,20 +22,91 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML * dsXML): LagrangianDS(dsXML), 
   OUT("LagrangianLinearTIDS::LagrangianLinearTIDS() - Xml constructor\n");
 }
 
-// --- Constructor from a minimum set of data ---
+// --- Constructor from a set of data - Mass (from a matrix), K and C ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
     const SimpleVector& newQ0, const SimpleVector& newVelocity0,
-    const SiconosMatrix& newMass,
-    const std::string& fExt, const SiconosMatrix& newK, const SiconosMatrix& newC):
+    const SiconosMatrix& newMass, const SiconosMatrix& newK, const SiconosMatrix& newC):
   LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, newMass), K(NULL), C(NULL), isKAllocatedIn(true), isCAllocatedIn(true)
 {
   IN("LagrangianLinearTIDS::LagrangianLinearTIDS -  Constructor from a minimum set of data\n");
-  K = new SiconosMatrix(ndof, ndof);
-  C = new SiconosMatrix(ndof, ndof);
+  if (newK.size(0) != ndof || newK.size(1) != ndof)
+    RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between K and ndof");
+
+  if (newC.size(0) != ndof || newC.size(1) != ndof)
+    RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between C and ndof");
+
+  K = new SiconosMatrix(newK);
+  C = new SiconosMatrix(newC);
   DSType = LTIDS;
-  *K = newK;
-  *C = newC;
   OUT("LagrangianLinearTIDS::LagrangianLinearTIDS - Constructor from a minimum set of data\n");
+}
+
+// --- Constructor from a set of data - Mass (from plugin), K and C ---
+LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
+    const SimpleVector& newQ0, const SimpleVector& newVelocity0,
+    const std::string& massName, const SiconosMatrix& newK, const SiconosMatrix& newC):
+  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, massName), K(NULL), C(NULL), isKAllocatedIn(true), isCAllocatedIn(true)
+{
+  IN("LagrangianLinearTIDS::LagrangianLinearTIDS -  Constructor from a minimum set of data\n");
+
+  if (newK.size(0) != ndof || newK.size(1) != ndof)
+    RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between K and ndof");
+
+  if (newC.size(0) != ndof || newC.size(1) != ndof)
+    RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between C and ndof");
+
+  K = new SiconosMatrix(newK);
+  C = new SiconosMatrix(newC);
+  DSType = LTIDS;
+  OUT("LagrangianLinearTIDS::LagrangianLinearTIDS - Constructor from a minimum set of data\n");
+}
+
+// --- Constructor from a set of data - Mass (from a matrix), no K and no C ---
+LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
+    const SimpleVector& newQ0, const SimpleVector& newVelocity0,
+    const SiconosMatrix& newMass):
+  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, newMass), K(NULL), C(NULL), isKAllocatedIn(true), isCAllocatedIn(true)
+{
+  IN("LagrangianLinearTIDS::LagrangianLinearTIDS -  Constructor from a minimum set of data\n");
+  DSType = LTIDS;
+  OUT("LagrangianLinearTIDS::LagrangianLinearTIDS - Constructor from a minimum set of data\n");
+}
+
+// --- Constructor from a set of data - Mass (from plugin), no K and no C ---
+LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
+    const SimpleVector& newQ0, const SimpleVector& newVelocity0,
+    const std::string& massName):
+  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, massName), K(NULL), C(NULL), isKAllocatedIn(true), isCAllocatedIn(true)
+{
+  IN("LagrangianLinearTIDS::LagrangianLinearTIDS -  Constructor from a minimum set of data\n");
+  DSType = LTIDS;
+  OUT("LagrangianLinearTIDS::LagrangianLinearTIDS - Constructor from a minimum set of data\n");
+}
+
+
+
+// Copy constructor
+LagrangianLinearTIDS::LagrangianLinearTIDS(const DynamicalSystem & newDS):
+  LagrangianDS(newDS), K(NULL), C(NULL), isKAllocatedIn(false), isCAllocatedIn(false)
+{
+  if (newDS.getType() != LTIDS)
+    RuntimeException::selfThrow("LagrangianLinearTIDS - copy constructor: try to copy into a LagrangianLinearTIDS a DS of type: " + newDS.getType());
+
+  DSType = LTIDS;
+
+  // convert newDS to lagrangianLinearTIDS by keeping const options
+  const LagrangianLinearTIDS * ltids = static_cast<const LagrangianLinearTIDS*>(&newDS);
+
+  if (ltids->getKPtr() != NULL)
+  {
+    K = new SiconosMatrix(ltids->getK());
+    isKAllocatedIn = true;
+  }
+  if (ltids->getCPtr() != NULL)
+  {
+    C = new SiconosMatrix(ltids->getC());
+    isCAllocatedIn = true;
+  }
 }
 
 LagrangianLinearTIDS::~LagrangianLinearTIDS()

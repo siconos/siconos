@@ -57,7 +57,7 @@ Model::Model(double newT0, double newT, string newTitle, string newAuthor,
 {
   IN("Model::constructor from min data\n");
   if (newT > t0) T = newT;
-  else cout << "Model::constructor from min data: Warning, wrong new value for final T -> ignored" << endl;
+  else  RuntimeException::selfThrow("Model::constructor from min data: Warning, final T lower than t0");
   OUT("Model::constructor from min data\n");
 }
 
@@ -81,7 +81,7 @@ Model::Model(double newT0, double newT, string newTitle, string newAuthor,
 //}
 
 
-// -> with a clear strategy given wtih a pointer
+// -> with a clear strategy given with a pointer
 
 //Model::Model(double newT0, Strategy * newStrategy, double newT, string newTitle, string newAuthor,
 //       string newDescription, string newDate, string newSchema):
@@ -362,10 +362,10 @@ int Model::xmlSchemaValidated(string xmlFile, string xmlSchema)
 void Model::display() const
 {
   IN("Model::display\n");
-
-  cout << "| t = " << t << endl;
-  cout << "| t0= " << t0 << endl;
-  cout << "| T = " << T << endl;
+  cout << " ===== Model display =====" << endl;
+  cout << "| current time = " << t << endl;
+  cout << "| t0 (initial time) = " << t0 << endl;
+  cout << "| T (final time) = " << T << endl;
   cout << "| &strategy = " << endl;
   if (strat != NULL) cout << strat << endl;
   else cout << "-> NULL" << endl;
@@ -380,27 +380,15 @@ void Model::display() const
   cout << "| date = " << date << endl;
   cout << "| title = " << title << endl;
   cout << "| xmlSchema = " << xmlSchema << endl;
-  cout << "|===========================" << endl;
-
+  cout << "============================" << endl;
   OUT("Model::display\n");
 }
-
-
 
 //=======================================================
 //
 // function to create the platform from a C++ programm
 //
 //=======================================================
-
-NonSmoothDynamicalSystem* Model::createNonSmoothDynamicalSystem(bool bvp)
-{
-  if (isNsdsAllocatedIn) delete nsds;
-  nsds = new NonSmoothDynamicalSystem(bvp);
-  isNsdsAllocatedIn = true;
-  return nsds;
-}
-
 
 Strategy* Model::createStrategy(string type)
 {

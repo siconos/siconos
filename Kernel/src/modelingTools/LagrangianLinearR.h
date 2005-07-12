@@ -8,13 +8,24 @@
 #include "CompositeVector.h"
 
 /** \class LagrangianLinearR
- *  \brief Lagrangian Linear Relation
+ *  \brief Lagrangian Linear Relation, derived from class Relation
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 27, 2004
  *
+ * This class defines and computes the Lagrangian Linear Relations defined by,
+ * for the input \f$ y \f$,
+ * \f[
+ * y= H q + b
+ * \f]
+ * and for the output \f$ p\f$ defined by
+ * \f[
+ * p= H^t \lamba
+ * \f]
+ *  H is the only required input to built a LagrangianLinearR.
  *
  */
+
 class LagrangianLinearR : public Relation
 {
 public:
@@ -75,21 +86,13 @@ public:
    *  \brief set the value of H to newValue
    *  \param SiconosMatrix newValue
    */
-  inline void setH(const SiconosMatrix& newValue)
-  {
-    *H = newValue;
-  }
+  void setH(const SiconosMatrix&);
 
   /** \fn void setHPtr(SiconosMatrix* newPtr)
    *  \brief set H to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setHPtr(SiconosMatrix *newPtr)
-  {
-    if (isHAllocatedIn) delete H;
-    H = newPtr;
-    isHAllocatedIn = false;
-  }
+  void setHPtr(SiconosMatrix *);
   // -- b --
 
   /** \fn  const SimpleVector getB() const
@@ -114,21 +117,13 @@ public:
    *  \brief set the value of b to newValue
    *  \param SimpleVector newValue
    */
-  inline void setB(const SimpleVector& newValue)
-  {
-    *b = newValue;
-  }
+  void setB(const SimpleVector&);
 
   /** \fn void setBPtr(SimpleVector* newPtr)
    *  \brief set B to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setBPtr(SimpleVector *newPtr)
-  {
-    if (isBAllocatedIn) delete b;
-    b = newPtr;
-    isBAllocatedIn = false;
-  }
+  void setBPtr(SimpleVector *);
 
   /** \fn SiconosMatrix getHPtrRelatingToDS(int position)
    *  \brief get the SiconosMatrix H relating to one

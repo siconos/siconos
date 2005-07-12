@@ -48,8 +48,8 @@ void LinearTIRTest::tearDown()
 void LinearTIRTest::testBuildLinearTIR1()
 {
   LinearTIR * ltir = new LinearTIR(*C, *B);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector : ", ltir->getC() == *C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector : ", ltir->getB() == *B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR : ", ltir->getC() == *C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR : ", ltir->getB() == *B, true);
   delete ltir;
   cout << " Constructor LTIR 1 ok" << endl;
 

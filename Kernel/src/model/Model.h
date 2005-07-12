@@ -359,13 +359,6 @@ public:
    *
    *//////////////////////////////////////////////////////
 
-  /** \fn NonSmoothDynamicalSystem* createNonSmoothDynamicalSystem(bool bvp)
-   *  \brief allows to create the NonSmoothDynamicalSystem of the Model
-   *  \param bool : to define if the NonSmoothDynamicalSystem is BVP or not
-   *  \return NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem created
-   */
-  NonSmoothDynamicalSystem* createNonSmoothDynamicalSystem(bool bvp = false);
-
   /** \fn Strategy* createStrategy(string type)
    *  \brief allows to create a Strategy (EventDriven or TimeStepping)
    *  \return Strategy* : the Strategy created

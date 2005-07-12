@@ -3,9 +3,10 @@ using namespace std;
 
 // --- Constructors ---
 
-// From xml file
-LinearDS::LinearDS(DSXML * dsXML):
-  DynamicalSystem(dsXML), A(NULL), b(NULL), uSize(0), u(NULL), E(NULL),
+// From xml file (newNsds is optional)
+LinearDS::LinearDS(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
+  DynamicalSystem(dsXML, newNsds), A(NULL), b(NULL), uSize(0), u(NULL), E(NULL),
+  AFunctionName("none"), bFunctionName("none"), uFunctionName("none"), EFunctionName("none"),
   computeAPtr(NULL), computeBPtr(NULL), computeUPtr(NULL), computeEPtr(NULL),
   isAAllocatedIn(true), isBAllocatedIn(false),  isUAllocatedIn(false), isEAllocatedIn(false)
 {
@@ -106,6 +107,7 @@ LinearDS::LinearDS(const int& newNumber, const unsigned int& newN, const Siconos
                    const string& pluginPath, const string& functionName):
   DynamicalSystem(newNumber, newN, newX0, "BasicPlugin:vectorField"),
   A(NULL), b(NULL), uSize(0), u(NULL), E(NULL),
+  AFunctionName("none"), bFunctionName("none"), uFunctionName("none"), EFunctionName("none"),
   computeAPtr(NULL), computeBPtr(NULL), computeUPtr(NULL), computeEPtr(NULL),
   isAAllocatedIn(true), isBAllocatedIn(false),  isUAllocatedIn(false), isEAllocatedIn(false)
 {
@@ -122,6 +124,7 @@ LinearDS::LinearDS(const int& newNumber, const SiconosVector& newX0,
                    const SiconosMatrix& newA):
   DynamicalSystem(newNumber, newA.size(0), newX0, "BasicPlugin:vectorField"),
   A(NULL), b(NULL), uSize(0), u(NULL), E(NULL),
+  AFunctionName("none"), bFunctionName("none"), uFunctionName("none"), EFunctionName("none"),
   computeAPtr(NULL), computeBPtr(NULL), computeUPtr(NULL), computeEPtr(NULL),
   isAAllocatedIn(true), isBAllocatedIn(false), isUAllocatedIn(false), isEAllocatedIn(false)
 {
@@ -132,6 +135,74 @@ LinearDS::LinearDS(const int& newNumber, const SiconosVector& newX0,
   A = new SiconosMatrix(n, n);
   *A = newA;
   isPlugin.resize(4, false);
+}
+
+// Copy constructor
+LinearDS::LinearDS(const DynamicalSystem & newDS):
+  DynamicalSystem(newDS), A(NULL), b(NULL), uSize(0), u(NULL), E(NULL),
+  AFunctionName("none"), bFunctionName("none"), uFunctionName("none"), EFunctionName("none"),
+  computeAPtr(NULL), computeBPtr(NULL), computeUPtr(NULL), computeEPtr(NULL),
+  isAAllocatedIn(true), isBAllocatedIn(false), isUAllocatedIn(false), isEAllocatedIn(false)
+
+{
+  if (newDS.getType() != LDS)
+    RuntimeException::selfThrow("LinearDS - copy constructor: try to copy into a LinearDS a DS of type: " + newDS.getType());
+
+  DSType = LDS;
+
+  // convert newDS to linearDS by keeping const options
+  const LinearDS * lds = static_cast<const LinearDS*>(&newDS);
+
+  A = new SiconosMatrix(lds->getA());
+  isAAllocatedIn = true;
+  if (lds->getBPtr() != NULL)
+  {
+    b = new SimpleVector(lds->getB());
+    isBAllocatedIn = true;
+  }
+  if (lds->getUPtr() != NULL)
+  {
+    u = new SimpleVector(lds->getU());
+    uSize = u->size();
+    isUAllocatedIn = true;
+  }
+  if (lds->getEPtr() != NULL)
+  {
+    E = new SiconosMatrix(lds->getE());
+    isEAllocatedIn = true;
+  }
+
+  isPlugin = lds->getIsPlugin();
+  string pluginPath, functionName;
+  if (isPlugin[0])
+  {
+    AFunctionName = lds -> getAFunctionName();
+    functionName = cShared.getPluginFunctionName(AFunctionName);
+    pluginPath  = cShared.getPluginName(AFunctionName);
+    setComputeAFunction(pluginPath, functionName);
+  }
+  if (isPlugin[1])
+  {
+    bFunctionName = lds -> getBFunctionName();
+    functionName = cShared.getPluginFunctionName(bFunctionName);
+    pluginPath  = cShared.getPluginName(bFunctionName);
+    setComputeBFunction(pluginPath, functionName);
+  }
+  if (isPlugin[2])
+  {
+    uFunctionName = lds -> getUFunctionName();
+    functionName = cShared.getPluginFunctionName(uFunctionName);
+    pluginPath  = cShared.getPluginName(uFunctionName);
+    setComputeUFunction(pluginPath, functionName);
+  }
+
+  if (isPlugin[3])
+  {
+    EFunctionName = lds -> getEFunctionName();
+    functionName = cShared.getPluginFunctionName(EFunctionName);
+    pluginPath  = cShared.getPluginName(EFunctionName);
+    setComputeEFunction(pluginPath, functionName);
+  }
 }
 
 LinearDS::~LinearDS()

@@ -84,9 +84,10 @@ public:
   /** \fn LagrangianDS(DSXML * nsdsXML)
    *  \brief constructor from an xml file
    *  \param DSXML * : the XML object for this DynamicalSystem
+   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
    *  \exception RuntimeException
    */
-  LagrangianDS(DSXML * dsXML);
+  LagrangianDS(DSXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
   /** \fn LagrangianDS(int number, int ndof,
       const SimpleVector& q0, const SimpleVector& velocity0,
@@ -118,6 +119,11 @@ public:
                const SimpleVector& , const SimpleVector& ,
                const std::string&  = "BasicPlugin:computeMass");
 
+  /** \fn LagrangianDS(const DynamicalSystem &)
+   *  \brief copy constructor
+   *  \param a Dynamical system to copy
+   */
+  LagrangianDS(const DynamicalSystem &);
 
   /** \fn ~LagrangianDS()
    *  \brief destructor */
@@ -719,7 +725,7 @@ public:
   void setJacobianVelocityQNLInertiaPtr(SiconosMatrix *newPtr);
 
   /** \fn const bool getIsLDSPlugin(unsigned int& n) const
-   *  \brief allows to get a bool to check if member number n is loaded from a plugin or not
+   *  \brief get a bool to check if member number n is loaded from a plugin or not
    *  to know which member corresponds to n see private member list below.
    *  \return a bool
    */
@@ -728,6 +734,88 @@ public:
     return isLDSPlugin[n];
   };
 
+  /** \fn const bool getIsLDSPlugin(unsigned int& n) const
+   *  \brief get the full vector isLDSPlugin, to check if member number n is loaded from a plugin or not
+   *  to know which member corresponds to n see private member list below.
+   *  \return a vector of bool
+   */
+  inline std::vector<bool> getIsLDSPlugin() const
+  {
+    return isLDSPlugin;
+  };
+
+  /** \fn  std::string getMassFunctionName() const
+   *  \brief get name of function that computes mass (if mass from plugin)
+   *  \return a string
+   */
+  inline const std::string getMassFunctionName() const
+  {
+    return massFunctionName;
+  }
+
+  /** \fn  std::string getFIntFunctionName() const
+   *  \brief get name of function that computes fInt (if fInt from plugin)
+   *  \return a string
+   */
+  inline const std::string getFIntFunctionName() const
+  {
+    return fIntFunctionName;
+  }
+
+  /** \fn  std::string getFExtFunctionName() const
+   *  \brief get name of function that computes fExt (if fExt from plugin)
+   *  \return a string
+   */
+  inline const std::string getFExtFunctionName() const
+  {
+    return fExtFunctionName;
+  }
+
+  /** \fn  std::string getQNLInertiaFunctionName() const
+   *  \brief get name of function that computes QNLInertia (if QNLInertia from plugin)
+   *  \return a string
+   */
+  inline const std::string getQNLInertiaFunctionName() const
+  {
+    return QNLInertiaFunctionName;
+  }
+
+  /** \fn  std::string getJacobianQFIntFunctionName() const
+   *  \brief get name of function that computes jacobianQFInt (if jacobianQFInt from plugin)
+   *  \return a string
+   */
+  inline const std::string getJacobianQFIntFunctionName() const
+  {
+    return jacobianQFIntFunctionName;
+  }
+
+  /** \fn  std::string getJacobianVelocityFIntFunctionName() const
+   *  \brief get name of function that computes jacobianVelocityFInt (if jacobianVelocityFInt from plugin)
+   *  \return a string
+   */
+  inline const std::string getJacobianVelocityFIntFunctionName() const
+  {
+    return jacobianVelocityFIntFunctionName;
+  }
+
+  /** \fn  std::string getJacobianQQNLInertiaFunctionName() const
+   *  \brief get name of function that computes jacobianQQNLInertia (if jacobianQQNLInertia from plugin)
+   *  \return a string
+   */
+  inline const std::string getJacobianQQNLInertiaFunctionName() const
+  {
+    return jacobianQQNLInertiaFunctionName;
+  }
+
+  /** \fn  std::string getJacobianVelocityQNLInertiaFunctionName() const
+   *  \brief get name of function that computes jacobianVelocityQNLInertia (if jacobianVelocityQNLInertia from plugin)
+   *  \return a string
+   */
+  inline const std::string getJacobianVelocityQNLInertiaFunctionName() const
+  {
+    return jacobianVelocityQNLInertiaFunctionName;
+  }
+
   // --- PLUGINS RELATED FUNCTIONS ---
 
   /** \fn void computeMass(const double &)
@@ -735,103 +823,102 @@ public:
    *  \param double time : the current time
    *  \exception RuntimeException
    */
-  virtual void computeMass(const double &);
+  void computeMass(const double &);
 
   /** \fn void computeMass(const double &, SimpleVector *q)
    *  \brief function to compute the mass
    *  \param double time : the current time, SimpleVector*: pointer on the state vector q
    *  \exception RuntimeException
    */
-  virtual void computeMass(const double &, SimpleVector *);
+  void computeMass(const double &, SimpleVector *);
 
   /** \fn void computeFInt(const double &)
    *  \brief default function to compute the internal strengths
    *  \param double time : the current time
    *  \exception RuntimeException
    */
-  virtual void computeFInt(const double &);
+  void computeFInt(const double &);
 
   /** \fn void computeFInt(const double &, SimpleVector q, SimpleVector velocity)
    *  \brief function to compute the internal strengths
    *  \param double time : the current time, SimpleVector*: pointers on the state vectors q and velocity (\dot q)
    *  \exception RuntimeException
    */
-  virtual void computeFInt(const double &, SimpleVector *, SimpleVector *);
+  void computeFInt(const double &, SimpleVector *, SimpleVector *);
 
   /** \fn void computeFExt(const double &)
    *  \brief default function to compute the external strengths
    *  \param double time : the current time
    *  \exception RuntimeException
    */
-
-  virtual void computeFExt(const double &);
+  void computeFExt(const double &);
 
   /** \fn void computeQNLInertia();
    *  \brief default function to compute the inertia
    *  \exception RuntimeException
    */
-  virtual void computeQNLInertia();
+  void computeQNLInertia();
 
   /** \fn void computeQNLInertia(SimpleVector q, SimpleVector velocity);
    *  \brief function to compute the inertia
    *  \param SimpleVector*: pointers on the state vectors q and velocity (\dot q)
    *  \exception RuntimeException
    */
-  virtual void computeQNLInertia(SimpleVector *q, SimpleVector *velocity);
+  void computeQNLInertia(SimpleVector *q, SimpleVector *velocity);
 
   /** \fn void computeJacobianQFInt(const double &)
    *  \brief default function to compute the gradient of the internal strengths compared to the state
    *  \param double time : the current time
    *  \exception RuntimeException
    */
-  virtual void computeJacobianQFInt(const double &);
+  void computeJacobianQFInt(const double &);
 
   /** \fn void computeJacobianQFInt(const double &,SimpleVector q, SimpleVector velocity)
    *  \brief function to compute the gradient of the internal strengths compared to state q
    *  \param double time : the current time, SimpleVector*: pointers on the state vectors q and velocity (\dot q)
    *  \exception RuntimeException
    */
-  virtual void computeJacobianQFInt(const double &, SimpleVector *q, SimpleVector *velocity);
+  void computeJacobianQFInt(const double &, SimpleVector *q, SimpleVector *velocity);
 
   /** \fn void computeJacobianVelocityFInt(double time)
    *  \brief function to compute the gradient of the internal strengths compared to velocity
    *  \param double time : the current time
    *  \exception RuntimeException
    */
-  virtual void computeJacobianVelocityFInt(const double &);
+  void computeJacobianVelocityFInt(const double &);
 
   /** \fn void computeJacobianVelocityFInt(const double &, SimpleVector q, SimpleVector velocity)
    *  \brief function to compute the gradient of the internal strengths compared to velocity
    *  \param double time : the current time, SimpleVector*: pointers on the state vectors q and velocity (\dot q)
    *  \exception RuntimeException
    */
-  virtual void computeJacobianVelocityFInt(const double &, SimpleVector *q, SimpleVector *velocity);
+  void computeJacobianVelocityFInt(const double &, SimpleVector *q, SimpleVector *velocity);
 
   /** \fn void computeJacobianQQNLInertia(const double &)
    *  \brief function to compute the gradient of the inertia strengths compared to the state q
    *  \exception RuntimeException
    */
-  virtual void computeJacobianQQNLInertia();
+  void computeJacobianQQNLInertia();
 
   /** \fn void computeJacobianQQNLInertia(const double &,SimpleVector q, SimpleVector velocity)
    *  \brief function to compute the gradient of the inertia strengths compared to the state q
    *  \param SimpleVector*: pointers on the state vectors q and velocity (\dot q)
    *  \exception RuntimeException
    */
-  virtual void computeJacobianQQNLInertia(SimpleVector *q, SimpleVector *velocity);
+  void computeJacobianQQNLInertia(SimpleVector *q, SimpleVector *velocity);
 
   /** \fn void computeJacobianVelocityQNLInertia(const double & )
    *  \brief function to compute the gradient of the inertia strengths compared to velocity
    *  \exception RuntimeException
    */
-  virtual void computeJacobianVelocityQNLInertia();
+  void computeJacobianVelocityQNLInertia();
 
   /** \fn void computeJacobianVelocityQNLInertia(double time, SimpleVector q, SimpleVector velocity )
    *  \brief function to compute the gradient of the inertia strengths compared to velocity
    *  \param SimpleVector*: pointers on the state vectors q and velocity (\dot q)
    *  \exception RuntimeException
    */
-  virtual void computeJacobianVelocityQNLInertia(SimpleVector *q, SimpleVector *velocity);
+  void computeJacobianVelocityQNLInertia(SimpleVector *q, SimpleVector *velocity);
 
   /** \fn void setComputeMassFunction(const string pluginPath, const string functionName&)
    *  \brief allow to set a specified function to compute the mass
@@ -899,18 +986,6 @@ public:
 
   // --- miscellaneous ---
 
-  /** \fn void SiconosVectorSizeInit()
-   *  \brief Initialisation of all the vector of the dynamical system with the right size
-   *  \exception RuntimeException
-   */
-  //virtual void SiconosVectorSizeInit();
-
-  /** \fn void CompositeVectorInit()
-   *  \brief Initialisation of all the composite vector of the dynamical system with different SiconosVector composing each composite
-   *  \exception RuntimeException
-   */
-  //virtual void CompositeVectorInit();
-
   /** \fn void saveDSToXML()
    *  \brief copy the data of the DS to the XML tree
    *  \exception RuntimeException
@@ -946,7 +1021,7 @@ public:
    *  \brief compute $\frac{|\dot q_{i+1} - \dot qi|}{|\dot q_i|}$ where $\dot q_{i+1}$ represents the present state and $\dot q_i$ the previous one
    * \return a double
    */
-  double LagrangianDS::dsConvergenceIndicator();
+  virtual double dsConvergenceIndicator();
 
 protected:
 
@@ -985,22 +1060,6 @@ protected:
   SimpleVector *fInt;
   /** external strength of the system */
   SimpleVector *fExt;
-  /* contains the name of the plugin used to compute fInt */
-  std::string  fIntFunctionName;
-  /* contains the name of the plugin used to compute fExt */
-  std::string  fExtFunctionName;
-  /* contains the name of the plugin used to compute the mass */
-  std::string  massFunctionName;
-  /* contains the name of the plugin used to compute jacobianQFInt */
-  std::string  jacobianQFIntFunctionName;
-  /* contains the name of the plugin used to compute jacobianQQNLInertia */
-  std::string  jacobianQQNLInertiaFunctionName;
-  /* contains the name of the plugin used to compute jacobianVelocityFInt */
-  std::string  jacobianVelocityFIntFunctionName;
-  /* contains the name of the plugin used to compute jacobianVelocityQNLInertia */
-  std::string  jacobianVelocityQNLInertiaFunctionName;
-  /* contains the name of the plugin used to compute QNLInertia */
-  std::string  QNLInertiaFunctionName;
   /** non-linear inertia term of the system */
   SimpleVector *QNLInertia;
   /** jacobian/coordinates of internal strength */
@@ -1011,6 +1070,23 @@ protected:
   SiconosMatrix *jacobianQQNLInertia;
   /** jacobian/velocity of inertie */
   SiconosMatrix *jacobianVelocityQNLInertia;
+
+  /* contains the name of the plugin used to compute the mass */
+  std::string  massFunctionName;
+  /* contains the name of the plugin used to compute fInt */
+  std::string  fIntFunctionName;
+  /* contains the name of the plugin used to compute fExt */
+  std::string  fExtFunctionName;
+  /* contains the name of the plugin used to compute jacobianQFInt */
+  std::string  jacobianQFIntFunctionName;
+  /* contains the name of the plugin used to compute jacobianQQNLInertia */
+  std::string  jacobianQQNLInertiaFunctionName;
+  /* contains the name of the plugin used to compute jacobianVelocityFInt */
+  std::string  jacobianVelocityFIntFunctionName;
+  /* contains the name of the plugin used to compute jacobianVelocityQNLInertia */
+  std::string  jacobianVelocityQNLInertiaFunctionName;
+  /* contains the name of the plugin used to compute QNLInertia */
+  std::string  QNLInertiaFunctionName;
 
   /** vector of bool to check if mass, fInt, fExt, QNLInertia and the 4 jacobian are loaded from a plugin or not
    The vector order is the one of members list (see above)*/
