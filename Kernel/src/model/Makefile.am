@@ -2,7 +2,7 @@
 
 include $(top_srcdir)/config/Make-rules
 
-#SUBDIRS = test
+SUBDIRS = test
 
 .cpp.o:
 	$(CXXCOMPILE) -c $<

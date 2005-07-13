@@ -79,9 +79,9 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, Interaction* int
   *H = newH;
 }
 
-// copy constructor
-LagrangianLinearR::LagrangianLinearR(const Relation & newLLR):
-  Relation(newLLR), H(NULL), b(NULL), isHAllocatedIn(true), isBAllocatedIn(true)
+// copy constructor (inter is optional)
+LagrangianLinearR::LagrangianLinearR(const Relation & newLLR, Interaction* inter):
+  Relation(newLLR, inter), H(NULL), b(NULL), isHAllocatedIn(true), isBAllocatedIn(true)
 {
   if (relationType !=  LAGRANGIANLINEARRELATION)
     RuntimeException::selfThrow("LagrangianLinearR:: copy constructor, inconsistent relation types for copy");

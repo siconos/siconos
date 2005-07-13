@@ -10,6 +10,11 @@
  */
 
 
+
+/** \todo: review completely this class to adapt it to multiple DS loading (rather than only 2)
+    -> partially done. Not reviewed: setDSConcerned, loadInteraction.
+*/
+
 #ifndef __INTERACTIONXML__
 #define __INTERACTIONXML__
 
@@ -163,7 +168,7 @@ public:
    *   \brief Return y vector of the InteractionXML
    *   \return SimpleVector : the y of the InteractionXML
    */
-  inline /*SiconosVector*/SimpleVector getY()
+  inline SimpleVector getY()
   {
     return SiconosDOMTreeTools::getSiconosVectorValue(yNode);
   }
@@ -194,7 +199,7 @@ public:
    *   \brief Return the lambda vector of the InteractionXML
    *   \return SimpleVector : the lambda of the InteractionXML
    */
-  inline /*SiconosVector*/ SimpleVector getLambda()
+  inline SimpleVector getLambda()
   {
     return SiconosDOMTreeTools::getSiconosVectorValue(lambdaNode);
   }
@@ -211,20 +216,14 @@ public:
   }
 
 
-  /** \fn vector< vector<int> > getDSConcerned()
-   *   \brief Return the DSs concerned by the InteractionXML
-   *   \return the 2D integer vector who contains the DSs concerned coulpes by the InteractionXML
+  /** \fn vector<int> getDSConcerned()
+   *   \brief Return the list of ds numbers concerned by the InteractionXML
+   *   \return a vector of int
    */
-  inline std::vector< std::vector<int> > getDSConcerned()
+  inline std::vector<int> getDSConcerned()
   {
-    return DSCouples;
+    return SiconosDOMTreeTools::getVectorIntContentValue(dsListNode);
   }
-
-  /** \fn void setDSConcerned( vector<DynamicalSystem*> )
-   *   \brief allows to set the dynamical systems which are interacting together with this interaction
-   *   \param vector<DynamicalSystem*> : the dynamical systems in interaction
-   */
-  void setDSConcerned(std::vector<DynamicalSystem*>);
 
   /** \fn SimpleVector getDSConcernedVector()
    *   \brief Return the DSs concerned by the InteractionXML
@@ -294,13 +293,9 @@ private:
   xmlNode * statusNode;
   xmlNode * yNode;
   xmlNode * lambdaNode;
-  xmlNode * isActiveNode;
   xmlNode * dsConcernedNode;
   // Node that contains a list (vector) of the ds concerned by this interaction
   xmlNode * dsListNode;
-
-  //Couples of DSs (DS numbers)
-  std::vector< std::vector<int> > DSCouples;
 
   //Relation
   RelationXML *relationXML;
@@ -312,25 +307,6 @@ private:
 
   bool isRelationXMLAllocatedIn;
   bool isNsLawXMLAllocatedIn;
-
-  //Methods
-
-  /** \fn loadInteractionProperties(xmlNode * , vector<int>)
-   *   \brief load the different properties of a Interaction
-   *   \param xmlNode * nodeInteraction : the DOM tree node of the concern Interaction
-   *   \param vector<int> definedDSNumbers : vector of DSXML numbers to verify DS concerned by the interaction (identified by number) exists
-   *   \exception XMLException : if a property of the Interaction lacks in the DOM tree
-   */
-  void loadInteractionProperties(xmlNode * interactionNode, std::vector<int> definedDSNumbers);
-
-  /** \fn loadInteractionConcernedDS(xmlNode * , vector<int>)
-   *   \brief load the DSs concerned by this interaction
-   *   \param xmlNode * DSConcernedNode : the DOM tree node of DS concerned by the interaction
-   *   \param vector<int> definedDSNumbers : vector of DSXML numbers to verify DS concerned by the interaction (identified by number) exists
-   *   \exception XMLException : if a DS number not exists
-   */
-  void loadInteractionConcernedDS(xmlNode * DSConcernedNode, std::vector<int> definedDSNumbers);
-
 
 };
 

@@ -3,8 +3,8 @@ using namespace std;
 
 // --- Constructor from an xml file ---
 LagrangianDS::LagrangianDS(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
-  DynamicalSystem(), ndof(0), q(NULL), q0(NULL), qFree(NULL), velocity(NULL), velocity0(NULL),
-  velocityFree(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL), QNLInertia(NULL), jacobianQFInt(NULL),
+  DynamicalSystem(), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
+  velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL), QNLInertia(NULL), jacobianQFInt(NULL),
   jacobianVelocityFInt(NULL), jacobianQQNLInertia(NULL), jacobianVelocityQNLInertia(NULL),
   isPAllocatedIn(true), isMassAllocatedIn(true),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeQNLInertiaPtr(NULL), computeJacobianQFIntPtr(NULL),
@@ -13,7 +13,6 @@ LagrangianDS::LagrangianDS(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
   IN("LagrangianDS::LagrangianDS() - Xml constructor\n");
   if (dsXML != NULL)
   {
-
     if (newNsds != NULL) nsds = newNsds;
 
     // --- DS BASE-CLASS MEMBERS ---
@@ -36,7 +35,8 @@ LagrangianDS::LagrangianDS(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
     isRAllocatedIn = true;
 
     // \todo review link between LagrangianDS and DS
-    // jacobianX = new SiconosMatrix(n,n);
+    jacobianX = new SiconosMatrix(n, n);
+    isJacobianXAllocatedIn = true;
     if (dsxml->hasStepsInMemory() == true) stepsInMemory = dsxml->getStepsInMemory();
 
     // -- plugins --
@@ -215,6 +215,7 @@ LagrangianDS::LagrangianDS(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
     }
   }
   else RuntimeException::selfThrow("LagrangianDS::LagrangianDS - DSXML paramater must not be NULL");
+
   OUT("LagrangianDS::LagrangianDS() - Xml constructor\n");
 }
 
@@ -222,7 +223,8 @@ LagrangianDS::LagrangianDS(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
 LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
                            const SimpleVector& newQ0, const SimpleVector& newVelocity0,
                            const SiconosMatrix& newMass):
-  DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), velocity(NULL), velocity0(NULL), velocityFree(NULL), p(NULL), mass(NULL),
+  DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL), velocityFree(NULL), velocityMemory(NULL),
+  p(NULL), mass(NULL),
   fInt(NULL), fExt(NULL), QNLInertia(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQQNLInertia(NULL), jacobianVelocityQNLInertia(NULL),
   isPAllocatedIn(true), isMassAllocatedIn(true),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeQNLInertiaPtr(NULL), computeJacobianQFIntPtr(NULL),
@@ -300,7 +302,8 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 // From a set of data - Mass loaded from a plugin
 LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
                            const SimpleVector& newQ0, const SimpleVector& newVelocity0, const string& massName):
-  DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), velocity(NULL), velocity0(NULL), velocityFree(NULL), p(NULL), mass(NULL),
+  DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL), velocityFree(NULL), velocityMemory(NULL),
+  p(NULL), mass(NULL),
   fInt(NULL), fExt(NULL), QNLInertia(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQQNLInertia(NULL), jacobianVelocityQNLInertia(NULL),
   isPAllocatedIn(true), isMassAllocatedIn(true),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeQNLInertiaPtr(NULL), computeJacobianQFIntPtr(NULL),
@@ -379,14 +382,15 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 
 // copy constructor
 LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
-  DynamicalSystem(newDS), ndof(0), q(NULL), q0(NULL), qFree(NULL), velocity(NULL), velocity0(NULL), velocityFree(NULL), p(NULL), mass(NULL),
+  DynamicalSystem(newDS), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL),
+  velocity(NULL), velocity0(NULL), velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL),
   fInt(NULL), fExt(NULL), QNLInertia(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQQNLInertia(NULL), jacobianVelocityQNLInertia(NULL),
   isPAllocatedIn(true), isMassAllocatedIn(true),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeQNLInertiaPtr(NULL), computeJacobianQFIntPtr(NULL),
   computeJacobianVelocityFIntPtr(NULL), computeJacobianQQNLInertiaPtr(NULL), computeJacobianVelocityQNLInertiaPtr(NULL)
 
 {
-  if (newDS.getType() != LNLDS)
+  if (newDS.getType() != LNLDS && newDS.getType() != LTIDS)
     RuntimeException::selfThrow("LagrangianDS - copy constructor: try to copy into a LagrangianDS a DS of type: " + newDS.getType());
 
   DSType = LNLDS;
@@ -429,6 +433,7 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
     fInt = new SimpleVector(lnlds->getFInt());
     areForcesAllocatedIn[0] = true;
   }
+
   if (lnlds->getFExtPtr() != NULL)
   {
     fExt = new SimpleVector(lnlds->getFExt());
@@ -1267,8 +1272,8 @@ double LagrangianDS::dsConvergenceIndicator()
 
 // -- Default constructor --
 LagrangianDS::LagrangianDS():
-  DynamicalSystem(), ndof(0), q(NULL), q0(NULL), qFree(NULL), velocity(NULL), velocity0(NULL),
-  velocityFree(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL), QNLInertia(NULL), jacobianQFInt(NULL),
+  DynamicalSystem(), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
+  velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL), QNLInertia(NULL), jacobianQFInt(NULL),
   jacobianVelocityFInt(NULL), jacobianQQNLInertia(NULL), jacobianVelocityQNLInertia(NULL),
   isPAllocatedIn(false), isMassAllocatedIn(false),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeQNLInertiaPtr(NULL), computeJacobianQFIntPtr(NULL),

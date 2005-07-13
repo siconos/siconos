@@ -22,17 +22,12 @@ OneStepIntegrator::~OneStepIntegrator()
 
 void OneStepIntegrator::initialize()
 {
-  IN("OneStepIntegrator::initialize \n");
   ds->initMemory(sizeMem);
-  OUT("OneStepIntegrator::initialize\n");
 }
 
 void OneStepIntegrator::nextStep()
 {
-  IN("OneStepIntegrator::nextStep\n");
   ds->swapInMemory();
-  OUT("OneStepIntegrator::nextStep\n");
-
 }
 
 void OneStepIntegrator::computeFreeState()
@@ -52,8 +47,7 @@ void OneStepIntegrator::updateState()
 
 void OneStepIntegrator::display() const
 {
-  cout << "-----------------------------------------------------" << endl;
-  cout << "____ data of the OneStepIntegrator " << endl;
+  cout << "==== OneStepIntegrator display =====" << endl;
   cout << "| integratorType : " << integratorType << endl;
   cout << "| DS id is: " << endl;
   if (ds != NULL) cout << ds->getId() << endl;
@@ -61,7 +55,7 @@ void OneStepIntegrator::display() const
   cout << "| sizeMem: " << sizeMem << endl;
   if (timeDiscretisation != NULL) timeDiscretisation->display();
   else cout << "-> NULL" << endl;
-  cout << "-----------------------------------------------------" << endl << endl;
+  cout << "====================================" << endl;
 }
 
 void OneStepIntegrator::saveIntegratorToXML()

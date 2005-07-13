@@ -3,20 +3,19 @@ using namespace std;
 
 // --- Constructor from an xml file (newNsds is optional) ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML * dsXML,  NonSmoothDynamicalSystem* newNsds):
-  LagrangianDS(dsXML), K(NULL), C(NULL),
+  LagrangianDS(dsXML, newNsds), K(NULL), C(NULL),
   isKAllocatedIn(true), isCAllocatedIn(true)
 {
   IN("LagrangianLinearTIDS::LagrangianLinearTIDS() - Xml constructor\n");
   DSType = LTIDS;
-  if (newNsds != NULL) nsds = newNsds;
 
   if (dsXML != NULL)
   {
     LagrangianLinearTIDSXML * lltidsxml = (static_cast <LagrangianLinearTIDSXML*>(dsxml));
-    K = new SiconosMatrix(ndof, ndof);
-    C = new SiconosMatrix(ndof, ndof);
-    *K = lltidsxml->getK();
-    *C = lltidsxml->getC();
+    if (lltidsxml->hasK())
+      K = new SiconosMatrix(lltidsxml->getK());
+    if (lltidsxml->hasC())
+      C = new SiconosMatrix(lltidsxml->getC());
   }
   else RuntimeException::selfThrow("LagrangianLinearTIDS::LagrangianLinearTIDS - DSXML paramater must not be NULL");
   OUT("LagrangianLinearTIDS::LagrangianLinearTIDS() - Xml constructor\n");
@@ -102,6 +101,7 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const DynamicalSystem & newDS):
     K = new SiconosMatrix(ltids->getK());
     isKAllocatedIn = true;
   }
+
   if (ltids->getCPtr() != NULL)
   {
     C = new SiconosMatrix(ltids->getC());

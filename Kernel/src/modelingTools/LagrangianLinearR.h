@@ -56,8 +56,10 @@ public:
   /** \fn LagrangianLinearR(const Relation&)
    *  \brief copy constructor
    *  \param a relation to copy
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
+   *  warning: the interaction link is not copied, set a new one!
    */
-  LagrangianLinearR(const Relation &);
+  LagrangianLinearR(const Relation &, Interaction* = NULL);
 
   ~LagrangianLinearR();
 

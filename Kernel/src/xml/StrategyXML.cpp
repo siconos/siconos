@@ -312,7 +312,7 @@ void StrategyXML::loadStrategy(Strategy* str)
           }
           else
           {
-            XMLException::selfThrow("InteracitonXML - loadInteraction ERROR : undefined Relation type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
+            XMLException::selfThrow("StrategyXML - loadStrategy ERROR : undefined Relation type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
           }
         }
       }

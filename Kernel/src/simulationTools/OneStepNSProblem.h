@@ -251,6 +251,11 @@ public:
    */
   virtual void updateState();
 
+  /** \fn void updateOutput(void)
+   *  \brief compute output for all the interaction of the DS
+   */
+  virtual void updateOutput();
+
   /** \fn void checkInteraction(void)
    *  \brief check and update status of the interactions
    */

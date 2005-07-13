@@ -9,10 +9,9 @@ Relation::Relation(Interaction* inter): relationType("none"), interaction(inter)
 {}
 
 // xml constructor
-Relation::Relation(RelationXML* relxml, Interaction* inter): relationType("none"), interaction(inter),
-  relationxml(relxml), computeInputName("none"),
-  computeOutputName("none")
-
+Relation::Relation(RelationXML* relxml, Interaction* inter):
+  relationType("none"), interaction(inter), relationxml(relxml),
+  computeInputName("none"), computeOutputName("none")
 {
   if (relationxml != NULL)
   {
@@ -34,13 +33,14 @@ Relation::Relation(RelationXML* relxml, Interaction* inter): relationType("none"
   else RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
 }
 
-// copy constructor
-Relation::Relation(const Relation& newRel):
-  relationType(newRel.getType()), interaction(NULL), relationxml(NULL),
+// copy constructor (inter is optional)
+Relation::Relation(const Relation& newRel, Interaction* inter):
+  relationType(newRel.getType()), interaction(inter), relationxml(NULL),
   computeInputName(newRel.getComputeInputName()), computeOutputName(newRel.getComputeOutputName()),
   computeOutputPtr(NULL), computeInputPtr(NULL)
 {
   // \warning:  interaction, relationxml and dsioVector are not copied !
+  // Interaction can be set with optional parameter inter (default=NULL)
   // \todo: manage dsio copy when this class will be well implemented
 }
 

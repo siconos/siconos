@@ -200,14 +200,14 @@ Strategy::~Strategy()
 bool Strategy::isStrategyComplete() const
 {
   bool isComplete = 1;
-  if (timeDiscretisation == NULL) cout << "Warning: strategy incomplete: no time discretisation" << endl;
+  if (timeDiscretisation == NULL) cout << "Warning: strategy may be incomplete: no time discretisation" << endl;
   isComplete = 0;
   if (integratorVector.size() == 1 && integratorVector[0] == NULL)
     cout << "Warning: strategy may be incomplete: no integrator" << endl;
   isComplete = 0;
   if (nsProblem == NULL) cout << "Warning: strategy may be incomplete: no NS problem" << endl;
   isComplete = 0;
-  if (model == NULL) cout << "Warning: strategy incomplete: not linked with any model" << endl;
+  if (model == NULL) cout << "Warning: strategy may be incomplete: not linked with any model" << endl;
   isComplete = 0;
   return(isComplete);
 }
@@ -263,7 +263,9 @@ void Strategy::computeFreeState()
 
 void Strategy::nextStep()
 {
+  // increment time step
   timeDiscretisation->increment();
+  model->setCurrentT(model->getCurrentT() + timeDiscretisation->getH());
 
   for (unsigned int i = 0; i < integratorVector.size(); i++)
     integratorVector[i]->nextStep();
@@ -272,9 +274,6 @@ void Strategy::nextStep()
     nsProblem->nextStep();
     nsProblem->checkInteraction();
   }
-
-  // increment time step
-  model->setCurrentT(model->getCurrentT() + timeDiscretisation->getH());
 }
 
 void Strategy::formaliseOneStepNSProblem()
@@ -289,33 +288,34 @@ void Strategy::computeOneStepNSProblem()
 
 void Strategy::updateState()
 {
-  if (nsProblem != NULL)nsProblem->updateState();
+  if (nsProblem != NULL) nsProblem->updateState();
   for (unsigned int i = 0; i < integratorVector.size(); i++)
   {
     integratorVector[i]->updateState();
   }
+  if (nsProblem != NULL) nsProblem->updateOutput();
+
 }
 
 void Strategy::initialize()
 {
   // initialization of the OneStepIntegrators
   for (unsigned int i = 0; i < integratorVector.size(); i++)
-  {
     integratorVector[i]->initialize();
-  }
 }
 
 OneStepIntegrator* Strategy::getIntegratorOfDSPtr(const int& numberDS)
 {
+  OneStepIntegrator * tmpOsi = NULL;
   for (unsigned int i = 0; i < integratorVector.size(); i++)
   {
     if (integratorVector[i]->getDynamicalSystemPtr()->getNumber() == numberDS)
-    {
-      return integratorVector[i];
-      break;
-    }
+      tmpOsi = integratorVector[i];
   }
-  return 0;
+  if (tmpOsi == NULL)
+    RuntimeException::selfThrow("Strategy::getIntegratorOfDSPtr, try to get an unexisting interaction");
+
+  return tmpOsi;
 }
 
 void Strategy::newtonSolve(const double& criterion, const int& maxStep)

@@ -15,8 +15,9 @@ using namespace std;
 
 // From XML file (warning: newNsds is optional)
 DynamicalSystem::DynamicalSystem(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
-  DSType(NLDS), nsds(newNsds), number(0), id("none"), n(0), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
-  stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(dsXML), vectorFieldPtr(NULL),
+  DSType(NLDS), nsds(newNsds), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL), xDot(NULL), xDotMemory(NULL),
+  xFree(NULL), r(NULL), rMemory(NULL), stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(dsXML),
+  vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
   isX0AllocatedIn(true), isXAllocatedIn(true), isXMemoryAllocatedIn(false), isXDotAllocatedIn(true), isXDotMemoryAllocatedIn(false),
   isXFreeAllocatedIn(true), isRAllocatedIn(true), isRMemoryAllocatedIn(false), isJacobianXAllocatedIn(true), isBCAllocatedIn(false)
 {
@@ -37,8 +38,9 @@ DynamicalSystem::DynamicalSystem(DSXML * dsXML, NonSmoothDynamicalSystem* newNsd
     jacobianX = new SiconosMatrix(n, n);
 
     // xml loading of vector and matrix members
-    if (dsxml->hasX0() == true) *(x0) = dsxml->getX0();
-    if (dsxml->hasX() == true) *(x) = dsxml->getX();
+    if (dsxml->hasX0() == true) *x0 = dsxml->getX0();
+    if (dsxml->hasX() == true) *x = dsxml->getX();
+    else *x = *x0;
     if (dsxml->hasXDot() == true) *(xDot) = dsxml->getXDot();
     if (dsxml->hasStepsInMemory() == true) stepsInMemory = dsxml->getStepsInMemory();
     if (dsxml->hasXMemory() == true)
@@ -79,9 +81,10 @@ DynamicalSystem::DynamicalSystem(DSXML * dsXML, NonSmoothDynamicalSystem* newNsd
 
 // From a minimum set of data
 DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN, const SiconosVector& newX0, const string& vectorFieldPlugin):
-  DSType(NLDS), nsds(NULL), number(newNumber), id("none"), n(newN), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
-  stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(NULL), vectorFieldPtr(NULL),
-  isX0AllocatedIn(true), isXAllocatedIn(true), isXMemoryAllocatedIn(false), isXDotAllocatedIn(true), isXDotMemoryAllocatedIn(false),
+  DSType(NLDS), nsds(NULL), number(newNumber), id("none"), n(newN), x0(NULL), x(NULL), xMemory(NULL), xDot(NULL), xDotMemory(NULL),
+  xFree(NULL), r(NULL), rMemory(NULL), stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(NULL),
+  vectorFieldPtr(NULL), computeJacobianXPtr(NULL), isX0AllocatedIn(true), isXAllocatedIn(true), isXMemoryAllocatedIn(false),
+  isXDotAllocatedIn(true), isXDotMemoryAllocatedIn(false),
   isXFreeAllocatedIn(true), isRAllocatedIn(true), isRMemoryAllocatedIn(false), isJacobianXAllocatedIn(true), isBCAllocatedIn(false)
 {
   IN("DynamicalSystem::DynamicalSystem - Minimum data constructor\n");
@@ -94,6 +97,9 @@ DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN,
   if (n != newX0.size())
     RuntimeException::selfThrow("DynamicalSystem::constructor from data, inconsistent sizes between problem size and x0.");
   *(x0) = newX0;
+
+  // x initialization
+  *x = *x0;
   setVectorFieldFunction(cShared.getPluginName(vectorFieldPlugin), cShared.getPluginFunctionName(vectorFieldPlugin));
   setComputeJacobianXFunction("BasicPlugin.so", "computeJacobianX");
   OUT("DynamicalSystem::DynamicalSystem - Minimum data constructor\n");
@@ -102,20 +108,37 @@ DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN,
 // copy constructor
 DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
   DSType(NLDS), nsds(newDS.getNSDSPtr()), number(newDS.getNumber()), id(newDS.getId()), n(newDS.getN()),
-  x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
-  stepsInMemory(newDS.getStepsInMemory()), jacobianX(NULL), BC(NULL), dsxml(NULL), vectorFieldPtr(NULL),
-  isX0AllocatedIn(true), isXAllocatedIn(true), isXMemoryAllocatedIn(false), isXDotAllocatedIn(true), isXDotMemoryAllocatedIn(false),
-  isXFreeAllocatedIn(true), isRAllocatedIn(true), isRMemoryAllocatedIn(false), isJacobianXAllocatedIn(true), isBCAllocatedIn(false)
+  x0(NULL), x(NULL), xMemory(NULL), xDot(NULL), xDotMemory(NULL),
+  xFree(NULL), r(NULL), rMemory(NULL), stepsInMemory(newDS.getStepsInMemory()), jacobianX(NULL), BC(NULL), dsxml(NULL),
+  vectorFieldPtr(NULL), computeJacobianXPtr(NULL), isX0AllocatedIn(true), isXAllocatedIn(true), isXMemoryAllocatedIn(false), isXDotAllocatedIn(true),
+  isXDotMemoryAllocatedIn(false), isXFreeAllocatedIn(true), isRAllocatedIn(true), isRMemoryAllocatedIn(false),
+  isJacobianXAllocatedIn(true), isBCAllocatedIn(false)
 {
-  x0 = new SimpleVector(newDS.getX0());
-  x = new SimpleVector(newDS.getX());
-  xDot = new SimpleVector(newDS.getXDot());
-  xFree = new SimpleVector(newDS.getXFree());
-  r = new SimpleVector(newDS.getR());
-  jacobianX = new SiconosMatrix(newDS.getJacobianX());
+  if (newDS.getX0Ptr()->isComposite())
+  {
+    x0 = new CompositeVector(newDS.getX0());
+    x = new CompositeVector(newDS.getX());
+    xDot = new CompositeVector(newDS.getXDot());
+    xFree = new CompositeVector(newDS.getXFree());
+  }
+  else
+  {
+    x0 = new SimpleVector(newDS.getX0());
+    x = new SimpleVector(newDS.getX());
+    xDot = new SimpleVector(newDS.getXDot());
+    xFree = new SimpleVector(newDS.getXFree());
+  }
+
+  if (newDS.getRPtr() != NULL)
+    r = new SimpleVector(newDS.getR());
+
+  if (newDS.getJacobianXPtr() != NULL)
+    jacobianX = new SiconosMatrix(newDS.getJacobianX());
 
   if (newDS.getXMemoryPtr() != NULL)
   {
+    cout << stepsInMemory << "SIM" << endl;
+    newDS.getXMemoryPtr()->display();
     xMemory = new SiconosMemory(newDS.getXMemory());
     isXMemoryAllocatedIn = true;
   }
@@ -376,7 +399,6 @@ void DynamicalSystem::setVectorFieldFunction(const string& pluginPath, const str
 {
   vectorFieldPtr = NULL;
   cShared.setFunction(&vectorFieldPtr, pluginPath, functionName);
-
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   vectorFieldFunctionName = plugin + ":" + functionName;
@@ -559,9 +581,9 @@ double DynamicalSystem::dsConvergenceIndicator()
 
 // Default constructor
 DynamicalSystem::DynamicalSystem():
-  DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xDot(NULL), xFree(NULL), r(NULL),
-  stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(NULL), vectorFieldPtr(NULL), isX0AllocatedIn(false),
-  isXAllocatedIn(false), isXMemoryAllocatedIn(false), isXDotAllocatedIn(false), isXDotMemoryAllocatedIn(false),
+  DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL), xDot(NULL), xDotMemory(NULL),
+  xFree(NULL), r(NULL), rMemory(NULL), stepsInMemory(1), jacobianX(NULL), BC(NULL), dsxml(NULL), vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
+  isX0AllocatedIn(false), isXAllocatedIn(false), isXMemoryAllocatedIn(false), isXDotAllocatedIn(false), isXDotMemoryAllocatedIn(false),
   isXFreeAllocatedIn(false), isRAllocatedIn(false), isRMemoryAllocatedIn(false), isJacobianXAllocatedIn(false),
   isBCAllocatedIn(false)
 

@@ -28,9 +28,9 @@ LagrangianNonLinearR::LagrangianNonLinearR(const string& computeInput, const str
   setComputeOutputFunction(cShared.getPluginName(computeOutput), cShared.getPluginFunctionName(computeOutput));
 }
 
-// copy constructor
-LagrangianNonLinearR::LagrangianNonLinearR(const Relation & newLNLR):
-  Relation(newLNLR)
+// copy constructor (inter is optional)
+LagrangianNonLinearR::LagrangianNonLinearR(const Relation & newLNLR, Interaction* inter):
+  Relation(newLNLR, inter)
 {
   if (relationType !=  LAGRANGIANNONLINEARRELATION)
     RuntimeException::selfThrow("LagrangianNonLinearR:: copy constructor, inconsistent relation types for copy");

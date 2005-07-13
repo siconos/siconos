@@ -58,21 +58,17 @@ Interaction::Interaction(const Interaction& newI):
   string relationType = newI.getRelationPtr()->getType();
   // -> call copy constructor
   if (relationType == LINEARTIRELATION)
-  {
-    relation = new LinearTIR(*(newI.getRelationPtr()));
-    relation->setInteractionPtr(this);
-  }
+    relation = new LinearTIR(*(newI.getRelationPtr()), this);
+
   else if (relationType == LAGRANGIANLINEARRELATION)
   {
-    LagrangianLinearR *tmp = static_cast<LagrangianLinearR*>(newI.getRelationPtr());
-    relation = new LagrangianLinearR(*tmp);
-    relation->setInteractionPtr(this);
+    //   LagrangianLinearR *tmp = static_cast<LagrangianLinearR*>(newI.getRelationPtr());
+    relation = new LagrangianLinearR(*(newI.getRelationPtr()), this);
   }
+
   else if (relationType == LAGRANGIANNONLINEARRELATION)
-  {
     relation = new LagrangianNonLinearR(*(newI.getRelationPtr()));
-    relation->setInteractionPtr(this);
-  }
+
   else RuntimeException::selfThrow("Interaction::copy constructor, unknown relation type " + relation->getType());
 
   // \remark FP: we do not link xml object in the copy
@@ -119,10 +115,11 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
         vectorDS = nsds->getDynamicalSystems();
       else
       {
-        SimpleVector listOfDsConcerned = interactionxml->getDSConcernedVector();
-        unsigned int size = listOfDsConcerned.size();
+        vector<int> listDS = interactionxml->getDSConcerned();
+        unsigned int size = listDS.size();
+        vectorDS.resize(size);
         for (unsigned int i = 0; i < size; i++)
-          vectorDS.push_back(nsds->getDynamicalSystemPtrNumber((int)listOfDsConcerned(i)));
+          vectorDS[i] = nsds->getDynamicalSystemPtrNumber(listDS[i]);
       }
     }
     else cout << "Interaction constructor, warning: no dynamical systems linked to the interaction!" << endl;
@@ -147,32 +144,25 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
     string relationType = interactionxml->getRelationXML()->getType();
     // Linear relation
     if (relationType == LINEAR_TIME_INVARIANT_RELATION_TAG)
-    {
-      relation = new LinearTIR(interactionxml->getRelationXML());
-      relation->setInteractionPtr(this);
-    }
+      relation = new LinearTIR(interactionxml->getRelationXML(), this);
+
     // Lagrangian linear relation
     else if (relationType == LAGRANGIAN_LINEAR_RELATION_TAG)
-    {
-      relation = new LagrangianLinearR(interactionxml->getRelationXML());
-      relation->setInteractionPtr(this);
-    }
+      relation = new LagrangianLinearR(interactionxml->getRelationXML(), this);
+
     // Lagrangian non-linear relation
     else if (relationType == LAGRANGIAN_NON_LINEAR_RELATION_TAG)
-    {
-      relation = new LagrangianNonLinearR(interactionxml->getRelationXML());
-      relation->setInteractionPtr(this);
-    }
+      relation = new LagrangianNonLinearR(interactionxml->getRelationXML(), this);
+
     else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + relation->getType());
   }
   else RuntimeException::selfThrow("Interaction::xml constructor, xmlfile = NULL");
 }
 
-// --- Constructor from a set of data ---
+// --- Constructor from a complete set of data ---
 
 Interaction::Interaction(const string& newId, const int& newNumber, const int& nInter,
-                         vector<int>* newStatus,
-                         vector<DynamicalSystem*> *dsConcerned):
+                         vector<int>* newStatus, vector<DynamicalSystem*> *dsConcerned):
   id(newId), number(newNumber), nInteraction(nInter), y(NULL), yDot(NULL),
   lambda(NULL), yOld(NULL), yDotOld(NULL), lambdaOld(NULL), nslaw(NULL),
   relation(NULL), interactionxml(NULL), isYAllocatedIn(true), isYDotAllocatedIn(true),
@@ -187,7 +177,6 @@ Interaction::Interaction(const string& newId, const int& newNumber, const int& n
   yDotOld = new SimpleVector(nInteraction);
   lambdaOld = new SimpleVector(nInteraction);
 
-  status.clear();
   status = *newStatus;
 
   vectorDS.clear();
@@ -257,7 +246,7 @@ DynamicalSystem* Interaction::getDynamicalSystemPtr(const int& number)
     if ((*it)->getNumber() == number) tmpDS = (*it);
 
   if (tmpDS == NULL)
-    RuntimeException::selfThrow("Interaction::getDynamicalSystemPtr(number), there is no DS which number is" + number);
+    RuntimeException::selfThrow("Interaction::getDynamicalSystemPtr(number), there is no DS which number is " + number);
 
   return tmpDS;
 }
@@ -296,7 +285,7 @@ void Interaction::check(const double& time, const double& pasH)
 {
   IN("Interaction::check(void)\n");
   int i;
-  relation->computeOutput(time);
+  //relation->computeOutput(time);
 
   // Compute yp, predicted value for constrained variable, for contact detection
   // if contact (yp<0), status=1, else equal 0.
@@ -321,6 +310,7 @@ void Interaction::update(const double& time, const double& pasH)
 {
   IN("Interaction::update(void)\n");
   int i;
+
   // Status update
   if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW || nslaw->getType() == NEWTONIMPACTLAWNSLAW || nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
   {

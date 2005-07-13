@@ -122,7 +122,7 @@ LinearDS::LinearDS(const int& newNumber, const unsigned int& newN, const Siconos
 // From a minimum set of data, A from a given matrix
 LinearDS::LinearDS(const int& newNumber, const SiconosVector& newX0,
                    const SiconosMatrix& newA):
-  DynamicalSystem(newNumber, newA.size(0), newX0, "BasicPlugin:vectorField"),
+  DynamicalSystem(newNumber, newA.size(0), newX0),
   A(NULL), b(NULL), uSize(0), u(NULL), E(NULL),
   AFunctionName("none"), bFunctionName("none"), uFunctionName("none"), EFunctionName("none"),
   computeAPtr(NULL), computeBPtr(NULL), computeUPtr(NULL), computeEPtr(NULL),

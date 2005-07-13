@@ -409,18 +409,15 @@ void NSDSXML::loadDSXML(xmlNode * rootDSNode)
 
   isbvp = isBVP();
 
-  node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)rootDSNode/*, NSDS_DS*/);
+  node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)rootDSNode);
   if (node == NULL)
-  {
     XMLException::selfThrow("NSDSXML - loadDSXML error : at least one " + DYNAMICAL_SYSTEM_TAG + " must be declared.");
-  }
 
   while (node != NULL)
   {
     DSXML *dsxml;
 
     number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
-
     i = DSXMLMap.find(number);
     // we can only add a DS if his number is not already defined
     if (i == DSXMLMap.end())
@@ -454,16 +451,12 @@ void NSDSXML::loadDSXML(xmlNode * rootDSNode)
         dsxml->setDSInputOutputXML(getDSInputOutputXMLRelatingToDS(number));
       }
       else
-      {
         XMLException::selfThrow("NSDSXML - loadDSXML error : undefined DS type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
-      }
     }
     else
-    {
       XMLException::selfThrow("NSDSXML - loadDSXML error : wrong DS number : already exists.");
-    }
 
-    node = SiconosDOMTreeTools::findFollowNode(node/*, NSDS_DS*/);
+    node = SiconosDOMTreeTools::findFollowNode(node);
   }
 }
 

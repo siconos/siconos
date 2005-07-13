@@ -143,9 +143,6 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
 
     xmlSchemaSetValidErrors(validctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
 
-
-
-
     //----------Verififys the XML file respects the schema------------//
 
     int xmlValid = 0;
@@ -230,8 +227,6 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_XMLSCHEMA)) != NULL)
     xmlSchemaNode = node;
   else XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_XMLSCHEMA + " not found.");
-
-
   /*
    * loadModel function is called, so an xml file has been given to load the data of the system
    */
@@ -251,7 +246,6 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
     timeNode = node;
   }
   else XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_TIME + " not found.");
-
   /*
    * Warning, in an xml input data file, the strategy is only optional
    */

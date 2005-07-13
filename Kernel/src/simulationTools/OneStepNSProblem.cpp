@@ -103,7 +103,7 @@ void OneStepNSProblem::updateState()
   vector<Interaction*>::iterator it;
   double currentTime = strategy->getModelPtr()->getCurrentT();
   double pasH = strategy->getTimeDiscretisationPtr()->getH();
-  for (it = interactionVector.begin(); it != interactionVector.end(); ++it)
+  for (it = interactionVector.begin(); it != interactionVector.end(); it++)
   {
     (*it)->update(currentTime, pasH);
     if (connectedInteractionMap.find(*it) != connectedInteractionMap.end())
@@ -111,11 +111,18 @@ void OneStepNSProblem::updateState()
   }
 }
 
+void OneStepNSProblem::updateOutput()
+{
+  vector<Interaction*>::iterator it;
+  double currentTime = strategy->getModelPtr()->getCurrentT();
+  for (it = interactionVector.begin(); it != interactionVector.end(); it++)
+    (*it)->getRelationPtr()->computeOutput(currentTime);
+}
 
 void OneStepNSProblem::nextStep()
 {
   vector<Interaction*>::iterator it;
-  for (it = interactionVector.begin(); it != interactionVector.end(); ++it)
+  for (it = interactionVector.begin(); it != interactionVector.end(); it++)
     (*it)->swapInMemory();
 }
 
@@ -124,8 +131,9 @@ void OneStepNSProblem::checkInteraction()
   // --- check and update status of the interactions ---
   vector<Interaction*>::iterator it;
   double pasH = strategy->getTimeDiscretisationPtr()->getH();
-  for (it = interactionVector.begin(); it != interactionVector.end(); ++it)
-    (*it)->check(strategy->getModelPtr()->getCurrentT(), pasH);
+  double time = strategy->getModelPtr()->getCurrentT();
+  for (it = interactionVector.begin(); it != interactionVector.end(); it++)
+    (*it)->check(time, pasH);
   updateConnectedInteractionMap();
 }
 
@@ -480,7 +488,7 @@ void OneStepNSProblem::updateConnectedInteractionMap()
     for (unsigned int k = 0; k < status.size(); k++)
       if (status[k] == 1)
       {
-        cout << "# interaction " << i << " is active !" << endl;
+        cout << "# interaction " << interactionVector[i]->getNumber() << " is active !" << endl;
         hasActiveConnection = false;
         for (unsigned int j = 0; j < interactionVector.size(); j++)
         {
@@ -547,7 +555,7 @@ void OneStepNSProblem::displayConnectedInteractionMap()
   map< Interaction*, vector<Connection*> >::iterator iter;
 
   //cout<<"#------OneStepNSProblem::displayConnectedInteractionMap-----------"<<endl;
-  for (iter = connectedInteractionMap.begin(); iter != connectedInteractionMap.end(); ++iter)
+  for (iter = connectedInteractionMap.begin(); iter != connectedInteractionMap.end(); iter++)
   {
     cout << "#-----------------" << endl;
     cout << "| Origin Interaction " << iter->first << endl;

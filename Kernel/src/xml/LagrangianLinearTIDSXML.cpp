@@ -12,14 +12,9 @@ LagrangianLinearTIDSXML::LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSN
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LTIDS_K)) != NULL)
     KNode = node;
-  else
-    XMLException::selfThrow("LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties error : tag " + LTIDS_K + " not found.");
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LTIDS_C)) != NULL)
     CNode = node;
-  else
-    XMLException::selfThrow("LagrangianLinearTIDSXML - loadLagrangianLinearTIDSProperties error : tag " + LTIDS_C + " not found.");
-
 }
 
 void LagrangianLinearTIDSXML::updateDynamicalSystemXML(xmlNode* newRootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)

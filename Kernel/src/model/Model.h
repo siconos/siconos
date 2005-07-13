@@ -159,9 +159,6 @@ public:
    */
   void setStrategyPtr(Strategy * newPtr);
 
-
-  //  void linkModelToStrategy(model *, strategy *)
-
   /** \fn inline NonSmoothDynamicalSystem* getNonSmoothDynamicalSystemPtr() const
    *  \brief get the NonSmoothDynamicalSystem of the Model
    *  \return a pointer on NonSmoothDynamicalSystem

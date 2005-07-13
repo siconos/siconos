@@ -35,16 +35,21 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
     {
       // \todo use factories to improve this copy.
       string type = dsTmp ->getType();
+      cout << " copie 0" << endl;
       if (type ==  NLDS)
         DSVector[i] = new DynamicalSystem(*dsTmp);
       else if (type ==  LDS)
         DSVector[i] = new LinearDS(*dsTmp);
-      else if (type ==  NLDS)
+      else if (type ==  LNLDS)
         DSVector[i] = new LagrangianDS(*dsTmp);
-      else if (type ==  NLDS)
+      else if (type ==  LTIDS)
+      {
+        cout << " OKDODKOSKD" << endl;
         DSVector[i] = new LagrangianLinearTIDS(*dsTmp);
+      }
       else
         RuntimeException::selfThrow("NonSmoothDynamicalSystem::copy constructor, unknown Dynamical system type:" + type);
+      cout << " fin copie 0" << endl;
 
       isDSVectorAllocatedIn[i] = true;
     }
@@ -109,11 +114,12 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NSDSXML* newNsdsxml):
     // DS Vector fill-in
     vector<int> nbDStab = nsdsxml->getDSNumbers();
     unsigned int size = nbDStab.size();
+    DSVector.resize(size, NULL);
+    isDSVectorAllocatedIn.resize(size, false);
+
     for (i = 0; i < size; i++)
     {
       string type = (nsdsxml->getDSXML(nbDStab[i]))->getType();
-      DSVector.resize(size, NULL);
-      isDSVectorAllocatedIn.resize(size, false);
 
       if (type  == LAGRANGIAN_NON_LINEARDS_TAG)  // LagrangianDS
       {

@@ -50,8 +50,6 @@ LagrangianDSXML::LagrangianDSXML(xmlNode * LagrangianDSNode, bool isBVP)
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LNLDS_FEXT)) != NULL)
     FextNode = node;
-  else
-    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_FEXT + " not found.");
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LNLDS_JACOBIANQFINT)) != NULL)
     jacobianQFintNode = node;

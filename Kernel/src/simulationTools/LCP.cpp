@@ -218,13 +218,7 @@ void LCP::compute()
   SimpleVector *yDot, *lambda, *ynew;
   int activeInteraction = 0;
 
-  yDot = interactionVector[0]->getYDotPtr();
-  lambda = interactionVector[0]->getLambdaPtr();
-  ynew = interactionVector[0]->getYPtr();
-
-
-  if (nLcp == 0) lambda->zero();
-  else //if (nLcp == 1)
+  if (nLcp != 0)
   {
     vector<Interaction*>::iterator it;
     for (it = interactionVector.begin(); it != interactionVector.end(); it++)
@@ -236,7 +230,6 @@ void LCP::compute()
       if (connectedInteractionMap.find(*it) != connectedInteractionMap.end())
       {
         yDot = (*it)->getYDotPtr();
-        lambda = (*it)->getLambdaPtr();
         ynew = (*it)-> getYPtr();
 
         Relation *R = (*it)->getRelationPtr();
@@ -257,21 +250,15 @@ void LCP::compute()
 void LCP::computeM()
 {
   IN("LCP::computeM(void)\n");
-  int number;
-  int orgDSRank, connectedDSRank;
+  int number, orgDSRank, connectedDSRank;
   int currentActiveInteraction = 0;
   int interConnectedNumber = 0;
-  vector<int> status;
-  vector<SiconosMatrix*> v;
-  vector<DynamicalSystem*> vDS;
   vector<Connection*> vCo;
-  vector<OneStepIntegrator*> OsiV;
-  vector<Moreau *> MoreauV;
   SiconosMatrix *H, *WW ;
   bool isWWAllocatedIn = false;
   SiconosMatrix orgH, connectedH, wTmp, Mtmp;
   Relation *R, *RConnected;
-  LagrangianLinearR *LLR;
+  LagrangianLinearR *LLR ;
   unsigned int i;
   // --- Count the number of active interactions ---
   nLcp = connectedInteractionMap.size();
@@ -288,28 +275,23 @@ void LCP::computeM()
   for (iter = connectedInteractionMap.begin(); iter != connectedInteractionMap.end(); ++iter)
   {
     Interaction *CurrentInteraction = iter->first;
-    vDS.clear();
-    OsiV.clear();
-    MoreauV.clear();
-    v.clear();
 
     // --- Check if W matrix of Moreau's integrator is already inversed ---
     // At the time, W is inversed in initialize of Moreau.cpp
     // -> \todo improve this step using forward-backward to compute inverse of Mlcp blocks rather than W
-    vDS = CurrentInteraction ->getDynamicalSystems();
+    vector<DynamicalSystem*> vDS = CurrentInteraction ->getDynamicalSystems();
     unsigned int sizeDS = vDS.size();
 
-    // Get W matrix of each DS concerned by the interaction
+    // Get W matrix of each DS concerned by the interaction and save in into v
+    vector<SiconosMatrix*> v;
+    vector<OneStepIntegrator*> OsiV;
+    OsiV.reserve(sizeDS);
     for (i = 0; i < sizeDS; i++)
     {
       number = vDS[i]->getNumber();
-      OsiV.push_back(strategy->getIntegratorOfDSPtr(number));
+      OsiV[i] = strategy->getIntegratorOfDSPtr(number);
       if (OsiV[i]->getType() == MOREAU_INTEGRATOR)
-      {
-        MoreauV.push_back(static_cast<Moreau*>(OsiV[i]));
-        v.push_back(MoreauV[i]->getWPtr());
-        // if( !v[i]->isInversed() ) v[i]->PLUInverseInPlace();
-      }
+        v.push_back((static_cast<Moreau*>(OsiV[i]))->getWPtr());
       else
         RuntimeException::selfThrow("LCP::computeM not yet implemented for Integrator of type " + OsiV[i]->getType());
     }

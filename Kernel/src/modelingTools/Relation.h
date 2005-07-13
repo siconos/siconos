@@ -41,8 +41,10 @@ public:
   /** \fn Relation(const Relation&)
    *  \brief copy constructor
    *  \param a relation to copy
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
+   *  warning: the interaction link is not copied, set a new one!
    */
-  Relation(const Relation&);
+  Relation(const Relation&, Interaction* = NULL);
 
   /** \fn ~Relation()
    *  \brief destructor

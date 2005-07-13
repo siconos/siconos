@@ -160,9 +160,9 @@ LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
   isAllocatedIn.resize(6, true);
 }
 
-// Copy constructor
-LinearTIR::LinearTIR(const Relation & newLTIR):
-  Relation(newLTIR), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
+// Copy constructor (inter is optional)
+LinearTIR::LinearTIR(const Relation & newLTIR, Interaction* inter):
+  Relation(newLTIR, inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
 {
   if (relationType != LINEARTIRELATION)
     RuntimeException::selfThrow("LinearTIR:: copy constructor, inconsistent relation types for copy");
