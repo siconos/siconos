@@ -290,7 +290,7 @@ void Interaction::check(const double& time, const double& pasH)
   // Compute yp, predicted value for constrained variable, for contact detection
   // if contact (yp<0), status=1, else equal 0.
 
-  if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW || nslaw->getType() == NEWTONIMPACTLAWNSLAW || nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
+  if (nslaw->getType() == NEWTONIMPACTLAWNSLAW || nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
   {
     SimpleVector *yDetection = new SimpleVector(yOld->size());
     *yDetection = *yOld + pasH * *yDotOld;
@@ -299,6 +299,10 @@ void Interaction::check(const double& time, const double& pasH)
       if ((*yDetection)(i) < 0.0) status[i] = 1;
     }
     delete yDetection;
+  }
+  else if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW)
+  {
+    for (i = 0; i < nInteraction; i++) status[i] = 1;
   }
   else
     RuntimeException::selfThrow("Interaction::check - not yet implemented for this NSLAW type :" + nslaw->getType());
@@ -312,7 +316,7 @@ void Interaction::update(const double& time, const double& pasH)
   int i;
 
   // Status update
-  if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW || nslaw->getType() == NEWTONIMPACTLAWNSLAW || nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
+  if (nslaw->getType() == NEWTONIMPACTLAWNSLAW || nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
   {
     SimpleVector *yDetection = new SimpleVector(y->size());
     *yDetection = *yOld + pasH * *yDotOld;
@@ -322,6 +326,9 @@ void Interaction::update(const double& time, const double& pasH)
     }
     delete yDetection;
   }
+  else if (nslaw->getType() == COMPLEMENTARITYCONDITIONNSLAW)
+    // to do : check the relative degree
+  {}
   else
     RuntimeException::selfThrow("Interaction::update - not yet implemented for this NSLAW type :" + nslaw->getType());
   OUT("Interaction::update(void)\n");

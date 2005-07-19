@@ -247,7 +247,7 @@ void Moreau::computeFreeState()
     SiconosVector *xfreeloc = ds->getXFreePtr();
     SiconosVector *xold;
     xold = ds->getXMemoryPtr()->getSiconosVector(0);
-    *xfreeloc = W->PLUForwardBackward(*xold);
+    *xfreeloc = *W * (*xold);
   }
   else RuntimeException::selfThrow("Moreau::computeFreeState - not yet implemented for Dynamical system type: " + dstyp);
   OUT("Moreau::computeFreeState\n");
@@ -358,8 +358,8 @@ void Moreau::updateState()
     *temp = *xold + (h * (ds->getR()));
 
     SiconosVector* xloc = ds->getXPtr();
-    if (W->isInversed()) *xloc = *W * *temp;
-    else *xloc =  W->PLUForwardBackward(*temp);
+
+    *xloc = *W * *temp;
 
     delete temp;
   }

@@ -323,7 +323,7 @@ void LCP::computeM()
       double h = strategy->getTimeDiscretisationPtr()->getH(); // time step
       unsigned int sizeMtmp = Dloc->size(0);
       SiconosMatrix Mtmp(sizeMtmp, sizeMtmp);
-      Mtmp = (*Cloc * *WW * *Bloc) + ((1.0 / h) * *Dloc);
+      Mtmp = (h * (*Cloc * *WW * *Bloc)) + *Dloc;
       M->blockMatrixCopy(Mtmp, currentActiveInteraction, currentActiveInteraction);
     }
     else
@@ -363,7 +363,7 @@ void LCP::computeM()
           connectedH = LLR->getHRelatingToDS(connectedDSRank);
         }
         else
-          RuntimeException::selfThrow("LCP::computeM [level3] not yet implemented for relation of type " + R->getType());
+          RuntimeException::selfThrow("LCP::computeM [level3] not yet implemented for relation of type " + RConnected->getType());
 
         Mtmp = orgH * wTmp.multTranspose(connectedH);
         //int interConnectedNumber = vCo[k]->connected->getNumber();
@@ -440,8 +440,8 @@ void LCP::computeQ(const double& time)
       {
         SiconosMatrix* Cloc = LTIR->getCPtr();
         //  intermediate version : only one dynamical system is handled
-        SiconosVector* xfreeloc = CurrentInteraction->getDynamicalSystemPtr(0)->getXFreePtr();
-        (*q)(qPos++) = (*Cloc * *xfreeloc)(0);
+        SiconosVector* xfreeloc = (CurrentInteraction->getDynamicalSystems())[0]->getXFreePtr();
+        (*q)(qPos++) = -(*Cloc * *xfreeloc)(0);
       }
       else
         RuntimeException::selfThrow("LCP::computeQ not yet implemented for NSlaw of type " + nslaw->getType() + "and for relation of type " + R->getType());
