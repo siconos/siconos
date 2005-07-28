@@ -224,19 +224,17 @@ public:
     isQAllocatedIn = false;
   }
 
-  /** \fn void formalize(const double&)
-   *  \brief Build the matrix M and the vector b from the OneStep integrator (Problem
-   * discretized in time) and the set of interactions.
-   *  \param double : current time
+  /** \fn void compute(const double&)
+   *  \brief Compute the unknown z and w and update the Interaction (y and lambda )
    *  \return void
    */
-  void formalize(const double& time);
+  void preCFD(const double&);
 
   /** \fn void compute(void)
    *  \brief Compute the unknown z and w and update the Interaction (y and lambda )
    *  \return void
    */
-  void compute(void);
+  void compute(const double&);
 
   /** \fn void computeM (void)
    *  \brief make the computation of matrix M

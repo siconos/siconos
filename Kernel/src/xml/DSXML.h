@@ -32,12 +32,16 @@ const std::string DS_X0 = "x0";
 const std::string DS_X = "x";
 const std::string DS_XDOT = "xDot";
 const std::string DS_R = "R";
+const std::string DS_U = "u";
+const std::string DS_T = "T";
 const std::string DS_XMEMORY = "xMemory";
 const std::string DS_XDOTMEMORY = "xDotMemory";
 const std::string DS_RMEMORY = "RMemory";
 const std::string DS_STEPSINMEMORY = "StepsInMemory";
 const std::string DS_VECTORFIELD = "vectorField";
 const std::string DS_COMPUTEJACOBIANX = "computeJacobianX";
+const std::string DS_MATRIXPLUGIN = "matrixPlugin";
+const std::string DS_VECTORPLUGIN = "vectorPlugin";
 
 class DSXML
 {
@@ -516,7 +520,7 @@ public:
    */
   inline std::vector<int> getDSInputOutputNumbers()
   {
-    return this->definedDSInputOutputNumbers;
+    return definedDSInputOutputNumbers;
   }
 
   /** \fn inline vector<int> getDSInputOutputNumbers()
@@ -525,13 +529,129 @@ public:
    */
   void setDSInputOutputXML(std::map<int, DSInputOutputXML*> m);
 
-  //    /** \fn void loadDSInputOutputXML(xmlNode * )
-  //    *   \brief Builds DSInputOutputXML objects from a DOM tree describing DSInputOutputs
-  //    *   \param xmlNode* : the DSInputOutputs DOM tree
-  //    *   \exception XMLException : if a number relating to an DSInputOutput declares in the NSDS is already used
-  //    */
-  //    void loadDSInputOutputXML(xmlNode * rootdsioNode);
+  /** \fn void loadDSInputOutputXML(xmlNode * )
+   *   \brief Builds DSInputOutputXML objects from a DOM tree describing DSInputOutputs
+   *   \param xmlNode* : the DSInputOutputs DOM tree
+   *   \exception XMLException : if a number relating to an DSInputOutput declares in the NSDS is already used
+   */
+  //void loadDSInputOutputXML(xmlNode * rootdsioNode);
 
+  // ===== U AND T MANAGEMENT =====
+
+  // --- uSize ---
+
+  /** \fn int getUSize()
+   *   \brief get size of vector u
+   */
+  inline const unsigned int getUSize() const
+  {
+    if (!hasUSize())
+      XMLException::selfThrow("DSXML - getUSize: this node does not exist");
+    return  SiconosDOMTreeTools::getIntegerContentValue(uSizeNode);
+  }
+
+  // --- u ---
+
+  /** \fn inline string getUPlugin()
+   *   \brief Return the u Plugin name of the DSXML
+   *   \return The u Plugin name of the DSXML
+   *  \exception XMLException
+   */
+  inline const std::string getUPlugin() const
+  {
+    if (!isUPlugin())
+      XMLException::selfThrow("DSXML - getUPlugin : u is not calculated from a plugin ; u vector is given");
+    return  SiconosDOMTreeTools::getStringAttributeValue(uNode, DS_VECTORPLUGIN);
+  }
+
+  /** \fn inline SimpleVector getUVector()
+   *   \brief Return u vector of the DSXML
+   *   \return SimpleVector : u of DSXML
+   *  \exception XMLException
+   */
+  inline const SimpleVector getUVector() const
+  {
+    if (isUPlugin())
+      XMLException::selfThrow("DSXML - getUVector : u vector is not given ; u is calculated from a plugin");
+
+    return  SiconosDOMTreeTools::getSiconosVectorValue(uNode);
+  }
+
+  /** \fn inline void setUVector(SiconosVector *v)
+   *   \brief allows to save the u vector of the DSXML
+   *   \param SiconosVector *u : SiconosVector U to save
+   */
+  inline void setUVector(const SiconosVector& v)
+  {
+    if (uNode != NULL)
+      SiconosDOMTreeTools::setSiconosVectorNodeValue(uNode, v);
+    else uNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, DS_U, v);
+  }
+
+  // --- T ---
+
+  /** \fn SiconosMatrix getTMatrix()
+   *   \brief get T Matrix
+   *   \return a SiconosMatrix
+   */
+  inline const SiconosMatrix getTMatrix() const
+  {
+    if (isTPlugin())
+      XMLException::selfThrow("DSXML - getT: T is not given but calculated from a plugin");
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(TNode);
+  }
+
+  /** \fn inline string getTPlugin()
+   *  \brief get Plugin name to compute T
+   *  \exception XMLException
+   */
+  inline const std::string getTPlugin() const
+  {
+    if (!isTPlugin())
+      XMLException::selfThrow("DSXML - getTPlugin : T is not loaded from a plugin");
+    return  SiconosDOMTreeTools::getStringAttributeValue(TNode, DS_MATRIXPLUGIN);
+  }
+
+  /** \fn void setT(SiconosMatrix *m)
+   *   \brief save T
+   *   \param The SiconosMatrix to save
+   */
+  inline void setT(const SiconosMatrix &m)
+  {
+    if (TNode != NULL)
+      SiconosDOMTreeTools::setSiconosMatrixNodeValue(TNode, m);
+    else TNode = SiconosDOMTreeTools::createMatrixNode(rootDSXMLNode, DS_T, m);
+  }
+  /** \fn bool isUPlugin()
+   *   \brief Return true if u is calculated from a plugin
+   */
+  inline bool isUPlugin() const
+  {
+    return xmlHasProp((xmlNodePtr)uNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
+  }
+
+  /** \fn bool isTPlugin()
+   *   \brief Return true if T is calculated from a plugin
+   */
+  inline bool isTPlugin() const
+  {
+    return xmlHasProp((xmlNodePtr)TNode, (xmlChar *) DS_MATRIXPLUGIN.c_str());
+  }
+
+  /** \fn bool hasXX()
+   * \brief return true if XXnode exists */
+  inline bool hasUSize() const
+  {
+    return (uSizeNode != NULL);
+  }
+  inline bool hasU() const
+  {
+    return (uNode != NULL);
+  }
+  inline bool hasT() const
+  {
+    return (TNode != NULL);
+  }
 
 protected:
   xmlNode * rootDSXMLNode;
@@ -539,13 +659,6 @@ protected:
 
   //Object
   BoundaryConditionXML * boundaryConditionXML;  //Maybe not defined (if not BVP NSDS)
-
-  /** \fn loadDSProperties(xmlNode * DSnode)
-   *   \brief load the different properties of a DS
-   *   \param bool isBVP : if NSDS is BVP DS have boundary condition
-   *   \exception XMLException : if a property of the DS lacks in the DOM tree
-   */
-  void loadDSProperties(const bool& isBVP);
 
 
   /** \fn void loadBoundaryConditionXML(xmlNode * rootBoundaryConditionNode)
@@ -582,6 +695,9 @@ private:
   xmlNode * dsInputOutputNode;
   xmlNode * rNode;
   xmlNode * rMemoryNode;
+  xmlNode * uSizeNode;
+  xmlNode * uNode;
+  xmlNode * TNode;
 
   //    //Object
   //    BoundaryConditionXML * boundaryConditionXML;  //Maybe not defined (if not BVP NSDS)

@@ -38,7 +38,7 @@ class LagrangianDSXML;
  *    - \f$ \ddot q  \in R^{ndof} \f$  the acceleration, i. e. the second time derivative of the  generalized coordinates.
  *    - \f$ p  \in R^{ndof} \f$  the forces due to the Non Smooth Interaction. In the particular case of Non Smooth evolution, the variable p contains the impulse and not the force.
  *    -  \f$ M(q)  \in  R^{ndof \times ndof}  \f$ is the inertia term saved in the SiconosMatrix mass.
- *    -  \f$ Q(\dot q, q)  \in R^{ndof}\f$ is the non linear inertia term saved in the SiconosVector QNLInertia.
+ *    -  \f$ Q(\dot q, q)  \in R^{ndof}\f$ is the non linear inertia term saved in the SiconosVector NNL.
  *    -  \f$ F_{Int}(\dot q , q , t)  \in R^{ndof} \f$ are the internal forces saved in the SiconosVector fInt.
  *    -  \f$ F_{Ext}(t)  \in R^{ndof}  \f$ are the external forces saved in the SiconosVector fExt.
  *
@@ -564,37 +564,37 @@ public:
    */
   void setFExtPtr(SimpleVector *newPtr);
 
-  // -- QNLInertia --
+  // -- NNL --
 
-  /** \fn  const SimpleVector getQNLInertia() const
-   *  \brief get the value of QNLInertia
+  /** \fn  const SimpleVector getNNL() const
+   *  \brief get the value of NNL
    *  \return SimpleVector
    */
-  inline const SimpleVector getQNLInertia() const
+  inline const SimpleVector getNNL() const
   {
-    return *QNLInertia;
+    return *NNL;
   }
 
-  /** \fn SimpleVector* getQNLInertiaPtr() const
-   *  \brief get QNLInertia
+  /** \fn SimpleVector* getNNLPtr() const
+   *  \brief get NNL
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getQNLInertiaPtr() const
+  inline SimpleVector* getNNLPtr() const
   {
-    return QNLInertia;
+    return NNL;
   }
 
-  /** \fn void setQNLInertia (const SimpleVector& newValue)
-   *  \brief set the value of QNLInertia to newValue
+  /** \fn void setNNL (const SimpleVector& newValue)
+   *  \brief set the value of NNL to newValue
    *  \param SimpleVector newValue
    */
-  void setQNLInertia(const SimpleVector&);
+  void setNNL(const SimpleVector&);
 
-  /** \fn void setQNLInertiaPtr(SimpleVector* newPtr)
-   *  \brief set QNLInertia to pointer newPtr
+  /** \fn void setNNLPtr(SimpleVector* newPtr)
+   *  \brief set NNL to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  void setQNLInertiaPtr(SimpleVector *newPtr);
+  void setNNLPtr(SimpleVector *newPtr);
 
   // -- Jacobian Q Fint --
 
@@ -660,69 +660,69 @@ public:
    */
   void setJacobianVelocityFIntPtr(SiconosMatrix *newPtr);
 
-  // -- Jacobian Q QNLInertia --
+  // -- Jacobian Q NNL --
 
-  /** \fn  const SiconosMatrix getJacobianQQNLInertia() const
-   *  \brief get the value of JacobianQQNLInertia
+  /** \fn  const SiconosMatrix getJacobianQNNL() const
+   *  \brief get the value of JacobianQNNL
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getJacobianQQNLInertia() const
+  inline const SiconosMatrix getJacobianQNNL() const
   {
-    return *jacobianQQNLInertia;
+    return *jacobianQNNL;
   }
 
-  /** \fn SiconosMatrix* getJacobianQQNLInertiaPtr() const
-   *  \brief get JacobianQQNLInertia
+  /** \fn SiconosMatrix* getJacobianQNNLPtr() const
+   *  \brief get JacobianQNNL
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianQQNLInertiaPtr() const
+  inline SiconosMatrix* getJacobianQNNLPtr() const
   {
-    return jacobianQQNLInertia;
+    return jacobianQNNL;
   }
 
-  /** \fn void setJacobianQQNLInertia (const SiconosMatrix& newValue)
-   *  \brief set the value of JacobianQQNLInertia to newValue
+  /** \fn void setJacobianQNNL (const SiconosMatrix& newValue)
+   *  \brief set the value of JacobianQNNL to newValue
    *  \param SiconosMatrix newValue
    */
-  void setJacobianQQNLInertia(const SiconosMatrix&);
+  void setJacobianQNNL(const SiconosMatrix&);
 
-  /** \fn void setJacobianQQNLInertiaPtr(SiconosMatrix* newPtr)
-   *  \brief set JacobianQQNLInertia to pointer newPtr
+  /** \fn void setJacobianQNNLPtr(SiconosMatrix* newPtr)
+   *  \brief set JacobianQNNL to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  void setJacobianQQNLInertiaPtr(SiconosMatrix *newPtr);
+  void setJacobianQNNLPtr(SiconosMatrix *newPtr);
 
-  // -- Jacobian velocity QNLInertia --
+  // -- Jacobian velocity NNL --
 
-  /** \fn  const SiconosMatrix getJacobianVelocityQNLInertia() const
-   *  \brief get the value of JacobianVelocityQNLInertia
+  /** \fn  const SiconosMatrix getJacobianVelocityNNL() const
+   *  \brief get the value of JacobianVelocityNNL
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getJacobianVelocityQNLInertia() const
+  inline const SiconosMatrix getJacobianVelocityNNL() const
   {
-    return *jacobianVelocityQNLInertia;
+    return *jacobianVelocityNNL;
   }
 
-  /** \fn SiconosMatrix* getJacobianVelocityQNLInertiaPtr() const
-   *  \brief get JacobianVelocityQNLInertia
+  /** \fn SiconosMatrix* getJacobianVelocityNNLPtr() const
+   *  \brief get JacobianVelocityNNL
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianVelocityQNLInertiaPtr() const
+  inline SiconosMatrix* getJacobianVelocityNNLPtr() const
   {
-    return jacobianVelocityQNLInertia;
+    return jacobianVelocityNNL;
   }
 
-  /** \fn void setJacobianVelocityQNLInertia (const SiconosMatrix& newValue)
-   *  \brief set the value of JacobianVelocityQNLInertia to newValue
+  /** \fn void setJacobianVelocityNNL (const SiconosMatrix& newValue)
+   *  \brief set the value of JacobianVelocityNNL to newValue
    *  \param SiconosMatrix newValue
    */
-  void setJacobianVelocityQNLInertia(const SiconosMatrix&);
+  void setJacobianVelocityNNL(const SiconosMatrix&);
 
-  /** \fn void setJacobianVelocityQNLInertiaPtr(SiconosMatrix* newPtr)
-   *  \brief set JacobianVelocityQNLInertia to pointer newPtr
+  /** \fn void setJacobianVelocityNNLPtr(SiconosMatrix* newPtr)
+   *  \brief set JacobianVelocityNNL to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  void setJacobianVelocityQNLInertiaPtr(SiconosMatrix *newPtr);
+  void setJacobianVelocityNNLPtr(SiconosMatrix *newPtr);
 
   /** \fn const bool getIsLDSPlugin(unsigned int& n) const
    *  \brief get a bool to check if member number n is loaded from a plugin or not
@@ -771,13 +771,13 @@ public:
     return fExtFunctionName;
   }
 
-  /** \fn  std::string getQNLInertiaFunctionName() const
-   *  \brief get name of function that computes QNLInertia (if QNLInertia from plugin)
+  /** \fn  std::string getNNLFunctionName() const
+   *  \brief get name of function that computes NNL (if NNL from plugin)
    *  \return a string
    */
-  inline const std::string getQNLInertiaFunctionName() const
+  inline const std::string getNNLFunctionName() const
   {
-    return QNLInertiaFunctionName;
+    return NNLFunctionName;
   }
 
   /** \fn  std::string getJacobianQFIntFunctionName() const
@@ -798,22 +798,22 @@ public:
     return jacobianVelocityFIntFunctionName;
   }
 
-  /** \fn  std::string getJacobianQQNLInertiaFunctionName() const
-   *  \brief get name of function that computes jacobianQQNLInertia (if jacobianQQNLInertia from plugin)
+  /** \fn  std::string getJacobianQNNLFunctionName() const
+   *  \brief get name of function that computes jacobianQNNL (if jacobianQNNL from plugin)
    *  \return a string
    */
-  inline const std::string getJacobianQQNLInertiaFunctionName() const
+  inline const std::string getJacobianQNNLFunctionName() const
   {
-    return jacobianQQNLInertiaFunctionName;
+    return jacobianQNNLFunctionName;
   }
 
-  /** \fn  std::string getJacobianVelocityQNLInertiaFunctionName() const
-   *  \brief get name of function that computes jacobianVelocityQNLInertia (if jacobianVelocityQNLInertia from plugin)
+  /** \fn  std::string getJacobianVelocityNNLFunctionName() const
+   *  \brief get name of function that computes jacobianVelocityNNL (if jacobianVelocityNNL from plugin)
    *  \return a string
    */
-  inline const std::string getJacobianVelocityQNLInertiaFunctionName() const
+  inline const std::string getJacobianVelocityNNLFunctionName() const
   {
-    return jacobianVelocityQNLInertiaFunctionName;
+    return jacobianVelocityNNLFunctionName;
   }
 
   // --- PLUGINS RELATED FUNCTIONS ---
@@ -853,18 +853,18 @@ public:
    */
   void computeFExt(const double &);
 
-  /** \fn void computeQNLInertia();
+  /** \fn void computeNNL();
    *  \brief default function to compute the inertia
    *  \exception RuntimeException
    */
-  void computeQNLInertia();
+  void computeNNL();
 
-  /** \fn void computeQNLInertia(SimpleVector q, SimpleVector velocity);
+  /** \fn void computeNNL(SimpleVector q, SimpleVector velocity);
    *  \brief function to compute the inertia
    *  \param SimpleVector*: pointers on the state vectors q and velocity (\dot q)
    *  \exception RuntimeException
    */
-  void computeQNLInertia(SimpleVector *q, SimpleVector *velocity);
+  void computeNNL(SimpleVector *q, SimpleVector *velocity);
 
   /** \fn void computeJacobianQFInt(const double &)
    *  \brief default function to compute the gradient of the internal strengths compared to the state
@@ -894,31 +894,31 @@ public:
    */
   void computeJacobianVelocityFInt(const double &, SimpleVector *q, SimpleVector *velocity);
 
-  /** \fn void computeJacobianQQNLInertia(const double &)
+  /** \fn void computeJacobianQNNL(const double &)
    *  \brief function to compute the gradient of the inertia strengths compared to the state q
    *  \exception RuntimeException
    */
-  void computeJacobianQQNLInertia();
+  void computeJacobianQNNL();
 
-  /** \fn void computeJacobianQQNLInertia(const double &,SimpleVector q, SimpleVector velocity)
+  /** \fn void computeJacobianQNNL(const double &,SimpleVector q, SimpleVector velocity)
    *  \brief function to compute the gradient of the inertia strengths compared to the state q
    *  \param SimpleVector*: pointers on the state vectors q and velocity (\dot q)
    *  \exception RuntimeException
    */
-  void computeJacobianQQNLInertia(SimpleVector *q, SimpleVector *velocity);
+  void computeJacobianQNNL(SimpleVector *q, SimpleVector *velocity);
 
-  /** \fn void computeJacobianVelocityQNLInertia(const double & )
+  /** \fn void computeJacobianVelocityNNL(const double & )
    *  \brief function to compute the gradient of the inertia strengths compared to velocity
    *  \exception RuntimeException
    */
-  void computeJacobianVelocityQNLInertia();
+  void computeJacobianVelocityNNL();
 
-  /** \fn void computeJacobianVelocityQNLInertia(double time, SimpleVector q, SimpleVector velocity )
+  /** \fn void computeJacobianVelocityNNL(double time, SimpleVector q, SimpleVector velocity )
    *  \brief function to compute the gradient of the inertia strengths compared to velocity
    *  \param SimpleVector*: pointers on the state vectors q and velocity (\dot q)
    *  \exception RuntimeException
    */
-  void computeJacobianVelocityQNLInertia(SimpleVector *q, SimpleVector *velocity);
+  void computeJacobianVelocityNNL(SimpleVector *q, SimpleVector *velocity);
 
   /** \fn void setComputeMassFunction(const string pluginPath, const string functionName&)
    *  \brief allow to set a specified function to compute the mass
@@ -944,13 +944,13 @@ public:
    */
   void setComputeFExtFunction(const std::string & pluginPath, const std::string & functionName);
 
-  /** \fn void setComputeQNLInertiaFunction(const string& pluginPath, const string& functionName)
+  /** \fn void setComputeNNLFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the inertia
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosCSharedLibraryException
    */
-  void setComputeQNLInertiaFunction(const std::string & pluginPath, const std::string & functionName);
+  void setComputeNNLFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void setComputeJacobianQFIntFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the gradient of the internal strength compared to the state
@@ -968,21 +968,21 @@ public:
    */
   void setComputeJacobianVelocityFIntFunction(const std::string & pluginPath, const std::string & functionName);
 
-  /** \fn void setComputeJacobianQQNLInertiaFunction(const string& pluginPath, const string& functionName)
+  /** \fn void setComputeJacobianQNNLFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the gradient of the the external strength compared to the state
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianQQNLInertiaFunction(const std::string & pluginPath, const std::string & functionName);
+  void setComputeJacobianQNNLFunction(const std::string & pluginPath, const std::string & functionName);
 
-  /** \fn void setComputeJacobianVelocityQNLInertiaFunction(const string& pluginPath, const string& functionName)
+  /** \fn void setComputeJacobianVelocityNNLFunction(const string& pluginPath, const string& functionName)
    *  \brief allow to set a specified function to compute the external strength compared to the velocity
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianVelocityQNLInertiaFunction(const std::string & pluginPath, const std::string & functionName);
+  void setComputeJacobianVelocityNNLFunction(const std::string & pluginPath, const std::string & functionName);
 
   // --- miscellaneous ---
 
@@ -1061,15 +1061,15 @@ protected:
   /** external strength of the system */
   SimpleVector *fExt;
   /** non-linear inertia term of the system */
-  SimpleVector *QNLInertia;
+  SimpleVector *NNL;
   /** jacobian/coordinates of internal strength */
   SiconosMatrix *jacobianQFInt;
   /** jacobian/velocity of internal strength */
   SiconosMatrix *jacobianVelocityFInt;
   /** jacobian/coordinates of inertia */
-  SiconosMatrix *jacobianQQNLInertia;
+  SiconosMatrix *jacobianQNNL;
   /** jacobian/velocity of inertie */
-  SiconosMatrix *jacobianVelocityQNLInertia;
+  SiconosMatrix *jacobianVelocityNNL;
 
   /* contains the name of the plugin used to compute the mass */
   std::string  massFunctionName;
@@ -1079,16 +1079,16 @@ protected:
   std::string  fExtFunctionName;
   /* contains the name of the plugin used to compute jacobianQFInt */
   std::string  jacobianQFIntFunctionName;
-  /* contains the name of the plugin used to compute jacobianQQNLInertia */
-  std::string  jacobianQQNLInertiaFunctionName;
+  /* contains the name of the plugin used to compute jacobianQNNL */
+  std::string  jacobianQNNLFunctionName;
   /* contains the name of the plugin used to compute jacobianVelocityFInt */
   std::string  jacobianVelocityFIntFunctionName;
-  /* contains the name of the plugin used to compute jacobianVelocityQNLInertia */
-  std::string  jacobianVelocityQNLInertiaFunctionName;
-  /* contains the name of the plugin used to compute QNLInertia */
-  std::string  QNLInertiaFunctionName;
+  /* contains the name of the plugin used to compute jacobianVelocityNNL */
+  std::string  jacobianVelocityNNLFunctionName;
+  /* contains the name of the plugin used to compute NNL */
+  std::string  NNLFunctionName;
 
-  /** vector of bool to check if mass, fInt, fExt, QNLInertia and the 4 jacobian are loaded from a plugin or not
+  /** vector of bool to check if mass, fInt, fExt, NNL and the 4 jacobian are loaded from a plugin or not
    The vector order is the one of members list (see above)*/
   std::vector<bool> isLDSPlugin;
 
@@ -1105,9 +1105,9 @@ protected:
   bool isPAllocatedIn;
   // Mass
   bool isMassAllocatedIn;
-  // Forces: fInt, fExt, QNLInertia
+  // Forces: fInt, fExt, NNL
   std::vector<bool> areForcesAllocatedIn;
-  // Jacobian: jacobianQFInt, jacobianVelocityFInt, jacobianQQNLInertia, jacobianVelocityQNLInertia
+  // Jacobian: jacobianQFInt, jacobianVelocityFInt, jacobianQNNL, jacobianVelocityNNL
   std::vector<bool> isJacobianAllocatedIn;
 
   // pointers to functions member to compute plug-in functions
@@ -1139,14 +1139,14 @@ protected:
    */
   void (*computeFExtPtr)(unsigned int* sizeOfq, const double* time, double* fExtPtr);
 
-  /** \fn void (*computeQNLInertiaPtr)(unsigned int* sizeOfq, double* qPtr, double* velocityPtr, double* QNLInertiaPtr)
+  /** \fn void (*computeNNLPtr)(unsigned int* sizeOfq, double* qPtr, double* velocityPtr, double* NNLPtr)
    *  \brief computes the inertia
    *  \param unsigned int* sizeOfq : the size of the vector q
    *  \param double* qPtr : the pointer to the first element of the vector q
    *  \param double* velocityPtr : the pointer to the first element of the vector velocity
-   *  \param double* QNLInertiaPtr : the pointer to the first element of the vector QNLInertia (in-out parameter)
+   *  \param double* NNLPtr : the pointer to the first element of the vector NNL (in-out parameter)
    */
-  void (*computeQNLInertiaPtr)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* QNLInertiaPtr);
+  void (*computeNNLPtr)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* NNLPtr);
 
   /** \fn void (*computeJacobianQFIntPtr)(int* sizeOfq, double* time, double* qPtr, double* velocityPtr, double* jacobPtr)
    *  \brief computes the gradient of the the internal strength compared to the state
@@ -1164,17 +1164,17 @@ protected:
    */
   void (*computeJacobianVelocityFIntPtr)(unsigned int* sizeOfq, const double* time, double* qPtr, double* velocityPtr, double* jacobPtr);
 
-  /** \fn void (*computeJacobianQQNLInertia)(const double * time)
+  /** \fn void (*computeJacobianQNNL)(const double * time)
    *  \brief computes the gradient of the the external strength compared to the state
    *  \param to be defined
    */
-  void (*computeJacobianQQNLInertiaPtr)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr);
+  void (*computeJacobianQNNLPtr)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr);
 
-  /** \fn void (*computeJacobianVelocityQNLInertiaPtr)(const double * time)
+  /** \fn void (*computeJacobianVelocityNNLPtr)(const double * time)
    *  \brief computes the gradient of the the external strength compared to the velocity
    *  \param to be defined
    */
-  void (*computeJacobianVelocityQNLInertiaPtr)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr);
+  void (*computeJacobianVelocityNNLPtr)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr);
 
 };
 

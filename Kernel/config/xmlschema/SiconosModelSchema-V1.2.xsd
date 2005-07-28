@@ -463,12 +463,12 @@
 
 						<xsd:element name="JacobianQFint" type="matrix" minOccurs='0' maxOccurs='0'/>
 						<xsd:element name="JacobianVelocityFint" type="matrix" minOccurs='0' maxOccurs='0'/>
-						<xsd:element name="JacobianQQNLInertia" type="matrix" minOccurs='0' maxOccurs='0'/>
-						<xsd:element name="JacobianVelocityQNLInertia" type="matrix" minOccurs='0' maxOccurs='0'/>
+						<xsd:element name="JacobianQNNL" type="matrix" minOccurs='0' maxOccurs='0'/>
+						<xsd:element name="JacobianVelocityNNL" type="matrix" minOccurs='0' maxOccurs='0'/>
 
 						<xsd:element name="M" type="matrix" minOccurs="1" maxOccurs="1"/>
 
-<!--					<xsd:element name="QNLInertia" type="vector" minOccurs='0' maxOccurs='0'/>
+<!--					<xsd:element name="NNL" type="vector" minOccurs='0' maxOccurs='0'/>
 -->	
 						<xsd:element name="K" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="C" type="matrix" minOccurs="1" maxOccurs="1"/>
@@ -511,12 +511,12 @@
 
 						<xsd:element name="JacobianQFint" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="JacobianVelocityFint" type="matrix" minOccurs="1" maxOccurs="1"/>
-						<xsd:element name="JacobianQQNLInertia" type="matrix" minOccurs="1" maxOccurs="1"/>
-						<xsd:element name="JacobianVelocityQNLInertia" type="matrix" minOccurs="1" maxOccurs="1"/>
+						<xsd:element name="JacobianQNNL" type="matrix" minOccurs="1" maxOccurs="1"/>
+						<xsd:element name="JacobianVelocityNNL" type="matrix" minOccurs="1" maxOccurs="1"/>
 
 						<xsd:element name="M" type="matrix" minOccurs="1" maxOccurs="1"/>
 
-						<xsd:element name="QNLInertia" type="vector" minOccurs="1" maxOccurs="1"/>
+						<xsd:element name="NNL" type="vector" minOccurs="1" maxOccurs="1"/>
 
 						<xsd:element name="BoundaryCondition" type="BoundaryCondition" minOccurs='0' maxOccurs='1'/>
 					</xsd:all>

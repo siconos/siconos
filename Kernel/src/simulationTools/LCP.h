@@ -213,19 +213,41 @@ public:
 
   // --- Others functions ---
 
-  /** \fn void formalize(const double&)
-   *  \brief Build the matrix M and the vector b from the OneStep integrator (Problem
-   * discretized in time) and the set of interactions.
+  /** \fn void initialize()
+   *  \brief initialize the LCP problem(compute topology ...)
+   */
+  virtual void initialize();
+
+  /** \fn void computeAllBlocks()
+   * \brief compute all the blocks matrices necessary to assemble Mlcp
+   */
+  void computeAllBlocks();
+
+  /** \fn void preLCP(const double& time)
+   *  \brief pre-treatment for LCP
    *  \param double : current time
    *  \return void
    */
-  void formalize(const double& time);
+  void preLCP(const double& time);
 
-  /** \fn void compute(void)
+  /** \fn void assembleM()
+   *  \brief built matrix M using already computed blocks
+   */
+  void assembleM();
+
+  /** \fn void compute(const double& time)
    *  \brief Compute the unknown z and w and update the Interaction (y and lambda )
+   *  \param double : current time
    *  \return void
    */
-  void compute();
+  void compute(const double& time);
+
+  /** \fn void postLCP(const SimpleVector& w, SimpleVector& z)
+   *  \brief post-treatment for LCP
+   *  \param 2 simple vectors: output of LCP solver
+   *  \return void
+   */
+  void postLCP(const SimpleVector&, const SimpleVector&);
 
   /** \fn void computeM (void)
    *  \brief compute matrix M

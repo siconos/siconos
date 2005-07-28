@@ -227,7 +227,13 @@ public:
    * \brief searchs the integrator of the DS number "numberDS"
    *
    */
-  OneStepIntegrator* getIntegratorOfDSPtr(const int&  numberDS);
+  OneStepIntegrator* getIntegratorOfDSPtr(const int&  numberDS) const ;
+
+  /* \fn OneStepIntegrator* getIntegratorOfDSptr(DynamicalSystem * ds) ;
+   * \brief get the integrator of ds
+   * \param a pointer to DynamicalSystem
+   */
+  OneStepIntegrator* getIntegratorOfDSPtr(DynamicalSystem * ds) const ;
 
   // --- OTHER FUNCTIONS ---
 
@@ -250,20 +256,15 @@ public:
    */
   virtual void nextStep();
 
-  /** \fn void formaliseOneStepNSProblem()
-   *  \brief formalizes the non smooth problem
-   */
-  virtual void formaliseOneStepNSProblem();
-
   /** \fn void computeOneStepNSProblem()
    *  \brief computes the one step NS problem
    */
   virtual void computeOneStepNSProblem();
 
-  /** \fn voir updateState()
-   *  \brief updates the state of each DynamicalSystem
+  /** \fn void update()
+   *  \brief update input, state of each dynamical system and output
    */
-  virtual void updateState();
+  virtual void update();
 
   /** \fn void initialize()
    *  \brief executes the complete initialisation of Strategy (OneStepIntegrators, OneStepNSProblem, TImediscretisation) with the XML Object
@@ -275,11 +276,6 @@ public:
    *  \param double criterion: convergence criterion, int maxStep: maximum number of Newton steps
    */
   void newtonSolve(const double& criterion , const int& maxStep);
-
-  /** \fn newtonUpdateState()
-   *  \brief update the state of the dynamical system at the end of Newton step
-   */
-  void newtonUpdateState();
 
   /** \fn newtonCheckConvergence(const double& criterion);
    *  \brief check the convergence of Newton algorithm

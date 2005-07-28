@@ -232,8 +232,8 @@ void LagrangianLinearR::computeOutput(const double& time)
   }
 
   // get y and yDot of the interaction
-  SimpleVector *y = interaction->getYPtr();
-  SimpleVector *yDot = interaction->getYDotPtr();
+  SimpleVector *y = interaction->getYPtr(0);
+  SimpleVector *yDot = interaction->getYPtr(1);
 
   // compute y and yDot
   if (b != NULL)
@@ -280,8 +280,8 @@ void LagrangianLinearR::computeFreeOutput(const double& time)
   }
 
   // get y and yDot of the interaction
-  SimpleVector *y = interaction->getYPtr();
-  SimpleVector *yDot = interaction->getYDotPtr();
+  SimpleVector *y = interaction->getYPtr(0);
+  SimpleVector *yDot = interaction->getYPtr(1);
 
   // compute y and yDot (!! values for free state)
   if (b != NULL)

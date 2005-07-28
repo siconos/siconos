@@ -109,16 +109,10 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** \fn formaliseO(const double& time)
-   *  \brief transform the discretised problem in a problem under numerical form
-   *  \param double : current time
-   */
-  void formalise(const double& time);
-
-  /** \fn compute()
+  /** \fn compute(const double & time)
    *  \brief make the computation so solve the NS problem
    */
-  void compute();
+  void compute(const double &);
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree

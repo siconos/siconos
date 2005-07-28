@@ -15,17 +15,20 @@ using namespace std;
 
 // Default constructor (isBvp is optional, default = false)
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const bool& isBvp):
-  BVP(isBvp), relativeDegree(NULL), nsdsxml(NULL), isRelativeDegreeAllocatedIn(false)
-{}
+  BVP(isBvp), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)
+{
+  topology = new Topology(this); // \todo use a copy constructor for topology?
+  isTopologyAllocatedIn = true;
+}
 
 // copy constructor
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem& nsds):
-  BVP(false), relativeDegree(NULL), nsdsxml(NULL), isRelativeDegreeAllocatedIn(false)
+  BVP(false), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)
 {
   BVP = nsds.isBVP();
   unsigned int i;
-
   DSVector.resize(nsds.getDynamicalSystems().size(), NULL);
+
   isDSVectorAllocatedIn.resize(DSVector.size(), false);
   DynamicalSystem * dsTmp;
   for (i = 0; i < DSVector.size(); i++)
@@ -35,7 +38,6 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
     {
       // \todo use factories to improve this copy.
       string type = dsTmp ->getType();
-      cout << " copie 0" << endl;
       if (type ==  NLDS)
         DSVector[i] = new DynamicalSystem(*dsTmp);
       else if (type ==  LDS)
@@ -43,14 +45,9 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
       else if (type ==  LNLDS)
         DSVector[i] = new LagrangianDS(*dsTmp);
       else if (type ==  LTIDS)
-      {
-        cout << " OKDODKOSKD" << endl;
         DSVector[i] = new LagrangianLinearTIDS(*dsTmp);
-      }
       else
         RuntimeException::selfThrow("NonSmoothDynamicalSystem::copy constructor, unknown Dynamical system type:" + type);
-      cout << " fin copie 0" << endl;
-
       isDSVectorAllocatedIn[i] = true;
     }
   }
@@ -67,6 +64,9 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
       isInteractionVectorAllocatedIn[i] = true;
     }
   }
+
+  topology = new Topology(this); // \todo use a copy constructor for topology?
+  isTopologyAllocatedIn = true;
 
   /*  \todo: add this part when EC will be well-implemented
   ecVector.resize(nsds.getEqualityConstraints.size(), NULL);
@@ -95,18 +95,12 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
     }
   */
 
-  if (nsds.getRelativeDegreePtr() != NULL)
-  {
-    relativeDegree = new SimpleVector(*(nsds.getRelativeDegreePtr()));
-    isRelativeDegreeAllocatedIn = true;
-  }
-
   // Warning: xml link is not copied.
 }
 
 // xml constuctor
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NSDSXML* newNsdsxml):
-  BVP(false), relativeDegree(NULL), nsdsxml(newNsdsxml), isRelativeDegreeAllocatedIn(false)
+  BVP(false), nsdsxml(newNsdsxml), isTopologyAllocatedIn(false)
 {
   if (nsdsxml != NULL)
   {
@@ -157,6 +151,10 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NSDSXML* newNsdsxml):
       isInteractionVectorAllocatedIn[i] = true;
     }
     if (nbInteractionTab.size() == 0) cout << "NonSmoothDymamicalSystem xml Constructor, warning : no Interaction defined." << endl;
+
+    // built topology:
+    topology = new Topology(this);
+    isTopologyAllocatedIn = true;
 
     // Algebraic constraints fill-in
     // get all the EqualityConstraintXML objects then create the EqualityConstraint for this EqualityConstraintXML
@@ -218,25 +216,17 @@ NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
   {
     for (i = 0; i < DSVector.size(); i++)
     {
-      if (isDSVectorAllocatedIn[i])
-      {
-        delete DSVector[i];
-        DSVector[i] = NULL;
-      }
+      if (isDSVectorAllocatedIn[i]) delete DSVector[i];
+      DSVector[i] = NULL;
     }
   }
   DSVector.clear();
 
-  if (interactionVector.size() > 0)
+  for (i = 0; i < interactionVector.size(); i++)
   {
-    for (i = 0; i < interactionVector.size(); i++)
-    {
-      if (isInteractionVectorAllocatedIn[i])
-      {
-        delete interactionVector[i];
-        interactionVector[i] = NULL;
-      }
-    }
+    if (isInteractionVectorAllocatedIn[i])
+      delete interactionVector[i];
+    interactionVector[i] = NULL;
   }
   interactionVector.clear();
 
@@ -244,20 +234,18 @@ NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
   {
     for (i = 0; i < ecVector.size(); i++)
     {
-      if (isEcVectorAllocatedIn[i])
-      {
-        delete ecVector[i];
-        ecVector[i] = NULL;
-      }
+      if (isEcVectorAllocatedIn[i]) delete ecVector[i];
+      ecVector[i] = NULL;
     }
   }
   ecVector.clear();
 
-  if (isRelativeDegreeAllocatedIn)
+  if (isTopologyAllocatedIn)
   {
-    delete relativeDegree;
-    relativeDegree = NULL;
+    delete topology;
+    topology = NULL;
   }
+
   OUT("NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem\n");
 }
 
@@ -324,13 +312,10 @@ void NonSmoothDynamicalSystem::setInteractions(const std::vector<Interaction*>& 
   interactionVector = newVect;
   isInteractionVectorAllocatedIn.clear();
   isInteractionVectorAllocatedIn.resize(newVect.size(), false);
-}
 
-void NonSmoothDynamicalSystem::setRelativeDegreePtr(SimpleVector *newPtr)
-{
-  if (isRelativeDegreeAllocatedIn) delete relativeDegree;
-  relativeDegree = newPtr;
-  isRelativeDegreeAllocatedIn = false;
+  // the topology should be updated
+  topology->setUpToDate(false);
+
 }
 
 EqualityConstraint* NonSmoothDynamicalSystem::getEqualityConstraintPtr(const int& i) const
@@ -472,6 +457,8 @@ void NonSmoothDynamicalSystem::addInteraction(Interaction *inter)
 {
   interactionVector.push_back(inter);
   isInteractionVectorAllocatedIn.push_back(false);
+  // the topology should be updated
+  topology->setUpToDate(false);
 }
 
 void NonSmoothDynamicalSystem::addEqualityConstraint(EqualityConstraint* ec)

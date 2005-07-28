@@ -207,3 +207,9 @@ void LinearTIRTest::testSetAPtr()
   cout << " test setAPtr ok" << endl;
 }
 
+void LinearTIRTest::End()
+{
+  cout << "====================================" << endl;
+  cout << " ===== End of LinearTIR Tests ===== " << endl;
+  cout << "====================================" << endl;
+}

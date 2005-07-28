@@ -5,7 +5,6 @@ using namespace std;
 // --- Default constructor ---
 TimeStepping::TimeStepping(): Strategy()
 {
-  cout << "CONSTR TIMESTEP" << endl;
   strategyType = TIMESTEPPING_STRATEGY;
 }
 

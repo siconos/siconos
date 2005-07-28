@@ -100,3 +100,10 @@ void LagrangianLinearRTest::testSetBPtr()
   delete llr;
   cout << " test setBPtr ok" << endl;
 }
+
+void LagrangianLinearRTest::End()
+{
+  cout << "============================================" << endl;
+  cout << " ===== End of LagrangianLinearR tests ===== " << endl;
+  cout << "============================================" << endl;
+}

@@ -4,11 +4,11 @@ using namespace std;
 // --- Constructor from an xml file ---
 LagrangianDS::LagrangianDS(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
   DynamicalSystem(), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
-  velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL), QNLInertia(NULL), jacobianQFInt(NULL),
-  jacobianVelocityFInt(NULL), jacobianQQNLInertia(NULL), jacobianVelocityQNLInertia(NULL),
+  velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL),
+  jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   isPAllocatedIn(true), isMassAllocatedIn(true),
-  computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeQNLInertiaPtr(NULL), computeJacobianQFIntPtr(NULL),
-  computeJacobianVelocityFIntPtr(NULL), computeJacobianQQNLInertiaPtr(NULL), computeJacobianVelocityQNLInertiaPtr(NULL)
+  computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
+  computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)
 {
   IN("LagrangianDS::LagrangianDS() - Xml constructor\n");
   if (dsXML != NULL)
@@ -23,20 +23,20 @@ LagrangianDS::LagrangianDS(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
     if (dsxml->hasId() == true) id = dsxml->getId();
     // -- Memory allocation for vector and matrix members --
     x = new CompositeVector();
-    isXAllocatedIn = true;
+    isXAllocatedIn[1] = true;
     x0 = new CompositeVector();
-    isX0AllocatedIn = true;
+    isXAllocatedIn[0] = true;
     xDot = new CompositeVector();
-    isXDotAllocatedIn = true;
+    isXAllocatedIn[3] = true;
     xFree = new CompositeVector();
-    isXFreeAllocatedIn = true;
+    isXAllocatedIn[5] = true;
     //
     r = new SimpleVector(n);
-    isRAllocatedIn = true;
+    isRAllocatedIn[0] = true;
 
     // \todo review link between LagrangianDS and DS
     jacobianX = new SiconosMatrix(n, n);
-    isJacobianXAllocatedIn = true;
+    isXAllocatedIn[6] = true;
     if (dsxml->hasStepsInMemory() == true) stepsInMemory = dsxml->getStepsInMemory();
 
     // -- plugins --
@@ -82,12 +82,12 @@ LagrangianDS::LagrangianDS(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
     mass = new SiconosMatrix(ndof, ndof);
     fInt = new SimpleVector(ndof);
     fExt = new SimpleVector(ndof);
-    QNLInertia = new SimpleVector(ndof);
+    NNL = new SimpleVector(ndof);
     areForcesAllocatedIn.resize(3, true);
     jacobianQFInt = new SiconosMatrix(ndof, ndof);
     jacobianVelocityFInt = new SiconosMatrix(ndof, ndof);
-    jacobianQQNLInertia = new SiconosMatrix(ndof, ndof);
-    jacobianVelocityQNLInertia = new SiconosMatrix(ndof, ndof);
+    jacobianQNNL = new SiconosMatrix(ndof, ndof);
+    jacobianVelocityNNL = new SiconosMatrix(ndof, ndof);
     isJacobianAllocatedIn.resize(4, true);
 
     isLDSPlugin.resize(8, false);
@@ -178,40 +178,40 @@ LagrangianDS::LagrangianDS(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
       else *jacobianVelocityFInt = lgptr->getJacobianVelocityFintMatrix();
     }
 
-    // -- QNL Inertia and its jacobian --
-    if (lgptr ->hasQNLInertia())
+    // -- NNL Inertia and its jacobian --
+    if (lgptr ->hasNNL())
     {
-      if (lgptr->isQNLInertiaPlugin())
+      if (lgptr->isNNLPlugin())
       {
-        plugin = lgptr->getQNLInertiaPlugin();
-        setComputeQNLInertiaFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+        plugin = lgptr->getNNLPlugin();
+        setComputeNNLFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
         isLDSPlugin[3] = true;
       }
-      else *QNLInertia = lgptr->getQNLInertiaVector();
+      else *NNL = lgptr->getNNLVector();
     }
 
-    // Jacobian Q QNLInertia
-    if (lgptr -> hasJacobianQQNLInertia())
+    // Jacobian Q NNL
+    if (lgptr -> hasJacobianQNNL())
     {
-      if (lgptr->isJacobianQQNLInertiaPlugin())
+      if (lgptr->isJacobianQNNLPlugin())
       {
-        plugin = lgptr->getJacobianQQNLInertiaPlugin();
-        setComputeJacobianQQNLInertiaFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+        plugin = lgptr->getJacobianQNNLPlugin();
+        setComputeJacobianQNNLFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
         isLDSPlugin[6] = true;
       }
-      else *jacobianQQNLInertia = lgptr->getJacobianQQNLInertiaMatrix();
+      else *jacobianQNNL = lgptr->getJacobianQNNLMatrix();
     }
 
-    // Jacobian Velocity QNLInertia
-    if (lgptr ->  hasJacobianVelocityQNLInertia())
+    // Jacobian Velocity NNL
+    if (lgptr ->  hasJacobianVelocityNNL())
     {
-      if (lgptr->isJacobianVelocityQNLInertiaPlugin())
+      if (lgptr->isJacobianVelocityNNLPlugin())
       {
-        plugin = lgptr->getJacobianVelocityQNLInertiaPlugin();
-        setComputeJacobianVelocityQNLInertiaFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+        plugin = lgptr->getJacobianVelocityNNLPlugin();
+        setComputeJacobianVelocityNNLFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
         isLDSPlugin[7] = true;
       }
-      else *jacobianVelocityQNLInertia = lgptr->getJacobianVelocityQNLInertiaMatrix();
+      else *jacobianVelocityNNL = lgptr->getJacobianVelocityNNLMatrix();
     }
   }
   else RuntimeException::selfThrow("LagrangianDS::LagrangianDS - DSXML paramater must not be NULL");
@@ -225,10 +225,10 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
                            const SiconosMatrix& newMass):
   DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL), velocityFree(NULL), velocityMemory(NULL),
   p(NULL), mass(NULL),
-  fInt(NULL), fExt(NULL), QNLInertia(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQQNLInertia(NULL), jacobianVelocityQNLInertia(NULL),
+  fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   isPAllocatedIn(true), isMassAllocatedIn(true),
-  computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeQNLInertiaPtr(NULL), computeJacobianQFIntPtr(NULL),
-  computeJacobianVelocityFIntPtr(NULL), computeJacobianQQNLInertiaPtr(NULL), computeJacobianVelocityQNLInertiaPtr(NULL)
+  computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
+  computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)
 {
   IN("LagrangianDS::LagrangianDS - From a minimum set of data\n");
   // --- DS BASE-CLASS MEMBERS ---
@@ -239,13 +239,13 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 
   // -- Memory allocation for vector and matrix members --
   x = new CompositeVector();
-  isXAllocatedIn = true;
+  isXAllocatedIn[1] = true;
   x0 = new CompositeVector();
-  isX0AllocatedIn = true;
+  isXAllocatedIn[0] = true;
   xDot = new CompositeVector();
-  isXDotAllocatedIn = true;
+  isXAllocatedIn[3] = true;
   xFree = new CompositeVector();
-  isXFreeAllocatedIn = true;
+  isXAllocatedIn[5] = true;
   //
   // \todo proper link between LagrangianDS object and DS ones (vectorField ...)
   // r = new SimpleVector(n);
@@ -270,12 +270,12 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   p = new SimpleVector(ndof);
   fInt = new SimpleVector(ndof);
   fExt = new SimpleVector(ndof);
-  QNLInertia = new SimpleVector(ndof);
+  NNL = new SimpleVector(ndof);
   areForcesAllocatedIn.resize(3, true);
   jacobianQFInt = new SiconosMatrix(ndof, ndof);
   jacobianVelocityFInt = new SiconosMatrix(ndof, ndof);
-  jacobianQQNLInertia = new SiconosMatrix(ndof, ndof);
-  jacobianVelocityQNLInertia = new SiconosMatrix(ndof, ndof);
+  jacobianQNNL = new SiconosMatrix(ndof, ndof);
+  jacobianVelocityNNL = new SiconosMatrix(ndof, ndof);
   isJacobianAllocatedIn.resize(4, true);
   isLDSPlugin.resize(8, false);
 
@@ -304,10 +304,10 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
                            const SimpleVector& newQ0, const SimpleVector& newVelocity0, const string& massName):
   DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL), velocityFree(NULL), velocityMemory(NULL),
   p(NULL), mass(NULL),
-  fInt(NULL), fExt(NULL), QNLInertia(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQQNLInertia(NULL), jacobianVelocityQNLInertia(NULL),
+  fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   isPAllocatedIn(true), isMassAllocatedIn(true),
-  computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeQNLInertiaPtr(NULL), computeJacobianQFIntPtr(NULL),
-  computeJacobianVelocityFIntPtr(NULL), computeJacobianQQNLInertiaPtr(NULL), computeJacobianVelocityQNLInertiaPtr(NULL)
+  computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
+  computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)
 
 {
   IN("LagrangianDS::LagrangianDS - From a minimum set of data\n");
@@ -319,13 +319,13 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 
   // -- Memory allocation for vector and matrix members --
   x = new CompositeVector();
-  isXAllocatedIn = true;
+  isXAllocatedIn[1] = true;
   x0 = new CompositeVector();
-  isX0AllocatedIn = true;
+  isXAllocatedIn[0] = true;
   xDot = new CompositeVector();
-  isXDotAllocatedIn = true;
+  isXAllocatedIn[3] = true;
   xFree = new CompositeVector();
-  isXFreeAllocatedIn = true;
+  isXAllocatedIn[5] = true;
 
   //
   // r = new SimpleVector(n);
@@ -351,12 +351,12 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   p = new SimpleVector(ndof);
   fInt = new SimpleVector(ndof);
   fExt = new SimpleVector(ndof);
-  QNLInertia = new SimpleVector(ndof);
+  NNL = new SimpleVector(ndof);
   areForcesAllocatedIn.resize(3, true);
   jacobianQFInt = new SiconosMatrix(ndof, ndof);
   jacobianVelocityFInt = new SiconosMatrix(ndof, ndof);
-  jacobianQQNLInertia = new SiconosMatrix(ndof, ndof);
-  jacobianVelocityQNLInertia = new SiconosMatrix(ndof, ndof);
+  jacobianQNNL = new SiconosMatrix(ndof, ndof);
+  jacobianVelocityNNL = new SiconosMatrix(ndof, ndof);
   isJacobianAllocatedIn.resize(4, true);
   isLDSPlugin.resize(8, false);
 
@@ -384,10 +384,10 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
   DynamicalSystem(newDS), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL),
   velocity(NULL), velocity0(NULL), velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL),
-  fInt(NULL), fExt(NULL), QNLInertia(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQQNLInertia(NULL), jacobianVelocityQNLInertia(NULL),
+  fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   isPAllocatedIn(true), isMassAllocatedIn(true),
-  computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeQNLInertiaPtr(NULL), computeJacobianQFIntPtr(NULL),
-  computeJacobianVelocityFIntPtr(NULL), computeJacobianQQNLInertiaPtr(NULL), computeJacobianVelocityQNLInertiaPtr(NULL)
+  computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
+  computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)
 
 {
   if (newDS.getType() != LNLDS && newDS.getType() != LTIDS)
@@ -439,9 +439,9 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
     fExt = new SimpleVector(lnlds->getFExt());
     areForcesAllocatedIn[1] = true;
   }
-  if (lnlds->getQNLInertiaPtr() != NULL)
+  if (lnlds->getNNLPtr() != NULL)
   {
-    QNLInertia = new SimpleVector(lnlds->getQNLInertia());
+    NNL = new SimpleVector(lnlds->getNNL());
     areForcesAllocatedIn[2] = true;
   }
 
@@ -457,14 +457,14 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
     jacobianVelocityFInt = new SiconosMatrix(lnlds->getJacobianVelocityFInt());
     isJacobianAllocatedIn[1] = true;
   }
-  if (lnlds->getJacobianQQNLInertiaPtr() != NULL)
+  if (lnlds->getJacobianQNNLPtr() != NULL)
   {
-    jacobianQQNLInertia = new SiconosMatrix(lnlds->getJacobianQQNLInertia());
+    jacobianQNNL = new SiconosMatrix(lnlds->getJacobianQNNL());
     isJacobianAllocatedIn[2] = true;
   }
-  if (lnlds->getJacobianVelocityQNLInertiaPtr() != NULL)
+  if (lnlds->getJacobianVelocityNNLPtr() != NULL)
   {
-    jacobianVelocityQNLInertia = new SiconosMatrix(lnlds->getJacobianVelocityQNLInertia());
+    jacobianVelocityNNL = new SiconosMatrix(lnlds->getJacobianVelocityNNL());
     isJacobianAllocatedIn[3] = true;
   }
 
@@ -496,10 +496,10 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
 
   if (isLDSPlugin[3])
   {
-    QNLInertiaFunctionName = lnlds -> getQNLInertiaFunctionName();
-    functionName = cShared.getPluginFunctionName(QNLInertiaFunctionName);
-    pluginPath  = cShared.getPluginName(QNLInertiaFunctionName);
-    setComputeQNLInertiaFunction(pluginPath, functionName);
+    NNLFunctionName = lnlds -> getNNLFunctionName();
+    functionName = cShared.getPluginFunctionName(NNLFunctionName);
+    pluginPath  = cShared.getPluginName(NNLFunctionName);
+    setComputeNNLFunction(pluginPath, functionName);
   }
 
   if (isLDSPlugin[4])
@@ -520,18 +520,18 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
 
   if (isLDSPlugin[6])
   {
-    jacobianQQNLInertiaFunctionName = lnlds -> getJacobianQQNLInertiaFunctionName();
-    functionName = cShared.getPluginFunctionName(jacobianQQNLInertiaFunctionName);
-    pluginPath  = cShared.getPluginName(jacobianQQNLInertiaFunctionName);
-    setComputeJacobianQQNLInertiaFunction(pluginPath, functionName);
+    jacobianQNNLFunctionName = lnlds -> getJacobianQNNLFunctionName();
+    functionName = cShared.getPluginFunctionName(jacobianQNNLFunctionName);
+    pluginPath  = cShared.getPluginName(jacobianQNNLFunctionName);
+    setComputeJacobianQNNLFunction(pluginPath, functionName);
   }
 
   if (isLDSPlugin[7])
   {
-    jacobianVelocityQNLInertiaFunctionName = lnlds -> getJacobianVelocityQNLInertiaFunctionName();
-    functionName = cShared.getPluginFunctionName(jacobianVelocityQNLInertiaFunctionName);
-    pluginPath  = cShared.getPluginName(jacobianVelocityQNLInertiaFunctionName);
-    setComputeJacobianVelocityQNLInertiaFunction(pluginPath, functionName);
+    jacobianVelocityNNLFunctionName = lnlds -> getJacobianVelocityNNLFunctionName();
+    functionName = cShared.getPluginFunctionName(jacobianVelocityNNLFunctionName);
+    pluginPath  = cShared.getPluginName(jacobianVelocityNNLFunctionName);
+    setComputeJacobianVelocityNNLFunction(pluginPath, functionName);
   }
 }
 
@@ -601,8 +601,8 @@ LagrangianDS::~LagrangianDS()
   }
   if (areForcesAllocatedIn[2])
   {
-    delete QNLInertia ;
-    QNLInertia = NULL;
+    delete NNL ;
+    NNL = NULL;
   }
   if (isJacobianAllocatedIn[0])
   {
@@ -616,13 +616,13 @@ LagrangianDS::~LagrangianDS()
   }
   if (isJacobianAllocatedIn[0])
   {
-    delete jacobianQQNLInertia ;
-    jacobianQQNLInertia = NULL;
+    delete jacobianQNNL ;
+    jacobianQNNL = NULL;
   }
   if (isJacobianAllocatedIn[0])
   {
-    delete jacobianVelocityQNLInertia ;
-    jacobianVelocityQNLInertia = NULL;
+    delete jacobianVelocityNNL ;
+    jacobianVelocityNNL = NULL;
   }
   OUT("LagrangianDS::~LagrangianDS()\n");
 }
@@ -744,23 +744,23 @@ void LagrangianDS::setFExtPtr(SimpleVector *newPtr)
   isLDSPlugin[2] = false;
 }
 
-void LagrangianDS::setQNLInertia(const SimpleVector& newValue)
+void LagrangianDS::setNNL(const SimpleVector& newValue)
 {
   if (newValue.size() != ndof)
-    RuntimeException::selfThrow("LagrangianDS - setQNLInertia: inconsistent dimensions with problem size for input vector QNLInertia");
+    RuntimeException::selfThrow("LagrangianDS - setNNL: inconsistent dimensions with problem size for input vector NNL");
 
-  if (QNLInertia == NULL)
+  if (NNL == NULL)
   {
-    QNLInertia = new SimpleVector(ndof);
+    NNL = new SimpleVector(ndof);
     areForcesAllocatedIn[2] = true;
   }
-  *QNLInertia = newValue;
+  *NNL = newValue;
   isLDSPlugin[3] = false;
 }
-void LagrangianDS::setQNLInertiaPtr(SimpleVector *newPtr)
+void LagrangianDS::setNNLPtr(SimpleVector *newPtr)
 {
-  if (areForcesAllocatedIn[2]) delete QNLInertia;
-  QNLInertia = newPtr;
+  if (areForcesAllocatedIn[2]) delete NNL;
+  NNL = newPtr;
   areForcesAllocatedIn[2] = false;
   isLDSPlugin[3] = false;
 }
@@ -809,46 +809,46 @@ void LagrangianDS::setJacobianVelocityFIntPtr(SiconosMatrix *newPtr)
   isLDSPlugin[5] = false;
 }
 
-void LagrangianDS::setJacobianQQNLInertia(const SiconosMatrix& newValue)
+void LagrangianDS::setJacobianQNNL(const SiconosMatrix& newValue)
 {
   if (newValue.size(0) != ndof || newValue.size(1) != ndof)
-    RuntimeException::selfThrow("LagrangianDS - setJacobianQQNLInertia: inconsistent dimensions with problem size for input matrix JacobianQQNLInertia");
+    RuntimeException::selfThrow("LagrangianDS - setJacobianQNNL: inconsistent dimensions with problem size for input matrix JacobianQNNL");
 
-  if (jacobianQQNLInertia == NULL)
+  if (jacobianQNNL == NULL)
   {
-    jacobianQQNLInertia = new SiconosMatrix(ndof, ndof);
+    jacobianQNNL = new SiconosMatrix(ndof, ndof);
     isJacobianAllocatedIn[2] = true;
   }
-  *jacobianQQNLInertia = newValue;
+  *jacobianQNNL = newValue;
   isLDSPlugin[6] = false;
 }
 
-void LagrangianDS::setJacobianQQNLInertiaPtr(SiconosMatrix *newPtr)
+void LagrangianDS::setJacobianQNNLPtr(SiconosMatrix *newPtr)
 {
-  if (isJacobianAllocatedIn[2]) delete jacobianQQNLInertia;
-  jacobianQQNLInertia = newPtr;
+  if (isJacobianAllocatedIn[2]) delete jacobianQNNL;
+  jacobianQNNL = newPtr;
   isJacobianAllocatedIn[2] = false;
   isLDSPlugin[6] = false;
 }
 
-void  LagrangianDS::setJacobianVelocityQNLInertia(const SiconosMatrix& newValue)
+void  LagrangianDS::setJacobianVelocityNNL(const SiconosMatrix& newValue)
 {
   if (newValue.size(0) != ndof || newValue.size(1) != ndof)
-    RuntimeException::selfThrow("LagrangianDS - setJacobianVelocityQNLInertia: inconsistent dimensions with problem size for input matrix JacobianVelocityQNLInertia");
+    RuntimeException::selfThrow("LagrangianDS - setJacobianVelocityNNL: inconsistent dimensions with problem size for input matrix JacobianVelocityNNL");
 
-  if (jacobianVelocityQNLInertia == NULL)
+  if (jacobianVelocityNNL == NULL)
   {
-    jacobianVelocityQNLInertia = new SiconosMatrix(ndof, ndof);
+    jacobianVelocityNNL = new SiconosMatrix(ndof, ndof);
     isJacobianAllocatedIn[3] = true;
   }
-  *jacobianVelocityQNLInertia = newValue;
+  *jacobianVelocityNNL = newValue;
   isLDSPlugin[7] = false;
 }
 
-void LagrangianDS::setJacobianVelocityQNLInertiaPtr(SiconosMatrix *newPtr)
+void LagrangianDS::setJacobianVelocityNNLPtr(SiconosMatrix *newPtr)
 {
-  if (isJacobianAllocatedIn[3]) delete jacobianVelocityQNLInertia;
-  jacobianVelocityQNLInertia = newPtr;
+  if (isJacobianAllocatedIn[3]) delete jacobianVelocityNNL;
+  jacobianVelocityNNL = newPtr;
   isJacobianAllocatedIn[3] = false;
   isLDSPlugin[7] = false;
 }
@@ -902,22 +902,22 @@ void LagrangianDS::computeFExt(const double& time)
 
 }
 
-void LagrangianDS::computeQNLInertia()
+void LagrangianDS::computeNNL()
 {
-  if (computeQNLInertiaPtr == NULL)
+  if (computeNNLPtr == NULL)
     RuntimeException::selfThrow("computeQ() is not linked to a plugin function");
 
   unsigned int size = q->size();
-  computeQNLInertiaPtr(&size, &(*q)(0), &(*velocity)(0), &(*QNLInertia)(0));
+  computeNNLPtr(&size, &(*q)(0), &(*velocity)(0), &(*NNL)(0));
 }
 
-void LagrangianDS::computeQNLInertia(SimpleVector *q2, SimpleVector *velocity2)
+void LagrangianDS::computeNNL(SimpleVector *q2, SimpleVector *velocity2)
 {
-  if (computeQNLInertiaPtr == NULL)
+  if (computeNNLPtr == NULL)
     RuntimeException::selfThrow("computeQ() is not linked to a plugin function");
 
   unsigned int size = q2->size();
-  computeQNLInertiaPtr(&size, &(*q2)(0), &(*velocity2)(0), &(*QNLInertia)(0));
+  computeNNLPtr(&size, &(*q2)(0), &(*velocity2)(0), &(*NNL)(0));
 }
 
 void LagrangianDS::computeJacobianQFInt(const double& time)
@@ -956,39 +956,39 @@ void LagrangianDS::computeJacobianVelocityFInt(const double & time, SimpleVector
 }
 
 
-void LagrangianDS::computeJacobianQQNLInertia()
+void LagrangianDS::computeJacobianQNNL()
 {
-  if (computeJacobianQQNLInertiaPtr == NULL)
-    RuntimeException::selfThrow("computeJacobianQQNLInertia() is not linked to a plugin function");
+  if (computeJacobianQNNLPtr == NULL)
+    RuntimeException::selfThrow("computeJacobianQNNL() is not linked to a plugin function");
 
   unsigned int size = q->size();
-  computeJacobianQQNLInertiaPtr(&size, &(*q)(0), &(*velocity)(0), &(*jacobianQQNLInertia)(0, 0));
+  computeJacobianQNNLPtr(&size, &(*q)(0), &(*velocity)(0), &(*jacobianQNNL)(0, 0));
 }
 
-void LagrangianDS::computeJacobianQQNLInertia(SimpleVector *q2, SimpleVector *velocity2)
+void LagrangianDS::computeJacobianQNNL(SimpleVector *q2, SimpleVector *velocity2)
 {
-  if (computeJacobianQQNLInertiaPtr == NULL)
-    RuntimeException::selfThrow("computeJacobianQQNLInertia() is not linked to a plugin function");
+  if (computeJacobianQNNLPtr == NULL)
+    RuntimeException::selfThrow("computeJacobianQNNL() is not linked to a plugin function");
 
   unsigned int size = q2->size();
-  computeJacobianQQNLInertiaPtr(&size, &(*q2)(0), &(*velocity2)(0), &(*jacobianQQNLInertia)(0, 0));
+  computeJacobianQNNLPtr(&size, &(*q2)(0), &(*velocity2)(0), &(*jacobianQNNL)(0, 0));
 }
 
-void LagrangianDS::computeJacobianVelocityQNLInertia()
+void LagrangianDS::computeJacobianVelocityNNL()
 {
-  if (computeJacobianVelocityQNLInertiaPtr == NULL)
-    RuntimeException::selfThrow("computeJacobianVelocityQNLInertia() is not linked to a plugin function");
+  if (computeJacobianVelocityNNLPtr == NULL)
+    RuntimeException::selfThrow("computeJacobianVelocityNNL() is not linked to a plugin function");
 
   unsigned int size = q->size();
-  computeJacobianVelocityQNLInertiaPtr(&size, &(*q)(0), &(*velocity)(0), &(*jacobianVelocityQNLInertia)(0, 0));
+  computeJacobianVelocityNNLPtr(&size, &(*q)(0), &(*velocity)(0), &(*jacobianVelocityNNL)(0, 0));
 }
-void LagrangianDS::computeJacobianVelocityQNLInertia(SimpleVector *q2, SimpleVector *velocity2)
+void LagrangianDS::computeJacobianVelocityNNL(SimpleVector *q2, SimpleVector *velocity2)
 {
-  if (computeJacobianVelocityQNLInertiaPtr == NULL)
-    RuntimeException::selfThrow("computeJacobianVelocityQNLInertia() is not linked to a plugin function");
+  if (computeJacobianVelocityNNLPtr == NULL)
+    RuntimeException::selfThrow("computeJacobianVelocityNNL() is not linked to a plugin function");
 
   unsigned int size = q2->size();
-  computeJacobianVelocityQNLInertiaPtr(&size, &(*q2)(0), &(*velocity2)(0), &(*jacobianVelocityQNLInertia)(0, 0));
+  computeJacobianVelocityNNLPtr(&size, &(*q2)(0), &(*velocity2)(0), &(*jacobianVelocityNNL)(0, 0));
 }
 
 void LagrangianDS::setComputeMassFunction(const string& pluginPath, const string& functionName)
@@ -1031,17 +1031,17 @@ void LagrangianDS::setComputeFExtFunction(const string& pluginPath, const string
   OUT("LagrangianDS::setComputeFExtFunction\n");
 }
 
-void LagrangianDS::setComputeQNLInertiaFunction(const string& pluginPath, const string& functionName)
+void LagrangianDS::setComputeNNLFunction(const string& pluginPath, const string& functionName)
 {
-  IN("LagrangianDS::setComputeQNLInertiaFunction\n");
-  cShared.setFunction(&computeQNLInertiaPtr, pluginPath, functionName);
+  IN("LagrangianDS::setComputeNNLFunction\n");
+  cShared.setFunction(&computeNNLPtr, pluginPath, functionName);
 
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  QNLInertiaFunctionName = plugin + ":" + functionName;
+  NNLFunctionName = plugin + ":" + functionName;
   isLDSPlugin[3] = true;
 
-  OUT("LagrangianDS::setComputeQNLInertiaFunction\n");
+  OUT("LagrangianDS::setComputeNNLFunction\n");
 }
 
 void LagrangianDS::setComputeJacobianQFIntFunction(const string& pluginPath, const string& functionName)
@@ -1070,30 +1070,30 @@ void LagrangianDS::setComputeJacobianVelocityFIntFunction(const string& pluginPa
   OUT("LagrangianDS::setComputeJacobianVelocityFIntFunction\n");
 }
 
-void LagrangianDS::setComputeJacobianQQNLInertiaFunction(const string& pluginPath, const string& functionName)
+void LagrangianDS::setComputeJacobianQNNLFunction(const string& pluginPath, const string& functionName)
 {
-  IN("LagrangianDS::setComputeJacobianQQNLInertiaFunction\n");
-  cShared.setFunction(&computeJacobianQQNLInertiaPtr, pluginPath, functionName);
+  IN("LagrangianDS::setComputeJacobianQNNLFunction\n");
+  cShared.setFunction(&computeJacobianQNNLPtr, pluginPath, functionName);
 
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  jacobianQQNLInertiaFunctionName = plugin + ":" + functionName;
+  jacobianQNNLFunctionName = plugin + ":" + functionName;
   isLDSPlugin[6] = true;
 
-  OUT("LagrangianDS::setComputeJacobianQQNLInertiaFunction\n");
+  OUT("LagrangianDS::setComputeJacobianQNNLFunction\n");
 }
 
-void LagrangianDS::setComputeJacobianVelocityQNLInertiaFunction(const string& pluginPath, const string& functionName)
+void LagrangianDS::setComputeJacobianVelocityNNLFunction(const string& pluginPath, const string& functionName)
 {
-  IN("LagrangianDS::setComputeJacobianVelocityQNLInertiaFunction\n");
-  cShared.setFunction(&computeJacobianVelocityQNLInertiaPtr, pluginPath, functionName);
+  IN("LagrangianDS::setComputeJacobianVelocityNNLFunction\n");
+  cShared.setFunction(&computeJacobianVelocityNNLPtr, pluginPath, functionName);
 
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  jacobianVelocityQNLInertiaFunctionName = plugin + ":" + functionName;
+  jacobianVelocityNNLFunctionName = plugin + ":" + functionName;
   isLDSPlugin[7] = true;
 
-  OUT("LagrangianDS::setComputeJacobianVelocityQNLInertiaFunction\n");
+  OUT("LagrangianDS::setComputeJacobianVelocityNNLFunction\n");
 }
 
 
@@ -1154,32 +1154,32 @@ void LagrangianDS::saveDSToXML()
     else
       lgptr->setJacobianVelocityFintPlugin(jacobianVelocityFIntFunctionName);
 
-    // JacobianQQNLInertia
-    if (lgptr->hasJacobianQQNLInertia())
+    // JacobianQNNL
+    if (lgptr->hasJacobianQNNL())
     {
-      if (!lgptr->isJacobianQQNLInertiaPlugin())
-        lgptr->setJacobianQQNLInertiaMatrix(jacobianQQNLInertia);
+      if (!lgptr->isJacobianQNNLPlugin())
+        lgptr->setJacobianQNNLMatrix(jacobianQNNL);
     }
     else
-      lgptr->setJacobianQQNLInertiaPlugin(jacobianQQNLInertiaFunctionName);
+      lgptr->setJacobianQNNLPlugin(jacobianQNNLFunctionName);
 
-    // JacobianVelocityQNLInertiaFunction
-    if (lgptr->hasJacobianVelocityQNLInertia())
+    // JacobianVelocityNNLFunction
+    if (lgptr->hasJacobianVelocityNNL())
     {
-      if (!lgptr->isJacobianVelocityQNLInertiaPlugin())
-        lgptr->setJacobianVelocityQNLInertiaMatrix(jacobianVelocityQNLInertia);
+      if (!lgptr->isJacobianVelocityNNLPlugin())
+        lgptr->setJacobianVelocityNNLMatrix(jacobianVelocityNNL);
     }
     else
-      lgptr->setJacobianVelocityQNLInertiaPlugin(jacobianVelocityQNLInertiaFunctionName);
+      lgptr->setJacobianVelocityNNLPlugin(jacobianVelocityNNLFunctionName);
 
-    // QNLInertia
-    if (lgptr->hasQNLInertia())
+    // NNL
+    if (lgptr->hasNNL())
     {
-      if (!lgptr->isQNLInertiaPlugin())
-        lgptr->setQNLInertiaVector(QNLInertia);
+      if (!lgptr->isNNLPlugin())
+        lgptr->setNNLVector(NNL);
     }
     else
-      lgptr->setQNLInertiaPlugin(QNLInertiaFunctionName);
+      lgptr->setNNLPlugin(NNLFunctionName);
   }
   else RuntimeException::selfThrow("LagrangianDS::saveDSToXML - object DSXML does not exist");
   OUT("LagrangianDS::saveDSToXML\n");
@@ -1235,7 +1235,6 @@ void LagrangianDS::initMemory(const unsigned int& steps)
   OUT("LagrangianDS::initMemory\n");
 }
 
-
 void LagrangianDS::swapInMemory()
 {
   IN("LagrangianDS::swapInMemory(void)\n");
@@ -1273,11 +1272,11 @@ double LagrangianDS::dsConvergenceIndicator()
 // -- Default constructor --
 LagrangianDS::LagrangianDS():
   DynamicalSystem(), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
-  velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL), QNLInertia(NULL), jacobianQFInt(NULL),
-  jacobianVelocityFInt(NULL), jacobianQQNLInertia(NULL), jacobianVelocityQNLInertia(NULL),
+  velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL),
+  jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   isPAllocatedIn(false), isMassAllocatedIn(false),
-  computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeQNLInertiaPtr(NULL), computeJacobianQFIntPtr(NULL),
-  computeJacobianVelocityFIntPtr(NULL), computeJacobianQQNLInertiaPtr(NULL), computeJacobianVelocityQNLInertiaPtr(NULL)
+  computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
+  computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)
 {
   IN("LagrangianDS::LagrangianDS() - Default constructor\n");
   DSType = LNLDS;
@@ -1291,10 +1290,10 @@ LagrangianDS::LagrangianDS():
   setComputeMassFunction("BasicPlugin.so", "computeMass");
   setComputeFIntFunction("BasicPlugin.so", "computeFInt");
   setComputeFExtFunction("BasicPlugin.so", "computeFExt");
-  setComputeQNLInertiaFunction("BasicPlugin.so", "computeQNLInertia");
+  setComputeNNLFunction("BasicPlugin.so", "computeNNL");
   setComputeJacobianQFIntFunction("BasicPlugin.so", "computeJacobianQFInt");
   setComputeJacobianVelocityFIntFunction("BasicPlugin.so", "computeJacobianVelocityFInt");
-  setComputeJacobianQQNLInertiaFunction("BasicPlugin.so", "computeJacobianQQNLInertia");
-  setComputeJacobianVelocityQNLInertiaFunction("BasicPlugin.so", "computeJacobianVelocityQNLInertia");
+  setComputeJacobianQNNLFunction("BasicPlugin.so", "computeJacobianQNNL");
+  setComputeJacobianVelocityNNLFunction("BasicPlugin.so", "computeJacobianVelocityNNL");
   OUT("LagrangianDS::LagrangianDS() - Default constructor\n");
 }

@@ -36,11 +36,12 @@ QP::~QP()
     p = NULL;
   }
 }
-void QP::formalise(const double& time)
-{}
 
-void QP::compute(void)
-{}
+void QP::compute(const double& time)
+{
+  RuntimeException::selfThrow("QP::compute not yet implemented");
+
+}
 
 void QP::display() const
 {

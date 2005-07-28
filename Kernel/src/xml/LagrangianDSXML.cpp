@@ -3,14 +3,14 @@ using namespace std;
 
 LagrangianDSXML::LagrangianDSXML() :
   DSXML(), qMemoryXML(NULL), velocityMemoryXML(NULL), qNode(NULL), q0Node(NULL), qMemoryNode(NULL), velocityNode(NULL),
-  velocity0Node(NULL), velocityMemoryNode(NULL), QNLInertiaNode(NULL), FintNode(NULL), FextNode(NULL), jacobianQFintNode(NULL),
-  jacobianVelocityFintNode(NULL), jacobianQQNLInertiaNode(NULL), jacobianVelocityQNLInertiaNode(NULL), MNode(NULL), ndofNode(NULL)
+  velocity0Node(NULL), velocityMemoryNode(NULL), NNLNode(NULL), FintNode(NULL), FextNode(NULL), jacobianQFintNode(NULL),
+  jacobianVelocityFintNode(NULL), jacobianQNNLNode(NULL), jacobianVelocityNNLNode(NULL), MNode(NULL), ndofNode(NULL)
 {}
 
 LagrangianDSXML::LagrangianDSXML(xmlNode * LagrangianDSNode, bool isBVP)
   : DSXML(LagrangianDSNode, isBVP), qMemoryXML(NULL), velocityMemoryXML(NULL), qNode(NULL), q0Node(NULL), qMemoryNode(NULL), velocityNode(NULL),
-    velocity0Node(NULL), velocityMemoryNode(NULL), QNLInertiaNode(NULL), FintNode(NULL), FextNode(NULL), jacobianQFintNode(NULL),
-    jacobianVelocityFintNode(NULL), jacobianQQNLInertiaNode(NULL), jacobianVelocityQNLInertiaNode(NULL), MNode(NULL), ndofNode(NULL)
+    velocity0Node(NULL), velocityMemoryNode(NULL), NNLNode(NULL), FintNode(NULL), FextNode(NULL), jacobianQFintNode(NULL),
+    jacobianVelocityFintNode(NULL), jacobianQNNLNode(NULL), jacobianVelocityNNLNode(NULL), MNode(NULL), ndofNode(NULL)
 {
   xmlNode *node;
 
@@ -43,7 +43,7 @@ LagrangianDSXML::LagrangianDSXML(xmlNode * LagrangianDSNode, bool isBVP)
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LNLDS_QNLINERTIA)) != NULL)
-    QNLInertiaNode = node;
+    NNLNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LNLDS_FINT)) != NULL)
     FintNode = node;
@@ -58,10 +58,10 @@ LagrangianDSXML::LagrangianDSXML(xmlNode * LagrangianDSNode, bool isBVP)
     jacobianVelocityFintNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LNLDS_JACOBIANQQNLINERTIA)) != NULL)
-    jacobianQQNLInertiaNode = node;
+    jacobianQNNLNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LNLDS_JACOBIANVELOCITYQNLINERTIA)) != NULL)
-    jacobianVelocityQNLInertiaNode = node;
+    jacobianVelocityNNLNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LNLDS_M)) != NULL)
     MNode = node;

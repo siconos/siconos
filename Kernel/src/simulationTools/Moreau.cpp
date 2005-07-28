@@ -104,15 +104,15 @@ void Moreau::computeW(const double& t)
     if (d->getIsLDSPlugin(5))
       d->computeJacobianVelocityFInt(t);
     if (d->getIsLDSPlugin(6))
-      d->computeJacobianQQNLInertia();
+      d->computeJacobianQNNL();
     if (d->getIsLDSPlugin(7))
-      d->computeJacobianVelocityQNLInertia();
+      d->computeJacobianVelocityNNL();
 
     SiconosMatrix *KFint, *KQNL, *CFint, *CQNL ;
     KFint = d->getJacobianQFIntPtr();
-    KQNL  = d->getJacobianQQNLInertiaPtr();
+    KQNL  = d->getJacobianQNNLPtr();
     CFint = d->getJacobianVelocityFIntPtr();
-    CQNL  = d->getJacobianVelocityQNLInertiaPtr();
+    CQNL  = d->getJacobianVelocityNNLPtr();
 
     // Get Mass matrix
     SiconosMatrix *M;
@@ -213,15 +213,15 @@ void Moreau::computeFreeState()
       // Compute Qint and Fint
       // for state i
       // warning: get values and not pointers
-      d->computeQNLInertia(qold, vold);
+      d->computeNNL(qold, vold);
       d->computeFInt(told, qold, vold);
-      SimpleVector QNL0 = d->getQNLInertia();
+      SimpleVector QNL0 = d->getNNL();
       SimpleVector FInt0 = d->getFInt();
       // for present state
       // warning: get values and not pointers
-      d->computeQNLInertia();
+      d->computeNNL();
       d->computeFInt(t);
-      SimpleVector QNL1 = d->getQNLInertia();
+      SimpleVector QNL1 = d->getNNL();
       SimpleVector FInt1 = d->getFInt();
       // Compute ResFree and vfree solution of Wk(v-vfree)=RESfree
       *RESfree = *M * (*v - *vold) + h * ((1.0 - theta) * (QNL0 + FInt0 - FExt0) + theta * (QNL1 + FInt1 - FExt1));
@@ -318,9 +318,9 @@ void Moreau::updateState()
   double h = timeDiscretisation->getH();
 
   // Get the DS type
-  std::string dstyp = ds->getType();
+  std::string dsType = ds->getType();
 
-  if ((dstyp == LNLDS) || (dstyp == LTIDS))
+  if ((dsType == LNLDS) || (dsType == LTIDS))
   {
     // get dynamical system
     LagrangianDS* d = static_cast<LagrangianDS*>(ds);
@@ -330,7 +330,7 @@ void Moreau::updateState()
     SimpleVector *v = d->getVelocityPtr();
     SimpleVector *q = d->getQPtr();
     // Save value of q and v in stateTmp for future convergence computation
-    if (dstyp == LNLDS)
+    if (dsType == LNLDS)
       ds->addTmpWorkVector(v, "LagNLDSMoreau");
     // Compute velocity
     *v = *vfree +  *W * *p;
@@ -342,14 +342,14 @@ void Moreau::updateState()
     // set reaction to zero
     p->zero();
     // --- Update W for general Lagrangian system
-    if (dstyp == LNLDS)
+    if (dsType == LNLDS)
     {
       double t = timeDiscretisation->getStrategyPtr()->getModelPtr()->getCurrentT();
       computeW(t);
     }
     // Remark: for Linear system, W is already saved in object member w
   }
-  else if (dstyp == LDS)
+  else if (dsType == LDS)
   {
     SiconosVector* xold;
     xold = ds->getXMemoryPtr()->getSiconosVector(0);
@@ -363,7 +363,7 @@ void Moreau::updateState()
 
     delete temp;
   }
-  else RuntimeException::selfThrow("Moreau::updateState - not yet implemented for Dynamical system type: " + dstyp);
+  else RuntimeException::selfThrow("Moreau::updateState - not yet implemented for Dynamical system type: " + dsType);
   OUT("Moreau::updateState\n");
 }
 

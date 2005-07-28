@@ -33,6 +33,9 @@ class NonSmoothDynamicalSystem;
  *  \version 1.0
  *  \date (Creation) Apr 29, 2004
  *
+ * \todo save a number of derivatives of y depending on the relative degree -> add a vector<SimpleVector*>
+ * rather than y, ydot ...
+ *
  */
 class Interaction
 {
@@ -104,102 +107,128 @@ public:
   }
 
   /** \fn const int getNInteraction() const
-   *  \brief get the number nInteraction of this Interaction
+   *  \brief get the number of relations of this Interaction
    *  \return the value of nInteraction
    */
-  inline const int getNInteraction() const
+  inline const unsigned int getNInteraction() const
   {
     return nInteraction;
   }
 
   /** \fn void setNInteraction(const int&)
-   *  \brief allows to set the value of nInteraction
+   *  \brief set the dimension of the Interaction
    *  \param the integer to set the nInteraction
    */
-  inline void setNInteraction(const int& nInter)
+  inline void setNInteraction(const unsigned int& nInter)
   {
     nInteraction = nInter;
   }
 
   // -- y --
 
-  /** \fn  const SimpleVector getY() const
-   *  \brief get the value of y
-   *  \return SimpleVector
+  /** \fn  const vector<SimpleVector*> getY() const
+   *  \brief get vector of output derivatives
+   *  \return a vector<SimpleVector*>
    */
-  inline const SimpleVector getY() const
-  {
-    return *y;
-  }
-
-  /** \fn SimpleVector* getYPtr() const
-   *  \brief get y
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getYPtr() const
+  inline const std::vector<SimpleVector*> getY() const
   {
     return y;
   }
 
-  /** \fn void setY (const SimpleVector& newValue)
-   *  \brief set the value of y to newValue
-   *  \param SimpleVector newValue
-   */
-  inline void setY(const SimpleVector& newValue)
-  {
-    *y = newValue;
-  }
-
-  /** \fn void setYPtr(SimpleVector* newPtr)
-   *  \brief set Y to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
-  inline void setYPtr(SimpleVector *newPtr)
-  {
-    if (isYAllocatedIn) delete y;
-    y = newPtr;
-    isYAllocatedIn = false;
-  }
-
-  // -- yDot --
-
-  /** \fn  const SimpleVector getYDot() const
-   *  \brief get the value of yDot
+  /** \fn  const SimpleVector getY(const unsigned int & i) const
+   *  \brief get y[i], derivative number i of output
    *  \return SimpleVector
    */
-  inline const SimpleVector getYDot() const
+  inline const SimpleVector getY(const unsigned int& i) const
   {
-    return *yDot;
+    return *(y[i]);
   }
 
-  /** \fn SimpleVector* getYDotPtr() const
-   *  \brief get yDot
+  /** \fn SimpleVector* getYPtr(const unsigned int& i) const
+   *  \brief get y[i], derivative number i of output
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getYDotPtr() const
+  inline SimpleVector* getYPtr(const unsigned int& i) const
   {
-    return yDot;
+    return y[i];
   }
 
-  /** \fn void setYDot (const SimpleVector& newValue)
-   *  \brief set the value of yDot to newValue
-   *  \param SimpleVector newValue
+  /** \fn void setY (const vector<SimpleVector*>& newVector)
+   *  \brief set the output vector y to newVector with copy of the y[i] (ie memory allocation)
+   *  \param std::vector<SimpleVector*>
    */
-  inline void setYDot(const SimpleVector& newValue)
+  void setY(const std::vector<SimpleVector*>&);
+
+  /** \fn void setYPtr (const vector<SimpleVector*>& newVector)
+   *  \brief set the output vector y to newVector with direct pointer equality for the y[i]
+   *  \param std::vector<SimpleVector*>
+   */
+  void setYPtr(const std::vector<SimpleVector*>&);
+
+  /** \fn void setY (const unsigned int & i, const SimpleVector& newValue);
+   *  \brief set y[i] to newValue
+   *  \param a SimpleVector and an unsigned int
+   */
+  void setY(const unsigned int &, const SimpleVector&);
+
+  /** \fn void setYPtr(const unsigned int & i, SimpleVector* newPtr)
+   *  \brief set y[i] to pointer newPtr
+   *  \param a SimpleVector * and an unsigned int
+   */
+  void setYPtr(const unsigned int &, SimpleVector *newPtr);
+
+  // -- yOld --
+
+  /** \fn  const vector<SimpleVector*> getYOld() const
+   *  \brief get vector of output derivatives
+   *  \return a vector<SimpleVector*>
+   */
+  inline const std::vector<SimpleVector*> getYOld() const
   {
-    *yDot = newValue;
+    return yOld;
   }
 
-  /** \fn void setYDotPtr(SimpleVector* newPtr)
-   *  \brief set YDot to pointer newPtr
-   *  \param SimpleVector * newPtr
+  /** \fn  const SimpleVector getYOld(const unsigned int & i) const
+   *  \brief get yOld[i], derivative number i of output
+   *  \return SimpleVector
    */
-  inline void setYDotPtr(SimpleVector *newPtr)
+  inline const SimpleVector getYOld(const unsigned int& i) const
   {
-    if (isYDotAllocatedIn) delete yDot;
-    yDot = newPtr;
-    isYDotAllocatedIn = false;
+    return *(yOld[i]);
   }
+
+  /** \fn SimpleVector* getYOldPtr(const unsigned int& i) const
+   *  \brief get yOld[i], derivative number i of output
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getYOldPtr(const unsigned int& i) const
+  {
+    return yOld[i];
+  }
+
+  /** \fn void setYOld (const vector<SimpleVector*>& newVector)
+   *  \brief set the output vector yOld to newVector
+   *  \param std::vector<SimpleVector*>
+   */
+  void setYOld(const std::vector<SimpleVector*>&);
+
+  /** \fn void setYOldPtr(const std::vector<SimpleVector*>& newVector);
+   *  \brief set vector yOld to newVector with direct pointer equality for the yOld[i]
+   *  \param std::vector<SimpleVector*>
+   */
+  void setYOldPtr(const std::vector<SimpleVector*>&);
+
+  /** \fn void setYOld (const unsigned int & i, const SimpleVector& newValue);
+   *  \brief set yOld[i] to newValue
+   *  \param a SimpleVector and an unsigned int
+   */
+  void setYOld(const unsigned int &, const SimpleVector&);
+
+  /** \fn void setYOldPtr(const unsigned int & i, SimpleVector* newPtr)
+   *  \brief set yOld[i] to pointer newPtr
+   *  \param a SimpleVector * and an unsigned int
+   */
+  void setYOldPtr(const unsigned int &, SimpleVector *newPtr);
 
   // -- lambda --
 
@@ -239,86 +268,6 @@ public:
     if (isLambdaAllocatedIn) delete lambda;
     lambda = newPtr;
     isLambdaAllocatedIn = false;
-  }
-
-  // -- yOld --
-
-  /** \fn  const SimpleVector getYOld() const
-   *  \brief get the value of yOld
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getYOld() const
-  {
-    return *yOld;
-  }
-
-  /** \fn SimpleVector* getYOldPtr() const
-   *  \brief get yOld
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getYOldPtr() const
-  {
-    return yOld;
-  }
-
-  /** \fn void setYOld (const SimpleVector& newValue)
-   *  \brief set the value of yOld to newValue
-   *  \param SimpleVector newValue
-   */
-  inline void setYOld(const SimpleVector& newValue)
-  {
-    *yOld = newValue;
-  }
-
-  /** \fn void setYOldPtr(SimpleVector* newPtr)
-   *  \brief set YOld to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
-  inline void setYOldPtr(SimpleVector *newPtr)
-  {
-    if (isYOldAllocatedIn) delete yOld;
-    yOld = newPtr;
-    isYOldAllocatedIn = false;
-  }
-
-  // -- yDotOld --
-
-  /** \fn  const SimpleVector getYDotOld() const
-   *  \brief get the value of yDotOld
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getYDotOld() const
-  {
-    return *yDotOld;
-  }
-
-  /** \fn SimpleVector* getYDotOldPtr() const
-   *  \brief get yDotOld
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getYDotOldPtr() const
-  {
-    return yDotOld;
-  }
-
-  /** \fn void setYDotOld (const SimpleVector& newValue)
-   *  \brief set the value of yDotOld to newValue
-   *  \param SimpleVector newValue
-   */
-  inline void setYDotOld(const SimpleVector& newValue)
-  {
-    *yDotOld = newValue;
-  }
-
-  /** \fn void setYDotOldPtr(SimpleVector* newPtr)
-   *  \brief set YDotOld to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
-  inline void setYDotOldPtr(SimpleVector *newPtr)
-  {
-    if (isYDotOldAllocatedIn) delete yDotOld;
-    yDotOld = newPtr;
-    isYDotOldAllocatedIn = false;
   }
 
   // -- lambdaOld --
@@ -532,17 +481,20 @@ private:
   /** number specific to each Interaction */
   int number;
   /** size of the the vector y */
-  int nInteraction;
-  /** relation between constrained variables and states variables */
-  SimpleVector* y;
-  /** relation between constrained variables and states variables */
-  SimpleVector* yDot;
+  unsigned int nInteraction;
+
+  /** relation between constrained variables and states variables
+   * vector of output derivatives
+   * y[0] is y, y[1] is yDot and so on
+   */
+  std::vector< SimpleVector* >  y;
+
+  /** previous step values for y */
+  std::vector< SimpleVector* >  yOld;
+
   /** result of the computeInput function */
   SimpleVector* lambda;
-  /** relation between constrained variables and states variables */
-  SimpleVector* yOld;
-  /** relation between constrained variables and states variables */
-  SimpleVector* yDotOld;
+
   /** result of the computeInput function */
   SimpleVector* lambdaOld;
 
@@ -563,12 +515,9 @@ private:
   InteractionXML *interactionxml;
 
   /** Flags to know if pointers have been allocated inside constructors or not */
-
-  bool isYAllocatedIn;
-  bool isYDotAllocatedIn;
+  std::vector<bool> isYAllocatedIn;
+  std::vector<bool> isYOldAllocatedIn;
   bool isLambdaAllocatedIn;
-  bool isYOldAllocatedIn;
-  bool isYDotOldAllocatedIn;
   bool isLambdaOldAllocatedIn;
   bool isRelationAllocatedIn;
   bool isNsLawAllocatedIn;

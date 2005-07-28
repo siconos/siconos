@@ -176,6 +176,12 @@ public:
     (*this)(row, col) = d;
   }
 
+  /** \fn setValue(const LaGenMatDouble&)
+   * \brief set the element matrix[row, col]
+   * \param a LaGenMatDouble
+   */
+  void setValue(const LaGenMatDouble&);
+
   /** \fn const double getValue(const int& row, const int& col) const
    * \brief get the element matrix[row, col]
    * \param an integer col
@@ -195,12 +201,30 @@ public:
    */
   bool addRow(const unsigned int&, const SiconosVector&);
 
+  /** \fn void setRow(const unsigned int& row, const SiconosVector &v)
+   *  \brief set line row of the current matrix with vector v
+   *  \param an int and a SiconosVector
+   */
+  void setRow(const unsigned int& , const SiconosVector &);
+
   /** \fn SiconosVector& getRow(int index)
    *  \brief get a row of the matrix
    *  \return a SiconosVector which represent the row
    *  \WARNING 11 Feb 2005 : possible memory problem ? (dynamical allocation without delete...)
    */
   SimpleVector getRow(const int&) const;
+
+  /** \fn SiconosVector& getCol(int index)
+   *  \brief get a col of the matrix
+   *  \return a SimpleVector
+   */
+  SimpleVector getCol(const int&) const;
+
+  /** \fn SiconosVector& getCol(int index)
+   *  \brief get a block of a matrix, which position is defined by index_list
+   *  \param vector<unsigned int> for indexes and a SiconosMatrix (in-out paramater)
+   */
+  void getBlock(const std::vector<unsigned int>&, SiconosMatrix&) const;
 
   /** \fn double* getArray()
    *  \brief return the adress of the array of double values of the matrix
@@ -278,10 +302,24 @@ public:
    */
   double& operator()(const int& row, const int& col);
 
+  /** \fn operator (int row, int col)
+   *  \brief get or set the element matrix[i,j]
+   *  \param an integer i
+   *  \param an integer j
+   *  \exception SiconosMatrixException
+   *  \return the element matrix[i,j]
+   */
+  double& operator()(const unsigned int& row, const unsigned int& col);
+
   /** \fn affectation operator
    *  \param SiconosMatrix : the matrix to be copied
    */
   SiconosMatrix& operator = (const SiconosMatrix& m);
+
+  /** \fn operator +=
+  *  \param SiconosMatrix : a matrix to add
+  */
+  SiconosMatrix& operator+=(const SiconosMatrix  &) ;
 
   /** \fn comparison operator ==
    *  \brief compare the value of each element

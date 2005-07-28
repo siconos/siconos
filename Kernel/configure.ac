@@ -298,6 +298,7 @@ AC_CONFIG_FILES([Makefile
 		 src/modelingTools/test/Makefile
 	         src/simulationTools/Makefile
                  src/plugin/Makefile
+		 src/plugin_test/Makefile
                  src/utils/Makefile
 		 src/utils/SiconosException/Makefile
                  src/utils/SiconosAlgebra/Makefile

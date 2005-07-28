@@ -309,7 +309,7 @@ SimpleVector &SimpleVector::operator+=(const SiconosVector &v)
   IN(" SimpleVector::operator+=(const SiconosVector &) \n");
   unsigned int sizeV = size();
   if (sizeV != v.size())
-    SiconosVectorException::selfThrow(" SimpleVector::operator-=   -- the vectors have not the same size");
+    SiconosVectorException::selfThrow(" SimpleVector::operator+=   -- the vectors have not the same size");
 
   for (unsigned int i = 0; i < sizeV; i++)
     (*this)(i) += v(i);
@@ -626,12 +626,31 @@ SimpleVector operator * (const SiconosMatrix &m, const SimpleVector &v)
   Blas_Mat_Vec_Mult(m.getLaGenMatDouble(), v.lavd, sv.lavd, 1.0, 0.0);
   return sv;
 }
+
 SimpleVector operator * (const SiconosMatrix &m, const SiconosVector &v)
 {
   SimpleVector sv(m.size(0));
   // "transform" v (which is simple or composite) into a simple
+  // not good -> to be optimized
   SimpleVector tmp(v);
   Blas_Mat_Vec_Mult(m.getLaGenMatDouble(), tmp.lavd, sv.lavd, 1.0, 0.0);
+  return sv;
+}
+
+SimpleVector operator * (const SimpleVector &v, const SiconosMatrix &m)
+{
+  SimpleVector sv(m.size(1));
+  Blas_Mat_Trans_Vec_Mult(m.getLaGenMatDouble(), v.lavd, sv.lavd, 1.0, 0.0);
+  return sv;
+}
+
+SimpleVector operator * (const SiconosVector &v, const SiconosMatrix &m)
+{
+  SimpleVector sv(m.size(1));
+  // "transform" v (which is simple or composite) into a simple
+  // not good -> to be optimized
+  SimpleVector tmp(v);
+  Blas_Mat_Trans_Vec_Mult(m.getLaGenMatDouble(), tmp.lavd, sv.lavd, 1.0, 0.0);
   return sv;
 }
 

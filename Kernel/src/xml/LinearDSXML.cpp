@@ -2,11 +2,11 @@
 using namespace std;
 
 LinearDSXML::LinearDSXML() :
-  DSXML(), ANode(NULL), bNode(NULL), uNode(NULL), ENode(NULL)
+  DSXML(), ANode(NULL), bNode(NULL), ENode(NULL)
 {}
 
 LinearDSXML::LinearDSXML(xmlNode * LinearDSNode, const bool& isBVP):
-  DSXML(LinearDSNode, isBVP), ANode(NULL), bNode(NULL), uNode(NULL), ENode(NULL)
+  DSXML(LinearDSNode, isBVP), ANode(NULL), bNode(NULL), ENode(NULL)
 {
   xmlNode *node;
   // The only required node is A
@@ -17,13 +17,8 @@ LinearDSXML::LinearDSXML(xmlNode * LinearDSNode, const bool& isBVP):
     XMLException::selfThrow("LinearDSXML - loadLinearDSProperties error : tag " + LDS_A + " not found.");
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LDS_B)) != NULL)
     bNode = node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, "uSize")) != NULL)
-    uSizeNode = node;
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LDS_E)) != NULL)
     ENode = node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LDS_U)) != NULL)
-    uNode = node;
-
 }
 
 LinearDSXML::~LinearDSXML()
@@ -35,7 +30,6 @@ void LinearDSXML::updateDynamicalSystemXML(xmlNode* rootDSXMLNode, DynamicalSyst
   ANode = NULL;
   ENode = NULL;
   bNode = NULL;
-  uNode = NULL;
   rootDSXMLNode = rootDSXMLNode;
   loadDS(ds);
   OUT("LinearSystemDynamicalSystem::updateDynamicalSystemXML\n");

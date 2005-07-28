@@ -270,29 +270,27 @@ void Strategy::nextStep()
   for (unsigned int i = 0; i < integratorVector.size(); i++)
     integratorVector[i]->nextStep();
   if (nsProblem != NULL)
-  {
     nsProblem->nextStep();
-    nsProblem->checkInteraction();
-  }
-}
 
-void Strategy::formaliseOneStepNSProblem()
-{
-  if (nsProblem != NULL) nsProblem->formalize(model->getCurrentT());
 }
 
 void Strategy::computeOneStepNSProblem()
 {
-  if (nsProblem != NULL) nsProblem->compute();
+  if (nsProblem != NULL) nsProblem->compute(model->getCurrentT());
 }
 
-void Strategy::updateState()
+void Strategy::update()
 {
-  if (nsProblem != NULL) nsProblem->updateState();
+  // compute input (lambda -> r)
+  if (nsProblem != NULL) nsProblem->updateInput();
+
+  // compute state for each dynamical system
   for (unsigned int i = 0; i < integratorVector.size(); i++)
   {
     integratorVector[i]->updateState();
   }
+
+  // compute output (y, ydot)
   if (nsProblem != NULL) nsProblem->updateOutput();
 
 }
@@ -302,20 +300,34 @@ void Strategy::initialize()
   // initialization of the OneStepIntegrators
   for (unsigned int i = 0; i < integratorVector.size(); i++)
     integratorVector[i]->initialize();
+
+  // initialization of  OneStepNonSmoothProblem
+  if (nsProblem != NULL)
+    nsProblem->initialize();
 }
 
-OneStepIntegrator* Strategy::getIntegratorOfDSPtr(const int& numberDS)
+OneStepIntegrator* Strategy::getIntegratorOfDSPtr(const int& numberDS) const
 {
-  OneStepIntegrator * tmpOsi = NULL;
-  for (unsigned int i = 0; i < integratorVector.size(); i++)
-  {
-    if (integratorVector[i]->getDynamicalSystemPtr()->getNumber() == numberDS)
-      tmpOsi = integratorVector[i];
-  }
-  if (tmpOsi == NULL)
-    RuntimeException::selfThrow("Strategy::getIntegratorOfDSPtr, try to get an unexisting interaction");
+  vector<OneStepIntegrator*>::const_iterator it  = integratorVector.begin();
+  while ((*it)->getDynamicalSystemPtr()->getNumber() != numberDS && it != integratorVector.end())
+    it++;
 
-  return tmpOsi;
+  if (it == integratorVector.end())
+    RuntimeException::selfThrow("Strategy::getIntegratorOfDSPtr(numberDS), no integrator corresponds to this dynamical sytem");
+
+  return (*it);
+}
+
+OneStepIntegrator* Strategy::getIntegratorOfDSPtr(DynamicalSystem * ds) const
+{
+  vector<OneStepIntegrator*>::const_iterator it = integratorVector.begin();
+  while ((*it)->getDynamicalSystemPtr() != ds && it != integratorVector.end())
+    it++;
+
+  if (it == integratorVector.end())
+    RuntimeException::selfThrow("Strategy::getIntegratorOfDSPtr(ds), no integrator corresponds to this dynamical sytem");
+
+  return (*it);
 }
 
 void Strategy::newtonSolve(const double& criterion, const int& maxStep)
@@ -327,9 +339,8 @@ void Strategy::newtonSolve(const double& criterion, const int& maxStep)
   {
     nbNewtonStep++;
     computeFreeState();
-    formaliseOneStepNSProblem();
     computeOneStepNSProblem();
-    newtonUpdateState();
+    update();
     isNewtonConverge = newtonCheckConvergence(criterion);
   }
   if (isNewtonConverge)
@@ -339,20 +350,6 @@ void Strategy::newtonSolve(const double& criterion, const int& maxStep)
 
   // time step increment
   model->setCurrentT(model->getCurrentT() + timeDiscretisation->getH());
-}
-
-void Strategy::newtonUpdateState()
-{
-  IN("Strategy::newtonUpdateState\n");
-  // update NonSmooth problem
-  if (nsProblem != NULL)nsProblem->updateState();
-
-  // update OneStep Integrators
-  for (unsigned int i = 0; i < integratorVector.size(); i++)
-  {
-    integratorVector[i]->updateState();
-  }
-  OUT("Strategy::newtonUpdateState\n");
 }
 
 bool Strategy::newtonCheckConvergence(const double& criterion)

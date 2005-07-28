@@ -6,6 +6,7 @@
 #include "DynamicalSystem.h"
 #include "Interaction.h"
 #include "EqualityConstraint.h"
+#include "Topology.h"
 #include "NSDSXML.h"
 
 #include "check.h"
@@ -18,6 +19,7 @@ enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
 class Interaction;
 class DynamicalSystem;
 class EqualityConstraint;
+class Topology;
 class NSDSXML;
 
 /** \class NonSmoothDynamicalSystem
@@ -160,41 +162,6 @@ public:
    */
   void setInteractions(const std::vector<Interaction*>&) ;
 
-  // -- RelativeDegree --
-
-  /** \fn  const SimpleVector getRelativeDegree() const
-   *  \brief get the value of RelativeDegree
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getRelativeDegree() const
-  {
-    return *relativeDegree;
-  }
-
-  /** \fn SimpleVector* getRelativeDegreePtr() const
-   *  \brief get RelativeDegree
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getRelativeDegreePtr() const
-  {
-    return relativeDegree;
-  }
-
-  /** \fn void setRelativeDegree (const SimpleVector& newValue)
-   *  \brief set the value of RelativeDegree to newValue
-   *  \param SimpleVector newValue
-   */
-  inline void setRelativeDegree(const SimpleVector& newValue)
-  {
-    *relativeDegree = newValue;
-  }
-
-  /** \fn void setRelativeDegreePtr(SimpleVector* newPtr)
-   *  \brief set RelativeDegree to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
-  void setRelativeDegreePtr(SimpleVector *newPtr);
-
   /** \fn vector<EqualityConstraint*> getEqualityConstraints(void)
    *  \brief get the vector of algebraic constraints
    *  \return vector of EqualityConstraint
@@ -216,6 +183,15 @@ public:
    *  \param vector<EqualityConstraint*> : new value for the vector
    */
   void setEqualityConstraints(const std::vector<EqualityConstraint*>& newEcVect) ;
+
+  /** \fn Topology* getTopologyPtr() const
+   *  \brief get the topology of the system
+   *  \return a pointer on Topology
+   */
+  inline Topology* getTopologyPtr() const
+  {
+    return topology;
+  }
 
   /** \fn inline NSDSXML* getNSDSXMLPtr()
    *  \brief get the xml linked object
@@ -295,11 +271,11 @@ private:
   /** contains the Interactions */
   std::vector<Interaction*> interactionVector;
 
-  /** vector of the relative degrees of the system */
-  SimpleVector * relativeDegree;
-
   /** contains the EqualityConstraints */
   std::vector<EqualityConstraint*> ecVector;
+
+  /** the topology of the system */
+  Topology * topology;
 
   /** the XML object linked to the NonSmoothDynamicalSystem to read XML data */
   NSDSXML *nsdsxml;
@@ -308,7 +284,7 @@ private:
   std::vector<bool> isDSVectorAllocatedIn;
   std::vector<bool> isInteractionVectorAllocatedIn;
   std::vector<bool> isEcVectorAllocatedIn;
-  bool isRelativeDegreeAllocatedIn;
+  bool isTopologyAllocatedIn;
 };
 
 #endif

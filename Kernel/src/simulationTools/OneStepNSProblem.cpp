@@ -1,4 +1,3 @@
-
 #include "OneStepNSProblem.h"
 using namespace std;
 
@@ -98,7 +97,83 @@ void OneStepNSProblem::addInteraction(Interaction *interaction)
   interactionVector.push_back(interaction);
 }
 
-void OneStepNSProblem::updateState()
+void OneStepNSProblem::initialize()
+{
+  // update topology if necessary (ie take into account modifications in the NonSmoothDynamicalSystem)
+  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  if (!(topology->isUpToDate()))
+    topology->updateTopology();
+
+  // if at least one relative degree is different from 0 or 1
+  if (!topology->isTimeInvariant())
+  {
+    checkEffectiveOutput();
+    // compute map of effective sizeOutput
+    topology->computeEffectiveSizeOutput();
+  }
+  // else effectiveSizeOutput = SizeOutput
+}
+
+void OneStepNSProblem::checkEffectiveOutput()
+{
+  // get topology of the NonSmooth Dynamical System
+  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  // get time step
+  double pasH = strategy->getTimeDiscretisationPtr()->getH();
+
+  // loop over the interactions
+  vector<Interaction*>::iterator it;
+  for (it = interactionVector.begin(); it != interactionVector.end(); it++)
+  {
+    // get the output derivatives vector
+    vector<SimpleVector *> yOld = (*it)->getYOld();
+
+    // get relative degrees vector of this interaction
+    vector<unsigned int> relativeDegree = topology->getRelativeDegrees(*it);
+
+    unsigned int size = relativeDegree.size();
+
+    // the prediction vector
+    vector<SimpleVector *> yp;
+
+    yp.resize(size, NULL);
+
+    for (unsigned int i = 0; i < size ; i++)
+      yp[i] = new SimpleVector(*yOld[i]);
+
+    // \todo the way prediction is calculated should be defined by user elsewhere
+    *(yp[0]) = *(yOld[0]) +  0.5 * pasH * *(yOld[1]) ;
+
+    // loop from 0 to relative degree to find the first yp>0
+    vector<unsigned int> indexMax;
+    indexMax.resize(size, 0);
+    for (unsigned int i = 0; i < size ; i++)
+    {
+      unsigned int j = 0;
+      while ((*(yp[i]))(j) <= 0) j++;
+      indexMax[i] = j;
+    }
+    topology->setIndexMax(*it, indexMax);
+  }
+}
+
+void OneStepNSProblem::nextStep()
+{
+  vector<Interaction*>::iterator it;
+  for (it = interactionVector.begin(); it != interactionVector.end(); it++)
+    (*it)->swapInMemory();
+  // get topology of the NonSmooth Dynamical System
+  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  // if relative degree different from 0 or 1
+  if (!(topology->isTimeInvariant()))
+  {
+    checkEffectiveOutput();
+    // compute map of effective sizeOutput
+    topology->computeEffectiveSizeOutput();
+  }
+}
+
+void OneStepNSProblem::updateInput()
 {
   vector<Interaction*>::iterator it;
   double currentTime = strategy->getModelPtr()->getCurrentT();
@@ -119,12 +194,6 @@ void OneStepNSProblem::updateOutput()
     (*it)->getRelationPtr()->computeOutput(currentTime);
 }
 
-void OneStepNSProblem::nextStep()
-{
-  vector<Interaction*>::iterator it;
-  for (it = interactionVector.begin(); it != interactionVector.end(); it++)
-    (*it)->swapInMemory();
-}
 
 void OneStepNSProblem::checkInteraction()
 {
@@ -137,13 +206,7 @@ void OneStepNSProblem::checkInteraction()
   updateConnectedInteractionMap();
 }
 
-void OneStepNSProblem::formalize(const double& time)
-{
-  RuntimeException::selfThrow("OneStepNSProblem::formalize - not yet implemented for problem type =" + getType());
-}
-
-
-void OneStepNSProblem::compute()
+void OneStepNSProblem::compute(const double& time)
 {
   RuntimeException::selfThrow("OneStepNSProblem::compute - not yet implemented for problem type =" + getType());
 }
@@ -648,3 +711,4 @@ bool OneStepNSProblem::isOneStepNsProblemComplete()
 
   return isComplete;
 }
+

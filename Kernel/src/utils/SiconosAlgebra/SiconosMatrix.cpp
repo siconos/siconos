@@ -101,6 +101,14 @@ LaGenMatDouble& SiconosMatrix::getLaGenMatDouble()
   return mat;
 }
 
+void SiconosMatrix::setValue(const LaGenMatDouble& newMat)
+{
+  mat.resize(newMat.size(0), newMat.size(1));
+  mat = newMat;
+  isPLUFactorized = false;
+  isPLUInversed = false;
+}
+
 bool SiconosMatrix::addRow(const unsigned int& row, const SiconosVector &v)
 {
   bool res = true;
@@ -114,6 +122,19 @@ bool SiconosMatrix::addRow(const unsigned int& row, const SiconosVector &v)
   return res;
 }
 
+void SiconosMatrix::setRow(const unsigned int& row, const SiconosVector &v)
+{
+  if ((int)v.size() != mat.size(1))
+    SiconosMatrixException::selfThrow("SiconosMatrix setRow: Index out of range");
+
+  if ((int)row >= mat.size(1))
+    SiconosMatrixException::selfThrow("SiconosMatrix setRow: Index out of range");
+
+  for (unsigned int i = 0; (int)i < mat.size(1); i++)
+    mat(row, i) = v(i);
+}
+
+
 SimpleVector SiconosMatrix::getRow(const int& index) const
 {
   const int rowSize = mat.size(1);
@@ -126,6 +147,45 @@ SimpleVector SiconosMatrix::getRow(const int& index) const
       res(i) = mat(index, i);
   }
   return res;
+}
+
+SimpleVector SiconosMatrix::getCol(const int& index) const
+{
+  if (index >= mat.size(0))
+    SiconosMatrixException::selfThrow("getCol : Index out of range");
+
+  unsigned int colSize = mat.size(0);
+  SimpleVector col(colSize);
+  for (unsigned int i = 0; i < colSize; i++)
+    col(i) = mat(i, index);
+
+  return col;
+}
+
+void SiconosMatrix::getBlock(const vector<unsigned int>& index_list, SiconosMatrix& block) const
+{
+  // index_list = {i,j,k,l}
+  // get block between lines i-j and columns k-l
+
+  unsigned int i = index_list[0];
+  unsigned int j = index_list[1];
+  unsigned int k = index_list[2];
+  unsigned int l = index_list[3];
+
+  if ((int)i >= mat.size(0) || (int)j >= mat.size(0) || (int)k >= mat.size(1) || (int)l >= mat.size(1))
+    SiconosMatrixException::selfThrow("getBlock : Index out of range");
+  if (i > j || k > l)
+    SiconosMatrixException::selfThrow("getBlock : wrong index_list");
+
+  // we use Lapack++ block matrix getter
+  LaIndex * I = new LaIndex(i, j);
+  LaIndex * J = new LaIndex(k, l);
+
+  if (mat(*I, *J).size(0) != (int)block.size(0) || mat(*I, *J).size(1) != (int)block.size(1))
+    SiconosMatrixException::selfThrow("getBlock : inconsistent sizes");
+  block.setValue(mat(*I, *J));
+  delete I;
+  delete J;
 }
 
 // --- READ, WRITE ... ---
@@ -327,6 +387,15 @@ double& SiconosMatrix::operator()(const int& row, const int& col)
   return mat(row, col);
 }
 
+// subscript operator to get/set individual elements
+double& SiconosMatrix::operator()(const unsigned int& row, const unsigned int& col)
+{
+  if (((int)row >= mat.size(0)) || ((int)col >= mat.size(1)))
+    SiconosMatrixException::selfThrow("operator() : Index out of range");
+
+  return mat(row, col);
+}
+
 /*************************************************/
 SiconosMatrix& SiconosMatrix::operator = (const SiconosMatrix& m)
 {
@@ -361,6 +430,22 @@ SiconosMatrix& SiconosMatrix::operator = (const SiconosMatrix& m)
   return *this;
 }
 
+
+SiconosMatrix &SiconosMatrix::operator+=(const SiconosMatrix &m)
+{
+  IN(" SiconosMatrix::operator+= \n");
+  int row = m.size(0);
+  int col = m.size(1);
+  if (row != mat.size(0) || col != mat.size(1))
+    SiconosMatrixException::selfThrow("SiconosMatrix::operator+=  inconsistent sizes");
+
+  for (int i = 0; i < row; i++)
+    for (int j = 0; j < col; j++)
+      mat(i, j) += (m.getLaGenMatDouble())(i, j);
+
+  OUT(" SiconosMatrix::operator+=\n");
+  return *this;
+}
 
 
 
@@ -466,6 +551,7 @@ SiconosMatrix operator ^ (const SiconosMatrix& m, const int pow)
 
   return temp;
 }
+
 
 // --- COMPUTING WITH MATRICES  ---
 

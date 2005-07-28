@@ -51,10 +51,9 @@ CFD::~CFD()
   }
 }
 
-void CFD::formalize(const double& time)
+void CFD::preCFD(const double& time)
 {
   IN("CFD::formalize(void)\n");
-  OneStepNSProblem::formalize(time);
 
   double pasH = strategy->getTimeDiscretisationPtr()->getH();
   //cout<<"## CFD::formalize - interactionVector.size() == "<<this->interactionVector.size()<<endl;
@@ -74,9 +73,12 @@ void CFD::formalize(const double& time)
 }
 
 
-void CFD::compute(void)
+void CFD::compute(const double& time)
 {
   IN("CFD::compute(void)\n");
+
+  // pre-treatment for CFD
+  preCFD(time);
 
   cout << " #%#% use of Numerics" << endl;
   /***********************************
@@ -97,7 +99,7 @@ void CFD::compute(void)
   SimpleVector *yDot, *lambda;
   int activeInteraction = 0;
 
-  yDot = interactionVector[0]->getYDotPtr();
+  yDot = interactionVector[0]->getYPtr(1);
   lambda = interactionVector[0]->getLambdaPtr();
 
   if (nCfd == 0)
@@ -113,7 +115,7 @@ void CFD::compute(void)
 
       if (connectedInteractionMap.find(interactionVector[i]) != connectedInteractionMap.end())
       {
-        yDot = interactionVector[i]->getYDotPtr();
+        yDot = interactionVector[i]->getYPtr(1);
         lambda = interactionVector[i]->getLambdaPtr();
 
         (*yDot)(0) = (*w)(activeInteraction);
@@ -317,9 +319,9 @@ void CFD::computeQ(const double& time)
           newton = static_cast<NewtonImpactLawNSL*>(nslaw);
           e = newton->getE();
           LLR->computeFreeOutput(time);
-          qCFDtmp = interactionVector[i]->getYDot();
+          qCFDtmp = interactionVector[i]->getY(1);
 
-          qCFDtmp += e * interactionVector[i]->getYDotOld();
+          qCFDtmp += e * interactionVector[i]->getYOld(1);
 
           // Assemble q
           //q = (-1)*qLCPtmp;

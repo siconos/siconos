@@ -45,7 +45,6 @@ void NonSmoothDynamicalSystemTest::tearDown()
 void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem1()
 {
   NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(tmpxml);
-
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemA : ", nsds->getDSVectorSize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemB : ", nsds->getDynamicalSystemPtr(0)->getNumber() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemC : ", nsds->getDynamicalSystemPtr(1)->getNumber() == 8, true);
@@ -53,13 +52,16 @@ void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemE : ", nsds->getInteractionPtr(0)->getNumber() == 12, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemF : ", nsds->isBVP() == false, true);
   delete nsds;
-  cout << " Constructor xml NonSmoothDynamicalSystem ok" << endl;
+  cout << " ------- Constructor xml NonSmoothDynamicalSystem ok -------" << endl;
 }
 // copy constructor
 void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem2()
 {
   NonSmoothDynamicalSystem * nsds1 = new NonSmoothDynamicalSystem(tmpxml);
+  cout << " OKOKOKO224 " << endl;
+
   NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(*nsds1);
+  cout << " OKOKOKO225 " << endl;
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2A : ", nsds->getDSVectorSize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2B : ", nsds->getDynamicalSystemPtr(0)->getNumber() == 3, true);
@@ -69,7 +71,7 @@ void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2F : ", nsds->isBVP() == false, true);
   delete nsds;
   delete nsds1;
-  cout << " Constructor copy NonSmoothDynamicalSystem ok" << endl;
+  cout << "------- Constructor copy NonSmoothDynamicalSystem ok -------" << endl;
 }
 
 
@@ -93,7 +95,7 @@ void NonSmoothDynamicalSystemTest::testaddDynamicalSystem()
   delete nsds;
   delete tmpdsxml;
 
-  cout << " test addDynamicalSystem ok" << endl;
+  cout << "------- test addDynamicalSystem ok -------" << endl;
 }
 
 // addInteraction
@@ -113,6 +115,12 @@ void NonSmoothDynamicalSystemTest::testaddInteraction()
   delete nsds;
   delete inter;
   delete interxml;
-  cout << " test addInteractiontest ok" << endl;
+  cout << " ------- test addInteractiontest ok -------" << endl;
 }
 
+void NonSmoothDynamicalSystemTest::End()
+{
+  cout << "===================================================" << endl;
+  cout << " ===== End of NonSmoothDynamicalSystem tests ===== " << endl;
+  cout << "===================================================" << endl;
+}

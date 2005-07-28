@@ -15,7 +15,7 @@ DSXML::DSXML():
   rootDSXMLNode(NULL), parentNode(NULL), boundaryConditionXML(NULL), xMemoryXML(NULL), xDotMemoryXML(NULL), rMemoryXML(NULL),
   idNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL), xDotNode(NULL), xMemoryNode(NULL), xDotMemoryNode(NULL),
   stepsInMemoryNode(NULL), vectorFieldNode(NULL), computeJacobianXNode(NULL), boundaryConditionNode(NULL),
-  dsInputOutputNode(NULL),  rNode(NULL), rMemoryNode(NULL)
+  dsInputOutputNode(NULL),  rNode(NULL), rMemoryNode(NULL), uSizeNode(NULL), uNode(NULL), TNode(NULL)
 {}
 
 
@@ -23,39 +23,14 @@ DSXML::DSXML(xmlNode * DSNode, const bool& isBVP):
   rootDSXMLNode(DSNode), parentNode(NULL), boundaryConditionXML(NULL), xMemoryXML(NULL), xDotMemoryXML(NULL), rMemoryXML(NULL),
   idNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL), xDotNode(NULL), xMemoryNode(NULL), xDotMemoryNode(NULL),
   stepsInMemoryNode(NULL), vectorFieldNode(NULL), computeJacobianXNode(NULL), boundaryConditionNode(NULL),
-  dsInputOutputNode(NULL),  rNode(NULL), rMemoryNode(NULL)
-{
-  loadDSProperties(isBVP);
-}
-
-DSXML::~DSXML()
-{
-  if (boundaryConditionXML != NULL) delete boundaryConditionXML;
-  if (rMemoryXML != NULL) delete rMemoryXML;
-  if (xMemoryXML != NULL) delete xMemoryXML;
-  if (xDotMemoryXML != NULL) delete xDotMemoryXML;
-}
-
-void DSXML::loadDSProperties(const bool& isBVP)
+  dsInputOutputNode(NULL),  rNode(NULL), rMemoryNode(NULL), uSizeNode(NULL), uNode(NULL), TNode(NULL)
 {
   xmlNode *node;
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, BOUNDARYCONDITION_TAG)) != NULL)
-  {
-    loadBoundaryConditionXML(node);
-    boundaryConditionNode = node;
-  }
-
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, ID_ATTRIBUTE)) != NULL)
     idNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_N)) != NULL)
     nNode = node;
-  else
-  {
-    if ((getType() != LAGRANGIAN_NON_LINEARDS_TAG) && (getType() != LAGRANGIAN_TIME_INVARIANTDS_TAG))
-      XMLException::selfThrow("DSXML - loadDSProperties error : tag " + DS_N + " not found.");
-  }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_X0)) != NULL)
     x0Node = node;
@@ -81,6 +56,18 @@ void DSXML::loadDSProperties(const bool& isBVP)
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_STEPSINMEMORY)) != NULL)
     stepsInMemoryNode = node;
 
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_VECTORFIELD)) != NULL)
+    vectorFieldNode = node;
+
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_COMPUTEJACOBIANX)) != NULL)
+    computeJacobianXNode = node;
+
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, BOUNDARYCONDITION_TAG)) != NULL)
+  {
+    loadBoundaryConditionXML(node);
+    boundaryConditionNode = node;
+  }
+
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_R)) != NULL)
     rNode = node;
 
@@ -90,11 +77,22 @@ void DSXML::loadDSProperties(const bool& isBVP)
     rMemoryXML = new SiconosMemoryXML(rMemoryNode, parentNode, DS_RMEMORY);
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_VECTORFIELD)) != NULL)
-    vectorFieldNode = node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, "uSize")) != NULL)
+    uSizeNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_COMPUTEJACOBIANX)) != NULL)
-    computeJacobianXNode = node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_U)) != NULL)
+    uNode = node;
+
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_T)) != NULL)
+    TNode = node;
+}
+
+DSXML::~DSXML()
+{
+  if (boundaryConditionXML != NULL) delete boundaryConditionXML;
+  if (rMemoryXML != NULL) delete rMemoryXML;
+  if (xMemoryXML != NULL) delete xMemoryXML;
+  if (xDotMemoryXML != NULL) delete xDotMemoryXML;
 }
 
 void DSXML::loadBoundaryConditionXML(xmlNode * rootBoundaryConditionNode)
@@ -109,21 +107,16 @@ void DSXML::loadBoundaryConditionXML(xmlNode * rootBoundaryConditionNode)
     xmlNode *node = SiconosDOMTreeTools::findNodeChild(rootBoundaryConditionNode);
     string type((char*)node->name);
     if (type == NON_LINEARBC_TAG)
-    {
       boundaryConditionXML = new NLinearBCXML(node);
-    }
+
     else if (type == LINEARBC_TAG)
-    {
       boundaryConditionXML = new LinearBCXML(node);
-    }
+
     else if (type == PERIODICBC_TAG)
-    {
       boundaryConditionXML = new PeriodicBCXML(node);
-    }
+
     else
-    {
       XMLException::selfThrow("DSXML : undefined boundary condition type : " + type);
-    }
   }
 }
 

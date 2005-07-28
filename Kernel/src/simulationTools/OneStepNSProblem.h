@@ -8,7 +8,7 @@
 #include "NewSiconosVector.h"
 #include "SimpleVector.h"
 #include "OneStepNSProblemXML.h"
-
+#include "Topology.h"
 #include "SiconosConst.h"
 #include "SiconosNumerics.h"
 #include "check.h"
@@ -239,20 +239,30 @@ public:
    */
   void addInteraction(Interaction*);
 
+  /** \fn void initialize()
+   *  \brief initialize the problem(compute topology ...)
+   */
+  virtual void initialize();
+
+  /** \fn void checkEffectiveOutput();
+   *  \brief compute vector indexMax of the topology of the nsds
+   *
+   */
+  void checkEffectiveOutput();
+
   /** \fn void nextStep(void)
-   *  \brief prepares the Interaction for the next time step push y and lambda in Memory
+   *  \brief prepares the problem for the next time step
    *  \exception to be defined
-   *  \return void
    */
   virtual void nextStep();
 
-  /** \fn void updateState(void)
-   *  \brief predict all the relations before updating state of the problem
+  /** \fn void updateInput()
+   *  \brief compute r thanks to lambda
    */
-  virtual void updateState();
+  virtual void updateInput();
 
   /** \fn void updateOutput(void)
-   *  \brief compute output for all the interaction of the DS
+   *  \brief compute output for all the interactions
    */
   virtual void updateOutput();
 
@@ -261,16 +271,11 @@ public:
    */
   virtual void checkInteraction();
 
-  /** \fn void formalize(void)
-   *  \brief transform the discretised problem in a problem under numerical form
+  /** \fn void compute(const double&)
+   *  \brief make the computation so solve the NS problem
    *  param double : current time
    */
-  virtual void formalize(const double&);
-
-  /** \fn void compute(void)
-   *  \brief make the computation so solve the NS problem
-   */
-  virtual void compute();
+  virtual void compute(const double&);
 
   /** \fn void fillSolvingMethod(const string& newSolvingMethod, const int& maxIter,
    *                             const double & Tolerance=0, const string & NormType="none",
@@ -341,7 +346,6 @@ public:
   virtual void setLatinAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
                                  const int& = DefaultAlgoMaxIter, const double& = DefaultAlgoSearchDirection);
 
-
   /** \fn void updateConnectedInteractionMap()
    *   \brief mofifies the connectedInteractions map according to the interactions of the OneStepNSProblem
    */
@@ -366,6 +370,20 @@ protected:
 
   /** all the EqualityConstraint known by the OneStepNSProblem */
   std::vector< EqualityConstraint* > ecVector;
+
+  /** map that links each interaction with the corresponding diagonal block*/
+  std::map< Interaction* , SiconosMatrix*>  diagonalBlocksMap  ;
+
+  /** map that links each interaction with the corresponding extra-diagonal blocks
+      map < InteractionA * , map < InteractionB* , blockMatrixAB > >
+      Interaction A and B are coupled through blockMatrixAB.
+  */
+  std::map< Interaction* , std::map<Interaction *, SiconosMatrix*> >  extraDiagonalBlocksMap  ;
+
+  /** */
+  std::map<Interaction*, bool> areDiagonalBlocksMapAllocatedIn ;
+  std::map< Interaction* , std::map<Interaction *, bool > >areExtraDiagonalBlocksMapAllocatedIn;
+
 
   /** structure containing the structures of the numerous solving methods */
   methode solvingMethod;

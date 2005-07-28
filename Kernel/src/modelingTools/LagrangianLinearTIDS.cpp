@@ -8,7 +8,6 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML * dsXML,  NonSmoothDynamicalSys
 {
   IN("LagrangianLinearTIDS::LagrangianLinearTIDS() - Xml constructor\n");
   DSType = LTIDS;
-
   if (dsXML != NULL)
   {
     LagrangianLinearTIDSXML * lltidsxml = (static_cast <LagrangianLinearTIDSXML*>(dsxml));

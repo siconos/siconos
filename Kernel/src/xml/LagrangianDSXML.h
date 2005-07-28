@@ -25,14 +25,14 @@ const std::string LNLDS_VELOCITY = "Velocity";
 const std::string LNLDS_VELOCITY0 = "Velocity0";
 const std::string LNLDS_VELOCITYMEMORY = "VelocityMemory";
 
-const std::string LNLDS_QNLINERTIA = "QNLInertia";
+const std::string LNLDS_QNLINERTIA = "NNL";
 const std::string LNLDS_FINT = "Fint";
 const std::string LNLDS_FEXT = "Fext";
 
 const std::string LNLDS_JACOBIANQFINT = "JacobianQFint";
 const std::string LNLDS_JACOBIANVELOCITYFINT = "JacobianVelocityFint";
-const std::string LNLDS_JACOBIANQQNLINERTIA = "JacobianQQNLInertia";
-const std::string LNLDS_JACOBIANVELOCITYQNLINERTIA = "JacobianVelocityQNLInertia";
+const std::string LNLDS_JACOBIANQQNLINERTIA = "JacobianQNNL";
+const std::string LNLDS_JACOBIANVELOCITYQNLINERTIA = "JacobianVelocityNNL";
 
 const std::string LNLDS_M = "M";
 const std::string LNLDS_NDOF = "ndof";
@@ -184,57 +184,57 @@ public:
    */
   void setVelocityMemory(SiconosMemory* smem);
 
-  // === QNLInertia ===
-  /** \fn inline string getQNLInertiaPlugin()
-   *   \brief Return the QNLInertia Plugin name of the LagrangianDSXML
-   *   \return The QNLInertia Plugin name of the LagrangianDSXML
+  // === NNL ===
+  /** \fn inline string getNNLPlugin()
+   *   \brief Return the NNL Plugin name of the LagrangianDSXML
+   *   \return The NNL Plugin name of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline std::string getQNLInertiaPlugin()
+  inline std::string getNNLPlugin()
   {
-    if (!isQNLInertiaPlugin())
-      XMLException::selfThrow("LagrangianDSXML - getQNLInertiaPlugin : QNLInertia is not calculated from a plugin ; QNLInertia vector is given");
-    return  SiconosDOMTreeTools::getStringAttributeValue(QNLInertiaNode, LNLDS_VECTORPLUGIN);
+    if (!isNNLPlugin())
+      XMLException::selfThrow("LagrangianDSXML - getNNLPlugin : NNL is not calculated from a plugin ; NNL vector is given");
+    return  SiconosDOMTreeTools::getStringAttributeValue(NNLNode, LNLDS_VECTORPLUGIN);
   }
 
-  /** \fn SimpleVector getQNLInertiaVector()
-   *   \brief Return the QNLInertia vector of the LagrangianDSXML
-   *   \return SimpleVector : QNLInertia vector of the LagrangianDSXML
+  /** \fn SimpleVector getNNLVector()
+   *   \brief Return the NNL vector of the LagrangianDSXML
+   *   \return SimpleVector : NNL vector of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline SimpleVector getQNLInertiaVector()
+  inline SimpleVector getNNLVector()
   {
-    if (isQNLInertiaPlugin())
-      XMLException::selfThrow("LagrangianDSXML - getQNLInertiaVector : QNLInertia vector is not given ; QNLInertia is calculated from a plugin");
-    return  SiconosDOMTreeTools::getSiconosVectorValue(QNLInertiaNode);
+    if (isNNLPlugin())
+      XMLException::selfThrow("LagrangianDSXML - getNNLVector : NNL vector is not given ; NNL is calculated from a plugin");
+    return  SiconosDOMTreeTools::getSiconosVectorValue(NNLNode);
   }
 
-  /** \fn void setQNLInertiaPlugin(string plugin)
-   *   \brief allows to save the QNLInertia plugin of the LagrangianDSXML
+  /** \fn void setNNLPlugin(string plugin)
+   *   \brief allows to save the NNL plugin of the LagrangianDSXML
    *   \param string : ths string which contains the name and the location of the plugin
    */
-  inline void setQNLInertiaPlugin(std::string plugin)
+  inline void setNNLPlugin(std::string plugin)
   {
-    if (QNLInertiaNode == NULL)
+    if (NNLNode == NULL)
     {
-      QNLInertiaNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_QNLINERTIA);
-      xmlNewProp(QNLInertiaNode, (xmlChar*)(LNLDS_VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
+      NNLNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_QNLINERTIA);
+      xmlNewProp(NNLNode, (xmlChar*)(LNLDS_VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
-    else SiconosDOMTreeTools::setStringAttributeValue(QNLInertiaNode, LNLDS_VECTORPLUGIN, plugin);
+    else SiconosDOMTreeTools::setStringAttributeValue(NNLNode, LNLDS_VECTORPLUGIN, plugin);
   }
 
-  /** \fn void setQNLInertiaVector(SiconosVector *v)
-   *   \brief allows to save the QNLInertia vector of the LagrangianDSXML
-   *   \return The QNLInertia SiconosVector to save
+  /** \fn void setNNLVector(SiconosVector *v)
+   *   \brief allows to save the NNL vector of the LagrangianDSXML
+   *   \return The NNL SiconosVector to save
    */
-  inline void setQNLInertiaVector(SiconosVector *v)
+  inline void setNNLVector(SiconosVector *v)
   {
-    if (QNLInertiaNode == NULL)
+    if (NNLNode == NULL)
     {
-      QNLInertiaNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LNLDS_QNLINERTIA, *v);
+      NNLNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LNLDS_QNLINERTIA, *v);
     }
     else
-      SiconosDOMTreeTools::setSiconosVectorNodeValue(QNLInertiaNode, *v);
+      SiconosDOMTreeTools::setSiconosVectorNodeValue(NNLNode, *v);
   }
 
   // === FInt ===
@@ -443,11 +443,11 @@ public:
    *   \return The JacobianQQ Plugin name of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline std::string getJacobianQQNLInertiaPlugin()
+  inline std::string getJacobianQNNLPlugin()
   {
-    if (!isJacobianQQNLInertiaPlugin())
-      XMLException::selfThrow("LagrangianDSXML - getJacobianQQNLInertiaPlugin : JacobianQQNLInertia is not calculated from a plugin ; JacobianQQNLInertia matrix is given");
-    return  SiconosDOMTreeTools::getStringAttributeValue(jacobianQQNLInertiaNode, LNLDS_MATRIXPLUGIN);
+    if (!isJacobianQNNLPlugin())
+      XMLException::selfThrow("LagrangianDSXML - getJacobianQNNLPlugin : JacobianQNNL is not calculated from a plugin ; JacobianQNNL matrix is given");
+    return  SiconosDOMTreeTools::getStringAttributeValue(jacobianQNNLNode, LNLDS_MATRIXPLUGIN);
   }
 
   /** \fn SiconosMatrix getJacobianQQMatrix()
@@ -455,84 +455,84 @@ public:
    *   \return The JacobianQQ SiconosMatrix of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline SiconosMatrix getJacobianQQNLInertiaMatrix()
+  inline SiconosMatrix getJacobianQNNLMatrix()
   {
-    if (isJacobianQQNLInertiaPlugin())
-      XMLException::selfThrow("LagrangianDSXML - getJacobianQQNLInertiaMatrix : JacobianQQNLInertia matrix is not given ; JacobianQQNLInertia is calculated from a plugin");
+    if (isJacobianQNNLPlugin())
+      XMLException::selfThrow("LagrangianDSXML - getJacobianQNNLMatrix : JacobianQNNL matrix is not given ; JacobianQNNL is calculated from a plugin");
 
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(jacobianQQNLInertiaNode);
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(jacobianQNNLNode);
   }
 
-  /** \fn void setJacobianQQNLInertiaPlugin(string plugin)
-   *   \brief allows to save the jacobianQQNLInertia plugin of the LagrangianDSXML
+  /** \fn void setJacobianQNNLPlugin(string plugin)
+   *   \brief allows to save the jacobianQNNL plugin of the LagrangianDSXML
    *   \param string : ths string which contains the name and the location of the plugin
    */
-  inline void setJacobianQQNLInertiaPlugin(std::string plugin)
+  inline void setJacobianQNNLPlugin(std::string plugin)
   {
-    if (jacobianQQNLInertiaNode == NULL)
+    if (jacobianQNNLNode == NULL)
     {
-      jacobianQQNLInertiaNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_JACOBIANQQNLINERTIA);
-      xmlNewProp(jacobianQQNLInertiaNode, (xmlChar*)(LNLDS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
+      jacobianQNNLNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_JACOBIANQQNLINERTIA);
+      xmlNewProp(jacobianQNNLNode, (xmlChar*)(LNLDS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
-    else SiconosDOMTreeTools::setStringAttributeValue(jacobianQQNLInertiaNode, LNLDS_JACOBIANQQNLINERTIA, plugin);
+    else SiconosDOMTreeTools::setStringAttributeValue(jacobianQNNLNode, LNLDS_JACOBIANQQNLINERTIA, plugin);
   }
 
   /** \fn void setJacobianQQMatrix(SiconosMatrix *m)
    *   \brief allows to save the JacobianQQ matrix of the LagrangianDSXML
    *   \return The JacobianQQ SiconosMatrix to save
    */
-  inline void setJacobianQQNLInertiaMatrix(SiconosMatrix *m)
+  inline void setJacobianQNNLMatrix(SiconosMatrix *m)
   {
-    //SiconosDOMTreeTools::setSiconosMatrixValue(jacobianQQNLInertiaNode, *m);
-    SiconosDOMTreeTools::setSiconosMatrixNodeValue(jacobianQQNLInertiaNode, *m);
+    //SiconosDOMTreeTools::setSiconosMatrixValue(jacobianQNNLNode, *m);
+    SiconosDOMTreeTools::setSiconosMatrixNodeValue(jacobianQNNLNode, *m);
   }
 
-  /** \fn inline string getJacobianVelocityQNLInertiaPlugin()
-   *   \brief Return the JacobianVelocityQNLInertia Plugin name of the LagrangianDSXML
-   *   \return The JacobianVelocityQNLInertia Plugin name of the LagrangianDSXML
+  /** \fn inline string getJacobianVelocityNNLPlugin()
+   *   \brief Return the JacobianVelocityNNL Plugin name of the LagrangianDSXML
+   *   \return The JacobianVelocityNNL Plugin name of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline std::string getJacobianVelocityQNLInertiaPlugin()
+  inline std::string getJacobianVelocityNNLPlugin()
   {
-    if (!isJacobianVelocityQNLInertiaPlugin())
-      XMLException::selfThrow("LagrangianDSXML - getJacobianVelocityQNLInertiaPlugin : JacobianVelocityQNLInertia is not calculated from a plugin ; JacobianVelocityQNLInertia matrix is given");
-    return  SiconosDOMTreeTools::getStringAttributeValue(jacobianVelocityQNLInertiaNode, LNLDS_MATRIXPLUGIN);
+    if (!isJacobianVelocityNNLPlugin())
+      XMLException::selfThrow("LagrangianDSXML - getJacobianVelocityNNLPlugin : JacobianVelocityNNL is not calculated from a plugin ; JacobianVelocityNNL matrix is given");
+    return  SiconosDOMTreeTools::getStringAttributeValue(jacobianVelocityNNLNode, LNLDS_MATRIXPLUGIN);
   }
 
-  /** \fn SiconosMatrix getJacobianVelocityQNLInertiaMatrix()
-   *   \brief Return the JacobianVelocityQNLInertia matrix of the LagrangianDSXML
-   *   \return The JacobianVelocityQNLInertia SiconosMatrix of the LagrangianDSXML
+  /** \fn SiconosMatrix getJacobianVelocityNNLMatrix()
+   *   \brief Return the JacobianVelocityNNL matrix of the LagrangianDSXML
+   *   \return The JacobianVelocityNNL SiconosMatrix of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline SiconosMatrix getJacobianVelocityQNLInertiaMatrix()
+  inline SiconosMatrix getJacobianVelocityNNLMatrix()
   {
-    if (isJacobianVelocityQNLInertiaPlugin())
-      XMLException::selfThrow("LagrangianDSXML - getJacobianVelocityQNLInertiaMatrix : JacobianVelocityQNLInertia matrix is not given ; JacobianVelocityQNLInertia is calculated from a plugin");
+    if (isJacobianVelocityNNLPlugin())
+      XMLException::selfThrow("LagrangianDSXML - getJacobianVelocityNNLMatrix : JacobianVelocityNNL matrix is not given ; JacobianVelocityNNL is calculated from a plugin");
 
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(jacobianVelocityQNLInertiaNode);
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(jacobianVelocityNNLNode);
   }
 
-  /** \fn void setJacobianVelocityQNLInertiaPlugin(string plugin)
-   *   \brief allows to save the jacobianVelocityQNLInertiaPlugin plugin of the LagrangianDSXML
+  /** \fn void setJacobianVelocityNNLPlugin(string plugin)
+   *   \brief allows to save the jacobianVelocityNNLPlugin plugin of the LagrangianDSXML
    *   \param string : ths string which contains the name and the location of the plugin
    */
-  inline void setJacobianVelocityQNLInertiaPlugin(std::string plugin)
+  inline void setJacobianVelocityNNLPlugin(std::string plugin)
   {
-    if (jacobianVelocityQNLInertiaNode == NULL)
+    if (jacobianVelocityNNLNode == NULL)
     {
-      jacobianVelocityQNLInertiaNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_JACOBIANVELOCITYQNLINERTIA);
-      xmlNewProp(jacobianVelocityQNLInertiaNode, (xmlChar*)(LNLDS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
+      jacobianVelocityNNLNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_JACOBIANVELOCITYQNLINERTIA);
+      xmlNewProp(jacobianVelocityNNLNode, (xmlChar*)(LNLDS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
-    else SiconosDOMTreeTools::setStringAttributeValue(jacobianVelocityQNLInertiaNode, LNLDS_JACOBIANVELOCITYQNLINERTIA, plugin);
+    else SiconosDOMTreeTools::setStringAttributeValue(jacobianVelocityNNLNode, LNLDS_JACOBIANVELOCITYQNLINERTIA, plugin);
   }
 
-  /** \fn void setJacobianVelocityQNLInertiaMatrix(SiconosMatrix *m)
-   *   \brief allows to save the JacobianVelocityQNLInertia matrix of the LagrangianDSXML
-   *   \return The JacobianVelocityQNLInertia SiconosMatrix to save
+  /** \fn void setJacobianVelocityNNLMatrix(SiconosMatrix *m)
+   *   \brief allows to save the JacobianVelocityNNL matrix of the LagrangianDSXML
+   *   \return The JacobianVelocityNNL SiconosMatrix to save
    */
-  inline void setJacobianVelocityQNLInertiaMatrix(SiconosMatrix *m)
+  inline void setJacobianVelocityNNLMatrix(SiconosMatrix *m)
   {
-    SiconosDOMTreeTools::setSiconosMatrixNodeValue(jacobianVelocityQNLInertiaNode, *m);
+    SiconosDOMTreeTools::setSiconosMatrixNodeValue(jacobianVelocityNNLNode, *m);
   }
 
   /** \fn inline string getMPlugin()
@@ -561,7 +561,7 @@ public:
   }
 
   /** \fn void setMPlugin(string plugin)
-   *   \brief allows to save the jacobianVelocityQNLInertiaPlugin plugin of the LagrangianDSXML
+   *   \brief allows to save the jacobianVelocityNNLPlugin plugin of the LagrangianDSXML
    *   \param string : ths string which contains the name and the location of the plugin
    */
   inline void setMPlugin(std::string plugin)
@@ -634,9 +634,9 @@ public:
    *   \brief Return true if QLNInertia is calculated from a plugin
    *   \return True if QLNInertia is calculated from plugin
    */
-  inline bool isQNLInertiaPlugin()
+  inline bool isNNLPlugin()
   {
-    return xmlHasProp((xmlNodePtr)QNLInertiaNode, (xmlChar *) LNLDS_VECTORPLUGIN.c_str());
+    return xmlHasProp((xmlNodePtr)NNLNode, (xmlChar *) LNLDS_VECTORPLUGIN.c_str());
   }
 
   /** \fn bool isFintPlugin()
@@ -679,18 +679,18 @@ public:
    *   \brief Return true if JacobianQQ is calculated from a plugin
    *   \return True if JacobianQQ is calculated from plugin
    */
-  inline bool isJacobianQQNLInertiaPlugin()
+  inline bool isJacobianQNNLPlugin()
   {
-    return xmlHasProp((xmlNodePtr)jacobianQQNLInertiaNode, (xmlChar *) LNLDS_MATRIXPLUGIN.c_str());
+    return xmlHasProp((xmlNodePtr)jacobianQNNLNode, (xmlChar *) LNLDS_MATRIXPLUGIN.c_str());
   }
 
-  /** \fn bool isJacobianVelocityQNLInertiaPlugin()
-   *   \brief Return true if JacobianVelocityQNLInertia is calculated from a plugin
-   *   \return True if JacobianVelocityQNLInertia is calculated from plugin
+  /** \fn bool isJacobianVelocityNNLPlugin()
+   *   \brief Return true if JacobianVelocityNNL is calculated from a plugin
+   *   \return True if JacobianVelocityNNL is calculated from plugin
    */
-  inline bool isJacobianVelocityQNLInertiaPlugin()
+  inline bool isJacobianVelocityNNLPlugin()
   {
-    return xmlHasProp((xmlNodePtr)jacobianVelocityQNLInertiaNode, (xmlChar *) LNLDS_MATRIXPLUGIN.c_str());
+    return xmlHasProp((xmlNodePtr)jacobianVelocityNNLNode, (xmlChar *) LNLDS_MATRIXPLUGIN.c_str());
   }
 
 
@@ -739,31 +739,31 @@ public:
     return (jacobianVelocityFintNode != NULL);
   }
 
-  /** \fn bool hasJacobianQQNLInertia()
-   *  \brief determines if jacobianQQNLInertia is defined in the DOM tree
-   *  \return bool : true if jacobianQQNLInertia is defined, false otherwise
+  /** \fn bool hasJacobianQNNL()
+   *  \brief determines if jacobianQNNL is defined in the DOM tree
+   *  \return bool : true if jacobianQNNL is defined, false otherwise
    */
-  inline bool hasJacobianQQNLInertia()
+  inline bool hasJacobianQNNL()
   {
-    return (jacobianQQNLInertiaNode != NULL);
+    return (jacobianQNNLNode != NULL);
   }
 
-  /** \fn bool hasJacobianVelocityQNLInertia()
-   *  \brief determines if jacobianVelocityQNLInertia is defined in the DOM tree
-   *  \return bool : true if jacobianVelocityQNLInertia is defined, false otherwise
+  /** \fn bool hasJacobianVelocityNNL()
+   *  \brief determines if jacobianVelocityNNL is defined in the DOM tree
+   *  \return bool : true if jacobianVelocityNNL is defined, false otherwise
    */
-  inline bool hasJacobianVelocityQNLInertia()
+  inline bool hasJacobianVelocityNNL()
   {
-    return (jacobianVelocityQNLInertiaNode != NULL);
+    return (jacobianVelocityNNLNode != NULL);
   }
 
-  /** \fn bool hasQNLInertia()
-   *  \brief determines if QNLInertia is defined in the DOM tree
-   *  \return bool : true if QNLInertia is defined, false otherwise
+  /** \fn bool hasNNL()
+   *  \brief determines if NNL is defined in the DOM tree
+   *  \return bool : true if NNL is defined, false otherwise
    */
-  inline bool hasQNLInertia()
+  inline bool hasNNL()
   {
-    return (QNLInertiaNode != NULL);
+    return (NNLNode != NULL);
   }
 
   /** \fn bool hasQMemory()
@@ -827,14 +827,14 @@ protected:
   xmlNode * velocity0Node;
   xmlNode * velocityMemoryNode;
 
-  xmlNode * QNLInertiaNode;
+  xmlNode * NNLNode;
   xmlNode * FintNode;
   xmlNode * FextNode;
 
   xmlNode * jacobianQFintNode;
   xmlNode * jacobianVelocityFintNode;
-  xmlNode * jacobianQQNLInertiaNode;
-  xmlNode * jacobianVelocityQNLInertiaNode;
+  xmlNode * jacobianQNNLNode;
+  xmlNode * jacobianVelocityNNLNode;
 
 
   xmlNode * MNode;

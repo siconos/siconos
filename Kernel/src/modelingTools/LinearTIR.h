@@ -266,6 +266,30 @@ public:
    */
   void setAPtr(SimpleVector *);
 
+  /** \fn void getCBlockDSPtr(DynamicalSystem* ds, SiconosMatrix&) const
+   *  \brief get block of C corresponding to ds
+   *  \param a pointer to dynamical system and a SiconosMatrix (in-out parameter)
+   */
+  void getCBlockDSPtr(DynamicalSystem*, SiconosMatrix&) const;
+
+  /** \fn void getCBlockDSPtr(const int & n, SiconosMatrix&) const
+   *  \brief get block of C corresponding to DS number n
+   *  \param an int and a SiconosMatrix (in-out parameter)
+   */
+  void getCBlockDSPtr(const int &, SiconosMatrix&) const;
+
+  /** \fn void getBBlockDSPtr(DynamicalSystem* ds, SiconosMatrix&) const
+   *  \brief get block of B corresponding to ds
+   *  \param a pointer to dynamical system and a SiconosMatrix (in-out parameter)
+   */
+  void getBBlockDSPtr(DynamicalSystem* , SiconosMatrix&) const;
+
+  /** \fn void getBBlockDSPtr(const int & n , SiconosMatrix&) const
+   *  \brief get block of B corresponding to DS number n
+   *  \param an int and a SiconosMatrix (in-out parameter)
+   */
+  void getBBlockDSPtr(const int &, SiconosMatrix&) const;
+
   // --- OTHER FUNCTIONS ---
 
   /** \fn void computeOutput(const double& time)
@@ -273,6 +297,12 @@ public:
    *  \param double : current time
    */
   void computeOutput(const double&);
+
+  /** \fn void computeFreeOutput(const double& time)
+   *  \brief computes yFree AND save it into y
+   *  \param double : current time
+   */
+  void computeFreeOutput(const double& = 0);
 
   /** \fn void computeInput(double time);
    *  \brief default function to compute lambda

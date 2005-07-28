@@ -20,6 +20,7 @@ private:
   CPPUNIT_TEST(testBuildNonSmoothDynamicalSystem2);
   CPPUNIT_TEST(testaddDynamicalSystem);
   CPPUNIT_TEST(testaddInteraction);
+  CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -29,7 +30,7 @@ private:
   void testBuildNonSmoothDynamicalSystem2();
   void testaddDynamicalSystem();
   void testaddInteraction();
-
+  void End();
   // Members
 
   xmlNode * node;

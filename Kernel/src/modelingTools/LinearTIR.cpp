@@ -465,6 +465,124 @@ void LinearTIR::setAPtr(SimpleVector *newPtr)
   isAllocatedIn[5] = false;
 }
 
+void LinearTIR::getCBlockDSPtr(DynamicalSystem * ds, SiconosMatrix& CBlock) const
+{
+  unsigned int k = 0;
+
+  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
+
+  vector<DynamicalSystem*>::iterator itDS;
+  itDS = vDS.begin();
+
+  // look for ds
+  while (*itDS != ds && itDS != vDS.end())
+  {
+    k += (*itDS)->getN();
+    itDS++;
+  }
+
+  // check dimension
+  if ((*itDS)->getN() != CBlock.size(1))
+    RuntimeException::selfThrow("LinearTIR - getCBlockDSPtr: inconsistent sizes between CBlock and DS");
+
+  // get block
+  unsigned int l = k + (*itDS)->getN() - 1;
+  vector<unsigned int> index_list(4);
+  index_list[0] = 0;
+  index_list[1] = C->size(0) - 1;
+  index_list[2] = k;
+  index_list[3] = l;
+  C->getBlock(index_list, CBlock);
+}
+
+void LinearTIR::getCBlockDSPtr(const int& DSNumber, SiconosMatrix& CBlock) const
+{
+  unsigned int k = 0;
+
+  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
+
+  vector<DynamicalSystem*>::iterator itDS;
+  itDS = vDS.begin();
+
+  // look for DS number DSNumber ...
+  while ((*itDS)->getNumber() != DSNumber && itDS != vDS.end())
+  {
+    k += (*itDS)->getN();
+    itDS++;
+  }
+
+  // check dimension
+  if ((*itDS)->getN() != CBlock.size(1))
+    RuntimeException::selfThrow("LinearTIR - getCBlockDSPtr: inconsistent sizes between CBlock and DS");
+
+  // get block
+  unsigned int l = k + (*itDS)->getN() - 1;
+  vector<unsigned int> index_list(4);
+  index_list[0] = 0;
+  index_list[1] = C->size(0) - 1;
+  index_list[2] = k;
+  index_list[3] = l;
+  C->getBlock(index_list, CBlock);
+}
+
+void LinearTIR::getBBlockDSPtr(DynamicalSystem* ds, SiconosMatrix& BBlock) const
+{
+  unsigned int k = 0;
+
+  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
+
+  vector<DynamicalSystem*>::iterator itDS;
+  itDS = vDS.begin();
+
+  while ((*itDS) != ds && itDS != vDS.end())
+  {
+    k += (*itDS)->getN();
+    itDS++;
+  }
+  // check dimension
+  if ((*itDS)->getN() != BBlock.size(0))
+    RuntimeException::selfThrow("LinearTIR - getBBlockDSPtr: inconsistent sizes between BBlock and DS");
+
+  // get block
+  unsigned int l = k + (*itDS)->getN() - 1;
+  vector<unsigned int> index_list(4);
+  index_list[0] = k;
+  index_list[1] = l;
+  index_list[2] = 0;
+  index_list[3] = B->size(1) - 1;
+
+  B->getBlock(index_list, BBlock);
+}
+
+void LinearTIR::getBBlockDSPtr(const int& DSNumber, SiconosMatrix& BBlock) const
+{
+  unsigned int k = 0;
+
+  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
+
+  vector<DynamicalSystem*>::iterator itDS;
+  itDS = vDS.begin();
+
+  while ((*itDS)->getNumber() != DSNumber && itDS != vDS.end())
+  {
+    k += (*itDS)->getN();
+    itDS++;
+  }
+  // check dimension
+  if ((*itDS)->getN() != BBlock.size(0))
+    RuntimeException::selfThrow("LinearTIR - getBBlockDSPtr: inconsistent sizes between BBlock and DS");
+
+  // get block
+  unsigned int l = k + (*itDS)->getN() - 1;
+  vector<unsigned int> index_list(4);
+  index_list[0] = k;
+  index_list[1] = l;
+  index_list[2] = 0;
+  index_list[3] = B->size(1) - 1;
+
+  B->getBlock(index_list, BBlock);
+}
+
 void LinearTIR::computeOutput(const double& time)
 {
   IN("LinearTIR::computeOutput\n");
@@ -484,7 +602,7 @@ void LinearTIR::computeOutput(const double& time)
       uTmp->add(*((*it)->getUPtr())) ;
   }
 
-  SimpleVector *y = interaction->getYPtr();
+  SimpleVector *y = interaction->getYPtr(0);
   SimpleVector *lambda = interaction->getLambdaPtr();
 
   // compute y
@@ -512,9 +630,54 @@ void LinearTIR::computeOutput(const double& time)
   else // if (D == NULL  && F == NULL && e!= NULL)
     *y = *C * *xTmp + *e;
 
+  // \todo update y, yDot ... depending on the relative degree.
+
   // free memory
   delete xTmp;
   delete uTmp;
+  OUT("LinearTIR::computeOutput\n");
+}
+void LinearTIR::computeFreeOutput(const double& time)
+{
+  IN("LinearTIR::computeOutput\n");
+  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+  CompositeVector *xTmp = new CompositeVector();
+  //CompositeVector *uTmp = new CompositeVector();
+  vector<DynamicalSystem*>::iterator it;
+  // \warning : to be reviewed with control term u !!!
+
+  for (it = vDS.begin(); it != vDS.end(); it++)
+  {
+    // Put xFree and uFree of each DS into a composite
+    // Warning: use copy constructors, no link between pointers
+    if ((*it)->getType() != LDS)
+      RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented for DS type " + (*it)->getType());
+
+    xTmp->add((*it)->getXFree());
+    if ((*it)->getUPtr() != NULL)
+      RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented when control term u is present");
+
+    // uTmp->add( *((*it)->getUPtr())) ;
+  }
+
+  SimpleVector *yFree = interaction->getYPtr(0);
+  // warning : yFree is saved in y !!
+
+  // compute y
+  if (F != NULL)
+    RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented when control term u is present");
+
+  if (e == NULL)
+    *yFree = *C * *xTmp;
+
+  else
+    *yFree = *C * *xTmp + *e;
+
+  // \todo update y, yDot ... depending on the relative degree.
+
+  // free memory
+  delete xTmp;
+  //delete uTmp;
   OUT("LinearTIR::computeOutput\n");
 }
 

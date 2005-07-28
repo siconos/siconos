@@ -29,6 +29,7 @@ private:
   CPPUNIT_TEST(testSetBPtr);
   CPPUNIT_TEST(testSetA);
   CPPUNIT_TEST(testSetAPtr);
+  CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -49,6 +50,7 @@ private:
   void testSetBPtr();
   void testSetA();
   void testSetAPtr();
+  void End();
 
   // Members
 
