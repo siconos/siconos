@@ -28,9 +28,9 @@ FF = g77
 FC = pgf90
 FORTRAN  = g77
 
-CFLAGS = -g -fbounds-check -w -Wno-deprecated -fPIC
-CCFLAGS = -g -fbounds-check -w -fPIC
-FFLAGS =
+CFLAGS = -g -fbounds-check -Wall  -fPIC
+CCFLAGS = -g -fbounds-check -Wall -fPIC 
+FFLAGS = -g 
 SHAREDFLAG = -shared
 FOPTS = -funroll-all-loops -O3 -fno-emulate-complex -fomit-frame-pointer
 ARCH = ar
@@ -73,15 +73,15 @@ DOXYGEN = doxygen
 DOXYGEN_CFG = $(NUMERICSPATH)/config/DoxygenNumerics.cfg
 
 #--- LIBG2C -----------------------------------
-LIBG2C_DIR = -L/sw/lib
-LIBG2C_LIB = -lg2c
-LIBG2C_INC = -I/sw/include
+LIBG2C_DIR =
+LIBG2C_LIB = -lg2c -ldl
+LIBG2C_INC = 
 
 #--- CPPUNIT --------------------------------------
-#CPPUNIT_PATH = /usr/bin/cppunit
-#CPPUNIT_INC = -I$(CPPUNIT_PATH)/include
-#CPPUNIT_LIB_PATH = $(CPPUNIT_PATH)/lib
-#CPPUNIT_LIB = -L$(CPPUNIT_LIB_PATH) -lcppunit
+CPPUNIT_PATH = /usr/local/bin/cppunit
+CPPUNIT_INC = -I$(CPPUNIT_PATH)/include
+CPPUNIT_LIB_PATH = $(CPPUNIT_PATH)/lib
+CPPUNIT_LIB = -L$(CPPUNIT_LIB_PATH) -lcppunit
 
 #--- INCLUDE -----------------------------------
 INCLUDE = -I$(NUMERICS_INC)
@@ -94,6 +94,6 @@ SOLVERPACKLIB    = libSolverpack.a
 LIBDYN_NUMERICS = libSiconosNumerics.so
 
 #--- LIBS --------------------------------------
-LIBS =  $(LIBG2C_LIB)
+LIBS =  $(LIBG2C_LIB) -llapack -lblas -lm
 LIBS_IFC =  -llapack -lblas -lm
 #---------------[ end of makefile.inc.linux ]-----------------------

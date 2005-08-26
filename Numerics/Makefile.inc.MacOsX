@@ -20,8 +20,8 @@ include $(MAKEFILEDEP)
 CC = gcc
 GCC = g++
 #GCC = insure
-CFLAGS = -g -fbounds-check -w -Wno-deprecated -fPIC
-CCFLAGS = -g -fbounds-check -w -fPIC
+CFLAGS = -g -fbounds-check -w  -fPIC -Wall
+CCFLAGS = -g -fbounds-check -w -fPIC -Wall
 SHAREDFLAG = -dynamiclib -single_module -flat_namespace -undefined suppress 
 FORTRAN  = g77
 FF = g77
@@ -89,5 +89,5 @@ SOLVERPACKLIB    = libSolverpack.a
 LIBDYN_NUMERICS = libSiconosNumerics.dylib
 
 #--- LIBS --------------------------------------
-#LIBS =  
+LIBS =  -llapack -lblas -lm $(LIBG2C_DIR) $(LIBG2C_LIB)
 #---------------[ end of makefile.inc.MacOsX ]-----------------------
