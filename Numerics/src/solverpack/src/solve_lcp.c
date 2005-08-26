@@ -47,15 +47,12 @@ M z- w=q\\
  */
 int solve_lcp(double *vec, double *q, int *nn, methode *pt, double z[], double w[])
 {
-  const char mot1[10] = "Lemke", mot2[10] = "Gsnl", mot3[10] = "Gcp", mot4[10] = "Latin";
+  const char mot1[10] = "Lemke", mot2[10] = "Gsnl", mot3[10] = "Gcp", mot4[10] = "Latin", mot5[10] = "Qp", mot6[10] = "Qpnonsym";
   double res;
   int info1 = -1, it_end, info;
   int n = *nn;
 
   clock_t t1 = clock();
-
-
-
 
   if (strcmp(pt->lcp.nom_method, mot1) == 0)
   {
@@ -67,6 +64,25 @@ int solve_lcp(double *vec, double *q, int *nn, methode *pt, double z[], double w
     gcp_lcp(vec, q, &n, & pt->lcp.itermax, & pt->lcp.tol, z, w, &it_end, &res, &info1);
   else if (strcmp(pt->lcp.nom_method, mot4) == 0)
     latin_lcp(vec, q, &n, & pt->lcp.k_latin, & pt->lcp.itermax, & pt->lcp.tol, z, w, &it_end, &res, &info1);
+  else if (strcmp(pt->lcp.nom_method, mot5) == 0)
+  {
+    // We assume that the LCP matrix M is symmetric
+
+
+    printf("tol = %10.4e\n", pt->lcp.tol);
+    pt->lcp.tol = 0.0000001;
+    qp_lcp(vec, q, &n, & pt->lcp.tol, z, w, &info1);
+
+    //ql0001_()
+  }
+  else if (strcmp(pt->lcp.nom_method, mot6) == 0)
+  {
+    // We assume that the LCP matrix M is not symmetric
+    printf("tol = %10.4e\n", pt->lcp.tol);
+    pt->lcp.tol = 0.0000001;
+    qpnonsym_lcp(vec, q, &n, & pt->lcp.tol, z, w, &info1);
+  }
+
   else printf("Warning : Unknown solving method : %s\n", pt->lcp.nom_method);
 
   clock_t t2 = clock();

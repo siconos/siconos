@@ -21,10 +21,6 @@ M z- w=q\\
 here M is an n by n  matrix, q an n-dimensional vector, w an n-dimensional  vector and z an n-dimensional vector.
 */
 
-
-double ddot_(int *, double [], int *, double [], int*);
-
-
 /*!\fn  gsnl_lcp(double vec[],double *qq,int *nn,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
 
 
@@ -44,6 +40,14 @@ gsnl_lcp is a basic gsnl (Gauss-Seidel Non Linear) solver for LCP.
 \author Nineb Sheherazade.
 */
 
+/*
+ * ===========================================================================
+ * Prototypes for level 1 BLAS functions ?
+ * ===========================================================================
+ */
+
+double ddot_(int *, double [], int *, double [], int*);
+
 
 
 gsnl_lcp(double vec[], double *qq, int *nn, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
@@ -60,7 +64,7 @@ gsnl_lcp(double vec[], double *qq, int *nn, int * itermax, double * tol, double 
 
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
-      M[i][j] = vec[i * n + j]; /* vec has a F90 storage and M has a C storage*/
+      M[i][j] = vec[j * n + i]; /* vec has a F90 storage and M has a C storage*/
 
 
 

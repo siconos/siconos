@@ -144,7 +144,7 @@ typedef union
   methode_cfd cfd;
   /* \todo method_qp does not exist
   */
-  //methode_qp qp;
+  /* methode_qp qp; */
 } methode;
 
 /*
@@ -168,7 +168,9 @@ extern "C" void gsnl_lcp(double [], double [], int *, int *, double *, double []
 extern "C" void gcp_lcp(double [], double [], int *, int *, double *, double [], double[], int *, double *, int *);
 extern "C" void latin_lcp(double*, double*, int *, double *, int *, double *, double [], double[], int *, double *, int *);
 extern "C" void cfp_gsnl(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int*);
-extern "C"  void cfp_gcp(double [], double [], int *, double *, int *, double *, double [], double [], int *, double *, int *);
+extern "C" void cfp_gcp(double [], double [], int *, double *, int *, double *, double [], double [], int *, double *, int *);
+extern "C" void qp_lcp(double [], double [], int *, double *, double [], double [], int *);
+extern "C" void qpnonsym_lcp(double [], double [], int *, double *, double [], double [], int *);
 
 extern "C" void cfp_latin(double [], double [], int *, double *, double *, int *, double *, double [], double [], int *, double *, int*);
 extern "C" void cfd_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
@@ -181,7 +183,7 @@ extern "C" int lcp_cfd(int *, double *, double *, methode *, double *, double *,
 
 
 #ifndef __cplusplus
-//extern {
+/*extern { */
 /**@defgroup group1 LCP (Linear Complementary Problem)
    @{
 */
@@ -210,6 +212,11 @@ gcp_lcp.c
 latin_lcp.c
 
 lemke_lcp.c
+
+qp_lcp.c
+
+qpnonsym_lcp.c
+
 */
 
 
@@ -354,6 +361,10 @@ extern gcp_lcp(double [], double [], int *, int *, double *, double [], double[]
 
 extern latin_lcp(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int *);
 
+extern void qp_lcp(double [], double [], int *, double *, double [], double [], int *);
+
+
+extern void qpnonsym_lcp(double [], double [], int *, double *, double [], double [], int *);
 
 extern cfp_gsnl(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int*);
 //extern cfp_gsnl (double [],double [],int *,double *,double *,double *, double [],double[],double *,double *,double*);

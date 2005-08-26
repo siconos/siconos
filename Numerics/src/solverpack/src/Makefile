@@ -30,7 +30,7 @@
 #-----------------------------------------------
 include $(NUMERICSPATH)/Makefile.inc
 
-OBJETS_LCP= gcp_lcp.o gsnl_lcp.o latin_lcp.o lemke_lcp.o solve_lcp.o
+OBJETS_LCP= gcp_lcp.o gsnl_lcp.o latin_lcp.o lemke_lcp.o solve_lcp.o ql0001.o  qp_lcp.o qpnonsym_lcp.o
 
 OBJETS_CFP= cfp_gsnl.o cfp_latin.o solve_cfp.o cfp_gcp.o projc.o projf.o
 
@@ -40,9 +40,7 @@ OBJETS_RP= rp_latin.o rp_gsnl.o solve_rp.o
 
 OBJETS_RD= rd_latin.o solve_rd.o
 
-OBJETS = cfd_latin.o  cfp_gsnl.o   gsnl_lcp.o   lemke_lcp.o  projc.o      rp_gsnl.o    solve_cfp.o  solve_rp.o \
-	 cfd_lcp.o    cfp_latin.o  latin_lcp.o  projf.o      rp_latin.o   solve_lcp.o \
-	 cfp_gcp.o    gcp_lcp.o    lcp_cfd.o    rd_latin.o   solve_cfd.o  solve_rd.o
+OBJETS = $(OBJETS_LCP) $(OBJETS_RP) $(OBJETS_CFP) $(OBJETS_CFD) $(OBJETS_RD)
 
 all : build lib
 
@@ -76,4 +74,6 @@ clean:
 	rm -f *.o *.a
 
 %.o: %.c
-	$(CC) -c -o $@ $(CCFLAGS) $<
+	$(CC) -c -o $@ $(CFLAGS) $<
+%.o: %.f
+	$(FF) -c -o $@ $(FFLAGS) $<
