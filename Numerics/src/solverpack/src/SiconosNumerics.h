@@ -172,6 +172,7 @@ extern "C" void cfp_gcp(double [], double [], int *, double *, int *, double *, 
 extern "C" void qp_lcp(double [], double [], int *, double *, double [], double [], int *);
 extern "C" void qpnonsym_lcp(double [], double [], int *, double *, double [], double [], int *);
 
+extern "C" void lexicolemke_lcp(double *vec, double *qq, int *nn, int *itermax, double *zlem, double *wlem, int *it_end, double *res, int *info);
 extern "C" void cfp_latin(double [], double [], int *, double *, double *, int *, double *, double [], double [], int *, double *, int*);
 extern "C" void cfd_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
 extern "C" int cfd_lcp(int *, double *, methode *, double *, int *, int *, int * , int *, int *, int *, int *, int *, double * , double * , int *, double *, double *);
@@ -365,6 +366,8 @@ extern void qp_lcp(double [], double [], int *, double *, double [], double [], 
 
 
 extern void qpnonsym_lcp(double [], double [], int *, double *, double [], double [], int *);
+
+extern void lexicolemke_lcp(double *vec, double *qq, int *nn, int *itermax, double *zlem, double *wlem, int *it_end, double *res, int *info);
 
 extern cfp_gsnl(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int*);
 //extern cfp_gsnl (double [],double [],int *,double *,double *,double *, double [],double[],double *,double *,double*);

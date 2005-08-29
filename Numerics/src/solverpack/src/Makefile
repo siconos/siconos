@@ -30,7 +30,8 @@
 #-----------------------------------------------
 include $(NUMERICSPATH)/Makefile.inc
 
-OBJETS_LCP= gcp_lcp.o gsnl_lcp.o latin_lcp.o lemke_lcp.o solve_lcp.o ql0001.o  qp_lcp.o qpnonsym_lcp.o
+OBJETS_LCP= gcp_lcp.o gsnl_lcp.o latin_lcp.o lemke_lcp.o solve_lcp.o \
+	ql0001.o  qp_lcp.o qpnonsym_lcp.o lexicolemke_lcp.o
 
 OBJETS_CFP= cfp_gsnl.o cfp_latin.o solve_cfp.o cfp_gcp.o projc.o projf.o
 

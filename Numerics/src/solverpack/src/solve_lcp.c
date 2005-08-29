@@ -47,7 +47,7 @@ M z- w=q\\
  */
 int solve_lcp(double *vec, double *q, int *nn, methode *pt, double z[], double w[])
 {
-  const char mot1[10] = "Lemke", mot2[10] = "Gsnl", mot3[10] = "Gcp", mot4[10] = "Latin", mot5[10] = "Qp", mot6[10] = "Qpnonsym";
+  const char mot1[10] = "Lemke", mot2[10] = "Gsnl", mot3[10] = "Gcp", mot4[10] = "Latin", mot5[10] = "Qp", mot6[10] = "Qpnonsym", mot7[15] = "LexicoLemke";
   double res;
   int info1 = -1, it_end, info;
   int n = *nn;
@@ -82,7 +82,10 @@ int solve_lcp(double *vec, double *q, int *nn, methode *pt, double z[], double w
     pt->lcp.tol = 0.0000001;
     qpnonsym_lcp(vec, q, &n, & pt->lcp.tol, z, w, &info1);
   }
-
+  else if (strcmp(pt->lcp.nom_method, mot7) == 0)
+  {
+    lexicolemke_lcp(vec, q, &n, & pt->lcp.itermax, z, w, &it_end, &res, &info1);
+  }
   else printf("Warning : Unknown solving method : %s\n", pt->lcp.nom_method);
 
   clock_t t2 = clock();
