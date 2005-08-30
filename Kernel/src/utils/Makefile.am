@@ -2,6 +2,7 @@
 
 include $(top_srcdir)/config/Make-rules
 
-SUBDIRS = SiconosException SiconosSharedLibrary SiconosAlgebra SiconosMemory
+SUBDIRS = SiconosException SiconosSharedLibrary SiconosAlgebra SiconosMemory contract
+
 
 
