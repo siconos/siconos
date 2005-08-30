@@ -52,7 +52,7 @@ int solve_lcp(double *vec, double *q, int *nn, methode *pt, double z[], double w
   int info1 = -1, it_end, info;
   int n = *nn;
 
-  clock_t t1 = clock();
+  //clock_t t1=clock();
 
   if (strcmp(pt->lcp.nom_method, mot1) == 0)
   {
@@ -88,8 +88,8 @@ int solve_lcp(double *vec, double *q, int *nn, methode *pt, double z[], double w
   }
   else printf("Warning : Unknown solving method : %s\n", pt->lcp.nom_method);
 
-  clock_t t2 = clock();
-  printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
+  //clock_t t2=clock();
+  //printf("%.4lf seconds of processing\n", (t2-t1)/(double)CLOCKS_PER_SEC);
 
   info = info1;
 
