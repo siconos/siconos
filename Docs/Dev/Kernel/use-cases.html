@@ -1,0 +1,1494 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//Tigris//DTD XHTML 1.0 Transitional//EN"
+"http://style.tigris.org/tigris_transitional.dtd">
+<html>
+<head>
+ <style type="text/css">
+/* <![CDATA[ */ 
+@import "css/readyset.css"; 
+@import "css/inst.css";
+/*  ]]> */
+ </style>
+
+<link rel="stylesheet" type="text/css" href="css/print.css" media="print" />
+ <title>Use Cases</title>
+</head>
+
+<body>
+<div class="app">
+<div class="readyset">
+
+
+<h1><a href="srs.html">SRS</a> &gt; <a href="use-case-suite.html">Use Case Suite</a> &gt; Use Cases</h1>
+
+ <div id="releaseinfo">
+ <h2>Release Information</h2>
+ <table border="1" cellpadding="3" cellspacing="2" class="axial">
+  <tr>
+   <th>Project:</th> 
+   <td><a href="index.html">PROJECTNAME</a></td> 
+  </tr>
+  <tr>
+   <th>Internal Release Number:</th> 
+   <td>X.Y.Z</td> 
+  </tr>
+  <tr>
+   <th>Related Documents:</th> 
+   <td>
+    <div><a href="proposal.html">Project proposal</a> &gt;
+         <a href="user-needs.html">Use needs</a></div>
+    <div><a href="feature-set.html">Feature set</a></div>
+    <div><a href="use-case-format.html">Use case format</a></div>
+    <div><a href="LINK-TO-DIAGRAM">Use case diagram</a></div>
+    <div>LINKS TO RELEVANT STANDARDS</div>
+    <div>LINKS TO OTHER DOCUMENTS</div>
+   </td>
+  </tr>
+ </table>
+</div> <!-- /releaseinfo -->
+
+<div class="todo">
+ TODO: Note any aspects that are common to all use cases here.  This
+ helps keep the use cases themselves short.  If any use case is an
+ exception, note it's specific value to replace or add to the default.
+</div> 
+
+<div id="defaults">
+<h2>Default Aspects of All Use Cases</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Direct Actors:</th>
+  <td>
+   <div>User: end-user in any role</div>
+   <div>System: The system being built</div>
+   <div>When actors are not listed, assume User is doing it.</div>
+   <div>Items beginning with &quot;see&quot; indicate that System has presented a new screen.</div>
+  </td>
+ </tr>
+ <tr>
+  <th>Stakeholders:</th>
+  <td>Project Owners and other members</td>
+ </tr>
+ <tr>
+ <th>Prereq:</th>
+  <td>User is logged in</td>
+ </tr>
+</table>
+</div> <!-- /defaults -->
+
+<div class="todo">
+ TODO: For each use case listed in the <a
+ href="use-case-suite.html">use case suite</a>, create an HTML anchor
+ and heading with it's unique ID, then fill in the rows of the table
+ to specify the use case in detail.  
+</div>
+
+
+<div class="tip"> 
+  TIP: It is OK to simply list the names of a lot of use cases without
+  actually writing the use case in detail.  Document the most
+  important use cases first and come back to less important ones
+  later.
+</div>
+
+<div class="tip">
+ TIP: See detailed tips in the <a
+ href="use-case-format.html#guidelines">guidelines for writing use
+ cases</a>.
+</div>
+
+
+<div id="UC-00">
+<h2>UC-00: Configure the site</h2>
+<div>
+<table border="1" cellpadding="3" cellspacing="2"  class="axial">
+ <tr>
+  <th>Summary:</th>
+
+  <td>The administrator navigates to the site configuration page and
+  uses it to change the behavior of the web application.
+  Specifically, the user-visible timezone is being set.</td>
+
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Rarely</td>
+ </tr>
+ <tr>
+  <th>Direct Actors:</th>
+  <td>
+   <div>Admin: Web-site administrator</div>
+  </td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>visit SiteConfiguration page</li>
+    <li>see site configuration options</li>
+    <li>enter timezone abbreviation for date displays</li>
+    <li>submit form</li>
+    <li>confirm changes</li>
+    <li>see SiteConfiguration page again, with updated values</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If the timezone abbreviation is incorrect, an error message
+    will be displayed and no changes will be made.
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+
+    <li>How will administrators know the right timezone abbreviation?
+    They would know it if they live in that timezone.  Maybe we could
+    provide a drop-down list of all choices, but each would need some
+    explanation.</li>
+
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+</div>
+
+<div id="UC-01"> 
+<h2>UC-01: Register as a new user</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>Users need to register themselves in this web application.</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Once per user</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>visit Login page</li>
+    <li>click to register as new user</li>
+    <li>enter identifying information: username, email, real name, password (twice)</li>
+    <li>submit form</li>
+    <li>check email</li>
+    <li>reply to confirmation message</li>
+    <li>log in</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If the username is taken, then the system will suggest an
+    available username based on the user's email address and/or real name.
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-02"> 
+<h2>UC-02: Request new password</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>If a user forgets their password, they can request a new one be
+  emailed to them.</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Expected</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Rarely</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>TODO</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>Alternatively, we could use password hints.</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+
+<div id="UC-03"> 
+<h2>UC-03: Edit user profile</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>Users can edit their own account preferences.</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Expected</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Rarely</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>TODO</li>
+   </ol>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+
+<div id="UC-04"> 
+<h2>UC-04: View user profile</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>Users can view the profiles of other users under certain circumstances.</td>
+ </tr>
+ <tr>
+  <th>Direct Actors:</th>
+  <td>
+   <div>Admin: Web-site administrator</div>
+  </td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Expected</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Rarely</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>TODO</li>
+   </ol>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-10"> 
+<h2>UC-10: Create course</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>An administrator creates dozens of course offerings before the
+  beginning of each school term.</td>
+ </tr>
+ <tr>
+  <th>Direct Actors:</th>
+  <td>
+   <div>Admin: Web-site administrator</div>
+  </td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Often</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>visit administrative function menu</li>
+    <li>click add course</li>
+    <li>enter course information: name, number, instructor, capacity</li>
+    <li>submit form</li>
+    <li>see course list with new course added</li>
+   </ol>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-11"> 
+<h2>UC-11: View catalog description</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>Students may view the course catalog description of a course
+  before registering.  They are especially likely to view it if they
+  are prevented from enrolling in a course because of a missing
+  prerequisite. </td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Sometimes</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>visit one of several in application pages that deal with courses</li>
+    <li>click link to course description</li>
+    <li>see course description in pop-up window</li>
+    <li>close pop-up window to continue using application</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>How do we accommodate users that configure their browsers to block pop-ups?</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-20"> 
+<h2>UC-20: Enroll in course</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>Students will enroll in courses</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Often</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>visit main menu</li>
+    <li>click link to enroll in courses</li>
+    <li>enter major and course number</li>
+    <li>select course section from list of available sections</li>
+    <li>submit choice</li>
+    <li>confirm choice</li>
+    <li>see list of current enrolled courses</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If a course is full, then the student may join the wait-list.
+     <ul>
+      <li>Course capacity and number of students currently waiting
+      should be shown so that students may choose the section that
+      they are most likely to be able to get into.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-21"> 
+<h2>UC-21: Drop a course</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>A student may drop a course that they are enrolled in.</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Sometimes</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>visit list of currently enrolled courses</li>
+    <li>select course from list</li>
+    <li>click button to drop course</li>
+    <li>see warning that they may not be able to add this course again</li>
+    <li>confirm choice</li>
+    <li>see revised list of currently enrolled courses</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>Only one course can be dropped at a time.  There is no need to
+    allow students to quickly drop more than one course.</li>
+    <li>It would be nice to offer an atomic "switch sections"
+    operation that drops and adds another, or does nothing.</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+<div id="UC-30"> 
+<h2>UC-30: View room description</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>Users can view descriptions of classrooms.  E.g., is it a
+  lecture hall or a lab?  E.g., does it have a built-in LCD projector?</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Rarely</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>TODO</li>
+   </ol>
+  </td>
+ </tr>
+</table>
+</div>
+
+<div id="UC-31"> 
+<h2>UC-31: Assign course to room</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>An administrator assigns each course to a room.  This is often
+  done after a course is created, but it can be redone at any time.</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Often</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>TODO</li>
+   </ol>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-40"> 
+<h2>UC-40: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-41"> 
+<h2>UC-41: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+<div id="UC-42"> 
+<h2>UC-42: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-50"> 
+<h2>UC-50: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-51"> 
+<h2>UC-51: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+<div id="UC-52"> 
+<h2>UC-52: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-60"> 
+<h2>UC-60: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-61"> 
+<h2>UC-61: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+<div id="UC-62"> 
+<h2>UC-62: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-70"> 
+<h2>UC-70: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-71"> 
+<h2>UC-71: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+<div id="UC-72"> 
+<h2>UC-72: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+
+<div id="UC-80">
+<h2>UC-80: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+<div id="UC-81">
+<h2>UC-81: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-82">
+<h2>UC-82: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+
+<div id="UC-90">
+<h2>UC-90: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+<div id="UC-91">
+<h2>UC-91: USE CASE NAME</h2>
+<table border="1" cellpadding="3" cellspacing="2" class="axial">
+ <tr>
+  <th>Summary:</th>
+  <td>1-3 SENTENCES</td>
+ </tr>
+ <tr>
+  <th>Priority:</th>
+  <td>Essential | Expected | Desired | Optional</td>
+ </tr>
+ <tr>
+  <th>Use Frequency:</th>
+  <td>Always | Often | Sometimes | Rarely | Once</td>
+ </tr>
+ <tr>
+  <th>Main Success Scenario:</th>
+  <td>
+   <ol>
+    <li>STEP</li>
+    <li>STEP</li>
+    <li>STEP</li>
+   </ol>
+  </td>
+ </tr>
+ <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+   <ul>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+    <li>If CONDITION, then ALTERNATIVE STEPS.
+     <ul>
+      <li>NOTES or DETAILS.</li>
+     </ul>
+    </li>
+   </ul>
+  </td>
+ </tr>
+ <tr>
+  <th>Notes and Questions</th>
+  <td>
+   <ul>
+    <li>NOTE</li>
+    <li>QUESTION</li>
+   </ul>
+  </td>
+ </tr>
+</table>
+</div>
+
+
+
+
+</div>
+
+  <div class="todo">
+  TODO:  Check for <a
+  href="http://readyset.tigris.org/words-of-wisdom/use-cases.html">words
+  of wisdom</a> and discuss ways to improve this template.
+  Or, evaluate the ReadySET Pro <a
+  href="http://www.readysetpro.com/">professional use case template</a>.
+  </div>
+
+<div class="legal1">Company Proprietary</div>
+
+<div class="footnote">
+ Copyright &#169; 2003-2004 Jason Robbins.  All rights reserved. <a href="readyset-license.html">License terms</a>.
+ Retain this copyright statement whenever this file is used as a
+ template.
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+Documentation Siconos
+24 Juin 2006
+RPG
+
+
+#
+# Files html - latex doc - commentary
+#
+ index.html - GPD (Overview Document)
+ proposal.html 
+ sdm.html   - CDS (Coding Documents Standard)
+ srs.html   - SRD (Software Requirements Document)
+  features.html 
+  feature-set.html
+  use-cases.html - ESD (External Software Document)
+ glossary-std.html - glossaire standard
+ glossary.html - glossaire
+ ready-set - la licence readyset (non incluse dans output)
+             on peut la virer.
+
+#
+# Génération
+#
+cover.html: couverture pour la doc
+htmldoc siconos.book 
+puis générer par ihm le pdf (output/generate)
+
+#
+# TODO
+#
+
+ - Remplir use-cases.html (ESD)
+ - Mail à ReadySet
+ - Finir le glossaire 
+ - A transferer de latex
+   CDS - Coding Documents Standard
+   ADD, DDD 
+   QP, QR - Quality Plan et Quality Report
+ - Faire 1 cartouche
+
+
+#
+# Glossaire
+#
+
+sed s/\ac{SICONOS}/"<a href=\"glossary.html#SICONOS\">SICONOS<a>"/ index.html >index1.html
