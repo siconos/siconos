@@ -4,151 +4,181 @@
 #include <math.h>
 
 /*!\file gsnl_lcp.c
-
-
-This subroutine allows the resolution of LCP (Linear Complementary Problem).
-Try \f$(z,w)\f$ such that:
-
-\f$
-\left\lbrace
-\begin{array}{l}
-M z- w=q\\
-0 \le z \perp w \ge 0\\
-\end{array}
-\right.
-\f$
-
-here M is an n by n  matrix, q an n-dimensional vector, w an n-dimensional  vector and z an n-dimensional vector.
-*/
-
-/*!\fn  gsnl_lcp(double vec[],double *qq,int *nn,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
-
-
-gsnl_lcp is a basic gsnl (Gauss-Seidel Non Linear) solver for LCP.
-
-\param vec On enter a pointer over doubles containing the components of the double matrix with a fortran90 allocation.
-\param qq On enter a pointer over doubles containing the components of the double vector.
-\param nn On enter a pointer over integers, the dimension of the second member.
-\param itermax On enter a pointer over integers, the maximum iterations required.
-\param tol On enter a pointer over doubles, the tolerance required.
-\param it_end On enter a pointer over integers, the number of iterations carried out.
-\param res On return a pointer over doubles, the error value.
-\param z On return double vector, the solution of the problem.
-\param w On return double vector, the solution of the problem.
-\param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
-
-\author Nineb Sheherazade.
-*/
-
-/*
+ *
+ *
+ * This subroutine allows the resolution of LCP (Linear Complementary Problem).
+ * Try \f$(z,w)\f$ such that:
+ * \f$
+ * \left\lbrace
+ * \begin{array}{l}
+ * M z- w= -q\\
+ * 0 \le z \perp w \ge 0\\
+ * \end{array}
+ * \right.
+ * \f$
+ *
+ * where M is an (n x n)-matrix, q , w and z n-vectors.
+ *
+ *
+ * \fn  gsnl_lcp(double vec[],double *qq,int *nn,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
+ *
+ * gsnl_lcp is a solver for LCP based on the principle of splitting method.
+ * (Non Linear Gauss-Seidel)
+ *
+ * \param vec On enter a pointer over doubles containing the components of the double matrix with a fortran90 allocation.
+ * \param qq On enter a pointer over doubles containing the components of the double vector.
+ * \param nn On enter a pointer over integers, the dimension of the second member.
+ * \param itermax On enter a pointer over integers, the maximum iterations required.
+ * \param tol On enter a pointer over doubles, the tolerance required.
+ * \param it_end On enter a pointer over integers, the number of iterations carried out.
+ * \param res On return a pointer over doubles, the error value.
+ * \param z On return double vector, the solution of the problem.
+ * \param w On return double vector, the solution of the problem.
+ * \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
+ *
+ * \author Nineb Sheherazade.
+ * \author Last Modif: Mathieu Renouf
+ *
  * ===========================================================================
- * Prototypes for level 1 BLAS functions ?
+ * Prototypes for level 1 BLAS functions
  * ===========================================================================
  */
 
-double ddot_(int *, double [], int *, double [], int*);
+double dnrm2_(int* , double* , int*);
+double ddot_(int* , double* , int* , double* , int*);
 
+/*
+ */
 
-
-gsnl_lcp(double vec[], double *qq, int *nn, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
+void gsnl_lcp(double *vec , double *qq , int *nn , int *itermax , double *tol , double *z ,
+              double *w , int *it_end , double *res , int *info)
 {
-  int i, j, kk, iter1, k, itt = *itermax;
-  int n = *nn, incx = 1, incy = 1;
-  double errmax = *tol, alpha, beta;
-  double err1, num11, num, den, avn, avt, apn, apt, xn;
-  double *q, *zz, *ww, *y;
-  char trans = 'T';
-  double M[n][n];
 
 
+  int n = *nn;
+  int itt = *itermax;
+  double errmax = *tol;
 
-  for (i = 0; i < n; i++)
-    for (j = 0; j < n; j++)
-      M[i][j] = vec[j * n + i]; /* vec has a F90 storage and M has a C storage*/
+  int i , j , iter;
 
+  int incx, incy;
+  double qs , err , num, den, zi;
 
+  double *ww;
+
+  /* Note:
+   * vec has a F90 storage
+   */
 
   ww = (double*)malloc(n * sizeof(double));
-  y = (double*)malloc(n * sizeof(double));
 
+  /* Check for trivial case */
+  /* Usefull or not ?*/
+  /* Note:
+   * If M is PSD then the trivial solution if one of
+   * the admissible ones. In this case the test can
+   * be avoid to obtain an other admissible one.
+   */
 
+  /*   incx = 1; */
+  /*   qs = idamax_( &n , qq , &incx ); */
 
-  for (i = 0; i < n; i++)
+  /*   if( qs <= 0.0 ){ */
+  /*     for( i = 0 ; i < n ; ++i ){ */
+  /*       w[i] = 0.; */
+  /*       z[i] = 0.; */
+  /*     } */
+  /*     info = 0; */
+  /*     return; */
+  /*   } */
+
+  /* Non trivial case */
+
+  incx = 1;
+  qs = dnrm2_(&n , &qq[0] , &incx);
+
+  if (qs > 1e-16) den = 1.0 / qs;
+  else
   {
-    y[i] = 0.;
-    w[i] = 0.;
-    z[i] = 0.;
-    ww[i] = 0.;
+    for (i = 0 ; i < n ; ++i)
+    {
+      w[i] = 0.;
+      z[i] = 0.;
+    }
+    info = 0;
+    return;
   }
 
-  iter1 = 0;
-  err1 = 1.;
-
-  while ((iter1 < itt) && (err1 > errmax))
+  for (i = 0 ; i < n ; ++i)
   {
-    iter1 = iter1 + 1;
-    dcopy_(&n, qq, &incx, y, &incy);
+    ww[i] = 0.;
+    w[i] = 0.;
+    /*z[i] = 0.; Start from an initial vector */
+  }
 
+  iter = 0;
+  err  = 1.;
 
-    alpha = 1.;
-    beta = -1.;
-    dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, y, &incy);
-    dcopy_(&n, y, &incx, ww, &incy);
+  while ((iter < itt) && (err > errmax))
+  {
 
-    for (i = 0; i < n; i++)
+    ++iter;
+
+    incx = 1;
+    incy = 1;
+
+    dcopy_(&n , w , &incx , ww , &incy);
+
+    for (i = 0 ; i < n ; ++i)
     {
-      avn = 0.;
-      apn = 0.;
 
-      for (j = 0; j <= i - 1; j++)
-        avn = avn + M[i][j] * z[j];
+      incx = n;
+      incy = 1;
 
-      for (k = i + 1; k < n; k++)
-        apn = apn + M[i][k] * z[k];
+      z[i] = 0.0;
 
-      xn = qq[i] - avn - apn;
+      zi = (qq[i] - ddot_(&n , &vec[i] , &incx , z , &incy)) / vec[i * n + i];
 
-      if (xn > 0.0)
-      {
-        z[i] = xn / M[i][i];
-        w[i] = 0.;
-      }
-      else
-      {
-        z[i] = 0.;
-        w[i] = -xn;
-      }
+      if (zi < 0) z[i] = 0.0;
+      else z[i] = zi;
+
+      w[i] = -zi +  z[i] * vec[i * n + i];
+
     }
 
+    /* **** Criterium convergence **** */
 
-    /* ///////// Criterium convergence ///////////// */
+    qs   = -1;
+    incx =  1;
+    incy =  1;
 
+    daxpy_(&n , &qs , w , &incx , ww , &incy);
 
-    alpha = -1.;
-    daxpy_(&n, &alpha, w, &incx, ww, &incy);
-    num = ddot_(&n, ww, &incx, ww, &incy);
-    den = ddot_(&n, qq, &incx, qq, &incy);
+    num = dnrm2_(&n, ww , &incx);
+    err = num * den;
 
-    err1 = sqrt(num) / sqrt(den);
-    *it_end = iter1;
-    *res = err1;
+    /* **** ********************* **** */
 
   }
 
+  *it_end = iter;
+  *res    = err;
 
-  if (err1 > errmax)
+  /* Compute w */
+
+  if (err > errmax)
   {
-    printf("no convergence after %d iterations, the residue is %g\n", iter1, err1);
+    printf(" No convergence of NLGS after %d iterations\n" , iter);
+    printf(" The residue is : %g \n", err);
     *info = 1;
   }
   else
   {
-    printf("there is convergence after %d iterations, the residue is %g \n", iter1, err1);
+    printf(" Convergence of NLGS after %d iterations\n" , iter);
+    printf(" The residue is : %g \n", err);
     *info = 0;
   }
 
-
-
   free(ww);
-  free(y);
+
 }
