@@ -105,15 +105,15 @@ CompositeVector::~CompositeVector()
 
 void CompositeVector::display() const
 {
-  cout << "| size : " << size() << endl;
-  cout << "| isComposite : " << isComposite() << endl;
-
+  cout << "=== Composite Display === " << endl;
+  cout << "with " << size() << " simple vectors" << endl;
   const int sizeV = svref.size();
   for (int i = 0; i < sizeV; i ++)
   {
-    cout << "Vector: " << i << endl;
+    cout << "Vector number " << i << endl;
     svref[i]->display();
   }
+  cout << endl << " ======================== " << endl;
 }
 
 double& CompositeVector::operator()(const int unsigned& index) const

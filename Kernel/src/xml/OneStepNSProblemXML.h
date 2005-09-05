@@ -22,25 +22,6 @@ const std::string OSNSP_N = "n";
 const std::string  OSNSP_INTERACTION_CONCERNED = "Interaction_Concerned";
 const std::string  OSNSP_SOLVER = "Solver";
 
-const std::string  OSNSP_TOLERANCE = "tolerance";
-const std::string  OSNSP_MAXITER = "maxIter";
-const std::string  OSNSP_NORMTYPE = "normType";
-const std::string  OSNSP_SEARCHDIRECTION = "searchDirection";
-
-const std::string  OSNSP_LCPSOLVING = "LcpSolving";
-const std::string  OSNSP_RPSOLVING = "RelayPrimalSolving";
-const std::string  OSNSP_RDSOLVING = "RelayDualSolving";
-const std::string  OSNSP_CFPSOLVING = "ContactFrictionPrimalSolving";
-const std::string  OSNSP_CFDSOLVING = "ContactFrictionDualSolving";
-const std::string  OSNSP_LEMKE = "Lemke";
-const std::string  OSNSP_GSNL = "Gsnl";
-const std::string  OSNSP_GCP = "Gcp";
-const std::string  OSNSP_LATIN = "Latin";
-//const std::string  OSNSP_lemke = "lemke";
-//const std::string  OSNSP_gsnl = "gsnl";
-//const std::string  OSNSP_gcp = "gcp";
-//const std::string  OSNSP_latin = "latin";
-
 #include "XMLTagsName.h"
 
 

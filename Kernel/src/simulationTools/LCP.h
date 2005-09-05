@@ -223,6 +223,20 @@ public:
    */
   void computeAllBlocks();
 
+  /** \fn void computeDiagonalBlocksLinearTIR(Relation *, unsigned int sizeInteraction, vector<DynamicalSystem*>, SiconosMatrix*)
+   * \brief compute diagonal block-matrices for a LinearTIR
+   */
+  void computeDiagonalBlocksLinearTIR(Relation *, const unsigned int&, std::vector<DynamicalSystem*>, std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
+
+
+  void computeExtraDiagonalBlocksLinearTIR(Relation *, Relation*, const unsigned int&, const unsigned int&, std::vector<DynamicalSystem*>,
+      std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
+
+  void computeDiagonalBlocksLagrangianLinearR(Relation *, const unsigned int&, std::vector<DynamicalSystem*>, std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
+
+
+  void computeExtraDiagonalBlocksLagrangianLinearR(Relation *, Relation*, const unsigned int&, const unsigned int&, std::vector<DynamicalSystem*>,
+      std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
   /** \fn void preLCP(const double& time)
    *  \brief pre-treatment for LCP
    *  \param double : current time
@@ -234,6 +248,12 @@ public:
    *  \brief built matrix M using already computed blocks
    */
   void assembleM();
+
+  /** \fn void computeQ (void)
+   *  \brief compute vector q
+   *  \param double : current time
+   */
+  void computeQ(const double& time);
 
   /** \fn void compute(const double& time)
    *  \brief Compute the unknown z and w and update the Interaction (y and lambda )
@@ -248,17 +268,6 @@ public:
    *  \return void
    */
   void postLCP(const SimpleVector&, const SimpleVector&);
-
-  /** \fn void computeM (void)
-   *  \brief compute matrix M
-   */
-  void computeM();
-
-  /** \fn void computeQ (void)
-   *  \brief compute vector q
-   *  \param double : current time
-   */
-  void computeQ(const double& time);
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree

@@ -127,12 +127,20 @@ public:
    */
   void setBPtr(SimpleVector *);
 
-  /** \fn SiconosMatrix getHPtrRelatingToDS(int position)
-   *  \brief get the SiconosMatrix H relating to one
-   * (the one at the given position in the dsVector of the interaction) of the 2 specific Dynamical System of of the Interaction
-   *  \return SiconosMatrix : the H for a DS
+  /** \fn void getHBlockDS(const int&,SiconosMatrix&) const
+   *  \brief get in Matrix H the block corresponding to DS number int
+   *  \param int, the ds number
+   *  \param SiconosMatrix (in-out parameter): the resulting block matrix
    */
-  SiconosMatrix getHRelatingToDS(const int&);
+  void getHBlockDS(const int&, SiconosMatrix&) const;
+
+
+  /** void getHBlockDS(DynamicalSystem * ds, SiconosMatrix&) const
+   *  \brief get in Matrix H the block corresponding to ds
+   *  \param a pointer to a dynamical system
+   *  \param SiconosMatrix (in-out parameter): the resulting block matrix
+   */
+  void getHBlockDS(DynamicalSystem *, SiconosMatrix&) const;
 
   // --- OTHER FUNCTIONS ---
 

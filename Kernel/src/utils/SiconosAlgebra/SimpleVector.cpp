@@ -82,15 +82,14 @@ SimpleVector::~SimpleVector()
 void SimpleVector::display() const
 {
   IN("SimpleVector::display() \n");
-  cout << "| size : " << size() << endl;
-  cout << "| isComposite : " << isComposite() << endl;
+  cout << "=== Simple vector display === " << "of size " << size() << endl;
   if (size() <= M_MAXSIZEFORDISPLAY)
   {
     for (unsigned int i = 0; i < size(); i++)
       cout << lavd(i) << " ";
-    cout << endl;
   }
   else cout << "Display SiconosVector : vector too large" << endl;
+  cout << endl << " ========== " << endl;
   OUT("SimpleVector::display() \n");
 }
 
@@ -174,6 +173,25 @@ const double SimpleVector::getValue(const int unsigned& index) const
     SiconosVectorException::selfThrow("SimpleVector::setValue - wrong index value");
   return lavd(index);
 }
+
+void SimpleVector::getBlock(const vector<unsigned int>& index, SimpleVector& block) const
+{
+  unsigned int sizeBlock = block.size();
+  if (sizeBlock != index.size())
+    SiconosVectorException::selfThrow("getBlock : wrong indexes list");
+
+  unsigned int k = 0;
+
+  vector<unsigned int>::const_iterator it;
+
+  for (it = index.begin(); it != index.end(); it++)
+  {
+    if (*it >= size()) SiconosVectorException::selfThrow("getBlock : index out of range");
+    block(k) = lavd(*it);
+    k++;
+  }
+}
+
 
 unsigned int SimpleVector::size(const unsigned int& i) const
 {

@@ -156,7 +156,7 @@ void Moreau::computeW(const double& t)
     }
     I = new SiconosMatrix(size, size);
     I->eye();
-    *W = *I - (h * (d->getA()));
+    *W = *I - (h * theta * (d->getA()));
     delete I;
   }
   // === ===
@@ -244,10 +244,19 @@ void Moreau::computeFreeState()
   }
   else if (dstyp == LDS)
   {
-    SiconosVector *xfreeloc = ds->getXFreePtr();
-    SiconosVector *xold;
-    xold = ds->getXMemoryPtr()->getSiconosVector(0);
-    *xfreeloc = *W * (*xold);
+    SiconosVector *xfree = ds->getXFreePtr();
+    SiconosVector *xold = ds->getXMemoryPtr()->getSiconosVector(0);
+    if (theta == 1.0)
+      *xfree = *W * (*xold);
+    else
+    {
+      unsigned int size = ds->getN();
+      SiconosMatrix *I = new SiconosMatrix(size, size);
+      I->eye();
+      SiconosMatrix * A = static_cast<LinearDS*>(ds)->getAPtr();
+      *xfree = *W * (*I + h* *A * (1.0 - theta))* *xold;
+      delete I;
+    }
   }
   else RuntimeException::selfThrow("Moreau::computeFreeState - not yet implemented for Dynamical system type: " + dstyp);
   OUT("Moreau::computeFreeState\n");
@@ -351,17 +360,10 @@ void Moreau::updateState()
   }
   else if (dsType == LDS)
   {
-    SiconosVector* xold;
-    xold = ds->getXMemoryPtr()->getSiconosVector(0);
+    SiconosVector* x = ds->getXPtr();
+    SiconosVector* xFree = ds->getXFreePtr();
 
-    SimpleVector* temp = new SimpleVector(ds->getN());
-    *temp = *xold + (h * (ds->getR()));
-
-    SiconosVector* xloc = ds->getXPtr();
-
-    *xloc = *W * *temp;
-
-    delete temp;
+    *x = *xFree + h * *W * *(ds->getRPtr()) ;
   }
   else RuntimeException::selfThrow("Moreau::updateState - not yet implemented for Dynamical system type: " + dsType);
   OUT("Moreau::updateState\n");

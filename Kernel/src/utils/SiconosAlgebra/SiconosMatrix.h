@@ -220,11 +220,17 @@ public:
    */
   SimpleVector getCol(const int&) const;
 
-  /** \fn SiconosVector& getCol(int index)
+  /** \fn void getBlock(const std::vector<unsigned int>& indexList, SiconosMatrix&)
    *  \brief get a block of a matrix, which position is defined by index_list
    *  \param vector<unsigned int> for indexes and a SiconosMatrix (in-out paramater)
    */
   void getBlock(const std::vector<unsigned int>&, SiconosMatrix&) const;
+
+  /** \fn void getBlock(const vector<unsigned int>& indexRow, const vector<unsigned int>& indexCol, SiconosMatrix& block)
+   *  \brief get block corresponding to lines given in indexRow and columns in indexCol
+   *  \param 2 vector<unsigned int> for indexes and a SiconosMatrix (in-out paramater)
+   */
+  void getBlock(const std::vector<unsigned int>& , const std::vector<unsigned int>&, SiconosMatrix&) const;
 
   /** \fn double* getArray()
    *  \brief return the adress of the array of double values of the matrix
@@ -237,7 +243,7 @@ public:
 
   /** \fn bool read(std::string fileName, std::string mode = BINARY)
    *  \brief read the matrix in a file
-   *  \param std::string fileName : the file to read
+   *  \param std::string fileName : the input file
    *  \param std::string mode : ASCII or BINARY (binary is the default mode)
    *  \exception SiconosMatrixException
    *  \return true if no error
@@ -249,12 +255,21 @@ public:
 
   /** \fn bool write(std::string fileName, std::string mode = BINARY)
    *  \brief write the matrix in a file
-   *  \param std::string fileName : the file to read
+   *  \param std::string fileName : the output file
    *  \param std::string mode : ASCII or BINARY (binary is the default mode
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
   bool write(const std::string& fileName, const std::string& mode = "binary") const ;
+
+  /** \fn bool rawWrite(std::string fileName, std::string mode = BINARY)
+   *  \brief write the matrix in a file without dimensions output
+   *  \param std::string fileName : the output file
+   *  \param std::string mode : ASCII or BINARY (binary is the default mode
+   *  \exception SiconosMatrixException
+   *  \return true if no error
+   */
+  bool rawWrite(const std::string& fileName, const std::string& mode = "binary") const ;
 
   /** \fn void zero();
    *  \brief sets all the values of the matrix to 0.0

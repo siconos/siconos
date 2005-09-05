@@ -28,18 +28,79 @@ class NonSmoothDynamicalSystem;
 
 /** \class Interaction
  *  \brief this class describes interaction between some dynamical systems (DS) (from 1 to NumberOfDS)
- *  Each interaction owns local variables and some relations between them, plus a non smooth law
+ *  Each interaction owns local variables  with relations between them, plus a non smooth law
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 29, 2004
  *
- * \todo save a number of derivatives of y depending on the relative degree -> add a vector<SimpleVector*>
- * rather than y, ydot ...
+ * \todo save a number of derivatives of y depending on the relative degree
+ * \todo remove createRelay etc ...
  *
  */
 class Interaction
 {
+
+  // === PRIVATE MEMBERS ===
+
+private:
+
+  /** name of the Interaction */
+  std::string  id;
+
+  /** number specific to each Interaction */
+  int number;
+
+  /** number of relations in the interaction (ie size of y[i], lambda[i] ...*/
+  unsigned int nInteraction;
+
+  /** relation between constrained variables and states variables
+   * vector of output derivatives
+   * y[0] is y, y[1] is yDot and so on
+   */
+  std::vector< SimpleVector* >  y;
+
+  /** previous step values for y */
+  std::vector< SimpleVector* >  yOld;
+
+  /** result of the computeInput function */
+  std::vector< SimpleVector* >  lambda;
+
+  /** previous step values for lambda */
+  std::vector< SimpleVector* > lambdaOld;
+
+  /** the Dynamical Systems concerned by this interaction
+   *  their number is between 1 and NumberOfDs */
+  std::vector<DynamicalSystem*> vectorDS;
+
+  /** the Non-smooth Law of the interaction*/
+  NonSmoothLaw *nslaw;
+
+  /** the type of Relation of the interaction */
+  Relation *relation;
+
+  /** the XML object linked to the Interaction to read XML data */
+  InteractionXML *interactionxml;
+
+  /** Flags to know if pointers have been allocated inside constructors or not */
+  std::vector<bool> isYAllocatedIn;
+  std::vector<bool> isYOldAllocatedIn;
+  std::vector<bool> isLambdaAllocatedIn;
+  std::vector<bool> isLambdaOldAllocatedIn;
+  bool isRelationAllocatedIn;
+  bool isNsLawAllocatedIn;
+
+  // === PRIVATE FUNCTIONS ===
+
+  /** \fn Interaction()
+   *  \brief default constructor
+   */
+  Interaction();
+
+  // === PUBLIC FUNCTIONS ===
+
 public:
+
+  // === CONSTRUCTORS/DESTRUCTOR ===
 
   /** \fn Interaction(const Interaction&)
    *  \brief copy constructor
@@ -54,21 +115,23 @@ public:
    */
   Interaction(InteractionXML*, NonSmoothDynamicalSystem* = NULL);
 
-  /** \fn Interaction(const string&, const int& number,const int& nInter, vector<int>* status,
-      vector<DynamicalSystem*>* dsConcerned)
-  *  \brief constructor with a set of data
-  *  \param string: the id of this Interaction
-  *  \param int : the number of this Interaction (optional)
-  *  \param int : the value of nInter for this Interaction (optional)
-  *  \param vector<int>* : the status of this Interaction (optional)
-  *  \param vector<DynamicalSystem*>* : the Dynamical Systems concerned by this interaction (optional)
-  *  \exception RuntimeException
-  */
-  Interaction(const std::string&, const int& = -1 , const int& = -1, std::vector<int>* = NULL, std::vector<DynamicalSystem*>* = NULL);
+  /** \fn Interaction(const string&, const int& number,const int& nInter,
+   *    vector<DynamicalSystem*>* dsConcerned)
+   *  \brief constructor with a set of data
+   *  \param string: the id of this Interaction
+   *  \param int : the number of this Interaction (optional)
+   *  \param int : the value of nInter for this Interaction (optional)
+   *  \param vector<DynamicalSystem*>* : the Dynamical Systems concerned by this interaction (optional)
+   *  \exception RuntimeException
+   */
+  Interaction(const std::string&, const int& = -1 , const int& = -1, std::vector<DynamicalSystem*>* = NULL);
 
+  /** \fn ~Interaction()
+   * \brief destructor
+   */
   ~Interaction();
 
-  // --- GETTERS/SETTERS ---
+  // === GETTERS/SETTERS ===
 
   /** \fn const string getId() const
    *  \brief get the id of this Interaction
@@ -232,101 +295,109 @@ public:
 
   // -- lambda --
 
-  /** \fn  const SimpleVector getLambda() const
-   *  \brief get the value of lambda
-   *  \return SimpleVector
+  /** \fn  const vector<SimpleVector*> getLambda() const
+   *  \brief get vector of input derivatives
+   *  \return a vector<SimpleVector*>
    */
-  inline const SimpleVector getLambda() const
-  {
-    return *lambda;
-  }
-
-  /** \fn SimpleVector* getLambdaPtr() const
-   *  \brief get lambda
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getLambdaPtr() const
+  inline const std::vector<SimpleVector*> getLambda() const
   {
     return lambda;
   }
 
-  /** \fn void setLambda (const SimpleVector& newValue)
-   *  \brief set the value of lambda to newValue
-   *  \param SimpleVector newValue
+  /** \fn  const SimpleVector getLambda(const unsigned int & i) const
+   *  \brief get lambda[i], derivative number i of input
+   *  \return SimpleVector
    */
-  inline void setLambda(const SimpleVector& newValue)
+  inline const SimpleVector getLambda(const unsigned int& i) const
   {
-    *lambda = newValue;
+    return *(lambda[i]);
   }
 
-  /** \fn void setLambdaPtr(SimpleVector* newPtr)
-   *  \brief set Lambda to pointer newPtr
-   *  \param SimpleVector * newPtr
+  /** \fn SimpleVector* getLambdaPtr(const unsigned int& i) const
+   *  \brief get lambda[i], derivative number i of input
+   *  \return pointer on a SimpleVector
    */
-  inline void setLambdaPtr(SimpleVector *newPtr)
+  inline SimpleVector* getLambdaPtr(const unsigned int& i) const
   {
-    if (isLambdaAllocatedIn) delete lambda;
-    lambda = newPtr;
-    isLambdaAllocatedIn = false;
+    return lambda[i];
   }
+
+  /** \fn void setLambda (const vector<SimpleVector*>& newVector)
+   *  \brief set the input vector lambda to newVector
+   *  \param std::vector<SimpleVector*>
+   */
+  void setLambda(const std::vector<SimpleVector*>&);
+
+  /** \fn void setLambdaPtr(const std::vector<SimpleVector*>& newVector);
+   *  \brief set vector lambda to newVector with direct pointer equality for the lambda[i]
+   *  \param std::vector<SimpleVector*>
+   */
+  void setLambdaPtr(const std::vector<SimpleVector*>&);
+
+  /** \fn void setLambda (const unsigned int & i, const SimpleVector& newValue);
+   *  \brief set lambda[i] to newValue
+   *  \param a SimpleVector and an unsigned int
+   */
+  void setLambda(const unsigned int &, const SimpleVector&);
+
+  /** \fn void setLambdaPtr(const unsigned int & i, SimpleVector* newPtr)
+   *  \brief set lambda[i] to pointer newPtr
+   *  \param a SimpleVector * and an unsigned int
+   */
+  void setLambdaPtr(const unsigned int &, SimpleVector *newPtr);
 
   // -- lambdaOld --
 
-  /** \fn  const SimpleVector getLambdaOld() const
-   *  \brief get the value of lambdaOld
-   *  \return SimpleVector
+  /** \fn  const vector<SimpleVector*> getLambdaOld() const
+   *  \brief get vector of input derivatives
+   *  \return a vector<SimpleVector*>
    */
-  inline const SimpleVector getLambdaOld() const
-  {
-    return *lambdaOld;
-  }
-
-  /** \fn SimpleVector* getLambdaOldPtr() const
-   *  \brief get lambdaOld
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getLambdaOldPtr() const
+  inline const std::vector<SimpleVector*> getLambdaOld() const
   {
     return lambdaOld;
   }
 
-  /** \fn void setLambdaOld (const SimpleVector& newValue)
-   *  \brief set the value of lambdaOld to newValue
-   *  \param SimpleVector newValue
+  /** \fn  const SimpleVector getLambdaOld(const unsigned int & i) const
+   *  \brief get lambdaOld[i], derivative number i of input
+   *  \return SimpleVector
    */
-  inline void setLambdaOld(const SimpleVector& newValue)
+  inline const SimpleVector getLambdaOld(const unsigned int& i) const
   {
-    *lambdaOld = newValue;
+    return *(lambdaOld[i]);
   }
 
-  /** \fn void setLambdaOldPtr(SimpleVector* newPtr)
-   *  \brief set LambdaOld to pointer newPtr
-   *  \param SimpleVector * newPtr
+  /** \fn SimpleVector* getLambdaOldPtr(const unsigned int& i) const
+   *  \brief get lambdaOld[i], derivative number i of input
+   *  \return pointer on a SimpleVector
    */
-  inline void setLambdaOldPtr(SimpleVector *newPtr)
+  inline SimpleVector* getLambdaOldPtr(const unsigned int& i) const
   {
-    if (isLambdaOldAllocatedIn) delete lambdaOld;
-    lambdaOld = newPtr;
-    isLambdaOldAllocatedIn = false;
+    return lambdaOld[i];
   }
 
-  /** \fn vector<int> getStatus(void)
-   *  \brief get the status of this Interaction
-   *  \return the value of status for this Interaction
+  /** \fn void setLambdaOld (const vector<SimpleVector*>& newVector)
+   *  \brief set the input vector lambdaOld to newVector
+   *  \param std::vector<SimpleVector*>
    */
-  inline const std::vector<int> getStatus() const
-  {
-    return status;
-  }
+  void setLambdaOld(const std::vector<SimpleVector*>&);
 
-  /** \fn void setStatus(vector<int>)
-   *  \brief set the status of this Interaction
-   *  \param the vector of integer to set the status
+  /** \fn void setLambdaOldPtr(const std::vector<SimpleVector*>& newVector);
+   *  \brief set vector lambdaOld to newVector with direct pointer equality for the lambdaOld[i]
+   *  \param std::vector<SimpleVector*>
    */
-  inline void setStatus(const std::vector<int>& vs)
-  {
-    status = vs;
-  }
+  void setLambdaOldPtr(const std::vector<SimpleVector*>&);
+
+  /** \fn void setLambdaOld (const unsigned int & i, const SimpleVector& newValue);
+   *  \brief set lambdaOld[i] to newValue
+   *  \param a SimpleVector and an unsigned int
+   */
+  void setLambdaOld(const unsigned int &, const SimpleVector&);
+
+  /** \fn void setLambdaOldPtr(const unsigned int & i, SimpleVector* newPtr)
+   *  \brief set lambdaOld[i] to pointer newPtr
+   *  \param a SimpleVector * and an unsigned int
+   */
+  void setLambdaOldPtr(const unsigned int &, SimpleVector *newPtr);
 
   /** \fn vector<DynamicalSystem*> getDynamicalSystems()
    *  \brief get the DynamicalSystems of this Interaction
@@ -412,20 +483,6 @@ public:
    */
   void swapInMemory();
 
-  /** \fn void check(const double& time, const double& pasH)
-   * \brief compares the output of the relation with respect to the NonSmoothLaw and set the status
-   * \param double : current time
-   * \param double : current time step
-   */
-  void check(const double& time, const double& pasH);
-
-  /** \fn void update(const double& time, const double& pasH)
-   *  \brief set the status after the computation
-   *  \param double : current time
-   * \param double : current time step
-   */
-  void update(const double& time, const double& pasH);
-
   /** \fn void display()
    *  \brief print the data to the screen
    */
@@ -469,58 +526,6 @@ public:
    */
   void saveInteractionToXML();
 
-private:
-  /** \fn Interaction()
-   *  \brief default constructor
-   */
-  Interaction();
-
-  // --- MEMBERS ---
-  /** name of the Interaction */
-  std::string  id;
-  /** number specific to each Interaction */
-  int number;
-  /** size of the the vector y */
-  unsigned int nInteraction;
-
-  /** relation between constrained variables and states variables
-   * vector of output derivatives
-   * y[0] is y, y[1] is yDot and so on
-   */
-  std::vector< SimpleVector* >  y;
-
-  /** previous step values for y */
-  std::vector< SimpleVector* >  yOld;
-
-  /** result of the computeInput function */
-  SimpleVector* lambda;
-
-  /** result of the computeInput function */
-  SimpleVector* lambdaOld;
-
-  /** shows the status of the Interaction */
-  std::vector<int> status;
-
-  /** the Dynamical Systems concerned by this interaction
-   *  their number is between 1 and NumberOfDs */
-  std::vector<DynamicalSystem*> vectorDS;
-
-  /** the Non-smooth Law of the interaction*/
-  NonSmoothLaw *nslaw;
-
-  /** the type of Relation of the interaction */
-  Relation *relation;
-
-  /** the XML object linked to the Interaction to read XML data */
-  InteractionXML *interactionxml;
-
-  /** Flags to know if pointers have been allocated inside constructors or not */
-  std::vector<bool> isYAllocatedIn;
-  std::vector<bool> isYOldAllocatedIn;
-  bool isLambdaAllocatedIn;
-  bool isLambdaOldAllocatedIn;
-  bool isRelationAllocatedIn;
-  bool isNsLawAllocatedIn;
 };
 
 #endif // INTERACTION_H

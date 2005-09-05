@@ -114,6 +114,9 @@ public:
    */
   const double getValue(const int unsigned&) const;
 
+
+
+
   /** \fn void setValues(const vector<double> v,  const int& = 0)
    *  \brief set the values of the vector to a new set of value
    *  \param vector<double> v
@@ -130,6 +133,12 @@ public:
   {
     return lavd;
   }
+
+  /** \fn void getBlock(const vector<unsigned int>& index,, SimpleVector& block)
+   *  \brief get block corresponding to indexes given in index
+   *  \param a vector<unsigned int> for indexes and a SimpleVector (in-out paramater)
+   */
+  void getBlock(const std::vector<unsigned int>& , SimpleVector&) const;
 
   /** \fn unsigned int size() const
    *  \brief get the vector size

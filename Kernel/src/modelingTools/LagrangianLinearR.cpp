@@ -176,30 +176,63 @@ void LagrangianLinearR::setBPtr(SimpleVector *newPtr)
   isBAllocatedIn = false;
 }
 
-SiconosMatrix LagrangianLinearR::getHRelatingToDS(const int& position)
+void LagrangianLinearR::getHBlockDS(DynamicalSystem * ds, SiconosMatrix& Block) const
 {
-  string typeDS =  interaction->getDynamicalSystems()[ position ]->getType();
-  if (typeDS != LNLDS && typeDS != LTIDS)
-    RuntimeException::selfThrow("LagrangianLinearR::getHRelatingToDS : Error! LagrangianLinear Relation linked to a Dynamical System which is not lagrangian");
-  unsigned int row, col, gap;
-  row = H->size(0);
-  // get size of q from the require ds
-  col = static_cast<LagrangianDS*>(interaction->getDynamicalSystems()[ position ])->getNdof();
+  unsigned int k = 0;
+  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
 
-  SiconosMatrix * newH = new SiconosMatrix(row, col);
+  vector<DynamicalSystem*>::iterator itDS;
+  itDS = vDS.begin();
 
-  /*
-   * the gap is used to select the good part of the H matrix, according to the right DynamicalSystem
-   */
+  // look for ds
+  while (*itDS != ds && itDS != vDS.end())
+  {
+    k += (*itDS)->getN() / 2;
+    itDS++;
+  }
 
-  gap = col * position;
-  for (unsigned int i = 0; i < row; i++)
-    for (unsigned int j = 0; j < col; j++)
-      (*newH)(i, j) = (*H)(i, j + gap);
-  return *newH;
-  cout <<  " DELETE OK " << endl;
-  delete newH;
-  cout <<  " DELETE OK " << endl;
+  // check dimension
+  if ((*itDS)->getN() / 2 != Block.size(1))
+    RuntimeException::selfThrow("LagrangianLinearR - getHBlockDSPtr: inconsistent sizes between HBlock and DS");
+
+  // get block
+  unsigned int l = k + (*itDS)->getN() / 2 - 1;
+  vector<unsigned int> index_list(4);
+  index_list[0] = 0;
+  index_list[1] = H->size(0) - 1;
+  index_list[2] = k;
+  index_list[3] = l;
+  H->getBlock(index_list, Block);
+}
+
+void LagrangianLinearR::getHBlockDS(const int& DSNumber, SiconosMatrix& Block) const
+{
+  unsigned int k = 0;
+
+  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
+
+  vector<DynamicalSystem*>::iterator itDS;
+  itDS = vDS.begin();
+
+  // look for DS number DSNumber ...
+  while ((*itDS)->getNumber() != DSNumber && itDS != vDS.end())
+  {
+    k += (*itDS)->getN() / 2;
+    itDS++;
+  }
+
+  // check dimension
+  if ((*itDS)->getN() / 2 != Block.size(1))
+    RuntimeException::selfThrow("LagrangianLinearR - getCBlockDSPtr: inconsistent sizes between CBlock and DS");
+
+  // get block
+  unsigned int l = k + (*itDS)->getN() / 2 - 1;
+  vector<unsigned int> index_list(4);
+  index_list[0] = 0;
+  index_list[1] = H->size(0) - 1;
+  index_list[2] = k;
+  index_list[3] = l;
+  H->getBlock(index_list, Block);
 }
 
 void LagrangianLinearR::computeOutput(const double& time)
@@ -307,17 +340,21 @@ void LagrangianLinearR::computeInput(const double& time)
   // Get the DS concerned by the interaction of this relation
   vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
   vector<LagrangianDS*> vLDS;
-  unsigned int size = vDS.size(), i;
+  unsigned int numberDS = vDS.size(), i;
+  vLDS.resize(numberDS);
 
   CompositeVector *p = new CompositeVector();
-  for (i = 0; i < size; i++)
+  string typeDS;
+
+  for (i = 0; i < numberDS; i++)
   {
     // check dynamical system type
-    if (vDS[i]->getType() != LTIDS && vDS[i]->getType() != LNLDS)
-      RuntimeException::selfThrow("LagrangianLinearR::computeInput not yet implemented for this type of dynamical system " + vDS[i]->getType());
+    typeDS = vDS[i] ->getType();
+    if (typeDS != LTIDS && typeDS != LNLDS)
+      RuntimeException::selfThrow("LagrangianLinearR::computeInput not yet implemented for this type of dynamical system " + typeDS);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
-    vLDS.push_back(static_cast<LagrangianDS*>(vDS[i]));
+    vLDS[i] = static_cast<LagrangianDS*>(vDS[i]);
 
     // Put p of each DS into a composite
     // Warning: use addPtr -> link between pointers
@@ -325,7 +362,7 @@ void LagrangianLinearR::computeInput(const double& time)
   }
 
   // get lambda of the concerned interaction
-  SimpleVector *lambda = interaction->getLambdaPtr();
+  SimpleVector *lambda = interaction->getLambdaPtr(1);
 
   // compute p = Ht lambda
   *p += matTransVecMult(*H, *lambda);

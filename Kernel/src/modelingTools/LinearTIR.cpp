@@ -603,7 +603,7 @@ void LinearTIR::computeOutput(const double& time)
   }
 
   SimpleVector *y = interaction->getYPtr(0);
-  SimpleVector *lambda = interaction->getLambdaPtr();
+  SimpleVector *lambda = interaction->getLambdaPtr(0);
 
   // compute y
   if (D == NULL && F == NULL && e == NULL)
@@ -692,12 +692,13 @@ void LinearTIR::computeInput(const double& time)
     // Warning: use addPtr -> link between pointers
     r->addPtr((*it)->getRPtr());
   }
-  SimpleVector *lambda = interaction->getLambdaPtr();
+
+  SimpleVector *lambda = interaction->getLambdaPtr(0);
 
   if (a == NULL)
-    *r = *B * *lambda;
+    *r += *B * *lambda;
   else
-    *r = *B * *lambda + *a;
+    *r += *B * *lambda + *a;
 }
 
 void LinearTIR::display() const

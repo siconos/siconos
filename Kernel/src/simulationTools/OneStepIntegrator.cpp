@@ -28,6 +28,7 @@ void OneStepIntegrator::initialize()
 void OneStepIntegrator::nextStep()
 {
   ds->swapInMemory();
+  ds->getRPtr()->zero();
 }
 
 void OneStepIntegrator::computeFreeState()

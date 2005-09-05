@@ -66,8 +66,11 @@ OneStepNSProblem::OneStepNSProblem(Strategy * newStrat, const string& newSolver,
     if (solver != "none")
     {
       solver = newSolver;
-      if (newSolvingMethod == "Lemke")
+      if (newSolvingMethod == "Lemke" || newSolvingMethod == "LexicoLemke")
         fillSolvingMethod(newSolvingMethod, MaxIter);
+
+      else if (newSolvingMethod == "Qp" || newSolvingMethod  == "Qpnonsym")
+        fillSolvingMethod(newSolvingMethod, 0, Tolerance);
 
       else if (newSolvingMethod == "Gsnl" || newSolvingMethod  == "Gcp")
         fillSolvingMethod(newSolvingMethod, MaxIter, Tolerance, NormType);
@@ -83,7 +86,28 @@ OneStepNSProblem::OneStepNSProblem(Strategy * newStrat, const string& newSolver,
 }
 
 OneStepNSProblem::~OneStepNSProblem()
-{}
+{
+  map< Interaction* , SiconosMatrix*>::iterator it;
+  for (it = diagonalBlocksMap.begin(); it != diagonalBlocksMap.end(); it++)
+  {
+    SiconosMatrix * tmp = (*it).second;
+    if (tmp != NULL)  delete tmp ;
+    tmp = NULL;
+  }
+
+  map< Interaction* , map<Interaction *, SiconosMatrix*> >::iterator it2;
+  map<Interaction *, SiconosMatrix*>::iterator it3;
+  for (it2 = extraDiagonalBlocksMap.begin(); it2 != extraDiagonalBlocksMap.end(); it2++)
+  {
+
+    for (it3 = ((*it2).second).begin(); it3 != ((*it2).second).end(); it3++)
+    {
+      SiconosMatrix * tmp = (*it3).second;
+      if (tmp != NULL)  delete tmp ;
+      tmp = NULL;
+    }
+  }
+}
 
 Interaction* OneStepNSProblem::getInteractionPtr(const unsigned int& nb)
 {
@@ -103,58 +127,118 @@ void OneStepNSProblem::initialize()
   Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   if (!(topology->isUpToDate()))
     topology->updateTopology();
-
-  // if at least one relative degree is different from 0 or 1
-  if (!topology->isTimeInvariant())
-  {
-    checkEffectiveOutput();
-    // compute map of effective sizeOutput
-    topology->computeEffectiveSizeOutput();
-  }
-  // else effectiveSizeOutput = SizeOutput
 }
 
-void OneStepNSProblem::checkEffectiveOutput()
+void OneStepNSProblem::computeEffectiveOutput()
 {
+
+  // 3 steps to update the effective output, this for each interaction:
+  //  - compute prediction for y ( -> yp), this for the r-1 first derivatives, r being
+  //    the relative degree
+  //  - compute indexMax using this prediction
+  //  - compute effectiveIndexes, a list of the indexes for which constraints will be applied
+  //
+  //
+
   // get topology of the NonSmooth Dynamical System
   Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   // get time step
   double pasH = strategy->getTimeDiscretisationPtr()->getH();
 
-  // loop over the interactions
+  unsigned int i ; // index of derivation
+  unsigned int j ; // relation number
+  unsigned int sizeOutput; // effective size of vector y for a specific interaction
+  unsigned int globalSizeOutput = 0; // effective size of global vector y (ie including all interactions) = sum sizeOutput over all interactions
+  unsigned int k;
+  // === loop over the interactions ===
   vector<Interaction*>::iterator it;
   for (it = interactionVector.begin(); it != interactionVector.end(); it++)
   {
-    // get the output derivatives vector
+    // get the output vector (values for previous time step)
     vector<SimpleVector *> yOld = (*it)->getYOld();
 
-    // get relative degrees vector of this interaction
+    // get relative degrees vector of this interaction (one relative degree for each relation!)
     vector<unsigned int> relativeDegree = topology->getRelativeDegrees(*it);
+    unsigned int size = relativeDegree.size(); // this size corresponds to the interaction size, ie the number of relations
 
-    unsigned int size = relativeDegree.size();
+    // --- prediction vector ---
 
-    // the prediction vector
-    vector<SimpleVector *> yp;
+    // we compute yp[i], i =0..r-2. r is equal to the maximum value of all the relative degrees.
+    // For the moment we consider that the interaction is homegeneous, ie all the relations have the same degree.
+    // if r<2, no prediction, all relations are effective.
+    unsigned int sizeYp;
 
-    yp.resize(size, NULL);
+    if (relativeDegree[0] != 0)  sizeYp = relativeDegree[0] - 1;
+    else sizeYp = 0;
 
-    for (unsigned int i = 0; i < size ; i++)
-      yp[i] = new SimpleVector(*yOld[i]);
-
-    // \todo the way prediction is calculated should be defined by user elsewhere
-    *(yp[0]) = *(yOld[0]) +  0.5 * pasH * *(yOld[1]) ;
-
-    // loop from 0 to relative degree to find the first yp>0
-    vector<unsigned int> indexMax;
-    indexMax.resize(size, 0);
-    for (unsigned int i = 0; i < size ; i++)
+    if (sizeYp > 0)
     {
-      unsigned int j = 0;
-      while ((*(yp[i]))(j) <= 0) j++;
-      indexMax[i] = j;
+      // --- prediction vector ---
+
+      vector<SimpleVector *> yp;
+      yp.resize(sizeYp, NULL);
+      // allocate and initialize yp with yOld.
+      for (i = 0; i < sizeYp ; i++)
+        yp[i] = new SimpleVector(*yOld[i]);
+      // \todo the way prediction is calculated should be defined by user elsewhere
+      *(yp[0]) = *(yOld[0]) +  0.5 * pasH * *(yOld[1]) ;
+
+      // --- indexMax ---
+
+      // loop from 0 to relative degree to find the first yp>0
+      vector<unsigned int> indexMax;
+      indexMax.resize(size, 0);
+      for (j = 0; j < size; j++)
+      {
+        for (i = 0; i < sizeYp; i++)
+        {
+          if ((*(yp[i]))(j) <= 0)
+            indexMax[j]++;
+          else
+            break;
+        }
+      }
+      topology->setIndexMax(*it, indexMax);
+
+      for (i = 0; i < sizeYp ; i++)
+        delete yp[i];
+
+      // --- effective indexes ---
+
+      // compute sizeOutput for the current interaction
+      sizeOutput = topology->computeEffectiveSizeOutput(*it);
+
+      vector<unsigned int> effectiveIndexes, indexMin;
+      indexMin = topology->getIndexMin(*it);
+
+      effectiveIndexes.resize(sizeOutput);
+
+      for (k = 0; k < sizeOutput; k++)
+      {
+        for (j = 0; j < size; j++)
+        {
+          for (i = 0; i < (indexMax[j] - indexMin[j]); i++)
+          {
+            effectiveIndexes[k] = i + j * (relativeDegree[j] - indexMin[j]);
+          }
+        }
+      }
+
+      topology->setEffectiveIndexes(*it, effectiveIndexes);
     }
-    topology->setIndexMax(*it, indexMax);
-  }
+    else
+    {
+      // compute sizeOutput for the current interaction
+      sizeOutput = topology->computeEffectiveSizeOutput(*it);
+    }
+    globalSizeOutput   += sizeOutput;
+
+  }// == end of interactions loop ==
+
+  topology->setEffectiveSizeOutput(globalSizeOutput);
+
+  // compute effective positions map
+  topology->computeInteractionEffectivePositionMap();
 }
 
 void OneStepNSProblem::nextStep()
@@ -163,27 +247,20 @@ void OneStepNSProblem::nextStep()
   for (it = interactionVector.begin(); it != interactionVector.end(); it++)
     (*it)->swapInMemory();
   // get topology of the NonSmooth Dynamical System
-  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-  // if relative degree different from 0 or 1
-  if (!(topology->isTimeInvariant()))
-  {
-    checkEffectiveOutput();
-    // compute map of effective sizeOutput
-    topology->computeEffectiveSizeOutput();
-  }
+  //Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  // if relative degree is different from 0 or 1
+  //if(!( topology->isTimeInvariant() ))
+  //  computeEffectiveOutput();
 }
 
 void OneStepNSProblem::updateInput()
 {
   vector<Interaction*>::iterator it;
   double currentTime = strategy->getModelPtr()->getCurrentT();
-  double pasH = strategy->getTimeDiscretisationPtr()->getH();
+
   for (it = interactionVector.begin(); it != interactionVector.end(); it++)
-  {
-    (*it)->update(currentTime, pasH);
-    if (connectedInteractionMap.find(*it) != connectedInteractionMap.end())
-      (*it)->getRelationPtr() -> computeInput(currentTime);
-  }
+    (*it)->getRelationPtr() -> computeInput(currentTime);
+
 }
 
 void OneStepNSProblem::updateOutput()
@@ -192,18 +269,6 @@ void OneStepNSProblem::updateOutput()
   double currentTime = strategy->getModelPtr()->getCurrentT();
   for (it = interactionVector.begin(); it != interactionVector.end(); it++)
     (*it)->getRelationPtr()->computeOutput(currentTime);
-}
-
-
-void OneStepNSProblem::checkInteraction()
-{
-  // --- check and update status of the interactions ---
-  vector<Interaction*>::iterator it;
-  double pasH = strategy->getTimeDiscretisationPtr()->getH();
-  double time = strategy->getModelPtr()->getCurrentT();
-  for (it = interactionVector.begin(); it != interactionVector.end(); it++)
-    (*it)->check(time, pasH);
-  updateConnectedInteractionMap();
 }
 
 void OneStepNSProblem::compute(const double& time)
@@ -228,8 +293,14 @@ void OneStepNSProblem::fillSolvingMethod(const string& newSolvingMethod, const i
 
   if (newSolvingMethod ==  "Lemke")
     setLemkeAlgorithm(solver, MaxIter);
+  else if (newSolvingMethod == "LexicoLemke")
+    setLexicoLemkeAlgorithm(solver, MaxIter);
   else if (newSolvingMethod == "Gsnl")
     setGsnlAlgorithm(solver, Tolerance, NormType, MaxIter);
+  else if (newSolvingMethod == "Qp")
+    setQpAlgorithm(solver, Tolerance);
+  else if (newSolvingMethod == "Qpnonsym")
+    setQpnonsymAlgorithm(solver, Tolerance);
   else if (newSolvingMethod == "Gcp")
     setGcpAlgorithm(solver, Tolerance, NormType, MaxIter);
   else if (newSolvingMethod == "Latin")
@@ -349,7 +420,7 @@ bool OneStepNSProblem::allInteractionConcerned()
   return res;
 }
 
-void OneStepNSProblem::setLemkeAlgorithm(const string& meth,  const double& t)
+void OneStepNSProblem::setLemkeAlgorithm(const string& meth,  const unsigned int& t)
 {
   solver = meth;
 
@@ -358,7 +429,7 @@ void OneStepNSProblem::setLemkeAlgorithm(const string& meth,  const double& t)
     strcpy(solvingMethod.lcp.nom_method, OSNSP_LEMKE.c_str());
     solvingMethod.lcp.tol = /*t*/ DefaultAlgoTolerance;
     strcpy(solvingMethod.lcp.normType, DefaultAlgoNormType.c_str());
-    solvingMethod.lcp.itermax = /*DefaultAlgoMaxIter*/(int)t;
+    solvingMethod.lcp.itermax = /*DefaultAlgoMaxIter*/t;
     solvingMethod.lcp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_CFDSOLVING)
@@ -366,7 +437,31 @@ void OneStepNSProblem::setLemkeAlgorithm(const string& meth,  const double& t)
     strcpy(solvingMethod.cfd.nom_method, OSNSP_LEMKE.c_str());
     solvingMethod.cfd.tol = /*t*/ DefaultAlgoTolerance;
     strcpy(solvingMethod.cfd.normType, DefaultAlgoNormType.c_str());
-    solvingMethod.cfd.itermax = /*DefaultAlgoMaxIter*/(int)t;
+    solvingMethod.cfd.itermax = /*DefaultAlgoMaxIter*/t;
+    solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
+  }
+  else
+    RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
+}
+
+void OneStepNSProblem::setLexicoLemkeAlgorithm(const string& meth,  const unsigned int& t)
+{
+  solver = meth;
+
+  if (meth == OSNSP_LCPSOLVING)
+  {
+    strcpy(solvingMethod.lcp.nom_method, OSNSP_LEXICOLEMKE.c_str());
+    solvingMethod.lcp.tol = /*t*/ DefaultAlgoTolerance;
+    strcpy(solvingMethod.lcp.normType, DefaultAlgoNormType.c_str());
+    solvingMethod.lcp.itermax = /*DefaultAlgoMaxIter*/t;
+    solvingMethod.lcp.k_latin = DefaultAlgoSearchDirection;
+  }
+  else if (meth == OSNSP_CFDSOLVING)
+  {
+    strcpy(solvingMethod.cfd.nom_method, OSNSP_LEXICOLEMKE.c_str());
+    solvingMethod.cfd.tol = /*t*/ DefaultAlgoTolerance;
+    strcpy(solvingMethod.cfd.normType, DefaultAlgoNormType.c_str());
+    solvingMethod.cfd.itermax = /*DefaultAlgoMaxIter*/t;
     solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
   }
   else
@@ -424,6 +519,32 @@ void OneStepNSProblem::setGsnlAlgorithm(const string& meth,  const double& t,  c
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::setGsnlAlgorithm - solving method " + meth + " doesn't exists.");
+}
+
+void OneStepNSProblem::setQpAlgorithm(const string& meth,  const double& t)
+{
+  solver = meth;
+
+  if (meth == OSNSP_LCPSOLVING)
+  {
+    strcpy(solvingMethod.lcp.nom_method, OSNSP_QP.c_str());
+    solvingMethod.lcp.tol = t;
+  }
+  else
+    RuntimeException::selfThrow("OneStepNSProblem::setQpAlgorithm - solving method " + meth + " doesn't exists.");
+}
+
+void OneStepNSProblem::setQpnonsymAlgorithm(const string& meth,  const double& t)
+{
+  solver = meth;
+
+  if (meth == OSNSP_LCPSOLVING)
+  {
+    strcpy(solvingMethod.lcp.nom_method, OSNSP_QPNONSYM.c_str());
+    solvingMethod.lcp.tol = t;
+  }
+  else
+    RuntimeException::selfThrow("OneStepNSProblem::setQpnonsymAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
 void OneStepNSProblem::setGcpAlgorithm(const string& meth,  const double& t,  const string& norm,  const int& iter)
@@ -532,112 +653,6 @@ void OneStepNSProblem::setLatinAlgorithm(const string& meth, const double& t, co
     RuntimeException::selfThrow("OneStepNSProblem::setLatinAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
-void OneStepNSProblem::updateConnectedInteractionMap()
-{
-  bool hasActiveConnection;
-  vector<DynamicalSystem*> dsvect1, dsvect2;
-  vector<int> status, status2;
-  Connection *co;
-
-  connectedInteractionMap.clear();
-
-  // -- loop over the interactions --
-  for (unsigned int i = 0; i < interactionVector.size(); i++)
-  {
-    // warning: only active interactions are put into the visibility table
-    status = interactionVector[i]->getStatus();
-
-    // -- loop over the status of the current interaction --
-    for (unsigned int k = 0; k < status.size(); k++)
-      if (status[k] == 1)
-      {
-        cout << "# interaction " << interactionVector[i]->getNumber() << " is active !" << endl;
-        hasActiveConnection = false;
-        for (unsigned int j = 0; j < interactionVector.size(); j++)
-        {
-          // we only put in the visibility table, the active interactions
-          status2 = interactionVector[j]->getStatus();
-          for (unsigned int l = 0; l < status2.size(); l++)
-          {
-            if (status2[l] == 1)
-            {
-              if (i != j)
-              {
-                hasActiveConnection = true;
-                dsvect1 = interactionVector[i]->getDynamicalSystems();
-                dsvect2 = interactionVector[j]->getDynamicalSystems();
-
-                if ((dsvect1[0] == dsvect2[0]) || (dsvect1[0] == dsvect2[1]))
-                {
-                  // the interaction i and j are connected
-                  co = new Connection();
-                  co->status = 1;
-                  co->originInteractionDSRank = 0;
-                  if (dsvect1[0] == dsvect2[0]) co->connectedInteractionDSRank = 0;
-                  else co->connectedInteractionDSRank = 1;
-                  co->connected = interactionVector[j];
-
-                  connectedInteractionMap[ interactionVector[i] ].push_back(co);
-                }
-                else if ((dsvect1[1] == dsvect2[0]) || (dsvect1[1] == dsvect2[1]))
-                {
-                  // the interaction i and j are connected
-                  co = new Connection();
-                  co->status = 1;
-                  co->originInteractionDSRank = 1;
-                  if (dsvect1[1] == dsvect2[0]) co->connectedInteractionDSRank = 0;
-                  else co->connectedInteractionDSRank = 1;
-                  co->connected = interactionVector[j];
-
-                  connectedInteractionMap[ interactionVector[i] ].push_back(co);
-                }
-              }
-            }
-          }
-        }
-        if (!hasActiveConnection)
-        {
-          /*
-           * if no active interaction is adjacent to the "interactionVector[i]"
-           * active interaction, we add to the map "interactionVector[i]"
-           * with an empty vector of Connection
-           */
-          //co = new Connection();
-          connectedInteractionMap[ interactionVector[i] ].push_back(NULL);
-        }
-      }
-  }
-  //    displayConnectedInteractionMap();
-  //    cout<<"#_#_  "<<connectedInteractionMap[ interactionVector[0] ].size()<<endl;
-  //    cout<<"updateConnectedInteractionMap  <<press enter>>"<<endl;
-  //    getchar();
-}
-
-void OneStepNSProblem::displayConnectedInteractionMap()
-{
-  map< Interaction*, vector<Connection*> >::iterator iter;
-
-  //cout<<"#------OneStepNSProblem::displayConnectedInteractionMap-----------"<<endl;
-  for (iter = connectedInteractionMap.begin(); iter != connectedInteractionMap.end(); iter++)
-  {
-    cout << "#-----------------" << endl;
-    cout << "| Origin Interaction " << iter->first << endl;
-    //cout<<"@ size of the second part of the map "<<iter->second.size()<<endl;
-    if (iter->second[0] != NULL)
-      for (unsigned int i = 0; i < iter->second.size(); i++)
-      {
-        cout << "|   + Connected Interaction " << iter->second[i]->connected << endl;
-        cout << "|     status = " << iter->second[i]->status;
-        cout << endl;
-        cout << "|     originInteractionDSRank = " << iter->second[i]->originInteractionDSRank;
-        cout << endl;
-        cout << "|     connectedInteractionDSRank = " << iter->second[i]->connectedInteractionDSRank;
-        cout << endl;
-      }
-    cout << "#-----------------" << endl;
-  }
-}
-
 bool OneStepNSProblem::isOneStepNsProblemComplete()
 {
   bool isComplete = true;
@@ -685,19 +700,6 @@ bool OneStepNSProblem::isOneStepNsProblemComplete()
   {
     cout << "OneStepNSProblem is not complete: unknown solver type " << solver  << endl;
     isComplete = false;
-  }
-
-  if (!(connectedInteractionMap.size()) > 0)
-  {
-    cout << "OneStepNSProblem warning: connected interaction map is empty" << endl;
-    isComplete = false;
-  }
-  else
-  {
-    map< Interaction*, std::vector<Connection*> >::iterator  mapit;
-    mapit = connectedInteractionMap.find(NULL);
-    if (mapit != connectedInteractionMap.end())
-      cout << "OneStepNSProblem warning: a connected interaction points to NULL" << endl;
   }
 
   if (strategy == NULL)

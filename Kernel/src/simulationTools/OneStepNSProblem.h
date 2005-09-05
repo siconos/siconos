@@ -28,30 +28,6 @@ extern double   DefaultAlgoTolerance;
 extern int    DefaultAlgoMaxIter;
 extern double   DefaultAlgoSearchDirection;
 
-
-/** \struct ConnectedInteraction
- *  \brief interaction connected to another interaction
- */
-typedef struct
-{
-  /* state of the interaction connected :
-   *  0->potential connection
-   *  1->active connection
-   */
-  int status;
-
-  /* the interaction connected to another interaction */
-  Interaction *connected;
-
-  /* position of the common DynamicalSystem in the dynamical system vector
-   *  of the interaction in origin Interaction */
-  int originInteractionDSRank;
-
-  /* position of the common DynamicalSystem in the dynamical system vector
-   *  of the interaction in connected Interaction */
-  int connectedInteractionDSRank;
-} Connection;
-
 /** \class OneStepNSProblem
  *  \brief It's the part of the Strategy which solve the Interactions
  *  \author SICONOS Development Team - copyright INRIA
@@ -244,11 +220,10 @@ public:
    */
   virtual void initialize();
 
-  /** \fn void checkEffectiveOutput();
-   *  \brief compute vector indexMax of the topology of the nsds
-   *
+  /** \fn void computeEffectiveOutput();
+   *  \brief compute variables indexMax, effectiveOutput and effectiveSizeOutput of the topology of the nsds
    */
-  void checkEffectiveOutput();
+  void computeEffectiveOutput();
 
   /** \fn void nextStep(void)
    *  \brief prepares the problem for the next time step
@@ -265,11 +240,6 @@ public:
    *  \brief compute output for all the interactions
    */
   virtual void updateOutput();
-
-  /** \fn void checkInteraction(void)
-   *  \brief check and update status of the interactions
-   */
-  virtual void checkInteraction();
 
   /** \fn void compute(const double&)
    *  \brief make the computation so solve the NS problem
@@ -306,15 +276,22 @@ public:
   bool allInteractionConcerned();
 
   /** \fn void setLemkeAlgorithm(const std::string&, const double& = DefaultAlgoMaxIter)
-   *   \brief sets the parameters for the lemke solfing algorithm in the solvingMethod structure
+   *   \brief sets the parameters for the lemke solving algorithm in the solvingMethod structure
    *   \param string : the solving method
-   *   \param double : the *tolerance* maxIter parameter
+   *   \param unsigned int : the *tolerance* maxIter parameter
    */
-  virtual void setLemkeAlgorithm(const std::string&, const double& = DefaultAlgoMaxIter);
+  virtual void setLemkeAlgorithm(const std::string&, const unsigned int& = DefaultAlgoMaxIter);
+
+  /** \fn void setLexicoLemkeAlgorithm(const std::string&, const double& = DefaultAlgoMaxIter)
+   *   \brief sets the parameters for the lexicoLemke solving algorithm in the solvingMethod structure
+   *   \param string : the solving method
+   *   \param  unsigned int: the *tolerance* maxIter parameter
+   */
+  virtual void setLexicoLemkeAlgorithm(const std::string&, const unsigned int& = DefaultAlgoMaxIter);
 
   /** \fn void setGsnlAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
    *                            const int& = DefaultAlgoMaxIter)
-   *   \brief sets the parameters for the gsnl solfing algorithm in the solvingMethod structure
+   *   \brief sets the parameters for the gsnl solving algorithm in the solvingMethod structure
    *   \param string : the solving method
    *   \param double : the tolerance parameter
    *   \param string : the norm type paramater
@@ -323,9 +300,27 @@ public:
   virtual void setGsnlAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
                                 const int& = DefaultAlgoMaxIter);
 
+  /** \fn void setQpAlgorithm(const std::string&, const double& = DefaultAlgoTolerance)
+   *   \brief sets the parameters for the gsnl solving algorithm in the solvingMethod structure
+   *   \param string : the solving method
+   *   \param double : the tolerance parameter
+   *   \param string : the norm type paramater
+   *   \param inte   : maxIter
+   */
+  virtual void setQpAlgorithm(const std::string&, const double& = DefaultAlgoTolerance);
+
+  /** \fn void setQpnonsymAlgorithm(const std::string&, const double& = DefaultAlgoTolerance)
+   *   \brief sets the parameters for the gsnl solving algorithm in the solvingMethod structure
+   *   \param string : the solving method
+   *   \param double : the tolerance parameter
+   *   \param string : the norm type paramater
+   *   \param inte   : maxIter
+   */
+  virtual void setQpnonsymAlgorithm(const std::string&, const double& = DefaultAlgoTolerance);
+
   /** \fn void setGcpAlgorithm( const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
    *                            const int& = DefaultAlgoMaxIter )
-   *   \brief sets the parameters for the gcp solfing algorithm in the solvingMethod structure
+   *   \brief sets the parameters for the gcp solving algorithm in the solvingMethod structure
    *   \param string : the kind of solving method
    *   \param double : the tolerance parameter
    *   \param string : the norm type paramater
@@ -345,16 +340,6 @@ public:
    */
   virtual void setLatinAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
                                  const int& = DefaultAlgoMaxIter, const double& = DefaultAlgoSearchDirection);
-
-  /** \fn void updateConnectedInteractionMap()
-   *   \brief mofifies the connectedInteractions map according to the interactions of the OneStepNSProblem
-   */
-  void updateConnectedInteractionMap();
-
-  /** \fn void displayConnectedInteractionMap()
-   *   \brief display the map of the connected interactions
-   */
-  void displayConnectedInteractionMap();
 
   bool isOneStepNsProblemComplete();
 
@@ -380,21 +365,11 @@ protected:
   */
   std::map< Interaction* , std::map<Interaction *, SiconosMatrix*> >  extraDiagonalBlocksMap  ;
 
-  /** */
-  std::map<Interaction*, bool> areDiagonalBlocksMapAllocatedIn ;
-  std::map< Interaction* , std::map<Interaction *, bool > >areExtraDiagonalBlocksMapAllocatedIn;
-
-
   /** structure containing the structures of the numerous solving methods */
   methode solvingMethod;
 
   /** name of the solver to use */
   std::string solver;
-
-  /** array of the connected interactions
-   * in this map, we put all the active interactions (status = 1)
-   * If an active interaction has no connection, the associated vector<Connection*> is empty */
-  std::map< Interaction*, std::vector<Connection*> > connectedInteractionMap;
 
   /** link to the strategy that owns the NSPb */
   Strategy *strategy;

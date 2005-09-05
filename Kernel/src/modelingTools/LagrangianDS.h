@@ -30,7 +30,7 @@ class LagrangianDSXML;
  * The class LagrangianDS  defines  and computes a generic ndof-dimensional
  * Lagrangian Non Linear Dynamical System of the form :
  * \f[
- * M(q) \ddot q + Q(\dot q, q) = F_{Int}(\dot q , q , t)+F_{Ext}(t) + p,
+ * M(q) \ddot q + NNL(\dot q, q) = F_{Int}(\dot q , q , t)+F_{Ext}(t) + p,
  * \f]
  * where
  *    - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
@@ -38,7 +38,7 @@ class LagrangianDSXML;
  *    - \f$ \ddot q  \in R^{ndof} \f$  the acceleration, i. e. the second time derivative of the  generalized coordinates.
  *    - \f$ p  \in R^{ndof} \f$  the forces due to the Non Smooth Interaction. In the particular case of Non Smooth evolution, the variable p contains the impulse and not the force.
  *    -  \f$ M(q)  \in  R^{ndof \times ndof}  \f$ is the inertia term saved in the SiconosMatrix mass.
- *    -  \f$ Q(\dot q, q)  \in R^{ndof}\f$ is the non linear inertia term saved in the SiconosVector NNL.
+ *    -  \f$ NNL(\dot q, q)  \in R^{ndof}\f$ is the non linear inertia term saved in the SiconosVector NNL.
  *    -  \f$ F_{Int}(\dot q , q , t)  \in R^{ndof} \f$ are the internal forces saved in the SiconosVector fInt.
  *    -  \f$ F_{Ext}(t)  \in R^{ndof}  \f$ are the external forces saved in the SiconosVector fExt.
  *

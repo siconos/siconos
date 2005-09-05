@@ -188,6 +188,32 @@ void SiconosMatrix::getBlock(const vector<unsigned int>& index_list, SiconosMatr
   delete J;
 }
 
+void SiconosMatrix::getBlock(const vector<unsigned int>& indexRow, const vector<unsigned int>& indexCol, SiconosMatrix& block) const
+{
+  unsigned int row = block.size(0);
+  unsigned int col = block.size(1);
+  if (row != indexRow.size() || col != indexCol.size())
+    SiconosMatrixException::selfThrow("getBlock : wrong indexes list");
+
+  unsigned int k = 0, l = 0;
+  unsigned int matRow = size(0), matCol = size(1);
+
+  vector<unsigned int>::const_iterator itRow, itCol;
+
+  for (itRow = indexRow.begin(); itRow != indexRow.end(); itRow++)
+  {
+    if (*itRow >= matRow) SiconosMatrixException::selfThrow("getBlock : row index out of range");
+    for (itCol = indexCol.begin(); itCol != indexCol.end(); itCol++)
+    {
+      if (*itCol >= matCol) SiconosMatrixException::selfThrow("getBlock : column index out of range");
+      block(k, l) = mat(*itRow, *itCol);
+      l++;
+    }
+    l = 0;
+    k++;
+  }
+}
+
 // --- READ, WRITE ... ---
 
 bool SiconosMatrix::read(const string& fileName, const string& mode)
@@ -256,6 +282,45 @@ bool SiconosMatrix::write(const string& fileName, const string& mode) const
   }
   else if (mode == "ascii")
     outFile << m << ' ' << n;
+
+  for (int i = 0; i < m; i++)
+  {
+    if (mode == "ascii")
+    {
+      outFile << endl;
+    }
+    for (int j = 0; j < n; j++)
+    {
+      if (mode == "binary")
+      {
+        outFile.write((char*)&mat(i, j), sizeof(double));
+      }
+      else if (mode == "ascii")
+      {
+        char buffer[30];
+        sprintf(buffer, "%1.17e ", mat(i, j)); // /!\ depends on machine precision
+        outFile << buffer;
+      }
+    }
+  }
+  outFile.close();
+  return true;
+}
+
+bool SiconosMatrix::rawWrite(const string& fileName, const string& mode) const
+{
+  //  if( (size(0) == 0)||(size(1) == 0) ) SiconosMatrixException::selfThrow("write impossible - SiconosMatrix empty");
+
+  if ((mode != "binary") && (mode != "ascii"))
+    SiconosMatrixException::selfThrow("Incorrect mode for writing");
+
+  // open the file
+  ofstream outFile(fileName.c_str());           // checks that it's opened
+  if (!outFile.is_open())
+    SiconosMatrixException::selfThrow("function write error : Fail to open \"" + fileName + "\"");
+
+  int m = mat.size(0);
+  int n = mat.size(1);
 
   for (int i = 0; i < m; i++)
   {

@@ -6,12 +6,12 @@ using namespace std;
 
 // default
 Topology::Topology():
-  sizeOutput(0), effectiveSizeOutput(sizeOutput), isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(NULL)
+  effectiveSizeOutput(0), isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(NULL)
 {}
 
 // with NonSmoothDynamicalSystem
 Topology::Topology(NonSmoothDynamicalSystem* newNsds):
-  sizeOutput(0), effectiveSizeOutput(sizeOutput), isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(newNsds)
+  effectiveSizeOutput(0), isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(newNsds)
 {
   updateTopology();
 }
@@ -42,32 +42,46 @@ void Topology::updateTopology()
 {
   //-- Get all the interactions --
   vector<Interaction*> listInteractions = nsds->getInteractions();
-  // -- Compute sizeOutput --
+
+  //-- Fill RelativeDegreesMaps in --
+  computeRelativeDegreesMap();
+
+  //-- Fill indexMinMap and indexMaxMap --
+  computeIndexMinMap();
+  // initialization of indexMax and effectiveIndexes
+  indexMaxMap = indexMinMap; // by default, indexMax = indexMin
+
+  // Note: all 'effective' values depend on time and should be updated during computation ('computeEffectiveOutput'
+  // in OneStepNSProblem, this as soon as one relative degree differs from 0 or 1.
+  // Thus, all default values given in the current function are those corresponding to r=0 or 1.
+
+
+  // -- Compute sizeOutput  ( ie sum of all interactions sizes) --
   vector<Interaction*>::iterator it;
   // loop through interactions list
   unsigned int size;
-  sizeOutput = 0;
   for (it = listInteractions.begin(); it != listInteractions.end(); it++)
   {
     size = (*it)->getNInteraction();
-    sizeOutput += size;
-    indexMaxMap[*it].resize(size, 0); // by default, all indexMax are set to 0.
+
+    // initialization of indexMax and effectiveIndexes
+
+    // by default, all relations are effective
+    effectiveIndexesMap[*it].resize(size);
+    for (unsigned int i = 0; i < size; i++)
+      effectiveIndexesMap[*it][i] = i;
   }
 
   // fill linkedInteractionMap and interactionPositionMap in:
   computeLinkedInteractionMap();
-  computeInteractionPositionMap();
-
-  // fill RelativeDegreesMaps in
-  computeRelativeDegreesMap();
-
-  // fill IndexMinMap
-  computeIndexMinMap();
+  //  computeInteractionPositionMap();
+  computeInteractionEffectivePositionMap();
 
   if (isTopologyTimeInvariant)
-    effectiveSizeOutput = sizeOutput;
+    computeEffectiveSizeOutput();
+
   // else this value will be computed in OneStepNSProblem
-  // and so for indexMap.
+  // after indexMap computation.
 
   isTopologyUpToDate = true;
 
@@ -85,10 +99,20 @@ void Topology::computeEffectiveSizeOutput()
   for (it = listInteractions.begin(); it != listInteractions.end(); it++)
   {
     // loop over ouput vector
-    vector<unsigned int>::iterator it2;
-    for (it2 = indexMaxMap[*it].begin(); it2 != indexMaxMap[*it].end(); it2++)
-      effectiveSizeOutput += indexMaxMap[*it][*it2] - indexMinMap[*it][*it2] + 1 ;
+    unsigned int j;
+    for (j = 0; j < (*it)->getNInteraction(); j++)
+      effectiveSizeOutput += (indexMaxMap[*it])[j] - (indexMinMap[*it])[j] + 1 ;
   }
+}
+
+unsigned int Topology::computeEffectiveSizeOutput(Interaction * inter)
+{
+  unsigned int sizeOutput = 0;
+  unsigned int j;
+  // loop over ouput vector
+  for (j = 0; j < inter->getNInteraction(); j++)
+    sizeOutput += indexMaxMap[inter][j] - indexMinMap[inter][j] + 1 ;
+  return sizeOutput;
 }
 
 // Linked interactions map computing:
@@ -112,6 +136,7 @@ void Topology::computeLinkedInteractionMap()
     // -- check all other interactions --
     for (itLinked = listInteractions.begin(); itLinked != listInteractions.end() && itLinked != itOrig; itLinked++)
     {
+      // list of ds of the second interaction
       dsLinked = (*itLinked)->getDynamicalSystems();
 
       vector<DynamicalSystem*> commonDS;  // list of ds common to both interactions
@@ -131,21 +156,24 @@ void Topology::computeLinkedInteractionMap()
   }
 }
 
-// Linked interactions map computing:
-void Topology::computeInteractionPositionMap()
+// interactionEffectivePosition map computing:
+// in the 'effective' matrix, the size of each bloc (ie for a specific interaction) is the sum of indexMax(j)-indexMin(j)+1.
+// j the relation number  => this value depends on time is should be updated during computation
+void Topology::computeInteractionEffectivePositionMap()
 {
-  interactionPositionMap.clear();
+  interactionEffectivePositionMap.clear();
 
   // Get all the interactions
   vector<Interaction*> listInteractions = nsds->getInteractions();
 
   vector<Interaction*>::iterator it;
-  unsigned int currentPosition = 0;
+  unsigned int currentEffectivePosition = 0;
+
   // loop through interactions list
   for (it = listInteractions.begin(); it != listInteractions.end(); it++)
   {
-    interactionPositionMap[*it] = currentPosition;
-    currentPosition += (*it)->getNInteraction();
+    interactionEffectivePositionMap[*it] = currentEffectivePosition;
+    currentEffectivePosition += computeEffectiveSizeOutput(*it);
   }
 }
 
@@ -178,11 +206,11 @@ vector<unsigned int> Topology::computeRelativeDegrees(Interaction * inter)
   unsigned int sizeInter = inter->getNInteraction();
 
   // loop over various non smooth law types
-  // \todo check isTimeInvariant correctly
+  // \todo check isTimeInvariant properly
   if (nslawType == COMPLEMENTARITYCONDITIONNSLAW)
   {
     relativeDegree.resize(sizeInter, 0);
-    // \todo compute correctly
+    // \todo compute properly
   }
   else if (nslawType == NEWTONIMPACTLAWNSLAW)
   {

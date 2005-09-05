@@ -31,14 +31,8 @@ private:
 
   // --- MEMBERS ---
 
-  // "Global" size of ouput (ie sum of all y vectors sizes from all interactions)
-  unsigned int sizeOutput;
-
   /** map that lists all the interactions and their linked interactions through common DS */
   std::map< Interaction*, std::vector<InteractionLink*>  > linkedInteractionMap;
-
-  /** map that links interactions with their position in global output vector */
-  std::map< Interaction*, unsigned int> interactionPositionMap;
 
   /** map that links interactions with their relative degrees */
   std::map< Interaction*, std::vector<unsigned int> > relativeDegreesMap;
@@ -53,6 +47,13 @@ private:
   /** global size of the effective output
    * effectiveSizeOutput = sum(indexMax - indexMin) over interactions */
   unsigned int effectiveSizeOutput;
+
+  /** map that links each interaction with a list of indexes, giving the effective relations.
+      An "effective" relation or output is one which is constrained.  */
+  std::map< Interaction* , std::vector<unsigned int> > effectiveIndexesMap ;
+
+  /** map that links interactions with their position in effective output vector */
+  std::map< Interaction*, unsigned int> interactionEffectivePositionMap;
 
   /** check if topology has been updated since nsds modifications occur */
   bool isTopologyUpToDate;
@@ -77,12 +78,6 @@ private:
    * \param: a vector<Interaction*> (list of the interactions of the nsds)
    */
   void computeLinkedInteractionMap();
-
-  /** \fn void computeInteractionPositionMap()
-   *   \brief compute the interactionPositionMap
-   * \param: a vector<Interaction*> (list of the interactions of the nsds)
-   */
-  void computeInteractionPositionMap();
 
   /** \fn void computeRelativeDegreesMap()
    *   \brief compute the  RelativeDegreesMap
@@ -122,26 +117,6 @@ public:
 
   // === GETTERS/SETTERS ===
 
-  // --- sizeOutput ---
-
-  /** \fn const int getSizeOutput() const
-   *  \brief get the value of sizeOutput
-   *  \return an unsigned int
-   */
-  inline const unsigned int getSizeOutput() const
-  {
-    return sizeOutput;
-  }
-
-  /** \fn void setSizeOutput(const int&)
-   *  \brief set the value of sizeOutput
-   *  \param an unsigned int
-   */
-  inline void setSizeOutput(const unsigned int& newVal)
-  {
-    sizeOutput = newVal;
-  }
-
   // --- effectiveSizeOutput ---
 
   /** \fn const int getEffectiveSizeOutput() const
@@ -171,17 +146,6 @@ public:
   inline const std::map< Interaction*, std::vector<InteractionLink*> > getLinkedInteractionMap() const
   {
     return linkedInteractionMap;
-  }
-
-  // --- interactionPositionMap ---
-
-  /** \fn  map<Interaction*, int> getOriginDSIndex(void)
-   *  \brief get the interactionPositionMap of this topology
-   *  \return a map <Interaction*, int>
-   */
-  inline const std::map< Interaction*, unsigned int> getInteractionPositionMap() const
-  {
-    return interactionPositionMap;
   }
 
   // --- relativeDegreesMap ---
@@ -257,6 +221,57 @@ public:
     indexMaxMap[inter] = index;
   }
 
+  // --- effectiveIndexesMap ---
+
+  /** \fn  map< Interaction*, std::vector<unsigned int> > getEffectiveIndexesMap(void)
+   *  \brief get the effectiveIndexesMap of this topology
+   *  \return a map < Interaction*, std::vector<unsigned int> >
+   */
+  inline const std::map< Interaction*, std::vector<unsigned int> > getEffectiveIndexesMap() const
+  {
+    return effectiveIndexesMap;
+  }
+
+  /** \fn  vector<unsigned int>  getEffectiveIndexes(Interaction*)
+   *  \brief get the effectiveIndexes vector of a specific interaction
+   *  \param a pointer on interaction
+   *  \return a vector<unsigned int>
+   */
+  inline const std::vector<unsigned int> getEffectiveIndexes(Interaction * Inter)
+  {
+    return effectiveIndexesMap[Inter];
+  }
+
+  /** \fn  void  setEffectiveIndexes(Interaction*,vector<unsigned int> )
+   *  \brief set the effectiveIndexes vector of a specific interaction
+   *  \param a pointer on interaction
+   *  \param a vector of int to set effectiveIndexes
+   */
+  inline void setEffectiveIndexes(Interaction * inter, const std::vector<unsigned int>&  index)
+  {
+    effectiveIndexesMap[inter] = index;
+  }
+
+  // --- interactionEffectivePositionMap ---
+
+  /** \fn  map<Interaction*, int> getOriginDSIndex(void)
+   *  \brief get the interactionEffectivePositionMap of this topology
+   *  \return a map <Interaction*, int>
+   */
+  inline const std::map< Interaction*, unsigned int> getInteractionEffectivePositionMap() const
+  {
+    return interactionEffectivePositionMap;
+  }
+
+  /** \fn  unsigned int getOriginDSIndex(void)
+   *  \brief get the interactionEffectivePosition of a specific interaction
+   *  \return an unsigned int
+   */
+  inline const unsigned int getInteractionEffectivePosition(Interaction * inter)
+  {
+    return interactionEffectivePositionMap[inter];
+  }
+
   // --- isTopologyUpToDate ---
 
   /** \fn void  setUpToDate(const bool & val)
@@ -303,9 +318,22 @@ public:
   void updateTopology();
 
   /** \fn void computeEffectiveSizeOutput()
-   *   \brief compute effectiveSizeOutput
+   *   \brief compute effectiveSizeOutput, ie count the total number
+   * of relations constrained
    */
   void computeEffectiveSizeOutput();
+
+  /** \fn unsigned int computeEffectiveSizeOutput(Interaction *)
+   *   \brief compute effectiveSizeOutput for a specific interaction
+   * \return an unsigned int
+   */
+  unsigned int computeEffectiveSizeOutput(Interaction *);
+
+  /** \fn void computeInteractionEffectivePositionMap()
+   *   \brief compute the interactionEffectivePositionMap
+   * \param: a vector<Interaction*> (list of the interactions of the nsds)
+   */
+  void computeInteractionEffectivePositionMap();
 
 };
 

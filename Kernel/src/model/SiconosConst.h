@@ -29,7 +29,7 @@ const std::string NLINEARDSIO = "NLinearDSIO";
 const std::string LAGRANGIANDSIO = "LagrangianDSIO";
 const std::string LAGRANGIANLINEARDSIO = "LagrangianLinearDSIO";
 
-// const for EqualitySonctraint
+// const for EqualityConstraint
 const std::string LINEAREC = "LinearEC";
 const std::string NLINEAREC = "NLinearEC";
 const std::string LINEARTIEC = "LinearTIEC";
@@ -41,6 +41,28 @@ const std::string LCP_OSNSP = "LCP";
 const std::string CFD_OSNSP = "CFD";
 const std::string QP_OSNSP = "QP";
 const std::string RELAY_OSNSP = "Relay";
+const std::string  OSNSP_TOLERANCE = "tolerance";
+const std::string  OSNSP_MAXITER = "maxIter";
+const std::string  OSNSP_NORMTYPE = "normType";
+const std::string  OSNSP_SEARCHDIRECTION = "searchDirection";
+
+const std::string  OSNSP_LCPSOLVING = "LcpSolving";
+const std::string  OSNSP_RPSOLVING = "RelayPrimalSolving";
+const std::string  OSNSP_RDSOLVING = "RelayDualSolving";
+const std::string  OSNSP_CFPSOLVING = "ContactFrictionPrimalSolving";
+const std::string  OSNSP_CFDSOLVING = "ContactFrictionDualSolving";
+const std::string  OSNSP_LEMKE = "Lemke";
+const std::string  OSNSP_LEXICOLEMKE = "LexicoLemke";
+const std::string  OSNSP_QP = "Qp" ;
+const std::string  OSNSP_QPNONSYM = "Qpnonsym" ;
+const std::string  OSNSP_GSNL = "Gsnl";
+const std::string  OSNSP_GCP = "Gcp";
+const std::string  OSNSP_LATIN = "Latin";
+
+
+
+
+
 //const std::string NSPB_LCPSOLVING = "LcpSolving";
 //const std::string NSPB_RPSOLVING = "RelayPrimalSolving";
 //const std::string NSPB_RDSOLVING = "RelayDualSolving";
