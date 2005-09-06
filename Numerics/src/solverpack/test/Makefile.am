@@ -9,7 +9,7 @@
 
 include $(top_srcdir)/config/Make-rules
 
-check_PROGRAMS = test1  test2 test3  test4  test5  
+check_PROGRAMS = test1  test2 test3  test4  test5  test7
 
 TESTS = $(check_PROGRAMS)
 
@@ -37,4 +37,6 @@ test5_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(SOLVERPACK_LIB) $(SICONOS_EXT_LDFLAGS)
 #test6_SOURCES = TestNumerics.cpp
 #test6_INCLUDES = $(CPPUNIT_INCLUDES)
 #test6_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(SOLVERPACK_LIB) $(SICONOS_EXT_LDFLAGS)
-
+test7_SOURCES = bench_lcp.c
+test7_INCLUDES = $(CPPUNIT_INCLUDES)
+test7_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(SOLVERPACK_LIB) $(SICONOS_EXT_LDFLAGS)
