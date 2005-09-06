@@ -37,7 +37,7 @@
 #include <stdlib.h>
 #include <string.h>
 #ifndef MEXFLAG
-#include "SiconosNumerics.h"
+#include "solverpack.h"
 #endif
 
 

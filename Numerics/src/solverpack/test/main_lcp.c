@@ -38,7 +38,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "SiconosNumerics.h"
+#include "solverpack.h"
 
 
 void test_lcp_series(int n, double ** M, double *q)

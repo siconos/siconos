@@ -1,8 +1,11 @@
+#ifndef SOLVERPACK_H
+#define SOLVERPACK_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-/*!\file SiconosNumerics.h
+/*!\file solverpack.h
  *   \author Nineb Sheherazade and Dubois Frederic.
  */
 
@@ -69,8 +72,6 @@ typedef struct
   int    itermax;
   double tol;
   double k_latin;
-  int    iout;
-  double relax;
   char   normType[64]; /* ** */
 
 } methode_lcp;
@@ -185,10 +186,7 @@ extern "C" void rp_latin(double [], double *, int *, double *, double [], double
 extern "C" void rp_gsnl(double [], double *, int *, double *, double *, int *, double *, double[], double [], int *, double *, int *)  ;
 extern "C" void rd_latin(double [], double *, int *, double * , double *, int *, double *, double[], double [], int *, double *, int *)  ;
 extern "C" void lemke_lcp(double *vec, double *qqq , int *nn, int *itermax, double *zlem, double *wlem, int *it_end, double *res, int *info);
-
-extern "C" void gsnl_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z , double *omega , int *ispeak ,
-                         double *w , int *it_end , double *res , int *info);
-
+extern "C" void gsnl_lcp(double [], double [], int *, int *, double *, double [], double [], int*, double *, int *);
 extern "C" void gcp_lcp(double [], double [], int *, int *, double *, double [], double[], int *, double *, int *);
 extern "C" void latin_lcp(double*, double*, int *, double *, int *, double *, double [], double[], int *, double *, int *);
 extern "C" void cfp_gsnl(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int*);
@@ -366,8 +364,7 @@ cfd_latin.c
 
 extern void  lemke_lcp(double *vec, double *qqq , int *nn, int *itermax, double *zlem, double *wlem, int *it_end, double *res, int *info);
 
-extern void gsnl_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z , double *omega , int *ispeak ,
-                     double *w , int *it_end , double *res , int *info);
+extern void gsnl_lcp(double [], double [], int *, int *, double *, double [], double [], int*, double *, int *);
 
 extern void gcp_lcp(double [], double [], int *, int *, double *, double [], double[], int *, double *, int *);
 
@@ -446,3 +443,4 @@ extern int lcp_cfd(int *, double *, double *, methode *, double *, double *, int
 //extern int lcp_cfd26 (int *,double *,double *,methode *,double *, double *, int *, double *,int *, int *, int *, int *,  int *, int *, int *, double *,double *);
 //} /* closing brace for extern */
 #endif
+#endif // SOLVERPACK_H

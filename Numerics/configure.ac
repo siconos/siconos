@@ -267,6 +267,7 @@ AC_SUBST(DOXYGEN_CFG)
 AC_CONFIG_FILES([Makefile
                  test/Makefile
                  src/Makefile
+                 src/utils/Makefile
 		 src/odepack/Makefile
 		 src/odepack/test/Makefile
 		 src/solverpack/Makefile

@@ -48,7 +48,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "SiconosNumerics.h"
+#include "solverpack.h"
 
 
 void test1(void)

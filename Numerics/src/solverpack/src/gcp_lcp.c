@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 
+#include "blaslapack.h"
 /*!\file gcp_lcp.c
 
 
@@ -39,16 +40,8 @@
  * \author Nineb Sheherazade.
  * \author Last Modif: Mathieu Renouf
  *
- * ===========================================================================
- * Prototypes for level 1 BLAS functions
- * ===========================================================================
  */
 
-double dnrm2_(int* , double* , int*);
-double  ddot_(int* , double* , int* , double* , int*);
-void   dcopy_(int* , double* , int* , double* , int*);
-void   daxpy_(int* , double* , double* , int* , double* , int*);
-void   dgemv_(char* , int* , int* , double* , double* , int* , double* , int* , double* , double* , int*);
 
 void gcp_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z ,
              double *vv , int *it_end , double * res , int *info)

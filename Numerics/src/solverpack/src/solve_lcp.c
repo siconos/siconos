@@ -26,7 +26,7 @@ M z- w=q\\
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "SiconosNumerics.h"
+#include "solverpack.h"
 #endif
 
 /*!\fn int solve_lcp (double *vec, double *q, int * nn, methode *pt,double z[], double w[])

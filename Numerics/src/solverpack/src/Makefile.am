@@ -15,8 +15,8 @@ libsolverpack_la_SOURCES = cfd_latin.c cfp_gcp.c cfp_latin.c gsnl_lcp.c lcp_cfd.
 	solve_rp.c cfd_lcp.c cfp_gsnl.c gcp_lcp.c latin_lcp.c lemke_lcp.c maxf.c\
         projc.c qp_lcp.c rd_latin.c rp_latin.c solve_cfp.c solve_rd.c \
 	ql0001.f \
-	SiconosNumerics.h SiconosNumerics_lab.h
+	solverpack.h
 
 libsolverpack_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
-include_HEADERS = SiconosNumerics.h SiconosNumerics_lab.h # solverpack.h header to be added !!!
+include_HEADERS = solverpack.h SiconosNumerics_lab.h # solverpack.h header to be added !!!

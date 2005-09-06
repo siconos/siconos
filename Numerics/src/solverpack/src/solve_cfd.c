@@ -25,7 +25,7 @@ M z- w=q\\
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "SiconosNumerics.h"
+#include "solverpack.h"
 #endif
 
 /*!\fn  int solve_cfd (double *vec,double *q,int *n,methode *pt,double z[],double w[])

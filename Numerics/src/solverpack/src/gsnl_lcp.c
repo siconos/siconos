@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "blaslapack.h"
 
 /*!\file gsnl_lcp.c
  *
@@ -44,15 +45,8 @@
  *
  * \author Mathieu Renouf
  *
- * ===========================================================================
- * Prototypes for level 1 BLAS functions
- * ===========================================================================
  */
 
-double dnrm2_(int* , double* , int*);
-double ddot_(int* , double* , int* , double* , int*);
-void   dcopy_(int* , double* , int* , double* , int*);
-void   daxpy_(int* , double* , double* , int* , double* , int*);
 
 /*
  *
