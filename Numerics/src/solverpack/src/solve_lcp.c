@@ -45,36 +45,38 @@ M z- w=q\\
 \author Nineb Sheherazade.
 */
 
-int solve_lcp(double *vec, double *q , int *nn , methode *pt , double *z , double *w)
+int solve_lcp(double *vec, double *q , int *nn , methode *pt , double *z , double *w , int *it_end , double *res)
 {
 
   const char mot1[10] = "Lemke", mot2[10] = "Gsnl", mot3[10] = "Gcp";
   const char mot4[10] = "Latin", mot5[10] = "Qp", mot6[10] = "Qpnonsym";
   const char mot7[15] = "LexicoLemke";
 
-  double res;
-
-  int info1 = -1, it_end, info;
+  int info1 = -1, info;
   int n = *nn;
+
+  *it_end = 0;
+  *res    = 0.0;
 
   //clock_t t1=clock();
 
   if (strcmp(pt->lcp.nom_method, mot1) == 0)
   {
-    lemke_lcp(vec, q, &n, & pt->lcp.itermax, z, w, &it_end, &res, &info1);
+    lemke_lcp(vec , q , &n , &pt->lcp.itermax , z , w , it_end , res , &info1);
   }
   else if (strcmp(pt->lcp.nom_method , mot2) == 0)
 
-    gsnl_lcp(vec , q , &n , &pt->lcp.itermax , &pt->lcp.tol , &pt->lcp.relax , &pt->lcp.iout , z ,
-             w , &it_end , &res , &info1);
+    gsnl_lcp(vec , q , &n , &pt->lcp.itermax , &pt->lcp.tol , z , &pt->lcp.relax , &pt->lcp.iout ,  /* in  */
+             w , it_end , res , &info1);                                                           /* out */
 
   else if (strcmp(pt->lcp.nom_method , mot3) == 0)
 
-    gcp_lcp(vec , q , &n , &pt->lcp.itermax , &pt->lcp.tol , z , w , &it_end , &res , &info1);
+    gcp_lcp(vec , q , &n , &pt->lcp.itermax , &pt->lcp.tol , z , &pt->lcp.iout ,  /* in  */
+            w , it_end , res , &info1);                                          /* out */
 
   else if (strcmp(pt->lcp.nom_method , mot4) == 0)
 
-    latin_lcp(vec, q, &n, & pt->lcp.k_latin, & pt->lcp.itermax, & pt->lcp.tol, z, w, &it_end, &res, &info1);
+    latin_lcp(vec, q, &n, & pt->lcp.k_latin, & pt->lcp.itermax, & pt->lcp.tol, z, w, it_end , res , &info1);
 
   else if (strcmp(pt->lcp.nom_method, mot5) == 0)
   {
@@ -98,7 +100,8 @@ int solve_lcp(double *vec, double *q , int *nn , methode *pt , double *z , doubl
   }
   else if (strcmp(pt->lcp.nom_method , mot7) == 0)
 
-    lexicolemke_lcp(vec , q , &n , &pt->lcp.itermax , z , w , &it_end , &res , &info1);
+    lexicolemke_lcp(vec , q , &n , &pt->lcp.itermax , z , &pt->lcp.iout ,  /* in  */
+                    w , it_end , res , &info1);                           /* out */
 
   else printf("Warning : Unknown solving method : %s\n", pt->lcp.nom_method);
 

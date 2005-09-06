@@ -171,7 +171,7 @@ typedef union
 
 /* body of header */
 
-extern "C" int solve_lcp(double* , double* , int* , methode* , double* , double*);
+extern "C" int solve_lcp(double *vec, double *q , int *nn , methode *pt , double* z , double* w , int* , double*);
 
 extern "C" int solve_rp(double* , double* , int* , methode* , double* , double*);
 
@@ -225,7 +225,7 @@ extern "C" int lcp_cfd(int *, double *, double *, methode *, double *, double *,
  * solve_lcp.c is a generic interface allowing the call of one of the @ref lcp solvers.
  */
 
-extern int solve_lcp(double* , double* , int* , methode* , double* , double*);
+extern int solve_lcp(double *vec, double *q , int *nn , methode *pt , double* z , double* w , int* , double*);
 
 /**@}*/
 
