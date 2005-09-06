@@ -2,59 +2,53 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
 #include "blaslapack.h"
-/*!\file gcp_lcp.c
 
-
-   This subroutine allows the resolution of LCP (Linear Complementary Problem).
-   Try \f$(z,w)\f$ such that:
-
-   \f$
-    \left\lbrace
-     \begin{array}{l}
-      M z- w=q\\
-      0 \le z \perp w \ge 0\\
-     \end{array}
-    \right.
-   \f$
-
-  here M is an n by n  matrix, q an n-dimensional vector, w an n-dimensional  vector and z an n-dimensional vector.
-*/
-
-/*!\fn  gcp_lcp(double vec[],double *q,int *nn,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
-
-   gcp_lcp is a basic gcp (gradient conjugated projected) solver for LCP.
-
-   \param vec On enter a pointer over doubles containing the components of the double matrix with a fortran90 allocation.
-   \param q On enter a pointer over doubles containing the components of the double vector.
-   \param nn On enter a pointer over integers, the dimension of the second member.
-   \param itermax On enter a pointer over integers, the maximum iterations required.
-   \param tol On enter a pointer over doubles, the tolerance required.
-   \param it_end On enter a pointer over integers, the number of iterations carried out.
-   \param res On return a pointer over doubles, the error value.
-   \param z On return double vector, the solution of the problem.
-   \param w On return double vector, the solution of the problem.
-   \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
-
- * \author Nineb Sheherazade.
- * \author Last Modif: Mathieu Renouf
+/*!\file gsnl_lcp.c
+ *
+ * This subroutine allows the resolution of LCP (Linear Complementary Problem).
+ * Try \f$(z,w)\f$ such that:
+ * \f$
+ *  \left\lbrace
+ *   \begin{array}{l}
+ *    M z + q= w\\
+ *    0 \le z \perp w \ge 0\\
+ *   \end{array}
+ *  \right.
+ * \f$
+ *
+ * where M is an (n x n)-matrix, q , w and z n-vectors.
+ *
+ *!\fn  gcp_lcp(double vec[],double *q,int *nn,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
+ *
+ * gcp_lcp is a basic gcp (gradient conjugated projected) solver for LCP.
+ *
+ * \param vec On enter a pointer over doubles containing the components of the double matrix with a fortran90 allocation.
+ * \param q On enter a pointer over doubles containing the components of the double vector.
+ * \param nn On enter a pointer over integers, the dimension of the second member.
+ * \param itermax On enter a pointer over integers, the maximum iterations required.
+ * \param tol On enter a pointer over doubles, the tolerance required.
+ * \param it_end On enter a pointer over integers, the number of iterations carried out.
+ * \param res On return a pointer over doubles, the error value.
+ * \param z On return double vector, the solution of the problem.
+ * \param w On return double vector, the solution of the problem.
+ * \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
+ *
+ * \author Mathieu Renouf
  *
  */
 
-
-void gcp_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z ,
+void gcp_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z , int *ispeak ,
              double *vv , int *it_end , double * res , int *info)
 {
 
 
-  int n = *nn, incx , incy, itt = *itermax;
-  double errmax = *tol;
+  int n, incx, incy;
+  int i, iter;
 
-  int i , iter;
-  double err, a1, b1 , qs ;
+  double err, a1, b1 , qs;
 
-  double alpha , beta , rp , pMp;
+  double alpha, beta, rp, pMp;
   double den, num;
 
   char NOTRANS = 'N';
@@ -73,7 +67,10 @@ void gcp_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , do
 
   Mp = (double*)malloc(n * sizeof(double));
 
+  *info = 1;
+  n = *nn;
   incx = 1;
+
   qs = dnrm2_(&n , &q[0] , &incx);
 
   //printf( " Norm: %g \n", qs );
@@ -90,11 +87,7 @@ void gcp_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , do
     return;
   }
 
-  for (i = 0 ; i < n ; ++i)
-  {
-    ww[i] = 0.;
-    /*z[i] = 0.; Start from an initial vector */
-  }
+  for (i = 0 ; i < n ; ++i) ww[i] = 0.;
 
   for (i = 0; i < n; ++i)
   {
@@ -117,7 +110,7 @@ void gcp_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , do
   dcopy_(&n , q , &incx , rr , &incy);
 
   a1 = -1.;
-  b1 =  1.;
+  b1 = -1.;
 
   dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , rr , &incy);
 
@@ -130,7 +123,7 @@ void gcp_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , do
   iter = 0.0;
   err  = 1.0 ;
 
-  while ((iter < itt) && (err > errmax))
+  while ((iter < *itermax) && (err > *tol))
   {
 
     ++iter;
@@ -151,8 +144,16 @@ void gcp_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , do
 
     if (fabs(pMp) < 1e-16)
     {
-      printf(" Operation no conform at the iteration %d \n", iter);
-      printf(" Alpha can be obtained with pWp = %10.4g  \n", pMp);
+
+      if (*ispeak > 0)
+      {
+        printf(" Operation no conform at the iteration %d \n", iter);
+        printf(" Alpha can be obtained with pWp = %10.4g  \n", pMp);
+      }
+
+      *it_end = iter;
+      *res    = err;
+
       return (*info = 3);
     }
 
@@ -190,7 +191,7 @@ void gcp_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , do
     dcopy_(&n , q , &incx , rr , &incy);
 
     a1 = -1.;
-    b1 =  1.;
+    b1 = -1.;
 
     dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , rr , &incy);
 
@@ -242,20 +243,22 @@ void gcp_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , do
   *it_end = iter;
   *res    = err;
 
-  /*    printf("iteration numbers %d and error evaluation %g \n ",iter,err);   */
-
-  if (err > errmax)
+  if (*ispeak > 0)
   {
-    printf(" No convergence of CPG after %d iterations\n" , iter);
-    printf(" The residue is : %g \n", err);
-    *info = 1;
+    if (err > *tol)
+    {
+      printf(" No convergence of CPG after %d iterations\n" , iter);
+      printf(" The residue is : %g \n", err);
+      *info = 1;
+    }
+    else
+    {
+      printf(" Convergence of CPG after %d iterations\n" , iter);
+      printf(" The residue is : %g \n", err);
+      *info = 0;
+    }
   }
-  else
-  {
-    printf(" Convergence of CPG after %d iterations\n" , iter);
-    printf(" The residue is : %g \n", err);
-    *info = 0;
-  }
+  else if (err < *tol) *info = 0;
 
   free(Mp);
 
