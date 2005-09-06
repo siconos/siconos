@@ -72,16 +72,9 @@ typedef struct
   int    itermax;
   double tol;
   double k_latin;
-  <<< <<< < .mine
+  double relax;
   int    iout;
-  double relax;
-  char   normType[64]; /* ** */
-  == == == =
-    int    iout;
-  double relax;
   char   normType[64];
-  /* ** */
-  >>> >>> > .r154
 
 } methode_lcp;
 
