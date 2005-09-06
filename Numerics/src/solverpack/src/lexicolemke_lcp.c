@@ -39,8 +39,8 @@ M z- w=q\\
    \author Mathieu Renouf
 */
 
-void lexicolemke_lcp(double *vec, double *qq, int *nn, int *itermax,
-                     double *zlem, double *wlem, int *it_end, double *res, int *info)
+void lexicolemke_lcp(double *vec, double *q , int *nn, int *itermax , double *zlem , int *ispeak ,
+                     double *wlem, int *it_end, double *res, int *info)
 {
 
 
@@ -55,7 +55,6 @@ void lexicolemke_lcp(double *vec, double *qq, int *nn, int *itermax,
   double tmp;
   int *basis;
   double** A;
-  double* q;
 
   DIM = *nn;
   DIM2 = 2 * (DIM + 1);
@@ -69,10 +68,6 @@ void lexicolemke_lcp(double *vec, double *qq, int *nn, int *itermax,
   for (ic = 0 ; ic < DIM; ++ic)
     for (jc = 0 ; jc < DIM2; ++jc)
       A[ic][jc] = 0.0;
-
-  q = (double *)malloc(DIM * sizeof(double));
-  for (ic = 0 ; ic < DIM; ++ic)
-    q[ic] = -qq[ic];
 
   /*! construction of A matrix such as
    * A = [ Id | -d | -M | q ] with d = (1,...1)

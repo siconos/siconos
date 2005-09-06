@@ -47,11 +47,6 @@
  *
  */
 
-
-/*
- *
- */
-
 void gsnl_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z , double *omega , int *ispeak ,
               double *w , int *it_end , double *res , int *info)
 {
