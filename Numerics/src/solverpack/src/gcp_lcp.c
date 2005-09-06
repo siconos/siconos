@@ -9,22 +9,17 @@
    This subroutine allows the resolution of LCP (Linear Complementary Problem).
    Try \f$(z,w)\f$ such that:
 
-\f$
-\left\lbrace
-\begin{array}{l}
-M z- w=q\\
-0 \le z \perp w \ge 0\\
-\end{array}
-\right.
-\f$
+   \f$
+    \left\lbrace
+     \begin{array}{l}
+      M z- w=q\\
+      0 \le z \perp w \ge 0\\
+     \end{array}
+    \right.
+   \f$
 
   here M is an n by n  matrix, q an n-dimensional vector, w an n-dimensional  vector and z an n-dimensional vector.
 */
-
-
-
-double ddot_(int *, double [], int *, double [], int*);
-
 
 /*!\fn  gcp_lcp(double vec[],double *q,int *nn,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
 
@@ -41,186 +36,241 @@ double ddot_(int *, double [], int *, double [], int*);
    \param w On return double vector, the solution of the problem.
    \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
 
-   \author Nineb Sheherazade.
+ * \author Nineb Sheherazade.
+ * \author Last Modif: Mathieu Renouf
+ *
+ * ===========================================================================
+ * Prototypes for level 1 BLAS functions
+ * ===========================================================================
  */
 
+double dnrm2_(int* , double* , int*);
+double  ddot_(int* , double* , int* , double* , int*);
+void   dcopy_(int* , double* , int* , double* , int*);
+void   daxpy_(int* , double* , double* , int* , double* , int*);
+void   dgemv_(char* , int* , int* , double* , double* , int* , double* , int* , double* , double* , int*);
 
-
-
-
-gcp_lcp(double vec[], double *q, int *nn, int * itermax, double * tol, double z[], double *vv, int *it_end, double * res, int *info)
+void gcp_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z ,
+             double *vv , int *it_end , double * res , int *info)
 {
-  int i, j, iter1;
-  int n = *nn, incx = 1, incy = 1, itt = *itermax;
-  double errmax = *tol, alpha, beta, rp;
-  double err1, pMp, alpha1, beta1, comp;
-  double *zz, *y, *p, *r, *w, *Mp;
-  char trans = 'T';
-  double M[n][n];
 
 
+  int n = *nn, incx , incy, itt = *itermax;
+  double errmax = *tol;
 
+  int i , iter;
+  double err, a1, b1 , qs ;
 
+  double alpha , beta , rp , pMp;
+  double den, num;
 
+  char NOTRANS = 'N';
 
-  for (i = 0; i < n; i++)
-    for (j = 0; j < n; j++)
-      M[i][j] = vec[i * n + j];
+  int *status;
+  double *zz , *dz , *pp , *rr, *ww, *Mp;
 
+  status = (int*)malloc(n * sizeof(int));
 
+  dz = (double*)malloc(n * sizeof(double));
 
-  w = (double*)malloc(n * sizeof(double));
-  r = (double*)malloc(n * sizeof(double));
-  p = (double*)malloc(n * sizeof(double));
+  ww = (double*)malloc(n * sizeof(double));
+  rr = (double*)malloc(n * sizeof(double));
+  pp = (double*)malloc(n * sizeof(double));
   zz = (double*)malloc(n * sizeof(double));
-  y = (double*)malloc(n * sizeof(double));
+
   Mp = (double*)malloc(n * sizeof(double));
 
+  incx = 1;
+  qs = dnrm2_(&n , &q[0] , &incx);
 
+  //printf( " Norm: %g \n", qs );
 
-  for (i = 0; i < n; i++)
+  if (qs > 1e-16) den = 1.0 / qs;
+  else
   {
-    y[i] = 0.;
-    zz[i] = 0.;
-    w[i] = 0.;
-    z[i] = 0.;
-    r[i] = 0.;
-    vv[i] = 0.;
-    p[i] = 0.;
-    Mp[i] = 0.;
+    for (i = 0 ; i < n ; ++i)
+    {
+      vv[i] = 0.;
+      z[i] = 0.;
+    }
+    info = 0;
+    return;
   }
 
+  for (i = 0 ; i < n ; ++i)
+  {
+    ww[i] = 0.;
+    /*z[i] = 0.; Start from an initial vector */
+  }
 
-  dcopy_(&n, q, &incx, y, &incy);
-
-
-  alpha = -1.;
-  beta = 1.;
-  dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, y, &incy); /*//r*/
-  dcopy_(&n, y, &incx, r, &incy);
-
-
-
-  dcopy_(&n, r, &incx, p, &incy);
-
-
-  alpha = 1.;
-  beta = 0.;
-  dgemv_(&trans, &n, &n, &alpha, M, &n, p, &incx, &beta, Mp, &incy);
-
-  pMp = ddot_(&n, p, &incx, Mp, &incy);
-
-  rp = ddot_(&n, p, &incx, r, &incy);
-
-  iter1 = 0;
-  err1 = pMp;
-
-  while ((iter1 < itt) && (err1 >= errmax))
+  for (i = 0; i < n; ++i)
   {
 
-    iter1 = iter1 + 1;
+    status[i] = 0;
 
-    if (pMp == 0.)
+    ww[i] = 0.;
+    rr[i] = 0.;
+    pp[i] = 0.;
+    zz[i] = 0.;
+
+    Mp[i] = 0.;
+
+  }
+
+  /* rr = -Wz + q */
+  incx = 1;
+  incy = 1;
+
+  dcopy_(&n , q , &incx , rr , &incy);
+
+  a1 = -1.;
+  b1 =  1.;
+
+  dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , rr , &incy);
+
+  /* Initialization of gradients */
+  /* rr -> p and rr -> w */
+
+  dcopy_(&n , rr , &incx , ww , &incy);
+  dcopy_(&n , rr , &incx , pp , &incy);
+
+  iter = 0.0;
+  err  = 1.0 ;
+
+  while ((iter < itt) && (err > errmax))
+  {
+
+    ++iter;
+
+    /* Compute initial pMp */
+
+    incx = 1;
+    incy = 1;
+
+    dcopy_(&n , pp , &incx , Mp , &incy);
+
+    a1 = 1.0;
+    b1 = 0.0;
+
+    dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , Mp , &incx , &b1 , vv , &incy);
+
+    pMp = ddot_(&n , pp , &incx , vv  , &incy);
+
+    if (fabs(pMp) < 1e-16)
     {
-      printf("operation other alpha not conform at the iteration %d", iter1);
-      return (*info = 3) ;
+      printf(" Operation no conform at the iteration %d \n", iter);
+      printf(" Alpha can be obtained with pWp = %10.4g  \n", pMp);
+      return (*info = 3);
     }
 
+    rp  = ddot_(&n , pp , &incx , rr , &incy);
 
-    alpha1 = rp / pMp;
+    alpha = rp / pMp;
 
+    /*
+     * Iterate prediction:
+     * z' = z + alpha*p
+     *
+     */
 
+    dcopy_(&n , z , &incx , dz , &incy);
 
-    alpha = alpha1;
-    daxpy_(&n, &alpha, p, &incx, z, &incy);
+    daxpy_(&n , &alpha , pp , &incx , z , &incy);
 
+    /* Iterate projection*/
 
-    for (j = 0; j < n; j++)
-      if (z[j] <= 0.) z[j] = 0.;
-
-
-    dcopy_(&n, q, &incx, y, &incy);
-
-    alpha = -1.;
-    beta = 1.;
-    dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, y, &incy);
-    dcopy_(&n, y, &incx, r, &incy);
-    dcopy_(&n, r, &incx, w, &incy);
-    dcopy_(&n, p, &incx, zz, &incy);
-
-    for (j = 0; j < n; j++)
+    for (i = 0; i < n; ++i)
     {
-      if (z[j] == 0. && w[j] < 0)
+      if (z[i] > 0.0)
       {
-        w[j] = 0.;
-        zz[j] = 0.;
+        status[i] = 1;
+      }
+      else
+      {
+        z[i] = 0.0;
+        status[i] = 0;
       }
     }
 
+    /* rr = -Wz + q */
+
+    dcopy_(&n , q , &incx , rr , &incy);
+
+    a1 = -1.;
+    b1 =  1.;
+
+    dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , rr , &incy);
+
+    /* Gradients projection
+     * rr --> ww
+     * pp --> zz
+     */
+
+    for (i = 0; i < n; ++i)
+    {
+
+      if (status[i])
+      {
+        ww[i] = rr[i];
+        zz[i] = pp[i];
+      }
+      else
+      {
+        if (rr[i] < 0)
+        {
+          ww[i] = 0.0;
+          zz[i] = 0.0;
+        }
+        else
+        {
+          ww[i] = rr[i];
+          if (pp[i] < 0) zz[i] = 0.0;
+          else zz[i] = pp[i];
+        }
+      }
+    }
 
     /*   beta = -w.Mp / pMp  */
-    rp = ddot_(&n, w, &incx, Mp, &incy);
-    beta1 = -rp / pMp;
 
+    rp = ddot_(&n , ww , &incx, vv , &incy);
 
+    beta = -rp / pMp;
 
-    alpha = beta1;
-    daxpy_(&n, &alpha, zz, &incx, w, &incy);
-    dcopy_(&n, w, &incx, p, &incy);
+    dcopy_(&n , ww , &incx , pp , &incy);
+    daxpy_(&n, &beta , zz , &incx , pp , &incy);
 
+    a1 = -1;
+    daxpy_(&n , &a1 , z , &incx , dz , &incy);
+    num = dnrm2_(&n , dz , &incx);
+    err = num * den;
 
-
-    alpha = 1.;
-    beta = 0.;
-    dgemv_(&trans, &n, &n, &alpha, M, &n, p, &incx, &beta, Mp, &incy);
-
-
-    pMp = ddot_(&n, p, &incx, Mp, &incy);
-
-
-    /* ///////// Criterium convergence : err1= pMp ///////////// */
-
-
-
-    err1 = pMp;
-
-
-    dcopy_(&n, q, &incx, y, &incy);
-    alpha = 1.;
-    beta = -1.;
-    dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, y, &incy);
-    dcopy_(&n, y, &incx, vv, &incy);
-    rp = ddot_(&n, p, &incx, r, &incy);
-
-    *it_end = iter1;
-    *res = err1;
-
-
-    /*    printf("iteration numbers %d and error evaluation %g \n ",iter1,err1);   */
   }
 
+  *it_end = iter;
+  *res    = err;
 
-  if (err1 >= errmax)
+  /*    printf("iteration numbers %d and error evaluation %g \n ",iter,err);   */
+
+  if (err > errmax)
   {
-    printf("no convergence after %d iterations, the residue is %g\n", iter1, err1);
+    printf(" No convergence of CPG after %d iterations\n" , iter);
+    printf(" The residue is : %g \n", err);
     *info = 1;
   }
   else
   {
-    printf("there is convergence after %d iterations, the residue is %g \n", iter1, err1);
-    comp = ddot_(&n, z, &incx, vv, &incy);
-    printf(" the complementarity %g\n", comp);
+    printf(" Convergence of CPG after %d iterations\n" , iter);
+    printf(" The residue is : %g \n", err);
     *info = 0;
   }
 
-
-
-  free(w);
-  free(r);
   free(Mp);
-  free(p);
-  free(zz);
-  free(y);
 
+  free(ww);
+  free(rr);
+  free(pp);
+  free(zz);
+
+  free(dz);
 
 }
