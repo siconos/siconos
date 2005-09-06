@@ -71,7 +71,7 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	uninstall-recursive
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = $(SUBDIRS)
+DIST_SUBDIRS = src test
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -101,6 +101,8 @@ CHMOD = /bin/chmod
 CP = /bin/cp
 CPP = gcc -E
 CPPFLAGS = 
+CPPUNIT_COND_FALSE = 
+CPPUNIT_COND_TRUE = #
 CPPUNIT_INCLUDES = 
 CPPUNIT_LIBRARIES = 
 CXX = g++
@@ -191,7 +193,7 @@ localstatedir = ${prefix}/var
 mandir = ${prefix}/man
 mkdir_p = mkdir -p -- .
 oldincludedir = /usr/include
-prefix = /home/bipop/acary/tmp/libtoto
+prefix = /usr/local
 program_transform_name = s,x,x,
 sbindir = ${exec_prefix}/sbin
 sharedstatedir = ${prefix}/com
@@ -222,7 +224,11 @@ INCLUDES = $(SICONOS_INCLUDES) $(SICONOS_EXT_INCLUDES)
 CXXCOMPILE = $(CXX) $(CXXFLAGS) $(INCLUDES)
 CCCOMPILE = $(CC) $(CFLAGS) $(INCLUDES)
 F77COMPILE = $(F77) $(CFLAGS) $(INCLUDES)
-SUBDIRS = src
+SICONOSNUMERICS_LIBS = -L$(top_srcdir)/src/ -lSiconosNumerics
+
+# Test directories if cppunit is present.
+#TEST_OPT = test
+SUBDIRS = src $(TEST_OPT)
 EXTRA_DIST = 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -435,7 +441,7 @@ distdir: $(DISTFILES)
 	    || exit 1; \
 	  fi; \
 	done
-	list='$(SUBDIRS)'; for subdir in $$list; do \
+	list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
 	  if test "$$subdir" = .; then :; else \
 	    test -d "$(distdir)/$$subdir" \
 	    || mkdir "$(distdir)/$$subdir" \
@@ -641,7 +647,6 @@ uninstall-info: uninstall-info-recursive
 	mostlyclean-libtool mostlyclean-recursive pdf pdf-am ps ps-am \
 	tags tags-recursive uninstall uninstall-am uninstall-info-am
 
-#SICONOS_LIBS=-L$(top_srcdir)/src/ -lSiconosKernel
 
 doc:
 	$(MKDIR) $(top_srcdir)/doc
