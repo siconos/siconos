@@ -1,0 +1,40 @@
+# Makefile.am --- SICONOS ModelingTools tests
+
+.c.o:
+	$(CCCOMPILE) -c $<
+.f.o:
+	$(F77COMPILE) -c $<
+.cpp.o:
+	$(CXXCOMPILE) -c $<
+
+include $(top_srcdir)/config/Make-rules
+
+check_PROGRAMS = test1  test2 test3  test4  test5  
+
+TESTS = $(check_PROGRAMS)
+
+test1_SOURCES = main_lcp.c
+include_HEADERS = 
+test1_INCLUDES = $(CPPUNIT_INCLUDES)
+test1_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(SOLVERPACK_LIB) $(SICONOS_EXT_LDFLAGS)
+
+test2_SOURCES =  main_rd.c
+test2_INCLUDES = $(CPPUNIT_INCLUDES)
+test2_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(SOLVERPACK_LIB) $(SICONOS_EXT_LDFLAGS)
+
+test3_SOURCES = main_rp.c 
+test3_INCLUDES = $(CPPUNIT_INCLUDES)
+test3_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(SOLVERPACK_LIB) $(SICONOS_EXT_LDFLAGS)
+
+test4_SOURCES = main_cfd.c
+test4_INCLUDES = $(CPPUNIT_INCLUDES)
+test4_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(SOLVERPACK_LIB) $(SICONOS_EXT_LDFLAGS)
+
+test5_SOURCES = main_cfp.c
+test5_INCLUDES = $(CPPUNIT_INCLUDES)
+test5_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(SOLVERPACK_LIB) $(SICONOS_EXT_LDFLAGS)
+
+#test6_SOURCES = TestNumerics.cpp
+#test6_INCLUDES = $(CPPUNIT_INCLUDES)
+#test6_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(SOLVERPACK_LIB) $(SICONOS_EXT_LDFLAGS)
+

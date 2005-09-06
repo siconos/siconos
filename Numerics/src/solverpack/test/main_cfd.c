@@ -82,11 +82,14 @@ main()
   double *q, *z, *w, *vec, *K1, *J1, *F1, *U2, *F2;
   double(*M)[n], *MM;
   double qi, Mij, mumu;
-  char val[14], vall[14], *name = "Gsnl"; //Cfd_latin";//Gsnl";//Lemke";
+  char val[14], vall[14];
+  char nom[64] = "Gsnl"; //Cfd_latin";//Gsnl";//Lemke";
   methode *pt;
+  // static methode_cfd meth_cfd = {"Gnsl",1000,0.0000001,0.7,0.6,dim_i,dim_tt,dim_c,};
+
   methode meth_cfd;
 
-  meth_cfd.cfd.nom_method = name;
+  // meth_cfd.cfd.nom_method = nom;
   meth_cfd.cfd.itermax = 1000;
   meth_cfd.cfd.tol = 0.000001;
   meth_cfd.cfd.mu = 0.5;
@@ -191,7 +194,7 @@ main()
   while (!feof(f4))
   {
     fscanf(f4, "%d", &nll);
-    fscanf(f4, "%s", &vall);
+    fscanf(f4, "%s", vall);
     qi = atof(vall);
     m = qi;
     *(meth_cfd.cfd.ddl_i + nll - 1) = m - 1;
@@ -210,7 +213,7 @@ main()
   while (!feof(f5))
   {
     fscanf(f5, "%d", &nll);
-    fscanf(f5, "%s", &vall);
+    fscanf(f5, "%s", vall);
     qi = atof(vall);
     m = qi;
     *(meth_cfd.cfd.ddl_n + nll - 1) = m - 1;
@@ -228,7 +231,7 @@ main()
   while (!feof(f6))
   {
     fscanf(f6, "%d", &nll);
-    fscanf(f6, "%s", &vall);
+    fscanf(f6, "%s", vall);
     qi = atof(vall);
     m = qi;
     *(meth_cfd.cfd.ddl_tt + nll - 1) = m - 1;
@@ -260,7 +263,7 @@ main()
   F2 = malloc(n * sizeof(double));
 
 
-  printf("\n\n  we go in the function name %s\n\n", name);
+  printf("\n\n  we go in the function name %s\n\n", nom);
 
 
 
