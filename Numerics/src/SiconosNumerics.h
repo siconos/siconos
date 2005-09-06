@@ -8,16 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-#if  defined(RIOS) && !defined(CLAPACK)
-#define F77NAME(x) x
-#else
-#define F77NAME(x) x##_
-#endif
-
-#include "blaslapack.h"
-
-
 #include "solverpack.h"
 
 //#include "odepack.h"

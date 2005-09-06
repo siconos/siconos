@@ -1,5 +1,6 @@
 
 #include "g2c.h"
+//#define _F2C_INCLUDE_H // to avoid f2c.h include => conflict with g2c.h
 #if  defined(RIOS) && !defined(CLAPACK)
 #define F77NAME(x) x
 #else

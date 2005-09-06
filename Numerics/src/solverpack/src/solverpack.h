@@ -72,7 +72,10 @@ typedef struct
   int    itermax;
   double tol;
   double k_latin;
-  char   normType[64]; /* ** */
+  int    iout;
+  double relax;
+  char   normType[64];
+  /* ** */
 
 } methode_lcp;
 
@@ -186,7 +189,7 @@ extern "C" void rp_latin(double [], double *, int *, double *, double [], double
 extern "C" void rp_gsnl(double [], double *, int *, double *, double *, int *, double *, double[], double [], int *, double *, int *)  ;
 extern "C" void rd_latin(double [], double *, int *, double * , double *, int *, double *, double[], double [], int *, double *, int *)  ;
 extern "C" void lemke_lcp(double *vec, double *qqq , int *nn, int *itermax, double *zlem, double *wlem, int *it_end, double *res, int *info);
-extern "C" void gsnl_lcp(double [], double [], int *, int *, double *, double [], double [], int*, double *, int *);
+extern "C" void gsnl_lcp(double [], double [], int *, int *, double *, double [], double [], int*, double *, int *, double *, int *);
 extern "C" void gcp_lcp(double [], double [], int *, int *, double *, double [], double[], int *, double *, int *);
 extern "C" void latin_lcp(double*, double*, int *, double *, int *, double *, double [], double[], int *, double *, int *);
 extern "C" void cfp_gsnl(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int*);
@@ -364,7 +367,7 @@ cfd_latin.c
 
 extern void  lemke_lcp(double *vec, double *qqq , int *nn, int *itermax, double *zlem, double *wlem, int *it_end, double *res, int *info);
 
-extern void gsnl_lcp(double [], double [], int *, int *, double *, double [], double [], int*, double *, int *);
+extern void gsnl_lcp(double [], double [], int *, int *, double *, double [], double [], int*, double *, int *, double *, int *);
 
 extern void gcp_lcp(double [], double [], int *, int *, double *, double [], double[], int *, double *, int *);
 
