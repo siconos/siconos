@@ -5,39 +5,44 @@
 
 /*!\file gsnl_lcp.c
  *
- *
  * This subroutine allows the resolution of LCP (Linear Complementary Problem).
  * Try \f$(z,w)\f$ such that:
  * \f$
- * \left\lbrace
- * \begin{array}{l}
- * M z- w= -q\\
- * 0 \le z \perp w \ge 0\\
- * \end{array}
- * \right.
+ *  \left\lbrace
+ *   \begin{array}{l}
+ *    M z + q= w\\
+ *    0 \le z \perp w \ge 0\\
+ *   \end{array}
+ *  \right.
  * \f$
  *
  * where M is an (n x n)-matrix, q , w and z n-vectors.
  *
- *
- * \fn  gsnl_lcp(double vec[],double *qq,int *nn,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
+ * \fn  gsnl_lcp( double *vec , double *q , int *nn , int *itermax , double *tol , double *z , double *omega , int *ispeak ,
+ *                double *w , int *it_end , double *res , int *info )
  *
  * gsnl_lcp is a solver for LCP based on the principle of splitting method.
  * (Non Linear Gauss-Seidel)
  *
- * \param vec On enter a pointer over doubles containing the components of the double matrix with a fortran90 allocation.
- * \param qq On enter a pointer over doubles containing the components of the double vector.
- * \param nn On enter a pointer over integers, the dimension of the second member.
- * \param itermax On enter a pointer over integers, the maximum iterations required.
- * \param tol On enter a pointer over doubles, the tolerance required.
- * \param it_end On enter a pointer over integers, the number of iterations carried out.
- * \param res On return a pointer over doubles, the error value.
- * \param z On return double vector, the solution of the problem.
- * \param w On return double vector, the solution of the problem.
- * \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
+ * \param vec     Unchanged parameter. Pointer over doubles which contains the components of the matrix with a fortran storage.
+ * \param q       Unchanged parameter. Pointer over doubles which contains the components of the right hand side vector.
+ * \param nn      Unchanged parameter. Pointer over integer which represents the dimension of the system.
+ * \param itermax Unchanged parameter. Pointer over integer which represents the maximum number of iterations allowed.
+ * \param tol     Unchanged parameter. Pointer over double which represents the tolerance required.
+ * \param omega   Unchanged parameter. Pointer over double which represents the relaxation parameter.
+ * \param ispeak  Unchanged parameter. Pointer over integer which represents the output log identifiant
+ *                0 - no output
+ *                0 < identifiant
  *
- * \author Nineb Sheherazade.
- * \author Last Modif: Mathieu Renouf
+ * \param it_end  Modified parameter. Pointer over integer which returns the number of iterations performed by the algorithm.
+ * \param res     Modified parameter. Pointer over double which returns the final error value.
+ * \param z       Modified parameter. Pointer over doubles which contains the initial solution and returns the solution of the problem.
+ * \param w       Modified parameter. Pointer over doubles which returns the solution of the problem.
+ * \param info    Modified parameter. Pointer over integer which returns the termination value
+ *                0 - successful
+ *                1 - unsuccessful
+ *
+ * \author Mathieu Renouf
  *
  * ===========================================================================
  * Prototypes for level 1 BLAS functions
@@ -46,56 +51,33 @@
 
 double dnrm2_(int* , double* , int*);
 double ddot_(int* , double* , int* , double* , int*);
+void   dcopy_(int* , double* , int* , double* , int*);
+void   daxpy_(int* , double* , double* , int* , double* , int*);
 
 /*
+ *
  */
 
-void gsnl_lcp(double *vec , double *qq , int *nn , int *itermax , double *tol , double *z ,
+void gsnl_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z , double *omega , int *ispeak ,
               double *w , int *it_end , double *res , int *info)
 {
 
 
-  int n = *nn;
-  int itt = *itermax;
-  double errmax = *tol;
+  int n, incx, incy;
+  int i, j, iter;
 
-  int i , j , iter;
+  double qs, err, num, den , zi;
+  double *ww, *diag;
 
-  int incx, incy;
-  double qs , err , num, den, zi;
+  n = *nn;
 
-  double *ww;
+  ww   = (double*)malloc(n * sizeof(double));
+  diag = (double*)malloc(n * sizeof(double));
 
-  /* Note:
-   * vec has a F90 storage
-   */
-
-  ww = (double*)malloc(n * sizeof(double));
-
-  /* Check for trivial case */
-  /* Usefull or not ?*/
-  /* Note:
-   * If M is PSD then the trivial solution if one of
-   * the admissible ones. In this case the test can
-   * be avoid to obtain an other admissible one.
-   */
-
-  /*   incx = 1; */
-  /*   qs = idamax_( &n , qq , &incx ); */
-
-  /*   if( qs <= 0.0 ){ */
-  /*     for( i = 0 ; i < n ; ++i ){ */
-  /*       w[i] = 0.; */
-  /*       z[i] = 0.; */
-  /*     } */
-  /*     info = 0; */
-  /*     return; */
-  /*   } */
-
-  /* Non trivial case */
+  /* Check for non trivial case */
 
   incx = 1;
-  qs = dnrm2_(&n , &qq[0] , &incx);
+  qs = dnrm2_(&n , &q[0] , &incx);
 
   if (qs > 1e-16) den = 1.0 / qs;
   else
@@ -113,13 +95,24 @@ void gsnl_lcp(double *vec , double *qq , int *nn , int *itermax , double *tol , 
   {
     ww[i] = 0.;
     w[i] = 0.;
-    /*z[i] = 0.; Start from an initial vector */
+  }
+
+  /* Preparation of the diagonal of the inverse matrix */
+
+  for (i = 0 ; i < n ; ++i)
+  {
+    if (fabs(vec[i * n + i]) < 1e-16)
+    {
+      info = 2;
+      return;
+    }
+    else diag[i] = 1.0 / vec[i * n + i];
   }
 
   iter = 0;
   err  = 1.;
 
-  while ((iter < itt) && (err > errmax))
+  while ((iter < *itermax) && (err > *tol))
   {
 
     ++iter;
@@ -137,12 +130,12 @@ void gsnl_lcp(double *vec , double *qq , int *nn , int *itermax , double *tol , 
 
       z[i] = 0.0;
 
-      zi = (qq[i] - ddot_(&n , &vec[i] , &incx , z , &incy)) / vec[i * n + i];
+      zi = (-q[i] - ddot_(&n , &vec[i] , &incx , z , &incy)) * diag[i];
 
       if (zi < 0) z[i] = 0.0;
       else z[i] = zi;
 
-      w[i] = -zi +  z[i] * vec[i * n + i];
+      w[i] = (-zi +  z[i]) * vec[i * n + i];
 
     }
 
@@ -164,19 +157,21 @@ void gsnl_lcp(double *vec , double *qq , int *nn , int *itermax , double *tol , 
   *it_end = iter;
   *res    = err;
 
-  /* Compute w */
 
-  if (err > errmax)
+  if (*ispeak > 0)
   {
-    printf(" No convergence of NLGS after %d iterations\n" , iter);
-    printf(" The residue is : %g \n", err);
-    *info = 1;
-  }
-  else
-  {
-    printf(" Convergence of NLGS after %d iterations\n" , iter);
-    printf(" The residue is : %g \n", err);
-    *info = 0;
+    if (err > *tol)
+    {
+      printf(" No convergence of NLGS after %d iterations\n" , iter);
+      printf(" The residue is : %g \n", err);
+      *info = 1;
+    }
+    else
+    {
+      printf(" Convergence of NLGS after %d iterations\n" , iter);
+      printf(" The residue is : %g \n", err);
+      *info = 0;
+    }
   }
 
   free(ww);
