@@ -112,7 +112,7 @@ int solve_cfd(double *K1, double *F1, int *n, methode *pt, double U2[], double F
 
     t1 = clock();
 
-    lemke_lcp(MM, q, &tempo, & pt->cfd.itermax, z, w, &it_end, &res, &info);
+    lcp_lemke(MM, q, &tempo, & pt->cfd.itermax, z, w, &it_end, &res, &info);
 
     t2 = clock();
 
@@ -145,7 +145,7 @@ int solve_cfd(double *K1, double *F1, int *n, methode *pt, double U2[], double F
     t1 = clock();
     itmp = 0;
     rtmp = 1.0;
-    gsnl_lcp(MM, q,  &tempo, & pt->cfd.itermax, & pt->cfd.tol, z, &rtmp , &itmp , w, &it_end, &res, &info);
+    lcp_nlgs(MM , q ,  &tempo , &pt->cfd.itermax , &pt->cfd.tol , &rtmp , &itmp , z, w, &it_end, &res, &info);
 
     t2 = clock();
 
@@ -174,8 +174,9 @@ int solve_cfd(double *K1, double *F1, int *n, methode *pt, double U2[], double F
     w = (double *) malloc((3 * pt->cfd.dim_tt) * sizeof(double));
 
     t1 = clock();
-
-    gcp_lcp(MM, q, &tempo, & pt->cfd.itermax, & pt->cfd.tol, z, w, &it_end, &res, &info);
+    itmp = 0;
+    rtmp = 1.0;
+    lcp_cpg(MM , q , &tempo , &pt->cfd.itermax , &pt->cfd.tol , &itmp , z , w , &it_end, &res, &info);
 
     t2 = clock();
     printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
