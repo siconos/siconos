@@ -25,6 +25,14 @@ SiconosMatrix::SiconosMatrix(): ipiv(NULL), isPLUFactorized(false), isPLUInverse
   mat.resize(0, 0);
 }
 
+SiconosMatrix::SiconosMatrix(const SiconosMatrix& m):
+  ipiv(m.ipiv), isPLUFactorized(m.isPLUFactorized), isPLUInversed(m.isPLUInversed)
+{
+  mat.resize(m.mat.size(0), m.mat.size(1));
+  mat = m.mat;
+
+}
+
 SiconosMatrix::SiconosMatrix(const int& row, const int& col):
   ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
 {
@@ -520,6 +528,7 @@ SiconosMatrix &SiconosMatrix::operator+=(const SiconosMatrix &m)
 bool operator == (const SiconosMatrix& m1, const SiconosMatrix& m2)
 {
   SiconosMatrix::verbose("WARNING : operator == and != not performed by Blas.");
+
   unsigned int m = m1.size(0);
   unsigned int n = m1.size(1);
 
@@ -569,26 +578,32 @@ SiconosMatrix operator - (const SiconosMatrix& m1, const SiconosMatrix& m2)
   return (m1.mat - m2.mat);
 }
 
+
 /*************************************************/
-SiconosMatrix operator * (const SiconosMatrix& mat, const double& d)
+SiconosMatrix operator * (const SiconosMatrix& m1, const double& d)
 {
-  SiconosMatrix::verbose("WARNING : SiconosMatrix * double is not compute by Blas.");
-  int m = mat.size(0);
-  int n = mat.size(1);
+
+  //SiconosMatrix matTmp(m1);
+
+  int m = m1.size(0);
+  int n = m1.size(1);
   SiconosMatrix matTmp(m, n);
-  for (int i = 0; i < m; i++)
-    for (int j = 0; j < n; j++)
-      matTmp(i, j) = mat.mat(i, j) * d;
+  matTmp.mat = m1.mat;
+
+  long int M = matTmp.size(0) * matTmp.size(1);
+  long int incx = 1;
+  double alpha = d;
+
+  F77NAME(dscal)(&M , &alpha, &(matTmp.mat(0, 0)), &incx);
 
   return SiconosMatrix(matTmp);
 }
-
 
 /*************************************************/
 SiconosMatrix operator / (const SiconosMatrix& m, const double d)
 {
   if (d == 0.0)
-    SiconosMatrixException::selfThrow("Operator '/' : try to divide by 0");
+    SiconosMatrixException::selfThrow("Operator '/' : division by 0");
   return (m * (1 / d));
 }
 

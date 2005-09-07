@@ -78,6 +78,14 @@ void SiconosMatrixTest::testConstructor2()
   cout << "SiconosMatrixTest >>> testConstructor2 .................................................. OK\n ";
 }
 
+void SiconosMatrixTest::copyConstructor()
+{
+
+  SiconosMatrix X(A);
+  CPPUNIT_ASSERT_MESSAGE("copyConstructor2 : X == A", X == A);
+  cout << "SiconosMatrixTest >>> copyConstructor .................................................. OK\n ";
+}
+
 void SiconosMatrixTest::testEquality()
 {
   CPPUNIT_ASSERT_MESSAGE("testEquality : A==A", A == A);
@@ -161,8 +169,10 @@ void SiconosMatrixTest::testOperator()
   B = A.multTranspose(A);
   B = A.multTranspose(B);
 
-  CPPUNIT_ASSERT_MESSAGE("testOperator : A+A == A*2 ", A + A == A * 2);
+  CPPUNIT_ASSERT_MESSAGE("testOperator : A+A == A*2 ", A + A == A * 2.0);
   CPPUNIT_ASSERT_MESSAGE("testOperator : A+A == 2*A ", A + A == 2 * A);
+  CPPUNIT_ASSERT_MESSAGE("testOperator : A+A+A+A+A == A*5 ", A + A + A + A + A == A * 5.0);
+  CPPUNIT_ASSERT_MESSAGE("testOperator : A+A+A+A+A == 5.0*A ", A + A + A + A + A == 5.0 * A);
   CPPUNIT_ASSERT_MESSAGE("testOperator : A^1 == A ", (A ^ 1) == A);
   CPPUNIT_ASSERT_MESSAGE("testOperator : A^2 == A*A ", (A ^ 2) == A * A);
   CPPUNIT_ASSERT_MESSAGE("testOperator : A^3 == A*A*A ", (A ^ 3) == A * A * A);

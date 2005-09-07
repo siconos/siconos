@@ -18,6 +18,7 @@ private:
 
   CPPUNIT_TEST(testConstructor1);
   CPPUNIT_TEST(testConstructor2);
+  CPPUNIT_TEST(copyConstructor);
   CPPUNIT_TEST(testEquality);
   CPPUNIT_TEST(testAffectation);
   CPPUNIT_TEST(testReadWriteAscii);
@@ -39,6 +40,7 @@ private:
 
   void testConstructor1();
   void testConstructor2();
+  void copyConstructor();
   void testEquality();
   void testAffectation();
   void testReadWriteAscii();

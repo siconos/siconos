@@ -81,6 +81,13 @@ public:
    */
   SiconosMatrix();
 
+  /** \fn SiconosMatrix (const SiconosMatrix  m)
+   *  \brief copy contructor
+   *  \param SiconosMatrix
+   *  \return SiconosMatrix
+   */
+  SiconosMatrix(const SiconosMatrix&);
+
   /** \fn SiconosMatrix (const int& row,const int& col)
    *  \brief contructor with the dimension
    *  \param an integer to set the number of row
