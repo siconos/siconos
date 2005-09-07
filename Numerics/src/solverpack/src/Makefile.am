@@ -11,7 +11,7 @@ SUBDIRS =
 
 noinst_LTLIBRARIES = libsolverpack.la
 libsolverpack_la_SOURCES = cfd_latin.c cfp_gcp.c cfp_latin.c lcp_cfd.c \
-	lcp_lexicolemke.c lcp_nlgs.c lcp_nsqp.c lcp_solver.c lcp_gcp.c \
+	lcp_lexicolemke.c lcp_nlgs.c lcp_nsqp.c lcp_solver.c lcp_cpg.c \
 	lcp_qp.c lcp_lemke.c lcp_latin.c \
 	minf.c  projf.c \
 	solve_rp.c rp_gsnl.c solve_cfd.c \

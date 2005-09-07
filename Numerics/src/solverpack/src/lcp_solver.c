@@ -94,7 +94,7 @@ int lcp_solver(double *vec, double *q , int *n , methode *pt , double *z , doubl
   else if (strcmp(pt->lcp.name , mot7) == 0)
 
     lcp_lexicolemke(vec , q , n , &pt->lcp.itermax , z , &pt->lcp.iout ,  /* in  */
-                    w , it_end , res , &info);                           /* out */
+                    w , it_end , &info);                                 /* out */
 
   else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
 
