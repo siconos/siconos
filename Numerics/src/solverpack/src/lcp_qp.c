@@ -59,7 +59,7 @@ void lcp_qp(double *vec , double *qq , int *nn , double *tol , double *z , doubl
 
 
 
-  int lwar, liwar, iout, inform, un;
+  int lwar, liwar, iout, un;
   int *iwar;
   double *war;
 
@@ -95,7 +95,7 @@ void lcp_qp(double *vec , double *qq , int *nn , double *tol , double *z , doubl
 
   p = (double *)malloc(nmax * sizeof(double));
   for (i = 0; i < n; i++)
-    p[i] = -qq[i] ;
+    p[i] = qq[i] ;
 
   // Creation of the data matrix of the linear constraints, A and  the constant data of the linear constraints b
   A = (double *)malloc(mmax * nmax * sizeof(double));
@@ -133,7 +133,7 @@ void lcp_qp(double *vec , double *qq , int *nn , double *tol , double *z , doubl
 
   // call ql0001_
   ql0001_(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu,
-          z, lambda, &iout, &inform, &un, war, &lwar, iwar, &liwar, tol);
+          z, lambda, &iout, info, &un, war, &lwar, iwar, &liwar, tol);
 
   //    printf("tol = %10.4e\n",*tol);
   //for (i=0;i<mnn;i++) printf("lambda[%i] = %g\n",i,lambda[i]);
@@ -142,28 +142,27 @@ void lcp_qp(double *vec , double *qq , int *nn , double *tol , double *z , doubl
   for (i = 0; i < n; i++) w[i] = lambda[m + i] ;
 
 
-  switch (inform)
-  {
-  case 0 :
-    printf("   Minimization sucessfull\n");
-    *info = 0;
-    break;
-  case 1 :
-    printf("   Too Many iterations\n");
-    break;
-  case 2 :
-    printf("   Accuracy insuficient to satisfy convergence criterion\n");
-    break;
-  case 3 :
-  case 4 :
-  case 5 :
-    printf("   Length of working array insufficient\n");
-    break;
-  default :
-    printf("   The constraints are inconstent\n");
-    break;
+  /*     switch(inform) { */
+  /*     case 0 : */
+  /*  printf("   Minimization sucessfull\n"); */
+  /*  *info = 0; */
+  /*  break; */
+  /*     case 1 : */
+  /*  printf("   Too Many iterations\n"); */
+  /*  break; */
+  /*     case 2 : */
+  /*  printf("   Accuracy insuficient to satisfy convergence criterion\n"); */
+  /*  break; */
+  /*     case 3 : */
+  /*     case 4 : */
+  /*     case 5 : */
+  /*  printf("   Length of working array insufficient\n"); */
+  /*  break; */
+  /*     default : */
+  /*  printf("   The constraints are inconstent\n"); */
+  /*  break; */
 
-  }
+  /*     } */
 
   // memory freeing
   free(A);
