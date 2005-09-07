@@ -10,10 +10,13 @@ include $(top_srcdir)/config/Make-rules
 SUBDIRS =
 
 noinst_LTLIBRARIES = libsolverpack.la
-libsolverpack_la_SOURCES = cfd_latin.c cfp_gcp.c cfp_latin.c gsnl_lcp.c lcp_cfd.c \
-	lexicolemke_lcp.c minf.c  projf.c qpnonsym_lcp.c rp_gsnl.c solve_cfd.c solve_lcp.c\
-	solve_rp.c cfd_lcp.c cfp_gsnl.c gcp_lcp.c latin_lcp.c lemke_lcp.c maxf.c\
-        projc.c qp_lcp.c rd_latin.c rp_latin.c solve_cfp.c solve_rd.c \
+libsolverpack_la_SOURCES = cfd_latin.c cfp_gcp.c cfp_latin.c lcp_cfd.c \
+	lcp_lexicolemke.c lcp_nlgs.c lcp_nsqp.c lcp_solver.c lcp_gcp.c \
+	lcp_qp.c lcp_lemke.c lcp_latin.c \
+	minf.c  projf.c \
+	solve_rp.c rp_gsnl.c solve_cfd.c \
+	cfd_lcp.c cfp_gsnl.c maxf.c\
+        projc.c rd_latin.c rp_latin.c solve_cfp.c solve_rd.c \
 	ql0001.f \
 	solverpack.h
 
