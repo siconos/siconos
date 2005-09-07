@@ -68,7 +68,7 @@ typedef struct
 typedef struct
 {
 
-  char   nom_method[64];
+  char   name[64];
   int    itermax;
   double tol;
   double k_latin;
@@ -171,7 +171,29 @@ typedef union
 
 /* body of header */
 
-extern "C" int solve_lcp(double *vec, double *q , int *nn , methode *pt , double* z , double* w , int* , double*);
+/**************** LCP *********************/
+
+extern "C" int lcp_solver(double *vec, double *q , int *n , methode *pt , double *z , double *w , int *it_end , double *res);
+
+extern "C" void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem,
+                          double *wlem, int *it_end, double *res, int *info);
+
+extern "C" void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , double *omega , int *ispeak , double *z ,
+                         double *w , int *it_end , double *res , int *info);
+
+extern "C" void lcp_gcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z , int *ispeak ,
+                        double *w , int *it_end , double * res , int *info);
+
+extern "C" void lcp_latin(double*, double*, int *, double *, int *, double *, double [], double[], int *, double *, int *);
+
+extern "C" void lcp_qp(double *vec , double *qq , int *nn , double *tol , double *z , double *w , int *info);
+
+extern "C" void lcp_nsqp(double *vec , double *qq , int *nn , double *tol , double *z , double *w , int *info);
+
+extern "C" void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , double *zlem , int *ispeak ,
+                                double *wlem, int *it_end , int *info);
+
+/********************************************/
 
 extern "C" int solve_rp(double* , double* , int* , methode* , double* , double*);
 
@@ -181,34 +203,27 @@ extern "C" int solve_cfp(double* , double* , int* , methode* , double* , double*
 
 extern "C" int solve_cfd(double* , double* , int* , methode* , double* , double*);
 
-extern "C" void rp_latin(double [], double *, int *, double *, double [], double [], int *, double *, double [], double [], int *, double *, int *);
+extern "C" void rp_latin(double [], double *, int *, double *, double [], double [], int *,
+                         double *, double [], double [], int *, double *, int *);
 
-
-//void rp_latin(double [],double *,int *, double *,double *,double *,int *, double *,double[],double [],int *,double *,int *)  ;
 
 extern "C" void rp_gsnl(double [], double *, int *, double *, double *, int *, double *, double[], double [], int *, double *, int *)  ;
+
 extern "C" void rd_latin(double [], double *, int *, double * , double *, int *, double *, double[], double [], int *, double *, int *)  ;
-extern "C" void lemke_lcp(double *vec, double *qqq , int *nn, int *itermax, double *zlem, double *wlem, int *it_end, double *res, int *info);
 
-extern "C" void gsnl_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z , double *omega , int *ispeak ,
-                         double *w , int *it_end , double *res , int *info);
-
-extern "C" void gcp_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z , int *ispeak ,
-                        double *vv , int *it_end , double * res , int *info);
-
-extern "C" void latin_lcp(double*, double*, int *, double *, int *, double *, double [], double[], int *, double *, int *);
 extern "C" void cfp_gsnl(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int*);
-extern "C" void cfp_gcp(double [], double [], int *, double *, int *, double *, double [], double [], int *, double *, int *);
-extern "C" void qp_lcp(double [], double [], int *, double *, double [], double [], int *);
-extern "C" void qpnonsym_lcp(double [], double [], int *, double *, double [], double [], int *);
 
-extern "C" void lexicolemke_lcp(double *vec, double *qq, int *nn, int *itermax , double *zlem , int *ispeak ,
-                                double *wlem, int *it_end, double *res, int *info);
+extern "C" void cfp_gcp(double [], double [], int *, double *, int *, double *, double [], double [], int *, double *, int *);
 
 extern "C" void cfp_latin(double [], double [], int *, double *, double *, int *, double *, double [], double [], int *, double *, int*);
+
 extern "C" void cfd_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
-extern "C" int cfd_lcp(int *, double *, methode *, double *, int *, int *, int * , int *, int *, int *, int *, int *, double * , double * , int *, double *, double *);
-extern "C" int lcp_cfd(int *, double *, double *, methode *, double *, double *, int *, double *, int *, int *, int *, int *,  int *, int *, int *, double *, double *);
+
+extern "C" int cfd_lcp(int *, double *, methode *, double *, int *, int *, int * , int *, int *, int *,
+                       int *, int *, double * , double * , int *, double *, double *);
+
+extern "C" int lcp_cfd(int *, double *, double *, methode *, double *, double *, int *, double *, int *,
+                       int *, int *, int *,  int *, int *, int *, double *, double *);
 
 #endif
 
@@ -225,7 +240,7 @@ extern "C" int lcp_cfd(int *, double *, double *, methode *, double *, double *,
  * solve_lcp.c is a generic interface allowing the call of one of the @ref lcp solvers.
  */
 
-extern int solve_lcp(double *vec, double *q , int *nn , methode *pt , double* z , double* w , int* , double*);
+extern int lcp_solver(double *vec, double *q , int *n , methode *pt , double *z , double *w , int *it_end , double *res);
 
 /**@}*/
 
@@ -370,24 +385,27 @@ cfd_latin.c
 /* \todo solve_qp does not exist
 */
 
-/* LCP */
+/*********************************** LCP *****************************************/
 
-extern void  lemke_lcp(double *vec, double *qqq , int *nn, int *itermax, double *zlem, double *wlem, int *it_end, double *res, int *info);
+extern void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem,
+                      double *wlem, int *it_end, double *res, int *info);
 
-extern void gsnl_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z , double *omega , int *ispeak ,
+extern void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , double *omega , int *ispeak , double *z ,
                      double *w , int *it_end , double *res , int *info);
 
-extern void gcp_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z , int *ispeak ,
-                    double *vv , int *it_end , double * res , int *info);
+extern void lcp_gcp(double *vec , double *q , int *nn , int *itermax , double *tol , int *ispeak , double *z ,
+                    double *w , int *it_end , double * res , int *info);
 
-extern void qp_lcp(double [], double [], int *, double *, double [], double [], int *);
+extern void lcp_latin(double*, double*, int *, double *, int *, double *, double [], double[], int *, double *, int *);
 
-extern void qpnonsym_lcp(double [], double [], int *, double *, double [], double [], int *);
+extern void lcp_qp(double *vec , double *qq , int *nn , double *tol , double *z , double *w , int *info);
 
-extern void lexicolemke_lcp(double *vec, double *qq, int *nn, int *itermax , double *zlem , int *ispeak ,
-                            double *wlem, int *it_end, double *res, int *info);
+extern void lcp_nsqp(double *vec , double *qq , int *nn , double *tol , double *z , double *w , int *info);
 
-extern latin_lcp(double [], double [], int *, double *, int *, double *, double [], double[], int *, double *, int *);
+extern void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , double *zlem , int *ispeak ,
+                            double *wlem, int *it_end , int *info);
+
+/*********************************** LCP *****************************************/
 
 /* RP */
 

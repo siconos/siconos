@@ -19,7 +19,7 @@
  *
  * where M is an (n x n)-matrix, q , w and z n-vectors.
  *
- *!\fn  lcp_cpg( double *vec , double *q , int *nn , int *itermax, double *tol , double *z ,
+ *!\fn  lcp_cpg( double *vec , double *q , int *nn , int *itermax , double *tol , int *ispeak , double *z ,
  *               double *w , int *it_end , double *res , int *info)
  *
  * lcp_cpg is a basic cpg (conjugated projected gradient) solver for LCP.
@@ -47,7 +47,7 @@
  *
  */
 
-void lcp_gcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z , int *ispeak ,
+void lcp_gcp(double *vec , double *q , int *nn , int *itermax , double *tol , int *ispeak , double *z ,
              double *w , int *it_end , double * res , int *info)
 {
 
