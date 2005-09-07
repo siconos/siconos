@@ -40,8 +40,9 @@
  * \param z       Modified parameter. Pointer over doubles which contains the initial solution and returns the solution of the problem.
  * \param w       Modified parameter. Pointer over doubles which returns the solution of the problem.
  * \param info    Modified parameter. Pointer over integer which returns the termination value
- *                0 - successful
- *                1 - unsuccessful
+ *                0 - convergence
+ *                1 - iter = itermax
+ *                2 - negative diagonal term
  *
  * \author Mathieu Renouf
  *
@@ -66,7 +67,7 @@ void gsnl_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , d
   /* Check for non trivial case */
 
   incx = 1;
-  qs = dnrm2_(&n , &q[0] , &incx);
+  qs = dnrm2_(&n , q , &incx);
 
   if (qs > 1e-16) den = 1.0 / qs;
   else
@@ -86,13 +87,29 @@ void gsnl_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , d
     w[i] = 0.;
   }
 
+  /* Intialization of w */
+
+  incx = 1;
+  incy = 1;
+  dcopy_(&n , q , &incx , w , &incy);
+
   /* Preparation of the diagonal of the inverse matrix */
 
   for (i = 0 ; i < n ; ++i)
   {
     if (fabs(vec[i * n + i]) < 1e-16)
     {
+
+      if (*ispeak > 0)
+      {
+        printf(" Warning negative diagonal term \n");
+        printf(" The local problem can be solved \n");
+      }
+
       info = 2;
+      free(diag);
+      free(ww);
+
       return;
     }
     else diag[i] = 1.0 / vec[i * n + i];
@@ -124,7 +141,7 @@ void gsnl_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , d
       if (zi < 0) z[i] = 0.0;
       else z[i] = zi;
 
-      w[i] = (-zi +  z[i]) * vec[i * n + i];
+      w[i] = (zi +  z[i]) * vec[i * n + i];
 
     }
 
@@ -164,5 +181,6 @@ void gsnl_lcp(double *vec , double *q , int *nn , int *itermax , double *tol , d
   }
 
   free(ww);
+  free(diag);
 
 }
