@@ -24,14 +24,14 @@
 #include "solverpack.h"
 #endif
 
-/*!\fn int lcp_solver( double *vec , double *q , int *nn , methode *pt , double *z , double *w , int *it_end , double *res )
+/*!\fn int lcp_solver( double *vec , double *q , int *nn , method *pt , double *z , double *w , int *it_end , double *res )
  *
  * lcp_solver is a generic interface allowing the call of one of the LCP solvers.
  *
  * \param double* vec  Unchanged parameter which contains the components of the LCP matrix with a Fortran storage.
  * \param double* q    Unchanged parameter which contains the components of the constant right hand side vector.
  * \param int* nn      Unchanged parameter which represents the dimension of the LCP problem.
- * \param methode* pt  Unchanged parameter which represents the LCP structure.
+ * \param method* pt  Unchanged parameter which represents the LCP structure.
  * \param double* z    Modified parameter which contains the initial value of the LCP and returns the solution of the problem.
  * \param double* w    Modified parameter which returns the complementary solution of the problem.
  * \param it_end       Modified parameter which returns the number of iterations performed by the algorithm.
@@ -42,7 +42,7 @@
  * \author Nineb Sheherazade & Mathieu Renouf
  */
 
-int lcp_solver(double *vec, double *q , int *n , methode *pt , double *z , double *w , int *it_end , double *res)
+int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w , int *it_end , double *res)
 {
 
   const char mot1[10] = "Lemke", mot2[10] = "NLGS", mot3[10] = "CPG";

@@ -28,13 +28,13 @@ M z- w=q\\
 #include "solverpack.h"
 #endif
 
-/*!\fn  int solve_cfd (double *vec,double *q,int *n,methode *pt,double z[],double w[])
+/*!\fn  int solve_cfd (double *vec,double *q,int *n,method *pt,double z[],double w[])
 
    solve_cfd is a generic interface allowing the call of one of the DFC solvers.
    \param vec On enter a double vector containing the components of the double matrix with a fortran90 allocation.
    \param q On enter a pointer over doubles containing the components of the double vector.
    \param n On enter a pointer over integers, the dimension of the second member.
-   \param pt On enter a pointer over a structure (::methode).
+   \param pt On enter a pointer over a structure (::method).
    \param z On return double vector, the solution of the problem.
    \param w On return double vector, the solution of the problem.
 
@@ -44,7 +44,7 @@ M z- w=q\\
 */
 
 
-int solve_cfd(double *K1, double *F1, int *n, methode *pt, double U2[], double F2[])
+int solve_cfd(double *K1, double *F1, int *n, method *pt, double U2[], double F2[])
 {
 
   const char mot1[10] = "Cfd_latin", mot2[10] = "Lemke", mot3[10] = "Gsnl", mot4[10] = "Gcp";

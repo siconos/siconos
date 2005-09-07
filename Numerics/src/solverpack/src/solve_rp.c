@@ -27,14 +27,14 @@ M z- w=q\\
 #endif
 #include <time.h>
 
-/*!\fn int solve_rp (double vec[],double *q,int *nn, methode *pt,double z[],double w[])
+/*!\fn int solve_rp (double vec[],double *q,int *nn, method *pt,double z[],double w[])
 
    solve_rp is a generic interface allowing the call of one of the PR solvers.
 
    \param double* : vec On enter double vector containing the components of the double matrix with a fortran90 allocation.
    \param double* : q On enter a pointer over doubles containing the components of the second member of the system.
    \param int* : nn On enter a pointer over integers, the dimension of the second member.
-   \param methode* : pt On enter a pointer other a structure (::methode).
+   \param method* : pt On enter a pointer other a structure (::method).
    \param double[] : z On return real vector, the solution of the problem.
    \param double[] : w On return real vector, the solution of the problem.
 
@@ -42,7 +42,7 @@ M z- w=q\\
 
    \author Nineb Sheherazade.
  */
-int solve_rp(double *vec, double *q, int *nn, methode *pt, double z[], double w[])
+int solve_rp(double *vec, double *q, int *nn, method *pt, double z[], double w[])
 {
   int info = -1, choix, it_end, fail;
   char mot1[10] = "Gsnl", mot2[10] = "Gcp", mot3[10] = "Latin";

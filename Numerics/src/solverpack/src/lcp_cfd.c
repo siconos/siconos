@@ -7,7 +7,7 @@
 
 
 
-/*!\fn  int lcp_cfd (int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, double *F1, int * dim_F1, double *J1, int *ddl_i, int * dim_i, int *ddl_c, int *dim_c,  int *ddl_n, int *ddl_tt, int *dim_tt, double *U2,double *F2)
+/*!\fn  int lcp_cfd (int *dim_nn, double *ztel, double *wtel, method *pt, double *K1, double *F1, int * dim_F1, double *J1, int *ddl_i, int * dim_i, int *ddl_c, int *dim_c,  int *ddl_n, int *ddl_tt, int *dim_tt, double *U2,double *F2)
 
    lcp_cfd subroutine allows to give the solution of the contact problem with friction given.
     \sa cfd_lcp subroutine.
@@ -15,7 +15,7 @@
    \param dim_nn On enter a pointer over integers, the size of the vector solution.
    \param ztel On enter a pointer over doubles, the solution given by an LCP ztel.
    \param wtel On enter a pointer over doubles, the solution given by an LCP wtel.
-   \param pt On enter a pointer over the union methode.
+   \param pt On enter a pointer over the union method.
    \param K1 On enter a pointer over doubles, the rigidity matrix.
    \param F1 On enter a pointer over doubles, the effort vector.
    \param dim_F1 On enter a pointer over integers, the dimension of F1.
@@ -44,7 +44,7 @@
 
 
 
-int lcp_cfd(int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, double *F1, int * dim_F1, double *J1, int *ddl_i, int * dim_i, int *ddl_c, int *dim_c,  int *ddl_n, int *ddl_tt, int *dim_tt, double *U2, double *F2)
+int lcp_cfd(int *dim_nn, double *ztel, double *wtel, method *pt, double *K1, double *F1, int * dim_F1, double *J1, int *ddl_i, int * dim_i, int *ddl_c, int *dim_c,  int *ddl_n, int *ddl_tt, int *dim_tt, double *U2, double *F2)
 {
 
   int dim_n, i, j, kk, taille_n = *dim_nn, taille_tt = *dim_tt, taille_i = *dim_i;

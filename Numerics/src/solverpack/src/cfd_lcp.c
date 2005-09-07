@@ -7,13 +7,13 @@
 
 
 
-/*!\fn int cfd_lcp (int *dim_n, double *mumu, methode *pt, double *K1, int *ddl_i, int *dim_i, int * ddl_n, int *dim_nn, int *ddl_tt, int *dim_tt, int * ddl_c,int *dim_c,double * J1, double * F1,int *dim_F1, double *MM,double *q)
+/*!\fn int cfd_lcp (int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *dim_i, int * ddl_n, int *dim_nn, int *ddl_tt, int *dim_tt, int * ddl_c,int *dim_c,double * J1, double * F1,int *dim_F1, double *MM,double *q)
 
    cfd_lcp subroutine allows the formulation in the LCP (Linear  Complementary Problem) form of a contact problem with friction.
 
    \param dim_n On return a pointer over integers, the dimension of the matrix after the reformulation  of the problem.
    \param mumu On enter a pointer over doubles, the friction coefficient.
-   \param pt On enter a pointer over the union methode.
+   \param pt On enter a pointer over the union method.
    \param K1 On enter a pointer over doubles containing the components of the rigidity matrix with a fortran90 allocation.
    \param ddl_i On enter a pointer over integers containing the components ddl imposed.
    \param dim_i On enter a pointer over integers, the dimension of the vector ddl_i.
@@ -41,7 +41,7 @@
 #endif
 
 
-int cfd_lcp(int *dim_n, double *mumu, methode *pt, double *K1, int *ddl_i, int *dim_i, int * ddl_n, int *dim_nn, int *ddl_tt, int *dim_tt, int * ddl_c, int *dim_c, double * J1, double * F1, int *dim_F1, double *MM, double *q)
+int cfd_lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *dim_i, int * ddl_n, int *dim_nn, int *ddl_tt, int *dim_tt, int * ddl_c, int *dim_c, double * J1, double * F1, int *dim_F1, double *MM, double *q)
 
 {
 
