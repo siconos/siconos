@@ -61,12 +61,12 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
   else if (strcmp(pt->lcp.name , mot2) == 0)
 
-    lcp_nlgs(vec , q , n , &pt->lcp.itermax , &pt->lcp.tol , z , &pt->lcp.relax , &pt->lcp.iout ,  /* in  */
+    lcp_nlgs(vec , q , n , &pt->lcp.itermax , &pt->lcp.tol , &pt->lcp.relax , &pt->lcp.iout , z ,  /* in  */
              w , it_end , res , &info);                                                           /* out */
 
   else if (strcmp(pt->lcp.name , mot3) == 0)
 
-    lcp_cpg(vec , q , n , &pt->lcp.itermax , &pt->lcp.tol , z , &pt->lcp.iout ,  /* in  */
+    lcp_cpg(vec , q , n , &pt->lcp.itermax , &pt->lcp.tol , &pt->lcp.iout , z ,  /* in  */
             w , it_end , res , &info);                                          /* out */
 
   else if (strcmp(pt->lcp.name , mot4) == 0)
@@ -93,7 +93,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   }
   else if (strcmp(pt->lcp.name , mot7) == 0)
 
-    lcp_lexicolemke(vec , q , n , &pt->lcp.itermax , z , &pt->lcp.iout ,  /* in  */
+    lcp_lexicolemke(vec , q , n , &pt->lcp.itermax , &pt->lcp.iout , z ,  /* in  */
                     w , it_end , &info);                                 /* out */
 
   else printf("Warning : Unknown solver : %s\n", pt->lcp.name);

@@ -42,7 +42,7 @@
  * \author Mathieu Renouf
  */
 
-void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , double *zlem , int *ispeak ,
+void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispeak , double *zlem ,
                      double *wlem, int *it_end , int *info)
 {
 
