@@ -1,4 +1,4 @@
----+ Little help to install the platform (Numerics, Kernel, Front-End):
+----+ Little help to install the platform (Numerics, Kernel, Front-End):
 
 ---++ Required external libraries
 
@@ -30,7 +30,7 @@
 ---++ Getting the sources
 
    * Through the svn server (acess required)
-       svn checkout svn+ssh://dÂŽveloppeur@scm.gforge.inria.fr/svn/siconos
+       svn checkout svn+ssh://dŽveloppeur@scm.gforge.inria.fr/svn/siconos
        for more explanation see http://gforge.inria.fr/scm/?group_id=9
    * Download the source packages on the Gforge   
 
@@ -39,24 +39,6 @@
 
    * Change directory to your source directory <br>
    =% cd /path/to/your/source/code/=
-
-   * Set environnement variable NUMERICSPATH to your path of Numerics directory <br>
-   =% setenv NUMERICSPATH /path/to/your/source/code/Numerics=
-
-   * create a symbolic link on the Makefile.inc corresponding to your OS (Linux or MacOs X) <br>
-   =% ln -s Makefile.inc Makefile.inc.[Linux or Macosx]=
-  
-   * Command to compile and create Numerics libraries : make lib
-   =% make lib=
-   
-   * Edit the file Makefile.inc to set the INSTALL_DIR variable
-   =% make install (as root if necessary)
-
-
----++ Kernel installation (for developers)
-   
-   * Change directory to your source directory <br>
-   =% cd /path/to/your/source/code/Kernel=
 
 ---+++ Creation of the configure script and run it
 
@@ -70,20 +52,36 @@ On SVN server, the platform is distributed in a developer version. To get a vers
    <br>
    =% ./configure --prefix="the path where you want to install the platform"= 
 
-   * *I advise you for the moment to install the platform in the directory retrieved from SVN. C++ compiler, System libraries, external libraries, etc. are tested...
-
    * If you have a local installation of an external library, you can give its path to configure with the option --with-local[library name]. You can get the possible options typing =%configure --help=. 
 
    * =% ./configure --help provides you with the others options
 
 ---+++ Compilation and installation of the Kernel
 
-
    * Compilation of the platform : <br>
    =% make=
 
    * Installation of the platform : <br>
    =% make install= (as root of neccesary)
+
+      
+---+++ Is the installation of the Kernel OK ?
+   =% make check
+
+ 
+
+---++ Kernel installation (for developers)
+   
+   * Change directory to your source directory <br>
+   =% cd /path/to/your/source/code/Kernel=
+
+   * The same standard procedure as in Kernel : <br>
+   =% ./reconf.sh= <br>
+   =% ./configure --prefix="the path where you want to install the platform"=  <br>
+   =% make= <br>
+   =% make install= (as root if necessary) <br>
+
+
 
       
 ---+++ Is the installation of the Kernel OK ?
