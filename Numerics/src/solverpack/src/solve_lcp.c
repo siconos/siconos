@@ -1,25 +1,20 @@
-
-/*!\file solve_lcp.c
-
-
-   This subroutine allows the resolution of LCP (Linear Complementary Problem).
-   Try \f$(z,w)\f$ such that:
-
-\f$
-\left\lbrace
-\begin{array}{l}
-M z- w=q\\
-0 \le z \perp w \ge 0\\
-\end{array}
-\right.
-\f$
-
-  here M is an n by n  matrix, q an n-dimensional vector, w an n-dimensional  vector and z an n-dimensional vector.
-  This system of equalities and inequalities is solved thanks to @ref lcp solvers.
-  The routine's call is due to the function solve_lcp.c.
-*/
-
-
+/*!\file lcp_solver.c
+ *
+ * This subroutine allows the resolution of LCP (Linear Complementary Problem).
+ * Try \f$(z,w)\f$ such that:
+ *
+ * \f$
+ *  \left\lbrace
+ *   \begin{array}{l}
+ *    0 \le z \perp Mz + q = w \ge 0\\
+ *   \end{array}
+ *  \right.
+ * \f$
+ *
+ * M is an ( n x n ) matrix, q , w and z n-vector. This system of equalities and inequalities
+ * is solved thanks to @ref lcp solvers. The routine's call is due to the function lcp_solver.c.
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,86 +24,84 @@ M z- w=q\\
 #include "solverpack.h"
 #endif
 
-/*!\fn int solve_lcp (double *vec, double *q, int * nn, methode *pt,double z[], double w[])
+/*!\fn int lcp_solver( double *vec , double *q , int *nn , methode *pt , double *z , double *w , int *it_end , double *res )
+ *
+ * lcp_solver is a generic interface allowing the call of one of the LCP solvers.
+ *
+ * \param double* vec  Unchanged parameter which contains the components of the LCP matrix with a Fortran storage.
+ * \param double* q    Unchanged parameter which contains the components of the constant right hand side vector.
+ * \param int* nn      Unchanged parameter which represents the dimension of the LCP problem.
+ * \param methode* pt  Unchanged parameter which represents the LCP structure.
+ * \param double* z    Modified parameter which contains the initial value of the LCP and returns the solution of the problem.
+ * \param double* w    Modified parameter which returns the complementary solution of the problem.
+ * \param it_end       Modified parameter which returns the number of iterations performed by the algorithm.
+ * \param res          Modified parameter which returns the final error value.
+ *
+ * \return integer     0 - successful / 1 - otherwise
+ *
+ * \author Nineb Sheherazade & Mathieu Renouf
+ */
 
-* solve_lcp is a generic interface allowing the call of one of the LCP solvers.
-
-\param double* : vec On enter a pointer over doubles containing the components of the double matrix with a f90 allocation.
-\param double* : q On enter a pointer over doubles containing the components of the double vector.
-\param int* : nn On enter a pointer over integers, the dimension of the second member.
-\param methde* : pt On enter a pointer other a structure (::methode).
-\param double[] : z On return double vector, the solution of the problem.
-\param double[] : w On return double vector, the solution of the problem.
-
-\return On return integer, the termination reason (0 is successful otherwise 1).
-
-\author Nineb Sheherazade.
-*/
-
-int solve_lcp(double *vec, double *q , int *nn , methode *pt , double *z , double *w , int *it_end , double *res)
+int lcp_solver(double *vec, double *q , int *n , methode *pt , double *z , double *w , int *it_end , double *res)
 {
 
-  const char mot1[10] = "Lemke", mot2[10] = "Gsnl", mot3[10] = "Gcp";
-  const char mot4[10] = "Latin", mot5[10] = "Qp", mot6[10] = "Qpnonsym";
+  const char mot1[10] = "Lemke", mot2[10] = "NLGS", mot3[10] = "CPG";
+  const char mot4[10] = "Latin", mot5[10] = "QP", mot6[10] = "NSQP";
   const char mot7[15] = "LexicoLemke";
 
-  int info1 = -1, info;
-  int n = *nn;
+  int info;
 
   *it_end = 0;
   *res    = 0.0;
 
-  //clock_t t1=clock();
+  if (strcmp(pt->lcp.name , mot1) == 0)
 
-  if (strcmp(pt->lcp.nom_method, mot1) == 0)
-  {
-    lemke_lcp(vec , q , &n , &pt->lcp.itermax , z , w , it_end , res , &info1);
-  }
-  else if (strcmp(pt->lcp.nom_method , mot2) == 0)
+    lcp_lemke(vec , q , n , &pt->lcp.itermax , z ,   /* in  */
+              w , it_end , res , &info);            /* out */
 
-    gsnl_lcp(vec , q , &n , &pt->lcp.itermax , &pt->lcp.tol , z , &pt->lcp.relax , &pt->lcp.iout ,  /* in  */
-             w , it_end , res , &info1);                                                           /* out */
+  else if (strcmp(pt->lcp.name , mot2) == 0)
 
-  else if (strcmp(pt->lcp.nom_method , mot3) == 0)
+    lcp_nlgs(vec , q , n , &pt->lcp.itermax , &pt->lcp.tol , z , &pt->lcp.relax , &pt->lcp.iout ,  /* in  */
+             w , it_end , res , &info);                                                           /* out */
 
-    gcp_lcp(vec , q , &n , &pt->lcp.itermax , &pt->lcp.tol , z , &pt->lcp.iout ,  /* in  */
-            w , it_end , res , &info1);                                          /* out */
+  else if (strcmp(pt->lcp.name , mot3) == 0)
 
-  else if (strcmp(pt->lcp.nom_method , mot4) == 0)
+    lcp_gcp(vec , q , n , &pt->lcp.itermax , &pt->lcp.tol , z , &pt->lcp.iout ,  /* in  */
+            w , it_end , res , &info);                                          /* out */
 
-    latin_lcp(vec, q, &n, & pt->lcp.k_latin, & pt->lcp.itermax, & pt->lcp.tol, z, w, it_end , res , &info1);
+  else if (strcmp(pt->lcp.name , mot4) == 0)
 
-  else if (strcmp(pt->lcp.nom_method, mot5) == 0)
+    lcp_latin(vec , q , n , &pt->lcp.k_latin , &pt->lcp.itermax , &pt->lcp.tol , z ,   /* in  */
+              w , it_end , res , &info);                                              /* out */
+
+  else if (strcmp(pt->lcp.name , mot5) == 0)
   {
 
     // We assume that the LCP matrix M is symmetric
 
     printf("tol = %10.4e\n", pt->lcp.tol);
     pt->lcp.tol = 0.0000001;
-    qp_lcp(vec, q, &n, & pt->lcp.tol, z, w, &info1);
+    lcp_qp(vec , q , n , &pt->lcp.tol , z ,  /* in  */
+           w , &info);                      /* out */
 
-    //ql0001_()
   }
-  else if (strcmp(pt->lcp.nom_method , mot6) == 0)
+  else if (strcmp(pt->lcp.name , mot6) == 0)
   {
 
     // We assume that the LCP matrix M is not symmetric
 
     printf("tol = %10.4e\n", pt->lcp.tol);
     pt->lcp.tol = 0.0000001;
-    qpnonsym_lcp(vec , q , &n , &pt->lcp.tol , z , w , &info1);
+    lcp_nsqp(vec , q , n , &pt->lcp.tol , z ,  /* in  */
+             w , &info);                  /* out */
   }
-  else if (strcmp(pt->lcp.nom_method , mot7) == 0)
+  else if (strcmp(pt->lcp.name , mot7) == 0)
 
-    lexicolemke_lcp(vec , q , &n , &pt->lcp.itermax , z , &pt->lcp.iout ,  /* in  */
-                    w , it_end , res , &info1);                           /* out */
+    lcp_lexicolemke(vec , q , n , &pt->lcp.itermax , z , &pt->lcp.iout ,  /* in  */
+                    w , it_end , res , &info);                           /* out */
 
-  else printf("Warning : Unknown solving method : %s\n", pt->lcp.nom_method);
-
-  //clock_t t2=clock();
-  //printf("%.4lf seconds of processing\n", (t2-t1)/(double)CLOCKS_PER_SEC);
-
-  info = info1;
+  else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
 
   return info;
+
 }
