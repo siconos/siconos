@@ -26,10 +26,10 @@
 //
 //  The subroutine's call is due to the function lcp_solver:
 //
-//  int lcp_solver (float (*M)[maxcols],float * q, int n, methode *pt, float *z, float * w)
+//  int lcp_solver (float (*M)[maxcols],float * q, int n, method *pt, float *z, float * w)
 //
-//  where M is an n by n matrix, q an n-dimensional vector, n is the row dimension of M, and pt a pointer other a structure (methode), z and w are n-dimensional vector, the solutions of the lcp.
-//  methode is a variable with a structure type; this structure gives to the function lcp_solver, the name and the parameters (itermax, tol, k_latin) of the method we want to use.
+//  where M is an n by n matrix, q an n-dimensional vector, n is the row dimension of M, and pt a pointer other a structure (method), z and w are n-dimensional vector, the solutions of the lcp.
+//  method is a variable with a structure type; this structure gives to the function lcp_solver, the name and the parameters (itermax, tol, k_latin) of the method we want to use.
 //  This function return an interger:  0 successful return otherwise 1.
 //
 //
@@ -67,7 +67,7 @@ void test_lcp_series(int n, double ** M, double *q)
   /////////////////////////////////
   printf("\n Test de GSNL\n");
 
-  static methode_lcp meth_lcp  = { "NLGS" , 1001 , 0.000001 , 0.6 , 1.0 , 0 , "N2"};
+  static method_lcp meth_lcp  = { "NLGS" , 1001 , 0.000001 , 0.6 , 1.0 , 0 , "N2"};
 
   printf("\n we go in the function solve\n");
   // for (i=0;i<n*n;i++)  printf("vec[%i] = %g\n",i,vec[i]);
@@ -86,7 +86,7 @@ void test_lcp_series(int n, double ** M, double *q)
   /////////////////////////////////
   printf("\n Test de Gcp\n");
 
-  static methode_lcp meth_lcp2  = { "CPG" , 1000 , 0.000001 , 0.6 , 1.0 , 0 , "N2"};
+  static method_lcp meth_lcp2  = { "CPG" , 1000 , 0.000001 , 0.6 , 1.0 , 0 , "N2"};
 
   printf("\n we go in the function solve\n");
   //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
@@ -103,7 +103,7 @@ void test_lcp_series(int n, double ** M, double *q)
   // third test //////////////////
   /////////////////////////////////
   printf("\n Test de Latin\n");
-  static methode_lcp meth_lcp3  = { "Latin" , 1000 , -0.000001 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp meth_lcp3  = { "Latin" , 1000 , -0.000001 , 0.7 , 1.0 , 0 , "N2"};
   printf("\n we go in the function\n");
   // for (i=0;i<n*n;i++)  printf("vec[%i] = %g\n",i,vec[i]);
 
@@ -120,7 +120,7 @@ void test_lcp_series(int n, double ** M, double *q)
   // Lemke test //////////////////
   /////////////////////////////////
   printf("\n Test de Lemke\n");
-  static methode_lcp meth_lcp4 = {"Lemke", 1000 , -0.000001 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp meth_lcp4 = {"Lemke", 1000 , -0.000001 , 0.7 , 1.0 , 0 , "N2"};
   //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
   info = lcp_solver(vec, q, &n, &meth_lcp4, z, w, &iter, &criteria);
   for (i = 0; i < n; i++)
@@ -134,7 +134,7 @@ void test_lcp_series(int n, double ** M, double *q)
 
 
   printf("\n Test du Qp\n");
-  static methode_lcp meth_lcp5 = {"QP", 1000 , 0.000001 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp meth_lcp5 = {"QP", 1000 , 0.000001 , 0.7 , 1.0 , 0 , "N2"};
   //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
   info = lcp_solver(vec, q, &n, &meth_lcp5, z, w, &iter, &criteria);
   for (i = 0; i < n; i++)
@@ -150,7 +150,7 @@ void test_lcp_series(int n, double ** M, double *q)
 
 
   printf("\n Test du Qpnonsym\n");
-  static methode_lcp meth_lcp6 = {"NSQP", 1000 , -0.000001 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp meth_lcp6 = {"NSQP", 1000 , -0.000001 , 0.7 , 1.0 , 0 , "N2"};
 
 
   printf("\n we go in the function lcp_solver\n");
@@ -171,7 +171,7 @@ void test_lcp_series(int n, double ** M, double *q)
 
   printf("\n Test du LexicoLemke\n");
 
-  static methode_lcp meth_lcp7 = {"LexicoLemke", 1000 , 0.000001 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp meth_lcp7 = {"LexicoLemke", 1000 , 0.000001 , 0.7 , 1.0 , 0 , "N2"};
 
   //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
   info = lcp_solver(vec, q, &n, &meth_lcp7, z, w, &iter, &criteria);

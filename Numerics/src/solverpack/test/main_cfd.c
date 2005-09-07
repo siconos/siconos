@@ -48,11 +48,11 @@
 //
 //  The subroutine's call is due to the function solve_cfd:
 //
-//   int solve_cfd (double (*M)[maxcols],double *q,int n,methode *pt,double z[],double w[])
+//   int solve_cfd (double (*M)[maxcols],double *q,int n,method *pt,double z[],double w[])
 //
 //  where M is an n by n matrix, q an n-dimensional vector, n is the row
-//  dimension of M, and pt a pointer other a structure ( methode).
-//  methode is a variable with a structure type; this structure gives to the
+//  dimension of M, and pt a pointer other a structure ( method).
+//  method is a variable with a structure type; this structure gives to the
 //  function solve_lcp, the name and the parameters (itermax, tol, k_latin,..)
 //  of the method we want to use.
 //  This function return an interger:  0 successful return otherwise 1.
@@ -84,10 +84,10 @@ main()
   double qi, Mij, mumu;
   char val[14], vall[14];
   char nom[64] = "Gsnl"; //Cfd_latin";//Gsnl";//Lemke";
-  methode *pt;
-  // static methode_cfd meth_cfd = {"Gnsl",1000,0.0000001,0.7,0.6,dim_i,dim_tt,dim_c,};
+  method *pt;
+  // static method_cfd meth_cfd = {"Gnsl",1000,0.0000001,0.7,0.6,dim_i,dim_tt,dim_c,};
 
-  methode meth_cfd;
+  method meth_cfd;
 
   // meth_cfd.cfd.nom_method = nom;
   meth_cfd.cfd.itermax = 1000;

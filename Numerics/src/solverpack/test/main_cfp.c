@@ -33,12 +33,12 @@
 //
 //  The subroutine's call is due to the function solve_cfp:
 //
-//  int solve_cfp (double (*M)[maxcols],double *q,int n,methode *pt, double *z,double *w)
+//  int solve_cfp (double (*M)[maxcols],double *q,int n,method *pt, double *z,double *w)
 //
 //  where M is an n by n matrix, q an n-dimensional vector, n is the row dimension
-//  of M, and pt a pointer other a structure ( methode). z and w are n-dimensional
+//  of M, and pt a pointer other a structure ( method). z and w are n-dimensional
 //  vectors solution.
-//  methode is a variable with a structure type; this structure gives to the function
+//  method is a variable with a structure type; this structure gives to the function
 // solve_pcf, the name and the parameters (itermax, tol, k_latin,...) of the method we want to use.
 //  This function return an interger:  0 successful return otherwise 1.
 //
@@ -62,7 +62,7 @@ main()
   double(*M)[n];
   double qi, Mij;
   char val[14], vall[14];
-  static methode_cfp meth_cfp  = {"Gsnl", 109, -0.0001, 0.3, 0.7};
+  static method_cfp meth_cfp  = {"Gsnl", 109, -0.0001, 0.3, 0.7};
 
   if ((f1 = fopen("DATA/MM_gran_mu12.dat", "r")) == NULL)
   {
@@ -144,7 +144,7 @@ main()
   ///////////////////////////////////////
   // second test ////////////////////////
   ///////////////////////////////////////
-  static methode_cfp meth_cfp2  = {"Latin", 1000, 0.0001, 0.3, 35};
+  static method_cfp meth_cfp2  = {"Latin", 1000, 0.0001, 0.3, 35};
 
   if ((f1 = fopen("DATA/MM_gran_mu12.dat", "r")) == NULL)
   {
@@ -226,7 +226,7 @@ main()
   ///////////////////////////////////////
   //   third test ////////////////////////
   ///////////////////////////////////////
-  static methode_cfp meth_cfp3  = {"Gcp", 1000, 0.0001, 0.3, 0.7};
+  static method_cfp meth_cfp3  = {"Gcp", 1000, 0.0001, 0.3, 0.7};
 
   if ((f1 = fopen("DATA/MM_gran_mu12.dat", "r")) == NULL)
   {

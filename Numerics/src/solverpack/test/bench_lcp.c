@@ -26,11 +26,11 @@
  *
  *  The subroutine's call is due to the function lcp_solver:
  *
- *  int lcp_solver (float (*M)[maxcols],float * q, int n, methode *pt, float *z, float * w)
+ *  int lcp_solver (float (*M)[maxcols],float * q, int n, method *pt, float *z, float * w)
  *
  *  where M is an n by n matrix, q an n-dimensional vector, n is the row dimension of M,
- *  and pt a pointer other a structure (methode), z and w are n-dimensional vector, the solutions of the lcp.
- *  methode is a variable with a structure type; this structure gives to the function lcp_solver,
+ *  and pt a pointer other a structure (method), z and w are n-dimensional vector, the solutions of the lcp.
+ *  method is a variable with a structure type; this structure gives to the function lcp_solver,
  *  the name and the parameters (itermax, tol, k_latin) of the method we want to use.
  *  This function return an interger:  0 successful return otherwise 1.
  *
@@ -67,17 +67,17 @@ int main(void)
   double criteria;
 
   /*
-   * methode declaration :
+   * method declaration :
    *
-   * methode 1 for Gsnl
-   * methode 2 for Cpg
-   * methode 3 for lexicolemke
+   * method 1 for Gsnl
+   * method 2 for Cpg
+   * method 3 for lexicolemke
    *
    */
 
-  static methode_lcp meth_lcp1 = { "NLGS"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
-  static methode_lcp meth_lcp2 = { "CPG"         , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
-  static methode_lcp meth_lcp3 = { "LexicoLemke" , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
+  static method_lcp meth_lcp1 = { "NLGS"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
+  static method_lcp meth_lcp2 = { "CPG"         , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
+  static method_lcp meth_lcp3 = { "LexicoLemke" , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
 
   /****************************************************************/
   /****************************************************************/
