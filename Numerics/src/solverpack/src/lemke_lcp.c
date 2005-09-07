@@ -5,7 +5,7 @@
 
 
 
-/*!\file lemke_lcp.c
+/*!\file lcp_lemke.c
 
 
    This subroutine allows the resolution of LCP (Linear Complementary Problem).
@@ -23,11 +23,10 @@ M z- w=q\\
   here M is an n by n  matrix, q an n-dimensional vector, w an n-dimensional  vector and z an n-dimensional vector.
 */
 
-double ddot_(int*, double [], int*, double[], int*);
-/*!\fn  lemke_lcp(double vec[], double *qq,int *nn, int *itermax, double *z, double *w, int *it_end, double *res, int *info )
+/*!\fn  lcp_lemke(double vec[], double *qq,int *nn, int *itermax, double *z, double *w, int *it_end, double *res, int *info )
 
 
-   lemke_lcp is a direct solver for LCP.
+   lcp_lemke is a direct solver for LCP.
 
 
    \param vec On enter a double vector containing the components of the double matrix with a fortran90 allocation.
@@ -42,7 +41,7 @@ double ddot_(int*, double [], int*, double[], int*);
    \author Nineb Sheherazade.
 */
 
-lemke_lcp(double *vec, double *qqq, int *nn, int *itermax, double *zlem, double *wlem, int *it_end, double *res, int *info)
+void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem, double *wlem, int *it_end, double *res, int *info)
 {
 
 
