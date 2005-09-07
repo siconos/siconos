@@ -64,7 +64,7 @@ main()
   char val[14], vall[14];
   static methode_cfp meth_cfp  = {"Gsnl", 109, -0.0001, 0.3, 0.7};
 
-  if ((f1 = fopen("MM_gran_mu12.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/MM_gran_mu12.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
@@ -96,7 +96,7 @@ main()
 
 
 
-  if ((f2 = fopen("qq_gran_mu12.dat", "r")) == NULL)
+  if ((f2 = fopen("DATA/qq_gran_mu12.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);
@@ -146,7 +146,7 @@ main()
   ///////////////////////////////////////
   static methode_cfp meth_cfp2  = {"Latin", 1000, 0.0001, 0.3, 35};
 
-  if ((f1 = fopen("MM_gran_mu12.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/MM_gran_mu12.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
@@ -178,7 +178,7 @@ main()
 
 
 
-  if ((f2 = fopen("qq_gran_mu12.dat", "r")) == NULL)
+  if ((f2 = fopen("DATA/qq_gran_mu12.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);
@@ -228,7 +228,7 @@ main()
   ///////////////////////////////////////
   static methode_cfp meth_cfp3  = {"Gcp", 1000, 0.0001, 0.3, 0.7};
 
-  if ((f1 = fopen("MM_gran_mu12.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/MM_gran_mu12.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
@@ -260,7 +260,7 @@ main()
 
 
 
-  if ((f2 = fopen("qq_gran_mu12.dat", "r")) == NULL)
+  if ((f2 = fopen("DATA/qq_gran_mu12.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);

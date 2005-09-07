@@ -71,7 +71,7 @@ void test1(void)
 
 
 
-  if ((f1 = fopen("M_relay.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/M_relay.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
@@ -112,21 +112,21 @@ void test1(void)
 
 
 
-  if ((f2 = fopen("q_relay.dat", "r")) == NULL)
+  if ((f2 = fopen("DATA/q_relay.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);
   }
 
 
-  if ((f5 = fopen("a_relay.dat", "r")) == NULL)
+  if ((f5 = fopen("DATA/a_relay.dat", "r")) == NULL)
   {
     perror("fopen 5");
     exit(5);
   }
 
 
-  if ((f6 = fopen("b_relay.dat", "r")) == NULL)
+  if ((f6 = fopen("DATA/b_relay.dat", "r")) == NULL)
   {
     perror("fopen 6");
     exit(6);
@@ -229,7 +229,7 @@ void test2(void)
 
 
 
-  if ((f1 = fopen("M_relay.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/M_relay.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
@@ -271,21 +271,21 @@ void test2(void)
 
 
 
-  if ((f2 = fopen("q_relay.dat", "r")) == NULL)
+  if ((f2 = fopen("DATA/q_relay.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);
   }
 
 
-  if ((f5 = fopen("a_relay.dat", "r")) == NULL)
+  if ((f5 = fopen("DATA/a_relay.dat", "r")) == NULL)
   {
     perror("fopen 5");
     exit(5);
   }
 
 
-  if ((f6 = fopen("b_relay.dat", "r")) == NULL)
+  if ((f6 = fopen("DATA/b_relay.dat", "r")) == NULL)
   {
     perror("fopen 6");
     exit(6);

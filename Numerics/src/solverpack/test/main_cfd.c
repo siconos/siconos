@@ -101,7 +101,7 @@ main()
 
 
 
-  if ((f1 = fopen("K1_mu.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/K1_mu.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
@@ -139,7 +139,7 @@ main()
 
 
 
-  if ((f2 = fopen("J1_mu.dat", "r")) == NULL)
+  if ((f2 = fopen("DATA/J1_mu.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);
@@ -167,7 +167,7 @@ main()
 
 
 
-  if ((f3 = fopen("F1_mu.dat", "r")) == NULL)
+  if ((f3 = fopen("DATA/F1_mu.dat", "r")) == NULL)
   {
     perror("fopen 3");
     exit(3);
@@ -184,7 +184,7 @@ main()
 
 
 
-  if ((f4 = fopen("ddl_i_mu.dat", "r")) == NULL)
+  if ((f4 = fopen("DATA/ddl_i_mu.dat", "r")) == NULL)
   {
     perror("fopen 4");
     exit(4);
@@ -203,7 +203,7 @@ main()
 
 
 
-  if ((f5 = fopen("ddl_n_mu.dat", "r")) == NULL)
+  if ((f5 = fopen("DATA/ddl_n_mu.dat", "r")) == NULL)
   {
     perror("fopen 5");
     exit(5);
@@ -221,7 +221,7 @@ main()
 
 
 
-  if ((f6 = fopen("ddl_t_mu.dat", "r")) == NULL)
+  if ((f6 = fopen("DATA/ddl_t_mu.dat", "r")) == NULL)
   {
     perror("fopen 6");
     exit(6);
@@ -240,7 +240,7 @@ main()
 
 
 
-  if ((f7 = fopen("ddl_c_mu.dat", "r")) == NULL)
+  if ((f7 = fopen("DATA/ddl_c_mu.dat", "r")) == NULL)
   {
     perror("fopen 7");
     exit(7);

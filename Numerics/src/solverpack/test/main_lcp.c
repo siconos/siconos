@@ -24,12 +24,12 @@
 //        _ fail shows the termination reason, it's an integer
 //        _ info shows the trmination reason (0 successful otherwise 1), it's an integer.
 //
-//  The subroutine's call is due to the function solve_lcp:
+//  The subroutine's call is due to the function lcp_solver:
 //
-//  int solve_lcp (float (*M)[maxcols],float * q, int n, methode *pt, float *z, float * w)
+//  int lcp_solver (float (*M)[maxcols],float * q, int n, methode *pt, float *z, float * w)
 //
 //  where M is an n by n matrix, q an n-dimensional vector, n is the row dimension of M, and pt a pointer other a structure (methode), z and w are n-dimensional vector, the solutions of the lcp.
-//  methode is a variable with a structure type; this structure gives to the function solve_lcp, the name and the parameters (itermax, tol, k_latin) of the method we want to use.
+//  methode is a variable with a structure type; this structure gives to the function lcp_solver, the name and the parameters (itermax, tol, k_latin) of the method we want to use.
 //  This function return an interger:  0 successful return otherwise 1.
 //
 //
@@ -67,13 +67,13 @@ void test_lcp_series(int n, double ** M, double *q)
   /////////////////////////////////
   printf("\n Test de GSNL\n");
 
-  static methode_lcp meth_lcp  = { "Gsnl" , 1001 , 0.000001 , 0.6 , 1.0 , 0 , "N2"};
+  static methode_lcp meth_lcp  = { "NLGS" , 1001 , 0.000001 , 0.6 , 1.0 , 0 , "N2"};
 
   printf("\n we go in the function solve\n");
   // for (i=0;i<n*n;i++)  printf("vec[%i] = %g\n",i,vec[i]);
 
 
-  info = solve_lcp(vec, q, &n, &meth_lcp, z, w, &iter, &criteria);
+  info = lcp_solver(vec , q , &n , &meth_lcp , z , w , &iter , &criteria);
 
   for (i = 0; i < n; i++)
     printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
@@ -86,12 +86,12 @@ void test_lcp_series(int n, double ** M, double *q)
   /////////////////////////////////
   printf("\n Test de Gcp\n");
 
-  static methode_lcp meth_lcp2  = { "Gcp" , 1000 , 0.000001 , 0.6 , 1.0 , 0 , "N2"};
+  static methode_lcp meth_lcp2  = { "CPG" , 1000 , 0.000001 , 0.6 , 1.0 , 0 , "N2"};
 
   printf("\n we go in the function solve\n");
   //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
 
-  info = solve_lcp(vec, q, &n, &meth_lcp2, z, w, &iter, &criteria);
+  info = lcp_solver(vec, q, &n, &meth_lcp2, z, w, &iter, &criteria);
 
   for (i = 0; i < n; i++)
     printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
@@ -103,11 +103,11 @@ void test_lcp_series(int n, double ** M, double *q)
   // third test //////////////////
   /////////////////////////////////
   printf("\n Test de Latin\n");
-  static methode_lcp meth_lcp3  = { "Latin" , 1000, -0.0000001, 0.7};
+  static methode_lcp meth_lcp3  = { "Latin" , 1000 , -0.000001 , 0.7 , 1.0 , 0 , "N2"};
   printf("\n we go in the function\n");
   // for (i=0;i<n*n;i++)  printf("vec[%i] = %g\n",i,vec[i]);
 
-  info = solve_lcp(vec, q, &n, &meth_lcp3, z, w, &iter, &criteria);
+  info = lcp_solver(vec, q, &n, &meth_lcp3, z, w, &iter, &criteria);
 
   for (i = 0; i < n; i++)
     printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
@@ -120,9 +120,9 @@ void test_lcp_series(int n, double ** M, double *q)
   // Lemke test //////////////////
   /////////////////////////////////
   printf("\n Test de Lemke\n");
-  static methode_lcp meth_lcp4 = {"Lemke", 1000, -0.0000001, 0.7};
+  static methode_lcp meth_lcp4 = {"Lemke", 1000 , -0.000001 , 0.7 , 1.0 , 0 , "N2"};
   //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
-  info = solve_lcp(vec, q, &n, &meth_lcp4, z, w, &iter, &criteria);
+  info = lcp_solver(vec, q, &n, &meth_lcp4, z, w, &iter, &criteria);
   for (i = 0; i < n; i++)
     printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
   printf("\n Info is %d\n", info);
@@ -134,9 +134,9 @@ void test_lcp_series(int n, double ** M, double *q)
 
 
   printf("\n Test du Qp\n");
-  static methode_lcp meth_lcp5 = {"Qp", 1000, 0.001, 0.7, 1.0, 0};
+  static methode_lcp meth_lcp5 = {"QP", 1000 , 0.000001 , 0.7 , 1.0 , 0 , "N2"};
   //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
-  info = solve_lcp(vec, q, &n, &meth_lcp5, z, w, &iter, &criteria);
+  info = lcp_solver(vec, q, &n, &meth_lcp5, z, w, &iter, &criteria);
   for (i = 0; i < n; i++)
     printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
 
@@ -150,13 +150,13 @@ void test_lcp_series(int n, double ** M, double *q)
 
 
   printf("\n Test du Qpnonsym\n");
-  static methode_lcp meth_lcp6 = {"Qpnonsym", 1000, 0.001, 0.7};
+  static methode_lcp meth_lcp6 = {"NSQP", 1000 , -0.000001 , 0.7 , 1.0 , 0 , "N2"};
 
 
-  printf("\n we go in the function solve_lcp\n");
+  printf("\n we go in the function lcp_solver\n");
   //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
 
-  info = solve_lcp(vec, q, &n, &meth_lcp6, z, w, &iter, &criteria);
+  info = lcp_solver(vec, q, &n, &meth_lcp6, z, w, &iter, &criteria);
 
   for (i = 0; i < n; i++)
     printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
@@ -171,10 +171,10 @@ void test_lcp_series(int n, double ** M, double *q)
 
   printf("\n Test du LexicoLemke\n");
 
-  static methode_lcp meth_lcp7 = {"LexicoLemke", 1000, 1e-8, 0.7, 1.0, 0};
+  static methode_lcp meth_lcp7 = {"LexicoLemke", 1000 , 0.000001 , 0.7 , 1.0 , 0 , "N2"};
 
   //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
-  info = solve_lcp(vec, q, &n, &meth_lcp7, z, w, &iter, &criteria);
+  info = lcp_solver(vec, q, &n, &meth_lcp7, z, w, &iter, &criteria);
   for (i = 0; i < n; i++)
     printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
   printf("\n Info is %d\n", info);
@@ -206,7 +206,7 @@ void testmmc(void)
   double **M;
   // computation of the size of the problem
   n = 0;
-  if ((f1 = fopen("MM_mmc_mu2.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/MM_mmc_mu2.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
@@ -239,13 +239,13 @@ void testmmc(void)
 
   // Data loading of M and q
 
-  if ((f1 = fopen("MM_mmc_mu2.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/MM_mmc_mu2.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
   }
 
-  if ((f2 = fopen("qq_mmc_mu2.dat", "r")) == NULL)
+  if ((f2 = fopen("DATA/qq_mmc_mu2.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);
@@ -472,7 +472,7 @@ void testmathieu1(void)
 
   // Data loading of M and q
   data = malloc(dimM * dimM * dimM * sizeof(double));
-  if ((f1 = fopen("mathieu.m1.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/mathieu.m1.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
@@ -497,7 +497,7 @@ void testmathieu1(void)
     for (j = 0; j < dimM; j++)
       M[i][j] = data[i * dimM + j];
 
-  if ((f1 = fopen("mathieu.q1.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/mathieu.q1.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);

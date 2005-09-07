@@ -11,10 +11,10 @@
  *
  *  This system of equations and inequalities is solved thanks to subroutine_lcp:
  *
- *        lexicolemke_lcp (M,q,n,itermax,z,w,it_end,res,info)
- *        gsnl_lcp(M,q,n,itermax,tol,z,w,it_end,res,info)
- *        gcp_lcp(M,q,n,itermax,tol,z,w,it_end,res,info)
- *        qp_lcp(M,q,n,res,z,w,fail)
+ *        lcp_lexicolemke(M,q,n,itermax,z,w,it_end,res,info)
+ *        lcp_gsnl(M,q,n,itermax,tol,z,w,it_end,res,info)
+ *        lcp_gcp(M,q,n,itermax,tol,z,w,it_end,res,info)
+ *        lcp_qp(M,q,n,res,z,w,fail)
  *
  *  where _ itermax is the maximum iterations required, it's an integer
  *        _ res is the residue, it's a float
@@ -24,13 +24,13 @@
  *        _ fail shows the termination reason, it's an integer
  *        _ info shows the trmination reason (0 successful otherwise 1), it's an integer.
  *
- *  The subroutine's call is due to the function solve_lcp:
+ *  The subroutine's call is due to the function lcp_solver:
  *
- *  int solve_lcp (float (*M)[maxcols],float * q, int n, methode *pt, float *z, float * w)
+ *  int lcp_solver (float (*M)[maxcols],float * q, int n, methode *pt, float *z, float * w)
  *
  *  where M is an n by n matrix, q an n-dimensional vector, n is the row dimension of M,
  *  and pt a pointer other a structure (methode), z and w are n-dimensional vector, the solutions of the lcp.
- *  methode is a variable with a structure type; this structure gives to the function solve_lcp,
+ *  methode is a variable with a structure type; this structure gives to the function lcp_solver,
  *  the name and the parameters (itermax, tol, k_latin) of the method we want to use.
  *  This function return an interger:  0 successful return otherwise 1.
  *
@@ -75,8 +75,8 @@ int main(void)
    *
    */
 
-  static methode_lcp meth_lcp1 = { "Gsnl"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
-  static methode_lcp meth_lcp2 = { "Gcp"         , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
+  static methode_lcp meth_lcp1 = { "NLGS"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
+  static methode_lcp meth_lcp2 = { "CPG"         , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
   static methode_lcp meth_lcp3 = { "LexicoLemke" , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
 
   /****************************************************************/
@@ -148,7 +148,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           NLGS   : ");
@@ -160,7 +160,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           CPG    : ");
@@ -172,7 +172,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           Lemke  : ");
@@ -254,7 +254,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           NLGS   : ");
@@ -266,7 +266,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           CPG    : ");
@@ -278,7 +278,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           Lemke  : ");
@@ -360,7 +360,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           NLGS   : ");
@@ -372,7 +372,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           CPG    : ");
@@ -384,7 +384,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           Lemke  : ");
@@ -466,7 +466,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           NLGS   : ");
@@ -478,7 +478,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           CPG    : ");
@@ -490,7 +490,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           Lemke  : ");
@@ -572,7 +572,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           NLGS   : ");
@@ -584,7 +584,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           CPG    : ");
@@ -596,7 +596,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           Lemke  : ");
@@ -678,7 +678,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           NLGS   : ");
@@ -690,7 +690,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           CPG    : ");
@@ -702,7 +702,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           Lemke  : ");
@@ -784,7 +784,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           NLGS   : ");
@@ -796,7 +796,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           CPG    : ");
@@ -808,7 +808,7 @@ int main(void)
 
   for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
 
-  info = solve_lcp(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
+  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
   printf("\n           Lemke  : ");

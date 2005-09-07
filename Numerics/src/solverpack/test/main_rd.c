@@ -71,7 +71,7 @@ main()
 
 
 
-  if ((f1 = fopen("M_relay_rd.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/M_relay_rd.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
@@ -112,21 +112,21 @@ main()
 
 
 
-  if ((f2 = fopen("q_relay_rd.dat", "r")) == NULL)
+  if ((f2 = fopen("DATA/q_relay_rd.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);
   }
 
 
-  if ((f5 = fopen("a_relay_rd.dat", "r")) == NULL)
+  if ((f5 = fopen("DATA/a_relay_rd.dat", "r")) == NULL)
   {
     perror("fopen 5");
     exit(5);
   }
 
 
-  if ((f6 = fopen("b_relay_rd.dat", "r")) == NULL)
+  if ((f6 = fopen("DATA/b_relay_rd.dat", "r")) == NULL)
   {
     perror("fopen 6");
     exit(6);
