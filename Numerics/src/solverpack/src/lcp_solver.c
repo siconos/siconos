@@ -66,7 +66,7 @@ int lcp_solver(double *vec, double *q , int *n , methode *pt , double *z , doubl
 
   else if (strcmp(pt->lcp.name , mot3) == 0)
 
-    lcp_gcp(vec , q , n , &pt->lcp.itermax , &pt->lcp.tol , z , &pt->lcp.iout ,  /* in  */
+    lcp_cpg(vec , q , n , &pt->lcp.itermax , &pt->lcp.tol , z , &pt->lcp.iout ,  /* in  */
             w , it_end , res , &info);                                          /* out */
 
   else if (strcmp(pt->lcp.name , mot4) == 0)
