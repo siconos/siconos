@@ -9,8 +9,8 @@
  *   \author Nineb Sheherazade and Dubois Frederic.
  */
 
-/*!\struct methode_rp
-  \brief A type definition for a structure methode_rp.
+/*!\struct method_rp
+  \brief A type definition for a structure method_rp.
 
   \param char * : nom_method A pointer over characters, the name of the solver.
   \param int : itermax The maximum iterations.
@@ -29,11 +29,11 @@ typedef struct
   double *a;
   double *b;
   double k_latin;
-} methode_rp;
+} method_rp;
 
 
-/*!\struct methode_rd
-   \brief A type definition for a structure methode_rd.
+/*!\struct method_rd
+   \brief A type definition for a structure method_rd.
 
    \param char* : nom_method A pointer over characters, the name of the solver.
    \param int : itermax The maximum iterations
@@ -52,10 +52,10 @@ typedef struct
   double *a;
   double *b;
   double k_latin;
-} methode_rd;
+} method_rd;
 
-/*!\struct methode_lcp
- *  \brief A type definition for a structure methode_lcp.
+/*!\struct method_lcp
+ *  \brief A type definition for a structure method_lcp.
  *
  * \param char*  : nom_method A pointer over characters, the name of the solver.
  * \param int    : itermax The maximum iterations.
@@ -76,11 +76,11 @@ typedef struct
   int    iout;
   char   normType[64];
 
-} methode_lcp;
+} method_lcp;
 
 
-/*!\struct methode_cfp
- * \brief A type definition for a structure methode_cfp.
+/*!\struct method_cfp
+ * \brief A type definition for a structure method_cfp.
  *
  * \param char* : nom_method A pointer over characters, the name of the solver.
  * \param int : itermax The maximum iterations.
@@ -101,10 +101,10 @@ typedef struct
   double mu;
   double k_latin;
 
-} methode_cfp;
+} method_cfp;
 
-/*!\struct methode_cfd
- * \brief A type definition for a structure methode_cfd.
+/*!\struct method_cfd
+ * \brief A type definition for a structure method_cfd.
  *
  * \param char* : nom_method A pointer over characters, the name of the solver.
  * \param int : itermax The maximum iterations.
@@ -132,34 +132,34 @@ typedef struct
   int dim_c;
   int dim_tt;
   int dim_n;
-} methode_cfd;
+} method_cfd;
 
-/*!\union methode
- * \brief A type definition for a union methode.
+/*!\union method
+ * \brief A type definition for a union method.
  *
  *
- * \param methode_rp  : rp is a method_rp structure .
- * \param methode_rd  : rd is a method_rd structure .
- * \param methode_lcp : lcp is a method_lpc structure .
- * \param methode_cfp : cfp is a method_cfp structure .
- * \param methode_cfd : cfd is a method_cfd structure .
- * \param methode_qp  : qp is a method_qp structure .
+ * \param method_rp  : rp is a method_rp structure .
+ * \param method_rd  : rd is a method_rd structure .
+ * \param method_lcp : lcp is a method_lpc structure .
+ * \param method_cfp : cfp is a method_cfp structure .
+ * \param method_cfd : cfd is a method_cfd structure .
+ * \param method_qp  : qp is a method_qp structure .
  *
  */
 
 typedef union
 {
 
-  methode_rp rp;
-  methode_rd rd;
-  methode_lcp lcp;
-  methode_cfp cfp;
-  methode_cfd cfd;
+  method_rp rp;
+  method_rd rd;
+  method_lcp lcp;
+  method_cfp cfp;
+  method_cfd cfd;
   /* \todo method_qp does not exist
    */
-  /* methode_qp qp; */
+  /* method_qp qp; */
 
-} methode;
+} method;
 
 /*
  * header for C++ compiling / and C compiling
@@ -173,7 +173,7 @@ typedef union
 
 /**************** LCP *********************/
 
-extern "C" int lcp_solver(double *vec, double *q , int *n , methode *pt , double *z , double *w , int *it_end , double *res);
+extern "C" int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w , int *it_end , double *res);
 
 extern "C" void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem,
                           double *wlem, int *it_end, double *res, int *info);
@@ -181,7 +181,7 @@ extern "C" void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, doubl
 extern "C" void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , double *omega , int *ispeak , double *z ,
                          double *w , int *it_end , double *res , int *info);
 
-extern "C" void lcp_gcp(double *vec , double *q , int *nn , int *itermax , double *tol , double *z , int *ispeak ,
+extern "C" void lcp_cpg(double *vec , double *q , int *nn , int *itermax , double *tol , double *z , int *ispeak ,
                         double *w , int *it_end , double * res , int *info);
 
 extern "C" void lcp_latin(double*, double*, int *, double *, int *, double *, double [], double[], int *, double *, int *);
@@ -195,13 +195,13 @@ extern "C" void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax ,
 
 /********************************************/
 
-extern "C" int solve_rp(double* , double* , int* , methode* , double* , double*);
+extern "C" int solve_rp(double* , double* , int* , method* , double* , double*);
 
-extern "C" int solve_rd(double* , double* , int* , methode* , double* , double*);
+extern "C" int solve_rd(double* , double* , int* , method* , double* , double*);
 
-extern "C" int solve_cfp(double* , double* , int* , methode* , double* , double*);
+extern "C" int solve_cfp(double* , double* , int* , method* , double* , double*);
 
-extern "C" int solve_cfd(double* , double* , int* , methode* , double* , double*);
+extern "C" int solve_cfd(double* , double* , int* , method* , double* , double*);
 
 extern "C" void rp_latin(double [], double *, int *, double *, double [], double [], int *,
                          double *, double [], double [], int *, double *, int *);
@@ -219,10 +219,10 @@ extern "C" void cfp_latin(double [], double [], int *, double *, double *, int *
 
 extern "C" void cfd_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
 
-extern "C" int cfd_lcp(int *, double *, methode *, double *, int *, int *, int * , int *, int *, int *,
+extern "C" int cfd_lcp(int *, double *, method *, double *, int *, int *, int * , int *, int *, int *,
                        int *, int *, double * , double * , int *, double *, double *);
 
-extern "C" int lcp_cfd(int *, double *, double *, methode *, double *, double *, int *, double *, int *,
+extern "C" int lcp_cfd(int *, double *, double *, method *, double *, double *, int *, double *, int *,
                        int *, int *, int *,  int *, int *, int *, double *, double *);
 
 #endif
@@ -233,14 +233,14 @@ extern "C" int lcp_cfd(int *, double *, double *, methode *, double *, double *,
 /**@defgroup group1 LCP (Linear Complementary Problem)
  * @{
  *
- * \fn int extern solve_lcp (double*,double*,int *, methode *,double [],double [])
+ * \fn int extern solve_lcp (double*,double*,int *, method *,double [],double [])
  * \brief solve_lcp.c is a generic interface allowing the call of one of the @ref lcp solvers.
  * @brief
  *
  * solve_lcp.c is a generic interface allowing the call of one of the @ref lcp solvers.
  */
 
-extern int lcp_solver(double *vec, double *q , int *n , methode *pt , double *z , double *w , int *it_end , double *res);
+extern int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w , int *it_end , double *res);
 
 /**@}*/
 
@@ -270,14 +270,14 @@ qpnonsym_lcp.c
 */
 
 
-/** \fn int extern  solve_rp (double*,double*,int *,methode *, double [],double [])
+/** \fn int extern  solve_rp (double*,double*,int *,method *, double [],double [])
  *  \brief solve_rp() is a generic interface allowing the call of one of the @ref pr solvers.
  */
 /** @brief
 
     solve_rp() is a generic interface allowing the call of one of the @ref pr solvers.
 */
-extern int solve_rp(double*, double*, int *, methode *, double [], double []);
+extern int solve_rp(double*, double*, int *, method *, double [], double []);
 
 /**@}*/
 
@@ -299,14 +299,14 @@ rp_gsnl.c
 */
 
 
-/** \fn int extern  solve_rd (double*,double*,int *,methode *, double [],double [])
+/** \fn int extern  solve_rd (double*,double*,int *,method *, double [],double [])
  *  \brief solve_rd() is a generic interface allowing the call of one of the @ref dr solvers.
  */
 /** @brief
 
     solve_rd() is a generic interface allowing the call of one of the @ref dr solvers.
 */
-extern int solve_rd(double*, double*, int *, methode *, double [], double []);
+extern int solve_rd(double*, double*, int *, method *, double [], double []);
 
 /**@}*/
 
@@ -329,14 +329,14 @@ rd_gsnl.c
 */
 
 
-/** \fn int extern  solve_cfp (double*,double*,int *,methode *, double [],double [])
+/** \fn int extern  solve_cfp (double*,double*,int *,method *, double [],double [])
  *  \brief solve_cfp() is a generic interface allowing the call of one of the @ref pfc solvers.
  */
 /** @brief
 
     solve_cfp() is a generic interface allowing the call of one of the @ref pfc solvers.
 */
-extern int solve_cfp(double*, double*, int *, methode *, double [], double []);
+extern int solve_cfp(double*, double*, int *, method *, double [], double []);
 
 /**@}*/
 
@@ -359,16 +359,16 @@ cfp_gcp.c
 */
 
 
-/** \fn int extern solve_cfd (double*,double*,int *, methode *,double [],double [])
+/** \fn int extern solve_cfd (double*,double*,int *, method *,double [],double [])
  *  \brief solve_cfd() is a generic interface allowing the call of one of the @ref dfc solvers.
  */
 /** @brief
 
     solve_cfd() is a generic interface allowing the call of one of the @ref dfc solvers.
 */
-extern int solve_cfd(double*, double*, int *, methode *, double [], double []);
-//extern double solve_cfd2 (double*, double*,int *, methode *,double [],double []);
-//extern double solve_cfd3 (double*, double*,int *, methode *,double [],double []);
+extern int solve_cfd(double*, double*, int *, method *, double [], double []);
+//extern double solve_cfd2 (double*, double*,int *, method *,double [],double []);
+//extern double solve_cfd3 (double*, double*,int *, method *,double [],double []);
 
 
 /**@}*/
@@ -393,7 +393,7 @@ extern void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *z
 extern void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , double *omega , int *ispeak , double *z ,
                      double *w , int *it_end , double *res , int *info);
 
-extern void lcp_gcp(double *vec , double *q , int *nn , int *itermax , double *tol , int *ispeak , double *z ,
+extern void lcp_cpg(double *vec , double *q , int *nn , int *itermax , double *tol , int *ispeak , double *z ,
                     double *w , int *it_end , double * res , int *info);
 
 extern void lcp_latin(double*, double*, int *, double *, int *, double *, double [], double[], int *, double *, int *);
@@ -431,16 +431,16 @@ extern  cfd_latin(double[], double[], int *, double*, double*, int *, double*, d
 
 /* LCP SWITCH CFD */
 
-extern int cfd_lcp(int *, double *, methode *, double *, int *, int *, int * , int *, int *, int *, int *, int *, double * , double * , int *, double *, double *);
+extern int cfd_lcp(int *, double *, method *, double *, int *, int *, int * , int *, int *, int *, int *, int *, double * , double * , int *, double *, double *);
 
-extern int lcp_cfd(int *, double *, double *, methode *, double *, double *, int *, double *, int *, int *, int *, int *,  int *, int *, int *, double *, double *);
+extern int lcp_cfd(int *, double *, double *, method *, double *, double *, int *, double *, int *, int *, int *, int *,  int *, int *, int *, double *, double *);
 
 
 //extern cfp_gsnl (double [],double [],int *,double *,double *,double *, double [],double[],double *,double *,double*);
 
-//extern int cfd_lcp26 (int *,double *, methode *,double *,int *, int *,int * ,int *,int *, int *, int *,int *,double * , double * ,int *, double *,double *);
+//extern int cfd_lcp26 (int *,double *, method *,double *,int *, int *,int * ,int *,int *, int *, int *,int *,double * , double * ,int *, double *,double *);
 
-//extern void cfd_lcpfin (int *,double *, methode *,double *,int *, int *,int * ,int *,int *, int *, int *,int *,double * , double * ,int *, double *,double *);
+//extern void cfd_lcpfin (int *,double *, method *,double *,int *, int *,int * ,int *,int *, int *, int *,int *,double * , double * ,int *, double *,double *);
 
 //extern lcp_cfd (int *,double[],double[],double[],double[]);
 
@@ -450,9 +450,9 @@ extern int lcp_cfd(int *, double *, double *, methode *, double *, double *, int
 
 //extern cfd_latin2 (double[],double[],int *,double*,double*,double *,double*,double[],double[], double *,double*,double*);
 
-//extern void lcp_cfd (int *,double *,double *,methode *,double *, double *, double *,int *, int *, int *, int *, double *,double *);
+//extern void lcp_cfd (int *,double *,double *,method *,double *, double *, double *,int *, int *, int *, int *, double *,double *);
 
-//extern solve_qp (double [][maxcols],double [], int *, methode *, double [],double []);
+//extern solve_qp (double [][maxcols],double [], int *, method *, double [],double []);
 
 //extern int rp_latin(double [],double *,int *, double * ,double *,int *, double *,double[],double [],int *,double *,int *)  ;
 
@@ -460,9 +460,9 @@ extern int lcp_cfd(int *, double *, double *, methode *, double *, double *, int
 
 //extern cfd_lcp (int *,double*,double[],double[],double[],double[]);
 
-//extern void cfd_lcp (int *,double *, methode *,double *,int *,int *,int *,int *,double *, double *, double *,double *);
+//extern void cfd_lcp (int *,double *, method *,double *,int *,int *,int *,int *,double *, double *, double *,double *);
 
-//extern void cfd_lcp (int *,double *, methode *,double *,int *, int * ,int *,int * ,int *, int *, int *,int *,double *, double *, int *, double *,double *);
+//extern void cfd_lcp (int *,double *, method *,double *,int *, int * ,int *,int * ,int *, int *, int *,int *,double *, double *, int *, double *,double *);
 
 //lemke_lcp2 (double [],double [],int *,double *,double[],double[],double *, double *,double *);
 
@@ -471,7 +471,7 @@ extern int lcp_cfd(int *, double *, double *, methode *, double *, double *, int
 
 //extern gcp_lcp2 (double [],double [],int *,int *,double *,double [],double[],int *,double *,int *);
 
-//extern int lcp_cfd26 (int *,double *,double *,methode *,double *, double *, int *, double *,int *, int *, int *, int *,  int *, int *, int *, double *,double *);
+//extern int lcp_cfd26 (int *,double *,double *,method *,double *, double *, int *, double *,int *, int *, int *, int *,  int *, int *, int *, double *,double *);
 //} /* closing brace for extern */
 #endif
 

@@ -47,7 +47,7 @@
  *
  */
 
-void lcp_gcp(double *vec , double *q , int *nn , int *itermax , double *tol , int *ispeak , double *z ,
+void lcp_cpg(double *vec , double *q , int *nn , int *itermax , double *tol , int *ispeak , double *z ,
              double *w , int *it_end , double * res , int *info)
 {
 
