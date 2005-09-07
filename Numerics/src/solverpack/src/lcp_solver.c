@@ -79,8 +79,6 @@ int lcp_solver(double *vec, double *q , int *n , methode *pt , double *z , doubl
 
     // We assume that the LCP matrix M is symmetric
 
-    printf("tol = %10.4e\n", pt->lcp.tol);
-    pt->lcp.tol = 0.0000001;
     lcp_qp(vec , q , n , &pt->lcp.tol , z ,  /* in  */
            w , &info);                      /* out */
 
@@ -90,8 +88,6 @@ int lcp_solver(double *vec, double *q , int *n , methode *pt , double *z , doubl
 
     // We assume that the LCP matrix M is not symmetric
 
-    printf("tol = %10.4e\n", pt->lcp.tol);
-    pt->lcp.tol = 0.0000001;
     lcp_nsqp(vec , q , n , &pt->lcp.tol , z ,  /* in  */
              w , &info);                  /* out */
   }
