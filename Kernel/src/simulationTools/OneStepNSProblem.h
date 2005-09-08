@@ -25,7 +25,7 @@ extern std::string  DefaultSolver;
 extern std::string  DefaultAlgoName;
 extern std::string  DefaultAlgoNormType;
 extern double   DefaultAlgoTolerance;
-extern int    DefaultAlgoMaxIter;
+extern int  DefaultAlgoMaxIter;
 extern double   DefaultAlgoSearchDirection;
 
 /** \class OneStepNSProblem
@@ -62,8 +62,8 @@ public:
    *  \param string: solver name (optional)
    *  \param string: name of the solving method (optional but required if a solver is given)
    *  \param int : MaxIter (optional) required if a solver is given
-   *  \param double : Tolerance (optional) -> for Gsnl, Gcp, Latin
-   *  \param string : NormType (optional) -> for Gsnl, Gcp, Latin
+   *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
+   *  \param string : NormType (optional) -> for NLGS, Gcp, Latin
    *  \param double : SearchDirection (optional) -> for Latin
    */
   OneStepNSProblem(Strategy * , const std::string& = "none", const std::string& = "none",
@@ -253,8 +253,8 @@ public:
    *  \brief to fill the fields of the solvingMethod object
    *  \param string: name of the solving method
    *  \param int : MaxIter
-   *  \param double : Tolerance (optional) -> for Gsnl, Gcp, Latin
-   *  \param string : NormType (optional) -> for Gsnl, Gcp, Latin
+   *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
+   *  \param string : NormType (optional) -> for NLGS, Gcp, Latin
    *  \param double : SearchDirection (optional) -> for Latin
    *  \exception RuntimeException
    */
@@ -278,68 +278,64 @@ public:
   /** \fn void setLemkeAlgorithm(const std::string&, const double& = DefaultAlgoMaxIter)
    *   \brief sets the parameters for the lemke solving algorithm in the solvingMethod structure
    *   \param string : the solving method
-   *   \param unsigned int : the *tolerance* maxIter parameter
+   *   \param unsigned int : the max number of iterations
    */
   virtual void setLemkeAlgorithm(const std::string&, const unsigned int& = DefaultAlgoMaxIter);
 
   /** \fn void setLexicoLemkeAlgorithm(const std::string&, const double& = DefaultAlgoMaxIter)
    *   \brief sets the parameters for the lexicoLemke solving algorithm in the solvingMethod structure
    *   \param string : the solving method
-   *   \param  unsigned int: the *tolerance* maxIter parameter
+   *   \param  unsigned int: the max number of iterations
    */
   virtual void setLexicoLemkeAlgorithm(const std::string&, const unsigned int& = DefaultAlgoMaxIter);
 
-  /** \fn void setGsnlAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
+  /** \fn void setNLGSAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
    *                            const int& = DefaultAlgoMaxIter)
-   *   \brief sets the parameters for the gsnl solving algorithm in the solvingMethod structure
-   *   \param string : the solving method
-   *   \param double : the tolerance parameter
-   *   \param string : the norm type paramater
-   *   \param inte   : maxIter
+   *   \brief sets the parameters for the NLGS solving algorithm in the solvingMethod structure
+   *   \param string : solving method
+   *   \param double : tolerance
+   *   \param int    : max number of iterations
+   *   \param string : norm type (unused)
    */
-  virtual void setGsnlAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
-                                const int& = DefaultAlgoMaxIter);
+  virtual void setNLGSAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const int& = DefaultAlgoMaxIter,
+                                const std::string& = DefaultAlgoNormType);
 
-  /** \fn void setQpAlgorithm(const std::string&, const double& = DefaultAlgoTolerance)
-   *   \brief sets the parameters for the gsnl solving algorithm in the solvingMethod structure
-   *   \param string : the solving method
-   *   \param double : the tolerance parameter
-   *   \param string : the norm type paramater
-   *   \param inte   : maxIter
+  /** \fn void setQPAlgorithm(const std::string&, const double& = DefaultAlgoTolerance)
+   *   \brief sets the parameters for the QP solving algorithm in the solvingMethod structure
+   *   \param string : solving method
+   *   \param double : tolerance
    */
-  virtual void setQpAlgorithm(const std::string&, const double& = DefaultAlgoTolerance);
+  virtual void setQPAlgorithm(const std::string&, const double& = DefaultAlgoTolerance);
 
-  /** \fn void setQpnonsymAlgorithm(const std::string&, const double& = DefaultAlgoTolerance)
-   *   \brief sets the parameters for the gsnl solving algorithm in the solvingMethod structure
-   *   \param string : the solving method
-   *   \param double : the tolerance parameter
-   *   \param string : the norm type paramater
-   *   \param inte   : maxIter
+  /** \fn void setNSQPAlgorithm(const std::string&, const double& = DefaultAlgoTolerance)
+   *   \brief sets the parameters for the NSQP solving algorithm in the solvingMethod structure
+   *   \param string : solving method
+   *   \param double : tolerance
    */
-  virtual void setQpnonsymAlgorithm(const std::string&, const double& = DefaultAlgoTolerance);
+  virtual void setNSQPAlgorithm(const std::string&, const double& = DefaultAlgoTolerance);
 
-  /** \fn void setGcpAlgorithm( const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
+  /** \fn void setCPGAlgorithm( const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
    *                            const int& = DefaultAlgoMaxIter )
    *   \brief sets the parameters for the gcp solving algorithm in the solvingMethod structure
-   *   \param string : the kind of solving method
-   *   \param double : the tolerance parameter
-   *   \param string : the norm type paramater
-   *   \param int : the iterMax parameter
+   *   \param string : solving method
+   *   \param double : tolerance
+   *   \param int    : max number of iterations
+   *   \param string : norm type
    */
-  virtual void setGcpAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
-                               const int& = DefaultAlgoMaxIter);
+  virtual void setCPGAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const int& = DefaultAlgoMaxIter ,
+                               const std::string& = DefaultAlgoNormType);
 
-  /** \fn void setLatinAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
-   *         const int& = DefaultAlgoMaxIter, const double& = DefaultAlgoSearchDirection)
+  /** \fn void setLatinAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const int& = DefaultAlgoMaxIter,
+   *                             const std::string& = DefaultAlgoNormTypeconst, double& = DefaultAlgoSearchDirection)
    *   \brief sets the parameters for the lcp solfing algorithm in the solvingMethod structure
-   *   \param string : the kind of solving method
-   *   \param double : the tolerance parameter
-   *   \param string : the norm type paramater
-   *   \param int : the iterMax parameter
+   *   \param string : solving method
+   *   \param double : tolerance
+   *   \param int    : iterMax
+   *   \param string : norm type (unused)
    *   \param double : the search direction parameter
    */
-  virtual void setLatinAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
-                                 const int& = DefaultAlgoMaxIter, const double& = DefaultAlgoSearchDirection);
+  virtual void setLatinAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const int& = DefaultAlgoMaxIter,
+                                 const std::string& = DefaultAlgoNormType, const double& = DefaultAlgoSearchDirection);
 
   bool isOneStepNsProblemComplete();
 
@@ -366,7 +362,7 @@ protected:
   std::map< Interaction* , std::map<Interaction *, SiconosMatrix*> >  extraDiagonalBlocksMap  ;
 
   /** structure containing the structures of the numerous solving methods */
-  methode solvingMethod;
+  method solvingMethod;
 
   /** name of the solver to use */
   std::string solver;

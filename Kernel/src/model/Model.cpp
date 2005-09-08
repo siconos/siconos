@@ -49,8 +49,8 @@ Model::Model(char *xmlFile):
 
 // --- From a minimum set of data ---
 // -> without precision on strategy ... (usefull ?)
-Model::Model(double newT0, double newT, string newTitle, string newAuthor,
-             string newDescription, string newDate, string newSchema):
+Model::Model(const double& newT0, const double& newT, const string& newTitle, const string& newAuthor,
+             const string& newDescription, const string& newDate, const string& newSchema):
   t(newT0), t0(newT0), T(-1), strat(NULL), nsds(NULL), modelxml(NULL), title(newTitle),
   author(newAuthor), description(newDescription), date(newDate), xmlSchema(newSchema),
   isNsdsAllocatedIn(false), isStrategyAllocatedIn(false), isModelXmlAllocatedIn(false)

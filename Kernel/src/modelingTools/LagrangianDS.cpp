@@ -248,7 +248,8 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   isXAllocatedIn[5] = true;
   //
   // \todo proper link between LagrangianDS object and DS ones (vectorField ...)
-  // r = new SimpleVector(n);
+  r = new SimpleVector(n);
+  isRAllocatedIn[0] = true;
   // jacobianX = new SiconosMatrix(n,n);
 
   // VectorField
@@ -296,6 +297,14 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   static_cast<CompositeVector*>(x0)->addPtr(velocity0);
   static_cast<CompositeVector*>(xFree)->addPtr(qFree);
   static_cast<CompositeVector*>(xFree)->addPtr(velocityFree);
+  setComputeMassFunction("BasicPlugin.so", "computeMass");
+  setComputeFIntFunction("BasicPlugin.so", "computeFInt");
+  setComputeFExtFunction("BasicPlugin.so", "computeFExt");
+  setComputeNNLFunction("BasicPlugin.so", "computeNNL");
+  setComputeJacobianQFIntFunction("BasicPlugin.so", "computeJacobianQFInt");
+  setComputeJacobianVelocityFIntFunction("BasicPlugin.so", "computeJacobianVelocityFInt");
+  setComputeJacobianQNNLFunction("BasicPlugin.so", "computeJacobianQNNL");
+  setComputeJacobianVelocityNNLFunction("BasicPlugin.so", "computeJacobianVelocityNNL");
   OUT("LagrangianDS::LagrangianDS - From a minimum set of data\n");
 }
 
@@ -377,6 +386,13 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 
   //   --- plugins ---
   setComputeMassFunction(cShared.getPluginName(massName), cShared.getPluginFunctionName(massName));
+  setComputeFIntFunction("BasicPlugin.so", "computeFInt");
+  setComputeFExtFunction("BasicPlugin.so", "computeFExt");
+  setComputeNNLFunction("BasicPlugin.so", "computeNNL");
+  setComputeJacobianQFIntFunction("BasicPlugin.so", "computeJacobianQFInt");
+  setComputeJacobianVelocityFIntFunction("BasicPlugin.so", "computeJacobianVelocityFInt");
+  setComputeJacobianQNNLFunction("BasicPlugin.so", "computeJacobianQNNL");
+  setComputeJacobianVelocityNNLFunction("BasicPlugin.so", "computeJacobianVelocityNNL");
   OUT("LagrangianDS::LagrangianDS - From a minimum set of data\n");
 }
 

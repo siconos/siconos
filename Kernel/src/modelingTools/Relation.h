@@ -79,7 +79,7 @@ public:
   }
 
   /** \fn void setInteractionPtr(Interaction* i)
-   *  \brief allows to set the Interaction which contains this Relation
+   *  \brief set the Interaction which contains this Relation
    */
   inline void setInteractionPtr(Interaction* i)
   {

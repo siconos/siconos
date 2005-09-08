@@ -193,7 +193,6 @@ void LCP::initialize()
 {
 
   // This function performs all steps that are not time dependant
-
   // General initialize for OneStepNSProblem
   OneStepNSProblem::initialize();
 
@@ -235,7 +234,6 @@ void LCP::computeAllBlocks()
   vector<unsigned int> r; // relative degrees
   unsigned int rMax;
   vector<unsigned int> indexMin;
-
   // --- loop over all the interactions ---
   for (iter = listInteractions.begin(); iter != listInteractions.end(); ++iter)
   {
@@ -284,9 +282,6 @@ void LCP::computeAllBlocks()
         RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
     }
 
-    //  !!!!!!!! At the time, we only consider LinearDS-LinearTIR  !!!!!!!
-    // other cases have not been tested
-
     // get the relation of the current interaction and its type
     Relation * RCurrent = currentInteraction -> getRelationPtr();
     relationType = RCurrent->getType();
@@ -320,7 +315,7 @@ void LCP::computeAllBlocks()
         rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
         if (rMax == 0) rMax = 1 ; // warning: review r=0 case
         indexMin = topology->getIndexMin(linkedInteraction);
-        sizeBlock = (rMax - indexMin[0]) * linkedInteractionSize;
+        sizeLinkedBlock = (rMax - indexMin[0]) * linkedInteractionSize;
 
         (extraDiagonalBlocksMap[currentInteraction])[linkedInteraction] = new SiconosMatrix(sizeBlock, sizeLinkedBlock);
         coupledInteractionsBlock = extraDiagonalBlocksMap[currentInteraction][linkedInteraction];
@@ -505,7 +500,6 @@ void LCP::computeDiagonalBlocksLagrangianLinearR(Relation * R, const unsigned in
 
   bool isHomogeneous = false; // \todo to be defined with relative degrees
   // isHomogeneous = true means that all relative degrees of the interaction are equal.
-
   if (!isHomogeneous)
   {
     // the resulting row-block
@@ -554,7 +548,6 @@ void LCP::computeDiagonalBlocksLagrangianLinearR(Relation * R, const unsigned in
       LLR->getHBlockDS(*itDS, *H);
       *currentMatrixBlock +=  *H * (W[*itDS])->multTranspose(*H);
       delete H;
-
     }
   }
 }
@@ -575,7 +568,7 @@ void LCP::computeExtraDiagonalBlocksLagrangianLinearR(Relation * RCurrent, Relat
   if (!isHomogeneous)
   {
     // the resulting row-block
-    SimpleVector * currentLine = new SimpleVector(sizeInteraction);
+    SimpleVector * currentLine = new SimpleVector(linkedInteractionSize);
     // a row of H corresponding to a specific DS (its size depends on the DS size)
     SimpleVector * Hrow ;
 
@@ -590,7 +583,7 @@ void LCP::computeExtraDiagonalBlocksLagrangianLinearR(Relation * RCurrent, Relat
         sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
         // get blocks corresponding to the current DS
         Hcurrent = new SiconosMatrix(sizeInteraction, sizeDS);
-        Hlinked = new SiconosMatrix(sizeDS, linkedInteractionSize);
+        Hlinked = new SiconosMatrix(linkedInteractionSize, sizeDS);
         LLR1->getHBlockDS(*itDS, *Hcurrent);
         LLR2->getHBlockDS(*itDS, *Hlinked);
         // get row i of H
@@ -616,7 +609,7 @@ void LCP::computeExtraDiagonalBlocksLagrangianLinearR(Relation * RCurrent, Relat
       sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
       // get blocks corresponding to the current DS
       Hcurrent = new SiconosMatrix(sizeInteraction, sizeDS);
-      Hlinked = new SiconosMatrix(sizeDS, linkedInteractionSize);
+      Hlinked = new SiconosMatrix(linkedInteractionSize, sizeDS);
       LLR1->getHBlockDS(*itDS, *Hcurrent);
       LLR2->getHBlockDS(*itDS, *Hlinked);
       *coupledInteractionsBlock += h* *Hcurrent * (W[*itDS])->multTranspose(*Hlinked);
@@ -827,7 +820,7 @@ void LCP::computeQ(const double& time)
         {
           yFree = new SimpleVector(currentInteraction->getY(0));   // copy, no pointer equality
           for (unsigned int i = 0; i < sizeInteraction; i++)
-            (*q)(i + pos) = -(*yFree)(i); // - because of LCP solver, Mz - w =q
+            (*q)(i + pos) = (*yFree)(i);
         }
         else
         {
@@ -835,7 +828,7 @@ void LCP::computeQ(const double& time)
           yFree = new SimpleVector(effectiveSize); // we get only the "effective" relations
           (currentInteraction->getY(0)).getBlock(index, *yFree); // copy, no pointer equality
           for (unsigned int i = 0; i < effectiveSize; i++)
-            (*q)(i + pos) = -(*yFree)(i); // - because of LCP solver, Mz - w =q
+            (*q)(i + pos) = (*yFree)(i);
         }
       }
       else
@@ -854,7 +847,7 @@ void LCP::computeQ(const double& time)
           yFree = new SimpleVector(currentInteraction -> getY(1)); // copy, no pointer equality
           *yFree += e * currentInteraction -> getYOld(1);
           for (unsigned int i = 0; i < sizeInteraction; i++)
-            (*q)(i + pos) = -(*yFree)(i);
+            (*q)(i + pos) = (*yFree)(i);
         }
         else
         {
@@ -866,7 +859,7 @@ void LCP::computeQ(const double& time)
           *yFree += e * *tmp;
           delete tmp;
           for (unsigned int i = 0; i < effectiveSize; i++)
-            (*q)(i + pos) = -(*yFree)(i);
+            (*q)(i + pos) = (*yFree)(i);
         }
       }
       else
@@ -883,17 +876,19 @@ void LCP::computeQ(const double& time)
 void LCP::compute(const double& time)
 {
   IN("LCP::compute(void)\n");
-  int res;
 
   // --- Prepare data for LCP computing ---
   preLCP(time);
 
   // --- Call Numerics solver ---
-  // !!! Warning: solve_lcp solve Mz - w =q !!!
   if (nLcp != 0)
   {
-    res = solve_lcp(M->getArray(), q->getArray(), (int*)&nLcp, &solvingMethod, z->getArray(), w->getArray());
-
+    int iter, info;
+    double residu;
+    int Nlcp = (int)nLcp;
+    info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray(), &iter, &residu);
+    if (info != 0)
+      RuntimeException::selfThrow("LCP::compute, solve_lcp: convergence failed");
     // --- Recover the desired variables from LCP output ---
     postLCP(*w, *z);
   }

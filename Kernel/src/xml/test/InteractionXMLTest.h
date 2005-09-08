@@ -29,7 +29,6 @@ private:
 
   // les tests qui doivent passer
   CPPUNIT_TEST(testGetNumber);
-  CPPUNIT_TEST(testGetStatus);
   CPPUNIT_TEST(testGetId);
   CPPUNIT_TEST(testHasYLambda);
   CPPUNIT_TEST(testGetDSConcerned);
@@ -44,7 +43,6 @@ private:
 
   // declaration de fonctions de test
   void testGetNumber();
-  void testGetStatus();
   void testGetId();
   void testHasYLambda();
   void testGetDSConcerned();

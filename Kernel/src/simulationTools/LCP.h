@@ -320,7 +320,7 @@ private:
   //  LCPStructure LCPMethod;
 
   //  /** C structure which gives the informations to the solve function */
-  //  methode_lcp meth_lcp;
+  //  method_lcp meth_lcp;
 
   /** Flags to check wheter pointers were allocated in class constructors or not */
   bool isWAllocatedIn;

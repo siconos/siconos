@@ -49,7 +49,6 @@ Relation::Relation(const Relation& newRel, Interaction* inter):
 Relation::~Relation()
 {}
 
-
 vector<DSInputOutput*> Relation::getDSInputOutputs(void)
 {
   return dsioVector;

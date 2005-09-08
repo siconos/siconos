@@ -53,29 +53,11 @@ const std::string  OSNSP_CFPSOLVING = "ContactFrictionPrimalSolving";
 const std::string  OSNSP_CFDSOLVING = "ContactFrictionDualSolving";
 const std::string  OSNSP_LEMKE = "Lemke";
 const std::string  OSNSP_LEXICOLEMKE = "LexicoLemke";
-const std::string  OSNSP_QP = "Qp" ;
-const std::string  OSNSP_QPNONSYM = "Qpnonsym" ;
-const std::string  OSNSP_GSNL = "Gsnl";
-const std::string  OSNSP_GCP = "Gcp";
+const std::string  OSNSP_QP = "QP" ;
+const std::string  OSNSP_NSQP = "NSQP" ;
+const std::string  OSNSP_NLGS = "NLGS";
+const std::string  OSNSP_CPG = "CPG";
 const std::string  OSNSP_LATIN = "Latin";
-
-
-
-
-
-//const std::string NSPB_LCPSOLVING = "LcpSolving";
-//const std::string NSPB_RPSOLVING = "RelayPrimalSolving";
-//const std::string NSPB_RDSOLVING = "RelayDualSolving";
-//const std::string NSPB_CFPSOLVING = "ContactFrictionPrimalSolving";
-//const std::string NSPB_CFDSOLVING = "ContactFrictionDualSolving";
-//const std::string NSPB_LEMKE = "Lemke";
-//const std::string NSPB_GSNL = "Gsnl";
-//const std::string NSPB_GCP = "Gcp";
-//const std::string NSPB_LATIN = "Latin";
-//const std::string NSPB_lemke = "lemke";
-//const std::string NSPB_gsnl = "gsnl";
-//const std::string NSPB_gcp = "gcp";
-//const std::string NSPB_latin = "latin";
 
 // const found in the Strategy
 const std::string EVENTDRIVEN_STRATEGY = "EventDriven";

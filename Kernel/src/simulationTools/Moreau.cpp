@@ -41,7 +41,7 @@ Moreau::Moreau(TimeDiscretisation* td, DynamicalSystem* ds, const double& newThe
   integratorType = MOREAU_INTEGRATOR;
   // Memory allocation for W
   string type = ds->getType();
-  if (type == LNLDS)
+  if (type == LNLDS || type == LTIDS)
   {
     int sizeW = (static_cast<LagrangianDS*>(ds))->getQPtr()->size();
     W = new SiconosMatrix(sizeW, sizeW);

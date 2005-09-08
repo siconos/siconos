@@ -12,13 +12,13 @@ OneStepNSProblemXML::OneStepNSProblemXML(xmlNode * oneStepNSProblemXMLNode, vect
 {
   xmlNode *node;
 
-  this->rootNode = oneStepNSProblemXMLNode;
-  //this->rootNSProblemXMLNode = oneStepNSProblemXMLNode;
+  rootNode = oneStepNSProblemXMLNode;
+  //rootNSProblemXMLNode = oneStepNSProblemXMLNode;
 
   /*
    * node definition of the OneStepNSProblem
    */
-  node = SiconosDOMTreeTools::findNodeChild(this->rootNode);
+  node = SiconosDOMTreeTools::findNodeChild(rootNode);
   if (node != NULL)
   {
     if (strcmp((char*)node->name, OSNSP_SOLVER.c_str()) == 0)
@@ -26,58 +26,58 @@ OneStepNSProblemXML::OneStepNSProblemXML(xmlNode * oneStepNSProblemXMLNode, vect
       /*
        * in this case, we got the Solver tag in first
        */
-      this->solverNode = node;
+      solverNode = node;
       node = SiconosDOMTreeTools::findNodeChild(node);
-      this->solverAlgorithmNode = SiconosDOMTreeTools::findNodeChild(node);
+      solverAlgorithmNode = SiconosDOMTreeTools::findNodeChild(node);
 
-      this->rootNSProblemXMLNode = SiconosDOMTreeTools::findFollowNode(this->solverNode);
+      rootNSProblemXMLNode = SiconosDOMTreeTools::findFollowNode(solverNode);
     }
     else
     {
       /*
        * in that case, it must be solving model definition in first
        */
-      this->rootNSProblemXMLNode = SiconosDOMTreeTools::findNodeChild(this->rootNode);
+      rootNSProblemXMLNode = SiconosDOMTreeTools::findNodeChild(rootNode);
 
-      if ((node = SiconosDOMTreeTools::findNodeChild(this->rootNode, OSNSP_SOLVER)) != NULL)
+      if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, OSNSP_SOLVER)) != NULL)
       {
-        this->solverNode = node;
+        solverNode = node;
         node = SiconosDOMTreeTools::findNodeChild(node);
-        this->solverAlgorithmNode = SiconosDOMTreeTools::findNodeChild(node);
+        solverAlgorithmNode = SiconosDOMTreeTools::findNodeChild(node);
       }
       else
       {
-        this->solverNode = NULL;
-        this->solverAlgorithmNode = NULL;
+        solverNode = NULL;
+        solverAlgorithmNode = NULL;
         cout << "Warning : optional tag not found : OneStepNSProblemXML - constructor, tag " << OSNSP_SOLVER << " not found." << endl;
       }
     }
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(this->rootNSProblemXMLNode, OSNSP_N)) != NULL)
-    this->nNode = node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNSProblemXMLNode, OSNSP_N)) != NULL)
+    nNode = node;
   else
   {
     //XMLException::selfThrow("OneStepNSProblemXML - constructor : tag " + OSNSP_N + " not found.");
-    this->nNode = NULL;
+    nNode = NULL;
     cout << "Warning : optional tag not found : OneStepNSProblemXML - constructor : tag " << OSNSP_N << " not found." << endl;
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(this->rootNSProblemXMLNode, OSNSP_INTERACTION_CONCERNED)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNSProblemXMLNode, OSNSP_INTERACTION_CONCERNED)) != NULL)
   {
-    this->interactionConcernedNode = node;
-    this->loadOneStepNSProblemConcernedInteraction(node, definedInteractionNumbers);
+    interactionConcernedNode = node;
+    loadOneStepNSProblemConcernedInteraction(node, definedInteractionNumbers);
   }
   else
     XMLException::selfThrow("OneStepNSProblemXML - constructor : tag " + OSNSP_INTERACTION_CONCERNED + " not found.");
 
-  //  if ((node=SiconosDOMTreeTools::findNodeChild(this->rootNode, OSNSP_SOLVER)) !=NULL)
+  //  if ((node=SiconosDOMTreeTools::findNodeChild(rootNode, OSNSP_SOLVER)) !=NULL)
   //    {
   //      cout<<" node Solver found !!!!!!!!!!"<<endl<<"<<press enter>>"<<endl;
   //      getchar();
-  //      this->solverNode = node;
+  //      solverNode = node;
   //      node = SiconosDOMTreeTools::findNodeChild( node );
-  //      this->solverAlgorithmNode = SiconosDOMTreeTools::findNodeChild( node );
+  //      solverAlgorithmNode = SiconosDOMTreeTools::findNodeChild( node );
   //    }
   //    else
   //      cout<<"Warning : optional tag not found : OneStepNSProblemXML - constructor, tag "<<OSNSP_SOLVER<<" not found."<<endl;
@@ -121,7 +121,7 @@ void OneStepNSProblemXML::loadOneStepNSProblemConcernedInteraction(xmlNode * int
       XMLException::selfThrow(errorMsg);
     }
 
-    this->interactionNumbersVector.push_back(number);
+    interactionNumbersVector.push_back(number);
 
     interactionNode = SiconosDOMTreeTools::findFollowNode(interactionNode, INTERACTION_TAG);
     i++;
@@ -148,19 +148,19 @@ void OneStepNSProblemXML::setInteractionConcerned(vector<int> v, bool all)
     node = xmlNewNode(NULL, (xmlChar*)OSNSP_INTERACTION_CONCERNED.c_str());
     xmlSetProp(node, (xmlChar*)ALL_ATTRIBUTE.c_str(), (xmlChar*)"true");
 
-    if (this->interactionConcernedNode != NULL)
-      xmlReplaceNode(this->interactionConcernedNode, node);
-    else xmlAddChild(this->rootNSProblemXMLNode, node);
-    this->interactionConcernedNode = node;
+    if (interactionConcernedNode != NULL)
+      xmlReplaceNode(interactionConcernedNode, node);
+    else xmlAddChild(rootNSProblemXMLNode, node);
+    interactionConcernedNode = node;
     cout << "#### OneStepNSProblemXML::setInteractionConcerned ALL" << endl;
   }
   else
   {
     cout << "#### OneStepNSProblemXML::setInteractionConcerned !ALL" << endl;
-    if (this->interactionConcernedNode == NULL)
+    if (interactionConcernedNode == NULL)
     {
-      node = xmlNewChild(this->rootNSProblemXMLNode, NULL, (xmlChar*)OSNSP_INTERACTION_CONCERNED.c_str(), NULL);
-      this->interactionConcernedNode = node;
+      node = xmlNewChild(rootNSProblemXMLNode, NULL, (xmlChar*)OSNSP_INTERACTION_CONCERNED.c_str(), NULL);
+      interactionConcernedNode = node;
       //sprintf(num, "%d", v.size());
       //xmlNewProp(node, (xmlChar*)OSNSP_SIZE.c_str(), (xmlChar*)num );
 
@@ -170,7 +170,7 @@ void OneStepNSProblemXML::setInteractionConcerned(vector<int> v, bool all)
         sprintf(num, "%d", v[i]);
         xmlNewProp(interactionNode, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
       }
-      this->interactionNumbersVector = v;
+      interactionNumbersVector = v;
     }
     else
     {
@@ -180,13 +180,13 @@ void OneStepNSProblemXML::setInteractionConcerned(vector<int> v, bool all)
       vector<int>::iterator iter;
       for (i = 0; i < v.size(); i++)
       {
-        iter = find(this->interactionNumbersVector.begin(), this->interactionNumbersVector.end(), v[i]);
-        if (iter == this->interactionNumbersVector.end())
+        iter = find(interactionNumbersVector.begin(), interactionNumbersVector.end(), v[i]);
+        if (iter == interactionNumbersVector.end())
         {
           /*
            * in this case, we must add in the DOMtree the number of this Interaction
            */
-          interactionNode = xmlNewChild(this->interactionConcernedNode, NULL, (xmlChar*)INTERACTION_TAG.c_str(), NULL);
+          interactionNode = xmlNewChild(interactionConcernedNode, NULL, (xmlChar*)INTERACTION_TAG.c_str(), NULL);
           sprintf(num, "%d", v[i]);
           xmlNewProp(interactionNode, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
         }
@@ -201,60 +201,60 @@ void OneStepNSProblemXML::setSolver(string name, string methodName, string normT
   char tmpChar[128];
   xmlNode *node;
 
-  if (this->solverNode == NULL)
+  if (solverNode == NULL)
   {
-    this->solverNode = xmlNewChild(this->rootNode, NULL, (xmlChar*)OSNSP_SOLVER.c_str(), NULL);
-    node = xmlNewChild(this->solverNode, NULL, (xmlChar*)name.c_str(), NULL);
-    this->solverAlgorithmNode = xmlNewChild(node, NULL, (xmlChar*)methodName.c_str(), NULL);
+    solverNode = xmlNewChild(rootNode, NULL, (xmlChar*)OSNSP_SOLVER.c_str(), NULL);
+    node = xmlNewChild(solverNode, NULL, (xmlChar*)name.c_str(), NULL);
+    solverAlgorithmNode = xmlNewChild(node, NULL, (xmlChar*)methodName.c_str(), NULL);
 
     sprintf(tmpChar, "%d", maxIter);
     if (maxIter != DefaultAlgoMaxIter)
-      xmlNewProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_MAXITER.c_str(), (xmlChar*)tmpChar);
+      xmlNewProp(solverAlgorithmNode, (xmlChar*)OSNSP_MAXITER.c_str(), (xmlChar*)tmpChar);
 
     sprintf(tmpChar, "%f", tolerance);
     if (tolerance != DefaultAlgoTolerance)
-      xmlNewProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_TOLERANCE.c_str(), (xmlChar*)tmpChar);
+      xmlNewProp(solverAlgorithmNode, (xmlChar*)OSNSP_TOLERANCE.c_str(), (xmlChar*)tmpChar);
 
     /*
      *       /!\ normType not yet implemented in SICONOS/Numerics
      */
     if (normType != DefaultAlgoNormType)
-      xmlNewProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_NORMTYPE.c_str(), (xmlChar*)normType.c_str());
+      xmlNewProp(solverAlgorithmNode, (xmlChar*)OSNSP_NORMTYPE.c_str(), (xmlChar*)normType.c_str());
 
     sprintf(tmpChar, "%f", searchDirection);
     if (searchDirection != DefaultAlgoSearchDirection)
-      xmlNewProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_SEARCHDIRECTION.c_str(), (xmlChar*)tmpChar);
+      xmlNewProp(solverAlgorithmNode, (xmlChar*)OSNSP_SEARCHDIRECTION.c_str(), (xmlChar*)tmpChar);
   }
   else
   {
-    node = this->solverNode->next;
+    node = solverNode->next;
     if (node != NULL)
       node->name = (xmlChar*)name.c_str();
     else
-      node = xmlNewChild(this->solverNode, NULL, (xmlChar*)name.c_str(), NULL);
+      node = xmlNewChild(solverNode, NULL, (xmlChar*)name.c_str(), NULL);
 
 
-    if (this->solverAlgorithmNode == NULL)
+    if (solverAlgorithmNode == NULL)
     {
-      this->solverAlgorithmNode = xmlNewChild(node, NULL, (xmlChar*)methodName.c_str(), NULL);
+      solverAlgorithmNode = xmlNewChild(node, NULL, (xmlChar*)methodName.c_str(), NULL);
 
       sprintf(tmpChar, "%d", maxIter);
       if (maxIter != DefaultAlgoMaxIter)
-        xmlNewProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_MAXITER.c_str(), (xmlChar*)tmpChar);
+        xmlNewProp(solverAlgorithmNode, (xmlChar*)OSNSP_MAXITER.c_str(), (xmlChar*)tmpChar);
 
       sprintf(tmpChar, "%f", tolerance);
       if (tolerance != DefaultAlgoTolerance)
-        xmlNewProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_TOLERANCE.c_str(), (xmlChar*)tmpChar);
+        xmlNewProp(solverAlgorithmNode, (xmlChar*)OSNSP_TOLERANCE.c_str(), (xmlChar*)tmpChar);
 
       /*
        *       /!\ normType not yet implemented in SICONOS/Numerics
        */
       if (normType != DefaultAlgoNormType)
-        xmlNewProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_NORMTYPE.c_str(), (xmlChar*)normType.c_str());
+        xmlNewProp(solverAlgorithmNode, (xmlChar*)OSNSP_NORMTYPE.c_str(), (xmlChar*)normType.c_str());
 
       sprintf(tmpChar, "%f", searchDirection);
       if (searchDirection != DefaultAlgoSearchDirection)
-        xmlNewProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_SEARCHDIRECTION.c_str(), (xmlChar*)tmpChar);
+        xmlNewProp(solverAlgorithmNode, (xmlChar*)OSNSP_SEARCHDIRECTION.c_str(), (xmlChar*)tmpChar);
     }
     else
     {
@@ -263,23 +263,23 @@ void OneStepNSProblemXML::setSolver(string name, string methodName, string normT
 
       sprintf(tmpChar, "%d", maxIter);
       if (maxIter != DefaultAlgoMaxIter)
-        xmlNewProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_MAXITER.c_str(), (xmlChar*)tmpChar);
+        xmlNewProp(solverAlgorithmNode, (xmlChar*)OSNSP_MAXITER.c_str(), (xmlChar*)tmpChar);
 
       sprintf(tmpChar, "%f", tolerance);
       if (tolerance != DefaultAlgoTolerance)
-        xmlNewProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_TOLERANCE.c_str(), (xmlChar*)tmpChar);
+        xmlNewProp(solverAlgorithmNode, (xmlChar*)OSNSP_TOLERANCE.c_str(), (xmlChar*)tmpChar);
 
       /*
        *       /!\ normType not yet implemented in SICONOS/Numerics
        */
       if (normType != DefaultAlgoNormType)
-        xmlNewProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_NORMTYPE.c_str(), (xmlChar*)normType.c_str());
+        xmlNewProp(solverAlgorithmNode, (xmlChar*)OSNSP_NORMTYPE.c_str(), (xmlChar*)normType.c_str());
 
       sprintf(tmpChar, "%f", searchDirection);
       if (searchDirection != DefaultAlgoSearchDirection)
-        xmlNewProp(this->solverAlgorithmNode, (xmlChar*)OSNSP_SEARCHDIRECTION.c_str(), (xmlChar*)tmpChar);
+        xmlNewProp(solverAlgorithmNode, (xmlChar*)OSNSP_SEARCHDIRECTION.c_str(), (xmlChar*)tmpChar);
 
-      xmlReplaceNode(this->solverAlgorithmNode, node);
+      xmlReplaceNode(solverAlgorithmNode, node);
     }
   }
 }
@@ -292,6 +292,6 @@ void OneStepNSProblemXML::setSolver(string name, string methodName, string normT
 //   *
 //   * the rootNSProblemXMLNode is set to the value of the node containing the solving model
 //   */
-//  this->rootNSProblemXMLNode = SiconosDOMTreeTools::findNodeChild( this->rootNode);
+//  rootNSProblemXMLNode = SiconosDOMTreeTools::findNodeChild( rootNode);
 //}
 

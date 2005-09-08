@@ -50,9 +50,9 @@ public:
    *  \param string : the xml schema of the Model (optional parameter)
    *  \exception RuntimeException
    */
-  Model(double t0, double T = -1, std::string  title = "none", std::string  author = "nobody",
-        std::string  description = "none", std::string  date = "none",
-        std::string  xmlSchema = "none");
+  Model(const double&, const double& = -1, const std::string& = "none", const std::string& = "nobody",
+        const std::string& = "none", const std::string& = "none",
+        const std::string& = "none");
 
   /** \fn Model(double t0, double T, string title, string author, string description, string date, string xmlSchema)
    *  \brief create the Model from a set of data

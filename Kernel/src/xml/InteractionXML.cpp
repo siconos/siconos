@@ -15,14 +15,14 @@ using namespace std;
 
 InteractionXML::InteractionXML():
   rootInteractionXMLNode(NULL), idNode(NULL), nInterNode(NULL),
-  statusNode(NULL),  yNode(NULL),   lambdaNode(NULL),
+  yNode(NULL),   lambdaNode(NULL),
   dsConcernedNode(NULL), dsListNode(NULL),  relationXML(NULL), nSLawXML(NULL),
   isRelationXMLAllocatedIn(false), isNsLawXMLAllocatedIn(false)
 {}
 
 InteractionXML::InteractionXML(xmlNode * interactionNode, vector<int> definedNumbers):
   rootInteractionXMLNode(interactionNode), idNode(NULL), nInterNode(NULL),
-  statusNode(NULL),  yNode(NULL),   lambdaNode(NULL),
+  yNode(NULL),   lambdaNode(NULL),
   dsConcernedNode(NULL), dsListNode(NULL), relationXML(NULL), nSLawXML(NULL),
   isRelationXMLAllocatedIn(false), isNsLawXMLAllocatedIn(false)
 {
@@ -37,11 +37,7 @@ InteractionXML::InteractionXML(xmlNode * interactionNode, vector<int> definedNum
     nInterNode = node;
   else
     XMLException::selfThrow("InteractionXML - loadInteractionProperties error : tag " + INTERACTION_NINTER + " not found.");
-  // status (required)
-  if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, INTERACTION_STATUS)) != NULL)
-    statusNode = node;
-  else
-    XMLException::selfThrow("InteractionXML - loadInteractionProperties error : tag " + INTERACTION_STATUS + " not found.");
+
   // y (optional)
   if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, INTERACTION_Y)) != NULL)
     yNode = node;

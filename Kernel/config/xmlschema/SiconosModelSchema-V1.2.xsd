@@ -214,20 +214,36 @@
 <!-- the different kind of solving method : -->
 <xsd:element name="Lemke">
 	<xsd:complexType>
-<!--		<xsd:attribute name="tolerance" type="xsd:double" use="optional"/> -->
+    		<xsd:attribute name="maxIter" type="xsd:positiveInteger" use="optional"/>
+	</xsd:complexType>
+</xsd:element>
+
+<xsd:element name="LexicoLemke">
+	<xsd:complexType>
 		<xsd:attribute name="maxIter" type="xsd:positiveInteger" use="optional"/>
 	</xsd:complexType>
 </xsd:element>
 
-<xsd:element name="Gsnl">
+<xsd:element name="QP">
+	<xsd:complexType>
+		<xsd:attribute name="tolerance" type="xsd:double" use="optional"/>
+	</xsd:complexType>
+</xsd:element>
+
+<xsd:element name="NSQP">
+	<xsd:complexType>
+		<xsd:attribute name="tolerance" type="xsd:double" use="optional"/>
+	</xsd:complexType>
+</xsd:element>
+
+<xsd:element name="NLGS">
 	<xsd:complexType>
 		<xsd:attribute name="maxIter" type="xsd:positiveInteger" use="optional"/>
 		<xsd:attribute name="tolerance" type="xsd:double" use="optional"/>
-		<xsd:attribute name="normType" type="NormTypeValues" use="optional"/>
 	</xsd:complexType>
 </xsd:element>
 
-<xsd:element name="Gcp">
+<xsd:element name="CPG">
 	<xsd:complexType>
 		<xsd:attribute name="maxIter" type="xsd:positiveInteger" use="optional"/>
 		<xsd:attribute name="tolerance" type="xsd:double" use="optional"/>
@@ -669,7 +685,6 @@
 				<xsd:complexType>
 					<xsd:all>
 						<xsd:element name="nInter" type="xsd:positiveInteger" minOccurs="1" maxOccurs="1"/>	
-						<xsd:element name="Status" type="intList" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="Id" type="xsd:string" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="y" type="vector" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="lambda" type="vector" minOccurs='0' maxOccurs='1'/>
@@ -902,8 +917,11 @@
 						<xsd:complexType>
 							<xsd:choice>
 							<xsd:element ref="Lemke"/>
-							<xsd:element ref="Gsnl"/>
-							<xsd:element ref="Gcp"/>
+							<xsd:element ref="LexicoLemke"/>
+							<xsd:element ref="QP"/>
+							<xsd:element ref="NSQP"/>
+							<xsd:element ref="NLGS"/>
+							<xsd:element ref="CPG"/>
 							<xsd:element ref="Latin"/>
 							</xsd:choice>
 						</xsd:complexType>
@@ -912,8 +930,8 @@
 						<xsd:element name="RelayPrimalSolving">
 						<xsd:complexType>
 							<xsd:choice>
-							<xsd:element ref="Gsnl"/>
-							<xsd:element ref="Gcp"/>
+							<xsd:element ref="NLGS"/>
+							<xsd:element ref="CPG"/>
 							<xsd:element ref="Latin"/>
 							</xsd:choice>
 						</xsd:complexType>
@@ -922,8 +940,8 @@
 						<xsd:element name="RelayDualSolving">
 						<xsd:complexType>
 							<xsd:choice>
-							<xsd:element ref="Gsnl"/>
-							<xsd:element ref="Gcp"/>
+							<xsd:element ref="NLGS"/>
+							<xsd:element ref="CPG"/>
 							<xsd:element ref="Latin"/>
 							</xsd:choice>
 						</xsd:complexType>
@@ -932,8 +950,8 @@
 						<xsd:element name="ContactFrictionPrimalSolving">
 						<xsd:complexType>
 							<xsd:choice>
-							<xsd:element ref="Gsnl"/>
-							<xsd:element ref="Gcp"/>
+							<xsd:element ref="NLGS"/>
+							<xsd:element ref="CPG"/>
 							<xsd:element ref="Latin"/>
 							</xsd:choice>
 						</xsd:complexType>
@@ -944,8 +962,8 @@
 							<xsd:choice>
 							<xsd:element ref="Latin"/>
 							<xsd:element ref="Lemke"/>
-							<xsd:element ref="Gsnl"/>
-							<xsd:element ref="Gcp"/>
+							<xsd:element ref="NLGS"/>
+							<xsd:element ref="CPG"/>
 							</xsd:choice>
 						</xsd:complexType>
 

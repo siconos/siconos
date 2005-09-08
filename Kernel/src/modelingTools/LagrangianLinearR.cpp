@@ -180,7 +180,6 @@ void LagrangianLinearR::getHBlockDS(DynamicalSystem * ds, SiconosMatrix& Block) 
 {
   unsigned int k = 0;
   vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
-
   vector<DynamicalSystem*>::iterator itDS;
   itDS = vDS.begin();
 
@@ -190,10 +189,9 @@ void LagrangianLinearR::getHBlockDS(DynamicalSystem * ds, SiconosMatrix& Block) 
     k += (*itDS)->getN() / 2;
     itDS++;
   }
-
   // check dimension
   if ((*itDS)->getN() / 2 != Block.size(1))
-    RuntimeException::selfThrow("LagrangianLinearR - getHBlockDSPtr: inconsistent sizes between HBlock and DS");
+    RuntimeException::selfThrow("LagrangianLinearR - getHBlockDS: inconsistent sizes between HBlock and DS");
 
   // get block
   unsigned int l = k + (*itDS)->getN() / 2 - 1;
@@ -223,7 +221,7 @@ void LagrangianLinearR::getHBlockDS(const int& DSNumber, SiconosMatrix& Block) c
 
   // check dimension
   if ((*itDS)->getN() / 2 != Block.size(1))
-    RuntimeException::selfThrow("LagrangianLinearR - getCBlockDSPtr: inconsistent sizes between CBlock and DS");
+    RuntimeException::selfThrow("LagrangianLinearR - getCBlockDS: inconsistent sizes between HBlock and DS");
 
   // get block
   unsigned int l = k + (*itDS)->getN() / 2 - 1;

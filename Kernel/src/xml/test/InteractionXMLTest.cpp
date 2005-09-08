@@ -46,12 +46,6 @@ void InteractionXMLTest::testGetNumber()
   cout << "InteractionXMLTest >>> testGetNumber ................................ OK\n ";
 }
 
-void InteractionXMLTest::testGetStatus()
-{
-  CPPUNIT_ASSERT_MESSAGE("testGetStatus ", (interaction.getStatus())[0] == 3);
-  cout << "InteractionXMLTest >>> testGetStatus ................................ OK\n ";
-}
-
 void InteractionXMLTest::testGetId()
 {
   CPPUNIT_ASSERT_MESSAGE("testGetId ", interaction.getId() == "Interaction1");

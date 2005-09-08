@@ -113,6 +113,8 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
 
     // --- Dynamical Systems ---
 
+    unsigned int sizeDS ;
+    vector<int> listDS;
     if (nsds != NULL)
     {
       // Get a list of DS concerned from xml
@@ -120,10 +122,10 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
         vectorDS = nsds->getDynamicalSystems();
       else
       {
-        vector<int> listDS = interactionxml->getDSConcerned();
-        unsigned int size = listDS.size();
-        vectorDS.resize(size);
-        for (unsigned int i = 0; i < size; i++)
+        listDS = interactionxml->getDSConcerned();
+        sizeDS = listDS.size();
+        vectorDS.resize(sizeDS);
+        for (unsigned int i = 0; i < sizeDS; i++)
           vectorDS[i] = nsds->getDynamicalSystemPtrNumber(listDS[i]);
       }
     }
@@ -513,6 +515,7 @@ void Interaction::setRelationPtr(Relation* newRelation)
   if (isRelationAllocatedIn) delete relation;
   relation = newRelation;
   isRelationAllocatedIn = false;
+  newRelation->setInteractionPtr(this);
 }
 
 void Interaction::setNonSmoothLawPtr(NonSmoothLaw* newNslaw)

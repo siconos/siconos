@@ -30,7 +30,6 @@ class Interaction;
 class NonSmoothLawXML;
 class RelationXML;
 
-const std::string INTERACTION_STATUS = "Status";
 const std::string INTERACTION_Y = "y";
 const std::string INTERACTION_LAMBDA = "lambda";
 const std::string INTERACTION_NINTER = "nInter";
@@ -131,28 +130,6 @@ public:
       nInterNode = SiconosDOMTreeTools::createIntegerNode(rootInteractionXMLNode, INTERACTION_NINTER, nInter);
     }
     else SiconosDOMTreeTools::setIntegerContentValue(nInterNode, nInter);
-  }
-
-  /** \fn vector<int> getStatus()
-   *   \brief Return the status of the InteractionXML
-   *   \return vector<int> status : the status of the InteractionXML
-   */
-  inline std::vector<int> getStatus()
-  {
-    return SiconosDOMTreeTools::getVectorIntContentValue(statusNode);
-  }
-
-  /** \fn void setStatus(vector<int> i)
-   *   \brief allows to save the status of the InteractionXML
-   *   \return vector<int> status : the status to save
-   */
-  inline void setStatus(std::vector<int> i)
-  {
-    if (statusNode == false)
-    {
-      statusNode = SiconosDOMTreeTools::createVectorIntNode(rootInteractionXMLNode, INTERACTION_STATUS, i);
-    }
-    else SiconosDOMTreeTools::setVectorIntContentValue(statusNode, i);
   }
 
   /** \fn bool hasY()
@@ -290,7 +267,6 @@ private:
 
   xmlNode * idNode;
   xmlNode * nInterNode;
-  xmlNode * statusNode;
   xmlNode * yNode;
   xmlNode * lambdaNode;
   xmlNode * dsConcernedNode;

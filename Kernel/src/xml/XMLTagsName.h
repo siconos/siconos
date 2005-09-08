@@ -134,7 +134,6 @@ const std::string RELAY_TAG = "Relay";
 ////const std::string INTERACTION_NODE = "Interaction";
 ////const std::string INTERACTION_CONTENT = "Interaction_Content";
 ////const std::string INTERACTION_ID = "Id";
-//const std::string INTERACTION_STATUS = "Status";
 //const std::string INTERACTION_Y = "y";
 //const std::string INTERACTION_LAMBDA = "lambda";
 //const std::string INTERACTION_NINTER = "nInter";
@@ -231,7 +230,6 @@ const std::string RELAY_TAG = "Relay";
 //const std::string NSDS_INTERACTION_DEFINITION = "Interaction_Definition";
 
 //const std::string NSDS_INTERACTION = "Interaction";
-//const std::string NSDS_STATUS = "status";
 
 //const std::string NSDS_DS = "DS";
 //const std::string NSDS_NUMBER = "number";

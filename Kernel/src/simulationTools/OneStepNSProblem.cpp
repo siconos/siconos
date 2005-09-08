@@ -21,10 +21,15 @@ OneStepNSProblem::OneStepNSProblem(OneStepNSProblemXML* osnspbxml, Strategy* new
 
       string newSolvingMethod = onestepnspbxml->getSolverAlgorithmName();
       int MaxIter = onestepnspbxml->getSolverAlgorithmMaxIter();
-      if (newSolvingMethod == "Lemke")
+      if (newSolvingMethod == "Lemke" || newSolvingMethod == "LexicoLemke")
         fillSolvingMethod(newSolvingMethod, MaxIter);
 
-      else if (newSolvingMethod == "Gsnl" || newSolvingMethod  == "Gcp")
+      else if (newSolvingMethod == "QP" || newSolvingMethod  == "NSQP")
+      {
+        double Tolerance = onestepnspbxml->getSolverAlgorithmTolerance();
+        fillSolvingMethod(newSolvingMethod, 0, Tolerance);
+      }
+      else if (newSolvingMethod == "NLGS" || newSolvingMethod  == "CPG")
       {
         double Tolerance = onestepnspbxml->getSolverAlgorithmTolerance();
         string NormType  = onestepnspbxml->getSolverAlgorithmNormType();
@@ -69,10 +74,10 @@ OneStepNSProblem::OneStepNSProblem(Strategy * newStrat, const string& newSolver,
       if (newSolvingMethod == "Lemke" || newSolvingMethod == "LexicoLemke")
         fillSolvingMethod(newSolvingMethod, MaxIter);
 
-      else if (newSolvingMethod == "Qp" || newSolvingMethod  == "Qpnonsym")
+      else if (newSolvingMethod == "QP" || newSolvingMethod  == "NSQP")
         fillSolvingMethod(newSolvingMethod, 0, Tolerance);
 
-      else if (newSolvingMethod == "Gsnl" || newSolvingMethod  == "Gcp")
+      else if (newSolvingMethod == "NLGS" || newSolvingMethod  == "CPG")
         fillSolvingMethod(newSolvingMethod, MaxIter, Tolerance, NormType);
 
       else if (newSolvingMethod == "Latin")
@@ -281,7 +286,7 @@ void OneStepNSProblem::fillSolvingMethod(const string& newSolvingMethod, const i
     const double & SearchDirection)
 {
   if (solver ==  "LcpSolving")
-    strcpy(solvingMethod.lcp.nom_method, newSolvingMethod.c_str());
+    strcpy(solvingMethod.lcp.name, newSolvingMethod.c_str());
   else if (solver == "RelayPrimalSolving")
     strcpy(solvingMethod.rp.nom_method, newSolvingMethod.c_str());
   else if (solver == "RelayDualSolving")
@@ -295,16 +300,16 @@ void OneStepNSProblem::fillSolvingMethod(const string& newSolvingMethod, const i
     setLemkeAlgorithm(solver, MaxIter);
   else if (newSolvingMethod == "LexicoLemke")
     setLexicoLemkeAlgorithm(solver, MaxIter);
-  else if (newSolvingMethod == "Gsnl")
-    setGsnlAlgorithm(solver, Tolerance, NormType, MaxIter);
-  else if (newSolvingMethod == "Qp")
-    setQpAlgorithm(solver, Tolerance);
-  else if (newSolvingMethod == "Qpnonsym")
-    setQpnonsymAlgorithm(solver, Tolerance);
-  else if (newSolvingMethod == "Gcp")
-    setGcpAlgorithm(solver, Tolerance, NormType, MaxIter);
+  else if (newSolvingMethod == "NLGS")
+    setNLGSAlgorithm(solver, Tolerance, MaxIter);
+  else if (newSolvingMethod == "QP")
+    setQPAlgorithm(solver, Tolerance);
+  else if (newSolvingMethod == "NSQP")
+    setNSQPAlgorithm(solver, Tolerance);
+  else if (newSolvingMethod == "CPG")
+    setCPGAlgorithm(solver, Tolerance, MaxIter);
   else if (newSolvingMethod == "Latin")
-    setLatinAlgorithm(solver, Tolerance, NormType, MaxIter, SearchDirection);
+    setLatinAlgorithm(solver, Tolerance, MaxIter, NormType, SearchDirection);
   else
     RuntimeException::selfThrow("OneStepNSProblem::fillSolvingMethod, unknown method = " + newSolvingMethod);
 }
@@ -331,7 +336,7 @@ void OneStepNSProblem::saveNSProblemToXML()
 
       if (solver == OSNSP_LCPSOLVING)
       {
-        methodName = solvingMethod.lcp.nom_method;
+        methodName = solvingMethod.lcp.name;
         normType = solvingMethod.lcp.normType;
         maxIter = solvingMethod.lcp.itermax;
         tolerance = solvingMethod.lcp.tol;
@@ -370,43 +375,12 @@ void OneStepNSProblem::saveNSProblemToXML()
         searchDirection = solvingMethod.cfd.k_latin;
       }
 
-      //      /*
-      //       * according to the algorithm method used, only some attribute will be saved to XML
-      //       * the other attributes will be put to the default value, so they won't be saved
-      //       */
-      //      if( methodName == OSNSP_LEMKE )
-      //      {
-      //        normType = DefaultAlgoNormType;
-      //        maxIter = DefaultAlgoMaxIter;
-      //        searchDirection = DefaultAlgoSearchDirection;
-      //      }
-      //      else if( methodName == OSNSP_GSNL )
-      //      {
-      //        searchDirection = DefaultAlgoSearchDirection;
-      //      }
-      //      else if( methodName == OSNSP_GCP )
-      //      {
-      //        searchDirection = DefaultAlgoSearchDirection;
-      //      }
-      //      else if( methodName == OSNSP_LATIN )
-      //      {
-      //        // all attributes are saved for Latin method
-      //      }
-      //      cout<<"OneStepNSproblem::saveNSProblemToXML => methodName == "<<methodName<<endl;
-
-      onestepnspbxml->setSolver(solver,
-                                methodName,
-                                normType,
-                                tolerance,
-                                maxIter,
-                                searchDirection);
+      onestepnspbxml->setSolver(solver, methodName, normType, tolerance, maxIter, searchDirection);
     }
     else
-    {
       cout << "# Warning : Can't save Solver tag, empty field" << endl;
-    }
   }
-  else RuntimeException::selfThrow("OneStepNSProblem::fillNSProblemWithNSProblemXML - OneStepNSProblemXML object not exists");
+  else RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - OneStepNSProblemXML object not exists");
   OUT("OneStepNSProblem::saveNSProblemToXML\n");
 }
 
@@ -420,193 +394,171 @@ bool OneStepNSProblem::allInteractionConcerned()
   return res;
 }
 
-void OneStepNSProblem::setLemkeAlgorithm(const string& meth,  const unsigned int& t)
+void OneStepNSProblem::setLemkeAlgorithm(const string& meth,  const unsigned int& iter)
 {
   solver = meth;
 
   if (meth == OSNSP_LCPSOLVING)
   {
-    strcpy(solvingMethod.lcp.nom_method, OSNSP_LEMKE.c_str());
-    solvingMethod.lcp.tol = /*t*/ DefaultAlgoTolerance;
-    strcpy(solvingMethod.lcp.normType, DefaultAlgoNormType.c_str());
-    solvingMethod.lcp.itermax = /*DefaultAlgoMaxIter*/t;
-    solvingMethod.lcp.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.lcp.name, OSNSP_LEMKE.c_str());
+    solvingMethod.lcp.itermax = iter;
   }
   else if (meth == OSNSP_CFDSOLVING)
   {
     strcpy(solvingMethod.cfd.nom_method, OSNSP_LEMKE.c_str());
-    solvingMethod.cfd.tol = /*t*/ DefaultAlgoTolerance;
-    strcpy(solvingMethod.cfd.normType, DefaultAlgoNormType.c_str());
-    solvingMethod.cfd.itermax = /*DefaultAlgoMaxIter*/t;
-    solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
+    solvingMethod.cfd.itermax = iter;
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
-void OneStepNSProblem::setLexicoLemkeAlgorithm(const string& meth,  const unsigned int& t)
+void OneStepNSProblem::setLexicoLemkeAlgorithm(const string& meth,  const unsigned int& iter)
 {
   solver = meth;
 
   if (meth == OSNSP_LCPSOLVING)
   {
-    strcpy(solvingMethod.lcp.nom_method, OSNSP_LEXICOLEMKE.c_str());
-    solvingMethod.lcp.tol = /*t*/ DefaultAlgoTolerance;
-    strcpy(solvingMethod.lcp.normType, DefaultAlgoNormType.c_str());
-    solvingMethod.lcp.itermax = /*DefaultAlgoMaxIter*/t;
-    solvingMethod.lcp.k_latin = DefaultAlgoSearchDirection;
+    strcpy(solvingMethod.lcp.name, OSNSP_LEXICOLEMKE.c_str());
+    solvingMethod.lcp.itermax = iter;
   }
   else if (meth == OSNSP_CFDSOLVING)
   {
     strcpy(solvingMethod.cfd.nom_method, OSNSP_LEXICOLEMKE.c_str());
-    solvingMethod.cfd.tol = /*t*/ DefaultAlgoTolerance;
-    strcpy(solvingMethod.cfd.normType, DefaultAlgoNormType.c_str());
-    solvingMethod.cfd.itermax = /*DefaultAlgoMaxIter*/t;
-    solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
+    solvingMethod.cfd.itermax = iter;
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
-void OneStepNSProblem::setGsnlAlgorithm(const string& meth,  const double& t,  const string& norm,  const int& iter)
+void OneStepNSProblem::setNLGSAlgorithm(const string& meth,  const double& tolerance,  const int& iter,  const string& norm)
 {
   solver = meth;
 
   if (meth == OSNSP_LCPSOLVING)
   {
-    strcpy(solvingMethod.lcp.nom_method, OSNSP_GSNL.c_str());
-    solvingMethod.lcp.tol = t;
+    strcpy(solvingMethod.lcp.name, OSNSP_NLGS.c_str());
+    solvingMethod.lcp.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.lcp.normType, norm.c_str());
+    //strcpy( solvingMethod.lcp.normType, norm.c_str() );
     solvingMethod.lcp.itermax = iter;
-    solvingMethod.lcp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_RPSOLVING)
   {
-    strcpy(solvingMethod.rp.nom_method, OSNSP_GSNL.c_str());
-    solvingMethod.rp.tol = t;
+    strcpy(solvingMethod.rp.nom_method, OSNSP_NLGS.c_str());
+    solvingMethod.rp.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.rp.normType, norm.c_str());
+    //strcpy( solvingMethod.rp.normType, norm.c_str() );
     solvingMethod.rp.itermax = iter;
-    solvingMethod.rp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_RDSOLVING)
   {
-    strcpy(solvingMethod.rd.nom_method, OSNSP_GSNL.c_str());
-    solvingMethod.rd.tol = t;
+    strcpy(solvingMethod.rd.nom_method, OSNSP_NLGS.c_str());
+    solvingMethod.rd.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.rd.normType, norm.c_str());
+    //strcpy( solvingMethod.rd.normType, norm.c_str() );
     solvingMethod.rd.itermax = iter;
-    solvingMethod.rd.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_CFPSOLVING)
   {
-    strcpy(solvingMethod.cfp.nom_method, OSNSP_GSNL.c_str());
-    solvingMethod.cfp.tol = t;
+    strcpy(solvingMethod.cfp.nom_method, OSNSP_NLGS.c_str());
+    solvingMethod.cfp.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.cfp.normType, norm.c_str());
+    //strcpy( solvingMethod.cfp.normType, norm.c_str() );
     solvingMethod.cfp.itermax = iter;
-    solvingMethod.cfp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_CFDSOLVING)
   {
-    strcpy(solvingMethod.cfd.nom_method, OSNSP_GSNL.c_str());
-    solvingMethod.cfd.tol = t;
+    strcpy(solvingMethod.cfd.nom_method, OSNSP_NLGS.c_str());
+    solvingMethod.cfd.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.cfd.normType, norm.c_str());
+    //strcpy( solvingMethod.cfd.normType, norm.c_str() );
     solvingMethod.cfd.itermax = iter;
-    solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
   }
   else
-    RuntimeException::selfThrow("OneStepNSProblem::setGsnlAlgorithm - solving method " + meth + " doesn't exists.");
+    RuntimeException::selfThrow("OneStepNSProblem::setNLGSAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
-void OneStepNSProblem::setQpAlgorithm(const string& meth,  const double& t)
+void OneStepNSProblem::setQPAlgorithm(const string& meth,  const double& tolerance)
 {
   solver = meth;
 
   if (meth == OSNSP_LCPSOLVING)
   {
-    strcpy(solvingMethod.lcp.nom_method, OSNSP_QP.c_str());
-    solvingMethod.lcp.tol = t;
+    strcpy(solvingMethod.lcp.name, OSNSP_QP.c_str());
+    solvingMethod.lcp.tol = tolerance;
   }
   else
-    RuntimeException::selfThrow("OneStepNSProblem::setQpAlgorithm - solving method " + meth + " doesn't exists.");
+    RuntimeException::selfThrow("OneStepNSProblem::setQPAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
-void OneStepNSProblem::setQpnonsymAlgorithm(const string& meth,  const double& t)
+void OneStepNSProblem::setNSQPAlgorithm(const string& meth,  const double& tolerance)
 {
   solver = meth;
 
   if (meth == OSNSP_LCPSOLVING)
   {
-    strcpy(solvingMethod.lcp.nom_method, OSNSP_QPNONSYM.c_str());
-    solvingMethod.lcp.tol = t;
+    strcpy(solvingMethod.lcp.name, OSNSP_NSQP.c_str());
+    solvingMethod.lcp.tol = tolerance;
   }
   else
-    RuntimeException::selfThrow("OneStepNSProblem::setQpnonsymAlgorithm - solving method " + meth + " doesn't exists.");
+    RuntimeException::selfThrow("OneStepNSProblem::setNSQPAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
-void OneStepNSProblem::setGcpAlgorithm(const string& meth,  const double& t,  const string& norm,  const int& iter)
+void OneStepNSProblem::setCPGAlgorithm(const string& meth,  const double& tolerance, const int& iter, const string& norm)
 {
   solver = meth;
 
   if (meth == OSNSP_LCPSOLVING)
   {
-    strcpy(solvingMethod.lcp.nom_method, OSNSP_GCP.c_str());
-    solvingMethod.lcp.tol = t;
+    strcpy(solvingMethod.lcp.name, OSNSP_CPG.c_str());
+    solvingMethod.lcp.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.lcp.normType, norm.c_str());
+    //strcpy( solvingMethod.lcp.normType, norm.c_str() );
     solvingMethod.lcp.itermax = iter;
-    solvingMethod.lcp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_RPSOLVING)
   {
-    strcpy(solvingMethod.rp.nom_method, OSNSP_GCP.c_str());
-    solvingMethod.rp.tol = t;
+    strcpy(solvingMethod.rp.nom_method, OSNSP_CPG.c_str());
+    solvingMethod.rp.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.rp.normType, norm.c_str());
+    //strcpy( solvingMethod.rp.normType, norm.c_str() );
     solvingMethod.rp.itermax = iter;
-    solvingMethod.rp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_RDSOLVING)
   {
-    strcpy(solvingMethod.rd.nom_method, OSNSP_GCP.c_str());
-    solvingMethod.rd.tol = t;
+    strcpy(solvingMethod.rd.nom_method, OSNSP_CPG.c_str());
+    solvingMethod.rd.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.rd.normType, norm.c_str());
+    //strcpy( solvingMethod.rd.normType, norm.c_str() );
     solvingMethod.rd.itermax = iter;
-    solvingMethod.rd.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_CFPSOLVING)
   {
-    strcpy(solvingMethod.cfp.nom_method, OSNSP_GCP.c_str());
-    solvingMethod.cfp.tol = t;
+    strcpy(solvingMethod.cfp.nom_method, OSNSP_CPG.c_str());
+    solvingMethod.cfp.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.cfp.normType, norm.c_str());
+    //strcpy( solvingMethod.cfp.normType, norm.c_str() );
     solvingMethod.cfp.itermax = iter;
-    solvingMethod.cfp.k_latin = DefaultAlgoSearchDirection;
   }
   else if (meth == OSNSP_CFDSOLVING)
   {
-    strcpy(solvingMethod.cfd.nom_method, OSNSP_GCP.c_str());
-    solvingMethod.cfd.tol = t;
+    strcpy(solvingMethod.cfd.nom_method, OSNSP_CPG.c_str());
+    solvingMethod.cfd.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.cfd.normType, norm.c_str());
+    //strcpy( solvingMethod.cfd.normType, norm.c_str() );
     solvingMethod.cfd.itermax = iter;
-    solvingMethod.cfd.k_latin = DefaultAlgoSearchDirection;
   }
   else
-    RuntimeException::selfThrow("OneStepNSProblem::setGcpAlgorithm - solving method " + meth + " doesn't exists.");
+    RuntimeException::selfThrow("OneStepNSProblem::setCPGAlgorithm - solving method " + meth + " doesn't exists.");
 }
 
-void OneStepNSProblem::setLatinAlgorithm(const string& meth, const double& t, const string& norm, const int& iter, const double& searchdirection)
+void OneStepNSProblem::setLatinAlgorithm(const string& meth, const double& t, const int& iter, const string& norm, const double& searchdirection)
 {
   solver = meth;
 
   if (meth == OSNSP_LCPSOLVING)
   {
-    strcpy(solvingMethod.lcp.nom_method, OSNSP_LATIN.c_str());
+    strcpy(solvingMethod.lcp.name, OSNSP_LATIN.c_str());
     solvingMethod.lcp.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
     strcpy(solvingMethod.lcp.normType, norm.c_str());
