@@ -7,7 +7,7 @@ AC_INIT(SICONOS, 1.0, www.siconos.com)
 dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(SICONOS/Numerics, 1.0)
-AC_CONFIG_SRCDIR([src/solverpack/src/solve_lcp.c])
+AC_CONFIG_SRCDIR([src/SiconosNumerics.h])
 AC_CONFIG_HEADER([config.h])
 
 # checks for libtool
@@ -255,7 +255,7 @@ AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
 ## DOXYGEN 
 #################################
 
-DOXYGEN_CFG=$srcdir/config/DoxygenSiconos.cfg
+DOXYGEN_CFG=$srcdir/config/DoxygenNumerics.cfg
 AC_SUBST(DOXYGEN_CFG)
 
 
