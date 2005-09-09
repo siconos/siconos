@@ -91,7 +91,6 @@ case $CXX_VER in
      ;;
 esac
 AC_MSG_RESULT([ok ($CXX_VER)])   
-AC_PROG_CC
 
 
 # checks for libtool
@@ -256,7 +255,7 @@ CXXFLAGS="$CXXFLAGS "
 
 AC_MSG_RESULT("Architecture $ARCH  Compilation flag CXXFLAGS= $CXXFLAGS CFLAGS= $CFLAGS FFLAGS= $FFLAGS  Linking flag CXX_DYNLIB = $CXX_DYNLIB")
 
-LDFLAGS="$CXX_DYNLIB"
+dnl LDFLAGS="$CXX_DYNLIB"
 
 AC_SUBST(CXX_DYNLIB)
 
