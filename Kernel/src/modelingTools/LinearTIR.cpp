@@ -696,9 +696,9 @@ void LinearTIR::computeInput(const double& time)
   SimpleVector *lambda = interaction->getLambdaPtr(0);
 
   if (a == NULL)
-    *r += *B * *lambda;
+    *r = *B * *lambda;
   else
-    *r += *B * *lambda + *a;
+    *r = *B * *lambda + *a;
 }
 
 void LinearTIR::display() const
