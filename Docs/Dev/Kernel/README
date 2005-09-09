@@ -13,6 +13,13 @@ RPG
   features.html 
   feature-set.html
   use-cases.html - ESD (External Software Document)
+
+ design.html - ADD/DDD
+  design.html 
+  design-src-org.html
+
+ qa-plan.html - QP/QR
+
  glossary-std.html - glossaire standard
  glossary.html - glossaire
  ready-set - la licence readyset (non incluse dans output)
