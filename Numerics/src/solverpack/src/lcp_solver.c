@@ -49,7 +49,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   const char mot4[10] = "Latin", mot5[10] = "QP", mot6[10] = "NSQP";
   const char mot7[15] = "LexicoLemke";
 
-  int info;
+  int info = 1;
 
   *it_end = 0;
   *res    = 0.0;

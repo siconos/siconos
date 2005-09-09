@@ -115,6 +115,7 @@ void lcp_nsqp(double *vec , double *qq , int *nn , double *tol , double *z , dou
 
   // on return, lambda contains the lagrange multipliers.
   lambda = (double *)malloc(mnn * sizeof(double));
+  for (i = 0; i < mnn; i++) lambda[i] = 0.0 ;
 
   //   integer indicating the desired output unit number,
   iout = 6;
@@ -173,4 +174,6 @@ void lcp_nsqp(double *vec , double *qq , int *nn , double *tol , double *z , dou
   free(xu);
   free(xl);
   free(lambda);
+  free(iwar);
+  free(war);
 }

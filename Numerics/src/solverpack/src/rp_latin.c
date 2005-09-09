@@ -62,8 +62,30 @@ rp_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], double
   double *wc, *zc, *wnum1, *znum1;
   double *zt;
   char trans = 'T';
-  double k[n][n], A[n][n], R[n][n], RT[n][n], invRT[n][n], invR[n][n];
-  double invRTinvR[n][n], kinv[n][n];
+  //double k[n][n], A[n][n], R[n][n], RT[n][n], invRT[n][n], invR[n][n];
+  //double invRTinvR[n][n], kinv[n][n];
+
+  double **k, **A, **R, **RT, **invRT, **invR;
+  double  **invRTinvR, **kinv;
+
+
+  k = (double **)malloc(n * sizeof(double*));
+  for (i = 0; i < n; i++) k[i] = (double*)malloc(n * sizeof(double));
+  A = (double **)malloc(n * sizeof(double*));
+  for (i = 0; i < n; i++) A[i] = (double*)malloc(n * sizeof(double));
+  R = (double **)malloc(n * sizeof(double*));
+  for (i = 0; i < n; i++) R[i] = (double*)malloc(n * sizeof(double));
+  RT = (double **)malloc(n * sizeof(double*));
+  for (i = 0; i < n; i++) RT[i] = (double*)malloc(n * sizeof(double));
+  invRT = (double **)malloc(n * sizeof(double*));
+  for (i = 0; i < n; i++) invRT[i] = (double*)malloc(n * sizeof(double));
+  invR = (double **)malloc(n * sizeof(double*));
+  for (i = 0; i < n; i++) invR[i] = (double*)malloc(n * sizeof(double));
+  invRTinvR = (double **)malloc(n * sizeof(double*));
+  for (i = 0; i < n; i++) invRTinvR[i] = (double*)malloc(n * sizeof(double));
+  kinv = (double **)malloc(n * sizeof(double*));
+  for (i = 0; i < n; i++) kinv[i] = (double*)malloc(n * sizeof(double));
+
 
 
 
@@ -326,6 +348,24 @@ rp_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], double
   free(znum1);
   free(wnum1);
   free(zt);
+
+  for (i = 0; i < n; i++) free(k[i]);
+  free(k);
+  for (i = 0; i < n; i++) free(A[i]);
+  free(A);
+  for (i = 0; i < n; i++) free(R[i]);
+  free(R);
+  for (i = 0; i < n; i++) free(RT[i]);
+  free(RT);
+  for (i = 0; i < n; i++) free(invRT[i]);
+  free(invRT);
+  for (i = 0; i < n; i++) free(invR[i]);
+  free(invR);
+  for (i = 0; i < n; i++) free(invRTinvR[i]);
+  free(invRTinvR);
+  for (i = 0; i < n; i++) free(kinv[i]);
+  free(k);
+
 
 
 }

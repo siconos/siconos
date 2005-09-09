@@ -57,9 +57,9 @@ void test1(void)
   int i, j, nl, nc, nll, it, n = 40, dimM = n, incx, incy;
   double *q, *z, *w, *vec, *a, *b, *c, *qqt, *zt;
   int info;
-  double(*M)[n];
+  double **M;
   double qi, Mij, alpha, beta;
-  char val[14], vall[14];
+  char val[50], vall[50];
   method meth_rp;
   char trans;
 
@@ -69,6 +69,9 @@ void test1(void)
   meth_rp.rp.tol = 0.0000001;
   meth_rp.rp.k_latin = 0.003; //0.00005;
 
+  M = (double **)malloc(dimM * sizeof(double*));
+  for (i = 0; i < n; i++)
+    M[i] = (double*)malloc(dimM * sizeof(double));
 
 
   if ((f1 = fopen("DATA/M_relay.dat", "r")) == NULL)
@@ -77,9 +80,6 @@ void test1(void)
     exit(1);
   }
 
-
-
-  M = malloc(dimM * dimM * sizeof(double));
   vec = (double*)malloc(dimM * dimM * sizeof(double));
 
 
@@ -92,7 +92,7 @@ void test1(void)
 
     /////////////       on met la transpos       ////////////////
 
-    *(*(M + nc - 1) + nl - 1) = Mij;
+    M[nl - 1][nc - 1] = Mij;
 
     //////////////         fin transpos         ////////////////////
 
@@ -150,7 +150,7 @@ void test1(void)
     fscanf(f2, "%d", &nll);
     fscanf(f2, "%s", vall);
     qi = atof(vall);
-    *(q + nll - 1) = qi;
+    q[nll - 1] = qi;
   }
 
 
@@ -160,7 +160,7 @@ void test1(void)
     fscanf(f5, "%s", vall);
     qi = atof(vall);
     fprintf(f5, "%d %.14e\n", nll, qi);
-    *(a + nll - 1) = qi;
+    a[nll - 1] = qi;
   }
 
 
@@ -170,7 +170,7 @@ void test1(void)
     fscanf(f6, "%s", vall);
     qi = atof(vall);
     fprintf(f6, "%d %.14e\n", nll, qi);
-    *(b + nll - 1) = qi;
+    b[nll - 1] = qi;
   }
 
 
@@ -197,9 +197,10 @@ void test1(void)
   fclose(f6);
   fclose(f1);
   fclose(f5);
-
-
+  for (i = 0; i < dimM; i++) free(M[i]);
   free(M);
+
+
   free(vec);
   free(q);
   free(z);
@@ -208,6 +209,7 @@ void test1(void)
   free(a);
   free(b);
   free(meth_rp.rp.a);
+  free(meth_rp.rp.b);
 }
 
 void test2(void)
@@ -216,9 +218,9 @@ void test2(void)
   int i, j, nl, nc, nll, it, n = 40, dimM = n, incx, incy;
   double *q, *z, *w, *vec, *a, *b, *c, *qqt, *zt;
   int info;
-  double(*M)[n];
+  double **M;
   double qi, Mij, alpha, beta;
-  char val[14], vall[14];
+  char val[50], vall[50];
   method meth_rp;
   char trans;
 
@@ -237,7 +239,11 @@ void test2(void)
 
 
 
-  M = malloc(dimM * dimM * sizeof(double));
+  M = (double **)malloc(dimM * sizeof(double*));
+  for (i = 0; i < n; i++)
+    M[i] = (double*)malloc(dimM * sizeof(double));
+
+
   vec = (double*)malloc(dimM * dimM * sizeof(double));
 
 
@@ -250,8 +256,8 @@ void test2(void)
 
     /////////////       on met la transpos       ////////////////
 
-    *(*(M + nc - 1) + nl - 1) = Mij;
-    //*(*(M+nl-1)+nc-1)=Mij;
+    M[nl - 1][nc - 1] = Mij;
+
 
     //////////////         fin transpos         ////////////////////
 
@@ -309,7 +315,7 @@ void test2(void)
     fscanf(f2, "%d", &nll);
     fscanf(f2, "%s", vall);
     qi = atof(vall);
-    *(q + nll - 1) = qi;
+    q[nll - 1] = qi;
   }
 
 
@@ -319,7 +325,7 @@ void test2(void)
     fscanf(f5, "%s", vall);
     qi = atof(vall);
     fprintf(f5, "%d %.14e\n", nll, qi);
-    *(a + nll - 1) = qi;
+    a[nll - 1] = qi;
   }
 
 
@@ -329,7 +335,7 @@ void test2(void)
     fscanf(f6, "%s", vall);
     qi = atof(vall);
     fprintf(f6, "%d %.14e\n", nll, qi);
-    *(b + nll - 1) = qi;
+    b[nll - 1] = qi;
   }
 
 
@@ -355,9 +361,10 @@ void test2(void)
   fclose(f6);
   fclose(f1);
   fclose(f5);
-
-
+  for (i = 0; i < dimM; i++) free(M[i]);
   free(M);
+
+
   free(vec);
   free(q);
   free(z);
@@ -366,6 +373,7 @@ void test2(void)
   free(a);
   free(b);
   free(meth_rp.rp.a);
+  free(meth_rp.rp.b);
 }
 
 

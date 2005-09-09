@@ -52,17 +52,20 @@
 
 
 
-main()
+int main(void)
 
 {
   FILE *f1, *f2, *f3, *f4, *f5, *f6, *f7, *f8, *f9;
   int i, j, nl, nc, nll, it, info, n = 40, dimM = n, incx, incy;
   double *q, *z, *w, *vec, *a, *b, *c, *qqt, *zt;
-  double(*M)[n];
+  double **M;
   double qi, Mij, alpha, beta;
-  char val[14], vall[14];
+  char val[14], vall[50];
   method meth_rd;
   char trans;
+
+  M = (double **)malloc(dimM * sizeof(double*));
+  for (i = 0; i < n; i++) M[i] = (double*)malloc(dimM * sizeof(double));
 
   strcpy(meth_rd.rd.nom_method, "latin");
   meth_rd.rd.itermax = 1000;
@@ -79,7 +82,7 @@ main()
 
 
 
-  M = malloc(dimM * dimM * sizeof(double));
+
   vec = (double*)malloc(dimM * dimM * sizeof(double));
 
 
@@ -91,8 +94,12 @@ main()
     Mij = atof(val);
 
     /////////////       on met la transpos       ////////////////
+    //printf("nl=%i", nl);
+    //printf("nc=%i", nc);
 
-    *(*(M + nc - 1) + nl - 1) = Mij;
+
+    M[nl - 1][nc - 1] = Mij;
+    //*(*(M+nc-1)+nl-1)=Mij;
 
     //////////////         fin transpos         ////////////////////
 
@@ -150,7 +157,8 @@ main()
     fscanf(f2, "%d", &nll);
     fscanf(f2, "%s", vall);
     qi = atof(vall);
-    *(q + nll - 1) = qi;
+    printf("nll=%i\n", nll);
+    q[nll - 1] = qi;
   }
 
 
@@ -160,7 +168,7 @@ main()
     fscanf(f5, "%s", vall);
     qi = atof(vall);
     fprintf(f5, "%d %.14e\n", nll, qi);
-    *(a + nll - 1) = qi;
+    a[nll - 1] = qi;
   }
 
 
@@ -170,7 +178,7 @@ main()
     fscanf(f6, "%s", vall);
     qi = atof(vall);
     fprintf(f6, "%d %.14e\n", nll, qi);
-    *(b + nll - 1) = qi;
+    b[nll - 1] = qi;
   }
 
 
@@ -197,7 +205,10 @@ main()
   fclose(f5);
   fclose(f6);
 
+  for (i = 0; i < dimM; i++) free(M[i]);
   free(M);
+
+
   free(vec);
   free(q);
   free(z);
@@ -206,5 +217,6 @@ main()
   free(a);
   free(b);
   free(meth_rd.rd.a);
-
+  free(meth_rd.rd.b);
+  return 0;
 }
