@@ -10,8 +10,6 @@ AM_INIT_AUTOMAKE(SICONOS/Numerics, 1.0)
 AC_CONFIG_SRCDIR([src/SiconosNumerics.h])
 AC_CONFIG_HEADER([config.h])
 
-# checks for libtool
-AC_PROG_LIBTOOL
 
 ##############################################
 # sh function to verify shared library version
@@ -55,8 +53,34 @@ AC_SUBST(SICONOSNUMERICS_SO_CURRENT)
 AC_SUBST(SICONOSNUMERICS_SO_REVISION)
 AC_SUBST(SICONOSNUMERICS_SO_AGE)
 
-# Checks for programs.
+# Checks for compilers.
+
+
+m4_define([AC_PROG_INSURE],[
+# Insure++ is a proriatary code checker/prober
+AC_ARG_ENABLE(insure,
+ [AC_HELP_STRING([--enable-insure],[Compile with Insure++])],
+ [
+  AC_CHECK_PROG(insure,insure,insure,no)
+  AC_MSG_CHECKING([------------------------------------------------])
+  if test "x$insure" = "xinsure"; then
+   if test -z $CXX; then
+    CXX=insure
+   fi;
+   if test -z $CC; then
+    CC=insure
+   fi;
+  fi;
+ ]
+)
+]) # AC_PROG_INSURE
+
+dnl AC_PROG_INSURE
+
+AC_PROG_CC
 AC_PROG_CXX
+CFLAGS=""
+CXXFLAGS=""
 AC_MSG_CHECKING([g++ version])
 CXX_VER=`$CXX -dumpversion`
 #  CXX_VERSION=`$CXX -v 2>&1 | grep 'gcc version'`
@@ -68,6 +92,17 @@ case $CXX_VER in
 esac
 AC_MSG_RESULT([ok ($CXX_VER)])   
 AC_PROG_CC
+
+
+# checks for libtool
+AC_PROG_LIBTOOL
+
+
+# Checks for programs.
+
+
+
+
 # AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_PROG_LN_S
@@ -87,7 +122,7 @@ AC_PATH_PROG(DOXYGEN, doxygen, /usr/bin/doxygen, $PATH:/bin:/usr/bin:/usr/ucb/bi
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([float.h stdlib.h string.h sys/time.h])
+AC_CHECK_HEADERS([float.h stdlib.h string.h sys/time.h g2c.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -221,17 +256,25 @@ CXXFLAGS="$CXXFLAGS "
 
 AC_MSG_RESULT("Architecture $ARCH  Compilation flag CXXFLAGS= $CXXFLAGS CFLAGS= $CFLAGS FFLAGS= $FFLAGS  Linking flag CXX_DYNLIB = $CXX_DYNLIB")
 
+LDFLAGS="$CXX_DYNLIB"
 
 AC_SUBST(CXX_DYNLIB)
 
 #################################
 ## LINK FLAGS
 #################################
-
 #SICONOS_EXT_INCLUDES
 SICONOS_EXT_INCLUDES="$BLAS_INCLUDES $LAPACK_INCLUDES"
-AC_SUBST(SICONOS_EXT_INCLUDES)
+case "$target" in
+    *-linux*)
+      
+      ;;
+    *-apple-darwin*)
+      SICONOS_EXT_INCLUDES="-I/sw/include/ $SICONOS_EXT_INCLUDES"
+      ;;
+esac
 AC_MSG_RESULT("SICONOS_EXT_INCLUDES = $SICONOS_EXT_INCLUDES")
+AC_SUBST(SICONOS_EXT_INCLUDES)
 
 #SICONOS_EXT_LDFLAGS
 SICONOS_EXT_LDFLAGS="$BLAS_LIBRARIES $LAPACK_LIBRARIES"
@@ -276,3 +319,23 @@ AC_CONFIG_FILES([Makefile
 AC_OUTPUT
 
 
+echo "
+ Configuration:
+   Target:                              ${target}
+   Architecture				${ARCH}
+   C Compiler:                          ${CC}
+   C compiler flags:                    ${CFLAGS}
+   C++ Compiler:                        ${CXX}
+   C++ compiler flags:                  ${CXXFLAGS}
+   F77 Compiler:                        ${F77}
+   F77 compiler flags:                  ${F77FLAGS}
+   Preprocessor flags:                  ${CPPFLAGS}
+   Linking flags			${LDFLAGS}
+   Includes:                            ${SICONOS_EXT_INCLUDES}
+"
+echo Type \'make \' to build the SICONOS platform
+echo Run \'make doc\' to generate the documentation.
+echo Type \'make install\' to install the platfrom
+echo Type \'make check\' torun the test
+echo
+echo Alternatively, you can \'make all\' to use the default configuration.

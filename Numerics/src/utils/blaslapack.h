@@ -1,5 +1,6 @@
-
-#include "g2c.h"
+#ifndef BLASLAPACK_H
+#define BLASLAPACK_H
+#include <g2c.h>
 //#define _F2C_INCLUDE_H // to avoid f2c.h include => conflict with g2c.h
 #if  defined(RIOS) && !defined(CLAPACK)
 #define F77NAME(x) x
@@ -412,3 +413,7 @@ extern void F77NAME(dgesdd)(char *jobz, integer *m, integer *n, double *a, integ
 
 
 #endif
+
+#endif // BLASLAPACK_H
+
+
