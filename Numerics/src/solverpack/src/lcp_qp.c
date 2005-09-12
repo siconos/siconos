@@ -31,9 +31,12 @@
  * \param tol     Unchanged parameter which represents the tolerance required.
  * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
  * \param w       Modified parameter which returns the solution of the problem.
- * \param info    Modified parameter which returns the termination value
- *                0 - convergence
- *                1 - no convergence
+ * \param info    Modified parameter which returns the termination value\n
+ *                0 - convergence  / minimization sucessfull\n
+ *                1 - Too Many iterations\n
+ *            2 - Accuracy insuficient to satisfy convergence criterion\n
+ *                5 - Length of working array insufficient\n
+ *                Other - The constraints are inconstent\n
  *
  * \author Vincent Acary
  */
@@ -140,29 +143,6 @@ void lcp_qp(double *vec , double *qq , int *nn , double *tol , double *z , doubl
 
   // getting the multiplier due to the lower bounds
   for (i = 0; i < n; i++) w[i] = lambda[m + i] ;
-
-
-  /*     switch(inform) { */
-  /*     case 0 : */
-  /*  printf("   Minimization sucessfull\n"); */
-  /*  *info = 0; */
-  /*  break; */
-  /*     case 1 : */
-  /*  printf("   Too Many iterations\n"); */
-  /*  break; */
-  /*     case 2 : */
-  /*  printf("   Accuracy insuficient to satisfy convergence criterion\n"); */
-  /*  break; */
-  /*     case 3 : */
-  /*     case 4 : */
-  /*     case 5 : */
-  /*  printf("   Length of working array insufficient\n"); */
-  /*  break; */
-  /*     default : */
-  /*  printf("   The constraints are inconstent\n"); */
-  /*  break; */
-
-  /*     } */
 
   // memory freeing
   free(A);

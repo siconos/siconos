@@ -42,6 +42,7 @@
  *                       0 - convergence
  *                       1 - iter = itermax
  *                       2 - negative diagonal term
+ *                       3 - pWp nul
  *
  * \author Mathieu Renouf
  *
@@ -92,7 +93,7 @@ void lcp_cpg(double *vec , double *q , int *nn , int *itermax , double *tol , in
       w[i] = 0.;
       z[i] = 0.;
     }
-    info = 0;
+    *info = 0;
     return;
   }
 

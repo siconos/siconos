@@ -38,10 +38,10 @@
  * \param res     Modified parameter which returns the final error value.
  * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
  * \param w       Modified parameter which returns the solution of the problem.
- * \param info    Modified parameter which returns the termination value
- *                0 - convergence
- *                1 - iter = itermax
- *                2 - negative diagonal term
+ * \param info    Modified parameter which returns the termination value\n
+ *                0 - convergence\n
+ *                1 - iter = itermax\n
+ *                2 - negative diagonal term\n
  *
  * \author Mathieu Renouf
  *
@@ -76,7 +76,7 @@ void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , d
       w[i] = 0.;
       z[i] = 0.;
     }
-    info = 0;
+    *info = 0;
     return;
   }
 
@@ -105,7 +105,7 @@ void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , d
         printf(" The local problem can be solved \n");
       }
 
-      info = 2;
+      *info = 2;
       free(diag);
       free(ww);
 
@@ -116,6 +116,7 @@ void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , d
 
   iter = 0;
   err  = 1.;
+
 
   while ((iter < *itermax) && (err > *tol))
   {
@@ -154,14 +155,13 @@ void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , d
 
     num = dnrm2_(&n, ww , &incx);
     err = num * den;
-
+    //printf(" %d -- %g \n",iter,err);
     /* **** ********************* **** */
 
   }
 
   *it_end = iter;
   *res    = err;
-
 
   if (*ispeak > 0)
   {
@@ -182,4 +182,5 @@ void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , d
   free(ww);
   free(diag);
 
+  return;
 }

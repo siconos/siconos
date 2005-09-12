@@ -31,13 +31,14 @@
  * \param double* vec  Unchanged parameter which contains the components of the LCP matrix with a Fortran storage.
  * \param double* q    Unchanged parameter which contains the components of the constant right hand side vector.
  * \param int* nn      Unchanged parameter which represents the dimension of the LCP problem.
- * \param method* pt  Unchanged parameter which represents the LCP structure.
+ * \param method* pt   Unchanged parameter which represents the LCP structure.
  * \param double* z    Modified parameter which contains the initial value of the LCP and returns the solution of the problem.
  * \param double* w    Modified parameter which returns the complementary solution of the problem.
  * \param it_end       Modified parameter which returns the number of iterations performed by the algorithm.
  * \param res          Modified parameter which returns the final error value.
  *
- * \return integer     0 - successful / 1 - otherwise
+ * \return integer     0 - successful\n
+ *                     0 >  - otherwise (see specific solvers for more information about the log info)
  *
  * \author Nineb Sheherazade & Mathieu Renouf
  */

@@ -36,8 +36,8 @@
  * \param double* zlem    Modified parameter which contains the initial solution and returns the solution of the problem.
  * \param double* wlem    Modified parameter which returns the solution of the problem.
  * \param int* info       Modified parameter which returns the termination value
- *                        0 - pivot termination
- *                        1 - maximal pivot number reached
+ *                        0 - pivot termination\n
+ *                        1 - maximal pivot number reached\n
  *
  * \author Mathieu Renouf
  */
