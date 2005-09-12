@@ -106,8 +106,8 @@ CompositeVector::~CompositeVector()
 void CompositeVector::display() const
 {
   cout << "=== Composite Display === " << endl;
-  cout << "with " << size() << " simple vectors" << endl;
   const int sizeV = svref.size();
+  cout << "with " << sizeV << " simple vectors" << endl;
   for (int i = 0; i < sizeV; i ++)
   {
     cout << "Vector number " << i << endl;
@@ -345,16 +345,15 @@ double* CompositeVector::getArray() const
 
 CompositeVector &CompositeVector::operator+=(const SiconosVector &v)
 {
-  if (size() != v.size())
-    SiconosVectorException::selfThrow(" CompositeVector::operator+=   -- the vectors have not the same size");
-
   unsigned int sizeV = size();
+  if (sizeV != v.size())
+    SiconosVectorException::selfThrow(" CompositeVector::operator+=   -- the vectors have not the same size");
 
   for (unsigned int i = 0; i < sizeV; i++)
     (*this)(i) += v(i);
+
   return *this;
 }
-
 
 CompositeVector &CompositeVector::operator-=(const SiconosVector &v)
 {

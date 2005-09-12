@@ -45,9 +45,9 @@ public:
   CompositeVector(const SimpleVector& v);
 
   /** \fn CompositeVector(const SiconosVector& v)
-  *  \brief copy contructor
-  *  \param SiconosVector& v
-  */
+   *  \brief copy contructor
+   *  \param SiconosVector& v
+   */
   CompositeVector(const CompositeVector&);
 
   /** \fn ~SiconosVector ()

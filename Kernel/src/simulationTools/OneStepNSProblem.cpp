@@ -245,17 +245,11 @@ void OneStepNSProblem::computeEffectiveOutput()
   // compute effective positions map
   topology->computeInteractionEffectivePositionMap();
 }
-
 void OneStepNSProblem::nextStep()
 {
   vector<Interaction*>::iterator it;
   for (it = interactionVector.begin(); it != interactionVector.end(); it++)
     (*it)->swapInMemory();
-  // get topology of the NonSmooth Dynamical System
-  //Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-  // if relative degree is different from 0 or 1
-  //if(!( topology->isTimeInvariant() ))
-  //  computeEffectiveOutput();
 }
 
 void OneStepNSProblem::updateInput()
@@ -265,7 +259,6 @@ void OneStepNSProblem::updateInput()
 
   for (it = interactionVector.begin(); it != interactionVector.end(); it++)
     (*it)->getRelationPtr() -> computeInput(currentTime);
-
 }
 
 void OneStepNSProblem::updateOutput()

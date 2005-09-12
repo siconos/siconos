@@ -684,8 +684,8 @@ void LinearTIR::computeFreeOutput(const double& time)
 void LinearTIR::computeInput(const double& time)
 {
   vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-  CompositeVector *r = new CompositeVector();
   vector<DynamicalSystem*>::iterator it;
+  CompositeVector *r = new CompositeVector();
   for (it = vDS.begin(); it != vDS.end(); it++)
   {
     // Put r of each DS into a composite
@@ -696,9 +696,9 @@ void LinearTIR::computeInput(const double& time)
   SimpleVector *lambda = interaction->getLambdaPtr(0);
 
   if (a == NULL)
-    *r = *B * *lambda;
+    *r += *B * *lambda;
   else
-    *r = *B * *lambda + *a;
+    *r += *B * *lambda + *a;
 }
 
 void LinearTIR::display() const

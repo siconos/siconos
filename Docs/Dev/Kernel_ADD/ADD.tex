@@ -26,74 +26,28 @@
 \begin{document}
 \pagestyle{empty}
 \renewcommand{\arraystretch}{1.8}
-
-\input{coverADD.tex}
-
 \tableofcontents
-
-
 \pagestyle{fancy}
 %---------------------------------------------------------------------%
 \cleardoublepage
-
 \pagenumbering{arabic}
-\chapter{Introduction}
-\label{Sec:ADD-Intoduction}
-\input{Introduction}
-
-
+The purpose of this part is to define and describe the software architecture of the \ac{siconos}. It provides a 
+general overview of the design of the system for (new) developers and will be used by the Project Manager to share out 
+the detailed conception and programming in work packages. \\
+This architecture relies on the specifications given in (link to part corresponding to ex-srd and ex-esd). \\
+The first section the context and general design of the platform, while its components are detailed in the second
+one. 
+\section{System Overview and Context}
+\label{Sec:ADD-SystemOverviewAndContext}
+\input{SystemOverviewAndContext}
 %---------------------------------------------------------------------------%
 \newpage
-\chapter{System overview}
-\label{Sec:ADD-SystemOverview}
-\input{SystemOverview}
+\section{Components}
+\label{Sec:ADD-Components}
+\input{Components}
 %---------------------------------------------------------------------------%
-
-\newpage
-\chapter{System context}
-\label{Sec:ADD-SystemContext}
-\input{SystemContext}
-
-\newpage
-%---------------------------------------------------------------------------%
-\chapter{Conceptual System design}
-\label{Sec:ADD-ConceptualSystemDesign}
-\input{ConceptualSystemDesign}
-
-
-
-\newpage
-%---------------------------------------------------------------------------%
-\chapter{Component description}
-\label{Sec:ADD-ComponentDescription}
-\input{ComponentDescription}
-
-
-\newpage
-%---------------------------------------------------------------------------%
-\chapter{Architecture implementation : methods and softwares}
-\label{Sec:ADD-ComponentImplementation}
-\input{ComponentImplementation}
-
-
-\newpage
-%---------------------------------------------------------------------------%
-%\chapter{Logical validation and verification}
-%\label{Sec:ADD-LogicalValidation}
-%\input{LogicalValidation}
-
-%\newpage
-%---------------------------------------------------------------------------%
-
-
 %\printglosstex(glo)[p]
 \printglosstex(acr)[p]
-
-
 \listoffigures
-%\listoftables
-%\cleardoublepage
-%\bibliographystyle{plainnat}
-%\bibliography{./Biblio/String,./Biblio/Cp.bib,./Biblio/Optim.bib,./Biblio/Contact.bib,./Biblio/NonSmooth.bib,./Biblio/Leger.bib,./Biblio/Petri.bib}
 \cleardoublepage
 \end{document} 
