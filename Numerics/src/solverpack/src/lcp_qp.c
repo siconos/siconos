@@ -46,7 +46,8 @@ void ql0001_(int *m , int *me , int *mmax , int *n , int *nmax , int *mnn ,
              double *x , double *u , int *iout , int *ifail , int *iprint , double *war ,
              int *lwar , int *iwar , int *liwar , double *eps);
 
-void lcp_qp(double *vec , double *qq , int *nn , double *tol , double *z , double *w , int *info)
+void lcp_qp(int *nn , double *vec , double *qq , double *z , double *w , int *info ,
+            int *iparamLCP , double *dparamLCP)
 {
 
   int i, j;
@@ -58,13 +59,13 @@ void lcp_qp(double *vec , double *qq , int *nn , double *tol , double *z , doubl
   double *Q, *A;
   double *p, *b, *xl, *xu;
 
-  double *lambda;
-
-
+  double *lambda, *tol;
 
   int lwar, liwar, iout, un;
   int *iwar;
   double *war;
+
+  tol   = &dparamLCP[0];
 
   // m :        total number of constraints.
   m = 0;

@@ -42,16 +42,15 @@
  * \author Mathieu Renouf
  */
 
-void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispeak , double *zlem ,
-                     double *wlem, int *it_end , int *info)
+void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *wlem , int *info ,
+                     int *iparamLCP , double *dparamLCP)
 {
 
-
-  int i, j, k, drive, block, Ifound;
-  int ic, jc, iadj, idlaw;
-  int icd, jcd, ian, jan;
-  int DIM, DIM2, NC, ITER;
+  int i, drive, block, Ifound;
+  int ic, jc;
+  int dim, dim2, ITER;
   int nobasis;
+  int itermax, ispeak;
 
   double qs, z0, zb, dblock;
   double pivot, tovip;
@@ -59,31 +58,42 @@ void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispea
   int *basis;
   double** A;
 
-  DIM = *nn;
-  DIM2 = 2 * (DIM + 1);
+  dim = *nn;
+  dim2 = 2 * (dim + 1);
 
-  basis = (int *)malloc(DIM * sizeof(int));
-  A = (double **)malloc(DIM * sizeof(double*));
+  /*input*/
 
-  for (ic = 0 ; ic < DIM; ++ic)
-    A[ic] = (double *)malloc(DIM2 * sizeof(double));
+  itermax = iparamLCP[0];
+  ispeak  = iparamLCP[1];
 
-  for (ic = 0 ; ic < DIM; ++ic)
-    for (jc = 0 ; jc < DIM2; ++jc)
+  /*output*/
+
+  iparamLCP[2] = 0;
+
+  /* Allocation */
+
+  basis = (int *)malloc(dim * sizeof(int));
+  A = (double **)malloc(dim * sizeof(double*));
+
+  for (ic = 0 ; ic < dim; ++ic)
+    A[ic] = (double *)malloc(dim2 * sizeof(double));
+
+  for (ic = 0 ; ic < dim; ++ic)
+    for (jc = 0 ; jc < dim2; ++jc)
       A[ic][jc] = 0.0;
 
   /*! construction of A matrix such as
    * A = [ Id | -d | -M | q ] with d = (1,...1)
    */
 
-  for (ic = 0 ; ic < DIM; ++ic)
-    for (jc = 0 ; jc < DIM; ++jc)
-      A[ic][jc + DIM + 2] = -vec[DIM * jc + ic];
+  for (ic = 0 ; ic < dim; ++ic)
+    for (jc = 0 ; jc < dim; ++jc)
+      A[ic][jc + dim + 2] = -vec[dim * jc + ic];
 
-  for (ic = 0 ; ic < DIM; ++ic) A[ic][0] = q[ic];
+  for (ic = 0 ; ic < dim; ++ic) A[ic][0] = q[ic];
 
-  for (ic = 0 ; ic < DIM; ++ic) A[ic][ic + 1 ] =  1.0;
-  for (ic = 0 ; ic < DIM; ++ic) A[ic][DIM + 1] = -1.0;
+  for (ic = 0 ; ic < dim; ++ic) A[ic][ic + 1 ] =  1.0;
+  for (ic = 0 ; ic < dim; ++ic) A[ic][dim + 1] = -1.0;
 
   /* End of construction of A */
 
@@ -94,7 +104,7 @@ void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispea
 
   qs = q[0];
 
-  for (ic = 1 ; ic < DIM ; ++ic)
+  for (ic = 1 ; ic < dim ; ++ic)
   {
     if (q[ic] < qs) qs = q[ic];
   }
@@ -108,7 +118,7 @@ void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispea
      * z = 0 and w = q is solution of LCP(q,M)
      */
 
-    for (ic = 0 ; ic < DIM; ++ic)
+    for (ic = 0 ; ic < dim; ++ic)
     {
       zlem[ic] = 0.0;
       wlem[ic] = q[ic];
@@ -119,9 +129,9 @@ void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispea
   else
   {
 
-    for (ic = 0 ; ic < DIM  ; ++ic) basis[ic] = ic + 1;
+    for (ic = 0 ; ic < dim  ; ++ic) basis[ic] = ic + 1;
 
-    drive = DIM + 1;
+    drive = dim + 1;
     block = 0;
     z0 = A[block][0];
     ITER = 0;
@@ -129,7 +139,7 @@ void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispea
     /* Start research of argmin lexico */
     /* With this first step the covering vector enter in the basis */
 
-    for (ic = 1 ; ic < DIM ; ++ic)
+    for (ic = 1 ; ic < dim ; ++ic)
     {
       zb = A[ic][0];
       if (zb < z0)
@@ -139,7 +149,7 @@ void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispea
       }
       else if (zb == z0)
       {
-        for (jc = 0 ; jc < DIM ; ++jc)
+        for (jc = 0 ; jc < dim ; ++jc)
         {
           dblock = A[block][1 + jc] - A[ic][1 + jc];
           if (dblock < 0)
@@ -164,38 +174,38 @@ void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispea
 
     A[block][drive] = 1;
     for (ic = 0       ; ic < drive ; ++ic) A[block][ic] = A[block][ic] * tovip;
-    for (ic = drive + 1 ; ic < DIM2  ; ++ic) A[block][ic] = A[block][ic] * tovip;
+    for (ic = drive + 1 ; ic < dim2  ; ++ic) A[block][ic] = A[block][ic] * tovip;
 
     /* */
 
     for (ic = 0 ; ic < block ; ++ic)
     {
       tmp = A[ic][drive];
-      for (jc = 0 ; jc < DIM2 ; ++jc) A[ic][jc] -=  tmp * A[block][jc];
+      for (jc = 0 ; jc < dim2 ; ++jc) A[ic][jc] -=  tmp * A[block][jc];
     }
-    for (ic = block + 1 ; ic < DIM ; ++ic)
+    for (ic = block + 1 ; ic < dim ; ++ic)
     {
       tmp = A[ic][drive];
-      for (jc = 0 ; jc < DIM2 ; ++jc) A[ic][jc] -=  tmp * A[block][jc];
+      for (jc = 0 ; jc < dim2 ; ++jc) A[ic][jc] -=  tmp * A[block][jc];
     }
 
     nobasis = basis[block];
     basis[block] = drive;
 
-    while (ITER < *itermax && !Ifound)
+    while (ITER < itermax && !Ifound)
     {
 
       ++ITER;
 
-      if (nobasis < DIM + 1)      drive = nobasis + (DIM + 1);
-      else if (nobasis > DIM + 1) drive = nobasis - (DIM + 1);
+      if (nobasis < dim + 1)      drive = nobasis + (dim + 1);
+      else if (nobasis > dim + 1) drive = nobasis - (dim + 1);
 
       /* Start research of argmin lexico for minimum ratio test */
 
       pivot = 1e20;
       block = -1;
 
-      for (ic = 0 ; ic < DIM ; ++ic)
+      for (ic = 0 ; ic < dim ; ++ic)
       {
         zb = A[ic][drive];
         if (zb > 0.0)
@@ -209,7 +219,7 @@ void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispea
           }
           else
           {
-            for (jc = 1 ; jc < DIM + 1 ; ++jc)
+            for (jc = 1 ; jc < dim + 1 ; ++jc)
             {
               dblock = A[block][jc] / pivot - A[ic][jc] / zb;
               if (dblock < 0) break;
@@ -224,7 +234,7 @@ void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispea
       }
       if (block == -1) break;
 
-      if (basis[block] == DIM + 1) Ifound = 1;
+      if (basis[block] == dim + 1) Ifound = 1;
 
       /* Pivot < block , drive > */
 
@@ -233,19 +243,19 @@ void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispea
       A[block][drive] = 1;
 
       for (ic = 0       ; ic < drive ; ++ic) A[block][ic] = A[block][ic] * tovip;
-      for (ic = drive + 1 ; ic < DIM2  ; ++ic) A[block][ic] = A[block][ic] * tovip;
+      for (ic = drive + 1 ; ic < dim2  ; ++ic) A[block][ic] = A[block][ic] * tovip;
 
       /* */
 
       for (ic = 0 ; ic < block ; ++ic)
       {
         tmp = A[ic][drive];
-        for (jc = 0 ; jc < DIM2 ; ++jc) A[ic][jc] -=  tmp * A[block][jc];
+        for (jc = 0 ; jc < dim2 ; ++jc) A[ic][jc] -=  tmp * A[block][jc];
       }
-      for (ic = block + 1 ; ic < DIM ; ++ic)
+      for (ic = block + 1 ; ic < dim ; ++ic)
       {
         tmp = A[ic][drive];
-        for (jc = 0 ; jc < DIM2 ; ++jc) A[ic][jc] -=  tmp * A[block][jc];
+        for (jc = 0 ; jc < dim2 ; ++jc) A[ic][jc] -=  tmp * A[block][jc];
       }
 
       nobasis = basis[block];
@@ -253,30 +263,31 @@ void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispea
 
     }
 
-    for (ic = 0 ; ic < DIM; ++ic)
+    for (ic = 0 ; ic < dim; ++ic)
     {
       drive = basis[ic];
-      if (drive < DIM + 1)
+      if (drive < dim + 1)
       {
         zlem[drive - 1] = 0.0;
         wlem[drive - 1] = A[ic][0];
       }
-      else if (drive > DIM + 1)
+      else if (drive > dim + 1)
       {
-        zlem[drive - DIM - 2] = A[ic][0];
-        wlem[drive - DIM - 2] = 0.0;
+        zlem[drive - dim - 2] = A[ic][0];
+        wlem[drive - dim - 2] = 0.0;
       }
     }
 
   }
 
-  *it_end = ITER;
+  iparamLCP = ITER;
+
   if (Ifound) *info = 0;
   else *info = 1;
 
   free(basis);
 
-  for (i = 0 ; i < DIM ; ++i) free(A[i]);
+  for (i = 0 ; i < dim ; ++i) free(A[i]);
   free(A);
 
 }

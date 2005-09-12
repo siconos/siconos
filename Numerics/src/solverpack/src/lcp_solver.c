@@ -50,7 +50,13 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   const char mot4[10] = "Latin", mot5[10] = "QP", mot6[10] = "NSQP";
   const char mot7[15] = "LexicoLemke";
 
-  int info = 1;
+  int i, info = 1;
+
+  int     iparamLCP[5];
+  double  dparamLCP[5];
+
+  for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
+  for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
 
   *it_end = 0;
   *res    = 0.0;
@@ -60,43 +66,92 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     lcp_lemke(vec , q , n , &pt->lcp.itermax , z ,   /* in  */
               w , it_end , res , &info);            /* out */
 
-  else if (strcmp(pt->lcp.name , mot2) == 0)
+  /* *** LCP signature *** */
 
-    lcp_nlgs(vec , q , n , &pt->lcp.itermax , &pt->lcp.tol , &pt->lcp.relax , &pt->lcp.iout , z ,  /* in  */
-             w , it_end , res , &info);                                                           /* out */
-
-  else if (strcmp(pt->lcp.name , mot3) == 0)
-
-    lcp_cpg(vec , q , n , &pt->lcp.itermax , &pt->lcp.tol , &pt->lcp.iout , z ,  /* in  */
-            w , it_end , res , &info);                                          /* out */
+  /* **** Latin Solver **** */
 
   else if (strcmp(pt->lcp.name , mot4) == 0)
+  {
 
-    lcp_latin(vec , q , n , &pt->lcp.k_latin , &pt->lcp.itermax , &pt->lcp.tol , z ,   /* in  */
-              w , it_end , res , &info);                                              /* out */
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.iout;
+    dparamLCP[0] = pt->lcp.tol;
+    dparamLCP[1] = pt->lcp.k_latin;
+
+    lcp_latin(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    *it_end = iparamLCP[2];
+    *res    = dparamLCP[2];
+
+  }
+  /* **** NLGS Solver **** */
+
+  else if (strcmp(pt->lcp.name , mot2) == 0)
+  {
+
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.iout;
+    dparamLCP[0] = pt->lcp.tol;
+    dparamLCP[1] = pt->lcp.relax;
+
+    lcp_nlgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    *it_end = iparamLCP[2];
+    *res    = dparamLCP[2];
+
+  }
+
+  /* **** CPG Solver **** */
+
+  else if (strcmp(pt->lcp.name , mot3) == 0)
+  {
+
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.iout;
+    dparamLCP[0] = pt->lcp.tol;
+
+    lcp_cpg(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    *it_end = iparamLCP[2];
+    *res    = dparamLCP[1];
+
+  }
+
+  /* ***** QP Solver ***** */
 
   else if (strcmp(pt->lcp.name , mot5) == 0)
   {
 
     // We assume that the LCP matrix M is symmetric
 
-    lcp_qp(vec , q , n , &pt->lcp.tol , z ,  /* in  */
-           w , &info);                      /* out */
+    dparamLCP[0] = pt->lcp.tol;
+
+    lcp_qp(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
   }
+
+  /* **** NSQP Solver **** */
+
   else if (strcmp(pt->lcp.name , mot6) == 0)
   {
 
     // We assume that the LCP matrix M is not symmetric
 
-    lcp_nsqp(vec , q , n , &pt->lcp.tol , z ,  /* in  */
-             w , &info);                  /* out */
+    dparamLCP[0] = pt->lcp.tol;
+
+    lcp_nsqp(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
   }
   else if (strcmp(pt->lcp.name , mot7) == 0)
+  {
 
-    lcp_lexicolemke(vec , q , n , &pt->lcp.itermax , &pt->lcp.iout , z ,  /* in  */
-                    w , it_end , &info);                                 /* out */
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.iout;
 
+    lcp_lexicolemke(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    *it_end = iparamLCP[2];
+  }
   else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
 
   return info;

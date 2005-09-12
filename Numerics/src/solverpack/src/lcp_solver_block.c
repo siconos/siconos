@@ -80,6 +80,9 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
 
   char NOTRANS = 'N';
 
+  int     iparamSolver[5];
+  double  dparamSolver[5];
+
   *it_end   = 0;
   *res      = 0.0;
   info      = 1;
@@ -91,6 +94,28 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   n   = (*db) * (*dn);
   db2 = (*db) * 2;
   db10 = (*db) * 10;
+
+  for (i = 0 ; i < 5 ; ++i) iparamSolver[i] = 0;
+  for (i = 0 ; i < 5 ; ++i) dparamSolver[i] = 0.0;
+
+  if (strcmp(pt->lcp.name , mot1) == 0);
+
+  else if (strcmp(pt->lcp.name , mot2) == 0)
+  {
+
+    iparamSolver[0] = pt->lcp.itermax;
+    iparamSolver[1] = pt->lcp.iout;
+    dparamSolver[0] = pt->lcp.tol;
+    dparamSolver[1] = pt->lcp.relax;
+
+  }
+  else if (strcmp(pt->lcp.name , mot3) == 0);
+
+  else if (strcmp(pt->lcp.name , mot4) == 0);
+
+  else if (strcmp(pt->lcp.name , mot5) == 0);
+
+  else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
 
   ww   = (double*)malloc(n * sizeof(double));
   rhs  = (double*)malloc((*db) * sizeof(double));
@@ -171,10 +196,9 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
 
       /* Local LCP resolution with NLGS algorithm */
 
-      lcp_nlgs(&vec[il * db2] , rhs , db , &db10 , &tol , &pt->lcp.relax , &pt->lcp.iout , &z[(*db)*i] ,
-               &w[(*db)*i] , &iter1 , &res1 , &info1);
+      lcp_nlgs(db , &vec[il * db2] , rhs , &z[(*db)*i] , &w[(*db)*i] , &info1 , iparamSolver , dparamSolver);
 
-      totaliter += iter1;
+      totaliter += iparamSolver[2];
     }
 
     /* **** Criterium convergence **** */

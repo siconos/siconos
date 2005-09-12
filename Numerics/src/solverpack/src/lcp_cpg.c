@@ -48,23 +48,40 @@
  *
  */
 
-void lcp_cpg(double *vec , double *q , int *nn , int *itermax , double *tol , int *ispeak , double *z ,
-             double *w , int *it_end , double * res , int *info)
+void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+             int *iparamLCP , double *dparamLCP)
 {
-
 
   int n, incx, incy;
   int i, iter;
+  int itermax, ispeak;
 
   double err, a1, b1 , qs;
 
   double alpha, beta, rp, pMp;
-  double den, num;
+  double den, num, tol;
 
   char NOTRANS = 'N';
 
   int *status;
   double *zz , *dz , *pp , *rr, *ww, *Mp;
+
+  *info = 1;
+  n = *nn;
+
+  /*input*/
+
+  itermax = iparamLCP[0];
+  ispeak  = iparamLCP[1];
+
+  tol   = dparamLCP[0];
+
+  /*output*/
+
+  iparamLCP[2] = 0;
+  dparamLCP[1] = 0.0;
+
+  /* Allocations */
 
   status = (int*)malloc(n * sizeof(int));
 
@@ -77,8 +94,6 @@ void lcp_cpg(double *vec , double *q , int *nn , int *itermax , double *tol , in
 
   Mp = (double*)malloc(n * sizeof(double));
 
-  *info = 1;
-  n = *nn;
   incx = 1;
 
   qs = dnrm2_(&n , &q[0] , &incx);
@@ -133,7 +148,7 @@ void lcp_cpg(double *vec , double *q , int *nn , int *itermax , double *tol , in
   iter = 0.0;
   err  = 1.0 ;
 
-  while ((iter < *itermax) && (err > *tol))
+  while ((iter < itermax) && (err > tol))
   {
 
     ++iter;
@@ -155,14 +170,14 @@ void lcp_cpg(double *vec , double *q , int *nn , int *itermax , double *tol , in
     if (fabs(pMp) < 1e-16)
     {
 
-      if (*ispeak > 0)
+      if (ispeak > 0)
       {
         printf(" Operation no conform at the iteration %d \n", iter);
         printf(" Alpha can be obtained with pWp = %10.4g  \n", pMp);
       }
 
-      *it_end = iter;
-      *res    = err;
+      iparamLCP[2] = iter;
+      dparamLCP[1] = err;
 
       return (*info = 3);
     }
@@ -250,12 +265,12 @@ void lcp_cpg(double *vec , double *q , int *nn , int *itermax , double *tol , in
 
   }
 
-  *it_end = iter;
-  *res    = err;
+  iparamLCP[2] = iter;
+  dparamLCP[1] = err;
 
-  if (*ispeak > 0)
+  if (ispeak > 0)
   {
-    if (err > *tol)
+    if (err > tol)
     {
       printf(" No convergence of CPG after %d iterations\n" , iter);
       printf(" The residue is : %g \n", err);
@@ -268,7 +283,7 @@ void lcp_cpg(double *vec , double *q , int *nn , int *itermax , double *tol , in
       *info = 0;
     }
   }
-  else if (err < *tol) *info = 0;
+  else if (err < tol) *info = 0;
 
   free(Mp);
 

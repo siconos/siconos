@@ -47,18 +47,38 @@
  *
  */
 
-void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , double *omega , int *ispeak , double *z ,
-              double *w , int *it_end , double *res , int *info)
-{
+//void lcp_nlgs( double *vec , double *q , int *nn , int *itermax , double *tol , double *omega , int *ispeak , double *z ,
+//         double *w , int *it_end , double *res , int *info ){
 
+void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+              int *iparamLCP , double *dparamLCP)
+{
 
   int n, incx, incy;
   int i, iter;
+  int itermax, ispeak;
 
-  double qs, err, num, den , zi;
+  double qs, err, num, den, zi;
+  double tol, omega;
   double *ww, *diag;
 
   n = *nn;
+
+  /*input*/
+
+  itermax = iparamLCP[0];
+  ispeak  = iparamLCP[1];
+
+  tol   = dparamLCP[0];
+  omega = dparamLCP[1];
+
+  /*output*/
+
+  iparamLCP[2] = 0;
+  dparamLCP[2] = 0.0;
+
+
+  /* Allocation */
 
   ww   = (double*)malloc(n * sizeof(double));
   diag = (double*)malloc(n * sizeof(double));
@@ -99,7 +119,7 @@ void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , d
     if (fabs(vec[i * n + i]) < 1e-16)
     {
 
-      if (*ispeak > 0)
+      if (ispeak > 0)
       {
         printf(" Warning negative diagonal term \n");
         printf(" The local problem can be solved \n");
@@ -114,11 +134,12 @@ void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , d
     else diag[i] = 1.0 / vec[i * n + i];
   }
 
+  /*start iterations*/
+
   iter = 0;
   err  = 1.;
 
-
-  while ((iter < *itermax) && (err > *tol))
+  while ((iter < itermax) && (err > tol))
   {
 
     ++iter;
@@ -160,12 +181,12 @@ void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , d
 
   }
 
-  *it_end = iter;
-  *res    = err;
+  iparamLCP[2] = iter;
+  dparamLCP[2] = err;
 
-  if (*ispeak > 0)
+  if (ispeak > 0)
   {
-    if (err > *tol)
+    if (err > tol)
     {
       printf(" No convergence of NLGS after %d iterations\n" , iter);
       printf(" The residue is : %g \n", err);
@@ -180,7 +201,7 @@ void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , d
   }
   else
   {
-    if (err > *tol) *info = 1;
+    if (err > tol) *info = 1;
     else *info = 0;
   }
 

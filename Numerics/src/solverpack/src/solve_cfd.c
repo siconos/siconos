@@ -62,6 +62,11 @@ int solve_cfd(double *K1, double *F1, int *n, method *pt, double U2[], double F2
   int itmp;
   double rtmp;
 
+  int iparamLCP[5];
+  int dparamLCP[5];
+
+  for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
+  for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
 
   if (strcmp(pt->cfd.nom_method, mot1) == 0)
   {
@@ -145,7 +150,16 @@ int solve_cfd(double *K1, double *F1, int *n, method *pt, double U2[], double F2
     t1 = clock();
     itmp = 0;
     rtmp = 1.0;
-    lcp_nlgs(MM , q ,  &tempo , &pt->cfd.itermax , &pt->cfd.tol , &rtmp , &itmp , z, w, &it_end, &res, &info);
+
+    iparamLCP[0] = pt->cfd.itermax;
+    iparamLCP[1] = 0;
+    dparamLCP[0] = pt->cfd.tol;
+    dparamLCP[1] = 1.0;
+
+    lcp_nlgs(&tempo , MM , q , z , w , &info , iparamLCP , dparamLCP);
+
+    it_end = iparamLCP[2];
+    res    = dparamLCP[2];
 
     t2 = clock();
 
@@ -176,7 +190,15 @@ int solve_cfd(double *K1, double *F1, int *n, method *pt, double U2[], double F2
     t1 = clock();
     itmp = 0;
     rtmp = 1.0;
-    lcp_cpg(MM , q , &tempo , &pt->cfd.itermax , &pt->cfd.tol , &itmp , z , w , &it_end, &res, &info);
+
+    iparamLCP[0] = pt->cfd.itermax;
+    iparamLCP[1] = 0;
+    dparamLCP[0] = pt->cfd.tol;
+
+    lcp_cpg(&tempo , MM , q , z , w , &info , iparamLCP , dparamLCP);
+
+    it_end = iparamLCP[2];
+    res    = dparamLCP[2];
 
     t2 = clock();
     printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);

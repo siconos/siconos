@@ -50,8 +50,8 @@ int main(void)
 
   FILE *LCPfile;
 
-  int i, j;
-  int info ;
+  int i, j, itest, NBTEST;
+  int info, isol;
   int dim , dim2;
   int dn, db, db2, nblock, itmp;
 
@@ -78,11 +78,15 @@ int main(void)
   static method_lcp meth_lcp3 = { "LexicoLemke" , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
   static method_lcp meth_lcp4 = { "QP"          , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
   static method_lcp meth_lcp5 = { "NSQP"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
+  static method_lcp meth_lcp6 = { "Latin"       , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" };
 
   /****************************************************************/
 
   iter  = 0;
   titer = 0;
+  criteria = 0.0;
+
+  NBTEST = 8;
 
   /****************************************************************/
 #ifdef BAVARD
@@ -90,961 +94,202 @@ int main(void)
 #endif
   /****************************************************************/
 
-  if ((LCPfile = fopen("MATRIX/deudeu.dat", "r")) == NULL)
+  for (itest = 0 ; itest < NBTEST ; ++itest)
   {
-    perror("fopen LCPfile: deudeu.dat");
-    exit(1);
-  }
 
-  fscanf(LCPfile , "%d" , &dim);
-
-  dim2 = dim * dim;
-
-  vecM = (double*)malloc(dim2 * sizeof(double));
-  q    = (double*)malloc(dim * sizeof(double));
-  sol  = (double*)malloc(dim * sizeof(double));
-
-  for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
-  for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
-  for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    for (j = 0 ; j < dim ; ++j)
+    switch (itest)
     {
-      fscanf(LCPfile, "%s", val);
-      vecM[ dim * j + i ] = atof(val);
+    case 0:
+      printf("\n 2x2 LCP ");
+      if ((LCPfile = fopen("MATRIX/deudeu.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: deudeu.dat");
+        exit(1);
+      }
+      break;
+    case 1:
+      printf("\n DIAGONAL LCP ");
+      if ((LCPfile = fopen("MATRIX/trivial.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: trivial.dat");
+        exit(1);
+      }
+      break;
+    case 2:
+      printf("\n ORTIZ LCP ");
+      if ((LCPfile = fopen("MATRIX/ortiz.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: ortiz.dat");
+        exit(1);
+      }
+      break;
+    case 3:
+      printf("\n PANG LCP ");
+      if ((LCPfile = fopen("MATRIX/pang.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: pang.dat");
+        exit(1);
+      }
+      break;
+    case 4:
+      printf("\n DIODES RLC LCP ");
+      if ((LCPfile = fopen("MATRIX/diodes.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: diodes.dat");
+        exit(1);
+      }
+      break;
+    case 5:
+      printf("\n MURTY1 LCP ");
+      if ((LCPfile = fopen("MATRIX/murty1.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: murty1.dat");
+        exit(1);
+      }
+      break;
+    case 6:
+      printf("\n APPROXIMATED FRICTION CONE LCP ");
+      if ((LCPfile = fopen("MATRIX/confeti.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: confeti.dat");
+        exit(1);
+      }
+      break;
+    case 7:
+      printf("\n MATHIEU2 LCP ");
+      if ((LCPfile = fopen("MATRIX/mathieu2.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: mathieu2.dat");
+        exit(1);
+      }
+      break;
     }
-  }
 
-  for (i = 0 ; i < dim ; ++i)
-  {
-    fscanf(LCPfile , "%s" , val);
-    q[i] = atof(val);
-  }
+    fscanf(LCPfile , "%d" , &dim);
 
-  fscanf(LCPfile , "%s" , val);
+    dim2 = dim * dim;
+    isol = 1;
 
-  if (!feof(LCPfile))
-  {
+    vecM = (double*)malloc(dim2 * sizeof(double));
+    q    = (double*)malloc(dim * sizeof(double));
+    sol  = (double*)malloc(dim * sizeof(double));
 
-    sol[0] = atof(val);
+    for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
+    for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
+    for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
 
-    for (i = 1 ; i < dim ; ++i)
+    for (i = 0 ; i < dim ; ++i)
     {
-      fscanf(LCPfile , "%s" , val);
-      sol[i] = atof(val);
+      for (j = 0 ; j < dim ; ++j)
+      {
+        fscanf(LCPfile, "%s", val);
+        vecM[ dim * j + i ] = atof(val);
+      }
     }
-  }
-  else
-  {
-    for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
-  }
 
-  fclose(LCPfile);
-
-#ifdef BAVARD
-  printf("\n solution deudeu  : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
-  printf("\n");
-#endif
-
-  z = malloc(dim * sizeof(double));
-  w = malloc(dim * sizeof(double));
-
-  /* NLGS */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NLGS   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* CPG */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           CPG    :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* Lemke */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           Lemke  :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* QP */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp4 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           QP     :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  free(q);
-  free(w);
-  free(z);
-  free(sol);
-  free(vecM);
-
-  /****************************************************************/
-  /****************************************************************/
-
-  if ((LCPfile = fopen("MATRIX/trivial.dat", "r")) == NULL)
-  {
-    perror("fopen LCPfile: trivial.dat");
-    exit(1);
-  }
-
-  fscanf(LCPfile , "%d" , &dim);
-
-  dim2 = dim * dim;
-
-  vecM = (double*)malloc(dim2 * sizeof(double));
-  q    = (double*)malloc(dim * sizeof(double));
-  sol  = (double*)malloc(dim * sizeof(double));
-
-  for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
-  for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
-  for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    for (j = 0 ; j < dim ; ++j)
-    {
-      fscanf(LCPfile, "%s", val);
-      vecM[ dim * j + i ] = atof(val);
-    }
-  }
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    fscanf(LCPfile , "%s" , val);
-    q[i] = atof(val);
-  }
-
-  fscanf(LCPfile , "%s" , val);
-
-  if (!feof(LCPfile))
-  {
-
-    sol[0] = atof(val);
-
-    for (i = 1 ; i < dim ; ++i)
+    for (i = 0 ; i < dim ; ++i)
     {
       fscanf(LCPfile , "%s" , val);
-      sol[i] = atof(val);
+      q[i] = atof(val);
     }
-  }
-  else
-  {
-    for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
-  }
 
-  fclose(LCPfile);
-
-#ifdef BAVARD
-  printf("\n");
-  printf("\n solution trivial : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
-  printf("\n");
-#endif
-
-  z = malloc(dim * sizeof(double));
-  w = malloc(dim * sizeof(double));
-
-  /* NLGS */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NLGS   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* CPG */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           CPG    :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* Lemke */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           Lemke  :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* QP */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp4 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           QP     :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  free(q);
-  free(w);
-  free(z);
-  free(sol);
-  free(vecM);
-
-  /****************************************************************/
-  /****************************************************************/
-
-  if ((LCPfile = fopen("MATRIX/ortiz.dat", "r")) == NULL)
-  {
-    perror("fopen LCPfile: ortiz.dat");
-    exit(1);
-  }
-
-  fscanf(LCPfile , "%d" , &dim);
-
-  dim2 = dim * dim;
-
-  vecM = (double*)malloc(dim2 * sizeof(double));
-  q    = (double*)malloc(dim * sizeof(double));
-  sol  = (double*)malloc(dim * sizeof(double));
-
-  for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
-  for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
-  for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    for (j = 0 ; j < dim ; ++j)
-    {
-      fscanf(LCPfile, "%s", val);
-      vecM[ dim * j + i ] = atof(val);
-    }
-  }
-
-  for (i = 0 ; i < dim ; ++i)
-  {
     fscanf(LCPfile , "%s" , val);
-    q[i] = atof(val);
-  }
 
-  fscanf(LCPfile , "%s" , val);
-
-  if (!feof(LCPfile))
-  {
-
-    sol[0] = atof(val);
-
-    for (i = 1 ; i < dim ; ++i)
+    if (!feof(LCPfile))
     {
-      fscanf(LCPfile , "%s" , val);
-      sol[i] = atof(val);
+
+      sol[0] = atof(val);
+
+      for (i = 1 ; i < dim ; ++i)
+      {
+        fscanf(LCPfile , "%s" , val);
+        sol[i] = atof(val);
+      }
     }
-  }
-  else
-  {
-    for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
-  }
-
-  fclose(LCPfile);
-
-#ifdef BAVARD
-  printf("\n");
-  printf("\n solution ortiz   : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
-  printf("\n");
-#endif
-
-  z = malloc(dim * sizeof(double));
-  w = malloc(dim * sizeof(double));
-
-  /* NLGS */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NLGS   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* CPG */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           CPG    :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* Lemke */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           Lemke  :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* NSQP */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp5 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NSQP   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  free(q);
-  free(sol);
-  free(w);
-  free(z);
-  free(vecM);
-
-  /****************************************************************/
-  /****************************************************************/
-
-  if ((LCPfile = fopen("MATRIX/pang.dat", "r")) == NULL)
-  {
-    perror("fopen LCPfile: pang.dat");
-    exit(1);
-  }
-
-  fscanf(LCPfile , "%d" , &dim);
-
-  dim2 = dim * dim;
-
-  vecM = (double*)malloc(dim2 * sizeof(double));
-  q    = (double*)malloc(dim * sizeof(double));
-  sol  = (double*)malloc(dim * sizeof(double));
-
-  for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
-  for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
-  for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    for (j = 0 ; j < dim ; ++j)
+    else
     {
-      fscanf(LCPfile, "%s", val);
-      vecM[ dim * j + i ] = atof(val);
+      isol = 0;
+      for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
     }
+
+    fclose(LCPfile);
+
+#ifdef BAVARD
+    printf("\n solution         : ");
+    if (isol) for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
+    printf("\n");
+#endif
+
+    z = malloc(dim * sizeof(double));
+    w = malloc(dim * sizeof(double));
+
+    /* NLGS */
+
+    for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
+
+    info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
+
+#ifdef BAVARD
+    printf("\n           NLGS   :%1d ", info);
+    for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
+    printf(" ( %6d ) " , iter);
+#endif
+
+    /* CPG */
+
+    for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
+
+    info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
+
+#ifdef BAVARD
+    printf("\n           CPG    :%1d ", info);
+    for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
+    printf(" ( %6d ) " , iter);
+#endif
+
+    /* Lemke */
+
+    for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
+
+    info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
+
+#ifdef BAVARD
+    printf("\n           Lemke  :%1d ", info);
+    for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
+    printf(" ( %6d ) " , iter);
+#endif
+
+    /* QP */
+
+    for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
+
+    info = lcp_solver(vecM , q , &dim , &meth_lcp5 , z , w , &iter , &criteria);
+
+#ifdef BAVARD
+    printf("\n    NSQP / QP     :%1d ", info);
+    for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
+    printf(" ( %6d ) " , iter);
+#endif
+
+    /* Latin */
+
+    for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
+
+    info = lcp_solver(vecM , q , &dim , &meth_lcp6 , z , w , &iter , &criteria);
+
+#ifdef BAVARD
+    printf("\n           QP     :%1d ", info);
+    for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
+    printf(" ( %6d ) " , iter);
+#endif
+
+    free(q);
+    free(w);
+    free(z);
+    free(sol);
+    free(vecM);
+
   }
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    fscanf(LCPfile , "%s" , val);
-    q[i] = atof(val);
-  }
-
-  fscanf(LCPfile , "%s" , val);
-
-  if (!feof(LCPfile))
-  {
-
-    sol[0] = atof(val);
-
-    for (i = 1 ; i < dim ; ++i)
-    {
-      fscanf(LCPfile , "%s" , val);
-      sol[i] = atof(val);
-    }
-  }
-  else
-  {
-    for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
-  }
-
-  fclose(LCPfile);
-
-#ifdef BAVARD
-  printf("\n");
-  printf("\n solution pang    : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
-  printf("\n");
-#endif
-
-  z = malloc(dim * sizeof(double));
-  w = malloc(dim * sizeof(double));
-
-  /* NLGS */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NLGS   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* CPG */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           CPG    :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* Lemke */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           Lemke  :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* NSQP */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp5 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NSQP   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  free(q);
-  free(sol);
-  free(w);
-  free(z);
-  free(vecM);
-
-  /****************************************************************/
-  /****************************************************************/
-
-  if ((LCPfile = fopen("MATRIX/diodes.dat", "r")) == NULL)
-  {
-    perror("fopen LCPfile: diodes.dat");
-    exit(1);
-  }
-
-  fscanf(LCPfile , "%d" , &dim);
-
-  dim2 = dim * dim;
-
-  vecM = (double*)malloc(dim2 * sizeof(double));
-  q    = (double*)malloc(dim * sizeof(double));
-  sol  = (double*)malloc(dim * sizeof(double));
-
-  for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
-  for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
-  for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    for (j = 0 ; j < dim ; ++j)
-    {
-      fscanf(LCPfile, "%s", val);
-      vecM[ dim * j + i ] = atof(val);
-    }
-  }
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    fscanf(LCPfile , "%s" , val);
-    q[i] = atof(val);
-  }
-
-  fscanf(LCPfile , "%s" , val);
-
-  if (!feof(LCPfile))
-  {
-
-    sol[0] = atof(val);
-
-    for (i = 1 ; i < dim ; ++i)
-    {
-      fscanf(LCPfile , "%s" , val);
-      sol[i] = atof(val);
-    }
-  }
-  else
-  {
-    for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
-  }
-
-  fclose(LCPfile);
-
-#ifdef BAVARD
-  printf("\n");
-  printf("\n solution diodes  : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
-  printf("\n");
-#endif
-
-  z = malloc(dim * sizeof(double));
-  w = malloc(dim * sizeof(double));
-
-  /* NLGS */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NLGS   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* CPG */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           CPG    :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* Lemke */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           Lemke  :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* NSQP */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp5 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NSQP   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  free(q);
-  free(sol);
-  free(w);
-  free(z);
-  free(vecM);
-
-  /****************************************************************/
-  /****************************************************************/
-
-  if ((LCPfile = fopen("MATRIX/murty1.dat", "r")) == NULL)
-  {
-    perror("fopen LCPfile: murty1.dat");
-    exit(1);
-  }
-
-  fscanf(LCPfile , "%d" , &dim);
-
-  dim2 = dim * dim;
-
-  vecM = (double*)malloc(dim2 * sizeof(double));
-  q    = (double*)malloc(dim * sizeof(double));
-  sol  = (double*)malloc(dim * sizeof(double));
-
-  for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
-  for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
-  for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    for (j = 0 ; j < dim ; ++j)
-    {
-      fscanf(LCPfile, "%s", val);
-      vecM[ dim * j + i ] = atof(val);
-    }
-  }
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    fscanf(LCPfile , "%s" , val);
-    q[i] = atof(val);
-  }
-
-  fscanf(LCPfile , "%s" , val);
-
-  if (!feof(LCPfile))
-  {
-
-    sol[0] = atof(val);
-
-    for (i = 1 ; i < dim ; ++i)
-    {
-      fscanf(LCPfile , "%s" , val);
-      sol[i] = atof(val);
-    }
-  }
-  else
-  {
-    for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
-  }
-
-  fclose(LCPfile);
-
-#ifdef BAVARD
-  printf("\n");
-  printf("\n solution murty1  : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
-  printf("\n");
-#endif
-
-  z = malloc(dim * sizeof(double));
-  w = malloc(dim * sizeof(double));
-
-  /* NLGS */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NLGS   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* CPG */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           CPG    :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* Lemke */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           Lemke  :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* NSQP */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp5 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NSQP   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  free(q);
-  free(w);
-  free(z);
-  free(sol);
-  free(vecM);
-
-  /****************************************************************/
-  /****************************************************************/
-
-  if ((LCPfile = fopen("MATRIX/confeti.dat", "r")) == NULL)
-  {
-    perror("fopen LCPfile: confeti.dat");
-    exit(1);
-  }
-
-  fscanf(LCPfile , "%d" , &dim);
-
-  dim2 = dim * dim;
-
-  vecM = (double*)malloc(dim2 * sizeof(double));
-  q    = (double*)malloc(dim * sizeof(double));
-  sol  = (double*)malloc(dim * sizeof(double));
-
-  for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
-  for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
-  for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    for (j = 0 ; j < dim ; ++j)
-    {
-      fscanf(LCPfile, "%s", val);
-      vecM[ dim * j + i ] = atof(val);
-    }
-  }
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    fscanf(LCPfile , "%s" , val);
-    q[i] = atof(val);
-  }
-
-  fscanf(LCPfile , "%s" , val);
-
-  if (!feof(LCPfile))
-  {
-
-    sol[0] = atof(val);
-
-    for (i = 1 ; i < dim ; ++i)
-    {
-      fscanf(LCPfile , "%s" , val);
-      sol[i] = atof(val);
-    }
-  }
-  else
-  {
-    for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
-  }
-
-  fclose(LCPfile);
-
-#ifdef BAVARD
-  printf("\n");
-  printf("\n solution confeti : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
-  printf("\n");
-#endif
-
-  z = malloc(dim * sizeof(double));
-  w = malloc(dim * sizeof(double));
-
-  /* NLGS */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NLGS   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* CPG */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           CPG    :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* Lemke */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           Lemke  :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* NSQP */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp5 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NSQP   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  free(q);
-  free(sol);
-  free(w);
-  free(z);
-  free(vecM);
-
-  /****************************************************************/
-  /****************************************************************/
-
-  if ((LCPfile = fopen("MATRIX/mathieu2.dat", "r")) == NULL)
-  {
-    perror("fopen LCPfile: mathieu2.dat");
-    exit(1);
-  }
-
-  fscanf(LCPfile , "%d" , &dim);
-
-  dim2 = dim * dim;
-
-  vecM = (double*)malloc(dim2 * sizeof(double));
-  q    = (double*)malloc(dim * sizeof(double));
-  sol  = (double*)malloc(dim * sizeof(double));
-
-  for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
-  for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
-  for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    for (j = 0 ; j < dim ; ++j)
-    {
-      fscanf(LCPfile, "%s", val);
-      vecM[ dim * j + i ] = atof(val);
-    }
-  }
-
-  for (i = 0 ; i < dim ; ++i)
-  {
-    fscanf(LCPfile , "%s" , val);
-    q[i] = atof(val);
-  }
-
-  fscanf(LCPfile , "%s" , val);
-
-  if (!feof(LCPfile))
-  {
-
-    sol[0] = atof(val);
-
-    for (i = 1 ; i < dim ; ++i)
-    {
-      fscanf(LCPfile , "%s" , val);
-      sol[i] = atof(val);
-    }
-  }
-  else
-  {
-    for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
-  }
-
-  fclose(LCPfile);
-
-#ifdef BAVARD
-  printf("\n");
-  printf("\n solution mathieu2 : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
-  printf("\n");
-#endif
-
-  z = malloc(dim * sizeof(double));
-  w = malloc(dim * sizeof(double));
-
-  /* NLGS */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp1 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NLGS   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* CPG */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp2 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           CPG    :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* Lemke */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp3 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           Lemke  :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  /* NSQP */
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver(vecM , q , &dim , &meth_lcp5 , z , w , &iter , &criteria);
-
-#ifdef BAVARD
-  printf("\n           NSQP   :%1d ", info);
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  printf(" ( %6d ) " , iter);
-#endif
-
-  free(q);
-  free(sol);
-  free(w);
-  free(z);
-  free(vecM);
 
   /****************************************************************/
 #ifdef BAVARD

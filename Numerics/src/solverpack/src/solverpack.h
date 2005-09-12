@@ -178,23 +178,28 @@ extern "C" int lcp_solver(double *vec, double *q , int *n , method *pt , double 
 extern "C" int lcp_solver_block(int *inb , int *iid , double *vec, double *q , int *nn , int *nb , method *pt , double *z ,
                                 double *w , int *it_end , int *itt_end , double *res);
 
+
+
 extern "C" void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem,
                           double *wlem, int *it_end, double *res, int *info);
 
-extern "C" void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , double *omega , int *ispeak , double *z ,
-                         double *w , int *it_end , double *res , int *info);
+extern  "C" void lcp_qp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                        int *iparamLCP , double *dparamLCP);
 
-extern "C" void lcp_cpg(double *vec , double *q , int *nn , int *itermax , double *tol , int *ispeak , double *z ,
-                        double *w , int *it_end , double * res , int *info);
+extern  "C" void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                         int *iparamLCP , double *dparamLCP);
 
-extern "C" void lcp_latin(double*, double*, int *, double *, int *, double *, double [], double[], int *, double *, int *);
+extern  "C" void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                          int *iparamLCP , double *dparamLCP);
 
-extern "C" void lcp_qp(double *vec , double *qq , int *nn , double *tol , double *z , double *w , int *info);
+extern  "C" void lcp_nsqp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                          int *iparamLCP , double *dparamLCP);
 
-extern "C" void lcp_nsqp(double *vec , double *qq , int *nn , double *tol , double *z , double *w , int *info);
+extern  "C" void lcp_latin(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                           int *iparamLCP , double *dparamLCP);
 
-extern "C" void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispeak , double *zlem ,
-                                double *wlem, int *it_end , int *info);
+extern  "C" void lcp_lexicolemke(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                                 int *iparamLCP , double *dparamLCP);
 
 /********************************************/
 
@@ -397,22 +402,26 @@ cfd_latin.c
 extern void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem,
                       double *wlem, int *it_end, double *res, int *info);
 
-extern void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , double *omega , int *ispeak , double *z ,
-                     double *w , int *it_end , double *res , int *info);
 
-extern void lcp_cpg(double *vec , double *q , int *nn , int *itermax , double *tol , int *ispeak , double *z ,
-                    double *w , int *it_end , double * res , int *info);
+extern void lcp_qp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                   int *iparamLCP , double *dparamLCP);
 
-extern void lcp_latin(double*, double*, int *, double *, int *, double *, double [], double[], int *, double *, int *);
+extern void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                    int *iparamLCP , double *dparamLCP);
 
-extern void lcp_qp(double *vec , double *qq , int *nn , double *tol , double *z , double *w , int *info);
+extern void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                     int *iparamLCP , double *dparamLCP);
 
-extern void lcp_nsqp(double *vec , double *qq , int *nn , double *tol , double *z , double *w , int *info);
+extern void lcp_nsqp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                     int *iparamLCP , double *dparamLCP);
 
-extern void lcp_lexicolemke(double *vec, double *q , int *nn, int *itermax , int *ispeak , double *zlem ,
-                            double *wlem, int *it_end , int *info);
+extern void lcp_latin(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                      int *iparamLCP , double *dparamLCP);
 
-/*********************************** LCP *****************************************/
+extern void lcp_lexicolemke(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                            int *iparamLCP , double *dparamLCP);
+
+/*********************************** *** *****************************************/
 
 /* RP */
 

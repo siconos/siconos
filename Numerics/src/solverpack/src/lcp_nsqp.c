@@ -45,8 +45,10 @@ void ql0001_(int *m , int *me , int *mmax , int *n , int *nmax , int *mnn ,
              double *x , double *u , int *iout , int *ifail , int *iprint , double *war ,
              int *lwar , int *iwar , int *liwar , double *eps);
 
-void lcp_nsqp(double *vec , double *qq , int *nn , double *tol , double *z , double *w , int *info)
+void lcp_nsqp(int *nn , double *vec , double *qq , double *z , double *w , int *info ,
+              int *iparamLCP , double *dparamLCP)
 {
+
 
   int i, j;
 
@@ -56,11 +58,13 @@ void lcp_nsqp(double *vec , double *qq , int *nn , double *tol , double *z , dou
   double *Q, *A;
   double *p, *b, *xl, *xu;
 
-  double *lambda;
+  double *lambda, tol;
 
   int lwar, liwar, iout, un;
   int *iwar;
   double *war;
+
+  tol   = dparamLCP[0];
 
   // m :        total number of constraints.
   m = n;
@@ -137,7 +141,7 @@ void lcp_nsqp(double *vec , double *qq , int *nn , double *tol , double *z , dou
 
   // call ql0001_
   ql0001_(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu,
-          z, lambda, &iout, info , &un, war, &lwar, iwar, &liwar, tol);
+          z, lambda, &iout, info , &un, war, &lwar, iwar, &liwar, &tol);
 
   //    printf("tol = %10.4e\n",*tol);
   // for (i=0;i<mnn;i++)printf("lambda[%i] = %g\n",i,lambda[i]);
