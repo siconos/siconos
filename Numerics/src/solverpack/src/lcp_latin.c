@@ -2,45 +2,43 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "blaslapack.h"
 
-
-/*!\file latin_lcp.c
-
-
-   This subroutine allows the resolution of LCP (Linear Complementary Problem).
-   Try \f$(z,w)\f$ such that:
-
-\f$
-\left\lbrace
-\begin{array}{l}
-M z- w=q\\
-0 \le z \perp w \ge 0\\
-\end{array}
-\right.
-\f$
-
-  here M is an n by n  matrix, q an n-dimensional vector, w an n-dimensional  vector and z an n-dimensional vector.
-*/
-
-
-/*!\fn  latin_lcp(double vec[],double *qq,int *nn, double * k_latin,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
-
-   latin_lcp is a basic latin solver for LCP.
-
-
-   \param vec On enter a double vector containing the components of the double matrix with a fortran90 allocation.
-   \param qq On enter a pointer over doubles containing the components of the double vector.
-   \param nn On enter a pointer over integers, the dimension of the second member.
-   \param k_latin On enter a pointer over doubles, the k_latin coefficient (positive).
-   \param itermax On enter a pointer over integers, the maximum iterations required.
-   \param tol On enter a pointer over doubles, the tolerance required.
-   \param it_end On enter a pointer over integers, the number of iterations carried out.
-   \param res On return a pointer over doubles, the error value.
-   \param z On return double vector, the solution of the problem.
-   \param w On return double vector, the solution of the problem.
-   \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
-   \author Nineb Sheherazade.
-*/
+/*!\file lcp_cpg.c
+ *
+ * This subroutine allows the resolution of LCP (Linear Complementary Problem).
+ * Try \f$(z,w)\f$ such that:
+ * \f$
+ *  \left\lbrace
+ *   \begin{array}{l}
+ *    M z + q= w\\
+ *    0 \le z \perp w \ge 0\\
+ *   \end{array}
+ *  \right.
+ * \f$
+ *
+ * where M is an (n x n)-matrix, q , w and z n-vectors.
+ *
+ *!\fn  latin_lcp(double vec[],double *qq,int *nn, double * k_latin,int * itermax, double * tol,
+ *                double z[],double w[],int *it_end,double * res,int *info)
+ *
+ * latin_lcp is a basic latin solver for LCP.
+ *
+ *
+ * \param vec On enter a double vector containing the components of the double matrix with a fortran90 allocation.
+ * \param qq On enter a pointer over doubles containing the components of the double vector.
+ * \param nn On enter a pointer over integers, the dimension of the second member.
+ * \param k_latin On enter a pointer over doubles, the k_latin coefficient (positive).
+ * \param itermax On enter a pointer over integers, the maximum iterations required.
+ * \param tol On enter a pointer over doubles, the tolerance required.
+ * \param it_end On enter a pointer over integers, the number of iterations carried out.
+ * \param res On return a pointer over doubles, the error value.
+ * \param z On return double vector, the solution of the problem.
+ * \param w On return double vector, the solution of the problem.
+ * \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
+ *
+ * \author Nineb Sheherazade.
+ */
 
 void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
@@ -48,11 +46,11 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
   FILE *f101;
 
   int i, j, kk, iter, info2, nrhs;
-  int n, iout, itermax, tol, k_latin;
+  int n, iout, itermax, tol;
 
   int incx = 1, incy = 1;
 
-  double alpha, beta;
+  double alpha, beta, k_latin;
   double rr, rrr, r1, r2, r3, invR0, invRT0, err, z0, num11, err0, invRTinvR0;
   double den11, den22, vv;
 
@@ -155,25 +153,33 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
 
     for (j = 0 ; j < n ; j++) DPO[i][j] = vec[j * n + i] + k[i][j];
 
-    kinv[i][i] = 1 / k[i][i];
+    kinv[i][i] = 1.0 / k[i][i];
 
   }
 
-  /* **** Call Cholesky ***** */
+  printf("\n k= %g \n", k_latin);
+
+  for (i = 0 ; i < n ; i++)
+  {
+    for (j = 0 ; j < n ; j++) printf(" %g ", DPO[i][j]);
+    printf("\n");
+  }
+
+  /* ***** Call  Cholesky ****** */
+  /* ** Only for PSD matrices ** */
 
   dpotrf_(&uplo, &n, DPO , &n, &info2);
 
-  /*  printf("success of cholesky? %d\n",info2);*/
-
   if (info2 != 0)
   {
-    printf("\nmatter with cholesky info2 %d\n", info2);
+    printf("\n Cholesky Factorization failed \n");
+    printf(" Minor %d non PSD\n", info2);
     return (*info = 2);
   }
 
   /* **** End of Cholesky ***** */
 
-  /*    //  !iteration loops*/
+  /* iteration loops*/
 
   iter = 0;
   err  = 1.;
