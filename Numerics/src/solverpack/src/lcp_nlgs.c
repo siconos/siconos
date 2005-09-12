@@ -53,7 +53,7 @@ void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , d
 
 
   int n, incx, incy;
-  int i, j, iter;
+  int i, iter;
 
   double qs, err, num, den , zi;
   double *ww, *diag;
@@ -177,6 +177,11 @@ void lcp_nlgs(double *vec , double *q , int *nn , int *itermax , double *tol , d
       printf(" The residue is : %g \n", err);
       *info = 0;
     }
+  }
+  else
+  {
+    if (err > *tol) *info = 1;
+    else *info = 0;
   }
 
   free(ww);

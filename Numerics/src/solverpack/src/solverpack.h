@@ -175,6 +175,9 @@ typedef union
 
 extern "C" int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w , int *it_end , double *res);
 
+extern "C" int lcp_solver_block(int *inb , int *iid , double *vec, double *q , int *nn , int *nb , method *pt , double *z ,
+                                double *w , int *it_end , int *itt_end , double *res);
+
 extern "C" void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem,
                           double *wlem, int *it_end, double *res, int *info);
 
@@ -230,6 +233,7 @@ extern "C" int lcp_cfd(int *, double *, double *, method *, double *, double *, 
 #ifndef __cplusplus
 
 /*extern { */
+
 /**@defgroup group1 LCP (Linear Complementary Problem)
  * @{
  *
@@ -262,8 +266,11 @@ qp_lcp.c
 
 qpnonsym_lcp.c
 
+
 */
 
+extern int lcp_solver_block(int *inb , int *iid , double *vec, double *q , int *nn , int *nb , method *pt , double *z ,
+                            double *w , int *it_end , int *itt_end , double *res);
 
 /**@defgroup group2 PR (Primal Relay)
    @{
