@@ -38,6 +38,7 @@
  * \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
  *
  * \author Nineb Sheherazade.
+ * Last modifications: Mathieu Renouf
  */
 
 void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
@@ -45,22 +46,23 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
 
   FILE *f101;
 
-  int i, j, kk, iter, info2, nrhs;
-  int n, iout, itermax, tol;
+  int i, j, iter, info2, nrhs;
+  int n, n2, iout, itermax, tol;
 
   int incx = 1, incy = 1;
 
   double alpha, beta, k_latin;
-  double rr, rrr, r1, r2, r3, invR0, invRT0, err, z0, num11, err0, invRTinvR0;
-  double den11, den22, vv;
+  double err, num11, err0;
+  double den11, den22;
 
   double  *wc, *zc, *kinvden1, *kinvden2, *wt, *maxwt, *wnum1, *znum1, *ww, *zz;
   double *num1, *kinvnum1, *den1, *den2, *wden1, *zden1;
 
-  char trans = 'T', uplo = 'U', diag = 'N', trans2 = 'N', uplo2 = 'U';
+  char TRANS = 'T', UPLO = 'U', DIAG = 'N', NOTRANS = 'N';
+
   double  *kinvwden1, *kzden1;
 
-  double  **k, **kinv, **DPO;
+  double  *k, *kinv, *DPO;
 
   /*input*/
 
@@ -71,12 +73,40 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
 
   /* *** */
 
-  n = *nn;
+  n  = *nn;
+  n2 = n * n;
 
   /* ********* */
 
   if (iout > 0) f101 = fopen("resultat_latin.dat", "w+");
 
+  /* Preparation of the diagonal of the inverse matrix */
+
+  k    = (double*) malloc(n * sizeof(double));
+  kinv = (double*) malloc(n * sizeof(double));
+
+  for (i = 0 ; i < n ; ++i)
+  {
+
+    k[i] = k_latin * vec[i * n + i];
+
+    if (fabs(k[i]) < 1e-16)
+    {
+
+      if (iout > 0)
+      {
+        printf(" Warning negative diagonal term \n");
+        printf(" The local problem can be solved \n");
+      }
+
+      free(k);
+      free(kinv);
+      *info = 4;
+
+      return;
+    }
+    else kinv[i] = 1.0 / k[i];
+  }
 
   /*** Allocations ***/
 
@@ -105,70 +135,44 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
 
   kzden1 = (double*) malloc(n * sizeof(double));
 
-  DPO = (double**) malloc(n * sizeof(double*));
-  for (i = 0 ; i < n ; ++i) DPO[i] = (double *)malloc(n * sizeof(double));
-
-  k = (double**) malloc(n * sizeof(double*));
-  for (i = 0 ; i < n ; ++i) k[i] = (double *)malloc(n * sizeof(double));
-
-  kinv = (double**) malloc(n * sizeof(double*));
-  for (i = 0 ; i < n ; ++i) kinv[i] = (double *)malloc(n * sizeof(double));
+  DPO  = (double*) malloc(n2 * sizeof(double));
+  k    = (double*) malloc(n * sizeof(double));
+  kinv = (double*) malloc(n * sizeof(double));
 
   /* Initialization */
 
   for (i = 0; i < n; i++)
   {
 
-    wc[i] = 0.0;
-    zc[i] = 0.;
     z[i] = 0.;
     w[i] = 0.;
-    znum1[i] = 0.;
-    wnum1[i] = 0.;
-    kinvden1[i] = 0.;
-    kinvden2[i] = 0.;
+    wc[i] = 0.;
     wt[i] = 0.;
-    maxwt[i] = 0.;
+    zc[i] = 0.;
     num1[i] = 0.;
-    kinvnum1[i] = 0.;
     den1[i] = 0.;
     den2[i] = 0.;
-
-
-    for (j = 0 ; j < n ; j++)
-    {
-      k[i][j] = 0.;
-      kinv[i][j] = 0.;
-      DPO[i][j] = 0.;
-    }
-
-    k[i][i] = k_latin * vec[i * n + i];
+    znum1[i] = 0.;
+    wnum1[i] = 0.;
+    maxwt[i] = 0.;
+    kinvden1[i] = 0.;
+    kinvden2[i] = 0.;
+    kinvnum1[i] = 0.;
 
   }
 
-  /* get C storage format for matrix*/
+  for (i = 0; i < n2 ; ++i) DPO[i] = 0.;
 
-  for (i = 0 ; i < n ; i++)
+  for (i = 0 ; i < n ; ++i)
   {
-
-    for (j = 0 ; j < n ; j++) DPO[i][j] = vec[j * n + i] + k[i][j];
-
-    kinv[i][i] = 1.0 / k[i][i];
-
+    for (j = 0 ; j < n ; ++j) DPO[n * j + i] = vec[j * n + i];
+    DPO[n * i + i] += k[i];
   }
 
-  printf("\n k= %g \n", k_latin);
-
-  for (i = 0 ; i < n ; i++)
-  {
-    for (j = 0 ; j < n ; j++) printf(" %g ", DPO[i][j]);
-    printf("\n");
-  }
-
-  /* ***** Call  Cholesky ****** */
+  /* **     Call Cholesky     ** */
   /* ** Only for PSD matrices ** */
 
-  dpotrf_(&uplo, &n, DPO , &n, &info2);
+  dpotrf_(&UPLO , &n , DPO , &n, &info2);
 
   if (info2 != 0)
   {
@@ -179,82 +183,87 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
 
   /* **** End of Cholesky ***** */
 
-  /* iteration loops*/
+  /* start  iteration loops */
 
   iter = 0;
   err  = 1.;
 
+  /*Check formulation ?*/
+
   alpha = -1.;
-  dscal_(&n, &alpha , qq, &incx);
+  dscal_(&n , &alpha , qq , &incx);
 
   while ((iter < itermax) && (err > tol))
   {
 
-    /*      //   !linear stage (zc,wc) -> (z,w)*/
+    /* linear stage (zc,wc) -> (z,w)*/
+
+    for (i = 0 ; i < n ; ++i) wc[i] +=  k[i] * z[i];
+
+    dcopy_(&n , qq , &incx , znum1 , &incy);
 
     alpha = 1.;
-    beta = 1.;
-    dgemv_(&trans, &n, &n, &alpha, k, &n, zc, &incx, &beta, /*wt*/ wc, &incy);
-
-    dcopy_(&n, qq, &incx, znum1, &incy);
-
-    alpha = 1.;
-    daxpy_(&n, &alpha, wc, &incx, znum1, &incy);
+    daxpy_(&n , &alpha , wc , &incx , znum1, &incy);
 
     nrhs = 1;
-    dtrtrs_(&uplo, &trans, &diag, &n, &nrhs, DPO, &n, znum1, &n, &info2);
 
-    trans2 = 'N';
-    uplo2 = 'U';
-    dtrtrs_(&uplo2, &trans2, &diag, &n, &nrhs, DPO, &n, znum1, &n, &info2);
-    dcopy_(&n, znum1, &incx, z, &incy);
+    dtrtrs_(&UPLO , &NOTRANS , &DIAG , &n , &nrhs , DPO , &n , znum1 , &n , &info2);
+
+    dtrtrs_(&UPLO ,   &TRANS , &DIAG , &n , &nrhs , DPO , &n , znum1 , &n , &info2);
+
+    dcopy_(&n , znum1 , &incx , z , &incy);
 
     alpha = -1.;
-    beta = 1.;
-    dgemv_(&trans, &n, &n, &alpha, k, &n, z, &incx, &beta, wc, &incy);
+    beta  =  1.;
 
-    dcopy_(&n, wc, &incx, w, &incy);
+    for (i = 0 ; i < n ; ++i) wc[i] +=  k[i] * z[i];
 
-    /*Local Stage*/
+    dcopy_(&n , wc , &incx , w , &incy);
 
-    dcopy_(&n, w, &incx, wt, &incy);
+    /* Local Stage */
+
+    dcopy_(&n , w , &incx , wt , &incy);
+
     alpha = -1.;
-    beta = 1.;
-    dgemv_(&trans, &n, &n, &alpha, k, &n, z, &incx, &beta, wt, &incy);
+    beta  =  1.;
 
-    for (i = 0; i < n; i++)
+    for (i = 0 ; i < n ; ++i)
     {
-      if (wt[i] > 0.0) wc[i] = wt[i];
-      else wc[i] = 0.0;
+
+      wt[i] +=  k[i] * zc[i];
+
+      if (wt[i] > 0.0)
+      {
+        wc[i] = wt[i];
+        zc[i] = 0.;
+      }
+      else
+      {
+        wc[i] = 0.0;
+        zc[i] = -wt[i] * kinv[i];
+      }
     }
 
+    /* convergence criterium */
 
-    for (i = 0; i < n; i++)
-    {
-      if (-wt[i] < 0.0) zc[i] = 0.;
-      else zc[i] = -wt[i] / k[i][i];
-    }
-
-
-    /*      // convergence criterium */
-
-
-    dcopy_(&n, w, &incx, wnum1, &incy);
+    dcopy_(&n , w , &incx , wnum1 , &incy);
     alpha = -1.;
-    daxpy_(&n, &alpha, wc, &incx, wnum1, &incy);
+    daxpy_(&n , &alpha , wc , &incx , wnum1 , &incy);
 
-    dcopy_(&n, z, &incx, znum1, &incy);
-    daxpy_(&n, &alpha, zc, &incx, znum1, &incy);
+    dcopy_(&n , z      , &incx , znum1 , &incy);
+    daxpy_(&n , &alpha , zc    , &incx , znum1 , &incy);
 
     alpha = 1.;
-    beta = 1.;
-    dgemv_(&trans, &n, &n, &alpha, k, &n, znum1, &incx, &beta, wnum1, &incy);
+    beta  = 1.;
+
+    for (i = 0 ; i < n ; ++i) wnum1[i] +=  k[i] * znum1[i];
 
     /*      //    wnum1(:) =(w(:)-wc(:))+matmul( k(:,:),(z(:)-zc(:)))*/
 
     alpha = 1.;
-    beta = 0.;
-    dgemv_(&trans, &n, &n, &alpha, kinv, &n, wnum1, &incx, &beta, kinvnum1, &incy);
+    beta  = 0.;
+
+    for (i = 0 ; i < n ; ++i) kinvnum1[i] =  kinv[i] * wnum1[i];
 
     num11 = ddot_(&n, wnum1, &incx, kinvnum1, &incy);
 
@@ -262,41 +271,35 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
     dcopy_(&n, w, &incx, ww, &incy);
 
     alpha = 1.;
+
     daxpy_(&n, &alpha, wc, &incx, ww, &incy);
 
     daxpy_(&n, &alpha, zc, &incx, zz, &incy);
 
-    beta = 0.;
-    alpha = 1.;
-    dgemv_(&trans, &n, &n, &alpha, k, &n, zz, &incx, &beta, kzden1, &incy);
+    for (i = 0 ; i < n ; ++i) kzden1[i] =  k[i] * zz[i];
 
     den22 = ddot_(&n, zz, &incx, kzden1, &incy);
 
-    beta = 0.;
-    alpha = 1.;
-    dgemv_(&trans, &n, &n, &alpha, kinv, &n, ww, &incx, &beta, kinvwden1, &incy);
+    for (i = 0 ; i < n ; ++i) kinvwden1[i] =  kinv[i] * ww[i];
 
     den11 = ddot_(&n, ww, &incx, kinvwden1, &incy);
 
     err0 = num11 / (den11 + den22);
     err = sqrt(err0);
+
     ++iter;
 
-    /*for(i=0;i<n;i++)
-      {
-
-      printf("conv i %d wc %14.7e zc %14.7e z %14.7e w %14.7e \n",i,wc[i],zc[i],z[i],w[i]);
-      }*/
+    /*for(i=0;i<n;i++) printf("conv i %d wc %14.7e zc %14.7e z %14.7e w %14.7e \n",i,wc[i],zc[i],z[i],w[i]); */
 
     if (iout > 0)
     {
+      /*Print result result_gs[i][iter-1] = z[i]; */
       for (i = 0 ; i < n ; ++i)
       {
-        /*result_gs[i][iter-1] = z[i]; */
         fprintf(f101, "%d  %d  %14.7e \n", iter - 1, i, z[i]);
       }
-
     }
+
   }
 
   iparamLCP[2] = iter;
@@ -319,33 +322,27 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
   }
   else if (err < tol) *info = 0;
 
-
+  free(k);
   free(wc);
   free(zz);
   free(ww);
   free(zc);
-  free(znum1);
-  free(wnum1);
-  free(kinvden1);
-  free(kinvden2);
   free(wt);
-  free(maxwt);
+  free(DPO);
   free(num1);
-  free(kinvnum1);
   free(den1);
   free(den2);
+  free(kinv);
+  free(maxwt);
   free(wden1);
   free(zden1);
-  free(kinvwden1);
+  free(znum1);
+  free(wnum1);
   free(kzden1);
-
-  for (i = 0 ; i < n; ++i) free(kinv[i]);
-  for (i = 0 ; i < n; ++i) free(DPO[i]);
-  for (i = 0 ; i < n; ++i) free(k[i]);
-
-  free(kinv);
-  free(k);
-  free(DPO);
+  free(kinvnum1);
+  free(kinvden1);
+  free(kinvden2);
+  free(kinvwden1);
 
   if (iout > 0) fclose(f101);
 
