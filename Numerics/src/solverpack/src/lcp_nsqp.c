@@ -5,39 +5,44 @@
 
 /*!\file lcp_nsqp.c
  *
- *
- * This subroutine allows the resolution of LCP (Linear Complementary Problem).
- * Try \f$(z,w)\f$ such that:
- *
+ * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
+ * Try \f$(z,w)\f$ such that:\n
  * \f$
  *  \left\lbrace
  *   \begin{array}{l}
- *   0 \le z \perp M z + b = w \ge 0\\
+ *    M z + q= w\\
+ *    0 \le z \perp w \ge 0\\
  *   \end{array}
  *  \right.
  * \f$
  *
- * M is an (n x n)  matrix , q , w and z n-vectors.
+ * where M is an (n x n)-matrix, q , w and z n-vectors.
  *
+ * \fn  lcp_nsqp( int *nn , double *vec , double *q , double *z , int *info ,
+ *                int *iparamLCP , double *dparamLCP )
  *
- *!\fn lcp_nsqp( double *vec , double *qq , int *nn , double *tol , double *z , double *w , int *info )
+ * lcp_nsqp use a quadratic programm formulation for solving an non symmetric LCP
  *
- * lcp_nsqp use a quadratic programm formulation for solving an LCP
+ * Generic lcp parameters:\n
  *
- * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
- * \param qq      Unchanged parameter which contains the components of the right hand side vector.
  * \param nn      Unchanged parameter which represents the dimension of the system.
- * \param tol     Unchanged parameter which represents the tolerance required.
+ * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
+ * \param q       Unchanged parameter which contains the components of the right hand side vector.
  * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
  * \param w       Modified parameter which returns the solution of the problem.
- * \param info    Modified parameter which returns the termination value
+ * \param info    Modified parameter which returns the termination value\n
  *                0 - convergence  / minimization sucessfull\n
  *                1 - Too Many iterations\n
  *            2 - Accuracy insuficient to satisfy convergence criterion\n
  *                5 - Length of working array insufficient\n
  *                Other - The constraints are inconstent\n
  *
+ * Specific NSQP parameters:\n
+ *
+ * \param dparamLCP[0] = tol    Input unchanged parameter which represents the tolerance required.
+ *
  * \author Vincent Acary
+ *
  */
 
 void ql0001_(int *m , int *me , int *mmax , int *n , int *nmax , int *mnn ,

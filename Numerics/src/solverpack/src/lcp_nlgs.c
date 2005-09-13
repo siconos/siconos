@@ -6,8 +6,8 @@
 
 /*!\file lcp_nlgs.c
  *
- * This subroutine allows the resolution of LCP (Linear Complementary Problem).
- * Try \f$(z,w)\f$ such that:
+ * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
+ * Try \f$(z,w)\f$ such that:\n
  * \f$
  *  \left\lbrace
  *   \begin{array}{l}
@@ -19,23 +19,16 @@
  *
  * where M is an (n x n)-matrix, q , w and z n-vectors.
  *
- * \fn  lcp_nlgs( double *vec , double *q , int *nn , int *itermax , double *tol , double *omega , int *ispeak , double *z ,
- *                double *w , int *it_end , double *res , int *info )
+ * \fn  lcp_nlgs( int *nn , double *vec , double *q , double *z , int *info ,
+ *                int *iparamLCP , double *dparamLCP )
  *
- * lcp_nlgs (Non Linear Gauss-Seidel) is a solver for LCP based on the principle of splitting method.
+ * lcp_nlgs (Non Linear Gauss-Seidel) is a solver for LCP based on the principle of splitting method\n
  *
+ * Generic lcp parameters:\n
+ *
+ * \param nn      Unchanged parameter which represents the dimension of the system.
  * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
  * \param q       Unchanged parameter which contains the components of the right hand side vector.
- * \param nn      Unchanged parameter which represents the dimension of the system.
- * \param itermax Unchanged parameter which represents the maximum number of iterations allowed.
- * \param tol     Unchanged parameter which represents the tolerance required.
- * \param omega   Unchanged parameter which represents the relaxation parameter.
- * \param ispeak  Unchanged parameter which represents the output log identifiant
- *                0 - no output
- *                0 < identifiant
- *
- * \param it_end  Modified parameter which returns the number of iterations performed by the algorithm.
- * \param res     Modified parameter which returns the final error value.
  * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
  * \param w       Modified parameter which returns the solution of the problem.
  * \param info    Modified parameter which returns the termination value\n
@@ -43,12 +36,21 @@
  *                1 - iter = itermax\n
  *                2 - negative diagonal term\n
  *
+ * Specific NLGS parameters:\n
+ *
+ * \param iparamLCP[0] = itermax Input unchanged parameter which represents the maximum number of iterations allowed.
+ * \param iparamLCP[1] = ispeak  Input unchanged parameter which represents the output log identifiant\n
+ *                       0 - no output\n
+ *                       0 < active screen output\n
+ * \param iparamLCP[2] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
+ *
+ * \param dparamLCP[0] = tol     Input unchanged parameter which represents the tolerance required.
+ * \param dparamLCP[1] = omega   Input unchanged parameter which represents the relaxation parameter.
+ * \param dparamLCP[2] = res     Output modified parameter which returns the final error value.
+ *
  * \author Mathieu Renouf
  *
  */
-
-//void lcp_nlgs( double *vec , double *q , int *nn , int *itermax , double *tol , double *omega , int *ispeak , double *z ,
-//         double *w , int *it_end , double *res , int *info ){
 
 void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
               int *iparamLCP , double *dparamLCP)
@@ -63,8 +65,10 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   double *ww, *diag;
 
   n = *nn;
+  incx = 1;
+  incy = 1;
 
-  /*input*/
+  /* Recup input */
 
   itermax = iparamLCP[0];
   ispeak  = iparamLCP[1];
@@ -72,11 +76,10 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   tol   = dparamLCP[0];
   omega = dparamLCP[1];
 
-  /*output*/
+  /* Initialize output */
 
   iparamLCP[2] = 0;
   dparamLCP[2] = 0.0;
-
 
   /* Allocation */
 
@@ -85,8 +88,9 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
   /* Check for non trivial case */
 
-  incx = 1;
   qs = dnrm2_(&n , q , &incx);
+
+  if (ispeak > 0) printf("\n ||q||= %g \n", qs);
 
   if (qs > 1e-16) den = 1.0 / qs;
   else
@@ -96,6 +100,10 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
       w[i] = 0.;
       z[i] = 0.;
     }
+
+    free(ww);
+    free(diag);
+
     *info = 0;
     return;
   }

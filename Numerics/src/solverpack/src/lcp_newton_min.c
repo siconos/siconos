@@ -35,33 +35,35 @@
  *
  *
  * References: Alart & Curnier 1990, Pang 1990
+ *
+ * Generic lcp parameters:\n
+ *
+ * \param nn      Unchanged parameter which represents the dimension of the system.
  * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
  * \param q       Unchanged parameter which contains the components of the right hand side vector.
- * \param nn      Unchanged parameter which represents the dimension of the system.
- * \param itermax Unchanged parameter which represents the maximum number of iterations allowed.
- * \param tol     Unchanged parameter which represents the tolerance required.
- * \param ispeak  Unchanged parameter which represents the output log identifiant
- *                0 - no output
- *                0 < identifiant
- *
- * \param it_end  Modified parameter which returns the number of iterations performed by the algorithm.
- * \param res     Modified parameter which returns the final error value.
  * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
  * \param w       Modified parameter which returns the solution of the problem.
  * \param info    Modified parameter which returns the termination value\n
  *                0 - convergence\n
  *                1 - iter = itermax\n
- *                2 - unregular gradient
+ *                2 - negative diagonal term\n
+ *
+ * Specific NLGS parameters:\n
+ *
+ * \param iparamLCP[0] = itermax Input unchanged parameter which represents the maximum number of iterations allowed.
+ * \param iparamLCP[1] = ispeak  Input unchanged parameter which represents the output log identifiant\n
+ *                       0 - no output\n
+ *                       0 < active screen output\n
+ * \param iparamLCP[2] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
+ *
+ * \param dparamLCP[0] = tol     Input unchanged parameter which represents the tolerance required.
+ * \param dparamLCP[1] = res     Output modified parameter which returns the final error value.
  *
  * \author Vincent Acary
  *
  * \todo Optimizing the memory allocation (Try to avoid the copy of JacH into A)
  * \todo Add a globalization strategy based on a decrease of a merit function. (Nonmonotone LCP) Reference in Ferris Kanzow 2002
  */
-
-
-//void lcp_newton_min( double *vec , double *q , int *nn , int *itermax , double *tol , int *ispeak , double *z ,
-//        double *w , int *it_end , double *res , int *info ){
 
 void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                     int *iparamLCP , double *dparamLCP)
@@ -71,7 +73,6 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   int i, j, iter;
   int n = *nn, m, mm, k;
   int itermax, ispeak;
-
 
   int incx, incy;
   char NOTRANS = 'N';
@@ -97,7 +98,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   /*output*/
 
   iparamLCP[2] = 0;
-  dparamLCP[2] = 0.0;
+  dparamLCP[1] = 0.0;
 
   for (i = 0; i < n; i++)
   {
@@ -193,6 +194,12 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
       }
       iparamLCP[2] = iter;
       dparamLCP[1] = err;
+
+      free(H);
+      free(A);
+      free(JacH);
+      free(ipiv);
+
       return (*info = 2);
 
     }
@@ -224,7 +231,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   }
 
   iparamLCP[2] = iter;
-  dparamLCP[2] = err;
+  dparamLCP[1] = err;
 
   if (ispeak > 0)
   {

@@ -163,7 +163,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     lcp_newton_min(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
     *it_end = iparamLCP[2];
-    *res    = dparamLCP[2];
+    *res    = dparamLCP[1];
   }
   else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
 

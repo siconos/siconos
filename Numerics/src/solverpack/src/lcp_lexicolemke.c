@@ -5,41 +5,49 @@
 
 /*!\file lcp_lexicolemke.c
  *
- * This subroutine allows the resolution of LCP (Linear Complementary Problem).
- * Try \f$(z,w)\f$ such that:
- *
+ * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
+ * Try \f$(z,w)\f$ such that:\n
  * \f$
  *  \left\lbrace
  *   \begin{array}{l}
- *    0 \le z \perp M z + q = w \ge 0\\
+ *    M z + q= w\\
+ *    0 \le z \perp w \ge 0\\
  *   \end{array}
  *  \right.
  * \f$
  *
- * M is an (n x n) matrix, q , w and z an n-vectors.
+ * where M is an (n x n)-matrix, q , w and z n-vectors.
  *
- *!\fn  lcp_lexicolemke( double *vec, double *q , int *nn, int *itermax , int *ispeak , double *zlem ,
- *             double *wlem, int *it_end, int *info )
+ * \fn  lcp_lexicolemke( int *nn , double *vec , double *q , double *z , int *info ,
+ *                       int *iparamLCP , double *dparamLCP )
  *
  * lcp_lexicolemke is a direct solver for LCP based on pivoting method principle for degenrate problem.
  * Choice of pivot variable is performed via lexicographic ordering
  * Ref: "The Linear Complementary Problem" Cottle, Pang, Stone (1992)
  *
- * \param double* vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
- * \param double* q       Unchanged parameter which contains the components of the right hand side vector.
- * \param int* nn         Unchanged parameter which represents the dimension of the system.
- * \param int* itermax    Unchanged parameter which represents the maximum number of iterations allowed.
- * \param int* ispeak     Unchanged parameter which represents the output log identifiant
- *                        0 - no output
- *                        0 < identifiant
+ * Generic lcp parameters:\n
  *
- * \param double* zlem    Modified parameter which contains the initial solution and returns the solution of the problem.
- * \param double* wlem    Modified parameter which returns the solution of the problem.
- * \param int* info       Modified parameter which returns the termination value
- *                        0 - pivot termination\n
- *                        1 - maximal pivot number reached\n
+ * \param nn      Unchanged parameter which represents the dimension of the system.
+ * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
+ * \param q       Unchanged parameter which contains the components of the right hand side vector.
+ * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
+ * \param w       Modified parameter which returns the solution of the problem.
+ * \param info    Modified parameter which returns the termination value\n
+ *                0 - convergence\n
+ *                1 - iter = itermax\n
+ *                2 - negative diagonal term\n
+ *
+ * Specific Lexico Lemke parameters:\n
+ *
+ * \param iparamLCP[0] = itermax Input unchanged parameter which represents the maximum number of pivots allowed.
+ * \param iparamLCP[1] = ispeak  Input unchanged parameter which represents the output log identifiant\n
+ *                       0 - no output\n
+ *                       0 < active screen output\n
+ * \param iparamLCP[2] = it_end  Output modified parameter which returns the number of pivots performed by the algorithm.
+ *
  *
  * \author Mathieu Renouf
+ *
  */
 
 void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *wlem , int *info ,

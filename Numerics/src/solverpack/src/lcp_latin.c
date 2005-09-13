@@ -4,10 +4,10 @@
 #include <math.h>
 #include "blaslapack.h"
 
-/*!\file lcp_cpg.c
+/*!\file lcp_latin.c
  *
- * This subroutine allows the resolution of LCP (Linear Complementary Problem).
- * Try \f$(z,w)\f$ such that:
+ * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
+ * Try \f$(z,w)\f$ such that:\n
  * \f$
  *  \left\lbrace
  *   \begin{array}{l}
@@ -19,23 +19,34 @@
  *
  * where M is an (n x n)-matrix, q , w and z n-vectors.
  *
- *!\fn  latin_lcp(double vec[],double *qq,int *nn, double * k_latin,int * itermax, double * tol,
- *                double z[],double w[],int *it_end,double * res,int *info)
+ * \fn  lcp_latin( int *nn , double *vec , double *q , double *z , int *info ,
+ *                int *iparamLCP , double *dparamLCP )
  *
- * latin_lcp is a basic latin solver for LCP.
+ * lcp_latin (LArge Time INcrements) is a solver for LCP based on the principle of splitting method\n
  *
+ * Generic lcp parameters:\n
  *
- * \param vec On enter a double vector containing the components of the double matrix with a fortran90 allocation.
- * \param qq On enter a pointer over doubles containing the components of the double vector.
- * \param nn On enter a pointer over integers, the dimension of the second member.
- * \param k_latin On enter a pointer over doubles, the k_latin coefficient (positive).
- * \param itermax On enter a pointer over integers, the maximum iterations required.
- * \param tol On enter a pointer over doubles, the tolerance required.
- * \param it_end On enter a pointer over integers, the number of iterations carried out.
- * \param res On return a pointer over doubles, the error value.
- * \param z On return double vector, the solution of the problem.
- * \param w On return double vector, the solution of the problem.
- * \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
+ * \param nn      Unchanged parameter which represents the dimension of the system.
+ * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
+ * \param q       Unchanged parameter which contains the components of the right hand side vector.
+ * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
+ * \param w       Modified parameter which returns the solution of the problem.
+ * \param info    Modified parameter which returns the termination value\n
+ *                0 - convergence\n
+ *                1 - iter = itermax\n
+ *                2 - negative diagonal term\n
+ *
+ * Specific LATIN parameters:\n
+ *
+ * \param iparamLCP[0] = itermax  Input unchanged parameter which represents the maximum number of iterations allowed.
+ * \param iparamLCP[1] = iout     Input unchanged parameter which represents the output log identifiant\n
+ *                       0 - no output\n
+ *                       0 < active screen output\n
+ * \param iparamLCP[2] = it_end   Output modified parameter which returns the number of iterations performed by the algorithm.
+ *
+ * \param dparamLCP[0] = tol      Input unchanged parameter which represents the tolerance required.
+ * \param dparamLCP[1] = k_latin  Input unchanged parameter which represents the latin parameter.
+ * \param dparamLCP[2] = res      Output modified parameter which returns the final error value.
  *
  * \author Nineb Sheherazade.
  * Last modifications: Mathieu Renouf

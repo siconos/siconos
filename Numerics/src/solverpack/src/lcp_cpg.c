@@ -6,8 +6,8 @@
 
 /*!\file lcp_cpg.c
  *
- * This subroutine allows the resolution of LCP (Linear Complementary Problem).
- * Try \f$(z,w)\f$ such that:
+ * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
+ * Try \f$(z,w)\f$ such that:\n
  * \f$
  *  \left\lbrace
  *   \begin{array}{l}
@@ -19,30 +19,34 @@
  *
  * where M is an (n x n)-matrix, q , w and z n-vectors.
  *
- *!\fn  lcp_cpg( double *vec , double *q , int *nn , int *itermax , double *tol , int *ispeak , double *z ,
- *               double *w , int *it_end , double *res , int *info)
+ * \fn  lcp_cpg( int *nn , double *vec , double *q , double *z , int *info ,
+ *               int *iparamLCP , double *dparamLCP )
  *
- * lcp_cpg is a basic cpg (conjugated projected gradient) solver for LCP.
+ * lcp_cpg is a cpg (Conjugated Projected Gradient) solver for LCP based on quadratic minimization.\n
  *
- * \param double* vec    Unchanged parameter which contains the components of the matrix with a fortran storage.
- * \param double* q      Unchanged parameter which contains the components of the right hand side vector.
- * \param int *nn        Unchanged parameter which represents the dimension of the system.
- * \param int *itermax   Unchanged parameter which represents the maximum number of iterations allowed.
- * \param double *tol    Unchanged parameter which represents the tolerance required.
- * \param double *omega  Unchanged parameter which represents the relaxation parameter.
- * \param int *ispeak    Unchanged parameter which represents the output log identifiant
- *                       0 - no output
- *                       0 < identifiant
+ * Generic lcp parameters:\n
  *
- * \param int* it_end    Modified parameter which returns the number of iterations performed by the algorithm.
- * \param double* res    Modified parameter which returns the final error value.
- * \param double* z      Modified parameter which contains the initial solution and returns the solution of the problem.
- * \param double* w      Modified parameter which returns the solution of the problem.
- * \param int* info      Modified parameter which returns the termination value
- *                       0 - convergence
- *                       1 - iter = itermax
- *                       2 - negative diagonal term
- *                       3 - pWp nul
+ * \param nn      Unchanged parameter which represents the dimension of the system.
+ * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
+ * \param q       Unchanged parameter which contains the components of the right hand side vector.
+ * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
+ * \param w       Modified parameter which returns the solution of the problem.
+ * \param info    Modified parameter which returns the termination value\n
+ *                0 - convergence
+ *                1 - iter = itermax
+ *                2 - negative diagonal term
+ *                3 - pWp nul
+ *
+ * Specific CPG parameters:\n
+ *
+ * \param iparamLCP[0] = itermax Input unchanged parameter which represents the maximum number of iterations allowed.
+ * \param iparamLCP[1] = ispeak  Input unchanged parameter which represents the output log identifiant\n
+ *                       0 - no output\n
+ *                       0 < active screen ouput\n
+ * \param iparamLCP[2] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
+ *
+ * \param dparamLCP[0] = tol     Input unchanged parameter which represents the tolerance required.
+ * \param dparamLCP[1] = res     Output modified parameter which returns the final error value.
  *
  * \author Mathieu Renouf
  *
@@ -81,21 +85,6 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
   iparamLCP[2] = 0;
   dparamLCP[1] = 0.0;
 
-  /* Allocations */
-
-  status = (int*)malloc(n * sizeof(int));
-
-  dz = (double*)malloc(n * sizeof(double));
-
-  ww = (double*)malloc(n * sizeof(double));
-  rr = (double*)malloc(n * sizeof(double));
-  pp = (double*)malloc(n * sizeof(double));
-  zz = (double*)malloc(n * sizeof(double));
-
-  Mp = (double*)malloc(n * sizeof(double));
-
-  incx = 1;
-
   qs = dnrm2_(&n , &q[0] , &incx);
 
   //printf( " Norm: %g \n", qs );
@@ -111,6 +100,21 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
     *info = 0;
     return;
   }
+
+  /* Allocations */
+
+  status = (int*)malloc(n * sizeof(int));
+
+  dz = (double*)malloc(n * sizeof(double));
+
+  ww = (double*)malloc(n * sizeof(double));
+  rr = (double*)malloc(n * sizeof(double));
+  pp = (double*)malloc(n * sizeof(double));
+  zz = (double*)malloc(n * sizeof(double));
+
+  Mp = (double*)malloc(n * sizeof(double));
+
+  incx = 1;
 
   for (i = 0 ; i < n ; ++i) ww[i] = 0.;
 
@@ -129,6 +133,7 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
   }
 
   /* rr = -Wz + q */
+
   incx = 1;
   incy = 1;
 
@@ -175,6 +180,13 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
         printf(" Operation no conform at the iteration %d \n", iter);
         printf(" Alpha can be obtained with pWp = %10.4g  \n", pMp);
       }
+
+      free(Mp);
+      free(ww);
+      free(rr);
+      free(pp);
+      free(zz);
+      free(dz);
 
       iparamLCP[2] = iter;
       dparamLCP[1] = err;
