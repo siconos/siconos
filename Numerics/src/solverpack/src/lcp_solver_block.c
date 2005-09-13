@@ -73,20 +73,21 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
                      double *w , int *it_end , int *itt_end , double *res)                                                      /* out */
 {
 
-  const char mot1[10] = "Lemke", mot2[10] = "NLGS", mot3[10] = "CPG";
-  const char mot4[10] = "QP"   , mot5[10] = "NSQP", mot6[10] = "NewtonMin";
+  const char mot1[15] = "LexicoLemke", mot2[10] = "NLGS", mot3[10] = "CPG";
+  const char mot4[10] = "QP"         , mot5[10] = "NSQP", mot6[10] = "NewtonMin";
   const char mot7[10] = "Latin";
 
   int info;
   int n, na, db2, db10;
-  int i, j, k, il, ii, iblock;
-  int iter, iter1, itermax, totaliter;
+  int i, j, k, il, iblock;
+  int iter, itermax, totaliter;
   int info1;
-  int incx, incy, iout;
+  int incx, incy;
 
-  double a1, b1, tol, relax;
+  double a1, b1, tol;
   double qs, err, num, den;
-  double *ww, *rhs, *zl, res1;
+
+  double *ww, *rhs, *zl;
 
   char NOTRANS = 'N';
 
@@ -269,6 +270,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   free(zl);
   free(ww);
   free(rhs);
+  local_solver = NULL;
 
   if (pt->lcp.iout > 0)
   {

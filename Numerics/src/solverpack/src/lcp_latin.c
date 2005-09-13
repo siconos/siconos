@@ -170,7 +170,7 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
 
   }
 
-  for (i = 0; i < n2 ; ++i) DPO[i] = 0.;
+  for (i = 0 ; i < n2 ; ++i) DPO[i] = 0.;
 
   for (i = 0 ; i < n ; ++i)
   {
@@ -187,6 +187,7 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
   {
     printf("\n Cholesky Factorization failed \n");
     printf(" Minor %d non PSD\n", info2);
+
     free(k);
     free(wc);
     free(zz);
@@ -209,7 +210,6 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
     free(kinvden2);
     free(kinvwden1);
 
-
     return (*info = 2);
   }
 
@@ -220,11 +220,6 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
   iter = 0;
   err  = 1.;
 
-  /*Check formulation ?*/
-
-  alpha = -1.;
-  dscal_(&n , &alpha , qq , &incx);
-
   while ((iter < itermax) && (err > tol))
   {
 
@@ -233,6 +228,9 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
     for (i = 0 ; i < n ; ++i) wc[i] +=  k[i] * z[i];
 
     dcopy_(&n , qq , &incx , znum1 , &incy);
+
+    alpha = -1.;
+    dscal_(&n , &alpha , znum1 , &incx);
 
     alpha = 1.;
     daxpy_(&n , &alpha , wc , &incx , znum1, &incy);
@@ -245,24 +243,19 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
 
     dcopy_(&n , znum1 , &incx , z , &incy);
 
-    alpha = -1.;
-    beta  =  1.;
-
-    for (i = 0 ; i < n ; ++i) wc[i] +=  k[i] * z[i];
+    for (i = 0 ; i < n ; ++i) wc[i] -=  k[i] * z[i];
 
     dcopy_(&n , wc , &incx , w , &incy);
+
 
     /* Local Stage */
 
     dcopy_(&n , w , &incx , wt , &incy);
 
-    alpha = -1.;
-    beta  =  1.;
-
     for (i = 0 ; i < n ; ++i)
     {
 
-      wt[i] +=  k[i] * zc[i];
+      wt[i] -=  k[i] * zc[i];
 
       if (wt[i] > 0.0)
       {

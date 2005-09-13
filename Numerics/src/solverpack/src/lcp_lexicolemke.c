@@ -288,7 +288,7 @@ void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *
 
   }
 
-  iparamLCP = ITER;
+  iparamLCP[2] = ITER;
 
   if (Ifound) *info = 0;
   else *info = 1;
