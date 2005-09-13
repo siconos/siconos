@@ -184,8 +184,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
     dcopy_(&mm , JacH , &incx , A , &incy);
     k = 1;
     F77NAME(dgesv)(&m, &k, A, &m, ipiv, H, &m, &infoDGESV);
-    for (i = 0; i < n; i++) printf("H[%i]=%10.4e\n", i, H[i]);
-    printf("\n");
+
     if (infoDGESV)
     {
       if (ispeak > 0)

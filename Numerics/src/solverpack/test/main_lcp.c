@@ -154,17 +154,17 @@ void test_lcp_series(int n , double *vec , double *q)
   printf("\n COMPLEMENTARITY : %g \n", comp);
 
 
-  /* #6 LEMKE TEST */
-  printf("\n ***** LEMKE TEST ************ \n");
-  for (i = 0 ; i < n ; ++i) z[i] = 0.0;
+  /*   /\* #6 LEMKE TEST *\/ */
+  /*   printf("\n ***** LEMKE TEST ************ \n"); */
+  /*   for( i = 0 ; i < n ; ++i ) z[i] = 0.0; */
 
-  info = lcp_solver(vec , q , &n , &method_lcp4 , z , w , &iter , &criteria);
+  /*   info = lcp_solver( vec , q , &n , &method_lcp4 , z , w , &iter , &criteria ); */
 
-  printf("\n LEMKE LOG        : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
-  printf(" SOLUTION: ");
-  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z[i]);
-  comp = ddot_(&n , z , &incx , w , &incy);
-  printf("\n COMPLEMENTARITY : %g \n", comp);
+  /*   printf("\n LEMKE LOG        : %d ( ITER/PIVOT= %d - RES= %g )\n",info,iter,criteria); */
+  /*   printf(" SOLUTION: "); */
+  /*   for( i = 0 ; i < n ; ++i ) printf(" %10.4g " , z[i] ); */
+  /*   comp = ddot_( &n , z , &incx , w , &incy ); */
+  /*   printf("\n COMPLEMENTARITY : %g \n",comp ); */
 
   /* #7 NEWTONMIN TEST */
   printf("\n ***** NEWTONMIN TEST ******** \n");
@@ -478,6 +478,7 @@ void test_blockmatrix(void)
   /* Method definition */
 
   static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
+
   /*   static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2"}; */
   /*   static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"}; */
   /*   static method_lcp method_lcp4 = { "Lemke"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"}; */
@@ -597,7 +598,7 @@ void test_blockmatrix(void)
 int main(void)
 {
 
-  //test_mmc();
+  test_mmc();
   test_matrix();
   test_blockmatrix();
 
