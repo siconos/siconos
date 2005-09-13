@@ -1,5 +1,5 @@
 
-/*!\file cfd_lcp.c
+/*!\file cfd2lcp.c
 
    This file allows the formulation in the LCP (Linear  Complementary Problem) form of a contact problem with friction.
 
@@ -7,13 +7,13 @@
 
 
 
-/*!\fn int cfd_lcp (int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *dim_i, int * ddl_n, int *dim_nn, int *ddl_tt, int *dim_tt, int * ddl_c,int *dim_c,double * J1, double * F1,int *dim_F1, double *MM,double *q)
+/*!\fn int cfd2lcp (int *dim_n, double *mumu, methode *pt, double *K1, int *ddl_i, int *dim_i, int * ddl_n, int *dim_nn, int *ddl_tt, int *dim_tt, int * ddl_c,int *dim_c,double * J1, double * F1,int *dim_F1, double *MM,double *q)
 
-   cfd_lcp subroutine allows the formulation in the LCP (Linear  Complementary Problem) form of a contact problem with friction.
+   cfd2lcp subroutine allows the formulation in the LCP (Linear  Complementary Problem) form of a contact problem with friction.
 
    \param dim_n On return a pointer over integers, the dimension of the matrix after the reformulation  of the problem.
    \param mumu On enter a pointer over doubles, the friction coefficient.
-   \param pt On enter a pointer over the union method.
+   \param pt On enter a pointer over the union methode.
    \param K1 On enter a pointer over doubles containing the components of the rigidity matrix with a fortran90 allocation.
    \param ddl_i On enter a pointer over integers containing the components ddl imposed.
    \param dim_i On enter a pointer over integers, the dimension of the vector ddl_i.
@@ -41,7 +41,7 @@
 #endif
 
 
-int cfd_lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *dim_i, int * ddl_n, int *dim_nn, int *ddl_tt, int *dim_tt, int * ddl_c, int *dim_c, double * J1, double * F1, int *dim_F1, double *MM, double *q)
+int cfd2lcp(int *dim_n, double *mumu, methode *pt, double *K1, int *ddl_i, int *dim_i, int * ddl_n, int *dim_nn, int *ddl_tt, int *dim_tt, int * ddl_c, int *dim_c, double * J1, double * F1, int *dim_F1, double *MM, double *q)
 
 {
 
@@ -51,12 +51,13 @@ int cfd_lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *d
   double **Kc , **M, **Mlat;
   double **Kii, **Kin, **Kit, **Knn, **Knt, **Ktn, **Ktt;
   double **Kic, **Kci, **Kcc, **Kni, **Kti, **Knn_bis, **Ktn_bis, **Knt_bis, **Ktt_bis;
-  double **Kii2, **invKii, temp_ni[*dim_nn][*dim_i], **temp_ti, **temp_nn, *Fi, **tempo_tn, **Id_nn ;
-  double **temp_tt, **temp_tn, **temp_nt, Mij, R[*dim_i][*dim_i];
-  double *qn, *qt, *qbis, *Jcn, q1[*dim_nn], q0[*dim_nn], q2[*dim_nn], q3[*dim_nn], **temp_ci, **temp_ic, **temp_cc, *qi, *qc, *Jc;
+  double **Kii2, **invKii, (*temp_ni)[*dim_i]/*temp_ni[*dim_nn][*dim_i]*/, **temp_ti, **temp_nn, *Fi, **tempo_tn, **Id_nn ;
+  double **temp_tt, **temp_tn, **temp_nt, Mij, (*R)[*dim_i]/* R[*dim_i][*dim_i]*/;
+  double *qn, *qt, *qbis, *Jcn /*, q1[*dim_nn], q0[*dim_nn], q2[*dim_nn], q3[*dim_nn]*/, **temp_ci, **temp_ic, **temp_cc, *qi, *qc, *Jc;
+  double *q1, *q0, *q2, *q3;
   double r3, rrr, rr, r1, r2;
   char uplo = 'U', trans, transa, transb, val[14], vall[14];
-  const char mot1[10] = "Cfd_latin", mot2[10] = "Gsnl", mot3[10] = "Gcp",  mot4[10] = "Lemke";
+  const char mot1[10] = "Cfd2latin", mot2[10] = "Gsnl", mot3[10] = "Gcp",  mot4[10] = "Lemke";
 
 
 
@@ -65,6 +66,14 @@ int cfd_lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *d
   taille_c = *dim_c;
   taille_tt = *dim_tt;
   taille_F1 = *dim_F1;
+
+  q0 = (double*) malloc(*dim_nn * sizeof(double));
+  q1 = (double*) malloc(*dim_nn * sizeof(double));
+  q2 = (double*) malloc(*dim_nn * sizeof(double));
+  q3 = (double*) malloc(*dim_nn * sizeof(double));
+
+  R = malloc(*dim_i**dim_i * sizeof(double));
+  temp_ni = malloc(*dim_nn**dim_i * sizeof(double));
 
 
 
@@ -930,6 +939,8 @@ int cfd_lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *d
   else if (strcmp(pt->cfd.nom_method, mot1) == 0)
   {
 
+    printf("dans mot1");
+
     for (i = 0; i < taille_i; i++)
     {
       for (j = 0; j < taille_c; j++)
@@ -1033,6 +1044,8 @@ int cfd_lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *d
     free(Mlat);
     free(qi);
     free(qbis);
+
+    printf("dans mot1 fin;");
   }
   else printf("Warning : Unknown solving method : %s\n", pt->cfd.nom_method);
 
@@ -1104,7 +1117,10 @@ int cfd_lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *d
   free(temp_ti);
   free(temp_tn);
   free(tempo_tn);
-
+  free(q0);
+  free(q1);
+  free(q2);
+  free(q3);
 
   for (i = 0; i < taille_c; i++)
   {
@@ -1121,6 +1137,10 @@ int cfd_lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *d
 
   free(Jcn);
   free(Jc);
+
+  free(R);
+  free(temp_ni);
+
 
   return 1;
 }
