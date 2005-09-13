@@ -1,216 +1,212 @@
-///////////////////////////////////////////////////////////////////////////
-//  This main file allows the resolution of LCP (Linear Complementary Problem):
-//  try (z,w) such that:
-//
-//                        M z - w = q        (1)
-//                        0<= z , 0<= w      (2)
-//                        z.w= O             (3)
-//
-//  here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional
-//  vector and w an n-dimensional vector.
-//
-//  This system of equations and inequalities is solved thanks to subroutine_lcp:
-//        lemke_lcp (M,q,n,itermax,z,w,it_end,res,info)
-//        gsnl_lcp(M,q,n,itermax,tol,z,w,it_end,res,info)
-//        gcp_lcp(M,q,n,itermax,tol,z,w,it_end,res,info)
-//        latin_lcp (M,q,n,k_latin,itermax,tol,z,w,it_end,res,info)
-//        qp_lcp(M,q,n,res,z,w,fail) (not available for the moment)
-//
-//  where _ itermax is the maximum iterations required, it's an integer
-//        _ res is the residue, it's a float
-//        _ it_end is the number of iterations carried out, it's an integer
-//        _ tol is the tolerance value desired, it's a float
-//        _ k_latin is the parameter research of the latin, it's a float
-//        _ fail shows the termination reason, it's an integer
-//        _ info shows the trmination reason (0 successful otherwise 1), it's an integer.
-//
-//  The subroutine's call is due to the function lcp_solver:
-//
-//  int lcp_solver (float (*M)[maxcols],float * q, int n, method *pt, float *z, float * w)
-//
-//  where M is an n by n matrix, q an n-dimensional vector, n is the row dimension of M, and pt a pointer other a structure (method), z and w are n-dimensional vector, the solutions of the lcp.
-//  method is a variable with a structure type; this structure gives to the function lcp_solver, the name and the parameters (itermax, tol, k_latin) of the method we want to use.
-//  This function return an interger:  0 successful return otherwise 1.
-//
-//
-///////////////////////////////////////////////////////////////////////////////
+/*!
+ ******************************************************************************
+ *
+ * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
+ *
+ * Try \f$(z,w)\f$ such that:\n
+ * \f$
+ *  \left\lbrace
+ *   \begin{array}{l}
+ *    M z + q= w\\
+ *    0 \le z \perp w \ge 0\\
+ *   \end{array}
+ *  \right.
+ * \f$
+ *
+ * where M is an (n x n)-matrix, q , w and z n-vectors.\n
+ *
+ *  This system of equations and inequalities is solved thanks to lcp solvers\n
+ *
+ *        lemke_lcp (M,q,n,itermax,z,w,it_end,res,info)
+
+ *        lcp_nlgs( n , M , q , z , w , info , iparam , dparam )
+ *        lcp_cpg ( n , M , q , z , w , info , iparam , dparam )
+ *        lcp_lexicolemke( n , M , q , z , w , info , iparam , dparam )
+ *        lcp_qp( n , M , q , z , w , info , iparam , dparam )
+ *        lcp_nsqp( n , M , q , z , w , info , iparam , dparam )
+ *
+ *  where info shows the termination result (0 for success) and iparam and dparam are respectivelly
+ *  pointer over integer and pointer over double which contain specific parameters of each solver.
+ *
+ *  The solver's call is performed via the function lcp_solver:
+ *
+ *  int lcp_solver( double *vec , double *q , int *nn , method *pt , double *z , double *w , int *it_end , double *res )
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "solverpack.h"
+#include "blaslapack.h"
 
+#define BAVARD
 
-void test_lcp_series(int n, double ** M, double *q)
+void test_lcp_series(int n , double *vec , double *q)
 {
 
-  int i, j;
-  int info;
-  double *z, *w;
-  double *vec;
+  int i, j, info, iter;
+  int nonsymmetric;
+  int incx = 1, incy = 1;
 
-  int iter;
-  double criteria;
+  double criteria, comp;
+  double *z, *w;
 
   z = malloc(n * sizeof(double));
   w = malloc(n * sizeof(double));
 
-  vec = (double*)malloc(n * n * sizeof(double));
+  /* Method definition */
 
-  //// Fortran compatibility
-  for (i = 0; i < n; i++)
-    for (j = 0; j < n; j++)
-      vec[j * n + i] = M[i][j];
+  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp4 = { "Lemke"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp5 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp6 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp7 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
 
-  /////////////////////////////////
-  // Premier test //////////////////
-  /////////////////////////////////
-  printf("\n Test de GSNL\n");
+  info     = -1;
+  iter     = 0;
+  criteria = 0.0;
+  comp     = 0.0;
 
-  static method_lcp meth_lcp  = { "NLGS" , 1001 , 0.000001 , 0.6 , 1.0 , 0 , "N2"};
+  nonsymmetric = 0;
 
-  printf("\n we go in the function solve\n");
-  // for (i=0;i<n*n;i++)  printf("vec[%i] = %g\n",i,vec[i]);
+  /* Is M symmetric ? */
 
+  for (i = 0 ; i < n ; ++i)
+  {
+    for (j = 0 ; j < i ; ++j)
+    {
+      if (abs(vec[i * n + j] - vec[j * n + i]) > 1e-16)
+      {
+        nonsymmetric = 1;
+        break;
+      }
+    }
+  }
 
-  info = lcp_solver(vec , q , &n , &meth_lcp , z , w , &iter , &criteria);
+  if (nonsymmetric) printf("\n !! WARNING !!\n M is a non symmetric matrix \n");
+  else printf(" M is a symmetric matrix \n");
 
-  for (i = 0; i < n; i++)
-    printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
+  /* #1 NLGS TEST */
 
+  printf("\n ***** NLGS TEST ************* \n");
+  for (i = 0 ; i < n ; ++i) z[i] = 0.0;
 
-  printf("\n we go out the function and info is %d\n", info);
+  info = lcp_solver(vec , q , &n , &method_lcp1 , z , w , &iter , &criteria);
 
-  /////////////////////////////////
-  // second test //////////////////
-  /////////////////////////////////
-  printf("\n Test de Gcp\n");
+  printf("\n NLGS LOG         : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
+  printf(" SOLUTION: ");
+  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z[i]);
+  comp = ddot_(&n , z , &incx , w , &incy);
+  printf("\n COMPLEMENTARITY : %g \n", comp);
 
-  static method_lcp meth_lcp2  = { "CPG" , 1000 , 0.000001 , 0.6 , 1.0 , 0 , "N2"};
+  /* #2 CPG TEST */
 
-  printf("\n we go in the function solve\n");
-  //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
+  printf("\n ***** CPG TEST ************** \n");
+  for (i = 0 ; i < n ; ++i) z[i] = 0.0;
 
-  info = lcp_solver(vec, q, &n, &meth_lcp2, z, w, &iter, &criteria);
+  info = lcp_solver(vec , q , &n , &method_lcp2 , z , w , &iter , &criteria);
 
-  for (i = 0; i < n; i++)
-    printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
+  printf("\n CPG LOG          : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
+  printf(" SOLUTION: ");
+  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z[i]);
+  comp = ddot_(&n , z , &incx , w , &incy);
+  printf("\n COMPLEMENTARITY : %g \n", comp);
 
+  /* #3 QP TEST */
 
-  printf("\n we go out the function and info is %d\n", info);
+  printf("\n ***** QP TEST *************** \n");
+  for (i = 0 ; i < n ; ++i) z[i] = 0.0;
 
-  /////////////////////////////////
-  // third test //////////////////
-  /////////////////////////////////
-  printf("\n Test de Latin\n");
-  static method_lcp meth_lcp3  = { "Latin" , 1000 , -0.000001 , 0.7 , 1.0 , 0 , "N2"};
-  printf("\n we go in the function\n");
-  // for (i=0;i<n*n;i++)  printf("vec[%i] = %g\n",i,vec[i]);
+  info = lcp_solver(vec , q , &n , &method_lcp5 , z , w , &iter , &criteria);
 
-  info = lcp_solver(vec, q, &n, &meth_lcp3, z, w, &iter, &criteria);
+  printf("\n QP LOG           : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
+  printf(" SOLUTION: ");
+  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z[i]);
+  comp = ddot_(&n , z , &incx , w , &incy);
+  printf("\n COMPLEMENTARITY : %g \n", comp);
 
-  for (i = 0; i < n; i++)
-    printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
+  /* #4 NSQP TEST */
+  printf("\n ***** NSQP TEST ************* \n");
+  for (i = 0 ; i < n ; ++i) z[i] = 0.0;
 
+  info = lcp_solver(vec , q , &n , &method_lcp6 , z , w , &iter , &criteria);
 
+  printf("\n NSQP LOG        : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
+  printf(" SOLUTION: ");
+  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z[i]);
+  comp = ddot_(&n , z , &incx , w , &incy);
+  printf("\n COMPLEMENTARITY : %g \n", comp);
 
-  printf("\n we go out the function and info is %d\n", info);
+  /* #5 LEXICO LEMKE TEST */
+  printf("\n ***** LEXICO LEMKE TEST ***** \n");
+  for (i = 0 ; i < n ; ++i) z[i] = 0.0;
 
-  /////////////////////////////////
-  // Lemke test //////////////////
-  /////////////////////////////////
-  printf("\n Test de Lemke\n");
-  static method_lcp meth_lcp4 = {"Lemke", 1000 , -0.000001 , 0.7 , 1.0 , 0 , "N2"};
-  //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
-  info = lcp_solver(vec, q, &n, &meth_lcp4, z, w, &iter, &criteria);
-  for (i = 0; i < n; i++)
-    printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
-  printf("\n Info is %d\n", info);
+  info = lcp_solver(vec , q , &n , &method_lcp7 , z , w , &iter , &criteria);
 
+  printf("\n LEXICO LEMKE LOG: %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
+  printf(" SOLUTION: ");
+  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z[i]);
+  comp = ddot_(&n , z , &incx , w , &incy);
+  printf("\n COMPLEMENTARITY : %g \n", comp);
 
-  /////////////////////////////////
-  // Qp test //////////////////
-  /////////////////////////////////
+  /* #6 LATIN TEST */
+  printf("\n ***** LATIN TEST ************ \n");
+  for (i = 0 ; i < n ; ++i) z[i] = 0.0;
 
+  info = lcp_solver(vec , q , &n , &method_lcp3 , z , w , &iter , &criteria);
 
-  printf("\n Test du Qp\n");
-  static method_lcp meth_lcp5 = {"QP", 1000 , 0.000001 , 0.7 , 1.0 , 0 , "N2"};
-  //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
-  info = lcp_solver(vec, q, &n, &meth_lcp5, z, w, &iter, &criteria);
-  for (i = 0; i < n; i++)
-    printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
+  printf("\n LATIN LOG        : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
+  printf(" SOLUTION: ");
+  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z[i]);
+  comp = ddot_(&n , z , &incx , w , &incy);
+  printf("\n COMPLEMENTARITY : %g \n", comp);
 
+  /* #7 LEMKE TEST */
+  printf("\n ***** LEMKE TEST ************ \n");
+  for (i = 0 ; i < n ; ++i) z[i] = 0.0;
 
+  info = lcp_solver(vec , q , &n , &method_lcp4 , z , w , &iter , &criteria);
 
-  printf("\n Info is %d\n", info);
-
-  /////////////////////////////////
-  // Qpnonsym test //////////////////
-  /////////////////////////////////
-
-
-  printf("\n Test du Qpnonsym\n");
-  static method_lcp meth_lcp6 = {"NSQP", 1000 , -0.000001 , 0.7 , 1.0 , 0 , "N2"};
-
-
-  printf("\n we go in the function lcp_solver\n");
-  //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
-
-  info = lcp_solver(vec, q, &n, &meth_lcp6, z, w, &iter, &criteria);
-
-  for (i = 0; i < n; i++)
-    printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
-
-
-
-  printf("\n we go out the function and info is %d\n", info);
-  /////////////////////////////////
-  // LexicoLemke test //////////////////
-  /////////////////////////////////
-
-
-  printf("\n Test du LexicoLemke\n");
-
-  static method_lcp meth_lcp7 = {"LexicoLemke", 1000 , 0.000001 , 0.7 , 1.0 , 0 , "N2"};
-
-  //for (i=0;i<n*n;i++) printf("vec[%i] = %g\n",i,vec[i]);
-  info = lcp_solver(vec, q, &n, &meth_lcp7, z, w, &iter, &criteria);
-  for (i = 0; i < n; i++)
-    printf("z %10.4e\t\t w %10.4e\n", z[i], w[i]);
-  printf("\n Info is %d\n", info);
-
-  printf("\n we go out the function and info is %d\n", info);
+  printf("\n LEMKE LOG        : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
+  printf(" SOLUTION: ");
+  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z[i]);
+  comp = ddot_(&n , z , &incx , w , &incy);
+  printf("\n COMPLEMENTARITY : %g \n", comp);
 
   free(z);
   free(w);
 
-
 }
 
-
-
-void testmmc(void)
+void test_mmc(void)
 {
 
-  printf("/////////////////////////////////////////////\n");
-  printf("////////////  TEST MMC             //////////\n");
-  printf("/////////////////////////////////////////////\n");
+  FILE *f1, *f2;
 
-  FILE *f1, *f2, *f3, *f4, *f5, *f6;
-  int i, j, nl, nc, nll, it, n, dimM;
-  double *q, *vec;
-  int info;
+  int i, nl, nc, n;
+
+  double *q, *vecM;
   double qi, Mij;
+
   char val[14], vall[14];
-  int symmetric;
-  double **M;
+
+  printf("* *** ******************** *** * \n");
+  printf("* ***        TEST MMC      *** * \n");
+  printf("* *** ******************** *** * \n");
+
   // computation of the size of the problem
+
   n = 0;
+
   if ((f1 = fopen("DATA/MM_mmc_mu2.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
   }
+
   while (!feof(f1))
   {
     fscanf(f1, "%d", &nl);
@@ -219,25 +215,12 @@ void testmmc(void)
     n = nl;
   }
 
-  printf("size of the problem n= %i\n", n);
+  printf("\n SIZE OF THE PROBLEM : %d \n", n);
   fclose(f1);
 
-  dimM = n;
+  vecM = (double *)malloc(n * n * sizeof(double));
 
-  // Memory allocation
-
-  //double (*M)[n];
-  //M =malloc(dimM*dimM*sizeof(double));
-
-
-  M = (double **)malloc(dimM * sizeof(double*));
-  for (i = 0; i < n; i++)
-    M[i] = (double*)malloc(dimM * sizeof(double));
-
-
-
-
-  // Data loading of M and q
+  /* Data loading of M and q */
 
   if ((f1 = fopen("DATA/MM_mmc_mu2.dat", "r")) == NULL)
   {
@@ -251,586 +234,359 @@ void testmmc(void)
     exit(2);
   }
 
-
-
-
-
-
-
-  for (i = 0; i < dimM; i++)
-    for (j = 0; j < dimM; j++)
-      M[i][j] = 0.;
+  for (i = 0 ; i < n * n ; ++i) vecM[i] = 0.0;
 
   while (!feof(f1))
   {
     fscanf(f1, "%d", &nl);
     fscanf(f1, "%d", &nc);
     fscanf(f1, "%s", val);
+
     Mij = atof(val);
-
-    /////////////       on met la transpos       ////////////////
-    /*fprintf(f3,"%d %d %.14e\n",nc,nl,Mij);
-      fscanf(f3,"%d %d %.14e\n", &nc, &nl, &Mij);*/
-    *(*(M + nc - 1) + nl - 1) = Mij;
-    //////////////         fin transpos         ////////////////////
-
+    vecM[(nc - 1)*n + nl - 1 ] = Mij;
   }
 
 
+  q = (double *)malloc(n * sizeof(double));
 
-  ////////////////////////////////////////////////////////////////////////
-
-  q = malloc(dimM * sizeof(double));
+  for (i = 0 ; i < n ; ++i) q[i] = 0.0;
 
   while (!feof(f2))
   {
-    fscanf(f2, "%d", &nll);
+    fscanf(f2, "%d", &nl);
     fscanf(f2, "%s", vall);
     qi = atof(vall);
 
-    *(q + nll - 1) = -qi;
+    q[nl - 1] = qi;
   }
+
   fclose(f2);
   fclose(f1);
 
-  // Test on M and q
-  // Is  M symmetric ?
-  symmetric = 0;
-  for (i = 0; i < dimM; i++)
-  {
-    for (j = 0; j < i; j++)
-    {
-      if (abs(M[i][j] - M[j][i]) > 1e-10)
-      {
-        symmetric = 1;
-        break;
-      }
-    }
-  }
+  test_lcp_series(n , vecM , q);
 
-
-
-  if (symmetric)
-  {
-    printf("M is a not symmetrix matrix\n");
-  }
-  else
-  {
-    printf("M is a symmetrix matrix\n");
-  }
-
-
-
-  test_lcp_series(n, M, q);
-
-  free(M);
+  free(vecM);
   free(q);
+
 }
 
-void testmathieuold(void)
+void test_matrix(void)
 {
 
-  printf("/////////////////////////////////////////////\n");
-  printf("////////////  TEST MATHIEU OLD     //////////\n");
-  printf("/////////////////////////////////////////////\n");
+  FILE *LCPfile;
 
-  FILE *f1, *f2, *f3, *f4, *f5, *f6;
-  int i, j, k, nl, nc, nll, it, n, dimM;
-  double *q, *vec, *data;
-  int info;
-  double qi, Mij;
-  char val[14], vall[14], totochar[100];
-  int symmetric;
-  double **M;
-  // computation of the size of the problem
-  n = 6;
-  dimM = n;
+  int i, j, itest, NBTEST;
+  int isol;
+  int dim , dim2;
 
-  // Memory allocation
+  double *q, *sol;
+  double *vecM;
 
+  char val[20];
 
-  M = (double **)malloc(dimM * sizeof(double*));
-  for (i = 0; i < n; i++)
-    M[i] = (double*)malloc(dimM * sizeof(double));
+  int iter;
+  double criteria;
 
-  q = malloc(dimM * sizeof(double));
+  iter  = 0;
+  criteria = 0.0;
 
-  // Data loading of M and q
+  NBTEST = 8;
 
-  if ((f1 = fopen("matrix.test.old", "r")) == NULL)
+  /****************************************************************/
+#ifdef BAVARD
+  printf("\n ********** BENCHMARK FOR LCP_SOLVER ********** \n\n");
+#endif
+  /****************************************************************/
+
+  for (itest = 0 ; itest < NBTEST ; ++itest)
   {
-    perror("fopen 1");
+
+    switch (itest)
+    {
+    case 0:
+      printf("\n 2x2 LCP ");
+      if ((LCPfile = fopen("MATRIX/deudeu.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: deudeu.dat");
+        exit(1);
+      }
+      break;
+    case 1:
+      printf("\n DIAGONAL LCP ");
+      if ((LCPfile = fopen("MATRIX/trivial.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: trivial.dat");
+        exit(1);
+      }
+      break;
+    case 2:
+      printf("\n ORTIZ LCP ");
+      if ((LCPfile = fopen("MATRIX/ortiz.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: ortiz.dat");
+        exit(1);
+      }
+      break;
+    case 3:
+      printf("\n PANG LCP ");
+      if ((LCPfile = fopen("MATRIX/pang.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: pang.dat");
+        exit(1);
+      }
+      break;
+    case 4:
+      printf("\n DIODES RLC LCP ");
+      if ((LCPfile = fopen("MATRIX/diodes.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: diodes.dat");
+        exit(1);
+      }
+      break;
+    case 5:
+      printf("\n MURTY1 LCP ");
+      if ((LCPfile = fopen("MATRIX/murty1.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: murty1.dat");
+        exit(1);
+      }
+      break;
+    case 6:
+      printf("\n APPROXIMATED FRICTION CONE LCP ");
+      if ((LCPfile = fopen("MATRIX/confeti.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: confeti.dat");
+        exit(1);
+      }
+      break;
+    case 7:
+      printf("\n MATHIEU2 LCP ");
+      if ((LCPfile = fopen("MATRIX/mathieu2.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: mathieu2.dat");
+        exit(1);
+      }
+      break;
+    }
+
+    fscanf(LCPfile , "%d" , &dim);
+
+    dim2 = dim * dim;
+    isol = 1;
+
+    vecM = (double*)malloc(dim2 * sizeof(double));
+    q    = (double*)malloc(dim * sizeof(double));
+    sol  = (double*)malloc(dim * sizeof(double));
+
+    for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
+    for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
+    for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
+
+    for (i = 0 ; i < dim ; ++i)
+    {
+      for (j = 0 ; j < dim ; ++j)
+      {
+        fscanf(LCPfile, "%s", val);
+        vecM[ dim * j + i ] = atof(val);
+      }
+    }
+
+    for (i = 0 ; i < dim ; ++i)
+    {
+      fscanf(LCPfile , "%s" , val);
+      q[i] = atof(val);
+    }
+
+    fscanf(LCPfile , "%s" , val);
+
+    if (!feof(LCPfile))
+    {
+
+      sol[0] = atof(val);
+
+      for (i = 1 ; i < dim ; ++i)
+      {
+        fscanf(LCPfile , "%s" , val);
+        sol[i] = atof(val);
+      }
+    }
+    else
+    {
+      isol = 0;
+      for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
+    }
+
+    fclose(LCPfile);
+
+#ifdef BAVARD
+    printf("\n exact solution : ");
+    if (isol) for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
+    else printf(" unknown ");
+    printf("\n");
+#endif
+
+    test_lcp_series(dim , vecM , q);
+
+    free(vecM);
+    free(q);
+  }
+}
+
+void test_blockmatrix(void)
+{
+
+  FILE *LCPfile;
+
+  int i, j;
+  int info, isol;
+  int dim , dim2;
+  int dn, db, db2, nblock, itmp;
+
+  int *inb, *iid;
+  double *q , *z , *w , *sol;
+  double *vecM;
+
+  char val[20];
+
+  int iter, titer;
+  double criteria;
+
+  iter  = 0;
+  titer = 0;
+  criteria = 0.0;
+
+  /****************************************************************/
+#ifdef BAVARD
+  printf("\n\n ******** BENCHMARK FOR LCP_SOLVER_BLOCK ******** \n\n");
+#endif
+  /****************************************************************/
+
+  /* Method definition */
+
+  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
+  /*   static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2"}; */
+  /*   static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"}; */
+  /*   static method_lcp method_lcp4 = { "Lemke"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"}; */
+  /*   static method_lcp method_lcp5 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"}; */
+  /*   static method_lcp method_lcp6 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"}; */
+  /*   static method_lcp method_lcp7 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"}; */
+
+
+  if ((LCPfile = fopen("BLOCKMATRIX/mathieu1.dat", "r")) == NULL)
+  {
+    perror("fopen LCPfile: mathieu1.dat");
     exit(1);
   }
 
-  for (i = 0; i < dimM; i++)
-    for (j = 0; j < dimM; j++)
-      M[i][j] = 0.;
+  fscanf(LCPfile , "%d" , &dn);
+  fscanf(LCPfile , "%d" , &db);
 
-  fscanf(f1, "%s", val);
-  k = 0;
+  nblock = 0;
 
-  //fscanf(f1,"%f %f %f %f %f %f",M[i][0],M[i][1],M[i][2],M[i][3],M[i][4],M[i][5]);
-  data = malloc(dimM * dimM * dimM * sizeof(double));
-  while (!feof(f1))
+  inb  = (int*)malloc(dn * sizeof(int));
+
+  for (i = 0 ; i < dn ; ++i)
   {
-    fscanf(f1, "%s", val);
-    data[k] = atof(val);
-    k++;
-  }
-  for (i = 0; i < k; i++)
-  {
-    printf("data[%i] = %g\n", i, data[i]);
+    fscanf(LCPfile , "%d" , &itmp);
+    inb[i] = itmp;
+    nblock += itmp;
   }
 
-  fclose(f1);
+  iid  = (int*)malloc(nblock * sizeof(int));
 
-
-  for (i = 0; i < dimM; i++)
-    for (j = 0; j < dimM; j++)
-      M[i][j] = data[i * dimM + j];
-
-  for (i = 0; i < dimM; i++)
-    q[i] = -data[dimM * dimM + i];
-
-
-
-
-  for (i = 0; i < dimM; i++)
+  for (i = 0 ; i < nblock ; ++i)
   {
-    printf("q[%i] = %g\n", i, q[i]);
-    for (j = 0; j < dimM; j++) printf("M[%i,%i ] = %g\n", i, j, M[i][j]);
+    fscanf(LCPfile , "%d" , &itmp);
+    iid[i] = itmp;
   }
 
+  dim  = db * dn;
+  db2 = db * db;
+  dim2 = nblock * db2;
 
-  // Test on M and q
-  // Is  M symmetric ?
-  symmetric = 0;
-  for (i = 0; i < dimM; i++)
+  q    = (double*)malloc(dim * sizeof(double));
+  sol  = (double*)malloc(dim * sizeof(double));
+  vecM = (double*)malloc(dim2 * sizeof(double));
+
+  for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
+  for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
+  for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
+
+
+  for (i = 0 ; i < nblock ; ++i)
   {
-    for (j = 0; j < i; j++)
+    for (j = 0 ; j < db2 ; ++j)
     {
-      if (abs(M[i][j] - M[j][i]) > 1e-10)
-      {
-        symmetric = 1;
-        break;
-      }
+      fscanf(LCPfile, "%s", val);
+      vecM[i * db2 + j] = atof(val);
     }
   }
 
-
-
-  if (symmetric)
+  for (i = 0 ; i < dim ; ++i)
   {
-    printf("M is a not symmetrix matrix\n");
-  }
-  else
-  {
-    printf("M is a symmetrix matrix\n");
+    fscanf(LCPfile , "%s" , val);
+    q[i] = atof(val);
   }
 
+  fscanf(LCPfile , "%s" , val);
 
-
-  test_lcp_series(n, M, q);
-
-  free(M);
-  free(q);
-}
-
-void testmathieu1(void)
-{
-
-  printf("/////////////////////////////////////////////\n");
-  printf("////////////  TEST MATHIEU1        //////////\n");
-  printf("/////////////////////////////////////////////\n");
-
-  FILE *f1, *f2, *f3, *f4, *f5, *f6;
-  int i, j, k, nl, nc, nll, it, n, dimM;
-  double *q, *vec, *data;
-  int info;
-  double qi, Mij;
-  char val[14], vall[14], totochar[100];
-  int symmetric;
-  double **M;
-  // computation of the size of the problem
-  n = 6;
-  dimM = n;
-
-  // Memory allocation
-
-
-  M = (double **)malloc(dimM * sizeof(double*));
-  for (i = 0; i < n; i++)
-    M[i] = (double*)malloc(dimM * sizeof(double));
-
-  q = malloc(dimM * sizeof(double));
-  for (i = 0; i < dimM; i++)
+  if (!feof(LCPfile))
   {
-    q[i] = 0.0;
-    for (j = 0; j < dimM; j++) M[i][j] = 0.;
-  }
 
-  // Data loading of M and q
-  data = malloc(dimM * dimM * dimM * sizeof(double));
-  if ((f1 = fopen("DATA/mathieu.m1.dat", "r")) == NULL)
-  {
-    perror("fopen 1");
-    exit(1);
-  }
-  k = 0;
+    sol[0] = atof(val);
 
-  while (!feof(f1))
-  {
-    fscanf(f1, "%s", val);
-    data[k] = atof(val);
-    k++;
-  }
-  for (i = 0; i < k; i++)
-  {
-    printf("data[%i] = %g\n", i, data[i]);
-  }
-
-  fclose(f1);
-
-
-  for (i = 0; i < dimM; i++)
-    for (j = 0; j < dimM; j++)
-      M[i][j] = data[i * dimM + j];
-
-  if ((f1 = fopen("DATA/mathieu.q1.dat", "r")) == NULL)
-  {
-    perror("fopen 1");
-    exit(1);
-  }
-  k = 0;
-
-  while (!feof(f1))
-  {
-    fscanf(f1, "%s", val);
-    data[k] = atof(val);
-    k++;
-  }
-  for (i = 0; i < k; i++)
-  {
-    printf("data[%i] = %g\n", i, data[i]);
-  }
-
-  fclose(f1);
-
-  for (i = 0; i < dimM; i++)
-    q[i] = -data[i];
-
-
-
-
-  for (i = 0; i < dimM; i++)
-  {
-    printf("q[%i] = %g\n", i, q[i]);
-    for (j = 0; j < dimM; j++) printf("M[%i,%i ] = %g\n", i, j, M[i][j]);
-  }
-
-
-  // Test on M and q
-  // Is  M symmetric ?
-  symmetric = 0;
-  for (i = 0; i < dimM; i++)
-  {
-    for (j = 0; j < i; j++)
+    for (i = 1 ; i < dim ; ++i)
     {
-      if (abs(M[i][j] - M[j][i]) > 1e-10)
-      {
-        symmetric = 1;
-        break;
-      }
+      fscanf(LCPfile , "%s" , val);
+      sol[i] = atof(val);
     }
   }
-
-
-
-  if (symmetric)
-  {
-    printf("M is a not symmetrix matrix\n");
-  }
   else
   {
-    printf("M is a symmetrix matrix\n");
+    for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
   }
 
+  fclose(LCPfile);
 
+#ifdef BAVARD
+  printf("\n exact solution : ");
+  if (isol) for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
+  else printf(" unknown ");
+  printf("\n");
+#endif
 
-  test_lcp_series(n, M, q);
+  z = malloc(dim * sizeof(double));
+  w = malloc(dim * sizeof(double));
 
-  free(M);
+  /* NLGS */
+
+  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
+
+  info = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp1 , z , w , &iter , &titer , &criteria);
+
+#ifdef BAVARD
+  printf("\n           NLGS   :%1d ", info);
+  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
+  printf(" ( %6d -- %6d ) " , iter , titer);
+#endif
+
   free(q);
+  free(w);
+  free(z);
+  free(sol);
+  free(vecM);
+
+  printf(" \n");
+
 }
-
-void test1(void)
-{
-  FILE *f1, *f2, *f3, *f4, *f5, *f6;
-  int i, j, nl, nc, nll, it, n, dimM;
-  double *q, *vec;
-  int info;
-  double qi, Mij;
-  char val[14], vall[14];
-  int symmetric;
-  double **M;
-
-  printf("/////////////////////////////////////////////\n");
-  printf("////////////  TEST 1               //////////\n");
-  printf("/////////////////////////////////////////////\n");
-
-
-  dimM = 2;
-  n = 2;
-
-  // Memory allocation
-
-  M = (double **)malloc(dimM * sizeof(double*));
-  for (i = 0; i < n; i++)
-    M[i] = (double*)malloc(dimM * sizeof(double));
-
-  q = (double*)malloc(dimM * sizeof(double));
-
-  M[0][0] = 2;
-  M[0][1] = 1;
-  M[1][0] = 1;
-  M[1][1] = 2;
-
-  q[0] = 5.0;
-  q[1] = 6.0;
-
-  test_lcp_series(n, M, q);
-
-  q[0] = -5.0;
-  q[1] = -6.0;
-
-  test_lcp_series(n, M, q);
-
-
-  free(M);
-  free(q);
-}
-
-
-void test2(void)
-{
-  FILE *f1, *f2, *f3, *f4, *f5, *f6;
-  int i, j, nl, nc, nll, it, n, dimM;
-  double *q, *vec;
-  int info;
-  double qi, Mij;
-  char val[14], vall[14];
-  int symmetric;
-  double **M;
-  printf("/////////////////////////////////////////////\n");
-  printf("////////////  TEST 2               //////////\n");
-  printf("/////////////////////////////////////////////\n");
-  //M=[[1 -1 -1 -1];[-1 1 -1 -1 ];[1 1 2 0];[1 1 0 2]]
-  //q=[-3 ;-5 ; 9 ; 5]
-
-  dimM = 4;
-  n = 4;
-
-  // Memory allocation
-
-  M = (double **)malloc(dimM * sizeof(double*));
-  for (i = 0; i < n; i++)
-    M[i] = (double*)malloc(dimM * sizeof(double));
-
-  q = (double*)malloc(dimM * sizeof(double));
-
-  M[0][0] = 1;
-  M[0][1] = -1;
-  M[0][2] = -1;
-  M[0][3] = -1;
-
-  M[1][0] = -1;
-  M[1][1] = 1;
-  M[1][2] = -1;
-  M[1][3] = -1;
-
-  M[2][0] = 1;
-  M[2][1] = 1;
-  M[2][2] = 2;
-  M[2][3] = 0;
-
-  M[3][0] = 1;
-  M[3][1] = 1;
-  M[3][2] = 0;
-  M[3][3] = 2;
-
-
-
-
-
-  q[0] = -3.0;
-  q[1] = -5.0;
-  q[2] = 9.0;
-  q[3] = 5.0;
-
-  test_lcp_series(n, M, q);
-
-
-  free(M);
-  free(q);
-}
-
-
-
-void test3(void)
-{
-  FILE *f1, *f2, *f3, *f4, *f5, *f6;
-  int i, j, nl, nc, nll, it, n, dimM;
-  double *q, *vec;
-  int info;
-  double qi, Mij;
-  char val[14], vall[14];
-  int symmetric;
-  double **M;
-  printf("/////////////////////////////////////////////\n");
-  printf("////////////  TEST 3               //////////\n");
-  printf("/////////////////////////////////////////////\n");
-  //M=[[1 0 2 -1];[0 1 1 4 ];[-2 -1 0 0 ];[1 -4 0 0 ]]
-  //q=[1/2 ; -1/2 ; 6 ;6 ]
-
-  dimM = 4;
-  n = 4;
-
-  // Memory allocation
-
-  M = (double **)malloc(dimM * sizeof(double*));
-  for (i = 0; i < n; i++)
-    M[i] = (double*)malloc(dimM * sizeof(double));
-
-  q = (double*)malloc(dimM * sizeof(double));
-
-  M[0][0] = 1;
-  M[0][1] = 0;
-  M[0][2] = 2;
-  M[0][3] = -1;
-
-  M[1][0] = 0;
-  M[1][1] = 1;
-  M[1][2] = 1;
-  M[1][3] = 4;
-
-  M[2][0] = -2;
-  M[2][1] = -1;
-  M[2][2] = 0;
-  M[2][3] = 0;
-
-  M[3][0] = 1;
-  M[3][1] = -4;
-  M[3][2] = 0;
-  M[3][3] = 0;
-
-
-
-
-
-  q[0] = -1. / 2;
-  q[1] = 1. / 2;
-  q[2] = -6.0;
-  q[3] = -6.0;
-
-  test_lcp_series(n, M, q);
-
-
-  free(M);
-  free(q);
-}
-
-
-
-
-
-void test4diodes(void)
-{
-  FILE *f1, *f2, *f3, *f4, *f5, *f6;
-  int i, j, nl, nc, nll, it, n, dimM;
-  double *q, *vec;
-  int info;
-  double qi, Mij;
-  char val[14], vall[14];
-  int symmetric;
-  double **M;
-  printf("/////////////////////////////////////////////\n");
-  printf("////////////  TEST 4 diodes       ///////////\n");
-  printf("/////////////////////////////////////////////\n");
-
-
-  //M = [0.001  0.001  -1  0; 0.001  0.001  0  -1; 1  0  9.90099  -9.90099; 0  1  -9.90099  9.90099]
-  //q = [-0 ;-0; 9.90099; -9.90099]
-
-  dimM = 4;
-  n = 4;
-
-  // Memory allocation
-
-  M = (double **)malloc(dimM * sizeof(double*));
-  for (i = 0; i < n; i++)
-    M[i] = (double*)malloc(dimM * sizeof(double));
-
-  q = (double*)malloc(dimM * sizeof(double));
-
-
-  M[0][0] = 0.001;
-  M[0][1] = 0.001;
-  M[0][2] = -1;
-  M[0][3] = 0;
-
-  M[1][0] = 0.001;
-  M[1][1] = 0.001;
-  M[1][2] = 0;
-  M[1][3] = -1;
-
-  M[2][0] = 1;
-  M[2][1] = 0;
-  M[2][2] = 9.90099;
-  M[2][3] = -9.90099;
-
-  M[3][0] = 0;
-  M[3][1] = 1;
-  M[3][2] = -9.90099;
-  M[3][3] = 9.90099;
-
-
-
-
-
-  q[0] = 0;
-  q[1] = 0;
-  q[2] = -9.90099;
-  q[3] = 9.90099;
-
-  test_lcp_series(n, M, q);
-
-
-  free(M);
-  free(q);
-}
-
-
-
-
-
 
 int main(void)
-
 {
 
+  //test_mmc();
+  test_matrix();
+  test_blockmatrix();
 
-  test1();
-  test2();
-  test3();
-  testmmc();
-  testmathieu1();
-  //testmathieuold();
-  test4diodes();
-
-
-
-
-  printf("\n The End \n");
+  return 0;
 }
 

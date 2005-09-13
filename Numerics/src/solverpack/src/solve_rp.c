@@ -53,7 +53,7 @@ int solve_rp(double *vec, double *q, int *nn, method *pt, double z[], double w[]
 
 
   if (strcmp(pt->rp.nom_method, mot1) == 0)
-    rp_gsnl(vec, q, &n, pt->rp.a, pt->rp.b, & pt->rp.itermax, & pt->rp.tol, z, w, &it_end, &res, &info);
+    rp_nlgs(vec, q, &n, pt->rp.a, pt->rp.b, & pt->rp.itermax, & pt->rp.tol, z, w, &it_end, &res, &info);
   else if (strcmp(pt->rp.nom_method, mot2) == 0)
   {
     /*    cfp_gcp_(vec,q,&n,& pt->cfp.mu,& pt->cfp.itermax,& pt->cfp.tol,z,w,&it_end,&res,&info);*/
