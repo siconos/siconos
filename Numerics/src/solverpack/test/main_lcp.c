@@ -64,6 +64,7 @@ void test_lcp_series(int n , double *vec , double *q)
   static method_lcp method_lcp5 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
   static method_lcp method_lcp6 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
   static method_lcp method_lcp7 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp8 = { "NewtonMin", 10 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
 
   info     = -1;
   iter     = 0;
@@ -152,25 +153,38 @@ void test_lcp_series(int n , double *vec , double *q)
   comp = ddot_(&n , z , &incx , w , &incy);
   printf("\n COMPLEMENTARITY : %g \n", comp);
 
-  /* #6 LATIN TEST */
-  printf("\n ***** LATIN TEST ************ \n");
-  for (i = 0 ; i < n ; ++i) z[i] = 0.0;
 
-  info = lcp_solver(vec , q , &n , &method_lcp3 , z , w , &iter , &criteria);
-
-  printf("\n LATIN LOG        : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
-  printf(" SOLUTION: ");
-  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z[i]);
-  comp = ddot_(&n , z , &incx , w , &incy);
-  printf("\n COMPLEMENTARITY : %g \n", comp);
-
-  /* #7 LEMKE TEST */
+  /* #6 LEMKE TEST */
   printf("\n ***** LEMKE TEST ************ \n");
   for (i = 0 ; i < n ; ++i) z[i] = 0.0;
 
   info = lcp_solver(vec , q , &n , &method_lcp4 , z , w , &iter , &criteria);
 
   printf("\n LEMKE LOG        : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
+  printf(" SOLUTION: ");
+  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z[i]);
+  comp = ddot_(&n , z , &incx , w , &incy);
+  printf("\n COMPLEMENTARITY : %g \n", comp);
+
+  /* #7 NEWTONMIN TEST */
+  printf("\n ***** NEWTONMIN TEST ******** \n");
+  for (i = 0 ; i < n ; ++i) z[i] = 0.0;
+
+  info = lcp_solver(vec , q , &n , &method_lcp8 , z , w , &iter , &criteria);
+
+  printf("\n NEWTONMIN LOG   : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
+  printf(" SOLUTION: ");
+  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z[i]);
+  comp = ddot_(&n , z , &incx , w , &incy);
+  printf("\n COMPLEMENTARITY : %g \n", comp);
+
+  /* #8 LATIN TEST */
+  printf("\n ***** LATIN TEST ************ \n");
+  for (i = 0 ; i < n ; ++i) z[i] = 0.0;
+
+  info = lcp_solver(vec , q , &n , &method_lcp3 , z , w , &iter , &criteria);
+
+  printf("\n LATIN LOG        : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
   printf(" SOLUTION: ");
   for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z[i]);
   comp = ddot_(&n , z , &incx , w , &incy);

@@ -49,6 +49,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   const char mot1[10] = "Lemke", mot2[10] = "NLGS", mot3[10] = "CPG";
   const char mot4[10] = "Latin", mot5[10] = "QP", mot6[10] = "NSQP";
   const char mot7[15] = "LexicoLemke";
+  const char mot8[15] = "NewtonMin";
 
   int i, info = 1;
 
@@ -151,6 +152,18 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     lcp_lexicolemke(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
     *it_end = iparamLCP[2];
+  }
+  else if (strcmp(pt->lcp.name , mot8) == 0)
+  {
+
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.iout;
+    dparamLCP[0] = pt->lcp.tol;
+
+    lcp_newton_min(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    *it_end = iparamLCP[2];
+    *res    = dparamLCP[2];
   }
   else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
 

@@ -200,6 +200,8 @@ extern  "C" void lcp_latin(int *nn , double *vec , double *q , double *z , doubl
 
 extern  "C" void lcp_lexicolemke(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                                  int *iparamLCP , double *dparamLCP);
+extern  "C" void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                                int *iparamLCP , double *dparamLCP);
 
 /********************************************/
 
@@ -420,6 +422,9 @@ extern void lcp_latin(int *nn , double *vec , double *q , double *z , double *w 
 
 extern void lcp_lexicolemke(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                             int *iparamLCP , double *dparamLCP);
+
+extern void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                           int *iparamLCP , double *dparamLCP);
 
 /*********************************** *** *****************************************/
 

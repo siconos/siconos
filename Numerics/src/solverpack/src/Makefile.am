@@ -14,7 +14,7 @@ libsolverpack_la_SOURCES = solverpack.h \
 	projc.c projf.c minf.c maxf.c \
 	lcp_solver.c lcp_solver_block.c \
 	lcp_lexicolemke.c lcp_nlgs.c lcp_nsqp.c lcp_cpg.c \
-	lcp_qp.c lcp_lemke.c lcp_latin.c \
+	lcp_qp.c lcp_lemke.c lcp_latin.c lcp_newton_min.c\
 	solve_cfp.c \
 	cfp_gcp.c cfp_latin.c cfp_gsnl.c \
 	lcp2cfd.c cfd2lcp.c \
