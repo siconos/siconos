@@ -11,6 +11,7 @@ double ddot_(int *, double [], int *, double [], int*);
 rd_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], double b[], int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
 {
 
+  FILE *f101;
   int i, j, kk, iter1, zzz;
   int n = *nn, incx = 1, incy = 1;
   double errmax = *tol, alpha, beta, mina, maxa, bb, cc, zw, aa;
@@ -19,8 +20,23 @@ rd_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], double
   double *wc, *zc, *wt, *wnum1, *znum1;
   double *zt, *kinvnum1;
   char trans = 'T';
-  double k[n][n], A[n][n], R[n][n], RT[n][n], invRT[n][n], invR[n][n];
-  double invRTinvR[n][n], kinv[n][n], xpivot;
+  /*  double k[n][n], A[n][n], R[n][n], RT[n][n], invRT[n][n], invR[n][n];*/
+  double(*k)[n], (*A)[n], (*R)[n], (*RT)[n], (*invRT)[n], (*invR)[n];
+  /*  double invRTinvR[n][n], kinv[n][n], xpivot;*/
+  double(*invRTinvR)[n], (*kinv)[n], xpivot;
+
+
+  f101 = fopen("resultat_latin.dat", "w+");
+
+
+  k =  malloc(n * n * sizeof(double));
+  A =  malloc(n * n * sizeof(double));
+  R =  malloc(n * n * sizeof(double));
+  RT =  malloc(n * n * sizeof(double));
+  invRT =  malloc(n * n * sizeof(double));
+  invR =  malloc(n * n * sizeof(double));
+  invRTinvR =  malloc(n * n * sizeof(double));
+  kinv =  malloc(n * n * sizeof(double));
 
 
   for (i = 0; i < n; i++)
@@ -304,6 +320,14 @@ rd_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], double
     *it_end = iter1;
     *res = err1;
 
+    for (i = 0; i < n; i++)
+    {
+      /*result_gs[i][iter1-1] = z[i]; */
+      fprintf(f101, "%d  %d  %14.7e %14.7e\n", iter1 - 1, i, z[i], w[i]);
+    }
+
+
+
   }
 
 
@@ -326,6 +350,18 @@ rd_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], double
   free(kinvnum1);
   free(wt);
   free(zt);
+
+  free(k);
+  free(A);
+  free(R);
+  free(RT);
+  free(invRT);
+  free(invR);
+  free(invRTinvR);
+  free(kinv);
+  fclose(f101);
+
+
 
 }
 

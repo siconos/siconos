@@ -50,27 +50,38 @@ double ddot_(int *, double [], int *, double [], int*);
 
 cfp_gsnl(double vec[], double *q, int *nn, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
 {
+  FILE *f101;
   double errmax = *tol, alpha, beta, mu = *mumu;
   int n = *nn, incx = 1, incy = 1, nc = n / 2, i, j, k, iter, maxit = *itermax;
-  double M[n][n], *y;
-  double fric1[nc], fric[nc], ww[n];
+  double /*M[n][n],*/ *y;
+  /*  double fric1[nc], fric[nc], ww[n];*/
+  double *fric1, *fric, *ww;
   double normr, eps, avn, avt, apn, apt, zn , zt, den1, num1;
   char trans = 'T';
+  double(*M)[n];
 
 
+  M = malloc(n * n * sizeof(double));
+
+
+
+  f101 = fopen("resultat_gsnl.dat", "w+");
 
   iter = 0;
   eps = 1.e-08;
 
 
   y = (double*) malloc(n * sizeof(double));
+  fric1 = (double*) malloc(nc * sizeof(double));
+  fric = (double*) malloc(nc * sizeof(double));
+  ww = (double*) malloc(n * sizeof(double));
 
-  for (i = 0; i < n; i++)
+  /*  for (i = 0; i < n; i++)
   {
-    z[i] = 0.0;
-    w[i] = 0.0;
-    ww[i] = 0.0;
-  }
+      z[i] = 0.0;
+      w[i] = 0.0;
+      ww[i] = 0.0;
+      }*/
 
   for (i = 0; i < nc; i++)
   {
@@ -80,9 +91,13 @@ cfp_gsnl(double vec[], double *q, int *nn, double *mumu, int * itermax, double *
 
 
   for (i = 0; i < n; i++)
+  {
+    z[i] = 0.0;
+    w[i] = 0.0;
+    ww[i] = 0.0;
     for (j = 0; j < n; j++)
       M[i][j] = vec[i * n + j];
-
+  }
 
   normr = 1.;
 
@@ -158,13 +173,24 @@ cfp_gsnl(double vec[], double *q, int *nn, double *mumu, int * itermax, double *
 
 
     num1 = ddot_(&n, y, &incx, y, &incy);
-    den1 = ddot_(&n, w, &incx, w, &incy);
+    /*   den1 = ddot_(&n, w, &incx, w, &incy);*/
+    den1 = ddot_(&n, q, &incx, q, &incy);
 
     normr = sqrt(num1 / den1);
     *it_end = iter;
     *res = normr;
+    for (i = 0; i < n; i++)
+    {
+      /*result_gs[i][iter1-1] = z[i]; */
+      fprintf(f101, "%d  %d  %14.7e\n", iter - 1, i, z[i]);
+    }
+
 
   }
+
+
+
+
 
   if (normr > errmax)
   {
@@ -178,5 +204,11 @@ cfp_gsnl(double vec[], double *q, int *nn, double *mumu, int * itermax, double *
   }
 
   free(y);
+  free(M);
+  free(fric1);
+  free(fric);
+  free(ww);
 
+
+  fclose(f101);
 }

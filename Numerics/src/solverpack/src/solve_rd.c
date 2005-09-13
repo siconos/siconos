@@ -53,6 +53,9 @@ int solve_rd(double *vec, double *q, int *nn, method *pt, double z[], double w[]
 
   if (strcmp(pt->rp.nom_method, mot3) == 0)
     rd_latin(vec, q, &n, & pt->rd.k_latin, pt->rd.a, pt->rd.b, & pt->rd.itermax, & pt->rd.tol, z, w, &it_end, &res, &info);
+  else if (strcmp(pt->rd.nom_method, mot1) == 0)
+    rd_nlgs(vec, q, &n, pt->rd.a, pt->rd.b, & pt->rd.itermax, & pt->rd.tol, z, w, &it_end, &res, &info);
+
   else printf("Warning : Unknown solving method : %s\n", pt->rp.nom_method);
 
   clock_t t2 = clock();

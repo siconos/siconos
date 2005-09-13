@@ -48,19 +48,23 @@ double ddot_(int *, double [], int *, double [], int*);
 
 cfp_gcp(double vec[], double *b, int *nn, double *mu3, int * itermax, double * tol, double x[], double rout[], int *it_end, double * res, int *info)
 {
+
+  FILE *f101;
   int n = *nn, maxit = *itermax;
   double mu = *mu3, eps = 1.e-08;
   int nc = n / 2, i, j, iter, k, ii, incx = 1, incy = 1;
   double pAp, alpha, beta, wAp, rp, normr;
   char trans = 'T';
-  double A[n][n], alphaf, betaf, den, num;
+  double /*A[n][n],*/ alphaf, betaf, den, num;
   int *stat, *statusi;
   double *p, *fric;
   double *fric1, *v, *w, *Ap, *xi, *z;
-  double r[n];
+  double /*r[n]*/ *r;
+  double(*A)[n];
 
+  A = malloc(n * n * sizeof(double));
 
-
+  r = (double*) malloc(n * sizeof(double));
   fric = (double*) malloc(n * sizeof(double));
   p = (double*) malloc(n * sizeof(double));
   v = (double*) malloc(n * sizeof(double));
@@ -72,6 +76,7 @@ cfp_gcp(double vec[], double *b, int *nn, double *mu3, int * itermax, double * t
   stat = (int*) malloc(nc * sizeof(int));
   statusi = (int*) malloc(nc * sizeof(int));
 
+  f101 = fopen("resultat_gcp.dat", "w+");
 
   for (i = 0; i < n; i++)
   {
@@ -210,16 +215,26 @@ cfp_gcp(double vec[], double *b, int *nn, double *mu3, int * itermax, double * t
 
     normr = sqrt(num / den);
 
+    for (i = 0; i < n; i++)
+    {
+      /*result_gs[i][iter1-1] = z[i]; */
+      fprintf(f101, "%d  %d  %14.7e\n", ii, i, x[i]);
+    }
+
     if (normr < *tol)
     {
       iter = ii;
-      printf("convergence after %d iterations with a residual %g\n", iter, normr);
+      /*printf("convergence after %d iterations with a residual %g\n",iter,normr);*/
       *info = 0;
       break;
     }
     iter = iter + 1;
 
+
+
   }
+
+
 
 
   if (normr < *tol)
@@ -251,5 +266,9 @@ cfp_gcp(double vec[], double *b, int *nn, double *mu3, int * itermax, double * t
   free(fric1);
   free(stat);
   free(statusi);
+  free(r);
+  free(A);
+
+  fclose(f101);
 
 }

@@ -50,21 +50,54 @@ double ddot_(int *, double [], int *, double [], int*);
 
 cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
 {
+
+  FILE *f101;
   int i, j, kk, iter1, ino, ddl;
   int n = *nn, incx = 1, incy = 1, nc = n / 2, idim, jdim, nbno, itt = *itermax;
   int taille, taillet, taillen;
   double errmax = *tol, alpha, beta, maxa, zw, aa, nt, wn, tc, zc0, mu = *mumu;
   double rr, rrr, r1, r2, r3, invR0, invRT0, err1, z0, num11, err0, invRTinvR0;
-  double den11, den22, vv, knz0, ktz0, ktz[nc], wf[nc];
+  double den11, den22, vv, knz0, ktz0, *ktz, *wf;/* ktz[nc], wf[nc];*/
   double *wc, *zc, *maxwt, *wnum1, *znum1;
-  double kn[nc][nc], kt[nc][nc];
+  double(*kn)[nc], (*kt)[nc]; /*kn[nc][nc], kt[nc][nc];*/
   char trans = 'T';
-  double k[n][n], A[n][n], R[n][n];
-  double RT[n][n], invRT[n][n], invR[n][n], kf[n][n], kninv[nc][nc];
-  double invRTinvR[n][n];
-  double kinvwden1[n], kzden1[n], kfinv[n][n], knz[nc], wtnc[nc];
-  int ddln[nc];
-  int ddlt[nc], vectnt[n];
+  double(*k)[n], (*A)[n], (*R)[n]; /*k[n][n], A[n][n], R[n][n];*/
+  double(*RT)[n], (*invRT)[n], (*invR)[n], (*kf)[n], (*kninv)[nc]; /* RT[n][n], invRT[n][n], invR[n][n], kf[n][n], kninv[nc][nc];*/
+  double(*invRTinvR)[n]; /*invRTinvR[n][n];*/
+  double *kinvwden1, *kzden1, (*kfinv)[n], *knz, *wtnc; /*kinvwden1[n], kzden1[n], kfinv[n][n], knz[nc], wtnc[nc];*/
+  int *ddln;/*ddln[nc];*/
+  int *ddlt, *vectnt;/*ddlt[nc], vectnt[n];*/
+
+  printf("ici \n ");
+
+  f101 = fopen("resultat_latin.dat", "w+");
+
+  ktz = (double*)malloc(nc * sizeof(double));
+  wf = (double*)malloc(nc * sizeof(double));
+  kn = malloc(nc * nc * sizeof(double));
+  kt = malloc(nc * nc * sizeof(double));
+  k =  malloc(n * n * sizeof(double));
+  A = malloc(n * n * sizeof(double));
+  R = malloc(n * n * sizeof(double));
+
+  RT = malloc(n * n * sizeof(double));
+  invRT = malloc(n * n * sizeof(double));
+  invR = malloc(n * n * sizeof(double));
+  kf = malloc(n * n * sizeof(double));
+  kninv = malloc(nc * nc * sizeof(double));
+  invRTinvR = malloc(n * n * sizeof(double));
+
+  kinvwden1 = (double*)malloc(n * sizeof(double));
+  kzden1 = (double*)malloc(n * sizeof(double));
+  kfinv = malloc(n * n * sizeof(double));
+  knz = (double*)malloc(nc * sizeof(double));
+  wtnc = (double*)malloc(nc * sizeof(double));
+
+  ddln = (int*)malloc(nc * sizeof(int));
+  ddlt = (int*)malloc(nc * sizeof(int));
+  vectnt = (int*)malloc(n * sizeof(int));
+
+
 
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
@@ -466,6 +499,14 @@ cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int
     *res = err1;
     iter1 = iter1 + 1;
     *it_end = iter1;
+
+    for (i = 0; i < n; i++)
+    {
+      fprintf(f101, "%d  %d  %14.7e\n", iter1 - 1, i, z[i]);
+    }
+
+
+
   }
 
 
@@ -482,9 +523,37 @@ cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int
 
   free(wc);
   free(zc);
+  free(ktz);
+  free(wf);
+  free(kn);
+  free(kt);
+  free(k);
+  free(A);
+  free(R);
+
+  free(RT);
+  free(invRT);
+  free(invR);
+  free(kf);
+  free(kninv);
+
+  free(invRTinvR);
+
+  free(kinvwden1);
+  free(kzden1);
+  free(kfinv);
+  free(knz);
+  free(wtnc);
+
+
+  free(ddln);
+  free(ddlt);
+  free(vectnt);
+
   free(znum1);
   free(wnum1);
   free(maxwt);
+  fclose(f101);
 
 }
 

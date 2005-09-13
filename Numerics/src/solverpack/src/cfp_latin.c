@@ -50,19 +50,58 @@ double ddot_(int *, double [], int *, double [], int*);
 cfp_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
 {
 
-  int i, j, kk, iter1, ino, ddl;
+  FILE *f101;
+  int i, j, kk, iter1, ino, ddl, info2;
   int n = *nn, incx = 1, incy = 1, nc = n / 2, idim, jdim, nbno, taille, taillet, taillen, itt = *itermax;
   double errmax = *tol, alpha, beta, maxa, bb, cc, zw, aa, nt, wn, tc, zc0, mu = *mumu;
   double rr, rrr, r1, r2, r3, invR0, invRT0, err1, z0, num11, err0, invRTinvR0;
-  double den11, den22, vv, knz0, ktz0, ktz[nc], wf[nc];
-  double  *wc, *zc, *wt, *maxwt, *wnum1, *znum1;
-  double *zt, *maxzt, kn[nc][nc], kt[nc][nc];
+  double den11, den22, vv, knz0, ktz0, *ktz, *wf; /*ktz[nc], wf[nc];*/
+  double  *wc, *zc, *wt, *maxwt, *wnum1, *znum1, *q;/*q[n];*/
+  double *zt, *maxzt, (*kn)[nc], (*kt)[nc]; /*kn[nc][nc], kt[nc][nc];*/
   char trans = 'T';
-  double k[n][n], A[n][n], R[n][n], RT[n][n], invRT[n][n], invR[n][n], kf[n][n], kninv[nc][nc];
-  double invRTinvR[n][n], kinvwden1[n], kzden1[n], kfinv[n][n], knz[nc], wtnc[nc];
-  int ddln[nc];
-  int ddlt[nc], vectnt[n];
+  char uplo = 'U';
+  /*  double k[n][n], A[n][n], R[n][n], RT[n][n], invRT[n][n], invR[n][n], kf[n][n], kninv[nc][nc];*/
+  double(*k)[n], (*A)[n], (*R)[n], (*DPO)[n], (*RT)[n], (*invRT)[n], (*invR)[n], (*kf)[n], (*kninv)[nc];
+  /*  double invRTinvR[n][n], kinvwden1[n], kzden1[n], kfinv[n][n], knz[nc], wtnc[nc];*/
+  double(*invRTinvR)[n], *kinvwden1, *kzden1, (* kfinv)[n], *knz, *wtnc;
+  /*  int ddln[nc];*/
+  int *ddln;
+  /*  int ddlt[nc], vectnt[n];*/
+  int *ddlt, *vectnt;
 
+
+
+
+  k =  malloc(n * n * sizeof(double));
+  A =  malloc(n * n * sizeof(double));
+  R =  malloc(n * n * sizeof(double));
+  DPO =  malloc(n * n * sizeof(double));
+  RT =  malloc(n * n * sizeof(double));
+  invRT =  malloc(n * n * sizeof(double));
+  invR =  malloc(n * n * sizeof(double));
+  kf =  malloc(n * n * sizeof(double));
+  kninv =  malloc(nc * nc * sizeof(double));
+
+
+
+
+  invRTinvR =  malloc(n * n * sizeof(double));
+  kfinv =  malloc(n * n * sizeof(double));
+  kn =  malloc(nc * nc * sizeof(double));
+  kt =  malloc(nc * nc * sizeof(double));
+  kinvwden1 = (double*) malloc(n * sizeof(double));
+  kzden1 = (double*) malloc(n * sizeof(double));
+  knz = (double*) malloc(nc * sizeof(double));
+  wtnc = (double*) malloc(nc * sizeof(double));
+  ktz = (double*) malloc(nc * sizeof(double));
+  wf = (double*) malloc(nc * sizeof(double));
+  q = (double*) malloc(n * sizeof(double));
+
+  ddln = (int*) malloc(nc * sizeof(int));
+  ddlt = (int*) malloc(nc * sizeof(int));
+  vectnt = (int*) malloc(n * sizeof(int));
+
+  f101 = fopen("resultat_latin.dat", "w+");
 
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
@@ -76,6 +115,7 @@ cfp_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int
   {
     k[i][i] = *k_latin / vec[i * n + i];
     vectnt[i] = i + 1;
+    q[i] = -qq[i];
   }
 
   for (i = 0; i < nc; i++)
@@ -145,25 +185,27 @@ cfp_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int
     {
       A[i][j] = vec[i * n + j] + kfinv[i][j];
       R[i][j] = 0.;
+      DPO[i][j] = A[i][j];
+
     }
 
 
   /*/   !!!!!!!!!!!!!!!!!!!!!Cholesky!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
-  R[0][0] = sqrt(A[0][0]);
+  /*  R[0][0] = sqrt(A[0][0]);
 
-  for (i = 1; i < n; i++)
+  for(i = 1;i < n; i++)
   {
-    rr = 0.0;
-    rrr = 0.0;
-    for (j = 0; j <= i; j++)
-    {
-      r1 = 0.0;
-      r2 = 0.0;
-      for (kk = 0; kk <= j - 1; kk++)
-      {
-        rr = R[i][kk] * R[j][kk] + r1;
-        r1 = rr;
+        rr = 0.0;
+        rrr = 0.0;
+        for(j = 0; j <= i; j++)
+        {
+            r1 = 0.0;
+            r2 = 0.0;
+            for(kk = 0; kk <= j-1; kk++)
+            {
+                rr = R[i][kk]*R[j][kk]+r1;
+                r1 = rr;
       }
 
       if (fabs(R[j][j]) <= 1.e-10)
@@ -171,36 +213,91 @@ cfp_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int
         printf("nul pivot %d ,and R(%d,%d) %g \n", j, j, j, R[j][j]);
         break;
       }
-      R[i][j] = (1 / R[j][j]) * (A[i][j] - rr);
-      r3 = 0.0;
-      for (kk = 0; kk <= i - 1; kk++)
+      R[i][j] = (1/ R[j][j])*(A[i][j]- rr);
+      r3=0.0;
+      for( kk = 0; kk <= i-1; kk++)
       {
-        rrr = R[i][kk] * R[i][kk] + r3;
+        rrr = R[i][kk]*R[i][kk]+r3;
         r3 = rrr;
       }
-      R[i][i] = sqrt(A[i][i] - rrr);
+      R[i][i] = sqrt(A[i][i]-rrr);
     }
   }
-
+  */
 
   /*    //  !!!!!end of cholesky!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
   /*   //  !determination of the R tranposeted*/
+
+  dpotrf_(&uplo, &n, DPO , &n, &info2);
+  printf("info1 chol %d DPO %g %g \n\n", info2, DPO[3][4], DPO[19][n - 1]);
+  printf("info1 chol %d DPO %g %g \n\n", info2, DPO[4][3], DPO[n - 1][19]);
+
   for (i = 0; i < n; i++)
-    for (j = 0; j < n; j++)
-      RT[i][j] = R[j][i];
+    for (j = i; j < n; j++)
+    {
+      R[i][j] = DPO[i][j];/**/
+
+      /*    RT[i][j] = R[j][i];/**/
+
+    }
+  /**/
+
+
+  for (i = 0; i < n; i++)
+    for (j = 0; j < i; j++)
+    {
+      R[i][j] = DPO[i][j];/**/
+
+      /*    RT[i][j] = R[j][i];/**/
+
+    }
+  /**/
+
 
   /*   //  !inverse of R and RT*/
+
+  /*  dpotri_( &uplo, &n, DPO , &n, &info2);
+
+  printf("info invsup %d DPO %g %g \n\n", info2,DPO[3][4],DPO[19][n-1]);
+  printf("info invsup %d DPO %g %g \n\n", info2,DPO[4][3],DPO[n-1][19]);*/
 
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
     {
+
+      /* R[j][i] = R[i][j];/*DPO[i][j];/**/
       invRT[i][j] = 0.;
       invR[i][j] = 0.;
+
+      /*    invR[i][j] = DPO[i][j];
+      /*      invR[j][i] = DPO[i][j];/**/
+
     }
 
+  /*  for(i = 0; i < n; i++)
+        for(j = 0; j < n; j++)
+         {
+
+       invRT[j][i] = invR[i][j];
+
+       }*/
+  /*
+  printf("info invinf DPO %g %g \n\n", invR[3][4],invR[19][n-1]);
+  printf("info invinf DPO %g %g \n\n", invR[4][3],invR[n-1][19]);   */
+
+  for (i = 0; i < n; i++)
+    for (j = 0; j < n; j++)
+    {
+      RT[i][j] = R[j][i];
+
+    }
+
+  //  printf("info invinf DPO %g %g \n\n", invRT[3][4],invRT[19][n-1]);
 
   /*   //  !!!!!!!!!inversion of the inf triangular matrix!!!!!!!!!!!!!*/
+  /**/
+
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
     {
@@ -217,11 +314,18 @@ cfp_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int
           invR0 = invR[i][j];
         }
       }
-    }
+    }/**/
 
   /*   //  !!!!!!!!!!!!!!!!!!!end of inversion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
+  printf("info invinf DPO %g %g \n\n", invR[3][4], invR[19][n - 1]);
+  printf("info invinf DPO %g %g \n\n", invR[4][3], invR[n - 1][19]); /**/
+
+
+
+
   /*  //  !!!!!!!!!!!!!!!!!!!!!!inversion of the sup triangular matrix!!!!!!!*/
+  /**/
   for (i = 0; i < n; i++)
     invRT[i][i] = 1 / RT[i][i];
 
@@ -234,10 +338,12 @@ cfp_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int
         invRT[i][j] = (-1 / RT[i][i]) * RT[i][kk] * invRT[kk][j] + invRT0;
         invRT0 = invRT[i][j];
       }
-    }
+    }/**/
 
   /*  //  !!!!!!!!!!!!!!!!!!!end of inversion!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
+  printf("info invinf DPO %g %g \n\n", invRT[3][4], invRT[19][n - 1]);
+  printf("info invinf DPO %g %g \n\n", invRT[4][3], invRT[n - 1][19]);
 
   /*  //  ! initialisation  s^ = 0*/
 
@@ -309,7 +415,10 @@ cfp_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int
     alpha = 1.;
     beta = 1.;
     dgemv_(&trans, &n, &n, &alpha, kfinv, &n, zc, &incx, &beta, wc, &incy);
-    dcopy_(&n, qq, &incx, znum1, &incy);
+    //    dcopy_( &n, qq, &incx, znum1, &incy);
+    dcopy_(&n, q, &incx, znum1, &incy);
+    /*alpha = -1.; /* 0807 */
+    /*daxpy_( &n, &alpha, qq, &incx, znum1, &incy);/**/
     alpha = 1.;
     daxpy_(&n, &alpha, wc, &incx, znum1, &incy);
     alpha = 1.;
@@ -438,6 +547,13 @@ cfp_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int
     iter1 = iter1 + 1;
     *it_end = iter1;
     *res = err1;
+
+    for (i = 0; i < n; i++)
+    {
+      /*result_gs[i][iter1-1] = z[i]; */
+      fprintf(f101, "%d  %d  %14.7e \n", iter1 - 1, i, z[i]);
+    }
+
   }
 
 
@@ -462,5 +578,35 @@ cfp_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int
   free(maxwt);
   free(zt);
   free(maxzt);
+  free(invRTinvR);
+  free(kfinv);
+  free(kinvwden1);
+  free(kzden1);
+  free(knz);
+  free(wtnc);
 
+  free(ddln);
+  free(ddlt);
+  free(vectnt);
+
+  free(ktz);
+  free(wf);
+  free(q);
+  free(kn);
+  free(kt);
+
+
+
+  free(k);
+  free(A);
+  free(R);
+  free(DPO);
+  free(RT);
+  free(invRT);
+  free(invR);
+  free(kf);
+  free(kninv);
+
+
+  fclose(f101);
 }
