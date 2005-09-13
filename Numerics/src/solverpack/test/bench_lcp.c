@@ -278,7 +278,7 @@ int main(void)
     info = lcp_solver(vecM , q , &dim , &meth_lcp6 , z , w , &iter , &criteria);
 
 #ifdef BAVARD
-    printf("\n           QP     :%1d ", info);
+    printf("\n        LATIN     :%1d ", info);
     for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
     printf(" ( %6d ) " , iter);
 #endif
