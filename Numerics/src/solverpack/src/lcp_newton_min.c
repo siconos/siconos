@@ -62,6 +62,7 @@
  * \author Vincent Acary
  *
  * \todo Optimizing the memory allocation (Try to avoid the copy of JacH into A)
+ * \todo Add rules for the computation of the penalization rho
  * \todo Add a globalization strategy based on a decrease of a merit function. (Nonmonotone LCP) Reference in Ferris Kanzow 2002
  */
 
@@ -84,7 +85,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
 
   double *JacH, *H, *A;
 
-  double rho;
+  double *rho;
 
   incx = 1;
   incy = 1;
@@ -107,7 +108,9 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   }
 
   // rho
-  rho = 1.0 / n;
+  rho = (double *)malloc(n * sizeof(double));
+  for (i = 0; i < n; i++) rho[i] = 1.0 / vec[i * n + i] ;
+  //for (i=0;i<n;i++) rho[i]=1.0/n ;
   // Sizw of the problem
   m = 2 * n;
   mm = m * m;
@@ -147,7 +150,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
 
   for (i = n; i < m; i++)
   {
-    if (w[i - n] > rho * z[i - n]) H[i] = rho * z[i - n];
+    if (w[i - n] > rho[i - n]*z[i - n]) H[i] = rho[i - n] * z[i - n];
     else H[i] = w[i - n];
   }
 
@@ -167,9 +170,9 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
     // Construction of the directional derivatives of H, JacH
     for (i = 0; i < n; i++)
     {
-      if (w[i] > rho * z[i])
+      if (w[i] > rho[i]*z[i])
       {
-        JacH[i * m + i + n] = rho;
+        JacH[i * m + i + n] = rho[i];
         JacH[(i + n)*m + (i + n)] = 0.0;
       }
       else
@@ -199,7 +202,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
       free(A);
       free(JacH);
       free(ipiv);
-
+      free(rho);
       return (*info = 2);
 
     }
@@ -220,7 +223,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
 
     for (i = n; i < m; i++)
     {
-      if (w[i - n] > rho * z[i - n]) H[i] = rho * z[i - n];
+      if (w[i - n] > rho[i - n]*z[i - n]) H[i] = rho[i - n] * z[i - n];
       else H[i] = w[i - n];
     }
 
@@ -257,5 +260,6 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   free(A);
   free(JacH);
   free(ipiv);
+  free(rho);
 
 }

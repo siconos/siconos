@@ -187,6 +187,7 @@ void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem, do
     trouve = 0;
 
     tempo = (double *)malloc(n * sizeof(double));
+    sol = (double *)malloc((2 * n + 1) * sizeof(double));
 
 
 
@@ -259,6 +260,7 @@ void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem, do
 
 
         free(posA);
+        free(posAA);
         val = -rtmp[0];
         pos = 0;
 
@@ -371,7 +373,6 @@ void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem, do
       /* Solution */
 
 
-      sol = (double *)malloc((2 * n + 1) * sizeof(double));
       for (i = 0; i < 2 * n + 1 ; i++)
       {
         sol[i] = 0.;
@@ -454,7 +455,6 @@ void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem, do
 
     free(Mz);
     free(sol);
-    free(posAA);
     free(tempo);
     free(basic);
 
