@@ -60,12 +60,22 @@
  *
  */
 
+/*
+ * Pointer function
+ */
+
+void (*local_solver)(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                     int *iparamLCP , double *dparamLCP) = NULL;
+/*
+ */
+
 int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , int *db , method *pt , double *z ,  /* in  */
                      double *w , int *it_end , int *itt_end , double *res)                                                      /* out */
 {
 
   const char mot1[10] = "Lemke", mot2[10] = "NLGS", mot3[10] = "CPG";
-  const char mot4[10] = "QP"   , mot5[10] = "NSQP";
+  const char mot4[10] = "QP"   , mot5[10] = "NSQP", mot6[10] = "NewtonMin";
+  const char mot7[10] = "Latin";
 
   int info;
   int n, na, db2, db10;
@@ -80,8 +90,8 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
 
   char NOTRANS = 'N';
 
-  int     iparamSolver[5];
-  double  dparamSolver[5];
+  int     iparamLCP[5];
+  double  dparamLCP[5];
 
   *it_end   = 0;
   *res      = 0.0;
@@ -95,26 +105,62 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   db2 = (*db) * 2;
   db10 = (*db) * 10;
 
-  for (i = 0 ; i < 5 ; ++i) iparamSolver[i] = 0;
-  for (i = 0 ; i < 5 ; ++i) dparamSolver[i] = 0.0;
+  for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
+  for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
 
-  if (strcmp(pt->lcp.name , mot1) == 0);
-
+  if (strcmp(pt->lcp.name , mot1) == 0)
+  {
+    /* Lexico Lemke */
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.iout;
+    local_solver = &lcp_lexicolemke;
+  }
   else if (strcmp(pt->lcp.name , mot2) == 0)
   {
-
-    iparamSolver[0] = pt->lcp.itermax;
-    iparamSolver[1] = pt->lcp.iout;
-    dparamSolver[0] = pt->lcp.tol;
-    dparamSolver[1] = pt->lcp.relax;
-
+    /* NLGS */
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.iout;
+    dparamLCP[0] = pt->lcp.tol;
+    dparamLCP[1] = pt->lcp.relax;
+    local_solver = &lcp_nlgs;
   }
-  else if (strcmp(pt->lcp.name , mot3) == 0);
-
-  else if (strcmp(pt->lcp.name , mot4) == 0);
-
-  else if (strcmp(pt->lcp.name , mot5) == 0);
-
+  else if (strcmp(pt->lcp.name , mot3) == 0)
+  {
+    /* CPG */
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.iout;
+    dparamLCP[0] = pt->lcp.tol;
+    local_solver = &lcp_cpg;
+  }
+  else if (strcmp(pt->lcp.name , mot4) == 0)
+  {
+    /* QP */
+    dparamLCP[0] = pt->lcp.tol;
+    local_solver = &lcp_qp;
+  }
+  else if (strcmp(pt->lcp.name , mot5) == 0)
+  {
+    /* NSQP */
+    dparamLCP[0] = pt->lcp.tol;
+    local_solver = &lcp_nsqp;
+  }
+  else if (strcmp(pt->lcp.name , mot6) == 0)
+  {
+    /* Newton Min */
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.iout;
+    dparamLCP[0] = pt->lcp.tol;
+    local_solver = &lcp_newton_min;
+  }
+  else if (strcmp(pt->lcp.name , mot7) == 0)
+  {
+    /* Latin */
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.iout;
+    dparamLCP[0] = pt->lcp.tol;
+    dparamLCP[1] = pt->lcp.k_latin;
+    local_solver = &lcp_latin;
+  }
   else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
 
   ww   = (double*)malloc(n * sizeof(double));
@@ -196,9 +242,9 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
 
       /* Local LCP resolution with NLGS algorithm */
 
-      lcp_nlgs(db , &vec[il * db2] , rhs , &z[(*db)*i] , &w[(*db)*i] , &info1 , iparamSolver , dparamSolver);
+      (*local_solver)(db , &vec[il * db2] , rhs , &z[(*db)*i] , &w[(*db)*i] , &info1 , iparamLCP , dparamLCP);
 
-      totaliter += iparamSolver[2];
+      totaliter += iparamLCP[2];
     }
 
     /* **** Criterium convergence **** */
