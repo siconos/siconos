@@ -443,6 +443,7 @@ void test_matrix(void)
 
     free(vecM);
     free(q);
+    free(sol);
   }
 }
 
@@ -590,7 +591,8 @@ void test_blockmatrix(void)
   free(z);
   free(sol);
   free(vecM);
-
+  free(iid);
+  free(inb);
   printf(" \n");
 
 }

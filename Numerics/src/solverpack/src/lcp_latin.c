@@ -147,8 +147,6 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
   kzden1 = (double*) malloc(n * sizeof(double));
 
   DPO  = (double*) malloc(n2 * sizeof(double));
-  k    = (double*) malloc(n * sizeof(double));
-  kinv = (double*) malloc(n * sizeof(double));
 
   /* Initialization */
 
@@ -189,6 +187,29 @@ void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int 
   {
     printf("\n Cholesky Factorization failed \n");
     printf(" Minor %d non PSD\n", info2);
+    free(k);
+    free(wc);
+    free(zz);
+    free(ww);
+    free(zc);
+    free(wt);
+    free(DPO);
+    free(num1);
+    free(den1);
+    free(den2);
+    free(kinv);
+    free(maxwt);
+    free(wden1);
+    free(zden1);
+    free(znum1);
+    free(wnum1);
+    free(kzden1);
+    free(kinvnum1);
+    free(kinvden1);
+    free(kinvden2);
+    free(kinvwden1);
+
+
     return (*info = 2);
   }
 

@@ -158,5 +158,8 @@ void lcp_qp(int *nn , double *vec , double *qq , double *z , double *w , int *in
   free(xu);
   free(xl);
   free(lambda);
+  free(war);
+  free(iwar);
+  free(Q);
 
 }
