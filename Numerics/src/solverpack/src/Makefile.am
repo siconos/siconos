@@ -17,12 +17,12 @@ libsolverpack_la_SOURCES = solverpack.h \
 	lcp_qp.c lcp_lemke.c lcp_latin.c \
 	solve_cfp.c \
 	cfp_gcp.c cfp_latin.c cfp_gsnl.c \
-	lcp_cfd.c cfd_lcp.c \
+	lcp2cfd.c cfd2lcp.c \
 	solve_rp.c \
-	rp_gsnl.c rp_latin.c \
+	rp_nlgs.c rp_latin.c \
 	solve_cfd.c \
 	cfd_latin.c \
-        rd_latin.c solve_rd.c \
+        rd_latin.c rd_nlgs.c solve_rd.c \
 	ql0001.f
 
 
