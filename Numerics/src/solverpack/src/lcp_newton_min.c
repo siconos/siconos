@@ -1,14 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "blaslapack.h"
 
 /*!\file lcp_newton.c
  *
  *
- * This subroutine allows the resolution of LCP (Linear Complementary Problem).
- * Try \f$(z,w)\f$ such that:
+ * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
+ * Try \f$(z,w)\f$ such that:\n
  *
  * \f$
  *  \left\lbrace
@@ -20,8 +15,8 @@
  *
  * M is an (n x n)  matrix , q , w and z n-vectors.
  *
- *
- *!\fn lcp_newtonmin(  double *vec , double *q , int *nn , int *itermax , double *tol , int *ispeak , double *z , double *w , int *it_end , double *res , int *info )
+ *!\fn lcp_newton_min( int *nn , double *vec , double *q , double *z , double *w , int *info ,\n
+ *           int *iparamLCP , double *dparamLCP )
  *
  * lcp_newton_min use a nonsmooth newton method based on the min formulation  (or max formulation) of the LCP
  *
@@ -65,6 +60,12 @@
  * \todo Add rules for the computation of the penalization rho
  * \todo Add a globalization strategy based on a decrease of a merit function. (Nonmonotone LCP) Reference in Ferris Kanzow 2002
  */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "blaslapack.h"
 
 void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                     int *iparamLCP , double *dparamLCP)

@@ -1,7 +1,7 @@
 /*!\file lcp_solver.c
  *
- * This subroutine allows the resolution of LCP (Linear Complementary Problem).
- * Try \f$(z,w)\f$ such that:
+ * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
+ * Try \f$(z,w)\f$ such that:\n
  *
  * \f$
  *  \left\lbrace
@@ -14,6 +14,23 @@
  * M is an ( n x n ) matrix, q , w and z n-vector. This system of equalities and inequalities
  * is solved thanks to @ref lcp solvers. The routine's call is due to the function lcp_solver.c.
  *
+ *!\fn int lcp_solver( double *vec , double *q , int *nn , method *pt , double *z , double *w , int *it_end , double *res )
+ *
+ * lcp_solver is a generic interface allowing the call of one of the LCP solvers.
+ *
+ * \param vec          Unchanged parameter which contains the components of the LCP matrix with a Fortran storage.
+ * \param q            Unchanged parameter which contains the components of the constant right hand side vector.
+ * \param nn           Unchanged parameter which represents the dimension of the LCP problem.
+ * \param pt           Unchanged parameter which represents the LCP structure.
+ * \param z            Modified parameter which contains the initial value of the LCP and returns the solution of the problem.
+ * \param w            Modified parameter which returns the complementary solution of the problem.
+ * \param it_end       Modified parameter which returns the number of iterations performed by the algorithm.
+ * \param res          Modified parameter which returns the final error value.
+ *
+ * \return integer     0 - successful\n
+ *                     0 >  - otherwise (see specific solvers for more information about the log info)
+ *
+ * \author Nineb Sheherazade & Mathieu Renouf
  */
 
 #include <stdio.h>
@@ -23,25 +40,6 @@
 #ifndef MEXFLAG
 #include "solverpack.h"
 #endif
-
-/*!\fn int lcp_solver( double *vec , double *q , int *nn , method *pt , double *z , double *w , int *it_end , double *res )
- *
- * lcp_solver is a generic interface allowing the call of one of the LCP solvers.
- *
- * \param double* vec  Unchanged parameter which contains the components of the LCP matrix with a Fortran storage.
- * \param double* q    Unchanged parameter which contains the components of the constant right hand side vector.
- * \param int* nn      Unchanged parameter which represents the dimension of the LCP problem.
- * \param method* pt   Unchanged parameter which represents the LCP structure.
- * \param double* z    Modified parameter which contains the initial value of the LCP and returns the solution of the problem.
- * \param double* w    Modified parameter which returns the complementary solution of the problem.
- * \param it_end       Modified parameter which returns the number of iterations performed by the algorithm.
- * \param res          Modified parameter which returns the final error value.
- *
- * \return integer     0 - successful\n
- *                     0 >  - otherwise (see specific solvers for more information about the log info)
- *
- * \author Nineb Sheherazade & Mathieu Renouf
- */
 
 int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w , int *it_end , double *res)
 {

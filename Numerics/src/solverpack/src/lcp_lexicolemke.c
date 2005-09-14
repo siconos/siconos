@@ -1,8 +1,3 @@
-#include <math.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 /*!\file lcp_lexicolemke.c
  *
  * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
@@ -18,7 +13,7 @@
  *
  * where M is an (n x n)-matrix, q , w and z n-vectors.
  *
- * \fn  lcp_lexicolemke( int *nn , double *vec , double *q , double *z , int *info ,
+ * \fn  lcp_lexicolemke( int *nn , double *vec , double *q , double *z , int *info ,\n
  *                       int *iparamLCP , double *dparamLCP )
  *
  * lcp_lexicolemke is a direct solver for LCP based on pivoting method principle for degenrate problem.
@@ -49,6 +44,11 @@
  * \author Mathieu Renouf
  *
  */
+
+#include <math.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *wlem , int *info ,
                      int *iparamLCP , double *dparamLCP)

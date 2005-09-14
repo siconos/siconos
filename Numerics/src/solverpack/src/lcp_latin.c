@@ -1,9 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "blaslapack.h"
-
 /*!\file lcp_latin.c
  *
  * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
@@ -51,6 +45,12 @@
  * \author Nineb Sheherazade.
  * Last modifications: Mathieu Renouf
  */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "blaslapack.h"
 
 void lcp_latin(int *nn , double *vec , double *qq , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {

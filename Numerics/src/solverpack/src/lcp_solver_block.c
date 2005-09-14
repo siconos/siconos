@@ -9,6 +9,72 @@
  * Here M is an (n x n) matrix , q , w and z n-vector.\n
  * This system of equalities and inequalities is solved thanks to @ref block_lcp solvers.
  *
+ *!\fn int lcp_solver_block( int *inb , int *iid , double *vec, double *q , int *n , int *nb ,\n
+ *                           methode *pt , double *z , double *w , int *it_end , double *res ){
+ *
+ * \brief lcp_solver_block is a generic interface allowing the call of one of the block LCP solvers.
+ *
+ * \param inb      Unchanged parameter which contains the number of non nul block element on the block row.
+ * \param iid      Unchanged parameter which contains the list of active block on each row.
+ * \param vec      Unchanged parameter which contains the components of the block matrices. Each block
+ *                 matrix is stored as a fortran matrix and all matrices are stored also as a fortran allocation.
+ * \param q        Unchanged parameter which contains the components of the right hand side.
+
+ * \param n        Unchanged parameter which contains the dimension of the problem.
+ * \param nb       Unchanged parameter which contains the dimension of the block matrices.
+ * \param pt       Unchanged parameter which contains a LCP structure
+ *
+ * \param z        Modified parameter which contains the initial iterate for the LCP(q,M)
+ *                 and returns the solution of the problem.
+ * \param w        Modified parameter which returns the solution of the problem.
+ * \param it_end   Modified parameter which returns the final number of iterations or pivots
+ * \param res      Modified parameter which returns the final value of error criteria.
+ *
+ * \return info    Integer identifiant for the solver result\n
+ *                 0 - convergence\n
+ *                 0 < no convergence (see solver for specific info value)\n
+ *
+ * \author Mathieu Renouf
+ *
+ * lcp_solver_block is a generic interface which consider LCP with a block structure. The global LCP is solved
+ * as a succession of local LCP solved via lcp_solver.\n
+ *
+ * list Keywords to call solvers:
+ *
+ *   - Lemke    for lcp_lexicolemke
+ *   - NLGS     for lcp_nlgs
+ *   - CPG      for lcp_cpg
+ *   - QP       for lcp_qp
+ *   - NSQP     for lcp_nsqp
+ *   - Latin    for lcp_latin
+ *   - Newton   for lcp_newton_min
+ *
+ * Data file example:\n
+ * If we consider the matrix M and the right-hand-side q defined as
+ *
+ * \f$
+ * M=\left[\begin{array}{cc|cc|cc|cc}
+ *          1 & 2 & 0 & 0 & 3 &-1 & 0 & 0\\
+ *          2 & 1 & 0 & 0 & 4 & 1 & 0 & 0\\
+ *          \hline
+ *          0 & 0 & 1 &-1 & 0 & 0 & 2 & 2\\
+ *          0 & 0 &-1 & 6 & 0 & 0 & 1 & 2\\
+ *          \hline
+ *          3 & 4 & 0 & 0 & 1 & 0 & 0 & 0\\
+ *         -1 & 3 & 0 & 0 & 0 & 2 & 0 & 0\\
+ *          \hline
+ *          0 & 0 & 2 & 1 & 0 & 0 & 2 & 2\\
+ *          0 & 0 & 2 & 2 & 0 & 0 & 2 & 2\\
+ *        \end{array}\right] \quad, q==\left[\begin{array}{c}-1\\-1\\\hline 0\\-1\\\hline 1\\0\\\hline -1\\2\end{array}\right].
+ * \f$
+ *
+ * then
+ * - the number of block is 4 (=dn) and the fimension of block is 2 (=db)
+ * - the vector inb[dn] is equal to [2,2,2,2]
+ * - the vector iid[dn*db] is equal to [1,3,2,4,1,3,2,4]
+ * - the vector vec contains all block matrices stored as\n
+ *   vec = { M11[1][1],M11[2][1],M11[1][2],M11[2][2],M12[1][1],M12[2][1],..., \n
+ *           M43[1][2],M43[2][2],M44[1][1],M44[2][1],M44[1][2],M44[2][2]}
  */
 
 #include <stdio.h>
@@ -19,46 +85,6 @@
 #include "solverpack.h"
 #endif // MEXFLAG
 #include "blaslapack.h"
-
-/*!\fn int lcp_solver_block( int *inb , int *iid , double *vec, double *q , int *n , int *nb ,
- *                           methode *pt , double *z , double *w , int *it_end , double *res ){
- *
- * \brief solve_block_lcp is a generic interface allowing the call of one of the block LCP solvers.
- *
- * \param int* inb      Unchanged parameter which contains the number of non nul block element on the block row.
- * \param int* iid      Unchanged parameter which contains the list of active block on each row.
- * \param double* vec   Unchanged parameter which contains the components of the block matrices. Each block
- *                      matrix is stored as a fortran matrix and all matrices are stored also as a fortran allocation.
- * \param double* q     Unchanged parameter which contains the components of the right hand side.
-
- * \param int* n        Unchanged parameter which contains the dimension of the problem.
- * \param int* nb       Unchanged parameter which contains the dimension of the block matrices.
- * \param methode* pt   Unchanged parameter which contains a LCP structure
- *
- * \param double* z     Modified parameter which contains the initial iterate for the LCP(q,M)
- *                      and returns the solution of the problem.
- * \param double* w     Modified parameter which returns the solution of the problem.
- * \param int* it_end   Modified parameter which returns the final number of iterations or pivots
- * \param int* res      Modified parameter which returns the final value of error criteria.
- *
- * \return info         Integer identifiant for the solver result\n
- *                      0 - convergence\n
- *                      0 < no convergence (see solver for specific info value)\n
- *
- * \author Mathieu Renouf
- *
- * solve_block_lcp is a generic interface which consider LCP with a block structure. The global LCP is solved
- * as a succession of local LCP solved via lcp_solver.\n
- *
- * - list Keywords to call solvers:
- *
- *   - sub Lemke for lcp_lexicolemke
- *   - sub NLGS  for lcp_nlgs
- *   - sub CPG   for lcp_cpg
- *   - sub QP    for lcp_qp
- *   - sub NSQP  for lcp_nsqp
- *
- */
 
 /*
  * Pointer function

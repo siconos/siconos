@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
 /*!\file lcp_nsqp.c
  *
  * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
@@ -18,7 +13,7 @@
  *
  * where M is an (n x n)-matrix, q , w and z n-vectors.
  *
- * \fn  lcp_nsqp( int *nn , double *vec , double *q , double *z , int *info ,
+ * \fn  lcp_nsqp( int *nn , double *vec , double *q , double *z , int *info ,\n
  *                int *iparamLCP , double *dparamLCP )
  *
  * lcp_nsqp use a quadratic programm formulation for solving an non symmetric LCP
@@ -44,6 +39,11 @@
  * \author Vincent Acary
  *
  */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
 void ql0001_(int *m , int *me , int *mmax , int *n , int *nmax , int *mnn ,
              double *c , double *d , double *a , double *b , double *xl , double *xu ,

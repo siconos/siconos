@@ -244,11 +244,9 @@ extern "C" int lcp_cfd(int *, double *, double *, method *, double *, double *, 
 /**@defgroup group1 LCP (Linear Complementary Problem)
  * @{
  *
- * \fn int extern solve_lcp (double*,double*,int *, method *,double [],double [])
- * \brief solve_lcp.c is a generic interface allowing the call of one of the @ref lcp solvers.
- * @brief
+ * \fn int extern lcp_solver( double *vec , double *q ,int *n , method *pt , double *z , double *w , int *it_end , double *res )
+ * \brief lcp_solver.c is a generic interface allowing the call of one of the @ref lcp solvers.
  *
- * solve_lcp.c is a generic interface allowing the call of one of the @ref lcp solvers.
  */
 
 extern int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w , int *it_end , double *res);
@@ -259,27 +257,41 @@ extern int lcp_solver(double *vec, double *q , int *n , method *pt , double *z ,
 
 The C routines that solve LCP:
 
-gsnl_lcp.c
+lcp_nlgs.c
 
-gcp_lcp.c
+lcp_cpg.c
 
-latin_lcp.c
+lcp_latin.c
 
-lemke_lcp.c
+lcp_lemke.c
 
-lexicolemke_lcp.c
+lcp_lexicolemke.c
 
-qp_lcp.c
+lcp_qp.c
 
-qpnonsym_lcp.c
+lcp_qpnonsym.c
 
+lcp_newtonmin.c
 
 */
+
+/**@defgroup group2 Block LCP (Linear Complementary Problem)
+ * @{
+ *
+ * \fn int extern lcp_solver_block( int *inb , int *iid , double *vec, double *q ,\n
+ *                                  int *nn , int *nb , method *pt , double *z ,\n
+ *                  double *w , int *it_end , int *itt_end , double *res )
+ *
+ * \brief lcp_solver_block.c is a generic interface for block matrices allowing the call of one of the @ref lcp solvers.
+ *
+ */
 
 extern int lcp_solver_block(int *inb , int *iid , double *vec, double *q , int *nn , int *nb , method *pt , double *z ,
                             double *w , int *it_end , int *itt_end , double *res);
 
-/**@defgroup group2 PR (Primal Relay)
+/**@}*/
+
+/**@defgroup group3 PR (Primal Relay)
    @{
 */
 
@@ -287,6 +299,7 @@ extern int lcp_solver_block(int *inb , int *iid , double *vec, double *q , int *
 /** \fn int extern  solve_rp (double*,double*,int *,method *, double [],double [])
  *  \brief solve_rp() is a generic interface allowing the call of one of the @ref pr solvers.
  */
+
 /** @brief
 
     solve_rp() is a generic interface allowing the call of one of the @ref pr solvers.
@@ -308,7 +321,7 @@ rp_gsnl.c
 
 
 
-/**@defgroup group3 DR (Dual Relay)
+/**@defgroup group4 DR (Dual Relay)
    @{
 */
 
@@ -338,7 +351,7 @@ rd_gsnl.c
 
 
 
-/**@defgroup group4 PFC (Primal Frictional Contact)
+/**@defgroup group5 PFC (Primal Frictional Contact)
    @{
 */
 
@@ -368,7 +381,7 @@ cfp_gcp.c
 */
 
 
-/**@defgroup group5 DFC (Dual Frictional Contact)
+/**@defgroup group6 DFC (Dual Frictional Contact)
    @{
 */
 
@@ -380,10 +393,8 @@ cfp_gcp.c
 
     solve_cfd() is a generic interface allowing the call of one of the @ref dfc solvers.
 */
-extern int solve_cfd(double*, double*, int *, method *, double [], double []);
-//extern double solve_cfd2 (double*, double*,int *, method *,double [],double []);
-//extern double solve_cfd3 (double*, double*,int *, method *,double [],double []);
 
+extern int solve_cfd(double*, double*, int *, method *, double [], double []);
 
 /**@}*/
 
@@ -456,44 +467,6 @@ extern int cfd_lcp(int *, double *, method *, double *, int *, int *, int * , in
 
 extern int lcp_cfd(int *, double *, double *, method *, double *, double *, int *, double *, int *, int *, int *, int *,  int *, int *, int *, double *, double *);
 
-
-//extern cfp_gsnl (double [],double [],int *,double *,double *,double *, double [],double[],double *,double *,double*);
-
-//extern int cfd_lcp26 (int *,double *, method *,double *,int *, int *,int * ,int *,int *, int *, int *,int *,double * , double * ,int *, double *,double *);
-
-//extern void cfd_lcpfin (int *,double *, method *,double *,int *, int *,int * ,int *,int *, int *, int *,int *,double * , double * ,int *, double *,double *);
-
-//extern lcp_cfd (int *,double[],double[],double[],double[]);
-
-//extern cfp_gcp (double [],double [],int *,double *,double *,double *, double [],double [],double*,double *,double*);
-
-//extern cfp_latin (double [],double [],int *,double *,double *,double *,double *,double [],double [], double *,double *,double*);
-
-//extern cfd_latin2 (double[],double[],int *,double*,double*,double *,double*,double[],double[], double *,double*,double*);
-
-//extern void lcp_cfd (int *,double *,double *,method *,double *, double *, double *,int *, int *, int *, int *, double *,double *);
-
-//extern solve_qp (double [][maxcols],double [], int *, method *, double [],double []);
-
-//extern int rp_latin(double [],double *,int *, double * ,double *,int *, double *,double[],double [],int *,double *,int *)  ;
-
-//extern cfd_latin (double[],double[],int *,double*,double*,int *,double*,double[],double[], int *,double*,int*);
-
-//extern cfd_lcp (int *,double*,double[],double[],double[],double[]);
-
-//extern void cfd_lcp (int *,double *, method *,double *,int *,int *,int *,int *,double *, double *, double *,double *);
-
-//extern void cfd_lcp (int *,double *, method *,double *,int *, int * ,int *,int * ,int *, int *, int *,int *,double *, double *, int *, double *,double *);
-
-//lemke_lcp2 (double [],double [],int *,double *,double[],double[],double *, double *,double *);
-
-
-//gsnl_lcp (double [],double [],int *,double *,double *,double [],double [],double*,double *,double *);
-
-//extern gcp_lcp2 (double [],double [],int *,int *,double *,double [],double[],int *,double *,int *);
-
-//extern int lcp_cfd26 (int *,double *,double *,method *,double *, double *, int *, double *,int *, int *, int *, int *,  int *, int *, int *, double *,double *);
-//} /* closing brace for extern */
 #endif
 
 #endif // SOLVERPACK_H

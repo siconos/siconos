@@ -1,9 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "blaslapack.h"
-
 /*!\file lcp_nlgs.c
  *
  * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
@@ -19,7 +13,7 @@
  *
  * where M is an (n x n)-matrix, q , w and z n-vectors.
  *
- * \fn  lcp_nlgs( int *nn , double *vec , double *q , double *z , int *info ,
+ * \fn  lcp_nlgs( int *nn , double *vec , double *q , double *z , int *info\n,
  *                int *iparamLCP , double *dparamLCP )
  *
  * lcp_nlgs (Non Linear Gauss-Seidel) is a solver for LCP based on the principle of splitting method\n
@@ -51,6 +45,12 @@
  * \author Mathieu Renouf
  *
  */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "blaslapack.h"
 
 void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
               int *iparamLCP , double *dparamLCP)
@@ -165,18 +165,23 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
       z[i] = 0.0;
 
-      zi = (-q[i] - ddot_(&n , &vec[i] , &incx , z , &incy)) * diag[i];
+      zi = -q[i] - ddot_(&n , &vec[i] , &incx , z , &incy);
 
-      if (zi < 0) z[i] = 0.0;
-      else z[i] = zi;
-
-      w[i] = (zi +  z[i]) * vec[i * n + i];
-
+      if (zi < 0)
+      {
+        z[i] = 0.0;
+        w[i] = -zi;
+      }
+      else
+      {
+        z[i] = zi * diag[i];
+        w[i] = 0.0;
+      }
     }
 
     /* **** Criterium convergence **** */
 
-    qs   = -1;
+    qs   = -1.0;
     incx =  1;
     incy =  1;
 

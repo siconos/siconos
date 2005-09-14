@@ -1,9 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "blaslapack.h"
-
 
 /*!\file lcp_qp.c
  *
@@ -20,7 +14,7 @@
  *
  * where M is an (n x n)-matrix, q , w and z n-vectors.
  *
- * \fn  lcp_qp( int *nn , double *vec , double *q , double *z , int *info ,
+ * \fn  lcp_qp( int *nn , double *vec , double *q , double *z , int *info ,\n
  *              int *iparamLCP , double *dparamLCP )
  *
  * lcp_qp use a quadratic programm formulation for solving an LCP
@@ -46,6 +40,12 @@
  * \author Vincent Acary
  *
  */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "blaslapack.h"
 
 void ql0001_(int *m , int *me , int *mmax , int *n , int *nmax , int *mnn ,
              double *c , double *d , double *a , double *b , double *xl , double *xu ,
