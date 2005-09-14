@@ -1,5 +1,5 @@
 
-/*!\file cfd2lcp.c
+/*!\file dfc_2D2lcp.c
 
    This file allows the formulation in the LCP (Linear  Complementary Problem) form of a contact problem with friction.
 
@@ -7,9 +7,9 @@
 
 
 
-/*!\fn int cfd2lcp (int *dim_n, double *mumu, methode *pt, double *K1, int *ddl_i, int *dim_i, int * ddl_n, int *dim_nn, int *ddl_tt, int *dim_tt, int * ddl_c,int *dim_c,double * J1, double * F1,int *dim_F1, double *MM,double *q)
+/*!\fn int dfc_2D2lcp (int *dim_n, double *mumu, methode *pt, double *K1, int *ddl_i, int *dim_i, int * ddl_n, int *dim_nn, int *ddl_tt, int *dim_tt, int * ddl_c,int *dim_c,double * J1, double * F1,int *dim_F1, double *MM,double *q)
 
-   cfd2lcp subroutine allows the formulation in the LCP (Linear  Complementary Problem) form of a contact problem with friction.
+   dfc_2D2lcp subroutine allows the formulation in the LCP (Linear  Complementary Problem) form of a contact problem with friction.
 
    \param dim_n On return a pointer over integers, the dimension of the matrix after the reformulation  of the problem.
    \param mumu On enter a pointer over doubles, the friction coefficient.
@@ -29,7 +29,7 @@
    \param MM On return a pointer over doubles containing the components of a double matrix (dim_n,dim_n) with a fortran90 allocation.
    \param q On return a pointer over doubles, a double vector (dim_n).
 
-   \author Nineb Sheherazade.
+   \author Nineb Sheherazade & Mathieu Renouf.
 
 */
 
@@ -41,7 +41,7 @@
 #endif
 
 
-int cfd2lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *dim_i, int * ddl_n, int *dim_nn, int *ddl_tt, int *dim_tt, int * ddl_c, int *dim_c, double * J1, double * F1, int *dim_F1, double *MM, double *q)
+int dfc_2D2lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *dim_i, int * ddl_n, int *dim_nn, int *ddl_tt, int *dim_tt, int * ddl_c, int *dim_c, double * J1, double * F1, int *dim_F1, double *MM, double *q)
 
 {
 
@@ -57,7 +57,7 @@ int cfd2lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *d
   double *q1, *q0, *q2, *q3;
   double r3, rrr, rr, r1, r2;
   char uplo = 'U', trans, transa, transb, val[14], vall[14];
-  const char mot1[10] = "Cfd2latin", mot2[10] = "Gsnl", mot3[10] = "Gcp",  mot4[10] = "Lemke";
+  const char mot1[10] = "Latin", mot2[10] = "NLGS", mot3[10] = "CPG",  mot4[10] = "Lemke";
 
 
 
@@ -576,7 +576,7 @@ int cfd2lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *d
   /*       qt         */
 
 
-  if (strcmp(pt->cfd.nom_method, mot2) == 0)
+  if (strcmp(pt->dfc_2D.name, mot2) == 0)
   {
 
     M = (double**) malloc(3 * taille_tt/*taille_F1*/*sizeof(double));
@@ -699,7 +699,7 @@ int cfd2lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *d
     free(M);
 
   }
-  else if (strcmp(pt->cfd.nom_method, mot3) == 0)
+  else if (strcmp(pt->dfc_2D.name, mot3) == 0)
   {
 
     M = (double**) malloc(3 * taille_tt/*F1*/*sizeof(double));
@@ -817,7 +817,7 @@ int cfd2lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *d
 
 
   }
-  else if (strcmp(pt->cfd.nom_method, mot4) == 0)
+  else if (strcmp(pt->dfc_2D.name, mot4) == 0)
   {
 
     M = (double**) malloc(3 * taille_tt/*F1*/*sizeof(double));
@@ -936,7 +936,7 @@ int cfd2lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *d
 
   }
 
-  else if (strcmp(pt->cfd.nom_method, mot1) == 0)
+  else if (strcmp(pt->dfc_2D.name, mot1) == 0)
   {
 
     printf("dans mot1");
@@ -1047,7 +1047,7 @@ int cfd2lcp(int *dim_n, double *mumu, method *pt, double *K1, int *ddl_i, int *d
 
     printf("dans mot1 fin;");
   }
-  else printf("Warning : Unknown solving method : %s\n", pt->cfd.nom_method);
+  else printf("Warning : Unknown solving method : %s\n", pt->dfc_2D.name);
 
   for (i = 0; i < taille_F1; i++)
   {

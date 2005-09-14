@@ -1,24 +1,41 @@
-/*!\file solve_cfd.c
-
-  This subroutine allows the dual resolution of contact problems with friction.
-
-  Try \f$(z,w)\f$ such that:
-\f$
-\left\lbrace
-\begin{array}{l}
-M z- w=q\\
-0 \le z_n \perp w_n \ge 0\\
--z_t \in \partial\psi_{[-\mu w_n, \mu w_n]}(w_t)\\
-\end{array}
-\right.
-\f$
-
- here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
-
- This system of equations and inequalities is solved thanks to @ref dfc solvers or thanks to @ref lcp routines after a new formulation of this problem in the LCP form due to the cfd_lcp.c and lcp_cfd.c routines.
- The routine's call is due to the function solve_cfd.c.
-*/
-
+/*!\file dfc_2D_solver.c
+ *
+ * This subroutine allows the dual resolution of contact problems with friction\n
+ *
+ * Try \f$(z,w)\f$ such that:
+ * \f$
+ *  \left\lbrace
+ *   \begin{array}{l}
+ *    M z- w=q\\
+ *    0 \le z_n \perp w_n \ge 0\\
+ *    -z_t \in \partial\psi_{[-\mu w_n, \mu w_n]}(w_t)\\
+ *   \end{array}
+ *  \right.
+ * \f$
+ *
+ * here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
+ *
+ * This system of equations and inequalities is solved thanks to @ref dfc solvers or thanks to @ref lcp routines after
+ * a new formulation of this problem in the LCP form due to the dfc_2D2lcp.c and lcp2dfc_2D.c routines.
+ * The routine's call is due to the function dfc_2D_solver.c.
+ *
+ * \fn  int dfc_2D_solver( double *vec , double *q , int *n ,method *pt , double *z , double *w )
+ *
+ *  dfc_2D_solver is a generic interface allowing the call of one of the DFC solvers.
+ *
+ * \param vec          Unchanged parameter which contains the components of the DFC_2D matrix with a Fortran storage.
+ * \param q            Unchanged parameter which contains the components of the constant right hand side vector.
+ * \param nn           Unchanged parameter which represents the dimension of the DFC_2D problem.
+ * \param pt           Unchanged parameter which represents the DFC_2D structure.
+ * \param z            Modified parameter which contains the initial value of the LCP and returns the solution of the problem.
+ * \param w            Modified parameter which returns the complementary solution of the problem.
+ *
+ * \return integer     0 - successful\n
+ *                     0 >  - otherwise (see specific solvers for more information about the log info)
+ *
+ *  \author Nineb Sheherazade.& Mathieu Renouf
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,26 +45,10 @@ M z- w=q\\
 #include "solverpack.h"
 #endif
 
-/*!\fn  int solve_cfd (double *vec,double *q,int *n,method *pt,double z[],double w[])
-
-   solve_cfd is a generic interface allowing the call of one of the DFC solvers.
-   \param vec On enter a double vector containing the components of the double matrix with a fortran90 allocation.
-   \param q On enter a pointer over doubles containing the components of the double vector.
-   \param n On enter a pointer over integers, the dimension of the second member.
-   \param pt On enter a pointer over a structure (::method).
-   \param z On return double vector, the solution of the problem.
-   \param w On return double vector, the solution of the problem.
-
-   \return On return a pointer over integers, the termination reason (0 is successful otherwise 1).
-
-   \author Nineb Sheherazade.
-*/
-
-
-int solve_cfd(double *K1, double *F1, int *n, method *pt, double U2[], double F2[])
+int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , double *F2)
 {
 
-  const char mot1[10] = "Cfd_latin", mot2[10] = "Lemke", mot3[10] = "Gsnl", mot4[10] = "Gcp";
+  const char mot1[10] = "Latin", mot2[10] = "Lemke", mot3[10] = "NLGS", mot4[10] = "CPG";
   double res;
   int info = -1, it_end;
   double info1 = -1, it_end1, itt;
@@ -68,32 +69,32 @@ int solve_cfd(double *K1, double *F1, int *n, method *pt, double U2[], double F2
   for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
   for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
 
-  if (strcmp(pt->cfd.nom_method, mot1) == 0)
+  if (strcmp(pt->dfc_2D.name, mot1) == 0)
   {
-    dim_MM = 4 * pt->cfd.dim_tt * pt->cfd.dim_tt;
-    dim_q = 2 * pt->cfd.dim_tt;
+    dim_MM = 4 * pt->dfc_2D.dim_tt * pt->dfc_2D.dim_tt;
+    dim_q = 2 * pt->dfc_2D.dim_tt;
     MM =  malloc(dim_MM * sizeof(double));
     q =  malloc(dim_q * sizeof(double));
 
 
 
-    aa = cfd_lcp(&tempo, & pt->cfd.mu, pt, K1,  pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_n, &pt->cfd.dim_n,  pt->cfd.ddl_tt, &pt->cfd.dim_tt, pt->cfd.ddl_c, &pt->cfd.dim_c,  pt->cfd.J1, F1, &nn, MM, q);
+    aa = dfc_2D2lcp(&tempo, & pt->dfc_2D.mu, pt, K1,  pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_n, &pt->dfc_2D.dim_n,  pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c,  pt->dfc_2D.J1, F1, &nn, MM, q);
 
 
-    z = (double *) malloc((2 * pt->cfd.dim_tt) * sizeof(double));
-    w = (double *) malloc((2 * pt->cfd.dim_tt) * sizeof(double));
+    z = (double *) malloc((2 * pt->dfc_2D.dim_tt) * sizeof(double));
+    w = (double *) malloc((2 * pt->dfc_2D.dim_tt) * sizeof(double));
 
 
 
     t1 = clock();
 
-    cfd_latin(MM, q, &tempo, & pt->cfd.k_latin, & pt->cfd.mu, & pt->cfd.itermax, & pt->cfd.tol, z, w, & it_end, &res, &info);
+    dfc_2D_latin(MM, q, &tempo, & pt->dfc_2D.k_latin, & pt->dfc_2D.mu, & pt->dfc_2D.itermax, & pt->dfc_2D.tol, z, w, & it_end, &res, &info);
 
     t2 = clock();
 
     printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
-    aa = lcp_cfd(&tempo , z, w, pt, K1, F1, &nn, pt->cfd.J1, pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_c, &pt->cfd.dim_c, pt->cfd.ddl_n, pt->cfd.ddl_tt, &pt->cfd.dim_tt, U2, F2);
+    aa = lcp2dfc_2D(&tempo , z, w, pt, K1, F1, &nn, pt->dfc_2D.J1, pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c, pt->dfc_2D.ddl_n, pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, U2, F2);
 
     free(MM);
     free(q);
@@ -102,28 +103,28 @@ int solve_cfd(double *K1, double *F1, int *n, method *pt, double U2[], double F2
 
   }
 
-  else if (strcmp(pt->cfd.nom_method, mot2) == 0)
+  else if (strcmp(pt->dfc_2D.name, mot2) == 0)
   {
 
-    dim_MM = 9 * pt->cfd.dim_tt * pt->cfd.dim_tt;
-    dim_q = 3 * pt->cfd.dim_tt;
+    dim_MM = 9 * pt->dfc_2D.dim_tt * pt->dfc_2D.dim_tt;
+    dim_q = 3 * pt->dfc_2D.dim_tt;
     MM =  malloc(dim_MM * sizeof(double));
     q =  malloc(dim_q * sizeof(double));
 
-    aa = cfd_lcp(&tempo, & pt->cfd.mu, pt, K1,  pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_n, &pt->cfd.dim_n,  pt->cfd.ddl_tt, &pt->cfd.dim_tt, pt->cfd.ddl_c, &pt->cfd.dim_c,  pt->cfd.J1, F1, &nn, MM, q);
+    aa = dfc_2D2lcp(&tempo, & pt->dfc_2D.mu, pt, K1,  pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_n, &pt->dfc_2D.dim_n,  pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c,  pt->dfc_2D.J1, F1, &nn, MM, q);
 
-    z = (double *) malloc((3 * pt->cfd.dim_tt) * sizeof(double));
-    w = (double *) malloc((3 * pt->cfd.dim_tt) * sizeof(double));
+    z = (double *) malloc((3 * pt->dfc_2D.dim_tt) * sizeof(double));
+    w = (double *) malloc((3 * pt->dfc_2D.dim_tt) * sizeof(double));
 
     t1 = clock();
 
-    lcp_lemke(MM, q, &tempo, & pt->cfd.itermax, z, w, &it_end, &res, &info);
+    lcp_lemke(MM, q, &tempo, & pt->dfc_2D.itermax, z, w, &it_end, &res, &info);
 
     t2 = clock();
 
     printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
-    aa = lcp_cfd(&tempo , z, w, pt, K1, F1, &nn, pt->cfd.J1, pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_c, &pt->cfd.dim_c, pt->cfd.ddl_n, pt->cfd.ddl_tt, &pt->cfd.dim_tt, U2, F2);
+    aa = lcp2dfc_2D(&tempo , z, w, pt, K1, F1, &nn, pt->dfc_2D.J1, pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c, pt->dfc_2D.ddl_n, pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, U2, F2);
 
 
     free(MM);
@@ -134,26 +135,26 @@ int solve_cfd(double *K1, double *F1, int *n, method *pt, double U2[], double F2
 
 
   }
-  else if (strcmp(pt->cfd.nom_method, mot3) == 0)
+  else if (strcmp(pt->dfc_2D.name, mot3) == 0)
   {
 
-    dim_MM = 9 * pt->cfd.dim_tt * pt->cfd.dim_tt;
-    dim_q = 3 * pt->cfd.dim_tt;
+    dim_MM = 9 * pt->dfc_2D.dim_tt * pt->dfc_2D.dim_tt;
+    dim_q = 3 * pt->dfc_2D.dim_tt;
     MM =  malloc(dim_MM * sizeof(double));
     q =  malloc(dim_q * sizeof(double));
 
-    aa = cfd_lcp(&tempo, & pt->cfd.mu, pt, K1,  pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_n, &pt->cfd.dim_n,  pt->cfd.ddl_tt, &pt->cfd.dim_tt, pt->cfd.ddl_c, &pt->cfd.dim_c,  pt->cfd.J1, F1, &nn, MM, q);
+    aa = dfc_2D2lcp(&tempo, & pt->dfc_2D.mu, pt, K1,  pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_n, &pt->dfc_2D.dim_n,  pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c,  pt->dfc_2D.J1, F1, &nn, MM, q);
 
-    z = (double *) malloc((3 * pt->cfd.dim_tt) * sizeof(double));
-    w = (double *) malloc((3 * pt->cfd.dim_tt) * sizeof(double));
+    z = (double *) malloc((3 * pt->dfc_2D.dim_tt) * sizeof(double));
+    w = (double *) malloc((3 * pt->dfc_2D.dim_tt) * sizeof(double));
 
     t1 = clock();
     itmp = 0;
     rtmp = 1.0;
 
-    iparamLCP[0] = pt->cfd.itermax;
+    iparamLCP[0] = pt->dfc_2D.itermax;
     iparamLCP[1] = 0;
-    dparamLCP[0] = pt->cfd.tol;
+    dparamLCP[0] = pt->dfc_2D.tol;
     dparamLCP[1] = 1.0;
 
     lcp_nlgs(&tempo , MM , q , z , w , &info , iparamLCP , dparamLCP);
@@ -165,8 +166,7 @@ int solve_cfd(double *K1, double *F1, int *n, method *pt, double U2[], double F2
 
     printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
-    aa = lcp_cfd(&tempo , z, w, pt, K1, F1, &nn, pt->cfd.J1, pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_c, &pt->cfd.dim_c, pt->cfd.ddl_n, pt->cfd.ddl_tt, &pt->cfd.dim_tt, U2, F2);
-
+    aa = lcp2dfc_2D(&tempo , z, w, pt, K1, F1, &nn, pt->dfc_2D.J1, pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c, pt->dfc_2D.ddl_n, pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, U2, F2);
 
     free(MM);
     free(q);
@@ -174,26 +174,26 @@ int solve_cfd(double *K1, double *F1, int *n, method *pt, double U2[], double F2
     free(w);
 
   }
-  else if (strcmp(pt->cfd.nom_method, mot4) == 0)
+  else if (strcmp(pt->dfc_2D.name, mot4) == 0)
   {
 
-    dim_MM = (3 * pt->cfd.dim_tt) * (3 * pt->cfd.dim_tt);
-    dim_q = (3 * pt->cfd.dim_tt);
+    dim_MM = (3 * pt->dfc_2D.dim_tt) * (3 * pt->dfc_2D.dim_tt);
+    dim_q = (3 * pt->dfc_2D.dim_tt);
     MM =  malloc(dim_MM * sizeof(double));
     q =  malloc(dim_q * sizeof(double));
 
-    aa = cfd_lcp(&tempo, & pt->cfd.mu, pt, K1,  pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_n, &pt->cfd.dim_n,  pt->cfd.ddl_tt, &pt->cfd.dim_tt, pt->cfd.ddl_c, &pt->cfd.dim_c,  pt->cfd.J1, F1, &nn, MM, q);
+    aa = dfc_2D2lcp(&tempo, & pt->dfc_2D.mu, pt, K1,  pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_n, &pt->dfc_2D.dim_n,  pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c,  pt->dfc_2D.J1, F1, &nn, MM, q);
 
-    z = (double *) malloc((3 * pt->cfd.dim_tt) * sizeof(double));
-    w = (double *) malloc((3 * pt->cfd.dim_tt) * sizeof(double));
+    z = (double *) malloc((3 * pt->dfc_2D.dim_tt) * sizeof(double));
+    w = (double *) malloc((3 * pt->dfc_2D.dim_tt) * sizeof(double));
 
     t1 = clock();
     itmp = 0;
     rtmp = 1.0;
 
-    iparamLCP[0] = pt->cfd.itermax;
+    iparamLCP[0] = pt->dfc_2D.itermax;
     iparamLCP[1] = 0;
-    dparamLCP[0] = pt->cfd.tol;
+    dparamLCP[0] = pt->dfc_2D.tol;
 
     lcp_cpg(&tempo , MM , q , z , w , &info , iparamLCP , dparamLCP);
 
@@ -203,7 +203,7 @@ int solve_cfd(double *K1, double *F1, int *n, method *pt, double U2[], double F2
     t2 = clock();
     printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
-    aa = lcp_cfd(&tempo , z, w, pt, K1, F1, &nn, pt->cfd.J1, pt->cfd.ddl_i, &pt->cfd.dim_i, pt->cfd.ddl_c, &pt->cfd.dim_c, pt->cfd.ddl_n, pt->cfd.ddl_tt, &pt->cfd.dim_tt, U2, F2);
+    aa = lcp2dfc_2D(&tempo , z, w, pt, K1, F1, &nn, pt->dfc_2D.J1, pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c, pt->dfc_2D.ddl_n, pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, U2, F2);
 
     free(MM);
     free(q);
@@ -211,7 +211,7 @@ int solve_cfd(double *K1, double *F1, int *n, method *pt, double U2[], double F2
     free(w);
 
   }
-  else printf("Warning : Unknown solving method : %s\n", pt->cfd.nom_method);
+  else printf("Warning : Unknown solving method : %s\n", pt->dfc_2D.name);
 
 
 
