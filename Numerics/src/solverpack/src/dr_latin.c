@@ -1,14 +1,18 @@
+/*!\file dr_latin.c
+ *
+ *
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "blaslapack.h"
 
 
-
-double ddot_(int *, double [], int *, double [], int*);
-
-
-rd_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], double b[], int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
+void dr_latin(double *vec , double *qq , int *nn , double *k_latin , double *a , double *b , int *itermax , double * tol ,
+              double *z , double *w , int *it_end , double *res , int *info)
 {
 
   FILE *f101;
@@ -20,24 +24,31 @@ rd_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], double
   double *wc, *zc, *wt, *wnum1, *znum1;
   double *zt, *kinvnum1;
   char trans = 'T';
-  /*  double k[n][n], A[n][n], R[n][n], RT[n][n], invRT[n][n], invR[n][n];*/
-  double(*k)[n], (*A)[n], (*R)[n], (*RT)[n], (*invRT)[n], (*invR)[n];
-  /*  double invRTinvR[n][n], kinv[n][n], xpivot;*/
-  double(*invRTinvR)[n], (*kinv)[n], xpivot;
-
+  double **k, **A, **R, **RT, **invRT, **invR;
+  double **invRTinvR, **kinv, xpivot;
 
   f101 = fopen("resultat_latin.dat", "w+");
 
+  A         = (double **)malloc(n * sizeof(double*));
+  k         = (double **)malloc(n * sizeof(double*));
+  R         = (double **)malloc(n * sizeof(double*));
+  RT        = (double **)malloc(n * sizeof(double*));
+  invR      = (double **)malloc(n * sizeof(double*));
+  kinv      = (double **)malloc(n * sizeof(double*));
+  invRT     = (double **)malloc(n * sizeof(double*));
+  invRTinvR = (double **)malloc(n * sizeof(double*));
 
-  k =  malloc(n * n * sizeof(double));
-  A =  malloc(n * n * sizeof(double));
-  R =  malloc(n * n * sizeof(double));
-  RT =  malloc(n * n * sizeof(double));
-  invRT =  malloc(n * n * sizeof(double));
-  invR =  malloc(n * n * sizeof(double));
-  invRTinvR =  malloc(n * n * sizeof(double));
-  kinv =  malloc(n * n * sizeof(double));
-
+  for (i = 0 ; i < n ; ++i)
+  {
+    A[i]      = (double *)malloc(n * sizeof(double));
+    k[i]      = (double *)malloc(n * sizeof(double));
+    R[i]      = (double *)malloc(n * sizeof(double));
+    RT[i]     = (double *)malloc(n * sizeof(double));
+    invR[i]   = (double *)malloc(n * sizeof(double));
+    kinv[i]   = (double *)malloc(n * sizeof(double));
+    invRT[i]  = (double *)malloc(n * sizeof(double));
+    invRTinvR = (double *)malloc(n * sizeof(double));
+  }
 
   for (i = 0; i < n; i++)
   {

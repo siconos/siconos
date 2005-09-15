@@ -1,53 +1,48 @@
+/*!\file pfc_2D_latin.c
+ *
+ *  This subroutine allows the primal resolution of contact problems with friction.
+ *
+ * Try \f$(z,w)\f$ such that:
+ *\f$
+ *\left\lbrace
+ *\begin{array}{l}
+ *M z- w=q\\
+ *0 \le z_n \perp w_n \ge 0\\
+ *-w_t \in \partial\psi_{[-\mu z_n, \mu z_n]}(z_t)\\
+ *\end{array}
+ *\right.
+ *\f$
+ *
+ *here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
+ *
+ * \fn pfc_2D_latin(double vec[],double *qq,int *nn, double * k_latin,double *mumu,int * itermax,
+ *                  double * tol,double z[],double w[],int *it_end,double * res,int *info)
+ *
+ *   cfp_latin  is a specific latin solver for primal contact problem with friction.
+ *
+ * \param vec On enter a double vector containing the components of the double matrix with a fortran90 allocation.
+ * \param qq On enter a pointer over doubles containing the components of the double vector.
+ * \param nn On enter a pointer over integers, the dimension of the second member.
+ * \param k_latin On enter a pointer over doubles, the latin coefficient (positive).
+ * \param mumu On enter a pointer over doubles, the friction coefficient.
+ * \param itermax On enter a pointer over integers, the maximum iterations required.
+ * \param tol On enter a pointer over doubles, the tolerance required.
+ * \param it_end On enter a pointer over integers, the number of iterations carried out.
+ * \param res On return a pointer over doubles, the error value.
+ * \param z On return double vector, the solution of the problem.
+ * \param w On return double vector, the solution of the problem.
+ * \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
+ *
+ * \author Nineb Sheherazade.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "blaslapack.h"
 
-
-/*!\file cfp_latin.c
-
-  This subroutine allows the primal resolution of contact problems with friction.
-
-   Try \f$(z,w)\f$ such that:
-\f$
-\left\lbrace
-\begin{array}{l}
-M z- w=q\\
-0 \le z_n \perp w_n \ge 0\\
--w_t \in \partial\psi_{[-\mu z_n, \mu z_n]}(z_t)\\
-\end{array}
-\right.
-\f$
-
- here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
-
-*/
-
-
-double ddot_(int *, double [], int *, double [], int*);
-
-
-/*!\fn cfp_latin(double vec[],double *qq,int *nn, double * k_latin,double *mumu,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
-
-   cfp_latin  is a specific latin solver for primal contact problem with friction.
-
-   \param vec On enter a double vector containing the components of the double matrix with a fortran90 allocation.
-   \param qq On enter a pointer over doubles containing the components of the double vector.
-   \param nn On enter a pointer over integers, the dimension of the second member.
-   \param k_latin On enter a pointer over doubles, the latin coefficient (positive).
-   \param mumu On enter a pointer over doubles, the friction coefficient.
-   \param itermax On enter a pointer over integers, the maximum iterations required.
-   \param tol On enter a pointer over doubles, the tolerance required.
-   \param it_end On enter a pointer over integers, the number of iterations carried out.
-   \param res On return a pointer over doubles, the error value.
-   \param z On return double vector, the solution of the problem.
-   \param w On return double vector, the solution of the problem.
-   \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
-
-   \author Nineb Sheherazade.
- */
-
-cfp_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
+pfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
 {
 
   FILE *f101;

@@ -1,4 +1,4 @@
-/*!\file solve_rp.c
+/*!\file pr_solver.c
 
   This subroutine allows the primal resolution of relay problems.
 
@@ -14,22 +14,11 @@ M z- w=q\\
 
  here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
  This system of equations and inequalities is solved thanks to @ref pr solvers.
- The routine's call is due to the function solve_rp.c.
-*/
+ The routine's call is due to the function pr_solver.c.
 
+\fn int pr_solver(double vec[],double *q,int *nn, method *pt,double z[],double w[])
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifndef MEXFLAG
-#include "solverpack.h"
-#endif
-#include <time.h>
-
-/*!\fn int solve_rp (double vec[],double *q,int *nn, method *pt,double z[],double w[])
-
-   solve_rp is a generic interface allowing the call of one of the PR solvers.
+   pr_solver is a generic interface allowing the call of one of the PR solvers.
 
    \param double* : vec On enter double vector containing the components of the double matrix with a fortran90 allocation.
    \param double* : q On enter a pointer over doubles containing the components of the second member of the system.
@@ -42,25 +31,35 @@ M z- w=q\\
 
    \author Nineb Sheherazade.
  */
-int solve_rp(double *vec, double *q, int *nn, method *pt, double z[], double w[])
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#ifndef MEXFLAG
+#include "solverpack.h"
+#endif
+#include <time.h>
+
+int pr_solver(double *vec, double *q, int *nn, method *pt, double z[], double w[])
 {
+
   int info = -1, choix, it_end, fail;
-  char mot1[10] = "Gsnl", mot2[10] = "Gcp", mot3[10] = "Latin";
+  char prkey1[10] = "NLGS", prkey2[10] = "CPG", prkey3[10] = "Latin";
   double res;
   int n = *nn, i;
 
   clock_t t1 = clock();
 
 
-  if (strcmp(pt->rp.nom_method, mot1) == 0)
-    rp_nlgs(vec, q, &n, pt->rp.a, pt->rp.b, & pt->rp.itermax, & pt->rp.tol, z, w, &it_end, &res, &info);
-  else if (strcmp(pt->rp.nom_method, mot2) == 0)
+  if (strcmp(pt->pr.name, prkey1) == 0)
+    pr_nlgs(vec, q, &n, pt->pr.a, pt->pr.b, & pt->pr.itermax, & pt->pr.tol, z, w, &it_end, &res, &info);
+  else if (strcmp(pt->pr.name, prkey2) == 0)
   {
     /*    cfp_gcp_(vec,q,&n,& pt->cfp.mu,& pt->cfp.itermax,& pt->cfp.tol,z,w,&it_end,&res,&info);*/
   }
-  else if (strcmp(pt->rp.nom_method, mot3) == 0)
-    rp_latin(vec, q, &n, &pt->rp.k_latin, pt->rp.a, pt->rp.b, &pt->rp.itermax, &pt->rp.tol, z, w, &it_end, &res, &info);
-  else printf("Warning : Unknown solving method : %s\n", pt->rp.nom_method);
+  else if (strcmp(pt->pr.name, prkey3) == 0)
+    pr_latin(vec, q, &n, &pt->pr.k_latin, pt->pr.a, pt->pr.b, &pt->pr.itermax, &pt->pr.tol, z, w, &it_end, &res, &info);
+  else printf("Warning : Unknown solving method : %s\n", pt->pr.name);
 
   clock_t t2 = clock();
   printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);

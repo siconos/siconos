@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
-
-/*!\file cfp_gsnl.c
+/*!\file pfc_2D_nlgs.c
 
   This subroutine allows the primal resolution of contact problems with friction.
 
@@ -21,14 +15,7 @@ M z- w=q\\
 
  here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
 
-*/
-
-
-
-double ddot_(int *, double [], int *, double [], int*);
-
-
-/*!\fn  cfp_gsnl(double vec[],double *qq,int *nn,double *mumu,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
+\fn  pfc_2D_nlgs(double vec[],double *qq,int *nn,double *mumu,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
 
    cfp_gsnl is a specific gsnl (Gauss Seidel Non Linear) solver for primal contact problem with friction.
 
@@ -48,8 +35,15 @@ double ddot_(int *, double [], int *, double [], int*);
 
  */
 
-cfp_gsnl(double vec[], double *q, int *nn, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "blaslapack.h"
+
+pfc_2D_nlgs(double vec[], double *q, int *nn, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
 {
+
   FILE *f101;
   double errmax = *tol, alpha, beta, mu = *mumu;
   int n = *nn, incx = 1, incy = 1, nc = n / 2, i, j, k, iter, maxit = *itermax;

@@ -15,14 +15,15 @@ libsolverpack_la_SOURCES = solverpack.h \
 	lcp_solver.c lcp_solver_block.c \
 	lcp_lexicolemke.c lcp_nlgs.c lcp_nsqp.c lcp_cpg.c \
 	lcp_qp.c lcp_lemke.c lcp_latin.c lcp_newton_min.c\
-	solve_cfp.c \
-	cfp_gcp.c cfp_latin.c cfp_gsnl.c \
+	pfc_2D_solver.c \
+	pfc_2D_cpg.c pfc_2D_latin.c pfc_2D_nlgs.c \
 	lcp2dfc_2D.c dfc_2D2lcp.c \
 	dfc_2D_solver.c \
 	dfc_2D_latin.c \
-	solve_rp.c \
-	rp_nlgs.c rp_latin.c \
-        rd_latin.c rd_nlgs.c solve_rd.c \
+	pr_solver.c \
+	pr_nlgs.c pr_latin.c \
+	dr_solver.c \
+        dr_latin.c dr_nlgs.c \
 	ql0001.f
 
 

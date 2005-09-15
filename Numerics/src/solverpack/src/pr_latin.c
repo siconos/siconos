@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
-
-/*!\file rp_latin.c
+/*!\file pr_latin.c
 
 
   This subroutine allows the primal resolution of relay problems.
@@ -21,15 +15,9 @@ M z- w=q\\
 
  here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
 
-*/
+ \fn int pr_latin(double vec[],double *qq,int *nn, double * k_latin,double a[],int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
 
-
-double ddot_(int *, double [], int *, double [], int*);
-
-
-/*!\fn int rp_latin(double vec[],double *qq,int *nn, double * k_latin,double a[],int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
-
-   rp_latin is a specific latin solver for primal relay problems.
+   pr_latin is a specific latin solver for primal relay problems.
 
 
 
@@ -51,7 +39,13 @@ double ddot_(int *, double [], int *, double [], int*);
    \author Nineb Sheherazade.
  */
 
-rp_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], double b[], int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "blaslapack.h"
+
+pr_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], double b[], int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
 {
 
   int i, j, kk, iter1;

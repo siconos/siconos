@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
-
-/*!\file rp_nlgs.c
+/*!\file pr_nlgs.c
 
   This subroutine allows the primal resolution of contact problems with friction.
 
@@ -20,16 +14,9 @@ M z- w=q\\
 
  here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
 
-*/
+\fn  pr_nlgs(double vec[],double *qq,int *nn,double a[],int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
 
-
-
-double ddot_(int *, double [], int *, double [], int*);
-
-
-/*!\fn  rp_nlgs(double vec[],double *qq,int *nn,double a[],int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
-
-   rp_nlgs is a specific nlgs (Gauss Seidel Non Linear)solver for relay problems.
+   pr_nlgs is a specific nlgs (Gauss Seidel Non Linear)solver for relay problems.
 
    \param vec On enter a double vector containing the components of the double matrix with a fortran90 allocation.
    \param qq On enter a pointer over doubles containing the components of the double vector.
@@ -46,8 +33,12 @@ double ddot_(int *, double [], int *, double [], int*);
    \author Nineb Sheherazade.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 
-rp_nlgs(double vec[], double *q, int *nn, double a[], double b[], int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
+pr_nlgs(double vec[], double *q, int *nn, double a[], double b[], int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
 {
 
   FILE *f101;
