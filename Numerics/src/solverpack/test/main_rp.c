@@ -53,16 +53,14 @@
 
 void test1(void)
 {
-  FILE *f1, *f2, *f3, *f4, *f5, *f6, *f7, *f8, *f9;
-  int i, j, nl, nc, nll, it, n = 40, dimM = n, incx, incy;
-  double *q, *z, *w, *vec, *a, *b, *c, *qqt, *zt;
+  FILE *f1, *f2, *f5, *f6;
+  int i, j, nl, nc, nll, n = 40, dimM = n;
+  double *q, *z, *w, *vec, *a, *b, *zt;
   int info;
   double **M;
-  double qi, Mij, alpha, beta;
+  double qi, Mij;
   char val[50], vall[50];
   method meth_rp;
-  char trans;
-
 
   strcpy(meth_rp.rp.nom_method, "Gsnl");
   meth_rp.rp.itermax = 100000;
@@ -214,15 +212,14 @@ void test1(void)
 
 void test2(void)
 {
-  FILE *f1, *f2, *f3, *f4, *f5, *f6, *f7, *f8, *f9;
-  int i, j, nl, nc, nll, it, n = 40, dimM = n, incx, incy;
-  double *q, *z, *w, *vec, *a, *b, *c, *qqt, *zt;
+  FILE *f1, *f2, *f5, *f6;
+  int i, j, nl, nc, nll, n = 40, dimM = n;
+  double *q, *z, *w, *vec, *a, *b, *qqt, *zt;
   int info;
   double **M;
-  double qi, Mij, alpha, beta;
+  double qi, Mij;
   char val[50], vall[50];
   method meth_rp;
-  char trans;
 
   strcpy(meth_rp.rp.nom_method, "Latin");
   meth_rp.rp.itermax = 1000;

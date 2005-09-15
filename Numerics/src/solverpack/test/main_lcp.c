@@ -263,8 +263,7 @@ void test_lcp_series(int n , double *vec , double *q)
 void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM , double *q)
 {
 
-  int i, j, dim, info, iter, titer;
-  int nonsymmetric;
+  int i, dim, info, iter, titer;
   int incx = 1, incy = 1;
 
   double criteria, comp;
@@ -280,7 +279,6 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
   static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
   static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
   static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
-  /*  static method_lcp method_lcp4 = { "Lemke"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"}; */
   static method_lcp method_lcp5 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
   static method_lcp method_lcp6 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
   static method_lcp method_lcp7 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
@@ -653,13 +651,12 @@ void test_blockmatrix(void)
 
   FILE *LCPfile;
 
-  int i, j;
-  int info, isol;
+  int i, j, isol;
   int dim , dim2;
   int dn, db, db2, nblock, itmp;
 
   int *inb, *iid;
-  double *q , *z , *w , *sol;
+  double *q , *sol;
   double *vecM;
 
   char val[20];

@@ -55,14 +55,13 @@
 int main(void)
 
 {
-  FILE *f1, *f2, *f3, *f4, *f5, *f6, *f7, *f8, *f9;
-  int i, j, nl, nc, nll, it, info, n = 40, dimM = n, incx, incy;
-  double *q, *z, *w, *vec, *a, *b, *c, *qqt, *zt;
+  FILE *f1, *f2, *f5, *f6;
+  int i, j, nl, nc, nll, info, n = 40, dimM = n;
+  double *q, *z, *w, *vec, *a, *b, *zt;
   double **M;
-  double qi, Mij, alpha, beta;
+  double qi, Mij;
   char val[14], vall[50];
   method meth_rd;
-  char trans;
 
   M = (double **)malloc(dimM * sizeof(double*));
   for (i = 0; i < n; i++) M[i] = (double*)malloc(dimM * sizeof(double));
