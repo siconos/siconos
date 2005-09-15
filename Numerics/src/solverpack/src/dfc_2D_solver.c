@@ -48,53 +48,53 @@
 int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , double *F2)
 {
 
-  const char mot1[10] = "Latin", mot2[10] = "Lemke", mot3[10] = "NLGS", mot4[10] = "CPG";
-  double res;
-  int info = -1, it_end;
-  double info1 = -1, it_end1, itt;
-  int aa, b = 3;
-  int nn = *n, tail1, tail2, tail3;
-  int *dim_nn, dim_MM, dim_q, tempo = 87;
-  int ddim_i, ddim_c, ddim_tt, ddim_n;
-  int *ddl_i, *ddl_n, *ddl_tt, *ddl_c, dim_i, dim_tt, dim_n, dim_c, i;
-  double *MM, *q, *z, *w;
-  clock_t t1, t2;
+  const char dfckey1[10] = "Latin", dfckey2[10] = "Lemke";
+  const char dfckey3[10] = "NLGS",  dfckey4[10] = "CPG";
 
-  int itmp;
-  double rtmp;
+  int i, nn, info, it_end;
+  int itmp, dim_q, dim_MM;
+
+  double res, rtmp;
+  double *MM, *q, *z, *w;
+
+  clock_t t1, t2;
 
   int iparamLCP[5];
   int dparamLCP[5];
 
+  int tempo = 87;
+
+  nn = *n;
+  info = -1;
+
   for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
   for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
 
-  if (strcmp(pt->dfc_2D.name, mot1) == 0)
+  if (strcmp(pt->dfc_2D.name , dfckey1) == 0)
   {
-    dim_MM = 4 * pt->dfc_2D.dim_tt * pt->dfc_2D.dim_tt;
-    dim_q = 2 * pt->dfc_2D.dim_tt;
-    MM =  malloc(dim_MM * sizeof(double));
-    q =  malloc(dim_q * sizeof(double));
 
+    dim_q  = 2 * pt->dfc_2D.dim_tt;
+    dim_MM = dim_q * dim_q;
 
+    q  = (double *)malloc(dim_q * sizeof(double));
+    z  = (double *)malloc(dim_q * sizeof(double));
+    w  = (double *)malloc(dim_q * sizeof(double));
+    MM = (double *)malloc(dim_MM * sizeof(double));
 
-    aa = dfc_2D2lcp(&tempo, & pt->dfc_2D.mu, pt, K1,  pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_n, &pt->dfc_2D.dim_n,  pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c,  pt->dfc_2D.J1, F1, &nn, MM, q);
-
-
-    z = (double *) malloc((2 * pt->dfc_2D.dim_tt) * sizeof(double));
-    w = (double *) malloc((2 * pt->dfc_2D.dim_tt) * sizeof(double));
-
-
+    dfc_2D2lcp(&tempo , &pt->dfc_2D.mu , pt , K1 , pt->dfc_2D.ddl_i , &pt->dfc_2D.dim_i , pt->dfc_2D.ddl_n , &pt->dfc_2D.dim_n ,
+               pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt , pt->dfc_2D.ddl_c , &pt->dfc_2D.dim_c ,  pt->dfc_2D.J1 , F1 , &nn , MM , q);
 
     t1 = clock();
 
-    dfc_2D_latin(MM, q, &tempo, & pt->dfc_2D.k_latin, & pt->dfc_2D.mu, & pt->dfc_2D.itermax, & pt->dfc_2D.tol, z, w, & it_end, &res, &info);
+    dfc_2D_latin(MM , q , &tempo , &pt->dfc_2D.k_latin , &pt->dfc_2D.mu , &pt->dfc_2D.itermax ,
+                 & pt->dfc_2D.tol , z , w , &it_end, &res , &info);
 
     t2 = clock();
 
     printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
-    aa = lcp2dfc_2D(&tempo , z, w, pt, K1, F1, &nn, pt->dfc_2D.J1, pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c, pt->dfc_2D.ddl_n, pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, U2, F2);
+    lcp2dfc_2D(&tempo , z , w , pt , K1 , F1 , &nn , pt->dfc_2D.J1 , pt->dfc_2D.ddl_i , &pt->dfc_2D.dim_i , pt->dfc_2D.ddl_c ,
+               &pt->dfc_2D.dim_c , pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt , U2 , F2);
 
     free(MM);
     free(q);
@@ -102,19 +102,19 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     free(w);
 
   }
-
-  else if (strcmp(pt->dfc_2D.name, mot2) == 0)
+  else if (strcmp(pt->dfc_2D.name , dfckey2) == 0)
   {
 
-    dim_MM = 9 * pt->dfc_2D.dim_tt * pt->dfc_2D.dim_tt;
-    dim_q = 3 * pt->dfc_2D.dim_tt;
-    MM =  malloc(dim_MM * sizeof(double));
-    q =  malloc(dim_q * sizeof(double));
+    dim_q  = 3 * pt->dfc_2D.dim_tt;
+    dim_MM = dim_q * dim_q;
 
-    aa = dfc_2D2lcp(&tempo, & pt->dfc_2D.mu, pt, K1,  pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_n, &pt->dfc_2D.dim_n,  pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c,  pt->dfc_2D.J1, F1, &nn, MM, q);
+    q  = (double *)malloc(dim_q * sizeof(double));
+    z  = (double *)malloc(dim_q * sizeof(double));
+    w  = (double *)malloc(dim_q * sizeof(double));
+    MM = (double *)malloc(dim_MM * sizeof(double));
 
-    z = (double *) malloc((3 * pt->dfc_2D.dim_tt) * sizeof(double));
-    w = (double *) malloc((3 * pt->dfc_2D.dim_tt) * sizeof(double));
+    dfc_2D2lcp(&tempo , &pt->dfc_2D.mu , pt , K1 , pt->dfc_2D.ddl_i , &pt->dfc_2D.dim_i , pt->dfc_2D.ddl_n , &pt->dfc_2D.dim_n ,
+               pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt , pt->dfc_2D.ddl_c , &pt->dfc_2D.dim_c ,  pt->dfc_2D.J1 , F1 , &nn , MM , q);
 
     t1 = clock();
 
@@ -124,8 +124,8 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
 
     printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
-    aa = lcp2dfc_2D(&tempo , z, w, pt, K1, F1, &nn, pt->dfc_2D.J1, pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c, pt->dfc_2D.ddl_n, pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, U2, F2);
-
+    lcp2dfc_2D(&tempo , z , w , pt , K1 , F1 , &nn , pt->dfc_2D.J1 , pt->dfc_2D.ddl_i , &pt->dfc_2D.dim_i , pt->dfc_2D.ddl_c ,
+               &pt->dfc_2D.dim_c , pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt , U2 , F2);
 
     free(MM);
     free(q);
@@ -135,18 +135,19 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
 
 
   }
-  else if (strcmp(pt->dfc_2D.name, mot3) == 0)
+  else if (strcmp(pt->dfc_2D.name , dfckey3) == 0)
   {
 
-    dim_MM = 9 * pt->dfc_2D.dim_tt * pt->dfc_2D.dim_tt;
-    dim_q = 3 * pt->dfc_2D.dim_tt;
-    MM =  malloc(dim_MM * sizeof(double));
-    q =  malloc(dim_q * sizeof(double));
+    dim_q  = 3 * pt->dfc_2D.dim_tt;
+    dim_MM = dim_q * dim_q;
 
-    aa = dfc_2D2lcp(&tempo, & pt->dfc_2D.mu, pt, K1,  pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_n, &pt->dfc_2D.dim_n,  pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c,  pt->dfc_2D.J1, F1, &nn, MM, q);
+    q  = (double *)malloc(dim_q * sizeof(double));
+    z  = (double *)malloc(dim_q * sizeof(double));
+    w  = (double *)malloc(dim_q * sizeof(double));
+    MM = (double *)malloc(dim_MM * sizeof(double));
 
-    z = (double *) malloc((3 * pt->dfc_2D.dim_tt) * sizeof(double));
-    w = (double *) malloc((3 * pt->dfc_2D.dim_tt) * sizeof(double));
+    dfc_2D2lcp(&tempo , &pt->dfc_2D.mu , pt , K1 , pt->dfc_2D.ddl_i , &pt->dfc_2D.dim_i , pt->dfc_2D.ddl_n , &pt->dfc_2D.dim_n ,
+               pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt , pt->dfc_2D.ddl_c , &pt->dfc_2D.dim_c ,  pt->dfc_2D.J1 , F1 , &nn , MM , q);
 
     t1 = clock();
     itmp = 0;
@@ -166,26 +167,27 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
 
     printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
-    aa = lcp2dfc_2D(&tempo , z, w, pt, K1, F1, &nn, pt->dfc_2D.J1, pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c, pt->dfc_2D.ddl_n, pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, U2, F2);
+    lcp2dfc_2D(&tempo , z , w , pt , K1 , F1 , &nn , pt->dfc_2D.J1 , pt->dfc_2D.ddl_i , &pt->dfc_2D.dim_i , pt->dfc_2D.ddl_c ,
+               &pt->dfc_2D.dim_c , pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt , U2 , F2);
 
     free(MM);
     free(q);
     free(z);
     free(w);
-
   }
-  else if (strcmp(pt->dfc_2D.name, mot4) == 0)
+  else if (strcmp(pt->dfc_2D.name , dfckey4) == 0)
   {
 
-    dim_MM = (3 * pt->dfc_2D.dim_tt) * (3 * pt->dfc_2D.dim_tt);
-    dim_q = (3 * pt->dfc_2D.dim_tt);
-    MM =  malloc(dim_MM * sizeof(double));
-    q =  malloc(dim_q * sizeof(double));
+    dim_q  = 3 * pt->dfc_2D.dim_tt;
+    dim_MM = dim_q * dim_q;
 
-    aa = dfc_2D2lcp(&tempo, & pt->dfc_2D.mu, pt, K1,  pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_n, &pt->dfc_2D.dim_n,  pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c,  pt->dfc_2D.J1, F1, &nn, MM, q);
+    q  = (double *)malloc(dim_q * sizeof(double));
+    z  = (double *)malloc(dim_q * sizeof(double));
+    w  = (double *)malloc(dim_q * sizeof(double));
+    MM = (double *)malloc(dim_MM * sizeof(double));
 
-    z = (double *) malloc((3 * pt->dfc_2D.dim_tt) * sizeof(double));
-    w = (double *) malloc((3 * pt->dfc_2D.dim_tt) * sizeof(double));
+    dfc_2D2lcp(&tempo , &pt->dfc_2D.mu , pt , K1 , pt->dfc_2D.ddl_i , &pt->dfc_2D.dim_i , pt->dfc_2D.ddl_n , &pt->dfc_2D.dim_n ,
+               pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt , pt->dfc_2D.ddl_c , &pt->dfc_2D.dim_c ,  pt->dfc_2D.J1 , F1 , &nn , MM , q);
 
     t1 = clock();
     itmp = 0;
@@ -203,7 +205,8 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     t2 = clock();
     printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
-    aa = lcp2dfc_2D(&tempo , z, w, pt, K1, F1, &nn, pt->dfc_2D.J1, pt->dfc_2D.ddl_i, &pt->dfc_2D.dim_i, pt->dfc_2D.ddl_c, &pt->dfc_2D.dim_c, pt->dfc_2D.ddl_n, pt->dfc_2D.ddl_tt, &pt->dfc_2D.dim_tt, U2, F2);
+    lcp2dfc_2D(&tempo , z , w , pt , K1 , F1 , &nn , pt->dfc_2D.J1 , pt->dfc_2D.ddl_i , &pt->dfc_2D.dim_i , pt->dfc_2D.ddl_c ,
+               &pt->dfc_2D.dim_c , pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt , U2 , F2);
 
     free(MM);
     free(q);
@@ -211,9 +214,7 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     free(w);
 
   }
-  else printf("Warning : Unknown solving method : %s\n", pt->dfc_2D.name);
-
-
+  else printf(" Warning !! Solver name unknown : %s\n", pt->dfc_2D.name);
 
   return info;
 }

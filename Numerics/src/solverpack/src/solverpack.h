@@ -229,11 +229,11 @@ extern "C" void cfp_latin(double [], double [], int *, double *, double *, int *
 
 extern "C" void dfc_2D_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
 
-extern "C" int dfc_2D2lcp(int *, double *, method *, double *, int *, int *, int * , int *, int *, int *,
-                          int *, int *, double * , double * , int *, double *, double *);
+extern "C" void dfc_2D2lcp(int *, double *, method *, double *, int *, int *, int * , int *, int *, int *,
+                           int *, int *, double * , double * , int *, double *, double *);
 
-extern "C" int lcp2dfc_2D(int *, double *, double *, method *, double *, double *, int *, double *, int *,
-                          int *, int *, int *,  int *, int *, int *, double *, double *);
+extern "C" void lcp2dfc_2D(int *, double *, double *, method *, double *, double *, int *, double *, int *,
+                           int *, int *, int *,  int *, int *, int *, double *, double *);
 
 #endif
 
@@ -463,9 +463,9 @@ extern  dfc_2D_latin(double[], double[], int *, double*, double*, int *, double*
 
 /* LCP SWITCH DFC 2D */
 
-extern int dfc_2D2lcp(int *, double *, method *, double *, int *, int *, int * , int *, int *, int *, int *, int *, double * , double * , int *, double *, double *);
+extern void dfc_2D2lcp(int *, double *, method *, double *, int *, int *, int * , int *, int *, int *, int *, int *, double * , double * , int *, double *, double *);
 
-extern int lcp2dfc_2D(int *, double *, double *, method *, double *, double *, int *, double *, int *, int *, int *, int *,  int *, int *, int *, double *, double *);
+extern void lcp2dfc_2D(int *, double *, double *, method *, double *, double *, int *, double *, int *, int *, int *, int *,  int *, int *, int *, double *, double *);
 
 #endif
 

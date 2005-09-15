@@ -37,10 +37,7 @@
 #include "solverpack.h"
 #endif
 
-
-
-
-int lcp2dfc_2D(int *dim_nn, double *ztel, double *wtel, method *pt, double *K1, double *F1, int * dim_F1, double *J1, int *ddl_i, int * dim_i, int *ddl_c, int *dim_c,  int *ddl_n, int *ddl_tt, int *dim_tt, double *U2, double *F2)
+void lcp2dfc_2D(int *dim_nn, double *ztel, double *wtel, method *pt, double *K1, double *F1, int * dim_F1, double *J1, int *ddl_i, int * dim_i, int *ddl_c, int *dim_c,  int *ddl_n, int *ddl_tt, int *dim_tt, double *U2, double *F2)
 {
 
   FILE *f101, *f202, *f303, *f404, *f000;
@@ -899,6 +896,5 @@ int lcp2dfc_2D(int *dim_nn, double *ztel, double *wtel, method *pt, double *K1, 
   free(Kin);
   free(Fi);
 
-
-  return 3;
+  return;
 }

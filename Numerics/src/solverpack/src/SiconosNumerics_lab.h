@@ -2,10 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-
-
-
 typedef struct
 {
   char * nom_method;
@@ -18,7 +14,7 @@ typedef struct
 
 typedef struct
 {
-  char *nom_method;
+  char *name;
   int itermax;
   double tol;
   double mu;
@@ -32,16 +28,16 @@ typedef struct
   int dim_c;
   int dim_tt;
   int dim_n;
-} methode_cfd;
+} method_dfc_2D;
 
 
 typedef struct
 {
-  char * nom_method;
+  char * name;
   int itermax;
   double tol;
   double k_latin;
-} methode_lcp;
+} method_lcp;
 
 
 typedef struct
