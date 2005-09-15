@@ -1,9 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "blaslapack.h"
-
 /*!\file lcp_cpg.c
  *
  * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
@@ -52,6 +46,12 @@
  *
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "blaslapack.h"
+
 void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info ,
              int *iparamLCP , double *dparamLCP)
 {
@@ -68,24 +68,25 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
   char NOTRANS = 'N';
 
   int *status;
-  double *zz , *dz , *pp , *rr, *ww, *Mp;
+  double *zz , *pp , *rr, *ww, *Mp;
 
   *info = 1;
-  n = *nn;
+  n     = *nn;
+  incx  = 1;
 
   /*input*/
 
   itermax = iparamLCP[0];
   ispeak  = iparamLCP[1];
 
-  tol   = dparamLCP[0];
+  tol = dparamLCP[0];
 
   /*output*/
 
   iparamLCP[2] = 0;
   dparamLCP[1] = 0.0;
 
-  qs = dnrm2_(&n , &q[0] , &incx);
+  qs = dnrm2_(&n , q , &incx);
 
   //printf( " Norm: %g \n", qs );
 
@@ -97,15 +98,13 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
       w[i] = 0.;
       z[i] = 0.;
     }
-    *info = 0;
+    *info = 9;
     return;
   }
 
   /* Allocations */
 
   status = (int*)malloc(n * sizeof(int));
-
-  dz = (double*)malloc(n * sizeof(double));
 
   ww = (double*)malloc(n * sizeof(double));
   rr = (double*)malloc(n * sizeof(double));
@@ -186,7 +185,6 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
       free(rr);
       free(pp);
       free(zz);
-      free(dz);
 
       iparamLCP[2] = iter;
       dparamLCP[1] = err;
@@ -203,8 +201,6 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
      * z' = z + alpha*p
      *
      */
-
-    dcopy_(&n , z , &incx , dz , &incy);
 
     daxpy_(&n , &alpha , pp , &incx , z , &incy);
 
@@ -225,7 +221,8 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
 
     /* rr = -Wz + q */
 
-    dcopy_(&n , q , &incx , rr , &incy);
+    dcopy_(&n , rr , &incx , w  , &incy);
+    dcopy_(&n , q  , &incx , rr , &incy);
 
     a1 = -1.;
     b1 = -1.;
@@ -270,15 +267,22 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
     dcopy_(&n , ww , &incx , pp , &incy);
     daxpy_(&n, &beta , zz , &incx , pp , &incy);
 
-    a1 = -1;
-    daxpy_(&n , &a1 , z , &incx , dz , &incy);
-    num = dnrm2_(&n , dz , &incx);
+    /* **** Criterium convergence **** */
+
+    qs   = -1.0;
+    daxpy_(&n , &qs , rr , &incx , w , &incy);
+    num = dnrm2_(&n, w , &incx);
     err = num * den;
 
   }
 
   iparamLCP[2] = iter;
   dparamLCP[1] = err;
+
+  dcopy_(&n , rr , &incx , w , &incy);
+
+  qs   = -1.0;
+  dscal_(&n , &qs , w , &incx);
 
   if (ispeak > 0)
   {
@@ -303,7 +307,5 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
   free(rr);
   free(pp);
   free(zz);
-
-  free(dz);
 
 }

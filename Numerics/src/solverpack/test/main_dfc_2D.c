@@ -78,7 +78,7 @@ void main(void)
   double(*M)[n];
   double qi, Mij;
   char val[14], vall[14];
-  char nom[64] = "NLGS"; //LATIN";//Gsnl";//Lemke";
+  char nom[64] = "NLGS";
 
   // static method_dfc_2D meth_dfc_2D = {"NLGS",1000,0.0000001,0.7,0.6,dim_i,dim_tt,dim_c,};
 

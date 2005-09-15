@@ -63,6 +63,9 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   double qs, err, num, den, zi;
   double tol, omega;
   double *ww, *diag;
+  double a1, b1;
+
+  char NOTRANS = 'N';
 
   n = *nn;
   incx = 1;
@@ -147,6 +150,11 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   iter = 0;
   err  = 1.;
 
+  incx = 1;
+  incy = 1;
+
+  dcopy_(&n , q , &incx , w , &incy);
+
   while ((iter < itermax) && (err > tol))
   {
 
@@ -156,6 +164,7 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
     incy = 1;
 
     dcopy_(&n , w , &incx , ww , &incy);
+    dcopy_(&n , q , &incx , w , &incy);
 
     for (i = 0 ; i < n ; ++i)
     {
@@ -165,31 +174,37 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
       z[i] = 0.0;
 
-      zi = -q[i] - ddot_(&n , &vec[i] , &incx , z , &incy);
+      zi = -(q[i] + ddot_(&n , &vec[i] , &incx , z , &incy)) * diag[i];
 
-      if (zi < 0)
-      {
-        z[i] = 0.0;
-        w[i] = -zi;
-      }
-      else
-      {
-        z[i] = zi * diag[i];
-        w[i] = 0.0;
-      }
+      if (zi < 0) z[i] = 0.0;
+      else z[i] = zi;
+
     }
 
     /* **** Criterium convergence **** */
 
-    qs   = -1.0;
     incx =  1;
     incy =  1;
 
+    a1 = 1.0;
+    b1 = 1.0;
+
+    dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , w , &incy);
+
+    qs   = -1.0;
     daxpy_(&n , &qs , w , &incx , ww , &incy);
 
     num = dnrm2_(&n, ww , &incx);
     err = num * den;
-    //printf(" %d -- %g \n",iter,err);
+
+    if (ispeak == 2)
+    {
+      printf(" # i%d -- %g : ", iter, err);
+      for (i = 0 ; i < n ; ++i) printf(" %g", z[i]);
+      for (i = 0 ; i < n ; ++i) printf(" %g", w[i]);
+      printf("\n");
+    }
+
     /* **** ********************* **** */
 
   }

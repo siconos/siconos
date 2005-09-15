@@ -46,8 +46,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
   const char mot1[10] = "Lemke", mot2[10] = "NLGS", mot3[10] = "CPG";
   const char mot4[10] = "Latin", mot5[10] = "QP", mot6[10] = "NSQP";
-  const char mot7[15] = "LexicoLemke";
-  const char mot8[15] = "NewtonMin";
+  const char mot7[15] = "LexicoLemke", mot8[15] = "NewtonMin";
 
   int i, info = 1;
 
