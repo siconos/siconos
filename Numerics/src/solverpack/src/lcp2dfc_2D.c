@@ -1,14 +1,14 @@
 
-/*!\file lcp_cfd.c
+/*!\file lcp2dfc_2D.c
 
    This file allows to give the solution of the contact problem with friction given.
 
 */
 
-/*!\fn  int lcp_cfd (int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, double *F1, int * dim_F1, double *J1, int *ddl_i, int * dim_i, int *ddl_c, int *dim_c,  int *ddl_n, int *ddl_tt, int *dim_tt, double *U2,double *F2)
+/*!\fn  int lcp2dfc_2D (int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, double *F1, int * dim_F1, double *J1, int *ddl_i, int * dim_i, int *ddl_c, int *dim_c,  int *ddl_n, int *ddl_tt, int *dim_tt, double *U2,double *F2)
 
-   lcp_cfd subroutine allows to give the solution of the contact problem with friction given.
-    \sa cfd_lcp subroutine.
+   lcp2dfc_2D subroutine allows to give the solution of the contact problem with friction given.
+    \sa dfc_2D_lcp subroutine.
 
    \param dim_nn On enter a pointer over integers, the size of the vector solution.
    \param ztel On enter a pointer over doubles, the solution given by an LCP ztel.
@@ -40,7 +40,7 @@
 
 
 
-int lcp_cfd(int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, double *F1, int * dim_F1, double *J1, int *ddl_i, int * dim_i, int *ddl_c, int *dim_c,  int *ddl_n, int *ddl_tt, int *dim_tt, double *U2, double *F2)
+int lcp2dfc_2D(int *dim_nn, double *ztel, double *wtel, method *pt, double *K1, double *F1, int * dim_F1, double *J1, int *ddl_i, int * dim_i, int *ddl_c, int *dim_c,  int *ddl_n, int *ddl_tt, int *dim_tt, double *U2, double *F2)
 {
 
   FILE *f101, *f202, *f303, *f404, *f000;
@@ -49,7 +49,7 @@ int lcp_cfd(int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, do
   double *a1, *a2, *b1, *b2, *Ut, * Un, *Uc, *Fn, *Ft, *Jc, *Ui;
   double *Jcn, *z, *w, *zz, *ww, Mij, invKii0;
   double *temp_i, alpha, beta, r, rrr, r1, r2, r3, rr, *temp_ibis;
-  char mot1[10] = "Cfd_latin", mot2[10] = "Gsnl", mot3[10] = "Gcp", mot4[10] = "Lemke", uplo = 'U', trans = 'T', val[14];
+  char mot1[10] = "Dfc_2D_latin", mot2[10] = "Gsnl", mot3[10] = "Gcp", mot4[10] = "Lemke", uplo = 'U', trans = 'T', val[14];
   int info1, info2, incx = 1, incy = 1, *vectnt, nl, ind1, ind2;
   int boucle, bouclei, iter1;
   char vall1[14], vall2[14];
@@ -259,7 +259,7 @@ int lcp_cfd(int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, do
     }
 
 
-  if (strcmp(pt->cfd.nom_method, mot2) == 0)
+  if (strcmp(pt->dfc_2D.name, mot2) == 0)
   {
 
 
@@ -270,7 +270,7 @@ int lcp_cfd(int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, do
       exit(1);
     }
 
-    f101 = fopen("resultat_gsnl_cfd.dat", "w+");
+    f101 = fopen("resultat_gsnl_dfc_2D.dat", "w+");
 
     dim_n = 2 * ((*dim_nn) / 3);
     nc = dim_n / 2;
@@ -470,7 +470,7 @@ int lcp_cfd(int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, do
 
 
   }
-  else if (strcmp(pt->cfd.nom_method, mot3) == 0)
+  else if (strcmp(pt->dfc_2D.name, mot3) == 0)
   {
 
     dim_n = 2 * ((*dim_nn) / 3);
@@ -635,7 +635,7 @@ int lcp_cfd(int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, do
 
 
   }
-  else if (strcmp(pt->cfd.nom_method, mot4) == 0)
+  else if (strcmp(pt->dfc_2D.name, mot4) == 0)
   {
 
     dim_n = 2 * ((*dim_nn) / 3);
@@ -710,7 +710,7 @@ int lcp_cfd(int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, do
     }
 
 
-    f404 = fopen("resultat_lemke_cfd.dat", "w+");
+    f404 = fopen("resultat_lemke_dfc_2D.dat", "w+");
     for (i = 0; i < 2 * taille_nr; i++)
     {
       fprintf(f404, "%d  %d %14.7e\n", i, i, zz[i]);
@@ -809,7 +809,7 @@ int lcp_cfd(int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, do
 
   }
 
-  else if (strcmp(pt->cfd.nom_method, mot1) == 0)
+  else if (strcmp(pt->dfc_2D.name, mot1) == 0)
   {
 
     Jc = (double*) malloc(taille_c * sizeof(double));
@@ -874,7 +874,7 @@ int lcp_cfd(int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, do
 
 
   }
-  else printf("Warning : Unknown solving method : %s\n", pt->cfd.nom_method);
+  else printf("Warning : Unknown solving method : %s\n", pt->dfc_2D.name);
 
   for (i = 0; i < taille_i; i++)
   {

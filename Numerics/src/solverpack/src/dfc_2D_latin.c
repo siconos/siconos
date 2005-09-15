@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 
-/*!\file cfd_latin.c
+/*!\file dfc_2D__latin.c
 
    This subroutine allows the dual resolution of contact problems with friction.
    Try \f$(z,w)\f$ such that:
@@ -25,9 +25,9 @@ M z- w=q\\
 double ddot_(int *, double [], int *, double [], int*);
 
 
-/*!\fn  cfd_latin(double vec[],double *qq,int *nn, double * k_latin,double *mumu,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
+/*!\fn  dfc_2D_latin(double vec[],double *qq,int *nn, double * k_latin,double *mumu,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
 
-   cfd_latin  is a specific latin solver for dual contact problem with friction.
+   dfc_2D_latin  is a specific latin solver for dual contact problem with friction.
 
    \param double[] : vec On enter a double vector containing the components of the double matrix with a fortran90 allocation.
    \param double* : qq On enter a pointer over doubles containing the components of the double vector.
@@ -48,7 +48,7 @@ double ddot_(int *, double [], int *, double [], int*);
 
 
 
-cfd_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
+dfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
 {
 
   FILE *f101;

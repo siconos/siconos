@@ -103,8 +103,8 @@ typedef struct
 
 } method_cfp;
 
-/*!\struct method_cfd
- * \brief A type definition for a structure method_cfd.
+/*!\struct method_dfc_2D
+ * \brief A type definition for a structure method_dfc_2D
  *
  * \param char* : nom_method A pointer over characters, the name of the solver.
  * \param int : itermax The maximum iterations.
@@ -117,7 +117,7 @@ typedef struct
 typedef struct
 {
 
-  char nom_method[64];
+  char name[64];
   int itermax;
   char normType[64];
   double tol;
@@ -132,7 +132,7 @@ typedef struct
   int dim_c;
   int dim_tt;
   int dim_n;
-} method_cfd;
+} method_dfc_2D;
 
 /*!\union method
  * \brief A type definition for a union method.
@@ -142,7 +142,7 @@ typedef struct
  * \param method_rd  : rd is a method_rd structure .
  * \param method_lcp : lcp is a method_lpc structure .
  * \param method_cfp : cfp is a method_cfp structure .
- * \param method_cfd : cfd is a method_cfd structure .
+ * \param method_dfc_2D : dfc_2D is a method_dfc_2D structure .
  * \param method_qp  : qp is a method_qp structure .
  *
  */
@@ -154,7 +154,7 @@ typedef union
   method_rd rd;
   method_lcp lcp;
   method_cfp cfp;
-  method_cfd cfd;
+  method_dfc_2D dfc_2D;
   /* \todo method_qp does not exist
    */
   /* method_qp qp; */
@@ -211,7 +211,7 @@ extern "C" int solve_rd(double* , double* , int* , method* , double* , double*);
 
 extern "C" int solve_cfp(double* , double* , int* , method* , double* , double*);
 
-extern "C" int solve_cfd(double* , double* , int* , method* , double* , double*);
+extern "C" int dfc_2D_solver(double* , double* , int* , method* , double* , double*);
 
 extern "C" void rp_latin(double [], double *, int *, double *, double [], double [], int *,
                          double *, double [], double [], int *, double *, int *);
@@ -227,13 +227,13 @@ extern "C" void cfp_gcp(double [], double [], int *, double *, int *, double *, 
 
 extern "C" void cfp_latin(double [], double [], int *, double *, double *, int *, double *, double [], double [], int *, double *, int*);
 
-extern "C" void cfd_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
+extern "C" void dfc_2D_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
 
-extern "C" int cfd_lcp(int *, double *, method *, double *, int *, int *, int * , int *, int *, int *,
-                       int *, int *, double * , double * , int *, double *, double *);
+extern "C" int dfc_2D2lcp(int *, double *, method *, double *, int *, int *, int * , int *, int *, int *,
+                          int *, int *, double * , double * , int *, double *, double *);
 
-extern "C" int lcp_cfd(int *, double *, double *, method *, double *, double *, int *, double *, int *,
-                       int *, int *, int *,  int *, int *, int *, double *, double *);
+extern "C" int lcp2dfc_2D(int *, double *, double *, method *, double *, double *, int *, double *, int *,
+                          int *, int *, int *,  int *, int *, int *, double *, double *);
 
 #endif
 
@@ -386,15 +386,15 @@ cfp_gcp.c
 */
 
 
-/** \fn int extern solve_cfd (double*,double*,int *, method *,double [],double [])
- *  \brief solve_cfd() is a generic interface allowing the call of one of the @ref dfc solvers.
+/** \fn int extern dfc_2D_solver (double*,double*,int *, method *,double [],double [])
+ *  \brief dfc_2D_solver() is a generic interface allowing the call of one of the @ref dfc solvers.
  */
 /** @brief
 
-    solve_cfd() is a generic interface allowing the call of one of the @ref dfc solvers.
+    dfc_2D_solver() is a generic interface allowing the call of one of the @ref dfc solvers.
 */
 
-extern int solve_cfd(double*, double*, int *, method *, double [], double []);
+extern int dfc_2D_solver(double*, double*, int *, method *, double [], double []);
 
 /**@}*/
 
@@ -403,7 +403,7 @@ extern int solve_cfd(double*, double*, int *, method *, double [], double []);
 
 The C routines that solve DFC:
 
-cfd_latin.c
+dfc_2D_latin.c
 
 */
 
@@ -457,15 +457,15 @@ extern cfp_gcp(double [], double [], int *, double *, int *, double *, double []
 
 extern cfp_latin(double [], double [], int *, double *, double *, int *, double *, double [], double [], int *, double *, int*);
 
-/* CFD */
+/* DFC 2D */
 
-extern  cfd_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
+extern  dfc_2D_latin(double[], double[], int *, double*, double*, int *, double*, double[], double[], int *, double*, int*);
 
-/* LCP SWITCH CFD */
+/* LCP SWITCH DFC 2D */
 
-extern int cfd_lcp(int *, double *, method *, double *, int *, int *, int * , int *, int *, int *, int *, int *, double * , double * , int *, double *, double *);
+extern int dfc_2D2lcp(int *, double *, method *, double *, int *, int *, int * , int *, int *, int *, int *, int *, double * , double * , int *, double *, double *);
 
-extern int lcp_cfd(int *, double *, double *, method *, double *, double *, int *, double *, int *, int *, int *, int *,  int *, int *, int *, double *, double *);
+extern int lcp2dfc_2D(int *, double *, double *, method *, double *, double *, int *, double *, int *, int *, int *, int *,  int *, int *, int *, double *, double *);
 
 #endif
 
