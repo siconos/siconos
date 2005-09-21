@@ -44,9 +44,9 @@
 int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w , int *it_end , double *res)
 {
 
-  const char mot1[10] = "Lemke", mot2[10] = "NLGS", mot3[10] = "CPG";
-  const char mot4[10] = "Latin", mot5[10] = "QP", mot6[10] = "NSQP";
-  const char mot7[15] = "LexicoLemke", mot8[15] = "NewtonMin";
+  const char lcpkey1[10] = "Lemke", lcpkey2[10] = "NLGS", lcpkey3[10] = "CPG";
+  const char lcpkey4[10] = "Latin", lcpkey5[10] = "QP", lcpkey6[10] = "NSQP";
+  const char lcpkey7[15] = "LexicoLemke", lcpkey8[15] = "NewtonMin";
 
   int i, info = 1;
 
@@ -59,7 +59,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   *it_end = 0;
   *res    = 0.0;
 
-  if (strcmp(pt->lcp.name , mot1) == 0)
+  if (strcmp(pt->lcp.name , lcpkey1) == 0)
 
     lcp_lemke(vec , q , n , &pt->lcp.itermax , z ,   /* in  */
               w , it_end , res , &info);            /* out */
@@ -68,7 +68,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
   /* **** Latin Solver **** */
 
-  else if (strcmp(pt->lcp.name , mot4) == 0)
+  else if (strcmp(pt->lcp.name , lcpkey4) == 0)
   {
 
     iparamLCP[0] = pt->lcp.itermax;
@@ -84,7 +84,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   }
   /* **** NLGS Solver **** */
 
-  else if (strcmp(pt->lcp.name , mot2) == 0)
+  else if (strcmp(pt->lcp.name , lcpkey2) == 0)
   {
 
     iparamLCP[0] = pt->lcp.itermax;
@@ -101,7 +101,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
   /* **** CPG Solver **** */
 
-  else if (strcmp(pt->lcp.name , mot3) == 0)
+  else if (strcmp(pt->lcp.name , lcpkey3) == 0)
   {
 
     iparamLCP[0] = pt->lcp.itermax;
@@ -117,7 +117,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
   /* ***** QP Solver ***** */
 
-  else if (strcmp(pt->lcp.name , mot5) == 0)
+  else if (strcmp(pt->lcp.name , lcpkey5) == 0)
   {
 
     // We assume that the LCP matrix M is symmetric
@@ -130,7 +130,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
   /* **** NSQP Solver **** */
 
-  else if (strcmp(pt->lcp.name , mot6) == 0)
+  else if (strcmp(pt->lcp.name , lcpkey6) == 0)
   {
 
     // We assume that the LCP matrix M is not symmetric
@@ -140,7 +140,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     lcp_nsqp(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
   }
-  else if (strcmp(pt->lcp.name , mot7) == 0)
+  else if (strcmp(pt->lcp.name , lcpkey7) == 0)
   {
 
     iparamLCP[0] = pt->lcp.itermax;
@@ -150,7 +150,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
     *it_end = iparamLCP[2];
   }
-  else if (strcmp(pt->lcp.name , mot8) == 0)
+  else if (strcmp(pt->lcp.name , lcpkey8) == 0)
   {
 
     iparamLCP[0] = pt->lcp.itermax;

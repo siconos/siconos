@@ -59,9 +59,9 @@ void main(void)
 
   FILE *f1, *f2;
 
-  int i, nl, nc, n, dimM;
-
-  int info[3];
+  int i, j, nl, nc, n, dimM;
+  int nonsymmetric;
+  int info[3], info1;
 
   double qi, Mij;
   double *q, *vec;
@@ -71,7 +71,7 @@ void main(void)
   char val[14];
 
   for (i = 0 ; i < 3 ; ++i) info[i] = -1;
-
+  info1 = -1;
   /****************************************************************/
 #ifdef BAVARD
   printf("\n ********** BENCHMARK FOR PFC 2D SOLVERS ********** \n\n");
@@ -85,9 +85,9 @@ void main(void)
 
   /* Methods*/
 
-  static method_pfc_2D meth_pfc1  = { "NLGS"  , 1000 , 1e-08 , 0.3 , 0.7 };
-  static method_pfc_2D meth_pfc2  = { "Latin" , 1000 , 1e-08 , 0.3 , 35. };
-  static method_pfc_2D meth_pfc3  = { "CPG"   , 1000 , 1e-08 , 0.3 , 0.7 };
+  static method_pfc_2D meth_pfc1  = { "NLGS"  , 1000 , 1e-08 , 0.3 , 0.7 , "N2"};
+  static method_pfc_2D meth_pfc2  = { "CPG"   , 1000 , 1e-08 , 0.3 , 0.7 , "N2"};
+  static method_pfc_2D meth_pfc3  = { "Latin" , 1000 , 1e-08 , 0.3 , 35. , "N2"};
 
   if ((f1 = fopen("DATA/MM_gran_mu12.dat", "r")) == NULL)
   {
@@ -133,19 +133,49 @@ void main(void)
   fclose(f2);
   fclose(f1);
 
+  nonsymmetric = 0;
 
+  /* Is M symmetric ? */
 
+  for (i = 0 ; i < n ; ++i)
+  {
+    for (j = 0 ; j < i ; ++j)
+    {
+      if (abs(vec[i * n + j] - vec[j * n + i]) > 1e-16)
+      {
+        nonsymmetric = 1;
+        break;
+      }
+    }
+  }
+
+#ifdef BAVARD
+  if (nonsymmetric) printf("\n !! WARNING !!\n M is a non symmetric matrix \n");
+  else printf(" M is a symmetric matrix \n");
+#endif
+
+  /* #1 NLGS TEST */
+#ifdef BAVARD
+  printf("**** NLGS TEST ****\n");
+#endif
   for (i = 0 ; i < dimM ; ++i) z1[i] = 0.0;
 
-  info[0] = pfc_2D_solver(vec , q , &n , &meth_pfc1 , z1 , w1);
+  info1 = pfc_2D_solver(vec , q , &dimM , &meth_pfc1 , z1 , w1);
 
+  /* #1 NLGS TEST */
+#ifdef BAVARD
+  printf("**** CPG TEST *****\n");
+#endif
   for (i = 0 ; i < dimM ; ++i) z2[i] = 0.0;
 
-  info[1] = pfc_2D_solver(vec , q , &n , &meth_pfc2 , z2 , w2);
-
+  info[1] = pfc_2D_solver(vec , q , &dimM , &meth_pfc2 , z2 , w2);
+  /* #1 NLGS TEST */
+#ifdef BAVARD
+  printf("**** Latin TEST ***\n");
+#endif
   for (i = 0 ; i < dimM ; ++i) z3[i] = 0.0;
 
-  info[2] = pfc_2D_solver(vec , q , &n , &meth_pfc3 , z3 , w3);
+  info[2] = pfc_2D_solver(vec , q , &dimM , &meth_pfc3 , z3 , w3);
 
 
 #ifdef BAVARD
@@ -160,13 +190,15 @@ void main(void)
 #endif
 
   free(q);
+  free(vec);
   free(z1);
   free(w1);
   free(z2);
   free(w2);
   free(z3);
   free(w3);
-  free(vec);
+
+  return 1;
 
 }
 

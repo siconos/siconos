@@ -48,26 +48,28 @@ int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , do
 {
 
   int info, it_end;
-  double res;
+  double *res;
   char pfckey1[10] = "NLGS", pfckey2[10] = "CPG", pfckey3[10] = "Latin";
 
   clock_t t1, t2;
 
-  info = -1;
+  info    = -1;
+  it_end  = 0;
+  *res    = 0.0;
 
   t1 = clock();
 
-  if (strcmp(pt->pfc_2D.name, pfckey1) == 0)
+  if (strcmp(pt->pfc_2D.name , pfckey1) == 0)
 
-    pfc_2D_nlgs(vec , q , n , &pt->pfc_2D.mu , &pt->pfc_2D.itermax , &pt->pfc_2D.tol , z , w , &it_end , &res , &info);
+    pfc_2D_nlgs(vec , q , n , &pt->pfc_2D.mu , &pt->pfc_2D.itermax , &pt->pfc_2D.tol , z , w , &it_end , res , &info);
 
-  else if (strcmp(pt->pfc_2D.name, pfckey2) == 0)
+  else if (strcmp(pt->pfc_2D.name , pfckey2) == 0)
 
-    pfc_2D_cpg(vec , q , n , &pt->pfc_2D.mu , &pt->pfc_2D.itermax , &pt->pfc_2D.tol , z , w , &it_end , &res , &info);
+    pfc_2D_cpg(vec , q , n , &pt->pfc_2D.mu , &pt->pfc_2D.itermax , &pt->pfc_2D.tol , z , w , &it_end , res , &info);
 
-  else if (strcmp(pt->pfc_2D.name, pfckey3) == 0)
+  else if (strcmp(pt->pfc_2D.name , pfckey3) == 0)
 
-    pfc_2D_latin(vec , q , n , &pt->pfc_2D.k_latin , &pt->pfc_2D.mu , &pt->pfc_2D.itermax , &pt->pfc_2D.tol , z , w , &it_end , &res , &info);
+    pfc_2D_latin(vec , q , n , &pt->pfc_2D.k_latin , &pt->pfc_2D.mu , &pt->pfc_2D.itermax , &pt->pfc_2D.tol , z , w , &it_end , res , &info);
 
   else printf("Warning : Unknown solving method : %s\n", pt->pfc_2D.name);
 
