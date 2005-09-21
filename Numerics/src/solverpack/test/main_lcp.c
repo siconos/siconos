@@ -263,128 +263,168 @@ void test_lcp_series(int n , double *vec , double *q)
 void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM , double *q)
 {
 
-  int i, dim, info, iter, titer;
+  int i, dim;
   int incx = 1, incy = 1;
+  int info1 = -1, info2 = -1, info3 = -1, info4 = -1, info5 = -1, info6 = -1, info7 = -1;
+  int iter1, iter2, iter3, iter4, iter5, iter6, iter7;
+  int titer1, titer2, titer3, titer4, titer5, titer6, titer7;
 
-  double criteria, comp;
-  double *z, *w;
+  double comp;
+  double err1, err2, err3, err4, err5, err6, err7;
+
+  double *z1, *z2, *z3, *z4, *z5, *z6, *z7;
+  double *w1, *w2, *w3, *w4, *w5, *w6, *w7;
 
   dim = dn * db;
 
-  z = malloc(dim * sizeof(double));
-  w = malloc(dim * sizeof(double));
+  z1 = malloc(dim * sizeof(double));
+  w1 = malloc(dim * sizeof(double));
+  z2 = malloc(dim * sizeof(double));
+  w2 = malloc(dim * sizeof(double));
+  z3 = malloc(dim * sizeof(double));
+  w3 = malloc(dim * sizeof(double));
+  z4 = malloc(dim * sizeof(double));
+  w4 = malloc(dim * sizeof(double));
+  z5 = malloc(dim * sizeof(double));
+  w5 = malloc(dim * sizeof(double));
+  z6 = malloc(dim * sizeof(double));
+  w6 = malloc(dim * sizeof(double));
+  z7 = malloc(dim * sizeof(double));
+  w7 = malloc(dim * sizeof(double));
 
   /* Method definition */
 
   static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
   static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
   static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp5 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp6 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp7 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp8 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp7 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
 
-  info     = -1;
-  iter     = 0;
-  titer    = 0;
-  criteria = 0.0;
-  comp     = 0.0;
 
   /* #1 NLGS TEST */
+#ifdef BAVARD
+  printf("**** NLGS TEST ****\n");
+#endif
 
-  printf("\n ***** NLGS TEST ************* \n");
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
+  for (i = 0 ; i < dim ; ++i) z1[i] = 0.0;
 
-  info = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp1 , z , w , &iter , &titer , &criteria);
-
-  printf("\n NLGS LOG         : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
-  printf(" SOLUTION: ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  comp = ddot_(&dim , z , &incx , w , &incy);
-  printf("\n COMPLEMENTARITY : %g \n", comp);
+  info1 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp1 , z1 , w1 , &iter1 , &titer1 , &err1);
 
   /* #2 CPG TEST */
+#ifdef BAVARD
+  printf("**** CPG TEST *****\n");
+#endif
+  for (i = 0 ; i < dim ; ++i) z2[i] = 0.0;
 
-  printf("\n ***** CPG TEST ************** \n");
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp2 , z , w , &iter , &titer , &criteria);
-
-  printf("\n CPG LOG          : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
-  printf(" SOLUTION: ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  comp = ddot_(&dim , z , &incx , w , &incy);
-  printf("\n COMPLEMENTARITY : %g \n", comp);
+  info2 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp2 , z2 , w2 , &iter2 , &titer2 , &err2);
 
   /* #3 QP TEST */
+#ifdef BAVARD
+  printf("**** QP TEST ******\n");
+#endif
+  for (i = 0 ; i < dim ; ++i) z4[i] = 0.0;
 
-  printf("\n ***** QP TEST *************** \n");
-
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp5 , z , w , &iter , &titer , &criteria);
-
-  printf("\n QP LOG           : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
-  printf(" SOLUTION: ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  comp = ddot_(&dim , z , &incx , w , &incy);
-  printf("\n COMPLEMENTARITY : %g \n", comp);
+  info4 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp4 , z4 , w4 , &iter4 , &titer4 , &err4);
 
   /* #4 NSQP TEST */
-  printf("\n ***** NSQP TEST ************* \n");
+#ifdef BAVARD
+  printf("**** NSQP TEST ****\n");
+#endif
+  for (i = 0 ; i < dim ; ++i) z5[i] = 0.0;
 
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp6 , z , w , &iter , &titer , &criteria);
-
-  printf("\n NSQP LOG        : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
-  printf(" SOLUTION: ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  comp = ddot_(&dim , z , &incx , w , &incy);
-  printf("\n COMPLEMENTARITY : %g \n", comp);
+  info5 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp5 , z5 , w5 , &iter5 , &titer5 , &err5);
 
   /* #5 LEXICO LEMKE TEST */
-  printf("\n ***** LEXICO LEMKE TEST ***** \n");
+#ifdef BAVARD
+  printf("**** Lemke TEST ***\n");
+#endif
+  for (i = 0 ; i < dim ; ++i) z6[i] = 0.0;
 
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp7 , z , w , &iter , &titer , &criteria);
-
-  printf("\n LEXICO LEMKE LOG: %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
-  printf(" SOLUTION: ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  comp = ddot_(&dim , z , &incx , w , &incy);
-  printf("\n COMPLEMENTARITY : %g \n", comp);
+  info6 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp6 , z6 , w6 , &iter6 , &titer6 , &err6);
 
   /* #7 NEWTONMIN TEST */
-  printf("\n ***** NEWTONMIN TEST ******** \n");
+#ifdef BAVARD
+  printf("**** Newton TEST **\n");
+#endif
+  for (i = 0 ; i < dim ; ++i) z7[i] = 0.0;
 
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
-
-  info = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp8 , z , w , &iter , &titer , &criteria);
-
-  printf("\n NEWTONMIN LOG   : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
-  printf(" SOLUTION: ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  comp = ddot_(&dim , z , &incx , w , &incy);
-  printf("\n COMPLEMENTARITY : %g \n", comp);
+  info7 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp7 , z7 , w7 , &iter7 , &titer7 , &err7);
 
   /* #8 LATIN TEST */
-  printf("\n ***** LATIN TEST ************ \n");
+#ifdef BAVARD
+  printf("**** LATIN TEST ***\n");
+#endif
+  for (i = 0 ; i < dim ; ++i) z3[i] = 0.0;
 
-  for (i = 0 ; i < dim ; ++i) z[i] = 0.0;
+  info3 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp3 , z3 , w3 , &iter3 , &titer3 , &err3);
 
-  info = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp3 , z , w , &iter , &titer , &criteria);
+#ifdef BAVARD
+  printf(" *** ************************************** ***\n");
+  printf("\n   NLGS RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z1[i]);
+  printf("\n    CPG RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z2[i]);
+  printf("\n     QP RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z4[i]);
+  printf("\n   NSQP RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z5[i]);
+  printf("\n  Lemke RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z6[i]);
+  printf("\n Newton RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z7[i]);
+  printf("\n  LATIN RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z3[i]);
+  printf("\n\n");
+  printf(" INFO RESULT\n");
 
-  printf("\n LATIN LOG        : %d ( ITER/PIVOT= %d - RES= %g )\n", info, iter, criteria);
-  printf(" SOLUTION: ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z[i]);
-  comp = ddot_(&dim , z , &incx , w , &incy);
-  printf("\n COMPLEMENTARITY : %g \n", comp);
+  printf(" -- SOLVEUR ------ BLOCK I/P ----- TOTAL I/P ----- ERR ----- COMP ");
 
-  free(z);
-  free(w);
+  comp = ddot_(&dim , z1 , &incx , w1 , &incy);
 
+  printf("\n    NLGS   (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info1, iter1, titer1, err1, comp);
+
+  comp = ddot_(&dim , z2 , &incx , w2 , &incy);
+
+  printf("\n    CPG    (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info2, iter2, titer2, err2, comp);
+
+  comp = ddot_(&dim , z4 , &incx , w4 , &incy);
+
+  printf("\n    QP     (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info4, iter4, titer4, err4, comp);
+
+  comp = ddot_(&dim , z5 , &incx , w5 , &incy);
+
+  printf("\n    NSQP   (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info5, iter5, titer5, err5, comp);
+
+  comp = ddot_(&dim , z6 , &incx , w6 , &incy);
+
+  printf("\n    Lemke  (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info6, iter6, titer6, err6, comp);
+
+  comp = ddot_(&dim , z7 , &incx , w7 , &incy);
+
+  printf("\n    Newton (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info7, iter7, titer7, err7, comp);
+
+  comp = ddot_(&dim , z3 , &incx , w3 , &incy);
+
+  printf("\n    LATIN  (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info3, iter3, titer3, err3, comp);
+
+#endif
+
+  free(z1);
+  free(w1);
+  free(z2);
+  free(w2);
+  free(z3);
+  free(w3);
+  free(z4);
+  free(w4);
+  free(z5);
+  free(w5);
+  free(z6);
+  free(w6);
+  free(z7);
+  free(w7);
 }
 /*
  ******************************************************************************
@@ -651,7 +691,7 @@ void test_blockmatrix(void)
 
   FILE *LCPfile;
 
-  int i, j, isol;
+  int i, j, isol, NBTEST, itest;
   int dim , dim2;
   int dn, db, db2, nblock, itmp;
 
@@ -668,104 +708,123 @@ void test_blockmatrix(void)
   titer = 0;
   criteria = 0.0;
 
+  NBTEST = 2;
+
   /****************************************************************/
 #ifdef BAVARD
   printf("\n\n ******** BENCHMARK FOR LCP_SOLVER_BLOCK ******** \n\n");
 #endif
   /****************************************************************/
 
-  if ((LCPfile = fopen("BLOCKMATRIX/mathieu1.dat", "r")) == NULL)
+  for (itest = 0 ; itest < NBTEST ; ++itest)
   {
-    perror("fopen LCPfile: mathieu1.dat");
-    exit(1);
-  }
 
-  fscanf(LCPfile , "%d" , &dn);
-  fscanf(LCPfile , "%d" , &db);
-
-  nblock = 0;
-
-  inb  = (int*)malloc(dn * sizeof(int));
-
-  for (i = 0 ; i < dn ; ++i)
-  {
-    fscanf(LCPfile , "%d" , &itmp);
-    inb[i] = itmp;
-    nblock += itmp;
-  }
-
-  iid  = (int*)malloc(nblock * sizeof(int));
-
-  for (i = 0 ; i < nblock ; ++i)
-  {
-    fscanf(LCPfile , "%d" , &itmp);
-    iid[i] = itmp;
-  }
-
-  dim  = db * dn;
-  db2 = db * db;
-  dim2 = nblock * db2;
-
-  q    = (double*)malloc(dim * sizeof(double));
-  sol  = (double*)malloc(dim * sizeof(double));
-  vecM = (double*)malloc(dim2 * sizeof(double));
-
-  for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
-  for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
-  for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
-
-
-  for (i = 0 ; i < nblock ; ++i)
-  {
-    for (j = 0 ; j < db2 ; ++j)
+    switch (itest)
     {
-      fscanf(LCPfile, "%s", val);
-      vecM[i * db2 + j] = atof(val);
+    case 0:
+      printf("\n\n MATHIEU2 LCP ");
+      if ((LCPfile = fopen("BLOCKMATRIX/mathieu1.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: mathieu1.dat");
+        exit(1);
+      }
+      break;
+    case 1:
+      printf("\n\n MATHIEU3 LCP ");
+      if ((LCPfile = fopen("BLOCKMATRIX/mathieu2.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: mathieu2.dat");
+        exit(1);
+      }
+      break;
     }
-  }
 
-  for (i = 0 ; i < dim ; ++i)
-  {
-    fscanf(LCPfile , "%s" , val);
-    q[i] = atof(val);
-  }
+    fscanf(LCPfile , "%d" , &dn);
+    fscanf(LCPfile , "%d" , &db);
 
-  fscanf(LCPfile , "%s" , val);
+    nblock = 0;
 
-  if (!feof(LCPfile))
-  {
+    inb  = (int*)malloc(dn * sizeof(int));
 
-    sol[0] = atof(val);
-    isol = 1;
-    for (i = 1 ; i < dim ; ++i)
+    for (i = 0 ; i < dn ; ++i)
+    {
+      fscanf(LCPfile , "%d" , &itmp);
+      inb[i] = itmp;
+      nblock += itmp;
+    }
+
+    iid  = (int*)malloc(nblock * sizeof(int));
+
+    for (i = 0 ; i < nblock ; ++i)
+    {
+      fscanf(LCPfile , "%d" , &itmp);
+      iid[i] = itmp;
+    }
+
+    dim  = db * dn;
+    db2 = db * db;
+    dim2 = nblock * db2;
+
+    q    = (double*)malloc(dim * sizeof(double));
+    sol  = (double*)malloc(dim * sizeof(double));
+    vecM = (double*)malloc(dim2 * sizeof(double));
+
+    for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
+    for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
+    for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
+
+
+    for (i = 0 ; i < nblock ; ++i)
+    {
+      for (j = 0 ; j < db2 ; ++j)
+      {
+        fscanf(LCPfile, "%s", val);
+        vecM[i * db2 + j] = atof(val);
+      }
+    }
+
+    for (i = 0 ; i < dim ; ++i)
     {
       fscanf(LCPfile , "%s" , val);
-      sol[i] = atof(val);
+      q[i] = atof(val);
     }
-  }
-  else
-  {
-    isol = 0;
-    for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
-  }
 
-  fclose(LCPfile);
+    fscanf(LCPfile , "%s" , val);
+
+    if (!feof(LCPfile))
+    {
+
+      sol[0] = atof(val);
+      isol = 1;
+      for (i = 1 ; i < dim ; ++i)
+      {
+        fscanf(LCPfile , "%s" , val);
+        sol[i] = atof(val);
+      }
+    }
+    else
+    {
+      isol = 0;
+      for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
+    }
+
+    fclose(LCPfile);
 
 #ifdef BAVARD
-  printf("\n exact solution : ");
-  if (isol) for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
-  else printf(" unknown ");
-  printf("\n");
+    printf("\n exact solution : ");
+    if (isol) for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
+    else printf(" unknown ");
+    printf("\n");
 #endif
 
-  test_lcp_block_series(dn , db , inb , iid , vecM , q);
+    test_lcp_block_series(dn , db , inb , iid , vecM , q);
 
-  free(sol);
-  free(vecM);
-  free(q);
-  free(iid);
-  free(inb);
-
+    free(sol);
+    free(vecM);
+    free(q);
+    free(iid);
+    free(inb);
+  }
 }
 
 /*
@@ -776,8 +835,8 @@ int main(void)
 {
 
   test_mmc();
-  //  test_matrix();
-  //   test_blockmatrix();
+  test_matrix();
+  test_blockmatrix();
 
   return 0;
 }
