@@ -1,49 +1,49 @@
-///////////////////////////////////////////////////////////////////////////
-//  This main file allows the primal resolution of contact problems with friction:
-//  try (z,w) such that:
-//
-//
-//
-//                    M z  - w = q                 (1)
-//                    0<= zn , 0<= wn , zn.wn= O   (2) (Signorini contact law)
-//                    -wt in diff(PSI)   (zt)      (3) (Coulomb friction law)
-//                                 [-mu*zn, mu*zn]
-//
-//
-//  here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional//  vector and w an n-dimensional vector.
-//
-//  This system of equations and inequalities is solved thanks to cfp_subroutine:
-//        cfp_gsnl (M,q,n,mu,itermax,tol,z,w,it_end,res,info)
-//        cfp_gcp (M,q,n,mu,itermax,tol,z,w,it_end,res,info)
-//        cfp_latin (M,q,n,k_latin,mu,itermax,tol,z,w,it_end,res,info)
-//
-//  where _ itermax is the maximum iterations required, it's an integer
-//        _ mu is the friction coefficient, it's a float
-//        _ res is the residue, it's a float
-//        _ it_end is the number of iterations carried out, it's an integer
-//        _ tol is the tolerance value desired, it's a float
-//        _ k_latin is the parameter research of the latin, it's a float
-//        _ z and w are the solutions of the problem
-//        _ info shows the termination reason,0 is successful otherwise 1, it's an integer.
-//
-//
-//    For more information about the methods see the chapter 4 of the Siconos manual theory.
-//
-//
-//
-//  The subroutine's call is due to the function solve_cfp:
-//
-//  int solve_cfp (double (*M)[maxcols],double *q,int n,method *pt, double *z,double *w)
-//
-//  where M is an n by n matrix, q an n-dimensional vector, n is the row dimension
-//  of M, and pt a pointer other a structure ( method). z and w are n-dimensional
-//  vectors solution.
-//  method is a variable with a structure type; this structure gives to the function
-// solve_pcf, the name and the parameters (itermax, tol, k_latin,...) of the method we want to use.
-//  This function return an interger:  0 successful return otherwise 1.
-//
-//
-///////////////////////////////////////////////////////////////////////////////
+/*!
+ *  This main file allows the primal resolution of contact problems with friction:
+ *  try (z,w) such that:
+ *
+ *
+ *
+ *                    M z  - w = q                 (1)
+ *                    0<= zn , 0<= wn , zn.wn= O   (2) (Signorini contact law)
+ *                    -wt in diff(PSI)   (zt)      (3) (Coulomb friction law)
+ *                                 [-mu*zn, mu*zn]
+ *
+ *
+ *  here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional*  vector and w an n-dimensional vector.
+ *
+ *  This system of equations and inequalities is solved thanks to cfp_subroutine:
+ *        cfp_gsnl (M,q,n,mu,itermax,tol,z,w,it_end,res,info)
+ *        cfp_gcp (M,q,n,mu,itermax,tol,z,w,it_end,res,info)
+ *        cfp_latin (M,q,n,k_latin,mu,itermax,tol,z,w,it_end,res,info)
+ *
+ *  where _ itermax is the maximum iterations required, it's an integer
+ *        _ mu is the friction coefficient, it's a float
+ *        _ res is the residue, it's a float
+ *        _ it_end is the number of iterations carried out, it's an integer
+ *        _ tol is the tolerance value desired, it's a float
+ *        _ k_latin is the parameter research of the latin, it's a float
+ *        _ z and w are the solutions of the problem
+ *        _ info shows the termination reason,0 is successful otherwise 1, it's an integer.
+ *
+ *
+ *    For more information about the methods see the chapter 4 of the Siconos manual theory.
+ *
+ *
+ *
+ *  The subroutine's call is due to the function solve_cfp:
+ *
+ *  int solve_cfp (double (*M)[maxcols],double *q,int n,method *pt, double *z,double *w)
+ *
+ *  where M is an n by n matrix, q an n-dimensional vector, n is the row dimension
+ *  of M, and pt a pointer other a structure ( method). z and w are n-dimensional
+ *  vectors solution.
+ *  method is a variable with a structure type; this structure gives to the function
+ * solve_pcf, the name and the parameters (itermax, tol, k_latin,...) of the method we want to use.
+ *  This function return an interger:  0 successful return otherwise 1.
+ *
+ *
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,6 +53,7 @@
 
 void test1(void)
 {
+
   FILE *f1, *f2, *f5, *f6;
   int i, j, nl, nc, nll, n = 40, dimM = n;
   double *q, *z, *w, *vec, *a, *b, *zt;
@@ -60,12 +61,13 @@ void test1(void)
   double **M;
   double qi, Mij;
   char val[50], vall[50];
-  method meth_rp;
 
-  strcpy(meth_rp.rp.nom_method, "Gsnl");
-  meth_rp.rp.itermax = 100000;
-  meth_rp.rp.tol = 0.0000001;
-  meth_rp.rp.k_latin = 0.003; //0.00005;
+  method meth_pr;
+
+  strcpy(meth_pr.pr.name , "NLGS");
+  meth_pr.pr.itermax = 100000;
+  meth_pr.pr.tol = 0.0000001;
+  meth_pr.pr.k_latin = 0.003; //0.00005;
 
   M = (double **)malloc(dimM * sizeof(double*));
   for (i = 0; i < n; i++)
@@ -174,19 +176,19 @@ void test1(void)
 
 
 
-  meth_rp.rp.a = (double*)malloc(dimM * sizeof(double));
-  meth_rp.rp.b = (double*)malloc(dimM * sizeof(double));
+  meth_pr.pr.a = (double*)malloc(dimM * sizeof(double));
+  meth_pr.pr.b = (double*)malloc(dimM * sizeof(double));
 
   for (i = 0; i <= n - 1; i++)
   {
-    meth_rp.rp.a[i] = a[i];
-    meth_rp.rp.b[i] = -b[i];
+    meth_pr.pr.a[i] = a[i];
+    meth_pr.pr.b[i] = -b[i];
   }
 
 
   printf("\n\n we go in the function \n\n");
 
-  info = solve_rp(vec, q, &n, &meth_rp, zt, w);
+  info = pr_solver(vec, q, &n, &meth_pr, zt, w);
 
 
   printf("\n\n we go out the function and info is %d\n", info);
@@ -206,8 +208,8 @@ void test1(void)
   free(w);
   free(a);
   free(b);
-  free(meth_rp.rp.a);
-  free(meth_rp.rp.b);
+  free(meth_pr.pr.a);
+  free(meth_pr.pr.b);
 }
 
 void test2(void)
@@ -219,12 +221,12 @@ void test2(void)
   double **M;
   double qi, Mij;
   char val[50], vall[50];
-  method meth_rp;
+  method meth_pr;
 
-  strcpy(meth_rp.rp.nom_method, "Latin");
-  meth_rp.rp.itermax = 1000;
-  meth_rp.rp.tol = 0.0001;
-  meth_rp.rp.k_latin = 0.003; //0.00005;
+  strcpy(meth_pr.pr.name, "Latin");
+  meth_pr.pr.itermax = 1000;
+  meth_pr.pr.tol = 0.0001;
+  meth_pr.pr.k_latin = 0.003; //0.00005;
 
 
 
@@ -337,19 +339,19 @@ void test2(void)
 
 
 
-  meth_rp.rp.a = (double*)malloc(dimM * sizeof(double));
-  meth_rp.rp.b = (double*)malloc(dimM * sizeof(double));
+  meth_pr.pr.a = (double*)malloc(dimM * sizeof(double));
+  meth_pr.pr.b = (double*)malloc(dimM * sizeof(double));
 
   for (i = 0; i <= n - 1; i++)
   {
-    meth_rp.rp.a[i] = a[i];
-    meth_rp.rp.b[i] = -b[i];
+    meth_pr.pr.a[i] = a[i];
+    meth_pr.pr.b[i] = -b[i];
   }
 
 
   printf("\n\n we go in the function \n\n");
 
-  info = solve_rp(vec, qqt, &n, &meth_rp, zt, w);
+  info = pr_solver(vec, qqt, &n, &meth_pr, zt, w);
 
 
   printf("\n\n we go out the function and info is %d\n", info);
@@ -369,8 +371,8 @@ void test2(void)
   free(w);
   free(a);
   free(b);
-  free(meth_rp.rp.a);
-  free(meth_rp.rp.b);
+  free(meth_pr.pr.a);
+  free(meth_pr.pr.b);
 }
 
 
