@@ -82,7 +82,7 @@ void test_lcp_series(int n , double *vec , double *q)
 
   static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
   static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 0 , "N2"};
   static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
   static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
   static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
@@ -410,7 +410,7 @@ void test_mmc(void)
 
   n = 0;
 
-  if ((f1 = fopen("DATA/MM_mmc_mu2.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/M_rectangle1.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
@@ -431,13 +431,13 @@ void test_mmc(void)
 
   /* Data loading of M and q */
 
-  if ((f1 = fopen("DATA/MM_mmc_mu2.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/M_rectangle1.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
   }
 
-  if ((f2 = fopen("DATA/qq_mmc_mu2.dat", "r")) == NULL)
+  if ((f2 = fopen("DATA/q_rectangle1.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);
@@ -775,9 +775,9 @@ void test_blockmatrix(void)
 int main(void)
 {
 
-  //  test_mmc();
-  test_matrix();
-  test_blockmatrix();
+  test_mmc();
+  //  test_matrix();
+  //   test_blockmatrix();
 
   return 0;
 }
