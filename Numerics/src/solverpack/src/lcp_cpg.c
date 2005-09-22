@@ -115,8 +115,6 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
 
   incx = 1;
 
-  for (i = 0 ; i < n ; ++i) ww[i] = 0.;
-
   for (i = 0; i < n; ++i)
   {
 
@@ -185,6 +183,7 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
       free(rr);
       free(pp);
       free(zz);
+      free(status);
 
       iparamLCP[2] = iter;
       dparamLCP[1] = err;
@@ -302,6 +301,7 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
   else if (err < tol) *info = 0;
 
   free(Mp);
+  free(status);
 
   free(ww);
   free(rr);

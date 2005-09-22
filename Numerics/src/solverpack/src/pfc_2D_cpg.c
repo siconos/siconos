@@ -62,10 +62,9 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
 
   FILE *f101;
   int n, nc, incx, incy;
-  int i, iter;
-  int itermax, ispeak;
+  int i, iter, itermax, ispeak;
 
-  double err, a1, b1 , qs;
+  double err, a1, b1, qs;
 
   double alpha, beta, rp, pMp;
   double den, num, tol, mu;
@@ -73,7 +72,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
   char NOTRANS = 'N';
 
   int *status;
-  double *zz , *pp , *rr, *ww, *Mp;
+  double *zz , *pp , *rr , *ww , *Mp;
 
   n    = *nn;
   incx = 1;
@@ -97,7 +96,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
 
   qs = dnrm2_(&n , q , &incx);
 
-  if (ispeak > 0) printf(" Norm: %g \n", qs);
+  if (ispeak > 0) printf("\n ||q||= %g \n" , qs);
 
   if (qs > 1e-16) den = 1.0 / qs;
   else
@@ -108,12 +107,13 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
       z[i] = 0.;
     }
     *info = 9;
+    if (ispeak == 2) fclose(f101);
     return;
   }
 
   /* Allocations */
 
-  status = (int*)malloc(n * sizeof(int));
+  status = (int*)malloc(nc * sizeof(int));
 
   ww = (double*)malloc(n * sizeof(double));
   rr = (double*)malloc(n * sizeof(double));
@@ -124,12 +124,8 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
 
   incx = 1;
 
-  for (i = 0 ; i < n ; ++i) ww[i] = 0.;
-
   for (i = 0; i < n; ++i)
   {
-
-    status[i] = 0;
 
     ww[i] = 0.;
     rr[i] = 0.;
@@ -140,9 +136,11 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
 
   }
 
+  for (i = 0; i < nc ; ++i) status[i] = 0;
+
+
   /* rr = -Wz + q */
 
-  incx = 1;
   incy = 1;
 
   dcopy_(&n , q , &incx , rr , &incy);
@@ -158,7 +156,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
   dcopy_(&n , rr , &incx , ww , &incy);
   dcopy_(&n , rr , &incx , pp , &incy);
 
-  iter = 0.0;
+  iter = 0;
   err  = 1.0 ;
 
   while ((iter < itermax) && (err > tol))
@@ -179,7 +177,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
     dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , Mp , &incx , &b1 , w , &incy);
 
     pMp = ddot_(&n , pp , &incx , w  , &incy);
-
+    //printf( " pWp = %10.4g  \n", pMp );
     if (fabs(pMp) < 1e-16)
     {
 
@@ -194,15 +192,18 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
       free(rr);
       free(pp);
       free(zz);
+      free(status);
 
       iparamLCP[2] = iter;
-      dparamLCP[1] = err;
+      dparamLCP[2] = err;
 
-      return (*info = 3);
+      if (ispeak == 2) fclose(f101);
+      *info = 3;
+      return;
     }
 
     rp  = ddot_(&n , pp , &incx , rr , &incy);
-
+    //printf( " rp = %10.4g  \n", rp );
     alpha = rp / pMp;
 
     /*
@@ -232,7 +233,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
      * pp --> zz
      */
 
-    pfc_2D_projf(n , ww , zz , rr , pp , status);
+    pfc_2D_projf(nc , ww , zz , rr , pp , status);
 
     /*   beta = -w.Mp / pMp  */
 
@@ -247,7 +248,12 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
 
     qs   = -1.0;
     daxpy_(&n , &qs , rr , &incx , w , &incy);
-    num = dnrm2_(&n, w , &incx);
+
+    /*
+     * Note: the function dnrm2_ leads to the generation of core
+     */
+    num = sqrt(ddot_(&n , w , &incx, w , &incy));
+
     err = num * den;
 
     if (ispeak == 2) for (i = 0 ; i < n ; ++i) fprintf(f101, "%d  %d  %14.7e\n", iter , i , z[i]);
@@ -255,7 +261,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
   }
 
   iparamLCP[2] = iter;
-  dparamLCP[1] = err;
+  dparamLCP[2] = err;
 
   dcopy_(&n , rr , &incx , w , &incy);
 
@@ -266,13 +272,13 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
   {
     if (err > tol)
     {
-      printf(" No convergence of NLGS after %d iterations\n" , iter);
+      printf(" No convergence of CPG after %d iterations\n" , iter);
       printf(" The residue is : %g \n", err);
       *info = 1;
     }
     else
     {
-      printf(" Convergence of NLGS after %d iterations\n" , iter);
+      printf(" Convergence of CPG after %d iterations\n" , iter);
       printf(" The residue is : %g \n", err);
       *info = 0;
     }
@@ -290,6 +296,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
   free(rr);
   free(pp);
   free(zz);
+  free(status);
 
   if (ispeak == 2) fclose(f101);
 

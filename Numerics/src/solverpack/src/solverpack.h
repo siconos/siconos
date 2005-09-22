@@ -35,7 +35,7 @@ typedef struct
   double k_latin;
   double *a;
   double *b;
-  int chat;
+  int    chat;
   char   normType[64];
   int    iter;
   double err;

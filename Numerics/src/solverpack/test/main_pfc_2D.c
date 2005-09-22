@@ -57,9 +57,9 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   /* Methods*/
 
-  static method_pfc_2D meth_pfc1  = { "NLGS"  , 1000 , 1e-08 , 0.3 , 0.7 , 0 , "N2" , 0 , 0.0 };
-  static method_pfc_2D meth_pfc2  = { "CPG"   , 1000 , 1e-08 , 0.3 , 0.7 , 0 , "N2" , 0 , 0.0 };
-  static method_pfc_2D meth_pfc3  = { "Latin" , 1000 , 1e-08 , 0.3 , 35. , 0 , "N2" , 0 , 0.0 };
+  static method_pfc_2D meth_pfc1  = { "NLGS"  , 1000 , 1e-08 , 0.3 , 0.7 , 1 , "N2" , 0 , 0.0 };
+  static method_pfc_2D meth_pfc2  = { "CPG"   , 1000 , 1e-08 , 0.3 , 0.7 , 1 , "N2" , 0 , 0.0 };
+  static method_pfc_2D meth_pfc3  = { "Latin" , 1000 , 1e-08 , 0.3 , 35. , 1 , "N2" , 0 , 0.0 };
 
   z1 = malloc(n * sizeof(double));
   w1 = malloc(n * sizeof(double));
@@ -183,9 +183,9 @@ void test_matrix(void)
       break;
     case 1:
       printf("\n\n DIAGONAL LCP \n");
-      if ((LCPfile = fopen("MATRIX/trivial.dat", "r")) == NULL)
+      if ((LCPfile = fopen("MATRIX/trivial2.dat", "r")) == NULL)
       {
-        perror("fopen LCPfile: trivial.dat");
+        perror("fopen LCPfile: trivial2.dat");
         exit(1);
       }
       break;

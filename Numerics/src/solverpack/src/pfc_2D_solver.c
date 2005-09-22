@@ -73,8 +73,8 @@ int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , do
 
     pfc_2D_nlgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[2];
+    pt->pfc_2D.iter = iparamLCP[2];
+    pt->pfc_2D.err  = dparamLCP[2];
 
   }
   else if (strcmp(pt->pfc_2D.name , pfckey2) == 0)
@@ -87,8 +87,8 @@ int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , do
 
     pfc_2D_cpg(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[2];
+    pt->pfc_2D.iter = iparamLCP[2];
+    pt->pfc_2D.err  = dparamLCP[2];
 
   }
   else if (strcmp(pt->pfc_2D.name , pfckey3) == 0)
@@ -102,8 +102,8 @@ int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , do
 
     pfc_2D_latin(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
-    pt->lcp.iter = iparamLCP[2];
-    pt->lcp.err  = dparamLCP[3];
+    pt->pfc_2D.iter = iparamLCP[2];
+    pt->pfc_2D.err  = dparamLCP[3];
 
   }
   else printf("Warning : Unknown solving method : %s\n", pt->pfc_2D.name);
