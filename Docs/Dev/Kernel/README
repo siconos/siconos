@@ -46,8 +46,3 @@ puis générer par ihm le pdf (output/generate)
  - Faire 1 cartouche
 
 
-#
-# Glossaire
-#
-
-sed s/\ac{SICONOS}/"<a href=\"glossary.html#SICONOS\">SICONOS<a>"/ index.html >index1.html
