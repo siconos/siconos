@@ -14,7 +14,7 @@
  * M is an ( n x n ) matrix, q , w and z n-vector. This system of equalities and inequalities
  * is solved thanks to @ref lcp solvers. The routine's call is due to the function lcp_solver.c.
  *
- *!\fn int lcp_solver( double *vec , double *q , int *nn , method *pt , double *z , double *w , int *it_end , double *res )
+ *!\fn int lcp_solver( double *vec , double *q , int *nn , method *pt , double *z , double *w )
  *
  * lcp_solver is a generic interface allowing the call of one of the LCP solvers.
  *
@@ -24,8 +24,6 @@
  * \param pt           Unchanged parameter which represents the LCP structure.
  * \param z            Modified parameter which contains the initial value of the LCP and returns the solution of the problem.
  * \param w            Modified parameter which returns the complementary solution of the problem.
- * \param it_end       Modified parameter which returns the number of iterations performed by the algorithm.
- * \param res          Modified parameter which returns the final error value.
  *
  * \return integer     0 - successful\n
  *                     0 >  - otherwise (see specific solvers for more information about the log info)
@@ -41,7 +39,7 @@
 #include "solverpack.h"
 #endif
 
-int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w , int *it_end , double *res)
+int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w)
 {
 
   const char lcpkey1[10] = "Lemke", lcpkey2[10] = "NLGS", lcpkey3[10] = "CPG";
@@ -56,13 +54,10 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
   for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
 
-  *it_end = 0;
-  *res    = 0.0;
-
   if (strcmp(pt->lcp.name , lcpkey1) == 0)
 
-    lcp_lemke(vec , q , n , &pt->lcp.itermax , z ,   /* in  */
-              w , it_end , res , &info);            /* out */
+    lcp_lemke(vec , q , n , &pt->lcp.itermax , z ,                   /* in  */
+              w , &pt->lcp.iter , &pt->lcp.err , &info);            /* out */
 
   /* *** LCP signature *** */
 
@@ -78,8 +73,8 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
     lcp_latin(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
-    *it_end = iparamLCP[2];
-    *res    = dparamLCP[2];
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[2];
 
   }
   /* **** NLGS Solver **** */
@@ -94,8 +89,8 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
     lcp_nlgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
-    *it_end = iparamLCP[2];
-    *res    = dparamLCP[2];
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[2];
 
   }
 
@@ -110,8 +105,8 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
     lcp_cpg(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
-    *it_end = iparamLCP[2];
-    *res    = dparamLCP[1];
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[1];
 
   }
 
@@ -148,7 +143,8 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
     lcp_lexicolemke(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
-    *it_end = iparamLCP[2];
+    pt->lcp.iter = iparamLCP[2];
+
   }
   else if (strcmp(pt->lcp.name , lcpkey8) == 0)
   {
@@ -159,8 +155,9 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
     lcp_newton_min(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
-    *it_end = iparamLCP[2];
-    *res    = dparamLCP[1];
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[1];
+
   }
   else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
 

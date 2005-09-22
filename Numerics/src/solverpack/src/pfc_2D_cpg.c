@@ -1,39 +1,52 @@
 /*!\file pfc_2D_cpg.c
  *
- *This subroutine allows the primal resolution of contact problems with friction.
+ * This subroutine allows the primal resolution of contact problems with friction.\n
  *
- * Try \f$(z,w)\f$ such that:
- *\f$
- *\left\lbrace
- *\begin{array}{l}
- *M z- w=q\\
- *0 \le z_n \perp w_n \ge 0\\
- *-w_t \in \partial\psi_{[-\mu z_n, \mu z_n]}(z_t)\\
- *\end{array}
- *\right.
- *\f$
+ * Try \f$(z,w)\f$ such that:\n
+ *  \f$
+ *   \left\lbrace
+ *    \begin{array}{l}
+ *     M z + q = w\\
+ *     0 \le z_n \perp w_n \ge 0\\
+ *     -w_t \in \partial\psi_{[-\mu z_n, \mu z_n]}(z_t)\\
+ *    \end{array}
+ *   \right.
+ *  \f$
  *
- *here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
+ * here M is an (n x n) matrix, q, z and w n-vector.
  *
- *\fn  pfc_2D_cpg(double vec[],double *qq,int *nn,double *mu3,int * itermax, double * tol,double xout[],
- *                double rout[],int *it_end,double * res,int *info)
+ * \fn  pfc_2D_cpg( int *nn , double *vec , double *q , double *z , double *w , int *info\n,
+ *                  int *iparamLCP , double *dparamLCP )
  *
- * pfc_2D_cpg is a specific gcp (gradient conjugated projected) solver for primal contact problem with friction.
+ * pfc_2D_cpg is a specific cpg (conjugated projected gradient) for primal contact problem with friction.\n
+ * Ref: Renouf, M. and Alart, P. "" Comp. Method Appl. Mech. Engrg. (2004).
  *
- * \param vec On enter a double vector containing the components of the double matrix with a fortran90 allocation.
- * \param qq On enter a pointer over doubles containing the components of the double vector.
- * \param nn On enter a pointer over integers, the dimension of the second member.
- * \param mu3 On enter a pointer over doubles, the friction coefficient.
- * \param itermax On enter a pointer over integers, the maximum iterations required.
- * \param tol On enter a pointer over doubles, the tolerance required.
- * \param it_end On enter a pointer over integers, the number of iterations carried out.
- * \param res On return a pointer over doubles, the error value.
- * \param xout On return double vector, the solution of the problem.
- * \param rout On return double vector, the solution of the problem.
- * \param info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
+ * Generic pfc_2D parameters:\n
  *
- * \author Nineb Sheherazade.
- * \coauthor
+ * \param nn      Unchanged parameter which represents the dimension of the system.
+ * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
+ * \param q       Unchanged parameter which contains the components of the right hand side vector.
+ * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
+ * \param w       Modified parameter which returns the solution of the problem.
+ * \param info    Modified parameter which returns the termination value\n
+ *                0 - convergence\n
+ *                1 - iter = itermax\n
+ *
+ * Specific CPG parameters:\n
+ *
+ * \param iparamLCP[0] = itermax Input unchanged parameter which represents the maximum number of iterations allowed.
+ * \param iparamLCP[1] = ispeak  Input unchanged parameter which represents the output log identifiant\n
+ *                       0 - no output\n
+ *                       0 < active screen output\n
+ * \param iparamLCP[2] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
+ *
+ * \param dparamLCP[0] = mu      Input unchanged parameter which represents the friction coefficient.
+ * \param dparamLCP[1] = tol     Input unchanged parameter which represents the tolerance required.
+ * \param dparamLCP[2] = res     Output modified parameter which returns the final error value.
+ *
+ *
+ * \author Nineb Sheherazade & Mathieu Renouf.
+ *
  */
 
 #include <stdio.h>
@@ -43,229 +56,241 @@
 #include "blaslapack.h"
 
 
-pfc_2D_cpg(double vec[], double *b, int *nn, double *mu3, int * itermax, double * tol, double x[], double rout[], int *it_end, double * res, int *info)
+void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info,
+                int *iparamLCP , double *dparamLCP)
 {
 
   FILE *f101;
-  int n = *nn, maxit = *itermax;
-  double mu = *mu3, eps = 1.e-08;
-  int nc = n / 2, i, j, iter, k, ii, incx = 1, incy = 1;
-  double pAp, alpha, beta, wAp, rp, normr;
-  char trans = 'T';
-  double /*A[n][n],*/ alphaf, betaf, den, num;
-  int *stat, *statusi;
-  double *p, *fric;
-  double *fric1, *v, *w, *Ap, *xi, *z;
-  double /*r[n]*/ *r;
-  double(*A)[n];
+  int n, nc, incx, incy;
+  int i, iter;
+  int itermax, ispeak;
 
-  A = malloc(n * n * sizeof(double));
+  double err, a1, b1 , qs;
 
-  r = (double*) malloc(n * sizeof(double));
-  fric = (double*) malloc(n * sizeof(double));
-  p = (double*) malloc(n * sizeof(double));
-  v = (double*) malloc(n * sizeof(double));
-  w = (double*) malloc(n * sizeof(double));
-  Ap = (double*) malloc(n * sizeof(double));
-  xi = (double*) malloc(n * sizeof(double));
-  z = (double*) malloc(n * sizeof(double));
-  fric1 = (double*) malloc(n * sizeof(double));
-  stat = (int*) malloc(nc * sizeof(int));
-  statusi = (int*) malloc(nc * sizeof(int));
+  double alpha, beta, rp, pMp;
+  double den, num, tol, mu;
 
-  f101 = fopen("resultat_gcp.dat", "w+");
+  char NOTRANS = 'N';
 
-  for (i = 0; i < n; i++)
+  int *status;
+  double *zz , *pp , *rr, *ww, *Mp;
+
+  n    = *nn;
+  incx = 1;
+  incy = 1;
+  nc   = n / 2;
+
+  /* Recup input */
+
+  itermax = iparamLCP[0];
+  ispeak  = iparamLCP[1];
+
+  mu  = dparamLCP[0];
+  tol = dparamLCP[1];
+
+  /* Initialize output */
+
+  iparamLCP[2] = 0;
+  dparamLCP[2] = 0.0;
+
+  if (ispeak == 2) f101 = fopen("pfc_2D_cpg.log" , "w+");
+
+  qs = dnrm2_(&n , q , &incx);
+
+  if (ispeak > 0) printf(" Norm: %g \n", qs);
+
+  if (qs > 1e-16) den = 1.0 / qs;
+  else
   {
-    x[i] = 0.;
-    xi[i] = 0.;
-    r[i] = 0.;
-    v[i] = 0.;
-    p[i] = 0.;
-    w[i] = 0.;
-    Ap[i] = 0.;
-    z[i] = 0.;
-    fric1[i] = 1.;
-    fric[i] = mu * fric1[i];
+    for (i = 0 ; i < n ; ++i)
+    {
+      w[i] = 0.;
+      z[i] = 0.;
+    }
+    *info = 9;
+    return;
   }
 
-  for (i = 0; i < n; i++)
-    for (j = 0; j < n; j++)
-      A[i][j] = vec[i * n + j];
+  /* Allocations */
 
-  for (i = 0; i < nc; i++)
+  status = (int*)malloc(n * sizeof(int));
+
+  ww = (double*)malloc(n * sizeof(double));
+  rr = (double*)malloc(n * sizeof(double));
+  pp = (double*)malloc(n * sizeof(double));
+  zz = (double*)malloc(n * sizeof(double));
+
+  Mp = (double*)malloc(n * sizeof(double));
+
+  incx = 1;
+
+  for (i = 0 ; i < n ; ++i) ww[i] = 0.;
+
+  for (i = 0; i < n; ++i)
   {
-    stat[i] = 0;
-    statusi[i] = 0;
+
+    status[i] = 0;
+
+    ww[i] = 0.;
+    rr[i] = 0.;
+    pp[i] = 0.;
+    zz[i] = 0.;
+
+    Mp[i] = 0.;
+
   }
 
+  /* rr = -Wz + q */
 
-  dcopy_(&n, b, &incx, r, &incy);
-  alphaf = -1.;
-  betaf = 1.;
-  dgemv_(&trans, &n, &n, &alphaf, A, &n, x, &incx, &betaf, r, &incy);
+  incx = 1;
+  incy = 1;
 
-  iter = 1;
+  dcopy_(&n , q , &incx , rr , &incy);
 
+  a1 = -1.;
+  b1 = -1.;
 
-  /*//  !Check for initial status*/
-  for (i = 0; i < nc; i++)
+  dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , rr , &incy);
+
+  /* Initialization of gradients */
+  /* rr -> p and rr -> w */
+
+  dcopy_(&n , rr , &incx , ww , &incy);
+  dcopy_(&n , rr , &incx , pp , &incy);
+
+  iter = 0.0;
+  err  = 1.0 ;
+
+  while ((iter < itermax) && (err > tol))
   {
-    mu = fric[i];
-    if (x[2 * i] <= eps)
-    {
-      /*// !no contact*/
-      stat[i] = 0;
-    }
-    else if (x[2 * i + 1] <= -mu * x[2 * i])
-    {
-      /*/ !slide backward*/
-      stat[i] = 1;
-    }
-    else if (x[2 * i + 1] >= mu * x[2 * i])
-    {
-      /*/  !slide forward*/
-      stat[i] = 3;
-    }
-    else
-    {
-      /*/ !stick contact*/
-      stat[i] = 2;
-    }
-  }
 
-  for (ii = 0; ii < maxit; ii++)
-  {
-    for (i = 0; i < nc; i++)
-      statusi[i] = stat[i];
+    ++iter;
 
+    /* Compute initial pMp */
 
-    dcopy_(&n, r, &incx, v, &incy);
+    incx = 1;
+    incy = 1;
 
-    if (ii == 0)
+    dcopy_(&n , pp , &incx , Mp , &incy);
+
+    a1 = 1.0;
+    b1 = 0.0;
+
+    dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , Mp , &incx , &b1 , w , &incy);
+
+    pMp = ddot_(&n , pp , &incx , w  , &incy);
+
+    if (fabs(pMp) < 1e-16)
     {
-      dcopy_(&n, r, &incx, w, &incy);
-      dcopy_(&n, w, &incx, p, &incy);
-      alphaf = 1.;
-      betaf = 0.;
-      dgemv_(&trans, &n, &n, &alphaf, A, &n, p, &incx, &betaf, Ap, &incy);
-      pAp = ddot_(&n, p, &incx, Ap, &incy);
-    }
-    else
-    {
-      alphaf = 1.;
-      betaf = 0.;
-      dgemv_(&trans, &n, &n, &alphaf, A, &n, p, &incx, &betaf, Ap, &incy);
-      pAp = ddot_(&n, p, &incx, Ap, &incy);
 
-      if (pAp == 0)
+      if (ispeak > 0)
       {
-        printf("operation non conform alpha at the iteration %d \n", iter);
-        break;
+        printf(" Operation no conform at the iteration %d \n", iter);
+        printf(" Alpha can be obtained with pWp = %10.4g  \n", pMp);
       }
 
+      free(Mp);
+      free(ww);
+      free(rr);
+      free(pp);
+      free(zz);
+
+      iparamLCP[2] = iter;
+      dparamLCP[1] = err;
+
+      return (*info = 3);
     }
 
-    rp = ddot_(&n, r, &incx, p, &incy);
-    alpha = rp / pAp;
+    rp  = ddot_(&n , pp , &incx , rr , &incy);
 
+    alpha = rp / pMp;
 
-    dcopy_(&n, x, &incx, xi, &incy);
-    alphaf = alpha;
-    daxpy_(&n, &alphaf, p, &incx, xi, &incy);
+    /*
+     * Iterate prediction:
+     * z' = z + alpha*p
+     *
+     */
 
-    projc(xi, &n, statusi, p, fric, x, stat);
+    daxpy_(&n , &alpha , pp , &incx , z , &incy);
 
+    /* Iterate projection*/
 
-    /*/   r(:)=b(:)-matmul(A,x)*/
+    pfc_2D_projc(nc , mu , z , pp , status);
 
-    dcopy_(&n, b, &incx, r, &incy);
-    alphaf = -1.;
-    betaf = 1.;
-    dgemv_(&trans, &n, &n, &alphaf, A, &n, x, &incx, &betaf, r, &incy);
+    /* rr = -Wz + q */
 
-    projf(statusi, &n, r, fric, w);
-    projf(statusi, &n, p, fric, z);
+    dcopy_(&n , rr , &incx , w  , &incy);
+    dcopy_(&n , q  , &incx , rr , &incy);
 
+    a1 = -1.;
+    b1 = -1.;
 
-    wAp = ddot_(&n, w, &incx, Ap, &incy);
-    beta = - wAp / pAp;
+    dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , rr , &incy);
 
-    dcopy_(&n, w, &incx, p, &incy);
-    alphaf = beta;
-    betaf = 1.;
-    daxpy_(&n, &alphaf, z, &incx, p, &incy);
+    /* Gradients projection
+     * rr --> ww
+     * pp --> zz
+     */
 
+    pfc_2D_projf(n , ww , zz , rr , pp , status);
 
-    alphaf = 1.;
-    betaf = 0.;
-    dgemv_(&trans, &n, &n, &alphaf, A, &n, p, &incx, &betaf, Ap, &incy);
+    /*   beta = -w.Mp / pMp  */
 
-    pAp = ddot_(&n, p, &incx, Ap, &incy);
+    rp = ddot_(&n , ww , &incx, w , &incy);
 
-    dcopy_(&n, r, &incx, xi, &incy);
-    alphaf = -1.;
-    daxpy_(&n, &alphaf, v, &incx, xi, &incy);
+    beta = -rp / pMp;
 
-    num = ddot_(&n, xi, &incx, xi, &incy);
-    den = ddot_(&n, v, &incx, v, &incy);
+    dcopy_(&n , ww , &incx , pp , &incy);
+    daxpy_(&n, &beta , zz , &incx , pp , &incy);
 
-    normr = sqrt(num / den);
+    /* **** Criterium convergence **** */
 
-    for (i = 0; i < n; i++)
-    {
-      /*result_gs[i][iter1-1] = z[i]; */
-      fprintf(f101, "%d  %d  %14.7e\n", ii, i, x[i]);
-    }
+    qs   = -1.0;
+    daxpy_(&n , &qs , rr , &incx , w , &incy);
+    num = dnrm2_(&n, w , &incx);
+    err = num * den;
 
-    if (normr < *tol)
-    {
-      iter = ii;
-      /*printf("convergence after %d iterations with a residual %g\n",iter,normr);*/
-      *info = 0;
-      break;
-    }
-    iter = iter + 1;
-
-
+    if (ispeak == 2) for (i = 0 ; i < n ; ++i) fprintf(f101, "%d  %d  %14.7e\n", iter , i , z[i]);
 
   }
 
+  iparamLCP[2] = iter;
+  dparamLCP[1] = err;
 
+  dcopy_(&n , rr , &incx , w , &incy);
 
+  qs   = -1.0;
+  dscal_(&n , &qs , w , &incx);
 
-  if (normr < *tol)
+  if (ispeak > 0)
   {
-    *info = 0;
-    printf("convergence after %d iterations with a residual %g\n", iter, normr);
+    if (err > tol)
+    {
+      printf(" No convergence of NLGS after %d iterations\n" , iter);
+      printf(" The residue is : %g \n", err);
+      *info = 1;
+    }
+    else
+    {
+      printf(" Convergence of NLGS after %d iterations\n" , iter);
+      printf(" The residue is : %g \n", err);
+      *info = 0;
+    }
   }
   else
   {
-    *info = 1;
-    printf("no convergence after %d iterations with a residual %g\n", iter, normr);
+    if (err > tol) *info = 1;
+    else *info = 0;
   }
 
 
-  *it_end = iter;
-  *res = normr;
+  free(Mp);
 
-  for (i = 0; i < n; i++)
-    rout[i] = -r[i];
+  free(ww);
+  free(rr);
+  free(pp);
+  free(zz);
 
-
-  free(fric);
-  free(p);
-  free(v);
-  free(w);
-  free(Ap);
-  free(xi);
-  free(z);
-  free(fric1);
-  free(stat);
-  free(statusi);
-  free(r);
-  free(A);
-
-  fclose(f101);
+  if (ispeak == 2) fclose(f101);
 
 }

@@ -15,13 +15,13 @@
  *
  *here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
  *
- * \fn pfc_2D_latin(double vec[],double *qq,int *nn, double * k_latin,double *mumu,int * itermax,
+ * \fn pfc_2D_latin(double vec[],double *q,int *nn, double * k_latin,double *mumu,int * itermax,
  *                  double * tol,double z[],double w[],int *it_end,double * res,int *info)
  *
  *   cfp_latin  is a specific latin solver for primal contact problem with friction.
  *
  * \param vec On enter a double vector containing the components of the double matrix with a fortran90 allocation.
- * \param qq On enter a pointer over doubles containing the components of the double vector.
+ * \param q On enter a pointer over doubles containing the components of the double vector.
  * \param nn On enter a pointer over integers, the dimension of the second member.
  * \param k_latin On enter a pointer over doubles, the latin coefficient (positive).
  * \param mumu On enter a pointer over doubles, the friction coefficient.
@@ -42,15 +42,16 @@
 #include <math.h>
 #include "blaslapack.h"
 
-pfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int * itermax, double * tol, double z[], double w[], int *it_end, double * res, int *info)
+pfc_2D_latin(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+             int *iparamLCP , double *dparamLCP)
 {
 
   FILE *f101;
-  int i, j, kk, iter1, ino, ddl, info2;
-  int n = *nn, incx = 1, incy = 1, nc = n / 2, idim, jdim, nbno, taille, taillet, taillen, itt = *itermax;
-  double errmax = *tol, alpha, beta, maxa, bb, cc, zw, aa, nt, wn, tc, zc0, mu = *mumu;
-  double rr, rrr, r1, r2, r3, invR0, invRT0, err1, z0, num11, err0, invRTinvR0;
-  double den11, den22, vv, knz0, ktz0, *ktz, *wf; /*ktz[nc], wf[nc];*/
+  int i, j, kk, iter1, ino, ddl, info2, ispeak;
+  int n, incx = 1, incy = 1, nc = n / 2, idim, jdim, nbno, taille, taillet, taillen, itermax;
+  double tol, alpha, beta, maxa, aa, nt, wn, tc, zc0, mu, k_latin;
+  double invR0, invRT0, err1, num11, err0, invRTinvR0;
+  double den11, den22, knz0, ktz0, *ktz, *wf; /*ktz[nc], wf[nc];*/
   double  *wc, *zc, *wt, *maxwt, *wnum1, *znum1, *q;/*q[n];*/
   double *zt, *maxzt, (*kn)[nc], (*kt)[nc]; /*kn[nc][nc], kt[nc][nc];*/
   char trans = 'T';
@@ -64,7 +65,21 @@ pfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, 
   /*  int ddlt[nc], vectnt[n];*/
   int *ddlt, *vectnt;
 
+  n = *nn;
 
+  /* Recup input */
+
+  itermax = iparamLCP[0];
+  ispeak  = iparamLCP[1];
+
+  mu  = dparamLCP[0];
+  tol = dparamLCP[1];
+  k_latin = dparamLCP[2];
+
+  /* Initialize output */
+
+  iparamLCP[2] = 0;
+  dparamLCP[3] = 0.0;
 
 
   k =  malloc(n * n * sizeof(double));
@@ -108,9 +123,8 @@ pfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, 
 
   for (i = 0; i < n; i++)
   {
-    k[i][i] = *k_latin / vec[i * n + i];
+    k[i][i] = k_latin / vec[i * n + i];
     vectnt[i] = i + 1;
-    q[i] = -qq[i];
   }
 
   for (i = 0; i < nc; i++)
@@ -158,9 +172,9 @@ pfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, 
 
   taille = 0;
   for (i = 0; i < n; i++)
-    taille = sizeof(qq[i]) + taille;
+    taille = sizeof(q[i]) + taille;
 
-  taille = taille / sizeof(qq[0]);
+  taille = taille / sizeof(q[0]);
   nbno = taille / idim;
 
   for (i = 0; i < nc; i++)
@@ -401,7 +415,7 @@ pfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, 
   iter1 = 0;
   err1 = 1.;
 
-  while ((iter1 < itt) && (err1 > errmax))
+  while ((iter1 < itermax) && (err1 > tol))
   {
 
     /*   !linear stage (zc,wc) -> (z,w)*/
@@ -410,10 +424,10 @@ pfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, 
     alpha = 1.;
     beta = 1.;
     dgemv_(&trans, &n, &n, &alpha, kfinv, &n, zc, &incx, &beta, wc, &incy);
-    //    dcopy_( &n, qq, &incx, znum1, &incy);
+    //    dcopy_( &n, q, &incx, znum1, &incy);
     dcopy_(&n, q, &incx, znum1, &incy);
     /*alpha = -1.; /* 0807 */
-    /*daxpy_( &n, &alpha, qq, &incx, znum1, &incy);/**/
+    /*daxpy_( &n, &alpha, q, &incx, znum1, &incy);/**/
     alpha = 1.;
     daxpy_(&n, &alpha, wc, &incx, znum1, &incy);
     alpha = 1.;
@@ -540,8 +554,6 @@ pfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, 
     err0 = num11 / (den11 + den22);
     err1 = sqrt(err0);
     iter1 = iter1 + 1;
-    *it_end = iter1;
-    *res = err1;
 
     for (i = 0; i < n; i++)
     {
@@ -551,8 +563,10 @@ pfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, 
 
   }
 
+  iparamLCP[2] = iter1;
+  dparamLCP[3] = err1;
 
-  if (err1 > errmax)
+  if (err1 > tol)
   {
     printf("no convergence after %d iterations, the residue is %g\n", iter1, err1);
     *info = 1;

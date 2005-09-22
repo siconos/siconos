@@ -13,7 +13,7 @@
  *
  * where M is an (n x n)-matrix, q , w and z n-vectors.
  *
- * \fn  lcp_nlgs( int *nn , double *vec , double *q , double *z , int *info\n,
+ * \fn  lcp_nlgs( int *nn , double *vec , double *q , double *z , double *w , int *info\n,
  *                int *iparamLCP , double *dparamLCP )
  *
  * lcp_nlgs (Non Linear Gauss-Seidel) is a solver for LCP based on the principle of splitting method\n

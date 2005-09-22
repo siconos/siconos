@@ -53,10 +53,8 @@ void test_lcp_series(int n , double *vec , double *q)
   int nonsymmetric;
   int incx = 1, incy = 1;
   int info1 = -1, info2 = -1, info3 = -1, info4 = -1, info5 = -1, info6 = -1, info7 = -1;
-  int iter1, iter2, iter3, iter4, iter5, iter6, iter7;
 
   double comp, diff, alpha, beta;
-  double err1, err2, err3, err4, err5, err6, err7;
 
   double *z1, *z2, *z3, *z4, *z5, *z6, *z7;
   double *w1, *w2, *w3, *w4, *w5, *w6, *w7;
@@ -80,13 +78,13 @@ void test_lcp_series(int n , double *vec , double *q)
 
   /* Method definition */
 
-  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp7 = { "NewtonMin",   10   , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp7 = { "NewtonMin",   10   , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
 
   nonsymmetric = 0;
 
@@ -115,7 +113,7 @@ void test_lcp_series(int n , double *vec , double *q)
 #endif
   for (i = 0 ; i < n ; ++i) z1[i] = 0.0;
 
-  info1 = lcp_solver(vec , q , &n , &method_lcp1 , z1 , w1 , &iter1 , &err1);
+  info1 = lcp_solver(vec , q , &n , &method_lcp1 , z1 , w1);
 
   /* #2 CPG TEST */
 #ifdef BAVARD
@@ -123,7 +121,7 @@ void test_lcp_series(int n , double *vec , double *q)
 #endif
   for (i = 0 ; i < n ; ++i) z2[i] = 0.0;
 
-  info2 = lcp_solver(vec , q , &n , &method_lcp2 , z2 , w2 , &iter2 , &err2);
+  info2 = lcp_solver(vec , q , &n , &method_lcp2 , z2 , w2);
 
   /* #4 QP TEST */
 #ifdef BAVARD
@@ -131,7 +129,7 @@ void test_lcp_series(int n , double *vec , double *q)
 #endif
   for (i = 0 ; i < n ; ++i) z4[i] = 0.0;
 
-  info4 = lcp_solver(vec , q , &n , &method_lcp4 , z4 , w4 , &iter4 , &err4);
+  info4 = lcp_solver(vec , q , &n , &method_lcp4 , z4 , w4);
 
   /* #5 NSQP TEST */
 #ifdef BAVARD
@@ -139,7 +137,7 @@ void test_lcp_series(int n , double *vec , double *q)
 #endif
   for (i = 0 ; i < n ; ++i) z5[i] = 0.0;
 
-  info5 = lcp_solver(vec , q , &n , &method_lcp5 , z5 , w5 , &iter5 , &err5);
+  info5 = lcp_solver(vec , q , &n , &method_lcp5 , z5 , w5);
 
   /* #6 LEXICO LEMKE TEST */
 #ifdef BAVARD
@@ -147,7 +145,7 @@ void test_lcp_series(int n , double *vec , double *q)
 #endif
   for (i = 0 ; i < n ; ++i) z6[i] = 0.0;
 
-  info6 = lcp_solver(vec , q , &n , &method_lcp6 , z6 , w6 , &iter6 , &err6);
+  info6 = lcp_solver(vec , q , &n , &method_lcp6 , z6 , w6);
 
   /* #7 NEWTONMIN TEST */
 #ifdef BAVARD
@@ -155,7 +153,7 @@ void test_lcp_series(int n , double *vec , double *q)
 #endif
   for (i = 0 ; i < n ; ++i) z7[i] = 0.0;
 
-  info7 = lcp_solver(vec , q , &n , &method_lcp7 , z7 , w7 , &iter7 , &err7);
+  info7 = lcp_solver(vec , q , &n , &method_lcp7 , z7 , w7);
 
   /* #3 LATIN TEST */
 #ifdef BAVARD
@@ -163,7 +161,7 @@ void test_lcp_series(int n , double *vec , double *q)
 #endif
   for (i = 0 ; i < n ; ++i) z3[i] = 0.0;
 
-  info3 = lcp_solver(vec , q , &n , &method_lcp3 , z3 , w3 , &iter3 , &err3);
+  info3 = lcp_solver(vec , q , &n , &method_lcp3 , z3 , w3);
 
 #ifdef BAVARD
   printf(" *** ************************************** ***\n");
@@ -171,6 +169,8 @@ void test_lcp_series(int n , double *vec , double *q)
   for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z1[i]);
   printf("\n    CPG RESULT : ");
   for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z2[i]);
+  printf("\n  LATIN RESULT : ");
+  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z3[i]);
   printf("\n     QP RESULT : ");
   for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z4[i]);
   printf("\n   NSQP RESULT : ");
@@ -179,8 +179,6 @@ void test_lcp_series(int n , double *vec , double *q)
   for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z6[i]);
   printf("\n Newton RESULT : ");
   for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z7[i]);
-  printf("\n  LATIN RESULT : ");
-  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z3[i]);
   printf("\n\n");
   printf(" INFO RESULT\n");
 
@@ -194,49 +192,49 @@ void test_lcp_series(int n , double *vec , double *q)
   dgemv_(&NT , &n , &n , &beta , vec , &n , z1 , &incx , &alpha , w1 , &incy);
   diff = dnrm2_(&n , w1 , &incx);
 
-  printf("\n    NLGS   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info1, iter1, err1, comp, diff);
+  printf("\n    NLGS   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info1, method_lcp1.iter, method_lcp1.err, comp, diff);
 
   comp = ddot_(&n , z2 , &incx , w2 , &incy);
   daxpy_(&n , &alpha , q , &incx , w2 , &incy);
   dgemv_(&NT , &n , &n , &beta , vec , &n , z2 , &incx , &alpha , w2 , &incy);
   diff = dnrm2_(&n , w2 , &incx);
 
-  printf("\n    CPG    (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info2, iter2, err2, comp, diff);
-
-  comp = ddot_(&n , z4 , &incx , w4 , &incy);
-  daxpy_(&n , &alpha , q , &incx , w4 , &incy);
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z4 , &incx , &alpha , w4 , &incy);
-  diff = dnrm2_(&n , w4 , &incx);
-
-  printf("\n    QP     (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info4, iter4, err4, comp, diff);
-
-  comp = ddot_(&n , z5 , &incx , w5 , &incy);
-  daxpy_(&n , &alpha , q , &incx , w5 , &incy);
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z5 , &incx , &alpha , w5 , &incy);
-  diff = dnrm2_(&n , w5 , &incx);
-
-  printf("\n    NSQP   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info5, iter5, err5, comp, diff);
-
-  comp = ddot_(&n , z6 , &incx , w6 , &incy);
-  daxpy_(&n , &alpha , q , &incx , w6 , &incy);
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z6 , &incx , &alpha , w6 , &incy);
-  diff = dnrm2_(&n , w6 , &incx);
-
-  printf("\n    Lemke  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info6, iter6, err6, comp, diff);
-
-  comp = ddot_(&n , z7 , &incx , w7 , &incy);
-  daxpy_(&n , &alpha , q , &incx , w7 , &incy);
-  dgemv_(&NT , &n , &n , &beta , vec , &n , z7 , &incx , &alpha , w7 , &incy);
-  diff = dnrm2_(&n , w7 , &incx);
-
-  printf("\n    Newton (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info7, iter7, err7, comp, diff);
+  printf("\n    CPG    (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info2, method_lcp2.iter, method_lcp2.err, comp, diff);
 
   comp = ddot_(&n , z3 , &incx , w3 , &incy);
   daxpy_(&n , &alpha , q , &incx , w3 , &incy);
   dgemv_(&NT , &n , &n , &beta , vec , &n , z3 , &incx , &alpha , w3 , &incy);
   diff = dnrm2_(&n , w3 , &incx);
 
-  printf("\n    LATIN  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info3, iter3, err3, comp, diff);
+  printf("\n    LATIN  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info3, method_lcp3.iter, method_lcp3.err, comp, diff);
+
+  comp = ddot_(&n , z4 , &incx , w4 , &incy);
+  daxpy_(&n , &alpha , q , &incx , w4 , &incy);
+  dgemv_(&NT , &n , &n , &beta , vec , &n , z4 , &incx , &alpha , w4 , &incy);
+  diff = dnrm2_(&n , w4 , &incx);
+
+  printf("\n    QP     (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info4, method_lcp4.iter, method_lcp4.err, comp, diff);
+
+  comp = ddot_(&n , z5 , &incx , w5 , &incy);
+  daxpy_(&n , &alpha , q , &incx , w5 , &incy);
+  dgemv_(&NT , &n , &n , &beta , vec , &n , z5 , &incx , &alpha , w5 , &incy);
+  diff = dnrm2_(&n , w5 , &incx);
+
+  printf("\n    NSQP   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info5, method_lcp5.iter, method_lcp5.err, comp, diff);
+
+  comp = ddot_(&n , z6 , &incx , w6 , &incy);
+  daxpy_(&n , &alpha , q , &incx , w6 , &incy);
+  dgemv_(&NT , &n , &n , &beta , vec , &n , z6 , &incx , &alpha , w6 , &incy);
+  diff = dnrm2_(&n , w6 , &incx);
+
+  printf("\n    Lemke  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info6, method_lcp6.iter, method_lcp6.err, comp, diff);
+
+  comp = ddot_(&n , z7 , &incx , w7 , &incy);
+  daxpy_(&n , &alpha , q , &incx , w7 , &incy);
+  dgemv_(&NT , &n , &n , &beta , vec , &n , z7 , &incx , &alpha , w7 , &incy);
+  diff = dnrm2_(&n , w7 , &incx);
+
+  printf("\n    Newton (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info7, method_lcp7.iter, method_lcp7.err, comp, diff);
 
 #endif
 
@@ -294,13 +292,13 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 
   /* Method definition */
 
-  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
-  static method_lcp method_lcp7 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 0 , "N2"};
+  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp7 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
 
 
   /* #1 NLGS TEST */

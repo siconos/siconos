@@ -9,7 +9,7 @@
  * \author Nineb Sheherazade and Dubois Frederic.
  * Last Modifications : Mathieu Renouf
  *
- * !\struct method_dr
+ * !\struct method_pr
  *
  * \brief A type definition for a structure method_pr.
  *
@@ -20,6 +20,9 @@
  * \param a          lower bound
  * \param a          upper bound
  * \param normType   name norm
+ *
+ * \param iter       final number of iteration
+ * \param err        final value of error criteria
  *
  */
 
@@ -33,6 +36,8 @@ typedef struct
   double *a;
   double *b;
   char   normType[64];
+  int    iter;
+  double err;
 
 } method_pr;
 
@@ -48,6 +53,9 @@ typedef struct
  * \param a          upper bound
  * \param normType   name norm
  *
+ * \param iter       final number of iteration
+ * \param err        final value of error criteria
+ *
  */
 
 typedef struct
@@ -60,6 +68,8 @@ typedef struct
   double *a;
   double *b;
   char   normType[64];
+  int    iter;
+  double err;
 
 } method_dr;
 
@@ -75,6 +85,9 @@ typedef struct
  * \param iout       output boolean ( 0 = no output log )
  * \param normType   name norm
  *
+ * \param iter       final number of iteration
+ * \param err        final value of error criteria
+ *
  */
 
 typedef struct
@@ -87,6 +100,8 @@ typedef struct
   double relax;
   int    iout;
   char   normType[64];
+  int    iter;
+  double err;
 
 } method_lcp;
 
@@ -101,6 +116,9 @@ typedef struct
  * \param k_latin    latin coefficient
  * \param normType   name norm
  *
+ * \param iter       final number of iteration
+ * \param err        final value of error criteria
+ *
  */
 
 typedef struct
@@ -111,7 +129,10 @@ typedef struct
   double tol;
   double mu;
   double k_latin;
+  int    iout;
   char   normType[64];
+  int    iter;
+  double err;
 
 } method_pfc_2D;
 
@@ -134,6 +155,9 @@ typedef struct
  * \param
  * \param
  *
+ * \param iter       final number of iteration
+ * \param err        final value of error criteria
+ *
  */
 
 typedef struct
@@ -154,6 +178,8 @@ typedef struct
   int    dim_c;
   int    dim_tt;
   int    dim_n;
+  int    iter;
+  double err;
 
 } method_dfc_2D;
 
@@ -167,6 +193,9 @@ typedef struct
  * \param method_pfc_2D : pfc_2D is a method_pfc_2D structure .
  * \param method_dfc_2D : dfc_2D is a method_dfc_2D structure .
  * \param method_qp     : qp is a method_qp structure .
+ *
+ * \param iter       final number of iteration
+ * \param err        final value of error criteria
  *
  */
 
@@ -185,6 +214,7 @@ typedef union
 
 } method;
 
+
 /*
  * header for C++ compiling / and C compiling
  */
@@ -197,7 +227,7 @@ typedef union
 
 /**************** LCP *********************/
 
-extern "C" int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w , int *it_end , double *res);
+extern "C" int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w);
 
 extern "C" int lcp_solver_block(int *inb , int *iid , double *vec, double *q , int *nn , int *nb , method *pt , double *z ,
                                 double *w , int *it_end , int *itt_end , double *res);
@@ -244,13 +274,13 @@ extern "C" void dfc_2D_latin(double* , double* , int* , double* , double* , int*
 
 /********************************************/
 
-extern "C" int pfc_2D_solver(double* , double* , int* , method* , double* , double*);
+extern "C" int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w);
 
-extern "C" void pfc_2D_cpg(double* , double* , int* , double* , int* , double* , double* , double* , int* , double* , int*);
+extern "C" void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
-extern "C" void pfc_2D_nlgs(double* , double* , int* , double* , int* , double* , double* , double* , int* , double* , int*);
+extern "C" void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
-extern "C" void pfc_2D_latin(double* , double* , int* , double* , double* , int* , double* , double* , double* , int* , double* , int*);
+extern "C" void pfc_2D_latin(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
 /********************************************/
 
@@ -269,6 +299,12 @@ extern "C" void dfc_2D2lcp(int *, double *, method *, double *, int *, int *, in
 extern "C" void lcp2dfc_2D(int *, double *, double *, method *, double *, double *, int *, double *, int *,
                            int *, int *, int *,  int *, int *, int *, double *, double *);
 
+/****************************** **************** ************************************/
+
+//extern "C" void pfc_2D_projc( int nc , double mu , double *z , double *p , int *status );
+
+//extern "C" void pfc_2D_projf( int n , double *ww , double *zz , double *rr , double *pp , int *status )
+
 #endif
 
 #ifndef __cplusplus
@@ -283,7 +319,7 @@ extern "C" void lcp2dfc_2D(int *, double *, double *, method *, double *, double
  *
  */
 
-extern int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w , int *it_end , double *res);
+extern int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w);
 
 /*
  * @}
@@ -357,7 +393,7 @@ extern int pr_solver(double* , double* , int* , method* , double* , double*);
  *
  */
 
-extern dr_solver(double* , double* , int* , method* , double* , double*);
+extern int dr_solver(double* , double* , int* , method* , double* , double*);
 
 /*!
  * @}
@@ -373,13 +409,13 @@ extern dr_solver(double* , double* , int* , method* , double* , double*);
  * @defgroup group5 PFC (Primal Frictional Contact)
  * @{
  *
- * \fn int extern  pfc_2D_solver( double* , double* , int* , method* , double* , double* )
+ * \fn int extern  pfc_2D_solver( double *vec , double *q , int *n , method *pt , double *z , double *w , int *it_end , double *res )
  *
  * \brief pfc_2D_solver() is a generic interface allowing the call of one of the @ref 2D pfc solvers.
  *
  */
 
-extern int pfc_2D_solver(double* , double* , int* , method* , double* , double*);
+extern int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w);
 
 /*!
  * @}
@@ -398,13 +434,13 @@ extern int pfc_2D_solver(double* , double* , int* , method* , double* , double*)
  * @defgroup group6 DFC (Dual Frictional Contact)
  * @{
  *
- * \fn int extern dfc_2D_solver( double* , double* , int* , method* , double* , double* )
+ * \fn int extern dfc_2D_solver( double *vec , double *q , int *n , method *pt , double *z , double *w )
  *
  * \brief dfc_2D_solver() is a generic interface allowing the call of one of the @ref dfc solvers.
  *
  */
 
-extern int dfc_2D_solver(double* , double* , int* , method* , double* , double*);
+extern int dfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w);
 
 /*!
  * @}
@@ -451,16 +487,12 @@ extern void lcp_newton_min(int *nn , double *vec , double *q , double *z , doubl
 
 /*********************************** PR *****************************************/
 
-extern int pr_solver(double* , double* , int* , method* , double* , double*);
-
 extern void pr_latin(double* , double* , int* , double* , double* , double* , int* ,
                      double* , double* , double* , int* , double* , int*);
 
 extern void pr_nlgs(double* , double* , int* , double* , double* , int* , double* , double* , double* , int* , double* , int *);
 
 /*********************************** DR *****************************************/
-
-extern int dr_solver(double* , double* , int* , method* , double* , double*);
 
 extern void dr_latin(double *, double *, int *, double * , double *, double *, int *, double *, double*, double *, int *, double *, int *)  ;
 
@@ -469,17 +501,13 @@ extern void dr_nlgs(double *vec , double *q , int *nn , double *a , double *b , 
 
 /*********************************** PFC 2D *****************************************/
 
-extern int pfc_2D_solver(double* , double* , int* , method* , double* , double*);
+extern void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
-extern void pfc_2D_cpg(double* , double* , int* , double* , int* , double* , double* , double* , int* , double* , int*);
+extern void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
-extern void pfc_2D_nlgs(double* , double* , int* , double* , int* , double* , double* , double* , int* , double* , int*);
-
-extern void pfc_2D_latin(double* , double* , int* , double* , double* , int* , double* , double* , double* , int* , double* , int*);
+extern void pfc_2D_latin(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
 /*********************************** DFC 2D *****************************************/
-
-extern int dfc_2D_solver(double* , double* , int* , method* , double* , double*);
 
 extern void dfc_2D_latin(double* , double* , int* , double* , double* , int* , double* , double* , double* , int* , double* , int*);
 
@@ -491,6 +519,14 @@ extern void dfc_2D2lcp(int *, double *, method *, double *, int *, int *, int * 
 
 extern void lcp2dfc_2D(int *, double *, double *, method *, double *, double *, int *, double *, int *, int *,
                        int *, int *,  int *, int *, int *, double *, double *);
+
+/****************************** **************** ************************************/
+
+//extern void pfc_2D_projc( int nc , double mu , double *z , double *p , int *status );
+
+//extern void pfc_2D_projf( int n , double *ww , double *zz , double *rr , double *pp , int *status )
+
+/******************************LCP SWITCH DFC 2D ************************************/
 
 #endif
 

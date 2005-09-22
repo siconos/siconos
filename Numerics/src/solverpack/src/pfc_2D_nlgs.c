@@ -15,15 +15,14 @@
  *
  * here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
  *
- * \fn  pfc_2D_nlgs( double *vec , double *q , int *nn , double *mu , int *itermax , double *tol ,
- *               double *z , double *w , int *it_end , double *res , int *info )
+ * \fn  pfc_2D_nlgs( int *nn , double *vec , double *q , double *z , double *w , int *info\n,
+ *                   int *iparamLCP , double *dparamLCP )
  *
- * pfc_2D_nlgs is a specific nlgs (Non Linear Gauss Seidel) solver for primal contact problem with friction.
+ * Generic pfc_2D parameters:\n
  *
+ * \param nn      Unchanged parameter which represents the dimension of the system.
  * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
  * \param q       Unchanged parameter which contains the components of the right hand side vector.
- * \param nn      Unchanged parameter which represents the dimension of the system.
- * \param mu      Unchanged parameter which represents the friction coefficient
  * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
  * \param w       Modified parameter which returns the solution of the problem.
  * \param info    Modified parameter which returns the termination value\n
@@ -31,7 +30,20 @@
  *                1 - iter = itermax\n
  *                2 - negative diagonal term\n
  *
- * \author Nineb Sheherazade & Mathieu Renouf.
+ * Specific NLGS parameters:\n
+ *
+ * \param iparamLCP[0] = itermax Input unchanged parameter which represents the maximum number of iterations allowed.
+ * \param iparamLCP[1] = ispeak  Input unchanged parameter which represents the output log identifiant\n
+ *                       0 - no output\n
+ *                       0 < active screen output\n
+ * \param iparamLCP[2] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
+ *
+ * \param dparamLCP[0] = mu      Input unchanged parameter which represents the friction coefficient.
+ * \param dparamLCP[1] = tol     Input unchanged parameter which represents the tolerance required.
+ * \param dparamLCP[2] = res     Output modified parameter which returns the final error value.
+ *
+ *
+ * \author Mathieu Renouf & Nineb Sheherazade .
  *
  */
 
@@ -41,14 +53,15 @@
 #include <math.h>
 #include "blaslapack.h"
 
-pfc_2D_nlgs(double *vec , double *q , int *nn , double *mu , int *itermax , double *tol ,
-            double *z , double *w , int *it_end , double *res , int *info)
+void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info,
+                 int *iparamLCP , double *dparamLCP)
 {
+
 
   FILE *f101;
 
-  int n, in, it, ispeak, incx, incy, nc, i, iter;
-  double err, zn , zt, den, num, dft, dfn;
+  int n, in, it, ispeak, itermax, incx, incy, nc, i, iter;
+  double err, zn , zt, den, num, dft, dfn, tol, mu;
   double qs, a1, b1;
 
   double *det, *bfd, *ww;
@@ -60,7 +73,21 @@ pfc_2D_nlgs(double *vec , double *q , int *nn , double *mu , int *itermax , doub
   incy = 1;
   nc   = n / 2;
 
-  if (ispeak) f101 = fopen("pfc_2D_nlgs.log" , "w+");
+  /* Recup input */
+
+  itermax = iparamLCP[0];
+  ispeak  = iparamLCP[1];
+
+  mu  = dparamLCP[0];
+  tol = dparamLCP[1];
+
+  /* Initialize output */
+
+  iparamLCP[2] = 0;
+  dparamLCP[2] = 0.0;
+
+
+  if (ispeak == 2) f101 = fopen("pfc_2D_nlgs.log" , "w+");
 
   iter = 0;
 
@@ -74,7 +101,7 @@ pfc_2D_nlgs(double *vec , double *q , int *nn , double *mu , int *itermax , doub
 
   qs = dnrm2_(&n , q , &incx);
 
-  if (ispeak) printf("\n ||q||= %g \n" , qs);
+  if (ispeak > 0) printf("\n ||q||= %g \n" , qs);
 
   if (qs > 1e-16) den = 1.0 / qs;
   else
@@ -113,7 +140,7 @@ pfc_2D_nlgs(double *vec , double *q , int *nn , double *mu , int *itermax , doub
     if (fabs(vec[in * n + in]) < 1e-16)
     {
 
-      if (ispeak)
+      if (ispeak > 0)
       {
         printf(" Warning negative diagonal term \n");
         printf(" The local problem can be solved \n");
@@ -130,7 +157,7 @@ pfc_2D_nlgs(double *vec , double *q , int *nn , double *mu , int *itermax , doub
     {
       it = 2 * i + 1;
       det[i] = vec[in * (n + 1)] * vec[it * (n + 1)] - vec[it * n + in] * vec[in * n + it];
-      bfd[i] = (*mu) * vec[it * n + in] / vec[in * (n + 1)];
+      bfd[i] = mu * vec[it * n + in] / vec[in * (n + 1)];
     }
   }
 
@@ -144,7 +171,7 @@ pfc_2D_nlgs(double *vec , double *q , int *nn , double *mu , int *itermax , doub
 
   dcopy_(&n , q , &incx , w , &incy);
 
-  while ((iter < *itermax) && (err > *tol))
+  while ((iter < itermax) && (err > tol))
   {
 
     ++iter;
@@ -180,18 +207,18 @@ pfc_2D_nlgs(double *vec , double *q , int *nn , double *mu , int *itermax , doub
         dft = vec[in * (n + 1)] * zt - vec[in * n + it ] * zn;
         dfn = -vec[it * n + in ] * zt - vec[it * (n + 1)] * zn;
 
-        a1 = dft + *mu * dfn;
-        b1 = dft - *mu * dfn;
+        a1 = dft + mu * dfn;
+        b1 = dft - mu * dfn;
 
         if (a1 > 0.0)
         {
           z[2 * i  ] = -(zn / vec[in * (n + 1)]) / (1 - bfd[i]);
-          z[2 * i + 1] = -(*mu) * z[2 * i];
+          z[2 * i + 1] = -mu * z[2 * i];
         }
         else if (b1 > 0.0)
         {
           z[2 * i  ] = -(zn / vec[in * (n + 1)]) / (1 + bfd[i]);
-          z[2 * i + 1] = (*mu) * z[2 * i];
+          z[2 * i + 1] =  mu * z[2 * i];
         }
         else
         {
@@ -217,19 +244,16 @@ pfc_2D_nlgs(double *vec , double *q , int *nn , double *mu , int *itermax , doub
     num = dnrm2_(&n, ww , &incx);
     err = num * den;
 
-    if (ispeak)
-    {
-      for (i = 0 ; i < n ; ++i) fprintf(f101, "%d  %d  %14.7e\n", iter - 1, i, z[i]);
-    }
+    if (ispeak == 2) for (i = 0 ; i < n ; ++i) fprintf(f101, "%d  %d  %14.7e\n", iter - 1, i, z[i]);
 
   }
 
-  *it_end = iter;
-  *res = err;
+  iparamLCP[2] = iter;
+  dparamLCP[2] = err;
 
-  if (ispeak)
+  if (ispeak > 0)
   {
-    if (err > *tol)
+    if (err > tol)
     {
       printf(" No convergence of NLGS after %d iterations\n" , iter);
       printf(" The residue is : %g \n", err);
@@ -244,7 +268,7 @@ pfc_2D_nlgs(double *vec , double *q , int *nn , double *mu , int *itermax , doub
   }
   else
   {
-    if (err > *tol) *info = 1;
+    if (err > tol) *info = 1;
     else *info = 0;
   }
 
@@ -252,6 +276,6 @@ pfc_2D_nlgs(double *vec , double *q , int *nn , double *mu , int *itermax , doub
   free(det);
   free(ww);
 
-  if (ispeak) fclose(f101);
+  if (ispeak == 2) fclose(f101);
 
 }

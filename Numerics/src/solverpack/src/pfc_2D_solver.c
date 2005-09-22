@@ -47,36 +47,71 @@
 int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w)
 {
 
-  int info, it_end;
-  double *res;
   char pfckey1[10] = "NLGS", pfckey2[10] = "CPG", pfckey3[10] = "Latin";
+
+  int i, info;
+
+  int     iparamLCP[5];
+  double  dparamLCP[5];
 
   clock_t t1, t2;
 
+  for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
+  for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
+
   info    = -1;
-  it_end  = 0;
-  *res    = 0.0;
 
   t1 = clock();
 
   if (strcmp(pt->pfc_2D.name , pfckey1) == 0)
+  {
 
-    pfc_2D_nlgs(vec , q , n , &pt->pfc_2D.mu , &pt->pfc_2D.itermax , &pt->pfc_2D.tol , z , w , &it_end , res , &info);
+    iparamLCP[0] = pt->pfc_2D.itermax;
+    iparamLCP[1] = pt->pfc_2D.iout;
+    dparamLCP[0] = pt->pfc_2D.mu;
+    dparamLCP[1] = pt->pfc_2D.tol;
 
+    pfc_2D_nlgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[2];
+
+  }
   else if (strcmp(pt->pfc_2D.name , pfckey2) == 0)
+  {
 
-    pfc_2D_cpg(vec , q , n , &pt->pfc_2D.mu , &pt->pfc_2D.itermax , &pt->pfc_2D.tol , z , w , &it_end , res , &info);
+    iparamLCP[0] = pt->pfc_2D.itermax;
+    iparamLCP[1] = pt->pfc_2D.iout;
+    dparamLCP[0] = pt->pfc_2D.mu;
+    dparamLCP[1] = pt->pfc_2D.tol;
 
+    pfc_2D_cpg(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[2];
+
+  }
   else if (strcmp(pt->pfc_2D.name , pfckey3) == 0)
+  {
 
-    pfc_2D_latin(vec , q , n , &pt->pfc_2D.k_latin , &pt->pfc_2D.mu , &pt->pfc_2D.itermax , &pt->pfc_2D.tol , z , w , &it_end , res , &info);
+    iparamLCP[0] = pt->pfc_2D.itermax;
+    iparamLCP[1] = pt->pfc_2D.iout;
+    dparamLCP[0] = pt->pfc_2D.mu;
+    dparamLCP[1] = pt->pfc_2D.tol;
+    dparamLCP[2] = pt->pfc_2D.k_latin;
 
+    pfc_2D_latin(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[3];
+
+  }
   else printf("Warning : Unknown solving method : %s\n", pt->pfc_2D.name);
 
   t2 = clock();
 
   printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
-
   return info;
+
 }
