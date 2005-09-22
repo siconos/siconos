@@ -1,10 +1,8 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC "-//Tigris//DTD XHTML 1.0 Transitional//EN"
-       "http://style.tigris.org/tigris_transitional.dtd">
+<!DOCTYPE html PUBLIC "-//Tigris//DTD XHTML 1.0 Transitional//EN" "http://style.tigris.org/tigris_transitional.dtd">
 <html>
 <head>
   <meta http-equiv="content-type"
-  content="application/xhtml+xml; charset=UTF-8" />
+ content="application/xhtml+xml; charset=UTF-8">
   <title>Software Requirements Specification</title>
   <style type="text/css">
 /* <![CDATA[ */ 
@@ -20,24 +18,20 @@
 
  */
  </style>
-  <link rel="stylesheet" type="text/css" href="css/print.css" media="print" />
+  <link rel="stylesheet" type="text/css" href="css/print.css"
+ media="print">
 </head>
-
 <body>
-
 <div class="app">
-
 <div class="readyset">
 <h1>Software Requirements Specification</h1>
-
 <div id="releaseinfo">
 <h2>Release Information</h2>
-
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
       <th>Project:</th>
-      <td><a href="index.html">Siconos</a><br />
+      <td><a href="index.html">Siconos</a><br>
       </td>
     </tr>
     <tr>
@@ -47,40 +41,33 @@
     <tr>
       <th>Attached worksheets:</th>
       <td>
-        <div>
-        SRS &gt; <a href="use-case-suite.html">Use case suite</a></div>
-
-        <div>
-        SRS &gt; <a href="feature-set.html">Feature set</a></div>
+      <div> SRS &gt; <a href="use-case-suite.html">Use case suite</a></div>
+      <div> SRS &gt; <a href="feature-set.html">Feature set</a></div>
       </td>
     </tr>
     <tr>
       <th>Related Documents:</th>
       <td>
-        <div>
-        <ul class="itemize">
-          <li class="li-itemize"><font size="3">"Guide to software
-            requirements specifications", standard 830 -
-          1984,IEEE.</font></li>
-          <li class="li-itemize"><font size="3">"Cours de Conduite de Projets
-            Logiciels", Ioannis Parissis, Master 2 Pro GI
-          2003-2004.</font></li>
-          <li class="li-itemize"><font size="3">Draft version of SRD of
-            SICONOS / WP2, January 2004.</font></li>
-          <li class="li-itemize"><font size="3">Templates and Guides, Roger
-            Pissard-Gibollet, INRIA</font><br />
-          </li>
-          <li class="li-itemize"><font size="3"><a
-            href="glossary.html#SICONOS">SICONOS</a> Contract Number
-            IST-2001-37172 and annexes</font></li>
-          <li class="li-itemize"><font size="3"><a
-            href="glossary.html#SICONOS">SICONOS</a> web site : <a
-            href="http://maply.univ-lyon1.fr/siconos/">http://maply.univ-lyon1.fr/siconos/</a></font></li>
-        </ul>
-        </div>
-
-        <div>
-        <a href="glossary.html">Glossary</a></div>
+      <div>
+      <ul class="itemize">
+        <li class="li-itemize"><font size="3">"Guide to software
+requirements specifications", standard 830 - 1984,IEEE.</font></li>
+        <li class="li-itemize"><font size="3">"Cours de Conduite de
+Projets Logiciels", Ioannis Parissis, Master 2 Pro GI 2003-2004.</font></li>
+        <li class="li-itemize"><font size="3">Draft version of SRD of
+SICONOS / WP2, January 2004.</font></li>
+        <li class="li-itemize"><font size="3">Templates and Guides,
+Roger Pissard-Gibollet, INRIA</font><br>
+        </li>
+        <li class="li-itemize"><font size="3"><a
+ href="glossary.html#SICONOS">SICONOS</a> Contract Number
+IST-2001-37172 and annexes</font></li>
+        <li class="li-itemize"><font size="3"><a
+ href="glossary.html#SICONOS">SICONOS</a> web site : <a
+ href="http://maply.univ-lyon1.fr/siconos/">http://maply.univ-lyon1.fr/siconos/</a></font></li>
+      </ul>
+      </div>
+      <div> <a href="glossary.html">Glossary</a></div>
       </td>
     </tr>
   </tbody>
@@ -88,73 +75,66 @@
 </div>
 <!-- /releaseinfo -->
 <!-- /processimpact -->
-
 <div id="introduction">
 <h2>Introduction</h2>
-
 <p>For the first version of the <a href="glossary.html#Siconos">Siconos</a>
-software, most of the users are scientists from various scientific fields :
-mathematicians, physicists, electrical and mechanical engineers, etc... Their
-computer skills are heterogeneous, but they have basic knowledges in computer
+software, most of the users are scientists from various scientific
+fields :
+mathematicians, physicists, electrical and mechanical engineers, etc...
+Their
+computer skills are heterogeneous, but they have basic knowledges in
+computer
 science. Most of them already use scientific softwares like <a
-href="glossary.html#Matlab">Matlab</a>, <a
-href="glossary.html#Scilab">Scilab</a> or dedicated softwares for their own
+ href="glossary.html#Matlab">Matlab</a>, <a href="glossary.html#Scilab">Scilab</a>
+or dedicated softwares for their own
 scientific fields (e.g. <a name="Lmgc90" id="Lmgc90"
-href="glossary.html#Lmgc90">Lmgc90</a>). Nevertheless, the platform have to
+ href="glossary.html#Lmgc90">Lmgc90</a>). Nevertheless, the platform
+have to
 be developed with well-known coding languages and interfaces.</p>
-
-<p>One of the most important requirements in the distribution of the software
+<p>One of the most important requirements in the distribution of the
+software
 is that it will be Open Source (see the definition at <a name="http"
-id="http"
-href="http://www.opensource.org/docs/definition.php">http://www.opensource.org/docs/definition.php</a>).
-One goal is to bring together a wide community of scientists to use and to
-develop several new numerical methods. Therefore, standards development tools
+ id="http" href="http://www.opensource.org/docs/definition.php">http://www.opensource.org/docs/definition.php</a>).
+One goal is to bring together a wide community of scientists to use and
+to
+develop several new numerical methods. Therefore, standards development
+tools
 must be used.</p>
-
 <p>Finally, for the users which come from the industry or the private
 company, the software must be compatible with standard softwares of
 scientific computing already used in the industry.</p>
 </div>
 <!-- /introduction -->
-
 <div id="usecases">
 <h2>Use Cases</h2>
-
 <p>ONE PARAGRAPH OVERVIEW</p>
-
 <p>Details:</p>
 <ul>
   <li>Actors must be described...</li>
-  <li>The <a href="use-case-suite.html">use case suite</a> lists all use
-    cases in an organized way.</li>
+  <li>The <a href="use-case-suite.html">use case suite</a> lists all
+use cases in an organized way.</li>
 </ul>
 </div>
 <!-- /usecases -->
-
 <div id="functional">
 <h2>Functional Requirements</h2>
-
 <p>ONE PARAGRAPH OVERVIEW</p>
-
 <p>Details:</p>
 <ul>
-  <li>The <a href="feature-set.html">feature set</a> lists all features in an
-    organized way.</li>
+  <li>The <a href="feature-set.html">feature set</a> lists all
+features in an organized way.</li>
 </ul>
 </div>
 <!-- /functional -->
-
 <div id="nonfunctional">
 <h2>Non-Functional Requirements</h2>
-
 <h3>What are the performance requirements?</h3>
-
-<p><strong>PER-00</strong> : The software must not be more than 10% slower
-than <a href="glossary.html#Lmgc90">Lmgc90</a> for the same treatement on the
+<p><strong>PER-00</strong> : The software must not be more than 10%
+slower
+than <a href="glossary.html#Lmgc90">Lmgc90</a> for the same treatement
+on the
 same computer</p>
-
 <h3>What are the documentation requirements?</h3>
-
 <p>The documentation must contain :</p>
 <ul>
   <li><strong>DOC-1.00</strong> : a Software User Manual</li>
@@ -165,24 +145,23 @@ same computer</p>
   <li><strong>DOC-1.05</strong> : an Interface users Manual</li>
   <li><strong>DOC-1.06</strong> : a Developer Manual</li>
 </ul>
-
 <p>The Documentation format requirements are:</p>
 <ul>
-  <li><strong>DOC-2.00</strong> : The source of the various manual must be in
-    TeX format</li>
-  <li><strong>DOC-2.01</strong> : The various manual must be available in
-    HTML format</li>
-  <li><strong>DOC-2.02</strong> : The various manual must be available in PDF
-    format</li>
+  <li><strong>DOC-2.00</strong> : The source of the various manual must
+be in TeX format</li>
+  <li><strong>DOC-2.01</strong> : The various manual must be available
+in HTML format</li>
+  <li><strong>DOC-2.02</strong> : The various manual must be available
+in PDF format</li>
   <li><strong>DOC-2.03</strong> : The various manual must be written in
-    English</li>
+English</li>
 </ul>
-
 <h3>What are the quality requirements?</h3>
-
-<p>After an analysis of <a href="glossary.html#Siconos">Siconos</a> software
-requirements, four priority software quality factors (Mc Call criteria) have
-been chosen. Each one has a mark of priority.<br />
+<p>After an analysis of <a href="glossary.html#Siconos">Siconos</a>
+software
+requirements, four priority software quality factors (Mc Call criteria)
+have
+been chosen. Each one has a mark of priority.<br>
 </p>
 <ul>
   <li><strong>QUA-00</strong> : Adaptability (or flexibility), 9/10</li>
@@ -190,34 +169,32 @@ been chosen. Each one has a mark of priority.<br />
   <li><strong>QUA-02</strong> : Couplability, 7/10</li>
   <li><strong>QUA-03</strong> : Portability, 5/10</li>
 </ul>
-
-<p>Here are short definitions of those criteria and the reasons why they were
+<p>Here are short definitions of those criteria and the reasons why
+they were
 chosen as priority quality factors for this project.</p>
 <ul>
-  <li> Adaptability : <br />
-    It measures the ability of the software to make easier additions of new
-    functionalities or modifications, even suppression of existing
-    functionalities. This factor has been chosen because users must be able
-    to add easily new algorithms or computations libraries. </li>
-  <li>Efficiency : <br />
-    It measures the ability of the software to minimize its resources needs
-    (cpu time, memory, etc.).<br />
-    This criterion is necessary for a scientific computation software.</li>
-  <li> Couplability :<br />
-    Capacity of the software to be used with other softwares (data exchanges,
-    calls, ...).</li>
-  <li>Portability: <br />
-    Capacity of the software to reduce consequences of an environment
-    technical change (hardware or software).<br />
-    Users come from several laboratories and companies, and work under
-    several OS.</li>
+  <li> Adaptability : <br>
+It measures the ability of the software to make easier additions of new
+functionalities or modifications, even suppression of existing
+functionalities. This factor has been chosen because users must be able
+to add easily new algorithms or computations libraries. </li>
+  <li>Efficiency : <br>
+It measures the ability of the software to minimize its resources needs
+(cpu time, memory, etc.).<br>
+This criterion is necessary for a scientific computation software.</li>
+  <li> Couplability :<br>
+Capacity of the software to be used with other softwares (data
+exchanges, calls, ...).</li>
+  <li>Portability: <br>
+Capacity of the software to reduce consequences of an environment
+technical change (hardware or software).<br>
+Users come from several laboratories and companies, and work under
+several OS.</li>
 </ul>
-
-<p><br />
+<p><br>
 </p>
 </div>
 <!-- /nonfunctional -->
-
 <div id="environmental">
 <h2>Environmental Requirements</h2>
 <dl>
@@ -225,69 +202,66 @@ chosen as priority quality factors for this project.</p>
 </dl>
 <ul>
   <li><a href="features.html#F-2.300">F-2.300</a> Data Files<a
-    href="glossary.html#Lmgc90">Lmgc90</a> interface<br />
+ href="glossary.html#Lmgc90">Lmgc90</a> interface<br>
   </li>
   <li><a href="features.html#F-2.301">F-2.301</a> <a
-    href="glossary.html#NSDS">NSDS</a> files saving</li>
+ href="glossary.html#NSDS">NSDS</a> files saving</li>
   <li><a href="features.html#F-2.302">F-2.302</a> Data files conversion</li>
   <li><a href="features.html#F-2.303">F-2.303</a> System trace states</li>
   <li><a href="features.html#F-2.304">F-2.304</a> XML backup file</li>
 </ul>
 <dl>
   <h3>What are the resource requirements?</h3>
-  <strong>RES-00</strong>: The configuration recommended is : processor 800
-  Mhz, 512 Mo Ram, 200 Mo of free space on HDD
-
+  <strong>RES-00</strong>: The configuration recommended is : processor
+800 Mhz, 512 Mo Ram, 200 Mo of free space on HDD
   <h3>What are the portability requirements?</h3>
-  Siconos must run on :</dl>
+Siconos must run on :
+</dl>
 <ul>
-  <li><strong>POR-1.00</strong>: PC / Linux environment <em>kernel
-    </em><em>2.4.20-8</em></li>
+  <li><strong>POR-1.00</strong>: PC / Linux environment <em>kernel </em><em>2.4.20-8</em></li>
   <li><strong>POR-1.01</strong>: PC / Windows environment <em>Microsoft
-    Windows XP</em></li>
-  <li><strong>POR-1.02</strong>: Sun Workstation OS-Solari environment
-    <em>Solaris 5.8</em></li>
-  <li><strong>POR-1.03</strong>: Apple/<em>Mac OS X 10.0</em> environment</li>
+Windows XP</em></li>
+  <li><strong>POR-1.02</strong>: Sun Workstation OS-Solari environment <em>Solaris
+5.8</em></li>
+  <li><strong>POR-1.03</strong>: Apple/<em>Mac OS X 10.0</em>
+environment</li>
 </ul>
-
 <p>The data must be portable:</p>
 <ul>
-  <li><strong>POR-2.00</strong> : The ASCII data files defined with an unique
-    charset</li>
-  <li><strong>POR-2.01</strong> : The BINARY data files defined with an IEEE
-    format norm</li>
+  <li><strong>POR-2.00</strong> : The ASCII data files defined with an
+unique charset</li>
+  <li><strong>POR-2.01</strong> : The BINARY data files defined with an
+IEEE format norm</li>
 </ul>
 <dl>
-  <h3>What application program interfaces (<a href="glossary-std.html#api"
-  class="def">APIs</a>) must be provided?</h3>
-    <dd class="sample1"><ul>
-        <li><a href="features.html#F-3.000">F-3.000</a> C++ <a
-          href="glossary.html#Siconos/Engine">Siconos/Engine</a> <a
-          href="glossary.html#API">API</a></li>
-        <li><a href="features.html#F-3.001">F-3.001</a> <a
-          href="glossary.html&quot;Scilab">Scilab</a> <a
-          href="glossary.html#Siconos/Engine">Siconos/Engine</a> <a
-          href="glossary.html#API">API</a></li>
-        <li><a href="features.html#F-2.002">F-3.002</a> <a
-          href="glossary.html#Matlab">Matlab</a> <a
-          href="glossary.html#Siconos/Engine">Siconos/Engine</a> <a
-          href="glossary.html#API">API</a></li>
-        <li><a href="features.html#F-3.002">F-3.002</a> C++
-          Siconos/Analysis&amp;Control <a
-        href="glossary.html#API">API</a></li>
-      </ul>
-    </dd>
+  <h3>What application program interfaces (<a
+ href="glossary-std.html#api" class="def">APIs</a>) must be provided?</h3>
+  <dd class="sample1">
+    <ul>
+      <li><a href="features.html#F-3.000">F-3.000</a> C++ <a
+ href="glossary.html#Siconos/Kernel">Siconos/Kernel</a> <a
+ href="glossary.html#API">API</a></li>
+      <li><a href="features.html#F-3.001">F-3.001</a> <a
+ href="glossary.html%22Scilab">Scilab</a> <a
+ href="glossary.html#Siconos/Kernel">Siconos/Kernel</a> <a
+ href="glossary.html#API">API</a></li>
+      <li><a href="features.html#F-2.002">F-3.002</a> <a
+ href="glossary.html#Matlab">Matlab</a> <a
+ href="glossary.html#Siconos/Kernel">Siconos/Kernel</a> <a
+ href="glossary.html#API">API</a></li>
+      <li><a href="features.html#F-3.002">F-3.002</a> C++
+Siconos/Analysis&amp;Control <a href="glossary.html#API">API</a></li>
+    </ul>
+  </dd>
 </dl>
 </div>
 <!-- /environmental -->
 </div>
-
 <div class="legal1">
 Company Proprietary</div>
-
 <div class="footnote">
 Copyright © 2003-2004 Jason Robbins. All rights reserved. <a
-href="readyset-license.html">License terms</a>. Retain this copyright
+ href="readyset-license.html">License terms</a>. Retain this copyright
 statement whenever this file is used as a template.</div>
 </div>
 </body>
