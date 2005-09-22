@@ -20,10 +20,10 @@ M z- w=q\\
 
    pr_solver is a generic interface allowing the call of one of the PR solvers.
 
-   \param double* : vec On enter double vector containing the components of the double matrix with a fortran90 allocation.
-   \param double* : q On enter a pointer over doubles containing the components of the second member of the system.
-   \param int* : nn On enter a pointer over integers, the dimension of the second member.
-   \param method* : pt On enter a pointer other a structure (::method).
+   \param double*  : vec On enter double vector containing the components of the double matrix with a fortran90 allocation.
+   \param double*  : q On enter a pointer over doubles containing the components of the second member of the system.
+   \param int*     : nn On enter a pointer over integers, the dimension of the second member.
+   \param method*  : pt On enter a pointer other a structure (::method).
    \param double[] : z On return real vector, the solution of the problem.
    \param double[] : w On return real vector, the solution of the problem.
 
@@ -43,25 +43,40 @@ M z- w=q\\
 int pr_solver(double *vec, double *q, int *nn, method *pt, double z[], double w[])
 {
 
-  int info = -1, choix, it_end, fail;
-  char prkey1[10] = "NLGS", prkey2[10] = "CPG", prkey3[10] = "Latin";
+
+  int info = -1, it_end;
+
+  char prkey1[10] = "NLGS", prkey2[10] = "Latin";
+
   double res;
-  int n = *nn, i;
 
-  clock_t t1 = clock();
+  clock_t t1, t2;
 
 
-  if (strcmp(pt->pr.name, prkey1) == 0)
-    pr_nlgs(vec, q, &n, pt->pr.a, pt->pr.b, & pt->pr.itermax, & pt->pr.tol, z, w, &it_end, &res, &info);
+  t1 = clock();
+
+
+  if (strcmp(pt->pr.name , prkey1) == 0)
+  {
+    pr_nlgs(vec, q, nn, pt->pr.a, pt->pr.b, & pt->pr.itermax, & pt->pr.tol, &pt->pr.chat, z, w, &it_end, &res, &info);
+
+    pt->pr.err = res;
+    pt->pr.iter = it_end;
+
+  }
   else if (strcmp(pt->pr.name, prkey2) == 0)
   {
-    /*    cfp_gcp_(vec,q,&n,& pt->cfp.mu,& pt->cfp.itermax,& pt->cfp.tol,z,w,&it_end,&res,&info);*/
+    pr_latin(vec, q, nn, &pt->pr.k_latin, pt->pr.a, pt->pr.b, &pt->pr.itermax, &pt->pr.tol, &pt->pr.chat, z, w, &it_end, &res, &info);
+
+    pt->pr.err = res;
+    pt->pr.iter = it_end;
   }
-  else if (strcmp(pt->pr.name, prkey3) == 0)
-    pr_latin(vec, q, &n, &pt->pr.k_latin, pt->pr.a, pt->pr.b, &pt->pr.itermax, &pt->pr.tol, z, w, &it_end, &res, &info);
+
   else printf("Warning : Unknown solving method : %s\n", pt->pr.name);
 
-  clock_t t2 = clock();
+  t2 = clock();
+
+
   printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
   return info;
