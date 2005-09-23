@@ -68,6 +68,7 @@ typedef struct
   double k_latin;
   double *a;
   double *b;
+  int chat;
   char   normType[64];
   int    iter;
   double err;
@@ -262,9 +263,9 @@ extern  "C" void lcp_newton_min(int *nn , double *vec , double *q , double *z , 
 
 extern "C" int dr_solver(double* , double* , int* , method* , double* , double*);
 
-extern "C" void dr_latin(double * , double *, int *, double * , double *, double *, int *, double *, double* , double* , int *, double *, int *)  ;
+extern "C" void dr_latin(double * , double *, int *, double * , double *, double *, int *, double *, int *, double* , double* , int *, double *, int *)  ;
 
-extern "C" void dr_nlgs(double *vec , double *q , int *nn , double *a , double *b , int *itermax , double *tol ,
+extern "C" void dr_nlgs(double *vec , double *q , int *nn , double *a , double *b , int *itermax , double *tol , int *chat,
                         double *z , double *w , int *it_end , double *res , int *info);
 
 /********************************************/
@@ -526,9 +527,9 @@ extern void pr_nlgs(double* , double* , int* , double* , double* , int* , double
 
 /*********************************** DR *****************************************/
 
-extern void dr_latin(double *, double *, int *, double * , double *, double *, int *, double *, double*, double *, int *, double *, int *)  ;
+extern void dr_latin(double *, double *, int *, double * , double *, double *, int *, double *, int *, double*, double *, int *, double *, int *)  ;
 
-extern void dr_nlgs(double *vec , double *q , int *nn , double *a , double *b , int *itermax , double *tol ,
+extern void dr_nlgs(double *vec , double *q , int *nn , double *a , double *b , int *itermax , double *tol , int *chat,
                     double *z , double *w , int *it_end , double *res , int *info);
 
 /*********************************** PFC 2D *****************************************/
