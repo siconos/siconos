@@ -125,8 +125,6 @@ void pr_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], d
       free(DPO);
       free(wc);
       free(zc);
-      free(z);
-      free(w);
       free(znum1);
       free(wnum1);
       free(zt);
@@ -161,6 +159,16 @@ void pr_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], d
   if (info2 != 0)
   {
     printf("\n Matter with Cholesky factorization \n");
+
+    free(k);
+    free(kinv);
+    free(DPO);
+    free(wc);
+    free(zc);
+    free(znum1);
+    free(wnum1);
+    free(zt);
+
     *info = 2;
     return;
   }
