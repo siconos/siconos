@@ -1,4 +1,4 @@
-#include "DSXML.h"
+#include "DynamicalSystemXML.h"
 
 // to be deleted thanks to factories:
 #include "NLinearBCXML.h"
@@ -11,83 +11,83 @@ using namespace std;
 
 
 
-DSXML::DSXML():
-  rootDSXMLNode(NULL), parentNode(NULL), boundaryConditionXML(NULL), xMemoryXML(NULL), xDotMemoryXML(NULL), rMemoryXML(NULL),
+DynamicalSystemXML::DynamicalSystemXML():
+  rootDynamicalSystemXMLNode(NULL), parentNode(NULL), boundaryConditionXML(NULL), xMemoryXML(NULL), xDotMemoryXML(NULL), rMemoryXML(NULL),
   idNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL), xDotNode(NULL), xMemoryNode(NULL), xDotMemoryNode(NULL),
   stepsInMemoryNode(NULL), vectorFieldNode(NULL), computeJacobianXNode(NULL), boundaryConditionNode(NULL),
   dsInputOutputNode(NULL),  rNode(NULL), rMemoryNode(NULL), uSizeNode(NULL), uNode(NULL), TNode(NULL)
 {}
 
 
-DSXML::DSXML(xmlNode * DSNode, const bool& isBVP):
-  rootDSXMLNode(DSNode), parentNode(NULL), boundaryConditionXML(NULL), xMemoryXML(NULL), xDotMemoryXML(NULL), rMemoryXML(NULL),
+DynamicalSystemXML::DynamicalSystemXML(xmlNode * DSNode, const bool& isBVP):
+  rootDynamicalSystemXMLNode(DSNode), parentNode(NULL), boundaryConditionXML(NULL), xMemoryXML(NULL), xDotMemoryXML(NULL), rMemoryXML(NULL),
   idNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL), xDotNode(NULL), xMemoryNode(NULL), xDotMemoryNode(NULL),
   stepsInMemoryNode(NULL), vectorFieldNode(NULL), computeJacobianXNode(NULL), boundaryConditionNode(NULL),
   dsInputOutputNode(NULL),  rNode(NULL), rMemoryNode(NULL), uSizeNode(NULL), uNode(NULL), TNode(NULL)
 {
   xmlNode *node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, ID_ATTRIBUTE)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, ID_ATTRIBUTE)) != NULL)
     idNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_N)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_N)) != NULL)
     nNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_X0)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_X0)) != NULL)
     x0Node = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_X)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_X)) != NULL)
     xNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_XDOT)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_XDOT)) != NULL)
     xDotNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_XMEMORY)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_XMEMORY)) != NULL)
   {
     xMemoryNode = node;
     xMemoryXML = new SiconosMemoryXML(xMemoryNode, parentNode, DS_XMEMORY);
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_XDOTMEMORY)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_XDOTMEMORY)) != NULL)
   {
     xDotMemoryNode = node;
     xDotMemoryXML = new SiconosMemoryXML(xDotMemoryNode, parentNode, DS_XDOTMEMORY);
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_STEPSINMEMORY)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_STEPSINMEMORY)) != NULL)
     stepsInMemoryNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_VECTORFIELD)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_VECTORFIELD)) != NULL)
     vectorFieldNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_COMPUTEJACOBIANX)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_COMPUTEJACOBIANX)) != NULL)
     computeJacobianXNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, BOUNDARYCONDITION_TAG)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, BOUNDARYCONDITION_TAG)) != NULL)
   {
     loadBoundaryConditionXML(node);
     boundaryConditionNode = node;
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_R)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_R)) != NULL)
     rNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_RMEMORY)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_RMEMORY)) != NULL)
   {
     rMemoryNode = node;
     rMemoryXML = new SiconosMemoryXML(rMemoryNode, parentNode, DS_RMEMORY);
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, "uSize")) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, "uSize")) != NULL)
     uSizeNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_U)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_U)) != NULL)
     uNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, DS_T)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_T)) != NULL)
     TNode = node;
 }
 
-DSXML::~DSXML()
+DynamicalSystemXML::~DynamicalSystemXML()
 {
   if (boundaryConditionXML != NULL) delete boundaryConditionXML;
   if (rMemoryXML != NULL) delete rMemoryXML;
@@ -95,7 +95,7 @@ DSXML::~DSXML()
   if (xDotMemoryXML != NULL) delete xDotMemoryXML;
 }
 
-void DSXML::loadBoundaryConditionXML(xmlNode * rootBoundaryConditionNode)
+void DynamicalSystemXML::loadBoundaryConditionXML(xmlNode * rootBoundaryConditionNode)
 {
   if (rootBoundaryConditionNode == NULL)  //BoundaryCondition is not defined
   {
@@ -116,35 +116,35 @@ void DSXML::loadBoundaryConditionXML(xmlNode * rootBoundaryConditionNode)
       boundaryConditionXML = new PeriodicBCXML(node);
 
     else
-      XMLException::selfThrow("DSXML : undefined boundary condition type : " + type);
+      XMLException::selfThrow("DynamicalSystemXML : undefined boundary condition type : " + type);
   }
 }
 
-void DSXML::updateDynamicalSystemXML(xmlNode* newRootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)
+void DynamicalSystemXML::updateDynamicalSystemXML(xmlNode* newRootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)
 {
-  IN("DSXML::updateDynamicalSystemXML\n");
-  rootDSXMLNode = newRootDSXMLNode;
-  loadDS(ds);
-  OUT("DSXML::updateDynamicalSystemXML\n");
+  IN("DynamicalSystemXML::updateDynamicalSystemXML\n");
+  rootDynamicalSystemXMLNode = newRootDSXMLNode;
+  loadDynamicalSystem(ds);
+  OUT("DynamicalSystemXML::updateDynamicalSystemXML\n");
 }
 
-void DSXML::loadDS(DynamicalSystem* ds)
+void DynamicalSystemXML::loadDynamicalSystem(DynamicalSystem* ds)
 {
-  IN("DSXML::loadDS( DynamicalSystem* ds)\n");
+  IN("DynamicalSystemXML::loadDynamicalSystem( DynamicalSystem* ds)\n");
   string type;
   xmlNode* node;
 
   if (ds->getBoundaryConditionPtr() != NULL)
   {
     type = ds->getBoundaryConditionPtr()->getType();
-    node = xmlNewChild(rootDSXMLNode, NULL, (xmlChar*)BOUNDARYCONDITION_TAG.c_str(), NULL);
+    node = xmlNewChild(rootDynamicalSystemXMLNode, NULL, (xmlChar*)BOUNDARYCONDITION_TAG.c_str(), NULL);
     if (type == NLINEARBC)
     {
       //xmlNewProp( node, (xmlChar*)TYPE_ATTRIBUTE.c_str(), (xmlChar*)NON_LINEARBC_TAG.c_str() );
       node = xmlNewChild(node, NULL, (xmlChar*)NON_LINEARBC_TAG.c_str(), NULL);
       boundaryConditionXML = new NLinearBCXML();
 
-      // linkage between the DynamicalSystem and his DSXML
+      // linkage between the DynamicalSystem and his DynamicalSystemXML
       ds->getBoundaryConditionPtr()->setBoundaryConditionXML(boundaryConditionXML);
 
       // creation of the DynamicalSystemXML
@@ -156,7 +156,7 @@ void DSXML::loadDS(DynamicalSystem* ds)
       node = xmlNewChild(node, NULL, (xmlChar*)LINEARBC_TAG.c_str(), NULL);
       boundaryConditionXML = new LinearBCXML();
 
-      // linkage between the DynamicalSystem and his DSXML
+      // linkage between the DynamicalSystem and his DynamicalSystemXML
       ds->getBoundaryConditionPtr()->setBoundaryConditionXML(boundaryConditionXML);
 
       // creation of the DynamicalSystemXML
@@ -168,7 +168,7 @@ void DSXML::loadDS(DynamicalSystem* ds)
       node = xmlNewChild(node, NULL, (xmlChar*)PERIODICBC_TAG.c_str(), NULL);
       boundaryConditionXML = new PeriodicBCXML();
 
-      // linkage between the DynamicalSystem and his DSXML
+      // linkage between the DynamicalSystem and his DynamicalSystemXML
       ds->getBoundaryConditionPtr()->setBoundaryConditionXML(boundaryConditionXML);
 
       // creation of the DynamicalSystemXML
@@ -176,7 +176,7 @@ void DSXML::loadDS(DynamicalSystem* ds)
     }
     else
     {
-      XMLException::selfThrow("DSXML - loadDS error : undefined DS type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
+      XMLException::selfThrow("DynamicalSystemXML - loadDynamicalSystem error : undefined DynamicalSystem type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
     }
   }
 
@@ -188,7 +188,7 @@ void DSXML::loadDS(DynamicalSystem* ds)
     xmlNode *dsioDefinitionNode, *nsdsNode;
     DSInputOutputXML *dsioXML;
 
-    nsdsNode = ds->getNSDSPtr()->getNSDSXMLPtr()->getNSDSXMLNode();
+    nsdsNode = ds->getNSDSPtr()->getNonSmoothDynamicalSystemXMLPtr()->getNonSmoothDynamicalSystemXMLNode();
     dsioDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)nsdsNode, DSINPUTOUTPUT_DEFINITION_TAG);
     if (dsioDefinitionNode == NULL)
       dsioDefinitionNode = xmlNewChild(nsdsNode, NULL, (xmlChar*)DSINPUTOUTPUT_DEFINITION_TAG.c_str(), NULL);
@@ -241,7 +241,7 @@ void DSXML::loadDS(DynamicalSystem* ds)
             dsioXML->updateDSInputOutputXML(node, ds->getDSInputOutput(i));
             dsInputOutputXMLMap[number] = dsioXML;
           }
-          else XMLException::selfThrow("DSXML - loadDS | Error : the DSInputOutput type : " + ds->getDSInputOutput(i)->getType() + " doesn't exist!");
+          else XMLException::selfThrow("DSXML - loadDynamicalSystem | Error : the DSInputOutput type : " + ds->getDSInputOutput(i)->getType() + " doesn't exist!");
 
           /*  end of the save : saving the DynamicalSystem linked to this DSInputOutput */
           node = xmlNewChild(node, NULL, (xmlChar*)DS_CONCERNED.c_str(), NULL);
@@ -250,17 +250,15 @@ void DSXML::loadDS(DynamicalSystem* ds)
           sprintf(num, "%d", number);
           xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
         }
-        else cout << "DSXML - loadDS : the DSInputOutput type : " << ds->getDSInputOutput(i)->getType() << " already exists!" << endl;
+        else cout << "DynamicalSystemXML - loadDynamicalSystem : the DSInputOutput type : " << ds->getDSInputOutput(i)->getType() << " already exists!" << endl;
       }
       else cout << "### strange, DSIOXML != NULL :gratgrat:" << endl;
     }
   }
-  //    else
-  //    cout<<"DSXML - loadDS WARNING : tag "<<DSINPUTOUTPUT_DEFINITION_TAG<<" not found,\nDefining DS InputOutput is optional."<<endl;
-  OUT("DSXML::loadDS( DynamicalSystem* ds)\n");
+  OUT("DynamicalSystemXML::loadDynamicalSystem( DynamicalSystem* ds)\n");
 }
 
-DSInputOutputXML* DSXML::getDSInputOutputXML(int number)
+DSInputOutputXML* DynamicalSystemXML::getDSInputOutputXML(int number)
 {
   map<int, DSInputOutputXML*>::iterator it;
 
@@ -272,7 +270,7 @@ DSInputOutputXML* DSXML::getDSInputOutputXML(int number)
   return dsInputOutputXMLMap[number];
 }
 
-void DSXML::setDSInputOutputXML(map<int, DSInputOutputXML*> m)
+void DynamicalSystemXML::setDSInputOutputXML(map<int, DSInputOutputXML*> m)
 {
   definedDSInputOutputNumbers.clear();
 
@@ -283,34 +281,3 @@ void DSXML::setDSInputOutputXML(map<int, DSInputOutputXML*> m)
   dsInputOutputXMLMap = m;
 }
 
-//void DSXML::loadDSInputOutputXML(xmlNode * rootdsioNode)
-//{
-//  xmlNode *node;
-//    int number; //Number of an EqualityCopnstraint
-//  map<int, DSInputOutputXML*>::iterator i;
-//
-//    node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)rootdsioNode);
-//
-//  while(node!=NULL)
-//    {
-//      DSInputOutputXML *ecxml;
-//
-//    number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
-//
-//    cout<<"CHARGEMENT DSInputOutput number"<<number<<endl;
-//
-//    i = dsInputOutputXMLMap.find(number);
-//    if (i == dsInputOutputXMLMap.end())
-//    {
-//      definedDSInputOutputNumbers.push_back(number);
-//      ecxml = new DSInputOutputXML((xmlNode *)node/*, definedDSNumbers*/);
-//      dsInputOutputXMLMap[number] = ecxml;
-//      }
-//      else
-//      {
-//      XMLException::selfThrow("DSXML - loadDSInputOutputXML error : wrong DSINPUTOUTPUT number : already exists.");
-//    }
-//
-//      node = SiconosDOMTreeTools::findFollowNode(node);
-//   }
-//}

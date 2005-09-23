@@ -33,7 +33,7 @@ void NonSmoothDynamicalSystemTest::setUp()
 
   // look for NSDS node
   node = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
-  tmpxml = new NSDSXML(node);
+  tmpxml = new NonSmoothDynamicalSystemXML(node);
 }
 
 void NonSmoothDynamicalSystemTest::tearDown()
@@ -81,7 +81,7 @@ void NonSmoothDynamicalSystemTest::testaddDynamicalSystem()
   NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(tmpxml);
   xmlNode *node2 = SiconosDOMTreeTools::findNodeChild(node, "DS_Definition");
   xmlNode * node3 = SiconosDOMTreeTools::findNodeChild(node2, "LagrangianLinearTIDS");
-  DSXML * tmpdsxml = new LagrangianLinearTIDSXML(node3, false);
+  DynamicalSystemXML * tmpdsxml = new LagrangianLinearTIDSXML(node3, false);
 
   DynamicalSystem * ltids = new LagrangianLinearTIDS(tmpdsxml);
   ltids ->setNumber(23);

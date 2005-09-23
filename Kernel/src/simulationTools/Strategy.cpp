@@ -4,7 +4,7 @@
 #include "Lsodar.h"
 #include "Adams.h"
 #include "LCP.h"
-#include "CFD.h"
+#include "DFC_2D.h"
 #include "QP.h"
 #include "Relay.h"
 
@@ -132,11 +132,11 @@ Strategy::Strategy(StrategyXML* strxml, Model *newModel): strategyType("none"), 
         // OneStepNSProblem - LCP memory allocation/construction
         if (strategyxml->getOneStepNSProblemXMLPtr()->getType() == LCP_TAG)
           nsProblem = new LCP(strategyxml->getOneStepNSProblemXMLPtr(), this);
-        // OneStepNSProblem - CFD
-        else if (strategyxml->getOneStepNSProblemXMLPtr()->getType() == CFD_TAG)
+        // OneStepNSProblem - DFC_2D
+        else if (strategyxml->getOneStepNSProblemXMLPtr()->getType() == DFC_2D_TAG)
         {
-          // CFD memory allocation/construction
-          nsProblem = new CFD(strategyxml->getOneStepNSProblemXMLPtr());
+          // DFC_2D memory allocation/construction
+          nsProblem = new DFC_2D(strategyxml->getOneStepNSProblemXMLPtr());
           for (unsigned int i = 0; i < interactionNumbers.size(); i++)
             nsProblem->addInteraction(model->getNonSmoothDynamicalSystemPtr()->getInteractionPtrNumber(interactionNumbers[i]));
           nsProblem->setStrategy(this);
@@ -386,8 +386,8 @@ void Strategy::saveStrategyToXML()
     {
       if (nsProblem->getType() == LCP_OSNSP)
         (static_cast<LCP*>(nsProblem))->saveNSProblemToXML();
-      else if (nsProblem->getType() == CFD_OSNSP)
-        (static_cast<CFD*>(nsProblem))->saveNSProblemToXML();
+      else if (nsProblem->getType() == DFC_2D_OSNSP)
+        (static_cast<DFC_2D*>(nsProblem))->saveNSProblemToXML();
       else if (nsProblem->getType() == QP_OSNSP)
         (static_cast<QP*>(nsProblem))->saveNSProblemToXML();
       else if (nsProblem->getType() == RELAY_OSNSP)

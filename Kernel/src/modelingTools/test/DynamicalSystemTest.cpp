@@ -48,10 +48,10 @@ void DynamicalSystemTest::setUp()
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "DS_Definition");
   // get first ds
   node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "DynamicalSystem");
-  tmpxml1 = new DSXML(node1, false);
+  tmpxml1 = new DynamicalSystemXML(node1, false);
   // get second ds
   node2 = SiconosDOMTreeTools::findFollowNode(node1, "DynamicalSystem");
-  tmpxml2 = new DSXML(node2, false);
+  tmpxml2 = new DynamicalSystemXML(node2, false);
 }
 
 void DynamicalSystemTest::tearDown()

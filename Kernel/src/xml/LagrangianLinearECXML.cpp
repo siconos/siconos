@@ -1,14 +1,14 @@
 #include "LagrangianLinearECXML.h"
 using namespace std;
 
-LagrangianLinearECXML::LagrangianLinearECXML(): EqualityConstraintXML()
+LagrangianLinearECXML::LagrangianLinearECXML(): LagrangianECXML()
 {
   this->HNode = NULL;
   this->bNode = NULL;
 }
 
 LagrangianLinearECXML::LagrangianLinearECXML(xmlNode *ecNode, vector<int> definedDSNumbers)
-  : EqualityConstraintXML(ecNode, definedDSNumbers)
+  : LagrangianECXML(ecNode, definedDSNumbers)
 {
   /*    xmlNode *node;
 

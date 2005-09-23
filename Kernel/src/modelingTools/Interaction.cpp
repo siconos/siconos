@@ -3,7 +3,7 @@
 // includes to be deleted thanks to factories
 #include "LinearTIR.h"
 #include "LagrangianLinearR.h"
-#include "LagrangianNonLinearR.h"
+#include "LagrangianR.h"
 #include "ComplementarityConditionNSL.h"
 #include "RelayNSL.h"
 #include "NewtonImpactLawNSL.h"
@@ -65,8 +65,8 @@ Interaction::Interaction(const Interaction& newI):
   else if (relationType == LAGRANGIANLINEARRELATION)
     relation = new LagrangianLinearR(*(newI.getRelationPtr()), this);
 
-  else if (relationType == LAGRANGIANNONLINEARRELATION)
-    relation = new LagrangianNonLinearR(*(newI.getRelationPtr()));
+  else if (relationType == LAGRANGIANRELATION)
+    relation = new LagrangianR(*(newI.getRelationPtr()));
 
   else RuntimeException::selfThrow("Interaction::copy constructor, unknown relation type " + relation->getType());
 
@@ -159,7 +159,7 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
 
     // Lagrangian non-linear relation
     else if (relationType == LAGRANGIAN_NON_LINEAR_RELATION_TAG)
-      relation = new LagrangianNonLinearR(interactionxml->getRelationXML(), this);
+      relation = new LagrangianR(interactionxml->getRelationXML(), this);
 
     else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + relation->getType());
   }
@@ -620,8 +620,8 @@ void Interaction::saveInteractionToXML()
     (static_cast<LinearTIR*>(relation))->saveRelationToXML();
   else if (relation->getType() == LAGRANGIANLINEARRELATION)
     (static_cast<LagrangianLinearR*>(relation))->saveRelationToXML();
-  else if (relation->getType() == LAGRANGIANNONLINEARRELATION)
-    (static_cast<LagrangianNonLinearR*>(relation))->saveRelationToXML();
+  else if (relation->getType() == LAGRANGIANRELATION)
+    (static_cast<LagrangianR*>(relation))->saveRelationToXML();
   else RuntimeException::selfThrow("Interaction::saveInteractionToXML - bad kind of Relation :" + relation->getType());
   /*
    * save the data of the NonSmoothLaw

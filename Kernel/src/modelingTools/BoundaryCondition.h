@@ -3,7 +3,7 @@
 
 #include "DynamicalSystem.h"
 #include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
+#include "SiconosVector.h"
 #include "BoundaryConditionXML.h"
 #include "RuntimeException.h"
 #include "SiconosConst.h"

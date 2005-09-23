@@ -2,11 +2,11 @@
 using namespace std;
 
 LagrangianLinearRXML::LagrangianLinearRXML():
-  RelationXML(), HNode(NULL), bNode(NULL)
+  LagrangianRXML(), HNode(NULL), bNode(NULL)
 {}
 
 LagrangianLinearRXML::LagrangianLinearRXML(xmlNode * LLRelationNode)
-  : RelationXML(LLRelationNode), HNode(NULL), bNode(NULL)
+  : LagrangianRXML(LLRelationNode), HNode(NULL), bNode(NULL)
 {
   xmlNode *node;
 

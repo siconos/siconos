@@ -1,67 +1,58 @@
-#ifndef CFD_H
-#define CFD_H
+#ifndef DFC_2D_H
+#define DFC_2D_H
 
 #include "OneStepNSProblem.h"
-#include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
-#include "SimpleVector.h"
-#include "CFDXML.h"
-#include "check.h"
+#include "DFC_2DXML.h"
 
-#include "Interaction.h"
 // hazardous dependency
 #include "Moreau.h"
 #include "LagrangianLinearR.h"
 #include "NewtonImpactLawNSL.h"
-//#include <stdio.h>
-
-
-
 
 class OneStepNSProbem;
 
-/** \class CFD
+/** \class DFC_2D
  *  \brief This class is devoted to the formalization and the resolution of the
- * Contact Friction Dual problem (CFD)
+ * Contact Friction Dual problem (DFC_2D)
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 12, 2005
  */
-class CFD : public OneStepNSProblem
+class DFC_2D : public OneStepNSProblem
 {
 public:
-  /** \fn CFD()
+  /** \fn DFC_2D()
    *  \brief default constructor
    */
-  CFD();
+  DFC_2D();
 
-  /** \fn CFD(OneStepNSProblemXML*, Strategy*=NULL)
+  /** \fn DFC_2D(OneStepNSProblemXML*, Strategy*=NULL)
    *  \brief xml constructor
    *  \param OneStepNSProblemXML* : the XML linked-object
    *  \param Strategy *: the strategy that owns the problem (optional)
    */
-  CFD(OneStepNSProblemXML*, Strategy* = NULL);
+  DFC_2D(OneStepNSProblemXML*, Strategy* = NULL);
 
-  ~CFD();
+  ~DFC_2D();
 
   // GETTERS/SETTERS
 
-  /** \fn int getNCfd(void)
-   *  \brief get the size nCfd of the CFD
+  /** \fn int getNDfc_2D(void)
+   *  \brief get the size nDfc_2D of the DFC_2D
    *  \return an int
    */
-  inline const int getNCfd(void) const
+  inline const int getNDfc_2D(void) const
   {
-    return nCfd;
+    return nDfc_2D;
   }
 
   /** \fn void setNLcp(const int&)
-   *  \brief set the size of the CFD
+   *  \brief set the size of the DFC_2D
    *  \param the size
    */
-  inline void setNCfd(const int& newValue)
+  inline void setNDfc_2D(const int& newValue)
   {
-    nCfd = newValue;
+    nDfc_2D = newValue;
   }
 
   // --- W ---
@@ -228,7 +219,7 @@ public:
    *  \brief Compute the unknown z and w and update the Interaction (y and lambda )
    *  \return void
    */
-  void preCFD(const double&);
+  void preDFC_2D(const double&);
 
   /** \fn void compute(void)
    *  \brief Compute the unknown z and w and update the Interaction (y and lambda )
@@ -270,28 +261,28 @@ public:
    */
   void display() const;
 
-  /** \fn CFD* convert (OneStepNSProblem* ds)
+  /** \fn DFC_2D* convert (OneStepNSProblem* ds)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param OneStepNSProblem* : the one step problem which must be converted
    * \return a pointer on the problem if it is of the right type, NULL otherwise
    */
-  static CFD* convert(OneStepNSProblem* osnsp);
+  static DFC_2D* convert(OneStepNSProblem* osnsp);
 
 private:
 
-  /** Size of the CFD */
-  int nCfd;
+  /** Size of the DFC_2D */
+  int nDfc_2D;
 
-  /** contains the vector w of a CFD system */
+  /** contains the vector w of a DFC_2D system */
   SimpleVector* w;
 
-  /** contains the vector z of a CFD system */
+  /** contains the vector z of a DFC_2D system */
   SimpleVector* z;
 
-  /** contains the matrix M of a CFD system */
+  /** contains the matrix M of a DFC_2D system */
   SiconosMatrix* M;
 
-  /** contains the vector q of a CFD system */
+  /** contains the vector q of a DFC_2D system */
   SimpleVector* q;
   /** Flags to check wheter pointers were allocated in class constructors or not */
   bool isWAllocatedIn;
@@ -300,4 +291,4 @@ private:
   bool isQAllocatedIn;
 };
 
-#endif // CFD_H
+#endif // DFC_2D_H

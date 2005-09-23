@@ -2,7 +2,7 @@
 using namespace std;
 
 // --- Constructor from an xml file (newNsds is optional) ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML * dsXML,  NonSmoothDynamicalSystem* newNsds):
+LagrangianLinearTIDS::LagrangianLinearTIDS(DynamicalSystemXML * dsXML,  NonSmoothDynamicalSystem* newNsds):
   LagrangianDS(dsXML, newNsds), K(NULL), C(NULL),
   isKAllocatedIn(true), isCAllocatedIn(true)
 {
@@ -16,7 +16,7 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(DSXML * dsXML,  NonSmoothDynamicalSys
     if (lltidsxml->hasC())
       C = new SiconosMatrix(lltidsxml->getC());
   }
-  else RuntimeException::selfThrow("LagrangianLinearTIDS::LagrangianLinearTIDS - DSXML paramater must not be NULL");
+  else RuntimeException::selfThrow("LagrangianLinearTIDS::LagrangianLinearTIDS - DynamicalSystemXML paramater must not be NULL");
   OUT("LagrangianLinearTIDS::LagrangianLinearTIDS() - Xml constructor\n");
 }
 
@@ -188,7 +188,7 @@ void LagrangianLinearTIDS::saveDSToXML()
     (static_cast <LagrangianLinearTIDSXML*>(dsxml))->setK(K);
     (static_cast <LagrangianLinearTIDSXML*>(dsxml))->setC(C);
   }
-  else RuntimeException::selfThrow("LagrangianLinearTIDS::saveDSToXML - object DSXML does not exist");
+  else RuntimeException::selfThrow("LagrangianLinearTIDS::saveDSToXML - object DynamicalSystemXML does not exist");
   OUT("LagrangianLinearTIDS::saveDSToXML\n");
 }
 

@@ -13,7 +13,7 @@ using namespace std;
 // ===== CONSTRUCTORS =====
 
 // From XML file (warning: newNsds is optional, default = NULL)
-DynamicalSystem::DynamicalSystem(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
+DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
   DSType(NLDS), nsds(newNsds), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL),
   xDot(NULL), xDotMemory(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL),
   uSize(0), u(NULL), T(NULL), stepsInMemory(1), BC(NULL), dsxml(dsXML),
@@ -152,7 +152,7 @@ DynamicalSystem::DynamicalSystem(DSXML * dsXML, NonSmoothDynamicalSystem* newNsd
     fillDsioFromXml();
   }
   else
-    RuntimeException::selfThrow("DynamicalSystem::DynamicalSystem - DSXML paramater must not be NULL");
+    RuntimeException::selfThrow("DynamicalSystem::DynamicalSystem - DynamicalSystemXML paramater must not be NULL");
 
   OUT("DynamicalSystem::DynamicalSystem - XML constructor\n");
 }
@@ -419,7 +419,7 @@ void DynamicalSystem::fillBoundaryConditionsFromXml()
       static_cast<PeriodicBC*>(BC)->createBoundaryCondition(dsxml->getBoundaryConditionXML());
       isBCAllocatedIn = true;
     }
-    else RuntimeException::selfThrow("DynamicalSystem::linkDSXML - bad kind of BoundaryCondition : " + dsxml->getBoundaryConditionXML()->getType());
+    else RuntimeException::selfThrow("DynamicalSystem::linkDynamicalSystemXML - bad kind of BoundaryCondition : " + dsxml->getBoundaryConditionXML()->getType());
   }
   OUT("DynamicalSystem::fillBoundaryConditionsFromXml\n");
 }
@@ -464,7 +464,7 @@ void DynamicalSystem::fillDsioFromXml()
       isDsioAllocatedIn[i] = true;
       static_cast<LagrangianLinearDSIO*>(dsio)->createDSInputOutput(dsxml->getDSInputOutputXML(nbDSIOtab[i]));
     }
-    else RuntimeException::selfThrow("DynamicalSystem::linkDSXML - bad kind of DSInputOutput: " + dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType());
+    else RuntimeException::selfThrow("DynamicalSystem::linkDynamicalSystemXML - bad kind of DSInputOutput: " + dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType());
   }
   OUT("DynamicalSystem::fillDsioFromXml\n");
 }
@@ -915,7 +915,7 @@ void DynamicalSystem::saveDSToXML()
     else
       dsxml->setComputeJacobianXPlugin("BasicPlugin:computeJacobianX");
   }
-  else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DSXML object doesn't exists");
+  else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DynamicalSystemXML object doesn't exists");
   OUT("DynamicalSystem::saveDSToXML\n");
 }
 
@@ -937,7 +937,7 @@ void DynamicalSystem::saveDSDataToXML()
     dsxml->setStepsInMemory(stepsInMemory);
     dsxml->setR(r);
   }
-  else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DSXML object doesn't exists");
+  else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DynamicalSystemXML object doesn't exists");
   OUT("DynamicalSystem::saveDSToXML\n");
 
 }

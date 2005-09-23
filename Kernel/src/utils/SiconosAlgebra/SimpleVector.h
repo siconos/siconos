@@ -1,7 +1,7 @@
 #ifndef __SimpleVector__
 #define __SimpleVector__
 
-#include "NewSiconosVector.h"
+#include "SiconosVector.h"
 #include "SiconosMatrix.h"
 #include <string>
 

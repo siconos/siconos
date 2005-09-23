@@ -27,7 +27,7 @@ public:
   /** \fn LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSNode, int number)
    *   \brief Build a LagrangianLinearTIDSXML object from a DOM tree describing a LagrangianLinearTIDS
    *   \param LagrangianLinearTIDSNode : the LagrangianLinearTIDS DOM tree
-   *   \param bool isBVP : if NSDS is BVP LagrangianLinearTIDS have boundary condition
+   *   \param bool isBVP : if NonSmoothDynamicalSystem is BVP LagrangianLinearTIDS have boundary condition
    */
   LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSNode, bool isBVP);
 
@@ -48,7 +48,7 @@ public:
   {
     if (this->KNode == NULL)
     {
-      this->KNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LTIDS_K, *m);
+      this->KNode = SiconosDOMTreeTools::createMatrixNode(this->rootDynamicalSystemXMLNode, LTIDS_K, *m);
     }
     else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->KNode, *m);
   }
@@ -70,17 +70,17 @@ public:
   {
     if (this->CNode == NULL)
     {
-      this->CNode = SiconosDOMTreeTools::createMatrixNode(this->rootDSXMLNode, LTIDS_C, *m);
+      this->CNode = SiconosDOMTreeTools::createMatrixNode(this->rootDynamicalSystemXMLNode, LTIDS_C, *m);
     }
     else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->CNode, *m);
   }
 
 
   /** \fn void updateDynamicalSystemXML(xmlNode*, DynamicalSystem*, BoundaryCondition*)
-   *   \brief makes the operations to add a DynamicalSystem to the NSDSXML
+   *   \brief makes the operations to add a DynamicalSystem to the NonSmoothDynamicalSystemXML
    *   \param xmlNode* : the root node of this DynamicalSystem
-   *   \param DynamicalSystem* : the DynamicalSystem of this DSXML
-   *   \param BoundaryCondition* : the BoundaryCondition of the DS if the NSDS is BVP (optional)
+   *   \param DynamicalSystem* : the DynamicalSystem of this DynamicalSystemXML
+   *   \param BoundaryCondition* : the BoundaryCondition of the DS if the NonSmoothDynamicalSystem is BVP (optional)
    */
   void updateDynamicalSystemXML(xmlNode*, DynamicalSystem*, BoundaryCondition* bc = NULL);
 

@@ -10,7 +10,7 @@ LagrangianLinearDSIO::LagrangianLinearDSIO()
   OUT("LagrangianLinearDSIO::LagrangianLinearDSIO()\n");
 }
 
-LagrangianLinearDSIO::LagrangianLinearDSIO(DSInputOutputXML* dsioXML): DSInputOutput(dsioXML)
+LagrangianLinearDSIO::LagrangianLinearDSIO(DSInputOutputXML* dsioXML): LagrangianDSIO()
 {
   //  this->h = NULL;
   //  this->b = NULL;

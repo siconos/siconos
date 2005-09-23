@@ -1,4 +1,4 @@
-#include "NSDSXML.h"
+#include "NonSmoothDynamicalSystemXML.h"
 
 //---  Following includes to be suppressed thanks to factory (?) ---
 
@@ -19,39 +19,39 @@
 using namespace std;
 
 
-NSDSXML::NSDSXML(): NSDSNode(NULL)
+NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(): NonSmoothDynamicalSystemNode(NULL)
 {}
 
-NSDSXML::NSDSXML(xmlNode * rootNSDSNode): NSDSNode(rootNSDSNode)
+NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNode * rootNSDSNode): NonSmoothDynamicalSystemNode(rootNSDSNode)
 {
-  IN("NSDSXML::NSDSXML(xmlNode * rootNSDSNode)\n");
+  IN("NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNode * rootNSDSNode)\n");
   if (rootNSDSNode != NULL)
   {
     xmlNode *node;
 
-    if ((node = SiconosDOMTreeTools::findNodeChild(NSDSNode, LMGC90_NSDS_TAG)) == NULL)
+    if ((node = SiconosDOMTreeTools::findNodeChild(NonSmoothDynamicalSystemNode, LMGC90_NSDS_TAG)) == NULL)
     {
-      // at first, we load the DSInputOutputs because we need them to load properly the DSXML
-      if ((node = SiconosDOMTreeTools::findNodeChild(NSDSNode, DSINPUTOUTPUT_DEFINITION_TAG)) != NULL)
+      // at first, we load the DSInputOutputs because we need them to load properly the DynamicalSystemXML
+      if ((node = SiconosDOMTreeTools::findNodeChild(NonSmoothDynamicalSystemNode, DSINPUTOUTPUT_DEFINITION_TAG)) != NULL)
         loadDSInputOutputXML(node);
 
-      if ((node = SiconosDOMTreeTools::findNodeChild(NSDSNode, DYNAMICAL_SYSTEM_DEFINITION_TAG)) != NULL)
-        loadDSXML(node);
+      if ((node = SiconosDOMTreeTools::findNodeChild(NonSmoothDynamicalSystemNode, DYNAMICAL_SYSTEM_DEFINITION_TAG)) != NULL)
+        loadDynamicalSystemXML(node);
       else
-        XMLException::selfThrow("NSDSXML - loadNSDS error : tag " + DYNAMICAL_SYSTEM_DEFINITION_TAG + " not found.");
+        XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem error : tag " + DYNAMICAL_SYSTEM_DEFINITION_TAG + " not found.");
 
-      if ((node = SiconosDOMTreeTools::findNodeChild(NSDSNode, INTERACTION_DEFINITION_TAG)) != NULL)
+      if ((node = SiconosDOMTreeTools::findNodeChild(NonSmoothDynamicalSystemNode, INTERACTION_DEFINITION_TAG)) != NULL)
         loadInteractionXML(node);
 
-      if ((node = SiconosDOMTreeTools::findNodeChild(NSDSNode, EQUALITYCONSTRAINT_DEFINITION_TAG)) != NULL)
+      if ((node = SiconosDOMTreeTools::findNodeChild(NonSmoothDynamicalSystemNode, EQUALITYCONSTRAINT_DEFINITION_TAG)) != NULL)
         loadEqualityConstraintXML(node);
     }
-    else cout << "NSDSXML - loadNSDS : no dynamical systems defined, use of LMGC90 tag." << endl;
+    else cout << "NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem : no dynamical systems defined, use of LMGC90 tag." << endl;
   }
-  OUT("NSDSXML::NSDSXML(xmlNode * rootNSDSNode)\n");
+  OUT("NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNode * rootNSDSNode)\n");
 }
 
-NSDSXML::~NSDSXML()
+NonSmoothDynamicalSystemXML::~NonSmoothDynamicalSystemXML()
 {
   if (DSXMLMap.size() > 0)
   {
@@ -74,75 +74,75 @@ NSDSXML::~NSDSXML()
 
 
 /* get the DS of number "number"*/
-DSXML* NSDSXML::getDSXML(int number)
+DynamicalSystemXML* NonSmoothDynamicalSystemXML::getDynamicalSystemXML(int number)
 {
-  map<int, DSXML*>::iterator it;
+  map<int, DynamicalSystemXML*>::iterator it;
 
   it = DSXMLMap.find(number);
   if (it == DSXMLMap.end())
   {
-    cout << "NSDSXML::getDSXML - Error : the DSXML number " << number << " does not exist!" << endl;
+    cout << "NonSmoothDynamicalSystemXML::getDynamicalSystemXML - Error : the DynamicalSystemXML number " << number << " does not exist!" << endl;
     return NULL;
   }
   return DSXMLMap[number];
 }
 
 
-InteractionXML* NSDSXML::getInteractionXML(int number)
+InteractionXML* NonSmoothDynamicalSystemXML::getInteractionXML(int number)
 {
   map<int, InteractionXML*>::iterator it;
 
   it = interactionXMLMap.find(number);
   if (it == interactionXMLMap.end())
   {
-    cout << "NSDSXML::getInteractionXML - Error : the InteractionXML number " << number << " does not exist!" << endl;
+    cout << "NonSmoothDynamicalSystemXML::getInteractionXML - Error : the InteractionXML number " << number << " does not exist!" << endl;
     return NULL;
   }
   return interactionXMLMap[number];
 }
 
-EqualityConstraintXML* NSDSXML::getEqualityConstraintXML(int number)
+EqualityConstraintXML* NonSmoothDynamicalSystemXML::getEqualityConstraintXML(int number)
 {
   map<int, EqualityConstraintXML*>::iterator it;
 
   it = equalityConstraintXMLMap.find(number);
   if (it == equalityConstraintXMLMap.end())
   {
-    cout << "NSDSXML::getEqualityConstraintXML - Error : the EqualityConstraintXML number " << number << " does not exist!" << endl;
+    cout << "NonSmoothDynamicalSystemXML::getEqualityConstraintXML - Error : the EqualityConstraintXML number " << number << " does not exist!" << endl;
     return NULL;
   }
   return equalityConstraintXMLMap[number];
 }
 
-void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
+void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
 {
-  IN("NSDSXML::loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* nsds )\n");
+  IN("NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* nsds )\n");
   string type;
   string tmp;
   xmlNode* node, *ecDsioNode;
   xmlNode* dsDefinitionNode;
   xmlNode* interactionDefinitionNode, *ecDefinitionNode;
-  DSXML* dsxml;
+  DynamicalSystemXML* dsxml;
   InteractionXML* interactionXML;
   EqualityConstraintXML *ecXML;
   int number;
   unsigned int i;
   char num[32];
-  map<int, DSXML*>::iterator it;
+  map<int, DynamicalSystemXML*>::iterator it;
   map<int, InteractionXML*>::iterator itinter;
   map<int, EqualityConstraintXML*>::iterator itec;
 
-  if (NSDSNode != NULL)
+  if (NonSmoothDynamicalSystemNode != NULL)
   {
     setBVP(nsds->isBVP());
 
     // at first, we check whether we the tag is LMGC90 tag
-    if (SiconosDOMTreeTools::findNodeChild((const xmlNode*)NSDSNode, LMGC90_NSDS_TAG) == NULL)
+    if (SiconosDOMTreeTools::findNodeChild((const xmlNode*)NonSmoothDynamicalSystemNode, LMGC90_NSDS_TAG) == NULL)
     {
       // creation of the DS_Definition node if necessary
-      dsDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)NSDSNode, DYNAMICAL_SYSTEM_DEFINITION_TAG);
+      dsDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)NonSmoothDynamicalSystemNode, DYNAMICAL_SYSTEM_DEFINITION_TAG);
       if (dsDefinitionNode == NULL)
-        dsDefinitionNode = xmlNewChild(NSDSNode, NULL, (xmlChar*)DYNAMICAL_SYSTEM_DEFINITION_TAG.c_str(), NULL);
+        dsDefinitionNode = xmlNewChild(NonSmoothDynamicalSystemNode, NULL, (xmlChar*)DYNAMICAL_SYSTEM_DEFINITION_TAG.c_str(), NULL);
 
       /*
        * now, creation of the DynamicalSystemXML objects
@@ -168,7 +168,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               dsxml = new LagrangianDSXML();
 
-              // linkage between the DynamicalSystem and his DSXML
+              // linkage between the DynamicalSystem and his DynamicalSystemXML
               nsds->getDynamicalSystemPtr(i)->setDynamicalSystemXMLPtr(dsxml);
 
               // creation of the DynamicalSystemXML
@@ -182,7 +182,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               dsxml = new LagrangianLinearTIDSXML();
 
-              // linkage between the DynamicalSystem and his DSXML
+              // linkage between the DynamicalSystem and his DynamicalSystemXML
               nsds->getDynamicalSystemPtr(i)->setDynamicalSystemXMLPtr(dsxml);
 
               // creation of the DynamicalSystemXML
@@ -197,7 +197,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               dsxml = new LinearDSXML();
 
-              // linkage between the DynamicalSystem and his DSXML
+              // linkage between the DynamicalSystem and his DynamicalSystemXML
               nsds->getDynamicalSystemPtr(i)->setDynamicalSystemXMLPtr(dsxml);
 
               // creation of the DynamicalSystemXML
@@ -210,9 +210,9 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
             {
               node = xmlNewChild(dsDefinitionNode, NULL, (xmlChar*)NON_LINEAR_SYSTEMDS_TAG.c_str(), NULL);
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
-              dsxml = new DSXML();
+              dsxml = new DynamicalSystemXML();
 
-              // linkage between the DynamicalSystem and his DSXML
+              // linkage between the DynamicalSystem and his DynamicalSystemXML
               nsds->getDynamicalSystemPtr(i)->setDynamicalSystemXMLPtr(dsxml);
 
               // creation of the DynamicalSystemXML
@@ -222,13 +222,13 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
             }
             else
             {
-              XMLException::selfThrow("NSDSXML - loadNSDS error : undefined DS type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
+              XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem error : undefined DS type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
             }
           }
           else
           {
             tmp = num;
-            XMLException::selfThrow("NSDSXML - loadNSDS | Error : the Dynamical System number : " + tmp + " already exists!");
+            XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem | Error : the Dynamical System number : " + tmp + " already exists!");
           }
         }
         else
@@ -246,9 +246,9 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
     // creation of the EqualityConstraint_Defintion if necessary
     if (nsds->getEqualityConstraints().size() > 0)
     {
-      ecDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)NSDSNode, EQUALITYCONSTRAINT_DEFINITION_TAG);
+      ecDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)NonSmoothDynamicalSystemNode, EQUALITYCONSTRAINT_DEFINITION_TAG);
       if (ecDefinitionNode == NULL)
-        ecDefinitionNode = xmlNewChild(NSDSNode, NULL, (xmlChar*)EQUALITYCONSTRAINT_DEFINITION_TAG.c_str(), NULL);
+        ecDefinitionNode = xmlNewChild(NonSmoothDynamicalSystemNode, NULL, (xmlChar*)EQUALITYCONSTRAINT_DEFINITION_TAG.c_str(), NULL);
 
       for (i = 0; i < nsds->getEqualityConstraints().size(); i++)
       {
@@ -268,7 +268,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               ecXML = new LinearECXML();
 
-              // linkage between the DynamicalSystem and his DSXML
+              // linkage between the DynamicalSystem and his DynamicalSystemXML
               nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML(ecXML);
 
               // creation of the DynamicalSystemXML
@@ -282,7 +282,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               ecXML = new LinearTIECXML();
 
-              // linkage between the DynamicalSystem and his DSXML
+              // linkage between the DynamicalSystem and his DynamicalSystemXML
               nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML(ecXML);
 
               // creation of the DynamicalSystemXML
@@ -296,7 +296,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               ecXML = new LagrangianECXML();
 
-              // linkage between the DynamicalSystem and his DSXML
+              // linkage between the DynamicalSystem and his DynamicalSystemXML
               nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML(ecXML);
 
               // creation of the DynamicalSystemXML
@@ -310,7 +310,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               ecXML = new LagrangianECXML();
 
-              // linkage between the DynamicalSystem and his DSXML
+              // linkage between the DynamicalSystem and his DynamicalSystemXML
               nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML(ecXML);
 
               // creation of the DynamicalSystemXML
@@ -324,7 +324,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               ecXML = new EqualityConstraintXML();
 
-              // linkage between the DynamicalSystem and his DSXML
+              // linkage between the DynamicalSystem and his DynamicalSystemXML
               nsds->getEqualityConstraintPtr(i)->setEqualityConstraintXML(ecXML);
 
               // creation of the DynamicalSystemXML
@@ -332,7 +332,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
 
               equalityConstraintXMLMap[number] = ecXML;
             }
-            else XMLException::selfThrow("NSDSXML - loadNSDS | Error : the EqualityConstraint type : " + nsds->getEqualityConstraintPtr(i)->getType() + " doesn't exist!");
+            else XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem | Error : the EqualityConstraint type : " + nsds->getEqualityConstraintPtr(i)->getType() + " doesn't exist!");
 
             /*  end of the save : saving the DynamicalSystem linked to this DSInputOutput */
             ecDsioNode = xmlNewChild(node, NULL, (xmlChar*)DSIO_CONCERNED.c_str(), NULL);
@@ -347,7 +347,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
           else
           {
             tmp = num;
-            XMLException::selfThrow("NSDSXML - loadNSDS | Error : the EqualityConstraint number : " + tmp + " already exists!");
+            XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem | Error : the EqualityConstraint number : " + tmp + " already exists!");
           }
         }
       }
@@ -357,9 +357,9 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
     // creation of the Interaction_Defintion if necessary
     if (nsds->getInteractionVectorSize() > 0)
     {
-      interactionDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)NSDSNode, INTERACTION_DEFINITION_TAG);
+      interactionDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)NonSmoothDynamicalSystemNode, INTERACTION_DEFINITION_TAG);
       if (interactionDefinitionNode == NULL)
-        interactionDefinitionNode = xmlNewChild(NSDSNode, NULL, (xmlChar*)INTERACTION_DEFINITION_TAG.c_str(), NULL);
+        interactionDefinitionNode = xmlNewChild(NonSmoothDynamicalSystemNode, NULL, (xmlChar*)INTERACTION_DEFINITION_TAG.c_str(), NULL);
 
       for (i = 0; int(i) < nsds->getInteractionVectorSize(); i++)
       {
@@ -377,7 +377,7 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
             xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
             interactionXML = new InteractionXML();
 
-            // linkage between the DynamicalSystem and his DSXML
+            // linkage between the DynamicalSystem and his DynamicalSystemXML
             nsds->getInteractionPtr(i)->setInteractionXMLPtr(interactionXML);
 
             // creation of the DynamicalSystemXML
@@ -388,22 +388,22 @@ void NSDSXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
           else
           {
             tmp = num;
-            XMLException::selfThrow("NSDSXML - loadNSDS | Error : the Interaction number : " + tmp + " already exists!");
+            XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem | Error : the Interaction number : " + tmp + " already exists!");
           }
         }
       }
     }
   }
-  else XMLException::selfThrow("NSDSXML - loadNonSmoothDynamicalSystem( NSDS* nsds ) Error : no NSDSNode is defined.");
-  OUT("NSDSXML::loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* nsds )\n");
+  else XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* nsds ) Error : no NonSmoothDynamicalSystemNode is defined.");
+  OUT("NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* nsds )\n");
 }
 
 
-void NSDSXML::loadDSXML(xmlNode * rootDSNode)
+void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNode * rootDSNode)
 {
   xmlNode *node;
   int number; //Number of a DS
-  map<int, DSXML*>::iterator i;
+  map<int, DynamicalSystemXML*>::iterator i;
   string type; //Type of DS
   bool isbvp;
 
@@ -411,11 +411,11 @@ void NSDSXML::loadDSXML(xmlNode * rootDSNode)
 
   node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)rootDSNode);
   if (node == NULL)
-    XMLException::selfThrow("NSDSXML - loadDSXML error : at least one " + DYNAMICAL_SYSTEM_TAG + " must be declared.");
+    XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDynamicalSystemXML error : at least one " + DYNAMICAL_SYSTEM_TAG + " must be declared.");
 
   while (node != NULL)
   {
-    DSXML *dsxml;
+    DynamicalSystemXML *dsxml;
 
     number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
     i = DSXMLMap.find(number);
@@ -446,21 +446,21 @@ void NSDSXML::loadDSXML(xmlNode * rootDSNode)
       }
       else if (type == NON_LINEAR_SYSTEMDS_TAG)
       {
-        dsxml = new DSXML((xmlNode *)node, isbvp);
+        dsxml = new DynamicalSystemXML((xmlNode *)node, isbvp);
         DSXMLMap[number] = dsxml;
         dsxml->setDSInputOutputXML(getDSInputOutputXMLRelatingToDS(number));
       }
       else
-        XMLException::selfThrow("NSDSXML - loadDSXML error : undefined DS type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
+        XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDynamicalSystemXML error : undefined DS type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
     }
     else
-      XMLException::selfThrow("NSDSXML - loadDSXML error : wrong DS number : already exists.");
+      XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDynamicalSystemXML error : wrong DS number : already exists.");
 
     node = SiconosDOMTreeTools::findFollowNode(node);
   }
 }
 
-map<int, DSInputOutputXML*> NSDSXML::getDSInputOutputXMLRelatingToDS(int number)
+map<int, DSInputOutputXML*> NonSmoothDynamicalSystemXML::getDSInputOutputXMLRelatingToDS(int number)
 {
   map<int, DSInputOutputXML*> m;
   vector<int> v;
@@ -479,7 +479,7 @@ map<int, DSInputOutputXML*> NSDSXML::getDSInputOutputXMLRelatingToDS(int number)
   return m;
 }
 
-void NSDSXML::loadInteractionXML(xmlNode * rootInteractionNode)
+void NonSmoothDynamicalSystemXML::loadInteractionXML(xmlNode * rootInteractionNode)
 {
   xmlNode *node;
   int number; //Number of an Interaction
@@ -502,14 +502,14 @@ void NSDSXML::loadInteractionXML(xmlNode * rootInteractionNode)
     }
     else
     {
-      XMLException::selfThrow("NSDSXML - loadInteractionXML error : wrong INTERACTION number : already exists.");
+      XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadInteractionXML error : wrong INTERACTION number : already exists.");
     }
 
     node = SiconosDOMTreeTools::findFollowNode(node, INTERACTION_TAG);
   }
 }
 
-void NSDSXML::loadEqualityConstraintXML(xmlNode * rootECNode)
+void NonSmoothDynamicalSystemXML::loadEqualityConstraintXML(xmlNode * rootECNode)
 {
   xmlNode *node;
   int number; //Number of an EqualityCopnstraint
@@ -532,14 +532,14 @@ void NSDSXML::loadEqualityConstraintXML(xmlNode * rootECNode)
     }
     else
     {
-      XMLException::selfThrow("NSDSXML - loadEqualityConstraintXML error : wrong EQUALITYCONSTRAINT number : already exists.");
+      XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadEqualityConstraintXML error : wrong EQUALITYCONSTRAINT number : already exists.");
     }
 
     node = SiconosDOMTreeTools::findFollowNode(node);
   }
 }
 
-void NSDSXML::loadDSInputOutputXML(xmlNode * rootdsioNode)
+void NonSmoothDynamicalSystemXML::loadDSInputOutputXML(xmlNode * rootdsioNode)
 {
   xmlNode *node;
   int number;
@@ -584,22 +584,22 @@ void NSDSXML::loadDSInputOutputXML(xmlNode * rootdsioNode)
         dsInputOutputXMLMap[number] = dsioxml;
       }
       else
-        XMLException::selfThrow("NSDSXML - loadDSInputOutputXML error : wrong DSInputOutput number : already exists.");
+        XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDSInputOutputXML error : wrong DSInputOutput number : already exists.");
     }
     else
     {
-      XMLException::selfThrow("NSDSXML - loadDSInputOutputXML error : wrong DSINPUTOUTPUT number : already exists.");
+      XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDSInputOutputXML error : wrong DSINPUTOUTPUT number : already exists.");
     }
 
     node = SiconosDOMTreeTools::findFollowNode(node);
   }
 }
 
-void NSDSXML::updateNSDSXML(xmlNode* node, NonSmoothDynamicalSystem* nsds)
+void NonSmoothDynamicalSystemXML::updateNonSmoothDynamicalSystemXML(xmlNode* node, NonSmoothDynamicalSystem* nsds)
 {
-  IN("NSDSXML::updateNSDSXML\n");
-  NSDSNode = node;
+  IN("NonSmoothDynamicalSystemXML::updateNonSmoothDynamicalSystemXML\n");
+  NonSmoothDynamicalSystemNode = node;
   loadNonSmoothDynamicalSystem(nsds);
-  OUT("NSDSXML::updateNSDSXML\n");
+  OUT("NonSmoothDynamicalSystemXML::updateNonSmoothDynamicalSystemXML\n");
 }
 

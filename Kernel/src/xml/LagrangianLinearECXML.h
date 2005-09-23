@@ -14,12 +14,12 @@
 #ifndef _LagrangianLinearECXML_
 #define _LagrangianLinearECXML_
 
-#include "EqualityConstraintXML.h"
+#include "LagrangianECXML.h"
 
 const std::string LLEC_H = "H";
 const std::string LLEC_B = "b";
 
-class LagrangianLinearECXML : public EqualityConstraintXML
+class LagrangianLinearECXML : public LagrangianECXML
 {
 public:
 

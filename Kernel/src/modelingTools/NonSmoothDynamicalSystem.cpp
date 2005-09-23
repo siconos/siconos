@@ -99,7 +99,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
 }
 
 // xml constuctor
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NSDSXML* newNsdsxml):
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* newNsdsxml):
   BVP(false), nsdsxml(newNsdsxml), isTopologyAllocatedIn(false)
 {
   if (nsdsxml != NULL)
@@ -113,26 +113,26 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NSDSXML* newNsdsxml):
 
     for (i = 0; i < size; i++)
     {
-      string type = (nsdsxml->getDSXML(nbDStab[i]))->getType();
+      string type = (nsdsxml->getDynamicalSystemXML(nbDStab[i]))->getType();
 
       if (type  == LAGRANGIAN_NON_LINEARDS_TAG)  // LagrangianDS
       {
-        DSVector[i] = new LagrangianDS(nsdsxml->getDSXML(nbDStab[i]), this);
+        DSVector[i] = new LagrangianDS(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
         isDSVectorAllocatedIn[i] = true;
       }
       else if (type == LAGRANGIAN_TIME_INVARIANTDS_TAG)  // Lagrangian Linear Time Invariant
       {
-        DSVector[i] = new LagrangianLinearTIDS(nsdsxml->getDSXML(nbDStab[i]), this);
+        DSVector[i] = new LagrangianLinearTIDS(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
         isDSVectorAllocatedIn[i] = true;
       }
       else if (type == LINEAR_SYSTEMDS_TAG)  // Linear DS
       {
-        DSVector[i] = new LinearDS(nsdsxml->getDSXML(nbDStab[i]), this);
+        DSVector[i] = new LinearDS(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
         isDSVectorAllocatedIn[i] = true;
       }
       else if (type == NON_LINEAR_SYSTEMDS_TAG)  // Non linear DS
       {
-        DSVector[i] = new DynamicalSystem(nsdsxml->getDSXML(nbDStab[i]), this);
+        DSVector[i] = new DynamicalSystem(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
         isDSVectorAllocatedIn[i] = true;
       }
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::xml constructor, wrong Dynamical System type" + type);
@@ -405,7 +405,7 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
     for (i = 0; i < size; i++)
       interactionVector[i]->saveInteractionToXML();
   }
-  else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveNSDSToXML - The NSDSXML object doesn't exists");
+  else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveNSDSToXML - The NonSmoothDynamicalSystemXML object doesn't exists");
 
   OUT("NonSmoothDynamicalSystem::saveNSDSToXML\n");
 }

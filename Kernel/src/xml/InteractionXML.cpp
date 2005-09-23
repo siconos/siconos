@@ -4,7 +4,7 @@
 // Relations
 #include "LinearTIRXML.h"
 #include "LagrangianLinearRXML.h"
-#include "LagrangianNonLinearRXML.h"
+#include "LagrangianRXML.h"
 // Nslaw
 #include "ComplementarityConditionNSLXML.h"
 #include "RelayNSLXML.h"
@@ -72,7 +72,7 @@ InteractionXML::InteractionXML(xmlNode * interactionNode, vector<int> definedNum
       if (type == LINEAR_TIME_INVARIANT_RELATION_TAG)
         relationXML = new LinearTIRXML(node2);
       else if (type == LAGRANGIAN_NON_LINEAR_RELATION_TAG)
-        relationXML = new LagrangianNonLinearRXML(node2);
+        relationXML = new LagrangianRXML(node2);
       else if (type == LAGRANGIAN_LINEAR_RELATION_TAG)
         relationXML = new LagrangianLinearRXML(node2);
       else
@@ -163,17 +163,17 @@ void InteractionXML::loadInteraction(Interaction* inter)
 
         relationXML = newRelationXml;
       }
-      else if (type == LAGRANGIANNONLINEARRELATION)
+      else if (type == LAGRANGIANRELATION)
       {
         //xmlNewProp( node, (xmlChar*)INTERACTION_TYPE.c_str(), (xmlChar*)INTERACTION_LNL.c_str() );
         node = xmlNewChild(InteractionContentNode, NULL, (xmlChar*)LAGRANGIAN_NON_LINEAR_RELATION_TAG.c_str(), NULL);
-        newRelationXml = new LagrangianNonLinearRXML();
+        newRelationXml = new LagrangianRXML();
 
         // linkage between the Relation and his RelationXML
         inter->getRelationPtr()->setRelationXML(newRelationXml);
 
         // creation of the RelationXML
-        static_cast<LagrangianNonLinearRXML*>(newRelationXml)->updateRelationXML(node, inter->getRelationPtr());
+        static_cast<LagrangianRXML*>(newRelationXml)->updateRelationXML(node, inter->getRelationPtr());
 
         relationXML = newRelationXml;
       }

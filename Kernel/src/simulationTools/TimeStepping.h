@@ -2,13 +2,6 @@
 #define TIMESTEPPING_H
 
 #include "Strategy.h"
-#include "StrategyXML.h"
-#include <iostream>
-#include <vector>
-#include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
-#include "check.h"
-
 /** \class TimeStepping
  *  \brief It's a way to drive a simulation, where the resolution is only managed by the time
  *  \author SICONOS Development Team - copyright INRIA

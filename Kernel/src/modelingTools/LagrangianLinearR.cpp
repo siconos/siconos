@@ -6,7 +6,7 @@ using namespace std;
 
 // Xml constructor
 LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
-  Relation(relxml, inter), H(NULL), b(NULL),
+  LagrangianR(relxml, inter), H(NULL), b(NULL),
   isHAllocatedIn(true), isBAllocatedIn(true)
 {
   relationType = LAGRANGIANLINEARRELATION;
@@ -39,7 +39,7 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
 
 // Constructor from data: H, b and interaction (optional)
 LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVector& newB, Interaction* inter):
-  Relation(inter), H(NULL), b(NULL), isHAllocatedIn(true), isBAllocatedIn(true)
+  LagrangianR(inter), H(NULL), b(NULL), isHAllocatedIn(true), isBAllocatedIn(true)
 {
   relationType = LAGRANGIANLINEARRELATION;
   unsigned int row = newH.size(0);
@@ -63,7 +63,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
 
 // Constructor from data: H and interaction (optional)
 LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, Interaction* inter):
-  Relation(inter), H(NULL), b(NULL), isHAllocatedIn(true), isBAllocatedIn(true)
+  LagrangianR(inter), H(NULL), b(NULL), isHAllocatedIn(true), isBAllocatedIn(true)
 {
   relationType = LAGRANGIANLINEARRELATION;
   unsigned int row = newH.size(0);
@@ -81,7 +81,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, Interaction* int
 
 // copy constructor (inter is optional)
 LagrangianLinearR::LagrangianLinearR(const Relation & newLLR, Interaction* inter):
-  Relation(newLLR, inter), H(NULL), b(NULL), isHAllocatedIn(true), isBAllocatedIn(true)
+  LagrangianR(newLLR, inter), H(NULL), b(NULL), isHAllocatedIn(true), isBAllocatedIn(true)
 {
   if (relationType !=  LAGRANGIANLINEARRELATION)
     RuntimeException::selfThrow("LagrangianLinearR:: copy constructor, inconsistent relation types for copy");
@@ -403,7 +403,7 @@ LagrangianLinearR* LagrangianLinearR::convert(Relation *r)
 
 // Default (private) constructor
 LagrangianLinearR::LagrangianLinearR():
-  Relation(), H(NULL), b(NULL), isHAllocatedIn(false), isBAllocatedIn(false)
+  LagrangianR(), H(NULL), b(NULL), isHAllocatedIn(false), isBAllocatedIn(false)
 {
   relationType = LAGRANGIANLINEARRELATION;
 }

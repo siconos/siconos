@@ -1,4 +1,4 @@
-#include "NewSiconosVector.h"
+#include "SiconosVector.h"
 using namespace std;
 
 SiconosVector::SiconosVector()

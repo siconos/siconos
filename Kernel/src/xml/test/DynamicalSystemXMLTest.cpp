@@ -17,7 +17,7 @@ void DynamicalSystemXMLTest::setUp()
   {
     this->doc = xmlParseFile("DynamicalSystem.xml");
     this->root = xmlDocGetRootElement(doc);
-    this->ds = DSXML(root, false);
+    this->ds = DynamicalSystemXML(root, false);
 
     vector<double> v(6);
     v.at(0) = 1.0;

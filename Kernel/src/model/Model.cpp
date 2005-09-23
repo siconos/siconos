@@ -1,3 +1,4 @@
+
 #include "Model.h"
 
 // includes to be deleted thanks to factories ...
@@ -32,7 +33,7 @@ Model::Model(char *xmlFile):
     xmlSchema = modelxml->getXMLSchema();
 
     // Memory allocation for nsds and strategy
-    nsds = new NonSmoothDynamicalSystem(modelxml->getNSDSXML());
+    nsds = new NonSmoothDynamicalSystem(modelxml->getNonSmoothDynamicalSystemXML());
     if (modelxml->hasStrategy())
     {
       isStrategyAllocatedIn = true;
@@ -228,14 +229,14 @@ void Model::checkXMLPlatform()
 
   if (modelxml != NULL)
   {
-    if (modelxml->getNSDSXML() != NULL)
+    if (modelxml->getNonSmoothDynamicalSystemXML() != NULL)
     {
-      // we must create/update the DSXMLs
-      nsds->getNSDSXMLPtr()->updateNSDSXML(modelxml->getNSDSXML()->getNSDSXMLNode(), nsds);
+      // we must create/update the DynamicalSystemXMLs
+      nsds->getNonSmoothDynamicalSystemXMLPtr()->updateNonSmoothDynamicalSystemXML(modelxml->getNonSmoothDynamicalSystemXML()->getNonSmoothDynamicalSystemXMLNode(), nsds);
     }
     else if (nsds != NULL)
     {
-      // creation of the NSDSXML and of all the DynamicalSystemXML and InteractionXML
+      // creation of the NonSmoothDynamicalSystemXML and of all the DynamicalSystemXML and InteractionXML
       modelxml->loadModel(this);
       // \todo to be tested !!
     }
@@ -264,7 +265,7 @@ void Model::checkXMLPlatform()
   else
   {
     // in this case, we must create all the XML objects
-    // SiconosModelXML, NSDSXML, StrategyXML, ...
+    // SiconosModelXML, NonSmoothDynamicalSystemXML, StrategyXML, ...
 
     // to build all the XML objects, we must fold all the objects of the platform
 

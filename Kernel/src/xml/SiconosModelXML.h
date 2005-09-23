@@ -9,7 +9,7 @@
  *
  * SiconosModelXML allows the verification of a Siconos XML data file thanks to an XML Schema.
  * All verifications can't be done with schema : others are done in the code, as the download of the XML file (download is stopped if error).
- * This class calls NSDSXML and StrategyXML classes to manage Siconos NSDS and Strategy data of a simulation.
+ * This class calls NonSmoothDynamicalSystemXML and StrategyXML classes to manage Siconos NSDS and Strategy data of a simulation.
  */
 #ifndef __MODELXML__
 #define __MODELXML__
@@ -18,7 +18,7 @@
 
 #include "SiconosDOMTreeTools.h"
 
-#include "NSDSXML.h"
+#include "NonSmoothDynamicalSystemXML.h"
 #include "StrategyXML.h"
 
 #include <libxml/parser.h>
@@ -31,7 +31,7 @@ extern std::string  FILE_STORAGE;
 extern std::string  XML_SCHEMA;
 
 class Model;
-class NSDSXML;
+class NonSmoothDynamicalSystemXML;
 class StrategyXML;
 
 const std::string  ISO = "ISO-8859-1";
@@ -81,11 +81,11 @@ public:
    */
   void saveSiconosModelInXMLFile(char *siconosModelXMLFilePath);
 
-  /** \fn getNSDSXML()
-   *   \brief This function allows to get the NSDSXML
-   *   \return The NSDSXML of the SiconosModelXML
+  /** \fn getNonSmoothDynamicalSystemXML()
+   *   \brief This function allows to get the NonSmoothDynamicalSystemXML
+   *   \return The NonSmoothDynamicalSystemXML of the SiconosModelXML
    */
-  inline NSDSXML* getNSDSXML()
+  inline NonSmoothDynamicalSystemXML* getNonSmoothDynamicalSystemXML()
   {
     return this->nsdsXML;
   }
@@ -255,8 +255,8 @@ public:
   }
 
   /** \fn void setTitle(string s)
-   *   \brief allows to save the title of the DSXML
-   *   \param string : The string s of the DSXML
+   *   \brief allows to save the title of the DynamicalSystemXML
+   *   \param string : The string s of the DynamicalSystemXML
    */
   inline void setTitle(std::string  s)
   {
@@ -268,8 +268,8 @@ public:
   }
 
   /** \fn void setAuthor(string s)
-   *   \brief allows to save the author of the DSXML
-   *   \param string : The string s of the DSXML
+   *   \brief allows to save the author of the DynamicalSystemXML
+   *   \param string : The string s of the DynamicalSystemXML
    */
   inline void setAuthor(std::string  s)
   {
@@ -281,8 +281,8 @@ public:
   }
 
   /** \fn void setDescription(string s)
-   *   \brief allows to save the Description of the DSXML
-   *   \param string : The string s of the DSXML
+   *   \brief allows to save the Description of the DynamicalSystemXML
+   *   \param string : The string s of the DynamicalSystemXML
    */
   inline void setDescription(std::string  s)
   {
@@ -294,8 +294,8 @@ public:
   }
 
   /** \fn void setDate(string s)
-   *   \brief allows to save the date of the DSXML
-   *   \param string : The string s of the DSXML
+   *   \brief allows to save the date of the DynamicalSystemXML
+   *   \param string : The string s of the DynamicalSystemXML
    */
   inline void setDate(std::string  s)
   {
@@ -307,8 +307,8 @@ public:
   }
 
   /** \fn void setXMLSchema(string s)
-   *   \brief allows to save the xml schema of the DSXML
-   *   \param string : The string s of the DSXML
+   *   \brief allows to save the xml schema of the DynamicalSystemXML
+   *   \param string : The string s of the DynamicalSystemXML
    */
   inline void setXMLSchema(std::string  s)
   {
@@ -387,7 +387,7 @@ private:
 
   std::string  xmlSchemaFile;
 
-  NSDSXML *nsdsXML;
+  NonSmoothDynamicalSystemXML *nsdsXML;
   StrategyXML *strategyXML;
 
   xmlNode * tNode;
@@ -406,7 +406,7 @@ private:
   xmlDoc * doc;
 
   /** \fn loadModel(xmlNode *)
-   *   \brief Loads the model : Time (to and T) and the NSDSXML and StrategyXML of the model in order to manage NSDS and Strategy data of the simulation
+   *   \brief Loads the model : Time (to and T) and the NonSmoothDynamicalSystemXML and StrategyXML of the model in order to manage NSDS and Strategy data of the simulation
    *  \param xmlNode * : the root node of the Model
    *   \exception XMLException : if a property of the SiconosModel (NSDS or Strategy or Time) lacks in the DOM tree
    */
@@ -419,11 +419,11 @@ private:
    */
   void loadTime(xmlNode *timeNode);
 
-  /** \fn loadNSDSXML(xmlNode *)
-   *   \brief Loads NSDSXML
+  /** \fn loadNonSmoothDynamicalSystemXML(xmlNode *)
+   *   \brief Loads NonSmoothDynamicalSystemXML
    *    \param xmlNode * : the root node of the
    */
-  void loadNSDSXML(xmlNode *NSDSNode);
+  void loadNonSmoothDynamicalSystemXML(xmlNode *NSDSNode);
 
   /** \fn loadStrategyXML(xmlNode *)
    *   \brief Loads StrategyXML

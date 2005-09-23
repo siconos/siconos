@@ -4,7 +4,7 @@ using namespace std;
 // --- Constructors ---
 
 // From xml file (newNsds is optional)
-LinearDS::LinearDS(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
+LinearDS::LinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
   DynamicalSystem(dsXML, newNsds), A(NULL), b(NULL),
   AFunctionName("none"), bFunctionName("none"),
   computeAPtr(NULL), computeBPtr(NULL),
@@ -247,7 +247,7 @@ void LinearDS::saveDSToXML()
       static_cast<LinearDSXML*>(dsxml)->setBVector(*b);
     }
   }
-  else RuntimeException::selfThrow("LinearDS::saveDSToXML - The DSXML object doesn't exists");
+  else RuntimeException::selfThrow("LinearDS::saveDSToXML - The DynamicalSystemXML object doesn't exists");
 
   OUT("LinearDS::saveDSToXML\n");
 }

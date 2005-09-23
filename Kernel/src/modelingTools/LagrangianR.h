@@ -1,54 +1,55 @@
-#ifndef LAGRANGIANNONLINEARRELATION_H
-#define LAGRANGIANNONLINEARRELATION_H
+#ifndef LAGRANGIANRELATION_H
+#define LAGRANGIANRELATION_H
 
 #include "Relation.h"
-#include "LagrangianNonLinearRXML.h"
+#include "LagrangianRXML.h"
 
-/** \class LagrangianNonLinearR
- *  \brief Lagrangian Non Linear Relation
+/** \class LagrangianR
+ *  \brief Lagrangian (Non Linear) Relation
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date Apr 27, 2004
  *
  *
  */
-class LagrangianNonLinearRXML;
+class LagrangianRXML;
 
-class LagrangianNonLinearR : public Relation
+class LagrangianR : public Relation
 {
 public:
 
-  /** \fn LagrangianNonLinearR(void);
+  /** \fn LagrangianR(Interaction* =NULL);
    * \brief default constructor
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    */
-  LagrangianNonLinearR();
+  LagrangianR(Interaction* = NULL);
 
-  /** \fn void LagrangianNonLinearR(RelationXML*, Interaction* =NULL)
+  /** \fn void LagrangianR(RelationXML*, Interaction* =NULL)
    *  \brief constructor from xml file
    *  \param relationXML
    *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  \exception RuntimeException
    */
-  LagrangianNonLinearR(RelationXML*, Interaction* = NULL);
+  LagrangianR(RelationXML*, Interaction* = NULL);
 
-  /** \fn void LagrangianNonLinearR(const string& computeInput,const string& computeOutput, Interaction* =NULL)
+  /** \fn void LagrangianR(const string& computeInput,const string& computeOutput, Interaction* =NULL)
    *  \brief constructor from a set of data
    *  \param string : the name of the plugin for computeInput
    *  \param string : the name of the plugin for computeOutput
    *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  \exception RuntimeException
    */
-  LagrangianNonLinearR(const std::string&, const std::string&, Interaction* = NULL);
+  LagrangianR(const std::string&, const std::string&, Interaction* = NULL);
 
-  /** \fn LagrangianNonLinearR(const Relation&)
+  /** \fn LagrangianR(const Relation&)
    *  \brief copy constructor
    *  \param a relation to copy
    *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  warning: the interaction link is not copied, set a new one!
    */
-  LagrangianNonLinearR(const Relation &, Interaction* = NULL);
+  LagrangianR(const Relation &, Interaction* = NULL);
 
-  ~LagrangianNonLinearR();
+  ~LagrangianR();
 
   /** \fn void computeJacobian(void);
    * \brief default function to compute Jacobian
@@ -62,12 +63,12 @@ public:
   void saveRelationToXML();
 
 
-  /** \fn LagrangianNonLinearR* convert (Relation *r)
+  /** \fn LagrangianR* convert (Relation *r)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation* : the relation which must be converted
    * \return a pointer on the relation if it is of the right type, NULL otherwise
    */
-  static LagrangianNonLinearR* convert(Relation *r);
+  static LagrangianR* convert(Relation *r);
 
 
 private:
@@ -85,4 +86,4 @@ private:
 
 };
 
-#endif // LAGRANGIANNONLINEARRELATION_H
+#endif // LAGRANGIANRELATION_H

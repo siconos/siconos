@@ -7,7 +7,7 @@
 #include "Interaction.h"
 #include "EqualityConstraint.h"
 #include "Topology.h"
-#include "NSDSXML.h"
+#include "NonSmoothDynamicalSystemXML.h"
 
 #include "check.h"
 #include <iostream>
@@ -20,7 +20,7 @@ class Interaction;
 class DynamicalSystem;
 class EqualityConstraint;
 class Topology;
-class NSDSXML;
+class NonSmoothDynamicalSystemXML;
 
 /** \class NonSmoothDynamicalSystem
  *  \brief This class describes the Non Smooth Dynamical System (NonSmoothDynamicalSystem)
@@ -49,11 +49,11 @@ public:
    */
   NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&);
 
-  /** \fn NonSmoothDynamicalSystem(NSDSXML*)
+  /** \fn NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML*)
    *  \brief xml constructor
    *  \param: the XML object corresponding to the NonSmoothDynamicalSystem
    */
-  NonSmoothDynamicalSystem(NSDSXML*);
+  NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML*);
 
   ~NonSmoothDynamicalSystem();
 
@@ -193,20 +193,20 @@ public:
     return topology;
   }
 
-  /** \fn inline NSDSXML* getNSDSXMLPtr()
+  /** \fn inline NonSmoothDynamicalSystemXML* getNonSmoothDynamicalSystemXMLPtr()
    *  \brief get the xml linked object
-   *  \return a pointer on NSDSXML
+   *  \return a pointer on NonSmoothDynamicalSystemXML
    */
-  inline NSDSXML* getNSDSXMLPtr() const
+  inline NonSmoothDynamicalSystemXML* getNonSmoothDynamicalSystemXMLPtr() const
   {
     return nsdsxml;
   }
 
-  /** \fn inline void setNSDSXMLPtr( NSDSXML *nsdsxml )
+  /** \fn inline void setNonSmoothDynamicalSystemXMLPtr( NonSmoothDynamicalSystemXML *nsdsxml )
    *  \brief set the xml linked object
-   *  \param NSDSXML* : a pointer on NSDSXML* to link
+   *  \param NonSmoothDynamicalSystemXML* : a pointer on NonSmoothDynamicalSystemXML* to link
    */
-  inline void setNSDSXMLPtr(NSDSXML *newNsdsxml)
+  inline void setNonSmoothDynamicalSystemXMLPtr(NonSmoothDynamicalSystemXML *newNsdsxml)
   {
     nsdsxml = newNsdsxml;
   }
@@ -278,7 +278,7 @@ private:
   Topology * topology;
 
   /** the XML object linked to the NonSmoothDynamicalSystem to read XML data */
-  NSDSXML *nsdsxml;
+  NonSmoothDynamicalSystemXML *nsdsxml;
 
   /** Flags to check wheter pointers were allocated in class constructors or not */
   std::vector<bool> isDSVectorAllocatedIn;

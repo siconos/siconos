@@ -12,7 +12,6 @@
 #define __SICONOSDOMTREETOOLS__
 
 #include "SiconosConst.h"
-#include "NewSiconosVector.h"
 #include "SimpleVector.h"
 #include "SiconosMatrix.h"
 

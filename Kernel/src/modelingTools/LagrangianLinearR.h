@@ -1,14 +1,14 @@
 #ifndef LAGRANGIANLINEARRELATION_H
 #define LAGRANGIANLINEARRELATION_H
 
-#include "Relation.h"
+#include "LagrangianR.h"
 #include "LagrangianLinearRXML.h"
 
 #include "SimpleVector.h"
 #include "CompositeVector.h"
 
 /** \class LagrangianLinearR
- *  \brief Lagrangian Linear Relation, derived from class Relation
+ *  \brief Lagrangian Linear Relation, derived from class LagrangianR
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 27, 2004
@@ -20,13 +20,13 @@
  * \f]
  * and for the output \f$ p\f$ defined by
  * \f[
- * p= H^t \lamba
+ * p= H^t \lambda
  * \f]
  *  H is the only required input to built a LagrangianLinearR.
  *
  */
 
-class LagrangianLinearR : public Relation
+class LagrangianLinearR : public LagrangianR
 {
 public:
 

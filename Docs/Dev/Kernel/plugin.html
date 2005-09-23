@@ -1,0 +1,325 @@
+<!DOCTYPE html PUBLIC "-//Tigris//DTD XHTML 1.0 Transitional//EN" "http://style.tigris.org/tigris_transitional.dtd">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=iso-8859-1">
+  <title>Plug-in system</title>
+  <style type="text/css">
+/* <![CDATA[ */ 
+@import "css/readyset.css";
+@import "css/inst.css";
+/*  ]]>
+ */
+ </style>
+  <link rel="stylesheet" type="text/css" href="css/print.css"
+ media="print">
+</head>
+<body>
+<div class="app">
+<div class="readyset">
+<h2>Kernel Components &gt; Plug-in system<br>
+</h2>
+<div id="releaseinfo">
+<h3>Release Information</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Project:</th>
+      <td><a href="index.html">Siconos</a></td>
+    </tr>
+    <tr>
+      <th>Internal Release Number:</th>
+      <td>X.Y.Z</td>
+    </tr>
+    <tr>
+      <th>Related Documents:</th>
+      <td>
+      <div> <a href="design.html">Design</a> <br>
+      </div>
+      <div> <a href="glossary.html">Glossar</a></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<!-- /releaseinfo -->
+<!-- /processimpact -->
+<div id="SimulationComponent">&nbsp;&nbsp; &nbsp;&nbsp; <br>
+<h3>Plug-in system component<br>
+</h3>
+<table>
+  <caption><br>
+  </caption> <tbody>
+    <tr>
+      <th><b>What for?</b></th>
+      <td>To provide a user plug-in system for specific functions<br>
+      </td>
+    </tr>
+    <tr>
+      <th><b>Feature sets:</b></th>
+      <td><a href="features.html#F-2.042">F-2.042</a> </td>
+    </tr>
+    <tr>
+      <th><b>Sources directory name:</b></th>
+      <td>Kernel/src/utils/SiconosSharedLibrary, Kernel/src/plugin<br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
+The purpose of Plug-in system is to allow user to provide his own
+computation methods for some specific functions (vector field of a
+dynamical system, mass ...), this <br>
+without having to re-compile the whole platform. <br>
+<br>
+<p>Plug-in is a set of C functions, but compiled with a C++ compiler (<i>extern
+"C"</i> before the header of the function). It must be supplied as a
+dynamical library, to allow the platform to load it and use its
+functions. Thus, parameters and returned values of function of plugins
+must be C
+types (no C++ objects or STL containers). <br>
+</p>
+<p>For Integrators using a FORTRAN routine with a plugin
+function as a parameter, a specific class method is used. It convert C
+to FORTRAN and conversely (g2f.h features). <br>
+</p>
+Main files of this component are: <br>
+<ul>
+  <li>Kernel/src/plugin/BasicPlugin.c: default external
+functions. <br>
+  </li>
+  <li>Sample/UserExample/UserPlugin.c : user-defined
+file.&nbsp; Where user implements its own functions, respecting the
+required signature (see list below). <br>
+  </li>
+  <li>Kernel/src/utils/SiconosSharedLibrary: toolbox for plug-in
+handling. <br>
+  </li>
+</ul>
+<br>
+In a specific class, plug-in mechanism is implemented with:<br>
+<ul>
+  <li>a private pointer to member function, that will point to
+user-defined function, implemented in its UserPlugin.c file&nbsp;</li>
+  <li>a public method that calls member function, and that will be used
+during computation<br>
+  </li>
+</ul>
+<span style="font-style: italic;">Example</span>:<br>
+<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; Let us consider LagrangianDS
+class. For user, it is possible to specify
+its own function definition for mass operator. This function is then
+implemented in<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; UserPlugin.c . <br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; LagrangianDS class has a private
+member defined as follows:<br>
+<pre>		void (*computeMassPtr)(unsigned int* sizeOfq, const double* time,double* qPtr, double* massPtr);</pre>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; and a public method: <br>
+<pre>		void computeMass(const double &amp;, SimpleVector *);</pre>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; During computation, when mass is
+required, one will use computeMass, which calls computeMassPtr which is
+linked to user external plug-in. <br>
+<br>
+For a complete example, see BouncingBall Template and its&nbsp;<a
+ href="../../../sample/BouncingBall/BallPlugin.c">BallPlugin.c</a>&nbsp;
+file. <br>
+<br>
+To find more details on files and objects described above, see
+<a href="../../../Kernel/doc/api/html/index.html">Doxygen</a>
+documentation of Siconos/Kernel. <br>
+<h3>Plug-in list<br>
+</h3>
+Here is the list of available plug-in with their complete signature and
+the classes they belong to. <br>
+<br>
+<ul>
+  <li><span style="font-weight: bold;">dynamical systems plug-in</span><br>
+    <br>
+&nbsp; DynamicalSystem class:&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+&nbsp; &nbsp; &nbsp; &nbsp; <img alt="DynamicalSystem"
+ src="figures/DS.png" style="width: 212px; height: 16px;"><br>
+    <ul>
+      <li> <span style="font-style: italic; font-weight: bold;">f(x,t):
+        </span><br>
+        <pre>void (*vectorFieldPtr) (unsigned int* sizeOfX, const double* time, double* xPtr, double* xdotPtr);</pre>
+and its jacobian:&nbsp; <br>
+        <pre>void (*computeJacobianXPtr) (unsigned int* sizeOfX, const double* time,<br>      double* xPtr, double* jacobianXPtr);<br></pre>
+      </li>
+      <li><span style="font-weight: bold; font-style: italic;">u(x,dx/dt,t):
+        </span><br>
+        <pre>void (*computeUPtr) (unsigned int* sizeOfU, unsigned int* sizeOfX, <br>       const double* time, double* xPtr, double* xDotPtr, double* UPtr);</pre>
+        <span style="font-weight: bold; font-style: italic;"></span></li>
+      <li><span style="font-weight: bold; font-style: italic;">T(x): </span><br>
+        <pre>void (*computeTPtr) (unsigned int* sizeOfU, unsigned int* sizeOfX, double* xPtr, double* TPtr);<br><span
+ style="font-weight: bold;"></span><br></pre>
+      </li>
+    </ul>
+LinearDS class: &nbsp; &nbsp; &nbsp; <img alt="LinearDS"
+ src="figures/LDS.png" style="width: 216px; height: 16px;"><br>
+    <ul>
+      <li> <span style="font-style: italic; font-weight: bold;">A(x,t):
+        </span><br>
+        <pre>void (*computeAPtr)(unsigned int* sizeOfA, double* APtr, const double* time);</pre>
+      </li>
+      <li><span style="font-weight: bold; font-style: italic;">b(t): </span><br>
+        <pre>void (*computeBPtr)(unsigned int* sizeOfB, double* bPtr, const double* time);<span
+ style="font-weight: bold; font-style: italic;"></span><span
+ style="font-weight: bold;"></span><br><br>        </pre>
+      </li>
+    </ul>
+LagrangianDS class: &nbsp; &nbsp; &nbsp; <img alt="LagrangianDS"
+ src="figures/LNLDS.png" style="width: 336px; height: 16px;"><br>
+    <ul>
+      <li> <span style="font-style: italic; font-weight: bold;">M(x,t):
+        </span><br>
+        <pre>void (*computeMassPtr)(unsigned int* sizeOfq, const double* time, double* qPtr, double* massPtr);</pre>
+      </li>
+      <li><span style="font-weight: bold; font-style: italic;">NNL(q,dq/dt):
+        </span><br>
+        <pre>void (*computeNNLPtr)(unsigned int* sizeOfq, const double* qPtr, <br>       double* velocityPtr, double* NNLPtr);<br></pre>
+and its jacobian compare to q and dq/dt:
+        <pre>void (*computeJacobianQNNLPtr)(unsigned int* sizeOfq, const double* qPtr,<br>       double* velocityPtr, double* jacobPtr);      <br>void (*computeJacobianVelocityNNLPtr)(unsigned int* sizeOfq, const double* qPtr,<br>       double* velocityPtr, double* jacobPtr);<br><br></pre>
+      </li>
+      <li><span style="font-weight: bold; font-style: italic;">FInt(q,dq/dt,t):</span><br>
+        <pre>void (*computeFIntPtr)(unsigned int* sizeOfq, const double* time, double* qPtr,<br>       double* velocityPtr, double* fIntPtr);<br></pre>
+and its jacobian compare to q and dq/dt:
+        <pre>void (*computeJacobianQFIntPtr)(unsigned int* sizeOfq, const double* time,<br>       double* qPtr, double* velocityPtr, double* jacobPtr);<br>void (*computeJacobianVelocityFIntPtr)(unsigned int* sizeOfq, const double* time,<br>       double* qPtr, double* velocityPtr, double* jacobPtr);<br></pre>
+      </li>
+      <li><span style="font-weight: bold; font-style: italic;">FExt(q,dq/dt,t):</span><br>
+        <pre>void (*computeFExtPtr)(unsigned int* sizeOfq, const double* time, double* fExtPtr);<br></pre>
+      </li>
+    </ul>
+  </li>
+  <li><span style="font-weight: bold;">Relations plug-in</span><br>
+    <br>
+&nbsp; Relation
+class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp; &nbsp; <img alt="relation" src="figures/relation.png"
+ style="width: 206px; height: 16px;">:&nbsp; <br>
+    <ul>
+      <li> <span style="font-style: italic; font-weight: bold;">h(x,t):
+        </span><br>
+        <pre>void (*computeOutputPtr)(double* xPtr, double* time, double* lambdaPtr, double* yPtr);</pre>
+      </li>
+      <li><span style="font-weight: bold; font-style: italic;">r(x,lambda,t):
+        </span><br>
+        <pre>void (*computeInputPtr)(double* xPtr, double* time, double* lambdaPtr, double* rPtr);<br><br>        </pre>
+      </li>
+    </ul>
+LagrangianRelation class: &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img
+ alt="LagrangianR" src="figures/LagR.png"
+ style="width: 239px; height: 18px;">&nbsp;<br>
+    <ul>
+      <li> <span style="font-style: italic; font-weight: bold;">H(q,t):
+        </span><br>
+        <pre>void (*computeHPtr)(int* sizeOfQ, double* qPtr, int* sizeOfY, double* yPtr);</pre>
+and its jacobian<br>
+        <pre>void (*computeJacobianPtr)(int* sizeOfQ, double* qPtr, int* sizeOfY, double* jacobPtr); <br><br></pre>
+      </li>
+    </ul>
+  </li>
+</ul>
+<h3>"False Plug-in"<br>
+</h3>
+<br>
+False plugin system allows an integrator dedicated to a dynamical
+systems class to integrate its derivated classes too. <br>
+<span style="font-style: italic;"><br>
+</span><span style="font-style: italic;">Example :</span>
+<br>
+Let us consider the DynamicalSystem&nbsp; class,&nbsp; ie systems
+represented by&nbsp; &nbsp;&nbsp; <img src="figures/DSreduced.png"
+ alt="\begin{displaymath}\nabla_x f(x, t) \end{displaymath}"
+ style="border: 0px solid ; width: 73px; height: 16px;"> ,&nbsp; and
+one of its derived class, LinearDS, where &nbsp;<img
+ alt="\begin{displaymath}\nabla_x f(x, t) = A \end{displaymath}"
+ src="figures/LDScoef.png" style="width: 84px; height: 16px;">.&nbsp;<!-- MATH \begin{displaymath}
+\dot x = f(x, t)
+\end{displaymath}
+--><!-- MATH
+\begin{displaymath}
+\nabla_x f(x, t)
+\end{displaymath}
+-->
+<p>f is a plugin function and is plugged to vectorField
+function pointer to the platform. <img src="figures/Jacob.png"
+ alt="$ \nabla_x f$"
+ style="border: 0px solid ; width: 64px; height: 16px;" align="middle">
+is a plugin function and is plugged
+to computeJacobianX function pointer to the platform.&nbsp; <br>
+</p>
+<!-- MATH
+\begin{displaymath}
+\dot x = Ax
+\end{displaymath}
+-->I is an
+integrator dedicated to DynamicalSystem
+objects.&nbsp;
+<p>Functions f and <img src="figures/Jacob.png" alt="$ \nabla_x f$"
+ style="border: 0px solid ; width: 64px; height: 16px;" align="middle">
+are in this case
+very simple and directly supplied by internal methods of LinearDS
+class. These methods are plugged to the platform during the
+initialisation phase instead of plugin functions. During computation,
+integrator I dedicated to
+DynamicalSystem class
+calls f et <img src="figures/Jacob.png" alt="$ \nabla_x f$"
+ style="border: 0px solid ; width: 64px; height: 16px;" align="middle">
+functions. It
+can therefore integrate a LinearDS object since required functions are
+supplied by the class and respect plugin functions signatures.&nbsp;</p>
+<p style="text-align: center;"><img alt="false plug-in mechanism"
+ src="figures/Plugin.png" style="width: 530px; height: 388px;"><br>
+</p>
+<p><br>
+<span style="font-weight: bold;">In a general manner, any class
+derivated from another
+which
+uses plugin system must use plugin functions too, or supply internal
+functions which can be plugged instead.&nbsp;</span> </p>
+<h3>lmgc90 plug-in<br>
+</h3>
+lmgc90 is an existing software for mechanical computations. The purpose
+of this specific plug-in is to use lmgc90 complex contact detection
+functions, so that only low level external methods are used. Simulation
+mechanisms
+do not change. This is a kind of communications between Kernel and the
+lmgc90 plug-in.
+<ul>
+  <li>Integration into the kernel: this plugin is designed to give
+specific data required by kernel to
+make a simulation with complex contact detection.
+It makes low level computations for the kernel to be able to do
+simulation steps. </li>
+  <li>Data communications:&nbsp; data transmission is bidirectionnal
+between kernel and lmgc90 plug-in. <br>
+The kernel needs modeling data supplied by the plug-in in modeling
+phase. Moreover the plug-in gives data at the beginning of each steps
+of
+the simulation allowing the kernel to have the good data to drive the
+simulation.<br>
+In the other way, the plugin get information at the end of each
+time step as an update of the state of the system. </li>
+  <li>Data to send
+    <ul>
+      <li>Data loading from lmgc90 model, to the kernel : <br>
+number of dynamical systems <br>
+q and dq/dt for each dynamical system <br>
+M matrix <br>
+Fext at each step <br>
+blocking constraints <br>
+        <p> </p>
+      </li>
+      <li>Update of the lmgc90 model : <br>
+q and dq/dt<br>
+reaction forces</li>
+    </ul>
+  </li>
+</ul>
+<p> </p>
+</div>
+</div>
+</div>
+</body>
+</html>

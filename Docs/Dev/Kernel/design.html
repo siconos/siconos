@@ -2,15 +2,22 @@
 <html>
 <head>
   <meta http-equiv="content-type"
- content="text/html; charset=iso-8859-1">
+ content="application/xhtml+xml; charset=UTF-8">
   <title>Design</title>
   <style type="text/css">
-/* <![CDATA[ */ 
+/* <![CDATA[ */
 @import "css/readyset.css";
 @import "css/inst.css";
-/*  ]]>
- */
- </style>
+/* ]]>
+
+
+
+
+
+
+
+*/
+  </style>
   <link rel="stylesheet" type="text/css" href="css/print.css"
  media="print">
 </head>
@@ -19,7 +26,7 @@
 <div class="readyset">
 <h1>Design</h1>
 <div id="releaseinfo">
-<h3>Release Information</h3>
+<h2>Release Information</h2>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -33,8 +40,14 @@
     <tr>
       <th>Attached Worksheets:</th>
       <td>
-      <div> Design &gt; <a href="design-architecture.html">Architecture
-Worksheet</a></div>
+      <div> Design &gt; <a href="model.html">Model component</a><br>
+Design &gt; <a href="modelingTools.html">Modeling component</a><br>
+Design &gt; <a href="simulationTools.html">Simulation component</a><br>
+Design &gt; <a href="utils.html">Utils component</a><br>
+Design &gt; <a href="inputOutput.html">Input-Output component</a><br>
+Design &gt; <a href="plugin.html">Plug-in component</a><br>
+Design &gt; <a href="FrontEnd.html">Front-End</a><br>
+      </div>
       <div> Design &gt; <a href="design-src-org.html">Source
 Organization and Build Worksheet</a></div>
 <!--    <div>Design &gt; <a href="design-scalability.html">Scalability Worksheet</a></div> -->
@@ -43,180 +56,125 @@ Organization and Build Worksheet</a></div>
     <tr>
       <th>Related Documents:</th>
       <td>
-      <div> <a href="srs.html">SRS</a> &gt; <a
- href="use-case-suite.html">Use case suite</a></div>
+      <div> <a href="sdm.html">Software development methodology</a><br>
+      <a href="srs.html">SRS</a> &gt; <a href="use-case-suite.html">Use
+case suite</a></div>
       <div> <a href="srs.html">SRS</a> &gt; <a href="feature-set.html">Feature
 set</a></div>
-      <div> <a href="glossary.html">Glossary</a></div>
+      <div> <a href="glossary.html">Glossar</a></div>
       </td>
     </tr>
   </tbody>
 </table>
 </div>
 <!-- /releaseinfo -->
-<div id="processimpact"><strong>Process impact:</strong> This design
-document describes a system that
-will satisfy the requirements of the <a href="srs.html">SRS</a>.
-Decisions
-made in creating this design document are based on those requirements
-and an
-understanding of available technologies and components. Once the design
-has
-been drafted, work on the system implementation and unit testing may
-begin.</div>
 <!-- /processimpact -->
-<div class="todo">TODO: Fill in the sections below. Add ore remove
-items as needed for your
-project.</div>
 <div id="introduction">
-<h3>Introduction</h3>
+<h2>Introduction</h2>
 <dl>
-  <dt>How is this design document organized?</dt>
-  <dd>This main page describes the system design in terms of packages,
-classes, relationships, and behavior. Several attached worksheets
-address specific aspects of the overall system design, such as user
-interface and database design.</dd>
-  <dt>What are the most important facts that a developer should know
-about this design?</dt>
-  <dd>PARAGRAPH or BULLETS</dd>
-  <dt>What are the prioritized goals of this design?</dt>
-  <dd class="sample1">
-    <ol>
-      <li><a class="def" href="glossary-std.html#dg_correctness">Correctness</a></li>
-      <li><a class="def" href="glossary-std.html#dg_feasibility">Feasibility</a></li>
-      <li><a class="def" href="glossary-std.html#dg_understandability">Understandability</a></li>
-      <li><a class="def" href="glossary-std.html#dg_guidance">Implementation
-phase guidance</a></li>
-      <li><a class="def" href="glossary-std.html#dg_modularity">Modularity</a></li>
-      <li><a class="def" href="glossary-std.html#dg_extensibility">Extensibility</a></li>
-      <li><a class="def" href="glossary-std.html#dg_testability">Testability</a></li>
-      <li><a class="def" href="glossary-std.html#dg_efficiency">Efficiency</a></li>
-    </ol>
-  </dd>
 </dl>
-</div>
-<!-- /introduction -->
-<div id="structuraldesign">
-<h3>UML Structural Design</h3>
-<div class="todo">
-TODO: Link to a design model and/or design diagrams that describe your
-system's structure in detail.</div>
-<p class="sample1">The system's structural design is described in the
-following UML model: <a href="LINK-TO-MODEL-FILE">MODELNAME</a>.</p>
-<div class="sample2">
-<p>The system's structural design is described in the following UML
-structural diagrams:</p>
+&nbsp;&nbsp;&nbsp; The purpose&nbsp; of this document is to define and
+describe the software architecture of the <a
+ href="glossary.html#Siconos/Kernel">Siconos/Kernel</a>. It also
+provides a general overview of the design of the system for (new)
+developers and will be used by the project manager to share out the
+detailed conception and programming in work packages. <br>
+This architecture relies on the specifications given in the <a
+ href="./srs.html">Software Requirements Specification</a>.<br>
+<h2><a name="designOverview">General context overview</a>
+</h2>
+As explained in&nbsp;<a href="./proposal.html">Project Proposal</a>,&nbsp;
+<a href="glossary.html#Siconos/Kernel">Siconos/Kernel</a> is dedicated
+to the modeling and the simulation of&nbsp; <a
+ href="glossary.html#NSDS">NSDS</a>, with high level
+description
+and numerical solving strategies. It relies on <a
+ href="glossary.html#Siconos/Numerics">Siconos/Numerics</a>
+which provides low-level algorithms to compute basic well-identified
+problems. <span style="font-weight: bold;"></span><br>
+<h3>External interfaces</h3>
+<br>
+The Kernel is designed to be used as a stand-alone software
+or as an external library for computational softwares such as <a
+ href="glossary.html#Scilab">Scilab</a> or <a
+ href="glossary.html#Matlab">Matlab</a>,
+through the Front-end interface. Indeed there are two main ways to
+perform a simulation:&nbsp;<br>
 <ul>
-  <li><a href="LINK-TO-DIAGRAM">PACKAGE OVERVIEW DIAGRAM</a></li>
-  <li>PACKAGENAME
-    <ul>
-      <li><a href="LINK-TO-DIAGRAM">DIAGRAMNAME</a></li>
-      <li><a href="LINK-TO-DIAGRAM">DIAGRAMNAME</a></li>
-    </ul>
+  <li>direct compilation/linking/launch of a main C++ program. All
+instantiated objects members are then available through public methods.
+    <br>
+For a complete example, see for instance <a
+ href="../../../sample/CircuitRLCD/CircuitRLCD.cpp">Circuit RLCD
+template</a> in sample directory. <br>
+    <br>
   </li>
-  <li>PACKAGENAME
-    <ul>
-      <li><a href="LINK-TO-DIAGRAM">DIAGRAMNAME</a></li>
-    </ul>
-  </li>
-  <li>PACKAGENAME
-    <ul>
-      <li><a href="LINK-TO-DIAGRAM">DIAGRAMNAME</a></li>
-    </ul>
+  <li>Interface with <a href="glossary.html#xxxlab">Scilab</a> or
+Python.
+The interface through a scientific computation software is the easiest
+way to use the platform. <br>
+The way component Front-End works and is implemented is described on <a
+ href="FrontEnd.html">Front-End</a>.<br>
   </li>
 </ul>
+The interfaces between Siconos/Kernel and other modules are detailed on
+the following scheme:
+<br>
+<br>
+<div align="center"><img alt="Kernel interfaces"
+ src="figures/kernelInterfaces.png" style="width: 707px; height: 362px;"><br>
+<br>
 </div>
-<p>ANY ADDITIONAL NOTES OR COMMENTS</p>
-</div>
-<!-- /structuraldesign -->
-<div id="behavioraldesign">
-<h3>UML Behavioral Design</h3>
-<div class="todo">
-TODO: Link to a design model and/or design diagrams that describe your
-system's behavior in detail.</div>
-<p class="sample1">The system's behavioral design is described in the
-following UML model: <a href="LINK-TO-MODEL-FILE">MODELNAME</a>.</p>
-<div class="sample2">
-<p>The system's behavioral design is described in the following UML
-behavioral diagrams:</p>
+<h2><a name="KComponents">Kernel Components</a>
+</h2>
+All the Kernel is written in C++,
+object-oriented language, using
+classes architecture, all object members being private with public
+methods to access to them. <br>
+A model is composed in two different parts: the Non Smooth Dynamical
+System definition (dynamical systems and their interactions, relations,
+non smooth laws ...) and the description of a strategy (time
+discretization, solver ...) to solve it. Simulation and modeling are
+clearly separated and rather independent. Moreover, they are completed
+by tools for input-output data management and to handle vectors,
+matrices, plus a system to allow user-defined plug-in functions. <br>
+This results in 5 distinct components listed below.
+<h3>Components list&nbsp;&nbsp; <br>
+</h3>
 <ul>
-  <li>State Diagrams
-    <ul>
-      <li><a href="LINK-TO-DIAGRAM">DIAGRAMNAME</a></li>
-      <li><a href="LINK-TO-DIAGRAM">DIAGRAMNAME</a></li>
-    </ul>
+  <li><a href="model.html">C-00: Model</a> : global model definition.</li>
+  <li><a href="modelingTools.html">C-10: ModelingTools</a>: all
+classes/objects to define a complete non smooth dynamical
+system.</li>
+  <li><a href="simulationTools.html">C-20: SimulationTools</a>: all
+classes/objects to define a strategy to solve the
+pre-defined NonSmoothDynamicalSystem.</li>
+  <li><a href="utils.html">C-30: Utils</a>:&nbsp; various usefully
+tools
+(Vectors and matrices, Exception handling ...)<br>
   </li>
-  <li>Sequence Diagrams
-    <ul>
-      <li><a href="LINK-TO-DIAGRAM">DIAGRAMNAME</a></li>
-      <li><a href="LINK-TO-DIAGRAM">DIAGRAMNAME</a></li>
-      <li><a href="LINK-TO-DIAGRAM">DIAGRAMNAME</a></li>
-      <li><a href="LINK-TO-DIAGRAM">DIAGRAMNAME</a></li>
-      <li><a href="LINK-TO-DIAGRAM">DIAGRAMNAME</a></li>
-    </ul>
+  <li><a href="inputOutput.html">C-40: InputOutput</a>: classes/objects
+for input-ouput of data. At the time: XML management.<br>
   </li>
-  <li>Collaboration Diagrams
-    <ul>
-      <li><a href="LINK-TO-DIAGRAM">DIAGRAMNAME</a></li>
-      <li><a href="LINK-TO-DIAGRAM">DIAGRAMNAME</a></li>
-    </ul>
+  <li><a href="plugin.html">C-50: Plug-in</a>: to provide user plug-in
+system for specific functions.<br>
   </li>
 </ul>
+<div id="integration">
+<h3>Integration and interfaces between components<br>
+</h3>
+The following figure describes the depencies between components of the
+Kernel. <br>
+<br>
+<div style="text-align: center;"><img
+ alt="interfaces between kernel components"
+ src="figures/kernelInterfaces2.png"
+ style="width: 802px; height: 497px;"><br>
 </div>
-<p>ANY ADDITIONAL NOTES OR COMMENTS</p>
 </div>
-<!-- /behavioraldesign -->
-<div id="checklist">
-<h3>UML Design Checklist</h3>
-<div class="todo">
-TODO: Answer the following questions to help evaluate your design. Add
-or
-remove questions to fit your project. If you cannot answer a question
-positively, that may indicate an aspect of the design that should be
-revised.</div>
-<dl>
-  <dt>Correctness: How do you know that this design is correct?</dt>
-  <dd>2-4 SENTENCES</dd>
-  <dt>Feasibility: What indicates that this design can be implemented
-and tested with the planned amount of time and effort?</dt>
-  <dd>2-4 SENTENCES</dd>
-  <dt>Understandability: What makes this design understandable?</dt>
-  <dd>2-4 SENTENCES</dd>
-  <dt>Implementation phase guidance: Does the design suggest reasonable
-implementation tasks?</dt>
-  <dd>2-4 SENTENCES</dd>
-  <dt>Modularity: How have concerns been separated and addressed in
-distinct modules?</dt>
-  <dd>2-4 SENTENCES</dd>
-  <dt>Extensibility: How can new features can be easily added later?</dt>
-  <dd>2-4 SENTENCES</dd>
-  <dt>Testability: What makes this system easy to test?</dt>
-  <dd>2-4 SENTENCES</dd>
-  <dt>Efficiency: Does the system consume an acceptable amount of time,
-storage space, bandwidth, and other resources?</dt>
-  <dd>2-4 SENTENCES</dd>
-<!--  <dd>See the <a href="design-scalability.html">scalability worksheet</a>.</dd> -->
-  <dt>Has the design been communicated to the development team and
-other stakeholders?</dt>
-  <dd class="sample1">Yes, everyone understands. Feedback is welcome.</dd>
-  <dd class="sample1">No, this is a risk that is noted in the <a
- href="plan.html#risks">Risk Management</a> section.</dd>
-</dl>
 </div>
-<!-- /checklist -->
 </div>
-<div class="todo">
-TODO: Check for <a
- href="http://readyset.tigris.org/words-of-wisdom/design.html">words of
-wisdom</a> and discuss ways to improve this template. Or, evaluate the
-ReadySET Pro <a title="pro use case template and sample test plan"
- href="http://www.readysetpro.com/">professional design template</a>.</div>
-<div class="legal1">
-Company Proprietary</div>
-<div class="footnote">
-Copyright &copy; 2003-2004 Jason Robbins. All rights reserved. <a
- href="readyset-license.html">License terms</a>. Retain this copyright
-statement whenever this file is used as a template.</div>
+<br>
 </div>
 </body>
 </html>

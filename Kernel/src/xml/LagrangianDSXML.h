@@ -13,9 +13,9 @@
 #ifndef __LAGRANGIANNLDSXML__
 #define __LAGRANGIANNLDSXML__
 
-#include "DSXML.h"
+#include "DynamicalSystemXML.h"
 
-class DSXML;
+class DynamicalSystemXML ;
 
 const std::string LNLDS_Q = "q";
 const std::string LNLDS_Q0 = "q0";
@@ -38,11 +38,10 @@ const std::string LNLDS_M = "M";
 const std::string LNLDS_NDOF = "ndof";
 const std::string LNLDS_MATRIXPLUGIN = "matrixPlugin";
 const std::string LNLDS_VECTORPLUGIN = "vectorPlugin";
-//#include "XMLTagsName.h"
 
 #include "check.h"
 
-class LagrangianDSXML : public DSXML
+class LagrangianDSXML : public DynamicalSystemXML
 {
 public:
 
@@ -54,7 +53,7 @@ public:
   /** \fn LagrangianDSXML(xmlNode * LagrangianDSNode, bool isBVP)
    *   \brief Build a LagrangianDSXML object from a DOM tree describing a DS
    *   \param xmlNode * LagrangianDSNode : the LagrangianDS DOM tree
-   *   \param bool isBVP : if NSDS is BVP LagrangianDS have boundary condition
+   *   \param bool isBVP : if NonSmoothDynamicalSystem is BVP LagrangianDS have boundary condition
    */
   LagrangianDSXML(xmlNode * LagrangianDSNode, bool isBVP);
 
@@ -77,7 +76,7 @@ public:
   inline void setQ(SiconosVector *v)
   {
     if (!hasQ())
-      qNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LNLDS_Q, *v);
+      qNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LNLDS_Q, *v);
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(qNode, *v);
   }
 
@@ -98,7 +97,7 @@ public:
   inline void  setQ0(SiconosVector *v)
   {
     if (q0Node == NULL)
-      q0Node = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LNLDS_Q0, *v);
+      q0Node = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LNLDS_Q0, *v);
     else
       SiconosDOMTreeTools::setSiconosVectorNodeValue(q0Node, *v);
   }
@@ -137,7 +136,7 @@ public:
   inline void setVelocity(SiconosVector *v)
   {
     if (!hasVelocity())
-      velocityNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LNLDS_VELOCITY, *v);
+      velocityNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LNLDS_VELOCITY, *v);
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(velocityNode, *v);
   }
 
@@ -159,7 +158,7 @@ public:
   {
     if (velocity0Node == NULL)
     {
-      velocity0Node = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LNLDS_VELOCITY0, *v);
+      velocity0Node = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LNLDS_VELOCITY0, *v);
     }
     else
     {
@@ -217,7 +216,7 @@ public:
   {
     if (NNLNode == NULL)
     {
-      NNLNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_QNLINERTIA);
+      NNLNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, LNLDS_QNLINERTIA);
       xmlNewProp(NNLNode, (xmlChar*)(LNLDS_VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
     else SiconosDOMTreeTools::setStringAttributeValue(NNLNode, LNLDS_VECTORPLUGIN, plugin);
@@ -231,7 +230,7 @@ public:
   {
     if (NNLNode == NULL)
     {
-      NNLNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LNLDS_QNLINERTIA, *v);
+      NNLNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LNLDS_QNLINERTIA, *v);
     }
     else
       SiconosDOMTreeTools::setSiconosVectorNodeValue(NNLNode, *v);
@@ -270,7 +269,7 @@ public:
   {
     if (hasFint())
     {
-      FintNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LNLDS_FINT, *v);
+      FintNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LNLDS_FINT, *v);
     }
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(FintNode, *v);
   }
@@ -283,7 +282,7 @@ public:
   {
     if (FintNode == NULL)
     {
-      FintNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_FINT);
+      FintNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, LNLDS_FINT);
       xmlNewProp(FintNode, (xmlChar*)(LNLDS_VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
     else SiconosDOMTreeTools::setStringAttributeValue(FintNode, LNLDS_VECTORPLUGIN, plugin);
@@ -332,7 +331,7 @@ public:
   {
     if (FextNode == NULL)
     {
-      FextNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_FEXT);
+      FextNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, LNLDS_FEXT);
       xmlNewProp(FextNode, (xmlChar*)(LNLDS_VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
     else
@@ -374,7 +373,7 @@ public:
   {
     if (jacobianQFintNode == NULL)
     {
-      jacobianQFintNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_JACOBIANQFINT);
+      jacobianQFintNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, LNLDS_JACOBIANQFINT);
       xmlNewProp(jacobianQFintNode, (xmlChar*)(LNLDS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
     else SiconosDOMTreeTools::setStringAttributeValue(jacobianQFintNode, LNLDS_JACOBIANQFINT, plugin);
@@ -422,7 +421,7 @@ public:
   {
     if (jacobianVelocityFintNode == NULL)
     {
-      jacobianVelocityFintNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_JACOBIANVELOCITYFINT);
+      jacobianVelocityFintNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, LNLDS_JACOBIANVELOCITYFINT);
       xmlNewProp(jacobianVelocityFintNode, (xmlChar*)(LNLDS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
     else SiconosDOMTreeTools::setStringAttributeValue(jacobianVelocityFintNode, LNLDS_JACOBIANVELOCITYFINT, plugin);
@@ -471,7 +470,7 @@ public:
   {
     if (jacobianQNNLNode == NULL)
     {
-      jacobianQNNLNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_JACOBIANQQNLINERTIA);
+      jacobianQNNLNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, LNLDS_JACOBIANQQNLINERTIA);
       xmlNewProp(jacobianQNNLNode, (xmlChar*)(LNLDS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
     else SiconosDOMTreeTools::setStringAttributeValue(jacobianQNNLNode, LNLDS_JACOBIANQQNLINERTIA, plugin);
@@ -520,7 +519,7 @@ public:
   {
     if (jacobianVelocityNNLNode == NULL)
     {
-      jacobianVelocityNNLNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_JACOBIANVELOCITYQNLINERTIA);
+      jacobianVelocityNNLNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, LNLDS_JACOBIANVELOCITYQNLINERTIA);
       xmlNewProp(jacobianVelocityNNLNode, (xmlChar*)(LNLDS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
     else SiconosDOMTreeTools::setStringAttributeValue(jacobianVelocityNNLNode, LNLDS_JACOBIANVELOCITYQNLINERTIA, plugin);
@@ -568,7 +567,7 @@ public:
   {
     if (MNode == NULL)
     {
-      MNode = SiconosDOMTreeTools::createSingleNode(rootDSXMLNode, LNLDS_M);
+      MNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, LNLDS_M);
       xmlNewProp(MNode, (xmlChar*)(LNLDS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
     else
@@ -583,7 +582,7 @@ public:
   {
     if (MNode == NULL)
     {
-      MNode = SiconosDOMTreeTools::createMatrixNode(rootDSXMLNode, LNLDS_M, *m);
+      MNode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, LNLDS_M, *m);
     }
     else SiconosDOMTreeTools::setSiconosMatrixNodeValue(MNode, *m);
   }
@@ -606,7 +605,7 @@ public:
   {
     if (ndofNode == NULL)
     {
-      ndofNode = SiconosDOMTreeTools::createIntegerNode(rootDSXMLNode, LNLDS_NDOF, i);
+      ndofNode = SiconosDOMTreeTools::createIntegerNode(rootDynamicalSystemXMLNode, LNLDS_NDOF, i);
     }
     else SiconosDOMTreeTools::setIntegerContentValue(ndofNode, i);
   }
@@ -804,10 +803,10 @@ public:
 
 
   /** \fn void updateDynamicalSystemXML(xmlNode*, DynamicalSystem*, BoundaryCondition*)
-   *   \brief makes the operations to add a DynamicalSystem to the NSDSXML
+   *   \brief makes the operations to add a DynamicalSystem to the NonSmoothDynamicalSystemXML
    *   \param xmlNode* : the root node of this DynamicalSystem
-   *   \param DynamicalSystem* : the DynamicalSystem of this DSXML
-   *   \param BoundaryCondition* : the BoundaryCondition of the DS if the NSDS is BVP (optional)
+   *   \param DynamicalSystem* : the DynamicalSystem of this DynamicalSystemXML
+   *   \param BoundaryCondition* : the BoundaryCondition of the DS if the NonSmoothDynamicalSystem is BVP (optional)
    */
   void updateDynamicalSystemXML(xmlNode*, DynamicalSystem*, BoundaryCondition* bc = NULL);
 

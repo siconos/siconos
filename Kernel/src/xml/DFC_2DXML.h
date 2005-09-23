@@ -1,42 +1,42 @@
-/** \class CFDXML
-*   \brief This class manages Lagrangian CFD data
+/** \class DFC_2DXML
+*   \brief This class manages Lagrangian DFC_2D data
 *  \author SICONOS Development Team - copyright INRIA
 *   \version 1.0
 *   \date 12/04/2005
 *
 *
 *
-* CFDXML allows to manage data of a CFD DOM tree.
+* DFC_2DXML allows to manage data of a DFC_2D DOM tree.
 */
 
 
-#ifndef CFDXML_H
-#define CFDXML_H
+#ifndef DFC_2DXML_H
+#define DFC_2DXML_H
 
 #include "OneStepNSProblemXML.h"
 
 class OneStepNSProblem;
 
-const std::string CFD_M = "M";
-const std::string CFD_Q = "q";
+const std::string DFC_2D_M = "M";
+const std::string DFC_2D_Q = "q";
 
 
-class CFDXML : public OneStepNSProblemXML
+class DFC_2DXML : public OneStepNSProblemXML
 {
 public:
-  CFDXML();
+  DFC_2DXML();
 
-  /** \fn CFDXML(xmlNode * CFDNode)
-  *   \brief Build a CFDXML object from a DOM tree describing a CFD
-  *   \param CFDNode : the CFD DOM tree
+  /** \fn DFC_2DXML(xmlNode * DFC_2DNode)
+  *   \brief Build a DFC_2DXML object from a DOM tree describing a DFC_2D
+  *   \param DFC_2DNode : the DFC_2D DOM tree
   *   \param vector<int> definedInteractionNumbers : the Interaction numbers effectivly defined in the model
-  *   \exception XMLException : if a property of the CFD lacks in the DOM tree
+  *   \exception XMLException : if a property of the DFC_2D lacks in the DOM tree
   */
-  CFDXML(xmlNode * CFDNode, std::vector<int> definedInteractionNumbers);
+  DFC_2DXML(xmlNode * DFC_2DNode, std::vector<int> definedInteractionNumbers);
 
   /** \fn SiconosMatrix getM()
   *   \brief Return M
-  *   \return The M SiconosMatrix of the CFD
+  *   \return The M SiconosMatrix of the DFC_2D
   */
   inline SiconosMatrix getM()
   {
@@ -45,7 +45,7 @@ public:
 
   /** \fn SimpleVector getQ()
   *   \brief Return vector q
-  *   \return SimpleVector : q vector of the CFD
+  *   \return SimpleVector : q vector of the DFC_2D
   */
   inline /*SiconosVector*/SimpleVector getQ()
   {
@@ -60,7 +60,7 @@ public:
   {
     if (this->hasM() == false)
     {
-      this->MNode = SiconosDOMTreeTools::createMatrixNode(this->rootNSProblemXMLNode, CFD_M, m);
+      this->MNode = SiconosDOMTreeTools::createMatrixNode(this->rootNSProblemXMLNode, DFC_2D_M, m);
     }
     else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->MNode, m);
   }
@@ -73,7 +73,7 @@ public:
   {
     if (this->hasQ() == false)
     {
-      this->qNode = SiconosDOMTreeTools::createVectorNode(this->rootNSProblemXMLNode, CFD_Q, v);
+      this->qNode = SiconosDOMTreeTools::createVectorNode(this->rootNSProblemXMLNode, DFC_2D_Q, v);
     }
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->qNode, v);
   }

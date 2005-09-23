@@ -89,7 +89,7 @@ private:
   SimpleVector * x0, *u0;
   SiconosMatrix *T0, *J0;
   xmlNode * node1 , *node2;
-  DSXML* tmpxml1, * tmpxml2;
+  DynamicalSystemXML* tmpxml1, * tmpxml2;
 public:
   void setUp();
   void tearDown();

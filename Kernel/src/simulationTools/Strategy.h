@@ -5,7 +5,7 @@
 #include "OneStepNSProblem.h"
 #include "TimeDiscretisation.h"
 #include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
+#include "SiconosVector.h"
 #include "StrategyXML.h"
 #include "SiconosConst.h"
 #include "Model.h"

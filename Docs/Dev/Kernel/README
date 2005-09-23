@@ -8,7 +8,7 @@ RPG
 #
  index.html - GPD (Overview Document)
  proposal.html 
- sdm.html   - CDS (Coding Documents Standard)
+ sdm.html   - CDS (Coding Documents Standard) + sdm directory
  srs.html   - SRD (Software Requirements Document)
   features.html 
   feature-set.html
@@ -17,6 +17,13 @@ RPG
  design.html - ADD/DDD
   design.html 
   design-src-org.html
+  model.html
+  simulation.html
+  modeling.html
+  utils.html
+  input-output.html
+  FrontEnd.html
+	
 
  qa-plan.html - QP/QR
 

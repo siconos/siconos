@@ -3,6 +3,9 @@
 
 #include<string>
 
+const std::string N_ASCII = "ascii";
+const std::string N_BINARY = "binary";
+
 // const found in the DynamicalSystem
 const std::string LNLDS = "LagrangianDS";
 const std::string LTIDS = "LagrangianLinearTIDS";
@@ -15,9 +18,11 @@ const std::string NLINEARBC = "NonLinearBC";
 const std::string PERIODICBC = "PeriodicBC";
 
 // const found in the Interaction
+// Relations:
 const std::string LINEARTIRELATION = "LinearTIR";
 const std::string LAGRANGIANLINEARRELATION = "LagrangianLinearR";
-const std::string LAGRANGIANNONLINEARRELATION = "LagrangianNonLinearR";
+const std::string LAGRANGIANRELATION = "LagrangianR";
+// Non smooth laws
 const std::string COMPLEMENTARITYCONDITIONNSLAW = "ComplementarityConditionNSL";
 const std::string RELAYNSLAW = "RelayNSL";
 const std::string NEWTONIMPACTLAWNSLAW = "NewtonImpactLawNSL";
@@ -38,7 +43,7 @@ const std::string LAGRANGIANLINEAREC = "LagrangianLinearEC";
 
 // const found in the OneStepNSProblem
 const std::string LCP_OSNSP = "LCP";
-const std::string CFD_OSNSP = "CFD";
+const std::string DFC_2D_OSNSP = "DFC_2D";
 const std::string QP_OSNSP = "QP";
 const std::string RELAY_OSNSP = "Relay";
 const std::string  OSNSP_TOLERANCE = "tolerance";
@@ -47,10 +52,10 @@ const std::string  OSNSP_NORMTYPE = "normType";
 const std::string  OSNSP_SEARCHDIRECTION = "searchDirection";
 
 const std::string  OSNSP_LCPSOLVING = "LcpSolving";
-const std::string  OSNSP_RPSOLVING = "RelayPrimalSolving";
-const std::string  OSNSP_RDSOLVING = "RelayDualSolving";
-const std::string  OSNSP_CFPSOLVING = "ContactFrictionPrimalSolving";
-const std::string  OSNSP_CFDSOLVING = "ContactFrictionDualSolving";
+const std::string  OSNSP_PRSOLVING = "PrimalRelaySolving";
+const std::string  OSNSP_DRSOLVING = "DualRelaySolving";
+const std::string  OSNSP_PFC_2DSOLVING = "PrimalFrictionContact2DSolving";
+const std::string  OSNSP_DFC_2DSOLVING = "DualFrictionContact2DSolving";
 const std::string  OSNSP_LEMKE = "Lemke";
 const std::string  OSNSP_LEXICOLEMKE = "LexicoLemke";
 const std::string  OSNSP_QP = "QP" ;

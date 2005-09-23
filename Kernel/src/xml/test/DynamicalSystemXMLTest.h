@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-#include "DSXML.h"
+#include "DynamicalSystemXML.h"
 #include<iostream>
 #include<vector>
 
@@ -20,7 +20,7 @@ private:
 
   xmlDoc *doc;
   xmlNode *root;
-  DSXML ds;
+  DynamicalSystemXML ds;
   SiconosMatrix matrixRef;
   /*SiconosVector*/
   SimpleVector vectorRef;

@@ -158,7 +158,7 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
     else //positive error code number returned
       XMLException::selfThrow("SiconosModelXML - Your XML model file " + (string)siconosModelXMLFilePath + " doesn't respect the siconos schema.");
 
-    //-------------------Load NSDSXML, StrategyXML and to and T ---------------------//
+    //-------------------Load NonSmoothDynamicalSystemXML, StrategyXML and to and T ---------------------//
     loadModel(rootNode);
   }
   else
@@ -232,7 +232,7 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
    */
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, NSDS_TAG)) != NULL)
   {
-    loadNSDSXML(node);
+    loadNonSmoothDynamicalSystemXML(node);
   }
   else
     XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + NSDS_TAG + " not found.");
@@ -290,15 +290,15 @@ void SiconosModelXML::loadModel(Model * model)
      */
     if (model->getNonSmoothDynamicalSystemPtr() != NULL)
     {
-      //nsdsXML = new NSDSXML( xmlNewChild(rootNode, NULL, (xmlChar*)SM_STRATEGY.c_str(), NULL) );
-      nsdsXML = new NSDSXML();
+      //nsdsXML = new NonSmoothDynamicalSystemXML( xmlNewChild(rootNode, NULL, (xmlChar*)SM_STRATEGY.c_str(), NULL) );
+      nsdsXML = new NonSmoothDynamicalSystemXML();
 
-      // linkage between the NSDS and his NSDSXML
-      model->getNonSmoothDynamicalSystemPtr()->setNSDSXMLPtr(nsdsXML);
+      // linkage between the NSDS and his NonSmoothDynamicalSystemXML
+      model->getNonSmoothDynamicalSystemPtr()->setNonSmoothDynamicalSystemXMLPtr(nsdsXML);
 
       // creation of the nodes of the NSDS with the right data
       node = xmlNewChild(rootNode, NULL, (xmlChar*)NSDS_TAG.c_str(), NULL);
-      nsdsXML->updateNSDSXML(node, model->getNonSmoothDynamicalSystemPtr());
+      nsdsXML->updateNonSmoothDynamicalSystemXML(node, model->getNonSmoothDynamicalSystemPtr());
     }
     else nsdsXML = NULL;
 
@@ -337,9 +337,9 @@ void SiconosModelXML::loadTime(xmlNode *timeNode)
 }
 
 
-void SiconosModelXML::loadNSDSXML(xmlNode *NSDSNode)
+void SiconosModelXML::loadNonSmoothDynamicalSystemXML(xmlNode *NSDSNode)
 {
-  nsdsXML = new NSDSXML(NSDSNode);
+  nsdsXML = new NonSmoothDynamicalSystemXML(NSDSNode);
 }
 
 
@@ -409,14 +409,14 @@ bool SiconosModelXML::checkSiconosDOMTreeCoherency()
    */
 
   // checks if the NSDS is BVP or not
-  bool bvp = getNSDSXML()->isBVP();
+  bool bvp = getNonSmoothDynamicalSystemXML()->isBVP();
   if (bvp)
   {
     // the NSDS is BVP so the DynamicalSystems must have a BoundaryCondition
-    vector<int> definedDS = getNSDSXML()->getDSNumbers();
+    vector<int> definedDS = getNonSmoothDynamicalSystemXML()->getDSNumbers();
     for (i = 0; i < definedDS.size(); i++)
     {
-      if (getNSDSXML()->getDSXML(definedDS[i])->getBoundaryConditionXML() == NULL)
+      if (getNonSmoothDynamicalSystemXML()->getDynamicalSystemXML(definedDS[i])->getBoundaryConditionXML() == NULL)
       {
         sprintf(errormsg, "SiconosModelXML::checkSiconosDOMTreeCoherency - the DynamicalSystem which 'id' is %i has no BoundariCondition whereas the NSDS is BVP", definedDS[i]);
         XMLException::selfThrow(errormsg);
@@ -426,10 +426,10 @@ bool SiconosModelXML::checkSiconosDOMTreeCoherency()
   else
   {
     // the NSDS is not BVP so the DynamicalSystems must have no BoundaryCondition
-    vector<int> definedDS = getNSDSXML()->getDSNumbers();
+    vector<int> definedDS = getNonSmoothDynamicalSystemXML()->getDSNumbers();
     for (i = 0; i < definedDS.size(); i++)
     {
-      if (getNSDSXML()->getDSXML(definedDS[i])->getBoundaryConditionXML() != NULL)
+      if (getNonSmoothDynamicalSystemXML()->getDynamicalSystemXML(definedDS[i])->getBoundaryConditionXML() != NULL)
       {
         sprintf(errormsg, "SiconosModelXML::checkSiconosDOMTreeCoherency - Warning : the DynamicalSystem which 'id' is %i has BoundariCondition whereas the NSDS is not BVP", definedDS[i]);
         cout << errormsg << endl;

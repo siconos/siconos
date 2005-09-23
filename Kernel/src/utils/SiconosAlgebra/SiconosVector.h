@@ -1,8 +1,8 @@
-#ifndef __NewSiconosVector__
-#define __NewSiconosVector__
+#ifndef __SiconosVector__
+#define __SiconosVector__
 
 #include "SiconosVectorException.h"
-//#include "SiconosMatrix.h"
+#include "SiconosConst.h"
 #include "check.h"
 #include <iostream>
 #include <lapack++.h>
@@ -10,10 +10,7 @@
 #include <vector>
 #include <string>
 
-const std::string N_ASCII = "ascii";
-const std::string N_BINARY = "binary";
 const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ MACHINE DEPENDE
-
 const unsigned int M_MAXSIZEFORDISPLAY = 10;
 
 /** \class SiconosVector

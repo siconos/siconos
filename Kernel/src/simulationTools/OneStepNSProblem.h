@@ -5,7 +5,6 @@
 #include "Interaction.h"
 #include "EqualityConstraint.h"
 #include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
 #include "SimpleVector.h"
 #include "OneStepNSProblemXML.h"
 #include "Topology.h"

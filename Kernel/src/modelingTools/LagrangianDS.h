@@ -4,19 +4,12 @@
 #include "DynamicalSystem.h"
 #include "LagrangianDSXML.h"
 
-#include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
-
-#include "SiconosSharedLibrary.h"
-#include "check.h"
 #include "LinearBC.h"
 #include "NLinearBC.h"
 #include "PeriodicBC.h"
 #include "LinearDSIO.h"
 #include "LagrangianDSIO.h"
 #include "LagrangianLinearDSIO.h"
-#include <iostream>
-#include <vector>
 
 class LagrangianDSXML;
 
@@ -81,13 +74,13 @@ public:
 
   // === CONSTRUCTORS - DESTRUCTOR ===
 
-  /** \fn LagrangianDS(DSXML * nsdsXML)
+  /** \fn LagrangianDS(DynamicalSystemXML * nsdsXML)
    *  \brief constructor from an xml file
-   *  \param DSXML * : the XML object for this DynamicalSystem
+   *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
    *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
    *  \exception RuntimeException
    */
-  LagrangianDS(DSXML * dsXML, NonSmoothDynamicalSystem* = NULL);
+  LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
   /** \fn LagrangianDS(int number, int ndof,
       const SimpleVector& q0, const SimpleVector& velocity0,

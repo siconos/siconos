@@ -6,7 +6,7 @@
 #include "SiconosMatrix.h"
 #include "SiconosConst.h"
 #include "check.h"
-#include "NewSiconosVector.h"
+#include "SiconosVector.h"
 #include "SimpleVector.h"
 #include "CompositeVector.h"
 
@@ -54,7 +54,7 @@ public:
 
 
   /** \fn int getNumber(void);
-   *  \brief allows to get the number of the EqualityConstraint
+   *  \brief allows to get the number of the DSIO
    *  \return the value of number
    */
   inline int getNumber(void) const
@@ -63,7 +63,7 @@ public:
   }
 
   /** \fn string getId(void)
-   *  \brief allows to get the id of the EqualityConstraint
+   *  \brief allows to get the id of the DSIO
    *  \return the value of ths id
    */
   inline std::string  getId(void) const

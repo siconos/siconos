@@ -6,7 +6,7 @@
 #include "MoreauXML.h"
 #include "LCPXML.h"
 #include "QPXML.h"
-#include "CFDXML.h"
+#include "DFC_2DXML.h"
 
 
 using namespace std;
@@ -194,9 +194,9 @@ void StrategyXML::loadOneStepNSProblemXML(xmlNode * rootOneStepNSProblemNode)
     {
     this->oneStepNSProblemXML= new RelayXML(rootOneStepNSProblemNode, definedNumberInteractionVector);
     }*/
-    else if (type == CFD_TAG)
+    else if (type == DFC_2D_TAG)
     {
-      oneStepNSProblemXML = new CFDXML(rootOneStepNSProblemNode, definedNumberInteractionVector);
+      oneStepNSProblemXML = new DFC_2DXML(rootOneStepNSProblemNode, definedNumberInteractionVector);
     }
     else
     {

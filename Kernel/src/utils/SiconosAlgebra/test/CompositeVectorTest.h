@@ -2,7 +2,7 @@
 #define __SiconosVectorTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "NewSiconosVector.h"
+#include "SiconosVector.h"
 #include "SimpleVector.h"
 #include "CompositeVector.h"
 #include "SiconosMatrix.h"

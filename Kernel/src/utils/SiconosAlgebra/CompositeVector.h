@@ -1,7 +1,7 @@
 #ifndef COMPOSITEVECTOR_H
 #define COMPOSITEVECTOR_H
 
-#include "NewSiconosVector.h"
+#include "SiconosVector.h"
 #include "SimpleVector.h"
 
 class SimpleVector;

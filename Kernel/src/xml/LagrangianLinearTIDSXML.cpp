@@ -10,18 +10,18 @@ LagrangianLinearTIDSXML::LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSN
 {
   xmlNode *node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LTIDS_K)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LTIDS_K)) != NULL)
     KNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDSXMLNode, LTIDS_C)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LTIDS_C)) != NULL)
     CNode = node;
 }
 
 void LagrangianLinearTIDSXML::updateDynamicalSystemXML(xmlNode* newRootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)
 {
   IN("LagrangianLinearTIDSXML::updateDynamicalSystemXML\n");
-  rootDSXMLNode = newRootDSXMLNode;
-  loadDS(ds);
+  rootDynamicalSystemXMLNode = newRootDSXMLNode;
+  loadDynamicalSystem(ds);
   OUT("LagrangianLinearTIDSXML::updateDynamicalSystemXML\n");
 }
 

@@ -1,53 +1,84 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!DOCTYPE html PUBLIC "-//Tigris//DTD XHTML 1.0 Transitional//EN"
-"http://style.tigris.org/tigris_transitional.dtd">
+<!DOCTYPE html PUBLIC "-//Tigris//DTD XHTML 1.0 Transitional//EN" "http://style.tigris.org/tigris_transitional.dtd">
 <html>
 <head>
- <style type="text/css">
+  <meta http-equiv="content-type"
+ content="text/html; charset=iso-8859-1">
+  <title>Software Development Methodology</title>
+  <style type="text/css">
 /* <![CDATA[ */ 
-@import "css/readyset.css"; 
+@import "css/readyset.css";
 @import "css/inst.css";
-/*  ]]> */
+/*  ]]>
+ */
  </style>
-
-<link rel="stylesheet" type="text/css" href="css/print.css" media="print" />
- <title>Software Development Methodology</title>
+  <link rel="stylesheet" type="text/css" href="css/print.css"
+ media="print">
 </head>
-
 <body>
 <div class="app">
 <div class="readyset">
- <h2>Software Development Methodology</h2>
-
- <h3>Place Holder</h3>
-
- <p>This template is not done yet.  Feel free to contribute your ideas.</p>
-
- <p>A Software Development Methodology is always specific to a given
- company, but the outline of that document could be reused, as could
- some sections on common practices such as version control
- procedures.</p>
-
-
- </div>
-
- <div class="todo">
-  TODO:  Check for <a
-  href="http://readyset.tigris.org/words-of-wisdom/sdm.html">words
-  of wisdom</a> and discuss ways to improve this template.
-  Or, evaluate the ReadySET Pro <a title="pro use case template and sample test plan"
-  href="http://www.readysetpro.com/">professional software development
-  methodology template</a>.
- </div>
-
-<div class="legal1">Company Proprietary</div>
-
-<div class="footnote">
- Copyright &#169; 2003-2004 Jason Robbins.  All rights reserved. <a href="readyset-license.html">License terms</a>.
- Retain this copyright statement whenever this file is used as a
- template.
+<h1>Software Development Methodology<br>
+</h1>
+<div id="releaseinfo">
+<h2>Release Information</h2>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Project:</th>
+      <td><a href="index.html">Siconos</a></td>
+    </tr>
+    <tr>
+      <th>Internal Release Number:</th>
+      <td>X.Y.Z</td>
+    </tr>
+    <tr>
+      <th>Related Documents:</th>
+      <td>
+      <div> <a href="design.html">Design</a> <br>
+      </div>
+      <div> <a href="glossary.html">Glossar</a></div>
+      </td>
+    </tr>
+  </tbody>
+</table>
 </div>
-
+<!-- /releaseinfo -->
+<!-- /processimpact -->
+<div id="introduction">
+<dl>
+</dl>
+&nbsp;&nbsp;&nbsp; This section is dedicated to developers and provides
+main rules and advises for
+programs writing in the Siconos platform. <br>
+<div id="TableOfContents">
+<h3><!--Table of Child-Links-->Guidelines for new classes
+implementation
+</h3>
+<ul>
+  <li><a href="sdm/Constructors.html">Constructors</a></li>
+  <li><a href="sdm/Destructor.html">Destructor</a></li>
+  <li><a href="sdm/FunctionsMembers.html">Functions members</a></li>
+  <li><a href="sdm/GettersSetters.html">Getters and setters</a></li>
+  <li><a href="sdm/ReferenceFile.html">Reference file</a>&nbsp;</li>
+</ul>
+<h3><!--Table of Child-Links-->Coding standards</h3>
+<ul>
+  <li><span style="text-decoration: underline;"><a href="sdm/node1.html">C++
+classes documentation</a></span> <br>
+  </li>
+  <li><a href="sdm/node2.html">Naming conventions</a></li>
+  <li><a href="sdm/node3.html">C++ coding guidelines</a><br>
+  </li>
+</ul>
+<!--End of Table of Child-Links--> <br>
+<h3>References</h3>
+&nbsp;&nbsp;&nbsp; <a name="Eckel2000"></a>B. Eckel, Thinking in C++,
+2nd edition, volume one: Introduction to standard C++ (available
+on-line, free). <br>
+<br>
+</div>
+</div>
+</div>
 </div>
 </body>
 </html>

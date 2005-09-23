@@ -280,14 +280,14 @@ void OneStepNSProblem::fillSolvingMethod(const string& newSolvingMethod, const i
 {
   if (solver ==  "LcpSolving")
     strcpy(solvingMethod.lcp.name, newSolvingMethod.c_str());
-  else if (solver == "RelayPrimalSolving")
-    strcpy(solvingMethod.rp.nom_method, newSolvingMethod.c_str());
-  else if (solver == "RelayDualSolving")
-    strcpy(solvingMethod.rd.nom_method, newSolvingMethod.c_str());
-  else if (solver == "ContactFrictionPrimalSolving")
-    strcpy(solvingMethod.cfp.nom_method, newSolvingMethod.c_str());
-  else if (solver == "ContactFrictionDualSolving")
-    strcpy(solvingMethod.cfd.nom_method, newSolvingMethod.c_str());
+  else if (solver == "PrimalRelaySolving")
+    strcpy(solvingMethod.pr.name, newSolvingMethod.c_str());
+  else if (solver == "DualRelaySolving")
+    strcpy(solvingMethod.dr.name, newSolvingMethod.c_str());
+  else if (solver == "PrimalFrictionContact2DSolving")
+    strcpy(solvingMethod.pfc_2D.name, newSolvingMethod.c_str());
+  else if (solver == "DualFrictionContact2DSolving")
+    strcpy(solvingMethod.dfc_2D.name, newSolvingMethod.c_str());
 
   if (newSolvingMethod ==  "Lemke")
     setLemkeAlgorithm(solver, MaxIter);
@@ -335,37 +335,37 @@ void OneStepNSProblem::saveNSProblemToXML()
         tolerance = solvingMethod.lcp.tol;
         searchDirection = solvingMethod.lcp.k_latin;
       }
-      else if (solver == OSNSP_RPSOLVING)
+      else if (solver == OSNSP_PRSOLVING)
       {
-        methodName = solvingMethod.rp.nom_method;
-        normType = solvingMethod.rp.normType;
-        maxIter = solvingMethod.rp.itermax;
-        tolerance = solvingMethod.rp.tol;
-        searchDirection = solvingMethod.rp.k_latin;
+        methodName = solvingMethod.pr.name;
+        normType = solvingMethod.pr.normType;
+        maxIter = solvingMethod.pr.itermax;
+        tolerance = solvingMethod.pr.tol;
+        searchDirection = solvingMethod.pr.k_latin;
       }
-      else if (solver == OSNSP_RDSOLVING)
+      else if (solver == OSNSP_DRSOLVING)
       {
-        methodName = solvingMethod.rd.nom_method;
-        normType = solvingMethod.rd.normType;
-        maxIter = solvingMethod.rd.itermax;
-        tolerance = solvingMethod.rd.tol;
-        searchDirection = solvingMethod.rd.k_latin;
+        methodName = solvingMethod.dr.name;
+        normType = solvingMethod.dr.normType;
+        maxIter = solvingMethod.dr.itermax;
+        tolerance = solvingMethod.dr.tol;
+        searchDirection = solvingMethod.dr.k_latin;
       }
-      else if (solver == OSNSP_CFPSOLVING)
+      else if (solver == OSNSP_PFC_2DSOLVING)
       {
-        methodName = solvingMethod.cfp.nom_method;
-        normType = solvingMethod.cfp.normType;
-        maxIter = solvingMethod.cfp.itermax;
-        tolerance = solvingMethod.cfp.tol;
-        searchDirection = solvingMethod.cfp.k_latin;
+        methodName = solvingMethod.pfc_2D.name;
+        normType = solvingMethod.pfc_2D.normType;
+        maxIter = solvingMethod.pfc_2D.itermax;
+        tolerance = solvingMethod.pfc_2D.tol;
+        searchDirection = solvingMethod.pfc_2D.k_latin;
       }
-      else if (solver == OSNSP_CFDSOLVING)
+      else if (solver == OSNSP_DFC_2DSOLVING)
       {
-        methodName = solvingMethod.cfd.nom_method;
-        normType = solvingMethod.cfd.normType;
-        maxIter = solvingMethod.cfd.itermax;
-        tolerance = solvingMethod.cfd.tol;
-        searchDirection = solvingMethod.cfd.k_latin;
+        methodName = solvingMethod.dfc_2D.name;
+        normType = solvingMethod.dfc_2D.normType;
+        maxIter = solvingMethod.dfc_2D.itermax;
+        tolerance = solvingMethod.dfc_2D.tol;
+        searchDirection = solvingMethod.dfc_2D.k_latin;
       }
 
       onestepnspbxml->setSolver(solver, methodName, normType, tolerance, maxIter, searchDirection);
@@ -396,10 +396,10 @@ void OneStepNSProblem::setLemkeAlgorithm(const string& meth,  const unsigned int
     strcpy(solvingMethod.lcp.name, OSNSP_LEMKE.c_str());
     solvingMethod.lcp.itermax = iter;
   }
-  else if (meth == OSNSP_CFDSOLVING)
+  else if (meth == OSNSP_DFC_2DSOLVING)
   {
-    strcpy(solvingMethod.cfd.nom_method, OSNSP_LEMKE.c_str());
-    solvingMethod.cfd.itermax = iter;
+    strcpy(solvingMethod.dfc_2D.name, OSNSP_LEMKE.c_str());
+    solvingMethod.dfc_2D.itermax = iter;
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
@@ -414,10 +414,10 @@ void OneStepNSProblem::setLexicoLemkeAlgorithm(const string& meth,  const unsign
     strcpy(solvingMethod.lcp.name, OSNSP_LEXICOLEMKE.c_str());
     solvingMethod.lcp.itermax = iter;
   }
-  else if (meth == OSNSP_CFDSOLVING)
+  else if (meth == OSNSP_DFC_2DSOLVING)
   {
-    strcpy(solvingMethod.cfd.nom_method, OSNSP_LEXICOLEMKE.c_str());
-    solvingMethod.cfd.itermax = iter;
+    strcpy(solvingMethod.dfc_2D.name, OSNSP_LEXICOLEMKE.c_str());
+    solvingMethod.dfc_2D.itermax = iter;
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
@@ -435,37 +435,37 @@ void OneStepNSProblem::setNLGSAlgorithm(const string& meth,  const double& toler
     //strcpy( solvingMethod.lcp.normType, norm.c_str() );
     solvingMethod.lcp.itermax = iter;
   }
-  else if (meth == OSNSP_RPSOLVING)
+  else if (meth == OSNSP_PRSOLVING)
   {
-    strcpy(solvingMethod.rp.nom_method, OSNSP_NLGS.c_str());
-    solvingMethod.rp.tol = tolerance;
+    strcpy(solvingMethod.pr.name, OSNSP_NLGS.c_str());
+    solvingMethod.pr.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.rp.normType, norm.c_str() );
-    solvingMethod.rp.itermax = iter;
+    //strcpy( solvingMethod.pr.normType, norm.c_str() );
+    solvingMethod.pr.itermax = iter;
   }
-  else if (meth == OSNSP_RDSOLVING)
+  else if (meth == OSNSP_DRSOLVING)
   {
-    strcpy(solvingMethod.rd.nom_method, OSNSP_NLGS.c_str());
-    solvingMethod.rd.tol = tolerance;
+    strcpy(solvingMethod.dr.name, OSNSP_NLGS.c_str());
+    solvingMethod.dr.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.rd.normType, norm.c_str() );
-    solvingMethod.rd.itermax = iter;
+    //strcpy( solvingMethod.dr.normType, norm.c_str() );
+    solvingMethod.dr.itermax = iter;
   }
-  else if (meth == OSNSP_CFPSOLVING)
+  else if (meth == OSNSP_PFC_2DSOLVING)
   {
-    strcpy(solvingMethod.cfp.nom_method, OSNSP_NLGS.c_str());
-    solvingMethod.cfp.tol = tolerance;
+    strcpy(solvingMethod.pfc_2D.name, OSNSP_NLGS.c_str());
+    solvingMethod.pfc_2D.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.cfp.normType, norm.c_str() );
-    solvingMethod.cfp.itermax = iter;
+    //strcpy( solvingMethod.pfc_2D.normType, norm.c_str() );
+    solvingMethod.pfc_2D.itermax = iter;
   }
-  else if (meth == OSNSP_CFDSOLVING)
+  else if (meth == OSNSP_DFC_2DSOLVING)
   {
-    strcpy(solvingMethod.cfd.nom_method, OSNSP_NLGS.c_str());
-    solvingMethod.cfd.tol = tolerance;
+    strcpy(solvingMethod.dfc_2D.name, OSNSP_NLGS.c_str());
+    solvingMethod.dfc_2D.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.cfd.normType, norm.c_str() );
-    solvingMethod.cfd.itermax = iter;
+    //strcpy( solvingMethod.dfc_2D.normType, norm.c_str() );
+    solvingMethod.dfc_2D.itermax = iter;
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::setNLGSAlgorithm - solving method " + meth + " doesn't exists.");
@@ -509,37 +509,37 @@ void OneStepNSProblem::setCPGAlgorithm(const string& meth,  const double& tolera
     //strcpy( solvingMethod.lcp.normType, norm.c_str() );
     solvingMethod.lcp.itermax = iter;
   }
-  else if (meth == OSNSP_RPSOLVING)
+  else if (meth == OSNSP_PRSOLVING)
   {
-    strcpy(solvingMethod.rp.nom_method, OSNSP_CPG.c_str());
-    solvingMethod.rp.tol = tolerance;
+    strcpy(solvingMethod.pr.name, OSNSP_CPG.c_str());
+    solvingMethod.pr.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.rp.normType, norm.c_str() );
-    solvingMethod.rp.itermax = iter;
+    //strcpy( solvingMethod.pr.normType, norm.c_str() );
+    solvingMethod.pr.itermax = iter;
   }
-  else if (meth == OSNSP_RDSOLVING)
+  else if (meth == OSNSP_DRSOLVING)
   {
-    strcpy(solvingMethod.rd.nom_method, OSNSP_CPG.c_str());
-    solvingMethod.rd.tol = tolerance;
+    strcpy(solvingMethod.dr.name, OSNSP_CPG.c_str());
+    solvingMethod.dr.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.rd.normType, norm.c_str() );
-    solvingMethod.rd.itermax = iter;
+    //strcpy( solvingMethod.dr.normType, norm.c_str() );
+    solvingMethod.dr.itermax = iter;
   }
-  else if (meth == OSNSP_CFPSOLVING)
+  else if (meth == OSNSP_PFC_2DSOLVING)
   {
-    strcpy(solvingMethod.cfp.nom_method, OSNSP_CPG.c_str());
-    solvingMethod.cfp.tol = tolerance;
+    strcpy(solvingMethod.pfc_2D.name, OSNSP_CPG.c_str());
+    solvingMethod.pfc_2D.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.cfp.normType, norm.c_str() );
-    solvingMethod.cfp.itermax = iter;
+    //strcpy( solvingMethod.pfc_2D.normType, norm.c_str() );
+    solvingMethod.pfc_2D.itermax = iter;
   }
-  else if (meth == OSNSP_CFDSOLVING)
+  else if (meth == OSNSP_DFC_2DSOLVING)
   {
-    strcpy(solvingMethod.cfd.nom_method, OSNSP_CPG.c_str());
-    solvingMethod.cfd.tol = tolerance;
+    strcpy(solvingMethod.dfc_2D.name, OSNSP_CPG.c_str());
+    solvingMethod.dfc_2D.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.cfd.normType, norm.c_str() );
-    solvingMethod.cfd.itermax = iter;
+    //strcpy( solvingMethod.dfc_2D.normType, norm.c_str() );
+    solvingMethod.dfc_2D.itermax = iter;
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::setCPGAlgorithm - solving method " + meth + " doesn't exists.");
@@ -558,41 +558,41 @@ void OneStepNSProblem::setLatinAlgorithm(const string& meth, const double& t, co
     solvingMethod.lcp.itermax = iter;
     solvingMethod.lcp.k_latin = searchdirection;
   }
-  else if (meth == OSNSP_RPSOLVING)
+  else if (meth == OSNSP_PRSOLVING)
   {
-    strcpy(solvingMethod.rp.nom_method, OSNSP_LATIN.c_str());
-    solvingMethod.rp.tol = t;
+    strcpy(solvingMethod.pr.name, OSNSP_LATIN.c_str());
+    solvingMethod.pr.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.rd.normType, norm.c_str());
-    solvingMethod.rp.itermax = iter;
-    solvingMethod.rp.k_latin = searchdirection;
+    strcpy(solvingMethod.dr.normType, norm.c_str());
+    solvingMethod.pr.itermax = iter;
+    solvingMethod.pr.k_latin = searchdirection;
   }
-  else if (meth == OSNSP_RDSOLVING)
+  else if (meth == OSNSP_DRSOLVING)
   {
-    strcpy(solvingMethod.rd.nom_method, OSNSP_LATIN.c_str());
-    solvingMethod.rd.tol = t;
+    strcpy(solvingMethod.dr.name, OSNSP_LATIN.c_str());
+    solvingMethod.dr.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.rd.normType, norm.c_str());
-    solvingMethod.rd.itermax = iter;
-    solvingMethod.rd.k_latin = searchdirection;
+    strcpy(solvingMethod.dr.normType, norm.c_str());
+    solvingMethod.dr.itermax = iter;
+    solvingMethod.dr.k_latin = searchdirection;
   }
-  else if (meth == OSNSP_CFPSOLVING)
+  else if (meth == OSNSP_PFC_2DSOLVING)
   {
-    strcpy(solvingMethod.cfp.nom_method, OSNSP_LATIN.c_str());
-    solvingMethod.cfp.tol = t;
+    strcpy(solvingMethod.pfc_2D.name, OSNSP_LATIN.c_str());
+    solvingMethod.pfc_2D.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.cfp.normType, norm.c_str());
-    solvingMethod.cfp.itermax = iter;
-    solvingMethod.cfp.k_latin = searchdirection;
+    strcpy(solvingMethod.pfc_2D.normType, norm.c_str());
+    solvingMethod.pfc_2D.itermax = iter;
+    solvingMethod.pfc_2D.k_latin = searchdirection;
   }
-  else if (meth == OSNSP_CFDSOLVING)
+  else if (meth == OSNSP_DFC_2DSOLVING)
   {
-    strcpy(solvingMethod.cfd.nom_method, OSNSP_LATIN.c_str());
-    solvingMethod.cfd.tol = t;
+    strcpy(solvingMethod.dfc_2D.name, OSNSP_LATIN.c_str());
+    solvingMethod.dfc_2D.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.cfd.normType, norm.c_str());
-    solvingMethod.cfd.itermax = iter;
-    solvingMethod.cfd.k_latin = searchdirection;
+    strcpy(solvingMethod.dfc_2D.normType, norm.c_str());
+    solvingMethod.dfc_2D.itermax = iter;
+    solvingMethod.dfc_2D.k_latin = searchdirection;
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem::setLatinAlgorithm - solving method " + meth + " doesn't exists.");
@@ -602,7 +602,7 @@ bool OneStepNSProblem::isOneStepNsProblemComplete()
 {
   bool isComplete = true;
 
-  if (nspbType != "LCP" || nspbType != "CFD" || nspbType != "QP" || nspbType != "Relay")
+  if (nspbType != "LCP" || nspbType != "DFC_2D" || nspbType != "QP" || nspbType != "Relay")
   {
     cout << "OneStepNSProblem is not complete: unknown problem type " << nspbType << endl;
     isComplete = false;
@@ -640,8 +640,8 @@ bool OneStepNSProblem::isOneStepNsProblemComplete()
         cout << "OneStepNSProblem warning: an equalityConstraint of the problem points to NULL" << endl;
   }
 
-  if (solver != "LcpSolving" || solver != "RelayPrimalSolving" || solver != "RelayDualSolving"
-      || solver != "ContactFrictionPrimalSolving" || solver != "ContactFrictionDualSolving")
+  if (solver != "LcpSolving" || solver != "PrimalRelaySolving" || solver != "DualRelaySolving"
+      || solver != "PrimalFrictionContact2DSolving" || solver != "DualFrictionContact2DSolving")
   {
     cout << "OneStepNSProblem is not complete: unknown solver type " << solver  << endl;
     isComplete = false;

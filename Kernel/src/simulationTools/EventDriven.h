@@ -2,11 +2,6 @@
 #define EVENTDRIVEN_H
 
 #include "Strategy.h"
-#include "StrategyXML.h"
-#include <iostream>
-#include <vector>
-#include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
 
 /** \class EventDriven
  *  \brief It's a way to manage a simulation, where the event a more important than the time

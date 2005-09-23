@@ -1,7 +1,7 @@
 #ifndef LAGRANGIANLINEARDSIO_H
 #define LAGRANGIANLINEARDSIO_H
 
-#include "DSInputOutput.h"
+#include "LagrangianDSIO.h"
 #include "LagrangianLinearDSIOXML.h"
 
 /** \class LagrangianLinearDSIO
@@ -14,7 +14,7 @@
  *
  *
  */
-class LagrangianLinearDSIO : public DSInputOutput
+class LagrangianLinearDSIO : public LagrangianDSIO
 {
 public:
   /** \fn LagrangianLinearDSIO()

@@ -6,22 +6,23 @@
 #include "check.h"
 
 #include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
+#include "SiconosVector.h"
 #include "SiconosMemory.h"
 #include "SiconosSharedLibrary.h"
 
 #include "NonSmoothDynamicalSystem.h"
 #include "DSInputOutput.h"
 #include "BoundaryCondition.h"
-#include "DSXML.h"
+#include "DynamicalSystemXML.h"
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 class NonSmoothDynamicalSystem;
 class BoundaryCondition;
 class DSInputOutput;
-class DSXML;
+class DynamicalSystemXML;
 class SiconosVector;
 class SiconosMatrix;
 class SiconosMemory;
@@ -68,15 +69,15 @@ public:
 
   // ===== CONSTRUCTORS =====
 
-  /** \fn DynamicalSystem(DSXML * nsdsXML, NonSmoothDynamicalSystem* =NULL)
+  /** \fn DynamicalSystem(DynamicalSystemXML * nsdsXML, NonSmoothDynamicalSystem* =NULL)
    *  \brief xml constructor
-   *  \param DSXML* : the XML object for this DynamicalSystem
+   *  \param DynamicalSystemXML* : the XML object for this DynamicalSystem
    *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
    *  \exception RuntimeException
    */
-  DynamicalSystem(DSXML * dsXML, NonSmoothDynamicalSystem* = NULL);
+  DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
-  /** \fn DynamicalSystem(DSXML * nsdsXML, const unsigned int& number, const unsigned int& n,
+  /** \fn DynamicalSystem(DynamicalSystemXML * nsdsXML, const unsigned int& number, const unsigned int& n,
       const SiconosVector& x0, const string& vectorFieldPlugin)
       *  \brief constructor from a set of data
       *  \param int : reference number for this DynamicalSystem
@@ -115,7 +116,7 @@ public:
   *  \brief set the type of a DynamicalSystem
   *  \param string : the type of the DynamicalSystem
   */
-  inline void getType(const std::string newType)
+  inline void setType(const std::string newType)
   {
     DSType = newType;
   }
@@ -629,20 +630,20 @@ public:
 
   // --- dsxml ---
 
-  /** \fn inline const DSXML* getDynamicalSystemXMLPtr() const
-   *  \brief get the object DSXML of the DynamicalSystem
-   *  \return a pointer on the DSXML of the DynamicalSystem
+  /** \fn inline const DynamicalSystemXML* getDynamicalSystemXMLPtr() const
+   *  \brief get the object DynamicalSystemXML of the DynamicalSystem
+   *  \return a pointer on the DynamicalSystemXML of the DynamicalSystem
    */
-  inline const DSXML* getDynamicalSystemXMLPtr() const
+  inline const DynamicalSystemXML* getDynamicalSystemXMLPtr() const
   {
     return dsxml;
   }
 
-  /** \fn inline void setDynamicalSystemXMLPtr(DSXML *dsxml)
-   *  \brief set the DSXML of the DynamicalSystem
-   *  \param DSXML* dsxml : the address of theDSXML to set
+  /** \fn inline void setDynamicalSystemXMLPtr(DynamicalSystemXML *dsxml)
+   *  \brief set the DynamicalSystemXML of the DynamicalSystem
+   *  \param DynamicalSystemXML* dsxml : the address of theDynamicalSystemXML to set
    */
-  inline void setDynamicalSystemXMLPtr(DSXML *newDsxml)
+  inline void setDynamicalSystemXMLPtr(DynamicalSystemXML *newDsxml)
   {
     dsxml = newDsxml;
   }
@@ -932,13 +933,13 @@ protected:
   DynamicalSystem();
 
   /** \fn void fillBoundaryConditionsFromXml()
-   *  \brief uses the DSXML of the DynamicalSystem to fill BoundaryCondition fields
+   *  \brief uses the DynamicalSystemXML of the DynamicalSystem to fill BoundaryCondition fields
    *  \exception RuntimeException
    */
   virtual void fillBoundaryConditionsFromXml();
 
   /** \fn void fillDsioFromXml()
-   *  \brief uses the DSXML of the DynamicalSystem to fill DSIO vector
+   *  \brief uses the DynamicalSystemXML of the DynamicalSystem to fill DSIO vector
    *  \exception RuntimeException
    */
   virtual void fillDsioFromXml();
@@ -1007,7 +1008,7 @@ protected:
   BoundaryCondition *BC;
 
   /** the XML object linked to the DynamicalSystem  */
-  DSXML *dsxml;
+  DynamicalSystemXML *dsxml;
 
   /** vector of the DS Inputs-Outputs of the Dynamical System */
   std::vector<DSInputOutput*> dsioVector;

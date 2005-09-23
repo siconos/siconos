@@ -3,11 +3,6 @@
 
 #include "LinearDSXML.h"
 #include "DynamicalSystem.h"
-#include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
-#include "check.h"
-#include <iostream>
-#include <vector>
 
 class LinearDSXML;
 
@@ -52,13 +47,13 @@ public:
 
   /** === CONSTRUCTORS/DESTRUCTOR === */
 
-  /** \fn LinearDS(DSXML * nsdsXML)
+  /** \fn LinearDS(DynamicalSystemXML * nsdsXML)
    *  \brief xml constructor
-   *  \param DSXML * : the XML object for this DynamicalSystem
+   *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
    *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
    *  \exception RuntimeException
    */
-  LinearDS(DSXML * dsXML, NonSmoothDynamicalSystem* = NULL);
+  LinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
   /** \fn LinearDS(int number, int n, SiconosVector* x0, NSDS * nsds)
    *  \brief constructor from a set of data

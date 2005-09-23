@@ -1,7 +1,7 @@
 #ifndef LAGRANGIANLINEARDSIOXML_H
 #define LAGRANGIANLINEARDSIOXML_H
 
-#include "DSInputOutputXML.h"
+#include "LagrangianDSIOXML.h"
 
 const std::string LLDSIO_H = "H";
 const std::string LLDSIO_B = "b";
@@ -16,7 +16,7 @@ const std::string LLDSIO_B = "b";
 *
 * LagrangianLinearDSIOXML allows to manage data of a LagrangianLinearDSIO DOM tree.
 */
-class LagrangianLinearDSIOXML : public DSInputOutputXML
+class LagrangianLinearDSIOXML : public LagrangianDSIOXML
 {
 public:
 

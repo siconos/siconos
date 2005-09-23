@@ -103,7 +103,7 @@ const std::string ADAMS_TAG = "Adams";
 
 /*Types of OneStepNSProblem defined*/
 const std::string LCP_TAG = "LCP";
-const std::string CFD_TAG = "CFD";
+const std::string DFC_2D_TAG = "DFC_2D";
 const std::string QP_TAG = "QP";
 const std::string RELAY_TAG = "Relay";
 

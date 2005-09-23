@@ -2,7 +2,7 @@
 using namespace std;
 
 // --- Constructor from an xml file ---
-LagrangianDS::LagrangianDS(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
+LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
   DynamicalSystem(), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
   velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL),
   jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
@@ -214,7 +214,7 @@ LagrangianDS::LagrangianDS(DSXML * dsXML, NonSmoothDynamicalSystem* newNsds):
       else *jacobianVelocityNNL = lgptr->getJacobianVelocityNNLMatrix();
     }
   }
-  else RuntimeException::selfThrow("LagrangianDS::LagrangianDS - DSXML paramater must not be NULL");
+  else RuntimeException::selfThrow("LagrangianDS::LagrangianDS - DynamicalSystemXML paramater must not be NULL");
 
   OUT("LagrangianDS::LagrangianDS() - Xml constructor\n");
 }
@@ -1197,7 +1197,7 @@ void LagrangianDS::saveDSToXML()
     else
       lgptr->setNNLPlugin(NNLFunctionName);
   }
-  else RuntimeException::selfThrow("LagrangianDS::saveDSToXML - object DSXML does not exist");
+  else RuntimeException::selfThrow("LagrangianDS::saveDSToXML - object DynamicalSystemXML does not exist");
   OUT("LagrangianDS::saveDSToXML\n");
 }
 

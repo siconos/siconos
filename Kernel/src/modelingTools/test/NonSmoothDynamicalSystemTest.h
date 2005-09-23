@@ -34,7 +34,7 @@ private:
   // Members
 
   xmlNode * node;
-  NSDSXML* tmpxml;
+  NonSmoothDynamicalSystemXML* tmpxml;
 public:
   void setUp();
   void tearDown();

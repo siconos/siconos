@@ -1,7 +1,7 @@
 #include "LagrangianLinearDSIOXML.h"
 using namespace std;
 
-LagrangianLinearDSIOXML::LagrangianLinearDSIOXML(): DSInputOutputXML()
+LagrangianLinearDSIOXML::LagrangianLinearDSIOXML(): LagrangianDSIOXML()
 {
   this->HNode = NULL;
   this->bNode = NULL;

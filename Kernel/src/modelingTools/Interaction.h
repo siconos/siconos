@@ -12,7 +12,6 @@
 #include "InteractionXML.h"
 
 // tools
-#include "NewSiconosVector.h"
 #include "SimpleVector.h"
 
 // const

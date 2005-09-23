@@ -29,7 +29,7 @@
 <xsd:simpleType name="PossibleRelationValues">
   	<xsd:restriction base="xsd:string">
 		<xsd:enumeration value="LagrangianLinear"/>
-		<xsd:enumeration value="LagrangianNonLinear"/>
+		<xsd:enumeration value="Lagrangian"/>
 		<xsd:enumeration value="LinearTimeInvariant"/>
    	</xsd:restriction>
 </xsd:simpleType>
@@ -61,7 +61,7 @@
 <xsd:simpleType name="PossibleOneStepNSProblemValues">
    <xsd:restriction base="xsd:string">
 	<xsd:enumeration value="LCP"/>
-	<xsd:enumeration value="CFD"/>
+	<xsd:enumeration value="DFC_2D"/>
 	<xsd:enumeration value="QP"/>
 	<xsd:enumeration value="Relay"/>
    </xsd:restriction>
@@ -729,7 +729,7 @@
 								</xsd:complexType>
 							</xsd:element>
 							
-							<xsd:element name="LagrangianNonLinear">
+							<xsd:element name="Lagrangian">
 								<xsd:complexType>
 									<xsd:all>
 										<xsd:element name="computeInput" type="pluginDef" minOccurs="1" maxOccurs="1"/>
@@ -888,7 +888,7 @@
 					</xsd:complexType>
 				</xsd:element>
 				
-				<xsd:element name="CFD">
+				<xsd:element name="DFC_2D">
 					<xsd:complexType>
 						<xsd:all>
 							<xsd:element name="n" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
@@ -927,7 +927,7 @@
 						</xsd:complexType>
 						</xsd:element>
 
-						<xsd:element name="RelayPrimalSolving">
+						<xsd:element name="PrimalRelaySolving">
 						<xsd:complexType>
 							<xsd:choice>
 							<xsd:element ref="NLGS"/>
@@ -937,7 +937,7 @@
 						</xsd:complexType>
 						</xsd:element>
 						
-						<xsd:element name="RelayDualSolving">
+						<xsd:element name="DualRelaySolving">
 						<xsd:complexType>
 							<xsd:choice>
 							<xsd:element ref="NLGS"/>
@@ -947,7 +947,7 @@
 						</xsd:complexType>
 						</xsd:element>
 						
-						<xsd:element name="ContactFrictionPrimalSolving">
+						<xsd:element name="PrimalFrictionContact2DSolving">
 						<xsd:complexType>
 							<xsd:choice>
 							<xsd:element ref="NLGS"/>
@@ -957,7 +957,7 @@
 						</xsd:complexType>
 						</xsd:element>
 												
-						<xsd:element name="ContactFrictionDualSolving">
+						<xsd:element name="DualFrictionContact2DSolving">
 						<xsd:complexType>
 							<xsd:choice>
 							<xsd:element ref="Latin"/>

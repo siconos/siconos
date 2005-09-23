@@ -13,13 +13,13 @@
 #ifndef __LINEARSYSTEMDSXML__
 #define __LINEARSYSTEMDSXML__
 
-#include "DSXML.h"
+#include "DynamicalSystemXML.h"
 
 const std::string LDS_A = "A";
 const std::string LDS_B = "b";
 const std::string LDS_E = "E";
 
-class LinearDSXML : public DSXML
+class LinearDSXML : public DynamicalSystemXML
 {
 public:
   LinearDSXML();
@@ -27,7 +27,7 @@ public:
   /** \fn LinearDSXML(xmlNode * LagrangianDSNode, bool isBVP)
    *   \brief Build a LinearDSXML object from a DOM tree describing a DS
    *   \param xmlNode * linearSystemDSNode : the linearSystemDS DOM tree
-   *   \param bool isBVP : if NSDS is BVP, linearSystemDS has boundary condition
+   *   \param bool isBVP : if NonSmoothDynamicalSystem is BVP, linearSystemDS has boundary condition
    */
   LinearDSXML(xmlNode * linearSystemDSNode, const bool& isBVP);
 
@@ -64,7 +64,7 @@ public:
     if (ANode != NULL)
       SiconosDOMTreeTools::setSiconosMatrixNodeValue(ANode, m);
     else
-      ANode = SiconosDOMTreeTools::createMatrixNode(rootDSXMLNode, LDS_A, m);
+      ANode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, LDS_A, m);
   }
 
   /** \fn SiconosMatrix getE()
@@ -97,7 +97,7 @@ public:
   {
     if (ENode != NULL)
       SiconosDOMTreeTools::setSiconosMatrixNodeValue(ENode, m);
-    else ENode = SiconosDOMTreeTools::createMatrixNode(rootDSXMLNode, LDS_E, m);
+    else ENode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, LDS_E, m);
   }
 
   /** \fn inline string getBPlugin()
@@ -133,7 +133,7 @@ public:
   {
     if (bNode != NULL)
       SiconosDOMTreeTools::setSiconosVectorNodeValue(bNode, v);
-    else bNode = SiconosDOMTreeTools::createVectorNode(rootDSXMLNode, LDS_B, v);
+    else bNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LDS_B, v);
   }
 
   /** \fn bool isAPlugin()
@@ -177,10 +177,10 @@ public:
 
 
   /** \fn void updateDynamicalSystemXML(xmlNode*, DynamicalSystem*, BoundaryCondition*)
-   *   \brief makes the operations to add a DynamicalSystem to the NSDSXML
+   *   \brief makes the operations to add a DynamicalSystem to the NonSmoothDynamicalSystemXML
    *   \param xmlNode* : the root node of this DynamicalSystem
-   *   \param DynamicalSystem* : the DynamicalSystem of this DSXML
-   *   \param BoundaryCondition* : the BoundaryCondition of the DS if the NSDS is BVP (optional)
+   *   \param DynamicalSystem* : the DynamicalSystem of this DynamicalSystemXML
+   *   \param BoundaryCondition* : the BoundaryCondition of the DS if the NonSmoothDynamicalSystem is BVP (optional)
    */
   void updateDynamicalSystemXML(xmlNode*, DynamicalSystem*, BoundaryCondition* bc = NULL);
 

@@ -13,16 +13,12 @@
 #ifndef __LLRelationXML__
 #define __LLRelationXML__
 
-#include "RelationXML.h"
+#include "LagrangianRXML.h"
 
 const std::string  LLR_H = "H";
 const std::string  LLR_B = "b";
 
-class SiconosMatrix;
-class SiconosVector;
-class SimpleVector;
-
-class LagrangianLinearRXML : public RelationXML
+class LagrangianLinearRXML : public LagrangianRXML
 {
 public:
 

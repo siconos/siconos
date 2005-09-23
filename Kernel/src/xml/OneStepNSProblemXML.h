@@ -146,7 +146,7 @@ public:
   //               ( according to SICONOS/Numerics )
   //============================================================
   /** \fn string getSolver()
-  *   \brief Return the kind of solver of the OneStepNSProblem (LcpSolving, RelayDualSolving, ...)
+  *   \brief Return the kind of solver of the OneStepNSProblem (LcpSolving, DualRelaySolving, ...)
   *   \return string : the type of solver
   */
   inline std::string  getSolver()
@@ -269,7 +269,7 @@ public:
 
 
   /** \fn void setSolver(string name)
-  *   \brief set the kind of solver of the OneStepNSProblem (LcpSolving, RelayDualSolving, ...)
+  *   \brief set the kind of solver of the OneStepNSProblem (LcpSolving, DualRelaySolving, ...)
   *   \param string : the type of solver
   *   \param string : the name of the method used for by the solver
   *   \param string : the norm type used by the solver

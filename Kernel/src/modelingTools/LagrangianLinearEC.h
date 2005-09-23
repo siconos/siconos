@@ -1,7 +1,7 @@
 #ifndef LAGRANGIANLINEAREC_H
 #define LAGRANGIANLINEAREC_H
 
-#include "EqualityConstraint.h"
+#include "LagrangianEC.h"
 #include "LagrangianLinearECXML.h"
 #include "SimpleVector.h"
 #include "CompositeVector.h"
@@ -14,7 +14,7 @@
  *
  *
  */
-class LagrangianLinearEC : public EqualityConstraint
+class LagrangianLinearEC : public LagrangianEC
 {
 public:
 

@@ -64,7 +64,7 @@ Moreau::~Moreau()
     delete W;
     W = NULL;
   }
-  if (ds->getType() == LNLDS) ds->freeTmpWorkVector("LagNLDSMoreau");
+  if (ds != NULL && ds->getType() == LNLDS) ds->freeTmpWorkVector("LagNLDSMoreau");
 }
 
 void Moreau::initialize()

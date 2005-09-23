@@ -4,7 +4,7 @@
 #include "TimeDiscretisation.h"
 #include "DynamicalSystem.h"
 #include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
+#include "SiconosVector.h"
 #include "OneStepIntegratorXML.h"
 #include "Strategy.h"
 #include "SiconosConst.h"

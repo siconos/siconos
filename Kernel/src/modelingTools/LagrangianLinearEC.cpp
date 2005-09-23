@@ -8,7 +8,7 @@ LagrangianLinearEC::LagrangianLinearEC()
   OUT("LagrangianLinearEC::LagrangianLinearEC()\n");
 }
 
-LagrangianLinearEC::LagrangianLinearEC(EqualityConstraintXML* ecxml): EqualityConstraint(ecxml)
+LagrangianLinearEC::LagrangianLinearEC(EqualityConstraintXML* ecxml): LagrangianEC(ecxml)
 {
   //  this->h = NULL;
   //  this->b = NULL;

@@ -2,14 +2,12 @@
 #define TIMEDISCRETISATION_H
 
 #include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
 #include "SimpleVector.h"
 #include "TimeDiscretisationXML.h"
 #include "Strategy.h"
 #include "OneStepIntegrator.h"
 #include "RuntimeException.h"
 #include "check.h"
-//#include <assert>
 #include <iostream>
 #include <vector>
 

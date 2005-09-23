@@ -4,13 +4,6 @@
 #include "LagrangianDS.h"
 #include "LagrangianLinearTIDSXML.h"
 
-#include "SiconosMatrix.h"
-#include "NewSiconosVector.h"
-#include "check.h"
-
-#include <iostream>
-#include <vector>
-
 class LagrangianLinearTIDSXML;
 
 /** \class LagrangianLinearTIDS
@@ -73,13 +66,13 @@ class LagrangianLinearTIDS : public LagrangianDS
 {
 public:
 
-  /** \fn LagrangianLinearTIDS(DSXML * dsXML)
+  /** \fn LagrangianLinearTIDS(DynamicalSystemXML * dsXML)
    *  \brief constructor from an xml file
-   *  \param DSXML * : the XML object for this DynamicalSystem
+   *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
    *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
    *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(DSXML * dsXML, NonSmoothDynamicalSystem* = NULL);
+  LagrangianLinearTIDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
   /** \fn LagrangianLinearTIDS(int number, int ndof,
    *   SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass,
