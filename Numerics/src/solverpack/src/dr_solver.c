@@ -7,7 +7,7 @@
  *   \left\lbrace
  *    \begin{array}{l}
  *      M z + q = w\\
- *     -w \in \partial\psi_{[-b, a]}(z)\\
+ *     -z \in \partial\psi_{[-b, a]}(w)\\
  *    \end{array}
  *   \right.
  *  \f$
@@ -16,7 +16,7 @@
  *
  * This system of equations and inequalities is solved thanks to @ref dr solvers.
  * The routine's call is due to the function pr_solver.c.
- * \fn int pr_solver( double *vec , double *q ,int *nn , method *pt , double *z , double *w )
+ * \fn int dr_solver( double *vec , double *q ,int *nn , method *pt , double *z , double *w )
  *
  * dr_solver is a generic interface allowing the call of one of the DR solvers.
  *
@@ -27,7 +27,7 @@
  * \param z        On return real vector, the solution of the problem.
  * \param w        On return real vector, the solution of the problem.
  *
- * \return  On return int, the termination reason (0 is successful otherwise 1).
+ *
  *
  * \author Nineb Sheherazade & Mathieu Renouf.
  *
@@ -45,22 +45,36 @@ int dr_solver(double *vec , double *q , int *nn , method *pt , double *z , doubl
 {
 
   int info = -1, it_end;
-  char drkey1[10] = "NLGS" , drkey2[10] = "CPG" , drkey3[10] = "Latin";
+
   double res;
-  int n = *nn;
+
+  char drkey1[10] = "NLGS" , drkey2[10] = "CPG" , drkey3[10] = "Latin";
+
+
+
 
   clock_t t1, t2;
 
   t1 = clock();
 
   if (strcmp(pt->dr.name , drkey3) == 0)
+  {
 
-    dr_latin(vec , q , &n , &pt->dr.k_latin , pt->dr.a , pt->dr.b , &pt->dr.itermax , &pt->dr.tol , z , w , &it_end , &res , &info);
+    dr_latin(vec , q , nn , &pt->dr.k_latin , pt->dr.a , pt->dr.b , &pt->dr.itermax , &pt->dr.tol , &pt->dr.chat, z , w , &it_end , &res , &info);
 
+    pt->dr.err = res;
+    pt->dr.iter = it_end;
+
+
+  }
   else if (strcmp(pt->dr.name , drkey1) == 0)
+  {
 
-    dr_nlgs(vec , q , &n , pt->dr.a , pt->dr.b , &pt->dr.itermax , &pt->dr.tol , z , w , &it_end , &res , &info);
+    dr_nlgs(vec , q , nn , pt->dr.a , pt->dr.b , &pt->dr.itermax , &pt->dr.tol , &pt->dr.chat, z , w , &it_end , &res , &info);
 
+    pt->dr.err = res;
+    pt->dr.iter = it_end;
+  }
   else printf("Warning : Unknown solving method : %s\n", pt->dr.name);
 
   t2 = clock();
