@@ -44,8 +44,10 @@
 <!-- /releaseinfo -->
 <!-- /processimpact -->
 <div id="ModelComponent">&nbsp;&nbsp; &nbsp;&nbsp; <br>
-<h3>Data input-output component -&gt; XML management <br>
-</h3>
+<big><big><big style="font-weight: bold;"><span
+ style="color: rgb(0, 51, 153);">Data input-output component -&gt; XML
+management </span></big></big></big><br>
+<br>
 <table>
   <caption><br>
   </caption> <tbody>
@@ -62,8 +64,8 @@
     </tr>
     <tr>
       <th><b>Depencies:</b></th>
-      <td><a href="glossary.html#Siconos/Numerics"></a><a
- href="http://xmlsoft.org">LibXml2</a>, <a href="utils.html">SiconosAlgebra
+      <td><a href="http://xmlsoft.org">LibXml2</a>, <a
+ href="utils.html">SiconosAlgebra
 (utils)</a> <br>
       </td>
     </tr>
@@ -84,8 +86,8 @@ for future computation. <br>
 To find more details on objects described in this section, see
 <a href="../../../Kernel/doc/api/html/index.html">Doxygen</a>
 documentation of Siconos/Kernel. <br>
-<h2><a name="xmlGenOverview">General overview</a>
-</h2>
+<h3><a name="xmlGenOverview">General overview</a>
+</h3>
 <p>
 The xml class architecture is the same as the model-modeling-simulation
 one:&nbsp; to (almost) each class of these last three components
@@ -189,9 +191,9 @@ results are encouraging. However, the library has an important drawback
 :
 its poor documentation for modules, methods and structures.<br>
 </p>
-<h2><a name="xmlModelLoading"></a>Model loading from XML
+<h3><a name="xmlModelLoading"></a>Model loading from XML
 file<br>
-</h2>
+</h3>
 To built a new model from an XML input file, user has to call Model
 constructor with input file name as an argument.<br>
 Then SiconosModelXML constructor&nbsp; is called and performs the
@@ -214,9 +216,9 @@ their corresponding XML object as argument:&nbsp;
 NonSmoothDynamicalSystem( NonSmoothDynamicalSystemXML ),&nbsp; Strategy
 ( StrategyXML) ... and so on with DynamicalSystem, Interaction etc. <span
  style="font-weight: bold;"></span><br>
-<h2><a name="xmlModelLoading"></a>Model saving in XML
+<h3><a name="xmlModelLoading"></a>Model saving in XML
 file<br>
-</h2>
+</h3>
 <span style="font-weight: bold;"></span>DOMtree saving occurs in two
 steps. First XML objects are updated and&nbsp; the XML tree is compared
 with the Kernel tree, to create missing XML object (when new Kernel
@@ -252,10 +254,10 @@ check they respect XML schema.<br>
   </li>
 </ul>
 <br>
-<h2><a name="xml_classes_diagram_"></a>xml classes diagram<br>
-</h2>
-&nbsp;<img title="xmlDiag" alt="xml classes diagram"
- src="figures/xmlClassDiagram.png" style="width: 1191px; height: 441px;"><br>
+<h3><a name="xml_classes_diagram_"></a>XML classes diagram<br>
+</h3>
+&nbsp; <img alt="xml classes diagram" src="figures/xmlClassDiagram.png"
+ style="width: 714px; height: 776px;"><br>
 <br>
 </div>
 </div>

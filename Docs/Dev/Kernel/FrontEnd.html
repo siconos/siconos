@@ -43,8 +43,7 @@
   </tbody>
 </table>
 <br>
-&nbsp;&nbsp;
-<h3>Siconos Front-End</h3>
+&nbsp;
 <table>
   <caption> <br>
   </caption> <tbody>
@@ -65,8 +64,8 @@
   </tbody>
 </table>
 <br>
-<h2>Python Interface<br>
-</h2>
+<h3>Python Interface<br>
+</h3>
 Python is an interpreted, interactive, object-oriented programming
 language. In python, Siconos platform is used as a library. When
 loaded, almost all Siconos/Kernel functions are available. This
@@ -78,22 +77,25 @@ sample/BouncingBall directory, and launched by typing " pySiconos <a
 ". <br>
 To find more on Python, see <a href="http://www.python.org/">http://www.python.org/</a>.
 <br>
-<h3>C++ - Python wrapper choice<br>
-</h3>
+<h4>C++ - Python wrapper choice<br>
+</h4>
 To produce the interface, Siconos/Kernel function and class has to be
 embedded in Python. There mainly exists two free tools to wrap C++ code
 with python
-: Swig and Boost. <br>
+: <br>
+Swig and Boost. <br>
 <ul>
   <li><span style="font-weight: bold;">Swig&nbsp; <a
  href="http://www.swig.org/">(http://www.swig.org/)</a>:</span>
     <p>SWIG is a software development tool that connects programs
 written in C and C++ with a variety of high-level programming
-languages. SWIG is used with different types of languages including
+languages. SWIG is <br>
+used with different types of languages including
 common scripting languages such as Perl, Python, Tcl/Tk and Ruby. </p>
     <p>The main task to connect C++ with Python using SWIG is to
 write an interface file. It references the header files that must be
-wrap and some types declarations for the data structures that cannot be
+wrap and some<br>
+types declarations for the data structures that cannot be
 directly and automatically wrapped. </p>
     <p>SWIG is really easy to use, but does not support every features
 of advanced C++, especially:&nbsp; </p>
@@ -108,36 +110,44 @@ and close types (int / double, etc.). </li>
  href="http://www.boost.org/">http://www.boost.org/</a>):</span>
     <p>Boost is a complete framework for C++ which provides
 advanced features and completes the Standard Template Library. Its
-Python wrapper is only one functionality among many others.</p>
+Python wrapper<br>
+is only one functionality among many others.</p>
   </li>
 </ul>
 For the development of the Kernel-Python interface,&nbsp;
 SWIG&nbsp; has been chosen because of its easiest use. Moreover, using
 Boost just for
-wrapping C++ with Python does not seem to be an appropriate solution. <br>
-<h3>Kernel wrapping
-</h3>
+wrapping<br>
+C++ with Python does not seem to be an appropriate solution. <br>
+<h4>Kernel wrapping
+</h4>
 <p>Connecting the Kernel with Python was pretty fast.&nbsp; The only
 encountered problem was with down-casting operations. The Kernel have
-STL containers of pointers. <br>
+STL<br>
+containers of pointers. <br>
 For example, a NSDS stores the
 dynamical systems, but does not know their specific types. So it is
-impossible to access the type of dynamical system after a
+impossible to access the type of dynamical <br>
+system after a
 down-casting operation (static_cast and dynamic_cast in C++). This
-operation is not allowed by Python. To solve this problem,&nbsp; a
+operation is not allowed by Python. To solve this problem, <br>
+a
 cast method&nbsp; has been written in each class which is not a base
 class. This method wraps
-the C++ operator of dynamic casting and returns a pointer on the class.
+the C++ operator of dynamic casting and returns <br>
+a pointer on the class.
 <br>
 </p>
 <p>The connection of STL containers is not fully automatic. A Python
 type has to be defined for each data type stored in such a
-container. This type definition must be placed in the interface file.
+container. <br>
+This type definition must be placed in the interface file.
 For example, to be able to use a container of pointers on Dynamical
-systems,&nbsp; the following command has to be added in the Swig
+systems,&nbsp; <br>
+the following command has to be added in the Swig
 interface file: </p>
 <pre>%include "std_vector.i";<br>namespace std {<br> %template(dsVector) vector&lt;DynamicalSystem*&gt;;<br>}<br></pre>
-<h3>How to add new functions or classes in Python interface?</h3>
+<h4>How to add new functions or classes in Python interface?</h4>
 <br>
 The "wrapping" file is <span style="font-weight: bold;">FrontEnd/python/pySiconos.i
 . </span><br>
@@ -146,17 +156,18 @@ corresponding header files should be added in this&nbsp;<a
  href="../../../Front-End/python/pySiconos.i">pySiconos.i</a>&nbsp;
 file.&nbsp; <br>
 <span style="font-weight: bold;"></span>
-<h3>Miscellaneous
-</h3>
+<h4>Miscellaneous
+</h4>
 <p>In Swig last version (1.3.23, 1.3.24), a bug makes the compilation
 of the interface failed. This is a simple syntax error and we
-wrote a bash script to correct this. This bug should be fixed soon in
+wrote a bash <br>
+script to correct this. This bug should be fixed soon in
 Swig distributions.<br>
 </p>
 </div>
 <div id="Python">&nbsp;&nbsp; &nbsp;&nbsp;
-<h2>xxxlab Interface<br>
-</h2>
+<h3>xxxlab Interface<br>
+</h3>
 <br>
 </div>
 </div>
