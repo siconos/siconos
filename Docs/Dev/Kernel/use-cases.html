@@ -82,12 +82,6 @@
   </td>
  </tr>
  <tr>
-  <th><div>Alternative</div> Scenario Extensions:</th>
-  <td>
-  
-  </td>
- </tr>
- <tr>
   <th>Notes and Questions</th>
   <td>
   
@@ -134,7 +128,11 @@
  <tr>
   <th><div>Alternative</div> Scenario Extensions:</th>
   <td>
-  
+ <ul>
+  <li>An user runs <a href="glossary.html#Scilab">Scilab</a> to invoke the <a href="glossary.html#Siconos">Siconos</a> platform for a new  simulation. He has already input files in <a href="glossary.html#Lmgc90">Lmgc90</a> format defining the problem and its initial state. Its  <a href="glossary.html#Siconos">Siconos</a> input data are defining  the kind of mathematical model and numerical strategy, the engine will use. The user specifies he wishes to save the results at the end of the simulation. Then he can carry out his simulation.</p></li>
+  <li> An user runs  <a href="glossary.html#Scilab">Scilab</a> to invoke the <a href="glossary.html#Siconos">Siconos</a> platform for a new  simulation. In this case, he provides several <a href="glossary.html#Siconos">Siconos</a>  data files in <a href="glossary.html#Xml">Xml</a> format, which define completely the problem.  He also decides  that the outputs of the simulation will be made every "10 time step" during the computations, and to extract, at every time step, the coordinates of an object. Then he can carry out his simulation.</li>
+<li> Mr Chabrier runs  <a href="glossary.html#Scilab">Scilab</a> to invoke the <a href="glossary.html#Siconos">Siconos</a> platform for a new  simulation. He uses <a href="glossary.html#Scilab">Scilab</a> to define all the data (matrices, functions, scalar parameters, \ldots). Then he can carry out his simulation.</li>
+</ul>
   </td>
  </tr>
  <tr>
@@ -180,6 +178,13 @@
   <li> Re-use already existing functions</li> 
 <li> Develop a new simulation model by using old and new functions</li> 
   <ul>
+  </td>
+ </tr>
+<tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+ <ul>
+<li> A user is not satisfied by the existing numerical models in the platform. He needs a new one and decides to create it. Using the functionalities given by the platform, he plugs a new external functionality. This new functionality is invoked through the  C++ interpretor.  He has the <a href="glossary.html#Xml">Xml</a> input files and he wants only the final result. Once he has defined some additional parameters, he can carry out his simulation.</li>
   </td>
  </tr>
  <tr>
@@ -228,6 +233,14 @@
 
   </td>
  </tr>
+  <tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+  <ul>
+  <li>An expert user implements a new functionality, he has developed and tested carefully. A developper can insert expert's code into the engine and make all the modifications needed by this operation. As a consequence, everybody can use the new functionality in downloading the new version of <a href="glossary.html#Siconos">Siconos</a></li>
+ </ul>
+  </td>
+ </tr>
 </table>
 
 <p><img alt="UC3 - Developper use" src="figures/use_case_developer_user.png"
@@ -236,11 +249,11 @@
 </div>
 
 <div id="UC-04"> 
-<h2>UC-03: use of a plug-in</h2>
+<h2>UC-04: Use in several domains</h2>
 <table border="1" cellpadding="3" cellspacing="2" class="axial">
  <tr>
   <th>Summary:</th>
-  <td>Users can edit their own account preferences.</td>
+  <td>Several kinds of application can be simulated</td>
  </tr>
  <tr>
   <th>Priority:</th>
@@ -248,14 +261,26 @@
  </tr>
  <tr>
   <th>Use Frequency:</th>
-  <td>Rarely</td>
+  <td>Sometimes</td>
  </tr>
  <tr>
   <th>Main Success Scenario:</th>
   <td>
    <ol>
-    <li>TODO</li>
+    <li>The software can be used in several domains. They  can write some dedicated code of <a href="glossary.html#NSDS">NSDS</a> addressing</li>
+    <ul>
+    <li>mechanics </li>
+    <li>electronics </li>
+    <lI>mechatronics</li>
+    <li>robotics</li>
+    </ul>
    </ol>
+  </td>
+ </tr>
+<tr>
+  <th><div>Alternative</div> Scenario Extensions:</th>
+  <td>
+  
   </td>
  </tr>
 </table>
