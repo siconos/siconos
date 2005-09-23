@@ -228,6 +228,29 @@ void lcp_latin(int *nn, double *vec, double *qq,  double *z, double *w, int *inf
   if (info2 != 0)
   {
     printf(" Matter with Cholesky Factorization \n ");
+
+    free(ww);
+    free(zz);
+    free(wc);
+    free(zc);
+    free(znum1);
+    free(wnum1);
+    free(kinvden1);
+    free(kinvden2);
+    free(wt);
+    free(maxwt);
+    free(num1);
+    free(kinvnum1);
+    free(den1);
+    free(den2);
+    free(wden1);
+    free(zden1);
+    free(kinvwden1);
+    free(kzden1);
+    free(DPO);
+    free(k);
+    free(kinv);
+
     *info = 2;
     return;
   }
