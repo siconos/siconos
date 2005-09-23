@@ -1,4 +1,4 @@
-/*!\file pfc_2D_cpg.c
+/*!\file pfc_3D_cpg.c
  *
  * This subroutine allows the primal resolution of contact problems with friction.\n
  *
@@ -15,15 +15,15 @@
  *
  * here M is an (n x n) matrix, q, z and w n-vector.
  *
- * \fn  pfc_2D_cpg( int *nn , double *vec , double *q , double *z , double *w , int *info\n,
+ * \fn  pfc_3D_cpg( int *nn , double *vec , double *q , double *z , double *w , int *info\n,
  *                  int *iparamLCP , double *dparamLCP )
  *
- * pfc_2D_cpg is a specific cpg (conjugated projected gradient) for primal contact problem with friction.\n
+ * pfc_3D_cpg is a specific cpg (conjugated projected gradient) for primal contact problem with friction.\n
  * Ref: Renouf, M. and Alart, P. "" Comp. Method Appl. Mech. Engrg. (2004).
  *
- * Generic pfc_2D parameters:\n
+ * Generic pfc_3D parameters:\n
  *
- * \param 2*nn    Unchanged parameter which represents the dimension of the system.
+ * \param nn      Unchanged parameter which represents the dimension of the system.
  * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
  * \param q       Unchanged parameter which contains the components of the right hand side vector.
  * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
@@ -45,7 +45,7 @@
  * \param dparamLCP[2] = res     Output modified parameter which returns the final error value.
  *
  *
- * \author Mathieu Renouf & Nineb Sheherazade
+ * \author Nineb Sheherazade & Mathieu Renouf.
  *
  */
 
@@ -56,7 +56,7 @@
 #include "blaslapack.h"
 
 
-void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info,
+void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info,
                 int *iparamLCP , double *dparamLCP)
 {
 
@@ -77,7 +77,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
   nc   = *nn;
   incx = 1;
   incy = 1;
-  n    = 2 * nc;
+  n    = 3 * nc;
 
   /* Recup input */
 
@@ -92,7 +92,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
   iparamLCP[2] = 0;
   dparamLCP[2] = 0.0;
 
-  if (ispeak == 2) f101 = fopen("pfc_2D_cpg.log" , "w+");
+  if (ispeak == 2) f101 = fopen("pfc_3D_cpg.log" , "w+");
 
   qs = dnrm2_(&n , q , &incx);
 
@@ -216,7 +216,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
 
     /* Iterate projection*/
 
-    pfc_2D_projc(nc , mu , z , pp , status);
+    pfc_3D_projc(nc , mu , z , pp , status);
 
     /* rr = -Wz + q */
 
@@ -233,7 +233,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
      * pp --> zz
      */
 
-    pfc_2D_projf(nc , ww , zz , rr , pp , status);
+    pfc_3D_projf(nc , ww , zz , rr , pp , status);
 
     /*   beta = -w.Mp / pMp  */
 

@@ -9,22 +9,57 @@ include $(top_srcdir)/config/Make-rules
 
 SUBDIRS =
 
-noinst_LTLIBRARIES = libsolverpack.la
-libsolverpack_la_SOURCES = solverpack.h \
-	projc.c projf.c minf.c maxf.c \
-	lcp_solver.c lcp_solver_block.c \
-	lcp_lexicolemke.c lcp_nlgs.c lcp_nsqp.c lcp_cpg.c \
-	lcp_qp.c lcp_lemke.c lcp_latin.c lcp_newton_min.c\
-	pfc_2D_solver.c \
-	pfc_2D_cpg.c pfc_2D_latin.c pfc_2D_nlgs.c \
+### LCP #####################################################
+
+LCP_SOURCES = lcp_solver.c lcp_solver_block.c $(LCP_SOLVERS)
+
+LCP_SOLVERS = lcp_lexicolemke.c lcp_nlgs.c lcp_nsqp.c lcp_cpg.c \
+	lcp_qp.c lcp_lemke.c lcp_latin.c lcp_newton_min.c
+
+### PFC ######################################################
+
+PFC_SOURCES = pfc_2D_solver.c pfc_3D_solver.c $(PFC_SOLVERS)
+
+PFC_SOLVERS = pfc_2D_cpg.c pfc_2D_latin.c pfc_2D_nlgs.c \
+	pfc_3D_cpg.c pfc_3D_nlgs.c \
+	projc.c projf.c \
 	pfc_2D_projc.c pfc_2D_projf.c \
-	lcp2dfc_2D.c dfc_2D2lcp.c \
-	dfc_2D_solver.c \
-	dfc_2D_latin.c \
-	pr_solver.c \
-	pr_nlgs.c pr_latin.c \
-	dr_solver.c \
-        dr_latin.c dr_nlgs.c \
+	pfc_3D_projc.c pfc_3D_projf.c
+
+### DFC ######################################################
+
+DFC_SOURCES = dfc_2D_solver.c $(DFC_SOLVERS)
+
+DFC_SOLVERS = dfc_2D_latin.c
+
+### LCP <--> DFC 2D ##########################################
+
+SWITCH = lcp2dfc_2D.c dfc_2D2lcp.c
+
+### PR #######################################################
+
+PR_SOURCES = pr_solver.c $(PR_SOLVERS)
+
+PR_SOLVERS = pr_nlgs.c pr_latin.c
+
+### DR #######################################################
+
+DR_SOURCES = dr_solver.c $(DR_SOLVERS)
+
+DR_SOLVERS = dr_latin.c dr_nlgs.c
+
+##############################################################
+
+noinst_LTLIBRARIES = libsolverpack.la
+
+libsolverpack_la_SOURCES = solverpack.h \
+	minf.c maxf.c \
+	$(LCP_SOURCES) \
+	$(PFC_SOURCES) \
+	$(DFC_SOURCES) \
+	$(SWITCH) \
+	$(PR_SOURCES) \
+	$(DR_SOURCES) \
 	ql0001.f
 
 

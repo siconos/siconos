@@ -106,9 +106,9 @@ typedef struct
 
 } method_lcp;
 
-/*!\struct method_pfc_2D
+/*!\struct method_pfc
  *
- * \brief A type definition for a structure method_pfc_2D.
+ * \brief A type definition for a structure method_pfc for 2D and 3D problem.
  *
  * \param name       name of the solver.
  * \param itermax    maximum number of iterations.
@@ -135,7 +135,7 @@ typedef struct
   int    iter;
   double err;
 
-} method_pfc_2D;
+} method_pfc;
 
 /*!\struct method_dfc_2D
  *
@@ -191,7 +191,7 @@ typedef struct
  * \param method_pr     : pr is a method_pr structure .
  * \param method_dr     : dr is a method_dr structure .
  * \param method_lcp    : lcp is a method_lpc structure .
- * \param method_pfc_2D : pfc_2D is a method_pfc_2D structure .
+ * \param method_pfc    : pfc is a method_pfc_2D structure .
  * \param method_dfc_2D : dfc_2D is a method_dfc_2D structure .
  * \param method_qp     : qp is a method_qp structure .
  *
@@ -203,10 +203,10 @@ typedef struct
 typedef union
 {
 
-  method_pr pr;
-  method_dr dr;
+  method_pr  pr;
+  method_dr  dr;
   method_lcp lcp;
-  method_pfc_2D pfc_2D;
+  method_pfc pfc;
   method_dfc_2D dfc_2D;
 
   /*!
@@ -282,6 +282,14 @@ extern "C" void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , doubl
 extern "C" void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
 extern "C" void pfc_2D_latin(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
+
+/********************************************/
+
+extern "C" int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w);
+
+extern "C" void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
+
+extern "C" void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
 /********************************************/
 
@@ -407,10 +415,10 @@ extern int dr_solver(double* , double* , int* , method* , double* , double*);
  *
  * dr_nlgs.c
  *
- * @defgroup group5 PFC (Primal Frictional Contact)
+ * @defgroup group5 2D PFC (Two-dimensional Primal Frictional Contact)
  * @{
  *
- * \fn int extern  pfc_2D_solver( double *vec , double *q , int *n , method *pt , double *z , double *w , int *it_end , double *res )
+ * \fn int extern  pfc_2D_solver( double *vec , double *q , int *n , method *pt , double *z , double *w )
  *
  * \brief pfc_2D_solver() is a generic interface allowing the call of one of the @ref 2D pfc solvers.
  *
@@ -422,7 +430,7 @@ extern int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double 
  * @}
  *
  *
- * @page pfc
+ * @page pfc 2D
  *
  * The C routines that solve PFC:
  *
@@ -432,7 +440,30 @@ extern int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double 
  *
  * pfc_2D_cpg.c
  *
- * @defgroup group6 DFC (Dual Frictional Contact)
+ * @defgroup group6 3D PFC (Three-dimensional Primal Frictional Contact)
+ * @{
+ *
+ * \fn int extern  pfc_3D_solver( double *vec , double *q , int *n , method *pt , double *z , double *w )
+ *
+ * \brief pfc_3D_solver() is a generic interface allowing the call of one of the @ref 3D pfc solvers.
+ *
+ */
+
+extern int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w);
+
+/*!
+ * @}
+ *
+ *
+ * @page pfc 3D
+ *
+ * The C routines that solve 3D PFC:
+ *
+ * pfc_3D_nlgs.c
+ *
+ * pfc_3D_cpg.c
+ *
+ * @defgroup group7 2D DFC (Two-Dimensional Dual Frictional Contact)
  * @{
  *
  * \fn int extern dfc_2D_solver( double *vec , double *q , int *n , method *pt , double *z , double *w )
@@ -507,6 +538,12 @@ extern void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w
 extern void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
 extern void pfc_2D_latin(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
+
+/*********************************** PFC 3D *****************************************/
+
+extern void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
+
+extern void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
 /*********************************** DFC 2D *****************************************/
 

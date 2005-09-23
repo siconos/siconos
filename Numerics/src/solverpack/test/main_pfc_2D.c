@@ -46,7 +46,7 @@ void pfc_2D_series(int n , double *vec , double *q)
   int i, j;
   int nonsymmetric;
   int info[3];
-
+  int n2;
   int incx = 1, incy = 1;
 
   double comp;
@@ -57,9 +57,9 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   /* Methods*/
 
-  static method_pfc_2D meth_pfc1  = { "NLGS"  , 1000 , 1e-08 , 0.3 , 0.7 , 1 , "N2" , 0 , 0.0 };
-  static method_pfc_2D meth_pfc2  = { "CPG"   , 1000 , 1e-08 , 0.3 , 0.7 , 1 , "N2" , 0 , 0.0 };
-  static method_pfc_2D meth_pfc3  = { "Latin" , 1000 , 1e-08 , 0.3 , 35. , 1 , "N2" , 0 , 0.0 };
+  static method_pfc meth_pfc1  = { "NLGS"  , 1000 , 1e-08 , 0.3 , 0.7 , 1 , "N2" , 0 , 0.0 };
+  static method_pfc meth_pfc2  = { "CPG"   , 1000 , 1e-08 , 0.3 , 0.7 , 1 , "N2" , 0 , 0.0 };
+  static method_pfc meth_pfc3  = { "Latin" , 1000 , 1e-08 , 0.3 , 35. , 1 , "N2" , 0 , 0.0 };
 
   z1 = malloc(n * sizeof(double));
   w1 = malloc(n * sizeof(double));
@@ -69,6 +69,7 @@ void pfc_2D_series(int n , double *vec , double *q)
   w3 = malloc(n * sizeof(double));
 
   nonsymmetric = 0;
+  n2 = n / 2;
 
   /* Is M symmetric ? */
 
@@ -95,7 +96,7 @@ void pfc_2D_series(int n , double *vec , double *q)
 #endif
   for (i = 0 ; i < n ; ++i) z1[i] = 0.0;
 
-  info[0] = pfc_2D_solver(vec , q , &n , &meth_pfc1 , z1 , w1);
+  info[0] = pfc_2D_solver(vec , q , &n2 , &meth_pfc1 , z1 , w1);
 
   /* #1 NLGS TEST */
 #ifdef BAVARD
@@ -103,14 +104,14 @@ void pfc_2D_series(int n , double *vec , double *q)
 #endif
   for (i = 0 ; i < n ; ++i) z2[i] = 0.0;
 
-  info[1] = pfc_2D_solver(vec , q , &n , &meth_pfc2 , z2 , w2);
+  info[1] = pfc_2D_solver(vec , q , &n2 , &meth_pfc2 , z2 , w2);
   /* #1 NLGS TEST */
 #ifdef BAVARD
   printf("**** Latin TEST ***\n");
 #endif
   for (i = 0 ; i < n ; ++i) z3[i] = 0.0;
 
-  //  info[2] = pfc_2D_solver( vec , q , &n , &meth_pfc3 , z3 , w3 );
+  //  info[2] = pfc_2D_solver( vec , q , &n2 , &meth_pfc3 , z3 , w3 );
 
 
 #ifdef BAVARD

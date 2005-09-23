@@ -1,4 +1,4 @@
-/*!\file pfc_2D_nlgs.c
+/*!\file pfc_3D_nlgs.c
  *
  * This subroutine allows the primal resolution of contact problems with friction.\n
  *
@@ -15,12 +15,12 @@
  *
  * here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
  *
- * \fn  pfc_2D_nlgs( int *nn , double *vec , double *q , double *z , double *w , int *info\n,
+ * \fn  pfc_3D_nlgs( int *nn , double *vec , double *q , double *z , double *w , int *info\n,
  *                   int *iparamLCP , double *dparamLCP )
  *
- * Generic pfc_2D parameters:\n
+ * Generic pfc_3D parameters:\n
  *
- * \param 2*nn    Unchanged parameter which represents the dimension of the system.
+ * \param nn      Unchanged parameter which represents the dimension of the system.
  * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
  * \param q       Unchanged parameter which contains the components of the right hand side vector.
  * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
@@ -53,7 +53,7 @@
 #include <math.h>
 #include "blaslapack.h"
 
-void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info,
+void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info,
                  int *iparamLCP , double *dparamLCP)
 {
 
@@ -68,7 +68,7 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   char NOTRANS = 'N';
 
   ispeak = 0;
-  nc   = *nn;
+  nc    = *nn;
   incx = 1;
   incy = 1;
   n    = 2 * nc;
@@ -87,7 +87,7 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   dparamLCP[2] = 0.0;
 
 
-  if (ispeak == 2) f101 = fopen("pfc_2D_nlgs.log" , "w+");
+  if (ispeak == 2) f101 = fopen("pfc_3D_nlgs.log" , "w+");
 
   iter = 0;
 
