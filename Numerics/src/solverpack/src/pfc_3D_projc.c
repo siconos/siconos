@@ -22,7 +22,7 @@
 #include <string.h>
 #include <math.h>
 
-void pfc_2D_projc(int nc , double mu , double *z , double *p , int *status)
+void pfc_3D_projc(int nc , double mu , double *z , double *p , int *status)
 {
 
   int i;
