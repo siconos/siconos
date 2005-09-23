@@ -883,10 +883,9 @@ void LCP::compute(const double& time)
   // --- Call Numerics solver ---
   if (nLcp != 0)
   {
-    int iter, info;
-    double residu;
+    int info;
     int Nlcp = (int)nLcp;
-    info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray(), &iter, &residu);
+    info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
     if (info != 0)
       RuntimeException::selfThrow("LCP::compute, solve_lcp: convergence failed");
     // --- Recover the desired variables from LCP output ---
