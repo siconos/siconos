@@ -11,7 +11,7 @@ RPG
  sdm.html   - CDS (Coding Documents Standard) + sdm directory
  srs.html   - SRD (Software Requirements Document)
   features.html 
-  feature-set.html
+  feature-set.html  - + SDD Numerics
   use-cases.html - ESD (External Software Document)
 
  design.html - ADD/DDD
@@ -23,7 +23,8 @@ RPG
   utils.html
   input-output.html
   FrontEnd.html
-	
+  Numerics.html  (DDD/SDD Numerics)		
+
 
  qa-plan.html - QP/QR
 

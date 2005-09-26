@@ -71,6 +71,91 @@
 <!-- /releaseinfo -->
 <div id="byfunction">
 <h2>Features by Functional Area</h2>
+<h3><a href="glossary.html#Siconos/Numerics">Siconos/Numerics</a></h3>
+<ul>
+  <li>General Requirement
+    <ul>
+      <li><a href="features.html#F-1.001">F-1.001</a> The module
+SICONOS/Numerics must provide basic algebra objects (vector, matrices,
+quaternions) relying on a matrix template library.<br>
+      </li>
+      <li><a href="features.html#F-1.002">F-1.002</a> The module
+SICONOS/Numerics must provide&nbsp; high performance methods for&nbsp;
+basic vector and matrix operations.<br>
+      </li>
+      <li><a href="features.html#F-1.003">F-1.003</a> The module
+SICONOS/Numerics must support various storage methods for matrices:<br>
+        <ul>
+          <li>dense (full)</li>
+          <li>band</li>
+          <li>sparse<br>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Numerical functionalities requirements&nbsp;<br>
+    <ul>
+      <li><a href="features.html#F-1.010">F-1.010</a> The module
+SICONOS/Numerics has to perform basic linear algebra computations&nbsp;
+relying on standard libraries for numerical computation (e.g. LAPACK): <br>
+        <ul>
+          <li>solution of linear system</li>
+          <li>eigenvalue and eigenvectors problem</li>
+          <li>singular value decomposition<br>
+          </li>
+        </ul>
+      </li>
+      <li><a href="features.html#F-1.011">F-1.011</a> The module
+SICONOS/Numerics has to perform solution for mathematical programming
+problems:<br>
+        <ul>
+          <li>linear Complementarity Problem (LCP) (direct and
+iterative solutions)</li>
+          <li>relay</li>
+          <li>quadratic problem (QP)</li>
+          <li>non Linear Complementarity Problem (NCP)<br>
+            <ol>
+              <li>Implicit interaction problem (for example 3D
+friction) <br>
+              </li>
+              <li>Non linear interaction problem (for example
+contact
+and friction)</li>
+              <li>Non linear smooth problem</li>
+              <li>A mix of the previous cases <br>
+              </li>
+            </ol>
+          </li>
+          <li> root finding for non smooth (generalized) equations</li>
+          <li>general non smooth optimization problem <br>
+          </li>
+        </ul>
+      </li>
+      <li><a href="features.html#F-1.012">F-1.012</a> The module
+SICONOS/Numerics has to perform basic computation for smooth time
+integration (one-step integration).<br>
+      </li>
+      <li><a href="features.html#F-1.013">F-1.013</a> The module
+SICONOS/Numerics has to perform root finding for non linear smooth
+equations (Newton's method).<br>
+      </li>
+      <li><a href="features.html#F-1.014">F-1.014</a> The module
+SICONOS/Numerics has to perform numerical, analytical and automatic
+differentiation.<br>
+      </li>
+    </ul>
+  </li>
+  <li>Interface Requirements
+    <ul>
+      <li><a href="features.html#F-1.020">F-1.020</a> The module
+SICONOS/Numerics must provide a common interface to various methods
+dedicated to one specific type of numerical problem.<br>
+      </li>
+    </ul>
+  </li>
+</ul>
+<br>
 <h3><a href="glossary.html#Siconos/Kernel">Siconos/Kernel</a></h3>
 <ul>
   <li>General Requirement
@@ -176,9 +261,9 @@ conversion</li>
       <li><a href="features.html#F-2.303">F-2.303</a> System trace
 states</li>
       <li><a href="features.html#F-2.304">F-2.304</a> XML backup file</li>
-       <li><a href="features.html#F-2.305">F-2.305</a>Standard Output</li>
-       <li><a href="features.html#F-2.306">F-2.306</a>F-2.306: Partial results saved</li>
-       
+      <li><a href="features.html#F-2.305">F-2.305</a>Standard Output</li>
+      <li><a href="features.html#F-2.306">F-2.306</a>F-2.306: Partial
+results saved</li>
     </ul>
   </li>
 </ul>
