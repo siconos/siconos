@@ -46,7 +46,7 @@ Set</a> &gt; Features</h2>
       <td>
       <div> <a href="srs.html">SRS</a> &gt; <a
  href="use-case-suite.html">Use case suite</a></div>
-      <div> <a href="feature-format.html"></a></div>
+      <div> </div>
       </td>
     </tr>
   </tbody>
@@ -56,8 +56,364 @@ Set</a> &gt; Features</h2>
 <div id="processimpact"><b>Process impact:</b> This is a set of
 detailed feature descriptions.</div>
 <!-- /processimpact -->
+<div id="F-1.001">
+<h3>F-1.001: Numerics Basic linear Algebra</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Numerics - General Requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The module
+SICONOS/Numerics must provide basic algebra objects (vector, matrices,
+quaternions) relying on a matrix template library.</td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-1.002">
+<h3>F-1.002: Numerics methods<br>
+</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Numerics - General Requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The module
+SICONOS/Numerics must provide&nbsp; high performance methods for&nbsp;
+basic vector and matrix operations.</td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-1.003">
+<h3>F-1.003: Numerics matrices storage.</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Numerics - General Requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The module
+SICONOS/Numerics must support various storage methods for matrices:<br>
+      <ul>
+        <li>dense (full)</li>
+        <li>band</li>
+        <li>sparse</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-1.010">
+<h3>F-1.010: Blas-Lapack numerical computation<br>
+</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Numerics - Numerical functionalities requirements.</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The module
+SICONOS/Numerics has to perform basic linear algebra computations&nbsp;
+relying on standard libraries for numerical computation (e.g. LAPACK): <br>
+      <ul>
+        <li>solution of linear system</li>
+        <li>eigenvalue and eigenvectors problem</li>
+        <li>singular value decomposition</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-1.011">
+<h3>F-1.011: Numerics types of treated problems</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Numerics - Numerical functionalities requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The module
+SICONOS/Numerics has to perform solution for mathematical programming
+problems:<br>
+      <ul>
+        <li>linear Complementarity Problem (LCP) (direct and
+iterative solutions)</li>
+        <li>relay</li>
+        <li>quadratic problem (QP)</li>
+        <li>non Linear Complementarity Problem (NCP)<br>
+          <ol>
+            <li>Implicit interaction problem (for example 3D
+friction) <br>
+            </li>
+            <li>Non linear interaction problem (for example
+contact
+and friction)</li>
+            <li>Non linear smooth problem</li>
+            <li>A mix of the previous cases <br>
+            </li>
+          </ol>
+        </li>
+        <li> root finding for non smooth (generalized) equations</li>
+        <li>general non smooth optimization problem </li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-1.012">
+<h3>F-1.012: Numerics time integration<br>
+</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Numerics - Numerical functionalities requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The module
+SICONOS/Numerics has to perform basic computation for smooth time
+integration (one-step integration).</td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-1.013">
+<h3>F-1.013: Numerical roots finding<br>
+</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Numerics - Numerical functionalities requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The module
+SICONOS/Numerics has to perform root finding for non linear smooth
+equations (Newton's method).</td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-1.014">
+<h3>F-1.014: Numerical differentiation<br>
+</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Optional</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Numerics - Numerical functionalities requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The module
+SICONOS/Numerics has to perform numerical, analytical and automatic
+differentiation.</td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-1.020">
+<h3>F-1.020: Numerics API<br>
+</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential<br>
+      </td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Numerics - Interface Requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The module
+SICONOS/Numerics must provide a common interface to various methods
+dedicated to one specific type of numerical problem.<br>
+      </td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
 <div id="F-2.000">
-<h3>F-2.000: Model Formalization</h3>
+<h3>F-2.000: Modeling</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -79,8 +435,9 @@ detailed feature descriptions.</div>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w shall propose a set of canonical models to formalize
-phusical process (Model Formalization)</td>
+      <td>The Siconos/Kernel must propose a set of tools to formalize
+physical process in the framework of NSDS theory.<br>
+      </td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -92,7 +449,7 @@ phusical process (Model Formalization)</td>
 </div>
 <div id="F-2.001">
 <h3><br>
-F-2.001: Numerical Model</h3>
+F-2.001: Simulation</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -114,8 +471,10 @@ F-2.001: Numerical Model</h3>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w shall propose a set of numerical strategies to
-simulate the canonical models (Numerical model)</td>
+      <td>The Siconos/Kernel must propose a set of numerical
+strategies to
+simulate the set of NSDS provided by modeling. <br>
+      </td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -127,7 +486,8 @@ simulate the canonical models (Numerical model)</td>
 </div>
 <div id="F-2.002">
 <h3><br>
-F-2.002: Linked with <a href="glossary.html#Siconos/Numerics">Siconos/Numerics</a></h3>
+F-2.002: Data input-output management<br>
+</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -149,9 +509,167 @@ F-2.002: Linked with <a href="glossary.html#Siconos/Numerics">Siconos/Numerics</
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w must be based on <a
- href="glossary.html#Siconos/Numerics">Siconos/Numerics</a> for the
-basic scientific computation</td>
+      <td>The Siconos/Kernel must propose different ways to load
+and&nbsp; export data. <br>
+      </td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-2.003">
+<h3><br>
+F-2.003: Basic linear algebra utilities<br>
+</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Kernel - General Requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The Siconos/Kernel must propose tools to handle vectors and
+matrices, with:<br>
+      <ol>
+        <li>overloaded operators</li>
+        <li>use of Blas/Lapack utilities</li>
+        <li>read/write matrices from/into files</li>
+        <li>various standard types of matrix storage:<br>
+          <ul>
+            <li>dense</li>
+            <li>band</li>
+            <li>sparse</li>
+            <li>sparse block structured<br>
+            </li>
+          </ul>
+        </li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-2.004">
+<h3><br>
+F-2.004: Error handling<br>
+</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Kernel - General Requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The Siconos/Kernel must propose tools to handle errors and
+exceptions.</td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<br>
+<div id="F-2.005">
+<h3>F-2.005: Plug-in architecture
+</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Kernel - General Requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The Siconos/Kernel must propose tools and methods for plug-in
+handling<br>
+      </td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-2.006">
+<h3>F-2.006: Modeling and simulation adequacy</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Kernel - Modeling Requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The Modeling part must provide all of the
+ingredients for the numerical strategies part</td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -162,8 +680,8 @@ basic scientific computation</td>
 </table>
 </div>
 <div id="F-2.010">
-<h3><br>
-F-2.010: NSDS canonical model</h3>
+<h3>F-2.010: NSDS modeling<br>
+</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -176,7 +694,7 @@ F-2.010: NSDS canonical model</h3>
     </tr>
     <tr>
       <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
+      <td>Siconos/Kernel - Modeling Requirements</td>
     </tr>
     <tr>
       <th>Use case(s):</th>
@@ -185,8 +703,23 @@ F-2.010: NSDS canonical model</h3>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w shall define and describe several canonical model for
-general <a href="glossary.html#NSDS">NSDS</a></td>
+      <td>The Siconos/Kernel must define and describe several
+canonical model for
+several <a href="glossary.html#NSDS">NSDS</a> types:<br>
+      <ol>
+        <li>Linear Complementarity Systems.<br>
+        </li>
+        <li>Lagrangian dynamical system with unilateral constraints and
+frictional contact.</li>
+        <li>Higher order sweeping process.</li>
+        <li>Projected dynamical systems.</li>
+        <li>Unilateral differential inclusions.</li>
+        <li>Differential variational inequalities.</li>
+        <li>Piecewise Smooth systems.<br>
+        </li>
+      </ol>
+For each NSDS type, Siconos/Kernel should treat boundary or initial
+value problems.&nbsp; </td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -197,7 +730,7 @@ general <a href="glossary.html#NSDS">NSDS</a></td>
 </table>
 </div>
 <div id="F-2.011">
-<h3>F-2.011: SDS canonical Model</h3>
+<h3>F-2.011: DS Model</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -219,8 +752,17 @@ general <a href="glossary.html#NSDS">NSDS</a></td>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w shall define and describe several canonical model for
-SDS</td>
+      <td>The Siconos/Kernel must define and describe several
+canonical model for Dynamical Systems:<br>
+      <ol>
+        <li>Linear Time invariant systems (LTI).</li>
+        <li>Non
+Linear systems.</li>
+        <li>Lagrangian systems.</li>
+        <li>Implicit and differential algebraic equations (DAE).<br>
+        </li>
+      </ol>
+      </td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -232,7 +774,8 @@ SDS</td>
 </div>
 <div id="F-2.012">
 <h3><br>
-F-2.012: Relation Model</h3>
+F-2.012: Interactions between DS<br>
+</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -245,7 +788,7 @@ F-2.012: Relation Model</h3>
     </tr>
     <tr>
       <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
+      <td>Siconos/Kernel - Modeling Requirements</td>
     </tr>
     <tr>
       <th>Use case(s):</th>
@@ -254,8 +797,17 @@ F-2.012: Relation Model</h3>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w shall define and describe several canonical model for
-relations</td>
+      <td>The Siconos/Kernel must provide tools and functions to define
+interactions between DS, using a non smooth law and the one of
+following relations types:<br>
+      <ol>
+        <li>Linear time invariant relations (LTIR)<br>
+        </li>
+        <li>Non linear relations</li>
+        <li>Lagrangian relations<br>
+        </li>
+      </ol>
+      </td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -267,7 +819,8 @@ relations</td>
 </div>
 <div id="F-2.013">
 <h3><br>
-F-2.013: Non Smooth Law Model</h3>
+F-2.013: Non Smooth Law <br>
+</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -280,7 +833,7 @@ F-2.013: Non Smooth Law Model</h3>
     </tr>
     <tr>
       <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
+      <td>Siconos/Kernel - Modeling Requirements</td>
     </tr>
     <tr>
       <th>Use case(s):</th>
@@ -289,8 +842,25 @@ F-2.013: Non Smooth Law Model</h3>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w shall define and describe several canonical model for
-Non Smooth Laws</td>
+      <td>The Siconos/Kernel must define and describe several
+canonical model for
+Non Smooth Laws:<br>
+      <ol>
+        <li>Complementarity type non smooth law<br>
+          <ul>
+            <li>linear</li>
+            <li>non linear</li>
+            <li>cone complementarity </li>
+            <li>switched complementarity</li>
+          </ul>
+        </li>
+        <li>Newton impact-friction type non smooth law</li>
+        <li>Newton impact type non smooth law</li>
+        <li>Relay type non smooth law</li>
+        <li>Piece-wise linear non smooth law<br>
+        </li>
+      </ol>
+      </td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -302,7 +872,7 @@ Non Smooth Laws</td>
 </div>
 <div id="F-2.014">
 <h3><br>
-F-2.014: LCS Model</h3>
+F-2.014: Translation between Models</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -315,7 +885,7 @@ F-2.014: LCS Model</h3>
     </tr>
     <tr>
       <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
+      <td>Siconos/Kernel - Modeling Requirements</td>
     </tr>
     <tr>
       <th>Use case(s):</th>
@@ -324,7 +894,9 @@ F-2.014: LCS Model</h3>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for LCS</td>
+      <td>The Modeling must provide several translation
+tools between the canonical models if possible. (general <a
+ href="glossary.html#NSDS">NSDS</a>, DS, and non smooth laws)</td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -335,8 +907,7 @@ F-2.014: LCS Model</h3>
 </table>
 </div>
 <div id="F-2.015">
-<h3><br>
-F-2.015: Lagrangian dynamical system with constraints Model</h3>
+<h3>F-2.015: Model Coherency</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -349,7 +920,7 @@ F-2.015: Lagrangian dynamical system with constraints Model</h3>
     </tr>
     <tr>
       <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
+      <td>Siconos/Kernel - Modeling Requirements</td>
     </tr>
     <tr>
       <th>Use case(s):</th>
@@ -358,790 +929,9 @@ F-2.015: Lagrangian dynamical system with constraints Model</h3>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Lagrangian dynamical system with constraints</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.016">
-<h3><br>
-F-2.016: Piecewise Smooth systems Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Piecewise Smooth systems</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.017">
-<p></p>
-<h3>F-2.017: Higher order sweeping process Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Higher order sweeping process</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.018">
-<h3><br>
-F-2.018: Projected dynamical systems Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Projected dynamical systems</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.019">
-<h3><br>
-F-2.019: Unilateral differential inclusions Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Unilateral differential inclusions</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.020">
-<h3><br>
-F-2.020: Differential variational inequalities Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Differential variational inequalities</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.021">
-<h3><br>
-F-2.021: Discrete time systems Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Discrete time systems</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.022">
-<h3><br>
-F-2.022: Linear time invariant systems Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Linear Time invariant System (LTI)</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.023">
-<h3><br>
-F-2.023: Non Linear systems Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for Non
-Linear System</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.024">
-<h3><br>
-F-2.024: Lagrangian Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Lagrangian system</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.025">
-<h3><br>
-F-2.025: Implicit and differential algebraic system Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Implicit System and differential Algebraic system</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.026">
-<h3><br>
-F-2.026: Linear Time invariant relations Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Linear Time invariant relations</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.027">
-<h3><br>
-F-2.027: Lagrangian relations Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Lagrangian relations (Jacobians)</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.028">
-<h3><br>
-F-2.028: Non linear relations Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for Non
-linear relations</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.029">
-<h3><br>
-F-2.029: Complementary problem Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Complementarity problem</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.030">
-<h3><br>
-F-2.030: Relay systems Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for Relay
-systems</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.031">
-<h3><br>
-F-2.031: Friction-type law Model</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall define and describe a canonical model for
-Friction-type law</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.040">
-<h3><br>
-F-2.040: Model and Numerical strategies adequation</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The Model Formalization part must provide all of the
-ingredients for the numerical strategies part</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.041">
-<h3><br>
-F-2.041: Translation between Models</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The model Formalization shall provide several translation
-tools between the canonical models if possible. (general <a
- href="glossary.html#NSDS">NSDS</a>, SDS, and non smooth laws)</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.042">
-<h3><br>
-F-2.042: Basic plug-in</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall propose mechanisms to define the canonical
-model through C F77 functions. This is the Basic plug-in</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.043">
-<h3><br>
-F-2.043: <a href="glossary.html#xxxLab">xxxLab</a> plug-in</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall propose mechanisms (Plug-ins) to define the
-canonical model through:
-      <ol>
-        <li><a href="glossary.html#Matlab">Matlab</a> functions</li>
-        <li><a href="glossary.html#Scilab">Scilab</a> functions</li>
-      </ol>
-      </td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.044">
-<h3><br>
-F-2.044: Software existing plug-in</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall propose mechanisms (Plug-ins) to define the
-canonical model through Existing modelling software :
-      <ol>
-        <li><a href="glossary.html#Lmgc90">Lmgc90</a> plug-in</li>
-        <li><a href="glossary.html#Modelica">Modelica</a> plug-in</li>
-        <li><a href="glossary.html#Scicos">Scicos</a> plug-in</li>
-        <li><a href="glossary.html#Simulink">Simulink</a> plug-in</li>
-      </ol>
-      </td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-<div id="F-2.045">
-<h3>F-2.045: Input Coherence</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Siconos/Kernel - Model Formalization Requirements</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The s/w shall propose several tools for the analysis of the
-coherence of the input</td>
+      <td>The Siconos/Kernel must propose several tools for the
+analysis of the
+coherence of the model</td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -1152,6 +942,7 @@ coherence of the input</td>
 </table>
 </div>
 <br>
+</div>
 <div id="F-2.100">
 <h3>F-2.100: Time-stepping scheme</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
@@ -1175,7 +966,7 @@ coherence of the input</td>
     </tr>
     <tr>
       <th>Description:</th>
-      <td> The s/w shall propose a Time--stepping scheme</td>
+      <td> The Siconos/Kernel must propose a Time--stepping scheme</td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -1208,7 +999,7 @@ coherence of the input</td>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w shall propose a Event--Driven scheme</td>
+      <td>The Siconos/Kernel must propose an Event--Driven scheme</td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -1219,8 +1010,9 @@ coherence of the input</td>
 </table>
 </div>
 <div id="F-2.102">
-<h3>F-2.102: One-step basic problem<br>
-</h3>
+<h3>F-2.102: Mixed Event-Driven, Time Stepping strategy<a
+ href="features.html#F-2.011"><br>
+</a></h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -1242,8 +1034,7 @@ coherence of the input</td>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w shall propose a formalization of a one-step basic
-problem</td>
+      <td>The Siconos/Kernel must propose an mixed strategy</td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -1254,7 +1045,7 @@ problem</td>
 </table>
 </div>
 <div id="F-2.103">
-<h3>F-2.103: Evaluation/prediction of the relations<br>
+<h3>F-2.103: One-step numerical time-integration<br>
 </h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
@@ -1277,8 +1068,9 @@ problem</td>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w shall propose an evaluation or prediction of the
-relations at discrete time</td>
+      <td>The Siconos/Kernel must propose one step time-integrators for
+dynamical systems.<br>
+      </td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -1289,7 +1081,7 @@ relations at discrete time</td>
 </table>
 </div>
 <div id="F-2.104">
-<h3>F-2.104: Input parameters for numerical strategies<br>
+<h3>F-2.104: One-step non-smooth problem<br>
 </h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
@@ -1312,8 +1104,16 @@ relations at discrete time</td>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w shall propose an input method for specific parameters
-for numerical strategies</td>
+      <td>The Siconos/Kernel must propose tools to handle with one step
+non smooth problem:<br>
+      <ol>
+        <li>Linear Complementarity Problem</li>
+        <li>Quadratic Programming&nbsp; Problem</li>
+        <li>Relay (Primal and Dual)<br>
+        </li>
+        <li>Frictional Contact (2D, 3D)</li>
+      </ol>
+      </td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -1322,9 +1122,9 @@ for numerical strategies</td>
     </tr>
   </tbody>
 </table>
-</div>
 <div id="F-2.105">
-<h3>F-2.105: Output parameters for numerical strategies</h3>
+<h3>F-2.105: Evaluation/prediction of the relations<br>
+</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -1346,8 +1146,9 @@ for numerical strategies</td>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The s/w shall propose an output method for specific
-parameters for numerical strategies</td>
+      <td>The Siconos/Kernel must propose an evaluation or prediction
+of the
+relations at discrete time</td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -1356,9 +1157,125 @@ parameters for numerical strategies</td>
     </tr>
   </tbody>
 </table>
+</div>
+<div id="F-2.106">
+<h3>F-2.106: Use of <a href="glossary.html#Siconos/Numerics">Siconos/Numerics</a></h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Kernel - General Requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The Siconos/Kernel must be based on <a
+ href="glossary.html#Siconos/Numerics">Siconos/Numerics</a> for the
+basic scientific computation</td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<br>
 </div>
 <div id="F-2.200">
-<h3>F-2.200: Interface with <a href="glossary.html%22Siconos/Numerics">Siconos/Numerics</a><br>
+<h3><br>
+F-2.200: User plug-in</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Kernel - Modeling Requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The Siconos/Kernel must propose mechanisms to define
+functions (C and F77)&nbsp; describing modeling components.<br>
+Example: external forces in dynamical systems.<br>
+      </td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-2.201">
+<h3><br>
+F-2.201: <a href="glossary.html#xxxLab">xxxLab</a> plug-in</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Optional<br>
+      </td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Siconos/Kernel - Modeling Requirements</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The Siconos/Kernel must propose mechanisms (Plug-ins) to
+define the
+canonical model through:
+      <ol>
+        <li><a href="glossary.html#Matlab">Matlab</a> functions</li>
+        <li><a href="glossary.html#Scilab">Scilab</a> functions</li>
+      </ol>
+      </td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-2.202">
+<h3><br>
+F-2.202: Dedicated softwares Plug-in<br>
 </h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
@@ -1372,7 +1289,7 @@ parameters for numerical strategies</td>
     </tr>
     <tr>
       <th>Functional area(s):</th>
-      <td>Interface with Siconos/Numerics</td>
+      <td>Siconos/Kernel - Modeling Requirements</td>
     </tr>
     <tr>
       <th>Use case(s):</th>
@@ -1381,10 +1298,16 @@ parameters for numerical strategies</td>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The module <a href="glossary.html#Siconos/Engine">Siconos/Kernel</a>
-must use the interface proposed by the <a
- href="glossary.html%22Siconos/Numerics">Siconos/Numerics</a> module
-for the numerical computations</td>
+      <td>The Siconos/Kernel must propose mechanisms (Plug-ins) to
+define the
+canonical model through Existing modeling software :
+      <ol>
+        <li><a href="glossary.html#Lmgc90">Lmgc90</a> plug-in</li>
+        <li><a href="glossary.html#Modelica">Modelica</a> plug-in</li>
+        <li><a href="glossary.html#Scicos">Scicos</a> plug-in</li>
+        <li><a href="glossary.html#Simulink">Simulink</a> plug-in</li>
+      </ol>
+      </td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -1393,10 +1316,12 @@ for the numerical computations</td>
     </tr>
   </tbody>
 </table>
+</div>
+<br>
 </div>
 <div id="F-2.300">
-<h3>F-2.300: Data Files<a href="glossary.html#Lmgc90">Lmgc90</a>
-interface</h3>
+<h3>F-2.300: XML format<br>
+</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -1409,7 +1334,8 @@ interface</h3>
     </tr>
     <tr>
       <th>Functional area(s):</th>
-      <td>Data managing</td>
+      <td>Siconos/Kernel - Data management<br>
+      </td>
     </tr>
     <tr>
       <th>Use case(s):</th>
@@ -1418,10 +1344,13 @@ interface</h3>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The software must be able to call functions of exiting
-scientific softwares to read their own data files. Only <a
- href="glossary.html#Lmgc90">Lmgc90</a> files will be called in the
-first version of the platform.</td>
+      <td>The Siconos/Kernel must be able to handle with XML
+input/output files:<br>
+      <ol>
+        <li>xml parser</li>
+        <li>xml schema</li>
+      </ol>
+      </td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -1430,9 +1359,11 @@ first version of the platform.</td>
     </tr>
   </tbody>
 </table>
-</div>
+<br>
+<br>
 <div id="F-2.301">
-<h3>F-2.301: NSDS files saving</h3>
+<h3>F-2.301: Input of Siconos Model<br>
+</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -1454,8 +1385,8 @@ first version of the platform.</td>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The software must allow users to save a <a
- href="glossary.html#NSDS">NSDS</a> in files under a formalized form.</td>
+      <td>The software must allow users to load a model from input file
+(for instance XML).</td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -1466,7 +1397,42 @@ first version of the platform.</td>
 </table>
 </div>
 <div id="F-2.302">
-<h3>F-2.302: Data files conversion</h3>
+<h3>F-2.302: Output of Siconos Model<br>
+</h3>
+<table class="axial" border="1" cellpadding="3" cellspacing="2">
+  <tbody>
+    <tr>
+      <th>Priority:</th>
+      <td>Essential</td>
+    </tr>
+    <tr>
+      <th>Risk:</th>
+      <td>Safe</td>
+    </tr>
+    <tr>
+      <th>Functional area(s):</th>
+      <td>Data managing</td>
+    </tr>
+    <tr>
+      <th>Use case(s):</th>
+      <td><br>
+      </td>
+    </tr>
+    <tr>
+      <th>Description:</th>
+      <td>The software must allow users to save a model into a file
+(for instance XML).</td>
+    </tr>
+    <tr>
+      <th>Notes and Questions:</th>
+      <td><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+</div>
+<div id="F-2.303">
+<h3>F-2.303: Data files conversion</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -1504,8 +1470,8 @@ conversions:
   </tbody>
 </table>
 </div>
-<div id="F-2.303">
-<h3>F-2.303:System trace states</h3>
+<div id="F-2.304">
+<h3>F-2.304: System trace states</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -1538,42 +1504,6 @@ system during a simulation.</td>
   </tbody>
 </table>
 </div>
-<div id="F-2.304">
-<h3>F-2.304: XML backup files<br>
-</h3>
-<table class="axial" border="1" cellpadding="3" cellspacing="2">
-  <tbody>
-    <tr>
-      <th>Priority:</th>
-      <td>Essential</td>
-    </tr>
-    <tr>
-      <th>Risk:</th>
-      <td>Safe</td>
-    </tr>
-    <tr>
-      <th>Functional area(s):</th>
-      <td>Data Managing</td>
-    </tr>
-    <tr>
-      <th>Use case(s):</th>
-      <td><br>
-      </td>
-    </tr>
-    <tr>
-      <th>Description:</th>
-      <td>The software must provide a system of backup and restart of a
-simulation, using XML files.</td>
-    </tr>
-    <tr>
-      <th>Notes and Questions:</th>
-      <td><br>
-      </td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
 <div id="F-2.305">
 <h3>F-2.305: Standard Output<br>
 </h3>
@@ -1598,7 +1528,8 @@ simulation, using XML files.</td>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The Software must provide a verbose level execution (all informations on the screen) </td>
+      <td>The Software must provide a verbose level execution (all
+informations on the screen) </td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -1608,7 +1539,6 @@ simulation, using XML files.</td>
   </tbody>
 </table>
 </div>
-
 <div id="F-2.306">
 <h3>F-2.306: Partial results saved</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
@@ -1632,7 +1562,7 @@ simulation, using XML files.</td>
     </tr>
     <tr>
       <th>Description:</th>
-      <td>The user can select datas to save in free format (XML, ASCII) </td>
+      <td>The user can select data to save in free format (XML, ASCII) </td>
     </tr>
     <tr>
       <th>Notes and Questions:</th>
@@ -1642,8 +1572,7 @@ simulation, using XML files.</td>
   </tbody>
 </table>
 </div>
-
-<div id="F-3.000">
+<div id="F-3.000"><br>
 <h3>F-3.000: C++ Siconos/Kernel <a href="glossary.html#API">API</a></h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
@@ -1667,10 +1596,11 @@ simulation, using XML files.</td>
     <tr>
       <th>Description:</th>
       <td> The <a href="glossary.html#Siconos/Front-End">Siconos/Front-End</a>
-shall propose a C++ <a href="glossary.html#API">API</a> of the major
+must propose a C++ <a href="glossary.html#API">API</a> of the major
 functionalities of the <a href="glossary.html#Siconos/Engine">Siconos/Kernel</a>
 (Functionalities F.2.xxx). In particular, this <a
- href="glossary.html#API">API</a> will be wrapped with Python, an object--oriented
+ href="glossary.html#API">API</a> will be wrapped with Python, an
+object--oriented
 scripting language.</td>
     </tr>
     <tr>
@@ -1705,7 +1635,7 @@ scripting language.</td>
     <tr>
       <th>Description:</th>
       <td>The <a href="glossary.html#Siconos/Front-End">Siconos/Front-End</a>
-shall propose a <a href="glossary.html#Scilab">Scilab</a> <a
+must propose a <a href="glossary.html#Scilab">Scilab</a> <a
  href="glossary.html#API">API</a> of the major functionalities of the <a
  href="glossary.html#Siconos/Engine">Siconos/Kernel</a>
 (Functionalities F.2.xxx) . In particular, this <a
@@ -1744,7 +1674,7 @@ shall propose a <a href="glossary.html#Scilab">Scilab</a> <a
     <tr>
       <th>Description:</th>
       <td>The <a href="glossary.html#Siconos/Front-End">Siconos/Front-End</a>
-shall propose a <a href="glossary.html#Matlab">Matlab</a> <a
+must propose a <a href="glossary.html#Matlab">Matlab</a> <a
  href="glossary.html#API">API</a> of the major functionalities of the <a
  href="glossary.html#Siconos/Engine">Siconos/Kernel</a>
 (Functionalities F.2.xxx) . In particular, this <a
@@ -1759,7 +1689,7 @@ shall propose a <a href="glossary.html#Matlab">Matlab</a> <a
   </tbody>
 </table>
 </div>
-<div id="F-3.003">
+<div id="F-3.003"><br>
 <h3>F-3.003: C++ Siconos/Analysis&amp;Control <a
  href="glossary.html#API">API</a><br>
 </h3>
@@ -1785,7 +1715,7 @@ shall propose a <a href="glossary.html#Matlab">Matlab</a> <a
     <tr>
       <th>Description:</th>
       <td>The <a href="glossary.html#Siconos/Front-End">Siconos/Front-End</a>
-shall propose a C++ <a href="glossary.html#API">API</a> well-suited
+must propose a C++ <a href="glossary.html#API">API</a> well-suited
 (completeness and granularity) for the the analysis (<a
  href="glossary.html#Siconos/Analysis">Siconos/Analysis</a>), the
 control (<a href="glossary.html#Siconos/Control">Siconos/Control</a>). </td>
@@ -1798,15 +1728,7 @@ control (<a href="glossary.html#Siconos/Control">Siconos/Control</a>). </td>
   </tbody>
 </table>
 </div>
-<p></p>
-<p></p>
 </div>
 </div>
-<div class="footnote">
-Copyright &copy; 2003-2004 Jason Robbins. All rights reserved. <a
- href="readyset-license.html">License terms</a>.<br>
-F-2.021: Discrete time systems Model Retain this copyright statement
-whenever
-this file is used as a template.</div>
 </body>
 </html>

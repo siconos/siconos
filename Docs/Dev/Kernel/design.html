@@ -47,9 +47,11 @@ Design &gt; <a href="utils.html">Utils component</a><br>
 Design &gt; <a href="inputOutput.html">Input-Output component</a><br>
 Design &gt; <a href="plugin.html">Plug-in component</a><br>
 Design &gt; <a href="FrontEnd.html">Front-End</a><br>
+      <div>Design &gt; <a href="Numerics/Numerics.html">Numerics </a><br>
+Design &gt; <a href="design-src-org.html">Source
+Organization and Build Worksheet<br>
+      </a> </div>
       </div>
-      <div> Design &gt; <a href="design-src-org.html">Source
-Organization and Build Worksheet</a></div>
 <!--    <div>Design &gt; <a href="design-scalability.html">Scalability Worksheet</a></div> -->
       </td>
     </tr>
@@ -74,8 +76,10 @@ set</a></div>
 <dl>
 </dl>
 &nbsp;&nbsp;&nbsp; The purpose&nbsp; of this document is to define and
-describe the software architecture of the <a
- href="glossary.html#Siconos/Kernel">Siconos/Kernel</a>. It also
+describe the software architecture of&nbsp; <a
+ href="glossary.html#Siconos/Kernel">Siconos/Kernel</a>, <a
+ href="glossary.html#Siconos/Numerics">Siconos/Numerics</a> and <a
+ href="glossary.html#Siconos/Front-End">Siconos/Front-End</a>. It also
 provides a general overview of the design of the system for (new)
 developers and will be used by the project manager to share out the
 detailed conception and programming in work packages. <br>
@@ -138,7 +142,10 @@ discretization, solver ...) to solve it. Simulation and modeling are
 clearly separated and rather independent. Moreover, they are completed
 by tools for input-output data management and to handle vectors,
 matrices, plus a system to allow user-defined plug-in functions. <br>
-This results in 5 distinct components listed below.
+This results in 5 distinct components listed below.<br>
+<br>
+<div class="todo">&nbsp;Explain architectural choices </div>
+<br>
 <h3>Components list&nbsp;&nbsp; <br>
 </h3>
 <ul>

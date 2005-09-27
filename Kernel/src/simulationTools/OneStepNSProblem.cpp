@@ -52,7 +52,7 @@ OneStepNSProblem::OneStepNSProblem(OneStepNSProblemXML* osnspbxml, Strategy* new
     interactionVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
     ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
     // Default value for n  \warning: default size is the size of the first interaction in the vector
-    n = interactionVector[0]->getNInteraction();
+    if (interactionVector.size() != 0) n = interactionVector[0]->getNInteraction();
   }
   else cout << "OneStepNSPb xml-constructor - Warning: no strategy linked to OneStepPb" << endl;
 }
@@ -66,8 +66,9 @@ OneStepNSProblem::OneStepNSProblem(Strategy * newStrat, const string& newSolver,
   {
     interactionVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
     ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
-    // Default value for n  \warning: default size is the size of the first interaction in the vector
-    n = interactionVector[0]->getNInteraction();
+    // Default value for n  \warning: default size is the size of the first interaction in the vector if it exists
+    // else, n=0
+    if (interactionVector.size() != 0) n = interactionVector[0]->getNInteraction();
     if (solver != "none")
     {
       solver = newSolver;

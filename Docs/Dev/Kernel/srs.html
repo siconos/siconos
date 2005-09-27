@@ -52,8 +52,6 @@
       <ul class="itemize">
         <li class="li-itemize"><font size="3">"Guide to software
 requirements specifications", standard 830 - 1984,IEEE.</font></li>
-        <li class="li-itemize"><font size="3">"Cours de Conduite de
-Projets Logiciels", Ioannis Parissis, Master 2 Pro GI 2003-2004.</font></li>
         <li class="li-itemize"><font size="3">Draft version of SRD of
 SICONOS / WP2, January 2004.</font></li>
         <li class="li-itemize"><font size="3">Templates and Guides,
@@ -64,7 +62,7 @@ Roger Pissard-Gibollet, INRIA</font><br>
 IST-2001-37172 and annexes</font></li>
         <li class="li-itemize"><font size="3"><a
  href="glossary.html#SICONOS">SICONOS</a> web site : <a
- href="http://maply.univ-lyon1.fr/siconos/">http://maply.univ-lyon1.fr/siconos/</a></font></li>
+ href="http://siconos.inrialpes.fr/">http://siconos.inrialpes.fr/</a></font></li>
       </ul>
       </div>
       <div> <a href="glossary.html">Glossary</a></div>
@@ -107,22 +105,18 @@ scientific computing already used in the industry.</p>
 <!-- /introduction -->
 <div id="usecases">
 <h2>Use Cases</h2>
-<p>ONE PARAGRAPH OVERVIEW</p>
-<p>Details:</p>
+The <a href="use-case-suite.html">use case suite</a> lists all
+use cases in an organized way. <a href="glossary-std.html#actor">Actors</a>
+are described.&nbsp;
 <ul>
-  <li>Actors must be described...</li>
-  <li>The <a href="use-case-suite.html">use case suite</a> lists all
-use cases in an organized way.</li>
 </ul>
 </div>
 <!-- /usecases -->
 <div id="functional">
 <h2>Functional Requirements</h2>
-<p>ONE PARAGRAPH OVERVIEW</p>
-<p>Details:</p>
+The <a href="feature-set.html">feature set</a> lists all
+features in an organized way. <br>
 <ul>
-  <li>The <a href="feature-set.html">feature set</a> lists all
-features in an organized way.</li>
 </ul>
 </div>
 <!-- /functional -->
@@ -131,30 +125,31 @@ features in an organized way.</li>
 <h3>What are the performance requirements?</h3>
 <p><strong>PER-00</strong> : The software must not be more than 10%
 slower
-than <a href="glossary.html#Lmgc90">Lmgc90</a> for the same treatement
+than <a href="glossary.html#Lmgc90">Lmgc90</a> for the same treatment
 on the
 same computer</p>
 <h3>What are the documentation requirements?</h3>
 <p>The documentation must contain :</p>
 <ul>
-  <li><strong>DOC-1.00</strong> : a Software User Manual</li>
-  <li><strong>DOC-1.01</strong> : a Tutorial Manual</li>
+  <li><strong>DOC-1.00</strong> : a Software User Manual (SUM)<br>
+  </li>
+  <li><strong>DOC-1.01</strong> : a Getting Started document<br>
+  </li>
   <li><strong>DOC-1.02</strong> : an Example problems Manual</li>
-  <li><strong>DOC-1.03</strong> : a Benchmarks and Verification Manual</li>
-  <li><strong>DOC-1.04</strong> : a Theory Manual</li>
-  <li><strong>DOC-1.05</strong> : an Interface users Manual</li>
-  <li><strong>DOC-1.06</strong> : a Developer Manual</li>
+  <li><strong>DOC-1.03</strong> : a Theory Manual</li>
+  <li><strong>DOC-1.04</strong> : a Developer Manual</li>
 </ul>
 <p>The Documentation format requirements are:</p>
 <ul>
-  <li><strong>DOC-2.00</strong> : The source of the various manual must
-be in TeX format</li>
-  <li><strong>DOC-2.01</strong> : The various manual must be available
-in HTML format</li>
-  <li><strong>DOC-2.02</strong> : The various manual must be available
-in PDF format</li>
-  <li><strong>DOC-2.03</strong> : The various manual must be written in
-English</li>
+  <li><strong>DOC-2.00</strong> : The source of User and Theory manuals
+must
+be in TeX format.</li>
+  <li><strong>DOC-2.01</strong> : Other manuals must be available
+in HTML format.</li>
+  <li><strong>DOC-2.02</strong> : All manuals must be available
+in PDF format.</li>
+  <li><strong>DOC-2.03</strong> : All documentation must be written in
+English.</li>
 </ul>
 <h3>What are the quality requirements?</h3>
 <p>After an analysis of <a href="glossary.html#Siconos">Siconos</a>
@@ -164,35 +159,16 @@ have
 been chosen. Each one has a mark of priority.<br>
 </p>
 <ul>
-  <li><strong>QUA-00</strong> : Adaptability (or flexibility), 9/10</li>
-  <li><strong>QUA-01</strong> : Efficiency, 8/10</li>
-  <li><strong>QUA-02</strong> : Couplability, 7/10</li>
-  <li><strong>QUA-03</strong> : Portability, 5/10</li>
+  <li><strong>QUA-00</strong> : <a
+ href="glossary-std.html#DesignedGoals">Extensibility</a> 9/10</li>
+  <li><strong>QUA-01</strong> : <a
+ href="glossary-std.html#DesignedGoals">Efficiency,</a> 8/10</li>
+  <li><strong>QUA-02</strong> : <a
+ href="glossary-std.html#DesignedGoals">Ease of integration</a>, 7/10</li>
+  <li><strong>QUA-03</strong> : <a
+ href="glossary-std.html#DesignedGoals">Portability,</a> 5/10<br>
+  </li>
 </ul>
-<p>Here are short definitions of those criteria and the reasons why
-they were
-chosen as priority quality factors for this project.</p>
-<ul>
-  <li> Adaptability : <br>
-It measures the ability of the software to make easier additions of new
-functionalities or modifications, even suppression of existing
-functionalities. This factor has been chosen because users must be able
-to add easily new algorithms or computations libraries. </li>
-  <li>Efficiency : <br>
-It measures the ability of the software to minimize its resources needs
-(cpu time, memory, etc.).<br>
-This criterion is necessary for a scientific computation software.</li>
-  <li> Couplability :<br>
-Capacity of the software to be used with other softwares (data
-exchanges, calls, ...).</li>
-  <li>Portability: <br>
-Capacity of the software to reduce consequences of an environment
-technical change (hardware or software).<br>
-Users come from several laboratories and companies, and work under
-several OS.</li>
-</ul>
-<p><br>
-</p>
 </div>
 <!-- /nonfunctional -->
 <div id="environmental">
@@ -202,36 +178,40 @@ several OS.</li>
 </dl>
 <ul>
   <li><a href="features.html#F-2.300">F-2.300</a> Data Files<a
- href="glossary.html#Lmgc90">Lmgc90</a> interface<br>
+ href="glossary.html#Lmgc90"> Lmgc90</a> interface<br>
   </li>
   <li><a href="features.html#F-2.301">F-2.301</a> <a
  href="glossary.html#NSDS">NSDS</a> files saving</li>
   <li><a href="features.html#F-2.302">F-2.302</a> Data files conversion</li>
   <li><a href="features.html#F-2.303">F-2.303</a> System trace states</li>
-  <li><a href="features.html#F-2.304">F-2.304</a> XML backup file</li>
+  <li><a href="features.html#F-2.304">F-2.304</a> XML management</li>
 </ul>
 <dl>
   <h3>What are the resource requirements?</h3>
-  <strong>RES-00</strong>: The configuration recommended is : processor
+  <strong>RES-00</strong>: The recommended configuration is : processor
 800 Mhz, 512 Mo Ram, 200 Mo of free space on HDD
-  <h3>What are the portability requirements?</h3>
-Siconos must run on :
+  <h3><a name="Portability"></a>What are the portability requirements?</h3>
+Siconos should run on :
 </dl>
 <ul>
-  <li><strong>POR-1.00</strong>: PC / Linux environment <em>kernel </em><em>2.4.20-8</em></li>
+  <li><strong>POR-1.00</strong>: PC / Linux environment <em>from
+kernel </em><em>2.6</em></li>
   <li><strong>POR-1.01</strong>: PC / Windows environment <em>Microsoft
 Windows XP</em></li>
-  <li><strong>POR-1.02</strong>: Sun Workstation OS-Solari environment <em>Solaris
-5.8</em></li>
+  <li><strong>POR-1.02</strong>: Sun Workstation OS-Solaris environment
+    <em>Solaris<br>
+    </em></li>
   <li><strong>POR-1.03</strong>: Apple/<em>Mac OS X 10.0</em>
 environment</li>
 </ul>
 <p>The data must be portable:</p>
 <ul>
-  <li><strong>POR-2.00</strong> : The ASCII data files defined with an
-unique charset</li>
-  <li><strong>POR-2.01</strong> : The BINARY data files defined with an
-IEEE format norm</li>
+  <li><strong>POR-2.00</strong> : ASCII data files must be defined with
+an
+unique charset.</li>
+  <li><strong>POR-2.01</strong> : BINARY data files must be defined
+with an
+IEEE format norm.</li>
 </ul>
 <dl>
   <h3>What application program interfaces (<a
@@ -257,12 +237,6 @@ Siconos/Analysis&amp;Control <a href="glossary.html#API">API</a></li>
 </div>
 <!-- /environmental -->
 </div>
-<div class="legal1">
-Company Proprietary</div>
-<div class="footnote">
-Copyright © 2003-2004 Jason Robbins. All rights reserved. <a
- href="readyset-license.html">License terms</a>. Retain this copyright
-statement whenever this file is used as a template.</div>
 </div>
 </body>
 </html>

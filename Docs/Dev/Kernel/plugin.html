@@ -57,7 +57,8 @@
     </tr>
     <tr>
       <th><b>Feature sets:</b></th>
-      <td><a href="features.html#F-2.042">F-2.042</a> </td>
+      <td><a href="features.html#F-2.005">F-2.005</a> and <a
+ href="features.html#F-2.200">F-2.200</a> </td>
     </tr>
     <tr>
       <th><b>Sources directory name:</b></th>
@@ -278,45 +279,7 @@ derivated from another
 which
 uses plugin system must use plugin functions too, or supply internal
 functions which can be plugged instead.&nbsp;</span> </p>
-<h3>lmgc90 plug-in<br>
-</h3>
-lmgc90 is an existing software for mechanical computations. The purpose
-of this specific plug-in is to use lmgc90 complex contact detection
-functions, so that only low level external methods are used. Simulation
-mechanisms
-do not change. This is a kind of communications between Kernel and the
-lmgc90 plug-in.
-<ul>
-  <li>Integration into the kernel: this plugin is designed to give
-specific data required by kernel to
-make a simulation with complex contact detection.
-It makes low level computations for the kernel to be able to do
-simulation steps. </li>
-  <li>Data communications:&nbsp; data transmission is bidirectionnal
-between kernel and lmgc90 plug-in. <br>
-The kernel needs modeling data supplied by the plug-in in modeling
-phase. Moreover the plug-in gives data at the beginning of each steps
-of
-the simulation allowing the kernel to have the good data to drive the
-simulation.<br>
-In the other way, the plugin get information at the end of each
-time step as an update of the state of the system. </li>
-  <li>Data to send
-    <ul>
-      <li>Data loading from lmgc90 model, to the kernel : <br>
-number of dynamical systems <br>
-q and dq/dt for each dynamical system <br>
-M matrix <br>
-Fext at each step <br>
-blocking constraints <br>
-        <p> </p>
-      </li>
-      <li>Update of the lmgc90 model : <br>
-q and dq/dt<br>
-reaction forces</li>
-    </ul>
-  </li>
-</ul>
+<br>
 <p> </p>
 </div>
 </div>
