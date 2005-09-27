@@ -6,7 +6,7 @@
 \f$
 \left\lbrace
 \begin{array}{l}
-M z+ q = w\\
+M z + q = w\\
 0 \le z_n \perp w_n \ge 0\\
 -w_t \in \partial\psi_{[-\mu z_n, \mu z_n]}(z_t)\\
 \end{array}
@@ -386,6 +386,8 @@ void pfc_2D_latin(int *nn, double *vec, double *qq, double *z, double *w, int *i
 
     dcopy_(&n, qq, &incx, znum1, &incy);
 
+    alpha = -1.;//-
+    dscal_(&n , &alpha , znum1 , &incx);
 
     alpha = 1.;
     daxpy_(&n, &alpha, wc, &incx, znum1, &incy);

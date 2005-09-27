@@ -1,51 +1,62 @@
 /*!\file pfc_2D_nlgs.c
- *
- * This subroutine allows the primal resolution of contact problems with friction.\n
- *
- *   Try \f$(z,w)\f$ such that:\n
- *   \f$
- *    \left\lbrace
- *     \begin{array}{l}
- *      M z + q = w\\
- *      0 \le z_n \perp w_n \ge 0\\
- *      -w_t \in \partial\psi_{[-\mu z_n, \mu z_n]}(z_t)\\
- *     \end{array}
- *    \right.
- *   \f$
- *
- * here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
- *
- * \fn  pfc_2D_nlgs( int *nn , double *vec , double *q , double *z , double *w , int *info\n,
- *                   int *iparamLCP , double *dparamLCP )
- *
- * Generic pfc_2D parameters:\n
- *
- * \param 2*nn    Unchanged parameter which represents the dimension of the system.
- * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
- * \param q       Unchanged parameter which contains the components of the right hand side vector.
- * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
- * \param w       Modified parameter which returns the solution of the problem.
- * \param info    Modified parameter which returns the termination value\n
- *                0 - convergence\n
- *                1 - iter = itermax\n
- *                2 - negative diagonal term\n
- *
- * Specific NLGS parameters:\n
- *
- * \param iparamLCP[0] = itermax Input unchanged parameter which represents the maximum number of iterations allowed.
- * \param iparamLCP[1] = ispeak  Input unchanged parameter which represents the output log identifiant\n
- *                       0 - no output\n
- *                       0 < active screen output\n
- * \param iparamLCP[2] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
- *
- * \param dparamLCP[0] = mu      Input unchanged parameter which represents the friction coefficient.
- * \param dparamLCP[1] = tol     Input unchanged parameter which represents the tolerance required.
- * \param dparamLCP[2] = res     Output modified parameter which returns the final error value.
- *
- *
- * \author Mathieu Renouf & Nineb Sheherazade .
- *
+
+  This subroutine allows the primal resolution of contact problems with friction.
+
+   Try \f$(z,w)\f$ such that:
+\f$
+\left\lbrace
+\begin{array}{l}
+M z + q = w\\
+0 \le z_n \perp w_n \ge 0\\
+-w_t \in \partial\psi_{[-\mu z_n, \mu z_n]}(z_t)\\
+\end{array}
+\right.
+\f$
+
+ here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
+
+*/
+/*!\fn  void pfc_2D_nlgs( int *nn , double *vec , double *q , double *z , double *w , int *info,
+      int *iparamPFC , double *dparamPFC )
+
+
+
+   pfc_2D_gsnl is a specific nlgs (Non Linear Gauss Seidel ) solver for primal contact problem with friction.
+
+   \param vec         On enter a double vector containing the components of the double matrix with a fortran90 allocation.
+   \param qq          On enter a pointer over doubles containing the components of the double vector.
+   \param nn          On enter a pointer over integers, the dimension of the second member.
+   \param iparamPFC   On enter/return a vector of integers,
+
+                       _ iparamPFC[0] = on enter, the maximum number of iterations allowed,
+                       _ iparamPFC[1] = on enter, the parameter which represents the output log identifiant
+                             0 - no output\n
+           0 < active screen output\n
+           _ iparamPFC[2] =  on return, the number of iterations performed by the algorithm
+
+  \param dparamPFC    On enter/return a vector of doubles,
+
+                       _ dparamPFC[0] = on enter, a positive double which represents the friction coefficient,
+                       _ dparamPFC[1] = on enter, a positive double which represents the tolerance required,
+                       _ dparamPFC[2] = on return, a positive double which represents the residu.
+
+
+   \param z           On return double vector, the solution of the problem.
+   \param w           On return double vector, the solution of the problem.
+   \param info        On return a pointer over integers, the termination reason
+                        0 = convergence
+            1 = no convergence
+            2 = nul term in diagonal of M.
+
+
+
+   \author Nineb Sheherazade.
+
+
+
  */
+
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,229 +64,236 @@
 #include <math.h>
 #include "blaslapack.h"
 
+
 void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info,
-                 int *iparamLCP , double *dparamLCP)
+                 int *iparamPFC , double *dparamPFC)
 {
 
-
-  FILE *f101;
-
-  int n, in, it, ispeak, itermax, incx, incy, nc, i, iter;
-  double err, zn , zt, den, num, dft, dfn, tol, mu;
-  double qs, a1, b1;
-
-  double *det, *bfd, *ww;
-  char NOTRANS = 'N';
-
-  ispeak = 0;
-  nc   = *nn;
-  incx = 1;
-  incy = 1;
-  n    = 2 * nc;
-
-  /* Recup input */
-
-  itermax = iparamLCP[0];
-  ispeak  = iparamLCP[1];
-
-  mu  = dparamLCP[0];
-  tol = dparamLCP[1];
-
-  /* Initialize output */
-
-  iparamLCP[2] = 0;
-  dparamLCP[2] = 0.0;
+  int i, j, k, iter, maxit;
+  int n = *nn, incx = 1, incy = 1, nc = n / 2;
+  int ispeak, it_end;
 
 
-  if (ispeak == 2) f101 = fopen("pfc_2D_nlgs.log" , "w+");
+  double errmax, alpha, beta, mu;
+  double *y, res;
+  double *fric1, *fric;
+  double normr, eps, avn, avt;
+  double apn, apt, zn , zt, den1, num1;
 
-  iter = 0;
+  char  notrans = 'N';
 
-  /* Allocation */
 
-  ww  = (double*)malloc(n * sizeof(double));
-  det = (double*)malloc(nc * sizeof(double));
-  bfd = (double*)malloc(nc * sizeof(double));
 
-  /* Check for non trivial case */
+  maxit        = iparamPFC[0];
+  ispeak       = iparamPFC[1];
 
-  qs = dnrm2_(&n , q , &incx);
 
-  if (ispeak > 0) printf("\n ||q||= %g \n" , qs);
+  mu           = dparamPFC[0];
+  errmax       = dparamPFC[1];
 
-  if (qs > 1e-16) den = 1.0 / qs;
-  else
+
+  iparamPFC[2] = 0;
+  dparamPFC[2] = 0.0;
+
+
+  iter         = 0;
+  eps          = 1.e-08;
+
+
+
+  y       = (double*) malloc(n  * sizeof(double));
+  fric1   = (double*) malloc(nc * sizeof(double));
+  fric    = (double*) malloc(nc * sizeof(double));
+
+
+
+
+  for (i = 0; i < n; i++)
   {
-    for (i = 0 ; i < n ; ++i)
+
+    z[i]  = 0.0 ;
+    w[i]  = 0.0 ;
+
+    if (i < nc)
     {
-      w[i] = 0.;
-      z[i] = 0.;
+
+      fric1[i] = 1.0 ;
+      fric[i]  = mu * fric1[i] ;
+
     }
 
-    free(ww);
-    free(det);
-    free(bfd);
-    *info = 0;
-    return;
   }
 
-  /* Intialization of w */
 
-  for (i = 0 ; i < n ; ++i)
+  normr    =   1.;
+
+
+
+  while ((iter < maxit) && (normr > errmax))
   {
-    ww[i] = 0.;
-    w[i]  = 0.;
-  }
 
-  incx = 1;
-  incy = 1;
 
-  dcopy_(&n , q , &incx , w , &incy);
 
-  /* Preparation of the diagonal of the inverse matrix */
+    iter = iter + 1 ;
 
-  for (i = 0 ; i < nc ; ++i)
-  {
-    in = 2 * i;
-    if (fabs(vec[in * n + in]) < 1e-16)
+
+    /*         Loop over contacts                */
+
+
+
+    for (i = 0; i < nc; i++)
     {
+      avn = 0.;
+      avt = 0.;
+      apn = 0.;
+      apt = 0.;
 
-      if (ispeak > 0)
+      for (j = 0; j <= 2 * i - 1; j++)
       {
-        printf(" Warning negative diagonal term \n");
-        printf(" The local problem can be solved \n");
+
+        avn += vec[j * n + 2 * i] * z[j];
+        avt += vec[j * n + 2 * i + 1] * z[j];
+
       }
 
-      *info = 2;
-      free(det);
-      free(bfd);
-      free(ww);
-
-      return;
-    }
-    else
-    {
-      it = 2 * i + 1;
-      det[i] = vec[in * (n + 1)] * vec[it * (n + 1)] - vec[it * n + in] * vec[in * n + it];
-      bfd[i] = mu * vec[it * n + in] / vec[in * (n + 1)];
-    }
-  }
-
-  /*start iterations*/
-
-  iter = 0;
-  err  = 1.;
-
-  incx = 1;
-  incy = 1;
-
-  dcopy_(&n , q , &incx , w , &incy);
-
-  while ((iter < itermax) && (err > tol))
-  {
-
-    ++iter;
-
-    incx = 1;
-    incy = 1;
-
-    dcopy_(&n , w , &incx , ww , &incy);
-    dcopy_(&n , q , &incx ,  w , &incy);
-
-    for (i = 0 ; i < nc ; ++i)
-    {
-
-      in = 2 * i;
-      it = 2 * i + 1;
-
-      incx = n;
-      incy = 1;
-
-      z[in] = 0.0;
-      z[it] = 0.0;
-
-      zn = q[in] + ddot_(&n , &vec[in] , &incx , z , &incy);
-      zt = q[it] + ddot_(&n , &vec[it] , &incx , z , &incy);
-
-      if (zn > 0.0)
+      for (k = 2 * i + 2; k < n; k++)
       {
-        z[2 * i  ] = 0.0;
-        z[2 * i + 1] = 0.0;
+
+        apn = apn + vec[k * n + 2 * i] * z[k];
+        apt = apt + vec[n * k + 2 * i + 1] * z[k];
+
       }
-      else
+
+
+      zn    = -q[2 * i] - avn - apn;
+      zt    = -q[2 * i + 1] - avt - apt;
+
+
+      if (zn > eps)
       {
-        dft = vec[in * (n + 1)] * zt - vec[in * n + it ] * zn;
-        dfn = -vec[it * n + in ] * zt - vec[it * (n + 1)] * zn;
 
-        a1 = dft + mu * dfn;
-        b1 = dft - mu * dfn;
+        if (fabs(vec[n * 2 * i + 2 * i]) < 1e-16)
+        {
+          if (ispeak > 0)
+            printf("\n Warning nul diagonal term of M \n");
 
-        if (a1 > 0.0)
-        {
-          z[2 * i  ] = -(zn / vec[in * (n + 1)]) / (1 - bfd[i]);
-          z[2 * i + 1] = -mu * z[2 * i];
-        }
-        else if (b1 > 0.0)
-        {
-          z[2 * i  ] = -(zn / vec[in * (n + 1)]) / (1 + bfd[i]);
-          z[2 * i + 1] =  mu * z[2 * i];
+          free(fric);
+          free(fric1);
+          free(y);
+
+          *info = 2;
+
+          return;
         }
         else
         {
-          z[2 * i  ] = -dfn / det[i];
-          z[2 * i + 1] = -dft / det[i];
+
+          z[2 * i]   = zn / vec[n * 2 * i + 2 * i] ;
+          w[2 * i]   = 0.0 ;
         }
+
+        if (fabs(vec[n * (2 * i + 1) + 2 * i + 1]) < 1e-16)
+        {
+          if (ispeak > 0)
+            printf("\n Warning nul diagonal term of M \n");
+
+          free(fric);
+          free(fric1);
+          free(y);
+
+          *info = 2;
+
+          return;
+
+        }
+        else
+        {
+
+          z[2 * i + 1] = zt / vec[n * (2 * i + 1) + 2 * i + 1] ;
+          w[2 * i + 1] = 0.;
+
+        }
+
+
+
+        if (z[2 * i + 1] >  fric[i]*z[2 * i])
+        {
+          z[2 * i + 1] = fric[i] * z[2 * i];
+          w[2 * i + 1] = -zt + vec[n * (2 * i + 1) + 2 * i + 1] * z[2 * i + 1];
+        }
+        else if (z[2 * i + 1] < -fric[i]*z[2 * i])
+        {
+          z[2 * i + 1] = -fric[i] * z[2 * i];
+          w[2 * i + 1] = -zt + vec[n * (2 * i + 1) + 2 * i + 1] * z[2 * i + 1];
+        }
+      }
+      else
+      {
+        z[2 * i]   = 0.0 ;
+        w[2 * i]   = -zn ;
+        z[2 * i + 1] = 0.0 ;
+        w[2 * i + 1] = -zt ;
+
       }
     }
 
-    /* **** Criterium convergence **** */
 
-    incx =  1;
-    incy =  1;
+    dcopy_(&n, q, &incx, y, &incy);
 
-    a1 = 1.0;
-    b1 = 1.0;
+    alpha = 1.;
+    beta  = 1.;
+    dgemv_(&notrans, &n, &n, &alpha, vec, &n, z, &incx, &beta, y, &incy);
 
-    dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , w , &incy);
 
-    qs   = -1.0;
-    daxpy_(&n , &qs , w , &incx , ww , &incy);
 
-    num = dnrm2_(&n, ww , &incx);
-    err = num * den;
+    /*          Convergence criterium           */
 
-    if (ispeak == 2) for (i = 0 ; i < n ; ++i) fprintf(f101, "%d  %d  %14.7e\n", iter - 1, i, z[i]);
+
+
+    alpha = -1.;
+    daxpy_(&n, &alpha, w, &incx, y, &incy);
+
+
+    num1 = ddot_(&n, y, &incx, y, &incy);
+    den1 = ddot_(&n, q, &incx, q, &incy);
+
+
+    normr = sqrt(num1 / den1);
+
+
+    it_end = iter;
+    res    = normr;
 
   }
 
-  iparamLCP[2] = iter;
-  dparamLCP[2] = err;
 
-  if (ispeak > 0)
+  iparamPFC[2] = it_end;
+  dparamPFC[2] = res;
+
+
+
+  if (normr > errmax)
   {
-    if (err > tol)
-    {
-      printf(" No convergence of NLGS after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", err);
-      *info = 1;
-    }
-    else
-    {
-      printf(" Convergence of NLGS after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", err);
-      *info = 0;
-    }
+    if (ispeak > 0)
+      printf("No convergence after %d iterations, the residue is %g\n", iter, normr);
+
+    *info = 1;
   }
   else
   {
-    if (err > tol) *info = 1;
-    else *info = 0;
+
+    if (ispeak > 0)
+      printf("Convergence after %d iterations, the residue is %g \n", iter, normr);
+
+    *info = 0;
   }
 
-  free(bfd);
-  free(det);
-  free(ww);
 
-  if (ispeak == 2) fclose(f101);
+
+
+  free(y);
+  free(fric1);
+  free(fric);
+
 
 }

@@ -14,7 +14,7 @@ SUBDIRS =
 LCP_SOURCES = lcp_solver.c lcp_solver_block.c $(LCP_SOLVERS)
 
 LCP_SOLVERS = lcp_lexicolemke.c lcp_nlgs.c lcp_nsqp.c lcp_cpg.c \
-	lcp_qp.c lcp_lemke.c lcp_latin.c lcp_newton_min.c
+	lcp_qp.c lcp_lemke.c lcp_latin.c lcp_newton_min.c lcp_latin_w.c
 
 ### PFC ######################################################
 
@@ -24,6 +24,7 @@ PFC_SOLVERS = pfc_2D_cpg.c pfc_2D_latin.c pfc_2D_nlgs.c \
 	pfc_3D_cpg.c pfc_3D_nlgs.c \
 	projc.c projf.c \
 	pfc_2D_projc.c pfc_2D_projf.c \
+	max_part.c min_part.c abs_part.c pos_part.c \
 	pfc_3D_projc.c pfc_3D_projf.c
 
 ### DFC ######################################################
