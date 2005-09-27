@@ -29,16 +29,16 @@
 typedef struct
 {
 
-  char   name[64];
-  int    itermax;
-  double tol;
-  double k_latin;
-  double *a;
-  double *b;
-  int    chat;
-  char   normType[64];
-  int    iter;
-  double err;
+  char     name[64];
+  int      itermax;
+  double   tol;
+  double   k_latin;
+  double   *a;
+  double   *b;
+  int      chat;
+  char     normType[64];
+  int      iter;
+  double   err;
 
 } method_pr;
 
@@ -62,16 +62,16 @@ typedef struct
 typedef struct
 {
 
-  char   name[64];
-  int    itermax;
-  double tol;
-  double k_latin;
-  double *a;
-  double *b;
-  int chat;
-  char   normType[64];
-  int    iter;
-  double err;
+  char     name[64];
+  int      itermax;
+  double   tol;
+  double   k_latin;
+  double   *a;
+  double   *b;
+  int      chat;
+  char     normType[64];
+  int      iter;
+  double   err;
 
 } method_dr;
 
@@ -131,7 +131,7 @@ typedef struct
   double tol;
   double mu;
   double k_latin;
-  int    iout;
+  int    chat;
   char   normType[64];
   int    iter;
   double err;
@@ -253,6 +253,11 @@ extern  "C" void lcp_nsqp(int *nn , double *vec , double *q , double *z , double
 extern  "C" void lcp_latin(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                            int *iparamLCP , double *dparamLCP);
 
+
+extern  "C" void lcp_latin_w(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                             int *iparamLCP , double *dparamLCP);
+
+
 extern  "C" void lcp_lexicolemke(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                                  int *iparamLCP , double *dparamLCP);
 
@@ -343,6 +348,8 @@ extern int lcp_solver(double *vec, double *q , int *n , method *pt , double *z ,
  * lcp_cpg.c
  *
  * lcp_latin.c
+ *
+ * lcp_latin_w.c
  *
  * lcp_lemke.c
  *
@@ -510,6 +517,10 @@ extern void lcp_nsqp(int *nn , double *vec , double *q , double *z , double *w ,
 
 extern void lcp_latin(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                       int *iparamLCP , double *dparamLCP);
+
+extern void lcp_latin_w(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                        int *iparamLCP , double *dparamLCP);
+
 
 extern void lcp_lexicolemke(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                             int *iparamLCP , double *dparamLCP);
