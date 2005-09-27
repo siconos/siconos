@@ -28,7 +28,7 @@
  *        _ info shows the termination reason,0 is successful otherwise 1, it's an integer.
  *
  *
- * \author Mathieu Renouf
+ * \author Shéhérazade Nineb.
  *
  */
 
@@ -43,41 +43,104 @@
 void pfc_2D_series(int n , double *vec , double *q)
 {
 
-  int i, j;
-  int nonsymmetric;
-  int info[3];
-  int n2;
-  int incx = 1, incy = 1;
+  int         i, j;
+  int         nonsymmetric;
+  int         info[3];
+  int         nc;
+  int         incx = 1, incy = 1, dim;
 
-  double comp;
+  double      den, num, alpha, beta , diff;
+  double      *z1, *w1, *z2, *w2, *z3, *w3;
+  double      *wn1, *zn1, *wt1, *zt1, *wn2;
+  double      *zn2, *wt2, *zt2, *wn3, *zn3, *wt3, *zt3;
+  double      *muzn1, *muzn2, *muzn3;
+  double      mini, *abso, maxi, comp1, comp2, comp3, *absow, *absoz;
+  double      max11, max22, max33, maxi_1, maxi_2;
+  double      max1, max2, *abso1, *abso2;
+  double      r1, r2, comp11, comp22, comp33, comp111, comp222, comp333;
+  double      comp1111, comp2222, comp3333;
 
-  double *z1, *w1, *z2, *w2, *z3, *w3;
+  char        NT = 'N';
+
+  method      meth_pfc1, meth_pfc2, meth_pfc3;
+
+
+
   printf(" START SERIES \n");
+
+
   for (i = 0 ; i < 3 ; ++i) info[i] = -1;
 
-  /* Methods*/
 
-  static method_pfc meth_pfc1  = { "NLGS"  , 1000 , 1e-08 , 0.3 , 0.7 , 1 , "N2" , 0 , 0.0 };
-  static method_pfc meth_pfc2  = { "CPG"   , 1000 , 1e-08 , 0.3 , 0.7 , 1 , "N2" , 0 , 0.0 };
-  static method_pfc meth_pfc3  = { "Latin" , 1000 , 1e-08 , 0.3 , 35. , 1 , "N2" , 0 , 0.0 };
 
-  z1 = malloc(n * sizeof(double));
-  w1 = malloc(n * sizeof(double));
-  z2 = malloc(n * sizeof(double));
-  w2 = malloc(n * sizeof(double));
-  z3 = malloc(n * sizeof(double));
-  w3 = malloc(n * sizeof(double));
+  strcpy(meth_pfc1.pfc.name, "NLGS");
+  meth_pfc1.pfc.itermax  =  10000;
+  meth_pfc1.pfc.tol      =  0.000000001;
+  meth_pfc1.pfc.chat     =  1;
+  meth_pfc1.pfc.mu       =  0.3;
+
+
+  strcpy(meth_pfc2.pfc.name, "CPG");
+  meth_pfc2.pfc.itermax  =  7000;
+  meth_pfc2.pfc.tol      =  0.0000000001;
+  meth_pfc2.pfc.chat     =  1;
+  meth_pfc2.pfc.mu       =  0.3;
+
+
+  strcpy(meth_pfc3.pfc.name, "Latin");
+  meth_pfc3.pfc.itermax  =  15000;
+  meth_pfc3.pfc.tol      =  0.00000000000001;
+  meth_pfc3.pfc.chat     =  1;
+  meth_pfc3.pfc.mu       =  0.3;
+  meth_pfc3.pfc.k_latin  =  5.5;
+
+
+
+
+  z1     = malloc(n * sizeof(double));
+  w1     = malloc(n * sizeof(double));
+  z2     = malloc(n * sizeof(double));
+  w2     = malloc(n * sizeof(double));
+  z3     = malloc(n * sizeof(double));
+  w3     = malloc(n * sizeof(double));
+  absow  = malloc(n * sizeof(double));
+  absoz  = malloc(n * sizeof(double));
+
+
+
+  wn1    = malloc(n / 2 * sizeof(double));
+  zn1    = malloc(n / 2 * sizeof(double));
+  wt1    = malloc(n / 2 * sizeof(double));
+  zt1    = malloc(n / 2 * sizeof(double));
+  wn2    = malloc(n / 2 * sizeof(double));
+  zn2    = malloc(n / 2 * sizeof(double));
+  wt2    = malloc(n / 2 * sizeof(double));
+  zt2    = malloc(n / 2 * sizeof(double));
+  wn3    = malloc(n / 2 * sizeof(double));
+  zn3    = malloc(n / 2 * sizeof(double));
+  wt3    = malloc(n / 2 * sizeof(double));
+  zt3    = malloc(n / 2 * sizeof(double));
+
+
+  muzn1  = malloc(n / 2 * sizeof(double));
+  muzn2  = malloc(n / 2 * sizeof(double));
+  muzn3  = malloc(n / 2 * sizeof(double));
+
+  abso   = malloc(n / 2 * sizeof(double));
+  abso1  = malloc(n / 2 * sizeof(double));
+  abso2  = malloc(n / 2 * sizeof(double));
+
 
   nonsymmetric = 0;
-  n2 = n / 2;
 
-  /* Is M symmetric ? */
+
+  /*         Is M symmetric ?         */
 
   for (i = 0 ; i < n ; ++i)
   {
     for (j = 0 ; j < i ; ++j)
     {
-      if (abs(vec[i * n + j] - vec[j * n + i]) > 1e-16)
+      if (abs(vec[i * n + j] - vec[j * n + i]) > 1e-12)
       {
         nonsymmetric = 1;
         break;
@@ -85,58 +148,1056 @@ void pfc_2D_series(int n , double *vec , double *q)
     }
   }
 
+
+
 #ifdef BAVARD
   if (nonsymmetric) printf("\n !! WARNING !!\n M is a non symmetric matrix \n");
   else printf(" M is a symmetric matrix \n");
 #endif
 
-  /* #1 NLGS TEST */
+
 #ifdef BAVARD
   printf("**** NLGS TEST ****\n");
 #endif
-  for (i = 0 ; i < n ; ++i) z1[i] = 0.0;
+  for (i = 0 ; i < n ; ++i)
+  {
+    z1[i] = 0.0;
+    w1[i] = 0.0;
+  }
 
-  info[0] = pfc_2D_solver(vec , q , &n2 , &meth_pfc1 , z1 , w1);
+  info[0] = pfc_2D_solver(vec , q , &n , &meth_pfc1 , z1 , w1);
 
-  /* #1 NLGS TEST */
+
 #ifdef BAVARD
   printf("**** CPG TEST *****\n");
 #endif
-  for (i = 0 ; i < n ; ++i) z2[i] = 0.0;
+  for (i = 0 ; i < n ; ++i)
+  {
+    z2[i] = 0.0;
+    w2[i] = 0.;
+  }
 
-  info[1] = pfc_2D_solver(vec , q , &n2 , &meth_pfc2 , z2 , w2);
-  /* #1 NLGS TEST */
+  info[1] = pfc_2D_solver(vec , q , &n , &meth_pfc2 , z2 , w2);
+
+
 #ifdef BAVARD
   printf("**** Latin TEST ***\n");
 #endif
-  for (i = 0 ; i < n ; ++i) z3[i] = 0.0;
+  for (i = 0 ; i < n ; ++i)
+  {
+    z3[i] = 0.0;
+    w3[i] = 0.0;
+  }
 
-  //  info[2] = pfc_2D_solver( vec , q , &n2 , &meth_pfc3 , z3 , w3 );
+  info[2] = pfc_2D_solver(vec , q , &n , &meth_pfc3 , z3 , w3);
 
 
 #ifdef BAVARD
   printf(" *** ************************************** ***\n");
-  printf("\n   NLGS RESULT : ");
-  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z1[i]);
-  printf("\n    CPG RESULT : ");
-  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z2[i]);
-  printf("\n  LATIN RESULT : ");
-  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z3[i]);
+
+  for (i = 0 ; i < n ; i++)
+    printf("\n   NLGS RESULT : %10.4g  %10.4g |CPG : %10.4g  %10.4g |LATIN : %10.4g  %10.4g" , z1[i], w1[i], z2[i], w2[i], z3[i], w3[i]);
+
+
+
   printf("\n\n");
 
-  printf(" -- SOLVEUR ------ ITER/PIVOT ----- ERR ----- COMP");
 
-  comp = ddot_(&n , z1 , &incx , w1 , &incy);
+  /*  TEST of behavior laws  and  equilibrium */
 
-  printf("\n    NLGS   (LOG:%1d)|      %5d | %10.4g | %10.4g |" , info[0] , meth_pfc1.iter , meth_pfc1.err , comp);
 
-  comp = ddot_(&n , z2 , &incx , w2 , &incy);
+  nc = n / 2;
 
-  printf("\n    CPG    (LOG:%1d)|      %5d | %10.4g | %10.4g |" , info[1] , meth_pfc2.iter , meth_pfc2.err , comp);
+  for (i = 0; i < nc ; i ++)
+  {
 
-  comp = ddot_(&n , z3 , &incx , w3 , &incy);
+    wn1[i] = w1[2 * i];
+    wt1[i] = w1[2 * i + 1];
 
-  printf("\n    LATIN  (LOG:%1d)|      %5d | %10.4g | %10.4g |" , info[2] , meth_pfc3.iter , meth_pfc3.err , comp);
+    zn1[i] = z1[2 * i];
+    zt1[i] = z1[2 * i + 1];
+
+
+    wn2[i] = w2[2 * i];
+    wt2[i] = w2[2 * i + 1];
+
+    zn2[i] = z2[2 * i];
+    zt2[i] = z2[2 * i + 1];
+
+    wn3[i] = w3[2 * i];
+    wt3[i] = w3[2 * i + 1];
+
+    zn3[i] = z3[2 * i];
+    zt3[i] = z3[2 * i + 1];
+
+  }
+
+
+  printf(" -- SOLVEUR -- ITER----- ERR ----POS--zn--------wn-------COMP------INT------NUL-wt----POS-wt----NPOS-wt--\n");
+
+
+
+  /*        Complementary of normal part     */
+
+
+  /*         zn            */
+
+  min_part(zn1, &mini, &nc);
+
+  mini = - mini;
+
+  dim = 1;
+  pos_part(&mini, &mini, &dim) ;
+
+  abs_part(zn1, abso, &nc);
+
+  max_part(abso , &maxi , &nc);
+
+  r1 = mini / maxi;
+
+  /*       wn                */
+
+  min_part(wn1, &mini, &nc);
+
+  mini = - mini;
+
+  pos_part(&mini, &mini, &dim) ;
+
+  abs_part(wn1, abso, &nc);
+
+  max_part(abso , &maxi , &nc);
+
+
+  if (maxi > 1e-10)
+  {
+
+    r2 = mini / maxi;
+
+  }
+  else
+  {
+
+    abs_part(w1, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      maxi = maxi_1;
+    else
+      maxi = maxi_2;
+
+    r2 = mini / maxi;
+  }
+
+
+
+  /*        zn^t wn                  */
+
+  abs_part(wn1, abso1, &nc);
+
+  abs_part(zn1, abso2, &nc);
+
+
+  comp1 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+
+  max_part(abso1 , &max1 , &nc);
+
+  max_part(abso2 , &max2 , &nc);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp1 = comp1 / (nc * max2 * max1);
+
+
+  }
+  else
+  {
+
+    abs_part(w1, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp1 = comp1 / (nc * max2 * max1);
+
+  }
+
+
+
+  /*                  Friction                */
+
+
+
+  /*           Test in interval             */
+
+
+  abs_part(zt1, abso1, &nc);
+
+  dcopy_(&nc, zn1, &incx, muzn1, &incy);
+
+  alpha = 0.3;
+  dscal_(&nc , &alpha , muzn1 , &incx);
+
+  abs_part(muzn1, abso2, &nc);
+
+
+  alpha = -1.0;
+  daxpy_(&nc , &alpha , abso1 , &incx , abso2 , &incy);
+
+  min_part(abso2, &mini, &nc);
+
+  mini = - mini;
+
+  pos_part(&mini, &mini, &dim) ;
+
+
+  abs_part(z1, absoz, &n);
+
+  max_part(absoz , &max11 , &n);
+
+  max11 = mini / max11;
+
+
+  /*            Test of |wt| = 0               */
+
+
+
+  abs_part(zt1, abso1, &nc);
+
+  dcopy_(&nc, zn1, &incx, muzn1, &incy);
+
+  alpha = 0.3;
+  dscal_(&nc , &alpha , muzn1 , &incx);
+
+  abs_part(muzn1, abso2, &nc);
+
+
+  alpha = -1.0;
+  daxpy_(&nc , &alpha , abso1 , &incx , abso2 , &incy);
+
+  abs_part(abso2, abso1, &nc);
+
+  abs_part(wt1, abso2, &nc);
+
+
+
+  comp11 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+
+
+  abs_part(z1, absoz, &n);
+
+  max_part(absoz , &max2 , &n);
+
+
+
+
+  abs_part(w1, absow, &n);
+
+  max_part(absow , &max1 , &n);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+
+    comp11 = comp11 / (nc * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w1, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp11 = comp11 / (nc * max1 * max2);
+
+  }
+
+
+
+
+  /*             Test of wt > 0           */
+
+  dcopy_(&nc, zn1, &incx, muzn1, &incy);
+
+  alpha = 0.3;
+  dscal_(&nc , &alpha , muzn1 , &incx);
+
+  alpha = -1.0;
+  daxpy_(&nc , &alpha , zt1 , &incx , muzn1 , &incy);
+
+  abs_part(muzn1, abso1, &nc);
+
+  pos_part(wt1, abso2, &nc) ;
+
+  comp111 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+
+  abs_part(z1, absoz, &n);
+
+  max_part(absoz , &max2 , &n);
+
+  abs_part(w1, absow, &n);
+
+  max_part(absow , &max1 , &n);
+
+
+  if (max1 > 1e-10)
+  {
+
+
+    comp111 = comp111 / (nc * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w1, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp111 = comp111 / (nc * max1 * max2);
+
+  }
+
+
+
+  /*             Test of wt < 0               */
+
+
+
+  dcopy_(&nc, zn1, &incx, muzn1, &incy);
+
+  alpha = 0.3;
+  dscal_(&nc , &alpha , muzn1 , &incx);
+
+  alpha = 1.0;
+  daxpy_(&nc , &alpha , zt1 , &incx , muzn1 , &incy);
+
+  abs_part(muzn1, abso1, &nc);
+
+  dcopy_(&nc, wt1, &incx, muzn1, &incy);
+
+  alpha = -1.;
+  dscal_(&nc , &alpha , muzn1 , &incx);
+
+  pos_part(muzn1, abso2, &nc) ;
+
+  comp1111 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+
+  abs_part(z1, absoz, &n);
+
+  max_part(absoz , &max2 , &n);
+
+  abs_part(w1, absow, &n);
+
+  max_part(absow , &max1 , &n);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+
+    comp1111 = comp1111 / (nc * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w1, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp1111 = comp1111 / (nc * max1 * max2);
+
+  }
+
+
+  /*                 Equilibrium                   */
+
+  alpha = -1;
+  daxpy_(&n , &alpha , q , &incx , w1 , &incy);
+
+  beta  = 1;
+  dgemv_(&NT , &n , &n , &beta , vec , &n , z1 , &incx , &alpha , w1 , &incy);
+
+  num = dnrm2_(&n , w1 , &incx);
+  den = dnrm2_(&n , q , &incx);
+
+  diff = num / den ;
+
+
+
+  printf("\n  NLGS (LOG:%1d)|%5d|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|" , info[0] , meth_pfc1.pfc.iter , diff , r1, r2, comp1, max11, comp11, comp111, comp1111);
+
+
+  /*                Complementary of normal part        */
+
+
+  /*              zn             */
+
+  min_part(zn2, &mini, &nc);
+
+  mini = - mini;
+
+  pos_part(&mini, &mini, &dim) ;
+
+  abs_part(zn2, abso, &nc);
+
+  max_part(abso , &maxi , &nc);
+
+  r1 = mini / maxi;
+
+
+  /*              wn                 */
+
+
+  min_part(wn2, &mini, &nc);
+
+  mini = - mini;
+
+  pos_part(&mini, &mini, &dim) ;
+
+  abs_part(wn2, abso, &nc);
+
+  max_part(abso , &maxi , &nc);
+
+
+  if (maxi > 1e-10)
+  {
+
+    r2 = mini / maxi;
+
+  }
+  else
+  {
+
+    abs_part(w2, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      maxi = maxi_1;
+    else
+      maxi = maxi_2;
+
+    r2 = mini / maxi;
+  }
+
+
+  /*          zn^t wn              */
+
+
+  abs_part(wn2, abso1, &nc);
+
+  abs_part(zn2, abso2, &nc);
+
+  comp2 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+
+  max_part(abso1 , &max1 , &nc);
+
+  max_part(abso2 , &max2 , &nc);
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp2 = comp2 / (nc * max2 * max1);
+
+
+  }
+  else
+  {
+
+    abs_part(w2, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp2 = comp2 / (nc * max2 * max1);
+
+  }
+
+
+  /*                  Friction                    */
+
+
+
+  /*           Test in interval             */
+
+  abs_part(zt2, abso1, &nc);
+
+  dcopy_(&nc, zn2, &incx, muzn2, &incy);
+
+  alpha = 0.3;
+  dscal_(&nc , &alpha , muzn2 , &incx);
+
+  abs_part(muzn2, abso2, &nc);
+
+
+  alpha = -1.0;
+  daxpy_(&nc , &alpha , abso1 , &incx , abso2 , &incy);
+
+  min_part(abso2, &mini, &nc);
+
+  mini = - mini;
+
+  pos_part(&mini, &mini, &dim) ;
+
+
+  abs_part(z2, absow, &n);
+
+  max_part(absow , &max22 , &n);
+
+  max22 = mini / max22;
+
+  /*                  Test of |wt| = 0                 */
+
+
+  abs_part(zt2, abso1, &nc);
+
+  dcopy_(&nc, zn2, &incx, muzn2, &incy);
+
+  alpha = 0.3;
+  dscal_(&nc , &alpha , muzn2 , &incx);
+
+  abs_part(muzn2, abso2, &nc);
+
+
+  alpha = -1.0;
+  daxpy_(&nc , &alpha , abso1 , &incx , abso2 , &incy);
+
+  abs_part(abso2, abso1, &nc);
+
+  abs_part(wt2, abso2, &nc);
+
+
+
+  comp22 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+
+
+  abs_part(z2, absoz, &n);
+
+  max_part(absoz , &max2 , &n);
+
+  abs_part(w2, absow, &n);
+
+  max_part(absow , &max1 , &n);
+
+
+  if (max1 > 1e-10)
+  {
+
+
+    comp22 = comp22 / (nc * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w2, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp22 = comp22 / (nc * max1 * max2);
+
+  }
+
+
+
+  /*             Test of wt > 0           */
+
+
+  dcopy_(&nc, zn2, &incx, muzn2, &incy);
+
+  alpha = 0.3;
+  dscal_(&nc , &alpha , muzn2 , &incx);
+
+  alpha = -1.0;
+  daxpy_(&nc , &alpha , zt2 , &incx , muzn2 , &incy);
+
+  abs_part(muzn2, abso1, &nc);
+
+  pos_part(wt2, abso2, &nc) ;
+
+  comp222 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+
+  abs_part(z2, absoz, &n);
+
+  max_part(absoz , &max2 , &n);
+
+  abs_part(w2, absow, &n);
+
+  max_part(absow , &max1 , &n);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+
+    comp222 = comp222 / (nc * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w2, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp222 = comp222 / (nc * max1 * max2);
+
+  }
+
+
+  /*           Test of wt < 0             */
+
+
+  dcopy_(&nc, zn2, &incx, muzn2, &incy);
+
+  alpha = 0.3;
+  dscal_(&nc , &alpha , muzn2 , &incx);
+
+  alpha = 1.0;
+  daxpy_(&nc , &alpha , zt2 , &incx , muzn2 , &incy);
+
+  abs_part(muzn2, abso1, &nc);
+
+  dcopy_(&nc, wt2, &incx, muzn2, &incy);
+
+  alpha = -1.;
+  dscal_(&nc , &alpha , muzn2 , &incx);
+
+  pos_part(muzn2, abso2, &nc) ;
+
+  comp2222 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+
+  abs_part(z2, absoz, &n);
+
+  max_part(absoz , &max2 , &n);
+
+  abs_part(w2, absow, &n);
+
+  max_part(absow , &max1 , &n);
+
+
+  if (max1 > 1e-10)
+  {
+
+
+    comp2222 = comp2222 / (nc * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w2, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp2222 = comp2222 / (nc * max1 * max2);
+
+  }
+
+
+
+  /*           Equilibrium                   */
+
+  alpha = -1;
+  daxpy_(&n , &alpha , q , &incx , w2 , &incy);
+
+  beta  = 1;
+  dgemv_(&NT , &n , &n , &beta , vec , &n , z2 , &incx , &alpha , w2 , &incy);
+
+  num = dnrm2_(&n , w2 , &incx);
+  den = dnrm2_(&n , q , &incx);
+
+  diff = num / den ;
+
+
+
+  printf("\n   CPG (LOG:%1d)|%5d|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|" , info[1] , meth_pfc2.pfc.iter , diff , r1, r2, comp2, max22, comp22, comp222, comp2222);
+
+
+  /*        Complementary of normal part            */
+
+  min_part(zn3, &mini, &nc);
+
+  mini = - mini;
+
+  pos_part(&mini, &mini, &dim) ;
+
+  abs_part(zn3, abso, &nc);
+
+  max_part(abso , &maxi , &nc);
+
+  r1 = mini / maxi;
+
+
+  min_part(wn3, &mini, &nc);
+
+  mini = - mini;
+
+  pos_part(&mini, &mini, &dim) ;
+
+  abs_part(wn3, abso, &nc);
+
+  max_part(abso , &maxi , &nc);
+
+
+  if (maxi > 1e-10)
+  {
+
+    r2 = mini / maxi;
+
+  }
+  else
+  {
+
+    abs_part(w3, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      maxi = maxi_1;
+    else
+      maxi = maxi_2;
+
+    r2 = mini / maxi;
+  }
+
+
+
+  abs_part(wn3, abso1, &nc);
+
+  abs_part(zn3, abso2, &nc);
+
+  comp3 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+
+  max_part(abso1 , &max1 , &nc);
+
+  max_part(abso2 , &max2 , &nc);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp3 = comp3 / (nc * max2 * max1);
+
+
+  }
+  else
+  {
+
+    abs_part(w3, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp3 = comp3 / (nc * max2 * max1);
+
+  }
+
+
+
+
+  /*                   Friction                 */
+
+
+  /*         Test in interval           */
+
+  abs_part(zt3, abso1, &nc);
+
+  dcopy_(&nc, zn3, &incx, muzn3, &incy);
+
+  alpha = 0.3;
+  dscal_(&nc , &alpha , muzn3 , &incx);
+
+  abs_part(muzn3, abso2, &nc);
+
+
+  alpha = -1.0;
+  daxpy_(&nc , &alpha , abso1 , &incx , abso2 , &incy);
+
+  min_part(abso2, &mini, &nc);
+
+  mini = - mini;
+
+  pos_part(&mini, &mini, &dim) ;
+
+
+  abs_part(z3, absoz, &n);
+
+  max_part(absoz , &max33 , &n);
+
+  max33 = mini / max33;
+
+
+
+  /*            Test of |wt| = 0               */
+
+  abs_part(zt3, abso1, &nc);
+
+  dcopy_(&nc, zn3, &incx, muzn3, &incy);
+
+  alpha = 0.3;
+  dscal_(&nc , &alpha , muzn3 , &incx);
+
+  abs_part(muzn3, abso2, &nc);
+
+
+  alpha = -1.0;
+  daxpy_(&nc , &alpha , abso1 , &incx , abso2 , &incy);
+
+  abs_part(abso2, abso1, &nc);
+
+  abs_part(wt3, abso2, &nc);
+
+  comp33 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+
+
+  abs_part(z3, absoz, &n);
+
+  max_part(absoz , &max2 , &n);
+
+  abs_part(w3, absow, &n);
+
+  max_part(absow , &max1 , &n);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+
+    comp33 = comp33 / (nc * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w3, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp33 = comp33 / (nc * max1 * max2);
+
+  }
+
+
+
+  /*          Test of wt > 0            */
+
+
+  dcopy_(&nc, zn3, &incx, muzn3, &incy);
+
+  alpha = 0.3;
+  dscal_(&nc , &alpha , muzn3 , &incx);
+
+  alpha = -1.0;
+  daxpy_(&nc , &alpha , zt3 , &incx , muzn3 , &incy);
+
+  abs_part(muzn3, abso1, &nc);
+
+  pos_part(wt3, abso2, &nc) ;
+
+  comp333 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+
+  abs_part(z3, absoz, &n);
+
+  max_part(absoz , &max2 , &n);
+
+  abs_part(w3, absow, &n);
+
+  max_part(absow , &max1 , &n);
+
+
+  if (max1 > 1e-10)
+  {
+
+
+    comp333 = comp333 / (nc * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w3, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp333 = comp333 / (nc * max1 * max2);
+
+  }
+
+
+
+
+
+  /*            Test of wt < 0           */
+
+
+
+  dcopy_(&nc, zn3, &incx, muzn3, &incy);
+
+  alpha = 0.3;
+  dscal_(&nc , &alpha , muzn3 , &incx);
+
+  alpha = 1.0;
+  daxpy_(&nc , &alpha , zt3 , &incx , muzn3 , &incy);
+
+  abs_part(muzn3, abso1, &nc);
+
+  dcopy_(&nc, wt3, &incx, muzn3, &incy);
+
+  alpha = -1.;
+  dscal_(&nc , &alpha , muzn3 , &incx);
+
+  pos_part(muzn3, abso2, &nc) ;
+
+  comp3333 = ddot_(&nc , abso1 , &incx , abso2 , &incy);
+
+  abs_part(z3, absoz, &n);
+
+  max_part(absoz , &max2 , &n);
+
+  abs_part(w3, absow, &n);
+
+  max_part(absow , &max1 , &n);
+
+
+  if (max1 > 1e-10)
+  {
+
+
+    comp3333 = comp3333 / (nc * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w3, absow, &n);
+    max_part(absow, &maxi_1, &n);
+
+    abs_part(q, absow, &n);
+    max_part(absow, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp3333 = comp3333 / (nc * max1 * max2);
+
+  }
+
+
+  /*              Equilibrium                   */
+
+  alpha = -1;
+  daxpy_(&n , &alpha , q , &incx , w3 , &incy);
+
+  beta  = 1;
+  dgemv_(&NT , &n , &n , &beta , vec , &n , z3 , &incx , &alpha , w3 , &incy);
+
+
+  num = dnrm2_(&n , w3 , &incx);
+  den = dnrm2_(&n , q , &incx);
+
+
+  diff = num / den ;
+
+
+  printf("\n LATIN (LOG:%1d)|%5d|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e| \n \n" , info[2] , meth_pfc3.pfc.iter , diff , r1, r2, comp3, max33, comp33, comp333, comp3333);
+
+
 
 #endif
 
@@ -146,6 +1207,28 @@ void pfc_2D_series(int n , double *vec , double *q)
   free(w2);
   free(z3);
   free(w3);
+  free(zn1);
+  free(wn1);
+  free(zt1);
+  free(wt1);
+  free(zn2);
+  free(wn2);
+  free(zt2);
+  free(wt2);
+  free(zn3);
+  free(wn3);
+  free(zt3);
+  free(wt3);
+  free(abso);
+  free(abso1);
+  free(abso2);
+
+  free(absow);
+  free(absoz);
+
+  free(muzn1);
+  free(muzn2);
+  free(muzn3);
 
 }
 
@@ -267,10 +1350,10 @@ void test_data(void)
 
   /* WARNING STATIC SIZE */
 
-  n = 152;
+  n = 314;
 
   printf("\n\n GRANUL TEST \n");
-  if ((f1 = fopen("DATA/MM_gran_mu12.dat", "r")) == NULL)
+  if ((f1 = fopen("DATA/M_bille84mu.dat", "r")) == NULL)
   {
     perror("fopen 1");
     exit(1);
@@ -290,7 +1373,7 @@ void test_data(void)
 
   }
 
-  if ((f2 = fopen("DATA/qq_gran_mu12.dat", "r")) == NULL)
+  if ((f2 = fopen("DATA/q_bille84mu.dat", "r")) == NULL)
   {
     perror("fopen 2");
     exit(2);
@@ -301,7 +1384,7 @@ void test_data(void)
     fscanf(f2, "%d", &nl);
     fscanf(f2, "%s", val);
     qi = atof(val);
-    q[nl - 1] = qi;
+    q[nl - 1] = -qi;
   }
 
   fclose(f2);
