@@ -330,11 +330,11 @@ OneStepIntegrator* Strategy::getIntegratorOfDSPtr(DynamicalSystem * ds) const
   return (*it);
 }
 
-void Strategy::newtonSolve(const double& criterion, const int& maxStep)
+void Strategy::newtonSolve(const double& criterion, const unsigned int& maxStep)
 {
 
   bool isNewtonConverge = false;
-  long nbNewtonStep = 0; // number of Newton iterations
+  unsigned int nbNewtonStep = 0; // number of Newton iterations
   while ((!isNewtonConverge) && (nbNewtonStep <= maxStep))
   {
     nbNewtonStep++;
@@ -343,9 +343,9 @@ void Strategy::newtonSolve(const double& criterion, const int& maxStep)
     update();
     isNewtonConverge = newtonCheckConvergence(criterion);
   }
-  if (isNewtonConverge)
-    cout << "Newton process: convergence reached after " << nbNewtonStep << " Newtons steps" << endl;
-  else
+  if (!isNewtonConverge)
+    //cout << "Newton process: convergence reached after " << nbNewtonStep <<" Newtons steps" <<endl;
+    //else
     cout << "Newton process stopped: reach max step number" << endl ;
 
   // time step increment

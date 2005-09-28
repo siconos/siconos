@@ -141,6 +141,10 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
       }
       else *fExt = lgptr->getFextVector();
     }
+    // Default value for paramFExt: simpleVector of size 1
+    paramFExt = new SimpleVector(1);
+    (*paramFExt)(0) = 1.0;
+    areForcesAllocatedIn[3] = true;
 
     // -- FInt and its jacobian --
     if (lgptr->hasFint())
@@ -271,6 +275,9 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   p = new SimpleVector(ndof);
   fInt = new SimpleVector(ndof);
   fExt = new SimpleVector(ndof);
+  // Default value for paramFExt: simpleVector of size 1
+  paramFExt = new SimpleVector(1);
+  (*paramFExt)(0) = 1.0;
   NNL = new SimpleVector(ndof);
   areForcesAllocatedIn.resize(4, true);
   jacobianQFInt = new SiconosMatrix(ndof, ndof);
@@ -360,6 +367,9 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   p = new SimpleVector(ndof);
   fInt = new SimpleVector(ndof);
   fExt = new SimpleVector(ndof);
+  // Default value for paramFExt: simpleVector of size 1
+  paramFExt = new SimpleVector(1);
+  (*paramFExt)(0) = 1.0;
   NNL = new SimpleVector(ndof);
   areForcesAllocatedIn.resize(4, true);
   jacobianQFInt = new SiconosMatrix(ndof, ndof);
@@ -461,6 +471,13 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
     paramFExt = new SimpleVector(lnlds->getParamFExt());
     areForcesAllocatedIn[3] = true;
   }
+  else
+  {
+    // Default value for paramFExt: simpleVector of size 1
+    paramFExt = new SimpleVector(1);
+    (*paramFExt)(0) = 1.0;
+  }
+
 
   if (lnlds->getNNLPtr() != NULL)
   {
@@ -720,13 +737,9 @@ void LagrangianDS::setFExtPtr(SimpleVector *newPtr)
 
 void LagrangianDS::setParamFExt(const SimpleVector& newValue)
 {
-  unsigned int numberOfParam = newValue.size();
-  if (paramFExt == NULL)
-  {
-    paramFExt = new SimpleVector(numberOfParam);
-    areForcesAllocatedIn[3] = true;
-  }
-  *paramFExt = newValue;
+  if (areForcesAllocatedIn[3]) delete paramFExt;
+  paramFExt = new SimpleVector(newValue);
+  areForcesAllocatedIn[3] = true;
 }
 
 void LagrangianDS::setParamFExtPtr(SimpleVector *newPtr)

@@ -271,11 +271,11 @@ public:
    */
   virtual void initialize();
 
-  /** \fn void newtonSolve(const double& criterion , const int& maxStep)
+  /** \fn void newtonSolve(const double& criterion , const unsigned int& maxStep)
    *  \brief newton algorithm
    *  \param double criterion: convergence criterion, int maxStep: maximum number of Newton steps
    */
-  void newtonSolve(const double& criterion , const int& maxStep);
+  void newtonSolve(const double&, const unsigned int&);
 
   /** \fn newtonCheckConvergence(const double& criterion);
    *  \brief check the convergence of Newton algorithm
