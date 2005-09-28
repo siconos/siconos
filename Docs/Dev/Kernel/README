@@ -17,16 +17,16 @@ RPG
  design.html - ADD/DDD
   design.html 
   design-src-org.html
+  FrontEnd.html
+  Numerics.html  (DDD/SDD Numerics)		
   model.html
   simulation.html
   modeling.html
   utils.html
   input-output.html
-  FrontEnd.html
-  Numerics.html  (DDD/SDD Numerics)		
-
-
- qa-plan.html - QP/QR
+  plugin.html
+ 
+  qa-plan.html - QP/QR
 
  glossary-std.html - glossaire standard
  glossary.html - glossaire
@@ -44,12 +44,9 @@ puis générer par ihm le pdf (output/generate)
 # TODO
 #
 
- - Remplir use-cases.html (ESD)
  - Mail à ReadySet
  - Finir le glossaire 
  - A transferer de latex
-   CDS - Coding Documents Standard
-   ADD, DDD 
    QP, QR - Quality Plan et Quality Report
  - Faire 1 cartouche
 
