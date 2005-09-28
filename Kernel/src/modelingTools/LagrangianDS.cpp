@@ -4,8 +4,8 @@ using namespace std;
 // --- Constructor from an xml file ---
 LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
   DynamicalSystem(), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
-  velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL),
-  jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
+  velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL), paramFExt(NULL),
+  NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   isPAllocatedIn(true), isMassAllocatedIn(true),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
   computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)
@@ -83,7 +83,7 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     fInt = new SimpleVector(ndof);
     fExt = new SimpleVector(ndof);
     NNL = new SimpleVector(ndof);
-    areForcesAllocatedIn.resize(3, true);
+    areForcesAllocatedIn.resize(4, true);
     jacobianQFInt = new SiconosMatrix(ndof, ndof);
     jacobianVelocityFInt = new SiconosMatrix(ndof, ndof);
     jacobianQNNL = new SiconosMatrix(ndof, ndof);
@@ -223,9 +223,9 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
 LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
                            const SimpleVector& newQ0, const SimpleVector& newVelocity0,
                            const SiconosMatrix& newMass):
-  DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL), velocityFree(NULL), velocityMemory(NULL),
-  p(NULL), mass(NULL),
-  fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
+  DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
+  velocityFree(NULL), velocityMemory(NULL),   p(NULL), mass(NULL), fInt(NULL), fExt(NULL), paramFExt(NULL),
+  NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   isPAllocatedIn(true), isMassAllocatedIn(true),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
   computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)
@@ -272,7 +272,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   fInt = new SimpleVector(ndof);
   fExt = new SimpleVector(ndof);
   NNL = new SimpleVector(ndof);
-  areForcesAllocatedIn.resize(3, true);
+  areForcesAllocatedIn.resize(4, true);
   jacobianQFInt = new SiconosMatrix(ndof, ndof);
   jacobianVelocityFInt = new SiconosMatrix(ndof, ndof);
   jacobianQNNL = new SiconosMatrix(ndof, ndof);
@@ -311,10 +311,10 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 // From a set of data - Mass loaded from a plugin
 LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
                            const SimpleVector& newQ0, const SimpleVector& newVelocity0, const string& massName):
-  DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL), velocityFree(NULL), velocityMemory(NULL),
-  p(NULL), mass(NULL),
-  fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
-  isPAllocatedIn(true), isMassAllocatedIn(true),
+  DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL),
+  velocity0(NULL), velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL),
+  fInt(NULL), fExt(NULL), paramFExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL),
+  jacobianQNNL(NULL), jacobianVelocityNNL(NULL), isPAllocatedIn(true), isMassAllocatedIn(true),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
   computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)
 
@@ -361,7 +361,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   fInt = new SimpleVector(ndof);
   fExt = new SimpleVector(ndof);
   NNL = new SimpleVector(ndof);
-  areForcesAllocatedIn.resize(3, true);
+  areForcesAllocatedIn.resize(4, true);
   jacobianQFInt = new SiconosMatrix(ndof, ndof);
   jacobianVelocityFInt = new SiconosMatrix(ndof, ndof);
   jacobianQNNL = new SiconosMatrix(ndof, ndof);
@@ -400,8 +400,8 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
   DynamicalSystem(newDS), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL),
   velocity(NULL), velocity0(NULL), velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL),
-  fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
-  isPAllocatedIn(true), isMassAllocatedIn(true),
+  fInt(NULL), fExt(NULL), paramFExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL),
+  jacobianQNNL(NULL), jacobianVelocityNNL(NULL), isPAllocatedIn(true), isMassAllocatedIn(true),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
   computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)
 
@@ -443,7 +443,7 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
 
   p = new SimpleVector(lnlds->getP());
 
-  areForcesAllocatedIn.resize(3, false);
+  areForcesAllocatedIn.resize(4, false);
   if (lnlds->getFIntPtr() != NULL)
   {
     fInt = new SimpleVector(lnlds->getFInt());
@@ -455,6 +455,13 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
     fExt = new SimpleVector(lnlds->getFExt());
     areForcesAllocatedIn[1] = true;
   }
+
+  if (lnlds->getParamFExtPtr() != NULL)
+  {
+    paramFExt = new SimpleVector(lnlds->getParamFExt());
+    areForcesAllocatedIn[3] = true;
+  }
+
   if (lnlds->getNNLPtr() != NULL)
   {
     NNL = new SimpleVector(lnlds->getNNL());
@@ -555,91 +562,42 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
 LagrangianDS::~LagrangianDS()
 {
   IN("LagrangianDS::~LagrangianDS()\n");
-  if (isQAllocatedIn[0])
-  {
-    delete q;
-    q = NULL;
-  }
-  if (isQAllocatedIn[1])
-  {
-    delete q0;
-    q0 = NULL;
-  }
-  if (isQAllocatedIn[2])
-  {
-    delete qFree;
-    qFree = NULL;
-  }
-  if (isQAllocatedIn[3])
-  {
-    delete qMemory;
-    qMemory = NULL;
-  }
-  if (isVelocityAllocatedIn[0])
-  {
-    delete velocity ;
-    velocity = NULL;
-  }
-  if (isVelocityAllocatedIn[1])
-  {
-    delete velocity0 ;
-    velocity0 = NULL;
-  }
-  if (isVelocityAllocatedIn[2])
-  {
-    delete velocityFree ;
-    velocityFree = NULL;
-  }
-  if (isVelocityAllocatedIn[3])
-  {
-    delete velocityMemory;
-    velocityMemory = NULL;
-  }
-  if (isPAllocatedIn)
-  {
-    delete p ;
-    p = NULL;
-  }
-  if (isMassAllocatedIn)
-  {
-    delete mass;
-    mass = NULL;
-  }
-  if (areForcesAllocatedIn[0])
-  {
-    delete fInt ;
-    fInt = NULL;
-  }
-  if (areForcesAllocatedIn[1])
-  {
-    delete fExt ;
-    fExt = NULL;
-  }
-  if (areForcesAllocatedIn[2])
-  {
-    delete NNL ;
-    NNL = NULL;
-  }
-  if (isJacobianAllocatedIn[0])
-  {
-    delete jacobianQFInt  ;
-    jacobianQFInt = NULL;
-  }
-  if (isJacobianAllocatedIn[0])
-  {
-    delete  jacobianVelocityFInt ;
-    jacobianVelocityFInt = NULL;
-  }
-  if (isJacobianAllocatedIn[0])
-  {
-    delete jacobianQNNL ;
-    jacobianQNNL = NULL;
-  }
-  if (isJacobianAllocatedIn[0])
-  {
-    delete jacobianVelocityNNL ;
-    jacobianVelocityNNL = NULL;
-  }
+  if (isQAllocatedIn[0]) delete q;
+  q = NULL;
+  if (isQAllocatedIn[1]) delete q0;
+  q0 = NULL;
+  if (isQAllocatedIn[2]) delete qFree;
+  qFree = NULL;
+  if (isQAllocatedIn[3]) delete qMemory;
+  qMemory = NULL;
+  if (isVelocityAllocatedIn[0]) delete velocity ;
+  velocity = NULL;
+  if (isVelocityAllocatedIn[1])delete velocity0 ;
+  velocity0 = NULL;
+  if (isVelocityAllocatedIn[2])delete velocityFree ;
+  velocityFree = NULL;
+  if (isVelocityAllocatedIn[3])delete velocityMemory;
+  velocityMemory = NULL;
+  if (isPAllocatedIn) delete p ;
+  p = NULL;
+  if (isMassAllocatedIn) delete mass;
+  mass = NULL;
+  if (areForcesAllocatedIn[0])delete fInt ;
+  fInt = NULL;
+  if (areForcesAllocatedIn[1])delete fExt ;
+  fExt = NULL;
+  if (areForcesAllocatedIn[2])delete NNL ;
+  NNL = NULL;
+  if (areForcesAllocatedIn[3]) delete paramFExt ;
+  paramFExt = NULL;
+  if (isJacobianAllocatedIn[0])delete jacobianQFInt  ;
+  jacobianQFInt = NULL;
+  if (isJacobianAllocatedIn[0])delete  jacobianVelocityFInt ;
+  jacobianVelocityFInt = NULL;
+  if (isJacobianAllocatedIn[0])delete jacobianQNNL ;
+  jacobianQNNL = NULL;
+  if (isJacobianAllocatedIn[0])delete jacobianVelocityNNL ;
+  jacobianVelocityNNL = NULL;
   OUT("LagrangianDS::~LagrangianDS()\n");
 }
 
@@ -758,6 +716,24 @@ void LagrangianDS::setFExtPtr(SimpleVector *newPtr)
   fExt = newPtr;
   areForcesAllocatedIn[1] = false;
   isLDSPlugin[2] = false;
+}
+
+void LagrangianDS::setParamFExt(const SimpleVector& newValue)
+{
+  unsigned int numberOfParam = newValue.size();
+  if (paramFExt == NULL)
+  {
+    paramFExt = new SimpleVector(numberOfParam);
+    areForcesAllocatedIn[3] = true;
+  }
+  *paramFExt = newValue;
+}
+
+void LagrangianDS::setParamFExtPtr(SimpleVector *newPtr)
+{
+  if (areForcesAllocatedIn[3]) delete paramFExt;
+  paramFExt = newPtr;
+  areForcesAllocatedIn[3] = false;
 }
 
 void LagrangianDS::setNNL(const SimpleVector& newValue)
@@ -913,7 +889,7 @@ void LagrangianDS::computeFExt(const double& time)
 
   unsigned int size = q->size();
 
-  computeFExtPtr(&size, &time, &(*fExt)(0));
+  computeFExtPtr(&size, &time, &(*paramFExt)(0), &(*fExt)(0));
   OUT("LagrangianDS::computeFExt(double time)\n");
 
 }
@@ -1298,7 +1274,7 @@ LagrangianDS::LagrangianDS():
   DSType = LNLDS;
   isQAllocatedIn.resize(4, false);
   isVelocityAllocatedIn.resize(4, false);
-  areForcesAllocatedIn.resize(3, false);
+  areForcesAllocatedIn.resize(4, false);
   isJacobianAllocatedIn.resize(4, false);
   isLDSPlugin.resize(8, false);
 

@@ -62,9 +62,10 @@ extern "C" void computeFInt(unsigned int *sizeOfq, const double *time, double *q
 
 }
 
-extern "C" void computeFExt(unsigned int *sizeOfq, const double *time, double *fExt)
+extern "C" void computeFExt(unsigned int *sizeOfq, const double *time, double *param, double *fExt)
 {
   /* input parameter : sizeOfq (size of the vector q); time; q (pointer to q vector);
+   * param: list of parameter to customize fExt (amplitude, pulsation ...)
    * output parameter : fExt (pointer to Fext vector)
    */
 

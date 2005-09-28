@@ -188,7 +188,7 @@ and its jacobian compare to q and dq/dt:
         <pre>void (*computeJacobianQFIntPtr)(unsigned int* sizeOfq, const double* time,<br>       double* qPtr, double* velocityPtr, double* jacobPtr);<br>void (*computeJacobianVelocityFIntPtr)(unsigned int* sizeOfq, const double* time,<br>       double* qPtr, double* velocityPtr, double* jacobPtr);<br></pre>
       </li>
       <li><span style="font-weight: bold; font-style: italic;">FExt(q,dq/dt,t):</span><br>
-        <pre>void (*computeFExtPtr)(unsigned int* sizeOfq, const double* time,<br>      double* fExtPtr);<br></pre>
+        <pre>void (*computeFExtPtr)(unsigned int* sizeOfq, const double* time,<br>      double* paramPtr, double* fExtPtr);<br></pre>
       </li>
     </ul>
   </li>

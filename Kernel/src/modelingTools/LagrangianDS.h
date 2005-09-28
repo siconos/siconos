@@ -1,9 +1,7 @@
 #ifndef LAGRANGIANNLDS_H
 #define LAGRANGIANNLDS_H
-
 #include "DynamicalSystem.h"
 #include "LagrangianDSXML.h"
-
 #include "LinearBC.h"
 #include "NLinearBC.h"
 #include "PeriodicBC.h"
@@ -557,6 +555,38 @@ public:
    */
   void setFExtPtr(SimpleVector *newPtr);
 
+  // -- paramFExt --
+
+  /** \fn  const SimpleVector getParamFExt() const
+   *  \brief get the value of fExt
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getParamFExt() const
+  {
+    return *paramFExt;
+  }
+
+  /** \fn SimpleVector* getParamFExtPtr() const
+   *  \brief get fExt
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getParamFExtPtr() const
+  {
+    return paramFExt;
+  }
+
+  /** \fn void setParamFExt (const SimpleVector& newValue)
+   *  \brief set the value of fExt to newValue
+   *  \param SimpleVector newValue
+   */
+  void setParamFExt(const SimpleVector&);
+
+  /** \fn void setParamFExtPtr(SimpleVector* newPtr)
+   *  \brief set paramFExt to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  void setParamFExtPtr(SimpleVector *newPtr);
+
   // -- NNL --
 
   /** \fn  const SimpleVector getNNL() const
@@ -1053,6 +1083,8 @@ protected:
   SimpleVector *fInt;
   /** external strength of the system */
   SimpleVector *fExt;
+  /** list of (user-defined) parameters to customize fExt (example, omega in fExt = cos(Omega t) ) **/
+  SimpleVector *paramFExt;
   /** non-linear inertia term of the system */
   SimpleVector *NNL;
   /** jacobian/coordinates of internal strength */
@@ -1081,7 +1113,7 @@ protected:
   /* contains the name of the plugin used to compute NNL */
   std::string  NNLFunctionName;
 
-  /** vector of bool to check if mass, fInt, fExt, NNL and the 4 jacobian are loaded from a plugin or not
+  /** vector of bool to check if mass, fInt, fExt, paramFExt, NNL and the 4 jacobian are loaded from a plugin or not
    The vector order is the one of members list (see above)*/
   std::vector<bool> isLDSPlugin;
 
@@ -1098,7 +1130,7 @@ protected:
   bool isPAllocatedIn;
   // Mass
   bool isMassAllocatedIn;
-  // Forces: fInt, fExt, NNL
+  // Forces: fInt, fExt, NNL, paramFExt
   std::vector<bool> areForcesAllocatedIn;
   // Jacobian: jacobianQFInt, jacobianVelocityFInt, jacobianQNNL, jacobianVelocityNNL
   std::vector<bool> isJacobianAllocatedIn;
@@ -1124,13 +1156,14 @@ protected:
    */
   void (*computeFIntPtr)(unsigned int* sizeOfq, const double* time, double* qPtr, double* velocityPtr, double* fIntPtr);
 
-  /** \fn void (*computeFExtPtr)(double* time, double* qPtr, unsigned int* sizeOfq, double* fExtPtr)
+  /** \fn void (*computeFExtPtr)(double* time, double* qPtr, unsigned int* sizeOfq, double* paramPtr, double* fExtPtr)
    *  \brief computes the external strengths
    *  \param unsigned int* sizeOfq : the size of the vector q
-   *      \param double* time : the current time
-   *  \param double* fExtPtr : the pointer to the first element of the vector FInt (in-out parameter)
+   *    \param double* time : the current time
+   *    \param double* paramPtr: a list of parameters to customize FExt
+   *  \param double* fExtPtr : the pointer to the first element of the vector FExt (in-out parameter)
    */
-  void (*computeFExtPtr)(unsigned int* sizeOfq, const double* time, double* fExtPtr);
+  void (*computeFExtPtr)(unsigned int* sizeOfq, const double* time, double* paramPtr, double* fExtPtr);
 
   /** \fn void (*computeNNLPtr)(unsigned int* sizeOfq, double* qPtr, double* velocityPtr, double* NNLPtr)
    *  \brief computes the inertia
