@@ -153,9 +153,16 @@ basic vector and matrix operations.</td>
       <td>The module
 SICONOS/Numerics must support various storage methods for matrices:<br>
       <ul>
+      </ul>
+      <ol>
         <li>dense (full)</li>
         <li>band</li>
         <li>sparse</li>
+        <li>sparse block structured</li>
+      </ol>
+This support must be undersood in terms of well adapted algorithms for
+every types of matrix storages.<br>
+      <ul>
       </ul>
       </td>
     </tr>
@@ -195,9 +202,13 @@ SICONOS/Numerics must support various storage methods for matrices:<br>
 SICONOS/Numerics has to perform basic linear algebra computations&nbsp;
 relying on standard libraries for numerical computation (e.g. LAPACK): <br>
       <ul>
+      </ul>
+      <ol>
         <li>solution of linear system</li>
         <li>eigenvalue and eigenvectors problem</li>
         <li>singular value decomposition</li>
+      </ol>
+      <ul>
       </ul>
       </td>
     </tr>
@@ -210,7 +221,8 @@ relying on standard libraries for numerical computation (e.g. LAPACK): <br>
 </table>
 </div>
 <div id="F-1.011">
-<h3>F-1.011: Numerics types of treated problems</h3>
+<h3>F-1.011: Numerical solvers for mathematical programming problems<br>
+</h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
     <tr>
@@ -236,6 +248,8 @@ relying on standard libraries for numerical computation (e.g. LAPACK): <br>
 SICONOS/Numerics has to perform solution for mathematical programming
 problems:<br>
       <ul>
+      </ul>
+      <ol>
         <li>linear Complementarity Problem (LCP) (direct and
 iterative solutions)</li>
         <li>relay</li>
@@ -255,6 +269,8 @@ and friction)</li>
         </li>
         <li> root finding for non smooth (generalized) equations</li>
         <li>general non smooth optimization problem </li>
+      </ol>
+      <ul>
       </ul>
       </td>
     </tr>
@@ -401,7 +417,14 @@ differentiation.</td>
       <th>Description:</th>
       <td>The module
 SICONOS/Numerics must provide a common interface to various methods
-dedicated to one specific type of numerical problem.<br>
+dedicated to one specific type of numerical problem. The set of
+interfaces must be provided through the following API :<br>
+      <ol>
+        <li>C++ API</li>
+        <li>Matlab API</li>
+        <li>Scilab API<br>
+        </li>
+      </ol>
       </td>
     </tr>
     <tr>
@@ -848,10 +871,14 @@ Non Smooth Laws:<br>
       <ol>
         <li>Complementarity type non smooth law<br>
           <ul>
+          </ul>
+          <ol>
             <li>linear</li>
             <li>non linear</li>
             <li>cone complementarity </li>
             <li>switched complementarity</li>
+          </ol>
+          <ul>
           </ul>
         </li>
         <li>Newton impact-friction type non smooth law</li>
@@ -1275,7 +1302,7 @@ canonical model through:
 </div>
 <div id="F-2.202">
 <h3><br>
-F-2.202: Dedicated softwares Plug-in<br>
+F-2.202: Dedicated modeling software Plug-in<br>
 </h3>
 <table class="axial" border="1" cellpadding="3" cellspacing="2">
   <tbody>
@@ -1300,12 +1327,14 @@ F-2.202: Dedicated softwares Plug-in<br>
       <th>Description:</th>
       <td>The Siconos/Kernel must propose mechanisms (Plug-ins) to
 define the
-canonical model through Existing modeling software :
+canonical model through existing modeling software :
       <ol>
         <li><a href="glossary.html#Lmgc90">Lmgc90</a> plug-in</li>
         <li><a href="glossary.html#Modelica">Modelica</a> plug-in</li>
         <li><a href="glossary.html#Scicos">Scicos</a> plug-in</li>
         <li><a href="glossary.html#Simulink">Simulink</a> plug-in</li>
+        <li>Electrical plugin (Spice ?)<br>
+        </li>
       </ol>
       </td>
     </tr>
