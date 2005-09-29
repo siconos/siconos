@@ -1,6 +1,7 @@
-Documentation Siconos
-24 Juin 2006
-RPG
+Siconos Documentation 
+29 Sept 2006
+Siconos Team
+
 
 
 #
@@ -34,20 +35,17 @@ RPG
              on peut la virer.
 
 #
-# Génération
+# pdf Generation usign htmldoc 1.8 (www.htmldoc.org, www.fltk.org)
 #
-cover.html: couverture pour la doc
-htmldoc siconos.book 
-puis générer par ihm le pdf (output/generate)
+cover.html: book cover
+htmldoc siconos.book (load the book configuration)
+then through the gui, generate the pdf file (output/generate)
+named output/siconos-dev.pdf
+
 
 #
-# TODO
+# Pb with w3c validation, why ?
 #
-
- - Mail à ReadySet
- - Finir le glossaire 
- - A transferer de latex
-   QP, QR - Quality Plan et Quality Report
- - Faire 1 cartouche
-
+Numerics/Numerics.html
+sdm/templateHeaderFile.html
 

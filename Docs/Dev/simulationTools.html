@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="content-type"
- content="text/html; charset=iso-8859-1">
+ content="text/html; charset=iso-8859-1"/>
   <title>Simulation component</title>
   <style type="text/css">
 /* <![CDATA[ */ 
@@ -12,12 +12,12 @@
  */
  </style>
   <link rel="stylesheet" type="text/css" href="css/print.css"
- media="print">
+ media="print"/>
 </head>
 <body>
 <div class="app">
 <div class="readyset">
-<h2>Kernel Components &gt; Simulation<br>
+<h2>Kernel Components &gt; Simulation<br/>
 </h2>
 <div id="releaseinfo">
 <h3>Release Information</h3>
@@ -29,8 +29,13 @@
     </tr>
     <tr>
       <th>Internal Release Number:</th>
-      <td>X.Y.Z</td>
+      <td>1.0</td>
     </tr>
+    <tr>
+      <th>Last update:</th>
+      <td>September 15, 2005</td>
+    </tr>
+
     <tr>
       <th>Related Documents:</th>
       <td>
@@ -43,11 +48,11 @@
 </div>
 <!-- /releaseinfo -->
 <!-- /processimpact -->
-<div id="SimulationComponent">&nbsp;&nbsp; &nbsp;&nbsp; <br>
-<h3>Simulation component<br>
+<div id="SimulationComponent">&nbsp;&nbsp; &nbsp;&nbsp; <br />
+<h3>Simulation component<br />
 </h3>
 <table>
-  <caption><br>
+  <caption><br />
   </caption> <tbody>
     <tr>
       <th><b>What for?</b></th>
@@ -58,14 +63,14 @@ pre-defined NonSmoothDynamicalSystem. </td>
       <th><b>Feature sets:</b></th>
       <td><a href="features.html#F-2.001">F-2001.</a> and <a
  href="features.html#F-2.100">F-2.100</a>, <a
- href="features.html#F-2.106">F-2.106</a>;<br>
+ href="features.html#F-2.106">F-2.106</a>;<br />
       </td>
     </tr>
     <tr>
       <th><b>Depencies:</b></th>
       <td><a href="glossary.html#Siconos/Numerics">Siconos/Numerics</a>,
       <a href="inputOutput.html">Input-output </a>(xml), <a
- href="modelingTools.html">Modeling</a><br>
+ href="modelingTools.html">Modeling</a><br />
       </td>
     </tr>
     <tr>
@@ -78,46 +83,46 @@ pre-defined NonSmoothDynamicalSystem. </td>
     </tr>
   </tbody>
 </table>
-<br>
+<br />
 To find more details on objects described in this section, see
 <a href="../../Kernel/doc/api/html/index.html">Doxygen</a>
-documentation of Siconos/Kernel. <br>
-<br>
+documentation of Siconos/Kernel. <br />
+<br />
 The purpose of this component is to define a strategy to compute the
-behavior of a non-smooth dynamical system. <br>
+behavior of a non-smooth dynamical system. <br />
 It then needs a complete NonSmoothDynamicalSystem (see <a
  href="modelingTools.html">modeling component</a>), some
 time-integrators (one per dynamical system, see OneStepIntegrator
 object) and the description of a non-smooth problem (OneStepNSProblem
-Object). <br>
-<br>
-Thus, the simulation component contains the following classes:<br>
+Object). <br />
+<br />
+Thus, the simulation component contains the following classes:<br />
 <ul>
   <li><span style="font-weight: bold;">Strategy</span>
 : the main class of this component. It contains a time discretization
 scheme, a <a href="http://www.sgi.com/tech/stl/index.html">STL</a>&nbsp;
     <a href="http://www.sgi.com/tech/stl/Vector.html">vectors</a> of
-OneStepIntegrator and a OneStepNSProblem object. <br>
+OneStepIntegrator and a OneStepNSProblem object. <br />
 This class provides also all the routines to solve the non smooth
-problem. <br>
+problem. <br />
 Main
-computation steps are:<br>
+computation steps are:<br />
     <ul>
       <li>nextStep:&nbsp; increment time step and&nbsp; save last
 step state in&nbsp; memory (swapInMemory function)</li>
       <li>computeFreeState: integrate dynamical system, using
 OneStepIntegrator, without taking into account the non smooth part of
-it.<br>
+it.<br />
       </li>
       <li>computeOneStepNSProblem:&nbsp; to formalize and compute
 the
 non-smooth problem; it provides input-output values (y and lambda, see
 Interaction object in <a href="modelingTools.html">modeling component</a>).</li>
       <li>update: fully-integrate dynamical systems, taking into
-account&nbsp; their non-smooth part.<br>
+account&nbsp; their non-smooth part.<br />
       </li>
     </ul>
-Two strategy types are available:<br>
+Two strategy types are available:<br />
     <ul>
       <li>EventDriven </li>
       <li>TimeStepping </li>
@@ -125,21 +130,21 @@ Two strategy types are available:<br>
   </li>
   <li><span style="font-weight: bold;">TimeDiscretisation</span>: the
 time discretization scheme. It depends on time boundary values given in
-the model (see <a href="model.html">model component</a>). <br>
+the model (see <a href="model.html">model component</a>). <br />
 &nbsp; </li>
   <li><span style="font-weight: bold;">OneStepIntegrator:&nbsp;</span>
 describes the way each dynamical system is integrate. It obviously
 depends on the time discretization. There is one OneStepIntegrator for
-each dynamical system. <br>
+each dynamical system. <br />
 Three types of integrators are available:&nbsp;
     <ul>
       <li>Lsodar </li>
       <li>Moreau </li>
       <li>Adams </li>
     </ul>
-    <br>
-For details see theory manual or specific examples in templates.<br>
-    <br>
+    <br />
+For details see theory manual or specific examples in templates.<br />
+    <br />
   </li>
   <li><span style="font-weight: bold;">OneStepNSProblem: </span>used
 to formalize the complete non smooth problem, taking into account
@@ -147,36 +152,36 @@ interactions between dynamical systems. This object is composed with a <a
  href="http://www.sgi.com/tech/stl/index.html">STL</a>&nbsp; <a
  href="http://www.sgi.com/tech/stl/Vector.html">vectors</a> of
 Interactions (those of the NonSmoothDynamicalSystem) and information on
-solver and solving method. <br>
-Three problem types are available:<br>
+solver and solving method. <br />
+Three problem types are available:<br />
     <ul>
-      <li>DFC_2D: dual friction contact in two dimensions. <br>
-        <br>
+      <li>DFC_2D: dual friction contact in two dimensions. <br />
+        <br />
       </li>
       <li>LCP: Linear complementary problem.&nbsp; Solve a non-smooth
 problem of the
 form:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <br>
-        <br>
+        <br />
+        <br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         <img alt="lcp" src="figures/lcp.png"
- style="width: 98px; height: 27px;"><br>
+ style="width: 98px; height: 27px;"/><br />
       </li>
-      <br>
-      <li>QP: quadratic formulation<br>
+      <br />
+      <li>QP: quadratic formulation<br />
       </li>
-      <br>
-      <li>Relay<br>
+      <br />
+      <li>Relay<br />
       </li>
     </ul>
   </li>
 </ul>
 <h3>SimulationTools classes diagram</h3>
-<br>
+<br />
 &nbsp;&nbsp;&nbsp; <img alt="simulation tools classes diagram"
  src="figures/simulationToolsClassDiagram.png"
- style="width: 639px; height: 285px;"><br>
-<br>
+ style="width: 639px; height: 285px;"/><br />
+<br />            
 </div>
 </div>
 </div>

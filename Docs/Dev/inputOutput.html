@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="content-type"
- content="text/html; charset=iso-8859-1">
+ content="text/html; charset=iso-8859-1"/>
   <title>Data input-output</title>
   <style type="text/css">
 /* <![CDATA[ */ 
@@ -12,12 +12,12 @@
  */
  </style>
   <link rel="stylesheet" type="text/css" href="css/print.css"
- media="print">
+ media="print"/>
 </head>
 <body>
 <div class="app">
 <div class="readyset">
-<h2>Kernel Components &gt; Data input-output<br>
+<h2>Kernel Components &gt; Data input-output<br/>
 </h2>
 <div id="releaseinfo">
 <h3>Release Information</h3>
@@ -29,7 +29,11 @@
     </tr>
     <tr>
       <th>Internal Release Number:</th>
-      <td>X.Y.Z</td>
+      <td>1.0</td>
+    </tr>
+    <tr>
+      <th>Last update:</th>
+      <td>September 15, 2005</td>
     </tr>
     <tr>
       <th>Related Documents:</th>
@@ -43,17 +47,17 @@
 </div>
 <!-- /releaseinfo -->
 <!-- /processimpact -->
-<div id="ModelComponent">&nbsp;&nbsp; &nbsp;&nbsp; <br>
+<div id="ModelComponent">&nbsp;&nbsp; &nbsp;&nbsp; <br />
 <big><big><big style="font-weight: bold;"><span
  style="color: rgb(0, 51, 153);">Data input-output component -&gt; XML
-management </span></big></big></big><br>
-<br>
+management </span></big></big></big><br />
+<br />
 <table>
-  <caption><br>
+  <caption><br />
   </caption> <tbody>
     <tr>
       <th><b>What for?</b></th>
-      <td>Classes/objects for input-ouput of data. At the time: XML <br>
+      <td>Classes/objects for input-ouput of data. At the time: XML <br />
       </td>
     </tr>
     <tr>
@@ -66,7 +70,7 @@ management </span></big></big></big><br>
       <th><b>Depencies:</b></th>
       <td><a href="http://xmlsoft.org">LibXml2</a>, <a
  href="utils.html">SiconosAlgebra
-(utils)</a> <br>
+(utils)</a> <br />
       </td>
     </tr>
     <tr>
@@ -75,17 +79,17 @@ management </span></big></big></big><br>
     </tr>
   </tbody>
 </table>
-<br>
+<br />
 The purpose of this component is to provide objects for data
-input-output management. At the time, the only available tool is XML. <br>
+input-output management. At the time, the only available tool is XML. <br />
 It is then possible to load a partial or complete model from a
 user-defined xml-file or to
 save a model into a new xml file, to create a restart-file
-for future computation. <br>
-<br>
+for future computation. <br />
+<br />
 To find more details on objects described in this section, see
 <a href="../../Kernel/doc/api/html/index.html">Doxygen</a>
-documentation of Siconos/Kernel. <br>
+documentation of Siconos/Kernel. <br />
 <h3><a name="xmlGenOverview">General overview</a>
 </h3>
 <p>
@@ -100,15 +104,15 @@ and output but never used during the
 computations. That means the data from the DOM tree are read
 when the software is launched (if a XML input file is
 defined) and stored to the DOM tree a the end of a simulation or
-when user asks for it.<br>
-<span style="font-weight: bold;"></span><br>
-Main objects of this component are: <br>
+when user asks for it.<br />
+<span style="font-weight: bold;"></span><br />
+Main objects of this component are: <br />
 </p>
 <ul>
   <li><span style="font-weight: bold;">SiconosModelXML</span> : highest
 level object of this component; a call to its constructor leads to the
-DOMtree building. <br>
-    <br>
+DOMtree building. <br />
+    <br />
   </li>
   <li><span style="font-weight: bold;">KernelObjectNameXML</span>,
 KernelObject being any object of modeling or simulation component
@@ -117,16 +121,16 @@ objects have access to the specific branch of the DOM
 tree
 (through xmlNode pointers) which
 contains the data relating to
-the corresponding object of the Kernel. <br>
+the corresponding object of the Kernel. <br />
 For example, an InteractionXML is a kind of link or key between
 Interaction object and its required data provided in XML input file and
-saved in the DOMtree.<br>
-    <br>
+saved in the DOMtree.<br />
+    <br />
   </li>
   <li><span style="font-weight: bold;">SiconosDOMTreeTools</span> class
 provides a toolbox to manipulate the data of the platform and to store
 them
-under XML format. Its functionnalities are:<br>
+under XML format. Its functionnalities are:<br />
     <ul>
       <li>Load SiconosVector and SiconosMatrix functions from the xml
 DOM tree.</li>
@@ -140,38 +144,38 @@ boolean, integer, double and string values.</li>
     </ul>
   </li>
 </ul>
-<span style="font-weight: bold;"><br>
-XML Schema :</span> <br>
-<br>
+<span style="font-weight: bold;"><br />
+XML Schema :</span> <br />
+<br />
 it is used to check validity of input data, according to rules
 specified in a xml-schema file (<a
  href="../../Kernel/config/xmlschema/SiconosModelSchema-V1.2.xsd">xml
-schema</a>). <br>
+schema</a>). <br />
 This schema describres what are the possible attributes for objects, if
-they are required or optional and so on.<br>
+they are required or optional and so on.<br />
 To check each information, the schema regroups the defined attributes
 in several tags relating to
 Model, NSDS, DynamicalSystem, Interaction, Relation and NonSmoothLaw,
 Strategy, TimeDiscretisation,
-OneStepIntegrator, OneStepNSProblem. <br>
-<br>
-<span style="font-weight: bold;">XML input data file:<br>
-</span><br>
+OneStepIntegrator, OneStepNSProblem. <br />
+<br />
+<span style="font-weight: bold;">XML input data file:<br />
+</span><br />
 Examples of xml input file are available in samples (<a
  href="../../sample/BouncingBall/BouncingBall_TIDS.xml">BouncingBall
-xml input file</a>,...). <br>
+xml input file</a>,...). <br />
 For more details on xml syntax see for example <a
  href="http://www.w3schools.com/xml/default.asp">xml tutorial</a>.
-<br>
-<br>
+<br />
+<br />
 <p><b>LibXML2 library </b>(<a href="http://xmlsoft.org">http://xmlsoft.org/)</a>
 </p>
 The LibXML2 library is used in the platform to manage the xml files
 (data input/output). This is an XML C parser and toolkit, developed for
 the Gnome project
 (but not limited to the Gnome platform). It is a free software
-available under MIT License. <br>
-<p>The main benefits of using LibXML2 are:&nbsp;<br>
+available under MIT License. <br />
+<p>The main benefits of using LibXML2 are:&nbsp;<br />
 </p>
 <ul>
   <li>its portability : LibXML2 is known to be very portable, the
@@ -189,23 +193,23 @@ powerfull enought for our project : a prototype verifing, reading, and
 writing xml files has been developed, and the
 results are encouraging. However, the library has an important drawback
 :
-its poor documentation for modules, methods and structures.<br>
+its poor documentation for modules, methods and structures.<br />
 </p>
 <h3><a name="xmlModelLoading"></a>Model loading from XML
-file<br>
+file<br />
 </h3>
 To built a new model from an XML input file, user has to call Model
-constructor with input file name as an argument.<br>
+constructor with input file name as an argument.<br />
 Then SiconosModelXML constructor&nbsp; is called and performs the
-following steps<br>
+following steps<br />
 <ul>
   <li>parse XML input file. </li>
-  <li> check data validity, according to xml schema. <br>
+  <li> check data validity, according to xml schema. <br />
   </li>
   <li> save data into the DOMtree and call constructors for
 SiconosModelXML members (StrategyXml and NonSmoothDynamicalSystemXML)
 and so on with children of these
-objects, till the lowest level is reached. <br>
+objects, till the lowest level is reached. <br />
   </li>
 </ul>
 Then, after all the XML objects have been created, the siconos
@@ -215,9 +219,9 @@ called, with
 their corresponding XML object as argument:&nbsp;
 NonSmoothDynamicalSystem( NonSmoothDynamicalSystemXML ),&nbsp; Strategy
 ( StrategyXML) ... and so on with DynamicalSystem, Interaction etc. <span
- style="font-weight: bold;"></span><br>
+ style="font-weight: bold;"></span><br />
 <h3><a name="xmlModelLoading"></a>Model saving in XML
-file<br>
+file<br />
 </h3>
 <span style="font-weight: bold;"></span>DOMtree saving occurs in two
 steps. First XML objects are updated and&nbsp; the XML tree is compared
@@ -226,7 +230,7 @@ objects have been created during computation). Then Kernel data are
 copied in
 the DOM tree with all the XML objects.
 Finally&nbsp; the DOM tree is saved into an XML file.
-<br>
+<br />
 &nbsp;Platform's data saving is leaded from the Model. The function
 which does this job is
 "saveToXMLFile",&nbsp; with the following steps:&nbsp;
@@ -238,27 +242,27 @@ XML Management platform does not exist,&nbsp; it is created and linked
 to
 the objects of the siconos platform. Otherwise, every link between the
 platform and the XML Management is checked to ensure the availability
-of the XML platform objects.<br>
-    <br>
+of the XML platform objects.<br />
+    <br />
   </li>
   <li>savePlatformToXML() :&nbsp; the information
 contained in the platform are saved in the DOM tree using the
-specific functions given by the XML object.<br>
-    <br>
+specific functions given by the XML object.<br />
+    <br />
   </li>
   <li>checkXMLDOMTree() : when data of the DOMtree are up to date,
-check they respect XML schema.<br>
-    <br>
+check they respect XML schema.<br />
+    <br />
   </li>
-  <li>saveSiconosModelInXMLFile(xmlFile) :&nbsp; write data in xmlfile.<br>
+  <li>saveSiconosModelInXMLFile(xmlFile) :&nbsp; write data in xmlfile.<br />
   </li>
 </ul>
-<br>
-<h3><a name="xml_classes_diagram_"></a>XML classes diagram<br>
+<br />
+<h3><a name="xml_classes_diagram_"></a>XML classes diagram<br />
 </h3>
 &nbsp; <img alt="xml classes diagram" src="figures/xmlClassDiagram.png"
- style="width: 714px; height: 776px;"><br>
-<br>
+ style="width: 714px; height: 776px;"/><br />
+<br />            
 </div>
 </div>
 </div>

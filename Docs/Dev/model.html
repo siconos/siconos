@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta http-equiv="content-type"
- content="text/html; charset=iso-8859-1">
+ content="text/html; charset=iso-8859-1"/>
   <title>Model</title>
   <style type="text/css">
 /* <![CDATA[ */ 
@@ -12,12 +12,12 @@
  */
  </style>
   <link rel="stylesheet" type="text/css" href="css/print.css"
- media="print">
+ media="print"/>
 </head>
 <body>
 <div class="app">
 <div class="readyset">
-<h2>Kernel Components &gt; Model<br>
+<h2>Kernel Components &gt; Model<br/>
 </h2>
 <div id="releaseinfo">
 <h3>Release Information</h3>
@@ -29,12 +29,16 @@
     </tr>
     <tr>
       <th>Internal Release Number:</th>
-      <td>X.Y.Z</td>
+      <td>1.0</td>
+    </tr>
+   <tr>
+      <th>Last update:</th>
+      <td>September 15, 2005</td>
     </tr>
     <tr>
       <th>Related Documents:</th>
       <td>
-      <div> <a href="design.html">Design</a><br>
+      <div> <a href="design.html">Design</a><br />
       <a href="modelingTools.html"></a></div>
       <div><a href="glossary.html">Glossary</a></div>
       </td>
@@ -44,22 +48,22 @@
 </div>
 <!-- /releaseinfo -->
 <!-- /processimpact -->
-<div id="ModelComponent">&nbsp;&nbsp; &nbsp;&nbsp; <br>
-<h3>Model component<br>
+<div id="ModelComponent">&nbsp;&nbsp; &nbsp;&nbsp; <br />
+<h3>Model component<br />
 </h3>
 <table>
-  <caption><br>
+  <caption><br />
   </caption> <tbody>
     <tr>
       <th><b>What for?</b></th>
-      <td>global model definition<br>
+      <td>global model definition<br />
       </td>
     </tr>
     <tr>
       <th><b>Depencies:</b></th>
       <td><a href="modelingTools.html"> modelingTools</a>
 (NonSmoothDynamicalSystemt), <a href="simulationTools.html">simulationTools</a>
-(Strategy), <a href="inputOutput.html">Input-output </a>(xml) <br>
+(Strategy), <a href="inputOutput.html">Input-output </a>(xml) <br />
       </td>
     </tr>
     <tr>
@@ -68,26 +72,26 @@
     </tr>
   </tbody>
 </table>
-<br>
+<br />
 To find more details on objects described in this section, see
 <a href="../../Kernel/doc/api/html/index.html">Doxygen</a>
-documentation of Siconos/Kernel. <br>
-<br>
-&nbsp;&nbsp; The model component contains three classes:<br>
+documentation of Siconos/Kernel. <br />
+<br />
+&nbsp;&nbsp; The model component contains three classes:<br />
 <ul>
   <li><span style="font-weight: bold;"> Model</span>: highest level
 object of the platform. It contains time boundary values for the
-simulation, a NonSmoothDynamicalSystem <br>
+simulation, a NonSmoothDynamicalSystem <br />
 (see <a href="modelingTools.html">modeling component</a>) and a
 computation
 strategy (see <a href="simulationTools.html">simulation component</a>)
 to be applied on
-this system.<br>
+this system.<br />
   </li>
-  <br>
+  <br />
   <li><span style="font-weight: bold;"> SiconosConst</span>: (almost)
-all the constants used in the Kernel files.<br>
-    <br>
+all the constants used in the Kernel files.<br />
+    <br />        
   </li>
   <li><span style="font-weight: bold;"> KernelDefaultConfig</span>:
 default values for some variables used everywhere in the Kernel. </li>
