@@ -496,7 +496,7 @@ public:
   // uSize
 
   /** \fn const int getUSize(void) const;
-   *  \brief allow to get uSize, the dimension, i.e. the size of u
+   *  \brief to get uSize, size of u
    *  \return the value of uSize
    */
   inline const unsigned int getUSize(void) const
@@ -504,14 +504,11 @@ public:
     return uSize;
   }
 
-  /** \fn void setUSize(const int&)
-   *  \brief allows to set the value of uSize
+  /** \fn void setUSize(const unsigned int&)
+   *  \brief to set the value of uSize
    *  \param an integer to set the value of uSize
    */
-  inline void setUSize(const int& newUSize)
-  {
-    uSize = newUSize;
-  }
+  void setUSize(const unsigned int&);
 
   // ---  U ---
 

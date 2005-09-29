@@ -5,6 +5,9 @@ SAMPLE_SOURCES = $(OBJ)
 SAMPLE_OBJ  = $(patsubst %.cpp,%.o,  $(SAMPLE_SOURCES))
 SAMPLE_EXE  = $(patsubst %.cpp,%_EXE,  $(SAMPLE_SOURCES))
 
+C_SOURCES = $(wildcard *.c)
+C_OBJ  = $(patsubst %.c,%.o,  $(C_SOURCES))
+
 sample:$(SAMPLE_OBJ) $(SAMPLE_EXE)
 	
 .cpp.o:
@@ -22,17 +25,18 @@ run:$(SAMPLE_EXE)
 #	rm -f *_EXE *.o *.output;
 
 
-PLUGIN_SOURCES = $(wildcard *Plugin.c)
-PLUGIN_OBJ  = $(patsubst %.c,%.o,  $(PLUGIN_SOURCES))
-PLUGIN_LIB = $(patsubst %.c,%.so,  $(PLUGIN_SOURCES))
+PLUGIN_SOURCES = $(wildcard *Plugin.cpp)
+PLUGIN_OBJ  = $(patsubst %.cpp,%.o,  $(PLUGIN_SOURCES))
+PLUGIN_LIB = $(patsubst %.cpp,%.so,  $(PLUGIN_SOURCES))
 
 plugin:$(PLUGIN_OBJ) $(PLUGIN_LIB)
+
 	
 .c.o:
-	$(CXX) -c $<
+	$(CC) -c $(CXXFLAGS) $<
 
-%.so:%.c
-	$(CXX) $(CXX_DYNLIB) $< -o $@
+%.so:%.cpp $(C_OBJ)
+	$(CXX) $(CXX_DYNLIB) $(C_OBJ) $< -o $@
 
 #cleanplugin:
 #	rm -f $(PLUGIN_OBJ) $(PLUGIN_LIB)

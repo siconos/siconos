@@ -609,11 +609,11 @@ LagrangianDS::~LagrangianDS()
   paramFExt = NULL;
   if (isJacobianAllocatedIn[0])delete jacobianQFInt  ;
   jacobianQFInt = NULL;
-  if (isJacobianAllocatedIn[0])delete  jacobianVelocityFInt ;
+  if (isJacobianAllocatedIn[1])delete  jacobianVelocityFInt ;
   jacobianVelocityFInt = NULL;
-  if (isJacobianAllocatedIn[0])delete jacobianQNNL ;
+  if (isJacobianAllocatedIn[2])delete jacobianQNNL ;
   jacobianQNNL = NULL;
-  if (isJacobianAllocatedIn[0])delete jacobianVelocityNNL ;
+  if (isJacobianAllocatedIn[3])delete jacobianVelocityNNL ;
   jacobianVelocityNNL = NULL;
   OUT("LagrangianDS::~LagrangianDS()\n");
 }

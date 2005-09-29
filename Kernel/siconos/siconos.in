@@ -16,7 +16,7 @@ function compilePlugins() {
     echo "listdir = $listdir";
     for dir in $listdir; do
 	cd $dir;
-	if test "`ls *Plugin.c 2>/dev/null`" != ""; then
+	if test "`ls *Plugin.cpp 2>/dev/null`" != ""; then
 	    echo "plugin dans $dir !";      
 	    make -f $SICONOSPATH/share/SICONOS/MakefilePluginSample plugin
 	    if test "${LD_LIBRARY_PATH}test" = "test"; then

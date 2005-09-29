@@ -205,7 +205,7 @@ DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN,
 DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
   DSType(NLDS), nsds(newDS.getNSDSPtr()), number(-2), id("copy"), n(newDS.getN()),
   x0(NULL), x(NULL), xMemory(NULL), xDot(NULL), xDotMemory(NULL),
-  xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL), uSize(0), u(NULL), T(NULL),
+  xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL), uSize(newDS.getUSize()), u(NULL), T(NULL),
   stepsInMemory(newDS.getStepsInMemory()), BC(NULL), dsxml(NULL),
   vectorFieldFunctionName(newDS.getVectorFieldFunctionName()), computeJacobianXFunctionName(newDS. getVectorFieldFunctionName()),
   computeUFunctionName(newDS.getComputeUFunctionName()), computeTFunctionName(newDS.getComputeTFunctionName()),
@@ -319,75 +319,37 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
 DynamicalSystem::~DynamicalSystem()
 {
   IN("DynamicalSystem::~DynamicalSystem()\n");
-  if (isXAllocatedIn[0])
-  {
-    delete x0;
-    x0 = NULL ;
-  }
-  if (isXAllocatedIn[1])
-  {
-    delete x;
-    x = NULL;
-  }
-  if (isXAllocatedIn[2])
-  {
-    delete xMemory;
-    xMemory = NULL;
-  }
-  if (isXAllocatedIn[3])
-  {
-    delete xDot;
-    xDot = NULL;
-  }
-  if (isXAllocatedIn[4])
-  {
-    delete xDotMemory;
-    xDotMemory = NULL;
-  }
-  if (isXAllocatedIn[5])
-  {
-    delete xFree;
-    xFree = NULL;
-  }
-  if (isRAllocatedIn[0])
-  {
-    delete r;
-    r = NULL;
-  }
-  if (isRAllocatedIn[1])
-  {
-    delete rMemory;
-    rMemory = NULL;
-  }
-  if (isXAllocatedIn[6])
-  {
-    delete jacobianX;
-    jacobianX = NULL;
-  }
-  if (isControlAllocatedIn[0])
-  {
-    delete u;
-    u = NULL;
-  }
-  if (isControlAllocatedIn[1])
-  {
-    delete T;
-    T = NULL;
-  }
+
+  if (isXAllocatedIn[0])delete x0;
+  x0 = NULL ;
+  if (isXAllocatedIn[1]) delete x;
+  x = NULL;
+  if (isXAllocatedIn[2]) delete xMemory;
+  xMemory = NULL;
+  if (isXAllocatedIn[3]) delete xDot;
+  xDot = NULL;
+  if (isXAllocatedIn[4]) delete xDotMemory;
+  xDotMemory = NULL;
+  if (isXAllocatedIn[5]) delete xFree;
+  xFree = NULL;
+  if (isRAllocatedIn[0]) delete r;
+  r = NULL;
+  if (isRAllocatedIn[1]) delete rMemory;
+  rMemory = NULL;
+  if (isXAllocatedIn[6]) delete jacobianX;
+  jacobianX = NULL;
+  if (isControlAllocatedIn[0]) delete u;
+  u = NULL;
+  if (isControlAllocatedIn[1]) delete T;
+  T = NULL;
 
   for (unsigned int i = 0; i < dsioVector.size(); i++)
   {
-    if (isDsioAllocatedIn[i])
-    {
-      delete dsioVector[i];
-      dsioVector[i] = NULL;
-    }
+    if (isDsioAllocatedIn[i]) delete dsioVector[i];
+    dsioVector[i] = NULL;
   }
-  if (isBCAllocatedIn)
-  {
-    delete BC;
-    BC = NULL;
-  }
+  if (isBCAllocatedIn) delete BC;
+  BC = NULL;
   OUT("DynamicalSystem::~DynamicalSystem()\n");
 }
 
@@ -714,12 +676,22 @@ void DynamicalSystem::setJacobianXPtr(SiconosMatrix *newPtr)
   isXAllocatedIn[6] = false;
 }
 
+void  DynamicalSystem::setUSize(const unsigned int& newUSize)
+{
+  if (isControlAllocatedIn[0]) delete u;
+  uSize = newUSize;
+  u = new SimpleVector(uSize);
+  isControlAllocatedIn[0] = true;
+}
+
+// Three steps to set u:
+//  - Check if uSize has been given (default value=0 in all constructors)
+//  - Allocate memory for u, if necessary
+//  - Set value for u
 void DynamicalSystem::setU(const SiconosVector& newValue)
 {
-  // check dimensions ...
-  if (newValue.size() != uSize)
+  if (uSize == 0 || newValue.size() != uSize)
     RuntimeException::selfThrow("DynamicalSystem::setU - inconsistent sizes between u input and uSize - Maybe you forget to set uSize?");
-
   if (u != NULL)
     *u = newValue;
 
@@ -735,9 +707,9 @@ void DynamicalSystem::setU(const SiconosVector& newValue)
 
 void DynamicalSystem::setUPtr(SiconosVector* newPtr)
 {
-  // check dimensions ...
-  if (newPtr->size() != uSize)
+  if (uSize == 0 || newPtr->size() != uSize)
     RuntimeException::selfThrow("DynamicalSystem::setUPtr - inconsistent sizes between u input and uSize - Maybe you forget to set uSize?");
+  // check dimensions ...
 
   if (isControlAllocatedIn[0]) delete u;
   u = newPtr;
@@ -747,7 +719,7 @@ void DynamicalSystem::setUPtr(SiconosVector* newPtr)
 void DynamicalSystem::setT(const SiconosMatrix& newValue)
 {
   // check dimensions ...
-  if (newValue.size(1) != uSize || newValue.size(0) != n)
+  if (uSize == 0 || newValue.size(1) != uSize || newValue.size(0) != n)
     RuntimeException::selfThrow("DynamicalSystem::setT - inconsistent sizes between T input, uSize and/or n - Maybe you forget to set n or uSize?");
 
   if (T != NULL)
@@ -762,7 +734,7 @@ void DynamicalSystem::setT(const SiconosMatrix& newValue)
 void DynamicalSystem::setTPtr(SiconosMatrix *newPtr)
 {
   // check dimensions ...
-  if (newPtr->size(1) != uSize || newPtr->size(0) != n)
+  if (uSize == 0 || newPtr->size(1) != uSize || newPtr->size(0) != n)
     RuntimeException::selfThrow("DynamicalSystem::setTPtr - inconsistent sizes between T input, uSize and/or n - Maybe you forget to set n or uSize?");
 
   if (isControlAllocatedIn[1]) delete T;
@@ -842,6 +814,16 @@ void DynamicalSystem::setComputeJacobianXFunction(const string& pluginPath, cons
 
 void DynamicalSystem::setComputeUFunction(const string& pluginPath, const string& functionName)
 {
+  // since u is not allocated by default, memory must be reserved for it
+  if (uSize == 0)
+    RuntimeException::selfThrow("DynamicalSystem::setComputeUFunction - uSize is equal to 0 - Maybe you forget to set it?");
+
+  if (u == NULL)
+  {
+    u = new SimpleVector(uSize);
+    isControlAllocatedIn[0] = true;
+  }
+
   computeUPtr = NULL;
   cShared.setFunction(&computeUPtr, pluginPath, functionName);
 
@@ -852,6 +834,16 @@ void DynamicalSystem::setComputeUFunction(const string& pluginPath, const string
 
 void DynamicalSystem::setComputeTFunction(const string& pluginPath, const string& functionName)
 {
+  // since T is not allocated by default, memory must be reserved for it
+  if (uSize == 0)
+    RuntimeException::selfThrow("DynamicalSystem::setComputeUFunction - uSize is equal to 0 - Maybe you forget to set it?");
+
+  if (T == NULL)
+  {
+    T = new SiconosMatrix(n, uSize);
+    isControlAllocatedIn[1] = true;
+  }
+
   computeTPtr = NULL;
   cShared.setFunction(&computeTPtr, pluginPath, functionName);
 
@@ -882,6 +874,8 @@ void DynamicalSystem::computeU(const double& time)
 {
   if (computeUPtr == NULL)
     RuntimeException::selfThrow("computeU() is not linked to a plugin function");
+  if (u == NULL)
+    RuntimeException::selfThrow("computeU(), warning: u = NULL");
 
   unsigned int sizeX = x->size();
   computeUPtr(&uSize, &sizeX, &time, &(*x)(0), &(*xDot)(0), &(*u)(0));
@@ -891,6 +885,8 @@ void DynamicalSystem::computeT()
 {
   if (computeTPtr == NULL)
     RuntimeException::selfThrow("computeT() is not linked to a plugin function");
+  if (T == NULL)
+    RuntimeException::selfThrow("computeT(), warning: T = NULL");
 
   unsigned int sizeX = x->size();
   computeTPtr(&uSize, &sizeX, &(*x)(0), &(*T)(0, 0));
