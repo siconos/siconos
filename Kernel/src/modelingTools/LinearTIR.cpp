@@ -606,29 +606,16 @@ void LinearTIR::computeOutput(const double& time)
   SimpleVector *lambda = interaction->getLambdaPtr(0);
 
   // compute y
-  if (D == NULL && F == NULL && e == NULL)
-    *y = *C * *xTmp;
+  *y = *C * *xTmp;
 
-  else if (D != NULL && F == NULL && e == NULL)
-    *y = *C * *xTmp + *D * *lambda;
+  if (D != NULL)
+    *y += *D * *lambda;
 
-  else if (D != NULL && F != NULL && e == NULL)
-    *y = *C * *xTmp + *F * *uTmp + *D * *lambda;
+  if (F != NULL)
+    *y += *F * *uTmp;
 
-  else if (D != NULL && F != NULL && e != NULL)
-    *y = *C * *xTmp + *F * *uTmp + *D * *lambda + *e;
-
-  else if (D != NULL  && F == NULL && e != NULL)
-    *y = *C * *xTmp + *D * *lambda + *e;
-
-  else if (D == NULL  && F != NULL && e == NULL)
-    *y = *C * *xTmp + *F * *uTmp;
-
-  else if (D == NULL  && F != NULL && e != NULL)
-    *y = *C * *xTmp + *F * *uTmp + *D * *lambda + *e;
-
-  else // if (D == NULL  && F == NULL && e!= NULL)
-    *y = *C * *xTmp + *e;
+  if (e != NULL)
+    *y += *e;
 
   // \todo update y, yDot ... depending on the relative degree.
 
@@ -639,46 +626,42 @@ void LinearTIR::computeOutput(const double& time)
 }
 void LinearTIR::computeFreeOutput(const double& time)
 {
-  IN("LinearTIR::computeOutput\n");
+  IN("LinearTIR::computeFreeOutput\n");
   vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
   CompositeVector *xTmp = new CompositeVector();
-  //CompositeVector *uTmp = new CompositeVector();
+  CompositeVector *uTmp = new CompositeVector();
   vector<DynamicalSystem*>::iterator it;
-  // \warning : to be reviewed with control term u !!!
 
   for (it = vDS.begin(); it != vDS.end(); it++)
   {
-    // Put xFree and uFree of each DS into a composite
+    // Put xFree and u of each DS into a composite
     // Warning: use copy constructors, no link between pointers
     if ((*it)->getType() != LDS)
-      RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented for DS type " + (*it)->getType());
+      RuntimeException::selfThrow("LinearTIR - computeFreeOutput: not yet implemented for DS type " + (*it)->getType());
 
     xTmp->add((*it)->getXFree());
     if ((*it)->getUPtr() != NULL)
-      RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented when control term u is present");
-
-    // uTmp->add( *((*it)->getUPtr())) ;
+      uTmp->add(*((*it)->getUPtr())) ;
   }
 
   SimpleVector *yFree = interaction->getYPtr(0);
   // warning : yFree is saved in y !!
 
-  // compute y
+  // compute yFree
+  *yFree = *C * *xTmp;
+
   if (F != NULL)
-    RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented when control term u is present");
+    *yFree += *F * *uTmp ;
 
-  if (e == NULL)
-    *yFree = *C * *xTmp;
-
-  else
-    *yFree = *C * *xTmp + *e;
+  if (e != NULL)
+    *yFree += *e;
 
   // \todo update y, yDot ... depending on the relative degree.
 
   // free memory
   delete xTmp;
-  //delete uTmp;
-  OUT("LinearTIR::computeOutput\n");
+  delete uTmp;
+  OUT("LinearTIR::computeFreeOutput\n");
 }
 
 void LinearTIR::computeInput(const double& time)
