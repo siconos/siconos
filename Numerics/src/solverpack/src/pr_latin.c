@@ -114,7 +114,7 @@ void pr_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], d
   {
     k[i + n * i] =  *k_latin * vec[i * n + i];
 
-    if (fabs(k[i + n * i]) < 1e-16)
+    if (fabs(k[i + n * i]) < 1e-12)
     {
 
       if (ispeak > 0)
@@ -323,7 +323,7 @@ void pr_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], d
   {
 
     if (ispeak > 0)
-      printf("there is convergence after %d iterations, the residue is %g \n", iter1, err1);
+      printf("Convergence after %d iterations, the residue is %g \n", iter1, err1);
 
     *info = 0;
   }

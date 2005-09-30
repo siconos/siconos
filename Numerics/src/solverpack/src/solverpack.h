@@ -136,7 +136,23 @@ typedef struct
   int    iter;
   double err;
 
-} method_pfc;
+} method_pfc_2D;
+
+
+typedef struct
+{
+
+  char   name[64];
+  int    itermax;
+  double tol;
+  double mu;
+  double k_latin;
+  int    chat;
+  char   normType[64];
+  int    iter;
+  double err;
+
+} method_pfc_3D;
 
 /*!\struct method_dfc_2D
  *
@@ -171,15 +187,15 @@ typedef struct
   double tol;
   double mu;
   double k_latin;
+
   double *J1;
-  int    *ddl_i;
   int    *ddl_n;
   int    *ddl_tt;
-  int    *ddl_c;
-  int    dim_i;
-  int    dim_c;
+  int    *ddl_d;
   int    dim_tt;
-  int    dim_n;
+  int    dim_d;
+
+  int   chat;
   int    iter;
   double err;
 
@@ -207,7 +223,8 @@ typedef union
   method_pr  pr;
   method_dr  dr;
   method_lcp lcp;
-  method_pfc pfc;
+  method_pfc_2D pfc_2D;
+  method_pfc_3D pfc_3D;
   method_dfc_2D dfc_2D;
 
   /*!
@@ -277,7 +294,7 @@ extern "C" void dr_nlgs(double *vec , double *q , int *nn , double *a , double *
 
 extern "C" int dfc_2D_solver(double* , double* , int* , method* , double* , double*);
 
-extern "C" void dfc_2D_latin(double* , double* , int* , double* , double* , int* , double* , double* , double* , int* , double* , int*);
+extern "C" void dfc_2D_latin(double* , double* , int* , double* , double* , int* , double* , int *, double* , double* , int* , double* , int*);
 
 /********************************************/
 
@@ -308,11 +325,30 @@ extern "C" void pr_nlgs(double* , double* , int* , double* , double* , int* , do
 
 /********************************************/
 
-extern "C" void dfc_2D2lcp(int *, double *, method *, double *, int *, int *, int * , int *, int *, int *,
-                           int *, int *, double * , double * , int *, double *, double *);
 
-extern "C" void lcp2dfc_2D(int *, double *, double *, method *, double *, double *, int *, double *, int *,
-                           int *, int *, int *,  int *, int *, int *, double *, double *);
+
+extern "C" void dfc_2D2lcp(int *, double *, double *, double *, int *, int *, int * , int *, int *, double * , double *, double *);
+
+
+
+
+
+extern "C" void lcp2dfc_2D(int *, double *, double *, double *, double *, double *,  int *, int *,
+                           int *, int *, int *,  double *, double *);
+
+
+
+extern "C" void dfc_2Dcond_2D(int *, double *, double *, double *, int *, int *, int * , int *, int *, double * , double *, double *);
+
+
+
+
+
+extern "C" void cond_2D2dfc_2D(int *, double *, double *, double *, double *, double *,  int *, int *,
+                               int *, int *, int *,  double *, double *);
+
+
+
 
 /****************************** **************** ************************************/
 
@@ -559,16 +595,32 @@ extern void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *
 
 /*********************************** DFC 2D *****************************************/
 
-extern void dfc_2D_latin(double* , double* , int* , double* , double* , int* , double* , double* , double* , int* , double* , int*);
+extern void dfc_2D_latin(double* , double* , int* , double* , double* , int* , double* , int *, double* , double* , int* , double* , int*);
 
 /******************************LCP SWITCH DFC 2D ************************************/
 
 
-extern void dfc_2D2lcp(int *, double *, method *, double *, int *, int *, int * , int *, int *, int *, int *,
-                       int *, double * , double * , int *, double *, double *);
 
-extern void lcp2dfc_2D(int *, double *, double *, method *, double *, double *, int *, double *, int *, int *,
-                       int *, int *,  int *, int *, int *, double *, double *);
+extern  void dfc_2D2lcp(int *, double *, double *, double *, int *, int *, int * , int *, int *, double * , double *, double *);
+
+
+
+
+
+extern  void lcp2dfc_2D(int *, double *, double *, double *, double *, double *,  int *, int *,
+                        int *, int *, int *,  double *, double *);
+
+/******************************COND SWITCH DFC 2D ************************************/
+
+extern  void dfc_2D2cond_2D(int *, double *, double *, double *, int *, int *, int * , int *, int *, double * , double *, double *);
+
+
+
+
+
+extern  void cond_2D2dfc_2D(int *, double *, double *, double *, double *, double *,  int *, int *,
+                            int *, int *, int *,  double *, double *);
+
 
 /****************************** **************** ************************************/
 

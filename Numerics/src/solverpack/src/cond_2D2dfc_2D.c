@@ -30,6 +30,8 @@
 
    \author Nineb Sheherazade.
 */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,33 +40,32 @@
 #endif
 #include "blaslapack.h"
 
-
-
 void sortsn_(int *ddl_i, int *sort, int *n);
 
-void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1, double *J1, int *ddl_n, int *ddl_tt, int * dim_tt, int *ddl_d, int *dim_d, double *U2, double *F2)
+
+void cond_2D2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1, double *J1, int *ddl_n, int *ddl_tt, int * dim_tt, int *ddl_d, int *dim_d, double *U2, double *F2)
 {
 
 
 
 
-
-  int      info2, incx = 1, incy = 1, *vectnt, ind1, ind2;
-  int      dim_n, i, j, taille_n = *dim_tt, taille_tt = *dim_tt, taille_i;
-  int      taille_c, *ddl_nr, *ddl_tr, nc, taille_nr, taille_tr, taille_F1 = *dim_F1;
+  int      info2, ind1, ind2;
+  int      i, j, taille_n = *dim_tt, taille_i;
+  int      taille_c = 2 * taille_n, taille_F1 = *dim_F1;
   int      taille_d = *dim_d, taille_sort;
   int      *ddl_c, *sort1, *sort, *sort2, *vecF1, *vec_i, *ddl_i;
 
 
-  double   *a1, *a2, *b1, *b2, *Ut, * Un, *Fn, *Ft, *Ui;
-  double   *Jcn, *z, *w, *zz, *ww, invKii0;
-  double   *temp_i, *temp_ibis;
+
+
+  double   *Uc, *Jc, *Ui;
+  double   invKii0;
+  double   *temp_i;
 
 
   double   *Kii;
   double   *Kii2, *invKii;
-  double   *Kit;
-  double   *Kin;
+  double   *Kic;
 
   double   *Fi, *R;
 
@@ -72,16 +73,12 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
 
 
 
-  taille_c = 2 * taille_n;
-
   ddl_c     = (int*) malloc(taille_c * sizeof(int));
   sort1     = (int*) malloc(taille_c * sizeof(int));
   sort      = (int*) malloc((taille_c + taille_d) * sizeof(int));
   sort2     = (int*) malloc((taille_c + taille_d) * sizeof(int));
   vecF1     = (int*) malloc(taille_F1 * sizeof(int));
   vec_i     = (int*) malloc(taille_F1 * sizeof(int));
-
-
 
 
   for (i = 0; i < taille_n; i++)
@@ -138,44 +135,16 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
   }
 
 
-
-
-
-  dim_n = 2 * taille_n;
-  nc    = taille_n;
-
-
-  Kii       = (double *) malloc(taille_i * taille_i * sizeof(double));
-  Kii2      = (double *) malloc(taille_i * taille_i * sizeof(double));
-  Kit       = (double *) malloc(taille_i * taille_tt * sizeof(double));
-  Kin       = (double *) malloc(taille_i * taille_n * sizeof(double));
-  Fi        = (double *) malloc(taille_i * sizeof(double));
-  invKii    = (double *) malloc(taille_i * taille_i * sizeof(double));
-  R         = (double *) malloc(taille_i * taille_i * sizeof(double));
-  Jcn       = (double *) malloc(nc * sizeof(double));
-  z         = (double *) malloc(dim_n * sizeof(double));
-  w         = (double *) malloc(dim_n * sizeof(double));
-  a1        = (double *) malloc(nc * sizeof(double));
-  a2        = (double *) malloc(nc * sizeof(double));
-  b1        = (double *) malloc(nc * sizeof(double));
-  b2        = (double *) malloc(nc * sizeof(double));
-  Ut        = (double *) malloc(nc * sizeof(double));
-  Ft        = (double *) malloc(nc * sizeof(double));
-  Un        = (double *) malloc(nc * sizeof(double));
-  Fn        = (double *) malloc(nc * sizeof(double));
-  temp_i    = (double *) malloc(taille_i * sizeof(double));
-  temp_ibis = (double *) malloc(taille_i * sizeof(double));
-  vectnt    = (int *)    malloc(dim_n * sizeof(int));
-  ddl_nr    = (int *)    malloc(nc * sizeof(int));
-  ddl_tr    = (int *)    malloc(nc * sizeof(int));
-  zz        = (double *) malloc(dim_n * sizeof(double));
-  ww        = (double *) malloc(dim_n * sizeof(double));
-  Ui        = (double *) malloc(taille_i * sizeof(double));
-
-
-
-
-
+  Kii     = (double *) malloc(taille_i * taille_i * sizeof(double));
+  Kii2    = (double *) malloc(taille_i * taille_i * sizeof(double));
+  Kic     = (double *) malloc(taille_i * taille_c * sizeof(double));
+  Fi      = (double *) malloc(taille_i * sizeof(double));
+  invKii  = (double *) malloc(taille_i * taille_i * sizeof(double));
+  R       = (double *) malloc(taille_i * taille_i * sizeof(double));
+  Jc      = (double *) malloc(taille_c * sizeof(double));
+  Uc      = (double *) malloc(taille_c * sizeof(double));
+  Ui      = (double *) malloc(taille_i * sizeof(double));
+  temp_i  = (double *) malloc(taille_i * sizeof(double));
 
 
 
@@ -204,23 +173,26 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
     }
   }
 
-  for (i = 0; i < taille_i; i++)
-    for (j = 0; j < taille_n; j++)
-      Kin[i + taille_i * j] = 0.;
+
+
 
   for (i = 0; i < taille_i; i++)
-    for (j = 0; j < taille_tt; j++)
+    for (j = 0; j < taille_c; j++)
+      Kic[i + taille_i * j] = 0.;
+
+
+  for (i = 0; i < taille_i; i++)
+    for (j = 0; j < taille_c; j++)
+      Kic[i + taille_i * j] = K1[ddl_i[i] + taille_F1 * ddl_c[j]];
+
+
+  for (i = 0; i < taille_i; i++)
+    for (j = 0; j < taille_i; j++)
     {
-      Kin[i + taille_i * j] = K1[ddl_i[i] + taille_F1 * ddl_n[j]];
+      R[i + taille_i * j] = 0.;
+
     }
 
-  for (i = 0; i < taille_i; i++)
-    for (j = 0; j < taille_tt; j++)
-      Kit[i + taille_i * j] = 0.;
-
-  for (i = 0; i < taille_i; i++)
-    for (j = 0; j < taille_tt; j++)
-      Kit[i + taille_i * j] = K1[ddl_i[i] + taille_F1 * ddl_tt[j]];
 
 
 
@@ -234,40 +206,23 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
 
 
 
-  /*                   Cholesky            */
+  /*                   Cholesky                 */
 
 
   dpotrf_(&uplo, &taille_i, R , &taille_i, &info2);
 
-
   if (info2 != 0)
   {
 
-    free(Jcn);
-    free(z);
-    free(w);
-    free(zz);
-    free(ww);
-    free(a1);
-    free(a2);
-    free(b1);
-    free(b2);
-    free(Ut);
-    free(Ft);
-    free(Un);
-    free(Fn);
+    free(Jc);
+    free(Uc);
     free(Ui);
     free(temp_i);
-    free(temp_ibis);
-    free(vectnt);
-    free(ddl_nr);
-    free(ddl_tr);
     free(invKii);
     free(R);
     free(Kii);
     free(Kii2);
-    free(Kit);
-    free(Kin);
+    free(Kic);
     free(Fi);
 
     free(vec_i);
@@ -278,7 +233,9 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
     free(vecF1);
     free(ddl_i);
 
-    //return ;
+
+    // return ;
+
   }
 
 
@@ -288,31 +245,15 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
   if (info2 != 0)
   {
 
-    free(Jcn);
-    free(z);
-    free(w);
-    free(zz);
-    free(ww);
-    free(a1);
-    free(a2);
-    free(b1);
-    free(b2);
-    free(Ut);
-    free(Ft);
-    free(Un);
-    free(Fn);
+    free(Jc);
+    free(Uc);
     free(Ui);
     free(temp_i);
-    free(temp_ibis);
-    free(vectnt);
-    free(ddl_nr);
-    free(ddl_tr);
     free(invKii);
     free(R);
     free(Kii);
     free(Kii2);
-    free(Kit);
-    free(Kin);
+    free(Kic);
     free(Fi);
 
 
@@ -324,10 +265,10 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
     free(vecF1);
     free(ddl_i);
 
-    //return ;
+
+    // return ;
 
   }
-
 
 
   for (i = 0; i < taille_i; i++)
@@ -343,84 +284,24 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
 
 
 
-
-
-  for (i = 0; i < nc; i++)
+  for (i = 0; i < taille_c; i++)
   {
-    Jcn[i] = J1[ddl_n[i]];
+    Jc[i] = J1[ddl_c[i]];
+    Uc[i] = ztel[i] - Jc[i];
   }
 
-
-
-
-  for (i = 0; i < nc; i++)
-  {
-    z[i]     = ztel[i] - Jcn[i];      /* Un*/
-    Un[i]    = z[i];
-    b1[i]    = ztel[nc + i];
-    b2[i]    = ztel[2 * nc + i];
-    z[nc + i]  = b2[i] - b1[i];       /* Ut */
-    Ut[i]    = z[nc + i];
-    w[i]     = wtel[i];               /* Fn */
-    Fn[i]    = w[i];
-    a1[i]    = wtel[nc + i];
-    a2[i]    = wtel[2 * nc + i];
-    w[nc + i]  = 0.5 * (a2[i] - a1[i]); /* Ft */
-    Ft[i]    = w[nc + i];
-  }
-
-
-
-
-
-  for (i = 0; i < dim_n; i++)
-  {
-    vectnt[i] = i + 1;
-  }
-
-  for (i = 0; i < nc; i++)
-  {
-    ddl_nr[i] = vectnt[2 * i];
-
-    if (i != 0) ddl_tr[i] = vectnt[2 * i - 1];
-
-    else ddl_tr[i] = 0;
-
-  }
-
-  taille_nr = nc;
-  taille_tr = nc;
-
-
-  for (i = 0; i < taille_nr; i++)
-  {
-    zz[ddl_nr[i]] = z[i] + Jcn[i];
-    zz[ddl_tr[i]] = z[taille_nr + i];
-    ww[ddl_nr[i]] = w[i];
-    ww[ddl_tr[i]] = w[taille_nr + i];
-  }
-
-
-
-
-
-  dcopy_(&taille_i, Fi, &incx, temp_i, &incy);
 
 
   for (i = 0; i < taille_i; i++)
   {
     invKii0 = 0.0;
-
-    for (j = 0; j < taille_tt; j++)
+    for (j = 0; j < taille_c; j++)
     {
-      temp_i[i] = -Kin[i + taille_i * j] * Un[j] + invKii0;
+      temp_i[i] = Kic[i + taille_i * j] * Uc[j] + invKii0;
       invKii0   = temp_i[i];
-
     }
-
-    temp_i[i] = temp_i[i] + Fi[i];
+    temp_i[i] = Fi[i] - temp_i[i];
   }
-
 
 
 
@@ -428,45 +309,21 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
   for (i = 0; i < taille_i; i++)
   {
     invKii0 = 0.0;
-
-    for (j = 0; j < taille_tt; j++)
-    {
-      temp_ibis[i] = -Kit[i + taille_i * j] * Ut[j] + invKii0;
-      invKii0      = temp_ibis[i];
-
-    }
-
-    temp_i[i] = temp_ibis[i] + temp_i[i];
-  }
-
-
-
-  for (i = 0; i < taille_i; i++)
-  {
-    invKii0 = 0.0;
-
     for (j = 0; j < taille_i; j++)
     {
       Ui[i]   = invKii[i + taille_i * j] * temp_i[j] + invKii0;
       invKii0 = Ui[i];
     }
-
   }
-
 
   for (i = 0; i < taille_i; i++)
   {
     U2[ddl_i[i]] = Ui[i];
   }
 
-  for (i = 0; i < taille_tt; i++)
+  for (i = 0; i < taille_c; i++)
   {
-    U2[ddl_n[i]] = Un[i];
-  }
-
-  for (i = 0; i < taille_tt; i++)
-  {
-    U2[ddl_tt[i]] = Ut[i];
+    U2[ddl_c[i]] = Uc[i];
   }
 
   for (i = 0; i < taille_i; i++)
@@ -474,44 +331,22 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
     F2[ddl_i[i]] = Fi[i];
   }
 
-  for (i = 0; i < taille_tt; i++)
+  for (i = 0; i < taille_c; i++)
   {
-    F2[ddl_n[i]] = Fn[i];
-  }
-
-  for (i = 0; i < taille_tt; i++)
-  {
-    F2[ddl_tt[i]] = Ft[i];
+    F2[ddl_c[i]] = wtel[i];
   }
 
 
 
-
-  free(Jcn);
-  free(z);
-  free(w);
-  free(zz);
-  free(ww);
-  free(a1);
-  free(a2);
-  free(b1);
-  free(b2);
-  free(Ut);
-  free(Ft);
-  free(Un);
-  free(Fn);
+  free(Jc);
+  free(Uc);
   free(Ui);
   free(temp_i);
-  free(temp_ibis);
-  free(vectnt);
-  free(ddl_nr);
-  free(ddl_tr);
   free(invKii);
   free(R);
   free(Kii);
   free(Kii2);
-  free(Kit);
-  free(Kin);
+  free(Kic);
   free(Fi);
 
   free(vec_i);
@@ -524,5 +359,5 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
 
 
 
-  //  return ;
+  //        return ;
 }

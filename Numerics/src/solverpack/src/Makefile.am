@@ -31,11 +31,13 @@ PFC_SOLVERS = pfc_2D_cpg.c pfc_2D_latin.c pfc_2D_nlgs.c \
 
 DFC_SOURCES = dfc_2D_solver.c $(DFC_SOLVERS)
 
-DFC_SOLVERS = dfc_2D_latin.c
+DFC_SOLVERS = dfc_2D_latin.c   
 
 ### LCP <--> DFC 2D ##########################################
 
-SWITCH = lcp2dfc_2D.c dfc_2D2lcp.c
+SWITCH = lcp2dfc_2D.c dfc_2D2lcp.c cond_2D2dfc_2D.c \
+	dfc_2D2cond_2D.c 	
+
 
 ### PR #######################################################
 
@@ -61,7 +63,7 @@ libsolverpack_la_SOURCES = solverpack.h \
 	$(SWITCH) \
 	$(PR_SOURCES) \
 	$(DR_SOURCES) \
-	ql0001.f
+	ql0001.f sortsn.f diffns.c
 
 
 libsolverpack_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
