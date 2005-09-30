@@ -65,34 +65,38 @@
 #include <stdlib.h>
 #include <string.h>
 #include "solverpack.h"
-
 #include "blaslapack.h"
 
-void main(void)
+
+
+
+int main(void)
 {
 
-  FILE *f1, *f2, *f3, *f4, *f5, *f6, *f7;
-  int i, j, nl, nc, nll, n = 596, dimM = n, dim_i = 529, dim_n = 25, dim_tt = 25, dim_c = 50, info = -7;
+  FILE *f1, *f2, *f3, *f4, *f5, *f6;
+  int i, nl, nc, nll, n = 596, dimM = n, dim_d = 17, dim_n = 25, dim_tt = 25, info = -7;
   int  m;
   double *vec, *K1, *F1, *U2, *F2;
-  double(*M)[n];
+  double *M;
   double qi, Mij;
-  char val[14], vall[14];
-  char nom[64] = "NLGS";
+  char val[50], vall[50];
 
-  // static method_dfc_2D meth_dfc_2D = {"NLGS",1000,0.0000001,0.7,0.6,dim_i,dim_tt,dim_c,};
+
+
 
   method meth_dfc_2D;
 
-  //meth_dfc_2D.dfc_2D.name = nom;
-  meth_dfc_2D.dfc_2D.itermax = 1000;
-  meth_dfc_2D.dfc_2D.tol = 0.000001;
+
+  strcpy(meth_dfc_2D.dfc_2D.name, "Cfd_latin");
+  meth_dfc_2D.dfc_2D.itermax = 1501;
+  meth_dfc_2D.dfc_2D.tol = -0.000001;
   meth_dfc_2D.dfc_2D.mu = 0.5;
+  meth_dfc_2D.dfc_2D.chat = 1;
+
   meth_dfc_2D.dfc_2D.k_latin = 0.6;
-  meth_dfc_2D.dfc_2D.dim_i = dim_i;
-  meth_dfc_2D.dfc_2D.dim_n = dim_n;
+  meth_dfc_2D.dfc_2D.dim_d = dim_d;
   meth_dfc_2D.dfc_2D.dim_tt = dim_tt;
-  meth_dfc_2D.dfc_2D.dim_c = dim_c;
+
 
 
 
@@ -103,7 +107,7 @@ void main(void)
   }
 
 
-  M = malloc(dimM * dimM * sizeof(double));
+  M = (double *)malloc(dimM * dimM * sizeof(double));
   vec = (double*)malloc(dimM * dimM * sizeof(double));
   K1 = (double*)malloc(dimM * dimM * sizeof(double));
 
@@ -114,23 +118,11 @@ void main(void)
     fscanf(f1, "%s", val);
     Mij = atof(val);
 
-    /////////////       on met la transpos       ////////////////
-    *(*(M + nc - 1) + nl - 1) = Mij;
-    //////////////         fin transpos         ////////////////////
+
+
+    K1 [(nc - 1)*dimM + nl - 1] = Mij;
 
   }
-
-
-  //// valeurs du tableau dans vec (compatibilite allocation memoire f90)///
-  for (i = 0; i < dimM; i++)
-  {
-    for (j = 0; j < dimM; j++)
-    {
-      vec[j * dimM + i] = M[i][j];
-      K1[j * dimM + i] = M[i][j];
-    }
-  }
-  //// valeurs du tableau dans vec (compatibilite allocation memoire f90)///
 
 
 
@@ -144,11 +136,13 @@ void main(void)
 
 
   meth_dfc_2D.dfc_2D.J1 = (double *) malloc(dimM * sizeof(double));
+
   F1 = (double *) malloc(dimM * sizeof(double));
-  meth_dfc_2D.dfc_2D.ddl_i = (int*)malloc(dim_i * sizeof(int));
+
+  meth_dfc_2D.dfc_2D.ddl_d = (int*)malloc(dim_d * sizeof(int));
   meth_dfc_2D.dfc_2D.ddl_n = (int*)malloc(dim_n * sizeof(int));
   meth_dfc_2D.dfc_2D.ddl_tt = (int*)malloc(dim_tt * sizeof(int));
-  meth_dfc_2D.dfc_2D.ddl_c = (int*)malloc(dim_c * sizeof(int));
+
 
 
 
@@ -179,7 +173,7 @@ void main(void)
 
 
 
-  if ((f4 = fopen("DATA/ddl_i_mu.dat", "r")) == NULL)
+  if ((f4 = fopen("DATA/ddl_d_mu.dat", "r")) == NULL)
   {
     perror("fopen 4");
     exit(4);
@@ -192,7 +186,7 @@ void main(void)
     fscanf(f4, "%s", vall);
     qi = atof(vall);
     m = qi;
-    *(meth_dfc_2D.dfc_2D.ddl_i + nll - 1) = m - 1;
+    *(meth_dfc_2D.dfc_2D.ddl_d + nll - 1) = m - 1;
 
   }
 
@@ -235,22 +229,6 @@ void main(void)
 
 
 
-  if ((f7 = fopen("DATA/ddl_c_mu.dat", "r")) == NULL)
-  {
-    perror("fopen 7");
-    exit(7);
-  }
-
-
-  while (!feof(f7))
-  {
-    fscanf(f7, "%d", &nll);
-    fscanf(f7, "%s", &vall);
-    qi = atof(vall);
-    m = qi;
-    *(meth_dfc_2D.dfc_2D.ddl_c + nll - 1) = m - 1;
-  }
-
 
 
 
@@ -258,7 +236,7 @@ void main(void)
   F2 = malloc(n * sizeof(double));
 
 
-  printf("\n\n  we go in the function name %s\n\n", nom);
+  printf("\n\n  we go in the function  %s\n\n", meth_dfc_2D.dfc_2D.name);
 
 
 
@@ -272,7 +250,7 @@ void main(void)
 
 
 
-  for (i = 0; i < 20; i++)
+  for (i = 0; i < 25; i++)
     printf("z %g w %g \n", U2[i], F2[i]);
 
 
@@ -283,7 +261,6 @@ void main(void)
   fclose(f4);
   fclose(f5);
   fclose(f6);
-  fclose(f7);
 
 
   free(vec);
@@ -294,12 +271,13 @@ void main(void)
 
   free(U2);
   free(F2);
-  free(meth_dfc_2D.dfc_2D.ddl_i);
+  free(meth_dfc_2D.dfc_2D.ddl_d);
   free(meth_dfc_2D.dfc_2D.ddl_tt);
   free(meth_dfc_2D.dfc_2D.ddl_n);
-  free(meth_dfc_2D.dfc_2D.ddl_c);
+
   free(meth_dfc_2D.dfc_2D.J1);
 
+  return 1;
 
 }
 

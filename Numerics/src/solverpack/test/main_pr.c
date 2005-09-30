@@ -53,23 +53,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include "solverpack.h"
+#include "blaslapack.h"
 
 #define CHAT
 
 
 void test_mmc(void)
 {
-  FILE *f1, *f2, *f3, *f4;
-  int i, j, nl, nc, nll, n = 15;
-  int info1 = -1, info2 = -1;
-  int nonsymmetric;
+  FILE    *f1, *f2, *f3, *f4;
+  int     i, j, nl, nc, nll, n = 15;
+  int     info1 = -1, info2 = -1, incx = 1, incy = 1, dim;
+  int     nonsymmetric;
 
-  double *q, *z1, *w1, *z2, *w2, *vec, *a, *b;
-  double qi, Mij;
+  double  *q, *z1, *w1, *z2, *w2, *vec, *a, *b, *qt;
+  double  *zt1, *zt2, *abso1, *abso2, *d, *c, *abso3, mini, max1, max2, maxi_1, maxi_2;
+  double  qi, Mij, diff1, diff2, num, den, alpha, beta, max11, max22;
+  double  comp11, comp22, comp111, comp222, comp1111, comp2222;
 
-
-  char val[50], vall[50];
-  method meth_pr1, meth_pr2;
+  char    val[50], vall[50], NT = 'T';
+  method  meth_pr1, meth_pr2;
 
 
   printf("\n* *** ******************** *** * \n");
@@ -80,14 +82,22 @@ void test_mmc(void)
 
   /*           Allocations                     */
 
-  q   = (double*)malloc(n * sizeof(double));
-  z1  = (double*)malloc(n * sizeof(double));
-  w1  = (double*)malloc(n * sizeof(double));
-  z2  = (double*)malloc(n * sizeof(double));
-  w2  = (double*)malloc(n * sizeof(double));
-  a   = (double*) malloc(n * sizeof(double));
-  b   = (double*)malloc(n * sizeof(double));
-  vec = (double*) malloc(n * n * sizeof(double));
+  q       = (double*) malloc(n * sizeof(double));
+  qt      = (double*) malloc(n * sizeof(double));
+  z1      = (double*) malloc(n * sizeof(double));
+  w1      = (double*) malloc(n * sizeof(double));
+  z2      = (double*) malloc(n * sizeof(double));
+  w2      = (double*) malloc(n * sizeof(double));
+  a       = (double*) malloc(n * sizeof(double));
+  b       = (double*) malloc(n * sizeof(double));
+  vec     = (double*) malloc(n * n * sizeof(double));
+  zt1     = (double*) malloc(n * sizeof(double));
+  zt2     = (double*) malloc(n * sizeof(double));
+  abso1   = (double*) malloc(n * sizeof(double));
+  abso2   = (double*) malloc(n * sizeof(double));
+  d       = (double*) malloc(n * sizeof(double));
+  abso3   = (double*) malloc(n * sizeof(double));
+  c       = (double*) malloc(n * sizeof(double));
 
 
   /*     Data loading of M , q , a and b           */
@@ -205,16 +215,16 @@ void test_mmc(void)
   /*           Initialization                 */
 
   strcpy(meth_pr1.pr.name, "NLGS");
-  meth_pr1.pr.itermax  =  30000;
-  meth_pr1.pr.tol      =  0.0000001;
-  meth_pr1.pr.chat  =  0;
+  meth_pr1.pr.itermax  =  50000;
+  meth_pr1.pr.tol      =  0.0000000001;
+  meth_pr1.pr.chat     =  1;
 
 
   strcpy(meth_pr2.pr.name, "Latin");
-  meth_pr2.pr.itermax  =  1500;
-  meth_pr2.pr.tol      =  0.0001;
-  meth_pr2.pr.k_latin  =  0.003;
-  meth_pr2.pr.chat  =  0;
+  meth_pr2.pr.itermax  =  50000;
+  meth_pr2.pr.tol      =  0.0000000001;
+  meth_pr2.pr.k_latin  =  0.003;//0.003;
+  meth_pr2.pr.chat     =  1;
 
 
 
@@ -254,11 +264,448 @@ void test_mmc(void)
 #ifdef CHAT
   printf(" *** ************************************** ***\n");
   for (i = 0 ; i < n ; ++i)
-    printf(" NLGS RESULT : %14.7g   LATIN RESULT : % 14.7g \n" , z1[i] , z2[i]);
+    printf(" NLGS RESULT : %10.4e  %10.4e| LATIN RESULT : % 10.4e  %10.4e \n" , z1[i], w1[i], z2[i], w2[i]);
 
-  printf(" -- SOLVEUR ------ ITER ----- ERR\n");
-  printf(" \n NLGS RESULT : %d   % 14.7g \n" , meth_pr1.pr.iter , meth_pr1.pr.err);
-  printf(" LATIN RESULT : %d   % 14.7g \n" , meth_pr2.pr.iter , meth_pr2.pr.err);
+  printf(" -- SOLVEUR --- ITER --- ERR-------INT-------NUL-w-----POS-w-----NPOS-w-----\n");
+
+
+
+
+  /*  TEST of behavior laws */
+
+
+
+  for (i = 0; i < n ; i ++)
+  {
+
+    c[i] = (meth_pr1.pr.a[i] - meth_pr1.pr.b[i]) / 2;
+    d[i] = (meth_pr1.pr.a[i] + meth_pr1.pr.b[i]) / 2;
+
+  }
+
+
+  dcopy_(&n, z1, &incx, zt1, &incy);
+  dcopy_(&n, z2, &incx, zt2, &incy);
+
+  alpha = -1.;
+  daxpy_(&n , &alpha , c , &incx , zt1 , &incy);
+
+  alpha = -1.;
+  daxpy_(&n , &alpha , c , &incx , zt2 , &incy);
+
+  alpha = 1.;
+  beta  = 0.;
+  dgemv_(&NT , &n , &n , &beta , vec , &n , q , &incx , &alpha , qt , &incy);
+
+
+
+  /*                 Relay                */
+
+
+  /*      zt in interval [-d,d]       */
+
+  abs_part(zt1, abso1, &n);
+
+  abs_part(d, abso2, &n);
+
+  alpha = -1.0;
+  daxpy_(&n , &alpha , abso1 , &incx , abso2 , &incy);
+
+  min_part(abso2, &mini, &n);
+
+  mini = - mini;
+
+  dim = 1;
+  pos_part(&mini, &mini, &dim) ;
+
+
+  abs_part(zt1, abso2, &n);
+
+  max_part(abso2 , &max11 , &n);
+
+  max11 = mini / max11;
+
+
+  /*       Test of |w| = 0        */
+
+
+
+  abs_part(zt1, abso1, &n);
+
+  abs_part(d, abso2, &n);
+
+  alpha = -1.0;
+  daxpy_(&n , &alpha , abso1 , &incx , abso2 , &incy);
+
+  abs_part(abso2, abso1, &n);
+
+  abs_part(w1, abso2, &n);
+
+  comp11 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+
+
+  abs_part(zt1, abso2, &n);
+
+  max_part(abso2 , &max2 , &n);
+
+  abs_part(w1, abso2, &n);
+
+  max_part(abso2 , &max1 , &n);
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp11 = comp11 / (n * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w1, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(q, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp11 = comp11 / (n * max2 * max1);
+
+  }
+
+
+
+  /*       Test of wt > 0       */
+
+
+  dcopy_(&n, zt1, &incx, abso1, &incy);
+
+  alpha = 1.0;
+  daxpy_(&n , &alpha , d , &incx , abso1 , &incy);
+
+  abs_part(abso1, abso2, &n);
+
+  pos_part(w1, abso1, &n) ;
+
+  comp111 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+
+  abs_part(zt1, abso2, &n);
+
+  max_part(abso2 , &max2 , &n);
+
+  abs_part(w1, abso2, &n);
+
+  max_part(abso2 , &max1 , &n);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp111 = comp111 / (n * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w1, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(q, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp111 = comp111 / (n * max2 * max1);
+
+  }
+
+
+
+
+
+
+  /*        Test of wt < 0         */
+
+
+  dcopy_(&n, zt1, &incx, abso1, &incy);
+
+  alpha = -1.0;
+  daxpy_(&n , &alpha , d , &incx , abso1 , &incy);
+
+  abs_part(abso1, abso2, &n);
+
+  dcopy_(&n, w1, &incx, abso1, &incy);
+
+  alpha = -1.;
+  dscal_(&n , &alpha , abso1 , &incx);
+
+  pos_part(abso1, abso1, &n) ;
+
+  comp1111 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+
+  abs_part(zt1, abso2, &n);
+
+  max_part(abso2 , &max2 , &n);
+
+  abs_part(w1, abso2, &n);
+
+  max_part(abso2 , &max1 , &n);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp1111 = comp1111 / (n * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w1, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(q, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp1111 = comp1111 / (n * max2 * max1);
+
+  }
+
+
+
+  /*                    Equilibrium                  */
+
+
+
+  alpha = -1;
+  daxpy_(&n , &alpha , q , &incx , w1 , &incy);
+
+  beta  = 1;
+  dgemv_(&NT , &n , &n , &beta , vec , &n , z1 , &incx , &alpha , w1 , &incy);
+
+  num = dnrm2_(&n , w1 , &incx);
+  den = dnrm2_(&n , q , &incx);
+
+  diff1 = num / den ;
+
+
+
+  /*                 Relay        */
+
+
+  /*      zt in interval [-d,d]       */
+
+
+  abs_part(zt2, abso1, &n);
+
+  abs_part(d, abso2, &n);
+
+  alpha = -1.0;
+  daxpy_(&n , &alpha , abso1 , &incx , abso2 , &incy);
+
+  min_part(abso2, &mini, &n);
+
+  mini = - mini;
+
+  dim = 1;
+  pos_part(&mini, &mini, &dim) ;
+
+
+  abs_part(zt2, abso2, &n);
+
+  max_part(abso2 , &max22 , &n);
+
+  max22 = mini / max22;
+
+
+  /*        Test of |w| = 0        */
+
+
+
+  abs_part(zt2, abso1, &n);
+
+  abs_part(d, abso2, &n);
+
+  alpha = -1.0;
+  daxpy_(&n , &alpha , abso1 , &incx , abso2 , &incy);
+
+  abs_part(abso2, abso1, &n);
+
+  abs_part(w2, abso2, &n);
+
+  comp22 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+
+
+  abs_part(zt2, abso2, &n);
+
+  max_part(abso2 , &max2 , &n);
+
+  abs_part(w2, abso2, &n);
+
+  max_part(abso2 , &max1 , &n);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp22 = comp22 / (n * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w2, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(q, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp22 = comp22 / (n * max2 * max1);
+
+  }
+
+
+
+  /*       Test of wt > 0       */
+
+
+
+  dcopy_(&n, zt2, &incx, abso1, &incy);
+
+  alpha = 1.0;
+  daxpy_(&n , &alpha , d , &incx , abso1 , &incy);
+
+  abs_part(abso1, abso2, &n);
+
+  pos_part(w2, abso1, &n) ;
+
+  comp222 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+
+  abs_part(zt2, abso2, &n);
+
+  max_part(abso2 , &max2 , &n);
+
+  abs_part(w2, abso2, &n);
+
+  max_part(abso2 , &max1 , &n);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp222 = comp222 / (n * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w2, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(q, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp222 = comp222 / (n * max2 * max1);
+
+  }
+
+  /*        Test of wt < 0       */
+
+
+  dcopy_(&n, zt2, &incx, abso1, &incy);
+
+  alpha = -1.0;
+  daxpy_(&n , &alpha , d , &incx , abso1 , &incy);
+
+  abs_part(abso1, abso2, &n);
+
+  dcopy_(&n, w2, &incx, abso1, &incy);
+
+  alpha = -1.;
+  dscal_(&n , &alpha , abso1 , &incx);
+
+  pos_part(abso1, abso1, &n) ;
+
+  comp2222 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+
+  abs_part(zt2, abso2, &n);
+
+  max_part(abso2 , &max2 , &n);
+
+  abs_part(w2, abso2, &n);
+
+  max_part(abso2 , &max1 , &n);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp2222 = comp2222 / (n * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(w2, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(q, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp2222 = comp2222 / (n * max2 * max1);
+
+  }
+
+
+  /*                    Equilibrium                  */
+
+  alpha = -1;
+  daxpy_(&n , &alpha , q , &incx , w2 , &incy);
+
+  beta  = 1;
+  dgemv_(&NT , &n , &n , &beta , vec , &n , z2 , &incx , &alpha , w2 , &incy);
+
+  num = dnrm2_(&n , w2 , &incx);
+  den = dnrm2_(&n , q , &incx);
+
+  diff2 = num / den ;
+
+
+
+  printf("\n  NLGS RESULT: %5d|%10.4e|%10.4e|%10.4e|%10.4e|%10.4e|\n" , meth_pr1.pr.iter ,  diff1, max11, comp11, comp111, comp1111);
+  printf(" LATIN RESULT: %5d|%10.4e|%10.4e|%10.4e|%10.4e|%10.4e|\n" , meth_pr2.pr.iter ,  diff2, max22, comp22, comp222, comp2222);
 
 
 
@@ -270,12 +717,20 @@ void test_mmc(void)
 
   free(vec);
   free(q);
+  free(qt);
   free(z1);
   free(w1);
   free(z2);
   free(w2);
   free(a);
   free(b);
+  free(zt1);
+  free(zt2);
+  free(abso1);
+  free(abso2);
+  free(d);
+  free(abso3);
+  free(c);
   free(meth_pr1.pr.a);
   free(meth_pr1.pr.b);
   free(meth_pr2.pr.a);

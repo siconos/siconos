@@ -42,7 +42,7 @@
 //        pt      a pointer other a union ( methode see "solverpack.h").
 //        z and w are n-dimensional  vectors solution.
 //
-//        methode is a variable with a union type; in this union you find the structure (method_rd) that gives to the function
+//        methode is a variable with a union type; in this union you find the structure (method_dr) that gives to the function
 //  solve_dr, the name and the parameters (itermax, tol, k_latin, a, b, chat) of the method we want to use.
 //  This function return an interger:  0 successful .
 //
@@ -54,23 +54,27 @@
 #include <stdlib.h>
 #include <string.h>
 #include "solverpack.h"
+#include "blaslapack.h"
 
 #define CHAT
 
 
 void test_mmc(void)
 {
-  FILE *f1, *f2, *f3, *f4;
-  int i, j, nl, nc, nll, n = 40;
-  int info1 = -1, info2 = -1;
-  int nonsymmetric;
+  FILE      *f1, *f2, *f3, *f4;
+  int       i, j, nl, nc, nll, n = 40;
+  int       info1 = -1, info2 = -1, incx = 1, incy = 1;
+  int       nonsymmetric, dim;
 
-  double *q, *z1, *w1, *z2, *w2, *vec, *a, *b;
-  double qi, Mij;
+  double    *q, *z1, *w1, *z2, *w2, *vec, *a, *b;
+  double    *c, *d, *qt, *wt1, *wt2, *abso1, *abso2;
+  double    mini, max1, max2, maxi_1, maxi_2, max11, max22;
+  double    qi, Mij, alpha, beta, num, den, diff1, diff2;
+  double    comp11, comp22, comp111, comp222, comp1111, comp2222;
 
 
-  char val[50], vall[50];
-  method meth_dr1, meth_dr2;
+  char      val[50], vall[50], NT = 'N';
+  method    meth_dr1, meth_dr2;
 
 
   printf("\n* *** ******************** *** * \n");
@@ -81,14 +85,21 @@ void test_mmc(void)
 
   /*           Allocations                     */
 
-  q   = (double*)malloc(n * sizeof(double));
-  z1  = (double*)malloc(n * sizeof(double));
-  w1  = (double*)malloc(n * sizeof(double));
-  z2  = (double*)malloc(n * sizeof(double));
-  w2  = (double*)malloc(n * sizeof(double));
-  a   = (double*) malloc(n * sizeof(double));
-  b   = (double*)malloc(n * sizeof(double));
-  vec = (double*) malloc(n * n * sizeof(double));
+  q     = (double*)malloc(n * sizeof(double));
+  z1    = (double*)malloc(n * sizeof(double));
+  w1    = (double*)malloc(n * sizeof(double));
+  z2    = (double*)malloc(n * sizeof(double));
+  w2    = (double*)malloc(n * sizeof(double));
+  a     = (double*)malloc(n * sizeof(double));
+  b     = (double*)malloc(n * sizeof(double));
+  vec   = (double*)malloc(n * n * sizeof(double));
+  c     = (double*)malloc(n * sizeof(double));
+  d     = (double*)malloc(n * sizeof(double));
+  qt    = (double*)malloc(n * sizeof(double));
+  wt1   = (double*)malloc(n * sizeof(double));
+  wt2   = (double*)malloc(n * sizeof(double));
+  abso1 = (double*)malloc(n * sizeof(double));
+  abso2 = (double*)malloc(n * sizeof(double));
 
 
   /*     Data loading of M , q , a and b           */
@@ -184,7 +195,7 @@ void test_mmc(void)
   {
     for (j = 0 ; j < i ; ++j)
     {
-      if (abs(vec[i * n + j] - vec[j * n + i]) > 1e-16)
+      if (abs(vec[i * n + j] - vec[j * n + i]) > 1e-10)
       {
         nonsymmetric = 1;
         break;
@@ -205,17 +216,19 @@ void test_mmc(void)
 
   /*           Initialization                 */
 
+
+
   strcpy(meth_dr1.dr.name, "NLGS");
   meth_dr1.dr.itermax  =  1000;
   meth_dr1.dr.tol      =  0.000001;
-  meth_dr1.dr.chat  =  0;
+  meth_dr1.dr.chat     =  1;
 
 
   strcpy(meth_dr2.dr.name, "Latin");
   meth_dr2.dr.itermax  =  5000;
   meth_dr2.dr.tol      =  0.0000000000001;
   meth_dr2.dr.k_latin  =  0.09;
-  meth_dr2.dr.chat  =  0;
+  meth_dr2.dr.chat     =  1;
 
 
 
@@ -257,9 +270,497 @@ void test_mmc(void)
   for (i = 0 ; i < n ; ++i)
     printf(" NLGS RESULT : %14.7e %14.7e   LATIN RESULT : % 14.7e  %14.7e \n" , z1[i] , w1 [i], z2[i], w2[i]);
 
-  printf("\n -- SOLVEUR ------ ITER ----- ERR\n");
-  printf(" \n NLGS RESULT : %d   % 14.7e \n" , meth_dr1.dr.iter , meth_dr1.dr.err);
-  printf("   LATIN RESULT : %d   % 14.7e \n" , meth_dr2.dr.iter , meth_dr2.dr.err);
+  printf("\n -- SOLVEUR --- ITER --- ERR-----INT-------NUL-z-----POS-z-----NPOS-z----\n");
+
+
+
+
+
+  for (i = 0; i < n ; i ++)
+  {
+
+    c[i] = (meth_dr1.dr.a[i] - meth_dr1.dr.b[i]) / 2;
+    d[i] = (meth_dr1.dr.a[i] + meth_dr1.dr.b[i]) / 2;
+
+  }
+
+
+  dcopy_(&n, w1, &incx, wt1, &incy);
+  dcopy_(&n, w2, &incx, wt2, &incy);
+  dcopy_(&n,  q, &incx, qt, &incy);
+
+  alpha = -1.;
+  daxpy_(&n , &alpha , c , &incx , wt1 , &incy);
+
+  alpha = -1.;
+  daxpy_(&n , &alpha , c , &incx , wt2 , &incy);
+
+  alpha = -1.;
+  daxpy_(&n , &alpha , c , &incx , qt , &incy);
+
+
+  /*  TEST of behavior laws */
+
+
+  /*                 Relay                */
+
+
+  /*      wt in interval [-d,d]       */
+
+  abs_part(wt1, abso1, &n);
+
+  abs_part(d, abso2, &n);
+
+  alpha = -1.0;
+  daxpy_(&n , &alpha , abso1 , &incx , abso2 , &incy);
+
+  min_part(abso2, &mini, &n);
+
+  mini = - mini;
+
+  dim = 1;
+  pos_part(&mini, &mini, &dim) ;
+
+
+  abs_part(wt1, abso2, &n);
+
+  max_part(abso2 , &max11 , &n);
+
+
+  if (max1 > 1e-10)
+  {
+
+    max11 = mini / max11;
+
+  }
+  else
+  {
+
+    abs_part(wt1, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(qt, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max11 = maxi_1;
+    else
+      max11 = maxi_2;
+
+    max11 = mini / max11;
+
+  }
+
+
+
+  /*       Test of |z| = 0        */
+
+
+
+  abs_part(wt1, abso1, &n);
+
+  abs_part(d, abso2, &n);
+
+  alpha = -1.0;
+  daxpy_(&n , &alpha , abso1 , &incx , abso2 , &incy);
+
+  abs_part(abso2, abso1, &n);
+
+  abs_part(z1, abso2, &n);
+
+  comp11 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+
+
+  abs_part(z1, abso2, &n);
+  max_part(abso2 , &max2 , &n);
+
+  abs_part(wt1, abso2, &n);
+  max_part(abso2 , &max1 , &n);
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp11 = comp11 / (n * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(wt1, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(qt, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp11 = comp11 / (n * max2 * max1);
+
+  }
+
+
+
+  /*       Test of z > 0       */
+
+
+  dcopy_(&n, wt1, &incx, abso1, &incy);
+
+  alpha = 1.0;
+  daxpy_(&n , &alpha , d , &incx , abso1 , &incy);
+
+  abs_part(abso1, abso2, &n);
+
+  pos_part(z1, abso1, &n) ;
+
+  comp111 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+
+  abs_part(z1, abso2, &n);
+
+  max_part(abso2 , &max2 , &n);
+
+  abs_part(wt1, abso2, &n);
+
+  max_part(abso2 , &max1 , &n);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp111 = comp111 / (n * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(wt1, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(qt, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp111 = comp111 / (n * max2 * max1);
+
+  }
+
+
+
+
+
+
+  /*        Test of z < 0         */
+
+
+  dcopy_(&n, wt1, &incx, abso1, &incy);
+
+  alpha = -1.0;
+  daxpy_(&n , &alpha , d , &incx , abso1 , &incy);
+
+  abs_part(abso1, abso2, &n);
+
+  dcopy_(&n, z1, &incx, abso1, &incy);
+
+  alpha = -1.;
+  dscal_(&n , &alpha , abso1 , &incx);
+
+  pos_part(abso1, abso1, &n) ;
+
+  comp1111 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+
+  abs_part(z1, abso2, &n);
+
+  max_part(abso2 , &max2 , &n);
+
+  abs_part(wt1, abso2, &n);
+
+  max_part(abso2 , &max1 , &n);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp1111 = comp1111 / (n * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(wt1, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(qt, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp1111 = comp1111 / (n * max2 * max1);
+
+  }
+
+
+
+  /*        Equilibrium       */
+
+
+  alpha = -1;
+  daxpy_(&n , &alpha , q , &incx , w1 , &incy);
+
+  beta  = 1;
+  dgemv_(&NT , &n , &n , &beta , vec , &n , z1 , &incx , &alpha , w1 , &incy);
+
+  num = dnrm2_(&n , w1 , &incx);
+  den = dnrm2_(&n , q , &incx);
+
+  diff1 = num / den ;
+
+
+  /*       TEST of behavior laws     */
+
+
+  /*                 Relay                */
+
+
+  /*      wt in interval [-d,d]       */
+
+  abs_part(wt2, abso1, &n);
+
+  abs_part(d, abso2, &n);
+
+  alpha = -1.0;
+  daxpy_(&n , &alpha , abso1 , &incx , abso2 , &incy);
+
+  min_part(abso2, &mini, &n);
+
+  mini = - mini;
+
+  dim = 1;
+  pos_part(&mini, &mini, &dim) ;
+
+
+  abs_part(wt2, abso2, &n);
+
+  max_part(abso2 , &max11 , &n);
+
+
+  if (max1 > 1e-10)
+  {
+
+    max22 = mini / max11;
+
+  }
+  else
+  {
+
+    abs_part(wt2, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(qt, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max22 = maxi_1;
+    else
+      max22 = maxi_2;
+
+    max22 = mini / max22;
+
+  }
+
+
+
+  /*       Test of |z| = 0        */
+
+
+
+  abs_part(wt1, abso1, &n);
+
+  abs_part(d, abso2, &n);
+
+  alpha = -1.0;
+  daxpy_(&n , &alpha , abso1 , &incx , abso2 , &incy);
+
+  abs_part(abso2, abso1, &n);
+
+  abs_part(z2, abso2, &n);
+
+  comp22 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+
+
+  abs_part(z2, abso2, &n);
+
+  max_part(abso2 , &max2 , &n);
+
+  abs_part(wt2, abso2, &n);
+
+  max_part(abso2 , &max1 , &n);
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp22 = comp22 / (n * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(wt2, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(qt, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp22 = comp22 / (n * max2 * max1);
+
+  }
+
+
+
+  /*       Test of z > 0       */
+
+
+  dcopy_(&n, wt2, &incx, abso1, &incy);
+
+  alpha = 1.0;
+  daxpy_(&n , &alpha , d , &incx , abso1 , &incy);
+
+  abs_part(abso1, abso2, &n);
+
+  pos_part(z2, abso1, &n) ;
+
+  comp222 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+
+  abs_part(z2, abso2, &n);
+
+  max_part(abso2 , &max2 , &n);
+
+  abs_part(wt2, abso2, &n);
+
+  max_part(abso2 , &max1 , &n);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp222 = comp222 / (n * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(wt2, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(qt, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp222 = comp222 / (n * max2 * max1);
+
+  }
+
+
+
+
+
+
+  /*        Test of z < 0         */
+
+
+  dcopy_(&n, wt2, &incx, abso1, &incy);
+
+  alpha = -1.0;
+  daxpy_(&n , &alpha , d , &incx , abso1 , &incy);
+
+  abs_part(abso1, abso2, &n);
+
+  dcopy_(&n, z2, &incx, abso1, &incy);
+
+  alpha = -1.;
+  dscal_(&n , &alpha , abso1 , &incx);
+
+  pos_part(abso1, abso1, &n) ;
+
+  comp2222 = ddot_(&n , abso1 , &incx , abso2 , &incy);
+
+  abs_part(z2, abso2, &n);
+
+  max_part(abso2 , &max2 , &n);
+
+  abs_part(wt2, abso2, &n);
+
+  max_part(abso2 , &max1 , &n);
+
+
+
+  if (max1 > 1e-10)
+  {
+
+    comp2222 = comp2222 / (n * max1 * max2);
+
+  }
+  else
+  {
+
+    abs_part(wt2, abso2, &n);
+    max_part(abso2, &maxi_1, &n);
+
+    abs_part(qt, abso1, &n);
+    max_part(abso1, &maxi_2, &n);
+
+    if (maxi_1 > maxi_2)
+      max1 = maxi_1;
+    else
+      max1 = maxi_2;
+
+    comp2222 = comp2222 / (n * max2 * max1);
+
+  }
+
+
+
+
+  /*        Equilibrium       */
+
+  alpha = -1;
+  daxpy_(&n , &alpha , q , &incx , w2 , &incy);
+
+  beta  = 1;
+  dgemv_(&NT , &n , &n , &beta , vec , &n , z2 , &incx , &alpha , w2 , &incy);
+
+  num = dnrm2_(&n , w2 , &incx);
+  den = dnrm2_(&n , q , &incx);
+
+  diff2 = num / den ;
+
+
+  /*       PRINT RESULT       */
+
+  printf("\n  NLGS RESULT:%5d|%10.4e|%10.4e|%10.4e|%10.4e|%10.4e|\n" , meth_dr1.dr.iter, diff1, max11, comp11, comp111, comp1111);
+  printf(" LATIN RESULT:%5d|%10.4e|%10.4e|%10.4e|%10.4e|%10.4e|\n" , meth_dr2.dr.iter , diff2, max22, comp22, comp222, comp2222);
 
 
 
@@ -277,6 +778,13 @@ void test_mmc(void)
   free(w2);
   free(a);
   free(b);
+  free(c);
+  free(d);
+  free(qt);
+  free(wt1);
+  free(wt2);
+  free(abso1);
+  free(abso2);
   free(meth_dr1.dr.a);
   free(meth_dr1.dr.b);
   free(meth_dr2.dr.a);
