@@ -46,7 +46,7 @@ M z + q = w\\
    \param info        On return a pointer over integers, the termination reason
                         0 = convergence
             1 = no convergence
-            2 = nul term in diagonal of M.
+            2 = nul term in denominator.
 
 
 
@@ -70,14 +70,13 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 {
 
   int i, j, k, iter, maxit;
-  int n = *nn, incx = 1, incy = 1, nc = n / 2;
+  int n = *nn, incx, incy, nc = n / 2;
   int ispeak, it_end;
 
 
   double errmax, alpha, beta, mu;
   double *y, res;
-  double *fric1, *fric;
-  double normr, eps, avn, avt;
+  double normr, eps, avn, avt, det, gplus, gmoins;
   double apn, apt, zn , zt, den1, num1;
 
   char  notrans = 'N';
@@ -102,8 +101,7 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
 
   y       = (double*) malloc(n  * sizeof(double));
-  fric1   = (double*) malloc(nc * sizeof(double));
-  fric    = (double*) malloc(nc * sizeof(double));
+
 
 
 
@@ -113,15 +111,6 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
     z[i]  = 0.0 ;
     w[i]  = 0.0 ;
-
-    if (i < nc)
-    {
-
-      fric1[i] = 1.0 ;
-      fric[i]  = mu * fric1[i] ;
-
-    }
-
   }
 
 
@@ -151,8 +140,8 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
       for (j = 0; j <= 2 * i - 1; j++)
       {
 
-        avn += vec[j * n + 2 * i] * z[j];
-        avt += vec[j * n + 2 * i + 1] * z[j];
+        avn = avn + vec[j * n + 2 * i] * z[j];
+        avt = avt + vec[j * n + 2 * i + 1] * z[j];
 
       }
 
@@ -165,88 +154,151 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
       }
 
 
+
       zn    = -q[2 * i] - avn - apn;
       zt    = -q[2 * i + 1] - avt - apt;
 
 
-      if (zn > eps)
+
+
+
+
+
+
+      if (-zn >= 0.0)
       {
 
-        if (fabs(vec[n * 2 * i + 2 * i]) < 1e-16)
-        {
-          if (ispeak > 0)
-            printf("\n Warning nul diagonal term of M \n");
 
-          free(fric);
-          free(fric1);
-          free(y);
-
-          *info = 2;
-
-          return;
-        }
-        else
-        {
-
-          z[2 * i]   = zn / vec[n * 2 * i + 2 * i] ;
-          w[2 * i]   = 0.0 ;
-        }
-
-        if (fabs(vec[n * (2 * i + 1) + 2 * i + 1]) < 1e-16)
-        {
-          if (ispeak > 0)
-            printf("\n Warning nul diagonal term of M \n");
-
-          free(fric);
-          free(fric1);
-          free(y);
-
-          *info = 2;
-
-          return;
-
-        }
-        else
-        {
-
-          z[2 * i + 1] = zt / vec[n * (2 * i + 1) + 2 * i + 1] ;
-          w[2 * i + 1] = 0.;
-
-        }
+        z[2 * i]   = 0.0;
+        w[2 * i]   = -zn;
+        z[2 * i + 1] = 0.0;
+        w[2 * i + 1] = -zt;
 
 
-
-        if (z[2 * i + 1] >  fric[i]*z[2 * i])
-        {
-          z[2 * i + 1] = fric[i] * z[2 * i];
-          w[2 * i + 1] = -zt + vec[n * (2 * i + 1) + 2 * i + 1] * z[2 * i + 1];
-        }
-        else if (z[2 * i + 1] < -fric[i]*z[2 * i])
-        {
-          z[2 * i + 1] = -fric[i] * z[2 * i];
-          w[2 * i + 1] = -zt + vec[n * (2 * i + 1) + 2 * i + 1] * z[2 * i + 1];
-        }
       }
       else
       {
-        z[2 * i]   = 0.0 ;
-        w[2 * i]   = -zn ;
-        z[2 * i + 1] = 0.0 ;
-        w[2 * i + 1] = -zt ;
 
+        w[2 * i]   = 0.0;
+        w[2 * i + 1] = 0.0;
+
+
+        det    = vec[2 * i + 2 * i * n] * vec[(2 * i + 1) + (2 * i + 1) * n] - vec[(2 * i) + (2 * i + 1) * n] * vec[(2 * i) + (2 * i + 1) * n];
+
+        if (fabs(det) < 1e-12)
+        {
+
+          if (ispeak > 0)
+            printf(" Warning denominator nul\n");
+
+          free(y);
+
+          *info = 2;
+          return;
+
+        }
+        else
+        {
+
+
+          z[2 * i]   = (zn * vec[(2 * i + 1) + n * (2 * i + 1)] - zt * vec[2 * i + (2 * i + 1) * n]) / det;
+          z[2 * i + 1] = (-zn * vec[(2 * i) + n * (2 * i + 1)] + zt * vec[2 * i + (2 * i) * n]) / det;
+
+        }
+
+        if ((z[2 * i] >= 0.0) && ((fabs(z[2 * i + 1]) - mu * z[2 * i]) <= 0.0))
+        {
+
+          //   printf("Stick status \n");
+        }
+        else
+        {
+
+
+          w[2 * i]   = 0.0;
+
+
+          gplus  = vec[2 * i + 2 * i * n] + mu * vec[(2 * i) + (2 * i + 1) * n];
+
+
+          if (fabs(gplus) < 1e-12)
+          {
+
+            if (ispeak > 0)
+              printf(" Warning denominator nul\n");
+
+            free(y);
+
+            *info = 2;
+            return;
+
+          }
+          else
+          {
+
+            w[2 * i + 1] = -zt + (zn / gplus) * (vec[2 * i + (2 * i + 1) * n] + mu * vec[(2 * i + 1) + (2 * i + 1) * n]);
+
+
+            z[2 * i]   = zn / gplus;
+            z[2 * i + 1] = mu * z[2 * i];
+
+          }
+
+          if ((z[2 * i] >= 0.0) && (w[2 * i + 1] <= 0.0))
+          {
+
+            //    printf("Slip+ status\n");
+
+          }
+          else
+          {
+
+            w[2 * i]   = 0.0;
+
+            gmoins = vec[2 * i + 2 * i * n] - mu * vec[(2 * i) + (2 * i + 1) * n];
+
+
+            if (fabs(gmoins) < 1e-12)
+            {
+
+              if (ispeak > 0)
+                printf(" Warning denominator nul\n");
+
+              free(y);
+
+              *info = 2;
+              return;
+
+            }
+            else
+            {
+
+
+              w[2 * i + 1] = -zt + (zn / gmoins) * (vec[2 * i + (2 * i + 1) * n] - mu * vec[(2 * i + 1) + (2 * i + 1) * n]);
+
+              z[2 * i]   = zn / gmoins;
+              z[2 * i + 1] = -mu * z[2 * i];
+            }
+
+            //printf("Slip- status\n");
+          }
+        }
       }
+
     }
 
+
+
+    /*          Convergence criterium           */
+
+    incx = 1;
+    incy = 1;
 
     dcopy_(&n, q, &incx, y, &incy);
 
     alpha = 1.;
     beta  = 1.;
     dgemv_(&notrans, &n, &n, &alpha, vec, &n, z, &incx, &beta, y, &incy);
-
-
-
-    /*          Convergence criterium           */
 
 
 
@@ -292,8 +344,7 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
 
   free(y);
-  free(fric1);
-  free(fric);
+
 
 
 }
