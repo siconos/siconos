@@ -63,50 +63,50 @@ int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , do
 
   t1 = clock();
 
-  if (strcmp(pt->pfc.name , pfckey1) == 0)
+  if (strcmp(pt->pfc_2D.name , pfckey1) == 0)
   {
 
-    iparamLCP[0] = pt->pfc.itermax;
-    iparamLCP[1] = pt->pfc.iout;
-    dparamLCP[0] = pt->pfc.mu;
-    dparamLCP[1] = pt->pfc.tol;
+    iparamLCP[0] = pt->pfc_2D.itermax;
+    iparamLCP[1] = pt->pfc_2D.chat;
+    dparamLCP[0] = pt->pfc_2D.mu;
+    dparamLCP[1] = pt->pfc_2D.tol;
 
     pfc_2D_nlgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
-    pt->pfc.iter = iparamLCP[2];
-    pt->pfc.err  = dparamLCP[2];
+    pt->pfc_2D.iter = iparamLCP[2];
+    pt->pfc_2D.err  = dparamLCP[2];
 
   }
-  else if (strcmp(pt->pfc.name , pfckey2) == 0)
+  else if (strcmp(pt->pfc_2D.name , pfckey2) == 0)
   {
 
-    iparamLCP[0] = pt->pfc.itermax;
-    iparamLCP[1] = pt->pfc.iout;
-    dparamLCP[0] = pt->pfc.mu;
-    dparamLCP[1] = pt->pfc.tol;
+    iparamLCP[0] = pt->pfc_2D.itermax;
+    iparamLCP[1] = pt->pfc_2D.chat;
+    dparamLCP[0] = pt->pfc_2D.mu;
+    dparamLCP[1] = pt->pfc_2D.tol;
 
     pfc_2D_cpg(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
-    pt->pfc.iter = iparamLCP[2];
-    pt->pfc.err  = dparamLCP[2];
+    pt->pfc_2D.iter = iparamLCP[2];
+    pt->pfc_2D.err  = dparamLCP[2];
 
   }
-  else if (strcmp(pt->pfc.name , pfckey3) == 0)
+  else if (strcmp(pt->pfc_2D.name , pfckey3) == 0)
   {
 
-    iparamLCP[0] = pt->pfc.itermax;
-    iparamLCP[1] = pt->pfc.iout;
-    dparamLCP[0] = pt->pfc.mu;
-    dparamLCP[1] = pt->pfc.tol;
-    dparamLCP[2] = pt->pfc.k_latin;
+    iparamLCP[0] = pt->pfc_2D.itermax;
+    iparamLCP[1] = pt->pfc_2D.chat;
+    dparamLCP[0] = pt->pfc_2D.mu;
+    dparamLCP[1] = pt->pfc_2D.tol;
+    dparamLCP[2] = pt->pfc_2D.k_latin;
 
     pfc_2D_latin(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
-    pt->pfc.iter = iparamLCP[2];
-    pt->pfc.err  = dparamLCP[3];
+    pt->pfc_2D.iter = iparamLCP[2];
+    pt->pfc_2D.err  = dparamLCP[3];
 
   }
-  else printf("Warning : Unknown solving method : %s\n", pt->pfc.name);
+  else printf("Warning : Unknown solving method : %s\n", pt->pfc_2D.name);
 
   t2 = clock();
 
