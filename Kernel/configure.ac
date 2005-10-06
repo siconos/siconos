@@ -10,8 +10,7 @@ AM_INIT_AUTOMAKE(SICONOS, 1.0)
 AC_CONFIG_SRCDIR([src/model/Model.h])
 AC_CONFIG_HEADER([config.h])
 
-# checks for libtool
-AC_PROG_LIBTOOL
+
 
 ##############################################
 # sh function to verify shared library version
@@ -54,9 +53,34 @@ SICONOS_SO_AGE=0
 AC_SUBST(SICONOS_SO_CURRENT)
 AC_SUBST(SICONOS_SO_REVISION)
 AC_SUBST(SICONOS_SO_AGE)
+# Checks for compilers.
 
-# Checks for programs.
+
+m4_define([AC_PROG_INSURE],[
+# Insure++ is a proriatary code checker/prober
+AC_ARG_ENABLE(insure,
+ [AC_HELP_STRING([--enable-insure],[Compile with Insure++])],
+ [
+  AC_CHECK_PROG(insure,insure,insure,no)
+  AC_MSG_CHECKING([------------------------------------------------])
+  if test "x$insure" = "xinsure"; then
+   if test -z $CXX; then
+    CXX=insure
+   fi;
+   if test -z $CC; then
+    CC=insure
+   fi;
+  fi;
+ ]
+)
+]) # AC_PROG_INSURE
+
+dnl  AC_PROG_INSURE
+
+AC_PROG_CC
 AC_PROG_CXX
+CFLAGS=""
+CXXFLAGS=""
 AC_MSG_CHECKING([g++ version])
 CXX_VER=`$CXX -dumpversion`
 #  CXX_VERSION=`$CXX -v 2>&1 | grep 'gcc version'`
@@ -67,7 +91,13 @@ case $CXX_VER in
      ;;
 esac
 AC_MSG_RESULT([ok ($CXX_VER)])   
-AC_PROG_CC
+
+
+# checks for libtool
+AC_PROG_LIBTOOL
+
+# Checks for programs.
+
 # AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_PROG_LN_S
@@ -312,3 +342,23 @@ AC_CONFIG_FILES([Makefile
 AC_OUTPUT
 
 
+echo "
+ Configuration:
+   Target:                              ${target}
+   Architecture				${ARCH}
+   C Compiler:                          ${CC}
+   C compiler flags:                    ${CFLAGS}
+   C++ Compiler:                        ${CXX}
+   C++ compiler flags:                  ${CXXFLAGS}
+   F77 Compiler:                        ${F77}
+   F77 compiler flags:                  ${F77FLAGS}
+   Preprocessor flags:                  ${CPPFLAGS}
+   Linking flags			${LDFLAGS}
+   Includes:                            ${SICONOS_EXT_INCLUDES}
+"
+echo Type \'make \' to build the SICONOS platform
+echo Run \'make doc\' to generate the documentation.
+echo Type \'make install\' to install the platfrom
+echo Type \'make check\' torun the test
+echo
+echo Alternatively, you can \'make all\' to use the default configuration.
