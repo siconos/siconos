@@ -52,7 +52,7 @@ extern "C" void computeJacobianX(double *time, double *x, double *jacob)
 // Plugins for Fext, Fint, NNL (vectors), Mass, JacobianQNNL, JacobianVelocityNNL,
 // JacobianQFint and JacobianVelocityFint (matrices)
 
-extern "C" void computeFInt(unsigned int *sizeOfq, const double *time, double *q, double *velocity, double *fInt)
+extern "C" void computeFInt(const unsigned int *sizeOfq, const double *time, const double *q, const double *velocity, double *fInt)
 {
   /* input parameter : sizeOfq (size of the vector q); time; q (pointer to q vector); velocity (pointer to velocity vector);
    * output parameter : fInt (pointer to Fint *vector)
@@ -62,7 +62,7 @@ extern "C" void computeFInt(unsigned int *sizeOfq, const double *time, double *q
 
 }
 
-extern "C" void computeFExt(unsigned int *sizeOfq, const double *time, double *param, double *fExt)
+extern "C" void computeFExt(const unsigned int *sizeOfq, const double *time, const double *param, double *fExt)
 {
   /* input parameter : sizeOfq (size of the vector q); time; q (pointer to q vector);
    * param: list of parameter to customize fExt (amplitude, pulsation ...)
@@ -73,7 +73,7 @@ extern "C" void computeFExt(unsigned int *sizeOfq, const double *time, double *p
 
 }
 
-extern "C" void computeNNL(unsigned int *sizeOfq, double *q, double *velocity, double *Q)
+extern "C" void computeNNL(const unsigned int *sizeOfq, const double *q, const double *velocity, double *Q)
 {
   /* input parameter : sizeOfq (size of the vector q); q (pointer to q vector); velocity (pointer to velocity vector);
    * output parameter : Q (pointer to Q vector)
@@ -84,7 +84,7 @@ extern "C" void computeNNL(unsigned int *sizeOfq, double *q, double *velocity, d
 }
 
 
-extern "C" void computeMass(unsigned int *sizeOfq, const double *time, double *q, double *mass)
+extern "C" void computeMass(const unsigned int *sizeOfq, const double *time, const double *q, double *mass)
 {
   /* input parameter : sizeOfq (size of the vector q); time ; q (pointer to q vector);
    * output parameter : mass (pointer to mass matrix)
@@ -93,7 +93,7 @@ extern "C" void computeMass(unsigned int *sizeOfq, const double *time, double *q
 }
 
 
-extern "C" void computeJacobianQFInt(unsigned int *sizeOfq, const double *time, double *q, double *velocity, double *jacob)
+extern "C" void computeJacobianQFInt(const unsigned int *sizeOfq, const double *time, const double *q, const double *velocity, double *jacob)
 {
   /* input parameter : sizeOfq (size of the vector q); time; q (pointer to q vector); velocity (pointer to velocity vector);
    * output parameter : jacob (pointer to JacobianCoordFint *matrix)
@@ -102,17 +102,17 @@ extern "C" void computeJacobianQFInt(unsigned int *sizeOfq, const double *time, 
   printf("Call of the function 'computeJacobianQFInt' of the basic plugin.\nYou have to implement this function.\n");
 }
 
-extern "C" void computeJacobianVelocityFInt(unsigned int *sizeOfq, const double *time, double *q, double *velocity, double *jacob)
+extern "C" void computeJacobianVelocityFInt(const unsigned int *sizeOfq, const double *time, const double *q, const double *velocity, double *jacob)
 {
   printf("Call of the function 'computeJacobianVelocityFInt' of the basic plugin.\nYou have to implement this function.\n");
 }
 
-extern "C" void computeJacobianQNNL(unsigned int *sizeOfq, double *q, double *velocity, double *jacob)
+extern "C" void computeJacobianQNNL(const unsigned int *sizeOfq, const double *q, const double *velocity, double *jacob)
 {
   printf("Call of the function 'computeJacobianQNNL' of the basic plugin.\nYou have to implement this function.\n");
 }
 
-extern "C" void computeJacobianVelocityNNL(unsigned int *sizeOfq, double *q, double *velocity, double *jacob)
+extern "C" void computeJacobianVelocityNNL(const unsigned int *sizeOfq, const double *q, const  double *velocity, double *jacob)
 {
   printf("Call of the function 'computeJacobianVelocityNNL' of the basic plugin.\nYou have to implement this function.\n");
 }

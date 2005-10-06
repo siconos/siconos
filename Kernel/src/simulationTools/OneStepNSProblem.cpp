@@ -286,7 +286,7 @@ void OneStepNSProblem::fillSolvingMethod(const string& newSolvingMethod, const i
   else if (solver == "DualRelaySolving")
     strcpy(solvingMethod.dr.name, newSolvingMethod.c_str());
   else if (solver == "PrimalFrictionContact2DSolving")
-    strcpy(solvingMethod.pfc.name, newSolvingMethod.c_str());
+    strcpy(solvingMethod.pfc_2D.name, newSolvingMethod.c_str());
   else if (solver == "DualFrictionContact2DSolving")
     strcpy(solvingMethod.dfc_2D.name, newSolvingMethod.c_str());
 
@@ -354,11 +354,11 @@ void OneStepNSProblem::saveNSProblemToXML()
       }
       else if (solver == OSNSP_PFC_2DSOLVING)
       {
-        methodName = solvingMethod.pfc.name;
-        normType = solvingMethod.pfc.normType;
-        maxIter = solvingMethod.pfc.itermax;
-        tolerance = solvingMethod.pfc.tol;
-        searchDirection = solvingMethod.pfc.k_latin;
+        methodName = solvingMethod.pfc_2D.name;
+        normType = solvingMethod.pfc_2D.normType;
+        maxIter = solvingMethod.pfc_2D.itermax;
+        tolerance = solvingMethod.pfc_2D.tol;
+        searchDirection = solvingMethod.pfc_2D.k_latin;
       }
       else if (solver == OSNSP_DFC_2DSOLVING)
       {
@@ -454,11 +454,11 @@ void OneStepNSProblem::setNLGSAlgorithm(const string& meth,  const double& toler
   }
   else if (meth == OSNSP_PFC_2DSOLVING)
   {
-    strcpy(solvingMethod.pfc.name, OSNSP_NLGS.c_str());
-    solvingMethod.pfc.tol = tolerance;
+    strcpy(solvingMethod.pfc_2D.name, OSNSP_NLGS.c_str());
+    solvingMethod.pfc_2D.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.pfc_2D.normType, norm.c_str() );
-    solvingMethod.pfc.itermax = iter;
+    //strcpy( solvingMethod.pfc_2D_2D.normType, norm.c_str() );
+    solvingMethod.pfc_2D.itermax = iter;
   }
   else if (meth == OSNSP_DFC_2DSOLVING)
   {
@@ -528,11 +528,11 @@ void OneStepNSProblem::setCPGAlgorithm(const string& meth,  const double& tolera
   }
   else if (meth == OSNSP_PFC_2DSOLVING)
   {
-    strcpy(solvingMethod.pfc.name, OSNSP_CPG.c_str());
-    solvingMethod.pfc.tol = tolerance;
+    strcpy(solvingMethod.pfc_2D.name, OSNSP_CPG.c_str());
+    solvingMethod.pfc_2D.tol = tolerance;
     /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.pfc_2D.normType, norm.c_str() );
-    solvingMethod.pfc.itermax = iter;
+    //strcpy( solvingMethod.pfc_2D_2D.normType, norm.c_str() );
+    solvingMethod.pfc_2D.itermax = iter;
   }
   else if (meth == OSNSP_DFC_2DSOLVING)
   {
@@ -579,12 +579,12 @@ void OneStepNSProblem::setLatinAlgorithm(const string& meth, const double& t, co
   }
   else if (meth == OSNSP_PFC_2DSOLVING)
   {
-    strcpy(solvingMethod.pfc.name, OSNSP_LATIN.c_str());
-    solvingMethod.pfc.tol = t;
+    strcpy(solvingMethod.pfc_2D.name, OSNSP_LATIN.c_str());
+    solvingMethod.pfc_2D.tol = t;
     /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.pfc.normType, norm.c_str());
-    solvingMethod.pfc.itermax = iter;
-    solvingMethod.pfc.k_latin = searchdirection;
+    strcpy(solvingMethod.pfc_2D.normType, norm.c_str());
+    solvingMethod.pfc_2D.itermax = iter;
+    solvingMethod.pfc_2D.k_latin = searchdirection;
   }
   else if (meth == OSNSP_DFC_2DSOLVING)
   {

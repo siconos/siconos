@@ -179,10 +179,7 @@ public:
    *  \brief set the value of K to newValue
    *  \param SiconosMatrix newValue
    */
-  inline void setK(const SiconosMatrix& newValue)
-  {
-    *K = newValue;
-  }
+  void setK(const SiconosMatrix&);
 
   /** \fn void setKPtr(SiconosMatrix* newPtr)
    *  \brief set K to pointer newPtr
@@ -213,10 +210,7 @@ public:
    *  \brief set the value of C to newValue
    *  \param SiconosMatrix newValue
    */
-  inline void setC(const SiconosMatrix& newValue)
-  {
-    *C = newValue;
-  }
+  void setC(const SiconosMatrix&);
 
   /** \fn void setCPtr(SiconosMatrix* newPtr)
    *  \brief set C to pointer newPtr

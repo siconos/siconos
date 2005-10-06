@@ -115,8 +115,7 @@ void Moreau::computeW(const double& t)
     CQNL  = d->getJacobianVelocityNNLPtr();
 
     // Get Mass matrix
-    SiconosMatrix *M;
-    M = d->getMassPtr();
+    SiconosMatrix *M = d->getMassPtr();
 
     // Compute W
     *W = *M + h * theta * (*CFint + *CQNL  + h * theta * (*KFint + *KQNL));

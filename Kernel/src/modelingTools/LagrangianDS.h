@@ -2,12 +2,6 @@
 #define LAGRANGIANNLDS_H
 #include "DynamicalSystem.h"
 #include "LagrangianDSXML.h"
-#include "LinearBC.h"
-#include "NLinearBC.h"
-#include "PeriodicBC.h"
-#include "LinearDSIO.h"
-#include "LagrangianDSIO.h"
-#include "LagrangianLinearDSIO.h"
 
 class LagrangianDSXML;
 
@@ -164,10 +158,7 @@ public:
    *  \brief set the value of q to newValue
    *  \param SimpleVector newValue
    */
-  inline void setQ(const SimpleVector& newValue)
-  {
-    *q = newValue;
-  }
+  void setQ(const SimpleVector&);
 
   /** \fn void setQPtr(SimpleVector* newPtr)
    *  \brief set Q to pointer newPtr
@@ -199,10 +190,7 @@ public:
    *  \brief set the value of q0 to newValue
    *  \param SimpleVector newValue
    */
-  inline void setQ0(const SimpleVector& newValue)
-  {
-    *q0 = newValue;
-  }
+  void setQ0(const SimpleVector&);
 
   /** \fn void setQ0Ptr(SimpleVector* newPtr)
    *  \brief set Q0 to pointer newPtr
@@ -234,10 +222,7 @@ public:
    *  \brief set the value of qFree to newValue
    *  \param SimpleVector newValue
    */
-  inline void setQFree(const SimpleVector& newValue)
-  {
-    *qFree = newValue;
-  }
+  void setQFree(const SimpleVector&);
 
   /** \fn void setQFreePtr(SimpleVector* newPtr)
    *  \brief set QFree to pointer newPtr
@@ -269,10 +254,7 @@ public:
    *  \brief set the value of qMemory
    *  \param a ref on a SiconosMemory
    */
-  inline void setQMemory(const SiconosMemory& newValue)
-  {
-    *qMemory = newValue;
-  }
+  void setQMemory(const SiconosMemory&);
 
   /** \fn void setQMemory(SiconosMemory * newPtr)
    *  \brief set qMemory to pointer newPtr
@@ -304,10 +286,7 @@ public:
    *  \brief set the value of velocity to newValue
    *  \param SimpleVector newValue
    */
-  inline void setVelocity(const SimpleVector& newValue)
-  {
-    *velocity = newValue;
-  }
+  void setVelocity(const SimpleVector&);
 
   /** \fn void setVelocityPtr(SimpleVector* newPtr)
    *  \brief set Velocity to pointer newPtr
@@ -339,10 +318,7 @@ public:
    *  \brief set the value of velocity0 to newValue
    *  \param SimpleVector newValue
    */
-  inline void setVelocity0(const SimpleVector& newValue)
-  {
-    *velocity0 = newValue;
-  }
+  void setVelocity0(const SimpleVector&);
 
   /** \fn void setVelocity0Ptr(SimpleVector* newPtr)
    *  \brief set Velocity0 to pointer newPtr
@@ -374,10 +350,7 @@ public:
    *  \brief set the value of velocityFree to newValue
    *  \param SimpleVector newValue
    */
-  inline void setVelocityFree(const SimpleVector& newValue)
-  {
-    *velocityFree = newValue;
-  }
+  void setVelocityFree(const SimpleVector&);
 
   /** \fn void setVelocityFreePtr(SimpleVector* newPtr)
    *  \brief set VelocityFree to pointer newPtr
@@ -409,10 +382,7 @@ public:
    *  \brief set the value of velocityMemory
    *  \param a ref on a SiconosMemory
    */
-  inline void setVelocityMemory(const SiconosMemory& newValue)
-  {
-    *velocityMemory = newValue;
-  }
+  void setVelocityMemory(const SiconosMemory&);
 
   /** \fn void setVelocityMemory(SiconosMemory * newPtr)
    *  \brief set velocityMemory to pointer newPtr
@@ -444,10 +414,7 @@ public:
    *  \brief set the value of p to newValue
    *  \param SimpleVector newValue
    */
-  inline void setP(const SimpleVector& newValue)
-  {
-    *p = newValue;
-  }
+  void setP(const SimpleVector&);
 
   /** \fn void setPPtr(SimpleVector* newPtr)
    *  \brief set P to pointer newPtr
@@ -479,11 +446,7 @@ public:
    *  \brief set the value of Mass to newValue
    *  \param SiconosMatrix newValue
    */
-  inline void setMass(const SiconosMatrix& newValue)
-  {
-    *mass = newValue;
-    isLDSPlugin[0] = true;
-  }
+  void setMass(const SiconosMatrix&);
 
   /** \fn void setMassPtr(SiconosMatrix* newPtr)
    *  \brief set Mass to pointer newPtr
@@ -1137,33 +1100,33 @@ protected:
 
   // pointers to functions member to compute plug-in functions
 
-  /** \fn void (*computeMassPtr)(const double * time, double* qPtr, int sizeOfq, double* massPtr)
+  /** \fn void (*computeMassPtr)(unsigned int* sizeOfq,const double * time, double* qPtr, double* massPtr)
    *  \brief compute the mass
    *  \param unsigned int* sizeOfq : the size of the vector q
    *  \param double* time : the time for the computation
    *  \param double* qPtr : the pointer to the first element of the vector q
    *  \param double* massPtr : the pointer to the first element of the matrix mass (in-out parameter)
    */
-  void (*computeMassPtr)(unsigned int* sizeOfq, const double* time, double* qPtr, double* massPtr);
+  void (*computeMassPtr)(const unsigned int*, const double*, const double*, double*);
 
   /** \fn void (*computeFIntPtr)(int* sizeOfq, double* time, double* qPtr, double* velocityPtr, double* fIntPtr)
    *  \brief computes the internal strengths
    *  \param int* sizeOfq : the size of the vector q
-   *  \param int* time : the current time
+   *    \param int* time : the current time
    *  \param double* qPtr : the pointer to the first element of the vector q
    *  \param double* velocityPtr : the pointer to the first element of the vector velocity
    *  \param double* fIntPtr : the pointer to the first element of the vector FInt (in-out parameter)
    */
-  void (*computeFIntPtr)(unsigned int* sizeOfq, const double* time, double* qPtr, double* velocityPtr, double* fIntPtr);
+  void (*computeFIntPtr)(const unsigned int*, const double*, const double*, const double*, double*);
 
-  /** \fn void (*computeFExtPtr)(double* time, double* qPtr, unsigned int* sizeOfq, double* paramPtr, double* fExtPtr)
+  /** \fn void (*computeFExtPtr)(unsigned int* sizeOfq, double* time, double* paramPtr, double* fExtPtr)
    *  \brief computes the external strengths
    *  \param unsigned int* sizeOfq : the size of the vector q
    *    \param double* time : the current time
    *    \param double* paramPtr: a list of parameters to customize FExt
    *  \param double* fExtPtr : the pointer to the first element of the vector FExt (in-out parameter)
    */
-  void (*computeFExtPtr)(unsigned int* sizeOfq, const double* time, double* paramPtr, double* fExtPtr);
+  void (*computeFExtPtr)(const unsigned int*, const double*, const double*, double* fExtPtr);
 
   /** \fn void (*computeNNLPtr)(unsigned int* sizeOfq, double* qPtr, double* velocityPtr, double* NNLPtr)
    *  \brief computes the inertia
@@ -1172,7 +1135,7 @@ protected:
    *  \param double* velocityPtr : the pointer to the first element of the vector velocity
    *  \param double* NNLPtr : the pointer to the first element of the vector NNL (in-out parameter)
    */
-  void (*computeNNLPtr)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* NNLPtr);
+  void (*computeNNLPtr)(const unsigned int*, const double*, const double*, double*);
 
   /** \fn void (*computeJacobianQFIntPtr)(int* sizeOfq, double* time, double* qPtr, double* velocityPtr, double* jacobPtr)
    *  \brief computes the gradient of the the internal strength compared to the state
@@ -1182,25 +1145,35 @@ protected:
    *  \param double* velocityPtr : the pointer to the first element of the vector velocity
    *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
    */
-  void (*computeJacobianQFIntPtr)(unsigned int* sizeOfq, const double* time, double* qPtr, double* velocityPtr, double* jacobPtr);
+  void (*computeJacobianQFIntPtr)(const unsigned int*, const double*, const double*, const double*, double*);
 
-  /** \fn void (*computeJacobianVelocityFIntPtr)(const double * time)
+  /** \fn void (*computeJacobianVelocityFIntPtr)(unsigned int* sizeOfq, const double* time, double* qPtr, double* velocityPtr, double* jacobPtr);
    *  \brief computes the gradient of the the internal strength compared to the velocity
-   *  \param to be defined
+   *  \param unsigned int* sizeOfq : the size of the vector q
+   *    \param double* time : the current time
+   *  \param double* qPtr : the pointer to the first element of the vector q
+   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
+   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
    */
-  void (*computeJacobianVelocityFIntPtr)(unsigned int* sizeOfq, const double* time, double* qPtr, double* velocityPtr, double* jacobPtr);
+  void (*computeJacobianVelocityFIntPtr)(const unsigned int*, const double*, const double*, const double*, double*);
 
-  /** \fn void (*computeJacobianQNNL)(const double * time)
+  /** \fn void (*computeJacobianQNNL)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr)
    *  \brief computes the gradient of the the external strength compared to the state
-   *  \param to be defined
+   *  \param unsigned int* sizeOfq : the size of the vector q
+   *  \param double* qPtr : the pointer to the first element of the vector q
+   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
+   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
    */
-  void (*computeJacobianQNNLPtr)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr);
+  void (*computeJacobianQNNLPtr)(const unsigned int*, const double*, const double*, double*);
 
-  /** \fn void (*computeJacobianVelocityNNLPtr)(const double * time)
+  /** \fn void (*computeJacobianVelocityNNLPtr)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr)
    *  \brief computes the gradient of the the external strength compared to the velocity
-   *  \param to be defined
+   *  \param unsigned int* sizeOfq : the size of the vector q
+   *  \param double* qPtr : the pointer to the first element of the vector q
+   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
+   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
    */
-  void (*computeJacobianVelocityNNLPtr)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr);
+  void (*computeJacobianVelocityNNLPtr)(const unsigned int*, const double*, const double*, double*);
 
 };
 

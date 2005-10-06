@@ -111,28 +111,56 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const DynamicalSystem & newDS):
 LagrangianLinearTIDS::~LagrangianLinearTIDS()
 {
   IN("LagrangianLinearTIDS::~LagrangianLinearTIDS()\n");
-  if (isKAllocatedIn)
-  {
-    delete K;
-    K = NULL;
-  }
-  if (isCAllocatedIn)
-  {
-    delete C;
-    C = NULL;
-  }
+  if (isKAllocatedIn) delete K;
+  K = NULL;
+  if (isCAllocatedIn) delete C;
+  C = NULL;
   OUT("LagrangianLinearTIDS::~LagrangianLinearTIDS()\n");
+}
+
+void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
+{
+  if (newValue.size(0) != ndof || newValue.size(1) != ndof)
+    RuntimeException::selfThrow("LagrangianLinearTIDS - setK: inconsistent input matrix size ");
+
+  if (K == NULL)
+  {
+    K = new SiconosMatrix(newValue);
+    isKAllocatedIn = true;
+  }
+  else
+    *K = newValue;
 }
 
 void LagrangianLinearTIDS::setKPtr(SiconosMatrix *newPtr)
 {
+  if (newPtr->size(0) != ndof || newPtr->size(1) != ndof)
+    RuntimeException::selfThrow("LagrangianLinearTIDS - setKPtr: inconsistent input matrix size ");
+
   if (isKAllocatedIn) delete K;
   K = newPtr;
   isKAllocatedIn = false;
 }
 
+void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
+{
+  if (newValue.size(0) != ndof || newValue.size(1) != ndof)
+    RuntimeException::selfThrow("LagrangianLinearTIDS - setC: inconsistent input matrix size ");
+
+  if (C == NULL)
+  {
+    C = new SiconosMatrix(newValue);
+    isCAllocatedIn = true;
+  }
+  else
+    *C = newValue;
+}
+
 void LagrangianLinearTIDS::setCPtr(SiconosMatrix *newPtr)
 {
+  if (newPtr->size(0) != ndof || newPtr->size(1) != ndof)
+    RuntimeException::selfThrow("LagrangianLinearTIDS - setCPtr: inconsistent input matrix size ");
+
   if (isCAllocatedIn) delete C;
   C = newPtr;
   isCAllocatedIn = false;

@@ -292,7 +292,6 @@ void LCP::computeAllBlocks()
       computeDiagonalBlocksLagrangianLinearR(RCurrent, sizeInteraction, vDS, W, h, currentMatrixBlock);
     else RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for relation of type " + relationType);
 
-
     // --- EXTRA-DIAGONAL BLOCKS MANAGEMENT ---
 
     // check if there are linked interactions with current one, and if so get them.
@@ -339,6 +338,7 @@ void LCP::computeAllBlocks()
       //extraDiagonalBlocksMap[currentInteraction] = tmpMap;
     }
   } // end of loop over interactions -> increment current interaction
+
 }
 
 void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeInteraction, vector<DynamicalSystem*> vDS,
