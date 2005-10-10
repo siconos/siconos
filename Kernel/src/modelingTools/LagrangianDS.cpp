@@ -292,6 +292,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   p = new SimpleVector(ndof);
   fInt = new SimpleVector(ndof);
   fExt = new SimpleVector(ndof);
+  fExt ->zero();
   // Default value for paramFExt: simpleVector of size 1
   paramFExt = new SimpleVector(1);
   (*paramFExt)(0) = 1.0;
@@ -323,7 +324,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   static_cast<CompositeVector*>(xFree)->addPtr(velocityFree);
   setComputeMassFunction("BasicPlugin.so", "computeMass");
   setComputeFIntFunction("BasicPlugin.so", "computeFInt");
-  setComputeFExtFunction("BasicPlugin.so", "computeFExt");
+  //setComputeFExtFunction("BasicPlugin.so", "computeFExt");
   setComputeNNLFunction("BasicPlugin.so", "computeNNL");
   setComputeJacobianQFIntFunction("BasicPlugin.so", "computeJacobianQFInt");
   setComputeJacobianVelocityFIntFunction("BasicPlugin.so", "computeJacobianVelocityFInt");
@@ -386,6 +387,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   p = new SimpleVector(ndof);
   fInt = new SimpleVector(ndof);
   fExt = new SimpleVector(ndof);
+  fExt->zero();
   // Default value for paramFExt: simpleVector of size 1
   paramFExt = new SimpleVector(1);
   (*paramFExt)(0) = 1.0;
@@ -416,7 +418,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   //   --- plugins ---
   setComputeMassFunction(cShared.getPluginName(massName), cShared.getPluginFunctionName(massName));
   setComputeFIntFunction("BasicPlugin.so", "computeFInt");
-  setComputeFExtFunction("BasicPlugin.so", "computeFExt");
+  //setComputeFExtFunction("BasicPlugin.so", "computeFExt");
   setComputeNNLFunction("BasicPlugin.so", "computeNNL");
   setComputeJacobianQFIntFunction("BasicPlugin.so", "computeJacobianQFInt");
   setComputeJacobianVelocityFIntFunction("BasicPlugin.so", "computeJacobianVelocityFInt");

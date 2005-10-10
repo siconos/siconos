@@ -16,6 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+
 #ifndef LAGRANGIANTIDS_H
 #define LAGRANGIANTIDS_H
 

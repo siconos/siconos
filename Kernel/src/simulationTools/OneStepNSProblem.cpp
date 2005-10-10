@@ -151,6 +151,10 @@ void OneStepNSProblem::initialize()
   Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   if (!(topology->isUpToDate()))
     topology->updateTopology();
+
+  updateOutput();
+  updateInput();
+
 }
 
 void OneStepNSProblem::computeEffectiveOutput()
@@ -241,10 +245,8 @@ void OneStepNSProblem::computeEffectiveOutput()
       {
         for (j = 0; j < size; j++)
         {
-          for (i = 0; i < (indexMax[j] - indexMin[j]); i++)
-          {
+          for (i = 0; i < (indexMax[j] - indexMin[j] + 1); i++)
             effectiveIndexes[k] = i + j * (relativeDegree[j] - indexMin[j]);
-          }
         }
       }
 

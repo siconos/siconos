@@ -25,8 +25,8 @@ include $(top_srcdir)/config/Make-rules
 
 all : BasicPlugin.so
 
-BasicPlugin.o: BasicPlugin.c
-	$(CXX) $(CXXFLAGS) -c BasicPlugin.c
+BasicPlugin.o: BasicPlugin.cpp
+	$(CXX) $(CXXFLAGS) -c BasicPlugin.cpp
 
 BasicPlugin.so: BasicPlugin.o
 	$(CXX) $(CXXFLAGS) $(CXX_DYNLIB) $< -o $@
