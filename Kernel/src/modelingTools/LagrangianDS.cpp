@@ -322,14 +322,14 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   static_cast<CompositeVector*>(x0)->addPtr(velocity0);
   static_cast<CompositeVector*>(xFree)->addPtr(qFree);
   static_cast<CompositeVector*>(xFree)->addPtr(velocityFree);
-  setComputeMassFunction("BasicPlugin.so", "computeMass");
-  setComputeFIntFunction("BasicPlugin.so", "computeFInt");
-  //setComputeFExtFunction("BasicPlugin.so", "computeFExt");
-  setComputeNNLFunction("BasicPlugin.so", "computeNNL");
-  setComputeJacobianQFIntFunction("BasicPlugin.so", "computeJacobianQFInt");
-  setComputeJacobianVelocityFIntFunction("BasicPlugin.so", "computeJacobianVelocityFInt");
-  setComputeJacobianQNNLFunction("BasicPlugin.so", "computeJacobianQNNL");
-  setComputeJacobianVelocityNNLFunction("BasicPlugin.so", "computeJacobianVelocityNNL");
+  setComputeMassFunction("DefaultPlugin.so", "computeMass");
+  setComputeFIntFunction("DefaultPlugin.so", "computeFInt");
+  //setComputeFExtFunction("DefaultPlugin.so", "computeFExt");
+  setComputeNNLFunction("DefaultPlugin.so", "computeNNL");
+  setComputeJacobianQFIntFunction("DefaultPlugin.so", "computeJacobianQFInt");
+  setComputeJacobianVelocityFIntFunction("DefaultPlugin.so", "computeJacobianVelocityFInt");
+  setComputeJacobianQNNLFunction("DefaultPlugin.so", "computeJacobianQNNL");
+  setComputeJacobianVelocityNNLFunction("DefaultPlugin.so", "computeJacobianVelocityNNL");
   OUT("LagrangianDS::LagrangianDS - From a minimum set of data\n");
 }
 
@@ -417,13 +417,13 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 
   //   --- plugins ---
   setComputeMassFunction(cShared.getPluginName(massName), cShared.getPluginFunctionName(massName));
-  setComputeFIntFunction("BasicPlugin.so", "computeFInt");
-  //setComputeFExtFunction("BasicPlugin.so", "computeFExt");
-  setComputeNNLFunction("BasicPlugin.so", "computeNNL");
-  setComputeJacobianQFIntFunction("BasicPlugin.so", "computeJacobianQFInt");
-  setComputeJacobianVelocityFIntFunction("BasicPlugin.so", "computeJacobianVelocityFInt");
-  setComputeJacobianQNNLFunction("BasicPlugin.so", "computeJacobianQNNL");
-  setComputeJacobianVelocityNNLFunction("BasicPlugin.so", "computeJacobianVelocityNNL");
+  setComputeFIntFunction("DefaultPlugin.so", "computeFInt");
+  //setComputeFExtFunction("DefaultPlugin.so", "computeFExt");
+  setComputeNNLFunction("DefaultPlugin.so", "computeNNL");
+  setComputeJacobianQFIntFunction("DefaultPlugin.so", "computeJacobianQFInt");
+  setComputeJacobianVelocityFIntFunction("DefaultPlugin.so", "computeJacobianVelocityFInt");
+  setComputeJacobianQNNLFunction("DefaultPlugin.so", "computeJacobianQNNL");
+  setComputeJacobianVelocityNNLFunction("DefaultPlugin.so", "computeJacobianVelocityNNL");
   OUT("LagrangianDS::LagrangianDS - From a minimum set of data\n");
 }
 
@@ -1557,14 +1557,14 @@ LagrangianDS::LagrangianDS():
   isJacobianAllocatedIn.resize(4, false);
   isLDSPlugin.resize(8, false);
 
-  // --- plugins connected to BasicPlugin ---
-  setComputeMassFunction("BasicPlugin.so", "computeMass");
-  setComputeFIntFunction("BasicPlugin.so", "computeFInt");
-  setComputeFExtFunction("BasicPlugin.so", "computeFExt");
-  setComputeNNLFunction("BasicPlugin.so", "computeNNL");
-  setComputeJacobianQFIntFunction("BasicPlugin.so", "computeJacobianQFInt");
-  setComputeJacobianVelocityFIntFunction("BasicPlugin.so", "computeJacobianVelocityFInt");
-  setComputeJacobianQNNLFunction("BasicPlugin.so", "computeJacobianQNNL");
-  setComputeJacobianVelocityNNLFunction("BasicPlugin.so", "computeJacobianVelocityNNL");
+  // --- plugins connected to DefaultPlugin ---
+  setComputeMassFunction("DefaultPlugin.so", "computeMass");
+  setComputeFIntFunction("DefaultPlugin.so", "computeFInt");
+  setComputeFExtFunction("DefaultPlugin.so", "computeFExt");
+  setComputeNNLFunction("DefaultPlugin.so", "computeNNL");
+  setComputeJacobianQFIntFunction("DefaultPlugin.so", "computeJacobianQFInt");
+  setComputeJacobianVelocityFIntFunction("DefaultPlugin.so", "computeJacobianVelocityFInt");
+  setComputeJacobianQNNLFunction("DefaultPlugin.so", "computeJacobianQNNL");
+  setComputeJacobianVelocityNNLFunction("DefaultPlugin.so", "computeJacobianVelocityNNL");
   OUT("LagrangianDS::LagrangianDS() - Default constructor\n");
 }

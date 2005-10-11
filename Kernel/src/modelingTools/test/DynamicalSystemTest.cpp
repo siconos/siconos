@@ -85,6 +85,9 @@ void DynamicalSystemTest::tearDown()
 // xml constructor (1), without plugin
 void DynamicalSystemTest::testBuildDynamicalSystem1()
 {
+  cout << "======================================" << endl;
+  cout << "=== DynamicalSystem tests start ...=== " << endl;
+  cout << "======================================" << endl;
   DynamicalSystem * ds = new DynamicalSystem(tmpxml1);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1A : ", ds->getType() == NLDS, true);

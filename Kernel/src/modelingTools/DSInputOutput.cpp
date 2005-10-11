@@ -109,8 +109,8 @@ void DSInputOutput::init()
   this->id = "none";
   this->dsioxml = NULL;
 
-  this->setComputeOutputFunction("BasicPlugin.so", "computeOutput");
-  this->setComputeInputFunction("BasicPlugin.so", "computeInput");
+  this->setComputeOutputFunction("DefaultPlugin.so", "computeOutput");
+  this->setComputeInputFunction("DefaultPlugin.so", "computeInput");
   OUT("DSInputOutput::init\n");
 }
 

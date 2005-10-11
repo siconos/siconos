@@ -189,17 +189,17 @@ public:
    */
   void saveRelationToXML();
 
-  /** \fn void display()
-   *  \brief print the data to the screen
-   */
-  void display() const;
-
   /** \fn LagrangianLinearR* convert (Relation *r)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation * : the relation which must be converted
    * \return a pointer on the relation if it is of the right type, NULL otherwise
    */
   static LagrangianLinearR* convert(Relation *r);
+
+  /** \fn  void display() const
+   * \brief main relation members display
+   */
+  void display() const;
 
 private:
 

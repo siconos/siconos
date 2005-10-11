@@ -65,6 +65,9 @@ void LinearTIRTest::tearDown()
 // data constructor (1)
 void LinearTIRTest::testBuildLinearTIR1()
 {
+  cout << "========================================" << endl;
+  cout << "=== LinearTIR tests start ...=== " << endl;
+  cout << "========================================" << endl;
   LinearTIR * ltir = new LinearTIR(*C, *B);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR : ", ltir->getC() == *C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR : ", ltir->getB() == *B, true);

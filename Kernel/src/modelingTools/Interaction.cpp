@@ -33,7 +33,7 @@ using namespace std;
 
 // Copy constructor
 Interaction::Interaction(const Interaction& newI):
-  id(newI.getId()), number(newI.getNumber()), nInteraction(newI.getNInteraction()),
+  id(newI.getId()), number(newI.getNumber()), nInteraction(newI.getNInteraction()), sizeOfDS(newI.getSizeOfDS()),
   nslaw(NULL), relation(NULL), interactionxml(NULL),
   isRelationAllocatedIn(true), isNsLawAllocatedIn(true)
 {
@@ -93,7 +93,7 @@ Interaction::Interaction(const Interaction& newI):
 
 // --- XML constructor ---
 Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * nsds):
-  id("none"), number(0), nInteraction(0), nslaw(NULL), relation(NULL), interactionxml(interxml),
+  id("none"), number(0), nInteraction(0), sizeOfDS(0), nslaw(NULL), relation(NULL), interactionxml(interxml),
   isRelationAllocatedIn(true), isNsLawAllocatedIn(true)
 {
   if (interactionxml != NULL)
@@ -146,6 +146,8 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
         for (unsigned int i = 0; i < sizeDS; i++)
           vectorDS[i] = nsds->getDynamicalSystemPtrNumber(listDS[i]);
       }
+
+      computeSizeOfDS();
     }
     else cout << "Interaction constructor, warning: no dynamical systems linked to the interaction!" << endl;
 
@@ -188,7 +190,7 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
 
 Interaction::Interaction(const string& newId, const int& newNumber, const int& nInter,
                          vector<DynamicalSystem*> *dsConcerned):
-  id(newId), number(newNumber), nInteraction(nInter), nslaw(NULL),
+  id(newId), number(newNumber), nInteraction(nInter), sizeOfDS(0), nslaw(NULL),
   relation(NULL), interactionxml(NULL), isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
 {
   // Memory allocation for simple vectors
@@ -216,6 +218,7 @@ Interaction::Interaction(const string& newId, const int& newNumber, const int& n
   vectorDS.clear();
   if (dsConcerned != NULL) vectorDS = *dsConcerned;
   else RuntimeException::selfThrow("Interaction::createInteraction - The dsConcerned are not given");
+  computeSizeOfDS();
 
   // Remark(FP): neither nslaw nor relation are created in this constructor -> todo?
 }
@@ -508,6 +511,7 @@ void Interaction::setDynamicalSystems(const std::vector<DynamicalSystem*>& newVe
 {
   vectorDS.clear();
   vectorDS = newVector;
+  computeSizeOfDS();
 }
 
 DynamicalSystem* Interaction::getDynamicalSystemPtr(const int& number)
@@ -544,6 +548,21 @@ void Interaction::setNonSmoothLawPtr(NonSmoothLaw* newNslaw)
 }
 
 // --- OTHER FUNCTIONS ---
+
+void Interaction::computeSizeOfDS()
+{
+  sizeOfDS = 0;
+  vector<DynamicalSystem*> vDS = getDynamicalSystems();
+  vector<DynamicalSystem*>::iterator it;
+  for (it = vDS.begin(); it != vDS.end(); it++)
+  {
+    string typeDS = (*it)->getType();
+    if (typeDS == LNLDS || typeDS == LTIDS)
+      sizeOfDS += (*it)->getN() / 2;
+    else
+      sizeOfDS += (*it)->getN();
+  }
+}
 
 void Interaction::swapInMemory()
 {
@@ -660,6 +679,6 @@ void Interaction::saveInteractionToXML()
 
 // Default (private) constructor
 Interaction::Interaction():
-  id("none"), number(0), nInteraction(0), nslaw(NULL), relation(NULL), interactionxml(NULL),
+  id("none"), number(0), nInteraction(0), sizeOfDS(0), nslaw(NULL), relation(NULL), interactionxml(NULL),
   isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
 {}

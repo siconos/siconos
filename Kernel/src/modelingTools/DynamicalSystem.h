@@ -105,7 +105,7 @@ public:
       *  \exception RuntimeException
       */
   DynamicalSystem(const int&, const unsigned int&,
-                  const SiconosVector&, const std::string& = "BasicPlugin:vectorField");
+                  const SiconosVector&, const std::string& = "DefaultPlugin:vectorField");
 
   /** \fn DynamicalSystem(const DynamicalSystem &)
    *  \brief copy constructor

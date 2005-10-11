@@ -152,7 +152,7 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
       setVectorFieldFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
     }
     else
-      setVectorFieldFunction("BasicPlugin.so", "vectorField");
+      setVectorFieldFunction("DefaultPlugin.so", "vectorField");
 
     // JacobianX
     if (dsxml->hasComputeJacobianXPlugin() == true)
@@ -161,7 +161,7 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
       setComputeJacobianXFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
     }
     else
-      setComputeJacobianXFunction("BasicPlugin.so", "computeJacobianX");
+      setComputeJacobianXFunction("DefaultPlugin.so", "computeJacobianX");
 
     // --- Boundary conditions ---
     fillBoundaryConditionsFromXml();
@@ -210,7 +210,7 @@ DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN,
 
   // plugins for vectorField and jacobianX
   setVectorFieldFunction(cShared.getPluginName(vectorFieldPlugin), cShared.getPluginFunctionName(vectorFieldPlugin));
-  setComputeJacobianXFunction("BasicPlugin.so", "computeJacobianX");
+  setComputeJacobianXFunction("DefaultPlugin.so", "computeJacobianX");
 
   // u and T are optional
   isPlugin.resize(2, false);
@@ -927,7 +927,7 @@ void DynamicalSystem::saveDSToXML()
     if (computeJacobianXFunctionName != "")
       dsxml->setComputeJacobianXPlugin(computeJacobianXFunctionName);
     else
-      dsxml->setComputeJacobianXPlugin("BasicPlugin:computeJacobianX");
+      dsxml->setComputeJacobianXPlugin("DefaultPlugin:computeJacobianX");
   }
   else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DynamicalSystemXML object doesn't exists");
   OUT("DynamicalSystem::saveDSToXML\n");
@@ -1047,6 +1047,6 @@ DynamicalSystem::DynamicalSystem():
   isRAllocatedIn.resize(2, false);
   isControlAllocatedIn.resize(2, false);
 
-  setVectorFieldFunction("BasicPlugin.so", "vectorField");
-  setComputeJacobianXFunction("BasicPlugin.so", "computeJacobianX");
+  setVectorFieldFunction("DefaultPlugin.so", "vectorField");
+  setComputeJacobianXFunction("DefaultPlugin.so", "computeJacobianX");
 }

@@ -83,7 +83,7 @@ public:
    *  \exception RuntimeException
    */
   LinearDS(const int&, const unsigned int&, const SiconosVector&,
-           const std::string& = "BasicPlugin.so", const std::string& = "computeA");
+           const std::string& = "DefaultPlugin.so", const std::string& = "computeA");
 
   /** \fn LinearDS( const int& newNumber, const SiconosVector& newX0,
    *                const SiconosMatrix& newA)

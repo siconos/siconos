@@ -23,17 +23,17 @@ include $(top_srcdir)/config/Make-rules
 #SUBDIRS = 
 #EXTRA_DIST =
 
-all : BasicPlugin.so
+all : DefaultPlugin.so
 
-BasicPlugin.o: BasicPlugin.cpp
-	$(CXX) $(CXXFLAGS) -c BasicPlugin.cpp
+DefaultPlugin.o: DefaultPlugin.cpp
+	$(CXX) $(CXXFLAGS) -c DefaultPlugin.cpp
 
-BasicPlugin.so: BasicPlugin.o
+DefaultPlugin.so: DefaultPlugin.o
 	$(CXX) $(CXXFLAGS) $(CXX_DYNLIB) $< -o $@
 
 clean:
-	$(RM) -f BasicPlugin.o BasicPlugin.so
+	$(RM) -f DefaultPlugin.o DefaultPlugin.so
 
-pkgdata_DATA = BasicPlugin.so
+pkgdata_DATA = DefaultPlugin.so
 
 

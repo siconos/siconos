@@ -79,7 +79,7 @@ LinearDS::LinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds
 // From a minimum set of data, A from a plugin
 LinearDS::LinearDS(const int& newNumber, const unsigned int& newN, const SiconosVector& newX0,
                    const string& pluginPath, const string& functionName):
-  DynamicalSystem(newNumber, newN, newX0, "BasicPlugin:vectorField"),
+  DynamicalSystem(newNumber, newN, newX0, "DefaultPlugin:vectorField"),
   A(NULL), b(NULL),
   AFunctionName("none"), bFunctionName("none"),
   computeAPtr(NULL), computeBPtr(NULL),

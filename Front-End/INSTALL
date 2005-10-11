@@ -23,32 +23,23 @@
 
 ---++ Required external libraries
 
-   * libxml2
-      * actual version used with the platform : 2.6.17
-      * last version : 2.6.17 
+   * swig
+      * actual version used with the platform : 1.3.24
+      * last version : 1.3.26
       * known problems : none
-      * location : http://www.xmlsoft.org/downloads.html
+      * location : http://www.swig.org/
 
-   * lapack++
-      * actual version used with the platform: 2.4.0
-      * last version : 2.4.0
+   * python
+      * actual version used with the platform : 2.3.3
+      * last version : 2.4.2
+      * known problems : overloaded operators can not be embedded. 
+      * location : http://www.python.org/
+
+   * scilab
+      * actual version used with the platform : 3.0
+      * last version : 3.1
       * known problems : none
-      * location : http://sourceforge.net/projects/lapackpp
-
----++ Optional external libraries (advised for developers)
-
-   * nana
-      * actual version used with the platform: 2.5
-      * last version : 2.5
-      * known problems : compilation problems
-      * location : Gforge
-
-   * cppunit
-      * actual version used with the platform: 1.10.2
-      * last version : 1.10.2
-      * known problems : none
-      * location : http://cppunit.sourceforge.net/cgi-bin/moin.cgi
-
+      * location : http://www.scilab.org/
 
 ---++ Getting the sources
 
@@ -60,7 +51,7 @@
 
 ---++ INSTALL 
 
-For each package (Numerics, Kernel, Front-End, in this order), in the corresponding main directory:
+Numerics and Kernel complete install is required. Then in Front-End directory:
 	
 	- ./reconf.sh
 	- configure --prefix="the path where you want to install the platform" --other_options
@@ -71,16 +62,6 @@ For each package (Numerics, Kernel, Front-End, in this order), in the correspond
 
 for more details on configure options, type configure --help. 
       
----+++ Is the installation of the Kernel OK ?
-   * You can try to run : cd /path/to/your/source/code/sample/BouncingBall ; siconos BouncingBall.cpp
-
----+++ Is the installation of the Front-End OK ?
-   * You can try to run : cd /path/to/your/source/code/sample/BouncingBall ; pySiconos BouncingBall.py
-
-   * *I advise you for the moment to install the platform in the directory retrieved from SVN. C++ compiler, System libraries, external libraries, etc. are tested...
-
-   * If you have a local installation of an external library, you can give its path to configure with the option --with-local[library name]. You can get the possible options typing =%configure --help=. 
-
 Basic Installation
 ==================
 

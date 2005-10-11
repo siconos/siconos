@@ -16,50 +16,22 @@
 #
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
-#--------------------------------------------------
-#                  SICONOS PROJECT
-#--------------------------------------------------
- 
-#--------------------------------------------------
-# Author(s)      : 
-# Creation Date  :
-# Version        :
-# Copyright      : INRIA 2004
-#--------------------------------------------------
-# Description    : README for Numerics
-#--------------------------------------------------
-# Options        : _ all
-#                  _ clean
-#                  _ doc
-#                  _ test
-#--------------------------------------------------
-# Compiled files :
-#--------------------------------------------------
-# Modifications  : _
-#                  _
-#                  _
-# Date           :
-#--------------------------------------------------
 
+------------------------------------
+  README File for Siconos Numerics
+------------------------------------
 
+This project belongs to the European project SICONOS, dedicated to the modeling, the control the analysis and the simulation of the so-called 
+``Non Smooth Dynamical system'' NSDS. More details on this European project can be found on the website of the Project http://siconos.inrialpes.fr.
 
-INSTALLATION NOTES
+The present package, Siconos/Numerics provides low-level algorithms to compute basic well-identified problems.
 
+More details are available on software documentation pages, Doc/Devel directory of the current distribution, in "design" chapter,
+or on http://siconos.gforge.inria.fr/
 
-1) Set the environment variable NUMERICSPATH, for example in csh
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-> setenv NUMERICSPATH /path/where/Numerics/is/located/
+Software install and loading: see INSTALL file. 
+Last changes/update: see ChangeLog file.
 
-2) Choose the right Makefile.inc according to the target platform, for example
-
-> cp Makefile.inc.linux Makefile.inc
-
-3) Build library
-
-> make lib
-
-4)  build and run test
-
-> make buildtest ; make runtest
-
-
+----------------------------------------------------------------------------------------------------------------------------------------------------------------

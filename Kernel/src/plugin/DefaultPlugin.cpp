@@ -32,7 +32,7 @@ extern "C" void computeU(unsigned int* sizeOfU, unsigned int* sizeOfX, const dou
    *  pointer to xDot
    *  pointer to u (in-out parameter)
    */
-  printf("Call of the function 'computeU' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeU' of the default plugin.\nYou have to implement this function.\n");
 
 }
 
@@ -45,7 +45,7 @@ extern "C" void computeT(unsigned int* sizeOfU, unsigned int* sizeOfX, double* x
    *  pointer to x
    *  pointer to T (in-out parameter) - T is a (sizeOfX x sizeOfU) matrix
    */
-  printf("Call of the function 'computeT' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeT' of the default plugin.\nYou have to implement this function.\n");
 }
 
 extern "C" void vectorField(int *sizeOfX, double *time, double *x, double *xdot)
@@ -53,7 +53,7 @@ extern "C" void vectorField(int *sizeOfX, double *time, double *x, double *xdot)
   /* input parameter : sizeOfX (size of the vector X); time ; x (pointer to X vector);
    * output parameter : xdot (pointer to Xdot vector)
    */
-  printf("Call of the function 'vectorField' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'vectorField' of the default plugin.\nYou have to implement this function.\n");
 }
 
 extern "C" void computeJacobianX(double *time, double *x, double *jacob)
@@ -62,7 +62,7 @@ extern "C" void computeJacobianX(double *time, double *x, double *jacob)
    * output parameter : jacob (pointer to JacobianX matrix)
    */
 
-  printf("Call of the function 'computeJacobianX' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeJacobianX' of the default plugin.\nYou have to implement this function.\n");
 }
 
 // ===== Lagrangian DS  =====
@@ -76,7 +76,7 @@ extern "C" void computeFInt(const unsigned int *sizeOfq, const double *time, con
    * output parameter : fInt (pointer to Fint *vector)
    */
 
-  printf("Call of the function 'computeFInt' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeFInt' of the default plugin.\nYou have to implement this function.\n");
 
 }
 
@@ -87,7 +87,7 @@ extern "C" void computeFExt(const unsigned int *sizeOfq, const double *time, con
    * output parameter : fExt (pointer to Fext vector)
    */
 
-  printf("Call of the function 'computeFExt' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeFExt' of the default plugin.\nYou have to implement this function.\n");
 
 }
 
@@ -97,7 +97,7 @@ extern "C" void computeNNL(const unsigned int *sizeOfq, const double *q, const d
    * output parameter : Q (pointer to Q vector)
    */
 
-  printf("Call of the function 'computeNNL' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeNNL' of the default plugin.\nYou have to implement this function.\n");
 
 }
 
@@ -107,7 +107,7 @@ extern "C" void computeMass(const unsigned int *sizeOfq, const double *time, con
   /* input parameter : sizeOfq (size of the vector q); time ; q (pointer to q vector);
    * output parameter : mass (pointer to mass matrix)
    */
-  printf("Call of the function 'computeMass' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeMass' of the default plugin.\nYou have to implement this function.\n");
 }
 
 
@@ -117,22 +117,22 @@ extern "C" void computeJacobianQFInt(const unsigned int *sizeOfq, const double *
    * output parameter : jacob (pointer to JacobianCoordFint *matrix)
    */
 
-  printf("Call of the function 'computeJacobianQFInt' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeJacobianQFInt' of the default plugin.\nYou have to implement this function.\n");
 }
 
 extern "C" void computeJacobianVelocityFInt(const unsigned int *sizeOfq, const double *time, const double *q, const double *velocity, double *jacob)
 {
-  printf("Call of the function 'computeJacobianVelocityFInt' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeJacobianVelocityFInt' of the default plugin.\nYou have to implement this function.\n");
 }
 
 extern "C" void computeJacobianQNNL(const unsigned int *sizeOfq, const double *q, const double *velocity, double *jacob)
 {
-  printf("Call of the function 'computeJacobianQNNL' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeJacobianQNNL' of the default plugin.\nYou have to implement this function.\n");
 }
 
 extern "C" void computeJacobianVelocityNNL(const unsigned int *sizeOfq, const double *q, const  double *velocity, double *jacob)
 {
-  printf("Call of the function 'computeJacobianVelocityNNL' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeJacobianVelocityNNL' of the default plugin.\nYou have to implement this function.\n");
 }
 
 // plugin for relations
@@ -141,7 +141,7 @@ extern "C" void computeOutput(int *sizeOfX, double* x, double *time, double* lam
   /* input parameter : sizeOfX (size of the vector X); x (pointer to x vector); time; lambda (pointer to lambda vector)
    * output parameter : y (pointer to vector y )
    */
-  printf("Call of the function 'computeOutput' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeOutput' of the default plugin.\nYou have to implement this function.\n");
 }
 
 extern "C" void computeInput(int *sizeOfX, double* x, double *time, double* lambda, double* r)
@@ -149,7 +149,7 @@ extern "C" void computeInput(int *sizeOfX, double* x, double *time, double* lamb
   /* input parameter : sizeOfX (size of the vector X); x (pointer to x vector); time; lambda (pointer to lambda vector)
    * output parameter : r (pointer to vector r )
    */
-  printf("Call of the function 'computeInput' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeInput' of the default plugin.\nYou have to implement this function.\n");
 }
 
 // ===== Linear DS  ====
@@ -161,7 +161,7 @@ extern "C" void computeA(unsigned int *sizeOfA, double* APtr, const double *time
   /* input parameter : time, sizeOfA (size of the matrix A)
    * output parameter : APtr (pointer to SiconosMatrix)
    */
-  printf("Call of the function 'computeA' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeA' of the default plugin.\nYou have to implement this function.\n");
 
 }
 
@@ -170,6 +170,19 @@ extern "C" void computeB(unsigned int *sizeOfB, double* b, const double *time)
   /* input parameter : time, sizeOfB (size of the vector b);
    * output parameter : b (pointer to b vector)
    */
-  printf("Call of the function 'computeB' of the basic plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'computeB' of the default plugin.\nYou have to implement this function.\n");
 
+}
+
+// ===== RELATIONS ====
+
+// === Lagrangian Relations ===
+
+extern "C" void h(const unsigned int* sizeOfq, const double* time , const unsigned int* sizeOfy, const double* q, double* y)
+{
+  printf("Call of the function 'h' of the default plugin (for Lagrangian relation).\nYou have to implement this function.\n");
+}
+extern "C" void jacobianQH(const unsigned int* sizeOfq, const double* time , const unsigned int* sizeOfy, const double* q, double* jacob)
+{
+  printf("Call of the function 'jacobianQH' of the default plugin (for Lagrangian relation).\nYou have to implement this function.\n");
 }

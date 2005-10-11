@@ -38,8 +38,8 @@ double  DefaultAlgoTolerance = -1.0;
 int   DefaultAlgoMaxIter = -1;
 double  DefaultAlgoSearchDirection = -1.0;
 
-std::string  DefaultComputeInput = "BasicPlugin:computeInput";
-std::string  DefaultComputeOutput = "BasicPlugin:computeOutput";
+std::string  DefaultComputeInput = "DefaultPlugin:computeInput";
+std::string  DefaultComputeOutput = "DefaultPlugin:computeOutput";
 
 #endif
 

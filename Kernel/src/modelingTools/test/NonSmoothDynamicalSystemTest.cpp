@@ -62,6 +62,10 @@ void NonSmoothDynamicalSystemTest::tearDown()
 // xml constructor
 void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem1()
 {
+  cout << "====================================================" << endl;
+  cout << " ===== NonSmoothDynamicalSystem tests start ...===== " << endl;
+  cout << "====================================================" << endl;
+  cout << "------- Xml Constructor test -------" << endl;
   NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(tmpxml);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemA : ", nsds->getDSVectorSize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystemB : ", nsds->getDynamicalSystemPtr(0)->getNumber() == 3, true);
@@ -75,12 +79,11 @@ void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem1()
 // copy constructor
 void NonSmoothDynamicalSystemTest::testBuildNonSmoothDynamicalSystem2()
 {
+  cout << "------- Copy Constructor test -------" << endl;
   NonSmoothDynamicalSystem * nsds1 = new NonSmoothDynamicalSystem(tmpxml);
-  cout << " OKOKOKO224 " << endl;
-
+  cout << " okokok0 " << endl;
   NonSmoothDynamicalSystem * nsds = new NonSmoothDynamicalSystem(*nsds1);
-  cout << " OKOKOKO225 " << endl;
-
+  cout << " okokok " << endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2A : ", nsds->getDSVectorSize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2B : ", nsds->getDynamicalSystemPtr(0)->getNumber() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildNonSmoothDynamicalSystem2C : ", nsds->getDynamicalSystemPtr(1)->getNumber() == 8, true);

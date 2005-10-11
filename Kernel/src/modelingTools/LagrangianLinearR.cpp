@@ -51,6 +51,11 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
       b = new SimpleVector(rowB);
       *b = LLRxml->getB();
     }
+    // LagrangianR required members
+    isHPlugin = false;
+    jacobianH[0] = H;
+    isJacobianHAllocatedIn[0] = false;
+    isJacobianHPlugin[0] = false;
   }
   else RuntimeException::selfThrow("LagrangianLinearR::xml constructor xml file=NULL");
 }
@@ -73,10 +78,15 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
       RuntimeException::selfThrow("LagrangianLinearR:: constructor from data, inconsistent size with y vector for input vector or matrix");
   }
 
-  H = new SiconosMatrix(row, newH.size(1));
-  *H = newH;
-  b = new SimpleVector(row);
-  *b = newB;
+  H = new SiconosMatrix(newH);
+  b = new SimpleVector(newB);
+
+  // LagrangianR required members
+  isHPlugin = false;
+  jacobianH[0] = H;
+  isJacobianHAllocatedIn[0] = false;
+  isJacobianHPlugin[0] = false;
+
 }
 
 // Constructor from data: H and interaction (optional)
@@ -93,20 +103,39 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, Interaction* int
       RuntimeException::selfThrow("LagrangianLinearR:: constructor from data, inconsistent size with y vector for input vector or matrix");
   }
 
-  H = new SiconosMatrix(row, newH.size(1));
-  *H = newH;
+  H = new SiconosMatrix(newH);
+  // LagrangianR required members
+  isHPlugin = false;
+  jacobianH[0] = H;
+  isJacobianHAllocatedIn[0] = false;
+  isJacobianHPlugin[0] = false;
 }
 
 // copy constructor (inter is optional)
 LagrangianLinearR::LagrangianLinearR(const Relation & newLLR, Interaction* inter):
   LagrangianR(newLLR, inter), H(NULL), b(NULL), isHAllocatedIn(true), isBAllocatedIn(true)
 {
-  if (relationType !=  LAGRANGIANLINEARRELATION)
+  if (relationType != LAGRANGIANLINEARRELATION)
     RuntimeException::selfThrow("LagrangianLinearR:: copy constructor, inconsistent relation types for copy");
 
+  isHPlugin = false;
+  cout << " OOK0 " << endl;
   const LagrangianLinearR *  llr = static_cast<const LagrangianLinearR*>(&newLLR);
-  H = new SiconosMatrix(llr->getH());
-  isHAllocatedIn = true;
+  cout << " OOK " << endl;
+  // warning: jacobianH = H may have already been allocated in LagrangianR copy constructor!
+  if (jacobianH[0] == NULL)
+  {
+    H = new SiconosMatrix(llr->getH());
+    cout << " OOK " << endl;
+    isHAllocatedIn = true;
+    jacobianH[0] == H;
+  }
+  else
+  {
+    H = jacobianH[0];
+    isHAllocatedIn = false;
+  }
+
   if (llr->getBPtr() != NULL)
   {
     b = new SimpleVector(llr->getB());
@@ -386,20 +415,6 @@ void LagrangianLinearR::computeInput(const double& time)
   OUT("LagrangianLinearR::computeInput\n");
 }
 
-void LagrangianLinearR::display() const
-{
-  cout << "---------------------------------------------------" << endl;
-  cout << "____ data of the LagrangianLinearR " << endl;
-  cout << "| h " << endl;
-  if (H != NULL) H->display();
-  else cout << "->NULL" << endl;
-  cout << "| b " << endl;
-  if (b != NULL) b->display();
-  else cout << "->NULL" << endl;
-  cout << "____________________________" << endl;
-  cout << "---------------------------------------------------" << endl;
-}
-
 void LagrangianLinearR::saveRelationToXML()
 {
   IN("LagrangianLinearR::saveRelationToXML\n");
@@ -424,4 +439,24 @@ LagrangianLinearR::LagrangianLinearR():
   LagrangianR(), H(NULL), b(NULL), isHAllocatedIn(false), isBAllocatedIn(false)
 {
   relationType = LAGRANGIANLINEARRELATION;
+}
+
+void LagrangianLinearR::display() const
+{
+  IN("LagrangianLinearR::display\n");
+  LagrangianR::display();
+  cout << "===== Lagrangian Linear Relation display ===== " << endl;
+  cout << " H: " << endl;
+  if (H != NULL)
+    H->display();
+  else
+    cout << " -> NULL " << endl;
+  cout << " b: " << endl;
+  if (b != NULL)
+    b->display();
+  else
+    cout << " -> NULL " << endl;
+
+  cout << "===================================== " << endl;
+  OUT("LagrangianLinearR::display\n");
 }

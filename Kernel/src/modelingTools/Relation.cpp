@@ -60,6 +60,7 @@ Relation::Relation(const Relation& newRel, Interaction* inter):
   // \warning:  interaction, relationxml and dsioVector are not copied !
   // Interaction can be set with optional parameter inter (default=NULL)
   // \todo: manage dsio copy when this class will be well implemented
+  cout << " REla ok " << endl;
 }
 
 
@@ -132,3 +133,16 @@ void Relation::setComputeInputFunction(const string& pluginPath, const string& f
   computeInputName = plugin + ":" + functionName;
 }
 
+void Relation::display() const
+{
+  IN("Relation::display\n");
+
+  cout << "===== Relation display ===== " << endl;
+  cout << "- Relation type: " << relationType << endl;
+  if (interaction != NULL) cout << "- Interaction id" << interaction->getId() << endl;
+  else cout << "- Linked interaction -> NULL" << endl;
+  cout << "- Input plug-in name: " << computeInputName << endl;
+  cout << "- Output plug-in name: " << computeOutputName << endl;
+  cout << "===================================== " << endl;
+  OUT("Relation::display\n");
+}

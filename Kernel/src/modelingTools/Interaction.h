@@ -70,6 +70,9 @@ private:
   /** number of relations in the interaction (ie size of y[i], lambda[i] ...*/
   unsigned int nInteraction;
 
+  /** sum of all DS sizes, for DS involved in the interaction */
+  unsigned int sizeOfDS;
+
   /** relation between constrained variables and states variables
    * vector of output derivatives
    * y[0] is y, y[1] is yDot and so on
@@ -202,6 +205,15 @@ public:
   inline void setNInteraction(const unsigned int& nInter)
   {
     nInteraction = nInter;
+  }
+
+  /** \fn const unsigned int getSizeOfDS() const
+   *  \brief get the sum of DS sizes, for DS involved in interaction
+   *  \return an unsigned int
+   */
+  inline const unsigned int getSizeOfDS() const
+  {
+    return sizeOfDS;
   }
 
   // -- y --
@@ -494,6 +506,11 @@ public:
   }
 
   // --- OTHER FUNCTIONS ---
+
+  /** \fn void computeSizeOfDS()
+   * \brief compute sum of all interaction-involved DS sizes
+   */
+  void computeSizeOfDS();
 
   /** \fn   void swapInMemory(void);
    * \brief   put values of y in yOld, the same for lambda

@@ -59,7 +59,7 @@ void PlatformTest::testManualCreation1()
   // Create dynamical systems
 
   // general type
-  DynamicalSystem *ds1 = new DynamicalSystem(1, sizePb, *x0, "BasicPlugin:vectorField");
+  DynamicalSystem *ds1 = new DynamicalSystem(1, sizePb, *x0, "DefaultPlugin:vectorField");
 
   // linear
   DynamicalSystem *ds2 = new LinearDS(2, 5, sv);
@@ -69,7 +69,7 @@ void PlatformTest::testManualCreation1()
 
   // Lagrangian linear and time invariant
   DynamicalSystem *ds4 = new LagrangianLinearTIDS(4, sizePbLag, *q0, *v0, *mass,
-      "BasicPlugin:computeFExt", *K, *C);
+      "DefaultPlugin:computeFExt", *K, *C);
 
   nsds->addDynamicalSystem(ds1);
 
@@ -241,15 +241,15 @@ void PlatformTest::testManualCreation3()
   SimpleVector sv;
 
 
-  ds = new DynamicalSystem(1, 2, sv, "BasicPlugin:vectorField");
+  ds = new DynamicalSystem(1, 2, sv, "DefaultPlugin:vectorField");
   ds2 = new LinearDS(2, 5, sv);
-  /*    ds3 = new LagrangianDS(3, 2, sv, sv, "BasicPlugin:computeMass",
-    "BasicPlugin:computeFInt","BasicPlugin:computeFExt","BasicPlugin:computeJacobianQFInt",
-    "BasicPlugin:computeJacobianVelocityFInt","BasicPlugin:computeJacobianQQNLInertia",
-    "BasicPlugin:computeJacobianVelocityQNLInertia", "BasicPlugin:computeQNLInertia");
+  /*    ds3 = new LagrangianDS(3, 2, sv, sv, "DefaultPlugin:computeMass",
+    "DefaultPlugin:computeFInt","DefaultPlugin:computeFExt","DefaultPlugin:computeJacobianQFInt",
+    "DefaultPlugin:computeJacobianVelocityFInt","DefaultPlugin:computeJacobianQQNLInertia",
+    "DefaultPlugin:computeJacobianVelocityQNLInertia", "DefaultPlugin:computeQNLInertia");
   */
   SiconosMatrix sm;
-  ds4 = new LagrangianLinearTIDS(4, 8, sv, sv, sm, "BasicPlugin:computeFExt", sm, sm);
+  ds4 = new LagrangianLinearTIDS(4, 8, sv, sv, sm, "DefaultPlugin:computeFExt", sm, sm);
 
   nsds->addDynamicalSystem(ds);
   nsds->addDynamicalSystem(ds2);

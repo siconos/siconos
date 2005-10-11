@@ -120,7 +120,7 @@ public:
       */
   LagrangianDS(const int&, const unsigned int& ,
                const SimpleVector& , const SimpleVector& ,
-               const std::string&  = "BasicPlugin:computeMass");
+               const std::string&  = "DefaultPlugin:computeMass");
 
   /** \fn LagrangianDS(const DynamicalSystem &)
    *  \brief copy constructor
@@ -738,7 +738,7 @@ public:
     return isLDSPlugin[n];
   };
 
-  /** \fn const bool getIsLDSPlugin(unsigned int& n) const
+  /** \fn const vector<bool> getIsLDSPlugin() const
    *  \brief get the full vector isLDSPlugin, to check if member number n is loaded from a plugin or not
    *  to know which member corresponds to n see private member list below.
    *  \return a vector of bool

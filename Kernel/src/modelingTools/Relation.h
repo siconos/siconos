@@ -195,6 +195,10 @@ public:
    */
   virtual void setComputeInputFunction(const std::string&, const std::string&);
 
+  /** \fn  void display() const
+   * \brief main relation members display
+   */
+  virtual void display() const;
   ///////////////////////
 
 protected:

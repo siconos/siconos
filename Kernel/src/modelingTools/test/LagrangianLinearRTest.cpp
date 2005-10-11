@@ -43,6 +43,10 @@ void LagrangianLinearRTest::tearDown()
 // data constructor (1)
 void LagrangianLinearRTest::testBuildLagrangianLinearR1()
 {
+  cout << "========================================" << endl;
+  cout << "=== LagrangianLinearR tests start ...=== " << endl;
+  cout << "========================================" << endl;
+  cout << " OKOKOK " << endl;
   LagrangianLinearR * llr = new LagrangianLinearR(*H, *b);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR : ", llr->getH() == *H, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR : ", llr->getB() == *b, true);
