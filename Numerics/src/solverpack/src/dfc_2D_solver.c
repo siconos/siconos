@@ -81,7 +81,7 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
   int           i, info, it_end;
   int           dim_q, dim_MM;
   int           iparamLCP[5];
-  int           dparamLCP[5];
+  double        dparamLCP[5];
 
   double        res;
   double        *MM, *q, *z, *w;
