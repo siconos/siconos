@@ -38,6 +38,13 @@ const std::string  LLR_B = "b";
 
 class LagrangianLinearRXML : public LagrangianRXML
 {
+
+private:
+
+  //Nodes
+  xmlNode * HNode;
+  xmlNode * bNode;
+
 public:
 
   LagrangianLinearRXML();
@@ -90,13 +97,6 @@ public:
   {
     return (!(bNode == NULL));
   }
-
-private:
-
-
-  //Nodes
-  xmlNode * HNode;
-  xmlNode * bNode;
 
 };
 

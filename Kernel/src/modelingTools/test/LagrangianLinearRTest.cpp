@@ -28,51 +28,133 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianLinearRTest);
 
 void LagrangianLinearRTest::setUp()
 {
+  // parse xml file:
+  xmlDocPtr doc;
+  xmlNodePtr cur;
+  doc = xmlParseFile("LagrangianLinearR_test.xml");
+  if (doc == NULL)
+    XMLException::selfThrow("Document not parsed successfully");
+  cur = xmlDocGetRootElement(doc);
+  if (cur == NULL)
+  {
+    XMLException::selfThrow("empty document");
+    xmlFreeDoc(doc);
+  }
+
+  // get rootNode
+
+  if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
+  {
+    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
+    xmlFreeDoc(doc);
+  }
+
+  // look for NSDS node
+  xmlNode * nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
+  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction");
+  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
+  // get relation
+  xmlNode * node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "LagrangianLinearRelation");
+  tmpxml1 = new LagrangianLinearRXML(node1);
+
+  // second file
+  // parse xml file:
+  xmlDocPtr doc2;
+  xmlNodePtr cur2;
+  doc2 = xmlParseFile("LagrangianLinearR_test2.xml");
+  if (doc2 == NULL)
+    XMLException::selfThrow("Document not parsed successfully");
+  cur2 = xmlDocGetRootElement(doc2);
+  if (cur2 == NULL)
+  {
+    XMLException::selfThrow("empty document");
+    xmlFreeDoc(doc2);
+  }
+
+  // get rootNode
+
+  if (xmlStrcmp(cur2->name, (const xmlChar *) "SiconosModel"))
+  {
+    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
+    xmlFreeDoc(doc2);
+  }
+  // look for NSDS node
+  xmlNode * nodetmp2 = SiconosDOMTreeTools::findNodeChild(cur2, "NSDS");
+  nodetmp2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "Interaction");
+  nodetmp2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "Interaction_Content");
+  // get relation
+  xmlNode * node2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "LagrangianLinearRelation");
+  tmpxml2 = new LagrangianLinearRXML(node2);
   H = new SiconosMatrix("matH.dat", true);
-  b = new SimpleVector(2);
-  (*b)(0) = 4;
-  (*b)(1) = 5;
+  b = new SimpleVector(1);
+  (*b)(0) = 12;
 }
 
 void LagrangianLinearRTest::tearDown()
 {
+  delete tmpxml1;
+  delete tmpxml2;
   delete b;
   delete H;
 }
 
-// data constructor (1)
-void LagrangianLinearRTest::testBuildLagrangianLinearR1()
+// xml constructor (1)
+void LagrangianLinearRTest::testBuildLagrangianLinearR0()
 {
   cout << "========================================" << endl;
   cout << "=== LagrangianLinearR tests start ...=== " << endl;
   cout << "========================================" << endl;
-  cout << " OKOKOK " << endl;
-  LagrangianLinearR * llr = new LagrangianLinearR(*H, *b);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR : ", llr->getH() == *H, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR : ", llr->getB() == *b, true);
+  LagrangianLinearR * llr = new LagrangianLinearR(tmpxml1);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR0a : ", llr->getType() == "LagrangianLinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR0b : ", llr->getH() == *H, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR0c : ", llr->getB() == *b, true);
   delete llr;
-  cout << " Constructor LLR 1 ok" << endl;
+  cout << " xml Constructor LLR 1 ok" << endl;
 }
 
-// data constructor (2)
+// xml constructor, with plug-in (2)
+void LagrangianLinearRTest::testBuildLagrangianLinearR1()
+{
+  LagrangianLinearR * llr = new LagrangianLinearR(tmpxml2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR1a : ", llr->getType() == "LagrangianLinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearLagrangianR1b : ", llr->getHFunctionName() == "TestPlugin:h0", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearLagrangianR1c : ", llr->getGFunctionName() == "TestPlugin:G0", true);
+  delete llr;
+  cout << " xml Constructor LLR 2 ok" << endl;
+}
+
+// data constructor (1)
 void LagrangianLinearRTest::testBuildLagrangianLinearR2()
 {
-  LagrangianLinearR * llr = new LagrangianLinearR(*H);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearRC : ", llr->getH() == *H, true);
+  LagrangianLinearR * llr = new LagrangianLinearR(*H, *b);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR2a : ", llr->getType() == "LagrangianLinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR2b : ", llr->getH() == *H, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR2c : ", llr->getB() == *b, true);
   delete llr;
   cout << " Constructor LLR 2 ok" << endl;
 }
 
-// copy constructor
+// data constructor (2)
 void LagrangianLinearRTest::testBuildLagrangianLinearR3()
 {
-  Relation * rel = new LagrangianLinearR(*H, *b);
-  LagrangianLinearR *llr = new LagrangianLinearR(*rel);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR : ", llr->getH() == *H, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR : ", llr->getB() == *b, true);
-  delete rel;
+  LagrangianLinearR * llr = new LagrangianLinearR(*H);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR3a : ", llr->getType() == "LagrangianLinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR3b : ", llr->getH() == *H, true);
   delete llr;
   cout << " Constructor LLR 3 ok" << endl;
+}
+
+// copy constructor
+void LagrangianLinearRTest::testBuildLagrangianLinearR4()
+{
+  Relation * rel = new LagrangianLinearR(tmpxml1);
+  LagrangianLinearR *llr = new LagrangianLinearR(*rel);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR4a : ", llr->getType() == "LagrangianLinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR4b : ", llr->getH() == *H, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR4c : ", llr->getB() == *b, true);
+  delete rel;
+  delete llr;
+  cout << " Copy Constructor LLR  ok" << endl;
 }
 
 // set H

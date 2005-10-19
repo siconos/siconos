@@ -1,0 +1,66 @@
+<SiconosModel>
+	<NSDS bvp='false'>
+		<!-- DSs defined in the problem -->
+		<DS_Definition>		
+			<LagrangianLinearTIDS number='3'>
+				<Id> Ball </Id>				
+	 			<StepsInMemory>1</StepsInMemory>				
+				<q0 vectorSize='3'>
+					1.0 0.0 0.0
+				</q0>
+				<Velocity0  vectorSize='3'>
+					0.0 0.0 0.0
+				</Velocity0>
+				<Fext vectorPlugin="TestPlugin:computeFExt"/>
+				<M matrixRowSize='3' matrixColSize='3'>	
+					<row>1.0 0.0 0.0</row>
+					<row>0.0 1.0 0.0</row>
+					<row>0.0 0.0 1.0</row>
+				</M>			
+				<ndof>3</ndof>								
+			</LagrangianLinearTIDS>
+			<LagrangianLinearTIDS number='4'>
+				<Id> Ball </Id>				
+	 			<StepsInMemory>1</StepsInMemory>				
+				<q0 vectorSize='3'>
+					1.0 0.0 0.0
+				</q0>
+				<Velocity0  vectorSize='3'>
+					0.0 0.0 0.0
+				</Velocity0>
+				<Fext vectorPlugin="TestPlugin:computeFExt"/>
+				<M matrixRowSize='3' matrixColSize='3'>	
+					<row>1.0 0.0 0.0</row>
+					<row>0.0 1.0 0.0</row>
+					<row>0.0 0.0 1.0</row>
+				</M>			
+				<ndof>3</ndof>								
+			</LagrangianLinearTIDS>
+		</DS_Definition>
+		<Interaction_Definition>
+			<Interaction number='1'>
+				<Id>test-of-rel</Id>
+				<nInter> 2 </nInter>
+				<!-- List of couple of DS concerned by this interaction -->
+		               <DS_Concerned all='false'>
+                               <DSList vectorSize='1' >3 4</DSList>
+                               </DS_Concerned>									
+				<!-- Relation of this interaction -->				
+				<Interaction_Content>		
+					<LinearTimeInvariantRelation>
+                                        <C matrixFile="matC.dat"/>
+                                        <D matrixFile="matD.dat"/>
+	                                <B matrixFile="matB.dat"/>
+  	                                <F matrixFile="matF.dat"/>
+                                        <a vectorSize = '3'>4 5 6</a>
+                                        <e vectorSize = '2'>0.1 0.1</e>
+                                       </LinearTimeInvariantRelation>			
+					<!-- NS Law of this interaction	-->
+					<NewtonImpactLaw>
+						<e>0.9</e>				
+					</NewtonImpactLaw>
+				</Interaction_Content>	
+			</Interaction>				
+		</Interaction_Definition>		
+	</NSDS>
+</SiconosModel>

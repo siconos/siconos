@@ -1,0 +1,44 @@
+<SiconosModel>
+	<NSDS bvp='false'>
+		<!-- DSs defined in the problem -->
+		<DS_Definition>		
+			<LagrangianLinearTIDS number='3'>
+				<Id> Ball </Id>				
+	 			<StepsInMemory>1</StepsInMemory>				
+				<q0 vectorSize='3'>
+					1.0 0.0 0.0
+				</q0>
+				<Velocity0  vectorSize='3'>
+					0.0 0.0 0.0
+				</Velocity0>
+				<Fext vectorPlugin="TestPlugin:computeFExt"/>
+				<M matrixRowSize='3' matrixColSize='3'>	
+					<row>1.0 0.0 0.0</row>
+					<row>0.0 1.0 0.0</row>
+					<row>0.0 0.0 1.0</row>
+				</M>			
+				<ndof>3</ndof>								
+			</LagrangianLinearTIDS>
+		</DS_Definition>
+		<Interaction_Definition>
+			<Interaction number='1'>
+				<Id>test-of-rel</Id>
+				<nInter> 1 </nInter>
+				<!-- List of couple of DS concerned by this interaction -->
+		               <DS_Concerned all='true'>
+                               </DS_Concerned>									
+				<!-- Relation of this interaction -->				
+				<Interaction_Content>		
+					<Relation>
+					<computeInput plugin="TestPlugin:R"/>
+					<computeOutput plugin="TestPlugin:y"/>
+					</Relation>			
+					<!-- NS Law of this interaction	-->
+					<NewtonImpactLaw>
+						<e>0.9</e>				
+					</NewtonImpactLaw>
+				</Interaction_Content>	
+			</Interaction>				
+		</Interaction_Definition>		
+	</NSDS>
+</SiconosModel>

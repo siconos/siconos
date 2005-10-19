@@ -40,6 +40,7 @@ private:
   CPPUNIT_TEST(testSetStrategyPtr);
   CPPUNIT_TEST(testsetNonSmoothDynamicalSystemPtr);
   CPPUNIT_TEST(testsetSiconosModelXMLPtr);
+  CPPUNIT_TEST(End);
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
@@ -49,7 +50,7 @@ private:
   void testSetStrategyPtr();
   void testsetNonSmoothDynamicalSystemPtr();
   void testsetSiconosModelXMLPtr();
-
+  void End();
   // Members
 
   double t0, T;

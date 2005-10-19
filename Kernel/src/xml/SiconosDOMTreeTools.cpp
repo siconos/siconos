@@ -61,10 +61,10 @@ SiconosMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNode * siconos
   else
   {
     //The matrix is precised in the XML DOM Tree
-    //lineSize
-    unsigned int matrixColSize = getIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXCOLSIZE);
-    //rowSize
+    //number of lines
     unsigned int matrixRowSize = getIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXROWSIZE);
+    //number of columns
+    unsigned int matrixColSize = getIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXCOLSIZE);
 
     xmlNode *node = SiconosDOMTreeTools::findNodeChild(siconosMatrixNode, SDTT_ROW);
     unsigned int i = 0;
@@ -626,6 +626,7 @@ vector<double> SiconosDOMTreeTools::string2Vector(const string& vectorContent, c
 
 vector<int> SiconosDOMTreeTools::string2Vector(const string& vectorContent)
 {
+
   vector <int> vect;
   int start = 0, nb = 0, end = 0;
   string stmp1, stmp2 = vectorContent;

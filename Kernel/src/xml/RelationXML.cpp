@@ -28,21 +28,12 @@ RelationXML::RelationXML(xmlNode *relationNode):
 {
   IN("RelationXML::RelationXML(xmlNode*)\n");
   xmlNode *node;
-  string type((char*)relationNode->name);
-  if ((node = SiconosDOMTreeTools::findNodeChild(this->rootRelationXMLNode, COMPUTE_INPUT_TAG)) != NULL)
+
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootRelationXMLNode, COMPUTE_INPUT_TAG)) != NULL)
     computeInputNode = node;
-  else
-  {
-    if (LAGRANGIAN_NON_LINEAR_RELATION_TAG == type)
-      XMLException::selfThrow("RelationXML - RelationXML::RelationXML(xmlNode *relationNode) error : tag " + COMPUTE_INPUT_TAG + " not found.");
-  }
-  if ((node = SiconosDOMTreeTools::findNodeChild(this->rootRelationXMLNode, COMPUTE_OUTPUT_TAG)) != NULL)
+
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootRelationXMLNode, COMPUTE_OUTPUT_TAG)) != NULL)
     computeOutputNode = node;
-  else
-  {
-    if (LAGRANGIAN_NON_LINEAR_RELATION_TAG == type)
-      XMLException::selfThrow("RelationXML - RelationXML::RelationXML(xmlNode *relationNode) error : tag " + COMPUTE_OUTPUT_TAG + " not found.");
-  }
   OUT("RelationXML::RelationXML(xmlNode*)\n");
 }
 

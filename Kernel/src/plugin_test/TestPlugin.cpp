@@ -152,22 +152,6 @@ extern "C" void computeJacobianVelocityNNL(unsigned int *sizeOfq, double *q, dou
   printf("Call of the function 'computeJacobianVelocityNNL' of the basic plugin.\nYou have to implement this function.\n");
 }
 
-// plugin for relations
-extern "C" void computeOutput(int *sizeOfX, double* x, double *time, double* lambda, double* y)
-{
-  /* input parameter : sizeOfX (size of the vector X); x (pointer to x vector); time; lambda (pointer to lambda vector)
-   * output parameter : y (pointer to vector y )
-   */
-  printf("Call of the function 'computeOutput' of the basic plugin.\nYou have to implement this function.\n");
-}
-
-extern "C" void computeInput(int *sizeOfX, double* x, double *time, double* lambda, double* r)
-{
-  /* input parameter : sizeOfX (size of the vector X); x (pointer to x vector); time; lambda (pointer to lambda vector)
-   * output parameter : r (pointer to vector r )
-   */
-  printf("Call of the function 'computeInput' of the basic plugin.\nYou have to implement this function.\n");
-}
 
 // ===== Linear DS  ====
 
@@ -190,3 +174,56 @@ extern "C" void computeB(unsigned int *sizeOfB, double* b, const double *time)
   printf("Call of the function 'computeB' of the basic plugin.\nYou have to implement this function.\n");
 
 }
+
+// ===== RELATIONS ====
+
+extern "C" void y(const unsigned int*, const double*, const double*, const unsigned int*, const double*, const unsigned int*, const double*, double*)
+{
+  /* input parameter : sizeOfX (size of the vector X); x (pointer to x vector); time; lambda (pointer to lambda vector)
+   * output parameter : y (pointer to vector y )
+   */
+  printf("Warning: call of the function 'computeOutput' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
+}
+
+extern "C" void R(const unsigned int*, const double*, const double*, double*)
+{
+  /* input parameter : sizeOfX (size of the vector X); x (pointer to x vector); time; lambda (pointer to lambda vector)
+   * output parameter : r (pointer to vector r )
+   */
+  printf("Warning: call of the function 'computeInput' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
+}
+
+// === Lagrangian Relations ===
+
+extern "C" void h0(const unsigned int*, const double*, const unsigned int*, double*)
+{
+  printf("Call of the function 'h0' of the basic plugin.\nYou have to implement this function.\n");
+
+}
+
+extern "C" void G0(const unsigned int*, const double*, const unsigned int*, double*)
+{
+  printf("Call of the function 'G0' of the basic plugin.\nYou have to implement this function.\n");
+
+}
+
+extern "C"  void h1(const unsigned int*, const double*, const double*, const unsigned int*, double*)
+{
+  printf("Call of the function 'h1' of the basic plugin.\nYou have to implement this function.\n");
+
+}
+
+
+extern "C"    void G10(const unsigned int*, const double*, const double*, const unsigned int*, double*)
+{
+  printf("Call of the function 'G10' of the basic plugin.\nYou have to implement this function.\n");
+
+}
+
+
+extern "C"    void G11(const unsigned int*, const double*, const double*, const unsigned int*, double*)
+{
+  printf("Call of the function 'G11' of the basic plugin.\nYou have to implement this function.\n");
+
+}
+

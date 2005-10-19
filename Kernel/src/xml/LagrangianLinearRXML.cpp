@@ -30,13 +30,11 @@ LagrangianLinearRXML::LagrangianLinearRXML(xmlNode * LLRelationNode)
 
   if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, LLR_H)) != NULL)
     HNode = node;
-  else
+  else if (hNode == NULL)
     XMLException::selfThrow("LLRelationXML - constructor error : tag " + LLR_H + " not found.");
 
   if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, LLR_B)) != NULL)
     bNode = node;
-  else
-    XMLException::selfThrow("LLRelationXML - constructor error : tag " + LLR_B + " not found.");
 }
 
 LagrangianLinearRXML::~LagrangianLinearRXML()

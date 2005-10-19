@@ -28,17 +28,19 @@
  *  \version 0.1
  *  \date Apr 27, 2004
  *
+ * This class defines and computes the Linear Time Invariant Relation defined by:
  *
+ * \f[
+ * y = h(x,t,\lambda,u,...) = C x + Fu + D \lambda + e
  *
- * This class defines and computes the Linear Time Invariant Relation defined by,
- * for the input \f$ y \f$,
- * \f[
- * y= C x + Fu + D \lambda + e
+ * R = g(\lambda,t) = B \lambda +a
  * \f]
- * and for the output \f$ r\f$ defined by
- * \f[
- * r= B \lambda +a
- * \f]
+ *
+ * Warning: For this class, h and g plug-in are not used but after all connected to default plug-in functions.
+ * To use plug-in rather than C, F ... matrices, call setComputeOutput and/or setComputeInput functions.
+ * This will connect h and g to the given plug-in and when calling computeOutput/Input functions, h and g will
+ * be used rather than C, F ... This means that, in this case, C, F and other matrices or vectors may be useless.
+ * It's up to user to be coherent and to provide good connections between plug-in and matrices if necessary.
  */
 class LinearTIR : public Relation
 {
@@ -332,7 +334,7 @@ public:
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the Relation to the XML tree
    */
-  void saveRelationToXML();
+  void saveRelationToXML() const;
 
   /** \fn void display()
    *  \brief print the data to the screen

@@ -37,9 +37,10 @@ const std::string PERIODICBC = "PeriodicBC";
 
 // const found in the Interaction
 // Relations:
+const std::string RELATION = "Relation";
 const std::string LINEARTIRELATION = "LinearTIR";
-const std::string LAGRANGIANLINEARRELATION = "LagrangianLinearR";
 const std::string LAGRANGIANRELATION = "LagrangianR";
+const std::string LAGRANGIANLINEARRELATION = "LagrangianLinearR";
 // Non smooth laws
 const std::string COMPLEMENTARITYCONDITIONNSLAW = "ComplementarityConditionNSL";
 const std::string RELAYNSLAW = "RelayNSL";

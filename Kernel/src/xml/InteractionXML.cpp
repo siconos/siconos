@@ -87,9 +87,11 @@ InteractionXML::InteractionXML(xmlNode * interactionNode, vector<int> definedNum
     {
       // get Relation type
       type = (char*)node2->name;
-      if (type == LINEAR_TIME_INVARIANT_RELATION_TAG)
+      if (type == RELATION_TAG)
+        relationXML = new RelationXML(node2);
+      else if (type == LINEAR_TIME_INVARIANT_RELATION_TAG)
         relationXML = new LinearTIRXML(node2);
-      else if (type == LAGRANGIAN_NON_LINEAR_RELATION_TAG)
+      else if (type == LAGRANGIAN_RELATION_TAG)
         relationXML = new LagrangianRXML(node2);
       else if (type == LAGRANGIAN_LINEAR_RELATION_TAG)
         relationXML = new LagrangianLinearRXML(node2);
@@ -159,15 +161,22 @@ void InteractionXML::loadInteraction(Interaction* inter)
   if (this->rootInteractionXMLNode != NULL)
   {
     /*
-     * now, creation of the RelationXML object
+     * Creation of the RelationXML object
      */
     xmlNode *InteractionContentNode;
     if (inter->getRelationPtr() != NULL)
     {
       type = inter->getRelationPtr()->getType();
-      //node = xmlNewChild( this->rootInteractionXMLNode, NULL, (xmlChar*)INTERACTION_RELATION.c_str(), NULL );
       InteractionContentNode = xmlNewChild(this->rootInteractionXMLNode, NULL, (xmlChar*)INTERACTION_CONTENT_TAG.c_str(), NULL);
-      if (type == LAGRANGIANLINEARRELATION)
+
+      if (type == RELATION)
+      {
+        node = xmlNewChild(InteractionContentNode, NULL, (xmlChar*)RELATION_TAG.c_str(), NULL);
+        relationXML = new RelationXML(node);
+        // linkage between the Relation and his RelationXML
+        inter->getRelationPtr()->setRelationXML(relationXML);
+      }
+      else if (type == LAGRANGIANLINEARRELATION)
       {
         //xmlNewProp( node, (xmlChar*)INTERACTION_TYPE.c_str(), (xmlChar*)INTERACTION_LL.c_str() );
         node = xmlNewChild(InteractionContentNode, NULL, (xmlChar*)LAGRANGIAN_LINEAR_RELATION_TAG.c_str(), NULL);
@@ -184,7 +193,7 @@ void InteractionXML::loadInteraction(Interaction* inter)
       else if (type == LAGRANGIANRELATION)
       {
         //xmlNewProp( node, (xmlChar*)INTERACTION_TYPE.c_str(), (xmlChar*)INTERACTION_LNL.c_str() );
-        node = xmlNewChild(InteractionContentNode, NULL, (xmlChar*)LAGRANGIAN_NON_LINEAR_RELATION_TAG.c_str(), NULL);
+        node = xmlNewChild(InteractionContentNode, NULL, (xmlChar*)LAGRANGIAN_RELATION_TAG.c_str(), NULL);
         newRelationXml = new LagrangianRXML();
 
         // linkage between the Relation and his RelationXML

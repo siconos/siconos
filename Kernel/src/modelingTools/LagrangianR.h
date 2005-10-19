@@ -30,22 +30,67 @@
  *  \date Apr 27, 2004
  *  This class provides tools to describe non linear relation of the type:
  *
- * \todo : write complete equations for NL Lagrangian relations
+ * \f[
+ * Y[0] = y = h(q,...)
  *
- *  using plug-in mechanism for function H definition.
+ * Y[1] = \dot y = G(q,...)\dot q + ...
+ *
+ * R = G^t(q,...)\lambda
+ *
+ * \f]
+ *
+ * using plug-in mechanism for functions h and G definition.
+ *
  *
  * Recall:
  *   - output is vector Y, ie y and all its derivatives from 1 to r-1, r being the relative degree (see Interaction)
  *   - input is vector Lambda (see Interaction)
  *
+ * member "LagrangianRelationType", set by user, defined h and G number of variables:
+ *
+ *   - holonom              -> h0(q), G0(q) (usual mechanical case)
+ *   - non-holonom          -> h1(q,t), G10(q,t), G11(q,t)
+ *   - holonom+control      -> h2(q,u), G20(q,u), G21(q,u)
+ *   - non-holonom+control  -> h3(q,t,u), G30(q,t,u), G31(q,t,u), G32(q,t,u)
+ *
+ * Usually, G functions corresponds to jacobians of h compare to its variables. But it is up to user
+ * to define these plug-in.
+ * Consider for example non-frictional case, with h(q,t).
+ * Then:
+ * \f[
+ * Y[0] = y = h(q,t)
+ *
+ * Y[1] = \dot y = G[0](q,t)\dot q + G[1]
+ *
+ * with G[1] = dh/dt.
+ *
+ * \f]
+ *
+ *
+ *
+ * Depending on this type, computeH() function call the right plug-in. The same for G.
+ * Mind that depending on the number of variables in h and G, corresponding jacobian operators
+ * are to be defined if necessary.
+ * \warning At the time, only holonom and non-holonom constraints are modelled.
+ *
  * Some rules:
  *   - h must be a plug-in
- *   - jacobianQH can be either a fixed matrix or a plug-in, to fill this matrix in.
+ *   - G can be either a fixed matrix or a plug-in, to fill this matrix in.
+ *   - h and all the G functions must have the same signature.
+ *   - G is defined as a stl-vector of SiconosMatrix* and the number of G functions (ie size of vector G)
+ *     depends on the number of variables in h.
  *
- * Remark: at the time, we consider that h is a function of q (and not velocity).
- * That means jacobianVelocity is not yet implemented.
+ * Friction case: in Y, components are in the following order:
+ *   first relation, normal part
+ *   first relation, tangential part
+ *   ...
+ *   relation n, normal part
+ *   relation n, tangential part
+ * and so on ...
+ * Note also that usually only normal part definition is required for Y[0].
  *
  */
+
 class LagrangianRXML;
 
 class LagrangianR : public Relation
@@ -53,51 +98,85 @@ class LagrangianR : public Relation
 
 protected:
 
-  // --- h ---
+  /* To define the type of constraints (holonom ...), ie the variables on which depend h and G*/
+  std::string LagrangianRelationType;
 
-  /* bool to check whether h is a plug-in or not */
-  /* Warning: for LagrangianR, h is always a plug-in but not necessary for LagrangianLinearR derived class */
-  /* Recall: h(q) = Hq + b in derived class */
-  bool isHPlugin;
+  /* Boolean variables to check if h and G are plugged to external functions or not
+   *  - always true for h
+   *  - G can be either a plug-in or a given matrix
+   *  - by default, h is not used in LagrangianLinear -> isHplugged = false
+   *  - the same for G
+   * That means that is..Plugged is false when connected to default plug-in.
+   *  Note that these variables are mainly useful for derived classes.
+   */
+  bool isHPlugged;
+  std::vector<bool> isGPlugged;
+
   /* Name of the plugin used to compute h */
   std::string  hFunctionName;
 
-  /** \fn void (*computeHPtr)(const unsigned int* sizeOfq, const double* time,
-   *                          const unsigned int* sizeOfy, const double* q, const double* y);
-   * \brief computes y = h(q,t)
+  /* G matrices that link Y[1] to dynamical system variables */
+  std::vector<SiconosMatrix*> G;
+  std::vector<bool> isGAllocatedIn;
+
+  /* Name of the plug-in used to compute G */
+  std::vector<std::string>  GFunctionName;
+
+  // === plug-in, depending on problem type, ie LagrangianRelationType value ===
+
+  // --- Plug-in for holonom case -> h0(q), G0(q) ---
+  /** \fn void (*h0Ptr)(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfy, const double* y);
+   * \brief computes y = h(q)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
-   * \param double*: time
-   * \param unsigned int: size of output vector y
    * \param double*: vector q (composite of all DS q-vectors)
+   * \param unsigned int: size of output vector y
    * \param double*: output vector y (in-out parameter)
    */
-  void (*computeHPtr)(const unsigned int*, const double*, const unsigned int*, const double*, double*);
-
-  // --- jacobianH ---
-
-  /* Jacobian Matrix of function h and a boolean to know whether it has been allocated or not */
-  /* at the time, we on;y use jacobian compare to q, index 0 of stl vectors */
-  std::vector<SiconosMatrix*> jacobianH;
-  std::vector<bool> isJacobianHAllocatedIn;
-  // Remark: stl vector usefull for future implementation with jacobian compare to velocity and so on
-
-  /* bool to check whether jacobian is a plug-in or not. See remark above concerning the use of stl vector */
-  std::vector<bool> isJacobianHPlugin;
-
-  /* Name of the plugin used to compute jacobian of H compare to q */
-  /* See remark above concerning the use of stl vector */
-  std::vector<std::string>  jacobianHFunctionName;
-
-  /** \fn void (*computeJacobianQHPtr)(const unsigned int* sizeOfq, const double* time,
-   *                                  const unsigned int* sizeOfy, const double* q, const double* jacob);
-   * \brief computes jacobian compare to q of function h
+  void (*h0Ptr)(const unsigned int*, const double*, const unsigned int*, double*);
+  /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfy, const double* G);
+   * \brief computes G(q)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
+   * \param double*: vector q (composite of all DS q-vectors)
+   * \param unsigned int: size of output vector y
+   * \param double*: output matrix G[0] (in-out parameter)
+   */
+  void (*G0Ptr)(const unsigned int*, const double*, const unsigned int*, double*);
+
+  // --- plug-in for non-holonom case -> h1(q,t), G10(q,t), G11(q,t) ---
+  /** \fn void (*h1Ptr)(const unsigned int* sizeOfq, const double* q,
+   *                    const double* time, const unsigned int* sizeOfy, const double* y);
+   * \brief computes y = h(q,t)
+   * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
+   * \param double*: vector q (composite of all DS q-vectors)
    * \param double*: time
    * \param unsigned int: size of output vector y
-   * \param double*: vector q (composite of all DS q-vectors)
-   * \param double*: output vector jacobianH (in-out parameter)
+   * \param double*: output vector y (in-out parameter)
    */
-  void (*computeJacobianQHPtr)(const unsigned int*, const double*, const unsigned int*, const double*, double*);
+  void (*h1Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*);
+  // G0(q,t)
+  /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q,  const double* time,
+   *                    const unsigned int* sizeOfy, const double* G);
+   * \brief computes jacobian compare to q of function h
+   * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
+   * \param double*: vector q (composite of all DS q-vectors)
+   * \param double*: time
+   * \param unsigned int: size of output vector y
+   * \param double*: output matrix G[0] (in-out parameter)
+   */
+  void (*G10Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*);
+  // G1(q,t)
+  /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q, const double* time,
+   *                    const unsigned int* sizeOfy, const double* G);
+   * \brief computes jacobian compare to q of function h
+   * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
+   * \param double*: vector q (composite of all DS q-vectors)
+   * \param double*: time
+   * \param unsigned int: size of output vector y
+   * \param double*: output matrix G[1] (in-out parameter)
+   */
+  void (*G11Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*);
+
+  //\todo  ... other plug-in to be added if required ...
 
   /** class for plug-in management (open, close librairy...) */
   SiconosSharedLibrary cShared;
@@ -137,55 +216,81 @@ public:
 
   ~LagrangianR();
 
-  // -- JacobianQH --
-
-  /** \fn  const SiconosMatrix getJacobianQH() const
-   *  \brief get the value of JacobianQH
-   *  \return SiconosMatrix
+  /** \fn  std::string getLagrangianRelationType() const
+   *  \brief get the type of constraints of the relation (holonom ...)
+   *  \return a string
    */
-  inline const SiconosMatrix getJacobianQH() const
+  inline const std::string getLagrangianRelationType() const
   {
-    return *(jacobianH[0]);
+    return LagrangianRelationType;
   }
 
-  /** \fn SiconosMatrix* getJacobianQHPtr() const
-   *  \brief get JacobianQH
-   *  \return pointer on a SiconosMatrix
+  // -- G --
+
+  /** \fn  vector<SiconosMatrix*> getGVector() const
+   *  \brief get the vector of matrices G
+   *  \return vector<SiconosMatrix*>
    */
-  inline SiconosMatrix* getJacobianQHPtr() const
+  inline std::vector<SiconosMatrix*> getGVector() const
   {
-    return jacobianH[0];
+    return G;
   }
 
-  /** \fn void setJacobianQH (const SiconosMatrix& newValue)
-   *  \brief set the value of JacobianQH to newValue
+  /** \fn void setGVector(const vector<SiconosMatrix*>& newVector)
+   *  \brief set the value of G vector
+   *  \param vector<SiconosMatrix*>
+   */
+  void setGVector(const std::vector<SiconosMatrix*> &);
+
+  /** \fn const SiconosMatrix getG(unsigned int& index) const
+   *  \brief get matrix G[index]
+   *  \return a SiconosMatrix
+   */
+  inline const SiconosMatrix getG(const unsigned int & index = 0) const
+  {
+    return *(G[index]);
+  }
+
+  /** \fn SiconosMatrix* getGPtr() const
+   *  \brief get a pointer on matrix G[index]
+   *  \return a pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getGPtr(const unsigned int& index = 0) const
+  {
+    return G[index];
+  }
+
+  /** \fn void setG(const SiconosMatrix& newValue, unsigned int& index)
+   *  \brief set the value of G[index] to newValue
    *  \param SiconosMatrix newValue
+   *  \param unsigned int: index position in G vector
    */
-  void setJacobianQH(const SiconosMatrix&);
+  void setG(const SiconosMatrix&, const unsigned int& = 0);
 
-  /** \fn void setJacobianQHPtr(SiconosMatrix* newPtr)
-   *  \brief set JacobianQH to pointer newPtr
+  /** \fn void setGPtr(SiconosMatrix* newPtr,const unsigned int& index )
+   *  \brief set G[index] to pointer newPtr
    *  \param SiconosMatrix * newPtr
+   *  \param unsigned int: index position in G vector
    */
-  void setJacobianQHPtr(SiconosMatrix *newPtr);
+  void setGPtr(SiconosMatrix *newPtr, const unsigned int& = 0);
 
 
   /** \fn void setComputeHFunction(const string pluginPath, const string functionName&)
-   *  \brief to set a specified function to compute function h(q)
+   *  \brief to set a specified function to compute function h(q,...)
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
   void setComputeHFunction(const std::string &, const std::string &);
 
-  /** \fn void setComputeJacobianHFunction(const string pluginPath, const string functionName&)
-   *  \brief to set a specified function to compute jacobian of h compare to q
+  /** \fn void setComputeGFunction(const string pluginPath, const string functionName&, const unsigned int& index)
+   *  \brief to set a specified function to compute G(q, ...)
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
+   *  \param unsigned int: the index of G that must be computed (see introduction of this class for details on indexes)
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianQHFunction(const std::string &, const std::string &);
-
+  void setComputeGFunction(const std::string &, const std::string & , const unsigned int & = 0);
 
   /** \fn  std::string getHFunctionName() const
    *  \brief get name of function that computes h
@@ -196,32 +301,35 @@ public:
     return hFunctionName;
   }
 
-  /** \fn  std::vector<string> getJacobianHFunctionName() const
-   *  \brief get names of functions that compute jacobian
+  /** \fn  std::vector<string> getGFunctionNameVector() const
+   *  \brief get list of names for functions that compute G
    *  \return a vector of strings
    */
-  inline const std::vector<std::string> getJacobianHFunctionName() const
+  inline const std::vector<std::string> getGFunctionNameVector() const
   {
-    return jacobianHFunctionName;
+    return GFunctionName;
+  }
+
+  /** \fn  string getJacobianHFunctionName(const unsigned int& index) const
+   *  \brief get names of functions that compute G[index]
+   *  \return a string
+   */
+  inline std::string getGFunctionName(const unsigned int& index = 0) const
+  {
+    return GFunctionName[index];
   }
 
   /** \fn const bool isHPlugged() const
    *  \brief bool that shows if h is a plug-in or not
    *  \return a bool
    */
-  inline const bool isHPlugged() const
-  {
-    return isHPlugin;
-  };
+  //inline const bool isHPlugged() const {return isHPlugin;};
 
   /** \fn const vector<bool> isJacobianHPlugged() const
   *  \brief list of bool that shows if jacobianH is a plug-in or not
   *  \return a vector of bool
   */
-  inline const std::vector<bool> isJacobianHPlugged() const
-  {
-    return isJacobianHPlugin;
-  };
+  //inline const std::vector<bool> isJacobianHPlugged() const {return isJacobianHPlugin;};
 
   /** \fn void computeH(const double & time);
    * \brief to compute y = h(q,v,t) using plug-in mechanism
@@ -229,11 +337,12 @@ public:
    */
   void computeH(const double &);
 
-  /** \fn void computeJacobianQH(const double & time);
-   * \brief to compute Jacobian of h(q,v,t) compare to q using plug-in mechanism
+  /** \fn void computeG(const double & time, const unsigned int & index );
+   * \brief to compute G using plug-in mechanism. Index shows which G is to be computed
    * \param: double, current time
+   * \param: unsigned int
    */
-  void computeJacobianQH(const double &);
+  void computeG(const double &, const unsigned int& = 0);
 
   /** \fn void computeOutput(double time);
    *  \brief to compute output
@@ -259,7 +368,7 @@ public:
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the Relation to the XML tree
    */
-  void saveRelationToXML();
+  void saveRelationToXML() const;
 
   /** \fn LagrangianR* convert (Relation *r)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.

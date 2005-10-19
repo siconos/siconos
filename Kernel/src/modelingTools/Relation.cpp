@@ -21,15 +21,24 @@ using namespace std;
 
 
 // Default constructor with optional interaction parameter
-Relation::Relation(Interaction* inter): relationType("none"), interaction(inter), relationxml(NULL),
-  computeInputName("none"), computeOutputName("none"),
+Relation::Relation(Interaction* inter):
+  relationType("Relation"), interaction(inter), relationxml(NULL), computeInputName("none"),
+  computeOutputName("none"), isOutputPlugged(false), isInputPlugged(false),
   computeOutputPtr(NULL), computeInputPtr(NULL)
-{}
+{
+  // Set plug-in default functions for h and g.
+  setComputeOutputFunction("DefaultPlugin.so", "computeOutput");
+  setComputeInputFunction("DefaultPlugin.so", "computeInput");
+  isOutputPlugged = false;
+  isInputPlugged = false;
+}
 
 // xml constructor
 Relation::Relation(RelationXML* relxml, Interaction* inter):
-  relationType("none"), interaction(inter), relationxml(relxml),
-  computeInputName("none"), computeOutputName("none")
+  relationType("Relation"), interaction(inter), relationxml(relxml),
+  computeInputName("none"), computeOutputName("none"),
+  isOutputPlugged(true), isInputPlugged(true),
+  computeOutputPtr(NULL), computeInputPtr(NULL)
 {
   if (relationxml != NULL)
   {
@@ -41,12 +50,27 @@ Relation::Relation(RelationXML* relxml, Interaction* inter):
       plugin = (relationxml)->getComputeInputPlugin();
       setComputeInputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
     }
+    else
+    {
+      setComputeInputFunction("DefaultPlugin.so", "computeInput");
+      isInputPlugged = false; //
+    }
+
     // computeOutput
     if (relationxml->hasComputeOutput())
     {
       plugin = (relationxml)->getComputeOutputPlugin();
       setComputeOutputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
     }
+    else
+    {
+      setComputeOutputFunction("DefaultPlugin.so", "computeOutput");
+      isOutputPlugged = false; //
+    }
+
+    if (inter != NULL)
+      inter->setRelationPtr(this);
+
   }
   else RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
 }
@@ -55,15 +79,23 @@ Relation::Relation(RelationXML* relxml, Interaction* inter):
 Relation::Relation(const Relation& newRel, Interaction* inter):
   relationType(newRel.getType()), interaction(inter), relationxml(NULL),
   computeInputName(newRel.getComputeInputName()), computeOutputName(newRel.getComputeOutputName()),
+  isOutputPlugged(true), isInputPlugged(true),
   computeOutputPtr(NULL), computeInputPtr(NULL)
 {
   // \warning:  interaction, relationxml and dsioVector are not copied !
   // Interaction can be set with optional parameter inter (default=NULL)
   // \todo: manage dsio copy when this class will be well implemented
-  cout << " REla ok " << endl;
+  string plugin = computeInputName;
+  setComputeInputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+  if (computeInputName == "DefaultPlugin:computeInput")
+    isInputPlugged = false;
+  plugin = computeOutputName;
+  setComputeOutputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+  if (computeOutputName == "DefaultPlugin:computeOutput")
+    isOutputPlugged = false;
+
+  // Remark : set is...Plugged to false is useful for derived classes .
 }
-
-
 
 Relation::~Relation()
 {}
@@ -98,21 +130,100 @@ void Relation::addDSInputOutput(DSInputOutput* dsio)
 
 void Relation::computeOutput(const double& time)
 {
-  //to do
-  RuntimeException::selfThrow("Relation - computeOutput: not yet implemented for relation of type" + getType());
+  if (interaction == NULL)
+    RuntimeException::selfThrow("Relation - computeOutput: relation is not connected to any interaction");
+
+  if (computeOutputPtr == NULL)
+    RuntimeException::selfThrow("computeOutput() is not linked to a plugin function");
+
+  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+  CompositeVector *xTmp = new CompositeVector();
+  CompositeVector *uTmp = new CompositeVector();
+  vector<DynamicalSystem*>::iterator it;
+  for (it = vDS.begin(); it != vDS.end(); it++)
+  {
+    // Put x and u of each DS into a composite
+    // Warning: use copy constructors, no link between pointers
+    if ((*it)->getType() != LDS)
+      RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented for DS type " + (*it)->getType());
+
+    xTmp->add((*it)->getX());
+    if ((*it)->getUPtr() != NULL)
+      uTmp->add(*((*it)->getUPtr())) ;
+  }
+  unsigned int sizeU = uTmp->size();
+  unsigned int sizeX = xTmp->size();
+
+  SimpleVector *y = interaction->getYPtr(0);
+  SimpleVector *lambda = interaction->getLambdaPtr(0);
+  unsigned int sizeY = y->size();
+  computeOutputPtr(&sizeX, &(*xTmp)(0), &time, &sizeY, &(*lambda)(0), &sizeU,  &(*uTmp)(0), &(*y)(0));
+  delete xTmp;
+  delete uTmp;
 }
 
 void Relation::computeFreeOutput(const double& time)
 {
-  RuntimeException::selfThrow("Relation - computeFreeOutput: not yet implemented for relation of type" + getType());
-  //to do
+  if (interaction == NULL)
+    RuntimeException::selfThrow("Relation - computeFreeOutput: relation is not connected to any interaction");
+
+  if (computeOutputPtr == NULL)
+    RuntimeException::selfThrow("computeOutput() is not linked to a plugin function");
+
+  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+  CompositeVector *xTmp = new CompositeVector();
+  CompositeVector *uTmp = new CompositeVector();
+  vector<DynamicalSystem*>::iterator it;
+
+  for (it = vDS.begin(); it != vDS.end(); it++)
+  {
+    // Put xFree and u of each DS into a composite
+    // Warning: use copy constructors, no link between pointers
+    if ((*it)->getType() != LDS)
+      RuntimeException::selfThrow("LinearTIR - computeFreeOutput: not yet implemented for DS type " + (*it)->getType());
+
+    xTmp->add((*it)->getXFree());
+    if ((*it)->getUPtr() != NULL)
+      uTmp->add(*((*it)->getUPtr())) ;
+  }
+
+  SimpleVector *yFree = interaction->getYPtr(0);
+  // warning : yFree is saved in y !!
+  unsigned int sizeU = uTmp->size();
+  unsigned int sizeX = xTmp->size();
+
+  SimpleVector *lambda = interaction->getLambdaPtr(0);
+  unsigned int sizeY = yFree->size();
+  computeOutputPtr(&sizeX, &(*xTmp)(0), &time, &sizeY, &(*lambda)(0), &sizeU,  &(*uTmp)(0), &(*yFree)(0));
+  delete xTmp;
+  delete uTmp;
+
+  // \todo update y, yDot ... depending on the relative degree.
 }
 
 void Relation::computeInput(const double& time)
 {
-  //to do
-  RuntimeException::selfThrow("Relation - computeIntput: not yet implemented for relation of type" + getType());
+  if (interaction == NULL)
+    RuntimeException::selfThrow("Relation - computeInput: relation is not connected to any interaction");
 
+  if (computeInputPtr == NULL)
+    RuntimeException::selfThrow("computeInput() is not linked to a plugin function");
+
+  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+  vector<DynamicalSystem*>::iterator it;
+  CompositeVector *r = new CompositeVector();
+  for (it = vDS.begin(); it != vDS.end(); it++)
+  {
+    // Put r of each DS into a composite
+    // Warning: use addPtr -> link between pointers
+    r->addPtr((*it)->getRPtr());
+  }
+
+  SimpleVector *lambda = interaction->getLambdaPtr(0);
+  unsigned int sizeY = lambda->size();
+
+  computeInputPtr(&sizeY, &(*lambda)(0), &time, &(*r)(0));
+  delete r;
 }
 
 void Relation::setComputeOutputFunction(const string& pluginPath, const string& functionName)
@@ -122,6 +233,7 @@ void Relation::setComputeOutputFunction(const string& pluginPath, const string& 
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   computeOutputName = plugin + ":" + functionName;
+  isOutputPlugged = true;
 }
 
 void Relation::setComputeInputFunction(const string& pluginPath, const string& functionName)
@@ -131,6 +243,7 @@ void Relation::setComputeInputFunction(const string& pluginPath, const string& f
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   computeInputName = plugin + ":" + functionName;
+  isInputPlugged = true;
 }
 
 void Relation::display() const
@@ -145,4 +258,10 @@ void Relation::display() const
   cout << "- Output plug-in name: " << computeOutputName << endl;
   cout << "===================================== " << endl;
   OUT("Relation::display\n");
+}
+
+void Relation::saveRelationToXML() const
+{
+  //to do
+  RuntimeException::selfThrow("Relation - saveRelationToXML: not yet implemented for relation of type" + getType());
 }

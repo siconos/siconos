@@ -17,25 +17,87 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "LagrangianRXML.h"
+
 using namespace std;
 
 LagrangianRXML::LagrangianRXML()
-  : RelationXML()
+  : RelationXML(), hNode(NULL)
 {}
 
 LagrangianRXML::LagrangianRXML(xmlNode * LNLRelationNode)
-  : RelationXML(LNLRelationNode)
-{}
+  : RelationXML(LNLRelationNode), hNode(NULL)
+{
+  xmlNodePtr node;
+
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootRelationXMLNode, "h")) != NULL)
+    hNode = node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootRelationXMLNode, "G")) != NULL)
+  {
+    // get number of G functions given
+    unsigned int size = SiconosDOMTreeTools::getIntegerAttributeValue(node, "number");
+    if (size == 0)
+      XMLException::selfThrow("LagrangianRXML:: constructor, G number = 0");
+    GNode.resize(size, NULL);
+    // get corresponding nodes
+    GNode[0] = SiconosDOMTreeTools::findNodeChild(node, "matrix")  ;
+    if (GNode[0] == NULL)
+      XMLException::selfThrow("LagrangianRXML:: constructor, G0 is missing");
+    for (unsigned int i = 1; i < size; i++)
+    {
+      GNode[i] =  SiconosDOMTreeTools::findFollowNode(GNode[i - 1]);
+      if (GNode[i] == NULL)
+        XMLException::selfThrow("LagrangianRXML:: constructor, another G is required");
+    }
+  }
+  else
+    GNode.resize(1, NULL); // default value, required for LagrangianLinearRXML
+
+}
 
 LagrangianRXML::~LagrangianRXML()
 {}
 
-string  LagrangianRXML::getComputeInputPlugin() const
+bool LagrangianRXML::isGPlugin(const unsigned int & index) const
 {
-  return  SiconosDOMTreeTools::getStringAttributeValue(computeInputNode, COMPUTE_INPUT_TAG);
+  if (index >= GNode.size())
+    XMLException::selfThrow("LagrangianRXML - isGPlugin(index), index out of range");
+
+  return xmlHasProp((xmlNodePtr)GNode[index], (xmlChar *) LAGRANGIANR_MATRIXPLUGIN.c_str());
 }
 
-string  LagrangianRXML::getComputeOutputPlugin() const
+bool LagrangianRXML::hasG(const unsigned int & index) const
 {
-  return  SiconosDOMTreeTools::getStringAttributeValue(computeOutputNode, COMPUTE_OUTPUT_TAG);
+  if (index >= GNode.size())
+    XMLException::selfThrow("LagrangianRXML - hasG(index), index out of range");
+  return (GNode[index] != NULL);
+}
+
+string LagrangianRXML::getGPlugin(const unsigned int & index) const
+{
+  if (index >= GNode.size())
+    XMLException::selfThrow("LagrangianRXML - getGPlugin(index), index out of range");
+
+  if (!isGPlugin(index))
+    XMLException::selfThrow("LagrangianRXML - getGPlugin : G is not computed with a plugin");
+
+  return  SiconosDOMTreeTools::getStringAttributeValue(GNode[index], LAGRANGIANR_MATRIXPLUGIN);
+}
+
+SiconosMatrix LagrangianRXML::getGMatrix(const unsigned int & index) const
+{
+  if (index >= GNode.size())
+    XMLException::selfThrow("LagrangianRXML - getGMatrix(index), index out of range");
+  if (isGPlugin(index))
+    XMLException::selfThrow("LagrangianRXML - getGMatrix : G is computed using a plug-in");
+  return  SiconosDOMTreeTools::getSiconosMatrixValue(GNode[index]);
+}
+
+void LagrangianRXML::setGPlugin(const std::string& plugin, const unsigned int & index)
+{
+  // \todo
+}
+
+void LagrangianRXML::setGMatrix(SiconosMatrix *newMat, const unsigned int &  index)
+{
+  // \todo
 }

@@ -217,6 +217,8 @@ public:
    */
   inline std::vector<int> getDSConcerned()
   {
+    if (dsListNode == NULL)
+      XMLException::selfThrow("dsList node == NULL");
     return SiconosDOMTreeTools::getVectorIntContentValue(dsListNode);
   }
 

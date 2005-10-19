@@ -25,8 +25,8 @@ include $(top_srcdir)/config/Make-rules
 
 all : TestPlugin.so
 
-TestPlugin.o: TestPlugin.c
-	$(CXX) $(CXXFLAGS) -c TestPlugin.c
+TestPlugin.o: TestPlugin.cpp
+	$(CXX) $(CXXFLAGS) -c TestPlugin.cpp
 
 TestPlugin.so: TestPlugin.o
 	$(CXX) $(CXXFLAGS) $(CXX_DYNLIB) $< -o $@

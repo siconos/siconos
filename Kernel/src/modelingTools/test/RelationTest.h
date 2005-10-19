@@ -16,71 +16,46 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef __LinearTIRTest__
-#define __LinearTIRTest__
+#ifndef __RelationTest__
+#define __RelationTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "LinearTIR.h"
+#include "Relation.h"
 
-class LinearTIRTest : public CppUnit::TestFixture
+class RelationTest : public CppUnit::TestFixture
 {
 
 private:
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(LinearTIRTest);
+  CPPUNIT_TEST_SUITE(RelationTest);
 
   // tests to be done ...
 
-  //CPPUNIT_TEST(testBuildLinearTIR);
-  CPPUNIT_TEST(testBuildLinearTIR0);
-  CPPUNIT_TEST(testBuildLinearTIR1);
-  CPPUNIT_TEST(testBuildLinearTIR2);
-  CPPUNIT_TEST(testBuildLinearTIR3);
-  CPPUNIT_TEST(testBuildLinearTIR4);
-  CPPUNIT_TEST(testSetC);
-  CPPUNIT_TEST(testSetCPtr);
-  CPPUNIT_TEST(testSetD);
-  CPPUNIT_TEST(testSetDPtr);
-  CPPUNIT_TEST(testSetF);
-  CPPUNIT_TEST(testSetFPtr);
-  CPPUNIT_TEST(testSetE);
-  CPPUNIT_TEST(testSetEPtr);
-  CPPUNIT_TEST(testSetB);
-  CPPUNIT_TEST(testSetBPtr);
-  CPPUNIT_TEST(testSetA);
-  CPPUNIT_TEST(testSetAPtr);
+  //CPPUNIT_TEST(testBuildRelation);
+  CPPUNIT_TEST(testBuildRelation1);
+  CPPUNIT_TEST(testBuildRelation2);
+  CPPUNIT_TEST(testBuildRelation3);
+  /*CPPUNIT_TEST(testComputeOutput);
+    CPPUNIT_TEST(testComputeInput);   */
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildLinearTIR0();
-  void testBuildLinearTIR1();
-  void testBuildLinearTIR2();
-  void testBuildLinearTIR3();
-  void testBuildLinearTIR4();
-  void testSetC();
-  void testSetCPtr();
-  void testSetD();
-  void testSetDPtr();
-  void testSetF();
-  void testSetFPtr();
-  void testSetE();
-  void testSetEPtr();
-  void testSetB();
-  void testSetBPtr();
-  void testSetA();
-  void testSetAPtr();
+  void testBuildRelation1();
+  void testBuildRelation2();
+  void testBuildRelation3();
+  /*
+  void testComputeOutput();
+  void testComputeInput();*/
   void End();
 
   // Members
 
-  SiconosMatrix *C, *B, *F, *D;
-  SimpleVector *a, *e;
-  xmlNode * node1, *node2;
-  RelationXML * tmpxml1, *tmpxml2;
+  xmlNode * node1;
+  RelationXML * tmpxml1;
   NonSmoothDynamicalSystem * nsds;
 
 public:

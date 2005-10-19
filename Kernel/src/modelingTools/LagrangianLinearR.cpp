@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "LagrangianLinearR.h"
 //
 #include "LagrangianDS.h"
@@ -27,35 +27,47 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
   LagrangianR(relxml, inter), H(NULL), b(NULL),
   isHAllocatedIn(true), isBAllocatedIn(true)
 {
+  // if one between h and G is plugged, both must be.
+  if (isHPlugged != isGPlugged[0])
+    RuntimeException::selfThrow("LagrangianLinearR:: xml constructor, can not have plug-in for h and matrix for G=H in linear case.");
+
   relationType = LAGRANGIANLINEARRELATION;
   if (relxml != NULL)
   {
-    LagrangianLinearRXML* LLRxml = (static_cast<LagrangianLinearRXML*>(relationxml));
-    unsigned int row = LLRxml->getH().size(0);
-    unsigned int col = LLRxml->getH().size(1);
+    if (!isHPlugged)
+    {
+      LagrangianLinearRXML* LLRxml = (static_cast<LagrangianLinearRXML*>(relationxml));
+      unsigned int row = LLRxml->getH().size(0);
+      unsigned int col = LLRxml->getH().size(1);
 
-    if (inter != NULL)
-    {
-      // get size of vector y
-      unsigned int size = interaction->getNInteraction();
-      if (row != size)
-        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size with y vector for input vector or matrix");
+      if (inter != NULL)
+      {
+        // get size of vector y
+        unsigned int size = interaction->getNInteraction();
+        if (row != size)
+          RuntimeException::selfThrow("LagrangianLinearR:: xml constructor, inconsistent size with y vector for input vector or matrix");
+      }
+      H = new SiconosMatrix(row, col);
+      *H = LLRxml->getH();
+      if (LLRxml->hasB())
+      {
+        unsigned int rowB = LLRxml->getB().size();
+        if (row != rowB)
+          RuntimeException::selfThrow("LagrangianLinearR:: xml constructor, inconsistent size between b and H");
+        b = new SimpleVector(rowB);
+        *b = LLRxml->getB();
+      }
+
+      // LagrangianR members
+      G[0] = H;
     }
-    H = new SiconosMatrix(row, col);
-    *H = LLRxml->getH();
-    if (LLRxml->hasB())
+    else
     {
-      unsigned int rowB = LLRxml->getB().size();
-      if (row != rowB)
-        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between b and H");
-      b = new SimpleVector(rowB);
-      *b = LLRxml->getB();
+      cout << "Warning: LagrangianLinearR xml constructor, original relations uses plug-in functions for h and G=H definition." << endl;
+      H = G[0];
+      isHAllocatedIn = false;
+      isBAllocatedIn = false;
     }
-    // LagrangianR required members
-    isHPlugin = false;
-    jacobianH[0] = H;
-    isJacobianHAllocatedIn[0] = false;
-    isJacobianHPlugin[0] = false;
   }
   else RuntimeException::selfThrow("LagrangianLinearR::xml constructor xml file=NULL");
 }
@@ -81,12 +93,8 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
   H = new SiconosMatrix(newH);
   b = new SimpleVector(newB);
 
-  // LagrangianR required members
-  isHPlugin = false;
-  jacobianH[0] = H;
-  isJacobianHAllocatedIn[0] = false;
-  isJacobianHPlugin[0] = false;
-
+  // LagrangianR members
+  G[0] = H;
 }
 
 // Constructor from data: H and interaction (optional)
@@ -104,11 +112,8 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, Interaction* int
   }
 
   H = new SiconosMatrix(newH);
-  // LagrangianR required members
-  isHPlugin = false;
-  jacobianH[0] = H;
-  isJacobianHAllocatedIn[0] = false;
-  isJacobianHPlugin[0] = false;
+  // LagrangianR members
+  G[0] = H;
 }
 
 // copy constructor (inter is optional)
@@ -118,28 +123,40 @@ LagrangianLinearR::LagrangianLinearR(const Relation & newLLR, Interaction* inter
   if (relationType != LAGRANGIANLINEARRELATION)
     RuntimeException::selfThrow("LagrangianLinearR:: copy constructor, inconsistent relation types for copy");
 
-  isHPlugin = false;
-  cout << " OOK0 " << endl;
+  // if one between h and G is plugged, both must be.
+  if (isHPlugged != isGPlugged[0])
+    RuntimeException::selfThrow("LagrangianLinearR:: data constructor, can not have plug-in for h and matrix for G=H in linear case.");
+
   const LagrangianLinearR *  llr = static_cast<const LagrangianLinearR*>(&newLLR);
-  cout << " OOK " << endl;
-  // warning: jacobianH = H may have already been allocated in LagrangianR copy constructor!
-  if (jacobianH[0] == NULL)
+
+  // warning: G may have already been allocated in LagrangianR copy constructor!
+
+  if (!isHPlugged)
   {
-    H = new SiconosMatrix(llr->getH());
-    cout << " OOK " << endl;
-    isHAllocatedIn = true;
-    jacobianH[0] == H;
+    if (G[0] == NULL)
+    {
+      H = new SiconosMatrix(llr->getH());
+      isHAllocatedIn = true;
+      G[0] == H;
+    }
+    else
+    {
+      H = G[0];
+      isHAllocatedIn = false;
+    }
+
+    if (llr->getBPtr() != NULL)
+    {
+      b = new SimpleVector(llr->getB());
+      isBAllocatedIn = true;
+    }
   }
   else
   {
-    H = jacobianH[0];
+    cout << "Warning: LagrangianLinearR copy constructor, original relations uses plug-in functions for h and G=H definition." << endl;
+    H = G[0];
     isHAllocatedIn = false;
-  }
-
-  if (llr->getBPtr() != NULL)
-  {
-    b = new SimpleVector(llr->getB());
-    isBAllocatedIn = true;
+    isBAllocatedIn = false;
   }
 }
 
@@ -155,6 +172,8 @@ LagrangianLinearR::~LagrangianLinearR()
 
 void LagrangianLinearR::setH(const SiconosMatrix& newValue)
 {
+  isHPlugged = false;
+  isGPlugged[0] = false;
   unsigned int sizeY = newValue.size(0);
   unsigned int sizeQ = newValue.size(1);
 
@@ -181,6 +200,8 @@ void LagrangianLinearR::setH(const SiconosMatrix& newValue)
 
 void LagrangianLinearR::setHPtr(SiconosMatrix *newPtr)
 {
+  isHPlugged = false;
+  isGPlugged[0] = false;
   if (isHAllocatedIn) delete H;
   if (interaction != NULL)
   {
@@ -194,6 +215,8 @@ void LagrangianLinearR::setHPtr(SiconosMatrix *newPtr)
 
 void LagrangianLinearR::setB(const SimpleVector& newValue)
 {
+  isHPlugged = false;
+  isGPlugged[0] = false;
   unsigned int sizeY = newValue.size();
   if (interaction != NULL)
   {
@@ -218,6 +241,8 @@ void LagrangianLinearR::setB(const SimpleVector& newValue)
 
 void LagrangianLinearR::setBPtr(SimpleVector *newPtr)
 {
+  isHPlugged = false;
+  isGPlugged[0] = false;
   if (isBAllocatedIn) delete b;
   b = newPtr;
   isBAllocatedIn = false;
@@ -287,43 +312,49 @@ void LagrangianLinearR::computeOutput(const double& time)
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianLinearR::computeOutput, no interaction linked with this relation");
 
-  // Get the DS concerned by the interaction of this relation
-  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-  vector<LagrangianDS*> vLDS;
-
-  unsigned int size = vDS.size(), i;
-  CompositeVector *qTmp = new CompositeVector();
-  CompositeVector *velocityTmp = new CompositeVector();
-  for (i = 0; i < size; i++)
+  if (!isHPlugged)
   {
-    // check dynamical system type
-    if (vDS[i]->getType() != LTIDS && vDS[i]->getType() != LNLDS)
-      RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + vDS[i]->getType());
+    // Get the DS concerned by the interaction of this relation
+    vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+    vector<LagrangianDS*> vLDS;
 
-    // convert vDS systems into LagrangianDS and put them in vLDS
-    vLDS.push_back(static_cast<LagrangianDS*>(vDS[i]));
+    unsigned int size = vDS.size(), i;
+    CompositeVector *qTmp = new CompositeVector();
+    CompositeVector *velocityTmp = new CompositeVector();
+    for (i = 0; i < size; i++)
+    {
+      // check dynamical system type
+      if (vDS[i]->getType() != LTIDS && vDS[i]->getType() != LNLDS)
+        RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + vDS[i]->getType());
 
-    // Put q and velocity of each DS into a composite
-    // Warning: use copy constructors (add function), no link between pointers
-    qTmp->add(vLDS[i]->getQ());
-    velocityTmp->add(vLDS[i]->getVelocity());
+      // convert vDS systems into LagrangianDS and put them in vLDS
+      vLDS.push_back(static_cast<LagrangianDS*>(vDS[i]));
+
+      // Put q and velocity of each DS into a composite
+      // Warning: use copy constructors (add function), no link between pointers
+      qTmp->add(vLDS[i]->getQ());
+      velocityTmp->add(vLDS[i]->getVelocity());
+    }
+
+    // get y and yDot of the interaction
+    SimpleVector *y = interaction->getYPtr(0);
+    SimpleVector *yDot = interaction->getYPtr(1);
+
+    // compute y and yDot
+    if (b != NULL)
+      *y = (*H * *qTmp) + *b;
+    else
+      *y = (*H * *qTmp) ;
+
+    *yDot = (*H * *velocityTmp);
+
+    // free memory
+    delete qTmp;
+    delete velocityTmp;
   }
-
-  // get y and yDot of the interaction
-  SimpleVector *y = interaction->getYPtr(0);
-  SimpleVector *yDot = interaction->getYPtr(1);
-
-  // compute y and yDot
-  if (b != NULL)
-    *y = (*H * *qTmp) + *b;
   else
-    *y = (*H * *qTmp) ;
+    LagrangianR::computeOutput(time);
 
-  *yDot = (*H * *velocityTmp);
-
-  // free memory
-  delete qTmp;
-  delete velocityTmp;
   OUT("LagrangianLinearR::computeOutput\n");
 }
 
@@ -334,44 +365,49 @@ void LagrangianLinearR::computeFreeOutput(const double& time)
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianLinearR::computeFreeOutput, no interaction linked with this relation");
 
-  // Get the DS concerned by the interaction of this relation
-  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-  vector<LagrangianDS*> vLDS;
-
-  unsigned int size = vDS.size(), i;
-  CompositeVector *qFreeTmp = new CompositeVector();
-  CompositeVector *velocityFreeTmp = new CompositeVector();
-
-  for (i = 0; i < size; i++)
+  if (!isHPlugged)
   {
-    // check dynamical system type
-    if (vDS[i]->getType() != LTIDS && vDS[i]->getType() != LNLDS)
-      RuntimeException::selfThrow("LagrangianLinearR::computeFreeOutput not yet implemented for dynamical system of type " + vDS[i]->getType());
+    // Get the DS concerned by the interaction of this relation
+    vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+    vector<LagrangianDS*> vLDS;
 
-    // convert vDS systems into LagrangianDS and put them in vLDS
-    vLDS.push_back(static_cast<LagrangianDS*>(vDS[i]));
+    unsigned int size = vDS.size(), i;
+    CompositeVector *qFreeTmp = new CompositeVector();
+    CompositeVector *velocityFreeTmp = new CompositeVector();
 
-    // Put qFree and velocityFree of each DS into a composite
-    // Warning: use copy constructors, no link between pointers
-    qFreeTmp->add(vLDS[i]->getQFree());
-    velocityFreeTmp->add(vLDS[i]->getVelocityFree());
+    for (i = 0; i < size; i++)
+    {
+      // check dynamical system type
+      if (vDS[i]->getType() != LTIDS && vDS[i]->getType() != LNLDS)
+        RuntimeException::selfThrow("LagrangianLinearR::computeFreeOutput not yet implemented for dynamical system of type " + vDS[i]->getType());
+
+      // convert vDS systems into LagrangianDS and put them in vLDS
+      vLDS.push_back(static_cast<LagrangianDS*>(vDS[i]));
+
+      // Put qFree and velocityFree of each DS into a composite
+      // Warning: use copy constructors, no link between pointers
+      qFreeTmp->add(vLDS[i]->getQFree());
+      velocityFreeTmp->add(vLDS[i]->getVelocityFree());
+    }
+
+    // get y and yDot of the interaction
+    SimpleVector *y = interaction->getYPtr(0);
+    SimpleVector *yDot = interaction->getYPtr(1);
+
+    // compute y and yDot (!! values for free state)
+    if (b != NULL)
+      *y = (*H * *qFreeTmp) + *b;
+    else
+      *y = (*H * *qFreeTmp);
+
+    *yDot = (*H * *velocityFreeTmp);
+
+    // free memory
+    delete qFreeTmp;
+    delete velocityFreeTmp;
   }
-
-  // get y and yDot of the interaction
-  SimpleVector *y = interaction->getYPtr(0);
-  SimpleVector *yDot = interaction->getYPtr(1);
-
-  // compute y and yDot (!! values for free state)
-  if (b != NULL)
-    *y = (*H * *qFreeTmp) + *b;
   else
-    *y = (*H * *qFreeTmp);
-
-  *yDot = (*H * *velocityFreeTmp);
-
-  // free memory
-  delete qFreeTmp;
-  delete velocityFreeTmp;
+    LagrangianR::computeFreeOutput(time);
 
   OUT("LagrangianLinearR::computeFreeOutput\n");
 }
@@ -382,40 +418,45 @@ void LagrangianLinearR::computeInput(const double& time)
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianLinearR::computeInput, no interaction linked with this relation");
 
-  // Get the DS concerned by the interaction of this relation
-  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-  vector<LagrangianDS*> vLDS;
-  unsigned int numberDS = vDS.size(), i;
-  vLDS.resize(numberDS);
-
-  CompositeVector *p = new CompositeVector();
-  string typeDS;
-
-  for (i = 0; i < numberDS; i++)
+  if (!isHPlugged)
   {
-    // check dynamical system type
-    typeDS = vDS[i] ->getType();
-    if (typeDS != LTIDS && typeDS != LNLDS)
-      RuntimeException::selfThrow("LagrangianLinearR::computeInput not yet implemented for this type of dynamical system " + typeDS);
+    // Get the DS concerned by the interaction of this relation
+    vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+    vector<LagrangianDS*> vLDS;
+    unsigned int numberDS = vDS.size(), i;
+    vLDS.resize(numberDS);
 
-    // convert vDS systems into LagrangianDS and put them in vLDS
-    vLDS[i] = static_cast<LagrangianDS*>(vDS[i]);
+    CompositeVector *p = new CompositeVector();
+    string typeDS;
 
-    // Put p of each DS into a composite
-    // Warning: use addPtr -> link between pointers
-    p->addPtr(vLDS[i]->getPPtr());
+    for (i = 0; i < numberDS; i++)
+    {
+      // check dynamical system type
+      typeDS = vDS[i] ->getType();
+      if (typeDS != LTIDS && typeDS != LNLDS)
+        RuntimeException::selfThrow("LagrangianLinearR::computeInput not yet implemented for this type of dynamical system " + typeDS);
+
+      // convert vDS systems into LagrangianDS and put them in vLDS
+      vLDS[i] = static_cast<LagrangianDS*>(vDS[i]);
+
+      // Put p of each DS into a composite
+      // Warning: use addPtr -> link between pointers
+      p->addPtr(vLDS[i]->getPPtr());
+    }
+
+    // get lambda of the concerned interaction
+    SimpleVector *lambda = interaction->getLambdaPtr(1);
+
+    // compute p = Ht lambda
+    *p += matTransVecMult(*H, *lambda);
   }
-
-  // get lambda of the concerned interaction
-  SimpleVector *lambda = interaction->getLambdaPtr(1);
-
-  // compute p = Ht lambda
-  *p += matTransVecMult(*H, *lambda);
+  else
+    LagrangianR::computeInput(time);
 
   OUT("LagrangianLinearR::computeInput\n");
 }
 
-void LagrangianLinearR::saveRelationToXML()
+void LagrangianLinearR::saveRelationToXML() const
 {
   IN("LagrangianLinearR::saveRelationToXML\n");
   if (relationxml != NULL)

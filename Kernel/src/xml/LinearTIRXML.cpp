@@ -29,8 +29,6 @@ LinearTIRXML::LinearTIRXML(xmlNode * LTIRelationNode):
   xmlNode *node;
   if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_C)) != NULL)
     CNode = node;
-  else
-    XMLException::selfThrow("LTIRelationXML - constructor error : tag " + LTIR_C + " not found.");
 
   if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_D)) != NULL)
     DNode = node;
@@ -41,10 +39,8 @@ LinearTIRXML::LinearTIRXML(xmlNode * LTIRelationNode):
   if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_E)) != NULL)
     eNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_C)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_B)) != NULL)
     BNode = node;
-  else
-    XMLException::selfThrow("LTIRelationXML - constructor error : tag " + LTIR_B + " not found.");
 
   if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_A)) != NULL)
     aNode = node;

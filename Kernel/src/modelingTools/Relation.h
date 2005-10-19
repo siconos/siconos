@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #ifndef RELATION_H
 #define RELATION_H
 
@@ -30,17 +30,87 @@ class RelationXML;
 class DSInputOutput;
 
 /** \class Relation
- *  \brief this class represents relation laws (contact, ...) in an interaction between 2 DS;
+ *  \brief general non linear relation class.
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 27, 2004
  *
+ *    This class provides tools to define and describe relations of the type:
+ * \f[
+ * y = h(x,t,\lambda,u,...)
+ * R = g(\lambda,t)
+ * \f]
+ *  x, u, R are DynamicalSystem variables.
+ *  x being the dof vector for all the DS involved in the interaction that owns the current relation.
+ *  u is a control term (see DynamicalSystem class), R the input due to non-smooth behavior.
+ *   \f[ y and \lambda \f] are specific variables of the interaction (see this class for more details).
+ * h and g are plugged on external functions, via plug-in mechanism (see SiconosSharedLibrary).
+ * h <=> output
+ * g <=> input
  *
- *
- *   \warning
+ * They MUST be plugged -> to default plug-in functions if nothing else specified.
  */
+
 class Relation
 {
+
+private:
+
+  /** contains a link to the DSInputOutput of the DynamicalSystems */
+  std::vector<DSInputOutput*> dsioVector;
+
+protected:
+
+  /** type of the Relation */
+  std::string  relationType;
+
+  /** the Interaction which contains this Relation */
+  Interaction *interaction;
+
+  /** the object linked this Relation to read XML data */
+  RelationXML *relationxml;
+
+  /** class for manage plugin (open, close librairy...) */
+  SiconosSharedLibrary cShared;
+
+  /* contains the name of the plugin used to compute g function */
+  std::string  computeInputName;
+  /* contains the name of the plugin used to compute h function */
+  std::string  computeOutputName;
+
+  /* Boolean variables to check if h and g are plugged to external functions or not
+   *  - always true for general Relations
+   *  - false by default for LinearTIR, but may be set to true by user, using setComputeOutput/Input functions
+   *  - always false for Lagrangian ( "overloaded" with h(q,...) and G(q,...) )
+   *  Note that these variables are only useful for derived classes.
+   */
+  bool isOutputPlugged;
+  bool isInputPlugged;
+
+  /** \fn void (*computeOutputPtr)(const unsigned int* sizeX, const double* xPtr, const double* time,
+                                   const unsigned int* sizeY, const double* lambdaPtr,
+           const unsigned int* sizeU, const double* uPtr, double* yPtr);
+   *  \brief computes y
+   *  \param unsigned int* sizeX : size of vector x
+   *  \param double* xPtr : the pointer to the first element of the vector x
+   *  \param double* time : the current time
+   *  \param unsigned int* sizeY : size of vector y and lambda.
+   *  \param double* lambdaPtr : the pointer to the first element of the vector lambda
+   *  \param unsigned int* sizeU : size of vector u
+   *  \param double* uPtr : the pointer to the first element of the vector u
+   *  \param double* yPtr : the pointer to the first element of the vector y (in-out parameter)
+   */
+  void (*computeOutputPtr)(const unsigned int*, const double*, const double*, const unsigned int*, const double*, const unsigned int*, const double*, double*);
+
+  /** \fn void (*computeInputPtr)(const unsigned int* sizeY, const double* time, const double* lambdaPtr, double* rPtr);
+   *  \brief computes r
+   *  \param unsigned int* sizeY : size of vector y and lambda.
+   *  \param double* lambdaPtr : the pointer to the first element of the vector lambda
+   *  \param double* time : the current time
+   *  \param double* rPtr : the pointer to the first element of the vector r (in-out parameter)
+   */
+  void (*computeInputPtr)(const unsigned int*, const double*, const double*, double*);
+
 public:
 
   /** \fn Relation(Interaction* =NULL)
@@ -156,8 +226,6 @@ public:
    */
   void addDSInputOutput(DSInputOutput*);
 
-  //////////////////////////
-
   /** \fn void computeOutput(double time);
    *  \brief default function to compute y
    *  \param double : current time
@@ -199,49 +267,13 @@ public:
    * \brief main relation members display
    */
   virtual void display() const;
-  ///////////////////////
 
-protected:
-
-  /** type of the Relation */
-  std::string  relationType;
-
-  /** the Interaction which contains this Relation */
-  Interaction *interaction;
-
-  /** the object linked this Relation to read XML data */
-  RelationXML *relationxml;
-
-  /** class for manage plugin (open, close librairy...) */
-  SiconosSharedLibrary cShared;
-
-  /* contains the name of the plugin used for computeInput */
-  std::string  computeInputName;
-  /* contains the name of the plugin used for computeOutput */
-  std::string  computeOutputName;
-
-  /** \fn void (*computeOutputPtr)(double* xPtr, double* time, double* lambdaPtr, double* yPtr)
-   *  \brief computes y
-   *  \param double* xPtr : the pointer to the first element of the vector x
-   *  \param double* time : the current time
-   *  \param double* lambdaPtr : the pointer to the first element of the vector lambda
-   *  \param double* yPtr : the pointer to the first element of the vector y (in-out parameter)
+  /** \fn void saveRelationToXML()
+   *  \brief copy the data of the Relation to the XML tree
    */
-  void (*computeOutputPtr)(double* xPtr, double* time, double* lambdaPtr, double* yPtr);
-
-  /** \fn void (*computeInputPtr)(double* xPtr, double* time, double* lambdaPtr, double* rPtr)
-   *  \brief computes r
-   *  \param double* xPtr : the pointer to the first element of the vector x
-   *  \param double* time : the current time
-   *  \param double* lambdaPtr : the pointer to the first element of the vector lambda
-   *  \param double* rPtr : the pointer to the first element of the vector r (in-out parameter)
-   */
-  void (*computeInputPtr)(double* xPtr, double* time, double* lambdaPtr, double* rPtr);
+  virtual void saveRelationToXML() const;
 
 
-private :
-  /** contains a link to the DSInputOutput of the DynamicalSystems */
-  std::vector<DSInputOutput*> dsioVector;
 };
 
 #endif // RELATION_H

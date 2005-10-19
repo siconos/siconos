@@ -46,6 +46,24 @@
 
 class LagrangianLinearR : public LagrangianR
 {
+
+private:
+
+  /** \fn LagrangianLinearR()
+   *  \brief Default constructor
+   */
+  LagrangianLinearR();
+
+  /** a specific matrix to the LagrangianLinearR */
+  SiconosMatrix* H;
+
+  /** a specific vector to the LagrangianLinearR */
+  SimpleVector* b;
+
+  /* Flags to control where pointers have been allocated (in or out constructors)*/
+  bool isHAllocatedIn;
+  bool isBAllocatedIn;
+
 public:
 
   /** \fn LagrangianLinearR(RelationXML*, Interaction* =NULL)
@@ -187,7 +205,7 @@ public:
    *  \brief copy the data of the Relation to the XML tree
    *  \exception RuntimeException
    */
-  void saveRelationToXML();
+  void saveRelationToXML() const;
 
   /** \fn LagrangianLinearR* convert (Relation *r)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
@@ -200,25 +218,6 @@ public:
    * \brief main relation members display
    */
   void display() const;
-
-private:
-
-  /** \fn LagrangianLinearR()
-   *  \brief Default constructor
-   */
-  LagrangianLinearR();
-
-  /** a specific matrix to the LagrangianLinearR */
-  SiconosMatrix* H;
-
-  /** a specific vector to the LagrangianLinearR */
-  SimpleVector* b;
-
-  /* Flags to control where pointers have been allocated (in or out constructors)*/
-  bool isHAllocatedIn;
-  bool isBAllocatedIn;
-
-
 };
 
 #endif // LAGRANGIANLINEARRELATION_H

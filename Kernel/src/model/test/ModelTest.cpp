@@ -38,6 +38,9 @@ void ModelTest::tearDown()
 // xml constructor
 void ModelTest::testBuildModel1()
 {
+  cout << "=============================" << endl;
+  cout << "=== Model tests start ...=== " << endl;
+  cout << "=============================" << endl;
   char * xmlFile = "ModelXml_test.xml" ;
   Model * M = new Model(xmlFile);
   // check that xml link is not NULL
@@ -106,4 +109,10 @@ void ModelTest::testsetSiconosModelXMLPtr()
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" test setSiconosModelXMLPtr: ", M->getSiconosModelXMLPtr() == newMxml, true);
   delete M;
   cout << " test setSiconosModelXMLPtr ok " << endl;
+}
+void ModelTest::End()
+{
+  cout << "================================" << endl;
+  cout << " ===== End of Model Tests ===== " << endl;
+  cout << "================================" << endl;
 }

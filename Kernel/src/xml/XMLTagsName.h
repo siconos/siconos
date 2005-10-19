@@ -51,7 +51,6 @@ const std::string NON_LINEAR_SYSTEMDS_TAG = "NonLinearDS";
 
 const std::string BOUNDARYCONDITION_TAG = "BoundaryCondition";
 const std::string INTERACTION_TAG = "Interaction";
-const std::string RELATION_TAG = "Relation";
 const std::string INTERACTION_CONTENT_TAG = "Interaction_Content";
 const std::string RELATION_CONTENT_TAG = "Relation_Content";
 
@@ -70,16 +69,16 @@ const std::string LMGC90_STRATEGY_TAG = "OneStepIntegrator_LMGC90";
 
 
 // Interaction
-const std::string LAGRANGIAN_LINEAR_RELATION_TAG = "LagrangianLinear";
-const std::string LAGRANGIAN_NON_LINEAR_RELATION_TAG = "LagrangianNonLinear";
-const std::string LINEAR_TIME_INVARIANT_RELATION_TAG = "LinearTimeInvariant";
-const std::string NON_LINEAR_RELATION_TAG = "NonLinear";
-
+// - Relations -
+const std::string RELATION_TAG = "Relation";
+const std::string LINEAR_TIME_INVARIANT_RELATION_TAG = "LinearTimeInvariantRelation";
+const std::string LAGRANGIAN_RELATION_TAG = "LagrangianRelation";
+const std::string LAGRANGIAN_LINEAR_RELATION_TAG = "LagrangianLinearRelation";
+// - Non-smooth laws -
 const std::string COMPLEMENTARITY_CONDITION_NSLAW_TAG = "ComplementarityCondition";
 const std::string RELAY_NSLAW_TAG = "Relay";
 const std::string NEWTON_IMPACT_LAW_NSLAW_TAG = "NewtonImpactLaw";
 const std::string NEWTON_IMPACT_FRICTION_NSLAW_TAG = "NewtonImpactFrictionLaw";
-
 
 // DSIO
 const std::string LINEAR_DSIO_TAG = "LinearDSIO";

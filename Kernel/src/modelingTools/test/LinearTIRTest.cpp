@@ -39,10 +39,75 @@ void LinearTIRTest::setUp()
   e = new SimpleVector(2);
   (*e)(0) = 0.1;
   (*e)(1) = 0.1;
+  // parse xml file:
+  xmlDocPtr doc;
+  xmlNodePtr cur;
+  doc = xmlParseFile("linearTIR_test.xml");
+  if (doc == NULL)
+    XMLException::selfThrow("Document not parsed successfully");
+  cur = xmlDocGetRootElement(doc);
+  if (cur == NULL)
+  {
+    XMLException::selfThrow("empty document");
+    xmlFreeDoc(doc);
+  }
+
+  // get rootNode
+
+  if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
+  {
+    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
+    xmlFreeDoc(doc);
+  }
+  // look for NSDS, Interaction and relation node
+  xmlNode* nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
+  NonSmoothDynamicalSystemXML * nsdsxml = new NonSmoothDynamicalSystemXML(nodetmp);
+  nsds = new NonSmoothDynamicalSystem(nsdsxml);
+  delete nsdsxml;
+
+  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Definition");
+  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction");
+  nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
+  // get relation
+  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "LinearTimeInvariantRelation");
+  tmpxml1 = new LinearTIRXML(node1);
+
+  // second file
+  // parse xml file:
+  xmlDocPtr doc2;
+  xmlNodePtr cur2;
+  doc2 = xmlParseFile("linearTIR_test2.xml");
+  if (doc2 == NULL)
+    XMLException::selfThrow("Document not parsed successfully");
+  cur2 = xmlDocGetRootElement(doc2);
+  if (cur2 == NULL)
+  {
+    XMLException::selfThrow("empty document");
+    xmlFreeDoc(doc2);
+  }
+
+  // get rootNode
+
+  if (xmlStrcmp(cur2->name, (const xmlChar *) "SiconosModel"))
+  {
+    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
+    xmlFreeDoc(doc2);
+  }
+  // look for NSDS, Interaction and relation node
+  xmlNode* nodetmp2 = SiconosDOMTreeTools::findNodeChild(cur2, "NSDS");
+  nodetmp2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "Interaction_Definition");
+  nodetmp2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "Interaction");
+  nodetmp2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "Interaction_Content");
+  // get relation
+  node2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "LinearTimeInvariantRelation");
+  tmpxml2 = new LinearTIRXML(node2);
 }
 
 void LinearTIRTest::tearDown()
 {
+  delete nsds;
+  delete tmpxml1;
+  delete tmpxml2;
   delete e;
   delete a;
   delete F;
@@ -62,12 +127,26 @@ void LinearTIRTest::tearDown()
   cout << " Constructor LTIR 0 ok" << endl;
 }
 */
-// data constructor (1)
-void LinearTIRTest::testBuildLinearTIR1()
+// xml constructor
+void LinearTIRTest::testBuildLinearTIR0()
 {
   cout << "========================================" << endl;
   cout << "=== LinearTIR tests start ...=== " << endl;
   cout << "========================================" << endl;
+  LinearTIR * ltir = new LinearTIR(tmpxml1);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR0a : ", ltir->getC() == *C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR0b : ", ltir->getB() == *B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR0c : ", ltir->getD() == *D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR0d : ", ltir->getE() == *e, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR0e : ", ltir->getA() == *a, true);
+  delete ltir;
+  cout << " xml Constructor LTIR ok" << endl;
+}
+
+// data constructor (1)
+void LinearTIRTest::testBuildLinearTIR1()
+{
   LinearTIR * ltir = new LinearTIR(*C, *B);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR : ", ltir->getC() == *C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR : ", ltir->getB() == *B, true);
@@ -89,6 +168,39 @@ void LinearTIRTest::testBuildLinearTIR2()
   delete ltir;
   cout << " Constructor LTIR 2 ok" << endl;
 }
+
+// copy constructor
+void LinearTIRTest::testBuildLinearTIR3()
+{
+  Relation * ref = new LinearTIR(tmpxml1);
+  LinearTIR * ltir = new LinearTIR(*ref);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR3C : ", ltir->getC() == *C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR3D : ", ltir->getD() == *D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR3F : ", ltir->getF() == *F, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR3E : ", ltir->getE() == *e, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR3B : ", ltir->getB() == *B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR3A : ", ltir->getA() == *a, true);
+  delete ltir;
+  delete ref;
+  cout << " copy Constructor LTIR ok" << endl;
+}
+
+// xml constructor with input/output as plug-in
+void LinearTIRTest::testBuildLinearTIR4()
+{
+  LinearTIR * ltir = new LinearTIR(tmpxml2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4b : ", ltir->getType() == "LinearTIR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4c : ", ltir->getComputeOutputName() == "TestPlugin:y", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4d : ", ltir->getComputeInputName() == "TestPlugin:R", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4e : ", ltir->getCPtr() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4f : ", ltir->getBPtr() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4g : ", ltir->getDPtr() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4h : ", ltir->getEPtr() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4i : ", ltir->getAPtr() == NULL, true);
+  delete ltir;
+  cout << " xml Constructor (2) LTIR ok" << endl;
+}
+
 
 // set C
 void LinearTIRTest::testSetC()

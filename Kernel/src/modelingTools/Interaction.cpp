@@ -77,6 +77,9 @@ Interaction::Interaction(const Interaction& newI):
   // Relation
   string relationType = newI.getRelationPtr()->getType();
   // -> call copy constructor
+  if (relationType == RELATION)
+    relation = new Relation(*(newI.getRelationPtr()), this);
+
   if (relationType == LINEARTIRELATION)
     relation = new LinearTIR(*(newI.getRelationPtr()), this);
 
@@ -130,19 +133,19 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
     swapInMemory();
 
     // --- Dynamical Systems ---
-
     unsigned int sizeDS ;
     vector<int> listDS;
     if (nsds != NULL)
     {
       // Get a list of DS concerned from xml
+
       if (interactionxml->hasAll())
         vectorDS = nsds->getDynamicalSystems();
       else
       {
         listDS = interactionxml->getDSConcerned();
         sizeDS = listDS.size();
-        vectorDS.resize(sizeDS);
+        vectorDS.resize(sizeDS, NULL);
         for (unsigned int i = 0; i < sizeDS; i++)
           vectorDS[i] = nsds->getDynamicalSystemPtrNumber(listDS[i]);
       }
@@ -169,17 +172,21 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
 
     // --- Relation ---
     string relationType = interactionxml->getRelationXML()->getType();
+    // general relation
+    if (relationType == RELATION_TAG)
+      relation = new Relation(interactionxml->getRelationXML(), this);
+
     // Linear relation
-    if (relationType == LINEAR_TIME_INVARIANT_RELATION_TAG)
+    else if (relationType == LINEAR_TIME_INVARIANT_RELATION_TAG)
       relation = new LinearTIR(interactionxml->getRelationXML(), this);
+
+    // Lagrangian non-linear relation
+    else if (relationType == LAGRANGIAN_RELATION_TAG)
+      relation = new LagrangianR(interactionxml->getRelationXML(), this);
 
     // Lagrangian linear relation
     else if (relationType == LAGRANGIAN_LINEAR_RELATION_TAG)
       relation = new LagrangianLinearR(interactionxml->getRelationXML(), this);
-
-    // Lagrangian non-linear relation
-    else if (relationType == LAGRANGIAN_NON_LINEAR_RELATION_TAG)
-      relation = new LagrangianR(interactionxml->getRelationXML(), this);
 
     else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + relation->getType());
   }
@@ -217,7 +224,7 @@ Interaction::Interaction(const string& newId, const int& newNumber, const int& n
 
   vectorDS.clear();
   if (dsConcerned != NULL) vectorDS = *dsConcerned;
-  else RuntimeException::selfThrow("Interaction::createInteraction - The dsConcerned are not given");
+  else RuntimeException::selfThrow("Interaction::data constructor - The dsConcerned are not given");
   computeSizeOfDS();
 
   // Remark(FP): neither nslaw nor relation are created in this constructor -> todo?
@@ -653,7 +660,9 @@ void Interaction::saveInteractionToXML()
   /*
    * save the data of the Relation
    */
-  if (relation->getType() == LINEARTIRELATION)
+  if (relation->getType() == RELATION)
+    relation->saveRelationToXML();
+  else  if (relation->getType() == LINEARTIRELATION)
     (static_cast<LinearTIR*>(relation))->saveRelationToXML();
   else if (relation->getType() == LAGRANGIANLINEARRELATION)
     (static_cast<LagrangianLinearR*>(relation))->saveRelationToXML();

@@ -45,9 +45,10 @@
 
 <xsd:simpleType name="PossibleRelationValues">
   	<xsd:restriction base="xsd:string">
-		<xsd:enumeration value="LagrangianLinear"/>
-		<xsd:enumeration value="Lagrangian"/>
-		<xsd:enumeration value="LinearTimeInvariant"/>
+		<xsd:enumeration value="Relation"/>
+		<xsd:enumeration value="LinearTimeInvariantRelation"/>
+		<xsd:enumeration value="LagrangianRelation"/>
+		<xsd:enumeration value="LagrangianLinearRelation"/>
    	</xsd:restriction>
 </xsd:simpleType>
 
@@ -108,7 +109,6 @@
 	<xsd:list itemType="xsd:nonNegativeInteger"  /> <!-- use="optional"-->
 </xsd:simpleType>
 
-
 <xsd:simpleType name="pluginType">
 	<xsd:restriction base="xsd:string">
 	  <xsd:pattern value="[a-zA-Z0-9/.]+:[a-zA-Z0-9]+"/>
@@ -155,6 +155,13 @@
 	<xsd:attribute name="matrixPlugin" type="pluginType" use="optional"/>
 </xsd:complexType>
 
+<xsd:complexType name="listOfMatrices">
+	<xsd:sequence>
+		<xsd:element name="matrix" minOccurs="0" maxOccurs="unbounded" type="matrix"/>
+	</xsd:sequence>
+	<!--Matrix is defined in the tag -->
+	<xsd:attribute name="number" type="xsd:nonNegativeInteger" use="optional"/>
+</xsd:complexType>
 
 <xsd:complexType name="matrixData">
 	<xsd:sequence>
@@ -713,7 +720,7 @@
 					<xsd:complexType>
 					<xsd:sequence>
 						<xsd:choice minOccurs="1" maxOccurs="1">
-							<xsd:element name="NonLinear">
+							<xsd:element name="Relation">
 								<xsd:complexType>
 									<xsd:all>
 										<xsd:element name="computeInput" type="pluginDef" minOccurs='0' maxOccurs='0'/>
@@ -722,7 +729,7 @@
 								</xsd:complexType>
 							</xsd:element>
 							
-							<xsd:element name="LinearTimeInvariant">
+							<xsd:element name="LinearTimeInvariantRelation">
 								<xsd:complexType>
 									<xsd:all>
 										<xsd:element name="computeInput" type="pluginDef" minOccurs='0' maxOccurs='0'/>
@@ -734,8 +741,17 @@
 									</xsd:all>
 								</xsd:complexType>
 							</xsd:element>
-		
-							<xsd:element name="LagrangianLinear">
+
+							<xsd:element name="LagrangianRelation">
+								<xsd:complexType>
+									<xsd:all>
+                                                                  		<xsd:element name="h" type="pluginDef" minOccurs="1" maxOccurs="1"/>
+										<xsd:element name="G" type="listOfMatrices" minOccurs="1" maxOccurs="1"/>
+									</xsd:all>
+								       	<xsd:attribute name="type" type="xsd:string" use="optional" default="holonom"/>
+									</xsd:complexType>
+							</xsd:element>
+		          				<xsd:element name="LagrangianLinearRelation">
 								<xsd:complexType>
 									<xsd:all>
 										<xsd:element name="computeInput" type="pluginDef" minOccurs='0' maxOccurs='0'/>
@@ -746,14 +762,6 @@
 								</xsd:complexType>
 							</xsd:element>
 							
-							<xsd:element name="Lagrangian">
-								<xsd:complexType>
-									<xsd:all>
-										<xsd:element name="computeInput" type="pluginDef" minOccurs="1" maxOccurs="1"/>
-										<xsd:element name="computeOutput" type="pluginDef" minOccurs="1" maxOccurs="1"/>
-									</xsd:all>
-								</xsd:complexType>
-							</xsd:element>
 						</xsd:choice>
 					
 

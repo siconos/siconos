@@ -16,53 +16,45 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef __LagrangianLinearRTest__
-#define __LagrangianLinearRTest__
+#ifndef __LagrangianRTest__
+#define __LagrangianRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "LagrangianLinearR.h"
+#include "LagrangianR.h"
 
-class LagrangianLinearRTest : public CppUnit::TestFixture
+class LagrangianRTest : public CppUnit::TestFixture
 {
 
 private:
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(LagrangianLinearRTest);
+  CPPUNIT_TEST_SUITE(LagrangianRTest);
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildLagrangianLinearR0);
-  CPPUNIT_TEST(testBuildLagrangianLinearR1);
-  CPPUNIT_TEST(testBuildLagrangianLinearR2);
-  CPPUNIT_TEST(testBuildLagrangianLinearR1);
-  CPPUNIT_TEST(testBuildLagrangianLinearR4);
-  CPPUNIT_TEST(testSetH);
-  CPPUNIT_TEST(testSetHPtr);
-  CPPUNIT_TEST(testSetB);
-  CPPUNIT_TEST(testSetBPtr);
+  CPPUNIT_TEST(testBuildLagrangianR0);
+  CPPUNIT_TEST(testBuildLagrangianR1);
+  CPPUNIT_TEST(testBuildLagrangianR2);
+  CPPUNIT_TEST(testBuildLagrangianR3);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildLagrangianLinearR0();
-  void testBuildLagrangianLinearR1();
-  void testBuildLagrangianLinearR2();
-  void testBuildLagrangianLinearR3();
-  void testBuildLagrangianLinearR4();
-  void testSetH();
-  void testSetHPtr();
-  void testSetB();
-  void testSetBPtr();
+  void testBuildLagrangianR0();
+  void testBuildLagrangianR1();
+  void testBuildLagrangianR2();
+  void testBuildLagrangianR3();
   void End();
 
   // Members
 
-  SiconosMatrix *H;
-  SimpleVector *b;
+  SiconosMatrix *G0, *G1;
+  NonSmoothDynamicalSystem * nsds ;
+  xmlNode * node;
   LagrangianRXML* tmpxml1, * tmpxml2;
+  Interaction * interaction;
 
 public:
   void setUp();

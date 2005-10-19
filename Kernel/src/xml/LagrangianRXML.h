@@ -32,9 +32,19 @@
 #define __LAGRANGIANRelationXML__
 
 #include "RelationXML.h"
+#include <vector>
+
+const std::string LAGRANGIANR_MATRIXPLUGIN = "matrixPlugin";
 
 class LagrangianRXML : public RelationXML
 {
+
+protected:
+  //Nodes
+
+  xmlNodePtr hNode; // node for h function (plug-in)
+  std::vector<xmlNodePtr> GNode; // node for G function(s) (plug-in or matrix)
+
 public:
 
   LagrangianRXML();
@@ -48,20 +58,93 @@ public:
 
   ~LagrangianRXML();
 
-  /** \fn int getComputeInputPlugin()
-   *   \brief Returns the computeInput plugin of the Relation
-   *   \return string which defines the plugin
+  /** \fn std::string  getLagrangianType() const;
+   *   \brief Returns the type of constraints in the Lagrangian relation
+   *   \return a string
    */
-  std::string  getComputeInputPlugin() const;
+  inline std::string getLagrangianType() const
+  {
+    if (SiconosDOMTreeTools::hasAttributeValue(rootRelationXMLNode, "type"))
+      return SiconosDOMTreeTools::getStringAttributeValue(rootRelationXMLNode, "type");
+    else return "holonom";
+  }
 
-  /** \fn int getComputeOutputPlugin()
-   *   \brief Returns the computeOutput plugin of the Relation
-   *   \return string which defines the plugin
+  // === h matrix/Plug-in ===
+
+  /** \fn bool hasH()
+   *  \brief checks if h is defined in the DOM tree
+   *  \return a bool
    */
-  std::string  getComputeOutputPlugin() const;
+  inline bool hasH()
+  {
+    return (hNode != NULL);
+  } const
 
-private:
-  //Nodes
+  /** \fn inline string getHPlugin()
+   *   \brief Return h plug-in name, if it exists
+   *   \return a string
+   *  \exception XMLException
+   */
+  inline std::string getHPlugin() const
+  {
+    return  SiconosDOMTreeTools::getStringAttributeValue(hNode, PLUGIN_ATTRIBUTE);
+  }
+
+  /** \fn void setHPlugin(const string& plugin)
+   *   \brief to save the h plug-in name
+   *   \param a string
+   */
+  inline void setHPlugin(const std::string& plugin)
+  {
+    if (hNode == NULL)
+    {
+      hNode = SiconosDOMTreeTools::createSingleNode(rootRelationXMLNode, "h");
+      xmlNewProp(hNode, (xmlChar*)(LAGRANGIANR_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
+    }
+    else
+      SiconosDOMTreeTools::setStringAttributeValue(hNode, PLUGIN_ATTRIBUTE, plugin);
+  }
+
+  // === G matrix/Plug-in ===
+
+  /** \fn bool isGPlugin(const unsigned int & = 0)
+   *   \brief Return true if G is computed with a plug-in
+   *   \return a bool
+   */
+  bool isGPlugin(const unsigned int & = 0) const;
+
+  /** \fn bool hasG(const unsigned int & = 0)
+   *  \brief checks if G is defined in the DOM tree
+   *  \return a bool
+   */
+  bool hasG(const unsigned int & = 0) const;
+
+  /** \fn inline string getGPlugin(const unsigned int & = 0)
+   *   \brief Return G plug-in name, if it exists
+   *   \return a string
+   *  \exception XMLException
+   */
+  std::string getGPlugin(const unsigned int & = 0) const ;
+
+  /** \fn SiconosMatrix getGMatrix(const unsigned int & = 0)
+   *   \brief Return the G matrix of the LagrangianRXML
+   *   \return a SiconosMatrix
+   *  \exception XMLException
+   */
+  SiconosMatrix getGMatrix(const unsigned int & = 0) const;
+
+  /** \fn void setGPlugin(const string& plugin,const unsigned int & = 0)
+   *   \brief to save the G plug-in name
+   *   \param a string
+   */
+  void setGPlugin(const std::string& plugin, const unsigned int & = 0);
+
+  /** \fn void setGMatrix(SiconosMatrix *newMat,const unsigned int & = 0)
+   *   \brief to save the G matrix of the LagrangianRXML
+   *   \return a pointer to SiconosMatrix
+   */
+  void setGMatrix(SiconosMatrix *newMat, const unsigned int & = 0);
+
 };
 
 
