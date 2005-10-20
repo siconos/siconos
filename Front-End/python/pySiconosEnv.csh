@@ -1,4 +1,4 @@
-#! /bin/csh
+#!/bin/csh
  # Siconos version 1.0, Copyright INRIA 2005.  
  # Siconos is a program dedicated to modeling, simulation and control
  # of non smooth dynamical systems.	

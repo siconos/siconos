@@ -44,8 +44,8 @@
 #include "SiconosDOMTreeTools.h"
 #include "SiconosMemoryXML.h"
 #include "RelationXML.h"
-#include "LagrangianLinearRXML.h"
 #include "LagrangianRXML.h"
+#include "LagrangianLinearRXML.h"
 #include "LinearTIRXML.h"
 #include "NonSmoothLawXML.h"
 #include "NewtonImpactLawNSLXML.h"
@@ -76,8 +76,8 @@
 #include "EqualityConstraintXML.h"
 #include "LagrangianDSIOXML.h"
 #include "LagrangianLinearDSIOXML.h"
-#include "LagrangianLinearECXML.h"
 #include "LagrangianECXML.h"
+#include "LagrangianLinearECXML.h"
 #include "LinearDSIOXML.h"
 #include "LinearECXML.h"
 #include "LinearTIECXML.h"
@@ -181,8 +181,8 @@ $1 = string(PyString_AsString($input));
 
 // Xml - formalisation
 %include "RelationXML.h"
-%include "LagrangianLinearRXML.h"
 %include "LagrangianRXML.h"
+%include "LagrangianLinearRXML.h"
 %include "LinearTIRXML.h"
 // ---
 %include "NonSmoothLawXML.h"
@@ -225,8 +225,8 @@ $1 = string(PyString_AsString($input));
 %include "EqualityConstraintXML.h"
 %include "LagrangianDSIOXML.h"
 %include "LagrangianLinearDSIOXML.h"
-%include "LagrangianLinearECXML.h"
 %include "LagrangianECXML.h"
+%include "LagrangianLinearECXML.h"
 %include "LinearDSIOXML.h"
 %include "LinearECXML.h"
 %include "LinearTIECXML.h"
@@ -239,8 +239,8 @@ $1 = string(PyString_AsString($input));
 // --- ModelFormalisation ---
 
 %include "Relation.h"
-%include "LagrangianLinearR.h"
 %include "LagrangianR.h"
+%include "LagrangianLinearR.h"
 %include "LinearTIR.h"
 // ---
 %include "NonSmoothLaw.h"
