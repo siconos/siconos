@@ -17,51 +17,48 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 /*!\file lcp_latin.c
- *
- * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
- * Try \f$(z,w)\f$ such that:\n
- * \f$
- *  \left\lbrace
- *   \begin{array}{l}
- *    M z + q= w\\
- *    0 \le z \perp w \ge 0\\
- *   \end{array}
- *  \right.
- * \f$
- *
- * where M is an (n x n)-matrix, q , w and z n-vectors.
- *
- * \fn  lcp_latin( int *nn , double *vec , double *q , double *z , int *info ,
- *                int *iparamLCP , double *dparamLCP )
- *
- * lcp_latin (LArge Time INcrements) is a solver for LCP based on the principle of splitting method\n
- *
- * Generic lcp parameters:\n
- *
- * \param nn      Unchanged parameter which represents the dimension of the system.
- * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
- * \param q       Unchanged parameter which contains the components of the right hand side vector.
- * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
- * \param w       Modified parameter which returns the solution of the problem.
- * \param info    Modified parameter which returns the termination value\n
- *                0 - convergence\n
- *                1 - iter = itermax\n
- *                2 - Cholesky Factorization failed \n
- *                3 - nul diagonal term\n
- *
- * Specific LATIN parameters:\n
- *
- * \param iparamLCP[0] = itermax  Input unchanged parameter which represents the maximum number of iterations allowed.
- * \param iparamLCP[1] = iout     Input unchanged parameter which represents the output log identifiant\n
- *                       0 - no output\n
- *                       0 < active screen output\n
- * \param iparamLCP[2] = it_end   Output modified parameter which returns the number of iterations performed by the algorithm.
- *
- * \param dparamLCP[0] = tol      Input unchanged parameter which represents the tolerance required.
- * \param dparamLCP[1] = k_latin  Input unchanged parameter which represents the latin parameter.
- * \param dparamLCP[2] = res      Output modified parameter which returns the final error value.
- *
- * \author Nineb Sheherazade.
+
+  This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
+  Try \f$(z,w)\f$ such that:\n
+  \f$
+   \left\lbrace
+    \begin{array}{l}
+     w - M z = q\\
+     0 \le z \perp w \ge 0\\
+    \end{array}
+   \right.
+  \f$
+
+  where M is an (\f$nn \times nn\f$)-matrix, q , w and z nn-vectors.
+
+*/
+
+/*!\fn void lcp_latin( int *nn, double *vec, double *qq,  double *z, double *w, int *info, int *iparamLCP, double *dparamLCP)
+  lcp_latin (LArge Time INcrements) is a basic latin solver for LCP.
+
+  \param nn      On enter, an integer which represents the dimension of the system.
+  \param vec     On enter, a (\f$nn \times nn\f$)-vector of doubles which contains the components of the matrix with a fortran storage.
+  \param q       On enter, a nn-vector of doubles which contains the components of the right hand side vector.
+  \param z       On return, a nn-vector of doubles which contains the solution of the problem.
+  \param w       On return, a nn-vector of doubles which contains the solution of the problem.
+  \param info    On return, an integer which returns the termination value:\n
+                 0 : convergence\n
+                 1 : iter = itermax\n
+                 2 : Cholesky Factorization failed \n
+                 3 : nul diagonal term\n
+
+  \param iparamLCP On enter/return a vector of integers,
+- iparamLCP[0] = itermax  On enter, the maximum number of iterations allowed.
+- iparamLCP[1] = iout     On enter, the output log identifiant:\n
+                          0: no output\n
+                         >0: active screen output\n
+- iparamLCP[2] = it_end   On return, the number of iterations performed by the algorithm.
+  \param dparamLCP  On enter/return a vector of doubles,
+- dparamLCP[0] = tol      On enter, the tolerance required.
+- dparamLCP[1] = k_latin  On enter, the latin parameter (a double strictly positive).
+- dparamLCP[2] = res      On return, the final error value.
+
+  \author Nineb Sheherazade.
  */
 
 #include <stdio.h>
@@ -179,7 +176,7 @@ void lcp_latin(int *nn, double *vec, double *qq,  double *z, double *w, int *inf
 
 
 
-  for (i = 0; i < n ; i++)
+  for (i = 0 ; i < n ; i++)
   {
 
     k[i * n + i] =  k_latin * vec[i * n + i];

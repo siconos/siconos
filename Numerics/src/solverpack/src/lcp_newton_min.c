@@ -17,67 +17,65 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/*!\file lcp_newton.c
- *
- *
- * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
- * Try \f$(z,w)\f$ such that:\n
- *
- * \f$
- *  \left\lbrace
- *   \begin{array}{l}
- *   0 \le z \perp M z + b = w \ge 0\\
- *   \end{array}
- *  \right.
- * \f$
- *
- * M is an (n x n)  matrix , q , w and z n-vectors.
- *
- *!\fn lcp_newton_min( int *nn , double *vec , double *q , double *z , double *w , int *info ,\n
- *           int *iparamLCP , double *dparamLCP )
- *
- * lcp_newton_min use a nonsmooth newton method based on the min formulation  (or max formulation) of the LCP
- *
- * \f$
- *   0 \le z \perp w \ge 0 \Longrightarrow \min(w,\rho z)=0 \Longrightarrow w = \max(0,w - \rho z)
- * \f$
+/*!\file lcp_newton_min.c
 
- * \f$
- *   H(z) = H(\left[ \begin{array}{c} z \\ w \end{array}\right])= \left[ \begin{array}{c} w-Mz-q \\ min(w,\rho z) \end{array}\right] =0\\
- * \f$
- *
- *
- * References: Alart & Curnier 1990, Pang 1990
- *
- * Generic lcp parameters:\n
- *
- * \param nn      Unchanged parameter which represents the dimension of the system.
- * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
- * \param q       Unchanged parameter which contains the components of the right hand side vector.
- * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
- * \param w       Modified parameter which returns the solution of the problem.
- * \param info    Modified parameter which returns the termination value\n
- *                0 - convergence\n
- *                1 - iter = itermax\n
- *                2 - negative diagonal term\n
- *
- * Specific NLGS parameters:\n
- *
- * \param iparamLCP[0] = itermax Input unchanged parameter which represents the maximum number of iterations allowed.
- * \param iparamLCP[1] = ispeak  Input unchanged parameter which represents the output log identifiant\n
- *                       0 - no output\n
- *                       0 < active screen output\n
- * \param iparamLCP[2] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
- *
- * \param dparamLCP[0] = tol     Input unchanged parameter which represents the tolerance required.
- * \param dparamLCP[1] = res     Output modified parameter which returns the final error value.
- *
- * \author Vincent Acary
- *
- * \todo Optimizing the memory allocation (Try to avoid the copy of JacH into A)
- * \todo Add rules for the computation of the penalization rho
- * \todo Add a globalization strategy based on a decrease of a merit function. (Nonmonotone LCP) Reference in Ferris Kanzow 2002
- */
+
+  This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
+  Try \f$(z,w)\f$ such that:\n
+
+  \f$
+   \left\lbrace
+    \begin{array}{l}
+    0 \le z \perp w - M z  = q \ge 0\\
+    \end{array}
+  \right.
+  \f$
+
+  M is an (\f$nn \times nn\f$)  matrix , q , w and z nn-vectors.
+*/
+/*!\fn void lcp_newton_min( int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP )
+
+ lcp_newton_min use a nonsmooth newton method based on the min formulation  (or max formulation) of the LCP
+
+ \f$
+   0 \le z \perp w \ge 0 \Longrightarrow \min(w,\rho z)=0 \Longrightarrow w = \max(0,w - \rho z)
+ \f$
+
+ \f$
+   H(z) = H(\left[ \begin{array}{c} z \\ w \end{array}\right])= \left[ \begin{array}{c} w-Mz-q \\ min(w,\rho z) \end{array}\right] =0\\
+ \f$
+
+
+ References: Alart & Curnier 1990, Pang 1990
+
+
+ \param nn      On enter, an integer which represents the dimension of the system.
+ \param vec     On enter, a (\f$nn \times nn\f$)-vector of doubles which contains the components of the matrix with a fortran storage.
+ \param q       On enter, a nn-vector of doubles which contains the components of the right hand side vector.
+ \param z       On return, a nn-vector of doubles which contains the solution of the problem.
+ \param w       On return, a nn-vector of doubles which contains the solution of the problem.
+ \param info    On return, an integer which returns the termination value:\n
+                0 : convergence\n
+                1 : iter = itermax\n
+                2 : negative diagonal term\n
+
+ \param iparamLCP On enter/return a vectr of integers:\n
+               - iparamLCP[0] = itermax On enter, the maximum number of iterations allowed.
+               - iparamLCP[1] = ispeak  On enter, the output log identifiant:\n
+                       0 : no output\n
+                       >0 : active screen output\n
+               - iparamLCP[2] = it_end  On return, the number of iterations performed by the algorithm.
+
+ \param dparamLCP On enter/return, a vector of doubles:\n
+                 - dparamLCP[0] = tol     On enter the tolerance required.
+                 - dparamLCP[1] = res     On return the final error value.
+
+ \author Vincent Acary
+
+ \todo Optimizing the memory allocation (Try to avoid the copy of JacH into A)
+ \todo Add rules for the computation of the penalization rho
+ \todo Add a globalization strategy based on a decrease of a merit function. (Nonmonotone LCP) Reference in Ferris Kanzow 2002
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,8 +83,7 @@
 #include <math.h>
 #include "blaslapack.h"
 
-void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , int *info ,
-                    int *iparamLCP , double *dparamLCP)
+void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
 
 
@@ -126,21 +123,21 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
     w[i] = 1.0;
   }
 
-  // rho
+  /* rho*/
   rho = (double *)malloc(n * sizeof(double));
   for (i = 0; i < n; i++) rho[i] = 1.0 / vec[i * n + i] ;
-  //for (i=0;i<n;i++) rho[i]=1.0/n ;
-  // Sizw of the problem
+  /* /for (i=0;i<n;i++) rho[i]=1.0/n ;
+  // Sizw of the problem*/
   m = 2 * n;
   mm = m * m;
-  // Creation of the gradient of the function H
+  /* / Creation of the gradient of the function H*/
 
   JacH = (double *)malloc(m * m * sizeof(double));
   A   = (double *)malloc(m * m * sizeof(double));
 
   for (j = 0; j < n; j++)
   {
-    for (i = 0; i < n; i++) JacH[j * m + i] = -vec[j * n + i]; // should be replaced by a tricky use of BLAS
+    for (i = 0; i < n; i++) JacH[j * m + i] = -vec[j * n + i]; /* / should be replaced by a tricky use of BLAS*/
   }
   for (j = n; j < m; j++)
   {
@@ -153,18 +150,18 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   }
 
 
-  // Creation of the RHS H,
+  /* / Creation of the RHS H, */
   H = (double *)malloc(m * sizeof(double));
-  // Construction of the RHS
+  /* / Construction of the RHS*/
   a1 = -1.;
   b1 = -1.;
-  // q --> H
+  /* / q --> H*/
   dcopy_(&n , q , &incx , H , &incy);
-  // -Mz-q --> H
+  /* / -Mz-q --> H*/
   dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , H , &incy);
-  // w+H --> H
+  /* / w+H --> H*/
   alpha = 1.0;
-  daxpy_(&n , &alpha , w , &incx , H , &incy);     // c'est faux
+  daxpy_(&n , &alpha , w , &incx , H , &incy);     /* / c'est faux*/
 
 
   for (i = n; i < m; i++)
@@ -176,7 +173,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
 
   ipiv = (int *)malloc(m * sizeof(int));
 
-  //
+
 
   iter = 0;
   err  = 1.;
@@ -186,7 +183,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   while ((iter < itermax) && (err > tol))
   {
     ++iter;
-    // Construction of the directional derivatives of H, JacH
+    /* / Construction of the directional derivatives of H, JacH*/
     for (i = 0; i < n; i++)
     {
       if (w[i] > rho[i]*z[i])
@@ -202,7 +199,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
     }
 
 
-    // Computation of the element of the subgradient.
+    /* / Computation of the element of the subgradient.*/
 
     dcopy_(&mm , JacH , &incx , A , &incy);
     k = 1;
@@ -227,18 +224,18 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
     }
 
 
-    // iteration
+    /* / iteration*/
     alpha = -1.0;
-    daxpy_(&n , &alpha , H , &incx , z , &incy);     //  z-H --> z
-    daxpy_(&n , &alpha , &H[n] , &incx , w , &incy);  //  w-H --> w
+    daxpy_(&n , &alpha , H , &incx , z , &incy);     /* /  z-H --> z*/
+    daxpy_(&n , &alpha , &H[n] , &incx , w , &incy);  /* /  w-H --> w*/
 
-    // Construction of the RHS for the next iterate and for the error evalutaion
+    /* / Construction of the RHS for the next iterate and for the error evalutaion*/
     a1 = 1.;
     b1 = 1.;
-    dcopy_(&n , q , &incx , H , &incy);                                         // q --> H
-    dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , H , &incy);  // Mz+q --> H
+    dcopy_(&n , q , &incx , H , &incy);                                         /* / q --> H*/
+    dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , H , &incy);  /* / Mz+q --> H*/
     alpha = -1.0;
-    daxpy_(&n , &alpha , w , &incx , H , &incy);                               // w-Mz-q --> H
+    daxpy_(&n , &alpha , w , &incx , H , &incy);                               /* / w-Mz-q --> H*/
 
     for (i = n; i < m; i++)
     {
@@ -246,7 +243,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
       else H[i] = w[i - n];
     }
 
-    // Error Evaluation
+    /* / Error Evaluation*/
 
     err = dnrm2_(&m , H , &incx);
 

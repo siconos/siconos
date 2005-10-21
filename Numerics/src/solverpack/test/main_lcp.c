@@ -25,7 +25,7 @@
  * \f$
  *  \left\lbrace
  *   \begin{array}{l}
- *    M z + q= w\\
+ *    w - M z = q\\
  *    0 \le z \perp w \ge 0\\
  *   \end{array}
  *  \right.
@@ -35,10 +35,12 @@
  *
  *  This system of equations and inequalities is solved thanks to lcp solvers\n
  *
- *        lemke_lcp (M,q,n,itermax,z,w,it_end,res,info)
+ *        lemke_lcp (M,q,n,itermax,z,w,it_end,res,info) (under modifications)
 
  *        lcp_nlgs( n , M , q , z , w , info , iparam , dparam )
  *        lcp_cpg ( n , M , q , z , w , info , iparam , dparam )
+ *        lcp_latin ( n , M , q , z , w , info , iparam , dparam )
+ *        lcp_latin_w ( n , M , q , z , w , info , iparam , dparam )
  *        lcp_lexicolemke( n , M , q , z , w , info , iparam , dparam )
  *        lcp_qp( n , M , q , z , w , info , iparam , dparam )
  *        lcp_nsqp( n , M , q , z , w , info , iparam , dparam )
@@ -70,12 +72,12 @@ void test_lcp_series(int n , double *vec , double *q)
   int i, j;
   int nonsymmetric;
   int incx = 1, incy = 1;
-  int info1 = -1, info2 = -1, info3 = -1, info4 = -1, info5 = -1, info6 = -1, info7 = -1;
+  int info1 = -1, info2 = -1, info3 = -1, info4 = -1, info5 = -1, info6 = -1, info7 = -1, info8 = -1;
 
   double comp, diff, alpha, beta;
 
-  double *z1, *z2, *z3, *z4, *z5, *z6, *z7;
-  double *w1, *w2, *w3, *w4, *w5, *w6, *w7;
+  double *z1, *z2, *z3, *z4, *z5, *z6, *z7, *z8;
+  double *w1, *w2, *w3, *w4, *w5, *w6, *w7, *w8;
 
   char NT = 'N';
 
@@ -93,12 +95,15 @@ void test_lcp_series(int n , double *vec , double *q)
   w6 = malloc(n * sizeof(double));
   z7 = malloc(n * sizeof(double));
   w7 = malloc(n * sizeof(double));
+  z8 = malloc(n * sizeof(double));
+  w8 = malloc(n * sizeof(double));
 
   /* Method definition */
 
   static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
   static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
   static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp8 = { "Latin_w"    , 1000 , 1e-6 , 0.3 , 1.0 , 0.75 , "N2" , 0 , 0.0 };
   static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
   static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
   static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
@@ -181,22 +186,29 @@ void test_lcp_series(int n , double *vec , double *q)
 
   info3 = lcp_solver(vec , q , &n , &method_lcp3 , z3 , w3);
 
+
+  /* #8 LATIN_W TEST */
+#ifdef BAVARD
+  printf("**** LATIN_W TEST ***\n");
+#endif
+  for (i = 0 ; i < n ; ++i)
+  {
+    z8[i] = 0.0;
+    w8[i] = 0.0;
+  }
+
+  info8 = lcp_solver(vec , q , &n , &method_lcp8 , z8 , w8);
+
+
 #ifdef BAVARD
   printf(" *** ************************************** ***\n");
-  printf("\n   NLGS RESULT : ");
-  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z1[i]);
-  printf("\n    CPG RESULT : ");
-  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z2[i]);
-  printf("\n  LATIN RESULT : ");
-  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z3[i]);
-  printf("\n     QP RESULT : ");
-  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z4[i]);
-  printf("\n   NSQP RESULT : ");
-  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z5[i]);
-  printf("\n  Lemke RESULT : ");
-  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z6[i]);
-  printf("\n Newton RESULT : ");
-  for (i = 0 ; i < n ; ++i) printf(" %10.4g " , z7[i]);
+
+  for (i = 0 ; i < n ; i++)
+    printf("NLGS: %14.7e    CPG: %14.7e   LATIN: %14.7e    LATIN_w %14.7e \n", z1[i], z2[i], z3[i], z8[i]);
+
+  for (i = 0 ; i < n ; i++)
+    printf("\n QP: %14.7e     NSQP: %14.7e   Lemke: %14.7e    Newton: %14.7e ", z4[i], z5[i], z6[i], z7[i]);
+
   printf("\n\n");
   printf(" INFO RESULT\n");
 
@@ -226,10 +238,21 @@ void test_lcp_series(int n , double *vec , double *q)
 
   printf("\n    LATIN  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info3, method_lcp3.iter, method_lcp3.err, comp, diff);
 
+
+
+
+  comp = ddot_(&n , z8 , &incx , w8 , &incy);
+  daxpy_(&n , &alpha , q , &incx , w8 , &incy);
+  dgemv_(&NT , &n , &n , &beta , vec , &n , z8 , &incx , &alpha , w8 , &incy);
+  diff = dnrm2_(&n , w8 , &incx);
+
+  printf("\n  LATIN_W  (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info8, method_lcp8.iter, method_lcp8.err, comp, diff);
+
   comp = ddot_(&n , z4 , &incx , w4 , &incy);
   daxpy_(&n , &alpha , q , &incx , w4 , &incy);
   dgemv_(&NT , &n , &n , &beta , vec , &n , z4 , &incx , &alpha , w4 , &incy);
   diff = dnrm2_(&n , w4 , &incx);
+
 
   printf("\n    QP     (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info4, method_lcp4.iter, method_lcp4.err, comp, diff);
 
@@ -252,7 +275,7 @@ void test_lcp_series(int n , double *vec , double *q)
   dgemv_(&NT , &n , &n , &beta , vec , &n , z7 , &incx , &alpha , w7 , &incy);
   diff = dnrm2_(&n , w7 , &incx);
 
-  printf("\n    Newton (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info7, method_lcp7.iter, method_lcp7.err, comp, diff);
+  printf("\n    Newton (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g | \n \n ", info7, method_lcp7.iter, method_lcp7.err, comp, diff);
 
 #endif
 
@@ -270,6 +293,9 @@ void test_lcp_series(int n , double *vec , double *q)
   free(w6);
   free(z7);
   free(w7);
+  free(z8);
+  free(w8);
+
 
 }
 /*

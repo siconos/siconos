@@ -24,76 +24,74 @@
  *    0 \le z \perp Mz + q = w \ge 0
  * \f$
  *
- * Here M is an (n x n) matrix , q , w and z n-vector.\n
- * This system of equalities and inequalities is solved thanks to @ref block_lcp solvers.
+ * Here M is an (\f$dn \times dn\f$) matrix , q , w and z dn-vector.\n
  *
- *!\fn int lcp_solver_block( int *inb , int *iid , double *vec, double *q , int *n , int *nb ,\n
- *                           methode *pt , double *z , double *w , int *it_end , double *res ){
- *
- * \brief lcp_solver_block is a generic interface allowing the call of one of the block LCP solvers.
- *
- * \param inb      Unchanged parameter which contains the number of non nul block element on the block row.
- * \param iid      Unchanged parameter which contains the list of active block on each row.
- * \param vec      Unchanged parameter which contains the components of the block matrices. Each block
- *                 matrix is stored as a fortran matrix and all matrices are stored also as a fortran allocation.
- * \param q        Unchanged parameter which contains the components of the right hand side.
+ * This system of equalities and inequalities is solved thanks to @ref block_lcp solvers. */
 
- * \param n        Unchanged parameter which contains the dimension of the problem.
- * \param nb       Unchanged parameter which contains the dimension of the block matrices.
- * \param pt       Unchanged parameter which contains a LCP structure
- *
- * \param z        Modified parameter which contains the initial iterate for the LCP(q,M)
- *                 and returns the solution of the problem.
- * \param w        Modified parameter which returns the solution of the problem.
- * \param it_end   Modified parameter which returns the final number of iterations or pivots
- * \param res      Modified parameter which returns the final value of error criteria.
- *
- * \return info    Integer identifiant for the solver result\n
- *                 0 - convergence\n
- *                 0 < no convergence (see solver for specific info value)\n
- *
- * \author Mathieu Renouf
- *
- * lcp_solver_block is a generic interface which consider LCP with a block structure. The global LCP is solved
- * as a succession of local LCP solved via lcp_solver.\n
- *
- * list Keywords to call solvers:
- *
- *   - Lemke    for lcp_lexicolemke
- *   - NLGS     for lcp_nlgs
- *   - CPG      for lcp_cpg
- *   - QP       for lcp_qp
- *   - NSQP     for lcp_nsqp
- *   - Latin    for lcp_latin
- *   - Newton   for lcp_newton_min
- *
- * Data file example:\n
- * If we consider the matrix M and the right-hand-side q defined as
- *
- * \f$
- * M=\left[\begin{array}{cc|cc|cc|cc}
- *          1 & 2 & 0 & 0 & 3 &-1 & 0 & 0\\
- *          2 & 1 & 0 & 0 & 4 & 1 & 0 & 0\\
- *          \hline
- *          0 & 0 & 1 &-1 & 0 & 0 & 2 & 2\\
- *          0 & 0 &-1 & 6 & 0 & 0 & 1 & 2\\
- *          \hline
- *          3 & 4 & 0 & 0 & 1 & 0 & 0 & 0\\
- *         -1 & 3 & 0 & 0 & 0 & 2 & 0 & 0\\
- *          \hline
- *          0 & 0 & 2 & 1 & 0 & 0 & 2 & 2\\
- *          0 & 0 & 2 & 2 & 0 & 0 & 2 & 2\\
- *        \end{array}\right] \quad, q==\left[\begin{array}{c}-1\\-1\\\hline 0\\-1\\\hline 1\\0\\\hline -1\\2\end{array}\right].
- * \f$
- *
- * then
- * - the number of block is 4 (=dn) and the fimension of block is 2 (=db)
- * - the vector inb[dn] is equal to [2,2,2,2]
- * - the vector iid[dn*db] is equal to [1,3,2,4,1,3,2,4]
- * - the vector vec contains all block matrices stored as\n
- *   vec = { M11[1][1],M11[2][1],M11[1][2],M11[2][2],M12[1][1],M12[2][1],..., \n
- *           M43[1][2],M43[2][2],M44[1][1],M44[2][1],M44[1][2],M44[2][2]}
- */
+/*!\fn int lcp_solver_block( int *inb , int *iid , double *vec , double *q , int *dn , int *db , method *pt , double *z , double *w , int *it_end , int *itt_end ,double *res )
+*  lcp_solver_block is a generic interface allowing the call of one of the block LCP solvers.\n
+*
+* \param inb      On enter, an integer which contains the number of non nul block element on the block row.
+* \param iid      On enter, a vector of integers which contains the list of active block on each row.
+* \param vec      On enter, a vector of doubles which contains the components of the block matrices. Each block
+*                 matrix is stored as a fortran matrix and all matrices are stored also as a fortran allocation.
+* \param q        On enter, a vector of doubles which contains the components of the right hand side.
+
+* \param dn       On enter, an integer which contains the dimension of the problem.
+* \param db       On enter, an integer which contains the dimension of the block matrices.
+* \param pt       On enter, a union which contains a LCP structure
+*
+* \param z        On enter/return, a vector of doubles which contains the initial iterate for the LCP(q,M) and returns the solution of the problem.
+* \param w        On return, a vector of doubles which returns the solution of the problem.
+* \param it_end   On return, an integer which returns the final number of iterations or pivots
+* \param itt_end  On return, an interger which returns the total number of iterations or pivots.
+* \param res      On return, a doubles which returns the final value of error criteria.
+*
+* \return info    Integer identifiant for the solver result\n
+*                 0 : convergence\n
+*                 >0 : no convergence (see solver for specific info value)\n
+*
+* lcp_solver_block is a generic interface which consider LCP with a block structure. The global LCP is solved
+* as a succession of local LCP solved via lcp_solver.\n
+*
+* list Keywords to call solvers:
+*
+*   - Lemke    for lcp_lexicolemke
+*   - NLGS     for lcp_nlgs
+*   - CPG      for lcp_cpg
+*   - QP       for lcp_qp
+*   - NSQP     for lcp_nsqp
+*   - Latin    for lcp_latin
+*   - Newton   for lcp_newton_min
+*
+* Data file example:\n
+* If we consider the matrix M and the right-hand-side q defined as
+*
+* \f$
+* M=\left[\begin{array}{cc|cc|cc|cc}
+*          1 & 2 & 0 & 0 & 3 &-1 & 0 & 0\\
+*          2 & 1 & 0 & 0 & 4 & 1 & 0 & 0\\
+*          \hline
+*          0 & 0 & 1 &-1 & 0 & 0 & 2 & 2\\
+*          0 & 0 &-1 & 6 & 0 & 0 & 1 & 2\\
+*          \hline
+*          3 & 4 & 0 & 0 & 1 & 0 & 0 & 0\\
+*         -1 & 3 & 0 & 0 & 0 & 2 & 0 & 0\\
+*          \hline
+*          0 & 0 & 2 & 1 & 0 & 0 & 2 & 2\\
+*          0 & 0 & 2 & 2 & 0 & 0 & 2 & 2\\
+*        \end{array}\right] \quad, q=\left[\begin{array}{c}-1\\-1\\\hline 0\\-1\\\hline 1\\0\\\hline -1\\2\end{array}\right].
+* \f$
+*
+* then
+* - the number of block is 4 (=dn) and the fimension of block is 2 (=db)
+* - the vector inb[dn] is equal to [2,2,2,2]
+* - the vector iid[dn*db] is equal to [1,3,2,4,1,3,2,4]
+* - the vector vec contains all block matrices stored as\n
+*   vec = { M11[1][1],M11[2][1],M11[1][2],M11[2][2],M12[1][1],M12[2][1],..., \n
+*           M43[1][2],M43[2][2],M44[1][1],M44[2][1],M44[1][2],M44[2][2]}\n
+* \author Mathieu Renouf
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -101,7 +99,7 @@
 #include <time.h>
 #ifndef MEXFLAG
 #include "solverpack.h"
-#endif // MEXFLAG
+#endif
 #include "blaslapack.h"
 
 /*
@@ -113,8 +111,7 @@ void (*local_solver)(int *nn , double *vec , double *q , double *z , double *w ,
 /*
  */
 
-int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , int *db , method *pt , double *z ,  /* in  */
-                     double *w , int *it_end , int *itt_end , double *res)                                                      /* out */
+int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , int *db , method *pt , double *z , /* in  */ double *w , int *it_end , int *itt_end , double *res)                                                       /* out */
 {
 
   const char mot1[15] = "LexicoLemke", mot2[10] = "NLGS", mot3[10] = "CPG";
@@ -157,14 +154,14 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   {
     /* Lexico Lemke */
     iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.iout;
+    iparamLCP[1] = pt->lcp.chat;
     local_solver = &lcp_lexicolemke;
   }
   else if (strcmp(pt->lcp.name , mot2) == 0)
   {
     /* NLGS */
     iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.iout;
+    iparamLCP[1] = pt->lcp.chat;
     dparamLCP[0] = pt->lcp.tol;
     dparamLCP[1] = pt->lcp.relax;
     local_solver = &lcp_nlgs;
@@ -173,7 +170,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   {
     /* CPG */
     iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.iout;
+    iparamLCP[1] = pt->lcp.chat;
     dparamLCP[0] = pt->lcp.tol;
     local_solver = &lcp_cpg;
   }
@@ -193,7 +190,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   {
     /* Newton Min */
     iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.iout;
+    iparamLCP[1] = pt->lcp.chat;
     dparamLCP[0] = pt->lcp.tol;
     local_solver = &lcp_newton_min;
   }
@@ -201,7 +198,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   {
     /* Latin */
     iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.iout;
+    iparamLCP[1] = pt->lcp.chat;
     dparamLCP[0] = pt->lcp.tol;
     dparamLCP[1] = pt->lcp.k_latin;
     local_solver = &lcp_latin;
@@ -316,7 +313,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   free(rhs);
   local_solver = NULL;
 
-  if (pt->lcp.iout > 0)
+  if (pt->lcp.chat > 0)
   {
     if (err > tol)
     {

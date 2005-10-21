@@ -16,6 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+
 /*!\file lcp_lexicolemke.c
  *
  * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
@@ -23,44 +24,46 @@
  * \f$
  *  \left\lbrace
  *   \begin{array}{l}
- *    M z + q= w\\
+ *    w - M z = q\\
  *    0 \le z \perp w \ge 0\\
  *   \end{array}
  *  \right.
  * \f$
  *
- * where M is an (n x n)-matrix, q , w and z n-vectors.
- *
- * \fn  lcp_lexicolemke( int *nn , double *vec , double *q , double *z , int *info ,\n
- *                       int *iparamLCP , double *dparamLCP )
- *
- * lcp_lexicolemke is a direct solver for LCP based on pivoting method principle for degenrate problem.
- * Choice of pivot variable is performed via lexicographic ordering
- * Ref: "The Linear Complementary Problem" Cottle, Pang, Stone (1992)
- *
- * Generic lcp parameters:\n
- *
- * \param nn      Unchanged parameter which represents the dimension of the system.
- * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
- * \param q       Unchanged parameter which contains the components of the right hand side vector.
- * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
- * \param w       Modified parameter which returns the solution of the problem.
- * \param info    Modified parameter which returns the termination value\n
- *                0 - convergence\n
- *                1 - iter = itermax\n
- *                2 - negative diagonal term\n
- *
- * Specific Lexico Lemke parameters:\n
- *
- * \param iparamLCP[0] = itermax Input unchanged parameter which represents the maximum number of pivots allowed.
- * \param iparamLCP[1] = ispeak  Input unchanged parameter which represents the output log identifiant\n
- *                       0 - no output\n
- *                       0 < active screen output\n
- * \param iparamLCP[2] = it_end  Output modified parameter which returns the number of pivots performed by the algorithm.
- *
- *
- * \author Mathieu Renouf
- *
+ * where M is an (\f$nn \times nn\f$)-matrix, q , w and z nn-vectors.
+ */
+
+
+/*!\fn  void lcp_lexicolemke( int *nn , double *vec , double *q , double *zlem , double *wlem , int *info , int *iparamLCP , double *dparamLCP )
+
+  lcp_lexicolemke is a direct solver for LCP based on pivoting method principle for degenrate problem.\n
+  Choice of pivot variable is performed via lexicographic ordering
+  Ref: "The Linear Complementary Problem" Cottle, Pang, Stone (1992)\n
+
+
+  \param nn      On enter, an integer which represents the dimension of the system.
+  \param vec     On enter, a (\f$nn\times nn\f$)-vector of doubles which contains the components of the matrix with a fortran storage.
+  \param q       On enter, a nn-vector of doubles which contains the components of the right hand side vector.
+  \param zlem    On return, a nn-vector of doubles which contains the solution of the problem.
+  \param wlem    On return, a nn-vector of doubles which contains the solution of the problem.
+  \param info    On return, an integer which returns the termination value:\n
+                 0 : convergence\n
+                 1 : iter = itermax\n
+                 2 : negative diagonal term\n
+
+  \param iparamLCP  On enter/return, a vetor of integers:\n
+                 - iparamLCP[0] = itermax On enter, the maximum number of pivots allowed.
+                 - iparamLCP[1] = ispeak  On enter, the output log identifiant:\n
+                        0 : no output\n
+                        >0: active screen output\n
+                 - iparamLCP[2] = it_end  On return, the number of pivots performed by the algorithm.
+
+  \param dparamLCP  On enter/return, a vetor of doubles (not used).\n
+
+
+
+  \author Mathieu Renouf
+
  */
 
 #include <math.h>
@@ -68,8 +71,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *wlem , int *info ,
-                     int *iparamLCP , double *dparamLCP)
+void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *wlem , int *info , int *iparamLCP , double *dparamLCP)
 {
 
   int i, drive, block, Ifound;
@@ -108,7 +110,7 @@ void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *
     for (jc = 0 ; jc < dim2; ++jc)
       A[ic][jc] = 0.0;
 
-  /*! construction of A matrix such as
+  /* construction of A matrix such as
    * A = [ Id | -d | -M | q ] with d = (1,...1)
    */
 
@@ -123,7 +125,7 @@ void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *
 
   /* End of construction of A */
 
-  /*! STEP 0
+  /* STEP 0
    * qs = min{ q[i], i=1,...,NC }
    */
 
@@ -140,7 +142,7 @@ void lcp_lexicolemke(int *nn , double *vec , double *q , double *zlem , double *
   if (qs >= 0)
   {
 
-    /*! TRIVIAL CASE
+    /* TRIVIAL CASE
      * z = 0 and w = q is solution of LCP(q,M)
      */
 

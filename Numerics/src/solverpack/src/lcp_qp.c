@@ -24,40 +24,40 @@
  * \f$
  *  \left\lbrace
  *   \begin{array}{l}
- *    M z + q= w\\
+ *    w - M z = q\\
  *    0 \le z \perp w \ge 0\\
  *   \end{array}
  *  \right.
  * \f$
  *
- * where M is an (n x n)-matrix, q , w and z n-vectors.
- *
- * \fn  lcp_qp( int *nn , double *vec , double *q , double *z , int *info ,\n
- *              int *iparamLCP , double *dparamLCP )
- *
- * lcp_qp use a quadratic programm formulation for solving an LCP
- *
- * Generic lcp parameters:\n
- *
- * \param nn      Unchanged parameter which represents the dimension of the system.
- * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
- * \param q       Unchanged parameter which contains the components of the right hand side vector.
- * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
- * \param w       Modified parameter which returns the solution of the problem.
- * \param info    Modified parameter which returns the termination value\n
- *                0 - convergence  / minimization sucessfull\n
- *                1 - Too Many iterations\n
- *            2 - Accuracy insuficient to satisfy convergence criterion\n
- *                5 - Length of working array insufficient\n
- *                Other - The constraints are inconstent\n
- *
- * Specific QP parameters:\n
- *
- * \param dparamLCP[0] = tol    Input unchanged parameter which represents the tolerance required.
- *
- * \author Vincent Acary
- *
+ * where M is an (\f$nn \times n\f$)-matrix, q , w and z nn-vectors.
  */
+
+/*!\fn  void lcp_qp( int *nn , double *vec , double *qq , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP )
+*
+* lcp_qp use a quadratic programm formulation for solving an LCP
+*
+* Generic lcp parameters:\n
+*
+* \param nn      On enter, an integer which represents the dimension of the system.
+* \param vec     On enter, a (\f$nn \times nn\f$)-vector of doubles which contains the components of the matrix with a fortran storage.
+* \param q       On enter, a nn-vector of doubles which contains the components of the right hand side vector.
+* \param z       On return, a nn-vector of doubles which contains the initial solution and returns the solution of the problem.
+* \param w       On return, a nn-vector of doubles which returns the solution of the problem.
+* \param info    On return, an integer which returns the termination value:\n
+*                0 : convergence  / minimization sucessfull\n
+*                1 : Too Many iterations\n
+*            2 : Accuracy insuficient to satisfy convergence criterion\n
+*                5 : Length of working array insufficient\n
+*                Other : The constraints are inconstent\n
+*
+* Specific QP parameters:\n
+* \param iparamLCP    On enter/return, vector of integers (not used here).
+* \param dparamLCP    On enter/return, vector of doubles:\n
+*                - dparamLCP[0] = tol    On enter, the tolerance required.
+*
+* \author Vincent Acary
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,8 +70,7 @@ void ql0001_(int *m , int *me , int *mmax , int *n , int *nmax , int *mnn ,
              double *x , double *u , int *iout , int *ifail , int *iprint , double *war ,
              int *lwar , int *iwar , int *liwar , double *eps);
 
-void lcp_qp(int *nn , double *vec , double *qq , double *z , double *w , int *info ,
-            int *iparamLCP , double *dparamLCP)
+void lcp_qp(int *nn , double *vec , double *qq , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
 
   int i, j;
@@ -91,16 +90,16 @@ void lcp_qp(int *nn , double *vec , double *qq , double *z , double *w , int *in
 
   tol   = &dparamLCP[0];
 
-  // m :        total number of constraints.
+  /*/ m :        total number of constraints.*/
   m = 0;
-  // me :       number of equality constraints.
+  /*/ me :       number of equality constraints.*/
   me = 0;
-  //  mmax :     row dimension of a. mmax must be at least one and greater than m.
+  /*/  mmax :     row dimension of a. mmax must be at least one and greater than m.*/
   mmax = m + 1;
-  //n :        number of variables.
-  //nmax :     row dimension of C. nmax must be greater or equal to n.
+  /*/n :        number of variables.
+  //nmax :     row dimension of C. nmax must be greater or equal to n.*/
   nmax = n;
-  //mnn :      must be equal to m + n + n.
+  /*/mnn :      must be equal to m + n + n. */
   mnn = m + n + n;
 
   for (i = 0; i < n; i++)
@@ -111,9 +110,9 @@ void lcp_qp(int *nn , double *vec , double *qq , double *z , double *w , int *in
 
 
 
-  // Creation of objective function matrix Q and the the constant vector of the objective function p
+  /*/ Creation of objective function matrix Q and the the constant vector of the objective function p
 
-  // Q= vec;
+  // Q= vec;*/
   Q = (double *)malloc(nmax * nmax * sizeof(double));
   for (i = 0; i < n; i++)
   {
@@ -125,7 +124,7 @@ void lcp_qp(int *nn , double *vec , double *qq , double *z , double *w , int *in
   for (i = 0; i < n; i++)
     p[i] = qq[i] ;
 
-  // Creation of the data matrix of the linear constraints, A and  the constant data of the linear constraints b
+  /* / Creation of the data matrix of the linear constraints, A and  the constant data of the linear constraints b*/
   A = (double *)malloc(mmax * nmax * sizeof(double));
   for (i = 0; i < m; i++)
   {
@@ -135,41 +134,41 @@ void lcp_qp(int *nn , double *vec , double *qq , double *z , double *w , int *in
   b = (double *)malloc(mmax * sizeof(double));
   for (i = 0; i < m; i++) b[i] = 0.0 ;
 
-  // Creation of the the lower and upper bounds for the variables.
+  /* Creation of the the lower and upper bounds for the variables.*/
   xu = (double *)malloc(n * sizeof(double));
   for (i = 0; i < n; i++) xu[i] = 1e32 ;
   xl = (double *)malloc(n * sizeof(double));
   for (i = 0; i < n; i++) xl[i] = 0.0 ;
 
-  // on return, lambda contains the lagrange multipliers.
+  /*  on return, lambda contains the lagrange multipliers.*/
   lambda = (double *)malloc(mnn * sizeof(double));
 
-  //   integer indicating the desired output unit number,
+  /* /   integer indicating the desired output unit number,*/
   iout = 6;
 
-  //   output control.
+  /* /   output control.*/
   un = 1;
 
-  // real working array.
+  /* / real working array. */
   lwar = 3 * nmax * nmax / 2 + 10 * nmax + 2 * mmax;
   war = (double *)malloc(lwar * sizeof(double));
-  // integer working array.
+  /* / integer working array. */
   liwar = n ;
   iwar = (int *)malloc(liwar * sizeof(int));
   iwar[0] = 1;
 
 
-  // call ql0001_
+  /* / call ql0001_ */
   ql0001_(&m, &me, &mmax, &n, &nmax, &mnn, Q, p, A, b, xl, xu,
           z, lambda, &iout, info, &un, war, &lwar, iwar, &liwar, tol);
 
-  //    printf("tol = %10.4e\n",*tol);
+  /* /    printf("tol = %10.4e\n",*tol);
   //for (i=0;i<mnn;i++) printf("lambda[%i] = %g\n",i,lambda[i]);
 
-  // getting the multiplier due to the lower bounds
+  // getting the multiplier due to the lower bounds*/
   for (i = 0; i < n; i++) w[i] = lambda[m + i] ;
 
-  // memory freeing
+  /*/ memory freeing*/
   free(A);
   free(p);
   free(b);
