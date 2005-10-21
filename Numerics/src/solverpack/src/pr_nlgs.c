@@ -20,49 +20,50 @@
 /*!\file pr_nlgs.c
 
 
-This subroutine allows the primal resolution of relay problems.
+This subroutine allows the primal resolution of relay problems(PR).\n
 
-   Try \f$(z,w)\f$ such that:
+   Try \f$(z,w)\f$ such that:\n
 \f$
 \left\lbrace
 \begin{array}{l}
-M z +q = w\\
+ w - M z = q\\
 -w \in \partial\psi_{[-b, a]}(z)\\
 \end{array}
 \right.
 \f$
 
- here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
+ here M is an (nn \f$\times\f$nn)-matrix, q an nn-dimensional vector, z an nn-dimensional  vector and w an nn-dimensional vector.
 
 */
 
 
-/*!\fn int  pr_nlgs(double vec[], double *q, int *nn, double a[], double b[], int * itermax, double * tol, int *chat, double z[], double w[], int *it_end, double * res, int *info)
+/*!\fn void  pr_nlgs(double *vec, double *q, int *nn, double *a, double *b, int * itermax, double * tol, int *chat, double *z, double *w, int *it_end, double * res, int *info)
 
-   pr_nlgs is a specific nlgs(non linear Gauss-Seidel) solver for primal relay problems.
-
-
-
-   \param vec       On enter a double vector containing the components of the matrix with a fortran storage.
-   \param qq        On enter a pointer over doubles containing the components of the vector.
-   \param nn        On enter a pointer over integers, the dimension of the second member.
-   \param a         On enter a pointer over doubles, the upper bound.
-   \param b         On enter a pointer over doubles, the down bound.
-   \param itermax   On enter a pointer over integers, the maximum iterations required.
-   \param tol       On enter a pointer over doubles, the tolerance required.
-   \param chat      On enter a pointer over integer, the output log identifiant
-                    0 > =  no output
-                    0 < =  active screen output
+  \n \n
+   pr_nlgs is a specific nlgs(non linear Gauss-Seidel) solver for primal relay problems.\n
 
 
-   \param it_end    On return a pointer over integers, the number of iterations carried out.
-   \param res       On return a pointer over doubles, the error value.
-   \param z         On return double vector, the solution of the problem.
-   \param w         On return double vector, the solution of the problem.
-   \param info      On return a pointer over integers, the termination reason
-                    0 = convergence,
-        1 = no convergence,
-        2 = Nul diagonal term
+
+   \param vec       On enter, a (nn\f$\times\f$nn)-vector of doubles containing the components of the matrix with a fortran storage.
+   \param qq        On enter, a nn-vector of doubles containing the components of the vector.
+   \param nn        On enter, an integer, the dimension of the second member.
+   \param a         On enter, a nn-vector of doubles, the upper bound.
+   \param b         On enter, a nn-vector of doubles, the down bound.
+   \param itermax   On enter, an integer, the maximum iterations required.
+   \param tol       On enter, a double, the tolerance required.
+   \param chat      On enter, an integer, the output log identifiant:\n
+                     0 =  no output \n
+                    >0 =  active screen output\n
+
+
+   \param it_end    On return, an integer, the number of iterations carried out.
+   \param res       On return, a double, the error value.
+   \param z         On return, a nn-vector of doubles, the solution of the problem.
+   \param w         On return, a nn-vector of double, the solution of the problem.
+   \param info      On return, an integer, the termination reason:\n
+                    0 = convergence,\n
+        1 = no convergence,\n
+        2 = Nul diagonal term\n
 
 
    \author Nineb Sheherazade.
@@ -76,7 +77,8 @@ M z +q = w\\
 #include "blaslapack.h"
 
 
-void pr_nlgs(double vec[], double *q, int *nn, double a[], double b[], int * itermax, double * tol, int *chat, double z[], double w[], int *it_end, double * res, int *info)
+
+void pr_nlgs(double *vec, double *q, int *nn, double *a, double *b, int * itermax, double * tol, int *chat, double *z, double *w, int *it_end, double * res, int *info)
 {
 
 

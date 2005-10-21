@@ -18,51 +18,46 @@
 */
 /*!\file pr_latin.c
 
+This subroutine allows the primal resolution of relay problems (PR).\n
+   Try \f$(z,w)\f$ such that:\n
 
-This subroutine allows the primal resolution of relay problems.
+   \f$
+    \left\lbrace
+     \begin{array}{l}
+       w - M z = q \\
+       -w \in \partial\psi_{[-b, a]}(z)\\
+     \end{array}
+    \right.
+   \f$
 
-   Try \f$(z,w)\f$ such that:
-\f$
-\left\lbrace
-\begin{array}{l}
-M z +q = w\\
--w \in \partial\psi_{[-b, a]}(z)\\
-\end{array}
-\right.
-\f$
-
- here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
+ here M is an (\f$nn \times nn \f$)-matrix, q an nn-dimensional vector, z an nn-dimensional  vector and w an nn-dimensional vector.
 
 */
 
-/*!\fn int  pr_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], double b[], int * itermax, double * tol, int *chat, double z[], double w[], int *it_end, double * res, int *info)
+/*!\fn void pr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, double *b, int * itermax, double * tol, int *chat, double *z, double *w, int *it_end, double * res, int *info)
 
    pr_latin is a specific latin solver for primal relay problems.
 
 
-
-   \param vec       On enter a double vector containing the components of the matrix with a fortran storage.
-   \param qq        On enter a pointer over doubles containing the components of the vector.
-   \param nn        On enter a pointer over integers, the dimension of the second member.
-   \param k_latin   On enter a pointer over doubles, the latin coefficient (strictly non negative).
-   \param a         On enter a pointer over doubles, the upper bound.
-   \param b         On enter a pointer over doubles, the down bound.
-   \param itermax   On enter a pointer over integers, the maximum iterations required.
-   \param tol       On enter a pointer over doubles, the tolerance required.
-   \param chat      On enter a pointer over integer, the output log identifiant
-                    0 > =  no output
-                    0 < =  active screen output
-
-
-   \param it_end    On return a pointer over integers, the number of iterations carried out.
-   \param res       On return a pointer over doubles, the error value.
-   \param z         On return double vector, the solution of the problem.
-   \param w         On return double vector, the solution of the problem.
-   \param info      On return a pointer over integers, the termination reason
-                    0 = convergence,
-        1 = no convergence,
-        2 = Cholesky factorization failed
-        3 = Nul diagonal term
+   \param vec       On enter, a (\f$nn \times nn\f$)-vector of doubles containing the components of the matrix with a fortran storage.
+   \param qq        On enter, a nn-vector of doubles containing the components of the vector.
+   \param nn        On enter, an integer which represents the dimension of the second member.
+   \param k_latin   On enter, a double, the latin coefficient (strictly non negative).
+   \param a         On enter, a nn-vector of doubles, the upper bound.
+   \param b         On enter, a nn-vector of doubles, the down bound.
+   \param itermax   On enter, an integer which represents the maximum iterations required.
+   \param tol       On enter, a double which contains the tolerance required.
+   \param chat      On enter, an integer the output log identifiant:\n                              0 : no output\n
+                    >0 : active screen output
+   \param it_end    On return, an integer which represents the number of iterations carried out.
+   \param res       On return, a double, the error value.
+   \param z         On return,a nn-vector of doubles wich contains the solution of the problem.
+   \param w         On return, a nn-vector of doubles which contains the solution of the problem.
+   \param info      On return, an integer which represents the termination reason: \n
+                    0 = convergence,\n
+        1 = no convergence,\n
+        2 = Cholesky factorization failed,\n
+        3 = Nul diagonal term\n
 
 
    \author Nineb Sheherazade.
@@ -76,7 +71,8 @@ M z +q = w\\
 #include "blaslapack.h"
 
 
-void pr_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], double b[], int * itermax, double * tol, int *chat, double z[], double w[], int *it_end, double * res, int *info)
+
+void pr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, double *b, int * itermax, double * tol, int *chat, double *z, double *w, int *it_end, double * res, int *info)
 {
 
 

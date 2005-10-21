@@ -16,38 +16,47 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+
 /*!\file pr_solver.c
+ *
+ * This subroutine allows the primal resolution of relay problems (PR).\n
+ *
+ * Try \f$(z,w)\f$ such that:\n
+ *
+ * \f$
+ *  \left\lbrace
+ *   \begin{array}{l}
+ *     w - M z = q\\
+ *     -w \in \partial\psi_{[-b, a]}(z)\\
+ *   \end{array}
+ *  \right.
+ * \f$
 
-  This subroutine allows the primal resolution of relay problems.
+ * here M is an (\f$ nn\times nn\f$)-matrix, q an nn-dimensional vector, z an nn-dimensional  vector
+ *and w an nn-dimensional vector.\n
+ *This system of equations and inequalities is solved thanks to @ref pr solvers.
+ *The routine's call is due to the function pr_solver.c.
 
-  Try \f$(z,w)\f$ such that:
-\f$
-\left\lbrace
-\begin{array}{l}
-M z- w=q\\
--w \in \partial\psi_{[-a, a]}(z)\\
-\end{array}
-\right.
-\f$
-
- here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
- This system of equations and inequalities is solved thanks to @ref pr solvers.
- The routine's call is due to the function pr_solver.c.
-
-\fn int pr_solver(double vec[],double *q,int *nn, method *pt,double z[],double w[])
-
-   pr_solver is a generic interface allowing the call of one of the PR solvers.
-
-   \param double*  : vec On enter double vector containing the components of the double matrix with a fortran90 allocation.
-   \param double*  : q On enter a pointer over doubles containing the components of the second member of the system.
-   \param int*     : nn On enter a pointer over integers, the dimension of the second member.
-   \param method*  : pt On enter a pointer other a structure (::method).
-   \param double[] : z On return real vector, the solution of the problem.
-   \param double[] : w On return real vector, the solution of the problem.
-
-  \return  On return int, the termination reason (0 is successful otherwise 1).
-
-   \author Nineb Sheherazade.
+ * \fn int pr_solver(double *vec,double *q,int *nn, method *pt,double *z,double *w)
+ *
+ *
+ * pr_solver is a generic interface allowing the call of one of the PR solvers.
+ *
+ *
+ *  \param vec       On enter, a (\f$nn \times nn\f$)-vector of doubles containing the components of the  matrix with a fortran90 allocation.
+ *  \param q         On enter, a nn-vector of doubles containing the components of the second member of the system.
+ *  \param nn        On enter, an integer which represents the dimension of the second member.
+ *  \param pt        On enter, a union (::method) containing the PR structure.
+ *  \n \n
+ *  \param z         On return, a nn-vector of doubles which contains the solution of the problem.
+ *  \param w         On return, a nn-vector of doubles which contains the solution of the problem.
+ *
+ *   \return integer : the termination reason\n
+ *                    - 0 : successful\n
+ *                    - otherwise : see specific solvers for more information about the log info.
+ *
+ *   \author Nineb Sheherazade.
+ *
  */
 
 #include <stdio.h>
@@ -58,7 +67,8 @@ M z- w=q\\
 #endif
 #include <time.h>
 
-int pr_solver(double *vec, double *q, int *nn, method *pt, double z[], double w[])
+
+int pr_solver(double *vec, double *q, int *nn, method *pt, double *z, double *w)
 {
 
 
