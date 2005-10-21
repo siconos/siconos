@@ -16,62 +16,60 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*!\file lcp_cpg.c
- *
- * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
- * Try \f$(z,w)\f$ such that:\n
- * \f$
- *  \left\lbrace
- *   \begin{array}{l}
- *    M z + q= w\\
- *    0 \le z \perp w \ge 0\\
- *   \end{array}
- *  \right.
- * \f$
- *
- * where M is an (n x n)-matrix, q , w and z n-vectors.
- *
- * \fn  lcp_cpg( int *nn , double *vec , double *q , double *z , int *info ,
- *               int *iparamLCP , double *dparamLCP )
- *
- * lcp_cpg is a cpg (Conjugated Projected Gradient) solver for LCP based on quadratic minimization.\n
- *
- * Generic lcp parameters:\n
- *
- * \param nn      Unchanged parameter which represents the dimension of the system.
- * \param vec     Unchanged parameter which contains the components of the matrix with a fortran storage.
- * \param q       Unchanged parameter which contains the components of the right hand side vector.
- * \param z       Modified parameter which contains the initial solution and returns the solution of the problem.
- * \param w       Modified parameter which returns the solution of the problem.
- * \param info    Modified parameter which returns the termination value\n
- *                0 - convergence
- *                1 - iter = itermax
- *                2 - negative diagonal term
- *                3 - pWp nul
- *
- * Specific CPG parameters:\n
- *
- * \param iparamLCP[0] = itermax Input unchanged parameter which represents the maximum number of iterations allowed.
- * \param iparamLCP[1] = ispeak  Input unchanged parameter which represents the output log identifiant\n
- *                       0 - no output\n
- *                       0 < active screen ouput\n
- * \param iparamLCP[2] = it_end  Output modified parameter which returns the number of iterations performed by the algorithm.
- *
- * \param dparamLCP[0] = tol     Input unchanged parameter which represents the tolerance required.
- * \param dparamLCP[1] = res     Output modified parameter which returns the final error value.
- *
- * \author Mathieu Renouf
- *
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "blaslapack.h"
 
-void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info ,
-             int *iparamLCP , double *dparamLCP)
+/*!\file lcp_cpg.c
+
+  This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
+  Try \f$(z,w)\f$ such that:\n
+  \f$
+   \left\lbrace
+    \begin{array}{l}
+     w - M z = q\\
+     0 \le z \perp w \ge 0\\
+    \end{array}
+   \right.
+  \f$
+
+  where M is an (\f$nn \times nn\f$)-matrix, q , w and z nn-vectors.
+
+*/
+/*!\fn  void lcp_cpg( int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP )
+
+  lcp_cpg is a CPG (Conjugated Projected Gradient) solver for LCP based on quadratic minimization.
+
+
+  \param nn      On enter, an integer which represents the dimension of the system.
+  \param vec     On enter, a (\f$nn \times nn\f$)-vector of doubles which contains the components of the matrix with a fortran storage.
+  \param q       On enter, a nn-vector of doubles which contains the components of the right hand side vector.
+  \param z       On return, a nn-vector of doubles which contains the solution of the problem.
+  \param w       On return, a nn-vector of doubles which contains the solution of the problem.
+  \param info    On return, an integer which contains the termination value:
+                  0: convergence\n
+                  1: iter = itermax\n
+                  2: negative diagonal term\n
+                  3: pWp nul
+
+ \param iparamLCP On enter/return, a vector of integers:
+                - iparamLCP[0] = itermax On enter, an integer which represents the maximum number of iterations allowed.
+                - iparamLCP[1] = ispeak  On enter, an integer which represents the output log identifiant:
+                   0 : no output\n
+                   > 0: active screen ouput
+                - iparamLCP[2] = it_end  On return, a double which represents the number of iterations performed by the algorithm.
+
+ \peram dparamLCP On enter/return, a vector of doubles:
+                - dparamLCP[0] = tol     On enter, a double which represents the tolerance required.
+                - dparamLCP[1] = res     On return, a double which represents the final error value.
+
+\author Mathieu Renouf.
+*/
+
+
+void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
 
   int n, incx, incy;
@@ -106,7 +104,7 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
 
   qs = dnrm2_(&n , q , &incx);
 
-  //printf( " Norm: %g \n", qs );
+  /*printf( " Norm: %g \n", qs );*/
 
   if (qs > 1e-16) den = 1.0 / qs;
   else
