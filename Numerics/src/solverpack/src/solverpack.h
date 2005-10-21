@@ -453,16 +453,16 @@ extern int lcp_solver_block(int *inb , int *iid , double *vec, double *q , int *
 
 
 /**@defgroup group3 PR (Primal Relay)
-* @{
+   @{
 */
 
 /** \fn int extern  pr_solver ( double* , double* , int* , method* , double* , double* )
 
- * \brief pr_solver() is a generic interface allowing the call of one of the @ref pr solvers.
+ * \brief pr_solver.c is a generic interface allowing the call of one of the @ref pr solvers.
  */
 
 /** @brief
-pr_solver() is a generic interface allowing the call of one of the @ref pr solvers.
+pr_solver.c is a generic interface allowing the call of one of the @ref pr solvers.
 
  */
 extern int pr_solver(double* , double* , int* , method* , double* , double*);
@@ -485,12 +485,12 @@ extern int pr_solver(double* , double* , int* , method* , double* , double*);
 
 /** \fn int extern  dr_solver( double* , double* , int* , method* , double* , double* )
 
- * \brief dr_solver() is a generic interface allowing the call of one of the @ref dr solvers.
+ * \brief dr_solver.c is a generic interface allowing the call of one of the @ref dr solvers.
 
  */
 
 /** @brief
-dr_solver() is a generic interface allowing the call of one of the @ref dr solvers.
+dr_solver.c is a generic interface allowing the call of one of the @ref dr solvers.
 */
 
 extern int dr_solver(double* , double* , int* , method* , double* , double*);

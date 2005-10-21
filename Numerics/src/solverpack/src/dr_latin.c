@@ -19,48 +19,47 @@
 /*!\file dr_latin.c
 
 
-This subroutine allows the resolution of DR (Dual Relay) problem.
-Try \f$(z,w)\f$ such that:
+This subroutine allows the resolution of Dual Relay (DR) problem.\n
+Try \f$(z,w)\f$ such that:\n
 
 \f$
 \left\lbrace
 \begin{array}{l}
-M z- w=q\\
+ w - M z = q\\
 -z \in \partial\psi_{[-b,a]}(w)\\
 \end{array}
 \right.
 \f$
 
-here M is an n by n  matrix, q an n-dimensional vector, w, z, a and b are n-dimensional vectors.
+here M is an (nn \f$\times\f$nn)-matrix, q an nn-dimensional vector, w, z, a and b are nn-dimensional vectors.
 
 */
 
-/*!\fn  dr_latin( double vec[], double *qq, int *nn, double * k_latin, double a[], double b[], int * itermax, double * tol, int * chat, double z[], double w[], int *it_end, double * res, int *info)
+/*!\fn  void dr_latin( double *vec, double *qq, int *nn, double * k_latin, double *a, double *b, int * itermax, double * tol, int * chat, double *z, double *w, int *it_end, double * res, int *info )
+   \n
+   dr_latin is a specific latin (LArge Time INcrement)solver for dual relay problems.\n
 
-   dr_latin is a specific latin (LArge Time INcrement)solver for dual relay problems.
+   \param vec        On enter, a (nn \f$\times\f$nn)-vector of doubles containing the components of the double matrix with a fortran storage.
+   \param q          On enter, a nn-vector of doubles containing the components of the second member.
+   \param nn         On enter, an integer, the dimension of the second member.
+   \param a          On enter, a nn-vector of doubles, the upper bound.
+   \param b          On enter, a nn-vector of doubles, the lower bound.
+   \param itermax    On enter, an integer, the maximum iterations required.
+   \param tol        On enter, a double, the tolerance required.
+   \param k_latin    On enter, a double, the search direction (strictly non negative).
+   \param chat       On enter, an integer, the output log identifiant:\n
+                    0  =  no output \n
+                    >0 =  active screen output\n
 
-   \param vec         On enter a double vector containing the components of the double matrix with a fortran storage.
-   \param q           On enter a pointer over doubles containing the components of the double vector.
-   \param nn On enter a pointer over integers, the dimension of the second member.
-   \param a          On enter a pointer over doubles, the upper bound.
-   \param b          On enter a pointer over doubles, the lower bound.
-   \param itermax    On enter a pointer over integers, the maximum iterations required.
-   \param tol        On enter a pointer over doubles, the tolerance required.
-   \param k_latin    On enter a pointer over double, the search direction (strictly non negative).
-   \param chat      On enter a pointer over integer, the output log identifiant
-                    0 > =  no output
-                    0 < =  active screen output
-
-
-   \param it_end     On return a pointer over integers, the number of iterations carried out.
-   \param res        On return a pointer over doubles, the error value.
-   \param z          On return double vector, the solution of the problem.
-   \param w          On return double vector, the solution of the problem.
-   \param info       On return a pointer over integers, the termination reason
-                       0 = convergence
-           1 = non convergence,
-           2 = Cholesky factorization failed
-           3 = Nul diagonal term
+   \param it_end     On return, an integer, the number of iterations carried out.
+   \param res        On return, a double, the error value.
+   \param z          On return, a nn-vector of doubles, the solution of the problem.
+   \param w          On return, a nn-vector of doubles, the solution of the problem.
+   \param info       On return, an integer, the termination reason:\n
+                       0 = convergence,\n
+           1 = non convergence,\n
+           2 = Cholesky factorization failed,\n
+           3 = Nul diagonal term.\n
 
    \author Nineb Sheherazade.
  */
@@ -72,7 +71,8 @@ here M is an n by n  matrix, q an n-dimensional vector, w, z, a and b are n-dime
 #include "blaslapack.h"
 
 
-void dr_latin(double vec[], double *qq, int *nn, double * k_latin, double a[], double b[], int * itermax, double * tol, int * chat, double z[], double w[], int *it_end, double * res, int *info)
+
+void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, double *b, int * itermax, double * tol, int * chat, double *z, double *w, int *it_end, double * res, int *info)
 {
 
 

@@ -18,36 +18,39 @@
 */
 /*!\file dr_solver.c
  *
- * This subroutine allows the dual resolution of relay problems.
+ * This subroutine allows the dual resolution of relay problems (DR).\n
  *
- * Try \f$(z,w)\f$ such that:
+ * Try \f$(z,w)\f$ such that:\n
  *  \f$
  *   \left\lbrace
  *    \begin{array}{l}
- *      M z + q = w\\
+ *      w - M z = q\\
  *     -z \in \partial\psi_{[-b, a]}(w)\\
  *    \end{array}
  *   \right.
  *  \f$
  *
- * where M is an (n x n)-matrix, q , w and z n-vectors.\n
+ * where M is an (nn \f$\times\f$nn)-matrix, q , w and z nn-vectors.\n
  *
  * This system of equations and inequalities is solved thanks to @ref dr solvers.
- * The routine's call is due to the function pr_solver.c.
+ * The routine's call is due to the function pr_solver.c.\n
+ *
+ *
  * \fn int dr_solver( double *vec , double *q ,int *nn , method *pt , double *z , double *w )
  *
- * dr_solver is a generic interface allowing the call of one of the DR solvers.
+ *\n
+ * dr_solver is a generic interface allowing the call of one of the DR solvers.\n
+
+ * \param vec      On enter, (nn \f$\times\f$nn)-vector of doubles containing the components of the double matrix with a fortran90 allocation.
+ * \param q        On enter, a nn-vector of doubles containing the components of the second member of the system.
+ * \param nn       On enter, an integer, the dimension of the second member.
+ * \param pt       On enter, a union (::method) containing the DR structure.\n \n
+ * \param z        On return, a nn-vector of doubles, the solution of the problem.
+ * \param w        On return, a nn-vector of doubles, the solution of the problem.
  *
- * \param vec      On enter double vector containing the components of the double matrix with a fortran90 allocation.
- * \param q        On enter a pointer over doubles containing the components of the second member of the system.
- * \param nn       On enter a pointer over integers, the dimension of the second member.
- * \param pt       On enter a pointer other a structure (::method).
- * \param z        On return real vector, the solution of the problem.
- * \param w        On return real vector, the solution of the problem.
  *
  *
- *
- * \author Nineb Sheherazade & Mathieu Renouf.
+ * \author Nineb Sheherazade.
  *
  */
 
@@ -66,7 +69,7 @@ int dr_solver(double *vec , double *q , int *nn , method *pt , double *z , doubl
 
   double res;
 
-  char drkey1[10] = "NLGS" , drkey2[10] = "CPG" , drkey3[10] = "Latin";
+  char drkey1[10] = "NLGS" , drkey2[10] = "Latin", drkey3[10] = "CPG";
 
 
 
@@ -75,7 +78,7 @@ int dr_solver(double *vec , double *q , int *nn , method *pt , double *z , doubl
 
   t1 = clock();
 
-  if (strcmp(pt->dr.name , drkey3) == 0)
+  if (strcmp(pt->dr.name , drkey2) == 0)
   {
 
     dr_latin(vec , q , nn , &pt->dr.k_latin , pt->dr.a , pt->dr.b , &pt->dr.itermax , &pt->dr.tol , &pt->dr.chat, z , w , &it_end , &res , &info);
