@@ -18,7 +18,7 @@
 #	
 # Makefile.am --- SICONOS - src
 
-SUBDIRS =  utils xml plugin modelingTools simulationTools model plugin_test
+SUBDIRS =  utils xml plugin modelingTools simulationTools model 
 EXTRA_DIST = 
 
 lib_LTLIBRARIES = libSiconosKernel.la

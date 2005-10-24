@@ -181,33 +181,42 @@ AC_ARG_WITH(locallibxml,
 
 # required version of the libraries
 
-LAPACK_VER="3.0.3"
-BLAS_VER="3.0."
-LIBXML_VER="2.6.17"
-LAPACKPP_VER="1.6.0"
-CPPUNIT_VER="1.10.2"
 
-AC_MSG_CHECKING([Blas])
+
+
+
+
+# Blas
+BLAS_VER="3.0."
+AC_MSG_CHECKING([for Blas])
 ACX_CHECK_BLAS([AC_SUBST(BLAS_LIBRARIES)], [AC_MSG_ERROR([Blas not found])])
 # exit 1;
 
-AC_MSG_CHECKING([Lapack])
+# Lapack
+AC_MSG_CHECKING([for Lapack])
 ACX_CHECK_LAPACK([AC_SUBST(LAPACK_LIBRARIES)], [AC_MSG_ERROR([Lapack not found])])
 # exit 1;
 
 # Numerics
-AC_MSG_CHECKING([SICONOS Numerics])
-ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-locallapackpp.])])
-echo $NUMERICS_PATH
-# Lapack++
-AC_MSG_CHECKING([Lapack++])
-ACX_CHECK_LAPACKPP([AC_SUBST(LAPACKPP_INCLUDES) AC_SUBST(LAPCKPP_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Lapack++ in a good version. Please install Lapack++, version >= $LAPACKPP_VER  or use the option --with-localnumerics.])])
-#
+AC_MSG_CHECKING([for Siconos/Numerics])
+ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-localnumerics.])])
 
+
+# Lapack++
+LAPACKPP_VER="1.6.0"
+AC_MSG_CHECKING([for Lapack++])
+ACX_CHECK_LAPACKPP([AC_SUBST(LAPACKPP_INCLUDES) AC_SUBST(LAPCKPP_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Lapack++ in a good version. Please install Lapack++, version >= $LAPACKPP_VER  or use the option --with-locallapackpp.])])
 CXX_LAPACKPP_FLAG="-DLA_COMPLEX_SUPPORT"  
 AC_SUBST(CXX_LAPACKPP_FLAG)
 
-# Nana
+
+
+# Libxml2
+LIBXML_VER="2.6.17"
+AC_MSG_CHECKING([Libxml2])
+ACX_CHECK_LIBXML2([AC_SUBST(LIBXML2_INCLUDES) AC_SUBST(LIBXML2_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Libxml2 in a good version. Please install Libxml2, version >= $LIBXML_VER  or use the option --with-locallibxml.])])
+
+# Nana Warning, by default we skip ccpunit
 AC_MSG_CHECKING([Nana])
 if test "$enable_nana" = yes; then
 ACX_CHECK_NANA([AC_SUBST(NANA_INCLUDES) AC_SUBST(NANA_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Nana. Please install Nana  or use the option --with-localnana.])])
@@ -217,14 +226,8 @@ else
 CXX_WITHOUTNANA_FLAG="-DWITHOUT_NANA"
 fi
 
-
-
-
-# exit 1;
-AC_MSG_CHECKING([Libxml2])
-ACX_CHECK_LIBXML2([AC_SUBST(LIBXML2_INCLUDES) AC_SUBST(LIBXML2_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Libxml2 in a good version. Please install Libxml2, version >= $LIBXML_VER  or use the option --with-locallibxml.])])
-# cppunit : Warning :  By default we skip ccpunit
-
+# Cppunit : Warning, by default we skip ccpunit
+CPPUNIT_VER="1.10.2"
 AC_MSG_CHECKING([cppunit])
 if test "$enable_cppunit" = yes; then
 AC_MSG_RESULT(option --enable-cppunit selected : able to run test suite)       
@@ -369,7 +372,7 @@ echo "
    C++ Compiler:                        ${CXX}
    C++ compiler flags:                  ${CXXFLAGS}
    F77 Compiler:                        ${F77}
-   F77 compiler flags:                  ${F77FLAGS}
+   F77 compiler flags:                  ${FFLAGS}
    Preprocessor flags:                  ${CPPFLAGS}
    Linking flags			${LDFLAGS}
    Includes:                            ${SICONOS_EXT_INCLUDES}

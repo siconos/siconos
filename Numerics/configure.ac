@@ -177,30 +177,27 @@ AC_ARG_WITH(locallapack,
 
 # required version of the libraries
 
-LAPACK_VER="3.0.3"
-BLAS_VER="3.0."
-LIBXML_VER="2.6.17"
-LAPACKPP_VER="1.6.0"
-CPPUNIT_VER="1.10.2"
 
-AC_MSG_CHECKING([Blas])
+
+# Blas
+# BLAS_VER="3.0."
+AC_MSG_CHECKING([for Blas])
 ACX_CHECK_BLAS([AC_SUBST(BLAS_LIBRARIES)], [AC_MSG_ERROR([Blas not found])])
 # exit 1;
 
-AC_MSG_CHECKING([Lapack])
+# Lapack
+AC_MSG_CHECKING([for Lapack])
 ACX_CHECK_LAPACK([AC_SUBST(LAPACK_LIBRARIES)], [AC_MSG_ERROR([Lapack not found])])
-# exit 1;
 
-
+# Cppunit : Warning, by default we skip ccpunit
+CPPUNIT_VER="1.10.2"
 AC_MSG_CHECKING([cppunit])
-$cppunit = "no"
 if test "$enable_cppunit" = yes; then
 AC_MSG_RESULT(option --enable-cppunit selected : able to run test suite)       
-ACX_CHECK_CPPUNIT([AC_SUBST(CPPUNIT_INCLUDES) AC_SUBST(CPPUNIT_LIBRARIES) $cppunit = "yes"], [AC_MSG_ERROR([Cannot find  cppunit in a good version. Please install cppunit, version >= $CPPUNIT_VER.])])
+ACX_CHECK_CPPUNIT([AC_SUBST(CPPUNIT_INCLUDES) AC_SUBST(CPPUNIT_LIBRARIES)], [AC_MSG_ERROR([Cannot find  cppunit in a good version. Please install cppunit, version >= $CPPUNIT_VER.])])
 else
  AC_MSG_RESULT(option --enable-cppunit not selected : Warning : unable to run test suite)  
 fi
-
 
 AM_CONDITIONAL([CPPUNIT_COND], [test "$cppunit" = yes])
 
@@ -345,7 +342,7 @@ echo "
    C++ Compiler:                        ${CXX}
    C++ compiler flags:                  ${CXXFLAGS}
    F77 Compiler:                        ${F77}
-   F77 compiler flags:                  ${F77FLAGS}
+   F77 compiler flags:                  ${FFLAGS}
    Preprocessor flags:                  ${CPPFLAGS}
    Linking flags			${LDFLAGS}
    Includes:                            ${SICONOS_EXT_INCLUDES}

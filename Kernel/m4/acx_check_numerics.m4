@@ -31,17 +31,19 @@ esac
 numerics_lib="no"
 dynlib=no;    
 for ac_dir in $list_dir;
-do  AC_MSG_CHECKING([for libSiconosNumerics.$libsuffix in $ac_dir])
-	   if test -r "$ac_dir/lib/libSiconosNumerics.$libsuffix" && test -r "$ac_dir/include/SiconosNumerics.h" ; then
-       		NUMERICS_INCLUDES="-I$ac_dir/include/"
-       		NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics"
-       		NUMERICS_PATH="$ac_dir/"
-       		numerics_lib="yes"
-		dynlib="yes"
-       		AC_MSG_RESULT([Library $ac_dir/lib/libSiconosNumerics.$libsuffix selected]) 
-       	break;  
-    fi
-done
+	do  AC_MSG_CHECKING([for libSiconosNumerics.$libsuffix in $ac_dir])
+		   if test -r "$ac_dir/lib/libSiconosNumerics.$libsuffix" && test -r "$ac_dir/include/SiconosNumerics.h" ; then
+       			NUMERICS_INCLUDES="-I$ac_dir/include/"
+       			NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics"
+       			NUMERICS_PATH="$ac_dir/"
+       			numerics_lib="yes"
+			dynlib="yes"
+       			AC_MSG_RESULT([yes, library $ac_dir/lib/libSiconosNumerics.$libsuffix selected]) 
+       		break;  
+		else
+			AC_MSG_RESULT([no]) 	
+    		fi
+	done
 
 # test static library
 if test "$numerics_lib" = "no" ; then
@@ -52,8 +54,10 @@ if test "$numerics_lib" = "no" ; then
 		NUMERICS_INCLUDES="-I$ac_dir/include/"
        		NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics"
        		NUMERICS_PATH="$ac_dir/"	    	   
-	    	AC_MSG_RESULT([Library $ac_dir/lib/libNumerics.a selected])
+	    	AC_MSG_RESULT([yes, library $ac_dir/lib/libNumerics.a selected])
 	    break
+	else
+		AC_MSG_RESULT([no])
 	fi
     done
 fi
@@ -74,4 +78,4 @@ fi
 
 
 	     
-])dnl ACX_CHECK_LAPACK
+])dnl ACX_CHECK_NUMERICS

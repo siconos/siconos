@@ -23,10 +23,10 @@ do dynlib=no;
    AC_MSG_CHECKING([for cppunit in $ac_dir])   
    if test -r "$ac_dir/cppunit-config" ; then
 	echo Found cppunit $ac_dir/cppunit. version `$ac_dir/cppunit-config --version`
-     checkLibraryVersionNumber `$ac_dir/cppunit-config --version` $CPPUNIT_VER
-       if test $? -eq 0; then
-	  AC_MSG_RESULT(but the minimal required version is $LIBXML_VER)
-       else         
+     	checkLibraryVersionNumber `$ac_dir/cppunit-config --version` $CPPUNIT_VER
+       	if test $? -eq 0; then
+	  AC_MSG_RESULT(but the minimal required version is $CPPUNIT_VER)
+       	else         
           cppunit_config="yes"
 	  CPPUNIT_INCLUDES="`$ac_dir/cppunit-config --cflags` -w"
 	  CPPUNIT_LIBRARIES="`$ac_dir/cppunit-config --libs`"
