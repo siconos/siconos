@@ -17,37 +17,45 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/*!\file cfd_lcp.c
+/*!\file dfc_2D2cond_2D.c
 
-   This file allows the formulation in the condensed form of a contact problem with friction.
+   This file allows the formulation in the condensed form of a 2D contact problem with friction (DFC_2D).\n
 
-*/
+  \fn void dfc_2D2cond_2D (int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_n, int * ddl_tt,
+                int *dim_nc, int *ddl_d, int *dim_d, double * J1, double *MM, double *q)
 
-/*!\fn int cfd_lcp (int *dim_n, double *mumu, methode *pt, double *K1, int *ddl_i, int *dim_i, int * ddl_n, int *dim_nn, int *ddl_tt, int *dim_tt, int * ddl_c,int *dim_c,double * J1, double * F1,int *dim_F1, double *MM,double *q)
 
-   cfd_lcp subroutine allows the formulation in the LCP (Linear  Complementary Problem) form of a contact problem with friction.
+   \param dim_F1    On enter a pointer over integers, the dimension of the DFC_2D problem,
 
-   \param dim_n    On return a pointer over integers, the dimension of the matrix after the reformulation  of the problem.
-   \param mumu     On enter a pointer over doubles, the friction coefficient.
-   \param pt       On enter a pointer over the union methode.
-   \param K1       On enter a pointer over doubles containing the components of the rigidity matrix with a fortran90 allocation.
-   \param ddl_i    On enter a pointer over integers containing the components ddl imposed.
-   \param dim_i    On enter a pointer over integers, the dimension of the vector ddl_i.
-   \param ddl_n    On enter a pointer over integers containing the components ddl .
-   \param dim_nn   On enter a pointer over integers, the dimension of the vector ddl_n.
-   \param ddl_tt   On enter a pointer over integers containing the components ddl .
-   \param dim_tt   On enter a pointer over integers, the dimension of the vector ddl_tt.
-   \param ddl_c    On enter a pointer over integers containing the components ddl .
-   \param dim_c    On enter a pointer over integers, the dimension of the vector ddl_c.
-   \param J1       On enter a pointer over doubles containing the components of the free motion.
-   \param F1       On enter a pointer over doubles containing the effort vector.
-   \param dim_F1   On enter a pointer over integers, the dimension of the vector F1.
-   \param MM       On return a pointer over doubles containing the components of a double matrix (dim_n,dim_n) with a fortran90 allocation.
-   \param q        On return a pointer over doubles, a double vector (dim_n).
+   \param mumu      On enter a pointer over doubles, the friction coefficient,
+
+   \param K1        On enter a pointer over doubles containing the components of the
+                     rigidity matrix with a fortran90 storage,
+
+   \param F1        On enter a pointer over doubles containing the right hand side,
+
+   \param ddl_n     On enter a pointer over integers , the contact in normal direction dof
+                     (not prescribed),
+
+   \param ddl_tt    On enter a pointer over integers, the contact in tangential direction dof
+                     (not prescribed)
+
+
+   \param dim_nc    On enter a pointer over integers, the dimension of the vector ddl_tt.
+
+   \param ddl_d     On enter a pointer over integers, the prescribed dof,
+
+   \param dim_d     On enter a pointer over integers, the dimension of the vector ddl_d,
+
+   \param J1        On enter a pointer over doubles, gap in normal contact direction.
+   \n\n
+   \param MM        On return a pointer over doubles containing the components of a double
+                      matrix (2*dim_nc,2*dim_nc) with a fortran90 allocation.
+
+   \param q         On return a pointer over doubles, a double vector (2*dim_nc).
 
 
    \author Nineb Sheherazade.
-
 */
 
 #include <stdio.h>
@@ -62,6 +70,7 @@
 
 void sortsn_(int *ddl_i, int *sort, int *n);
 
+/*void diffns( int *taille_F1,int * vecF1, int *taille_sort,int * sort, int *taille_i, int *vec_i);*/
 
 void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_n, int * ddl_tt, int *dim_nc, int *ddl_d, int *dim_d, double * J1, double *MM, double *q)
 {
@@ -101,6 +110,7 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
   sort      = (int*) malloc((taille_c + taille_d) * sizeof(int));
   sort2     = (int*) malloc((taille_c + taille_d) * sizeof(int));
   vecF1     = (int*) malloc(taille_F1 * sizeof(int));
+
   vec_i     = (int*) malloc(taille_F1 * sizeof(int));
 
   for (i = 0; i < taille_n; i++)
@@ -112,7 +122,10 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
   }
 
 
+
+
   sortsn_(ddl_c, sort1, &taille_c);
+
 
 
 
@@ -122,6 +135,9 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
     sort[i] = ddl_c[i];
 
   }
+
+
+
 
   for (i = 0; i < taille_d; i++)
   {
@@ -133,6 +149,7 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
   taille_sort = taille_d + taille_c;
 
   sortsn_(sort, sort2, &taille_sort);
+
 
 
   for (i = 0 ; i < taille_F1 ; i++)
@@ -147,6 +164,7 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
   diffns(&taille_F1, vecF1, &taille_sort, sort, &taille_i, vec_i);
 
 
+
   ddl_i     = (int*) malloc(taille_i * sizeof(int));
 
 
@@ -159,6 +177,7 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
 
 
 
+
   dim_i     = taille_i;
   dim_nn    = taille_n;
 
@@ -166,15 +185,15 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
   q0        = (double*) malloc(dim_nn * sizeof(double));
   q1        = (double*) malloc(dim_nn * sizeof(double));
   q2        = (double*) malloc(dim_nn * sizeof(double));
+
   q3        = (double*) malloc(dim_nn * sizeof(double));
   R         = (double*) malloc(dim_i * dim_i * sizeof(double));
   temp_ic   = (double*) malloc(taille_c * taille_i * sizeof(double));
   Kii       = (double*) malloc(taille_i * taille_i * sizeof(double));
   invKii    = (double*) malloc(taille_i * taille_i * sizeof(double));
+
   Kii2      = (double*) malloc(taille_i * taille_i * sizeof(double));
   Kic       = (double*) malloc(taille_i * taille_c * sizeof(double));
-
-
   Kcc       = (double*) malloc(taille_c * taille_c * sizeof(double));
   Kci       = (double*) malloc(taille_c * taille_i * sizeof(double));
   temp_cc   = (double*) malloc(taille_c * taille_c * sizeof(double));
@@ -231,12 +250,14 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
     }
 
 
+
   for (i = 0; i < taille_i * taille_c; i++)
     Kic[i] = 0.;
 
   for (i = 0; i < taille_i; i++)
     for (j = 0; j < taille_c; j++)
       Kic[i + taille_i * j] = K1[ddl_i[i] + taille_F1 * ddl_c[j]];
+
 
 
 
@@ -262,54 +283,59 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
     }
 
 
+
+
   /*                        Cholesky                                   */
 
 
   dpotrf_(&uplo, &taille_i, R , &taille_i, &info2);
 
+
+
   if (info2 != 0)
   {
     printf("Matter with Cholesky factorization \n");
 
-    free(Mlat);
-    free(qi);
-    free(qbis);
+
     free(temp_ic);
     free(Kii);
+
     free(invKii);
     free(Kii2);
     free(Kic);
     free(Fi);
-
     free(q0);
+
     free(q1);
     free(q2);
     free(q3);
     free(Kcc);
     free(Kci);
+
     free(temp_cc);
     free(Jcn);
     free(Jc);
     free(R);
     free(sort);
+
     free(sort2);
     free(ddl_c);
     free(sort1);
     free(vecF1);
     free(vec_i);
+
     free(ddl_i);
   }
 
 
   dpotri_(&uplo, &taille_i, R , &taille_i, &info2);
 
+
   if (info2 != 0)
   {
     printf("Matter with matrix inversion \n");
 
-    free(Mlat);
-    free(qi);
-    free(qbis);
+
     free(temp_ic);
     free(Kii);
     free(invKii);
@@ -466,6 +492,7 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
   dscal_(&taille_c, &alpha, q, &incx);
 
 
+
   free(Mlat);
   free(qi);
   free(qbis);
@@ -497,5 +524,5 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
 
 
 
-  //  return 1;
+  /*  return 1;*/
 }

@@ -17,34 +17,51 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/*!\file lcp_cfd.c
+/*!\file lcp2dfc_2D.c
 
-   This file allows to give the solution of the contact problem with friction given.
+   This file allows to give the solution of the 2D contact problem with friction given. \n
 
-*/
+  \fn void lcp2dfc_2D (int *dim_F1, double *ztel, double *wtel, double *K1, double *F1, double *J1, int *ddl_n, int *ddl_tt, int * dim_tt, int *ddl_d, int *dim_d, double *U2,double *F2)
 
-/*!\fn  int lcp_cfd (int *dim_nn, double *ztel, double *wtel, methode *pt, double *K1, double *F1, int * dim_F1, double *J1, int *ddl_i, int * dim_i, int *ddl_c, int *dim_c,  int *ddl_n, int *ddl_tt, int *dim_tt, double *U2,double *F2)
+   lcp2dfc_2D.c subroutine allows to give the solution of the 2D contact problem with friction given.
+    \sa dfc_2D2lcp subroutine.\n
 
-   lcp_cfd subroutine allows to give the solution of the contact problem with friction given.
-    \sa cfd_lcp subroutine.
 
-   \param dim_nn On enter a pointer over integers, the size of the vector solution.
-   \param ztel On enter a pointer over doubles, the solution given by an LCP ztel.
-   \param wtel On enter a pointer over doubles, the solution given by an LCP wtel.
-   \param pt On enter a pointer over the union methode.
-   \param K1 On enter a pointer over doubles, the rigidity matrix.
-   \param F1 On enter a pointer over doubles, the effort vector.
-   \param dim_F1 On enter a pointer over integers, the dimension of F1.
-   \param J1 On enter a pointer over doubles, the free motion vector.
-   \param ddl_i On enter a pointer over integers, the ddl .
-   \param dim_i On enter a pointer over integers, the ddl_i size.
-   \param ddl_c On enter a pointer over integers, the ddl .
-   \param dim_c On enter a pointer over integers, the ddl_c size.
-   \param ddl_n On enter a pointer over integers, the ddl.
-   \param ddl_tt On enter a pointer over integers, the ddl .
-   \param dim_tt On enter a pointer over integers, the ddl_tt size.
-   \param U2 On return a pointer over doubles, the solution of the contact friction problem U2(dim_nn).
-   \param F2 On return a pointer over doubles, the solution of the contact friction problem F2(dim_nn).
+   \param dim_F1    On enter a pointer over integers, the dimension of the DFC_2D problem,
+
+   \param ztel      On enter a pointer over doubles, the solution given by a LCP solver.
+
+   \param wtel      On enter a pointer over doubles, the solution given by a LCP solver.
+
+   \param K1        On enter a pointer over doubles containing the components of the
+                     rigidity matrix with a fortran90 storage,
+
+   \param F1        On enter a pointer over doubles containing the right hand side,
+
+   \param J1        On enter a pointer over doubles, gap in normal contact direction.
+
+   \param ddl_n     On enter a pointer over integers , the contact in normal direction dof
+                     (not prescribed),
+
+   \param ddl_tt    On enter a pointer over integers, the contact in tangential direction dof
+                     (not prescribed)
+
+
+   \param dim_tt    On enter a pointer over integers, the dimension of the vector ddl_tt.
+
+   \param ddl_d     On enter a pointer over integers, the prescribed dof,
+
+   \param dim_d     On enter a pointer over integers, the dimension of the vector ddl_d,
+
+
+   \n\n
+
+   \param U2        On return a pointer over doubles, the solution of the contact friction problem U2(dim_F1).
+   \param F2        On return a pointer over doubles, the solution of the contact friction problem F2(dim_F1).
+
+
+
+
 
    \author Nineb Sheherazade.
 */
@@ -296,7 +313,7 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
     free(vecF1);
     free(ddl_i);
 
-    //return ;
+    /*return ;*/
   }
 
 
@@ -342,7 +359,7 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
     free(vecF1);
     free(ddl_i);
 
-    //return ;
+    /*return ;*/
 
   }
 
@@ -542,5 +559,5 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
 
 
 
-  //  return ;
+  /*  return ;   */
 }

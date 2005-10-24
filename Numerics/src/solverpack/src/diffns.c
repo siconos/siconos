@@ -26,6 +26,7 @@ Input na, a, nb, b
 Output nc, c
 a and b: interger vectors in increasing order
 c : vector of integers of a that are not in b.
+\author Nineb Sheherazade & Dureisseix David.
 
  */
 
@@ -60,23 +61,15 @@ void diffns(int *na, int *a, int *nb, int * b, int *nc, int *c)
       c[i] = -1;
 
 
-    //printf("bb %d \n", b[ptb]);
-
-
-
-
     while ((pta < *na) && (ptb < *nb))
     {
 
       aa  = a[pta];
 
-      // printf("aa %d \n", aa );
-
       if (b[ptb] > aa)
       {
 
         c[ptc] = aa ;
-        //printf("cc %d \n", c[ptc]);
         ptc    = ptc + 1 ;
         pta = pta + 1;
       }
@@ -92,21 +85,18 @@ void diffns(int *na, int *a, int *nb, int * b, int *nc, int *c)
         while ((b[ptb] < aa) && (ptb < *nb))
         {
 
+
           ptb = ptb + 1;
 
-          if (ptb < *nb)
-            //printf("bb %d \n", b[ptb]);
+          if (ptb >= *nb)
+          {
 
-            if (ptb >= *nb)
-            {
+            c[ptc] = aa;
+            ptc    = ptc + 1;
 
-              c[ptc] = aa;
-              //printf("cc %d \n", c[ptc]);
-              ptc    = ptc + 1;
+            break;
 
-              break;
-
-            }
+          }
         }
 
       }
@@ -124,11 +114,6 @@ void diffns(int *na, int *a, int *nb, int * b, int *nc, int *c)
       c[ptc] = a[i];
       ptc = ptc + 1;
     }
-    /**/
-
-
-
-
 
     *nc = ptc;
 

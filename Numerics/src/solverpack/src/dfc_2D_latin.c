@@ -17,44 +17,57 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/*!\file cfd_latin.c
+/*!\file dfc_2D_latin.c
 
-   This subroutine allows the dual resolution of contact problems with friction.
-   Try \f$(z,w)\f$ such that:
+   This subroutine allows the dual resolution of contact problems with friction.\n
+   Try \f$(z,w)\f$ such that:\n
 \f$
 \left\lbrace
 \begin{array}{l}
-M z +q =w\\
+w - M z = q\\
 0 \le z_n \perp w_n \ge 0\\
 -z_t \in \partial\psi_{[-\mu w_n, \mu w_n]}(w_t)\\
 \end{array}
 \right.
 \f$
 
-  here M is an n by n  matrix,symmetric, positive semidefinite, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
+  here M is an (nn \f$\times\f$nn)-matrix,symmetric, positive semidefinite, q an nn-dimensional vector, z an nn-dimensional  vector and w an nn-dimensional vector.\n
 
 */
 
+/*!\fn void dfc_2D_latin(double *vec,double *qq,int *nn, double * k_latin,double *mumu,int * itermax, double * tol, int *chat,double *z,double *w,int *it_end,double * res,int *info)
 
-//double ddot_(int *,double [],int *,double [],int*);
+   cfd_latin  is a specific latin solver for dual contact problem with friction in the 2D case.\n
 
+   \param vec      On enter a (nn \f$\times\f$nn)-vector of doubles containing the components of the double matrix with a fortran storage.
 
-/*!\fn  cfd_latin(double vec[],double *qq,int *nn, double * k_latin,double *mumu,int * itermax, double * tol,double z[],double w[],int *it_end,double * res,int *info)
+   \param qq       On enter a nn-vector of doubles containing the components of the second member.
 
-   cfd_latin  is a specific latin solver for dual contact problem with friction.
+   \param nn       On enter an integer, the dimension of the second member.
 
-   \param double[] : vec On enter a double vector containing the components of the double matrix with a fortran90 allocation.
-   \param double* : qq On enter a pointer over doubles containing the components of the double vector.
-   \param int * : nn On enter a pointer over integers, the dimension of the second member.
-   \param double* : k_latin On enter a pointer over doubles, the latin coefficient (positive).
-   \param double* : mumu On enter a pointer over doubles, the friction coefficient.
-   \param int* : itermax On enter a pointer over integers, the maximum iterations required.
-   \param double* : tol On enter a pointer over doubles, the tolerance required.
-   \param double[] : z On return double vector, the solution of the problem.
-   \param double[] : w On return double vector, the solution of the problem.
-   \param int* : it_end On enter a pointer over integers, the number of iterations carried out.
-   \param double* : res On return a pointer over doubles, the error value.
-   \param int* : info On return a pointer over integers, the termination reason (0 is successful otherwise 1).
+   \param k_latin  On enter a double, the latin coefficient (strictly nonnegative).
+
+   \param mumu     On enter a positive double, the friction coefficient.
+
+   \param itermax  On enter an integer, the maximum iterations required.
+
+   \param tol      On enter a double, the tolerance required.
+
+   \param z        On return a nn-vector of doubles, the solution of the problem.
+
+   \param w        On return a nn-vector of doubles, the solution of the problem.
+
+   \param it_end   On enter an integer, the number of iterations carried out.
+
+   \param res      On return a double, the error value.
+
+   \param info     On return an integer, the termination reason:\n
+                        0 = successful, \n
+                        1 = no convergence, \n
+                        2 = Cholesky failed, \n
+                        3 = nul diagonal term, \n
+                        4 = nul diagonal term, \n
+
 
    \author Nineb Sheherazade.
  */
@@ -66,8 +79,9 @@ M z +q =w\\
 #include <math.h>
 #include "blaslapack.h"
 
-
-void dfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *mumu, int * itermax, double * tol, int *chat, double z[], double w[], int *it_end, double * res, int *info)
+/*
+  void dfc_2D_latin(double vec[],double *qq,int *nn, double * k_latin,double *mumu,int * itermax, double * tol, int *chat,double z[],double w[],int *it_end,double * res,int *info) */
+void dfc_2D_latin(double *vec, double *qq, int *nn, double * k_latin, double *mumu, int * itermax, double * tol, int *chat, double *z, double *w, int *it_end, double * res, int *info)
 {
 
 
@@ -224,21 +238,25 @@ void dfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *m
       free(ktz);
       free(wf);
       free(kn);
+
       free(kt);
       free(k);
       free(R);
       free(kf);
       free(kninv);
+
       free(kinvwden1);
       free(kzden1);
       free(kfinv);
       free(knz);
       free(wtnc);
+
       free(ddln);
       free(ddlt);
       free(vectnt);
       free(znum1);
       free(wnum1);
+
       free(maxwt);
 
       *info = 3;
@@ -268,21 +286,25 @@ void dfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *m
       free(ktz);
       free(wf);
       free(kn);
+
       free(kt);
       free(k);
       free(R);
       free(kf);
       free(kninv);
+
       free(kinvwden1);
       free(kzden1);
       free(kfinv);
       free(knz);
       free(wtnc);
+
       free(ddln);
       free(ddlt);
       free(vectnt);
       free(znum1);
       free(wnum1);
+
       free(maxwt);
 
       *info = 4;
@@ -321,21 +343,25 @@ void dfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *m
     free(ktz);
     free(wf);
     free(kn);
+
     free(kt);
     free(k);
     free(R);
     free(kf);
     free(kninv);
+
     free(kinvwden1);
     free(kzden1);
     free(kfinv);
     free(knz);
     free(wtnc);
+
     free(ddln);
     free(ddlt);
     free(vectnt);
     free(znum1);
     free(wnum1);
+
     free(maxwt);
 
     *info = 2;
@@ -604,12 +630,10 @@ void dfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *m
   free(ktz);
   free(wf);
   free(kn);
+
   free(kt);
   free(k);
-
   free(R);
-
-
   free(kf);
   free(kninv);
 
@@ -624,9 +648,9 @@ void dfc_2D_latin(double vec[], double *qq, int *nn, double * k_latin, double *m
   free(ddln);
   free(ddlt);
   free(vectnt);
-
   free(znum1);
   free(wnum1);
+
   free(maxwt);
 
 

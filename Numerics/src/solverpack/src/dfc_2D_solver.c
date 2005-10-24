@@ -18,7 +18,7 @@
 */
 /*!\file dfc_2D_solver.c
 
-  This subroutine allows the dual resolution of contact problems with friction\n
+  This subroutine allows the dual resolution of contact problems with friction in the 2D case (DFC_2D).\n
 
   \fn int dfc_2D_solver( double *K1, double *F1, int *n, method *pt, double *U2 , double *F2 )
 
@@ -30,30 +30,25 @@
 
   \param n            On enter, the dimension of the DFC_2D problem, an integer,
 
-  \param pt           0n enter, the union containing the DFC_2D structure,
-                         in this structure there is the following parameters:
+  \param pt           0n enter, the union (::method) containing the DFC_2D structure,
+                         in this structure there is the following parameters:\n
+        - char   name:      the name of the solver we want to use (on enter),
+                          - int    itermax:   the maximum number of iteration required (on enter)
+        - double tol:       the tolerance required (on enter)
+        - double  mu:       the friction coefficient (on enter)
+        - int    *ddl_n:    contact in normal direction dof (not prescribed) (on enter)
+        - int    *ddl_tt:   contact in tangential direction dof (not prescribed) (on enter)
+        - int    *ddl_d:    prescribed dof (on enter)
+        - int    dim_tt:    dimension of ddl_tt (= dimension of ddl_n) (on enter)
+        - int    dim_d:     dimension of ddl_d (on enter)
+        - double *J1:       gap in normal contact direction (on enter)
+        - int    chat:      an integer that can make on or off the chattering (0=off, >0=on)(on enter)
+        - int    iter:      the number of iteration carry out (on return)
+        - double err:       the residue (on return) \n\n
 
-        _ char   name:      the name of the subroutine we want to use (on enter),
-                          _ int    itermax:   the maximum number of iteration required (on enter)
-        _ double tol:       the tolerance required (on enter)
-        _ double  mu:       the friction coefficient (on enter)
-        _ int    *ddl_n:    contact in normal direction dof (not prescribed) (on enter)
-        _ int    *ddl_tt:   contact in tangential direction dof (not prescribed) (on enter)
-        _ int    *ddl_d:    prescribed dof (on enter)
-        _ int    dim_tt:    dimension of ddl_tt (= dimension of ddl_n) (on enter)
-        _ int    dim_d:     dimension of ddl_d (on enter)
-        _ double *J1:       gap in normal contact direction (on enter)
-        _ int    chat:      a integer that can make on or off the chattering (0=off, >0=on)(on enter)
-        _ int    iter:      the number of iteration carry out (on return)
-        _ double err:       the residue (on return)
-
-
-
-
-  This problem can be solved thanks to @ref dfc_2D solvers (cfd_latin.c)  or thanks to @ref lcp subroutines after
-  a new formulation of this problem in the LCP form due to the dfc_2D2lcp.c and lcp2dfc_2D.c routines
-  or in the condensed form thanks to dfc_2D2cond_2D.c and cond_2D2dfc_2D.c.
-
+  This problem can be solved thanks to @ref dfc_2D solvers or thanks to @ref lcp solvers after:\n
+ - either a condensation makes thanks to dfc_2D2cond_2D.c and cond_2D2dfc_2D.c,
+ - or a new formulation of this problem in the LCP form due to the dfc_2D2lcp.c and lcp2dfc_2D.c routines.
 
   \param U2           On return, the solution of the problem, vector of double.
 
@@ -163,7 +158,7 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     dparamLCP[0] = pt->dfc_2D.tol;
     dparamLCP[1] = 1.0;
 
-    //lcp_lemke( MM, q, &dim_q, & pt->dfc_2D.itermax, z, w, &it_end, &res, &info);
+    /*lcp_lemke( MM, q, &dim_q, & pt->dfc_2D.itermax, z, w, &it_end, &res, &info);*/
 
     lcp_lexicolemke(&dim_q , MM , q , z , w , &info , iparamLCP , dparamLCP);
 
