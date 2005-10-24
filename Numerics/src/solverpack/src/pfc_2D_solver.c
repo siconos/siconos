@@ -18,39 +18,43 @@
 */
 /*!\file pfc_2D_solver.c
  *
- * This subroutine allows the primal resolution of contact problems with friction.
+ * This subroutine allows the primal resolution of contact problems with friction in the 2D case (PFC_2D).
  *
  * Try \f$(z,w)\f$ such that:\n
  *
  * \f$
  *  \left\lbrace
  *   \begin{array}{l}
- *    M z + q = w \\
+ *    w - M z = q \\
  *    0 \le z_n \perp w_n \ge 0\\
  *    -w_t \in \partial\psi_{[-\mu z_n, \mu z_n]}(z_t)\\
  *    \end{array}
  *   \right.
  *  \f$
  *
- * here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
+ * here M is an (n \f$\times\f$n)-matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
  *
- * This system of equations and inequalities is solved thanks to @ref pfc solvers.
- * The routine's call is due to the function pfc_2D_solver.c.
+ * This system of equations and inequalities is solved thanks to @ref pfc_2D solvers.
+ * The routine's call is due to the function pfc_2D_solver.c.\n\n
  *
- * \fn int pfc_2D_solver( double *vec , double *q ,int *n , method *pt , double *z , double *w )
+ * !\fn int pfc_2D_solver( double *vec , double *q ,int *n , method *pt , double *z , double *w )
  *
- *  pfc_2D_solver is a generic interface allowing the call of one of the PFC solvers.
  *
- *  \param vec  components of the double matrix with a fortran allocation.
- *  \param q    the components of the second member of the system.
- *  \param nn   the dimension of the second member.
- *  \param pt   structure
- *  \param z    the solution of the problem.
- *  \param w    the complementarity solution of the problem.
  *
- *  \return     result (0 is successful otherwise 1).
+ *  \param vec  On enter, a (n \f$\times\f$n)-vector of doubles which contains the components of the double matrix with a fortran allocation.
+ *  \param q    On enter, a n-vector of doubles containing the components of the second member of the system.
+ *  \param n    On enter, an integer, the dimension of the second member.
+ *  \param pt   On enter, a union (::method) containing the PFC_2D structure.
+ *   \n \n
+ *  \param z    On return, a n-vector of doubles containing the solution of the problem.
+ *  \param w    On return, a n-vector of doubles containing the solution of the problem.
  *
- * \author Nineb Sheherazade & Mathieu Renouf.
+ *  \return     integer
+ *                       - 0: successful,
+ *                       - otherwise (see specific solvers for more information about the
+ *                           termination reason).
+ *
+ * \author Nineb Sheherazade.
  *
  */
 

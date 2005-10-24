@@ -18,20 +18,21 @@
 */
 /*!\file pfc_2D_projc.c
  *
- * \fn  pfc_2D_projc( int n , double mu , double *z , double *p , int *status )
+ * \fn pfc_2D_projc ( double xi[], int *nn, int statusi[], double pi[], double fric[], double *projc1, int *projc2 )
+
  *
- * pfc_2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm
- *              for primal contact problem with friction.\n
+ * pfc_2D_projc is a specific projection operator related to CPG (conjugated projected gradient) algorithm for primal contact problem with friction.\n
  *
- * Ref: Renouf, M. and Alart, P. "" Comp. Method Appl. Mech. Engrg. (2004).
  *
- * \param n       Unchanged parameter which represents the half dimension of the system.
- * \param mu      Unchanged parameter which represents the friction coefficient
- * \param z       Modified parameter which retruns the corrected iterate.
- * \param p       Unchanged parameter which contains the components of the descent direction.
- * \param status  Unchanged parameter which contains the vector status
+ * \param xi        On enter, the intermediate iterate which goes to be projected (projc1).
+ * \param nn        On enter, the dimension of the system.
+ * \param statusi   On enter, a vector which contains the initial status.
+ * \param pi        On enter, a vector which contains the components of the descent direction.
+ * \param fric      On enter, a vector which contains the friction coefficient.
+ * \param projc1    On return, the corrected iterate.
+ * \param projc2    On return, the new status.
  *
- * \author Mathieu Renouf.
+ * \author Sheherazade Nineb.
  *
  */
 
@@ -40,61 +41,83 @@
 #include <string.h>
 #include <math.h>
 
-void pfc_2D_projc(int nc , double mu , double *z , double *p , int *status)
+
+pfc_2D_projc(double xi[], int *nn, int statusi[], double pi[], double fric[], double *projc1, int *projc2)
+
 {
 
-  int i;
+  int     i, nc, n = *nn, stat;
 
-  for (i = 0 ; i < nc ; ++i)
+  double  mu1;
+
+
+
+
+  nc  = n / 2;
+
+
+
+  for (i = 0 ; i < nc ; i++)
   {
+    mu1  = fric[i];
+    stat = statusi[i];
 
-    /* No contact case */
-
-    if (z[2 * i] < 0.0)
+    if (xi[2 * i] <= 0.0)                       /* No contact status  */
     {
 
-      z[2 * i  ]  = 0.0;
-      z[2 * i + 1]  = 0.0;
-      status[i] = 0;
+      projc1[2 * i]   = 0.0;
+      projc1[2 * i + 1] = 0.0;
+      projc2[i]     = 0;
+
     }
     else
     {
-      /* contact case */
-      if (p[2 * i + 1] == 0.0)
+      projc1[2 * i] = xi[2 * i];
+
+      if (xi[2 * i + 1] <= -mu1 * xi[2 * i])   /*  Slide backward     */
       {
-        /* sliding contact */
-        if (z[2 * i + 1] > 0.0)
-        {
-          z[2 * i + 1] = mu * z[2 * i];
-          status[i] = 2;
-        }
-        else
-        {
-          z[2 * i + 1] = -mu * z[2 * i];
-          status[i] = 3;
-        }
+
+        projc1[2 * i + 1] = -mu1 * xi[2 * i] ;
+        projc2[i]     = 1;
+
+      }
+      else if (xi[2 * i + 1] >= mu1 * xi[2 * i]) /*  Slide forward      */
+      {
+        projc1[2 * i + 1] = mu1 * xi[2 * i];
+        projc2[i]     = 3;
       }
       else
       {
-        /* slide forward */
-        if (z[2 * i + 1] < -mu * z[2 * i])
+        if (pi[2 * i + 1] == 0.0)
         {
-          z[2 * i + 1]  = -mu * z[2 * i];
-          status[i] = 3;
+          if (stat == 1)                     /*  Slide backward     */
+          {
+            projc1[2 * i + 1] = -mu1 * xi[2 * i];
+            projc2[i]     = 1;
+          }
+          else if (stat == 3)                  /*  Slide forward        */
+          {
+            projc1[2 * i + 1] = mu1 * xi[2 * i];
+            projc2[i]     = 3;
+          }
+          else
+            /*   Stick contact        */
+          {
+            projc1[2 * i + 1] = xi[2 * i + 1];
+            projc2[i]     = 2;
+          }
         }
-        /* slide backward */
-        else if (z[2 * i + 1] > mu * z[2 * i])
-        {
-          z[2 * i + 1] = mu * z[2 * i];
-          status[i] = 2;
-        }
-        /* sticking contact */
         else
+          /*   Stick contact      */
         {
-          status[i] = 1;
+          projc1[2 * i + 1]   = xi[2 * i + 1];
+          projc2[i]       = 2;
         }
       }
+
     }
+
   }
+
 }
 

@@ -16,57 +16,55 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*!\file pfc_2D_cgp.c
+/*!\file pfc_2D_cpg.c
 
-  This subroutine allows the primal resolution of contact problems with friction.
+  This subroutine allows the primal resolution of contact problems with friction in the 2D case (PFC_2D).
 
    Try \f$(z,w)\f$ such that:
 \f$
 \left\lbrace
 \begin{array}{l}
-M z + q =  w\\
+w - M z = q \\
 0 \le z_n \perp w_n \ge 0\\
 -w_t \in \partial\psi_{[-\mu z_n, \mu z_n]}(z_t)\\
 \end{array}
 \right.
 \f$
 
- here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
+ here M is an (nn \f$\times\f$nn)-matrix, q an nn-dimensional vector, z an nn-dimensional  vector and w an nn-dimensional vector.
 
 */
 /*!\fn void pfc_2D_cpg( int *nn , double *vec , double *b , double *x , double *rout , int *info,
      int *iparamPFC , double *dparamPFC )
 
 
-   cfp_gcp is a specific gcp (gradient conjugated projected) solver for primal contact problem with friction.
+   cfp_cpg is a specific cpg (conjugated projected gradient) solver for primal contact problems with friction in the 2D case.
 
-   \param vec         On enter a double vector containing the components of the double matrix with a fortran90 allocation.
-   \param b           On enter a pointer over doubles containing the components of the double vector ( q ).
-   \param nn          On enter a pointer over integers, the dimension of the second member.
+   \param vec         On enter a (nn\f$\times\f$nn)-vector of doubles containing the components of the double matrix with a fortran90 allocation ( M ).
+   \param b           On enter a nn-vector of doubles containing the components of the double vector ( q ).
+   \param nn          On enter an integer, the dimension of the second member.
 
 
-   \param iparamPFC   On enter/return a vector of integers,
-
-                       _ iparamPFC[0] = on enter, the maximum number of iterations allowed,
-                       _ iparamPFC[1] = on enter, the parameter which represents the output log identifiant
+   \param iparamPFC   On enter/return a vector of integers:\n
+                       - iparamPFC[0] = on enter, the maximum number of iterations allowed,
+                       - iparamPFC[1] = on enter, the parameter which represents the output log identifiant,\n
                              0 - no output\n
-           0 < active screen output\n
-           _ iparamPFC[2] =  on return, the number of iterations performed by the algorithm
+           >0 - active screen output\n
+           - iparamPFC[2] =  on return, the number of iterations performed by the algorithm.
 
-  \param dparamPFC    On enter/return a vector of doubles,
-
-                       _ dparamPFC[0] = on enter, a positive double which represents the friction coefficient,
-                       _ dparamPFC[1] = on enter, a positive double which represents the tolerance required,
-                       _ dparamPFC[2] = on return, a positive double which represents the residu.
-
+  \param dparamPFC    On enter/return a vector of doubles:\n
+                       - dparamPFC[0] = on enter, a positive double which represents the friction coefficient,
+                       - dparamPFC[1] = on enter, a positive double which represents the tolerance required,
+                       - dparamPFC[2] = on return, a positive double which represents the residu.
 
 
-   \param xout        On return double vector, the solution of the problem ( z ).
-   \param rout        On return double vector, the solution of the problem ( w ).
-   \param info        On return a pointer over integers, the termination reason
-                       0 = convergenec
-           1 = no convergence
-           2 = Operation of alpha no conform.
+
+   \param x           On return a nn-vector of doubles, the solution of the problem ( z ).
+   \param rout        On return a nn-vector of doubles, the solution of the problem ( w ).
+   \param info        On return an integer, the termination reason:\n
+                       0 = convergence,\n
+           1 = no convergence,\n
+           2 = Operation of alpha no conform.\n
 
    \author Nineb Sheherazade.
 
@@ -90,7 +88,7 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
   int       *stat, *statusi, it_end;
 
 
-  double    mu, eps = 1.e-16;
+  double    mu, eps = 1.e-12;
   double    pAp, alpha, beta, wAp, rp, normr, tol;
   double    alphaf, betaf, den, num, res;
 
@@ -216,45 +214,46 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
       dcopy_(&n, r, &incx, w, &incy);
 
       dcopy_(&n, w, &incx, p, &incy);
-
-      alphaf = 1.0;
-      betaf  = 0.0;
-      dgemv_(&notrans, &n, &n, &alphaf, vec, &n, p, &incx, &betaf, Ap, &incy);
-
-      pAp    = ddot_(&n, p, &incx, Ap, &incy);
     }
-    else
+
+    alphaf = 1.0;
+    betaf  = 0.0;
+    dgemv_(&notrans, &n, &n, &alphaf, vec, &n, p, &incx, &betaf, Ap, &incy);
+
+    pAp    = ddot_(&n, p, &incx, Ap, &incy);
+
+    /*}
+      else
     {
-      alphaf = 1.0;
-      betaf  = 0.0;
-      dgemv_(&notrans, &n, &n, &alphaf, vec, &n, p, &incx, &betaf, Ap, &incy);
+    alphaf = 1.0;
+    betaf  = 0.0;
+    dgemv_( &notrans, &n, &n, &alphaf, vec, &n, p, &incx, &betaf, Ap, &incy );
 
-      pAp    = ddot_(&n, p, &incx, Ap, &incy);
+    pAp    = ddot_( &n, p, &incx, Ap, &incy );*/
 
-      if (pAp == 0)
-      {
+    if (pAp == 0)
+    {
+      if (ispeak > 0)
+        printf("\n Operation non conform alpha at the iteration %d \n", iter);
 
-        if (ispeak > 0)
-          printf("\n Operation non conform alpha at the iteration %d \n", iter);
+      free(r);
+      free(fric);
+      free(p);
+      free(v);
+      free(w);
+      free(Ap);
+      free(xi);
+      free(z);
+      free(fric1);
+      free(stat);
+      free(statusi);
 
-        free(r);
-        free(fric);
-        free(p);
-        free(v);
-        free(w);
-        free(Ap);
-        free(xi);
-        free(z);
-        free(fric1);
-        free(stat);
-        free(statusi);
+      *info = 2;
 
-        *info = 2;
-
-        return;
-      }
-
+      return;
     }
+
+    /*} */
 
     rp     = ddot_(&n, r, &incx, p, &incy);
 
@@ -291,11 +290,11 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
     daxpy_(&n, &alphaf, z, &incx, p, &incy);
 
 
-    alphaf  = 1.;
+    /*    alphaf  = 1.;
     betaf   = 0.;
-    dgemv_(&notrans, &n, &n, &alphaf, vec , &n, p, &incx, &betaf, Ap, &incy);
+    dgemv_( &notrans, &n, &n, &alphaf, vec , &n, p, &incx, &betaf, Ap, &incy );
 
-    pAp     = ddot_(&n, p, &incx, Ap, &incy);
+    pAp     = ddot_( &n, p, &incx, Ap, &incy );*/
 
     dcopy_(&n, r, &incx, xi, &incy);
 

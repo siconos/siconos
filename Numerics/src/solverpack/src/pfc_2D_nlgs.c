@@ -18,52 +18,50 @@
 */
 /*!\file pfc_2D_nlgs.c
 
-  This subroutine allows the primal resolution of contact problems with friction.
+  This subroutine allows the primal resolution of contact problems with friction in the 2D case (PFC_2D).
 
    Try \f$(z,w)\f$ such that:
 \f$
 \left\lbrace
 \begin{array}{l}
-M z + q = w\\
+w - M z = q\\
 0 \le z_n \perp w_n \ge 0\\
 -w_t \in \partial\psi_{[-\mu z_n, \mu z_n]}(z_t)\\
 \end{array}
 \right.
 \f$
 
- here M is an n by n  matrix, q an n-dimensional vector, z an n-dimensional  vector and w an n-dimensional vector.
+ here M is an (nn \f$\times\f$nn)-matrix, q an nn-dimensional vector, z an nn-dimensional  vector and w an nn-dimensional vector.
 
 */
+
 /*!\fn  void pfc_2D_nlgs( int *nn , double *vec , double *q , double *z , double *w , int *info,
       int *iparamPFC , double *dparamPFC )
 
 
+   pfc_2D_gsnl is a specific nlgs (Non Linear Gauss Seidel ) solver for primal contact problem with friction in 2D case.
 
-   pfc_2D_gsnl is a specific nlgs (Non Linear Gauss Seidel ) solver for primal contact problem with friction.
-
-   \param vec         On enter a double vector containing the components of the double matrix with a fortran90 allocation.
-   \param qq          On enter a pointer over doubles containing the components of the double vector.
-   \param nn          On enter a pointer over integers, the dimension of the second member.
-   \param iparamPFC   On enter/return a vector of integers,
-
-                       _ iparamPFC[0] = on enter, the maximum number of iterations allowed,
-                       _ iparamPFC[1] = on enter, the parameter which represents the output log identifiant
+   \param vec         On enter a (nn\f$\times\f$nn)-vector of doubles containing the components of the double matrix with a fortran90 allocation.
+   \param qq          On enter a nn-vector of doubles containing the components of the second member.
+   \param nn          On enter an integer, the dimension of the second member.
+   \param iparamPFC   On enter/return a vector of integers:\n
+                       - iparamPFC[0] = on enter, the maximum number of iterations allowed,
+                       - iparamPFC[1] = on enter, the parameter which represents the output log identifiant:\n
                              0 - no output\n
-           0 < active screen output\n
-           _ iparamPFC[2] =  on return, the number of iterations performed by the algorithm
+           >0 - active screen output\n
+           - iparamPFC[2] =  on return, the number of iterations performed by the algorithm.\n
 
-  \param dparamPFC    On enter/return a vector of doubles,
+  \param dparamPFC    On enter/return a vector of doubles:\n
+                       - dparamPFC[0] = on enter, a positive double which represents the friction coefficient,
+                       - dparamPFC[1] = on enter, a positive double which represents the tolerance required,
+                       - dparamPFC[2] = on return, a positive double which represents the residu.
 
-                       _ dparamPFC[0] = on enter, a positive double which represents the friction coefficient,
-                       _ dparamPFC[1] = on enter, a positive double which represents the tolerance required,
-                       _ dparamPFC[2] = on return, a positive double which represents the residu.
 
-
-   \param z           On return double vector, the solution of the problem.
-   \param w           On return double vector, the solution of the problem.
-   \param info        On return a pointer over integers, the termination reason
-                        0 = convergence
-            1 = no convergence
+   \param z           On return a nn-vector of doubles, the solution of the problem.
+   \param w           On return a nn-vector of doubles, the solution of the problem.
+   \param info        On return an integer, the termination reason:\n
+                        0 = convergence,\n
+            1 = no convergence,\n
             2 = nul term in denominator.
 
 
@@ -83,8 +81,7 @@ M z + q = w\\
 #include "blaslapack.h"
 
 
-void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info,
-                 int *iparamPFC , double *dparamPFC)
+void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info, int *iparamPFC , double *dparamPFC)
 {
 
   int i, j, k, iter, maxit;
@@ -227,7 +224,7 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
         if ((z[2 * i] >= 0.0) && ((fabs(z[2 * i + 1]) - mu * z[2 * i]) <= 0.0))
         {
 
-          //   printf("Stick status \n");
+          /*  printf("Stick status \n");*/
         }
         else
         {
@@ -265,7 +262,7 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
           if ((z[2 * i] >= 0.0) && (w[2 * i + 1] <= 0.0))
           {
 
-            //    printf("Slip+ status\n");
+            /*    printf("Slip+ status\n");*/
 
           }
           else
@@ -298,7 +295,7 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
               z[2 * i + 1] = -mu * z[2 * i];
             }
 
-            //printf("Slip- status\n");
+            /* printf("Slip- status\n");*/
           }
         }
       }

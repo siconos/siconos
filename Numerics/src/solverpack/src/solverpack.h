@@ -213,7 +213,7 @@ typedef struct
   \param method_pr     : pr is a method_pr structure .
   \param method_dr     : dr is a method_dr structure .
   \param method_lcp    : lcp is a method_lpc structure .
-  \param method_pfc    : pfc is a method_pfc_2D structure .
+  \param method_pfc_2D : pfc_2D is a method_pfc_2D structure .
   \param method_dfc_2D : dfc_2D is a method_dfc_2D structure .
   \param method_qp     : qp is a method_qp structure .
 
@@ -512,17 +512,17 @@ extern int dr_solver(double* , double* , int* , method* , double* , double*);
 
 /** \fn int extern  pfc_2D_solver( double *vec , double *q , int *n , method *pt , double *z , double *w )
 
- * \brief pfc_2D_solver() is a generic interface allowing the call of one of the @ref 2D pfc solvers.
+ * \brief pfc_2D_solver.c is a generic interface allowing the call of one of the @ref pfc_2D solvers.
 
  */
 /** @brief
-pfc_2D_solver() is a generic interface allowing the call of one of the @ref 2D pfc solvers.
+pfc_2D_solver.c is a generic interface allowing the call of one of the @ref pfc_2D solvers.
 */
 extern int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w);
 
 /**@}*/
 
-/**@page pfc 2D
+/**@page pfc_2D
 
   The C routines that solve PFC:
 
