@@ -20,7 +20,7 @@
 /*!\file dfc_2D2lcp.c
 
    This subroutine allows the formulation in the LCP (Linear  Complementary Problem) form
-   of a contact problem with friction.
+   of a 2D contact problem with friction.\n
 
 
 
@@ -30,7 +30,7 @@
 
 
 
-   \param dim_F1    On return a pointer over integers, the dimension of the DFC_2D problem,
+   \param dim_F1    On enter a pointer over integers, the dimension of the DFC_2D problem,
 
    \param mumu      On enter a pointer over doubles, the friction coefficient,
 
@@ -53,11 +53,7 @@
    \param dim_d     On enter a pointer over integers, the dimension of the vector ddl_d,
 
    \param J1        On enter a pointer over doubles, gap in normal contact direction.
-
-
-
-
-
+   \n\n
    \param MM        On return a pointer over doubles containing the components of a double
                       matrix (3*dim_nc,3*dim_nc) with a fortran90 allocation.
 
@@ -865,5 +861,5 @@ void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n
   free(vec_i);
   free(ddl_i);
 
-  //        return ;
+  /*        return ;*/
 }
