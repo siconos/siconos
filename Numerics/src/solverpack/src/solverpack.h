@@ -37,12 +37,13 @@
   \param itermax    maximum number of iterations.
   \param tol        convergence criteria value.
   \param k_latin    latin coefficient
-  \param a          lower bound
-  \param a          upper bound
-  \param normType   name norm
+  \param a          upper bound.
+  \param b          lower bound.
+  \param chat       output boolean ( 0 = no output log ).
+  \param normType   name norm (not yet available).
 
-  \param iter       final number of iteration
-  \param err        final value of error criteria
+  \param iter       final number of iterations.
+  \param err        final value of error criteria.
 */
 
 typedef struct
@@ -69,11 +70,12 @@ typedef struct
   \param itermax    maximum number of iterations.
   \param tol        convergence criteria value.
   \param k_latin    latin coefficient
-  \param a          lower bound
   \param a          upper bound
-  \param normType   name norm
+  \param b          lower bound
+  \param chat       output boolean ( 0 = no output log ).
+  \param normType   name norm (not yet available).
 
-  \param iter       final number of iteration
+  \param iter       final number of iterations
   \param err        final value of error criteria
 */
 
@@ -103,9 +105,9 @@ typedef struct
   \param k_latin    latin coefficient.
   \param relax      relaxation coefficient.
   \param chat       output boolean ( 0 = no output log ).
-  \param normType   name norm.
+  \param normType   name norm (not yet available).
 
-  \param iter       final number of iteration.
+  \param iter       final number of iterations.
   \param err        final value of error criteria.
 */
 
@@ -126,15 +128,16 @@ typedef struct
 
 /*!\struct method_pfc_2D
 
-  \brief A type definition for a structure method_pfc for 2D and 3D problem.
+  \brief A type definition for a structure method_pfc_2D.
 
   \param name       name of the solver.
   \param itermax    maximum number of iterations.
   \param mu         friction coefficient.
   \param tol        convergence criteria value.
-  \param k_latin    latin coefficient
-  \param normType   name norm
-  \param iter       final number of iteration
+  \param k_latin    search direction of the latin metod.
+  \param chat       output boolean ( 0 = no output log ).
+  \param normType   name norm (not yet available).
+  \param iter       final number of iterations.
   \param err        final value of error criteria
 */
 
@@ -153,7 +156,20 @@ typedef struct
 
 } method_pfc_2D;
 
+/*!\struct method_pfc_3D
 
+  \brief A type definition for a structure method_pfc_3D.
+
+  \param name       name of the solver.
+  \param itermax    maximum number of iterations.
+  \param mu         friction coefficient.
+  \param tol        convergence criteria value.
+  \param k_latin    search direction of the latin metod.
+  \param chat       output boolean ( 0 = no output log ).
+  \param normType   name norm (not yet available).
+  \param iter       final number of iterations.
+  \param err        final value of error criteria
+*/
 typedef struct
 {
 
@@ -175,10 +191,18 @@ typedef struct
 
   \param name       name of the solver.
   \param itermax    maximum number of iterations.
-  \param normType   name norm
+  \param normType   name norm (not yet available).
   \param tol        convergence criteria value.
   \param mu         friction coefficient.
   \param k_latin    latin coefficient
+  \param J1         gap in normal contact direction.
+  \param ddl_n      the contact in normal direction dof (not prescribed),
+  \param ddl_tt     the contact in tangential direction dof (not prescribed)
+
+  \param ddl_d      the prescribed dof.
+  \param dim_tt     the dimension of the vector ddl_tt.
+  \param dim_d      the dimension of the vector ddl_d.
+  \param chat       output boolean ( 0 = no output log ).
   \param iter       final number of iteration
   \param err        final value of error criteria
 */
@@ -212,13 +236,11 @@ typedef struct
 
   \param method_pr     : pr is a method_pr structure .
   \param method_dr     : dr is a method_dr structure .
-  \param method_lcp    : lcp is a method_lpc structure .
+  \param method_lcp    : lcp is a method_lcp structure .
   \param method_pfc_2D : pfc_2D is a method_pfc_2D structure .
   \param method_dfc_2D : dfc_2D is a method_dfc_2D structure .
-  \param method_qp     : qp is a method_qp structure .
+  \param method_qp     : qp is a method_qp structure (not yet available).
 
-  \param iter       final number of iteration
-  \param err        final value of error criteria
 
 */
 
@@ -245,11 +267,9 @@ typedef union
 
 #ifdef __cplusplus
 
-//extern "C" {
-
 /* body of header */
 
-// **************** LCP *********************
+/*  **************** LCP ********************       */
 
 extern "C" int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w);
 
@@ -286,7 +306,7 @@ extern  "C" void lcp_lexicolemke(int *nn , double *vec , double *q , double *z ,
 extern  "C" void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                                 int *iparamLCP , double *dparamLCP);
 
-// ********************************************
+/* ******************************************* */
 
 extern "C" int dr_solver(double* , double* , int* , method* , double* , double*);
 
@@ -295,14 +315,14 @@ extern "C" void dr_latin(double * , double *, int *, double * , double *, double
 extern "C" void dr_nlgs(double *vec , double *q , int *nn , double *a , double *b , int *itermax , double *tol , int *chat,
                         double *z , double *w , int *it_end , double *res , int *info);
 
-// ********************************************
+/* ******************************************* */
 
 extern "C" int dfc_2D_solver(double* , double* , int* , method* , double* , double*);
 
 extern "C" void dfc_2D_latin(double* , double* , int* , double* , double* , int* , double* , int *, double* , double* , int* , double* , int*);
 
-// ********************************************
 
+/* ******************************************* */
 extern "C" int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w);
 
 extern "C" void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
@@ -311,16 +331,16 @@ extern "C" void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , doub
 
 extern "C" void pfc_2D_latin(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
-// ********************************************
 
+/* ******************************************* */
 extern "C" int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w);
 
 extern "C" void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
 extern "C" void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
-// ********************************************
 
+/* ******************************************* */
 extern "C" int pr_solver(double* , double* , int* , method* , double* , double*);
 
 extern "C" void pr_latin(double* , double* , int* , double* , double* , double* , int* ,
@@ -328,9 +348,8 @@ extern "C" void pr_latin(double* , double* , int* , double* , double* , double* 
 
 extern "C" void pr_nlgs(double* , double* , int* , double* , double* , int* , double* , int*, double* , double* , int* , double* , int *);
 
-// ********************************************
 
-
+/* ******************************************* */
 
 extern "C" void dfc_2D2lcp(int *, double *, double *, double *, int *, int *, int * , int *, int *, double * , double *, double *);
 
@@ -355,17 +374,20 @@ extern "C" void cond_2D2dfc_2D(int *, double *, double *, double *, double *, do
 
 
 
-// ****************************** **************** ************************************
 
-//extern "C" void pfc_2D_projc( int nc , double mu , double *z , double *p , int *status );
+/* ******************************************* */
 
-//extern "C" void pfc_2D_projf( int n , double *ww , double *zz , double *rr , double *pp , int *status )
+/*extern "C" void pfc_2D_projc( int nc , double mu , double *z , double *p , int *status );
+
+extern "C" void pfc_2D_projf( int n , double *ww , double *zz , double *rr , double *pp , int *status )
+*/
+
 
 #endif
 
 #ifndef __cplusplus
 
-//extern {
+
 /**@defgroup group1 LCP (Linear Complementary Problem)
    @{
 */
@@ -425,30 +447,6 @@ extern int lcp_solver_block(int *inb , int *iid , double *vec, double *q , int *
 
 /**@}*/
 
-
-/**@page lcp
-
-  The C routines that solve LCP:
-
-  lcp_nlgs.c
-
-  lcp_cpg.c
-
-  lcp_latin.c
-
-  lcp_latin_w.c
-
-  lcp_lemke.c
-
-  lcp_lexicolemke.c
-
-  lcp_qp.c
-
-  lcp_qpnonsym.c
-
-  lcp_newtonmin.c
-
-*/
 
 
 
@@ -539,17 +537,17 @@ extern int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double 
 
 /** \fn int extern  pfc_3D_solver( double *vec , double *q , int *n , method *pt , double *z , double *w )
 
- * \brief pfc_3D_solver() is a generic interface allowing the call of one of the @ref 3D pfc solvers.
+ * \brief pfc_3D_solver() is a generic interface allowing the call of one of the @ref pfc_3D solvers.
 
  */
 /** @brief
-pfc_3D_solver() is a generic interface allowing the call of one of the @ref 3D pfc solvers.
+pfc_3D_solver() is a generic interface allowing the call of one of the @ref  pfc_3D solvers.
 */
 extern int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w);
 
 /**@}*/
 
-/**@page pfc 3D
+/**@page pfc_3D
 
   The C routines that solve 3D PFC:
 
@@ -589,7 +587,7 @@ extern int dfc_2D_solver(double *vec , double *q , int *n , method *pt , double 
  * \todo solve_qp does not exist
  */
 
-//  *********************************** LCP ****************************************
+/*  *********************************** LCP ******************************* */
 
 extern void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem,
                       double *wlem, int *it_end, double *res, int *info);
@@ -621,21 +619,21 @@ extern void lcp_newton_min(int *nn , double *vec , double *q , double *z , doubl
                            int *iparamLCP , double *dparamLCP);
 
 
-// *********************************** PR *****************************************
+/* **************************** PR **************************************** */
 
 extern void pr_latin(double* , double* , int* , double* , double* , double* , int* ,
                      double* , int *, double* , double* , int* , double* , int*);
 
 extern void pr_nlgs(double* , double* , int* , double* , double* , int* , double* , int*, double* , double* , int* , double* , int *);
 
-// *********************************** DR *****************************************
+/* ********************************** DR ********************************** */
 
 extern void dr_latin(double *, double *, int *, double * , double *, double *, int *, double *, int *, double*, double *, int *, double *, int *)  ;
 
 extern void dr_nlgs(double *vec , double *q , int *nn , double *a , double *b , int *itermax , double *tol , int *chat,
                     double *z , double *w , int *it_end , double *res , int *info);
 
-// *********************************** PFC 2D *****************************************
+/* ********************************** PFC 2D *************************** */
 
 extern void pfc_2D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
@@ -643,17 +641,17 @@ extern void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *
 
 extern void pfc_2D_latin(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
-// *********************************** PFC 3D *****************************************
+/*  ******************************* PFC 3D **************************** */
 
 extern void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
 extern void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP);
 
-// *********************************** DFC 2D *****************************************
+/* ************************* DFC 2D **************************************** */
 
 extern void dfc_2D_latin(double* , double* , int* , double* , double* , int* , double* , int *, double* , double* , int* , double* , int*);
 
-// ******************************LCP SWITCH DFC 2D ************************************
+/* *****************************LCP SWITCH DFC 2D *********************** */
 
 
 
@@ -666,7 +664,7 @@ extern  void dfc_2D2lcp(int *, double *, double *, double *, int *, int *, int *
 extern  void lcp2dfc_2D(int *, double *, double *, double *, double *, double *,  int *, int *,
                         int *, int *, int *,  double *, double *);
 
-// ******************************COND SWITCH DFC 2D ************************************
+/* *****************************COND SWITCH DFC 2D ********************* */
 
 extern  void dfc_2D2cond_2D(int *, double *, double *, double *, int *, int *, int * , int *, int *, double * , double *, double *);
 
@@ -678,14 +676,14 @@ extern  void cond_2D2dfc_2D(int *, double *, double *, double *, double *, doubl
                             int *, int *, int *,  double *, double *);
 
 
-// ****************************** **************** ************************************
+/* ***************************** **************** ************************* */
 
-//extern void pfc_2D_projc( int nc , double mu , double *z , double *p , int *status );
+/* extern void pfc_2D_projc( int nc , double mu , double *z , double *p , int *status );
 
-//extern void pfc_2D_projf( int n , double *ww , double *zz , double *rr , double *pp , int *status )
+extern void pfc_2D_projf( int n , double *ww , double *zz , double *rr , double *pp , int *status ) */
 
-// ******************************LCP SWITCH DFC 2D ************************************
+/* *****************************LCP SWITCH DFC 2D ********************** */
 
 #endif
 
-#endif // SOLVERPACK_H
+#endif /* SOLVERPACK_H */
