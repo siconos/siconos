@@ -153,7 +153,7 @@ void SiconosMatrix::setRow(const unsigned int& row, const SiconosVector &v)
   if ((int)v.size() != mat.size(1))
     SiconosMatrixException::selfThrow("SiconosMatrix setRow: Index out of range");
 
-  if ((int)row >= mat.size(1))
+  if ((int)row >= mat.size(0))
     SiconosMatrixException::selfThrow("SiconosMatrix setRow: Index out of range");
 
   for (unsigned int i = 0; (int)i < mat.size(1); i++)

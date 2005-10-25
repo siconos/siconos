@@ -365,6 +365,21 @@ public:
    */
   virtual void computeInput(const double&);
 
+  /** \fn void getGBlockDS(const int&,SiconosMatrix&, const unsigned int& index = 0) const
+   *  \brief get in Matrix G[index] the block corresponding to DS number int
+   *  \param int, the ds number
+   *  \param SiconosMatrix (in-out parameter): the resulting block matrix
+   */
+  void getGBlockDS(const int&, SiconosMatrix&, const unsigned int& = 0) const;
+
+
+  /** void getGBlockDS(DynamicalSystem * ds, SiconosMatrix&, const unsigned int& index = 0) const
+   *  \brief get in Matrix G[index] the block corresponding to ds
+   *  \param a pointer to a dynamical system
+   *  \param SiconosMatrix (in-out parameter): the resulting block matrix
+   */
+  void getGBlockDS(DynamicalSystem *, SiconosMatrix&, const unsigned int& = 0) const;
+
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the Relation to the XML tree
    */

@@ -293,7 +293,7 @@ void LagrangianLinearR::getHBlockDS(const int& DSNumber, SiconosMatrix& Block) c
 
   // check dimension
   if ((*itDS)->getN() / 2 != Block.size(1))
-    RuntimeException::selfThrow("LagrangianLinearR - getCBlockDS: inconsistent sizes between HBlock and DS");
+    RuntimeException::selfThrow("LagrangianLinearR - getHBlockDS: inconsistent sizes between HBlock and DS");
 
   // get block
   unsigned int l = k + (*itDS)->getN() / 2 - 1;

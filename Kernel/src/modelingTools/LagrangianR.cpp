@@ -262,7 +262,7 @@ void LagrangianR::setG(const SiconosMatrix& newValue, const unsigned int & index
     RuntimeException::selfThrow("LagrangianR:: setG, no interaction linked to the current relation");
   unsigned int sizeY = interaction->getNInteraction();
   unsigned int sizeQ = interaction->getSizeOfDS();
-  if (newValue.size(0) != sizeQ || newValue.size(1) != sizeY)
+  if (newValue.size(1) != sizeQ || newValue.size(0) != sizeY)
     RuntimeException::selfThrow("LagrangianR - setG: inconsistent input matrix size ");
 
   if (index >= G.size())
@@ -284,7 +284,7 @@ void LagrangianR::setGPtr(SiconosMatrix *newPtr, const unsigned int & index)
     RuntimeException::selfThrow("LagrangianR:: setGPtr, no interaction linked to the current relation");
   unsigned int sizeY = interaction->getNInteraction();
   unsigned int sizeQ = interaction->getSizeOfDS();
-  if (newPtr->size(0) != sizeQ || newPtr->size(1) != sizeY)
+  if (newPtr->size(1) != sizeQ || newPtr->size(0) != sizeY)
     RuntimeException::selfThrow("LagrangianR - setGPtr: inconsistent input matrix size ");
 
   if (index >= G.size())
@@ -327,7 +327,7 @@ void LagrangianR::setComputeGFunction(const string& pluginPath, const string& fu
     unsigned int sizeQ = interaction->getSizeOfDS();
     if (G[index] == NULL)
     {
-      G[index] = new SiconosMatrix(sizeQ, sizeY);
+      G[index] = new SiconosMatrix(sizeY, sizeQ);
       isGAllocatedIn[index] = true;
     }
   }
@@ -505,10 +505,8 @@ void LagrangianR::computeOutput(const double& time)
     if (G0Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     G0Ptr(&sizeQ, &(*qTmp)(0), &sizeY, &(*Gtmp)(0, 0));
-
     *yDot = *Gtmp * *velocityTmp;
   }
-
   // y = h(...) and yDot = G10qDot + G11
   else if (LagrangianRelationType == "non-holonom")
   {
@@ -534,7 +532,6 @@ void LagrangianR::computeOutput(const double& time)
   }
   else
     RuntimeException::selfThrow("LagrangianR::computeOutput(),  not yet implemented for this type of constraints");
-
 
   // free memory
   delete qTmp;
@@ -661,6 +658,63 @@ void LagrangianR::computeInput(const double& time)
   }
   else
     RuntimeException::selfThrow("LagrangianR::computeInput,  not yet implemented for constraints of type" + LagrangianRelationType);
+}
+
+void LagrangianR::getGBlockDS(DynamicalSystem * ds, SiconosMatrix& Block, const unsigned & index) const
+{
+  unsigned int k = 0;
+  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
+  vector<DynamicalSystem*>::iterator itDS;
+  itDS = vDS.begin();
+
+  // look for ds
+  while (*itDS != ds && itDS != vDS.end())
+  {
+    k += (*itDS)->getN() / 2;
+    itDS++;
+  }
+  // check dimension
+  if ((*itDS)->getN() / 2 != Block.size(1))
+    RuntimeException::selfThrow("LagrangianR - getGBlockDS: inconsistent sizes between GBlock and DS");
+
+  // get block
+  unsigned int l = k + (*itDS)->getN() / 2 - 1;
+  vector<unsigned int> index_list(4);
+  index_list[0] = 0;
+  index_list[1] = G[index]->size(0) - 1;
+  index_list[2] = k;
+  index_list[3] = l;
+  G[index]->getBlock(index_list, Block);
+}
+
+void LagrangianR::getGBlockDS(const int& DSNumber, SiconosMatrix& Block, const unsigned & index) const
+{
+  unsigned int k = 0;
+
+  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
+
+  vector<DynamicalSystem*>::iterator itDS;
+  itDS = vDS.begin();
+
+  // look for DS number DSNumber ...
+  while ((*itDS)->getNumber() != DSNumber && itDS != vDS.end())
+  {
+    k += (*itDS)->getN() / 2;
+    itDS++;
+  }
+
+  // check dimension
+  if ((*itDS)->getN() / 2 != Block.size(1))
+    RuntimeException::selfThrow("LagrangianR - getGlockDS: inconsistent sizes between GBlock and DS");
+
+  // get block
+  unsigned int l = k + (*itDS)->getN() / 2 - 1;
+  vector<unsigned int> index_list(4);
+  index_list[0] = 0;
+  index_list[1] = G[index]->size(0) - 1;
+  index_list[2] = k;
+  index_list[3] = l;
+  G[index]->getBlock(index_list, Block);
 }
 
 void LagrangianR::saveRelationToXML() const

@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "OneStepNSProblem.h"
 using namespace std;
 
@@ -154,7 +154,6 @@ void OneStepNSProblem::initialize()
 
   updateOutput();
   updateInput();
-
 }
 
 void OneStepNSProblem::computeEffectiveOutput()
@@ -187,7 +186,7 @@ void OneStepNSProblem::computeEffectiveOutput()
 
     // get relative degrees vector of this interaction (one relative degree for each relation!)
     vector<unsigned int> relativeDegree = topology->getRelativeDegrees(*it);
-    unsigned int size = relativeDegree.size(); // this size corresponds to the interaction size, ie the number of relations
+    unsigned int numberOfRelations = relativeDegree.size(); // this size corresponds to the interaction size, ie the number of relations
 
     // --- prediction vector ---
 
@@ -215,8 +214,8 @@ void OneStepNSProblem::computeEffectiveOutput()
 
       // loop from 0 to relative degree to find the first yp>0
       vector<unsigned int> indexMax;
-      indexMax.resize(size, 0);
-      for (j = 0; j < size; j++)
+      indexMax.resize(numberOfRelations, 0);
+      for (j = 0; j < numberOfRelations; j++)
       {
         for (i = 0; i < sizeYp; i++)
         {
@@ -236,21 +235,26 @@ void OneStepNSProblem::computeEffectiveOutput()
       // compute sizeOutput for the current interaction
       sizeOutput = topology->computeEffectiveSizeOutput(*it);
 
-      vector<unsigned int> effectiveIndexes, indexMin;
+      vector<unsigned int> effectiveIndexes, blockIndexes, indexMin;
       indexMin = topology->getIndexMin(*it);
 
-      effectiveIndexes.resize(sizeOutput);
+      effectiveIndexes.resize(sizeOutput, 0);
+      blockIndexes.resize(sizeOutput, 0);
 
-      for (k = 0; k < sizeOutput; k++)
+      k = 0;
+
+      for (j = 0; j < numberOfRelations; j++)
       {
-        for (j = 0; j < size; j++)
+        for (i = indexMin[j]; i < indexMax[j] + 1; i++)
         {
-          for (i = 0; i < (indexMax[j] - indexMin[j] + 1); i++)
-            effectiveIndexes[k] = i + j * (relativeDegree[j] - indexMin[j]);
+          effectiveIndexes[k] = i + j * (relativeDegree[j]);
+          blockIndexes[k] = i - indexMin[j] + j * (relativeDegree[j] - indexMin[j]);
+          k++;
         }
       }
-
       topology->setEffectiveIndexes(*it, effectiveIndexes);
+      blockIndexesMap[*it] = blockIndexes;
+
     }
     else
     {
@@ -258,6 +262,7 @@ void OneStepNSProblem::computeEffectiveOutput()
       sizeOutput = topology->computeEffectiveSizeOutput(*it);
     }
     globalSizeOutput   += sizeOutput;
+
 
   }// == end of interactions loop ==
 

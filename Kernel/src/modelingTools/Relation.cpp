@@ -31,6 +31,8 @@ Relation::Relation(Interaction* inter):
   setComputeInputFunction("DefaultPlugin.so", "computeInput");
   isOutputPlugged = false;
   isInputPlugged = false;
+  if (inter != NULL)
+    inter->setRelationPtr(this);
 }
 
 // xml constructor

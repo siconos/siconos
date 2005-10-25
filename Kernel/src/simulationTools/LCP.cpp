@@ -306,8 +306,10 @@ void LCP::computeAllBlocks()
 
     if (relationType == LINEARTIRELATION)
       computeDiagonalBlocksLinearTIR(RCurrent, sizeInteraction, vDS, W, h, currentMatrixBlock);
-    else if (relationType == LAGRANGIANLINEARRELATION)
-      computeDiagonalBlocksLagrangianLinearR(RCurrent, sizeInteraction, vDS, W, h, currentMatrixBlock);
+    else if (relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION)
+      computeDiagonalBlocksLagrangianR(RCurrent, sizeInteraction, vDS, W, h, currentMatrixBlock);
+    //else if (relationType == LAGRANGIANRELATION)
+    //computeDiagonalBlocksLagrangianR(RCurrent, sizeInteraction,vDS,W,h,currentMatrixBlock);
     else RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for relation of type " + relationType);
 
     // --- EXTRA-DIAGONAL BLOCKS MANAGEMENT ---
@@ -346,14 +348,12 @@ void LCP::computeAllBlocks()
         string RlinkedType = RLinked->getType();
         if (relationType == LINEARTIRELATION && RlinkedType == LINEARTIRELATION)
           computeExtraDiagonalBlocksLinearTIR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, h, coupledInteractionsBlock);
-        else if (relationType == LAGRANGIANLINEARRELATION && RlinkedType == LAGRANGIANLINEARRELATION)
-          computeExtraDiagonalBlocksLagrangianLinearR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, h, coupledInteractionsBlock);
-
+        //else if (relationType == LAGRANGIANLINEARRELATION && RlinkedType== LAGRANGIANLINEARRELATION)
+        //computeExtraDiagonalBlocksLagrangianLinearR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS,W,h,coupledInteractionsBlock);
+        else if ((relationType == LAGRANGIANRELATION || relationType == LAGRANGIANLINEARRELATION) && (RlinkedType == LAGRANGIANRELATION ||  RlinkedType == LAGRANGIANLINEARRELATION))
+          computeExtraDiagonalBlocksLagrangianR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, h, coupledInteractionsBlock);
         else RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for relation of type " + relationType);
       } // end of loop over linked interactions
-
-      // put tmpMap, ie blocks corresponding to interactions linked with current interaction into the map
-      //extraDiagonalBlocksMap[currentInteraction] = tmpMap;
     }
   } // end of loop over interactions -> increment current interaction
 
@@ -503,16 +503,20 @@ void LCP::computeExtraDiagonalBlocksLinearTIR(Relation * RCurrent, Relation* RLi
     }
   }
 }
-void LCP::computeDiagonalBlocksLagrangianLinearR(Relation * R, const unsigned int& sizeInteraction, vector<DynamicalSystem*> vDS,
+
+void LCP::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& sizeInteraction, vector<DynamicalSystem*> vDS,
     map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* currentMatrixBlock)
 {
-  // convert to lagrangianLinearR
-  LagrangianLinearR *LLR = static_cast<LagrangianLinearR*>(R);
+
+  // Warning: we suppose that at this point, G and/or h have been computed through plug-in mechanism.
+
+  // convert to lagrangianR
+  LagrangianR *LR = static_cast<LagrangianR*>(R);
 
   // For 1 relation, we need:
-  // - a block-row of H, that corresponds to a specific DS
-  // - a block of tH, that corresponds to a specific DS
-  SiconosMatrix *H;
+  // - a block-row of G, that corresponds to a specific DS
+  // - a block of tG, that corresponds to a specific DS
+  SiconosMatrix *G;
   vector<DynamicalSystem*>::iterator itDS;
   unsigned int sizeDS;
 
@@ -522,10 +526,10 @@ void LCP::computeDiagonalBlocksLagrangianLinearR(Relation * R, const unsigned in
   {
     // the resulting row-block
     SimpleVector * currentLine = new SimpleVector(sizeInteraction);
-    // a row of H corresponding to a specific DS (its size depends on the DS size)
-    SimpleVector * Hrow ;
+    // a row of G corresponding to a specific DS (its size depends on the DS size)
+    SimpleVector * Grow ;
 
-    // compute currentLine = sum(j) Hrow,j Wj  tHj, with j the list of DS of the
+    // compute currentLine = sum(j) Grow,j Wj  tGj, with j the list of DS of the
     // current interaction.
     // loop over the relations of the current interaction
     for (unsigned int i = 0; i < sizeInteraction; i++)
@@ -536,16 +540,16 @@ void LCP::computeDiagonalBlocksLagrangianLinearR(Relation * R, const unsigned in
       {
         sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
         // get blocks corresponding to the current DS
-        H = new SiconosMatrix(sizeInteraction, sizeDS);
-        LLR->getHBlockDS(*itDS, *H);
-        // get row i of H
-        Hrow = new SimpleVector(sizeDS);
-        *Hrow = H->getRow(i);
+        G = new SiconosMatrix(sizeInteraction, sizeDS);
+        LR->getGBlockDS(*itDS, *G);
+        // get row i of G
+        Grow = new SimpleVector(sizeDS);
+        *Grow = G->getRow(i);
 
         // compute currentLine
-        *currentLine +=  *Hrow * (W[*itDS])->multTranspose(*H);
-        delete H;
-        delete Hrow;
+        *currentLine +=  *Grow * (W[*itDS])->multTranspose(*G);
+        delete G;
+        delete Grow;
       }
       // save the result in currentMatrixBlock (and so in diagonalBlocksMap)
       currentMatrixBlock->setRow(i, *currentLine);
@@ -562,22 +566,24 @@ void LCP::computeDiagonalBlocksLagrangianLinearR(Relation * R, const unsigned in
 
       sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
       // get blocks corresponding to the current DS
-      H = new SiconosMatrix(sizeInteraction, sizeDS);
-      LLR->getHBlockDS(*itDS, *H);
-      *currentMatrixBlock +=  *H * (W[*itDS])->multTranspose(*H);
-      delete H;
+      G = new SiconosMatrix(sizeInteraction, sizeDS);
+      LR->getGBlockDS(*itDS, *G);
+      *currentMatrixBlock +=  *G * (W[*itDS])->multTranspose(*G);
+      delete G;
     }
   }
 }
 
-void LCP::computeExtraDiagonalBlocksLagrangianLinearR(Relation * RCurrent, Relation* RLinked, const unsigned int& sizeInteraction,
+void LCP::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* RLinked, const unsigned int& sizeInteraction,
     const unsigned int& linkedInteractionSize, vector<DynamicalSystem*> commonDS,
     map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* coupledInteractionsBlock)
 {
+  // Warning: we suppose that at this point, G and/or h have been computed through plug-in mechanism.
+
   // convert to LagrangianLinear relation
-  LagrangianLinearR *LLR1 = static_cast<LagrangianLinearR*>(RCurrent);
-  LagrangianLinearR *LLR2 = static_cast<LagrangianLinearR*>(RLinked);
-  SiconosMatrix *Hcurrent, *Hlinked;
+  LagrangianR *LR1 = static_cast<LagrangianR*>(RCurrent);
+  LagrangianR *LR2 = static_cast<LagrangianR*>(RLinked);
+  SiconosMatrix *Gcurrent, *Glinked;
   coupledInteractionsBlock->zero();
   vector<DynamicalSystem*>::iterator itDS;
   unsigned int sizeDS;
@@ -587,11 +593,11 @@ void LCP::computeExtraDiagonalBlocksLagrangianLinearR(Relation * RCurrent, Relat
   {
     // the resulting row-block
     SimpleVector * currentLine = new SimpleVector(linkedInteractionSize);
-    // a row of H corresponding to a specific DS (its size depends on the DS size)
-    SimpleVector * Hrow ;
+    // a row of G corresponding to a specific DS (its size depends on the DS size)
+    SimpleVector * Grow ;
 
-    // compute currentLine =  sum(j) Hrow,j Wj  tHj, with j the list of common DS
-    // Hrow belongs to current Interaction and tH to linked interaction
+    // compute currentLine =  sum(j) Grow,j Wj  tGj, with j the list of common DS
+    // Grow belongs to current Interaction and tG to linked interaction
     // loop over the relations of the current interaction
     for (unsigned int i = 0; i < sizeInteraction; i++)
     {
@@ -600,18 +606,18 @@ void LCP::computeExtraDiagonalBlocksLagrangianLinearR(Relation * RCurrent, Relat
       {
         sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
         // get blocks corresponding to the current DS
-        Hcurrent = new SiconosMatrix(sizeInteraction, sizeDS);
-        Hlinked = new SiconosMatrix(linkedInteractionSize, sizeDS);
-        LLR1->getHBlockDS(*itDS, *Hcurrent);
-        LLR2->getHBlockDS(*itDS, *Hlinked);
-        // get row i of H
-        Hrow = new SimpleVector(sizeDS);
-        *Hrow = Hcurrent->getRow(i);
+        Gcurrent = new SiconosMatrix(sizeInteraction, sizeDS);
+        Glinked = new SiconosMatrix(linkedInteractionSize, sizeDS);
+        LR1->getGBlockDS(*itDS, *Gcurrent);
+        LR2->getGBlockDS(*itDS, *Glinked);
+        // get row i of G
+        Grow = new SimpleVector(sizeDS);
+        *Grow = Gcurrent->getRow(i);
         // compute currentLine
-        *currentLine +=  h* *Hrow * (W[*itDS])->multTranspose(*Hlinked);
-        delete Hrow;
-        delete Hcurrent;
-        delete Hlinked;
+        *currentLine +=  h* *Grow * (W[*itDS])->multTranspose(*Glinked);
+        delete Grow;
+        delete Gcurrent;
+        delete Glinked;
       }
       // save the result in currentMatrixBlock (and so in diagonalBlocksMap)
       coupledInteractionsBlock->setRow(i, *currentLine);
@@ -626,15 +632,140 @@ void LCP::computeExtraDiagonalBlocksLagrangianLinearR(Relation * RCurrent, Relat
     {
       sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
       // get blocks corresponding to the current DS
-      Hcurrent = new SiconosMatrix(sizeInteraction, sizeDS);
-      Hlinked = new SiconosMatrix(linkedInteractionSize, sizeDS);
-      LLR1->getHBlockDS(*itDS, *Hcurrent);
-      LLR2->getHBlockDS(*itDS, *Hlinked);
-      *coupledInteractionsBlock += h* *Hcurrent * (W[*itDS])->multTranspose(*Hlinked);
-      delete Hcurrent;
-      delete Hlinked;
+      Gcurrent = new SiconosMatrix(sizeInteraction, sizeDS);
+      Glinked = new SiconosMatrix(linkedInteractionSize, sizeDS);
+      LR1->getGBlockDS(*itDS, *Gcurrent);
+      LR2->getGBlockDS(*itDS, *Glinked);
+      *coupledInteractionsBlock += h* *Gcurrent * (W[*itDS])->multTranspose(*Glinked);
+      delete Gcurrent;
+      delete Glinked;
     }
   }
+}
+
+void LCP::updateBlocks()
+{
+  // --- get topology ---
+  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+
+  // --- get linked-Interactions map ---
+  map< Interaction*, vector<InteractionLink*> > linkedInteractionMap = topology->getLinkedInteractionMap();
+  map< Interaction*, vector<InteractionLink*> >::const_iterator itMapInter;
+
+  // --- get interactions list ---
+  vector<Interaction*> listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  vector<Interaction*>::iterator iter;
+
+  // --- get time step ---
+  double h = strategy->getTimeDiscretisationPtr()->getH(); // time step
+
+  string relationType, dsType;
+  unsigned int globalDSSize, sizeInteraction, linkedInteractionSize;
+
+  unsigned int sizeBlock, sizeLinkedBlock; // For each interaction, this size depends on relative degree(r), indexMin and the number of relations (j).
+  // sizeBlock = (r - indexMin)*j  ou = j si r=0.
+  vector<unsigned int> r; // relative degrees
+  unsigned int rMax;
+  vector<unsigned int> indexMin;
+  // --- loop over all the interactions ---
+  for (iter = listInteractions.begin(); iter != listInteractions.end(); ++iter)
+  {
+    // the current interaction and its size
+    Interaction *currentInteraction = *iter;
+    sizeInteraction = currentInteraction->getNInteraction();
+    // relative degrees
+    r = topology->getRelativeDegrees(currentInteraction);
+    rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
+    if (rMax == 0) rMax = 1 ; // warning: review r=0 case
+    indexMin = topology->getIndexMin(currentInteraction);
+    sizeBlock = (rMax - indexMin[0]) * sizeInteraction;
+
+    // --- DIAGONAL BLOCKS MANAGEMENT ---
+
+    // matrix that corresponds to diagonal block for the current interaction
+    SiconosMatrix * currentMatrixBlock = diagonalBlocksMap[ currentInteraction ];
+
+    // get DS list of the current interaction
+    vector<DynamicalSystem*> vDS = currentInteraction ->getDynamicalSystems();
+    unsigned int nbDS = vDS.size(); // number of DS
+
+    // sum of all DS sizes
+    globalDSSize = 0;
+    vector<DynamicalSystem*>::iterator itDS;
+    for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
+    {
+      dsType = (*itDS)->getType();
+      if (dsType == LNLDS || dsType == LTIDS)
+        globalDSSize += (*itDS)->getN() / 2;
+      else
+        globalDSSize += (*itDS)->getN();
+    }
+
+    // Get Wi matrix of each DS concerned by the interaction and assemble global matrix W
+    OneStepIntegrator * Osi;
+    map<DynamicalSystem*, SiconosMatrix*> W;
+
+    for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
+    {
+      Osi = strategy->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
+      if (Osi->getType() == MOREAU_INTEGRATOR)
+        W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr();  // get its W matrix
+      else
+        RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
+    }
+
+    // get the relation of the current interaction and its type
+    Relation * RCurrent = currentInteraction -> getRelationPtr();
+    relationType = RCurrent->getType();
+
+    if (relationType == LAGRANGIANLINEARRELATION)
+    {}// Nothing to be done, blocks allready computed
+    else if (relationType == LAGRANGIANRELATION)
+      computeDiagonalBlocksLagrangianR(RCurrent, sizeInteraction, vDS, W, h, currentMatrixBlock);
+    else RuntimeException::selfThrow("LCP::updateBlocks not yet implemented for relation of type " + relationType);
+
+    // --- EXTRA-DIAGONAL BLOCKS MANAGEMENT ---
+
+    // check if there are linked interactions with current one, and if so get them.
+    itMapInter = linkedInteractionMap.find(currentInteraction);
+    if (itMapInter != linkedInteractionMap.end())
+    {
+      vector<InteractionLink*> ILV = linkedInteractionMap[currentInteraction];
+      vector<InteractionLink*>::iterator itLink;
+
+      //map<Interaction*, SiconosMatrix*> tmpMap;
+      SiconosMatrix * coupledInteractionsBlock;
+
+      // loop over LinkedInteractions
+      for (itLink = ILV.begin(); itLink != ILV.end(); itLink++)
+      {
+        Interaction * linkedInteraction = (*itLink)->getLinkedInteractionPtr();
+        linkedInteractionSize = linkedInteraction->getNInteraction();
+        // relative degrees
+        r = topology->getRelativeDegrees(linkedInteraction);
+        rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
+        if (rMax == 0) rMax = 1 ; // warning: review r=0 case
+        indexMin = topology->getIndexMin(linkedInteraction);
+        sizeLinkedBlock = (rMax - indexMin[0]) * linkedInteractionSize;
+
+        coupledInteractionsBlock = extraDiagonalBlocksMap[currentInteraction][linkedInteraction];
+
+        // get the list of common DS and their number
+        vector<DynamicalSystem*> commonDS = (*itLink)->getCommonDS();
+        nbDS = commonDS.size();
+
+        // get the relation of the current interaction
+        Relation * RLinked = linkedInteraction -> getRelationPtr();
+        string RlinkedType = RLinked->getType();
+        if (relationType == LAGRANGIANLINEARRELATION && RlinkedType == LAGRANGIANLINEARRELATION)
+        {}// Nothing to be done, blocks allready computed
+        else if (relationType == LAGRANGIANRELATION || RlinkedType == LAGRANGIANRELATION)
+          computeExtraDiagonalBlocksLagrangianR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, h, coupledInteractionsBlock);
+        else RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for relation of type " + relationType);
+      } // end of loop over linked interactions
+    }
+  } // end of loop over interactions -> increment current interaction
+
 }
 
 void LCP::preLCP(const double& time)
@@ -647,6 +778,7 @@ void LCP::preLCP(const double& time)
   // if relative degree is not equal to 0 or 1, check effective output
   if (! topology->isTimeInvariant())
   {
+    updateBlocks(); // compute blocks for NonLinear Relations, with G that has been computed during update of previous time step
     computeEffectiveOutput();
     nLcp = topology->getEffectiveSizeOutput();
     if (nLcp != 0)
@@ -713,7 +845,6 @@ void LCP::assembleM() //
   unsigned int size, sizeLinked;
 
   map< Interaction*, unsigned int>  interactionEffectivePositionMap =  topology->getInteractionEffectivePositionMap();
-  vector<unsigned int>  effectiveIndexes, effectiveIndexesLinked;
   map< Interaction* , map<Interaction *, SiconosMatrix*> >::iterator itCoupled  ;
   map<Interaction *, SiconosMatrix*>::iterator it;
   SiconosMatrix *blockDiago , *coupledBlock;
@@ -746,13 +877,10 @@ void LCP::assembleM() //
     }
     else
     {
-      // get list of effective relations for current interaction
-      effectiveIndexes = topology->getEffectiveIndexes(currentInteraction);
-
       // get the "reduced" diagonal block for the current interaction
-      size = effectiveIndexes.size();
+      size = blockIndexesMap[currentInteraction].size();
       SiconosMatrix * reducedBlock = new SiconosMatrix(size, size);
-      blockDiago->getBlock(effectiveIndexes, effectiveIndexes, *reducedBlock);
+      blockDiago->getBlock(blockIndexesMap[currentInteraction], blockIndexesMap[currentInteraction], *reducedBlock);
 
       // diagonal blocks
       M->blockMatrixCopy(*reducedBlock, pos, pos); // \todo avoid copy
@@ -768,12 +896,11 @@ void LCP::assembleM() //
         {
           // get list of effective relations for linked interaction
           Interaction * linkedInteraction = (*it).first;
-          effectiveIndexesLinked = topology->getEffectiveIndexes(linkedInteraction);
-          sizeLinked = effectiveIndexesLinked.size();
+          sizeLinked = blockIndexesMap[linkedInteraction].size();
           // get the corresponding "reduced" block
           coupledBlock = (*it).second;
           reducedCoupledBlock = new SiconosMatrix(size, sizeLinked);
-          coupledBlock->getBlock(effectiveIndexes, effectiveIndexesLinked, *reducedCoupledBlock);
+          coupledBlock->getBlock(blockIndexesMap[currentInteraction], blockIndexesMap[linkedInteraction], *reducedCoupledBlock);
           col = interactionEffectivePositionMap[ linkedInteraction ];
           M->blockMatrixCopy(*reducedCoupledBlock, pos, col); // \todo avoid copy
         }
@@ -820,7 +947,7 @@ void LCP::computeQ(const double& time)
   {
     // get current interaction, its relation and its nslaw
     currentInteraction = *iter;
-    unsigned int sizeInteraction = currentInteraction->getNInteraction();
+    unsigned int numberOfRelations = currentInteraction->getNInteraction();
     R = currentInteraction->getRelationPtr();
     string relationType = R->getType();
     nslaw = currentInteraction->getNonSmoothLawPtr();
@@ -837,7 +964,7 @@ void LCP::computeQ(const double& time)
         if (topology->isTimeInvariant())
         {
           yFree = new SimpleVector(currentInteraction->getY(0));   // copy, no pointer equality
-          for (unsigned int i = 0; i < sizeInteraction; i++)
+          for (unsigned int i = 0; i < numberOfRelations; i++)
             (*q)(i + pos) = (*yFree)(i);
         }
         else
@@ -852,11 +979,13 @@ void LCP::computeQ(const double& time)
       else
         RuntimeException::selfThrow("LCP::computeQ not yet implemented for NSlaw of type " + nslaw->getType() + "and for relation of type " + R->getType());
     }
-    else if (relationType == LAGRANGIANLINEARRELATION)
+    else if (relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION)
     {
       LagrangianLinearR *LLR = static_cast<LagrangianLinearR*>(R);
       if (nslaw->getType() == NEWTONIMPACTLAWNSLAW)
       {
+        vector<unsigned int> indexMax = topology->getIndexMax(currentInteraction);
+
         NewtonImpactLawNSL * newton = static_cast<NewtonImpactLawNSL*>(nslaw);
         double e = newton->getE();
         LLR->computeFreeOutput(time);
@@ -864,11 +993,23 @@ void LCP::computeQ(const double& time)
         {
           yFree = new SimpleVector(currentInteraction -> getY(1)); // copy, no pointer equality
           *yFree += e * currentInteraction -> getYOld(1);
-          for (unsigned int i = 0; i < sizeInteraction; i++)
+          for (unsigned int i = 0; i < numberOfRelations; i++)
             (*q)(i + pos) = (*yFree)(i);
         }
         else
         {
+          // compute list of effective relations
+          unsigned int k = 0;
+          for (unsigned int j = 0; j < numberOfRelations; j++)
+          {
+            for (unsigned int i = 1; i < indexMax[j] + 1; i++)
+            {
+              index[k] = j;
+              k++;
+            }
+          }
+
+
           effectiveSize = index.size();
           yFree = new SimpleVector(effectiveSize); // we get only the "effective" relations
           (currentInteraction->getY(1)).getBlock(index, *yFree); // copy, no pointer equality
@@ -927,7 +1068,7 @@ void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)
 
   vector<unsigned int> effectiveIndexes, indexMin;
   unsigned int effectivePosition;
-  unsigned int effectiveSize, sizeInteraction ;
+  unsigned int effectiveSize, numberOfRelations ;
   unsigned int i; // index of derivation for Y
   unsigned int j; // number of relation in a specific interaction
   unsigned int k;
@@ -941,7 +1082,7 @@ void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)
   {
     // the current interaction and its size
     Interaction *currentInteraction = *iter;
-    sizeInteraction = currentInteraction->getNInteraction();
+    numberOfRelations = currentInteraction->getNInteraction();
 
     // Y vector of the interactions
     Y = currentInteraction -> getY();
@@ -958,8 +1099,10 @@ void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)
     effectiveIndexes = topology->getEffectiveIndexes(currentInteraction);
     indexMin = topology->getIndexMin(currentInteraction);
     // 'offset' due to indexMin
-    for (j = 0; j < effectiveSize; j++)
-      effectiveIndexes[j] += indexMin[effectiveIndexes[j]];
+    /*      for(j=0;j<effectiveSize;j++)
+    effectiveIndexes[j] += indexMin[effectiveIndexes[j]]*numberOfRelations;
+    */
+    // Get the 'position' of vector corresponding to the current interaction, in the LCP output:
     effectivePosition = topology->getInteractionEffectivePosition(currentInteraction);
 
     // we consider that the interaction is homogeneous, ie all degrees are equals
@@ -969,6 +1112,7 @@ void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)
     unsigned int pos;
     vector<unsigned int>::iterator itPos;
     // First we get in w results corresponding to the current interaction
+
     for (j = 0; j < effectiveSize ; j++)
     {
       (*tmpY)(j) =  w(j + effectivePosition);
@@ -978,7 +1122,7 @@ void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)
     // then we save these results in Y and Lambda, only for effective relations
     for (i = 0; i < rMax ; i++)
     {
-      for (j = 0; j < sizeInteraction; j++)
+      for (j = 0; j < numberOfRelations; j++)
       {
         pos = j * rMax + i;
         for (k = 0; k < effectiveSize; k++)
@@ -995,6 +1139,8 @@ void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)
       }
     }
   }
+
+
 
   delete tmpY;
   delete tmpLambda;

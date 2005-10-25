@@ -378,6 +378,10 @@ protected:
   */
   std::map< Interaction* , std::map<Interaction *, SiconosMatrix*> >  extraDiagonalBlocksMap  ;
 
+  /** map that links each interaction with a list of indexes, giving the indexes
+      corresponding to the effective relations AND their derivatives */
+  std::map< Interaction* , std::vector<unsigned int> > blockIndexesMap ;
+
   /** structure containing the structures of the numerous solving methods */
   method solvingMethod;
 

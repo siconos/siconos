@@ -250,11 +250,19 @@ public:
   void computeExtraDiagonalBlocksLinearTIR(Relation *, Relation*, const unsigned int&, const unsigned int&, std::vector<DynamicalSystem*>,
       std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
 
-  void computeDiagonalBlocksLagrangianLinearR(Relation *, const unsigned int&, std::vector<DynamicalSystem*>, std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
+  void computeDiagonalBlocksLagrangianR(Relation *, const unsigned int&, std::vector<DynamicalSystem*>, std::map < DynamicalSystem*,
+                                        SiconosMatrix* > , const double&, SiconosMatrix*);
 
 
-  void computeExtraDiagonalBlocksLagrangianLinearR(Relation *, Relation*, const unsigned int&, const unsigned int&, std::vector<DynamicalSystem*>,
+  void computeExtraDiagonalBlocksLagrangianR(Relation *, Relation*, const unsigned int&, const unsigned int&, std::vector<DynamicalSystem*>,
       std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
+
+  /** \fn void updateBlocks();
+   *  \brief update blocks value for nonlinear relations
+   *  \return void
+   */
+  void updateBlocks();
+
   /** \fn void preLCP(const double& time)
    *  \brief pre-treatment for LCP
    *  \param double : current time
