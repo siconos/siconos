@@ -14,7 +14,7 @@ if test "$with_localcppunit" = no -o "$with_localcppunit" = yes -o "$with_localc
 esac     
 else
    AC_MSG_RESULT(option  --with-localcppunit selected :locally installed cppunit used)
-   list_dir="$with_localcppunnit/bin"
+   list_dir="$with_localcppunit/bin"
 fi
 
 cppunit_config="no"

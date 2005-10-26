@@ -322,7 +322,7 @@ void LCP::computeAllBlocks()
       vector<InteractionLink*>::iterator itLink;
 
       //map<Interaction*, SiconosMatrix*> tmpMap;
-      SiconosMatrix * coupledInteractionsBlock;
+      SiconosMatrix * coupledInteractionsBlock, *coupledInteractionsBlockSym;
 
       // loop over LinkedInteractions
       for (itLink = ILV.begin(); itLink != ILV.end(); itLink++)
@@ -337,7 +337,9 @@ void LCP::computeAllBlocks()
         sizeLinkedBlock = (rMax - indexMin[0]) * linkedInteractionSize;
 
         (extraDiagonalBlocksMap[currentInteraction])[linkedInteraction] = new SiconosMatrix(sizeBlock, sizeLinkedBlock);
+        (extraDiagonalBlocksMap[linkedInteraction])[currentInteraction] = new SiconosMatrix(sizeLinkedBlock, sizeBlock);
         coupledInteractionsBlock = extraDiagonalBlocksMap[currentInteraction][linkedInteraction];
+        coupledInteractionsBlockSym = extraDiagonalBlocksMap[linkedInteraction][currentInteraction];
 
         // get the list of common DS and their number
         vector<DynamicalSystem*> commonDS = (*itLink)->getCommonDS();
@@ -347,11 +349,17 @@ void LCP::computeAllBlocks()
         Relation * RLinked = linkedInteraction -> getRelationPtr();
         string RlinkedType = RLinked->getType();
         if (relationType == LINEARTIRELATION && RlinkedType == LINEARTIRELATION)
+        {
           computeExtraDiagonalBlocksLinearTIR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, h, coupledInteractionsBlock);
+          computeExtraDiagonalBlocksLinearTIR(RLinked, RCurrent, linkedInteractionSize, sizeInteraction, commonDS, W, h, coupledInteractionsBlockSym);
+        }
         //else if (relationType == LAGRANGIANLINEARRELATION && RlinkedType== LAGRANGIANLINEARRELATION)
         //computeExtraDiagonalBlocksLagrangianLinearR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS,W,h,coupledInteractionsBlock);
         else if ((relationType == LAGRANGIANRELATION || relationType == LAGRANGIANLINEARRELATION) && (RlinkedType == LAGRANGIANRELATION ||  RlinkedType == LAGRANGIANLINEARRELATION))
+        {
           computeExtraDiagonalBlocksLagrangianR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, h, coupledInteractionsBlock);
+          computeExtraDiagonalBlocksLagrangianR(RLinked, RCurrent, linkedInteractionSize, sizeInteraction, commonDS, W, h, coupledInteractionsBlockSym);
+        }
         else RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for relation of type " + relationType);
       } // end of loop over linked interactions
     }
@@ -456,6 +464,7 @@ void LCP::computeExtraDiagonalBlocksLinearTIR(Relation * RCurrent, Relation* RLi
     SimpleVector * currentLine = new SimpleVector(sizeInteraction);
     // a row of C corresponding to a specific DS (its size depends on the DS size)
     SimpleVector * Crow ;
+    currentLine->zero();
 
     // compute currentLine =  h sum(j) Crow,j Wj  Bj, with j the list of common DS
     // C belongs to current Interaction and B to linked interaction
@@ -595,7 +604,7 @@ void LCP::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* R
     SimpleVector * currentLine = new SimpleVector(linkedInteractionSize);
     // a row of G corresponding to a specific DS (its size depends on the DS size)
     SimpleVector * Grow ;
-
+    currentLine->zero();
     // compute currentLine =  sum(j) Grow,j Wj  tGj, with j the list of common DS
     // Grow belongs to current Interaction and tG to linked interaction
     // loop over the relations of the current interaction
@@ -614,7 +623,7 @@ void LCP::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* R
         Grow = new SimpleVector(sizeDS);
         *Grow = Gcurrent->getRow(i);
         // compute currentLine
-        *currentLine +=  h* *Grow * (W[*itDS])->multTranspose(*Glinked);
+        *currentLine +=  *Grow * (W[*itDS])->multTranspose(*Glinked);
         delete Grow;
         delete Gcurrent;
         delete Glinked;
@@ -636,7 +645,7 @@ void LCP::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* R
       Glinked = new SiconosMatrix(linkedInteractionSize, sizeDS);
       LR1->getGBlockDS(*itDS, *Gcurrent);
       LR2->getGBlockDS(*itDS, *Glinked);
-      *coupledInteractionsBlock += h* *Gcurrent * (W[*itDS])->multTranspose(*Glinked);
+      *coupledInteractionsBlock += *Gcurrent * (W[*itDS])->multTranspose(*Glinked);
       delete Gcurrent;
       delete Glinked;
     }
@@ -734,7 +743,7 @@ void LCP::updateBlocks()
       vector<InteractionLink*>::iterator itLink;
 
       //map<Interaction*, SiconosMatrix*> tmpMap;
-      SiconosMatrix * coupledInteractionsBlock;
+      SiconosMatrix * coupledInteractionsBlock, *coupledInteractionsBlockSym;
 
       // loop over LinkedInteractions
       for (itLink = ILV.begin(); itLink != ILV.end(); itLink++)
@@ -749,6 +758,7 @@ void LCP::updateBlocks()
         sizeLinkedBlock = (rMax - indexMin[0]) * linkedInteractionSize;
 
         coupledInteractionsBlock = extraDiagonalBlocksMap[currentInteraction][linkedInteraction];
+        coupledInteractionsBlockSym = extraDiagonalBlocksMap[linkedInteraction][currentInteraction];
 
         // get the list of common DS and their number
         vector<DynamicalSystem*> commonDS = (*itLink)->getCommonDS();
@@ -760,7 +770,10 @@ void LCP::updateBlocks()
         if (relationType == LAGRANGIANLINEARRELATION && RlinkedType == LAGRANGIANLINEARRELATION)
         {}// Nothing to be done, blocks allready computed
         else if (relationType == LAGRANGIANRELATION || RlinkedType == LAGRANGIANRELATION)
+        {
           computeExtraDiagonalBlocksLagrangianR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, h, coupledInteractionsBlock);
+          computeExtraDiagonalBlocksLagrangianR(RLinked, RCurrent, linkedInteractionSize, sizeInteraction, commonDS, W, h, coupledInteractionsBlockSym);
+        }
         else RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for relation of type " + relationType);
       } // end of loop over linked interactions
     }

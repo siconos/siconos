@@ -174,6 +174,8 @@ AC_ARG_WITH(locallapackpp,
 	[  --with-locallapackpp=path	indicates a local path of lapackpp lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
 AC_ARG_WITH(locallibxml,		
 	[  --with-locallibxml=path	indicates a local path of libxml lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
+AC_ARG_WITH(localcppunit,		
+	[  --with-localcppunit=path	indicates a local path of cppunit lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
 
 #################################
 ## Checks for external libraries
