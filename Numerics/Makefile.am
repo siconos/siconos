@@ -21,11 +21,11 @@
 include $(top_srcdir)/config/Make-rules
 
 # Test directories if cppunit is present.
-if CPPUNIT_COND
-       TEST_OPT = test
-endif	
+#if CPPUNIT_COND
+#       TEST_OPT = 
+#endif	
 
-SUBDIRS = src $(TEST_OPT)
+SUBDIRS = src 
 
 
 EXTRA_DIST = 
