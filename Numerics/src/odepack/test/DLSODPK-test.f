@@ -119,8 +119,8 @@ c and the dimension liw of iwork must be .ge. 35 + ns*ngrp.
       dimension cc(576), rwork(5213), iwork(67)
       data lrw/5213/, liw/67/
 c
-      open (unit=6, file='demout', status='new')
-      open (unit=8, file='ccout', status='new')
+      open (unit=6, file='demout', status='unknown')
+      open (unit=8, file='ccout', status='unknown')
 c
       ax = 1.0d0
       ay = 1.0d0

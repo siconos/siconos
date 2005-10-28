@@ -80,7 +80,7 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   char        NT = 'N';
 
-  method      meth_pfc1, meth_pfc2, meth_pfc3;
+  method      meth_pfc_2D1, meth_pfc_2D2, meth_pfc_2D3;
 
 
 
@@ -91,26 +91,26 @@ void pfc_2D_series(int n , double *vec , double *q)
 
 
 
-  strcpy(meth_pfc1.pfc.name, "NLGS");
-  meth_pfc1.pfc.itermax  =  10000;
-  meth_pfc1.pfc.tol      =  0.000000001;
-  meth_pfc1.pfc.chat     =  1;
-  meth_pfc1.pfc.mu       =  0.3;
+  strcpy(meth_pfc_2D1.pfc_2D.name, "NLGS");
+  meth_pfc_2D1.pfc_2D.itermax  =  10000;
+  meth_pfc_2D1.pfc_2D.tol      =  0.000000001;
+  meth_pfc_2D1.pfc_2D.chat     =  1;
+  meth_pfc_2D1.pfc_2D.mu       =  0.3;
 
 
-  strcpy(meth_pfc2.pfc.name, "CPG");
-  meth_pfc2.pfc.itermax  =  7000;
-  meth_pfc2.pfc.tol      =  0.0000000001;
-  meth_pfc2.pfc.chat     =  1;
-  meth_pfc2.pfc.mu       =  0.3;
+  strcpy(meth_pfc_2D2.pfc_2D.name, "CPG");
+  meth_pfc_2D2.pfc_2D.itermax  =  7000;
+  meth_pfc_2D2.pfc_2D.tol      =  0.0000000001;
+  meth_pfc_2D2.pfc_2D.chat     =  1;
+  meth_pfc_2D2.pfc_2D.mu       =  0.3;
 
 
-  strcpy(meth_pfc3.pfc.name, "Latin");
-  meth_pfc3.pfc.itermax  =  15000;
-  meth_pfc3.pfc.tol      =  0.00000000000001;
-  meth_pfc3.pfc.chat     =  1;
-  meth_pfc3.pfc.mu       =  0.3;
-  meth_pfc3.pfc.k_latin  =  5.5;
+  strcpy(meth_pfc_2D3.pfc_2D.name, "Latin");
+  meth_pfc_2D3.pfc_2D.itermax  =  15000;
+  meth_pfc_2D3.pfc_2D.tol      =  0.00000000000001;
+  meth_pfc_2D3.pfc_2D.chat     =  1;
+  meth_pfc_2D3.pfc_2D.mu       =  0.3;
+  meth_pfc_2D3.pfc_2D.k_latin  =  5.5;
 
 
 
@@ -183,7 +183,7 @@ void pfc_2D_series(int n , double *vec , double *q)
     w1[i] = 0.0;
   }
 
-  info[0] = pfc_2D_solver(vec , q , &n , &meth_pfc1 , z1 , w1);
+  info[0] = pfc_2D_solver(vec , q , &n , &meth_pfc_2D1 , z1 , w1);
 
 
 #ifdef BAVARD
@@ -195,7 +195,7 @@ void pfc_2D_series(int n , double *vec , double *q)
     w2[i] = 0.;
   }
 
-  info[1] = pfc_2D_solver(vec , q , &n , &meth_pfc2 , z2 , w2);
+  info[1] = pfc_2D_solver(vec , q , &n , &meth_pfc_2D2 , z2 , w2);
 
 
 #ifdef BAVARD
@@ -207,7 +207,7 @@ void pfc_2D_series(int n , double *vec , double *q)
     w3[i] = 0.0;
   }
 
-  info[2] = pfc_2D_solver(vec , q , &n , &meth_pfc3 , z3 , w3);
+  info[2] = pfc_2D_solver(vec , q , &n , &meth_pfc_2D3 , z3 , w3);
 
 
 #ifdef BAVARD
@@ -580,7 +580,7 @@ void pfc_2D_series(int n , double *vec , double *q)
 
 
 
-  printf("\n  NLGS (LOG:%1d)|%5d|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|" , info[0] , meth_pfc1.pfc.iter , diff , r1, r2, comp1, max11, comp11, comp111, comp1111);
+  printf("\n  NLGS (LOG:%1d)|%5d|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|" , info[0] , meth_pfc_2D1.pfc_2D.iter , diff , r1, r2, comp1, max11, comp11, comp111, comp1111);
 
 
   /*                Complementary of normal part        */
@@ -898,7 +898,7 @@ void pfc_2D_series(int n , double *vec , double *q)
 
 
 
-  printf("\n   CPG (LOG:%1d)|%5d|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|" , info[1] , meth_pfc2.pfc.iter , diff , r1, r2, comp2, max22, comp22, comp222, comp2222);
+  printf("\n   CPG (LOG:%1d)|%5d|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|" , info[1] , meth_pfc_2D2.pfc_2D.iter , diff , r1, r2, comp2, max22, comp22, comp222, comp2222);
 
 
   /*        Complementary of normal part            */
@@ -1213,7 +1213,7 @@ void pfc_2D_series(int n , double *vec , double *q)
   diff = num / den ;
 
 
-  printf("\n LATIN (LOG:%1d)|%5d|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e| \n \n" , info[2] , meth_pfc3.pfc.iter , diff , r1, r2, comp3, max33, comp33, comp333, comp3333);
+  printf("\n LATIN (LOG:%1d)|%5d|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e|%7.4e| \n \n" , info[2] , meth_pfc_2D3.pfc_2D.iter , diff , r1, r2, comp3, max33, comp33, comp333, comp3333);
 
 
 

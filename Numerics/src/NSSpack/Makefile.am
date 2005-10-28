@@ -25,7 +25,7 @@ include $(top_srcdir)/config/Make-rules
 .f.o:
 	$(F77COMPILE) -c $<
 
-SUBDIRS =
+SUBDIRS = test
 
 ### LCP #####################################################
 
@@ -71,9 +71,9 @@ DR_SOLVERS = dr_latin.c dr_nlgs.c
 
 ##############################################################
 
-noinst_LTLIBRARIES = libsolverpack.la
+noinst_LTLIBRARIES = libNSSpack.la
 
-libsolverpack_la_SOURCES = solverpack.h \
+libNSSpack_la_SOURCES = solverpack.h \
 	minf.c maxf.c \
 	$(LCP_SOURCES) \
 	$(PFC_SOURCES) \
@@ -84,6 +84,6 @@ libsolverpack_la_SOURCES = solverpack.h \
 	ql0001.f sortsn.f diffns.c
 
 
-libsolverpack_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
+libNSSpack_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
 include_HEADERS = solverpack.h SiconosNumerics_lab.h # solverpack.h header to be added !!!

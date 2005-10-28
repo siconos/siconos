@@ -326,9 +326,8 @@ AC_CONFIG_FILES([Makefile
                  src/utils/Makefile
 		 src/odepack/Makefile
 		 src/odepack/test/Makefile
-		 src/solverpack/Makefile
-		 src/solverpack/src/Makefile
-		 src/solverpack/test/Makefile])
+		 src/NSSpack/Makefile
+		 src/NSSpack/test/Makefile])
 AC_OUTPUT
 
 
