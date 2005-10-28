@@ -66,7 +66,7 @@
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "solverpack.h"
+#include "NSSpack.h"
 #endif
 
 int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , double *F2)

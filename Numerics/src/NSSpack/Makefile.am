@@ -73,7 +73,7 @@ DR_SOLVERS = dr_latin.c dr_nlgs.c
 
 noinst_LTLIBRARIES = libNSSpack.la
 
-libNSSpack_la_SOURCES = solverpack.h \
+libNSSpack_la_SOURCES = NSSpack.h \
 	minf.c maxf.c \
 	$(LCP_SOURCES) \
 	$(PFC_SOURCES) \
@@ -86,4 +86,4 @@ libNSSpack_la_SOURCES = solverpack.h \
 
 libNSSpack_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
-include_HEADERS = solverpack.h SiconosNumerics_lab.h # solverpack.h header to be added !!!
+include_HEADERS = NSSpack.h SiconosNumerics_lab.h

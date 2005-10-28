@@ -20,7 +20,7 @@ dnl configure script for SICONOS
 dnl V. ACARY, 2005
 
 AC_PREREQ(2.57)
-AC_INIT(SICONOS, 1.0, www.siconos.com)
+AC_INIT(SICONOS, 1.0, siconos.gforge.inria.fr)
 
 dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_SYSTEM

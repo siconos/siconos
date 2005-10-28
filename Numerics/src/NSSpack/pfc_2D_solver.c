@@ -63,7 +63,7 @@
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "solverpack.h"
+#include "NSSpack.h"
 #endif
 
 int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w)

@@ -63,7 +63,7 @@
 #include <stdlib.h>
 #include <string.h>
 #ifndef MEXFLAG
-#include "solverpack.h"
+#include "NSSpack.h"
 #endif
 #include <time.h>
 

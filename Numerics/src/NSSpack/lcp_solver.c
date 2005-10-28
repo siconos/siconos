@@ -59,7 +59,7 @@
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "solverpack.h"
+#include "NSSpack.h"
 #endif
 
 int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w)

@@ -98,7 +98,7 @@
 #include <string.h>
 #include <time.h>
 #ifndef MEXFLAG
-#include "solverpack.h"
+#include "NSSpack.h"
 #endif
 #include "blaslapack.h"
 

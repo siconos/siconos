@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "solverpack.h"
+#include "NSSpack.h"
 
 //#include "odepack.h"
 

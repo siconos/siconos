@@ -57,7 +57,7 @@
 //  where M       is an n by n matrix,
 //        q       an n-dimensional vector,
 //        n       is the row dimension of M,
-//        pt      a pointer other a union ( methode see "solverpack.h").
+//        pt      a pointer other a union ( methode see "NSSpack.h").
 //        z and w are n-dimensional  vectors solution.
 //
 //        methode is a variable with a union type; in this union you find the structure (method_dr) that gives to the function
@@ -71,7 +71,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "solverpack.h"
+#include "NSSpack.h"
 #include "blaslapack.h"
 
 #define CHAT
