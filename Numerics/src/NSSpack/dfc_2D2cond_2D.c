@@ -77,10 +77,10 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
 
 
   int            i, j, taille_i, taille_n, taille_tt, taille_c, taille_F1, kk, taille_d;
-  int            info2, incx = 1, ind1, ind2;
+  int            info2,  ind1, ind2;
   int            *sort, *sort1, *sort2, *ddl_c, *vecF1, *vec_i, *ddl_i, dim_nn, dim_i;
   int            taille_sort;
-
+  integer incx = 1;
 
   double         alpha, invKii0;
   double         *Mlat;
@@ -288,7 +288,7 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
   /*                        Cholesky                                   */
 
 
-  dpotrf_(&uplo, &taille_i, R , &taille_i, &info2);
+  dpotrf_(&uplo, (integer *)&taille_i, R , (integer *)&taille_i, (integer *)&info2);
 
 
 
@@ -489,7 +489,7 @@ void dfc_2D2cond_2D(int *dim_F1, double *mumu, double *K1, double *F1, int *ddl_
 
 
   alpha = -1;
-  dscal_(&taille_c, &alpha, q, &incx);
+  dscal_((integer *)&taille_c, &alpha, q, &incx);
 
 
 

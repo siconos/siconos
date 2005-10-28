@@ -85,9 +85,9 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 {
 
   int i, j, k, iter, maxit;
-  int n = *nn, incx, incy, nc = n / 2;
+  int n = *nn, nc = n / 2;
   int ispeak, it_end;
-
+  integer  incx, incy;
 
   double errmax, alpha, beta, mu;
   double *y, res;
@@ -309,20 +309,20 @@ void pfc_2D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     incx = 1;
     incy = 1;
 
-    dcopy_(&n, q, &incx, y, &incy);
+    dcopy_((integer *)&n, q, &incx, y, &incy);
 
     alpha = 1.;
     beta  = 1.;
-    dgemv_(&notrans, &n, &n, &alpha, vec, &n, z, &incx, &beta, y, &incy);
+    dgemv_(&notrans, (integer *)&n, (integer *)&n, &alpha, vec, (integer *)&n, z, &incx, &beta, y, &incy);
 
 
 
     alpha = -1.;
-    daxpy_(&n, &alpha, w, &incx, y, &incy);
+    daxpy_((integer *)&n, &alpha, w, &incx, y, &incy);
 
 
-    num1 = ddot_(&n, y, &incx, y, &incy);
-    den1 = ddot_(&n, q, &incx, q, &incy);
+    num1 = ddot_((integer *)&n, y, &incx, y, &incy);
+    den1 = ddot_((integer *)&n, q, &incx, q, &incy);
 
 
     normr = sqrt(num1 / den1);

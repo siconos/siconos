@@ -82,9 +82,9 @@ void sortsn_(int *ddl_i, int *sort, int *n);
 void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n , int *ddl_tt , int * dim_nc, int *ddl_d, int *dim_d , double *J1 , double *MM , double *q)
 {
   int            i, j, taille_i, taille_n, taille_tt, taille_c, taille_F1, kk, taille_sort;
-  int            info2, incx = 1, nnn, ind1, ind2, taille_d;
+  int            info2,  nnn, ind1, ind2, taille_d;
   int            *sort, *sort1, *sort2, *ddl_c, *vecF1, *vec_i, n3, *ddl_i, dim_nn, dim_i;
-
+  integer incx = 1;
 
   double         mu = *mumu, alpha, invKii0;
   double         *M;
@@ -362,7 +362,7 @@ void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n
   /*                        Cholesky                                   */
 
 
-  dpotrf_(&uplo, &taille_i, R , &taille_i, &info2);
+  dpotrf_(&uplo, (integer *)&taille_i, R , (integer *)&taille_i, (integer *)&info2);
 
 
 
@@ -816,7 +816,7 @@ void dfc_2D2lcp(int *dim_F1 , double *mumu , double *K1 , double *F1, int *ddl_n
 
 
   alpha = -1.;
-  dscal_(&n3, &alpha, q, &incx);
+  dscal_((integer *)&n3, &alpha, q, &incx);
 
 
 

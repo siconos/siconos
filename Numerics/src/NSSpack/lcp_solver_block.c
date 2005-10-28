@@ -212,7 +212,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   /* Check for non trivial case */
 
   incx = 1;
-  qs = dnrm2_(&n , q , &incx);
+  qs = dnrm2_((integer *)&n , q , (integer *)&incx);
 
   if (qs > 1e-16) den = 1.0 / qs;
   else
@@ -236,7 +236,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
 
   incx = 1;
   incy = 1;
-  dcopy_(&n , q , &incx , w , &incy);
+  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
 
   iter = 0;
   err  = 1.;
@@ -250,7 +250,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
     incx = 1;
     incy = 1;
 
-    dcopy_(&n , w , &incx , ww , &incy);
+    dcopy_((integer *)&n , w , (integer *)&incx , ww , (integer *)&incy);
 
     for (i = 0 ; i < *dn ; ++i)
     {
@@ -277,7 +277,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
         incx = 1;
         incy = 1;
 
-        dgemv_(&NOTRANS , db , db , &a1 , &vec[iblock * db2] , db , &z[(*db)*k] , &incx , &b1 , rhs , &incy);
+        dgemv_(&NOTRANS , (integer *)db , (integer *)db , &a1 , &vec[iblock * db2] , (integer *)db , &z[(*db)*k] , (integer *)&incx , &b1 , rhs , (integer *)&incy);
         ++iblock;
 
       }
@@ -295,9 +295,9 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
     incx =  1;
     incy =  1;
 
-    daxpy_(&n , &qs , w , &incx , ww , &incy);
+    daxpy_((integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy);
 
-    num = dnrm2_(&n, ww , &incx);
+    num = dnrm2_((integer *)&n, ww , (integer *)&incx);
     err = num * den;
 
     /* **** ********************* **** */

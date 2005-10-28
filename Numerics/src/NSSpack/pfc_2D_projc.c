@@ -42,7 +42,7 @@
 #include <math.h>
 
 
-pfc_2D_projc(double xi[], int *nn, int statusi[], double pi[], double fric[], double *projc1, int *projc2)
+void pfc_2D_projc(double xi[], int *nn, int statusi[], double pi[], double fric[], double *projc1, int *projc2)
 
 {
 

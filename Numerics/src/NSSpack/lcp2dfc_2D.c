@@ -84,7 +84,8 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
 
 
 
-  int      info2, incx = 1, incy = 1, *vectnt, ind1, ind2;
+  int      info2,  *vectnt, ind1, ind2;
+  integer incx = 1, incy = 1;
   int      dim_n, i, j, taille_n = *dim_tt, taille_tt = *dim_tt, taille_i;
   int      taille_c, *ddl_nr, *ddl_tr, nc, taille_nr, taille_tr, taille_F1 = *dim_F1;
   int      taille_d = *dim_d, taille_sort;
@@ -272,7 +273,7 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
   /*                   Cholesky            */
 
 
-  dpotrf_(&uplo, &taille_i, R , &taille_i, &info2);
+  dpotrf_(&uplo, (integer *)&taille_i, R , (integer *)&taille_i, (integer *)&info2);
 
 
   if (info2 != 0)
@@ -439,7 +440,7 @@ void lcp2dfc_2D(int *dim_F1, double *ztel, double *wtel, double *K1, double *F1,
 
 
 
-  dcopy_(&taille_i, Fi, &incx, temp_i, &incy);
+  dcopy_((integer *)&taille_i, Fi, &incx, temp_i, &incy);
 
 
   for (i = 0; i < taille_i; i++)

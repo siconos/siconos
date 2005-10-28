@@ -84,8 +84,8 @@ void pr_nlgs(double *vec, double *q, int *nn, double *a, double *b, int * iterma
 
 
   int i, j, iter1, k, ispeak = *chat;
-  int n = *nn, incx = 1, incy = 1, itt = *itermax;
-
+  int n = *nn,  itt = *itermax;
+  integer incx = 1, incy = 1;
 
   double errmax = *tol, alpha, beta, mina;
   double err1, num, den, avn, apn, xn;
@@ -176,18 +176,18 @@ void pr_nlgs(double *vec, double *q, int *nn, double *a, double *b, int * iterma
 
     /*          Convergence criterium      */
 
-    dcopy_(&n, w, &incx, wnum1, &incy);
+    dcopy_((integer *)&n, w, &incx, wnum1, &incy);
 
     alpha = -1.;
-    daxpy_(&n, &alpha, q, &incx, wnum1, &incy);
+    daxpy_((integer *)&n, &alpha, q, &incx, wnum1, &incy);
 
     alpha = 1.;
     beta = -1.;
-    dgemv_(&trans, &n, &n, &alpha, vec, &n, z, &incx, &beta, wnum1, &incy);
+    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, vec, (integer *)&n, z, &incx, &beta, wnum1, &incy);
 
-    num = ddot_(&n, wnum1, &incx, wnum1, &incy);
+    num = ddot_((integer *)&n, wnum1, &incx, wnum1, &incy);
 
-    den = ddot_(&n, q, &incx, q, &incy);
+    den = ddot_((integer *)&n, q, &incx, q, &incy);
 
     err1 = sqrt(num) / sqrt(den);
 

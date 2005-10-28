@@ -79,9 +79,9 @@ void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *i
 
 
   int      i, j,  iter1, info2, nrhs, iout;
-  int      n, incx, incy, n2;
+  int      n, n2;
   int      itermax, itt, it_end;
-
+  integer incx, incy;
 
   double   alpha, beta;
   double   err1, num11, err0;
@@ -255,7 +255,7 @@ void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *i
   /*            Cholesky              */
 
 
-  dpotrf_(&uplo, &n, DPO , &n, &info2);
+  dpotrf_(&uplo, (integer*)&n, DPO , (integer*)&n, (integer*)&info2);
 
 
   if (info2 != 0)
@@ -309,60 +309,60 @@ void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *i
 
     alpha = 1.;
     beta  = 1.;
-    dgemv_(&trans, &n, &n, &alpha, k, &n, zc, &incx, &beta, wc, &incy);
+    dgemv_(&trans, (integer*)&n, (integer*)&n, &alpha, k, (integer*)&n, zc, &incx, &beta, wc, &incy);
 
 
-    dcopy_(&n, qq, &incx, znum1, &incy);
+    dcopy_((integer*)&n, qq, &incx, znum1, &incy);
 
 
     alpha = -1.;
-    dscal_(&n , &alpha , znum1 , &incx);
+    dscal_((integer*)&n , &alpha , znum1 , &incx);
 
     alpha = 1.;
-    daxpy_(&n, &alpha, wc, &incx, znum1, &incy);
+    daxpy_((integer*)&n, &alpha, wc, &incx, znum1, &incy);
     nrhs = 1;
 
 
-    dtrtrs_(&uplo, &trans, &diag, &n, &nrhs, DPO, &n, znum1, &n, &info2);
+    dtrtrs_(&uplo, &trans, &diag, (integer*)&n, (integer*)&nrhs, DPO, (integer*)&n, znum1, (integer*)&n, (integer *)&info2);
 
-    dtrtrs_(&uplo, &notrans, &diag, &n, &nrhs, DPO, &n, znum1, &n, &info2);
+    dtrtrs_(&uplo, &notrans, &diag, (integer*)&n, (integer*)&nrhs, DPO, (integer*)&n, znum1, (integer*)&n, (integer *)&info2);
 
-    dcopy_(&n, znum1, &incx, z, &incy);
+    dcopy_((integer*)&n, znum1, &incx, z, &incy);
 
 
 
 
     alpha = -1.;
     beta = 1.;
-    dgemv_(&trans, &n, &n, &alpha, k, &n, z, &incx, &beta, wc, &incy);
+    dgemv_(&trans, (integer*)&n, (integer*)&n, &alpha, k, (integer*)&n, z, &incx, &beta, wc, &incy);
 
-    dcopy_(&n, wc, &incx, w, &incy);
-
-    alpha = omega;
-    dscal_(&n , &alpha , z , &incx);
-
-    alpha = 1.0 - omega;
-    daxpy_(&n, &alpha, zn, &incx, z, &incy);
-
+    dcopy_((integer*)&n, wc, &incx, w, &incy);
 
     alpha = omega;
-    dscal_(&n , &alpha , w , &incx);
+    dscal_((integer*)&n , &alpha , z , &incx);
 
     alpha = 1.0 - omega;
-    daxpy_(&n, &alpha, wn, &incx, w, &incy);
+    daxpy_((integer*)&n, &alpha, zn, &incx, z, &incy);
 
 
-    dcopy_(&n, w, &incx, wn, &incy);
-    dcopy_(&n, z, &incx, zn, &incy);
+    alpha = omega;
+    dscal_((integer*)&n , &alpha , w , &incx);
+
+    alpha = 1.0 - omega;
+    daxpy_((integer*)&n, &alpha, wn, &incx, w, &incy);
+
+
+    dcopy_((integer*)&n, w, &incx, wn, &incy);
+    dcopy_((integer*)&n, z, &incx, zn, &incy);
 
 
 
     /*         Local Stage                  */
 
-    dcopy_(&n, w, &incx, wt, &incy);
+    dcopy_((integer*)&n, w, &incx, wt, &incy);
     alpha = -1.;
     beta = 1.;
-    dgemv_(&trans, &n, &n, &alpha, k, &n, z, &incx, &beta, wt, &incy);
+    dgemv_(&trans, (integer*)&n, (integer*)&n, &alpha, k, (integer*)&n, z, &incx, &beta, wt, &incy);
 
 
 
@@ -386,19 +386,19 @@ void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *i
     /*         Convergence criterium                */
 
 
-    dcopy_(&n, w, &incx, wnum1, &incy);
+    dcopy_((integer*)&n, w, &incx, wnum1, &incy);
     alpha = -1.;
-    daxpy_(&n, &alpha, wc, &incx, wnum1, &incy);
+    daxpy_((integer*)&n, &alpha, wc, &incx, wnum1, &incy);
 
 
-    dcopy_(&n, z, &incx, znum1, &incy);
-    daxpy_(&n, &alpha, zc, &incx, znum1, &incy);
+    dcopy_((integer*)&n, z, &incx, znum1, &incy);
+    daxpy_((integer*)&n, &alpha, zc, &incx, znum1, &incy);
 
 
 
     alpha = 1.;
     beta = 1.;
-    dgemv_(&trans, &n, &n, &alpha, k, &n, znum1, &incx, &beta, wnum1, &incy);
+    dgemv_(&trans, (integer*)&n, (integer*)&n, &alpha, k, (integer*)&n, znum1, &incx, &beta, wnum1, &incy);
 
 
     /*    wnum1(:) =(w(:)-wc(:))+matmul( k(:,:),(z(:)-zc(:)))   */
@@ -407,34 +407,34 @@ void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *i
 
     alpha = 1.;
     beta = 0.;
-    dgemv_(&trans, &n, &n, &alpha, kinv, &n, wnum1, &incx, &beta, kinvnum1, &incy);
+    dgemv_(&trans, (integer*)&n, (integer*)&n, &alpha, kinv, (integer*)&n, wnum1, &incx, &beta, kinvnum1, &incy);
 
 
-    num11 = ddot_(&n, wnum1, &incx, kinvnum1, &incy);
+    num11 = ddot_((integer*)&n, wnum1, &incx, kinvnum1, &incy);
 
 
 
 
-    dcopy_(&n, z, &incx, zz, &incy);
-    dcopy_(&n, w, &incx, ww, &incy);
+    dcopy_((integer*)&n, z, &incx, zz, &incy);
+    dcopy_((integer*)&n, w, &incx, ww, &incy);
 
     alpha = 1.;
-    daxpy_(&n, &alpha, wc, &incx, ww, &incy);
+    daxpy_((integer*)&n, &alpha, wc, &incx, ww, &incy);
 
-    daxpy_(&n, &alpha, zc, &incx, zz, &incy);
+    daxpy_((integer*)&n, &alpha, zc, &incx, zz, &incy);
 
     beta = 0.;
     alpha = 1.;
-    dgemv_(&trans, &n, &n, &alpha, k, &n, zz, &incx, &beta, kzden1, &incy);
+    dgemv_(&trans, (integer*)&n, (integer*)&n, &alpha, k, (integer*)&n, zz, &incx, &beta, kzden1, &incy);
 
 
-    den22 = ddot_(&n, zz, &incx, kzden1, &incy);
+    den22 = ddot_((integer*)&n, zz, &incx, kzden1, &incy);
 
     beta = 0.;
     alpha = 1.;
-    dgemv_(&trans, &n, &n, &alpha, kinv, &n, ww, &incx, &beta, kinvwden1, &incy);
+    dgemv_(&trans, (integer*)&n, (integer*)&n, &alpha, kinv, (integer*)&n, ww, &incx, &beta, kinvwden1, &incy);
 
-    den11 = ddot_(&n, ww, &incx, kinvwden1, &incy);
+    den11 = ddot_((integer*)&n, ww, &incx, kinvwden1, &incy);
 
 
 

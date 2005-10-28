@@ -91,7 +91,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   int n = *nn, m, mm, k;
   int itermax, ispeak;
 
-  int incx, incy;
+  integer  incx, incy;
   char NOTRANS = 'N';
   double err, tol, a1, b1;
   double alpha;
@@ -156,12 +156,12 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   a1 = -1.;
   b1 = -1.;
   /* / q --> H*/
-  dcopy_(&n , q , &incx , H , &incy);
+  dcopy_((integer*)&n , q , &incx , H , &incy);
   /* / -Mz-q --> H*/
-  dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , H , &incy);
+  dgemv_(&NOTRANS , (integer*)&n , (integer*)&n , &a1 , vec , (integer*)&n , z , &incx , &b1 , H , &incy);
   /* / w+H --> H*/
   alpha = 1.0;
-  daxpy_(&n , &alpha , w , &incx , H , &incy);     /* / c'est faux*/
+  daxpy_((integer*)&n , &alpha , w , &incx , H , &incy);     /* / c'est faux*/
 
 
   for (i = n; i < m; i++)
@@ -201,9 +201,9 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
 
     /* / Computation of the element of the subgradient.*/
 
-    dcopy_(&mm , JacH , &incx , A , &incy);
+    dcopy_((integer *)&mm , JacH , &incx , A , &incy);
     k = 1;
-    F77NAME(dgesv)(&m, &k, A, &m, ipiv, H, &m, &infoDGESV);
+    F77NAME(dgesv)((integer *)&m, (integer *)&k, A, (integer *)&m, (integer *)ipiv, H, (integer *)&m, (integer *)&infoDGESV);
 
     if (infoDGESV)
     {
@@ -219,23 +219,23 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
       free(JacH);
       free(ipiv);
       free(rho);
-      return (*info = 2);
+      (*info = 2);
 
     }
 
 
     /* / iteration*/
     alpha = -1.0;
-    daxpy_(&n , &alpha , H , &incx , z , &incy);     /* /  z-H --> z*/
-    daxpy_(&n , &alpha , &H[n] , &incx , w , &incy);  /* /  w-H --> w*/
+    daxpy_((integer*)&n , &alpha , H , &incx , z , &incy);     /* /  z-H --> z*/
+    daxpy_((integer*)&n , &alpha , &H[n] , &incx , w , &incy);  /* /  w-H --> w*/
 
     /* / Construction of the RHS for the next iterate and for the error evalutaion*/
     a1 = 1.;
     b1 = 1.;
-    dcopy_(&n , q , &incx , H , &incy);                                         /* / q --> H*/
-    dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , H , &incy);  /* / Mz+q --> H*/
+    dcopy_((integer*)&n , q , &incx , H , &incy);                                         /* / q --> H*/
+    dgemv_(&NOTRANS , (integer*)&n , (integer*)&n , &a1 , vec , (integer*)&n , z , &incx , &b1 , H , &incy);  /* / Mz+q --> H*/
     alpha = -1.0;
-    daxpy_(&n , &alpha , w , &incx , H , &incy);                               /* / w-Mz-q --> H*/
+    daxpy_((integer*)&n , &alpha , w , &incx , H , &incy);                               /* / w-Mz-q --> H*/
 
     for (i = n; i < m; i++)
     {
@@ -245,7 +245,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
 
     /* / Error Evaluation*/
 
-    err = dnrm2_(&m , H , &incx);
+    err = dnrm2_((integer *)&m , H , &incx);
 
   }
 

@@ -20,7 +20,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "blaslapack.h"
 
 
 /*!\file lcp_lemke.c
@@ -63,8 +63,9 @@ void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem, do
 {
 
 
-  int n = *nn, i, j, k, pos_z0, pos_pivot, pos_q, incx, incy, pos,  itt = *itermax, s[n], *ss, kk, test_out;
+  int n = *nn, i, j, k, pos_z0, pos_pivot, pos_q,  pos,  itt = *itermax, s[n], *ss, kk, test_out;
   int *basic, iter, pos_out0, pos_out, *posA, dim_posA, dimposAA, *posAA, nonbasic, compt;
+  integer incx, incy;
   double  alpha, beta, qs, z0, *tempo, *rtmp, *sol, pdt, pivot;
   double M[n][n], val, aa, bb, cc, WI[n][n], W[n][n], MM[n][n], q[n], qq[n];
   double z[n], w[n];
@@ -436,12 +437,12 @@ void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem, do
     incy = 1;
     alpha = -1.;
     beta = 1.;
-    dcopy_(&n, w, &incx, Mz, &incy);
-    dgemv_(&trans, &n, &n, &alpha, M, &n, z, &incx, &beta, Mz, &incy);
+    dcopy_((integer *)&n, w, &incx, Mz, &incy);
+    dgemv_(&trans, (integer *)&n, (integer *)&n, &alpha, M, (integer *)&n, z, &incx, &beta, Mz, &incy);
     beta = -1.;
-    daxpy_(&n, &beta, q, &incx, Mz, &incy);
-    num = ddot_(&n, Mz, &incx, Mz, &incy);
-    den = ddot_(&n, q, &incx, q, &incy);
+    daxpy_((integer *)&n, &beta, q, &incx, Mz, &incy);
+    num = ddot_((integer *)&n, Mz, &incx, Mz, &incy);
+    den = ddot_((integer *)&n, q, &incx, q, &incy);
     resi = sqrt(num) / sqrt(den);
     *res = resi;
     minw = w[0];
@@ -453,7 +454,7 @@ void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem, do
     }
 
 
-    pdt = ddot_(&n, w, &incx, z, &incy);
+    pdt = ddot_((integer *)&n, w, &incx, z, &incy);
     printf("equilibrium %g min(w) %g min(z) %g w'z %g z0 %g\n", resi, minw, minz, pdt, z0);
 
     for (i = 0; i < n; i++)

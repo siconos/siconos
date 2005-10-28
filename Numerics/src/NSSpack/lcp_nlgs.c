@@ -104,8 +104,10 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   diag = (double*)malloc(n * sizeof(double));
 
   /* Check for non trivial case */
+  integer totoincx;
+  totoincx = (integer)incx;
 
-  qs = dnrm2_(&n , q , &incx);
+  qs = dnrm2_((integer *)&n , q , (integer *)&incx);
 
   if (ispeak > 0) printf("\n ||q||= %g \n", qs);
 
@@ -135,7 +137,7 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
   incx = 1;
   incy = 1;
-  dcopy_(&n , q , &incx , w , &incy);
+  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
 
   /* Preparation of the diagonal of the inverse matrix */
 
@@ -167,7 +169,7 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   incx = 1;
   incy = 1;
 
-  dcopy_(&n , q , &incx , w , &incy);
+  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
 
   while ((iter < itermax) && (err > tol))
   {
@@ -177,8 +179,8 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
     incx = 1;
     incy = 1;
 
-    dcopy_(&n , w , &incx , ww , &incy);
-    dcopy_(&n , q , &incx , w , &incy);
+    dcopy_((integer *)&n , w , (integer *)&incx , ww , (integer *)&incy);
+    dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
 
     for (i = 0 ; i < n ; ++i)
     {
@@ -188,7 +190,7 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
       z[i] = 0.0;
 
-      zi = -(q[i] + ddot_(&n , &vec[i] , &incx , z , &incy)) * diag[i];
+      zi = -(q[i] + ddot_((integer *)&n , &vec[i] , (integer *)&incx , z , (integer *)&incy)) * diag[i];
 
       if (zi < 0) z[i] = 0.0;
       else z[i] = zi;
@@ -203,12 +205,12 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
     a1 = 1.0;
     b1 = 1.0;
 
-    dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , w , &incy);
+    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , (integer *)&incx , &b1 , w , (integer *)&incy);
 
     qs   = -1.0;
-    daxpy_(&n , &qs , w , &incx , ww , &incy);
+    daxpy_((integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy);
 
-    num = dnrm2_(&n, ww , &incx);
+    num = dnrm2_((integer *)&n, ww , (integer *)&incx);
     err = num * den;
 
     if (ispeak == 2)

@@ -78,13 +78,19 @@ w - M z = q \\
 #include <math.h>
 #include "blaslapack.h"
 
+void pfc_2D_projc(double *, int *, int *  , double *, double *, double *, int *) ;
+void pfc_2D_projf(int *, int *, double *, double *, double *);
+
+
+
 void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , int *info,
                 int *iparamPFC , double *dparamPFC)
 {
 
 
   int       n = *nn, maxit, ispeak;
-  int       nc = n / 2, i, iter, incx = 1, incy = 1;
+  int       nc = n / 2, i, iter;
+  integer incx = 1, incy = 1;
   int       *stat, *statusi, it_end;
 
 
@@ -153,12 +159,12 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
 
 
 
-  dcopy_(&n, b, &incx, r, &incy);
+  dcopy_((integer *)&n, b, &incx, r, &incy);
 
   alphaf = -1.;
   betaf  = -1.;
 
-  dgemv_(&notrans, &n, &n, &alphaf, vec, &n, x, &incx, &betaf, r, &incy);
+  dgemv_(&notrans, (integer *)&n, (integer *)&n, &alphaf, vec, (integer *)&n, x, &incx, &betaf, r, &incy);
 
 
 
@@ -207,29 +213,29 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
       statusi[i] = stat[i];
 
 
-    dcopy_(&n, r, &incx, v, &incy);
+    dcopy_((integer *)&n, r, &incx, v, &incy);
 
     if (iter == 0)
     {
-      dcopy_(&n, r, &incx, w, &incy);
+      dcopy_((integer *)&n, r, &incx, w, &incy);
 
-      dcopy_(&n, w, &incx, p, &incy);
+      dcopy_((integer *)&n, w, &incx, p, &incy);
     }
 
     alphaf = 1.0;
     betaf  = 0.0;
-    dgemv_(&notrans, &n, &n, &alphaf, vec, &n, p, &incx, &betaf, Ap, &incy);
+    dgemv_(&notrans, (integer *)&n, (integer *)&n, &alphaf, vec, (integer *)&n, p, &incx, &betaf, Ap, &incy);
 
-    pAp    = ddot_(&n, p, &incx, Ap, &incy);
+    pAp    = ddot_((integer *)&n, p, &incx, Ap, &incy);
 
     /*}
       else
     {
     alphaf = 1.0;
     betaf  = 0.0;
-    dgemv_( &notrans, &n, &n, &alphaf, vec, &n, p, &incx, &betaf, Ap, &incy );
+    dgemv_( &notrans, (integer *)&n, (integer *)&n, &alphaf, vec, (integer *)&n, p, &incx, &betaf, Ap, &incy );
 
-    pAp    = ddot_( &n, p, &incx, Ap, &incy );*/
+    pAp    = ddot_( (integer *)&n, p, &incx, Ap, &incy );*/
 
     if (pAp == 0)
     {
@@ -255,55 +261,55 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
 
     /*} */
 
-    rp     = ddot_(&n, r, &incx, p, &incy);
+    rp     = ddot_((integer *)&n, r, &incx, p, &incy);
 
     alpha  = rp / pAp;
 
-    dcopy_(&n, x, &incx, xi, &incy);
+    dcopy_((integer *)&n, x, &incx, xi, &incy);
 
     alphaf = alpha;
-    daxpy_(&n, &alphaf, p, &incx, xi, &incy);
+    daxpy_((integer *)&n, &alphaf, p, &incx, xi, &incy);
 
     pfc_2D_projc(xi, &n, statusi, p, fric, x, stat);
 
 
     /*         r(:)=b(:)-matmul(A,x)          */
 
-    dcopy_(&n, b, &incx, r, &incy);
+    dcopy_((integer *)&n, b, &incx, r, &incy);
 
     alphaf = -1.;
     betaf  = -1.;
-    dgemv_(&notrans, &n, &n, &alphaf, vec, &n, x, &incx, &betaf, r, &incy);
+    dgemv_(&notrans, (integer *)&n, (integer *)&n, &alphaf, vec, (integer *)&n, x, &incx, &betaf, r, &incy);
 
     pfc_2D_projf(statusi, &n, r, fric, w);
 
     pfc_2D_projf(statusi, &n, p, fric, z);
 
 
-    wAp    = ddot_(&n, w, &incx, Ap, &incy);
+    wAp    = ddot_((integer *)&n, w, &incx, Ap, &incy);
 
     beta   = - wAp / pAp;
 
-    dcopy_(&n, w, &incx, p, &incy);
+    dcopy_((integer *)&n, w, &incx, p, &incy);
 
     alphaf  = beta;
-    daxpy_(&n, &alphaf, z, &incx, p, &incy);
+    daxpy_((integer *)&n, &alphaf, z, &incx, p, &incy);
 
 
     /*    alphaf  = 1.;
     betaf   = 0.;
-    dgemv_( &notrans, &n, &n, &alphaf, vec , &n, p, &incx, &betaf, Ap, &incy );
+    dgemv_( &notrans, (integer *)&n, (integer *)&n, &alphaf, vec , (integer *)&n, p, &incx, &betaf, Ap, &incy );
 
-    pAp     = ddot_( &n, p, &incx, Ap, &incy );*/
+    pAp     = ddot_( (integer *)&n, p, &incx, Ap, &incy );*/
 
-    dcopy_(&n, r, &incx, xi, &incy);
+    dcopy_((integer *)&n, r, &incx, xi, &incy);
 
     alphaf  = -1.;
-    daxpy_(&n, &alphaf, v, &incx, xi, &incy);
+    daxpy_((integer *)&n, &alphaf, v, &incx, xi, &incy);
 
-    num     = ddot_(&n, xi, &incx, xi, &incy);
+    num     = ddot_((integer *)&n, xi, &incx, xi, &incy);
 
-    den     = ddot_(&n, v, &incx, v, &incy);
+    den     = ddot_((integer *)&n, v, &incx, v, &incy);
 
     normr   = sqrt(num / den);
 
@@ -342,9 +348,9 @@ void pfc_2D_cpg(int *nn , double *vec , double *b , double *x , double *rout , i
 
 
   alpha = -1.;
-  dscal_(&n , &alpha , r , &incx);
+  dscal_((integer *)&n , &alpha , r , &incx);
 
-  dcopy_(&n, r, &incx, rout, &incy);
+  dcopy_((integer *)&n, r, &incx, rout, &incy);
 
 
 

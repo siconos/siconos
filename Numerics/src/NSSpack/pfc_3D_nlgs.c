@@ -78,10 +78,10 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
   FILE *f101;
 
-  int n, in, it, ispeak, itermax, incx, incy, nc, i, iter;
+  int n, in, it, ispeak, itermax, nc, i, iter;
   double err, zn , zt, den, num, dft, dfn, tol, mu;
   double qs, a1, b1;
-
+  integer incx, incy;
   double *det, *bfd, *ww;
   char NOTRANS = 'N';
 
@@ -117,7 +117,7 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
   /* Check for non trivial case */
 
-  qs = dnrm2_(&n , q , &incx);
+  qs = dnrm2_((integer *)&n , q , &incx);
 
   if (ispeak > 0) printf("\n ||q||= %g \n" , qs);
 
@@ -148,7 +148,7 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   incx = 1;
   incy = 1;
 
-  dcopy_(&n , q , &incx , w , &incy);
+  dcopy_((integer *)&n , q , &incx , w , &incy);
 
   /* Preparation of the diagonal of the inverse matrix */
 
@@ -187,7 +187,7 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   incx = 1;
   incy = 1;
 
-  dcopy_(&n , q , &incx , w , &incy);
+  dcopy_((integer *)&n , q , &incx , w , &incy);
 
   while ((iter < itermax) && (err > tol))
   {
@@ -197,8 +197,8 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     incx = 1;
     incy = 1;
 
-    dcopy_(&n , w , &incx , ww , &incy);
-    dcopy_(&n , q , &incx ,  w , &incy);
+    dcopy_((integer *)&n , w , &incx , ww , &incy);
+    dcopy_((integer *)&n , q , &incx ,  w , &incy);
 
     for (i = 0 ; i < nc ; ++i)
     {
@@ -212,8 +212,8 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
       z[in] = 0.0;
       z[it] = 0.0;
 
-      zn = q[in] + ddot_(&n , &vec[in] , &incx , z , &incy);
-      zt = q[it] + ddot_(&n , &vec[it] , &incx , z , &incy);
+      zn = q[in] + ddot_((integer *)&n , &vec[in] , &incx , z , &incy);
+      zt = q[it] + ddot_((integer *)&n , &vec[it] , &incx , z , &incy);
 
       if (zn > 0.0)
       {
@@ -254,12 +254,12 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     a1 = 1.0;
     b1 = 1.0;
 
-    dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , w , &incy);
+    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , &incx , &b1 , w , &incy);
 
     qs   = -1.0;
-    daxpy_(&n , &qs , w , &incx , ww , &incy);
+    daxpy_((integer *)&n , &qs , w , &incx , ww , &incy);
 
-    num = dnrm2_(&n, ww , &incx);
+    num = dnrm2_((integer *)&n, ww , &incx);
     err = num * den;
 
     if (ispeak == 2) for (i = 0 ; i < n ; ++i) fprintf(f101, "%d  %d  %14.7e\n", iter - 1, i, z[i]);
