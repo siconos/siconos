@@ -50,8 +50,9 @@
  *
  *   - holonom              -> h0(q), G0(q) (usual mechanical case)
  *   - non-holonom          -> h1(q,t), G10(q,t), G11(q,t)
- *   - holonom+control      -> h2(q,u), G20(q,u), G21(q,u)
- *   - non-holonom+control  -> h3(q,t,u), G30(q,t,u), G31(q,t,u), G32(q,t,u)
+ *   - holonom+lambda       -> h2(q,lambda) , G20(q,lambda), G21(q,lambda)
+ *   - holonom+control      -> h3(q,u), G30(q,u), G31(q,u)
+ *   - non-holonom+control  -> h4(q,t,u), G40(q,t,u), G41(q,t,u), G42(q,t,u)
  *
  * Usually, G functions corresponds to jacobians of h compare to its variables. But it is up to user
  * to define these plug-in.
@@ -98,10 +99,10 @@ class LagrangianR : public Relation
 
 protected:
 
-  /* To define the type of constraints (holonom ...), ie the variables on which depend h and G*/
+  /** To define the type of constraints (holonom ...), ie the variables on which depend h and G*/
   std::string LagrangianRelationType;
 
-  /* Boolean variables to check if h and G are plugged to external functions or not
+  /** Boolean variables to check if h and G are plugged to external functions or not
    *  - always true for h
    *  - G can be either a plug-in or a given matrix
    *  - by default, h is not used in LagrangianLinear -> isHplugged = false
@@ -112,69 +113,118 @@ protected:
   bool isHPlugged;
   std::vector<bool> isGPlugged;
 
-  /* Name of the plugin used to compute h */
+  /** Name of the plugin used to compute h */
   std::string  hFunctionName;
 
-  /* G matrices that link Y[1] to dynamical system variables */
+  /** G matrices that link Y[1] to dynamical system variables */
   std::vector<SiconosMatrix*> G;
   std::vector<bool> isGAllocatedIn;
 
-  /* Name of the plug-in used to compute G */
+  /** Name of the plug-in used to compute G */
   std::vector<std::string>  GFunctionName;
+
+  /** Parameters list, argument of plug-in. What are those parameters depends on user´s choice.
+   *  At the time, all plug-in functions have the same list.
+   */
+  SimpleVector * parametersList;
+  bool isParametersListAllocatedIn;
 
   // === plug-in, depending on problem type, ie LagrangianRelationType value ===
 
   // --- Plug-in for holonom case -> h0(q), G0(q) ---
-  /** \fn void (*h0Ptr)(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfy, const double* y);
+  /** \fn void (*h0Ptr)(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfy, double* y, double * param=0);
    * \brief computes y = h(q)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (composite of all DS q-vectors)
    * \param unsigned int: size of output vector y
    * \param double*: output vector y (in-out parameter)
+   * \param double*: vector of parameters
    */
-  void (*h0Ptr)(const unsigned int*, const double*, const unsigned int*, double*);
-  /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfy, const double* G);
+  void (*h0Ptr)(const unsigned int*, const double*, const unsigned int*, double*, double* = NULL);
+  /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfy, double* G, double * param);
    * \brief computes G(q)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (composite of all DS q-vectors)
    * \param unsigned int: size of output vector y
    * \param double*: output matrix G[0] (in-out parameter)
+   * \param double*: vector of parameters
    */
-  void (*G0Ptr)(const unsigned int*, const double*, const unsigned int*, double*);
+  void (*G0Ptr)(const unsigned int*, const double*, const unsigned int*, double*, double*);
 
   // --- plug-in for non-holonom case -> h1(q,t), G10(q,t), G11(q,t) ---
   /** \fn void (*h1Ptr)(const unsigned int* sizeOfq, const double* q,
-   *                    const double* time, const unsigned int* sizeOfy, const double* y);
+   *                    const double* time, const unsigned int* sizeOfy,  double* y, double * param);
    * \brief computes y = h(q,t)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (composite of all DS q-vectors)
    * \param double*: time
    * \param unsigned int: size of output vector y
    * \param double*: output vector y (in-out parameter)
+   * \param double*: vector of parameters
    */
-  void (*h1Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*);
+  void (*h1Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*);
   // G0(q,t)
   /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q,  const double* time,
-   *                    const unsigned int* sizeOfy, const double* G);
+   *                    const unsigned int* sizeOfy,  double* G, double * param);
    * \brief computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (composite of all DS q-vectors)
    * \param double*: time
    * \param unsigned int: size of output vector y
    * \param double*: output matrix G[0] (in-out parameter)
+   * \param double*: vector of parameters
    */
-  void (*G10Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*);
+  void (*G10Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*);
   // G1(q,t)
   /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q, const double* time,
-   *                    const unsigned int* sizeOfy, const double* G);
+   *                    const unsigned int* sizeOfy,  double* G, double * param);
    * \brief computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (composite of all DS q-vectors)
    * \param double*: time
    * \param unsigned int: size of output vector y
    * \param double*: output matrix G[1] (in-out parameter)
+   * \param double*: vector of parameters
    */
-  void (*G11Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*);
+  void (*G11Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*);
+
+  // --- plug-in for holonom+lambda case -> h2(q,t), G20(q,t), G21(q,t) ---
+
+  /** \fn void (*h2Ptr)(const unsigned int* sizeOfq, const double* q,
+   *                    const double* lambda, const unsigned int* sizeOfy, double* y, double * param);
+   * \brief computes y = h(q,t)
+   * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
+   * \param double*: vector q (composite of all DS q-vectors)
+   * \param double*: vector lambda
+   * \param unsigned int: size of output vector y
+   * \param double*: output vector y (in-out parameter)
+   * \param double*: vector of parameters
+   */
+  void (*h2Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*);
+  // G20(q,t)
+  /** \fn void (*G20Ptr)(const unsigned int* sizeOfq, const double* q,  const double* lambda,
+   *                    const unsigned int* sizeOfy, double* G, double * param);
+   * \brief computes jacobian compare to q of function h
+   * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
+   * \param double*: vector q (composite of all DS q-vectors)
+   * \param double*: lambda
+   * \param unsigned int: size of output vector y
+   * \param double*: output matrix G[0] (in-out parameter)
+   * \param double*: vector of parameters
+   */
+  void (*G20Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*);
+  // G1(q,t)
+  /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q, const double* lambda,
+   *                    const unsigned int* sizeOfy, double* G, double * param);
+   * \brief computes jacobian compare to q of function h
+   * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
+   * \param double*: vector q (composite of all DS q-vectors)
+   * \param double*: lambda
+   * \param unsigned int: size of output vector y
+   * \param double*: output matrix G[1] (in-out parameter)
+   * \param double*: vector of parameters
+   */
+  void (*G21Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*);
 
   //\todo  ... other plug-in to be added if required ...
 
@@ -224,6 +274,13 @@ public:
   {
     return LagrangianRelationType;
   }
+
+  /** \fn  std::string setLagrangianRelationType(const string & type)
+   *  \brief set the type of constraints of the relation (holonom ...) and adapt corresponding variables
+   * (resize G ...)
+   *  \param a string
+   */
+  void setLagrangianRelationType(const std::string &);
 
   // -- G --
 
@@ -319,17 +376,37 @@ public:
     return GFunctionName[index];
   }
 
-  /** \fn const bool isHPlugged() const
-   *  \brief bool that shows if h is a plug-in or not
-   *  \return a bool
-   */
-  //inline const bool isHPlugged() const {return isHPlugin;};
+  // -- parametersList --
 
-  /** \fn const vector<bool> isJacobianHPlugged() const
-  *  \brief list of bool that shows if jacobianH is a plug-in or not
-  *  \return a vector of bool
-  */
-  //inline const std::vector<bool> isJacobianHPlugged() const {return isJacobianHPlugin;};
+  /** \fn  const SimpleVector getParametersList() const
+   *  \brief get the value of fExt
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getParametersList() const
+  {
+    return *parametersList;
+  }
+
+  /** \fn SimpleVector* getParametersListPtr() const
+   *  \brief get fExt
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getParametersListPtr() const
+  {
+    return parametersList;
+  }
+
+  /** \fn void setParametersList (const SimpleVector& newValue)
+   *  \brief set the value of fExt to newValue
+   *  \param SimpleVector newValue
+   */
+  void setParametersList(const SimpleVector&);
+
+  /** \fn void setParametersListPtr(SimpleVector* newPtr)
+   *  \brief set parametersList to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  void setParametersListPtr(SimpleVector *newPtr);
 
   /** \fn void computeH(const double & time);
    * \brief to compute y = h(q,v,t) using plug-in mechanism

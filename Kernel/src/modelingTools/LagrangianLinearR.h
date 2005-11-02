@@ -34,7 +34,7 @@
  * This class defines and computes the Lagrangian Linear Relations defined by,
  * for the input \f$ y \f$,
  * \f[
- * y= H q + b
+ * y= H q + b + D\lambda
  * \f]
  * and for the output \f$ p\f$ defined by
  * \f[
@@ -54,15 +54,19 @@ private:
    */
   LagrangianLinearR();
 
-  /** a specific matrix to the LagrangianLinearR */
+  /** H matrix such as y = Hq + ...*/
   SiconosMatrix* H;
 
-  /** a specific vector to the LagrangianLinearR */
+  /** b vector such y = Hq + b + ...*/
   SimpleVector* b;
+
+  /** D matrix, coefficient of lambda in y */
+  SiconosMatrix * D;
 
   /* Flags to control where pointers have been allocated (in or out constructors)*/
   bool isHAllocatedIn;
   bool isBAllocatedIn;
+  bool isDAllocatedIn;
 
 public:
 
@@ -73,21 +77,30 @@ public:
    */
   LagrangianLinearR(RelationXML*, Interaction* = NULL);
 
-  /** \fn LagrangianLinearR(const SiconosMatrix& , const SimpleVector& , Interaction* = NULL);
+  /** \fn LagrangianLinearR(const SiconosMatrix& H, const SimpleVector& q, Interaction* = NULL);
    *  \brief constructor with in parameters, the data needed to build this Relation
    *  \param a SiconosMatrix to set H
-   *  \param a SiconosVector to set b
+   *  \param a SimpleVector to set b
    *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    */
   LagrangianLinearR(const SiconosMatrix&, const SimpleVector&, Interaction* = NULL);
 
 
-  /** \fn LagrangianLinearR(const SiconosMatrix& , Interaction* = NULL);
+  /** \fn LagrangianLinearR(const SiconosMatrix& H, Interaction* = NULL);
    *  \brief constructor with in parameters, the data needed to build this Relation
    *  \param a SiconosMatrix to set H
    *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    */
   LagrangianLinearR(const SiconosMatrix&, Interaction* = NULL);
+
+  /** \fn LagrangianLinearR(const SiconosMatrix& H, const SimpleVector& q, const SiconosMatrix& D, Interaction* = NULL);
+   *  \brief constructor with in parameters, the data needed to build this Relation
+   *  \param a SiconosMatrix to set H
+   *  \param a SimpleVector to set b
+   *  \param a SiconosMatrix to set D
+   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
+   */
+  LagrangianLinearR(const SiconosMatrix&, const SimpleVector&, const SiconosMatrix&, Interaction* = NULL);
 
   /** \fn LagrangianLinearR(const Relation&)
    *  \brief copy constructor
@@ -162,6 +175,39 @@ public:
    *  \param SimpleVector * newPtr
    */
   void setBPtr(SimpleVector *);
+
+  // -- D --
+
+  /** \fn  const SiconosMatrix getD() const
+   *  \brief get the value of D
+   *  \return SiconosMatrix
+   */
+  inline const SiconosMatrix getD() const
+  {
+    return *D;
+  }
+
+  /** \fn SiconosMatrix* getDPtr() const
+   *  \brief get D
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getDPtr() const
+  {
+    return D;
+  }
+
+  /** \fn void setD (const SiconosMatrix& newValue)
+   *  \brief set the value of D to newValue
+   *  \param SiconosMatrix newValue
+   */
+  void setD(const SiconosMatrix&);
+
+  /** \fn void setDPtr(SiconosMatrix* newPtr)
+   *  \brief set D to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  void setDPtr(SiconosMatrix *);
+
 
   /** \fn void getHBlockDS(const int&,SiconosMatrix&) const
    *  \brief get in Matrix H the block corresponding to DS number int

@@ -20,11 +20,11 @@
 using namespace std;
 
 LagrangianLinearRXML::LagrangianLinearRXML():
-  LagrangianRXML(), HNode(NULL), bNode(NULL)
+  LagrangianRXML(), HNode(NULL), bNode(NULL), DNode(NULL)
 {}
 
 LagrangianLinearRXML::LagrangianLinearRXML(xmlNode * LLRelationNode)
-  : LagrangianRXML(LLRelationNode), HNode(NULL), bNode(NULL)
+  : LagrangianRXML(LLRelationNode), HNode(NULL), bNode(NULL), DNode(NULL)
 {
   xmlNode *node;
 
@@ -35,6 +35,9 @@ LagrangianLinearRXML::LagrangianLinearRXML(xmlNode * LLRelationNode)
 
   if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, LLR_B)) != NULL)
     bNode = node;
+
+  if ((node = SiconosDOMTreeTools::findNodeChild(LLRelationNode, "D")) != NULL)
+    DNode = node;
 }
 
 LagrangianLinearRXML::~LagrangianLinearRXML()
@@ -56,4 +59,13 @@ void LagrangianLinearRXML::setB(const SiconosVector &vec)
     bNode = SiconosDOMTreeTools::createVectorNode(rootRelationXMLNode, LLR_B, vec);
   }
   else SiconosDOMTreeTools::setSiconosVectorNodeValue(bNode, vec);
+}
+
+void LagrangianLinearRXML::setD(const SiconosMatrix& matrix)
+{
+  if (DNode == NULL)
+  {
+    DNode = SiconosDOMTreeTools::createMatrixNode(rootRelationXMLNode, "D", matrix);
+  }
+  else SiconosDOMTreeTools::setSiconosMatrixNodeValue(DNode, matrix);
 }

@@ -87,7 +87,9 @@ void LagrangianLinearRTest::setUp()
   tmpxml2 = new LagrangianLinearRXML(node2);
   H = new SiconosMatrix("matH.dat", true);
   b = new SimpleVector(1);
+  D = new SiconosMatrix(1, 1);
   (*b)(0) = 12;
+  (*D)(0, 0) = 13;
 }
 
 void LagrangianLinearRTest::tearDown()
@@ -96,6 +98,7 @@ void LagrangianLinearRTest::tearDown()
   delete tmpxml2;
   delete b;
   delete H;
+  delete D;
 }
 
 // xml constructor (1)
@@ -203,6 +206,27 @@ void LagrangianLinearRTest::testSetBPtr()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBPtr: ", llr->getBPtr() == b, true);
   delete llr;
   cout << " test setBPtr ok" << endl;
+}
+
+// setD
+void LagrangianLinearRTest::testSetD()
+{
+  LagrangianLinearR * llr = new LagrangianLinearR(*H);
+  llr->setD(*D);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetb: ", llr->getD() == *D, true);
+  delete llr;
+  cout << " test setD ok" << endl;
+}
+
+// setDPtr
+void LagrangianLinearRTest::testSetDPtr()
+{
+  LagrangianLinearR * llr = new LagrangianLinearR(*H);
+  llr->setDPtr(D);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr : ", llr->getD() == *D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr: ", llr->getDPtr() == D, true);
+  delete llr;
+  cout << " test setDPtr ok" << endl;
 }
 
 void LagrangianLinearRTest::End()

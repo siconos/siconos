@@ -41,6 +41,8 @@ private:
   CPPUNIT_TEST(testSetHPtr);
   CPPUNIT_TEST(testSetB);
   CPPUNIT_TEST(testSetBPtr);
+  CPPUNIT_TEST(testSetD);
+  CPPUNIT_TEST(testSetDPtr);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
@@ -56,11 +58,13 @@ private:
   void testSetHPtr();
   void testSetB();
   void testSetBPtr();
+  void testSetD();
+  void testSetDPtr();
   void End();
 
   // Members
 
-  SiconosMatrix *H;
+  SiconosMatrix *H, *D;
   SimpleVector *b;
   LagrangianRXML* tmpxml1, * tmpxml2;
 

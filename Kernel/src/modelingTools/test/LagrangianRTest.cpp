@@ -87,6 +87,33 @@ void LagrangianRTest::setUp()
   // get relation
   xmlNode * node2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "LagrangianRelation");
   tmpxml2 = new LagrangianRXML(node2);
+
+  // third file
+  // parse xml file:
+  doc2 = xmlParseFile("LagrangianR_test3.xml");
+  if (doc2 == NULL)
+    XMLException::selfThrow("Document not parsed successfully");
+  cur2 = xmlDocGetRootElement(doc2);
+  if (cur2 == NULL)
+  {
+    XMLException::selfThrow("empty document");
+    xmlFreeDoc(doc2);
+  }
+
+  // get rootNode
+
+  if (xmlStrcmp(cur2->name, (const xmlChar *) "SiconosModel"))
+  {
+    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
+    xmlFreeDoc(doc2);
+  }
+  // look for NSDS node
+  node = SiconosDOMTreeTools::findNodeChild(cur2, "NSDS");
+  nodetmp2 = SiconosDOMTreeTools::findNodeChild(node, "Interaction");
+  nodetmp2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "Interaction_Content");
+  // get relation
+  node2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "LagrangianRelation");
+  tmpxml3 = new LagrangianRXML(node2);
 }
 
 void LagrangianRTest::tearDown()
@@ -95,6 +122,7 @@ void LagrangianRTest::tearDown()
   delete G1;
   delete tmpxml1;
   delete tmpxml2;
+  delete tmpxml3;
 }
 
 // xml constructor (holonom case)
@@ -121,6 +149,19 @@ void LagrangianRTest::testBuildLagrangianR1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1c : ", R1->getGFunctionName(0) == "TestPlugin:G10", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1c : ", R1->getGFunctionName(1) == "TestPlugin:G11", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1a : ", R1->getLagrangianRelationType() == "non-holonom", true);
+  delete R1;
+  cout << " xml Constructor (2) LagrangianR ok" << endl;
+}
+
+// xml constructor (holonom+lambda case)
+void LagrangianRTest::testBuildLagrangianR4()
+{
+  LagrangianR * R1 = new LagrangianR(tmpxml3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR4a : ", R1->getType() == "LagrangianR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR4b : ", R1->getHFunctionName() == "TestPlugin:h2", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR4c : ", R1->getGFunctionName(0) == "TestPlugin:G20", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR4d : ", R1->getGFunctionName(1) == "TestPlugin:G21", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR4e : ", R1->getLagrangianRelationType() == "holonom+lambda", true);
   delete R1;
   cout << " xml Constructor (2) LagrangianR ok" << endl;
 }

@@ -44,6 +44,7 @@ private:
   //Nodes
   xmlNode * HNode;
   xmlNode * bNode;
+  xmlNode * DNode;
 
 public:
 
@@ -77,6 +78,15 @@ public:
     return  SiconosDOMTreeTools::getSiconosVectorValue(bNode);
   }
 
+  /** \fn SiconosMatrix getD()
+   *   \brief Return the D of the LLRelationXML
+   *   \return The D SiconosMatrix of the LLRelationXML
+   */
+  inline SiconosMatrix getD()
+  {
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(DNode);
+  }
+
   /** \fn void setH(SiconosMatrix *matrix)
    *   \brief Change the H matrix value (in xml file or external data file switch his origin position)
    *   \param SiconosMatrix matrix : the new value for H matrix
@@ -89,6 +99,12 @@ public:
    */
   void setB(const SiconosVector&);
 
+  /** \fn void setD(SiconosMatrix *matrix)
+   *   \brief Change the D matrix value (in xml file or external data file switch his origin position)
+   *   \param SiconosMatrix matrix : the new value for D matrix
+   */
+  void setD(const SiconosMatrix&);
+
 
   /** \fn bool hasB() const
    *   \brief return true if b is given in xmlfile
@@ -98,7 +114,13 @@ public:
     return (!(bNode == NULL));
   }
 
+  /** \fn bool hasD() const
+   *   \brief return true if D is given in xmlfile
+   */
+  inline bool hasD() const
+  {
+    return (!(DNode == NULL));
+  }
 };
-
 
 #endif

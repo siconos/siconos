@@ -439,6 +439,7 @@ void OneStepNSProblem::setLexicoLemkeAlgorithm(const string& meth,  const unsign
   {
     strcpy(solvingMethod.lcp.name, OSNSP_LEXICOLEMKE.c_str());
     solvingMethod.lcp.itermax = iter;
+    solvingMethod.lcp.chat = 1;
   }
   else if (meth == OSNSP_DFC_2DSOLVING)
   {

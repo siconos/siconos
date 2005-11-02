@@ -827,6 +827,8 @@ void LCP::preLCP(const double& time)
       w = new SimpleVector(nLcp);
       isWAllocatedIn = true;
     }
+    w->zero();
+    z->zero();
   }
   OUT("LCP::preLCP()\n");
 }

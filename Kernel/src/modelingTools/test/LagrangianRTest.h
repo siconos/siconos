@@ -34,6 +34,7 @@ private:
 
   CPPUNIT_TEST(testBuildLagrangianR0);
   CPPUNIT_TEST(testBuildLagrangianR1);
+  CPPUNIT_TEST(testBuildLagrangianR4);
   CPPUNIT_TEST(testBuildLagrangianR2);
   CPPUNIT_TEST(testBuildLagrangianR3);
   CPPUNIT_TEST(End);
@@ -44,6 +45,7 @@ private:
 
   void testBuildLagrangianR0();
   void testBuildLagrangianR1();
+  void testBuildLagrangianR4();
   void testBuildLagrangianR2();
   void testBuildLagrangianR3();
   void End();
@@ -53,7 +55,7 @@ private:
   SiconosMatrix *G0, *G1;
   NonSmoothDynamicalSystem * nsds ;
   xmlNode * node;
-  LagrangianRXML* tmpxml1, * tmpxml2;
+  LagrangianRXML* tmpxml1, * tmpxml2, *tmpxml3;
   Interaction * interaction;
 
 public:

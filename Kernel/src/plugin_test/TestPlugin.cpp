@@ -195,33 +195,53 @@ extern "C" void R(const unsigned int*, const double*, const double*, double*)
 
 // === Lagrangian Relations ===
 
-extern "C" void h0(const unsigned int*, const double*, const unsigned int*, double*)
+extern "C" void h0(const unsigned int*, const double*, const unsigned int*, double*, double*)
 {
   printf("Call of the function 'h0' of the basic plugin.\nYou have to implement this function.\n");
 
 }
 
-extern "C" void G0(const unsigned int*, const double*, const unsigned int*, double*)
+extern "C" void G0(const unsigned int*, const double*, const unsigned int*, double*, double*)
 {
   printf("Call of the function 'G0' of the basic plugin.\nYou have to implement this function.\n");
 
 }
 
-extern "C"  void h1(const unsigned int*, const double*, const double*, const unsigned int*, double*)
+extern "C"  void h1(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*)
 {
   printf("Call of the function 'h1' of the basic plugin.\nYou have to implement this function.\n");
 
 }
 
 
-extern "C"    void G10(const unsigned int*, const double*, const double*, const unsigned int*, double*)
+extern "C"    void G10(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*)
 {
   printf("Call of the function 'G10' of the basic plugin.\nYou have to implement this function.\n");
 
 }
 
 
-extern "C"    void G11(const unsigned int*, const double*, const double*, const unsigned int*, double*)
+extern "C"    void G11(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*)
+{
+  printf("Call of the function 'G11' of the basic plugin.\nYou have to implement this function.\n");
+
+}
+
+extern "C"  void h2(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*)
+{
+  printf("Call of the function 'h1' of the basic plugin.\nYou have to implement this function.\n");
+
+}
+
+
+extern "C"    void G20(const unsigned int*, const double*, const double*, const unsigned int*, double, double**)
+{
+  printf("Call of the function 'G10' of the basic plugin.\nYou have to implement this function.\n");
+
+}
+
+
+extern "C"    void G21(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*)
 {
   printf("Call of the function 'G11' of the basic plugin.\nYou have to implement this function.\n");
 
