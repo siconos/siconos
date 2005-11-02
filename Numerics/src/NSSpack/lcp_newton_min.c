@@ -156,12 +156,12 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   a1 = -1.;
   b1 = -1.;
   /* / q --> H*/
-  dcopy_((integer*)&n , q , &incx , H , &incy);
+  dcopy_((integer *)&n , q , &incx , H , &incy);
   /* / -Mz-q --> H*/
-  dgemv_(&NOTRANS , (integer*)&n , (integer*)&n , &a1 , vec , (integer*)&n , z , &incx , &b1 , H , &incy);
+  dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , &incx , &b1 , H , &incy);
   /* / w+H --> H*/
   alpha = 1.0;
-  daxpy_((integer*)&n , &alpha , w , &incx , H , &incy);     /* / c'est faux*/
+  daxpy_((integer *)&n , &alpha , w , &incx , H , &incy);     /* / c'est faux*/
 
 
   for (i = n; i < m; i++)
@@ -219,23 +219,24 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
       free(JacH);
       free(ipiv);
       free(rho);
-      (*info = 2);
+      *info = 2;
+      return;
 
     }
 
 
     /* / iteration*/
     alpha = -1.0;
-    daxpy_((integer*)&n , &alpha , H , &incx , z , &incy);     /* /  z-H --> z*/
-    daxpy_((integer*)&n , &alpha , &H[n] , &incx , w , &incy);  /* /  w-H --> w*/
+    daxpy_((integer *)&n , &alpha , H , &incx , z , &incy);      /* /  z-H --> z*/
+    daxpy_((integer *)&n , &alpha , &H[n] , &incx , w , &incy);  /* /  w-H --> w*/
 
     /* / Construction of the RHS for the next iterate and for the error evalutaion*/
     a1 = 1.;
     b1 = 1.;
-    dcopy_((integer*)&n , q , &incx , H , &incy);                                         /* / q --> H*/
-    dgemv_(&NOTRANS , (integer*)&n , (integer*)&n , &a1 , vec , (integer*)&n , z , &incx , &b1 , H , &incy);  /* / Mz+q --> H*/
+    dcopy_((integer *)&n , q , &incx , H , &incy);                                         /* / q --> H*/
+    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , &incx , &b1 , H , &incy);  /* / Mz+q --> H*/
     alpha = -1.0;
-    daxpy_((integer*)&n , &alpha , w , &incx , H , &incy);                               /* / w-Mz-q --> H*/
+    daxpy_((integer *)&n , &alpha , w , &incx , H , &incy);                                /* / w-Mz-q --> H*/
 
     for (i = n; i < m; i++)
     {
