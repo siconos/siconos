@@ -23,7 +23,7 @@
 #--------------------------------------------------
 # Author(s)      : RPG
 # Creation Date  : 06 June 2005
-# Version        :
+# Version        : 28 Oct 2005
 # Copyright      : INRIA 2005
 #--------------------------------------------------
 
@@ -53,7 +53,6 @@ Scilab function implemented:
  sicInitStrategy()
  sicSTNextStep()
  sicSTComputeFreeState()
- sicSTformalisePb()
  sicSTcomputePb()
  sicSTupdateState()
  sicModelgetQ(index)
@@ -63,13 +62,14 @@ BouncingBall Execution
 -----------------------
 variables of environnement to set (example):
 
-export SICONOSPATH=/local_home/pissard/Workspace/siconos-user/
-export NUMERICSPATH=/local_home/pissard/Workspace/siconos/trunk/Numerics/
+export SICONOSPATH=/local_home/pissard/Workspace/siconos/distrib
+export NUMERICSPATH=/local_home/pissard/Workspace/siconos/distrib
 
 export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS:$NUMERICSPATH
 /lib:.
 
 copy the xml file (BouncingBall_TIDS.xml) in the current directory
+copy BallPlugin.so in $SICONOSPATH/share/SICONOS
 
 scilab -f sample.sci : scilab example of the "famous" BouncingBall execution
 
@@ -91,6 +91,7 @@ It remains some work to validate scilab mechanism:
  - use a scilab function for a siconos simulation like a 'C' plugin
  - solve the bug with DGETRI call (on parameter 6) which has been fixed with a
 simple silab catch error !
+
 
 
 TODO for a complete toolbox

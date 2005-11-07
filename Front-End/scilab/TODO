@@ -1,0 +1,23 @@
+Interface Scilab
+
+1. Faire tourner RollBouncingBall/ 
+
+2. Fignoler la visu pour les boules :
+  - fignoler scintillement, échelle,
+  - numérotage fenetre
+  - mettre à jour le README
+
+3. commit
+
+4. Faire les interfaces pour l'utilisation sans XML.
+
+5. Faire tourner MultiBeadsColumn/
+
+6. Faire tourner Pa10
+
+7. Probleme de perf. sans doute les appels 7 mns au lieu de 22 s
+
+8. Exemples electriques
+
+9. Intégration HuMaNS
+

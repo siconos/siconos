@@ -16,16 +16,27 @@
 #
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
-SICONOSPATH=/local_home/pissard/Workspace/siconos-user/
-NUMERICSPATH=/local_home/pissard/Workspace/siconos/trunk/Numerics/
+
+
+SICONOSPATH=/local_home/pissard/Workspace/siconos/distrib
+NUMERICSPATH=/local_home/pissard/Workspace/siconos/distrib
+
+
+include $(SICONOSPATH)/share/SICONOS/KernelConfig.sh
 
 INC_PATH=$(SICONOSPATH)/include
 CFLAGS=-g -fbounds-check -w -Wno-deprecated -fPIC -DLA_COMPLEX_SUPPORT -DWITHOUT_NANA -I$(INC_PATH) -I$(NUMERICSPATH)/include -I/usr/local//include/lapackpp/ `xml2-config --cflags`
 DYNFLAGS=-shared
 
-siconos.so:siconos.cpp
-	g++  $(CFLAGS) -c siconos.cpp
-	g++  $(DYNFLAGS) -o siconos.so siconos.o
+all: libsiconos.so sictest
+
+libsiconos.so:siconos.cpp
+	g++  -g  $(CFLAGS) -c siconos.cpp
+	g++   -g $(DYNFLAGS) -o libsiconos.so siconos.o
+
+sictest:sictest.c libsiconos.so
+	gcc -g sictest.c -o sictest -L. -lsiconos $(SICONOS_LIBS) $(LIBEXT_LDFLAGS)
 
 clean:
-	rm siconos.so siconos.o
+	rm libsiconos.so siconos.o sictest
+

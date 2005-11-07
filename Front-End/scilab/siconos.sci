@@ -27,7 +27,14 @@
 //   for siconos and numerics lib
 //
 
+
 function sicLink()
+        // Standard SICONOS environment variable
+	setenv("SICONOSPATH","/local_home/pissard/Workspace/siconos/distrib");
+	setenv("NUMERICSPATH","/local_home/pissard/Workspace/siconos/distrib");
+	strLD_LIBRARY_PATH=getenv("LD_LIBRARY_PATH")+"/local_home/pissard/Workspace/siconos/distrib/lib:/local_home/pissard/Workspace/siconos/distrib/share/SICONOS:/local_home/pissard/Workspace/siconos/distrib/share/SICONOS/local_home/pissard/:.";
+	setenv("LD_LIBRARY_PATH",strLD_LIBRARY_PATH);
+
 	// dynamic lib
         // FC core 3
         link("/usr/lib/libstdc++.so.6");
@@ -40,9 +47,10 @@ function sicLink()
 	//link("/usr/local/lib/libblas++.so");
 	link("/usr/local/lib/liblapack++.so");
 	// Numerics and Siconos
-	link("/local_home/pissard/Workspace/siconos/trunk/Numerics/lib/libNumerics.so");
-	link("/local_home/pissard/Workspace/siconos-user/lib/libSiconosKernel.so");
-	link("/local_home/pissard/Workspace/siconos/trunk/Front-End/scilab/siconos.so",['simul','sicLoadModel','sicTimeGetH','sicTimeGetK','sicTimeGetN','sicInitStrategy','sicSTNextStep','sicSTComputeFreeState','sicSTformalisePb','sicSTcomputePb','sicSTupdateState','sicModelgetQ'],'C');
+	// TODO : getenv
+	link("/local_home/pissard/Workspace/siconos/distrib/lib/libSiconosNumerics.so");
+	link("/local_home/pissard/Workspace/siconos/distrib/lib/libSiconosKernel.so");
+	link("/local_home/pissard/Workspace/siconos/Front-End/scilab/libsiconos.so",['sicLoadModel','sicTimeGetH','sicTimeGetK','sicTimeGetN','sicInitStrategy','sicSTNextStep','sicSTComputeFreeState','sicSTcomputePb','sicSTupdateState','sicModelgetQ','simul','sicDebug'],'C');
 endfunction
 
 
@@ -74,10 +82,6 @@ function sicSTComputeFreeState()
 	call("sicSTComputeFreeState","out",[1,1],1,"i");
 endfunction
 
-function sicSTformalisePb()
-	call("sicSTformalisePb","out",[1,1],1,"i");
-endfunction
-
 function sicSTcomputePb()
 	call("sicSTcomputePb","out",[1,1],1,"i");
 endfunction
@@ -88,4 +92,12 @@ endfunction
 
 function [ret_val]=sicModelgetQ(index)
 	ret_val=call("sicModelgetQ",index,2,"i","out",[1,1],1,"d");
+endfunction
+
+function sicDebug()
+	call("sicDebug","out",[1,1],1,"i");
+endfunction
+
+function sicSimul()
+	call("simul","out",[1,1],1,"i");
 endfunction
