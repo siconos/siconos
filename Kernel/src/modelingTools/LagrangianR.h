@@ -140,7 +140,7 @@ protected:
    * \param double*: output vector y (in-out parameter)
    * \param double*: vector of parameters
    */
-  void (*h0Ptr)(const unsigned int*, const double*, const unsigned int*, double*, double* = NULL);
+  void (*h0Ptr)(const unsigned int*, const double*, const unsigned int*, double*, double*);
   /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfy, double* G, double * param);
    * \brief computes G(q)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
