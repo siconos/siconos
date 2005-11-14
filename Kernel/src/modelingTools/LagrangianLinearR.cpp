@@ -25,7 +25,7 @@ using namespace std;
 // Xml constructor
 LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
   LagrangianR(relxml, inter), H(NULL), b(NULL), D(NULL),
-  isHAllocatedIn(true), isBAllocatedIn(false), isDAllocatedIn(false)
+  isHAllocatedIn(false), isBAllocatedIn(false), isDAllocatedIn(false)
 {
   // if one between h and G is plugged, both must be.
   if (isHPlugged != isGPlugged[0])
@@ -38,7 +38,11 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
     {
       LagrangianLinearRXML* LLRxml = (static_cast<LagrangianLinearRXML*>(relationxml));
       unsigned int row = LLRxml->getH().size(0);
-      unsigned int col = LLRxml->getH().size(1);
+
+      if (LLRxml->hasD())
+        setLagrangianRelationType("holonom+lambda");
+      else
+        setLagrangianRelationType("holonom");
 
       if (inter != NULL)
       {
@@ -46,9 +50,33 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
         unsigned int size = interaction->getNInteraction();
         if (row != size)
           RuntimeException::selfThrow("LagrangianLinearR:: xml constructor, inconsistent size with y vector for input vector or matrix");
+
+        H = G[0];
+        *H = LLRxml->getH();
+        if (LagrangianRelationType == "holonom+lambda")
+        {
+          D = G[1];
+          *D = LLRxml->getD();
+        }
       }
-      H = new SiconosMatrix(row, col);
-      *H = LLRxml->getH();
+      else
+      {
+        H = new SiconosMatrix(LLRxml->getH());
+        isHAllocatedIn = true;
+        G[0] = H;
+        if (LagrangianRelationType == "holonom+lambda")
+        {
+          unsigned int rowD = LLRxml ->getD().size(0);
+          unsigned int colD = LLRxml ->getD().size(1);
+          if (rowD != colD || (interaction != NULL && rowD !=  interaction->getNInteraction()))
+            RuntimeException::selfThrow("LagrangianLinearR:: xml constructor, inconsistent size for input matrix D");
+
+          D = new SiconosMatrix(LLRxml->getD());
+          isDAllocatedIn = true;
+          G[1] = D;
+        }
+      }
+
       if (LLRxml->hasB())
       {
         unsigned int rowB = LLRxml->getB().size();
@@ -58,21 +86,6 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
         *b = LLRxml->getB();
         isBAllocatedIn = true;
       }
-
-      if (LLRxml->hasD())
-      {
-        unsigned int rowD = LLRxml ->getD().size(0);
-        unsigned int colD = LLRxml ->getD().size(1);
-        if (rowD != colD || (interaction != NULL && rowD !=  interaction->getNInteraction()))
-          RuntimeException::selfThrow("LagrangianLinearR:: xml constructor, inconsistent size for input matrix D");
-        D = new SiconosMatrix(LLRxml->getD());
-        isDAllocatedIn = true;
-      }
-
-      // LagrangianR members
-      G[0] = H;
-      if (LagrangianRelationType == "holonom+lambda")
-        G[1] = D;
     }
     else
     {
@@ -80,10 +93,6 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
       H = G[0];
       if (LagrangianRelationType == "holonom+lambda")
         D = G[1];
-
-      isHAllocatedIn = false;
-      isBAllocatedIn = false;
-      isDAllocatedIn = false;
     }
   }
   else RuntimeException::selfThrow("LagrangianLinearR::xml constructor xml file=NULL");
@@ -91,7 +100,7 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
 
 // Constructor from data: H, b and interaction (optional)
 LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVector& newB, Interaction* inter):
-  LagrangianR(inter), H(NULL), b(NULL), D(NULL), isHAllocatedIn(true), isBAllocatedIn(true), isDAllocatedIn(false)
+  LagrangianR(inter), H(NULL), b(NULL), D(NULL), isHAllocatedIn(false), isBAllocatedIn(true), isDAllocatedIn(false)
 {
   relationType = LAGRANGIANLINEARRELATION;
   unsigned int row = newH.size(0);
@@ -99,26 +108,35 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
   if (row2 != row)
     RuntimeException::selfThrow("LagrangianLinearR:: constructor from data, inconsistent size between H and b");
 
+  setLagrangianRelationType("holonom");
+
   if (inter != NULL)
   {
     // get size of vector y
     unsigned int size = interaction->getNInteraction();
     if (row != size)
       RuntimeException::selfThrow("LagrangianLinearR:: constructor from data, inconsistent size with y vector for input vector or matrix");
+
+    H = G[0];
+    *H = newH;
   }
+  else
+  {
+    H = new SiconosMatrix(newH);
+    isHAllocatedIn = true;
+    G[0] = H;
+  }
+  isGPlugged.push_back(false);
 
-  H = new SiconosMatrix(newH);
   b = new SimpleVector(newB);
-
-  // LagrangianR members
-  G[0] = H;
 }
 
 // Constructor from data: H and interaction (optional)
 LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, Interaction* inter):
-  LagrangianR(inter), H(NULL), b(NULL), D(NULL), isHAllocatedIn(true), isBAllocatedIn(true), isDAllocatedIn(false)
+  LagrangianR(inter), H(NULL), b(NULL), D(NULL), isHAllocatedIn(false), isBAllocatedIn(true), isDAllocatedIn(false)
 {
   relationType = LAGRANGIANLINEARRELATION;
+  setLagrangianRelationType("holonom");
   unsigned int row = newH.size(0);
   if (inter != NULL)
   {
@@ -126,16 +144,22 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, Interaction* int
     unsigned int size = interaction->getNInteraction();
     if (row != size)
       RuntimeException::selfThrow("LagrangianLinearR:: constructor from data, inconsistent size with y vector for input vector or matrix");
-  }
 
-  H = new SiconosMatrix(newH);
-  // LagrangianR members
-  G[0] = H;
+    H = G[0];
+    *H = newH;
+  }
+  else
+  {
+    H = new SiconosMatrix(newH);
+    isHAllocatedIn = true;
+    G[0] = H;
+  }
+  isGPlugged.push_back(false);
 }
 
 // Constructor from data: H, b, D and interaction (optional)
 LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVector& newB, const SiconosMatrix& newD, Interaction* inter):
-  LagrangianR(inter), H(NULL), b(NULL), D(NULL), isHAllocatedIn(true), isBAllocatedIn(true), isDAllocatedIn(true)
+  LagrangianR(inter), H(NULL), b(NULL), D(NULL), isHAllocatedIn(false), isBAllocatedIn(true), isDAllocatedIn(false)
 {
   relationType = LAGRANGIANLINEARRELATION;
   unsigned int row = newH.size(0);
@@ -149,22 +173,32 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
   if (rowD != colD || rowD != row)
     RuntimeException::selfThrow("LagrangianLinearR:: constructor from data, inconsistent size for D input matrix");
 
+  setLagrangianRelationType("holonom+lambda");
+
   if (inter != NULL)
   {
     // get size of vector y
     unsigned int size = interaction->getNInteraction();
     if (row != size)
       RuntimeException::selfThrow("LagrangianLinearR:: constructor from data, inconsistent size with y vector for input vector or matrix");
+    H = G[0];
+    *H = newH;
+    D = G[1];
+    *D = newD;
+  }
+  else
+  {
+    H = new SiconosMatrix(newH);
+    isHAllocatedIn = true;
+    G[0] = H;
+    D = new SiconosMatrix(newD);
+    isDAllocatedIn = true;
+    G[1] = D;
   }
 
-  H = new SiconosMatrix(newH);
+  isGPlugged.push_back(false); // G[0]
+  isGPlugged.push_back(false); // G[1]
   b = new SimpleVector(newB);
-  D = new SiconosMatrix(newD);
-
-  // LagrangianR members
-  LagrangianRelationType = "holonom+lambda";
-  setGPtr(H, 0);
-  setGPtr(D, 1);
 }
 
 // copy constructor (inter is optional)
@@ -204,10 +238,18 @@ LagrangianLinearR::LagrangianLinearR(const Relation & newLLR, Interaction* inter
 
     if (llr->getDPtr() != NULL)
     {
-      D = new SiconosMatrix(llr->getD());
-      isDAllocatedIn = true;
+      if (G[1] == NULL)
+      {
+        D = new SiconosMatrix(llr->getD());
+        isDAllocatedIn = true;
+        G[1] == D;
+      }
+      else
+      {
+        D = G[1];
+        isDAllocatedIn = false;
+      }
     }
-
   }
   else
   {
@@ -560,6 +602,7 @@ void LagrangianLinearR::computeInput(const double& time)
 
     // compute p = Ht lambda
     *p += matTransVecMult(*H, *lambda);
+    delete p;
   }
   else
     LagrangianR::computeInput(time);

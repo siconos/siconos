@@ -130,16 +130,16 @@ public:
    */
   inline SiconosMatrix* getGPtr()
   {
-    return &(this->G);
+    return G;
   }
 
   /** \fn void setG(SiconosMatrix&)
    *  \brief allows to set the value of G
    *  \param SiconosMatrix& : the matrix to set for G
    */
-  inline void setG(SiconosMatrix& G)
+  inline void setG(SiconosMatrix& newG)
   {
-    this->G = G;
+    *G = newG;
   }
 
 
@@ -237,7 +237,7 @@ protected :
   EqualityConstraintXML *ecXML;
 
   /** the matrix containing the constraint informations */
-  SiconosMatrix G;
+  SiconosMatrix* G;
 
 
   //////////////////////////////

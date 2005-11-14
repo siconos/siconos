@@ -109,9 +109,11 @@ Strategy::Strategy(StrategyXML* strxml, Model *newModel): strategyType("none"), 
       // --- OneStepIntegrators ---
       // Get the OSI vector from xml
       vector<OneStepIntegratorXML*> osiXMLVector = strategyxml->getOneStepIntegratorXML();
+      unsigned int sizeOsi = osiXMLVector.size();
+      integratorVector.reserve(sizeOsi);
 
       // For each OSI ...
-      for (unsigned int i = 0; i < osiXMLVector.size(); i++)
+      for (unsigned int i = 0; i < sizeOsi; i++)
       {
         // Get the number of the DynamicalSystem concerned
         dsNb = (osiXMLVector[i]->getDSConcerned())[0];

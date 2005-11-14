@@ -19,7 +19,7 @@
 #include "SimpleVector.h"
 using namespace std;
 
-// default
+// default (private)
 SimpleVector::SimpleVector(): SiconosVector()
 {
   IN("SimpleVector() \n");
@@ -83,9 +83,15 @@ SimpleVector::SimpleVector(const int unsigned& size):
 {
   IN("SimpleVector (const int size) \n");
   composite = false;
+
   if (size < 0)
     SiconosVectorException::selfThrow(" SimpleVector:: constructor, negative size");
+
+  // resize and init lavd
   lavd.resize(size, 1);
+  for (unsigned int i = 0; i < size; ++i)
+    lavd(i) = 0.0;
+
   OUT("SimpleVector (const int size) \n");
 }
 
@@ -121,15 +127,6 @@ double& SimpleVector::operator()(const int unsigned& index) const
   OUT("SimpleVector::operator()\n");
 
   return const_cast<double&>(lavd(index));
-}
-
-vector<SiconosVector*> SimpleVector::getSvref() const
-{
-  SiconosVectorException::selfThrow(" SimpleVector::getSvref()  -- do not use this function for simple vector");
-  // return to avoid warning ...
-  vector<SiconosVector*> tmp;
-  tmp.push_back(NULL);
-  return tmp;
 }
 
 std::vector<int> SimpleVector::getTabIndex() const
@@ -175,7 +172,7 @@ void SimpleVector::setValue(const int unsigned& index, const double& newVal)
   lavd(index) = newVal;
 }
 
-void SimpleVector::setValues(const vector<double>& v, const int unsigned& index)
+void SimpleVector::setValues(const vector<double>& v, const int unsigned& index) // index default value = 0, useless for simpleVector BUT required for composite
 {
   if (v.size() < 0)
     SiconosVectorException::selfThrow("SimpleVector::setValues - negative vector size");

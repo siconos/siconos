@@ -31,50 +31,50 @@ Extern  "C"
 void SiconosMatrix::verbose(const string& msg)
 {
   if (printVerbose)
-  {
     cout << msg << endl;
-  }
 }
 
 // --- CONSTRUCTORS ---
 
+// Default (private)
 SiconosMatrix::SiconosMatrix(): ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
-{
-  mat.resize(0, 0);
-}
+{}
 
+// copy
 SiconosMatrix::SiconosMatrix(const SiconosMatrix& m):
-  ipiv(m.ipiv), isPLUFactorized(m.isPLUFactorized), isPLUInversed(m.isPLUInversed)
+  ipiv(NULL), isPLUFactorized(m.isFactorized()), isPLUInversed(m.isInversed())
 {
-  mat.resize(m.mat.size(0), m.mat.size(1));
-  mat = m.mat;
-
+  mat = m.getLaGenMatDouble();
 }
 
+// From dimensions
 SiconosMatrix::SiconosMatrix(const int& row, const int& col):
   ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
 {
   mat.resize(row, col);
+  zero();
 }
 
+// copy a LaGenMatDouble
 SiconosMatrix::SiconosMatrix(const LaGenMatDouble& m):
   ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
 {
-  mat.resize(m.size(0), m.size(1));
   mat = m;
 }
 
+// built from dimensions and a LaVectorDouble
 SiconosMatrix::SiconosMatrix(const LaVectorDouble& v, const int& row, const int& col):
   ipiv(NULL), isPLUFactorized(false), isPLUInversed(false)
 
 {
   if (v.size() != row * col)
     SiconosMatrixException::selfThrow("constructor(LaVectorDouble,int,int) : invalid vector size");
+
   mat.resize(row, col);
   int index = 0;
-  for (int i = 0; i < mat.size(0); i++)
+  for (int i = 0; i < row; i++)
   {
-    for (int j = 0; j < mat.size(1); j++)
+    for (int j = 0; j < col; j++)
     {
       mat(i, j) = v(index);
       index ++;
@@ -95,7 +95,7 @@ SiconosMatrix::SiconosMatrix(const string& file, const bool& ascii):
 SiconosMatrix::~SiconosMatrix()
 {
   IN("SiconosMatrix::~SiconosMatrix \n");
-  delete ipiv;
+  if (ipiv != NULL) delete ipiv;
   OUT("SiconosMatrix::~SiconosMatrix \n");
 
 }
@@ -122,30 +122,14 @@ LaGenMatDouble SiconosMatrix::getLaGenMatDouble() const
   return mat;
 }
 
-LaGenMatDouble& SiconosMatrix::getLaGenMatDouble()
-{
-  return mat;
-}
+//LaGenMatDouble& SiconosMatrix::getLaGenMatDouble() { return mat;}
 
 void SiconosMatrix::setValue(const LaGenMatDouble& newMat)
 {
-  mat.resize(newMat.size(0), newMat.size(1));
   mat = newMat;
+  if (ipiv != NULL) delete ipiv;
   isPLUFactorized = false;
   isPLUInversed = false;
-}
-
-bool SiconosMatrix::addRow(const unsigned int& row, const SiconosVector &v)
-{
-  bool res = true;
-  if ((int)v.size() != mat.size(1))
-    res = false;
-
-  else
-    for (int i = 0; i < mat.size(1); i++)
-      mat(row, i) = v(i);
-
-  return res;
 }
 
 void SiconosMatrix::setRow(const unsigned int& row, const SiconosVector &v)
@@ -161,31 +145,29 @@ void SiconosMatrix::setRow(const unsigned int& row, const SiconosVector &v)
 }
 
 
-SimpleVector SiconosMatrix::getRow(const int& index) const
+void SiconosMatrix::getRow(const int& index, const SimpleVector& vOut) const
 {
-  const int rowSize = mat.size(1);
-  SimpleVector res(mat.size(1));
+  unsigned int rowSize = vOut.size();
+  if ((int)rowSize != mat.size(1))
+    SiconosMatrixException::selfThrow("getRow : inconsistent sizes");
   if (index >= mat.size(0) || index < 0)
     SiconosMatrixException::selfThrow("getRow : Index out of range");
-  else
-  {
-    for (int i = 0; i < rowSize; i++)
-      res(i) = mat(index, i);
-  }
-  return res;
+
+  for (unsigned int i = 0; i < rowSize; i++)
+    vOut(i) = mat(index, i);
 }
 
-SimpleVector SiconosMatrix::getCol(const int& index) const
+void SiconosMatrix::getCol(const int& index, const SimpleVector& vOut) const
 {
-  if (index >= mat.size(0))
+  unsigned int colSize = vOut.size();
+  if ((int)colSize != mat.size(0))
+    SiconosMatrixException::selfThrow("getCol : inconsistent sizes");
+
+  if (index >= mat.size(1) || index < 0)
     SiconosMatrixException::selfThrow("getCol : Index out of range");
 
-  unsigned int colSize = mat.size(0);
-  SimpleVector col(colSize);
   for (unsigned int i = 0; i < colSize; i++)
-    col(i) = mat(i, index);
-
-  return col;
+    vOut(i) = mat(i, index);
 }
 
 void SiconosMatrix::getBlock(const vector<unsigned int>& index_list, SiconosMatrix& block) const
@@ -396,42 +378,32 @@ void SiconosMatrix::eye()
   unsigned int sizeMin;
   sizeMin = size(0);
   if (sizeMin > size(1)) sizeMin = size(1);
-
   zero();
-
   for (unsigned int j = 0; j < sizeMin; j++) mat(j, j) = 1.0;
 
 }
 
-
 // --- MATRICES HANDLING AND OPERATORS ---
 
-
-SiconosMatrix SiconosMatrix::multTranspose(SiconosMatrix &B)
+SiconosMatrix SiconosMatrix::multTranspose(const SiconosMatrix & B)
 {
-  LaGenMatDouble matResult(mat.size(0), B.mat.size(0));
-
   if (size(1) != B.size(1))
     SiconosMatrixException::selfThrow("Incompatible matrix dimension. Operation multTranspose is impossible");
 
-
+  LaGenMatDouble matResult(mat.size(0), B.mat.size(0));
   Blas_Mat_Mat_Trans_Mult(mat, B.mat, matResult);
 
-  SiconosMatrix result(matResult);
+  //SiconosMatrix result(matResult);
 
-  return result;
+  return SiconosMatrix(matResult);
 }
 
-void SiconosMatrix::blockMatrixCopy(SiconosMatrix &blockMat, const unsigned int& xPos, const unsigned int& yPos)
+void SiconosMatrix::blockMatrixCopy(const SiconosMatrix &blockMat, const unsigned int& xPos, const unsigned int& yPos)
 {
   if ((int)xPos > mat.size(0) || (int)yPos > mat.size(1))
-  {
     SiconosMatrixException::selfThrow("ERROR. SiconosMatrix::blockMatrixCopy : Cannot copy block matrix into specified matrix [block matrix to copy is too big]");
-  }
   else if ((int)(xPos + blockMat.size(0)) > mat.size(0) || (int)(yPos + blockMat.size(1)) > mat.size(1))
-  {
     SiconosMatrixException::selfThrow("ERROR. SiconosMatrix::blockMatrixCopy : Cannot copy block matrix into specified matrix [bad position for the copy of the block matrix]");
-  }
   else
   {
     for (unsigned int i = 0; i < blockMat.size(0); i++)
@@ -487,42 +459,30 @@ double& SiconosMatrix::operator()(const unsigned int& row, const unsigned int& c
   return mat(row, col);
 }
 
+// subscript operator to get/set individual elements
+double& SiconosMatrix::operator()(const unsigned int& row, const unsigned int& col) const
+{
+  if (((int)row >= mat.size(0)) || ((int)col >= mat.size(1)))
+    SiconosMatrixException::selfThrow("operator() : Index out of range");
+
+  return mat(row, col);
+}
+
 /*************************************************/
 SiconosMatrix& SiconosMatrix::operator = (const SiconosMatrix& m)
 {
-  //verbose("Matrix = operator ");
-
-  mat.resize(m.mat.size(0), m.mat.size(1));
-  mat = m.mat;
-  if (m.ipiv == NULL)
+  if (&m != this)
   {
-    if (ipiv != NULL)
-    {
-      delete ipiv;
-      ipiv = NULL;
-    }
+    mat = m.getLaGenMatDouble();
+    if (ipiv != NULL) delete ipiv;
+    ipiv = NULL;
+    isPLUFactorized = m.isFactorized();
+    isPLUInversed   = m.isInversed();
   }
-  else
-  {
-
-    if (ipiv != NULL)
-    {
-      *(ipiv) = *(m.ipiv);
-    }
-    else
-    {
-      ipiv = new LaVectorLongInt(*(m.ipiv));
-
-    }
-
-  }
-  isPLUFactorized = m.isPLUFactorized;
-  isPLUInversed = m.isPLUInversed;
   return *this;
 }
 
-
-SiconosMatrix &SiconosMatrix::operator+=(const SiconosMatrix &m)
+SiconosMatrix& SiconosMatrix::operator+=(const SiconosMatrix &m)
 {
   IN(" SiconosMatrix::operator+= \n");
   int row = m.size(0);
@@ -869,19 +829,17 @@ void SiconosMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
 }
 
 
-SiconosMatrix  BlockMatrixAssemble(vector<SiconosMatrix*> VM)
+SiconosMatrix BlockMatrixAssemble(const vector<SiconosMatrix*>& VM)
 {
   IN("SiconosMatrix BlockMatrixAssemble\n");
   // compute the size of the result
-  unsigned int i, size = 0;
-  SiconosMatrix res;
+  unsigned int sizeRes = 0;
 
+  vector<SiconosMatrix*>::const_iterator iter;
+  for (iter = VM.begin(); iter != VM.end(); ++iter)
+    sizeRes += (*iter)->size(0); // we assume that the matrices contained in VM are squared
 
-  for (i = 0; i < VM.size(); i++)
-  {
-    size += VM[i]->size(0); // we assume that the matrices contained in VM are squared
-  }
-  res.mat.resize(size, size);
+  SiconosMatrix res(sizeRes, sizeRes);
   res.zero();
 
   // assemble the blocks
@@ -898,8 +856,10 @@ SiconosMatrix  BlockMatrixAssemble(vector<SiconosMatrix*> VM)
     }
     start += sizeOfBlock;
   }
-  OUT("SiconosMatrix BlockMatrixAssemble\n");
-  return res;
+
+  return res
+
+         OUT("SiconosMatrix BlockMatrixAssemble\n");
 }
 
 

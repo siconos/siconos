@@ -845,6 +845,53 @@ public:
    */
   void setComputeTFunction(const std::string & pluginPath, const std::string & functionName);
 
+  // -- parametersList --
+
+  /** \fn vector<SimpleVector*> getParametersListVector(unsigned int & index) const
+   *  \brief get the parameter list at position index
+   *  \return SimpleVector
+   */
+  virtual inline std::vector<SimpleVector*> getParametersListVector() const
+  {
+    return parametersList0;
+  }
+
+  /** \fn  const SimpleVector getParametersList(const unsigned int & index) const
+   *  \brief get the parameter list at position index
+   *  \return SimpleVector
+   */
+  virtual inline const SimpleVector getParametersList(const unsigned int & index) const
+  {
+    return *(parametersList0[index]);
+  }
+
+  /** \fn SimpleVector* getParametersListPtr(const unsigned int & index) const
+   *  \brief get the pointer on the parameter list at position index
+   *  \return pointer on a SimpleVector
+   */
+  virtual inline SimpleVector* getParametersListPtr(const unsigned int & index) const
+  {
+    return parametersList0[index];
+  }
+
+  /** \fn void setParametersListVector(const std::vector<SimpleVector*>& newVector)
+   *  \brief set vector parameterList0 to newVector
+   *  \param vector<SimpleVector*>
+   */
+  virtual void setParametersListVector(const std::vector<SimpleVector*>&);
+
+  /** \fn void setParametersList (const SimpleVector& newValue, const unsigned int & index)
+   *  \brief set the value of parameterList0[index] to newValue
+   *  \param SimpleVector newValue
+   */
+  virtual void setParametersList(const SimpleVector&, const unsigned int &);
+
+  /** \fn void setParametersListPtr(SimpleVector* newPtr, const unsigned int & index)
+   *  \brief set parametersList0[index] to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  virtual  void setParametersListPtr(SimpleVector *newPtr, const unsigned int & index);
+
   // --- compute plugin functions ---
 
   /** \fn void vectorField (const double& time)
@@ -877,11 +924,11 @@ public:
 
   // --- isPlugin ---
 
-  /** \fn const std::vector<bool> getIsPlugin() const;
+  /** \fn const std::deque<bool> getIsPlugin() const;
    *  \brief get flag that checks if u and T are loaded from plugin or not
    *  \return a vector of bool
    */
-  inline const std::vector<bool> getIsPlugin() const
+  inline const std::deque<bool> getIsPlugin() const
   {
     return isPlugin;
   }
@@ -921,15 +968,16 @@ public:
 
   /** \var typedef void (*vfPtr) (int* sizeOfX, double* time, double* xPtr, double* xdotPtr);
    *  \brief signature of plugin function computing the vectorfield
-   *  \param int* sizeOfX : the size of the vector X
-   *  \param double* time : current time
-   *  \param double* xPtr : the pointer to the first element of the vector X
-   *  \param double* jacobianXPtr : the pointer to the first element of the matrix jacobianX (in-out parameter)
    */
-  typedef void (*vfPtr)(unsigned int* sizeOfX, const double* time, double* xPtr, double* xdotPtr);
+  typedef void (*vfPtr)(const unsigned int*, const double*, const double*, double*, double*);
 
   /** \fn vfPtr getVectorFieldPtr()
    *  \brief return the function adress of the plugin computing vectorfield
+   *  \param int* sizeOfX : the size of the vector x
+   *  \param double* time : current time
+   *  \param double* xPtr : the pointer to the first element of the vector x
+   *  \param double* xdotPtr : the pointer to the first element of the vector xDot
+   *    \param double* param   : a vector of user-defined parameters
    */
   vfPtr getVectorFieldPtr()
   {
@@ -1028,6 +1076,13 @@ protected:
   /** vector of the DS Inputs-Outputs of the Dynamical System */
   std::vector<DSInputOutput*> dsioVector;
 
+  /** Parameters list, argument of plug-in. What are those parameters depends on user´s choice.
+   *  The order corresponds to the one of the plug-in list below :
+   *  vectorField, jacobianX, u and T
+   */
+  std::vector<SimpleVector*> parametersList0; // -> Size = 4
+  std::deque<bool> isParametersList0AllocatedIn;
+
   // --- plugins ---
 
   /** class for plugin managing (open, close librairy...) */
@@ -1046,57 +1101,62 @@ protected:
   std::string  computeTFunctionName;
 
   /** Flag to check if u and T are plugins or not */
-  std::vector<bool> isPlugin;
+  std::deque<bool> isPlugin;
 
-  /** \fn void (*vectorFieldPtr) (int* sizeOfX, double* time, double* xPtr, double* xdotPtr)
+  /** \fn void (*vectorFieldPtr) (const unsigned int* sizeOfX, const double* t, const double* x, double* xDot, double* param)
    *  \brief pointer on function to compute vectorfield
    *  \param int* sizeOfX : the size of the vector x
    *  \param double* time : current time
    *  \param double* xPtr : the pointer to the first element of the vector x
    *  \param double* xdotPtr : the pointer to the first element of the vector xDot
+   *    \param double* param   : a vector of user-defined parameters
    */
-  void (*vectorFieldPtr)(unsigned int* sizeOfX, const double* time, double* xPtr, double* xdotPtr);
+  void (*vectorFieldPtr)(const unsigned int*, const double*, const double*, double*, double*);
 
-  /** \fn void (*computeJacobianXPtr) (int* sizeOfX, double* time, double* xPtr, double* jacobianXPtr)
+  /** \fn void (*computeJacobianXPtr)(const unsigned int* sizeOfX, const double* t, const double* x, double* jacobianX, double* param)
    *  \brief  Pointer on function to compute the gradient of the vector field with the respect to the state  \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param int* sizeOfX : size of vector x
    *  \param double* time : current time
    *  \param double* xPtr : pointer to the first element of x
    *  \param double* jacobianXPtr : pointer to the first element of jacobianX matrix (in-out parameter)
+   *    \param double* param   : a vector of user-defined parameters
    */
-  void (*computeJacobianXPtr)(unsigned int* sizeOfX, const double* time, double* xPtr, double* jacobianXPtr);
+  void (*computeJacobianXPtr)(const unsigned int*, const double*, const double*, double*, double*);
 
-  /** \fn void (*computeUPtr) (int* sizeOfX, double* time, double* xPtr, double* xDotPtr, double* TPtr)
+  /** \fn void (*computeUPtr)(const unsigned int* sizeOfU, const unsigned int* sizeOfX, const double* t, const double* x, const double* xDot, double* u, double* param)
    *  \brief  Pointer on function to compute u
-   *  \param double* time : current time
    *  \param int* sizeOfU : size of vector u
    *  \param int* sizeOfX : size of vector x
+   *  \param double* time : current time
    *  \param double* xPtr : pointer to the first element of x
    *  \param double* xDotPtr : pointer to the first element of xDot
-   *  \param double* TPtr : pointer to the first element of u vector (in-out parameter)
+   *  \param double* UPtr : pointer to the first element of u vector (in-out parameter)
+   *    \param double* param   : a vector of user-defined parameters
    */
-  void (*computeUPtr)(unsigned int* sizeOfU, unsigned int* sizeOfX, const double* time, double* xPtr, double* xDotPtr, double* UPtr);
+  void (*computeUPtr)(const unsigned int*, const unsigned int*, const double*, const double*, const double*, double*, double*);
 
-  /** \fn void (*computeTPtr) (int* sizeOfX, double* xPtr, double* TPtr)
+  /** \fn void (*computeTPtr)(const unsigned int* sizeOfU, const unsigned int* sizeOfX, const double* x, double* T, double* param)
    *  \brief  Pointer on function to compute T
+   *  \param int* sizeOfU : size of vector u
    *  \param int* sizeOfX : size of vector X
-   *  \param double* xPtr : pointer to the first element of X
-   *  \param double* TPtr : pointer to the first element of T matrix (in-out parameter)
+   *  \param double* x : pointer to the first element of X
+   *  \param double* T: pointer to the first element of T matrix (in-out parameter)
+   *    \param double* param   : a vector of user-defined parameters
    */
-  void (*computeTPtr)(unsigned int* sizeOfU, unsigned int* sizeOfX, double* xPtr, double* TPtr);
+  void (*computeTPtr)(const unsigned int*, const unsigned int*, const double*, double*, double*);
 
   /** Flags to know if pointers have been allocated inside constructors or not */
 
   /** index corresponds to the following order:  x0, x, xMemory, xDot, xDotMemory, xFree, jacobianX */
-  std::vector<bool> isXAllocatedIn;
+  std::deque<bool> isXAllocatedIn;
   /** r and rMemory */
-  std::vector<bool> isRAllocatedIn;
+  std::deque<bool> isRAllocatedIn;
   /** u and T */
-  std::vector<bool> isControlAllocatedIn;
+  std::deque<bool> isControlAllocatedIn;
   /** Boundary conditions */
   bool isBCAllocatedIn;
   /** dsio */
-  std::vector<bool> isDsioAllocatedIn;
+  std::deque<bool> isDsioAllocatedIn;
 };
 
 #endif // DYNAMICALSYSTEM_H

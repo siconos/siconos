@@ -30,7 +30,9 @@ EqualityConstraint::EqualityConstraint(EqualityConstraintXML* newEcXML):
 {}
 
 EqualityConstraint::~EqualityConstraint()
-{}
+{
+  if (G != NULL) delete G;
+}
 
 vector<DSInputOutput*> EqualityConstraint::getDSInputOutputs(void)
 {
@@ -72,7 +74,7 @@ void EqualityConstraint::saveEqualityConstraintToXML()
      */
     //    disoxml->setComputeInputPlugin( computeInputName );
     //    dsioxml->setComputeOutputPlugin( computeOutputName );
-    ecXML->setG(&G);
+    ecXML->setG(G);
   }
   else RuntimeException::selfThrow("EqualityConstraint::saveEqualityConstraintToXML - object EqualityConstraintXML does not exist");
   OUT("EqualityConstraint::saveEqualityConstraintToXML\n");
@@ -85,7 +87,7 @@ void EqualityConstraint::display() const
   cout << "| id : " << id << endl;
   cout << "| number : " << number << endl;
   cout << "| G : " << endl;
-  G.display();
+  G->display();
   cout << "-----------------------------------------------------" << endl << endl;
 }
 
@@ -189,7 +191,7 @@ void EqualityConstraint::fillEqualityConstraintWithEqualityConstraintXML()
     else cout << "Warning - No computeOutput method is defined in a Relation " << getType() << endl;
 
     number = ecXML->getNumber();
-    G = ecXML->getG();
+    G = new SiconosMatrix(ecXML->getG());
   }
   //else RuntimeException::selfThrow("EqualityConstraint::fillEqualityConstraintWithEqualityConstraintXML - object EqualityConstraintXML does not exist");
 }
@@ -209,7 +211,7 @@ void EqualityConstraint::createEqualityConstraint(EqualityConstraintXML *newEcXM
     ecXML = NULL;
     type = NLINEAREC;
     number = newNumber;
-    G = *newG;
+    G = new SiconosMatrix(*newG);
     dsioVector = *newDsioVector;
   }
 }

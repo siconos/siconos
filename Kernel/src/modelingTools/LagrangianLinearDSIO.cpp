@@ -36,16 +36,19 @@ LagrangianLinearDSIO::LagrangianLinearDSIO(DSInputOutputXML* dsioXML): Lagrangia
 }
 
 LagrangianLinearDSIO::~LagrangianLinearDSIO()
-{}
+{
+  if (H != NULL) delete H;
+  if (b != NULL) delete b;
+}
 
 SiconosMatrix* LagrangianLinearDSIO::getHPtr(void)
 {
-  return &this->H;
+  return H;
 }
 
 SiconosVector* LagrangianLinearDSIO::getBPtr(void)
 {
-  return &this->b;
+  return b;
 }
 
 void LagrangianLinearDSIO::computeOutput(double time)
@@ -244,8 +247,8 @@ void LagrangianLinearDSIO::fillDSInputOutputWithDSInputOutputXML()
   DSInputOutput::fillDSInputOutputWithDSInputOutputXML();
   if (this->dsioxml != NULL)
   {
-    this->H = (static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->getH();
-    this->b = (static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->getB();
+    H = new SiconosMatrix((static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->getH());
+    b = new SimpleVector((static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->getB());
 
     //    this->display();
   }
@@ -257,9 +260,9 @@ void LagrangianLinearDSIO::display() const
   cout << "---------------------------------------------------" << endl;
   cout << "____ data of the LagrangianLinearDSIO " << endl;
   cout << "| h " << endl;
-  this->H.display();
+  this->H->display();
   cout << "| b " << endl;
-  this->b.display();
+  this->b->display();
   cout << "____________________________" << endl;
   cout << "---------------------------------------------------" << endl;
 }
@@ -270,15 +273,15 @@ void LagrangianLinearDSIO::saveDSInputOutputToXML()
   DSInputOutput::saveDSInputOutputToXML();
   if (this->dsioxml != NULL)
   {
-    (static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->setH(&(this->H));
-    (static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->setB(&(this->b));
+    (static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->setH(H);
+    (static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->setB(b);
   }
   else RuntimeException::selfThrow("LagrangianLinearDSIO::saveDSInputOutputToXML - object DSInputOutputXML does not exist");
   OUT("LagrangianLinearDSIO::saveDSInputOutputToXML\n");
 }
 
 void LagrangianLinearDSIO::createDSInputOutput(DSInputOutputXML * dsioXML,
-    SiconosMatrix* H, SiconosVector* b)
+    SiconosMatrix* newH, SiconosVector* newb)
 {
   if (dsioXML != NULL)
   {
@@ -289,8 +292,8 @@ void LagrangianLinearDSIO::createDSInputOutput(DSInputOutputXML * dsioXML,
   }
   else
   {
-    this->H = *H;
-    this->b = *b;
+    H = new SiconosMatrix(*newH);
+    b = new SimpleVector(*newb);
   }
 }
 

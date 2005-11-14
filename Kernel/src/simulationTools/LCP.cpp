@@ -399,7 +399,7 @@ void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeI
     for (unsigned int i = 0; i < sizeInteraction; i++)
     {
       // get row i of D
-      *Drow = D->getRow(i);
+      D->getRow(i, *Drow);
       *currentLine = *Drow;
       // loop over the DS of the current interaction
       for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
@@ -412,7 +412,7 @@ void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeI
         LTIR->getBBlockDSPtr(*itDS, *B);
         // get row i of C
         Crow = new SimpleVector(sizeDS);
-        *Crow = C->getRow(i);
+        C->getRow(i, *Crow);
 
         // compute currentLine
         *currentLine +=  h* *Crow * (*W[*itDS]* *B);
@@ -482,7 +482,7 @@ void LCP::computeExtraDiagonalBlocksLinearTIR(Relation * RCurrent, Relation* RLi
         LTIR2->getBBlockDSPtr(*itDS, *B);
         // get row i of C
         Crow = new SimpleVector(sizeDS);
-        *Crow = C->getRow(i);
+        C->getRow(i, *Crow);
         // compute currentLine
         *currentLine +=   *Crow * (*W[*itDS]* *B);
         delete Crow;
@@ -553,7 +553,7 @@ void LCP::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& siz
         LR->getGBlockDS(*itDS, *G);
         // get row i of G
         Grow = new SimpleVector(sizeDS);
-        *Grow = G->getRow(i);
+        G->getRow(i, *Grow);
 
         // compute currentLine
         *currentLine +=  *Grow * (W[*itDS])->multTranspose(*G);
@@ -621,7 +621,7 @@ void LCP::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* R
         LR2->getGBlockDS(*itDS, *Glinked);
         // get row i of G
         Grow = new SimpleVector(sizeDS);
-        *Grow = Gcurrent->getRow(i);
+        Gcurrent->getRow(i, *Grow);
         // compute currentLine
         *currentLine +=  *Grow * (W[*itDS])->multTranspose(*Glinked);
         delete Grow;
@@ -918,8 +918,10 @@ void LCP::assembleM() //
           coupledBlock->getBlock(blockIndexesMap[currentInteraction], blockIndexesMap[linkedInteraction], *reducedCoupledBlock);
           col = interactionEffectivePositionMap[ linkedInteraction ];
           M->blockMatrixCopy(*reducedCoupledBlock, pos, col); // \todo avoid copy
+          delete reducedCoupledBlock;
         }
       }
+      delete reducedBlock;
     }
   }// --- end of interactions loop ---
 }
@@ -1153,12 +1155,9 @@ void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)
         }
       }
     }
+    delete tmpY;
+    delete tmpLambda;
   }
-
-
-
-  delete tmpY;
-  delete tmpLambda;
 }
 
 

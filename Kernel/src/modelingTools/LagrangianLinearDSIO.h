@@ -55,7 +55,7 @@ public:
    */
   inline SiconosMatrix getH(void) const
   {
-    return this->H;
+    return *H;
   } ;
 
   /** \fn SimpleVector getB(void)
@@ -64,7 +64,7 @@ public:
    */
   inline SimpleVector getB(void) const
   {
-    return this->b;
+    return *b;
   };
 
   /** \fn SiconosMatrix* getHPtr(void)
@@ -83,18 +83,18 @@ public:
    *  \brief setter on the SiconosMatrix h
    *  \param a SiconosMatrix to set h
    */
-  inline void setH(const SiconosMatrix &H)
+  inline void setH(const SiconosMatrix &newH)
   {
-    this->H = H;
+    *H = newH;
   };
 
   /** \fn void setH(SimpleVector&)
    *  \brief set the vector b
    *  \param SimpleVector& : new value of b
    */
-  inline void setB(SimpleVector& B)
+  inline void setB(SimpleVector& newB)
   {
-    this->b = B;
+    *b = newB;
   };
 
 
@@ -159,10 +159,10 @@ protected:
 
 private:
   /** a specific matrix to the LagrangianLinearDSIO */
-  SiconosMatrix H;
+  SiconosMatrix* H;
 
   /** a specific vector to the LagrangianLinearDSIO */
-  SimpleVector b;
+  SimpleVector* b;
 };
 
 #endif // LAGRANGIANLINEARDSIO_H

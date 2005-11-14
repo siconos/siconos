@@ -52,7 +52,7 @@ public:
    *  \param a SiconosMatrix to set h
    *  \param e SiconosVector to set b
    */
-  LagrangianLinearEC(SiconosMatrix, SimpleVector);
+  LagrangianLinearEC(const SiconosMatrix&, const SimpleVector&);
   ~LagrangianLinearEC();
 
   /** \fn SiconosMatrix getH(void)
@@ -61,7 +61,7 @@ public:
    */
   inline SiconosMatrix getH(void) const
   {
-    return this->h;
+    return *h;
   } ;
 
   /** \fn SimpleVector getB(void)
@@ -70,7 +70,7 @@ public:
    */
   inline /*SiconosVector*/SimpleVector getB(void) const
   {
-    return this->b;
+    return *b;
   };
 
   /** \fn SiconosMatrix* getHPtr(void)
@@ -89,18 +89,18 @@ public:
    *  \brief setter on the SiconosMatrix h
    *  \param a SiconosMatrix to set h
    */
-  inline void setH(const SiconosMatrix &H)
+  inline void setH(const SiconosMatrix &newH)
   {
-    this->h = H;
+    *h = newH;
   };
 
   /** \fn void setH(SimpleVector&)
    *  \brief set the vector b
    *  \param SimpleVector& : new value of b
    */
-  inline void setB(/*SiconosVector*/SimpleVector& B)
+  inline void setB(/*SiconosVector*/SimpleVector& newB)
   {
-    this->b = B;
+    *b = newB;
   };
 
 
@@ -168,11 +168,11 @@ protected:
 
 private:
   /** a specific matrix to the LagrangianLinearEC */
-  SiconosMatrix h;
+  SiconosMatrix *h;
 
   /** a specific vector to the LagrangianLinearEC */
   /*SiconosVector*/
-  SimpleVector b;
+  SimpleVector *b;
 };
 
 #endif // LAGRANGIANLINEAREC_H

@@ -87,29 +87,38 @@ protected:
   bool isOutputPlugged;
   bool isInputPlugged;
 
-  /** \fn void (*computeOutputPtr)(const unsigned int* sizeX, const double* xPtr, const double* time,
-                                   const unsigned int* sizeY, const double* lambdaPtr,
-           const unsigned int* sizeU, const double* uPtr, double* yPtr);
+  /** Parameters list, argument of plug-in. What are those parameters depends on user´s choice.
+   *  The order corresponds to the one of the plug-in list below :
+   *  computeOutput, computeInput
+   */
+  std::vector<SimpleVector*> parametersList0; // -> Size = 2
+  std::deque<bool> isParametersList0AllocatedIn;
+
+  /** \fn void (*computeOutputPtr)(const unsigned int* sizeX, const double* x, const double* time,
+                                   const unsigned int* sizeY, const double* lambda,
+           const unsigned int* sizeU, const double* u, double* y, double* param);
    *  \brief computes y
    *  \param unsigned int* sizeX : size of vector x
-   *  \param double* xPtr : the pointer to the first element of the vector x
+   *  \param double* x : the pointer to the first element of the vector x
    *  \param double* time : the current time
    *  \param unsigned int* sizeY : size of vector y and lambda.
-   *  \param double* lambdaPtr : the pointer to the first element of the vector lambda
+   *  \param double* lambda : the pointer to the first element of the vector lambda
    *  \param unsigned int* sizeU : size of vector u
-   *  \param double* uPtr : the pointer to the first element of the vector u
-   *  \param double* yPtr : the pointer to the first element of the vector y (in-out parameter)
+   *  \param double* u : the pointer to the first element of the vector u
+   *  \param double* y : the pointer to the first element of the vector y (in-out parameter)
+   *  \param double* param   : a vector of user-defined parameters
    */
-  void (*computeOutputPtr)(const unsigned int*, const double*, const double*, const unsigned int*, const double*, const unsigned int*, const double*, double*);
+  void (*computeOutputPtr)(const unsigned int*, const double*, const double*, const unsigned int*, const double*, const unsigned int*, const double*, double*, double*);
 
-  /** \fn void (*computeInputPtr)(const unsigned int* sizeY, const double* time, const double* lambdaPtr, double* rPtr);
+  /** \fn void (*computeInputPtr)(const unsigned int* sizeY, const double* lambda, const double* time, double* r, double* param);
    *  \brief computes r
    *  \param unsigned int* sizeY : size of vector y and lambda.
-   *  \param double* lambdaPtr : the pointer to the first element of the vector lambda
+   *  \param double* lambda : the pointer to the first element of the vector lambda
    *  \param double* time : the current time
-   *  \param double* rPtr : the pointer to the first element of the vector r (in-out parameter)
+   *  \param double* r : the pointer to the first element of the vector r (in-out parameter)
+   *  \param double* param   : a vector of user-defined parameters
    */
-  void (*computeInputPtr)(const unsigned int*, const double*, const double*, double*);
+  void (*computeInputPtr)(const unsigned int*, const double*, const double*, double*, double*);
 
 public:
 
@@ -169,7 +178,7 @@ public:
   /** \fn void setInteractionPtr(Interaction* i)
    *  \brief set the Interaction which contains this Relation
    */
-  inline void setInteractionPtr(Interaction* i)
+  virtual inline void setInteractionPtr(Interaction* i)
   {
     interaction = i;
   }
@@ -225,6 +234,53 @@ public:
    *  \param DSInputOutput* : the DSInputOutput to add
    */
   void addDSInputOutput(DSInputOutput*);
+
+  // -- parametersList --
+
+  /** \fn vector<SimpleVector*> getParametersListVector(unsigned int & index) const
+   *  \brief get the parameter list at position index
+   *  \return SimpleVector
+   */
+  virtual inline std::vector<SimpleVector*> getParametersListVector() const
+  {
+    return parametersList0;
+  }
+
+  /** \fn  const SimpleVector getParametersList(const unsigned int & index) const
+   *  \brief get the parameter list at position index
+   *  \return SimpleVector
+   */
+  virtual inline const SimpleVector getParametersList(const unsigned int & index) const
+  {
+    return *(parametersList0[index]);
+  }
+
+  /** \fn SimpleVector* getParametersListPtr(const unsigned int & index) const
+   *  \brief get the pointer on the parameter list at position index
+   *  \return pointer on a SimpleVector
+   */
+  virtual inline SimpleVector* getParametersListPtr(const unsigned int & index) const
+  {
+    return parametersList0[index];
+  }
+
+  /** \fn void setParametersListVector(const std::vector<SimpleVector*>& newVector)
+   *  \brief set vector parameterList0 to newVector
+   *  \param vector<SimpleVector*>
+   */
+  virtual void setParametersListVector(const std::vector<SimpleVector*>&);
+
+  /** \fn void setParametersList (const SimpleVector& newValue, const unsigned int & index)
+   *  \brief set the value of parameterList0[index] to newValue
+   *  \param SimpleVector newValue
+   */
+  virtual void setParametersList(const SimpleVector&, const unsigned int &);
+
+  /** \fn void setParametersListPtr(SimpleVector* newPtr, const unsigned int & index)
+   *  \brief set parametersList0[index] to pointer newPtr
+   *  \param SimpleVector * newPtr
+   */
+  virtual  void setParametersListPtr(SimpleVector *newPtr, const unsigned int & index);
 
   /** \fn void computeOutput(double time);
    *  \brief default function to compute y

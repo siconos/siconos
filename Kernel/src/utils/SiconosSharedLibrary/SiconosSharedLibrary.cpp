@@ -25,11 +25,25 @@ using namespace std;
 //
 //*************************************************************************
 
+SiconosSharedLibrary::SiconosSharedLibrary(const unsigned int & n)
+{
+  if (n > 0)
+    isPlugged.reserve(n);
+}
+
+SiconosSharedLibrary::~SiconosSharedLibrary()
+{
+  vector<PluginHandle>::iterator iter;
+  for (iter = isPlugged.begin(); iter != isPlugged.end(); ++iter)
+    dlclose(*iter);
+  isPlugged.clear();
+}
+
 ///////////////////////////////////////////////////////////////////////////
 //
 // loadPlugin
 //
-PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath) const
+PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath)
 {
   PluginHandle HandleRes;
   cout << "PluginPath   :  " << pluginPath << endl;
@@ -40,11 +54,10 @@ PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath) const
   HandleRes = dlopen(pluginPath.c_str(), RTLD_LAZY);
   //  cout << "dlerror() :" <<dlerror()<< endl;
   if (HandleRes == NULL)
-  {
     SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin");
-    //throw SiconosSharedLibraryException(dlerror());
-  }
 #endif
+
+  isPlugged.push_back(HandleRes);
   return HandleRes;
 }
 
@@ -73,6 +86,15 @@ void  SiconosSharedLibrary::closePlugin(PluginHandle plugin)
 {
 #ifdef _SYS_UNX
   dlclose(plugin);
+#endif
+}
+
+void  SiconosSharedLibrary::closeAllPlugins()
+{
+#ifdef _SYS_UNX
+  vector<PluginHandle>::iterator iter;
+  for (iter = isPlugged.begin(); iter != isPlugged.end(); ++iter)
+    dlclose(*iter);
 #endif
 }
 

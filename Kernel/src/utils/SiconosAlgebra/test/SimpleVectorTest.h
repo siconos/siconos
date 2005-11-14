@@ -38,7 +38,7 @@ private:
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildSimpleVector);
+  //  CPPUNIT_TEST(testBuildSimpleVector);
   CPPUNIT_TEST(testBuildSimpleVector1);
   CPPUNIT_TEST(testBuildSimpleVector2);
   CPPUNIT_TEST(testBuildSimpleVector3);
@@ -66,7 +66,7 @@ private:
 
   // \todo exception test
 
-  void testBuildSimpleVector();
+  //void testBuildSimpleVector();
   void testBuildSimpleVector1();
   void testBuildSimpleVector2();
   void testBuildSimpleVector3();

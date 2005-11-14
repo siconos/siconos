@@ -21,31 +21,45 @@
 using namespace std;
 
 // Default constructor with optional interaction parameter
+// LagrangianR::LagrangianR(Interaction* inter):
+//   Relation(inter), LagrangianRelationType("holonom"), isHPlugged(false), hFunctionName("none"),
+//   parametersList(NULL), isParametersListAllocatedIn(false),
+//   h0Ptr(NULL), G0Ptr(NULL), h1Ptr(NULL), G10Ptr(NULL), G11Ptr(NULL), h2Ptr(NULL), G20Ptr(NULL), G21Ptr(NULL)
+// {
+//   // Default option is holonom case.
+//   isOutputPlugged = false;
+//   isInputPlugged  = false;
+//   relationType = LAGRANGIANRELATION;
+//   isGPlugged.push_back(false);
+//   G.reserve(1);
+//   G.push_back(NULL);
+//   isGAllocatedIn.push_back(false);
+//   GFunctionName.reserve(1);
+//   GFunctionName.push_back("none");
+//   setComputeGFunction("DefaultPlugin.so","G0");
+//   isGPlugged[0] = false;
+//   setComputeHFunction("DefaultPlugin.so","h0");
+//   isHPlugged = false;
+//   parametersList = new SimpleVector(1);
+//   isParametersListAllocatedIn = true;
+//   (*parametersList)(0) = 1.0;
+// }
+
+// Default constructor with optional interaction parameter
 LagrangianR::LagrangianR(Interaction* inter):
-  Relation(inter), LagrangianRelationType("holonom"), isHPlugged(false), hFunctionName("none"),
-  parametersList(NULL), isParametersListAllocatedIn(false),
+  Relation(inter), LagrangianRelationType("default"), isHPlugged(false), hFunctionName("none"),
   h0Ptr(NULL), G0Ptr(NULL), h1Ptr(NULL), G10Ptr(NULL), G11Ptr(NULL), h2Ptr(NULL), G20Ptr(NULL), G21Ptr(NULL)
 {
   isOutputPlugged = false;
   isInputPlugged  = false;
   relationType = LAGRANGIANRELATION;
-  isGPlugged.resize(1, false);
-  G.resize(1, NULL);
-  isGAllocatedIn.resize(1, false);
-  GFunctionName.resize(1, "none");
-  setComputeGFunction("DefaultPlugin.so", "G0");
-  isGPlugged[0] = false;
-  setComputeHFunction("DefaultPlugin.so", "h0");
-  isHPlugged = false;
-  parametersList = new SimpleVector(1);
-  isParametersListAllocatedIn = true;
-  (*parametersList)(0) = 1.0;
+  initParametersList();
+  isHPlugged = false ;
 }
 
 // xml constructor
 LagrangianR::LagrangianR(RelationXML* relxml, Interaction* inter):
-  Relation(relxml, inter), LagrangianRelationType("holonom"), isHPlugged(true), hFunctionName("none"),
-  parametersList(NULL), isParametersListAllocatedIn(false),
+  Relation(relxml, inter), LagrangianRelationType("none"), isHPlugged(true), hFunctionName("none"),
   h0Ptr(NULL), G0Ptr(NULL), h1Ptr(NULL), G10Ptr(NULL), G11Ptr(NULL), h2Ptr(NULL), G20Ptr(NULL), G21Ptr(NULL)
 {
 
@@ -71,15 +85,17 @@ LagrangianR::LagrangianR(RelationXML* relxml, Interaction* inter):
     isHPlugged = false ;
   }
 
-
   if (LRxml->hasG())
   {
     if (LagrangianRelationType == "holonom")
     {
-      isGPlugged.resize(1, true);
-      G.resize(1, NULL);
-      isGAllocatedIn.resize(1, false);
-      GFunctionName.resize(1, "none");
+      isGPlugged.push_back(true);
+      G.reserve(1);
+      G.push_back(NULL);
+      isGAllocatedIn.push_back(false);
+      GFunctionName.reserve(1);
+      GFunctionName.push_back("none");
+
       if (LRxml->isGPlugin())
       {
         plugin = LRxml->getGPlugin();
@@ -95,9 +111,14 @@ LagrangianR::LagrangianR(RelationXML* relxml, Interaction* inter):
     else if (LagrangianRelationType == "non-holonom" || LagrangianRelationType == "holonom+lambda")
     {
       isGPlugged.resize(2, true);
-      G.resize(2, NULL);
-      isGAllocatedIn.resize(2, false);
-      GFunctionName.resize(2, "none");
+      G.reserve(2);
+      G.push_back(NULL);
+      G.push_back(NULL);
+      isGAllocatedIn.push_back(false);
+      isGAllocatedIn.push_back(false);
+      GFunctionName.reserve(2);
+      GFunctionName.push_back("none");
+      GFunctionName.push_back("none");
       if (LRxml->isGPlugin())
       {
         plugin = LRxml->getGPlugin(0);
@@ -120,46 +141,101 @@ LagrangianR::LagrangianR(RelationXML* relxml, Interaction* inter):
   }
   else
   {
-    isGPlugged.resize(1, false);
-    G.resize(1, NULL);
-    isGAllocatedIn.resize(1, false);
-    GFunctionName.resize(1, "none");
-    setComputeGFunction("DefaultPlugin.so", "G0");
-    isGPlugged[0] = false;
+    isGPlugged.push_back(false);
+    if (LagrangianRelationType == "holonom")
+    {
+      G.reserve(1);
+      G.push_back(NULL);
+      isGAllocatedIn.push_back(false);
+      GFunctionName.reserve(1);
+      GFunctionName.push_back("none");
+      setComputeGFunction("DefaultPlugin.so", "G0");
+      isGPlugged[0] = false;
+    }
+    else if (LagrangianRelationType == "non-holonom" || LagrangianRelationType == "holonom+lambda")
+    {
+      G.reserve(2);
+      G.push_back(NULL);
+      G.push_back(NULL);
+      isGAllocatedIn.push_back(false);
+      isGAllocatedIn.push_back(false);
+      GFunctionName.reserve(2);
+      GFunctionName.push_back("none");
+      GFunctionName.push_back("none");
+      if (LagrangianRelationType == "non-holonom")
+      {
+        setComputeGFunction("DefaultPlugin.so", "G10");
+        setComputeGFunction("DefaultPlugin.so", "G11");
+      }
+      else
+      {
+        setComputeGFunction("DefaultPlugin.so", "G20");
+        setComputeGFunction("DefaultPlugin.so", "G21");
+      }
+      isGPlugged.push_back(false);
+      isGPlugged.push_back(false);
+    }
   }
-  parametersList = new SimpleVector(1);
-  isParametersListAllocatedIn = true;
-  (*parametersList)(0) = 1.0;
+  // Initialize parameter list
+  initParametersList();
+
+  // check or set sizes for G
+  if (inter != NULL) // else this will be done during setInteractionPtr call by user
+    manageGMemory();
 }
 
-// constructor from a set of data, holonom case
-LagrangianR::LagrangianR(const string& computeH, const string& computeG, Interaction* inter):
-  Relation(inter), LagrangianRelationType("holonom"), isHPlugged(true), hFunctionName("none"),
-  parametersList(NULL), isParametersListAllocatedIn(false),
+// constructor from a set of data
+LagrangianR::LagrangianR(const string& lagRelType, const string& computeH, const vector<string> & computeG, Interaction* inter):
+  Relation(inter), LagrangianRelationType(lagRelType), isHPlugged(true), hFunctionName("none"),
   h0Ptr(NULL), G0Ptr(NULL), h1Ptr(NULL), G10Ptr(NULL), G11Ptr(NULL), h2Ptr(NULL), G20Ptr(NULL), G21Ptr(NULL)
 {
+
   relationType = LAGRANGIANRELATION;
   isOutputPlugged = false;
   isInputPlugged  = false;
-  isGPlugged.resize(1, true);
-  G.resize(1, NULL);
-  isGAllocatedIn.resize(1, false);
-  GFunctionName.resize(1, "none");
-  parametersList = new SimpleVector(1);
-  isParametersListAllocatedIn = true;
-  (*parametersList)(0) = 1.0;
+
+  if (LagrangianRelationType == "holonom")
+  {
+    isGPlugged.push_back(true);
+    G.reserve(1);
+    G.push_back(NULL);
+    isGAllocatedIn.push_back(false);
+    GFunctionName.reserve(1);
+    GFunctionName.push_back("none");
+  }
+  else if (LagrangianRelationType == "non-holonom" || LagrangianRelationType == "holonom+lambda")
+  {
+    isGPlugged.push_back(true);
+    isGPlugged.push_back(true);
+    G.reserve(2);
+    G.push_back(NULL);
+    G.push_back(NULL);
+    isGAllocatedIn.push_back(false);
+    isGAllocatedIn.push_back(false);
+    GFunctionName.reserve(1);
+    GFunctionName.push_back("none");
+    GFunctionName.push_back("none");
+  }
+
+  // Initialize parameter list
+  initParametersList();
 
   // === Set plug-in for h and G functions
   // h
   setComputeHFunction(cShared.getPluginName(computeH), cShared.getPluginFunctionName(computeH));
-  // jacobianQH
-  setComputeGFunction(cShared.getPluginName(computeG), cShared.getPluginFunctionName(computeG));
+  // G0
+  setComputeGFunction(cShared.getPluginName(computeG[0]), cShared.getPluginFunctionName(computeG[0]), 0);
+  // G1 if necessary
+  if (LagrangianRelationType == "non-holonom" || LagrangianRelationType == "holonom+lambda")
+    setComputeGFunction(cShared.getPluginName(computeG[1]), cShared.getPluginFunctionName(computeG[1]), 1);
+  // Memory allocation for G
+  if (inter != NULL)
+    manageGMemory();
 }
 
 // copy constructor (inter is optional)
 LagrangianR::LagrangianR(const Relation & newLNLR, Interaction* inter):
   Relation(newLNLR, inter), LagrangianRelationType("none"), isHPlugged(true), hFunctionName("none"),
-  parametersList(NULL), isParametersListAllocatedIn(false),
   h0Ptr(NULL), G0Ptr(NULL), h1Ptr(NULL), G10Ptr(NULL), G11Ptr(NULL)
 {
   if (relationType !=  LAGRANGIANRELATION && relationType !=  LAGRANGIANLINEARRELATION)
@@ -177,31 +253,24 @@ LagrangianR::LagrangianR(const Relation & newLNLR, Interaction* inter):
   if (cShared.getPluginName(hPluginName) == "DefaultPlugin.so")
     isHPlugged = false;
 
-  if (lnlr->getParametersListPtr() != NULL)
-  {
-    parametersList = new SimpleVector(lnlr->getParametersList());
-    isParametersListAllocatedIn = true;
-  }
-  else
-  {
-    // Default value for parametersList: simpleVector of size 1
-    parametersList = new SimpleVector(1);
-    (*parametersList)(0) = 1.0;
-    isParametersListAllocatedIn = true;
-  }
+  setParametersListVector(lnlr->getParametersListVector());
 
   // --- G ---
   if (LagrangianRelationType == "holonom")
   {
-    isGPlugged.resize(1, true);
-    G.resize(1, NULL);
-    isGAllocatedIn.resize(1, false);
-    GFunctionName.resize(1, "none");
+    isGPlugged.push_back(true);
+    G.reserve(1);
+    //      G.push_back(NULL);
+    isGAllocatedIn.push_back(false);
+    GFunctionName.reserve(1);
+    GFunctionName.push_back("none");
     if (lnlr->getGPtr() != NULL)
     {
-      G[0] = new SiconosMatrix(lnlr->getG());
+      G.push_back(new SiconosMatrix(lnlr->getG()));
       isGAllocatedIn[0] = true;
     }
+    else
+      G.push_back(NULL);
     plugin = lnlr->getGFunctionName();
     setComputeGFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin), 0);
     if (cShared.getPluginName(plugin) == "DefaultPlugin.so")
@@ -210,10 +279,16 @@ LagrangianR::LagrangianR(const Relation & newLNLR, Interaction* inter):
 
   else if (LagrangianRelationType == "non-holonom" || LagrangianRelationType == "holonom+lambda")
   {
-    isGPlugged.resize(2, true);
-    G.resize(2, NULL);
-    isGAllocatedIn.resize(2, false);
-    GFunctionName.resize(2, "none");
+    isGPlugged.push_back(true);
+    isGPlugged.push_back(true);
+    G.reserve(2);
+    G.push_back(NULL);
+    G.push_back(NULL);
+    isGAllocatedIn.push_back(false);
+    isGAllocatedIn.push_back(false);
+    GFunctionName.reserve(1);
+    GFunctionName.push_back("none");
+    GFunctionName.push_back("none");
     if (lnlr->getGPtr(0) != NULL)
     {
       G[0] = new SiconosMatrix(lnlr->getG(0));
@@ -223,7 +298,6 @@ LagrangianR::LagrangianR(const Relation & newLNLR, Interaction* inter):
     setComputeGFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin), 0);
     if (cShared.getPluginName(plugin) == "DefaultPlugin.so")
       isGPlugged[0] = false;
-
 
     if (lnlr->getGPtr(1) != NULL)
     {
@@ -238,6 +312,9 @@ LagrangianR::LagrangianR(const Relation & newLNLR, Interaction* inter):
   }
   else
     RuntimeException::selfThrow("LagrangianR:: copy constructor, not yet implemented for problem of type" + LagrangianRelationType);
+
+  if (interaction != NULL)
+    manageGMemory();
 }
 
 LagrangianR::~LagrangianR()
@@ -247,8 +324,14 @@ LagrangianR::~LagrangianR()
     if (isGAllocatedIn[i]) delete G[i];
     G[i] = NULL;
   }
-  if (isParametersListAllocatedIn) delete parametersList;
-  parametersList = NULL;
+
+  for (unsigned int i = 0; i < parametersList.size(); i++)
+  {
+    if (isParametersListAllocatedIn[i]) delete parametersList[i];
+    parametersList[i] = NULL;
+  }
+  isParametersListAllocatedIn.resize(8, false);
+
   h0Ptr = NULL;
   h1Ptr = NULL;
   G0Ptr = NULL;
@@ -259,8 +342,105 @@ LagrangianR::~LagrangianR()
   G21Ptr = NULL;
 }
 
+void LagrangianR::initParametersList()
+{
+  unsigned int sizeOfList, i ;
+  if (LagrangianRelationType == "holonom")
+    sizeOfList = 2;
+  else if (LagrangianRelationType == "non-holonom" || LagrangianRelationType == "holonom+lambda")
+    sizeOfList = 3;
+  else if (LagrangianRelationType == "default") // default = holonom
+    sizeOfList = 2;
+  else
+    RuntimeException::selfThrow("LagrangianR::initParametersList not yet implemented for problem of type " + LagrangianRelationType);
+
+  for (i = 0; i < sizeOfList; ++i)
+  {
+    // parametersList is set to default (vector of size 1 set to 0)
+    parametersList.push_back(NULL);
+    isParametersListAllocatedIn.push_back(true);
+  }
+  vector<SimpleVector*>::iterator iter;
+  for (iter = parametersList.begin(); iter != parametersList.end(); iter++)
+  {
+    *iter = new SimpleVector(1);
+    (*iter)->zero();
+  }
+}
+
+void LagrangianR::manageGMemory()
+{
+  if (interaction != NULL)
+  {
+    unsigned int sizeY = interaction->getNInteraction();
+    unsigned int sizeQ = interaction->getSizeOfDS();
+    unsigned int size0, size1;
+
+    if (G[0] == NULL)
+    {
+      G[0] = new SiconosMatrix(sizeY, sizeQ);
+      isGAllocatedIn[0] = true;
+    }
+    else
+    {
+      size0 = G[0]->size(0);
+      size1 = G[0]->size(1);
+      if (size0 != sizeY || size1 != sizeQ)
+        RuntimeException::selfThrow("LagrangianR:: setInteractionPtr, inconsistent sizes for G[0] with interaction dimensions.");
+    }
+
+    if (LagrangianRelationType == "non-holonom")
+    {
+      if (G[1] == NULL)
+      {
+        G[1] = new SiconosMatrix(sizeY, 1);
+        isGAllocatedIn[1] = true ;
+      }
+      else
+      {
+        size0 = G[1]->size(0);
+        size1 = G[1]->size(1);
+        if (size0 != sizeY || size1 != 1)
+          RuntimeException::selfThrow("LagrangianR:: setInteractionPtr, inconsistent sizes for G[1] with interaction dimensions.");
+      }
+    }
+    if (LagrangianRelationType == "holonom+lambda")
+    {
+      if (G[1] == NULL)
+      {
+        G[1] = new SiconosMatrix(sizeY, sizeY);
+        isGAllocatedIn[1] = true ;
+      }
+      else
+      {
+        size0 = G[1]->size(0);
+        size1 = G[1]->size(1);
+        if (size0 != sizeY || size1 != sizeY)
+          RuntimeException::selfThrow("LagrangianR:: setInteractionPtr, inconsistent sizes for G[1] with interaction dimensions.");
+      }
+    }
+  }
+  else
+    cout << "LagrangianR::manageGMemory, no interaction linked to the current relation, can not set size for G" << endl;
+}
+
+void LagrangianR::setInteractionPtr(Interaction* newInter)
+{
+  interaction = newInter;
+  if (interaction != NULL)
+    manageGMemory();
+  else
+    RuntimeException::selfThrow("LagrangianR::setInteractionPtr, input interaction ==NULL ");
+}
+
 void LagrangianR::setLagrangianRelationType(const string & type)
 {
+  // Warning: this function reset G to NULL !!
+  for (unsigned int i = 0; i < G.size(); i++)
+  {
+    if (isGAllocatedIn[i]) delete G[i];
+    G[i] = NULL;
+  }
 
   LagrangianRelationType = type;
   if (LagrangianRelationType == "holonom")
@@ -284,7 +464,8 @@ void LagrangianR::setLagrangianRelationType(const string & type)
   else
     RuntimeException::selfThrow("LagrangianR:: copy constructor, not yet implemented for problem of type" + LagrangianRelationType);
 
-
+  if (interaction != NULL)
+    manageGMemory();
 }
 
 void LagrangianR::setGVector(const vector<SiconosMatrix*>& newVector)
@@ -413,24 +594,6 @@ void LagrangianR::setComputeGFunction(const string& pluginPath, const string& fu
   if (index >= G.size())
     RuntimeException::selfThrow("LagrangianR:: setComputeGFunction, index out of range. Use rather setGVector?");
 
-  if (interaction != NULL)
-  {
-    unsigned int sizeY = interaction->getNInteraction();
-    unsigned int sizeQ = interaction->getSizeOfDS();
-
-    if (G[index] == NULL)
-    {
-      if (LagrangianRelationType == "holonom+lambda" && index == 1)
-        G[index] = new SiconosMatrix(sizeY, sizeY);
-      else
-        G[index] = new SiconosMatrix(sizeY, sizeQ);
-      isGAllocatedIn[index] = true;
-      G[index]->zero();
-    }
-  }
-  else
-    cout << "LagrangianR::setComputeGFunction: warning, no interaction linked with relation, can not set size of G matrix" << endl;
-
   if (LagrangianRelationType == "holonom")
     cShared.setFunction(&G0Ptr, pluginPath, functionName);
   else if (LagrangianRelationType == "non-holonom")
@@ -461,18 +624,29 @@ void LagrangianR::setComputeGFunction(const string& pluginPath, const string& fu
   OUT("LagrangianR::setComputeGFunction\n");
 }
 
-void LagrangianR::setParametersList(const SimpleVector& newValue)
+void LagrangianR::setParametersListVector(const std::vector<SimpleVector*>& newVector)
 {
-  if (isParametersListAllocatedIn) delete parametersList;
-  parametersList = new SimpleVector(newValue);
-  isParametersListAllocatedIn = true;
+  // copy!!
+  for (unsigned int i = 0; i < parametersList.size(); ++i)
+  {
+    if (isParametersListAllocatedIn[i]) delete parametersList[i];
+    *(parametersList[i]) = *(newVector[i]);
+    isParametersListAllocatedIn[i] = true;
+  }
 }
 
-void LagrangianR::setParametersListPtr(SimpleVector *newPtr)
+void LagrangianR::setParametersList(const SimpleVector& newValue, const unsigned int & index)
 {
-  if (isParametersListAllocatedIn) delete parametersList;
-  parametersList = newPtr;
-  isParametersListAllocatedIn = false;
+  if (isParametersListAllocatedIn[index]) delete parametersList[index];
+  parametersList[index] = new SimpleVector(newValue);
+  isParametersListAllocatedIn[index] = true;
+}
+
+void LagrangianR::setParametersListPtr(SimpleVector *newPtr, const unsigned int & index)
+{
+  if (isParametersListAllocatedIn[index]) delete parametersList[index];
+  parametersList[index] = newPtr;
+  isParametersListAllocatedIn[index] = false;
 }
 
 void LagrangianR::computeH(const double& time)
@@ -507,26 +681,29 @@ void LagrangianR::computeH(const double& time)
   SimpleVector *y = interaction->getYPtr(0);
   SimpleVector *lambda = interaction->getLambdaPtr(0);
 
+  SimpleVector* param = parametersList[0];
+
   if (LagrangianRelationType == "holonom")
   {
     if (h0Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeH() is not linked to a plugin function");
-    h0Ptr(&sizeQ, &(*qTmp)(0) , &sizeY, &(*y)(0), &(*parametersList)(0));
+    h0Ptr(&sizeQ, &(*qTmp)(0) , &sizeY, &(*y)(0), &(*param)(0));
   }
   else if (LagrangianRelationType == "non-holonom")
   {
     if (h1Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeH() is not linked to a plugin function");
-    h1Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY,  &(*y)(0), &(*parametersList)(0));
+    h1Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY,  &(*y)(0), &(*param)(0));
   }
   else if (LagrangianRelationType == "holonom+lambda")
   {
     if (h2Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeH() is not linked to a plugin function");
-    h2Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY,  &(*y)(0), &(*parametersList)(0));
+    h2Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY,  &(*y)(0), &(*param)(0));
   }
   else
     RuntimeException::selfThrow("LagrangianR::computeH,  not yet implemented for this type of constraints");
+  delete qTmp;
 }
 
 void LagrangianR::computeG(const double & time, const unsigned int & index)
@@ -561,13 +738,15 @@ void LagrangianR::computeG(const double & time, const unsigned int & index)
 
   // get vector lambda of the current interaction
   SimpleVector *lambda = interaction->getLambdaPtr(0);
+  SimpleVector* param;
 
   if (LagrangianRelationType == "holonom")
   {
+    param = parametersList[1];
     SiconosMatrix * Gtmp = G[0];
     if (G0Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G0Ptr(&sizeQ, &(*qTmp)(0), &sizeY, &(*Gtmp)(0, 0), &(*parametersList)(0));
+    G0Ptr(&sizeQ, &(*qTmp)(0), &sizeY, &(*Gtmp)(0, 0), &(*param)(0));
   }
   else if (LagrangianRelationType == "non-holonom")
   {
@@ -576,13 +755,15 @@ void LagrangianR::computeG(const double & time, const unsigned int & index)
     {
       if (G10Ptr == NULL)
         RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-      G10Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY, &(*Gtmp)(0, 0), &(*parametersList)(0));
+      param = parametersList[1];
+      G10Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY, &(*Gtmp)(0, 0), &(*param)(0));
     }
     else if (index == 1)
     {
       if (G11Ptr == NULL)
         RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-      G11Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY, &(*Gtmp)(0, 0), &(*parametersList)(0));
+      param = parametersList[2];
+      G11Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY, &(*Gtmp)(0, 0), &(*param)(0));
     }
     else
       RuntimeException::selfThrow("LagrangianR::computeG, index out of range");
@@ -594,19 +775,24 @@ void LagrangianR::computeG(const double & time, const unsigned int & index)
     {
       if (G20Ptr == NULL)
         RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-      G20Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY, &(*Gtmp)(0, 0), &(*parametersList)(0));
+      param = parametersList[1];
+      G20Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY, &(*Gtmp)(0, 0), &(*param)(0));
     }
     else if (index == 1)
     {
       if (G21Ptr == NULL)
         RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-      G21Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY, &(*Gtmp)(0, 0), &(*parametersList)(0));
+      param = parametersList[2];
+      G21Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY, &(*Gtmp)(0, 0), &(*param)(0));
     }
     else
       RuntimeException::selfThrow("LagrangianR::computeG, index out of range");
   }
   else
     RuntimeException::selfThrow("LagrangianR::computeG,  not yet implemented for this type of constraints");
+
+  delete qTmp;
+
 }
 
 void LagrangianR::computeOutput(const double& time)
@@ -644,17 +830,20 @@ void LagrangianR::computeOutput(const double& time)
   SimpleVector *yDot = interaction->getYPtr(1);
   SimpleVector *lambda = interaction->getLambdaPtr(0);
   SimpleVector *lambdaDot = interaction->getLambdaPtr(1);
+  SimpleVector* param;
 
   // y = h(...) and yDot = GqDot
   if (LagrangianRelationType == "holonom")
   {
     if (h0Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeOutput() h0 is not linked to a plugin function");
-    h0Ptr(&sizeQ, &(*qTmp)(0) , &sizeY, &(*y)(0), &(*parametersList)(0));
+    param = parametersList[0];
+    h0Ptr(&sizeQ, &(*qTmp)(0) , &sizeY, &(*y)(0), &(*param)(0));
     SiconosMatrix * Gtmp = G[0];
     if (G0Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G0Ptr(&sizeQ, &(*qTmp)(0), &sizeY, &(*Gtmp)(0, 0), &(*parametersList)(0));
+    param = parametersList[1];
+    G0Ptr(&sizeQ, &(*qTmp)(0), &sizeY, &(*Gtmp)(0, 0), &(*param)(0));
     *yDot = *Gtmp * *velocityTmp;
   }
   // y = h(...) and yDot = G10qDot + G11
@@ -662,17 +851,20 @@ void LagrangianR::computeOutput(const double& time)
   {
     if (h1Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeOutput() h1 is not linked to a plugin function");
-    h1Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY,  &(*y)(0), &(*parametersList)(0));
+    param = parametersList[0];
+    h1Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY,  &(*y)(0), &(*param)(0));
     SiconosMatrix * G0tmp = G[0];
     SiconosMatrix * G1tmp = G[1];
 
     if (G10Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G10Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY, &(*G0tmp)(0, 0), &(*parametersList)(0));
+    param = parametersList[1];
+    G10Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY, &(*G0tmp)(0, 0), &(*param)(0));
 
     if (G11Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G11Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY, &(*G1tmp)(0, 0), &(*parametersList)(0));
+    param = parametersList[2];
+    G11Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY, &(*G1tmp)(0, 0), &(*param)(0));
 
     // warning: G1 is a matrix
     SimpleVector * Id = new SimpleVector(1);
@@ -684,17 +876,20 @@ void LagrangianR::computeOutput(const double& time)
   {
     if (h1Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeOutput() h2 is not linked to a plugin function");
-    h2Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY,  &(*y)(0), &(*parametersList)(0));
+    param = parametersList[0];
+    h2Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY,  &(*y)(0), &(*param)(0));
     SiconosMatrix * G0tmp = G[0];
     SiconosMatrix * G1tmp = G[1];
 
     if (G10Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G20Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY, &(*G0tmp)(0, 0), &(*parametersList)(0));
+    param = parametersList[1];
+    G20Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY, &(*G0tmp)(0, 0), &(*param)(0));
 
     if (G11Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G21Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY, &(*G1tmp)(0, 0), &(*parametersList)(0));
+    param = parametersList[2];
+    G21Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY, &(*G1tmp)(0, 0), &(*param)(0));
 
     *yDot = *G0tmp * *velocityTmp + *G1tmp * *lambdaDot;
   }
@@ -741,17 +936,20 @@ void LagrangianR::computeFreeOutput(const double& time)
   SimpleVector *yDot = interaction->getYPtr(1);
   SimpleVector *lambda = interaction->getLambdaPtr(0);
   SimpleVector *lambdaDot = interaction->getLambdaPtr(1);
+  SimpleVector* param;
 
   // y = h(...) and yDot = GqDot
   if (LagrangianRelationType == "holonom")
   {
     if (h0Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeOutput() h0 is not linked to a plugin function");
-    h0Ptr(&sizeQ, &(*qTmp)(0) , &sizeY, &(*y)(0), &(*parametersList)(0));
+    param = parametersList[0];
+    h0Ptr(&sizeQ, &(*qTmp)(0) , &sizeY, &(*y)(0), &(*param)(0));
     SiconosMatrix * Gtmp = G[0];
     if (G0Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G0Ptr(&sizeQ, &(*qTmp)(0), &sizeY, &(*Gtmp)(0, 0), &(*parametersList)(0));
+    param = parametersList[1];
+    G0Ptr(&sizeQ, &(*qTmp)(0), &sizeY, &(*Gtmp)(0, 0), &(*param)(0));
 
     *yDot = *Gtmp * *velocityTmp;
   }
@@ -761,17 +959,20 @@ void LagrangianR::computeFreeOutput(const double& time)
   {
     if (h1Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeOutput() h1 is not linked to a plugin function");
-    h1Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY,  &(*y)(0), &(*parametersList)(0));
+    param = parametersList[0];
+    h1Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY,  &(*y)(0), &(*param)(0));
     SiconosMatrix * G0tmp = G[0];
     SiconosMatrix * G1tmp = G[0];
 
     if (G10Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G10Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY, &(*G0tmp)(0, 0), &(*parametersList)(0));
+    param = parametersList[1];
+    G10Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY, &(*G0tmp)(0, 0), &(*param)(0));
 
     if (G11Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G11Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY, &(*G1tmp)(0, 0), &(*parametersList)(0));
+    param = parametersList[2];
+    G11Ptr(&sizeQ, &(*qTmp)(0), &time, &sizeY, &(*G1tmp)(0, 0), &(*param)(0));
 
     // warning: G1 is a matrix
     SimpleVector * Id = new SimpleVector(1);
@@ -782,17 +983,20 @@ void LagrangianR::computeFreeOutput(const double& time)
   {
     if (h1Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeOutput() h2 is not linked to a plugin function");
-    h2Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY,  &(*y)(0), &(*parametersList)(0));
+    param = parametersList[0];
+    h2Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY,  &(*y)(0), &(*param)(0));
     SiconosMatrix * G0tmp = G[0];
     SiconosMatrix * G1tmp = G[1];
 
     if (G10Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G20Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY, &(*G0tmp)(0, 0), &(*parametersList)(0));
+    param = parametersList[1];
+    G20Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY, &(*G0tmp)(0, 0), &(*param)(0));
 
     if (G11Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G21Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY, &(*G1tmp)(0, 0), &(*parametersList)(0));
+    param = parametersList[2];
+    G21Ptr(&sizeQ, &(*qTmp)(0), &(*lambda)(0), &sizeY, &(*G1tmp)(0, 0), &(*param)(0));
 
     *yDot = *G0tmp * *velocityTmp + *G1tmp * *lambdaDot;
   }
@@ -846,6 +1050,7 @@ void LagrangianR::computeInput(const double& time)
   }
   else
     RuntimeException::selfThrow("LagrangianR::computeInput,  not yet implemented for constraints of type" + LagrangianRelationType);
+  delete p;
 }
 
 void LagrangianR::getGBlockDS(DynamicalSystem * ds, SiconosMatrix& Block, const unsigned & index) const

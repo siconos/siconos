@@ -205,10 +205,11 @@ ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_
 
 
 # Lapack++
-LAPACKPP_VER="1.6.0"
+LAPACKPP_VER="1.8.0"	# lib....so number
+LAPACKPP_REL_VER="2.4.2" # Release number
 AC_MSG_CHECKING([for Lapack++])
-ACX_CHECK_LAPACKPP([AC_SUBST(LAPACKPP_INCLUDES) AC_SUBST(LAPCKPP_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Lapack++ in a good version. Please install Lapack++, version >= $LAPACKPP_VER  or use the option --with-locallapackpp.])])
-CXX_LAPACKPP_FLAG="-DLA_COMPLEX_SUPPORT"  
+ACX_CHECK_LAPACKPP([AC_SUBST(LAPACKPP_INCLUDES) AC_SUBST(LAPCKPP_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Lapack++ in a good version. Please install Lapack++, version >= $LAPACKPP_VER  or use the option --with-locallapackpp. Warning: this version number corresponds to liblapackpp.so index. See INSTALL for corresponding release. ])])
+CXX_LAPACKPP_FLAG=#"-DLA_COMPLEX_SUPPORT"  
 AC_SUBST(CXX_LAPACKPP_FLAG)
 
 

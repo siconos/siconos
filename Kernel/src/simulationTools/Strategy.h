@@ -31,6 +31,8 @@
 #include "check.h"
 #include <iostream>
 #include <vector>
+#include <deque>
+
 
 
 class Model;
@@ -367,7 +369,7 @@ protected:
   /** Flags to check wheter pointers were allocated in class constructors or not */
   bool isTimeDiscrAllocatedIn;
   bool isNsPbAllocatedIn;
-  std::vector<bool> isIntegratorVectorAllocatedIn;
+  std::deque<bool> isIntegratorVectorAllocatedIn;
 };
 
 #endif // STRATEGY_H

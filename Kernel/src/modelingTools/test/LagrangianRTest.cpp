@@ -169,7 +169,10 @@ void LagrangianRTest::testBuildLagrangianR4()
 // data constructor:
 void LagrangianRTest::testBuildLagrangianR2()
 {
-  LagrangianR * R1 = new LagrangianR("TestPlugin:h0", "TestPlugin:G0");
+  vector<string> G;
+  G.reserve(1);
+  G.push_back("TestPlugin:G0");
+  LagrangianR * R1 = new LagrangianR("holonom", "TestPlugin:h0", G);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR2a : ", R1->getType() == "LagrangianR", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR2b : ", R1->getHFunctionName() == "TestPlugin:h0", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR2c : ", R1->getGFunctionName() == "TestPlugin:G0", true);

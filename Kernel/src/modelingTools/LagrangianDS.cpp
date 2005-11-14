@@ -22,7 +22,7 @@ using namespace std;
 // --- Constructor from an xml file ---
 LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
   DynamicalSystem(), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
-  velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL), paramFExt(NULL),
+  velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL),
   NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   isPAllocatedIn(true), isMassAllocatedIn(true),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
@@ -48,9 +48,11 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     isXAllocatedIn[3] = true;
     xFree = new CompositeVector();
     isXAllocatedIn[5] = true;
+
     //
     r = new SimpleVector(n);
     isRAllocatedIn[0] = true;
+    r->zero();
 
     // \todo review link between LagrangianDS and DS
     jacobianX = new SiconosMatrix(n, n);
@@ -89,26 +91,44 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     q = new SimpleVector(ndof);
     q0 = new SimpleVector(ndof);
     qFree = new SimpleVector(ndof);
-    isQAllocatedIn.resize(4, true);
-    isQAllocatedIn[3] = false; // qMemory
+    qFree->zero();
     velocity = new SimpleVector(ndof);
+    unsigned int i;
+    for (i = 0; i < 3; ++i)
+    {
+      isQAllocatedIn.push_back(true);
+      isVelocityAllocatedIn.push_back(true);
+    }
+    isQAllocatedIn.push_back(false); // velocityMemory
+    isVelocityAllocatedIn.push_back(false); // velocityMemory
     velocity0 = new SimpleVector(ndof);
     velocityFree = new SimpleVector(ndof);
-    isVelocityAllocatedIn.resize(4, true);
-    isVelocityAllocatedIn[3] = false; // velocityMemory
+    velocityFree->zero();
     p = new SimpleVector(ndof);
+    p->zero();
     mass = new SiconosMatrix(ndof, ndof);
     fInt = new SimpleVector(ndof);
     fExt = new SimpleVector(ndof);
     NNL = new SimpleVector(ndof);
-    areForcesAllocatedIn.resize(4, true);
+    for (i = 0; i < 3; ++i) areForcesAllocatedIn.push_back(true);
     jacobianQFInt = new SiconosMatrix(ndof, ndof);
     jacobianVelocityFInt = new SiconosMatrix(ndof, ndof);
     jacobianQNNL = new SiconosMatrix(ndof, ndof);
     jacobianVelocityNNL = new SiconosMatrix(ndof, ndof);
-    isJacobianAllocatedIn.resize(4, true);
-
-    isLDSPlugin.resize(8, false);
+    for (i = 0; i < 4; ++i) isJacobianAllocatedIn.push_back(true);
+    for (i = 0; i < 8; ++i)
+    {
+      isLDSPlugin.push_back(false);
+      // parametersList is set to default (vector of size 1 set to 0)
+      parametersList.push_back(NULL);
+      isParametersListAllocatedIn.push_back(true);
+    }
+    vector<SimpleVector*>::iterator iter;
+    for (iter = parametersList.begin(); iter != parametersList.end(); iter++)
+    {
+      *iter = new SimpleVector(1);
+      (*iter)->zero();
+    }
     // The following members are either directly filled-in or read from a plugin
 
     // Mass
@@ -141,13 +161,13 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     }
 
     // fill in x, x0 and xFree with q and velocity
-    static_cast<CompositeVector*>(x)->addPtr(q);
+    /*static_cast<CompositeVector*>(x)->addPtr(q);
     static_cast<CompositeVector*>(x)->addPtr(velocity);
     static_cast<CompositeVector*>(x0)->addPtr(q0);
     static_cast<CompositeVector*>(x0)->addPtr(velocity0);
     static_cast<CompositeVector*>(xFree)->addPtr(qFree);
     static_cast<CompositeVector*>(xFree)->addPtr(velocityFree);
-
+    */
     // FExt
     if (lgptr->hasFext())
     {
@@ -159,9 +179,6 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
       }
       else *fExt = lgptr->getFextVector();
     }
-    // Default value for paramFExt: simpleVector of size 1
-    paramFExt = new SimpleVector(1);
-    (*paramFExt)(0) = 1.0;
 
     // -- FInt and its jacobian --
     if (lgptr->hasFint())
@@ -282,28 +299,46 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   q = new SimpleVector(ndof);
   q0 = new SimpleVector(ndof);
   qFree = new SimpleVector(ndof);
-  isQAllocatedIn.resize(4, true);
-  isQAllocatedIn[3] = false; // qMemory
+  qFree->zero();
+  unsigned int i;
+  for (i = 0; i < 3; ++i)
+  {
+    isQAllocatedIn.push_back(true);
+    isVelocityAllocatedIn.push_back(true);
+  }
+  isQAllocatedIn.push_back(false); // qMemory
+  isVelocityAllocatedIn.push_back(false); // velocityMemory
   velocity = new SimpleVector(ndof);
   velocity0 = new SimpleVector(ndof);
   velocityFree = new SimpleVector(ndof);
-  isVelocityAllocatedIn.resize(4, true);
-  isVelocityAllocatedIn[3] = false; // velocityMemory
+  velocityFree->zero();
   p = new SimpleVector(ndof);
+  p->zero();
   fInt = new SimpleVector(ndof);
   fExt = new SimpleVector(ndof);
   fExt ->zero();
-  // Default value for paramFExt: simpleVector of size 1
-  paramFExt = new SimpleVector(1);
-  (*paramFExt)(0) = 1.0;
+  // parametersList is set to default (vector of size 1 set to 0)
+  for (i = 0; i < 8; ++i)
+  {
+    isLDSPlugin.push_back(false);
+    // parametersList is set to default (vector of size 1 set to 0)
+    parametersList.push_back(NULL);
+    isParametersListAllocatedIn.push_back(true);
+  }
+  vector<SimpleVector*>::iterator iter;
+  for (iter = parametersList.begin(); iter != parametersList.end(); iter++)
+  {
+    *iter = new SimpleVector(1);
+    (*iter)->zero();
+  }
+
   NNL = new SimpleVector(ndof);
-  areForcesAllocatedIn.resize(4, true);
+  areForcesAllocatedIn.resize(3, true);
   jacobianQFInt = new SiconosMatrix(ndof, ndof);
   jacobianVelocityFInt = new SiconosMatrix(ndof, ndof);
   jacobianQNNL = new SiconosMatrix(ndof, ndof);
   jacobianVelocityNNL = new SiconosMatrix(ndof, ndof);
-  isJacobianAllocatedIn.resize(4, true);
-  isLDSPlugin.resize(8, false);
+  for (i = 0; i < 4; ++i) isJacobianAllocatedIn.push_back(true);
 
   // --- initial state filling ---
   *q0 = newQ0;
@@ -315,13 +350,14 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   *mass = newMass;
 
   // --- x, xDot and xFree update ---
-
+  /*
   static_cast<CompositeVector*>(x)->addPtr(q);
   static_cast<CompositeVector*>(x)->addPtr(velocity);
   static_cast<CompositeVector*>(x0)->addPtr(q0);
   static_cast<CompositeVector*>(x0)->addPtr(velocity0);
   static_cast<CompositeVector*>(xFree)->addPtr(qFree);
   static_cast<CompositeVector*>(xFree)->addPtr(velocityFree);
+  */
   setComputeMassFunction("DefaultPlugin.so", "computeMass");
   setComputeFIntFunction("DefaultPlugin.so", "computeFInt");
   //setComputeFExtFunction("DefaultPlugin.so", "computeFExt");
@@ -363,6 +399,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 
   r = new SimpleVector(n);
   isRAllocatedIn[0] = true;
+  r->zero();
 
   //
   // jacobianX = new SiconosMatrix(n,n);
@@ -377,28 +414,46 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   q = new SimpleVector(ndof);
   q0 = new SimpleVector(ndof);
   qFree = new SimpleVector(ndof);
-  isQAllocatedIn.resize(4, true);
-  isQAllocatedIn[3] = false; // qMemory
+  qFree->zero();
+  unsigned int i;
+  for (i = 0; i < 3; ++i)
+  {
+    isQAllocatedIn.push_back(true);
+    isVelocityAllocatedIn.push_back(true);
+  }
+  isQAllocatedIn.push_back(false); // qMemory
+  isVelocityAllocatedIn.push_back(false); // velocityMemory
   velocity = new SimpleVector(ndof);
   velocity0 = new SimpleVector(ndof);
   velocityFree = new SimpleVector(ndof);
-  isVelocityAllocatedIn.resize(4, true);
-  isVelocityAllocatedIn[3] = false; // velocityMemory
+  velocityFree->zero();
   p = new SimpleVector(ndof);
+  p->zero();
   fInt = new SimpleVector(ndof);
   fExt = new SimpleVector(ndof);
   fExt->zero();
-  // Default value for paramFExt: simpleVector of size 1
-  paramFExt = new SimpleVector(1);
-  (*paramFExt)(0) = 1.0;
+  // parametersList is set to default (vector of size 1 set to 0)
+  for (i = 0; i < 8; ++i)
+  {
+    isLDSPlugin.push_back(false);
+    // parametersList is set to default (vector of size 1 set to 0)
+    parametersList.push_back(NULL);
+    isParametersListAllocatedIn.push_back(true);
+  }
+  vector<SimpleVector*>::iterator iter;
+  for (iter = parametersList.begin(); iter != parametersList.end(); iter++)
+  {
+    *iter = new SimpleVector(1);
+    (*iter)->zero();
+  }
+
   NNL = new SimpleVector(ndof);
-  areForcesAllocatedIn.resize(4, true);
+  areForcesAllocatedIn.resize(3, true);
   jacobianQFInt = new SiconosMatrix(ndof, ndof);
   jacobianVelocityFInt = new SiconosMatrix(ndof, ndof);
   jacobianQNNL = new SiconosMatrix(ndof, ndof);
   jacobianVelocityNNL = new SiconosMatrix(ndof, ndof);
-  isJacobianAllocatedIn.resize(4, true);
-  isLDSPlugin.resize(8, false);
+  for (i = 0; i < 4; ++i) isJacobianAllocatedIn.push_back(true);
 
   // --- initial state filling ---
   *q0 = newQ0;
@@ -407,14 +462,14 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   *velocity = newVelocity0;
 
   // --- x, xDot and xFree update ---
-
+  /*
   static_cast<CompositeVector*>(x)->addPtr(q);
   static_cast<CompositeVector*>(x)->addPtr(velocity);
   static_cast<CompositeVector*>(x0)->addPtr(q0);
   static_cast<CompositeVector*>(x0)->addPtr(velocity0);
   static_cast<CompositeVector*>(xFree)->addPtr(qFree);
   static_cast<CompositeVector*>(xFree)->addPtr(velocityFree);
-
+  */
   //   --- plugins ---
   setComputeMassFunction(cShared.getPluginName(massName), cShared.getPluginFunctionName(massName));
   setComputeFIntFunction("DefaultPlugin.so", "computeFInt");
@@ -453,8 +508,14 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
   q = new SimpleVector(lnlds->getQ());
   qFree = new SimpleVector(lnlds->getQFree());
 
-  isQAllocatedIn.resize(4, true);
-  isQAllocatedIn[3] = false; // qMemory
+  unsigned int i;
+  for (i = 0; i < 3; ++i)
+  {
+    isQAllocatedIn.push_back(true);
+    isVelocityAllocatedIn.push_back(true);
+  }
+  isQAllocatedIn.push_back(false); // qMemory
+  isVelocityAllocatedIn.push_back(false); // velocityMemory
   if (lnlds->getQMemoryPtr() != NULL)
   {
     qMemory = new SiconosMemory(lnlds->getQMemory());
@@ -464,8 +525,6 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
   velocity0 = new SimpleVector(lnlds->getVelocity0());
   velocity  = new SimpleVector(lnlds->getVelocity0());
   velocityFree = new SimpleVector(lnlds->getVelocityFree());
-  isVelocityAllocatedIn.resize(4, true);
-  isVelocityAllocatedIn[3] = false; // velocityMemory
   if (lnlds->getVelocityMemoryPtr() != NULL)
   {
     velocityMemory = new SiconosMemory(lnlds->getVelocityMemory());
@@ -474,32 +533,20 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
 
   p = new SimpleVector(lnlds->getP());
 
-  areForcesAllocatedIn.resize(4, false);
+  areForcesAllocatedIn.resize(3, false);
   if (lnlds->getFIntPtr() != NULL)
   {
     fInt = new SimpleVector(lnlds->getFInt());
     areForcesAllocatedIn[0] = true;
   }
 
+  setParametersListVector(lnlds->getParametersListVector());
+
   if (lnlds->getFExtPtr() != NULL)
   {
     fExt = new SimpleVector(lnlds->getFExt());
     areForcesAllocatedIn[1] = true;
   }
-
-  if (lnlds->getParamFExtPtr() != NULL)
-  {
-    paramFExt = new SimpleVector(lnlds->getParamFExt());
-    areForcesAllocatedIn[3] = true;
-  }
-  else
-  {
-    // Default value for paramFExt: simpleVector of size 1
-    paramFExt = new SimpleVector(1);
-    (*paramFExt)(0) = 1.0;
-    areForcesAllocatedIn[3] = true;
-  }
-
 
   if (lnlds->getNNLPtr() != NULL)
   {
@@ -627,8 +674,6 @@ LagrangianDS::~LagrangianDS()
   fExt = NULL;
   if (areForcesAllocatedIn[2])delete NNL ;
   NNL = NULL;
-  if (areForcesAllocatedIn[3]) delete paramFExt ;
-  paramFExt = NULL;
   if (isJacobianAllocatedIn[0])delete jacobianQFInt  ;
   jacobianQFInt = NULL;
   if (isJacobianAllocatedIn[1])delete  jacobianVelocityFInt ;
@@ -637,6 +682,14 @@ LagrangianDS::~LagrangianDS()
   jacobianQNNL = NULL;
   if (isJacobianAllocatedIn[3])delete jacobianVelocityNNL ;
   jacobianVelocityNNL = NULL;
+
+  for (unsigned int i = 0; i < parametersList.size(); i++)
+  {
+    if (isParametersListAllocatedIn[i]) delete parametersList[i];
+    parametersList[i] = NULL;
+  }
+  isParametersListAllocatedIn.resize(8, false);
+
   OUT("LagrangianDS::~LagrangianDS()\n");
 }
 
@@ -924,20 +977,6 @@ void LagrangianDS::setFExtPtr(SimpleVector *newPtr)
   isLDSPlugin[2] = false;
 }
 
-void LagrangianDS::setParamFExt(const SimpleVector& newValue)
-{
-  if (areForcesAllocatedIn[3]) delete paramFExt;
-  paramFExt = new SimpleVector(newValue);
-  areForcesAllocatedIn[3] = true;
-}
-
-void LagrangianDS::setParamFExtPtr(SimpleVector *newPtr)
-{
-  if (areForcesAllocatedIn[3]) delete paramFExt;
-  paramFExt = newPtr;
-  areForcesAllocatedIn[3] = false;
-}
-
 void LagrangianDS::setNNL(const SimpleVector& newValue)
 {
   if (newValue.size() != ndof)
@@ -1075,7 +1114,8 @@ void LagrangianDS::computeMass(const double& time)
   if (computeMassPtr == NULL)
     RuntimeException::selfThrow("computeMass() is not linked to a plugin function");
   unsigned int size = q->size();
-  computeMassPtr(&size, &time, &(*q)(0), &(*mass)(0, 0));
+  SimpleVector* param = parametersList[0];
+  computeMassPtr(&size, &time, &(*q)(0), &(*mass)(0, 0), &(*param)(0));
 }
 
 void LagrangianDS::computeMass(const double& time, SimpleVector *q2)
@@ -1084,7 +1124,8 @@ void LagrangianDS::computeMass(const double& time, SimpleVector *q2)
     RuntimeException::selfThrow("computeMass() is not linked to a plugin function");
 
   unsigned int size = q2->size();
-  computeMassPtr(&size, &time, &(*q2)(0), &(*mass)(0, 0));
+  SimpleVector* param = parametersList[0];
+  computeMassPtr(&size, &time, &(*q2)(0), &(*mass)(0, 0), &(*param)(0));
 }
 
 void LagrangianDS::computeFInt(const double& time)
@@ -1093,7 +1134,8 @@ void LagrangianDS::computeFInt(const double& time)
     RuntimeException::selfThrow("computeFInt() is not linked to a plugin function");
 
   unsigned int size = q->size();
-  computeFIntPtr(&size, &time, &(*q)(0), &(*velocity)(0), &(*fInt)(0));
+  SimpleVector* param = parametersList[1];
+  computeFIntPtr(&size, &time, &(*q)(0), &(*velocity)(0), &(*fInt)(0), &(*param)(0));
 }
 void LagrangianDS::computeFInt(const double& time, SimpleVector *q2, SimpleVector *velocity2)
 {
@@ -1101,7 +1143,8 @@ void LagrangianDS::computeFInt(const double& time, SimpleVector *q2, SimpleVecto
     RuntimeException::selfThrow("computeFInt() is not linked to a plugin function");
 
   unsigned int size = q2->size();
-  computeFIntPtr(&size, &time, &(*q2)(0), &(*velocity2)(0), &(*fInt)(0));
+  SimpleVector* param = parametersList[1];
+  computeFIntPtr(&size, &time, &(*q2)(0), &(*velocity2)(0), &(*fInt)(0), &(*param)(0));
 }
 
 void LagrangianDS::computeFExt(const double& time)
@@ -1112,7 +1155,8 @@ void LagrangianDS::computeFExt(const double& time)
 
   unsigned int size = q->size();
 
-  computeFExtPtr(&size, &time, &(*paramFExt)(0), &(*fExt)(0));
+  SimpleVector* param = parametersList[2];
+  computeFExtPtr(&size, &time, &(*fExt)(0), &(*param)(0));
   OUT("LagrangianDS::computeFExt(double time)\n");
 
 }
@@ -1123,7 +1167,8 @@ void LagrangianDS::computeNNL()
     RuntimeException::selfThrow("computeQ() is not linked to a plugin function");
 
   unsigned int size = q->size();
-  computeNNLPtr(&size, &(*q)(0), &(*velocity)(0), &(*NNL)(0));
+  SimpleVector* param = parametersList[3];
+  computeNNLPtr(&size, &(*q)(0), &(*velocity)(0), &(*NNL)(0), &(*param)(0));
 }
 
 void LagrangianDS::computeNNL(SimpleVector *q2, SimpleVector *velocity2)
@@ -1132,7 +1177,8 @@ void LagrangianDS::computeNNL(SimpleVector *q2, SimpleVector *velocity2)
     RuntimeException::selfThrow("computeQ() is not linked to a plugin function");
 
   unsigned int size = q2->size();
-  computeNNLPtr(&size, &(*q2)(0), &(*velocity2)(0), &(*NNL)(0));
+  SimpleVector* param = parametersList[3];
+  computeNNLPtr(&size, &(*q2)(0), &(*velocity2)(0), &(*NNL)(0), &(*param)(0));
 }
 
 void LagrangianDS::computeJacobianQFInt(const double& time)
@@ -1141,7 +1187,8 @@ void LagrangianDS::computeJacobianQFInt(const double& time)
     RuntimeException::selfThrow("computeJacobianQFInt() is not linked to a plugin function");
 
   unsigned int size = q->size();
-  computeJacobianQFIntPtr(&size, &time, &(*q)(0), &(*velocity)(0), &(*jacobianQFInt)(0, 0));
+  SimpleVector* param = parametersList[4];
+  computeJacobianQFIntPtr(&size, &time, &(*q)(0), &(*velocity)(0), &(*jacobianQFInt)(0, 0), &(*param)(0));
 }
 
 void LagrangianDS::computeJacobianQFInt(const double& time, SimpleVector *q2, SimpleVector *velocity2)
@@ -1150,7 +1197,8 @@ void LagrangianDS::computeJacobianQFInt(const double& time, SimpleVector *q2, Si
     RuntimeException::selfThrow("computeJacobianQFInt() is not linked to a plugin function");
 
   unsigned int size = q2->size();
-  computeJacobianQFIntPtr(&size, &time, &(*q2)(0), &(*velocity2)(0), &(*jacobianQFInt)(0, 0));
+  SimpleVector* param = parametersList[4];
+  computeJacobianQFIntPtr(&size, &time, &(*q2)(0), &(*velocity2)(0), &(*jacobianQFInt)(0, 0), &(*param)(0));
 }
 
 void LagrangianDS::computeJacobianVelocityFInt(const double & time)
@@ -1159,7 +1207,8 @@ void LagrangianDS::computeJacobianVelocityFInt(const double & time)
     RuntimeException::selfThrow("computeJacobianVelocityFInt() is not linked to a plugin function");
 
   unsigned int size = q->size();
-  computeJacobianVelocityFIntPtr(&size, &time, &(*q)(0), &(*velocity)(0), &(*jacobianVelocityFInt)(0, 0));
+  SimpleVector* param = parametersList[5];
+  computeJacobianVelocityFIntPtr(&size, &time, &(*q)(0), &(*velocity)(0), &(*jacobianVelocityFInt)(0, 0), &(*param)(0));
 }
 void LagrangianDS::computeJacobianVelocityFInt(const double & time, SimpleVector *q2, SimpleVector *velocity2)
 {
@@ -1167,7 +1216,8 @@ void LagrangianDS::computeJacobianVelocityFInt(const double & time, SimpleVector
     RuntimeException::selfThrow("computeJacobianVelocityFInt() is not linked to a plugin function");
 
   unsigned int size = q2->size();
-  computeJacobianVelocityFIntPtr(&size, &time, &(*q2)(0), &(*velocity2)(0), &(*jacobianVelocityFInt)(0, 0));
+  SimpleVector* param = parametersList[5];
+  computeJacobianVelocityFIntPtr(&size, &time, &(*q2)(0), &(*velocity2)(0), &(*jacobianVelocityFInt)(0, 0), &(*param)(0));
 }
 
 
@@ -1177,7 +1227,8 @@ void LagrangianDS::computeJacobianQNNL()
     RuntimeException::selfThrow("computeJacobianQNNL() is not linked to a plugin function");
 
   unsigned int size = q->size();
-  computeJacobianQNNLPtr(&size, &(*q)(0), &(*velocity)(0), &(*jacobianQNNL)(0, 0));
+  SimpleVector* param = parametersList[6];
+  computeJacobianQNNLPtr(&size, &(*q)(0), &(*velocity)(0), &(*jacobianQNNL)(0, 0), &(*param)(0));
 }
 
 void LagrangianDS::computeJacobianQNNL(SimpleVector *q2, SimpleVector *velocity2)
@@ -1186,7 +1237,8 @@ void LagrangianDS::computeJacobianQNNL(SimpleVector *q2, SimpleVector *velocity2
     RuntimeException::selfThrow("computeJacobianQNNL() is not linked to a plugin function");
 
   unsigned int size = q2->size();
-  computeJacobianQNNLPtr(&size, &(*q2)(0), &(*velocity2)(0), &(*jacobianQNNL)(0, 0));
+  SimpleVector* param = parametersList[6];
+  computeJacobianQNNLPtr(&size, &(*q2)(0), &(*velocity2)(0), &(*jacobianQNNL)(0, 0), &(*param)(0));
 }
 
 void LagrangianDS::computeJacobianVelocityNNL()
@@ -1195,7 +1247,8 @@ void LagrangianDS::computeJacobianVelocityNNL()
     RuntimeException::selfThrow("computeJacobianVelocityNNL() is not linked to a plugin function");
 
   unsigned int size = q->size();
-  computeJacobianVelocityNNLPtr(&size, &(*q)(0), &(*velocity)(0), &(*jacobianVelocityNNL)(0, 0));
+  SimpleVector* param = parametersList[7];
+  computeJacobianVelocityNNLPtr(&size, &(*q)(0), &(*velocity)(0), &(*jacobianVelocityNNL)(0, 0), &(*param)(0));
 }
 void LagrangianDS::computeJacobianVelocityNNL(SimpleVector *q2, SimpleVector *velocity2)
 {
@@ -1203,7 +1256,8 @@ void LagrangianDS::computeJacobianVelocityNNL(SimpleVector *q2, SimpleVector *ve
     RuntimeException::selfThrow("computeJacobianVelocityNNL() is not linked to a plugin function");
 
   unsigned int size = q2->size();
-  computeJacobianVelocityNNLPtr(&size, &(*q2)(0), &(*velocity2)(0), &(*jacobianVelocityNNL)(0, 0));
+  SimpleVector* param = parametersList[7];
+  computeJacobianVelocityNNLPtr(&size, &(*q2)(0), &(*velocity2)(0), &(*jacobianVelocityNNL)(0, 0), &(*param)(0));
 }
 
 void LagrangianDS::setComputeMassFunction(const string& pluginPath, const string& functionName)
@@ -1367,6 +1421,30 @@ void LagrangianDS::setComputeJacobianVelocityNNLFunction(const string& pluginPat
   OUT("LagrangianDS::setComputeJacobianVelocityNNLFunction\n");
 }
 
+void LagrangianDS::setParametersListVector(const std::vector<SimpleVector*>& newVector)
+{
+  // copy!!
+  for (unsigned int i = 0; i < parametersList.size(); ++i)
+  {
+    if (isParametersListAllocatedIn[i]) delete parametersList[i];
+    *(parametersList[i]) = *(newVector[i]);
+    isParametersListAllocatedIn[i] = true;
+  }
+}
+
+void LagrangianDS::setParametersList(const SimpleVector& newValue, const unsigned int & index)
+{
+  if (isParametersListAllocatedIn[index]) delete parametersList[index];
+  parametersList[index] = new SimpleVector(newValue);
+  isParametersListAllocatedIn[index] = true;
+}
+
+void LagrangianDS::setParametersListPtr(SimpleVector *newPtr, const unsigned int & index)
+{
+  if (isParametersListAllocatedIn[index]) delete parametersList[index];
+  parametersList[index] = newPtr;
+  isParametersListAllocatedIn[index] = false;
+}
 
 void LagrangianDS::saveDSToXML()
 {
@@ -1503,6 +1581,7 @@ void LagrangianDS::initMemory(const unsigned int& steps)
   if (isVelocityAllocatedIn[3]) delete velocityMemory;
   velocityMemory = new SiconosMemory(steps);
   isVelocityAllocatedIn[3] = true;
+  swapInMemory();
   OUT("LagrangianDS::initMemory\n");
 }
 
@@ -1553,9 +1632,18 @@ LagrangianDS::LagrangianDS():
   DSType = LNLDS;
   isQAllocatedIn.resize(4, false);
   isVelocityAllocatedIn.resize(4, false);
-  areForcesAllocatedIn.resize(4, false);
+  areForcesAllocatedIn.resize(3, false);
   isJacobianAllocatedIn.resize(4, false);
   isLDSPlugin.resize(8, false);
+  // parametersList is set to default (vector of size 1 set to 0)
+  parametersList.resize(8, NULL);
+  vector<SimpleVector*>::iterator iter;
+  for (iter = parametersList.begin(); iter != parametersList.end(); iter++)
+  {
+    *iter = new SimpleVector(1);
+    (*iter)->zero();
+  }
+  isParametersListAllocatedIn.resize(8, true);
 
   // --- plugins connected to DefaultPlugin ---
   setComputeMassFunction("DefaultPlugin.so", "computeMass");

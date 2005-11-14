@@ -40,8 +40,8 @@ void CompositeVectorTest::setUp()
   simpleVect = new SimpleVector(vdotq);
   q = new SimpleVector(vq);
   r = new SimpleVector(vq);
-  CV = new CompositeVector();
-  CV->add(*simpleVect);
+  CV = new CompositeVector(*simpleVect);
+  //  CV->add(*simpleVect);
   CV->add(*r); // CV = [ [2 2 2 ]   [1 1 1 1 1]] tabindex = [3 8]
   SimpleVector * tmp1 = new SimpleVector(3);
   SimpleVector * tmp2 = new SimpleVector(5);
@@ -79,32 +79,26 @@ void CompositeVectorTest::testBuildCompositeVector()
 // Copy from SiconosVector and direct copy
 void CompositeVectorTest::testBuildCompositeVector1()
 {
-  // from a SiconosVector which is a simple
-  CompositeVector * v = new CompositeVector(*simpleVect);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", v->isComposite(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", v->size() == simpleVect->size(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", (v->getValues(0)) == (simpleVect->getValues()), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", (v->getTabIndex()).size() == 1 , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", (v->getTabIndex())[0] == 3 , true);
-  cout << "CompositeVectorTest >>> testBuildCompositeVector1 ............................... OK\n ";
-  delete v;
-
   // copy from composite
-  SiconosVector * tmp = new CompositeVector(*CV);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", *tmp == *CV, true);
+  CompositeVector * tmp = new CompositeVector(*simpleVect);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", *tmp == *simpleVect, true);
 
   // from a SiconosVector which is a composite
 
-  CompositeVector * vv = new CompositeVector(*tmp);
+  cout << (CV->getTabIndex())[0] << endl;
+  CompositeVector * vv = new CompositeVector(*CV);
+  cout << (vv->getTabIndex())[0] << endl;
+
+  int a = (vv->getTabIndex())[0];
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", vv->isComposite(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", vv->size() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", vv->getValues(0) == simpleVect->getValues(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", vv->getValues(1) == q->getValues(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", (vv->getTabIndex()).size() == 2 , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", (vv->getTabIndex())[0] == 3 , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", (vv->getTabIndex())[1] == 8 , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", a == 3 , true);
+  a = (vv->getTabIndex())[1];
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", a == 8 , true);
   cout << "CompositeVectorTest >>> testBuildCompositeVector1 ............................... OK\n ";
   delete vv;
   delete tmp;
@@ -134,8 +128,10 @@ void CompositeVectorTest::testSetValue()
   double a = 4;
   int i = 2;
   CV->setValue(i, a);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValue : ", (*CV)(2) == 4, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValue : ", (CV->getValues(0))(2) == 4, true);
+  double b = (*CV)(2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValue : ", b == 4, true);
+  b = (CV->getValues(0))(2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValue : ", b == 4, true);
   cout << "CompositeVectorTest >>> testSetValue ............................... OK\n ";
 }
 
@@ -155,14 +151,18 @@ void CompositeVectorTest::testSetValues()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", CV->size() == 10, true);
   unsigned int size = (CV->getValues(0)).size();
   unsigned int i;
+  LaVectorDouble tmp = CV->getValues(0);
   for (i = 0; i < size; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", (CV->getValues(0))(i) == 1, true);
-  size = (CV->getValues(1)).size();
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", tmp(i) == 1, true);
+  tmp = CV->getValues(1);
+  size = tmp.size();
   for (i = 0; i < size; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", (CV->getValues(1))(i) == 1, true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", tmp(i) == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", (CV->getTabIndex()).size() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", (CV->getTabIndex())[0] == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", (CV->getTabIndex())[1] == 10, true);
+  double a = (CV->getTabIndex())[0];
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", a == 5, true);
+  a = (CV->getTabIndex())[1];
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", a == 10, true);
   cout << "CompositeVectorTest >>> testSetValues ............................... OK\n ";
 }
 
@@ -171,11 +171,13 @@ void CompositeVectorTest::testGetValues()
 {
   unsigned int size = (CV->getValues(0)).size();
   unsigned int i;
+  LaVectorDouble tmp = CV->getValues(0);
   for (i = 0; i < size; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", (CV->getValues(0))(i) == 2, true);
-  size = (CV->getValues(1)).size();
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", tmp(i) == 2, true);
+  tmp = CV->getValues(1);
+  size = tmp.size();
   for (i = 0; i < size; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", (CV->getValues(1))(i) == 1, true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", tmp(i) == 1, true);
   cout << "CompositeVectorTest >>> testGetValues ............................... OK\n ";
 }
 
@@ -193,26 +195,36 @@ void CompositeVectorTest::testAdd()
   SimpleVector tmp =  *q;
   CV->addPtr(simpleVect);
   CV->add(tmp);
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", CV->isComposite(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", CV->size() == 16, true);
+  double a = (CV->getTabIndex())[0];
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getTabIndex()).size() == 4, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getTabIndex())[0] == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getTabIndex())[1] == 8, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getTabIndex())[2] == 11, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getTabIndex())[3] == 16, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", a == 3, true);
+  a = (CV->getTabIndex())[1];
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", a == 8, true);
+  a = (CV->getTabIndex())[2];
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", a == 11, true);
+  a = (CV->getTabIndex())[3];
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", a == 16, true);
   unsigned int size = (CV->getValues(0)).size();
   unsigned int i;
+  LaVectorDouble tmp2 = CV->getValues(0);
+
   for (i = 0; i < size; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getValues(0))(i) == 2, true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", tmp2(i) == 2, true);
   size = (CV->getValues(1)).size();
+  tmp2 = CV->getValues(1);
   for (i = 0; i < size; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getValues(1))(i) == 1, true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", tmp2(i) == 1, true);
   size = (CV->getValues(2)).size();
+  tmp2 = CV->getValues(2);
   for (i = 0; i < size; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getValues(2))(i) == 2, true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", tmp2(i) == 2, true);
   size = (CV->getValues(3)).size();
+  tmp2 = CV->getValues(3);
   for (i = 0; i < size; i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getValues(3))(i) == 1, true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", tmp2(i) == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getSvref())[2] == simpleVect, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getSvref())[3] != q, true);
   cout << "CompositeVectorTest >>> testAdd ............................... OK\n ";
@@ -240,8 +252,10 @@ void CompositeVectorTest::testReadWrite()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", v->size() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", v->size() == v2->size(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", v->getTabIndex() == v2->getTabIndex(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", (v->getTabIndex())[0] == 3, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", (v->getTabIndex())[1] == 8, true);
+  double a = (v->getTabIndex())[0] ;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", a == 3, true);
+  a = (v->getTabIndex())[1] ;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", a == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", (v->getTabIndex()).size() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", v->getValues(0) == simpleVect->getValues() , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", v->getValues(1) == q->getValues() , true);

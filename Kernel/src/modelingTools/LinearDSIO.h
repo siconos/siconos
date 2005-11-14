@@ -76,8 +76,8 @@ protected:
 
 
 private:
-  SiconosMatrix A;
-  SiconosMatrix B;
+  SiconosMatrix* A;
+  SiconosMatrix* B;
 };
 
 #endif // LINEARDSIO_H

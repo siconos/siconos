@@ -42,7 +42,7 @@ private:
   CPPUNIT_TEST(testReadWriteAscii);
   CPPUNIT_TEST(testReadWriteBinary);
   CPPUNIT_TEST(testLinearSolve);
-  CPPUNIT_TEST(testAddRow);
+  CPPUNIT_TEST(testGetRow);
   CPPUNIT_TEST(testOperator);
   CPPUNIT_TEST(testBlockMatrixCopy1);
   CPPUNIT_TEST(testBlockMatrixCopy2);
@@ -64,7 +64,7 @@ private:
   void testReadWriteAscii();
   void testReadWriteBinary();
   void testLinearSolve();
-  void testAddRow();
+  void testGetRow();
   void testOperator();
   void testSizeException();
   void testConstructorException();
@@ -77,8 +77,8 @@ private:
   void testBlockMatrixCopyException1();
   void testBlockMatrixCopyException2();
 
-  SiconosMatrix A, B, C;
-  SimpleVector SV;
+  SiconosMatrix *A, *B, *C;
+  SimpleVector* SV;
   LaVectorDouble LVD;
 
 public:

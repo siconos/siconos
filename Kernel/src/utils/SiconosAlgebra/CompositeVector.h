@@ -49,22 +49,15 @@ public:
    */
   CompositeVector(const std::string&, const bool&);
 
-  /** \fn CompositeVector(const SiconosVector& v)
-   *  \brief contructor with a SiconosVector
-   *  \param SiconosVector& v
-   *  \exception SiconosVectorException
-   */
-  CompositeVector(const SiconosVector&);
-
-  /** \fn CompositeVector(const SiconosVector& v)
+  /** \fn CompositeVector(const SimpleVector& v)
    *  \brief contructor with a SimpleVector
    *  \param SimpleVector& v
    */
-  CompositeVector(const SimpleVector& v);
+  CompositeVector(const SimpleVector&);
 
-  /** \fn CompositeVector(const SiconosVector& v)
+  /** \fn CompositeVector(const CompositeVector& v)
    *  \brief copy contructor
-   *  \param SiconosVector& v
+   *  \param CompositeVector& v
    */
   CompositeVector(const CompositeVector&);
 
@@ -74,11 +67,11 @@ public:
   ~CompositeVector();
 
   // GETTERS/SETTERS
-  /** \fn std::vector<SiconosVector*> getSvref() const
+  /** \fn std::vector<SimpleVector*> getSvref() const
    *  \brief get svref
-   * \return a standard vector ofm SiconosVector
+   * \return a standard vector of SimpleVector
    */
-  inline std::vector<SiconosVector*> getSvref() const
+  inline std::vector<SimpleVector*> getSvref() const
   {
     return svref;
   }
@@ -147,8 +140,9 @@ public:
    */
   const LaVectorDouble getValues(const int unsigned& = 0) const ;
 
-  /** \fn unsigned int size() const
-   *  \brief get the vector size
+  /** \fn unsigned int size(unsigned int & index) const
+   *  \brief if index = 0, get the vector total-size (ie number of elements in vector)
+   *         if index = 1, get the number of element in svref.
    *  \exception to be defined
    *  \return int : the vector size
    */
@@ -179,19 +173,19 @@ public:
    */
   double* getArray() const;
 
-  /** \fn bool add(const SiconosVector& v)
+  /** \fn bool add(const SimpleVector& v)
    *  \brief add a sub Vector in this vector
-   *  \param SiconosVector& v : the vector to add
+   *  \param SimpleVector& v : the vector to add
    *  \exception SiconosVectorException
    */
-  void add(const SiconosVector &v) ;
+  void add(const  SimpleVector&) ;
 
-  /** \fn bool addPtr(SiconosVector* v)
+  /** \fn bool addPtr(SimpleVector* v)
    *  \brief add a sub Vector in this vector
    *  \param SiconosVector*
    *  \exception SiconosVectorException
    */
-  void addPtr(SiconosVector *v) ;
+  void addPtr(SimpleVector*) ;
 
   // generic internal operators
   CompositeVector &operator+=(const SiconosVector &) ;
@@ -242,12 +236,12 @@ public:
   //
 private:
   // A container of pointers on SiconosVector (that are to be SimpleVector : no Composite of Composite allowed
-  std::vector<SiconosVector*> svref;
+  std::vector<SimpleVector*> svref;
   //
   std::vector<int> tabindex;
 
   /** Flags to check wheter pointers were allocated in class constructors or not */
-  std::vector<bool> isSvrefAllocatedIn;
+  std::deque<bool> isSvrefAllocatedIn;
 };
 
 #endif

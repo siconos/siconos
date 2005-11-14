@@ -111,23 +111,24 @@ protected:
    *  Note that these variables are mainly useful for derived classes.
    */
   bool isHPlugged;
-  std::vector<bool> isGPlugged;
+  std::deque<bool> isGPlugged;
 
   /** Name of the plugin used to compute h */
   std::string  hFunctionName;
 
   /** G matrices that link Y[1] to dynamical system variables */
   std::vector<SiconosMatrix*> G;
-  std::vector<bool> isGAllocatedIn;
+  std::deque<bool> isGAllocatedIn;
 
   /** Name of the plug-in used to compute G */
   std::vector<std::string>  GFunctionName;
 
   /** Parameters list, argument of plug-in. What are those parameters depends on user´s choice.
-   *  At the time, all plug-in functions have the same list.
+   *  The order corresponds to the one of the plug-in list below :
+   *  h0, G0 or h1, G10, G11 or h2, G20, G21.
    */
-  SimpleVector * parametersList;
-  bool isParametersListAllocatedIn;
+  std::vector<SimpleVector*> parametersList; // -> Size depends on problem type
+  std::deque<bool> isParametersListAllocatedIn;
 
   // === plug-in, depending on problem type, ie LagrangianRelationType value ===
 
@@ -247,14 +248,15 @@ public:
    */
   LagrangianR(RelationXML*, Interaction* = NULL);
 
-  /** \fn void LagrangianR(const string& computeInput,const string& computeOutput, Interaction* =NULL)
+  /** \fn void LagrangianR(const string& relationType, const string& computeH,const vector<string>& computeG, Interaction* =NULL)
    *  \brief constructor from a set of data
-   *  \param string : the name of the plugin for computeInput
-   *  \param string : the name of the plugin for computeOutput
+   *  \param string : the type of relation (holonom ...)
+   *  \param string : the name of the plugin for computeH
+   *  \param vector<string> : a list of names for the plugin for computeG (depends on relation type)
    *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  \exception RuntimeException
    */
-  LagrangianR(const std::string&, const std::string&, Interaction* = NULL);
+  LagrangianR(const std::string&, const std::string&, const std::vector<std::string>&, Interaction* = NULL);
 
   /** \fn LagrangianR(const Relation&)
    *  \brief copy constructor
@@ -264,7 +266,7 @@ public:
    */
   LagrangianR(const Relation &, Interaction* = NULL);
 
-  ~LagrangianR();
+  virtual ~LagrangianR();
 
   /** \fn  std::string getLagrangianRelationType() const
    *  \brief get the type of constraints of the relation (holonom ...)
@@ -274,6 +276,21 @@ public:
   {
     return LagrangianRelationType;
   }
+
+  /** \fn  void initParametersList()
+   *  \brief initialize parametersList vector
+   */
+  void initParametersList();
+
+  /** \fn  void manageGMemory();
+   *  \brief check and/or allocate memory for G
+   */
+  void manageGMemory();
+
+  /** \fn void setInteractionPtr(Interaction* i)
+   *  \brief set the Interaction which contains this Relation
+   */
+  void setInteractionPtr(Interaction*);
 
   /** \fn  std::string setLagrangianRelationType(const string & type)
    *  \brief set the type of constraints of the relation (holonom ...) and adapt corresponding variables
@@ -378,35 +395,50 @@ public:
 
   // -- parametersList --
 
-  /** \fn  const SimpleVector getParametersList() const
-   *  \brief get the value of fExt
+  /** \fn vector<SimpleVector*> getParametersListVector(unsigned int & index) const
+   *  \brief get the parameter list at position index
    *  \return SimpleVector
    */
-  inline const SimpleVector getParametersList() const
-  {
-    return *parametersList;
-  }
-
-  /** \fn SimpleVector* getParametersListPtr() const
-   *  \brief get fExt
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getParametersListPtr() const
+  inline std::vector<SimpleVector*> getParametersListVector() const
   {
     return parametersList;
   }
 
-  /** \fn void setParametersList (const SimpleVector& newValue)
-   *  \brief set the value of fExt to newValue
+  /** \fn  const SimpleVector getParametersList(const unsigned int & index) const
+   *  \brief get the parameter list at position index
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getParametersList(const unsigned int & index) const
+  {
+    return *(parametersList[index]);
+  }
+
+  /** \fn SimpleVector* getParametersListPtr(const unsigned int & index) const
+   *  \brief get the pointer on the parameter list at position index
+   *  \return pointer on a SimpleVector
+   */
+  inline SimpleVector* getParametersListPtr(const unsigned int & index) const
+  {
+    return parametersList[index];
+  }
+
+  /** \fn void setParametersListVector(const std::vector<SimpleVector*>& newVector)
+   *  \brief set vector parameterList to newVector
+   *  \param vector<SimpleVector*>
+   */
+  void setParametersListVector(const std::vector<SimpleVector*>&);
+
+  /** \fn void setParametersList (const SimpleVector& newValue, const unsigned int & index)
+   *  \brief set the value of parameterList[index] to newValue
    *  \param SimpleVector newValue
    */
-  void setParametersList(const SimpleVector&);
+  void setParametersList(const SimpleVector&, const unsigned int &);
 
-  /** \fn void setParametersListPtr(SimpleVector* newPtr)
-   *  \brief set parametersList to pointer newPtr
+  /** \fn void setParametersListPtr(SimpleVector* newPtr, const unsigned int & index)
+   *  \brief set parametersList[index] to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  void setParametersListPtr(SimpleVector *newPtr);
+  void setParametersListPtr(SimpleVector *newPtr, const unsigned int & index);
 
   /** \fn void computeH(const double & time);
    * \brief to compute y = h(q,v,t) using plug-in mechanism

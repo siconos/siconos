@@ -36,25 +36,27 @@ LagrangianLinearEC::LagrangianLinearEC(EqualityConstraintXML* ecxml): Lagrangian
 LagrangianLinearEC::~LagrangianLinearEC()
 {
   IN("LagrangianLinearEC::~LagrangianLinearEC()\n");
+  if (h != NULL) delete h;
+  if (b != NULL) delete b;
   OUT("LagrangianLinearEC::~LagrangianLinearEC()\n");
 }
 
-LagrangianLinearEC::LagrangianLinearEC(SiconosMatrix h, SimpleVector b)
+LagrangianLinearEC::LagrangianLinearEC(const SiconosMatrix& newh, const SimpleVector& newb)
 {
-  this->h = h;
-  this->b = b;
-  this->type = LAGRANGIANLINEAREC;
+  h = new SiconosMatrix(newh);
+  b = new SimpleVector(newb);
+  type = LAGRANGIANLINEAREC;
 }
 
 
 SiconosMatrix* LagrangianLinearEC::getHPtr(void)
 {
-  return &this->h;
+  return h;
 }
 
 SiconosVector* LagrangianLinearEC::getBPtr(void)
 {
-  return &this->b;
+  return b;
 }
 
 void LagrangianLinearEC::computeOutput(double time)
@@ -259,9 +261,9 @@ void LagrangianLinearEC::display() const
   cout << "---------------------------------------------------" << endl;
   cout << "____ data of the LagrangianLinearEC " << endl;
   cout << "| h " << endl;
-  (this->h).display();
+  h->display();
   cout << "| b " << endl;
-  this->b.display();
+  b->display();
   cout << "____________________________" << endl;
   cout << "---------------------------------------------------" << endl;
 }
@@ -281,7 +283,7 @@ void LagrangianLinearEC::saveEqualityConstraintToXML()
   OUT("LagrangianLinearEC::saveEqualityConstraintToXML\n");
 }
 
-void LagrangianLinearEC::createEqualityConstraint(EqualityConstraintXML* ecXML, SiconosMatrix* H, SiconosVector* b)
+void LagrangianLinearEC::createEqualityConstraint(EqualityConstraintXML* ecXML, SiconosMatrix* H, SiconosVector* newb)
 {
   if (ecXML != NULL)
   {
@@ -292,8 +294,8 @@ void LagrangianLinearEC::createEqualityConstraint(EqualityConstraintXML* ecXML, 
   }
   else
   {
-    this->h = *H;
-    this->b = *b;
+    h = new SiconosMatrix(*H);
+    b = new SimpleVector(*newb);
   }
 }
 

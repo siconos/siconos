@@ -23,6 +23,7 @@
 #include <string>
 #include <iostream>
 #include <dlfcn.h>
+#include <vector>
 
 #define _SYS_UNX
 
@@ -40,17 +41,23 @@ typedef void* PluginHandle;
 // --------------------------------------------------------------------------
 class SiconosSharedLibrary
 {
+private:
+
+  /* to manage plug-in object closing (for each call to dlopen one object is add into isPlugged)*/
+  std::vector<PluginHandle> isPlugged;
+
 public:
 
-  /** \fn SiconosSharedLibrary(){}
+  /** \fn SiconosSharedLibrary(const unsigned int& n = 0)
    *  \brief constructor
+   *    \param unsigned int n, the number of plug-in that will be "connected" through the current object (optional)
    */
-  SiconosSharedLibrary() {}
+  SiconosSharedLibrary(const unsigned int& = 0);
 
   /** \fn ~SiconosSharedLibrary(){}
    *  \brief destructor
    */
-  ~SiconosSharedLibrary() {}
+  ~SiconosSharedLibrary();
 
   /** \fn PluginHandle loadPlugin(const std::string& pluginPath)
    *  \brief load a plugin
@@ -58,7 +65,7 @@ public:
    *  \exception SiconosSharedLibraryException if plugin fail to open
    *  \return PluginHandle : plugin handle
    */
-  PluginHandle loadPlugin(const std::string& pluginPath) const ;
+  PluginHandle loadPlugin(const std::string& pluginPath) ;
 
   /** \fn void* getProcAddress(PluginHandle plugin, const std::string& procedure)
    *  \brief get procedure address
@@ -75,12 +82,16 @@ public:
    */
   void closePlugin(PluginHandle plugin);
 
+  /** \fn void closeAllPlugins()
+   *  \brief close all plugin set using the current object
+   */
+  void closeAllPlugins();
+
   /** \fn std::string getSharedLibraryExtension()
    *  \brief get shared library extension
    *  \return library extension ("*.so" for UNIX or "*.dll" for WNT)
    */
   const std::string getSharedLibraryExtension() const ;
-
 
   /** \fn void setFunction(void* functionPtr, PluginHandle pluginHandle, const std::string pluginPath&, const std::string functionName&)
    *  \brief set a function pointer to a function in an external library. Don't use it directely
@@ -103,6 +114,7 @@ public:
    *  \return a std::string containing the function name
    */
   const std::string getPluginFunctionName(const std::string&) const ;
+
 };
 
 #endif //SICONOSSHAREDLIBRARY_H

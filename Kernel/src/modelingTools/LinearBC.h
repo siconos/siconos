@@ -54,7 +54,7 @@ public:
    */
   inline SiconosMatrix getOmega0(void) const
   {
-    return this->omega0;
+    return *omega0;
   };
 
   /** \fn SiconosMatrix getOmegaT(void)
@@ -63,16 +63,16 @@ public:
    */
   inline SiconosMatrix getOmegaT(void) const
   {
-    return this->omegaT;
+    return *omegaT;
   };
 
   /** \fn SimpleVector getOmega(void)
    *  \brief get vector omega
    *  \return SimpleVector : value of omega
    */
-  inline /*SiconosVector*/SimpleVector getOmega(void) const
+  inline SimpleVector getOmega(void) const
   {
-    return this->omega;
+    return *omega;
   };
 
 
@@ -82,7 +82,7 @@ public:
    */
   inline void setOmega0(SiconosMatrix &M)
   {
-    this->omega0 = M;
+    *omega0 = M;
   };
 
   /** \fn void setOmegaT(SiconosMatrix)
@@ -91,7 +91,7 @@ public:
    */
   inline void setOmegaT(SiconosMatrix &M)
   {
-    this->omegaT = M;
+    *omegaT = M;
   };
 
   /** \fn void setOmega(SimpleVector&)
@@ -100,7 +100,7 @@ public:
    */
   inline void setOmega(/*SiconosVector*/SimpleVector& v)
   {
-    this->omega = v;
+    *omega = v;
   };
 
 
@@ -142,12 +142,11 @@ protected:
 
 private:
   /** Initial matrix of boundary conditions */
-  SiconosMatrix omega0;
+  SiconosMatrix* omega0;
   /** Current matrix of boundary conditions */
-  SiconosMatrix omegaT;
+  SiconosMatrix* omegaT;
   /** Vector omega of the BoundaryCondition */
-  /*SiconosVector*/
-  SimpleVector omega;
+  SimpleVector* omega;
 };
 
 #endif // LINEARBC_H

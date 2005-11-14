@@ -33,7 +33,7 @@ LinearEC::~LinearEC()
 {}
 
 void LinearEC::createEqualityConstraint(EqualityConstraintXML *ecXML ,
-                                        int number,  SiconosMatrix *G,
+                                        int number,  SiconosMatrix *newG,
                                         vector<DSInputOutput*> *dsioVector)
 {
   if (ecXML != NULL)
@@ -47,7 +47,7 @@ void LinearEC::createEqualityConstraint(EqualityConstraintXML *ecXML ,
     this->ecXML = NULL;
     this->type = NLINEAREC;
     this->number = number;
-    this->G = *G;
+    G = new SiconosMatrix(*newG);
     this->dsioVector = *dsioVector;
   }
 }

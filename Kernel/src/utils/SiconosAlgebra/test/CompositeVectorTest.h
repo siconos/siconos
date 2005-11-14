@@ -87,7 +87,7 @@ private:
 
   SimpleVector * q;
   SiconosVector * compVect, *r;
-  SiconosVector * simpleVect;
+  SimpleVector * simpleVect;
   std::vector<double> vq;
   std::vector<double> vdotq;
   CompositeVector * CV, *tmp;

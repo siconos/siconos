@@ -30,7 +30,10 @@ LinearDSIO::LinearDSIO(DSInputOutputXML* dsioxml): DSInputOutput(dsioxml)
 }
 
 LinearDSIO::~LinearDSIO()
-{}
+{
+  if (A != NULL) delete A;
+  if (B != NULL) delete B;
+}
 
 
 void LinearDSIO::fillDSInputOutputWithDSInputOutputXML()
@@ -38,8 +41,8 @@ void LinearDSIO::fillDSInputOutputWithDSInputOutputXML()
   if (this->dsioxml != NULL)
   {
     this->number = this->dsioxml->getNumber();
-    this->A = static_cast<LinearDSIOXML*>(this->dsioxml)->getA();
-    this->B = static_cast<LinearDSIOXML*>(this->dsioxml)->getB();
+    A = new SiconosMatrix(static_cast<LinearDSIOXML*>(this->dsioxml)->getA());
+    B = new SiconosMatrix(static_cast<LinearDSIOXML*>(this->dsioxml)->getB());
   }
   else RuntimeException::selfThrow("DSInputOutput::fillDSInputOutputWithDSInputOutputXML - object DSInputOutputXML does not exist");
 }
@@ -51,14 +54,14 @@ void LinearDSIO::saveDSInputOutputToXML()
     /*
      * these attributes are only required for LagrangianNonLinear DSInputOutput !
      */
-    static_cast<LinearDSIOXML*>(this->dsioxml)->setA(&(this->A));
-    static_cast<LinearDSIOXML*>(this->dsioxml)->setB(&(this->B));
+    static_cast<LinearDSIOXML*>(this->dsioxml)->setA(A);
+    static_cast<LinearDSIOXML*>(this->dsioxml)->setB(B);
   }
   else RuntimeException::selfThrow("DSInputOutput::saveDSInputOutputToXML - object DSInputOutputXML does not exist");
 }
 
 void LinearDSIO::createDSInputOutput(DSInputOutputXML * dsioXML, int number,
-                                     SiconosMatrix *A, SiconosMatrix *B)
+                                     SiconosMatrix *newA, SiconosMatrix *newB)
 {
   if (dsioXML != NULL)
   {
@@ -72,8 +75,8 @@ void LinearDSIO::createDSInputOutput(DSInputOutputXML * dsioXML, int number,
     //this->dsioxml = dsioXML;
     this->dsioType = LINEARDSIO;
     this->number = number;
-    this->A = *A;
-    this->B = *B;
+    A = new SiconosMatrix(*A);
+    B = new SiconosMatrix(*B);
   }
 }
 

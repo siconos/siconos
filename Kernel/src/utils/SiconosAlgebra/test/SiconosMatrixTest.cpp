@@ -34,10 +34,10 @@ void SiconosMatrixTest::setUp()
   int Bcol = 5;
   int Vsize = 10;
 
-  A = SiconosMatrix(Arow, Acol);
-  B = SiconosMatrix(Brow, Bcol);
+  A = new SiconosMatrix(Arow, Acol);
+  B = new SiconosMatrix(Brow, Bcol);
   /*C==A*/
-  C = SiconosMatrix(Arow, Acol);
+  C = new SiconosMatrix(Arow, Acol);
 
 
   /* init A, C */
@@ -45,14 +45,14 @@ void SiconosMatrixTest::setUp()
   for (i = 0; i < Arow; i++)
     for (int j = 0; j < Acol; j++)
     {
-      A(i, j) = rand() % 10 + 20;
-      C(i, j) = A(i, j);
+      (*A)(i, j) = rand() % 10 + 20;
+      (*C)(i, j) = (*A)(i, j);
     }
 
   /* init B */
   for (i = 0; i < Brow; i++)
     for (j = 0; j < Bcol; j++)
-      B(i, j) = rand() % 100 - 50;
+      (*B)(i, j) = rand() % 100 - 50;
 
 
   /* init SV */
@@ -60,11 +60,16 @@ void SiconosMatrixTest::setUp()
   for (i = 0; i < Vsize; i++)
     vtmp.at(i) = rand() % 10 + 20;
 
-  SV.setValues(vtmp);
+  SV = new SimpleVector(vtmp);
 }
 
 void SiconosMatrixTest::tearDown()
-{ }
+{
+  delete A;
+  delete B;
+  delete C;
+  delete SV;
+}
 
 //______________________________________________________________________________
 
@@ -98,77 +103,77 @@ void SiconosMatrixTest::testConstructor2()
 
 void SiconosMatrixTest::copyConstructor()
 {
-
-  SiconosMatrix X(A);
-  CPPUNIT_ASSERT_MESSAGE("copyConstructor2 : X == A", X == A);
+  SiconosMatrix *X = new SiconosMatrix(*A);
+  cout <<  "DSKDSLDK" << endl;
+  CPPUNIT_ASSERT_MESSAGE("copyConstructor2 : X == A", *X == (*A));
   cout << "SiconosMatrixTest >>> copyConstructor .................................................. OK\n ";
+  delete X;
 }
 
 void SiconosMatrixTest::testEquality()
 {
-  CPPUNIT_ASSERT_MESSAGE("testEquality : A==A", A == A);
-  CPPUNIT_ASSERT_MESSAGE("testEquality : B==B", B == B);
-  CPPUNIT_ASSERT_MESSAGE("testEquality : C==C", C == C);
+  CPPUNIT_ASSERT_MESSAGE("testEquality : A==A", (*A) == (*A));
+  CPPUNIT_ASSERT_MESSAGE("testEquality : B==B", (*B) == (*B));
+  CPPUNIT_ASSERT_MESSAGE("testEquality : C==C", (*C) == (*C));
 
-  CPPUNIT_ASSERT_MESSAGE("testEquality : A!=B", A != B);
-  CPPUNIT_ASSERT_MESSAGE("testEquality : B!=C", B != C);
-  CPPUNIT_ASSERT_MESSAGE("testEquality : A==C", A == C);
-  C(5, 5) = C(5, 5) * 2;
-  CPPUNIT_ASSERT_MESSAGE("testEquality : A!=C", A != C);
+  CPPUNIT_ASSERT_MESSAGE("testEquality : A!=B", (*A) != (*B));
+  CPPUNIT_ASSERT_MESSAGE("testEquality : B!=C", (*B) != (*C));
+  CPPUNIT_ASSERT_MESSAGE("testEquality : A==C", (*A) == (*C));
+  (*C)(5, 5) = (*C)(5, 5) * 2;
+  CPPUNIT_ASSERT_MESSAGE("testEquality : A!=C", (*A) != (*C));
   cout << "SiconosMatrixTest >>> testEquality ...................................................... OK\n ";
 }
 
 
 void SiconosMatrixTest::testLinearSolve()
 {
-  SiconosMatrix X;
+  SiconosMatrix X(10, 10);
   SiconosMatrix Xbefore = X;
   CPPUNIT_ASSERT_MESSAGE("testLinearSolve : Xbefore==X", Xbefore == X);
-  X = A.linearSolve(B);
-  CPPUNIT_ASSERT_MESSAGE("testLinearSolve : A==A", A == A);
-  CPPUNIT_ASSERT_MESSAGE("testLinearSolve : B==B", B == B);
-  CPPUNIT_ASSERT_MESSAGE("testLinearSolve : X!=A", X != A);
-  CPPUNIT_ASSERT_MESSAGE("testLinearSolve : X!=B", X != B);
+  X = (*A).linearSolve((*B));
+  CPPUNIT_ASSERT_MESSAGE("testLinearSolve : A==A", (*A) == (*A));
+  CPPUNIT_ASSERT_MESSAGE("testLinearSolve : B==B", (*B) == (*B));
+  CPPUNIT_ASSERT_MESSAGE("testLinearSolve : X!=A", X != (*A));
+  CPPUNIT_ASSERT_MESSAGE("testLinearSolve : X!=B", X != (*B));
   CPPUNIT_ASSERT_MESSAGE("testLinearSolve : Xbefore!=X", Xbefore != X);
   cout << "SiconosMatrixTest >>> testLinearSolve ................................................... OK\n ";
 }
 
 void SiconosMatrixTest::testReadWriteBinary()
 {
-  SiconosMatrix X = B;
-  A.write("totoMat.bin", "binary");
+  SiconosMatrix X = (*B);
+  (*A).write("totoMat.bin", "binary");
   X.read("totoMat.bin", "binary");
 
-  CPPUNIT_ASSERT_MESSAGE("testReadWriteBinary : A == X ", A == X);
+  CPPUNIT_ASSERT_MESSAGE("testReadWriteBinary : A == X ", (*A) == X);
   SiconosMatrix Y("totoMat.bin", false);
-  CPPUNIT_ASSERT_MESSAGE("testReadWriteBinary : A == Y ", A == Y);
+  CPPUNIT_ASSERT_MESSAGE("testReadWriteBinary : A == Y ", *A == Y);
   cout << "SiconosMatrixTest >>> testReadWriteBinary ............................................... OK\n ";
 }
 
 void SiconosMatrixTest::testReadWriteAscii()
 {
-  SiconosMatrix X = B;
-  A.write("totoMat.ascii", "ascii");
+  SiconosMatrix X = (*B);
+  (*A).write("totoMat.ascii", "ascii");
   X.read("totoMat.ascii", "ascii");
 
-  CPPUNIT_ASSERT_MESSAGE("testReadWriteAscii : A == X ", A == X);
+  CPPUNIT_ASSERT_MESSAGE("testReadWriteAscii : A == X ", (*A) == X);
   SiconosMatrix Y("totoMat.ascii", true);
-  CPPUNIT_ASSERT_MESSAGE("testReadWriteAscii : A == Y ", A == Y);
+  CPPUNIT_ASSERT_MESSAGE("testReadWriteAscii : A == Y ", (*A) == Y);
   cout << "SiconosMatrixTest >>> testReadWriteAscii ................................................ OK\n ";
 }
 
 void SiconosMatrixTest::testAffectation()
 {
-  SiconosMatrix X = A;
-  SiconosMatrix Y;
-  Y = A;
-  CPPUNIT_ASSERT_MESSAGE("testAffectation : A == X ", A == X);
-  CPPUNIT_ASSERT_MESSAGE("testAffectation : &A!=&X ", &A != &X);
-  CPPUNIT_ASSERT_MESSAGE("testAffectation : A == Y ", A == Y);
-  CPPUNIT_ASSERT_MESSAGE("testAffectation : &A!=&Y ", &A != &Y);
-  A(1, 1) = A(1, 1) * 2;
-  CPPUNIT_ASSERT_MESSAGE("testAffectation : A != X ", A != X);
-  CPPUNIT_ASSERT_MESSAGE("testAffectation : A != Y ", A != Y);
+  SiconosMatrix X = (*A);
+  SiconosMatrix Y = *A;
+  CPPUNIT_ASSERT_MESSAGE("testAffectation : A == X ", (*A) == X);
+  CPPUNIT_ASSERT_MESSAGE("testAffectation : &A!=&X ", A != &X);
+  CPPUNIT_ASSERT_MESSAGE("testAffectation : A == Y ", (*A) == Y);
+  CPPUNIT_ASSERT_MESSAGE("testAffectation : &A!=&Y ", A != &Y);
+  (*A)(1, 1) = (*A)(1, 1) * 2;
+  CPPUNIT_ASSERT_MESSAGE("testAffectation : A != X ", (*A) != X);
+  CPPUNIT_ASSERT_MESSAGE("testAffectation : A != Y ", (*A) != Y);
   CPPUNIT_ASSERT_MESSAGE("testAffectation : X == Y ", X == Y);
 
   cout << "SiconosMatrixTest >>> testAffectation ................................................... OK\n ";
@@ -177,47 +182,48 @@ void SiconosMatrixTest::testAffectation()
 void SiconosMatrixTest::testOperator()
 {
   cout << endl;
-  B = A + A;
-  B = A - A;
-  B = A * 2;
-  B = 2 * A;
-  B = A / 2;
-  B = A ^ 0;
-  B = A ^ 5;
-  B = A.multTranspose(A);
-  B = A.multTranspose(B);
+  (*B) = (*A) + (*A);
+  (*B) = (*A) - (*A);
+  (*B) = (*A) * 2;
+  (*B) = 2 * (*A);
+  (*B) = (*A) / 2;
+  (*B) = (*A) ^ 0;
+  (*B) = (*A) ^ 5;
+  (*B) = (*A).multTranspose((*A));
+  (*B) = (*A).multTranspose((*B));
 
-  CPPUNIT_ASSERT_MESSAGE("testOperator : A+A == A*2 ", A + A == A * 2.0);
-  CPPUNIT_ASSERT_MESSAGE("testOperator : A+A == 2*A ", A + A == 2 * A);
-  CPPUNIT_ASSERT_MESSAGE("testOperator : A+A+A+A+A == A*5 ", A + A + A + A + A == A * 5.0);
-  CPPUNIT_ASSERT_MESSAGE("testOperator : A+A+A+A+A == 5.0*A ", A + A + A + A + A == 5.0 * A);
-  CPPUNIT_ASSERT_MESSAGE("testOperator : A^1 == A ", (A ^ 1) == A);
-  CPPUNIT_ASSERT_MESSAGE("testOperator : A^2 == A*A ", (A ^ 2) == A * A);
-  CPPUNIT_ASSERT_MESSAGE("testOperator : A^3 == A*A*A ", (A ^ 3) == A * A * A);
-  CPPUNIT_ASSERT_MESSAGE("testOperator : A^10 == A*A*A*A*A*A*A*A*A*A ", (A ^ 10) == A * A * A * A * A * A * A * A * A * A);
+  CPPUNIT_ASSERT_MESSAGE("testOperator : A+A == A*2 ", (*A) + (*A) == (*A) * 2.0);
+  CPPUNIT_ASSERT_MESSAGE("testOperator : A+A == 2*A ", (*A) + (*A) == 2 * (*A));
+  CPPUNIT_ASSERT_MESSAGE("testOperator : A+A+A+A+A == A*5 ", (*A) + (*A) + (*A) + (*A) + (*A) == (*A) * 5.0);
+  CPPUNIT_ASSERT_MESSAGE("testOperator : A+A+A+A+A == 5.0*A ", (*A) + (*A) + (*A) + (*A) + (*A) == 5.0 * (*A));
+  CPPUNIT_ASSERT_MESSAGE("testOperator : A^1 == A ", ((*A) ^ 1) == (*A));
+  CPPUNIT_ASSERT_MESSAGE("testOperator : A^2 == A*A ", ((*A) ^ 2) == (*A) * (*A));
+  CPPUNIT_ASSERT_MESSAGE("testOperator : A^3 == A*A*A ", ((*A) ^ 3) == (*A) * (*A) * (*A));
+  CPPUNIT_ASSERT_MESSAGE("testOperator : A^10 == A*A*A*A*A*A*A*A*A*A ", ((*A) ^ 10) == (*A) * (*A) * (*A) * (*A) * (*A) * (*A) * (*A) * (*A) * (*A) * (*A));
 
   cout << "SiconosMatrixTest >>> testOperator ...................................................... OK\n ";
 }
 
-void SiconosMatrixTest::testAddRow()
+void SiconosMatrixTest::testGetRow()
 {
-  SiconosMatrix X = A;
-  /*SiconosVector*/
-  SimpleVector V2 = X.getRow(2);
-  CPPUNIT_ASSERT_MESSAGE("testAffectation : X == A ", X == A);
-  X.addRow(2, SV);
-  /*SiconosVector*/
-  SimpleVector V3 = X.getRow(2);
-  CPPUNIT_ASSERT_MESSAGE("testAffectation : X != A ", X != A);
-  CPPUNIT_ASSERT_MESSAGE("testAffectation : V2 != V3 ", V2 != V3);
-  CPPUNIT_ASSERT_MESSAGE("testAffectation : V3 == SV ", V3 == SV);
-
-  cout << "SiconosMatrixTest >>> testAddRow ........................................................ OK\n ";
+  SiconosMatrix *X = new SiconosMatrix(*A);
+  SimpleVector *V2 = new SimpleVector(10);
+  X->getRow(2, *V2);
+  CPPUNIT_ASSERT_MESSAGE("testAffectation : X == A ", *X == (*A));
+  X->getRow(3, *SV);
+  SimpleVector * V3 = new SimpleVector(10);
+  X->getRow(3, *V3);
+  CPPUNIT_ASSERT_MESSAGE("testAffectation : V2 != V3 ", *V2 != *V3);
+  CPPUNIT_ASSERT_MESSAGE("testAffectation : V3 == SV ", *V3 == *SV);
+  delete V2;
+  delete V3;
+  delete X;
+  cout << "SiconosMatrixTest >>> testGetRow ........................................................ OK\n ";
 }
 
 void SiconosMatrixTest::testSizeException()
 {
-  A + B;
+  *A + (*B);
 }
 
 void SiconosMatrixTest::testConstructorException()
@@ -230,143 +236,156 @@ void SiconosMatrixTest::testConstructorException()
 
 void SiconosMatrixTest::testBlockMatrixCopy1()
 {
-  SiconosMatrix A(1, 2), B(3, 3), C(3, 3);
-  A(0, 0) = 1.0;
-  A(0, 1) = 2.0;
-  B(0, 0) = 0.0;
-  B(0, 1) = 0.0;
-  B(0, 2) = 0.0;
-  B(1, 0) = 0.0;
-  B(1, 1) = 0.0;
-  B(1, 2) = 0.0;
-  B(2, 0) = 0.0;
-  B(2, 1) = 0.0;
-  B(2, 2) = 0.0;
-  C(0, 0) = 0.0;
-  C(0, 1) = 0.0;
-  C(0, 2) = 0.0;
-  C(1, 0) = 1.0;
-  C(1, 1) = 2.0;
-  C(1, 2) = 0.0;
-  C(2, 0) = 0.0;
-  C(2, 1) = 0.0;
-  C(2, 2) = 0.0;
+  SiconosMatrix Aa(1, 2), Bb(3, 3), Cc(3, 3);
+  Aa(0, 0) = 1.0;
+  Aa(0, 1) = 2.0;
+  Bb(0, 0) = 0.0;
+  Bb(0, 1) = 0.0;
+  Bb(0, 2) = 0.0;
+  Bb(1, 0) = 0.0;
+  Bb(1, 1) = 0.0;
+  Bb(1, 2) = 0.0;
+  Bb(2, 0) = 0.0;
+  Bb(2, 1) = 0.0;
+  Bb(2, 2) = 0.0;
+  Cc(0, 0) = 0.0;
+  Cc(0, 1) = 0.0;
+  Cc(0, 2) = 0.0;
+  Cc(1, 0) = 1.0;
+  Cc(1, 1) = 2.0;
+  Cc(1, 2) = 0.0;
+  Cc(2, 0) = 0.0;
+  Cc(2, 1) = 0.0;
+  Cc(2, 2) = 0.0;
 
-  B.blockMatrixCopy(A, 1, 0);
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy1 : B.blockMatrixCopy( A, x, y) ", B == C);
+  Bb.blockMatrixCopy(Aa, 1, 0);
+  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy1 : B.blockMatrixCopy( A, x, y) ", Bb == Cc);
   cout << "SiconosMatrixTest >>> testBlockMatrixCopy1 ........................................................ OK\n ";
 }
 
 void SiconosMatrixTest::testBlockMatrixCopy2()
 {
-  SiconosMatrix A(1, 1), B(1, 1), C(1, 1);
-  A(0, 0) = 1.0;
-  B(0, 0) = 0.0;
-  C(0, 0) = 1.0;
+  SiconosMatrix Aa(1, 1), Bb(1, 1), Cc(1, 1);
+  Aa(0, 0) = 1.0;
+  Bb(0, 0) = 0.0;
+  Cc(0, 0) = 1.0;
 
-  B.blockMatrixCopy(A, 0, 0);
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy2 : B.blockMatrixCopy( A, x, y) ", B == C);
+  Bb.blockMatrixCopy(Aa, 0, 0);
+  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy2 : B.blockMatrixCopy( A, x, y) ", Bb == Cc);
   cout << "SiconosMatrixTest >>> testBlockMatrixCopy2 ........................................................ OK\n ";
 }
 
 void SiconosMatrixTest::testBlockMatrixCopy3()
 {
-  SiconosMatrix A(2, 2), B(4, 4), C(4, 4);
-  A(0, 0) = 1.0;
-  A(0, 1) = 2.0;
-  A(1, 0) = 3.0;
-  A(1, 1) = 4.0;
-  B(0, 0) = 0.0;
-  B(0, 1) = 0.0;
-  B(0, 2) = 0.0;
-  B(0, 3) = 0.0;
-  B(1, 0) = 0.0;
-  B(1, 1) = 0.0;
-  B(1, 2) = 0.0;
-  B(1, 3) = 0.0;
-  B(2, 0) = 0.0;
-  B(2, 1) = 0.0;
-  B(2, 2) = 0.0;
-  B(2, 3) = 0.0;
-  B(3, 0) = 0.0;
-  B(3, 1) = 0.0;
-  B(3, 2) = 0.0;
-  B(3, 3) = 0.0;
-  C(0, 0) = 1.0;
-  C(0, 1) = 2.0;
-  C(0, 2) = 0.0;
-  C(0, 3) = 0.0;
-  C(1, 0) = 3.0;
-  C(1, 1) = 4.0;
-  C(1, 2) = 0.0;
-  C(1, 3) = 0.0;
-  C(2, 0) = 0.0;
-  C(2, 1) = 0.0;
-  C(2, 2) = 0.0;
-  C(2, 3) = 0.0;
-  C(3, 0) = 0.0;
-  C(3, 1) = 0.0;
-  C(3, 2) = 0.0;
-  C(3, 3) = 0.0;
+  SiconosMatrix * Aa = new SiconosMatrix(2, 2);
+  SiconosMatrix * Bb = new SiconosMatrix(4, 4);
+  SiconosMatrix * Cc = new SiconosMatrix(4, 4);
 
-  B.blockMatrixCopy(A, 0, 0);
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy3 : B.blockMatrixCopy( A, x, y) ", B == C);
+  (*Aa)(0, 0) = 1.0;
+  (*Aa)(0, 1) = 2.0;
+  (*Aa)(1, 0) = 3.0;
+  (*Aa)(1, 1) = 4.0;
+  (*Bb)(0, 0) = 0.0;
+  (*Bb)(0, 1) = 0.0;
+  (*Bb)(0, 2) = 0.0;
+  (*Bb)(0, 3) = 0.0;
+  (*Bb)(1, 0) = 0.0;
+  (*Bb)(1, 1) = 0.0;
+  (*Bb)(1, 2) = 0.0;
+  (*Bb)(1, 3) = 0.0;
+  (*Bb)(2, 0) = 0.0;
+  (*Bb)(2, 1) = 0.0;
+  (*Bb)(2, 2) = 0.0;
+  (*Bb)(2, 3) = 0.0;
+  (*Bb)(3, 0) = 0.0;
+  (*Bb)(3, 1) = 0.0;
+  (*Bb)(3, 2) = 0.0;
+  (*Bb)(3, 3) = 0.0;
+  (*Cc)(0, 0) = 1.0;
+  (*Cc)(0, 1) = 2.0;
+  (*Cc)(0, 2) = 0.0;
+  (*Cc)(0, 3) = 0.0;
+  (*Cc)(1, 0) = 3.0;
+  (*Cc)(1, 1) = 4.0;
+  (*Cc)(1, 2) = 0.0;
+  (*Cc)(1, 3) = 0.0;
+  (*Cc)(2, 0) = 0.0;
+  (*Cc)(2, 1) = 0.0;
+  (*Cc)(2, 2) = 0.0;
+  (*Cc)(2, 3) = 0.0;
+  (*Cc)(3, 0) = 0.0;
+  (*Cc)(3, 1) = 0.0;
+  (*Cc)(3, 2) = 0.0;
+  (*Cc)(3, 3) = 0.0;
+
+  (*Bb).blockMatrixCopy((*Aa), 0, 0);
+  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy3 : B.blockMatrixCopy( A, x, y) ", (*Bb) == (*Cc));
+  delete Aa;
+  delete Bb;
+  delete Cc;
   cout << "SiconosMatrixTest >>> testBlockMatrixCopy3 ........................................................ OK\n ";
 }
 
 void SiconosMatrixTest::testBlockMatrixCopy4()
 {
-  SiconosMatrix A(2, 2), B(4, 4), C(4, 4);
-  A(0, 0) = 1.0;
-  A(0, 1) = 2.0;
-  A(1, 0) = 3.0;
-  A(1, 1) = 4.0;
-  B(0, 0) = 0.0;
-  B(0, 1) = 0.0;
-  B(0, 2) = 0.0;
-  B(0, 3) = 0.0;
-  B(1, 0) = 0.0;
-  B(1, 1) = 0.0;
-  B(1, 2) = 0.0;
-  B(1, 3) = 0.0;
-  B(2, 0) = 0.0;
-  B(2, 1) = 0.0;
-  B(2, 2) = 0.0;
-  B(2, 3) = 0.0;
-  B(3, 0) = 0.0;
-  B(3, 1) = 0.0;
-  B(3, 2) = 0.0;
-  B(3, 3) = 0.0;
-  C(0, 0) = 0.0;
-  C(0, 1) = 0.0;
-  C(0, 2) = 0.0;
-  C(0, 3) = 0.0;
-  C(1, 0) = 0.0;
-  C(1, 1) = 0.0;
-  C(1, 2) = 0.0;
-  C(1, 3) = 0.0;
-  C(2, 0) = 0.0;
-  C(2, 1) = 0.0;
-  C(2, 2) = 1.0;
-  C(2, 3) = 2.0;
-  C(3, 0) = 0.0;
-  C(3, 1) = 0.0;
-  C(3, 2) = 3.0;
-  C(3, 3) = 4.0;
+  SiconosMatrix *Aa = new SiconosMatrix(2, 2), *Bb = new SiconosMatrix(4, 4), *Cc = new SiconosMatrix(4, 4);
+  (*Aa)(0, 0) = 1.0;
+  (*Aa)(0, 1) = 2.0;
+  (*Aa)(1, 0) = 3.0;
+  (*Aa)(1, 1) = 4.0;
+  (*Bb)(0, 0) = 0.0;
+  (*Bb)(0, 1) = 0.0;
+  (*Bb)(0, 2) = 0.0;
+  (*Bb)(0, 3) = 0.0;
+  (*Bb)(1, 0) = 0.0;
+  (*Bb)(1, 1) = 0.0;
+  (*Bb)(1, 2) = 0.0;
+  (*Bb)(1, 3) = 0.0;
+  (*Bb)(2, 0) = 0.0;
+  (*Bb)(2, 1) = 0.0;
+  (*Bb)(2, 2) = 0.0;
+  (*Bb)(2, 3) = 0.0;
+  (*Bb)(3, 0) = 0.0;
+  (*Bb)(3, 1) = 0.0;
+  (*Bb)(3, 2) = 0.0;
+  (*Bb)(3, 3) = 0.0;
+  (*Cc)(0, 0) = 0.0;
+  (*Cc)(0, 1) = 0.0;
+  (*Cc)(0, 2) = 0.0;
+  (*Cc)(0, 3) = 0.0;
+  (*Cc)(1, 0) = 0.0;
+  (*Cc)(1, 1) = 0.0;
+  (*Cc)(1, 2) = 0.0;
+  (*Cc)(1, 3) = 0.0;
+  (*Cc)(2, 0) = 0.0;
+  (*Cc)(2, 1) = 0.0;
+  (*Cc)(2, 2) = 1.0;
+  (*Cc)(2, 3) = 2.0;
+  (*Cc)(3, 0) = 0.0;
+  (*Cc)(3, 1) = 0.0;
+  (*Cc)(3, 2) = 3.0;
+  (*Cc)(3, 3) = 4.0;
 
-  B.blockMatrixCopy(A, 2, 2);
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", B == C);
+  (*Bb).blockMatrixCopy((*Aa), 2, 2);
+  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", (*Bb) == (*Cc));
+  delete Aa;
+  delete Bb;
+  delete Cc;
   cout << "SiconosMatrixTest >>> testBlockMatrixCopy4 ........................................................ OK\n ";
 }
 
 void SiconosMatrixTest::testBlockMatrixCopyException1()
 {
-  SiconosMatrix A(2, 2), B(4, 4), C(4, 4);
-  B.blockMatrixCopy(A, 3, 3);
+  SiconosMatrix *Aa = new SiconosMatrix(2, 2), *Bb = new SiconosMatrix(4, 4);
+  (*Bb).blockMatrixCopy((*Aa), 3, 3);
+  delete Aa;
+  delete Bb;
 }
 
 void SiconosMatrixTest::testBlockMatrixCopyException2()
 {
-  SiconosMatrix A(6, 6), B(4, 4), C(4, 4);
-  B.blockMatrixCopy(A, 0, 0);
+  SiconosMatrix *Aa = new SiconosMatrix(6, 6), *Bb = new SiconosMatrix(4, 4);
+  (*Bb).blockMatrixCopy((*Aa), 0, 0);
+  delete Aa;
+  delete Bb;
 }

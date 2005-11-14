@@ -24,9 +24,6 @@ using namespace std;
 CompositeVector::CompositeVector(): SiconosVector()
 {
   composite = true;
-  svref.clear();
-  tabindex.clear();
-  isSvrefAllocatedIn.clear();
 }
 
 // From a file
@@ -39,48 +36,13 @@ CompositeVector::CompositeVector(const string& file, const bool& ascii): Siconos
   read(file, mode);
 }
 
-// copy from a SiconosVector
-CompositeVector::CompositeVector(const SiconosVector& v): SiconosVector()
-{
-  composite = true;
-  svref.clear();
-  tabindex.clear();
-  isSvrefAllocatedIn.clear();
-  unsigned int i;
-  if (v.isComposite())
-  {
-    if (this != &v)
-    {
-      unsigned int sizeV = v.size(1);
-      for (i = 0; i < sizeV; i++)
-      {
-        svref.push_back(new SimpleVector(v.getValues(i).size()));
-        *(svref[i]) = *((v.getSvref())[i]);
-        isSvrefAllocatedIn.push_back(true);
-      }
-      tabindex = v.getTabIndex();
-    }
-    else
-      SiconosVectorException::selfThrow("CompositeVector: copy constructor, auto copy");
-  }
-  else
-  {
-    svref.push_back(new SimpleVector(v.size()));
-    *svref[0] = v;
-    isSvrefAllocatedIn.push_back(true);
-    tabindex.push_back(v.size());
-  }
-}
-
 // copy from a Simple
 CompositeVector::CompositeVector(const SimpleVector& v): SiconosVector()
 {
   composite = true;
-  svref.clear();
-  tabindex.clear();
-  isSvrefAllocatedIn.clear();
-  svref.push_back(new SimpleVector(v.size()));
-  *svref[0] = v;
+  svref.reserve(1);
+  tabindex.reserve(1);
+  svref.push_back(new SimpleVector(v));
   isSvrefAllocatedIn.push_back(true);
   tabindex.push_back(v.size());
 }
@@ -92,16 +54,16 @@ CompositeVector::CompositeVector(const CompositeVector& v): SiconosVector()
   composite = true;
   if (this != &v)
   {
-    svref.clear();
-    tabindex.clear();
-    isSvrefAllocatedIn.clear();
     unsigned int sizeV = v.size(1);
+    svref.reserve(sizeV);
+    vector<SimpleVector*> tmpVector = v.getSvref();
+
     for (unsigned int i = 0; i < sizeV; i++)
     {
-      svref.push_back(new SimpleVector(v.getValues(i).size()));
-      *(svref[i]) = *((v.getSvref()[i]));
+      svref.push_back(new SimpleVector(*(tmpVector[i])));
       isSvrefAllocatedIn.push_back(true);
     }
+    tabindex.reserve(sizeV);
     tabindex = v.getTabIndex();
   }
   else
@@ -111,14 +73,10 @@ CompositeVector::CompositeVector(const CompositeVector& v): SiconosVector()
 CompositeVector::~CompositeVector()
 {
   for (unsigned int i = 0; i < svref.size(); i++)
-    if (isSvrefAllocatedIn[i])
-    {
-      delete svref[i];
-      svref[i] = NULL;
-    }
-  svref.clear();
-  tabindex.clear();
-  isSvrefAllocatedIn.clear();
+  {
+    if (isSvrefAllocatedIn[i]) delete svref[i];
+    svref[i] = NULL;
+  }
 }
 
 void CompositeVector::display() const
@@ -152,33 +110,26 @@ double& CompositeVector::operator()(const int unsigned& index) const
   return (*svref[numVect])(pos);
 }
 
-void CompositeVector::add(const SiconosVector &v)
+void CompositeVector::add(const SimpleVector& v)
 {
-  if (v.isComposite())
-    SiconosVectorException::selfThrow("CompositeVector::add: can not add a composite into a composite");
-
   // copy the vector into svref
-  svref.push_back(new SimpleVector(v.size()));
+  svref.push_back(new SimpleVector(v));
   isSvrefAllocatedIn.push_back(true);
-  *(svref[svref.size() - 1]) = v;
+
   if (tabindex.size() > 0)
     tabindex.push_back(tabindex[tabindex.size() - 1] + v.size());
   else
     tabindex.push_back(v.size());
 }
 
-void CompositeVector::addPtr(SiconosVector *v)
+void CompositeVector::addPtr(SimpleVector*v)
 {
-  if (v->isComposite())
-    SiconosVectorException::selfThrow("CompositeVector::add: can not add a composite into a composite");
-
   svref.push_back(v);
   if (tabindex.size() > 0)
     tabindex.push_back(tabindex[tabindex.size() - 1] + v->size());
   else
     tabindex.push_back(v->size());
   isSvrefAllocatedIn.push_back(false);
-
 }
 
 void CompositeVector::setValues(const vector<double>& v, const int unsigned& i)
@@ -368,7 +319,7 @@ CompositeVector &CompositeVector::operator+=(const SiconosVector &v)
     SiconosVectorException::selfThrow(" CompositeVector::operator+=   -- the vectors have not the same size");
 
   for (unsigned int i = 0; i < sizeV; i++)
-    (*this)(i) += v(i);
+    (*this)(i) = (*this)(i) + v(i);
 
   return *this;
 }

@@ -102,10 +102,10 @@ private:
   InteractionXML *interactionxml;
 
   /** Flags to know if pointers have been allocated inside constructors or not */
-  std::vector<bool> isYAllocatedIn;
-  std::vector<bool> isYOldAllocatedIn;
-  std::vector<bool> isLambdaAllocatedIn;
-  std::vector<bool> isLambdaOldAllocatedIn;
+  std::deque<bool> isYAllocatedIn;
+  std::deque<bool> isYOldAllocatedIn;
+  std::deque<bool> isLambdaAllocatedIn;
+  std::deque<bool> isLambdaOldAllocatedIn;
   bool isRelationAllocatedIn;
   bool isNsLawAllocatedIn;
 
@@ -150,6 +150,12 @@ public:
    * \brief destructor
    */
   ~Interaction();
+
+  /** \fn void initializeVectors(vector<SimpleVector*> inputVector)
+   *  \brief set all components of inputVector to zero
+   *  \param a vector of SimpleVector*
+   */
+  void initializeVectors(std::vector<SimpleVector*>);
 
   // === GETTERS/SETTERS ===
 

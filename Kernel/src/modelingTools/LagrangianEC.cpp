@@ -34,7 +34,7 @@ LagrangianEC::~LagrangianEC()
 {}
 
 void LagrangianEC::createEqualityConstraint(EqualityConstraintXML *ecXML,
-    int number,  SiconosMatrix *G,
+    int number,  SiconosMatrix *newG,
     vector<DSInputOutput*> *dsioVector)
 {
   if (ecXML != NULL)
@@ -48,7 +48,7 @@ void LagrangianEC::createEqualityConstraint(EqualityConstraintXML *ecXML,
     this->ecXML = NULL;
     this->type = LAGRANGIANEC;
     this->number = number;
-    this->G = *G;
+    G = new SiconosMatrix(*newG);
     this->dsioVector = *dsioVector;
   }
 }

@@ -141,16 +141,16 @@ public:
    */
   inline SiconosMatrix* getHPtr()
   {
-    return &(this->H);
+    return H;
   }
 
   /** \fn void setH(SiconosMatrix&)
    *  \brief allows to set the value of H
    *  \param SiconosMatrix& : the matrix to set for H
    */
-  inline void setH(SiconosMatrix& H)
+  inline void setH(const SiconosMatrix& newH)
   {
-    this->H = H;
+    *H = newH;
   }
 
   /** \fn void display()
@@ -229,7 +229,7 @@ protected:
   std::string id;
 
   /** the matrix H */
-  SiconosMatrix H;
+  SiconosMatrix* H;
 
   /** the DSs connected to this DSInputOuput */
   std::vector<DynamicalSystem*> dsVector;

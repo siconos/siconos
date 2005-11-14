@@ -72,32 +72,19 @@ private:
    */
   bool isPLUInversed;
 
-  /** \fn LaGenMatDouble getMatrix() const;
-   *  \brief get the private member mat
-   *  \return LaGenMatDouble
-   */
-  //LaGenMatDouble getMatrix() const;
-
-  /** \fn void setMatrix(LaGenMatDouble m)
-   *  \brief set the private member mat with m
-   *  \param the LaGenMatDouble to put in the matrix
-   */
-  //void setMatrix(LaGenMatDouble m) {mat = m;};
-
   /** \fn static void verbose(std::string msg)
    *  \brief print on the screen a message "printVerbose" static variable is true
    *  \param std::string : the message to print
    */
   static void verbose(const std::string& msg);
 
-public:
-
-
   /** \fn SiconosMatrix ()
    *  \brief contructor
    *  \return SiconosMatrix
    */
   SiconosMatrix();
+
+public:
 
   /** \fn SiconosMatrix (const SiconosMatrix  m)
    *  \brief copy contructor
@@ -171,7 +158,7 @@ public:
    *  \brief determines if the matrix has been factorized
    *  \return true if the matrix is factorized
    */
-  inline bool isFactorised() const
+  inline bool isFactorized() const
   {
     return isPLUFactorized;
   }
@@ -188,7 +175,7 @@ public:
    *  \brief get LaGenMatDouble matrix
    *  \return a LaGenMatDouble
    */
-  LaGenMatDouble& getLaGenMatDouble();
+  //LaGenMatDouble& getLaGenMatDouble();
 
   /** \fn setValue(const int& row, const int& col, const double& d)
    * \brief set the element matrix[row, col]
@@ -218,32 +205,25 @@ public:
     return (*this)(row, col);
   }
 
-  /** \fn bool addRow(int row, SiconosVector v)
-   *  \brief fill values of a row in the matrix
-   *  \param int row : the row which is filled
-   *  \param SiconosVector v : the values which have to be copied in the row
-   *  \return true if no error
-   */
-  bool addRow(const unsigned int&, const SiconosVector&);
-
   /** \fn void setRow(const unsigned int& row, const SiconosVector &v)
    *  \brief set line row of the current matrix with vector v
    *  \param an int and a SiconosVector
    */
   void setRow(const unsigned int& , const SiconosVector &);
 
-  /** \fn SiconosVector& getRow(int index)
-   *  \brief get a row of the matrix
-   *  \return a SiconosVector which represent the row
-   *  \WARNING 11 Feb 2005 : possible memory problem ? (dynamical allocation without delete...)
+  /** \fn void getRow(const int& index, const SimpleVector& vOut) const
+   *  \brief get row index of current matrix and save it into vOut
+   *  \param int: index of required line
+   *  \param ref to SimpleVector: in-out parameter
    */
-  SimpleVector getRow(const int&) const;
+  void getRow(const int& i, const SimpleVector&) const;
 
-  /** \fn SiconosVector& getCol(int index)
-   *  \brief get a col of the matrix
-   *  \return a SimpleVector
+  /** \fn void getCol(const int& index, const SimpleVector& vOut) const
+   *  \brief get column index of the current matrix and save it into vOut
+   *  \param int: index of required column
+   *  \param ref to SimpleVector: in-out parameter
    */
-  SimpleVector getCol(const int&) const;
+  void getCol(const int&, const SimpleVector&) const;
 
   /** \fn void getBlock(const std::vector<unsigned int>& indexList, SiconosMatrix&)
    *  \brief get a block of a matrix, which position is defined by index_list
@@ -313,12 +293,12 @@ public:
 
   // --- MATRICES HANDLING AND OPERATORS ---
 
-  /** \fn SiconosMatrix multTranspose(SiconosMatrix B)
+  /** \fn SiconosMatrix multTranspose(const SiconosMatrix B)
    *  \brief compute A*Bt
    *  \param SiconosMatrix B
    *  \return SiconosMatrix : the result of the multiplication
    */
-  SiconosMatrix multTranspose(SiconosMatrix &B);
+  SiconosMatrix multTranspose(const SiconosMatrix &);
 
   /** \fn void blockMatrixCopy( SiconosMatrix &blockMat, const int&, const int&)
    *  \brief copy the blockmatrix "blockMat" in the matrix "mat" at the position (xPos, yPos)
@@ -327,7 +307,7 @@ public:
    *  \param int : the line position to start the copy of the blockmatrix
    *  \param int : the column position to start the copy of the blockmatrix
    */
-  void blockMatrixCopy(SiconosMatrix &, const unsigned int&, const unsigned int&);
+  void blockMatrixCopy(const SiconosMatrix &, const unsigned int&, const unsigned int&);
 
   // Io-stream operators
   friend std::istream& operator >> (std::istream& i, SiconosMatrix& m);
@@ -350,6 +330,7 @@ public:
    *  \return the element matrix[i,j]
    */
   double& operator()(const unsigned int& row, const unsigned int& col);
+  double& operator()(const unsigned int& row, const unsigned int& col) const;
 
   /** \fn affectation operator
    *  \param SiconosMatrix : the matrix to be copied
@@ -492,7 +473,7 @@ public:
    *  \brief build a matrix from n matrices
    *  \return a SiconosMatrix
    */
-  friend SiconosMatrix BlockMatrixAssemble(std::vector<SiconosMatrix*>);
+  friend SiconosMatrix BlockMatrixAssemble(const std::vector<SiconosMatrix*>&);
 
 };
 

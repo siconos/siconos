@@ -27,6 +27,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include<deque>
 
 const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ MACHINE DEPENDE
 const unsigned int M_MAXSIZEFORDISPLAY = 10;
@@ -79,12 +80,6 @@ public:
   }
 
   // !!! WARNING : all the following functions are to be implemented in derivated classes !!!
-
-  /** \fn std::vector<SiconosVector*> getSvref() const
-   *  \brief get svref (usefull only for composite, should not be used for simple) => avoid downcast
-   * \return a standard vector of SiconosVector
-   */
-  virtual std::vector<SiconosVector*> getSvref() const = 0;
 
   /** \fn std::vector<int> getTabIndex() const
    *  \brief get the index tab (usefull only for composite, should not be used for simple) => avoid downcast

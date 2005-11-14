@@ -35,7 +35,7 @@ using namespace std;
 Interaction::Interaction(const Interaction& newI):
   id(newI.getId()), number(newI.getNumber()), nInteraction(newI.getNInteraction()), sizeOfDS(newI.getSizeOfDS()),
   nslaw(NULL), relation(NULL), interactionxml(NULL),
-  isRelationAllocatedIn(true), isNsLawAllocatedIn(true)
+  isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
 {
   // Memory allocation and copy for simple vectors
   unsigned int size = newI.getY().size();
@@ -71,7 +71,7 @@ Interaction::Interaction(const Interaction& newI):
   else if (NslawType == RELAYNSLAW)
     nslaw = new  RelayNSL();
   else RuntimeException::selfThrow("Interaction::copy constructor, unknown NSLAW type :" + nslaw->getType());
-
+  isNsLawAllocatedIn = true;
   *nslaw = *newI.getNonSmoothLawPtr();
 
   // Relation
@@ -90,14 +90,14 @@ Interaction::Interaction(const Interaction& newI):
     relation = new LagrangianR(*(newI.getRelationPtr()));
 
   else RuntimeException::selfThrow("Interaction::copy constructor, unknown relation type " + relation->getType());
-
+  isRelationAllocatedIn = true;
   // \remark FP: we do not link xml object in the copy
 }
 
 // --- XML constructor ---
 Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * nsds):
   id("none"), number(0), nInteraction(0), sizeOfDS(0), nslaw(NULL), relation(NULL), interactionxml(interxml),
-  isRelationAllocatedIn(true), isNsLawAllocatedIn(true)
+  isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
 {
   if (interactionxml != NULL)
   {
@@ -125,6 +125,11 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
     isYOldAllocatedIn.resize(size, true);
     isLambdaAllocatedIn.resize(size, true);
     isLambdaOldAllocatedIn.resize(size, true);
+
+    initializeVectors(y);
+    initializeVectors(yOld);
+    initializeVectors(lambda);
+    initializeVectors(lambdaOld);
 
     if (interactionxml->hasY()) *(y[0]) = interactionxml->getY();
     if (interactionxml->hasLambda()) *(lambda[0]) = interactionxml->getLambda();
@@ -169,7 +174,7 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
     else if (NslawType == NEWTON_IMPACT_FRICTION_NSLAW_TAG)
       nslaw = new NewtonImpactFrictionNSL(interactionxml->getNonSmoothLawXML());
     else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type :" + nslaw->getType());
-
+    isNsLawAllocatedIn = true;
     // --- Relation ---
     string relationType = interactionxml->getRelationXML()->getType();
     // general relation
@@ -187,8 +192,8 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
     // Lagrangian linear relation
     else if (relationType == LAGRANGIAN_LINEAR_RELATION_TAG)
       relation = new LagrangianLinearR(interactionxml->getRelationXML(), this);
-
     else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + relation->getType());
+    isRelationAllocatedIn = true;
   }
   else RuntimeException::selfThrow("Interaction::xml constructor, xmlfile = NULL");
 }
@@ -222,6 +227,11 @@ Interaction::Interaction(const string& newId, const int& newNumber, const int& n
   isLambdaAllocatedIn.resize(size, true);
   isLambdaOldAllocatedIn.resize(size, true);
 
+  initializeVectors(y);
+  initializeVectors(yOld);
+  initializeVectors(lambda);
+  initializeVectors(lambdaOld);
+
   vectorDS.clear();
   if (dsConcerned != NULL) vectorDS = *dsConcerned;
   else RuntimeException::selfThrow("Interaction::data constructor - The dsConcerned are not given");
@@ -253,6 +263,15 @@ Interaction::~Interaction()
   relation = NULL;
   if (isNsLawAllocatedIn) delete nslaw;
   nslaw = NULL;
+}
+
+// vector<SimpleVector*> initialization
+// Initialization is required to avoid uninit memory reading (-> insure tests: READ_UNINIT_MEM)
+void Interaction::initializeVectors(vector<SimpleVector*> inputVector)
+{
+  vector<SimpleVector*>::iterator iter;
+  for (iter = inputVector.begin(); iter != inputVector.end(); ++iter)
+    (*iter)->zero();
 }
 
 // --- GETTERS/SETTERS ---
@@ -615,25 +634,33 @@ void Interaction::display() const
 
 NonSmoothLaw* Interaction::createComplementarityConditionNSL()
 {
+  if (isNsLawAllocatedIn) delete nslaw;
   nslaw = new ComplementarityConditionNSL();
+  isNsLawAllocatedIn = true;
   return nslaw;
 }
 
 NonSmoothLaw* Interaction::createRelayNSL(const double& c, const double& d)
 {
+  if (isNsLawAllocatedIn) delete nslaw;
   nslaw = new RelayNSL(c, d);
+  isNsLawAllocatedIn = true;
   return nslaw;
 }
 
 NonSmoothLaw* Interaction::createNewtonImpactLawNSL(const double& e)
 {
+  if (isNsLawAllocatedIn) delete nslaw;
   nslaw = new NewtonImpactLawNSL(e);
+  isNsLawAllocatedIn = true;
   return nslaw;
 }
 
 NonSmoothLaw* Interaction::createNewtonImpactFrictionNSL(const double& en, const double& et, const double& mu)
 {
+  if (isNsLawAllocatedIn) delete nslaw;
   nslaw = new NewtonImpactFrictionNSL(en, et, mu);
+  isNsLawAllocatedIn = true;
   return nslaw;
 }
 

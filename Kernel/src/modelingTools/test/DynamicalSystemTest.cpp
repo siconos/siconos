@@ -89,7 +89,6 @@ void DynamicalSystemTest::testBuildDynamicalSystem1()
   cout << "=== DynamicalSystem tests start ...=== " << endl;
   cout << "======================================" << endl;
   DynamicalSystem * ds = new DynamicalSystem(tmpxml1);
-
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1A : ", ds->getType() == NLDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1B : ", ds->getNumber() == 13, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1C : ", ds->getId() == "testDS1", true);

@@ -39,7 +39,7 @@ do dynlib=no;
 	  AC_MSG_RESULT(but the minimal required version is $LAPACKPP_VER)
        else         
           LAPACKPP_INCLUDES="-I$ac_dir/include/lapackpp"
-          LAPACKPP_LIBRARIES="-L$ac_dir -llapack++ -llamatrix++ -lblas++"
+          LAPACKPP_LIBRARIES="-L$ac_dir -llapackpp"
           lapackpp_lib="yes"
           AC_MSG_RESULT([Good version - library $ac_dir/lib/lapackpp.$libsuffix selected]) 
 	  break;  

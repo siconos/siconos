@@ -58,8 +58,8 @@ void SimpleVectorTest::tearDown()
 
 // CONSTRUCTORS TESTS
 
-// Default
-void SimpleVectorTest::testBuildSimpleVector()
+// Default  ->private
+/*void SimpleVectorTest::testBuildSimpleVector()
 {
   SimpleVector * v = new SimpleVector();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector : ", v->isComposite(), false);
@@ -67,7 +67,7 @@ void SimpleVectorTest::testBuildSimpleVector()
   delete v;
   cout << " Constructor SV 0 ok" << endl;
 }
-
+*/
 // from a file, see testRead
 
 // Copy from a std vector
@@ -77,7 +77,7 @@ void SimpleVectorTest::testBuildSimpleVector1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", v->isComposite(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", v->size() == vq.size(), true);
   for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", v->lavd(i) == vq[i], true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", (v->getValues())(i) == vq[i], true);
   cout << " Constructor SV 1 ok" << endl;
   delete v;
 }
@@ -174,7 +174,7 @@ void SimpleVectorTest::testSetValues()
 {
   u->setValues(vq);
   for (unsigned int i = 0; i < u->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", u->lavd(i) == vq[i], true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", (u->getValues())(i) == vq[i], true);
 }
 
 // getValues
@@ -587,7 +587,7 @@ void SimpleVectorTest::testOperatorAccess()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", v->isComposite(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", v->size() == vq.size() , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", (*v)(2) != vq[2] , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", v->lavd(2) == 10 , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", (v->getValues())(2) == 10 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", d == 1, true);
   delete v;
   cout << "SimpleVectorTest >>> testOperatorAccess ............................... OK\n ";

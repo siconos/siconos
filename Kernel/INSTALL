@@ -30,8 +30,8 @@
       * location : http://www.xmlsoft.org/downloads.html
 
    * lapack++
-      * actual version used with the platform: 2.4.0
-      * last version : 2.4.0
+      * actual version used with the platform: 2.4.2 -> liblapackpp.1.8.0.so 
+      * last version : 2.4.2
       * known problems : none
       * location : http://sourceforge.net/projects/lapackpp
 

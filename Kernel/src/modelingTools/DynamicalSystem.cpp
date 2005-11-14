@@ -56,12 +56,23 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
     xDot = new SimpleVector(n);
     xFree = new SimpleVector(n);
     r = new SimpleVector(n);
+    r->zero();
     jacobianX = new SiconosMatrix(n, n);
     isXAllocatedIn.resize(7, true);
     isXAllocatedIn[2] = false ; //xMemory
     isXAllocatedIn[4] = false ; // xDotMemory
     isRAllocatedIn.resize(2, true);
     isRAllocatedIn[1] = false ; // rMemory
+
+
+    // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
+    parametersList0.reserve(4);
+    for (unsigned int i = 0; i < 4; ++i)
+      parametersList0.push_back(new SimpleVector(1));
+    isParametersList0AllocatedIn.resize(4, true);
+    vector<SimpleVector*>::iterator iter;
+    for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
+      (*iter)->zero();
 
     // ---  xml loading for vector and matrix members ---
     if (dsxml->hasX0() == true) *x0 = dsxml->getX0();
@@ -197,6 +208,7 @@ DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN,
   xDot = new SimpleVector(n);
   xFree = new SimpleVector(n);
   r = new SimpleVector(n);
+  r->zero();
   jacobianX = new SiconosMatrix(n, n);
 
   isXAllocatedIn.resize(7, true);
@@ -207,6 +219,15 @@ DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN,
 
   // x initialization
   *x = *x0;
+
+  // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
+  parametersList0.reserve(4);
+  for (unsigned int i = 0; i < 4; ++i)
+    parametersList0.push_back(new SimpleVector(1));
+  isParametersList0AllocatedIn.resize(4, true);
+  vector<SimpleVector*>::iterator iter;
+  for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
+    (*iter)->zero();
 
   // plugins for vectorField and jacobianX
   setVectorFieldFunction(cShared.getPluginName(vectorFieldPlugin), cShared.getPluginFunctionName(vectorFieldPlugin));
@@ -301,6 +322,9 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
     isControlAllocatedIn[1] = true ;
   }
 
+  // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
+  setParametersListVector(newDS.getParametersListVector());
+
   string pluginPath, functionName;
 
   functionName = cShared.getPluginFunctionName(vectorFieldFunctionName);
@@ -337,7 +361,6 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
 DynamicalSystem::~DynamicalSystem()
 {
   IN("DynamicalSystem::~DynamicalSystem()\n");
-
   if (isXAllocatedIn[0])delete x0;
   x0 = NULL ;
   if (isXAllocatedIn[1]) delete x;
@@ -360,6 +383,13 @@ DynamicalSystem::~DynamicalSystem()
   u = NULL;
   if (isControlAllocatedIn[1]) delete T;
   T = NULL;
+
+  for (unsigned int i = 0; i < parametersList0.size(); ++i)
+  {
+    if (isParametersList0AllocatedIn[i]) delete parametersList0[i];
+    parametersList0[i] = NULL;
+  }
+  isParametersList0AllocatedIn.resize(4, false);
 
   for (unsigned int i = 0; i < dsioVector.size(); i++)
   {
@@ -870,13 +900,39 @@ void DynamicalSystem::setComputeTFunction(const string& pluginPath, const string
   computeTFunctionName = plugin + ":" + functionName;
 }
 
+void DynamicalSystem::setParametersListVector(const std::vector<SimpleVector*>& newVector)
+{
+  // copy!!
+  for (unsigned int i = 0; i < parametersList0.size(); ++i)
+  {
+    if (isParametersList0AllocatedIn[i]) delete parametersList0[i];
+    *(parametersList0[i]) = *(newVector[i]);
+    isParametersList0AllocatedIn[i] = true;
+  }
+}
+
+void DynamicalSystem::setParametersList(const SimpleVector& newValue, const unsigned int & index)
+{
+  if (isParametersList0AllocatedIn[index]) delete parametersList0[index];
+  parametersList0[index] = new SimpleVector(newValue);
+  isParametersList0AllocatedIn[index] = true;
+}
+
+void DynamicalSystem::setParametersListPtr(SimpleVector *newPtr, const unsigned int & index)
+{
+  if (isParametersList0AllocatedIn[index]) delete parametersList0[index];
+  parametersList0[index] = newPtr;
+  isParametersList0AllocatedIn[index] = false;
+}
+
 void DynamicalSystem::computeVectorField(const double& time)
 {
   if (vectorFieldPtr == NULL)
     RuntimeException::selfThrow("vectorField() is not linked to a plugin function");
 
   unsigned int size = x->size();
-  vectorFieldPtr(&size, &time, &(*x)(0) , &(*xDot)(0));
+  SimpleVector* param = parametersList0[0];
+  vectorFieldPtr(&size, &time, &(*x)(0) , &(*xDot)(0), &(*param)(0));
 }
 
 void DynamicalSystem::computeJacobianX(const double& time)
@@ -885,7 +941,8 @@ void DynamicalSystem::computeJacobianX(const double& time)
     RuntimeException::selfThrow("computeJacobianX() is not linked to a plugin function");
 
   unsigned int size = x->size();
-  computeJacobianXPtr(&size, &time, &(*x)(0), &(*jacobianX)(0, 0));
+  SimpleVector* param = parametersList0[1];
+  computeJacobianXPtr(&size, &time, &(*x)(0), &(*jacobianX)(0, 0), &(*param)(0));
 }
 
 void DynamicalSystem::computeU(const double& time)
@@ -896,7 +953,8 @@ void DynamicalSystem::computeU(const double& time)
     RuntimeException::selfThrow("computeU(), warning: u = NULL");
 
   unsigned int sizeX = x->size();
-  computeUPtr(&uSize, &sizeX, &time, &(*x)(0), &(*xDot)(0), &(*u)(0));
+  SimpleVector* param = parametersList0[2];
+  computeUPtr(&uSize, &sizeX, &time, &(*x)(0), &(*xDot)(0), &(*u)(0), &(*param)(0));
 }
 
 void DynamicalSystem::computeT()
@@ -907,7 +965,8 @@ void DynamicalSystem::computeT()
     RuntimeException::selfThrow("computeT(), warning: T = NULL");
 
   unsigned int sizeX = x->size();
-  computeTPtr(&uSize, &sizeX, &(*x)(0), &(*T)(0, 0));
+  SimpleVector* param = parametersList0[3];
+  computeTPtr(&uSize, &sizeX, &(*x)(0), &(*T)(0, 0), &(*param)(0));
 }
 
 // ===== XML MANAGEMENT FUNCTIONS =====
@@ -1046,6 +1105,16 @@ DynamicalSystem::DynamicalSystem():
   isXAllocatedIn.resize(7, false);
   isRAllocatedIn.resize(2, false);
   isControlAllocatedIn.resize(2, false);
+
+  // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
+  parametersList0.reserve(4);
+  for (unsigned int i = 0; i < 4; ++i)
+    parametersList0.push_back(new SimpleVector(1));
+  isParametersList0AllocatedIn.resize(4, true);
+  vector<SimpleVector*>::iterator iter;
+  for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
+    (*iter)->zero();
+
 
   setVectorFieldFunction("DefaultPlugin.so", "vectorField");
   setComputeJacobianXFunction("DefaultPlugin.so", "computeJacobianX");

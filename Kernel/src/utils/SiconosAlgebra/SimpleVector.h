@@ -30,15 +30,15 @@ class SimpleVector : public SiconosVector
 private:
   LaVectorDouble lavd;
 
-public:
-
-  // --- CONSTRUCTORS/DESTRUCTOR ---
-
   /** \fn SimpleVector()
    *  \brief default contructor
    *  \return SimpleVector
    */
   SimpleVector();
+
+public:
+
+  // --- CONSTRUCTORS/DESTRUCTOR ---
 
   /** \fn SimpleVector (std::string file, bool ascii)
    *  \brief contructor from an input file
@@ -83,12 +83,6 @@ public:
   ~SimpleVector();
 
   // --- OTHER FUNCTIONS ---
-
-  /** \fn std::vector<SiconosVector*> getSvref() const
-   *  \brief get svref (usefull only for composite, should not be used for simple)
-   * \return a standard vector of SiconosVector
-   */
-  std::vector<SiconosVector*> getSvref() const ;
 
   /** \fn std::vector<int> getTabIndex() const
    *  \brief get the index tab (usefull only for composite, should not be used for simple) => avoid downcast
