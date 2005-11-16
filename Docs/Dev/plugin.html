@@ -253,25 +253,25 @@ class&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb
 LagrangianRelation class:&nbsp; the plug-in type depends on the
 variable "LagrangianRelationType", that fix the list of variables in h.
     <br>
-Three cases are available at the time, holonom, non-holonom and
-holonom+lambda. <br>
+Three cases are available at the time, scleronomic, rhenomorous and
+scleronomic+lambda. <br>
     <ul>
-      <li> <span style="font-style: italic; font-weight: bold;">"holonom":&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <img alt="holonom lagrangian relation"
+      <li> <span style="font-style: italic; font-weight: bold;">"scleronomic":&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <img alt="scleronomic lagrangian relation"
  src="figures/lagRelation1.png" style="width: 378px; height: 29px;"></span><br>
         <pre>void (*h0Ptr)(const unsigned int* sizeOfQ, const double* q, const unsigned int* sizeOfY, <br>              double* y, double* param);</pre>
 and<br>
         <pre>void (*G0Ptr)(const unsigned int* sizeOfQ, const double* q, const unsigned int* sizeOfY,<br>              double* G0, double* param); <br></pre>
       </li>
-      <li><span style="font-style: italic; font-weight: bold;">"non-holonom"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp; &nbsp;&nbsp; <img alt="non-holonom lagrangian relation"
+      <li><span style="font-style: italic; font-weight: bold;">"rhenomorous"</span>:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp; &nbsp;&nbsp; <img alt="rhenomorous lagrangian relation"
  src="figures/lagRelation2.png" style="width: 331px; height: 28px;"><br>
         <pre>void (*h1Ptr)(const unsigned int* sizeOfQ, const double* q, const double time,<br>              const unsigned int* sizeOfY, double* y, double* param);</pre>
 and<br>
         <pre>void (*G10Ptr)(const unsigned int* sizeOfQ, const double* q, const double time,<br>               const unsigned int* sizeOfY, double* y, double* param);<br><br>         <br>void (*G11Ptr)(const unsigned int* sizeOfQ, const double* q, const double time,<br>               const unsigned int* sizeOfY, double* y, double* param);<br></pre>
       </li>
-      <li> <span style="font-style: italic; font-weight: bold;">"holonom+lambda":&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <img alt="holonom+lambda lagrangian relation"
+      <li> <span style="font-style: italic; font-weight: bold;">"scleronomic+lambda":&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <img alt="scleronomic+lambda lagrangian relation"
  src="figures/lagRelation3.png" style="width: 353px; height: 28px;"></span><br>
         <pre>void (*h2Ptr)(const unsigned int* sizeOfQ, const double* q, const double * lambda, <br>              const unsigned int* sizeOfY, double* y, double* param);</pre>
 and<br>

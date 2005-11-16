@@ -51,7 +51,7 @@
                                </DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
-					<LagrangianRelation type="holonom+lambda">
+					<LagrangianRelation type="scleronomic+lambda">
                                              <h plugin="TestPlugin:h2"/>
                                              <G number='2'>
                                               <matrix matrixPlugin="TestPlugin:G20"/>

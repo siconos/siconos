@@ -125,7 +125,7 @@ void LagrangianRTest::tearDown()
   delete tmpxml3;
 }
 
-// xml constructor (holonom case)
+// xml constructor (scleronomic case)
 void LagrangianRTest::testBuildLagrangianR0()
 {
   cout << "==================================" << endl;
@@ -135,12 +135,12 @@ void LagrangianRTest::testBuildLagrangianR0()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1a : ", R1->getType() == "LagrangianR", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1b : ", R1->getHFunctionName() == "TestPlugin:h0", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1c : ", R1->getGFunctionName() == "TestPlugin:G0", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1a : ", R1->getLagrangianRelationType() == "holonom", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1a : ", R1->getLagrangianRelationType() == "scleronomic", true);
   delete R1;
   cout << " xml Constructor (1) LagrangianR ok" << endl;
 }
 
-// xml constructor (non-holonom case)
+// xml constructor (rhenomorous case)
 void LagrangianRTest::testBuildLagrangianR1()
 {
   LagrangianR * R1 = new LagrangianR(tmpxml2);
@@ -148,12 +148,12 @@ void LagrangianRTest::testBuildLagrangianR1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1b : ", R1->getHFunctionName() == "TestPlugin:h1", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1c : ", R1->getGFunctionName(0) == "TestPlugin:G10", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1c : ", R1->getGFunctionName(1) == "TestPlugin:G11", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1a : ", R1->getLagrangianRelationType() == "non-holonom", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1a : ", R1->getLagrangianRelationType() == "rhenomorous", true);
   delete R1;
   cout << " xml Constructor (2) LagrangianR ok" << endl;
 }
 
-// xml constructor (holonom+lambda case)
+// xml constructor (scleronomic+lambda case)
 void LagrangianRTest::testBuildLagrangianR4()
 {
   LagrangianR * R1 = new LagrangianR(tmpxml3);
@@ -161,7 +161,7 @@ void LagrangianRTest::testBuildLagrangianR4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR4b : ", R1->getHFunctionName() == "TestPlugin:h2", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR4c : ", R1->getGFunctionName(0) == "TestPlugin:G20", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR4d : ", R1->getGFunctionName(1) == "TestPlugin:G21", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR4e : ", R1->getLagrangianRelationType() == "holonom+lambda", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR4e : ", R1->getLagrangianRelationType() == "scleronomic+lambda", true);
   delete R1;
   cout << " xml Constructor (2) LagrangianR ok" << endl;
 }
@@ -172,11 +172,11 @@ void LagrangianRTest::testBuildLagrangianR2()
   vector<string> G;
   G.reserve(1);
   G.push_back("TestPlugin:G0");
-  LagrangianR * R1 = new LagrangianR("holonom", "TestPlugin:h0", G);
+  LagrangianR * R1 = new LagrangianR("scleronomic", "TestPlugin:h0", G);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR2a : ", R1->getType() == "LagrangianR", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR2b : ", R1->getHFunctionName() == "TestPlugin:h0", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR2c : ", R1->getGFunctionName() == "TestPlugin:G0", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR2a : ", R1->getLagrangianRelationType() == "holonom", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR2a : ", R1->getLagrangianRelationType() == "scleronomic", true);
   delete R1;
   cout << " data Constructor LagrangianR ok" << endl;
 }
@@ -190,7 +190,7 @@ void LagrangianRTest::testBuildLagrangianR3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1a : ", R1->getType() == "LagrangianR", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1b : ", R1->getHFunctionName() == "TestPlugin:h0", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1c : ", R1->getGFunctionName() == "TestPlugin:G0", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1a : ", R1->getLagrangianRelationType() == "holonom", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianR1a : ", R1->getLagrangianRelationType() == "scleronomic", true);
   delete R1;
   delete ref;
   cout << "copy Constructor LagrangianR ok" << endl;

@@ -48,11 +48,11 @@
  *
  * member "LagrangianRelationType", set by user, defined h and G number of variables:
  *
- *   - holonom              -> h0(q), G0(q) (usual mechanical case)
- *   - non-holonom          -> h1(q,t), G10(q,t), G11(q,t)
- *   - holonom+lambda       -> h2(q,lambda) , G20(q,lambda), G21(q,lambda)
- *   - holonom+control      -> h3(q,u), G30(q,u), G31(q,u)
- *   - non-holonom+control  -> h4(q,t,u), G40(q,t,u), G41(q,t,u), G42(q,t,u)
+ *   - scleronomic              -> h0(q), G0(q) (usual mechanical case)
+ *   - rhenomorous              -> h1(q,t), G10(q,t), G11(q,t)
+ *   - scleronomic+lambda       -> h2(q,lambda) , G20(q,lambda), G21(q,lambda)
+ *   - scleronomic+control      -> h3(q,u), G30(q,u), G31(q,u)
+ *   - rhenomourous+control     -> h4(q,t,u), G40(q,t,u), G41(q,t,u), G42(q,t,u)
  *
  * Usually, G functions corresponds to jacobians of h compare to its variables. But it is up to user
  * to define these plug-in.
@@ -72,7 +72,7 @@
  * Depending on this type, computeH() function call the right plug-in. The same for G.
  * Mind that depending on the number of variables in h and G, corresponding jacobian operators
  * are to be defined if necessary.
- * \warning At the time, only holonom and non-holonom constraints are modelled.
+ * \warning At the time, only scleronomic and non-scleronomic constraints are modelled.
  *
  * Some rules:
  *   - h must be a plug-in
@@ -99,7 +99,7 @@ class LagrangianR : public Relation
 
 protected:
 
-  /** To define the type of constraints (holonom ...), ie the variables on which depend h and G*/
+  /** To define the type of constraints (scleronomic ...), ie the variables on which depend h and G*/
   std::string LagrangianRelationType;
 
   /** Boolean variables to check if h and G are plugged to external functions or not
@@ -132,7 +132,7 @@ protected:
 
   // === plug-in, depending on problem type, ie LagrangianRelationType value ===
 
-  // --- Plug-in for holonom case -> h0(q), G0(q) ---
+  // --- Plug-in for scleronomic case -> h0(q), G0(q) ---
   /** \fn void (*h0Ptr)(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfy, double* y, double * param=0);
    * \brief computes y = h(q)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
@@ -152,7 +152,7 @@ protected:
    */
   void (*G0Ptr)(const unsigned int*, const double*, const unsigned int*, double*, double*);
 
-  // --- plug-in for non-holonom case -> h1(q,t), G10(q,t), G11(q,t) ---
+  // --- plug-in for non-scleronomic case -> h1(q,t), G10(q,t), G11(q,t) ---
   /** \fn void (*h1Ptr)(const unsigned int* sizeOfq, const double* q,
    *                    const double* time, const unsigned int* sizeOfy,  double* y, double * param);
    * \brief computes y = h(q,t)
@@ -189,7 +189,7 @@ protected:
    */
   void (*G11Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*);
 
-  // --- plug-in for holonom+lambda case -> h2(q,t), G20(q,t), G21(q,t) ---
+  // --- plug-in for scleronomic+lambda case -> h2(q,t), G20(q,t), G21(q,t) ---
 
   /** \fn void (*h2Ptr)(const unsigned int* sizeOfq, const double* q,
    *                    const double* lambda, const unsigned int* sizeOfy, double* y, double * param);
@@ -250,7 +250,7 @@ public:
 
   /** \fn void LagrangianR(const string& relationType, const string& computeH,const vector<string>& computeG, Interaction* =NULL)
    *  \brief constructor from a set of data
-   *  \param string : the type of relation (holonom ...)
+   *  \param string : the type of relation (scleronomic ...)
    *  \param string : the name of the plugin for computeH
    *  \param vector<string> : a list of names for the plugin for computeG (depends on relation type)
    *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
@@ -269,7 +269,7 @@ public:
   virtual ~LagrangianR();
 
   /** \fn  std::string getLagrangianRelationType() const
-   *  \brief get the type of constraints of the relation (holonom ...)
+   *  \brief get the type of constraints of the relation (scleronomic ...)
    *  \return a string
    */
   inline const std::string getLagrangianRelationType() const
@@ -293,7 +293,7 @@ public:
   void setInteractionPtr(Interaction*);
 
   /** \fn  std::string setLagrangianRelationType(const string & type)
-   *  \brief set the type of constraints of the relation (holonom ...) and adapt corresponding variables
+   *  \brief set the type of constraints of the relation (scleronomic ...) and adapt corresponding variables
    * (resize G ...)
    *  \param a string
    */

@@ -40,9 +40,9 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
       unsigned int row = LLRxml->getH().size(0);
 
       if (LLRxml->hasD())
-        setLagrangianRelationType("holonom+lambda");
+        setLagrangianRelationType("scleronomic+lambda");
       else
-        setLagrangianRelationType("holonom");
+        setLagrangianRelationType("scleronomic");
 
       if (inter != NULL)
       {
@@ -53,7 +53,7 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
 
         H = G[0];
         *H = LLRxml->getH();
-        if (LagrangianRelationType == "holonom+lambda")
+        if (LagrangianRelationType == "scleronomic+lambda")
         {
           D = G[1];
           *D = LLRxml->getD();
@@ -64,7 +64,7 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
         H = new SiconosMatrix(LLRxml->getH());
         isHAllocatedIn = true;
         G[0] = H;
-        if (LagrangianRelationType == "holonom+lambda")
+        if (LagrangianRelationType == "scleronomic+lambda")
         {
           unsigned int rowD = LLRxml ->getD().size(0);
           unsigned int colD = LLRxml ->getD().size(1);
@@ -91,7 +91,7 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
     {
       cout << "Warning: LagrangianLinearR xml constructor, original relations uses plug-in functions for h and G=H definition." << endl;
       H = G[0];
-      if (LagrangianRelationType == "holonom+lambda")
+      if (LagrangianRelationType == "scleronomic+lambda")
         D = G[1];
     }
   }
@@ -108,7 +108,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
   if (row2 != row)
     RuntimeException::selfThrow("LagrangianLinearR:: constructor from data, inconsistent size between H and b");
 
-  setLagrangianRelationType("holonom");
+  setLagrangianRelationType("scleronomic");
 
   if (inter != NULL)
   {
@@ -136,7 +136,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, Interaction* int
   LagrangianR(inter), H(NULL), b(NULL), D(NULL), isHAllocatedIn(false), isBAllocatedIn(true), isDAllocatedIn(false)
 {
   relationType = LAGRANGIANLINEARRELATION;
-  setLagrangianRelationType("holonom");
+  setLagrangianRelationType("scleronomic");
   unsigned int row = newH.size(0);
   if (inter != NULL)
   {
@@ -173,7 +173,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
   if (rowD != colD || rowD != row)
     RuntimeException::selfThrow("LagrangianLinearR:: constructor from data, inconsistent size for D input matrix");
 
-  setLagrangianRelationType("holonom+lambda");
+  setLagrangianRelationType("scleronomic+lambda");
 
   if (inter != NULL)
   {
@@ -255,7 +255,7 @@ LagrangianLinearR::LagrangianLinearR(const Relation & newLLR, Interaction* inter
   {
     cout << "Warning: LagrangianLinearR copy constructor, original relations uses plug-in functions for h and G=H definition." << endl;
     H = G[0];
-    if (LagrangianRelationType == "holonom+lambda")
+    if (LagrangianRelationType == "scleronomic+lambda")
       G[1] = D;
 
     isHAllocatedIn = false;

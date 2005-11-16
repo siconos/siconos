@@ -66,7 +66,7 @@ public:
   {
     if (SiconosDOMTreeTools::hasAttributeValue(rootRelationXMLNode, "type"))
       return SiconosDOMTreeTools::getStringAttributeValue(rootRelationXMLNode, "type");
-    else return "holonom";
+    else return "scleronomic";
   }
 
   // === h matrix/Plug-in ===
