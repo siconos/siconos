@@ -134,7 +134,11 @@ void test_lcp_series(int n , double *vec , double *q)
 #ifdef BAVARD
   printf("**** NLGS TEST ****\n");
 #endif
-  for (i = 0 ; i < n ; ++i) z1[i] = 0.0;
+  for (i = 0 ; i < n ; ++i)
+  {
+    z1[i] = 0.0;
+    w1[i] = 0.0;
+  }
 
   info1 = lcp_solver(vec , q , &n , &method_lcp1 , z1 , w1);
 
@@ -142,7 +146,11 @@ void test_lcp_series(int n , double *vec , double *q)
 #ifdef BAVARD
   printf("**** CPG TEST *****\n");
 #endif
-  for (i = 0 ; i < n ; ++i) z2[i] = 0.0;
+  for (i = 0 ; i < n ; ++i)
+  {
+    z2[i] = 0.0;
+    w2[i] = 0.0;
+  }
 
   info2 = lcp_solver(vec , q , &n , &method_lcp2 , z2 , w2);
 
@@ -150,7 +158,11 @@ void test_lcp_series(int n , double *vec , double *q)
 #ifdef BAVARD
   printf("**** QP TEST ******\n");
 #endif
-  for (i = 0 ; i < n ; ++i) z4[i] = 0.0;
+  for (i = 0 ; i < n ; ++i)
+  {
+    z4[i] = 0.0;
+    w4[i] = 0.0;
+  }
 
   info4 = lcp_solver(vec , q , &n , &method_lcp4 , z4 , w4);
 
@@ -158,7 +170,11 @@ void test_lcp_series(int n , double *vec , double *q)
 #ifdef BAVARD
   printf("**** NSQP TEST ****\n");
 #endif
-  for (i = 0 ; i < n ; ++i) z5[i] = 0.0;
+  for (i = 0 ; i < n ; ++i)
+  {
+    z5[i] = 0.0;
+    w5[i] = 0.0;
+  }
 
   info5 = lcp_solver(vec , q , &n , &method_lcp5 , z5 , w5);
 
@@ -166,7 +182,11 @@ void test_lcp_series(int n , double *vec , double *q)
 #ifdef BAVARD
   printf("**** Lemke TEST ***\n");
 #endif
-  for (i = 0 ; i < n ; ++i) z6[i] = 0.0;
+  for (i = 0 ; i < n ; ++i)
+  {
+    z6[i] = 0.0;
+    w6[i] = 0.0;
+  }
 
   info6 = lcp_solver(vec , q , &n , &method_lcp6 , z6 , w6);
 
@@ -174,7 +194,11 @@ void test_lcp_series(int n , double *vec , double *q)
 #ifdef BAVARD
   printf("**** Newton TEST **\n");
 #endif
-  for (i = 0 ; i < n ; ++i) z7[i] = 0.0;
+  for (i = 0 ; i < n ; ++i)
+  {
+    z7[i] = 0.0;
+    w7[i] = 0.0;
+  }
 
   info7 = lcp_solver(vec , q , &n , &method_lcp7 , z7 , w7);
 
@@ -182,7 +206,11 @@ void test_lcp_series(int n , double *vec , double *q)
 #ifdef BAVARD
   printf("**** LATIN TEST ***\n");
 #endif
-  for (i = 0 ; i < n ; ++i) z3[i] = 0.0;
+  for (i = 0 ; i < n ; ++i)
+  {
+    z3[i] = 0.0;
+    w3[i] = 0.0;
+  }
 
   info3 = lcp_solver(vec , q , &n , &method_lcp3 , z3 , w3);
 
@@ -382,7 +410,15 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 #ifdef BAVARD
   printf("**** Lemke TEST ***\n");
 #endif
-  for (i = 0 ; i < dim ; ++i) z6[i] = 0.0;
+  for (i = 0 ; i < dim ; ++i)
+  {
+    z6[i] = 0.0;
+    w6[i] = 0.0;
+  }
+
+  iter6 = 0;
+  titer6 = 0;
+  err6 = 0.;
 
   info6 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp6 , z6 , w6 , &iter6 , &titer6 , &err6);
 
@@ -441,6 +477,11 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 
   comp = ddot_(&dim , z6 , &incx , w6 , &incy);
 
+  /*  printf("\n    Lemke  (LOG:%1d)|",info6);
+  printf("\n    Lemke    %5d ",iter6);
+  printf("\n    Lemke %5d |",titer6);
+  printf("\n    Lemke %10.4g",err6);
+  printf("\n    Lemke %10.4g |",comp);*/
   printf("\n    Lemke  (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info6, iter6, titer6, err6, comp);
 
   comp = ddot_(&dim , z7 , &incx , w7 , &incy);

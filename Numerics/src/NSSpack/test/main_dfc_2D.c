@@ -105,7 +105,9 @@ int main(void)
   method meth_dfc_2D;
 
 
-  strcpy(meth_dfc_2D.dfc_2D.name, "Cfd_latin");
+  strcpy(meth_dfc_2D.dfc_2D.name, "Lemke");
+  /* strcpy( meth_dfc_2D.dfc_2D.name, "NLGS");*/
+  /*  strcpy( meth_dfc_2D.dfc_2D.name, "Cfd_latin");*/
   meth_dfc_2D.dfc_2D.itermax = 1501;
   meth_dfc_2D.dfc_2D.tol = -0.000001;
   meth_dfc_2D.dfc_2D.mu = 0.5;
@@ -250,9 +252,15 @@ int main(void)
 
 
 
-  U2 = malloc(n * sizeof(double));
-  F2 = malloc(n * sizeof(double));
+  U2 = (double *)malloc(n * sizeof(double));
+  F2 = (double*)malloc(n * sizeof(double));
 
+  for (i = 0; i < n; i++)
+  {
+    U2[i] = 0.0;
+    F2[i] = 0.0;
+
+  }
 
   printf("\n\n  we go in the function  %s\n\n", meth_dfc_2D.dfc_2D.name);
 

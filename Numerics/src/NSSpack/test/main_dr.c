@@ -345,7 +345,7 @@ void test_mmc(void)
   max_part(abso2 , &max11 , &n);
 
 
-  if (max1 > 1e-10)
+  if (max11 > 1e-10)
   {
 
     max11 = mini / max11;

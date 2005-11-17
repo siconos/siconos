@@ -35,8 +35,9 @@ C     |         X     --SORTED ARRAY                           |
 C     |________________________________________________________|
 C
       SUBROUTINE sortsn(X,Y,N)
-      INTEGER X(1),Y(1),S,T
       INTEGER I,J,K,L,M,N
+      INTEGER X(N),Y(N),S,T
+
       I = 1
 10    K = I
 20    J = I

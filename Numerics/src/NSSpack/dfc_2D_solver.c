@@ -106,6 +106,14 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     w      = (double *)malloc(dim_q * sizeof(double));
     MM     = (double *)malloc(dim_MM * sizeof(double));
 
+    for (i = 0; i < dim_q; i++)
+    {
+      q[i] = 0.0;
+      z[i] = 0.0;
+      w[i] = 0.0;
+
+
+    }
 
 
     dfc_2D2cond_2D(n , &pt->dfc_2D.mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
@@ -145,6 +153,14 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     w      = (double *)malloc(dim_q * sizeof(double));
     MM     = (double *)malloc(dim_MM * sizeof(double));
 
+    for (i = 0; i < dim_q; i++)
+    {
+      q[i] = 0.0;
+      z[i] = 0.0;
+      w[i] = 0.0;
+
+
+    }
 
     dfc_2D2lcp(n , &pt->dfc_2D.mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
                pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d ,  pt->dfc_2D.J1 , MM , q);
@@ -193,6 +209,16 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     w      = (double *)malloc(dim_q * sizeof(double));
     MM     = (double *)malloc(dim_MM * sizeof(double));
 
+
+    for (i = 0; i < dim_q; i++)
+    {
+      q[i] = 0.0;
+      z[i] = 0.0;
+      w[i] = 0.0;
+
+
+    }
+
     dfc_2D2lcp(n , &pt->dfc_2D.mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
                pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d ,  pt->dfc_2D.J1 , MM , q);
 
@@ -234,6 +260,16 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     z      = (double *)malloc(dim_q * sizeof(double));
     w      = (double *)malloc(dim_q * sizeof(double));
     MM     = (double *)malloc(dim_MM * sizeof(double));
+
+    for (i = 0; i < dim_q; i++)
+    {
+      q[i] = 0.0;
+      z[i] = 0.0;
+      w[i] = 0.0;
+
+
+    }
+
 
     dfc_2D2lcp(n , &pt->dfc_2D.mu , K1 , F1, pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
                pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d ,  pt->dfc_2D.J1 , MM , q);
