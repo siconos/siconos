@@ -234,13 +234,13 @@ void test_mmc(void)
 
   strcpy(meth_pr1.pr.name, "NLGS");
   meth_pr1.pr.itermax  =  50000;
-  meth_pr1.pr.tol      =  0.0000000001;
+  meth_pr1.pr.tol      =  0.000001;
   meth_pr1.pr.chat     =  1;
 
 
   strcpy(meth_pr2.pr.name, "Latin");
   meth_pr2.pr.itermax  =  50000;
-  meth_pr2.pr.tol      =  0.0000000001;
+  meth_pr2.pr.tol      =  0.0000001;
   meth_pr2.pr.k_latin  =  0.003;//0.003;
   meth_pr2.pr.chat     =  1;
 

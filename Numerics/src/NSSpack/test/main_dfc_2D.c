@@ -105,11 +105,11 @@ int main(void)
   method meth_dfc_2D;
 
 
-  strcpy(meth_dfc_2D.dfc_2D.name, "Lemke");
-  /* strcpy( meth_dfc_2D.dfc_2D.name, "NLGS");*/
-  /*  strcpy( meth_dfc_2D.dfc_2D.name, "Cfd_latin");*/
+  //   strcpy( meth_dfc_2D.dfc_2D.name, "Lemke");
+  // strcpy( meth_dfc_2D.dfc_2D.name, "NLGS");
+  strcpy(meth_dfc_2D.dfc_2D.name, "Cfd_latin");
   meth_dfc_2D.dfc_2D.itermax = 1501;
-  meth_dfc_2D.dfc_2D.tol = -0.000001;
+  meth_dfc_2D.dfc_2D.tol = 0.000001;
   meth_dfc_2D.dfc_2D.mu = 0.5;
   meth_dfc_2D.dfc_2D.chat = 1;
 

@@ -93,21 +93,21 @@ void pfc_2D_series(int n , double *vec , double *q)
 
   strcpy(meth_pfc_2D1.pfc_2D.name, "NLGS");
   meth_pfc_2D1.pfc_2D.itermax  =  10000;
-  meth_pfc_2D1.pfc_2D.tol      =  0.000000001;
+  meth_pfc_2D1.pfc_2D.tol      =  0.0000001;
   meth_pfc_2D1.pfc_2D.chat     =  1;
   meth_pfc_2D1.pfc_2D.mu       =  0.3;
 
 
   strcpy(meth_pfc_2D2.pfc_2D.name, "CPG");
   meth_pfc_2D2.pfc_2D.itermax  =  7000;
-  meth_pfc_2D2.pfc_2D.tol      =  0.0000000001;
+  meth_pfc_2D2.pfc_2D.tol      =  0.0000001;
   meth_pfc_2D2.pfc_2D.chat     =  1;
   meth_pfc_2D2.pfc_2D.mu       =  0.3;
 
 
   strcpy(meth_pfc_2D3.pfc_2D.name, "Latin");
   meth_pfc_2D3.pfc_2D.itermax  =  15000;
-  meth_pfc_2D3.pfc_2D.tol      =  0.00000000000001;
+  meth_pfc_2D3.pfc_2D.tol      =  0.0000001;
   meth_pfc_2D3.pfc_2D.chat     =  1;
   meth_pfc_2D3.pfc_2D.mu       =  0.3;
   meth_pfc_2D3.pfc_2D.k_latin  =  5.5;
