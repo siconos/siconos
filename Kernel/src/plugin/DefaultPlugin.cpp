@@ -196,7 +196,7 @@ extern "C"  void h1(const unsigned int* sizeDS, const double* q, const double* t
 }
 
 
-extern "C"    void G10(const unsigned int* sizeDS, const double* q, const double* time, const unsigned int* sizeY, double* G0, double* param)
+extern "C" void G10(const unsigned int* sizeDS, const double* q, const double* time, const unsigned int* sizeY, double* G0, double* param)
 {
   printf("Call of the function 'G10' of the default plugin.\nYou have to implement this function.\n");
 }

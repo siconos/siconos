@@ -165,7 +165,7 @@ $1 = string(PyString_AsString($input));
 %include "SiconosSharedLibrary.h"
 %include "SiconosMatrixException.h"
 %include "SiconosVectorException.h"
-%include "NewSiconosVector.h"
+%include "SiconosVector.h"
 %include "SimpleVector.h"
 %include "CompositeVector.h"
 %include "SiconosMatrix.h"
