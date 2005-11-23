@@ -30,6 +30,11 @@ do dynlib=no;
           cppunit_config="yes"
 	  CPPUNIT_INCLUDES="`$ac_dir/cppunit-config --cflags` -w"
 	  CPPUNIT_LIBRARIES="`$ac_dir/cppunit-config --libs`"
+	  if test "${LOCAL_LIB_PATH}test" = "test"; then
+	    export LOCAL_LIB_PATH="$ac_dir/lib";
+          else
+	    export LOCAL_LIB_PATH=$LOCAL_LIB_PATH:"$ac_dir/lib";
+	  fi;
           AC_MSG_RESULT([Good version - binary $ac_dir/cppunit selected]) 
 	  break;  
        fi    	

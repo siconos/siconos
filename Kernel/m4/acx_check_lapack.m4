@@ -39,6 +39,11 @@ do dynlib=no;
        if test "$dynlib" = "yes"; then
 	   lapack_lib="yes"
            LAPACK_LIBRARIES="-L$ac_dir -llapack"
+	  if test "${LOCAL_LIB_PATH}test" = "test"; then
+	    export LOCAL_LIB_PATH="$ac_dir";
+          else
+	    export LOCAL_LIB_PATH=$LOCAL_LIB_PATH:"$ac_dir";
+	  fi;
            break
        fi	
     fi

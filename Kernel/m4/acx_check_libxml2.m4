@@ -41,6 +41,11 @@ do dynlib=no;
        else         
           LIBXML2_INCLUDES="`$ac_dir/bin/xml2-config --cflags`"
           LIBXML2_LIBRARIES="`$ac_dir/bin/xml2-config --libs`"
+	  if test "${LOCAL_LIB_PATH}test" = "test"; then
+	    export LOCAL_LIB_PATH="$ac_dir/lib";
+          else
+	    export LOCAL_LIB_PATH=$LOCAL_LIB_PATH:"$ac_dir/lib";
+	  fi;
           libxml_lib="yes"
           AC_MSG_RESULT([Good version - library $ac_dir/lib/libxml2.$libsuffix selected]) 
 	  break;  

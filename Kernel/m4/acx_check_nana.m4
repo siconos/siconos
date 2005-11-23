@@ -32,8 +32,13 @@ for ac_dir in $list_dir;
 do dynlib=no;  
    AC_MSG_CHECKING([for libnana.$libsuffix in $ac_dir/lib])   
    if test -r "$ac_dir/lib/libnana.$libsuffix"  && test -r "$ac_dir/include/nana.h" ;then
-          NANA_INCLUDES="$ac_dir/lib/nana.h"
-          NANA_LIBRARIES="$ac_dir/lib/libnana.$libsuffix"
+          NANA_INCLUDES="-I$ac_dir/include"
+          NANA_LIBRARIES="-L$ac_dir/lib -lnana"
+	  if test "${LOCAL_LIB_PATH}test" = "test"; then
+	    export LOCAL_LIB_PATH="$ac_dir/lib";
+          else
+	    export LOCAL_LIB_PATH=$LOCAL_LIB_PATH:"$ac_dir/lib";
+	  fi;
           nana_lib="yes"
           dynlib = "yes" 
           AC_MSG_RESULT([Library $ac_dir/lib/nana.$libsuffix selected]) 

@@ -2,7 +2,7 @@
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
+# it under the terms of the GNU General Public license as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # Siconos is distributed in the hope that it will be useful,
@@ -203,7 +203,6 @@ ACX_CHECK_LAPACK([AC_SUBST(LAPACK_LIBRARIES)], [AC_MSG_ERROR([Lapack not found])
 AC_MSG_CHECKING([for Siconos/Numerics])
 ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-localnumerics.])])
 
-
 # Lapack++
 LAPACKPP_VER="1.8.0"	# lib....so number
 LAPACKPP_REL_VER="2.4.2" # Release number
@@ -323,10 +322,8 @@ esac
 AC_SUBST(SICONOS_EXT_LDFLAGS)
 AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
 
-
-
-
-
+# LD_LIBRARY_PATH for siconos script
+AC_SUBST(LOCAL_LIB_PATH) 
 
 #################################
 ## DOXYGEN 

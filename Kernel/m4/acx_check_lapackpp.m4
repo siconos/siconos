@@ -27,7 +27,6 @@ case "$target" in
       ;;
 esac  
 
-
 lapackpp_lib="no"
 
 for ac_dir in $list_dir;
@@ -38,8 +37,13 @@ do dynlib=no;
 	if test $? -eq 0; then
 	  AC_MSG_RESULT(but the minimal required version is $LAPACKPP_VER)
        else         
-          LAPACKPP_INCLUDES="-I$ac_dir/include/lapackpp"
+          LAPACKPP_INCLUDES="-I$ac_dir/include/lapackpp" 
           LAPACKPP_LIBRARIES="-L$ac_dir/lib -llapackpp"
+	  if test "${LOCAL_LIB_PATH}test" = "test"; then
+	    export LOCAL_LIB_PATH="$ac_dir/lib";
+          else
+	    export LOCAL_LIB_PATH=$LOCAL_LIB_PATH:"$ac_dir/lib";
+	  fi;
           lapackpp_lib="yes"
           AC_MSG_RESULT([Good version - library $ac_dir/lib/lapackpp.$libsuffix selected]) 
 	  break;  

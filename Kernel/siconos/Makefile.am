@@ -27,8 +27,11 @@ siconos:siconos.in Makefile
 	    < $(srcdir)/siconos.in > siconos.tmp
 	sed -e 's?\@numericspath\@?$(NUMERICS_PATH)?g' \
             -e 's/whatever//' \
-	    < $(srcdir)/siconos.tmp > siconos.tmp2 \
-	&& mv siconos.tmp2 siconos
+	    < $(srcdir)/siconos.tmp > siconos.tmp2
+	sed -e 's?\@locallibpath\@?$(LOCAL_LIB_PATH)?g' \
+            -e 's/whatever//' \
+	    < $(srcdir)/siconos.tmp2 > siconos.tmp3 \
+	&& mv siconos.tmp3 siconos
 	chmod +x siconos
 
 MakefilePluginSample:MakefilePluginSample.in Makefile
