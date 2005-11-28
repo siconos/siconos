@@ -22,7 +22,15 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 
 --------------------------------------------------------------------------------
-  v1.0 - October 2005
+  v1.0 - November 2005 (release 341)
+--------------------------------------------------------------------------------
+
+        - Solverpack renamed in NSSPack
+        - Fixed warnings on invalid pointer type due to integer types	
+        - Matlab interface
+	
+--------------------------------------------------------------------------------
+  v1.0 - October 2005 (release 304)
 --------------------------------------------------------------------------------
 
         Numerical algorihtms for:

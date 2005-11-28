@@ -20,9 +20,19 @@ This is the changelog for the Siconos software, www.siconos.gforge.inria.fr.
 Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.
-
 --------------------------------------------------------------------------------
-  v1.0 - October 2005
+  v1.0 - October 2005 (release 341)
+--------------------------------------------------------------------------------
+
+       - add modeling of Lagrangian (non linear) relations + related simulation part
+	 and cppunit tests + general review of all kind of relations.
+       - Insure tests ok
+       - add user-defined parameters list in all plug-in
+       - add samples "Ball in a bowl", "robotic arm",  	   
+       - Fix various bugs in configure and m4 files (local libraries loading)
+	
+--------------------------------------------------------------------------------
+  v1.0 - October 2005 (release 304)
 --------------------------------------------------------------------------------
 
 	Modeling of:
