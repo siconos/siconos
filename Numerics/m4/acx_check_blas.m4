@@ -44,20 +44,20 @@ do dynlib=no;
     fi
 done
 
-# test static library
-if test "$blas_lib" = "no" ; then
-    for ac_dir in $list_dir;
-    do  AC_MSG_CHECKING([for libblas.a in $ac_dir])
-        if test -r "$ac_dir/libblas.a" ; then
-	    blas_lib="yes"
+# # test static library
+# if test "$blas_lib" = "no" ; then
+#     for ac_dir in $list_dir;
+#     do  AC_MSG_CHECKING([for libblas.a in $ac_dir])
+#         if test -r "$ac_dir/libblas.a" ; then
+# 	    blas_lib="yes"
 	    
-	    BLAS_LIBRARIES="-L$ac_dir -lblas"
-	    AC_MSG_RESULT([$blas_lib])
-	    break
-	fi
-        AC_MSG_RESULT([$blas_lib])
-    done
-fi
+# 	    BLAS_LIBRARIES="-L$ac_dir -lblas"
+# 	    AC_MSG_RESULT([$blas_lib])
+# 	    break
+# 	fi
+#         AC_MSG_RESULT([$blas_lib])
+#     done
+# fi
 # result of test
 if test "$blas_lib" = "yes" ; then
     if test "$dynlib" = "no"; then

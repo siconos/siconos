@@ -180,12 +180,13 @@ AC_ARG_WITH(locallapack,
 
 
 # Blas
-# BLAS_VER="3.0."
+BLAS_VER="3.0."
 AC_MSG_CHECKING([for Blas])
 ACX_CHECK_BLAS([AC_SUBST(BLAS_LIBRARIES)], [AC_MSG_ERROR([Blas not found])])
 # exit 1;
 
 # Lapack
+LAPACK_VER="3.0."
 AC_MSG_CHECKING([for Lapack])
 ACX_CHECK_LAPACK([AC_SUBST(LAPACK_LIBRARIES)], [AC_MSG_ERROR([Lapack not found])])
 

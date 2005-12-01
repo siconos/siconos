@@ -195,6 +195,7 @@ ACX_CHECK_BLAS([AC_SUBST(BLAS_LIBRARIES)], [AC_MSG_ERROR([Blas not found])])
 # exit 1;
 
 # Lapack
+LAPACK_VER="3.0."
 AC_MSG_CHECKING([for Lapack])
 ACX_CHECK_LAPACK([AC_SUBST(LAPACK_LIBRARIES)], [AC_MSG_ERROR([Lapack not found])])
 # exit 1;
@@ -214,7 +215,7 @@ AC_SUBST(CXX_LAPACKPP_FLAG)
 
 
 # Libxml2
-LIBXML_VER="2.6.17"
+LIBXML_VER="2.6.16"
 AC_MSG_CHECKING([Libxml2])
 ACX_CHECK_LIBXML2([AC_SUBST(LIBXML2_INCLUDES) AC_SUBST(LIBXML2_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Libxml2 in a good version. Please install Libxml2, version >= $LIBXML_VER  or use the option --with-locallibxml.])])
 
