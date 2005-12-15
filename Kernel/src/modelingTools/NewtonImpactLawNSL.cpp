@@ -46,16 +46,15 @@ bool NewtonImpactLawNSL::isVerified() const
 {
   bool res = false;
   // to do
+  RuntimeException::selfThrow("NewtonImpactFrictionNSL:: isVerified, not yet implemented!");
   return res;
 }
 
 void NewtonImpactLawNSL::display() const
 {
-  cout << "------------------------------------" << endl;
-  cout << "____ data of the NewtonImpactLawNSL" << endl;
-  cout << "| The Newton coefficient of restitution e : " << e << endl;
-  cout << "____________________________" << endl;
-  cout << "------------------------------------" << endl;
+  cout << "===============================================================================" << endl;
+  cout << "=== Newton impact (frictionless) non-smooth law coefficient of restitution: " << e << endl;
+  cout << "===============================================================================" << endl;
 }
 
 void NewtonImpactLawNSL::saveNonSmoothLawToXML()

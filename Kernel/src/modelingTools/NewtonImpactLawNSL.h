@@ -69,7 +69,7 @@ public:
    *  \brief check the ns law to see if it is verified
    *  \return a boolean value whioch determines if the NS Law is verified
    */
-  bool isVerified(void) const;
+  bool isVerified() const;
 
   /** \fn const double getE(void) const
    *  \brief getter of e

@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #ifndef COMPLEMENTARITYCONDITIONNSLAW_H
 #define COMPLEMENTARITYCONDITIONNSLAW_H
 
@@ -24,7 +24,7 @@
 
 /** \class ComplementarityConditionNSL
  *  \brief NonSmoothLaw for complementarity models
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 27, 2004
  *
@@ -54,6 +54,11 @@ public:
   bool isVerified(void) const;
 
   ///////////////////
+
+  /** \fn void display()
+   *  \brief print the data to the screen
+   */
+  inline void display()const {};
 
   /** \fn void saveNonSmoothLawToXML()
    *  \brief copy the data of the NonSmoothLaw to the XML tree

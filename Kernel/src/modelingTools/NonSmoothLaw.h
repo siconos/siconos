@@ -57,7 +57,7 @@ public:
    *  \brief check if the NS law is verified
    *  \return a boolean value whioch determines if the NS Law is verified
    */
-  virtual bool isVerified(void) const = 0;
+  virtual bool isVerified() const = 0;
 
   /** \fn inline NonSmoothLawXML* getNonSmoothLawXML()
    *  \brief get the NonSmoothLawXML of the NonSmoothLaw
@@ -105,7 +105,7 @@ public:
    *  \brief display the data of the NonSmoothLaw on the standard output
    *  \exception RuntimeException
    */
-  virtual void display() const;
+  virtual void display() const = 0;
 
 protected:
 

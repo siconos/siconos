@@ -105,7 +105,7 @@ public:
    *  \brief getter of mu
    *  \return the value of mu
    */
-  inline const double getMu(void) const
+  inline const double getMu() const
   {
     return mu;
   };
@@ -143,6 +143,7 @@ private:
    */
   double en;
   double et;
+  /** friction coefficient */
   double mu;
 };
 

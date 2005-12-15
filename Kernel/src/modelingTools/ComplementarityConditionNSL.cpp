@@ -37,6 +37,7 @@ bool ComplementarityConditionNSL::isVerified() const
 {
   bool res = false;
   // to do
+  RuntimeException::selfThrow("NewtonImpactFrictionNSL:: isVerified, not yet implemented!");
   return res;
 }
 

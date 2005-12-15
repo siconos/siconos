@@ -47,22 +47,21 @@ NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(const double& newEn, const doub
 NewtonImpactFrictionNSL::~NewtonImpactFrictionNSL()
 {}
 
-bool NewtonImpactFrictionNSL::isVerified(void) const
+bool NewtonImpactFrictionNSL::isVerified() const
 {
   bool res = false;
   // to do
+  RuntimeException::selfThrow("NewtonImpactFrictionNSL:: isVerified, not yet implemented!");
   return res;
 }
 
 void NewtonImpactFrictionNSL::display() const
 {
-  cout << "------------------------------------" << endl;
-  cout << "____ data of the NewtonImpactFrictionNSL" << endl;
-  cout << "| The normal Newton coefficient of restitution en : " << en << endl;
-  cout << "| The tangential Newton coefficient of restitution et : " << et << endl;
-  cout << "| The friction coefficient mu : " << mu << endl;
-  cout << "____________________________" << endl;
-  cout << "------------------------------------" << endl;
+  cout << "=== Newton impact-friction non-smooth law data display ===" << endl;
+  cout << " Normal Newton coefficient of restitution: " << en << endl;
+  cout << " Tangential Newton coefficient of restitution: " << et << endl;
+  cout << "Friction coefficient: " << mu << endl;
+  cout << "==========================================================" << endl;
 }
 
 void NewtonImpactFrictionNSL::saveNonSmoothLawToXML()
