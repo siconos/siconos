@@ -23,10 +23,6 @@
 #include "LagrangianDSIOXML.h"
 #include "check.h"
 
-extern std::string  DefaultComputeInput;
-extern std::string  DefaultComputeOutput;
-
-
 /** \class LagrangianDSIO
  *  \brief Lagrangian DSInputOutput
  *         { y = H(q, t)

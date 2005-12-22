@@ -15,16 +15,16 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /** \class NewtonImpactFrictionNSLXML
  *  \brief  This class manages NewtonImpactFrictionNSL data part
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 0.1
  *  \date (Creation) March 22, 2005
  *
  *
  *
- * NewtonImpactFrictionNSLXML allows to manage data of a NewtonImpactFrictionNSL DOM tree.
+ * NewtonImpactFrictionNSLXMLdata xml management for NewtonImpactFrictionNSL
  * \bug
  */
 
@@ -33,119 +33,111 @@
 
 #include "NonSmoothLawXML.h"
 
-const std::string NEWTON_EN = "en";
-const std::string NEWTON_ET = "et";
-const std::string NEWTON_MU = "mu";
-
 class NewtonImpactFrictionNSLXML : public NonSmoothLawXML
 {
-public:
-  NewtonImpactFrictionNSLXML();
-
-  /** \fn NewtonImpactFrictionNSLXML(xmlNode *)
-  *   \brief Build a NewtonImpactFrictionNSLXML object from a DOM tree describing a Law with Relay type
-  *   \param xmlNode* : the NewtonImpactFrictionNSLXML node in the DOM tree
-  *   \exception XMLException : if a property of the NewtonImpactFrictionNSL  lacks in the DOM tree
-  */
-  NewtonImpactFrictionNSLXML(xmlNode *);
-
-  /** \fn double getEn()
-  *   \brief Return the En of the NSLaw
-  *   \return The En double value of the normal coefficient of restitution
-  */
-  inline double getEn()
-  {
-    return  SiconosDOMTreeTools::getDoubleContentValue(this->enNode);
-  }
-
-  /** \fn void setEn(double en)
-  *   \brief Return the En of NSLaw
-  *   \return The En double value of the normal coefficient of restitution
-  */
-  inline void setEn(double en)
-  {
-    if (this->hasEn() == false)
-    {
-      this->enNode = SiconosDOMTreeTools::createDoubleNode(this->rootNSLawXMLNode, NEWTON_EN, en);
-    }
-    else SiconosDOMTreeTools::setDoubleContentValue(this->enNode, en);
-  }
-
-  /** \fn bool hasEn()
-   *  \brief returns true if enNode is defined
-   *  \return true if enNode is defined
-   */
-  inline bool hasEn()
-  {
-    return (this->enNode != NULL);
-  }
-
-  /** \fn double getEt()
-  *   \brief Return the Et of the NSLaw
-  *   \return The Et double value of the tangential coefficient of restitution
-  */
-  inline double getEt()
-  {
-    return  SiconosDOMTreeTools::getDoubleContentValue(this->etNode);
-  }
-
-  /** \fn void setEt(double et)
-  *   \brief Return the Et of NSLaw
-  *   \return The Et double value of the tangential coefficient of restitution
-  */
-  inline void setEt(double et)
-  {
-    if (this->hasEt() == false)
-    {
-      this->etNode = SiconosDOMTreeTools::createDoubleNode(this->rootNSLawXMLNode, NEWTON_ET, et);
-    }
-    else SiconosDOMTreeTools::setDoubleContentValue(this->etNode, et);
-  }
-
-  /** \fn bool hasEt()
-   *  \brief returns true if etNode is defined
-   *  \return true if etNode is defined
-   */
-  inline bool hasEt()
-  {
-    return (this->etNode != NULL);
-  }
-
-  /** \fn double getMu()
-  *   \brief Return the Mu of the NSLaw
-  *   \return The Mu double value of the friction coefficient
-  */
-  inline double getMu()
-  {
-    return  SiconosDOMTreeTools::getDoubleContentValue(this->muNode);
-  }
-
-  /** \fn void setMu(double mu)
-  *   \brief Return the Mu of NSLaw
-  *   \return The Mu double value of the friction coefficient
-  */
-  inline void setMu(double mu)
-  {
-    if (this->hasMu() == false)
-    {
-      this->muNode = SiconosDOMTreeTools::createDoubleNode(this->rootNSLawXMLNode, NEWTON_MU, mu);
-    }
-    else SiconosDOMTreeTools::setDoubleContentValue(this->muNode, mu);
-  }
-
-  /** \fn bool hasMu()
-   *  \brief returns true if muNode is defined
-   *  \return true if muNode is defined
-   */
-  inline bool hasMu()
-  {
-    return (this->muNode != NULL);
-  }
-
 private:
   xmlNode * enNode;
   xmlNode * etNode;
   xmlNode * muNode;
+
+public:
+  /** \fn NewtonImpactFrictionNSLXML()
+   *   \brief default constructor
+   */
+  NewtonImpactFrictionNSLXML();
+
+  /** \fn NewtonImpactFrictionNSLXML(xmlNodePtr)
+   *   \brief Build a NewtonImpactFrictionNSLXML object using DOM tree data loading
+   *   \param xmlNode* : the NewtonImpactFrictionNSL node in the DOM tree
+   */
+  NewtonImpactFrictionNSLXML(xmlNodePtr);
+
+  /** \fn const double getEn() const
+   *   \brief return the En of the NSLaw
+   *   \return a double
+   */
+  inline const double getEn() const
+  {
+    return  SiconosDOMTreeTools::getDoubleContentValue(enNode);
+  }
+
+  /** \fn void setEn(const double& en)
+   *   \brief set en value
+   *   \param a double
+   */
+  inline void setEn(const double& en)
+  {
+    if (!hasEn())
+      enNode = SiconosDOMTreeTools::createDoubleNode(rootNSLawXMLNode, "en", en);
+    else SiconosDOMTreeTools::setDoubleContentValue(enNode, en);
+  }
+
+  /** \fn bool hasEn() const
+   *  \brief returns true if enNode is defined
+   *  \return a bool
+   */
+  inline bool hasEn() const
+  {
+    return (enNode != NULL);
+  }
+
+  /** \fn const double getEt() const
+   *   \brief return the Et of the NSLaw
+   *   \return a double
+   */
+  inline const double getEt() const
+  {
+    return  SiconosDOMTreeTools::getDoubleContentValue(etNode);
+  }
+
+  /** \fn void setEt(const double& et)
+   *   \brief set et value
+   *   \param a double
+   */
+  inline void setEt(const double& et)
+  {
+    if (!hasEt())
+      etNode = SiconosDOMTreeTools::createDoubleNode(rootNSLawXMLNode, "et", et);
+    else SiconosDOMTreeTools::setDoubleContentValue(etNode, et);
+  }
+
+  /** \fn bool hasEt() const
+   *  \brief returns true if etNode is defined
+   *  \return a bool
+   */
+  inline bool hasEt() const
+  {
+    return (etNode != NULL);
+  }
+
+  /** \fn const double getMu() const
+   *   \brief return mu value
+   *   \return a double
+   */
+  inline const double getMu() const
+  {
+    return  SiconosDOMTreeTools::getDoubleContentValue(muNode);
+  }
+
+  /** \fn void setMu(const double& mu)
+   *   \brief set mu value
+   *   \param a double
+   */
+  inline void setMu(const double& mu)
+  {
+    if (!hasMu())
+      muNode = SiconosDOMTreeTools::createDoubleNode(rootNSLawXMLNode, "mu", mu);
+    else SiconosDOMTreeTools::setDoubleContentValue(muNode, mu);
+  }
+
+  /** \fn bool hasMu() const
+   *  \brief return true if muNode is defined
+   *  \return a bool
+   */
+  inline bool hasMu() const
+  {
+    return (muNode != NULL);
+  }
 
 };
 

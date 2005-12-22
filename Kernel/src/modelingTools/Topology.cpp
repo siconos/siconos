@@ -230,7 +230,12 @@ vector<unsigned int> Topology::computeRelativeDegrees(Interaction * inter)
     relativeDegree.resize(sizeInter, 0);
     // \todo compute properly
   }
-  else if (nslawType == NEWTONIMPACTLAWNSLAW)
+  else if (nslawType == NEWTONIMPACTNSLAW)
+  {
+    relativeDegree.resize(sizeInter, 2);
+    isTopologyTimeInvariant = false;
+  }
+  else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
   {
     relativeDegree.resize(sizeInter, 2);
     isTopologyTimeInvariant = false;
@@ -275,7 +280,10 @@ vector<unsigned int> Topology::computeIndexMin(Interaction * inter)
   {
     indexMin.resize(sizeInter, 0);
   }
-  else if (nslawType == NEWTONIMPACTLAWNSLAW)
+  else if (nslawType == NEWTONIMPACTNSLAW)
+    indexMin.resize(sizeInter, 1);
+
+  else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
     indexMin.resize(sizeInter, 1);
 
   else

@@ -38,8 +38,8 @@ class DynamicalSystem;
 class DSInputOutputXML;
 class SiconosMatrix;
 
-extern std::string  DefaultComputeInput;
-extern std::string  DefaultComputeOutput;
+//extern std::string  DefaultComputeInput;
+//extern std::string  DefaultComputeOutput;
 
 /** \class DSInputOutput
  *  \brief this class contains data for a specific DynamicalSystem about

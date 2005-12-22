@@ -15,47 +15,29 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "NewtonImpactFrictionNSLXML.h"
 using namespace std;
 
-NewtonImpactFrictionNSLXML::NewtonImpactFrictionNSLXML()
+NewtonImpactFrictionNSLXML::NewtonImpactFrictionNSLXML():
+  NonSmoothLawXML(), enNode(NULL), etNode(NULL), muNode(NULL)
+{}
+
+NewtonImpactFrictionNSLXML::NewtonImpactFrictionNSLXML(xmlNodePtr nslNode):
+  NonSmoothLawXML(nslNode), enNode(NULL), etNode(NULL), muNode(NULL)
 {
-  this->enNode = NULL;
-  this->etNode = NULL;
-  this->muNode = NULL;
-}
-
-NewtonImpactFrictionNSLXML::NewtonImpactFrictionNSLXML(xmlNode * nslNode)
-  : NonSmoothLawXML(nslNode)
-{
-  xmlNode *node;
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(nslNode, NEWTON_EN)) != NULL)
-  {
-    this->enNode = node;
-  }
+  xmlNodePtr node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(nslNode, "en")) != NULL)
+    enNode = node;
   else
-  {
-    XMLException::selfThrow("NewtonImpactFrictionNSLXML - constructor error : tag " + NEWTON_EN + " not found.");
-  }
+    XMLException::selfThrow("NewtonImpactFrictionNSLXML - constructor error : tag en not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(nslNode, NEWTON_ET)) != NULL)
-  {
-    this->etNode = node;
-  }
+  // et is not always required (friction2D)
+  if ((node = SiconosDOMTreeTools::findNodeChild(nslNode, "et")) != NULL)
+    etNode = node;
+
+  if ((node = SiconosDOMTreeTools::findNodeChild(nslNode, "mu")) != NULL)
+    muNode = node;
   else
-  {
-    XMLException::selfThrow("NewtonImpactFrictionNSLXML - constructor error : tag " + NEWTON_ET + " not found.");
-  }
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(nslNode, NEWTON_MU)) != NULL)
-  {
-    this->muNode = node;
-  }
-  else
-  {
-    XMLException::selfThrow("NewtonImpactFrictionNSLXML - constructor error : tag " + NEWTON_MU + " not found.");
-  }
-
+    XMLException::selfThrow("NewtonImpactFrictionNSLXML - constructor error : tag mu not found.");
 }

@@ -52,11 +52,10 @@ PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath)
 #endif
 #ifdef _SYS_UNX
   HandleRes = dlopen(pluginPath.c_str(), RTLD_LAZY);
-  //  cout << "dlerror() :" <<dlerror()<< endl;
+  //cout << "dlerror() :" <<dlerror()<< endl;
   if (HandleRes == NULL)
     SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin");
 #endif
-
   isPlugged.push_back(HandleRes);
   return HandleRes;
 }

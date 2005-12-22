@@ -999,7 +999,7 @@ void LCP::computeQ(const double& time)
     else if (relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION)
     {
       LagrangianLinearR *LLR = static_cast<LagrangianLinearR*>(R);
-      if (nslaw->getType() == NEWTONIMPACTLAWNSLAW)
+      if (nslaw->getType() == NEWTONIMPACTNSLAW)
       {
         vector<unsigned int> indexMax = topology->getIndexMax(currentInteraction);
 
@@ -1061,6 +1061,7 @@ void LCP::compute(const double& time)
   {
     int info;
     int Nlcp = (int)nLcp;
+    method solvingMethod = *(solver->getSolvingMethodPtr());
     info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
     if (info != 0)
       RuntimeException::selfThrow("LCP::compute, solve_lcp: convergence failed");

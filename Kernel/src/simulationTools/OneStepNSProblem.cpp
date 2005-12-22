@@ -17,68 +17,77 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "OneStepNSProblem.h"
+// to be removed thanks to factories:
+#include "LemkeSolver.h"
+#include "LexicoLemkeSolver.h"
+#include "QPSolver.h"
+#include "NSQPSolver.h"
+#include "NLGSSolver.h"
+#include "CPGSolver.h"
+#include "LatinSolver.h"
+
 using namespace std;
+
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // Default constructor
 OneStepNSProblem::OneStepNSProblem():
-  nspbType("none"), n(0), solver(""), strategy(NULL), onestepnspbxml(NULL)
+  nspbType("none"), dim(0), solver(NULL), isSolverAllocatedIn(false),  strategy(NULL), onestepnspbxml(NULL)
 {}
 
 // xml constructor
 OneStepNSProblem::OneStepNSProblem(OneStepNSProblemXML* osnspbxml, Strategy* newStrat):
-  nspbType("none"), n(0), solver(""), strategy(newStrat), onestepnspbxml(osnspbxml)
+  nspbType("none"), dim(0), solver(NULL), isSolverAllocatedIn(false), strategy(newStrat), onestepnspbxml(osnspbxml)
 {
   if (onestepnspbxml != NULL)
   {
-    if (onestepnspbxml->hasN()) n = onestepnspbxml->getN();
+    // get dimension of the problem ...
+    if (onestepnspbxml->hasDim()) dim = onestepnspbxml->getDimNSProblem();
+
+    // === read solver related data ===
     if (onestepnspbxml->hasSolver())
     {
-      solver = onestepnspbxml->getSolver();
-
-      string newSolvingMethod = onestepnspbxml->getSolverAlgorithmName();
-      int MaxIter = onestepnspbxml->getSolverAlgorithmMaxIter();
-      if (newSolvingMethod == "Lemke" || newSolvingMethod == "LexicoLemke")
-        fillSolvingMethod(newSolvingMethod, MaxIter);
-
-      else if (newSolvingMethod == "QP" || newSolvingMethod  == "NSQP")
-      {
-        double Tolerance = onestepnspbxml->getSolverAlgorithmTolerance();
-        fillSolvingMethod(newSolvingMethod, 0, Tolerance);
-      }
-      else if (newSolvingMethod == "NLGS" || newSolvingMethod  == "CPG")
-      {
-        double Tolerance = onestepnspbxml->getSolverAlgorithmTolerance();
-        string NormType  = onestepnspbxml->getSolverAlgorithmNormType();
-        fillSolvingMethod(newSolvingMethod, MaxIter, Tolerance, NormType);
-      }
-
-      else if (newSolvingMethod == "Latin")
-      {
-        double Tolerance = onestepnspbxml->getSolverAlgorithmTolerance();
-        string NormType  = onestepnspbxml->getSolverAlgorithmNormType();
-        double SearchDirection = onestepnspbxml->getSolverAlgorithmSearchDirection();
-        fillSolvingMethod(newSolvingMethod, MaxIter, Tolerance, NormType, SearchDirection);
-      }
-      else RuntimeException::selfThrow("OneStepNSProblem::xml constructor, wrong solving method type");
+      // get the name of the solver algorithm used
+      string solverAlgorithmType = onestepnspbxml->getSolverXMLPtr()->getSolverAlgorithmName();
+      if (solverAlgorithmType == "Lemke")
+        solver = new LemkeSolver(onestepnspbxml->getSolverXMLPtr());
+      else if (solverAlgorithmType == "LexicoLemke")
+        solver =  new LexicoLemkeSolver(onestepnspbxml->getSolverXMLPtr());
+      else if (solverAlgorithmType == "QP")
+        solver =  new QPSolver(onestepnspbxml->getSolverXMLPtr());
+      else if (solverAlgorithmType == "NSQP")
+        solver =  new NSQPSolver(onestepnspbxml->getSolverXMLPtr());
+      else if (solverAlgorithmType == "NLGS")
+        solver =  new NLGSSolver(onestepnspbxml->getSolverXMLPtr());
+      else if (solverAlgorithmType == "CPG")
+        solver =  new CPGSolver(onestepnspbxml->getSolverXMLPtr());
+      else if (solverAlgorithmType == "Latin")
+        solver =  new LatinSolver(onestepnspbxml->getSolverXMLPtr());
+      else
+        RuntimeException::selfThrow("OneStepNSProblem::xml constructor, unknown solver algorithm type: " + solverAlgorithmType);
+      isSolverAllocatedIn = true;
     }
+    else
+      RuntimeException::selfThrow("OneStepNSProblem::xml constructor, no solver found!");
   }
   else RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file=NULL");
+
+  // read list of interactions and equality constraints concerned
   if (strategy != NULL)
   {
     interactionVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
     ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
-    // Default value for n  \warning: default size is the size of the first interaction in the vector
-    if (interactionVector.size() != 0) n = interactionVector[0]->getNInteraction();
+    // Default value for dim. Warning: default size is the size of the first interaction in the vector
+    if (interactionVector.size() != 0) dim = interactionVector[0]->getNInteraction();
   }
   else cout << "OneStepNSPb xml-constructor - Warning: no strategy linked to OneStepPb" << endl;
 }
 
 // Constructor with given strategy and solving method parameters (optional)
-OneStepNSProblem::OneStepNSProblem(Strategy * newStrat, const string& newSolver, const string& newSolvingMethod, const int& MaxIter,
+OneStepNSProblem::OneStepNSProblem(Strategy * newStrat, const string& newSolvingFormalisation, const string& solverAlgorithmType, const int& MaxIter,
                                    const double & Tolerance, const string & NormType, const double & SearchDirection):
-  nspbType("none"), n(0), solver(""), strategy(newStrat), onestepnspbxml(NULL)
+  nspbType("none"), dim(0), solver(NULL), isSolverAllocatedIn(false), strategy(newStrat), onestepnspbxml(NULL)
 {
   if (strategy != NULL)
   {
@@ -86,24 +95,44 @@ OneStepNSProblem::OneStepNSProblem(Strategy * newStrat, const string& newSolver,
     ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
     // Default value for n  \warning: default size is the size of the first interaction in the vector if it exists
     // else, n=0
-    if (interactionVector.size() != 0) n = interactionVector[0]->getNInteraction();
-    if (solver != "none")
+    if (interactionVector.size() != 0) dim = interactionVector[0]->getNInteraction();
+    if (newSolvingFormalisation != "none")
     {
-      solver = newSolver;
-      if (newSolvingMethod == "Lemke" || newSolvingMethod == "LexicoLemke")
-        fillSolvingMethod(newSolvingMethod, MaxIter);
-
-      else if (newSolvingMethod == "QP" || newSolvingMethod  == "NSQP")
-        fillSolvingMethod(newSolvingMethod, 0, Tolerance);
-
-      else if (newSolvingMethod == "NLGS" || newSolvingMethod  == "CPG")
-        fillSolvingMethod(newSolvingMethod, MaxIter, Tolerance, NormType);
-
-      else if (newSolvingMethod == "Latin")
-        fillSolvingMethod(newSolvingMethod, MaxIter, Tolerance, NormType, SearchDirection);
-
-      else RuntimeException::selfThrow("OneStepNSProblem:: constructor from data, wrong solving method type");
+      if (solverAlgorithmType == " Lemke")
+        solver = new LemkeSolver(newSolvingFormalisation, MaxIter);
+      else if (solverAlgorithmType == "LexicoLemke")
+        solver =  new LexicoLemkeSolver(newSolvingFormalisation, MaxIter);
+      else if (solverAlgorithmType == "QP")
+        solver =  new QPSolver(newSolvingFormalisation, Tolerance);
+      else if (solverAlgorithmType == "NSQP")
+        solver =  new NSQPSolver(newSolvingFormalisation, Tolerance);
+      else if (solverAlgorithmType == "NLGS")
+        solver =  new NLGSSolver(newSolvingFormalisation, MaxIter, Tolerance);
+      else if (solverAlgorithmType == "CPG")
+        solver =  new CPGSolver(newSolvingFormalisation, MaxIter, Tolerance);
+      else if (solverAlgorithmType == "Latin")
+        solver =  new LatinSolver(newSolvingFormalisation, MaxIter, Tolerance, SearchDirection);
+      else
+        RuntimeException::selfThrow("OneStepNSProblem::constructor, unknown solver algorithm type: " + solverAlgorithmType);
+      isSolverAllocatedIn = true;
     }
+    else RuntimeException::selfThrow("OneStepNSProblem:: constructor from data, wrong solving method type");
+  }
+  else
+    RuntimeException::selfThrow("OneStepNSProblem:: constructor from strategy, given strategy == NULL");
+}
+
+// Constructor with given strategy and a pointer on Solver
+OneStepNSProblem::OneStepNSProblem(Strategy * newStrat, Solver* newSolver):
+  nspbType("none"), dim(0), solver(newSolver), isSolverAllocatedIn(false), strategy(newStrat), onestepnspbxml(NULL)
+{
+  if (strategy != NULL)
+  {
+    interactionVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+    ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
+    // Default value for n  \warning: default size is the size of the first interaction in the vector if it exists
+    // else, n=0
+    if (interactionVector.size() != 0) dim = interactionVector[0]->getNInteraction();
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem:: constructor from strategy, given strategy == NULL");
@@ -131,6 +160,8 @@ OneStepNSProblem::~OneStepNSProblem()
       tmp = NULL;
     }
   }
+  if (isSolverAllocatedIn) delete solver;
+  solver = NULL;
 }
 
 Interaction* OneStepNSProblem::getInteractionPtr(const unsigned int& nb)
@@ -300,342 +331,45 @@ void OneStepNSProblem::compute(const double& time)
   RuntimeException::selfThrow("OneStepNSProblem::compute - not yet implemented for problem type =" + getType());
 }
 
-void OneStepNSProblem::fillSolvingMethod(const string& newSolvingMethod, const int& MaxIter,
-    const double & Tolerance, const string & NormType,
-    const double & SearchDirection)
-{
-  if (solver ==  "LcpSolving")
-    strcpy(solvingMethod.lcp.name, newSolvingMethod.c_str());
-  else if (solver == "PrimalRelaySolving")
-    strcpy(solvingMethod.pr.name, newSolvingMethod.c_str());
-  else if (solver == "DualRelaySolving")
-    strcpy(solvingMethod.dr.name, newSolvingMethod.c_str());
-  else if (solver == "PrimalFrictionContact2DSolving")
-    strcpy(solvingMethod.pfc_2D.name, newSolvingMethod.c_str());
-  else if (solver == "DualFrictionContact2DSolving")
-    strcpy(solvingMethod.dfc_2D.name, newSolvingMethod.c_str());
-
-  if (newSolvingMethod ==  "Lemke")
-    setLemkeAlgorithm(solver, MaxIter);
-  else if (newSolvingMethod == "LexicoLemke")
-    setLexicoLemkeAlgorithm(solver, MaxIter);
-  else if (newSolvingMethod == "NLGS")
-    setNLGSAlgorithm(solver, Tolerance, MaxIter);
-  else if (newSolvingMethod == "QP")
-    setQPAlgorithm(solver, Tolerance);
-  else if (newSolvingMethod == "NSQP")
-    setNSQPAlgorithm(solver, Tolerance);
-  else if (newSolvingMethod == "CPG")
-    setCPGAlgorithm(solver, Tolerance, MaxIter);
-  else if (newSolvingMethod == "Latin")
-    setLatinAlgorithm(solver, Tolerance, MaxIter, NormType, SearchDirection);
-  else
-    RuntimeException::selfThrow("OneStepNSProblem::fillSolvingMethod, unknown method = " + newSolvingMethod);
-}
-
 void OneStepNSProblem::saveNSProblemToXML()
 {
   IN("OneStepNSProblem::saveNSProblemToXML\n");
   if (onestepnspbxml != NULL)
   {
-    onestepnspbxml->setN(n);
+    onestepnspbxml->setDimNSProblem(dim);
     vector<int> v;
     for (unsigned int i = 0; i < interactionVector.size(); i++)
       v.push_back(interactionVector[i]->getNumber());
-    onestepnspbxml->setInteractionConcerned(v, allInteractionConcerned());
+    //onestepnspbxml->setInteractionConcerned( v, allInteractionConcerned() );
 
     /*
      * save of the solving method to XML
      */
-    if (solver != "")
-    {
-      string methodName, normType;
-      int maxIter;
-      double tolerance, searchDirection;
 
-      if (solver == OSNSP_LCPSOLVING)
-      {
-        methodName = solvingMethod.lcp.name;
-        normType = solvingMethod.lcp.normType;
-        maxIter = solvingMethod.lcp.itermax;
-        tolerance = solvingMethod.lcp.tol;
-        searchDirection = solvingMethod.lcp.k_latin;
-      }
-      else if (solver == OSNSP_PRSOLVING)
-      {
-        methodName = solvingMethod.pr.name;
-        normType = solvingMethod.pr.normType;
-        maxIter = solvingMethod.pr.itermax;
-        tolerance = solvingMethod.pr.tol;
-        searchDirection = solvingMethod.pr.k_latin;
-      }
-      else if (solver == OSNSP_DRSOLVING)
-      {
-        methodName = solvingMethod.dr.name;
-        normType = solvingMethod.dr.normType;
-        maxIter = solvingMethod.dr.itermax;
-        tolerance = solvingMethod.dr.tol;
-        searchDirection = solvingMethod.dr.k_latin;
-      }
-      else if (solver == OSNSP_PFC_2DSOLVING)
-      {
-        methodName = solvingMethod.pfc_2D.name;
-        normType = solvingMethod.pfc_2D.normType;
-        maxIter = solvingMethod.pfc_2D.itermax;
-        tolerance = solvingMethod.pfc_2D.tol;
-        searchDirection = solvingMethod.pfc_2D.k_latin;
-      }
-      else if (solver == OSNSP_DFC_2DSOLVING)
-      {
-        methodName = solvingMethod.dfc_2D.name;
-        normType = solvingMethod.dfc_2D.normType;
-        maxIter = solvingMethod.dfc_2D.itermax;
-        tolerance = solvingMethod.dfc_2D.tol;
-        searchDirection = solvingMethod.dfc_2D.k_latin;
-      }
-
-      onestepnspbxml->setSolver(solver, methodName, normType, tolerance, maxIter, searchDirection);
-    }
-    else
-      cout << "# Warning : Can't save Solver tag, empty field" << endl;
+    //    onestepnspbxml->setSolver(solvingFormalisation, methodName, normType, tolerance, maxIter, searchDirection );
   }
   else RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - OneStepNSProblemXML object not exists");
   OUT("OneStepNSProblem::saveNSProblemToXML\n");
 }
 
-bool OneStepNSProblem::allInteractionConcerned()
+void OneStepNSProblem::setSolverPtr(Solver * newSolv)
 {
-  bool res = false;
-
-  if (interactionVector == getStrategyPtr()->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions())
-    res = true;
-
-  return res;
-}
-
-void OneStepNSProblem::setLemkeAlgorithm(const string& meth,  const unsigned int& iter)
-{
-  solver = meth;
-
-  if (meth == OSNSP_LCPSOLVING)
-  {
-    strcpy(solvingMethod.lcp.name, OSNSP_LEMKE.c_str());
-    solvingMethod.lcp.itermax = iter;
-  }
-  else if (meth == OSNSP_DFC_2DSOLVING)
-  {
-    strcpy(solvingMethod.dfc_2D.name, OSNSP_LEMKE.c_str());
-    solvingMethod.dfc_2D.itermax = iter;
-  }
-  else
-    RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
-}
-
-void OneStepNSProblem::setLexicoLemkeAlgorithm(const string& meth,  const unsigned int& iter)
-{
-  solver = meth;
-
-  if (meth == OSNSP_LCPSOLVING)
-  {
-    strcpy(solvingMethod.lcp.name, OSNSP_LEXICOLEMKE.c_str());
-    solvingMethod.lcp.itermax = iter;
-    solvingMethod.lcp.chat = 1;
-  }
-  else if (meth == OSNSP_DFC_2DSOLVING)
-  {
-    strcpy(solvingMethod.dfc_2D.name, OSNSP_LEXICOLEMKE.c_str());
-    solvingMethod.dfc_2D.itermax = iter;
-  }
-  else
-    RuntimeException::selfThrow("OneStepNSProblem::setLemkeAlgorithm - solving method " + meth + " doesn't exists.");
-}
-
-void OneStepNSProblem::setNLGSAlgorithm(const string& meth,  const double& tolerance,  const int& iter,  const string& norm)
-{
-  solver = meth;
-
-  if (meth == OSNSP_LCPSOLVING)
-  {
-    strcpy(solvingMethod.lcp.name, OSNSP_NLGS.c_str());
-    solvingMethod.lcp.tol = tolerance;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.lcp.normType, norm.c_str() );
-    solvingMethod.lcp.itermax = iter;
-  }
-  else if (meth == OSNSP_PRSOLVING)
-  {
-    strcpy(solvingMethod.pr.name, OSNSP_NLGS.c_str());
-    solvingMethod.pr.tol = tolerance;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.pr.normType, norm.c_str() );
-    solvingMethod.pr.itermax = iter;
-  }
-  else if (meth == OSNSP_DRSOLVING)
-  {
-    strcpy(solvingMethod.dr.name, OSNSP_NLGS.c_str());
-    solvingMethod.dr.tol = tolerance;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.dr.normType, norm.c_str() );
-    solvingMethod.dr.itermax = iter;
-  }
-  else if (meth == OSNSP_PFC_2DSOLVING)
-  {
-    strcpy(solvingMethod.pfc_2D.name, OSNSP_NLGS.c_str());
-    solvingMethod.pfc_2D.tol = tolerance;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.pfc_2D_2D.normType, norm.c_str() );
-    solvingMethod.pfc_2D.itermax = iter;
-  }
-  else if (meth == OSNSP_DFC_2DSOLVING)
-  {
-    strcpy(solvingMethod.dfc_2D.name, OSNSP_NLGS.c_str());
-    solvingMethod.dfc_2D.tol = tolerance;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.dfc_2D.normType, norm.c_str() );
-    solvingMethod.dfc_2D.itermax = iter;
-  }
-  else
-    RuntimeException::selfThrow("OneStepNSProblem::setNLGSAlgorithm - solving method " + meth + " doesn't exists.");
-}
-
-void OneStepNSProblem::setQPAlgorithm(const string& meth,  const double& tolerance)
-{
-  solver = meth;
-
-  if (meth == OSNSP_LCPSOLVING)
-  {
-    strcpy(solvingMethod.lcp.name, OSNSP_QP.c_str());
-    solvingMethod.lcp.tol = tolerance;
-  }
-  else
-    RuntimeException::selfThrow("OneStepNSProblem::setQPAlgorithm - solving method " + meth + " doesn't exists.");
-}
-
-void OneStepNSProblem::setNSQPAlgorithm(const string& meth,  const double& tolerance)
-{
-  solver = meth;
-
-  if (meth == OSNSP_LCPSOLVING)
-  {
-    strcpy(solvingMethod.lcp.name, OSNSP_NSQP.c_str());
-    solvingMethod.lcp.tol = tolerance;
-  }
-  else
-    RuntimeException::selfThrow("OneStepNSProblem::setNSQPAlgorithm - solving method " + meth + " doesn't exists.");
-}
-
-void OneStepNSProblem::setCPGAlgorithm(const string& meth,  const double& tolerance, const int& iter, const string& norm)
-{
-  solver = meth;
-
-  if (meth == OSNSP_LCPSOLVING)
-  {
-    strcpy(solvingMethod.lcp.name, OSNSP_CPG.c_str());
-    solvingMethod.lcp.tol = tolerance;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.lcp.normType, norm.c_str() );
-    solvingMethod.lcp.itermax = iter;
-  }
-  else if (meth == OSNSP_PRSOLVING)
-  {
-    strcpy(solvingMethod.pr.name, OSNSP_CPG.c_str());
-    solvingMethod.pr.tol = tolerance;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.pr.normType, norm.c_str() );
-    solvingMethod.pr.itermax = iter;
-  }
-  else if (meth == OSNSP_DRSOLVING)
-  {
-    strcpy(solvingMethod.dr.name, OSNSP_CPG.c_str());
-    solvingMethod.dr.tol = tolerance;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.dr.normType, norm.c_str() );
-    solvingMethod.dr.itermax = iter;
-  }
-  else if (meth == OSNSP_PFC_2DSOLVING)
-  {
-    strcpy(solvingMethod.pfc_2D.name, OSNSP_CPG.c_str());
-    solvingMethod.pfc_2D.tol = tolerance;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.pfc_2D_2D.normType, norm.c_str() );
-    solvingMethod.pfc_2D.itermax = iter;
-  }
-  else if (meth == OSNSP_DFC_2DSOLVING)
-  {
-    strcpy(solvingMethod.dfc_2D.name, OSNSP_CPG.c_str());
-    solvingMethod.dfc_2D.tol = tolerance;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    //strcpy( solvingMethod.dfc_2D.normType, norm.c_str() );
-    solvingMethod.dfc_2D.itermax = iter;
-  }
-  else
-    RuntimeException::selfThrow("OneStepNSProblem::setCPGAlgorithm - solving method " + meth + " doesn't exists.");
-}
-
-void OneStepNSProblem::setLatinAlgorithm(const string& meth, const double& t, const int& iter, const string& norm, const double& searchdirection)
-{
-  solver = meth;
-
-  if (meth == OSNSP_LCPSOLVING)
-  {
-    strcpy(solvingMethod.lcp.name, OSNSP_LATIN.c_str());
-    solvingMethod.lcp.tol = t;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.lcp.normType, norm.c_str());
-    solvingMethod.lcp.itermax = iter;
-    solvingMethod.lcp.k_latin = searchdirection;
-  }
-  else if (meth == OSNSP_PRSOLVING)
-  {
-    strcpy(solvingMethod.pr.name, OSNSP_LATIN.c_str());
-    solvingMethod.pr.tol = t;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.dr.normType, norm.c_str());
-    solvingMethod.pr.itermax = iter;
-    solvingMethod.pr.k_latin = searchdirection;
-  }
-  else if (meth == OSNSP_DRSOLVING)
-  {
-    strcpy(solvingMethod.dr.name, OSNSP_LATIN.c_str());
-    solvingMethod.dr.tol = t;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.dr.normType, norm.c_str());
-    solvingMethod.dr.itermax = iter;
-    solvingMethod.dr.k_latin = searchdirection;
-  }
-  else if (meth == OSNSP_PFC_2DSOLVING)
-  {
-    strcpy(solvingMethod.pfc_2D.name, OSNSP_LATIN.c_str());
-    solvingMethod.pfc_2D.tol = t;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.pfc_2D.normType, norm.c_str());
-    solvingMethod.pfc_2D.itermax = iter;
-    solvingMethod.pfc_2D.k_latin = searchdirection;
-  }
-  else if (meth == OSNSP_DFC_2DSOLVING)
-  {
-    strcpy(solvingMethod.dfc_2D.name, OSNSP_LATIN.c_str());
-    solvingMethod.dfc_2D.tol = t;
-    /*##### normType is not yet implemented in Numerics  #####*/
-    strcpy(solvingMethod.dfc_2D.normType, norm.c_str());
-    solvingMethod.dfc_2D.itermax = iter;
-    solvingMethod.dfc_2D.k_latin = searchdirection;
-  }
-  else
-    RuntimeException::selfThrow("OneStepNSProblem::setLatinAlgorithm - solving method " + meth + " doesn't exists.");
+  if (isSolverAllocatedIn) delete solver;
+  solver = newSolv;
+  isSolverAllocatedIn = false;
 }
 
 bool OneStepNSProblem::isOneStepNsProblemComplete()
 {
   bool isComplete = true;
 
-  if (nspbType != "LCP" || nspbType != "DFC_2D" || nspbType != "QP" || nspbType != "Relay")
+  if (nspbType != "LCP" || nspbType != "FrictionContact2D" || nspbType != "FrictionContact3D" || nspbType != "QP" || nspbType != "Relay")
   {
     cout << "OneStepNSProblem is not complete: unknown problem type " << nspbType << endl;
     isComplete = false;
   }
 
-  if (n == 0)
+  if (dim == 0)
   {
     cout << "OneStepNSProblem warning: problem size == 0" << endl;
     isComplete = false;
@@ -656,7 +390,7 @@ bool OneStepNSProblem::isOneStepNsProblemComplete()
 
   if (!(ecVector.size() > 0))
   {
-    cout << "OneStepNSProblem warning: interaction vector is empty" << endl;
+    cout << "OneStepNSProblem warning: equality constraints vector is empty" << endl;
     isComplete = false;
   }
   else
@@ -667,21 +401,17 @@ bool OneStepNSProblem::isOneStepNsProblemComplete()
         cout << "OneStepNSProblem warning: an equalityConstraint of the problem points to NULL" << endl;
   }
 
-  if (solver != "LcpSolving" || solver != "PrimalRelaySolving" || solver != "DualRelaySolving"
-      || solver != "PrimalFrictionContact2DSolving" || solver != "DualFrictionContact2DSolving")
-  {
-    cout << "OneStepNSProblem is not complete: unknown solver type " << solver  << endl;
-    isComplete = false;
-  }
-
   if (strategy == NULL)
   {
     cout << "OneStepNSProblem warning: no strategy linked with the problem" << endl;
     isComplete = false;
   }
 
-  if (onestepnspbxml == NULL)
-    cout << "OneStepNSProblem warning: xml linked-file == NULL" << endl;
+  if (solver == NULL)
+  {
+    cout << "OneStepNSProblem warning: no solver defined in the problem" << endl;
+    isComplete = false;
+  }
 
   return isComplete;
 }

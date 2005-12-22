@@ -19,24 +19,24 @@
 #include "SiconosDOMTreeTools.h"
 using namespace std;
 
-SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNode * siconosVectorNode)
+SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNode * vectorNode)
 {
-  if (siconosVectorNode == NULL)
+  if (vectorNode == NULL)
     XMLException::selfThrow("SiconosDOMTreeTools - getSiconosVectorValue, node == NULL ");
 
   // \warning FP: v is defined two times ??? xml option should be either size or file
-  if (xmlHasProp((xmlNodePtr)siconosVectorNode, (xmlChar *)SDTT_VECTORFILE.c_str())) //vector is defined in a extern ascii file
+  if (xmlHasProp((xmlNodePtr)vectorNode, (xmlChar *)SDTT_VECTORFILE.c_str())) //vector is defined in a extern ascii file
   {
-    SimpleVector v(getStringAttributeValue(siconosVectorNode, SDTT_VECTORFILE), true);
+    SimpleVector v(getStringAttributeValue(vectorNode, SDTT_VECTORFILE), true);
     return v;
   }
   else
   {
     //Size
-    unsigned int size = getIntegerAttributeValue(siconosVectorNode, SDTT_VECTORSIZE);
+    unsigned int size = getIntegerAttributeValue(vectorNode, SDTT_VECTORSIZE);
 
     //Content
-    xmlChar* tmp = xmlNodeGetContent((xmlNode *)siconosVectorNode);
+    xmlChar* tmp = xmlNodeGetContent((xmlNode *)vectorNode);
     string vectorContent = (char *)tmp;
     SimpleVector v(string2Vector(vectorContent, size));
     xmlFree(tmp);
@@ -44,10 +44,58 @@ SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNode * siconosV
     if (v.size() != size)
     {
       string s("size given in attribute and real size of the loaded vector are different in tag ");
-      XMLException::selfThrow("SiconosDOMTreeTools - getSiconosVectorValue : " + s + (char*)siconosVectorNode->name);
+      XMLException::selfThrow("SiconosDOMTreeTools - getSiconosVectorValue : " + s + (char*)vectorNode->name);
     }
     return v;
   }
+}
+
+vector<int> SiconosDOMTreeTools::getIntVector(const xmlNode * vectorNode)
+{
+  if (vectorNode == NULL)
+    XMLException::selfThrow("SiconosDOMTreeTools - getIntVector, node == NULL ");
+
+  // vector loading, 3 options:
+  //  - size of the vector + list of values
+  //  - read from a file
+  //  - read from a plug-in
+
+  vector<int> outputVector; // the vector to be read ...
+  unsigned int size;        // ... and its size
+
+  if (xmlHasProp((xmlNodePtr)vectorNode, (xmlChar *)SDTT_VECTORFILE.c_str()))
+  {
+    // Case 1: read from an ascii file
+    string fileName = getStringAttributeValue(vectorNode, SDTT_VECTORFILE);
+    ifstream in(fileName.c_str());
+    in >> size;
+    outputVector.reserve(size);
+    int tmp;
+    for (unsigned int i = 0; i < size; i++)
+    {
+      in >> tmp ;
+      outputVector.push_back(tmp);
+    }
+  }
+  else if (xmlHasProp((xmlNodePtr)vectorNode, (xmlChar *)SDTT_VECTORPLUGIN.c_str()))
+  {
+    // Case 2: read using a plug-in
+    XMLException::selfThrow("SiconosDOMTreeTools - getIntVector using a plug-in, not yet implemented");
+  }
+  else
+  {
+    // Case 3: read from a list of values
+    //Size
+    size = getIntegerAttributeValue(vectorNode, SDTT_VECTORSIZE);
+
+    outputVector.resize(size);
+    xmlChar* tmp = xmlNodeGetContent((xmlNode *)vectorNode);
+    string vOut = (char*)tmp;
+    xmlFree(tmp);
+    outputVector = string2Vector(vOut);
+  }
+
+  return outputVector;
 }
 
 SiconosMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNode * siconosMatrixNode)

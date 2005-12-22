@@ -69,6 +69,10 @@ For each package (Numerics, Kernel, Front-End, in this order), in the correspond
 	- make check (optional) : to run tests	
 	- make documentation (optional)  : to generate Doxygen documentation
 
+!!! WARNING: to run make check, it is first necessary to set LD_LIBRARY_PATH and SICONOS_PATH !!!
+LD_LIBRARY_PATH: location of DefaultPlugin.so or TestPlugin.so
+SICONOS_PATH: location of libSiconosKernel.so
+
 for more details on configure options, type configure --help. 
       
 ---+++ Is the installation of the Kernel OK ?

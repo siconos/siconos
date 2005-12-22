@@ -50,24 +50,27 @@ const std::string SDTT_MATRIXSIZE = "matrixSize";
 const std::string SDTT_MATRIXCOLSIZE = "matrixColSize";
 const std::string SDTT_MATRIXROWSIZE = "matrixRowSize";
 const std::string SDTT_VECTORFILE = "vectorFile";
+const std::string SDTT_VECTORPLUGIN = "vectorPlugin";
 const std::string SDTT_MATRIXFILE = "matrixFile";
 const std::string SDTT_ROW = "row";
-
-extern unsigned int MATRIX_MAX_SIZE;
-extern unsigned int VECTOR_MAX_SIZE;
-extern std::string FILE_STORAGE;
 
 class SiconosDOMTreeTools
 {
 public:
 
-  /** \fn static SiconosVector getSiconosVectorValue(xmlNode * siconosVectorNode)
-   *   \brief Return a SiconosVector computed from a siconos vector node
-   *   \param siconosVectorNode : the vector node you want to get in SiconosVector type
-   *   \return A SiconosVector
+  /** \fn static SimpleVector getSiconosVectorValue(xmlNode * vectorNode)
+   *   \brief Return a SimpleVector read from a vector-type node
+   *   \param xmlNode*: the vector node to be read
+   *   \return A simpleVector
    */
-  //static SiconosVector getSiconosVectorValue(const xmlNode * siconosVectorNode);
-  static SimpleVector getSiconosVectorValue(const xmlNode * siconosVectorNode);
+  static SimpleVector getSiconosVectorValue(const xmlNode *);
+
+  /** \fn static vector<int> getIntVector(xmlNode * vectorNode)
+   *   \brief Return a vector of int, read from vector-type node
+   *   \param xmlNode*: the vector node to be read
+   *   \return a vector<int>
+   */
+  static std::vector<int> getIntVector(const xmlNode *);
 
   /** \fn static SiconosMatrix getSiconosMatrixValue(xmlNode * siconosMatrixNode)
    *   \brief Return a SiconosMatrix computed from a siconos matrix node
@@ -272,7 +275,6 @@ public:
    *   \param vector<int> : the vector of int to set
    */
   static void setVectorIntContentValue(const xmlNode * vectorNode, const std::vector<int> v);
-
 
   //-----------------
 

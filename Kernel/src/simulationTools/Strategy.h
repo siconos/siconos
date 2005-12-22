@@ -368,7 +368,7 @@ protected:
 
   /** Flags to check wheter pointers were allocated in class constructors or not */
   bool isTimeDiscrAllocatedIn;
-  bool isNsPbAllocatedIn;
+  bool isNSPAllocatedIn;
   std::deque<bool> isIntegratorVectorAllocatedIn;
 };
 

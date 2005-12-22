@@ -44,6 +44,29 @@ class TimeDiscretisationXML;
 
 class StrategyXML
 {
+
+private:
+
+  /* root node for strategy */
+  xmlNode *strategyNode;
+
+  /* vector of OneStepIntegratorXML* */
+  std::vector<OneStepIntegratorXML*> oneStepIntegratorXMLVector;
+
+  /* OneStepNSProblemXML - maybe not defined */
+  OneStepNSProblemXML *oneStepNSProblemXML;
+
+
+  /* TimeDiscretisationXML */
+  TimeDiscretisationXML *timeDiscretisationXML;
+
+  //---
+  /* Map of availables DS : DS defined in the model / for OneStepIntegrator : to know if a DS is already used by another OneStepIntegrator or if well defined */
+  std::map<int, bool> DSAvailabilityMap;
+
+  /* Vector of defined Interaction in the model / for OneStepNSProblem : to know if an interactiion is well defined*/
+  std::vector<int> definedNumberInteractionVector;
+
 public:
 
   // --- Default constructor ---
@@ -138,70 +161,12 @@ public:
     return (oneStepNSProblemXML != NULL);
   }
 
-  /** \fn void updateStrategyXML( xmlNode* node, Strategy* str )
-   *   \brief makes the operations to create a StrategyXML to the SiconosModelXML
+  /** \fn void saveStrategy2XML( xmlNode* node, Strategy* str )
+   *   \brief save data of str into the DOM tree
    *   \param xmlNode* : the root node of the StrategyXML
    *   \param Strategy* : the Strategy of this StrategyXML
    */
-  void updateStrategyXML(xmlNode* node, Strategy* str);
-
-  /** \fn void loadStrategy( Strategy* )
-   *   \brief loads the data of the Strategy into the StrategyXML (in the DOM tree)
-   *   \param Strategy* : the Strategy of this StrategyXML
-   */
-  void loadStrategy(Strategy*);
-
-
-private:
-  xmlNode *strategyNode;
-
-
-  /* vector of OneStepIntegratorXML* */
-  std::vector<OneStepIntegratorXML*> oneStepIntegratorXMLVector;
-
-  /* OneStepNSProblemXML - maybe not defined */
-  OneStepNSProblemXML *oneStepNSProblemXML;
-
-
-  /* TimeDiscretisationXML */
-  TimeDiscretisationXML *timeDiscretisationXML;
-
-  //---
-  /* Map of availables DS : DS defined in the model / for OneStepIntegrator : to know if a DS is already used by another OneStepIntegrator or if well defined */
-  std::map<int, bool> DSAvailabilityMap;
-
-  /* Vector of defined Interaction in the model / for OneStepNSProblem : to know if an interactiion is well defined*/
-  std::vector<int> definedNumberInteractionVector;
-  //--
-
-
-  /** \fn void loadStrategy(xmlNode * rootStrategyNode)
-   *   \brief Load the StrategyXML : OneStepIntegratorXMLs, OneStepNSProblemXML and TimeDiscretisationXML components
-   *   \exception XMLException : if a property of the Strategy lacks in the DOM tree
-   */
-  void loadStrategyXML();
-
-
-  /** \fn void loadOneStepIntegratorXML(xmlNode * rootOneStepIntegratorNode)
-   *   \brief Build OneStepIntegratorXML objects from a DOM tree describing OneStepIntegrators
-   *   \param rootOneStepIntegratorNode : the OneStepIntegrators DOM tree
-   *   \exception XMLException : if a property of OneStepIntegrator lacks in the DOM tree
-   */
-  void loadOneStepIntegratorXML(xmlNode *rootOneStepIntegratorNode);
-
-
-  /** \fn void loadOneStepNSProblemXML(xmlNode * rootOneStepNSProblemNode)
-   *   \brief Build OneStepNSProblemXML object from a DOM tree describing OneStepNSProblem
-   *   \param rootOneStepNSProblemXMLrNode : the OneStepNSProblem DOM tree
-   *   \exception XMLException : if a property of OneStepNSProblem lacks in the DOM tree
-   */
-  void loadOneStepNSProblemXML(xmlNode * rootOneStepNSProblemNode);
-
-  /** \fn void loadTimeDiscretisationXML(xmlNode * rootTimeDiscretisationNode)
-   *   \brief Build TimeDiscretisationXML object from a DOM tree describing TimeDiscretisation
-   *   \param rootTimeDiscretisationNode : the TimeDiscretisation DOM tree
-   */
-  void loadTimeDiscretisationXML(xmlNode * rootTimeDiscretisationNode);
+  void saveStrategy2XML(xmlNode* , Strategy*);
 };
 
 

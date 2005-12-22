@@ -132,7 +132,6 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* 
     for (i = 0; i < size; i++)
     {
       string type = (nsdsxml->getDynamicalSystemXML(nbDStab[i]))->getType();
-
       if (type  == LAGRANGIAN_NON_LINEARDS_TAG)  // LagrangianDS
       {
         DSVector[i] = new LagrangianDS(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);

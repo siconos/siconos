@@ -34,6 +34,14 @@
 class NewtonImpactFrictionNSL : public NonSmoothLaw
 {
 
+private:
+  /**  \brief The Newton coefficient of restitution
+   */
+  double en;
+  double et;
+  /** friction coefficient */
+  double mu;
+
 public:
 
   /** \fn NewtonImpactFrictionNSL()
@@ -138,13 +146,6 @@ public:
    */
   static NewtonImpactFrictionNSL* convert(NonSmoothLaw* nsl);
 
-private:
-  /**  \brief The Newton coefficient of restitution
-   */
-  double en;
-  double et;
-  /** friction coefficient */
-  double mu;
 };
 
 #endif // NewtonImpactFrictionNSL_H

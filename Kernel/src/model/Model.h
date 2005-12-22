@@ -29,10 +29,6 @@
 #include <iostream>
 #include <vector>
 
-extern unsigned int MATRIX_MAX_SIZE;
-extern unsigned int VECTOR_MAX_SIZE;
-extern std::string  FILE_STORAGE;
-extern std::string  XML_SCHEMA;
 
 class NonSmoothDynamicalSystem;
 class Strategy;
@@ -391,27 +387,6 @@ public:
    *  \return Strategy* : the Strategy created
    */
   Strategy* createTimeEventDriven();
-
-  /** \fn void setMatrixMaxSize( int max )
-   *  \brief allows to change the value MatrixMaxSize which determines the bound over between
-   * external file storing and xml input/outpout file storing
-   *  \param int :  the value to assign to MatrixMaxSize
-   */
-  void setMatrixMaxSize(const int& max);
-
-  /** \fn void setVectorMaxSize( int max )
-   *  \brief allows to change the value VectorMaxSize which determines the bound over between
-   * external file storing and xml input/outpout file storing
-   *  \param int :  the value to assign to VectorMaxSize
-   */
-  void setVectorMaxSize(const int& max);
-
-  /** \fn void setFileStorage( string fs )
-   *  \brief allows to change the value fileStorage which determines the format
-   * of external file save (binary or ascii)
-   *  \param string :  the value to assign to fileStorage
-   */
-  void setFileStorage(const std::string & fs);
 
 private:
   /** \fn Model()

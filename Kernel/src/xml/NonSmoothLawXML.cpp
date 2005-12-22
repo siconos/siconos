@@ -19,21 +19,17 @@
 #include "NonSmoothLawXML.h"
 using namespace std;
 
-NonSmoothLawXML::NonSmoothLawXML()
+NonSmoothLawXML::NonSmoothLawXML(): rootNSLawXMLNode(NULL)
 {}
 
-NonSmoothLawXML::NonSmoothLawXML(xmlNode *node)
-{
-  this->rootNSLawXMLNode = node;
-}
+NonSmoothLawXML::NonSmoothLawXML(xmlNodePtr node): rootNSLawXMLNode(node)
+{}
 
 NonSmoothLawXML::~NonSmoothLawXML()
 {}
 
-void NonSmoothLawXML::updateNonSmoothLawXML(xmlNode* node, NonSmoothLaw* nsl)
+void NonSmoothLawXML::updateNonSmoothLawXML(xmlNodePtr node, NonSmoothLaw* nsl)
 {
-  IN("NonSmoothLawXML::updateNonSmoothLawXML\n");
-  this->rootNSLawXMLNode = node;
-  OUT("RelaNonSmoothLawXMLtionXML::updateNonSmoothLawXML\n");
+  rootNSLawXMLNode = node;
 }
 

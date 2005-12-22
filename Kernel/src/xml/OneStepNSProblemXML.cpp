@@ -15,210 +15,139 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+#include "NSQPSolverXML.h"
+ */
 
 #include "OneStepNSProblemXML.h"
+// To be removed thanks to factories:
+#include "LemkeSolverXML.h"
+#include "LexicoLemkeSolverXML.h"
+#include "QPSolverXML.h"
+#include "NSQPSolverXML.h"
+#include "NLGSSolverXML.h"
+#include "CPGSolverXML.h"
+#include "LatinSolverXML.h"
 using namespace std;
 
 
 OneStepNSProblemXML::OneStepNSProblemXML():
-  rootNSProblemXMLNode(NULL), rootNode(NULL), interactionConcernedNode(NULL),
-  solverNode(NULL), solverAlgorithmNode(NULL), nNode(NULL)
+  rootNode(NULL), problemTypeNode(NULL), dimNode(NULL), interactionConcernedNode(NULL),
+  interactionListNode(NULL), solverNode(NULL), solverXML(NULL), isSolverXMLAllocatedIn(false)
 {}
 
-OneStepNSProblemXML::OneStepNSProblemXML(xmlNode * oneStepNSProblemXMLNode, vector<int> definedInteractionNumbers)
+OneStepNSProblemXML::OneStepNSProblemXML(xmlNode * oneStepNSProblemXMLNode, vector<int> definedInteractionNumbers):
+  rootNode(oneStepNSProblemXMLNode), problemTypeNode(NULL), dimNode(NULL), interactionConcernedNode(NULL),
+  interactionListNode(NULL), solverNode(NULL), solverXML(NULL), isSolverXMLAllocatedIn(false)
 {
-  xmlNode *node;
+  // Two steps in OneStepNSProblem xml loading:
+  //  - problem formalisation part ( LCP, FrictionContact ...) => partly done in derived class constructor
+  //  - solver data loading => done in OneStepNS top class constructor.
 
-  rootNode = oneStepNSProblemXMLNode;
-  //rootNSProblemXMLNode = oneStepNSProblemXMLNode;
+  // rootNode == OneStepNSProblem
+  // problemTypeNode == formalisation type (LCP ...)
 
-  /*
-   * node definition of the OneStepNSProblem
-   */
-  node = SiconosDOMTreeTools::findNodeChild(rootNode);
-  if (node != NULL)
+  // === Solver part ===
+  solverNode = SiconosDOMTreeTools::findNodeChild(rootNode, "Solver");
+
+  if (solverNode != NULL)
   {
-    if (strcmp((char*)node->name, OSNSP_SOLVER.c_str()) == 0)
-    {
-      /*
-       * in this case, we got the Solver tag in first
-       */
-      solverNode = node;
-      node = SiconosDOMTreeTools::findNodeChild(node);
-      solverAlgorithmNode = SiconosDOMTreeTools::findNodeChild(node);
+    // \todo To be updated thanks to factories to avoid if ... else if ...
+    xmlNodePtr solvingFormalisationNode = SiconosDOMTreeTools::findNodeChild(solverNode);
+    xmlNodePtr solverAlgorithmNode = SiconosDOMTreeTools::findNodeChild(solvingFormalisationNode);
+    if (solvingFormalisationNode == NULL || solverAlgorithmNode == NULL)
+      XMLException::selfThrow("OneStepNSProblemXML - constructor : algorithm node name or solving form node name not found");
 
-      rootNSProblemXMLNode = SiconosDOMTreeTools::findFollowNode(solverNode);
-    }
+    string type = (char*)solverAlgorithmNode->name;
+    if (type == "Lemke")
+      solverXML = new LemkeSolverXML(solverNode, solvingFormalisationNode, solverAlgorithmNode);
+    else if (type == "LexicoLemke")
+      solverXML = new LexicoLemkeSolverXML(solverNode, solvingFormalisationNode, solverAlgorithmNode);
+    else if (type == "QP")
+      solverXML = new QPSolverXML(solverNode, solvingFormalisationNode, solverAlgorithmNode);
+    else if (type == "NSQP")
+      solverXML = new NSQPSolverXML(solverNode, solvingFormalisationNode, solverAlgorithmNode);
+    else if (type == "NLGS")
+      solverXML = new NLGSSolverXML(solverNode, solvingFormalisationNode, solverAlgorithmNode);
+    else if (type == "CPG")
+      solverXML = new CPGSolverXML(solverNode, solvingFormalisationNode, solverAlgorithmNode);
+    else if (type == "Latin")
+      solverXML = new LatinSolverXML(solverNode, solvingFormalisationNode, solverAlgorithmNode);
     else
-    {
-      /*
-       * in that case, it must be solving model definition in first
-       */
-      rootNSProblemXMLNode = SiconosDOMTreeTools::findNodeChild(rootNode);
-
-      if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, OSNSP_SOLVER)) != NULL)
-      {
-        solverNode = node;
-        node = SiconosDOMTreeTools::findNodeChild(node);
-        solverAlgorithmNode = SiconosDOMTreeTools::findNodeChild(node);
-      }
-      else
-      {
-        solverNode = NULL;
-        solverAlgorithmNode = NULL;
-        cout << "Warning : optional tag not found : OneStepNSProblemXML - constructor, tag " << OSNSP_SOLVER << " not found." << endl;
-      }
-    }
+      XMLException::selfThrow("OneStepNSProblemXML constructor, undefined solver algorithm type: " + type);
+    isSolverXMLAllocatedIn = true;
   }
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNSProblemXMLNode, OSNSP_N)) != NULL)
-    nNode = node;
   else
-  {
-    //XMLException::selfThrow("OneStepNSProblemXML - constructor : tag " + OSNSP_N + " not found.");
-    nNode = NULL;
-    cout << "Warning : optional tag not found : OneStepNSProblemXML - constructor : tag " << OSNSP_N << " not found." << endl;
-  }
+    XMLException::selfThrow("OneStepNSProblemXML - constructor : tag Solver not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNSProblemXMLNode, OSNSP_INTERACTION_CONCERNED)) != NULL)
+  // === non smooth problem formalisation part ===
+  problemTypeNode = SiconosDOMTreeTools::findNodeChild(rootNode);
+  if (problemTypeNode == NULL)
+    XMLException::selfThrow("OneStepNSProblemXML - constructor : tag NonSmooth Problem type not found");
+
+  xmlNode *node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(problemTypeNode, "n")) != NULL)
+    dimNode = node;
+
+  // interactionConcerned
+  if ((node = SiconosDOMTreeTools::findNodeChild(problemTypeNode, OSNSP_INTERACTION_CONCERNED)) != NULL)
   {
     interactionConcernedNode = node;
-    loadOneStepNSProblemConcernedInteraction(node, definedInteractionNumbers);
+    // Check if all interactions are concerned or not
+    if (! hasAll())
+    {
+      // Get the indexList node
+      if ((node = SiconosDOMTreeTools::findNodeChild(interactionConcernedNode, INDEX_LIST)) != NULL)
+        interactionListNode = node;
+      else
+        XMLException::selfThrow("tag indexList not found.");
+    }
   }
-  else
-    XMLException::selfThrow("OneStepNSProblemXML - constructor : tag " + OSNSP_INTERACTION_CONCERNED + " not found.");
-
-  //  if ((node=SiconosDOMTreeTools::findNodeChild(rootNode, OSNSP_SOLVER)) !=NULL)
-  //    {
-  //      cout<<" node Solver found !!!!!!!!!!"<<endl<<"<<press enter>>"<<endl;
-  //      getchar();
-  //      solverNode = node;
-  //      node = SiconosDOMTreeTools::findNodeChild( node );
-  //      solverAlgorithmNode = SiconosDOMTreeTools::findNodeChild( node );
-  //    }
-  //    else
-  //      cout<<"Warning : optional tag not found : OneStepNSProblemXML - constructor, tag "<<OSNSP_SOLVER<<" not found."<<endl;
-  //    //XMLException::selfThrow("OneStepNSProblemXML - constructor : tag " + OSNSP_SOLVER + " not found.");
+  // interaction list not required => all interactions are concerned by the problem.
+  // else
+  //  XMLException::selfThrow("OneStepNSProblemXML - constructor : tag " + OSNSP_INTERACTION_CONCERNED + " not found.");
 }
 
 OneStepNSProblemXML::~OneStepNSProblemXML()
-{}
-
-
-void OneStepNSProblemXML::loadOneStepNSProblemConcernedInteraction(xmlNode * interactionConcernedNode, vector<int> definedInteractionNumbers)
 {
-  xmlNode *interactionNode;
-  int number;
-  int size = 0, i = 0;
-  unsigned int j = 0;
-
-  interactionNumbersVector.clear();
-
-  if (((interactionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)interactionConcernedNode, INTERACTION_TAG)) == NULL) && (!SiconosDOMTreeTools::getBooleanAttributeValue(interactionConcernedNode, ALL_ATTRIBUTE)))
-    XMLException::selfThrow("OneStepNSProblemXML - loadOneStepNSProblemConcernedInteraction error : at least one " + INTERACTION_TAG + " tag must be declared in " + OSNSP_INTERACTION_CONCERNED + " tag.");
-
-  size = SiconosDOMTreeTools::getNodeChildrenNumber(interactionConcernedNode);
-  //  cout<<"number of children = "<<size<<endl;
-  //  cout<<"# Press <<ENTER>> !!"<<endl;
-  //  getchar();
-
-  while ((interactionNode != NULL) && (i < size))
-  {
-    number = SiconosDOMTreeTools::getIntegerAttributeValue(interactionNode, NUMBER_ATTRIBUTE);
-
-    //Verifying Interaction number exists
-    j = 0;
-    while ((j < definedInteractionNumbers.size()) && (number != definedInteractionNumbers[j]))
-      j++;
-
-    if (j == definedInteractionNumbers.size())
-    {
-      char errorMsg[1024];
-      sprintf(errorMsg, "OneStepNSProblemXML - loadOneStepNSProblemConcernedInteraction error : in a tag %s you define an Interaction number who doesn't exist : %d.", OSNSP_INTERACTION_CONCERNED.c_str(), number);
-      XMLException::selfThrow(errorMsg);
-    }
-
-    interactionNumbersVector.push_back(number);
-
-    interactionNode = SiconosDOMTreeTools::findFollowNode(interactionNode, INTERACTION_TAG);
-    i++;
-  }
-
-  if (i < size)
-  {
-    XMLException::selfThrow("OneStepIntegratorXML - loadOneStepNSProblemConcernedInteraction error : the size attribute given in the tag " + OSNSP_INTERACTION_CONCERNED + " is not correct.");
-  }
+  if (isSolverXMLAllocatedIn) delete solverXML;
+  solverXML = NULL;
 }
 
-void OneStepNSProblemXML::setInteractionConcerned(vector<int> v, bool all)
+void OneStepNSProblemXML::setDimNSProblem(const int& n)
 {
-  unsigned int i;
-  xmlNode* node;
-  xmlNode* interactionNode;
-  char num[32];
+  if (! hasDim())
+    dimNode = SiconosDOMTreeTools::createIntegerNode(problemTypeNode, "n", n);
+  else SiconosDOMTreeTools::setIntegerContentValue(dimNode, n);
+}
 
-  if (all)
+void OneStepNSProblemXML::setAll(const bool& all)
+{
+  if (!hasAll())
   {
-    /*
-     * in that case, the attribute "all" of the Interaction_Concerned must be used
-     */
-    node = xmlNewNode(NULL, (xmlChar*)OSNSP_INTERACTION_CONCERNED.c_str());
-    xmlSetProp(node, (xmlChar*)ALL_ATTRIBUTE.c_str(), (xmlChar*)"true");
-
-    if (interactionConcernedNode != NULL)
-      xmlReplaceNode(interactionConcernedNode, node);
-    else xmlAddChild(rootNSProblemXMLNode, node);
-    interactionConcernedNode = node;
-    cout << "#### OneStepNSProblemXML::setInteractionConcerned ALL" << endl;
+    if (all == true)
+      xmlNewProp(interactionConcernedNode, (xmlChar*)ALL_ATTRIBUTE.c_str(), (xmlChar*)"true");
   }
   else
   {
-    cout << "#### OneStepNSProblemXML::setInteractionConcerned !ALL" << endl;
-    if (interactionConcernedNode == NULL)
-    {
-      node = xmlNewChild(rootNSProblemXMLNode, NULL, (xmlChar*)OSNSP_INTERACTION_CONCERNED.c_str(), NULL);
-      interactionConcernedNode = node;
-      //sprintf(num, "%d", v.size());
-      //xmlNewProp(node, (xmlChar*)OSNSP_SIZE.c_str(), (xmlChar*)num );
-
-      for (i = 0; i < v.size(); i++)
-      {
-        interactionNode = xmlNewChild(node, NULL, (xmlChar*)INTERACTION_TAG.c_str(), NULL);
-        sprintf(num, "%d", v[i]);
-        xmlNewProp(interactionNode, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
-      }
-      interactionNumbersVector = v;
-    }
-    else
-    {
-      /*
-       * it must check if a nmber of the vector is not already in the DOM tree
-       */
-      vector<int>::iterator iter;
-      for (i = 0; i < v.size(); i++)
-      {
-        iter = find(interactionNumbersVector.begin(), interactionNumbersVector.end(), v[i]);
-        if (iter == interactionNumbersVector.end())
-        {
-          /*
-           * in this case, we must add in the DOMtree the number of this Interaction
-           */
-          interactionNode = xmlNewChild(interactionConcernedNode, NULL, (xmlChar*)INTERACTION_TAG.c_str(), NULL);
-          sprintf(num, "%d", v[i]);
-          xmlNewProp(interactionNode, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
-        }
-      }
-    }
+    if (all == false)
+      xmlRemoveProp(xmlHasProp(interactionConcernedNode, (xmlChar*)ALL_ATTRIBUTE.c_str()));
   }
 }
 
-void OneStepNSProblemXML::setSolver(string name, string methodName, string normType,
-                                    double tolerance, int maxIter, double searchDirection)
+void OneStepNSProblemXML::setSolverXMLPtr(SolverXML * solv)
+{
+  if (isSolverXMLAllocatedIn) delete solverXML;
+  solverXML = solv;
+  isSolverXMLAllocatedIn = false;
+}
+
+// \warning: following routine has to been checked and updated
+void OneStepNSProblemXML::setSolver(const string& name, const string& methodName, const string& normType,
+                                    const double& tolerance, const unsigned int& maxIter, const double& searchDirection)
 {
   char tmpChar[128];
   xmlNode *node;
-
+  xmlNodePtr solverAlgorithmNode;
   if (solverNode == NULL)
   {
     solverNode = xmlNewChild(rootNode, NULL, (xmlChar*)OSNSP_SOLVER.c_str(), NULL);
@@ -302,14 +231,8 @@ void OneStepNSProblemXML::setSolver(string name, string methodName, string normT
   }
 }
 
-//void OneStepNSProblemXML::loadOneStepNSProblem( /*OneStepNSProblem *osnsp*/ )
-//{
-//  /*
-//   * At this time, the OneStepNSProblemXML is just created and contains only
-//   * one node for the solving model (LCP, QP, Relay, ...)
-//   *
-//   * the rootNSProblemXMLNode is set to the value of the node containing the solving model
-//   */
-//  rootNSProblemXMLNode = SiconosDOMTreeTools::findNodeChild( rootNode);
-//}
-
+void OneStepNSProblemXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
+{
+  rootNode = node;
+  problemTypeNode = SiconosDOMTreeTools::findNodeChild(rootNode);
+}

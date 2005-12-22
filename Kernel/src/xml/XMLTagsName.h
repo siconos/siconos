@@ -30,6 +30,10 @@ const std::string NUMBER_ATTRIBUTE = "number";
 const std::string PLUGIN_ATTRIBUTE = "plugin";
 const std::string ALL_ATTRIBUTE = "all";
 const std::string SIZE_ATTRIBUTE = "size";
+// usefull when a list of objects, identified thanks to numbers, is required;
+// for example a list of DS in an interaction:
+const std::string INDEX_LIST = "indexList";
+
 
 // common tags
 const std::string COMPUTE_INPUT_TAG = "computeInput";
@@ -120,7 +124,8 @@ const std::string ADAMS_TAG = "Adams";
 
 /*Types of OneStepNSProblem defined*/
 const std::string LCP_TAG = "LCP";
-const std::string DFC_2D_TAG = "DFC_2D";
+const std::string FrictionContact2D_TAG = "FrictionContact2D";
+const std::string FrictionContact3D_TAG = "FrictionContact3D";
 const std::string QP_TAG = "QP";
 const std::string RELAY_TAG = "Relay";
 

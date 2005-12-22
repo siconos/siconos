@@ -15,17 +15,17 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /** \class NSLawXML
-*   \brief This class manages NSLaw data part
-*  \author SICONOS Development Team - copyright INRIA
-*   \version 1.0
-*   \date 05/13/2004
-*
-*
-*
-* NSLawXML allows to manage data of a NSLaw DOM tree.
-*/
+ *   \brief This class manages NSLaw data part
+ *  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.0
+ *   \date 05/13/2004
+ *
+ *
+ *
+ * NSLawXML allows to manage data of a NSLaw DOM tree.
+ */
 
 
 #ifndef __NSLawXML__
@@ -39,41 +39,51 @@ class NonSmoothLaw;
 //const string NSLAW_TYPE = "type";
 class NonSmoothLawXML
 {
+protected:
+  xmlNodePtr rootNSLawXMLNode;
+
 public:
+
+  /** \fn NonSmoothLawXML()
+   *   \brief default constructor
+   */
   NonSmoothLawXML();
-  NonSmoothLawXML(xmlNode*);
+
+  /** \fn NonSmoothLawXML(xmlNodePtr);
+   *   \brief constructor from DOM tree data
+   */
+  NonSmoothLawXML(xmlNodePtr);
+
+  /** \fn ~NonSmoothLawXML()
+   *   \brief destructor
+   */
   virtual ~NonSmoothLawXML();
 
-  /** \fn int getType()
-  *   \brief Return the type of the NSLawXML
-  *   \return The string type of the NSLawXML
-  */
-  inline std::string getType()
+  /** \fn const string getType() const
+   *   \brief get the type of non smooth law
+   *   \return a string
+   */
+  inline const std::string getType() const
   {
-    //return SiconosDOMTreeTools::getStringAttributeValue(this->rootNSLawXMLNode, NSLAW_TYPE);
     std::string type((char*) rootNSLawXMLNode->name);
     return type;
   }
 
-  /** \fn xmlNode* getNode()
-  *   \brief Return the node of the NonSmoothLawXML
-  *   \return xmlNode* : the node of the NonSmoothLawXML in the DOM tree
-  */
-  inline xmlNode* getNode() const
+  /** \fn xmlNodePtr getNode()
+   *   \brief Return node named "NonSmoothLaw"
+   *   \return an xmlNodePtr
+   */
+  inline xmlNodePtr getNode() const
   {
     return rootNSLawXMLNode;
   }
 
-  /** \fn void updateNonSmoothLawXML( xmlNode* node, NonSmoothLaw* nsl )
-  *   \brief makes the operations to create the NonSmoothLaw of the Interaction
-  *   \param xmlNode* : the root node of the NonSmoothLawXML
-  *   \param Relation* : the NonSmoothLaw of this NonSmoothLawXML
-  */
-  void updateNonSmoothLawXML(xmlNode* node, NonSmoothLaw* nsl);
-
-protected:
-  xmlNode * rootNSLawXMLNode;
+  /** \fn void updateNonSmoothLawXML( xmlNodePtr node, NonSmoothLaw* nsl )
+   *   \brief makes the operations to create the NonSmoothLaw of the Interaction
+   *   \param xmlNodePtr : the root node of the NonSmoothLawXML
+   *   \param Relation* : the NonSmoothLaw of this NonSmoothLawXML
+   */
+  void updateNonSmoothLawXML(xmlNodePtr node, NonSmoothLaw* nsl);
 };
-
 
 #endif

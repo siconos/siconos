@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /** \class LCPXML
  *   \brief This class manages Lagrangian LCP data
  *  \author SICONOS Development Team - copyright INRIA
@@ -24,7 +24,8 @@
  *
  *
  *
- * LCPXML allows to manage data of a LCP DOM tree.
+ * LCPXML XML data management for LCP NSProblem
+ *
  */
 
 #ifndef __LCPXML__
@@ -33,14 +34,18 @@
 #include "OneStepNSProblemXML.h"
 
 class OneStepNSProblem;
-
-const std::string  LCP_M = "M";
-const std::string  LCP_Q = "q";
-
-
 class LCPXML : public OneStepNSProblemXML
 {
+private:
+
+  //Nodes
+  xmlNode * MNode;
+  xmlNode * qNode;
+
 public:
+  /** \fn LCPXML()
+   *   \brief Default constructor
+   */
   LCPXML();
 
   /** \fn LCPXML(xmlNode * LCPNode)
@@ -51,13 +56,16 @@ public:
    */
   LCPXML(xmlNode * LCPNode, std::vector<int> definedInteractionNumbers);
 
+  /** \fn LCPXML()
+   *   \brief Destructor
+   */
   ~LCPXML();
 
   /** \fn SiconosMatrix getM()
    *   \brief Return M
    *   \return The M SiconosMatrix of the LCP
    */
-  inline SiconosMatrix getM()
+  inline SiconosMatrix getM() const
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(MNode);
   }
@@ -66,42 +74,28 @@ public:
    *   \brief Return vector q
    *   \return SimpleVector : q vector of the LCP
    */
-  inline SimpleVector getQ()
+  inline SimpleVector getQ() const
   {
     return SiconosDOMTreeTools::getSiconosVectorValue(qNode);
   }
 
   /** \fn void setM(const SiconosMatrix &m)
-   *   \brief save M
-   *   \param The M SiconosMatrix to save
+   *   \brief set matrix M
+   *   \param The M SiconosMatrix to set
    */
-  inline void setM(const SiconosMatrix &m)
-  {
-    if (hasM() == false)
-    {
-      MNode = SiconosDOMTreeTools::createMatrixNode(rootNSProblemXMLNode, LCP_M, m);
-    }
-    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(MNode, m);
-  }
+  void setM(const SiconosMatrix &);
 
   /** \fn void setQ(const SiconosVector &q)
-   *   \brief save q
-   *   \param The q SiconosVector to save
+   *   \brief set vector q
+   *   \param The q SiconosVector to set
    */
-  inline void setQ(const SiconosVector& q)
-  {
-    if (hasQ() == false)
-    {
-      qNode = SiconosDOMTreeTools::createVectorNode(rootNSProblemXMLNode, LCP_Q, q);
-    }
-    else SiconosDOMTreeTools::setSiconosVectorNodeValue(qNode, q);
-  }
+  void setQ(const SiconosVector&);
 
   /** \fn bool hasM()
    *  \brief returns true if MNode is defined
    *  \return true if MNode is defined
    */
-  inline bool hasM()
+  inline bool hasM() const
   {
     return (MNode != NULL);
   }
@@ -110,24 +104,10 @@ public:
    *  \brief returns true if qNode is defined
    *  \return true if qNode is defined
    */
-  inline bool hasQ()
+  inline bool hasQ() const
   {
     return (qNode != NULL);
   }
-
-  /** \fn void updateOneStepNSProblemXML( xmlNode* node, OneStepNSProblemXML* str )
-   *   \brief makes the operations to create a OneStepNSProblemXML to the StrategyXML
-   *   \param xmlNode* : the root node of the OneStepNSProblemXML
-   *   \param OneStepNSProblem* : the OneStepNSProblem of this OneStepNSProblemXML
-   */
-  void updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb);
-
-
-private:
-
-  //Nodes
-  xmlNode * MNode;
-  xmlNode * qNode;
 };
 
 

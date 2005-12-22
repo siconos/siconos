@@ -21,13 +21,13 @@ using namespace std;
 
 NewtonImpactLawNSL::NewtonImpactLawNSL(): NonSmoothLaw(), e(0.0)
 {
-  nsLawType = NEWTONIMPACTLAWNSLAW;
+  nsLawType = NEWTONIMPACTNSLAW;
 }
 
 NewtonImpactLawNSL::NewtonImpactLawNSL(NonSmoothLawXML* nslawxml):
   NonSmoothLaw(nslawxml), e(0.0)
 {
-  nsLawType = NEWTONIMPACTLAWNSLAW;
+  nsLawType = NEWTONIMPACTNSLAW;
   if (nslawxml != NULL)
     e = (static_cast<NewtonImpactLawNSLXML*>(nslawxml))->getE();
   else RuntimeException::selfThrow("NewtonImpactLawNSL:: xml constructor, xml file=NULL");
@@ -36,7 +36,7 @@ NewtonImpactLawNSL::NewtonImpactLawNSL(NonSmoothLawXML* nslawxml):
 NewtonImpactLawNSL::NewtonImpactLawNSL(const double& newE):
   NonSmoothLaw(), e(newE)
 {
-  nsLawType = NEWTONIMPACTLAWNSLAW;
+  nsLawType = NEWTONIMPACTNSLAW;
 }
 
 NewtonImpactLawNSL::~NewtonImpactLawNSL()

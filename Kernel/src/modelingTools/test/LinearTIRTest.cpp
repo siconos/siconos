@@ -59,6 +59,7 @@ void LinearTIRTest::setUp()
     XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
     xmlFreeDoc(doc);
   }
+
   // look for NSDS, Interaction and relation node
   xmlNode* nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
   NonSmoothDynamicalSystemXML * nsdsxml = new NonSmoothDynamicalSystemXML(nodetmp);
@@ -87,7 +88,6 @@ void LinearTIRTest::setUp()
   }
 
   // get rootNode
-
   if (xmlStrcmp(cur2->name, (const xmlChar *) "SiconosModel"))
   {
     XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");

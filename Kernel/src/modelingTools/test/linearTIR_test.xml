@@ -43,7 +43,7 @@
 				<nInter> 2 </nInter>
 				<!-- List of couple of DS concerned by this interaction -->
 		               <DS_Concerned all='false'>
-                               <DSList vectorSize='1' >3 4</DSList>
+                               <indexList vectorSize='1' >3 4</indexList>
                                </DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		

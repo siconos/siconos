@@ -43,7 +43,7 @@ void ModelTest::testBuildModel1()
   cout << "=============================" << endl;
   char * xmlFile = "ModelXml_test.xml" ;
   Model * M = new Model(xmlFile);
-  // check that xml link is not NULL
+  //check that xml link is not NULL
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1a : ", M->getSiconosModelXMLPtr() != NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1b : ", M->getT0() == 0.1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1c : ", M->getFinalT() == 10.0, true);
@@ -108,6 +108,7 @@ void ModelTest::testsetSiconosModelXMLPtr()
   M->setSiconosModelXMLPtr(newMxml);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" test setSiconosModelXMLPtr: ", M->getSiconosModelXMLPtr() == newMxml, true);
   delete M;
+  delete newMxml;
   cout << " test setSiconosModelXMLPtr ok " << endl;
 }
 void ModelTest::End()

@@ -15,31 +15,33 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ *
+ * This file contains global variables defined in Siconos/Kernel, that are
+ * used to set default values.
+ *
+ */
 #ifndef __KERNELDEFAULTCONFIG__
 #define __KERNELDEFAULTCONFIG__
 
 #include <string>
 
-/* A matrix is saved in the XML output file if his size is not higher then MatrixMaxSize */
-/*const*/ unsigned int    MATRIX_MAX_SIZE = 10;
-/*const*/
-unsigned int    VECTOR_MAX_SIZE = 10;
-/*const*/
-std::string   FILE_STORAGE = "ascii"; // N_ASCII or N_BINARY
+const unsigned int MATRIX_MAX_SIZE = 10;
+const unsigned int VECTOR_MAX_SIZE = 10;
+const std::string FILE_STORAGE = "ascii";
 
-/*const*/
-std::string   XML_SCHEMA = "/share/SICONOS/SiconosModelSchema-V1.2.xsd";
+const std::string XML_SCHEMA = "/share/SICONOS/SiconosModelSchema-V1.2.xsd";
 
-std::string   DefaultSolver = "default";
-std::string   DefaultAlgoName = "default";
-std::string   DefaultAlgoNormType = "default";
-double  DefaultAlgoTolerance = -1.0;
-int   DefaultAlgoMaxIter = -1;
-double  DefaultAlgoSearchDirection = -1.0;
+// Default values for non smooth problem solver
+const std::string DefaultSolvingForm = "LcpSolving";
+const std::string DefaultAlgoName = "NSQP";
+const std::string DefaultAlgoNormType = "default";
+const double  DefaultAlgoTolerance = 0.01;
+const unsigned int DefaultAlgoMaxIter = 10;
+const double  DefaultAlgoSearchDirection = 1.0;
 
-std::string  DefaultComputeInput = "DefaultPlugin:computeInput";
-std::string  DefaultComputeOutput = "DefaultPlugin:computeOutput";
+// Defaults values for input/output plug-in in DSIO
+const std::string  DefaultComputeInput = "DefaultPlugin:computeInput";
+const std::string  DefaultComputeOutput = "DefaultPlugin:computeOutput";
 
 #endif
 

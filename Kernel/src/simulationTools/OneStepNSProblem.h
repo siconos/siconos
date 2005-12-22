@@ -29,6 +29,7 @@
 #include "SiconosConst.h"
 #include "SiconosNumerics.h"
 #include "check.h"
+#include "Solver.h"
 #include <iostream>
 #include <vector>
 
@@ -38,13 +39,6 @@ class EqualityConstraint;
 
 class OneStepNSProblemXML;
 
-extern std::string  DefaultSolver;
-extern std::string  DefaultAlgoName;
-extern std::string  DefaultAlgoNormType;
-extern double   DefaultAlgoTolerance;
-extern int  DefaultAlgoMaxIter;
-extern double   DefaultAlgoSearchDirection;
-
 /** \class OneStepNSProblem
  *  \brief It's the part of the Strategy which solve the Interactions
  *  \author SICONOS Development Team - copyright INRIA
@@ -52,9 +46,62 @@ extern double   DefaultAlgoSearchDirection;
  *  \date (Creation) Apr 26, 2004
  *
  *
+ * This is an abstract class, that provides an interface to define a non smooth problem:
+ *   -> a formulation (ie the way the problem is written)
+ *   -> a solver (algorithm and solving formulation, that can be different from problem formulation)
+ *   -> routines to compute the problem solution.
+ *
+ * The available problem formulation, given by derived classes, are:
+ *  - LCP
+ *  - FrictionContact2D and 3D
+ *  - QP
+ *  - Relay
+ *
+ *  See Solver class for details on algorithm and solving formulation.
+ *
  */
 class OneStepNSProblem
 {
+
+protected:
+
+  /** type of the OneStepNSProblem (LCP ...) */
+  std::string nspbType;
+
+  /** size of the problem to solve */
+  unsigned int dim;
+
+  /** all the Interactions known by the OneStepNSProblem */
+  std::vector< Interaction* > interactionVector;
+
+  /** all the Equality Constraints known by the OneStepNSProblem */
+  std::vector< EqualityConstraint* > ecVector;
+
+  /** map that links each interaction with the corresponding diagonal block*/
+  std::map< Interaction* , SiconosMatrix*>  diagonalBlocksMap  ;
+
+  /** map that links each interaction with the corresponding extra-diagonal blocks
+      map < InteractionA * , map < InteractionB* , blockMatrixAB > >
+      Interaction A and B are coupled through blockMatrixAB.
+  */
+  std::map< Interaction* , std::map<Interaction *, SiconosMatrix*> >  extraDiagonalBlocksMap  ;
+
+  /** map that links each interaction with a list of indexes, giving the indexes
+      corresponding to the effective relations AND their derivatives */
+  std::map< Interaction* , std::vector<unsigned int> > blockIndexesMap ;
+
+  /** Solver for Non Smooth Problem*/
+  Solver* solver;
+
+  /** bool to check whether solver has been allocated inside the class or not */
+  bool isSolverAllocatedIn;
+
+  /** link to the strategy that owns the NSPb */
+  Strategy *strategy;
+
+  /** the XML object linked to the OneStepNSProblem to read XML data */
+  OneStepNSProblemXML* onestepnspbxml;
+
 public:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -78,7 +125,7 @@ public:
    *  \param Strategy *: the strategy that owns this problem
    *  \param string: solver name (optional)
    *  \param string: name of the solving method (optional but required if a solver is given)
-   *  \param int : MaxIter (optional) required if a solver is given
+   *  \param int   : MaxIter (optional) required if a solver is given
    *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
    *  \param string : NormType (optional) -> for NLGS, Gcp, Latin
    *  \param double : SearchDirection (optional) -> for Latin
@@ -87,6 +134,18 @@ public:
                    const int& = 0, const double& = 0, const std::string & = "none",
                    const double & = 0);
 
+  /** \fn OneStepNSProblem(Strategy*, const string& solverName, const string& newSolvingMethod, const int& maxIter,
+   *                       const double & Tolerance=0, const string & NormType="none",
+   *                       const double & SearchDirection=0)
+   *  \brief constructor from data
+   *  \param Strategy *: the strategy that owns this problem
+   *  \param Solver *: pointer on object that contains solver algorithm and formulation
+   */
+  OneStepNSProblem(Strategy * , Solver*);
+
+  /** \fn OneStepNSProblem()
+   *  \brief destructor
+   */
   virtual ~OneStepNSProblem();
 
   // --- GETTERS/SETTERS ---
@@ -110,21 +169,21 @@ public:
   }
 
   /** \fn const int getN() const
-   *  \brief get the value of n
-   *  \return an int
+   *  \brief get dimension of the problem
+   *  \return an unsigned ing
    */
-  inline const unsigned int getN() const
+  inline const unsigned int getDim() const
   {
-    return n;
+    return dim;
   }
 
-  /** \fn void setN(const int&)
-   *  \brief set the value of n
-   *  \param an int
+  /** \fn void setDim(const int&)
+   *  \brief set the value of dim
+   *  \param an unsigned int
    */
-  inline void setN(const unsigned int& newVal)
+  inline void setDim(const unsigned int& newVal)
   {
-    n = newVal;
+    dim = newVal;
   }
 
   /** \fn vector< Interaction* > getInteractions()
@@ -170,24 +229,6 @@ public:
     ecVector = newVec;
   }
 
-  /** \fn inline const string getSolver() const
-   *  \brief to get the solver of the OneStepNSProblem
-   *  \return string
-   */
-  inline std::string getSolver() const
-  {
-    return solver;
-  }
-
-  /** \fn inline void setSolver(const string&)
-   *  \brief set the solver of the OneStepNSProblem
-   *  \param: string
-   */
-  inline void setSolver(const std::string & newVal)
-  {
-    solver = newVal;
-  }
-
   /** \fn Strategy* getStrategyPtr()
    *  \brief get the Strategy
    *  \return a pointer on Strategy
@@ -205,6 +246,21 @@ public:
   {
     strategy = str;
   }
+
+  /** \fn Solver* getSolverPtr()
+   *  \brief get the Solver
+   *  \return a pointer on Solver
+   */
+  inline Solver* getSolverPtr() const
+  {
+    return solver;
+  }
+
+  /** \fn void setSolverPtr(Solver*)
+   *  \brief set the Solver of the OneStepNSProblem
+   *  \param: a pointer on Solver
+   */
+  void setSolverPtr(Solver*);
 
   /** \fn inline OneStepNSProblemXML* getOneStepNSProblemXML()
    *  \brief get the OneStepNSProblemXML
@@ -235,7 +291,7 @@ public:
   /** \fn void initialize()
    *  \brief initialize the problem(compute topology ...)
    */
-  virtual void initialize();
+  virtual void initialize() = 0;
 
   /** \fn void computeEffectiveOutput();
    *  \brief compute variables indexMax, effectiveOutput and effectiveSizeOutput of the topology of the nsds
@@ -264,135 +320,18 @@ public:
    */
   virtual void compute(const double&);
 
-  /** \fn void fillSolvingMethod(const string& newSolvingMethod, const int& maxIter,
-   *                             const double & Tolerance=0, const string & NormType="none",
-   *                             const double & SearchDirection=0)
-   *  \brief to fill the fields of the solvingMethod object
-   *  \param string: name of the solving method
-   *  \param int : MaxIter
-   *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
-   *  \param string : NormType (optional) -> for NLGS, Gcp, Latin
-   *  \param double : SearchDirection (optional) -> for Latin
-   *  \exception RuntimeException
-   */
-  void fillSolvingMethod(const std::string&, const int& ,
-                         const double& = 0, const std::string & = "none",
-                         const double & = 0);
-
   /** \fn void saveNSProblemToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree
    *  \exception RuntimeException
    */
   virtual void saveNSProblemToXML();
 
-  /** \fn bool allInteractionConcerned()
-   *   \brief defines if the vector of Interaction concerned by this OneStepNSProblem
-   *          contains all the Interactions of the NonSmoothDynamicalSystem
-   *   \return bool : true if the vector of Interaction of the OneStepNSProblem and the NonSmoothDynamicalSystem have the same size
+  /** \fn void isOneStepNsProblemComplete()
+   *  \brief check is all data required by non smooth problem are present
+   *  \return : a bool
    */
-  bool allInteractionConcerned();
-
-  /** \fn void setLemkeAlgorithm(const std::string&, const double& = DefaultAlgoMaxIter)
-   *   \brief sets the parameters for the lemke solving algorithm in the solvingMethod structure
-   *   \param string : the solving method
-   *   \param unsigned int : the max number of iterations
-   */
-  virtual void setLemkeAlgorithm(const std::string&, const unsigned int& = DefaultAlgoMaxIter);
-
-  /** \fn void setLexicoLemkeAlgorithm(const std::string&, const double& = DefaultAlgoMaxIter)
-   *   \brief sets the parameters for the lexicoLemke solving algorithm in the solvingMethod structure
-   *   \param string : the solving method
-   *   \param  unsigned int: the max number of iterations
-   */
-  virtual void setLexicoLemkeAlgorithm(const std::string&, const unsigned int& = DefaultAlgoMaxIter);
-
-  /** \fn void setNLGSAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
-   *                            const int& = DefaultAlgoMaxIter)
-   *   \brief sets the parameters for the NLGS solving algorithm in the solvingMethod structure
-   *   \param string : solving method
-   *   \param double : tolerance
-   *   \param int    : max number of iterations
-   *   \param string : norm type (unused)
-   */
-  virtual void setNLGSAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const int& = DefaultAlgoMaxIter,
-                                const std::string& = DefaultAlgoNormType);
-
-  /** \fn void setQPAlgorithm(const std::string&, const double& = DefaultAlgoTolerance)
-   *   \brief sets the parameters for the QP solving algorithm in the solvingMethod structure
-   *   \param string : solving method
-   *   \param double : tolerance
-   */
-  virtual void setQPAlgorithm(const std::string&, const double& = DefaultAlgoTolerance);
-
-  /** \fn void setNSQPAlgorithm(const std::string&, const double& = DefaultAlgoTolerance)
-   *   \brief sets the parameters for the NSQP solving algorithm in the solvingMethod structure
-   *   \param string : solving method
-   *   \param double : tolerance
-   */
-  virtual void setNSQPAlgorithm(const std::string&, const double& = DefaultAlgoTolerance);
-
-  /** \fn void setCPGAlgorithm( const std::string&, const double& = DefaultAlgoTolerance, const std::string& = DefaultAlgoNormType,
-   *                            const int& = DefaultAlgoMaxIter )
-   *   \brief sets the parameters for the gcp solving algorithm in the solvingMethod structure
-   *   \param string : solving method
-   *   \param double : tolerance
-   *   \param int    : max number of iterations
-   *   \param string : norm type
-   */
-  virtual void setCPGAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const int& = DefaultAlgoMaxIter ,
-                               const std::string& = DefaultAlgoNormType);
-
-  /** \fn void setLatinAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const int& = DefaultAlgoMaxIter,
-   *                             const std::string& = DefaultAlgoNormTypeconst, double& = DefaultAlgoSearchDirection)
-   *   \brief sets the parameters for the lcp solfing algorithm in the solvingMethod structure
-   *   \param string : solving method
-   *   \param double : tolerance
-   *   \param int    : iterMax
-   *   \param string : norm type (unused)
-   *   \param double : the search direction parameter
-   */
-  virtual void setLatinAlgorithm(const std::string&, const double& = DefaultAlgoTolerance, const int& = DefaultAlgoMaxIter,
-                                 const std::string& = DefaultAlgoNormType, const double& = DefaultAlgoSearchDirection);
-
   bool isOneStepNsProblemComplete();
 
-protected:
-  /** type of the OneStepNSProblem */
-  std::string nspbType;
-
-  /** size of the problem to solve */
-  unsigned int n;
-
-  /** all the Interaction known by the OneStepNSProblem */
-  std::vector< Interaction* > interactionVector;
-
-  /** all the EqualityConstraint known by the OneStepNSProblem */
-  std::vector< EqualityConstraint* > ecVector;
-
-  /** map that links each interaction with the corresponding diagonal block*/
-  std::map< Interaction* , SiconosMatrix*>  diagonalBlocksMap  ;
-
-  /** map that links each interaction with the corresponding extra-diagonal blocks
-      map < InteractionA * , map < InteractionB* , blockMatrixAB > >
-      Interaction A and B are coupled through blockMatrixAB.
-  */
-  std::map< Interaction* , std::map<Interaction *, SiconosMatrix*> >  extraDiagonalBlocksMap  ;
-
-  /** map that links each interaction with a list of indexes, giving the indexes
-      corresponding to the effective relations AND their derivatives */
-  std::map< Interaction* , std::vector<unsigned int> > blockIndexesMap ;
-
-  /** structure containing the structures of the numerous solving methods */
-  method solvingMethod;
-
-  /** name of the solver to use */
-  std::string solver;
-
-  /** link to the strategy that owns the NSPb */
-  Strategy *strategy;
-
-  /** the XML object linked to the OneStepNSProblem to read XML data */
-  OneStepNSProblemXML* onestepnspbxml;
 };
 
 #endif // ONESTEPNSPROBLEM_H

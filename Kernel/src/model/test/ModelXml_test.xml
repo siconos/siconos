@@ -147,14 +147,6 @@
 		<!-- One Step NS Problem of th Strategy-->
 		<OneStepNSProblem>
 		 	<LCP>
-				<n>1</n>			
-<!--				<M matrixRowSize='1' matrixColSize='1'>
-					<row> 1.0 </row>
-				</M>
-				<q vectorSize='1'> 1.0</q> -->
-				<Interaction_Concerned>
-					<Interaction number='1'/>
-				</Interaction_Concerned>			
 		 	</LCP>
 		 	<Solver>
 				<LcpSolving>

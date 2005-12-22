@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "SiconosModelXML.h"
+
 using namespace std;
 
 SiconosModelXML::SiconosModelXML():
@@ -332,7 +333,7 @@ void SiconosModelXML::loadModel(Model * model)
       // creation of the nodes of the Strategy with the right data
       node = xmlNewChild(rootNode, NULL, (xmlChar*)STRATEGY_TAG.c_str(), NULL);
       xmlNewProp(node, (xmlChar*)TYPE_ATTRIBUTE.c_str(), (xmlChar*)model->getStrategyPtr()->getType().c_str());
-      strategyXML->updateStrategyXML(node, model->getStrategyPtr());
+      strategyXML->saveStrategy2XML(node, model->getStrategyPtr());
     }
   }
   else XMLException::selfThrow("SiconosModelXML::loadModel(Model * model) : no Model has been given.");

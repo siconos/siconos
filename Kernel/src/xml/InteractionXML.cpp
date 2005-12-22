@@ -70,8 +70,8 @@ InteractionXML::InteractionXML(xmlNode * interactionNode, vector<int> definedNum
     if (! hasAll())
     {
       // Get the DSList node
-      if (SiconosDOMTreeTools::findNodeChild(dsConcernedNode, INTERACTION_DS_LIST) != NULL)
-        dsListNode = SiconosDOMTreeTools::findNodeChild(dsConcernedNode, INTERACTION_DS_LIST);
+      if (SiconosDOMTreeTools::findNodeChild(dsConcernedNode, INDEX_LIST) != NULL)
+        dsListNode = SiconosDOMTreeTools::findNodeChild(dsConcernedNode, INDEX_LIST);
       else
         XMLException::selfThrow("tag DSlist not found.");
     }
@@ -261,7 +261,7 @@ void InteractionXML::loadInteraction(Interaction* inter)
 
         this->nSLawXML = nslxml;
       }
-      else if (type == NEWTONIMPACTLAWNSLAW)
+      else if (type == NEWTONIMPACTNSLAW)
       {
         //xmlNewProp( node, (xmlChar*)INTERACTION_TYPE.c_str(), (xmlChar*)INTERACTION_NEWTONIMPACTLAWNSLAW.c_str() );
         node = xmlNewChild(InteractionContentNode, NULL, (xmlChar*)NEWTON_IMPACT_LAW_NSLAW_TAG.c_str(), NULL);

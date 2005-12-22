@@ -25,13 +25,16 @@ include $(top_srcdir)/config/Make-rules
 
 
 noinst_LTLIBRARIES = libSimulationTools.la
-libSimulationTools_la_SOURCES = Adams.cpp DFC_2D.cpp EventDriven.cpp LCP.cpp Lsodar.cpp Moreau.cpp OneStepIntegrator.cpp \
-		OneStepNSProblem.cpp QP.cpp \
+libSimulationTools_la_SOURCES = Solver.cpp LemkeSolver.cpp LexicoLemkeSolver.cpp QPSolver.cpp NSQPSolver.cpp NLGSSolver.cpp CPGSolver.cpp \
+		LatinSolver.cpp Adams.cpp FrictionContact2D.cpp FrictionContact3D.cpp \
+	  	EventDriven.cpp LCP.cpp Lsodar.cpp Moreau.cpp OneStepIntegrator.cpp OneStepNSProblem.cpp QP.cpp \
 		Relay.cpp Strategy.cpp TimeDiscretisation.cpp TimeStepping.cpp \
-		Adams.h DFC_2D.h EventDriven.h LCP.h Lsodar.h Moreau.h OneStepIntegrator.h OneStepNSProblem.h QP.h \
+		Solver.h LemkeSolver.h LexicoLemkeSolver.h QPSolver.h NSQPSolver.h NLGSSolver.h CPGSolver.h \
+		LatinSolver.h Adams.h FrictionContact2D.h FrictionContact3D.h EventDriven.h LCP.h Lsodar.h Moreau.h OneStepIntegrator.h OneStepNSProblem.h QP.h \
 		Relay.h Strategy.h TimeDiscretisation.h TimeStepping.h	
 libSimulationTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
-include_HEADERS = Adams.h DFC_2D.h EventDriven.h LCP.h Lsodar.h Moreau.h OneStepIntegrator.h OneStepNSProblem.h QP.h \
+include_HEADERS = Solver.h LemkeSolver.h LexicoLemkeSolver.h QPSolver.h NSQPSolver.h NLGSSolver.h CPGSolver.h \
+		LatinSolver.h Adams.h FrictionContact2D.h FrictionContact3D.h EventDriven.h LCP.h Lsodar.h Moreau.h OneStepIntegrator.h OneStepNSProblem.h QP.h \
 		Relay.h Strategy.h TimeDiscretisation.h TimeStepping.h
 
 

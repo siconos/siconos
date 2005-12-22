@@ -79,7 +79,8 @@
 <xsd:simpleType name="PossibleOneStepNSProblemValues">
    <xsd:restriction base="xsd:string">
 	<xsd:enumeration value="LCP"/>
-	<xsd:enumeration value="DFC_2D"/>
+	<xsd:enumeration value="FrictionContact2D"/>
+	<xsd:enumeration value="FrictionContact3D"/>
 	<xsd:enumeration value="QP"/>
 	<xsd:enumeration value="Relay"/>
    </xsd:restriction>
@@ -309,6 +310,14 @@
 <xsd:complexType name="list_of_DS">
 	<xsd:sequence>
 		<xsd:element name="DSList" minOccurs="0" maxOccurs="unbounded" type="vector"/>
+	</xsd:sequence>
+	<xsd:attribute name="all" type="boolean" use="optional" default="false"/>
+</xsd:complexType>
+
+<!--~~~~~~ special type to provide a list of indexes for DS (for interaction, OSI ...), interaction (for OneStepNS, ...) or anything else ~~~~~~~~-->
+<xsd:complexType name="index_list">
+	<xsd:sequence>
+		<xsd:element name="indexList" minOccurs="0" maxOccurs="unbounded" type="vector"/>
 	</xsd:sequence>
 	<xsd:attribute name="all" type="boolean" use="optional" default="false"/>
 </xsd:complexType>
@@ -713,7 +722,7 @@
 						<xsd:element name="y" type="vector" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="lambda" type="vector" minOccurs='0' maxOccurs='1'/>
 						<!--~~~~~~ DS_Concerned ~~~~~~-->
-						<xsd:element name="DS_Concerned" type="list_of_DS" minOccurs='1' maxOccurs="1"/>
+						<xsd:element name="DS_Concerned" type="index_list" minOccurs='1' maxOccurs="1"/>
 						
 				<!--~~~~~~~~ Relation ~~~~~~~~-->
 				<xsd:element name="Interaction_Content" minOccurs="1" maxOccurs="1">
@@ -865,7 +874,7 @@
 				<xsd:element name="Moreau">
 					<xsd:complexType>
 						<xsd:all>
-							<xsd:element name="DS_Concerned" type="OSI_DS_ConcernedType" minOccurs='1' maxOccurs="1"/>
+							<xsd:element name="DS_Concerned" type="index_list" minOccurs='1' maxOccurs="1"/>
 <!--							<xsd:element name="r" type="xsd:integer"  minOccurs='1' maxOccurs="1"/> -->
 							<xsd:element name="Theta" type="positiveDouble" minOccurs="1" maxOccurs="1"/>
 							<xsd:element name="W" type="matrix" minOccurs="0" maxOccurs="1"/>
@@ -876,7 +885,7 @@
 				<xsd:element name="Adams">
 					<xsd:complexType>
 						<xsd:all>
-							<xsd:element name="DS_Concerned" type="OSI_DS_ConcernedType" minOccurs="1" maxOccurs="1"/>
+							<xsd:element name="DS_Concerned" type="index_list" minOccurs="1" maxOccurs="1"/>
 							<xsd:element name="r" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
 						</xsd:all>
 					</xsd:complexType>
@@ -885,7 +894,7 @@
 				<xsd:element name="LSODAR">
 					<xsd:complexType>
 						<xsd:all>
-							<xsd:element name="DS_Concerned" type="OSI_DS_ConcernedType" minOccurs="1" maxOccurs="1"/>
+							<xsd:element name="DS_Concerned" type="index_list" minOccurs="1" maxOccurs="1"/>
 							<xsd:element name="r" type="xsd:integer" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
 					</xsd:complexType>
@@ -909,18 +918,31 @@
 							<xsd:element name="n" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
-							<xsd:element name="Interaction_Concerned" type="InteractionConcernedType" minOccurs="1" maxOccurs="1"/>
+							<!--~~~~~~ list of interactions concerned ~~~~~~-->
+               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='1' maxOccurs="1"/>
 						</xsd:all>
 					</xsd:complexType>
 				</xsd:element>
 				
-				<xsd:element name="DFC_2D">
+				<xsd:element name="FrictionContact2D">
 					<xsd:complexType>
 						<xsd:all>
 							<xsd:element name="n" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
-							<xsd:element name="Interaction_Concerned" type="InteractionConcernedType" minOccurs="1" maxOccurs="1"/>
+							<!--~~~~~~ list of interactions concerned ~~~~~~-->
+               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='1' maxOccurs="1"/>
+						</xsd:all>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="FrictionContact3D">
+					<xsd:complexType>
+						<xsd:all>
+							<xsd:element name="n" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
+							<!--~~~~~~ list of interactions concerned ~~~~~~-->
+               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='1' maxOccurs="1"/>
 						</xsd:all>
 					</xsd:complexType>
 				</xsd:element>
@@ -931,7 +953,19 @@
 							<xsd:element name="n" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="Q" type="matrix" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="p" type="vector" minOccurs="0" maxOccurs="1"/>
-							<xsd:element name="Interaction_Concerned" type="InteractionConcernedType" minOccurs="1" maxOccurs="1"/>
+							<!--~~~~~~ list of interactions concerned ~~~~~~-->
+               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='1' maxOccurs="1"/>
+						</xsd:all>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="Relay">
+					<xsd:complexType>
+		 				<xsd:all>
+							<xsd:element name="n" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
+							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
+							<!--~~~~~~ list of interactions concerned ~~~~~~-->
+               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='1' maxOccurs="1"/>
 						</xsd:all>
 					</xsd:complexType>
 				</xsd:element>

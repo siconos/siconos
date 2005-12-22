@@ -179,7 +179,8 @@ extern "C" void computeB(unsigned int *sizeOfB, double* b, const double *time)
 
 // ===== RELATIONS ====
 
-extern "C" void computeOutput(const unsigned int* sizeOfX, const double* x, const double* time, const unsigned int* sizeOfY, const double* lambda, const unsigned int* sizeOfU, const double* u, double* y, double* param)
+extern "C" void y(const unsigned int* sizeOfX, const double* x, const double* time, const unsigned int* sizeOfY, const double* lambda,
+                  const unsigned int* sizeOfU, const double* u, double* y, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); x (pointer to x vector); time; lambda (pointer to lambda vector)
    * output parameter : y (pointer to vector y )
@@ -187,7 +188,7 @@ extern "C" void computeOutput(const unsigned int* sizeOfX, const double* x, cons
   printf("Warning: call of the function 'computeOutput' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
 
-extern "C" void computeInput(const unsigned int* sizeY, const double* lambda, const double* time, double* r, double* param)
+extern "C" void R(const unsigned int* sizeY, const double* lambda, const double* time, double* r, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); x (pointer to x vector); time; lambda (pointer to lambda vector)
    * output parameter : r (pointer to vector r )

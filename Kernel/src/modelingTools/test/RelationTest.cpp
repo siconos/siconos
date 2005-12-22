@@ -32,7 +32,6 @@ CPPUNIT_TEST_SUITE_REGISTRATION(RelationTest);
 
 void RelationTest::setUp()
 {
-  cout << "Set up" << endl;
   // parse xml file:
   xmlDocPtr doc;
   xmlNodePtr cur;

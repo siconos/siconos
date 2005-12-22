@@ -63,7 +63,6 @@ Relation::Relation(RelationXML* relxml, Interaction* inter):
       (*iter)->zero();
 
     string plugin;
-
     // computeInput
     if (relationxml->hasComputeInput())
     {

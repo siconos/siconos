@@ -19,6 +19,7 @@
 #ifndef __SICONOSCONST__
 #define __SICONOSCONST__
 
+#include"KernelDefaultConfig.h"
 #include<string>
 
 const std::string N_ASCII = "ascii";
@@ -44,7 +45,7 @@ const std::string LAGRANGIANLINEARRELATION = "LagrangianLinearR";
 // Non smooth laws
 const std::string COMPLEMENTARITYCONDITIONNSLAW = "ComplementarityConditionNSL";
 const std::string RELAYNSLAW = "RelayNSL";
-const std::string NEWTONIMPACTLAWNSLAW = "NewtonImpactLawNSL";
+const std::string NEWTONIMPACTNSLAW = "NewtonImpactLawNSL";
 const std::string NEWTONIMPACTFRICTIONNSLAW = "NewtonImpactFrictionNSL";
 
 // const for DSInputOutput
@@ -62,7 +63,8 @@ const std::string LAGRANGIANLINEAREC = "LagrangianLinearEC";
 
 // const found in the OneStepNSProblem
 const std::string LCP_OSNSP = "LCP";
-const std::string DFC_2D_OSNSP = "DFC_2D";
+const std::string FrictionContact2D_OSNSP = "FrictionContact2D";
+const std::string FrictionContact3D_OSNSP = "FrictionContact3D";
 const std::string QP_OSNSP = "QP";
 const std::string RELAY_OSNSP = "Relay";
 const std::string  OSNSP_TOLERANCE = "tolerance";
@@ -73,15 +75,8 @@ const std::string  OSNSP_SEARCHDIRECTION = "searchDirection";
 const std::string  OSNSP_LCPSOLVING = "LcpSolving";
 const std::string  OSNSP_PRSOLVING = "PrimalRelaySolving";
 const std::string  OSNSP_DRSOLVING = "DualRelaySolving";
-const std::string  OSNSP_PFC_2DSOLVING = "PrimalFrictionContact2DSolving";
-const std::string  OSNSP_DFC_2DSOLVING = "DualFrictionContact2DSolving";
-const std::string  OSNSP_LEMKE = "Lemke";
-const std::string  OSNSP_LEXICOLEMKE = "LexicoLemke";
-const std::string  OSNSP_QP = "QP" ;
-const std::string  OSNSP_NSQP = "NSQP" ;
-const std::string  OSNSP_NLGS = "NLGS";
-const std::string  OSNSP_CPG = "CPG";
-const std::string  OSNSP_LATIN = "Latin";
+const std::string  OSNSP_FrictionContact2DSOLVING = "FrictionContact2DSolving";
+const std::string  OSNSP_FrictionContact3DSOLVING = "FrictionContact3DSolving";
 
 // const found in the Strategy
 const std::string EVENTDRIVEN_STRATEGY = "EventDriven";

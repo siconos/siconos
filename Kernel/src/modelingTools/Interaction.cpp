@@ -64,7 +64,7 @@ Interaction::Interaction(const Interaction& newI):
   string NslawType = newI.getNonSmoothLawPtr()->getType();
   if (NslawType ==  COMPLEMENTARITYCONDITIONNSLAW)
     nslaw = new ComplementarityConditionNSL();
-  else if (NslawType == NEWTONIMPACTLAWNSLAW)
+  else if (NslawType == NEWTONIMPACTNSLAW)
     nslaw = new NewtonImpactLawNSL();
   else if (NslawType == NEWTONIMPACTFRICTIONNSLAW)
     nslaw = new NewtonImpactFrictionNSL();
@@ -704,7 +704,7 @@ void Interaction::saveInteractionToXML()
     (static_cast<ComplementarityConditionNSL*>(nslaw))->saveNonSmoothLawToXML();
   else if (nslaw->getType() == RELAYNSLAW)
     (static_cast<RelayNSL*>(nslaw))->saveNonSmoothLawToXML();
-  else if (nslaw->getType() == NEWTONIMPACTLAWNSLAW)
+  else if (nslaw->getType() == NEWTONIMPACTNSLAW)
     (static_cast<NewtonImpactLawNSL*>(nslaw))->saveNonSmoothLawToXML();
   else if (nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
     (static_cast<NewtonImpactFrictionNSL*>(nslaw))->saveNonSmoothLawToXML();

@@ -64,7 +64,6 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
     isRAllocatedIn.resize(2, true);
     isRAllocatedIn[1] = false ; // rMemory
 
-
     // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
     parametersList0.reserve(4);
     for (unsigned int i = 0; i < 4; ++i)
@@ -1114,8 +1113,6 @@ DynamicalSystem::DynamicalSystem():
   vector<SimpleVector*>::iterator iter;
   for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
     (*iter)->zero();
-
-
   setVectorFieldFunction("DefaultPlugin.so", "vectorField");
   setComputeJacobianXFunction("DefaultPlugin.so", "computeJacobianX");
 }

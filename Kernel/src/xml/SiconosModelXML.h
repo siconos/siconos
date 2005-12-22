@@ -42,12 +42,6 @@
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
 
-
-extern unsigned int MATRIX_MAX_SIZE;
-extern unsigned int VECTOR_MAX_SIZE;
-extern std::string  FILE_STORAGE;
-extern std::string  XML_SCHEMA;
-
 class Model;
 class NonSmoothDynamicalSystemXML;
 class StrategyXML;

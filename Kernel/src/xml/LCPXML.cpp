@@ -15,52 +15,48 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "LCPXML.h"
 using namespace std;
 
-LCPXML::LCPXML() : OneStepNSProblemXML()
+LCPXML::LCPXML() : OneStepNSProblemXML(), MNode(NULL), qNode(NULL)
+{}
+
+LCPXML::LCPXML(xmlNode * OSNSNode, vector<int> definedInteractionNumbers):
+  OneStepNSProblemXML(OSNSNode, definedInteractionNumbers), MNode(NULL), qNode(NULL)
 {
-  this->MNode = NULL;
-  this->qNode = NULL;
-}
+  // OSNSNode == "OneStepNSProblem"
+  // problemTypeNode = "LCP"
 
-LCPXML::LCPXML(xmlNode * LCPNode, vector<int> definedInteractionNumbers)
-  : OneStepNSProblemXML(LCPNode, definedInteractionNumbers)
-{
-  xmlNode *node, *lcpModelNode;
 
-  lcpModelNode = SiconosDOMTreeTools::findNodeChild(LCPNode);
-  if (lcpModelNode != NULL)
-  {
-    if (strcmp((char*)lcpModelNode->name, OSNSP_SOLVER.c_str()) == 0)
-      lcpModelNode = SiconosDOMTreeTools::findFollowNode(lcpModelNode);
-  }
+  xmlNode* node;
+  // dim
+  //if ((node=SiconosDOMTreeTools::findNodeChild(problemTypeNode, "n")) !=NULL)
+  //  dimNode=node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(lcpModelNode, LCP_M)) != NULL)
-  {
-    this->MNode = node;
-  }
-  else
-    this->MNode = NULL;
+  // M
+  if ((node = SiconosDOMTreeTools::findNodeChild(problemTypeNode, "M")) != NULL)
+    MNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(lcpModelNode, LCP_Q)) != NULL)
-  {
-    this->qNode = node;
-  }
-  else
-    this->qNode = NULL;
+  // q
+  if ((node = SiconosDOMTreeTools::findNodeChild(problemTypeNode, "q")) != NULL)
+    qNode = node;
+
 }
 
 
 LCPXML::~LCPXML() {}
 
-void LCPXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
+void LCPXML::setM(const SiconosMatrix &m)
 {
-  IN("LCPXML::updateOneStepNSProblemXML\n");
-  this->rootNode = node;
-  this->rootNSProblemXMLNode = SiconosDOMTreeTools::findNodeChild(this->rootNode);
-  //this->loadOneStepNSProblem( osnspb );
-  OUT("LCPXML::updateOneStepNSProblemXML\n");
+  if (!hasM())
+    MNode = SiconosDOMTreeTools::createMatrixNode(problemTypeNode, "M", m);
+  else SiconosDOMTreeTools::setSiconosMatrixNodeValue(MNode, m);
 }
 
+void LCPXML::setQ(const SiconosVector& q)
+{
+  if (!hasQ())
+    qNode = SiconosDOMTreeTools::createVectorNode(problemTypeNode, "q", q);
+  else SiconosDOMTreeTools::setSiconosVectorNodeValue(qNode, q);
+}

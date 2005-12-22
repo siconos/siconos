@@ -276,7 +276,7 @@ void Model::checkXMLPlatform()
       }
       else
       {
-        strat->getStrategyXMLPtr()->updateStrategyXML(modelxml->getStrategyXML()->getNode(), strat);
+        strat->getStrategyXMLPtr()->saveStrategy2XML(modelxml->getStrategyXML()->getNode(), strat);
       }
     }
   }
@@ -442,22 +442,6 @@ Strategy* Model::createTimeEventDriven()
   strat = new EventDriven(NULL, this);
   isStrategyAllocatedIn = true ;
   return strat;
-}
-
-void Model::setMatrixMaxSize(const int& max)
-{
-  MATRIX_MAX_SIZE = max;
-}
-
-void Model::setVectorMaxSize(const int& max)
-{
-  VECTOR_MAX_SIZE = max;
-}
-
-void Model::setFileStorage(const string& fs)
-{
-  if ((fs == N_ASCII) || (fs == N_BINARY)) FILE_STORAGE = fs;
-  else cout << "/!\\ file storage not changed, new file storage method doesn't exist!" << endl;
 }
 
 // --- Default (private) constructor ---

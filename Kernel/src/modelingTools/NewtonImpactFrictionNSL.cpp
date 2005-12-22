@@ -32,7 +32,8 @@ NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(NonSmoothLawXML* nslawxml):
   if (nslawxml != NULL)
   {
     en = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getEn();
-    et = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getEt();
+    if ((static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->hasEt())
+      et = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getEt();
     mu = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getMu();
   }
   else RuntimeException::selfThrow("NewtonImpactFrictionNSL:: xml constructor, xml file=NULL");
