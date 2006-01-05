@@ -61,7 +61,7 @@ void QPSolver::setSolvingMethod()
     solvingMethod->lcp.tol = tolerance;
   }
   else
-    RuntimeException::selfThrow("QPSolver constructor - solving method " + solvingFormalisation + " does not exist.");
+    RuntimeException::selfThrow("QPSolver constructor - solving method " + solvingFormalisation + " not available for this solver.");
 }
 
 QPSolver* QPSolver::convert(Solver* solv)

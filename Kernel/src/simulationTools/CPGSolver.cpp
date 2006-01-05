@@ -60,33 +60,24 @@ void CPGSolver::setSolvingMethod()
     strcpy(solvingMethod->lcp.name, solverAlgorithmName.c_str());
     solvingMethod->lcp.itermax = maxIter;
     solvingMethod->lcp.tol = tolerance;
-  }
-  else if (solvingFormalisation == "PrimalRelaySolving")
-  {
-    strcpy(solvingMethod->pr.name, solverAlgorithmName.c_str());
-    solvingMethod->pr.itermax = maxIter;
-    solvingMethod->pr.tol = tolerance;
-  }
-  else if (solvingFormalisation == "DualRelaySolving")
-  {
-    strcpy(solvingMethod->dr.name, solverAlgorithmName.c_str());
-    solvingMethod->dr.itermax = maxIter;
-    solvingMethod->dr.tol = tolerance;
+    solvingMethod->lcp.chat = 0;
   }
   else if (solvingFormalisation == "FrictionContact2DSolving")
   {
     strcpy(solvingMethod->pfc_2D.name, solverAlgorithmName.c_str());
     solvingMethod->pfc_2D.itermax = maxIter;
     solvingMethod->pfc_2D.tol = tolerance;
+    solvingMethod->pfc_2D.chat = 0;
   }
   else if (solvingFormalisation == "FrictionContact3DSolving")
   {
     strcpy(solvingMethod->pfc_3D.name, solverAlgorithmName.c_str());
     solvingMethod->pfc_3D.itermax = maxIter;
     solvingMethod->pfc_3D.tol = tolerance;
+    solvingMethod->pfc_3D.chat = 0;
   }
   else
-    RuntimeException::selfThrow("CPGSolver constructor - solving method " + solvingFormalisation + " does not exist.");
+    RuntimeException::selfThrow("CPGSolver constructor - solving method " + solvingFormalisation + " not available for this solver.");
 }
 
 CPGSolver* CPGSolver::convert(Solver* solv)

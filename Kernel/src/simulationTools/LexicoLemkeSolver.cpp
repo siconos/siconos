@@ -37,7 +37,10 @@ LexicoLemkeSolver::LexicoLemkeSolver(const LexicoLemkeSolver& solv):
 
 LexicoLemkeSolver::LexicoLemkeSolver(SolverXML* lemkeXML):
   Solver(lemkeXML), maxIter((static_cast<LexicoLemkeSolverXML*>(lemkeXML))->getMaxIter())
-{}
+{
+  // fill solvingMethod structure
+  setSolvingMethod();
+}
 
 LexicoLemkeSolver::~LexicoLemkeSolver()
 {}
@@ -56,11 +59,6 @@ void LexicoLemkeSolver::setSolvingMethod()
     strcpy(solvingMethod->lcp.name, solverAlgorithmName.c_str());
     solvingMethod->lcp.itermax = maxIter;
     solvingMethod->lcp.chat = 1;
-  }
-  else if (solvingFormalisation == "FrictionContact2DSolving")
-  {
-    strcpy(solvingMethod->dfc_2D.name, solverAlgorithmName.c_str());
-    solvingMethod->dfc_2D.itermax = maxIter;
   }
   else
     RuntimeException::selfThrow("LexicoLemkeSolver constructor - solving method " + solvingFormalisation + " does not exist.");

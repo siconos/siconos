@@ -1083,8 +1083,7 @@ void FrictionContact2D::compute(const double& time)
     Interaction * currentInteraction = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0);
     solvingMethod.pfc_2D.mu = static_cast<NewtonImpactFrictionNSL*>(currentInteraction->getNonSmoothLawPtr())->getMu();
     info = pfc_2D_solver(M->getArray(), q->getArray(), &Dim, &solvingMethod  , z->getArray(), w->getArray());
-    if (info != 0)
-      RuntimeException::selfThrow("FrictionContact2D::compute, pfc_2d_solver convergence failed");
+    check_solver(info);
     // --- Recover the desired variables from FrictionContact2D output ---
     postFrictionContact2D(*w, *z);
   }

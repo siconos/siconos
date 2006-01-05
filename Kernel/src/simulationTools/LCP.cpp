@@ -1063,8 +1063,8 @@ void LCP::compute(const double& time)
     int Nlcp = (int)nLcp;
     method solvingMethod = *(solver->getSolvingMethodPtr());
     info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
-    if (info != 0)
-      RuntimeException::selfThrow("LCP::compute, solve_lcp: convergence failed");
+    // \warning : info value and signification depends on solver type ...
+    check_solver(info);
     // --- Recover the desired variables from LCP output ---
     postLCP(*w, *z);
   }

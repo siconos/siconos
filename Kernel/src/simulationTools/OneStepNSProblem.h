@@ -332,6 +332,12 @@ public:
    */
   bool isOneStepNsProblemComplete();
 
+  /** \fn void check_solver(const int& info) const
+   *  \brief return exception and message if solver failed
+   *  \param: output from solve_... (Numerics routine)
+   */
+  void check_solver(const int&) const;
+
 };
 
 #endif // ONESTEPNSPROBLEM_H

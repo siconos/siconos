@@ -83,15 +83,14 @@ SimpleVector::SimpleVector(const int unsigned& size):
 {
   IN("SimpleVector (const int size) \n");
   composite = false;
-
-  if (size < 0)
-    SiconosVectorException::selfThrow(" SimpleVector:: constructor, negative size");
-
+  cout << " IN SV" << endl;
+  cout << size << endl;
   // resize and init lavd
   lavd.resize(size, 1);
+  cout << " IN SV2" << endl;
   for (unsigned int i = 0; i < size; ++i)
     lavd(i) = 0.0;
-
+  cout << " IN SV3" << endl;
   OUT("SimpleVector (const int size) \n");
 }
 

@@ -86,15 +86,8 @@ void LatinSolver::setSolvingMethod()
     solvingMethod->pfc_2D.tol = tolerance;
     solvingMethod->pfc_3D.k_latin = searchDirection;
   }
-  else if (solvingFormalisation == "FrictionContact3DSolving")
-  {
-    strcpy(solvingMethod->pfc_3D.name, solverAlgorithmName.c_str());
-    solvingMethod->pfc_3D.itermax = maxIter;
-    solvingMethod->pfc_3D.tol = tolerance;
-    solvingMethod->pfc_3D.k_latin = searchDirection;
-  }
   else
-    RuntimeException::selfThrow("LatinSolver constructor - solving method " + solvingFormalisation + " does not exist.");
+    RuntimeException::selfThrow("LatinSolver constructor - solving method " + solvingFormalisation + " not available for this solver.");
 }
 
 LatinSolver* LatinSolver::convert(Solver* solv)

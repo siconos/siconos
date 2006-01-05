@@ -48,6 +48,35 @@ class OneStepNSProblem;
  */
 class LCP : public OneStepNSProblem
 {
+private:
+
+  /** Size of the LCP */
+  unsigned int nLcp;
+
+  /** contains the vector w of a LCP system */
+  SimpleVector *w;
+
+  /** contains the vector z of a LCP system */
+  SimpleVector *z;
+
+  /** contains the matrix M of a LCP system */
+  SiconosMatrix *M;
+
+  /** contains the vector q of a LCP system */
+  SimpleVector *q;
+
+  //  /** contains the data of the LCP, according to siconos/numerics */
+  //  LCPStructure LCPMethod;
+
+  //  /** C structure which gives the informations to the solve function */
+  //  method_lcp meth_lcp;
+
+  /** Flags to check wheter pointers were allocated in class constructors or not */
+  bool isWAllocatedIn;
+  bool isZAllocatedIn;
+  bool isMAllocatedIn;
+  bool isQAllocatedIn;
+
 public:
 
   /** \fn LCP()
@@ -325,34 +354,6 @@ public:
    */
   static LCP* convert(OneStepNSProblem* osnsp);
 
-private:
-
-  /** Size of the LCP */
-  unsigned int nLcp;
-
-  /** contains the vector w of a LCP system */
-  SimpleVector *w;
-
-  /** contains the vector z of a LCP system */
-  SimpleVector *z;
-
-  /** contains the matrix M of a LCP system */
-  SiconosMatrix *M;
-
-  /** contains the vector q of a LCP system */
-  SimpleVector *q;
-
-  //  /** contains the data of the LCP, according to siconos/numerics */
-  //  LCPStructure LCPMethod;
-
-  //  /** C structure which gives the informations to the solve function */
-  //  method_lcp meth_lcp;
-
-  /** Flags to check wheter pointers were allocated in class constructors or not */
-  bool isWAllocatedIn;
-  bool isZAllocatedIn;
-  bool isMAllocatedIn;
-  bool isQAllocatedIn;
 
 };
 

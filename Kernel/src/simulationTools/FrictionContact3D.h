@@ -63,12 +63,6 @@ private:
   /** contains the vector q of a FrictionContact3D system */
   SimpleVector *q;
 
-  //  /** contains the data of the FrictionContact3D, according to siconos/numerics */
-  //  FrictionContact3DStructure FrictionContact3DMethod;
-
-  //  /** C structure which gives the informations to the solve function */
-  //  method_lcp meth_lcp;
-
   /** Flags to check wheter pointers were allocated in class constructors or not */
   bool isWAllocatedIn;
   bool isZAllocatedIn;
@@ -105,28 +99,19 @@ public:
                     const int& = 0, const double& = 0, const std::string & = "none",
                     const double & = 0);
 
+  /** \fn FrictionContact3D(Strategy*, const string& solverName, const string& newSolvingMethod, const int& maxIter,
+   *          const double & Tolerance=0, const string & NormType="none",
+   *          const double & SearchDirection=0)
+   *  \brief constructor from data
+   *  \param Strategy *: the strategy that owns this problem
+   *  \param Solver* : pointer to object that contains solver algorithm and formulation
+   */
+  FrictionContact3D(Strategy * , Solver*);
+
   // --- Destructror ---
   ~FrictionContact3D();
 
   // GETTERS/SETTERS
-
-  /** \fn int getDim(void)
-   *  \brief get the size dim of the FrictionContact3D
-   *  \return an int
-   */
-  inline const unsigned int getDim() const
-  {
-    return dim;
-  }
-
-  /** \fn void setDim(const int&)
-   *  \brief set the size of the FrictionContact3D
-   *  \param the size
-   */
-  inline void setDim(const unsigned int& newValue)
-  {
-    dim = newValue;
-  }
 
   // --- W ---
   /** \fn  const SimpleVector getW(void) const
@@ -351,6 +336,7 @@ public:
    * \return a pointer on the problem if it is of the right type, NULL otherwise
    */
   static FrictionContact3D* convert(OneStepNSProblem* osnsp);
+
 
 };
 

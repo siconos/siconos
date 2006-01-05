@@ -21,7 +21,7 @@
 // includes to be deleted thanks to factories
 #include "Moreau.h"
 #include "LagrangianLinearR.h"
-#include "NewtonImpactLawNSL.h"
+#include "NewtonImpactFrictionNSL.h"
 #include "LinearTIR.h"
 
 using namespace std;
@@ -75,6 +75,14 @@ FrictionContact3D::FrictionContact3D(Strategy* newStrat, const string& newSolver
                                      const double & SearchDirection):
   OneStepNSProblem(newStrat, newSolver, newSolvingMethod, MaxIter, Tolerance, NormType, SearchDirection),
   w(NULL), z(NULL), M(NULL), q(NULL),
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
+{
+  nspbType = FrictionContact3D_OSNSP;
+}
+
+// Constructor from a set of data
+FrictionContact3D::FrictionContact3D(Strategy* newStrat, Solver*  newSolver):
+  OneStepNSProblem(newStrat, newSolver), w(NULL), z(NULL), M(NULL), q(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
 {
   nspbType = FrictionContact3D_OSNSP;
@@ -999,17 +1007,24 @@ void FrictionContact3D::computeQ(const double& time)
     else if (relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION)
     {
       LagrangianLinearR *LLR = static_cast<LagrangianLinearR*>(R);
-      if (nslaw->getType() == NEWTONIMPACTNSLAW)
+      if (nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
       {
         vector<unsigned int> indexMax = topology->getIndexMax(currentInteraction);
 
-        NewtonImpactLawNSL * newton = static_cast<NewtonImpactLawNSL*>(nslaw);
-        double e = newton->getE();
+        NewtonImpactFrictionNSL * newton = static_cast<NewtonImpactFrictionNSL*>(nslaw);
+        double e = newton->getEn();
+        //double mu= newton->getMu();
         LLR->computeFreeOutput(time);
         if (topology->isTimeInvariant())
         {
           yFree = new SimpleVector(currentInteraction -> getY(1)); // copy, no pointer equality
-          *yFree += e * currentInteraction -> getYOld(1);
+          // Only normal part has to be multiplied by e.
+          // even indexes corresponds to normal components of y.
+
+          SimpleVector * yDotOld = currentInteraction->getYOldPtr(1);
+          for (unsigned int i = 0; i < numberOfRelations; i = i + 3)
+            (*yFree)(i) += e * (*yDotOld)(i);
+
           for (unsigned int i = 0; i < numberOfRelations; i++)
             (*q)(i + pos) = (*yFree)(i);
         }
@@ -1026,13 +1041,15 @@ void FrictionContact3D::computeQ(const double& time)
             }
           }
 
-
           effectiveSize = index.size();
           yFree = new SimpleVector(effectiveSize); // we get only the "effective" relations
           (currentInteraction->getY(1)).getBlock(index, *yFree); // copy, no pointer equality
           SimpleVector * tmp =  new SimpleVector(effectiveSize);
           (currentInteraction -> getYOld(1)).getBlock(index, *tmp);
-          *yFree += e * *tmp;
+
+          for (unsigned int i = 0; i < numberOfRelations; i = i + 3)
+            (*yFree)(i) += e * (*tmp)(i);
+
           delete tmp;
           for (unsigned int i = 0; i < effectiveSize; i++)
             (*q)(i + pos) = (*yFree)(i);
@@ -1059,12 +1076,14 @@ void FrictionContact3D::compute(const double& time)
   // --- Call Numerics solver ---
   if (dim != 0)
   {
+
     int info;
     int Dim = (int)dim;
     method solvingMethod = *(solver->getSolvingMethodPtr());
-    info = dfc_2D_solver(M->getArray(), q->getArray(), &Dim, &solvingMethod, z->getArray(), w->getArray());
-    if (info != 0)
-      RuntimeException::selfThrow("FrictionContact3D::compute, dfc_2d_solver convergence failed");
+    Interaction * currentInteraction = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0);
+    solvingMethod.pfc_3D.mu = static_cast<NewtonImpactFrictionNSL*>(currentInteraction->getNonSmoothLawPtr())->getMu();
+    info = pfc_3D_solver(M->getArray(), q->getArray(), &Dim, &solvingMethod  , z->getArray(), w->getArray());
+    check_solver(info);
     // --- Recover the desired variables from FrictionContact3D output ---
     postFrictionContact3D(*w, *z);
   }
@@ -1075,6 +1094,7 @@ void FrictionContact3D::compute(const double& time)
 void FrictionContact3D::postFrictionContact3D(const SimpleVector& w, const SimpleVector &z)
 {
   // --- get topology ---
+  cout << " IN POST " << endl;
   Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   // --- get interactions list ---
@@ -1094,7 +1114,6 @@ void FrictionContact3D::postFrictionContact3D(const SimpleVector& w, const Simpl
   SimpleVector * tmpY, *tmpLambda;
   vector< SimpleVector* >  Y, Lambda;
   vector<unsigned int> r; // relative degrees
-
   // --- loop over all the interactions ---
   for (iter = listInteractions.begin(); iter != listInteractions.end(); ++iter)
   {
@@ -1106,7 +1125,6 @@ void FrictionContact3D::postFrictionContact3D(const SimpleVector& w, const Simpl
     Y = currentInteraction -> getY();
     // lambda vector
     Lambda = currentInteraction ->getLambda();
-
     // relative degrees
     r = topology->getRelativeDegrees(currentInteraction);
     rMax = r[0]; // we suppose the interaction is homogeneous
@@ -1122,20 +1140,25 @@ void FrictionContact3D::postFrictionContact3D(const SimpleVector& w, const Simpl
     */
     // Get the 'position' of vector corresponding to the current interaction, in the FrictionContact3D output:
     effectivePosition = topology->getInteractionEffectivePosition(currentInteraction);
+    cout << " IN POST 3" << endl;
 
     // we consider that the interaction is homogeneous, ie all degrees are equals
+    cout << "EF " << effectiveSize << endl;
     tmpY = new SimpleVector(effectiveSize); // warning: review r=0 case
+    cout << " IN POST 33" << endl;
     tmpLambda = new SimpleVector(effectiveSize);
 
     unsigned int pos;
     vector<unsigned int>::iterator itPos;
     // First we get in w results corresponding to the current interaction
+    cout << " IN POST 4" << endl;
 
     for (j = 0; j < effectiveSize ; j++)
     {
       (*tmpY)(j) =  w(j + effectivePosition);
       (*tmpLambda)(j) = z(j + effectivePosition);
     }
+    cout << " IN POST 5" << endl;
 
     // then we save these results in Y and Lambda, only for effective relations
     for (i = 0; i < rMax ; i++)
@@ -1159,6 +1182,7 @@ void FrictionContact3D::postFrictionContact3D(const SimpleVector& w, const Simpl
     delete tmpY;
     delete tmpLambda;
   }
+  cout << " IN POST FIN" << endl;
 }
 
 
@@ -1214,8 +1238,8 @@ void FrictionContact3D::saveQToXML()
 FrictionContact3D* FrictionContact3D::convert(OneStepNSProblem* osnsp)
 {
   cout << "FrictionContact3D::convert (OneStepNSProblem* osnsp)" << endl;
-  FrictionContact3D* fc2d = dynamic_cast<FrictionContact3D*>(osnsp);
-  return fc2d;
+  FrictionContact3D* fc3d = dynamic_cast<FrictionContact3D*>(osnsp);
+  return fc3d;
 }
 
 

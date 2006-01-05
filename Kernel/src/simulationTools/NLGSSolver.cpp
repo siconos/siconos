@@ -86,7 +86,7 @@ void NLGSSolver::setSolvingMethod()
     solvingMethod->pfc_3D.tol = tolerance;
   }
   else
-    RuntimeException::selfThrow("NLGSSolver constructor - solving method " + solvingFormalisation + " does not exist.");
+    RuntimeException::selfThrow("NLGSSolver constructor - solving method " + solvingFormalisation + " not available for this solver.");
 }
 
 NLGSSolver* NLGSSolver::convert(Solver* solv)

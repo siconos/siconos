@@ -74,14 +74,15 @@ OneStepNSProblem::OneStepNSProblem(OneStepNSProblemXML* osnspbxml, Strategy* new
   else RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file=NULL");
 
   // read list of interactions and equality constraints concerned
-  if (strategy != NULL)
-  {
-    interactionVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-    ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
-    // Default value for dim. Warning: default size is the size of the first interaction in the vector
-    if (interactionVector.size() != 0) dim = interactionVector[0]->getNInteraction();
-  }
-  else cout << "OneStepNSPb xml-constructor - Warning: no strategy linked to OneStepPb" << endl;
+  if (onestepnspbxml != NULL)
+    if (strategy != NULL)
+    {
+      interactionVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+      ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
+      // Default value for dim. Warning: default size is the size of the first interaction in the vector
+      if (interactionVector.size() != 0) dim = interactionVector[0]->getNInteraction();
+    }
+    else cout << "OneStepNSPb xml-constructor - Warning: no strategy linked to OneStepPb" << endl;
 }
 
 // Constructor with given strategy and solving method parameters (optional)
@@ -98,7 +99,7 @@ OneStepNSProblem::OneStepNSProblem(Strategy * newStrat, const string& newSolving
     if (interactionVector.size() != 0) dim = interactionVector[0]->getNInteraction();
     if (newSolvingFormalisation != "none")
     {
-      if (solverAlgorithmType == " Lemke")
+      if (solverAlgorithmType == "Lemke")
         solver = new LemkeSolver(newSolvingFormalisation, MaxIter);
       else if (solverAlgorithmType == "LexicoLemke")
         solver =  new LexicoLemkeSolver(newSolvingFormalisation, MaxIter);
@@ -246,16 +247,61 @@ void OneStepNSProblem::computeEffectiveOutput()
       // loop from 0 to relative degree to find the first yp>0
       vector<unsigned int> indexMax;
       indexMax.resize(numberOfRelations, 0);
-      for (j = 0; j < numberOfRelations; j++)
+
+      NonSmoothLaw * nslaw = (*it) ->getNonSmoothLawPtr();
+      string nslawType = nslaw -> getType();
+
+      // loop over various non smooth law types
+      if (nslawType == COMPLEMENTARITYCONDITIONNSLAW || nslawType == NEWTONIMPACTNSLAW)
       {
-        for (i = 0; i < sizeYp; i++)
+        for (j = 0; j < numberOfRelations; j++)
         {
-          if ((*(yp[i]))(j) <= 0)
-            indexMax[j]++;
-          else
-            break;
+          for (i = 0; i < sizeYp; i++)
+          {
+            if ((*(yp[i]))(j) <= 0)
+              indexMax[j]++;
+            else
+              break;
+          }
         }
       }
+      else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
+      {
+        if (nspbType == FrictionContact2D_OSNSP)
+        {
+          for (j = 0; j < numberOfRelations / 2; j++)
+          {
+            for (i = 0; i < sizeYp; i++)
+            {
+              if ((*(yp[i]))(2 * j) <= 0)
+                indexMax[2 * j]++;
+              else
+                break;
+            }
+            indexMax[2 * j + 1] = indexMax[2 * j];
+          }
+        }
+        else if (nspbType == FrictionContact3D_OSNSP)
+        {
+          for (j = 0; j < numberOfRelations; j = j + 3)
+          {
+            for (i = 0; i < sizeYp; i++)
+            {
+              if ((*(yp[i]))(j) <= 0)
+                indexMax[j]++;
+              else
+                break;
+            }
+            indexMax[j + 1] = indexMax[j];
+            indexMax[j + 2] = indexMax[j];
+          }
+        }
+        else
+          RuntimeException::selfThrow("OneStepNSProblem::computeEffectiveOutput unknown Non smooth problem type: " + nslawType);
+      }
+      else
+        RuntimeException::selfThrow("OneStepNSProblem::computeEffectiveOutput not yet implemented for non smooth law of type " + nslawType);
+
       topology->setIndexMax(*it, indexMax);
 
       for (i = 0; i < sizeYp ; i++)
@@ -416,3 +462,33 @@ bool OneStepNSProblem::isOneStepNsProblemComplete()
   return isComplete;
 }
 
+void OneStepNSProblem::check_solver(const int& info) const
+{
+  string solverName = solver->getSolverAlgorithmName();
+  // info = 0 => ok
+  // else: depend on solver
+  if (info != 0)
+  {
+    cout << "OneStepNS computeOutput warning: output message from solver is equal to " << info << " => may have failed?" << endl;
+    if (info == 1)
+      cout << " reach max iterations number with solver " << solverName << endl;
+    else if (info == 2)
+    {
+      if (solverName == "LexicoLemke" || solverName == "CPG" || solverName == "NLGS")
+        RuntimeException::selfThrow(" negative diagonal term with solver " + solverName);
+      else if (solverName == "QP" || solverName == "NSQP")
+        RuntimeException::selfThrow(" can not satisfy convergence criteria for solver " + solverName);
+      else if (solverName == "Latin")
+        RuntimeException::selfThrow(" Choleski factorisation failed with solver Latin");
+    }
+    else if (info == 3 && solverName == "CPG")
+      //RuntimeException::selfThrow(" pWp nul in solver CPG");
+      cout << "pWp null in solver CPG" << endl;
+    else if (info == 3 && solverName == "Latin")
+      RuntimeException::selfThrow(" null diagonal term with solver Latin");
+    else if (info == 5 && (solverName == "QP" || solverName == "NSQP"))
+      RuntimeException::selfThrow(" Length of working array insufficient in solver " + solverName);
+    else
+      RuntimeException::selfThrow(" unknown error type in solver " + solverName);
+  }
+}

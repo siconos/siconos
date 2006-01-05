@@ -60,13 +60,8 @@ void NSQPSolver::setSolvingMethod()
     strcpy(solvingMethod->lcp.name, solverAlgorithmName.c_str());
     solvingMethod->lcp.tol = tolerance;
   }
-  else if (solvingFormalisation == "FrictionContact2DSolving")
-  {
-    strcpy(solvingMethod->pfc_2D.name, solverAlgorithmName.c_str());
-    solvingMethod->pfc_2D.tol = tolerance;
-  }
   else
-    RuntimeException::selfThrow("NSQPSolver constructor - solving method " + solvingFormalisation + " does not exist.");
+    RuntimeException::selfThrow("NSQPSolver constructor - solving method " + solvingFormalisation + " not available for this solver.");
 }
 
 NSQPSolver* NSQPSolver::convert(Solver* solv)

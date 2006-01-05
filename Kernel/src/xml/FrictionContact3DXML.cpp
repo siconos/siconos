@@ -19,19 +19,17 @@
 #include "FrictionContact3DXML.h"
 using namespace std;
 
-FrictionContact3DXML::FrictionContact3DXML() : OneStepNSProblemXML()
-{
-}
+FrictionContact3DXML::FrictionContact3DXML() :
+  OneStepNSProblemXML(), MNode(NULL), qNode(NULL)
+{}
 
 FrictionContact3DXML::FrictionContact3DXML(xmlNode * FrictionContact3DNode, vector<int> definedInteractionNumbers)
-  : OneStepNSProblemXML(FrictionContact3DNode, definedInteractionNumbers)
-{
-}
+  : OneStepNSProblemXML(FrictionContact3DNode, definedInteractionNumbers), MNode(NULL), qNode(NULL)
+{}
 
 
 FrictionContact3DXML::~FrictionContact3DXML() {}
 
 void FrictionContact3DXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
-{
-}
+{}
 
