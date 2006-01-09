@@ -33,7 +33,7 @@
   <tbody>
     <tr>
       <th>Project:</th>
-      <td><a href="index.html">Orccad</a></td>
+      <td><a href="index.html">Siconos</a></td>
     </tr>
     <tr>
       <th>Internal Release Number:</th>
@@ -41,16 +41,29 @@
     </tr>
     <tr>
       <th>Last update:</th>
-      <td>January 06, 2006</td>
+      <td>September 15, 2005</td>
     </tr>
     <tr>
       <th>Attached Worksheets:</th>
       <td>
+        <div>
         Design &gt; <a href="model.html">Model component</a><br />
+        Design &gt; <a href="modelingTools.html">Modeling component</a><br />
+        Design &gt; <a href="simulationTools.html">Simulation
+        component</a><br />
+        Design &gt; <a href="utils.html">Utils component</a><br />
+        Design &gt; <a href="inputOutput.html">Input-Output component</a><br
+        />
+        Design &gt; <a href="plugin.html">Plug-in component</a><br />
+        Design &gt; <a href="FrontEnd.html">Front-End</a><br />
+
+
+        <div>
         Design &gt; <a href="Numerics/Numerics.html">Numerics</a><br />
         Design &gt; <a href="design-src-org.html">Source Organization and
         Build Worksheet<br />
-        </a>
+        </a></div>
+        </div>
         <!--    &lt;div&gt;Design &amp;gt; &lt;a href="design-scalability.html"&gt;Scalability Worksheet&lt;/a&gt;&lt;/div&gt; -->
       </td>
     </tr>
@@ -78,71 +91,91 @@
 
 <div id="introduction">
 <h2>Introduction</h2>
-
-<p> The purpose of this document is to define and describe the software
-architecture of <a href="glossary.html#OrccadV4">Orccad V4</a>. It also
+<dl>
+</dl>
+    The purpose  of this document is to define and describe the software
+architecture of  <a href="glossary.html#Siconos/Kernel">Siconos/Kernel</a>,
+<a href="glossary.html#Siconos/Numerics">Siconos/Numerics</a> and <a
+href="glossary.html#Siconos/Front-End">Siconos/Front-End</a>. It also
 provides a general overview of the design of the system for (new) developers
 and will be used by the project manager to share out the detailed conception
-and programming in work packages. </p>
-
-
-<p>  This architecture relies on the specifications given in the <a
-href="./srs.html">Software Requirements Specification</a>.</p>
+and programming in work packages. <br />
+This architecture relies on the specifications given in the <a
+href="./srs.html">Software Requirements Specification</a>.<br />
 
 
 <h2><a name="designOverview">General context overview</a></h2>
-
-As explained in <a href="./proposal.html">Project Proposal</a>, <a
-href="glossary.html#Orccad">Orccad</a> is to the design
-and the implementation of advanced robotics control systems.
-
-<p> <a href="glossary.html#OrccadV4">Orccad V4</a> is a complete
-re-engineering of <a href="glossary.html#OrccadV3">Orccad V3.</a>
-</p>
+As explained in <a href="./proposal.html">Project Proposal</a>,  <a
+href="glossary.html#Siconos/Kernel">Siconos/Kernel</a> is dedicated to the
+modeling and the simulation of  <a href="glossary.html#NSDS">NSDS</a>, with
+high level description and numerical solving strategies. It relies on <a
+href="Numerics/Numerics.html">Siconos/Numerics</a> which provides low-level
+algorithms to compute basic well-identified problems. <span
+style="font-weight: bold;"></span><br />
 
 
 <h3>External interfaces</h3>
+<br />
+The Kernel is designed to be used as a stand-alone software or as an external
+libr /ary for computational softwares such as <a
+href="glossary.html#Scilab">Scilab</a> or <a
+href="glossary.html#Matlab">Matlab</a>, through the Front-end interface.
+Indeed there are two main ways to perform a simulation: <br />
 
-
-stand-alone : Kernel or Kernel/Gui<br />
-
-importing datas from Matlab or Scilab with Front-End<br />
-
-link with Esterel for robot controller<br />
-
-
-</div>
+<ul>
+  <li>direct compilation/linking/launch of a main C++ program. All
+    instantiated objects members are then available through public methods.
+    <br />
+    For a complete example, see for instance <a
+    href="../../sample/CircuitRLCD/CircuitRLCD.cpp">Circuit RLCD template</a>
+    in sample directory. <br />
+    <br />
+  </li>
+  <li>Interface with <a href="glossary.html#xxxlab">Scilab</a> or Python. The
+    interface through a scientific computation software is the easiest way to
+    use the platform. <br />
+    The way component Front-End works and is implemented is described on <a
+    href="FrontEnd.html">Front-End</a>.<br />
+  </li>
+</ul>
+The interfaces between Siconos/Kernel and other modules are detailed on the
+following scheme: <br />
+<br />
 
 
 <div align="center">
-<img alt="Figure Orccad/Kernel interfaces" src="figures/kernelInterfaces.png"
+<img alt="Kernel interfaces" src="figures/kernelInterfaces.png"
 style="width: 707px; height: 362px;" /><br />
 <br />
 </div>
 
-
-
 <h2><a name="KComponents">Kernel Components</a></h2>
-<p>
-All the Kernel is written in Java, object-oriented language, using classes
+All the Kernel is written in C++, object-oriented language, using classes
 architecture, all object members being private with public methods to access
-to them. </p>
-
-<p>
-model of an application = PrR,Tr,Modules, ports...<br />
-plugin (extension)<br />
-data<br />
-API ?<br />
-</p>
-
-This results in x distinct components listed below.<br />
+to them. <br />
+A model is composed in two different parts: the Non Smooth Dynamical System
+definition (dynamical systems and their interactions, relations, non smooth
+laws ...) and the description of a strategy (time discretization, solver ...)
+to solve it. Simulation and modeling are clearly separated and rather
+independent. Moreover, they are completed by tools for input-output data
+management and to handle vectors, matrices, plus a system to allow
+user-defined plug-in functions. <br />
+This results in 5 distinct components listed below.<br />
 <br />
 
 
-<h3>Components Lists</h3>
+<h3>Components list   <br />
+</h3>
 <ul>
   <li><a href="model.html">C-00: Model</a> : global model definition.</li>
-  <li><a href="modelingTools.html">C-10: ModelingTools</a>: all</li>
+  <li><a href="modelingTools.html">C-10: ModelingTools</a>: all
+    classes/objects to define a complete non smooth dynamical system.</li>
+  <li><a href="simulationTools.html">C-20: SimulationTools</a>: all
+    classes/objects to define a strategy to solve the pre-defined
+    NonSmoothDynamicalSystem.</li>
+  <li><a href="utils.html">C-30: Utils</a>:  various usefully tools (Vectors
+    and matrices, Exception handling ...)<br />
+  </li>
   <li><a href="inputOutput.html">C-40: InputOutput</a>: classes/objects for
     input-ouput of data. At the time: XML management.<br />
   </li>
@@ -160,13 +193,13 @@ Kernel. <br />
 
 
 <div style="text-align: center;">
-<img alt="Figure kernel components interfaces" src="figures/kernelInterfaces2.png"
+<img alt="kernel components interfaces" src="figures/kernelInterfaces2.png"
 style="width: 612px; height: 457px;" /><br />
 </div>
 </div>
-
-
 </div>
+</div>
+<br />
 </div>
 </body>
 </html>
