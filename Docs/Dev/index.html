@@ -1,155 +1,182 @@
-<?xml version="1.0" encoding=""?>
-<!DOCTYPE html PUBLIC "-//Tigris//DTD XHTML 1.0 Transitional//EN" "http://style.tigris.org/tigris_transitional.dtd">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//Tigris//DTD XHTML 1.0 Transitional//EN"
+       "http://style.tigris.org/tigris_transitional.dtd">
 <html>
 <head>
-  <meta http-equiv="content-type" content=""/>
+  <meta http-equiv="content-type" content="utf-8" />
   <title>Project Overview</title>
   <style type="text/css">
 /* <![CDATA[ */ 
 @import "css/readyset.css"; 
 @import "css/inst.css";
 /*  ]]>
+
  */
  </style>
-  <link rel="stylesheet" type="text/css" href="css/print.css" media="print"/>
+  <link rel="stylesheet" type="text/css" href="css/print.css" media="print" />
 </head>
 
 <body>
-<h1>SICONOS - Project Overview</h1>
+<h1>ORCCAD - Project Overview</h1>
+
 <div class="app">
+
 <div class="readyset">
+
 <div id="mission">
+
 <div id="scope">
 <h2>Mission and Scope</h2>
+
 <h3>What is the purpose and scope of this document ?</h3>
-<p>This document aims at presenting a general description of the
-Siconos
-platform project. It describes, in a very general way, the major
-objectives
-of the platform and the major constraints of development and
-exploitation. It
-is addressed to users and software framework builders.</p>
+
+<p>This document aims at presenting a general description of the <a href="glossary.html#OrccadV3">ORCCAD V4</a> 
+software. It describes, in a very general way, the major objectives of the
+software and the major constraints of development and exploitation. It is
+addressed to users and software framework builders.</p>
+
 <h3>What is the scope of this project?</h3>
-<p>This project belongs to the European project <a
- href="glossary.html#SICONOS">SICONOS</a>, dedicated to the modeling,
-the
-control the analysis and the simulation of the so-called ``Non Smooth
-Dynamical system'' <a href="glossary.html#NSDS">NSDS</a>. More details
-on
-this European project can be found on the website of the Project <a
- href="http://siconos.inrialpes.fr">http://siconos.inrialpes.fr</a>.</p>
-<p>The design and the development of the <a
- href="glossary.html#Siconos">Siconos</a> platform which is one of the
-major
-objective of this European project, is told the work package 2
-("Numerical
-methods and algorithms'') in confidence; More details on this European
-project can be found on the website of the WP2 : <a
- href="http://siconos.inrialpes.fr/software">http://siconos.inrialpes.fr/software</a>.</p>
+
+<p><a href="glossary.html#Orccad">ORCCAD</a> is a methodology and a software environment dedicated to the design
+and the implementation of advanced robotics control systems. It also allows
+the specification and the validation of missions. <a href="glossary.html#Orccad">ORCCAD</a> is mainly oriented
+towards critical real-time applications in robotics. Here, automatic control
+issues are strongly connected with discrete-event aspects. Such systems are
+called hybrid systems. </p>
+
+<p>In this class of applications, <a href="glossary.html#Orccad">ORCCAD</a> is particularly concerned with
+systems which strongly interact with their environment, through several
+actuators and sensors. The control architecture of such systems is generally
+on board, and the criticality of the application is emphasized by the very
+high direct or indirect cost associated with a failure: since it is difficult
+or even impossible to physically intervene on a long range automatic
+underwater vehicle, or on an autonomous rover working on a contaminated site,
+it is necessary to minimize a priori the risk of non achievement of a
+mission. For that purpose, <a href="glossary.html#Orccad">ORCCAD</a> provides the user with dedicated interfaces
+ensuring the safety of programming, and has capabilities of validation,
+either by formal verification or by extensive simulation.</p>
+
+<p>More details on this software will be found on the website of the Project
+<a href="http://orccad.gforge.inria.fr">http://orccad.gforge.inria.fr</a>.</p>
+
+<p>The <a href="glossary.html#OrccadV4">ORCCAD V4</a> is developped jointly by Pop-Art, Sed from INRIA
+Rhône-Alpes and Trasys Space.</p>
+
 <h3>What are the main objectives and motivations ?</h3>
 <dl>
-  <dd>The first version of the objectives can be found in the Annex 1
-of the proposition of the European Project.</dd>
+    <dd><a href="glossary.html#Orccad">ORCCAD</a> is about 15 years old project and since 1998, the software
+      <a href="glossary.html#OrccadV3">ORCCAD V3</a> was not be upgraded to a major release. The main objective of
+      <a href="glossary.html#OrccadV4">ORCCAD</a> V4 is to completly rewrite the software keeping the basic ideas
+      (<a href="glossary.html#Orccad">ORCCAD</a> approaches).</dd>
 </dl>
-<dd>Besides the standard features which are required for a software of
-scientific computing, the objectives of this project are of the
-following :
-  <ul>
-    <li>To provide a common framework (modeling and simulation tools)
-for non smooth problems present in various scientific fields : applied
-Mathematics, Mechanics, Robotics, Electrical networks, etc.</li>
-    <li>To be able to rely on existing developments, as well for the
-modeling tools as for the simulation tools. The platform will not
-re-implement the dedicated tools, which are already used for the
-modeling of specific systems in various fields,but will provide a
-framework to their integration. In the same way, we want to re-use
-improved numerical low-level routines.</li>
-    <li>To support exchanges and comparisons of methods between
-researchers.</li>
-    <li>To disseminate the know-how to other fields of research and
-industry.</li>
-    <li>To take into account the diversity of users (end users,
-experts, software developers, framework builders,
-industrial users, etc ... ).</li>
-    <li>To set up standards in terms of modeling of the <a
- href="glossary.html#NSDS">NSDS.</a></li>
-    <li>To ensure software quality by the use of modern software design
-methods.</li>
-  </ul>
-</dd>
+  <dd>Besides the standard features which are required for illustrating the
+    <a href="glossary.html#Orccad">ORCCAD</a> approaches, the objectives of this project are of the following :
+    <ul>
+      <li>To be open to current methods and tools of controller modelization
+        (Scilab/Scicos, Matlab/Simulink, UML,...)</li>
+      <li>To support exchanges and comparisons of methods between
+        researchers. In particular, in the distributed and real-time robot
+        controller domain.</li>
+      <li>To disseminate the know-how to other fields of research and
+        industry.</li>
+      <li>To take into account the diversity of users (end users, experts,
+        software developers, framework builders, industrial users, etc ...
+      ).</li>
+      <li>To ensure software quality by the use of modern software design
+        methods.</li>
+    </ul>
+  </dd>
+
 <h3>What is the exploitation context ?</h3>
-<p>The <a href="glossary.html#Siconos">Siconos</a> platform should be
-used as
-well by research academic teams as by the industries, interested in <a
- href="glossary.html#NSDS">NSDS.</a> As we said earlier, the platform
-must
-rely on existing habits of the community if users, that we want to
-reach. The
-exploitation must take into account these hard constraints.</p>
-<p>To fulfill the constraints on the existing habits of a variety of
-users,
-the user interface must be implemented in three ways :</p>
+
+<p>Compared to other systems dedicated to this class of applications, <a href="glossary.html#Orccad">ORCCAD</a>
+offers a coherent and full solution, from the high level specification to the
+generation of real-time code. It can also been customized to fulfill the
+requirements of a particular problem. The tool is open to general purpose
+tools (Scilab/Scicos, Matlab/Simulink, UML,...). </p>
+
+<p>Through dedicated interfaces, and in relation with software tools adapted
+to every design level, <a href="glossary.html#Orccad">ORCCAD</a> can be used:</p>
 <ul>
-  <li>An expert and proper interface must be developed, allowing the
-access of the maximum of the functionalities of the platform. A
-accurate definition of an <a href="glossary-std.html#api">API</a> of
-the platform based on all public method of the contained classes is
-unavoidable. A interface to this <a href="glossary-std.html#api">API</a>
-in a scripting (interpreted) language should be suitable.</li>
-  <li>An <a href="glossary.html#xxxlab">xxxlab</a> interface, for
-instance for <a href="glossary.html#Scilab">Scilab</a> (<a
- href="http://www.scilab.org">www.scilab.org</a> A free scientific
-software package for numerical computations developed at <a
- href="glossary.html#INRIA">INRIA</a> too with the same
-functionalities to <a href="glossary.html#Matlab">Matlab</a>)</li>
-  <li>Finally, a graphical user interface (GUI) embedded in a
-integrated modeling and simulation environment.</li>
+  <li>by an <strong>engineer or a scientist</strong> in charge of launching
+    the system in view of a given application: for instance, he can describe
+    the mission of an underwater observation robot in terms of combination of
+    elementary behaviors associated with recovery procedures; macro
+    simulations and formal verifications can also be performed from the
+    resulting specification;</li>
+  <li>by an <strong>expert in automatic control</strong> who has to design
+    the elementary actions, to implement and tune the feedback loops and to
+    specify the event-driven behavior of these actions; validation tools can
+    also be connected at this level; besides, tool boxes like predefined
+    control schemes or robot models are available;</li>
+  <li> by a <strong>computer scientist, expert in real-time issues,</strong>
+    who defines the target architecture and the related communication and
+    execution aspects; code generators and simulation tools will allow him to
+    verify the validity of his technological choices.</li>
 </ul>
-To fulfill the constraints to re-use the existing development and
-software,
-the product must implement this two functionalities :
+
+<p></p>
+
+<p>The <a href="glossary.html#Orccad">ORCCAD</a> software should be used as
+well by research academic teams as by industry. Currently, <a href="glossary.html#OrccadV3">ORCCAD V3</a> is used
+in three ways :</p>
 <ul>
-  <li>To have a user plug-in interface to use in an easy way the code
-which already model, non smooth dynamical. This users plug-in system
-intend to provide to the user the possibility to input his data without
-recompiling the platform</li>
-  <li>To have a expert plug-in system, which allows us to specify the
-behavior of a generic type of <a href="glossary.html#NSDS">NSDS</a>
-in the platform by loading dynamically new types of derived systems.</li>
+  <li>Research for Pop-Art to experiment :
+    <ul>
+      <li>distributed and real-time robot controller</li>
+      <li>validation of missions</li>
+    </ul>
+  </li>
+  <li>Robots controller (Biped robot) for Sed.<br />
+  </li>
+  <li>Demonstrators for Trasys Space :
+    <ul>
+      <li>project XXX to test controller for a ESA Mars Rover</li>
+      <li>project XXX of visual servoing</li>
+    </ul>
+  </li>
 </ul>
+
+<p>With the <a href="glossary.html#OrccadV4">ORCCAD V4</a>, we expect to replace the <a href="glossary.html#OrccadV3">ORCCAD V3</a> use and to adress
+new research academic teams.</p>
+
 <h2>Status</h2>
-<p>The project is currently under development, a first public version
-will be
-ready for October 2005</p>
+
+<p>The <a href="glossary.html#OrccadV3">ORCCAD V3</a> is obsolete and is not distributed due to license problems.
+<a href="glossary.html#OrccadV4">ORCCAD V4</a> is currently under specification, a first public version will be
+ready for October 2006.</p>
+
 <h2>Project Document</h2>
 </div>
+
 <table>
-  
- <tbody>
+  <tbody>
     <tr>
       <th>Inception:</th>
       <td class="linklist"><a href="index.html">Project overview</a> <a
- href="proposal.html">Project proposal</a></td>
+        href="proposal.html">Project proposal</a></td>
       <td>Project presentation</td>
     </tr>
     <tr>
       <th>Specification:</th>
       <td class="linklist"><a href="srs.html">Software requirements
-specification</a> <a href="feature-set.html" class="sub">Feature set</a>
-      <a href="use-case-suite.html" class="sub">Use case suite</a></td>
-      <td>It aims to define precisely the software to realize. It
-describes functionalities and characteristics of the software and
-constraints of development and exploitation. It is addressed to users
-and software framework builders.</td>
+        specification</a> <a href="feature-set.html" class="sub">Feature
+        set</a> <a href="use-case-suite.html" class="sub">Use case
+      suite</a></td>
+      <td>It aims to define precisely the software to realize. It describes
+        functionalities and characteristics of the software and constraints
+        of development and exploitation. It is addressed to users and
+        software framework builders.</td>
     </tr>
     <tr>
       <th>Design:</th>
       <td><a href="design.html">Design</a>
-      <p><a href="sdm.html">Software Development Methodology</a></p>
+
+        <p><a href="sdm.html">Software Development Methodology</a></p>
       </td>
       <td>Define the software architecture of the <a
- href="glossary.html#Siconos">Siconos</a>. This architecture relies on
-the specification.</td>
+        href="glossary.html#Orccad">Orccad</a>. This architecture relies on
+        the specification.</td>
     </tr>
     <tr>
       <th>Quality Plan</th>
@@ -159,14 +186,16 @@ the specification.</td>
     <tr>
       <th>Glossary</th>
       <td class="linklist"><a href="glossary.html">Project Term</a> <a
- href="glossary-std.html">Standard</a></td>
-      <td> </td>
+        href="glossary-std.html">Standard</a></td>
+      <td></td>
     </tr>
   </tbody>
 </table>
+
 <div id="scope1">
-<div class="tip">TIP: Internet Explorer users can print all documents
-from this page by
+
+<div class="tip">
+TIP: Internet Explorer users can print all documents from this page by
 selecting the "Print linked documents" option in the IE Print dialog.</div>
 </div>
 </div>
