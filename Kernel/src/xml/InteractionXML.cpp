@@ -28,6 +28,8 @@
 #include "RelayNSLXML.h"
 #include "NewtonImpactLawNSLXML.h"
 #include "NewtonImpactFrictionNSLXML.h"
+
+#include "NonSmoothLaw.h"
 using namespace std;
 
 

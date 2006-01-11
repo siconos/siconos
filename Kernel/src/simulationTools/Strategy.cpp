@@ -301,7 +301,6 @@ void Strategy::update()
 
   // compute output (y, ydot)
   if (nsProblem != NULL) nsProblem->updateOutput();
-
 }
 
 void Strategy::initialize()
@@ -391,15 +390,14 @@ void Strategy::saveStrategyToXML()
 
     if (getStrategyXMLPtr()->hasOneStepNSProblemXML())
     {
-      if (nsProblem->getType() == LCP_OSNSP)
+      string NSPType = nsProblem->getType();
+      if (NSPType == "LCP")
         (static_cast<LCP*>(nsProblem))->saveNSProblemToXML();
-      else if (nsProblem->getType() == FrictionContact2D_OSNSP)
-        (static_cast<FrictionContact2D*>(nsProblem))->saveNSProblemToXML();
-      else if (nsProblem->getType() == FrictionContact3D_OSNSP)
-        (static_cast<FrictionContact3D*>(nsProblem))->saveNSProblemToXML();
-      else if (nsProblem->getType() == QP_OSNSP)
+      else if (NSPType == "FrictionContact2D" || NSPType == "FrictionContact3D")
+        (static_cast<FrictionContact*>(nsProblem))->saveNSProblemToXML();
+      else if (NSPType == "QP")
         (static_cast<QP*>(nsProblem))->saveNSProblemToXML();
-      else if (nsProblem->getType() == RELAY_OSNSP)
+      else if (NSPType == "Relay")
         (static_cast<Relay*>(nsProblem))->saveNSProblemToXML();
       else
         RuntimeException::selfThrow("Strategy::saveStrategyToXML - wrong type of OneStepNSProblem");

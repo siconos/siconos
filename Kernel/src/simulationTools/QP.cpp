@@ -25,12 +25,11 @@ QP::QP(OneStepNSProblemXML* osnspbxml, Strategy* newStrat):
   OneStepNSProblem(osnspbxml, newStrat), Q(NULL), p(NULL),
   isQAllocatedIn(true), isPAllocatedIn(true)
 {
-  nspbType = QP_OSNSP;
+  nspbType = "QP";
 }
 
 QP::~QP()
-{
-}
+{}
 
 void QP::compute(const double& time)
 {
@@ -69,5 +68,5 @@ QP* QP::convert(OneStepNSProblem* osnsp)
 QP::QP(): OneStepNSProblem(), Q(NULL), p(NULL),
   isQAllocatedIn(false), isPAllocatedIn(false)
 {
-  nspbType = QP_OSNSP;
+  nspbType = "QP";
 }

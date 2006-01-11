@@ -43,6 +43,7 @@
 #include <sstream>
 #include <iostream>
 
+const std::string FILE_STORAGE = "ascii";
 const std::string SDTT_VECTOR = "Vector";
 const std::string SDTT_MATRIX = "Matrix";
 const std::string SDTT_VECTORSIZE = "vectorSize";
@@ -53,6 +54,8 @@ const std::string SDTT_VECTORFILE = "vectorFile";
 const std::string SDTT_VECTORPLUGIN = "vectorPlugin";
 const std::string SDTT_MATRIXFILE = "matrixFile";
 const std::string SDTT_ROW = "row";
+const unsigned int MATRIX_MAX_SIZE = 10;
+const unsigned int VECTOR_MAX_SIZE = 10;
 
 class SiconosDOMTreeTools
 {

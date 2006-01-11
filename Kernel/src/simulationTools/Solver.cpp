@@ -19,30 +19,43 @@
 #include "Solver.h"
 using namespace std;
 
-Solver::Solver(const string& algoName, const string& solvingForm):
-  solvingFormalisation(solvingForm), solverAlgorithmName(algoName), solvingMethod(NULL)
+Solver::Solver(): nonSmoothPbType("undefined"), solverAlgorithmName(DEFAULT_SOLVER), solvingMethod(NULL), maxIter(DEFAULT_ITER), tolerance(DEFAULT_TOL),
+  normType(DEFAULT_NORMTYPE), searchDirection(DEFAULT_SEARCHDIR)
+{}
+
+Solver::Solver(const string& nspType, const string& algoName, const unsigned int & iter, const double & tol,
+               const string & norm, const double & searchDir):
+  nonSmoothPbType(nspType), solverAlgorithmName(algoName), solvingMethod(NULL), maxIter(iter), tolerance(tol),
+  normType(norm), searchDirection(searchDir)
 {
-  solvingMethod = new method;
+  solvingMethod = new method();
+  setSolvingMethod();
 }
 
 Solver::Solver(const Solver& newS):
-  solvingFormalisation(newS.getSolvingFormalisation()), solverAlgorithmName(newS.getSolverAlgorithmName()), solvingMethod(NULL)
+  nonSmoothPbType(newS.getNonSmoothPbType()), solverAlgorithmName(newS.getSolverAlgorithmName()), solvingMethod(NULL),
+  maxIter(newS.getMaxIter()), tolerance(newS.getTolerance()), normType(newS.getNormType()), searchDirection(newS.getSearchDirection())
 {
-  solvingMethod = new method;
+  solvingMethod = new method();
+  setSolvingMethod();
 }
 
-Solver::Solver(SolverXML* solvXml):
-  solvingFormalisation(""), solverAlgorithmName(""), solvingMethod(NULL)
+Solver::Solver(SolverXML* solvXml, const string& nspbType):
+  nonSmoothPbType(nspbType), solverAlgorithmName("undefined"), solvingMethod(NULL), maxIter(DEFAULT_ITER), tolerance(DEFAULT_TOL),
+  normType(DEFAULT_NORMTYPE), searchDirection(DEFAULT_SEARCHDIR)
 {
   if (solvXml != NULL)
   {
-    solvingFormalisation = solvXml->getSolvingFormalisation();
-    solverAlgorithmName  = solvXml->getSolverAlgorithmName();
+    solverAlgorithmName = solvXml->getType();
+    maxIter = solvXml->getMaxIter();
+    tolerance = solvXml->getTolerance();
+    normType = solvXml->getNormType();
+    searchDirection = solvXml->getSearchDirection();
   }
   else RuntimeException::selfThrow("Solver:: xml constructor, xml file=NULL");
-  solvingMethod = new method;
+  solvingMethod = new method();
+  setSolvingMethod();
 }
-
 
 Solver::~Solver()
 {
@@ -53,11 +66,64 @@ Solver::~Solver()
 void Solver::display() const
 {
   cout << "=== Solver data display ===" << endl;
-  cout << " - Solving formalisation is: " << solvingFormalisation << endl;
   cout << " - Solver algorithm is: " << solverAlgorithmName << endl;
+  cout << " - MaxIter: " << maxIter << endl;
+  cout << " - Tolerance: " << tolerance << endl;
+  cout << " - Search direction: " << searchDirection << endl;
+  // cout<<" - Norm Type: " << normType <<endl; never used at the time.
+  cout << "Warning: depending on the solver type, some of the data above may be useless. See documentation for more details." << endl;
+  cout << "===== End of Solver display =====" << endl;
 }
 
 void Solver::saveSolverToXML()
 {
   RuntimeException::selfThrow("saveSolverToXML: not yet implemented");
+}
+
+void Solver::setSolvingMethod()
+{
+  if (nonSmoothPbType == "LCP")
+  {
+    strcpy(solvingMethod->lcp.name, solverAlgorithmName.c_str());
+    solvingMethod->lcp.itermax = maxIter;
+    solvingMethod->lcp.tol = tolerance;
+    solvingMethod->lcp.k_latin = searchDirection;
+  }
+  else if (nonSmoothPbType == "Relay")
+  {
+    strcpy(solvingMethod->pr.name, solverAlgorithmName.c_str());
+    solvingMethod->pr.itermax = maxIter;
+    solvingMethod->pr.tol = tolerance;
+    solvingMethod->pr.k_latin = searchDirection;
+  }
+  else if (nonSmoothPbType == "DualRelay")
+  {
+    strcpy(solvingMethod->dr.name, solverAlgorithmName.c_str());
+    solvingMethod->dr.itermax = maxIter;
+    solvingMethod->dr.tol = tolerance;
+    solvingMethod->dr.k_latin = searchDirection;
+  }
+  else if (nonSmoothPbType == "FrictionContact2D")
+  {
+    strcpy(solvingMethod->pfc_2D.name, solverAlgorithmName.c_str());
+    solvingMethod->pfc_2D.itermax = maxIter;
+    solvingMethod->pfc_2D.tol = tolerance;
+    solvingMethod->pfc_2D.k_latin = searchDirection;
+  }
+  else if (nonSmoothPbType == "FrictionContact3D")
+  {
+    strcpy(solvingMethod->pfc_3D.name, solverAlgorithmName.c_str());
+    solvingMethod->pfc_3D.itermax = maxIter;
+    solvingMethod->pfc_3D.tol = tolerance;
+    solvingMethod->pfc_3D.k_latin = searchDirection;
+  }
+  else if (nonSmoothPbType == "dualFrictionContact2D")
+  {
+    strcpy(solvingMethod->dfc_2D.name, solverAlgorithmName.c_str());
+    solvingMethod->dfc_2D.itermax = maxIter;
+    solvingMethod->dfc_2D.tol = tolerance;
+    solvingMethod->dfc_2D.k_latin = searchDirection;
+  }
+  else
+    RuntimeException::selfThrow("Solver constructor - non smooth formalisation of type " + nonSmoothPbType + " not available.");
 }

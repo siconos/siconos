@@ -37,6 +37,11 @@
 #include <vector>
 #include <iostream>
 
+const std::string LNLDS = "LagrangianDS";
+const std::string LTIDS = "LagrangianLinearTIDS";
+const std::string LDS = "LinearDS";
+const std::string NLDS = "NonLinearDS";
+
 class NonSmoothDynamicalSystem;
 class BoundaryCondition;
 class DSInputOutput;

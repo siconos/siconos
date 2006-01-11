@@ -16,13 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef RELAY_H
-#define RELAY_H
-
-#include "OneStepNSProblem.h"
 
 /** \class Relay
- *  \brief It's a way to solve NSDS. It's used in electronics
+ *  \brief Non smooth problem written as a relay.
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
  *  \date (Creation) Apr 26, 2004
@@ -30,6 +26,11 @@
  *
  *
  */
+#ifndef RELAY_H
+#define RELAY_H
+
+#include "OneStepNSProblem.h"
+
 class Relay : public OneStepNSProblem
 {
 public:
@@ -47,8 +48,15 @@ public:
 
   ~Relay();
 
-  /** \fn void saveRelationToXML()
+  /** \fn void compute(const double&)
+   *  \brief make the computation so solve the NS problem
+   *  param double : current time
+   */
+  void compute(const double&);
+
+  /** \fn void saveNSProblemToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree
+   *  \exception RuntimeException
    */
   void saveNSProblemToXML();
 

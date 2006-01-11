@@ -17,123 +17,41 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "OneStepNSProblem.h"
-// to be removed thanks to factories:
-#include "LemkeSolver.h"
-#include "LexicoLemkeSolver.h"
-#include "QPSolver.h"
-#include "NSQPSolver.h"
-#include "NLGSSolver.h"
-#include "CPGSolver.h"
-#include "LatinSolver.h"
-
 using namespace std;
 
-
 // --- CONSTRUCTORS/DESTRUCTOR ---
-
 // Default constructor
 OneStepNSProblem::OneStepNSProblem():
-  nspbType("none"), dim(0), solver(NULL), isSolverAllocatedIn(false),  strategy(NULL), onestepnspbxml(NULL)
+  nspbType("undefined"), dim(0), solver(NULL), isSolverAllocatedIn(false),  strategy(NULL), onestepnspbxml(NULL)
 {}
 
 // xml constructor
 OneStepNSProblem::OneStepNSProblem(OneStepNSProblemXML* osnspbxml, Strategy* newStrat):
-  nspbType("none"), dim(0), solver(NULL), isSolverAllocatedIn(false), strategy(newStrat), onestepnspbxml(osnspbxml)
+  nspbType("undefined"), dim(0), solver(NULL), isSolverAllocatedIn(false), strategy(newStrat), onestepnspbxml(osnspbxml)
 {
-  if (onestepnspbxml != NULL)
+  if (onestepnspbxml != NULL) // get dimension of the problem ...
   {
-    // get dimension of the problem ...
     if (onestepnspbxml->hasDim()) dim = onestepnspbxml->getDimNSProblem();
-
-    // === read solver related data ===
-    if (onestepnspbxml->hasSolver())
-    {
-      // get the name of the solver algorithm used
-      string solverAlgorithmType = onestepnspbxml->getSolverXMLPtr()->getSolverAlgorithmName();
-      if (solverAlgorithmType == "Lemke")
-        solver = new LemkeSolver(onestepnspbxml->getSolverXMLPtr());
-      else if (solverAlgorithmType == "LexicoLemke")
-        solver =  new LexicoLemkeSolver(onestepnspbxml->getSolverXMLPtr());
-      else if (solverAlgorithmType == "QP")
-        solver =  new QPSolver(onestepnspbxml->getSolverXMLPtr());
-      else if (solverAlgorithmType == "NSQP")
-        solver =  new NSQPSolver(onestepnspbxml->getSolverXMLPtr());
-      else if (solverAlgorithmType == "NLGS")
-        solver =  new NLGSSolver(onestepnspbxml->getSolverXMLPtr());
-      else if (solverAlgorithmType == "CPG")
-        solver =  new CPGSolver(onestepnspbxml->getSolverXMLPtr());
-      else if (solverAlgorithmType == "Latin")
-        solver =  new LatinSolver(onestepnspbxml->getSolverXMLPtr());
-      else
-        RuntimeException::selfThrow("OneStepNSProblem::xml constructor, unknown solver algorithm type: " + solverAlgorithmType);
-      isSolverAllocatedIn = true;
-    }
-    else
-      RuntimeException::selfThrow("OneStepNSProblem::xml constructor, no solver found!");
   }
   else RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file=NULL");
 
   // read list of interactions and equality constraints concerned
-  if (onestepnspbxml != NULL)
-    if (strategy != NULL)
-    {
-      interactionVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-      ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
-      // Default value for dim. Warning: default size is the size of the first interaction in the vector
-      if (interactionVector.size() != 0) dim = interactionVector[0]->getNInteraction();
-    }
-    else cout << "OneStepNSPb xml-constructor - Warning: no strategy linked to OneStepPb" << endl;
-}
-
-// Constructor with given strategy and solving method parameters (optional)
-OneStepNSProblem::OneStepNSProblem(Strategy * newStrat, const string& newSolvingFormalisation, const string& solverAlgorithmType, const int& MaxIter,
-                                   const double & Tolerance, const string & NormType, const double & SearchDirection):
-  nspbType("none"), dim(0), solver(NULL), isSolverAllocatedIn(false), strategy(newStrat), onestepnspbxml(NULL)
-{
   if (strategy != NULL)
   {
     interactionVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
     ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
-    // Default value for n  \warning: default size is the size of the first interaction in the vector if it exists
-    // else, n=0
-    if (interactionVector.size() != 0) dim = interactionVector[0]->getNInteraction();
-    if (newSolvingFormalisation != "none")
-    {
-      if (solverAlgorithmType == "Lemke")
-        solver = new LemkeSolver(newSolvingFormalisation, MaxIter);
-      else if (solverAlgorithmType == "LexicoLemke")
-        solver =  new LexicoLemkeSolver(newSolvingFormalisation, MaxIter);
-      else if (solverAlgorithmType == "QP")
-        solver =  new QPSolver(newSolvingFormalisation, Tolerance);
-      else if (solverAlgorithmType == "NSQP")
-        solver =  new NSQPSolver(newSolvingFormalisation, Tolerance);
-      else if (solverAlgorithmType == "NLGS")
-        solver =  new NLGSSolver(newSolvingFormalisation, MaxIter, Tolerance);
-      else if (solverAlgorithmType == "CPG")
-        solver =  new CPGSolver(newSolvingFormalisation, MaxIter, Tolerance);
-      else if (solverAlgorithmType == "Latin")
-        solver =  new LatinSolver(newSolvingFormalisation, MaxIter, Tolerance, SearchDirection);
-      else
-        RuntimeException::selfThrow("OneStepNSProblem::constructor, unknown solver algorithm type: " + solverAlgorithmType);
-      isSolverAllocatedIn = true;
-    }
-    else RuntimeException::selfThrow("OneStepNSProblem:: constructor from data, wrong solving method type");
   }
-  else
-    RuntimeException::selfThrow("OneStepNSProblem:: constructor from strategy, given strategy == NULL");
+  else cout << "OneStepNSPb xml-constructor - Warning: no strategy linked to OneStepPb" << endl;
 }
 
 // Constructor with given strategy and a pointer on Solver
 OneStepNSProblem::OneStepNSProblem(Strategy * newStrat, Solver* newSolver):
-  nspbType("none"), dim(0), solver(newSolver), isSolverAllocatedIn(false), strategy(newStrat), onestepnspbxml(NULL)
+  nspbType("undefined"), dim(0), solver(newSolver), isSolverAllocatedIn(false), strategy(newStrat), onestepnspbxml(NULL)
 {
   if (strategy != NULL)
   {
     interactionVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
     ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
-    // Default value for n  \warning: default size is the size of the first interaction in the vector if it exists
-    // else, n=0
-    if (interactionVector.size() != 0) dim = interactionVector[0]->getNInteraction();
   }
   else
     RuntimeException::selfThrow("OneStepNSProblem:: constructor from strategy, given strategy == NULL");
@@ -163,6 +81,8 @@ OneStepNSProblem::~OneStepNSProblem()
   }
   if (isSolverAllocatedIn) delete solver;
   solver = NULL;
+  strategy = NULL;
+  onestepnspbxml = NULL;
 }
 
 Interaction* OneStepNSProblem::getInteractionPtr(const unsigned int& nb)
@@ -170,6 +90,13 @@ Interaction* OneStepNSProblem::getInteractionPtr(const unsigned int& nb)
   if (nb >= interactionVector.size())
     RuntimeException::selfThrow("OneStepNSProblem::getInteractionPtr(const int& nb) - number greater than size of interaction vector");
   return interactionVector[nb];
+}
+
+void OneStepNSProblem::setSolverPtr(Solver * newSolv)
+{
+  if (isSolverAllocatedIn) delete solver;
+  solver = newSolv;
+  isSolverAllocatedIn = false;
 }
 
 void OneStepNSProblem::addInteraction(Interaction *interaction)
@@ -267,7 +194,7 @@ void OneStepNSProblem::computeEffectiveOutput()
       }
       else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
       {
-        if (nspbType == FrictionContact2D_OSNSP)
+        if (nspbType == "FrictionContact2D")
         {
           for (j = 0; j < numberOfRelations / 2; j++)
           {
@@ -281,7 +208,7 @@ void OneStepNSProblem::computeEffectiveOutput()
             indexMax[2 * j + 1] = indexMax[2 * j];
           }
         }
-        else if (nspbType == FrictionContact3D_OSNSP)
+        else if (nspbType == "FrictionContact3D")
         {
           for (j = 0; j < numberOfRelations; j = j + 3)
           {
@@ -398,14 +325,7 @@ void OneStepNSProblem::saveNSProblemToXML()
   OUT("OneStepNSProblem::saveNSProblemToXML\n");
 }
 
-void OneStepNSProblem::setSolverPtr(Solver * newSolv)
-{
-  if (isSolverAllocatedIn) delete solver;
-  solver = newSolv;
-  isSolverAllocatedIn = false;
-}
-
-bool OneStepNSProblem::isOneStepNsProblemComplete()
+bool OneStepNSProblem::isOneStepNsProblemComplete() const
 {
   bool isComplete = true;
 
@@ -428,7 +348,7 @@ bool OneStepNSProblem::isOneStepNsProblemComplete()
   }
   else
   {
-    vector< Interaction* >::iterator it;
+    vector< Interaction* >::const_iterator it;
     for (it = interactionVector.begin(); it != interactionVector.end(); it++)
       if (*it == NULL)
         cout << "OneStepNSProblem warning: an interaction points to NULL" << endl;
@@ -441,7 +361,7 @@ bool OneStepNSProblem::isOneStepNsProblemComplete()
   }
   else
   {
-    vector< EqualityConstraint* >::iterator it;
+    vector< EqualityConstraint* >::const_iterator it;
     for (it = ecVector.begin(); it != ecVector.end(); it++)
       if (*it == NULL)
         cout << "OneStepNSProblem warning: an equalityConstraint of the problem points to NULL" << endl;
@@ -467,28 +387,30 @@ void OneStepNSProblem::check_solver(const int& info) const
   string solverName = solver->getSolverAlgorithmName();
   // info = 0 => ok
   // else: depend on solver
+  // \todo: chose a standard output for solver parameter "info", that do not depend on the solver -> Numerics part
   if (info != 0)
   {
     cout << "OneStepNS computeOutput warning: output message from solver is equal to " << info << " => may have failed?" << endl;
-    if (info == 1)
-      cout << " reach max iterations number with solver " << solverName << endl;
+    RuntimeException::selfThrow(" Non smooth problem, solver convergence failed");
+    /*      if(info == 1)
+    cout <<" reach max iterations number with solver " << solverName << endl;
     else if (info == 2)
     {
-      if (solverName == "LexicoLemke" || solverName == "CPG" || solverName == "NLGS")
-        RuntimeException::selfThrow(" negative diagonal term with solver " + solverName);
-      else if (solverName == "QP" || solverName == "NSQP")
-        RuntimeException::selfThrow(" can not satisfy convergence criteria for solver " + solverName);
-      else if (solverName == "Latin")
-        RuntimeException::selfThrow(" Choleski factorisation failed with solver Latin");
+    if (solverName == "LexicoLemke" || solverName == "CPG" || solverName == "NLGS")
+    RuntimeException::selfThrow(" negative diagonal term with solver "+solverName);
+    else if (solverName == "QP" || solverName == "NSQP" )
+    RuntimeException::selfThrow(" can not satisfy convergence criteria for solver "+solverName);
+    else if (solverName == "Latin")
+    RuntimeException::selfThrow(" Choleski factorisation failed with solver Latin");
     }
     else if (info == 3 && solverName == "CPG")
-      //RuntimeException::selfThrow(" pWp nul in solver CPG");
-      cout << "pWp null in solver CPG" << endl;
+       cout << "pWp null in solver CPG" << endl;
     else if (info == 3 && solverName == "Latin")
-      RuntimeException::selfThrow(" null diagonal term with solver Latin");
+    RuntimeException::selfThrow("Null diagonal term with solver Latin");
     else if (info == 5 && (solverName == "QP" || solverName == "NSQP"))
-      RuntimeException::selfThrow(" Length of working array insufficient in solver " + solverName);
+    RuntimeException::selfThrow("Length of working array insufficient in solver "+solverName);
     else
-      RuntimeException::selfThrow(" unknown error type in solver " + solverName);
+    RuntimeException::selfThrow("Unknown error type in solver "+ solverName);
+    */
   }
 }

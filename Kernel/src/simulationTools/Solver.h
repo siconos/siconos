@@ -27,25 +27,25 @@
  *  \version 0.1
  *  \date (Creation) December 19, 2005
  *
- *  !!! This class is an abstract one !!!
+ *  It provides an interface to define a solver for a given solving formalisation (the way the problem is written to be solved, ie the non
+ *  smooth problem type). The solver characteristics are:
+ *    - the way the problem is written, defined by the class type name of the OneStepNSProblem that owns this solver
+ *    - the name of the solver, ie the numerical algorithm that is used, among those provide by Numerics package
+ *    - a structure method from Numerics (see related doc for more details)
+ *    - some specific parameters, which are required or not, depending on the used algorithm.
  *
- *  It provides an interface to define a solving formalisation (the way the problem is written to be solved),
- *  a solver algorithm (which corresponds to one of the derived class) and its
- *  required parameters (fields of the derived class).
- *  The method structure from Numerics is embedded in the present class.
+ *  Available solvers algorithms are (and their required parameters):
+ *   - Lemke (maxIter) => warning: not fully implemented in Numerics, do not use!
+ *   - LexicoLemke (maxIter)
+ *   - NLGS (Non Linear Gauss Seidel) (tolerance, maxIter)
+ *   - NSQP (Non Smooth Quadratic Programming) (tolerance)
+ *   - QP   (tolerance)
+ *   - CPG  (Conjugate Projected Gradient) (tolerance, maxIter)
+ *   - Latin (tolerance, maxIter, searchDirection)
  *
- * Various solving formalisations are:
- *   - lcp ( "LcpSolving")
- *   -
- *
- * Available solvers algorithms are:
- *   - Lemke
- *   - LexicoLemke
- *   - NLGS (Non Linear Gauss Seidel)
- *   - NSQP (Non Smooth Quadratic Programming
- *   - QP
- *   - CPG  (Conjugate Projected Gradient)
- *   - Latin
+ *  Notes:
+ *          - parameter normType is never used, but present for future developments.
+ *          - it is Numerics work to test whether non-smooth problem accept a solver or not, nothing is done in that sense in the Kernel.
  *
  */
 
@@ -54,15 +54,24 @@
 #include "RuntimeException.h"
 #include<string>
 #include<iostream>
+
+// Default values for non smooth problem solver
+const std::string DEFAULT_SOLVER = "NLGS";
+const double DEFAULT_TOL = 0.0001;
+const unsigned int DEFAULT_ITER = 101;
+const std::string DEFAULT_NORMTYPE = "max";
+const double DEFAULT_SEARCHDIR = 0.6;
+
 class SolverXML;
 
 class Solver
 {
 protected:
 
-  /** name of the solvingFormalisation to use
-      Warning: this variable may be different from NSProblem type */
-  std::string solvingFormalisation ;
+  /** non smooth problem formulation
+   *  This corresponds to the type of the OneStepNSProblem
+   *  that owns this solver */
+  std::string nonSmoothPbType;
 
   /** name of the used solver algorithm
       This corresponds to the derived class name*/
@@ -73,20 +82,44 @@ protected:
       object. */
   method* solvingMethod;
 
+  // Warning: some of the following data may be useless, depending on the solver type.
+  // See full documentation for more details.
+
+  /** maximum iterations number */
+  unsigned int maxIter;
+
+  /** algorithm tolerance */
+  double tolerance;
+
+  /** */
+  std::string normType;
+
+  /**  */
+  double searchDirection;
+
   /** \fn virtual void setSolvingMethod() = 0;
    *  \brief Function to fill structure solvingMethod fields
    */
-  virtual void setSolvingMethod() = 0;
+  void setSolvingMethod();
+
+  /** \fn Solver(const Solver&)
+   *  \brief default constructor
+   */
+  Solver();
 
 public:
 
   /** \fn Solver(const std::string& = DefaultAlgoName, const std::string& = DefaultSolvingForm)
    *  \brief constructor with the value of the Solver attributes
-   *  \param string: solver algorithm name (optional)
-   *  \param string: solving formalisation type (optional)
-   *  Note that without any parameters, this is the default constructor
+   *  \param string: non smooth problem type (LCP ...)
+   *  \param string: solver name (optional)
+   *  \param unsigned int   : MaxIter (optional) required if a solver is given
+   *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
+   *  \param string : NormType (optional) -> for NLGS, Gcp, Latin
+   *  \param double : SearchDirection (optional) -> for Latin
    */
-  Solver(const std::string& = DefaultAlgoName, const std::string& = DefaultSolvingForm);
+  Solver(const std::string&, const std::string& = DEFAULT_SOLVER, const unsigned int & = DEFAULT_ITER,
+         const double & = DEFAULT_TOL, const std::string & = DEFAULT_NORMTYPE, const double & = DEFAULT_SEARCHDIR);
 
   /** \fn Solver(const Solver&)
    *  \brief copy constructor
@@ -97,32 +130,33 @@ public:
   /** \fn Solver(SolverXML*)
    *  \brief constructor with XML object of the Solver
    *  \param a pointer to SolverXML
+   *  \param string: non smooth problem type
    */
-  Solver(SolverXML*);
+  Solver(SolverXML*, const std::string&);
 
   /** \fn ~Solver()
    *  \brief destructor
    */
-  virtual ~Solver();
+  ~Solver();
 
   // GETTERS/SETTERS
 
-  /** \fn const string getSolvingFormalisation() const
-   *  \brief get the solving formalisation type
+  /** \fn const string getNonSmoothPbType() const
+   *  \brief get the solver algorithm name
    *  \return a string
    */
-  inline const std::string getSolvingFormalisation() const
+  inline const std::string getNonSmoothPbType() const
   {
-    return solvingFormalisation;
+    return nonSmoothPbType;
   };
 
-  /** \fn void setSolvingFormalisation(const string&)
-   *  \brief set the solving formalisation type
+  /** \fn void setNonSmoothPbType(const string&)
+   *  \brief set the solver algorithm name
    *  \param a string
    */
-  inline void setSolvingFormalisation(const std::string& newVal)
+  inline void setNonSmoothPbType(const std::string& newVal)
   {
-    solvingFormalisation = newVal;
+    nonSmoothPbType = newVal;
   };
 
   /** \fn const string getSolverAlgorithmName() const
@@ -152,23 +186,87 @@ public:
     return solvingMethod;
   };
 
+  /** \fn const unsigned int getMaxIter() const
+   *  \brief get maximum iterations number
+   *  \return an unsigned int
+   */
+  inline const unsigned int getMaxIter() const
+  {
+    return maxIter;
+  };
+
+  /** \fn void setMaxIter(const unsigned int&)
+   *  \brief set maximum iterations number
+   *  \param an unsigned int
+   */
+  inline void setMaxIter(const unsigned int& newVal)
+  {
+    maxIter = newVal;
+  };
+
+  /** \fn const double getTolerance() const
+   *  \brief get tolerance
+   *  \return an double
+   */
+  inline const double getTolerance() const
+  {
+    return tolerance;
+  };
+
+  /** \fn void setTolerance(const double&)
+   *  \brief set tolerance algorithm
+   *  \param an double
+   */
+  inline void setTolerance(const double& newVal)
+  {
+    tolerance = newVal;
+  };
+
+  /** \fn const double getSearchDirection() const
+   *  \brief get searchDirection
+   *  \return an double
+   */
+  inline const double getSearchDirection() const
+  {
+    return searchDirection;
+  };
+
+  /** \fn void setSearchDirection(const double&)
+   *  \brief set searchDirection
+   *  \param an double
+   */
+  inline void setSearchDirection(const double& newVal)
+  {
+    searchDirection = newVal;
+  };
+
+  /** \fn const std::string getNormType() const
+   *  \brief get normType
+   *  \return a string
+   */
+  inline const std::string getNormType() const
+  {
+    return normType;
+  };
+
+  /** \fn void setNormType(const std::string&)
+   *  \brief set normType
+   *  \param an std::string
+   */
+  inline void setNormType(const std::string& newVal)
+  {
+    normType = newVal;
+  };
+
   /** \fn void saveSolverToXML()
    *  \brief copy the data of the Solver into the XML tree
    */
-  virtual void saveSolverToXML();
+  void saveSolverToXML();
 
   /** \fn void display()
    *  \brief display solver data
    */
-  virtual void display() const = 0 ;
-
-  /** \fn Solver* convert (Solver* solv)
-    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
-    *  \param Solver* : the solver that must be converted
-    * \return a pointer on the XXXSolver if it is of the right type, XXX being the solver name
-    * NULL otherwise
-    */
-  virtual Solver* convert(Solver*) = 0;
+  void display() const ;
 };
 
 #endif // Solver_H

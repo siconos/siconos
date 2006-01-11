@@ -16,28 +16,6 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef ONESTEPNSPROBLEM_H
-#define ONESTEPNSPROBLEM_H
-
-#include "Strategy.h"
-#include "Interaction.h"
-#include "EqualityConstraint.h"
-#include "SiconosMatrix.h"
-#include "SimpleVector.h"
-#include "OneStepNSProblemXML.h"
-#include "Topology.h"
-#include "SiconosConst.h"
-#include "SiconosNumerics.h"
-#include "check.h"
-#include "Solver.h"
-#include <iostream>
-#include <vector>
-
-class Strategy;
-class Interaction;
-class EqualityConstraint;
-
-class OneStepNSProblemXML;
 
 /** \class OneStepNSProblem
  *  \brief It's the part of the Strategy which solve the Interactions
@@ -57,9 +35,34 @@ class OneStepNSProblemXML;
  *  - QP
  *  - Relay
  *
- *  See Solver class for details on algorithm and solving formulation.
+ *  See Solver class or Numerics documentation for details on algorithm name and parameters.
  *
  */
+
+#ifndef ONESTEPNSPROBLEM_H
+#define ONESTEPNSPROBLEM_H
+
+#include "Strategy.h"
+#include "Interaction.h"
+#include "EqualityConstraint.h"
+#include "SiconosMatrix.h"
+#include "SimpleVector.h"
+#include "OneStepNSProblemXML.h"
+#include "Topology.h"
+#include "SiconosConst.h"
+#include "SiconosNumerics.h"
+#include "check.h"
+#include "Solver.h"
+#include <iostream>
+#include <vector>
+#include <string>
+
+class Strategy;
+class Interaction;
+class EqualityConstraint;
+class SiconosMatrix;
+class OneStepNSProblemXML;
+class Solver;
 class OneStepNSProblem
 {
 
@@ -118,30 +121,12 @@ public:
    */
   OneStepNSProblem(OneStepNSProblemXML*, Strategy * = NULL);
 
-  /** \fn OneStepNSProblem(Strategy*, const string& solverName, const string& newSolvingMethod, const int& maxIter,
-   *                       const double & Tolerance=0, const string & NormType="none",
-   *                       const double & SearchDirection=0)
+  /** \fn OneStepNSProblem(Strategy*, Solver*)
    *  \brief constructor from data
    *  \param Strategy *: the strategy that owns this problem
-   *  \param string: solver name (optional)
-   *  \param string: name of the solving method (optional but required if a solver is given)
-   *  \param int   : MaxIter (optional) required if a solver is given
-   *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
-   *  \param string : NormType (optional) -> for NLGS, Gcp, Latin
-   *  \param double : SearchDirection (optional) -> for Latin
+   *  \param Solver *: pointer on object that contains solver algorithm definition (optional)
    */
-  OneStepNSProblem(Strategy * , const std::string& = "none", const std::string& = "none",
-                   const int& = 0, const double& = 0, const std::string & = "none",
-                   const double & = 0);
-
-  /** \fn OneStepNSProblem(Strategy*, const string& solverName, const string& newSolvingMethod, const int& maxIter,
-   *                       const double & Tolerance=0, const string & NormType="none",
-   *                       const double & SearchDirection=0)
-   *  \brief constructor from data
-   *  \param Strategy *: the strategy that owns this problem
-   *  \param Solver *: pointer on object that contains solver algorithm and formulation
-   */
-  OneStepNSProblem(Strategy * , Solver*);
+  OneStepNSProblem(Strategy * , Solver* = NULL);
 
   /** \fn OneStepNSProblem()
    *  \brief destructor
@@ -302,35 +287,35 @@ public:
    *  \brief prepares the problem for the next time step
    *  \exception to be defined
    */
-  virtual void nextStep();
+  void nextStep();
 
   /** \fn void updateInput()
    *  \brief compute r thanks to lambda
    */
-  virtual void updateInput();
+  void updateInput();
 
   /** \fn void updateOutput(void)
    *  \brief compute output for all the interactions
    */
-  virtual void updateOutput();
+  void updateOutput();
 
   /** \fn void compute(const double&)
    *  \brief make the computation so solve the NS problem
    *  param double : current time
    */
-  virtual void compute(const double&);
+  virtual void compute(const double&) = 0;
 
   /** \fn void saveNSProblemToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree
    *  \exception RuntimeException
    */
-  virtual void saveNSProblemToXML();
+  virtual void saveNSProblemToXML() = 0;
 
   /** \fn void isOneStepNsProblemComplete()
    *  \brief check is all data required by non smooth problem are present
    *  \return : a bool
    */
-  bool isOneStepNsProblemComplete();
+  bool isOneStepNsProblemComplete() const;
 
   /** \fn void check_solver(const int& info) const
    *  \brief return exception and message if solver failed

@@ -1079,8 +1079,6 @@ protected:
   SimpleVector *fInt;
   /** external strength of the system */
   SimpleVector *fExt;
-  /** list of (user-defined) parameters to customize fExt (example, omega in fExt = cos(Omega t) ) **/
-  SimpleVector *paramFExt;
   /** non-linear inertia term of the system */
   SimpleVector *NNL;
   /** jacobian/coordinates of internal strength */
@@ -1109,7 +1107,7 @@ protected:
   /* contains the name of the plugin used to compute NNL */
   std::string  NNLFunctionName;
 
-  /** vector of bool to check if mass, fInt, fExt, paramFExt, NNL and the 4 jacobian are loaded from a plugin or not
+  /** vector of bool to check if mass, fInt, fExt, NNL and the 4 jacobian are loaded from a plugin or not
    The vector order is the one of members list (see above)*/
   std::deque<bool> isLDSPlugin;
 
@@ -1126,7 +1124,7 @@ protected:
   bool isPAllocatedIn;
   // Mass
   bool isMassAllocatedIn;
-  // Forces: fInt, fExt, NNL, paramFExt
+  // Forces: fInt, fExt, NNL
   std::deque<bool> areForcesAllocatedIn;
   // Jacobian: jacobianQFInt, jacobianVelocityFInt, jacobianQNNL, jacobianVelocityNNL
   std::deque<bool> isJacobianAllocatedIn;

@@ -19,33 +19,48 @@
 #include "SolverXML.h"
 using namespace std;
 
-SolverXML::SolverXML():
-  rootNode(NULL), solvingFormalisationNode(NULL), solverAlgorithmNode(NULL)
-{}
-
 SolverXML::SolverXML(xmlNodePtr solverNode):
-  rootNode(solverNode), solvingFormalisationNode(NULL), solverAlgorithmNode(NULL)
-{
-  if (solverNode != NULL)
-  {
-    solvingFormalisationNode = SiconosDOMTreeTools::findNodeChild(solverNode);
-    solverAlgorithmNode = SiconosDOMTreeTools::findNodeChild(solvingFormalisationNode);
-  }
-  else
-    XMLException::selfThrow("SolverXML - constructor : tag Solver not found.");
-
-  if (solvingFormalisationNode == NULL || solverAlgorithmNode == NULL)
-    XMLException::selfThrow("SolverXML - constructor : algorithm node name or solving form node name not found");
-}
-
-
-SolverXML::SolverXML(xmlNodePtr solverNode, xmlNodePtr solvFNode, xmlNodePtr solvAlgNode):
-  rootNode(solverNode), solvingFormalisationNode(solvFNode), solverAlgorithmNode(solvAlgNode)
-{
-  if (solvingFormalisationNode == NULL || solverAlgorithmNode == NULL)
-    XMLException::selfThrow("SolverXML - constructor : algorithm node name or solving form node name not found");
-}
+  rootNode(solverNode)
+{}
 
 SolverXML::~SolverXML()
 {}
 
+string SolverXML::getType() const
+{
+  return SiconosDOMTreeTools::getStringAttributeValue(rootNode, "type");
+}
+
+unsigned int SolverXML::getMaxIter() const
+{
+  if (xmlHasProp(rootNode, (xmlChar *)"maxIter"))
+    return SiconosDOMTreeTools::getIntegerAttributeValue(rootNode, "maxIter");
+  else return DEFAULT_ITER;
+}
+
+double SolverXML::getTolerance() const
+{
+  if (xmlHasProp(rootNode, (xmlChar *)"tolerance"))
+  {
+    string type = SiconosDOMTreeTools::getStringAttributeValue(rootNode, "tolerance");
+    return atof(type.c_str());
+  }
+  else return DEFAULT_TOL;
+}
+
+double SolverXML::getSearchDirection() const
+{
+  if (xmlHasProp(rootNode, (xmlChar *)"searchDirection"))
+  {
+    string type = SiconosDOMTreeTools::getStringAttributeValue(rootNode, "searchDirection");
+    return atof(type.c_str());
+  }
+  else return DEFAULT_SEARCHDIR;
+}
+
+string SolverXML::getNormType() const
+{
+  if (xmlHasProp(rootNode, (xmlChar *)"normType"))
+    return SiconosDOMTreeTools::getStringAttributeValue(rootNode, "normType");
+  else return DEFAULT_NORMTYPE;
+}

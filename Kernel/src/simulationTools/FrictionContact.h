@@ -16,54 +16,52 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+#ifndef FrictionContact_H
+#define FrictionContact_H
 
-/** \class LCP
+#include "OneStepNSProblem.h"
+#include "FrictionContactXML.h"
+
+/** \class FrictionContact
  *  \brief This class is devoted to the formalization and the resolution of the
- * Linear Complementarity Problem (LCP)
+ * Linear Complementarity Problem (FrictionContact)
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.0
- *  \date (Creation) Apr 26, 2004
+ *  \date (Creation) Dec 15, 2005
  *
+ *  WARNING !!! This is a virtual class -> derived class = FrictionContact2D and 3D !!!
  *
- * This class is devoted to the formalization and the resolution of the
- * Linear Complementarity Problem (LCP) defined by :
+ * This class is devoted to the formalization and the resolution of
+ * friction contact problems defined by :
  *  * \f[
  * w =  q + M z
  * \f]
  * \f[
  * w \geq 0, z \geq 0,  z^{T} w =0
  * \f]
+ * and a Coulomb friction law.
  * where
  *    - \f$w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknown,
  *    - \f$A \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
  *
+ * The present formulation corresponds to pfc2D and 3D of Numerics package.
+ *
  * \todo Correct the computation of M with a correct concatenation process
  */
-#ifndef LCP_H
-#define LCP_H
-
-#include "OneStepNSProblem.h"
-#include "LCPXML.h"
-
-class OneStepNSProblem;
-
-class LCP : public OneStepNSProblem
+class FrictionContact : public OneStepNSProblem
 {
-private:
+protected:
 
-  /** Size of the LCP */
-  unsigned int nLcp;
-
-  /** contains the vector w of a LCP system */
+  /** contains the vector w of a FrictionContact system */
   SimpleVector *w;
 
-  /** contains the vector z of a LCP system */
+  /** contains the vector z of a FrictionContact system */
   SimpleVector *z;
 
-  /** contains the matrix M of a LCP system */
+  /** contains the matrix M of a FrictionContact system */
   SiconosMatrix *M;
 
-  /** contains the vector q of a LCP system */
+  /** contains the vector q of a FrictionContact system */
   SimpleVector *q;
 
   /** Flags to check wheter pointers were allocated in class constructors or not */
@@ -74,53 +72,37 @@ private:
 
 public:
 
-  /** \fn LCP()
+  /** \fn FrictionContact()
    *  \brief default constructor
    */
-  LCP();
+  FrictionContact();
 
-  /** \fn LCP(OneStepNSProblemXML*, Strategy*=NULL)
+  /** \fn FrictionContact(OneStepNSProblemXML*, Strategy*=NULL)
    *  \brief xml constructor
    *  \param OneStepNSProblemXML* : the XML linked-object
    *  \param Strategy *: the strategy that owns the problem (optional)
    */
-  LCP(OneStepNSProblemXML*, Strategy* = NULL);
+  FrictionContact(OneStepNSProblemXML*, Strategy* = NULL);
 
-  /** \fn LCP(Strategy * , const std::string& =DEFAULT_SOLVER, const unsigned int& =DEFAULT_ITER, const double& =DEFAULT_TOL,
-   *          const std::string & = DEFAULT_NORMTYPE, const double & =DEFAULT_SEARCHDIR);
+  /** \fn FrictionContact(Strategy*)
    *  \brief constructor from data
    *  \param Strategy *: the strategy that owns this problem
-   *  \param string: solver name (optional)
-   *  \param unsigned int   : MaxIter (optional) required if a solver is given
-   *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
-   *  \param string : NormType (optional) -> never used at the time
-   *  \param double : SearchDirection (optional) -> for Latin
    */
-  LCP(Strategy * , const std::string& = DEFAULT_SOLVER, const unsigned int& = DEFAULT_ITER, const double& = DEFAULT_TOL,
-      const std::string& = DEFAULT_NORMTYPE, const double& = DEFAULT_SEARCHDIR);
+  FrictionContact(Strategy *);
+
+  /** \fn FrictionContact(Strategy*, const string& solverName, const string& newSolvingMethod, const int& maxIter,
+   *          const double & Tolerance=0, const string & NormType="none",
+   *          const double & SearchDirection=0)
+   *  \brief constructor from data
+   *  \param Strategy *: the strategy that owns this problem
+   *  \param Solver* : pointer to object that contains solver algorithm and formulation
+   */
+  FrictionContact(Strategy * , Solver*);
 
   // --- Destructror ---
-  ~LCP();
+  virtual ~FrictionContact();
 
   // GETTERS/SETTERS
-
-  /** \fn int getNLcp(void)
-   *  \brief get the size nLcp of the LCP
-   *  \return an int
-   */
-  inline const unsigned int getNLcp() const
-  {
-    return nLcp;
-  }
-
-  /** \fn void setNLcp(const int&)
-   *  \brief set the size of the LCP
-   *  \param the size
-   */
-  inline void setNLcp(const unsigned int& newValue)
-  {
-    nLcp = newValue;
-  }
 
   // --- W ---
   /** \fn  const SimpleVector getW(void) const
@@ -253,7 +235,7 @@ public:
   // --- Others functions ---
 
   /** \fn void initialize()
-   *  \brief initialize the LCP problem(compute topology ...)
+   *  \brief initialize the FrictionContact problem(compute topology ...)
    */
   void initialize();
 
@@ -262,18 +244,8 @@ public:
    */
   void computeAllBlocks();
 
-  /** \fn void computeDiagonalBlocksLinearTIR(Relation *, unsigned int sizeInteraction, vector<DynamicalSystem*>, SiconosMatrix*)
-   * \brief compute diagonal block-matrices for a LinearTIR
-   */
-  void computeDiagonalBlocksLinearTIR(Relation *, const unsigned int&, std::vector<DynamicalSystem*>, std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
-
-
-  void computeExtraDiagonalBlocksLinearTIR(Relation *, Relation*, const unsigned int&, const unsigned int&, std::vector<DynamicalSystem*>,
-      std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
-
   void computeDiagonalBlocksLagrangianR(Relation *, const unsigned int&, std::vector<DynamicalSystem*>, std::map < DynamicalSystem*,
                                         SiconosMatrix* > , const double&, SiconosMatrix*);
-
 
   void computeExtraDiagonalBlocksLagrangianR(Relation *, Relation*, const unsigned int&, const unsigned int&, std::vector<DynamicalSystem*>,
       std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
@@ -284,12 +256,12 @@ public:
    */
   void updateBlocks();
 
-  /** \fn void preLCP(const double& time)
-   *  \brief pre-treatment for LCP
+  /** \fn void preFrictionContact(const double& time)
+   *  \brief pre-treatment for FrictionContact
    *  \param double : current time
    *  \return void
    */
-  void preLCP(const double& time);
+  void preFrictionContact(const double& time);
 
   /** \fn void assembleM()
    *  \brief built matrix M using already computed blocks
@@ -300,7 +272,7 @@ public:
    *  \brief compute vector q
    *  \param double : current time
    */
-  void computeQ(const double& time);
+  virtual void computeQ(const double& time) = 0;
 
   /** \fn void compute(const double& time)
    *  \brief Compute the unknown z and w and update the Interaction (y and lambda )
@@ -309,17 +281,12 @@ public:
    */
   void compute(const double& time);
 
-  /** \fn void postLCP(const SimpleVector& w, SimpleVector& z)
-   *  \brief post-treatment for LCP
-   *  \param 2 simple vectors: output of LCP solver
+  /** \fn void postFrictionContact(const SimpleVector& w, SimpleVector& z)
+   *  \brief post-treatment for FrictionContact
+   *  \param 2 simple vectors: output of FrictionContact solver
    *  \return void
    */
-  void postLCP(const SimpleVector&, const SimpleVector&);
-
-  /** \fn void display()
-   *  \brief print the data to the screen
-   */
-  void display() const;
+  void postFrictionContact(const SimpleVector&, const SimpleVector&);
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree
@@ -339,14 +306,17 @@ public:
    */
   void saveQToXML();
 
-  /** \fn LCP* convert (OneStepNSProblem* ds)
+  /** \fn void display()
+   *  \brief print the data to the screen
+   */
+  void display() const;
+
+  /** \fn FrictionContact* convert (OneStepNSProblem* ds)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param OneStepNSProblem* : the one step problem which must be converted
    * \return a pointer on the problem if it is of the right type, NULL otherwise
    */
-  static LCP* convert(OneStepNSProblem* osnsp);
-
-
+  static FrictionContact* convert(OneStepNSProblem* osnsp);
 };
 
-#endif // LCP_H
+#endif // FrictionContact_H

@@ -46,6 +46,7 @@ class Model;
 class NonSmoothDynamicalSystemXML;
 class StrategyXML;
 
+const std::string XML_SCHEMA = "/share/SICONOS/SiconosModelSchema-V1.2.xsd";
 const std::string  ISO = "ISO-8859-1";
 const std::string  SM_T_CURRENT = "t";
 const std::string  SM_T = "T";

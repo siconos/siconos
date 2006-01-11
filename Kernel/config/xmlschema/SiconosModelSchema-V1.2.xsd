@@ -236,55 +236,16 @@
 </xsd:complexType>
 
 
-<!-- the different kind of solving method : -->
-<xsd:element name="Lemke">
+<!-- Non smooth problem solver definition tag: -->
+<xsd:element name="Solver">
 	<xsd:complexType>
+    		<xsd:attribute name="type" type="xsd:string" use="required"/>
     		<xsd:attribute name="maxIter" type="xsd:positiveInteger" use="optional"/>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="LexicoLemke">
-	<xsd:complexType>
-		<xsd:attribute name="maxIter" type="xsd:positiveInteger" use="optional"/>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="QP">
-	<xsd:complexType>
-		<xsd:attribute name="tolerance" type="xsd:double" use="optional"/>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="NSQP">
-	<xsd:complexType>
-		<xsd:attribute name="tolerance" type="xsd:double" use="optional"/>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="NLGS">
-	<xsd:complexType>
-		<xsd:attribute name="maxIter" type="xsd:positiveInteger" use="optional"/>
-		<xsd:attribute name="tolerance" type="xsd:double" use="optional"/>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="CPG">
-	<xsd:complexType>
-		<xsd:attribute name="maxIter" type="xsd:positiveInteger" use="optional"/>
-		<xsd:attribute name="tolerance" type="xsd:double" use="optional"/>
-		<xsd:attribute name="normType" type="NormTypeValues" use="optional"/>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="Latin">
-	<xsd:complexType>
-		<xsd:attribute name="maxIter" type="xsd:positiveInteger" use="optional"/>
 		<xsd:attribute name="tolerance" type="xsd:double" use="optional"/>
 		<xsd:attribute name="normType" type="NormTypeValues" use="optional"/>
 		<xsd:attribute name="searchDirection" type="xsd:double" use="optional"/>
 	</xsd:complexType>
 </xsd:element>
-
 
 <!--~~~~~~ DS_Concerned for Interaction~~~~~~~~-->
 <xsd:complexType name="Interaction_DS_ConcernedType">
@@ -919,7 +880,8 @@
 							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
 							<!--~~~~~~ list of interactions concerned ~~~~~~-->
-               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='1' maxOccurs="1"/>
+               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
+							<xsd:element ref="Solver" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
 					</xsd:complexType>
 				</xsd:element>
@@ -931,7 +893,8 @@
 							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
 							<!--~~~~~~ list of interactions concerned ~~~~~~-->
-               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='1' maxOccurs="1"/>
+               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
+							<xsd:element ref="Solver" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
 					</xsd:complexType>
 				</xsd:element>
@@ -942,7 +905,8 @@
 							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
 							<!--~~~~~~ list of interactions concerned ~~~~~~-->
-               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='1' maxOccurs="1"/>
+  							<xsd:element ref="Solver" minOccurs="0" maxOccurs="1"/>
+             						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
 						</xsd:all>
 					</xsd:complexType>
 				</xsd:element>
@@ -954,7 +918,8 @@
 							<xsd:element name="Q" type="matrix" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="p" type="vector" minOccurs="0" maxOccurs="1"/>
 							<!--~~~~~~ list of interactions concerned ~~~~~~-->
-               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='1' maxOccurs="1"/>
+               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
+							<xsd:element ref="Solver" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
 					</xsd:complexType>
 				</xsd:element>
@@ -965,74 +930,12 @@
 							<xsd:element name="M" type="matrix" minOccurs="0" maxOccurs="1"/>
 							<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
 							<!--~~~~~~ list of interactions concerned ~~~~~~-->
-               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='1' maxOccurs="1"/>
+               						<xsd:element name="Interaction_Concerned" type="index_list" minOccurs='0' maxOccurs="1"/>
+							<xsd:element ref="Solver" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
 					</xsd:complexType>
 				</xsd:element>
 			</xsd:choice>
-			<xsd:element name="Solver" minOccurs="0" maxOccurs="1">
-				<xsd:complexType>
-					<xsd:choice minOccurs="1" maxOccurs="1">
-						<xsd:element name="LcpSolving">
-						<xsd:complexType>
-							<xsd:choice>
-							<xsd:element ref="Lemke"/>
-							<xsd:element ref="LexicoLemke"/>
-							<xsd:element ref="QP"/>
-							<xsd:element ref="NSQP"/>
-							<xsd:element ref="NLGS"/>
-							<xsd:element ref="CPG"/>
-							<xsd:element ref="Latin"/>
-							</xsd:choice>
-						</xsd:complexType>
-						</xsd:element>
-
-						<xsd:element name="PrimalRelaySolving">
-						<xsd:complexType>
-							<xsd:choice>
-							<xsd:element ref="NLGS"/>
-							<xsd:element ref="CPG"/>
-							<xsd:element ref="Latin"/>
-							</xsd:choice>
-						</xsd:complexType>
-						</xsd:element>
-						
-						<xsd:element name="DualRelaySolving">
-						<xsd:complexType>
-							<xsd:choice>
-							<xsd:element ref="NLGS"/>
-							<xsd:element ref="CPG"/>
-							<xsd:element ref="Latin"/>
-							</xsd:choice>
-						</xsd:complexType>
-						</xsd:element>
-						
-						<xsd:element name="PrimalFrictionContact2DSolving">
-						<xsd:complexType>
-							<xsd:choice>
-							<xsd:element ref="NLGS"/>
-							<xsd:element ref="CPG"/>
-							<xsd:element ref="Latin"/>
-							</xsd:choice>
-						</xsd:complexType>
-						</xsd:element>
-												
-						<xsd:element name="DualFrictionContact2DSolving">
-						<xsd:complexType>
-							<xsd:choice>
-							<xsd:element ref="Latin"/>
-							<xsd:element ref="Lemke"/>
-							<xsd:element ref="NLGS"/>
-							<xsd:element ref="CPG"/>
-							</xsd:choice>
-						</xsd:complexType>
-
-						</xsd:element>
-					</xsd:choice>
-					
-				<xsd:attribute name="lib" type="xsd:string" use="optional"/>
-				</xsd:complexType>
-			</xsd:element>
 		</xsd:sequence>
 	</xsd:complexType>
 	</xsd:element>

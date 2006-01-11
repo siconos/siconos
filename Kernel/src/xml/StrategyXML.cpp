@@ -24,9 +24,7 @@
 #include "MoreauXML.h"
 #include "LCPXML.h"
 #include "QPXML.h"
-#include "FrictionContact2DXML.h"
-#include "FrictionContact3DXML.h"
-
+#include "FrictionContactXML.h"
 
 using namespace std;
 
@@ -99,11 +97,8 @@ StrategyXML::StrategyXML(xmlNode * rootStrategyNode, vector<int> definedNumberDS
       else if (type == QP_TAG)
         oneStepNSProblemXML = new QPXML(node, definedNumberInteractionVector);
 
-      else if (type == FrictionContact2D_TAG)
-        oneStepNSProblemXML = new FrictionContact2DXML(node, definedNumberInteractionVector);
-
-      else if (type == FrictionContact3D_TAG)
-        oneStepNSProblemXML = new FrictionContact3DXML(node, definedNumberInteractionVector);
+      else if (type == FrictionContact2D_TAG || type == FrictionContact3D_TAG)
+        oneStepNSProblemXML = new FrictionContactXML(node, definedNumberInteractionVector);
 
       else if (type == RELAY_TAG) //--Not implemented for the moment
         XMLException::selfThrow("StrategyXML constructor, following OneStepNSProblem is not yet implemented: " + type);

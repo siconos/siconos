@@ -22,6 +22,12 @@
  *   \version 1.0
  *   \date 20/12/2005
  *
+ *  The only member of this class is the adress of node corresponding to tag "Solver",
+ *  child of node "OneStepNSProblem.
+ *  Member functions provide reading of attributes of this node:
+ *   - Solver type (among those delivered by Numerics)
+ *   - Solver parameters
+ *   The tag solver is optional and, if omitted, solver type and parameters are set to default values (see Solver.h)
  */
 
 #ifndef __SOLVERXML__
@@ -36,89 +42,62 @@ class SolverXML
 {
 protected:
 
-  /** root node named "Solver" */
+  /** root node named "Solver" - Child of OneStepNSProblem node */
   xmlNodePtr rootNode;
-
-  /** root node for SOLVER formalisation type of the problem (LcpSolving, ...) - Child of solverNode */
-  xmlNodePtr solvingFormalisationNode;
-
-  /** Name of algorithm used to solved the problem - Child of solvingFormalisationNode */
-  xmlNodePtr solverAlgorithmNode;
-
-  /** \fn SolverXML()
-   *  \brief default constructor
-   */
-  SolverXML();
 
 public:
 
-  /** \fn SolverXML(xmlNodePtr, xmlNodePtr, xmlNodePtr)
-   *  \brief constructor using xmlNode input
+  /** \fn SolverXML(xmlNodePtr = NULL)
+   *  \brief default constructor
    *  \param : rootNode
    */
-  SolverXML(xmlNodePtr);
-
-  /** \fn SolverXML(xmlNodePtr, xmlNodePtr, xmlNodePtr)
-   *  \brief constructor using xmlNode input for all xmlNode
-   *  This constructor should be removed thanks to factories
-   *  \param : rootNode
-   *  \param : solvingFormalisationNode
-   *  \param : solverAlgorithmNode
-   */
-  SolverXML(xmlNodePtr, xmlNodePtr, xmlNodePtr);
+  SolverXML(xmlNodePtr = NULL);
 
   /** \fn ~SolverXML()
    *  \brief destructor
    */
-  virtual ~SolverXML();
+  ~SolverXML();
 
   /** \fn xmlNode* getRootNode()
-   *   \brief Return the node corresponding to the Solver
-   *   \return an xmlNodePtr
+   *  \brief Return the node corresponding to the Solver
+   *  \return an xmlNodePtr
    */
   inline xmlNodePtr getRootNode() const
   {
     return rootNode;
   }
 
-  /** \fn string getSolvingFormalisation() const
-   *   \brief Return contain of node solving formalisation
-   *   \return a string
-   */
-  inline std::string getSolvingFormalisation() const
-  {
-    std::string type((char*) solvingFormalisationNode->name);
-    return type;
-  }
+  // Functions to get attributes of node "Solver"
 
-  /** \fn bool hasSolvingFormalisation()
-   *  \brief checks if tag Solver contains a solving formalisation type
-   *  \return a bool
+  /** \fn string getType() const
+   *  \brief return the name of the solver algorithm
+   *  \return a string
    */
-  inline bool hasSolvingFormalisation() const
-  {
-    return (solvingFormalisationNode != NULL);
-  }
+  std::string getType() const;
 
-  /** \fn string getSolverAlgorithmName() const
-   *   \brief return name of solve algorithm
-   *   \return a string
+  /** \fn unsigned int getMaxIter() const
+   *  \brief Return the maximum number of iteration the algorithm can do
+   *  \return unsigned int
    */
-  inline std::string getSolverAlgorithmName() const
-  {
-    std::string type((char*) solverAlgorithmNode->name);
-    return type;
-  }
+  unsigned int getMaxIter() const;
 
-  /** \fn bool hasSolverAlgorithm()
-   *  \brief checks if tag Solver contains a solving method
-   *  \return a bool
+  /** \fn double getTolerance() const
+   *  \brief Return the tolerance value for the algorithm
+   *  \return double
    */
-  inline bool hasSolverAlgorithm() const
-  {
-    return (solverAlgorithmNode != NULL);
-  }
+  double getTolerance() const;
 
+  /** \fn string getNormType() const
+   *  \brief Return norm type of the algorithm
+   *  \return a string
+   */
+  std::string getNormType() const;
+
+  /** \fn double getSearchDirection() const
+   *  \brief Return the searchDirection value
+   *  \return double
+   */
+  double getSearchDirection() const;
 };
 
 

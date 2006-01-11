@@ -30,6 +30,10 @@
 #include <string>
 #include <vector>
 
+const std::string LINEARBC = "LinearBC";
+const std::string NLINEARBC = "NonLinearBC";
+const std::string PERIODICBC = "PeriodicBC";
+
 class DynamicalSystem;
 
 /** \class BoundaryCondition

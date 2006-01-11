@@ -16,26 +16,19 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "QPSolverXML.h"
+#include "FrictionContactXML.h"
 using namespace std;
 
-QPSolverXML::QPSolverXML():
-  SolverXML()
+FrictionContactXML::FrictionContactXML() :
+  OneStepNSProblemXML(), MNode(NULL), qNode(NULL)
 {}
 
-QPSolverXML::QPSolverXML(xmlNodePtr solverNode):
-  SolverXML(solverNode)
+FrictionContactXML::FrictionContactXML(xmlNode * FrictionContactNode, vector<int> definedInteractionNumbers)
+  : OneStepNSProblemXML(FrictionContactNode, definedInteractionNumbers), MNode(NULL), qNode(NULL)
 {}
 
-QPSolverXML::QPSolverXML(xmlNodePtr solverNode, xmlNodePtr solvFNode, xmlNodePtr solvAlgNode):
-  SolverXML(solverNode, solvFNode, solvAlgNode)
+FrictionContactXML::~FrictionContactXML() {}
+
+void FrictionContactXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
 {}
 
-QPSolverXML::~QPSolverXML()
-{}
-
-double QPSolverXML::getTolerance() const
-{
-  string type = SiconosDOMTreeTools::getStringAttributeValue(solverAlgorithmNode, OSNSP_TOLERANCE);
-  return atof(type.c_str());
-}

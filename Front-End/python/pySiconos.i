@@ -64,13 +64,6 @@
 #include "NonSmoothDynamicalSystemXML.h"
 #include "TimeDiscretisationXML.h"
 #include "SolverXML.h"
-#include "LemkeSolverXML.h"
-#include "LexicoLemkeSolverXML.h"
-#include "QPSolverXML.h"
-#include "NSQPSolverXML.h"
-#include "NLGSSolverXML.h"
-#include "CPGSolverXML.h"
-#include "LatinSolverXML.h"
 #include "OneStepNSProblemXML.h"
 #include "QPXML.h"
 #include "LCPXML.h"
@@ -128,19 +121,12 @@
 
 #include "TimeDiscretisation.h"
 #include "Solver.h"
-#include "LemkeSolver.h"
-#include "LexicoLemkeSolver.h"
-#include "QPSolver.h"
-#include "NSQPSolver.h"
-#include "NLGSSolver.h"
-#include "CPGSolver.h"
-#include "LatinSolver.h"
 #include "OneStepNSProblem.h"
+#include "QP.h"
 #include "Relay.h"
 #include "LCP.h"
 #include "FrictionContact2D.h"
 #include "FrictionContact3D.h"
-#include "QP.h"
 #include "OneStepIntegrator.h"
 #include "Moreau.h"
 #include "Lsodar.h"
@@ -149,8 +135,6 @@
 #include "EventDriven.h"
 #include "TimeStepping.h"
 
-
-#include "KernelDefaultConfig.h"
 #include "Model.h"
 #include "SiconosConst.h"
 %} 
@@ -226,13 +210,6 @@ $1 = string(PyString_AsString($input));
 // Xml - strategy
 %include "TimeDiscretisationXML.h"
 %include "SolverXML.h"
-%include "LemkeSolverXML.h"
-%include "LexicoLemkeSolverXML.h"
-%include "QPSolverXML.h"
-%include "NSQPSolverXML.h"
-%include "NLGSSolverXML.h"
-%include "CPGSolverXML.h"
-%include "LatinSolverXML.h"
 // ---
 %include "OneStepNSProblemXML.h"
 %include "QPXML.h"
@@ -308,20 +285,13 @@ $1 = string(PyString_AsString($input));
 // --- simulationTools ---
 %include "TimeDiscretisation.h"
 %include "Solver.h"
-%include "LemkeSolver.h"
-%include "LexicoLemkeSolver.h"
-%include "QPSolver.h"
-%include "NSQPSolver.h"
-%include "NLGSSolver.h"
-%include "CPGSolver.h"
-%include "LatinSolver.h"
 // ---
 %include "OneStepNSProblem.h"
+%include "QP.h"
 %include "Relay.h"
 %include "LCP.h"
 %include "FrictionContact2D.h"
 %include "FrictionContact3D.h"
-%include "QP.h"
 // ---
 %include "OneStepIntegrator.h"
 %include "Moreau.h"
@@ -334,7 +304,6 @@ $1 = string(PyString_AsString($input));
 
 
 // --- Model ---
-%include "KernelDefaultConfig.h"
 %include "Model.h"
 %include "SiconosConst.h"
 

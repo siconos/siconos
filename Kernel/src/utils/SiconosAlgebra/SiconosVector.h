@@ -31,6 +31,7 @@
 
 const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ MACHINE DEPENDE
 const unsigned int M_MAXSIZEFORDISPLAY = 10;
+const std::string DEFAULT_FORMAT = "ascii";
 
 /** \class SiconosVector
  *  \brief This is an abstract class to provide interface for vector handling
@@ -153,7 +154,7 @@ public:
    *  \exception SiconosVectorException
    *  \return true if no error
    */
-  virtual bool read(const std::string& , const std::string& = N_ASCII) = 0;
+  virtual bool read(const std::string& , const std::string& = DEFAULT_FORMAT) = 0;
 
   /** \fn bool write(std::string fileName, std::string mode = ASCII)
    *  \brief write the vector in a file
@@ -162,7 +163,7 @@ public:
    *  \exception SiconosVectorException
    *  \return true if no error
    */
-  virtual bool write(const std::string& , const std::string& = N_ASCII) const  = 0 ;
+  virtual bool write(const std::string& , const std::string& = DEFAULT_FORMAT) const  = 0 ;
 
   /** \fn double* getArray()
    *  \brief return the array of double values of the vector

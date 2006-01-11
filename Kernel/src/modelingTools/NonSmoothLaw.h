@@ -16,12 +16,6 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef NSLAW_H
-#define NSLAW_H
-
-#include "NonSmoothLawXML.h"
-#include "Interaction.h"
-#include "SiconosConst.h"
 
 /** \class NonSmoothLaw
  *  \brief this class contains non-smooth law
@@ -33,6 +27,17 @@
  *
  */
 
+#ifndef NSLAW_H
+#define NSLAW_H
+
+#include "NonSmoothLawXML.h"
+#include "Interaction.h"
+#include "SiconosConst.h"
+
+const std::string COMPLEMENTARITYCONDITIONNSLAW = "ComplementarityNSL";
+const std::string NEWTONIMPACTNSLAW = "NewtonImpactNSL";
+const std::string RELAYNSLAW = "RelayNSL";
+const std::string NEWTONIMPACTFRICTIONNSLAW = "NewtonImpactFrictionNSL";
 class Interaction;
 class NonSmoothLawXML;
 

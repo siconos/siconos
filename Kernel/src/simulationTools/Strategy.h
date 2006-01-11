@@ -33,7 +33,8 @@
 #include <vector>
 #include <deque>
 
-
+const std::string EVENTDRIVEN_STRATEGY = "EventDriven";
+const std::string TIMESTEPPING_STRATEGY = "TimeStepping";
 
 class Model;
 class OneStepIntegrator;

@@ -246,7 +246,7 @@ void SiconosDOMTreeTools::setSiconosVectorNodeValue(const xmlNode * siconosVecto
   if (xmlHasProp((xmlNodePtr)siconosVectorNode, (xmlChar *)SDTT_VECTORFILE.c_str())) //vector is defined in a extern ascii file
   {
     string file = getStringAttributeValue(siconosVectorNode, SDTT_VECTORFILE);
-    v.write(file, /*ASCII*/ /*N_ASCII*/ FILE_STORAGE); //For the moment only ASCII file are managed
+    v.write(file, FILE_STORAGE); //For the moment only ASCII file are managed
   }
   else
   {
@@ -272,7 +272,7 @@ void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNode * siconosMatri
   if (xmlHasProp((xmlNodePtr)siconosMatrixNode, (xmlChar *)SDTT_MATRIXFILE.c_str())) //matrix is defined in a extern ascii file
   {
     string file = getStringAttributeValue(siconosMatrixNode, SDTT_MATRIXFILE);
-    matrix.write(file, /*ASCII*/ /*N_ASCII*/ FILE_STORAGE); //For the moment only ASCII file are managed
+    matrix.write(file, FILE_STORAGE); //For the moment only ASCII file are managed
   }
   else
   {
@@ -763,7 +763,7 @@ void SiconosDOMTreeTools::setSiconosRowMatrixValue(const xmlNode * siconosMatrix
   while (i < v.size())
   {
     strcpy(element, "");
-    sprintf(element, /*DOUBLE_PRECISION*/ N_DOUBLE_PRECISION, v(i));
+    sprintf(element, N_DOUBLE_PRECISION, v(i));
     if (i > 0)
     {
       vectorContent += " ";

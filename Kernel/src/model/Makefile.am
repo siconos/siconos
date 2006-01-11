@@ -29,5 +29,5 @@ SUBDIRS = test
 #libModel_a_SOURCES = Model.cpp KernelDefaultConfig.cpp Model.h KernelDefaultConfig.h
 
 noinst_LTLIBRARIES = libModel.la
-libModel_la_SOURCES = Model.cpp KernelDefaultConfig.cpp Model.h KernelDefaultConfig.h
-include_HEADERS = Model.h KernelDefaultConfig.h SiconosConst.h
+libModel_la_SOURCES = Model.cpp Model.h 
+include_HEADERS = Model.h  SiconosConst.h

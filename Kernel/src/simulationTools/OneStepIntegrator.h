@@ -30,6 +30,10 @@
 #include <iostream>
 #include <vector>
 
+const std::string MOREAU_INTEGRATOR = "Moreau";
+const std::string ADAMS_INTEGRATOR = "Adams";
+const std::string LSODAR_INTEGRATOR = "LSODAR";
+
 class DynamicalSystem;
 class TimeDiscretisation;
 class OneStepIntegratorXML;

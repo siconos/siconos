@@ -15,31 +15,28 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "QPXML.h"
 using namespace std;
 
-QPXML::QPXML() : OneStepNSProblemXML()
-{
-  this->QNode = NULL;
-  this->pNode = NULL;
-}
+QPXML::QPXML() : OneStepNSProblemXML(), QNode(NULL), pNode(NULL)
+{}
 
 QPXML::QPXML(xmlNode * QPNode, vector<int> definedInteractionNumbers)
-  : OneStepNSProblemXML(QPNode, definedInteractionNumbers)
+  : OneStepNSProblemXML(QPNode, definedInteractionNumbers), QNode(NULL), pNode(NULL)
 {
   xmlNode *node, *qpModelNode;
 
   qpModelNode = SiconosDOMTreeTools::findNodeChild(QPNode);
   if (qpModelNode != NULL)
   {
-    if (strcmp((char*)qpModelNode->name, OSNSP_SOLVER.c_str()) == 0)
+    if (strcmp((char*)qpModelNode->name, "Solver") == 0)
       qpModelNode = SiconosDOMTreeTools::findFollowNode(qpModelNode);
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(qpModelNode, QP_Q)) != NULL)
   {
-    this->QNode = node;
+    QNode = node;
   }
   else
   {
@@ -48,7 +45,7 @@ QPXML::QPXML(xmlNode * QPNode, vector<int> definedInteractionNumbers)
 
   if ((node = SiconosDOMTreeTools::findNodeChild(qpModelNode, QP_P)) != NULL)
   {
-    this->pNode = node;
+    pNode = node;
   }
   else
   {
@@ -62,9 +59,8 @@ QPXML::~QPXML() {}
 void QPXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
 {
   IN("LCPXML::updateOneStepNSProblemXML\n");
-  this->rootNode = node;
-  this->problemTypeNode = SiconosDOMTreeTools::findNodeChild(this->rootNode);
-  //this->loadOneStepNSProblem( onsnpb );
+  rootNode = node;
+  problemTypeNode = SiconosDOMTreeTools::findNodeChild(rootNode);
   OUT("LCPXML::updateOneStepNSProblemXML\n");
 }
 

@@ -16,6 +16,15 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+
+/** \class EqualityConstraint
+ *  \brief \todo
+*  \author SICONOS Development Team - copyright INRIA
+ *  \version 0.1
+ *  \date 17/01/2005
+ *
+ *
+ */
 #ifndef EQUALITYCONSTRAINT_H
 #define EQUALITYCONSTRAINT_H
 
@@ -29,14 +38,11 @@
 #include "check.h"
 #include <iostream>
 
-/** \class EqualityConstraint
- *  \brief \todo
-*  \author SICONOS Development Team - copyright INRIA
- *  \version 0.1
- *  \date 17/01/2005
- *
- *
- */
+const std::string LINEAREC = "LinearEC";
+const std::string NLINEAREC = "NLinearEC";
+const std::string LINEARTIEC = "LinearTIEC";
+const std::string LAGRANGIANEC = "LagrangianEC";
+const std::string LAGRANGIANLINEAREC = "LagrangianLinearEC";
 
 class EqualityConstraintXML;
 class DSInputOutput;

@@ -25,6 +25,11 @@
 #include "DSInputOutput.h"
 #include "check.h"
 
+const std::string RELATION = "Relation";
+const std::string LINEARTIRELATION = "LinearTIR";
+const std::string LAGRANGIANRELATION = "LagrangianR";
+const std::string LAGRANGIANLINEARRELATION = "LagrangianLinearR";
+
 class Interaction;
 class RelationXML;
 class DSInputOutput;

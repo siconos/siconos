@@ -50,8 +50,6 @@
 #include "SolverXML.h"
 
 //Tags
-const std::string  OSNSP_INTERACTION_CONCERNED = "Interaction_Concerned";
-const std::string  OSNSP_SOLVER = "Solver";
 
 class OneStepNSProblem;
 class OneStepNSProblemXML
@@ -132,22 +130,11 @@ public:
     return (dimNode != NULL);
   }
 
-  /** \fn vector<int> getInteractionConcerned()
-   *   \brief Return the list of interaction numbers concerned by the OneStepNSProblem
-   *   \return a vector of int
-   */
-  //inline std::vector<int> getInteractionConcerned() const {return interactionNumbersVector;}
-
   /** \fn bool hasAll() const
    *  \brief All is an attribute of the DS_Concerned tag
    *  \return bool : true if attribute all is defined
    */
-  inline bool hasAll() const
-  {
-    if (SiconosDOMTreeTools::hasAttributeValue(interactionConcernedNode, ALL_ATTRIBUTE))
-      return SiconosDOMTreeTools::getBooleanAttributeValue(interactionConcernedNode, ALL_ATTRIBUTE);
-    else return false;
-  }
+  bool hasAll() const;
 
   /** \fn void setAll(const bool& all)
    *   \brief to set the attribute "all" of the Interaction_concerned tag
@@ -183,17 +170,16 @@ public:
     return (solverNode != NULL);
   }
 
-  /** \fn void setSolver(const std::string&  name, const std::string&  methodName, const std::string& normType,
+  /** \fn void setSolver(const std::string&  name, const std::string& normType,
    *                     const double& tolerance, const int& maxIter, const double& searchDirection)
-   *   \brief set the kind of solver of the OneStepNSProblem (LcpSolving, DualRelaySolving, ...)
+   *   \brief set the solver for the OneStepNSProblem
    *   \param string : the type of solver
-   *   \param string : the name of the method used for by the solver
    *   \param string : the norm type used by the solver
    *   \param double : the tolerance parameter used by the solver
    *   \param unsigned int : the maximum iteration parameter used by the solver
    *   \param double : the search direction parameter used by the solver
    */
-  void setSolver(const std::string&, const std::string&, const std::string&,
+  void setSolver(const std::string&, const std::string&,
                  const double&, const unsigned int&, const double&);
 
   /** \fn void updateOneStepNSProblemXML( xmlNode* node, OneStepNSProblemXML* str )

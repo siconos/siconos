@@ -166,7 +166,7 @@ public:
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  bool read(const std::string&, const std::string& = N_ASCII) ;
+  bool read(const std::string&, const std::string& = DEFAULT_FORMAT) ;
 
   /** \fn bool write(std::string fileName, std::string mode = ASCII)
    *  \brief write the vector in a file
@@ -175,7 +175,7 @@ public:
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  bool write(const std::string& , const std::string& = N_ASCII) const  ;
+  bool write(const std::string& , const std::string& = DEFAULT_FORMAT) const  ;
 
   /** \fn double* getArray()
    *  \brief return the array of double values of the vector

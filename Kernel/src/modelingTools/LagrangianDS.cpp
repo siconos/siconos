@@ -262,7 +262,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
                            const SimpleVector& newQ0, const SimpleVector& newVelocity0,
                            const SiconosMatrix& newMass):
   DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
-  velocityFree(NULL), velocityMemory(NULL),   p(NULL), mass(NULL), fInt(NULL), fExt(NULL), paramFExt(NULL),
+  velocityFree(NULL), velocityMemory(NULL),   p(NULL), mass(NULL), fInt(NULL), fExt(NULL),
   NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   isPAllocatedIn(true), isMassAllocatedIn(true),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
@@ -374,7 +374,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
                            const SimpleVector& newQ0, const SimpleVector& newVelocity0, const string& massName):
   DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL),
   velocity0(NULL), velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL),
-  fInt(NULL), fExt(NULL), paramFExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL),
+  fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL),
   jacobianQNNL(NULL), jacobianVelocityNNL(NULL), isPAllocatedIn(true), isMassAllocatedIn(true),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
   computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)
@@ -486,7 +486,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
   DynamicalSystem(newDS), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL),
   velocity(NULL), velocity0(NULL), velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL),
-  fInt(NULL), fExt(NULL), paramFExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL),
+  fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL),
   jacobianQNNL(NULL), jacobianVelocityNNL(NULL), isPAllocatedIn(true), isMassAllocatedIn(true),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
   computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)

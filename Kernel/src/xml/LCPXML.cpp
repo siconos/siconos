@@ -28,7 +28,6 @@ LCPXML::LCPXML(xmlNode * OSNSNode, vector<int> definedInteractionNumbers):
   // OSNSNode == "OneStepNSProblem"
   // problemTypeNode = "LCP"
 
-
   xmlNode* node;
   // dim
   //if ((node=SiconosDOMTreeTools::findNodeChild(problemTypeNode, "n")) !=NULL)

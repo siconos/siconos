@@ -16,85 +16,70 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "LCP.h"
+#include "FrictionContact.h"
 
 // includes to be deleted thanks to factories
 #include "Moreau.h"
 #include "LagrangianLinearR.h"
-#include "NewtonImpactLawNSL.h"
+#include "NewtonImpactFrictionNSL.h"
 #include "LinearTIR.h"
 
 using namespace std;
 
 // Default constructor
-LCP::LCP(): OneStepNSProblem(), nLcp(0), w(NULL), z(NULL), M(NULL), q(NULL),
+FrictionContact::FrictionContact(): OneStepNSProblem(), w(NULL), z(NULL), M(NULL), q(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
-{
-  nspbType = "LCP";
-}
+{}
 
 // xml constructor
-LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Strategy* newStrat):
-  OneStepNSProblem(onestepnspbxml, newStrat), nLcp(0), w(NULL), z(NULL), M(NULL), q(NULL),
+FrictionContact::FrictionContact(OneStepNSProblemXML* osNsPbXml, Strategy* newStrat):
+  OneStepNSProblem(osNsPbXml, newStrat), w(NULL), z(NULL), M(NULL), q(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
 {
-  nspbType = "LCP";
-  // === read solver related data ===
-  if (onestepnspbxml->hasSolver())
-    solver = new Solver(onestepnspbxml->getSolverXMLPtr(), nspbType);
-  else // solver = default one
+  if (osNsPbXml != NULL)
   {
-    solver = new Solver(nspbType, DEFAULT_SOLVER, DEFAULT_ITER, DEFAULT_TOL, DEFAULT_NORMTYPE, DEFAULT_SEARCHDIR);
-    cout << " Warning, no solver defined in non-smooth problem - Default one is used" << endl;
-    solver->display();
-  }
-  isSolverAllocatedIn = true;
-
-  if (onestepnspbxml != NULL)
-  {
-    LCPXML * xmllcp = (static_cast<LCPXML*>(onestepnspbxml));
+    FrictionContactXML * xmllcp = (static_cast<FrictionContactXML*>(osNsPbXml));
 
     // If both q and M are given in xml file, check if sizes are consistent
     if (xmllcp->hasQ() && xmllcp->hasM() && ((xmllcp->getM()).size(0) != (xmllcp->getQ()).size()))
-      RuntimeException::selfThrow("LCP: xml constructor, inconsistent sizes between given q and M");
+      RuntimeException::selfThrow("FrictionContact: xml constructor, inconsistent sizes between given q and M");
 
     // first nlcp is given by M matrix size in xml file
     if (xmllcp->hasM())
     {
-      nLcp = (xmllcp->getM()).size(0);
+      dim = (xmllcp->getM()).size(0);
       M = new SiconosMatrix(xmllcp->getM());
       isMAllocatedIn = true;
     }
 
     if (xmllcp->hasQ())
     {
-      // get nLcp if necessary
+      // get dim if necessary
       if (M == NULL)
-        nLcp = (xmllcp->getQ()).size();
+        dim = (xmllcp->getQ()).size();
 
       q = new SimpleVector(xmllcp->getQ());
       isQAllocatedIn = true;
     }
 
   }
-  else RuntimeException::selfThrow("LCP: xml constructor, xml file=NULL");
+  else RuntimeException::selfThrow("FrictionContact: xml constructor, xml file=NULL");
 }
 
 // Constructor from a set of data
-LCP::LCP(Strategy* newStrat, const string& newSolver, const unsigned int& MaxIter,
-         const double & Tolerance, const string & NormType, const double & SearchDirection):
-  OneStepNSProblem(newStrat),
-  nLcp(0), w(NULL), z(NULL), M(NULL), q(NULL),
+FrictionContact::FrictionContact(Strategy* newStrat):
+  OneStepNSProblem(newStrat), w(NULL), z(NULL), M(NULL), q(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
-{
-  nspbType = "LCP";
-  // set solver:
-  solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, NormType, SearchDirection);
-  isSolverAllocatedIn = true;
-}
+{}
+
+// Constructor from a set of data (2)
+FrictionContact::FrictionContact(Strategy* newStrat, Solver*  newSolver):
+  OneStepNSProblem(newStrat, newSolver), w(NULL), z(NULL), M(NULL), q(NULL),
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
+{}
 
 // destructor
-LCP::~LCP()
+FrictionContact::~FrictionContact()
 {
   if (isWAllocatedIn)
   {
@@ -120,26 +105,26 @@ LCP::~LCP()
 
 // Setters
 
-void LCP::setW(const SimpleVector& newValue)
+void FrictionContact::setW(const SimpleVector& newValue)
 {
-  if (nLcp != newValue.size())
-    RuntimeException::selfThrow("LCP: setW, inconsistent size between given w size and problem size. You should set nLcp before");
+  if (dim != newValue.size())
+    RuntimeException::selfThrow("FrictionContact: setW, inconsistent size between given w size and problem size. You should set dim before");
 
   if (w == NULL)
   {
-    w = new SimpleVector(nLcp);
+    w = new SimpleVector(dim);
     isWAllocatedIn = true;
   }
-  else if (w->size() != nLcp)
-    RuntimeException::selfThrow("LCP: setW, w size differs from nLcp");
+  else if (w->size() != dim)
+    RuntimeException::selfThrow("FrictionContact: setW, w size differs from dim");
 
   *w = newValue;
 }
 
-void LCP::setWPtr(SimpleVector* newPtr)
+void FrictionContact::setWPtr(SimpleVector* newPtr)
 {
-  if (nLcp != newPtr->size())
-    RuntimeException::selfThrow("LCP: setWPtr, inconsistent size between given w size and problem size. You should set nLcp before");
+  if (dim != newPtr->size())
+    RuntimeException::selfThrow("FrictionContact: setWPtr, inconsistent size between given w size and problem size. You should set dim before");
 
   if (isWAllocatedIn) delete w;
   w = newPtr;
@@ -147,48 +132,48 @@ void LCP::setWPtr(SimpleVector* newPtr)
 }
 
 
-void LCP::setZ(const SimpleVector& newValue)
+void FrictionContact::setZ(const SimpleVector& newValue)
 {
-  if (nLcp != newValue.size())
-    RuntimeException::selfThrow("LCP: setZ, inconsistent size between given z size and problem size. You should set nLcp before");
+  if (dim != newValue.size())
+    RuntimeException::selfThrow("FrictionContact: setZ, inconsistent size between given z size and problem size. You should set dim before");
 
   if (z == NULL)
   {
-    z = new SimpleVector(nLcp);
+    z = new SimpleVector(dim);
     isZAllocatedIn = true;
   }
 
   *z = newValue;
 }
 
-void LCP::setZPtr(SimpleVector* newPtr)
+void FrictionContact::setZPtr(SimpleVector* newPtr)
 {
-  if (nLcp != newPtr->size())
-    RuntimeException::selfThrow("LCP: setZPtr, inconsistent size between given z size and problem size. You should set nLcp before");
+  if (dim != newPtr->size())
+    RuntimeException::selfThrow("FrictionContact: setZPtr, inconsistent size between given z size and problem size. You should set dim before");
 
   if (isZAllocatedIn) delete z;
   z = newPtr;
   isZAllocatedIn = false;
 }
 
-void LCP::setM(const SiconosMatrix& newValue)
+void FrictionContact::setM(const SiconosMatrix& newValue)
 {
-  if (nLcp != newValue.size(0) || nLcp != newValue.size(1))
-    RuntimeException::selfThrow("LCP: setM, inconsistent size between given M size and problem size. You should set nLcp before");
+  if (dim != newValue.size(0) || dim != newValue.size(1))
+    RuntimeException::selfThrow("FrictionContact: setM, inconsistent size between given M size and problem size. You should set dim before");
 
   if (M == NULL)
   {
-    M = new SiconosMatrix(nLcp, nLcp);
+    M = new SiconosMatrix(dim, dim);
     isMAllocatedIn = true;
   }
 
   *M = newValue;
 }
 
-void LCP::setMPtr(SiconosMatrix* newPtr)
+void FrictionContact::setMPtr(SiconosMatrix* newPtr)
 {
-  if (nLcp != newPtr->size(0) || nLcp != newPtr->size(1))
-    RuntimeException::selfThrow("LCP: setMPtr, inconsistent size between given M size and problem size. You should set nLcp before");
+  if (dim != newPtr->size(0) || dim != newPtr->size(1))
+    RuntimeException::selfThrow("FrictionContact: setMPtr, inconsistent size between given M size and problem size. You should set dim before");
 
   if (isMAllocatedIn) delete M;
   M = newPtr;
@@ -196,31 +181,31 @@ void LCP::setMPtr(SiconosMatrix* newPtr)
 }
 
 
-void LCP::setQ(const SimpleVector& newValue)
+void FrictionContact::setQ(const SimpleVector& newValue)
 {
-  if (nLcp != newValue.size())
-    RuntimeException::selfThrow("LCP: setQ, inconsistent size between given q size and problem size. You should set nLcp before");
+  if (dim != newValue.size())
+    RuntimeException::selfThrow("FrictionContact: setQ, inconsistent size between given q size and problem size. You should set dim before");
 
   if (q == NULL)
   {
-    q = new SimpleVector(nLcp);
+    q = new SimpleVector(dim);
     isQAllocatedIn = true;
   }
 
   *q = newValue;
 }
 
-void LCP::setQPtr(SimpleVector* newPtr)
+void FrictionContact::setQPtr(SimpleVector* newPtr)
 {
-  if (nLcp != newPtr->size())
-    RuntimeException::selfThrow("LCP: setQPtr, inconsistent size between given q size and problem size. You should set nLcp before");
+  if (dim != newPtr->size())
+    RuntimeException::selfThrow("FrictionContact: setQPtr, inconsistent size between given q size and problem size. You should set dim before");
 
   if (isQAllocatedIn) delete q;
   q = newPtr;
   isQAllocatedIn = false;
 }
 
-void LCP::initialize()
+void FrictionContact::initialize()
 {
 
   // This function performs all steps that are not time dependant
@@ -236,12 +221,12 @@ void LCP::initialize()
   // if all relative degrees are equal to 0 or 1
   if (topology->isTimeInvariant())
   {
-    nLcp = topology->getEffectiveSizeOutput();
+    dim = topology->getEffectiveSizeOutput();
     assembleM();
   }
 }
 
-void LCP::computeAllBlocks()
+void FrictionContact::computeAllBlocks()
 {
   // --- get topology ---
   Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
@@ -310,20 +295,16 @@ void LCP::computeAllBlocks()
       if (Osi->getType() == MOREAU_INTEGRATOR)
         W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr();  // get its W matrix
       else
-        RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
+        RuntimeException::selfThrow("FrictionContact::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
     }
 
     // get the relation of the current interaction and its type
     Relation * RCurrent = currentInteraction -> getRelationPtr();
     relationType = RCurrent->getType();
 
-    if (relationType == LINEARTIRELATION)
-      computeDiagonalBlocksLinearTIR(RCurrent, sizeInteraction, vDS, W, h, currentMatrixBlock);
-    else if (relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION)
+    if (relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION)
       computeDiagonalBlocksLagrangianR(RCurrent, sizeInteraction, vDS, W, h, currentMatrixBlock);
-    //else if (relationType == LAGRANGIANRELATION)
-    //computeDiagonalBlocksLagrangianR(RCurrent, sizeInteraction,vDS,W,h,currentMatrixBlock);
-    else RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for relation of type " + relationType);
+    else RuntimeException::selfThrow("FrictionContact::computeAllBlocks not yet implemented for relation of type " + relationType);
 
     // --- EXTRA-DIAGONAL BLOCKS MANAGEMENT ---
 
@@ -361,172 +342,20 @@ void LCP::computeAllBlocks()
         // get the relation of the current interaction
         Relation * RLinked = linkedInteraction -> getRelationPtr();
         string RlinkedType = RLinked->getType();
-        if (relationType == LINEARTIRELATION && RlinkedType == LINEARTIRELATION)
-        {
-          computeExtraDiagonalBlocksLinearTIR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, h, coupledInteractionsBlock);
-          computeExtraDiagonalBlocksLinearTIR(RLinked, RCurrent, linkedInteractionSize, sizeInteraction, commonDS, W, h, coupledInteractionsBlockSym);
-        }
-        //else if (relationType == LAGRANGIANLINEARRELATION && RlinkedType== LAGRANGIANLINEARRELATION)
-        //computeExtraDiagonalBlocksLagrangianLinearR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS,W,h,coupledInteractionsBlock);
-        else if ((relationType == LAGRANGIANRELATION || relationType == LAGRANGIANLINEARRELATION) && (RlinkedType == LAGRANGIANRELATION ||  RlinkedType == LAGRANGIANLINEARRELATION))
+
+        if ((relationType == LAGRANGIANRELATION || relationType == LAGRANGIANLINEARRELATION) && (RlinkedType == LAGRANGIANRELATION ||  RlinkedType == LAGRANGIANLINEARRELATION))
         {
           computeExtraDiagonalBlocksLagrangianR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, h, coupledInteractionsBlock);
           computeExtraDiagonalBlocksLagrangianR(RLinked, RCurrent, linkedInteractionSize, sizeInteraction, commonDS, W, h, coupledInteractionsBlockSym);
         }
-        else RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for relation of type " + relationType);
+        else RuntimeException::selfThrow("FrictionContact::computeAllBlocks not yet implemented for relation of type " + relationType);
       } // end of loop over linked interactions
     }
   } // end of loop over interactions -> increment current interaction
 
 }
 
-void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeInteraction, vector<DynamicalSystem*> vDS,
-    map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* currentMatrixBlock)
-{
-  // convert to linearTIR
-  LinearTIR *LTIR = static_cast<LinearTIR*>(R);
-  // For 1 relation, we need:
-  // - the corresponding row of D
-  // - a block-row of C, that corresponds to a specific DS
-  // - a block of B, that corresponds to a specific DS
-  SiconosMatrix* D = LTIR->getDPtr();
-  SiconosMatrix * C, *B;
-  vector<DynamicalSystem*>::iterator itDS;
-  unsigned int sizeDS;
-
-  bool isHomogeneous = false; // \todo to be defined with relative degrees
-  // isHomogeneous = true means that all relative degrees of the interaction are equal.
-
-  if (!isHomogeneous)
-  {
-    // the resulting row-block
-    SimpleVector * currentLine = new SimpleVector(sizeInteraction);
-    // a row of D corresponding to the a relation of the current interaction
-    SimpleVector * Drow = new SimpleVector(sizeInteraction);
-    // a row of C corresponding to a specific DS (its size depends on the DS size)
-    SimpleVector * Crow ;
-
-    // compute currentLine = Drow + h sum(j) Crow,j Wj  Bj, with j the list of DS of the
-    // current interaction.
-    // loop over the relations of the current interaction
-    for (unsigned int i = 0; i < sizeInteraction; i++)
-    {
-      // get row i of D
-      D->getRow(i, *Drow);
-      *currentLine = *Drow;
-      // loop over the DS of the current interaction
-      for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
-      {
-        sizeDS = (*itDS)->getN();
-        // get blocks corresponding to the current DS
-        C = new SiconosMatrix(sizeInteraction, sizeDS);
-        B = new SiconosMatrix(sizeDS, sizeInteraction);
-        LTIR->getCBlockDSPtr(*itDS, *C);
-        LTIR->getBBlockDSPtr(*itDS, *B);
-        // get row i of C
-        Crow = new SimpleVector(sizeDS);
-        C->getRow(i, *Crow);
-
-        // compute currentLine
-        *currentLine +=  h* *Crow * (*W[*itDS]* *B);
-        delete C;
-        delete B;
-        delete Crow;
-      }
-      // save the result in currentMatrixBlock (and so in diagonalBlocksMap)
-      currentMatrixBlock->setRow(i, *currentLine);
-    }
-    delete currentLine;
-    delete Drow;
-  }
-  else
-  {
-    // the resulting block
-    *currentMatrixBlock = *D;
-    // loop over the DS of the current interaction
-    for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
-    {
-      sizeDS = (*itDS)->getN();
-      // get blocks corresponding to the current DS
-      C = new SiconosMatrix(sizeInteraction, sizeDS);
-      B = new SiconosMatrix(sizeDS, sizeInteraction);
-      LTIR->getCBlockDSPtr(*itDS, *C);
-      LTIR->getBBlockDSPtr(*itDS, *B);
-      *currentMatrixBlock += h * *C * (*W[*itDS] * *B);
-      delete C;
-      delete B;
-    }
-  }
-}
-
-void LCP::computeExtraDiagonalBlocksLinearTIR(Relation * RCurrent, Relation* RLinked, const unsigned int& sizeInteraction,
-    const unsigned int& linkedInteractionSize, vector<DynamicalSystem*> commonDS,
-    map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* coupledInteractionsBlock)
-{
-  // convert to linearTIR
-  LinearTIR *LTIR1 = static_cast<LinearTIR*>(RCurrent);
-  LinearTIR *LTIR2 = static_cast<LinearTIR*>(RLinked);
-  SiconosMatrix *C, *B;
-  coupledInteractionsBlock->zero();
-  vector<DynamicalSystem*>::iterator itDS;
-  unsigned int sizeDS;
-  bool isHomogeneous = false; // \todo to be defined with relative degrees
-  if (!isHomogeneous)
-  {
-    // the resulting row-block
-    SimpleVector * currentLine = new SimpleVector(sizeInteraction);
-    // a row of C corresponding to a specific DS (its size depends on the DS size)
-    SimpleVector * Crow ;
-    currentLine->zero();
-
-    // compute currentLine =  h sum(j) Crow,j Wj  Bj, with j the list of common DS
-    // C belongs to current Interaction and B to linked interaction
-    // loop over the relations of the current interaction
-    for (unsigned int i = 0; i < sizeInteraction; i++)
-    {
-      // loop over common DS
-      for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
-      {
-        sizeDS = (*itDS)->getN();
-        // get blocks corresponding to the current DS
-        C = new SiconosMatrix(sizeInteraction, sizeDS);
-        B = new SiconosMatrix(sizeDS, linkedInteractionSize);
-        LTIR1->getCBlockDSPtr(*itDS, *C);
-        LTIR2->getBBlockDSPtr(*itDS, *B);
-        // get row i of C
-        Crow = new SimpleVector(sizeDS);
-        C->getRow(i, *Crow);
-        // compute currentLine
-        *currentLine +=   *Crow * (*W[*itDS]* *B);
-        delete Crow;
-        delete C;
-        delete B;
-      }
-      // save the result in currentMatrixBlock (and so in diagonalBlocksMap)
-      coupledInteractionsBlock->setRow(i, *currentLine);
-    }
-    delete currentLine;
-  }
-  else
-  {
-    // the resulting block
-    // loop over the DS of the current interaction
-    for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
-    {
-      sizeDS = (*itDS)->getN();
-      // get blocks corresponding to the current DS
-      C = new SiconosMatrix(sizeInteraction, sizeDS);
-      B = new SiconosMatrix(sizeDS, linkedInteractionSize);
-      LTIR1->getCBlockDSPtr(*itDS, *C);
-      LTIR2->getBBlockDSPtr(*itDS, *B);
-      *coupledInteractionsBlock +=  *C * (*W[*itDS] * *B);
-      delete C;
-      delete B;
-    }
-  }
-}
-
-void LCP::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& sizeInteraction, vector<DynamicalSystem*> vDS,
+void FrictionContact::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& sizeInteraction, vector<DynamicalSystem*> vDS,
     map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* currentMatrixBlock)
 {
 
@@ -596,7 +425,7 @@ void LCP::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& siz
   }
 }
 
-void LCP::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* RLinked, const unsigned int& sizeInteraction,
+void FrictionContact::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* RLinked, const unsigned int& sizeInteraction,
     const unsigned int& linkedInteractionSize, vector<DynamicalSystem*> commonDS,
     map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* coupledInteractionsBlock)
 {
@@ -665,7 +494,7 @@ void LCP::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* R
   }
 }
 
-void LCP::updateBlocks()
+void FrictionContact::updateBlocks()
 {
   // --- get topology ---
   Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
@@ -733,7 +562,7 @@ void LCP::updateBlocks()
       if (Osi->getType() == MOREAU_INTEGRATOR)
         W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr();  // get its W matrix
       else
-        RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
+        RuntimeException::selfThrow("FrictionContact::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
     }
 
     // get the relation of the current interaction and its type
@@ -744,7 +573,7 @@ void LCP::updateBlocks()
     {}// Nothing to be done, blocks allready computed
     else if (relationType == LAGRANGIANRELATION)
       computeDiagonalBlocksLagrangianR(RCurrent, sizeInteraction, vDS, W, h, currentMatrixBlock);
-    else RuntimeException::selfThrow("LCP::updateBlocks not yet implemented for relation of type " + relationType);
+    else RuntimeException::selfThrow("FrictionContact::updateBlocks not yet implemented for relation of type " + relationType);
 
     // --- EXTRA-DIAGONAL BLOCKS MANAGEMENT ---
 
@@ -787,17 +616,17 @@ void LCP::updateBlocks()
           computeExtraDiagonalBlocksLagrangianR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, h, coupledInteractionsBlock);
           computeExtraDiagonalBlocksLagrangianR(RLinked, RCurrent, linkedInteractionSize, sizeInteraction, commonDS, W, h, coupledInteractionsBlockSym);
         }
-        else RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for relation of type " + relationType);
+        else RuntimeException::selfThrow("FrictionContact::computeAllBlocks not yet implemented for relation of type " + relationType);
       } // end of loop over linked interactions
     }
   } // end of loop over interactions -> increment current interaction
 
 }
 
-void LCP::preLCP(const double& time)
+void FrictionContact::preFrictionContact(const double& time)
 {
-  IN("LCP::preLCP()\n");
-  // compute M and q operators for LCP problem
+  IN("FrictionContact::preFrictionContact()\n");
+  // compute M and q operators for FrictionContact problem
 
   // get topology
   Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
@@ -806,59 +635,59 @@ void LCP::preLCP(const double& time)
   {
     updateBlocks(); // compute blocks for NonLinear Relations, with G that has been computed during update of previous time step
     computeEffectiveOutput();
-    nLcp = topology->getEffectiveSizeOutput();
-    if (nLcp != 0)
+    dim = topology->getEffectiveSizeOutput();
+    if (dim != 0)
       assembleM();
   }
 
-  if (nLcp != 0)
+  if (dim != 0)
   {
     computeQ(time);
     // check z and w sizes and reset if necessary
     if (z == NULL)
     {
-      z = new SimpleVector(nLcp);
+      z = new SimpleVector(dim);
       isZAllocatedIn = true;
     }
-    else if (z->size() != nLcp)
+    else if (z->size() != dim)
     {
       // reset z if it has a wrong size
       if (isZAllocatedIn) delete z;
-      z = new SimpleVector(nLcp);
+      z = new SimpleVector(dim);
       isZAllocatedIn = true;
     }
 
     if (w == NULL)
     {
-      w = new SimpleVector(nLcp);
+      w = new SimpleVector(dim);
       isWAllocatedIn = true;
     }
-    else if (w->size() != nLcp)
+    else if (w->size() != dim)
     {
       // reset w if it has a wrong size
       if (isWAllocatedIn) delete w;
-      w = new SimpleVector(nLcp);
+      w = new SimpleVector(dim);
       isWAllocatedIn = true;
     }
     w->zero();
     z->zero();
   }
-  OUT("LCP::preLCP()\n");
+  OUT("FrictionContact::preFrictionContact()\n");
 }
 
-void LCP::assembleM() //
+void FrictionContact::assembleM() //
 {
 
   if (M == NULL)
   {
-    M = new SiconosMatrix(nLcp, nLcp);
+    M = new SiconosMatrix(dim, dim);
     isMAllocatedIn = true;
   }
-  else if (M->size(0) != nLcp || M->size(1) != nLcp)
+  else if (M->size(0) != dim || M->size(1) != dim)
   {
     // reset M matrix if it has a wrong size
     if (isMAllocatedIn) delete M;
-    M = new SiconosMatrix(nLcp, nLcp);
+    M = new SiconosMatrix(dim, dim);
     isMAllocatedIn = true;
   }
   M->zero();
@@ -939,154 +768,44 @@ void LCP::assembleM() //
   }// --- end of interactions loop ---
 }
 
-void LCP::computeQ(const double& time)
+void FrictionContact::compute(const double& time)
 {
-  IN("LCP::computeQ(void)\n");
-  if (q == NULL)
-  {
-    q = new SimpleVector(nLcp);
-    isQAllocatedIn = true;
-  }
-  else if (q->size() != nLcp)
-  {
-    // reset q if it has a wrong size
-    if (isQAllocatedIn) delete q;
-    q = new SimpleVector(nLcp);
-    isQAllocatedIn = true;
-  }
+  IN("FrictionContact::compute(void)\n");
 
-  q->zero();
-
-  // --- get topology ---
-  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-  // --- get interactions list ---
-  vector<Interaction*> listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  vector<Interaction*>::iterator iter;
-  // get Interaction position map
-  map< Interaction* , SiconosMatrix*>::iterator itDiago;
-  map< Interaction*, unsigned int>  interactionEffectivePositionMap =  topology->getInteractionEffectivePositionMap();
-  unsigned int pos;
-  Relation *R;
-  NonSmoothLaw *nslaw;
-  vector<unsigned int> index ;
-  unsigned int effectiveSize ;
-  Interaction *currentInteraction ;
-  SimpleVector * yFree;
-  // --- loop over all the interactions ---
-  for (iter = listInteractions.begin(); iter != listInteractions.end(); ++iter)
-  {
-    // get current interaction, its relation and its nslaw
-    currentInteraction = *iter;
-    unsigned int numberOfRelations = currentInteraction->getNInteraction();
-    R = currentInteraction->getRelationPtr();
-    string relationType = R->getType();
-    nslaw = currentInteraction->getNonSmoothLawPtr();
-    // position of current yFree in global (including all interactions) y vector
-    pos = interactionEffectivePositionMap[currentInteraction];
-    index = topology->getEffectiveIndexes(currentInteraction);
-    if (relationType == LINEARTIRELATION)
-    {
-      LinearTIR *LTIR = static_cast<LinearTIR*>(R);
-      string nslawType = nslaw->getType() ;
-      if (nslawType == COMPLEMENTARITYCONDITIONNSLAW)
-      {
-        LTIR->computeFreeOutput(); // free output is saved in y
-        if (topology->isTimeInvariant())
-        {
-          yFree = new SimpleVector(currentInteraction->getY(0));   // copy, no pointer equality
-          for (unsigned int i = 0; i < numberOfRelations; i++)
-            (*q)(i + pos) = (*yFree)(i);
-        }
-        else
-        {
-          effectiveSize = index.size();
-          yFree = new SimpleVector(effectiveSize); // we get only the "effective" relations
-          (currentInteraction->getY(0)).getBlock(index, *yFree); // copy, no pointer equality
-          for (unsigned int i = 0; i < effectiveSize; i++)
-            (*q)(i + pos) = (*yFree)(i);
-        }
-      }
-      else
-        RuntimeException::selfThrow("LCP::computeQ not yet implemented for NSlaw of type " + nslaw->getType() + "and for relation of type " + R->getType());
-    }
-    else if (relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION)
-    {
-      LagrangianLinearR *LLR = static_cast<LagrangianLinearR*>(R);
-      if (nslaw->getType() == NEWTONIMPACTNSLAW)
-      {
-        vector<unsigned int> indexMax = topology->getIndexMax(currentInteraction);
-
-        NewtonImpactLawNSL * newton = static_cast<NewtonImpactLawNSL*>(nslaw);
-        double e = newton->getE();
-        LLR->computeFreeOutput(time);
-        if (topology->isTimeInvariant())
-        {
-          yFree = new SimpleVector(currentInteraction -> getY(1)); // copy, no pointer equality
-          *yFree += e * currentInteraction -> getYOld(1);
-          for (unsigned int i = 0; i < numberOfRelations; i++)
-            (*q)(i + pos) = (*yFree)(i);
-        }
-        else
-        {
-          // compute list of effective relations
-          unsigned int k = 0;
-          for (unsigned int j = 0; j < numberOfRelations; j++)
-          {
-            for (unsigned int i = 1; i < indexMax[j] + 1; i++)
-            {
-              index[k] = j;
-              k++;
-            }
-          }
-
-
-          effectiveSize = index.size();
-          yFree = new SimpleVector(effectiveSize); // we get only the "effective" relations
-          (currentInteraction->getY(1)).getBlock(index, *yFree); // copy, no pointer equality
-          SimpleVector * tmp =  new SimpleVector(effectiveSize);
-          (currentInteraction -> getYOld(1)).getBlock(index, *tmp);
-          *yFree += e * *tmp;
-          delete tmp;
-          for (unsigned int i = 0; i < effectiveSize; i++)
-            (*q)(i + pos) = (*yFree)(i);
-        }
-      }
-      else
-        RuntimeException::selfThrow("LCP::computeQ not yet implemented for NSlaw of type " + nslaw->getType() + "and for relation of type " + R->getType());
-    }
-    else
-      RuntimeException::selfThrow("LCP::computeQ not yet implemented for relation of type " + R->getType());
-
-    delete yFree;
-  }
-  OUT("LCP::computeQ(void)\n");
-}
-
-void LCP::compute(const double& time)
-{
-  IN("LCP::compute(void)\n");
-
-  // --- Prepare data for LCP computing ---
-  preLCP(time);
+  // --- Prepare data for FrictionContact2D computing ---
+  preFrictionContact(time);
 
   // --- Call Numerics solver ---
-  if (nLcp != 0)
+  if (dim != 0)
   {
-    int info;
-    int Nlcp = (int)nLcp;
-    method solvingMethod = *(solver->getSolvingMethodPtr());
-    info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
 
-    // \warning : info value and signification depends on solver type ...
+    int info;
+    int Dim = (int)dim;
+    // get solving method and friction coefficient value.
+    method solvingMethod = *(solver->getSolvingMethodPtr());
+    Interaction * currentInteraction = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0);
+    // call Numerics method for 2D or 3D problem:
+    if (nspbType == "FrictionContact2D")
+    {
+      solvingMethod.pfc_2D.mu = static_cast<NewtonImpactFrictionNSL*>(currentInteraction->getNonSmoothLawPtr())->getMu();
+      info = pfc_2D_solver(M->getArray(), q->getArray(), &Dim, &solvingMethod  , z->getArray(), w->getArray());
+    }
+    else if (nspbType == "FrictionContact3D")
+    {
+      solvingMethod.pfc_3D.mu = static_cast<NewtonImpactFrictionNSL*>(currentInteraction->getNonSmoothLawPtr())->getMu();
+      info = pfc_3D_solver(M->getArray(), q->getArray(), &Dim, &solvingMethod  , z->getArray(), w->getArray());
+    }
+    else
+      RuntimeException::selfThrow("FrictionContact::compute, unknown or unconsistent non smooth problem type: " + nspbType);
     check_solver(info);
-    // --- Recover the desired variables from LCP output ---
-    postLCP(*w, *z);
+    // --- Recover the desired variables from FrictionContact2D output ---
+    postFrictionContact(*w, *z);
   }
 
-  OUT("LCP::compute(void)\n");
+  OUT("FrictionContact::compute(void)\n");
 }
 
-void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)
+void FrictionContact::postFrictionContact(const SimpleVector& w, const SimpleVector &z)
 {
   // --- get topology ---
   Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
@@ -1134,7 +853,7 @@ void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)
     /*      for(j=0;j<effectiveSize;j++)
     effectiveIndexes[j] += indexMin[effectiveIndexes[j]]*numberOfRelations;
     */
-    // Get the 'position' of vector corresponding to the current interaction, in the LCP output:
+    // Get the 'position' of vector corresponding to the current interaction, in the FrictionContact output:
     effectivePosition = topology->getInteractionEffectivePosition(currentInteraction);
 
     // we consider that the interaction is homogeneous, ie all degrees are equals
@@ -1176,60 +895,60 @@ void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)
 }
 
 
-void LCP::display() const
+void FrictionContact::display() const
 {
-  cout << "======= LCP display ======" << endl;
-  cout << "| nLcp : " << nLcp << endl;
-  cout << "| LCP Matrix M  : " << endl;
+  cout << "======= FrictionContact display ======" << endl;
+  cout << "| dim : " << dim << endl;
+  cout << "| FrictionContact Matrix M  : " << endl;
   if (M != NULL) M->display();
   else cout << "-> NULL" << endl;
-  cout << "| LCP vector q : " << endl;
+  cout << "| FrictionContact vector q : " << endl;
   if (q != NULL) q->display();
   else cout << "-> NULL" << endl;
   cout << "==========================" << endl;
 
 }
 
-void LCP::saveNSProblemToXML()
+void FrictionContact::saveNSProblemToXML()
 {
-  IN("LCP::saveNSProblemToXML\n");
+  IN("FrictionContact::saveNSProblemToXML\n");
   OneStepNSProblem::saveNSProblemToXML();
   if (onestepnspbxml != NULL)
   {
-    (static_cast<LCPXML*>(onestepnspbxml))->setM(*M);
-    (static_cast<LCPXML*>(onestepnspbxml))->setQ(*q);
+    (static_cast<FrictionContactXML*>(onestepnspbxml))->setM(*M);
+    (static_cast<FrictionContactXML*>(onestepnspbxml))->setQ(*q);
   }
-  else RuntimeException::selfThrow("LCP::saveNSProblemToXML - OneStepNSProblemXML object not exists");
-  OUT("LCP::saveNSProblemToXML\n");
+  else RuntimeException::selfThrow("FrictionContact::saveNSProblemToXML - OneStepNSProblemXML object not exists");
+  OUT("FrictionContact::saveNSProblemToXML\n");
 }
 
-void LCP::saveMToXML()
+void FrictionContact::saveMToXML()
 {
-  IN("LCP::saveMToXML\n");
+  IN("FrictionContact::saveMToXML\n");
   if (onestepnspbxml != NULL)
   {
-    (static_cast<LCPXML*>(onestepnspbxml))->setM(*M);
+    (static_cast<FrictionContactXML*>(onestepnspbxml))->setM(*M);
   }
-  else RuntimeException::selfThrow("LCP::saveMToXML - OneStepNSProblemXML object not exists");
-  OUT("LCP::saveMToXML\n");
+  else RuntimeException::selfThrow("FrictionContact::saveMToXML - OneStepNSProblemXML object not exists");
+  OUT("FrictionContact::saveMToXML\n");
 }
 
-void LCP::saveQToXML()
+void FrictionContact::saveQToXML()
 {
-  IN("LCP::saveQToXML\n");
+  IN("FrictionContact::saveQToXML\n");
   if (onestepnspbxml != NULL)
   {
-    (static_cast<LCPXML*>(onestepnspbxml))->setQ(*q);
+    (static_cast<FrictionContactXML*>(onestepnspbxml))->setQ(*q);
   }
-  else RuntimeException::selfThrow("LCP::saveQToXML - OneStepNSProblemXML object not exists");
-  OUT("LCP::saveQToXML\n");
+  else RuntimeException::selfThrow("FrictionContact::saveQToXML - OneStepNSProblemXML object not exists");
+  OUT("FrictionContact::saveQToXML\n");
 }
 
-LCP* LCP::convert(OneStepNSProblem* osnsp)
+FrictionContact* FrictionContact::convert(OneStepNSProblem* osnsp)
 {
-  cout << "LCP::convert (OneStepNSProblem* osnsp)" << endl;
-  LCP* lcp = dynamic_cast<LCP*>(osnsp);
-  return lcp;
+  cout << "FrictionContact::convert (OneStepNSProblem* osnsp)" << endl;
+  FrictionContact* fc2d = dynamic_cast<FrictionContact*>(osnsp);
+  return fc2d;
 }
 
 

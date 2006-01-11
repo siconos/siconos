@@ -38,8 +38,12 @@ class DynamicalSystem;
 class DSInputOutputXML;
 class SiconosMatrix;
 
-//extern std::string  DefaultComputeInput;
-//extern std::string  DefaultComputeOutput;
+const std::string  DefaultComputeInput = "DefaultPlugin:computeInput";
+const std::string  DefaultComputeOutput = "DefaultPlugin:computeOutput";
+const std::string LINEARDSIO = "LinearDSIO";
+const std::string NLINEARDSIO = "NLinearDSIO";
+const std::string LAGRANGIANDSIO = "LagrangianDSIO";
+const std::string LAGRANGIANLINEARDSIO = "LagrangianLinearDSIO";
 
 /** \class DSInputOutput
  *  \brief this class contains data for a specific DynamicalSystem about

@@ -22,21 +22,28 @@ using namespace std;
 
 Relay::Relay(): OneStepNSProblem()
 {
-  nspbType = RELAY_OSNSP;
+  nspbType = "Relay";
 }
 
 Relay::Relay(OneStepNSProblemXML* osnspbxml, Strategy * newStrat):
   OneStepNSProblem(osnspbxml, newStrat)
 {
-  nspbType = RELAY_OSNSP;
+  nspbType = "Relay";
 
 }
 
 Relay::~Relay()
 {}
 
+void Relay::compute(const double& time)
+{
+  RuntimeException::selfThrow("Relay compute: not yet implemented.");
+}
+
 void Relay::saveNSProblemToXML()
-{}
+{
+  RuntimeException::selfThrow("Relay saveNSProblemToXML: not yet implemented.");
+}
 
 Relay* Relay::convert(OneStepNSProblem* osnsp)
 {
