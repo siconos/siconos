@@ -19,8 +19,12 @@
 #ifndef BLASLAPACK_H
 #define BLASLAPACK_H
 
-
+#if __GNUC__ >= 4
+#include "g2c-compatgcc4.h"
+#else
 #include <g2c.h>
+#endif
+
 //#define _F2C_INCLUDE_H // to avoid f2c.h include => conflict with g2c.h
 #if  defined(RIOS) && !defined(CLAPACK)
 #define F77NAME(x) x
@@ -29,7 +33,9 @@
 #endif
 
 
+
 #ifndef _BLAS1_H_
+
 #define _BLAS1_H_
 
 extern  double F77NAME(dasum)(const integer *n, const double *dx, const integer *incx);

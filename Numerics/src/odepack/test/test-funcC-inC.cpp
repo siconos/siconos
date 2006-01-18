@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "g2c.h"
+#include "blaslapack.h"
 #include <stdio.h>
 
 

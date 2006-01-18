@@ -139,7 +139,12 @@ AC_PATH_PROG(DOXYGEN, doxygen, /usr/bin/doxygen, $PATH:/bin:/usr/bin:/usr/ucb/bi
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([float.h stdlib.h string.h sys/time.h g2c.h])
+AC_CHECK_HEADERS([float.h stdlib.h string.h sys/time.h])
+case $CXX_VER in
+     ( 3.*.* )
+     AC_CHECK_HEADERS([g2c.h])
+     ;;
+esac
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -290,15 +295,22 @@ case "$target" in
 esac
 AC_MSG_RESULT("SICONOS_EXT_INCLUDES = $SICONOS_EXT_INCLUDES")
 AC_SUBST(SICONOS_EXT_INCLUDES)
-
+LIBG2C=""
 #SICONOS_EXT_LDFLAGS
+case $CXX_VER in
+     ( 3.*.* )
+     LIBG2C="-lg2c"
+     ;;
+esac  
+
 SICONOS_EXT_LDFLAGS="$BLAS_LIBRARIES $LAPACK_LIBRARIES"
+
 case "$target" in
     *-linux*)
-      SICONOS_EXT_LDFLAGS="-lg2c $SICONOS_EXT_LDFLAGS"
+      SICONOS_EXT_LDFLAGS="$LIBG2C $SICONOS_EXT_LDFLAGS"
       ;;
     *-apple-darwin*)
-      SICONOS_EXT_LDFLAGS="-L/sw/lib -lg2c $SICONOS_EXT_LDFLAGS"
+      SICONOS_EXT_LDFLAGS="-L/sw/lib -$LIBG2C  $SICONOS_EXT_LDFLAGS"
       ;;
 esac
 AC_SUBST(SICONOS_EXT_LDFLAGS)
@@ -340,11 +352,12 @@ echo "
    C compiler flags:                    ${CFLAGS}
    C++ Compiler:                        ${CXX}
    C++ compiler flags:                  ${CXXFLAGS}
-   F77 Compiler:                        ${F77}
-   F77 compiler flags:                  ${FFLAGS}
+   FORTRAN Compiler:                    ${F77}
+   FORTRAN compiler flags:              ${FFLAGS}
    Preprocessor flags:                  ${CPPFLAGS}
    Linking flags			${LDFLAGS}
-   Includes:                            ${SICONOS_EXT_INCLUDES}
+   Siconos includes:                    ${SICONOS_EXT_INCLUDES}
+   Siconos ld flags:                    ${SICONOS_EXT_LDFLAGS}
 "
 echo Type \'make \' to build the SICONOS platform
 echo Run \'make doc\' to generate the documentation.

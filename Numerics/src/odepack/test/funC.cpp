@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "g2c.h"
 #include <stdio.h>
+#include "blaslapack.h"
 
 #define F77NAME(x) x##_
 
