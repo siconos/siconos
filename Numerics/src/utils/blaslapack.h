@@ -16,11 +16,12 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+
 #ifndef BLASLAPACK_H
 #define BLASLAPACK_H
 
 #if __GNUC__ >= 4
-#include "g2c-compatgcc4.h"
+#include "f2c.h"
 #else
 #include <g2c.h>
 #endif

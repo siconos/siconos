@@ -21,4 +21,4 @@
 SUBDIRS = 
 EXTRA_DIST = 
 
-include_HEADERS = blaslapack.h g2c-compatgcc4.h
+include_HEADERS = blaslapack.h f2c.h

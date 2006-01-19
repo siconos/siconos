@@ -27,6 +27,7 @@ dnl @license GPLWithACException
 
 AC_DEFUN([AC_PROG_SWIG],[
         AC_PATH_PROG([SWIG],[swig])
+	echo $SWIG
         if test -z "$SWIG" ; then
                 AC_MSG_WARN([cannot find 'swig' program. You should look at http://www.swig.org])
                 SWIG='echo "Error: SWIG is not installed. You should look at http://www.swig.org" ; false'
@@ -70,7 +71,7 @@ AC_DEFUN([AC_PROG_SWIG],[
                         if test $available_major -ne $required_major \
                                 -o $available_minor -ne $required_minor \
                                 -o $available_patch -lt $required_patch ; then
-                                AC_MSG_WARN([SWIG version >= $1 is required.  You have $swig_version.  You should look at http://www.swig.org])
+                                AC_MSG_WARN([SWIG version >= $1 is required.  You have $swig_version.  You should look at http://www.swig.org or check your PATH environement variable])
                                 SWIG='echo "Error: SWIG version >= $1 is required.  You have '"$swig_version"'.  You should look at http://www.swig.org" ; false'
                         else
                                 AC_MSG_NOTICE([SWIG executable is '$SWIG'])
