@@ -20,7 +20,26 @@ This is the changelog for the Siconos/Numerics package, www.siconos.gforge.inria
 Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.
+Do not hesitate to use the emacs mode Change Log for editing this file
 
+--------------------------------------------------------------------------------
+  v1.1.0 - In devel 
+--------------------------------------------------------------------------------
+	
+Notes:
+
+Changes:
+
+2006-01-20   Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * configure.ac, src/utils/blaslapack.h, f2c.h: Add workaround for 
+	gcc-4.0.2 gfortran-4.0.2 and so on. Use of a local f2c.h for gcc4.
+	use of the macro AC_F77_LIBRARY_LDFLAGS for linking gcc and gfortran 
+	compiled codes
+
+	
+
+	
 --------------------------------------------------------------------------------
   v1.0 - November 2005 (release 341)
 --------------------------------------------------------------------------------
