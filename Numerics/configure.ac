@@ -97,6 +97,8 @@ dnl AC_PROG_INSURE
 
 AC_PROG_CC
 AC_PROG_CXX
+AC_PROG_F77
+
 CFLAGS=""
 CXXFLAGS=""
 AC_MSG_CHECKING([g++ version])
@@ -295,24 +297,29 @@ case "$target" in
 esac
 AC_MSG_RESULT("SICONOS_EXT_INCLUDES = $SICONOS_EXT_INCLUDES")
 AC_SUBST(SICONOS_EXT_INCLUDES)
-LIBG2C=""
+
 #SICONOS_EXT_LDFLAGS
-case $CXX_VER in
-     ( 3.*.* )
-     LIBG2C="-lg2c"
-     ;;
-esac  
+
 
 SICONOS_EXT_LDFLAGS="$BLAS_LIBRARIES $LAPACK_LIBRARIES"
 
 case "$target" in
     *-linux*)
-      SICONOS_EXT_LDFLAGS="$LIBG2C $SICONOS_EXT_LDFLAGS"
+    AC_F77_LIBRARY_LDFLAGS	
       ;;
     *-apple-darwin*)
-      SICONOS_EXT_LDFLAGS="-L/sw/lib -$LIBG2C  $SICONOS_EXT_LDFLAGS"
-      ;;
+    # the flag for linking c anf f77 has to be defined 
+    # the macros  AC_F77_LIBRARY_LDFLAGS yields an error of link between C and F77
+    FLIBS="" 
+    case $CXX_VER in
+     ( 3.*.* )
+     FLIBS="-L/sw/lib -lg2c"
+     ;;
+    esac	
+     ;;
 esac
+
+SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $FLIBS"
 AC_SUBST(SICONOS_EXT_LDFLAGS)
 AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
 

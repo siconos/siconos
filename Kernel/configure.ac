@@ -97,6 +97,11 @@ dnl  AC_PROG_INSURE
 
 AC_PROG_CC
 AC_PROG_CXX
+AC_PROG_F77
+
+
+
+
 CFLAGS=""
 CXXFLAGS=""
 AC_MSG_CHECKING([g++ version])
@@ -182,11 +187,6 @@ AC_ARG_WITH(localcppunit,
 #################################
 
 # required version of the libraries
-
-
-
-
-
 
 # Blas
 BLAS_VER="3.0."
@@ -309,26 +309,27 @@ AC_SUBST(CXX_DYNLIB)
 SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $NANA_INCLUDES $LAPACKPP_INCLUDES $BLAS_INCLUDES $LAPACK_INCLUDES $LIBXML2_INCLUDES"
 AC_SUBST(SICONOS_EXT_INCLUDES)
 AC_MSG_RESULT("SICONOS_EXT_INCLUDES = $SICONOS_EXT_INCLUDES")
-LIBG2C=""
-#SICONOS_EXT_LDFLAGS
-case $CXX_VER in
-     ( 3.*.* )
-     LIBG2C="-lg2c"
-     ;;
-esac  
-
-
 
 #SICONOS_EXT_LDFLAGS
-SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $NANA_LIBRARIES $LAPACKPP_LIBRARIES $BLAS_LIBRARIES $LAPACK_LIBRARIES $LIBXML2_LIBRARIES"
+SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $NANA_LIBRARIES $LAPACKPP_LIBRARIES $BLAS_LIBRARIES $LAPACK_LIBRARIES $LIBXML2_LIBRARIES -ldl"
 case "$target" in
     *-linux*)
-      SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBG2C -ldl"
+    AC_F77_LIBRARY_LDFLAGS	
       ;;
     *-apple-darwin*)
-      SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS -L/sw/lib $LIBG2C "
-      ;;
+    # the flag for linking c anf f77 has to be defined
+    # the macros  AC_F77_LIBRARY_LDFLAGS yields an error of link between C and F77
+    FLIBS="" 
+    case $CXX_VER in
+     ( 3.*.* )
+     FLIBS="-L/sw/lib -lg2c"
+     ;;
+    esac	
+     ;;
 esac
+
+SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $FLIBS"
+
 AC_SUBST(SICONOS_EXT_LDFLAGS)
 AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
 
@@ -385,8 +386,8 @@ echo "
    F77 compiler flags:                  ${FFLAGS}
    Preprocessor flags:                  ${CPPFLAGS}
    Linking flags			${LDFLAGS}
-   Includes:                            ${SICONOS_EXT_INCLUDES}
-"
+   Siconos includes:                    ${SICONOS_EXT_INCLUDES}
+   Siconos ld flags:                    ${SICONOS_EXT_LDFLAGS}"
 echo Type \'make \' to build the SICONOS platform
 echo Run \'make doc\' to generate the documentation.
 echo Type \'make install\' to install the platfrom
