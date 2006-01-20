@@ -31,9 +31,9 @@ esac
 blas_lib="no"
 
 for ac_dir in $list_dir;
-do dynlib=no;    
+do dynlib=no;
+	AC_MSG_CHECKING([for libblas.$libsuffix in $ac_dir])    
    if test -r "$ac_dir/libblas.$libsuffix" ; then
-       AC_MSG_CHECKING([for libblas.$libsuffix in $ac_dir])
        ACX_CHECK_DYNLIB_VER([$ac_dir/libblas.$libsuffix], [$BLAS_VER], [dynlib="yes"] ,[dynlib="higher version required"])	
        AC_MSG_RESULT($dynlib)
        if test "$dynlib" = "yes"; then
@@ -45,19 +45,18 @@ do dynlib=no;
 done
 
 # # test static library
-# if test "$blas_lib" = "no" ; then
-#     for ac_dir in $list_dir;
-#     do  AC_MSG_CHECKING([for libblas.a in $ac_dir])
-#         if test -r "$ac_dir/libblas.a" ; then
-# 	    blas_lib="yes"
-	    
-# 	    BLAS_LIBRARIES="-L$ac_dir -lblas"
-# 	    AC_MSG_RESULT([$blas_lib])
-# 	    break
-# 	fi
-#         AC_MSG_RESULT([$blas_lib])
-#     done
-# fi
+if test "$blas_lib" = "no" ; then
+    for ac_dir in $list_dir;
+    do  AC_MSG_CHECKING([for libblas.a in $ac_dir])
+        if test -r "$ac_dir/libblas.a" ; then
+	    blas_lib="yes"	    
+	    BLAS_LIBRARIES="-L$ac_dir -lblas"
+	    AC_MSG_RESULT([$blas_lib])
+	    break
+	fi
+        AC_MSG_RESULT([$blas_lib])
+    done
+fi
 # result of test
 if test "$blas_lib" = "yes" ; then
     if test "$dynlib" = "no"; then

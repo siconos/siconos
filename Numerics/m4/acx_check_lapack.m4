@@ -32,8 +32,8 @@ lapack_lib="no"
 
 for ac_dir in $list_dir;
 do dynlib=no;    
-   if test -r "$ac_dir/liblapack.$libsuffix" ; then
        AC_MSG_CHECKING([for liblapack.$libsuffix in $ac_dir])
+   if test -r "$ac_dir/liblapack.$libsuffix" ; then
        ACX_CHECK_DYNLIB_VER([$ac_dir/liblapack.$libsuffix], [$LAPACK_VER], [dynlib="yes"] ,[dynlib="higher version required"])	
        AC_MSG_RESULT($dynlib)
        if test "$dynlib" = "yes"; then
