@@ -369,6 +369,6 @@ echo "
 echo Type \'make \' to build the SICONOS platform
 echo Run \'make doc\' to generate the documentation.
 echo Type \'make install\' to install the platfrom
-echo Type \'make check\' torun the test
+echo Type \'make check\' to run the test
 echo
 echo Alternatively, you can \'make all\' to use the default configuration.

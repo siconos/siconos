@@ -37,19 +37,6 @@ do dynlib=no;
 done
 
 
-# test static library
-#if test "$libxml_lib" = "no" ; then
-#    for ac_dir in $list_dir;
-#    do  AC_MSG_CHECKING([for cppunit.a in $ac_dir/lib])
-#        if test -r "$ac_dir/lib/cppunit.a" ; then
-#	    libxml_lib="yes"          
-#	    CPPUNIT_LIBRARIES="-L$ac_dir/lib -lcppunit"
-#        break
-#	fi
-#	AC_MSG_RESULT([yes - Found  a static library $ac_dir/lib/$libxml_lib])
-#    done
-#fi
-# result of test
 if test "$cppunit_config" = "yes" ; then
     if test "$dynlib" = "no"; then
        result="static version found"
