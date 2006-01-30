@@ -1,4 +1,4 @@
-# Siconos version 1.0, Copyright INRIA 2005.  
+# Siconos version 1.1.0, Copyright INRIA 2005.  
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -20,11 +20,11 @@ dnl configure script for SICONOS
 dnl JB CHARLETY, 2005
 
 AC_PREREQ(2.57)
-AC_INIT(SICONOS, 1.0, www.siconos.com)
+AC_INIT(SICONOS, 1.1.0, siconos.gforge.inria.fr)
 
 dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_SYSTEM
-AM_INIT_AUTOMAKE(SICONOS, 1.0)
+AM_INIT_AUTOMAKE(SICONOS, 1.1.0)
 AC_CONFIG_SRCDIR([src/model/Model.h])
 AC_CONFIG_HEADER([config.h])
 
@@ -65,8 +65,8 @@ function checkLibraryVersionNumber () {
 }
 
 # SO version of all siconos shared libraries
-SICONOS_SO_CURRENT=0
-SICONOS_SO_REVISION=1
+SICONOS_SO_CURRENT=1
+SICONOS_SO_REVISION=0
 SICONOS_SO_AGE=0
 AC_SUBST(SICONOS_SO_CURRENT)
 AC_SUBST(SICONOS_SO_REVISION)
@@ -360,7 +360,7 @@ AC_CONFIG_FILES([Makefile
 		 src/modelingTools/test/Makefile
 	         src/simulationTools/Makefile
                  src/plugin/Makefile
-		 src/plugin_test/Makefile
+		 src/plugin/test/Makefile
                  src/utils/Makefile
 		 src/utils/SiconosException/Makefile
                  src/utils/SiconosAlgebra/Makefile

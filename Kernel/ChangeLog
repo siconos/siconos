@@ -23,19 +23,37 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
-  v1.1.0 - In devel 
+  v1.1.0 - February 2006 (release 383)
 --------------------------------------------------------------------------------
 	
 Notes:
 
+   This new version includes friction modeling and simulation for
+	Lagrangian systems in 2D (3D version in devel)
+		
 Changes:
 
-2006-01-20   Vincent Acary <vincent.acary@inrialpes.fr>
+2006-01-30 Vincent Acary <vincent.acary@inrialpes.fr>  Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * configure.ac, plugin_test/Makefile plugin/test/Makefile, preparation 
+	of the version v1.1.0
+	* plugin_test -> plugin/test
+
+2006-01-20 Vincent Acary <vincent.acary@inrialpes.fr>
 
         * configure.ac: Add workaround for gcc-4.0.2 gfortran-4.0.2.
 	Use of the macro AC_F77_LIBRARY_LDFLAGS for linking gcc and
 	gfortran compiled codes
 
+2006-15-01 Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * src/simulationTools: review non-smooth problem solvers management
+
+2005-12-22  Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * src/simulationTools: add friction problem simulation tools (2D) 
+	* src/xml: add xml files for friction problems (2D) 
+	
 
 --------------------------------------------------------------------------------
   v1.0 - October 2005 (release 341)

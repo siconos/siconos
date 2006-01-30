@@ -20,7 +20,7 @@
 
 include $(top_srcdir)/config/Make-rules
 
-#SUBDIRS = 
+SUBDIRS = test
 #EXTRA_DIST =
 
 all : DefaultPlugin.so
