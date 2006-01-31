@@ -171,14 +171,8 @@ AC_ARG_WITH(localnumerics,
 	[  --with-localnumerics=path        indicates a local path of numerics lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
 AC_ARG_WITH(localnana,			
 	[  --with-localnana=path        indicates a local path of nana lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
-AC_ARG_WITH(localblas,			
-	[  --with-localblas=path	indicates a local path of blas lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
-AC_ARG_WITH(locallapack,			  
-	[  --with-locallapack=path      indicates a local path of lapack lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
 AC_ARG_WITH(locallapackpp,		
 	[  --with-locallapackpp=path	indicates a local path of lapackpp lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
-AC_ARG_WITH(locallibxml,		
-	[  --with-locallibxml=path	indicates a local path of libxml lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
 AC_ARG_WITH(localcppunit,		
 	[  --with-localcppunit=path	indicates a local path of cppunit lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
 
@@ -188,17 +182,17 @@ AC_ARG_WITH(localcppunit,
 
 # required version of the libraries
 
-# Blas
-BLAS_VER="3.0."
-AC_MSG_CHECKING([for Blas])
-ACX_CHECK_BLAS([AC_SUBST(BLAS_LIBRARIES)], [AC_MSG_ERROR([Blas not found])])
-# exit 1;
-
-# Lapack
-LAPACK_VER="3.0."
-AC_MSG_CHECKING([for Lapack])
-ACX_CHECK_LAPACK([AC_SUBST(LAPACK_LIBRARIES)], [AC_MSG_ERROR([Lapack not found])])
-# exit 1;
+dnl Check for Lapack
+ACX_LAPACK([  dnl action-if-found:  # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS],
+ [
+  dnl action-if-not-found: 
+  AC_MSG_ERROR([Blas/Lapack was not found. 
+*** This makes this library unusable. Please get blas and lapack 
+*** installed. If you do have these installed, use the options 
+*** --with-blas=<libname> or --with-lapack=<libname> and/or set 
+*** the env variable LDFLAGS to include the appropriate linker 
+*** flags.])
+])
 
 # Numerics
 AC_MSG_CHECKING([for Siconos/Numerics])
@@ -215,9 +209,11 @@ AC_SUBST(CXX_LAPACKPP_FLAG)
 
 
 # Libxml2
-LIBXML_VER="2.6.16"
 AC_MSG_CHECKING([Libxml2])
-ACX_CHECK_LIBXML2([AC_SUBST(LIBXML2_INCLUDES) AC_SUBST(LIBXML2_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Libxml2 in a good version. Please install Libxml2, version >= $LIBXML_VER  or use the option --with-locallibxml.])])
+AM_PATH_XML2(2.6.16,,AC_MSG_ERROR([
+*** Libxml is required to build GVideoDB; Available at
+http://www.libxml.org/.]))
+dnl ACX_CHECK_LIBXML2([AC_SUBST(LIBXML2_INCLUDES) AC_SUBST(LIBXML2_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Libxml2 in a good version. Please install Libxml2, version >= $LIBXML_VER  or use the option --with-locallibxml.])])
 
 # Nana Warning, by default we skip ccpunit
 AC_MSG_CHECKING([Nana])
@@ -306,29 +302,29 @@ AC_SUBST(CXX_DYNLIB)
 #################################
 
 #SICONOS_EXT_INCLUDES
-SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $NANA_INCLUDES $LAPACKPP_INCLUDES $BLAS_INCLUDES $LAPACK_INCLUDES $LIBXML2_INCLUDES"
+SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $NANA_INCLUDES $LAPACKPP_INCLUDES  $XML_CPPFLAGS"
 AC_SUBST(SICONOS_EXT_INCLUDES)
 AC_MSG_RESULT("SICONOS_EXT_INCLUDES = $SICONOS_EXT_INCLUDES")
 
 #SICONOS_EXT_LDFLAGS
-SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $NANA_LIBRARIES $LAPACKPP_LIBRARIES $BLAS_LIBRARIES $LAPACK_LIBRARIES $LIBXML2_LIBRARIES -ldl"
-case "$target" in
-    *-linux*)
-    AC_F77_LIBRARY_LDFLAGS	
-      ;;
-    *-apple-darwin*)
-    # the flag for linking c anf f77 has to be defined
-    # the macros  AC_F77_LIBRARY_LDFLAGS yields an error of link between C and F77
-    FLIBS="" 
-    case $CXX_VER in
-     ( 3.*.* )
-     FLIBS="-L/sw/lib -lg2c"
-     ;;
-    esac	
-     ;;
-esac
+SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $NANA_LIBRARIES $LAPACKPP_LIBRARIES $LAPACK_LIBS $BLAS_LIBS $XML_LIBS -ldl"
+dnl case "$target" in
+dnl     *-linux*)
+dnl     AC_F77_LIBRARY_LDFLAGS	
+dnl       ;;
+dnl     *-apple-darwin*)
+dnl     # the flag for linking c anf f77 has to be defined
+dnl     # the macros  AC_F77_LIBRARY_LDFLAGS yields an error of link between C and F77
+dnl     FLIBS="" 
+dnl     case $CXX_VER in
+dnl      ( 3.*.* )
+dnl      FLIBS="-L/sw/lib -lg2c"
+dnl      ;;
+dnl     esac	
+dnl      ;;
+dnl esac
 
-SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $FLIBS"
+SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS $FLIBS"
 
 AC_SUBST(SICONOS_EXT_LDFLAGS)
 AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")

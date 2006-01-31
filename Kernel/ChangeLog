@@ -23,7 +23,7 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
-  v1.1.0 - February 2006 (release 383)
+  v1.1.0 - February 2006 (release 386)
 --------------------------------------------------------------------------------
 	
 Notes:
@@ -33,6 +33,13 @@ Notes:
 		
 Changes:
 
+2006-01-31   Franck Perignon <franck.perignon@inrialpes.fr> 
+	     Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * rename reconf.sh in autogen.sh and m4 directory in macros
+	  Use standard acx_blas and lapack macros. 
+	  Warning: new options for configure ( -> configure --help for details )
+	
 2006-01-30 Vincent Acary <vincent.acary@inrialpes.fr>  Franck Perignon <franck.perignon@inrialpes.fr>
 
         * configure.ac, plugin_test/Makefile plugin/test/Makefile, preparation 
