@@ -170,32 +170,24 @@ AC_ARG_ENABLE(warnings,[  --enable-warnings            enable compilation warnin
 AC_ARG_ENABLE(error-on-warning,[  --enable-erroronwarning     treat all compile warnings as errors, default=no])
 
 #################################
-## all the --with-* argument help
-#################################
-AC_ARG_WITH(localblas,			
-	[  --with-localblas=path	indicates a local path of blas lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
-AC_ARG_WITH(locallapack,			  
-	[  --with-locallapack=path      indicates a local path of lapack lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
-
-
-#################################
 ## Checks for external libraries
 #################################
 
-# required version of the libraries
-
-
-
-# Blas
-BLAS_VER="3.0."
-AC_MSG_CHECKING([for Blas])
-ACX_CHECK_BLAS([AC_SUBST(BLAS_LIBRARIES)], [AC_MSG_ERROR([Blas not found])])
-# exit 1;
-
-# Lapack
-LAPACK_VER="3.0."
-AC_MSG_CHECKING([for Lapack])
-ACX_CHECK_LAPACK([AC_SUBST(LAPACK_LIBRARIES)], [AC_MSG_ERROR([Lapack not found])])
+dnl Check for Lapack
+ACX_LAPACK([
+  dnl action-if-found: 
+  AC_DEFINE(HAVE_LAPACKPP,1,[Define if you have LAPACK++ library.])
+  # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS
+], [
+  dnl action-if-not-found: 
+  AC_MSG_ERROR([Blas/Lapack was not found. 
+*** This means Lapack++ and matrix support cannot be compiled. 
+*** This makes this library unusable. Please get blas and lapack 
+*** installed. If you do have these installed, use the options 
+*** --with-blas=<libname> or --with-lapack=<libname> and/or set 
+*** the env variable LDFLAGS to include the appropriate linker 
+*** flags.])
+])
 
 # Cppunit : Warning, by default we skip ccpunit
 CPPUNIT_VER="1.10.2"
@@ -286,7 +278,7 @@ AC_SUBST(CXX_DYNLIB)
 ## LINK FLAGS
 #################################
 #SICONOS_EXT_INCLUDES
-SICONOS_EXT_INCLUDES="$BLAS_INCLUDES $LAPACK_INCLUDES"
+SICONOS_EXT_INCLUDES=""
 case "$target" in
     *-linux*)
       
@@ -301,32 +293,27 @@ AC_SUBST(SICONOS_EXT_INCLUDES)
 #SICONOS_EXT_LDFLAGS
 
 
-SICONOS_EXT_LDFLAGS="$BLAS_LIBRARIES $LAPACK_LIBRARIES"
+SICONOS_EXT_LDFLAGS="$LAPACK_LIBS $BLAS_LIBS "
 
-case "$target" in
-    *-linux*)
-    AC_F77_LIBRARY_LDFLAGS	
-      ;;
-    *-apple-darwin*)
-    # the flag for linking c anf f77 has to be defined 
-    # the macros  AC_F77_LIBRARY_LDFLAGS yields an error of link between C and F77
-    FLIBS="" 
-    case $CXX_VER in
-     ( 3.*.* )
-     FLIBS="-L/sw/lib -lg2c"
-     ;;
-    esac	
-     ;;
-esac
+dnl case "$target" in
+dnl     *-linux*)
+dnl     AC_F77_LIBRARY_LDFLAGS	
+dnl       ;;
+dnl     *-apple-darwin*)
+dnl     # the flag for linking c anf f77 has to be defined 
+dnl     # the macros  AC_F77_LIBRARY_LDFLAGS yields an error of link between C and F77
+dnl     FLIBS="" 
+dnl     case $CXX_VER in
+dnl      ( 3.*.* )
+dnl      FLIBS="-L/sw/lib -lg2c"
+dnl      ;;
+dnl     esac	
+dnl      ;;
+dnl esac
 
-SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $FLIBS"
+SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS $FLIBS"
 AC_SUBST(SICONOS_EXT_LDFLAGS)
 AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
-
-
-
-
-
 
 #################################
 ## DOXYGEN 

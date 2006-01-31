@@ -1,4 +1,5 @@
-# Siconos version 1.0, Copyright INRIA 2005.  
+#!/bin/sh -x
+# Siconos version 1.1.0, Copyright INRIA 2005-2006.  
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -16,11 +17,26 @@
 #
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
-#! /bin/sh
-rm -f config.cache
-libtoolize
-aclocal -I ./m4 > /dev/null 
-autoconf
-autoheader
-automake --add-missing
-exit 0
+
+# Print every line before execution
+set -e
+
+# First cache the command names in variables. If you want to
+# override the names, simply set the variables before calling this
+# script.
+: ${LIBTOOLIZE=libtoolize}
+: ${ACLOCAL=aclocal}
+: ${AUTOHEADER=autoheader}
+: ${AUTOMAKE=automake}
+: ${AUTOCONF=autoconf}
+
+# Call the commands one by one
+${LIBTOOLIZE} -f --automake
+${ACLOCAL} -I macros ${ACLOCAL_FLAGS}
+${AUTOHEADER}
+${AUTOMAKE} --add-missing
+${AUTOCONF}
+
+# Successfully finished.
+echo "Now you can run ./configure"
+

@@ -1,4 +1,4 @@
-# Siconos version 1.0, Copyright INRIA 2005.  
+# Siconos version 1.1.0, Copyright INRIA 2005-2006.  
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -18,30 +18,16 @@
 #	
 
 --------------------------------------------------------------------------------
- How to load and install the platform (Numerics, Kernel, Front-End):
+ How to load and install Numerics:
 --------------------------------------------------------------------------------
 
 ---++ Required external libraries
 
-   * libxml2
-      * actual version used with the platform : 2.6.17
-      * last version : 2.6.17 
-      * known problems : none
-      * location : http://www.xmlsoft.org/downloads.html
+   * blas / lapack
+      * actual version used with the platform : 3.0
+      * location : http://www.netlib.org/
 
-   * lapack++
-      * actual version used with the platform: 2.4.0
-      * last version : 2.4.0
-      * known problems : none
-      * location : http://sourceforge.net/projects/lapackpp
-
----++ Optional external libraries (advised for developers)
-
-   * nana
-      * actual version used with the platform: 2.5
-      * last version : 2.5
-      * known problems : compilation problems
-      * location : Gforge
+---++ Optional external libraries
 
    * cppunit
       * actual version used with the platform: 1.10.2
@@ -49,39 +35,26 @@
       * known problems : none
       * location : http://cppunit.sourceforge.net/cgi-bin/moin.cgi
 
-
 ---++ Getting the sources
 
    * Through the svn server (acess required)
        svn checkout svn+ssh://user@scm.gforge.inria.fr/svn/siconos
        for more explanation see http://gforge.inria.fr/scm/?group_id=9
-   * Download the source packages on the Gforge   
 
+   * Download the source packages on the Gforge   
 
 ---++ INSTALL 
 
-For each package (Numerics, Kernel, Front-End, in this order), in the corresponding main directory:
+in Numerics directory:
 	
-	- ./reconf.sh
-	- configure --prefix="the path where you want to install the platform" --other_options
+	- ./autogen.sh
+	- ./configure --prefix="the path where you want to install the platform" --other_options
 	- make
 	- make install (default install location: /usr/local) 
 	- make check (optional) : to run tests	
-	- make documentation (optional)  : to generate Doxygen documentation
+	- make doc (optional)  : to generate Doxygen documentation
 
 for more details on configure options, type configure --help. 
       
----+++ Is the installation of the Kernel OK ?
-   * You can try to run : cd /path/to/your/source/code/sample/BouncingBall ; siconos BouncingBall.cpp
-
----+++ Is the installation of the Font-End OK ?
-   * You can try to run : cd /path/to/your/source/code/sample/BouncingBall ; pySiconos BouncingBall.py
-
-   * *I advise you for the moment to install the platform in the directory retrieved from SVN. C++ compiler, System libraries, external libraries, etc. are tested...
-
-   * If you have a local installation of an external library, you can give its path to configure with the option --with-local[library name]. You can get the possible options typing =%configure --help=. 
-
-
-
--- Main.VincentAcary - 28 Jun 2005
+   * If you have a local installation of an external library, you can give its path to configure with the option --with-[library name]. You can get the possible options typing = ./configure --help. 
 
