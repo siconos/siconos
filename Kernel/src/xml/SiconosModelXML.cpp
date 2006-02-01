@@ -21,19 +21,18 @@
 using namespace std;
 
 SiconosModelXML::SiconosModelXML():
-  xmlSchemaFile(XML_SCHEMA), nsdsXML(NULL), strategyXML(NULL), tNode(NULL),
-  t0Node(NULL), TNode(NULL), titleNode(NULL), authorNode(NULL), descriptionNode(NULL),
-  dateNode(NULL), xmlSchemaNode(NULL), rootNode(NULL), timeNode(NULL), doc(NULL)
+  rootNode(NULL), timeNode(NULL), doc(NULL), xmlSchemaFile(XML_SCHEMA),
+  titleNode(NULL), authorNode(NULL), descriptionNode(NULL), dateNode(NULL), xmlSchemaNode(NULL),
+  tNode(NULL), t0Node(NULL), TNode(NULL),
+  nsdsXML(NULL), strategyXML(NULL)
 {
   IN("SiconosModelXML::SiconosModelXML()\n");
-  if (getenv("SICONOSPATH") == NULL)
-    RuntimeException::selfThrow("Environment variable SICONOSPATH is not defined.");
 
   doc = xmlNewDoc((xmlChar*)"1.0");
   if (doc == NULL)
     XMLException::selfThrow("SiconosModelXML - Creation of the document aborted");
 
-  //------------Create and set the root element node----------//
+  //=====Create and set the root element node=====//
   rootNode = xmlNewNode(NULL, (xmlChar*)MODEL_TAG.c_str());
   xmlDocSetRootElement(doc, rootNode);
 
@@ -47,31 +46,20 @@ SiconosModelXML::SiconosModelXML():
 
 
 SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
-  xmlSchemaFile("none"), nsdsXML(NULL), strategyXML(NULL), tNode(NULL),
-  t0Node(NULL), TNode(NULL), titleNode(NULL), authorNode(NULL),   descriptionNode(NULL),
-  dateNode(NULL), xmlSchemaNode(NULL), rootNode(NULL), timeNode(NULL), doc(NULL)
+  rootNode(NULL), timeNode(NULL), doc(NULL), xmlSchemaFile(XML_SCHEMA),
+  titleNode(NULL), authorNode(NULL), descriptionNode(NULL), dateNode(NULL), xmlSchemaNode(NULL),
+  tNode(NULL), t0Node(NULL), TNode(NULL),
+  nsdsXML(NULL), strategyXML(NULL)
 {
-  /*
-   * this initialize the library and check potential API mismatches
-   * between the version it was compiled for and the actual shared
-   * library used.
-   */
-  //xmlKeepBlanksDefault(0);
-
-  if (getenv("SICONOSPATH") == NULL)
-    RuntimeException::selfThrow("Environment variable SICONOSPATH is not defined.");
-
   if (siconosModelXMLFilePath != NULL)
   {
-    //      LIBXML_TEST_VERSION
-
-    //---------- XML input file loading ------------//
+    //===== XML input file loading =====
     doc = xmlParseFile(siconosModelXMLFilePath);
 
-    if (doc == NULL)
+    if (doc == NULL) // check if parsing is ok
       XMLException::selfThrow("SiconosModelXML - Document " + (string)siconosModelXMLFilePath + " not parsed successfully.");
 
-    //------------ Retrieve the document's root element ----------//
+    //===== Retrieve the document's root element =====
     xmlNode *newRootNode = xmlDocGetRootElement(doc);
 
     if (newRootNode == NULL)
@@ -81,115 +69,79 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
     }
     else rootNode = newRootNode;
 
-    //------------- Check document is of the right type (SiconosModel) ----- //
+    //=====- Check if document is of the right type (SiconosModel) - //
     if (xmlStrcmp(rootNode->name, (const xmlChar *) "SiconosModel"))
     {
       XMLException::selfThrow("SiconosModelXML - Wrong xml document type, root node !=SiconosModel.");
       xmlFreeDoc(doc);
     }
 
-    //----------Loads the XML schema------------//
-    /* 1- gets the value of the node which contains the tag "XMLSchema"
-     * 2- gets the name and location of the XML shcema file
-     * 3- loads the XML schema
-     */
-    xmlNode *xmlSchemaGiven = SiconosDOMTreeTools::findNodeChild(rootNode, SM_XMLSCHEMA);
+    //===== Load the XML schema =====//
+    // get schema location and name from the corresponding node
+    xmlNodePtr xmlSchemaGiven = SiconosDOMTreeTools::findNodeChild(rootNode, SM_XMLSCHEMA);
     if (xmlSchemaGiven != NULL)
     {
+      // First case: the full-path for xmlSchema is given by user in input file
       xmlSchemaFile = SiconosDOMTreeTools::getStringContentValue(xmlSchemaGiven);
-      // checks if the path of the file is well formed
-      unsigned int cpt = 0;
-      bool goodFile = true;
-
-      /*
-       * the spaces are deleted at the end and at the begining of the string value
-       */
-      while ((xmlSchemaFile[cpt] == ' ') && (cpt < xmlSchemaFile.size()))
-        cpt++;
-      // delete spaces at the beginning
-      if (cpt != 0)
-        xmlSchemaFile = xmlSchemaFile.substr(cpt, xmlSchemaFile.size() - cpt);
-
-      cpt = xmlSchemaFile.size();
-      if (cpt > 0)
-      {
-        while ((xmlSchemaFile[cpt - 1] == ' ') && (cpt > 0))
-          cpt--;
-        // delete spaces at the end
-        if (cpt != 0)
-          xmlSchemaFile = xmlSchemaFile.substr(0, cpt);
-      }
-      else goodFile = false;
-
-      if (xmlSchemaFile[0] != '/')
-        xmlSchemaFile = "/" + xmlSchemaFile;
-
-      /*
-       * if there's no schema given (empty field)
-       */
-      if (!goodFile)
-      {
-        //xmlSchemaFile = DEFAULT_XMLSCHEMA;
-        xmlSchemaFile = XML_SCHEMA;//DEFAULT_XMLSCHEMA;
-        cout << "/!\\No XML Schema file has been given !\n# Generic schema will be used" << endl;
-      }
     }
     else
     {
-      //xmlSchemaFile = "/config/xmlschema/SiconosModelSchema-V1.0.xsd";
-      XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_XMLSCHEMA + " not found.");
+      // Second case: no schema is given by user -> default one is used: SICONOSPATH/XML_SCHEMA
+
+      // Check that SICONOSPATH is set.
+      if (getenv("SICONOSPATH") == NULL)
+        RuntimeException::selfThrow("Environment variable SICONOSPATH is not defined.");
+
+      xmlSchemaFile = getenv("SICONOSPATH") + XML_SCHEMA;
     }
 
-    string schemaFile = getenv("SICONOSPATH") + xmlSchemaFile;
+    string schemaFile = xmlSchemaFile; //getenv("SICONOSPATH") + (string)"/share/SICONOS/";
 
-    //----------Load Schema--------//
+    cout << " **** The xml schema used is: " << schemaFile << " **** " << endl;
+
+    //=====Load Schema=====
     std::ifstream givenXMLSchema(schemaFile.c_str());
     if (givenXMLSchema == NULL)
-      XMLException::selfThrow("SiconosModelXML - File \"" + schemaFile + "\" doesn't exist.");
+      XMLException::selfThrow("SiconosModelXML constructor. File \"" + schemaFile + "\" does not exist.");
 
     xmlSchemaParserCtxtPtr ctxt = xmlSchemaNewParserCtxt(schemaFile.c_str());
     xmlSchemaSetParserErrors(ctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
 
-
-    //----------Verifify the Schema validity------------//
+    //=====Verifify the Schema validity=====
     xmlSchemaPtr schema = xmlSchemaParse(ctxt);
     xmlSchemaFreeParserCtxt(ctxt);
 
     if (schema == NULL)
-      XMLException::selfThrow("SiconosModelXML - please correct the xml schema : " + schemaFile + ".");
+      XMLException::selfThrow("SiconosModelXML - Unvalid schema: " + schemaFile + ".");
 
     xmlSchemaValidCtxtPtr validctxt = xmlSchemaNewValidCtxt(schema);
 
     xmlSchemaSetValidErrors(validctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
 
-    //----------Verififys the XML file respects the schema------------//
+    //=====Verifify that the XML file respects the schema=====
 
     int xmlValid = 0;
-    //  xmlSchemaValidateDoc(validctxt, doc);
-
 
     xmlSchemaFreeValidCtxt(validctxt);
     xmlSchemaFree(schema);
 
-    if (xmlValid == 0) cout << "SiconosModelXML - Your XML model file : " << siconosModelXMLFilePath << " is valid with respect to the schema" << endl;
+    if (xmlValid == 0)
+      cout << "SiconosModelXML - Your XML model file : " << siconosModelXMLFilePath << " is valid with respect to the schema" << endl;
     else if (xmlValid == -1)
       XMLException::selfThrow("SiconosModelXML - Internal or API error to verify your XML model file : " + (string)siconosModelXMLFilePath + ".");
     else //positive error code number returned
-      XMLException::selfThrow("SiconosModelXML - Your XML model file " + (string)siconosModelXMLFilePath + " doesn't respect the siconos schema.");
+      XMLException::selfThrow("SiconosModelXML - Your XML model file " + (string)siconosModelXMLFilePath + " does not respect the siconos schema.");
 
-    //-------------------Load NonSmoothDynamicalSystemXML, StrategyXML and to and T ---------------------//
+    //===== read model-nodes values in xml files ====
     loadModel(rootNode);
   }
-  else
+  else // if siconosModelXMLFilePath == NULL
   {
-    // \to do, when "siconosModelXMLFilePath == NULL"
-
     doc = xmlNewDoc((xmlChar*)"1.0");
-
     if (doc == NULL)
       XMLException::selfThrow("SiconosModelXML - Creation of the document aborted");
 
-    //------------Create and set the root element node----------//
+    //===== Create and set the root element node =====//
     rootNode = xmlNewNode(NULL, (xmlChar*)MODEL_TAG.c_str());
     xmlDocSetRootElement(doc, rootNode);
   }
@@ -224,9 +176,7 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
 {
   xmlNode *node;
 
-  /*
-   * load the information about the Model
-   */
+  // title, author, description and date tags (required)
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_TITLE)) != NULL)
     titleNode = node;
   else XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_TITLE + " not found.");
@@ -243,43 +193,30 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
     dateNode = node;
   else XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_DATE + " not found.");
 
+  // xml schema location and name tag (optional)
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_XMLSCHEMA)) != NULL)
     xmlSchemaNode = node;
-  else XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_XMLSCHEMA + " not found.");
-  /*
-   * loadModel function is called, so an xml file has been given to load the data of the system
-   */
+
+  // Non smooth dynamical system tag (required)
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, NSDS_TAG)) != NULL)
-  {
-    loadNonSmoothDynamicalSystemXML(node);
-  }
+    nsdsXML = new NonSmoothDynamicalSystemXML(node);
   else
     XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + NSDS_TAG + " not found.");
 
-  /*
-   * loadTime function is called, so an xml file has been given to load the data of the system
-   */
+  // Time interval (required)
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_TIME)) != NULL)
   {
     loadTime(node);
     timeNode = node;
   }
   else XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_TIME + " not found.");
-  /*
-   * Warning, in an xml input data file, the strategy is only optional
-   */
+
+  // Strategy tag (optional)
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, STRATEGY_TAG)) != NULL)
-  {
-    loadStrategyXML(node);
-  }
+    strategyXML = new StrategyXML(node, nsdsXML->getDSNumbers(), nsdsXML->getInteractionNumbers());
   else
   {
-    //XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_STRATEGY + " not found.");
-
-    /*
-     * the strategy is optional so if there's no strategy, we only print to the screen a warning
-     */
-    cout << "SiconosModelXML - loadModel Warning : tag " << STRATEGY_TAG << " not found. The Strategy is optional" << endl;
+    cout << "SiconosModelXML - loadModel Warning : optional tag " << STRATEGY_TAG << " not found." << endl;
     timeNode = node;
     strategyXML = NULL;
   }
@@ -355,18 +292,6 @@ void SiconosModelXML::loadTime(xmlNode *timeNode)
   else tNode = NULL;
 }
 
-
-void SiconosModelXML::loadNonSmoothDynamicalSystemXML(xmlNode *NSDSNode)
-{
-  nsdsXML = new NonSmoothDynamicalSystemXML(NSDSNode);
-}
-
-
-void SiconosModelXML::loadStrategyXML(xmlNode *strategyNode)
-{
-  strategyXML = new StrategyXML(strategyNode, nsdsXML->getDSNumbers(), nsdsXML->getInteractionNumbers());
-}
-
 bool SiconosModelXML::checkSiconosDOMTree()
 {
   //  cout<<">> SiconosModelXML::checkSiconosDOMTree()"<<endl;
@@ -377,11 +302,11 @@ bool SiconosModelXML::checkSiconosDOMTree()
     cout << "Warning: no DOM tree has been initialized yet." << endl;
   else
   {
-    //----------Load Schema--------//
+    //=====Load Schema=====//
     xmlSchemaParserCtxtPtr ctxt = xmlSchemaNewParserCtxt(schemaFile.c_str());
     xmlSchemaSetParserErrors(ctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
 
-    //----------Verifify the Schema validity------------//
+    //=====Verifify the Schema validity=====//
     xmlSchemaPtr schema = xmlSchemaParse(ctxt);
     xmlSchemaFreeParserCtxt(ctxt);
 
@@ -390,7 +315,7 @@ bool SiconosModelXML::checkSiconosDOMTree()
     xmlSchemaValidCtxtPtr validctxt = xmlSchemaNewValidCtxt(schema);
     xmlSchemaSetValidErrors(validctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
 
-    //----------Verifify the XML file respects the schema------------//
+    //=====Verifify the XML file respects the schema=====//
     int xmlValid = 0;
     // xmlSchemaValidateDoc(validctxt, doc);
 
@@ -463,7 +388,7 @@ bool SiconosModelXML::checkSiconosDOMTreeCoherency()
   return res;
 }
 
-int SiconosModelXML::validateXmlFile(string xmlFile, string xmlSchema)
+int SiconosModelXML::validateXmlFile(const string& xmlFile, const string& xmlSchema)
 {
   int res = 0;
   string schemaXML;
@@ -478,7 +403,7 @@ int SiconosModelXML::validateXmlFile(string xmlFile, string xmlSchema)
   xmlSchemaParserCtxtPtr ctxt = xmlSchemaNewParserCtxt(schemaXML.c_str());
   xmlSchemaSetParserErrors(ctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
 
-  //----------Verifify the Schema validity------------//
+  //=====Verifify the Schema validity=====//
   xmlSchemaPtr schema = xmlSchemaParse(ctxt);
   xmlSchemaFreeParserCtxt(ctxt);
 
@@ -488,12 +413,12 @@ int SiconosModelXML::validateXmlFile(string xmlFile, string xmlSchema)
   xmlSchemaValidCtxtPtr validctxt = xmlSchemaNewValidCtxt(schema);
   xmlSchemaSetValidErrors(validctxt, (xmlSchemaValidityErrorFunc) fprintf, (xmlSchemaValidityWarningFunc) fprintf, stderr);
 
-  //----------Loads the XML input file------------//
+  //=====Loads the XML input file=====//
   xmlDoc *doc = xmlParseFile(xmlFile.c_str());
   if (doc == NULL)
     XMLException::selfThrow("SiconosModelXML - Could not find or error(s) in your model XML file : " + xmlFile + ".");
 
-  //----------Verififys the XML file respects the schema------------//
+  //=====Verififys the XML file respects the schema=====//
   int xmlValid = 0;
   //xmlSchemaValidateDoc(validctxt, doc);
 

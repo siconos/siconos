@@ -2,9 +2,9 @@ AC_DEFUN([ACX_CHECK_NUMERICS], [
 AC_PREREQ(2.57)
 
 # Numerics: no include files (FORTRAN libraries)
-if test "$with_localnumerics" = no -o "$with_localnumerics" = yes -o "$with_localnumerics" = ""; then
-    AC_MSG_RESULT(option --with-localnumerics not selected : installed numerics used)
-    with_localnumerics=no
+if test "$with_numerics" = no -o "$with_numerics" = yes -o "$with_numerics" = ""; then
+    AC_MSG_RESULT(option --with-numerics not selected : installed numerics used)
+    with_numerics=no
    case "$target" in
     *-apple-darwin*)
       list_dir="/usr/local /sw /usr"  
@@ -14,8 +14,8 @@ if test "$with_localnumerics" = no -o "$with_localnumerics" = yes -o "$with_loca
       ;;
 esac     
 else
-   AC_MSG_RESULT(option  --with-localnumerics selected :locally installed numerics used)
-   list_dir="$with_localnumerics"
+   AC_MSG_RESULT(option  --with-numerics selected :locally installed numerics used)
+   list_dir="$with_numerics"
 fi
 
 case "$target" in

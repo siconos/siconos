@@ -28,5 +28,5 @@ test1_SOURCES = BoundaryConditionXMLTest.cpp LagrangianDSXMLTest.cpp OneStepInte
 include_HEADERS = BoundaryConditionXMLTest.h LagrangianDSXMLTest.h OneStepIntegratorXMLTest.h SiconosMemoryXMLTest.h \
 		DynamicalSystemXMLTest.h LinearDSXMLTest.h RelayNSLXMLTest.h InteractionXMLTest.h LinearTIRXMLTest.h \
 		SiconosDOMTreeToolsTest.h TimeDiscretisationXMLTest.h
-test1_INCLUDES = $(CPPUNIT_INCLUDES)
-test1_LDFLAGS = $(CPPUNIT_LIBRARIES) $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
+test1_INCLUDES = $(CPPUNIT_CFLAGS)
+test1_LDFLAGS = $(CPPUNIT_LIBS) $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)

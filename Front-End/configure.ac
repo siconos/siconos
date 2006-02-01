@@ -22,11 +22,11 @@ dnl configure script for SICONOS front-end
 dnl JB CHARLETY, 2005
 
 AC_PREREQ(2.57)
-AC_INIT(SICONOS_Front-end, 1.0, www.siconos.com)
+AC_INIT(SICONOS-Front-end, 1.1.0, siconos.gforge.inria.fr)
 
 dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_SYSTEM
-AM_INIT_AUTOMAKE(SICONOS-Front-end, 1.0)
+AM_INIT_AUTOMAKE(SICONOS-Front-end, 1.1.0)
 AC_CONFIG_SRCDIR([python/pySiconos.i])
 AC_CONFIG_HEADER([config.h])
 
@@ -41,6 +41,18 @@ AC_MSG_CHECKING([Python Checking])
 #echo $pythondir
 #echo $PYTHON_SIR
 
+dnl make /usr/local the default for the installation
+
+AC_PREFIX_DEFAULT(/usr/local)
+local_installation="no"
+if test "x$prefix" = "xNONE"; then
+  prefix=$ac_default_prefix
+  ac_configure_args="$ac_configure_args --prefix $prefix"
+ else
+ local_installation="yes"
+fi
+AC_SUBST(prefix)
+echo "local_installation" $local_installation
 
 # Checks for swig-python.
 AC_PROG_SWIG(1.3.21)
@@ -53,20 +65,38 @@ SWIG_PYTHON
 #################################
 ## all the --with-* argument help
 #################################
-AC_ARG_WITH(localnumerics,	
-	[  --with-localnumerics=path        indicates a local path of numerics lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
-AC_ARG_WITH(localkernel,	
-	[  --with-localkernel=path        indicates a local path of kernel lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
+AC_ARG_WITH(numerics,	
+	[  --with-numerics=path        indicates a local path of numerics lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
+AC_ARG_WITH(kernel,	
+	[  --with-kernel=path        indicates a local path of kernel lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
 
 # Numerics
 AC_MSG_CHECKING([SICONOS Numerics])
-ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Siconos Numerics. Please install it or use the option --with-localnumerics.])])
-echo $NUMERICS_PATH
+ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Siconos Numerics. Please install it or use the option --with-numerics.])])
+echo "NUMERICS_PATH=" $NUMERICS_PATH
 # kernel
 AC_MSG_CHECKING([SICONOS Kernel])
-ACX_CHECK_KERNEL([AC_SUBST(KERNEL_INCLUDES) AC_SUBST(KERNEL_LIBRARIES) AC_SUBST(KERNEL_PATH)], [AC_MSG_ERROR([Cannot find  Siconos Kernel. Please install it or use the option --with-localkernel.])])
-echo $KERNEL_PATH
+ACX_CHECK_KERNEL([AC_SUBST(KERNEL_INCLUDES) AC_SUBST(KERNEL_LIBRARIES) AC_SUBST(KERNEL_PATH)], [AC_MSG_ERROR([Cannot find  Siconos Kernel. Please install it or use the option --with-kernel.])])
+echo "KERNEL_PATH=" $KERNEL_PATH
 
+#PYTHONPATH
+
+
+PYTHON_DIR=$PYTHON_SITE_PKG
+
+if test "$local_installation" = "yes" ; then
+   PYTHON_DIR=$prefix/site-package
+   PYTHONPATH=$prefix/site-package
+fi
+echo "PYTHON_DIR=" $PYTHON_DIR
+echo "PYTHONPATH=" $PYTHONPATH
+
+AC_SUBST(PYTHON_DIR)
+AC_SUBST(PYTHONPATH)
+
+dnl PYTHONPATH = "/scratch/Franck/Siconos-v1.1.0/siconos/trunk/Front-End/python/"
+dnl AC_SUBST(PYTHONPATH)
+dnl AC_MSG_RESULT("PYTHONPATH = $PYTHONPATH")
 
 # Checks for libraries.
 

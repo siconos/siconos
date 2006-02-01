@@ -48,8 +48,8 @@ Model::Model(char *xmlFile):
     author = modelxml->getAuthor();
     description = modelxml->getDescription();
     date = modelxml->getDate();
-    xmlSchema = modelxml->getXMLSchema();
-
+    if (modelxml->hasXMLSchema())  xmlSchema = modelxml->getXMLSchema();
+    else xmlSchema = XML_SCHEMA;
     // Memory allocation for nsds and strategy
     nsds = new NonSmoothDynamicalSystem(modelxml->getNonSmoothDynamicalSystemXML());
     if (modelxml->hasStrategy())

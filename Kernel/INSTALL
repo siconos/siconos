@@ -1,4 +1,4 @@
-# Siconos version 1.0, Copyright INRIA 2005.  
+# Siconos version 1.1.0, Copyright INRIA 2005-2006.  
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -17,9 +17,9 @@
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
 
---------------------------
- Quick installation notes 
---------------------------
+----------------------------------------------
+ Quick installation notes for Siconos Kernel 
+----------------------------------------------
 
 ---++ Required external libraries
 
@@ -62,16 +62,15 @@
 
 For each package (Numerics, Kernel, Front-End, in this order), in the corresponding main directory:
 	
-	- ./reconf.sh
+	- ./autogen.sh
 	- configure --prefix="the path where you want to install the platform" --other_options
 	- make
-	- make install (default install location: /usr/local) 
 	- make check (optional) : to run tests	
-	- make documentation (optional)  : to generate Doxygen documentation
+	- make doc (optional)  : to generate Doxygen documentation
+	- make install (default install location: /usr/local) 
 
-!!! WARNING: to run make check, it is first necessary to set LD_LIBRARY_PATH and SICONOS_PATH !!!
-LD_LIBRARY_PATH: location of DefaultPlugin.so or TestPlugin.so
-SICONOS_PATH: location of libSiconosKernel.so
+!!! WARNING: any local installation of a library (libxml2, cppunit ...) requires that you set properly 
+	     the LD_LIBRARY_PATH.
 
 for more details on configure options, type configure --help. 
       
@@ -81,9 +80,29 @@ for more details on configure options, type configure --help.
 ---+++ Is the installation of the Front-End OK ?
    * You can try to run : cd /path/to/your/source/code/sample/BouncingBall ; pySiconos BouncingBall.py
 
-   * *I advise you for the moment to install the platform in the directory retrieved from SVN. C++ compiler, System libraries, external libraries, etc. are tested...
+Examples: 
+=========
 
-   * If you have a local installation of an external library, you can give its path to configure with the option --with-local[library name]. You can get the possible options typing =%configure --help=. 
+	* classic default install:
+
+		- ./autogen.sh
+	        - ./configure         (-> kernel will be installed in /usr/local)
+	        - make
+	        - make install (as root) 
+
+	* install in a local directory, using cppunit also in a local directory. 
+
+		- ./autogen.sh
+	        - ./configure --enable-cppunit --with-cppunit-prefix=/enm/local/ --prefix=/mySiconos/  
+	        - make
+	        - make install 
+		
+	  + run tests: 
+	        
+	        - make check 
+
+
+         
 
 Basic Installation
 ==================

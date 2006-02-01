@@ -25,7 +25,7 @@
   <Author>SiconosTeam</Author>
   <Description>none</Description>
   <Date>Today</Date>
-  <SchemaXML>/share/SICONOS/SiconosModelSchema-V1.2.xsd</SchemaXML>
+  <SchemaXML>../../../config/xmlschema/SiconosModelSchema-V1.2.xsd</SchemaXML>
 	<Time>
 		<t0>0.1</t0>
 		<T>10.0</T>

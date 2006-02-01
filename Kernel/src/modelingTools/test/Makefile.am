@@ -19,11 +19,12 @@
 # Makefile.am --- SICONOS ModelingTools tests
 
 include $(top_srcdir)/config/Make-rules
+TESTS_ENVIRONMENT = LD_LIBRARY_PATH=$(top_srcdir)/src/plugin/:$(top_builddir)/src/plugin/test:${LD_LIBRARY_PATH}
 
 check_PROGRAMS = test1
 TESTS = $(check_PROGRAMS)
 test1_SOURCES = RelationTest.cpp LinearTIRTest.cpp LagrangianRTest.cpp LagrangianLinearRTest.cpp DynamicalSystemTest.cpp TestMain.cpp
 include_HEADERS =RelationTest.h LinearTIRTest.h LagrangianRTest.h LagrangianLinearRTest.h DynamicalSystemTest.h 
-test1_INCLUDES = $(CPPUNIT_INCLUDES)
-test1_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
+test1_INCLUDES = $(CPPUNIT_CFLAGS)
+test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
 

@@ -1,4 +1,4 @@
-# Siconos version 1.0, Copyright INRIA 2005.  
+# Siconos version 1.1.0, Copyright INRIA 2005-2005.  
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -22,7 +22,28 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 
 --------------------------------------------------------------------------------
-  v1.0 - October 2005
+  v1.1.0 - February 2006 (release 388)
+--------------------------------------------------------------------------------
+
+Notes:
+
+		
+Changes:
+
+2006-02-01   Franck Perignon <franck.perignon@inrialpes.fr> 
+	     Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * rename reconf.sh in autogen.sh and m4 directory in macros
+	  Warning: new options for configure ( -> configure --help for details )
+	* upgrade pySiconos.in to avoid setenv of LD_LIBRARY_PATH and PYTHONPATH
+
+2006-01-30 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* upgrade ac_python_devel.m4
+        * update pySiconos.i, according to changes in Kernel (friction ...)
+	
+--------------------------------------------------------------------------------
+  v1.0 - November 2005
 --------------------------------------------------------------------------------
 
 	- add 3 Beads sample using scilab.  

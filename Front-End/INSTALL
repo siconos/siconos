@@ -17,9 +17,9 @@
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
 
---------------------------
- Quick installation notes 
---------------------------
+------------------------------------------------
+ Quick installation notes for Siconos Front-end
+------------------------------------------------
 
 ---++ Required external libraries
 
@@ -53,12 +53,11 @@
 
 Numerics and Kernel complete install is required. Then in Front-End directory:
 	
-	- ./reconf.sh
+	- ./autogen.sh
 	- configure --prefix="the path where you want to install the platform" --other_options
 	- make
-	- make install (default install location: /usr/local) 
 	- make check (optional) : to run tests	
-	- make documentation (optional)  : to generate Doxygen documentation
+	- make install (default install location: /usr/local, as root) 
 
 for more details on configure options, type configure --help. 
       

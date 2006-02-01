@@ -2,9 +2,9 @@ AC_DEFUN([ACX_CHECK_KERNEL], [
 AC_PREREQ(2.57)
 
 # Kernel
-if test "$with_localkernel" = no -o "$with_localkernel" = yes -o "$with_localkernel" = ""; then
-    AC_MSG_RESULT(option --with-localkernel not selected : installed kernel used)
-    with_localkernel=no
+if test "$with_kernel" = no -o "$with_kernel" = yes -o "$with_kernel" = ""; then
+    AC_MSG_RESULT(option --with-kernel not selected : installed kernel used)
+    with_kernel=no
    case "$target" in
     *-apple-darwin*)
       list_dir="/usr/local /sw /usr"  
@@ -14,8 +14,8 @@ if test "$with_localkernel" = no -o "$with_localkernel" = yes -o "$with_localker
       ;;
 esac     
 else
-   AC_MSG_RESULT(option  --with-localkernel selected :locally installed kernel used)
-   list_dir="$with_localkernel"
+   AC_MSG_RESULT(option  --with-kernel selected :locally installed kernel used)
+   list_dir="$with_kernel"
 fi
 
 case "$target" in
@@ -32,7 +32,7 @@ kernel_lib="no"
 dynlib=no;    
 for ac_dir in $list_dir;
 do  AC_MSG_CHECKING([for libSiconosKernel.$libsuffix in $ac_dir]) 
-	   if test -r "$ac_dir/lib/libSiconosKernel.$libsuffix" && test -r "$ac_dir/include/KernelDefaultConfig.h" ; then
+	   if test -r "$ac_dir/lib/libSiconosKernel.$libsuffix" ; then
        		KERNEL_INCLUDES="-I$ac_dir/include/"
        		KERNEL_LIBRARIES="-L$ac_dir/lib -lSiconosKernel"
        		KERNEL_PATH="$ac_dir/"

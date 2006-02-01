@@ -2,8 +2,8 @@ AC_DEFUN([ACX_CHECK_NANA], [
 AC_PREREQ(2.57)
 echo
 # Nana 2 
-if test "$with_localnana" = no -o "$with_localnana" = yes -o "$with_localnana" = ""; then
-    AC_MSG_RESULT(option --with-localnana not selected : installed nana used)
+if test "$with_nana" = no -o "$with_nana" = yes -o "$with_nana" = ""; then
+    AC_MSG_RESULT(option --with-nana not selected : installed nana used)
     with_localnana=no
    case "$target" in
     *-apple-darwin*)
@@ -14,8 +14,8 @@ if test "$with_localnana" = no -o "$with_localnana" = yes -o "$with_localnana" =
       ;;
 esac     
 else
-   AC_MSG_RESULT(option  --with-localnana selected :locally installed nana used)
-   list_dir="$with_localnana/"
+   AC_MSG_RESULT(option  --with-nana selected :locally installed nana used)
+   list_dir="$with_nana/"
 fi
 
 case "$target" in
@@ -34,11 +34,6 @@ do dynlib=no;
    if test -r "$ac_dir/lib/libnana.$libsuffix"  && test -r "$ac_dir/include/nana.h" ;then
           NANA_INCLUDES="-I$ac_dir/include"
           NANA_LIBRARIES="-L$ac_dir/lib -lnana"
-	  if test "${LOCAL_LIB_PATH}test" = "test"; then
-	    export LOCAL_LIB_PATH="$ac_dir/lib";
-          else
-	    export LOCAL_LIB_PATH=$LOCAL_LIB_PATH:"$ac_dir/lib";
-	  fi;
           nana_lib="yes"
           dynlib = "yes" 
           AC_MSG_RESULT([Library $ac_dir/lib/nana.$libsuffix selected]) 

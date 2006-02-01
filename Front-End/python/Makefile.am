@@ -61,5 +61,6 @@ clean:
 	rm -f pySiconos_wrap.o _pySiconos.so pySiconos_wrap.cxx pySiconos.py pySiconos.pyc
 
 install-data-am:
-	@INSTALL@ -m 0644 _pySiconos.so $(PYTHON_SITE_PKG)
-	@INSTALL@ -m 0644 pySiconos.py $(PYTHON_SITE_PKG)
+	test -z "$(PYTHON_DIR)" || $(mkdir_p) "$(PYTHON_DIR)"
+	@INSTALL@ -m 0644 _pySiconos.so $(PYTHON_DIR)
+	@INSTALL@ -m 0644 pySiconos.py $(PYTHON_DIR)

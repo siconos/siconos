@@ -23,7 +23,7 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
-  v1.1.0 - February 2006 (release 386)
+  v1.1.0 - February 2006 (release 388)
 --------------------------------------------------------------------------------
 	
 Notes:
@@ -32,6 +32,10 @@ Notes:
 	Lagrangian systems in 2D (3D version in devel)
 		
 Changes:
+
+2006-02-01 Vincent Acary <vincent.acary@inrialpes.fr>  Franck Perignon <franck.perignon@inrialpes.fr>
+
+        * Upgrade SiconosModelXml, configure and make to allow "make check" without install or setenv ...
 
 2006-01-31   Franck Perignon <franck.perignon@inrialpes.fr> 
 	     Vincent Acary <vincent.acary@inrialpes.fr>

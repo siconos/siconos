@@ -10,7 +10,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License
+# You should have received a copy of the GNU General public License
 # along with Siconos; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
@@ -27,42 +27,6 @@ AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(SICONOS, 1.1.0)
 AC_CONFIG_SRCDIR([src/model/Model.h])
 AC_CONFIG_HEADER([config.h])
-
-
-
-##############################################
-# sh function to verify shared library version
-##############################################
-
-# function checkLibraryVersion ()
-# $1 : absolute path of the library (ex. : /usr/lib/liblapack.so)
-# $2 : minimum version (ex. : 3.0.3)
-
-function checkLibraryVersion () { 
-     lib=$1; 
-     ver=$2;
-     vers=`ls -l $lib | awk '{ print $NF}' |  awk 'BEGIN {FS = "."; } { printf "%d", ($3 * 1000 + $4) * 1000 + $5;}'`
-     verReq=`expr $ver  | awk 'BEGIN {FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
-     if test -n "$vers" && test "$vers" -ge $verReq ; then
-	return 1;
-     else
-	return 0;
-     fi	     
-}
-
-# function checkLibraryVersionNumber ()
-# $1 : version number ex. : 3.2.1)
-# $2 : minimum version (ex. : 3.0.3)
-
-function checkLibraryVersionNumber () { 
-     vers=`expr $1 |  awk 'BEGIN {FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
-     verReq=`expr $2  | awk 'BEGIN {FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
-     if test -n "$vers" && test "$vers" -ge $verReq ; then
-	return 1;
-     else
-	return 0;
-     fi	     
-}
 
 # SO version of all siconos shared libraries
 SICONOS_SO_CURRENT=1
@@ -98,9 +62,6 @@ dnl  AC_PROG_INSURE
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_F77
-
-
-
 
 CFLAGS=""
 CXXFLAGS=""
@@ -169,12 +130,8 @@ AC_ARG_ENABLE(error-on-warning,[  --enable-erroronwarning     treat all compile 
 #################################
 AC_ARG_WITH(localnumerics,	
 	[  --with-localnumerics=path        indicates a local path of numerics lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
-AC_ARG_WITH(localnana,			
-	[  --with-localnana=path        indicates a local path of nana lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
-AC_ARG_WITH(locallapackpp,		
-	[  --with-locallapackpp=path	indicates a local path of lapackpp lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
-AC_ARG_WITH(localcppunit,		
-	[  --with-localcppunit=path	indicates a local path of cppunit lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
+AC_ARG_WITH(nana,			
+	[  --with-nana=path        indicates a local path of nana lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
 
 #################################
 ## Checks for external libraries
@@ -202,23 +159,18 @@ ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_
 LAPACKPP_VER="1.8.0"	# lib....so number
 LAPACKPP_REL_VER="2.4.2" # Release number
 AC_MSG_CHECKING([for Lapack++])
-ACX_CHECK_LAPACKPP([AC_SUBST(LAPACKPP_INCLUDES) AC_SUBST(LAPCKPP_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Lapack++ in a good version. Please install Lapack++, version >= $LAPACKPP_VER  or use the option --with-locallapackpp. Warning: this version number corresponds to liblapackpp.so index. See INSTALL for corresponding release. ])])
-CXX_LAPACKPP_FLAG=#"-DLA_COMPLEX_SUPPORT"  
-AC_SUBST(CXX_LAPACKPP_FLAG)
-
-
+ACX_LAPACKPP([], [AC_MSG_ERROR([Cannot find  Lapack++ in a good version. Please install Lapack++, version >= $LAPACKPP_VER  or use the option --with-lapackpp-prefix. Warning: this version number corresponds to liblapackpp.so index. See INSTALL for corresponding release. ])])
 
 # Libxml2
 AC_MSG_CHECKING([Libxml2])
 AM_PATH_XML2(2.6.16,,AC_MSG_ERROR([
-*** Libxml is required to build GVideoDB; Available at
+*** Libxml is required; Available at
 http://www.libxml.org/.]))
-dnl ACX_CHECK_LIBXML2([AC_SUBST(LIBXML2_INCLUDES) AC_SUBST(LIBXML2_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Libxml2 in a good version. Please install Libxml2, version >= $LIBXML_VER  or use the option --with-locallibxml.])])
 
 # Nana Warning, by default we skip ccpunit
 AC_MSG_CHECKING([Nana])
 if test "$enable_nana" = yes; then
-ACX_CHECK_NANA([AC_SUBST(NANA_INCLUDES) AC_SUBST(NANA_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Nana. Please install Nana  or use the option --with-localnana.])])
+ACX_CHECK_NANA([AC_SUBST(NANA_INCLUDES) AC_SUBST(NANA_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Nana. Please install Nana  or use the option --with-nana.])])
 CXX_WITHOUTNANA_FLAG=""
 else
  AC_MSG_RESULT(option --enable-nana not selected : Warning : do not use nana)  
@@ -226,15 +178,13 @@ CXX_WITHOUTNANA_FLAG="-DWITHOUT_NANA"
 fi
 
 # Cppunit : Warning, by default we skip ccpunit
-CPPUNIT_VER="1.10.2"
 AC_MSG_CHECKING([cppunit])
 if test "$enable_cppunit" = yes; then
 AC_MSG_RESULT(option --enable-cppunit selected : able to run test suite)       
-ACX_CHECK_CPPUNIT([AC_SUBST(CPPUNIT_INCLUDES) AC_SUBST(CPPUNIT_LIBRARIES)], [AC_MSG_ERROR([Cannot find  cppunit in a good version. Please install cppunit, version >= $CPPUNIT_VER.])])
+AM_PATH_CPPUNIT(1.10.2,,AC_MSG_ERROR([Cannot find  cppunit in a good version.]))
 else
  AC_MSG_RESULT(option --enable-cppunit not selected : Warning : unable to run test suite)  
 fi
-
 
 #################################
 ## COMPILE FLAGS CXXFLAGS
@@ -290,7 +240,7 @@ case "$target" in
 esac
 
 
-CXXFLAGS="$CXXFLAGS $CXX_WITHOUTNANA_FLAG $CXX_LAPACKPP_FLAG"
+CXXFLAGS="$CXXFLAGS $CXX_WITHOUTNANA_FLAG"
 
 AC_MSG_RESULT("Architecture $ARCH  Compilation flag CXXFLAGS= $CXXFLAGS  Linking flag CXX_DYNLIB = $CXX_DYNLIB")
 
@@ -302,12 +252,12 @@ AC_SUBST(CXX_DYNLIB)
 #################################
 
 #SICONOS_EXT_INCLUDES
-SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $NANA_INCLUDES $LAPACKPP_INCLUDES  $XML_CPPFLAGS"
+SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $NANA_INCLUDES $LAPACKPP_INCLUDES $XML_CPPFLAGS"
 AC_SUBST(SICONOS_EXT_INCLUDES)
 AC_MSG_RESULT("SICONOS_EXT_INCLUDES = $SICONOS_EXT_INCLUDES")
 
 #SICONOS_EXT_LDFLAGS
-SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $NANA_LIBRARIES $LAPACKPP_LIBRARIES $LAPACK_LIBS $BLAS_LIBS $XML_LIBS -ldl"
+SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $NANA_LIBRARIES $LAPACKPP_LDFLAGS $LAPACKPP_LIBS $LAPACK_LIBS $BLAS_LIBS $XML_LIBS -ldl"
 dnl case "$target" in
 dnl     *-linux*)
 dnl     AC_F77_LIBRARY_LDFLAGS	
@@ -323,14 +273,12 @@ dnl      ;;
 dnl     esac	
 dnl      ;;
 dnl esac
+echo $LAPACKPP_INCLUDES
 
 SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS $FLIBS"
 
 AC_SUBST(SICONOS_EXT_LDFLAGS)
 AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
-
-# LD_LIBRARY_PATH for siconos script
-AC_SUBST(LOCAL_LIB_PATH) 
 
 #################################
 ## DOXYGEN 
@@ -384,9 +332,10 @@ echo "
    Linking flags			${LDFLAGS}
    Siconos includes:                    ${SICONOS_EXT_INCLUDES}
    Siconos ld flags:                    ${SICONOS_EXT_LDFLAGS}"
+echo 
 echo Type \'make \' to build the SICONOS platform
-echo Run \'make doc\' to generate the documentation.
+echo Type \'make doc\' to generate the documentation.
 echo Type \'make install\' to install the platfrom
-echo Type \'make check\' torun the test
-echo
+echo Type \'make check\' to run the test
+echo 
 echo Alternatively, you can \'make all\' to use the default configuration.

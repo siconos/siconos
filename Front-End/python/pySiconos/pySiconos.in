@@ -25,6 +25,7 @@
 DIR=`pwd`;
 SICONOSPATH=@kernelpath@
 NUMERICSPATH=@numericspath@
+PYTHONPATH=@pythonpath@
 #-----------
 # functions
 #-----------
@@ -34,7 +35,7 @@ function compilePlugins() {
     echo "listdir = $listdir";
     for dir in $listdir; do
 	cd $dir;
-	if test "`ls *Plugin.c 2>/dev/null`" != ""; then
+	if test "`ls *Plugin.cpp 2>/dev/null`" != ""; then
 	    echo "plugin dans $dir !";      
 	    make -f $SICONOSPATH/share/SICONOS/MakefilePluginSample plugin
 	    if test "${LD_LIBRARY_PATH}test" = "test"; then
@@ -89,9 +90,15 @@ if test "$NUMERICSPATH" = ""; then
 fi;
 
 if test "${LD_LIBRARY_PATH}test" = "test"; then
-   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS:$NUMERICSPATH/lib;  
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS:$NUMERICSPATH/lib:/usr/local/lib;  
 else
-   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS:$LD_LIBRARY_PATH:$NUMERICSPATH/lib; 
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS:$NUMERICSPATH/lib:/usr/local/lib:$LD_LIBRARY_PATH; 
+fi;	 
+
+if test "${PYTHONPATH}test" = "test"; then
+   export PYTHONPATH=$SICONOSPATH/site-package;  
+else
+   export PYTHONPATH=$SICONOSPATH/site-package:$PYTHONPATH; 
 fi;	 
 
 clean="false";

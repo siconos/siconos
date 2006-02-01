@@ -369,7 +369,7 @@
 				<xsd:element name="Author" type="xsd:string" minOccurs="1" maxOccurs="1"/>
 				<xsd:element name="Description" type="xsd:string" minOccurs="1" maxOccurs="1"/>
 				<xsd:element name="Date" type="xsd:string" minOccurs="1" maxOccurs="1"/>
-				<xsd:element name="SchemaXML" type="xsd:string" minOccurs="1" maxOccurs="1"/>
+				<xsd:element name="SchemaXML" type="xsd:string" minOccurs="0" maxOccurs="1"/>
 	<!--~~~~~~~~~~~~~~~~~~~~~~~ Time ~~~~~~~~~~~~~~~~~~~~~~~~-->
 	<xsd:element name="Time" type="ModelTime" minOccurs="1" maxOccurs="1"/>
 
