@@ -30,9 +30,18 @@ AM_INIT_AUTOMAKE(SICONOS-Front-end, 1.1.0)
 AC_CONFIG_SRCDIR([python/pySiconos.i])
 AC_CONFIG_HEADER([config.h])
 
+#Checks libtool
+AC_PROG_LIBTOOL
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_RANLIB
+
+###################################
+## all the --enable-* argument help
+###################################
+
+AC_ARG_ENABLE(scilab,[  --enable-scilab             compiling toolbox for scilab, default=no ])
 
 # Checks for python.
 AC_PYTHON_DEVEL
@@ -50,7 +59,7 @@ if test "x$prefix" = "xNONE"; then
   ac_configure_args="$ac_configure_args --prefix $prefix"
  else
  local_installation="yes"
-fi
+fi 
 AC_SUBST(prefix)
 echo "local_installation" $local_installation
 
@@ -59,7 +68,36 @@ AC_PROG_SWIG(1.3.21)
 SWIG_ENABLE_CXX
 SWIG_PYTHON
 
+# Scilab : Warning, by default we skip scilab
+AC_MSG_CHECKING([scilab])
+if test "$enable_scilab" = yes; then
+# test if SCI is defined. If not,
+# test if scilab is in path, then get SCI from scilab -nw.
+if test -z $SCI; then
+   AC_CHECK_PROG([has_scilab],[scilab],[yes],[no], , )
+   if test x$has_scilab = xno; then
+      AC_MSG_ERROR([[neither Scilab was found in your PATH nor a SCI variable has been defined]])
+   else
+	cmd='F=mopen("path.incl","w");
+        mfprintf(F,SCI);
+        mclose(F);'
+      echo "$cmd" | scilab -nw >/dev/null
+      SCIDIR=`cat path.incl` 
+      echo "SCIDIR=" $SCIDIR
+      AC_SUBST(SCIDIR)
+
+   fi
+else
+   SCIDIR=$SCI
+   echo "SCIDIR=" $SCIDIR
+   AC_SUBST(SCIDIR)
+fi
+else
+ AC_MSG_RESULT(option --enable-scilab not selected : Warning : unable to compile scilab toolbox)  
+fi
+
 # Checks for kernel & Numerics paths
+
 
 
 #################################
@@ -96,7 +134,7 @@ AC_SUBST(PYTHONPATH)
 
 dnl PYTHONPATH = "/scratch/Franck/Siconos-v1.1.0/siconos/trunk/Front-End/python/"
 dnl AC_SUBST(PYTHONPATH)
-dnl AC_MSG_RESULT("PYTHONPATH = $PYTHONPATH")
+dnl AC_MSG_RESULT("PYTHONPATH = $PYTHONPATH"
 
 # Checks for libraries.
 
@@ -109,5 +147,9 @@ dnl AC_MSG_RESULT("PYTHONPATH = $PYTHONPATH")
 AC_CONFIG_FILES([Makefile
 		 config/Makefile
 		 python/Makefile]
-		 python/pySiconos/Makefile)
+		 python/pySiconos/Makefile
+		 scilab/Makefile
+		 scilab/loader.sce
+		 scilab/env.sh
+		 )
 AC_OUTPUT

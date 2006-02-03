@@ -1,23 +1,50 @@
-Interface Scilab
+I - Faire Exemples.
+  BouncingBall.sci
+  ThreeBeadsColumn.sci
+  RollBouncingBall.sci
+  MultiBeadsColumn.sci
 
-1. Faire tourner RollBouncingBall/ 
+I.1 Fignoler les simuls Boules
+  - taille des boules :-) ('b'=rayon dans les relations linéaires)
+  - visu sol, traj.
+  - temps d'ech. pour aller plus vite ?
 
-2. Fignoler la visu pour les boules :
-  - fignoler scintillement, échelle,
-  - numérotage fenetre
-  - mettre à jour le README
+I.2 OK Faire tourner MultiBeadsColumn.sci
 
-3. commit
+I.3 Faire tourner PA10
+ - ajouter LagrangianDS avec fct C plugin
 
-4. Faire les interfaces pour l'utilisation sans XML.
+I.4 Faire tourner exemples electriques ?
 
-5. Faire tourner MultiBeadsColumn/
 
-6. Faire tourner Pa10
+II - Integration
 
-7. Probleme de perf. sans doute les appels 7 mns au lieu de 22 s
+ - OK Compatible derniere version
+ - Split Fonction
+ - Naming des fonctions
+ - Doxygen
+ - Mettre à jour README
+ - Doc utilisateur
+ - fichiers : interface dans Kernel/, interface scilab dans Front-End/scilab
+  et les exemples dans les Samples correspondants
+ - OK Mettre à jour le configure
+ - finir le configure de loader.sce.in et samples.sci et gestion env.sh
 
-8. Exemples electriques
+III - Integration siconos/humans
 
-9. Intégration HuMaNS
+IV - plugin en scilab !!
 
+V - Fonctions qui manquent
+  sicModelgetVelocity
+  sicInteractionDisplay 
+  sicModelSaveXMLfile
+  sicIsModelComplete
+  all setters
+  sicDSgetNumber
+  and so on...
+
+VI - Fignoler
+ - Robustifier ctl des parametres ds siconosScilab.c
+ - faire des listes d'objets Modeles avec Id
+ - mettre les lois d'impacts dans sicInteractionLLR
+ - récupérer les Ids des DS dans les fcts scilab

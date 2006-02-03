@@ -21,8 +21,12 @@
 
 function [arc]=InitDrawBall(nBalls,high,sizeball)
 
-set("figure_style","new");
+nWin=0;
+//set("figure_style","new");
+xdel(nWin);
+xset("window",nWin);
 xset("pixmap",1);
+
 plot2d([-1;1],[0;0],2,"031"," ",[-1,-1,1,high]);
 
 arc=get("hdl"); 
@@ -36,9 +40,6 @@ for i = 1:nBalls,
   arc(i).visible="on";  
 end; //for
 
-xset("wshow");
- 
-
 endfunction
 
 
@@ -46,35 +47,33 @@ function DrawBall(arc,index,x,y)
 
 
 if ((index>0)&(index<=size(arc,1))) then
- arc(index).data(1)=x;
- arc(index).data(2)=y;
+ arc(index).data(1)=y;
+ arc(index).data(2)=x;
 end; //if
 xset("wshow");
 
 endfunction
 
-function VisuBalls(q,step,high,sizeball)
- 
- nBalls=size(q,1);
- N =size(q,2);
 
- arc=InitDrawBall(nBalls,high,sizeball);
-
- xset("pixmap",0);
- xset("window",3);
+function VisuBalls(qx,qy,step,high,sizeball)
  
+ nBalls=size(qy,1);
+ N =size(qy,2);
+
+ xset("window",1);
  for i = 1:nBalls,
-    plot2d(t,q(i,:),style=i);
+    plot2d(t,qx(i,:),style=i);
  end; //for
    
-k=0;
-while k <= N do 
- 
-  for i = 1:nBalls,
-    DrawBall(arc,i,0,q(i,k+1));
-  end
-  k=k+step;
-  
- end;
+ arc=InitDrawBall(nBalls,high,sizeball);
+
+  k=0;
+ while k < N do 
+   
+   for i = 1:nBalls,
+     DrawBall(arc,i,qx(i,k+1),qy(i,k+1));
+   end
+   k=k+step;
+ end
  
 endfunction

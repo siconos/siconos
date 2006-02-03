@@ -16,27 +16,11 @@
 #
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
+# Makefile.am --- SICONOS - src
+
+include ../config/Make-rules
 
 
-SICONOSPATH=/local_home/pissard/Workspace/siconos/distrib
-NUMERICSPATH=/local_home/pissard/Workspace/siconos/distrib
-
-
-include $(SICONOSPATH)/share/SICONOS/KernelConfig.sh
-
-INC_PATH=$(SICONOSPATH)/include
-CFLAGS=-g -fbounds-check -w -Wno-deprecated -fPIC -DLA_COMPLEX_SUPPORT -DWITHOUT_NANA -I$(INC_PATH) -I$(NUMERICSPATH)/include -I/usr/local//include/lapackpp/ `xml2-config --cflags`
-DYNFLAGS=-shared
-
-all: libsiconos.so sictest
-
-libsiconos.so:siconos.cpp
-	g++  -g  $(CFLAGS) -c siconos.cpp
-	g++   -g $(DYNFLAGS) -o libsiconos.so siconos.o
-
-sictest:sictest.c libsiconos.so
-	gcc -g sictest.c -o sictest -L. -lsiconos $(SICONOS_LIBS) $(LIBEXT_LDFLAGS)
-
-clean:
-	rm libsiconos.so siconos.o sictest
-
+lib_LTLIBRARIES = libSiconosApiSci.la
+libSiconosApiSci_la_SOURCES=SiconosApiSci.c
+include_HEADERS = SiconosApiSci.h
