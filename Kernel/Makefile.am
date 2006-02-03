@@ -20,7 +20,7 @@
 
 include $(top_srcdir)/config/Make-rules
 
-SUBDIRS = config src siconos #src must be compiled before main program
+SUBDIRS = config src siconos api/C #src must be compiled before main program
 EXTRA_DIST = kernel.csh.TEMPLATE
 
 

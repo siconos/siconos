@@ -294,6 +294,7 @@ AC_SUBST(DOXYGEN_CFG)
 
 # output files
 AC_CONFIG_FILES([Makefile
+		 api/C/Makefile
                  config/Makefile
 		 config/xmlschema/Makefile
 		 siconos/Makefile
