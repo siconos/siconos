@@ -1,8 +1,8 @@
 I - Faire Exemples.
-  BouncingBall.sci
-  ThreeBeadsColumn.sci
-  RollBouncingBall.sci
-  MultiBeadsColumn.sci
+ OK BouncingBall.sci
+ OK  ThreeBeadsColumn.sci
+ OK  RollBouncingBall.sci
+ OK  MultiBeadsColumn.sci
 
 I.1 Fignoler les simuls Boules
   - taille des boules :-) ('b'=rayon dans les relations linéaires)
@@ -19,15 +19,10 @@ I.4 Faire tourner exemples electriques ?
 
 II - Integration
 
- - OK Compatible derniere version
  - Split Fonction
  - Naming des fonctions
  - Doxygen
- - Mettre à jour README
- - Doc utilisateur
- - fichiers : interface dans Kernel/, interface scilab dans Front-End/scilab
-  et les exemples dans les Samples correspondants
- - OK Mettre à jour le configure
+ - README / Doc utilisateur
  - finir le configure de loader.sce.in et samples.sci et gestion env.sh
 
 III - Integration siconos/humans
