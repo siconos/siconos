@@ -27,7 +27,7 @@ xdel(nWin);
 xset("window",nWin);
 xset("pixmap",1);
 
-plot2d([-1;1],[0;0],2,"031"," ",[-1,-1,1,high]);
+plot2d([-1;1],[0;0],2,"031"," ",[-1,0,1,high]);
 
 arc=get("hdl"); 
 

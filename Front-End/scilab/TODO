@@ -5,9 +5,7 @@ I - Faire Exemples.
  OK  MultiBeadsColumn.sci
 
 I.1 Fignoler les simuls Boules
-  - taille des boules :-) ('b'=rayon dans les relations linéaires)
   - visu sol, traj.
-  - temps d'ech. pour aller plus vite ?
 
 I.2 Faire tourner PA10
  - ajouter LagrangianDS avec fct C plugin
@@ -17,8 +15,6 @@ I.4 Faire tourner exemples electriques ?
 
 II - Integration
 
- - faire l'interface scilab avec les nvlles fonctions
- - Naming des fonctions
  - Doxygen
  - README / Doc utilisateur
  - finir le configure de loader.sce.in et samples.sci et gestion env.sh
@@ -38,5 +34,4 @@ V - Fonctions qui manquent
 
 VI - Fignoler
  - Robustifier ctl des parametres ds siconosScilab.c
- - mettre les lois d'impacts dans sicInteractionLLR
-
+ - Temps de calcul

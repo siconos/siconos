@@ -349,7 +349,7 @@ int sicInteractionInterface(char *fname)
   GetRhsVar(1, "c", &dim1, &dim2, &name);
   if (!(dim1 * dim2 > 0))
   {
-    sciprint("Wrong parameter in sicInteractionLLR (name has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicInteraction (name has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -358,7 +358,7 @@ int sicInteractionInterface(char *fname)
   GetRhsVar(2, "i", &dim1, &dim2, &nbDS);
   if (!(dim1 * dim2 == 1))
   {
-    sciprint("Wrong parameter in sicInteractionLLR (nbDS has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicInteraction (nbDS has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -367,7 +367,7 @@ int sicInteractionInterface(char *fname)
   GetRhsVar(3, "i", &dim1, &dim2, &DS);
   if (!(dim1 * dim2 > 0))
   {
-    sciprint("Wrong parameter in sicInteractionLLR (DS has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicInteraction (DS has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -376,7 +376,7 @@ int sicInteractionInterface(char *fname)
   GetRhsVar(4, "i", &dim1, &dim2, &nbRel);
   if (!(dim1 * dim2 == 1))
   {
-    sciprint("Wrong parameter in sicInteractionLLR (nbRel has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicInteraction (nbRel has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -384,7 +384,7 @@ int sicInteractionInterface(char *fname)
   CreateVar(5, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicInteractionLLR(cstk(name), *istk(nbDS), istk(DS), *istk(nbRel));
+  *istk(st) = sicInteraction(cstk(name), *istk(nbDS), istk(DS), *istk(nbRel));
 
   /*  Return variable  */
   LhsVar(1) = 5;
@@ -458,25 +458,25 @@ int sicNewtonImpactLawNSLInterface(char *fname)
   GetRhsVar(1, "i", &dim1, &dim2, &nIdInteraction);
   if (!(dim1 * dim2 == 1))
   {
-    sciprint("Wrong parameter in sicLagrangianLinearR (nIdInteraction has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicNewtonImpactLawNSLInterface (nIdInteraction has wrong size!)\r\n");
     Error(999);
     return 0;
   }
 
-  /* Get lawtype (1, char *)  */
+  /* Get lawtype (2, char *)  */
   GetRhsVar(2, "c", &dim1, &dim2, &lawtype);
   if (!(dim1 * dim2 > 0))
   {
-    sciprint("Wrong parameter in sicInteractionLLR (name has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicNewtonImpactLawNSLInterface (name has wrong size!)\r\n");
     Error(999);
     return 0;
   }
 
-  /* Get e (2, double)  */
+  /* Get e (3, double)  */
   GetRhsVar(3, "d", &dim1, &dim2, &e);
   if (!(dim1 * dim2 == 1))
   {
-    sciprint("Wrong parameter in sicInteractionLLR (b has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicNewtonImpactLawNSLInterface has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -484,7 +484,7 @@ int sicNewtonImpactLawNSLInterface(char *fname)
   CreateVar(4, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicLagrangianLinearR(*istk(nIdInteraction), cstk(lawtype), *stk(e));
+  *istk(st) = sicNewtonImpactLawNSL(*istk(nIdInteraction), cstk(lawtype), *stk(e));
 
   /*  Return variable  */
   LhsVar(1) = 4;
@@ -549,7 +549,7 @@ int sicModelInterface(char *fname)
   GetRhsVar(2, "d", &dim1, &dim2, &T);
   if (!(dim1 * dim2 == 1))
   {
-    sciprint("Wrong parameter in sicNSDSModel (T has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicModel (T has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -557,7 +557,7 @@ int sicModelInterface(char *fname)
   CreateVar(3, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicModel(*istk(isBVP), *stk(t0), *stk(T));
+  *istk(st) = sicModel(*stk(t0), *stk(T));
 
   /*  Return variable  */
   LhsVar(1) = 3;
@@ -567,7 +567,7 @@ int sicModelInterface(char *fname)
 
 int sicStrategyTimeSteppingInterface(char *fname)
 {
-  static int minrhs = 4, maxrhs = 4, minlhs = 1, maxlhs = 1;
+  static int minrhs = 1, maxrhs = 1, minlhs = 1, maxlhs = 1;
   static int dim1, dim2;
   static int h, theta, maxiter, tolerance;
   static int dimo1 = 1, dimo2 = 1, st;
@@ -620,7 +620,7 @@ int sicOneStepIntegratorMoreauInterface(char *fname)
   CreateVar(2, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicOneStepIntegratorMoreau(*stk(theta));
+  *istk(st) = sicOneStepIntegratorMoreau(stk(theta));
 
   /*  Return variable  */
   LhsVar(1) = 2;
@@ -734,6 +734,7 @@ int C2F(SiconosGateway)()
                   "sicNonSmoothDynamicalSystem",
                   "sicModel",
                   "sicStrategyTimeStepping",
+                  "sicOneStepIntegratorMoreau",
                   "sicOneStepNSProblemLCP",
                   "sicClean"
                  };
