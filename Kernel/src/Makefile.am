@@ -18,7 +18,7 @@
 #	
 # Makefile.am --- SICONOS - src
 
-SUBDIRS =  utils xml plugin modelingTools simulationTools model ../api/C
+SUBDIRS =  utils xml plugin modelingTools simulationTools model apiC
 EXTRA_DIST = 
 
 lib_LTLIBRARIES = libSiconosKernel.la
@@ -32,4 +32,4 @@ libSiconosKernel_la_LIBADD = $(top_builddir)/src/model/libModel.la \
 	$(top_builddir)/src/utils/SiconosAlgebra/libSiconosAlgebra.la  \
 	$(top_builddir)/src/utils/SiconosSharedLibrary/libSiconosSharedLibrary.la \
 	$(top_builddir)/src/utils/SiconosException/libSiconosException.la\
-	$(top_builddir)/api/C/libSiconosApiC.la
+	$(top_builddir)/src/apiC/libSiconosApiC.la
