@@ -45,8 +45,20 @@ extern int sicModelgetQInterface(char *fname);
 
 extern int sicLagrangianLinearTIDSInterface(char *fname);
 
-extern int sicInteractionLLRInterface(char *fname);
+extern int sicInteractionInterface(char *fname);
 
-extern int sicNSDSModelInterface(char *fname);
+extern int sicLagrangianLinearRInterface(char *fname);
+
+extern int sicNewtonImpactLawNSLInterface(char *fname);
+
+extern int sicNonSmoothDynamicalSystemInterface(char *fname);
+
+extern int sicModelInterface(char *fname);
 
 extern int sicStrategyTimeSteppingInterface(char *fname);
+
+extern int sicOneStepIntegratorMoreauInterface(char *fname);
+
+extern int sicOneStepNSProblemLCPInterface(char *fname);
+
+extern int sicCleanInterface(char *fname);

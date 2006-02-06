@@ -334,14 +334,14 @@ int sicLagrangianLinearTIDSInterface(char *fname)
   return 0;
 }
 
-int sicInteractionLLRInterface(char *fname)
+int sicInteractionInterface(char *fname)
 {
-  static int minrhs = 8, maxrhs = 8, minlhs = 1, maxlhs = 1;
+  static int minrhs = 4, maxrhs = 4, minlhs = 1, maxlhs = 1;
   static int dim1, dim2;
-  static int name, nbDS, DS, nbRel, H, b, lawtype, e;
+  static int name, nbDS, DS, nbRel;
   static int dimo1 = 1, dimo2 = 1, st;
 
-  /* Check number of inputs (rhs=8) and outputs (lhs=1) */
+  /* Check number of inputs (rhs=4) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
 
@@ -381,26 +381,90 @@ int sicInteractionLLRInterface(char *fname)
     return 0;
   }
 
-  /* Get H (5, double)  */
-  GetRhsVar(5, "d", &dim1, &dim2, &H);
-  if (!(dim1 * dim2 > 0))
+  CreateVar(5, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicInteractionLLR(cstk(name), *istk(nbDS), istk(DS), *istk(nbRel));
+
+  /*  Return variable  */
+  LhsVar(1) = 5;
+
+  return 0;
+}
+
+
+int sicLagrangianLinearRInterface(char *fname)
+{
+  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int nIdInteraction, H, b;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+  /* Check number of inputs (rhs=3) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get nIdInteraction (1, int)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &nIdInteraction);
+  if (!(dim1 * dim2 == 1))
   {
-    sciprint("Wrong parameter in sicInteractionLLR (H has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicLagrangianLinearR (nIdInteraction has wrong size!)\r\n");
     Error(999);
     return 0;
   }
 
-  /* Get b (6, double)  */
-  GetRhsVar(6, "d", &dim1, &dim2, &b);
+  /* Get H (2, double vector)  */
+  GetRhsVar(2, "d", &dim1, &dim2, &H);
   if (!(dim1 * dim2 > 0))
   {
-    sciprint("Wrong parameter in sicInteractionLLR (b has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicLagrangianLinearR (H has wrong size!)\r\n");
     Error(999);
     return 0;
   }
 
-  /* Get lawtype (7, char)  */
-  GetRhsVar(7, "c", &dim1, &dim2, &lawtype);
+  /* Get b (3, double vector)  */
+  GetRhsVar(3, "d", &dim1, &dim2, &b);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicLagrangianLinearR (b has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(4, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicLagrangianLinearR(*istk(nIdInteraction), stk(H), stk(b));
+
+  /*  Return variable  */
+  LhsVar(1) = 4;
+
+
+  return 0;
+}
+
+int sicNewtonImpactLawNSLInterface(char *fname)
+{
+  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int nIdInteraction, lawtype, e;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+  /* Check number of inputs (rhs=3) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get nIdInteraction (1, int)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &nIdInteraction);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicLagrangianLinearR (nIdInteraction has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get lawtype (1, char *)  */
+  GetRhsVar(2, "c", &dim1, &dim2, &lawtype);
   if (!(dim1 * dim2 > 0))
   {
     sciprint("Wrong parameter in sicInteractionLLR (name has wrong size!)\r\n");
@@ -408,8 +472,8 @@ int sicInteractionLLRInterface(char *fname)
     return 0;
   }
 
-  /* Get e (8, double)  */
-  GetRhsVar(8, "d", &dim1, &dim2, &e);
+  /* Get e (2, double)  */
+  GetRhsVar(3, "d", &dim1, &dim2, &e);
   if (!(dim1 * dim2 == 1))
   {
     sciprint("Wrong parameter in sicInteractionLLR (b has wrong size!)\r\n");
@@ -417,20 +481,52 @@ int sicInteractionLLRInterface(char *fname)
     return 0;
   }
 
-  CreateVar(9, "i", &dimo1, &dimo2, &st);
+  CreateVar(4, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicInteractionLLR(cstk(name), *istk(nbDS), istk(DS), *istk(nbRel), stk(H), stk(b), cstk(lawtype), *stk(e));
+  *istk(st) = sicLagrangianLinearR(*istk(nIdInteraction), cstk(lawtype), *stk(e));
 
   /*  Return variable  */
-  LhsVar(1) = 9;
+  LhsVar(1) = 4;
 
   return 0;
 }
 
-int sicNSDSModelInterface(char *fname)
+int sicNonSmoothDynamicalSystemInterface(char *fname)
 {
-  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
+  static int minrhs = 1, maxrhs = 1, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int isBVP;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+  /* Check number of inputs (rhs=1) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get isBVP (1, int)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &isBVP);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicNonSmoothDynamicalSystem (isBVP has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(2, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicNonSmoothDynamicalSystem(*istk(isBVP));
+
+  /*  Return variable  */
+  LhsVar(1) = 2;
+
+  return 0;
+}
+
+
+int sicModelInterface(char *fname)
+{
+  static int minrhs = 2, maxrhs = 2, minlhs = 1, maxlhs = 1;
   static int dim1, dim2;
   static int isBVP, t0, T;
   static int dimo1 = 1, dimo2 = 1, st;
@@ -439,26 +535,18 @@ int sicNSDSModelInterface(char *fname)
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
 
-  /* Get isBVP (1, int)  */
-  GetRhsVar(1, "i", &dim1, &dim2, &isBVP);
+
+  /* Get t0 (1, double)  */
+  GetRhsVar(1, "d", &dim1, &dim2, &t0);
   if (!(dim1 * dim2 == 1))
   {
-    sciprint("Wrong parameter in sicNSDSModel (isBVP has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicModel (t0 has wrong size!)\r\n");
     Error(999);
     return 0;
   }
 
-  /* Get t0 (2, double)  */
-  GetRhsVar(2, "d", &dim1, &dim2, &t0);
-  if (!(dim1 * dim2 == 1))
-  {
-    sciprint("Wrong parameter in sicNSDSModel (t0 has wrong size!)\r\n");
-    Error(999);
-    return 0;
-  }
-
-  /* Get T (3, double)  */
-  GetRhsVar(3, "d", &dim1, &dim2, &T);
+  /* Get T (2, double)  */
+  GetRhsVar(2, "d", &dim1, &dim2, &T);
   if (!(dim1 * dim2 == 1))
   {
     sciprint("Wrong parameter in sicNSDSModel (T has wrong size!)\r\n");
@@ -466,13 +554,13 @@ int sicNSDSModelInterface(char *fname)
     return 0;
   }
 
-  CreateVar(4, "i", &dimo1, &dimo2, &st);
+  CreateVar(3, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicNSDSModel(*istk(isBVP), *stk(t0), *stk(T));
+  *istk(st) = sicModel(*istk(isBVP), *stk(t0), *stk(T));
 
   /*  Return variable  */
-  LhsVar(1) = 4;
+  LhsVar(1) = 3;
 
   return 0;
 }
@@ -497,45 +585,108 @@ int sicStrategyTimeSteppingInterface(char *fname)
     return 0;
   }
 
-  /* Get  h (2, theta)  */
-  GetRhsVar(2, "d", &dim1, &dim2, &theta);
-  if (!(dim1 * dim2 > 0))
-  {
-    sciprint("Wrong parameter in sicStrategyTimeStepping (theta has wrong size!)\r\n");
-    Error(999);
-    return 0;
-  }
 
-  /* Get  h (3, maxiter)  */
-  GetRhsVar(3, "d", &dim1, &dim2, &maxiter);
-  if (!(dim1 * dim2 == 1))
-  {
-    sciprint("Wrong parameter in sicStrategyTimeStepping (maxiter has wrong size!)\r\n");
-    Error(999);
-    return 0;
-  }
-
-  /* Get  h (4, tolerance)  */
-  GetRhsVar(4, "d", &dim1, &dim2, &tolerance);
-  if (!(dim1 * dim2 == 1))
-  {
-    sciprint("Wrong parameter in sicStrategyTimeStepping (tolerance has wrong size!)\r\n");
-    Error(999);
-    return 0;
-  }
-
-  CreateVar(5, "i", &dimo1, &dimo2, &st);
+  CreateVar(2, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicStrategyTimeStepping(*stk(h), stk(theta), *stk(maxiter), *stk(tolerance));
+  *istk(st) = sicStrategyTimeStepping(*stk(h));
 
   /*  Return variable  */
-  LhsVar(1) = 5;
+  LhsVar(1) = 2;
+
+  return 0;
+}
+
+int sicOneStepIntegratorMoreauInterface(char *fname)
+{
+  static int minrhs = 1, maxrhs = 1, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int theta;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+  /* Check number of inputs (rhs=1) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get  theta (2, double vector)  */
+  GetRhsVar(1, "d", &dim1, &dim2, &theta);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in ssicOneStepIntegratorMoreau (theta has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(2, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicOneStepIntegratorMoreau(*stk(theta));
+
+  /*  Return variable  */
+  LhsVar(1) = 2;
+
+  return 0;
+}
+
+int sicOneStepNSProblemLCPInterface(char *fname)
+{
+  static int minrhs = 2, maxrhs = 2, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int maxiter, tolerance;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+  /* Check number of inputs (rhs=2) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get  maxiter (1, double)  */
+  GetRhsVar(1, "d", &dim1, &dim2, &maxiter);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicOneStepNSProblemLCP (maxiter has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get  tolerance (2, double)  */
+  GetRhsVar(2, "d", &dim1, &dim2, &tolerance);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicOneStepNSProblemLCP (tolerance has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(3, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicOneStepNSProblemLCP(*stk(maxiter), *stk(tolerance));
+
+  /*  Return variable  */
+  LhsVar(1) = 3;
 
 
   return 0;
 }
 
+int sicCleanInterface(char *fname)
+{
+  static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+  /* Check number of inputs (rhs=1) and outputs (lhs=0) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+
+  CreateVar(1, "i", &dimo1, &dimo2, &st);
+  /* Call function */
+  *istk(st) = sicClean();
+  /*  Return variable  */
+  LhsVar(1) = 1;
+
+  return 0;
+}
 
 
 /***************************************************
@@ -555,9 +706,15 @@ int C2F(SiconosGateway)()
                               sicSTupdateStateInterface,
                               sicModelgetQInterface,
                               sicLagrangianLinearTIDSInterface,
-                              sicInteractionLLRInterface,
-                              sicNSDSModelInterface,
-                              sicStrategyTimeSteppingInterface
+                              sicInteractionInterface,
+                              sicLagrangianLinearRInterface,
+                              sicNewtonImpactLawNSLInterface,
+                              sicNonSmoothDynamicalSystemInterface,
+                              sicModelInterface,
+                              sicStrategyTimeSteppingInterface,
+                              sicOneStepIntegratorMoreauInterface,
+                              sicOneStepNSProblemLCPInterface,
+                              sicCleanInterface
                              };
 
   char *name[] = {"sicLoadModel",
@@ -571,9 +728,14 @@ int C2F(SiconosGateway)()
                   "sicSTupdateState",
                   "sicModelgetQ"
                   "sicLagrangianLinearTIDS",
-                  "sicInteractionLLR",
-                  "sicNSDSModel",
-                  "sicStrategyTimeStepping"
+                  "sicInteraction",
+                  "sicLagrangianLinearR",
+                  "sicNewtonImpactLawNSL",
+                  "sicNonSmoothDynamicalSystem",
+                  "sicModel",
+                  "sicStrategyTimeStepping",
+                  "sicOneStepNSProblemLCP",
+                  "sicClean"
                  };
 
   Rhs = Max(0, Rhs);

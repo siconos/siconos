@@ -77,3 +77,19 @@ function VisuBalls(qx,qy,step,high,sizeball)
  end
  
 endfunction
+
+
+function sicCartouche()
+
+  printf("\n"); 
+  printf("\n"); 
+  printf("+---------------------------------------------------------------+\n");
+  printf("+                                                               +\n");
+  printf("+                        SICONOS / WP2                          +\n");
+  printf("+                       INRIA - 2005 (c)                        +\n");
+  printf("+                                                               +\n");
+  printf("+---------------------------------------------------------------+\n");
+  printf("\n"); 
+  printf("\n"); 
+
+endfunction

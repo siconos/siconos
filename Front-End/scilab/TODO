@@ -9,9 +9,7 @@ I.1 Fignoler les simuls Boules
   - visu sol, traj.
   - temps d'ech. pour aller plus vite ?
 
-I.2 OK Faire tourner MultiBeadsColumn.sci
-
-I.3 Faire tourner PA10
+I.2 Faire tourner PA10
  - ajouter LagrangianDS avec fct C plugin
 
 I.4 Faire tourner exemples electriques ?
@@ -19,7 +17,7 @@ I.4 Faire tourner exemples electriques ?
 
 II - Integration
 
- - Split Fonction
+ - faire l'interface scilab avec les nvlles fonctions
  - Naming des fonctions
  - Doxygen
  - README / Doc utilisateur
@@ -40,6 +38,5 @@ V - Fonctions qui manquent
 
 VI - Fignoler
  - Robustifier ctl des parametres ds siconosScilab.c
- - faire des listes d'objets Modeles avec Id
  - mettre les lois d'impacts dans sicInteractionLLR
- - récupérer les Ids des DS dans les fcts scilab
+
