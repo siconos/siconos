@@ -99,7 +99,7 @@ extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int sicNewtonImpactLawNSL(int nIdInteraction, char *lawtype, double e);
+int sicNewtonImpactLawNSL(int nIdInteraction, double e);
 
 extern
 #ifdef __cplusplus
@@ -131,7 +131,7 @@ extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int sicOneStepNSProblemLCP(double maxiter, double tolerance);
+int sicOneStepNSProblemLCP(int maxiter, double tolerance);
 
 extern
 #ifdef __cplusplus

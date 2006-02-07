@@ -445,9 +445,9 @@ int sicLagrangianLinearRInterface(char *fname)
 
 int sicNewtonImpactLawNSLInterface(char *fname)
 {
-  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
+  static int minrhs = 2, maxrhs = 2, minlhs = 1, maxlhs = 1;
   static int dim1, dim2;
-  static int nIdInteraction, lawtype, e;
+  static int nIdInteraction, e;
   static int dimo1 = 1, dimo2 = 1, st;
 
   /* Check number of inputs (rhs=3) and outputs (lhs=1) */
@@ -463,17 +463,8 @@ int sicNewtonImpactLawNSLInterface(char *fname)
     return 0;
   }
 
-  /* Get lawtype (2, char *)  */
-  GetRhsVar(2, "c", &dim1, &dim2, &lawtype);
-  if (!(dim1 * dim2 > 0))
-  {
-    sciprint("Wrong parameter in sicNewtonImpactLawNSLInterface (name has wrong size!)\r\n");
-    Error(999);
-    return 0;
-  }
-
-  /* Get e (3, double)  */
-  GetRhsVar(3, "d", &dim1, &dim2, &e);
+  /* Get e (2, double)  */
+  GetRhsVar(2, "d", &dim1, &dim2, &e);
   if (!(dim1 * dim2 == 1))
   {
     sciprint("Wrong parameter in sicNewtonImpactLawNSLInterface has wrong size!)\r\n");
@@ -481,13 +472,13 @@ int sicNewtonImpactLawNSLInterface(char *fname)
     return 0;
   }
 
-  CreateVar(4, "i", &dimo1, &dimo2, &st);
+  CreateVar(3, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicNewtonImpactLawNSL(*istk(nIdInteraction), cstk(lawtype), *stk(e));
+  *istk(st) = sicNewtonImpactLawNSL(*istk(nIdInteraction), *stk(e));
 
   /*  Return variable  */
-  LhsVar(1) = 4;
+  LhsVar(1) = 3;
 
   return 0;
 }
@@ -639,8 +630,8 @@ int sicOneStepNSProblemLCPInterface(char *fname)
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
 
-  /* Get  maxiter (1, double)  */
-  GetRhsVar(1, "d", &dim1, &dim2, &maxiter);
+  /* Get  maxiter (1, integer)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &maxiter);
   if (!(dim1 * dim2 == 1))
   {
     sciprint("Wrong parameter in sicOneStepNSProblemLCP (maxiter has wrong size!)\r\n");
@@ -660,7 +651,7 @@ int sicOneStepNSProblemLCPInterface(char *fname)
   CreateVar(3, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicOneStepNSProblemLCP(*stk(maxiter), *stk(tolerance));
+  *istk(st) = sicOneStepNSProblemLCP(*istk(maxiter), *stk(tolerance));
 
   /*  Return variable  */
   LhsVar(1) = 3;

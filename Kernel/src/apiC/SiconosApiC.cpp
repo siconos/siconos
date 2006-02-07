@@ -480,7 +480,7 @@ extern "C" int sicLagrangianLinearR(int nIdInteraction, double *H, double *b)
   return nId;
 }
 
-extern "C" int sicNewtonImpactLawNSL(int nIdInteraction, char *lawtype, double e)
+extern "C" int sicNewtonImpactLawNSL(int nIdInteraction, double e)
 {
   int nId;
 
@@ -652,7 +652,7 @@ extern "C" int sicOneStepIntegratorMoreau(double *theta)
 
 }
 
-extern "C" int sicOneStepNSProblemLCP(double maxiter, double tolerance)
+extern "C" int sicOneStepNSProblemLCP(int maxiter, double tolerance)
 {
   int nId = SIC_OK;
 
@@ -682,11 +682,12 @@ extern "C" int sicOneStepNSProblemLCP(double maxiter, double tolerance)
 
 extern "C" int sicClean()
 {
-  int i;
+  unsigned int i;
 
   delete GLOB_MODEL;
   delete GLOB_NSDS;
   delete GLOB_STRATEGIE;
+
   for (i = 0; i < GLOB_VECTOR_DS.size(); i++)
   {
     delete GLOB_VECTOR_DS[i];
@@ -697,4 +698,5 @@ extern "C" int sicClean()
     delete GLOB_VECTOR_INTERACTION[i];
   }
 
+  return SIC_OK;
 }
