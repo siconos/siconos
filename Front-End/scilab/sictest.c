@@ -110,7 +110,7 @@ testMultiBeadsColumn()
   /* Strategy Model */
   sicStrategyTimeStepping(0.001);
   sicOneStepIntegratorMoreau(Theta);
-  sicOneStepNSProblemLCP(101, 0.0001);
+  sicOneStepNSProblemLCP("NSQP", 101, 0.0001);
 
 
   /* Simulation */

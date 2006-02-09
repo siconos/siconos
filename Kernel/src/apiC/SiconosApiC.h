@@ -53,6 +53,12 @@ extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
+int sicSTnewtonSolve(double criterion, int maxIter);
+
+extern
+#ifdef __cplusplus
+"C"
+#endif /* __cplusplus */
 int sicSTupdateState();
 
 extern
@@ -78,9 +84,50 @@ extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int sicLagrangianDS(int nDof, double *Q0, double *Vel0, char *libname,
-                    char *fctMass, char *fctNNL, char *fctJacNNL,
-                    char *fctFInt, char *fctJacFInt, char *fctFext);
+int sicLagrangianDS(int nDof, double *Q0, double *Vel0);
+
+extern
+#ifdef __cplusplus
+"C"
+#endif /* __cplusplus */
+int setComputeMassFunction(int nIdDs, char *libname, char *func);
+
+extern
+#ifdef __cplusplus
+"C"
+#endif /* __cplusplus */
+int setComputeNNLFunction(int nIdDs, char *libname, char *func);
+
+extern
+#ifdef __cplusplus
+"C"
+#endif /* __cplusplus */
+int setComputeJacobianQNNLFunction(int nIdDs, char *libname, char *func);
+
+extern
+#ifdef __cplusplus
+"C"
+#endif /* __cplusplus */
+int setComputeJacobianVelocityNNLFunction(int nIdDs, char *libname, char *func);
+
+extern
+#ifdef __cplusplus
+"C"
+#endif /* __cplusplus */
+int setComputeFIntFunction(int nIdDs, char *libname, char *func);
+
+extern
+#ifdef __cplusplus
+"C"
+#endif /* __cplusplus */
+int setComputeJacobianQFIntFunction(int nIdDs, char *libname, char *func);
+
+extern
+#ifdef __cplusplus
+"C"
+#endif /* __cplusplus */
+int setComputeFExtFunction(int nIdDs, char *libname, char *func);
+
 
 extern
 #ifdef __cplusplus
@@ -94,6 +141,11 @@ extern
 #endif /* __cplusplus */
 int sicLagrangianLinearR(int nIdInteraction, double *H, double *b);
 
+extern
+#ifdef __cplusplus
+"C"
+#endif /* __cplusplus */
+int sicLagrangianR(int nIdInteraction, char *relationType, char *funcH, char *funcG);
 
 extern
 #ifdef __cplusplus
@@ -131,7 +183,7 @@ extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int sicOneStepNSProblemLCP(int maxiter, double tolerance);
+int sicOneStepNSProblemLCP(char* solverName, int maxiter, double tolerance);
 
 extern
 #ifdef __cplusplus

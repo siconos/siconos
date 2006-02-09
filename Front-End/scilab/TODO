@@ -8,7 +8,9 @@ I.1 Fignoler les simuls Boules
   - visu sol, traj.
 
 I.2 Faire tourner PA10
- - ajouter LagrangianDS avec fct C plugin
+ - ecrire sictest.c
+ - compléter SiconosApiSci.c
+ - tester Robot.sci
 
 I.4 Faire tourner exemples electriques ?
 

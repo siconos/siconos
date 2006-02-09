@@ -191,6 +191,18 @@ extern "C" int sicSTComputePb()
   return ret;
 }
 
+extern "C" int ssicSTnewtonSolve(double criterion, int maxIter)
+{
+  int ret = SIC_OK;
+
+  if (GLOB_STRATEGIE != NULL)
+    GLOB_STRATEGIE->newtonSolve(criterion, maxIter);
+  else
+    ret = SIC_ERROR;
+
+  return ret;
+}
+
 extern "C" int sicSTupdateState()
 {
   int ret = SIC_OK;
@@ -236,7 +248,7 @@ extern "C" int sicModelgetQ(double *value, int indexDS, int indexVector)
     {
       size = (system->getQ()).size();
       if ((indexVector >= size) || (indexVector < 0))
-        RuntimeException::selfThrow("siconos/C:: sicInitStrategy failed");
+        RuntimeException::selfThrow("siconos/C:: sicModelgetQ failed");
       else
       {
         *value = system->getQ()(indexVector);
@@ -251,7 +263,7 @@ extern "C" int sicModelgetQ(double *value, int indexDS, int indexVector)
   }
   catch (...)
   {
-    cout << "Exception caught in sicSTformalisePb" << endl;
+    cout << "Exception caught in sicModelgetQ" << endl;
     ret = SIC_ERROR;
   }
 
@@ -317,9 +329,7 @@ extern "C" int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, doubl
   return nId;
 }
 
-extern "C" int sicLagrangianDS(int nDof, double *Q0, double *Vel0, char *libname,
-                               char *fctMass, char *fctNNL, char *fctJacNNL,
-                               char *fctFInt, char *fctJacFInt, char *fctFext)
+extern "C" int sicLagrangianDS(int nDof, double *Q0, double *Vel0)
 {
   int nId, i;
 
@@ -341,16 +351,16 @@ extern "C" int sicLagrangianDS(int nDof, double *Q0, double *Vel0, char *libname
     }
     // Create the object
     LagrangianDS * DS = new LagrangianDS(nId, nDof, vQ0, vVel0);
-
-    DS->setComputeMassFunction(libname, fctMass);
-    DS->setComputeNNLFunction(libname, fctNNL);
-    DS->setComputeJacobianQNNLFunction(libname, fctJacNNL);
-    DS->setComputeJacobianVelocityNNLFunction(libname, fctJacNNL);
-    DS->setComputeFIntFunction(libname, fctFInt);
-    DS->setComputeJacobianQFIntFunction(libname, fctJacFInt);
+    /*
+    DS->setComputeMassFunction(libname,fctMass);
+    DS->setComputeNNLFunction(libname,fctNNL);
+    DS->setComputeJacobianQNNLFunction(libname,fctJacNNL);
+    DS->setComputeJacobianVelocityNNLFunction(libname,fctJacNNL);
+    DS->setComputeFIntFunction(libname,fctFInt);
+    DS->setComputeJacobianQFIntFunction(libname,fctJacFInt);
     DS->setComputeJacobianVelocityFIntFunction(libname, fctJacFInt);
     DS->setComputeFExtFunction(libname, fctFext);
-
+    */
     // Push the LagrangianDS on global DS vectors
     GLOB_VECTOR_DS.push_back(DS);
 
@@ -362,13 +372,257 @@ extern "C" int sicLagrangianDS(int nDof, double *Q0, double *Vel0, char *libname
   }
   catch (...)
   {
-    cout << "Exception caught in sicLagrangianLinearTIDS" << endl;
+    cout << "Exception caught in sicLagrangianLinearDS" << endl;
     nId = SIC_ERROR;
   }
 
   return nId;
 }
 
+extern "C" int setComputeMassFunction(int nIdDs, char *libname, char *func)
+{
+  int st = SIC_OK;
+
+  try
+  {
+    // DS verification
+    int  nDSMax = GLOB_VECTOR_DS.size();
+    if ((nIdDs > nDSMax) || (nIdDs < 0))
+    {
+      RuntimeException::selfThrow("siconos/C:: setComputeMassFunction failed");
+      st = SIC_ERROR;
+    }
+    if (GLOB_VECTOR_DS[nIdDs] == NULL)
+    {
+      RuntimeException::selfThrow("siconos/C:: setComputeMassFunction failed");
+      st = SIC_ERROR;
+    }
+    DynamicalSystem *DS = GLOB_VECTOR_DS[nIdDs];
+    static_cast<LagrangianDS*>(DS)->setComputeMassFunction(libname, func);
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    st = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in setComputeMassFunction" << endl;
+    st = SIC_ERROR;
+  }
+
+  return st;
+}
+
+extern "C" int setComputeNNLFunction(int nIdDs, char *libname, char *func)
+{
+  int st = SIC_OK;
+
+  try
+  {
+    // DS verification
+    int  nDSMax = GLOB_VECTOR_DS.size();
+    if ((nIdDs > nDSMax) || (nIdDs < 0))
+    {
+      RuntimeException::selfThrow("siconos/C:: setComputeNNLFunction failed");
+      st = SIC_ERROR;
+    }
+    if (GLOB_VECTOR_DS[nIdDs] == NULL)
+    {
+      RuntimeException::selfThrow("siconos/C:: setComputeNNLFunction failed");
+      st = SIC_ERROR;
+    }
+    DynamicalSystem *DS = GLOB_VECTOR_DS[nIdDs];
+    static_cast<LagrangianDS*>(DS)->setComputeNNLFunction(libname, func);
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    st = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in setComputeNNLFunction" << endl;
+    st = SIC_ERROR;
+  }
+
+  return st;
+}
+
+extern "C" int setComputeJacobianQNNLFunction(int nIdDs, char *libname, char *func)
+{
+  int st = SIC_OK;
+
+  try
+  {
+    // DS verification
+    int  nDSMax = GLOB_VECTOR_DS.size();
+    if ((nIdDs > nDSMax) || (nIdDs < 0))
+    {
+      RuntimeException::selfThrow("siconos/C:: setComputeJacobianQNNLFunction failed");
+      st = SIC_ERROR;
+    }
+    if (GLOB_VECTOR_DS[nIdDs] == NULL)
+    {
+      RuntimeException::selfThrow("siconos/C:: setComputeJacobianQNNLFunction failed");
+      st = SIC_ERROR;
+    }
+    DynamicalSystem *DS = GLOB_VECTOR_DS[nIdDs];
+    static_cast<LagrangianDS*>(DS)->setComputeJacobianQNNLFunction(libname, func);
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    st = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in setComputeJacobianQNNLFunction" << endl;
+    st = SIC_ERROR;
+  }
+
+  return st;
+}
+
+extern "C" int  setComputeJacobianVelocityNNLFunction(int nIdDs, char *libname, char *func)
+{
+  int st = SIC_OK;
+
+  try
+  {
+    // DS verification
+    int  nDSMax = GLOB_VECTOR_DS.size();
+    if ((nIdDs > nDSMax) || (nIdDs < 0))
+    {
+      RuntimeException::selfThrow("siconos/C::  setComputeJacobianVelocityNNLFunction");
+      st = SIC_ERROR;
+    }
+    if (GLOB_VECTOR_DS[nIdDs] == NULL)
+    {
+      RuntimeException::selfThrow("siconos/C::  setComputeJacobianVelocityNNLFunction failed");
+      st = SIC_ERROR;
+    }
+    DynamicalSystem *DS = GLOB_VECTOR_DS[nIdDs];
+    static_cast<LagrangianDS*>(DS)-> setComputeJacobianVelocityNNLFunction(libname, func);
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    st = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in s setComputeJacobianVelocityNNLFunction" << endl;
+    st = SIC_ERROR;
+  }
+
+  return st;
+}
+
+extern "C" int setComputeFIntFunction(int nIdDs, char *libname, char *func)
+{
+  int st = SIC_OK;
+
+  try
+  {
+    // DS verification
+    int  nDSMax = GLOB_VECTOR_DS.size();
+    if ((nIdDs > nDSMax) || (nIdDs < 0))
+    {
+      RuntimeException::selfThrow("siconos/C:: setComputeFIntFunction failed");
+      st = SIC_ERROR;
+    }
+    if (GLOB_VECTOR_DS[nIdDs] == NULL)
+    {
+      RuntimeException::selfThrow("siconos/C:: setComputeFIntFunction failed");
+      st = SIC_ERROR;
+    }
+    DynamicalSystem *DS = GLOB_VECTOR_DS[nIdDs];
+    static_cast<LagrangianDS*>(DS)->setComputeFIntFunction(libname, func);
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    st = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in setComputeFIntFunction" << endl;
+    st = SIC_ERROR;
+  }
+
+  return st;
+}
+
+extern "C" int setComputeJacobianQFIntFunction(int nIdDs, char *libname, char *func)
+{
+  int st = SIC_OK;
+
+  try
+  {
+    // DS verification
+    int  nDSMax = GLOB_VECTOR_DS.size();
+    if ((nIdDs > nDSMax) || (nIdDs < 0))
+    {
+      RuntimeException::selfThrow("siconos/C:: setComputeJacobianQFIntFunction failed");
+      st = SIC_ERROR;
+    }
+    if (GLOB_VECTOR_DS[nIdDs] == NULL)
+    {
+      RuntimeException::selfThrow("siconos/C:: setComputeJacobianQFIntFunction failed");
+      st = SIC_ERROR;
+    }
+    DynamicalSystem *DS = GLOB_VECTOR_DS[nIdDs];
+    static_cast<LagrangianDS*>(DS)->setComputeJacobianQFIntFunction(libname, func);
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    st = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in setComputeJacobianQFIntFunction" << endl;
+    st = SIC_ERROR;
+  }
+
+  return st;
+}
+
+extern "C" int  setComputeFExtFunction(int nIdDs, char *libname, char *func)
+{
+  int st = SIC_OK;
+
+  try
+  {
+    // DS verification
+    int  nDSMax = GLOB_VECTOR_DS.size();
+    if ((nIdDs > nDSMax) || (nIdDs < 0))
+    {
+      RuntimeException::selfThrow("siconos/C::  setComputeFExtFunction failed");
+      st = SIC_ERROR;
+    }
+    if (GLOB_VECTOR_DS[nIdDs] == NULL)
+    {
+      RuntimeException::selfThrow("siconos/C::  setComputeFExtFunction failed");
+      st = SIC_ERROR;
+    }
+    DynamicalSystem *DS = GLOB_VECTOR_DS[nIdDs];
+    static_cast<LagrangianDS*>(DS)-> setComputeFExtFunction(libname, func);
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    st = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in  setComputeFExtFunction" << endl;
+    st = SIC_ERROR;
+  }
+
+  return st;
+}
 
 extern "C" int sicInteraction(char *name, int nbDS, int *DS, int nbRel)
 {
@@ -480,9 +734,49 @@ extern "C" int sicLagrangianLinearR(int nIdInteraction, double *H, double *b)
   return nId;
 }
 
+extern "C" int sicLagrangianR(int nIdInteraction, char *relationType, char *funcH, char *funcG)
+{
+  int nId = SIC_OK;
+
+
+  try
+  {
+    // Retrieve Interaction
+    int nSize = GLOB_VECTOR_INTERACTION.size();
+    if ((nIdInteraction < 0) || (nIdInteraction > nSize))
+      RuntimeException::selfThrow("siconos/C:: sicLagrangianR failed");
+
+    Interaction *interaction = GLOB_VECTOR_INTERACTION[nIdInteraction];
+
+    if (interaction == NULL)
+      RuntimeException::selfThrow("siconos/C:: sicLagrangianR failed");
+
+    // Why a vector ? See Franck or Vincent...
+    vector<string> vG;
+    vG.reserve(1);
+    vG.push_back(funcG);
+
+    Relation * relation = new LagrangianR(relationType, funcH, vG, interaction);
+    interaction->setRelationPtr(relation);
+  }
+  catch (SiconosException e)
+  {
+    cout << e.report() << endl;
+    nId = SIC_ERROR;
+  }
+  catch (...)
+  {
+    cout << "Exception caught in sicLagrangianLinearR" << endl;
+    nId = SIC_ERROR;
+  }
+
+  return nId;
+}
+
+
 extern "C" int sicNewtonImpactLawNSL(int nIdInteraction, double e)
 {
-  int nId;
+  int nId = SIC_OK;
 
   try
   {
@@ -652,14 +946,14 @@ extern "C" int sicOneStepIntegratorMoreau(double *theta)
 
 }
 
-extern "C" int sicOneStepNSProblemLCP(int maxiter, double tolerance)
+extern "C" int sicOneStepNSProblemLCP(char *solverName, int maxiter, double tolerance)
 {
   int nId = SIC_OK;
 
   try
   {
     // One Step problem
-    OneStepNSProblem * onsspb = new LCP(GLOB_STRATEGIE, "NSQP", maxiter, tolerance);
+    OneStepNSProblem * onsspb = new LCP(GLOB_STRATEGIE, solverName, maxiter, tolerance);
     GLOB_STRATEGIE->setOneStepNSProblemPtr(onsspb);
 
     cout << "=== End of model loading === " << endl;
