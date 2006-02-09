@@ -193,7 +193,10 @@ void Moreau::computeFreeState()
   double h = timeDiscretisation->getH();
   // Previous time step (i)
   double told = t - h;
-
+  /*
+   \warning Access to previous values of source terms shall be provided
+   \warning thanks to a dedicated memory or to the accurate value of old time instants
+  */
   // Get the DS type
   std::string dstyp = ds->getType();
 
@@ -261,19 +264,58 @@ void Moreau::computeFreeState()
   }
   else if (dstyp == LDS)
   {
-    SiconosVector *xfree = ds->getXFreePtr();
-    SiconosVector *xold = ds->getXMemoryPtr()->getSiconosVector(0);
+    LinearDS *d = static_cast<LinearDS*>(ds);
+
+    SiconosVector *xfree = d->getXFreePtr();
+    SiconosVector *xold = d->getXMemoryPtr()->getSiconosVector(0);
+    SiconosVector *xDotold = d->getXDotMemoryPtr()->getSiconosVector(0);
+    unsigned int sizeX = xfree->size();
+    SimpleVector *xtmp = new SimpleVector(sizeX);
+
+    /*   \ warning : A supposed to be constant */
+
     if (theta == 1.0)
-      *xfree = *W * (*xold);
+      *xtmp = *xold;
     else
     {
-      unsigned int size = ds->getN();
-      SiconosMatrix *I = new SiconosMatrix(size, size);
+      SiconosMatrix *I = new SiconosMatrix(sizeX, sizeX);
       I->eye();
-      SiconosMatrix * A = static_cast<LinearDS*>(ds)->getAPtr();
-      *xfree = *W * (*I + h* *A * (1.0 - theta))* *xold;
+      SiconosMatrix *A = d->getAPtr();
+
+      *xtmp = (*I + h * (1.0 - theta) * *A) * *xold;
+
       delete I;
     }
+
+    /*   \ warning : b supposed to be constant */
+
+    SimpleVector *b = d->getBPtr();
+    if (b != NULL) *xtmp += h * *b;
+
+    /*   \ warning : T supposed to be constant */
+
+    SiconosVector *ucur = d->getUPtr();
+    SiconosMatrix *T = d->getTPtr();
+
+    if (ucur != NULL)
+    {
+      if (theta == 1.0)
+        *xtmp += h * *T * *ucur;
+      else
+      {
+        unsigned int uSize = d->getUSize();
+        SiconosVector *uold = new SimpleVector(uSize);
+        SimpleVector *param = d->getParametersListPtr(2);
+        d->computeUPtr(&uSize, &sizeX, &told, &(*xold)(0), &(*xDotold)(0), &(*uold)(0), &(*param)(0));
+
+        *xtmp += h * *T * (theta * *ucur + (1.0 - theta) * *uold);
+        delete uold;
+      }
+    }
+
+    *xfree = *W * *xtmp;
+
+    delete xtmp;
   }
   else RuntimeException::selfThrow("Moreau::computeFreeState - not yet implemented for Dynamical system type: " + dstyp);
   OUT("Moreau::computeFreeState\n");
