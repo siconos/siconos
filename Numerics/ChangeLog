@@ -23,6 +23,26 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
+  v1.1.1 - February 2006 (current release)
+--------------------------------------------------------------------------------
+	
+Notes:
+
+Changes:
+
+2006-02-10   Franck Perignon <franck.perignon@inrialpes.fr> 
+	     Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * Update macros m4 for cppunit => the same as in kernel
+	  (this to correct install bug 494)
+	  Minor changes in configure.ac, (--with-name rather than
+	  --with-local-name)
+	* Update obsolete keywords in Doxygen config file
+	* Changes in headers files for odepack: add usefull functions
+	  for Lsodar solver in Kernel. 
+  	
+
+--------------------------------------------------------------------------------
   v1.1.0 - February 2006 (release 385)
 --------------------------------------------------------------------------------
 	

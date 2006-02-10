@@ -26,42 +26,7 @@ dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(SICONOS/Numerics, 1.1.0)
 AC_CONFIG_SRCDIR([src/SiconosNumerics.h])
-AC_CONFIG_HEADER([config.h])
-
-
-##############################################
-# sh function to verify shared library version
-##############################################
-
-# function checkLibraryVersion ()
-# $1 : absolute path of the library (ex. : /usr/lib/liblapack.so)
-# $2 : minimum version (ex. : 3.0.3)
-
-function checkLibraryVersion () { 
-     lib=$1; 
-     ver=$2;
-     vers=`ls -l $lib | awk '{ print $NF}' |  awk 'BEGIN {FS = "."; } { printf "%d", ($3 * 1000 + $4) * 1000 + $5;}'`
-     verReq=`expr $ver  | awk 'BEGIN {FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
-     if test -n "$vers" && test "$vers" -ge $verReq ; then
-	return 1;
-     else
-	return 0;
-     fi	     
-}
-
-# function checkLibraryVersionNumber ()
-# $1 : version number ex. : 3.2.1)
-# $2 : minimum version (ex. : 3.0.3)
-
-function checkLibraryVersionNumber () { 
-     vers=`expr $1 |  awk 'BEGIN {FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
-     verReq=`expr $2  | awk 'BEGIN {FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
-     if test -n "$vers" && test "$vers" -ge $verReq ; then
-	return 1;
-     else
-	return 0;
-     fi	     
-}
+AM_CONFIG_HEADER([config.h])
 
 # SO version of all siconos shared libraries
 SICONOSNUMERICS_SO_CURRENT=1
@@ -190,11 +155,10 @@ ACX_LAPACK([
 ])
 
 # Cppunit : Warning, by default we skip ccpunit
-CPPUNIT_VER="1.10.2"
 AC_MSG_CHECKING([cppunit])
 if test "$enable_cppunit" = yes; then
 AC_MSG_RESULT(option --enable-cppunit selected : able to run test suite)       
-ACX_CHECK_CPPUNIT([AC_SUBST(CPPUNIT_INCLUDES) AC_SUBST(CPPUNIT_LIBRARIES)], [AC_MSG_ERROR([Cannot find  cppunit in a good version. Please install cppunit, version >= $CPPUNIT_VER.])])
+AM_PATH_CPPUNIT(1.10.2,,AC_MSG_ERROR([Cannot find  cppunit in a good version.]))
 else
  AC_MSG_RESULT(option --enable-cppunit not selected : Warning : unable to run test suite)  
 fi
@@ -351,10 +315,10 @@ echo "
    Preprocessor flags:                  ${CPPFLAGS}
    Linking flags			${LDFLAGS}
    Siconos includes:                    ${SICONOS_EXT_INCLUDES}
-   Siconos ld flags:                    ${SICONOS_EXT_LDFLAGS}
-"
+   Siconos ld flags:                    ${SICONOS_EXT_LDFLAGS}"
+echo
 echo Type \'make \' to build the SICONOS platform
-echo Run \'make doc\' to generate the documentation.
+echo Type \'make doc\' to generate the documentation.
 echo Type \'make install\' to install the platfrom
 echo Type \'make check\' to run the test
 echo

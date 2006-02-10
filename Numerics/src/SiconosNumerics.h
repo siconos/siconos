@@ -28,7 +28,7 @@
 
 #include "NSSpack.h"
 
-//#include "odepack.h"
+#include "odepack.h"
 
 #endif // SICONOSNUMERICS_H
 
