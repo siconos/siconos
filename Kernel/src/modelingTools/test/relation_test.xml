@@ -24,7 +24,7 @@
 			<Interaction number='1'>
 				<Id>test-of-rel</Id>
 				<nInter> 1 </nInter>
-				<!-- List of couple of DS concerned by this interaction -->
+				<!-- List of DS concerned by this interaction -->
 		               <DS_Concerned all='true'>
                                </DS_Concerned>									
 				<!-- Relation of this interaction -->				

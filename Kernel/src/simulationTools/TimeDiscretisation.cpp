@@ -62,7 +62,7 @@ TimeDiscretisation::TimeDiscretisation(SimpleVector *newTk, Strategy* str):
   h(0), nSteps(0), tk(NULL), hMin(0), hMax(0), constant(1),
   timeDiscretisationXML(NULL), k(0), strategy(str), isTkAllocatedIn(true)
 {
-  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
+  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation:: data constructor - Strategy=NULL!");
   // Allocate memory for tk and fill it
   tk = new SimpleVector(newTk->size());
   *tk = *newTk;
@@ -75,7 +75,7 @@ TimeDiscretisation::TimeDiscretisation(const double& newH, const int& newNSteps,
   h(newH), nSteps(newNSteps), tk(NULL), hMin(newH), hMax(newH), constant(1),
   timeDiscretisationXML(NULL), k(0), strategy(str), isTkAllocatedIn(false)
 {
-  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
+  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::data constructor - Strategy=NULL!");
   int tdCase = checkTimeDiscretisationCase(0, 1, 1, hasT());
   computeTimeDiscretisation(tdCase);
 }
@@ -85,7 +85,7 @@ TimeDiscretisation::TimeDiscretisation(const int& newNSteps, Strategy* str):
   h(0), nSteps(newNSteps), tk(NULL), hMin(0), hMax(0), constant(1),
   timeDiscretisationXML(NULL), k(0), strategy(str), isTkAllocatedIn(false)
 {
-  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
+  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::data constructor - Strategy=NULL!");
   int tdCase = checkTimeDiscretisationCase(0, 0, 1, hasT());
   computeTimeDiscretisation(tdCase);
 }
@@ -95,7 +95,7 @@ TimeDiscretisation::TimeDiscretisation(const double& newH, Strategy* str):
   h(newH), nSteps(0), tk(NULL), hMin(newH), hMax(newH), constant(1),
   timeDiscretisationXML(NULL), k(0), strategy(str), isTkAllocatedIn(false)
 {
-  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
+  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::data constructor - Strategy=NULL!");
   int tdCase = checkTimeDiscretisationCase(0, 1, 0, hasT());
   computeTimeDiscretisation(tdCase);
 }

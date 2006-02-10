@@ -128,8 +128,8 @@ AC_ARG_ENABLE(error-on-warning,[  --enable-erroronwarning     treat all compile 
 #################################
 ## all the --with-* argument help
 #################################
-AC_ARG_WITH(localnumerics,	
-	[  --with-localnumerics=path        indicates a local path of numerics lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
+AC_ARG_WITH(numerics,	
+	[  --with-numerics=path        indicates a local path of numerics lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
 AC_ARG_WITH(nana,			
 	[  --with-nana=path        indicates a local path of nana lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
 
@@ -153,13 +153,13 @@ ACX_LAPACK([  dnl action-if-found:  # This defines LAPACK_LIBS, BLAS_LIBS, and F
 
 # Numerics
 AC_MSG_CHECKING([for Siconos/Numerics])
-ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-localnumerics.])])
+ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-numerics.])])
 
 # Lapack++
 LAPACKPP_VER="1.8.0"	# lib....so number
 LAPACKPP_REL_VER="2.4.2" # Release number
 AC_MSG_CHECKING([for Lapack++])
-ACX_LAPACKPP([], [AC_MSG_ERROR([Cannot find  Lapack++ in a good version. Please install Lapack++, version >= $LAPACKPP_VER  or use the option --with-lapackpp-prefix. Warning: this version number corresponds to liblapackpp.so index. See INSTALL for corresponding release. ])])
+ACX_LAPACKPP([], [AC_MSG_ERROR([Cannot find  Lapack++ in a good version. Please install Lapack++, version >= $LAPACKPP_VER.])])
 
 # Libxml2
 AC_MSG_CHECKING([Libxml2])

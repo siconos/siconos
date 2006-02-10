@@ -25,6 +25,13 @@
 using namespace std;
 
 
+
+// --- Default constructor ---
+Moreau::Moreau(): OneStepIntegrator(), W(NULL), isWAllocatedIn(false), theta(0.1)
+{
+  integratorType = MOREAU_INTEGRATOR;
+}
+
 // --- xml constructor ---
 Moreau::Moreau(OneStepIntegratorXML *osiXML, TimeDiscretisation* td, DynamicalSystem* ds) :
   OneStepIntegrator(td, ds), W(NULL), isWAllocatedIn(true), theta(0.1)
@@ -84,6 +91,54 @@ Moreau::~Moreau()
   }
   if (ds != NULL && ds->getType() == LNLDS) ds->freeTmpWorkVector("LagNLDSMoreau");
 }
+
+void Moreau::setW(const SiconosMatrix& newValue)
+{
+  unsigned int line = newValue.size(0);
+  unsigned int col  = newValue.size(1);
+  if (line != col) // Check that newValue is square
+    RuntimeException::selfThrow("Moreau::setW(newVal) - newVal is not square! ");
+
+  if (ds != NULL)
+  {
+    unsigned int sizeW = (static_cast<LagrangianDS*>(ds))->getQPtr()->size();
+    if (line != sizeW) // check consistency between newValue and dynamical system size
+      RuntimeException::selfThrow("Moreau::setW(newVal) - unconsistent dimension between newVal and dynamical system to be integrated ");
+  }
+
+  if (W == NULL) // allocate a new W
+  {
+    W = new SiconosMatrix(newValue);
+    isWAllocatedIn = true;
+  }
+  else  // or fill-in an existing one if dimensions are consistent.
+  {
+    if (line == W->size(0) && col == W->size(1))
+      *W = newValue;
+    else
+      RuntimeException::selfThrow("Moreau - setW: inconsistent dimensions with problem size for given input matrix W");
+  }
+}
+
+void Moreau::setWPtr(SiconosMatrix *newPtr)
+{
+  unsigned int line = newPtr->size(0);
+  unsigned int col  = newPtr->size(1);
+  if (line != col) // Check that newPtr is square
+    RuntimeException::selfThrow("Moreau::setWPtr(newVal) - newVal is not square! ");
+
+  if (ds != NULL)
+  {
+    unsigned int sizeW = (static_cast<LagrangianDS*>(ds))->getQPtr()->size();
+    if (line != sizeW) // check consistency between newValue and dynamical system size
+      RuntimeException::selfThrow("Moreau::setW(newVal) - unconsistent dimension between newVal and dynamical system to be integrated ");
+  }
+
+  if (isWAllocatedIn) delete W; // free memory for previous W
+  W = newPtr;                  // link with new pointer
+  isWAllocatedIn = false;
+}
+
 
 void Moreau::initialize()
 {
@@ -332,7 +387,7 @@ void Moreau::integrate()
 
   if (ds->getType() == LNLDS)
   {
-    //VL(("Moreau::integrate -- LNLDS\n"));
+    RuntimeException::selfThrow("Moreau::integrate - not yet implemented for Dynamical system type: " + ds->getType()); //VL(("Moreau::integrate -- LNLDS\n"));
     // We do not use integrate() for LNDS
   }
   else if (ds->getType() == LTIDS)
@@ -471,10 +526,4 @@ Moreau* Moreau::convert(OneStepIntegrator* osi)
   cout << "Moreau::convert (OneStepIntegrator* osi)" << endl;
   Moreau* moreau = dynamic_cast<Moreau*>(osi);
   return moreau;
-}
-
-// --- Default constructor ---
-Moreau::Moreau(): OneStepIntegrator(), W(NULL), isWAllocatedIn(false), theta(0.1)
-{
-  integratorType = MOREAU_INTEGRATOR;
 }

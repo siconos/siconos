@@ -56,3 +56,23 @@ Adams::Adams(): OneStepIntegrator(), r(-1)
 {
   integratorType = ADAMS_INTEGRATOR;
 }
+
+void Adams::initialize()
+{}
+
+void Adams::computeFreeState()
+{
+  IN("Adams::computeFreeState\n");
+  integrate();
+  OUT("Adams::computeFreeState\n");
+}
+
+void Adams::integrate()
+{
+  IN("Adams::integrate\n");
+  //tryfunction(ds->getVectorFieldPtr());
+  OUT("Adams::integrate\n");
+}
+
+void Adams::updateState()
+{}

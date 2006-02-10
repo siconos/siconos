@@ -26,6 +26,7 @@
 #include "OneStepIntegratorXML.h"
 #include "Strategy.h"
 #include "SiconosConst.h"
+#include "SiconosNumerics.h"
 #include "check.h"
 #include <iostream>
 #include <vector>
@@ -44,28 +45,56 @@ class OneStepIntegratorXML;
  *  \version 1.0
  *  \date (Creation) Apr 26, 2004
  *
+ * !!! This is a virtual class, interface for some specific integrators !!!
  *
+ * At the time, available integrators are: Moreau, LSodar and Adams.
  *
  */
 class OneStepIntegrator
 {
+protected:
+
+  // -- Members --
+  /** type of the Integrator */
+  std::string integratorType;
+
+  /** The DynamicalSystem to integrate */
+  DynamicalSystem *ds;
+
+  /** size of the memory for the integrator */
+  int sizeMem;
+
+  /** The time discretisation */
+  TimeDiscretisation *timeDiscretisation;
+
+  /** the corresponding XML object */
+  OneStepIntegratorXML *integratorXml;
+
+  // -- Default constructor --
+  /** \fn OneStepIntegrator()
+   *  \brief default constructor
+   */
+  OneStepIntegrator();
+
 public:
 
   /** \fn OneStepIntegrator(OneStepIntegratorXML*)
    *  \brief constructor from xml file
-   *  \param OneStepIntegratorXML* : the XML object corresponding
+   *  \param OneStepIntegratorXML* : the corresponding XML object
    */
   OneStepIntegrator(OneStepIntegratorXML*);
 
   /** \fn OneStepIntegrator(TimeDiscretisation*, DynamicalSystem* )
    *  \brief constructor from a minimum set of data
    *  \param TimeDiscretisation* : the TimeDiscretisation of the OneStepIntegrator
-   *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
+   *  \param DynamicalSystem* : the DynamicalSystem to be integrated
    */
   OneStepIntegrator(TimeDiscretisation*, DynamicalSystem*);
 
-  //OneStepIntegrator(OneStepIntegratorXML*,TimeDiscretisation*, DynamicalSystem* );
 
+  /** \fn ~OneStepIntegrator()
+   *  \brief destructor
+   */
   virtual ~OneStepIntegrator();
 
   // --- GETTERS/SETTERS ---
@@ -99,27 +128,27 @@ public:
 
   /** \fn void setDynamicalSystemPtr(DynamicalSystem*)
    *  \brief set the DynamicalSystem of this Integrator
-   *  \param a pointer on DynamicalSystem
+   *  \param a pointer to a DynamicalSystem
    */
   inline void setDynamicalSystemPtr(DynamicalSystem* newDs)
   {
     ds = newDs;
   };
 
-  /** \fn const int getSizeMem() const
+  /** \fn const unsigned int getSizeMem() const
    *  \brief get sizeMem value
-   *  \return an int
+   *  \return an unsigned int
    */
-  inline const int getSizeMem() const
+  inline const unsigned int getSizeMem() const
   {
     return sizeMem;
   };
 
-  /** \fn void setSizeMem(const int&)
+  /** \fn void setSizeMem(const unsigned int&)
    *  \brief set sizeMem
-   *  \param a ref on an int
+   *  \param an unsigned int
    */
-  inline void setSizeMem(const int& newValue)
+  inline void setSizeMem(const unsigned int& newValue)
   {
     sizeMem = newValue;
   };
@@ -166,14 +195,14 @@ public:
   /** \fn void initialize()
    *  \brief initialise the integrator
    */
-  virtual void initialize();
+  virtual void initialize() = 0;
 
   /** \fn void nextStep()
-    *  \brief prepares the DynamicalSystem for the next time step, push x and xDot in Memory
-    *  \param to be defined
-    *  \exception to be defined
-    *  \return void
-    */
+   *  \brief prepares the DynamicalSystem for the next time step, push x and xDot in Memory
+   *  \param to be defined
+   *  \exception to be defined
+   *  \return void
+   */
   virtual void nextStep();
 
   /** \fn void computeFreeState()
@@ -181,17 +210,17 @@ public:
    *  \exception RuntimeException if the integration method for this type of DS is not implemented
    *  \return void
    */
-  virtual void computeFreeState();
+  virtual void computeFreeState() = 0;
 
   /** \fn void integrate()
    *  \brief not implemented
    */
-  virtual void integrate();
+  virtual void integrate() = 0;
 
   /** \fn void updateState()
    *  \brief update the state of the DynamicalSystem attached to this Integrator
    */
-  virtual void updateState();
+  virtual void updateState() = 0;
 
   /** \fn void display()
    *  \brief print the data to the screen
@@ -203,30 +232,6 @@ public:
    *  \exception RuntimeException
    */
   virtual void saveIntegratorToXML();
-
-protected:
-
-  // -- Default constructor --
-  /** \fn OneStepIntegrator()
-   *  \brief default constructor
-   */
-  OneStepIntegrator();
-
-  // -- Members --
-  /** type of the Integrator */
-  std::string integratorType;
-
-  /** contains the DynamicalSystem for this Integrator */
-  DynamicalSystem *ds;
-
-  /** size of the memory for the integrator */
-  int sizeMem;
-
-  /** contains the data of the time discretisation */
-  TimeDiscretisation *timeDiscretisation;
-
-  /** the XML object linked to the OneStepIntegrator to read XML data */
-  OneStepIntegratorXML *integratorXml;
 
 };
 

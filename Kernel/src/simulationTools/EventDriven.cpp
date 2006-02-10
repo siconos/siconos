@@ -23,26 +23,18 @@ using namespace std;
 // --- Default constructor ---
 EventDriven::EventDriven(): Strategy()
 {
-  strategyType = EVENTDRIVEN_STRATEGY;
+  strategyType = "EventDriven";
 }
 
 // --- XML constructor ---
 EventDriven::EventDriven(StrategyXML* strxml, Model *newModel): Strategy(strxml, newModel)
 {
-  strategyType = EVENTDRIVEN_STRATEGY;
+  strategyType = "EventDriven";
 }
 
 // --- Destructor ---
 EventDriven::~EventDriven()
 {}
-
-void EventDriven::createStrategy(StrategyXML * newStrategyXML, Model * newModel)
-{
-  strategyxml = NULL;
-  strategyType = EVENTDRIVEN_STRATEGY;
-  model = newModel;
-}
-
 
 EventDriven* EventDriven::convert(Strategy *str)
 {

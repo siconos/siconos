@@ -277,9 +277,8 @@ vector<unsigned int> Topology::computeIndexMin(Interaction * inter)
 
   // loop over various non smooth law types
   if (nslawType == COMPLEMENTARITYCONDITIONNSLAW)
-  {
     indexMin.resize(sizeInter, 0);
-  }
+
   else if (nslawType == NEWTONIMPACTNSLAW)
     indexMin.resize(sizeInter, 1);
 

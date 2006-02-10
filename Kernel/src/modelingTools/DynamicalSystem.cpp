@@ -124,7 +124,6 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
       else
         *T = dsxml->getTMatrix();
     }
-
     // optional xml loading for u
     if (dsxml->hasU())
     {
@@ -163,7 +162,6 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
     }
     else
       setVectorFieldFunction("DefaultPlugin.so", "vectorField");
-
     // JacobianX
     if (dsxml->hasComputeJacobianXPlugin() == true)
     {

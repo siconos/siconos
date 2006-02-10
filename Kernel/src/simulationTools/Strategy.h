@@ -33,9 +33,6 @@
 #include <vector>
 #include <deque>
 
-const std::string EVENTDRIVEN_STRATEGY = "EventDriven";
-const std::string TIMESTEPPING_STRATEGY = "TimeStepping";
-
 class Model;
 class OneStepIntegrator;
 class OneStepNSProblem;
@@ -48,10 +45,38 @@ class StrategyXML;
  *  \version 1.0
  *  \date (Crestion) Apr 26, 2004
  *
+ * !!! This is an abstract class !!!
+ *
+ * The to present available strategies are time stepping and event driven. See derived classes for more details.
  *
  */
 class Strategy
 {
+protected:
+
+  /** the type of the Strategy */
+  std::string strategyType;
+
+  /** the time discretisation scheme */
+  TimeDiscretisation *timeDiscretisation;
+
+  /** the dynamical systems integrators */
+  std::vector<OneStepIntegrator*> integratorVector;
+
+  /** the non smooth problem */
+  OneStepNSProblem *nsProblem;
+
+  /** the XML object linked to the Strategy to read XML data */
+  StrategyXML *strategyxml;
+
+  /** A link to the Model which contains the Strategy */
+  Model *model;
+
+  /** Flags to check wheter pointers were allocated in the present class constructors or not */
+  bool isTimeDiscretisationAllocatedIn;
+  bool isNSProblemAllocatedIn;
+  std::deque<bool> isIntegratorVectorAllocatedIn;
+
 public:
 
   /** \fn Strategy()
@@ -126,6 +151,9 @@ public:
    */
   virtual ~Strategy();
 
+  /** \fn isStrategyComplete()
+   *  \brief test if all strategy members are complete or not.
+   */
   bool isStrategyComplete() const;
 
   // GETTERS/SETTERS
@@ -347,30 +375,6 @@ public:
    */
   bool hasDynamicalSystemIntegrator(DynamicalSystem* ds) const ;
 
-protected:
-
-  /** the name of the type of the Strategy */
-  std::string strategyType;
-
-  /** contains the data of the time discretisation */
-  TimeDiscretisation *timeDiscretisation;
-
-  /** contains the integrators to integre the DS */
-  std::vector<OneStepIntegrator*> integratorVector;
-
-  /** contains the type of resolution */
-  OneStepNSProblem *nsProblem;
-
-  /** the XML object linked to the Strategy to read XML data */
-  StrategyXML *strategyxml;
-
-  /** A link to the Model which contains the Strategy */
-  Model *model;
-
-  /** Flags to check wheter pointers were allocated in class constructors or not */
-  bool isTimeDiscrAllocatedIn;
-  bool isNSPAllocatedIn;
-  std::deque<bool> isIntegratorVectorAllocatedIn;
 };
 
 #endif // STRATEGY_H

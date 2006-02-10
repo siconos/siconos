@@ -32,9 +32,9 @@
 using namespace std;
 
 // --- Default constructor ---
-Strategy::Strategy(): strategyType("none"), timeDiscretisation(NULL), nsProblem(NULL),
+Strategy::Strategy(): strategyType("undefined"), timeDiscretisation(NULL), nsProblem(NULL),
   strategyxml(NULL), model(NULL),
-  isTimeDiscrAllocatedIn(false), isNSPAllocatedIn(false)
+  isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
   isStrategyComplete();
 }
@@ -42,59 +42,59 @@ Strategy::Strategy(): strategyType("none"), timeDiscretisation(NULL), nsProblem(
 // --- Constructors from a given set of data ---
 
 Strategy::Strategy(TimeDiscretisation* newTd, vector<OneStepIntegrator*> newOsiVector, OneStepNSProblem* newNspb, Model* newModel):
-  strategyType("none"), timeDiscretisation(newTd), integratorVector(newOsiVector), nsProblem(newNspb), strategyxml(NULL), model(newModel),
-  isTimeDiscrAllocatedIn(false), isNSPAllocatedIn(false)
+  strategyType("undefined"), timeDiscretisation(newTd), integratorVector(newOsiVector), nsProblem(newNspb), strategyxml(NULL), model(newModel),
+  isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
   isStrategyComplete();
 }
 
 Strategy::Strategy(TimeDiscretisation* newTd, vector<OneStepIntegrator*> newOsiVector, Model* newModel):
-  strategyType("none"), timeDiscretisation(newTd), integratorVector(newOsiVector), nsProblem(NULL), strategyxml(NULL), model(newModel),
-  isTimeDiscrAllocatedIn(false), isNSPAllocatedIn(false)
+  strategyType("undefined"), timeDiscretisation(newTd), integratorVector(newOsiVector), nsProblem(NULL), strategyxml(NULL), model(newModel),
+  isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
   isStrategyComplete();
 }
 
 Strategy::Strategy(TimeDiscretisation* newTd, OneStepNSProblem* newNspb, Model* newModel):
-  strategyType("none"), timeDiscretisation(newTd), nsProblem(newNspb), strategyxml(NULL), model(newModel),
-  isTimeDiscrAllocatedIn(false), isNSPAllocatedIn(false)
+  strategyType("undefined"), timeDiscretisation(newTd), nsProblem(newNspb), strategyxml(NULL), model(newModel),
+  isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
   isStrategyComplete();
 }
 
 Strategy::Strategy(TimeDiscretisation* newTd, Model* newModel):
-  strategyType("none"), timeDiscretisation(newTd), nsProblem(NULL), strategyxml(NULL), model(newModel),
-  isTimeDiscrAllocatedIn(false), isNSPAllocatedIn(false)
+  strategyType("undefined"), timeDiscretisation(newTd), nsProblem(NULL), strategyxml(NULL), model(newModel),
+  isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
   isStrategyComplete();
 }
 
 Strategy::Strategy(vector<OneStepIntegrator*> newOsiVector, OneStepNSProblem* newNspb, Model* newModel):
-  strategyType("none"), timeDiscretisation(NULL), integratorVector(newOsiVector), nsProblem(newNspb), strategyxml(NULL), model(newModel),
-  isTimeDiscrAllocatedIn(false), isNSPAllocatedIn(false)
+  strategyType("undefined"), timeDiscretisation(NULL), integratorVector(newOsiVector), nsProblem(newNspb), strategyxml(NULL), model(newModel),
+  isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
   isStrategyComplete();
 }
 
 Strategy::Strategy(vector<OneStepIntegrator*> newOsiVector, Model* newModel):
-  strategyType("none"), timeDiscretisation(NULL), integratorVector(newOsiVector),
+  strategyType("undefined"), timeDiscretisation(NULL), integratorVector(newOsiVector),
   nsProblem(NULL), strategyxml(NULL), model(newModel),
-  isTimeDiscrAllocatedIn(false), isNSPAllocatedIn(false)
+  isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
   isStrategyComplete();
 }
 
 Strategy::Strategy(OneStepNSProblem* newNspb, Model* newModel):
-  strategyType("none"), timeDiscretisation(NULL), nsProblem(newNspb), strategyxml(NULL), model(newModel),
-  isTimeDiscrAllocatedIn(false), isNSPAllocatedIn(false)
+  strategyType("undefined"), timeDiscretisation(NULL), nsProblem(newNspb), strategyxml(NULL), model(newModel),
+  isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
   isStrategyComplete();
 }
 
 // --- xml constructor ---
-Strategy::Strategy(StrategyXML* strxml, Model *newModel): strategyType("none"), timeDiscretisation(NULL), nsProblem(NULL),
+Strategy::Strategy(StrategyXML* strxml, Model *newModel): strategyType("undefined"), timeDiscretisation(NULL), nsProblem(NULL),
   strategyxml(strxml), model(newModel),
-  isTimeDiscrAllocatedIn(true), isNSPAllocatedIn(false)
+  isTimeDiscretisationAllocatedIn(true), isNSProblemAllocatedIn(false)
 {
   IN("Strategy::xml constructor\n");
   if (strategyxml != 0)
@@ -180,7 +180,7 @@ Strategy::Strategy(StrategyXML* strxml, Model *newModel): strategyType("none"), 
         //      nsProblem->setStrategy(this);
         //    }
         else RuntimeException::selfThrow("Strategy::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
-        isNSPAllocatedIn = true;
+        isNSProblemAllocatedIn = true;
       }
     }
     isStrategyComplete();
@@ -192,12 +192,12 @@ Strategy::Strategy(StrategyXML* strxml, Model *newModel): strategyType("none"), 
 // --- Destructor ---
 Strategy::~Strategy()
 {
-  if (isTimeDiscrAllocatedIn)
+  if (isTimeDiscretisationAllocatedIn)
   {
     delete timeDiscretisation;
     timeDiscretisation = NULL;
   }
-  if (isNSPAllocatedIn) delete nsProblem;
+  if (isNSProblemAllocatedIn) delete nsProblem;
   nsProblem = NULL;
   if (integratorVector.size() > 0)
   {
@@ -227,16 +227,16 @@ bool Strategy::isStrategyComplete() const
 
 void Strategy::setTimeDiscretisationPtr(TimeDiscretisation* td)
 {
-  if (isTimeDiscrAllocatedIn) delete timeDiscretisation;
+  if (isTimeDiscretisationAllocatedIn) delete timeDiscretisation;
   timeDiscretisation = td;
-  isTimeDiscrAllocatedIn = false;
+  isTimeDiscretisationAllocatedIn = false;
 }
 
 void Strategy::setOneStepNSProblemPtr(OneStepNSProblem* nspb)
 {
-  if (isNSPAllocatedIn) delete nsProblem;
+  if (isNSProblemAllocatedIn) delete nsProblem;
   nsProblem = nspb;
-  isNSPAllocatedIn = false;
+  isNSProblemAllocatedIn = false;
 }
 
 void Strategy::setOneStepIntegrators(const vector<OneStepIntegrator*> vOSI)

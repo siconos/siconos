@@ -33,6 +33,15 @@
  */
 class Adams : public OneStepIntegrator
 {
+private:
+  /** \fn Adams()
+   *  \brief default constructor
+   */
+  Adams();
+
+  /**  */
+  int r;
+
 public:
 
   /** \fn Adams(OneStepIntegratorXML*)
@@ -67,21 +76,32 @@ public:
     r = newR;
   }
 
+  /** \fn void initialize()
+   *  \brief initialise the integrator
+   */
+  void initialize();
+
+  /** \fn void computeFreeState()
+   *   \brief compute the free state of the dynamical system
+   */
+  void computeFreeState();
+
+  /** \fn void integrate()
+   *   \brief integrates the dynamical system
+   */
+  void integrate();
+
+  /** \fn void updateState()
+   *  \brief update the state of the DynamicalSystem attached to this Integrator
+   */
+  void updateState();
+
   /** \fn Adams* convert (OneStepIntegrator* osi)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param OneStepIntegrator* : the integrator which must be converted
    * \return a pointer on the integrator if it is of the right type, NULL otherwise
    */
   static Adams* convert(OneStepIntegrator* osi);
-
-private:
-  /** \fn Adams()
-   *  \brief default constructor
-   */
-  Adams();
-
-  /**  */
-  int r;
 
 };
 

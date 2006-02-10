@@ -48,8 +48,7 @@ Model::Model(char *xmlFile):
     author = modelxml->getAuthor();
     description = modelxml->getDescription();
     date = modelxml->getDate();
-    if (modelxml->hasXMLSchema())  xmlSchema = modelxml->getXMLSchema();
-    else xmlSchema = XML_SCHEMA;
+    xmlSchema = modelxml->getXMLSchema();
     // Memory allocation for nsds and strategy
     nsds = new NonSmoothDynamicalSystem(modelxml->getNonSmoothDynamicalSystemXML());
     if (modelxml->hasStrategy())
@@ -218,9 +217,9 @@ void Model::savePlatformToXML()
   {
     strat->getTimeDiscretisationPtr()->saveTimeDiscretisationToXML();
 
-    if (strat->getType() == TIMESTEPPING_STRATEGY)
+    if (strat->getType() == "TimeStepping")
       (static_cast<TimeStepping*>(strat))->saveStrategyToXML();
-    else if (strat->getType() == EVENTDRIVEN_STRATEGY)
+    else if (strat->getType() == "EventDriven")
       (static_cast<EventDriven*>(strat))->saveStrategyToXML();
     else RuntimeException::selfThrow("Model::savePlatformToXML - bad kind of Strategy");
   }
@@ -414,12 +413,12 @@ Strategy* Model::createStrategy(string type)
   if (isStrategyAllocatedIn) delete strat;
   isStrategyAllocatedIn = false;
   strat = NULL;
-  if (type == TIMESTEPPING_STRATEGY || type == "timestepping" || type == "Timestepping")
+  if (type == "TimeStepping")
   {
     strat = new TimeStepping(NULL, this);
     isStrategyAllocatedIn = true ;
   }
-  else if (type == EVENTDRIVEN_STRATEGY || type == "Eventdriven" || type == "eventdriven")
+  else if (type == "EventDriven")
   {
     strat = new EventDriven(NULL, this);
     isStrategyAllocatedIn = true ;

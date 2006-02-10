@@ -792,6 +792,7 @@ void FrictionContact::compute(const double& time)
     }
     else if (nspbType == "FrictionContact3D")
     {
+      Dim = Dim / 3; // in pfc_3D, Dim is the number of contact points.
       solvingMethod.pfc_3D.mu = static_cast<NewtonImpactFrictionNSL*>(currentInteraction->getNonSmoothLawPtr())->getMu();
       info = pfc_3D_solver(M->getArray(), q->getArray(), &Dim, &solvingMethod  , z->getArray(), w->getArray());
     }

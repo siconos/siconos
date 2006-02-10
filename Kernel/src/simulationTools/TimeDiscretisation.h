@@ -50,7 +50,7 @@ class Strategy;
  * 1 | \f$t_k\f$      => \f$T, nSteps, h\f$
  * 2 | \f$t_k,T\f$    => \f$nSteps, h\f$
  * 3 | \f$nSteps,h\f$ => \f$T,t_k\f$
- * 5 | \f$h,T$        => \f$nSteps,t_k\f$
+ * 4 | \f$h,T\f$      => \f$nSteps,t_k\f$
  * 5 | \f$nSteps,T\f$ => \f$h,t_k\f$
  * 6 |  all =>  none
  * any other case causes an exception.
@@ -169,6 +169,15 @@ public:
   inline const SimpleVector getTk() const
   {
     return *tk;
+  }
+
+  /** \fn  const double getTk(const unsigned int& k) const
+   *  \brief get the value of tk at step k
+   *  \return a double
+   */
+  inline const double getTk(const unsigned int & k) const
+  {
+    return (*tk)(k);
   }
 
   /** \fn SimpleVector* getTkPtr() const

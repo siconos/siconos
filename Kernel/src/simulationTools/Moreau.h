@@ -22,7 +22,7 @@
 #include "OneStepIntegrator.h"
 #include "MoreauXML.h"
 
-const int MOREAUSTEPSINMEMORY = 1;
+const unsigned int MOREAUSTEPSINMEMORY = 1;
 
 /** \class Moreau
  *  \brief It's a kind of single-step Integrator
@@ -35,6 +35,22 @@ const int MOREAUSTEPSINMEMORY = 1;
  */
 class Moreau : public OneStepIntegrator
 {
+private:
+
+  /** \fn Moreau()
+   *  \brief Default constructor
+   */
+  Moreau();
+
+  /** a specific matrix of the Moreau Integrator */
+  SiconosMatrix *W;
+
+  /** boolean indicator, to check whether W has been allocated in the present class or not */
+  bool isWAllocatedIn;
+
+  /** parameter of the theta-method */
+  double theta;
+
 public:
 
   /** \fn Moreau(OneStepIntegratorXML*,TimeDiscretisation*, DynamicalSystem* )
@@ -65,7 +81,7 @@ public:
    *  \brief get the value of W
    *  \return SiconosMatrix
    */
-  inline const SiconosMatrix getW(void) const
+  inline const SiconosMatrix getW() const
   {
     return *W;
   }
@@ -74,7 +90,7 @@ public:
    *  \brief get W
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getWPtr(void) const
+  inline SiconosMatrix* getWPtr() const
   {
     return W;
   }
@@ -83,21 +99,13 @@ public:
    *  \brief set the value of W to newValue
    *  \param SiconosMatrix newValue
    */
-  inline void setW(const SiconosMatrix& newValue)
-  {
-    *W = newValue;
-  }
+  void setW(const SiconosMatrix& newValue);
 
   /** \fn void setWPtr(SiconosMatrix* newPtr)
    *  \brief set W to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  inline void setWPtr(SiconosMatrix *newPtr)
-  {
-    if (isWAllocatedIn) delete W;
-    W = newPtr;
-    isWAllocatedIn = false;
-  }
+  void setWPtr(SiconosMatrix *newPtr);
 
   // -- theta --
 
@@ -172,18 +180,6 @@ public:
    */
   static Moreau* convert(OneStepIntegrator* osi);
 
-private:
-  /** \fn Moreau()
-   *  \brief Default constructor
-   */
-  Moreau();
-
-  /** a specific matrix of the Moreau Integrator */
-  SiconosMatrix *W;
-
-  bool isWAllocatedIn;
-  /** parameter of the theta method */
-  double theta;
 };
 
 #endif // MOREAU_H

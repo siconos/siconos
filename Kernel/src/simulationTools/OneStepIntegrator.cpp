@@ -20,7 +20,7 @@
 using namespace std;
 
 // --- Xml constructor ---
-OneStepIntegrator::OneStepIntegrator(OneStepIntegratorXML* osixml): integratorType("none"), ds(NULL), sizeMem(1), timeDiscretisation(NULL), integratorXml(osixml)
+OneStepIntegrator::OneStepIntegrator(OneStepIntegratorXML* osixml): integratorType("undefined"), ds(NULL), sizeMem(1), timeDiscretisation(NULL), integratorXml(osixml)
 {
   if (integratorXml != NULL)
   {
@@ -30,12 +30,16 @@ OneStepIntegrator::OneStepIntegrator(OneStepIntegratorXML* osixml): integratorTy
 }
 
 // --- Constructor from a minimum set of data ---
-OneStepIntegrator::OneStepIntegrator(TimeDiscretisation* td, DynamicalSystem* newDs): integratorType("none"), ds(newDs), sizeMem(1), timeDiscretisation(td), integratorXml(NULL)
+OneStepIntegrator::OneStepIntegrator(TimeDiscretisation* td, DynamicalSystem* newDs): integratorType("undefined"), ds(newDs), sizeMem(1), timeDiscretisation(td), integratorXml(NULL)
 {}
 
 // --- Destructor ---
 OneStepIntegrator::~OneStepIntegrator()
-{}
+{
+  timeDiscretisation = NULL;
+  ds = NULL;
+  integratorXml = NULL;
+}
 
 
 void OneStepIntegrator::initialize()
