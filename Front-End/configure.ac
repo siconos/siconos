@@ -28,7 +28,7 @@ dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(SICONOS-Front-end, 1.1.0)
 AC_CONFIG_SRCDIR([python/pySiconos.i])
-AC_CONFIG_HEADER([config.h])
+AM_CONFIG_HEADER([config.h])
 
 #Checks libtool
 AC_PROG_LIBTOOL
