@@ -1,4 +1,4 @@
-# Siconos version 1.1.0, Copyright INRIA 2005-2006.  
+# Siconos version 1.1.1, Copyright INRIA 2005-2006.  
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -29,6 +29,10 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 Notes:
 
 Changes:
+2006-02-13   Vincent Acary <vincent.acary@inrialpes.fr>
+
+	* /src/NSSpack/test/Makefile.am 
+	Use of the variable XFAIL_TESTS for tests expected failures
 
 2006-02-10   Franck Perignon <franck.perignon@inrialpes.fr> 
 	     Vincent Acary <vincent.acary@inrialpes.fr>
