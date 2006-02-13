@@ -20,18 +20,18 @@ dnl configure script for SICONOS
 dnl JB CHARLETY, 2005
 
 AC_PREREQ(2.57)
-AC_INIT(SICONOS, 1.1.0, siconos.gforge.inria.fr)
+AC_INIT(SICONOS, 1.1.1, siconos.gforge.inria.fr)
 
 dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_SYSTEM
-AM_INIT_AUTOMAKE(SICONOS, 1.1.0)
+AM_INIT_AUTOMAKE(SICONOS, 1.1.1)
 AC_CONFIG_SRCDIR([src/model/Model.h])
 AC_CONFIG_HEADER([config.h])
 
 # SO version of all siconos shared libraries
 SICONOS_SO_CURRENT=1
-SICONOS_SO_REVISION=0
-SICONOS_SO_AGE=0
+SICONOS_SO_REVISION=1
+SICONOS_SO_AGE=1
 AC_SUBST(SICONOS_SO_CURRENT)
 AC_SUBST(SICONOS_SO_REVISION)
 AC_SUBST(SICONOS_SO_AGE)

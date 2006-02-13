@@ -30,6 +30,11 @@ Notes:
 
 Changes:
 
+2006-02-13 Franck Perignon <franck.perignon@inrialpes.fr>
+                                                                                
+        * corrections in Moreau in order to handle u plug-in
+	  for linear DS. 
+
 2006-02-10 Franck Perignon <franck.perignon@inrialpes.fr>
                                                                                 
         * update Doxygen config file

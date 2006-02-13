@@ -20,7 +20,6 @@
 #define FrictionContact3D_H
 
 #include "FrictionContact.h"
-#include "FrictionContact3DXML.h"
 
 /** \class FrictionContact3D
  *  \brief This class is devoted to the formalization and the resolution of the
