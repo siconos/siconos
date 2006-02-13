@@ -90,43 +90,49 @@ extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int setComputeMassFunction(int nIdDs, char *libname, char *func);
+int sicSetComputeMassFunction(int nIdDs, char *libname, char *func);
 
 extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int setComputeNNLFunction(int nIdDs, char *libname, char *func);
+int sicSetComputeNNLFunction(int nIdDs, char *libname, char *func);
 
 extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int setComputeJacobianQNNLFunction(int nIdDs, char *libname, char *func);
+int sicSetComputeJacobianQNNLFunction(int nIdDs, char *libname, char *func);
 
 extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int setComputeJacobianVelocityNNLFunction(int nIdDs, char *libname, char *func);
+int sicSetComputeJacobianVelocityNNLFunction(int nIdDs, char *libname, char *func);
 
 extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int setComputeFIntFunction(int nIdDs, char *libname, char *func);
+int sicSetComputeJacobianVelocityFIntFunction(int nIdDs, char *libname, char *func);
 
 extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int setComputeJacobianQFIntFunction(int nIdDs, char *libname, char *func);
+int sicSetComputeFIntFunction(int nIdDs, char *libname, char *func);
 
 extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int setComputeFExtFunction(int nIdDs, char *libname, char *func);
+int sicSetComputeJacobianQFIntFunction(int nIdDs, char *libname, char *func);
+
+extern
+#ifdef __cplusplus
+"C"
+#endif /* __cplusplus */
+int sicSetComputeFExtFunction(int nIdDs, char *libname, char *func);
 
 
 extern

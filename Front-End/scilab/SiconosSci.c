@@ -1,4 +1,4 @@
-#include "SiconosApiSci.h"
+#include "SiconosSci.h"
 
 
 int sicLoadModelInterface(char *fname)
@@ -7,6 +7,10 @@ int sicLoadModelInterface(char *fname)
   static int dim1, dim2;
   static int dimo1 = 1, dimo2 = 1, st;
   static int ModelXmlFile;
+
+#ifdef _DEBUG
+  printf("sicLoadModelInterface\n");
+#endif
 
   /* Check number of inputs (rhs=1) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
@@ -36,6 +40,11 @@ int sicInitStrategyInterface(char *fname)
   static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
   static int dimo1 = 1, dimo2 = 1, st;
 
+#ifdef _DEBUG
+  printf("sicInitStrategyInterface\n");
+#endif
+
+
   /* Check number of inputs (rhs=1) and outputs (lhs=0) */
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
@@ -55,6 +64,10 @@ int sicTimeGetHInterface(char *fname)
   static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 2;
   static int dim1 = 1, dim2 = 1, H;
   static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicTimeGetHInterface\n");
+#endif
 
 
   /* Check number of inputs (rhs=1) and outputs (lhs=1) */
@@ -79,10 +92,14 @@ int sicTimeGetNInterface(char *fname)
   static int dim1 = 1, dim2 = 1, N;
   static int dimo1 = 1, dimo2 = 1, st;
 
+#ifdef _DEBUG
+  printf("sicTimeGetNInterface\n");
+#endif
+
+
   /* Check number of inputs (rhs=1) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
-
 
   CreateVar(1, "i", &dim1, &dim2, &N);
   CreateVar(2, "i", &dimo1, &dimo2, &st);
@@ -99,6 +116,10 @@ int sicTimeGetKInterface(char *fname)
   static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 2;
   static int dim1 = 1, dim2 = 1, K;
   static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicTimeGetKInterface\n");
+#endif
 
   /* Check number of inputs (rhs=1) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
@@ -122,6 +143,10 @@ int sicSTNextStepInterface(char *fname)
   static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
   static int dimo1 = 1, dimo2 = 1, st;
 
+#ifdef _DEBUG
+  printf("sicSTNextStepInterface\n");
+#endif
+
   /* Check number of inputs (rhs=1) and outputs (lhs=0) */
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
@@ -140,6 +165,10 @@ int sicSTComputeFreeStateInterface(char *fname)
 {
   static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
   static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicSTComputeFreeStateInterface\n");
+#endif
 
   /* Check number of inputs (rhs=1) and outputs (lhs=0) */
   CheckRhs(minrhs, maxrhs) ;
@@ -161,6 +190,10 @@ int sicSTcomputePbInterface(char *fname)
   static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
   static int dimo1 = 1, dimo2 = 1, st;
 
+#ifdef _DEBUG
+  printf("sicSTcomputePbInterface\n");
+#endif
+
   /* Check number of inputs (rhs=1) and outputs (lhs=0) */
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
@@ -180,6 +213,10 @@ int sicSTupdateStateInterface(char *fname)
   static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
   static int dimo1 = 1, dimo2 = 1, st;
 
+#ifdef _DEBUG
+  printf("sicSTupdateStateInterface\n");
+#endif
+
   /* Check number of inputs (rhs=1) and outputs (lhs=0) */
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
@@ -194,6 +231,52 @@ int sicSTupdateStateInterface(char *fname)
   return 0;
 }
 
+int sicSTnewtonSolveInterface(char *fname)
+{
+  int sicSTnewtonSolve(double criterion, int maxIter);
+  static int minrhs = 2, maxrhs = 2, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int criterion, maxIter;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicSTnewtonSolveInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=3) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get criterion (1, double)  */
+  GetRhsVar(1, "d", &dim1, &dim2, &criterion);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in  sicSTnewtonSolve (criterion has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get maxIter (2, int)  */
+  GetRhsVar(2, "i", &dim1, &dim2, &maxIter);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in  sicSTnewtonSolve (maxIter has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(3, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicSTnewtonSolve(*stk(criterion), *istk(maxIter));
+
+  /*  Return variable  */
+  LhsVar(1) = 3;
+
+  return 0;
+}
+
+
 int sicModelgetQInterface(char *fname)
 {
   static int minrhs = 2, maxrhs = 2, minlhs = 1, maxlhs = 2;
@@ -201,6 +284,11 @@ int sicModelgetQInterface(char *fname)
   static int dimIndexVec1 = 1, dimIndexVec2 = 1, IndexVec;
   static int dimVal1 = 1, dimVal2 = 1, Val;
   static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicModelgetQInterface\n");
+#endif
+
 
   /* Check number of inputs (rhs=1) and outputs (lhs=0) */
   CheckRhs(minrhs, maxrhs) ;
@@ -211,7 +299,7 @@ int sicModelgetQInterface(char *fname)
   GetRhsVar(1, "i", &dimIndexDS1, &dimIndexDS2, &IndexDS);
   if (!(dimIndexDS1 * dimIndexDS2 > 0))
   {
-    sciprint("Wrong parameter in ssicModelgetQ (number IndexDS has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicModelgetQ (number IndexDS has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -219,7 +307,7 @@ int sicModelgetQInterface(char *fname)
   GetRhsVar(2, "i", &dimIndexVec1, &dimIndexVec2, &IndexVec);
   if (!(dimIndexVec1 * dimIndexVec2 > 0))
   {
-    sciprint("Wrong parameter in ssicModelgetQ (number IndexVector has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicModelgetQ (number IndexVector has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -244,6 +332,11 @@ int sicLagrangianLinearTIDSInterface(char *fname)
   static int dim1, dim2;
   static int nDof, Q0, Vel0, Mass, K, C, libname, fctname;
   static int dimo1 = 1, dimo2 = 1, st;
+
+
+#ifdef _DEBUG
+  printf("sicLagrangianLinearTIDSInterface\n");
+#endif
 
   /* Check number of inputs (rhs=8) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
@@ -334,12 +427,444 @@ int sicLagrangianLinearTIDSInterface(char *fname)
   return 0;
 }
 
+int sicLagrangianDSInterface(char *fname)
+{
+  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int nDof, Q0, Vel0;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicLagrangianDSInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=3) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get nIdInteraction (1, int)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &nDof);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicLagrangianDS (nDof has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get Q0 (2, double vector)  */
+  GetRhsVar(2, "d", &dim1, &dim2, &Q0);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicLagrangianDS (Q0 has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get Vel0 (3, double vector)  */
+  GetRhsVar(3, "d", &dim1, &dim2, &Vel0);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicLagrangianDS (Vel0 has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(4, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicLagrangianDS(*istk(nDof), stk(Q0), stk(Vel0));
+
+  /*  Return variable  */
+  LhsVar(1) = 4;
+
+
+  return 0;
+}
+
+
+
+int sicSetMassInterface(char *fname)
+{
+  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int nId, libname, func;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicSetMassInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=3) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get nIdInteraction (1, int)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &nId);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicSetMass (nId has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get libname (2, char* )  */
+  GetRhsVar(2, "c", &dim1, &dim2, &libname);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicSetMass ( libname has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get func (3, char* )  */
+  GetRhsVar(3, "c", &dim1, &dim2, &func);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicSetMass (func has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(4, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicSetComputeMassFunction(*istk(nId), cstk(libname), cstk(func));
+
+  /*  Return variable  */
+  LhsVar(1) = 4;
+
+  return 0;
+}
+
+int sicSetJacQNNLInterface(char *fname)
+{
+  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int nId, libname, func;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicSetJacQNNLInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=3) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get nIdInteraction (1, int)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &nId);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicSetJacQNNL (nId has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get libname (2, char* )  */
+  GetRhsVar(2, "c", &dim1, &dim2, &libname);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in ssicSetJacQNNL ( libname has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get func (3, char* )  */
+  GetRhsVar(3, "c", &dim1, &dim2, &func);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicSetJacQNNL (func has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(4, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicSetComputeJacobianQNNLFunction(*istk(nId), cstk(libname), cstk(func));
+
+  /*  Return variable  */
+  LhsVar(1) = 4;
+
+  return 0;
+}
+
+int sicSetJacVelNNLInterface(char *fname)
+{
+  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int nId, libname, func;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf(" sicSetJacVelNNLInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=3) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get nIdInteraction (1, int)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &nId);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicSetJacVelNNL (nId has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get libname (2, char* )  */
+  GetRhsVar(2, "c", &dim1, &dim2, &libname);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicSetJacVelNNL ( libname has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get func (3, char* )  */
+  GetRhsVar(3, "c", &dim1, &dim2, &func);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicSetJacVelNNL (func has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(4, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) =  sicSetComputeJacobianVelocityNNLFunction(*istk(nId), cstk(libname), cstk(func));
+
+  /*  Return variable  */
+  LhsVar(1) = 4;
+
+  return 0;
+}
+
+int sicSetFIntInterface(char *fname)
+{
+  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int nId, libname, func;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicSetFIntInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=3) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get nIdInteraction (1, int)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &nId);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicSetFInt (nId has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get libname (2, char* )  */
+  GetRhsVar(2, "c", &dim1, &dim2, &libname);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicSetFInt (libname has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get func (3, char* )  */
+  GetRhsVar(3, "c", &dim1, &dim2, &func);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicSetFInt (func has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(4, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicSetComputeFIntFunction(*istk(nId), cstk(libname), cstk(func));
+
+  /*  Return variable  */
+  LhsVar(1) = 4;
+
+  return 0;
+}
+
+int sicSetJacQFIntInterface(char *fname)
+{
+  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int nId, libname, func;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicSetJacQFIntInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=3) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get nIdInteraction (1, int)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &nId);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicSetJacQFInt (nId has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get libname (2, char* )  */
+  GetRhsVar(2, "c", &dim1, &dim2, &libname);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicSetJacQFInt ( libname has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get func (3, char* )  */
+  GetRhsVar(3, "c", &dim1, &dim2, &func);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicSetJacQFInt (func has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(4, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) =  sicSetComputeJacobianQFIntFunction(*istk(nId), cstk(libname), cstk(func));
+
+  /*  Return variable  */
+  LhsVar(1) = 4;
+
+  return 0;
+}
+
+
+int sicSetJacVelFIntInterface(char *fname)
+{
+  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int nId, libname, func;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicSetJacVelFIntInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=3) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get nIdInteraction (1, int)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &nId);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicSetJacVelFInt (nId has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get libname (2, char* )  */
+  GetRhsVar(2, "c", &dim1, &dim2, &libname);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicSetJacVelFInt ( libname has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get func (3, char* )  */
+  GetRhsVar(3, "c", &dim1, &dim2, &func);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicSetJacVelFInt (func has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(4, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicSetComputeJacobianVelocityFIntFunction(*istk(nId), cstk(libname), cstk(func));
+
+  /*  Return variable  */
+  LhsVar(1) = 4;
+
+  return 0;
+}
+int sicSetFExtInterface(char *fname)
+{
+  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int nId, libname, func;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicSetFExtInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=3) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get nIdInteraction (1, int)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &nId);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicSetFExt  (nId has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get libname (2, char* )  */
+  GetRhsVar(2, "c", &dim1, &dim2, &libname);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in ssicSetFExt ( libname has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get func (3, char* )  */
+  GetRhsVar(3, "c", &dim1, &dim2, &func);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicSetFExt (func has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(4, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicSetComputeFExtFunction(*istk(nId), cstk(libname), cstk(func));
+
+  /*  Return variable  */
+  LhsVar(1) = 4;
+
+  return 0;
+}
+
+
 int sicInteractionInterface(char *fname)
 {
   static int minrhs = 4, maxrhs = 4, minlhs = 1, maxlhs = 1;
   static int dim1, dim2;
   static int name, nbDS, DS, nbRel;
   static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicInteractionInterface\n");
+#endif
 
   /* Check number of inputs (rhs=4) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
@@ -400,6 +925,10 @@ int sicLagrangianLinearRInterface(char *fname)
   static int nIdInteraction, H, b;
   static int dimo1 = 1, dimo2 = 1, st;
 
+#ifdef _DEBUG
+  printf("sicLagrangianLinearRInterface\n");
+#endif
+
   /* Check number of inputs (rhs=3) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
@@ -450,6 +979,10 @@ int sicNewtonImpactLawNSLInterface(char *fname)
   static int nIdInteraction, e;
   static int dimo1 = 1, dimo2 = 1, st;
 
+#ifdef _DEBUG
+  printf("sicNewtonImpactLawNSL\n");
+#endif
+
   /* Check number of inputs (rhs=3) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
@@ -458,7 +991,7 @@ int sicNewtonImpactLawNSLInterface(char *fname)
   GetRhsVar(1, "i", &dim1, &dim2, &nIdInteraction);
   if (!(dim1 * dim2 == 1))
   {
-    sciprint("Wrong parameter in sicNewtonImpactLawNSLInterface (nIdInteraction has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicNewtonImpactLawNSL (nIdInteraction has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -467,7 +1000,7 @@ int sicNewtonImpactLawNSLInterface(char *fname)
   GetRhsVar(2, "d", &dim1, &dim2, &e);
   if (!(dim1 * dim2 == 1))
   {
-    sciprint("Wrong parameter in sicNewtonImpactLawNSLInterface has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicNewtonImpactLawNSL has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -489,6 +1022,10 @@ int sicNonSmoothDynamicalSystemInterface(char *fname)
   static int dim1, dim2;
   static int isBVP;
   static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicNonSmoothDynamicalSystemInterface\n");
+#endif
 
   /* Check number of inputs (rhs=1) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
@@ -521,6 +1058,10 @@ int sicModelInterface(char *fname)
   static int dim1, dim2;
   static int isBVP, t0, T;
   static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicModelInterface\n");
+#endif
 
   /* Check number of inputs (rhs=3) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
@@ -563,6 +1104,10 @@ int sicStrategyTimeSteppingInterface(char *fname)
   static int h, theta, maxiter, tolerance;
   static int dimo1 = 1, dimo2 = 1, st;
 
+#ifdef _DEBUG
+  printf("sicStrategyTimeSteppingInterface\n");
+#endif
+
   /* Check number of inputs (rhs=3) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
@@ -595,6 +1140,10 @@ int sicOneStepIntegratorMoreauInterface(char *fname)
   static int theta;
   static int dimo1 = 1, dimo2 = 1, st;
 
+#ifdef _DEBUG
+  printf("sicOneStepIntegratorMoreauInterface\n");
+#endif
+
   /* Check number of inputs (rhs=1) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
@@ -625,6 +1174,10 @@ int sicOneStepNSProblemLCPInterface(char *fname)
   static int dim1, dim2;
   static int maxiter, tolerance;
   static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicOneStepNSProblemLCPInterface\n");
+#endif
 
   /* Check number of inputs (rhs=2) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
@@ -665,6 +1218,10 @@ int sicCleanInterface(char *fname)
   static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
   static int dimo1 = 1, dimo2 = 1, st;
 
+#ifdef _DEBUG
+  printf("sicCleanInterface\n");
+#endif
+
   /* Check number of inputs (rhs=1) and outputs (lhs=0) */
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
@@ -684,54 +1241,79 @@ int sicCleanInterface(char *fname)
  * Gateways for Scilab
  ***************************************************/
 
+/*
 int C2F(SiconosGateway)()
 {
+  int Rhs0;
+
   gate_function function[] = {sicLoadModelInterface,
-                              sicInitStrategyInterface,
-                              sicTimeGetHInterface,
-                              sicTimeGetNInterface,
-                              sicTimeGetKInterface,
-                              sicSTNextStepInterface,
-                              sicSTComputeFreeStateInterface,
-                              sicSTcomputePbInterface,
-                              sicSTupdateStateInterface,
-                              sicModelgetQInterface,
-                              sicLagrangianLinearTIDSInterface,
-                              sicInteractionInterface,
-                              sicLagrangianLinearRInterface,
-                              sicNewtonImpactLawNSLInterface,
-                              sicNonSmoothDynamicalSystemInterface,
-                              sicModelInterface,
-                              sicStrategyTimeSteppingInterface,
-                              sicOneStepIntegratorMoreauInterface,
-                              sicOneStepNSProblemLCPInterface,
-                              sicCleanInterface
+            sicInitStrategyInterface,
+            sicTimeGetHInterface,
+            sicTimeGetNInterface,
+            sicTimeGetKInterface,
+            sicSTNextStepInterface,
+            sicSTComputeFreeStateInterface,
+            sicSTcomputePbInterface,
+            sicSTupdateStateInterface,
+            sicSTnewtonSolveInterface,
+            sicModelgetQInterface,
+            sicLagrangianLinearTIDSInterface,
+            sicLagrangianDSInterface,
+            sicSetMassInterface,
+            sicSetJacQNNLInterface,
+            sicSetJacVelNNLInterface,
+            sicSetFIntInterface,
+            sicSetJacQFIntInterface,
+            sicSetFExtInterface,
+            sicInteractionInterface,
+            sicLagrangianLinearRInterface,
+            sicNewtonImpactLawNSLInterface,
+            sicNonSmoothDynamicalSystemInterface,
+            sicModelInterface,
+            sicStrategyTimeSteppingInterface,
+            sicOneStepIntegratorMoreauInterface,
+            sicOneStepNSProblemLCPInterface,
+            sicCleanInterface
                              };
 
   char *name[] = {"sicLoadModel",
-                  "sicInitStrategy",
-                  "sicTimeGetH",
-                  "sicTimeGetN",
-                  "sicTimeGetK",
-                  "sicSTNextStep",
-                  "sicSTComputeFreeState",
-                  "sicSTcomputePb",
-                  "sicSTupdateState",
-                  "sicModelgetQ"
-                  "sicLagrangianLinearTIDS",
-                  "sicInteraction",
-                  "sicLagrangianLinearR",
-                  "sicNewtonImpactLawNSL",
-                  "sicNonSmoothDynamicalSystem",
-                  "sicModel",
-                  "sicStrategyTimeStepping",
-                  "sicOneStepIntegratorMoreau",
-                  "sicOneStepNSProblemLCP",
-                  "sicClean"
-                 };
+      "sicInitStrategy",
+      "sicTimeGetH",
+      "sicTimeGetN",
+      "sicTimeGetK",
+      "sicSTNextStep",
+      "sicSTComputeFreeState",
+      "sicSTcomputePb",
+      "sicSTupdateState",
+      "sicSTnewtonSolve",
+      "sicModelgetQ",
+      "sicLagrangianLinearTIDS",
+      "sicLagrangianDS",
+      "sicSetMass",
+      "sicSetJacQNNL",
+      "sicSetJacVelNNL",
+      "sicSetFInt",
+      "sicSetJacQFInt",
+      "sicSetFExt",
+      "sicInteraction",
+      "sicLagrangianLinearR",
+      "sicNewtonImpactLawNSL",
+      "sicNonSmoothDynamicalSystem",
+      "sicModel",
+      "sicStrategyTimeStepping",
+      "sicOneStepIntegratorMoreau",
+      "sicOneStepNSProblemLCP",
+      "sicClean"
+  };
 
+  Rhs0=Rhs;
   Rhs = Max(0, Rhs);
-  sci_gateway(name[Fin - 1], function[Fin - 1]);
+
+#ifdef _DEBUG
+  printf("SiconosGateway %d %d %d functions %s \n",Rhs,Rhs0,Fin-1,name[Fin-1]);
+#endif
+  sci_gateway(name[Fin-1], function[Fin-1]);
   return 0;
 }
 
+*/
