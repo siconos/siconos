@@ -921,6 +921,15 @@ public:
    */
   virtual void computeU(const double&);
 
+  /** \fn static void computeU (const double&)
+   *  \brief function to compute u when x and xDot are not those of the current object.
+   * \param double time : current time
+   * \param SiconosVector* : pointer to a x value
+   * \param SiconosVector* : pointer to xDot value
+   *  \exception RuntimeException
+   */
+  virtual void computeU(const double&,  SiconosVector* xx, SiconosVector* xxDot);
+
   /** \fn static void computeT ()
    *  \brief Default function to compute T
    *  \exception RuntimeException

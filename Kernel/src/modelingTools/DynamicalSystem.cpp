@@ -727,6 +727,7 @@ void  DynamicalSystem::setUSize(const unsigned int& newUSize)
   uSize = newUSize;
   u = new SimpleVector(uSize);
   isControlAllocatedIn[0] = true;
+  u->zero();
 }
 
 // Three steps to set u:
@@ -867,6 +868,7 @@ void DynamicalSystem::setComputeUFunction(const string& pluginPath, const string
   {
     u = new SimpleVector(uSize);
     isControlAllocatedIn[0] = true;
+    u->zero();
   }
 
   computeUPtr = NULL;
@@ -887,6 +889,7 @@ void DynamicalSystem::setComputeTFunction(const string& pluginPath, const string
   {
     T = new SiconosMatrix(n, uSize);
     isControlAllocatedIn[1] = true;
+    T->zero();
   }
 
   computeTPtr = NULL;
@@ -952,6 +955,18 @@ void DynamicalSystem::computeU(const double& time)
   unsigned int sizeX = x->size();
   SimpleVector* param = parametersList0[2];
   computeUPtr(&uSize, &sizeX, &time, &(*x)(0), &(*xDot)(0), &(*u)(0), &(*param)(0));
+}
+
+void DynamicalSystem::computeU(const double& time, SiconosVector* xx, SiconosVector* xxDot)
+{
+  if (computeUPtr == NULL)
+    RuntimeException::selfThrow("computeU() is not linked to a plugin function");
+  if (u == NULL)
+    RuntimeException::selfThrow("computeU(), warning: u = NULL");
+
+  unsigned int sizeX = xx->size();
+  SimpleVector* param = parametersList0[2];
+  computeUPtr(&uSize, &sizeX, &time, &(*xx)(0), &(*xxDot)(0), &(*u)(0), &(*param)(0));
 }
 
 void DynamicalSystem::computeT()

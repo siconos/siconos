@@ -308,6 +308,14 @@ double* CompositeVector::getArray() const
   SiconosVectorException::selfThrow(" CompositeVector::getArray, should not be used for composite vector");
   return NULL;
 }
+
+void CompositeVector::zero()
+{
+  vector<SimpleVector*>::iterator it;
+  for (it = svref.begin(); it != svref.end(); ++it)
+    (*it)->zero();
+}
+
 //===================================================================================
 //          GENERIC INTERNAL OPERATORS
 //===================================================================================

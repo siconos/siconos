@@ -187,6 +187,11 @@ public:
    */
   void addPtr(SimpleVector*) ;
 
+  /** \fn void zero();
+   *  \brief set the values to 0.0
+   */
+  void zero();
+
   // generic internal operators
   CompositeVector &operator+=(const SiconosVector &) ;
   CompositeVector &operator-=(const SiconosVector &) ;

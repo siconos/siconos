@@ -179,6 +179,11 @@ public:
    */
   //virtual void add(const SiconosVector &) = 0 ;
 
+  /** \fn void zero();
+   *  \brief set the values to 0.0
+   */
+  virtual void zero() = 0;
+
   /** \fn bool addPtr(SiconosVector* v)
    *  \brief add a pointer to sub Vector in this vector - Usefull only for composite
    *  \param SiconosVector*

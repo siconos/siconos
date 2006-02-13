@@ -324,52 +324,43 @@ void Moreau::computeFreeState()
     SiconosVector *xfree = d->getXFreePtr();
     SiconosVector *xold = d->getXMemoryPtr()->getSiconosVector(0);
     SiconosVector *xDotold = d->getXDotMemoryPtr()->getSiconosVector(0);
+
     unsigned int sizeX = xfree->size();
     SimpleVector *xtmp = new SimpleVector(sizeX);
 
-    /*   \ warning : A supposed to be constant */
+    SiconosMatrix *I = new SiconosMatrix(sizeX, sizeX);
+    I->eye();
+    // Warning: A is supposed to be constant, not time dependent.
+    SiconosMatrix *A = d->getAPtr();
 
-    if (theta == 1.0)
-      *xtmp = *xold;
-    else
-    {
-      SiconosMatrix *I = new SiconosMatrix(sizeX, sizeX);
-      I->eye();
-      SiconosMatrix *A = d->getAPtr();
+    *xtmp = (*I + h * (1.0 - theta) * *A) * *xold;
+    delete I;
 
-      *xtmp = (*I + h * (1.0 - theta) * *A) * *xold;
-
-      delete I;
-    }
-
-    /*   \ warning : b supposed to be constant */
-
+    // Warning: b is supposed to be constant, not time dependent.
     SimpleVector *b = d->getBPtr();
     if (b != NULL) *xtmp += h * *b;
 
-    /*   \ warning : T supposed to be constant */
+    // Warning: T is supposed to be constant, not time dependent.
 
-    SiconosVector *ucur = d->getUPtr();
-    SiconosMatrix *T = d->getTPtr();
+    // Warning: u is supposed to depend only on time
 
-    if (ucur != NULL)
+    if (d->getUPtr() != NULL)
     {
-      if (theta == 1.0)
-        *xtmp += h * *T * *ucur;
-      else
-      {
-        unsigned int uSize = d->getUSize();
-        SiconosVector *uold = new SimpleVector(uSize);
-        SimpleVector *param = d->getParametersListPtr(2);
-        d->computeUPtr(&uSize, &sizeX, &told, &(*xold)(0), &(*xDotold)(0), &(*uold)(0), &(*param)(0));
+      // get u at previous time step
+      d->computeU(told);
+      SiconosVector *uOld = d->getUPtr();
 
-        *xtmp += h * *T * (theta * *ucur + (1.0 - theta) * *uold);
-        delete uold;
-      }
+      // get current u
+      d->computeU(t);
+      SiconosVector *uCurrent = d->getUPtr();
+
+      // get T
+      SiconosMatrix *T = d->getTPtr();
+      d->computeU(t);
+
+      *xtmp += h * *T * (theta * *uCurrent + (1.0 - theta) * *uOld);
     }
-
     *xfree = *W * *xtmp;
-
     delete xtmp;
   }
   else RuntimeException::selfThrow("Moreau::computeFreeState - not yet implemented for Dynamical system type: " + dstyp);
