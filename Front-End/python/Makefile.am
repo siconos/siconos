@@ -29,12 +29,12 @@ all:swig_interface lib
 swig_interface:pySiconos.i
 
 pySiconos_wrap.cxx:pySiconos.i
-	$(SWIG) $(SWIG_PYTHON_OPT) -I$(SICONOS_INSTALLED_INCLUDES) pySiconos.i;
+	$(SWIG) $(SWIG_PYTHON_OPT) -I$(SICONOS_INCLUDES) pySiconos.i;
 	sed "s/SWIG_append_msg/SWIG_append_errmsg/g" pySiconos_wrap.cxx > pySiconos_wrap.cxx.res ;
 	mv pySiconos_wrap.cxx.res pySiconos_wrap.cxx;
 
 pySiconos_wrap.o:pySiconos_wrap.cxx
-	g++ -c $(CXXFLAGS) -I$(SICONOS_INSTALLED_INCLUDES) $(LIBEXT_INCLUDES) pySiconos_wrap.cxx $(PYTHON_CPPFLAGS)
+	g++ -c $(CXXFLAGS) -I$(SICONOS_INCLUDES) $(LIBEXT_INCLUDES) pySiconos_wrap.cxx $(PYTHON_CPPFLAGS)
 
 #wrap: libsiconos runswig pySiconos_wrap.o lib
 
@@ -53,7 +53,7 @@ pySiconos_wrap.o:pySiconos_wrap.cxx
 lib:_pySiconos.so
 
 _pySiconos.so:pySiconos_wrap.o
-	$(CXX) $(CXX_DYNLIB)  $(SICONOS_INSTALLED_LIBS) $(LIBEXT_LDFLAGS) pySiconos_wrap.o -o _pySiconos.so
+	$(CXX) $(CXX_DYNLIB)  $(SICONOS_LIBS) $(LIBEXT_LDFLAGS) pySiconos_wrap.o -o _pySiconos.so
 
 #	g++ -shared $(SICONOS_LDFLAGS) $(SICONOS_LDADD) $(LIBS) libSiconos.so pySiconos_wrap.o -o _pySiconos.so 
 
