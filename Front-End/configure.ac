@@ -84,13 +84,15 @@ if test -z $SCI; then
       echo "$cmd" | scilab -nw >/dev/null
       SCIDIR=`cat path.incl` 
       echo "SCIDIR=" $SCIDIR
+      SCILAB=scilab
       AC_SUBST(SCIDIR)
-
+      AC_SUBST(SCILAB)
    fi
 else
    SCIDIR=$SCI
    echo "SCIDIR=" $SCIDIR
    AC_SUBST(SCIDIR)
+   AC_SUBST(SCILAB)
 fi
 else
  AC_MSG_RESULT(option --enable-scilab not selected : Warning : unable to compile scilab toolbox)  
@@ -146,10 +148,10 @@ dnl AC_MSG_RESULT("PYTHONPATH = $PYTHONPATH"
 
 AC_CONFIG_FILES([Makefile
 		 config/Makefile
-		 python/Makefile]
+		 python/Makefile
 		 python/pySiconos/Makefile
 		 scilab/Makefile
 		 scilab/loaderSiconos.sce
-		 scilab/env.sh
+		 scilab/env.sh]
 		 )
 AC_OUTPUT

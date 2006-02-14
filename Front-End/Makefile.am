@@ -16,5 +16,5 @@
  #
  # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
  #	
-SUBDIRS = config python scilab
+SUBDIRS = config python @SCILAB@
 

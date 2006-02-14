@@ -152,7 +152,7 @@ public:
    *  \brief set doubleData[i] to newPtr
    *  \param a unsigned int (index) and a pointer to doublereal
    */
-  void setDoubleData(const unsigned int &, doublereal*);
+  // void setDoubleData(const unsigned int &, doublereal*);
 
   /** \fn integer* getIwork() const
    *  \brief get iwork
@@ -205,7 +205,7 @@ public:
    *  \param OneStepIntegrator* : the integrator which must be converted
    * \return a pointer on the integrator if it is of the right type, NULL otherwise
    */
-  static Lsodar* convert(OneStepIntegrator* osi);
+  //static Lsodar* convert (OneStepIntegrator* osi);
 
 };
 

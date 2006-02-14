@@ -48,14 +48,6 @@ public:
 
   ~EventDriven();
 
-  /** \fn void createStrategy(StrategyXML * strategyXML, Model * model, TimeDiscretisation * timediscretisation)
-   *  \brief create the Strategy with an xml file, or the needed data
-   *  \param StrategyXML* : the StrategyXML linked to this Strategy
-   *  \param Model* : the Model which contains this Strategy
-   *  \exception RuntimeException
-   */
-  void createStrategy(StrategyXML * strategyXML, Model * model);
-
   /** \fn EventDriven* convert (Strategy* str)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Strategy* : the Strategy which must be converted

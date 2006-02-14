@@ -21,6 +21,24 @@ Entries are written backwards. That is, items at the bottom
 of the file were added first, and each subsequent addition is placed on a line
 before it.
 
+
+--------------------------------------------------------------------------------
+  v1.1.1 - XXX 2006 (release XXX)
+--------------------------------------------------------------------------------
+
+Notes:
+
+		
+Changes:
+
+2006-02-01   Roger Pissard-Gibollet <Roger.Pissard-Gibollet@inrialpes.fr> 
+	     Vincent Acary <vincent.acary@inrialpes.fr>
+
+        * add a scilab Siconos toolbox 
+	* upgrade configure for scilab toolbox (--enable-scilab option)
+	* Samples in scilab: BouncingBall, RollBouncingBall, ThreeBeadsColumn, 
+	MultiBeadsColumn/HuMAns_pa10,
+	
 --------------------------------------------------------------------------------
   v1.1.0 - February 2006 (release 388)
 --------------------------------------------------------------------------------
