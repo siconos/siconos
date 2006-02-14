@@ -149,7 +149,7 @@ AC_CONFIG_FILES([Makefile
 		 python/Makefile]
 		 python/pySiconos/Makefile
 		 scilab/Makefile
-		 scilab/loader.sce
+		 scilab/loaderSiconos.sce
 		 scilab/env.sh
 		 )
 AC_OUTPUT

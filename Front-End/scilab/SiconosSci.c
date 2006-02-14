@@ -536,6 +536,59 @@ int sicSetMassInterface(char *fname)
   return 0;
 }
 
+int sicSetNNLInterface(char *fname)
+{
+  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int nId, libname, func;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicSetNNLInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=3) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get nIdInteraction (1, int)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &nId);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicSetNNL (nId has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get libname (2, char* )  */
+  GetRhsVar(2, "c", &dim1, &dim2, &libname);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in ssicSetNNL ( libname has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get func (3, char* )  */
+  GetRhsVar(3, "c", &dim1, &dim2, &func);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicSetNNL (func has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(4, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicSetComputeNNLFunction(*istk(nId), cstk(libname), cstk(func));
+
+  /*  Return variable  */
+  LhsVar(1) = 4;
+
+  return 0;
+}
+
 int sicSetJacQNNLInterface(char *fname)
 {
   static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
@@ -972,6 +1025,69 @@ int sicLagrangianLinearRInterface(char *fname)
   return 0;
 }
 
+int sicLagrangianRInterface(char *fname)
+{
+  static int minrhs = 4, maxrhs = 4, minlhs = 1, maxlhs = 1;
+  static int dim1, dim2;
+  static int nId, relationType, funcH, funcG;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicSetJacQNNLInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=4) and outputs (lhs=1) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+  /* Get nIdInteraction (1, int)  */
+  GetRhsVar(1, "i", &dim1, &dim2, &nId);
+  if (!(dim1 * dim2 == 1))
+  {
+    sciprint("Wrong parameter in sicLagrangianR (nId has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get libname (2, char* )  */
+  GetRhsVar(2, "c", &dim1, &dim2, &relationType);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicLagrangianR (relationType has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get func (3, char* )  */
+  GetRhsVar(3, "c", &dim1, &dim2, &funcH);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicLagrangianR (funcH has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+
+  /* Get func (4, char* )  */
+  GetRhsVar(4, "c", &dim1, &dim2, &funcG);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicLagrangianR (funcG has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  CreateVar(5, "i", &dimo1, &dimo2, &st);
+
+  /* Call function */
+  *istk(st) = sicLagrangianR(*istk(nId), cstk(relationType), cstk(funcH), cstk(funcG));
+
+  /*  Return variable  */
+  LhsVar(1) = 5;
+
+  return 0;
+}
+
 int sicNewtonImpactLawNSLInterface(char *fname)
 {
   static int minrhs = 2, maxrhs = 2, minlhs = 1, maxlhs = 1;
@@ -1170,21 +1286,30 @@ int sicOneStepIntegratorMoreauInterface(char *fname)
 
 int sicOneStepNSProblemLCPInterface(char *fname)
 {
-  static int minrhs = 2, maxrhs = 2, minlhs = 1, maxlhs = 1;
+  static int minrhs = 3, maxrhs = 3, minlhs = 1, maxlhs = 1;
   static int dim1, dim2;
-  static int maxiter, tolerance;
+  static int solverName, maxiter, tolerance;
   static int dimo1 = 1, dimo2 = 1, st;
 
 #ifdef _DEBUG
   printf("sicOneStepNSProblemLCPInterface\n");
 #endif
 
-  /* Check number of inputs (rhs=2) and outputs (lhs=1) */
+  /* Check number of inputs (rhs=3) and outputs (lhs=1) */
   CheckRhs(minrhs, maxrhs) ;
   CheckLhs(minlhs, maxlhs) ;
 
-  /* Get  maxiter (1, integer)  */
-  GetRhsVar(1, "i", &dim1, &dim2, &maxiter);
+  /* Get  solverName (1, char *)  */
+  GetRhsVar(1, "c", &dim1, &dim2, &solverName);
+  if (!(dim1 * dim2 > 0))
+  {
+    sciprint("Wrong parameter in sicOneStepNSProblemLCP (solverName has wrong size!)\r\n");
+    Error(999);
+    return 0;
+  }
+
+  /* Get  maxiter (2, int)  */
+  GetRhsVar(2, "i", &dim1, &dim2, &maxiter);
   if (!(dim1 * dim2 == 1))
   {
     sciprint("Wrong parameter in sicOneStepNSProblemLCP (maxiter has wrong size!)\r\n");
@@ -1192,8 +1317,8 @@ int sicOneStepNSProblemLCPInterface(char *fname)
     return 0;
   }
 
-  /* Get  tolerance (2, double)  */
-  GetRhsVar(2, "d", &dim1, &dim2, &tolerance);
+  /* Get  tolerance (3, double)  */
+  GetRhsVar(3, "d", &dim1, &dim2, &tolerance);
   if (!(dim1 * dim2 == 1))
   {
     sciprint("Wrong parameter in sicOneStepNSProblemLCP (tolerance has wrong size!)\r\n");
@@ -1201,13 +1326,13 @@ int sicOneStepNSProblemLCPInterface(char *fname)
     return 0;
   }
 
-  CreateVar(3, "i", &dimo1, &dimo2, &st);
+  CreateVar(4, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicOneStepNSProblemLCP(*istk(maxiter), *stk(tolerance));
+  *istk(st) = sicOneStepNSProblemLCP(cstk(solverName), *istk(maxiter), *stk(tolerance));
 
   /*  Return variable  */
-  LhsVar(1) = 3;
+  LhsVar(1) = 4;
 
 
   return 0;
@@ -1236,84 +1361,3 @@ int sicCleanInterface(char *fname)
   return 0;
 }
 
-
-/***************************************************
- * Gateways for Scilab
- ***************************************************/
-
-/*
-int C2F(SiconosGateway)()
-{
-  int Rhs0;
-
-  gate_function function[] = {sicLoadModelInterface,
-            sicInitStrategyInterface,
-            sicTimeGetHInterface,
-            sicTimeGetNInterface,
-            sicTimeGetKInterface,
-            sicSTNextStepInterface,
-            sicSTComputeFreeStateInterface,
-            sicSTcomputePbInterface,
-            sicSTupdateStateInterface,
-            sicSTnewtonSolveInterface,
-            sicModelgetQInterface,
-            sicLagrangianLinearTIDSInterface,
-            sicLagrangianDSInterface,
-            sicSetMassInterface,
-            sicSetJacQNNLInterface,
-            sicSetJacVelNNLInterface,
-            sicSetFIntInterface,
-            sicSetJacQFIntInterface,
-            sicSetFExtInterface,
-            sicInteractionInterface,
-            sicLagrangianLinearRInterface,
-            sicNewtonImpactLawNSLInterface,
-            sicNonSmoothDynamicalSystemInterface,
-            sicModelInterface,
-            sicStrategyTimeSteppingInterface,
-            sicOneStepIntegratorMoreauInterface,
-            sicOneStepNSProblemLCPInterface,
-            sicCleanInterface
-                             };
-
-  char *name[] = {"sicLoadModel",
-      "sicInitStrategy",
-      "sicTimeGetH",
-      "sicTimeGetN",
-      "sicTimeGetK",
-      "sicSTNextStep",
-      "sicSTComputeFreeState",
-      "sicSTcomputePb",
-      "sicSTupdateState",
-      "sicSTnewtonSolve",
-      "sicModelgetQ",
-      "sicLagrangianLinearTIDS",
-      "sicLagrangianDS",
-      "sicSetMass",
-      "sicSetJacQNNL",
-      "sicSetJacVelNNL",
-      "sicSetFInt",
-      "sicSetJacQFInt",
-      "sicSetFExt",
-      "sicInteraction",
-      "sicLagrangianLinearR",
-      "sicNewtonImpactLawNSL",
-      "sicNonSmoothDynamicalSystem",
-      "sicModel",
-      "sicStrategyTimeStepping",
-      "sicOneStepIntegratorMoreau",
-      "sicOneStepNSProblemLCP",
-      "sicClean"
-  };
-
-  Rhs0=Rhs;
-  Rhs = Max(0, Rhs);
-
-#ifdef _DEBUG
-  printf("SiconosGateway %d %d %d functions %s \n",Rhs,Rhs0,Fin-1,name[Fin-1]);
-#endif
-  sci_gateway(name[Fin-1], function[Fin-1]);
-  return 0;
-}
-
-*/

@@ -55,6 +55,7 @@ extern int sicLagrangianLinearTIDSInterface(char *fname);
 extern int sicLagrangianDSInterface(char *fname);
 
 extern int sicSetMassInterface(char *fname);
+extern int sicSetNNLInterface(char *fname);
 extern int sicSetJacQNNLInterface(char *fname);
 extern int sicSetJacVelNNLInterface(char *fname);
 extern int sicSetFIntInterface(char *fname);
@@ -67,6 +68,8 @@ extern int sicSetFExtInterface(char *fname);
 extern int sicInteractionInterface(char *fname);
 
 extern int sicLagrangianLinearRInterface(char *fname);
+
+extern int sicLagrangianRInterface(char *fname);
 
 extern int sicNewtonImpactLawNSLInterface(char *fname);
 

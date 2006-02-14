@@ -24,7 +24,7 @@
 
 // Standard SICONOS environment variable
 setenv("SICONOSPATH","@KERNEL_PATH@");
-strLD_LIBRARY_PATH=getenv("LD_LIBRARY_PATH")+":@NUMERICS_PATH@/lib"+":@KERNEL_PATH@/lib"+":@KERNEL_PATH@/share/SICONOS:."
+strLD_LIBRARY_PATH=getenv("LD_LIBRARY_PATH")+":@NUMERICS_PATH@/lib"+":@KERNEL_PATH@/lib"+":@KERNEL_PATH@/share/SICONOS:.";
 setenv("LD_LIBRARY_PATH",strLD_LIBRARY_PATH);
 // dynamic lib 
 // TO DO : use configure
@@ -40,5 +40,6 @@ link("/usr/local/lib/liblapack++.so");
 link("@NUMERICS_PATH@/lib/libSiconosNumerics.so");
 link("@KERNEL_PATH@/lib/libSiconosKernel.so");
 
-exec './loader.sce';
+libSiconos_loader=get_file_path('loaderSiconos.sce')+'/loader.sce';
+exec(libSiconos_loader);
 
