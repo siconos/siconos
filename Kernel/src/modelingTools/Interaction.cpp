@@ -175,6 +175,7 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
       nslaw = new NewtonImpactFrictionNSL(interactionxml->getNonSmoothLawXML());
     else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type :" + nslaw->getType());
     isNsLawAllocatedIn = true;
+
     // --- Relation ---
     string relationType = interactionxml->getRelationXML()->getType();
     // general relation

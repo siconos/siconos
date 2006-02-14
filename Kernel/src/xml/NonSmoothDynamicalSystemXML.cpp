@@ -508,7 +508,6 @@ void NonSmoothDynamicalSystemXML::loadInteractionXML(xmlNode * rootInteractionNo
   while (node != NULL)
   {
     InteractionXML *interxml;
-
     number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
 
     i = interactionXMLMap.find(number);
@@ -519,9 +518,7 @@ void NonSmoothDynamicalSystemXML::loadInteractionXML(xmlNode * rootInteractionNo
       interactionXMLMap[number] = interxml;
     }
     else
-    {
       XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadInteractionXML error : wrong INTERACTION number : already exists.");
-    }
 
     node = SiconosDOMTreeTools::findFollowNode(node, INTERACTION_TAG);
   }

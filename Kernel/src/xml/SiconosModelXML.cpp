@@ -202,7 +202,6 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
     nsdsXML = new NonSmoothDynamicalSystemXML(node);
   else
     XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + NSDS_TAG + " not found.");
-
   // Time interval (required)
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SM_TIME)) != NULL)
   {
@@ -294,7 +293,6 @@ void SiconosModelXML::loadTime(xmlNode *timeNode)
 
 bool SiconosModelXML::checkSiconosDOMTree()
 {
-  //  cout<<">> SiconosModelXML::checkSiconosDOMTree()"<<endl;
   bool res = false;
   string schemaFile = getenv("SICONOSPATH") + xmlSchemaFile;
 

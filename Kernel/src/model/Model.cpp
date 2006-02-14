@@ -39,6 +39,7 @@ Model::Model(char *xmlFile):
   {
     // Built DOMtree
     modelxml = new SiconosModelXML(xmlFile);
+
     // Load data (default value for T is -1)
     if (modelxml->hasT()) T = modelxml->getT();
     t0 = modelxml->getT0();
@@ -48,7 +49,9 @@ Model::Model(char *xmlFile):
     author = modelxml->getAuthor();
     description = modelxml->getDescription();
     date = modelxml->getDate();
-    xmlSchema = modelxml->getXMLSchema();
+    if (modelxml->hasXMLSchema())
+      xmlSchema = modelxml->getXMLSchema();
+
     // Memory allocation for nsds and strategy
     nsds = new NonSmoothDynamicalSystem(modelxml->getNonSmoothDynamicalSystemXML());
     if (modelxml->hasStrategy())
