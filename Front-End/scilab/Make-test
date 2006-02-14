@@ -18,11 +18,11 @@
 #	
 
 
-SICONOSPATH=/local_home/pissard/Workspace/siconos/distrib
-NUMERICSPATH=/local_home/pissard/Workspace/siconos/distrib
+SICONOSPATH=/usr/local/
+NUMERICSPATH=/usr/local
 
 ifndef SCIDIR
-  SCIDIR=/usr/lib/scilab-3.1.1
+  SCIDIR=/usr/lib/scilab-3.0
 endif
 
 include $(SICONOSPATH)/share/SICONOS/KernelConfig.sh

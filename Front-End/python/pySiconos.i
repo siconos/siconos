@@ -124,6 +124,7 @@
 #include "QP.h"
 #include "Relay.h"
 #include "LCP.h"
+#include "FrictionContact.h"
 #include "FrictionContact2D.h"
 #include "FrictionContact3D.h"
 #include "OneStepIntegrator.h"
@@ -288,6 +289,7 @@ $1 = string(PyString_AsString($input));
 %include "QP.h"
 %include "Relay.h"
 %include "LCP.h"
+%include "FrictionContact.h"
 %include "FrictionContact2D.h"
 %include "FrictionContact3D.h"
 // ---
