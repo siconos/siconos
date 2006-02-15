@@ -29,6 +29,13 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 Notes:
 
 Changes:
+2006-02-15   Vincent Acary <vincent.acary@inrialpes.fr>
+
+	* /macros/ac_f77_library_ldflags.m4 : This file is added and 
+	replaced the system defined macro. A small correction is done 
+	to neglect -lcrt2.o option at linking on MacOsX. This bug will 
+	be normally corrected in further version of autoconf.
+
 2006-02-13   Vincent Acary <vincent.acary@inrialpes.fr>
 
 	* /src/NSSpack/test/Makefile.am 
