@@ -357,9 +357,6 @@ void Moreau::computeFreeState()
       // get T
       SiconosMatrix *T = d->getTPtr();
 
-      cout << "uold - ucurrent" << endl;
-      uOld.display();
-      uCurrent.display();
       *xtmp += h * *T * (theta * uCurrent + (1.0 - theta) * uOld);
     }
     *xfree = *W * *xtmp;
