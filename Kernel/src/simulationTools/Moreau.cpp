@@ -348,17 +348,19 @@ void Moreau::computeFreeState()
     {
       // get u at previous time step
       d->computeU(told);
-      SiconosVector *uOld = d->getUPtr();
+      SimpleVector uOld = d->getU();
 
       // get current u
       d->computeU(t);
-      SiconosVector *uCurrent = d->getUPtr();
+      SimpleVector uCurrent = d->getU();
 
       // get T
       SiconosMatrix *T = d->getTPtr();
-      d->computeU(t);
 
-      *xtmp += h * *T * (theta * *uCurrent + (1.0 - theta) * *uOld);
+      cout << "uold - ucurrent" << endl;
+      uOld.display();
+      uCurrent.display();
+      *xtmp += h * *T * (theta * uCurrent + (1.0 - theta) * uOld);
     }
     *xfree = *W * *xtmp;
     delete xtmp;
