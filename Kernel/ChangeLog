@@ -1,4 +1,4 @@
-# Siconos version 1.0, Copyright INRIA 2005.  
+# Siconos-Kernel version 1.1.1, Copyright INRIA 2005-2006.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
-  v1.1.1 - February 2006 (current release)
+  v1.1.1 - February 2006 (release 420)
 --------------------------------------------------------------------------------
 	
 Notes:
@@ -31,7 +31,7 @@ Notes:
 Changes:
 
 2006-02-13 Franck Perignon <franck.perignon@inrialpes.fr>
-                                                                                
+                                                                               
         * corrections in Moreau in order to handle u plug-in
 	  for linear DS. 
 

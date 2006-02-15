@@ -1,4 +1,4 @@
-# Siconos version 1.1.0, Copyright INRIA 2005.  
+# Siconos-Kernel version 1.1.1, Copyright INRIA 2005-2006.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@ AC_CONFIG_HEADER([config.h])
 
 # SO version of all siconos shared libraries
 SICONOS_SO_CURRENT=1
-SICONOS_SO_REVISION=1
+SICONOS_SO_REVISION=2
 SICONOS_SO_AGE=1
 AC_SUBST(SICONOS_SO_CURRENT)
 AC_SUBST(SICONOS_SO_REVISION)
