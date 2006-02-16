@@ -222,7 +222,7 @@ LagrangianLinearR::LagrangianLinearR(const Relation & newLLR, Interaction* inter
     {
       H = new SiconosMatrix(llr->getH());
       isHAllocatedIn = true;
-      G[0] == H;
+      G[0] = H;
     }
     else
     {
@@ -242,7 +242,7 @@ LagrangianLinearR::LagrangianLinearR(const Relation & newLLR, Interaction* inter
       {
         D = new SiconosMatrix(llr->getD());
         isDAllocatedIn = true;
-        G[1] == D;
+        G[1] = D;
       }
       else
       {

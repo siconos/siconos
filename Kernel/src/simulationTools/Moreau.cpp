@@ -323,7 +323,6 @@ void Moreau::computeFreeState()
 
     SiconosVector *xfree = d->getXFreePtr();
     SiconosVector *xold = d->getXMemoryPtr()->getSiconosVector(0);
-    SiconosVector *xDotold = d->getXDotMemoryPtr()->getSiconosVector(0);
 
     unsigned int sizeX = xfree->size();
     SimpleVector *xtmp = new SimpleVector(sizeX);
