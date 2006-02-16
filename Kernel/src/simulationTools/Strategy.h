@@ -42,7 +42,7 @@ class StrategyXML;
 /** \class Strategy
  *  \brief It regroups all the elements to lead the resolution of the simulation
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Crestion) Apr 26, 2004
  *
  * !!! This is an abstract class !!!

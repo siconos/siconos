@@ -19,7 +19,7 @@
 /** \class SiconosMatrix
  *   \brief This class is an encapsulation of the Lapack++ class managing vmatrices of double.
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.0
+ *   \version 1.1.1.
  *   \date (Creation) 05/19/2004
  *
  *

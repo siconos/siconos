@@ -19,7 +19,7 @@
 /** \class RuntimeException
 *   \brief This class represent a runtime exeption causing by the plateforme
 *  \author SICONOS Development Team - copyright INRIA
-*   \version 1.0
+*   \version 1.1.1.
 *   \date (Creation) 05/25/2004
 *
 *

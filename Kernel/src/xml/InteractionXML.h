@@ -19,7 +19,7 @@
 /** \class InteractionXML
  *   \brief This class manages Interaction data part
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.0
+ *   \version 1.1.1.
  *   \date (Creation) 04/12/2004
  *
 

@@ -37,7 +37,7 @@ class DSInputOutput;
 /** \class Relation
  *  \brief general non linear relation class.
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Apr 27, 2004
  *
  *    This class provides tools to define and describe relations of the type:

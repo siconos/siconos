@@ -42,7 +42,7 @@ class OneStepIntegratorXML;
 /** \class OneStepIntegrator
  *  \brief It's the generic object which can integre a DynamicalSystem
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Apr 26, 2004
  *
  * !!! This is a virtual class, interface for some specific integrators !!!

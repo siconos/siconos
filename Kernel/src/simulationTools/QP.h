@@ -25,7 +25,7 @@
 /** \class QP
  *  \brief It's a way to solve NSDS. It's used in mechanics
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Apr 26, 2004
  *
  *

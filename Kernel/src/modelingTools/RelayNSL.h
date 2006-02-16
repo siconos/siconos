@@ -25,7 +25,7 @@
 /** \class RelayNSL
  *  \brief kind of Non-smooth law
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 0.1
+ *  \version 1.1.1.
  *  \date (Creation) Apr 27, 2004
  *
  *

@@ -19,7 +19,7 @@
 /** \class AdamsXML
  *   \brief This class manages Adams data part
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.0
+ *   \version 1.1.1.
  *   \date 05/17/2004
  *
  *

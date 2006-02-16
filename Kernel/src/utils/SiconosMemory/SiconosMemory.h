@@ -21,7 +21,7 @@
  *  There is a max number of saved vector (memorySize) and all the vector (simple or composite)
  * should have the same size.
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.0
+ *   \version 1.1.1.
  *   \date (Creation) 07/06/2004
  */
 

@@ -37,7 +37,7 @@ class SiconosModelXML;
 /** \class Model
  *  \brief The Model regroups the high level functionnalities of the platform
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Apr 26, 2004
  *
  *

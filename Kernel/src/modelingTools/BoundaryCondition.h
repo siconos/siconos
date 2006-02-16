@@ -39,7 +39,7 @@ class DynamicalSystem;
 /** \class BoundaryCondition
  *  \brief represents the boundary conditions for a NSDS BVP
 *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) May 24, 2004
  *
  *

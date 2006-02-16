@@ -20,7 +20,7 @@
 /** \class LinearBCXML
 *   \brief This class manages Linear BC data part
 *  \author SICONOS Development Team - copyright INRIA
-*   \version 1.0
+*   \version 1.1.1.
 *   \date 05/25/2004
 *
 *

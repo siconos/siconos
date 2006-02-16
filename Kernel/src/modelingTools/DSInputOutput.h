@@ -50,7 +50,7 @@ const std::string LAGRANGIANLINEARDSIO = "LagrangianLinearDSIO";
  *         { y = H(x, t)
  *         { R = G(lambda)
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Jan 14, 2005
  *
  *

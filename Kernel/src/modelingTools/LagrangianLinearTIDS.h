@@ -28,7 +28,7 @@ class LagrangianLinearTIDSXML;
 /** \class LagrangianLinearTIDS
  *  \brief class of Lagrangian systems with time invariant coefficients - Derived from LagrangianDS
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Apr 29, 2004
  *
  *

@@ -25,7 +25,7 @@
 /** \class ComplementarityConditionNSL
  *  \brief NonSmoothLaw for complementarity models
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Apr 27, 2004
  *
  *

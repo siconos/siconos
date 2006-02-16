@@ -19,7 +19,7 @@
 /** \class NewtonImpactLawNSLXML
  *  \brief  This class manages NewtonImpactLawNSL data part
 *  \author SICONOS Development Team - copyright INRIA
- *  \version 0.1
+ *  \version 1.1.1.
  *  \date (Creation) June 29, 2004
  *
  *

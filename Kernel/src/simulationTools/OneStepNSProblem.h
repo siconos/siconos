@@ -20,7 +20,7 @@
 /** \class OneStepNSProblem
  *  \brief It's the part of the Strategy which solve the Interactions
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Apr 26, 2004
  *
  *

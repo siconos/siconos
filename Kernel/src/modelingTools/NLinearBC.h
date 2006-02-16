@@ -25,7 +25,7 @@
 /** \class NLinearBC
  *  \brief kind of BoundaryCondition
 *  \author SICONOS Development Team - copyright INRIA
- *  \version 0.1
+ *  \version 1.1.1.
  *  \date (Creation) May 6, 2004
  *
  *

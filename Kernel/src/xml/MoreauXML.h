@@ -19,7 +19,7 @@
 /** \class MoreauXML
  *   \brief This class manages Moreau data part
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.0
+ *   \version 1.1.1.
  *   \date 05/17/2004
  *
  *

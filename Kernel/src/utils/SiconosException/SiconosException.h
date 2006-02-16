@@ -19,7 +19,7 @@
 /** \class SiconosException
 *   \brief This class represent all the exeption in the Siconos platform
 *  \author SICONOS Development Team - copyright INRIA
-*   \version 1.0
+*   \version 1.1.1.
 *   \date (Creation) 05/25/2004
 *
 *

@@ -24,7 +24,7 @@
 /** \class LinearTIECXML
  *  \brief object to manage XML data of an Linear Time Invariant EqualityConstraint
 *  \author SICONOS Development Team - copyright INRIA
- *  \version 0.1
+ *  \version 1.1.1.
  *  \date 17/01/2005
  *
  *

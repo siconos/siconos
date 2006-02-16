@@ -25,7 +25,7 @@
 /** \class Lsodar
  *  \brief It's a kind of single-step Integrator
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Apr 26, 2004
  */
 

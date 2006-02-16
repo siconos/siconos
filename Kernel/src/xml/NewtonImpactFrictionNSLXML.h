@@ -19,7 +19,7 @@
 /** \class NewtonImpactFrictionNSLXML
  *  \brief  This class manages NewtonImpactFrictionNSL data part
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 0.1
+ *  \version 1.1.1.
  *  \date (Creation) March 22, 2005
  *
  *

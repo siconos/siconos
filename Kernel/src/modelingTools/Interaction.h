@@ -48,7 +48,7 @@ class NonSmoothDynamicalSystem;
  *  \brief this class describes interaction between some dynamical systems (DS) (from 1 to NumberOfDS)
  *  Each interaction owns local variables  with relations between them, plus a non smooth law
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Apr 29, 2004
  *
  * \todo save a number of derivatives of y depending on the relative degree

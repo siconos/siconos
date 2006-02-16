@@ -19,7 +19,7 @@
 /** \class LagrangianLinearTIDSXML
  *   \brief This class manages Lagrangian TIDS data
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.0
+ *   \version 1.1.1.
  *   \date 05/11/2004
  *
  *

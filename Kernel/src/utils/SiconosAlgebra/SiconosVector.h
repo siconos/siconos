@@ -38,7 +38,7 @@ const std::string DEFAULT_FORMAT = "ascii";
  *  vector can be either a SimpleVector or a CompositeVector, ie a container of several SimpleVector
  *  See documentation of these derivated classes for more details
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 0.1
+ *  \version 1.1.1.
  *
  */
 

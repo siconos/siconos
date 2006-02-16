@@ -20,7 +20,7 @@
 /** \class QPXML
 *   \brief This class manages Lagrangian QP data
 *  \author SICONOS Development Team - copyright INRIA
-*   \version 1.0
+*   \version 1.1.1.
 *   \date 05/18/2004
 *
 *

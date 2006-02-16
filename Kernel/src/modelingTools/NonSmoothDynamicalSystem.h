@@ -44,7 +44,7 @@ class NonSmoothDynamicalSystemXML;
  *  \brief This class describes the Non Smooth Dynamical System (NonSmoothDynamicalSystem)
  * composed with some dynamical systems, some algebraic constraints and some interactions between those systems
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 0.1
+ *  \version 1.1.1.
  *  \date (Creation) Apr 23, 2004
  *
  */

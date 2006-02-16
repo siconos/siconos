@@ -28,7 +28,7 @@
 /** \class LagrangianLinearR
  *  \brief Lagrangian Linear Relation, derived from class LagrangianR
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Apr 27, 2004
  *
  * This class defines and computes the Lagrangian Linear Relations defined by,

@@ -25,7 +25,7 @@
 /** \class NewtonImpactLawNSL
  *  \brief Specific NonSmoothLaw for the Newton impact model
 *  \author SICONOS Development Team - copyright INRIA
- *  \version 0.1
+ *  \version 1.1.1.
  *  \date (Creation) June 29, 2004
  *
  *

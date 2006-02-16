@@ -19,7 +19,7 @@
 /** \class NonSmoothDynamicalSystemXML
  *   \brief This class manages NonSmoothDynamicalSystem data part
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.0
+ *   \version 1.1.1.
  *   \date 04/04/2004
  *
  *

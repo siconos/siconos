@@ -28,7 +28,7 @@ class SimpleVector;
  *  \brief This class describes Composite Vectors, containers of several Siconos Vectors (that should be SimpleVectors)
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 0.1
+ *  \version 1.1.1.
  *
  */
 

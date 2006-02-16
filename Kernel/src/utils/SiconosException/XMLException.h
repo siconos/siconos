@@ -19,7 +19,7 @@
 /** \class XMLException
 *   \brief This class represent an exeption causing by an XML class of the platform
 *  \author SICONOS Development Team - copyright INRIA
-*   \version 1.0
+*   \version 1.1.1.
 *   \date (Creation) 05/25/2004
 *
 *

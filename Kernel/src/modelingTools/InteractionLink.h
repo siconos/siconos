@@ -32,7 +32,7 @@ class DynamicalSystem;
 /** \class InteractionLink
  *  \brief class that defines a link between 2 interactions and provides information about common DS positions
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) July 20, 2005
  *
  */

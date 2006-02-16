@@ -37,7 +37,7 @@ class Interaction;
 /** \class Topology
  *  \brief this class provides maps to describe the topology of interactions of a NonSmoothDynamicalSystem
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) July 20, 2005
  *
  */

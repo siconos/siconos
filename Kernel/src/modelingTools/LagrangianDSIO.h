@@ -28,7 +28,7 @@
  *         { y = H(q, t)
  *         { R = G(lambda)
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 0.1
+ *  \version 1.1.1.
  *  \date 17/01/2005
  *
  *

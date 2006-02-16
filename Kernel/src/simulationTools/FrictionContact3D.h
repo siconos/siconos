@@ -25,7 +25,7 @@
  *  \brief This class is devoted to the formalization and the resolution of the
  * Linear Complementarity Problem (FrictionContact3D)
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Dec 15, 2005
  *
  *

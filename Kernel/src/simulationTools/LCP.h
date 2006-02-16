@@ -21,7 +21,7 @@
  *  \brief This class is devoted to the formalization and the resolution of the
  * Linear Complementarity Problem (LCP)
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Apr 26, 2004
  *
  *

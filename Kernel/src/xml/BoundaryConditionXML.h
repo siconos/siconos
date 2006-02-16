@@ -30,7 +30,7 @@
 /** \class BoundaryConditionXML
  *  \brief describes the boundary conditions for a BVP NSDS
 *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date May 24, 2004
  *
  */

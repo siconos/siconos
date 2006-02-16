@@ -19,7 +19,7 @@
 /** \class SolverXML
  *   \brief XML data management for class Solver
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.0
+ *   \version 1.1.1.
  *   \date 20/12/2005
  *
  *  The only member of this class is the adress of node corresponding to tag "Solver",

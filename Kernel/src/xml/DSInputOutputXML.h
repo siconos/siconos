@@ -19,7 +19,7 @@
 /** \class DSInputOutputXML
  *   \brief This class manages Relation data part
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.0
+ *   \version 1.1.1.
  *   \date 17/01/2005
  *
  *

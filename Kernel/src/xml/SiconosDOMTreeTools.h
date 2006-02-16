@@ -19,7 +19,7 @@
 /** \class SiconosDOMTreeTools
  *   \brief This class is a sort of tools box to get and set elements from nodes DOM tree
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.0
+ *   \version 1.1.1.
  *   \date 04/06/2004
  *
  *

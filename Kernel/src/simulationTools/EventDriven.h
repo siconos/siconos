@@ -24,7 +24,7 @@
 /** \class EventDriven
  *  \brief Strategy based on event driven method, ie events detection (see theoretical manual for more details).
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Apr 26, 2004
  *
  *

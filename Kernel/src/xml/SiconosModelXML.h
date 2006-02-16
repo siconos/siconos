@@ -20,7 +20,7 @@
 /** \class SiconosModelXML
  *   \brief This class allows to verify and download a Siconos XML data file, manage it data and save in a new Siconos XML data file
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.0
+ *   \version 1.1.1.
  *   \date 04/04/2004
  *
  *

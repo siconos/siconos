@@ -20,7 +20,7 @@
 /** \class LinearDSIOXML
 *   \brief This class manages LinearDSIO DSInputOutput data
 *  \author SICONOS Development Team - copyright INRIA
-*   \version 1.0
+*   \version 1.1.1.
 *   \date 17/01/2005
 *
 *

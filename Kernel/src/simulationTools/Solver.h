@@ -24,7 +24,7 @@
 /** \class Solver
  *  \brief to define a solver for a Non smooth problem.
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 0.1
+ *  \version 1.1.1.
  *  \date (Creation) December 19, 2005
  *
  *  It provides an interface to define a solver for a given solving formalisation (the way the problem is written to be solved, ie the non

@@ -26,7 +26,7 @@ class LagrangianDSXML;
 /** \class LagrangianDS
  *  \brief main class of Lagrangian dynamic systems
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) Apr 29, 2004
  *
  *

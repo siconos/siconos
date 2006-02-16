@@ -54,7 +54,7 @@ class SiconosSharedLibrary;
 /** \class DynamicalSystem
  *  \brief  General first order non linear dynamical systems
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.0
+ *  \version 1.1.1.
  *  \date (Creation) April 29, 2004
  *
  *

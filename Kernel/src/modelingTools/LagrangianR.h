@@ -26,7 +26,7 @@
 /** \class LagrangianR
  *  \brief Lagrangian (Non Linear) Relation
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 0.1
+ *  \version 1.1.1.
  *  \date Apr 27, 2004
  *  This class provides tools to describe non linear relation of the type:
  *
