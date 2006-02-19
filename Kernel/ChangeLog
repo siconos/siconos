@@ -1,4 +1,4 @@
-# Siconos-Kernel version 1.1.1, Copyright INRIA 2005-2006.
+../# Siconos-Kernel version 1.1.1, Copyright INRIA 2005-2006.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -22,6 +22,20 @@ of the file were added first, and each subsequent addition is placed on a line
 before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
+--------------------------------------------------------------------------------
+  v1.1.x -  (current release)
+--------------------------------------------------------------------------------
+	
+Notes:
+
+Changes:
+
+2006-02-19   Vincent Acary <vincent.acary@inrialpes.fr>
+
+	* /macros/ac_f77_library_ldflags.m4 : This file is added and 
+	replaced the system defined macro. A small correction is done 
+	to neglect -lcrt2.o option at linking on MacOsX. This bug will 
+	be normally corrected in further version of autoconf.
 --------------------------------------------------------------------------------
   v1.1.1 - February 2006 (release 421)
 --------------------------------------------------------------------------------
