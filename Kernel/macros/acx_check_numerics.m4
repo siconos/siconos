@@ -35,7 +35,7 @@ for ac_dir in $list_dir;
 		   if test -r "$ac_dir/lib/libSiconosNumerics.$libsuffix" && test -r "$ac_dir/include/SiconosNumerics.h" ; then
        			NUMERICS_INCLUDES="-I$ac_dir/include/"
        			NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics"
-       			NUMERICS_PATH="$ac_dir/"
+       			NUMERICS_PATH="$ac_dir"
        			numerics_lib="yes"
 			dynlib="yes"
        			AC_MSG_RESULT([yes, library $ac_dir/lib/libSiconosNumerics.$libsuffix selected]) 
@@ -53,7 +53,7 @@ if test "$numerics_lib" = "no" ; then
 	    	numerics_lib="yes"
 		NUMERICS_INCLUDES="-I$ac_dir/include/"
        		NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics"
-       		NUMERICS_PATH="$ac_dir/"	    	   
+       		NUMERICS_PATH="$ac_dir"	    	   
 	    	AC_MSG_RESULT([yes, library $ac_dir/lib/libNumerics.a selected])
 	    break
 	else

@@ -33,8 +33,8 @@ sample:$(SAMPLE_OBJ) $(SAMPLE_EXE)
 
 $(SAMPLE_EXE):$(SAMPLE_OBJ)
 	echo "$(SAMPLE_EXE):"
-#	$(CXX) -o $@ $< -L$(SICONOSPATH)/lib $(SICONOS_LIBS) $(LIBEXT_LDFLAGS)
-	$(CXX) -o $@ $< $(LIBEXT_LDFLAGS) -L$(SICONOSPATH)/lib -lSiconosKernel
+#	$(CXX) -o $@ $< $(LIBEXT_LDFLAGS) -L$(SICONOSPATH)/lib -lSiconosKernel
+	$(CXX) -o $@ $< $(SICONOS_LDFLAGS) 
 
 run:$(SAMPLE_EXE) 
 	./$(SAMPLE_EXE)

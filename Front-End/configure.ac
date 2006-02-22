@@ -112,11 +112,11 @@ AC_ARG_WITH(kernel,
 
 # Numerics
 AC_MSG_CHECKING([SICONOS Numerics])
-ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Siconos Numerics. Please install it or use the option --with-numerics.])])
+ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Siconos Numerics. Please install it or set correctly the option --with-numerics.])])
 echo "NUMERICS_PATH=" $NUMERICS_PATH
 # kernel
 AC_MSG_CHECKING([SICONOS Kernel])
-ACX_CHECK_KERNEL([AC_SUBST(KERNEL_INCLUDES) AC_SUBST(KERNEL_LIBRARIES) AC_SUBST(KERNEL_PATH)], [AC_MSG_ERROR([Cannot find  Siconos Kernel. Please install it or use the option --with-kernel.])])
+ACX_CHECK_KERNEL([AC_SUBST(KERNEL_INCLUDES) AC_SUBST(KERNEL_LIBRARIES) AC_SUBST(KERNEL_PATH)], [AC_MSG_ERROR([Cannot find  Siconos Kernel. Please install it or set correctly the option --with-kernel.])])
 echo "KERNEL_PATH=" $KERNEL_PATH
 
 #PYTHONPATH
@@ -134,10 +134,6 @@ echo "PYTHONPATH=" $PYTHONPATH
 AC_SUBST(PYTHON_DIR)
 AC_SUBST(PYTHONPATH)
 
-dnl PYTHONPATH = "/scratch/Franck/Siconos-v1.1.0/siconos/trunk/Front-End/python/"
-dnl AC_SUBST(PYTHONPATH)
-dnl AC_MSG_RESULT("PYTHONPATH = $PYTHONPATH"
-
 # Checks for libraries.
 
 # Checks for header files.
@@ -149,6 +145,7 @@ dnl AC_MSG_RESULT("PYTHONPATH = $PYTHONPATH"
 AC_CONFIG_FILES([Makefile
 		 config/Makefile
 		 python/Makefile
+		 python/pySiconos/pySiconos
 		 python/pySiconos/Makefile
 		 scilab/Makefile
 		 scilab/loaderSiconos.sce

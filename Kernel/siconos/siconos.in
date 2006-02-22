@@ -24,7 +24,7 @@
 
 DIR=`pwd`;
 SICONOSPATH=@prefix@
-NUMERICSPATH=@numericspath@
+NUMERICSPATH=@NUMERICS_PATH@
 
 #-----------
 # functions

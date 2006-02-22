@@ -3,7 +3,7 @@ AC_PREREQ(2.57)
 
 # Numerics: no include files (FORTRAN libraries)
 if test "$with_numerics" = no -o "$with_numerics" = yes -o "$with_numerics" = ""; then
-    AC_MSG_RESULT(option --with-numerics not selected : installed numerics used)
+    AC_MSG_RESULT(option --with-numerics not selected : default (/usr/local) numerics used)
     with_numerics=no
    case "$target" in
     *-apple-darwin*)
@@ -80,4 +80,4 @@ fi
 
 
 	     
-])dnl ACX_CHECK_LAPACK
+])dnl ACX_CHECK_NUMERICS

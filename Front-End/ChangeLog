@@ -23,6 +23,28 @@ before it.
 
 
 --------------------------------------------------------------------------------
+  v1.1.x - February 2006 (current release)
+--------------------------------------------------------------------------------
+
+Notes: 
+
+		
+Changes:
+
+2006-02-22   Vincent Acary <vincent.acary@inrialpes.fr>
+             Franck Perignon <franck.perignon@inrialpes.fr>
+	* update configure.ac to use the correct SiconosLDFLAGS
+	  (correct install bug 540)
+	* remove useless .sh files in python
+	 
+2006-02-14   Roger Pissard-Gibollet <Roger.Pissard-Gibollet@inrialpes.fr> 
+
+        * add a scilab Siconos toolbox 
+	* upgrade configure for scilab toolbox (--enable-scilab option)
+	* Samples in scilab: BouncingBall, RollBouncingBall, ThreeBeadsColumn, 
+	MultiBeadsColumn/HuMAns_pa10,
+
+--------------------------------------------------------------------------------
   v1.1.1 - February 2006 (release 421)
 --------------------------------------------------------------------------------
 

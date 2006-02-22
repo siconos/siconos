@@ -30,6 +30,13 @@ Notes:
 
 Changes:
 
+2006-02-22   Vincent Acary <vincent.acary@inrialpes.fr>
+             Franck Perignon <franck.perignon@inrialpes.fr>
+	* update configure.ac to generate automatically 
+	  siconos/siconos, siconos/MakefilePluginSample, 
+	  KernelConfig.sh.
+	 
+
 2006-02-19   Vincent Acary <vincent.acary@inrialpes.fr>
 
 	* /macros/ac_f77_library_ldflags.m4 : This file is added and 

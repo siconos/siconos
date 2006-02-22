@@ -296,6 +296,9 @@ AC_SUBST(DOXYGEN_CFG)
 AC_CONFIG_FILES([Makefile
                  config/Makefile
 		 config/xmlschema/Makefile
+		 config/KernelConfig.sh
+		 siconos/MakefilePluginSample 
+		 siconos/siconos
 		 siconos/Makefile
                  src/Makefile
 		 src/apiC/Makefile

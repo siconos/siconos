@@ -23,9 +23,9 @@
 #-----------
 
 DIR=`pwd`;
-SICONOSPATH=@kernelpath@
-NUMERICSPATH=@numericspath@
-PYTHONPATH=@pythonpath@
+SICONOSPATH=@KERNEL_PATH@
+NUMERICSPATH=@NUMERICS_PATH@
+PYTHONPATH=@PYTHONPATH@
 #-----------
 # functions
 #-----------

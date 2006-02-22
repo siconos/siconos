@@ -3,7 +3,7 @@ AC_PREREQ(2.57)
 
 # Kernel
 if test "$with_kernel" = no -o "$with_kernel" = yes -o "$with_kernel" = ""; then
-    AC_MSG_RESULT(option --with-kernel not selected : installed kernel used)
+    AC_MSG_RESULT(option --with-kernel not selected : default (/usr/local) kernel used)
     with_kernel=no
    case "$target" in
     *-apple-darwin*)
@@ -40,10 +40,10 @@ do  AC_MSG_CHECKING([for libSiconosKernel.$libsuffix in $ac_dir])
 		dynlib="yes"
 		echo "yes"
        		AC_MSG_RESULT([Library $ac_dir/lib/libSiconosKernel.$libsuffix selected]) 
-       	break;  
+      	 	break;  
 	else
-	echo "no"
-    fi
+		echo "no"
+    	fi	
 done
 
 # test static library
@@ -57,9 +57,9 @@ if test "$kernel_lib" = "no" ; then
        		KERNEL_PATH="$ac_dir/"	  
 		echo "yes"  	   
 	    	AC_MSG_RESULT([Library $ac_dir/lib/libSiconosKernel.a selected])
-	    break
+	        break
 	else
-	echo "no"
+		echo "no"
 	fi
     done
 fi
@@ -80,4 +80,4 @@ fi
 
 
 	     
-])dnl ACX_CHECK_LAPACK
+])dnl ACX_CHECK_KERNEL
