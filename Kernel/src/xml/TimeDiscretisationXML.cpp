@@ -20,7 +20,6 @@
 #include "TimeDiscretisationXML.h"
 using namespace std;
 
-
 TimeDiscretisationXML::TimeDiscretisationXML():
   rootNode(NULL), hNode(NULL), NNode(NULL), tkNode(NULL),
   hMinNode(NULL), hMaxNode(NULL)

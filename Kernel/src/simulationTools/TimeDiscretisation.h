@@ -19,18 +19,15 @@
 #ifndef TIMEDISCRETISATION_H
 #define TIMEDISCRETISATION_H
 
-#include "SiconosMatrix.h"
 #include "SimpleVector.h"
 #include "TimeDiscretisationXML.h"
-#include "Strategy.h"
-#include "OneStepIntegrator.h"
 #include "RuntimeException.h"
 #include "check.h"
+#include "Strategy.h"
 #include <iostream>
 #include <vector>
 
 class Strategy;
-//class OneStepIntegrator;
 
 /** \class TimeDiscretisation
  *  \brief The time discretisation scheme

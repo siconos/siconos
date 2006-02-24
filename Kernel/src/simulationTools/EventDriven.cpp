@@ -36,6 +36,78 @@ EventDriven::EventDriven(StrategyXML* strxml, Model *newModel): Strategy(strxml,
 EventDriven::~EventDriven()
 {}
 
+void EventDriven::setEventsManagerPtr(EventsManager*)
+{
+  // TODO if required ??
+}
+
+// Run the whole simulation
+void EventDriven::run()
+{
+
+  unsigned int count = 0; // events counter.
+  // do simulation while events remains in the "future events" list of events manager.
+  cout << " ==== Start of Event Driven simulation - This may take a while ... ====" << endl;
+  while (eventsManager->hasNextEvent())
+  {
+    // Integrate system between "current" and "next" event of events manager.
+    advanceToEvent();
+    // update events
+    eventsManager->processEvents();
+    count++;
+  }
+  cout << "===== End of Event Driven simulation. " << count << " events have been processed. ==== " << endl;
+}
+
+// void EventDriven::simulateOneStep()
+// {
+//   advanceToEvent();
+//   // update events
+//   eventsManager->processEvents();
+// }
+
+void EventDriven::advanceToEvent()
+{
+  // Get double value of init time (currentEvent time) and final time (nextEvent time)
+  double tinit = eventsManager->getCurrentTime();
+  double tend =  eventsManager->getNextTime();
+  double tout, ttmp = tend;
+  bool isNewEventOccur = false;  // set to true if a new event occur during integration
+  // call integrate method of each OSI, between tinit and tend.
+  vectorOfOSIPtr::iterator it;
+  for (it = integratorVector.begin(); it != integratorVector.end(); ++it)
+  {
+    bool iout = false;
+    (*it)->integrate(tinit, tend, ttmp, iout); // integrate must return a flag telling if tend has been reached or not.
+    // If not, ttmp is the real reached time.
+    if (!iout)
+    {
+      tout = min(tout, ttmp) ;
+      isNewEventOccur = true;
+    }
+  }
+  if (isNewEventOccur)
+  {
+    // Add an event into the events manager list
+    bool isScheduleOk = eventsManager->scheduleEvent("NonSmoothEvent", tout);
+    if (!isScheduleOk) cout << " EventDriven advanceToEvent warning: try to add an already existing event" << endl;
+    else
+    {
+      // restart integration from tinit to tout
+      for (it = integratorVector.begin(); it != integratorVector.end(); ++it)
+      {
+        // Add something to "reset" the OSI state as it was a tinit.
+
+        bool iout = false;
+        (*it)->integrate(tinit, tout, ttmp, iout); // integrate must return a flag telling if tend has been reached or not.
+        // If not, ttmp is the real reached time.
+        if (!iout)
+          RuntimeException::selfThrow("EventDriven advanceToEvent, event management problem.");
+      }
+    }
+  }
+}
+
 EventDriven* EventDriven::convert(Strategy *str)
 {
   cout << "EventDriven::convert (Strategy *str)" << endl;

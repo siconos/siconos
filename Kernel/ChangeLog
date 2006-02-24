@@ -24,19 +24,25 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
   v1.1.x -  (current release)
---------------------------------------------------------------------------------
-	
+--------------------------------------------------------------------------------	
 Notes:
 
 Changes:
 
+2006-02-24 Franck Perignon <franck.perignon@inrialpes.fr>
+                                                                               
+        * add Event, EventsComparison and EventsManager
+	  classes in simulation tools
+	=> used in EventDriven strategy
+	* Makefile.am -> make install also install doc in @prefix@
+	* Remove Adams class
+	
 2006-02-22   Vincent Acary <vincent.acary@inrialpes.fr>
              Franck Perignon <franck.perignon@inrialpes.fr>
 	* update configure.ac to generate automatically 
 	  siconos/siconos, siconos/MakefilePluginSample, 
 	  KernelConfig.sh.
 	 
-
 2006-02-19   Vincent Acary <vincent.acary@inrialpes.fr>
 
 	* /macros/ac_f77_library_ldflags.m4 : This file is added and 

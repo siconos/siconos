@@ -20,7 +20,6 @@
 // includes to be deleted thanks to factories:
 #include "Moreau.h"
 #include "Lsodar.h"
-#include "Adams.h"
 #include "LCP.h"
 #include "FrictionContact2D.h"
 #include "FrictionContact3D.h"
@@ -133,12 +132,6 @@ Strategy::Strategy(StrategyXML* strxml, Model *newModel): strategyType("undefine
         else if (osiXMLVector[i]->getType() == LSODAR_TAG)
         {
           integratorVector.push_back(new Lsodar(osiXMLVector[i]));
-          isIntegratorVectorAllocatedIn.push_back(true);
-        }
-        // Adams
-        else if (osiXMLVector[i]->getType() == ADAMS_TAG)
-        {
-          integratorVector.push_back(new Adams(osiXMLVector[i]));
           isIntegratorVectorAllocatedIn.push_back(true);
         }
         else RuntimeException::selfThrow("Strategy::xml constructor - wrong type of Integrator");
@@ -381,8 +374,6 @@ void Strategy::saveStrategyToXML()
     {
       if (integratorVector[i]->getType() == MOREAU_INTEGRATOR)
         (static_cast<Moreau*>(integratorVector[i]))->saveIntegratorToXML();
-      else if (integratorVector[i]->getType() == ADAMS_INTEGRATOR)
-        (static_cast<Adams*>(integratorVector[i]))->saveIntegratorToXML();
       else if (integratorVector[i]->getType() == LSODAR_INTEGRATOR)
         (static_cast<Lsodar*>(integratorVector[i]))->saveIntegratorToXML();
       else RuntimeException::selfThrow("Strategy::saveStrategyToXML - wrong type of OneStepIntegrator");
@@ -405,17 +396,6 @@ void Strategy::saveStrategyToXML()
   }
   else RuntimeException::selfThrow("Strategy::saveStrategyToXML - StrategyXML = NULL");
   OUT("Strategy::saveStrategyToXML\n");
-}
-
-OneStepIntegrator* Strategy::addAdams(TimeDiscretisation* td, DynamicalSystem* ds)
-{
-  if (hasDynamicalSystemIntegrator(ds))
-    RuntimeException::selfThrow("Strategy::addAdams : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
-  OneStepIntegrator* osi;
-  osi = new Adams(td, ds);
-  integratorVector.push_back(osi);
-  isIntegratorVectorAllocatedIn.push_back(true);
-  return osi;
 }
 
 OneStepIntegrator* Strategy::addMoreau(TimeDiscretisation* td, DynamicalSystem* ds, const double& theta)

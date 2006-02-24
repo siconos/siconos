@@ -20,7 +20,6 @@
 
 // includes to be deleted thanks to factories
 #include "LsodarXML.h"
-#include "AdamsXML.h"
 #include "MoreauXML.h"
 #include "LCPXML.h"
 #include "QPXML.h"
@@ -67,10 +66,6 @@ StrategyXML::StrategyXML(xmlNode * rootStrategyNode, vector<int> definedNumberDS
 
         else if (type == LSODAR_TAG)
           oneStepIntegratorXMLVector.push_back(new LsodarXML(OSInode, DSAvailabilityMap));
-
-        else if (type == ADAMS_TAG)
-          oneStepIntegratorXMLVector.push_back(new AdamsXML(OSInode, DSAvailabilityMap));
-
         else
           XMLException::selfThrow("StrategyXML, Integrator loading : undefined OneStepIntegrator type : " + type);
 
@@ -194,19 +189,6 @@ void StrategyXML::saveStrategy2XML(xmlNode* node, Strategy* str)
             static_cast<LsodarXML*>(osixml)->updateOneStepIntegratorXML(node, str->getOneStepIntegrator(i));
 
             this->oneStepIntegratorXMLVector.push_back(osixml);
-          }
-          else if (type == ADAMS_TAG)
-          {
-            node = xmlNewChild(integratorDefinitionNode, NULL, (xmlChar*)ADAMS_TAG.c_str(), NULL);
-            osixml = new AdamsXML();
-
-            // linkage between the OneStepIntegrator and his OneStepIntegratorXML
-            str->getOneStepIntegrator(i)->setOneStepIntegratorXMLPtr(osixml);
-
-            // creation of the OneStepIntegratorXML
-            static_cast<AdamsXML*>(osixml)->updateOneStepIntegratorXML(node, str->getOneStepIntegrator(i));
-
-            oneStepIntegratorXMLVector.push_back(osixml);
           }
           else
             XMLException::selfThrow("StrategyXML - saveStrategy2XML ERROR : undefined integrator type : " + type);

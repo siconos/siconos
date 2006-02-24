@@ -29,7 +29,13 @@ doc:
 	$(MKDIR) $(top_srcdir)/doc/api
 	$(DOXYGEN) $(DOXYGEN_CFG)
 
-docclean:
-	$(RM) -rf $(top_srcdir)/doc/api
-	$(RM) -rf $(top_srcdir)/doc
-
+install-data-local: 
+	  @if test -d $(top_srcdir)/doc; then \
+	    if ! test -d @prefix@/doc; then \
+	      $(MKDIR) @prefix@/doc; \
+	    fi; \
+	    if test -d @prefix@/doc/Siconos_Kernel; then \
+	      $(RM) -rf @prefix@/doc/Siconos_Kernel; \
+	    fi; \
+	    $(CP) -r $(top_srcdir)/doc/ @prefix@/doc/Siconos_Kernel; \
+	  fi; 

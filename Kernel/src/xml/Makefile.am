@@ -27,7 +27,7 @@ include $(top_srcdir)/config/Make-rules
 
 
 noinst_LTLIBRARIES = libSiconosXml.la
-libSiconosXml_la_SOURCES = SolverXML.cpp AdamsXML.cpp BoundaryConditionXML.cpp FrictionContactXML.cpp \
+libSiconosXml_la_SOURCES = SolverXML.cpp BoundaryConditionXML.cpp FrictionContactXML.cpp \
 		ComplementarityConditionNSLXML.cpp DSInputOutputXML.cpp DynamicalSystemXML.cpp \
 		EqualityConstraintXML.cpp InteractionXML.cpp LagrangianDSIOXML.cpp LagrangianECXML.cpp LagrangianLinearDSIOXML.cpp \
 		LagrangianLinearECXML.cpp LagrangianLinearRXML.cpp LagrangianDSXML.cpp LagrangianRXML.cpp \
@@ -37,7 +37,7 @@ libSiconosXml_la_SOURCES = SolverXML.cpp AdamsXML.cpp BoundaryConditionXML.cpp F
 		NonSmoothLawXML.cpp NonSmoothDynamicalSystemXML.cpp OneStepIntegratorXML.cpp OneStepNSProblemXML.cpp \
 		PeriodicBCXML.cpp QPXML.cpp RelationXML.cpp RelayNSLXML.cpp SiconosDOMTreeTools.cpp \
 		SiconosMemoryXML.cpp SiconosModelXML.cpp StrategyXML.cpp TimeDiscretisationXML.cpp \
-		SolverXML.h AdamsXML.h BoundaryConditionXML.h FrictionContactXML.h ComplementarityConditionNSLXML.h DSInputOutputXML.h \
+		SolverXML.h BoundaryConditionXML.h FrictionContactXML.h ComplementarityConditionNSLXML.h DSInputOutputXML.h \
 		DynamicalSystemXML.h EqualityConstraintXML.h InteractionXML.h LagrangianDSIOXML.h LagrangianECXML.h LagrangianLinearDSIOXML.h \
 		LagrangianLinearECXML.h LagrangianLinearRXML.h LagrangianDSXML.h LagrangianRXML.h \
 		LagrangianLinearTIDSXML.h LCPXML.h LinearBCXML.h LinearDSIOXML.h LinearECXML.h \
@@ -48,7 +48,7 @@ libSiconosXml_la_SOURCES = SolverXML.cpp AdamsXML.cpp BoundaryConditionXML.cpp F
 		StrategyXML.h TimeDiscretisationXML.h XMLTagsName.h
 
 libSiconosXml_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
-include_HEADERS = SolverXML.h AdamsXML.h BoundaryConditionXML.h FrictionContactXML.h ComplementarityConditionNSLXML.h \
+include_HEADERS = SolverXML.h BoundaryConditionXML.h FrictionContactXML.h ComplementarityConditionNSLXML.h \
 		DSInputOutputXML.h DynamicalSystemXML.h EqualityConstraintXML.h InteractionXML.h \
 		LagrangianDSIOXML.h LagrangianECXML.h LagrangianLinearDSIOXML.h LagrangianLinearECXML.h \
 		LagrangianLinearRXML.h LagrangianDSXML.h \

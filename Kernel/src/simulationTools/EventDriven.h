@@ -19,8 +19,6 @@
 #ifndef EVENTDRIVEN_H
 #define EVENTDRIVEN_H
 
-#include "Strategy.h"
-
 /** \class EventDriven
  *  \brief Strategy based on event driven method, ie events detection (see theoretical manual for more details).
  *  \author SICONOS Development Team - copyright INRIA
@@ -30,8 +28,18 @@
  *
  */
 
+#include "Strategy.h"
+#include "EventsManager.h"
+
+class EventsManager;
+
 class EventDriven : public Strategy
 {
+
+private:
+  /** tool to manage events */
+  EventsManager* eventsManager;
+
 public:
 
   /** \fn EventDriven()
@@ -46,7 +54,43 @@ public:
    */
   EventDriven(StrategyXML*, Model*);
 
+  /** \fn ~EventDriven()
+   *  \brief destructor
+   */
   ~EventDriven();
+
+  /* Getters and setters */
+
+  /** \fn EventsManager* getEventsManagerPtr()
+   *  \brief get the EventsManager
+   *  \return a pointer to EventsManager
+   */
+  inline EventsManager* getEventsManagerPtr() const
+  {
+    return eventsManager;
+  }
+
+  /** \fn void setEventsManagerPtr(EventsManager*)
+   *  \brief set the EventsManager of the OneStepNSProblem
+   *  \param: a pointer on EventsManager
+   */
+  void setEventsManagerPtr(EventsManager*);
+
+  /** \fn void simulateOneStep()
+   *  \brief run the whole simulation
+   */
+  void run();
+
+  /** \fn void simulateOneStep()
+   *  \brief run simulation from one Event to the next
+   */
+  //void simulateOneStep();
+
+  /** \fn void advanceToEvent()
+   *  \brief run simulation from one Event to the next, according to events manager settings.
+   */
+  void advanceToEvent();
+
 
   /** \fn EventDriven* convert (Strategy* str)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.

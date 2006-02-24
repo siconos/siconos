@@ -66,10 +66,10 @@ For each package (Numerics, Kernel, Front-End, in this order), in the correspond
 	- configure --prefix="the path where you want to install the platform" --other_options
 	- make
 	- make check (optional) : to run tests	
-	- make doc (optional)  : to generate Doxygen documentation
+	- make doc (optional)  : to generate Doxygen documentation 
 	- make install (default install location: /usr/local) 
 
-!!! WARNING: any local installation of a library (libxml2, cppunit ...) requires that you set properly 
+!!! WARNING: any local installation of a library (libxml2, cppunit ...) may require that you set properly 
 	     the LD_LIBRARY_PATH.
 
 for more details on configure options, type configure --help. 

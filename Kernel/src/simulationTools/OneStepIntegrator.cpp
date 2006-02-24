@@ -63,6 +63,11 @@ void OneStepIntegrator::integrate()
   RuntimeException::selfThrow("OneStepIntegrator:integrate, not yet implemented for this type of integrator" + getType());
 }
 
+void OneStepIntegrator::integrate(const double&, const double&, const double&, const bool&)
+{
+
+  cout << " OSI Integrate, not yet implemented, test version" << endl;
+}
 void OneStepIntegrator::updateState()
 {
   RuntimeException::selfThrow("OneStepIntegrator:updateState, not yet implemented for this type of integrator" + getType());

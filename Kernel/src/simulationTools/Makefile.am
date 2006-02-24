@@ -25,13 +25,15 @@ include $(top_srcdir)/config/Make-rules
 
 
 noinst_LTLIBRARIES = libSimulationTools.la
-libSimulationTools_la_SOURCES = Solver.cpp Adams.cpp FrictionContact.cpp FrictionContact2D.cpp FrictionContact3D.cpp \
-	  	EventDriven.cpp LCP.cpp Lsodar.cpp Moreau.cpp OneStepIntegrator.cpp OneStepNSProblem.cpp QP.cpp \
-		Relay.cpp Strategy.cpp TimeDiscretisation.cpp TimeStepping.cpp \
-		Solver.h Adams.h FrictionContact.h FrictionContact2D.h FrictionContact3D.h EventDriven.h LCP.h Lsodar.h Moreau.h OneStepIntegrator.h OneStepNSProblem.h QP.h \
-		Relay.h Strategy.h TimeDiscretisation.h TimeStepping.h	
+libSimulationTools_la_SOURCES = TimeDiscretisation.cpp Solver.cpp Event.cpp TimeDiscrEvent.cpp NonSmoothEvent.cpp FrictionContact.cpp \
+				FrictionContact2D.cpp FrictionContact3D.cpp LCP.cpp Lsodar.cpp Moreau.cpp OneStepIntegrator.cpp \
+				OneStepNSProblem.cpp QP.cpp Relay.cpp Strategy.cpp TimeStepping.cpp EventDriven.cpp EventsComparison.cpp EventsManager.cpp
+				TimeDiscretisation.h Solver.h Event.h TimeDiscrEvent.h NonSmoothEvent.h FrictionContact.h FrictionContact2D.h \
+				FrictionContact3D.h LCP.h Lsodar.h Moreau.h OneStepIntegrator.h OneStepNSProblem.h QP.h \
+				Relay.h Strategy.h TimeStepping.h EventDriven.h EventsComparison.h EventsManager.h	
 libSimulationTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
-include_HEADERS = Solver.h Adams.h FrictionContact.h FrictionContact2D.h FrictionContact3D.h EventDriven.h LCP.h Lsodar.h Moreau.h OneStepIntegrator.h OneStepNSProblem.h QP.h \
-		Relay.h Strategy.h TimeDiscretisation.h TimeStepping.h
+include_HEADERS = TimeDiscretisation.h Solver.h Event.h  TimeDiscrEvent.h NonSmoothEvent.h FrictionContact.h FrictionContact2D.h\
+		  FrictionContact3D.h LCP.h Lsodar.h Moreau.h OneStepIntegrator.h OneStepNSProblem.h QP.h \
+	          Relay.h Strategy.h TimeStepping.h EventDriven.h EventsComparison.h EventsManager.h
 
 

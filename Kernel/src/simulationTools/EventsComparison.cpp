@@ -16,13 +16,23 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "AdamsXML.h"
+#include "EventsComparison.h"
 using namespace std;
 
-AdamsXML::AdamsXML() : OneStepIntegratorXML()
-{}
-
-AdamsXML::AdamsXML(xmlNode * AdamsNode,  map<int, bool> definedDSNumbersMap)
-  : OneStepIntegratorXML(AdamsNode, definedDSNumbersMap)
-{}
-
+bool EventsComparison::operator()(Event* e1, Event* e2) const
+{
+  //  bool result = 0;
+  unsigned long int t1 = e1->getTimeOfEvent();
+  unsigned long int t2 = e2->getTimeOfEvent();
+  // if time are different, sort according to time ...
+  if (t1 == t2)
+  {
+    //      bool comp = 0;
+    // Todo: Set type name in order to be consistent with string operator ">" ??
+    string type1 = e1->getType();
+    string type2 = e2->getType();
+    return type1 > type2; // This means TimeDiscretisationEvent is set as anterior to NonSmoothEvent
+  }
+  else
+    return mode == normal ? t1 < t2 : t2 < t1;
+}

@@ -26,7 +26,7 @@ dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_SYSTEM
 AM_INIT_AUTOMAKE(SICONOS, 1.1.1)
 AC_CONFIG_SRCDIR([src/model/Model.h])
-AC_CONFIG_HEADER([config.h])
+AM_CONFIG_HEADER([config.h])
 
 # SO version of all siconos shared libraries
 SICONOS_SO_CURRENT=1

@@ -16,37 +16,50 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/** \class AdamsXML
- *   \brief This class manages Adams data part
+#ifndef TIMEDISCREVENT_H
+#define TIMEDISCREVENT_H
+
+/** \class TimeDiscrEvent
+ *  \brief class derived from Event one: events that corresponds to original time discretisation steps.
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.1.1.
- *   \date 05/17/2004
+ *  \version 1.1.1.
+ *  \date (Creation) February 21, 2006
  *
- *
- * AdamsXML allows to manage data of a Adams DOM tree.
  */
 
-#ifndef __ADAMSXML__
-#define __ADAMSXML__
-#include "OneStepIntegratorXML.h"
+#include "Event.h"
 
-//const string ADAMS_R = "r";
-
-class AdamsXML : public OneStepIntegratorXML
+class TimeDiscrEvent : public Event
 {
-public:
-
-  AdamsXML();
-
-  /** \fn AdamsXML(xmlNode * AdamsNode)
-   *   \brief Build a AdamsXML object from a DOM tree describing Adams OneStepIntegrator
-   *   \param AdamsNode : the Adams DOM tree
-   *   \param map<int, bool> definedDSNumbersMap : to know if DS numbers are not used by another OneStepIntegrator
-   */
-  AdamsXML(xmlNode * AdamsNode, std::map<int, bool> definedDSNumbersMap);
 
 private:
+
+  /** Default constructor */
+  TimeDiscrEvent();
+
+public:
+
+  /** \fn TimeDiscrEvent(const TimeDiscrEvent&)
+   *  \brief copy constructor
+   *  \param the timeDiscrEvent to be copied
+   */
+  TimeDiscrEvent(const TimeDiscrEvent&);
+
+  /** \fn TimeDiscrEvent(const unsigned long int&)
+   *  \brief constructor with time value as a parameter
+   *  \param an unsigned long int
+   */
+  TimeDiscrEvent(const unsigned long int&);
+
+  /** \fn ~TimeDiscrEvent()
+   *  \brief destructor
+   */
+  ~TimeDiscrEvent();
+
+  /** \fn void process()
+   *  \brief
+   */
+  void process();
 };
 
-
-#endif
+#endif // TimeDiscrEvent_H

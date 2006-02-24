@@ -50,6 +50,8 @@ class StrategyXML;
  * The to present available strategies are time stepping and event driven. See derived classes for more details.
  *
  */
+typedef std::vector<OneStepIntegrator*> vectorOfOSIPtr;
+
 class Strategy
 {
 protected:
@@ -61,7 +63,7 @@ protected:
   TimeDiscretisation *timeDiscretisation;
 
   /** the dynamical systems integrators */
-  std::vector<OneStepIntegrator*> integratorVector;
+  vectorOfOSIPtr integratorVector;
 
   /** the non smooth problem */
   OneStepNSProblem *nsProblem;
@@ -91,7 +93,7 @@ public:
    *  \param pointer on a OneStepNSProblem
    *  \param the model which owns this strategy  (optional parameter)
    */
-  Strategy(TimeDiscretisation*, std::vector<OneStepIntegrator*>, OneStepNSProblem *, Model* = NULL);
+  Strategy(TimeDiscretisation*, vectorOfOSIPtr, OneStepNSProblem *, Model* = NULL);
 
   /** \fn Strategy(TimeDiscretisation*, vector<OneStepIntegrator*>, Model*= NULL)
    *  \brief constructor from a given set of data (2)
@@ -100,7 +102,7 @@ public:
    *  \param the model which owns this strategy  (optional parameter)
    *   with previous constructor)
    */
-  Strategy(TimeDiscretisation*, std::vector<OneStepIntegrator*>, Model* = NULL);
+  Strategy(TimeDiscretisation*, vectorOfOSIPtr, Model* = NULL);
 
   /** \fn Strategy(TimeDiscretisation*, OneStepNSProblem *, Model*= NULL )
    *  \brief constructor from a given set of data (3)
@@ -123,14 +125,14 @@ public:
    *  \param pointer on a OneStepNSProblem
    *  \param the model which owns this strategy  (optional parameter)
    */
-  Strategy(std::vector<OneStepIntegrator*>, OneStepNSProblem *, Model* = NULL);
+  Strategy(vectorOfOSIPtr, OneStepNSProblem *, Model* = NULL);
 
   /** \fn Strategy(vector<OneStepIntegrator*> , Model*= NULL)
    *  \brief constructor from a given set of data (6)
    *  \param the vector of osi
    *  \param the model which owns this strategy  (optional parameter)
    */
-  Strategy(std::vector<OneStepIntegrator*>, Model* = NULL);
+  Strategy(vectorOfOSIPtr, Model* = NULL);
 
   /** \fn Strategy(vector<OneStepIntegrator*> , Model*= NULL)
    *  \brief constructor from a given set of data (7)
@@ -195,7 +197,7 @@ public:
    *  \return a vector of OneStepIntegrator*
    *  \exception RuntimeException
    */
-  inline std::vector<OneStepIntegrator*> getOneStepIntegrators() const
+  inline vectorOfOSIPtr getOneStepIntegrators() const
   {
     return integratorVector;
   };
@@ -204,7 +206,7 @@ public:
    *  \brief set the vector of Integrators
    *  \param a vector of OneStepIntegrator to set
    */
-  void setOneStepIntegrators(const std::vector<OneStepIntegrator*> vOSI);
+  void setOneStepIntegrators(const vectorOfOSIPtr vOSI);
 
   /** \fn OneStepIntegrator* getOneStepIntegrator(const int&)
    *  \brief get one Integrator of the Strategy
@@ -342,14 +344,6 @@ public:
   // --- FUNCTIONS TO CREATE OR ADD VARIOUS OBJECTS ---
 
   //===========================================
-
-  /** \fn OneStepIntegrator* addAdams(TimeDiscretisation* td, DynamicalSystem* ds)
-   *  \brief allows to add an Adams integrator to the Strategy
-   *  \param TimeDiscretisation* : the TimeDiscretisation of the OneStepIntegrator
-   *  \param DynamicalSystem* : the DynamicalSystem that OneStepIntegrator must integrate
-   *  \return OneStepIntegrator* : the OneStepIntegrator created
-   */
-  OneStepIntegrator* addAdams(TimeDiscretisation* td, DynamicalSystem* ds);
 
   /** \fn OneStepIntegrator* addMoreau(TimeDiscretisation* td, DynamicalSystem* ds,
                                        const double& theta)
