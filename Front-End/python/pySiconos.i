@@ -69,7 +69,6 @@
 #include "QPXML.h"
 #include "LCPXML.h"
 #include "OneStepIntegratorXML.h"
-#include "AdamsXML.h"
 #include "MoreauXML.h"
 #include "LsodarXML.h"
 #include "StrategyXML.h"
@@ -120,6 +119,11 @@
 
 #include "TimeDiscretisation.h"
 #include "Solver.h"
+#include "Event.h"
+#include "NonSmoothEvent.h"
+#include "TimeDiscrEvent.h"
+#include "EventsComparison.h"
+#include "EventsManager.h"
 #include "OneStepNSProblem.h"
 #include "QP.h"
 #include "Relay.h"
@@ -130,7 +134,6 @@
 #include "OneStepIntegrator.h"
 #include "Moreau.h"
 #include "Lsodar.h"
-#include "Adams.h"
 #include "Strategy.h"
 #include "EventDriven.h"
 #include "TimeStepping.h"
@@ -217,7 +220,6 @@ $1 = string(PyString_AsString($input));
 %include "FrictionContactXML.h"
 // ---
 %include "OneStepIntegratorXML.h"
-%include "AdamsXML.h"
 %include "MoreauXML.h"
 %include "LsodarXML.h"
 // ---
@@ -284,6 +286,11 @@ $1 = string(PyString_AsString($input));
 // --- simulationTools ---
 %include "TimeDiscretisation.h"
 %include "Solver.h"
+%include "Event.h"
+%include "NonSmoothEvent.h"
+%include "TimeDiscrEvent.h"
+%include "EventsComparison.h"
+%include "EventsManager.h"
 // ---
 %include "OneStepNSProblem.h"
 %include "QP.h"
@@ -296,7 +303,6 @@ $1 = string(PyString_AsString($input));
 %include "OneStepIntegrator.h"
 %include "Moreau.h"
 %include "Lsodar.h"
-%include "Adams.h"
 // ---
 %include "Strategy.h"
 %include "EventDriven.h"

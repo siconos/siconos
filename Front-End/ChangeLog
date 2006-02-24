@@ -31,6 +31,10 @@ Notes:
 		
 Changes:
 
+2006-02-24  Franck Perignon <franck.perignon@inrialpes.fr>
+	* add EventsMangager.h include 
+	  (and other EventDriven related files) in pySiconos.i
+
 2006-02-22   Vincent Acary <vincent.acary@inrialpes.fr>
              Franck Perignon <franck.perignon@inrialpes.fr>
 	* update configure.ac to use the correct SiconosLDFLAGS
@@ -52,6 +56,11 @@ Notes:
 
 		
 Changes:
+
+2006-02-22   Franck Perignon <franck.perignon@inrialpes.fr> 
+
+        * remove useless csh or sh files in python (compile.sh,
+	  pySiconos.csh, correctif.sh, pySiconosEnv.csh)
 
 2006-02-14   Roger Pissard-Gibollet <Roger.Pissard-Gibollet@inrialpes.fr> 
 
