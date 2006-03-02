@@ -81,10 +81,10 @@ void ModelTest::testBuildModel2()
 
 void ModelTest::testSetStrategyPtr()
 {
-  Strategy * newStrat = new Strategy();
 
   Model * M = new Model(t0, T);
-  M->setStrategyPtr(newStrat);
+  Strategy * newStrat = new Strategy(M);
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE("test SetStrategyPtr : ", M->getStrategyPtr() == newStrat, true);
   delete M;
   cout << " test setStrategyPtr ok" << endl;

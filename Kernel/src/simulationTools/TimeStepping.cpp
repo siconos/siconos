@@ -21,7 +21,13 @@
 using namespace std;
 
 // --- Default constructor ---
-TimeStepping::TimeStepping(): Strategy()
+TimeStepping::TimeStepping(Model * newModel): Strategy(newModel)
+{
+  strategyType = "TimeStepping";
+}
+
+// --- From Model ---
+TimeStepping::TimeStepping(Model& newModel): Strategy(newModel)
 {
   strategyType = "TimeStepping";
 }
@@ -41,5 +47,45 @@ TimeStepping* TimeStepping::convert(Strategy *str)
   cout << "TimeStepping::convert (Strategy *str)" << endl;
   TimeStepping* ts = dynamic_cast<TimeStepping*>(str);
   return ts;
+}
+
+void TimeStepping::initialize()
+{
+  // initialization of the OneStepIntegrators
+  for (unsigned int i = 0; i < integratorVector.size(); i++)
+    integratorVector[i]->initialize();
+  // initialization of  OneStepNonSmoothProblem
+  if (nsProblem != NULL)
+    nsProblem->initialize();
+}
+
+void TimeStepping::run()
+{
+  // Current Step
+  unsigned int k = timeDiscretisation->getK();
+  // Number of time steps
+  unsigned int nSteps = timeDiscretisation->getNSteps();
+  while (k < nSteps)
+  {
+    // transfer of state i+1 into state i and time incrementation
+    nextStep();
+    // update current time step
+    k = timeDiscretisation->getK();
+
+    computeOneStep();
+
+  }
+}
+
+// compute simulation between ti and ti+1, ti+1 being currentTime (?)
+// Initial DS/interaction state is given by memory vectors (check that?)
+// and final state is the one saved in DS/Interaction at the end of this function
+void TimeStepping::computeOneStep()
+{
+  // solve ...
+  computeFreeState();
+  computeOneStepNSProblem();
+  // update
+  update();
 }
 

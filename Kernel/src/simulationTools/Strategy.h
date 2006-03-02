@@ -47,14 +47,23 @@ class StrategyXML;
  *
  * !!! This is an abstract class !!!
  *
- * The to present available strategies are time stepping and event driven. See derived classes for more details.
+ * The available strategies are time stepping and event driven. See derived classes for more details.
  *
+ * Rules:
+ *     - A Model* must be given to the constructor, else => exception.
+ *     - Strategy must always be built before TimeDiscretisation, which
+ *       means that a TimeDiscretisation constructor can not be called
+ *       without a strategy as argument.
+ *       Moreover, there is no strategy->setTimeDiscretisation() function
  */
 typedef std::vector<OneStepIntegrator*> vectorOfOSIPtr;
 
 class Strategy
 {
 protected:
+
+  /** name or id of the Strategy */
+  std::string name;
 
   /** the type of the Strategy */
   std::string strategyType;
@@ -81,72 +90,47 @@ protected:
 
 public:
 
-  /** \fn Strategy()
+  /** \fn Strategy(Model* = NULL)
    *  \brief default constructor
+   *  \param a pointer to the model that owns this strategy. NULL Model leads to exception
    */
-  Strategy();
+  Strategy(Model* = NULL);
 
-  /** \fn Strategy(TimeDiscretisation*, vector<OneStepIntegrator*>, OneStepNSProblem*, Model*= NULL)
+  /** \fn Strategy(Model&)
+   *  \brief constructor from Model => avoid this function, prefer the one with Model*
+   *  \param a Model.
+   */
+  Strategy(Model&);
+
+  /** \fn Strategy(vector<OneStepIntegrator*>, OneStepNSProblem*, Model*)
    *  \brief constructor from a given set of data (1)
-   *  \param pointer on the time discretisation
    *  \param the vector of osi
    *  \param pointer on a OneStepNSProblem
-   *  \param the model which owns this strategy  (optional parameter)
+   *  \param the model that owns this strategy
    */
-  Strategy(TimeDiscretisation*, vectorOfOSIPtr, OneStepNSProblem *, Model* = NULL);
+  Strategy(vectorOfOSIPtr, OneStepNSProblem *, Model*);
 
-  /** \fn Strategy(TimeDiscretisation*, vector<OneStepIntegrator*>, Model*= NULL)
+  /** \fn Strategy(vector<OneStepIntegrator*>, Model*)
    *  \brief constructor from a given set of data (2)
-   *  \param pointer on the time discretisation
    *  \param the vector of osi
-   *  \param the model which owns this strategy  (optional parameter)
+   *  \param the model that owns this strategy
    *   with previous constructor)
    */
-  Strategy(TimeDiscretisation*, vectorOfOSIPtr, Model* = NULL);
+  Strategy(vectorOfOSIPtr, Model*);
 
-  /** \fn Strategy(TimeDiscretisation*, OneStepNSProblem *, Model*= NULL )
+  /** \fn Strategy(OneStepNSProblem *, Model* )
    *  \brief constructor from a given set of data (3)
-   *  \param pointer on the time discretisation
-   *  \param pointer on a OneStepNSProblem
-   *  \param the model which owns this strategy  (optional parameter)
+   *  \param pointer to a OneStepNSProblem
+   *  \param the model that owns this strategy
    */
-  Strategy(TimeDiscretisation*, OneStepNSProblem *, Model* = NULL);
-
-  /** \fn Strategy(TimeDiscretisation*, Model*)
-   *  \brief constructor from a given set of data (4)
-   *  \param pointer on the time discretisation
-   *  \param the model which owns this strategy  (optional parameter)
-   */
-  Strategy(TimeDiscretisation*, Model* = NULL);
-
-  /** \fn Strategy(vector<OneStepIntegrator*>, OneStepNSProblem*, Model*= NULL)
-   *  \brief constructor from a given set of data (5)
-   *  \param the vector of osi
-   *  \param pointer on a OneStepNSProblem
-   *  \param the model which owns this strategy  (optional parameter)
-   */
-  Strategy(vectorOfOSIPtr, OneStepNSProblem *, Model* = NULL);
-
-  /** \fn Strategy(vector<OneStepIntegrator*> , Model*= NULL)
-   *  \brief constructor from a given set of data (6)
-   *  \param the vector of osi
-   *  \param the model which owns this strategy  (optional parameter)
-   */
-  Strategy(vectorOfOSIPtr, Model* = NULL);
-
-  /** \fn Strategy(vector<OneStepIntegrator*> , Model*= NULL)
-   *  \brief constructor from a given set of data (7)
-   *  \param pointer on a OneStepNSProblem
-   *  \param the model which owns this strategy  (optional parameter)
-   */
-  Strategy(OneStepNSProblem *, Model* = NULL);
+  Strategy(OneStepNSProblem *, Model*);
 
   /** \fn Strategy(StrategyXML*, Model*)
    *  \brief constructor with XML object of the Strategy
    *  \param StrategyXML* : the XML object corresponding
    *  \param the model which owns this strategy  (optional parameter)
    */
-  Strategy(StrategyXML*, Model* = NULL);
+  Strategy(StrategyXML*, Model*);
 
   /** \fn ~Strategy()
    *  \brief destructor
@@ -159,6 +143,23 @@ public:
   bool isStrategyComplete() const;
 
   // GETTERS/SETTERS
+
+  /** \fn inline string getName() const
+   *  \brief get the name of the Strategy
+   *  \return string : the name of the Strategy
+   */
+  inline const std::string getName() const
+  {
+    return name;
+  }
+
+  /** \fn inline string setName(const string&)
+   *  \brief set the name of the Strategy
+   */
+  inline void setName(const std::string& newName)
+  {
+    name = newName;
+  }
 
   /** \fn inline string getType() const
    *  \brief get the type of the Strategy
@@ -187,10 +188,10 @@ public:
   };
 
   /** \fn void setTimeDiscretisationPtr(TimeDiscretisation*)
-   *  \brief set timeDiscretisation
-   *  \param the TimeDiscretisation to set
+   *  \brief set the TimeDiscretisation of the Strategy
+   *  \param the TimeDiscretisation
    */
-  void setTimeDiscretisationPtr(TimeDiscretisation* td);
+  void setTimeDiscretisationPtr(TimeDiscretisation*);
 
   /** \fn vector<OneStepIntegrator*> getOneStepIntegrators(void)
    *  \brief get all the Integrators of the Strategy
@@ -320,7 +321,17 @@ public:
   /** \fn void initialize()
    *  \brief executes the complete initialisation of Strategy (OneStepIntegrators, OneStepNSProblem, TImediscretisation) with the XML Object
    */
-  virtual void initialize();
+  virtual void initialize() = 0;
+
+  /** \fn void run()
+   *  \brief run the simulation, from t0 to T
+   */
+  virtual void run() = 0;
+
+  /** \fn void computeOneStep()
+   *  \brief run one step of the simulation
+   */
+  virtual void computeOneStep() = 0;
 
   /** \fn void newtonSolve(const double& criterion , const unsigned int& maxStep)
    *  \brief newton algorithm

@@ -19,14 +19,14 @@
 dnl configure script for SICONOS
 dnl V. ACARY, 2005
 
-AC_PREREQ(2.57)
-AC_INIT(SICONOS, 1.1.1, siconos.gforge.inria.fr)
+AC_PREREQ(2.59)
+AC_INIT([Siconos-Numerics],[1.1.2],[siconos.gforge.inria.fr])
 
 dnl Checking host/target/build systems, for make, install etc.
-AC_CANONICAL_SYSTEM
-AM_INIT_AUTOMAKE(SICONOS/Numerics, 1.1.1)
+AC_CANONICAL_TARGET([])
 AC_CONFIG_SRCDIR([src/SiconosNumerics.h])
-AM_CONFIG_HEADER([config.h]) 
+AM_INIT_AUTOMAKE
+AC_CONFIG_HEADERS([config.h]) 
 
 # SO version of all siconos shared libraries
 SICONOSNUMERICS_SO_CURRENT=1
@@ -56,7 +56,7 @@ AC_ARG_ENABLE(insure,
   fi;
  ]
 )
-]) # AC_PROG_INSURE
+])  # AC_PROG_INSURE
 
 dnl AC_PROG_INSURE
 

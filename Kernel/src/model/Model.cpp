@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 #include "Model.h"
 
@@ -69,7 +69,6 @@ Model::Model(char *xmlFile):
 }
 
 // --- From a minimum set of data ---
-// -> without precision on strategy ... (usefull ?)
 Model::Model(const double& newT0, const double& newT, const string& newTitle, const string& newAuthor,
              const string& newDescription, const string& newDate, const string& newSchema):
   t(newT0), t0(newT0), T(-1), strat(NULL), nsds(NULL), modelxml(NULL), title(newTitle),
@@ -78,75 +77,42 @@ Model::Model(const double& newT0, const double& newT, const string& newTitle, co
 {
   IN("Model::constructor from min data\n");
   if (newT > t0) T = newT;
-  else  RuntimeException::selfThrow("Model::constructor from min data: Warning, final T lower than t0");
+  else if (newT > 0 && newT <= t0)
+    RuntimeException::selfThrow("Model::constructor from min data: Warning, final T lower than t0");
+  // else no T in the model!
   OUT("Model::constructor from min data\n");
 }
-
-// -> with a clear strategy defined from a string
-/*Model::Model(double newT0, string strategy_name, double newT, string newTitle, string newAuthor,
-       string newDescription, string newDate, string newSchema):
-  t(newT0),t0(newT0),T(-1),title(newTitle), strat(NULL), nsds(NULL), modelxml(NULL) ,
-  author(newAuthor), description(newDescription),date(newDate),xmlSchema(newSchema)
-{
-  IN("Model::constructor from min data\n");*/
-// check time boundaries ...
-//if( newT > t0 ) T = newT;
-//  else cout << "Model::constructor from min data: Warning, wrong new value for final T -> ignored"<< endl;
-// Memory allocation for strategy object
-//  if(strategy_name == TIMESTEPPING_TAG )
-//  strat = new TimeStepping(this);
-//else if(strategy_name == EVENTDRIVEN_TAG )
-//  strat = new EventDriven(this);
-//else RuntimeException::selfThrow("Model: constructor from min data, wrong strategy type");
-//OUT("Model::constructor from min data\n");
-//}
-
-
-// -> with a clear strategy given with a pointer
-
-//Model::Model(double newT0, Strategy * newStrategy, double newT, string newTitle, string newAuthor,
-//       string newDescription, string newDate, string newSchema):
-//  t(newT0),t0(newT0),T(-1),title(newTitle), strat(newStrategy), nsds(NULL), modelxml(NULL) ,
-//  author(newAuthor), description(newDescription),date(newDate),xmlSchema(newSchema)
-//{
-//  IN("Model::constructor from min data\n");
-// check time boundaries ...
-//  if( newT > t0 ) T = newT;
-//  else cout << "Model::constructor from min data: Warning, wrong new value for final T -> ignored"<< endl;
-// link with model object in strategy
-//  newStrategy->setModelPtr(this);
-//  OUT("Model::constructor from min data\n");
-//}
 
 Model::~Model()
 {
   IN("Model::~Model()\n");
-  if (isNsdsAllocatedIn)
-  {
-    delete nsds;
-    nsds = NULL;
-  }
-  if (isStrategyAllocatedIn)
-  {
-    delete strat;
-    strat = NULL;
-  }
-  if (isModelXmlAllocatedIn)
-  {
-    delete modelxml;
-    modelxml = NULL;
-  }
+  if (isNsdsAllocatedIn) delete nsds;
+  nsds = NULL;
+  if (isStrategyAllocatedIn) delete strat;
+  strat = NULL;
+  if (isModelXmlAllocatedIn) delete modelxml;
+  modelxml = NULL;
   OUT("Model::~Model()\n");
 }
 
 // --- SETTERS ---
+void Model::setT0(const double& newT0)
+{
+  if (strat != NULL && strat->getTimeDiscretisationPtr() != NULL)
+    RuntimeException::selfThrow("Model::setT0 - To set t0 value, use rather setT0 of the corresponding TimeDiscretisation.");
+  else
+    t0 = newT0;
+}
+
 void Model::setStrategyPtr(Strategy *newPtr)
 {
+  // Warning: this function may be used carefully because of the links between Model and TimeDiscretisation
+  // The model of the strategy input MUST be the current model.
   if (isStrategyAllocatedIn) delete strat;
   strat = newPtr;
   isStrategyAllocatedIn = false;
-  newPtr->setModelPtr(this);
 }
+
 
 void Model::setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem *newPtr)
 {

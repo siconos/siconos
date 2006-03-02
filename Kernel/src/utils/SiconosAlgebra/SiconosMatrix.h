@@ -405,6 +405,12 @@ public:
    */
   friend SiconosMatrix operator ^ (const SiconosMatrix& m, const int pow);
 
+  /** \fn const double normInf() const;
+   *  \brief compute the infinite norm of the matrix
+   *  \return a double
+   */
+  const double normInf() const;
+
   // --- COMPUTING WITH MATRICES  ---
 
   /** \fn SiconosMatrix linearSolve(SiconosMatrix & B)

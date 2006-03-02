@@ -69,7 +69,6 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
       isDSVectorAllocatedIn[i] = true;
     }
   }
-
   interactionVector.resize(nsds.getInteractions().size(), NULL);
   isInteractionVectorAllocatedIn.resize(interactionVector.size(), false);
   Interaction * interTmp;

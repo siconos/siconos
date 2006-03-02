@@ -25,7 +25,7 @@ ifndef SCIDIR
   SCIDIR=/usr/lib/scilab-3.0
 endif
 
-include $(SICONOSPATH)/share/SICONOS/KernelConfig.sh
+include $(SICONOSPATH)/share/siconos-kernel/KernelConfig.sh
 
 INC_PATH=$(SICONOSPATH)/include
 CFLAGS=-g -fbounds-check -w -Wno-deprecated -fPIC -DLA_COMPLEX_SUPPORT -DWITHOUT_NANA -I$(INC_PATH) -I$(SICONOSSPATH)/include -I/usr/local//include/lapackpp/ `xml2-config --cflags`

@@ -294,6 +294,45 @@ void Lsodar::integrate()
   OUT("Lsodar::integrate\n");
 }
 
+void Lsodar::integrate(const double& tinit, const double& tend, const double& tout, const bool& iout)
+{
+  SiconosVector * y = ds->getXPtr();
+
+  doublereal tend_DR = tend  ;             // next point where output is desired (different from t!)
+  doublereal tinit_DR = tinit;              // current time
+
+  //   Integer parameters for LSODAR are saved in vector intParam.
+  //   The link with variable names in opkdmain.f is indicated in comments
+  intData[0] =  y->size();  // neq, number of equations, ie dim of y
+  intData[1] = 0 ;  // ng, number of constraints
+  intData[2] = 1; // itol, 1 or 2 according as ATOL (below) is a scalar or an array.
+  intData[3] = 1; // itask
+  intData[4] = 1; // istate
+  intData[5] = 0; // iopt
+  intData[6] = 22 + intData[0] * max(16, (int)intData[0] + 9) + 3 * intData[1]; // lrw
+  intData[7] = 20 + intData[0];  // liw
+  intData[8] = 2;   // jt
+  // update memory size for doubleData and iwork according to intData values ...
+  updateData();
+
+  //   Doublereal parameters for LSODAR are saved in vector doubleData.
+  //   The link with variable names in opkdmain.f is indicated in comments
+  *(doubleData[0]) = 0.0;
+  *(doubleData[1]) = 1.0e-6;
+
+  // Pointers to function definition and initialisation thanks to wrapper:
+  global_object = this; // Warning: global object must be initialized to current one before pointers to function initialisation.
+  fpointer pointerToF = Lsodar_f_wrapper;
+  jacopointer pointerToJacobianF = Lsodar_jacobianF_wrapper;
+  gpointer pointerToG;
+  pointerToG = Lsodar_g_wrapper;
+
+  F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*y)(0), &tinit_DR, &tend_DR, &(intData[2]), doubleData[0], doubleData[1], &(intData[3]), &(intData[4]), &(intData[5]), doubleData[2],
+                   &(intData[6]), iwork, &(intData[7]), pointerToJacobianF, &(intData[8]), pointerToG, &(intData[1]), doubleData[3]);
+
+}
+
+
 void Lsodar::updateState()
 {}
 

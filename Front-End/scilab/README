@@ -65,11 +65,11 @@ variables of environnement to set (example):
 export SICONOSPATH=/local_home/pissard/Workspace/siconos/distrib
 export NUMERICSPATH=/local_home/pissard/Workspace/siconos/distrib
 
-export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS:$NUMERICSPATH
+export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/siconos-kernel:$NUMERICSPATH
 /lib:.
 
 copy the xml file (BouncingBall_TIDS.xml) in the current directory
-copy BallPlugin.so in $SICONOSPATH/share/SICONOS
+copy BallPlugin.so in $SICONOSPATH/share/siconos-kernel
 
 scilab -f sample.sci : scilab example of the "famous" BouncingBall execution
 

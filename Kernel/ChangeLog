@@ -23,6 +23,29 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
+  v1.1.X -  (current release)
+--------------------------------------------------------------------------------
+
+Changes:
+
+2006-03-02 Franck Perignon <franck.perignon@inrialpes.fr>
+                                                                               
+	* general review of Model/Strategy and TimeDiscretisation
+	  
+2006-02-28 Franck Perignon <franck.perignon@inrialpes.fr>
+                                                                               
+	* global_Tests -> add this directory and related files
+	  to allow "global" tests, ie automatic running of chosen
+	  samples. 
+
+2006-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
+                                                                               
+	* configure.ac -> run autoupdate to remove obsolete macros. 
+	  Warning: must add insure related part after. 
+	  Keep configure.ac.old to work with older
+	  autotools version. 
+
+--------------------------------------------------------------------------------
   v1.1.2 -  (release 428)
 --------------------------------------------------------------------------------	
 Notes:  bugs fixing version

@@ -57,7 +57,7 @@ OneStepNSProblemXML::OneStepNSProblemXML(xmlNode * oneStepNSProblemXMLNode, vect
       if ((node = SiconosDOMTreeTools::findNodeChild(interactionConcernedNode, INDEX_LIST)) != NULL)
         interactionListNode = node;
       else
-        XMLException::selfThrow("tag indexList not found.");
+        XMLException::selfThrow("Tag indexList not found in Interaction.");
     }
   }
   // interaction list not required => all interactions are concerned by the problem.

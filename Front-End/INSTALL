@@ -60,6 +60,12 @@ Numerics and Kernel complete install is required. Then in Front-End directory:
 	- make install (default install location: /usr/local, as root) 
 
 for more details on configure options, type configure --help. 
+
+!!! WARNING: for autoconf version older that 2.59, you should use configure.ac.old rather than configure.ac.
+=> cp configure.ac.old configure.ac.
+
+Run autoupdate -V to get autoconf version. 
+Anyway, the best solution is to install the last version of autoconf ...
       
 Basic Installation
 ==================

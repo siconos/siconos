@@ -33,3 +33,4 @@ libSiconosKernel_la_LIBADD = $(top_builddir)/src/model/libModel.la \
 	$(top_builddir)/src/utils/SiconosSharedLibrary/libSiconosSharedLibrary.la \
 	$(top_builddir)/src/utils/SiconosException/libSiconosException.la\
 	$(top_builddir)/src/apiC/libSiconosApiC.la
+

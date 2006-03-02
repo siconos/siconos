@@ -29,6 +29,14 @@ Notes:
 
 Changes:
 
+2006-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
+                                                                               
+	* configure.ac -> run autoupdate to remove obsolete macros. 
+	  Warning: must add insure related part after. 
+	  Keep configure.ac.old to work with older
+	  autotools version. 
+
+
 2006-02-24 Franck Perignon <franck.perignon@inrialpes.fr>
                                                                                
 	* Makefile.am -> make install also install doc in @prefix@

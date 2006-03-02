@@ -423,6 +423,59 @@ void Moreau::integrate()
   OUT("Moreau::integrate()\n");
 }
 
+void Moreau::integrate(const double& told, const double& t, const double& tout, const bool& iout)
+{
+  double h = timeDiscretisation->getH();
+
+  if (ds->getType() == LNLDS)
+  {
+    RuntimeException::selfThrow("Moreau::integrate - not yet implemented for Dynamical system type: " + ds->getType()); //VL(("Moreau::integrate -- LNLDS\n"));
+    // We do not use integrate() for LNDS
+  }
+  else if (ds->getType() == LTIDS)
+  {
+    VL(("Moreau::integrate -- LTIDS\n"));
+    // get the ds
+    LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(ds);
+    // get q and velocity pointers for current time step
+    SimpleVector *v, *q, *vold, *qold;
+    q = d->getQPtr();
+    v = d->getVelocityPtr();
+    // get q and velocity pointers for previous time step
+    qold = static_cast<SimpleVector*>(d->getQMemoryPtr()->getSiconosVector(0));
+    vold = static_cast<SimpleVector*>(d->getVelocityMemoryPtr()->getSiconosVector(0));
+    // get mass, K and C pointers
+    SiconosMatrix *M, *K, *C;
+    M = d->getMassPtr();
+    K = d->getKPtr();
+    C = d->getCPtr();
+    // get p pointer
+    SimpleVector  *p;
+    p = d->getPPtr();
+    // Inline Version
+    // The method computeFExt does not allow to compute directly
+    // as a function.  To do that, you have to call directly the function of the plugin
+    // or call the F77 function  MoreauLTIDS
+    // Computation of the external forces
+    d->computeFExt(told);
+    SimpleVector FExt0 = d->getFExt();
+    d->computeFExt(t);
+    SimpleVector FExt1 = d->getFExt();
+    // velocity computation
+    *v = *vold + *W * (h * (theta * FExt1 + (1.0 - theta) * FExt0 - (*C * *vold) - (*K * *qold) - h * theta * (*K * *vold)) + *p);
+    // q computation
+    *q = (*qold) + h * ((theta * (*v)) + (1.0 - theta) * (*vold));
+    // Right Way  : Fortran 77 version with BLAS call
+    // F77NAME(MoreauLTIDS)(told,t,theta
+    //                      ndof, &qold(0),&vold(0),
+    //                      &W(0,0),&K(0,0),&C(0,0),fext,
+    //                      &v(0),&q(0))
+
+  }
+  else RuntimeException::selfThrow("Moreau::integrate - not yet implemented for Dynamical system type :" + ds->getType());
+  OUT("Moreau::integrate()\n");
+}
+
 void Moreau::updateState()
 {
   IN("Moreau::updateState\n");

@@ -915,15 +915,13 @@ extern "C" int sicStrategyTimeStepping(double h)
   try
   {
 
-    GLOB_STRATEGIE = new TimeStepping();
-
-    GLOB_MODEL->setStrategyPtr(GLOB_STRATEGIE);
+    GLOB_STRATEGIE = new TimeStepping(GLOB_MODEL);
 
     // Time discretisation
     TimeDiscretisation *t = new  TimeDiscretisation(h, GLOB_STRATEGIE);
-    GLOB_STRATEGIE->setTimeDiscretisationPtr(t);
     GLOB_STRATEGIE->initialize();
 
+    t->getT(); // to avoid warning ...
 
   }
   catch (SiconosException e)

@@ -25,7 +25,6 @@
  *  \version 1.1.2.
  *  \date (Creation) Apr 26, 2004
  *
- *
  */
 
 #include "Strategy.h"
@@ -42,10 +41,17 @@ private:
 
 public:
 
-  /** \fn EventDriven()
+  /** \fn EventDriven(Model * = NULL)
    *  \brief defaut constructor
+   *  \param a pointer to the model that owns this strategy. NULL Model leads to exception
    */
-  EventDriven();
+  EventDriven(Model * = NULL);
+
+  /** \fn EventDriven(Model&)
+   *  \brief constructor from Model => avoid this function, prefer the one with Model*
+   *  \param a Model.
+   */
+  EventDriven(Model&);
 
   /** \fn EventDriven(StrategyXML*, Model*)
    *  \brief constructor with XML object of the EventDriven
@@ -76,15 +82,20 @@ public:
    */
   void setEventsManagerPtr(EventsManager*);
 
-  /** \fn void simulateOneStep()
-   *  \brief run the whole simulation
+  /** \fn void initialize()
+   *  \brief initialisation of the strategy
    */
-  void run();
+  void initialize();
 
   /** \fn void simulateOneStep()
+    *  \brief run the whole simulation
+    */
+  void run();
+
+  /** \fn void computeOneStep()
    *  \brief run simulation from one Event to the next
    */
-  //void simulateOneStep();
+  void computeOneStep();
 
   /** \fn void advanceToEvent()
    *  \brief run simulation from one Event to the next, according to events manager settings.

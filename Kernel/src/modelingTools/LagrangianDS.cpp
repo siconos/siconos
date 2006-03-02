@@ -32,7 +32,6 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
   if (dsXML != NULL)
   {
     if (newNsds != NULL) nsds = newNsds;
-
     // --- DS BASE-CLASS MEMBERS ---
     // --- Settings and xml load ---
     DSType = LNLDS;

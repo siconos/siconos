@@ -1,8 +1,8 @@
-# Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.
+# Siconos-Numerics version 1.1.1, Copyright INRIA 2005-2006.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public license as published by
+# it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
 # Siconos is distributed in the hope that it will be useful,
@@ -10,32 +10,34 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General public License
+# You should have received a copy of the GNU General Public License
 # along with Siconos; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
 dnl configure script for SICONOS
-dnl JB CHARLETY, 2005
+dnl V. ACARY, 2005
 
-AC_PREREQ(2.59)
-AC_INIT([Siconos-Kernel],[1.1.2],[siconos.gforge.inria.fr])
+AC_PREREQ(2.57)
+AC_INIT(SICONOS, 1.1.1, siconos.gforge.inria.fr)
 
 dnl Checking host/target/build systems, for make, install etc.
-AC_CANONICAL_TARGET([])
-AC_CONFIG_SRCDIR([src/model/Model.h])
-AM_INIT_AUTOMAKE
-AC_CONFIG_HEADERS([config.h])
+AC_CANONICAL_SYSTEM
+AM_INIT_AUTOMAKE(SICONOS/Numerics, 1.1.1)
+AC_CONFIG_SRCDIR([src/SiconosNumerics.h])
+AM_CONFIG_HEADER([config.h]) 
 
 # SO version of all siconos shared libraries
-SICONOS_SO_CURRENT=1
-SICONOS_SO_REVISION=2
-SICONOS_SO_AGE=1
-AC_SUBST(SICONOS_SO_CURRENT)
-AC_SUBST(SICONOS_SO_REVISION)
-AC_SUBST(SICONOS_SO_AGE)
+SICONOSNUMERICS_SO_CURRENT=1
+SICONOSNUMERICS_SO_REVISION=2
+SICONOSNUMERICS_SO_AGE=0
+AC_SUBST(SICONOSNUMERICS_SO_CURRENT)
+AC_SUBST(SICONOSNUMERICS_SO_REVISION)
+AC_SUBST(SICONOSNUMERICS_SO_AGE)
+
 # Checks for compilers.
+
 
 m4_define([AC_PROG_INSURE],[
 # Insure++ is a proriatary code checker/prober
@@ -56,7 +58,7 @@ AC_ARG_ENABLE(insure,
 )
 ]) # AC_PROG_INSURE
 
-dnl  AC_PROG_INSURE
+dnl AC_PROG_INSURE
 
 AC_PROG_CC
 AC_PROG_CXX
@@ -79,7 +81,11 @@ AC_MSG_RESULT([ok ($CXX_VER)])
 # checks for libtool
 AC_PROG_LIBTOOL
 
+
 # Checks for programs.
+
+
+
 
 # AC_PROG_RANLIB
 AC_PROG_INSTALL
@@ -101,6 +107,11 @@ AC_PATH_PROG(DOXYGEN, doxygen, /usr/bin/doxygen, $PATH:/bin:/usr/bin:/usr/ucb/bi
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([float.h stdlib.h string.h sys/time.h])
+case $CXX_VER in
+     ( 3.*.* )
+     AC_CHECK_HEADERS([g2c.h])
+     ;;
+esac
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -118,63 +129,30 @@ AC_CHECK_FUNCS([floor gettimeofday])
 ###################################
 
 AC_ARG_ENABLE(cppunit,[  --enable-cppunit              use cppunit to pass unitary tests, default=no ])
-AC_ARG_ENABLE(nana,[  --enable-nana              use nana to design by contract to pass unitary tests, default=no ])
 AC_ARG_ENABLE(debug,  [  --enable-debug              compiling with debugging symbols (-g), default=no ])
 AC_ARG_ENABLE(optimisation,  [  --enable-optimisation              compiling with optimiation symbols (O2), default=no ])
 AC_ARG_ENABLE(warnings,[  --enable-warnings            enable compilation warnings, default=yes])
 AC_ARG_ENABLE(error-on-warning,[  --enable-erroronwarning     treat all compile warnings as errors, default=no])
 
 #################################
-## all the --with-* argument help
-#################################
-AC_ARG_WITH(numerics,	
-	[  --with-numerics=path        indicates a local path of numerics lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
-AC_ARG_WITH(nana,			
-	[  --with-nana=path        indicates a local path of nana lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
-
-#################################
 ## Checks for external libraries
 #################################
 
-# required version of the libraries
-
 dnl Check for Lapack
-ACX_LAPACK([  dnl action-if-found:  # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS],
- [
+ACX_LAPACK([
+  dnl action-if-found: 
+  AC_DEFINE(HAVE_LAPACKPP,1,[Define if you have LAPACK++ library.])
+  # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS
+], [
   dnl action-if-not-found: 
   AC_MSG_ERROR([Blas/Lapack was not found. 
+*** This means Lapack++ and matrix support cannot be compiled. 
 *** This makes this library unusable. Please get blas and lapack 
 *** installed. If you do have these installed, use the options 
 *** --with-blas=<libname> or --with-lapack=<libname> and/or set 
 *** the env variable LDFLAGS to include the appropriate linker 
 *** flags.])
 ])
-
-# Numerics
-AC_MSG_CHECKING([for Siconos/Numerics])
-ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-numerics.])])
-
-# Lapack++
-LAPACKPP_VER="1.8.0"	# lib....so number
-LAPACKPP_REL_VER="2.4.2" # Release number
-AC_MSG_CHECKING([for Lapack++])
-ACX_LAPACKPP([], [AC_MSG_ERROR([Cannot find  Lapack++ in a good version. Please install Lapack++, version >= $LAPACKPP_VER.])])
-
-# Libxml2
-AC_MSG_CHECKING([Libxml2])
-AM_PATH_XML2(2.6.16,,AC_MSG_ERROR([
-*** Libxml is required; Available at
-http://www.libxml.org/.]))
-
-# Nana Warning, by default we skip ccpunit
-AC_MSG_CHECKING([Nana])
-if test "$enable_nana" = yes; then
-ACX_CHECK_NANA([AC_SUBST(NANA_INCLUDES) AC_SUBST(NANA_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Nana. Please install Nana  or use the option --with-nana.])])
-CXX_WITHOUTNANA_FLAG=""
-else
- AC_MSG_RESULT(option --enable-nana not selected : Warning : do not use nana)  
-CXX_WITHOUTNANA_FLAG="-DWITHOUT_NANA"
-fi
 
 # Cppunit : Warning, by default we skip ccpunit
 AC_MSG_CHECKING([cppunit])
@@ -185,32 +163,45 @@ else
  AC_MSG_RESULT(option --enable-cppunit not selected : Warning : unable to run test suite)  
 fi
 
+AM_CONDITIONAL([CPPUNIT_COND], [test "$cppunit" = yes])
+
+
 #################################
-## COMPILE FLAGS CXXFLAGS
+## COMPILE FLAGS CXXFLAGS CFLAGS FFLAGS
 #################################
 
 # Default Flag
 if test "$enable_warnings" = no; then
 CXXFLAGS="-fPIC"
+CFLAGS="-fPIC"
+FFLAGS="-fPIC"
 else
 CXXFLAGS="-Wall -fPIC"
+CFLAGS="-Wall -fPIC"
+FFLAGS="-Wall -fPIC"
 fi
 
 #Optional flag
 if test "$enable_erroronwarning" = yes; then
    AC_MSG_RESULT(option --enable-erroronwarning selected : compiling with the -Werror option)
    CXXFLAGS="-Werror $CXXFLAGS"
+   CFLAGS="-Werror $CFLAGS"
+   FFLAGS="-Werror $FFLAGS"
 fi
 
 
 if test "$enable_debug" = yes; then
    AC_MSG_RESULT(option --enable-debug selected : compiling with the -g option)
    CXXFLAGS="-g -fbounds-check $CXXFLAGS"
+   CFLAGS="-g -fbounds-check $CFLAGS"
+   FFLAGS="-g -fbounds-check $FFLAGS"
 fi
 
 if test "$enable_optimisation" = yes; then
    AC_MSG_RESULT(option --enable-optimisation selected : compiling with the -02 option)
    CXXFLAGS="-O2 $CXXFLAGS"
+   CFLAGS="-O2 $CFLAGS"
+   FFLAGS="-O2 $FFLAGS"
 fi
 
 
@@ -239,30 +230,41 @@ case "$target" in
 esac
 
 
-CXXFLAGS="$CXXFLAGS $CXX_WITHOUTNANA_FLAG"
+CXXFLAGS="$CXXFLAGS "
 
-AC_MSG_RESULT("Architecture $ARCH  Compilation flag CXXFLAGS= $CXXFLAGS  Linking flag CXX_DYNLIB = $CXX_DYNLIB")
+AC_MSG_RESULT("Architecture $ARCH  Compilation flag CXXFLAGS= $CXXFLAGS CFLAGS= $CFLAGS FFLAGS= $FFLAGS  Linking flag CXX_DYNLIB = $CXX_DYNLIB")
 
+dnl LDFLAGS="$CXX_DYNLIB"
 
 AC_SUBST(CXX_DYNLIB)
 
 #################################
 ## LINK FLAGS
 #################################
-
 #SICONOS_EXT_INCLUDES
-SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $NANA_INCLUDES $LAPACKPP_INCLUDES $XML_CPPFLAGS"
-AC_SUBST(SICONOS_EXT_INCLUDES)
+SICONOS_EXT_INCLUDES=""
+case "$target" in
+    *-linux*)
+      
+      ;;
+    *-apple-darwin*)
+      SICONOS_EXT_INCLUDES="-I/sw/include/ $SICONOS_EXT_INCLUDES"
+      ;;
+esac
 AC_MSG_RESULT("SICONOS_EXT_INCLUDES = $SICONOS_EXT_INCLUDES")
+AC_SUBST(SICONOS_EXT_INCLUDES)
 
 #SICONOS_EXT_LDFLAGS
-SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $NANA_LIBRARIES $LAPACKPP_LDFLAGS $LAPACKPP_LIBS $LAPACK_LIBS $BLAS_LIBS $XML_LIBS -ldl"
+
+
+SICONOS_EXT_LDFLAGS="$LAPACK_LIBS $BLAS_LIBS "
+
 dnl case "$target" in
 dnl     *-linux*)
 dnl     AC_F77_LIBRARY_LDFLAGS	
 dnl       ;;
 dnl     *-apple-darwin*)
-dnl     # the flag for linking c anf f77 has to be defined
+dnl     # the flag for linking c anf f77 has to be defined 
 dnl     # the macros  AC_F77_LIBRARY_LDFLAGS yields an error of link between C and F77
 dnl     FLIBS="" 
 dnl     case $CXX_VER in
@@ -272,10 +274,8 @@ dnl      ;;
 dnl     esac	
 dnl      ;;
 dnl esac
-echo $LAPACKPP_INCLUDES
 
 SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS $FLIBS"
-
 AC_SUBST(SICONOS_EXT_LDFLAGS)
 AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
 
@@ -283,7 +283,7 @@ AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
 ## DOXYGEN 
 #################################
 
-DOXYGEN_CFG=$srcdir/config/DoxygenSiconos.cfg
+DOXYGEN_CFG=$srcdir/config/DoxygenNumerics.cfg
 AC_SUBST(DOXYGEN_CFG)
 
 
@@ -293,32 +293,12 @@ AC_SUBST(DOXYGEN_CFG)
 
 # output files
 AC_CONFIG_FILES([Makefile
-                 config/Makefile
-		 config/xmlschema/Makefile
-		 config/KernelConfig.sh
-		 siconos/MakefilePluginSample 
-		 siconos/siconos
-		 siconos/Makefile
-                 src/Makefile
-		 src/apiC/Makefile
-                 src/model/Makefile
-                 src/model/test/Makefile
-                 src/modelingTools/Makefile
-		 src/modelingTools/test/Makefile
-	         src/simulationTools/Makefile
-                 src/plugin/Makefile
-		 src/plugin/test/Makefile
+		 src/Makefile
                  src/utils/Makefile
-		 src/utils/SiconosException/Makefile
-                 src/utils/SiconosAlgebra/Makefile
-                 src/utils/SiconosAlgebra/test/Makefile
-                 src/utils/SiconosMemory/Makefile
-                 src/utils/SiconosMemory/test/Makefile
-                 src/utils/SiconosSharedLibrary/Makefile
-                 src/utils/contract/Makefile
-                 src/xml/Makefile
-                 src/xml/test/Makefile
-		 global_tests/Makefile])
+		 src/odepack/Makefile
+		 src/odepack/test/Makefile
+		 src/NSSpack/Makefile
+		 src/NSSpack/test/Makefile])
 AC_OUTPUT
 
 
@@ -330,16 +310,16 @@ echo "
    C compiler flags:                    ${CFLAGS}
    C++ Compiler:                        ${CXX}
    C++ compiler flags:                  ${CXXFLAGS}
-   F77 Compiler:                        ${F77}
-   F77 compiler flags:                  ${FFLAGS}
+   FORTRAN Compiler:                    ${F77}
+   FORTRAN compiler flags:              ${FFLAGS}
    Preprocessor flags:                  ${CPPFLAGS}
    Linking flags			${LDFLAGS}
    Siconos includes:                    ${SICONOS_EXT_INCLUDES}
    Siconos ld flags:                    ${SICONOS_EXT_LDFLAGS}"
-echo 
+echo
 echo Type \'make \' to build the SICONOS platform
 echo Type \'make doc\' to generate the documentation.
 echo Type \'make install\' to install the platfrom
 echo Type \'make check\' to run the test
-echo 
+echo
 echo Alternatively, you can \'make all\' to use the default configuration.

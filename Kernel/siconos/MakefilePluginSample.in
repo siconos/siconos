@@ -17,12 +17,11 @@
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
 SICONOSPATH=@prefix@
-include $(SICONOSPATH)/share/SICONOS/KernelConfig.sh
+include $(SICONOSPATH)/share/siconos-kernel/KernelConfig.sh
 
 SAMPLE_SOURCES = $(OBJ)
 SAMPLE_OBJ  = $(patsubst %.cpp,%.o,  $(SAMPLE_SOURCES))
 SAMPLE_EXE  = $(patsubst %.cpp,%_EXE,  $(SAMPLE_SOURCES))
-
 C_SOURCES = $(wildcard *.c)
 C_OBJ  = $(patsubst %.c,%.o,  $(C_SOURCES))
 
@@ -32,7 +31,7 @@ sample:$(SAMPLE_OBJ) $(SAMPLE_EXE)
 	$(CXX) -c $(CXXFLAGS) $(LIBEXT_INCLUDES) -I $(SICONOSPATH)/include $<
 
 $(SAMPLE_EXE):$(SAMPLE_OBJ)
-	echo "$(SAMPLE_EXE):"
+#	echo "$(SAMPLE_EXE):"
 #	$(CXX) -o $@ $< $(LIBEXT_LDFLAGS) -L$(SICONOSPATH)/lib -lSiconosKernel
 	$(CXX) -o $@ $< $(SICONOS_LDFLAGS) 
 

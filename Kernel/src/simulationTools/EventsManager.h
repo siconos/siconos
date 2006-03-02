@@ -27,7 +27,12 @@
  *     - Events can be removed or insert anywhere in the list
  *     - An event can not be modified (but removed!) => no setEvent(Event) function
  *     - All Events are created inside this class
+ *       That means user can not create an Event and then insert it. He is forced to
+ *       scheduleEvent method.
  *     - Tick must be set at construction, and can not be change after.
+ *
+ *  Questions/Todo : link with strategy or TimeDiscretisation?
+ *              depends on what Event->process will need.
  */
 
 //#include "EventsManagerXML.h"
@@ -57,6 +62,7 @@ const double DEFAULT_TICK = 1e-09;
 /*  A stl container of type "set" is used at the time
  *  \Warning This may be not the best choice => review all possibilities */
 typedef std::set<Event*, EventsComparison > eventsContainer; // sort in a chronological way
+
 //typedef std::set<Event*,EventsComparison(reverse) > reverseEventsContainer; // reverse sorting.
 
 // return value for insert and erase in set -> checkEventSet.second is a bool
@@ -67,25 +73,26 @@ class EventsManager
 protected:
 
   /** list of events already processed.
-   *  The last element of this list (ie the more "recent" according to EventsComparison)
-   *  is currentEvent, ie the event from which simulation is supposed to start.
+   *  At the end of the process, currentEvent is inserted in this set.
    */
   eventsContainer pastEvents;
 
   /** list of future, not processed, events.
    *  This list is not fixed and can be updated at any time
    *  depending on the simulation, user add ...
+   *  The first event of this set is currentEvent, and the second is nextEvent.
+   * ("first" and "second" defined according to event comparison operator)
    */
-  eventsContainer futureEvents;
+  eventsContainer unProcessedEvents;
 
   /** Pointer to currentEvent, ie the simulation starting point.
-    * It correponds to the more recent object in pastEvents.
+    * It correponds to the first object in unProcessedEvents.
     */
   Event * currentEvent;
 
   /** Pointer to nextEvent, ie the simulation ending point.
-    * It correponds to the event following currentEvent and to
-    * the first object in futureEvents.
+    * It correponds to the event following currentEvent and so
+    * to the second object in unProcessedEvents.
     */
   Event * nextEvent;
 
@@ -107,6 +114,12 @@ protected:
    *  \brief convert time from unsigned int to double according to tick.
    */
   const double intToDoubleTime(const unsigned long int&) const;
+
+  /** \fn const bool insertEvent(Event*)
+   *  \brief add a new Event in the unProcessedEvents list
+   *  \return false if Event already exists
+   */
+  const bool insertEvent(const std::string&, const double&);
 
 public:
 
@@ -139,6 +152,12 @@ public:
   */
   void initialize();
 
+  /** \fn void scheduleTimeDiscretisation(TimeDiscretisation*);
+  *  \brief insert time discretisation into unProcessedEvents
+  *  this destroy any previous existing unProcessedEvents set.
+  */
+  void scheduleTimeDiscretisation(TimeDiscretisation*);
+
   // GETTERS/SETTERS
 
   /** \fn inline const eventsContainer getPastEvents() const
@@ -150,24 +169,39 @@ public:
     return pastEvents ;
   };
 
-  /* No setter for member pastEvents or futureEvents-> depends on simulation and can not be set in another way.
+  /* No setter for member pastEvents or unProcessedEvents-> depends on simulation and can not be set in another way.
    * Moreover, only EventsManager can create new Events.
    */
 
-  /** \fn inline const eventsContainer getFutureEvents() const
-   *  \brief get the list of future Events
+  /** \fn inline const eventsContainer getUnProcessedEvents() const
+   *  \brief get the list of unProcessed Events
    *  \return a set of Events*
    */
-  inline const eventsContainer getFutureEvents() const
+  inline const eventsContainer getUnProcessedEvents() const
   {
-    return futureEvents ;
+    return unProcessedEvents ;
   };
+
+  /** \fn Events* getEventPtr(const unsigned long int& inputTime) const
+   *  \brief get the event that occurs at time inputTime
+   *  \param an unsigned long int
+   *  \return a pointer to Event
+   */
+  Event* getEventPtr(const unsigned long int& inputTime) const;
 
   /** \fn Events* getNextEventPtr(Event* inputEvent) const
    *  \brief get the event following inputEvent  ("following" defined with operator(s) comparison of events)
+   *  \param a pointer to Event
    *  \return a pointer to Events
    */
   Event* getNextEventPtr(Event*) const;
+
+  /** \fn Events* getNextEventPtr(const unsigned long int& inputTime) const
+   *  \brief get the event that follows the event at time inputTime  ("following" defined with operator(s) comparison of events)
+   *  \param an unsigned long int
+   *  \return a pointer to Event
+   */
+  Event* getNextEventPtr(const unsigned long int& inputTime) const;
 
   /** \fn inline const double getTick() const
    *  \brief get tick value
@@ -196,7 +230,17 @@ public:
     strategy = str;
   }
 
-  // Events managements functions
+  /** \fn const bool hasEvent(Event* event) const
+   *  \brief check if event is present in past of unProcessedEvents list
+   *  \return a bool
+   */
+  const bool hasEvent(Event*) const ;
+
+  /** \fn const bool hasNextEvent() const
+   *  \brief check if some events remain in unProcessedEvents list
+   *  \return a bool
+   */
+  const bool hasNextEvent() const ;
 
   /** \fn const double getTimeOfEvent(Event*) const
    *  \brief get the time (double format) of an event
@@ -222,37 +266,19 @@ public:
    */
   const double getNextTime() const ;
 
-  /** \fn const bool hasEvent(Event* event) const
-   *  \brief check if event is present in past of futureEvents list
-   *  \return a bool
-   */
-  const bool hasEvent(Event*) const ;
-
-  /** \fn const bool hasNextEvent() const
-   *  \brief check if some events remain in futureEvents list
-   *  \return a bool
-   */
-  const bool hasNextEvent() const ;
-
   /** \fn void display()
    *  \brief display EventsManager data
    */
   void display() const ;
 
-  /** \fn const bool insertEvent(Event*)
-   *  \brief add a new Event in the futureEvents list
-   *  \return false if Event already exists
-   */
-  const bool insertEvent(const std::string&, const double&);
-
   /** \fn const bool scheduleEvent(Event*)
-   *  \brief add a new Event in the futureEvents list and update nextEvent value
+   *  \brief add a new Event in the unProcessedEvents list and update nextEvent value
    *  \return false if Event already exists
    */
   const bool scheduleEvent(const std::string&, const double&);
 
   /** \fn void removeEvent(Event*)
-   *  \brief remove an Event from the future events list
+   *  \brief remove an Event from the unProcessed events list
    */
   void removeEvent(Event*);
 

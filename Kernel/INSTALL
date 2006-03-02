@@ -72,6 +72,12 @@ For each package (Numerics, Kernel, Front-End, in this order), in the correspond
 !!! WARNING: any local installation of a library (libxml2, cppunit ...) may require that you set properly 
 	     the LD_LIBRARY_PATH.
 
+!!! WARNING: for autoconf version older that 2.59, you should use configure.ac.old rather than configure.ac.
+=> cp configure.ac.old configure.ac.
+
+Run autoupdate -V to get autoconf version. 
+Anyway, the best solution is to install the last version of autoconf ...
+
 for more details on configure options, type configure --help. 
       
 ---+++ Is the installation of the Kernel OK ?

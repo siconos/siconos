@@ -19,6 +19,8 @@
 #include "EventsManager.h"
 using namespace std;
 
+// PRIVATE METHODS
+
 const unsigned long int EventsManager::doubleToIntTime(const double& doubleTime) const
 {
   return (unsigned long int)ceil(doubleTime / tick);
@@ -28,6 +30,31 @@ const double EventsManager::intToDoubleTime(const unsigned long int& intTime) co
 {
   return tick * intTime;
 }
+
+// insert event functions.
+// schedule is required by strategy.
+//  -> necessary to insert a new event AND to update current/past event
+// There are two different functions, to avoid multiple nextEvent update during initialize calls of insertEvent.
+const bool EventsManager::insertEvent(const string& type, const double& time)
+{
+  unsigned long int intTime;
+
+  // convert input double time to unsigned int
+  intTime = doubleToIntTime(time);
+
+  checkEventSet checkSchedule; // to check if insertion succeed or not.
+
+  // scan various possible types for events
+  if (type == "TimeDiscretisationEvent")
+    checkSchedule = unProcessedEvents.insert(new TimeDiscrEvent(intTime));
+  else if (type == "NonSmoothEvent")
+    checkSchedule = unProcessedEvents.insert(new NonSmoothEvent(intTime));
+  else
+    RuntimeException::selfThrow("EventsManager insertEvent, unknown event type" + type);
+  return checkSchedule.second;  // true if insert succeed.
+}
+
+// PUBLIC METHODS
 
 // Default/from data constructor
 EventsManager::EventsManager(const double& inputTick, Strategy * newStrat):
@@ -44,7 +71,6 @@ EventsManager::EventsManager(const EventsManager& newManager):
 
 EventsManager::~EventsManager()
 {
-  if (currentEvent != NULL) delete currentEvent;
   currentEvent = NULL;
   nextEvent = NULL;
   eventsContainer::iterator it;
@@ -53,11 +79,11 @@ EventsManager::~EventsManager()
     if (*it != NULL) delete(*it);
   }
   pastEvents.clear();
-  for (it = futureEvents.begin(); it != futureEvents.end(); ++it)
+  for (it = unProcessedEvents.begin(); it != unProcessedEvents.end(); ++it)
   {
     if (*it != NULL) delete(*it);
   }
-  futureEvents.clear();
+  unProcessedEvents.clear();
 }
 
 void EventsManager::initialize()
@@ -65,59 +91,102 @@ void EventsManager::initialize()
   if (strategy == NULL)
     RuntimeException::selfThrow("EventsManager initialize, no strategy linked to the manager.");
 
-  // get original, user, time discretisation.
+  // === get original, user, time discretisation. ===
   TimeDiscretisation * td = strategy->getTimeDiscretisationPtr();
-  // get tk
-  SimpleVector * tk = td->getTkPtr();
-  unsigned int nSteps = tk->size();
 
-  // get initial time, initialize currentEvent and insert it in future events.
+  // === insert TimeDiscretisation into the unProcessedEvents set. ===
+  scheduleTimeDiscretisation(td);
+
+  // Todo: allow external events (provided by user -> xml reading or anything else) addition.
+  // Mind to check that new time-events are superior to t0/currentEvent ...
+
+  // === Set current and nextEvent ===
   double t0 = td->getT0();
-  currentEvent = new TimeDiscrEvent(doubleToIntTime(t0));
-  futureEvents.clear();
-  pastEvents.clear();
-  checkEventSet checkSchedule = futureEvents.insert(currentEvent);
-  if (!checkSchedule.second)
-    RuntimeException::selfThrow("EventsManager initialize, currentEvent insertion failed.");
+  currentEvent = getEventPtr(doubleToIntTime(t0));
+  if (hasNextEvent())
+    nextEvent = getNextEventPtr(doubleToIntTime(t0));
+  else
+    RuntimeException::selfThrow("EventsManager initialize, can not find next event since there is only one event in the set!");
+}
 
-  // Create future events list, by adding all time discretisation events.
+void EventsManager::scheduleTimeDiscretisation(TimeDiscretisation* td)
+{
+  // === Clear unProcessedEvents set ===
+  eventsContainer::iterator it;
+  for (it = unProcessedEvents.begin(); it != unProcessedEvents.end(); ++it)
+  {
+    if (*it != NULL) delete(*it);
+  }
+  unProcessedEvents.clear();
+
+  // === get tk ===
+  SimpleVector * tk = td->getTkPtr();
+  unsigned int nSteps = tk->size(); // number of time steps
+
+  // === insert tk into the unProcessedEvents set ===
+  // Create unProcessed events list, by adding time discretisation events.
   bool isInsertOk;
-
-  for (unsigned int i = 1 ; i < nSteps ; ++i)
+  // isInsertOk is not really usefull: no need to test, since unProcessedEvents is cleared at the beginning of this function
+  for (unsigned int i = 0 ; i < nSteps ; ++i)
     isInsertOk = insertEvent("TimeDiscretisationEvent", (*tk)(i));
+}
 
-  // Todo: allow external events (provided by user) addition.
+Event* EventsManager::getEventPtr(const unsigned long int& inputTime) const
+{
+  eventsContainer::iterator current;
+  Event * searchedEvent = NULL;
+  // look for the event following the one which time is inputTime
+  for (current = unProcessedEvents.begin(); current != unProcessedEvents.end(); ++current)
+  {
+    if ((*current)->getTimeOfEvent() == inputTime)
+    {
+      searchedEvent = *current;
+      break;
+    }
+  }
+  if (searchedEvent == NULL)
+    RuntimeException::selfThrow("EventsManager getEventPtr(inputTime), no Event corresponding to that time in the set.");
 
-  // Set nextEvent
-  nextEvent = getNextEventPtr(currentEvent);
+  return searchedEvent;
 }
 
 Event* EventsManager::getNextEventPtr(Event* inputEvent) const
 {
-  // look for inputEvent in the future events list ...
-  eventsContainer::iterator next, current = futureEvents.find(inputEvent);
+  // look for inputEvent in the unProcessed events list ...
+  eventsContainer::iterator next, current = unProcessedEvents.find(inputEvent);
   // get iterator pointing to next event ...
-  if (current != futureEvents.end())
-    next = futureEvents.upper_bound(*current);
+  if (current != unProcessedEvents.end())
+    next = unProcessedEvents.upper_bound(*current);
   else
-    RuntimeException::selfThrow("EventsManager getNextEventPtr(input), Event input is not present in the set ");
+    RuntimeException::selfThrow("EventsManager getNextEventPtr(inputEvent), Event input is not present in the set ");
 
-  if (next == futureEvents.end())
-    RuntimeException::selfThrow("EventsManager getNextEventPtr(input), no next event, input is the last one in the list.");
+  if (next == unProcessedEvents.end())
+    RuntimeException::selfThrow("EventsManager getNextEventPtr(inputEvent), no next event, input is the last one in the list.");
+
+  return (*next);
+}
+
+Event* EventsManager::getNextEventPtr(const unsigned long int& inputTime) const
+{
+  eventsContainer::iterator next = unProcessedEvents.upper_bound(getEventPtr(inputTime));
+
+  if (next == unProcessedEvents.end())
+    RuntimeException::selfThrow("EventsManager getNextEventPtr(inputTime), no next event, the one corresponding to inputTime is the last one in the list.");
 
   return (*next);
 }
 
 const bool EventsManager::hasEvent(Event* event) const
 {
+  if (event == NULL) return false;
   eventsContainer::iterator it = pastEvents.find(event);
-  eventsContainer::iterator it2 = futureEvents.find(event);
-  return ((it != pastEvents.end()) || (it2 != futureEvents.end()));
+  eventsContainer::iterator it2 = unProcessedEvents.find(event);
+  return ((it != pastEvents.end()) || (it2 != unProcessedEvents.end()));
 }
 
 const bool EventsManager::hasNextEvent() const
 {
-  return (futureEvents.size() < 2); // minimum size of futureEvents is one, since it contains currentEvent.
+  return (!unProcessedEvents.size() < 2); // minimum size of unProcessedEvents is one, since it contains currentEvent.
 }
 
 const double EventsManager::getTimeOfEvent(Event* event) const
@@ -151,43 +220,30 @@ const double EventsManager::getNextTime() const
 void EventsManager::display() const
 {
   cout << "=== EventsManager data display ===" << endl;
-  cout << " - tick: " << tick << endl;
+  if (strategy != NULL)
+    cout << "- This manager belongs to the strategy named \" " << strategy->getName() << "\", of type " << strategy->getType() << "." << endl;
+  else
+    cout << "- No strategy linked to this manager." << endl;
+  cout << " - Tick: " << tick << endl;
   eventsContainer::iterator it;
-  cout << " ----- Already processed events: ----- " << endl;
+  cout << " - The number of already processed events is: " << pastEvents.size() << endl;
   for (it = pastEvents.begin(); it != pastEvents.end(); ++it)
     (*it)->display();
-  cout << " ----- Future events: ----- " << endl;
-  for (it = futureEvents.begin(); it != futureEvents.end(); ++it)
+  cout << " - The number of unprocessed events (including current one) is: " << unProcessedEvents.size() << endl;
+  for (it = unProcessedEvents.begin(); it != unProcessedEvents.end(); ++it)
     (*it)->display();
   cout << "===== End of EventsManager display =====" << endl;
 }
 
-// insert event functions.
-// schedule is required by strategy.
-//  -> necessary to insert a new event AND to update current/past event
-// There are two different functions, to avoid multiple nextEvent update during initialize calls of insertEvent.
-const bool EventsManager::insertEvent(const string& type, const double& time)
-{
-  unsigned long int intTime;
-
-  // convert input double time to unsigned int
-  intTime = doubleToIntTime(time);
-
-  checkEventSet checkSchedule; // to check if insertion succeed or not.
-
-  // scan various possible types for events
-  if (type == "TimeDiscretisationEvent")
-    checkSchedule = futureEvents.insert(new TimeDiscrEvent(intTime));
-  else if (type == "NonSmoothEvent")
-    checkSchedule = futureEvents.insert(new NonSmoothEvent(intTime));
-  else
-    RuntimeException::selfThrow("EventsManager scheduleEvent, unknown event type" + type);
-  return checkSchedule.second;  // true if insert succeed.
-}
-
 const bool EventsManager::scheduleEvent(const string& type, const double& time)
 {
-  // Insert the event into the list
+  // === get original, user, time discretisation. ===
+  //     and check that t0 < time < T
+  TimeDiscretisation * td = strategy->getTimeDiscretisationPtr();
+  if (time < td->getT0() || time > td->getT())
+    RuntimeException::selfThrow("EventsManager scheduleEvent(..., time), time out of bounds ([t0,T]).");
+
+  // === Insert the event into the list ===
   bool isInsertOk = insertEvent(type, time);
   // update nextEvent value.(may have change because of insertion)
   nextEvent = getNextEventPtr(currentEvent);
@@ -196,39 +252,53 @@ const bool EventsManager::scheduleEvent(const string& type, const double& time)
 
 void EventsManager::removeEvent(Event* event)
 {
-  eventsContainer::iterator it = futureEvents.find(event);
-  if (it != futureEvents.end())
+  if (event == currentEvent)
+    RuntimeException::selfThrow("EventsManager removeEvent(input), input = currentEvent, you can not remove it!");
+
+  if (unProcessedEvents.size() < 3) // check that at least 2 events remains in the set.
+    RuntimeException::selfThrow("EventsManager removeEvent(input), can not remove input, else only currentEvent will remain in the set!");
+
+  eventsContainer::iterator it = unProcessedEvents.find(event);
+  if (it != unProcessedEvents.end())
   {
-    if ((*it) != NULL) delete(*it);
-    futureEvents.erase(event);
+    //if ((*it)!=NULL) delete (*it);  // causes exception. Is erase enough to free memory?
+    unProcessedEvents.erase(event);
   }
   else
-    RuntimeException::selfThrow("EventsManager removeEvent, Event not present in the set ");
+    RuntimeException::selfThrow("EventsManager removeEvent(input), input is not present in the set.");
 
   // update nextEvent value (may have change because of removal)
+  //unsigned long int t = currentEvent->getTimeOfEvent();
   nextEvent = getNextEventPtr(currentEvent);
 }
 
 void EventsManager::processEvents()
 {
-  checkEventSet check; // to check if insertion succeed or not.
+  // === process events ===
 
-  // insert current event into pastEvents and remove it from futureEvents
-  check = pastEvents.insert(currentEvent);
+  eventsContainer::iterator it;
+  for (it = unProcessedEvents.begin(); it != unProcessedEvents.end(); ++it)
+    (*it)->process();
+
+  // === update current and next event pointed values ===
+
+  checkEventSet check; // to check if insertion succeed or not.
+  // Get time of current event
+  unsigned long int t = currentEvent->getTimeOfEvent();
+  // Save currentEvent into pastEvents
+  // Warning: do not directly insert or remove currentEvent. Mind the pointer links!!
+  check = pastEvents.insert(getEventPtr(t));
   if (!check.second) RuntimeException::selfThrow("EventsManager, processEvents, event insertion in pastEvents failed.");
 
-  futureEvents.erase(currentEvent);
+  // Get new currentEvent
+  currentEvent = getNextEventPtr(t);
 
-  // set new current event
-  currentEvent = nextEvent;
+  // Remove event that occurs at time t (ie old current event) from unProcessedEvents set
+  unProcessedEvents.erase(getEventPtr(t));
 
-  // get new next event
-  nextEvent = getNextEventPtr(currentEvent);
+  // Get new nextEvent
+  nextEvent = getNextEventPtr(currentEvent->getTimeOfEvent());
 
-  // process events
-  eventsContainer::iterator it;
-  for (it = futureEvents.begin(); it != futureEvents.end(); ++it)
-    (*it)->process();
 }
 
 //void EventsManager::saveEventsManagerToXML()

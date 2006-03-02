@@ -26,6 +26,8 @@ DIR=`pwd`;
 SICONOSPATH=@KERNEL_PATH@
 NUMERICSPATH=@NUMERICS_PATH@
 PYTHONPATH=@PYTHONPATH@
+
+SICONOS_SHAREPATH=$SICONOSPATH/share/siconos-kernel;
 #-----------
 # functions
 #-----------
@@ -37,7 +39,7 @@ function compilePlugins() {
 	cd $dir;
 	if test "`ls *Plugin.cpp 2>/dev/null`" != ""; then
 	    echo "plugin dans $dir !";      
-	    make -f $SICONOSPATH/share/SICONOS/MakefilePluginSample plugin
+	    make -f $SICONOS_SHAREDPATH/MakefilePluginSample plugin
 	    if test "${LD_LIBRARY_PATH}test" = "test"; then
 		export LD_LIBRARY_PATH=$PWD;
 	    else
@@ -54,7 +56,7 @@ function cleanAll() {
     echo "listdir = $listdir";
     for dir in $listdir; do
 	cd $dir;
-	make -f $SICONOSPATH/share/SICONOS/MakefilePluginSample clean	    
+	make -f $SICONOS_SHAREDPATH/MakefilePluginSample clean	    
 	cd $DIR;
     done;
 }
@@ -90,9 +92,9 @@ if test "$NUMERICSPATH" = ""; then
 fi;
 
 if test "${LD_LIBRARY_PATH}test" = "test"; then
-   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS:$NUMERICSPATH/lib:/usr/local/lib;  
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOS_SHAREDPATH:$NUMERICSPATH/lib:/usr/local/lib;  
 else
-   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOSPATH/share/SICONOS:$NUMERICSPATH/lib:/usr/local/lib:$LD_LIBRARY_PATH; 
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOS_SHAREDPATH:$NUMERICSPATH/lib:/usr/local/lib:$LD_LIBRARY_PATH; 
 fi;	 
 
 if test "${PYTHONPATH}test" = "test"; then

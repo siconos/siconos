@@ -22,7 +22,7 @@
 #include "SiconosModelXML.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "Strategy.h"
-
+#include "TimeDiscretisation.h"
 #include "check.h"
 #include "SiconosConst.h"
 
@@ -33,6 +33,7 @@
 class NonSmoothDynamicalSystem;
 class Strategy;
 class SiconosModelXML;
+class TimeDiscretisation;
 
 /** \class Model
  *  \brief The Model regroups the high level functionnalities of the platform
@@ -44,6 +45,38 @@ class SiconosModelXML;
  */
 class Model
 {
+private:
+  /** current time of the simulation */
+  double t;
+
+  /** initial time of the simulation */
+  double t0;
+
+  /** final time of the simulation */
+  double T;
+
+  /** The strategy to solve the NonSmoothDynamicalSystem */
+  Strategy *strat;
+
+  /** The NonSmoothDynamicalSystem of the simulation */
+  NonSmoothDynamicalSystem * nsds;
+
+  /** XML object linked to the Model */
+  SiconosModelXML *modelxml;
+
+  /** information concerning the Model */
+  std::string  title, author, description, date, xmlSchema;
+
+  /** Flags to check wheter pointers were allocated in class constructors or not */
+  bool isNsdsAllocatedIn;
+  bool isStrategyAllocatedIn;
+  bool isModelXmlAllocatedIn;
+
+  /** \fn Model()
+   *  \brief default constructor
+   */
+  Model();
+
 public:
 
   /** \fn Model(char *xmlFile)
@@ -68,38 +101,9 @@ public:
         const std::string& = "none", const std::string& = "none",
         const std::string& = "none");
 
-  /** \fn Model(double t0, double T, string title, string author, string description, string date, string xmlSchema)
-   *  \brief create the Model from a set of data
-   *  \param double : the value for t0
-   *  \param string : the type of strategy to be used
-   *  \param double : the value for T (optional parameter)
-   *  \param string : the title of the Model (optional parameter)
-   *  \param string : the author of the Model (optional parameter)
-   *  \param string : the description of the Model (optional parameter)
-   *  \param string : the date of the Model (optional parameter)
-   *  \param string : the xml schema of the Model (optional parameter)
-   *  \exception RuntimeException
+  /** \fn ~Model()
+   *  \brief destructor
    */
-  /*Model(double t0, string strategy_name, double T = -1, string title="none", string author="nobody",
-    string description="none", string date="none",
-    string xmlSchema="none");
-  */
-  /** \fn Model(double t0, double T, string title, string author, string description, string date, string xmlSchema)
-   *  \brief create the Model from a set of data
-   *  \param double : the value for t0
-   *  \param strategy : the predefined strategy to use
-   *  \param double : the value for T (optional parameter)
-   *  \param string : the title of the Model (optional parameter)
-   *  \param string : the author of the Model (optional parameter)
-   *  \param string : the description of the Model (optional parameter)
-   *  \param string : the date of the Model (optional parameter)
-   *  \param string : the xml schema of the Model (optional parameter)
-   *  \exception RuntimeException
-   */
-  /*Model(double t0, string strategy_name, double T = -1, string title="none", string author="nobody",
-    string description="none", string date="none",
-    string xmlSchema="none");
-  */
   ~Model();
 
   // --- GETTERS/SETTERS
@@ -132,13 +136,10 @@ public:
   }
 
   /** \fn inline void setT0(const double&)
-   *  \brief set initial time
+   *  \brief set initial time of the time discretisation
    *  \param a double
    */
-  inline void setT0(const double& newValue)
-  {
-    t0 = newValue;
-  }
+  void setT0(const double&);
 
   /** \fn inline const double getFinalT()
    *  \brief get final time
@@ -167,11 +168,11 @@ public:
     return strat;
   }
 
-  /** \fn void setStrategyPtr(Strategy *str)
+  /** \fn Strategy* setStrategyPtr(Strategy*)
    *  \brief set the Strategy of the Model
-   *  \param a pointer on Strategy
+   *  \return a pointer on Strategy
    */
-  void setStrategyPtr(Strategy * newPtr);
+  void setStrategyPtr(Strategy*);
 
   /** \fn inline NonSmoothDynamicalSystem* getNonSmoothDynamicalSystemPtr() const
    *  \brief get the NonSmoothDynamicalSystem of the Model
@@ -362,6 +363,12 @@ public:
    */
   void display() const ;
 
+  /** \fn friend void TimeDiscretisation::setT0(const double&);
+   *  \brief set t0 value in TimeDiscretisation and in Model
+   *  \param the double value of t0
+   */
+  friend class TimeDiscretisation;//::setT0(const double&);
+
   /*******************************************************
    *
    * function to create the platform from a C++ programm
@@ -387,39 +394,6 @@ public:
    *  \return Strategy* : the Strategy created
    */
   Strategy* createTimeEventDriven();
-
-private:
-  /** \fn Model()
-   *  \brief default constructor
-   */
-  Model();
-
-  /** current time of the simulation */
-  double t;
-
-  /** initial time of the simulation */
-  double t0;
-
-  /** final time of the simulation */
-  double T;
-
-  /** The strategy to solve the NonSmoothDynamicalSystem */
-  Strategy *strat;
-
-  /** The NonSmoothDynamicalSystem of the simulation */
-  NonSmoothDynamicalSystem * nsds;
-
-  /** XML object linked to the Model */
-  SiconosModelXML *modelxml;
-
-  /** information concerning the Model */
-  std::string  title, author, description, date, xmlSchema;
-
-  /** Flags to check wheter pointers were allocated in class constructors or not */
-  bool isNsdsAllocatedIn;
-  bool isStrategyAllocatedIn;
-  bool isModelXmlAllocatedIn;
-
 };
 
 #endif // MODEL_H

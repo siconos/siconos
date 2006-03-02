@@ -38,23 +38,18 @@ class Strategy;
  * Two types of constructors:
  * - IO (at the time only xml)
  * - straightforward
- * Always the same process:
- * - load the data (from io or as arguments of the straightforward constructor function)
- * - determine which case we have (function checkTimeDiscretisationCase)
- * - compute the missing data using the given ones
- * 6 possible cases:
- *   | Given data     =>  Computed data
- * 1 | \f$t_k\f$      => \f$T, nSteps, h\f$
- * 2 | \f$t_k,T\f$    => \f$nSteps, h\f$
- * 3 | \f$nSteps,h\f$ => \f$T,t_k\f$
- * 4 | \f$h,T\f$      => \f$nSteps,t_k\f$
- * 5 | \f$nSteps,T\f$ => \f$h,t_k\f$
- * 6 |  all =>  none
- * any other case causes an exception.
- * Note that the last case is used when recovering a saved or crash file
- * (from xml for example) that contains all the data.
+ *  The construction process is always the same:
+ *   - data loading (from io or as arguments of the straightforward constructor function)
+ *   - available data checking using checkCase function. This sets the value of tdCase which tells us
+ *     how the timeDiscretisation will be compute, depending on the input.
+ *   - compute the time discretisation members, using compute(tdCase) method.
+ *
  * At the time, TimeDiscretisation is linked with the strategy, but this should change (one discretisation per integrator?).
  * That is s why get/set for \f$t_0\f$ and \f$T\f$ (from model) are encapsulate.
+ * setT0 function is a friend of class Model, to allow t0 changes in Model without a call to setT0 of the model, which would
+ * result in an infinite loop.
+ *
+ * Note that we forbid any construction of a TimeDiscretisation without a given (not NULL) strategy.
  *
  * \todo add a vector Memory for the previous time tk which have to be stored.
  *  The complete SimpleVector will be only used for a complete definition a priori of a variable timediscretisation.
@@ -62,6 +57,59 @@ class Strategy;
 
 class TimeDiscretisation
 {
+private:
+  /** Time step */
+  double h;
+
+  /** Number of time step */
+  unsigned int nSteps;
+
+  /** vector of time values at each step (=> size = nSteps) */
+  SimpleVector* tk;
+
+  /** contains the lowest possible time step value */
+  double hMin;
+
+  /** contains the highest possible time step value */
+  double hMax;
+
+  /** true if all the Integrator have the same time step */
+  bool constant;
+
+  /** the XML object linked to the TimeDiscretisation to read XML data */
+  TimeDiscretisationXML* timeDiscretisationXML;
+
+  /** Current step number*/
+  int k;
+
+  /* the strategy of simulation */
+  Strategy* strategy;
+
+  /** Flags to know if pointers have been allocated inside present class constructors or not */
+  bool isTkAllocatedIn;
+
+  /** indicator of the way of construction for this time discretisation.
+      Obtained with a call to checkCase(...) during construction.*/
+  int tdCase;
+
+  /** \fn TimeDiscretisation()
+   *  \brief default constructor
+   */
+  TimeDiscretisation();
+
+  /** \fn const int checkCase(const bool&, const bool&,const bool&,const bool&) const;
+   *  \brief determine the way to compute TD values, according to which data are provided => set tdCase
+   *  \param booleans indicated if tk, h, nSteps and T are present or not
+   */
+  void checkCase(const bool&, const bool&, const bool&, const bool&);
+
+  /** \fn void compute(const int&);
+   *  \brief to compute TD values according a case, depending on input values and provided
+   *   by checkCase.
+   *  \param an int to switch to the good case
+   */
+  void compute(const int&);
+
 public:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -82,19 +130,19 @@ public:
   */
   TimeDiscretisation(SimpleVector *, Strategy*);
 
-  /** \fn TimeDiscretisation(const double& newH, const int& newNSteps, Strategy* str)
+  /** \fn TimeDiscretisation(const double& newH, const unsigned int& newNSteps, Strategy* str)
    *  \brief constructor with h, nSteps and strategy as given data
-   *  \param double (h), int (nSteps)
+   *  \param double (h), unsigned int (nSteps)
    *  \param Strategy* : the strategy that owns this discretisation
    */
-  TimeDiscretisation(const double& newH, const int& newNSteps, Strategy* str);
+  TimeDiscretisation(const double& newH, const unsigned int& newNSteps, Strategy* str);
 
-  /** \fn TimeDiscretisation(const int& newNSteps, Strategy* str)
+  /** \fn TimeDiscretisation(const unsigned int& newNSteps, Strategy* str)
    *  \brief constructor with nSteps and strategy as given data
    *  \param int (nSteps)
    *  \param Strategy* : the strategy that owns this discretisation
   */
-  TimeDiscretisation(const int& newNSteps, Strategy* str);
+  TimeDiscretisation(const unsigned int& newNSteps, Strategy* str);
 
   /** \fn TimeDiscretisation(const double& newH, Strategy* str)
    *  \brief constructor with h and strategy as given data
@@ -105,21 +153,6 @@ public:
 
   // Destructor
   ~TimeDiscretisation();
-
-  // --- Constructors related functions ---
-
-  /** \fn const int checkTimeDiscretisationCase(const bool&, const bool&,const bool&,const bool&) const;
-   *  \brief determine which type of time discretisation scheme we have depending on the provided data
-   *  \param booleans indicated if tk, h, nSteps and T are present or not
-   *  \return an int indicating the resulting case
-   */
-  const int checkTimeDiscretisationCase(const bool&, const bool&, const bool&, const bool&) const;
-
-  /** \fn void computeTimeDiscretisation(const int&);
-  *  \brief check the coherency of the scheme and compute the missing values
-  *  \param an in to switch on the good case
-  */
-  void computeTimeDiscretisation(const int&);
 
   // --- GETTERS/SETTERS ---
 
@@ -136,28 +169,22 @@ public:
    *  \brief set the time step
    *  \param the new value for h
    */
-  inline void setH(const double& newH)
-  {
-    h = newH;
-  };
+  void setH(const double& newH);
 
-  /** \fn const int getNSteps() const
+  /** \fn const unsigned int getNSteps() const
    *  \brief get the number of time steps
    *  \return the value of nSteps
    */
-  inline const int getNSteps() const
+  inline const unsigned int getNSteps() const
   {
     return nSteps;
   };
 
-  /** \fn void setNSteps(const int&)
+  /** \fn void setNSteps(const unsigned int&)
    *  \brief set the number of time steps
    *  \param the new value for nSteps
    */
-  inline void setNSteps(const int& newNSteps)
-  {
-    nSteps = newNSteps;
-  };
+  void setNSteps(const unsigned int& newNSteps);
 
   /** \fn  const SimpleVector getTk() const
    *  \brief get the value of tk
@@ -190,21 +217,13 @@ public:
    *  \brief set the value of tk to newValue
    *  \param SimpleVector newValue
    */
-  inline void setTk(const SimpleVector& newValue)
-  {
-    *tk = newValue;
-  }
+  void setTk(const SimpleVector& newValue);
 
   /** \fn void setTkPtr(SimpleVector* newPtr)
    *  \brief set tk to pointer newPtr
    *  \param SimpleVector * newPtr
    */
-  inline void setTkPtr(SimpleVector *newPtr)
-  {
-    if (isTkAllocatedIn = true) delete tk;
-    tk = newPtr;
-    isTkAllocatedIn = false;
-  }
+  void setTkPtr(SimpleVector *newPtr) ;
 
   /** \fn const double getHMin() const
    *  \brief get hMin
@@ -305,15 +324,6 @@ public:
     return strategy;
   };
 
-  /** \fn void setStrategyPtr(Strategy* str)
-   *  \brief set the link to the Strategy
-   *  \param Strategy* : a pointer on Strategy
-   */
-  inline void setStrategyPtr(Strategy* str)
-  {
-    strategy = str;
-  }
-
   // Getters and setters for time boundary value from model
 
   /** \fn const double getT0() const
@@ -321,6 +331,12 @@ public:
    *  \return the value of t0
    */
   const double getT0() const ;
+
+  /** \fn void setT0(const double& newValue)
+   *  \brief set initial time (friend function of class Model)
+   *  \param double : the new value for t0
+   */
+  void setT0(const double& newValue);
 
   /** \fn const bool hasT() const
    *  \brief check if T, time max value is in the model or not
@@ -361,42 +377,6 @@ public:
    *  \exception RuntimeException
    */
   void saveTimeDiscretisationToXML();
-
-private:
-  /** \fn TimeDiscretisation()
-   *  \brief default constructor
-   */
-  TimeDiscretisation();
-
-  /** contains the time step */
-  double h;
-
-  /** contains the number of time step */
-  int nSteps;
-
-  /** contains the time of each step */
-  SimpleVector* tk;
-
-  /** contains the lowest value of a time step */
-  double hMin;
-
-  /** contains the highest value of a time step */
-  double hMax;
-
-  /** true if all the Integrator have the same time step */
-  bool constant;
-
-  /** the XML object linked to the TimeDiscretisation to read XML data */
-  TimeDiscretisationXML* timeDiscretisationXML;
-
-  /** the current step */
-  int k;
-
-  /* the strategy of simulation */
-  Strategy* strategy;
-
-  /** Flags to know if pointers have been allocated inside constructors or not */
-  bool isTkAllocatedIn;
 };
 
 #endif // TIMEDISCRETISATION_H

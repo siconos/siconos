@@ -21,7 +21,13 @@
 using namespace std;
 
 // --- Default constructor ---
-EventDriven::EventDriven(): Strategy()
+EventDriven::EventDriven(Model* newModel): Strategy(newModel)
+{
+  strategyType = "EventDriven";
+}
+
+// --- From Model ---
+EventDriven::EventDriven(Model& newModel): Strategy(newModel)
 {
   strategyType = "EventDriven";
 }
@@ -39,6 +45,14 @@ EventDriven::~EventDriven()
 void EventDriven::setEventsManagerPtr(EventsManager*)
 {
   // TODO if required ??
+}
+
+void EventDriven::initialize()
+{
+  eventsManager = new EventsManager();
+  eventsManager->setStrategyPtr(this);
+  // Review eventsManager constructor? Strategy as a required input? Or set as here?
+  eventsManager->initialize();
 }
 
 // Run the whole simulation
@@ -59,12 +73,13 @@ void EventDriven::run()
   cout << "===== End of Event Driven simulation. " << count << " events have been processed. ==== " << endl;
 }
 
-// void EventDriven::simulateOneStep()
-// {
-//   advanceToEvent();
-//   // update events
-//   eventsManager->processEvents();
-// }
+void EventDriven::computeOneStep()
+{
+  cout << "EventDriven, compute One Step, not yet implemented." << endl;
+  //  advanceToEvent();
+  // update events
+  //eventsManager->processEvents();
+}
 
 void EventDriven::advanceToEvent()
 {

@@ -19,14 +19,14 @@
 dnl configure script for SICONOS
 dnl JB CHARLETY, 2005
 
-AC_PREREQ(2.59)
-AC_INIT([Siconos-Kernel],[1.1.2],[siconos.gforge.inria.fr])
+AC_PREREQ(2.57)
+AC_INIT(SICONOS, 1.1.1, siconos.gforge.inria.fr)
 
 dnl Checking host/target/build systems, for make, install etc.
-AC_CANONICAL_TARGET([])
+AC_CANONICAL_SYSTEM
+AM_INIT_AUTOMAKE(SICONOS, 1.1.1)
 AC_CONFIG_SRCDIR([src/model/Model.h])
-AM_INIT_AUTOMAKE
-AC_CONFIG_HEADERS([config.h])
+AM_CONFIG_HEADER([config.h])
 
 # SO version of all siconos shared libraries
 SICONOS_SO_CURRENT=1
@@ -36,6 +36,7 @@ AC_SUBST(SICONOS_SO_CURRENT)
 AC_SUBST(SICONOS_SO_REVISION)
 AC_SUBST(SICONOS_SO_AGE)
 # Checks for compilers.
+
 
 m4_define([AC_PROG_INSURE],[
 # Insure++ is a proriatary code checker/prober
@@ -317,8 +318,7 @@ AC_CONFIG_FILES([Makefile
                  src/utils/SiconosSharedLibrary/Makefile
                  src/utils/contract/Makefile
                  src/xml/Makefile
-                 src/xml/test/Makefile
-		 global_tests/Makefile])
+                 src/xml/test/Makefile])
 AC_OUTPUT
 
 

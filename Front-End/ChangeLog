@@ -23,6 +23,21 @@ before it.
 
 
 --------------------------------------------------------------------------------
+  v1.1.X - February 2006 (current release)
+--------------------------------------------------------------------------------
+
+Notes:
+
+		
+Changes:
+	
+2006-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
+                                                                               
+	* configure.ac -> run autoupdate to remove obsolete macros. 
+	  Keep configure.ac.old to work with older
+	  autotools version. 
+
+--------------------------------------------------------------------------------
   v1.1.2 - February 2006 (release 428)
 --------------------------------------------------------------------------------
 

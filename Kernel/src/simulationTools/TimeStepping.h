@@ -31,10 +31,17 @@ class TimeStepping : public Strategy
 {
 public:
 
-  /** \fn TimeStepping()
+  /** \fn TimeStepping(Model * = NULL)
    *  \brief Default constructor
+   *  \param a pointer to the model that owns this strategy. NULL Model leads to exception
    */
-  TimeStepping();
+  TimeStepping(Model* = NULL);
+
+  /** \fn TimeStepping(Model&)
+   *  \brief constructor from Model => avoid this function, prefer the one with Model*
+   *  \param a Model.
+   */
+  TimeStepping(Model&);
 
   /** \fn TimeStepping(StrategyXML*, Model*)
    *  \brief constructor with XML object for TimeStepping
@@ -44,6 +51,21 @@ public:
   TimeStepping(StrategyXML*, Model*);
 
   ~TimeStepping();
+
+  /** \fn void initialize()
+   *  \brief executes the complete initialisation of Strategy (OneStepIntegrators, OneStepNSProblem, TImediscretisation) with the XML Object
+   */
+  void initialize();
+
+  /** \fn void run()
+   *  \brief run the simulation, from t0 to T
+   */
+  void run();
+
+  /** \fn void computeOneStep()
+   *  \brief run one step of the simulation
+   */
+  void computeOneStep();
 
   /** \fn TimeStepping* convert (Strategy* str)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.

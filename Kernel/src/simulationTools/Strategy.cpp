@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "Strategy.h"
 // includes to be deleted thanks to factories:
 #include "Moreau.h"
@@ -31,63 +31,60 @@
 using namespace std;
 
 // --- Default constructor ---
-Strategy::Strategy(): strategyType("undefined"), timeDiscretisation(NULL), nsProblem(NULL),
-  strategyxml(NULL), model(NULL),
-  isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
+Strategy::Strategy(Model * mainModel):
+  name("unnamed"), strategyType("undefined"), timeDiscretisation(NULL), nsProblem(NULL),
+  strategyxml(NULL), model(mainModel), isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
-  isStrategyComplete();
+
+  if (model == NULL)
+    RuntimeException::selfThrow("Strategy constructor - model = NULL.");
+  model->setStrategyPtr(this);
+  //  isStrategyComplete();
+}
+
+// --- Default constructor ---
+Strategy::Strategy(Model& newModel):
+  name("unnamed"), strategyType("undefined"), timeDiscretisation(NULL), nsProblem(NULL),
+  strategyxml(NULL), model(NULL), isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
+{
+  model = &newModel;
+  model->setStrategyPtr(this);
+  //  isStrategyComplete();
 }
 
 // --- Constructors from a given set of data ---
 
-Strategy::Strategy(TimeDiscretisation* newTd, vector<OneStepIntegrator*> newOsiVector, OneStepNSProblem* newNspb, Model* newModel):
-  strategyType("undefined"), timeDiscretisation(newTd), integratorVector(newOsiVector), nsProblem(newNspb), strategyxml(NULL), model(newModel),
-  isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
-{
-  isStrategyComplete();
-}
-
-Strategy::Strategy(TimeDiscretisation* newTd, vector<OneStepIntegrator*> newOsiVector, Model* newModel):
-  strategyType("undefined"), timeDiscretisation(newTd), integratorVector(newOsiVector), nsProblem(NULL), strategyxml(NULL), model(newModel),
-  isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
-{
-  isStrategyComplete();
-}
-
-Strategy::Strategy(TimeDiscretisation* newTd, OneStepNSProblem* newNspb, Model* newModel):
-  strategyType("undefined"), timeDiscretisation(newTd), nsProblem(newNspb), strategyxml(NULL), model(newModel),
-  isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
-{
-  isStrategyComplete();
-}
-
-Strategy::Strategy(TimeDiscretisation* newTd, Model* newModel):
-  strategyType("undefined"), timeDiscretisation(newTd), nsProblem(NULL), strategyxml(NULL), model(newModel),
-  isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
-{
-  isStrategyComplete();
-}
-
+// Vector of OSI + OSNS + Model
 Strategy::Strategy(vector<OneStepIntegrator*> newOsiVector, OneStepNSProblem* newNspb, Model* newModel):
-  strategyType("undefined"), timeDiscretisation(NULL), integratorVector(newOsiVector), nsProblem(newNspb), strategyxml(NULL), model(newModel),
+  name("unnamed"), strategyType("undefined"), timeDiscretisation(NULL), integratorVector(newOsiVector), nsProblem(newNspb), strategyxml(NULL), model(newModel),
   isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
-  isStrategyComplete();
+  if (model == NULL)
+    RuntimeException::selfThrow("Strategy constructor - model = NULL.");
+  model->setStrategyPtr(this);
+  //isStrategyComplete();
 }
 
+// Vector of OSI + Model
 Strategy::Strategy(vector<OneStepIntegrator*> newOsiVector, Model* newModel):
-  strategyType("undefined"), timeDiscretisation(NULL), integratorVector(newOsiVector),
-  nsProblem(NULL), strategyxml(NULL), model(newModel),
+  name("unnamed"), strategyType("undefined"), timeDiscretisation(NULL), integratorVector(newOsiVector), nsProblem(NULL), strategyxml(NULL), model(newModel),
   isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
-  isStrategyComplete();
+  if (model == NULL)
+    RuntimeException::selfThrow("Strategy constructor - model = NULL.");
+  model->setStrategyPtr(this);
+  //  isStrategyComplete();
 }
 
+// OSNS + Model
 Strategy::Strategy(OneStepNSProblem* newNspb, Model* newModel):
-  strategyType("undefined"), timeDiscretisation(NULL), nsProblem(newNspb), strategyxml(NULL), model(newModel),
+  name("unnamed"), strategyType("undefined"), timeDiscretisation(NULL), nsProblem(newNspb), strategyxml(NULL), model(newModel),
   isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
-  isStrategyComplete();
+  if (model == NULL)
+    RuntimeException::selfThrow("Strategy constructor - model = NULL.");
+  model->setStrategyPtr(this);
+  //isStrategyComplete();
 }
 
 // --- xml constructor ---
@@ -101,82 +98,83 @@ Strategy::Strategy(StrategyXML* strxml, Model *newModel): strategyType("undefine
     // memory allocation/construction for time discretisation
     timeDiscretisation = new TimeDiscretisation(strategyxml->getTimeDiscretisationXMLPtr(), this);
 
-    if (model != NULL)
+    if (model == NULL)
+      RuntimeException::selfThrow("Strategy constructor - model = NULL.");
+    model->setStrategyPtr(this);
+    int dsNb;
+    DynamicalSystem *dsPtr;
+
+    // --- OneStepIntegrators ---
+    // Get the OSI vector from xml
+    vector<OneStepIntegratorXML*> osiXMLVector = strategyxml->getOneStepIntegratorXML();
+    unsigned int sizeOsi = osiXMLVector.size();
+    integratorVector.reserve(sizeOsi);
+
+    // For each OSI ...
+    for (unsigned int i = 0; i < sizeOsi; i++)
     {
-      int dsNb;
-      DynamicalSystem *dsPtr;
+      // Get the number of the DynamicalSystem concerned
+      dsNb = (osiXMLVector[i]->getDSConcerned())[0];
+      // Get this DS
+      dsPtr = model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(dsNb);
 
-      // --- OneStepIntegrators ---
-      // Get the OSI vector from xml
-      vector<OneStepIntegratorXML*> osiXMLVector = strategyxml->getOneStepIntegratorXML();
-      unsigned int sizeOsi = osiXMLVector.size();
-      integratorVector.reserve(sizeOsi);
-
-      // For each OSI ...
-      for (unsigned int i = 0; i < sizeOsi; i++)
+      if (dsPtr == NULL) RuntimeException::selfThrow("Strategy::xml constructor - DS = NULL");
+      // memory allocation/construction of the osi
+      // Moreau
+      if (osiXMLVector[i]->getType() == MOREAU_TAG)
       {
-        // Get the number of the DynamicalSystem concerned
-        dsNb = (osiXMLVector[i]->getDSConcerned())[0];
-        // Get this DS
-        dsPtr = model->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtrNumber(dsNb);
-
-        if (dsPtr == NULL) RuntimeException::selfThrow("Strategy::xml constructor - DS = NULL");
-        // memory allocation/construction of the osi
-        // Moreau
-        if (osiXMLVector[i]->getType() == MOREAU_TAG)
-        {
-          integratorVector.push_back(new Moreau(osiXMLVector[i], timeDiscretisation, dsPtr));
-          isIntegratorVectorAllocatedIn.push_back(true);
-        }
-        // Lsodar
-        else if (osiXMLVector[i]->getType() == LSODAR_TAG)
-        {
-          integratorVector.push_back(new Lsodar(osiXMLVector[i]));
-          isIntegratorVectorAllocatedIn.push_back(true);
-        }
-        else RuntimeException::selfThrow("Strategy::xml constructor - wrong type of Integrator");
+        integratorVector.push_back(new Moreau(osiXMLVector[i], timeDiscretisation, dsPtr));
+        isIntegratorVectorAllocatedIn.push_back(true);
       }
-
-      // OneStepNSProblem
-      if (strategyxml->hasOneStepNSProblemXML())
+      // Lsodar
+      else if (osiXMLVector[i]->getType() == LSODAR_TAG)
       {
-        // we get all the numbers of the Interactions to link
-        //        vector<int> interactionNumbers = strategyxml->getOneStepNSProblemXMLPtr()->getInteractionConcerned();
-
-        // OneStepNSProblem - LCP memory allocation/construction
-        string type = strategyxml->getOneStepNSProblemXMLPtr()->getNSProblemType();
-        if (type == LCP_TAG)
-          nsProblem = new LCP(strategyxml->getOneStepNSProblemXMLPtr(), this);
-        // OneStepNSProblem - FrictionContact2D
-        else if (type == FrictionContact2D_TAG)
-          nsProblem = new FrictionContact2D(strategyxml->getOneStepNSProblemXMLPtr(), this);
-        // OneStepNSProblem - FrictionContact3D
-        else if (type == FrictionContact3D_TAG)
-          nsProblem = new FrictionContact3D(strategyxml->getOneStepNSProblemXMLPtr(), this);
-        // Uncomment following lines when QP and Relay will be fully implemented
-        //        // OneStepNSProblem - QP
-        //        else if( strategyxml->getOneStepNSProblemXMLPtr()->getType() == QP_TAG )
-        //    {
-        //      // QP memory allocation/construction
-        //      nsProblem = new QP(strategyxml->getOneStepNSProblemXMLPtr());
-        //      for(unsigned int i = 0; i < interactionNumbers.size(); i++ )
-        //        nsProblem->addInteraction( model->getNonSmoothDynamicalSystemPtr()->getInteractionPtrNumber(interactionNumbers[i]) );
-        //      nsProblem->setStrategy(this);
-        //    }
-        //        // OneStepNSProblem - Relay
-        //        else if( strategyxml->getOneStepNSProblemXMLPtr()->getType() == RELAY_TAG )
-        //    {
-        //      // relay memory allocation/construction
-        //      nsProblem = new Relay(strategyxml->getOneStepNSProblemXMLPtr());
-        //      for( unsigned int i = 0; i < interactionNumbers.size(); i++ )
-        //        nsProblem->addInteraction( model->getNonSmoothDynamicalSystemPtr()->getInteractionPtrNumber(interactionNumbers[i]) );
-        //      nsProblem->setStrategy(this);
-        //    }
-        else RuntimeException::selfThrow("Strategy::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
-        isNSProblemAllocatedIn = true;
+        integratorVector.push_back(new Lsodar(osiXMLVector[i]));
+        isIntegratorVectorAllocatedIn.push_back(true);
       }
+      else RuntimeException::selfThrow("Strategy::xml constructor - wrong type of Integrator");
     }
-    isStrategyComplete();
+
+    // OneStepNSProblem
+    if (strategyxml->hasOneStepNSProblemXML())
+    {
+      // we get all the numbers of the Interactions to link
+      //        vector<int> interactionNumbers = strategyxml->getOneStepNSProblemXMLPtr()->getInteractionConcerned();
+
+      // OneStepNSProblem - LCP memory allocation/construction
+      string type = strategyxml->getOneStepNSProblemXMLPtr()->getNSProblemType();
+      if (type == LCP_TAG)
+        nsProblem = new LCP(strategyxml->getOneStepNSProblemXMLPtr(), this);
+      // OneStepNSProblem - FrictionContact2D
+      else if (type == FrictionContact2D_TAG)
+        nsProblem = new FrictionContact2D(strategyxml->getOneStepNSProblemXMLPtr(), this);
+      // OneStepNSProblem - FrictionContact3D
+      else if (type == FrictionContact3D_TAG)
+        nsProblem = new FrictionContact3D(strategyxml->getOneStepNSProblemXMLPtr(), this);
+      // Uncomment following lines when QP and Relay will be fully implemented
+      //        // OneStepNSProblem - QP
+      //        else if( strategyxml->getOneStepNSProblemXMLPtr()->getType() == QP_TAG )
+      //    {
+      //      // QP memory allocation/construction
+      //      nsProblem = new QP(strategyxml->getOneStepNSProblemXMLPtr());
+      //      for(unsigned int i = 0; i < interactionNumbers.size(); i++ )
+      //        nsProblem->addInteraction( model->getNonSmoothDynamicalSystemPtr()->getInteractionPtrNumber(interactionNumbers[i]) );
+      //      nsProblem->setStrategy(this);
+      //    }
+      //        // OneStepNSProblem - Relay
+      //        else if( strategyxml->getOneStepNSProblemXMLPtr()->getType() == RELAY_TAG )
+      //    {
+      //      // relay memory allocation/construction
+      //      nsProblem = new Relay(strategyxml->getOneStepNSProblemXMLPtr());
+      //      for( unsigned int i = 0; i < interactionNumbers.size(); i++ )
+      //        nsProblem->addInteraction( model->getNonSmoothDynamicalSystemPtr()->getInteractionPtrNumber(interactionNumbers[i]) );
+      //      nsProblem->setStrategy(this);
+      //    }
+      else RuntimeException::selfThrow("Strategy::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
+      isNSProblemAllocatedIn = true;
+    }
+
+    //isStrategyComplete();
   }
   else  RuntimeException::selfThrow("Strategy:: xml constructor - xml file = NULL");
   OUT("Strategy::xml constructor\n");
@@ -185,11 +183,8 @@ Strategy::Strategy(StrategyXML* strxml, Model *newModel): strategyType("undefine
 // --- Destructor ---
 Strategy::~Strategy()
 {
-  if (isTimeDiscretisationAllocatedIn)
-  {
-    delete timeDiscretisation;
-    timeDiscretisation = NULL;
-  }
+  if (isTimeDiscretisationAllocatedIn) delete timeDiscretisation;
+  timeDiscretisation = NULL;
   if (isNSProblemAllocatedIn) delete nsProblem;
   nsProblem = NULL;
   if (integratorVector.size() > 0)
@@ -204,15 +199,12 @@ Strategy::~Strategy()
 }
 
 // Check whether strategy is complete or not
-// Useless function since usually default constructor is used before OSI, OSNS etc setting. To be updated.
 bool Strategy::isStrategyComplete() const
 {
   bool isComplete = 1;
-  //if (timeDiscretisation == NULL) cout << "Warning: strategy may be incomplete: no time discretisation" << endl; isComplete =0;
   //if (integratorVector.size()==1 && integratorVector[0] == NULL)
   //  cout << "Warning: strategy may be incomplete: no integrator" << endl;isComplete =0;
   //if (nsProblem == NULL) cout << "Warning: strategy may be incomplete: no NS problem" << endl;isComplete =0;
-  //if (model == NULL) cout << "Warning: strategy may be incomplete: not linked with any model" << endl;isComplete =0;
   return(isComplete);
 }
 
@@ -220,6 +212,9 @@ bool Strategy::isStrategyComplete() const
 
 void Strategy::setTimeDiscretisationPtr(TimeDiscretisation* td)
 {
+  // Warning: this function may be used carefully because of the links between Model and TimeDiscretisation
+  // The strategy of the td input MUST be the current strategy.
+  //
   if (isTimeDiscretisationAllocatedIn) delete timeDiscretisation;
   timeDiscretisation = td;
   isTimeDiscretisationAllocatedIn = false;
@@ -428,4 +423,3 @@ bool Strategy::hasDynamicalSystemIntegrator(DynamicalSystem* ds) const
   }
   return false;
 }
-

@@ -36,4 +36,3 @@ include_HEADERS = TimeDiscretisation.h Solver.h Event.h  TimeDiscrEvent.h NonSmo
 		  FrictionContact3D.h LCP.h Lsodar.h Moreau.h OneStepIntegrator.h OneStepNSProblem.h QP.h \
 	          Relay.h Strategy.h TimeStepping.h EventDriven.h EventsComparison.h EventsManager.h
 
-

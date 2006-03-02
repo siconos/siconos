@@ -47,7 +47,7 @@ Event::~Event()
 
 void Event::display() const
 {
-  cout << "=== Event data display ===" << endl;
+  cout << "===== Event data display =====" << endl;
   cout << " - Type: " << type << endl;
   cout << " - time (unsigned int format): " << timeOfEvent << endl;
   cout << "===== End of Event display =====" << endl;

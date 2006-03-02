@@ -24,7 +24,7 @@
 
 // Standard SICONOS environment variable
 setenv("SICONOSPATH","@KERNEL_PATH@");
-strLD_LIBRARY_PATH=getenv("LD_LIBRARY_PATH")+":@NUMERICS_PATH@/lib"+":@KERNEL_PATH@/lib"+":@KERNEL_PATH@/share/SICONOS:.";
+strLD_LIBRARY_PATH=getenv("LD_LIBRARY_PATH")+":@NUMERICS_PATH@/lib"+":@KERNEL_PATH@/lib"+":@KERNEL_PATH@/share/siconos-kernel:.";
 setenv("LD_LIBRARY_PATH",strLD_LIBRARY_PATH);
 // dynamic lib 
 // TO DO : use configure

@@ -40,7 +40,6 @@
 
 class TimeDiscretisation;
 
-
 const std::string  TD_H = "h";
 const std::string  TD_N = "N";
 const std::string  TD_TK = "tk";

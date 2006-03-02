@@ -610,6 +610,23 @@ SiconosMatrix operator ^ (const SiconosMatrix& m, const int pow)
   return temp;
 }
 
+const double SiconosMatrix::normInf() const
+{
+  // get number or rows and columns
+  unsigned int row = mat.size(0);
+  unsigned int col = mat.size(1);
+  double norm = 0, normMax = 0 ;
+  for (unsigned int i = 0; i < row; ++i)
+  {
+    for (unsigned int j = 0; j < col; ++j)
+      norm += fabs(mat(i, j));
+    if (norm > normMax) normMax = norm;
+    norm = 0;
+  }
+
+  return normMax;
+
+}
 
 // --- COMPUTING WITH MATRICES  ---
 
