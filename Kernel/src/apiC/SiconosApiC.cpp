@@ -60,6 +60,7 @@ using namespace std;
 Model *GLOB_MODEL;
 NonSmoothDynamicalSystem *GLOB_NSDS;
 Strategy *GLOB_STRATEGIE;
+TimeDiscretisation *GLOB_TIME;
 vector<DynamicalSystem *> GLOB_VECTOR_DS;
 vector<Interaction*> GLOB_VECTOR_INTERACTION;
 
@@ -118,7 +119,7 @@ extern "C" int sicInitStrategy()
   return ret;
 }
 
-extern "C" int sicTimeGetH(double *H)
+extern "C" int sicTimGetH(double *H)
 {
   int ret = SIC_OK;
 
@@ -918,10 +919,9 @@ extern "C" int sicStrategyTimeStepping(double h)
     GLOB_STRATEGIE = new TimeStepping(GLOB_MODEL);
 
     // Time discretisation
-    TimeDiscretisation *t = new  TimeDiscretisation(h, GLOB_STRATEGIE);
-    GLOB_STRATEGIE->initialize();
+    GLOB_TIME = new  TimeDiscretisation(h, GLOB_STRATEGIE);
 
-    t->getT(); // to avoid warning ...
+    GLOB_STRATEGIE->initialize();
 
   }
   catch (SiconosException e)
