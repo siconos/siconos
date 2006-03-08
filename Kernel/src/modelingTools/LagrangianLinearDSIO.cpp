@@ -300,7 +300,6 @@ void LagrangianLinearDSIO::createDSInputOutput(DSInputOutputXML * dsioXML,
 
 LagrangianLinearDSIO* LagrangianLinearDSIO::convert(DSInputOutput *dsio)
 {
-  cout << "LagrangianLinearDSIO::convert (DSInputOutput *dsio)" << endl;
   LagrangianLinearDSIO* lldsio = dynamic_cast<LagrangianLinearDSIO*>(dsio);
   return lldsio;
 }

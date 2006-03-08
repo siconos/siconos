@@ -272,7 +272,6 @@ void LinearDS::saveDSToXML()
 
 LinearDS* LinearDS::convert(DynamicalSystem* ds)
 {
-  cout << "LinearDS::convert (DynamicalSystem* ds)" << endl;
   LinearDS* lsds = dynamic_cast<LinearDS*>(ds);
   return lsds;
 }

@@ -180,7 +180,6 @@ void FrictionContact2D::computeQ(const double& time)
 
 FrictionContact2D* FrictionContact2D::convert(OneStepNSProblem* osnsp)
 {
-  cout << "FrictionContact2D::convert (OneStepNSProblem* osnsp)" << endl;
   FrictionContact2D* fc2d = dynamic_cast<FrictionContact2D*>(osnsp);
   return fc2d;
 }

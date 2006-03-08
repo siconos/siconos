@@ -73,7 +73,6 @@ void RelayNSL::saveNonSmoothLawToXML()
 
 RelayNSL* RelayNSL::convert(NonSmoothLaw* nsl)
 {
-  cout << "RelayNSL::convert (NonSmoothLaw* nsl)" << endl;
   RelayNSL* rnsl = dynamic_cast<RelayNSL*>(nsl);
   return rnsl;
 }

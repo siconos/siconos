@@ -1099,7 +1099,6 @@ void LagrangianR::saveRelationToXML() const
 
 LagrangianR* LagrangianR::convert(Relation *r)
 {
-  cout << "LagrangianR::convert (Relation *r)" << endl;
   LagrangianR* lnlr = dynamic_cast<LagrangianR*>(r);
   return lnlr;
 }

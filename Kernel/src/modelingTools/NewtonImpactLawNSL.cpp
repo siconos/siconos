@@ -66,7 +66,6 @@ void NewtonImpactLawNSL::saveNonSmoothLawToXML()
 
 NewtonImpactLawNSL* NewtonImpactLawNSL::convert(NonSmoothLaw* nsl)
 {
-  cout << "NewtonImpactLawNSL::convert (NonSmoothLaw* nsl)" << endl;
   NewtonImpactLawNSL* nilnsl = dynamic_cast<NewtonImpactLawNSL*>(nsl);
   return nilnsl;
 }

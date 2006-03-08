@@ -1227,7 +1227,6 @@ void LCP::saveQToXML()
 
 LCP* LCP::convert(OneStepNSProblem* osnsp)
 {
-  cout << "LCP::convert (OneStepNSProblem* osnsp)" << endl;
   LCP* lcp = dynamic_cast<LCP*>(osnsp);
   return lcp;
 }

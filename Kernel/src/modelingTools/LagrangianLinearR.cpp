@@ -625,7 +625,6 @@ void LagrangianLinearR::saveRelationToXML() const
 
 LagrangianLinearR* LagrangianLinearR::convert(Relation *r)
 {
-  cout << "LagrangianLinearR::convert (Relation *r)" << endl;
   LagrangianLinearR* llr = dynamic_cast<LagrangianLinearR*>(r);
   return llr;
 }

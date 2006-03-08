@@ -59,7 +59,6 @@ void QP::saveQToXML()
 
 QP* QP::convert(OneStepNSProblem* osnsp)
 {
-  cout << "QP::convert (DynamicalSystem* osnsp)" << endl;
   QP* qp = dynamic_cast<QP*>(osnsp);
   return qp;
 }

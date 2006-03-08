@@ -76,7 +76,6 @@ void NewtonImpactFrictionNSL::saveNonSmoothLawToXML()
 
 NewtonImpactFrictionNSL* NewtonImpactFrictionNSL::convert(NonSmoothLaw* nsl)
 {
-  cout << "NewtonImpactFrictionNSL::convert (NonSmoothLaw* nsl)" << endl;
   NewtonImpactFrictionNSL* nilnsl = dynamic_cast<NewtonImpactFrictionNSL*>(nsl);
   return nilnsl;
 }

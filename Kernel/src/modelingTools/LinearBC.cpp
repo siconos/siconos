@@ -87,7 +87,6 @@ void LinearBC::createBoundaryCondition(BoundaryConditionXML * bcXML,
 
 LinearBC* LinearBC::convert(BoundaryCondition* bc)
 {
-  cout << "LinearBC::convert (BoundaryCondition* bc)" << endl;
   LinearBC* lbc = dynamic_cast<LinearBC*>(bc);
   return lbc;
 }

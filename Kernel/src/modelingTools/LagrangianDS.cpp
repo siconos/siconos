@@ -1597,7 +1597,6 @@ void LagrangianDS::swapInMemory()
 
 LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
 {
-  cout << "LagrangianDS::convert (DynamicalSystem* ds)" << endl;
   LagrangianDS* lnlds = dynamic_cast<LagrangianDS*>(ds);
   return lnlds;
 }

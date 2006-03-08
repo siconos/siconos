@@ -819,7 +819,6 @@ void LinearTIR::saveRelationToXML() const
 
 LinearTIR* LinearTIR::convert(Relation *r)
 {
-  cout << "LinearTIR::convert (Relation *r)" << endl;
   LinearTIR* ltir = dynamic_cast<LinearTIR*>(r);
   return ltir;
 }

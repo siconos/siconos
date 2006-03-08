@@ -125,7 +125,6 @@ void EventDriven::advanceToEvent()
 
 EventDriven* EventDriven::convert(Strategy *str)
 {
-  cout << "EventDriven::convert (Strategy *str)" << endl;
   EventDriven* ed = dynamic_cast<EventDriven*>(str);
   return ed;
 }

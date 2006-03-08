@@ -240,7 +240,6 @@ void LagrangianLinearTIDS::saveDSToXML()
 
 LagrangianLinearTIDS* LagrangianLinearTIDS::convert(DynamicalSystem* ds)
 {
-  cout << "LagrangianLinearTIDS::convert (DynamicalSystem* ds)" << endl;
   LagrangianLinearTIDS* ltids = dynamic_cast<LagrangianLinearTIDS*>(ds);
   return ltids;
 }

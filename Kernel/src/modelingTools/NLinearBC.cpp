@@ -67,7 +67,6 @@ void NLinearBC::createBoundaryCondition(BoundaryConditionXML * bcXML)
 
 NLinearBC* NLinearBC::convert(BoundaryCondition* bc)
 {
-  cout << "NLinearBC::convert (BoundaryCondition* bc)" << endl;
   NLinearBC* nlbc = dynamic_cast<NLinearBC*>(bc);
   return nlbc;
 }

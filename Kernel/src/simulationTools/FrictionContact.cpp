@@ -947,7 +947,6 @@ void FrictionContact::saveQToXML()
 
 FrictionContact* FrictionContact::convert(OneStepNSProblem* osnsp)
 {
-  cout << "FrictionContact::convert (OneStepNSProblem* osnsp)" << endl;
   FrictionContact* fc2d = dynamic_cast<FrictionContact*>(osnsp);
   return fc2d;
 }

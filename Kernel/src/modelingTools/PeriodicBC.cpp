@@ -67,7 +67,6 @@ void PeriodicBC::createBoundaryCondition(BoundaryConditionXML * bcXML)//, Dynami
 
 PeriodicBC* PeriodicBC::convert(BoundaryCondition* bc)
 {
-  cout << "PeriodicBC::convert (BoundaryCondition* bc)" << endl;
   PeriodicBC* pbc = dynamic_cast<PeriodicBC*>(bc);
   return pbc;
 }

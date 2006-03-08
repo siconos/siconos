@@ -47,7 +47,6 @@ void Relay::saveNSProblemToXML()
 
 Relay* Relay::convert(OneStepNSProblem* osnsp)
 {
-  cout << "Relay::convert (DynamicalSystem* osnsp)" << endl;
   Relay* r = dynamic_cast<Relay*>(osnsp);
   return r;
 }

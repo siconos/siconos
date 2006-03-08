@@ -565,7 +565,6 @@ void Moreau::saveWToXML()
 
 Moreau* Moreau::convert(OneStepIntegrator* osi)
 {
-  cout << "Moreau::convert (OneStepIntegrator* osi)" << endl;
   Moreau* moreau = dynamic_cast<Moreau*>(osi);
   return moreau;
 }

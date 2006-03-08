@@ -43,7 +43,6 @@ bool ComplementarityConditionNSL::isVerified() const
 
 ComplementarityConditionNSL* ComplementarityConditionNSL::convert(NonSmoothLaw* nsl)
 {
-  cout << "ComplementarityConditionNSL::convert (NonSmoothLaw* nsl)" << endl;
   ComplementarityConditionNSL* ccnsl = dynamic_cast<ComplementarityConditionNSL*>(nsl);
   return ccnsl;
 }

@@ -44,7 +44,6 @@ TimeStepping::~TimeStepping()
 
 TimeStepping* TimeStepping::convert(Strategy *str)
 {
-  cout << "TimeStepping::convert (Strategy *str)" << endl;
   TimeStepping* ts = dynamic_cast<TimeStepping*>(str);
   return ts;
 }
