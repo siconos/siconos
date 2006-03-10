@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -75,7 +75,7 @@ public:
    *  \exception SiconosVectorException if size < 0
    *  \return SimpleVector
    */
-  SimpleVector(const int unsigned& size);
+  SimpleVector(const unsigned int& size);
 
   /** \fn ~SiconosVector ()
    *  \brief destructor
@@ -84,11 +84,20 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
+  /** \fn SimpleVector* getVectorPtr(const unsigned int&) const;
+   *  \brief return the current object. This function is really usefull only for composite.
+   * \return a pointer to a SimpleVector
+   */
+  inline SimpleVector* getVectorPtr(const unsigned int&)
+  {
+    return this;
+  };
+
   /** \fn std::vector<int> getTabIndex() const
    *  \brief get the index tab (usefull only for composite, should not be used for simple) => avoid downcast
    * \return a standard vector of int
    */
-  std::vector<int> getTabIndex() const;
+  std::vector<unsigned int> getTabIndex() const;
 
   /** \fn void zero();
    *  \brief set the values to 0.0
@@ -111,20 +120,20 @@ public:
    *  \exception SiconosVectorException
    *  \return the element vector[i]
    */
-  double& operator()(const int unsigned &)  const;
+  double& operator()(const unsigned int &)  const;
 
   /** \fn void setValue(const int&, const double&)
    *  \brief set the value of one element of the vector
    *  \param double d : the new value
    *  \param int index : the position of the element to be set
    */
-  void setValue(const int unsigned&, const double&);
+  void setValue(const unsigned int&, const double&);
 
   /** \fn const double getValue(const int&) const
    *  \brief get the value of one element of the vector
    *  \param int index : the position of the element
    */
-  const double getValue(const int unsigned&) const;
+  const double getValue(const unsigned int&) const;
 
 
 
@@ -134,14 +143,14 @@ public:
    *  \param vector<double> v
    *  \param: int, not used for Simple, only for composite
    */
-  void setValues(const std::vector<double>& v, const int unsigned& = 0) ;
+  void setValues(const std::vector<double>& v, const unsigned int& = 0) ;
 
   /** \fn const LaVectorDouble getValues() const
    *  \brief get lavd vector
    *  \return a LaVectorDouble
    *  \param: int, not used for Simple, only for composite
    */
-  inline const LaVectorDouble getValues(const int unsigned& i = 0) const
+  inline const LaVectorDouble getValues(const unsigned int& i = 0) const
   {
     return lavd;
   }

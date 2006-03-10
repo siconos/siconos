@@ -1,5 +1,5 @@
 #!/bin/sh
-# Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.
+# Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@ SICONOSPATH=@prefix@
 NUMERICSPATH=@NUMERICS_PATH@
 
 # siconos shared files (xml_schema, KernelConfig, DefaultPlugin .so ...) location.
-SICONOS_SHAREPATH=$SICONOSPATH/share/siconos-kernel;
+SICONOS_SHAREPATH=$SICONOSPATH/share/siconos-kernel; 
 
 
 #-----------
@@ -39,8 +39,17 @@ function compilePlugins() {
     for dir in $listdir; do
 	cd $dir;
 	if test "`ls *Plugin.cpp 2>/dev/null`" != ""; then
-	    echo " --> Plug-in files location: $dir ";      
-	    make -f $SICONOS_SHAREPATH/MakefilePluginSample plugin
+	    if test "${silent}" = "true"; then
+		make -s -f $SICONOS_SHAREPATH/MakefilePluginSample plugin
+	    else
+		echo " ***** Plug-in management *****"
+		echo;
+		echo " --> Plug-in files location is $dir ";      
+		echo;
+		echo " Creation of the xxxPlugin.so file   ..."
+		echo;
+		make -f $SICONOS_SHAREPATH/MakefilePluginSample plugin
+	    fi;
 	    if test "${LD_LIBRARY_PATH}test" = "test"; then
 		export LD_LIBRARY_PATH=$PWD;
 	    else
@@ -56,17 +65,24 @@ function cleanAll() {
     listdir=`find . -type d`;
     for dir in $listdir; do
 	cd $dir;
-	make -f $SICONOS_SHAREPATH/MakefilePluginSample clean	    
+	if test "${silent}" = "true"; then
+	    make -s -f $SICONOS_SHAREPATH/MakefilePluginSample clean;
+	else
+	    make -f $SICONOS_SHAREPATH/MakefilePluginSample clean;
+	fi;	    
 	cd $DIR;
     done;
+    echo " --> Cleaning ok.";
 }
 
 function cartridge() {
+    echo;
     echo "|=========================================================|";
-    echo "| Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.|";
+    echo "| Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.|";
     echo "|                                                         |";
     echo "|     Free software under GNU General Public License.     |";
     echo "|=========================================================|"; 
+    echo;
 }
 
 #------
@@ -74,48 +90,44 @@ function cartridge() {
 #------
 
 cartridge;
-# parameters and paths
-echo " --> SICONOSPATH= $SICONOSPATH"
-export SICONOSPATH=$SICONOSPATH;
-if test "$SICONOSPATH" = ""; then
-    echo " /!\ SICONOSPATH undefined => stop /!\ ";
-    exit 1;
-fi;
 
-echo " --> NUMERICSPATH= $NUMERICSPATH"
-export NUMERICSPATH=$NUMERICSPATH;
-if test "$NUMERICSPATH" = ""; then
-    echo " /!\ NUMERICSPATH undefined => stop /!\ ";
-    exit 1;
-fi;
-
-echo " --> LD_LIBRARY_PATH= $LD_LIBRARY_PATH"
-if test "${LD_LIBRARY_PATH}test" = "test"; then
-   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOS_SHAREPATH:$NUMERICSPATH/lib/:/usr/local/lib;  
-else
-   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOS_SHAREPATH:$LD_LIBRARY_PATH:$NUMERICSPATH/lib:/usr/local/lib; 
-fi;	 
-
+# Get siconos command options
 clean="false";
-while getopts ch OPTION
+silent="true";
+sample="false";
+while getopts chv OPTION
   do
   case "$OPTION" in
       c) clean=true;;
-      h) echo " --> Path to a sample source file : compiles, links and runs this sample";
-	 echo "     -c : cleans the current repertory (deletes binary files, etc.)";
-	 echo "     -h : prints this help and exits";
+      v) silent=false;
+	  if [ $# -eq 2 ]; then
+	      if [ ! -f $2 ]; then
+		  echo "$2: file not found.";
+		  sample="false"
+		  exit 1;
+	      else
+		  sample="true"
+		  echo "$2 salut";
+	      fi;
+	  else sample="false"
+	  fi;;
+      h) echo "Run siconos YourSample.cpp or location/YourSample.cpp to compile, link and run a program.";
+	  echo "Other options are: ";
+	 echo "     -c : to clean the current directory (deletes binary files, etc.)";
+	 echo "     -h : to print this help.";
+	 echo "     -v : to print 'make' commands as they are executed.";
 	 exit 0;
 	 ;;
   esac
 done
-#echo "$# $0 $1 $2"
+
+# Clean action (ie call siconos -c)
 if "$clean" = "true"; then
     if [ $# -eq 2 ]; then
 	if [ ! -d $2 ]; then
 	    echo "/!\ clean $2 -> no such file or directory. /!\ ";
 	    exit 1;
 	else
-	    echo " --> Cleaning ok.";
 	    cd $2;
 	    cleanAll;
 	    cd ..;
@@ -125,16 +137,40 @@ if "$clean" = "true"; then
 	cleanAll;
 	exit 0;
     fi;
-fi;
-
-
-sample="false";
-# test if there are one or two argument. if not, exit
-if [ $# -gt 1 ]; then
-    echo "$0 : Bad number of argument";
+else
+# parameters and paths settings
+export SICONOSPATH=$SICONOSPATH;
+if test "$SICONOSPATH" = ""; then
+    echo " /!\ SICONOSPATH undefined => stop /!\ ";
     exit 1;
 fi;
-	
+export NUMERICSPATH=$NUMERICSPATH;
+if test "$NUMERICSPATH" = ""; then
+    echo " /!\ NUMERICSPATH undefined => stop /!\ ";
+    exit 1;
+fi;
+if test "${LD_LIBRARY_PATH}test" = "test"; then
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOS_SHAREPATH:$NUMERICSPATH/lib/:/usr/local/lib;  
+else
+   export LD_LIBRARY_PATH=$SICONOSPATH/lib:$SICONOS_SHAREPATH:$LD_LIBRARY_PATH:$NUMERICSPATH/lib:/usr/local/lib; 
+fi;	 
+
+if test "${silent}" = "false"; then
+echo " ***** Siconos environment variables *****"
+echo;
+echo " --> SICONOSPATH is $SICONOSPATH"
+echo " --> NUMERICSPATH is $NUMERICSPATH"
+echo " --> LD_LIBRARY_PATH is $LD_LIBRARY_PATH"
+echo;
+fi;
+
+# test if there are one or two argument. if not, exit
+if [ $# -gt 2 ]; then
+    echo "$0 : Two many arguments for siconos command.";
+    exit 1;
+fi;
+
+if test "${silent}" = "true"; then	
 # test if command file exist. if not, exit
 if [ $# -eq 1 ]; then
     if [ ! -f $1 ]; then
@@ -145,24 +181,31 @@ if [ $# -eq 1 ]; then
 	sample="true"
     fi;
 fi;
-    
-
-# plugin compilation
-compilePlugins;
-
-if "$sample" = "true"; then
-# sample compilation
-echo " --> Sample location is: `dirname $1`";
-    DIR_SAMPLE=`dirname $1`;
-
-    if [ ! -d $DIR_SAMPLE ]; then
-	echo "/!\ Can not find sample location. /!\ ";
-	exit 1;
-    else
-	cd $DIR_SAMPLE;
-	make -f $SICONOS_SHAREPATH/MakefilePluginSample OBJ=`basename $1` sample run
-	cd $DIR;
-    fi;
 fi;
 
+
+if "$sample" = "true"; then
+# plugin compilation
+compilePlugins;
+# sample compilation
+DIR_SAMPLE=`dirname $1`;
+echo;
+
+if [ ! -d $DIR_SAMPLE ]; then
+    echo "/!\ Can not find sample location. /!\ ";
+    exit 1;
+else
+    cd $DIR_SAMPLE;
+    if test "${silent}" = "true"; then
+	make -s -f $SICONOS_SHAREPATH/MakefilePluginSample OBJ=`basename $1` sample run
+    else
+	echo;
+	echo " ***** Current sample compilation and linking *****"
+	echo;
+	make -f $SICONOS_SHAREPATH/MakefilePluginSample OBJ=`basename $2` sample run
+    fi;
+    cd $DIR;
+fi;
+fi;
+fi;
 exit 0;

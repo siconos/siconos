@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -29,6 +29,32 @@
 using namespace std;
 
 // ===== CONSTRUCTORS =====
+
+// Default constructor
+DynamicalSystem::DynamicalSystem():
+  DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL),
+  xDot(NULL), xDotMemory(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL),
+  uSize(0), u(NULL), T(NULL), stepsInMemory(1), BC(NULL), dsxml(NULL),
+  vectorFieldFunctionName("none"), computeJacobianXFunctionName("none"), computeUFunctionName("none"),
+  computeTFunctionName("none"), vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
+  computeUPtr(NULL), computeTPtr(NULL), isBCAllocatedIn(false)
+{
+  // --- plugins (not u and T because they are optional) -> connected to  "false" plugin
+  isXAllocatedIn.resize(7, false);
+  isRAllocatedIn.resize(2, false);
+  isControlAllocatedIn.resize(2, false);
+
+  // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
+  parametersList0.reserve(4);
+  for (unsigned int i = 0; i < 4; ++i)
+    parametersList0.push_back(new SimpleVector(1));
+  isParametersList0AllocatedIn.resize(4, true);
+  vector<SimpleVector*>::iterator iter;
+  for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
+    (*iter)->zero();
+  setVectorFieldFunction("DefaultPlugin.so", "vectorField");
+  setComputeJacobianXFunction("DefaultPlugin.so", "computeJacobianX");
+}
 
 // From XML file (warning: newNsds is optional, default = NULL)
 DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
@@ -644,7 +670,7 @@ void DynamicalSystem::setXFreePtr(SiconosVector* newPtr)
   isXAllocatedIn[5] = false;
 }
 
-void DynamicalSystem::setR(const SimpleVector& newValue)
+void DynamicalSystem::setR(const SiconosVector& newValue)
 {
   // check dimensions ...
   if (newValue.size() != n)
@@ -660,7 +686,7 @@ void DynamicalSystem::setR(const SimpleVector& newValue)
   }
 }
 
-void DynamicalSystem::setRPtr(SimpleVector *newPtr)
+void DynamicalSystem::setRPtr(SiconosVector *newPtr)
 {
   // check dimensions ...
   if (newPtr->size() != n)
@@ -1104,28 +1130,3 @@ double DynamicalSystem::dsConvergenceIndicator()
   return 0;
 }
 
-// Default constructor
-DynamicalSystem::DynamicalSystem():
-  DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL),
-  xDot(NULL), xDotMemory(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL),
-  uSize(0), u(NULL), T(NULL), stepsInMemory(1), BC(NULL), dsxml(NULL),
-  vectorFieldFunctionName("none"), computeJacobianXFunctionName("none"), computeUFunctionName("none"),
-  computeTFunctionName("none"), vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
-  computeUPtr(NULL), computeTPtr(NULL), isBCAllocatedIn(false)
-{
-  // --- plugins (not u and T because they are optional) -> connected to  "false" plugin
-  isXAllocatedIn.resize(7, false);
-  isRAllocatedIn.resize(2, false);
-  isControlAllocatedIn.resize(2, false);
-
-  // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
-  parametersList0.reserve(4);
-  for (unsigned int i = 0; i < 4; ++i)
-    parametersList0.push_back(new SimpleVector(1));
-  isParametersList0AllocatedIn.resize(4, true);
-  vector<SimpleVector*>::iterator iter;
-  for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
-    (*iter)->zero();
-  setVectorFieldFunction("DefaultPlugin.so", "vectorField");
-  setComputeJacobianXFunction("DefaultPlugin.so", "computeJacobianX");
-}

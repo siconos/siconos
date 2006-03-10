@@ -1,4 +1,4 @@
-# Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.
+# Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -26,21 +26,15 @@ C_SOURCES = $(wildcard *.c)
 C_OBJ  = $(patsubst %.c,%.o,  $(C_SOURCES))
 
 sample:$(SAMPLE_OBJ) $(SAMPLE_EXE)
-	
+
 .cpp.o:
 	$(CXX) -c $(CXXFLAGS) $(LIBEXT_INCLUDES) -I $(SICONOSPATH)/include $<
 
 $(SAMPLE_EXE):$(SAMPLE_OBJ)
-#	echo "$(SAMPLE_EXE):"
-#	$(CXX) -o $@ $< $(LIBEXT_LDFLAGS) -L$(SICONOSPATH)/lib -lSiconosKernel
 	$(CXX) -o $@ $< $(SICONOS_LDFLAGS) 
 
 run:$(SAMPLE_EXE) 
-	./$(SAMPLE_EXE)
-
-#cleansample:
-#	rm -f *_EXE *.o *.output;
-
+	./$(SAMPLE_EXE) 
 
 PLUGIN_SOURCES = $(wildcard *Plugin.cpp)
 PLUGIN_OBJ  = $(patsubst %.cpp,%.o,  $(PLUGIN_SOURCES))
@@ -48,17 +42,12 @@ PLUGIN_LIB = $(patsubst %.cpp,%.so,  $(PLUGIN_SOURCES))
 
 plugin:$(PLUGIN_OBJ) $(PLUGIN_LIB)
 
-	
 .c.o:
 	$(CC) -c $(CXXFLAGS) $<
 
 %.so:%.cpp $(C_OBJ)
 	$(CXX) $(CXX_DYNLIB) $(C_OBJ) $< -o $@
 
-#cleanplugin:
-#	rm -f $(PLUGIN_OBJ) $(PLUGIN_LIB)
-
-
-#clean:cleansample cleanplugin
 clean:	
 	rm -f *_EXE *.o *.output *.so;
+

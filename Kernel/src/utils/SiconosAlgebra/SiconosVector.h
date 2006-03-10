@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -38,7 +38,7 @@ const std::string DEFAULT_FORMAT = "ascii";
  *  vector can be either a SimpleVector or a CompositeVector, ie a container of several SimpleVector
  *  See documentation of these derivated classes for more details
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.1.2.
+ *  \version 1.1.3.
  *
  */
 
@@ -82,11 +82,17 @@ public:
 
   // !!! WARNING : all the following functions are to be implemented in derivated classes !!!
 
-  /** \fn std::vector<int> getTabIndex() const
+  /** \fn SiconosVector* getVectorPtr(const unsigned int&) const;
+   *  \brief if this is a composite return i-eme SimpleVector (if composite), else return this.
+   * \return a pointer to a SimpleVector
+   */
+  virtual SiconosVector* getVectorPtr(const unsigned int&) = 0;
+
+  /** \fn std::vector<unsigned int> getTabIndex() const
    *  \brief get the index tab (usefull only for composite, should not be used for simple) => avoid downcast
    * \return a standard vector of int
    */
-  virtual std::vector<int> getTabIndex() const = 0;
+  virtual std::vector<unsigned int> getTabIndex() const = 0;
 
   /** \fn std::string toString();
    *  \brief put data of the vector into a string

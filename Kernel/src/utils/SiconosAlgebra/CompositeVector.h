@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -28,12 +28,21 @@ class SimpleVector;
  *  \brief This class describes Composite Vectors, containers of several Siconos Vectors (that should be SimpleVectors)
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.1.2.
+ *  \version 1.1.3.
  *
  */
 
 class CompositeVector : public SiconosVector
 {
+private:
+  // A container of pointers on SiconosVector (that are to be SimpleVector : no Composite of Composite allowed
+  std::vector<SimpleVector*> svref;
+  //
+  std::vector<unsigned int> tabindex;
+
+  /** Flags to check wheter pointers were allocated in class constructors or not */
+  std::deque<bool> isSvrefAllocatedIn;
+
 public:
 
   // CONSTRUCTORS
@@ -54,6 +63,19 @@ public:
    *  \param SimpleVector& v
    */
   CompositeVector(const SimpleVector&);
+
+  /** \fn CompositeVector(vector<SimpleVector*> v)
+   *  \brief contructor with a list of SimpleVector*
+   *  \param a vector<SimpleVector*>
+   */
+  CompositeVector(std::vector<SimpleVector*>);
+
+  /** \fn CompositeVector(SimpleVector* v1, SimpleVector* v2)
+   *  \brief contructor with a 2 SimpleVectors
+   *  \param SimpleVector* v1
+   *  \param SimpleVector* v2
+   */
+  CompositeVector(SimpleVector*, SimpleVector*);
 
   /** \fn CompositeVector(const CompositeVector& v)
    *  \brief copy contructor
@@ -76,11 +98,17 @@ public:
     return svref;
   }
 
-  /** \fn std::vector<int> getTabIndex() const
+  /** \fn SimpleVector* getVectorPtr(const unsigned int&) const;
+   *  \brief return i-eme SimpleVector of svref
+   * \return a pointer to a SimpleVector
+   */
+  SimpleVector* getVectorPtr(const unsigned int&);
+
+  /** \fn std::vector<unsigned int> getTabIndex() const
    *  \brief get the index tab
    * \return a standard vector of int
    */
-  inline std::vector<int> getTabIndex() const
+  inline std::vector<unsigned int> getTabIndex() const
   {
     return tabindex;
   }
@@ -99,29 +127,29 @@ public:
    */
   void display() const  ;
 
-  /** \fn operator (int index)
+  /** \fn operator (unsigned int index)
    *  \brief get the element vector[i]
-   *  \param an integer i
+   *  \param an unsigned integer i
    *  \exception SiconosVectorException
    *  \return the element vector[i]
    */
   double& operator()(const unsigned int&) const ;
 
-  /** \fn void setValue(const int unsigned index, const double d)
+  /** \fn void setValue(const unsigned int index, const double d)
    *  \brief set the value of one element of the vector
    *  \param double d : the new value
    *  \param int index : the position of the element which is set
    */
-  inline void setValue(const int unsigned& i, const double& d)
+  inline void setValue(const unsigned int& i, const double& d)
   {
     (*this)(i) = d;
   }
 
-  /** \fn double getValue(const int unsigned i)
+  /** \fn double getValue(const unsigned int i)
    *  \brief get the value of index i element of the vector
-   *  \param int index : the position of the element
+   *  \param unsigned int index : the position of the element
    */
-  inline const double getValue(const int unsigned& index) const
+  inline const double getValue(const unsigned int& index) const
   {
     return (*this)(index);
   }
@@ -131,14 +159,14 @@ public:
   *  \param vector<double> v
   *  \param optional, the index of required vector in svref
   */
-  void setValues(const std::vector<double>& v, const int unsigned& = 0) ;
+  void setValues(const std::vector<double>& v, const unsigned int& = 0) ;
 
   /** \fn const LaVectorDouble getValues() const
    *  \brief get the values saved in vector (depends on vector type)
    *  \param optional, the index of required vector in svref
    *  \return a LaVectorDouble
    */
-  const LaVectorDouble getValues(const int unsigned& = 0) const ;
+  const LaVectorDouble getValues(const unsigned int& = 0) const ;
 
   /** \fn unsigned int size(unsigned int & index) const
    *  \brief if index = 0, get the vector total-size (ie number of elements in vector)
@@ -239,14 +267,6 @@ public:
 
 
   //
-private:
-  // A container of pointers on SiconosVector (that are to be SimpleVector : no Composite of Composite allowed
-  std::vector<SimpleVector*> svref;
-  //
-  std::vector<int> tabindex;
-
-  /** Flags to check wheter pointers were allocated in class constructors or not */
-  std::deque<bool> isSvrefAllocatedIn;
 };
 
 #endif

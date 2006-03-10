@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -26,14 +26,14 @@ class LagrangianDSXML;
 /** \class LagrangianDS
  *  \brief main class of Lagrangian dynamic systems
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.1.2.
+ *  \version 1.1.3.
  *  \date (Creation) Apr 29, 2004
  *
  *
  * The class LagrangianDS  defines  and computes a generic ndof-dimensional
  * Lagrangian Non Linear Dynamical System of the form :
  * \f[
- * M(q) \ddot q + NNL(\dot q, q) = F_{Int}(\dot q , q , t)+F_{Ext}(t) + p,
+ * M(q) \ddot q + NNL(\dot q, q) + F_{Int}(\dot q , q , t) = F_{Ext}(t) + p,
  * \f]
  * where
  *    - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
@@ -50,15 +50,22 @@ class LagrangianDSXML;
  *
  * One word on the bilateral constraint
  *
- * The state of the master class DynamicalSystem is defined by \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$ and then \f$ n= 2 ndof \f$ and the VectorField
- * is specified as :
+ * The state of the master class DynamicalSystem is defined by \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$, with \f$ n= 2 ndof \f$.
+ * The VectorField is given by:
  * \f[
- * f(x,t) = \left[\begin{array}{cc}
- *  0_{ndof \times ndof} & I_{ndof \times ndof} \\
- * M^{-1}(q)\left[   F_{Int}(\dot q , q , t)+F_{Ext}( q , t) -  Q(\dot q, q) \right]\\
+ * f(x,t) = \left[\begin{array}{c}
+ *  \dot q  \\
+ * M^{-1}(q)\left[F_{Ext}( q , t) - F_{Int}(\dot q , q , t) - NNL(\dot q, q) \right]\\
  * \end{array}\right]
  * \f]
- *  and the input due to the non smooth law by
+ * Its jacobian is:
+ * \f[
+ * \nabla_{x}f(x,t) = \left[\begin{array}{cc}
+ *  0  & I \\
+ * \nabla_{q}M^{-1}(q)\left[F_{Ext}( q , t) - F_{Int}(\dot q , q , t) - NNL(\dot q, q) \right]-M^{-1}(q)\left[\nabla_q(F_{Int}(\dot q , q , t)-NNL(\dot q, q))\right] & -M^{-1}(q)\left[\nabla_{\dot q}(F_{Int}(\dot q , q , t)-NNL(\dot q, q))\right] \\
+ * \end{array}\right]
+ * \f]
+ *  The input due to the non smooth law is:
  * \f[
  * r = \left[\begin{array}{c}0 \\ p \end{array}\right]
  * \f]

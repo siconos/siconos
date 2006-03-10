@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -47,6 +47,59 @@ CompositeVector::CompositeVector(const SimpleVector& v): SiconosVector()
   tabindex.push_back(v.size());
 }
 
+// fill with a list of SimpleVector* (Warning: links between pointers!!)
+CompositeVector::CompositeVector(vector<SimpleVector*> v): SiconosVector()
+{
+  composite = true;
+  unsigned int numberOfVectors = v.size();
+  svref.reserve(numberOfVectors);
+  tabindex.reserve(numberOfVectors);
+  for (unsigned int i = 0; i < numberOfVectors; ++i)
+  {
+    svref.push_back(v[i]);
+    tabindex.push_back(v[i]->size());
+    isSvrefAllocatedIn.push_back(false);
+  }
+}
+
+// link with 2 SimpleVector
+CompositeVector::CompositeVector(SimpleVector* v1, SimpleVector* v2): SiconosVector()
+{
+  composite = true;
+  svref.reserve(2);
+  tabindex.reserve(2);
+  if ((v1 == NULL) && (v1 == NULL))
+    SiconosVectorException::selfThrow("CompositeVector:constructor(SimpleVector*,SimpleVector*), both vectors are NULL.");
+
+  if (v1 != NULL)
+  {
+    svref.push_back(v1);
+    tabindex.push_back(v1->size());
+    isSvrefAllocatedIn.push_back(false);
+  }
+  else
+    // If first parameter is a NULL pointer, then set this(1) to a SimpleVector of the same size as v2, and equal to 0.
+  {
+    // This case is usefull to set xDot in LagrangianDS.
+    svref.push_back(new SimpleVector(v2->size()));
+    tabindex.push_back(v2->size());
+    isSvrefAllocatedIn.push_back(true);
+  }
+
+  if (v2 != NULL)
+  {
+    svref.push_back(v2);
+    tabindex.push_back(v2->size());
+    isSvrefAllocatedIn.push_back(false);
+  }
+  else // If second parameter is a NULL pointer, then set this(2) to a SimpleVector of the same size as v1, and equal to 0.
+  {
+    // This case is usefull to set xDot in LagrangianDS.
+    svref.push_back(new SimpleVector(v1->size()));
+    tabindex.push_back(v1->size());
+    isSvrefAllocatedIn.push_back(true);
+  }
+}
 
 // copy
 CompositeVector::CompositeVector(const CompositeVector& v): SiconosVector()
@@ -79,6 +132,14 @@ CompositeVector::~CompositeVector()
   }
 }
 
+SimpleVector* CompositeVector::getVectorPtr(const unsigned int& i)
+{
+  if (i > svref.size())
+    SiconosVectorException::selfThrow("CompositeVector:getVectorPtr(i), i out of range.");
+
+  return svref[i];
+}
+
 void CompositeVector::display() const
 {
   cout << "=== Composite Display === " << endl;
@@ -94,12 +155,12 @@ void CompositeVector::display() const
 
 double& CompositeVector::operator()(const int unsigned& index) const
 {
-  if ((int)index > tabindex[tabindex.size() - 1])
+  if (index > tabindex[tabindex.size() - 1])
     SiconosVectorException::selfThrow(" CompositeVector::operator() -- index out of range");
 
   // locate which vector of svref corresponds to index
   unsigned int numVect = 0;
-  while ((int)index >= tabindex[numVect] && numVect < tabindex.size()) numVect++;
+  while (index >= tabindex[numVect] && numVect < tabindex.size()) numVect++;
   // get position of required index in vector numVect
   unsigned int pos = 0;
   if (numVect == 0)

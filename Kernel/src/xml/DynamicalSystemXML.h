@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 /** \class DynamicalSystemXML
  *   \brief This class manages DynamicalSystem data part
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.1.2.
+ *   \version 1.1.3.
  *   \date 04/04/2004
  *
  *
@@ -271,11 +271,11 @@ public:
     }
   }
 
-  /** \fn void setR(SimpleVector *r)
+  /** \fn void setR(SiconosVector *r)
    *   \brief allows to save the R of the DynamicalSystemXML
    *   \param SiconosVector R of the DynamicalSystemXML
    */
-  inline void setR(SimpleVector *r)
+  inline void setR(SiconosVector *r)
   {
     if (this->hasR() == false)
     {

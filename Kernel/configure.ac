@@ -1,4 +1,4 @@
-# Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.
+# Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@ dnl configure script for SICONOS
 dnl JB CHARLETY, 2005
 
 AC_PREREQ(2.59)
-AC_INIT([Siconos-Kernel],[1.1.2],[siconos.gforge.inria.fr])
+AC_INIT([Siconos-Kernel],[1.1.3],[siconos.gforge.inria.fr])
 
 dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_TARGET([])
@@ -340,6 +340,6 @@ echo
 echo Type \'make \' to build the SICONOS platform
 echo Type \'make doc\' to generate the documentation.
 echo Type \'make install\' to install the platfrom
-echo Type \'make check\' to run the test
+echo Type \'make check\' to run the test \(requires cppunit\)
 echo 
 echo Alternatively, you can \'make all\' to use the default configuration.

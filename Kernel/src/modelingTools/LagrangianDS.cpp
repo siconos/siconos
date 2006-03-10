@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -274,24 +274,6 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   number = newNumber;
   n = 2 * ndof;
 
-  // -- Memory allocation for vector and matrix members --
-  x = new CompositeVector();
-  isXAllocatedIn[1] = true;
-  x0 = new CompositeVector();
-  isXAllocatedIn[0] = true;
-  xDot = new CompositeVector();
-  isXAllocatedIn[3] = true;
-  xFree = new CompositeVector();
-  isXAllocatedIn[5] = true;
-  //
-  // \todo proper link between LagrangianDS object and DS ones (vectorField ...)
-  r = new SimpleVector(n);
-  isRAllocatedIn[0] = true;
-  // jacobianX = new SiconosMatrix(n,n);
-
-  // VectorField
-  // JacobianX
-
   // --- LAGRANGIAN INHERITED CLASS MEMBERS ---
   // -- Memory allocation for vector and matrix members --
   mass = new SiconosMatrix(ndof, ndof);
@@ -348,15 +330,26 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   // set mass
   *mass = newMass;
 
+  // === Settings and links for master dynamical system variables ===
+
+  // -- Memory allocation for vector and matrix members --
+  x = new CompositeVector(q, velocity);
+  isXAllocatedIn[1] = true;
+  x0 = new CompositeVector(q0, velocity0);
+  isXAllocatedIn[0] = true;
+  xDot = new CompositeVector(velocity, NULL);
+  isXAllocatedIn[3] = true;
+  xFree = new CompositeVector(qFree, velocityFree);
+  isXAllocatedIn[5] = true;
+  r = new CompositeVector(NULL, p);
+  isRAllocatedIn[0] = true;
+
+  //  jacobianX = new SiconosMatrix(n,n);
+
+  // VectorField
+  // JacobianX
   // --- x, xDot and xFree update ---
-  /*
-  static_cast<CompositeVector*>(x)->addPtr(q);
-  static_cast<CompositeVector*>(x)->addPtr(velocity);
-  static_cast<CompositeVector*>(x0)->addPtr(q0);
-  static_cast<CompositeVector*>(x0)->addPtr(velocity0);
-  static_cast<CompositeVector*>(xFree)->addPtr(qFree);
-  static_cast<CompositeVector*>(xFree)->addPtr(velocityFree);
-  */
+
   setComputeMassFunction("DefaultPlugin.so", "computeMass");
   setComputeFIntFunction("DefaultPlugin.so", "computeFInt");
   //setComputeFExtFunction("DefaultPlugin.so", "computeFExt");

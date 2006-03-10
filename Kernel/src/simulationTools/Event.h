@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.2, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@
 /** \class Event
  *  \brief virtual class that represents generic time events.
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.1.2.
+ *  \version 1.1.3.
  *  \date (Creation) February 21, 2006
  *
  *  This base class simply records the time at which the event will take place. A pure virtual function named process
