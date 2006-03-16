@@ -48,7 +48,7 @@ FrictionContact::FrictionContact(OneStepNSProblemXML* osNsPbXml, Strategy* newSt
     if (xmllcp->hasM())
     {
       dim = (xmllcp->getM()).size(0);
-      M = new SiconosMatrix(xmllcp->getM());
+      M = new SimpleMatrix(xmllcp->getM());
       isMAllocatedIn = true;
     }
 
@@ -163,7 +163,7 @@ void FrictionContact::setM(const SiconosMatrix& newValue)
 
   if (M == NULL)
   {
-    M = new SiconosMatrix(dim, dim);
+    M = new SimpleMatrix(dim, dim);
     isMAllocatedIn = true;
   }
 
@@ -266,7 +266,7 @@ void FrictionContact::computeAllBlocks()
     // --- DIAGONAL BLOCKS MANAGEMENT ---
 
     // matrix that corresponds to diagonal block for the current interaction
-    diagonalBlocksMap[ currentInteraction ] = new SiconosMatrix(sizeBlock, sizeBlock);
+    diagonalBlocksMap[ currentInteraction ] = new SimpleMatrix(sizeBlock, sizeBlock);
     SiconosMatrix * currentMatrixBlock = diagonalBlocksMap[ currentInteraction ];
 
     // get DS list of the current interaction
@@ -330,8 +330,8 @@ void FrictionContact::computeAllBlocks()
         indexMin = topology->getIndexMin(linkedInteraction);
         sizeLinkedBlock = (rMax - indexMin[0]) * linkedInteractionSize;
 
-        (extraDiagonalBlocksMap[currentInteraction])[linkedInteraction] = new SiconosMatrix(sizeBlock, sizeLinkedBlock);
-        (extraDiagonalBlocksMap[linkedInteraction])[currentInteraction] = new SiconosMatrix(sizeLinkedBlock, sizeBlock);
+        (extraDiagonalBlocksMap[currentInteraction])[linkedInteraction] = new SimpleMatrix(sizeBlock, sizeLinkedBlock);
+        (extraDiagonalBlocksMap[linkedInteraction])[currentInteraction] = new SimpleMatrix(sizeLinkedBlock, sizeBlock);
         coupledInteractionsBlock = extraDiagonalBlocksMap[currentInteraction][linkedInteraction];
         coupledInteractionsBlockSym = extraDiagonalBlocksMap[linkedInteraction][currentInteraction];
 
@@ -391,7 +391,7 @@ void FrictionContact::computeDiagonalBlocksLagrangianR(Relation * R, const unsig
       {
         sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
         // get blocks corresponding to the current DS
-        G = new SiconosMatrix(sizeInteraction, sizeDS);
+        G = new SimpleMatrix(sizeInteraction, sizeDS);
         LR->getGBlockDS(*itDS, *G);
         // get row i of G
         Grow = new SimpleVector(sizeDS);
@@ -417,7 +417,7 @@ void FrictionContact::computeDiagonalBlocksLagrangianR(Relation * R, const unsig
 
       sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
       // get blocks corresponding to the current DS
-      G = new SiconosMatrix(sizeInteraction, sizeDS);
+      G = new SimpleMatrix(sizeInteraction, sizeDS);
       LR->getGBlockDS(*itDS, *G);
       *currentMatrixBlock +=  *G * (W[*itDS])->multTranspose(*G);
       delete G;
@@ -457,8 +457,8 @@ void FrictionContact::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent,
       {
         sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
         // get blocks corresponding to the current DS
-        Gcurrent = new SiconosMatrix(sizeInteraction, sizeDS);
-        Glinked = new SiconosMatrix(linkedInteractionSize, sizeDS);
+        Gcurrent = new SimpleMatrix(sizeInteraction, sizeDS);
+        Glinked = new SimpleMatrix(linkedInteractionSize, sizeDS);
         LR1->getGBlockDS(*itDS, *Gcurrent);
         LR2->getGBlockDS(*itDS, *Glinked);
         // get row i of G
@@ -483,8 +483,8 @@ void FrictionContact::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent,
     {
       sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
       // get blocks corresponding to the current DS
-      Gcurrent = new SiconosMatrix(sizeInteraction, sizeDS);
-      Glinked = new SiconosMatrix(linkedInteractionSize, sizeDS);
+      Gcurrent = new SimpleMatrix(sizeInteraction, sizeDS);
+      Glinked = new SimpleMatrix(linkedInteractionSize, sizeDS);
       LR1->getGBlockDS(*itDS, *Gcurrent);
       LR2->getGBlockDS(*itDS, *Glinked);
       *coupledInteractionsBlock += *Gcurrent * (W[*itDS])->multTranspose(*Glinked);
@@ -680,14 +680,14 @@ void FrictionContact::assembleM() //
 
   if (M == NULL)
   {
-    M = new SiconosMatrix(dim, dim);
+    M = new SimpleMatrix(dim, dim);
     isMAllocatedIn = true;
   }
   else if (M->size(0) != dim || M->size(1) != dim)
   {
     // reset M matrix if it has a wrong size
     if (isMAllocatedIn) delete M;
-    M = new SiconosMatrix(dim, dim);
+    M = new SimpleMatrix(dim, dim);
     isMAllocatedIn = true;
   }
   M->zero();
@@ -736,7 +736,7 @@ void FrictionContact::assembleM() //
     {
       // get the "reduced" diagonal block for the current interaction
       size = blockIndexesMap[currentInteraction].size();
-      SiconosMatrix * reducedBlock = new SiconosMatrix(size, size);
+      SiconosMatrix * reducedBlock = new SimpleMatrix(size, size);
       blockDiago->getBlock(blockIndexesMap[currentInteraction], blockIndexesMap[currentInteraction], *reducedBlock);
 
       // diagonal blocks
@@ -756,7 +756,7 @@ void FrictionContact::assembleM() //
           sizeLinked = blockIndexesMap[linkedInteraction].size();
           // get the corresponding "reduced" block
           coupledBlock = (*it).second;
-          reducedCoupledBlock = new SiconosMatrix(size, sizeLinked);
+          reducedCoupledBlock = new SimpleMatrix(size, sizeLinked);
           coupledBlock->getBlock(blockIndexesMap[currentInteraction], blockIndexesMap[linkedInteraction], *reducedCoupledBlock);
           col = interactionEffectivePositionMap[ linkedInteraction ];
           M->blockMatrixCopy(*reducedCoupledBlock, pos, col); // \todo avoid copy

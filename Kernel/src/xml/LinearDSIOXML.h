@@ -34,7 +34,7 @@
 
 #include "DSInputOutputXML.h"
 
-class SiconosMatrix;
+class SimpleMatrix;
 
 
 const std::string LINEARDSIO_A = "A";
@@ -54,29 +54,29 @@ public:
   LinearDSIOXML(xmlNode * dsioNode/*, vector<int> definedDSNumbers */);
   ~LinearDSIOXML();
 
-  /** \fn SiconosMatrix getA()
+  /** \fn SimpleMatrix getA()
   *   \brief Return the A of the LinearDSIOXML
-  *   \return The A SiconosMatrix of the LinearDSIOXML
+  *   \return The A SimpleMatrix of the LinearDSIOXML
   */
-  inline SiconosMatrix getA()
+  inline SimpleMatrix getA()
   {
     return SiconosDOMTreeTools::getSiconosMatrixValue(ANode);
   }
 
-  /** \fn SiconosMatrix getB()
+  /** \fn SimpleMatrix getB()
   *   \brief Return the B of the LinearDSIOXML
-  *   \return The B SiconosMatrix of the LinearDSIOXML
+  *   \return The B SimpleMatrix of the LinearDSIOXML
   */
-  inline SiconosMatrix getB()
+  inline SimpleMatrix getB()
   {
     return SiconosDOMTreeTools::getSiconosMatrixValue(BNode);
   }
 
-  //    /** \fn SiconosMatrix getE()
+  //    /** \fn SimpleMatrix getE()
   //    *   \brief Return the E of the LinearDSIOXML
-  //    *   \return The E SiconosMatrix of the LinearDSIOXML
+  //    *   \return The E SimpleMatrix of the LinearDSIOXML
   //    */
-  //    inline SiconosMatrix getE()
+  //    inline SimpleMatrix getE()
   //    {
   //      return SiconosDOMTreeTools::getSiconosMatrixValue(this->ENode);
   //    }

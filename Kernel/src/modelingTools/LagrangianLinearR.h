@@ -23,7 +23,7 @@
 #include "LagrangianLinearRXML.h"
 
 #include "SimpleVector.h"
-#include "CompositeVector.h"
+#include "BlockVector.h"
 
 /** \class LagrangianLinearR
  *  \brief Lagrangian Linear Relation, derived from class LagrangianR
@@ -115,11 +115,11 @@ public:
   // --- GETTERS/SETTERS
   // -- H --
 
-  /** \fn  const SiconosMatrix getH() const
+  /** \fn  const SimpleMatrix getH() const
    *  \brief get the value of H
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getH() const
+  inline const SimpleMatrix getH() const
   {
     return *H;
   }
@@ -178,11 +178,11 @@ public:
 
   // -- D --
 
-  /** \fn  const SiconosMatrix getD() const
+  /** \fn  const SimpleMatrix getD() const
    *  \brief get the value of D
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getD() const
+  inline const SimpleMatrix getD() const
   {
     return *D;
   }

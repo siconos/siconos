@@ -98,14 +98,14 @@ vector<int> SiconosDOMTreeTools::getIntVector(const xmlNode * vectorNode)
   return outputVector;
 }
 
-SiconosMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNode * siconosMatrixNode)
+SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNode * siconosMatrixNode)
 {
   if (siconosMatrixNode == NULL)
     XMLException::selfThrow("SiconosDOMTreeTools - getSiconosMatrixValue, node == NULL");
 
   if (xmlHasProp((xmlNodePtr)siconosMatrixNode, (xmlChar *)SDTT_MATRIXFILE.c_str())) //matrix is defined in a extern ascii file
   {
-    SiconosMatrix matrix(getStringAttributeValue(siconosMatrixNode, SDTT_MATRIXFILE), true);
+    SimpleMatrix matrix(getStringAttributeValue(siconosMatrixNode, SDTT_MATRIXFILE), true);
     return matrix;
   }
   else
@@ -118,7 +118,7 @@ SiconosMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNode * siconos
 
     xmlNode *node = SiconosDOMTreeTools::findNodeChild(siconosMatrixNode, SDTT_ROW);
     unsigned int i = 0;
-    SiconosMatrix matrix(matrixRowSize, matrixColSize);
+    SimpleMatrix matrix(matrixRowSize, matrixColSize);
     SimpleVector *v = new SimpleVector(matrixColSize);
     while ((node != NULL) && (i < matrixRowSize))
     {

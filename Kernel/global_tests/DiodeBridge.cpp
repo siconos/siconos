@@ -88,7 +88,7 @@ bool DiodeBridge()
     init_state.setValue(0 , Vinit);
     init_state.setValue(1 , 0.0);
 
-    SiconosMatrix LS_A(2, 2);
+    SimpleMatrix LS_A(2, 2);
     LS_A.setValue(0 , 0 , 0.0);
     LS_A.setValue(0 , 1 , -1.0 / Cvalue);
     LS_A.setValue(1 , 0 , 1.0 / Lvalue);
@@ -103,12 +103,12 @@ bool DiodeBridge()
     vector< DynamicalSystem * >* Inter_DS = new vector< DynamicalSystem * >(1);
     (*Inter_DS)[0] = LSDiodeBridge;
 
-    SiconosMatrix* Int_C = new SiconosMatrix(4, 2);
+    SiconosMatrix* Int_C = new SimpleMatrix(4, 2);
     Int_C->zero();
     Int_C->setValue(2 , 0 , -1.0);
     Int_C->setValue(3 , 0 , 1.0);
 
-    SiconosMatrix* Int_D = new SiconosMatrix(4, 4);
+    SiconosMatrix* Int_D = new SimpleMatrix(4, 4);
     Int_D->zero();
     Int_D->setValue(0 , 0 , 1.0 / Rvalue);
     Int_D->setValue(0 , 1 , 1.0 / Rvalue);
@@ -119,7 +119,7 @@ bool DiodeBridge()
     Int_D->setValue(2 , 0 , 1.0);
     Int_D->setValue(3 , 1 , 1.0);
 
-    SiconosMatrix* Int_B = new SiconosMatrix(2, 4);
+    SiconosMatrix* Int_B = new SimpleMatrix(2, 4);
     Int_B->zero();
     Int_B->setValue(0 , 2 , -1.0 / Cvalue);
     Int_B->setValue(0 , 3 , 1.0 / Cvalue);
@@ -155,7 +155,7 @@ bool DiodeBridge()
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    SiconosMatrix dataPlot(N + 1, 7);
+    SimpleMatrix dataPlot(N + 1, 7);
 
     // For the initial time step:
 
@@ -218,7 +218,7 @@ bool DiodeBridge()
     }
 
     // dataPlot (ascii) output
-    SiconosMatrix * dataRef = new SiconosMatrix("refDiodeBridge.dat", true);
+    SiconosMatrix * dataRef = new SimpleMatrix("refDiodeBridge.dat", true);
 
     double tol = 1e-9;
     double norm = (dataPlot - (*dataRef)).normInf() ;

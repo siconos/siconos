@@ -29,7 +29,7 @@
 #include "Model.h"
 #include "LagrangianLinearTIDS.h"
 #include "SimpleVector.h"
-#include "SiconosMatrix.h"
+#include "SimpleMatrix.h"
 #include "LCP.h"
 #include <sys/time.h>
 #include <iostream>
@@ -57,7 +57,7 @@ bool BouncingBall()
     int N = t->getNSteps(); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    SiconosMatrix dataPlot(N + 1, 4);
+    SimpleMatrix dataPlot(N + 1, 4);
     // For the initial time step:
     // time
     dataPlot(k, 0) = k * t->getH();
@@ -89,7 +89,7 @@ bool BouncingBall()
       dataPlot(k, 3) = (bouncingBall.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
     }
 
-    SiconosMatrix * dataRef = new SiconosMatrix("refBouncingBall.dat", true);
+    SiconosMatrix * dataRef = new SimpleMatrix("refBouncingBall.dat", true);
 
     double tol = 1e-9;
     double norm = (dataPlot - (*dataRef)).normInf() ;// diff->normInf();

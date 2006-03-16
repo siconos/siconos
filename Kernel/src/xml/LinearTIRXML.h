@@ -55,29 +55,29 @@ public:
 
   ~LinearTIRXML();
 
-  /** \fn SiconosMatrix getC()
+  /** \fn SimpleMatrix getC()
    *   \brief Return the C of the LTIRelationXML
-   *   \return The C SiconosMatrix of the LTIRelationXML
+   *   \return The C SimpleMatrix of the LTIRelationXML
    */
-  inline SiconosMatrix getC()
+  inline SimpleMatrix getC()
   {
     return SiconosDOMTreeTools::getSiconosMatrixValue(CNode);
   }
 
-  /** \fn SiconosMatrix getD()
+  /** \fn SimpleMatrix getD()
    *   \brief Return the D of the LTIRelationXML
-   *   \return The D SiconosMatrix of the LTIRelationXML
+   *   \return The D SimpleMatrix of the LTIRelationXML
    */
-  inline SiconosMatrix getD()
+  inline SimpleMatrix getD()
   {
     return SiconosDOMTreeTools::getSiconosMatrixValue(DNode);
   }
 
-  /** \fn SiconosMatrix getF()
+  /** \fn SimpleMatrix getF()
    *   \brief Return the F of the LTIRelationXML
-   *   \return The F SiconosMatrix of the LTIRelationXML
+   *   \return The F SimpleMatrix of the LTIRelationXML
    */
-  inline SiconosMatrix getF()
+  inline SimpleMatrix getF()
   {
     return SiconosDOMTreeTools::getSiconosMatrixValue(FNode);
   }
@@ -91,11 +91,11 @@ public:
     return SiconosDOMTreeTools::getSiconosVectorValue(eNode);
   }
 
-  /** \fn SiconosMatrix getB()
+  /** \fn SimpleMatrix getB()
    *   \brief Return the B of the LTIRelationXML
-   *   \return The B SiconosMatrix of the LTIRelationXML
+   *   \return The B SimpleMatrix of the LTIRelationXML
    */
-  inline SiconosMatrix getB()
+  inline SimpleMatrix getB()
   {
     return SiconosDOMTreeTools::getSiconosMatrixValue(BNode);
   }

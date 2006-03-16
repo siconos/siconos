@@ -61,8 +61,8 @@ SiconosMemory::SiconosMemory(SiconosMemoryXML *memXML, const unsigned int& newMe
     unsigned int i;
     for (i = 0; i < nbVectorsInMemory ; i++)
     {
-      if (V[i]->isComposite())
-        vectorMemory.push_back(new CompositeVector(V[i]->size()));
+      if (V[i]->isBlock())
+        vectorMemory.push_back(new BlockVector(V[i]->size()));
       else
         vectorMemory.push_back(new SimpleVector(V[i]->size()));
       isVectorMemoryAllocated.push_back(true);
@@ -92,8 +92,8 @@ SiconosMemory::SiconosMemory(const deque<SiconosVector*>& V):
   nbVectorsInMemory = sizeV;
   for (unsigned int i = 0; i < sizeV; i++)
   {
-    if (V[i]->isComposite())
-      vectorMemory.push_back(new CompositeVector(V[i]->size()));
+    if (V[i]->isBlock())
+      vectorMemory.push_back(new BlockVector(V[i]->size()));
     else
       vectorMemory.push_back(new SimpleVector(V[i]->size()));
     isVectorMemoryAllocated.push_back(true);
@@ -114,8 +114,8 @@ SiconosMemory::SiconosMemory(const unsigned int& newMemorySize, const  deque<Sic
   {
     for (unsigned int i = 0; i < V.size(); i++)
     {
-      if (V[i]->isComposite())
-        vectorMemory.push_back(new CompositeVector(V[i]->size()));
+      if (V[i]->isBlock())
+        vectorMemory.push_back(new BlockVector(V[i]->size()));
       else
         vectorMemory.push_back(new SimpleVector(V[i]->size()));
       isVectorMemoryAllocated.push_back(true);
@@ -132,8 +132,8 @@ SiconosMemory::SiconosMemory(const SiconosMemory&  source):
   IN("SiconosMemory(const SiconosMemory&  source) \n");
   for (unsigned int i = 0; i < nbVectorsInMemory; i++)
   {
-    if (source.vectorMemory[i]->isComposite())
-      vectorMemory.push_back(new CompositeVector(*(source.vectorMemory[i])));
+    if (source.vectorMemory[i]->isBlock())
+      vectorMemory.push_back(new BlockVector(*(source.vectorMemory[i])));
     else
       vectorMemory.push_back(new SimpleVector(*(source.vectorMemory[i])));
     isVectorMemoryAllocated.push_back(true);
@@ -180,8 +180,8 @@ void SiconosMemory::setVectorMemory(const deque<SiconosVector*>& V)
   isVectorMemoryAllocated.clear();
   for (unsigned int i = 0; i < V.size(); i++)
   {
-    if (V[i]->isComposite())
-      vectorMemory.push_back(new CompositeVector(V[i]->size()));
+    if (V[i]->isBlock())
+      vectorMemory.push_back(new BlockVector(V[i]->size()));
     else
       vectorMemory.push_back(new SimpleVector(V[i]->size()));
     isVectorMemoryAllocated.push_back(true);
@@ -210,8 +210,8 @@ void SiconosMemory::swap(const SiconosVector& v)
   if (nbVectorsInMemory < memorySize)
   {
     // allocate memory for the new vector
-    if (v.isComposite())
-      vectorMemory.push_front(new CompositeVector(v));
+    if (v.isBlock())
+      vectorMemory.push_front(new BlockVector(v));
     else
       vectorMemory.push_front(new SimpleVector(v));
     isVectorMemoryAllocated.push_front(true);

@@ -370,12 +370,12 @@ public:
     return  SiconosDOMTreeTools::getStringAttributeValue(jacobianQFintNode, LNLDS_MATRIXPLUGIN);
   }
 
-  /** \fn SiconosMatrix getJacobianQFintMatrix()
+  /** \fn SimpleMatrix getJacobianQFintMatrix()
    *   \brief Return the JacobianQFint matrix of the LagrangianDSXML
-   *   \return The JacobianQFint SiconosMatrix of the LagrangianDSXML
+   *   \return The JacobianQFint SimpleMatrix of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline SiconosMatrix getJacobianQFintMatrix()
+  inline SimpleMatrix getJacobianQFintMatrix()
   {
     if (isJacobianQFintPlugin())
       XMLException::selfThrow("LagrangianDSXML - getJacobianQFintMatrix : JacobianQFint matrix is not given ; JacobianQFint is calculated from a plugin");
@@ -418,12 +418,12 @@ public:
     return  SiconosDOMTreeTools::getStringAttributeValue(jacobianVelocityFintNode, LNLDS_MATRIXPLUGIN);
   }
 
-  /** \fn SiconosMatrix getJacobianVelocityFintMatrix()
+  /** \fn SimpleMatrix getJacobianVelocityFintMatrix()
    *   \brief Return the JacobianVelocityFint matrix of the LagrangianDSXML
-   *   \return The JacobianVelocityFint SiconosMatrix of the LagrangianDSXML
+   *   \return The JacobianVelocityFint SimpleMatrix of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline SiconosMatrix getJacobianVelocityFintMatrix()
+  inline SimpleMatrix getJacobianVelocityFintMatrix()
   {
     if (isJacobianVelocityFintPlugin())
       XMLException::selfThrow("LagrangianDSXML - getJacobianVelocityFintMatrix : JacobianVelocityFint matrix is not given ; JacobianVelocityFint is calculated from a plugin");
@@ -467,12 +467,12 @@ public:
     return  SiconosDOMTreeTools::getStringAttributeValue(jacobianQNNLNode, LNLDS_MATRIXPLUGIN);
   }
 
-  /** \fn SiconosMatrix getJacobianQQMatrix()
+  /** \fn SimpleMatrix getJacobianQQMatrix()
    *   \brief Return the JacobianQQ matrix of the LagrangianDSXML
-   *   \return The JacobianQQ SiconosMatrix of the LagrangianDSXML
+   *   \return The JacobianQQ SimpleMatrix of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline SiconosMatrix getJacobianQNNLMatrix()
+  inline SimpleMatrix getJacobianQNNLMatrix()
   {
     if (isJacobianQNNLPlugin())
       XMLException::selfThrow("LagrangianDSXML - getJacobianQNNLMatrix : JacobianQNNL matrix is not given ; JacobianQNNL is calculated from a plugin");
@@ -516,12 +516,12 @@ public:
     return  SiconosDOMTreeTools::getStringAttributeValue(jacobianVelocityNNLNode, LNLDS_MATRIXPLUGIN);
   }
 
-  /** \fn SiconosMatrix getJacobianVelocityNNLMatrix()
+  /** \fn SimpleMatrix getJacobianVelocityNNLMatrix()
    *   \brief Return the JacobianVelocityNNL matrix of the LagrangianDSXML
-   *   \return The JacobianVelocityNNL SiconosMatrix of the LagrangianDSXML
+   *   \return The JacobianVelocityNNL SimpleMatrix of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline SiconosMatrix getJacobianVelocityNNLMatrix()
+  inline SimpleMatrix getJacobianVelocityNNLMatrix()
   {
     if (isJacobianVelocityNNLPlugin())
       XMLException::selfThrow("LagrangianDSXML - getJacobianVelocityNNLMatrix : JacobianVelocityNNL matrix is not given ; JacobianVelocityNNL is calculated from a plugin");
@@ -564,12 +564,12 @@ public:
     return  SiconosDOMTreeTools::getStringAttributeValue(MNode, LNLDS_MATRIXPLUGIN);
   }
 
-  /** \fn SiconosMatrix getMMatrix()
+  /** \fn SimpleMatrix getMMatrix()
    *   \brief Return the M matrix of the LagrangianDSXML
-   *   \return The M SiconosMatrix of the LagrangianDSXML
+   *   \return The M SimpleMatrix of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline SiconosMatrix getMMatrix()
+  inline SimpleMatrix getMMatrix()
   {
     if (isMPlugin())
       XMLException::selfThrow("LagrangianDSXML - getMMatrix : M matrix is not given ; M is calculated from a plugin");

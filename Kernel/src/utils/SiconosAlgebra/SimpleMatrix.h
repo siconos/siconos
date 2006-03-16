@@ -16,64 +16,102 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/** \class SiconosMatrix: abstract class
- *   \brief this class provides an interface for matrices in Siconos
+/** \class SimpleMatrix
+ *   \brief This class is an encapsulation of the Lapack++ class managing vmatrices of double.
  *  \author SICONOS Development Team - copyright INRIA
  *   \version 1.1.3.
  *   \date (Creation) 05/19/2004
  *
- *   Matrices can be either block or simple. See derived classes for details.
- *    Simple: a LaGenMatDouble from Lapack++
- *    Block: a map(stl) of Simple
+ *
+ *
+ *
+ * SimpleMatrix is used in the platform to store matrices (mathematical object).
  *
  */
 
-#ifndef __SiconosMatrix__
-#define __SiconosMatrix__
+#ifndef __SimpleMatrix__
+#define __SimpleMatrix__
 
-#include "SiconosVector.h"
-#include "SimpleVector.h"
-#include "SiconosMatrixException.h"
-#include "check.h"
-#include <lapack++.h>
-#include <string>
-#include <fstream>
-#include <iostream>
+#include "SiconosMatrix.h"
 
-const bool printVerbose = true;
-
-// This constant set the maximum allowed size for displaying a Matrix on standard output (see function display())
-const unsigned int MAXSIZEFORDISPLAY = 10;
-const double tolerance = 1e-10; // value used to compare matrices. Matrices A and B are equal when (A-B).normInf()<tolerance.
 class SimpleVector;
-class SimpleMatrix;
 
-class SiconosMatrix
+class SimpleMatrix: public SiconosMatrix
 {
-protected:
+private:
 
-  /**\var isBlockMatrix
-   *  bool to check this matrix type; true if block else false. */
-  bool isBlockMatrix;
-
-  /** \fn static void verbose(std::string msg)
-   *  \brief print on the screen a message "printVerbose" static variable is true
-   *  \param std::string : the message to print
+  /** \var LaGenMatDouble mat;
+   * \brief The Matrix Lapack ++, LaGenMatDouble, encapsulated.
    */
-  static void verbose(const std::string& msg);
+  LaGenMatDouble mat;
 
-  /** \fn SiconosMatrix (const bool & = false)
-   *  \brief default contructor
-   *  \param a bool to set isBlockMatrix (optional, default = false)
+  /** \var LaVectorLongInt* ipiv;
+   * \brief Pointer to a  LaVectorLongInt for the partial pivoting in PLUFactorization.
    */
-  SiconosMatrix(const bool & = false);
+  LaVectorLongInt* ipiv;
+
+  /** \var  bool isPLUFactorized;
+   * \brief  Boolean = true if the Matrix is PLU Factorized
+   */
+  bool isPLUFactorized;
+
+  /** \var  bool isPLUInversed;
+   * \brief  Boolean = true if the Matrix is Inversed in Place
+   */
+  bool isPLUInversed;
+
+  /** \fn SimpleMatrix ()
+   *  \brief contructor
+   *  \return SimpleMatrix
+   */
+  SimpleMatrix();
 
 public:
 
-  /** \fn ~SiconosMatrix ()
+  /** \fn SimpleMatrix (const SiconosMatrix&  m)
+   *  \brief copy contructor
+   *  \param SiconosMatrix
+   */
+  SimpleMatrix(const SiconosMatrix&);
+
+  /** \fn SimpleMatrix (const SimpleMatrix&  m)
+   *  \brief copy contructor
+   *  \param SimpleMatrix
+   */
+  SimpleMatrix(const SimpleMatrix&);
+
+  /** \fn SimpleMatrix (const unsigned int& row , const unsigned int& col)
+   *  \brief contructor with the dimension
+   *  \param an integer to set the number of row
+   *  \param an integer to set the number of column
+   */
+  SimpleMatrix(const unsigned int&, const unsigned int&);
+
+  /** \fn SimpleMatrix (const LaGenMatDouble m)
+   *  \brief contructor with a LaGenMatDouble
+   *  \param a LaGenMatDouble
+   */
+  SimpleMatrix(const LaGenMatDouble&);
+
+  /** \fn SimpleMatrix (const LaVectorDouble v, unsigned int& row, unsigned int& col);
+   *  \brief contructor with a LaVectorDouble
+   *  \param a LaVectorDouble
+   *  \param an integer to set the number of row
+   *  \param an integer to set the number of column
+   */
+  SimpleMatrix(const LaVectorDouble&, const unsigned int&, const unsigned int&);
+
+  /** \fn SimpleMatrix (std::string file, bool ascii)
+   *  \brief contructor with an input file
+   *  \param a std::string which contain the file path
+   *  \param a boolean to indicate if the file is in ascii
+   */
+  SimpleMatrix(const std::string&, const bool&);
+
+  /** \fn ~SimpleMatrix ()
    *  \brief destructor
    */
-  virtual ~SiconosMatrix();
+  ~SimpleMatrix();
 
   /** \fn  unsigned int size (const unsigned int&)
    *  \brief get the dimension of the matrix
@@ -81,34 +119,31 @@ public:
    *  \exception SiconosMatrixException
    *  \return the a dimension of the matrix
    */
-  virtual unsigned int size(const unsigned int&) const = 0;
+  unsigned int size(const unsigned int&) const;
 
   /** \fn bool isSquare()
    *  \brief determines if the matrix is square
    *  \return true if the matrix is square
    */
-  virtual bool isSquare() const = 0;
+  bool isSquare() const;
 
   /** \fn bool isInversed()
    *  \brief determines if the matrix has been inversed
    *  \return true if the matrix is inversed
    */
-  virtual bool isInversed() const  = 0;
+  inline bool isInversed() const
+  {
+    return isPLUInversed;
+  }
 
   /** \fn bool isfactorized()
    *  \brief determines if the matrix has been factorized
    *  \return true if the matrix is factorized
    */
-  virtual bool isFactorized() const  = 0;
-
-  /** \fn bool isBlock()
-   *  \brief true if the matrix is block else false
-   *  \return a bool
-   */
-  inline bool isBlock() const
+  inline bool isFactorized() const
   {
-    return isBlockMatrix;
-  };
+    return isPLUFactorized;
+  }
 
   // --- GETTERS/SETTERS ---
 
@@ -118,7 +153,7 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a LaGenMatDouble
    */
-  virtual LaGenMatDouble getLaGenMatDouble(const unsigned int& = 0, const unsigned int& = 0) const = 0;
+  LaGenMatDouble getLaGenMatDouble(const unsigned int& = 0, const unsigned int& = 0) const;
 
   /** \fn setValue(const unsigned int& row, const unsigned int& col, const double& d)
    * \brief set the element matrix[row, col]
@@ -126,7 +161,10 @@ public:
    * \param an integer row
    * \param a double d : the value.
    */
-  virtual void setValue(const unsigned int & row, const unsigned int& col, const double& d) = 0;
+  inline void setValue(const unsigned int & row, const unsigned int& col, const double& d)
+  {
+    (*this)(row, col) = d;
+  }
 
   /** \fn setValue(const LaGenMatDouble&, const unsigned int& row = 0, const unsigned int& col = 0)
    * \brief set mat of a SimpleMatrix, of mat-block(row,col) of a BlockMatrix
@@ -134,56 +172,48 @@ public:
    * \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    * \param a LaGenMatDouble
    */
-  virtual void setValue(const LaGenMatDouble&, const unsigned int& = 0, const unsigned int& = 0) = 0;
-
-  /** \fn const double getValue(const int& row, const int& col) const
-   * \brief get the element matrix[row, col]
-   * \param an integer col
-   * \param an integer row
-   * \return a double d : the value.
-   */
-  inline const double getValue(const unsigned int& row, const unsigned int& col)
-  {
-    return (*this)(row, col);
-  }
+  void setValue(const LaGenMatDouble&, const unsigned int& = 0, const unsigned int& = 0);
 
   /** \fn void setRow(const unsigned int& row, const SiconosVector &v)
    *  \brief set line row of the current matrix with vector v
    *  \param an int and a SiconosVector
    */
-  virtual void setRow(const unsigned int& , const SiconosVector &) = 0;
+  void setRow(const unsigned int& , const SiconosVector &);
 
   /** \fn void getRow(const int& index, const SimpleVector& vOut) const
    *  \brief get row index of current matrix and save it into vOut
    *  \param int: index of required line
    *  \param ref to SimpleVector: in-out parameter
    */
-  virtual void getRow(const unsigned int& i, const SimpleVector&) const = 0;
+  void getRow(const unsigned int& i, const SimpleVector&) const;
 
   /** \fn void getCol(const int& index, const SimpleVector& vOut) const
    *  \brief get column index of the current matrix and save it into vOut
    *  \param int: index of required column
    *  \param ref to SimpleVector: in-out parameter
    */
-  virtual void getCol(const unsigned int&, const SimpleVector&) const = 0;
+  void getCol(const unsigned int&, const SimpleVector&) const;
 
   /** \fn void getBlock(const std::vector<unsigned int>& indexList, SiconosMatrix&)
    *  \brief get a block of a matrix, which position is defined by index_list
    *  \param vector<unsigned int> for indexes and a SiconosMatrix (in-out paramater)
    */
-  virtual void getBlock(const std::vector<unsigned int>&, SiconosMatrix&) const = 0;
+  void getBlock(const std::vector<unsigned int>&, SiconosMatrix&) const;
 
   /** \fn void getBlock(const vector<unsigned int>& indexRow, const vector<unsigned int>& indexCol, SiconosMatrix& block)
    *  \brief get block corresponding to lines given in indexRow and columns in indexCol
    *  \param 2 vector<unsigned int> for indexes and a SiconosMatrix (in-out paramater)
    */
-  virtual void getBlock(const std::vector<unsigned int>& , const std::vector<unsigned int>&, SiconosMatrix&) const = 0;
+  void getBlock(const std::vector<unsigned int>& , const std::vector<unsigned int>&, SiconosMatrix&) const;
 
   /** \fn double* getArray()
    *  \brief return the adress of the array of double values of the matrix
    *  \return double* : the pointer on the double array
    */
-  virtual double* getArray() = 0;
+  inline double* getArray()
+  {
+    return mat.addr();
+  }
 
   /** \fn bool read(std::string fileName, std::string mode = BINARY)
    *  \brief read the matrix in a file
@@ -192,7 +222,7 @@ public:
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  virtual bool read(const std::string& , const std::string& = "binary") = 0;
+  bool read(const std::string& , const std::string& = "binary");
 
   /** \fn bool write(std::string fileName, std::string mode = BINARY)
    *  \brief write the matrix in a file
@@ -201,7 +231,7 @@ public:
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  virtual bool write(const std::string& fileName, const std::string& mode = "binary") const  = 0;
+  bool write(const std::string& fileName, const std::string& mode = "binary") const ;
 
   /** \fn bool rawWrite(std::string fileName, std::string mode = BINARY)
    *  \brief write the matrix in a file without dimensions output
@@ -210,22 +240,22 @@ public:
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  virtual bool rawWrite(const std::string& fileName, const std::string& mode = "binary") const  = 0;
+  bool rawWrite(const std::string& fileName, const std::string& mode = "binary") const ;
 
   /** \fn void zero();
    *  \brief sets all the values of the matrix to 0.0
    */
-  virtual void zero() = 0;
+  void zero();
 
   /** \fn void eye();
    *  \brief set an identity matrix
    */
-  virtual void eye() = 0;
+  void eye();
 
   /** \fn void display();
    *  \brief display data on standard output
    */
-  virtual void display() const = 0;
+  void display() const;
 
   // --- MATRICES HANDLING AND OPERATORS ---
 
@@ -234,7 +264,7 @@ public:
    *  \param SiconosMatrix B
    *  \return SimpleMatrix : the result of the multiplication
    */
-  virtual SimpleMatrix multTranspose(const SiconosMatrix &) = 0;
+  SimpleMatrix multTranspose(const SiconosMatrix &);
 
   /** \fn void blockMatrixCopy( SiconosMatrix &blockMat, const int&, const int&)
    *  \brief copy the blockmatrix "blockMat" in the matrix "mat" at the position (xPos, yPos)
@@ -243,90 +273,150 @@ public:
    *  \param int : the line position to start the copy of the blockmatrix
    *  \param int : the column position to start the copy of the blockmatrix
    */
-  virtual void blockMatrixCopy(const SiconosMatrix &, const unsigned int&, const unsigned int&) = 0;
+  void blockMatrixCopy(const SiconosMatrix &, const unsigned int&, const unsigned int&);
 
-  // Io-stream operators
-  friend std::istream& operator >> (std::istream& i, SiconosMatrix& m);
-  friend std::ostream& operator << (std::ostream& o, SiconosMatrix& m);
-
-  /** \fn operator() (const int& row, const int& col)= 0
+  /** \fn operator (int row, int col)
    *  \brief get or set the element matrix[i,j]
    *  \param an integer i
    *  \param an integer j
    *  \exception SiconosMatrixException
    *  \return the element matrix[i,j]
    */
-  virtual double& operator()(const int& row, const int& col) = 0;
+  double& operator()(const int& row, const int& col);
 
-  /** \fn operator () (const unsigned int& row, const unsigned int& col) = 0;
+  /** \fn operator (int row, int col)
    *  \brief get or set the element matrix[i,j]
    *  \param an integer i
    *  \param an integer j
    *  \exception SiconosMatrixException
    *  \return the element matrix[i,j]
    */
-  virtual double& operator()(const unsigned int& row, const unsigned int& col) = 0;
-  virtual double& operator()(const unsigned int& row, const unsigned int& col) const = 0;
+  double& operator()(const unsigned int& row, const unsigned int& col);
+  double& operator()(const unsigned int& row, const unsigned int& col) const;
 
   /** \fn assignment operator
    *  \param SiconosMatrix : the matrix to be copied
    */
-  virtual SiconosMatrix& operator = (const SiconosMatrix& m) = 0;
+  SimpleMatrix& operator = (const SiconosMatrix&);
+
+  /** \fn assignment operator
+   *  \param SimpleMatrix : the matrix to be copied
+   */
+  SimpleMatrix& operator = (const SimpleMatrix&);
 
   /** \fn operator +=
-  *  \param SiconosMatrix : a matrix to add
+  *  \param  SimpleMatrix: a matrix to add
   */
-  virtual SiconosMatrix& operator+=(const SiconosMatrix  &)  = 0;
+  SimpleMatrix& operator+=(const SiconosMatrix  &) ;
 
   /** \fn operator -=
-  *  \param SiconosMatrix : a matrix to subtract
+  *  \param SimpleMatrix : a matrix to subtract
   */
-  virtual SiconosMatrix& operator-=(const SiconosMatrix  &)  = 0;
+  SimpleMatrix& operator-=(const SiconosMatrix  &);
 
   /** \fn operator *=
   *  \param double, a scalar
   */
-  virtual SiconosMatrix& operator*=(const double  &)  = 0;
+  SimpleMatrix& operator*=(const double  &);
+
+  /** \fn operator ==
+   * \brief: A==B when (A-B).normInf()<tolerance
+   * \param a SiconosMatrix
+   */
+  friend bool operator==(const SiconosMatrix&, const SiconosMatrix&);
+
+  /** \fn operator * (const SimpleMatrix& m1, const SimpleMatrix& m2);
+   *  \brief multiplication of two matrices
+   *  \return a SimpleMatrix
+   *  \exception SiconosMatrixException, if the sizes are incompatible
+   */
+  friend SimpleMatrix operator * (const SimpleMatrix&, const SimpleMatrix&);
+
+  /** \fn operator * (const SimpleMatrix& m1, const double& d);
+   *  \brief multiplication of a matrix by a double
+   *  \return a SimpleMatrix
+   */
+  friend SimpleMatrix operator * (const SiconosMatrix&, const double&);
+
+  /** \fn operator * (const double& d, const SimpleMatrix& m1);
+   *  \brief multiplication of a matrix by a double
+   *  \return a SimpleMatrix
+   */
+  friend SimpleMatrix operator * (const double&, const SiconosMatrix&);
+
+  /** \fn operator / (const SimpleMatrix& m1, const double d);
+   *  \brief division of the matrix by a double
+   *  \return a SimpleMatrix
+   *  \exception SiconosMatrixException, if the double d = 0
+   */
+  friend SimpleMatrix operator / (const SiconosMatrix&, const double&);
+
+  /** \fn operator + (const SiconosMatrix& m1, const SiconosMatrix& m2);
+   *  \brief Addition of two matrices
+   *  \return a SimpleMatrix
+   *  \exception SiconosMatrixException, if the sizes are incompatible
+   */
+  friend SimpleMatrix operator + (const SiconosMatrix&, const SiconosMatrix&);
+
+  /** \fn operator - (const SiconosMatrix& m1, const SiconosMatrix& m2);
+   *  \brief subtraction of two matrices
+   *  \return a SimpleMatrix
+   *  \exception SiconosMatrixException, if the sizes are incompatible
+   */
+  friend SimpleMatrix operator - (const SiconosMatrix&, const SiconosMatrix&);
+
+  /** \fn pow(const SimpleMatrix& m1,  const unsigned int&);
+   *  \brief compute the power of the matrix (!)
+   *  \return a SimpleMatrix
+   *  \exception SiconosMatrixException, if the power < 0
+   */
+  friend SimpleMatrix pow(const SimpleMatrix&, const unsigned int&);
 
   /** \fn const double normInf() const;
    *  \brief compute the infinite norm of the matrix
    *  \return a double
    */
-  virtual const double normInf() const = 0;
+  const double normInf() const;
 
   // --- COMPUTING WITH MATRICES  ---
 
-  /** \fn SiconosMatrix linearSolve(const SiconosMatrix & B,SiconosMatrix &X )
+  /** \fn void linearSolve(const SiconosMatrix & B, SimpleMatrix & X)
    *  \brief compute the vector x in  Ax=B
-   *  \param SiconosMatrix & B
-   *  \param SiconosMatrix X
+   *  \param SimpleMatrix & B
    */
-  virtual void linearSolve(const SiconosMatrix & , SiconosMatrix&) = 0;
+  void linearSolve(const SiconosMatrix & , SiconosMatrix &);
 
   /** \fn  PLUFactorizationInPlace(void);
    *  \brief Compute the LU factorization with Partial pivoting.  The result is returned in this (InPlace)
    */
-  virtual void PLUFactorizationInPlace(void) = 0;
+  void PLUFactorizationInPlace();
 
   /** \fn  SiconosMatrix  PLUInverseInPlace(void);
    *  \brief  use the LU factorization with Partial pivoting of the matrix this (or the matrix this itself if it is triangular)
    *       to compute the inverse matrix.  The result is returned in this (InPlace)
    */
-  virtual void  PLUInverseInPlace(void) = 0;
+  void  PLUInverseInPlace();
 
   /** \fn SiconosMatrix  PLUForwardBackward(SiconosMatrix &B);
    *  \brief use the LU factorization with Partial pivoting of the matrix this (or the matrix this itself if it is triangular)
    *  to solve A x = B by forward or backward substitution;
    *  \param the RHS matrix b  which contains the result x
    */
-  virtual void  PLUForwardBackwardInPlace(SiconosMatrix &B) = 0 ;
+  void  PLUForwardBackwardInPlace(SiconosMatrix &B) ;
 
   /** \fn SiconosVector  PLUForwardBackward(SiconosVector &B);
    *  \brief use the LU factorization with Partial pivoting of the matrix this (or the matrix this itself if it is triangular)
    *  to solve A x = B by forward or backward substitution;
    *  \param the RHS vector b which contains the result x
    */
-  virtual void   PLUForwardBackwardInPlace(SiconosVector &B) = 0;
+  void   PLUForwardBackwardInPlace(SiconosVector &B);
+
+  /** \fn SiconosMatrix BlockMatrixAssemble(vector<SiconosMatrix*>);
+   *  \brief build a matrix from n matrices
+   *  \return a SimpleMatrix
+   */
+  friend SimpleMatrix BlockMatrixAssemble(const std::vector<SiconosMatrix*>&);
+
 };
 
-#endif // __SiconosMatrix__
+#endif // __SimpleMatrix__

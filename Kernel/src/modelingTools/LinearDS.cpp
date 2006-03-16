@@ -42,7 +42,7 @@ LinearDS::LinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds
     // (only those specific to LinearDS) and values loading
     string plugin;
 
-    A = new SiconosMatrix(n, n);
+    A = new SimpleMatrix(n, n);
     if (ldsxml->isAPlugin())
     {
       plugin = ldsxml->getAPlugin();
@@ -88,7 +88,7 @@ LinearDS::LinearDS(const int& newNumber, const unsigned int& newN, const Siconos
   DSType = LDS;
   isLDSPlugin.resize(2, false);
 
-  A = new SiconosMatrix(n, n);
+  A = new SimpleMatrix(n, n);
   setComputeAFunction(pluginPath, functionName);
   isLDSPlugin[0] = true;
 }
@@ -106,7 +106,7 @@ LinearDS::LinearDS(const int& newNumber, const SiconosVector& newX0,
     RuntimeException::selfThrow("LinearDS - constructor(3): inconsistent dimensions with problem size for input matrix A");
 
   DSType = LDS;
-  A = new SiconosMatrix(n, n);
+  A = new SimpleMatrix(n, n);
   *A = newA;
   isLDSPlugin.resize(2, false);
 }
@@ -127,7 +127,7 @@ LinearDS::LinearDS(const DynamicalSystem & newDS):
   // convert newDS to linearDS by keeping const options
   const LinearDS * lds = static_cast<const LinearDS*>(&newDS);
 
-  A = new SiconosMatrix(lds->getA());
+  A = new SimpleMatrix(lds->getA());
   isAAllocatedIn = true;
   if (lds->getBPtr() != NULL)
   {

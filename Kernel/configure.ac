@@ -155,8 +155,8 @@ AC_MSG_CHECKING([for Siconos/Numerics])
 ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-numerics.])])
 
 # Lapack++
-LAPACKPP_VER="1.8.0"	# lib....so number
-LAPACKPP_REL_VER="2.4.2" # Release number
+LAPACKPP_VER="1.12.0"	# lib....so number
+LAPACKPP_REL_VER="2.4.7" # Release number
 AC_MSG_CHECKING([for Lapack++])
 ACX_LAPACKPP([], [AC_MSG_ERROR([Cannot find  Lapack++ in a good version. Please install Lapack++, version >= $LAPACKPP_VER.])])
 

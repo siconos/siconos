@@ -26,7 +26,7 @@
 #include "check.h"
 #include "SiconosVector.h"
 #include "SimpleVector.h"
-#include "CompositeVector.h"
+#include "BlockVector.h"
 
 #include "DynamicalSystem.h"
 #include "DSInputOutputXML.h"

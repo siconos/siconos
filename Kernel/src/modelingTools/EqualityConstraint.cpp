@@ -119,12 +119,12 @@ void EqualityConstraint::computeOutput(double time)
   //        LagrangianDS *d1 = static_cast<LagrangianDS*> (ds1);
   //        LagrangianDS *d2 = static_cast<LagrangianDS*> (ds2);
   //
-  //        CompositeVector q;
+  //        BlockVector q;
   //        q.add(*(d1->getQPtr()));
   //      q.add(*(d2->getQPtr()));
   //        //*y = (h * q) + b;
   //
-  //      CompositeVector vel;
+  //      BlockVector vel;
   //      vel.add(*(d1->getVelocityPtr()));
   //      vel.add(*(d2->getVelocityPtr()));
   //      *yDot = (h * vel);
@@ -191,7 +191,7 @@ void EqualityConstraint::fillEqualityConstraintWithEqualityConstraintXML()
     else cout << "Warning - No computeOutput method is defined in a Relation " << getType() << endl;
 
     number = ecXML->getNumber();
-    G = new SiconosMatrix(ecXML->getG());
+    G = new SimpleMatrix(ecXML->getG());
   }
   //else RuntimeException::selfThrow("EqualityConstraint::fillEqualityConstraintWithEqualityConstraintXML - object EqualityConstraintXML does not exist");
 }
@@ -211,7 +211,7 @@ void EqualityConstraint::createEqualityConstraint(EqualityConstraintXML *newEcXM
     ecXML = NULL;
     type = NLINEAREC;
     number = newNumber;
-    G = new SiconosMatrix(*newG);
+    G = new SimpleMatrix(*newG);
     dsioVector = *newDsioVector;
   }
 }

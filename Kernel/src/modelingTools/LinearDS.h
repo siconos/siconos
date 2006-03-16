@@ -109,11 +109,11 @@ public:
   // --- getter and setter ---
 
   // --- A ---
-  /** \fn  const SiconosMatrix getA() const
+  /** \fn  const SimpleMatrix getA() const
    *  \brief get the value of A
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getA() const
+  inline const SimpleMatrix getA() const
   {
     return *A;
   }

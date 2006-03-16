@@ -83,7 +83,7 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
     xFree = new SimpleVector(n);
     r = new SimpleVector(n);
     r->zero();
-    jacobianX = new SiconosMatrix(n, n);
+    jacobianX = new SimpleMatrix(n, n);
     isXAllocatedIn.resize(7, true);
     isXAllocatedIn[2] = false ; //xMemory
     isXAllocatedIn[4] = false ; // xDotMemory
@@ -135,7 +135,7 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
       else
         RuntimeException::selfThrow("DynamicalSystem:: xml constructor, uSize is a required input");
 
-      T = new SiconosMatrix(n, uSize);
+      T = new SimpleMatrix(n, uSize);
       u = new SimpleVector(uSize);
       isControlAllocatedIn[0] = true;
       isControlAllocatedIn[1] = true;
@@ -232,7 +232,7 @@ DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN,
   xFree = new SimpleVector(n);
   r = new SimpleVector(n);
   r->zero();
-  jacobianX = new SiconosMatrix(n, n);
+  jacobianX = new SimpleMatrix(n, n);
 
   isXAllocatedIn.resize(7, true);
   isXAllocatedIn[2] = false ; //xMemory
@@ -277,12 +277,12 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
 
   cout << "Warning: Dynamical System copy, do not forget to set id and number for the new system" << endl;
 
-  if (newDS.getX0Ptr()->isComposite())
+  if (newDS.getX0Ptr()->isBlock())
   {
-    x0 = new CompositeVector(newDS.getX0());
-    x = new CompositeVector(newDS.getX());
-    xDot = new CompositeVector(newDS.getXDot());
-    xFree = new CompositeVector(newDS.getXFree());
+    x0 = new BlockVector(newDS.getX0());
+    x = new BlockVector(newDS.getX());
+    xDot = new BlockVector(newDS.getXDot());
+    xFree = new BlockVector(newDS.getXFree());
   }
   else
   {
@@ -306,7 +306,7 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
 
   if (newDS.getJacobianXPtr() != NULL)
   {
-    jacobianX = new SiconosMatrix(newDS.getJacobianX());
+    jacobianX = new SimpleMatrix(newDS.getJacobianX());
     isXAllocatedIn[6] = true ;
   }
 
@@ -332,8 +332,8 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
   isControlAllocatedIn.resize(2, false);
   if (newDS.getUPtr() != NULL)
   {
-    if (newDS.getUPtr()->isComposite())
-      u = new CompositeVector(newDS.getU());
+    if (newDS.getUPtr()->isBlock())
+      u = new BlockVector(newDS.getU());
     else
       u = new SimpleVector(newDS.getU());
     isControlAllocatedIn[0] = true;
@@ -341,7 +341,7 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
 
   if (newDS.getTPtr() != NULL)
   {
-    T = new SiconosMatrix(newDS.getT());
+    T = new SimpleMatrix(newDS.getT());
     isControlAllocatedIn[1] = true ;
   }
 
@@ -515,8 +515,8 @@ void DynamicalSystem::setX0(const SiconosVector& newValue)
 
   else
   {
-    if (newValue.isComposite())
-      x0 = new CompositeVector(newValue);
+    if (newValue.isBlock())
+      x0 = new BlockVector(newValue);
     else
       x0 = new SimpleVector(newValue);
     isXAllocatedIn[0] = true;
@@ -545,8 +545,8 @@ void DynamicalSystem::setX(const SiconosVector& newValue)
 
   else
   {
-    if (newValue.isComposite())
-      x = new CompositeVector(newValue);
+    if (newValue.isBlock())
+      x = new BlockVector(newValue);
     else
       x = new SimpleVector(newValue);
     isXAllocatedIn[1] = true;
@@ -598,8 +598,8 @@ void DynamicalSystem::setXDot(const SiconosVector& newValue)
 
   else
   {
-    if (newValue.isComposite())
-      xDot = new CompositeVector(newValue);
+    if (newValue.isBlock())
+      xDot = new BlockVector(newValue);
     else
       xDot = new SimpleVector(newValue);
     isXAllocatedIn[3] = true;
@@ -651,8 +651,8 @@ void DynamicalSystem::setXFree(const SiconosVector& newValue)
 
   else
   {
-    if (newValue.isComposite())
-      xFree = new CompositeVector(newValue);
+    if (newValue.isBlock())
+      xFree = new BlockVector(newValue);
     else
       xFree = new SimpleVector(newValue);
     isXAllocatedIn[5] = true;
@@ -731,7 +731,7 @@ void DynamicalSystem::setJacobianX(const SiconosMatrix& newValue)
 
   else
   {
-    jacobianX = new SiconosMatrix(newValue);
+    jacobianX = new SimpleMatrix(newValue);
     isXAllocatedIn[6] = true;
   }
 }
@@ -769,8 +769,8 @@ void DynamicalSystem::setU(const SiconosVector& newValue)
 
   else
   {
-    if (newValue.isComposite())
-      u = new CompositeVector(newValue);
+    if (newValue.isBlock())
+      u = new BlockVector(newValue);
     else
       u = new SimpleVector(newValue);
     isControlAllocatedIn[0] = true;
@@ -798,7 +798,7 @@ void DynamicalSystem::setT(const SiconosMatrix& newValue)
     *T = newValue;
   else
   {
-    T = new SiconosMatrix(newValue);
+    T = new SimpleMatrix(newValue);
     isControlAllocatedIn[1] = true;
   }
 }
@@ -913,7 +913,7 @@ void DynamicalSystem::setComputeTFunction(const string& pluginPath, const string
 
   if (T == NULL)
   {
-    T = new SiconosMatrix(n, uSize);
+    T = new SimpleMatrix(n, uSize);
     isControlAllocatedIn[1] = true;
     T->zero();
   }

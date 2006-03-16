@@ -39,13 +39,13 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     number = dsxml->getNumber();
     if (dsxml->hasId() == true) id = dsxml->getId();
     // -- Memory allocation for vector and matrix members --
-    x = new CompositeVector();
+    x = new BlockVector();
     isXAllocatedIn[1] = true;
-    x0 = new CompositeVector();
+    x0 = new BlockVector();
     isXAllocatedIn[0] = true;
-    xDot = new CompositeVector();
+    xDot = new BlockVector();
     isXAllocatedIn[3] = true;
-    xFree = new CompositeVector();
+    xFree = new BlockVector();
     isXAllocatedIn[5] = true;
 
     //
@@ -54,7 +54,7 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     r->zero();
 
     // \todo review link between LagrangianDS and DS
-    jacobianX = new SiconosMatrix(n, n);
+    jacobianX = new SimpleMatrix(n, n);
     isXAllocatedIn[6] = true;
     if (dsxml->hasStepsInMemory() == true) stepsInMemory = dsxml->getStepsInMemory();
 
@@ -105,15 +105,15 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     velocityFree->zero();
     p = new SimpleVector(ndof);
     p->zero();
-    mass = new SiconosMatrix(ndof, ndof);
+    mass = new SimpleMatrix(ndof, ndof);
     fInt = new SimpleVector(ndof);
     fExt = new SimpleVector(ndof);
     NNL = new SimpleVector(ndof);
     for (i = 0; i < 3; ++i) areForcesAllocatedIn.push_back(true);
-    jacobianQFInt = new SiconosMatrix(ndof, ndof);
-    jacobianVelocityFInt = new SiconosMatrix(ndof, ndof);
-    jacobianQNNL = new SiconosMatrix(ndof, ndof);
-    jacobianVelocityNNL = new SiconosMatrix(ndof, ndof);
+    jacobianQFInt = new SimpleMatrix(ndof, ndof);
+    jacobianVelocityFInt = new SimpleMatrix(ndof, ndof);
+    jacobianQNNL = new SimpleMatrix(ndof, ndof);
+    jacobianVelocityNNL = new SimpleMatrix(ndof, ndof);
     for (i = 0; i < 4; ++i) isJacobianAllocatedIn.push_back(true);
     for (i = 0; i < 8; ++i)
     {
@@ -160,12 +160,12 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     }
 
     // fill in x, x0 and xFree with q and velocity
-    /*static_cast<CompositeVector*>(x)->addPtr(q);
-    static_cast<CompositeVector*>(x)->addPtr(velocity);
-    static_cast<CompositeVector*>(x0)->addPtr(q0);
-    static_cast<CompositeVector*>(x0)->addPtr(velocity0);
-    static_cast<CompositeVector*>(xFree)->addPtr(qFree);
-    static_cast<CompositeVector*>(xFree)->addPtr(velocityFree);
+    /*static_cast<BlockVector*>(x)->addPtr(q);
+    static_cast<BlockVector*>(x)->addPtr(velocity);
+    static_cast<BlockVector*>(x0)->addPtr(q0);
+    static_cast<BlockVector*>(x0)->addPtr(velocity0);
+    static_cast<BlockVector*>(xFree)->addPtr(qFree);
+    static_cast<BlockVector*>(xFree)->addPtr(velocityFree);
     */
     // FExt
     if (lgptr->hasFext())
@@ -276,7 +276,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 
   // --- LAGRANGIAN INHERITED CLASS MEMBERS ---
   // -- Memory allocation for vector and matrix members --
-  mass = new SiconosMatrix(ndof, ndof);
+  mass = new SimpleMatrix(ndof, ndof);
   q = new SimpleVector(ndof);
   q0 = new SimpleVector(ndof);
   qFree = new SimpleVector(ndof);
@@ -315,10 +315,10 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 
   NNL = new SimpleVector(ndof);
   areForcesAllocatedIn.resize(3, true);
-  jacobianQFInt = new SiconosMatrix(ndof, ndof);
-  jacobianVelocityFInt = new SiconosMatrix(ndof, ndof);
-  jacobianQNNL = new SiconosMatrix(ndof, ndof);
-  jacobianVelocityNNL = new SiconosMatrix(ndof, ndof);
+  jacobianQFInt = new SimpleMatrix(ndof, ndof);
+  jacobianVelocityFInt = new SimpleMatrix(ndof, ndof);
+  jacobianQNNL = new SimpleMatrix(ndof, ndof);
+  jacobianVelocityNNL = new SimpleMatrix(ndof, ndof);
   for (i = 0; i < 4; ++i) isJacobianAllocatedIn.push_back(true);
 
   // --- initial state filling ---
@@ -333,15 +333,15 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   // === Settings and links for master dynamical system variables ===
 
   // -- Memory allocation for vector and matrix members --
-  x = new CompositeVector(q, velocity);
+  x = new BlockVector(q, velocity);
   isXAllocatedIn[1] = true;
-  x0 = new CompositeVector(q0, velocity0);
+  x0 = new BlockVector(q0, velocity0);
   isXAllocatedIn[0] = true;
-  xDot = new CompositeVector(velocity, NULL);
+  xDot = new BlockVector(velocity, NULL);
   isXAllocatedIn[3] = true;
-  xFree = new CompositeVector(qFree, velocityFree);
+  xFree = new BlockVector(qFree, velocityFree);
   isXAllocatedIn[5] = true;
-  r = new CompositeVector(NULL, p);
+  r = new BlockVector(NULL, p);
   isRAllocatedIn[0] = true;
 
   //  jacobianX = new SiconosMatrix(n,n);
@@ -380,13 +380,13 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   n = 2 * ndof;
 
   // -- Memory allocation for vector and matrix members --
-  x = new CompositeVector();
+  x = new BlockVector();
   isXAllocatedIn[1] = true;
-  x0 = new CompositeVector();
+  x0 = new BlockVector();
   isXAllocatedIn[0] = true;
-  xDot = new CompositeVector();
+  xDot = new BlockVector();
   isXAllocatedIn[3] = true;
-  xFree = new CompositeVector();
+  xFree = new BlockVector();
   isXAllocatedIn[5] = true;
 
   r = new SimpleVector(n);
@@ -394,7 +394,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   r->zero();
 
   //
-  // jacobianX = new SiconosMatrix(n,n);
+  // jacobianX = new SimpleMatrix(n,n);
   // -- plugins --
   string plugin;
   // VectorField
@@ -402,7 +402,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 
   // --- LAGRANGIAN INHERITED CLASS MEMBERS ---
   // -- Memory allocation for vector and matrix members --
-  mass = new SiconosMatrix(ndof, ndof);
+  mass = new SimpleMatrix(ndof, ndof);
   q = new SimpleVector(ndof);
   q0 = new SimpleVector(ndof);
   qFree = new SimpleVector(ndof);
@@ -441,10 +441,10 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 
   NNL = new SimpleVector(ndof);
   areForcesAllocatedIn.resize(3, true);
-  jacobianQFInt = new SiconosMatrix(ndof, ndof);
-  jacobianVelocityFInt = new SiconosMatrix(ndof, ndof);
-  jacobianQNNL = new SiconosMatrix(ndof, ndof);
-  jacobianVelocityNNL = new SiconosMatrix(ndof, ndof);
+  jacobianQFInt = new SimpleMatrix(ndof, ndof);
+  jacobianVelocityFInt = new SimpleMatrix(ndof, ndof);
+  jacobianQNNL = new SimpleMatrix(ndof, ndof);
+  jacobianVelocityNNL = new SimpleMatrix(ndof, ndof);
   for (i = 0; i < 4; ++i) isJacobianAllocatedIn.push_back(true);
 
   // --- initial state filling ---
@@ -455,12 +455,12 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 
   // --- x, xDot and xFree update ---
   /*
-  static_cast<CompositeVector*>(x)->addPtr(q);
-  static_cast<CompositeVector*>(x)->addPtr(velocity);
-  static_cast<CompositeVector*>(x0)->addPtr(q0);
-  static_cast<CompositeVector*>(x0)->addPtr(velocity0);
-  static_cast<CompositeVector*>(xFree)->addPtr(qFree);
-  static_cast<CompositeVector*>(xFree)->addPtr(velocityFree);
+  static_cast<BlockVector*>(x)->addPtr(q);
+  static_cast<BlockVector*>(x)->addPtr(velocity);
+  static_cast<BlockVector*>(x0)->addPtr(q0);
+  static_cast<BlockVector*>(x0)->addPtr(velocity0);
+  static_cast<BlockVector*>(xFree)->addPtr(qFree);
+  static_cast<BlockVector*>(xFree)->addPtr(velocityFree);
   */
   //   --- plugins ---
   setComputeMassFunction(cShared.getPluginName(massName), cShared.getPluginFunctionName(massName));
@@ -494,7 +494,7 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
 
   ndof = lnlds->getNdof();
 
-  mass = new SiconosMatrix(lnlds->getMass());
+  mass = new SimpleMatrix(lnlds->getMass());
 
   q0 = new SimpleVector(lnlds->getQ0());
   q = new SimpleVector(lnlds->getQ());
@@ -550,22 +550,22 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
 
   if (lnlds->getJacobianQFIntPtr() != NULL)
   {
-    jacobianQFInt = new SiconosMatrix(lnlds->getJacobianQFInt());
+    jacobianQFInt = new SimpleMatrix(lnlds->getJacobianQFInt());
     isJacobianAllocatedIn[0] = true;
   }
   if (lnlds->getJacobianVelocityFIntPtr() != NULL)
   {
-    jacobianVelocityFInt = new SiconosMatrix(lnlds->getJacobianVelocityFInt());
+    jacobianVelocityFInt = new SimpleMatrix(lnlds->getJacobianVelocityFInt());
     isJacobianAllocatedIn[1] = true;
   }
   if (lnlds->getJacobianQNNLPtr() != NULL)
   {
-    jacobianQNNL = new SiconosMatrix(lnlds->getJacobianQNNL());
+    jacobianQNNL = new SimpleMatrix(lnlds->getJacobianQNNL());
     isJacobianAllocatedIn[2] = true;
   }
   if (lnlds->getJacobianVelocityNNLPtr() != NULL)
   {
-    jacobianVelocityNNL = new SiconosMatrix(lnlds->getJacobianVelocityNNL());
+    jacobianVelocityNNL = new SimpleMatrix(lnlds->getJacobianVelocityNNL());
     isJacobianAllocatedIn[3] = true;
   }
 
@@ -899,7 +899,7 @@ void LagrangianDS::setMass(const SiconosMatrix& newValue)
 
   if (mass == NULL)
   {
-    mass = new SiconosMatrix(newValue);
+    mass = new SimpleMatrix(newValue);
     isMassAllocatedIn = true;
   }
   else
@@ -1002,7 +1002,7 @@ void LagrangianDS::setJacobianQFInt(const SiconosMatrix& newValue)
 
   if (jacobianQFInt == NULL)
   {
-    jacobianQFInt = new SiconosMatrix(newValue);
+    jacobianQFInt = new SimpleMatrix(newValue);
     isJacobianAllocatedIn[0] = true;
   }
   else
@@ -1028,7 +1028,7 @@ void LagrangianDS::setJacobianVelocityFInt(const SiconosMatrix& newValue)
 
   if (jacobianVelocityFInt == NULL)
   {
-    jacobianVelocityFInt = new SiconosMatrix(newValue);
+    jacobianVelocityFInt = new SimpleMatrix(newValue);
     isJacobianAllocatedIn[1] = true;
   }
   else
@@ -1054,7 +1054,7 @@ void LagrangianDS::setJacobianQNNL(const SiconosMatrix& newValue)
 
   if (jacobianQNNL == NULL)
   {
-    jacobianQNNL = new SiconosMatrix(newValue);
+    jacobianQNNL = new SimpleMatrix(newValue);
     isJacobianAllocatedIn[2] = true;
   }
   else
@@ -1080,7 +1080,7 @@ void  LagrangianDS::setJacobianVelocityNNL(const SiconosMatrix& newValue)
 
   if (jacobianVelocityNNL == NULL)
   {
-    jacobianVelocityNNL = new SiconosMatrix(newValue);
+    jacobianVelocityNNL = new SimpleMatrix(newValue);
     isJacobianAllocatedIn[3] = true;
   }
   else
@@ -1258,7 +1258,7 @@ void LagrangianDS::setComputeMassFunction(const string& pluginPath, const string
 
   if (mass == NULL)
   {
-    mass = new SiconosMatrix(ndof, ndof);
+    mass = new SimpleMatrix(ndof, ndof);
     isMassAllocatedIn = true;
   }
 
@@ -1339,7 +1339,7 @@ void LagrangianDS::setComputeJacobianQFIntFunction(const string& pluginPath, con
 
   if (jacobianQFInt == NULL)
   {
-    jacobianQFInt = new SiconosMatrix(ndof, ndof);
+    jacobianQFInt = new SimpleMatrix(ndof, ndof);
     isJacobianAllocatedIn[0] = true;
   }
 
@@ -1359,7 +1359,7 @@ void LagrangianDS::setComputeJacobianVelocityFIntFunction(const string& pluginPa
 
   if (jacobianVelocityFInt == NULL)
   {
-    jacobianVelocityFInt = new SiconosMatrix(ndof, ndof);
+    jacobianVelocityFInt = new SimpleMatrix(ndof, ndof);
     isJacobianAllocatedIn[1] = true;
   }
 
@@ -1379,7 +1379,7 @@ void LagrangianDS::setComputeJacobianQNNLFunction(const string& pluginPath, cons
 
   if (jacobianQNNL == NULL)
   {
-    jacobianQNNL = new SiconosMatrix(ndof, ndof);
+    jacobianQNNL = new SimpleMatrix(ndof, ndof);
     isJacobianAllocatedIn[2] = true;
   }
 
@@ -1399,7 +1399,7 @@ void LagrangianDS::setComputeJacobianVelocityNNLFunction(const string& pluginPat
 
   if (jacobianVelocityNNL == NULL)
   {
-    jacobianVelocityNNL = new SiconosMatrix(ndof, ndof);
+    jacobianVelocityNNL = new SimpleMatrix(ndof, ndof);
     isJacobianAllocatedIn[3] = true;
   }
 

@@ -36,7 +36,7 @@
 #include <libxml/parser.h>
 #include "SiconosVector.h"
 #include "SimpleVector.h"
-#include "SiconosMatrix.h"
+#include "SimpleMatrix.h"
 #include "SiconosDOMTreeTools.h"
 #include <math.h>
 #include <stdio.h>
@@ -286,9 +286,9 @@ extern "C" int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, doubl
     // Vectors and Matrix creation
     SimpleVector vQ0(nDof);
     SimpleVector vVel0(nDof);
-    SiconosMatrix mMass(nDof, nDof);
-    SiconosMatrix mK(nDof, nDof);
-    SiconosMatrix mC(nDof, nDof);
+    SimpleMatrix mMass(nDof, nDof);
+    SimpleMatrix mK(nDof, nDof);
+    SimpleMatrix mC(nDof, nDof);
 
     // Vectors and Matrix initialisation with function parameters
     // Is there a solution less stupid ?
@@ -732,7 +732,7 @@ extern "C" int sicLagrangianLinearR(int nIdInteraction, double *H, double *b)
       RuntimeException::selfThrow("siconos/C:: sicLagrangianLinearR  failed");
 
     // Vectors and Matrix creation
-    SiconosMatrix mH(nbRel, dimDS);
+    SimpleMatrix mH(nbRel, dimDS);
     SimpleVector  vb(nbRel);
 
     // Vectors and Matrix initialisation with function parameters

@@ -170,11 +170,11 @@ public:
 
   // --- M ---
 
-  /** \fn  const SiconosMatrix getM(void) const
+  /** \fn  const SimpleMatrix getM(void) const
    *  \brief get the value of M
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getM() const
+  inline const SimpleMatrix getM() const
   {
     return *M;
   }

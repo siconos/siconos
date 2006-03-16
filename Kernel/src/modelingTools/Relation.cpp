@@ -189,12 +189,12 @@ void Relation::computeOutput(const double& time)
     RuntimeException::selfThrow("computeOutput() is not linked to a plugin function");
 
   vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-  CompositeVector *xTmp = new CompositeVector();
-  CompositeVector *uTmp = new CompositeVector();
+  BlockVector *xTmp = new BlockVector();
+  BlockVector *uTmp = new BlockVector();
   vector<DynamicalSystem*>::iterator it;
   for (it = vDS.begin(); it != vDS.end(); it++)
   {
-    // Put x and u of each DS into a composite
+    // Put x and u of each DS into a block
     // Warning: use copy constructors, no link between pointers
     if ((*it)->getType() != LDS)
       RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented for DS type " + (*it)->getType());
@@ -224,13 +224,13 @@ void Relation::computeFreeOutput(const double& time)
     RuntimeException::selfThrow("computeOutput() is not linked to a plugin function");
 
   vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-  CompositeVector *xTmp = new CompositeVector();
-  CompositeVector *uTmp = new CompositeVector();
+  BlockVector *xTmp = new BlockVector();
+  BlockVector *uTmp = new BlockVector();
   vector<DynamicalSystem*>::iterator it;
 
   for (it = vDS.begin(); it != vDS.end(); it++)
   {
-    // Put xFree and u of each DS into a composite
+    // Put xFree and u of each DS into a block
     // Warning: use copy constructors, no link between pointers
     if ((*it)->getType() != LDS)
       RuntimeException::selfThrow("LinearTIR - computeFreeOutput: not yet implemented for DS type " + (*it)->getType());
@@ -265,15 +265,15 @@ void Relation::computeInput(const double& time)
 
   vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
   vector<DynamicalSystem*>::iterator it;
-  CompositeVector *r = new CompositeVector();
+  BlockVector *r = new BlockVector();
   for (it = vDS.begin(); it != vDS.end(); it++)
   {
-    // Put r of each DS into a composite
+    // Put r of each DS into a block
     // Warning: use addPtr -> link between pointers
-    bool isComp = (*it)->getRPtr()->isComposite();
+    bool isComp = (*it)->getRPtr()->isBlock();
     if (isComp)
     {
-      CompositeVector * tmp = static_cast<CompositeVector*>((*it)->getRPtr());
+      BlockVector * tmp = static_cast<BlockVector*>((*it)->getRPtr());
       r->addPtr(tmp->getVectorPtr(0));
       r->addPtr(tmp->getVectorPtr(1));
     }

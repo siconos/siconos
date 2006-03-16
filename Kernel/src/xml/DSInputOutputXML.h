@@ -169,11 +169,11 @@ public:
   }
 
 
-  //    /** \fn SiconosMatrix getH()
+  //    /** \fn SimpleMatrix getH()
   //    *   \brief Return H matrix of the DSInputOutputXML
-  //    *   \return SiconosMatrix : the H matrix of the DSInputOutputXML
+  //    *   \return SimpleMatrix : the H matrix of the DSInputOutputXML
   //    */
-  //    inline SiconosMatrix getH()
+  //    inline SimpleMatrix getH()
   //    {
   //      return SiconosDOMTreeTools::getSiconosMatrixValue(this->HNode);
   //    }

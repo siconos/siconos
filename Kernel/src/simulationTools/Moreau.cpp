@@ -41,7 +41,7 @@ Moreau::Moreau(OneStepIntegratorXML *osiXML, TimeDiscretisation* td, DynamicalSy
   integratorType = MOREAU_INTEGRATOR;
   // Memory allocation for W
   int sizeW = (static_cast<LagrangianDS*>(ds))->getQPtr()->size();
-  W = new SiconosMatrix(sizeW, sizeW);
+  W = new SimpleMatrix(sizeW, sizeW);
 
   // xml loading
   if (osiXML != NULL)
@@ -69,13 +69,13 @@ Moreau::Moreau(TimeDiscretisation* td, DynamicalSystem* ds, const double& newThe
   if (type == LNLDS || type == LTIDS)
   {
     int sizeW = (static_cast<LagrangianDS*>(ds))->getQPtr()->size();
-    W = new SiconosMatrix(sizeW, sizeW);
+    W = new SimpleMatrix(sizeW, sizeW);
     isWAllocatedIn = true;
   }
   else if (type == LDS)
   {
     int sizeW = (static_cast<LinearDS*>(ds))->getN();
-    W = new SiconosMatrix(sizeW, sizeW);
+    W = new SimpleMatrix(sizeW, sizeW);
     isWAllocatedIn = true;
   }
   else
@@ -108,7 +108,7 @@ void Moreau::setW(const SiconosMatrix& newValue)
 
   if (W == NULL) // allocate a new W
   {
-    W = new SiconosMatrix(newValue);
+    W = new SimpleMatrix(newValue);
     isWAllocatedIn = true;
   }
   else  // or fill-in an existing one if dimensions are consistent.
@@ -165,7 +165,7 @@ void Moreau::computeW(const double& t)
     if (W == NULL)
     {
       unsigned int size = d->getQPtr()->size();
-      W = new SiconosMatrix(size, size);
+      W = new SimpleMatrix(size, size);
       isWAllocatedIn = true;
     }
     // Compute Mass matrix (if loaded from plugin)
@@ -201,7 +201,7 @@ void Moreau::computeW(const double& t)
     if (W == NULL)
     {
       unsigned int size = d->getQPtr()->size();
-      W = new SiconosMatrix(size, size);
+      W = new SimpleMatrix(size, size);
       isWAllocatedIn = true;
     }
     // Get K, C and Mass
@@ -223,10 +223,10 @@ void Moreau::computeW(const double& t)
     // Check if W is allocated
     if (W == NULL)
     {
-      W = new SiconosMatrix(size, size);
+      W = new SimpleMatrix(size, size);
       isWAllocatedIn = true;
     }
-    I = new SiconosMatrix(size, size);
+    I = new SimpleMatrix(size, size);
     I->eye();
     *W = *I - (h * theta * (d->getA()));
     delete I;
@@ -327,7 +327,7 @@ void Moreau::computeFreeState()
     unsigned int sizeX = xfree->size();
     SimpleVector *xtmp = new SimpleVector(sizeX);
 
-    SiconosMatrix *I = new SiconosMatrix(sizeX, sizeX);
+    SiconosMatrix *I = new SimpleMatrix(sizeX, sizeX);
     I->eye();
     // Warning: A is supposed to be constant, not time dependent.
     SiconosMatrix *A = d->getAPtr();

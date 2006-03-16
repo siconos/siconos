@@ -42,8 +42,8 @@ void SimpleVectorTest::setUp()
   u4->zero();
   u3 ->setValue(2, 12);
   u4 ->setValue(0, 8);
-  nsv = new CompositeVector(*u3);
-  (static_cast<CompositeVector*>(nsv))->add(*u4);
+  nsv = new BlockVector(*u3);
+  (static_cast<BlockVector*>(nsv))->add(*u4);
 
 }
 
@@ -62,7 +62,7 @@ void SimpleVectorTest::tearDown()
 /*void SimpleVectorTest::testBuildSimpleVector()
 {
   SimpleVector * v = new SimpleVector();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector : ", v->size() == 0, true);
   delete v;
   cout << " Constructor SV 0 ok" << endl;
@@ -74,7 +74,7 @@ void SimpleVectorTest::tearDown()
 void SimpleVectorTest::testBuildSimpleVector1()
 {
   SimpleVector * v = new SimpleVector(vq);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", v->size() == vq.size(), true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", (v->getValues())(i) == vq[i], true);
@@ -87,9 +87,9 @@ void SimpleVectorTest::testBuildSimpleVector2()
 {
   SimpleVector *v = new SimpleVector(*u);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->size() == u->size(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->getValues() == u->getValues(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", *v == *u, true);
   cout << "SimpleVectorTest >>> testBuildSimpleVector2 ............................... OK\n ";
   delete v;
 }
@@ -101,20 +101,20 @@ void SimpleVectorTest::testBuildSimpleVector3()
   SiconosVector * tmp = new SimpleVector(vq);
   SimpleVector *v = new SimpleVector(*tmp);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->size() == tmp->size(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->getValues() == tmp->getValues(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", *v == *tmp, true);
   cout << "SimpleVectorTest >>> testBuildSimpleVector2 ............................... OK\n ";
   delete v;
   delete tmp;
 
-  // from a siconos which is a composite
+  // from a siconos which is a block vector
   tmp = static_cast<SiconosVector*>(u2);
 
-  SiconosVector * tmp2 = new CompositeVector(*tmp);
-  (static_cast<CompositeVector*>(tmp2))->add(*u2);
+  SiconosVector * tmp2 = new BlockVector(*tmp);
+  (static_cast<BlockVector*>(tmp2))->add(*u2);
   v = new SimpleVector(*tmp2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->size() == 10, true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", (*v)(i) == 1, true);
@@ -130,7 +130,7 @@ void SimpleVectorTest::testBuildSimpleVector4()
   unsigned int SIZE = 10;
   SimpleVector *v = new SimpleVector(SIZE);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->size() == SIZE, true);
   cout << "SimpleVectorTest >>> testBuildSimpleVector3 ............................... OK\n ";
   delete v;
@@ -238,13 +238,13 @@ void SimpleVectorTest::testOperatorPlusEqual()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", v->size() == vq.size(), true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == 2 * (*sv)(i), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
 
   *v -= *sv;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", v->size() == vq.size(), true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == vq[i], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
 
   delete sv;
 
@@ -254,7 +254,7 @@ void SimpleVectorTest::testOperatorPlusEqual()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(2) == 13, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(3) == 9, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(4) == 1, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
 
   v->zero();
   *v -= *nsv;
@@ -262,7 +262,7 @@ void SimpleVectorTest::testOperatorPlusEqual()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(2) == -12, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(3) == -8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(4) == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
   delete v;
   cout << "SimpleVectorTest >>> testOperatorPlusEqualGEN ............................... OK\n ";
 }
@@ -276,7 +276,7 @@ void SimpleVectorTest::testOperatorEqual()
 
   *v = *w ;
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", v->size() == w->size(), true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == (*w)(i), true);
@@ -285,13 +285,13 @@ void SimpleVectorTest::testOperatorEqual()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", v->size() == z->size(), true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == (*z)(i), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
 
   *v = *nsv;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", v->size() == nsv->size(), true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == (*nsv)(i), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
 
 
   delete z;
@@ -299,34 +299,6 @@ void SimpleVectorTest::testOperatorEqual()
   delete v;
   cout << "SimpleVectorTest >>> testOperatorEqual ............................... OK\n ";
 }
-
-// ==, !=
-
-void SimpleVectorTest::testOperatorComp()
-{
-  SiconosVector *v = new SimpleVector(vq);
-  SiconosVector *w = new SimpleVector(3);
-  SiconosVector *z = new SimpleVector(vdotq);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", *v == *u2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", !(*v == *w), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", !(*v == *z), true);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", !(*u == *u2), true);
-  *u = *u2;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", *u == *u2, true);
-
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", !(*v != *u2), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", *v != *w, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", *v != *z, true);
-
-  delete z;
-  delete w;
-  delete v;
-  cout << "SimpleVectorTest >>> testOperatorComp ............................... OK\n ";
-}
-
 
 // *= , /=
 
@@ -475,7 +447,7 @@ void SimpleVectorTest::testExternalOperatorMultDiv()
 
 void SimpleVectorTest::testExternalOperatorMultMat()
 {
-  SiconosMatrix m(2, 4);
+  SimpleMatrix m(2, 4);
   m(0, 0) = 0;
   m(0, 1) = 1;
   m(0, 2) = -1;
@@ -498,6 +470,7 @@ void SimpleVectorTest::testExternalOperatorMultMat()
 
   SimpleVector sv(2);
   sv = m * *v;
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMultMat : ", sv == res, true);
 
   SiconosVector * sv2 = new SimpleVector(4);
@@ -508,8 +481,8 @@ void SimpleVectorTest::testExternalOperatorMultMat()
   sv = m * (*sv2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMultMat : ", sv == res, true);
 
-  SiconosVector * sv3 = new CompositeVector(*u4);
-  (static_cast<CompositeVector*>(sv3))->add(*u4);
+  SiconosVector * sv3 = new BlockVector(*u4);
+  (static_cast<BlockVector*>(sv3))->add(*u4);
   (*sv3)(0) = 1;
   (*sv3)(1) = 2;
   (*sv3)(2) = 3;
@@ -526,7 +499,7 @@ void SimpleVectorTest::testExternalOperatorMultMat()
 
 void SimpleVectorTest::testExternalOperatorMatTransMult()
 {
-  SiconosMatrix m(4, 2);
+  SimpleMatrix m(4, 2);
   m(0, 0) = 0;
   m(0, 1) = 2;
   m(1, 0) = 1;
@@ -559,8 +532,8 @@ void SimpleVectorTest::testExternalOperatorMatTransMult()
   sv = matTransVecMult(m, *sv2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMultMat : ", sv == res, true);
 
-  SiconosVector * sv3 = new CompositeVector(*u4);
-  (static_cast<CompositeVector*>(sv3))->add(*u4);
+  SiconosVector * sv3 = new BlockVector(*u4);
+  (static_cast<BlockVector*>(sv3))->add(*u4);
   (*sv3)(0) = 1;
   (*sv3)(1) = 2;
   (*sv3)(2) = 3;
@@ -584,7 +557,7 @@ void SimpleVectorTest::testOperatorAccess()
 
   const double d = (*v)(1);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", v->isComposite(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", v->size() == vq.size() , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", (*v)(2) != vq[2] , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", (v->getValues())(2) == 10 , true);

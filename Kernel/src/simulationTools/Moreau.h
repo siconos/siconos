@@ -77,11 +77,11 @@ public:
   // --- GETTERS/SETTERS ---
   // -- W --
 
-  /** \fn  const SiconosMatrix getW(void) const
+  /** \fn  const SimpleMatrix getW(void) const
    *  \brief get the value of W
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getW() const
+  inline const SimpleMatrix getW() const
   {
     return *W;
   }

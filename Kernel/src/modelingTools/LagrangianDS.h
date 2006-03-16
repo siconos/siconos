@@ -449,11 +449,11 @@ public:
 
   // -- Mass --
 
-  /** \fn  const SiconosMatrix getMass() const
+  /** \fn  const SimpleMatrix getMass() const
    *  \brief get the value of Mass
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getMass() const
+  inline const SimpleMatrix getMass() const
   {
     return *mass;
   }
@@ -577,11 +577,11 @@ public:
 
   // -- Jacobian Q Fint --
 
-  /** \fn  const SiconosMatrix getJacobianQFInt() const
+  /** \fn  const SimpleMatrix getJacobianQFInt() const
    *  \brief get the value of JacobianQFInt
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getJacobianQFInt() const
+  inline const SimpleMatrix getJacobianQFInt() const
   {
     return *jacobianQFInt;
   }
@@ -609,11 +609,11 @@ public:
 
   // -- Jacobian velocity Fint --
 
-  /** \fn  const SiconosMatrix getJacobianVelocityFInt() const
+  /** \fn  const SimpleMatrix getJacobianVelocityFInt() const
    *  \brief get the value of JacobianVelocityFInt
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getJacobianVelocityFInt() const
+  inline const SimpleMatrix getJacobianVelocityFInt() const
   {
     return *jacobianVelocityFInt;
   }
@@ -641,11 +641,11 @@ public:
 
   // -- Jacobian Q NNL --
 
-  /** \fn  const SiconosMatrix getJacobianQNNL() const
+  /** \fn  const SimpleMatrix getJacobianQNNL() const
    *  \brief get the value of JacobianQNNL
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getJacobianQNNL() const
+  inline const SimpleMatrix getJacobianQNNL() const
   {
     return *jacobianQNNL;
   }
@@ -673,11 +673,11 @@ public:
 
   // -- Jacobian velocity NNL --
 
-  /** \fn  const SiconosMatrix getJacobianVelocityNNL() const
+  /** \fn  const SimpleMatrix getJacobianVelocityNNL() const
    *  \brief get the value of JacobianVelocityNNL
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getJacobianVelocityNNL() const
+  inline const SimpleMatrix getJacobianVelocityNNL() const
   {
     return *jacobianVelocityNNL;
   }

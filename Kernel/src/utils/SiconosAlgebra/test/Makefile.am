@@ -22,8 +22,8 @@ include $(top_srcdir)/config/Make-rules
 
 check_PROGRAMS = test1
 TESTS = $(check_PROGRAMS)
-test1_SOURCES = SimpleVectorTest.cpp CompositeVectorTest.cpp SiconosMatrixTest.cpp TestMain.cpp
-include_HEADERS =SimpleVectorTest.h CompositeVectorTest.h SiconosMatrixTest.h
+test1_SOURCES = SimpleVectorTest.cpp BlockVectorTest.cpp SimpleMatrixTest.cpp TestMain.cpp
+include_HEADERS =SimpleVectorTest.h BlockVectorTest.h SimpleMatrixTest.h
 test1_INCLUDES = $(CPPUNIT_CFLAGS)
 test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
 

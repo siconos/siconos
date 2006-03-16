@@ -61,11 +61,11 @@ public:
    */
   ~LCPXML();
 
-  /** \fn SiconosMatrix getM()
+  /** \fn SimpleMatrix getM()
    *   \brief Return M
-   *   \return The M SiconosMatrix of the LCP
+   *   \return The M SimpleMatrix of the LCP
    */
-  inline SiconosMatrix getM() const
+  inline SimpleMatrix getM() const
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(MNode);
   }

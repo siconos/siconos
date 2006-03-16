@@ -52,11 +52,11 @@ public:
 
   ~LagrangianLinearECXML();
 
-  /** \fn SiconosMatrix getH()
+  /** \fn SimpleMatrix getH()
   *   \brief Return the H of the LagrangianLinearECXML
-  *   \return The H SiconosMatrix of the LagrangianLinearECXML
+  *   \return The H SimpleMatrix of the LagrangianLinearECXML
   */
-  inline SiconosMatrix getH()
+  inline SimpleMatrix getH()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->HNode);
   }

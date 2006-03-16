@@ -83,7 +83,7 @@ string LagrangianRXML::getGPlugin(const unsigned int & index) const
   return  SiconosDOMTreeTools::getStringAttributeValue(GNode[index], LAGRANGIANR_MATRIXPLUGIN);
 }
 
-SiconosMatrix LagrangianRXML::getGMatrix(const unsigned int & index) const
+SimpleMatrix LagrangianRXML::getGMatrix(const unsigned int & index) const
 {
   if (index >= GNode.size())
     XMLException::selfThrow("LagrangianRXML - getGMatrix(index), index out of range");

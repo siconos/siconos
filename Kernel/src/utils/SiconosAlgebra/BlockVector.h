@@ -16,26 +16,26 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef COMPOSITEVECTOR_H
-#define COMPOSITEVECTOR_H
+#ifndef BLOCKVECTOR_H
+#define BLOCKVECTOR_H
 
 #include "SiconosVector.h"
 #include "SimpleVector.h"
 
 class SimpleVector;
 
-/** \class CompositeVector
- *  \brief This class describes Composite Vectors, containers of several Siconos Vectors (that should be SimpleVectors)
+/** \class BlockVector
+ *  \brief This class describes Block Vectors, containers of several Siconos Vectors (that should be SimpleVectors)
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.1.3.
  *
  */
 
-class CompositeVector : public SiconosVector
+class BlockVector : public SiconosVector
 {
 private:
-  // A container of pointers on SiconosVector (that are to be SimpleVector : no Composite of Composite allowed
+  // A container of pointers on SiconosVector (that are to be SimpleVector : no Block of Block allowed
   std::vector<SimpleVector*> svref;
   //
   std::vector<unsigned int> tabindex;
@@ -46,47 +46,47 @@ private:
 public:
 
   // CONSTRUCTORS
-  /** \fn CompositeVector()
+  /** \fn BlockVector()
    *  \brief default contructor
    */
-  CompositeVector();
+  BlockVector();
 
-  /** \fn CompositeVector(const std::string&, const bool&)
+  /** \fn BlockVector(const std::string&, const bool&)
    *  \brief contructor from data by function read call
    *  \param a string
    *  \param a bool
    */
-  CompositeVector(const std::string&, const bool&);
+  BlockVector(const std::string&, const bool&);
 
-  /** \fn CompositeVector(const SimpleVector& v)
+  /** \fn BlockVector(const SimpleVector& v)
    *  \brief contructor with a SimpleVector
    *  \param SimpleVector& v
    */
-  CompositeVector(const SimpleVector&);
+  BlockVector(const SimpleVector&);
 
-  /** \fn CompositeVector(vector<SimpleVector*> v)
+  /** \fn BlockVector(vector<SimpleVector*> v)
    *  \brief contructor with a list of SimpleVector*
    *  \param a vector<SimpleVector*>
    */
-  CompositeVector(std::vector<SimpleVector*>);
+  BlockVector(std::vector<SimpleVector*>);
 
-  /** \fn CompositeVector(SimpleVector* v1, SimpleVector* v2)
+  /** \fn BlockVector(SimpleVector* v1, SimpleVector* v2)
    *  \brief contructor with a 2 SimpleVectors
    *  \param SimpleVector* v1
    *  \param SimpleVector* v2
    */
-  CompositeVector(SimpleVector*, SimpleVector*);
+  BlockVector(SimpleVector*, SimpleVector*);
 
-  /** \fn CompositeVector(const CompositeVector& v)
+  /** \fn BlockVector(const BlockVector& v)
    *  \brief copy contructor
-   *  \param CompositeVector& v
+   *  \param BlockVector& v
    */
-  CompositeVector(const CompositeVector&);
+  BlockVector(const BlockVector&);
 
   /** \fn ~SiconosVector ()
    *  \brief destructor
    */
-  ~CompositeVector();
+  ~BlockVector();
 
   // GETTERS/SETTERS
   /** \fn std::vector<SimpleVector*> getSvref() const
@@ -115,11 +115,11 @@ public:
 
   /** \fn std::string toString();
    * \brief put datas of the vector in a std::string
-   * useless for composite ?
+   * useless for block ?
    */
   inline std::string toString() const
   {
-    return "composite!!";
+    return "block!!";
   }
 
   /** \fn void display();
@@ -221,15 +221,15 @@ public:
   void zero();
 
   // generic internal operators
-  CompositeVector &operator+=(const SiconosVector &) ;
-  CompositeVector &operator-=(const SiconosVector &) ;
-  CompositeVector &operator = (const SiconosVector& v) ;
+  BlockVector &operator+=(const SiconosVector &) ;
+  BlockVector &operator-=(const SiconosVector &) ;
+  BlockVector &operator = (const SiconosVector& v) ;
   // specific internal operators
-  CompositeVector &operator+=(const CompositeVector &) ;
-  CompositeVector &operator-=(const CompositeVector &) ;
-  CompositeVector &operator*=(const double&) ;
-  CompositeVector &operator/=(const double&) ;
-  CompositeVector &operator = (const CompositeVector& v) ;
+  BlockVector &operator+=(const BlockVector &) ;
+  BlockVector &operator-=(const BlockVector &) ;
+  BlockVector &operator*=(const double&) ;
+  BlockVector &operator/=(const double&) ;
+  BlockVector &operator = (const BlockVector& v) ;
 
   // Logical operators
   /** \fn bool operator == (const SiconosVector& v) const;
@@ -237,33 +237,33 @@ public:
    *  \return bool
    */
   bool operator == (const SiconosVector& v) const  ;
-  bool operator == (const CompositeVector& v) const  ;
+  bool operator == (const BlockVector& v) const  ;
 
   /** \fn bool operator != (const SiconosVector& v) const;
    *  \brief compares two vectors (sizes and values).
    *  \return bool
    */
   bool operator != (const SiconosVector& v) const  ;
-  bool operator != (const CompositeVector& v) const  ;
+  bool operator != (const BlockVector& v) const  ;
 
   // generic internal operator for mixed operations
-  CompositeVector addition(const SiconosVector&) const;
-  CompositeVector subtraction(const SiconosVector&) const;
+  BlockVector addition(const SiconosVector&) const;
+  BlockVector subtraction(const SiconosVector&) const;
 
 
   // generic external operators
-  //  friend CompositeVector operator + (const CompositeVector& v1, /*const*/ SiconosVector& v2);
-  //  friend CompositeVector operator - (const CompositeVector& v1, const SiconosVector& v2);
+  //  friend BlockVector operator + (const BlockVector& v1, /*const*/ SiconosVector& v2);
+  //  friend BlockVector operator - (const BlockVector& v1, const SiconosVector& v2);
 
   // specific external operators
-  friend CompositeVector operator * (const CompositeVector&, const double&) ;
-  friend CompositeVector operator * (const double&, const CompositeVector&);
-  friend CompositeVector operator / (const CompositeVector&, const double&);
-  friend CompositeVector operator + (const CompositeVector& v1, const CompositeVector& v2);
-  friend CompositeVector operator - (const CompositeVector& v1, const CompositeVector& v2);
-  friend SimpleVector operator * (const SiconosMatrix &m, const CompositeVector &v);
+  friend BlockVector operator * (const BlockVector&, const double&) ;
+  friend BlockVector operator * (const double&, const BlockVector&);
+  friend BlockVector operator / (const BlockVector&, const double&);
+  friend BlockVector operator + (const BlockVector& v1, const BlockVector& v2);
+  friend BlockVector operator - (const BlockVector& v1, const BlockVector& v2);
+  friend SimpleVector operator * (const SiconosMatrix &m, const BlockVector &v);
 
-  friend SimpleVector matTransVecMult(SiconosMatrix &, CompositeVector &);
+  friend SimpleVector matTransVecMult(SiconosMatrix &, BlockVector &);
 
 
   //

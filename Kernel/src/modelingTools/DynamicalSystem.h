@@ -23,7 +23,7 @@
 #include "RuntimeException.h"
 #include "check.h"
 
-#include "SiconosMatrix.h"
+#include "SimpleMatrix.h"
 #include "SiconosVector.h"
 #include "SiconosMemory.h"
 #include "SiconosSharedLibrary.h"
@@ -47,7 +47,7 @@ class BoundaryCondition;
 class DSInputOutput;
 class DynamicalSystemXML;
 class SiconosVector;
-class SiconosMatrix;
+class SimpleMatrix;
 class SiconosMemory;
 class SiconosSharedLibrary;
 
@@ -653,11 +653,11 @@ public:
 
   // --- JacobianX ---
 
-  /** \fn  const SiconosMatrix getJacobianX(void) const
+  /** \fn  const SimpleMatrix getJacobianX(void) const
    *  \brief get the value of JacobianX
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getJacobianX() const
+  inline const SimpleMatrix getJacobianX() const
   {
     return *jacobianX;
   }
@@ -735,11 +735,11 @@ public:
 
   // --- T ---
 
-  /** \fn  const SiconosMatrix getT(void) const
+  /** \fn  const SimpleMatrix getT(void) const
    *  \brief get the value of T
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getT() const
+  inline const SimpleMatrix getT() const
   {
     return *T;
   }

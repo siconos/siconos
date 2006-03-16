@@ -85,7 +85,7 @@ public:
   // --- OTHER FUNCTIONS ---
 
   /** \fn SimpleVector* getVectorPtr(const unsigned int&) const;
-   *  \brief return the current object. This function is really usefull only for composite.
+   *  \brief return the current object. This function is really usefull only for block vector
    * \return a pointer to a SimpleVector
    */
   inline SimpleVector* getVectorPtr(const unsigned int&)
@@ -94,7 +94,7 @@ public:
   };
 
   /** \fn std::vector<int> getTabIndex() const
-   *  \brief get the index tab (usefull only for composite, should not be used for simple) => avoid downcast
+   *  \brief get the index tab (usefull only for block vector, should not be used for simple) => avoid downcast
    * \return a standard vector of int
    */
   std::vector<unsigned int> getTabIndex() const;
@@ -114,7 +114,7 @@ public:
    */
   void display() const  ;
 
-  /** \fn operator (int index)
+  /** \fn operator()(const unsigned int &index)
    *  \brief get the element vector[i]
    *  \param an integer i
    *  \exception SiconosVectorException
@@ -135,20 +135,17 @@ public:
    */
   const double getValue(const unsigned int&) const;
 
-
-
-
   /** \fn void setValues(const vector<double> v,  const int& = 0)
    *  \brief set the values of the vector to a new set of value
    *  \param vector<double> v
-   *  \param: int, not used for Simple, only for composite
+   *  \param: int, not used for Simple, only for block vector
    */
   void setValues(const std::vector<double>& v, const unsigned int& = 0) ;
 
   /** \fn const LaVectorDouble getValues() const
    *  \brief get lavd vector
    *  \return a LaVectorDouble
-   *  \param: int, not used for Simple, only for composite
+   *  \param: int, not used for Simple, only for block vector
    */
   inline const LaVectorDouble getValues(const unsigned int& i = 0) const
   {
@@ -230,35 +227,24 @@ public:
   SimpleVector &operator/=(const double&) ;
   SimpleVector &operator = (const SimpleVector& v) ;
 
-  /** \fn bool operator == (const SiconosVector& v) const;
-   *  \brief compares two vectors (sizes and values).
-   *  \return bool
-   */
-  bool operator == (const SiconosVector& v) const  ;
-  bool operator == (const SimpleVector& v) const  ;
-
-  /** \fn bool operator != (const SiconosVector& v) const;
-   *  \brief compares two vectors (sizes and values).
-   *  \return bool
-   */
-  bool operator != (const SiconosVector& v) const  ;
-  bool operator != (const SimpleVector& v) const  ;
-
-
   // generic internal operator for mixed operations
   SimpleVector addition(const SiconosVector&) const;
   SimpleVector subtraction(const SiconosVector&) const;
+
+  /** \fn operator ==
+   * \brief: v==w when (v-w).norm()<tolerance
+   */
+  friend bool operator==(const SiconosVector&, const SiconosVector&);
 
   // generic external operators
   friend SimpleVector operator + (const SiconosVector& v1, const SiconosVector& v2);
   friend SimpleVector operator - (const SiconosVector& v1, const SiconosVector& v2);
 
+
   // specific external operators
   friend SimpleVector operator * (const SimpleVector& v, const double& d) ;
   friend SimpleVector operator * (const double& d, const SimpleVector& v);
   friend SimpleVector operator / (const SimpleVector&  v, const double& d);
-  //friend SimpleVector operator + (const SimpleVector& v1, const SimpleVector& v2);
-  //friend SimpleVector operator - (const SimpleVector& v1, const SimpleVector& v2);
   friend SimpleVector operator * (const SiconosMatrix &m, const SimpleVector &v);
   friend SimpleVector operator * (const SiconosMatrix &m, const SiconosVector &v);
   friend SimpleVector operator * (const SimpleVector &v, const SiconosMatrix &m);

@@ -49,11 +49,11 @@ public:
    */
   LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSNode, bool isBVP);
 
-  /** \fn SiconosMatrix getK()
+  /** \fn SimpleMatrix getK()
    *   \brief Return the K of the LagrangianLinearTIDSXML
-   *   \return The K SiconosMatrix of the LagrangianLinearTIDSXML
+   *   \return The K SimpleMatrix of the LagrangianLinearTIDSXML
    */
-  inline SiconosMatrix getK()
+  inline SimpleMatrix getK()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->KNode);
   }
@@ -71,11 +71,11 @@ public:
     else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->KNode, *m);
   }
 
-  /** \fn SiconosMatrix getC()
+  /** \fn SimpleMatrix getC()
    *   \brief Return the C of the LagrangianLinearTIDSXML
-   *   \return The C SiconosMatrix of the LagrangianLinearTIDSXML
+   *   \return The C SimpleMatrix of the LagrangianLinearTIDSXML
    */
-  inline SiconosMatrix getC()
+  inline SimpleMatrix getC()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->CNode);
   }

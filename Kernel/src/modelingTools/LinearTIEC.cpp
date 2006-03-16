@@ -47,7 +47,7 @@ void LinearTIEC::createEqualityConstraint(EqualityConstraintXML *ecXML ,
     this->ecXML = NULL;
     this->type = LINEARTIEC;
     this->number = number;
-    G = new SiconosMatrix(*newG);
+    G = new SimpleMatrix(*newG);
     this->dsioVector = *dsioVector;
   }
 }

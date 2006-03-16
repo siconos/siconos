@@ -47,11 +47,11 @@ public:
   // --- GETTERS/SETTERS ---
 
   // --- Q ---
-  /** \fn  const SiconosMatrix getQ(void) const
+  /** \fn  const SimpleMatrix getQ(void) const
    *  \brief get the value of Q
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getQ() const
+  inline const SimpleMatrix getQ() const
   {
     return *Q;
   }

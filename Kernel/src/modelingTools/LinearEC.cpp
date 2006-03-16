@@ -47,7 +47,7 @@ void LinearEC::createEqualityConstraint(EqualityConstraintXML *ecXML ,
     this->ecXML = NULL;
     this->type = NLINEAREC;
     this->number = number;
-    G = new SiconosMatrix(*newG);
+    G = new SimpleMatrix(*newG);
     this->dsioVector = *dsioVector;
   }
 }

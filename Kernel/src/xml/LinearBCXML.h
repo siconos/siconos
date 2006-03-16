@@ -62,20 +62,20 @@ public:
     return  SiconosDOMTreeTools::getSiconosVectorValue(this->omegaNode);
   }
 
-  /** \fn SiconosMatrix getOmega0()
+  /** \fn SimpleMatrix getOmega0()
   *   \brief Return the Omega0 of the LinearBCXML
-  *   \return The Omega0 SiconosMatrix of the LinearBCXML
+  *   \return The Omega0 SimpleMatrix of the LinearBCXML
   */
-  inline SiconosMatrix getOmega0()
+  inline SimpleMatrix getOmega0()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->omega0Node);
   }
 
-  /** \fn SiconosMatrix getOmegaT()
+  /** \fn SimpleMatrix getOmegaT()
   *   \brief Return the OmegaT of the LinearBCXML
-  *   \return The OmegaT SiconosMatrix of the LinearBCXML
+  *   \return The OmegaT SimpleMatrix of the LinearBCXML
   */
-  inline SiconosMatrix getOmegaT()
+  inline SimpleMatrix getOmegaT()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->omegaTNode);
   }

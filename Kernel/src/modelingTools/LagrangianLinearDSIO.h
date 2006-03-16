@@ -49,11 +49,11 @@ public:
   virtual ~LagrangianLinearDSIO();
 
 
-  /** \fn SiconosMatrix getH(void)
-   *  \brief getter of the SiconosMatrix H
-   *  \return a pointer on the SiconosMatrix H
+  /** \fn SimpleMatrix getH(void)
+   *  \brief getter of the SimpleMatrix H
+   *  \return a pointer on the SimpleMatrix H
    */
-  inline SiconosMatrix getH(void) const
+  inline SimpleMatrix getH(void) const
   {
     return *H;
   } ;

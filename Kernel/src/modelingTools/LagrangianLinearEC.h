@@ -22,7 +22,7 @@
 #include "LagrangianEC.h"
 #include "LagrangianLinearECXML.h"
 #include "SimpleVector.h"
-#include "CompositeVector.h"
+#include "BlockVector.h"
 
 /** \class LagrangianLinearEC
  *  \brief Lagrangian Linear EqualityConstraint
@@ -55,11 +55,11 @@ public:
   LagrangianLinearEC(const SiconosMatrix&, const SimpleVector&);
   ~LagrangianLinearEC();
 
-  /** \fn SiconosMatrix getH(void)
-   *  \brief getter of the SiconosMatrix h
-   *  \return a pointer on the SiconosMatrix h
+  /** \fn SimpleMatrix getH(void)
+   *  \brief getter of the SimpleMatrix h
+   *  \return a pointer on the SimpleMatrix h
    */
-  inline SiconosMatrix getH(void) const
+  inline SimpleMatrix getH(void) const
   {
     return *h;
   } ;

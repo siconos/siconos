@@ -46,8 +46,8 @@ void LinearBC::fillBCWithBCXML()
   if (this->bcXML != NULL)
   {
     omega = new SimpleVector(static_cast<LinearBCXML*>(this->bcXML)->getOmega());
-    omegaT = new SiconosMatrix(static_cast<LinearBCXML*>(this->bcXML)->getOmegaT());
-    omega0 = new SiconosMatrix(static_cast<LinearBCXML*>(this->bcXML)->getOmega0());
+    omegaT = new SimpleMatrix(static_cast<LinearBCXML*>(this->bcXML)->getOmegaT());
+    omega0 = new SimpleMatrix(static_cast<LinearBCXML*>(this->bcXML)->getOmega0());
   }
   else RuntimeException::selfThrow("LinearBC::fillBCWithBCXML - The BoundaryConditionXML object doesn't exists");
 }
@@ -77,8 +77,8 @@ void LinearBC::createBoundaryCondition(BoundaryConditionXML * bcXML,
   else if (omega != NULL && omega0 != NULL && omegaT != NULL)
   {
     omega = new SimpleVector(*newOmega);
-    omega0 = new SiconosMatrix(*newOmega0);
-    omegaT = new SiconosMatrix(*newOmegaT);
+    omega0 = new SimpleMatrix(*newOmega0);
+    omegaT = new SimpleMatrix(*newOmegaT);
   }
   else RuntimeException::selfThrow("LinearBC::createBoundaryCondition - The omega, omega0 and/or omegaT matrices is/are missing");
   OUT("LinearBC::createBoundaryCondition\n");

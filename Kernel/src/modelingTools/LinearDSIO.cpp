@@ -41,8 +41,8 @@ void LinearDSIO::fillDSInputOutputWithDSInputOutputXML()
   if (this->dsioxml != NULL)
   {
     this->number = this->dsioxml->getNumber();
-    A = new SiconosMatrix(static_cast<LinearDSIOXML*>(this->dsioxml)->getA());
-    B = new SiconosMatrix(static_cast<LinearDSIOXML*>(this->dsioxml)->getB());
+    A = new SimpleMatrix(static_cast<LinearDSIOXML*>(this->dsioxml)->getA());
+    B = new SimpleMatrix(static_cast<LinearDSIOXML*>(this->dsioxml)->getB());
   }
   else RuntimeException::selfThrow("DSInputOutput::fillDSInputOutputWithDSInputOutputXML - object DSInputOutputXML does not exist");
 }
@@ -75,8 +75,8 @@ void LinearDSIO::createDSInputOutput(DSInputOutputXML * dsioXML, int number,
     //this->dsioxml = dsioXML;
     this->dsioType = LINEARDSIO;
     this->number = number;
-    A = new SiconosMatrix(*A);
-    B = new SiconosMatrix(*B);
+    A = new SimpleMatrix(*A);
+    B = new SimpleMatrix(*B);
   }
 }
 

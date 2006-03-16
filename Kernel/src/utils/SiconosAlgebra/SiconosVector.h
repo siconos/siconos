@@ -29,13 +29,13 @@
 #include <string>
 #include<deque>
 
-const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ MACHINE DEPENDE
+const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ DEPENDS ON MACHINE
 const unsigned int M_MAXSIZEFORDISPLAY = 10;
 const std::string DEFAULT_FORMAT = "ascii";
 
 /** \class SiconosVector
  *  \brief This is an abstract class to provide interface for vector handling
- *  vector can be either a SimpleVector or a CompositeVector, ie a container of several SimpleVector
+ *  vector can be either a SimpleVector or a BlockVector, ie a container of several SimpleVector
  *  See documentation of these derivated classes for more details
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.1.3.
@@ -48,8 +48,8 @@ class SiconosVector
 {
 protected:
 
-  // true if composite
-  bool composite;
+  // true if block vector
+  bool isBlockVector;
 
 public:
 
@@ -71,25 +71,25 @@ public:
 
   /***********************************************************************************************/
 
-  /** \fn bool isComposite()
-   *  \brief test whether the present vector is composite or not
+  /** \fn bool isBlock()
+   *  \brief test whether the present vector is block or not
    * \return a bool
    */
-  inline bool isComposite() const
+  inline bool isBlock() const
   {
-    return composite;
+    return isBlockVector;
   }
 
   // !!! WARNING : all the following functions are to be implemented in derivated classes !!!
 
   /** \fn SiconosVector* getVectorPtr(const unsigned int&) const;
-   *  \brief if this is a composite return i-eme SimpleVector (if composite), else return this.
+   *  \brief if this is a block vector return i-eme SimpleVector, else return this.
    * \return a pointer to a SimpleVector
    */
   virtual SiconosVector* getVectorPtr(const unsigned int&) = 0;
 
   /** \fn std::vector<unsigned int> getTabIndex() const
-   *  \brief get the index tab (usefull only for composite, should not be used for simple) => avoid downcast
+   *  \brief get the index tab (usefull only for block vector, should not be used for simple) => avoid downcast
    * \return a standard vector of int
    */
   virtual std::vector<unsigned int> getTabIndex() const = 0;
@@ -106,10 +106,10 @@ public:
 
   // Note: in the following functions, index is a general one;
   // that means that for a SimpleVector v, v(i) is index i element but
-  // for a CompositeVector w that contains 2 SiconosVector of size 3
+  // for a BlockVector w that contains 2 SiconosVector of size 3
   // w(4) corresponds to the first element of the second vector.
 
-  /** \fn operator (int index)
+  /** \fn operator ()(const int unsigned& index)
    *  \brief get the element at position i in the vector
    *  \param an integer i
    *  \exception SiconosVectorException
@@ -133,13 +133,13 @@ public:
   /** \fn void setValues(const vector<double> v, const int& = 0)
    *  \brief set the values of the vector to a new set of value
    *  \param vector<double> v
-   *  \param optional, only for composite, to set values of vector number i
+   *  \param optional, only for block vector, to set values of vector number i
    */
   virtual void setValues(const std::vector<double>& v, const unsigned int& = 0) = 0;
 
   /** \fn const LaVectorDouble getValues(const int& i) const
    *  \brief get the values saved in vector (depends on vector type)
-   *  \param optional, only for composite, to get values of vector number i
+   *  \param optional, only for block vector, to get values of vector number i
    *  \return a LaVectorDouble
    */
   virtual const LaVectorDouble getValues(const int unsigned& = 0) const = 0;
@@ -148,7 +148,7 @@ public:
    *  \brief get the vector size, ie the total number of (double)
    *  elements in the vector
    * \param (optional). =0 -> number of element in the vector
-   *                    =1 -> number of subvectors if composite
+   *                    =1 -> number of subvectors if block vector
    *  \return int
    */
   virtual unsigned int size(const unsigned int& = 0) const = 0 ;
@@ -179,7 +179,7 @@ public:
   virtual double* getArray() const = 0;
 
   /** \fn bool add(const SiconosVector& v)
-   *  \brief add a sub Vector in this vector - Usefull only for composite
+   *  \brief add a sub Vector in this vector - Usefull only for block vector
    *  \param SiconosVector& v : the vector to add
    *  \exception SiconosVectorException
    */
@@ -191,7 +191,7 @@ public:
   virtual void zero() = 0;
 
   /** \fn bool addPtr(SiconosVector* v)
-   *  \brief add a pointer to sub Vector in this vector - Usefull only for composite
+   *  \brief add a pointer to sub Vector in this vector - Usefull only for block vector
    *  \param SiconosVector*
    *  \exception SiconosVectorException
    */
@@ -232,27 +232,13 @@ public:
    */
   virtual SiconosVector &operator/=(const double&) = 0;
 
-  // affectation operation
   /** \fn operator=(const SiconosVector& v)
-   *  \brief affectation of the operator.
+   *  \brief assignment operator
    *  \param SiconosVector&
    *  \exception SiconosVectorException
    *  \return SiconosVector & : current vector, equlas to the parameter
    */
   virtual SiconosVector& operator = (const SiconosVector& v) = 0;
-
-  // Logical operators
-  /** \fn bool operator == (const SiconosVector& v) const;
-   *  \brief compares two vectors (sizes and values).
-   *  \return bool
-   */
-  virtual bool operator == (const SiconosVector& v) const = 0 ;
-
-  /** \fn bool operator != (const SiconosVector& v) const;
-   *  \brief compares two vectors (sizes and values).
-   *  \return bool
-   */
-  virtual bool operator != (const SiconosVector& v) const = 0 ;
 
 };
 #endif

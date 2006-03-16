@@ -16,30 +16,30 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "CompositeVector.h"
+#include "BlockVector.h"
 using namespace std;
 
 // CONSTRUCTORS
 // Default
-CompositeVector::CompositeVector(): SiconosVector()
+BlockVector::BlockVector(): SiconosVector()
 {
-  composite = true;
+  isBlockVector = true;
 }
 
 // From a file
-CompositeVector::CompositeVector(const string& file, const bool& ascii): SiconosVector()
+BlockVector::BlockVector(const string& file, const bool& ascii): SiconosVector()
 {
   string mode;
-  composite = true;
+  isBlockVector = true;
   if (ascii) mode = "ascii";
   else mode = "binary";
   read(file, mode);
 }
 
 // copy from a Simple
-CompositeVector::CompositeVector(const SimpleVector& v): SiconosVector()
+BlockVector::BlockVector(const SimpleVector& v): SiconosVector()
 {
-  composite = true;
+  isBlockVector = true;
   svref.reserve(1);
   tabindex.reserve(1);
   svref.push_back(new SimpleVector(v));
@@ -48,9 +48,9 @@ CompositeVector::CompositeVector(const SimpleVector& v): SiconosVector()
 }
 
 // fill with a list of SimpleVector* (Warning: links between pointers!!)
-CompositeVector::CompositeVector(vector<SimpleVector*> v): SiconosVector()
+BlockVector::BlockVector(vector<SimpleVector*> v): SiconosVector()
 {
-  composite = true;
+  isBlockVector = true;
   unsigned int numberOfVectors = v.size();
   svref.reserve(numberOfVectors);
   tabindex.reserve(numberOfVectors);
@@ -63,13 +63,13 @@ CompositeVector::CompositeVector(vector<SimpleVector*> v): SiconosVector()
 }
 
 // link with 2 SimpleVector
-CompositeVector::CompositeVector(SimpleVector* v1, SimpleVector* v2): SiconosVector()
+BlockVector::BlockVector(SimpleVector* v1, SimpleVector* v2): SiconosVector()
 {
-  composite = true;
+  isBlockVector = true;
   svref.reserve(2);
   tabindex.reserve(2);
   if ((v1 == NULL) && (v1 == NULL))
-    SiconosVectorException::selfThrow("CompositeVector:constructor(SimpleVector*,SimpleVector*), both vectors are NULL.");
+    SiconosVectorException::selfThrow("BlockVector:constructor(SimpleVector*,SimpleVector*), both vectors are NULL.");
 
   if (v1 != NULL)
   {
@@ -102,9 +102,9 @@ CompositeVector::CompositeVector(SimpleVector* v1, SimpleVector* v2): SiconosVec
 }
 
 // copy
-CompositeVector::CompositeVector(const CompositeVector& v): SiconosVector()
+BlockVector::BlockVector(const BlockVector& v): SiconosVector()
 {
-  composite = true;
+  isBlockVector = true;
   if (this != &v)
   {
     unsigned int sizeV = v.size(1);
@@ -120,10 +120,10 @@ CompositeVector::CompositeVector(const CompositeVector& v): SiconosVector()
     tabindex = v.getTabIndex();
   }
   else
-    SiconosVectorException::selfThrow("CompositeVector: copy constructor, auto copy");
+    SiconosVectorException::selfThrow("BlockVector: copy constructor, auto copy");
 }
 
-CompositeVector::~CompositeVector()
+BlockVector::~BlockVector()
 {
   for (unsigned int i = 0; i < svref.size(); i++)
   {
@@ -132,17 +132,17 @@ CompositeVector::~CompositeVector()
   }
 }
 
-SimpleVector* CompositeVector::getVectorPtr(const unsigned int& i)
+SimpleVector* BlockVector::getVectorPtr(const unsigned int& i)
 {
   if (i > svref.size())
-    SiconosVectorException::selfThrow("CompositeVector:getVectorPtr(i), i out of range.");
+    SiconosVectorException::selfThrow("BlockVector:getVectorPtr(i), i out of range.");
 
   return svref[i];
 }
 
-void CompositeVector::display() const
+void BlockVector::display() const
 {
-  cout << "=== Composite Display === " << endl;
+  cout << "=== Block Display === " << endl;
   const int sizeV = svref.size();
   cout << "with " << sizeV << " simple vectors" << endl;
   for (int i = 0; i < sizeV; i ++)
@@ -153,10 +153,10 @@ void CompositeVector::display() const
   cout << endl << " ======================== " << endl;
 }
 
-double& CompositeVector::operator()(const int unsigned& index) const
+double& BlockVector::operator()(const int unsigned& index) const
 {
   if (index > tabindex[tabindex.size() - 1])
-    SiconosVectorException::selfThrow(" CompositeVector::operator() -- index out of range");
+    SiconosVectorException::selfThrow(" BlockVector::operator() -- index out of range");
 
   // locate which vector of svref corresponds to index
   unsigned int numVect = 0;
@@ -171,7 +171,7 @@ double& CompositeVector::operator()(const int unsigned& index) const
   return (*svref[numVect])(pos);
 }
 
-void CompositeVector::add(const SimpleVector& v)
+void BlockVector::add(const SimpleVector& v)
 {
   // copy the vector into svref
   svref.push_back(new SimpleVector(v));
@@ -183,7 +183,7 @@ void CompositeVector::add(const SimpleVector& v)
     tabindex.push_back(v.size());
 }
 
-void CompositeVector::addPtr(SimpleVector*v)
+void BlockVector::addPtr(SimpleVector*v)
 {
   svref.push_back(v);
   if (tabindex.size() > 0)
@@ -193,10 +193,10 @@ void CompositeVector::addPtr(SimpleVector*v)
   isSvrefAllocatedIn.push_back(false);
 }
 
-void CompositeVector::setValues(const vector<double>& v, const int unsigned& i)
+void BlockVector::setValues(const vector<double>& v, const int unsigned& i)
 {
   if (svref.size() <= i)
-    SiconosVectorException::selfThrow("CompositeVector::setValues -- index out of range");
+    SiconosVectorException::selfThrow("BlockVector::setValues -- index out of range");
   unsigned int oldSize;
   if (isSvrefAllocatedIn[i])
   {
@@ -212,18 +212,18 @@ void CompositeVector::setValues(const vector<double>& v, const int unsigned& i)
 }
 
 
-const LaVectorDouble CompositeVector::getValues(const unsigned int& i) const
+const LaVectorDouble BlockVector::getValues(const unsigned int& i) const
 {
   if (svref.size() <= i)
-    SiconosVectorException::selfThrow("CompositeVector::getValues -- index out of range");
+    SiconosVectorException::selfThrow("BlockVector::getValues -- index out of range");
   if (svref[i] == NULL)
-    SiconosVectorException::selfThrow("CompositeVector::getValues -- NULL vector");
+    SiconosVectorException::selfThrow("BlockVector::getValues -- NULL vector");
   return svref[i]->getValues();
 }
 
-unsigned int CompositeVector::size(const unsigned int& i) const
+unsigned int BlockVector::size(const unsigned int& i) const
 {
-  if (i > 1) SiconosVectorException::selfThrow("CompositeVector::size(i) -- index i out of range");
+  if (i > 1) SiconosVectorException::selfThrow("BlockVector::size(i) -- index i out of range");
   if (i == 0)
   {
     int sizeV = 0;
@@ -234,11 +234,11 @@ unsigned int CompositeVector::size(const unsigned int& i) const
     return tabindex.size();
 }
 
-bool CompositeVector::read(const string& fileName, const string& mode)
+bool BlockVector::read(const string& fileName, const string& mode)
 {
   // warning: this function reads the whole vector and overwrites existing values !!
   // to read only one part of the std::vector, use read for a SimpleVector and then
-  // add it at the right place of the present composite
+  // add it at the right place of the present block vector
   bool res = false;
   unsigned int i, j, size, nbVectors;
   double tmp;
@@ -247,10 +247,10 @@ bool CompositeVector::read(const string& fileName, const string& mode)
   {
     FILE * inFile = fopen(fileName.c_str(), "rb");    // open the input file in binary mode
     if (inFile == NULL)
-      SiconosVectorException::selfThrow(" CompositeVector::read : Fail to open file \"" + fileName + "\"");
+      SiconosVectorException::selfThrow(" BlockVector::read : Fail to open file \"" + fileName + "\"");
     fread((char *) &nbVectors, sizeof(int), 1, inFile);   // read nbVectors
     if (nbVectors <= 0)
-      SiconosVectorException::selfThrow(" CompositeVector::read : try to read a vector with a negative size");
+      SiconosVectorException::selfThrow(" BlockVector::read : try to read a vector with a negative size");
     svref.clear();
     tabindex.clear();
     isSvrefAllocatedIn.clear();
@@ -259,7 +259,7 @@ bool CompositeVector::read(const string& fileName, const string& mode)
     {
       fread((char *) &size, sizeof(int), 1, inFile);  // read size of vector i
       if (size <= 0)
-        SiconosVectorException::selfThrow(" CompositeVector::read : try to read a vector with a negative size");
+        SiconosVectorException::selfThrow(" BlockVector::read : try to read a vector with a negative size");
       // Memory allocation for vector i
       svref.push_back(new SimpleVector(size));
       isSvrefAllocatedIn.push_back(true);
@@ -282,12 +282,12 @@ bool CompositeVector::read(const string& fileName, const string& mode)
   {
     ifstream inFile(fileName.c_str(),  ifstream::in);
     if (inFile == NULL)
-      SiconosVectorException::selfThrow(" CompositeVector::read : Failed to open file \"" + fileName + "\"");
+      SiconosVectorException::selfThrow(" BlockVector::read : Failed to open file \"" + fileName + "\"");
 
     // get the number of vectors to load
     inFile >> nbVectors;
     if (nbVectors <= 0)
-      SiconosVectorException::selfThrow(" CompositeVector::read : try to read a vector with a negative size");
+      SiconosVectorException::selfThrow(" BlockVector::read : try to read a vector with a negative size");
     svref.clear();
     tabindex.clear();
     isSvrefAllocatedIn.clear();
@@ -296,7 +296,7 @@ bool CompositeVector::read(const string& fileName, const string& mode)
     {
       inFile >> size; // read size of vector i
       if (size <= 0)
-        SiconosVectorException::selfThrow(" CompositeVector::read : try to read a vector with a negative size");
+        SiconosVectorException::selfThrow(" BlockVector::read : try to read a vector with a negative size");
       // Memory allocation for vector i
       svref.push_back(new SimpleVector(size));
       isSvrefAllocatedIn.push_back(true);
@@ -319,17 +319,17 @@ bool CompositeVector::read(const string& fileName, const string& mode)
 }
 
 
-bool CompositeVector::write(const string& fileName, const  string& mode) const
+bool BlockVector::write(const string& fileName, const  string& mode) const
 {
   bool res = false;
   if ((mode != "binary") && (mode != "ascii"))
-    SiconosVectorException::selfThrow("CompositeVector::write : unknown mode");
+    SiconosVectorException::selfThrow("BlockVector::write : unknown mode");
 
   // open the file
   ofstream outFile(fileName.c_str());
 
   if (!outFile.is_open())
-    SiconosVectorException::selfThrow("CompositeVector::write : : Fail to open file \"" + fileName + "\"");
+    SiconosVectorException::selfThrow("BlockVector::write : : Fail to open file \"" + fileName + "\"");
 
   unsigned int nbVectors = svref.size();
 
@@ -364,13 +364,13 @@ bool CompositeVector::write(const string& fileName, const  string& mode) const
 }
 
 
-double* CompositeVector::getArray() const
+double* BlockVector::getArray() const
 {
-  SiconosVectorException::selfThrow(" CompositeVector::getArray, should not be used for composite vector");
+  SiconosVectorException::selfThrow(" BlockVector::getArray, should not be used for a block vector.");
   return NULL;
 }
 
-void CompositeVector::zero()
+void BlockVector::zero()
 {
   vector<SimpleVector*>::iterator it;
   for (it = svref.begin(); it != svref.end(); ++it)
@@ -381,11 +381,11 @@ void CompositeVector::zero()
 //          GENERIC INTERNAL OPERATORS
 //===================================================================================
 
-CompositeVector &CompositeVector::operator+=(const SiconosVector &v)
+BlockVector &BlockVector::operator+=(const SiconosVector &v)
 {
   unsigned int sizeV = size();
   if (sizeV != v.size())
-    SiconosVectorException::selfThrow(" CompositeVector::operator+=   -- the vectors have not the same size");
+    SiconosVectorException::selfThrow(" BlockVector::operator+=   -- the vectors have not the same size");
 
   for (unsigned int i = 0; i < sizeV; i++)
     (*this)(i) = (*this)(i) + v(i);
@@ -393,137 +393,76 @@ CompositeVector &CompositeVector::operator+=(const SiconosVector &v)
   return *this;
 }
 
-CompositeVector &CompositeVector::operator-=(const SiconosVector &v)
+BlockVector &BlockVector::operator-=(const SiconosVector &v)
 {
   unsigned int sizeV = size();
   if (sizeV != v.size())
-    SiconosVectorException::selfThrow(" CompositeVector::operator-=   -- the vectors have not the same size");
+    SiconosVectorException::selfThrow(" BlockVector::operator-=   -- the vectors have not the same size");
 
   for (unsigned int i = 0; i < sizeV; i++)
     (*this)(i) -= v(i);
   return *this;
 }
 
-CompositeVector& CompositeVector::operator = (const SiconosVector& v)
+BlockVector& BlockVector::operator = (const SiconosVector& v)
 {
   if (this != &v)
   {
     unsigned int sizeV = size();
     if (sizeV != v.size())
-      SiconosVectorException::selfThrow(" CompositeVector::operator = -- the vectors have not the same size");
+      SiconosVectorException::selfThrow(" BlockVector::operator = -- the vectors have not the same size");
     else
     {
       for (unsigned int i = 0; i < sizeV; i++)
         (*this)(i) = v(i);
-      if (v.isComposite())
+      if (v.isBlock())
         tabindex = v.getTabIndex();
     }
   }
   return *this;
 }
 
-
-bool CompositeVector::operator == (const SiconosVector& v) const
-{
-  bool res = true;
-  if (this != &v)
-  {
-    unsigned int sizeV = size();
-    if (sizeV == v.size())
-    {
-      if (sizeV != 0)
-      {
-        for (unsigned int i = 0; i < sizeV; i++)
-        {
-          if ((*this)(i) != v(i))
-          {
-            res = false;
-            break;
-          }
-        }
-      }
-    }
-    else res =  false;
-  }
-  return res;
-}
-
-bool CompositeVector::operator == (const CompositeVector& v) const
-{
-  bool res = true;
-  if (this != &v)
-  {
-    unsigned int sizeV = size();
-    if (v.getTabIndex() == getTabIndex())
-    {
-      if (sizeV != 0)
-      {
-        for (unsigned int i = 0; i < sizeV; i++)
-        {
-          if ((*this)(i) != v(i))
-          {
-            res = false;
-            break;
-          }
-        }
-      }
-    }
-    else res =  false;
-  }
-  return res;
-}
-
-bool CompositeVector::operator != (const SiconosVector& v) const
-{
-  return !(*this == v);
-}
-
-bool CompositeVector::operator != (const CompositeVector& v) const
-{
-  return !(*this == v);
-}
-
 //==============================================================================
 //          SPECIFIC INTERNAL OPERATORS
 //==============================================================================
 
-CompositeVector &CompositeVector::operator*=(const double& d)
+BlockVector &BlockVector::operator*=(const double& d)
 {
   *this = *this * d;
   return *this;
 }
 
-CompositeVector &CompositeVector::operator/=(const double& d)
+BlockVector &BlockVector::operator/=(const double& d)
 {
   *this = *this / d;
   return *this;
 }
 
-CompositeVector &CompositeVector::operator+=(const CompositeVector& v)
+BlockVector &BlockVector::operator+=(const BlockVector& v)
 {
   if (v.size() != size())
-    SiconosVectorException::selfThrow(" CompositeVector::+=, the vectors have not the same size");
+    SiconosVectorException::selfThrow(" BlockVector::+=, the vectors have not the same size");
   *this = *this + v;
   return *this;
 }
 
 
-CompositeVector &CompositeVector::operator-=(const CompositeVector& v)
+BlockVector &BlockVector::operator-=(const BlockVector& v)
 {
   if (size() != v.size())
-    SiconosVectorException::selfThrow(" CompositeVector::-=, the vectors have not the same size");
+    SiconosVectorException::selfThrow(" BlockVector::-=, the vectors have not the same size");
   *this = *this - v;
   return *this;
 }
 
 
-CompositeVector& CompositeVector::operator = (const CompositeVector& v)
+BlockVector& BlockVector::operator = (const BlockVector& v)
 {
   if (this != &v)
   {
     unsigned int sizeV = size();
     if (sizeV != v.size())
-      SiconosVectorException::selfThrow(" CompositeVector::operator = GENERIC  -- the vectors have not the same size");
+      SiconosVectorException::selfThrow(" BlockVector::operator = GENERIC  -- the vectors have not the same size");
     else
     {
       for (unsigned int i = 0; i < sizeV; i++)
@@ -538,27 +477,27 @@ CompositeVector& CompositeVector::operator = (const CompositeVector& v)
 //          GENERIC EXTERNAL OPERATORS
 //=============================================================================
 
-CompositeVector CompositeVector::addition(const SiconosVector& v1) const
+BlockVector BlockVector::addition(const SiconosVector& v1) const
 {
   unsigned int sizeV = size();
 
   if (sizeV != v1.size())
-    SiconosVectorException::selfThrow(" CompositeVector::addition(const CompositeVector& v1)  --- the vectors have not the same size");
+    SiconosVectorException::selfThrow(" BlockVector::addition(const BlockVector& v1)  --- the vectors have not the same size");
 
-  CompositeVector cv(*this);
+  BlockVector cv(*this);
   cv += v1;
   return cv;
 }
 
 
-CompositeVector CompositeVector::subtraction(const SiconosVector& v1) const
+BlockVector BlockVector::subtraction(const SiconosVector& v1) const
 {
   unsigned int sizeV = size();
 
   if (sizeV != v1.size())
-    SiconosVectorException::selfThrow(" CompositeVector::subtraction(const CompositeVector& v1)  --- the vectors have not the same size");
+    SiconosVectorException::selfThrow(" BlockVector::subtraction(const BlockVector& v1)  --- the vectors have not the same size");
 
-  CompositeVector cv(*this);
+  BlockVector cv(*this);
   cv -= v1;
   return cv;
 }
@@ -568,9 +507,9 @@ CompositeVector CompositeVector::subtraction(const SiconosVector& v1) const
 //          SPECIFIC EXTERNAL OPERATORS
 //=============================================================================
 
-CompositeVector operator * (const CompositeVector& v, const double& d)
+BlockVector operator * (const BlockVector& v, const double& d)
 {
-  CompositeVector tmp(v);
+  BlockVector tmp(v);
   unsigned int size = v.size();
   for (unsigned int i = 0; i < size; i++)
     tmp(i) = d * v(i);
@@ -578,9 +517,9 @@ CompositeVector operator * (const CompositeVector& v, const double& d)
 }
 
 
-CompositeVector operator * (const double& d, const CompositeVector& v)
+BlockVector operator * (const double& d, const BlockVector& v)
 {
-  CompositeVector tmp(v);
+  BlockVector tmp(v);
   unsigned int size = v.size();
   for (unsigned int i = 0; i < size; i++)
     tmp(i) = d * v(i);
@@ -588,24 +527,23 @@ CompositeVector operator * (const double& d, const CompositeVector& v)
 }
 
 
-CompositeVector operator / (const CompositeVector& v, const double& d)
+BlockVector operator / (const BlockVector& v, const double& d)
 {
   if (d == 0.0)
-    SiconosVectorException::selfThrow(" CompositeVector operator/   --- division by 0");
-  CompositeVector tmp(v);
+    SiconosVectorException::selfThrow(" BlockVector operator/   --- division by 0");
+  BlockVector tmp(v);
   unsigned int size = v.size();
   for (unsigned int i = 0; i < size; i++)
     tmp(i) = v(i) / d;
   return tmp;
 }
 
-
-CompositeVector operator + (const CompositeVector& v1, const CompositeVector& v2)
+BlockVector operator + (const BlockVector& v1, const BlockVector& v2)
 {
   if (v1.getTabIndex() != v2.getTabIndex())
-    SiconosVectorException::selfThrow(" CompositeVector operator+  --- the vectors have not the same size or structure");
+    SiconosVectorException::selfThrow(" BlockVector operator+  --- the vectors have not the same size or structure");
 
-  CompositeVector tmp(v1);
+  BlockVector tmp(v1);
   unsigned int size = v1.size();
   for (unsigned int i = 0; i < size; i++)
     tmp(i) += v2(i);
@@ -613,12 +551,12 @@ CompositeVector operator + (const CompositeVector& v1, const CompositeVector& v2
   return tmp;
 }
 
-CompositeVector operator - (const CompositeVector& v1, const CompositeVector& v2)
+BlockVector operator - (const BlockVector& v1, const BlockVector& v2)
 {
   if (v1.getTabIndex() != v2.getTabIndex())
-    SiconosVectorException::selfThrow(" CompositeVector operator+  --- the vectors have not the same size or structure");
+    SiconosVectorException::selfThrow(" BlockVector operator+  --- the vectors have not the same size or structure");
 
-  CompositeVector tmp(v1);
+  BlockVector tmp(v1);
   unsigned int size = v1.size();
   for (unsigned int i = 0; i < size; i++)
     tmp(i) -= v2(i);
@@ -626,20 +564,22 @@ CompositeVector operator - (const CompositeVector& v1, const CompositeVector& v2
   return tmp;
 }
 
-SimpleVector operator * (const SiconosMatrix &m, const CompositeVector &v)
+
+
+SimpleVector operator * (const SiconosMatrix &m, const BlockVector &v)
 {
   // Check sizes
   if (v.size() != m.size(1))
-    SiconosVectorException::selfThrow(" CompositeVector, SiconosMatrix*CompositeVector: inconsistent sizes");
+    SiconosVectorException::selfThrow(" BlockVector, SiconosMatrix*BlockVector: inconsistent sizes");
   SimpleVector tmp(v);
   return m * tmp;
 }
 
-SimpleVector matTransVecMult(SiconosMatrix &m, CompositeVector &v)
+SimpleVector matTransVecMult(SiconosMatrix &m, BlockVector &v)
 {
   // Check sizes
   if (v.size() != m.size(0))
-    SiconosVectorException::selfThrow(" CompositeVector, SiconosMatrix*CompositeVector: inconsistent sizes");
+    SiconosVectorException::selfThrow(" BlockVector, SiconosMatrix*BlockVector: inconsistent sizes");
 
   SimpleVector tmp(v);
   return matTransVecMult(m, tmp);

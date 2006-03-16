@@ -50,11 +50,11 @@ public:
 
   //////////////////////////////////////////////
 
-  /** \fn SiconosMatrix getH()
+  /** \fn SimpleMatrix getH()
   *   \brief Return the H of the LagrangianLinearDSIOXML
-  *   \return The H SiconosMatrix of the LagrangianLinearDSIOXML
+  *   \return The H SimpleMatrix of the LagrangianLinearDSIOXML
   */
-  inline SiconosMatrix getH()
+  inline SimpleMatrix getH()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->HNode);
   }

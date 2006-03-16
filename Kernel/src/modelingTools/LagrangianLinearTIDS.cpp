@@ -30,9 +30,9 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(DynamicalSystemXML * dsXML,  NonSmoot
   {
     LagrangianLinearTIDSXML * lltidsxml = (static_cast <LagrangianLinearTIDSXML*>(dsxml));
     if (lltidsxml->hasK())
-      K = new SiconosMatrix(lltidsxml->getK());
+      K = new SimpleMatrix(lltidsxml->getK());
     if (lltidsxml->hasC())
-      C = new SiconosMatrix(lltidsxml->getC());
+      C = new SimpleMatrix(lltidsxml->getC());
   }
   else RuntimeException::selfThrow("LagrangianLinearTIDS::LagrangianLinearTIDS - DynamicalSystemXML paramater must not be NULL");
   OUT("LagrangianLinearTIDS::LagrangianLinearTIDS() - Xml constructor\n");
@@ -51,8 +51,8 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned 
   if (newC.size(0) != ndof || newC.size(1) != ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between C and ndof");
 
-  K = new SiconosMatrix(newK);
-  C = new SiconosMatrix(newC);
+  K = new SimpleMatrix(newK);
+  C = new SimpleMatrix(newC);
   DSType = LTIDS;
   OUT("LagrangianLinearTIDS::LagrangianLinearTIDS - Constructor from a minimum set of data\n");
 }
@@ -71,8 +71,8 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned 
   if (newC.size(0) != ndof || newC.size(1) != ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between C and ndof");
 
-  K = new SiconosMatrix(newK);
-  C = new SiconosMatrix(newC);
+  K = new SimpleMatrix(newK);
+  C = new SimpleMatrix(newC);
   DSType = LTIDS;
   OUT("LagrangianLinearTIDS::LagrangianLinearTIDS - Constructor from a minimum set of data\n");
 }
@@ -115,13 +115,13 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const DynamicalSystem & newDS):
 
   if (ltids->getKPtr() != NULL)
   {
-    K = new SiconosMatrix(ltids->getK());
+    K = new SimpleMatrix(ltids->getK());
     isKAllocatedIn = true;
   }
 
   if (ltids->getCPtr() != NULL)
   {
-    C = new SiconosMatrix(ltids->getC());
+    C = new SimpleMatrix(ltids->getC());
     isCAllocatedIn = true;
   }
 }
@@ -143,7 +143,7 @@ void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
 
   if (K == NULL)
   {
-    K = new SiconosMatrix(newValue);
+    K = new SimpleMatrix(newValue);
     isKAllocatedIn = true;
   }
   else
@@ -167,7 +167,7 @@ void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
 
   if (C == NULL)
   {
-    C = new SiconosMatrix(newValue);
+    C = new SimpleMatrix(newValue);
     isCAllocatedIn = true;
   }
   else

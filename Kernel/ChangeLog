@@ -28,6 +28,16 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 
 Changes:
 
+2006-03-16 Franck Perignon <franck.perignon@inrialpes.fr>
+                                                                               
+	* Add SimpleMatrix class, derived from SiconosMatrix. 
+	      SiconosMatrix is now an abstract class
+	* Rename Composite in Block
+
+2006-03-13 Franck Perignon <franck.perignon@inrialpes.fr>
+                                                                               
+	* lapackpp2.4.7 is now required
+	
 2006-03-02 Franck Perignon <franck.perignon@inrialpes.fr>
                                                                                
 	* general review of Model/Strategy and TimeDiscretisation

@@ -71,12 +71,12 @@ void LagrangianLinearDSIO::computeOutput(double time)
   //        LagrangianDS *d1 = static_cast<LagrangianDS*> (ds1);
   //        LagrangianDS *d2 = static_cast<LagrangianDS*> (ds2);
   //
-  //        CompositeVector q;
+  //        BlockVector q;
   //        q.add(*(d1->getQPtr()));
   //      q.add(*(d2->getQPtr()));
   //        *y = (this->h * q) + this->b;
   //
-  //      CompositeVector vel;
+  //      BlockVector vel;
   //      vel.add(*(d1->getVelocityPtr()));
   //      vel.add(*(d2->getVelocityPtr()));
   //      *yDot = (this->h * vel);
@@ -139,12 +139,12 @@ void LagrangianLinearDSIO::computeFreeOutput(double time)
   //        LagrangianDS *d1 = static_cast<LagrangianDS*> (ds1);
   //        LagrangianDS *d2 = static_cast<LagrangianDS*> (ds2);
   ////        SiconosVector qfree(*(d1->getQFreePtr()), false);
-  //      CompositeVector qfree;
+  //      BlockVector qfree;
   //      qfree.add(*(d1->getQFreePtr()));
   //      qfree.add(*(d2->getQFreePtr()));
   //      *y = (this->h * qfree) + this->b;
   ////        SiconosVector velfree(*(d1->getVelocityFreePtr()), false);
-  //      CompositeVector velfree;
+  //      BlockVector velfree;
   //      velfree.add(*(d1->getVelocityFreePtr()));
   //      velfree.add(*(d2->getVelocityFreePtr()));
   //      *yDot = (this->h * velfree);
@@ -203,7 +203,7 @@ void LagrangianLinearDSIO::computeInput(double time)
   //        LagrangianDS *d1 = static_cast<LagrangianDS*> (ds1);
   //        LagrangianDS *d2 = static_cast<LagrangianDS*> (ds2);
   //
-  //      CompositeVector p;
+  //      BlockVector p;
   //      p.add(*(d1->getPPtr()));
   //      p.add(*(d2->getPPtr()));
   //        p += matTransVecMult(this->h, *lambda);
@@ -247,7 +247,7 @@ void LagrangianLinearDSIO::fillDSInputOutputWithDSInputOutputXML()
   DSInputOutput::fillDSInputOutputWithDSInputOutputXML();
   if (this->dsioxml != NULL)
   {
-    H = new SiconosMatrix((static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->getH());
+    H = new SimpleMatrix((static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->getH());
     b = new SimpleVector((static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->getB());
 
     //    this->display();
@@ -292,7 +292,7 @@ void LagrangianLinearDSIO::createDSInputOutput(DSInputOutputXML * dsioXML,
   }
   else
   {
-    H = new SiconosMatrix(*newH);
+    H = new SimpleMatrix(*newH);
     b = new SimpleVector(*newb);
   }
 }

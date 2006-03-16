@@ -53,11 +53,11 @@ public:
 
   ~FrictionContactXML();
 
-  /** \fn SiconosMatrix getM()
+  /** \fn SimpleMatrix getM()
    *   \brief Return M
-   *   \return The M SiconosMatrix of the FrictionContact
+   *   \return The M SimpleMatrix of the FrictionContact
    */
-  inline SiconosMatrix getM()
+  inline SimpleMatrix getM()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(MNode);
   }

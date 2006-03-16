@@ -51,11 +51,11 @@ public:
 
   ~LinearDSXML();
 
-  /** \fn SiconosMatrix getA()
+  /** \fn SimpleMatrix getA()
    *   \brief Return the A of the LinearDSXML
-   *   \return The A SiconosMatrix of the LinearDSXML
+   *   \return The A SimpleMatrix of the LinearDSXML
    */
-  inline const SiconosMatrix getA() const
+  inline const SimpleMatrix getA() const
   {
     if (isAPlugin())
       XMLException::selfThrow("LinearDSXML - getA: A is not given but calculated from a plugin");
@@ -85,11 +85,11 @@ public:
       ANode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, LDS_A, m);
   }
 
-  /** \fn SiconosMatrix getE()
+  /** \fn SimpleMatrix getE()
    *   \brief Return the E of the LinearDSXML
-   *   \return The E SiconosMatrix of the LinearDSXML
+   *   \return The E SimpleMatrix of the LinearDSXML
    */
-  inline const SiconosMatrix getE() const
+  inline const SimpleMatrix getE() const
   {
     if (isEPlugin())
       XMLException::selfThrow("LinearDSXML - getE: E is not given but calculated from a plugin");

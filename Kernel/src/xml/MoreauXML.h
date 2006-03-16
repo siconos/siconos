@@ -61,11 +61,11 @@ public:
     return (WNode != NULL);
   }
 
-  /** \fn SiconosMatrix getW()
+  /** \fn SimpleMatrix getW()
    *   \brief Return the w of the OneStepIntegratorXML
-   *   \return SiconosMatrix : the w of the OneStepIntegratorXML
+   *   \return SimpleMatrix : the w of the OneStepIntegratorXML
    */
-  inline SiconosMatrix getW()
+  inline SimpleMatrix getW()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(WNode);
   }
@@ -92,9 +92,9 @@ public:
     return (ThetaNode != NULL);
   }
 
-  /** \fn SiconosMatrix getTheta()
+  /** \fn SimpleMatrix getTheta()
    *   \brief Return the theta of the OneStepIntegratorXML
-   *   \return SiconosMatrix : the theta of the OneStepIntegratorXML
+   *   \return SimpleMatrix : the theta of the OneStepIntegratorXML
    */
   inline const double getTheta() const
   {

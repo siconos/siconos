@@ -48,20 +48,20 @@ public:
 
   ~LinearBC();
 
-  /** \fn SiconosMatrix getOmega0(void)
-   *  \brief allow to get the SiconosMatrix omega0
-   *  \return the SiconosMatrix omega0
+  /** \fn SimpleMatrix getOmega0(void)
+   *  \brief allow to get the SimpleMatrix omega0
+   *  \return the SimpleMatrix omega0
    */
-  inline SiconosMatrix getOmega0(void) const
+  inline SimpleMatrix getOmega0(void) const
   {
     return *omega0;
   };
 
-  /** \fn SiconosMatrix getOmegaT(void)
-   *  \brief allow to get the SiconosMatrix omegaT
-   *  \return the SiconosMatrix omegaT
+  /** \fn SimpleMatrix getOmegaT(void)
+   *  \brief allow to get the SimpleMatrix omegaT
+   *  \return the SimpleMatrix omegaT
    */
-  inline SiconosMatrix getOmegaT(void) const
+  inline SimpleMatrix getOmegaT(void) const
   {
     return *omegaT;
   };

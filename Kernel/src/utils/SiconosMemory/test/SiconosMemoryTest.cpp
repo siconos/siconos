@@ -42,12 +42,12 @@ void SiconosMemoryTest::setUp()
   q1 = new SimpleVector(v);
   q2 = new SimpleVector(w);
   q3 = new SimpleVector(z);
-  c1 = new CompositeVector();
-  c2 = new CompositeVector();
+  c1 = new BlockVector();
+  c2 = new BlockVector();
 
-  (static_cast<CompositeVector*>(c1))->add(*q1);
-  (static_cast<CompositeVector*>(c1))->add(*q2);
-  (static_cast<CompositeVector*>(c2))->add(*q3);
+  (static_cast<BlockVector*>(c1))->add(*q1);
+  (static_cast<BlockVector*>(c1))->add(*q2);
+  (static_cast<BlockVector*>(c2))->add(*q3);
 
   V1.push_back(q1);
   V1.push_back(q2);

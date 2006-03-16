@@ -61,7 +61,7 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
       }
       else
       {
-        H = new SiconosMatrix(LLRxml->getH());
+        H = new SimpleMatrix(LLRxml->getH());
         isHAllocatedIn = true;
         G[0] = H;
         if (LagrangianRelationType == "scleronomic+lambda")
@@ -71,7 +71,7 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
           if (rowD != colD || (interaction != NULL && rowD !=  interaction->getNInteraction()))
             RuntimeException::selfThrow("LagrangianLinearR:: xml constructor, inconsistent size for input matrix D");
 
-          D = new SiconosMatrix(LLRxml->getD());
+          D = new SimpleMatrix(LLRxml->getD());
           isDAllocatedIn = true;
           G[1] = D;
         }
@@ -122,7 +122,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
   }
   else
   {
-    H = new SiconosMatrix(newH);
+    H = new SimpleMatrix(newH);
     isHAllocatedIn = true;
     G[0] = H;
   }
@@ -150,7 +150,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, Interaction* int
   }
   else
   {
-    H = new SiconosMatrix(newH);
+    H = new SimpleMatrix(newH);
     isHAllocatedIn = true;
     G[0] = H;
   }
@@ -188,10 +188,10 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
   }
   else
   {
-    H = new SiconosMatrix(newH);
+    H = new SimpleMatrix(newH);
     isHAllocatedIn = true;
     G[0] = H;
-    D = new SiconosMatrix(newD);
+    D = new SimpleMatrix(newD);
     isDAllocatedIn = true;
     G[1] = D;
   }
@@ -220,7 +220,7 @@ LagrangianLinearR::LagrangianLinearR(const Relation & newLLR, Interaction* inter
   {
     if (G[0] == NULL)
     {
-      H = new SiconosMatrix(llr->getH());
+      H = new SimpleMatrix(llr->getH());
       isHAllocatedIn = true;
       G[0] = H;
     }
@@ -240,7 +240,7 @@ LagrangianLinearR::LagrangianLinearR(const Relation & newLLR, Interaction* inter
     {
       if (G[1] == NULL)
       {
-        D = new SiconosMatrix(llr->getD());
+        D = new SimpleMatrix(llr->getD());
         isDAllocatedIn = true;
         G[1] = D;
       }
@@ -292,7 +292,7 @@ void LagrangianLinearR::setH(const SiconosMatrix& newValue)
 
   if (H == NULL)
   {
-    H = new SiconosMatrix(newValue);
+    H = new SimpleMatrix(newValue);
     isHAllocatedIn = true;
   }
   else
@@ -370,7 +370,7 @@ void LagrangianLinearR::setD(const SiconosMatrix& newValue)
 
   if (D == NULL)
   {
-    D = new SiconosMatrix(newValue);
+    D = new SimpleMatrix(newValue);
     isDAllocatedIn = true;
   }
   else
@@ -464,8 +464,8 @@ void LagrangianLinearR::computeOutput(const double& time)
     vector<LagrangianDS*> vLDS;
 
     unsigned int size = vDS.size(), i;
-    CompositeVector *qTmp = new CompositeVector();
-    CompositeVector *velocityTmp = new CompositeVector();
+    BlockVector *qTmp = new BlockVector();
+    BlockVector *velocityTmp = new BlockVector();
     for (i = 0; i < size; i++)
     {
       // check dynamical system type
@@ -475,7 +475,7 @@ void LagrangianLinearR::computeOutput(const double& time)
       // convert vDS systems into LagrangianDS and put them in vLDS
       vLDS.push_back(static_cast<LagrangianDS*>(vDS[i]));
 
-      // Put q and velocity of each DS into a composite
+      // Put q and velocity of each DS into a block
       // Warning: use copy constructors (add function), no link between pointers
       qTmp->add(vLDS[i]->getQ());
       velocityTmp->add(vLDS[i]->getVelocity());
@@ -525,8 +525,8 @@ void LagrangianLinearR::computeFreeOutput(const double& time)
     vector<LagrangianDS*> vLDS;
 
     unsigned int size = vDS.size(), i;
-    CompositeVector *qFreeTmp = new CompositeVector();
-    CompositeVector *velocityFreeTmp = new CompositeVector();
+    BlockVector *qFreeTmp = new BlockVector();
+    BlockVector *velocityFreeTmp = new BlockVector();
 
     for (i = 0; i < size; i++)
     {
@@ -537,7 +537,7 @@ void LagrangianLinearR::computeFreeOutput(const double& time)
       // convert vDS systems into LagrangianDS and put them in vLDS
       vLDS.push_back(static_cast<LagrangianDS*>(vDS[i]));
 
-      // Put qFree and velocityFree of each DS into a composite
+      // Put qFree and velocityFree of each DS into a block
       // Warning: use copy constructors, no link between pointers
       qFreeTmp->add(vLDS[i]->getQFree());
       velocityFreeTmp->add(vLDS[i]->getVelocityFree());
@@ -579,7 +579,7 @@ void LagrangianLinearR::computeInput(const double& time)
     unsigned int numberDS = vDS.size(), i;
     vLDS.resize(numberDS);
 
-    CompositeVector *p = new CompositeVector();
+    BlockVector *p = new BlockVector();
     string typeDS;
 
     for (i = 0; i < numberDS; i++)
@@ -592,7 +592,7 @@ void LagrangianLinearR::computeInput(const double& time)
       // convert vDS systems into LagrangianDS and put them in vLDS
       vLDS[i] = static_cast<LagrangianDS*>(vDS[i]);
 
-      // Put p of each DS into a composite
+      // Put p of each DS into a block
       // Warning: use addPtr -> link between pointers
       p->addPtr(vLDS[i]->getPPtr());
     }

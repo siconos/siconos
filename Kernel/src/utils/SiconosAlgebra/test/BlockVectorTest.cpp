@@ -17,16 +17,16 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-#include "CompositeVectorTest.h"
+#include "BlockVectorTest.h"
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
 
 // on place cette classe de test dans le registry
-CPPUNIT_TEST_SUITE_REGISTRATION(CompositeVectorTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(BlockVectorTest);
 
 
-void CompositeVectorTest::setUp()
+void BlockVectorTest::setUp()
 {
   int i;
   vq.resize(5, 1);   // = [1 1 1 1 1]
@@ -40,21 +40,23 @@ void CompositeVectorTest::setUp()
   simpleVect = new SimpleVector(vdotq);
   q = new SimpleVector(vq);
   r = new SimpleVector(vq);
-  CV = new CompositeVector(*simpleVect);
+  CV = new BlockVector(*simpleVect);
   //  CV->add(*simpleVect);
   CV->add(*r); // CV = [ [2 2 2 ]   [1 1 1 1 1]] tabindex = [3 8]
   SimpleVector * tmp1 = new SimpleVector(3);
   SimpleVector * tmp2 = new SimpleVector(5);
   tmp1->zero();
   tmp2->zero();
-  tmp = new CompositeVector();
+  tmp = new BlockVector();
   tmp->add(*tmp1);
   tmp->add(*tmp2);
   delete tmp2;
   delete tmp1;
+  tol = 1e-9;
+
 }
 
-void CompositeVectorTest::tearDown()
+void BlockVectorTest::tearDown()
 {
   delete tmp;
   delete CV;
@@ -66,40 +68,43 @@ void CompositeVectorTest::tearDown()
 // CONSTRUCTORS
 
 // default
-void CompositeVectorTest::testBuildCompositeVector()
+void BlockVectorTest::testBuildBlockVector()
 {
-  CompositeVector *v = new CompositeVector();
+  BlockVector *v = new BlockVector();
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector : ", v->isComposite(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector : ", v->size() == 0, true);
-  cout << "CompositeVectorTest >>> testBuildCompositeVector ............................... OK\n ";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector : ", v->isBlock(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector : ", v->size() == 0, true);
+  cout << "BlockVectorTest >>> testBuildBlockVector ............................... OK\n ";
   delete v;
 }
 
 // Copy from SiconosVector and direct copy
-void CompositeVectorTest::testBuildCompositeVector1()
+void BlockVectorTest::testBuildBlockVector1()
 {
-  // copy from composite
-  CompositeVector * tmp = new CompositeVector(*simpleVect);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", *tmp == *simpleVect, true);
+  // copy from a block vector
+  BlockVector * tmp = new BlockVector(*simpleVect);
+  double norm = ((*tmp) - (*simpleVect)).norm();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", norm < tol, true);
 
-  // from a SiconosVector which is a composite
+  // from a SiconosVector which is a block vector
 
   cout << (CV->getTabIndex())[0] << endl;
-  CompositeVector * vv = new CompositeVector(*CV);
+  BlockVector * vv = new BlockVector(*CV);
   cout << (vv->getTabIndex())[0] << endl;
 
   int a = (vv->getTabIndex())[0];
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", vv->isComposite(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", vv->size() == 8, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", vv->getValues(0) == simpleVect->getValues(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", vv->getValues(1) == q->getValues(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", (vv->getTabIndex()).size() == 2 , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", a == 3 , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", vv->isBlock(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", vv->size() == 8, true);
+  norm = (((*(vv->getVectorPtr(0)))) - (*simpleVect)).norm();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", norm < tol, true);
+  norm = (((*(vv->getVectorPtr(1)))) - (*q)).norm();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", norm < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", (vv->getTabIndex()).size() == 2 , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", a == 3 , true);
   a = (vv->getTabIndex())[1];
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector1 : ", a == 8 , true);
-  cout << "CompositeVectorTest >>> testBuildCompositeVector1 ............................... OK\n ";
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", a == 8 , true);
+  cout << "BlockVectorTest >>> testBuildBlockVector1 ............................... OK\n ";
   delete vv;
   delete tmp;
 }
@@ -110,20 +115,20 @@ void CompositeVectorTest::testBuildCompositeVector1()
 // toString
 
 // ()
-void CompositeVectorTest::testOperatorAccess()
+void BlockVectorTest::testOperatorAccess()
 {
 
   (*CV)(2) = 10;
   double d = (*CV)(7);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccess : ", CV->isComposite(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccess : ", CV->isBlock(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccess : ", CV->size() == 8 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", (*(CV->getSvref())[0])(2) == 10 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", d == 1, true);
-  cout << "CompositeVectorTest >>> testOperatorAccessRef ............................... OK\n ";
+  cout << "BlockVectorTest >>> testOperatorAccessRef ............................... OK\n ";
 }
 
 // setValue
-void CompositeVectorTest::testSetValue()
+void BlockVectorTest::testSetValue()
 {
   double a = 4;
   int i = 2;
@@ -132,20 +137,20 @@ void CompositeVectorTest::testSetValue()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValue : ", b == 4, true);
   b = (CV->getValues(0))(2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValue : ", b == 4, true);
-  cout << "CompositeVectorTest >>> testSetValue ............................... OK\n ";
+  cout << "BlockVectorTest >>> testSetValue ............................... OK\n ";
 }
 
 // getValue
-void CompositeVectorTest::testGetValue()
+void BlockVectorTest::testGetValue()
 {
   int i = 2;
   CV->setValue(i, 8);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetValue : ", CV->getValue(i) == 8 , true);
-  cout << "CompositeVectorTest >>> testGetValue ............................... OK\n ";
+  cout << "BlockVectorTest >>> testGetValue ............................... OK\n ";
 }
 
 // setValues
-void CompositeVectorTest::testSetValues()
+void BlockVectorTest::testSetValues()
 {
   CV->setValues(vq, 0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", CV->size() == 10, true);
@@ -163,11 +168,11 @@ void CompositeVectorTest::testSetValues()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", a == 5, true);
   a = (CV->getTabIndex())[1];
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", a == 10, true);
-  cout << "CompositeVectorTest >>> testSetValues ............................... OK\n ";
+  cout << "BlockVectorTest >>> testSetValues ............................... OK\n ";
 }
 
 // getValues
-void CompositeVectorTest::testGetValues()
+void BlockVectorTest::testGetValues()
 {
   unsigned int size = (CV->getValues(0)).size();
   unsigned int i;
@@ -178,25 +183,25 @@ void CompositeVectorTest::testGetValues()
   size = tmp.size();
   for (i = 0; i < size; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", tmp(i) == 1, true);
-  cout << "CompositeVectorTest >>> testGetValues ............................... OK\n ";
+  cout << "BlockVectorTest >>> testGetValues ............................... OK\n ";
 }
 
 // size
-void CompositeVectorTest::testSize()
+void BlockVectorTest::testSize()
 {
   unsigned int i = CV->size();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSize : ", i == 8, true);
-  cout << "CompositeVectorTest >>> testSize ............................... OK\n ";
+  cout << "BlockVectorTest >>> testSize ............................... OK\n ";
 }
 
 // add and addPtr
-void CompositeVectorTest::testAdd()
+void BlockVectorTest::testAdd()
 {
   SimpleVector tmp =  *q;
   CV->addPtr(simpleVect);
   CV->add(tmp);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", CV->isComposite(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", CV->isBlock(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", CV->size() == 16, true);
   double a = (CV->getTabIndex())[0];
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getTabIndex()).size() == 4, true);
@@ -227,11 +232,11 @@ void CompositeVectorTest::testAdd()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", tmp2(i) == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getSvref())[2] == simpleVect, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getSvref())[3] != q, true);
-  cout << "CompositeVectorTest >>> testAdd ............................... OK\n ";
+  cout << "BlockVectorTest >>> testAdd ............................... OK\n ";
 }
 
 // write, read and read from a file constructor
-void CompositeVectorTest::testReadWrite()
+void BlockVectorTest::testReadWrite()
 {
   // write CV into an ascii file
   bool isok = CV->write("testCompWrite_ascii.dat", "ascii");
@@ -243,10 +248,10 @@ void CompositeVectorTest::testReadWrite()
 
   // load v from an ascii file
   string input = "testCompWrite_ascii.dat";
-  CompositeVector * v = new CompositeVector(input, true);
+  BlockVector * v = new BlockVector(input, true);
   // load v2 from a binary file
   string input_bin = "testCompWrite_bin.dat";
-  CompositeVector *v2 = new CompositeVector(input_bin, false);
+  BlockVector *v2 = new BlockVector(input_bin, false);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", v->size(1) == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", v->size() == 8, true);
@@ -257,18 +262,20 @@ void CompositeVectorTest::testReadWrite()
   a = (v->getTabIndex())[1] ;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", a == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", (v->getTabIndex()).size() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", v->getValues(0) == simpleVect->getValues() , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", v->getValues(1) == q->getValues() , true);
+  double norm = ((*(v->getVectorPtr(0))) - (*simpleVect)).norm();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", norm < tol, true);
+  norm = ((*(v->getVectorPtr(1))) - (*q)).norm();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", norm < tol, true);
 
   delete v2;
   delete v;
-  cout << "CompositeVectorTest >>> testWrite ............................... OK\n ";
+  cout << "BlockVectorTest >>> testWrite ............................... OK\n ";
 }
 
 // OPERATORS
 
 // += -=
-void CompositeVectorTest::testOperatorPlusEqual()
+void BlockVectorTest::testOperatorPlusEqual()
 {
   SiconosVector *sv = new SimpleVector(*CV);
   *CV += *sv;
@@ -279,7 +286,7 @@ void CompositeVectorTest::testOperatorPlusEqual()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*CV)(i) == 2, true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", CV->isComposite(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", CV->isBlock(), true);
 
   *CV -= *sv;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", CV->size() == 8, true);
@@ -288,13 +295,13 @@ void CompositeVectorTest::testOperatorPlusEqual()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*CV)(i) == 1, true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector3 : ", CV->isComposite(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector3 : ", CV->isBlock(), true);
 
   delete sv;
 
-  CompositeVector * tmp = new CompositeVector(*CV);
+  BlockVector * tmp = new BlockVector(*CV);
 
-  sv = new CompositeVector(*CV);
+  sv = new BlockVector(*CV);
   *tmp += *sv;
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", tmp->size() == 8, true);
@@ -303,7 +310,7 @@ void CompositeVectorTest::testOperatorPlusEqual()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*tmp)(i) == 2, true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector3 : ", tmp->isComposite(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector3 : ", tmp->isBlock(), true);
 
   *tmp -= *sv;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", tmp->size() == 8, true);
@@ -312,10 +319,10 @@ void CompositeVectorTest::testOperatorPlusEqual()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*tmp)(i) == 1, true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector3 : ", tmp->isComposite(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector3 : ", tmp->isBlock(), true);
 
   delete sv;
-  CompositeVector * sv2 = new CompositeVector(*CV);
+  BlockVector * sv2 = new BlockVector(*CV);
   *CV += *sv2;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", CV->size() == 8, true);
   for (unsigned int i = 0; i < 3; i++)
@@ -323,7 +330,7 @@ void CompositeVectorTest::testOperatorPlusEqual()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*CV)(i) == 2, true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector3 : ", CV->isComposite(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector3 : ", CV->isBlock(), true);
 
   *CV -= *sv2;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", CV->size() == 8, true);
@@ -332,72 +339,48 @@ void CompositeVectorTest::testOperatorPlusEqual()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*CV)(i) == 1, true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector3 : ", CV->isComposite(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector3 : ", CV->isBlock(), true);
 
   delete sv2;
   delete tmp;
 
-  cout << "CompositeVectorTest >>> testOperatorPlusEqualGEN ............................... OK\n ";
+  cout << "BlockVectorTest >>> testOperatorPlusEqualGEN ............................... OK\n ";
 }
 
 // =
-void CompositeVectorTest::testOperatorEqual()
+void BlockVectorTest::testOperatorEqual()
 {
   SiconosVector *v = new SimpleVector(*CV);
-  SiconosVector *w = new CompositeVector(*CV);
+  SiconosVector *w = new BlockVector(*CV);
 
   *tmp = *v;
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector3 : ", tmp->isComposite(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector3 : ", tmp->isBlock(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", tmp->size() == CV->size(), true);
   for (unsigned int i = 0; i < tmp->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*tmp)(i) == (*CV)(i), true);
 
   *tmp = *w;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector3 : ", tmp->isComposite(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector3 : ", tmp->isBlock(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", tmp->size() == CV->size(), true);
   for (unsigned int i = 0; i < tmp->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*tmp)(i) == (*CV)(i), true);
 
   *tmp = *CV;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildCompositeVector3 : ", tmp->isComposite(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector3 : ", tmp->isBlock(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", tmp->size() == CV->size(), true);
   for (unsigned int i = 0; i < tmp->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*tmp)(i) == (*CV)(i), true);
 
   delete w;
   delete v;
-  cout << "CompositeVectorTest >>> testOperatorEqual ............................... OK\n ";
-}
-
-// ==, !=
-
-void CompositeVectorTest::testOperatorComp()
-{
-  SiconosVector *v = new SimpleVector(*CV);
-  SiconosVector *w = new CompositeVector(*CV);
-  CompositeVector *z = new CompositeVector();
-  CompositeVector *z2 = new CompositeVector(*CV);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", *CV == *v, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", *CV == *w, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", *CV == *z2, true);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", !(*CV == *z), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", !(*z == *v), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", !(*z == *w), true);
-
-  delete z2;
-  delete z;
-  delete w;
-  delete v;
-  cout << "CompositeVectorTest >>> testOperatorComp ............................... OK\n ";
+  cout << "BlockVectorTest >>> testOperatorEqual ............................... OK\n ";
 }
 
 
 // *= , /=
 
-void CompositeVectorTest::testOperatorMultDivEqual()
+void BlockVectorTest::testOperatorMultDivEqual()
 {
 
   double d = 2;
@@ -416,11 +399,11 @@ void CompositeVectorTest::testOperatorMultDivEqual()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualGEN : ", (*CV)(i) == 1, true);
 
-  cout << "CompositeVectorTest >>> testOperatorMultDivEqual ............................... OK\n ";
+  cout << "BlockVectorTest >>> testOperatorMultDivEqual ............................... OK\n ";
 }
 
 // addition
-void CompositeVectorTest::testAddition()
+void BlockVectorTest::testAddition()
 {
   SiconosVector * sv = new SimpleVector(*CV);
 
@@ -433,7 +416,7 @@ void CompositeVectorTest::testAddition()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualGEN : ", (*tmp)(i) == 2, true);
 
   delete sv;
-  sv = new CompositeVector(*CV);
+  sv = new BlockVector(*CV);
 
   *tmp = CV->addition(*sv);
 
@@ -444,11 +427,11 @@ void CompositeVectorTest::testAddition()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualGEN : ", (*tmp)(i) == 2, true);
   delete sv;
-  cout << "CompositeVectorTest >>> testAddition ............................... OK\n ";
+  cout << "BlockVectorTest >>> testAddition ............................... OK\n ";
 }
 
 // subtraction
-void CompositeVectorTest::testSubtraction()
+void BlockVectorTest::testSubtraction()
 {
   SiconosVector * sv = new SimpleVector(*CV);
 
@@ -461,7 +444,7 @@ void CompositeVectorTest::testSubtraction()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualGEN : ", (*tmp)(i) == 0, true);
 
   delete sv;
-  sv = new CompositeVector(*CV);
+  sv = new BlockVector(*CV);
 
   *tmp = CV->subtraction(*sv);
 
@@ -471,11 +454,11 @@ void CompositeVectorTest::testSubtraction()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualGEN : ", (*tmp)(i) == 0, true);
   delete sv;
-  cout << "CompositeVectorTest >>> testSubtraction ............................... OK\n ";
+  cout << "BlockVectorTest >>> testSubtraction ............................... OK\n ";
 }
 
 // +
-void CompositeVectorTest::testExternalOperatorPlusMoins()
+void BlockVectorTest::testExternalOperatorPlusMoins()
 {
 
   *tmp = *CV + *CV;
@@ -492,13 +475,13 @@ void CompositeVectorTest::testExternalOperatorPlusMoins()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualGEN : ", (*tmp)(i) == 0, true);
 
-  cout << "CompositeVectorTest >>> testExternalOperatorPlusMoins ............................... OK\n ";
+  cout << "BlockVectorTest >>> testExternalOperatorPlusMoins ............................... OK\n ";
 }
 
 // * /
-void CompositeVectorTest::testExternalOperatorMultDiv()
+void BlockVectorTest::testExternalOperatorMultDiv()
 {
-  CompositeVector *w = new CompositeVector(*CV);
+  BlockVector *w = new BlockVector(*CV);
   double d = 2;
 
   *w = d * (*CV);
@@ -516,14 +499,14 @@ void CompositeVectorTest::testExternalOperatorMultDiv()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualGEN : ", (*w)(i) == 0.5, true);
 
   delete w;
-  cout << "CompositeVectorTest >>> testExternalOperatorMultDiv ............................... OK\n ";
+  cout << "BlockVectorTest >>> testExternalOperatorMultDiv ............................... OK\n ";
 }
 
 // matTransVectMult
 
-void CompositeVectorTest::testExternalOperatorMultMat()
+void BlockVectorTest::testExternalOperatorMultMat()
 {
-  SiconosMatrix m(2, 4);
+  SimpleMatrix m(2, 4);
   m(0, 0) = 0;
   m(0, 1) = 1;
   m(0, 2) = -1;
@@ -533,7 +516,7 @@ void CompositeVectorTest::testExternalOperatorMultMat()
   m(1, 2) = -1;
   m(1, 3) = -2;
 
-  CompositeVector *v = new CompositeVector(*simpleVect);
+  BlockVector *v = new BlockVector(*simpleVect);
   SimpleVector *v2 = new SimpleVector(1);
   (*v2)(0) = 4;
   (*v)(0) = 1;
@@ -547,17 +530,17 @@ void CompositeVectorTest::testExternalOperatorMultMat()
 
   SimpleVector sv(2);
   sv = m * *v;
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMultMat : ", sv == res, true);
+  double norm = (sv - res).norm();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMultMat : ", norm < tol, true);
 
   delete v2;
   delete v;
-  cout << "CompositeVectorTest >>> testExternalOperatorMultMat ............................... OK\n ";
+  cout << "BlockVectorTest >>> testExternalOperatorMultMat ............................... OK\n ";
 }
 
-void CompositeVectorTest::testExternalOperatorMatTransMult()
+void BlockVectorTest::testExternalOperatorMatTransMult()
 {
-  SiconosMatrix m(4, 2);
+  SimpleMatrix m(4, 2);
   m(0, 0) = 0;
   m(0, 1) = 2;
   m(1, 0) = 1;
@@ -567,7 +550,7 @@ void CompositeVectorTest::testExternalOperatorMatTransMult()
   m(3, 0) = 0;
   m(3, 1) = -2;
 
-  CompositeVector *v = new CompositeVector(*simpleVect);
+  BlockVector *v = new BlockVector(*simpleVect);
   SimpleVector *v2 = new SimpleVector(1);
   (*v2)(0) = 4;
   (*v)(0) = 1;
@@ -581,12 +564,12 @@ void CompositeVectorTest::testExternalOperatorMatTransMult()
 
   SimpleVector sv(2);
   sv = matTransVecMult(m, *v);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMatTransMult : ", sv == res, true);
+  double norm = (sv - res).norm();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMatTransMult : ", norm < tol, true);
 
   delete v2;
   delete v;
-  cout << "CompositeVectorTest >>> testExternalOperatorMatTransMult ............................... OK\n ";
+  cout << "BlockVectorTest >>> testExternalOperatorMatTransMult ............................... OK\n ";
 }
 
 

@@ -62,7 +62,7 @@ LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Strategy* newStrat):
     if (xmllcp->hasM())
     {
       nLcp = (xmllcp->getM()).size(0);
-      M = new SiconosMatrix(xmllcp->getM());
+      M = new SimpleMatrix(xmllcp->getM());
       isMAllocatedIn = true;
     }
 
@@ -178,7 +178,7 @@ void LCP::setM(const SiconosMatrix& newValue)
 
   if (M == NULL)
   {
-    M = new SiconosMatrix(nLcp, nLcp);
+    M = new SimpleMatrix(nLcp, nLcp);
     isMAllocatedIn = true;
   }
 
@@ -281,7 +281,7 @@ void LCP::computeAllBlocks()
     // --- DIAGONAL BLOCKS MANAGEMENT ---
 
     // matrix that corresponds to diagonal block for the current interaction
-    diagonalBlocksMap[ currentInteraction ] = new SiconosMatrix(sizeBlock, sizeBlock);
+    diagonalBlocksMap[ currentInteraction ] = new SimpleMatrix(sizeBlock, sizeBlock);
     SiconosMatrix * currentMatrixBlock = diagonalBlocksMap[ currentInteraction ];
 
     // get DS list of the current interaction
@@ -349,8 +349,8 @@ void LCP::computeAllBlocks()
         indexMin = topology->getIndexMin(linkedInteraction);
         sizeLinkedBlock = (rMax - indexMin[0]) * linkedInteractionSize;
 
-        (extraDiagonalBlocksMap[currentInteraction])[linkedInteraction] = new SiconosMatrix(sizeBlock, sizeLinkedBlock);
-        (extraDiagonalBlocksMap[linkedInteraction])[currentInteraction] = new SiconosMatrix(sizeLinkedBlock, sizeBlock);
+        (extraDiagonalBlocksMap[currentInteraction])[linkedInteraction] = new SimpleMatrix(sizeBlock, sizeLinkedBlock);
+        (extraDiagonalBlocksMap[linkedInteraction])[currentInteraction] = new SimpleMatrix(sizeLinkedBlock, sizeBlock);
         coupledInteractionsBlock = extraDiagonalBlocksMap[currentInteraction][linkedInteraction];
         coupledInteractionsBlockSym = extraDiagonalBlocksMap[linkedInteraction][currentInteraction];
 
@@ -419,8 +419,8 @@ void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeI
       {
         sizeDS = (*itDS)->getN();
         // get blocks corresponding to the current DS
-        C = new SiconosMatrix(sizeInteraction, sizeDS);
-        B = new SiconosMatrix(sizeDS, sizeInteraction);
+        C = new SimpleMatrix(sizeInteraction, sizeDS);
+        B = new SimpleMatrix(sizeDS, sizeInteraction);
         LTIR->getCBlockDSPtr(*itDS, *C);
         LTIR->getBBlockDSPtr(*itDS, *B);
         // get row i of C
@@ -448,8 +448,8 @@ void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeI
     {
       sizeDS = (*itDS)->getN();
       // get blocks corresponding to the current DS
-      C = new SiconosMatrix(sizeInteraction, sizeDS);
-      B = new SiconosMatrix(sizeDS, sizeInteraction);
+      C = new SimpleMatrix(sizeInteraction, sizeDS);
+      B = new SimpleMatrix(sizeDS, sizeInteraction);
       LTIR->getCBlockDSPtr(*itDS, *C);
       LTIR->getBBlockDSPtr(*itDS, *B);
       *currentMatrixBlock += h * *C * (*W[*itDS] * *B);
@@ -489,8 +489,8 @@ void LCP::computeExtraDiagonalBlocksLinearTIR(Relation * RCurrent, Relation* RLi
       {
         sizeDS = (*itDS)->getN();
         // get blocks corresponding to the current DS
-        C = new SiconosMatrix(sizeInteraction, sizeDS);
-        B = new SiconosMatrix(sizeDS, linkedInteractionSize);
+        C = new SimpleMatrix(sizeInteraction, sizeDS);
+        B = new SimpleMatrix(sizeDS, linkedInteractionSize);
         LTIR1->getCBlockDSPtr(*itDS, *C);
         LTIR2->getBBlockDSPtr(*itDS, *B);
         // get row i of C
@@ -515,8 +515,8 @@ void LCP::computeExtraDiagonalBlocksLinearTIR(Relation * RCurrent, Relation* RLi
     {
       sizeDS = (*itDS)->getN();
       // get blocks corresponding to the current DS
-      C = new SiconosMatrix(sizeInteraction, sizeDS);
-      B = new SiconosMatrix(sizeDS, linkedInteractionSize);
+      C = new SimpleMatrix(sizeInteraction, sizeDS);
+      B = new SimpleMatrix(sizeDS, linkedInteractionSize);
       LTIR1->getCBlockDSPtr(*itDS, *C);
       LTIR2->getBBlockDSPtr(*itDS, *B);
       *coupledInteractionsBlock +=  *C * (*W[*itDS] * *B);
@@ -562,7 +562,7 @@ void LCP::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& siz
       {
         sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
         // get blocks corresponding to the current DS
-        G = new SiconosMatrix(sizeInteraction, sizeDS);
+        G = new SimpleMatrix(sizeInteraction, sizeDS);
         LR->getGBlockDS(*itDS, *G);
         // get row i of G
         Grow = new SimpleVector(sizeDS);
@@ -588,7 +588,7 @@ void LCP::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& siz
 
       sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
       // get blocks corresponding to the current DS
-      G = new SiconosMatrix(sizeInteraction, sizeDS);
+      G = new SimpleMatrix(sizeInteraction, sizeDS);
       LR->getGBlockDS(*itDS, *G);
       *currentMatrixBlock +=  *G * (W[*itDS])->multTranspose(*G);
       delete G;
@@ -628,8 +628,8 @@ void LCP::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* R
       {
         sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
         // get blocks corresponding to the current DS
-        Gcurrent = new SiconosMatrix(sizeInteraction, sizeDS);
-        Glinked = new SiconosMatrix(linkedInteractionSize, sizeDS);
+        Gcurrent = new SimpleMatrix(sizeInteraction, sizeDS);
+        Glinked = new SimpleMatrix(linkedInteractionSize, sizeDS);
         LR1->getGBlockDS(*itDS, *Gcurrent);
         LR2->getGBlockDS(*itDS, *Glinked);
         // get row i of G
@@ -654,8 +654,8 @@ void LCP::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* R
     {
       sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
       // get blocks corresponding to the current DS
-      Gcurrent = new SiconosMatrix(sizeInteraction, sizeDS);
-      Glinked = new SiconosMatrix(linkedInteractionSize, sizeDS);
+      Gcurrent = new SimpleMatrix(sizeInteraction, sizeDS);
+      Glinked = new SimpleMatrix(linkedInteractionSize, sizeDS);
       LR1->getGBlockDS(*itDS, *Gcurrent);
       LR2->getGBlockDS(*itDS, *Glinked);
       *coupledInteractionsBlock += *Gcurrent * (W[*itDS])->multTranspose(*Glinked);
@@ -851,14 +851,14 @@ void LCP::assembleM() //
 
   if (M == NULL)
   {
-    M = new SiconosMatrix(nLcp, nLcp);
+    M = new SimpleMatrix(nLcp, nLcp);
     isMAllocatedIn = true;
   }
   else if (M->size(0) != nLcp || M->size(1) != nLcp)
   {
     // reset M matrix if it has a wrong size
     if (isMAllocatedIn) delete M;
-    M = new SiconosMatrix(nLcp, nLcp);
+    M = new SimpleMatrix(nLcp, nLcp);
     isMAllocatedIn = true;
   }
   M->zero();
@@ -907,7 +907,7 @@ void LCP::assembleM() //
     {
       // get the "reduced" diagonal block for the current interaction
       size = blockIndexesMap[currentInteraction].size();
-      SiconosMatrix * reducedBlock = new SiconosMatrix(size, size);
+      SiconosMatrix * reducedBlock = new SimpleMatrix(size, size);
       blockDiago->getBlock(blockIndexesMap[currentInteraction], blockIndexesMap[currentInteraction], *reducedBlock);
 
       // diagonal blocks
@@ -927,7 +927,7 @@ void LCP::assembleM() //
           sizeLinked = blockIndexesMap[linkedInteraction].size();
           // get the corresponding "reduced" block
           coupledBlock = (*it).second;
-          reducedCoupledBlock = new SiconosMatrix(size, sizeLinked);
+          reducedCoupledBlock = new SimpleMatrix(size, sizeLinked);
           coupledBlock->getBlock(blockIndexesMap[currentInteraction], blockIndexesMap[linkedInteraction], *reducedCoupledBlock);
           col = interactionEffectivePositionMap[ linkedInteraction ];
           M->blockMatrixCopy(*reducedCoupledBlock, pos, col); // \todo avoid copy

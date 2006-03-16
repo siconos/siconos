@@ -18,7 +18,7 @@
 */
 /** \class SiconosException
  *   \brief This class is used to save vectors for several steps
- *  There is a max number of saved vector (memorySize) and all the vector (simple or composite)
+ *  There is a max number of saved vector (memorySize) and all the vector (simple or block)
  * should have the same size.
  *  \author SICONOS Development Team - copyright INRIA
  *   \version 1.1.3.
@@ -28,7 +28,7 @@
 #ifndef SICONOSMEMORY_H
 #define SICONOSMEMORY_H
 
-#include "CompositeVector.h"
+#include "BlockVector.h"
 #include "SiconosMemoryException.h"
 #include "SiconosMemoryXML.h"
 #include "check.h"

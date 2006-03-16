@@ -54,21 +54,21 @@ LinearTIR::LinearTIR(RelationXML* relxml, Interaction * inter):
       if (inter != NULL && size != sizeY)
         RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between C and y vector");
 
-      C = new SiconosMatrix(lTIRxml->getC());
+      C = new SimpleMatrix(lTIRxml->getC());
       isAllocatedIn[0] = true;
 
       if (lTIRxml->hasD())
       {
         if (lTIRxml->getD().size(0) != sizeY || lTIRxml->getD().size(0) != sizeY)
           RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between D and C");
-        D = new SiconosMatrix(lTIRxml->getD());
+        D = new SimpleMatrix(lTIRxml->getD());
         isAllocatedIn[1] = true;
       }
       if (lTIRxml->hasF())
       {
         if (lTIRxml->getF().size(0) != sizeY)
           RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between F and C");
-        F = new SiconosMatrix(lTIRxml->getF());
+        F = new SimpleMatrix(lTIRxml->getF());
         isAllocatedIn[2] = true;
       }
       if (lTIRxml->hasE())
@@ -95,7 +95,7 @@ LinearTIR::LinearTIR(RelationXML* relxml, Interaction * inter):
 
         if (lTIRxml->getB().size(0) != sizeX || (C != NULL && sizeB != C->size(0)))
           RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between B and ds vector");
-        B = new SiconosMatrix(lTIRxml->getB());
+        B = new SimpleMatrix(lTIRxml->getB());
         isAllocatedIn[4] = true;
       }
       else
@@ -136,8 +136,8 @@ LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB, Inter
       RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size with y vector for input vector or matrix");
   }
 
-  C = new SiconosMatrix(sizeY, sizeX);
-  B = new SiconosMatrix(sizeX, sizeY);
+  C = new SimpleMatrix(sizeY, sizeX);
+  B = new SimpleMatrix(sizeX, sizeY);
   *C = newC;
   *B = newB;
   isAllocatedIn.resize(6, false);
@@ -166,18 +166,18 @@ LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
       RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between C and y vector");
   }
 
-  C = new SiconosMatrix(sizeY, sizeX);
+  C = new SimpleMatrix(sizeY, sizeX);
   *C = newC;
 
   if (newD.size(0) != sizeY || newD.size(1) != sizeY)
     RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between C and D");
-  D = new SiconosMatrix(sizeY, sizeY);
+  D = new SimpleMatrix(sizeY, sizeY);
   *D = newD;
 
   // \todo check newF.size(1) = size of u and that the ds type is well adapted to this kind of relation
   if (newF.size(0) != sizeY)
     RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between F and C");
-  F = new SiconosMatrix(sizeY, newF.size(1));
+  F = new SimpleMatrix(sizeY, newF.size(1));
   *F = newF;
 
   if (newE.size(0) != sizeY)
@@ -187,7 +187,7 @@ LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
 
   if (newB.size(0) != sizeX || newB.size(1) != sizeY)
     RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between C and B");
-  B = new SiconosMatrix(sizeX, sizeY);
+  B = new SimpleMatrix(sizeX, sizeY);
   *B = newB;
 
   if (newA.size(0) != sizeX)
@@ -216,16 +216,16 @@ LinearTIR::LinearTIR(const Relation & newLTIR, Interaction* inter):
   // === Output ===
   if (!isOutputPlugged)
   {
-    C = new SiconosMatrix(ltir->getC());
+    C = new SimpleMatrix(ltir->getC());
     isAllocatedIn[0] = true; // C
     if (ltir->getDPtr() != NULL)
     {
-      D = new SiconosMatrix(ltir->getD());
+      D = new SimpleMatrix(ltir->getD());
       isAllocatedIn[1] = true;
     }
     if (ltir->getFPtr() != NULL)
     {
-      F = new SiconosMatrix(ltir->getF());
+      F = new SimpleMatrix(ltir->getF());
       isAllocatedIn[2] = true;
     }
     if (ltir->getEPtr() != NULL)
@@ -240,7 +240,7 @@ LinearTIR::LinearTIR(const Relation & newLTIR, Interaction* inter):
   // === Input ===
   if (!isInputPlugged)
   {
-    B = new SiconosMatrix(ltir->getB());
+    B = new SimpleMatrix(ltir->getB());
     isAllocatedIn[4] = true; // B
 
     if (ltir->getAPtr() != NULL)
@@ -303,7 +303,7 @@ void LinearTIR::setC(const SiconosMatrix& newValue)
 
   if (C == NULL)
   {
-    C = new SiconosMatrix(newValue);
+    C = new SimpleMatrix(newValue);
     isAllocatedIn[0] = true;
   }
   else
@@ -348,7 +348,7 @@ void LinearTIR::setD(const SiconosMatrix& newValue)
 
   if (D == NULL)
   {
-    D = new SiconosMatrix(newValue);
+    D = new SimpleMatrix(newValue);
     isAllocatedIn[1] = true;
   }
   else
@@ -391,7 +391,7 @@ void LinearTIR::setF(const SiconosMatrix& newValue)
 
   if (F == NULL)
   {
-    F = new SiconosMatrix(newValue);
+    F = new SimpleMatrix(newValue);
     isAllocatedIn[2] = true;
   }
   else
@@ -477,7 +477,7 @@ void LinearTIR::setB(const SiconosMatrix& newValue)
 
   if (B == NULL)
   {
-    B = new SiconosMatrix(newValue);
+    B = new SimpleMatrix(newValue);
     isAllocatedIn[4] = true;
   }
   else
@@ -665,12 +665,12 @@ void LinearTIR::computeOutput(const double& time)
   if (!isOutputPlugged)
   {
     vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-    CompositeVector *xTmp = new CompositeVector();
-    CompositeVector *uTmp = new CompositeVector();
+    BlockVector *xTmp = new BlockVector();
+    BlockVector *uTmp = new BlockVector();
     vector<DynamicalSystem*>::iterator it;
     for (it = vDS.begin(); it != vDS.end(); it++)
     {
-      // Put x and u of each DS into a composite
+      // Put x and u of each DS into a block
       // Warning: use copy constructors, no link between pointers
       if ((*it)->getType() != LDS)
         RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented for DS type " + (*it)->getType());
@@ -712,13 +712,13 @@ void LinearTIR::computeFreeOutput(const double& time)
   if (!isOutputPlugged)
   {
     vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-    CompositeVector *xTmp = new CompositeVector();
-    CompositeVector *uTmp = new CompositeVector();
+    BlockVector *xTmp = new BlockVector();
+    BlockVector *uTmp = new BlockVector();
     vector<DynamicalSystem*>::iterator it;
 
     for (it = vDS.begin(); it != vDS.end(); it++)
     {
-      // Put xFree and u of each DS into a composite
+      // Put xFree and u of each DS into a block
       // Warning: use copy constructors, no link between pointers
       if ((*it)->getType() != LDS)
         RuntimeException::selfThrow("LinearTIR - computeFreeOutput: not yet implemented for DS type " + (*it)->getType());
@@ -758,15 +758,15 @@ void LinearTIR::computeInput(const double& time)
   {
     vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
     vector<DynamicalSystem*>::iterator it;
-    CompositeVector *r = new CompositeVector();
+    BlockVector *r = new BlockVector();
     for (it = vDS.begin(); it != vDS.end(); it++)
     {
-      // Put r of each DS into a composite
+      // Put r of each DS into a block
       // Warning: use addPtr -> link between pointers
-      bool isComp = (*it)->getRPtr()->isComposite();
+      bool isComp = (*it)->getRPtr()->isBlock();
       if (isComp)
       {
-        CompositeVector * tmp = static_cast<CompositeVector*>((*it)->getRPtr());
+        BlockVector * tmp = static_cast<BlockVector*>((*it)->getRPtr());
         r->addPtr(tmp->getVectorPtr(0));
         r->addPtr(tmp->getVectorPtr(1));
       }

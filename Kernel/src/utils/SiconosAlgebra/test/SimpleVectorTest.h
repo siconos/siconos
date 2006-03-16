@@ -23,7 +23,7 @@
 #include "SiconosVector.h"
 #include "SimpleVector.h"
 #include "SiconosMatrix.h"
-#include "CompositeVector.h"
+#include "BlockVector.h"
 #include <math.h>
 #include <vector>
 

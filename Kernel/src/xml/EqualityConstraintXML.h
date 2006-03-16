@@ -70,11 +70,11 @@ public:
     return res;
   }
 
-  /** \fn SiconosMatrix getG()
+  /** \fn SimpleMatrix getG()
   *   \brief Return G matrix of the EqualityConstraintXML
-  *   \return SiconosMatrix : the G matrix of the EqualityConstraintXML
+  *   \return SimpleMatrix : the G matrix of the EqualityConstraintXML
   */
-  inline SiconosMatrix getG()
+  inline SimpleMatrix getG()
   {
     return SiconosDOMTreeTools::getSiconosMatrixValue(this->GNode);
   }

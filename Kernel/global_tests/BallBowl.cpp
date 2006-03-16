@@ -21,7 +21,7 @@
 #include "LagrangianLinearTIDS.h"
 
 #include "SimpleVector.h"
-#include "SiconosMatrix.h"
+#include "SimpleMatrix.h"
 #include "LCP.h"
 #include <sys/time.h>
 #include <iostream>
@@ -49,7 +49,7 @@ bool BallBowl()
     int N = t->getNSteps(); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    SiconosMatrix dataPlot(N + 1, 3);
+    SimpleMatrix dataPlot(N + 1, 3);
 
     // For the initial time step:
     // time
@@ -81,7 +81,7 @@ bool BallBowl()
       // Ball: velocity
       dataPlot(k, 2) = (ball->getVelocity())(0);
     }
-    SiconosMatrix * dataRef = new SiconosMatrix("refBallBowl.dat", true);
+    SiconosMatrix * dataRef = new SimpleMatrix("refBallBowl.dat", true);
     double tol = 1e-7;
     double norm = (dataPlot - (*dataRef)).normInf() ;
     cout << endl << endl;

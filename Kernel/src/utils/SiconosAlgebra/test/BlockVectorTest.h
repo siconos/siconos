@@ -22,25 +22,25 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "SiconosVector.h"
 #include "SimpleVector.h"
-#include "CompositeVector.h"
+#include "BlockVector.h"
 #include "SiconosMatrix.h"
 
 #include <math.h>
 
 using namespace std;
 
-class CompositeVectorTest : public CppUnit::TestFixture
+class BlockVectorTest : public CppUnit::TestFixture
 {
 
 
 private:
 
   // test suite
-  CPPUNIT_TEST_SUITE(CompositeVectorTest);
+  CPPUNIT_TEST_SUITE(BlockVectorTest);
 
   // test list
-  CPPUNIT_TEST(testBuildCompositeVector);
-  CPPUNIT_TEST(testBuildCompositeVector1);
+  CPPUNIT_TEST(testBuildBlockVector);
+  CPPUNIT_TEST(testBuildBlockVector1);
   CPPUNIT_TEST(testOperatorAccess);
   CPPUNIT_TEST(testSetValue);
   CPPUNIT_TEST(testGetValue);
@@ -62,8 +62,8 @@ private:
 
   CPPUNIT_TEST_SUITE_END();
 
-  void testBuildCompositeVector();
-  void testBuildCompositeVector1();
+  void testBuildBlockVector();
+  void testBuildBlockVector1();
   void testOperatorAccess();
   void testSetValue();
   void testGetValue();
@@ -90,7 +90,7 @@ private:
   SimpleVector * simpleVect;
   std::vector<double> vq;
   std::vector<double> vdotq;
-  CompositeVector * CV, *tmp;
+  BlockVector * CV, *tmp;
 
 
 public:

@@ -136,7 +136,7 @@ protected:
   /** \fn void (*h0Ptr)(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfy, double* y, double * param=0);
    * \brief computes y = h(q)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
-   * \param double*: vector q (composite of all DS q-vectors)
+   * \param double*: vector q (block of all DS q-vectors)
    * \param unsigned int: size of output vector y
    * \param double*: output vector y (in-out parameter)
    * \param double*: vector of parameters
@@ -145,7 +145,7 @@ protected:
   /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfy, double* G, double * param);
    * \brief computes G(q)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
-   * \param double*: vector q (composite of all DS q-vectors)
+   * \param double*: vector q (block of all DS q-vectors)
    * \param unsigned int: size of output vector y
    * \param double*: output matrix G[0] (in-out parameter)
    * \param double*: vector of parameters
@@ -157,7 +157,7 @@ protected:
    *                    const double* time, const unsigned int* sizeOfy,  double* y, double * param);
    * \brief computes y = h(q,t)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
-   * \param double*: vector q (composite of all DS q-vectors)
+   * \param double*: vector q (block of all DS q-vectors)
    * \param double*: time
    * \param unsigned int: size of output vector y
    * \param double*: output vector y (in-out parameter)
@@ -169,7 +169,7 @@ protected:
    *                    const unsigned int* sizeOfy,  double* G, double * param);
    * \brief computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
-   * \param double*: vector q (composite of all DS q-vectors)
+   * \param double*: vector q (block of all DS q-vectors)
    * \param double*: time
    * \param unsigned int: size of output vector y
    * \param double*: output matrix G[0] (in-out parameter)
@@ -181,7 +181,7 @@ protected:
    *                    const unsigned int* sizeOfy,  double* G, double * param);
    * \brief computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
-   * \param double*: vector q (composite of all DS q-vectors)
+   * \param double*: vector q (block of all DS q-vectors)
    * \param double*: time
    * \param unsigned int: size of output vector y
    * \param double*: output matrix G[1] (in-out parameter)
@@ -195,7 +195,7 @@ protected:
    *                    const double* lambda, const unsigned int* sizeOfy, double* y, double * param);
    * \brief computes y = h(q,t)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
-   * \param double*: vector q (composite of all DS q-vectors)
+   * \param double*: vector q (block of all DS q-vectors)
    * \param double*: vector lambda
    * \param unsigned int: size of output vector y
    * \param double*: output vector y (in-out parameter)
@@ -207,7 +207,7 @@ protected:
    *                    const unsigned int* sizeOfy, double* G, double * param);
    * \brief computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
-   * \param double*: vector q (composite of all DS q-vectors)
+   * \param double*: vector q (block of all DS q-vectors)
    * \param double*: lambda
    * \param unsigned int: size of output vector y
    * \param double*: output matrix G[0] (in-out parameter)
@@ -219,7 +219,7 @@ protected:
    *                    const unsigned int* sizeOfy, double* G, double * param);
    * \brief computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
-   * \param double*: vector q (composite of all DS q-vectors)
+   * \param double*: vector q (block of all DS q-vectors)
    * \param double*: lambda
    * \param unsigned int: size of output vector y
    * \param double*: output matrix G[1] (in-out parameter)
@@ -316,11 +316,11 @@ public:
    */
   void setGVector(const std::vector<SiconosMatrix*> &);
 
-  /** \fn const SiconosMatrix getG(unsigned int& index) const
+  /** \fn const SimpleMatrix getG(unsigned int& index) const
    *  \brief get matrix G[index]
-   *  \return a SiconosMatrix
+   *  \return a SimpleMatrix
    */
-  inline const SiconosMatrix getG(const unsigned int & index = 0) const
+  inline const SimpleMatrix getG(const unsigned int & index = 0) const
   {
     return *(G[index]);
   }

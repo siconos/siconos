@@ -31,7 +31,7 @@
 
 #include "SiconosConst.h"
 #include "SimpleVector.h"
-#include "SiconosMatrix.h"
+#include "SimpleMatrix.h"
 
 #include "XMLException.h"
 #include "XMLTagsName.h"
@@ -75,13 +75,13 @@ public:
    */
   static std::vector<int> getIntVector(const xmlNode *);
 
-  /** \fn static SiconosMatrix getSiconosMatrixValue(xmlNode * siconosMatrixNode)
-   *   \brief Return a SiconosMatrix computed from a siconos matrix node
-   *   \param siconosMatrixNode : the matrix node you want to get in SiconosMatrix type
+  /** \fn static SimpleMatrix getSiconosMatrixValue(xmlNode * siconosMatrixNode)
+   *   \brief Return a SimpleMatrix computed from a siconos matrix node
+   *   \param siconosMatrixNode : the matrix node you want to get in SimpleMatrix type
    *   \return A Sicono   else cout<<"!!! /!\ the number of dynamical system of the interaction is uneven, a couple of dynamical system in interaction is not complete."<<endl;
   sMatrix
    */
-  static SiconosMatrix getSiconosMatrixValue(const xmlNode * siconosMatrixNode);
+  static SimpleMatrix getSiconosMatrixValue(const xmlNode * siconosMatrixNode);
 
 
   //    /** \fn static vector<SiconosVector*> getVectorMemoryValue(const xmlNode * memoryNode)

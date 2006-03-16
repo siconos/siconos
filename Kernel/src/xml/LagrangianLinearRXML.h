@@ -59,11 +59,11 @@ public:
 
   ~LagrangianLinearRXML();
 
-  /** \fn SiconosMatrix getH()
+  /** \fn SimpleMatrix getH()
    *   \brief Return the H of the LLRelationXML
-   *   \return The H SiconosMatrix of the LLRelationXML
+   *   \return The H SimpleMatrix of the LLRelationXML
    */
-  inline SiconosMatrix getH()
+  inline SimpleMatrix getH()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(HNode);
   }
@@ -78,11 +78,11 @@ public:
     return  SiconosDOMTreeTools::getSiconosVectorValue(bNode);
   }
 
-  /** \fn SiconosMatrix getD()
+  /** \fn SimpleMatrix getD()
    *   \brief Return the D of the LLRelationXML
-   *   \return The D SiconosMatrix of the LLRelationXML
+   *   \return The D SimpleMatrix of the LLRelationXML
    */
-  inline SiconosMatrix getD()
+  inline SimpleMatrix getD()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(DNode);
   }

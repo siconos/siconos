@@ -55,11 +55,11 @@ public:
 
   ~QPXML();
 
-  /** \fn SiconosMatrix getQ()
+  /** \fn SimpleMatrix getQ()
   *   \brief Return Q
-  *   \return The Q SiconosMatrix of the QP
+  *   \return The Q SimpleMatrix of the QP
   */
-  inline SiconosMatrix getQ()
+  inline SimpleMatrix getQ()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->QNode);
   }

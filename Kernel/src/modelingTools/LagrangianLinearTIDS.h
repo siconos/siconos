@@ -167,20 +167,14 @@ public:
   // destructor
   ~LagrangianLinearTIDS();
 
-  // getter/setter
-  /** \fn SiconosMatrix getK()
-   *  \brief allow to get the SiconosMatrix K
-   *  \return the SiconosMatrix K
-   */
-
   // --- GETTERS AND SETTERS ---
 
   // -- K --
-  /** \fn  const SiconosMatrix getK() const
+  /** \fn  const SimpleMatrix getK() const
    *  \brief get the value of K
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getK() const
+  inline const SimpleMatrix getK() const
   {
     return *K;
   }
@@ -207,11 +201,11 @@ public:
   void setKPtr(SiconosMatrix *newPtr);
 
   // -- C --
-  /** \fn  const SiconosMatrix getC() const
+  /** \fn  const SimpleMatrix getC() const
    *  \brief get the value of C
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getC() const
+  inline const SimpleMatrix getC() const
   {
     return *C;
   }

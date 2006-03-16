@@ -608,11 +608,11 @@ public:
 
   // --- T ---
 
-  /** \fn SiconosMatrix getTMatrix()
+  /** \fn SimpleMatrix getTMatrix()
    *   \brief get T Matrix
-   *   \return a SiconosMatrix
+   *   \return a SimpleMatrix
    */
-  inline const SiconosMatrix getTMatrix() const
+  inline const SimpleMatrix getTMatrix() const
   {
     if (isTPlugin())
       XMLException::selfThrow("DynamicalSystemXML - getT: T is not given but calculated from a plugin");

@@ -96,11 +96,11 @@ public:
 
   // -- C --
 
-  /** \fn  const SiconosMatrix getC() const
+  /** \fn  const SimpleMatrix getC() const
    *  \brief get the value of C
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getC() const
+  inline const SimpleMatrix getC() const
   {
     return *C;
   }
@@ -128,11 +128,11 @@ public:
 
   // -- D --
 
-  /** \fn  const SiconosMatrix getD() const
+  /** \fn  const SimpleMatrix getD() const
    *  \brief get the value of D
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getD() const
+  inline const SimpleMatrix getD() const
   {
     return *D;
   }
@@ -160,11 +160,11 @@ public:
 
   // -- F --
 
-  /** \fn  const SiconosMatrix getF() const
+  /** \fn  const SimpleMatrix getF() const
    *  \brief get the value of F
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getF() const
+  inline const SimpleMatrix getF() const
   {
     return *F;
   }
@@ -224,11 +224,11 @@ public:
 
   // -- B --
 
-  /** \fn  const SiconosMatrix getB() const
+  /** \fn  const SimpleMatrix getB() const
    *  \brief get the value of B
-   *  \return SiconosMatrix
+   *  \return SimpleMatrix
    */
-  inline const SiconosMatrix getB() const
+  inline const SimpleMatrix getB() const
   {
     return *B;
   }

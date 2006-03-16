@@ -126,12 +126,12 @@ public:
    */
   std::string getGPlugin(const unsigned int & = 0) const ;
 
-  /** \fn SiconosMatrix getGMatrix(const unsigned int & = 0)
+  /** \fn SimpleMatrix getGMatrix(const unsigned int & = 0)
    *   \brief Return the G matrix of the LagrangianRXML
-   *   \return a SiconosMatrix
+   *   \return a SimpleMatrix
    *  \exception XMLException
    */
-  SiconosMatrix getGMatrix(const unsigned int & = 0) const;
+  SimpleMatrix getGMatrix(const unsigned int & = 0) const;
 
   /** \fn void setGPlugin(const string& plugin,const unsigned int & = 0)
    *   \brief to save the G plug-in name
