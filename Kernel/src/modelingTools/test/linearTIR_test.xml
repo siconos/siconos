@@ -52,7 +52,6 @@
                                         <D matrixFile="matD.dat"/>
 	                                <B matrixFile="matB.dat"/>
   	                                <F matrixFile="matF.dat"/>
-                                        <a vectorSize = '3'>4 5 6</a>
                                         <e vectorSize = '2'>0.1 0.1</e>
                                        </LinearTimeInvariantRelation>			
 					<!-- NS Law of this interaction	-->

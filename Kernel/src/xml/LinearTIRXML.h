@@ -39,7 +39,6 @@ const std::string  LTIR_D = "D";
 const std::string  LTIR_F = "F";
 const std::string  LTIR_E = "e";
 const std::string  LTIR_B = "B";
-const std::string  LTIR_A = "a";
 
 class LinearTIRXML : public RelationXML
 {
@@ -100,15 +99,6 @@ public:
     return SiconosDOMTreeTools::getSiconosMatrixValue(BNode);
   }
 
-  /** \fn SimpleVector getA()
-   *   \brief Return a of the LTIRelationXML
-   *   \return SimpleVector : a of LTIRelationXML
-   */
-  inline SimpleVector getA()
-  {
-    return SiconosDOMTreeTools::getSiconosVectorValue(aNode);
-  }
-
   /** \fn void setC(SiconosMatrix )
    *   \brief Change the C matrix values (in xml file or external data file switch his origin position)
    *   \param SiconosMatrix matrix : the new value for C matrix
@@ -139,12 +129,6 @@ public:
     */
   void setB(const SiconosMatrix&);
 
-  /** \fn void setA(SiconosVector )
-   *   \brief Change the a Vector values (in xml file or external data file switch his origin position)
-   *   \param SiconosVector *vector : new value of a
-   */
-  void setA(const SiconosVector&);
-
   /** \fn bool hasXX()
    * \brief return true if XXnode exists */
   inline bool hasC() const
@@ -167,10 +151,6 @@ public:
   {
     return (BNode != NULL);
   }
-  inline bool hasA() const
-  {
-    return (aNode != NULL);
-  }
 
 private:
 
@@ -180,8 +160,6 @@ private:
   xmlNode * FNode;
   xmlNode * eNode;
   xmlNode * BNode;
-  xmlNode * aNode;
-
 };
 
 

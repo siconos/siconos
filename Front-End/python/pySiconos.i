@@ -32,11 +32,13 @@
 
 #include "SiconosMatrixException.h"
 #include "SiconosVectorException.h"
-#include "CompositeVector.h"
 
 #include "SiconosVector.h"
 #include "SimpleVector.h"
+#include "BlockVector.h"
 #include "SiconosMatrix.h"
+#include "SimpleMatrix.h"
+#include "BlockMatrix.h"
 
 #include "SiconosMemory.h"
 #include "SiconosMemoryException.h"
@@ -172,8 +174,10 @@ $1 = string(PyString_AsString($input));
 %include "SiconosVectorException.h"
 %include "SiconosVector.h"
 %include "SimpleVector.h"
-%include "CompositeVector.h"
+%include "BlockVector.h"
 %include "SiconosMatrix.h"
+%include "SimpleMatrix.h"
+%include "BlockMatrix.h"
 %include "SiconosMemoryException.h"
 %include "SiconosMemory.h"
 

@@ -23,7 +23,7 @@
 #include "SiconosVector.h"
 #include "SimpleVector.h"
 #include "BlockVector.h"
-#include "SiconosMatrix.h"
+#include "SimpleMatrix.h"
 
 #include <math.h>
 
@@ -51,7 +51,6 @@ private:
   CPPUNIT_TEST(testReadWrite);
   CPPUNIT_TEST(testOperatorPlusEqual);
   CPPUNIT_TEST(testOperatorEqual);
-  CPPUNIT_TEST(testOperatorComp);
   CPPUNIT_TEST(testOperatorMultDivEqual);
   CPPUNIT_TEST(testAddition);
   CPPUNIT_TEST(testSubtraction);
@@ -59,6 +58,7 @@ private:
   CPPUNIT_TEST(testExternalOperatorMultDiv);
   CPPUNIT_TEST(testExternalOperatorMultMat);
   CPPUNIT_TEST(testExternalOperatorMatTransMult);
+  CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -75,7 +75,6 @@ private:
 
   void testOperatorPlusEqual();
   void testOperatorEqual();
-  void testOperatorComp();
   void testOperatorMultDivEqual();
   void testAddition();
   void testSubtraction();
@@ -83,6 +82,7 @@ private:
   void testExternalOperatorMultDiv();
   void testExternalOperatorMultMat();
   void testExternalOperatorMatTransMult();
+  void End();
   // \todo exception test
 
   SimpleVector * q;

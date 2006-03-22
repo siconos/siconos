@@ -153,7 +153,7 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
    *  \return a LaGenMatDouble
    */
-  LaGenMatDouble getLaGenMatDouble(const unsigned int& = 0, const unsigned int& = 0) const;
+  const LaGenMatDouble getLaGenMatDouble(const unsigned int& = 0, const unsigned int& = 0) const;
 
   /** \fn setValue(const unsigned int& row, const unsigned int& col, const double& d)
    * \brief set the element matrix[row, col]
@@ -194,6 +194,12 @@ public:
    */
   void getCol(const unsigned int&, const SimpleVector&) const;
 
+  /** \fn void setCol(const unsigned int& col, const SiconosVector &v)
+   *  \brief set column col of the current matrix with vector v
+   *  \param an int and a SiconosVector
+   */
+  void setCol(const unsigned int& , const SiconosVector &);
+
   /** \fn void getBlock(const std::vector<unsigned int>& indexList, SiconosMatrix&)
    *  \brief get a block of a matrix, which position is defined by index_list
    *  \param vector<unsigned int> for indexes and a SiconosMatrix (in-out paramater)
@@ -206,11 +212,13 @@ public:
    */
   void getBlock(const std::vector<unsigned int>& , const std::vector<unsigned int>&, SiconosMatrix&) const;
 
-  /** \fn double* getArray()
+  /** \fn double* getArray(const unsigned int& i = 0, const unsigned int&  j = 0)
    *  \brief return the adress of the array of double values of the matrix
+   *  \param: row position for the required block ->useless for SimpleMatrix
+   *  \param: col position for the required block ->useless for SimpleMatrix
    *  \return double* : the pointer on the double array
    */
-  inline double* getArray()
+  inline double* getArray(const unsigned int& = 0, const unsigned int& = 0)
   {
     return mat.addr();
   }

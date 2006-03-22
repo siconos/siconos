@@ -104,7 +104,7 @@ bool SimpleMatrix::isSquare() const
 
 // --- GETTERS/SETTERS ---
 
-LaGenMatDouble SimpleMatrix::getLaGenMatDouble(const unsigned int& row, const unsigned int& col) const
+const LaGenMatDouble SimpleMatrix::getLaGenMatDouble(const unsigned int& row, const unsigned int& col) const
 {
   if (row != 0 || col != 0)
     SiconosMatrixException::selfThrow("SimpleMatrix getLaGenMatDouble(row,col), row or col not equal to 0.");
@@ -144,6 +144,18 @@ void SimpleMatrix::getRow(const unsigned int& index, const SimpleVector& vOut) c
 
   for (unsigned int i = 0; i < rowSize; i++)
     vOut(i) = mat(index, i);
+}
+
+void SimpleMatrix::setCol(const unsigned int& col, const SiconosVector &v)
+{
+  if (v.size() != size(0))
+    SiconosMatrixException::selfThrow("SiconosMatrix setCol: Index out of range");
+
+  if (col >= size(1))
+    SiconosMatrixException::selfThrow("SiconosMatrix setCol: Index out of range");
+
+  for (unsigned int i = 0; i < size(0); i++)
+    mat(i , col) = v(i);
 }
 
 void SimpleMatrix::getCol(const unsigned int& index, const SimpleVector& vOut) const
@@ -526,7 +538,7 @@ SimpleMatrix operator * (const double& d, const SiconosMatrix& m1)
   return tmp;
 }
 
-SimpleMatrix operator / (const SiconosMatrix& m1, const double d)
+SimpleMatrix operator / (const SiconosMatrix& m1, const double& d)
 {
   if (d == 0.0)
     SiconosMatrixException::selfThrow("SimpleMatrix/double : division by 0");
@@ -549,7 +561,7 @@ SimpleMatrix operator - (const SiconosMatrix& m1, const SiconosMatrix& m2)
   return (m1.getLaGenMatDouble() - m2.getLaGenMatDouble());
 }
 
-SimpleMatrix pow(const SimpleMatrix& m, const unsigned int power)
+SimpleMatrix pow(const SimpleMatrix& m, const unsigned int& power)
 {
   SimpleMatrix temp(m);
   unsigned int size = m.size(0);

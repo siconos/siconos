@@ -28,14 +28,10 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LinearTIRTest);
 
 void LinearTIRTest::setUp()
 {
-  C = new SiconosMatrix("matC.dat", true);
-  D = new SiconosMatrix("matD.dat", true);
-  B = new SiconosMatrix("matB.dat", true);
-  F = new SiconosMatrix("matF.dat", true);
-  a = new SimpleVector(3);
-  (*a)(0) = 4;
-  (*a)(1) = 5;
-  (*a)(2) = 6;
+  C = new SimpleMatrix("matC.dat", true);
+  D = new SimpleMatrix("matD.dat", true);
+  B = new SimpleMatrix("matB.dat", true);
+  F = new SimpleMatrix("matF.dat", true);
   e = new SimpleVector(2);
   (*e)(0) = 0.1;
   (*e)(1) = 0.1;
@@ -109,69 +105,57 @@ void LinearTIRTest::tearDown()
   delete tmpxml1;
   delete tmpxml2;
   delete e;
-  delete a;
   delete F;
   delete B;
   delete C;
   delete D;
 }
 
-// default constructor
-
-// Default  -> private -> no test
-/*void LinearTIRTest::testBuildLinearTIR()
-{
-  LinearTIR * ltir = new LinearTIR();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector : ", ltir->getType()==LINEARTIRELATION, true);
-  delete ltir;
-  cout << " Constructor LTIR 0 ok" << endl;
-}
-*/
 // xml constructor
 void LinearTIRTest::testBuildLinearTIR0()
 {
-  cout << "========================================" << endl;
+  cout << "================================" << endl;
   cout << "=== LinearTIR tests start ...=== " << endl;
-  cout << "========================================" << endl;
+  cout << "================================" << endl;
   LinearTIR * ltir = new LinearTIR(tmpxml1);
-
+  cout << "--> Test: constructor xml." << endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR0a : ", ltir->getC() == *C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR0b : ", ltir->getB() == *B, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR0c : ", ltir->getD() == *D, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR0d : ", ltir->getE() == *e, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR0e : ", ltir->getA() == *a, true);
   delete ltir;
-  cout << " xml Constructor LTIR ok" << endl;
+  cout << "--> Constructor xml test ended with success." << endl;
 }
 
 // data constructor (1)
 void LinearTIRTest::testBuildLinearTIR1()
 {
+  cout << "--> Test: constructor 1." << endl;
   LinearTIR * ltir = new LinearTIR(*C, *B);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR : ", ltir->getC() == *C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR : ", ltir->getB() == *B, true);
   delete ltir;
-  cout << " Constructor LTIR 1 ok" << endl;
-
+  cout << "--> Constructor 1 test ended with success." << endl;
 }
 
 // data constructor (2)
 void LinearTIRTest::testBuildLinearTIR2()
 {
-  LinearTIR * ltir = new LinearTIR(*C, *D, *F, *e, *B, *a);
+  cout << "--> Test: constructor 2." << endl;
+  LinearTIR * ltir = new LinearTIR(*C, *D, *F, *e, *B);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIRC : ", ltir->getC() == *C, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIRD : ", ltir->getD() == *D, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIRF : ", ltir->getF() == *F, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIRE : ", ltir->getE() == *e, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIRB : ", ltir->getB() == *B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIRA : ", ltir->getA() == *a, true);
   delete ltir;
-  cout << " Constructor LTIR 2 ok" << endl;
+  cout << "--> Constructor 2 test ended with success." << endl;
 }
 
 // copy constructor
 void LinearTIRTest::testBuildLinearTIR3()
 {
+  cout << "--> Test: constructor 3." << endl;
   Relation * ref = new LinearTIR(tmpxml1);
   LinearTIR * ltir = new LinearTIR(*ref);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR3C : ", ltir->getC() == *C, true);
@@ -179,15 +163,15 @@ void LinearTIRTest::testBuildLinearTIR3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR3F : ", ltir->getF() == *F, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR3E : ", ltir->getE() == *e, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR3B : ", ltir->getB() == *B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR3A : ", ltir->getA() == *a, true);
   delete ltir;
   delete ref;
-  cout << " copy Constructor LTIR ok" << endl;
+  cout << "--> Constructor 3 test ended with success." << endl;
 }
 
 // xml constructor with input/output as plug-in
 void LinearTIRTest::testBuildLinearTIR4()
 {
+  cout << "--> Test: constructor 4." << endl;
   LinearTIR * ltir = new LinearTIR(tmpxml2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4b : ", ltir->getType() == "LinearTIR", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4c : ", ltir->getComputeOutputName() == "TestPlugin:y", true);
@@ -196,29 +180,30 @@ void LinearTIRTest::testBuildLinearTIR4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4f : ", ltir->getBPtr() == NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4g : ", ltir->getDPtr() == NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4h : ", ltir->getEPtr() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearTIR4i : ", ltir->getAPtr() == NULL, true);
   delete ltir;
-  cout << " xml Constructor (2) LTIR ok" << endl;
+  cout << "--> Constructor 4 test ended with success." << endl;
 }
 
 
 // set C
 void LinearTIRTest::testSetC()
 {
-  SiconosMatrix * tmp = new SiconosMatrix(*C);
+  cout << "--> Test: setC." << endl;
+  SiconosMatrix * tmp = new SimpleMatrix(*C);
   tmp->zero();
   LinearTIR * ltir = new LinearTIR(*tmp, *B);
   ltir->setC(*C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetC : ", ltir->getC() == *C, true);
   delete ltir;
   delete tmp;
-  cout << " testSetC ok" << endl;
+  cout << "--> setC test ended with success." << endl;
 }
 
 // setCPtr
 void LinearTIRTest::testSetCPtr()
 {
-  SiconosMatrix * tmp = new SiconosMatrix(*C);
+  cout << "--> Test: setCPtr." << endl;
+  SiconosMatrix * tmp = new SimpleMatrix(*C);
   tmp->zero();
   LinearTIR * ltir = new LinearTIR(*tmp, *B);
   ltir->setCPtr(C);
@@ -226,89 +211,97 @@ void LinearTIRTest::testSetCPtr()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", ltir->getCPtr() == C, true);
   delete ltir;
   delete tmp;
-  cout << " test setCPtr ok" << endl;
+  cout << "--> setCPtr test ended with success." << endl;
 }
 
 // set D
 void LinearTIRTest::testSetD()
 {
+  cout << "--> Test: setD." << endl;
   LinearTIR * ltir = new LinearTIR(*C, *B);
   ltir->setD(*D);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetD: ", ltir->getD() == *D, true);
   delete ltir;
-  cout << " test setD ok" << endl;
+  cout << "--> setD test ended with success." << endl;
 }
 
 // setDPtr
 void LinearTIRTest::testSetDPtr()
 {
+  cout << "--> Test: setDPtr." << endl;
   LinearTIR * ltir = new LinearTIR(*C, *B);
   ltir->setDPtr(D);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr : ", ltir->getD() == *D, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr: ", ltir->getDPtr() == D, true);
   delete ltir;
-  cout << " test setDPtr ok" << endl;
+  cout << "--> setDPtr test ended with success." << endl;
 }
 
 // set F
 void LinearTIRTest::testSetF()
 {
+  cout << "--> Test: setF." << endl;
   LinearTIR * ltir = new LinearTIR(*C, *B);
   ltir->setF(*F);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetF: ", ltir->getF() == *F, true);
   delete ltir;
-  cout << " test setF ok" << endl;
+  cout << "--> setF test ended with success." << endl;
 }
 
 // setFPtr
 void LinearTIRTest::testSetFPtr()
 {
+  cout << "--> Test: setFPtr." << endl;
   LinearTIR * ltir = new LinearTIR(*C, *B);
   ltir->setFPtr(F);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetFPtr : ", ltir->getF() == *F, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetFPtr: ", ltir->getFPtr() == F, true);
   delete ltir;
-  cout << " test setFPtr ok" << endl;
+  cout << "--> setFPtr test ended with success." << endl;
 }
 
 // set E
 void LinearTIRTest::testSetE()
 {
+  cout << "--> Test: setE." << endl;
   LinearTIR * ltir = new LinearTIR(*C, *B);
   ltir->setE(*e);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetE: ", ltir->getE() == *e, true);
   delete ltir;
-  cout << " test setE ok" << endl;
+  cout << "--> setE test ended with success." << endl;
 }
 
 // setEPtr
 void LinearTIRTest::testSetEPtr()
 {
+  cout << "--> Test: setEPtr." << endl;
   LinearTIR * ltir = new LinearTIR(*C, *B);
   ltir->setEPtr(e);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetEPtr : ", ltir->getE() == *e, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetEPtr: ", ltir->getEPtr() == e, true);
   delete ltir;
-  cout << " test setEPtr ok" << endl;
+  cout << "--> setEPtr test ended with success." << endl;
 }
 
 // set B
 void LinearTIRTest::testSetB()
 {
-  SiconosMatrix * tmp = new SiconosMatrix(*B);
+  cout << "--> Test: setB." << endl;
+  SiconosMatrix * tmp = new SimpleMatrix(*B);
   tmp->zero();
   LinearTIR * ltir = new LinearTIR(*C, *tmp);
   ltir->setB(*B);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetB: ", ltir->getB() == *B, true);
   delete ltir;
   delete tmp;
-  cout << " test setB ok" << endl;
+  cout << "--> setB test ended with success." << endl;
 }
 
 // setBPtr
 void LinearTIRTest::testSetBPtr()
 {
-  SiconosMatrix * tmp = new SiconosMatrix(*B);
+  cout << "--> Test: setBPtr." << endl;
+  SiconosMatrix * tmp = new SimpleMatrix(*B);
   tmp->zero();
   LinearTIR * ltir = new LinearTIR(*C, *tmp);
   ltir->setBPtr(B);
@@ -316,28 +309,7 @@ void LinearTIRTest::testSetBPtr()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBPtr: ", ltir->getBPtr() == B, true);
   delete ltir;
   delete tmp;
-  cout << " test setBPtr ok" << endl;
-}
-
-// set A
-void LinearTIRTest::testSetA()
-{
-  LinearTIR * ltir = new LinearTIR(*C, *B);
-  ltir->setA(*a);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetA: ", ltir->getA() == *a, true);
-  delete ltir;
-  cout << " test setA ok" << endl;
-}
-
-// setAPtr
-void LinearTIRTest::testSetAPtr()
-{
-  LinearTIR * ltir = new LinearTIR(*C, *B);
-  ltir->setAPtr(a);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAPtr : ", ltir->getA() == *a, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAPtr: ", ltir->getAPtr() == a, true);
-  delete ltir;
-  cout << " test setAPtr ok" << endl;
+  cout << "--> setBPtr test ended with success." << endl;
 }
 
 void LinearTIRTest::End()

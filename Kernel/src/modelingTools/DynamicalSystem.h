@@ -184,27 +184,27 @@ protected:
   /** Flag to check if u and T are plugins or not */
   std::deque<bool> isPlugin;
 
-  /** \fn void (*vectorFieldPtr) (const unsigned int* sizeOfX, const double* t, const double* x, double* xDot, double* param)
+  /** \fn void (*vectorFieldPtr) (const unsigned int& sizeOfX, const double* t, const double* x, double* xDot, double* param)
    *  \brief pointer on function to compute vectorfield
-   *  \param int* sizeOfX : the size of the vector x
+   *  \param unsigned int& sizeOfX : the size of the vector x
    *  \param double* time : current time
    *  \param double* x : the pointer to the first element of the vector x
    *  \param double* xDot : the pointer to the first element of the vector x
    *    \param double* param   : a vector of user-defined parameters
    */
-  void (*vectorFieldPtr)(const unsigned int*, const double*, const double*, double*, double*);
+  void (*vectorFieldPtr)(const unsigned int&, const double*, const double*, double*, double*);
 
-  /** \fn void (*computeJacobianXPtr)(const unsigned int* sizeOfX, const double* t, const double* x, double* jacobianX, double* param)
+  /** \fn void (*computeJacobianXPtr)(const unsigned int& sizeOfX, const double* t, const double* x, double* jacobianX, double* param)
    *  \brief  Pointer on function to compute the gradient of the vector field with the respect to the state  \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
-   *  \param int* sizeOfX : size of vector x
+   *  \param unsigned int& sizeOfX : size of vector x
    *  \param double* time : current time
    *  \param double* xPtr : pointer to the first element of x
    *  \param double* jacobianXPtr : pointer to the first element of jacobianX matrix (in-out parameter)
    *    \param double* param   : a vector of user-defined parameters
    */
-  void (*computeJacobianXPtr)(const unsigned int*, const double*, const double*, double*, double*);
+  void (*computeJacobianXPtr)(const unsigned int&, const double*, const double*, double*, double*);
 
-  /** \fn void (*computeUPtr)(const unsigned int* sizeOfU, const unsigned int* sizeOfX, const double* t, const double* x, const double* xDot, double* u, double* param)
+  /** \fn void (*computeUPtr)(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* t, const double* x, const double* xDot, double* u, double* param)
    *  \brief  Pointer on function to compute u
    *  \param int* sizeOfU : size of vector u
    *  \param int* sizeOfX : size of vector x
@@ -214,17 +214,17 @@ protected:
    *  \param double* UPtr : pointer to the first element of u vector (in-out parameter)
    *    \param double* param   : a vector of user-defined parameters
    */
-  void (*computeUPtr)(const unsigned int*, const unsigned int*, const double*, const double*, const double*, double*, double*);
+  void (*computeUPtr)(const unsigned int&, const unsigned int&, const double*, const double*, const double*, double*, double*);
 
-  /** \fn void (*computeTPtr)(const unsigned int* sizeOfU, const unsigned int* sizeOfX, const double* x, double* T, double* param)
+  /** \fn void (*computeTPtr)(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* x, double* T, double* param)
    *  \brief  Pointer on function to compute T
-   *  \param int* sizeOfU : size of vector u
-   *  \param int* sizeOfX : size of vector X
+   *  \param unsigned int& sizeOfU : size of vector u
+   *  \param unsigned int& sizeOfX : size of vector X
    *  \param double* x : pointer to the first element of X
    *  \param double* T: pointer to the first element of T matrix (in-out parameter)
    *    \param double* param   : a vector of user-defined parameters
    */
-  void (*computeTPtr)(const unsigned int*, const unsigned int*, const double*, double*, double*);
+  void (*computeTPtr)(const unsigned int&, const unsigned int&, const double*, double*, double*);
 
   /** Flags to know if pointers have been allocated inside constructors or not */
 
@@ -272,11 +272,12 @@ public:
       *  \param int : reference number for this DynamicalSystem
       *  \param int : dimension of this DynamicalSystem
       *  \param SiconosVector : initial state of this DynamicalSystem
-      *  \param string : plugin name for vectorField of this DynamicalSystem
+      *  \param string : plugin name for vectorField of this DynamicalSystem (optional)
+      *  \param string : plugin name for jacobianX of this DynamicalSystem (optional)
       *  \exception RuntimeException
       */
-  DynamicalSystem(const int&, const unsigned int&,
-                  const SiconosVector&, const std::string& = "DefaultPlugin:vectorField");
+  DynamicalSystem(const int&, const unsigned int&, const SiconosVector&,
+                  const std::string& = "DefaultPlugin:vectorField", const std::string& = "DefaultPlugin:computeJacobianX");
 
   /** \fn DynamicalSystem(const DynamicalSystem &)
    *  \brief copy constructor
@@ -675,13 +676,13 @@ public:
    *  \brief set the value of JacobianX to newValue
    *  \param SiconosMatrix newValue
    */
-  void setJacobianX(const SiconosMatrix&);
+  virtual void setJacobianX(const SiconosMatrix&);
 
   /** \fn void setJacobianXPtr(SiconosMatrix* newPtr)
    *  \brief set JacobianX to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  void setJacobianXPtr(SiconosMatrix *newPtr);
+  virtual void setJacobianXPtr(SiconosMatrix *newPtr);
 
   // uSize
 
@@ -991,7 +992,7 @@ public:
    *  \param string functionName : the function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  void setVectorFieldFunction(const std::string & pluginPath, const std::string& functionName);
+  virtual void setVectorFieldFunction(const std::string & pluginPath, const std::string& functionName);
 
   /** \fn void setComputeJacobianXFunction(const string&, const string&)
    *  \brief allow to set a specified function to compute jacobianX
@@ -999,7 +1000,7 @@ public:
    *  \param the string functionName : function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianXFunction(const std::string & pluginPath, const std::string & functionName);
+  virtual void setComputeJacobianXFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void setComputeUFunction(const string&, const string&)
    *  \brief allow to set a specified function to compute u
@@ -1147,10 +1148,10 @@ public:
    */
   virtual void display() const;
 
-  /** \var typedef void (*vfPtr) (int* sizeOfX, double* time, double* x, double* xDot double* param);
+  /** \var typedef void (*vfPtr) (const unsigned int& sizeOfX, double* time, double* x, double* xDot double* param);
    *  \brief signature of plugin function computing the vectorfield
    */
-  typedef void (*vfPtr)(const unsigned int*, const double*, const double*, double*, double*);
+  typedef void (*vfPtr)(const unsigned int&, const double*, const double*, double*, double*);
 
   /** \fn vfPtr getVectorFieldPtr()
    *  \brief return the function adress of the plugin computing vectorfield

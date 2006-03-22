@@ -152,11 +152,23 @@ public:
     return lavd;
   }
 
-  /** \fn void getBlock(const vector<unsigned int>& index,, SimpleVector& block)
+  /** \fn void getBlock(const vector<unsigned int>& index, SimpleVector& block)
    *  \brief get block corresponding to indexes given in index
    *  \param a vector<unsigned int> for indexes and a SimpleVector (in-out paramater)
    */
   void getBlock(const std::vector<unsigned int>& , SimpleVector&) const;
+
+  /** \fn void getBlock(const unsigned int& index ,const unsigned int& nbval , SimpleVector& block)
+   *  \brief write block of "nbval" contiguous values starting from "index" into "block"
+   *  \param 2 unsigned int for "index" and "nbval" and a SimpleVector (in-out paramater)
+   */
+  void getBlock(const unsigned int& , const unsigned int& , SimpleVector&) const;
+
+  /** \fn void setBlock(const unsigned int& posi, const SiconosVector &v)
+   *  \brief fill current vector from index posi with vector v values
+   *  \param an unsigned int and a SiconosVector
+   */
+  void setBlock(const unsigned int& , const SiconosVector &);
 
   /** \fn unsigned int size() const
    *  \brief get the vector size
@@ -226,15 +238,14 @@ public:
   SimpleVector &operator*=(const double&) ;
   SimpleVector &operator/=(const double&) ;
   SimpleVector &operator = (const SimpleVector& v) ;
-
-  // generic internal operator for mixed operations
-  SimpleVector addition(const SiconosVector&) const;
-  SimpleVector subtraction(const SiconosVector&) const;
-
   /** \fn operator ==
    * \brief: v==w when (v-w).norm()<tolerance
    */
   friend bool operator==(const SiconosVector&, const SiconosVector&);
+
+  // generic internal operator for mixed operations
+  SimpleVector addition(const SiconosVector&) const;
+  SimpleVector subtraction(const SiconosVector&) const;
 
   // generic external operators
   friend SimpleVector operator + (const SiconosVector& v1, const SiconosVector& v2);

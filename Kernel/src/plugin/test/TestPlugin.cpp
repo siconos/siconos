@@ -21,7 +21,7 @@
 // ==== Dynamical System ====
 
 // function to compute u
-extern "C" void computeU(const unsigned int* sizeOfU, const unsigned int* sizeOfX, const double* time, const double* xPtr, const double* xDotPtr, double* UPtr, double* param)
+extern "C" void computeU(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* time, const double* xPtr, const double* xDotPtr, double* UPtr, double* param)
 {
   /* input parameter :
    *  sizeOfU (size of the vector u)
@@ -32,10 +32,9 @@ extern "C" void computeU(const unsigned int* sizeOfU, const unsigned int* sizeOf
    *  pointer to u (in-out parameter)
    */
 
-  unsigned int size = *sizeOfU;
-  for (unsigned int i = 0; i < size; i++)
+  for (unsigned int i = 0; i < sizeOfU; i++)
   {
-    if (i < *sizeOfX)
+    if (i < sizeOfX)
       UPtr[i] = *time * xPtr[i];
     else
       UPtr[i] = 0;
@@ -43,7 +42,7 @@ extern "C" void computeU(const unsigned int* sizeOfU, const unsigned int* sizeOf
 }
 
 // function to compute T
-extern "C" void computeT(const unsigned int* sizeOfU, const unsigned int* sizeOfX, const double* xPtr, double* TPtr, double* param)
+extern "C" void computeT(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* xPtr, double* TPtr, double* param)
 {
   /* input parameter :
    *  sizeOfU (size of the vector u)
@@ -51,29 +50,26 @@ extern "C" void computeT(const unsigned int* sizeOfU, const unsigned int* sizeOf
    *  pointer to x
    *  pointer to T (in-out parameter) - T is a (sizeOfX x sizeOfU) matrix
    */
-  unsigned int sizeU = *sizeOfU;
-  unsigned int sizeX = *sizeOfX;
-  for (unsigned int j = 0; j < sizeU; j++)
+  for (unsigned int j = 0; j < sizeOfU; j++)
   {
-    for (unsigned int i = 0; i < sizeX; i++)
-      TPtr[i + j * sizeX] =  xPtr[i];
+    for (unsigned int i = 0; i < sizeOfX; i++)
+      TPtr[i + j * sizeOfX] =  xPtr[i];
   }
 }
 
 // vectorField
-extern "C" void vectorField(const unsigned int *sizeOfX, const double *time, const double *x, double *xdot, double* param)
+extern "C" void vectorField(const unsigned int& sizeOfX, const double *time, const double *x, double *xdot, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); time ; x (pointer to X vector);
    * output parameter : xdot (pointer to Xdot vector)
    */
-  unsigned int size = *sizeOfX;
-  for (unsigned int i = 0; i < size; i++)
+  for (unsigned int i = 0; i < sizeOfX; i++)
     xdot[i] = *time * x[i];
 }
 
 
 
-extern "C" void computeJacobianX(const unsigned int *sizeOfX, const double *time, const double *x, double *jacob, double* param)
+extern "C" void computeJacobianX(const unsigned int &sizeOfX, const double *time, const double *x, double *jacob, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); time; x (pointer to x vector);
    * output parameter : jacob (pointer to JacobianX matrix)
@@ -159,22 +155,22 @@ extern "C" void computeJacobianVelocityNNL(const unsigned int *sizeOfq, const do
 
 // Plugins for A, B (matrices), u and f. See LinearDS.h
 
-extern "C" void computeA(unsigned int *sizeOfA, double* APtr, const double *time)
+extern "C" void computeB(const unsigned int &sizeOfB, const double *time, double* b, double *param)
 {
-  /* input parameter : time, sizeOfA (size of the matrix A)
-   * output parameter : APtr (pointer to SiconosMatrix)
-   */
-  printf("Warning: call of the function 'computeA' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
+  for (unsigned int i = 0; i < sizeOfB; i++)
+    b[i] = *time * i ;
 
 }
-
-extern "C" void computeB(unsigned int *sizeOfB, double* b, const double *time)
+extern "C" void computeA(const unsigned int &sizeOfX, const double *time, const double *x, double *jacob, double* param)
 {
-  /* input parameter : time, sizeOfB (size of the vector b);
-   * output parameter : b (pointer to b vector)
+  /* input parameter : sizeOfX (size of the vector X); time; x (pointer to x vector);
+   * output parameter : jacob (pointer to JacobianX matrix)
    */
-  printf("Warning: call of the function 'computeB' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
-
+  for (unsigned int j = 0; j < sizeOfX; j++)
+  {
+    for (unsigned int i = 0; i < sizeOfX; i++)
+      jacob[i + j * sizeOfX] = 4 * (i + 1);
+  }
 }
 
 // ===== RELATIONS ====

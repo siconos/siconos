@@ -52,8 +52,6 @@ void BlockVectorTest::setUp()
   tmp->add(*tmp2);
   delete tmp2;
   delete tmp1;
-  tol = 1e-9;
-
 }
 
 void BlockVectorTest::tearDown()
@@ -70,43 +68,43 @@ void BlockVectorTest::tearDown()
 // default
 void BlockVectorTest::testBuildBlockVector()
 {
+  cout << "===================================" << endl;
+  cout << "=== Block Vector tests start ...=== " << endl;
+  cout << "===================================" << endl;
+  cout << "--> Test: buildBlockVector." << endl;
   BlockVector *v = new BlockVector();
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector : ", v->isBlock(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector : ", v->size() == 0, true);
-  cout << "BlockVectorTest >>> testBuildBlockVector ............................... OK\n ";
   delete v;
+  cout << "--> buildBlockVector test ended with success." << endl;
 }
 
 // Copy from SiconosVector and direct copy
 void BlockVectorTest::testBuildBlockVector1()
 {
+  cout << "--> Test: constructor 1." << endl;
   // copy from a block vector
   BlockVector * tmp = new BlockVector(*simpleVect);
-  double norm = ((*tmp) - (*simpleVect)).norm();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", norm < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", (*tmp) == (*simpleVect), true);
 
   // from a SiconosVector which is a block vector
 
-  cout << (CV->getTabIndex())[0] << endl;
   BlockVector * vv = new BlockVector(*CV);
-  cout << (vv->getTabIndex())[0] << endl;
 
   int a = (vv->getTabIndex())[0];
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", vv->isBlock(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", vv->size() == 8, true);
-  norm = (((*(vv->getVectorPtr(0)))) - (*simpleVect)).norm();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", norm < tol, true);
-  norm = (((*(vv->getVectorPtr(1)))) - (*q)).norm();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", norm < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", ((*(vv->getVectorPtr(0)))) == (*simpleVect), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", ((*(vv->getVectorPtr(1)))) == (*q) , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", (vv->getTabIndex()).size() == 2 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", a == 3 , true);
   a = (vv->getTabIndex())[1];
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildBlockVector1 : ", a == 8 , true);
-  cout << "BlockVectorTest >>> testBuildBlockVector1 ............................... OK\n ";
   delete vv;
   delete tmp;
+  cout << "--> Constructor 1 test ended with success." << endl;
 }
 
 // display
@@ -117,19 +115,20 @@ void BlockVectorTest::testBuildBlockVector1()
 // ()
 void BlockVectorTest::testOperatorAccess()
 {
-
+  cout << "--> Test: operatorAccess ." << endl;
   (*CV)(2) = 10;
   double d = (*CV)(7);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccess : ", CV->isBlock(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccess : ", CV->size() == 8 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", (*(CV->getSvref())[0])(2) == 10 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", d == 1, true);
-  cout << "BlockVectorTest >>> testOperatorAccessRef ............................... OK\n ";
+  cout << "--> operatorAccess test ended with success." << endl;
 }
 
 // setValue
 void BlockVectorTest::testSetValue()
 {
+  cout << "--> Test: setValue." << endl;
   double a = 4;
   int i = 2;
   CV->setValue(i, a);
@@ -137,21 +136,23 @@ void BlockVectorTest::testSetValue()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValue : ", b == 4, true);
   b = (CV->getValues(0))(2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValue : ", b == 4, true);
-  cout << "BlockVectorTest >>> testSetValue ............................... OK\n ";
+  cout << "-->  setValue test ended with success." << endl;
 }
 
 // getValue
 void BlockVectorTest::testGetValue()
 {
+  cout << "--> Test: getValue." << endl;
   int i = 2;
   CV->setValue(i, 8);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetValue : ", CV->getValue(i) == 8 , true);
-  cout << "BlockVectorTest >>> testGetValue ............................... OK\n ";
+  cout << "-->  getValue test ended with success." << endl;
 }
 
 // setValues
 void BlockVectorTest::testSetValues()
 {
+  cout << "--> Test: setValues." << endl;
   CV->setValues(vq, 0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", CV->size() == 10, true);
   unsigned int size = (CV->getValues(0)).size();
@@ -168,12 +169,13 @@ void BlockVectorTest::testSetValues()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", a == 5, true);
   a = (CV->getTabIndex())[1];
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", a == 10, true);
-  cout << "BlockVectorTest >>> testSetValues ............................... OK\n ";
+  cout << "-->  setValues test ended with success." << endl;
 }
 
 // getValues
 void BlockVectorTest::testGetValues()
 {
+  cout << "--> Test: getValues." << endl;
   unsigned int size = (CV->getValues(0)).size();
   unsigned int i;
   LaVectorDouble tmp = CV->getValues(0);
@@ -183,20 +185,22 @@ void BlockVectorTest::testGetValues()
   size = tmp.size();
   for (i = 0; i < size; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", tmp(i) == 1, true);
-  cout << "BlockVectorTest >>> testGetValues ............................... OK\n ";
+  cout << "-->  getValues test ended with success." << endl;
 }
 
 // size
 void BlockVectorTest::testSize()
 {
+  cout << "--> Test: setSize." << endl;
   unsigned int i = CV->size();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSize : ", i == 8, true);
-  cout << "BlockVectorTest >>> testSize ............................... OK\n ";
+  cout << "-->  setSize test ended with success." << endl;
 }
 
 // add and addPtr
 void BlockVectorTest::testAdd()
 {
+  cout << "--> Test: add." << endl;
   SimpleVector tmp =  *q;
   CV->addPtr(simpleVect);
   CV->add(tmp);
@@ -232,12 +236,13 @@ void BlockVectorTest::testAdd()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", tmp2(i) == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getSvref())[2] == simpleVect, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAdd : ", (CV->getSvref())[3] != q, true);
-  cout << "BlockVectorTest >>> testAdd ............................... OK\n ";
+  cout << "-->  add test ended with success." << endl;
 }
 
 // write, read and read from a file constructor
 void BlockVectorTest::testReadWrite()
 {
+  cout << "--> Test: readWrite." << endl;
   // write CV into an ascii file
   bool isok = CV->write("testCompWrite_ascii.dat", "ascii");
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testReadWrite : ", isok == true, true);
@@ -262,14 +267,12 @@ void BlockVectorTest::testReadWrite()
   a = (v->getTabIndex())[1] ;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", a == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", (v->getTabIndex()).size() == 2, true);
-  double norm = ((*(v->getVectorPtr(0))) - (*simpleVect)).norm();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", norm < tol, true);
-  norm = ((*(v->getVectorPtr(1))) - (*q)).norm();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", norm < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", (*(v->getVectorPtr(0))) == (*simpleVect) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", (*(v->getVectorPtr(1))) == (*q) , true);
 
   delete v2;
   delete v;
-  cout << "BlockVectorTest >>> testWrite ............................... OK\n ";
+  cout << "--> readWrite test ended with success." << endl;
 }
 
 // OPERATORS
@@ -277,6 +280,7 @@ void BlockVectorTest::testReadWrite()
 // += -=
 void BlockVectorTest::testOperatorPlusEqual()
 {
+  cout << "--> Test: operatorPlusEqual." << endl;
   SiconosVector *sv = new SimpleVector(*CV);
   *CV += *sv;
 
@@ -344,12 +348,13 @@ void BlockVectorTest::testOperatorPlusEqual()
   delete sv2;
   delete tmp;
 
-  cout << "BlockVectorTest >>> testOperatorPlusEqualGEN ............................... OK\n ";
+  cout << "--> operatorPlusEqual test ended with success." << endl;
 }
 
 // =
 void BlockVectorTest::testOperatorEqual()
 {
+  cout << "--> Test: operatorEqual." << endl;
   SiconosVector *v = new SimpleVector(*CV);
   SiconosVector *w = new BlockVector(*CV);
 
@@ -374,7 +379,7 @@ void BlockVectorTest::testOperatorEqual()
 
   delete w;
   delete v;
-  cout << "BlockVectorTest >>> testOperatorEqual ............................... OK\n ";
+  cout << "--> operatorEqual test ended with success." << endl;
 }
 
 
@@ -383,6 +388,7 @@ void BlockVectorTest::testOperatorEqual()
 void BlockVectorTest::testOperatorMultDivEqual()
 {
 
+  cout << "--> Test: operatorMultDivEqual." << endl;
   double d = 2;
 
   *CV *= d;
@@ -399,12 +405,13 @@ void BlockVectorTest::testOperatorMultDivEqual()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualGEN : ", (*CV)(i) == 1, true);
 
-  cout << "BlockVectorTest >>> testOperatorMultDivEqual ............................... OK\n ";
+  cout << "--> operatorMultDivEqual test ended with success." << endl;
 }
 
 // addition
 void BlockVectorTest::testAddition()
 {
+  cout << "--> Test: addition." << endl;
   SiconosVector * sv = new SimpleVector(*CV);
 
   *tmp = CV->addition(*sv);
@@ -427,12 +434,13 @@ void BlockVectorTest::testAddition()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualGEN : ", (*tmp)(i) == 2, true);
   delete sv;
-  cout << "BlockVectorTest >>> testAddition ............................... OK\n ";
+  cout << "--> addition test ended with success." << endl;
 }
 
 // subtraction
 void BlockVectorTest::testSubtraction()
 {
+  cout << "--> Test: subtraction ." << endl;
   SiconosVector * sv = new SimpleVector(*CV);
 
   *tmp = CV->subtraction(*sv);
@@ -454,12 +462,13 @@ void BlockVectorTest::testSubtraction()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualGEN : ", (*tmp)(i) == 0, true);
   delete sv;
-  cout << "BlockVectorTest >>> testSubtraction ............................... OK\n ";
+  cout << "--> subtraction test ended with success." << endl;
 }
 
 // +
 void BlockVectorTest::testExternalOperatorPlusMoins()
 {
+  cout << "--> Test: externalOperatorPlusMoins ." << endl;
 
   *tmp = *CV + *CV;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", tmp->size() == 8, true);
@@ -475,12 +484,13 @@ void BlockVectorTest::testExternalOperatorPlusMoins()
   for (unsigned int i = 3; i < 8; i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualGEN : ", (*tmp)(i) == 0, true);
 
-  cout << "BlockVectorTest >>> testExternalOperatorPlusMoins ............................... OK\n ";
+  cout << "--> externalOperatorPlusMoins test ended with success." << endl;
 }
 
 // * /
 void BlockVectorTest::testExternalOperatorMultDiv()
 {
+  cout << "--> Test: externalOperatorMultDiv ." << endl;
   BlockVector *w = new BlockVector(*CV);
   double d = 2;
 
@@ -499,13 +509,14 @@ void BlockVectorTest::testExternalOperatorMultDiv()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualGEN : ", (*w)(i) == 0.5, true);
 
   delete w;
-  cout << "BlockVectorTest >>> testExternalOperatorMultDiv ............................... OK\n ";
+  cout << "--> externalOperatorMultDiv test ended with success." << endl;
 }
 
 // matTransVectMult
 
 void BlockVectorTest::testExternalOperatorMultMat()
 {
+  cout << "--> Test: externalOperatorMultMat ." << endl;
   SimpleMatrix m(2, 4);
   m(0, 0) = 0;
   m(0, 1) = 1;
@@ -530,16 +541,16 @@ void BlockVectorTest::testExternalOperatorMultMat()
 
   SimpleVector sv(2);
   sv = m * *v;
-  double norm = (sv - res).norm();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMultMat : ", norm < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMultMat : ", sv == res, true);
 
   delete v2;
   delete v;
-  cout << "BlockVectorTest >>> testExternalOperatorMultMat ............................... OK\n ";
+  cout << "--> externalOperatorMultMat test ended with success." << endl;
 }
 
 void BlockVectorTest::testExternalOperatorMatTransMult()
 {
+  cout << "--> Test: externalOperatorMatTransMult ." << endl;
   SimpleMatrix m(4, 2);
   m(0, 0) = 0;
   m(0, 1) = 2;
@@ -564,12 +575,19 @@ void BlockVectorTest::testExternalOperatorMatTransMult()
 
   SimpleVector sv(2);
   sv = matTransVecMult(m, *v);
-  double norm = (sv - res).norm();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMatTransMult : ", norm < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMatTransMult : ", sv == res, true);
 
   delete v2;
   delete v;
-  cout << "BlockVectorTest >>> testExternalOperatorMatTransMult ............................... OK\n ";
+  cout << "--> externalOperatorMatTransMult test ended with success." << endl;
 }
+
+void BlockVectorTest::End()
+{
+  cout << "=====================================" << endl;
+  cout << " ===== End of BlockVector Tests ===== " << endl;
+  cout << "=====================================" << endl;
+}
+
 
 

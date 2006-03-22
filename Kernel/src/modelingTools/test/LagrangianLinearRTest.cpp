@@ -85,9 +85,9 @@ void LagrangianLinearRTest::setUp()
   // get relation
   xmlNode * node2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "LagrangianLinearRelation");
   tmpxml2 = new LagrangianLinearRXML(node2);
-  H = new SiconosMatrix("matH.dat", true);
+  H = new SimpleMatrix("matH.dat", true);
   b = new SimpleVector(1);
-  D = new SiconosMatrix(1, 1);
+  D = new SimpleMatrix(1, 1);
   (*b)(0) = 12;
   (*D)(0, 0) = 13;
 }
@@ -163,7 +163,7 @@ void LagrangianLinearRTest::testBuildLagrangianLinearR4()
 // set H
 void LagrangianLinearRTest::testSetH()
 {
-  SiconosMatrix * tmp = new SiconosMatrix(*H);
+  SiconosMatrix * tmp = new SimpleMatrix(*H);
   tmp->zero();
   LagrangianLinearR * llr = new LagrangianLinearR(*tmp, *b);
   llr->setH(*H);
@@ -176,7 +176,7 @@ void LagrangianLinearRTest::testSetH()
 // setHPtr
 void LagrangianLinearRTest::testSetHPtr()
 {
-  SiconosMatrix * tmp = new SiconosMatrix(*H);
+  SiconosMatrix * tmp = new SimpleMatrix(*H);
   tmp->zero();
   LagrangianLinearR * llr = new LagrangianLinearR(*tmp, *b);
   llr->setHPtr(H);

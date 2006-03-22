@@ -38,6 +38,8 @@
  *    - \f$A \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
  *
  * \todo Correct the computation of M with a correct concatenation process
+ * \todo : add "recover" function to start from old values of z and w.
+ *
  */
 #ifndef LCP_H
 #define LCP_H

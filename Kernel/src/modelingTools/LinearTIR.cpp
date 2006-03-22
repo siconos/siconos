@@ -22,13 +22,13 @@ using namespace std;
 
 // xml constructor
 LinearTIR::LinearTIR(RelationXML* relxml, Interaction * inter):
-  Relation(relxml, inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
+  Relation(relxml, inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
 {
   relationType = LINEARTIRELATION;
   if (relationxml != NULL)
   {
     LinearTIRXML * lTIRxml = static_cast<LinearTIRXML *>(relationxml);
-    isAllocatedIn.resize(6, false);
+    isAllocatedIn.resize(5, false);
     unsigned int sizeY, sizeX, size; // size of vector y and of vector x
 
     if (inter != NULL)
@@ -100,16 +100,8 @@ LinearTIR::LinearTIR(RelationXML* relxml, Interaction * inter):
       }
       else
         RuntimeException::selfThrow("LinearTIR:: xml constructor: input matrix B is missing in xml file ");
-
-      if (lTIRxml->hasA())
-      {
-        if (lTIRxml->getA().size() != sizeX)
-          RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between a and B");
-        a = new SimpleVector(lTIRxml->getA());
-        isAllocatedIn[5] = true;
-      }
     }
-    else if (lTIRxml->hasB() || lTIRxml->hasA())
+    else if (lTIRxml->hasB())
       cout << "Warning: LinearTIR xml constructor, you give plug-in function and matrices values for input definition -> conflict. Plug-in will be used." << endl;
   }
   else RuntimeException::selfThrow("LinearTIR::xml constructor, xml file=NULL");
@@ -117,7 +109,7 @@ LinearTIR::LinearTIR(RelationXML* relxml, Interaction * inter):
 
 // Minimum data (C, B) constructor
 LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB, Interaction* inter):
-  Relation(inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
+  Relation(inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
 {
   isOutputPlugged = false;
   isInputPlugged  = false;
@@ -140,7 +132,7 @@ LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB, Inter
   B = new SimpleMatrix(sizeX, sizeY);
   *C = newC;
   *B = newB;
-  isAllocatedIn.resize(6, false);
+  isAllocatedIn.resize(5, false);
   isAllocatedIn[0] = true;
   isAllocatedIn[4] = true;
 }
@@ -148,8 +140,8 @@ LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB, Inter
 // Constructor from a complete set of data
 LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
                      const SiconosMatrix& newF, const SimpleVector& newE,
-                     const SiconosMatrix& newB, const SimpleVector& newA, Interaction* inter):
-  Relation(inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
+                     const SiconosMatrix& newB, Interaction* inter):
+  Relation(inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
 {
   relationType = LINEARTIRELATION;
   isOutputPlugged = false;
@@ -190,17 +182,12 @@ LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
   B = new SimpleMatrix(sizeX, sizeY);
   *B = newB;
 
-  if (newA.size(0) != sizeX)
-    RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between a and B");
-  a = new SimpleVector(sizeX);
-  *a = newA;
-
-  isAllocatedIn.resize(6, true);
+  isAllocatedIn.resize(5, true);
 }
 
 // Copy constructor (inter is optional)
 LinearTIR::LinearTIR(const Relation & newLTIR, Interaction* inter):
-  Relation(newLTIR, inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
+  Relation(newLTIR, inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
 {
   if (relationType != LINEARTIRELATION)
     RuntimeException::selfThrow("LinearTIR:: copy constructor, inconsistent relation types for copy");
@@ -208,7 +195,7 @@ LinearTIR::LinearTIR(const Relation & newLTIR, Interaction* inter):
   // Warning: the interaction link is not copyed!!!
 
   const LinearTIR * ltir = static_cast<const LinearTIR*>(&newLTIR);
-  isAllocatedIn.resize(6, false);
+  isAllocatedIn.resize(5, false);
 
   // Since this is a copy, we suppose that various sizes of members of newLTIR are consistent alltogether
   // -> no more tests on that subject.
@@ -242,12 +229,6 @@ LinearTIR::LinearTIR(const Relation & newLTIR, Interaction* inter):
   {
     B = new SimpleMatrix(ltir->getB());
     isAllocatedIn[4] = true; // B
-
-    if (ltir->getAPtr() != NULL)
-    {
-      a = new SimpleVector(ltir->getA());
-      isAllocatedIn[5] = true;
-    }
   }
   else
     cout << "Warning: LinearTIR copy constructor, original relations uses plug-in function for input definition." << endl;
@@ -280,11 +261,6 @@ LinearTIR::~LinearTIR()
   {
     delete B;
     B = NULL;
-  }
-  if (isAllocatedIn[5])
-  {
-    delete a;
-    a = NULL;
   }
 }
 
@@ -501,43 +477,6 @@ void LinearTIR::setBPtr(SiconosMatrix *newPtr)
   }
   B = newPtr;
   isAllocatedIn[4] = false;
-}
-
-void LinearTIR::setA(const SimpleVector& newValue)
-{
-  if (isInputPlugged)
-    cout << " LinearTIR:setA warning: before this set, input was a plug-in, do not forget to set other required operators (D)" << endl;
-  isInputPlugged = false;
-  unsigned int sizeY = newValue.size();
-  if (interaction != NULL)
-  {
-    unsigned int size = interaction->getNInteraction();
-    if (size != sizeY)
-      RuntimeException::selfThrow("LinearTIR - setA: inconsistent dimensions with problem size for input vector a");
-  }
-
-  if (a == NULL)
-  {
-    a = new SimpleVector(newValue);
-    isAllocatedIn[5] = true;
-  }
-  else
-  {
-    if (sizeY == a->size())
-      *a = newValue;
-    else
-      RuntimeException::selfThrow("LinearTIR - setA: inconsistent dimensions with problem size for input vector a");
-  }
-}
-
-void LinearTIR::setAPtr(SimpleVector *newPtr)
-{
-  if (isInputPlugged)
-    cout << " LinearTIR:setAPtr warning: before this set, input was a plug-in, do not forget to set other required operators (D)" << endl;
-  isInputPlugged = false;
-  if (isAllocatedIn[5]) delete a;
-  a = newPtr;
-  isAllocatedIn[5] = false;
 }
 
 void LinearTIR::getCBlockDSPtr(DynamicalSystem * ds, SiconosMatrix& CBlock) const
@@ -776,10 +715,7 @@ void LinearTIR::computeInput(const double& time)
 
     SimpleVector *lambda = interaction->getLambdaPtr(0);
 
-    if (a == NULL)
-      *r += *B * *lambda;
-    else
-      *r += *B * *lambda + *a;
+    *r += *B * *lambda;
     delete r;
   }
   else
@@ -804,9 +740,6 @@ void LinearTIR::display() const
   cout << "| B " << endl;
   if (B != NULL) B->display();
   else cout << "->NULL" << endl;
-  cout << "| a " << endl;
-  if (a != NULL) a->display();
-  else cout << "->NULL" << endl;
   cout << " ================================================== " << endl;
 }
 
@@ -821,7 +754,6 @@ void LinearTIR::saveRelationToXML() const
     lTIRxml->setF(*F);
     lTIRxml->setE(*e);
     lTIRxml->setB(*B);
-    lTIRxml->setA(*a);
   }
 }
 
@@ -833,9 +765,9 @@ LinearTIR* LinearTIR::convert(Relation *r)
 
 // Default (private) constructor
 LinearTIR::LinearTIR():
-  Relation(), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL), a(NULL)
+  Relation(), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
 {
   relationType = LINEARTIRELATION;
-  isAllocatedIn.resize(6, false);
+  isAllocatedIn.resize(5, false);
 }
 

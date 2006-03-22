@@ -26,7 +26,7 @@ include $(top_srcdir)/config/Make-rules
 SUBDIRS = test 
 
 noinst_LTLIBRARIES = libSiconosAlgebra.la
-libSiconosAlgebra_la_SOURCES = SiconosVector.cpp SimpleVector.cpp BlockVector.cpp SiconosMatrix.cpp SimpleMatrix.cpp\
-				SiconosVector.h SimpleVector.h BlockVector.h SiconosMatrix.h SimpleMatrix.h
-include_HEADERS = SiconosVector.h SimpleVector.h BlockVector.h SiconosMatrix.h SimpleMatrix.h
+libSiconosAlgebra_la_SOURCES = SiconosVector.cpp SimpleVector.cpp BlockVector.cpp SiconosMatrix.cpp SimpleMatrix.cpp BlockMatrix.cpp\
+				SiconosVector.h SimpleVector.h BlockVector.h SiconosMatrix.h SimpleMatrix.h BlockMatrix.h
+include_HEADERS = SiconosVector.h SimpleVector.h BlockVector.h SiconosMatrix.h SimpleMatrix.h BlockMatrix.h
 libSiconosAlgebra_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)

@@ -30,7 +30,7 @@ using namespace std;
 
 // ===== CONSTRUCTORS =====
 
-// Default constructor
+// Default constructor (private)
 DynamicalSystem::DynamicalSystem():
   DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL),
   xDot(NULL), xDotMemory(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL),
@@ -52,8 +52,6 @@ DynamicalSystem::DynamicalSystem():
   vector<SimpleVector*>::iterator iter;
   for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
     (*iter)->zero();
-  setVectorFieldFunction("DefaultPlugin.so", "vectorField");
-  setComputeJacobianXFunction("DefaultPlugin.so", "computeJacobianX");
 }
 
 // From XML file (warning: newNsds is optional, default = NULL)
@@ -65,7 +63,6 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
   computeTFunctionName("none"), vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
   computeUPtr(NULL), computeTPtr(NULL), isBCAllocatedIn(false)
 {
-  IN("DynamicalSystem::DynamicalSystem - XML constructor\n");
   // --- get values in xml file ---
   if (dsXML != NULL)
   {
@@ -77,14 +74,40 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
       RuntimeException::selfThrow("DynamicalSystem:: xml constructor, n (problem size) is a required input");
 
     // --- Memory allocation for vector and matrix members ---
+
+    // x and related vectors
     x0 = new SimpleVector(n);
     x = new SimpleVector(n);
-    xDot = new SimpleVector(n);
     xFree = new SimpleVector(n);
+
+    // r
     r = new SimpleVector(n);
     r->zero();
+
+    string plugin;
+    // vectorField
+    xDot = new SimpleVector(n);
+    if (dsxml->hasVectorFieldPlugin() == true)
+    {
+      plugin = dsxml->getVectorFieldPlugin();
+      setVectorFieldFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+    }
+    else
+      setVectorFieldFunction("DefaultPlugin.so", "vectorField");
+
+    // jacobianX
     jacobianX = new SimpleMatrix(n, n);
+    if (dsxml->hasComputeJacobianXPlugin() == true)
+    {
+      plugin = dsxml->getComputeJacobianXPlugin();
+      setComputeJacobianXFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+    }
+    else
+      setComputeJacobianXFunction("DefaultPlugin.so", "computeJacobianX");
+
     isXAllocatedIn.resize(7, true);
+
+    // Memory
     isXAllocatedIn[2] = false ; //xMemory
     isXAllocatedIn[4] = false ; // xDotMemory
     isRAllocatedIn.resize(2, true);
@@ -124,7 +147,6 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
     }
 
     // --- u and T xml loading (optional) ---
-    string plugin;
     isControlAllocatedIn.resize(2, false);
     isPlugin.resize(2, false);
     if (dsxml->hasT())
@@ -178,25 +200,6 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
         RuntimeException::selfThrow("DynamicalSystem:: xml constructor, inconsistent size between uSize, u and T");
     }
 
-    // --- other plugins ---
-
-    // VectorField
-    if (dsxml->hasVectorFieldPlugin() == true)
-    {
-      plugin = dsxml->getVectorFieldPlugin();
-      setVectorFieldFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
-    }
-    else
-      setVectorFieldFunction("DefaultPlugin.so", "vectorField");
-    // JacobianX
-    if (dsxml->hasComputeJacobianXPlugin() == true)
-    {
-      plugin = dsxml->getComputeJacobianXPlugin();
-      setComputeJacobianXFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
-    }
-    else
-      setComputeJacobianXFunction("DefaultPlugin.so", "computeJacobianX");
-
     // --- Boundary conditions ---
     fillBoundaryConditionsFromXml();
 
@@ -205,12 +208,11 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
   }
   else
     RuntimeException::selfThrow("DynamicalSystem::DynamicalSystem - DynamicalSystemXML paramater must not be NULL");
-
-  OUT("DynamicalSystem::DynamicalSystem - XML constructor\n");
 }
 
 // From a minimum set of data
-DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN, const SiconosVector& newX0, const string& vectorFieldPlugin):
+DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN, const SiconosVector& newX0,
+                                 const string& vectorFieldPlugin, const string& jacobianXPlugin):
   DSType(NLDS), nsds(NULL), number(newNumber), id("none"), n(newN), x0(NULL), x(NULL), xMemory(NULL),
   xDot(NULL), xDotMemory(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL), uSize(0), u(NULL),
   T(NULL), stepsInMemory(1), BC(NULL), dsxml(NULL),
@@ -218,30 +220,37 @@ DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN,
   computeTFunctionName("none"), vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
   computeUPtr(NULL), computeTPtr(NULL), isBCAllocatedIn(false)
 {
-  IN("DynamicalSystem::DynamicalSystem - Minimum data constructor\n");
-
   // --- Memory allocation ---
   if (n != newX0.size())
     RuntimeException::selfThrow("DynamicalSystem::constructor from data, inconsistent sizes between problem size and x0.");
+
+  // x and related vectors
   x0 = new SimpleVector(n);
   *(x0) = newX0;
-
   x = new SimpleVector(*x0); // x is initialized with x0.
-
-  xDot = new SimpleVector(n);
   xFree = new SimpleVector(n);
+  // x initialization
+  *x = *x0;
+
+  // r
   r = new SimpleVector(n);
   r->zero();
+
+  // vectorField
+  xDot = new SimpleVector(n);
+  setVectorFieldFunction(cShared.getPluginName(vectorFieldPlugin), cShared.getPluginFunctionName(vectorFieldPlugin));
+
+  // jacobianX
   jacobianX = new SimpleMatrix(n, n);
+  setComputeJacobianXFunction(cShared.getPluginName(jacobianXPlugin), cShared.getPluginFunctionName(jacobianXPlugin));
 
   isXAllocatedIn.resize(7, true);
+
+  // Memory
   isXAllocatedIn[2] = false ; //xMemory
   isXAllocatedIn[4] = false ; // xDotMemory
   isRAllocatedIn.resize(2, true);
   isRAllocatedIn[1] = false ; // rMemory
-
-  // x initialization
-  *x = *x0;
 
   // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
   parametersList0.reserve(4);
@@ -252,15 +261,9 @@ DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN,
   for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
     (*iter)->zero();
 
-  // plugins for vectorField and jacobianX
-  setVectorFieldFunction(cShared.getPluginName(vectorFieldPlugin), cShared.getPluginFunctionName(vectorFieldPlugin));
-  setComputeJacobianXFunction("DefaultPlugin.so", "computeJacobianX");
-
   // u and T are optional
   isPlugin.resize(2, false);
   isControlAllocatedIn.resize(2, false);
-
-  OUT("DynamicalSystem::DynamicalSystem - Minimum data constructor\n");
 }
 
 // copy constructor
@@ -275,7 +278,7 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
   computeUPtr(NULL), computeTPtr(NULL), isBCAllocatedIn(false)
 {
 
-  cout << "Warning: Dynamical System copy, do not forget to set id and number for the new system" << endl;
+  cout << "!!! Warning: Dynamical System copy, do not forget to set id and number for the new system !!! " << endl;
 
   if (newDS.getX0Ptr()->isBlock())
   {
@@ -383,7 +386,6 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
 // --- Destructor ---
 DynamicalSystem::~DynamicalSystem()
 {
-  IN("DynamicalSystem::~DynamicalSystem()\n");
   if (isXAllocatedIn[0])delete x0;
   x0 = NULL ;
   if (isXAllocatedIn[1]) delete x;
@@ -421,13 +423,11 @@ DynamicalSystem::~DynamicalSystem()
   }
   if (isBCAllocatedIn) delete BC;
   BC = NULL;
-  OUT("DynamicalSystem::~DynamicalSystem()\n");
 }
 
 // Boundary conditions built-in (called from constructors)
 void DynamicalSystem::fillBoundaryConditionsFromXml()
 {
-  IN("DynamicalSystem::fillBoundaryConditionsFromXml\n");
   if (dsxml->getBoundaryConditionXML() != 0)
   {
     if (dsxml->getBoundaryConditionXML()->getType() == LINEARBC_TAG)
@@ -454,13 +454,11 @@ void DynamicalSystem::fillBoundaryConditionsFromXml()
     }
     else RuntimeException::selfThrow("DynamicalSystem::linkDynamicalSystemXML - bad kind of BoundaryCondition : " + dsxml->getBoundaryConditionXML()->getType());
   }
-  OUT("DynamicalSystem::fillBoundaryConditionsFromXml\n");
 }
 
 // DSIO built-in (called from constructors)
 void DynamicalSystem::fillDsioFromXml()
 {
-  IN("DynamicalSystem::fillDsioFromXml\n");
   DSInputOutput *dsio;
   // get the numbers of DSIO
   vector<int> nbDSIOtab = dsxml->getDSInputOutputNumbers();
@@ -499,7 +497,6 @@ void DynamicalSystem::fillDsioFromXml()
     }
     else RuntimeException::selfThrow("DynamicalSystem::linkDynamicalSystemXML - bad kind of DSInputOutput: " + dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType());
   }
-  OUT("DynamicalSystem::fillDsioFromXml\n");
 }
 
 // Setters
@@ -832,7 +829,6 @@ void DynamicalSystem::setBoundaryConditionPtr(BoundaryCondition *newBC)
 
 void DynamicalSystem::initMemory(const unsigned int& steps)
 {
-  IN("DynamicalSystem::initMemory\n");
   if (steps == 0)
     cout << "Warning : DynamicalSystem::initMemory with size equal to zero" << endl;
   else
@@ -856,17 +852,21 @@ void DynamicalSystem::initMemory(const unsigned int& steps)
 
 void DynamicalSystem::swapInMemory()
 {
-  IN("DynamicalSystem::swapInMemory\n ");
   xMemory->swap(*x);
   xDotMemory->swap(*xDot);
   rMemory->swap(*r);
-  OUT("DynamicalSystem::swapInMemory\n ");
 }
 
 // ===== COMPUTE PLUGINS FUNCTIONS =====
 
 void DynamicalSystem::setVectorFieldFunction(const string& pluginPath, const string& functionName)
 {
+  if (xDot == NULL)
+  {
+    xDot = new SimpleVector(n);
+    isXAllocatedIn[3] = true ;
+  }
+
   vectorFieldPtr = NULL;
   cShared.setFunction(&vectorFieldPtr, pluginPath, functionName);
   string plugin;
@@ -876,6 +876,12 @@ void DynamicalSystem::setVectorFieldFunction(const string& pluginPath, const str
 
 void DynamicalSystem::setComputeJacobianXFunction(const string& pluginPath, const string& functionName)
 {
+  if (jacobianX == NULL)
+  {
+    jacobianX = new SimpleMatrix(n, n);
+    isXAllocatedIn[6] = true ;
+  }
+
   computeJacobianXPtr = NULL;
   cShared.setFunction(&computeJacobianXPtr, pluginPath, functionName);
 
@@ -958,7 +964,7 @@ void DynamicalSystem::computeVectorField(const double& time)
 
   unsigned int size = x->size();
   SimpleVector* param = parametersList0[0];
-  vectorFieldPtr(&size, &time, &(*x)(0) , &(*xDot)(0), &(*param)(0));
+  vectorFieldPtr(size, &time, &(*x)(0) , &(*xDot)(0), &(*param)(0));
 }
 
 void DynamicalSystem::computeJacobianX(const double& time)
@@ -968,7 +974,7 @@ void DynamicalSystem::computeJacobianX(const double& time)
 
   unsigned int size = x->size();
   SimpleVector* param = parametersList0[1];
-  computeJacobianXPtr(&size, &time, &(*x)(0), &(*jacobianX)(0, 0), &(*param)(0));
+  computeJacobianXPtr(size, &time, &(*x)(0), &(*jacobianX)(0, 0), &(*param)(0));
 }
 
 void DynamicalSystem::computeU(const double& time)
@@ -980,7 +986,7 @@ void DynamicalSystem::computeU(const double& time)
 
   unsigned int sizeX = x->size();
   SimpleVector* param = parametersList0[2];
-  computeUPtr(&uSize, &sizeX, &time, &(*x)(0), &(*xDot)(0), &(*u)(0), &(*param)(0));
+  computeUPtr(uSize, sizeX, &time, &(*x)(0), &(*xDot)(0), &(*u)(0), &(*param)(0));
 }
 
 void DynamicalSystem::computeU(const double& time, SiconosVector* xx, SiconosVector* xxDot)
@@ -992,7 +998,7 @@ void DynamicalSystem::computeU(const double& time, SiconosVector* xx, SiconosVec
 
   unsigned int sizeX = xx->size();
   SimpleVector* param = parametersList0[2];
-  computeUPtr(&uSize, &sizeX, &time, &(*xx)(0), &(*xxDot)(0), &(*u)(0), &(*param)(0));
+  computeUPtr(uSize, sizeX, &time, &(*xx)(0), &(*xxDot)(0), &(*u)(0), &(*param)(0));
 }
 
 void DynamicalSystem::computeT()
@@ -1004,15 +1010,13 @@ void DynamicalSystem::computeT()
 
   unsigned int sizeX = x->size();
   SimpleVector* param = parametersList0[3];
-  computeTPtr(&uSize, &sizeX, &(*x)(0), &(*T)(0, 0), &(*param)(0));
+  computeTPtr(uSize, sizeX, &(*x)(0), &(*T)(0, 0), &(*param)(0));
 }
 
 // ===== XML MANAGEMENT FUNCTIONS =====
 
 void DynamicalSystem::saveDSToXML()
 {
-  IN("DynamicalSystem::saveDSToXML\n");
-
   // --- general DS data ---
   saveDSDataToXML();
 
@@ -1027,7 +1031,6 @@ void DynamicalSystem::saveDSToXML()
       dsxml->setComputeJacobianXPlugin("DefaultPlugin:computeJacobianX");
   }
   else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DynamicalSystemXML object doesn't exists");
-  OUT("DynamicalSystem::saveDSToXML\n");
 }
 
 // Save data common to each system into the xml file
@@ -1049,8 +1052,6 @@ void DynamicalSystem::saveDSDataToXML()
     dsxml->setR(r);
   }
   else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DynamicalSystemXML object doesn't exists");
-  OUT("DynamicalSystem::saveDSToXML\n");
-
 }
 
 // Save boundary conditions to xml file
@@ -1090,7 +1091,6 @@ void DynamicalSystem::saveDSIOToXML()
 
 void DynamicalSystem::display() const
 {
-  IN("DynamicalSystem::display\n");
   cout << " ===== General dynamical system display =====" << endl;
   cout << "- number : " << number << endl;
   cout << "- id : " << id << endl;
@@ -1120,8 +1120,6 @@ void DynamicalSystem::display() const
   //  cout<<"- VectorField plugin: "<<vectorFieldFunctionName <<endl;
   //  cout<<"- JacobianX plugin: "<<computeJacobianXFunctionName <<endl;
   cout << " ============================================" << endl;
-  OUT("DynamicalSystem::display\n");
-
 }
 
 double DynamicalSystem::dsConvergenceIndicator()

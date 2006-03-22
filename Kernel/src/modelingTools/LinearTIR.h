@@ -33,7 +33,7 @@
  * \f[
  * y = h(x,t,\lambda,u,...) = C x + Fu + D \lambda + e
  *
- * R = g(\lambda,t) = B \lambda +a
+ * R = g(\lambda,t) = B \lambda
  * \f]
  *
  * Warning: For this class, h and g plug-in are not used but after all connected to default plug-in functions.
@@ -44,6 +44,34 @@
  */
 class LinearTIR : public Relation
 {
+
+private:
+  /** Relation is given by: \f$ y= C x + D \lambda + Fu + e \f$*/
+  /** and \f$ r = B\lambda\f$ */
+  /** \var C */
+  SiconosMatrix* C;
+  /** \var D*/
+  SiconosMatrix* D;
+  /** \var F*/
+  SiconosMatrix* F;
+  /** \var e*/
+  SimpleVector* e;
+  /** \var B*/
+  SiconosMatrix* B;
+
+  /** \var isAllocatedIn
+   * Flags to know if pointers have been allocated in constructors or not*/
+  /* the order is the one of members list above (C,D,F,e,B)  */
+  std::vector<bool> isAllocatedIn;
+
+  /** the XML object linked to the LinearTIR to read XML data */
+  // LinearTIRXML * lTIRxml;
+
+  /** \fn LinearTIR();
+   *  \brief Default (private) constructor
+   */
+  LinearTIR();
+
 public:
 
   /** \fn LinearTIR(RelationXML*, Interaction* =NULL)
@@ -64,20 +92,19 @@ public:
 
   /** \fn void LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
    *                     const SiconosMatrix& newF, const SimpleVector& newE,
-   *                     const SiconosMatrix& newB, const SimpleVector& newA)
+   *                     const SiconosMatrix& newB)
    *  \brief create the Relation from a set of data
    *  \param SiconosMatrix : C
    *  \param SiconosMatrix : D
    *  \param SiconosMatrix : F
    *  \param SimpleVectorx : e
    *  \param SiconosMatrix : B
-   *  \param SimpleVector : a
    *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  \exception RuntimeException
    */
   LinearTIR(const SiconosMatrix& , const SiconosMatrix& ,
             const SiconosMatrix& , const SimpleVector& ,
-            const SiconosMatrix& , const SimpleVector& , Interaction* = NULL);
+            const SiconosMatrix& , Interaction* = NULL);
 
   /** \fn LinearTIR(const Relation&)
    *  \brief copy constructor
@@ -254,38 +281,6 @@ public:
    */
   void setBPtr(SiconosMatrix *) ;
 
-  // -- a --
-
-  /** \fn  const SimpleVector getA() const
-   *  \brief get the value of a
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getA() const
-  {
-    return *a;
-  }
-
-  /** \fn SimpleVector* getAPtr() const
-   *  \brief get a
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getAPtr() const
-  {
-    return a;
-  }
-
-  /** \fn void setA (const SimpleVector& newValue)
-   *  \brief set the value of a to newValue
-   *  \param SimpleVector newValue
-   */
-  void setA(const SimpleVector&);
-
-  /** \fn void setAPtr(SimpleVector* newPtr)
-   *  \brief set a to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
-  void setAPtr(SimpleVector *);
-
   /** \fn void getCBlockDSPtr(DynamicalSystem* ds, SiconosMatrix&) const
    *  \brief get block of C corresponding to ds
    *  \param a pointer to dynamical system and a SiconosMatrix (in-out parameter)
@@ -347,33 +342,6 @@ public:
    * \return a pointer on the relation if it is of the right type, NULL otherwise
    */
   static LinearTIR* convert(Relation *r);
-
-private:
-  /** \fn LinearTIR();
-   *  \brief Default (private) constructor
-   */
-  LinearTIR();
-
-  /** Relation is given by: \f$ y= C x + D \lambda + Fu + e \f$*/
-  /** and \f$ r = B\lambda\f$ */
-  /** */
-  SiconosMatrix* C;
-  /** */
-  SiconosMatrix* D;
-  /** */
-  SiconosMatrix* F;
-  /** */
-  SimpleVector* e;
-  /** */
-  SiconosMatrix* B;
-  /** */
-  SimpleVector* a;
-  /** Flags to know if pointers have been allocated in constructors or not*/
-  /* the order is the one of members list above (C,D,F,e,B,a)  */
-  std::vector<bool> isAllocatedIn;
-
-  /** the XML object linked to the LinearTIR to read XML data */
-  // LinearTIRXML * lTIRxml;
 };
 
 #endif // LINEARTIRELATION_H

@@ -28,6 +28,16 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 
 Changes:
 
+2006-03-22 Franck Perignon <franck.perignon@inrialpes.fr>
+                                                                               
+	* Set correct links between DynamicalSystem and its derived classes.
+	* Add tests for DS and derived classes.
+
+2006-03-21 Franck Perignon <franck.perignon@inrialpes.fr>
+                                                                               
+	* Add BlockMatrix class, derived from SiconosMatrix. 
+	* Add test functions for Matrices
+
 2006-03-16 Franck Perignon <franck.perignon@inrialpes.fr>
                                                                                
 	* Add SimpleMatrix class, derived from SiconosMatrix. 

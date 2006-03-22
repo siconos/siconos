@@ -1064,8 +1064,6 @@ void LCP::computeQ(const double& time)
 
 void LCP::compute(const double& time)
 {
-  IN("LCP::compute(void)\n");
-
   // --- Prepare data for LCP computing ---
   preLCP(time);
 
@@ -1082,8 +1080,6 @@ void LCP::compute(const double& time)
     // --- Recover the desired variables from LCP output ---
     postLCP(*w, *z);
   }
-
-  OUT("LCP::compute(void)\n");
 }
 
 void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)

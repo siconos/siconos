@@ -16,44 +16,32 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#ifndef __SimpleMatrixTest__
-#define __SimpleMatrixTest__
+#ifndef __BlockMatrixTest__
+#define __BlockMatrixTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "BlockMatrix.h"
 #include "SimpleMatrix.h"
 
 using namespace std;
 
-class SimpleMatrixTest : public CppUnit::TestFixture
+class BlockMatrixTest : public CppUnit::TestFixture
 {
-
 
 private:
 
   // test suite
-  CPPUNIT_TEST_SUITE(SimpleMatrixTest);
+  CPPUNIT_TEST_SUITE(BlockMatrixTest);
 
   CPPUNIT_TEST(testConstructor1);
   CPPUNIT_TEST(testConstructor2);
   CPPUNIT_TEST(testConstructor3);
   CPPUNIT_TEST(testConstructor4);
-  CPPUNIT_TEST(testConstructor5);
-  CPPUNIT_TEST(testGetRow);
-  CPPUNIT_TEST(testReadWriteBinary);
-  CPPUNIT_TEST(testReadWriteAscii);
+  CPPUNIT_TEST(testGetLaGenMatDouble);
+  CPPUNIT_TEST(testSetValue);
   CPPUNIT_TEST(testAssignment);
-  CPPUNIT_TEST(testMultTranspose);
-  CPPUNIT_TEST(testBlockMatrixCopy1);
-  CPPUNIT_TEST(testBlockMatrixCopy2);
-  CPPUNIT_TEST(testBlockMatrixCopy3);
-  CPPUNIT_TEST(testBlockMatrixCopy4);
-  CPPUNIT_TEST(End);
-  CPPUNIT_TEST_EXCEPTION(testBlockMatrixCopyException1, SiconosMatrixException);
-  CPPUNIT_TEST_EXCEPTION(testBlockMatrixCopyException2, SiconosMatrixException);
   CPPUNIT_TEST(testOperators);
-  CPPUNIT_TEST(testLinearSolve);
-  CPPUNIT_TEST_EXCEPTION(testSizeException, SiconosMatrixException);
-  CPPUNIT_TEST_EXCEPTION(testConstructorException, SiconosMatrixException);
+  CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -61,27 +49,14 @@ private:
   void testConstructor2();
   void testConstructor3();
   void testConstructor4();
-  void testConstructor5();
-  void testGetRow();
-  void testReadWriteBinary();
-  void testReadWriteAscii();
+  void testGetLaGenMatDouble();
+  void testSetValue();
   void testAssignment();
-  void testMultTranspose();
-  void testBlockMatrixCopy1();
-  void testBlockMatrixCopy2();
-  void testBlockMatrixCopy3();
-  void testBlockMatrixCopy4();
-  void testBlockMatrixCopyException1();
-  void testBlockMatrixCopyException2();
   void testOperators();
-  void testLinearSolve();
-  void testSizeException();
-  void testConstructorException();
   void End();
 
-  SiconosMatrix *A, *B, *C;
-  SimpleVector* SV;
-  LaVectorDouble LVD;
+  SiconosMatrix *B, *C, *D, *E, *F, *G;
+  vector<SiconosMatrix*> m;
 
 public:
   void setUp();

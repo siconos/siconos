@@ -54,13 +54,40 @@ class LinearDSXML;
  * \f]
  * and so A should always be specified.
  *
- *  \todo Automatically, specify the function of DynamicalSystem such as
- *          VectorField.
- *
  **/
 
 class LinearDS : public DynamicalSystem
 {
+private:
+
+  /** matrix specific to the LinearDS \f$ A \in R^{n \times n}  \f$*/
+  SiconosMatrix *A;
+  /** strength vector */
+  SimpleVector *b;
+
+  /* the name of the plugin used to compute b */
+  std::string  bFunctionName;
+
+  /** \fn void (*bPtr) (const unsigned int & sizeOfB, const double* t, double* b, double* param)
+   *  \brief pointer on function to compute b
+   *  \param unsigned int sizeOfB : size of vector b
+   *  \param double* time : current time
+   *  \param double* b : the pointer to the first element of the vector b
+   *    \param double* param   : a vector of user-defined parameters
+   */
+  void (*computeBPtr)(const unsigned int &, const double*, double*, double*);
+
+  /** Flags to know if pointers have been allocated inside constructors or not */
+  bool isBAllocatedIn;
+
+  /** Flag to check if jacobianX (A) and/or b is a plug-in or not - isPlugin[0] for A, [1] for b.*/
+  std::deque<bool> isLDSPlugin;
+
+  /** \fn LinearDS()
+   *  \brief default constructor
+   */
+  LinearDS();
+
 public:
 
   /** === CONSTRUCTORS/DESTRUCTOR === */
@@ -78,12 +105,12 @@ public:
    *  \param int : reference number of this DynamicalSystem
    *  \param int : dimension of this DynamicalSystem
    *  \param SiconosVector : the initial state of this DynamicalSystem
-   *  \param string: plugin path for A (optional)
-   *  \param string: plugin function name for A (optional)
+   *  \param string: plugin for A=jacobianX (optional)
+   *  \param string: plugin for b (optional)
    *  \exception RuntimeException
    */
-  LinearDS(const int&, const unsigned int&, const SiconosVector&,
-           const std::string& = "DefaultPlugin.so", const std::string& = "computeA");
+  LinearDS(const int&, const unsigned int&, const SiconosVector&, const std::string& = "DefaultPlugin:jacobianX",
+           const std::string& = "DefaultPlugin:computeB");
 
   /** \fn LinearDS( const int& newNumber, const SiconosVector& newX0,
    *                const SiconosMatrix& newA)
@@ -131,17 +158,25 @@ public:
    *  \brief set the value of A to newValue
    *  \param SiconosMatrix newValue
    */
-  inline void setA(const SiconosMatrix& newValue)
-  {
-    *A = newValue;
-    isLDSPlugin[0] = false;
-  }
+  void setA(const SiconosMatrix& newValue);
 
   /** \fn void setAPtr(SiconosMatrix* newPtr)
    *  \brief set A to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
   void setAPtr(SiconosMatrix *);
+
+  /** \fn void setJacobianX (const SiconosMatrix& newValue)
+   *  \brief set the value of JacobianX to newValue
+   *  \param SiconosMatrix newValue
+   */
+  void setJacobianX(const SiconosMatrix&);
+
+  /** \fn void setJacobianXPtr(SiconosMatrix* newPtr)
+   *  \brief set JacobianX to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  void setJacobianXPtr(SiconosMatrix *newPtr);
 
   // --- b ---
 
@@ -175,25 +210,24 @@ public:
    */
   void setBPtr(SimpleVector *);
 
-  // --- plugins related functions
-
-  /** \fn  std::vector<bool> getIsLDSPlugin() const
+  /** \fn  std::deque<bool> getIsLDSPlugin() const
    *  \brief get boolean vector that checks if members are loaded from plugin or not
    *  \return a vector of bool
    */
-  inline const std::vector<bool> getIsLDSPlugin() const
+  inline const std::deque<bool> getIsLDSPlugin() const
   {
     return isLDSPlugin;
   }
 
-  /** \fn  std::string getAFunctionName() const
-  *  \brief get name of function that computes A (if A from plugin)
-  *  \return a string
+  // --- plugins related functions
+
+  /** \fn void setComputeAFunction(const string& libPath,const string& functionName)
+  *  \brief set a specified function to compute the matrix A => same action as setComputeJacobianXFunction
+  *  \param string : the complete path to the plugin
+  *  \param string : the function name to use in this plugin
+  *  \exception SiconosSharedLibraryException
   */
-  inline const std::string getAFunctionName() const
-  {
-    return AFunctionName;
-  }
+  void setComputeAFunction(const std::string &, const std::string &);
 
   /** \fn  std::string getBFunctionName() const
   *  \brief get name of function that computes b (if b from plugin)
@@ -204,14 +238,6 @@ public:
     return bFunctionName;
   }
 
-  /** \fn void setComputeAFunction(const string& libPath,const string& functionName)
-   *  \brief set a specified function to compute the matrix A
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeAFunction(const std::string &, const std::string &);
-
   /** \fn void setComputeBFunction(const string& libPath,const string& functionName);
    *  \brief set a specified function to compute the vector b
    *  \param string : the complete path to the plugin
@@ -220,8 +246,31 @@ public:
    */
   void setComputeBFunction(const std::string &, const std::string &);
 
+  /** \fn void setVectorFieldFunction(const string&, const string&)
+   *  \brief overload corresponding function of DS -> did nothing.
+   *  \param string pluginPath : the complete path to the plugin
+   *  \param string functionName : the function name to use in this library
+   *  \exception SiconosSharedLibraryException
+   */
+  void setVectorFieldFunction(const std::string & pluginPath, const std::string& functionName);
+
+  /** \fn void setComputeJacobianXFunction(const string&, const string&)
+   *  \brief set a specified function to compute jacobianX=A
+   *  \param string pluginPath : the complete path to the plugin
+   *  \param the string functionName : function name to use in this library
+   *  \exception SiconosSharedLibraryException
+   */
+  void setComputeJacobianXFunction(const std::string & pluginPath, const std::string & functionName);
+
+  /** \fn void vectorField (const double& time)
+   * \brief compute the vector field Ax+b
+   * \param double time : current time
+   *  \exception RuntimeException
+   */
+  void computeVectorField(const double&);
+
   /** \fn void computeA(const double& time)
-   *  \brief default function to compute matrix A
+   *  \brief default function to compute matrix A => same action as computeJacobianX
    *  \exception RuntimeException
    */
   void computeA(const double&);
@@ -252,45 +301,6 @@ public:
    */
   static LinearDS* convert(DynamicalSystem* ds);
 
-private:
-
-  /** \fn LinearDS()
-   *  \brief default constructor
-   */
-  LinearDS();
-
-  /** matrix specific to the LinearDS \f$ A \in R^{n \times n}  \f$*/
-  SiconosMatrix *A;
-  /** strength vector */
-  SimpleVector *b;
-
-  /* contains the name of the plugin for A */
-  std::string  AFunctionName;
-  /* contains the name of the plugin for b */
-  std::string  bFunctionName;
-
-  /** class for plugin management (open, close library...) */
-  SiconosSharedLibrary cShared;
-
-  /** \fn void (*computeAPtr)(int sizeOfA, double* APtr,double time)
-   *  \brief compute matrix A
-   *  \param double : the time to make the computations
-   */
-  void (*computeAPtr)(unsigned int* sizeOfA, double* APtr, const double* time);
-
-  /** \fn void (*computeBPtr)(int sizeOfB, double* bPtr,double time)
-   *  \brief compute vector b
-   *  \param double : the time to make the computations
-   */
-  void (*computeBPtr)(unsigned int* sizeOfB, double* bPtr, const double* time);
-
-  /** vector of bool to check if A, b (in this order!) are loaded from a plugin or not */
-  std::vector<bool> isLDSPlugin;
-
-  /** Flags to know if pointers have been allocated inside constructors or not */
-
-  bool isAAllocatedIn;
-  bool isBAllocatedIn;
 };
 
 #endif // LINEARDS_H

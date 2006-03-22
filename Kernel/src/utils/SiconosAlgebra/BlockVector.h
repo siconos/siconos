@@ -231,20 +231,10 @@ public:
   BlockVector &operator/=(const double&) ;
   BlockVector &operator = (const BlockVector& v) ;
 
-  // Logical operators
-  /** \fn bool operator == (const SiconosVector& v) const;
-   *  \brief compares two vectors (sizes and values).
-   *  \return bool
-   */
-  bool operator == (const SiconosVector& v) const  ;
-  bool operator == (const BlockVector& v) const  ;
-
   /** \fn bool operator != (const SiconosVector& v) const;
    *  \brief compares two vectors (sizes and values).
    *  \return bool
    */
-  bool operator != (const SiconosVector& v) const  ;
-  bool operator != (const BlockVector& v) const  ;
 
   // generic internal operator for mixed operations
   BlockVector addition(const SiconosVector&) const;

@@ -32,6 +32,7 @@
 const char N_DOUBLE_PRECISION[] = "%1.52e "; // double mantisse precision /!\ DEPENDS ON MACHINE
 const unsigned int M_MAXSIZEFORDISPLAY = 10;
 const std::string DEFAULT_FORMAT = "ascii";
+const double tolerance = 1e-10; // value used to compare matrices. Matrices A and B are equal when (A-B).normInf()<tolerance.
 
 /** \class SiconosVector
  *  \brief This is an abstract class to provide interface for vector handling

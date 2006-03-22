@@ -87,6 +87,185 @@ class LagrangianDSXML;
  */
 class LagrangianDS : public DynamicalSystem
 {
+protected:
+
+  // -- DEFAULT CONSTRUCTOR --
+  /** \fn LagrangianDS()
+   *  \brief Default constructor
+   */
+  LagrangianDS();
+
+  // -- MEMBERS --
+
+  /** number of degrees of freedom of the system */
+  unsigned int ndof;
+  /** coordinates of the system */
+  SimpleVector *q;
+  /** initial coordinates of the system */
+  SimpleVector *q0;
+  /** free coordinate */
+  SimpleVector *qFree;
+  /** memory of previous coordinates of the system */
+  SiconosMemory *qMemory;
+  /** velocity of the system */
+  SimpleVector *velocity;
+  /** initial velocity of the system */
+  SimpleVector *velocity0;
+  /** free Velocity */
+  SimpleVector *velocityFree;
+  /** memory of previous velocity of the system */
+  SiconosMemory *velocityMemory;
+  /** Reaction due to the non smooth law */
+  SimpleVector *p;
+
+  /** mass of the system */
+  SiconosMatrix *mass;
+  /** internal strength of the system */
+  SimpleVector *fInt;
+  /** external strength of the system */
+  SimpleVector *fExt;
+  /** non-linear inertia term of the system */
+  SimpleVector *NNL;
+  /** jacobian/coordinates of internal strength */
+  SiconosMatrix *jacobianQFInt;
+  /** jacobian/velocity of internal strength */
+  SiconosMatrix *jacobianVelocityFInt;
+  /** jacobian/coordinates of inertia */
+  SiconosMatrix *jacobianQNNL;
+  /** jacobian/velocity of inertie */
+  SiconosMatrix *jacobianVelocityNNL;
+
+  /* contains the name of the plugin used to compute the mass */
+  std::string  massFunctionName;
+  /* contains the name of the plugin used to compute fInt */
+  std::string  fIntFunctionName;
+  /* contains the name of the plugin used to compute fExt */
+  std::string  fExtFunctionName;
+  /* contains the name of the plugin used to compute jacobianQFInt */
+  std::string  jacobianQFIntFunctionName;
+  /* contains the name of the plugin used to compute jacobianQNNL */
+  std::string  jacobianQNNLFunctionName;
+  /* contains the name of the plugin used to compute jacobianVelocityFInt */
+  std::string  jacobianVelocityFIntFunctionName;
+  /* contains the name of the plugin used to compute jacobianVelocityNNL */
+  std::string  jacobianVelocityNNLFunctionName;
+  /* contains the name of the plugin used to compute NNL */
+  std::string  NNLFunctionName;
+
+  /** vector of bool to check if mass, fInt, fExt, NNL and the 4 jacobian are loaded from a plugin or not
+   The vector order is the one of members list (see above)*/
+  std::deque<bool> isLDSPlugin;
+
+  /** class for manage plugin (open, close librairy...) */
+  SiconosSharedLibrary cShared;
+
+  /** Flags to know if pointers have been allocated inside constructors or not */
+
+  // for vectors related to q (q, q0, qFree, qMemory)
+  std::deque<bool> isQAllocatedIn;
+  // the same for velocity
+  std::deque<bool> isVelocityAllocatedIn;
+  // p
+  bool isPAllocatedIn;
+  // Mass
+  bool isMassAllocatedIn;
+  // Forces: fInt, fExt, NNL
+  std::deque<bool> areForcesAllocatedIn;
+  // Jacobian: jacobianQFInt, jacobianVelocityFInt, jacobianQNNL, jacobianVelocityNNL
+  std::deque<bool> isJacobianAllocatedIn;
+
+  /** Parameters list, argument of plug-in. What are those parameters depends on user´s choice.
+   *  At the time, all plug-in functions have the same list.
+   *  The order corresponds to the one of the plug-in list below :
+   *  mass, FInt, FExt, NNL, jacobianQ and Velocity for FInt and NNL.
+   */
+  std::vector<SimpleVector*> parametersList; // -> Size = 8
+  std::deque<bool> isParametersListAllocatedIn;
+
+  // pointers to functions member to compute plug-in functions
+
+  /** \fn void (*computeMassPtr)(unsigned int* sizeOfq,const double * time, double* qPtr, double* massPtr, double* param)
+   *  \brief compute the mass
+   *  \param unsigned int* sizeOfq : the size of the vector q
+   *  \param double* time : the time for the computation
+   *  \param double* qPtr : the pointer to the first element of the vector q
+   *  \param double* massPtr : the pointer to the first element of the matrix mass (in-out parameter)
+   *    \param double*: vector of parameters
+   */
+  void (*computeMassPtr)(const unsigned int*, const double*, const double*, double*, double*);
+
+  /** \fn void (*computeFIntPtr)(int* sizeOfq, double* time, double* qPtr, double* velocityPtr, double* fIntPtr, double* param)
+   *  \brief computes the internal strengths
+   *  \param int* sizeOfq : the size of the vector q
+   *    \param int* time : the current time
+   *  \param double* qPtr : the pointer to the first element of the vector q
+   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
+   *  \param double* fIntPtr : the pointer to the first element of the vector FInt (in-out parameter)
+   *    \param double*: vector of parameters
+   */
+  void (*computeFIntPtr)(const unsigned int*, const double*, const double*, const double*, double*, double*);
+
+  /** \fn void (*computeFExtPtr)(unsigned int* sizeOfq, double* time, double* fExtPtr, double* param)
+   *  \brief computes the external strengths
+   *  \param unsigned int* sizeOfq : the size of the vector q
+   *    \param double* time : the current time
+   *  \param double* fExtPtr : the pointer to the first element of the vector FExt (in-out parameter)
+   *    \param double*: vector of parameters
+   */
+  void (*computeFExtPtr)(const unsigned int*, const double*, double*, double*);
+
+  /** \fn void (*computeNNLPtr)(unsigned int* sizeOfq, double* qPtr, double* velocityPtr, double* NNLPtr, double* param)
+   *  \brief computes the inertia
+   *  \param unsigned int* sizeOfq : the size of the vector q
+   *  \param double* qPtr : the pointer to the first element of the vector q
+   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
+   *  \param double* NNLPtr : the pointer to the first element of the vector NNL (in-out parameter)
+   *    \param double*: vector of parameters
+   */
+  void (*computeNNLPtr)(const unsigned int*, const double*, const double*, double*, double*);
+
+  /** \fn void (*computeJacobianQFIntPtr)(int* sizeOfq, double* time, double* qPtr, double* velocityPtr, double* jacobPtr, double* param)
+   *  \brief computes the gradient of the the internal strength compared to the state
+   *  \param unsigned int* sizeOfq : the size of the vector q
+   *    \param double* time : the current time
+   *  \param double* qPtr : the pointer to the first element of the vector q
+   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
+   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
+   *    \param double*: vector of parameters
+   */
+  void (*computeJacobianQFIntPtr)(const unsigned int*, const double*, const double*, const double*, double*, double*);
+
+  /** \fn void (*computeJacobianVelocityFIntPtr)(unsigned int* sizeOfq, const double* time, double* qPtr, double* velocityPtr, double* jacobPtr, double* param);
+   *  \brief computes the gradient of the the internal strength compared to the velocity
+   *  \param unsigned int* sizeOfq : the size of the vector q
+   *    \param double* time : the current time
+   *  \param double* qPtr : the pointer to the first element of the vector q
+   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
+   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
+   *    \param double*: vector of parameters
+   */
+  void (*computeJacobianVelocityFIntPtr)(const unsigned int*, const double*, const double*, const double*, double*, double*);
+
+  /** \fn void (*computeJacobianQNNL)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr, double* param)
+   *  \brief computes the gradient of the the external strength compared to the state
+   *  \param unsigned int* sizeOfq : the size of the vector q
+   *  \param double* qPtr : the pointer to the first element of the vector q
+   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
+   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
+   *    \param double*: vector of parameters
+   */
+  void (*computeJacobianQNNLPtr)(const unsigned int*, const double*, const double*, double*, double*);
+
+  /** \fn void (*computeJacobianVelocityNNLPtr)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr, double* param)
+   *  \brief computes the gradient of the the external strength compared to the velocity
+   *  \param unsigned int* sizeOfq : the size of the vector q
+   *  \param double* qPtr : the pointer to the first element of the vector q
+   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
+   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
+   *    \param double*: vector of parameters
+   */
+  void (*computeJacobianVelocityNNLPtr)(const unsigned int*, const double*, const double*, double*, double*);
+
 public:
 
   // === CONSTRUCTORS - DESTRUCTOR ===
@@ -1048,185 +1227,6 @@ public:
    * \return a double
    */
   virtual double dsConvergenceIndicator();
-
-protected:
-
-  // -- DEFAULT CONSTRUCTOR --
-  /** \fn LagrangianDS()
-   *  \brief Default constructor
-   */
-  LagrangianDS();
-
-  // -- MEMBERS --
-
-  /** number of degrees of freedom of the system */
-  unsigned int ndof;
-  /** coordinates of the system */
-  SimpleVector *q;
-  /** initial coordinates of the system */
-  SimpleVector *q0;
-  /** free coordinate */
-  SimpleVector *qFree;
-  /** memory of previous coordinates of the system */
-  SiconosMemory *qMemory;
-  /** velocity of the system */
-  SimpleVector *velocity;
-  /** initial velocity of the system */
-  SimpleVector *velocity0;
-  /** free Velocity */
-  SimpleVector *velocityFree;
-  /** memory of previous velocity of the system */
-  SiconosMemory *velocityMemory;
-  /** Reaction due to the non smooth law */
-  SimpleVector *p;
-
-  /** mass of the system */
-  SiconosMatrix *mass;
-  /** internal strength of the system */
-  SimpleVector *fInt;
-  /** external strength of the system */
-  SimpleVector *fExt;
-  /** non-linear inertia term of the system */
-  SimpleVector *NNL;
-  /** jacobian/coordinates of internal strength */
-  SiconosMatrix *jacobianQFInt;
-  /** jacobian/velocity of internal strength */
-  SiconosMatrix *jacobianVelocityFInt;
-  /** jacobian/coordinates of inertia */
-  SiconosMatrix *jacobianQNNL;
-  /** jacobian/velocity of inertie */
-  SiconosMatrix *jacobianVelocityNNL;
-
-  /* contains the name of the plugin used to compute the mass */
-  std::string  massFunctionName;
-  /* contains the name of the plugin used to compute fInt */
-  std::string  fIntFunctionName;
-  /* contains the name of the plugin used to compute fExt */
-  std::string  fExtFunctionName;
-  /* contains the name of the plugin used to compute jacobianQFInt */
-  std::string  jacobianQFIntFunctionName;
-  /* contains the name of the plugin used to compute jacobianQNNL */
-  std::string  jacobianQNNLFunctionName;
-  /* contains the name of the plugin used to compute jacobianVelocityFInt */
-  std::string  jacobianVelocityFIntFunctionName;
-  /* contains the name of the plugin used to compute jacobianVelocityNNL */
-  std::string  jacobianVelocityNNLFunctionName;
-  /* contains the name of the plugin used to compute NNL */
-  std::string  NNLFunctionName;
-
-  /** vector of bool to check if mass, fInt, fExt, NNL and the 4 jacobian are loaded from a plugin or not
-   The vector order is the one of members list (see above)*/
-  std::deque<bool> isLDSPlugin;
-
-  /** class for manage plugin (open, close librairy...) */
-  SiconosSharedLibrary cShared;
-
-  /** Flags to know if pointers have been allocated inside constructors or not */
-
-  // for vectors related to q (q, q0, qFree, qMemory)
-  std::deque<bool> isQAllocatedIn;
-  // the same for velocity
-  std::deque<bool> isVelocityAllocatedIn;
-  // p
-  bool isPAllocatedIn;
-  // Mass
-  bool isMassAllocatedIn;
-  // Forces: fInt, fExt, NNL
-  std::deque<bool> areForcesAllocatedIn;
-  // Jacobian: jacobianQFInt, jacobianVelocityFInt, jacobianQNNL, jacobianVelocityNNL
-  std::deque<bool> isJacobianAllocatedIn;
-
-  /** Parameters list, argument of plug-in. What are those parameters depends on user´s choice.
-   *  At the time, all plug-in functions have the same list.
-   *  The order corresponds to the one of the plug-in list below :
-   *  mass, FInt, FExt, NNL, jacobianQ and Velocity for FInt and NNL.
-   */
-  std::vector<SimpleVector*> parametersList; // -> Size = 8
-  std::deque<bool> isParametersListAllocatedIn;
-
-  // pointers to functions member to compute plug-in functions
-
-  /** \fn void (*computeMassPtr)(unsigned int* sizeOfq,const double * time, double* qPtr, double* massPtr, double* param)
-   *  \brief compute the mass
-   *  \param unsigned int* sizeOfq : the size of the vector q
-   *  \param double* time : the time for the computation
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* massPtr : the pointer to the first element of the matrix mass (in-out parameter)
-   *    \param double*: vector of parameters
-   */
-  void (*computeMassPtr)(const unsigned int*, const double*, const double*, double*, double*);
-
-  /** \fn void (*computeFIntPtr)(int* sizeOfq, double* time, double* qPtr, double* velocityPtr, double* fIntPtr, double* param)
-   *  \brief computes the internal strengths
-   *  \param int* sizeOfq : the size of the vector q
-   *    \param int* time : the current time
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
-   *  \param double* fIntPtr : the pointer to the first element of the vector FInt (in-out parameter)
-   *    \param double*: vector of parameters
-   */
-  void (*computeFIntPtr)(const unsigned int*, const double*, const double*, const double*, double*, double*);
-
-  /** \fn void (*computeFExtPtr)(unsigned int* sizeOfq, double* time, double* fExtPtr, double* param)
-   *  \brief computes the external strengths
-   *  \param unsigned int* sizeOfq : the size of the vector q
-   *    \param double* time : the current time
-   *  \param double* fExtPtr : the pointer to the first element of the vector FExt (in-out parameter)
-   *    \param double*: vector of parameters
-   */
-  void (*computeFExtPtr)(const unsigned int*, const double*, double*, double*);
-
-  /** \fn void (*computeNNLPtr)(unsigned int* sizeOfq, double* qPtr, double* velocityPtr, double* NNLPtr, double* param)
-   *  \brief computes the inertia
-   *  \param unsigned int* sizeOfq : the size of the vector q
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
-   *  \param double* NNLPtr : the pointer to the first element of the vector NNL (in-out parameter)
-   *    \param double*: vector of parameters
-   */
-  void (*computeNNLPtr)(const unsigned int*, const double*, const double*, double*, double*);
-
-  /** \fn void (*computeJacobianQFIntPtr)(int* sizeOfq, double* time, double* qPtr, double* velocityPtr, double* jacobPtr, double* param)
-   *  \brief computes the gradient of the the internal strength compared to the state
-   *  \param unsigned int* sizeOfq : the size of the vector q
-   *    \param double* time : the current time
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
-   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
-   *    \param double*: vector of parameters
-   */
-  void (*computeJacobianQFIntPtr)(const unsigned int*, const double*, const double*, const double*, double*, double*);
-
-  /** \fn void (*computeJacobianVelocityFIntPtr)(unsigned int* sizeOfq, const double* time, double* qPtr, double* velocityPtr, double* jacobPtr, double* param);
-   *  \brief computes the gradient of the the internal strength compared to the velocity
-   *  \param unsigned int* sizeOfq : the size of the vector q
-   *    \param double* time : the current time
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
-   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
-   *    \param double*: vector of parameters
-   */
-  void (*computeJacobianVelocityFIntPtr)(const unsigned int*, const double*, const double*, const double*, double*, double*);
-
-  /** \fn void (*computeJacobianQNNL)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr, double* param)
-   *  \brief computes the gradient of the the external strength compared to the state
-   *  \param unsigned int* sizeOfq : the size of the vector q
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
-   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
-   *    \param double*: vector of parameters
-   */
-  void (*computeJacobianQNNLPtr)(const unsigned int*, const double*, const double*, double*, double*);
-
-  /** \fn void (*computeJacobianVelocityNNLPtr)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr, double* param)
-   *  \brief computes the gradient of the the external strength compared to the velocity
-   *  \param unsigned int* sizeOfq : the size of the vector q
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
-   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
-   *    \param double*: vector of parameters
-   */
-  void (*computeJacobianVelocityNNLPtr)(const unsigned int*, const double*, const double*, double*, double*);
 
 };
 

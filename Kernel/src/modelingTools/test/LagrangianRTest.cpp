@@ -28,8 +28,8 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianRTest);
 
 void LagrangianRTest::setUp()
 {
-  G0 = new SiconosMatrix("matG0.dat", true);
-  G1 = new SiconosMatrix("matG.dat", true);
+  G0 = new SimpleMatrix("matG0.dat", true);
+  G1 = new SimpleMatrix("matG.dat", true);
   // parse xml file:
   xmlDocPtr doc;
   xmlNodePtr cur;

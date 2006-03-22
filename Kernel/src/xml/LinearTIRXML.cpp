@@ -20,11 +20,11 @@
 using namespace std;
 
 LinearTIRXML::LinearTIRXML():
-  RelationXML(), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL), aNode(NULL)
+  RelationXML(), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
 {}
 
 LinearTIRXML::LinearTIRXML(xmlNode * LTIRelationNode):
-  RelationXML(LTIRelationNode), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL), aNode(NULL)
+  RelationXML(LTIRelationNode), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
 {
   xmlNode *node;
   if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_C)) != NULL)
@@ -41,9 +41,6 @@ LinearTIRXML::LinearTIRXML(xmlNode * LTIRelationNode):
 
   if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_B)) != NULL)
     BNode = node;
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_A)) != NULL)
-    aNode = node;
 }
 
 LinearTIRXML::~LinearTIRXML()
@@ -82,12 +79,5 @@ void LinearTIRXML::setB(const SiconosMatrix &matrix)
   if (BNode == NULL)
     BNode = SiconosDOMTreeTools::createMatrixNode(rootRelationXMLNode, LTIR_B, matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(BNode, matrix);
-}
-
-void LinearTIRXML::setA(const SiconosVector& vec)
-{
-  if (aNode == NULL)
-    aNode = SiconosDOMTreeTools::createVectorNode(rootRelationXMLNode, LTIR_A, vec);
-  else SiconosDOMTreeTools::setSiconosVectorNodeValue(aNode, vec);
 }
 

@@ -22,7 +22,7 @@
 // ===== Dynamical System =====
 
 
-extern "C" void vectorField(const unsigned int *sizeOfX, const double *time, const double *x, double *xdot, double* param)
+extern "C" void vectorField(const unsigned int& sizeOfX, const double *time, const double *x, double *xdot, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); time ; x (pointer to X vector);
    * output parameter : xdot (pointer to Xdot vector)
@@ -30,7 +30,7 @@ extern "C" void vectorField(const unsigned int *sizeOfX, const double *time, con
   printf("Warning: call of the function 'vectorField' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
 
-extern "C" void computeJacobianX(const unsigned int *sizeOfX, const double *time, const double *x, double *jacob, double* param)
+extern "C" void computeJacobianX(const unsigned int &sizeOfX, const double *time, const double *x, double *jacob, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); time; x (pointer to x vector);
    * output parameter : jacob (pointer to JacobianX matrix)
@@ -41,7 +41,7 @@ extern "C" void computeJacobianX(const unsigned int *sizeOfX, const double *time
 
 
 // function to compute u
-extern "C" void computeU(const unsigned int* sizeOfU, const unsigned int* sizeOfX, const double* time, const double* xPtr, const double* xDotPtr, double* UPtr, double* param)
+extern "C" void computeU(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* time, const double* xPtr, const double* xDotPtr, double* UPtr, double* param)
 {
   /* input parameter :
    *  sizeOfU (size of the vector u)
@@ -56,7 +56,7 @@ extern "C" void computeU(const unsigned int* sizeOfU, const unsigned int* sizeOf
 }
 
 // function to compute T
-extern "C" void computeT(const unsigned int* sizeOfU, const unsigned int* sizeOfX, const double* xPtr, double* TPtr, double* param)
+extern "C" void computeT(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* xPtr, double* TPtr, double* param)
 {
   /* input parameter :
    *  sizeOfU (size of the vector u)
@@ -140,18 +140,10 @@ extern "C" void computeJacobianVelocityNNL(const unsigned int *sizeOfq, const do
 
 // ===== Linear DS  ====
 
-// Plugins for A, B (matrices), u and f. See LinearDS.h
+// Plugins for b (vector), u and f. See LinearDS.h
 
-extern "C" void computeA(unsigned int *sizeOfA, double* APtr, const double *time)
-{
-  /* input parameter : time, sizeOfA (size of the matrix A)
-   * output parameter : APtr (pointer to SiconosMatrix)
-   */
-  printf("Warning: call of the function 'computeA' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 
-}
-
-extern "C" void computeB(unsigned int *sizeOfB, double* b, const double *time)
+extern "C" void computeB(const unsigned int &sizeOfB, const double *time, double* b, double *param)
 {
   /* input parameter : time, sizeOfB (size of the vector b);
    * output parameter : b (pointer to b vector)

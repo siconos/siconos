@@ -30,8 +30,8 @@ void SimpleMatrixTest::setUp()
   unsigned int i, j;
   unsigned int Arow = 10;
   unsigned int Acol = 10;
-  unsigned int Brow = 5;
-  unsigned int Bcol = 10;
+  unsigned int Brow = 10;
+  unsigned int Bcol = 5;
   unsigned int Vsize = 10;
 
   A = new SimpleMatrix(Arow, Acol);
@@ -62,7 +62,6 @@ void SimpleMatrixTest::setUp()
     vtmp.at(i) = rand() % 10 + 20;
 
   SV = new SimpleVector(vtmp);
-  tol = 1e-9;
 }
 
 void SimpleMatrixTest::tearDown()
@@ -77,9 +76,9 @@ void SimpleMatrixTest::tearDown()
 
 void SimpleMatrixTest::testConstructor1()
 {
-  cout << "================================" << endl;
-  cout << "=== Relation tests start ...=== " << endl;
-  cout << "================================" << endl;
+  cout << "====================================" << endl;
+  cout << "=== Simple Matrix tests start ...=== " << endl;
+  cout << "====================================" << endl;
   cout << "--> Test: constructor 1." << endl;
   SimpleMatrix test(*A);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test == *A, true);
@@ -100,7 +99,7 @@ void SimpleMatrixTest::testConstructor3()
 {
   cout << "--> Test: constructor 3." << endl;
   LaGenMatDouble tmp;
-  tmp = A.getLaGenMatDouble();
+  tmp = A->getLaGenMatDouble();
   SimpleMatrix test(tmp);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test == *A, true);
   cout << "--> Constructor 3 test ended with success." << endl;
@@ -110,7 +109,7 @@ void SimpleMatrixTest::testConstructor4()
 {
   cout << "--> Test: constructor 4." << endl;
   LaVectorDouble LVD(10);
-  for (unsigned int i = 0; i < LVD.size(); i++)
+  for (int i = 0; i < LVD.size(); i++)
     LVD(i) = i;
 
   SimpleMatrix X(LVD, 5, 2);
@@ -119,7 +118,7 @@ void SimpleMatrixTest::testConstructor4()
   for (unsigned int i = 0; i < 5; i++)
     for (unsigned int j = 0; j < 2; j++)
       Xtrue(i, j) = 2 * i + j;
-  CPPUNIT_ASSERT_MESSAGE("testConstructor4 : X == Xtrue", X == Xtrue, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : X == Xtrue", X == Xtrue, true);
   cout << "--> Constructor 4 test ended with success." << endl;
 }
 
@@ -129,7 +128,7 @@ void SimpleMatrixTest::testConstructor5()
   A->write("tmp.dat", "ascii");
   SimpleMatrix test("tmp.dat", 1);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", test == *A, true);
-  B->write("tmp.dat", "binary");
+  B->write("tmp2.dat", "binary");
   SimpleMatrix test2("tmp2.dat", 0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", test2 == *B, true);
   cout << "--> Constructor 5 test ended with success." << endl;
@@ -141,12 +140,12 @@ void SimpleMatrixTest::testGetRow()
   SimpleMatrix *X = new SimpleMatrix(*A);
   SimpleVector *V2 = new SimpleVector(10);
   X->getRow(2, *V2);
-  CPPUNIT_ASSERT_MESSAGE("testGetRow : X == A ", *X == (*A), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetRow : X == A ", *X == (*A), true);
   X->getRow(3, *SV);
   SimpleVector * V3 = new SimpleVector(10);
   X->getRow(3, *V3);
-  CPPUNIT_ASSERT_MESSAGE("testGetRow : V2 != V3 ", *V2 == *V3, false);
-  CPPUNIT_ASSERT_MESSAGE("testGetRow : V3 == SV ", *V3 == *SV, false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetRow : V2 != V3 ", *V2 == *V3, false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetRow : V3 == SV ", *V3 == *SV, true);
   delete V2;
   delete V3;
   delete X;
@@ -159,7 +158,7 @@ void SimpleMatrixTest::testReadWriteBinary()
   SimpleMatrix X(*B);
   (*A).write("totoMat.bin", "binary");
   X.read("totoMat.bin", "binary");
-  CPPUNIT_ASSERT_MESSAGE("testReadWriteBinary : A == X ", (*A) == X, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testReadWriteBinary : A == X ", (*A) == X, true);
   cout << "--> readWriteBinary test ended with success." << endl;
 }
 
@@ -169,16 +168,16 @@ void SimpleMatrixTest::testReadWriteAscii()
   SimpleMatrix X(*B);
   (*A).write("totoMat.ascii", "ascii");
   X.read("totoMat.ascii", "ascii");
-  CPPUNIT_ASSERT_MESSAGE("testReadWriteAscii : A == X ", (*A) == X, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testReadWriteAscii : A == X ", (*A) == X, true);
   cout << "-->  test readWriteAscii ended with success." << endl;
 }
 
 void SimpleMatrixTest::testAssignment()
 {
   cout << "--> Test: assignment." << endl;
-  SimpleMatrix X(4, 4);
+  SimpleMatrix X(10, 10);
   X = (*A);
-  CPPUNIT_ASSERT_MESSAGE("testAssignment :", X == *A, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment :", X == *A, true);
   cout << "-->  test assignment ended with success." << endl;
 }
 
@@ -210,7 +209,7 @@ void SimpleMatrixTest::testMultTranspose()
   Z(1, 1) = 1;
   Z(1, 2) = 2;
 
-  CPPUNIT_ASSERT_MESSAGE("testAssignment :", X.multTranspose(Y) == Z, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment :", X.multTranspose(Y) == Z, true);
   cout << "-->  test multTranspose ended with success." << endl;
 }
 
@@ -240,7 +239,7 @@ void SimpleMatrixTest::testBlockMatrixCopy1()
   Cc(2, 2) = 0.0;
 
   Bb.blockMatrixCopy(Aa, 1, 0);
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy1 : B.blockMatrixCopy( A, x, y) ", Bb == Cc, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy1 : B.blockMatrixCopy( A, x, y) ", Bb == Cc, true);
   cout << "-->  test BlockMatrixCopy1 ended with success." << endl;
 }
 
@@ -253,7 +252,7 @@ void SimpleMatrixTest::testBlockMatrixCopy2()
   Cc(0, 0) = 1.0;
 
   Bb.blockMatrixCopy(Aa, 0, 0);
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy2 : B.blockMatrixCopy( A, x, y) ", Bb == Cc, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy2 : B.blockMatrixCopy( A, x, y) ", Bb == Cc, true);
   cout << "-->  test BlockMatrixCopy2 ended with success." << endl;
 }
 
@@ -302,7 +301,7 @@ void SimpleMatrixTest::testBlockMatrixCopy3()
   (*Cc)(3, 3) = 0.0;
 
   (*Bb).blockMatrixCopy((*Aa), 0, 0);
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy3 : B.blockMatrixCopy( A, x, y) ", (*Bb) == (*Cc), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy3 : B.blockMatrixCopy( A, x, y) ", (*Bb) == (*Cc), true);
   delete Aa;
   delete Bb;
   delete Cc;
@@ -351,7 +350,7 @@ void SimpleMatrixTest::testBlockMatrixCopy4()
   (*Cc)(3, 3) = 4.0;
 
   (*Bb).blockMatrixCopy((*Aa), 2, 2);
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", (*Bb) == (*Cc), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", (*Bb) == (*Cc), true);
   delete Aa;
   delete Bb;
   delete Cc;
@@ -373,17 +372,17 @@ void SimpleMatrixTest::testBlockMatrixCopyException2()
   delete Aa;
   delete Bb;
 }
-void SimpleMatrixTest::testOperator()
+void SimpleMatrixTest::testOperators()
 {
   cout << "--> Test: operators." << endl;
   SimpleMatrix test(*A);
   SimpleMatrix test2(10, 10);
   test += *A;
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test == (2 * *A), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE(" testOperators: B.blockMatrixCopy( A, x, y) ", test == (2 * *A), true);
   test -= *A;
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test == (*A), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators", test == (*A), true);
   test *= 3;
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test == (3 * *A), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators", test == (3 * *A), true);
   SimpleMatrix X(2, 3);
   X(0, 0) = 1;
   X(0, 1) = 2;
@@ -408,30 +407,30 @@ void SimpleMatrixTest::testOperator()
   Z(1, 0) = 1;
   Z(1, 1) = 1;
   Z(1, 2) = 2;
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", X * Y == Z, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", X * Y == Z, true);
   test2 = 2 * test;
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test2 == 6 * *A, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test2 == 6 * *A, true);
   test2 = test * 2;
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test2 == 6 * *A, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test2 == 6 * *A, true);
   test2 = test / 2;
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test2 == 1.5 * *A, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test2 == 1.5 * *A, true);
   test2 = test + *A;
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test2 == 4 * *A, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test2 == 4 * *A, true);
   test2 = test - *A;
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test2 == 2 * *A, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test2 == 2 * *A, true);
   test2 = pow(*A, 3);
-  CPPUNIT_ASSERT_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test2 == ((*A) * (*A) * (*A)), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", test2 == ((*A) * (*A) * (*A)), true);
   cout << "-->  test operators ended with success." << endl;
 }
 
 void SimpleMatrixTest::testLinearSolve()
 {
   cout << "--> Test: linearSolve." << endl;
-  SimpleMatrix X(10, 10);
+  SimpleMatrix X(10, 5);
   A->linearSolve((*B), X);
-  CPPUNIT_ASSERT_MESSAGE("testLinearSolve : A==A", (*A) == (*A), true);
-  CPPUNIT_ASSERT_MESSAGE("testLinearSolve : B==B", (*B) == (*B), true);
-  CPPUNIT_ASSERT_MESSAGE("testLinearSolve 3: ", ((*A)*X) == (*B), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testLinearSolve : A==A", (*A) == (*A), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testLinearSolve : B==B", (*B) == (*B), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testLinearSolve 3: ", ((*A)*X) == (*B), true);
   cout << "--> linearSolve test ended with success." << endl;
 }
 
@@ -443,7 +442,7 @@ void SimpleMatrixTest::testSizeException()
 void SimpleMatrixTest::testConstructorException()
 {
   LaVectorDouble LVD(10);
-  for (unsigned int i = 0; i < LVD.size(); i++)
+  for (int i = 0; i < LVD.size(); i++)
     LVD(i) = i;
   SimpleMatrix X(LVD, 4, 2);
 }

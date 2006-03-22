@@ -171,7 +171,7 @@ void SimpleVector::getBlock(const vector<unsigned int>& index, SimpleVector& blo
 {
   unsigned int sizeBlock = block.size();
   if (sizeBlock != index.size())
-    SiconosVectorException::selfThrow("getBlock : wrong indexes list");
+    SiconosVectorException::selfThrow("SimpleVector::getBlock : wrong indexes list");
 
   unsigned int k = 0;
 
@@ -179,12 +179,33 @@ void SimpleVector::getBlock(const vector<unsigned int>& index, SimpleVector& blo
 
   for (it = index.begin(); it != index.end(); it++)
   {
-    if (*it >= size()) SiconosVectorException::selfThrow("getBlock : index out of range");
+    if (*it >= size()) SiconosVectorException::selfThrow("SimpleVector::getBlock : index out of range");
     block(k) = lavd(*it);
     k++;
   }
 }
 
+void SimpleVector::getBlock(const unsigned int& index , const unsigned int& nbval , SimpleVector& block) const
+{
+  if ((block.size() != nbval) || (index + nbval > size()))
+    SiconosVectorException::selfThrow("SimpleVector::getBlock : wrong index or sizes");
+
+  for (unsigned int i = 0; i < nbval; i++)
+    block(i) = lavd(i + index);
+
+}
+
+void SimpleVector::setBlock(const unsigned int& posi, const SiconosVector &v)
+{
+  if (v.isBlock())
+    SiconosVectorException::selfThrow("SimpleVector::setBlock : argument vector is composite");
+
+  if (posi + v.size() > (unsigned int)lavd.size())
+    SiconosVectorException::selfThrow("SimpleVector::setBlock : filling out of range");
+
+  for (unsigned int i = 0; i < v.size(); i++)
+    lavd(i + posi) = v.getValue(i);
+}
 
 unsigned int SimpleVector::size(const unsigned int& i) const
 {
@@ -349,12 +370,6 @@ SimpleVector& SimpleVector::operator = (const SiconosVector& v)
   return *this;
 }
 
-bool operator==(const SiconosVector& v1, const SiconosVector& v2)
-{
-  double norm = (v1 - v2).norm();
-  return(norm < tolerance);
-}
-
 /*******************************************************************************
  *          SPECIFIC INTERNAL OPERATORS                                *
  *******************************************************************************/
@@ -406,6 +421,11 @@ SimpleVector &SimpleVector::operator/=(const double& d)
   return *this;
 }
 
+bool operator==(const SiconosVector& v1, const SiconosVector& v2)
+{
+  double norm = (v1 - v2).norm();
+  return(norm < tolerance);
+}
 
 //==================================================================================
 //      GENERIC INTERNAL FUNCTIONS FOR MIXED OPERATIONS

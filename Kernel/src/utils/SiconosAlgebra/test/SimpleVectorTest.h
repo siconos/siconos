@@ -22,7 +22,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "SiconosVector.h"
 #include "SimpleVector.h"
-#include "SiconosMatrix.h"
+#include "SimpleMatrix.h"
 #include "BlockVector.h"
 #include <math.h>
 #include <vector>
@@ -52,7 +52,6 @@ private:
   CPPUNIT_TEST(testReadWrite);
   CPPUNIT_TEST(testOperatorPlusEqual);
   CPPUNIT_TEST(testOperatorEqual);
-  CPPUNIT_TEST(testOperatorComp);
   CPPUNIT_TEST(testOperatorMultDivEqual);
   CPPUNIT_TEST(testAddition);
   CPPUNIT_TEST(testSubtraction);
@@ -61,6 +60,7 @@ private:
   CPPUNIT_TEST(testExternalOperatorMultMat);
   CPPUNIT_TEST(testExternalOperatorMatTransMult);
   CPPUNIT_TEST(testOperatorAccess);
+  CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -80,7 +80,6 @@ private:
   void testReadWrite();
   void testOperatorPlusEqual();
   void testOperatorEqual();
-  void testOperatorComp();
   void testOperatorMultDivEqual();
   void testAddition();
   void testSubtraction();
@@ -89,7 +88,7 @@ private:
   void testExternalOperatorMultMat();
   void testExternalOperatorMatTransMult();
   void testOperatorAccess();
-
+  void End();
   // Members
 
   std::vector<double> vq;

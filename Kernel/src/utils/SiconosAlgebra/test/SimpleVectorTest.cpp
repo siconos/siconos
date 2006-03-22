@@ -73,30 +73,36 @@ void SimpleVectorTest::tearDown()
 // Copy from a std vector
 void SimpleVectorTest::testBuildSimpleVector1()
 {
+  cout << "====================================" << endl;
+  cout << "=== Simple Vector tests start ...=== " << endl;
+  cout << "====================================" << endl;
+  cout << "--> Test: constructor 1." << endl;
   SimpleVector * v = new SimpleVector(vq);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", v->size() == vq.size(), true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", (v->getValues())(i) == vq[i], true);
-  cout << " Constructor SV 1 ok" << endl;
   delete v;
+  cout << "--> Constructor 1 test ended with success." << endl;
 }
 
 // Copy
 void SimpleVectorTest::testBuildSimpleVector2()
 {
+  cout << "--> Test: constructor 2." << endl;
   SimpleVector *v = new SimpleVector(*u);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->size() == u->size(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", *v == *u, true);
-  cout << "SimpleVectorTest >>> testBuildSimpleVector2 ............................... OK\n ";
   delete v;
+  cout << "--> Constructor 2 test ended with success." << endl;
 }
 
 // copy from SiconosVector
 void SimpleVectorTest::testBuildSimpleVector3()
 {
+  cout << "--> Test: constructor 3." << endl;
   // from a siconos which is a simple
   SiconosVector * tmp = new SimpleVector(vq);
   SimpleVector *v = new SimpleVector(*tmp);
@@ -104,7 +110,6 @@ void SimpleVectorTest::testBuildSimpleVector3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->size() == tmp->size(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", *v == *tmp, true);
-  cout << "SimpleVectorTest >>> testBuildSimpleVector2 ............................... OK\n ";
   delete v;
   delete tmp;
 
@@ -118,22 +123,22 @@ void SimpleVectorTest::testBuildSimpleVector3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->size() == 10, true);
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", (*v)(i) == 1, true);
-  cout << "SimpleVectorTest >>> testBuildSimpleVector2 ............................... OK\n ";
   delete v;
   delete tmp2;
-
+  cout << "--> Constructor 3 test ended with success." << endl;
 }
 
 // with size
 void SimpleVectorTest::testBuildSimpleVector4()
 {
+  cout << "--> Test: constructor 4." << endl;
   unsigned int SIZE = 10;
   SimpleVector *v = new SimpleVector(SIZE);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->size() == SIZE, true);
-  cout << "SimpleVectorTest >>> testBuildSimpleVector3 ............................... OK\n ";
   delete v;
+  cout << "--> Constructor 4 test ended with success." << endl;
 }
 
 // destructor
@@ -141,11 +146,13 @@ void SimpleVectorTest::testBuildSimpleVector4()
 // zero
 void SimpleVectorTest::testZero()
 {
+  cout << "--> Test: zero." << endl;
   SimpleVector *v = new SimpleVector(vq);
   v->zero();
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testZero : ", (*v)(i) == 0, true);
   delete v;
+  cout << "--> zero test ended with success." << endl;
 }
 
 // toString
@@ -154,46 +161,57 @@ void SimpleVectorTest::testZero()
 // setValue
 void SimpleVectorTest::testSetValue()
 {
+  cout << "--> Test: setValue." << endl;
   double a = 4;
   int i = 2;
   u->setValue(i, a);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValue : ", (*u)(2) == 4, true);
+  cout << "-->  setValue test ended with success." << endl;
 }
 
 // getValue
 void SimpleVectorTest::testGetValue()
 {
+  cout << "--> Test: getValue." << endl;
   int i = 2;
   u->setValue(i, 8);
   u->getValue(i);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetValue : ", (*u)(2) == 8, true);
+  cout << "-->  getValue test ended with success." << endl;
 }
 
 // setValues
 void SimpleVectorTest::testSetValues()
 {
+  cout << "--> Test: setValues." << endl;
   u->setValues(vq);
   for (unsigned int i = 0; i < u->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", (u->getValues())(i) == vq[i], true);
+  cout << "-->  setValues test ended with success." << endl;
 }
 
 // getValues
 void SimpleVectorTest::testGetValues()
 {
+  cout << "--> Test: getValues." << endl;
   for (unsigned int i = 0; i < u->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetValues : ", (u2->getValues())(i) == 1, true);
+  cout << "-->  getValues test ended with success." << endl;
 }
 
 // size
 void SimpleVectorTest::testSize()
 {
+  cout << "--> Test: setSize." << endl;
   int i = u2->size();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSize : ", i == 5, true);
+  cout << "-->  setSize test ended with success." << endl;
 }
 
 // write, read and read from a file constructor
 void SimpleVectorTest::testReadWrite()
 {
+  cout << "--> Test: readWrite." << endl;
   // write u2 into an ascii file
   bool isok = u2->write("testWrite_ascii.dat", "ascii");
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testReadWrite : ", isok == true, true);
@@ -218,7 +236,7 @@ void SimpleVectorTest::testReadWrite()
   }
   delete v2;
   delete v;
-  cout << "SimpleVectorTest >>> testWrite ............................... OK\n ";
+  cout << "--> readWrite test ended with success." << endl;
 }
 
 // getArray and norm: embedded blas or lapack functions => no tests
@@ -230,6 +248,7 @@ void SimpleVectorTest::testReadWrite()
 // += -=
 void SimpleVectorTest::testOperatorPlusEqual()
 {
+  cout << "--> Test: operatorPlusEqual." << endl;
   SimpleVector *v = new SimpleVector(vq);
 
   SiconosVector *sv = new SimpleVector(vq);
@@ -264,12 +283,13 @@ void SimpleVectorTest::testOperatorPlusEqual()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(4) == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
   delete v;
-  cout << "SimpleVectorTest >>> testOperatorPlusEqualGEN ............................... OK\n ";
+  cout << "--> operatorPlusEqual test ended with success." << endl;
 }
 
 // =
 void SimpleVectorTest::testOperatorEqual()
 {
+  cout << "--> Test: operatorEqual." << endl;
   SimpleVector *v = new SimpleVector(vq);
   SimpleVector *w = new SimpleVector(vdotq);
   SiconosVector *z = new SimpleVector(vq);
@@ -297,13 +317,14 @@ void SimpleVectorTest::testOperatorEqual()
   delete z;
   delete w;
   delete v;
-  cout << "SimpleVectorTest >>> testOperatorEqual ............................... OK\n ";
+  cout << "--> operatorEqual test ended with success." << endl;
 }
 
 // *= , /=
 
 void SimpleVectorTest::testOperatorMultDivEqual()
 {
+  cout << "--> Test: operatorMultDivEqual." << endl;
 
   double d = 2;
 
@@ -317,12 +338,13 @@ void SimpleVectorTest::testOperatorMultDivEqual()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorDivEqualSPC : ", u2->size() == 5, true);
   for (unsigned int i = 0; i < u2->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorDivEqualGEN : ", (*u2)(i) == 1, true);
-  cout << "SimpleVectorTest >>> testOperatorMultDivEqual ............................... OK\n ";
+  cout << "--> operatorMultDivEqual test ended with success." << endl;
 }
 
 // addition
 void SimpleVectorTest::testAddition()
 {
+  cout << "--> Test: addition." << endl;
   SiconosVector * sv = new SimpleVector(*u2);
 
   *u = u2->addition(*sv);
@@ -337,12 +359,13 @@ void SimpleVectorTest::testAddition()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*u)(3) == 9, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*u)(4) == 1, true);
   delete sv;
-  cout << "SimpleVectorTest >>> testAddition ............................... OK\n ";
+  cout << "--> addition test ended with success." << endl;
 }
 
 // subtraction
 void SimpleVectorTest::testSubtraction()
 {
+  cout << "--> Test: subtraction ." << endl;
   SiconosVector * sv = new SimpleVector(*u2);
 
   *u = u2->subtraction(*sv);
@@ -358,12 +381,13 @@ void SimpleVectorTest::testSubtraction()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*u)(4) == 1, true);
 
   delete sv;
-  cout << "SimpleVectorTest >>> testSubtraction ............................... OK\n ";
+  cout << "--> subtraction test ended with success." << endl;
 }
 // +
 
 void SimpleVectorTest::testExternalOperatorPlusMoins()
 {
+  cout << "--> Test: externalOperatorPlusMoins ." << endl;
   SimpleVector *v = new SimpleVector(5);
   SiconosVector *nsv1 = new SimpleVector(vq);
 
@@ -418,12 +442,13 @@ void SimpleVectorTest::testExternalOperatorPlusMoins()
 
   delete v2;
   delete v;
-  cout << "SimpleVectorTest >>> testExternalOperatorPlusMoins ............................... OK\n ";
+  cout << "--> externalOperatorPlusMoins test ended with success." << endl;
 }
 
 // * /
 void SimpleVectorTest::testExternalOperatorMultDiv()
 {
+  cout << "--> Test: externalOperatorMultDiv ." << endl;
   SimpleVector *v = new SimpleVector(5);
   double d = 2;
 
@@ -440,13 +465,14 @@ void SimpleVectorTest::testExternalOperatorMultDiv()
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == 0.5, true);
 
   delete v;
-  cout << "SimpleVectorTest >>> testExternalOperatorMultDiv ............................... OK\n ";
+  cout << "--> externalOperatorMultDiv test ended with success." << endl;
 }
 
 // matTransVectMult
 
 void SimpleVectorTest::testExternalOperatorMultMat()
 {
+  cout << "--> Test: externalOperatorMultMat ." << endl;
   SimpleMatrix m(2, 4);
   m(0, 0) = 0;
   m(0, 1) = 1;
@@ -494,11 +520,12 @@ void SimpleVectorTest::testExternalOperatorMultMat()
   delete sv3;
   delete sv2;
   delete v;
-  cout << "SimpleVectorTest >>> testExternalOperatorMultMat ............................... OK\n ";
+  cout << "--> externalOperatorMultMat test ended with success." << endl;
 }
 
 void SimpleVectorTest::testExternalOperatorMatTransMult()
 {
+  cout << "--> Test: externalOperatorMatTransMult ." << endl;
   SimpleMatrix m(4, 2);
   m(0, 0) = 0;
   m(0, 1) = 2;
@@ -545,12 +572,13 @@ void SimpleVectorTest::testExternalOperatorMatTransMult()
   delete sv3;
   delete sv2;
   delete v;
-  cout << "SimpleVectorTest >>> testExternalOperatorMatTransMult ............................... OK\n ";
+  cout << "--> externalOperatorMatTransMult test ended with success." << endl;
 }
 
 // ()
 void SimpleVectorTest::testOperatorAccess()
 {
+  cout << "--> Test: operatorAccess ." << endl;
   SimpleVector *v = new SimpleVector(vq);
 
   (*v)(2) = 10;
@@ -563,10 +591,15 @@ void SimpleVectorTest::testOperatorAccess()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", (v->getValues())(2) == 10 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", d == 1, true);
   delete v;
-  cout << "SimpleVectorTest >>> testOperatorAccess ............................... OK\n ";
-
+  cout << "--> operatorAccess test ended with success." << endl;
 }
 
+void SimpleVectorTest::End()
+{
+  cout << "======================================" << endl;
+  cout << " ===== End of SimpleVector Tests ===== " << endl;
+  cout << "======================================" << endl;
+}
 
 
 
