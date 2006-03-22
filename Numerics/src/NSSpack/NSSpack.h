@@ -289,6 +289,9 @@ extern  "C" void lcp_cpg(int *nn , double *vec , double *q , double *z , double 
 extern  "C" void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                           int *iparamLCP , double *dparamLCP);
 
+extern  "C" void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                         int *iparamLCP , double *dparamLCP);
+
 extern  "C" void lcp_nsqp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                           int *iparamLCP , double *dparamLCP);
 

@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*!\file lcp_nlgs.c
+/*!\file lcp_sor.c
 
   This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
   Try \f$(z,w)\f$ such that:\n
@@ -31,9 +31,9 @@
 
   where M is an (\f$nn \times nn\f$)-matrix, q , w and z nn-vectors.
 */
-/*!\fn  void lcp_nlgs( int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP )
+/*!\fn  void lcp_sor( int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP )
 
-  lcp_nlgs (Non Linear Gauss-Seidel) is a basic nlgs solver for LCP.\n
+  lcp_sor Succesive over relaxation solver for LCP. See cottle, Pang Stone Chap 5
 
   \param nn      On enter, an integer which represents the dimension of the system.
   \param vec     On enter, a (\f$nn \times nn\f$)-vector of doubles which contains the components of the matrix with a fortran storage.
@@ -57,9 +57,14 @@ it_end  On enter, the number of iterations performed by the algorithm.
 
   \param dparamLCP  On enter/return a vector of doubles:\n
                 - dparamLCP[0] = tol     On enter, the tolerance required.
-                - dparamLCP[1] = res     On return, the final error value.
+                - dparamLCP[1] = omega   On enter, the relaxation parameter
+                - dparamLCP[2] = res     On return, the final error value.
 
-  \author Mathieu Renouf,  Vincent Acary(modification Max function, ...)
+  \author  Vincent Acary
+
+  \todo use the relax parameter
+  \todo add test
+  \todo add a vector of relaxation parameter wtith an auto sizing (see SOR algorithm for linear solver.)
 
  */
 
@@ -69,7 +74,7 @@ it_end  On enter, the number of iterations performed by the algorithm.
 #include <math.h>
 #include "blaslapack.h"
 
-void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
 
   int n;

@@ -68,7 +68,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   const char lcpkey1[10] = "Lemke", lcpkey2[10] = "NLGS", lcpkey3[10] = "CPG";
   const char lcpkey4[10] = "Latin", lcpkey5[10] = "QP", lcpkey6[10] = "NSQP";
   const char lcpkey7[15] = "LexicoLemke", lcpkey8[15] = "NewtonMin";
-  const char lcpkey9[15] = "Latin_w", lcpkey10[15] = "NewtonFB";
+  const char lcpkey9[15] = "Latin_w", lcpkey10[15] = "NewtonFB", lcpkey11[15] = "SOR";
 
   int i, info = 1;
 
@@ -129,7 +129,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     iparamLCP[0] = pt->lcp.itermax;
     iparamLCP[1] = pt->lcp.chat;
     dparamLCP[0] = pt->lcp.tol;
-    dparamLCP[1] = pt->lcp.relax;
+    /* dparamLCP[1] = pt->lcp.relax;*/
 
     lcp_nlgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
@@ -137,7 +137,22 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     pt->lcp.err  = dparamLCP[2];
 
   }
+  /* **** SOR Solver **** */
 
+  else if (strcmp(pt->lcp.name , lcpkey11) == 0)
+  {
+
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.chat;
+    dparamLCP[0] = pt->lcp.tol;
+    dparamLCP[1] = pt->lcp.relax;
+
+    lcp_sor(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[2];
+
+  }
   /* **** CPG Solver **** */
 
   else if (strcmp(pt->lcp.name , lcpkey3) == 0)
