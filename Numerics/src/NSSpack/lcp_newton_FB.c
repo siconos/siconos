@@ -1,8 +1,22 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include "blaslapack.h"
+/* Siconos-Numerics version 1.1.3, Copyright INRIA 2005-2006.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+*/
+
 
 /*!\file lcp_newton_FB.c
  *
@@ -65,9 +79,13 @@
  * \todo Add rules for the computation of the penalization rho
  * \todo Add a globalization strategy based on a decrease of a merit function. (Nonmonotone LCP) Reference in Ferris Kanzow 2002
  */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include "blaslapack.h"
 
-void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , int *info ,
-                   int *iparamLCP , double *dparamLCP)
+void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
 
 
@@ -75,7 +93,7 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
   int n = *nn, m, k;
   int itermax, ispeak;
 
-  int incx, incy;
+  integer incx, incy;
   char NOTRANS = 'N';
   char TRANS = 'T';
   double err, tol, a1, b1;
@@ -133,11 +151,11 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
 
     // Construction of the directional derivatives of Phi, JacPhi
     // q --> w
-    dcopy_(&n , q , &incx , w , &incy);
+    dcopy_((integer *)&n , q , &incx , w , &incy);
     // Mz+q --> w
     a1 = 1.;
     b1 = 1.;
-    dgemv_(&TRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , w , &incy);
+    dgemv_(&TRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , &incx , &b1 , w , &incy);
     for (i = 0; i < n; i++) printf("z[%i]=%e", i, z[i]);
     printf("\n");
     for (i = 0; i < n; i++) printf("w[%i]=%e", i, w[i]);
@@ -163,7 +181,7 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
     // M^T.beta --> mbeta
     a1 = 1.;
     b1 = 0.0;
-    dgemv_(&NOTRANS , &n , &n , &a1 , vec , &n , beta , &incx , &b1 , mbeta  , &incy);
+    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , beta , &incx , &b1 , mbeta  , &incy);
     for (i = 0; i < n; i++) printf("mbeta[%i]=%e", i, mbeta[i]);
     printf("\n");
 
@@ -215,9 +233,9 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
 
     // Computation of the element of the subgradient.
 
-    dcopy_(&n , JacPhi , &incx , JacPhi_copy , &incy);
+    dcopy_((integer *)&n , JacPhi , &incx , JacPhi_copy , &incy);
     k = 1;
-    F77NAME(dgesv)(&m, &k, JacPhi_copy, &m, ipiv, beta, &m, &infoDGESV);
+    F77NAME(dgesv)((integer *)&m, (integer *)&k, JacPhi_copy, (integer *)&m, (integer *)ipiv, beta, (integer *)&m, (integer *)&infoDGESV);
 
     if (infoDGESV)
     {
@@ -236,16 +254,16 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
 
     // iteration
     alpha = -1.0;
-    daxpy_(&n , &alpha , beta , &incx , z , &incy);      //  z-beta --> z
+    daxpy_((integer *)&n , &alpha , beta , &incx , z , &incy);     //  z-beta --> z
 
 
     // Construction of the RHS for the next iterate and for the error evaluation
     // q --> w
-    dcopy_(&n , q , &incx , w , &incy);
+    dcopy_((integer *)&n , q , &incx , w , &incy);
     // Mz+q --> w
     a1 = 1.;
     b1 = 1.;
-    dgemv_(&TRANS , &n , &n , &a1 , vec , &n , z , &incx , &b1 , w , &incy);
+    dgemv_(&TRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , &incx , &b1 , w , &incy);
 
     for (i = 0; i < n; i++)
     {
@@ -258,7 +276,7 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
 
 
 
-    err = dnrm2_(&n , Phi , &incx);
+    err = dnrm2_((integer *)&n , Phi , &incx);
     err = 1 / 2 * err * err;
 
   }

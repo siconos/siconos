@@ -50,14 +50,17 @@
                 - iparamLCP[1] = ispeak  On enter, the output log identifiant:\n
                         0 : no output\n
                         >0: active screen output\n
-                - iparamLCP[2] = it_end  On enter, the number of iterations performed by the algorithm.
+                - iparamLCP[2] = initmethod On enter, the method of initialization
+            0 : default w = q, z unchang
+
+it_end  On enter, the number of iterations performed by the algorithm.
 
   \param dparamLCP  On enter/return a vector of doubles:\n
                 - dparamLCP[0] = tol     On enter, the tolerance required.
                 - dparamLCP[1] = omega   On enter, the relaxation parameter (not yet available).
                 - dparamLCP[2] = res     On return, the final error value.
 
-  \author Mathieu Renouf
+  \author Mathieu Renouf modification Vincent Acary
 
  */
 
@@ -70,7 +73,9 @@
 void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
 
-  int n, incx, incy;
+  int n;
+  int incx = 1, incy = 1;
+  int incxn = n;
   int i, iter;
   int itermax, ispeak;
 
@@ -82,9 +87,6 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   char NOTRANS = 'N';
 
   n = *nn;
-  incx = 1;
-  incy = 1;
-
   /* Recup input */
 
   itermax = iparamLCP[0];
@@ -130,127 +132,120 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   for (i = 0 ; i < n ; ++i)
   {
     ww[i] = 0.;
-    w[i] = 0.;
   }
 
-  /* Intialization of w */
-
-  incx = 1;
-  incy = 1;
-  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
-
-  /* Preparation of the diagonal of the inverse matrix */
-
-  for (i = 0 ; i < n ; ++i)
+  /* Intialization of w and z */
+  if (initmethod == 0)
   {
-    if (fabs(vec[i * n + i]) < 1e-16)
-    {
-
-      if (ispeak > 0)
-      {
-        printf(" Warning negative diagonal term \n");
-        printf(" The local problem can be solved \n");
-      }
-
-      *info = 2;
-      free(diag);
-      free(ww);
-
-      return;
-    }
-    else diag[i] = 1.0 / vec[i * n + i];
-  }
-
-  /*start iterations*/
-
-  iter = 0;
-  err  = 1.;
-
-  incx = 1;
-  incy = 1;
-
-  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
-
-  while ((iter < itermax) && (err > tol))
-  {
-
-    ++iter;
-
-    incx = 1;
-    incy = 1;
-
-    dcopy_((integer *)&n , w , (integer *)&incx , ww , (integer *)&incy);
     dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+    dcopy_((integer *)&n , ww , (integer *)&incx , z , (integer *)&incy);
+  }
+  else if (initmethod == 0)
+  {
+
+
+    /* Preparation of the diagonal of the inverse matrix */
 
     for (i = 0 ; i < n ; ++i)
     {
+      if (fabs(vec[i * n + i]) < 1e-16)
+      {
 
-      incx = n;
-      incy = 1;
+        if (ispeak > 0)
+        {
+          printf(" Warning negative diagonal term \n");
+          printf(" The local problem can be solved \n");
+        }
 
-      z[i] = 0.0;
+        *info = 2;
+        free(diag);
+        free(ww);
 
-      zi = -(q[i] + ddot_((integer *)&n , &vec[i] , (integer *)&incx , z , (integer *)&incy)) * diag[i];
+        return;
+      }
+      else diag[i] = 1.0 / vec[i * n + i];
+    }
 
-      if (zi < 0) z[i] = 0.0;
-      else z[i] = zi;
+    /*start iterations*/
+
+    iter = 0;
+    err  = 1.;
+
+
+    dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+
+    while ((iter < itermax) && (err > tol))
+    {
+
+      ++iter;
+
+      dcopy_((integer *)&n , w , (integer *)&incx , ww , (integer *)&incy);   /* w --> ww */
+      dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);    /* q --> w */
+
+      for (i = 0 ; i < n ; ++i)
+      {
+
+
+        z[i] = 0.0;
+
+        zi = -(q[i] + ddot_((integer *)&n , &vec[i] , (integer *)&incxn , z , (integer *)&incy)) * diag[i];
+
+        if (zi < 0) z[i] = 0.0;
+        else z[i] = zi;
+
+      }
+
+      /* **** Criterium convergence **** */
+
+      a1 = 1.0;
+      b1 = 1.0;
+
+      dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , (integer *)&incx , &b1 , w , (integer *)&incy);
+
+      qs   = -1.0;
+      daxpy_((integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy);
+
+      num = dnrm2_((integer *)&n, ww , (integer *)&incx);
+      err = num * den;
+
+      if (ispeak == 2)
+      {
+        printf(" # i%d -- %g : ", iter, err);
+        for (i = 0 ; i < n ; ++i) printf(" %g", z[i]);
+        for (i = 0 ; i < n ; ++i) printf(" %g", w[i]);
+        printf("\n");
+      }
+
+      /* **** ********************* **** */
 
     }
 
-    /* **** Criterium convergence **** */
+    iparamLCP[2] = iter;
+    dparamLCP[2] = err;
 
-    incx =  1;
-    incy =  1;
-
-    a1 = 1.0;
-    b1 = 1.0;
-
-    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , (integer *)&incx , &b1 , w , (integer *)&incy);
-
-    qs   = -1.0;
-    daxpy_((integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy);
-
-    num = dnrm2_((integer *)&n, ww , (integer *)&incx);
-    err = num * den;
-
-    if (ispeak == 2)
+    if (ispeak > 0)
     {
-      printf(" # i%d -- %g : ", iter, err);
-      for (i = 0 ; i < n ; ++i) printf(" %g", z[i]);
-      for (i = 0 ; i < n ; ++i) printf(" %g", w[i]);
-      printf("\n");
-    }
-
-    /* **** ********************* **** */
-
-  }
-
-  iparamLCP[2] = iter;
-  dparamLCP[2] = err;
-
-  if (ispeak > 0)
-  {
-    if (err > tol)
-    {
-      printf(" No convergence of NLGS after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", err);
-      *info = 1;
+      if (err > tol)
+      {
+        printf(" No convergence of NLGS after %d iterations\n" , iter);
+        printf(" The residue is : %g \n", err);
+        *info = 1;
+      }
+      else
+      {
+        printf(" Convergence of NLGS after %d iterations\n" , iter);
+        printf(" The residue is : %g \n", err);
+        *info = 0;
+      }
     }
     else
     {
-      printf(" Convergence of NLGS after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", err);
-      *info = 0;
+      if (err > tol) *info = 1;
+      else *info = 0;
     }
-  }
-  else
-  {
-    if (err > tol) *info = 1;
-    else *info = 0;
-  }
 
-  free(ww);
-  free(diag);
+    free(ww);
+    free(diag);
 
-  return;
-}
+    return;
+  }
