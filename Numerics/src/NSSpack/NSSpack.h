@@ -306,6 +306,10 @@ extern  "C" void lcp_lexicolemke(int *nn , double *vec , double *q , double *z ,
 extern  "C" void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                                 int *iparamLCP , double *dparamLCP);
 
+extern  "C" void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                               int *iparamLCP , double *dparamLCP);
+
+
 /* ******************************************* */
 
 extern "C" int dr_solver(double* , double* , int* , method* , double* , double*);

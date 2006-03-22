@@ -68,7 +68,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   const char lcpkey1[10] = "Lemke", lcpkey2[10] = "NLGS", lcpkey3[10] = "CPG";
   const char lcpkey4[10] = "Latin", lcpkey5[10] = "QP", lcpkey6[10] = "NSQP";
   const char lcpkey7[15] = "LexicoLemke", lcpkey8[15] = "NewtonMin";
-  const char lcpkey9[15] = "Latin_w";
+  const char lcpkey9[15] = "Latin_w", lcpkey10[15] = "NewtonFB";
 
   int i, info = 1;
 
@@ -203,6 +203,20 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     pt->lcp.err  = dparamLCP[1];
 
   }
+  else if (strcmp(pt->lcp.name , lcpkey10) == 0)
+  {
+
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.chat;
+    dparamLCP[0] = pt->lcp.tol;
+
+    lcp_newton_FB(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[1];
+
+  }
+
   else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
 
   return info;
