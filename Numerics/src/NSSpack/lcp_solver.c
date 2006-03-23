@@ -79,12 +79,20 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
 
   if (strcmp(pt->lcp.name , lcpkey1) == 0)
+  {
 
-    lcp_lemke(vec , q , n , &pt->lcp.itermax , z ,                   /* in  */
-              w , &pt->lcp.iter , &pt->lcp.err , &info);            /* out */
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.chat;
 
-  /* *** LCP signature *** */
+    lcp_lexicolemke(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
+    pt->lcp.iter = iparamLCP[2];
+
+    /*  Old version of Lemke. Use LexicoLemke Directly */
+    /*     lcp_lemke( vec , q , n , &pt->lcp.itermax , z ,                  /\* in  *\/ */
+    /*         w , &pt->lcp.iter , &pt->lcp.err , &info );           /\* out *\/ */
+
+  }
   /* **** Latin Solver **** */
 
   else if (strcmp(pt->lcp.name , lcpkey4) == 0)

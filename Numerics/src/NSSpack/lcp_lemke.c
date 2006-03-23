@@ -73,6 +73,9 @@ void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem, do
   char trans = 'T';
   int trouve;
 
+  printf("This Lemke Algorithm is not reliable yet, use LexicoLemke algorithm");
+  return ;
+
   for (i = 0; i < n; i++)
     for (j = 0; j < n; j++)
     {

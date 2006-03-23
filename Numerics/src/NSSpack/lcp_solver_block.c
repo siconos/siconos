@@ -84,7 +84,7 @@
 * \f$
 *
 * then
-* - the number of block is 4 (=dn) and the fimension of block is 2 (=db)
+* - the number of block is 4 (=dn) and the dimension of block is 2 (=db)
 * - the vector inb[dn] is equal to [2,2,2,2]
 * - the vector iid[dn*db] is equal to [1,3,2,4,1,3,2,4]
 * - the vector vec contains all block matrices stored as\n

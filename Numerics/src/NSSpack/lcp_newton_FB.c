@@ -104,6 +104,10 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
   double *beta, *mbeta;
   double *JacPhi, *JacPhi_copy, *Phi;
 
+  printf("The Algorithm lcp_newton_FB is not reliable yet, report to siconos.gforge.inria.fr if you need it soon \n");
+  return ;
+
+
   incx = 1;
   incy = 1;
   /*input*/

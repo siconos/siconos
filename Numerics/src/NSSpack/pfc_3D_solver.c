@@ -74,6 +74,11 @@ int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , do
 
   clock_t t1, t2;
 
+  printf("pfc_3D_* Algorithms are not reliable yet, report to siconos.gforge.inria.fr if you need it soon \n");
+  return ;
+
+
+
   for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
   for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
 

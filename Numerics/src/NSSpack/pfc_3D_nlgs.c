@@ -85,6 +85,9 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   double *det, *bfd, *ww;
   char NOTRANS = 'N';
 
+  printf("pfc_3D_* Algorithms are not reliable yet, report to siconos.gforge.inria.fr if you need it soon \n");
+  return ;
+
   ispeak = 0;
   nc    = *nn;
   incx = 1;

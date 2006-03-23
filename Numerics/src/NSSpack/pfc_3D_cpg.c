@@ -95,6 +95,9 @@ void pfc_3D_cpg(int *nn , double *vec , double *q , double *z , double *w , int 
   int *status;
   double *zz , *pp , *rr , *ww , *Mp;
 
+  printf("pfc_3D_* Algorithms are not reliable yet, report to siconos.gforge.inria.fr if you need it soon \n");
+  return ;
+
   nc   = *nn;
   incx = 1;
   incy = 1;

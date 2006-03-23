@@ -612,6 +612,9 @@ extern void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w ,
 extern void lcp_nsqp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                      int *iparamLCP , double *dparamLCP);
 
+extern void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                    int *iparamLCP , double *dparamLCP);
+
 extern void lcp_latin(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                       int *iparamLCP , double *dparamLCP);
 
@@ -624,6 +627,9 @@ extern void lcp_lexicolemke(int *nn , double *vec , double *q , double *z , doub
 
 extern void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                            int *iparamLCP , double *dparamLCP);
+
+extern void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                          int *iparamLCP , double *dparamLCP);
 
 
 /* **************************** PR **************************************** */
