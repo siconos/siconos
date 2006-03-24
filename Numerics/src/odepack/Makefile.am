@@ -20,8 +20,8 @@
 
 include $(top_srcdir)/config/Make-rules
 
-.cpp.o:
-	$(CXXCOMPILE) -c $<
+.f.o:
+	$(F77COMPILE) -c $<
 
 SUBDIRS = test 
 

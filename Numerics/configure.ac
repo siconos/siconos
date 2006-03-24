@@ -172,13 +172,13 @@ AM_CONDITIONAL([CPPUNIT_COND], [test "$cppunit" = yes])
 
 # Default Flag
 if test "$enable_warnings" = no; then
-CXXFLAGS="-fPIC"
-CFLAGS="-fPIC"
-FFLAGS="-fPIC"
+CXXFLAGS=""
+CFLAGS=""
+FFLAGS=""
 else
-CXXFLAGS="-Wall -fPIC"
-CFLAGS="-Wall -fPIC"
-FFLAGS="-Wall -fPIC"
+CXXFLAGS="-Wall"
+CFLAGS="-Wall"
+FFLAGS="-Wall"
 fi
 
 #Optional flag
@@ -213,13 +213,20 @@ case "$target" in
       ARCH="WIN32"
       ;;
     *-linux*)
-      CXXFLAGS="$CXXFLAGS"
+      CFLAGS="$CFLAGS -fPIC"
+      FFLAGS="$FFLAGS -fPIC"
+      CXXFLAGS="$CXXFLAGS -fPIC"
       CXX_DYNLIB="-shared"
       ARCH="Linux"
       ;;
     *-apple-darwin*)
+      # The Flag -fno-common is mandatory on MacOsX   
+      FFLAGS="$FFLAGS -fno-common"  
       CXXFLAGS="$CXXFLAGS -flat_namespace"
-      CXX_DYNLIB="-dynamiclib -flat_namespace -single-module -undefined suppress"
+      # This flag is used for LIBTOOL
+      CXX_DYNLIB="-dynamiclib"
+      #  if we want to have module and not dylib librairy
+      #CXX_DYNLIB="-module"
       ARCH="Apple-Darwin"
       ;; 
     *)
