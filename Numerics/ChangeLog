@@ -29,6 +29,18 @@ Notes:
 
 Changes:
 
+2006-03-24 Vincent Acary <vincent.acary@inrialpes.fr>
+                                                                               
+	* INSTALL, src/Makefile.am, src/dummy.cpp
+	  First draft of a linking strategy on MacOsX
+
+2006-03-22 Vincent Acary <vincent.acary@inrialpes.fr>
+                                                                               
+	* lcp_solver.c, lcp_sor.c, lcp_newton_FB.c, NSSpack.h
+	  Removing not reliable solvers. 
+	  Adding Draft version of the sor algorihm and the newton based on
+	  Fischer-Bursmeister function.
+
 2006-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
                                                                                
 	* configure.ac -> run autoupdate to remove obsolete macros. 
