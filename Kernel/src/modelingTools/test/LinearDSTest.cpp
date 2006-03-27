@@ -40,7 +40,6 @@ void LinearDSTest::setUp()
 
 
   A0 = new SimpleMatrix("matA0.dat", true);
-  J0 = new SimpleMatrix("matJ0.dat", true);
 
   // parse xml file:
   xmlDocPtr doc;
@@ -81,7 +80,6 @@ void LinearDSTest::tearDown()
   delete x0;
   delete b0;
   delete A0;
-  delete J0;
 }
 
 // xml constructor (1), without plugin
@@ -124,11 +122,25 @@ void LinearDSTest::testBuildLinearDS2()
   ds->computeA(time);
   SimpleVector * x01 = new SimpleVector(3);
   (*x01)(0) = 0;
-  (*x01)(1) = (*b0)(1);
-  (*x01)(2) = 2 * (*b0)(2);
+  (*x01)(1) = 1;
+  (*x01)(2) = 2;
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2I : ", ds->getB() == time* *x01, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2J : ", ds->getA() == 2 * *A0, true);
+
+  SimpleVector* u0 = new SimpleVector(2);
+  (*u0)(0) = 3;
+  (*u0)(1) = 6;
+  SiconosMatrix *T0 = new SimpleMatrix("matT0.dat", true);
+
+  ds->computeVectorField(time);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2K : ", ds->getU() == *u0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2L : ", ds->getT() == *T0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2M : ", (*(ds->getXDotPtr())) == (*(ds->getAPtr()) * 2 * *x0 + ds->getB() + * (ds->getTPtr())**(ds->getUPtr())), true);
+
+  delete T0;
+  delete u0;
   delete x01;
   delete ds;
   cout << "--> Constructor xml 2 test ended with success." << endl;
@@ -152,12 +164,21 @@ void LinearDSTest::testBuildLinearDS3()
   ds->computeVectorField(time);
   SimpleVector * x01 = new SimpleVector(3);
   (*x01)(0) = 0;
-  (*x01)(1) = (*b0)(1);
-  (*x01)(2) = 2 * (*b0)(2);
+  (*x01)(1) = 1;
+  (*x01)(2) = 2;
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2I : ", ds->getB() == time* *x01, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2J : ", ds->getA() == 2 * *A0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3I : ", ds->getB() == time* *x01, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3J : ", ds->getA() == 2 * *A0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3E : ", ds->getXDot() == (time* *x01 + 2 * *A0 **x0) , true);
+
+  ds->setUSize(3);
+  ds->setComputeUFunction("TestPlugin.so", "computeU");
+  ds->computeU(time);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3K : ", ds->getU() == time **x0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3L : ", ds->getTPtr() == NULL, true);
+  ds->computeVectorField(time);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2M : ", *(ds->getXDotPtr()) == (2 * *A0 * *x0 + ds->getB() + time**x0), true);
   delete ds;
   cout << "--> Constructor 3 test ended with success." << endl;
 }

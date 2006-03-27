@@ -24,7 +24,7 @@
 	<NSDS bvp='false'>
 	<!-- DSs defined in the problem -->
 		<DS_Definition>		
-			<DynamicalSystem number='13'>
+			<NonLinearDS number='13'>
 				<Id>testDS1</Id>	
 			        <n> 3 </n>
 	 			<StepsInMemory>2</StepsInMemory>				
@@ -40,8 +40,8 @@
 					<row>4.0 4.0 </row>
 					<row>6.0 6.0 </row>
 				</T>			
-			</DynamicalSystem>
-			<DynamicalSystem number='2'>
+			</NonLinearDS>
+			<NonLinearDS number='2'>
 				<Id>testDS2</Id>				
 			        <n> 3 </n>
 				<x0 vectorSize='3'>
@@ -50,7 +50,7 @@
                                 <uSize> 2 </uSize>
 				<u vectorPlugin="TestPlugin:computeU"/>
 				<T matrixPlugin="TestPlugin:computeT"/>	
-			</DynamicalSystem>
+			</NonLinearDS>
 		</DS_Definition>
 	</NSDS>
 </SiconosModel>

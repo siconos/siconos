@@ -41,14 +41,13 @@ extern "C" void computeJacobianX(const unsigned int &sizeOfX, const double *time
 
 
 // function to compute u
-extern "C" void computeU(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* time, const double* xPtr, const double* xDotPtr, double* UPtr, double* param)
+extern "C" void computeU(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* time, const double* xPtr, double* UPtr, double* param)
 {
   /* input parameter :
    *  sizeOfU (size of the vector u)
    *  sizeOfX (size of the vector x)
    *  time
    *  pointer to x
-   *  pointer to xDot
    *  pointer to u (in-out parameter)
    */
   printf("Warning: call of the function 'computeU' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");

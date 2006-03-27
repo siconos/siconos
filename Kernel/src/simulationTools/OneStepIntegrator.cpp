@@ -44,11 +44,13 @@ OneStepIntegrator::~OneStepIntegrator()
 
 void OneStepIntegrator::initialize()
 {
-  ds->initMemory(sizeMem);
+  double t0 = timeDiscretisation->getT0();
+  ds->initialize(t0, sizeMem);
 }
 
 void OneStepIntegrator::nextStep()
 {
+  ds->setIsDSUp(false); // to reset isDSUp bool, see LagrangianDS.
   ds->swapInMemory();
   ds->getRPtr()->zero();
 }

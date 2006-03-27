@@ -80,7 +80,7 @@ private:
   /** Flags to know if pointers have been allocated inside constructors or not */
   bool isBAllocatedIn;
 
-  /** Flag to check if jacobianX (A) and/or b is a plug-in or not - isPlugin[0] for A, [1] for b.*/
+  /** Flag to check if jacobianX (A) and/or b is a plug-in or not - isLDSPlugin[0] for A, [1] for b.*/
   std::deque<bool> isLDSPlugin;
 
   /** \fn LinearDS()
@@ -123,6 +123,12 @@ public:
   LinearDS(const int& newNumber, const SiconosVector& newX0,
            const SiconosMatrix& newA);
 
+  /** \fn LinearDS(const LinearDS &)
+   *  \brief copy constructor
+   *  \param a Dynamical system to copy
+   */
+  LinearDS(const LinearDS &);
+
   /** \fn LinearDS(const DynamicalSystem &)
    *  \brief copy constructor
    *  \param a Dynamical system to copy
@@ -132,6 +138,13 @@ public:
   /** \fn ~LinearDS()
    *  \brief destructor */
   ~LinearDS();
+
+  /** \fn void initialize(const double& = 0, const unsigned int& = 1) ;
+   *  \brief dynamical system initialization function: mainly set memory and compute value for initial state values.
+   *  \param time of initialisation, default value = 0
+   *  \param the size of the memory, default size = 1.
+   */
+  void initialize(const double& = 0, const unsigned int& = 1) ;
 
   // --- getter and setter ---
 
@@ -221,12 +234,21 @@ public:
 
   // --- plugins related functions
 
+  /** \fn  std::string getAFunctionName() const
+   *  \brief get name of function that computes A = jacobianX
+   *  \return a string
+   */
+  inline const std::string getAFunctionName() const
+  {
+    return computeJacobianXFunctionName;
+  }
+
   /** \fn void setComputeAFunction(const string& libPath,const string& functionName)
-  *  \brief set a specified function to compute the matrix A => same action as setComputeJacobianXFunction
-  *  \param string : the complete path to the plugin
-  *  \param string : the function name to use in this plugin
-  *  \exception SiconosSharedLibraryException
-  */
+   *  \brief set a specified function to compute the matrix A => same action as setComputeJacobianXFunction
+   *  \param string : the complete path to the plugin
+   *  \param string : the function name to use in this plugin
+   *  \exception SiconosSharedLibraryException
+   */
   void setComputeAFunction(const std::string &, const std::string &);
 
   /** \fn  std::string getBFunctionName() const

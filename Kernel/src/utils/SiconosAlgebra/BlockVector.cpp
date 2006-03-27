@@ -68,7 +68,7 @@ BlockVector::BlockVector(SimpleVector* v1, SimpleVector* v2): SiconosVector()
   isBlockVector = true;
   svref.reserve(2);
   tabindex.reserve(2);
-  if ((v1 == NULL) && (v1 == NULL))
+  if ((v1 == NULL) && (v2 == NULL))
     SiconosVectorException::selfThrow("BlockVector:constructor(SimpleVector*,SimpleVector*), both vectors are NULL.");
 
   if (v1 != NULL)

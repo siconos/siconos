@@ -184,6 +184,13 @@ public:
    */
   virtual void getBlock(const std::vector<unsigned int>& , const std::vector<unsigned int>&, SiconosMatrix&) const = 0;
 
+  /** \fn SiconosMatrix* getBlockPtr(const unsigned int& row, const unsigned int& col)
+   *  \brief get block at position row-col if BlockMatrix, else if SimpleMatrix return this
+   *  \param unsigned int row
+   *  \param unsigned int col
+   */
+  virtual SiconosMatrix* getBlockPtr(const unsigned int& = 0, const unsigned int& = 0) = 0;
+
   /** \fn double* getArray(const unsigned int& i = 0, const unsigned int&  j = 0)
    *  \brief return the adress of the array of double values of the matrix ( for block(i,j) if this is a block matrix)
    *  \param: row position for the required block

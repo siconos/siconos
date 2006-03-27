@@ -19,12 +19,17 @@
 #include "LagrangianLinearTIDS.h"
 using namespace std;
 
+// --- Default (private) constructor ---
+LagrangianLinearTIDS::LagrangianLinearTIDS(): LagrangianDS(), K(NULL), C(NULL), isKAllocatedIn(false), isCAllocatedIn(false)
+{
+  DSType = LTIDS;
+}
+
 // --- Constructor from an xml file (newNsds is optional) ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(DynamicalSystemXML * dsXML,  NonSmoothDynamicalSystem* newNsds):
   LagrangianDS(dsXML, newNsds), K(NULL), C(NULL),
   isKAllocatedIn(true), isCAllocatedIn(true)
 {
-  IN("LagrangianLinearTIDS::LagrangianLinearTIDS() - Xml constructor\n");
   DSType = LTIDS;
   if (dsXML != NULL)
   {
@@ -35,7 +40,6 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(DynamicalSystemXML * dsXML,  NonSmoot
       C = new SimpleMatrix(lltidsxml->getC());
   }
   else RuntimeException::selfThrow("LagrangianLinearTIDS::LagrangianLinearTIDS - DynamicalSystemXML paramater must not be NULL");
-  OUT("LagrangianLinearTIDS::LagrangianLinearTIDS() - Xml constructor\n");
 }
 
 // --- Constructor from a set of data - Mass (from a matrix), K and C ---
@@ -136,6 +140,61 @@ LagrangianLinearTIDS::~LagrangianLinearTIDS()
   OUT("LagrangianLinearTIDS::~LagrangianLinearTIDS()\n");
 }
 
+void LagrangianLinearTIDS::initialize(const double& time, const unsigned int& sizeOfMemory)
+{
+  // set q and velocity to q0 and velocity0
+  *q = *q0;
+  *velocity = *velocity0;
+
+  // reset r and free vectors
+  qFree->zero();
+  velocityFree->zero();
+  p->zero();
+
+  // Initialize memory vectors
+  initMemory(sizeOfMemory);
+
+  // compute values for mass, FInt etc ...
+  isConstant["mass"] = true;
+
+  // FInt
+  * fInt = *C ** velocity + *K **q;
+
+  SiconosVector * param;
+
+  if (isLDSPlugin[2]) // FExt
+  {
+    if (computeFExtPtr == NULL)
+      RuntimeException::selfThrow("LagrangianLinearTIDS initialize, computeFExt() is not linked to a plugin function");
+    param = parametersList[2];
+    computeFExtPtr(ndof, &time, &(*fExt)(0), &(*param)(0));
+  }
+
+  // vectorField
+  // note that xDot(0) = velocity, with pointer link, must already be set.
+  SiconosVector* tmp = xDot->getVectorPtr(1); // Pointer link!
+  // Compute M-1
+  workMatrix["inverseOfMass"] = new SimpleMatrix(*mass);
+  workMatrix["inverseOfMass"]->PLUFactorizationInPlace();
+  workMatrix["inverseOfMass"]->PLUInverseInPlace();
+
+  *tmp = *(workMatrix["inverseOfMass"]) * (*fExt - *fInt);
+  // todo: use linearSolve to avoid inversion ? Or save M-1 to avoid re-computation. See this when "M" will be added in DS or LDS.
+
+  // jacobianX
+  SiconosMatrix * tmp2;
+  tmp2 = jacobianX->getBlockPtr(1, 0); // Pointer link!
+  // !!! jacobian of M according to q is not take into account at the time !!!
+  *tmp2 = -1 * *workMatrix["inverseOfMass"] * *K;
+  tmp2 = jacobianX->getBlockPtr(1, 1); // Pointer link!
+  *tmp2 = -1 * *workMatrix["inverseOfMass"] * *C;
+
+  isDSup = true;
+
+  // \todo: control terms handling
+}
+
+
 void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
 {
   if (newValue.size(0) != ndof || newValue.size(1) != ndof)
@@ -200,6 +259,40 @@ void LagrangianLinearTIDS::display() const
   OUT("LagrangianLinearTIDS::display\n");
 }
 
+void LagrangianLinearTIDS::computeVectorField(const double& time)
+{
+  // note that xDot(0) = velocity with pointer link must already be set.
+
+  SiconosVector* tmp = xDot->getVectorPtr(1); // Pointer link!
+  // Compute M-1
+  map<string, SiconosMatrix*>::iterator it = workMatrix.find("inverseOfMass");
+  if (it == workMatrix.end()) // if it is the first call to computeVectorField
+  {
+    workMatrix["inverseOfMass"] = new SimpleMatrix(*mass);
+    workMatrix["inverseOfMass"]->PLUFactorizationInPlace();
+    workMatrix["inverseOfMass"]->PLUInverseInPlace();
+  }
+
+  *tmp = *(workMatrix["inverseOfMass"]) * (*fExt - *C ** velocity - *K **q);;
+  // todo: use linearSolve to avoid inversion ? Or save M-1 to avoid re-computation. See this when "M" will be added in DS or LDS.
+}
+
+void LagrangianLinearTIDS::computeJacobianX(const double& time)
+{
+  SiconosMatrix* tmp = jacobianX->getBlockPtr(1, 0); // Pointer link!
+  // Compute M-1 if required
+  map<string, SiconosMatrix*>::iterator it = workMatrix.find("inverseOfMass");
+  if (it == workMatrix.end()) // if it is the first call to computeVectorField or computeJacobianX
+  {
+    workMatrix["inverseOfMass"] = new SimpleMatrix(*mass);
+    workMatrix["inverseOfMass"]->PLUFactorizationInPlace();
+    workMatrix["inverseOfMass"]->PLUInverseInPlace();
+  }
+  *tmp = -1 * *workMatrix["inverseOfMass"] * *K;
+  tmp = jacobianX->getBlockPtr(1, 1); // Pointer link!
+  *tmp = -1 * *workMatrix["inverseOfMass"] * *C;
+}
+
 void LagrangianLinearTIDS::saveDSToXML()
 {
   IN("LagrangianLinearTIDS::saveDSToXML\n");
@@ -242,11 +335,5 @@ LagrangianLinearTIDS* LagrangianLinearTIDS::convert(DynamicalSystem* ds)
 {
   LagrangianLinearTIDS* ltids = dynamic_cast<LagrangianLinearTIDS*>(ds);
   return ltids;
-}
-
-// --- Default (private) constructor ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(): LagrangianDS(), K(NULL), C(NULL), isKAllocatedIn(false), isCAllocatedIn(false)
-{
-  DSType = LTIDS;
 }
 

@@ -254,7 +254,7 @@ public:
    *  \param unsigned int row
    *  \param unsigned int col
    */
-  SiconosMatrix* getBlockPtr(const unsigned int& row, const unsigned int& col);
+  SiconosMatrix* getBlockPtr(const unsigned int& = 0, const unsigned int& = 0);
 
   /** \fn double* getArray(const unsigned int& i,const unsigned int&  j)
    *  \brief return the adress of the array of double values of the matrix for block(i,j)

@@ -212,6 +212,16 @@ public:
    */
   void getBlock(const std::vector<unsigned int>& , const std::vector<unsigned int>&, SiconosMatrix&) const;
 
+  /** \fn SiconosMatrix* getBlockPtr(const unsigned int& row, const unsigned int& col)
+   *  \brief get block at position row-col, ie return this in SimpleMatrix case
+   *  \param unsigned int row
+   *  \param unsigned int col
+   */
+  inline SiconosMatrix* getBlockPtr(const unsigned int& = 0, const unsigned int& = 0)
+  {
+    return this;
+  };
+
   /** \fn double* getArray(const unsigned int& i = 0, const unsigned int&  j = 0)
    *  \brief return the adress of the array of double values of the matrix
    *  \param: row position for the required block ->useless for SimpleMatrix

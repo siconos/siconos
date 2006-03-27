@@ -48,10 +48,10 @@ const std::string NON_LINEARBC_TAG = "NLinear";
 const std::string PERIODICBC_TAG = "Periodic";
 
 // DynamicalSystem tags
-const std::string LAGRANGIAN_TIME_INVARIANTDS_TAG = "LagrangianLinearTIDS"; // LL
-const std::string LAGRANGIAN_NON_LINEARDS_TAG = "LagrangianDS"; // LNL
-const std::string LINEAR_SYSTEMDS_TAG = "LinearDS"; // LTI
-const std::string NON_LINEAR_SYSTEMDS_TAG = "DynamicalSystem";
+const std::string LAGRANGIAN_TIME_INVARIANTDS_TAG = "LagrangianLinearTIDS";
+const std::string LAGRANGIAN_NON_LINEARDS_TAG = "LagrangianDS";
+const std::string LINEAR_SYSTEMDS_TAG = "LinearDS";
+const std::string NON_LINEAR_SYSTEMDS_TAG = "NonLinearDS";
 
 const std::string BOUNDARYCONDITION_TAG = "BoundaryCondition";
 const std::string INTERACTION_TAG = "Interaction";

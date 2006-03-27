@@ -61,7 +61,7 @@ class SiconosSharedLibrary;
  * This class defines and computes a generic n-dimensional
  * dynamical system of the form :
  * \f[
- * \dot x = f(x,t) + T(x) u(x, \dot x, t) + r,
+ * \dot x = f(x,t) + T(x) u(x,t) + r,
  * \f]
  * where
  *    - \f$x \in R^{n} \f$ is the state,
@@ -204,17 +204,16 @@ protected:
    */
   void (*computeJacobianXPtr)(const unsigned int&, const double*, const double*, double*, double*);
 
-  /** \fn void (*computeUPtr)(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* t, const double* x, const double* xDot, double* u, double* param)
+  /** \fn void (*computeUPtr)(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* t, const double* x, double* u, double* param)
    *  \brief  Pointer on function to compute u
    *  \param int* sizeOfU : size of vector u
    *  \param int* sizeOfX : size of vector x
    *  \param double* time : current time
    *  \param double* xPtr : pointer to the first element of x
-   *  \param double* xDotPtr : pointer to the first element of xDot
    *  \param double* UPtr : pointer to the first element of u vector (in-out parameter)
    *    \param double* param   : a vector of user-defined parameters
    */
-  void (*computeUPtr)(const unsigned int&, const unsigned int&, const double*, const double*, const double*, double*, double*);
+  void (*computeUPtr)(const unsigned int&, const unsigned int&, const double*, const double*, double*, double*);
 
   /** \fn void (*computeTPtr)(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* x, double* T, double* param)
    *  \brief  Pointer on function to compute T
@@ -930,9 +929,22 @@ public:
     delete tmpWorkVector[id];
   }
 
+  /** \fn void initialize(const double& = 0, const unsigned int& = 1) ;
+   *  \brief dynamical system initialization function: mainly set memory and compute value for initial state values.
+   *  \param time of initialisation, default value = 0
+   *  \param the size of the memory, default size = 1.
+   */
+  virtual void initialize(const double& = 0, const unsigned int& = 1) ;
+
+  /** \fn inline void setIsDSUp(const bool& input)
+   *  \brief set isDSup value to input - Only implemented in LagrangianDS.
+   *  \param a bool
+   */
+  inline virtual void setIsDSUp(const bool& input) {};
+
   // ===== MEMORY MANAGEMENT FUNCTIONS =====
 
-  /** \fn void initMemory(const int& steps) ;
+  /** \fn void initMemory(const unsigned int& steps) ;
    *  \brief initialize the SiconosMemory objects with a positive size.
    *  \param the size of the SiconosMemory
    */
@@ -1091,12 +1103,11 @@ public:
 
   /** \fn static void computeU (const double&)
    *  \brief function to compute u when x and xDot are not those of the current object.
-   * \param double time : current time
-   * \param SiconosVector* : pointer to a x value
-   * \param SiconosVector* : pointer to xDot value
+   *  \param double time : current time
+   *  \param SiconosVector* : pointer to a x value
    *  \exception RuntimeException
    */
-  virtual void computeU(const double&,  SiconosVector* xx, SiconosVector* xxDot);
+  virtual void computeU(const double&,  SiconosVector* xx);
 
   /** \fn static void computeT ()
    *  \brief Default function to compute T

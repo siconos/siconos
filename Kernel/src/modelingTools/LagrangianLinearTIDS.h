@@ -167,6 +167,13 @@ public:
   // destructor
   ~LagrangianLinearTIDS();
 
+  /** \fn void initialize(const double& = 0, const unsigned int& = 1) ;
+   *  \brief dynamical system initialization function: mainly set memory and compute value for initial state values.
+   *  \param time of initialisation, default value = 0
+   *  \param the size of the memory, default size = 1.
+   */
+  void initialize(const double& = 0, const unsigned int& = 1) ;
+
   // --- GETTERS AND SETTERS ---
 
   // -- K --
@@ -230,6 +237,21 @@ public:
    *  \param SiconosMatrix * newPtr
    */
   void setCPtr(SiconosMatrix *newPtr) ;
+
+  /** \fn void vectorField (const double& time)
+   * \brief Default function to compute the vector field \f$ f: (x,t) \in R^{n} \times R  \mapsto  R^{n}\f$
+   * \param double time : current time
+   *  \exception RuntimeException
+   */
+  void computeVectorField(const double&);
+
+  /** \fn static void computeJacobianX (const double& time)
+   *  \brief Default function to compute the gradient of the vector field with the respect
+   *  to the state  \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
+   *  \param double time : current time
+   *  \exception RuntimeException
+   */
+  void computeJacobianX(const double&);
 
   // --- Miscellaneous ---
 

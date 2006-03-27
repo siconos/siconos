@@ -441,7 +441,6 @@ void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNode * rootDSNode)
     if (i == DSXMLMap.end())
     {
       type = (char*)node->name;
-      cout << "#~#~ Loading DynamicalSystem number : " << number << " - " << type << endl;
       definedDSNumbers.push_back(number);
 
       if (type == LAGRANGIAN_NON_LINEARDS_TAG)
@@ -569,7 +568,6 @@ void NonSmoothDynamicalSystemXML::loadDSInputOutputXML(xmlNode * rootdsioNode)
   {
     number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
     type = (char*)node->name;
-    cout << "#~#~ Loading DSInputOutput number : " << number << " - " << type << endl;
 
     i = dsInputOutputXMLMap.find(number);
     if (i == dsInputOutputXMLMap.end())

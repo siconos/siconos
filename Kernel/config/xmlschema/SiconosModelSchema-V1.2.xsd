@@ -39,7 +39,7 @@
 		<xsd:enumeration value="LagrangianDS"/>
 		<xsd:enumeration value="LagrangianLinearTIDS"/>
 		<xsd:enumeration value="LinearDS"/>
-		<xsd:enumeration value="DynamicalSystem"/>
+		<xsd:enumeration value="NonLinearDS"/>
 	</xsd:restriction>
 </xsd:simpleType>
 
@@ -394,7 +394,7 @@
 				<xsd:sequence>
 		  <!--~~~~~~~~~~~~~~~~~ DS ~~~~~~~~~~~~~~~~~-->
 		<xsd:choice minOccurs='0' maxOccurs='unbounded'>
-			<xsd:element name="DynamicalSystem">
+			<xsd:element name="NonLinearDS">
 				<xsd:complexType>
 					<xsd:all>
 						<xsd:element name="Id" type="xsd:string" minOccurs='0' maxOccurs='1'/>

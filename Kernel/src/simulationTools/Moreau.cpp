@@ -142,7 +142,6 @@ void Moreau::setWPtr(SiconosMatrix *newPtr)
 
 void Moreau::initialize()
 {
-  IN("Moreau::initialize\n");
   OneStepIntegrator::initialize();
   // Get initial time
   double t0 = timeDiscretisation->getT0();
@@ -150,7 +149,6 @@ void Moreau::initialize()
   computeW(t0);
   if (ds->getType() == LNLDS)
     ds->allocateTmpWorkVector("LagNLDSMoreau", W->size(0));
-  OUT("Moreau::initialize\n");
 }
 
 void Moreau::computeW(const double& t)
@@ -170,7 +168,7 @@ void Moreau::computeW(const double& t)
     }
     // Compute Mass matrix (if loaded from plugin)
     if (d->getIsLDSPlugin(0))
-      d->computeMass(t);
+      d->computeMass();
     // Compute and get Jacobian (if loaded from plugin)
     if (d->getIsLDSPlugin(4))
       d->computeJacobianQFInt(t);
@@ -242,7 +240,6 @@ void Moreau::computeW(const double& t)
 
 void Moreau::computeFreeState()
 {
-  IN("Moreau::computeFreeState\n");
   // get current time, theta and time step
   double t = timeDiscretisation->getStrategyPtr()->getModelPtr()->getCurrentT();
   double h = timeDiscretisation->getH();
@@ -362,14 +359,11 @@ void Moreau::computeFreeState()
     delete xtmp;
   }
   else RuntimeException::selfThrow("Moreau::computeFreeState - not yet implemented for Dynamical system type: " + dstyp);
-  OUT("Moreau::computeFreeState\n");
 }
 
 
 void Moreau::integrate()
 {
-  IN("Moreau::integrate()\n");
-
   double h = timeDiscretisation->getH();
   double t = timeDiscretisation->getStrategyPtr()->getModelPtr()->getCurrentT();
   double told = t - h;
@@ -417,10 +411,10 @@ void Moreau::integrate()
     //                      ndof, &qold(0),&vold(0),
     //                      &W(0,0),&K(0,0),&C(0,0),fext,
     //                      &v(0),&q(0))
+    d->setIsDSUp(false); // to reset isDSUp bool, see LagrangianDS.
 
   }
   else RuntimeException::selfThrow("Moreau::integrate - not yet implemented for Dynamical system type :" + ds->getType());
-  OUT("Moreau::integrate()\n");
 }
 
 void Moreau::integrate(const double& told, const double& t, const double& tout, const bool& iout)
@@ -473,13 +467,10 @@ void Moreau::integrate(const double& told, const double& t, const double& tout, 
 
   }
   else RuntimeException::selfThrow("Moreau::integrate - not yet implemented for Dynamical system type :" + ds->getType());
-  OUT("Moreau::integrate()\n");
 }
 
 void Moreau::updateState()
 {
-  IN("Moreau::updateState\n");
-
   double h = timeDiscretisation->getH();
 
   // Get the DS type
@@ -522,7 +513,6 @@ void Moreau::updateState()
     *x = *xFree + h * *W * *(ds->getRPtr()) ;
   }
   else RuntimeException::selfThrow("Moreau::updateState - not yet implemented for Dynamical system type: " + dsType);
-  OUT("Moreau::updateState\n");
 }
 
 
@@ -541,7 +531,6 @@ void Moreau::display() const
 
 void Moreau::saveIntegratorToXML()
 {
-  IN("Moreau::saveIntegratorToXML\n");
   OneStepIntegrator::saveIntegratorToXML();
   if (integratorXml != NULL)
   {
@@ -549,18 +538,15 @@ void Moreau::saveIntegratorToXML()
     (static_cast<MoreauXML*>(integratorXml))->setW(W);
   }
   else RuntimeException::selfThrow("Moreau::saveIntegratorToXML - IntegratorXML object not exists");
-  OUT("Moreau::saveIntegratorToXML\n");
 }
 
 void Moreau::saveWToXML()
 {
-  IN("Moreau::saveWToXML\n");
   if (integratorXml != NULL)
   {
     (static_cast<MoreauXML*>(integratorXml))->setW(W);
   }
   else RuntimeException::selfThrow("Moreau::saveIntegratorToXML - IntegratorXML object not exists");
-  OUT("Moreau::saveWToXML\n");
 }
 
 Moreau* Moreau::convert(OneStepIntegrator* osi)

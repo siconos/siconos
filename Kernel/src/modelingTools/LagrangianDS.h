@@ -20,6 +20,8 @@
 #define LAGRANGIANNLDS_H
 #include "DynamicalSystem.h"
 #include "LagrangianDSXML.h"
+#include "BlockMatrix.h"
+#include<map>
 
 class LagrangianDSXML;
 
@@ -120,6 +122,11 @@ protected:
 
   /** mass of the system */
   SiconosMatrix *mass;
+
+  /** \var isConstant
+   *  map of bool, with NameOfVariable as a key, to set this variable constant, and so make computeVariable useless */
+  std::map<std::string, bool> isConstant;
+
   /** internal strength of the system */
   SimpleVector *fInt;
   /** external strength of the system */
@@ -184,87 +191,103 @@ protected:
 
   // pointers to functions member to compute plug-in functions
 
-  /** \fn void (*computeMassPtr)(unsigned int* sizeOfq,const double * time, double* qPtr, double* massPtr, double* param)
+  /** \fn void (*computeMassPtr)(const unsigned int& sizeOfq, double* qPtr, double* massPtr, double* param)
    *  \brief compute the mass
-   *  \param unsigned int* sizeOfq : the size of the vector q
-   *  \param double* time : the time for the computation
+   *  \param unsigned int& sizeOfq : the size of the vector q
    *  \param double* qPtr : the pointer to the first element of the vector q
    *  \param double* massPtr : the pointer to the first element of the matrix mass (in-out parameter)
    *    \param double*: vector of parameters
    */
-  void (*computeMassPtr)(const unsigned int*, const double*, const double*, double*, double*);
+  void (*computeMassPtr)(const unsigned int&, const double*, double*, double*);
 
-  /** \fn void (*computeFIntPtr)(int* sizeOfq, double* time, double* qPtr, double* velocityPtr, double* fIntPtr, double* param)
+  /** \fn void (*computeFIntPtr)(const unsigned int& sizeOfq, double* time, double* qPtr, double* velocityPtr, double* fIntPtr, double* param)
    *  \brief computes the internal strengths
-   *  \param int* sizeOfq : the size of the vector q
+   *  \param const unsigned int sizeOfq : the size of the vector q
    *    \param int* time : the current time
    *  \param double* qPtr : the pointer to the first element of the vector q
    *  \param double* velocityPtr : the pointer to the first element of the vector velocity
    *  \param double* fIntPtr : the pointer to the first element of the vector FInt (in-out parameter)
    *    \param double*: vector of parameters
    */
-  void (*computeFIntPtr)(const unsigned int*, const double*, const double*, const double*, double*, double*);
+  void (*computeFIntPtr)(const unsigned int&, const double*, const double*, const double*, double*, double*);
 
-  /** \fn void (*computeFExtPtr)(unsigned int* sizeOfq, double* time, double* fExtPtr, double* param)
+  /** \fn void (*computeFExtPtr)(const unsigned int& sizeOfq, const double* time, double* fExtPtr, double* param)
    *  \brief computes the external strengths
-   *  \param unsigned int* sizeOfq : the size of the vector q
+   *  \param unsigned int& sizeOfq : the size of the vector q
    *    \param double* time : the current time
    *  \param double* fExtPtr : the pointer to the first element of the vector FExt (in-out parameter)
    *    \param double*: vector of parameters
    */
-  void (*computeFExtPtr)(const unsigned int*, const double*, double*, double*);
+  void (*computeFExtPtr)(const unsigned int&, const double*, double*, double*);
 
-  /** \fn void (*computeNNLPtr)(unsigned int* sizeOfq, double* qPtr, double* velocityPtr, double* NNLPtr, double* param)
+  /** \fn void (*computeNNLPtr)(const unsigned int& sizeOfq, const double* qPtr, const double* velocityPtr, double* NNLPtr, double* param)
    *  \brief computes the inertia
-   *  \param unsigned int* sizeOfq : the size of the vector q
+   *  \param unsigned int sizeOfq : the size of the vector q
    *  \param double* qPtr : the pointer to the first element of the vector q
    *  \param double* velocityPtr : the pointer to the first element of the vector velocity
    *  \param double* NNLPtr : the pointer to the first element of the vector NNL (in-out parameter)
    *    \param double*: vector of parameters
    */
-  void (*computeNNLPtr)(const unsigned int*, const double*, const double*, double*, double*);
+  void (*computeNNLPtr)(const unsigned int&, const double*, const double*, double*, double*);
 
-  /** \fn void (*computeJacobianQFIntPtr)(int* sizeOfq, double* time, double* qPtr, double* velocityPtr, double* jacobPtr, double* param)
+  /** \fn void (*computeJacobianQFIntPtr)(const unsigned int& sizeOfq, const double* time, const double* qPtr, const double* velocityPtr, double* jacobPtr, double* param)
    *  \brief computes the gradient of the the internal strength compared to the state
-   *  \param unsigned int* sizeOfq : the size of the vector q
+   *  \param const unsigned int& sizeOfq : the size of the vector q
    *    \param double* time : the current time
    *  \param double* qPtr : the pointer to the first element of the vector q
    *  \param double* velocityPtr : the pointer to the first element of the vector velocity
    *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
    *    \param double*: vector of parameters
    */
-  void (*computeJacobianQFIntPtr)(const unsigned int*, const double*, const double*, const double*, double*, double*);
+  void (*computeJacobianQFIntPtr)(const unsigned int&, const double*, const double*, const double*, double*, double*);
 
-  /** \fn void (*computeJacobianVelocityFIntPtr)(unsigned int* sizeOfq, const double* time, double* qPtr, double* velocityPtr, double* jacobPtr, double* param);
+  /** \fn void (*computeJacobianVelocityFIntPtr)(const unsigned int& sizeOfq, const double* time, double* qPtr, double* velocityPtr, double* jacobPtr, double* param);
    *  \brief computes the gradient of the the internal strength compared to the velocity
-   *  \param unsigned int* sizeOfq : the size of the vector q
+   *  \param unsigned int& sizeOfq : the size of the vector q
    *    \param double* time : the current time
    *  \param double* qPtr : the pointer to the first element of the vector q
    *  \param double* velocityPtr : the pointer to the first element of the vector velocity
    *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
    *    \param double*: vector of parameters
    */
-  void (*computeJacobianVelocityFIntPtr)(const unsigned int*, const double*, const double*, const double*, double*, double*);
+  void (*computeJacobianVelocityFIntPtr)(const unsigned int&, const double*, const double*, const double*, double*, double*);
 
-  /** \fn void (*computeJacobianQNNL)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr, double* param)
+  /** \fn void (*computeJacobianQNNL)(const unsigned int& sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr, double* param)
    *  \brief computes the gradient of the the external strength compared to the state
-   *  \param unsigned int* sizeOfq : the size of the vector q
+   *  \param unsigned int& sizeOfq : the size of the vector q
    *  \param double* qPtr : the pointer to the first element of the vector q
    *  \param double* velocityPtr : the pointer to the first element of the vector velocity
    *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
    *    \param double*: vector of parameters
    */
-  void (*computeJacobianQNNLPtr)(const unsigned int*, const double*, const double*, double*, double*);
+  void (*computeJacobianQNNLPtr)(const unsigned int&, const double*, const double*, double*, double*);
 
   /** \fn void (*computeJacobianVelocityNNLPtr)(unsigned int* sizeOfq, const double* qPtr, double* velocityPtr, double* jacobPtr, double* param)
    *  \brief computes the gradient of the the external strength compared to the velocity
-   *  \param unsigned int* sizeOfq : the size of the vector q
+   *  \param unsigned int& sizeOfq : the size of the vector q
    *  \param double* qPtr : the pointer to the first element of the vector q
    *  \param double* velocityPtr : the pointer to the first element of the vector velocity
    *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
    *    \param double*: vector of parameters
    */
-  void (*computeJacobianVelocityNNLPtr)(const unsigned int*, const double*, const double*, double*, double*);
+  void (*computeJacobianVelocityNNLPtr)(const unsigned int&, const double*, const double*, double*, double*);
+
+
+  /** Specific variables to handle links with DynamicalSystem class */
+  /** \var workMatrix
+   * a map of SiconosMatrix*, zero-matrix, Id-matrix, inverse of Mass or any tmp work matrix
+   * No get-set functions at the time. Only used as a protected member.*/
+  std::map<std::string, SiconosMatrix*> workMatrix;
+
+  /** \var isDSup
+   * bool to avoid recomputation of mass, inverse of mass ... when call of computeVectorField or computeJacobianX
+   */
+  bool isDSup;
+
+  /** \fn void connectToDS()
+   *  \brief set links with DS members
+   */
+  void connectToDS();
 
 public:
 
@@ -278,7 +301,7 @@ public:
    */
   LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
-  /** \fn LagrangianDS(int number, int ndof,
+  /** \fn LagrangianDS(int number, const unsigned int& ndof,
       const SimpleVector& q0, const SimpleVector& velocity0,
       const SiconosMatrix& Mass)
       *  \brief constructor from a minimum set of data
@@ -293,7 +316,7 @@ public:
                const SimpleVector& , const SimpleVector& ,
                const SiconosMatrix&);
 
-  /** \fn LagrangianDS(int number, int ndof,
+  /** \fn LagrangianDS(int number, const unsigned int& ndof,
       const SimpleVector& q0, const SimpleVector& velocity0,
       const std::string& massPluginName)
       *  \brief constructor from a minimum set of data
@@ -318,10 +341,17 @@ public:
    *  \brief destructor */
   virtual ~LagrangianDS();
 
+  /** \fn void initialize(const double& = 0, const unsigned int& = 1) ;
+   *  \brief dynamical system initialization function: mainly set memory and compute plug-in for initial state values.
+   *  \param time of initialisation, default value = 0
+   *  \param the size of the memory, default size = 1.
+   */
+  virtual void initialize(const double& = 0, const unsigned int& = 1) ;
+
   // === GETTERS AND SETTERS ===
 
-  /** \fn const int getNdof() const
-   *  \brief allows to get the value of ndof
+  /** \fn const unsigned int getNdof() const
+   *  \brief to get the value of ndof
    *  \return the value of ndof
    */
   inline const unsigned int getNdof() const
@@ -330,7 +360,7 @@ public:
   };
 
   /** \fn void setNdof(const unsigned int&)
-   *  \brief allows to set ndof
+   *  \brief to set ndof
    *  \param unsigned int ndof : the value to set ndof
    */
   inline void setNdof(const unsigned int& newNdof)
@@ -651,6 +681,33 @@ public:
    *  \param SiconosMatrix newValue
    */
   void setMass(const SiconosMatrix&);
+
+  /** \fn inline void setMassConstant(const bool& input);
+   *  \brief if input = true,  the mass will be constant, ie from this point, computeMass has no more effect.
+   *  \param a bool
+   */
+  inline void setMassConstant(const bool& input)
+  {
+    isConstant["mass"] = input ;
+  };
+
+  /** \fn inline bool isMassConstant()
+   *  \brief return true if the mass is constant
+   *  \return a bool
+   */
+  inline bool isMassConstant()
+  {
+    return isConstant["mass"];
+  };
+
+  /** \fn inline void setIsDSUp(const bool& input)
+   *  \brief set isDSup value to input
+   *  \param a bool
+   */
+  inline void setIsDSUp(const bool& input)
+  {
+    isDSup = input ;
+  };
 
   /** \fn void setMassPtr(SiconosMatrix* newPtr)
    *  \brief set Mass to pointer newPtr
@@ -976,19 +1033,18 @@ public:
 
   // --- PLUGINS RELATED FUNCTIONS ---
 
-  /** \fn void computeMass(const double &)
+  /** \fn void computeMass()
    *  \brief default function to compute the mass
-   *  \param double time : the current time
    *  \exception RuntimeException
    */
-  void computeMass(const double &);
+  void computeMass();
 
-  /** \fn void computeMass(const double &, SimpleVector *q)
+  /** \fn void computeMass(SimpleVector *q)
    *  \brief function to compute the mass
    *  \param double time : the current time, SimpleVector*: pointer on the state vector q
    *  \exception RuntimeException
    */
-  void computeMass(const double &, SimpleVector *);
+  void computeMass(SimpleVector *);
 
   /** \fn void computeFInt(const double &)
    *  \brief default function to compute the internal strengths
@@ -1077,6 +1133,37 @@ public:
    *  \exception RuntimeException
    */
   void computeJacobianVelocityNNL(SimpleVector *q, SimpleVector *velocity);
+
+  /** \fn void vectorField (const double& time)
+   * \brief Default function to compute the vector field for Lagrangian
+   * \param double time : current time
+   *  \exception RuntimeException
+   */
+  virtual void computeVectorField(const double&);
+
+  /** \fn static void computeJacobianX (const double& time)
+   *  \brief to compute the gradient of the vector field with the respect
+   *  to the state
+   *  \param double time : current time
+   *  \exception RuntimeException
+   */
+  virtual void computeJacobianX(const double&);
+
+  /** \fn void setVectorFieldFunction(const string&, const string&)
+   *  \brief set a specified function to compute vector field
+   *  \param string pluginPath : the complete path to the plugin
+   *  \param string functionName : the function name to use in this library
+   *  \exception SiconosSharedLibraryException
+   */
+  virtual void setVectorFieldFunction(const std::string & pluginPath, const std::string& functionName);
+
+  /** \fn void setComputeJacobianXFunction(const string&, const string&)
+   *  \brief set a specified function to compute jacobianX
+   *  \param string pluginPath : the complete path to the plugin
+   *  \param the string functionName : function name to use in this library
+   *  \exception SiconosSharedLibraryException
+   */
+  virtual void setComputeJacobianXFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void setComputeMassFunction(const string pluginPath, const string functionName&)
    *  \brief allow to set a specified function to compute the mass

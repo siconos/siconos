@@ -51,6 +51,7 @@ void RelationTest::setUp()
     XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
     xmlFreeDoc(doc);
   }
+
   // look for NSDS, Interaction and relation node
   xmlNode* nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
   NonSmoothDynamicalSystemXML * nsdsxml = new NonSmoothDynamicalSystemXML(nodetmp);

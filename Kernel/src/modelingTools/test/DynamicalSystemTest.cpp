@@ -65,10 +65,10 @@ void DynamicalSystemTest::setUp()
   xmlNode* nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "DS_Definition");
   // get first ds
-  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "DynamicalSystem");
+  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "NonLinearDS");
   tmpxml1 = new DynamicalSystemXML(node1, false);
   // get second ds
-  node2 = SiconosDOMTreeTools::findFollowNode(node1, "DynamicalSystem");
+  node2 = SiconosDOMTreeTools::findFollowNode(node1, "NonLinearDS");
   tmpxml2 = new DynamicalSystemXML(node2, false);
 }
 
@@ -124,10 +124,10 @@ void DynamicalSystemTest::testBuildDynamicalSystem2()
   ds->computeU(time);
   ds->computeT();
   SimpleVector * x01 = new SimpleVector(2);
-  (*x01)(0) = (*x0)(0);
-  (*x01)(1) = (*x0)(1);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2I : ", ds->getU() == 2 * time* *x01, true);
+  (*x01)(0) = 2;
+  (*x01)(1) = 4;
+  ds->getU().display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2I : ", ds->getU() == time* *x01, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2J : ", ds->getT() == *T0, true);
   delete x01;
   delete ds;
@@ -458,7 +458,6 @@ void DynamicalSystemTest::testSwap()
   ds1->setR(*x0);
   ds1->initMemory(1);
   ds1->swapInMemory();
-  cout << " swap ok " << endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap1 : ", *((ds1->getXMemoryPtr()->getVectorMemory())[0]) == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap2 : ", *((ds1->getXDotMemoryPtr()->getVectorMemory())[0]) == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap3 : ", *((ds1->getRMemoryPtr()->getVectorMemory())[0]) == *x0, true);
