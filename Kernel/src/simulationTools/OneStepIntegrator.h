@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.1.4, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -42,7 +42,7 @@ class OneStepIntegratorXML;
 /** \class OneStepIntegrator
  *  \brief It's the generic object which can integre a DynamicalSystem
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.1.3.
+ *  \version 1.1.4.
  *  \date (Creation) Apr 26, 2004
  *
  * !!! This is a virtual class, interface for some specific integrators !!!

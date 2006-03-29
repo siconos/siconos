@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.1.4, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -306,7 +306,6 @@ void OneStepNSProblem::compute(const double& time)
 
 void OneStepNSProblem::saveNSProblemToXML()
 {
-  IN("OneStepNSProblem::saveNSProblemToXML\n");
   if (onestepnspbxml != NULL)
   {
     onestepnspbxml->setDimNSProblem(dim);
@@ -322,7 +321,6 @@ void OneStepNSProblem::saveNSProblemToXML()
     //    onestepnspbxml->setSolver(solvingFormalisation, methodName, normType, tolerance, maxIter, searchDirection );
   }
   else RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - OneStepNSProblemXML object not exists");
-  OUT("OneStepNSProblem::saveNSProblemToXML\n");
 }
 
 bool OneStepNSProblem::isOneStepNsProblemComplete() const

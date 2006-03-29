@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.1.4, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -625,7 +625,6 @@ void FrictionContact::updateBlocks()
 
 void FrictionContact::preFrictionContact(const double& time)
 {
-  IN("FrictionContact::preFrictionContact()\n");
   // compute M and q operators for FrictionContact problem
 
   // get topology
@@ -672,7 +671,6 @@ void FrictionContact::preFrictionContact(const double& time)
     w->zero();
     z->zero();
   }
-  OUT("FrictionContact::preFrictionContact()\n");
 }
 
 void FrictionContact::assembleM() //
@@ -770,8 +768,6 @@ void FrictionContact::assembleM() //
 
 void FrictionContact::compute(const double& time)
 {
-  IN("FrictionContact::compute(void)\n");
-
   // --- Prepare data for FrictionContact2D computing ---
   preFrictionContact(time);
 
@@ -802,8 +798,6 @@ void FrictionContact::compute(const double& time)
     // --- Recover the desired variables from FrictionContact2D output ---
     postFrictionContact(*w, *z);
   }
-
-  OUT("FrictionContact::compute(void)\n");
 }
 
 void FrictionContact::postFrictionContact(const SimpleVector& w, const SimpleVector &z)
@@ -912,7 +906,6 @@ void FrictionContact::display() const
 
 void FrictionContact::saveNSProblemToXML()
 {
-  IN("FrictionContact::saveNSProblemToXML\n");
   OneStepNSProblem::saveNSProblemToXML();
   if (onestepnspbxml != NULL)
   {
@@ -920,29 +913,24 @@ void FrictionContact::saveNSProblemToXML()
     (static_cast<FrictionContactXML*>(onestepnspbxml))->setQ(*q);
   }
   else RuntimeException::selfThrow("FrictionContact::saveNSProblemToXML - OneStepNSProblemXML object not exists");
-  OUT("FrictionContact::saveNSProblemToXML\n");
 }
 
 void FrictionContact::saveMToXML()
 {
-  IN("FrictionContact::saveMToXML\n");
   if (onestepnspbxml != NULL)
   {
     (static_cast<FrictionContactXML*>(onestepnspbxml))->setM(*M);
   }
   else RuntimeException::selfThrow("FrictionContact::saveMToXML - OneStepNSProblemXML object not exists");
-  OUT("FrictionContact::saveMToXML\n");
 }
 
 void FrictionContact::saveQToXML()
 {
-  IN("FrictionContact::saveQToXML\n");
   if (onestepnspbxml != NULL)
   {
     (static_cast<FrictionContactXML*>(onestepnspbxml))->setQ(*q);
   }
   else RuntimeException::selfThrow("FrictionContact::saveQToXML - OneStepNSProblemXML object not exists");
-  OUT("FrictionContact::saveQToXML\n");
 }
 
 FrictionContact* FrictionContact::convert(OneStepNSProblem* osnsp)

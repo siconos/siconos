@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.3, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.1.4, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -72,7 +72,6 @@ FrictionContact2D::~FrictionContact2D()
 
 void FrictionContact2D::computeQ(const double& time)
 {
-  IN("FrictionContact2D::computeQ(void)\n");
   if (q == NULL)
   {
     q = new SimpleVector(dim);
@@ -139,6 +138,7 @@ void FrictionContact2D::computeQ(const double& time)
 
           for (unsigned int i = 0; i < numberOfRelations; i++)
             (*q)(i + pos) = (*yFree)(i);
+          delete yFree;
         }
         else
         {
@@ -148,23 +148,28 @@ void FrictionContact2D::computeQ(const double& time)
           {
             for (unsigned int i = 1; i < indexMax[j] + 1; i++)
             {
+
               index[k] = j;
               k++;
             }
           }
 
           effectiveSize = index.size();
-          yFree = new SimpleVector(effectiveSize); // we get only the "effective" relations
-          (currentInteraction->getY(1)).getBlock(index, *yFree); // copy, no pointer equality
-          SimpleVector * tmp =  new SimpleVector(effectiveSize);
-          (currentInteraction -> getYOld(1)).getBlock(index, *tmp);
+          if (effectiveSize != 0)
+          {
+            yFree = new SimpleVector(effectiveSize); // we get only the "effective" relations
+            (currentInteraction->getY(1)).getBlock(index, *yFree); // copy, no pointer equality
+            SimpleVector * tmp =  new SimpleVector(effectiveSize);
+            (currentInteraction -> getYOld(1)).getBlock(index, *tmp);
 
-          for (unsigned int i = 0; i < numberOfRelations / 2; i++)
-            (*yFree)(2 * i) += e * (*tmp)(2 * i);
+            for (unsigned int i = 0; i < effectiveSize / 2; i++)
+              (*yFree)(2 * i) += e * (*tmp)(2 * i);
 
-          delete tmp;
-          for (unsigned int i = 0; i < effectiveSize; i++)
-            (*q)(i + pos) = (*yFree)(i);
+            delete tmp;
+            for (unsigned int i = 0; i < effectiveSize; i++)
+              (*q)(i + pos) = (*yFree)(i);
+            delete yFree;
+          }
         }
       }
       else
@@ -172,10 +177,7 @@ void FrictionContact2D::computeQ(const double& time)
     }
     else
       RuntimeException::selfThrow("FrictionContact2D::computeQ not yet implemented for relation of type " + R->getType());
-
-    delete yFree;
   }
-  OUT("FrictionContact2D::computeQ(void)\n");
 }
 
 FrictionContact2D* FrictionContact2D::convert(OneStepNSProblem* osnsp)
