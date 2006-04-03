@@ -102,6 +102,7 @@
 #include "LagrangianLinearDSIO.h"
 #include "DynamicalSystem.h"
 #include "LinearDS.h"
+#include "LinearTIDS.h"
 #include "LagrangianDS.h"
 #include "LagrangianLinearTIDS.h"
 #include "EqualityConstraint.h"
@@ -268,6 +269,7 @@ $1 = string(PyString_AsString($input));
 // ---
 %include "DynamicalSystem.h"
 %include "LinearDS.h"
+%include "LinearTIDS.h"
 %include "LagrangianDS.h"
 %include "LagrangianLinearTIDS.h"
 // ---

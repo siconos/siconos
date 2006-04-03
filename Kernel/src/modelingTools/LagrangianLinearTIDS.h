@@ -83,6 +83,25 @@ class LagrangianLinearTIDSXML;
  */
 class LagrangianLinearTIDS : public LagrangianDS
 {
+private:
+
+  /** \fn LagrangianLinearTIDS()
+   *  \brief default constructor
+   */
+  LagrangianLinearTIDS();
+
+  /** specific matrix for a LagrangianLinearTIDS */
+  SiconosMatrix *K;
+
+  /** specific matrix for a LagrangianLinearTIDS */
+  SiconosMatrix *C;
+
+  /** \fn initAllocationFlags(const bool& val);
+   *  \brief set all allocation flags of Lagrangian (isAllocated map) to val
+   *  \param a bool
+   */
+  void initAllocationFlags(const bool&);
+
 public:
 
   /** \fn LagrangianLinearTIDS(DynamicalSystemXML * dsXML)
@@ -166,6 +185,12 @@ public:
 
   // destructor
   ~LagrangianLinearTIDS();
+
+  /** \fn bool checkDynamicalSystem()
+   *  \brief check that the system is complete (ie all required data are well set)
+   * \return a bool
+   */
+  bool checkDynamicalSystem();
 
   /** \fn void initialize(const double& = 0, const unsigned int& = 1) ;
    *  \brief dynamical system initialization function: mainly set memory and compute value for initial state values.
@@ -276,23 +301,6 @@ public:
   {
     return 0.0;
   }
-
-private:
-
-  /** \fn LagrangianLinearTIDS()
-   *  \brief default constructor
-   */
-  LagrangianLinearTIDS();
-
-  /** specific matrix for a LagrangianLinearTIDS */
-  SiconosMatrix *K;
-
-  /** specific matrix for a LagrangianLinearTIDS */
-  SiconosMatrix *C;
-
-  /** Flags to know if pointers have been allocated inside constructors or not */
-  bool isKAllocatedIn;
-  bool isCAllocatedIn;
 };
 
 #endif // LAGRANGIANTIDS_H

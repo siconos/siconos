@@ -50,7 +50,6 @@ void OneStepIntegrator::initialize()
 
 void OneStepIntegrator::nextStep()
 {
-  ds->setIsDSUp(false); // to reset isDSUp bool, see LagrangianDS.
   ds->swapInMemory();
   ds->getRPtr()->zero();
 }

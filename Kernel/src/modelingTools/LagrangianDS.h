@@ -26,7 +26,7 @@
 class LagrangianDSXML;
 
 /** \class LagrangianDS
- *  \brief main class of Lagrangian dynamic systems
+ *  \brief Lagrangian non linear dynamical systems - Derived from DynamicalSystem -
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.1.4.
  *  \date (Creation) Apr 29, 2004
@@ -35,7 +35,7 @@ class LagrangianDSXML;
  * The class LagrangianDS  defines  and computes a generic ndof-dimensional
  * Lagrangian Non Linear Dynamical System of the form :
  * \f[
- * M(q) \ddot q + NNL(\dot q, q) + F_{Int}(\dot q , q , t) = F_{Ext}(t) + p,
+ * M(q) \ddot q + NNL(\dot q, q) + F_{Int}(\dot q , q , t) = F_{Ext}(t) + p
  * \f]
  * where
  *    - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
@@ -48,11 +48,11 @@ class LagrangianDSXML;
  *    -  \f$ F_{Ext}(t)  \in R^{ndof}  \f$ are the external forces saved in the SiconosVector fExt.
  *
  *
- * One word on the initial condition.
+ * Links with first order DynamicalSystem top-class are:
  *
- * One word on the bilateral constraint
+ * \f$ n= 2 ndof \f$
+ * \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
  *
- * The state of the master class DynamicalSystem is defined by \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$, with \f$ n= 2 ndof \f$.
  * The VectorField is given by:
  * \f[
  * f(x,t) = \left[\begin{array}{c}
@@ -72,61 +72,60 @@ class LagrangianDSXML;
  * r = \left[\begin{array}{c}0 \\ p \end{array}\right]
  * \f]
  *
+ * The control part (NOT IMPLEMENTED) is given by:
  *
- * \todo Automatically, specify the function of DynamicalSystem such as
- *          VectorField.
- * \todo The specification of the master class DynamicalSystem must be made :
- *     -  Automatically,  in order to specify the function of DynamicalSystem such as
- *          VectorField.
- *     -  On the control of the OneStep Integrator and/or the user for the variable x, xDot and r and the memories.
- * we should find a right way ti do that without systematically copying the value of the state.
- * \todo Default plugin mechanism (for example for fExt FInt, M, ....) has to be enhanced following these steps :
- *   -# A Plugin is defined (in the XML or via the API) : Plug this Plugin. If a value is also given  (if it is possible),
- * this value is set as a current value in this object.
- *   -# A contant vector is given : Create a function which returns the constant value and plug it.
- *   -# Nothing is given : Plug the Basic Plugin and print a help message.
+ *  \f$ u(x,t) = u_L(q,t) \f$
  *
+ * \f$ T(x) = \left[\begin{array}{c} 0_{ndof} \\ T_L(q)\end{array}\right]\f$
+ *
+ *  Main functionalities to handle a LagrangianDS are:
+ *
+ *    - Construction: the only required operator is M. All the operators can be set using the plug-in mechanism.
+ *    - Initialization: compute state members and operators for time=t0 (usually done when calling strategy->initialize)
+ *    - Computation at time t, thanks to "compute" functions. Any call to one of the following functions requires that the plug-in
+ *      has been set properly thanks to the corresponding setPluginFunction:
+ *        => computeMass     (setComputeMassFunction)
+ *        => computeFInt     (setComputeFIntFunction)
+ *        => computeFExt     (setComputeFExtFunction)
+ *        => computeNNL      (setComputeNNLFunction)
+ *        => computeJacobianQFInt         (setComputeJacobianQFIntFunction)
+ *        => computeJacobianVelocityFInt  (setComputeJacobianVelocityFIntFunction)
+ *        => computeJacobianQNNL          (setComputeJacobianQNNLFunction)
+ *        => computeJacobianVelocityNNL   (setComputeJacobianVelocityNNLFunction)
+ *        => computeVectorField             Warning: no setVectorFieldFunction function. This depends only on NNL, FInt, FExt and Mass.
+ *        => computeJacobianX               Warning: no setComputeJacobianXFunction. This depends only on NNL, FInt, FExt and Mass.
+ *
+ *  \todo: add a check function (for example check that NNL plug-in given => jacobian required  ...)
  */
 class LagrangianDS : public DynamicalSystem
 {
 protected:
 
-  // -- DEFAULT CONSTRUCTOR --
-  /** \fn LagrangianDS()
-   *  \brief Default constructor
-   */
-  LagrangianDS();
-
   // -- MEMBERS --
 
   /** number of degrees of freedom of the system */
   unsigned int ndof;
-  /** coordinates of the system */
+
+  /** \var q
+      coordinates of the system */
   SimpleVector *q;
-  /** initial coordinates of the system */
+  /** \var q0
+      initial coordinates of the system */
   SimpleVector *q0;
-  /** free coordinate */
+  /** \var qFree
+      free state of the system */
   SimpleVector *qFree;
-  /** memory of previous coordinates of the system */
+  /** \var qMemory
+      memory of previous coordinates of the system */
   SiconosMemory *qMemory;
-  /** velocity of the system */
-  SimpleVector *velocity;
-  /** initial velocity of the system */
-  SimpleVector *velocity0;
-  /** free Velocity */
-  SimpleVector *velocityFree;
-  /** memory of previous velocity of the system */
-  SiconosMemory *velocityMemory;
-  /** Reaction due to the non smooth law */
-  SimpleVector *p;
+  SimpleVector *velocity;/**<velocity of the system*/
+  SimpleVector *velocity0; /**< initial velocity of the system*/
+  SimpleVector *velocityFree;/**<free Velocity*/
+  SiconosMemory *velocityMemory;/**<memory of previous velocities of the system */
+  SimpleVector *p;/**<Reaction due to the non smooth law */
 
   /** mass of the system */
   SiconosMatrix *mass;
-
-  /** \var isConstant
-   *  map of bool, with NameOfVariable as a key, to set this variable constant, and so make computeVariable useless */
-  std::map<std::string, bool> isConstant;
-
   /** internal strength of the system */
   SimpleVector *fInt;
   /** external strength of the system */
@@ -159,27 +158,8 @@ protected:
   /* contains the name of the plugin used to compute NNL */
   std::string  NNLFunctionName;
 
-  /** vector of bool to check if mass, fInt, fExt, NNL and the 4 jacobian are loaded from a plugin or not
-   The vector order is the one of members list (see above)*/
-  std::deque<bool> isLDSPlugin;
-
   /** class for manage plugin (open, close librairy...) */
   SiconosSharedLibrary cShared;
-
-  /** Flags to know if pointers have been allocated inside constructors or not */
-
-  // for vectors related to q (q, q0, qFree, qMemory)
-  std::deque<bool> isQAllocatedIn;
-  // the same for velocity
-  std::deque<bool> isVelocityAllocatedIn;
-  // p
-  bool isPAllocatedIn;
-  // Mass
-  bool isMassAllocatedIn;
-  // Forces: fInt, fExt, NNL
-  std::deque<bool> areForcesAllocatedIn;
-  // Jacobian: jacobianQFInt, jacobianVelocityFInt, jacobianQNNL, jacobianVelocityNNL
-  std::deque<bool> isJacobianAllocatedIn;
 
   /** Parameters list, argument of plug-in. What are those parameters depends on user´s choice.
    *  At the time, all plug-in functions have the same list.
@@ -279,15 +259,28 @@ protected:
    * No get-set functions at the time. Only used as a protected member.*/
   std::map<std::string, SiconosMatrix*> workMatrix;
 
-  /** \var isDSup
-   * bool to avoid recomputation of mass, inverse of mass ... when call of computeVectorField or computeJacobianX
-   */
-  bool isDSup;
-
   /** \fn void connectToDS()
    *  \brief set links with DS members
    */
   void connectToDS();
+
+  /** \fn initAllocationFlags(const bool& val);
+   *  \brief set all allocation flags of Lagrangian (isAllocated map) to val
+   *  \param a bool
+   */
+  virtual void initAllocationFlags(const bool&);
+
+  /** \fn initPluginFlags(const bool& val);
+   *  \brief set all plug-in flags (isPlugin map) to val
+   *  \param a bool
+   */
+  virtual void initPluginFlags(const bool&);
+
+  // -- DEFAULT CONSTRUCTOR --
+  /** \fn LagrangianDS()
+   *  \brief Default constructor
+   */
+  LagrangianDS();
 
 public:
 
@@ -340,6 +333,12 @@ public:
   /** \fn ~LagrangianDS()
    *  \brief destructor */
   virtual ~LagrangianDS();
+
+  /** \fn bool checkDynamicalSystem()
+   *  \brief check that the system is complete (ie all required data are well set)
+   * \return a bool
+   */
+  virtual bool checkDynamicalSystem();
 
   /** \fn void initialize(const double& = 0, const unsigned int& = 1) ;
    *  \brief dynamical system initialization function: mainly set memory and compute plug-in for initial state values.
@@ -682,33 +681,6 @@ public:
    */
   void setMass(const SiconosMatrix&);
 
-  /** \fn inline void setMassConstant(const bool& input);
-   *  \brief if input = true,  the mass will be constant, ie from this point, computeMass has no more effect.
-   *  \param a bool
-   */
-  inline void setMassConstant(const bool& input)
-  {
-    isConstant["mass"] = input ;
-  };
-
-  /** \fn inline bool isMassConstant()
-   *  \brief return true if the mass is constant
-   *  \return a bool
-   */
-  inline bool isMassConstant()
-  {
-    return isConstant["mass"];
-  };
-
-  /** \fn inline void setIsDSUp(const bool& input)
-   *  \brief set isDSup value to input
-   *  \param a bool
-   */
-  inline void setIsDSUp(const bool& input)
-  {
-    isDSup = input ;
-  };
-
   /** \fn void setMassPtr(SiconosMatrix* newPtr)
    *  \brief set Mass to pointer newPtr
    *  \param SiconosMatrix * newPtr
@@ -939,26 +911,6 @@ public:
    */
   void setJacobianVelocityNNLPtr(SiconosMatrix *newPtr);
 
-  /** \fn const bool getIsLDSPlugin(unsigned int& n) const
-   *  \brief get a bool to check if member number n is loaded from a plugin or not
-   *  to know which member corresponds to n see private member list below.
-   *  \return a bool
-   */
-  inline bool getIsLDSPlugin(const unsigned int& n) const
-  {
-    return isLDSPlugin[n];
-  };
-
-  /** \fn const deque<bool> getIsLDSPlugin() const
-   *  \brief get the full vector isLDSPlugin, to check if member number n is loaded from a plugin or not
-   *  to know which member corresponds to n see private member list below.
-   *  \return a vector of bool
-   */
-  inline std::deque<bool> getIsLDSPlugin() const
-  {
-    return isLDSPlugin;
-  };
-
   /** \fn  std::string getMassFunctionName() const
    *  \brief get name of function that computes mass (if mass from plugin)
    *  \return a string
@@ -1123,37 +1075,39 @@ public:
 
   /** \fn void computeJacobianVelocityNNL(const double & )
    *  \brief function to compute the gradient of the inertia strengths compared to velocity
-   *  \exception RuntimeException
    */
   void computeJacobianVelocityNNL();
 
   /** \fn void computeJacobianVelocityNNL(double time, SimpleVector q, SimpleVector velocity )
    *  \brief function to compute the gradient of the inertia strengths compared to velocity
    *  \param SimpleVector*: pointers on the state vectors q and velocity (\dot q)
-   *  \exception RuntimeException
    */
   void computeJacobianVelocityNNL(SimpleVector *q, SimpleVector *velocity);
 
-  /** \fn void vectorField (const double& time)
+  /** \fn void  computeInverseOfMass();
+   *  \brief function to compute inverse of the mass matrix
+   */
+  void computeInverseOfMass();
+
+  /** \fn void vectorField (const double& time, const bool & isDSup)
    * \brief Default function to compute the vector field for Lagrangian
    * \param double time : current time
-   *  \exception RuntimeException
+   * \param bool isDSup : flag to avoid recomputation of mass, fInt ...
    */
-  virtual void computeVectorField(const double&);
+  virtual void computeVectorField(const double&, const bool &);
 
-  /** \fn static void computeJacobianX (const double& time)
+  /** \fn static void computeJacobianX (const double& time, const bool & isDSup)
    *  \brief to compute the gradient of the vector field with the respect
    *  to the state
    *  \param double time : current time
-   *  \exception RuntimeException
+   *  \param bool isDSup : flag to avoid recomputation of mass, fInt ...
    */
-  virtual void computeJacobianX(const double&);
+  virtual void computeJacobianX(const double&, const bool &);
 
   /** \fn void setVectorFieldFunction(const string&, const string&)
    *  \brief set a specified function to compute vector field
    *  \param string pluginPath : the complete path to the plugin
    *  \param string functionName : the function name to use in this library
-   *  \exception SiconosSharedLibraryException
    */
   virtual void setVectorFieldFunction(const std::string & pluginPath, const std::string& functionName);
 
@@ -1161,7 +1115,6 @@ public:
    *  \brief set a specified function to compute jacobianX
    *  \param string pluginPath : the complete path to the plugin
    *  \param the string functionName : function name to use in this library
-   *  \exception SiconosSharedLibraryException
    */
   virtual void setComputeJacobianXFunction(const std::string & pluginPath, const std::string & functionName);
 
@@ -1169,7 +1122,6 @@ public:
    *  \brief allow to set a specified function to compute the mass
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosSharedLibraryException
    */
   void setComputeMassFunction(const std::string & pluginPath, const std::string & functionName);
 
@@ -1177,7 +1129,6 @@ public:
    *  \brief allow to set a specified function to compute Fint
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosSharedLibraryException
    */
   void setComputeFIntFunction(const std::string & pluginPath, const std::string & functionName);
 

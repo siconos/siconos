@@ -24,7 +24,7 @@
 #include "check.h"
 
 #include "SimpleMatrix.h"
-#include "SiconosVector.h"
+#include "SimpleVector.h"
 #include "SiconosMemory.h"
 #include "SiconosSharedLibrary.h"
 
@@ -36,10 +36,12 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <map>
 
 const std::string LNLDS = "LagrangianDS";
 const std::string LTIDS = "LagrangianLinearTIDS";
 const std::string LDS = "LinearDS";
+const std::string LITIDS = "LinearTIDS";
 const std::string NLDS = "NonLinearDS";
 
 class NonSmoothDynamicalSystem;
@@ -181,8 +183,10 @@ protected:
   /* the name of the plugin used to compute T */
   std::string  computeTFunctionName;
 
-  /** Flag to check if u and T are plugins or not */
-  std::deque<bool> isPlugin;
+  /** Flag to check if operators are plugged or not (and thus constant)
+   * For example isPlugin["jacobianX"] = false, means that jacobianX is constant,
+   * then computeJacobianX does not change its value, and not plugged.*/
+  std::map<std::string, bool> isPlugin;
 
   /** \fn void (*vectorFieldPtr) (const unsigned int& sizeOfX, const double* t, const double* x, double* xDot, double* param)
    *  \brief pointer on function to compute vectorfield
@@ -227,19 +231,10 @@ protected:
 
   /** Flags to know if pointers have been allocated inside constructors or not */
 
-  /** index corresponds to the following order:  x0, x, xMemory, xDot, xDotMemory, xFree, jacobianX */
-  std::deque<bool> isXAllocatedIn;
-  /** r and rMemory */
-  std::deque<bool> isRAllocatedIn;
-  /** u and T */
-  std::deque<bool> isControlAllocatedIn;
-  /** Boundary conditions */
-  bool isBCAllocatedIn;
+  /** Flags to know if pointers have been allocated inside constructors or not */
+  std::map<std::string, bool> isAllocatedIn;
   /** dsio */
   std::deque<bool> isDsioAllocatedIn;
-
-  // Default constructor
-  DynamicalSystem();
 
   /** \fn void fillBoundaryConditionsFromXml()
    *  \brief uses the DynamicalSystemXML of the DynamicalSystem to fill BoundaryCondition fields
@@ -252,6 +247,23 @@ protected:
    *  \exception RuntimeException
    */
   virtual void fillDsioFromXml();
+
+  /** \fn initAllocationFlags(const bool& val);
+   *  \brief set all allocation flags (isAllocated map) to val
+   *  \param a bool
+   */
+  virtual void initAllocationFlags(const bool&);
+
+  /** \fn initPluginFlags(const bool& val);
+   *  \brief set all plug-in flags (isPlugin map) to val
+   *  \param a bool
+   */
+  virtual void initPluginFlags(const bool&);
+
+  /** \fn DynamicalSystem();
+   *  \brief default constructor
+   */
+  DynamicalSystem();
 
 public:
 
@@ -276,7 +288,7 @@ public:
       *  \exception RuntimeException
       */
   DynamicalSystem(const int&, const unsigned int&, const SiconosVector&,
-                  const std::string& = "DefaultPlugin:vectorField", const std::string& = "DefaultPlugin:computeJacobianX");
+                  const std::string& = "DefaultPlugin:vectorField", const std::string& = "DefaultPlugin:jacobianX");
 
   /** \fn DynamicalSystem(const DynamicalSystem &)
    *  \brief copy constructor
@@ -286,7 +298,16 @@ public:
 
   // ===== DESTRUCTOR =====
 
+  /** \fn ~DynamicalSystem();
+   *  \brief destructor
+   */
   virtual ~DynamicalSystem();
+
+  /** \fn bool checkDynamicalSystem()
+   *  \brief check that the system is complete (ie all required data are well set)
+   * \return a bool
+   */
+  virtual bool checkDynamicalSystem();
 
   // ===== GETTERS/SETTERS =====
 
@@ -312,20 +333,20 @@ public:
 
   // --- NonSmoothDynamicalSystem ---
 
-  /** \fn NonSmoothDynamicalSystem* getNSDSPtr(void) const;
+  /** \fn NonSmoothDynamicalSystem* getNonSmoothDynamicalSystemPtr(void) const;
    *  \brief get the NonSmoothDynamicalSystem containing this DynamicalSystem
    *  \return NonSmoothDynamicalSystem*
    */
-  inline NonSmoothDynamicalSystem* getNSDSPtr() const
+  inline NonSmoothDynamicalSystem* getNonSmoothDynamicalSystemPtr() const
   {
     return nsds;
   }
 
-  /** \fn void setNSDSPtr(NonSmoothDynamicalSystem*);
+  /** \fn void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem*);
    *  \brief set the NonSmoothDynamicalSystem containing the DynamicalSystem
    *  \param NonSmoothDynamicalSystem*
    */
-  inline void setNSDSPtr(NonSmoothDynamicalSystem *newNsds)
+  inline void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem *newNsds)
   {
     nsds = newNsds;
   }
@@ -866,7 +887,7 @@ public:
    *  \brief allows to add the DSInputOutput to the DynamicalSystem
    *  \param DSInputOutput* : the DSInputOutput to add
    */
-  void addDSInputOutput(DSInputOutput* dsio)
+  inline void addDSInputOutput(DSInputOutput* dsio)
   {
     dsioVector.push_back(dsio);
   }
@@ -905,7 +926,7 @@ public:
   *  \param a SimpleVector*
   *  \param a string id
   */
-  void addTmpWorkVector(SimpleVector* newVal, const std::string& id)
+  inline void addTmpWorkVector(SimpleVector* newVal, const std::string& id)
   {
     *tmpWorkVector[id] = *newVal;
   }
@@ -915,7 +936,7 @@ public:
    *  \param the id of the SimpleVector
    *  \param an int to set the size
    */
-  void allocateTmpWorkVector(const std::string& id, const int& size)
+  inline void allocateTmpWorkVector(const std::string& id, const int& size)
   {
     tmpWorkVector[id] = new SimpleVector(size);
   }
@@ -924,7 +945,7 @@ public:
    *  \brief to free memory in the map
    *  \param the id of the SimpleVector to free
    */
-  void freeTmpWorkVector(const std::string& id)
+  inline void freeTmpWorkVector(const std::string& id)
   {
     delete tmpWorkVector[id];
   }
@@ -935,12 +956,6 @@ public:
    *  \param the size of the memory, default size = 1.
    */
   virtual void initialize(const double& = 0, const unsigned int& = 1) ;
-
-  /** \fn inline void setIsDSUp(const bool& input)
-   *  \brief set isDSup value to input - Only implemented in LagrangianDS.
-   *  \param a bool
-   */
-  inline virtual void setIsDSUp(const bool& input) {};
 
   // ===== MEMORY MANAGEMENT FUNCTIONS =====
 
@@ -1117,13 +1132,22 @@ public:
 
   // --- isPlugin ---
 
-  /** \fn const std::deque<bool> getIsPlugin() const;
-   *  \brief get flag that checks if u and T are loaded from plugin or not
-   *  \return a vector of bool
+  /** \fn const std::map<std::string, bool> getIsPlugin() const
+   *  \brief get isPlugin, map of flags to check if operators are plugged or not
+   *  \return a map of bool
    */
-  inline const std::deque<bool> getIsPlugin() const
+  inline const std::map<std::string, bool> getIsPlugin() const
   {
     return isPlugin;
+  }
+
+  /** \fn const bool isPlugged(const std::string& name) const
+   *  \brief return true if "name" is plugged, else false (ie name is constant)
+   *  \return a map of bool
+   */
+  inline const bool isPlugged(const std::string& name)
+  {
+    return isPlugin[name];
   }
 
   // ===== XML MANAGEMENT FUNCTIONS =====

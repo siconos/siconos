@@ -19,17 +19,24 @@
 #include "LagrangianLinearTIDS.h"
 using namespace std;
 
-// --- Default (private) constructor ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(): LagrangianDS(), K(NULL), C(NULL), isKAllocatedIn(false), isCAllocatedIn(false)
+void LagrangianLinearTIDS::initAllocationFlags(const bool& val)
 {
+  isAllocatedIn["C"] = val;
+  isAllocatedIn["K"] = val;
+}
+
+// --- Default (private) constructor ---
+LagrangianLinearTIDS::LagrangianLinearTIDS(): LagrangianDS(), K(NULL), C(NULL)
+{
+  initAllocationFlags(false);
   DSType = LTIDS;
 }
 
 // --- Constructor from an xml file (newNsds is optional) ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(DynamicalSystemXML * dsXML,  NonSmoothDynamicalSystem* newNsds):
-  LagrangianDS(dsXML, newNsds), K(NULL), C(NULL),
-  isKAllocatedIn(true), isCAllocatedIn(true)
+  LagrangianDS(dsXML, newNsds), K(NULL), C(NULL)
 {
+  initAllocationFlags(true);
   DSType = LTIDS;
   if (dsXML != NULL)
   {
@@ -40,15 +47,16 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(DynamicalSystemXML * dsXML,  NonSmoot
       C = new SimpleMatrix(lltidsxml->getC());
   }
   else RuntimeException::selfThrow("LagrangianLinearTIDS::LagrangianLinearTIDS - DynamicalSystemXML paramater must not be NULL");
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 // --- Constructor from a set of data - Mass (from a matrix), K and C ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
     const SimpleVector& newQ0, const SimpleVector& newVelocity0,
     const SiconosMatrix& newMass, const SiconosMatrix& newK, const SiconosMatrix& newC):
-  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, newMass), K(NULL), C(NULL), isKAllocatedIn(true), isCAllocatedIn(true)
+  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, newMass), K(NULL), C(NULL)
 {
-  IN("LagrangianLinearTIDS::LagrangianLinearTIDS -  Constructor from a minimum set of data\n");
   if (newK.size(0) != ndof || newK.size(1) != ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between K and ndof");
 
@@ -58,17 +66,17 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned 
   K = new SimpleMatrix(newK);
   C = new SimpleMatrix(newC);
   DSType = LTIDS;
-  OUT("LagrangianLinearTIDS::LagrangianLinearTIDS - Constructor from a minimum set of data\n");
+  initAllocationFlags(true);
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 // --- Constructor from a set of data - Mass (from plugin), K and C ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
     const SimpleVector& newQ0, const SimpleVector& newVelocity0,
     const std::string& massName, const SiconosMatrix& newK, const SiconosMatrix& newC):
-  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, massName), K(NULL), C(NULL), isKAllocatedIn(true), isCAllocatedIn(true)
+  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, massName), K(NULL), C(NULL)
 {
-  IN("LagrangianLinearTIDS::LagrangianLinearTIDS -  Constructor from a minimum set of data\n");
-
   if (newK.size(0) != ndof || newK.size(1) != ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between K and ndof");
 
@@ -78,36 +86,40 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned 
   K = new SimpleMatrix(newK);
   C = new SimpleMatrix(newC);
   DSType = LTIDS;
-  OUT("LagrangianLinearTIDS::LagrangianLinearTIDS - Constructor from a minimum set of data\n");
+  initAllocationFlags(true);
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 // --- Constructor from a set of data - Mass (from a matrix), no K and no C ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
     const SimpleVector& newQ0, const SimpleVector& newVelocity0,
     const SiconosMatrix& newMass):
-  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, newMass), K(NULL), C(NULL), isKAllocatedIn(true), isCAllocatedIn(true)
+  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, newMass), K(NULL), C(NULL)
 {
-  IN("LagrangianLinearTIDS::LagrangianLinearTIDS -  Constructor from a minimum set of data\n");
   DSType = LTIDS;
-  OUT("LagrangianLinearTIDS::LagrangianLinearTIDS - Constructor from a minimum set of data\n");
+  initAllocationFlags(false);
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 // --- Constructor from a set of data - Mass (from plugin), no K and no C ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
     const SimpleVector& newQ0, const SimpleVector& newVelocity0,
     const std::string& massName):
-  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, massName), K(NULL), C(NULL), isKAllocatedIn(true), isCAllocatedIn(true)
+  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, massName), K(NULL), C(NULL)
 {
-  IN("LagrangianLinearTIDS::LagrangianLinearTIDS -  Constructor from a minimum set of data\n");
   DSType = LTIDS;
-  OUT("LagrangianLinearTIDS::LagrangianLinearTIDS - Constructor from a minimum set of data\n");
+  initAllocationFlags(false);
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 
 
 // Copy constructor
 LagrangianLinearTIDS::LagrangianLinearTIDS(const DynamicalSystem & newDS):
-  LagrangianDS(newDS), K(NULL), C(NULL), isKAllocatedIn(false), isCAllocatedIn(false)
+  LagrangianDS(newDS), K(NULL), C(NULL)
 {
   if (newDS.getType() != LTIDS)
     RuntimeException::selfThrow("LagrangianLinearTIDS - copy constructor: try to copy into a LagrangianLinearTIDS a DS of type: " + newDS.getType());
@@ -120,24 +132,74 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const DynamicalSystem & newDS):
   if (ltids->getKPtr() != NULL)
   {
     K = new SimpleMatrix(ltids->getK());
-    isKAllocatedIn = true;
+    isAllocatedIn["K"] = true;
   }
+  else isAllocatedIn["K"] = false;
 
   if (ltids->getCPtr() != NULL)
   {
     C = new SimpleMatrix(ltids->getC());
-    isCAllocatedIn = true;
+    isAllocatedIn["C"] = true;
   }
+  else isAllocatedIn["C"] = false;
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 LagrangianLinearTIDS::~LagrangianLinearTIDS()
 {
-  IN("LagrangianLinearTIDS::~LagrangianLinearTIDS()\n");
-  if (isKAllocatedIn) delete K;
+  if (isAllocatedIn["K"]) delete K;
   K = NULL;
-  if (isCAllocatedIn) delete C;
+  if (isAllocatedIn["C"]) delete C;
   C = NULL;
-  OUT("LagrangianLinearTIDS::~LagrangianLinearTIDS()\n");
+}
+
+
+bool LagrangianLinearTIDS::checkDynamicalSystem()
+{
+  bool output = true;
+  // ndof
+  if (ndof == 0)
+  {
+    RuntimeException::selfThrow("LagrangianLinearTIDS::checkDynamicalSystem - number of degrees of freedom is equal to 0.");
+    output = false;
+  }
+
+  // q0 and velocity0 != NULL
+  if (q0 == NULL || velocity0 == NULL)
+  {
+    RuntimeException::selfThrow("LagrangianLinearTIDS::checkDynamicalSystem - initial conditions are badly set.");
+    output = false;
+  }
+
+  // Mass
+  if (mass == NULL)
+  {
+    RuntimeException::selfThrow("LagrangianLinearTIDS::checkDynamicalSystem - Mass is not set.");
+    output = false;
+  }
+
+  // fInt, NNL and their Jacobian
+  if (isPlugin["fInt"] || isPlugin["jacobianQFInt"] || isPlugin["jacobianVelocityFInt"])
+    // ie if fInt is defined and not constant => its Jacobian must be defined (but not necessarily plugged)
+  {
+    RuntimeException::selfThrow("LagrangianLinearTIDS::checkDynamicalSystem - Fint and/or their Jacobian are plugged, which should not be.");
+    output = false;
+  }
+
+  if (isPlugin["NNL"] || isPlugin["jacobianQNNL"] || isPlugin["jacobianVelocityNNL"])
+    // ie if fInt is defined and not constant => its Jacobian must be defined (but not necessarily plugged)
+  {
+    RuntimeException::selfThrow("LagrangianLinearTIDS::checkDynamicalSystem -NNl and/or their Jacobian are plugged, which should not be.");
+    output = false;
+  }
+
+  if (isPlugin["vectorField"] || isPlugin["jacobianX"])
+  {
+    RuntimeException::selfThrow("LagrangianLinearTIDS::checkDynamicalSystem - vectorField and/or ist Jacobian can not be plugged for a Lagrangian system.");
+    output = false;
+  }
+  return output;
 }
 
 void LagrangianLinearTIDS::initialize(const double& time, const unsigned int& sizeOfMemory)
@@ -154,21 +216,10 @@ void LagrangianLinearTIDS::initialize(const double& time, const unsigned int& si
   // Initialize memory vectors
   initMemory(sizeOfMemory);
 
-  // compute values for mass, FInt etc ...
-  isConstant["mass"] = true;
-
   // FInt
   * fInt = *C ** velocity + *K **q;
 
-  SiconosVector * param;
-
-  if (isLDSPlugin[2]) // FExt
-  {
-    if (computeFExtPtr == NULL)
-      RuntimeException::selfThrow("LagrangianLinearTIDS initialize, computeFExt() is not linked to a plugin function");
-    param = parametersList[2];
-    computeFExtPtr(ndof, &time, &(*fExt)(0), &(*param)(0));
-  }
+  computeFExt(time);
 
   // vectorField
   // note that xDot(0) = velocity, with pointer link, must already be set.
@@ -189,8 +240,6 @@ void LagrangianLinearTIDS::initialize(const double& time, const unsigned int& si
   tmp2 = jacobianX->getBlockPtr(1, 1); // Pointer link!
   *tmp2 = -1 * *workMatrix["inverseOfMass"] * *C;
 
-  isDSup = true;
-
   // \todo: control terms handling
 }
 
@@ -203,7 +252,7 @@ void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
   if (K == NULL)
   {
     K = new SimpleMatrix(newValue);
-    isKAllocatedIn = true;
+    isAllocatedIn["K"] = true;
   }
   else
     *K = newValue;
@@ -214,9 +263,9 @@ void LagrangianLinearTIDS::setKPtr(SiconosMatrix *newPtr)
   if (newPtr->size(0) != ndof || newPtr->size(1) != ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setKPtr: inconsistent input matrix size ");
 
-  if (isKAllocatedIn) delete K;
+  if (isAllocatedIn["K"]) delete K;
   K = newPtr;
-  isKAllocatedIn = false;
+  isAllocatedIn["K"] = false;
 }
 
 void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
@@ -227,7 +276,7 @@ void LagrangianLinearTIDS::setC(const SiconosMatrix& newValue)
   if (C == NULL)
   {
     C = new SimpleMatrix(newValue);
-    isCAllocatedIn = true;
+    isAllocatedIn["C"] = true;
   }
   else
     *C = newValue;
@@ -238,15 +287,13 @@ void LagrangianLinearTIDS::setCPtr(SiconosMatrix *newPtr)
   if (newPtr->size(0) != ndof || newPtr->size(1) != ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - setCPtr: inconsistent input matrix size ");
 
-  if (isCAllocatedIn) delete C;
+  if (isAllocatedIn["C"]) delete C;
   C = newPtr;
-  isCAllocatedIn = false;
+  isAllocatedIn["C"] = false;
 }
 
 void LagrangianLinearTIDS::display() const
 {
-  IN("LagrangianLinearTIDS::display\n");
-
   LagrangianDS::display();
   cout << "===== Lagrangian Linear Time Invariant System display ===== " << endl;
   cout << "- Stiffness Matrix K : " << endl;
@@ -256,7 +303,6 @@ void LagrangianLinearTIDS::display() const
   if (C != NULL) C->display();
   else cout << "-> NULL" << endl;
   cout << "=========================================================== " << endl;
-  OUT("LagrangianLinearTIDS::display\n");
 }
 
 void LagrangianLinearTIDS::computeVectorField(const double& time)
@@ -266,7 +312,7 @@ void LagrangianLinearTIDS::computeVectorField(const double& time)
   SiconosVector* tmp = xDot->getVectorPtr(1); // Pointer link!
   // Compute M-1
   map<string, SiconosMatrix*>::iterator it = workMatrix.find("inverseOfMass");
-  if (it == workMatrix.end()) // if it is the first call to computeVectorField
+  if (it == workMatrix.end()) // if it is the first call to computeVectorField or computeJacobianX
   {
     workMatrix["inverseOfMass"] = new SimpleMatrix(*mass);
     workMatrix["inverseOfMass"]->PLUFactorizationInPlace();
@@ -295,8 +341,6 @@ void LagrangianLinearTIDS::computeJacobianX(const double& time)
 
 void LagrangianLinearTIDS::saveDSToXML()
 {
-  IN("LagrangianLinearTIDS::saveDSToXML\n");
-
   // --- general DS data---
   saveDSDataToXML();
   // --- other data  ---
@@ -304,31 +348,30 @@ void LagrangianLinearTIDS::saveDSToXML()
   {
     LagrangianDSXML* lgptr = static_cast <LagrangianDSXML*>(dsxml);
     lgptr->setNdof(ndof);
-    lgptr->setMMatrix(mass);
-    lgptr->setQ(q);
-    lgptr->setQ0(q0);
-    lgptr->setQMemory(qMemory);
-    lgptr->setVelocity(velocity);
-    lgptr->setVelocity0(velocity0);
-    lgptr->setVelocityMemory(velocityMemory);
+    lgptr->setMMatrix(*mass);
+    lgptr->setQ(*q);
+    lgptr->setQ0(*q0);
+    lgptr->setQMemory(*qMemory);
+    lgptr->setVelocity(*velocity);
+    lgptr->setVelocity0(*velocity0);
+    lgptr->setVelocityMemory(*velocityMemory);
 
     // FExt
     if (lgptr->hasFext())
     {
       if (!lgptr->isFextPlugin())
       {
-        lgptr->setFextVector(fExt);
+        lgptr->setFextVector(*fExt);
       }
     }
     else
     {
       lgptr->setFextPlugin(fExtFunctionName);
     }
-    (static_cast <LagrangianLinearTIDSXML*>(dsxml))->setK(K);
-    (static_cast <LagrangianLinearTIDSXML*>(dsxml))->setC(C);
+    (static_cast <LagrangianLinearTIDSXML*>(dsxml))->setK(*K);
+    (static_cast <LagrangianLinearTIDSXML*>(dsxml))->setC(*C);
   }
   else RuntimeException::selfThrow("LagrangianLinearTIDS::saveDSToXML - object DynamicalSystemXML does not exist");
-  OUT("LagrangianLinearTIDS::saveDSToXML\n");
 }
 
 LagrangianLinearTIDS* LagrangianLinearTIDS::convert(DynamicalSystem* ds)

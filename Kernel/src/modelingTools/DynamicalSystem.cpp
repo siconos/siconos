@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "DynamicalSystem.h"
 
 // includes to be deleted thanks to factories
@@ -28,412 +28,6 @@
 
 using namespace std;
 
-// ===== CONSTRUCTORS =====
-
-// Default constructor (private)
-DynamicalSystem::DynamicalSystem():
-  DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL),
-  xDot(NULL), xDotMemory(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL),
-  uSize(0), u(NULL), T(NULL), stepsInMemory(1), BC(NULL), dsxml(NULL),
-  vectorFieldFunctionName("none"), computeJacobianXFunctionName("none"), computeUFunctionName("none"),
-  computeTFunctionName("none"), vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
-  computeUPtr(NULL), computeTPtr(NULL), isBCAllocatedIn(false)
-{
-  // --- plugins (not u and T because they are optional) -> connected to  "false" plugin
-  isXAllocatedIn.resize(7, false);
-  isRAllocatedIn.resize(2, false);
-  isControlAllocatedIn.resize(2, false);
-
-  // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
-  parametersList0.reserve(4);
-  for (unsigned int i = 0; i < 4; ++i)
-    parametersList0.push_back(new SimpleVector(1));
-  isParametersList0AllocatedIn.resize(4, true);
-  vector<SimpleVector*>::iterator iter;
-  for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
-    (*iter)->zero();
-}
-
-// From XML file (warning: newNsds is optional, default = NULL)
-DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
-  DSType(NLDS), nsds(newNsds), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL),
-  xDot(NULL), xDotMemory(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL),
-  uSize(0), u(NULL), T(NULL), stepsInMemory(1), BC(NULL), dsxml(dsXML),
-  vectorFieldFunctionName("none"), computeJacobianXFunctionName("none"), computeUFunctionName("none"),
-  computeTFunctionName("none"), vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
-  computeUPtr(NULL), computeTPtr(NULL), isBCAllocatedIn(false)
-{
-  // --- get values in xml file ---
-  if (dsXML != NULL)
-  {
-    number = dsxml->getNumber();
-    if (dsxml->hasId() == true) id = dsxml->getId();
-    // n is required only for first order systems (not for Lagrangian ones, replaced by ndof)
-    if (dsxml->hasN() == true) n = dsxml->getN();
-    else if (DSType == NLDS || DSType == LDS)
-      RuntimeException::selfThrow("DynamicalSystem:: xml constructor, n (problem size) is a required input");
-
-    // --- Memory allocation for vector and matrix members ---
-
-    // x and related vectors
-    if (dsxml->hasX0() == true)
-      x0 = new SimpleVector(dsxml->getX0());
-    else
-      RuntimeException::selfThrow("DynamicalSystem:: xml constructor, x0 is a required input");
-    if (x0->size() != n)
-      RuntimeException::selfThrow("DynamicalSystem:: xml constructor, x size differs from n!");
-
-    if (dsxml->hasX() == true) x = new SimpleVector(dsxml->getX());
-    else x = new SimpleVector(*x0);
-    if (x->size() != n)
-      RuntimeException::selfThrow("DynamicalSystem:: xml constructor, x size differs from n!");
-
-    xFree = new SimpleVector(n);
-
-    // r
-    r = new SimpleVector(n);
-
-    string plugin;
-    // vectorField
-    if (dsxml->hasXDot() && dsxml->hasVectorFieldPlugin())
-      RuntimeException::selfThrow("DynamicalSystem:: xml constructor, you can not give xDot and vectorField plug-in, only one is required.");
-
-    if (dsxml->hasXDot())
-    {
-      xDot = new SimpleVector(dsxml->getXDot());
-      if (xDot->size() != n)
-        RuntimeException::selfThrow("DynamicalSystem:: xml constructor, xDot size differs from n!");
-      setVectorFieldFunction("DefaultPlugin.so", "vectorField");
-    }
-    else if (dsxml->hasVectorFieldPlugin())
-    {
-      xDot = new SimpleVector(n);
-      plugin = dsxml->getVectorFieldPlugin();
-      setVectorFieldFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
-    }
-    else
-    {
-      xDot = new SimpleVector(n); // for derived classes
-      setVectorFieldFunction("DefaultPlugin.so", "vectorField");
-    }
-
-    // jacobianX
-    jacobianX = new SimpleMatrix(n, n);
-    if (dsxml->hasComputeJacobianXPlugin())
-    {
-      plugin = dsxml->getComputeJacobianXPlugin();
-      setComputeJacobianXFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
-    }
-    else
-      setComputeJacobianXFunction("DefaultPlugin.so", "computeJacobianX");
-
-    isXAllocatedIn.resize(7, true);
-
-    // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
-    parametersList0.reserve(4);
-    for (unsigned int i = 0; i < 4; ++i)
-      parametersList0.push_back(new SimpleVector(1));
-    isParametersList0AllocatedIn.resize(4, true);
-    vector<SimpleVector*>::iterator iter;
-    for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
-      (*iter)->zero();
-
-    // Memory
-    isXAllocatedIn[2] = false ; //xMemory
-    isXAllocatedIn[4] = false ; // xDotMemory
-    isRAllocatedIn.resize(2, true);
-    isRAllocatedIn[1] = false ; // rMemory
-    if (dsxml->hasStepsInMemory() == true) stepsInMemory = dsxml->getStepsInMemory();
-
-    if (dsxml->hasXMemory() == true)
-    {
-      xMemory = new SiconosMemory(dsxml->getXMemoryXML());
-      isXAllocatedIn[2] = true;
-    }
-
-    if (dsxml->hasXDotMemory() == true)
-    {
-      xDotMemory = new SiconosMemory(dsxml->getXDotMemoryXML());
-      isXAllocatedIn[4] = true;
-    }
-
-    // --- u and T xml loading (optional) ---
-    isControlAllocatedIn.resize(2, false);
-    isPlugin.resize(2, false);
-    if (dsxml->hasT())
-    {
-      // uSize is required
-      if (dsxml->hasUSize())
-        uSize = dsxml -> getUSize();
-      else
-        RuntimeException::selfThrow("DynamicalSystem:: xml constructor, uSize is a required input");
-
-      T = new SimpleMatrix(n, uSize);
-      u = new SimpleVector(uSize);
-      isControlAllocatedIn[0] = true;
-      isControlAllocatedIn[1] = true;
-
-      // if T plugin, set compute function, else load matrix from xml
-      if (dsxml->isTPlugin())
-      {
-        plugin = dsxml->getTPlugin();
-        setComputeTFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
-        isPlugin[0] = true;
-      }
-      else
-        *T = dsxml->getTMatrix();
-    }
-    // optional xml loading for u
-    if (dsxml->hasU())
-    {
-      // check if uSize has already been loaded
-      if (uSize == 0)
-      {
-        if (dsxml->hasUSize())
-          uSize = dsxml -> getUSize();
-        else
-          RuntimeException::selfThrow("DynamicalSystem:: xml constructor, uSize is a required input");
-      }
-
-      // check if u is allocated
-      if (u == NULL)
-      {
-        u = new SimpleVector(uSize);
-        isControlAllocatedIn[0] = true;
-      }
-
-      if (dsxml->isUPlugin())
-      {
-        plugin = dsxml->getUPlugin();
-        setComputeUFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
-        isPlugin[1] = true;
-      }
-      else if (dsxml->getUVector().size() == uSize)
-        *u = dsxml->getUVector();
-      else
-        RuntimeException::selfThrow("DynamicalSystem:: xml constructor, inconsistent size between uSize, u and T");
-    }
-
-    // --- Boundary conditions ---
-    fillBoundaryConditionsFromXml();
-
-    // --- DS input-output ---
-    fillDsioFromXml();
-  }
-  else
-    RuntimeException::selfThrow("DynamicalSystem::DynamicalSystem - DynamicalSystemXML paramater must not be NULL");
-}
-
-// From a minimum set of data
-DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN, const SiconosVector& newX0,
-                                 const string& vectorFieldPlugin, const string& jacobianXPlugin):
-  DSType(NLDS), nsds(NULL), number(newNumber), id("none"), n(newN), x0(NULL), x(NULL), xMemory(NULL),
-  xDot(NULL), xDotMemory(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL), uSize(0), u(NULL),
-  T(NULL), stepsInMemory(1), BC(NULL), dsxml(NULL),
-  vectorFieldFunctionName("none"), computeJacobianXFunctionName("none"), computeUFunctionName("none"),
-  computeTFunctionName("none"), vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
-  computeUPtr(NULL), computeTPtr(NULL), isBCAllocatedIn(false)
-{
-  // --- Memory allocation ---
-  if (n != newX0.size())
-    RuntimeException::selfThrow("DynamicalSystem::constructor from data, inconsistent sizes between problem size and x0.");
-
-  // x and related vectors
-  x0 = new SimpleVector(newX0);
-  x = new SimpleVector(*x0); // x is initialized with x0.
-  xFree = new SimpleVector(n);
-
-  // r
-  r = new SimpleVector(n);
-
-  // vectorField
-  xDot = new SimpleVector(n);
-  setVectorFieldFunction(cShared.getPluginName(vectorFieldPlugin), cShared.getPluginFunctionName(vectorFieldPlugin));
-
-  // jacobianX
-  jacobianX = new SimpleMatrix(n, n);
-  setComputeJacobianXFunction(cShared.getPluginName(jacobianXPlugin), cShared.getPluginFunctionName(jacobianXPlugin));
-
-  isXAllocatedIn.resize(7, true);
-
-  // Memory
-  isXAllocatedIn[2] = false ; //xMemory
-  isXAllocatedIn[4] = false ; // xDotMemory
-  isRAllocatedIn.resize(2, true);
-  isRAllocatedIn[1] = false ; // rMemory
-
-  // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
-  parametersList0.reserve(4);
-  for (unsigned int i = 0; i < 4; ++i)
-    parametersList0.push_back(new SimpleVector(1));
-  isParametersList0AllocatedIn.resize(4, true);
-  vector<SimpleVector*>::iterator iter;
-  for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
-    (*iter)->zero();
-
-  // u and T are optional
-  isPlugin.resize(2, false);
-  isControlAllocatedIn.resize(2, false);
-}
-
-// copy constructor
-DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
-  DSType(NLDS), nsds(newDS.getNSDSPtr()), number(-2), id("copy"), n(newDS.getN()),
-  x0(NULL), x(NULL), xMemory(NULL), xDot(NULL), xDotMemory(NULL),
-  xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL), uSize(newDS.getUSize()), u(NULL), T(NULL),
-  stepsInMemory(newDS.getStepsInMemory()), BC(NULL), dsxml(NULL),
-  vectorFieldFunctionName(newDS.getVectorFieldFunctionName()), computeJacobianXFunctionName(newDS. getVectorFieldFunctionName()),
-  computeUFunctionName(newDS.getComputeUFunctionName()), computeTFunctionName(newDS.getComputeTFunctionName()),
-  vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
-  computeUPtr(NULL), computeTPtr(NULL), isBCAllocatedIn(false)
-{
-
-  cout << "!!! Warning: Dynamical System copy, do not forget to set id and number for the new system !!! " << endl;
-
-  if (newDS.getX0Ptr()->isBlock())
-  {
-    x0 = new BlockVector(newDS.getX0());
-    x = new BlockVector(newDS.getX());
-    xDot = new BlockVector(newDS.getXDot());
-    xFree = new BlockVector(newDS.getXFree());
-  }
-  else
-  {
-    x0 = new SimpleVector(newDS.getX0());
-    x = new SimpleVector(newDS.getX());
-    xDot = new SimpleVector(newDS.getXDot());
-    xFree = new SimpleVector(newDS.getXFree());
-  }
-  isXAllocatedIn.resize(7, true);
-  isXAllocatedIn[2] = false ; //xMemory
-  isXAllocatedIn[4] = false ; // xDotMemory
-  isXAllocatedIn[6] = false ; // jacobianX
-  isRAllocatedIn.resize(2, false);
-  isRAllocatedIn[1] = false ; // rMemory
-
-  if (newDS.getRPtr() != NULL)
-  {
-    r = new SimpleVector(newDS.getR());
-    isRAllocatedIn[0] = true ;
-  }
-
-  if (newDS.getJacobianXPtr() != NULL)
-  {
-    jacobianX = new SimpleMatrix(newDS.getJacobianX());
-    isXAllocatedIn[6] = true ;
-  }
-
-  if (newDS.getXMemoryPtr() != NULL)
-  {
-    xMemory = new SiconosMemory(newDS.getXMemory());
-    isXAllocatedIn[2] = true;
-  }
-
-  if (newDS.getXDotMemoryPtr() != NULL)
-  {
-    xDotMemory = new SiconosMemory(newDS.getXDotMemory());
-    isXAllocatedIn[4] = true;
-  }
-
-  if (newDS.getRMemoryPtr() != NULL)
-  {
-    rMemory = new SiconosMemory(newDS.getRMemory());
-    isRAllocatedIn[1] = true;
-  }
-
-  isControlAllocatedIn.resize(2, false);
-  if (newDS.getUPtr() != NULL)
-  {
-    if (newDS.getUPtr()->isBlock())
-      u = new BlockVector(newDS.getU());
-    else
-      u = new SimpleVector(newDS.getU());
-    isControlAllocatedIn[0] = true;
-  }
-
-  if (newDS.getTPtr() != NULL)
-  {
-    T = new SimpleMatrix(newDS.getT());
-    isControlAllocatedIn[1] = true ;
-  }
-
-  // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
-  setParametersListVector(newDS.getParametersListVector());
-
-  string pluginPath, functionName;
-
-  functionName = cShared.getPluginFunctionName(vectorFieldFunctionName);
-  pluginPath  = cShared.getPluginName(vectorFieldFunctionName);
-  setVectorFieldFunction(pluginPath, functionName);
-
-  functionName = cShared.getPluginFunctionName(computeJacobianXFunctionName);
-  pluginPath  = cShared.getPluginName(computeJacobianXFunctionName);
-  setComputeJacobianXFunction(pluginPath, functionName);
-
-  isPlugin = newDS.getIsPlugin();
-
-  // plugin for u
-  if (isPlugin[0])
-  {
-    functionName = cShared.getPluginFunctionName(computeUFunctionName);
-    pluginPath  = cShared.getPluginName(computeUFunctionName);
-    setVectorFieldFunction(pluginPath, functionName);
-  }
-  // plugin for T
-  if (isPlugin[1])
-  {
-    functionName = cShared.getPluginFunctionName(computeTFunctionName);
-    pluginPath  = cShared.getPluginName(computeTFunctionName);
-    setVectorFieldFunction(pluginPath, functionName);
-  }
-
-  // \todo: manage copy of dsio and boundary conditions when these classes will be well implemented.
-
-  // xml link is not copied.
-}
-
-// --- Destructor ---
-DynamicalSystem::~DynamicalSystem()
-{
-  if (isXAllocatedIn[0])delete x0;
-  x0 = NULL ;
-  if (isXAllocatedIn[1]) delete x;
-  x = NULL;
-  if (isXAllocatedIn[2]) delete xMemory;
-  xMemory = NULL;
-  if (isXAllocatedIn[3]) delete xDot;
-  xDot = NULL;
-  if (isXAllocatedIn[4]) delete xDotMemory;
-  xDotMemory = NULL;
-  if (isXAllocatedIn[5]) delete xFree;
-  xFree = NULL;
-  if (isRAllocatedIn[0]) delete r;
-  r = NULL;
-  if (isRAllocatedIn[1]) delete rMemory;
-  rMemory = NULL;
-  if (isXAllocatedIn[6]) delete jacobianX;
-  jacobianX = NULL;
-  if (isControlAllocatedIn[0]) delete u;
-  u = NULL;
-  if (isControlAllocatedIn[1]) delete T;
-  T = NULL;
-
-  for (unsigned int i = 0; i < parametersList0.size(); ++i)
-  {
-    if (isParametersList0AllocatedIn[i]) delete parametersList0[i];
-    parametersList0[i] = NULL;
-  }
-  isParametersList0AllocatedIn.resize(4, false);
-
-  for (unsigned int i = 0; i < dsioVector.size(); i++)
-  {
-    if (isDsioAllocatedIn[i]) delete dsioVector[i];
-    dsioVector[i] = NULL;
-  }
-  if (isBCAllocatedIn) delete BC;
-  BC = NULL;
-}
-
 // Boundary conditions built-in (called from constructors)
 void DynamicalSystem::fillBoundaryConditionsFromXml()
 {
@@ -444,14 +38,14 @@ void DynamicalSystem::fillBoundaryConditionsFromXml()
       //  Linear BC
       BC = new LinearBC();
       static_cast<LinearBC*>(BC)->createBoundaryCondition(dsxml->getBoundaryConditionXML());
-      isBCAllocatedIn = true;
+      isAllocatedIn["BoundaryConditions"] = true;
     }
     else if (dsxml->getBoundaryConditionXML()->getType() == NON_LINEARBC_TAG)
     {
       // Non linear BC
       BC = new NLinearBC();
       static_cast<NLinearBC*>(BC)->createBoundaryCondition(dsxml->getBoundaryConditionXML());
-      isBCAllocatedIn = true;
+      isAllocatedIn["BoundaryConditions"] = true;
     }
 
     else if (dsxml->getBoundaryConditionXML()->getType() == PERIODICBC_TAG)
@@ -459,7 +53,7 @@ void DynamicalSystem::fillBoundaryConditionsFromXml()
       // Periodic BC
       BC = new PeriodicBC();
       static_cast<PeriodicBC*>(BC)->createBoundaryCondition(dsxml->getBoundaryConditionXML());
-      isBCAllocatedIn = true;
+      isAllocatedIn["BoundaryConditions"] = true;
     }
     else RuntimeException::selfThrow("DynamicalSystem::linkDynamicalSystemXML - bad kind of BoundaryCondition : " + dsxml->getBoundaryConditionXML()->getType());
   }
@@ -508,6 +102,508 @@ void DynamicalSystem::fillDsioFromXml()
   }
 }
 
+void DynamicalSystem::initAllocationFlags(const bool& val)
+{
+  isAllocatedIn["x0"] = val;
+  isAllocatedIn["x"] = val;
+  isAllocatedIn["xMemory"] = val;
+  isAllocatedIn["xDot"] = val;
+  isAllocatedIn["xDotMemory"] = val;
+  isAllocatedIn["xFree"] = val;
+  isAllocatedIn["r"] = val;
+  isAllocatedIn["rMemory"] = val;
+  isAllocatedIn["jacobianX"] = val;
+  isAllocatedIn["u"] = val;
+  isAllocatedIn["T"] = val;
+}
+
+void DynamicalSystem::initPluginFlags(const bool& val)
+{
+  isPlugin["vectorField"] = val;
+  isPlugin["jacobianX"] = val;
+  isPlugin["u"] = val;
+  isPlugin["T"] = val;
+}
+// ===== CONSTRUCTORS =====
+
+// Default constructor (private)
+DynamicalSystem::DynamicalSystem():
+  DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL),
+  xDot(NULL), xDotMemory(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL),
+  uSize(0), u(NULL), T(NULL), stepsInMemory(1), BC(NULL), dsxml(NULL),
+  vectorFieldFunctionName("none"), computeJacobianXFunctionName("none"), computeUFunctionName("none"),
+  computeTFunctionName("none"), vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
+  computeUPtr(NULL), computeTPtr(NULL)
+{
+  initAllocationFlags(false);
+  initPluginFlags(false);
+  // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
+  parametersList0.reserve(4);
+  for (unsigned int i = 0; i < 4; ++i)
+    parametersList0.push_back(new SimpleVector(1));
+  isParametersList0AllocatedIn.resize(4, true);
+  vector<SimpleVector*>::iterator iter;
+  for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
+    (*iter)->zero();
+}
+
+// From XML file (warning: newNsds is optional, default = NULL)
+DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
+  DSType(NLDS), nsds(newNsds), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL),
+  xDot(NULL), xDotMemory(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL),
+  uSize(0), u(NULL), T(NULL), stepsInMemory(1), BC(NULL), dsxml(dsXML),
+  vectorFieldFunctionName("none"), computeJacobianXFunctionName("none"), computeUFunctionName("none"),
+  computeTFunctionName("none"), vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
+  computeUPtr(NULL), computeTPtr(NULL)
+{
+  // --- get values in xml file ---
+  if (dsXML != NULL)
+  {
+    number = dsxml->getNumber();
+    if (dsxml->hasId()) id = dsxml->getId();
+    // n is required only for first order systems (not for Lagrangian ones, replaced by ndof)
+    if (dsxml->hasN()) n = dsxml->getN();
+    else if (DSType == NLDS || DSType == LDS)
+      RuntimeException::selfThrow("DynamicalSystem:: xml constructor, n (problem size) is a required input");
+
+    // --- Memory allocation for vector and matrix members ---
+
+    // x and related vectors
+    if (dsxml->hasX0())
+      x0 = new SimpleVector(dsxml->getX0());
+    else
+      RuntimeException::selfThrow("DynamicalSystem:: xml constructor, x0 is a required input");
+    if (x0->size() != n)
+      RuntimeException::selfThrow("DynamicalSystem:: xml constructor, x size differs from n!");
+
+    if (dsxml->hasX()) x = new SimpleVector(dsxml->getX());
+    else x = new SimpleVector(*x0);
+    if (x->size() != n)
+      RuntimeException::selfThrow("DynamicalSystem:: xml constructor, x size differs from n!");
+
+    xFree = new SimpleVector(n);
+
+    // r
+    r = new SimpleVector(n);
+
+    string plugin;
+    // vectorField and jacobianX are required for DynamicalSystem but not for derived class.
+    // Then we can not set exception if they are not given. By default, they are connected to defaultPlugin
+    // and isPlugin corresponding flag has to be set in the derived class.
+
+    // vectorField
+    if (dsxml->hasVectorField())
+    {
+      if (dsxml->isVectorFieldPlugin())
+      {
+        xDot = new SimpleVector(n);
+        plugin = dsxml->getVectorFieldPlugin();
+        setVectorFieldFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));     // this set isPlugin["vectorField"] to true.
+      }
+      else
+      {
+        xDot = new SimpleVector(dsxml->getVectorFieldVector()); // Usefull case?
+        if (xDot->size() != n)
+          RuntimeException::selfThrow("DynamicalSystem:: xml constructor, vectorField size differs from n!");
+        isPlugin["vectorField"] = false;
+      }
+    }
+    else
+    {
+      xDot = new SimpleVector(n);
+      setVectorFieldFunction("DefaultPlugin.so", "vectorField"); // this set isPlugin["vectorField"] to true.
+    }
+    //RuntimeException::selfThrow("DynamicalSystem:: xml constructor,vectorField input is missing.");
+
+    // jacobianX
+    if (dsxml->hasJacobianX())
+    {
+      if (dsxml->isJacobianXPlugin())
+      {
+        jacobianX = new SimpleMatrix(n, n);
+        plugin = dsxml->getJacobianXPlugin();
+        setComputeJacobianXFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));     // this set isPlugin["jacobianX"] to true
+      }
+      else // This means that jacobianX is constant
+      {
+        jacobianX = new SimpleMatrix(dsxml->getJacobianXMatrix());
+        if (jacobianX->size(0) != n || jacobianX->size(1) != n)
+          RuntimeException::selfThrow("DynamicalSystem:: xml constructor, jacobianX size differs from n!");
+        isPlugin["jacobianX"] = false; //setVectorFieldFunction("DefaultPlugin.so", "vectorField");
+      }
+    }
+    else
+    {
+      jacobianX = new SimpleMatrix(n, n);
+      setComputeJacobianXFunction("DefaultPlugin.so", "jacobianX"); // this set isPlugin["vectorField"] to true.
+    }
+
+    //RuntimeException::selfThrow("DynamicalSystem:: xml constructor,jacobianX input is missing.");
+
+    initAllocationFlags(true);
+
+    // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
+    parametersList0.reserve(4);
+    for (unsigned int i = 0; i < 4; ++i)
+      parametersList0.push_back(new SimpleVector(1));
+    isParametersList0AllocatedIn.resize(4, true);
+    vector<SimpleVector*>::iterator iter;
+    for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
+      (*iter)->zero();
+
+    // Memory
+    isAllocatedIn["rMemory"] = false ; // rMemory
+    if (dsxml->hasStepsInMemory()) stepsInMemory = dsxml->getStepsInMemory();
+
+    if (dsxml->hasXMemory())
+    {
+      xMemory = new SiconosMemory(dsxml->getXMemoryXML());
+      isAllocatedIn["xMemory"] = true;
+    }
+    else
+      isAllocatedIn["xMemory"] = false ;
+
+    if (dsxml->hasXDotMemory())
+    {
+      xDotMemory = new SiconosMemory(dsxml->getXDotMemoryXML());
+      isAllocatedIn["xDotMemory"] = true;
+    }
+    else
+      isAllocatedIn["xDotMemory"] = false ;
+
+    // --- u and T xml loading (optional) ---
+    isAllocatedIn["u"] = true;
+    isAllocatedIn["T"] = true;
+    isPlugin["u"] = false;
+    isPlugin["T"] = false;
+    if (dsxml->hasT())
+    {
+      // uSize is required
+      if (dsxml->hasUSize())
+        uSize = dsxml -> getUSize();
+      else
+        RuntimeException::selfThrow("DynamicalSystem:: xml constructor, uSize is a required input");
+
+      T = new SimpleMatrix(n, uSize);
+      u = new SimpleVector(uSize);
+      isAllocatedIn["u"] = true;
+      isAllocatedIn["T"] = true;
+
+      // if T plugin, set compute function, else load matrix from xml
+      if (dsxml->isTPlugin())
+      {
+        plugin = dsxml->getTPlugin();
+        setComputeTFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+        isPlugin["T"] = true;
+      }
+      else
+        *T = dsxml->getTMatrix();
+    }
+
+    // optional xml loading for u
+    if (dsxml->hasU())
+    {
+      // check if uSize has already been loaded
+      if (uSize == 0)
+      {
+        if (dsxml->hasUSize())
+          uSize = dsxml -> getUSize();
+        else
+          RuntimeException::selfThrow("DynamicalSystem:: xml constructor, uSize is a required input");
+      }
+
+      // check if u is allocated
+      if (u == NULL)
+      {
+        u = new SimpleVector(uSize);
+        isAllocatedIn["u"] = true;
+      }
+
+      if (dsxml->isUPlugin())
+      {
+        plugin = dsxml->getUPlugin();
+        setComputeUFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+        isPlugin["u"] = true;
+      }
+      else if (dsxml->getUVector().size() == uSize)
+        *u = dsxml->getUVector();
+      else
+        RuntimeException::selfThrow("DynamicalSystem:: xml constructor, inconsistent size between uSize, u and T");
+    }
+
+    // --- Boundary conditions ---
+    fillBoundaryConditionsFromXml();
+
+    // --- DS input-output ---
+    fillDsioFromXml();
+  }
+  else
+    RuntimeException::selfThrow("DynamicalSystem::DynamicalSystem - DynamicalSystemXML paramater must not be NULL");
+
+  bool res;
+  res = checkDynamicalSystem();
+}
+
+// From a minimum set of data
+DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN, const SiconosVector& newX0,
+                                 const string& vectorFieldPlugin, const string& jacobianXPlugin):
+  DSType(NLDS), nsds(NULL), number(newNumber), id("none"), n(newN), x0(NULL), x(NULL), xMemory(NULL),
+  xDot(NULL), xDotMemory(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL), uSize(0), u(NULL),
+  T(NULL), stepsInMemory(1), BC(NULL), dsxml(NULL),
+  vectorFieldFunctionName("none"), computeJacobianXFunctionName("none"), computeUFunctionName("none"),
+  computeTFunctionName("none"), vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
+  computeUPtr(NULL), computeTPtr(NULL)
+{
+  // --- Memory allocation ---
+  if (n != newX0.size())
+    RuntimeException::selfThrow("DynamicalSystem::constructor from data, inconsistent sizes between problem size and x0.");
+
+  // x and related vectors
+  x0 = new SimpleVector(newX0);
+  x = new SimpleVector(*x0); // x is initialized with x0.
+  xFree = new SimpleVector(n);
+
+  // r
+  r = new SimpleVector(n);
+
+  // vectorField
+  xDot = new SimpleVector(n);
+  setVectorFieldFunction(cShared.getPluginName(vectorFieldPlugin), cShared.getPluginFunctionName(vectorFieldPlugin));
+
+  // jacobianX
+  jacobianX = new SimpleMatrix(n, n);
+  setComputeJacobianXFunction(cShared.getPluginName(jacobianXPlugin), cShared.getPluginFunctionName(jacobianXPlugin));
+
+  initAllocationFlags(true);
+  // Memory
+  isAllocatedIn["xMemory"] = false ; //xMemory
+  isAllocatedIn["xDotMemory"] = false ; // xDotMemory
+  isAllocatedIn["rMemory"] = false ; // rMemory
+
+  // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
+  parametersList0.reserve(4);
+  for (unsigned int i = 0; i < 4; ++i)
+    parametersList0.push_back(new SimpleVector(1));
+  isParametersList0AllocatedIn.resize(4, true);
+  vector<SimpleVector*>::iterator iter;
+  for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
+    (*iter)->zero();
+
+  // u and T are optional
+  isAllocatedIn["u"] = false;
+  isAllocatedIn["T"] = false;
+  isPlugin["u"] = false;
+  isPlugin["T"] = false;
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+}
+
+// copy constructor
+DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
+  DSType(NLDS), nsds(newDS.getNonSmoothDynamicalSystemPtr()), number(-2), id("copy"), n(newDS.getN()),
+  x0(NULL), x(NULL), xMemory(NULL), xDot(NULL), xDotMemory(NULL),
+  xFree(NULL), r(NULL), rMemory(NULL), jacobianX(NULL), uSize(newDS.getUSize()), u(NULL), T(NULL),
+  stepsInMemory(newDS.getStepsInMemory()), BC(NULL), dsxml(NULL),
+  vectorFieldFunctionName(newDS.getVectorFieldFunctionName()), computeJacobianXFunctionName(newDS. getVectorFieldFunctionName()),
+  computeUFunctionName(newDS.getComputeUFunctionName()), computeTFunctionName(newDS.getComputeTFunctionName()),
+  vectorFieldPtr(NULL), computeJacobianXPtr(NULL),
+  computeUPtr(NULL), computeTPtr(NULL)
+{
+
+  cout << "!!! Warning: Dynamical System copy, do not forget to set id and number for the new system !!! " << endl;
+
+  if (newDS.getX0Ptr()->isBlock())
+  {
+    x0 = new BlockVector(newDS.getX0());
+    x = new BlockVector(newDS.getX());
+    xDot = new BlockVector(newDS.getXDot());
+    xFree = new BlockVector(newDS.getXFree());
+  }
+  else
+  {
+    x0 = new SimpleVector(newDS.getX0());
+    x = new SimpleVector(newDS.getX());
+    xDot = new SimpleVector(newDS.getXDot());
+    xFree = new SimpleVector(newDS.getXFree());
+  }
+  initAllocationFlags(true);
+
+  if (newDS.getRPtr() != NULL)
+  {
+    r = new SimpleVector(newDS.getR());
+    isAllocatedIn["r"] = true ;
+  }
+  else
+    isAllocatedIn["r"] = false ;
+
+
+  if (newDS.getJacobianXPtr() != NULL)
+  {
+    jacobianX = new SimpleMatrix(newDS.getJacobianX());
+    isAllocatedIn["jacobianX"] = true ;
+  }
+  else
+    isAllocatedIn["jacobianX"] = false ;
+
+  if (newDS.getXMemoryPtr() != NULL)
+  {
+    xMemory = new SiconosMemory(newDS.getXMemory());
+    isAllocatedIn["xMemory"] = true;
+  }
+  else
+    isAllocatedIn["xMemory"] = false ;
+
+  if (newDS.getXDotMemoryPtr() != NULL)
+  {
+    xDotMemory = new SiconosMemory(newDS.getXDotMemory());
+    isAllocatedIn["xDotMemory"] = true;
+  }
+  else isAllocatedIn["xDotMemory"] = false ;
+
+
+  if (newDS.getRMemoryPtr() != NULL)
+  {
+    rMemory = new SiconosMemory(newDS.getRMemory());
+    isAllocatedIn["rMemory"] = true;
+  }
+  else isAllocatedIn["rMemory"] = false ;
+
+  if (newDS.getUPtr() != NULL)
+  {
+    if (newDS.getUPtr()->isBlock())
+      u = new BlockVector(newDS.getU());
+    else
+      u = new SimpleVector(newDS.getU());
+    isAllocatedIn["u"] = true;
+  }
+  else isAllocatedIn["u"] = false ;
+
+
+  if (newDS.getTPtr() != NULL)
+  {
+    T = new SimpleMatrix(newDS.getT());
+    isAllocatedIn["T"] = true ;
+  }
+  else isAllocatedIn["T"] = false ;
+
+  // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
+  setParametersListVector(newDS.getParametersListVector());
+
+  string pluginPath, functionName;
+
+  isPlugin = newDS.getIsPlugin();
+
+  if (isPlugin["vectorField"])
+  {
+    functionName = cShared.getPluginFunctionName(vectorFieldFunctionName);
+    pluginPath  = cShared.getPluginName(vectorFieldFunctionName);
+    setVectorFieldFunction(pluginPath, functionName);
+  }
+
+  if (isPlugin["jacobianX"])
+  {
+    functionName = cShared.getPluginFunctionName(computeJacobianXFunctionName);
+    pluginPath  = cShared.getPluginName(computeJacobianXFunctionName);
+    setComputeJacobianXFunction(pluginPath, functionName);
+  }
+
+  // plugin for u
+  if (isPlugin["u"])
+  {
+    functionName = cShared.getPluginFunctionName(computeUFunctionName);
+    pluginPath  = cShared.getPluginName(computeUFunctionName);
+    setVectorFieldFunction(pluginPath, functionName);
+  }
+  // plugin for T
+  if (isPlugin["T"])
+  {
+    functionName = cShared.getPluginFunctionName(computeTFunctionName);
+    pluginPath  = cShared.getPluginName(computeTFunctionName);
+    setVectorFieldFunction(pluginPath, functionName);
+  }
+
+  // \todo: manage copy of dsio and boundary conditions when these classes will be well implemented.
+
+  // xml link is not copied.
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+}
+
+// --- Destructor ---
+DynamicalSystem::~DynamicalSystem()
+{
+  if (isAllocatedIn["x0"])delete x0;
+  x0 = NULL ;
+  if (isAllocatedIn["x"]) delete x;
+  x = NULL;
+  if (isAllocatedIn["xMemory"]) delete xMemory;
+  xMemory = NULL;
+  if (isAllocatedIn["xDot"]) delete xDot;
+  xDot = NULL;
+  if (isAllocatedIn["xDotMemory"]) delete xDotMemory;
+  xDotMemory = NULL;
+  if (isAllocatedIn["xFree"]) delete xFree;
+  xFree = NULL;
+  if (isAllocatedIn["r"]) delete r;
+  r = NULL;
+  if (isAllocatedIn["rMemory"]) delete rMemory;
+  rMemory = NULL;
+  if (isAllocatedIn["jacobianX"]) delete jacobianX;
+  jacobianX = NULL;
+  if (isAllocatedIn["u"]) delete u;
+  u = NULL;
+  if (isAllocatedIn["T"]) delete T;
+  T = NULL;
+
+  for (unsigned int i = 0; i < parametersList0.size(); ++i)
+  {
+    if (isParametersList0AllocatedIn[i]) delete parametersList0[i];
+    parametersList0[i] = NULL;
+  }
+  isParametersList0AllocatedIn.resize(4, false);
+
+  for (unsigned int i = 0; i < dsioVector.size(); i++)
+  {
+    if (isDsioAllocatedIn[i]) delete dsioVector[i];
+    dsioVector[i] = NULL;
+  }
+  if (isAllocatedIn["BoundaryConditions"]) delete BC;
+  BC = NULL;
+}
+
+bool DynamicalSystem::checkDynamicalSystem()
+{
+  bool output = true;
+  // n
+  if (n == 0)
+  {
+    RuntimeException::selfThrow("DynamicalSystem::checkDynamicalSystem - number of degrees of freedom is equal to 0.");
+    output = false;
+  }
+  // x0 != NULL
+  if (x0 == NULL)
+  {
+    RuntimeException::selfThrow("DynamicalSystem::checkDynamicalSystem - x0 not set.");
+    output = false;
+  }
+
+  // vectorField
+  if (xDot == NULL)
+  {
+    RuntimeException::selfThrow("DynamicalSystem::checkDynamicalSystem - vectorField not set.");
+    output = false;
+  }
+
+  // if vectorField not constant (plugged) => jacobianX required
+  if (isPlugin["vectorField"] && jacobianX == NULL)
+  {
+    RuntimeException::selfThrow("DynamicalSystem::checkDynamicalSystem - Jacobian of vectorField according to x is a required input and is not set.");
+    output = false;
+  }
+  return output;
+}
+
+
 // Setters
 
 void DynamicalSystem::setX0(const SiconosVector& newValue)
@@ -525,7 +621,7 @@ void DynamicalSystem::setX0(const SiconosVector& newValue)
       x0 = new BlockVector(newValue);
     else
       x0 = new SimpleVector(newValue);
-    isXAllocatedIn[0] = true;
+    isAllocatedIn["x0"] = true;
   }
 }
 
@@ -535,9 +631,9 @@ void DynamicalSystem::setX0Ptr(SiconosVector* newPtr)
   if (newPtr->size() != n)
     RuntimeException::selfThrow("DynamicalSystem::setX0Ptr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
 
-  if (isXAllocatedIn[0]) delete x0;
+  if (isAllocatedIn["x0"]) delete x0;
   x0 = newPtr;
-  isXAllocatedIn[0] = false;
+  isAllocatedIn["x0"] = false;
 }
 
 void DynamicalSystem::setX(const SiconosVector& newValue)
@@ -555,7 +651,7 @@ void DynamicalSystem::setX(const SiconosVector& newValue)
       x = new BlockVector(newValue);
     else
       x = new SimpleVector(newValue);
-    isXAllocatedIn[1] = true;
+    isAllocatedIn["x"] = true;
   }
 }
 
@@ -565,9 +661,9 @@ void DynamicalSystem::setXPtr(SiconosVector* newPtr)
   if (newPtr->size() != n)
     RuntimeException::selfThrow("DynamicalSystem::setXPtr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
 
-  if (isXAllocatedIn[1]) delete x;
+  if (isAllocatedIn["x"]) delete x;
   x = newPtr;
-  isXAllocatedIn[1] = false;
+  isAllocatedIn["x"] = false;
 }
 
 void DynamicalSystem::setXMemory(const SiconosMemory& newValue)
@@ -582,15 +678,15 @@ void DynamicalSystem::setXMemory(const SiconosMemory& newValue)
   else
   {
     xMemory = new SiconosMemory(newValue);
-    isXAllocatedIn[2] = true;
+    isAllocatedIn["xMemory"] = true;
   }
 }
 
 void DynamicalSystem::setXMemoryPtr(SiconosMemory * newPtr)
 {
-  if (isXAllocatedIn[2]) delete xMemory;
+  if (isAllocatedIn["xMemory"]) delete xMemory;
   xMemory = newPtr;
-  isXAllocatedIn[2] = false;
+  isAllocatedIn["xMemory"] = false;
 }
 
 void DynamicalSystem::setXDot(const SiconosVector& newValue)
@@ -608,7 +704,7 @@ void DynamicalSystem::setXDot(const SiconosVector& newValue)
       xDot = new BlockVector(newValue);
     else
       xDot = new SimpleVector(newValue);
-    isXAllocatedIn[3] = true;
+    isAllocatedIn["xDot"] = true;
   }
 }
 
@@ -618,9 +714,9 @@ void DynamicalSystem::setXDotPtr(SiconosVector* newPtr)
   if (newPtr->size() != n)
     RuntimeException::selfThrow("DynamicalSystem::setXDotPtr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
 
-  if (isXAllocatedIn[3]) delete xDot;
+  if (isAllocatedIn["xDot"]) delete xDot;
   xDot = newPtr;
-  isXAllocatedIn[3] = false;
+  isAllocatedIn["xDot"] = false;
 }
 
 void DynamicalSystem::setXDotMemory(const SiconosMemory& newValue)
@@ -635,15 +731,15 @@ void DynamicalSystem::setXDotMemory(const SiconosMemory& newValue)
   else
   {
     xDotMemory = new SiconosMemory(newValue);
-    isXAllocatedIn[4] = true;
+    isAllocatedIn["xDotMemory"] = true;
   }
 }
 
 void DynamicalSystem::setXDotMemoryPtr(SiconosMemory * newPtr)
 {
-  if (isXAllocatedIn[4]) delete xDotMemory;
+  if (isAllocatedIn["xDotMemory"]) delete xDotMemory;
   xDotMemory = newPtr;
-  isXAllocatedIn[4] = false;
+  isAllocatedIn["xDotMemory"] = false;
 }
 
 void DynamicalSystem::setXFree(const SiconosVector& newValue)
@@ -661,7 +757,7 @@ void DynamicalSystem::setXFree(const SiconosVector& newValue)
       xFree = new BlockVector(newValue);
     else
       xFree = new SimpleVector(newValue);
-    isXAllocatedIn[5] = true;
+    isAllocatedIn["xFree"] = true;
   }
 }
 
@@ -671,9 +767,9 @@ void DynamicalSystem::setXFreePtr(SiconosVector* newPtr)
   if (newPtr->size() != n)
     RuntimeException::selfThrow("DynamicalSystem::setXFreePtr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
 
-  if (isXAllocatedIn[5]) delete xFree;
+  if (isAllocatedIn["xFree"]) delete xFree;
   xFree = newPtr;
-  isXAllocatedIn[5] = false;
+  isAllocatedIn["xFree"] = false;
 }
 
 void DynamicalSystem::setR(const SiconosVector& newValue)
@@ -688,7 +784,7 @@ void DynamicalSystem::setR(const SiconosVector& newValue)
   else
   {
     r = new SimpleVector(newValue);
-    isRAllocatedIn[0] = true;
+    isAllocatedIn["r"] = true;
   }
 }
 
@@ -698,9 +794,9 @@ void DynamicalSystem::setRPtr(SiconosVector *newPtr)
   if (newPtr->size() != n)
     RuntimeException::selfThrow("DynamicalSystem::setRPtr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
 
-  if (isRAllocatedIn[0]) delete r;
+  if (isAllocatedIn["r"]) delete r;
   r = newPtr;
-  isRAllocatedIn[0] = false;
+  isAllocatedIn["r"] = false;
 }
 
 void DynamicalSystem::setRMemory(const SiconosMemory& newValue)
@@ -715,15 +811,15 @@ void DynamicalSystem::setRMemory(const SiconosMemory& newValue)
   else
   {
     rMemory = new SiconosMemory(newValue);
-    isRAllocatedIn[1] = true;
+    isAllocatedIn["rMemory"] = true;
   }
 }
 
 void DynamicalSystem::setRMemoryPtr(SiconosMemory * newPtr)
 {
-  if (isRAllocatedIn[1]) delete rMemory;
+  if (isAllocatedIn["rMemory"]) delete rMemory;
   rMemory = newPtr;
-  isRAllocatedIn[1] = false;
+  isAllocatedIn["rMemory"] = false;
 }
 
 void DynamicalSystem::setJacobianX(const SiconosMatrix& newValue)
@@ -738,8 +834,9 @@ void DynamicalSystem::setJacobianX(const SiconosMatrix& newValue)
   else
   {
     jacobianX = new SimpleMatrix(newValue);
-    isXAllocatedIn[6] = true;
+    isAllocatedIn["jacobianX"] = true;
   }
+  isPlugin["jacobianX"] = false;
 }
 
 void DynamicalSystem::setJacobianXPtr(SiconosMatrix *newPtr)
@@ -748,17 +845,18 @@ void DynamicalSystem::setJacobianXPtr(SiconosMatrix *newPtr)
   if (newPtr->size(0) != n || newPtr->size(1) != n)
     RuntimeException::selfThrow("DynamicalSystem::setJacobianXPtr - inconsistent sizes between jacobianX input and n - Maybe you forget to set n?");
 
-  if (isXAllocatedIn[6]) delete jacobianX;
+  if (isAllocatedIn["jacobianX"]) delete jacobianX;
   jacobianX = newPtr;
-  isXAllocatedIn[6] = false;
+  isAllocatedIn["jacobianX"] = false;
+  isPlugin["jacobianX"] = false;
 }
 
 void  DynamicalSystem::setUSize(const unsigned int& newUSize)
 {
-  if (isControlAllocatedIn[0]) delete u;
+  if (isAllocatedIn["u"]) delete u;
   uSize = newUSize;
   u = new SimpleVector(uSize);
-  isControlAllocatedIn[0] = true;
+  isAllocatedIn["u"] = true;
   u->zero();
 }
 
@@ -779,8 +877,9 @@ void DynamicalSystem::setU(const SiconosVector& newValue)
       u = new BlockVector(newValue);
     else
       u = new SimpleVector(newValue);
-    isControlAllocatedIn[0] = true;
+    isAllocatedIn["u"] = true;
   }
+  isPlugin["u"] = false;
 }
 
 void DynamicalSystem::setUPtr(SiconosVector* newPtr)
@@ -789,9 +888,10 @@ void DynamicalSystem::setUPtr(SiconosVector* newPtr)
     RuntimeException::selfThrow("DynamicalSystem::setUPtr - inconsistent sizes between u input and uSize - Maybe you forget to set uSize?");
   // check dimensions ...
 
-  if (isControlAllocatedIn[0]) delete u;
+  if (isAllocatedIn["u"]) delete u;
   u = newPtr;
-  isControlAllocatedIn[0] = false;
+  isAllocatedIn["u"] = false;
+  isPlugin["u"] = false;
 }
 
 void DynamicalSystem::setT(const SiconosMatrix& newValue)
@@ -805,8 +905,9 @@ void DynamicalSystem::setT(const SiconosMatrix& newValue)
   else
   {
     T = new SimpleMatrix(newValue);
-    isControlAllocatedIn[1] = true;
+    isAllocatedIn["T"] = true;
   }
+  isPlugin["T"] = false;
 }
 
 void DynamicalSystem::setTPtr(SiconosMatrix *newPtr)
@@ -815,9 +916,17 @@ void DynamicalSystem::setTPtr(SiconosMatrix *newPtr)
   if (uSize == 0 || newPtr->size(1) != uSize || newPtr->size(0) != n)
     RuntimeException::selfThrow("DynamicalSystem::setTPtr - inconsistent sizes between T input, uSize and/or n - Maybe you forget to set n or uSize?");
 
-  if (isControlAllocatedIn[1]) delete T;
+  if (isAllocatedIn["T"]) delete T;
   T = newPtr;
-  isControlAllocatedIn[1] = false;
+  isAllocatedIn["T"] = false;
+  isPlugin["T"] = false;
+}
+
+void DynamicalSystem::setBoundaryConditionPtr(BoundaryCondition *newBC)
+{
+  if (isAllocatedIn["BoundaryConditions"]) delete BC;
+  BC = newBC;
+  isAllocatedIn["BoundaryConditions"] = false;
 }
 
 DSInputOutput* DynamicalSystem::getDSInputOutput(const unsigned int& i)
@@ -825,13 +934,6 @@ DSInputOutput* DynamicalSystem::getDSInputOutput(const unsigned int& i)
   if (i >= dsioVector.size())
     RuntimeException::selfThrow("DS - getDSInputOutput : \'i\' is out of range");
   return dsioVector[i];
-}
-
-void DynamicalSystem::setBoundaryConditionPtr(BoundaryCondition *newBC)
-{
-  if (isBCAllocatedIn) delete BC;
-  BC = newBC;
-  isBCAllocatedIn = false;
 }
 
 void DynamicalSystem::initialize(const double& time, const unsigned int& sizeOfMemory)
@@ -845,26 +947,36 @@ void DynamicalSystem::initialize(const double& time, const unsigned int& sizeOfM
   // Initialize memory vectors
   initMemory(sizeOfMemory);
 
+  SimpleVector* param;
   // compute initial values for vectorField and jacobianX
-  if (vectorFieldPtr == NULL)
-    RuntimeException::selfThrow("vectorField() is not linked to a plugin function");
-  if (computeJacobianXPtr == NULL)
-    RuntimeException::selfThrow("computeJacobianX() is not linked to a plugin function");
+  if (isPlugin["vectorField"])
+  {
+    if (vectorFieldPtr == NULL)
+      RuntimeException::selfThrow("vectorField() is not linked to a plugin function");
+    param = parametersList0[0];
+    vectorFieldPtr(n, &time, &(*x)(0) , &(*xDot)(0), &(*param)(0));
+  }
+  else
+    xDot->zero();
 
-  SimpleVector* param = parametersList0[0];
-  vectorFieldPtr(n, &time, &(*x)(0) , &(*xDot)(0), &(*param)(0));
+  if (isPlugin["jacobianX"])
+  {
+    if (computeJacobianXPtr == NULL)
+      RuntimeException::selfThrow("computeJacobianX() is not linked to a plugin function");
+    param = parametersList0[1];
+    computeJacobianXPtr(n, &time, &(*x)(0), &(*jacobianX)(0, 0), &(*param)(0));
+  }
+  else
+    jacobianX->zero();
 
-  param = parametersList0[1];
-  computeJacobianXPtr(n, &time, &(*x)(0), &(*jacobianX)(0, 0), &(*param)(0));
-
-  // If they are plugged, initialize u and T
-  if (u != NULL && computeUPtr != NULL)
+  // If they exist and are plugged, initialize u and T, else keep old values. (Maybe better to reset to 0?)
+  if (u != NULL  && isPlugin["u"] && computeUPtr != NULL)
   {
     param = parametersList0[2];
     computeUPtr(uSize, n, &time, &(*x)(0), &(*u)(0), &(*param)(0));
   }
 
-  if (T != NULL && computeTPtr != NULL)
+  if (T != NULL && isPlugin["T"], computeTPtr != NULL)
   {
     param = parametersList0[3];
     computeTPtr(uSize, n, &(*x)(0), &(*T)(0, 0), &(*param)(0));
@@ -880,17 +992,17 @@ void DynamicalSystem::initMemory(const unsigned int& steps)
   else
   {
     stepsInMemory = steps;
-    if (isXAllocatedIn[2]) delete xMemory;
+    if (isAllocatedIn["xMemory"]) delete xMemory;
     xMemory = new SiconosMemory(steps);
-    isXAllocatedIn[2] = true;
+    isAllocatedIn["xMemory"] = true;
 
-    if (isXAllocatedIn[4]) delete xDotMemory;
+    if (isAllocatedIn["xDotMemory"]) delete xDotMemory;
     xDotMemory = new SiconosMemory(steps);
-    isXAllocatedIn[4] = true;
+    isAllocatedIn["xDotMemory"] = true;
 
-    if (isRAllocatedIn[1]) delete rMemory;
+    if (isAllocatedIn["rMemory"]) delete rMemory;
     rMemory = new SiconosMemory(steps);
-    isRAllocatedIn[1] = true;
+    isAllocatedIn["rMemory"] = true;
   }
 }
 
@@ -908,7 +1020,7 @@ void DynamicalSystem::setVectorFieldFunction(const string& pluginPath, const str
   if (xDot == NULL)
   {
     xDot = new SimpleVector(n);
-    isXAllocatedIn[3] = true ;
+    isAllocatedIn["xDot"] = true ;
   }
 
   vectorFieldPtr = NULL;
@@ -916,6 +1028,7 @@ void DynamicalSystem::setVectorFieldFunction(const string& pluginPath, const str
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   vectorFieldFunctionName = plugin + ":" + functionName;
+  isPlugin["vectorField"] = true;
 }
 
 void DynamicalSystem::setComputeJacobianXFunction(const string& pluginPath, const string& functionName)
@@ -923,7 +1036,7 @@ void DynamicalSystem::setComputeJacobianXFunction(const string& pluginPath, cons
   if (jacobianX == NULL)
   {
     jacobianX = new SimpleMatrix(n, n);
-    isXAllocatedIn[6] = true ;
+    isAllocatedIn["jacobianX"] = true ;
   }
 
   computeJacobianXPtr = NULL;
@@ -932,6 +1045,7 @@ void DynamicalSystem::setComputeJacobianXFunction(const string& pluginPath, cons
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   computeJacobianXFunctionName = plugin + ":" + functionName;
+  isPlugin["jacobianX"] = true;
 }
 
 void DynamicalSystem::setComputeUFunction(const string& pluginPath, const string& functionName)
@@ -943,7 +1057,7 @@ void DynamicalSystem::setComputeUFunction(const string& pluginPath, const string
   if (u == NULL)
   {
     u = new SimpleVector(uSize);
-    isControlAllocatedIn[0] = true;
+    isAllocatedIn["u"] = true;
     u->zero();
   }
 
@@ -953,6 +1067,7 @@ void DynamicalSystem::setComputeUFunction(const string& pluginPath, const string
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   computeUFunctionName = plugin + ":" + functionName;
+  isPlugin["u"] = true;
 }
 
 void DynamicalSystem::setComputeTFunction(const string& pluginPath, const string& functionName)
@@ -964,7 +1079,7 @@ void DynamicalSystem::setComputeTFunction(const string& pluginPath, const string
   if (T == NULL)
   {
     T = new SimpleMatrix(n, uSize);
-    isControlAllocatedIn[1] = true;
+    isAllocatedIn["T"] = true;
     T->zero();
   }
 
@@ -974,6 +1089,7 @@ void DynamicalSystem::setComputeTFunction(const string& pluginPath, const string
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   computeTFunctionName = plugin + ":" + functionName;
+  isPlugin["T"] = true;
 }
 
 void DynamicalSystem::setParametersListVector(const std::vector<SimpleVector*>& newVector)
@@ -1003,59 +1119,69 @@ void DynamicalSystem::setParametersListPtr(SimpleVector *newPtr, const unsigned 
 
 void DynamicalSystem::computeVectorField(const double& time)
 {
-  if (vectorFieldPtr == NULL)
-    RuntimeException::selfThrow("vectorField() is not linked to a plugin function");
-
-  unsigned int size = x->size();
-  SimpleVector* param = parametersList0[0];
-  vectorFieldPtr(size, &time, &(*x)(0) , &(*xDot)(0), &(*param)(0));
+  if (isPlugin["vectorField"])
+  {
+    if (vectorFieldPtr == NULL)
+      RuntimeException::selfThrow("DynamicalSystem::computeVectorField() vectorField is not linked to a plugin function");
+    SimpleVector* param = parametersList0[0];
+    vectorFieldPtr(n, &time, &(*x)(0) , &(*xDot)(0), &(*param)(0));
+  }
+  // else nothing!
 }
 
 void DynamicalSystem::computeJacobianX(const double& time)
 {
-  if (computeJacobianXPtr == NULL)
-    RuntimeException::selfThrow("computeJacobianX() is not linked to a plugin function");
-
-  unsigned int size = x->size();
-  SimpleVector* param = parametersList0[1];
-  computeJacobianXPtr(size, &time, &(*x)(0), &(*jacobianX)(0, 0), &(*param)(0));
+  if (isPlugin["jacobianX"])
+  {
+    if (computeJacobianXPtr == NULL)
+      RuntimeException::selfThrow("DynamicalSystem::computeJacobianX() is not linked to a plugin function");
+    SimpleVector* param = parametersList0[1];
+    computeJacobianXPtr(n, &time, &(*x)(0), &(*jacobianX)(0, 0), &(*param)(0));
+  }
+  // else nothing!
 }
 
 void DynamicalSystem::computeU(const double& time)
 {
-  if (computeUPtr == NULL)
-    RuntimeException::selfThrow("computeU() is not linked to a plugin function");
-  if (u == NULL)
-    RuntimeException::selfThrow("computeU(), warning: u = NULL");
+  if (isPlugin["u"])
+  {
+    if (computeUPtr == NULL)
+      RuntimeException::selfThrow("DynamicalSystem::computeU() is not linked to a plugin function");
+    if (u == NULL)
+      RuntimeException::selfThrow("DynamicalSystem::computeU(), warning: u = NULL");
 
-
-  unsigned int sizeX = x->size();
-  SimpleVector* param = parametersList0[2];
-  computeUPtr(uSize, sizeX, &time, &(*x)(0), &(*u)(0), &(*param)(0));
+    SimpleVector* param = parametersList0[2];
+    computeUPtr(uSize, n, &time, &(*x)(0), &(*u)(0), &(*param)(0));
+  }
+  // else nothing!
 }
 
 void DynamicalSystem::computeU(const double& time, SiconosVector* xx)
 {
-  if (computeUPtr == NULL)
-    RuntimeException::selfThrow("computeU() is not linked to a plugin function");
-  if (u == NULL)
-    RuntimeException::selfThrow("computeU(), warning: u = NULL");
-
-  unsigned int sizeX = xx->size();
-  SimpleVector* param = parametersList0[2];
-  computeUPtr(uSize, sizeX, &time, &(*xx)(0), &(*u)(0), &(*param)(0));
+  if (isPlugin["u"])
+  {
+    if (computeUPtr == NULL)
+      RuntimeException::selfThrow("DynamicalSystem::computeU() is not linked to a plugin function");
+    if (u == NULL)
+      RuntimeException::selfThrow("DynamicalSystem::computeU(), warning: u = NULL");
+    SimpleVector* param = parametersList0[2];
+    computeUPtr(uSize, n, &time, &(*xx)(0), &(*u)(0), &(*param)(0));
+  }
+  // else nothing!
 }
 
 void DynamicalSystem::computeT()
 {
-  if (computeTPtr == NULL)
-    RuntimeException::selfThrow("computeT() is not linked to a plugin function");
-  if (T == NULL)
-    RuntimeException::selfThrow("computeT(), warning: T = NULL");
-
-  unsigned int sizeX = x->size();
-  SimpleVector* param = parametersList0[3];
-  computeTPtr(uSize, sizeX, &(*x)(0), &(*T)(0, 0), &(*param)(0));
+  if (isPlugin["T"])
+  {
+    if (computeTPtr == NULL)
+      RuntimeException::selfThrow("DynamicalSystem::computeT() is not linked to a plugin function");
+    if (T == NULL)
+      RuntimeException::selfThrow("DynamicalSystem::computeT(), warning: T = NULL");
+    SimpleVector* param = parametersList0[3];
+    computeTPtr(uSize, n, &(*x)(0), &(*T)(0, 0), &(*param)(0));
+  }
+  // else nothing!
 }
 
 // ===== XML MANAGEMENT FUNCTIONS =====
@@ -1071,9 +1197,9 @@ void DynamicalSystem::saveDSToXML()
     dsxml->setN(n);
     dsxml->setVectorFieldPlugin(vectorFieldFunctionName);
     if (computeJacobianXFunctionName != "")
-      dsxml->setComputeJacobianXPlugin(computeJacobianXFunctionName);
+      dsxml->setJacobianXPlugin(computeJacobianXFunctionName);
     else
-      dsxml->setComputeJacobianXPlugin("DefaultPlugin:computeJacobianX");
+      dsxml->setJacobianXPlugin("DefaultPlugin:jacobianX");
   }
   else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DynamicalSystemXML object doesn't exists");
 }
@@ -1088,13 +1214,11 @@ void DynamicalSystem::saveDSDataToXML()
   if (dsxml != NULL)
   {
     dsxml->setId(id);
-    dsxml->setX0(x0);
-    dsxml->setX(x);
-    dsxml->setXMemory(xMemory);
-    dsxml->setXDot(xDot);
-    dsxml->setXDotMemory(xDotMemory);
+    dsxml->setX0(*x0);
+    dsxml->setX(*x);
+    dsxml->setXMemory(*xMemory);
+    dsxml->setXDotMemory(*xDotMemory);
     dsxml->setStepsInMemory(stepsInMemory);
-    dsxml->setR(r);
   }
   else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DynamicalSystemXML object doesn't exists");
 }
@@ -1162,8 +1286,10 @@ void DynamicalSystem::display() const
   cout << "- T " << endl;
   if (T != NULL) T->display();
   else cout << "-> NULL" << endl;
-  //  cout<<"- VectorField plugin: "<<vectorFieldFunctionName <<endl;
-  //  cout<<"- JacobianX plugin: "<<computeJacobianXFunctionName <<endl;
+  map<string, bool>::const_iterator it;
+  cout << "Plug-in state (0: unplugged, ie constant, 1: plugged):" << endl;
+  for (it = isPlugin.begin(); it != isPlugin.end(); ++it)
+    cout << "Object " << it->first << " " << it->second << endl;
   cout << " ============================================" << endl;
 }
 

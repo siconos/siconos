@@ -23,36 +23,38 @@ using namespace std;
 
 // Default constructor
 LinearDS::LinearDS():
-  DynamicalSystem(NULL), A(NULL), b(NULL), bFunctionName("none"), computeBPtr(NULL), isBAllocatedIn(false)
+  DynamicalSystem(NULL), A(NULL), b(NULL), bFunctionName("none"), computeBPtr(NULL)
 {
   DSType = LDS;
+  isAllocatedIn["b"] = false;
+  isPlugin["b"] = false;
 }
 
 // From xml file (newNsds is optional)
 LinearDS::LinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
-  DynamicalSystem(dsXML, newNsds), A(NULL), b(NULL), bFunctionName("none"), computeBPtr(NULL), isBAllocatedIn(false)
+  DynamicalSystem(dsXML, newNsds), A(NULL), b(NULL), bFunctionName("none"), computeBPtr(NULL)
 {
   if (dsXML != NULL)
   {
     DSType = LDS;
-
     // pointer to xml
     LinearDSXML * ldsxml = (static_cast <LinearDSXML*>(dsxml));
 
     // --- vector and matrix members memory allocation ---
     // (only those specific to LinearDS) and values loading
     string plugin;
-    isLDSPlugin.resize(2, false);
 
     // Check if vectorField is not given as a plug-in in xml input file.
-    if (ldsxml->hasVectorFieldPlugin())
+    if (ldsxml->hasVectorField())
       RuntimeException::selfThrow("LinearDS - xml constructor, you give a vectorField plug-in for a LinearDS -> set rather A (or jacobianX) and b plug-in.");
+
+    isPlugin["vectorField"] = false;
 
     // A = jacobianX
     A = jacobianX; // jacobianX is allocated during DynamicalSystem constructor call
 
     // reject case were jacobianX plug-in is given
-    if (ldsxml->hasComputeJacobianXPlugin())
+    if (ldsxml->hasJacobianX())
       RuntimeException::selfThrow("LinearDS - xml constructor, you give a plug-in for jacobianX, set rather A.");
 
     // set A or A plug-in (ie jacobianX) - A is a required input in xml (xml error if node not found)
@@ -64,12 +66,16 @@ LinearDS::LinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds
         setComputeJacobianXFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
       }
       else
+      {
         *A = ldsxml->getA();
+        isPlugin["jacobianX"] = false;
+      }
     }
     else
       RuntimeException::selfThrow("LinearDS - xml constructor, no input (plug-in or matrix) find for A.");
 
     // b - Optional parameter
+    isAllocatedIn["b"] = false;
     if (ldsxml->hasB())
     {
       if (ldsxml->isBPlugin())
@@ -80,48 +86,80 @@ LinearDS::LinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds
       else
       {
         b = new SimpleVector(ldsxml->getBVector());
-        isBAllocatedIn = true;
+        isAllocatedIn["b"] = true;
+        isPlugin["b"] = false;
       }
     }
   }
   else
     RuntimeException::selfThrow("LinearDS - xml constructor, xml file = NULL");
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 // For the following constructors, only A is required. If necessary b or u can be defined thanks
 // to set or setCompute, depending on they are plugins or not.
 
-// From a minimum set of data, A from a plugin
+// From a minimum set of data, A and b connected to a plug-in
 LinearDS::LinearDS(const int& newNumber, const unsigned int& newN, const SiconosVector& newX0,
                    const string& APlugin, const string& bPlugin):
   DynamicalSystem(newNumber, newN, newX0),
-  A(NULL), b(NULL), bFunctionName("none"), computeBPtr(NULL), isBAllocatedIn(false)
+  A(NULL), b(NULL), bFunctionName("none"), computeBPtr(NULL)
 {
   DSType = LDS;
-  isLDSPlugin.resize(2, false);
-
+  isAllocatedIn["b"] = false;
+  isPlugin["vectorField"] = false;
   A = jacobianX; // jacobianX is allocated during DynamicalSystem constructor call
   setComputeJacobianXFunction(cShared.getPluginName(APlugin), cShared.getPluginFunctionName(APlugin));
   setComputeBFunction(cShared.getPluginName(bPlugin), cShared.getPluginFunctionName(bPlugin));
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 // From a minimum set of data, A from a given matrix
 LinearDS::LinearDS(const int& newNumber, const SiconosVector& newX0, const SiconosMatrix& newA):
   DynamicalSystem(newNumber, newA.size(0), newX0),
-  A(NULL), b(NULL), bFunctionName("none"), computeBPtr(NULL), isBAllocatedIn(false)
+  A(NULL), b(NULL), bFunctionName("none"), computeBPtr(NULL)
 {
   if (newA.size(0) != n || newA.size(1) != n)
-    RuntimeException::selfThrow("LinearDS - constructor(3): inconsistent dimensions with problem size for input matrix A");
+    RuntimeException::selfThrow("LinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
 
+  isAllocatedIn["b"] = false;
+  isPlugin["b"] = false;
+  isPlugin["vectorField"] = false;
+  isPlugin["jacobianX"] = false; // A
   DSType = LDS;
   A = jacobianX; // jacobianX is allocated during DynamicalSystem constructor call
   *A = newA;
-  isLDSPlugin.resize(2, false);
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+}
+
+// From a minimum set of data, A from a given matrix
+LinearDS::LinearDS(const int& newNumber, const SiconosVector& newX0, const SiconosMatrix& newA, const SiconosVector& newB):
+  DynamicalSystem(newNumber, newA.size(0), newX0),
+  A(NULL), b(NULL), bFunctionName("none"), computeBPtr(NULL)
+{
+  if (newA.size(0) != n || newA.size(1) != n)
+    RuntimeException::selfThrow("LinearDS - constructor(number,x0,A,b): inconsistent dimensions with problem size for input matrix A");
+  if (newB.size() != n)
+    RuntimeException::selfThrow("LinearDS - constructor(number,x0,A,b): inconsistent dimensions with problem size for input vector b.");
+
+  isPlugin["vectorField"] = false;
+  isPlugin["jacobianX"] = false; // A
+  DSType = LDS;
+  A = jacobianX; // jacobianX is allocated during DynamicalSystem constructor call
+  *A = newA;
+  b = new SimpleVector(newB);
+  isAllocatedIn["b"] = true;
+  isPlugin["b"] = false;
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 // Copy constructor
 LinearDS::LinearDS(const LinearDS & lds):
-  DynamicalSystem(lds), A(NULL), b(NULL), bFunctionName("none"), computeBPtr(NULL), isBAllocatedIn(false)
+  DynamicalSystem(lds), A(NULL), b(NULL), bFunctionName("none"), computeBPtr(NULL)
 {
   DSType = LDS;
 
@@ -131,31 +169,35 @@ LinearDS::LinearDS(const LinearDS & lds):
   if (lds.getBPtr() != NULL)
   {
     b = new SimpleVector(lds.getB());
-    isBAllocatedIn = true;
+    isAllocatedIn["b"] = true;
   }
+  else isAllocatedIn["b"] = false;
 
-  isLDSPlugin = lds.getIsLDSPlugin();
+  // note that isPlugin has been copied during DynamicalSystem constructor call.
+  isPlugin["vectorField"] = false;
   string pluginPath, functionName;
-  if (isLDSPlugin[0])
+  if (isPlugin["jacobianX"])
   {
     string AFunctionName = lds.getComputeJacobianXFunctionName();
     functionName = cShared.getPluginFunctionName(AFunctionName);
     pluginPath  = cShared.getPluginName(AFunctionName);
     setComputeJacobianXFunction(pluginPath, functionName);
   }
-  if (isLDSPlugin[1])
+  if (isPlugin["b"])
   {
     bFunctionName = lds.getBFunctionName();
     functionName = cShared.getPluginFunctionName(bFunctionName);
     pluginPath  = cShared.getPluginName(bFunctionName);
     setComputeBFunction(pluginPath, functionName);
   }
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 LinearDS::LinearDS(const DynamicalSystem & newDS):
-  DynamicalSystem(newDS), A(NULL), b(NULL), bFunctionName("none"), computeBPtr(NULL), isBAllocatedIn(false)
+  DynamicalSystem(newDS), A(NULL), b(NULL), bFunctionName("none"), computeBPtr(NULL)
 {
-  if (newDS.getType() != LDS)
+  if (newDS.getType() != LDS || newDS.getType() != LITIDS)
     RuntimeException::selfThrow("LinearDS - copy constructor: try to copy into a LinearDS a DS of type: " + newDS.getType());
 
   DSType = LDS;
@@ -169,35 +211,68 @@ LinearDS::LinearDS(const DynamicalSystem & newDS):
   if (lds->getBPtr() != NULL)
   {
     b = new SimpleVector(lds->getB());
-    isBAllocatedIn = true;
+    isAllocatedIn["b"] = true;
   }
+  else isAllocatedIn["b"] = false;
 
-  isLDSPlugin = lds->getIsLDSPlugin();
   string pluginPath, functionName;
-  if (isLDSPlugin[0])
+  // note that isPlugin has been copied during DynamicalSystem constructor call.
+  isPlugin["vectorField"] = false;
+  if (isPlugin["jacobianX"])
   {
     string AFunctionName = lds->getComputeJacobianXFunctionName();
     functionName = cShared.getPluginFunctionName(AFunctionName);
     pluginPath  = cShared.getPluginName(AFunctionName);
     setComputeJacobianXFunction(pluginPath, functionName);
   }
-  if (isLDSPlugin[1])
+  if (isPlugin["b"])
   {
     bFunctionName = lds->getBFunctionName();
     functionName = cShared.getPluginFunctionName(bFunctionName);
     pluginPath  = cShared.getPluginName(bFunctionName);
     setComputeBFunction(pluginPath, functionName);
   }
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 LinearDS::~LinearDS()
 {
   A = NULL ;
-  if (isBAllocatedIn)
+  if (isAllocatedIn["b"]) delete b;
+  b = NULL;
+}
+
+bool LinearDS::checkDynamicalSystem()
+{
+  bool output = true;
+  // n
+  if (n == 0)
   {
-    delete b;
-    b = NULL;
+    RuntimeException::selfThrow("LinearDS::checkDynamicalSystem - number of degrees of freedom is equal to 0.");
+    output = false;
   }
+  // x0 != NULL
+  if (x0 == NULL)
+  {
+    RuntimeException::selfThrow("LinearDS::checkDynamicalSystem - x0 not set.");
+    output = false;
+  }
+
+  // A
+  if (A == NULL)
+  {
+    RuntimeException::selfThrow("LinearDS::checkDynamicalSystem - A not set.");
+    output = false;
+  }
+
+  // if vectorField not constant (plugged) => jacobianX required
+  if (isPlugin["vectorField"])
+  {
+    RuntimeException::selfThrow("LinearDS::checkDynamicalSystem - vectorField is plugged and should not be.");
+    output = false;
+  }
+  return output;
 }
 
 void LinearDS::initialize(const double& time, const unsigned int& sizeOfMemory)
@@ -210,78 +285,34 @@ void LinearDS::initialize(const double& time, const unsigned int& sizeOfMemory)
   // Initialize memory vectors
   initMemory(sizeOfMemory);
 
-  SimpleVector* param;
-  // compute A if it is a plug-in
-  if (isLDSPlugin[0])
-  {
-    param = parametersList0[1];
-    computeJacobianXPtr(n, &time, &(*x)(0), &(*jacobianX)(0, 0), &(*param)(0));
-  }
+  computeVectorField(time); // If necessary, this will also compute A, b, u and T
 
-  // compute xDot = vectorField
-  *xDot = *A * *x;
-
-  if (b != NULL) // if b is given
-  {
-    if (isLDSPlugin[1] && computeBPtr == NULL) // if a plug-in is given for b
-    {
-      parametersList0[0]; // Since vectorField plug-in is not used in LinearDS, we use parameter(0) which corresponds to vectorField, for b.
-      computeBPtr(n, &time, &(*b)(0), &(*param)(0));
-    }
-    *xDot += *b;
-  }
-
-  // If they are plugged, initialize u and T, and then complete xDot
-  if (u != NULL && T != NULL)
-  {
-    if (isPlugin[0] && computeUPtr != NULL) // if u is a plug-in function
-    {
-      param = parametersList0[2];
-      computeUPtr(uSize, n, &time, &(*x)(0), &(*u)(0), &(*param)(0));
-    }
-    if (isPlugin[1] && computeTPtr != NULL) // if T is a plug-in function
-    {
-      param = parametersList0[3];
-      computeTPtr(uSize, n, &(*x)(0), &(*T)(0, 0), &(*param)(0));
-    }
-
-    *xDot += *T ** u;
-  }
-  else if (u != NULL && T == NULL)
-  {
-    if (isPlugin[0] && computeUPtr != NULL) // if u is a plug-in function
-    {
-      param = parametersList0[2];
-      computeUPtr(uSize, n, &time, &(*x)(0), &(*u)(0), &(*param)(0));
-    }
-    *xDot += * u;
-  }
 }
 
 void LinearDS::setA(const SiconosMatrix& newValue)
 {
   setJacobianX(newValue);
-  isLDSPlugin[0] = false;
+  isPlugin["jacobianX"] = false;
 }
 
 void LinearDS::setAPtr(SiconosMatrix *newPtr)
 {
   setJacobianXPtr(newPtr);
-  isLDSPlugin[0] = false;
+  isPlugin["jacobianX"] = false;
 }
 
 void LinearDS::setJacobianX(const SiconosMatrix& newValue)
 {
   DynamicalSystem::setJacobianX(newValue);
   A = jacobianX;
-  isLDSPlugin[0] = false;
+  isPlugin["jacobianX"] = false;
 }
 
 void LinearDS::setJacobianXPtr(SiconosMatrix *newPtr)
 {
   DynamicalSystem::setJacobianXPtr(newPtr);
   A = jacobianX;
-  isLDSPlugin[0] = false;
+  isPlugin["jacobianX"] = false;
 }
 
 void LinearDS::setB(const SimpleVector& newValue)
@@ -292,18 +323,18 @@ void LinearDS::setB(const SimpleVector& newValue)
   if (b == NULL)
   {
     b = new SimpleVector(n);
-    isBAllocatedIn = true;
+    isAllocatedIn["b"] = true;
   }
   *b = newValue;
-  isLDSPlugin[1] = false;
+  isPlugin["b"] = false;
 }
 
 void LinearDS::setBPtr(SimpleVector *newPtr)
 {
-  if (isBAllocatedIn) delete b;
+  if (isAllocatedIn["b"]) delete b;
   b = newPtr;
-  isBAllocatedIn = false;
-  isLDSPlugin[1] = false;
+  isAllocatedIn["b"] = false;
+  isPlugin["b"] = false;
 }
 
 void LinearDS::setVectorFieldFunction(const string& pluginPath, const string& functionName)
@@ -315,7 +346,7 @@ void LinearDS::setComputeJacobianXFunction(const string& pluginPath, const strin
 {
   DynamicalSystem::setComputeJacobianXFunction(pluginPath, functionName);
   A = jacobianX;
-  isLDSPlugin[0] = true;
+  isPlugin["jacobianX"] = true;
 }
 
 void LinearDS::setComputeAFunction(const string& pluginPath, const string& functionName)
@@ -328,20 +359,21 @@ void LinearDS::setComputeBFunction(const string& pluginPath, const string& funct
   if (b == NULL)
   {
     b = new SimpleVector(n);
-    isBAllocatedIn = true ;
+    isAllocatedIn["b"] = true;
   }
   cShared.setFunction(&computeBPtr, pluginPath, functionName);
 
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   bFunctionName = plugin + ":" + functionName;
-  isLDSPlugin[1] = true;
+  isPlugin["b"] = true;
 }
 
 void LinearDS::computeVectorField(const double& time)
 {
   // compute A=jacobianX
-  computeJacobianX(time);
+  if (isPlugin["jacobianX"])
+    computeJacobianX(time);
 
   // compute xDot = vectorField
   *xDot = *A * *x;
@@ -349,22 +381,23 @@ void LinearDS::computeVectorField(const double& time)
   // compute and add b if required
   if (b != NULL)
   {
-    computeB(time);
+    if (isPlugin["b"])
+      computeB(time);
     *xDot += *b;
   }
 
   // compute and add Tu if required
   if (u != NULL && T != NULL)
   {
-    if (isPlugin[0]) // if u is a plug-in function
+    if (isPlugin["u"]) // if u is a plug-in function
       computeU(time);
-    if (isPlugin[1]) // if T is a plug-in function
+    if (isPlugin["T"]) // if T is a plug-in function
       computeT();
     *xDot += *T ** u;
   }
   else if (u != NULL && T == NULL)
   {
-    if (isPlugin[0]) // if u is a plug-in function
+    if (isPlugin["u"]) // if u is a plug-in function
       computeU(time);
     *xDot += * u;
   }
@@ -377,12 +410,14 @@ void LinearDS::computeA(const double& time)
 
 void LinearDS::computeB(const double& time)
 {
-  if (computeBPtr == NULL)
-    RuntimeException::selfThrow("computeB() is not linked to a plugin function");
-
-  unsigned int size = b->size();
-  SimpleVector* param = parametersList0[0]; // Since vectorField plug-in is not used in LinearDS, we use parameter(0) which corresponds to vectorField, for b.
-  computeBPtr(size, &time, &(*b)(0), &(*param)(0));
+  if (isPlugin["b"])
+  {
+    if (computeBPtr == NULL)
+      RuntimeException::selfThrow("computeB() is not linked to a plugin function");
+    SimpleVector* param = parametersList0[0]; // Since vectorField plug-in is not used in LinearDS, we use parameter(0) which corresponds to vectorField, for b.
+    computeBPtr(n, &time, &(*b)(0), &(*param)(0));
+  }
+  // else nothing
 }
 
 void LinearDS::display() const
@@ -411,7 +446,7 @@ void LinearDS::saveDSToXML()
     // b
     if (!(static_cast <LinearDSXML*>(dsxml))->isBPlugin())
     {
-      static_cast<LinearDSXML*>(dsxml)->setBVector(*b);
+      static_cast<LinearDSXML*>(dsxml)->setB(*b);
     }
   }
   else RuntimeException::selfThrow("LinearDS::saveDSToXML - The DynamicalSystemXML object doesn't exists");

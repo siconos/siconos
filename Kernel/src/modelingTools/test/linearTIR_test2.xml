@@ -2,8 +2,7 @@
 	<NSDS bvp='false'>
 		<!-- DSs defined in the problem -->
 		<DS_Definition>		
-			<LagrangianLinearTIDS number='3'>
-				<Id> Ball </Id>				
+			<LagrangianLinearTIDS number='3' Id="Ball">
 	 			<StepsInMemory>1</StepsInMemory>				
 				<q0 vectorSize='3'>
 					1.0 0.0 0.0
@@ -19,8 +18,7 @@
 				</M>			
 				<ndof>3</ndof>								
 			</LagrangianLinearTIDS>
-			<LagrangianLinearTIDS number='4'>
-				<Id> Ball </Id>				
+			<LagrangianLinearTIDS number='4' Id="Ball2">
 	 			<StepsInMemory>1</StepsInMemory>				
 				<q0 vectorSize='3'>
 					1.0 0.0 0.0

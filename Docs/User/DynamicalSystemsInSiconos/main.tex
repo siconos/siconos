@@ -47,14 +47,14 @@ This is the top class for dynamical systems. All other systems classes derived f
 
 A general dynamical systems is described by the following set of $n$ equations, completed with initial conditions:
 \begin{eqnarray}
-  \dot x &=& f(x,t) + T(x) u(x, \dot x, t) + r \\
+  \dot x &=& f(x,t) + T(x) u(x, t) + r \\
   x(t_0)&=&x_0 
 \end{eqnarray}
 
 \begin{itemize}
 \item $x$: state of the system - Vector of size $n$.
 \item $f(x,t)$: vector field - Vector of size $n$.
-\item $u(x, \dot x, t)$: control term - Vector of size $uSize$.
+\item $u(x, t)$: control term - Vector of size $uSize$.
 \item $T(x)$: $n\times uSize$ matrix, related to control term.
 \item $r$: input due to non-smooth behavior - Vector of size $n$.
 \end{itemize}
@@ -89,6 +89,27 @@ Links with vectorField and its Jacobian are:
 \begin{eqnarray}
   f(x,t) &=& A(t)x(t)+b(t) \\
   jacobianX&=&\nabla_x f(x,t) = A(t) 
+\end{eqnarray}
+
+% LINEAR TIDS
+\section{First order linear dynamical systems $\rightarrow$ class \it{LinearDS}}
+
+Derived from DynamicalSystem, described by the set of $n$ equations and initial conditions: 
+\begin{eqnarray}
+  \dot x &=& Ax(t)+Tu(t)+b+r \\
+  x(t_0)&=&x_0 
+\end{eqnarray}
+With:
+\begin{itemize}
+\item $A(t)$: $n\times n$ constant matrix
+\item $b(t)$: constant vector of size $n$
+\end{itemize}
+Other variables are those of DynamicalSystem class. \\
+
+Links with vectorField and its Jacobian are: 
+\begin{eqnarray}
+  f(x,t) &=& Ax(t)+b \\
+  jacobianX&=&\nabla_x f(x,t) = A
 \end{eqnarray}
 
 % LAGRANGIANDS

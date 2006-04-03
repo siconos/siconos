@@ -34,8 +34,7 @@
 	
 		<!-- DSs defined in the problem -->
 		<DS_Definition>		
-			<LagrangianLinearTIDS number='1'>
-				<Id> Ball </Id>				
+			<LagrangianLinearTIDS number='1' Id="Ball">
 				<StepsInMemory>1</StepsInMemory>				
 				<q0 vectorSize='3'>
 					0.4 0.2 0.0

@@ -196,7 +196,7 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(NonSmoothDynamica
             }
             else if (type == LTIDS)
             {
-              node = xmlNewChild(dsDefinitionNode, NULL, (xmlChar*)LAGRANGIAN_TIME_INVARIANTDS_TAG.c_str(), NULL);
+              node = xmlNewChild(dsDefinitionNode, NULL, (xmlChar*)LAGRANGIAN_TIDS_TAG.c_str(), NULL);
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               dsxml = new LagrangianLinearTIDSXML();
 
@@ -210,8 +210,7 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(NonSmoothDynamica
             }
             else if (type == LDS)
             {
-              node = xmlNewChild(dsDefinitionNode, NULL, (xmlChar*)LINEAR_SYSTEMDS_TAG.c_str(), NULL);
-              //xmlNewProp( node, (xmlChar*)NSDS_TYPE.c_str(), (xmlChar*)NSDS_LINEARSYSTEM.c_str() );
+              node = xmlNewChild(dsDefinitionNode, NULL, (xmlChar*)LINEAR_DS_TAG.c_str(), NULL);
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               dsxml = new LinearDSXML();
 
@@ -226,7 +225,7 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(NonSmoothDynamica
             }
             else if (type == NLDS)
             {
-              node = xmlNewChild(dsDefinitionNode, NULL, (xmlChar*)NON_LINEAR_SYSTEMDS_TAG.c_str(), NULL);
+              node = xmlNewChild(dsDefinitionNode, NULL, (xmlChar*)NON_LINEAR_DS_TAG.c_str(), NULL);
               xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
               dsxml = new DynamicalSystemXML();
 
@@ -449,19 +448,19 @@ void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNode * rootDSNode)
         DSXMLMap[number] = dsxml;
         dsxml->setDSInputOutputXML(getDSInputOutputXMLRelatingToDS(number));
       }
-      else if (type == LAGRANGIAN_TIME_INVARIANTDS_TAG)
+      else if (type == LAGRANGIAN_TIDS_TAG)
       {
         dsxml = new LagrangianLinearTIDSXML((xmlNode *)node, isbvp);
         DSXMLMap[number] = dsxml;
         dsxml->setDSInputOutputXML(getDSInputOutputXMLRelatingToDS(number));
       }
-      else if (type == LINEAR_SYSTEMDS_TAG)
+      else if (type == LINEAR_DS_TAG)
       {
         dsxml = new LinearDSXML((xmlNode *)node, isbvp);
         DSXMLMap[number] = dsxml;
         dsxml->setDSInputOutputXML(getDSInputOutputXMLRelatingToDS(number));
       }
-      else if (type == NON_LINEAR_SYSTEMDS_TAG)
+      else if (type == NON_LINEAR_DS_TAG)
       {
         dsxml = new DynamicalSystemXML((xmlNode *)node, isbvp);
         DSXMLMap[number] = dsxml;

@@ -132,8 +132,6 @@ int pfc_2D_solver(double *vec , double *q , int *n , method *pt , double *z , do
 
   t2 = clock();
 
-  printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
-
   return info;
 
 }

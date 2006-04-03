@@ -57,506 +57,307 @@ const std::string DS_XDOTMEMORY = "xDotMemory";
 const std::string DS_RMEMORY = "RMemory";
 const std::string DS_STEPSINMEMORY = "StepsInMemory";
 const std::string DS_VECTORFIELD = "vectorField";
-const std::string DS_COMPUTEJACOBIANX = "computeJacobianX";
+const std::string DS_JACOBIANX = "jacobianX";
 const std::string DS_MATRIXPLUGIN = "matrixPlugin";
 const std::string DS_VECTORPLUGIN = "vectorPlugin";
 
 class DynamicalSystemXML
 {
+
+protected:
+
+  xmlNodePtr rootDynamicalSystemXMLNode;/**< root node  */
+  xmlNodePtr parentNode; /**< node that owns root node (NonSmoothDynamicalSystemNode)  */
+  xmlNodePtr nNode;  /**< nimber of degrees of freedom  */
+  xmlNodePtr x0Node;/**< initial state */
+  xmlNodePtr xNode;/**<  state (usefull is start from recovery xml-file*/
+  xmlNodePtr stepsInMemoryNode; /**< size of memory */
+  xmlNodePtr xMemoryNode;/**<  memory vector for x*/
+  xmlNodePtr xDotMemoryNode;/**< memory vector for xDot (usefull?) */
+  xmlNodePtr rMemoryNode;/**< memory vector for r */
+  xmlNodePtr vectorFieldNode;/**< f(x,t) */
+  xmlNodePtr jacobianXNode;/**< jacobian of f according to x */
+  xmlNodePtr boundaryConditionNode;/**< boundary conditions */
+  xmlNodePtr dsInputOutputNode;/**< ds input-output */
+  xmlNodePtr uSizeNode;/**< size of control vector */
+  xmlNodePtr uNode;/**< control term */
+  xmlNodePtr TNode;/**< coefficient of control term */
+
+  BoundaryConditionXML * boundaryConditionXML;/**< Boundary conditions obxml object */
+  SiconosMemoryXML * xMemoryXML;/** <xml object for xMemory*/
+  SiconosMemoryXML * xDotMemoryXML;/**<xml object for xDotMemory*/
+  SiconosMemoryXML * rMemoryXML;/**<xml object for rMemory*/
+  std::map<int, DSInputOutputXML*> dsInputOutputXMLMap;/**< list of dsinput-output, with an int as a key identifier*/
+  std::vector<int> definedDSInputOutputNumbers;/**<  useless at the time */
+
+  /** \fn void loadBoundaryConditionXML(xmlNodePtr rootBoundaryConditionNode)
+   *   \brief Build BoundaryConditionXML object from a DOM tree describing BoundaryCondition
+   *   \param rootBoundaryConditionXMLNode : the BoundaryCondition DOM tree
+   *   \exception XMLException : if the type of the BoundaryCondition given in the DOM tree does not exist
+   */
+  void loadBoundaryConditionXML(xmlNodePtr rootBoundaryConditionNode);
+
 public:
 
+  /** \fn DynamicalSystemXML()
+   *   \brief Default constructor */
   DynamicalSystemXML();
 
+  /** \fn ~DynamicalSystemXML()
+   *   \brief Destructor */
   virtual ~DynamicalSystemXML();
 
-  /** \fn DynamicalSystemXML(xmlNode * DynamicalSystemNode)
-   *   \brief Build a DynamicalSystemXML object from a DOM tree describing a DynamicalSystem
-   *   \param xmlNode * DynamicalSystemNode : the DynamicalSystem DOM tree
-   *   \param bool isBVP : if NonSmoothDynamicalSystem is IBP DynamicalSystem have boundary condition
+  /** \fn DynamicalSystemXML(xmlNodePtr DynamicalSystemNode, const bool&)
+   *   \brief Build a DynamicalSystemXML object from the DynamicalSystem node of the xml DOMtree
+   *   \param an xmlNodePtr DynamicalSystemNode
+   *   \param bool isBVP : if true, NonSmoothDynamicalSystem is a Boundary value problem
    */
-  DynamicalSystemXML(xmlNode * DynamicalSystemNode, const bool&);
+  DynamicalSystemXML(xmlNodePtr DynamicalSystemNode, const bool&);
 
-  /** \fn int getNumber()
-   *   \brief Return the number of the DynamicalSystemXML
-   *   \return The integer number of the DynamicalSystemXML
+  /** \fn const int getNumber() const
+   *   \brief Return the number of the DynamicalSystem
+   *   \return an integer
    */
-  inline int getNumber()
+  inline const int getNumber() const
   {
-    return SiconosDOMTreeTools::getIntegerAttributeValue(this->rootDynamicalSystemXMLNode, NUMBER_ATTRIBUTE);
+    return SiconosDOMTreeTools::getIntegerAttributeValue(rootDynamicalSystemXMLNode, NUMBER_ATTRIBUTE);
   }
 
-
-  /** \fn int getType()
-   *   \brief Return the type of the DynamicalSystemXML
-   *   \return The string type of the DynamicalSystemXML
+  /** \fn const string getType() const
+   *   \brief Return the type of the DynamicalSystem
+   *   \return a string
    */
-  inline std::string getType()
+  inline const std::string getType() const
   {
-    //return SiconosDOMTreeTools::getStringAttributeValue(this->rootDynamicalSystemXMLNode, TYPE_ATTRIBUTE);
-    std::string res((char*)this->rootDynamicalSystemXMLNode->name);
+    std::string res((char*)rootDynamicalSystemXMLNode->name);
     return res;
   }
 
-
-  /** \fn string getId()
-   *   \brief Return the id of the DynamicalSystemXML
-   *   \return The string id of the DynamicalSystemXML
+  /** \fn const std::string getId() const
+   *   \brief Return the id of the DynamicalSystem
+   *   \return The string id of the DynamicalSystem
    */
-  inline std::string getId()
+  inline const std::string getId() const
   {
-    return  SiconosDOMTreeTools::getStringContentValue(this->idNode);
+    return SiconosDOMTreeTools::getStringAttributeValue(rootDynamicalSystemXMLNode, "Id");
   }
 
-  /** \fn void setId(string s)
-   *   \brief allows to save the id of the DynamicalSystemXML
-   *   \param Integer : The string s of the DynamicalSystemXML
+  /** \fn bool hasId() const
+   *  \brief return true if id is given
+   *  \return a bool
    */
-  inline void setId(std::string s)
+  inline bool hasId() const
   {
-    if (this->hasId() == false)
-    {
-      this->idNode = SiconosDOMTreeTools::createStringNode(this->rootDynamicalSystemXMLNode, ID_ATTRIBUTE, s);
-    }
-    else SiconosDOMTreeTools::setStringContentValue(this->idNode, s);
+    return (xmlHasProp(rootDynamicalSystemXMLNode, (xmlChar*)"Id"));
   }
 
-  /** \fn int getN()
-   *   \brief Return the n of the DynamicalSystemXML
-   *   \return The integer n of the DynamicalSystemXML
+  /** \fn   void setId(const std::string& s);
+   *   \brief to save the id of the DynamicalSystem
+   *   \param a string
    */
-  inline int getN()
+  inline void setId(const std::string& s)
   {
-    return  SiconosDOMTreeTools::getIntegerContentValue(this->nNode);
+    SiconosDOMTreeTools::setStringAttributeValue(rootDynamicalSystemXMLNode, "Id", s);
   }
 
-  /** \fn void setN(int n)
-   *   \brief allows to save the n of the DynamicalSystemXML
-   *   \param Integer : The integer n of the DynamicalSystemXML
+  /** \fn const unsigned int getN() const
+   *   \brief Return the number of degrees of freedom of the DynamicalSystem
+   *   \return an unsigned integer
    */
-  inline void setN(int n)
+  inline const unsigned int getN() const
   {
-    if (this->hasN() == false)
-    {
-      this->nNode = SiconosDOMTreeTools::createIntegerNode(this->rootDynamicalSystemXMLNode, DS_N, n);
-    }
-    else SiconosDOMTreeTools::setIntegerContentValue(this->nNode, n);
+    return  SiconosDOMTreeTools::getIntegerContentValue(nNode);
   }
 
-
-  /** \fn SimpleVector getX0()
-   *   \brief Returns the X0 vector of the DynamicalSystemXML
-   *   \return SimpleVector : X0 vector of the DynamicalSystemXML
+  /** \fn void setN(const unsigned int& n)
+   *   \brief to save the number of degrees of freedom of the DynamicalSystem
+   *   \param an unsigned int
    */
-  inline /*SiconosVector*/SimpleVector getX0()
+  inline void setN(const unsigned int& n)
   {
-    return  SiconosDOMTreeTools::getSiconosVectorValue(this->x0Node);
+    if (!hasN())
+      nNode = SiconosDOMTreeTools::createIntegerNode(rootDynamicalSystemXMLNode, DS_N, n);
+    else SiconosDOMTreeTools::setIntegerContentValue(nNode, n);
   }
 
-  /** \fn void setX0(SiconosVector *v)
-   *   \brief allows to set the X0 of the DynamicalSystemXML
-   *   \param The X0 SiconosVector to save
+  /** \fn  const SimpleVector getX0() const
+   *   \brief Returns initial state of the DynamicalSystem (x0)
+   *   \return a SimpleVector
    */
-  inline void setX0(SiconosVector *v)
+  inline const SimpleVector getX0() const
+  {
+    return  SiconosDOMTreeTools::getSiconosVectorValue(x0Node);
+  }
+
+  /** \fn void setX0(const SiconosVector& v)
+   *   \brief save x0 of the DynamicalSystem
+   *   \param a SiconosVector
+   */
+  inline void setX0(const SiconosVector& v)
   {
     if (!hasX0())
-      x0Node = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, DS_X0, *v);
-    else SiconosDOMTreeTools::setSiconosVectorNodeValue(x0Node, *v);
+      x0Node = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, DS_X0, v);
+    else SiconosDOMTreeTools::setSiconosVectorNodeValue(x0Node, v);
   }
 
-  /** \fn SimpleVector getX()
-   *   \brief Returns the X vector of the DynamicalSystemXML
-   *   \return SimpleVector : X vector of the DynamicalSystemXML
+  /** \fn const SimpleVector getX() const
+   *   \brief Returns the x state-vector of the DynamicalSystem
+   *   \return SimpleVector
    */
-  inline /*SiconosVector*/SimpleVector getX()
+  inline const SimpleVector getX() const
   {
-    OUT("inline /*SiconosVector*/SimpleVector getX()");
-    return  SiconosDOMTreeTools::getSiconosVectorValue(this->xNode);
+    return  SiconosDOMTreeTools::getSiconosVectorValue(xNode);
   }
 
-  /** \fn void setX(SiconosVector *v)
-   *   \brief allows to save the X of the DynamicalSystemXML
-   *   \return The X SiconosVector to save
+  /** \fn void setX(const SiconosVector& v)
+   *   \brief save x of the DynamicalSystem
+   *   \param a SiconosVector
    */
-  inline void setX(SiconosVector *v)
+  inline void setX(const SiconosVector& v)
   {
-    if (this->hasX() == false)
-    {
-      this->xNode = SiconosDOMTreeTools::createVectorNode(this->rootDynamicalSystemXMLNode, DS_X, *v);
-    }
-    else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->xNode, *v);
-  }
-
-  /** \fn SimpleVector getXDot()
-   *   \brief Returns the XDot vector of the DynamicalSystemXML
-   *   \return SimpleVector : XDot vector of the DynamicalSystemXML
-   */
-  inline /*SiconosVector*/SimpleVector getXDot()
-  {
-    return  SiconosDOMTreeTools::getSiconosVectorValue(this->xDotNode);
-  }
-
-  /** \fn void setXDot(SiconosVector *v)
-   *   \brief allows to save the XDot of the DynamicalSystemXML
-   *   \param The XDot SiconosVector to save
-   */
-  inline void setXDot(SiconosVector *v)
-  {
-    if (this->hasXDot() == false)
-    {
-      this->xDotNode = SiconosDOMTreeTools::createVectorNode(this->rootDynamicalSystemXMLNode, DS_XDOT, *v);
-    }
-    else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->xDotNode, *v);
-  }
-
-
-  /** \fn SiconosMemoryXML* getXMemoryXML()
-   *   \brief Returns the xMemoryXML* of the DynamicalSystemXML
-   *   \return SiconosMemoryXML*
-   */
-  inline SiconosMemoryXML* getXMemoryXML()
-  {
-    return this->xMemoryXML;
-  }
-
-  /** \fn void setXMemory(SiconosMemory* smem)
-   *   \brief allows to save the XMemory of the DynamicalSystemXML
-   *   \param SiconosMemory* smem : SiconosMemory to save
-   */
-  inline void setXMemory(SiconosMemory* smem)
-  {
-    if (this->hasXMemory() == false)
-    {
-      this->xMemoryXML = new SiconosMemoryXML(NULL, this->rootDynamicalSystemXMLNode, DS_XMEMORY);
-      this->xMemoryNode = this->xMemoryXML->getSiconosMemoryXMLNode();
-
-      this->xMemoryXML->setSiconosMemorySize(smem->getMemorySize());
-      this->xMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
-    }
-    else
-    {
-      this->xMemoryXML->setSiconosMemorySize(smem->getMemorySize());
-      this->xMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
-    }
-  }
-
-
-  /** \fn SiconosMemoryXML* getXDotMemoryXML()
-   *   \brief Returns the xDotMemoryXML* of the DynamicalSystemXML
-   *   \return SiconosMemoryXML*
-   */
-  inline SiconosMemoryXML* getXDotMemoryXML()
-  {
-    return xDotMemoryXML;
-  }
-
-  /** \fn void setXDotMemory(SiconosMemory* smem)
-   *   \brief allows to save the xDotMemory of the DynamicalSystemXML
-   *   \param SiconosMemory* smem : SiconosMemory to save
-   */
-  inline void setXDotMemory(SiconosMemory* smem)
-  {
-
-    if (this->hasXDotMemory() == false)
-    {
-      this->xDotMemoryXML = new SiconosMemoryXML(NULL, this->rootDynamicalSystemXMLNode, DS_XDOTMEMORY);
-      this->xDotMemoryNode = this->xDotMemoryXML->getSiconosMemoryXMLNode();
-
-      this->xDotMemoryXML->setSiconosMemorySize(smem->getMemorySize());
-      this->xDotMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
-    }
-    else
-    {
-      this->xDotMemoryXML->setSiconosMemorySize(smem->getMemorySize());
-      this->xDotMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
-    }
-  }
-
-  /** \fn void setR(SiconosVector *r)
-   *   \brief allows to save the R of the DynamicalSystemXML
-   *   \param SiconosVector R of the DynamicalSystemXML
-   */
-  inline void setR(SiconosVector *r)
-  {
-    if (this->hasR() == false)
-    {
-      this->rNode = SiconosDOMTreeTools::createVectorNode(this->rootDynamicalSystemXMLNode, DS_R, *r);
-    }
-    else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->rNode, *r);
-  }
-
-  /** \fn SiconosMemoryXML* getRMemoryXML()
-   *   \brief Returns the rMemoryXML* of the DynamicalSystemXML
-   *   \return SiconosMemoryXML*
-   */
-  inline SiconosMemoryXML* getRMemoryXML()
-  {
-    return this->rMemoryXML;
-  }
-
-  /** \fn void setRMemory(SiconosMemory* smem)
-   *   \brief allows to save the rMemory of the DynamicalSystemXML
-   *   \param SiconosMemory* smem : SiconosMemory to save
-   */
-  inline void setRMemory(SiconosMemory* smem)
-  {
-    if (this->hasRMemory() == false)
-    {
-      this->rMemoryXML = new SiconosMemoryXML(NULL, this->rootDynamicalSystemXMLNode, DS_RMEMORY);
-      this->rMemoryNode = this->rMemoryXML->getSiconosMemoryXMLNode();
-
-      this->rMemoryXML->setSiconosMemorySize(smem->getMemorySize());
-      this->rMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
-    }
-    else
-    {
-      this->rMemoryXML->setSiconosMemorySize(smem->getMemorySize());
-      this->rMemoryXML->setSiconosMemoryVector(smem->getVectorMemory());
-    }
+    if (!hasX())
+      xNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, DS_X, v);
+    else SiconosDOMTreeTools::setSiconosVectorNodeValue(xNode, v);
   }
 
   /** \fn int getStepsInMemory()
    *   \brief Returns the steps in memory for the DynamicalSystemXML
    *   \return The integer number of steps in memory for the DynamicalSystemXML
    */
-  inline int getStepsInMemory()
+  inline const unsigned int getStepsInMemory() const
   {
-    return  SiconosDOMTreeTools::getIntegerContentValue(this->stepsInMemoryNode);
+    return  SiconosDOMTreeTools::getIntegerContentValue(stepsInMemoryNode);
   }
 
-  /** \fn inline void setStepsInMemory(int nb)
-   *   \brief allows to save the steps in memory for the DynamicalSystemXML
-   *   \param The integer number of steps in memory to save
+  /** \fn inline void setStepsInMemory(const unsigned int& nb)
+   *   \brief to save the steps in memory for the DynamicalSystemXML
+   *   \param an unsigned int
    */
-  inline void setStepsInMemory(int nb)
+  void setStepsInMemory(const unsigned int&);
+
+  /** \fn SiconosMemoryXML* getXMemoryXML() const
+   *   \brief Returns the xMemoryXML* of the DynamicalSystemXML
+   *   \return SiconosMemoryXML*
+   */
+  inline SiconosMemoryXML* getXMemoryXML() const
   {
-    if (this->hasStepsInMemory() == false)
-    {
-      this->stepsInMemoryNode = SiconosDOMTreeTools::createIntegerNode(this->rootDynamicalSystemXMLNode, DS_STEPSINMEMORY, nb);
-    }
-    else SiconosDOMTreeTools::setIntegerContentValue(this->stepsInMemoryNode, nb);
+    return xMemoryXML;
   }
 
-  /** \fn BoundaryConditionXML * getBoundaryConditionXML()
+  /** \fn void setXMemory(const SiconosMemory& smem)
+   *   \brief to save the XMemory of the DynamicalSystemXML
+   *   \param SiconosMemory* smem : SiconosMemory to save
+   */
+  void setXMemory(const SiconosMemory&);
+
+  /** \fn SiconosMemoryXML* getXDotMemoryXML() const
+   *   \brief Returns the xDotMemoryXML* of the DynamicalSystemXML
+   *   \return SiconosMemoryXML*
+   */
+  inline SiconosMemoryXML* getXDotMemoryXML() const
+  {
+    return xDotMemoryXML;
+  }
+
+  /** \fn void setXDotMemory(const SiconosMemory& )
+   *   \brief to save the xDotMemory of the DynamicalSystemXML
+   *   \param SiconosMemory* smem : SiconosMemory to save
+   */
+  void setXDotMemory(const SiconosMemory&);
+
+  /** \fn SiconosMemoryXML* getRMemoryXML() const
+   *   \brief Returns the rMemoryXML* of the DynamicalSystemXML
+   *   \return SiconosMemoryXML*
+   */
+  inline SiconosMemoryXML* getRMemoryXML() const
+  {
+    return rMemoryXML;
+  }
+
+  /** \fn void setRMemory( const SiconosMemory& );
+   *   \brief to save the rMemory of the DynamicalSystemXML
+   *   \param SiconosMemory*
+   */
+  void setRMemory(const SiconosMemory&);
+
+  /** \fn BoundaryConditionXML * getBoundaryConditionXML() const
    *   \brief Returns the BoundaryConditionXML pointer of the DynamicalSystemXML
    *   \return the BoundaryConditionXML pointer of the DynamicalSystemXML ; NULL if DynamicalSystemXML does not have
    */
-  inline BoundaryConditionXML * getBoundaryConditionXML()
+  inline BoundaryConditionXML * getBoundaryConditionXML() const
   {
-    return this->boundaryConditionXML;
+    return boundaryConditionXML;
   }
 
-
-  /** \fn int getVectorFieldPlugin()
-   *   \brief Returns the plugin for the DynamicalSystemXML
-   *   \return string which defines the plugin for the DynamicalSystemXML
+  // === VectorField ===
+  /** \fn inline string getVectorFieldPlugin()
+   *  \brief Return the name of the vectorField plug-in
+   *  \return a string
    */
-  inline std::string getVectorFieldPlugin()
+  inline const std::string getVectorFieldPlugin() const
   {
-    return  SiconosDOMTreeTools::getStringAttributeValue(this->vectorFieldNode, PLUGIN_ATTRIBUTE);
+    if (!isVectorFieldPlugin())
+      XMLException::selfThrow("DynamicalSystemXML - getVectorFieldPlugin : vectorField is not calculated from a plugin since a vectorField vector is given.");
+    return  SiconosDOMTreeTools::getStringAttributeValue(vectorFieldNode, "vectorPlugin");
   }
 
-  /** \fn inline void setVectorFieldPlugin(string plugin)
-   *   \brief allows to save the the vectorFieldPlugin for the DynamicalSystemXML
-   *   \param The string corresponding to the plugin to save
+  /** \fn const SimpleVector getVectorFieldVector() const
+   *   \brief return vectorField vector
+   *   \return SimpleVector
    */
-  inline void setVectorFieldPlugin(std::string plugin)
+  inline const SimpleVector getVectorFieldVector() const
   {
-    if (this->hasVectorFieldPlugin() == false)
-    {
-      this->vectorFieldNode = SiconosDOMTreeTools::createSingleNode(this->rootDynamicalSystemXMLNode, DS_VECTORFIELD);
-      xmlNewProp(this->vectorFieldNode, (xmlChar*)(PLUGIN_ATTRIBUTE.c_str()), (xmlChar*)plugin.c_str());
-    }
-    else SiconosDOMTreeTools::setStringAttributeValue(this->vectorFieldNode, PLUGIN_ATTRIBUTE, plugin);
+    if (isVectorFieldPlugin())
+      XMLException::selfThrow("DynamicalSystemXML - getVectorFieldVector : vectorField vector is not given since vectorField is calculated using a plug-in");
+    return  SiconosDOMTreeTools::getSiconosVectorValue(vectorFieldNode);
   }
 
-  /** \fn int getComputeJacobianXPlugin()
-   *   \brief Returns the plugin for the DynamicalSystemXML
-   *   \return string which defines the plugin for the DynamicalSystemXML
+  /** \fn void setVectorFieldVector(const SiconosVector& v)
+   *   \brief to save the vectorField vector
+   *   \param a SiconosVector
    */
-  inline std::string getComputeJacobianXPlugin()
+  void setVectorFieldVector(const SiconosVector&v);
+
+  /** \fn void setVectorFieldPlugin(const string& plugin)
+   *   \brief to save the VectorField plugin
+   *   \param a string (name of the plug-in)
+   */
+  void setVectorFieldPlugin(const std::string& plugin);
+
+  // === JacobianX ===
+  /** \fn inline string getJacobianXPlugin()
+   *  \brief Return the name of the jacobianX plug-in
+   *  \return a string
+   */
+  inline const std::string getJacobianXPlugin() const
   {
-    return  SiconosDOMTreeTools::getStringAttributeValue(this->computeJacobianXNode, PLUGIN_ATTRIBUTE);
+    if (!isJacobianXPlugin())
+      XMLException::selfThrow("DynamicalSystemXML - getJacobianXPlugin : jacobianX is not calculated from a plugin since a jacobianX matrix is given.");
+    return  SiconosDOMTreeTools::getStringAttributeValue(jacobianXNode, "matrixPlugin");
   }
 
-  /** \fn inline void setComputeJacobianXPlugin(string plugin)
-   *   \brief allows to save the the vectorFieldPlugin for the DynamicalSystemXML
-   *   \param The string corresponding to the plugin to save
+  /** \fn const SimpleMatrix getJacobianXMatrix() const
+   *   \brief return jacobianX matrix
+   *   \return SimpleMatrix
    */
-  inline void setComputeJacobianXPlugin(std::string plugin)
+  inline const SimpleMatrix getJacobianXMatrix() const
   {
-    if (this->hasComputeJacobianXPlugin() == false)
-    {
-      this->computeJacobianXNode = SiconosDOMTreeTools::createSingleNode(this->rootDynamicalSystemXMLNode, DS_COMPUTEJACOBIANX);
-      xmlNewProp(this->computeJacobianXNode, (xmlChar*)(PLUGIN_ATTRIBUTE.c_str()), (xmlChar*)plugin.c_str());
-    }
-    else SiconosDOMTreeTools::setStringAttributeValue(this->computeJacobianXNode, PLUGIN_ATTRIBUTE, plugin);
+    if (isJacobianXPlugin())
+      XMLException::selfThrow("DynamicalSystemXML - getJacobianXMatrix : jacobianX matrix is not given since jacobianX is calculated using a plug-in");
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(jacobianXNode);
   }
 
-  /** \fn bool hasN()
-   *  \brief returns true if nNode is defined
-   *  \return true if nNode is defined
+  /** \fn void setJacobianXMatrix(const SiconosMatrix& v)
+   *   \brief to save the jacobianX matrix
+   *   \param a SiconosMatrix
    */
-  inline bool hasN()
-  {
-    return (this->nNode != NULL);
-  }
+  void setJacobianXMatrix(const SiconosMatrix&v);
 
-  /** \fn bool hasId()
-   *  \brief returns true if idNode is defined
-   *  \return true if idNode is defined
+  /** \fn void setJacobianXPlugin(const string& plugin)
+   *   \brief to save the JacobianX plugin of the LagrangianDSXML
+   *   \param a string (name of the plug-in)
    */
-  inline bool hasId()
-  {
-    return (this->idNode != NULL);
-  }
-
-  /** \fn bool hasX()
-   *  \brief returns true if xNode is defined
-   *  \return true if xNode is defined
-   */
-  inline bool hasX()
-  {
-    return (this->xNode != NULL);
-  }
-
-  /** \fn bool hasXDot()
-   *  \brief returns true if xDotNode is defined
-   *  \return true if xDotNode is defined
-   */
-  inline bool hasXDot()
-  {
-    return (this->xDotNode != NULL);
-  }
-
-  /** \fn bool hasXMemory()
-   *  \brief returns true if xMemoryNode is defined
-   *  \return true if xMemoryNode is defined
-   */
-  inline bool hasXMemory()
-  {
-    return (this->xMemoryNode != NULL);
-  }
-
-  /** \fn bool hasXDotMemory()
-   *  \brief returns true if xDotMemoryNode is defined
-   *  \return true if xDotMemoryNode is defined
-   */
-  inline bool hasXDotMemory()
-  {
-    return (this->xDotMemoryNode != NULL);
-  }
-
-  /** \fn bool hasX0()
-   *  \brief returns true if x0Node is defined
-   *  \return true if x0Node is defined
-   */
-  inline bool hasX0()
-  {
-    return (this->x0Node != NULL);
-  }
-
-  /** \fn bool hasStepsInMemory()
-   *  \brief returns true if stepsInMemoryNode is defined
-   *  \return true if stepsInMemoryNode is defined
-   */
-  inline bool hasStepsInMemory()
-  {
-    return (this->stepsInMemoryNode != NULL);
-  }
-
-  /** \fn bool hasR()
-   *  \brief returns true if R is defined
-   *  \return true if R is defined
-   */
-  inline bool hasR()
-  {
-    return (this->rNode != NULL);
-  }
-
-  /** \fn bool hasRMemory()
-   *  \brief returns true if RMemory is defined
-   *  \return true if RMemory is defined
-   */
-  inline bool hasRMemory()
-  {
-    return (this->rMemoryNode != NULL);
-  }
-
-  /** \fn bool hasBoundaryCondition()
-   *  \brief returns true if boundaryConditionNode is defined
-   *  \return true if boundaryConditionNode is defined
-   */
-  inline bool hasBoundaryCondition()
-  {
-    return (this->boundaryConditionNode != NULL);
-  }
-
-  /** \fn bool hasComputeJacobianXPlugin()
-   *  \brief returns true if computeJacobianXNode is defined
-   *  \return true if computeJacobianXNode is defined
-   */
-  inline bool hasComputeJacobianXPlugin()
-  {
-    return (this->computeJacobianXNode != NULL);
-  }
-
-  /** \fn bool hasVectorFieldPlugin()
-   *  \brief returns true if vectorFieldNode is defined
-   *  \return true if vectorFieldNode is defined
-   */
-  inline bool hasVectorFieldPlugin()
-  {
-    return (this->vectorFieldNode != NULL);
-  }
-
-  /** \fn void updateDynamicalSystemXML(xmlNode*, DynamicalSystem*, BoundaryCondition*)
-   *   \brief makes the operations to add a DynamicalSystem to the NonSmoothDynamicalSystemXML
-   *   \param xmlNode* : the root node of this DynamicalSystem
-   *   \param DynamicalSystem* : the DynamicalSystem of this DynamicalSystemXML
-   *   \param BoundaryCondition* : the BoundaryCondition of the DynamicalSystem if the NonSmoothDynamicalSystem is BVP (optional)
-   */
-  void updateDynamicalSystemXML(xmlNode*, DynamicalSystem*, BoundaryCondition* bc = NULL);
-
-  /** \fn void loadDynamicalSystem( DynamicalSystem* )
-   *   \brief loads the depending data of the DynamicalSystem into the DynamicalSystemXML (the BoundaryCondition if exists)
-   *   \param DynamicalSystem* : the DynamicalSystem of this DynamicalSystemXML
-   */
-  void loadDynamicalSystem(DynamicalSystem*);
-
-
-  /** \fn DSInputOutputXML* getDSInputOutputXML(int number)
-   *   \brief Return the DSInputOutputXML with id number
-   *   \param number : int number : the number of the DSInputOutputXML to return
-   *  \exception XMLException
-   *   \return the DSInputOutputXML of number number, NULL if doesn't exist
-   */
-  DSInputOutputXML* getDSInputOutputXML(int number);
-
-  /** \fn inline vector<int> getDSInputOutputNumbers();
-   *   \brief Allows to know the defined DSInputOutputs
-   *   \return vector DSInputOutputs integer numbers
-   */
-  inline std::vector<int> getDSInputOutputNumbers()
-  {
-    return definedDSInputOutputNumbers;
-  }
-
-  /** \fn inline vector<int> getDSInputOutputNumbers()
-   *   \brief Allows to know the defined DSInputOutputs
-   *   \return vector DSInputOutputs integer numbers
-   */
-  void setDSInputOutputXML(std::map<int, DSInputOutputXML*> m);
-
-  /** \fn void loadDSInputOutputXML(xmlNode * )
-   *   \brief Builds DSInputOutputXML objects from a DOM tree describing DSInputOutputs
-   *   \param xmlNode* : the DSInputOutputs DOM tree
-   *   \exception XMLException : if a number relating to an DSInputOutput declares in the NSDS is already used
-   */
-  //void loadDSInputOutputXML(xmlNode * rootdsioNode);
-
-  // ===== U AND T MANAGEMENT =====
-
-  // --- uSize ---
+  void setJacobianXPlugin(const std::string& plugin);
 
   /** \fn int getUSize()
    *   \brief get size of vector u
@@ -568,12 +369,22 @@ public:
     return  SiconosDOMTreeTools::getIntegerContentValue(uSizeNode);
   }
 
+  /** \fn void setUSize(const unsigned int& us)
+   *   \brief to save the size of vector u
+   *   \param an unsigned int
+   */
+  inline void setUSize(const unsigned int& us)
+  {
+    if (!hasUSize())
+      uSizeNode = SiconosDOMTreeTools::createIntegerNode(rootDynamicalSystemXMLNode, "uSize", us);
+    else SiconosDOMTreeTools::setIntegerContentValue(uSizeNode, us);
+  }
+
   // --- u ---
 
-  /** \fn inline string getUPlugin()
-   *   \brief Return the u Plugin name of the DynamicalSystemXML
-   *   \return The u Plugin name of the DynamicalSystemXML
-   *  \exception XMLException
+  /** \fn inline const string getUPlugin() const
+   *   \brief Return the u plug-in name
+   *   \return a string
    */
   inline const std::string getUPlugin() const
   {
@@ -582,9 +393,9 @@ public:
     return  SiconosDOMTreeTools::getStringAttributeValue(uNode, DS_VECTORPLUGIN);
   }
 
-  /** \fn inline SimpleVector getUVector()
-   *   \brief Return u vector of the DynamicalSystemXML
-   *   \return SimpleVector : u of DynamicalSystemXML
+  /** \fn inline const SimpleVector getUVector() const
+   *   \brief Return u vector
+   *   \return a SimpleVector
    *  \exception XMLException
    */
   inline const SimpleVector getUVector() const
@@ -595,20 +406,21 @@ public:
     return  SiconosDOMTreeTools::getSiconosVectorValue(uNode);
   }
 
-  /** \fn inline void setUVector(SiconosVector *v)
-   *   \brief allows to save the u vector of the DynamicalSystemXML
-   *   \param SiconosVector *u : SiconosVector U to save
+  /** \fn void setUVector(const SiconosVector & v)
+   *   \brief to save the u vector
+   *   \param a SiconosVector
    */
-  inline void setUVector(const SiconosVector& v)
-  {
-    if (uNode != NULL)
-      SiconosDOMTreeTools::setSiconosVectorNodeValue(uNode, v);
-    else uNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, DS_U, v);
-  }
+  void setUVector(const SiconosVector&);
+
+  /** \fn void setUPlugin(const string& plugin)
+   *   \brief to save the u plugin
+   *   \param a string (name of the plug-in)
+   */
+  void setUPlugin(const std::string& plugin);
 
   // --- T ---
 
-  /** \fn SimpleMatrix getTMatrix()
+  /** \fn const SimpleMatrix getTMatrix() const
    *   \brief get T Matrix
    *   \return a SimpleMatrix
    */
@@ -619,7 +431,7 @@ public:
     return  SiconosDOMTreeTools::getSiconosMatrixValue(TNode);
   }
 
-  /** \fn inline string getTPlugin()
+  /** \fn inline const string getTPlugin() const
    *  \brief get Plugin name to compute T
    *  \exception XMLException
    */
@@ -630,16 +442,151 @@ public:
     return  SiconosDOMTreeTools::getStringAttributeValue(TNode, DS_MATRIXPLUGIN);
   }
 
-  /** \fn void setT(SiconosMatrix *m)
+  /** \fn void setT(const SiconosMatrix& m)
    *   \brief save T
    *   \param The SiconosMatrix to save
    */
-  inline void setT(const SiconosMatrix &m)
+  void setT(const SiconosMatrix &m);
+
+  /** \fn void setTPlugin(const string& plugin)
+   *   \brief to save the T plugin
+   *   \param a string (name of the plug-in)
+   */
+  void setTPlugin(const std::string& plugin);
+
+  /** \fn bool hasN() const
+   *  \brief returns true if nNode is defined
+   *  \return true if nNode is defined
+   */
+  inline bool hasN() const
   {
-    if (TNode != NULL)
-      SiconosDOMTreeTools::setSiconosMatrixNodeValue(TNode, m);
-    else TNode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, DS_T, m);
+    return (nNode != NULL);
   }
+
+  /** \fn bool hasX0() const
+   *  \brief returns true if x0Node is defined
+   *  \return true if x0Node is defined
+   */
+  inline bool hasX0() const
+  {
+    return (x0Node != NULL);
+  }
+
+  /** \fn bool hasX() const
+   *  \brief returns true if xNode is defined
+   *  \return true if xNode is defined
+   */
+  inline bool hasX() const
+  {
+    return (xNode != NULL);
+  }
+
+  /** \fn bool hasStepsInMemory() const
+   *  \brief returns true if stepsInMemoryNode is defined
+   *  \return true if stepsInMemoryNode is defined
+   */
+  inline bool hasStepsInMemory() const
+  {
+    return (stepsInMemoryNode != NULL);
+  }
+
+  /** \fn bool hasXMemory() const
+   *  \brief returns true if xMemoryNode is defined
+   *  \return true if xMemoryNode is defined
+   */
+  inline bool hasXMemory()const
+  {
+    return (xMemoryNode != NULL);
+  }
+
+  /** \fn bool hasXDotMemory()  const
+   *  \brief returns true if xDotMemoryNode is defined
+   *  \return true if xDotMemoryNode is defined
+   */
+  inline bool hasXDotMemory() const
+  {
+    return (xDotMemoryNode != NULL);
+  }
+
+  /** \fn bool hasRMemory() const
+   *  \brief returns true if RMemory is defined
+   *  \return true if RMemory is defined
+   */
+  inline bool hasRMemory() const
+  {
+    return (rMemoryNode != NULL);
+  }
+
+  /** \fn bool hasVectorField() const
+   *  \brief returns true if vectorFieldNode is defined
+   *  \return true if vectorFieldNode is defined
+   */
+  inline bool hasVectorField() const
+  {
+    return (vectorFieldNode != NULL);
+  }
+
+  /** \fn bool hasJacobianX() const
+   *  \brief returns true if jacobianXNode is defined
+   *  \return true if jacobianXNode is defined
+   */
+  inline bool hasJacobianX() const
+  {
+    return (jacobianXNode != NULL);
+  }
+
+  /** \fn bool hasBoundaryCondition() const
+   *  \brief returns true if boundaryConditionNode is defined
+   *  \return true if boundaryConditionNode is defined
+   */
+  inline bool hasBoundaryCondition() const
+  {
+    return (boundaryConditionNode != NULL);
+  }
+
+  /** \fn bool hasUSize() const
+  *  \brief returns true if uSizeNode is defined
+  *  \return true if jacobianXNode is defined
+  */
+  inline bool hasUSize() const
+  {
+    return (uSizeNode != NULL);
+  }
+
+  /** \fn bool hasU() const
+  *  \brief returns true if uNode is defined
+  *  \return true if jacobianXNode is defined
+  */
+  inline bool hasU() const
+  {
+    return (uNode != NULL);
+  }
+
+  /** \fn bool hasT() const
+  *  \brief returns true if TNode is defined
+  *  \return true if jacobianXNode is defined
+  */
+  inline bool hasT() const
+  {
+    return (TNode != NULL);
+  }
+
+  /** \fn bool isVectorFieldPlugin()
+   *   \brief Return true if vectorField is calculated from a plugin
+   */
+  inline bool isVectorFieldPlugin() const
+  {
+    return xmlHasProp((xmlNodePtr)vectorFieldNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
+  }
+
+  /** \fn bool isJacobianXPlugin()
+   *   \brief Return true if jacobianX is calculated from a plugin
+   */
+  inline bool isJacobianXPlugin() const
+  {
+    return xmlHasProp((xmlNodePtr)jacobianXNode, (xmlChar *) DS_MATRIXPLUGIN.c_str());
+  }
+
   /** \fn bool isUPlugin()
    *   \brief Return true if u is calculated from a plugin
    */
@@ -656,67 +603,49 @@ public:
     return xmlHasProp((xmlNodePtr)TNode, (xmlChar *) DS_MATRIXPLUGIN.c_str());
   }
 
-  /** \fn bool hasXX()
-   * \brief return true if XXnode exists */
-  inline bool hasUSize() const
-  {
-    return (uSizeNode != NULL);
-  }
-  inline bool hasU() const
-  {
-    return (uNode != NULL);
-  }
-  inline bool hasT() const
-  {
-    return (TNode != NULL);
-  }
-
-protected:
-  xmlNode * rootDynamicalSystemXMLNode;
-  xmlNode * parentNode;
-
-  //Object
-  BoundaryConditionXML * boundaryConditionXML;  //Maybe not defined (if not BVP NonSmoothDynamicalSystem)
-
-
-  /** \fn void loadBoundaryConditionXML(xmlNode * rootBoundaryConditionNode)
-   *   \brief Build BoundaryConditionXML object from a DOM tree describing BoundaryCondition
-   *   \param rootBoundaryConditionXMLNode : the BoundaryCondition DOM tree
-   *   \exception XMLException : if the type of the BoundaryCondition given in the DOM tree does not exist
+  /** \fn void updateDynamicalSystemXML(xmlNodePtr, DynamicalSystem*, BoundaryCondition*)
+   *   \brief prepare object(s) to add a DynamicalSystem to the NonSmoothDynamicalSystemXML
+   *   \param xmlNodePtr : the root node of this DynamicalSystem
+   *   \param DynamicalSystem* : the DynamicalSystem of this DynamicalSystemXML
+   *   \param BoundaryCondition* : the BoundaryCondition of the DynamicalSystem if the NonSmoothDynamicalSystem is BVP (optional)
    */
-  void loadBoundaryConditionXML(xmlNode * rootBoundaryConditionNode);
+  void updateDynamicalSystemXML(xmlNodePtr, DynamicalSystem*, BoundaryCondition* bc = NULL);
 
-  SiconosMemoryXML * xMemoryXML;
-  SiconosMemoryXML * xDotMemoryXML;
-  SiconosMemoryXML * rMemoryXML;
+  /** \fn void loadDynamicalSystem( DynamicalSystem* )
+   *   \brief loads the depending data of the DynamicalSystem into the DynamicalSystemXML (the BoundaryCondition if exists)
+   *   \param DynamicalSystem* : the DynamicalSystem of this DynamicalSystemXML
+   */
+  void loadDynamicalSystem(DynamicalSystem*);
 
-  /* Map of DSInputOutputs */
-  std::map<int, DSInputOutputXML*> dsInputOutputXMLMap;
+  /** \fn DSInputOutputXML* getDSInputOutputXML(const int& number);
+   *   \brief Return the DSInputOutputXML with id number
+   *   \param number : int number : the number of the DSInputOutputXML to return
+   *  \exception XMLException
+   *   \return the DSInputOutputXML of number number, NULL if doesn't exist
+   */
+  DSInputOutputXML* getDSInputOutputXML(const int&);
 
-  /* vector of DSInputOutput numbers*/
-  std::vector<int> definedDSInputOutputNumbers;
+  /** \fn inline const vector<int> getDSInputOutputNumbers(); const
+   *   \brief Allows to know the defined DSInputOutputs
+   *   \return vector DSInputOutputs integer numbers
+   */
+  inline const std::vector<int> getDSInputOutputNumbers() const
+  {
+    return definedDSInputOutputNumbers;
+  }
 
-private:
-  //Nodes
+  /** \fn inline vector<int> getDSInputOutputNumbers()
+   *   \brief Allows to know the defined DSInputOutputs
+   *   \return vector DSInputOutputs integer numbers
+   */
+  void setDSInputOutputXML(std::map<int, DSInputOutputXML*> m);
 
-  xmlNode * idNode;
-  xmlNode * nNode;
-  xmlNode * x0Node;
-  xmlNode * xNode;
-  xmlNode * xDotNode;
-  xmlNode * xMemoryNode;
-  xmlNode * xDotMemoryNode;
-  xmlNode * stepsInMemoryNode;
-  xmlNode * vectorFieldNode;
-  xmlNode * computeJacobianXNode;
-  xmlNode * boundaryConditionNode;
-  xmlNode * dsInputOutputNode;
-  xmlNode * rNode;
-  xmlNode * rMemoryNode;
-  xmlNode * uSizeNode;
-  xmlNode * uNode;
-  xmlNode * TNode;
-
+  /** \fn void loadDSInputOutputXML(xmlNodePtr )
+   *   \brief Builds DSInputOutputXML objects from a DOM tree describing DSInputOutputs
+   *   \param xmlNodePtr : the DSInputOutputs DOM tree
+   *   \exception XMLException : if a number relating to an DSInputOutput declares in the NSDS is already used
+   */
+  //void loadDSInputOutputXML(xmlNodePtr rootdsioNode);
 };
 
 #endif

@@ -107,7 +107,6 @@ while getopts chv OPTION
 		  exit 1;
 	      else
 		  sample="true"
-		  echo "$2 salut";
 	      fi;
 	  else sample="false"
 	  fi;;

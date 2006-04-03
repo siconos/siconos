@@ -35,11 +35,20 @@
 
 const std::string LDS_A = "A";
 const std::string LDS_B = "b";
-const std::string LDS_E = "E";
 
 class LinearDSXML : public DynamicalSystemXML
 {
+private:
+
+  //Nodes
+  xmlNode * ANode; /**< A in xDot = Ax+b */
+  xmlNode * bNode; /**< b in xDot = Ax+b */
+
 public:
+
+  /** \fn LinearDSXML();
+   *   \brief Default constructor
+   */
   LinearDSXML();
 
   /** \fn LinearDSXML(xmlNode * LagrangianDSNode, bool isBVP)
@@ -49,22 +58,25 @@ public:
    */
   LinearDSXML(xmlNode * linearSystemDSNode, const bool& isBVP);
 
+  /** \fn ~LinearDSXML();
+   *   \brief destructor
+   */
   ~LinearDSXML();
 
-  /** \fn SimpleMatrix getA()
-   *   \brief Return the A of the LinearDSXML
-   *   \return The A SimpleMatrix of the LinearDSXML
+  /** \fn const SimpleMatrix getA() const
+   *   \brief return the A of the LinearDSXML
+   *   \return a SimpleMatrix
    */
   inline const SimpleMatrix getA() const
   {
     if (isAPlugin())
-      XMLException::selfThrow("LinearDSXML - getA: A is not given but calculated from a plugin");
+      XMLException::selfThrow("LinearDSXML - getA: A is not given but calculated with a plugin");
     return  SiconosDOMTreeTools::getSiconosMatrixValue(ANode);
   }
 
-  /** \fn inline string getAPlugin()
-   *   \brief Return the A Plugin name of the LinearDSXML
-   *  \exception XMLException
+  /** \fn inline const string getAPlugin() const
+   *   \brief return the A plug-in name of the LinearDSXML
+   *   \return a string
    */
   inline const std::string getAPlugin() const
   {
@@ -73,55 +85,21 @@ public:
     return  SiconosDOMTreeTools::getStringAttributeValue(ANode, DS_MATRIXPLUGIN);
   }
 
-  /** \fn void setA(SiconosMatrix *m)
-   *   \brief allows to save the A of the LinearDSXML
+  /** \fn void setA(const SiconosMatrix& m)
+   *   \brief to save the A of the LinearDSXML
    *   \return The A SiconosMatrix to save
    */
-  inline void setA(const SiconosMatrix& m)
-  {
-    if (ANode != NULL)
-      SiconosDOMTreeTools::setSiconosMatrixNodeValue(ANode, m);
-    else
-      ANode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, LDS_A, m);
-  }
+  void setA(const SiconosMatrix& m);
 
-  /** \fn SimpleMatrix getE()
-   *   \brief Return the E of the LinearDSXML
-   *   \return The E SimpleMatrix of the LinearDSXML
+  /** \fn void setAPlugin(const string& plugin)
+   *   \brief to save the A plugin
+   *   \param a string (name of the plug-in)
    */
-  inline const SimpleMatrix getE() const
-  {
-    if (isEPlugin())
-      XMLException::selfThrow("LinearDSXML - getE: E is not given but calculated from a plugin");
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(ENode);
-  }
+  void setAPlugin(const std::string& plugin);
 
-  /** \fn inline string getEPlugin()
-   *   \brief Return the E Plugin name of the LinearDSXML
-   *  \exception XMLException
-   */
-  inline const std::string getEPlugin() const
-  {
-    if (!isEPlugin())
-      XMLException::selfThrow("LinearDSXML - getEPlugin : E is not loaded from a plugin");
-    return  SiconosDOMTreeTools::getStringAttributeValue(ENode, DS_MATRIXPLUGIN);
-  }
-
-  /** \fn void setE(SiconosMatrix *m)
-   *   \brief allows to save the E of the LinearDSXML
-   *   \param The SiconosMatrix to save
-   */
-  inline void setE(const SiconosMatrix &m)
-  {
-    if (ENode != NULL)
-      SiconosDOMTreeTools::setSiconosMatrixNodeValue(ENode, m);
-    else ENode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, LDS_E, m);
-  }
-
-  /** \fn inline string getBPlugin()
-   *   \brief Return the b Plugin name of the LinearDSXML
-   *   \return The b Plugin name of the LinearDSXML
-   *  \exception XMLException
+  /** \fn inline const string getBPlugin() const
+   *   \brief Return the b plug-in name of the LinearDSXML
+   *   \return a string
    */
   inline const std::string getBPlugin() const
   {
@@ -130,10 +108,9 @@ public:
     return  SiconosDOMTreeTools::getStringAttributeValue(bNode, DS_VECTORPLUGIN);
   }
 
-  /** \fn inline SimpleVector getBVector()
+  /** \fn inline const SimpleVector getBVector() const
    *   \brief Return b vector of the LinearDSXML
-   *   \return SimpleVector : value of b of LinearDSXML
-   *  \exception XMLException
+   *   \return a SimpleVector
    */
   inline const SimpleVector getBVector() const
   {
@@ -143,16 +120,17 @@ public:
     return  SiconosDOMTreeTools::getSiconosVectorValue(bNode);
   }
 
-  /** \fn inline void setBVector(SiconosVector *v)
-   *   \brief allows to save the b vector of the LinearDSXML
+  /** \fn inline void setB(SiconosVector *v)
+   *   \brief to save the b vector of the LinearDSXML
    *   \return The b SimpleVector to save
    */
-  inline void setBVector(const SiconosVector& v)
-  {
-    if (bNode != NULL)
-      SiconosDOMTreeTools::setSiconosVectorNodeValue(bNode, v);
-    else bNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LDS_B, v);
-  }
+  void setB(const SiconosVector& v);
+
+  /** \fn void setBPlugin(const string& plugin)
+   *   \brief to save the B plugin
+   *   \param a string (name of the plug-in)
+   */
+  void setBPlugin(const std::string& plugin);
 
   /** \fn bool isAPlugin()
    *   \brief Return true if A is calculated from a plugin
@@ -170,29 +148,23 @@ public:
     return xmlHasProp((xmlNodePtr)bNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
   }
 
-  /** \fn bool isEPlugin()
-   *   \brief Return true if E is calculated from a plugin
+  /** \fn bool hasA() const
+   *  \brief returns true if ANode is defined
+   *  \return true if ANode is defined
    */
-  inline bool isEPlugin() const
-  {
-    return xmlHasProp((xmlNodePtr)ENode, (xmlChar *) DS_MATRIXPLUGIN.c_str());
-  }
-
-  /** \fn bool hasXX()
-   * \brief return true if XXnode exists */
   inline bool hasA() const
   {
     return (ANode != NULL);
   }
+
+  /** \fn bool hasB() const
+   *  \brief returns true if bNode is defined
+   *  \return true if bNode is defined
+   */
   inline bool hasB() const
   {
     return (bNode != NULL);
   }
-  inline bool hasE() const
-  {
-    return (ENode != NULL);
-  }
-
 
   /** \fn void updateDynamicalSystemXML(xmlNode*, DynamicalSystem*, BoundaryCondition*)
    *   \brief makes the operations to add a DynamicalSystem to the NonSmoothDynamicalSystemXML
@@ -203,12 +175,6 @@ public:
   void updateDynamicalSystemXML(xmlNode*, DynamicalSystem*, BoundaryCondition* bc = NULL);
 
 
-private:
-
-  //Nodes
-  xmlNode * ANode;
-  xmlNode * bNode;
-  xmlNode * ENode;
 };
 
 #endif

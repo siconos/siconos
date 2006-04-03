@@ -544,8 +544,6 @@ void LagrangianR::setGPtr(SiconosMatrix *newPtr, const unsigned int & index)
 
 void LagrangianR::setComputeHFunction(const string& pluginPath, const string& functionName)
 {
-  IN("LagrangianR::setComputeHFunction\n");
-
   if (LagrangianRelationType == "scleronomic")
     cShared.setFunction(&h0Ptr, pluginPath, functionName);
   else if (LagrangianRelationType == "rhenomorous")
@@ -559,13 +557,10 @@ void LagrangianR::setComputeHFunction(const string& pluginPath, const string& fu
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   hFunctionName = plugin + ":" + functionName;
   isHPlugged = true;
-  OUT("LagrangianR::setComputeHFunction\n");
 }
 
 void LagrangianR::setComputeGFunction(const string& pluginPath, const string& functionName, const unsigned int & index)
 {
-  IN("LagrangianR::setComputeGFunction\n");
-
   if (index >= G.size())
     RuntimeException::selfThrow("LagrangianR:: setComputeGFunction, index out of range. Use rather setGVector?");
 
@@ -596,7 +591,6 @@ void LagrangianR::setComputeGFunction(const string& pluginPath, const string& fu
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   GFunctionName[index] = plugin + ":" + functionName;
   isGPlugged[index] = true;
-  OUT("LagrangianR::setComputeGFunction\n");
 }
 
 void LagrangianR::setParametersListVector(const std::vector<SimpleVector*>& newVector)
@@ -986,7 +980,6 @@ void LagrangianR::computeFreeOutput(const double& time)
 
 void LagrangianR::computeInput(const double& time)
 {
-  IN("LagrangianLinearR::computeInput\n");
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianLinearR::computeInput, no interaction linked with this relation");
 
@@ -1021,7 +1014,6 @@ void LagrangianR::computeInput(const double& time)
   {
     computeG(time, 0);
     *p += matTransVecMult(*(G[0]), *lambda);
-
   }
   else
     RuntimeException::selfThrow("LagrangianR::computeInput,  not yet implemented for constraints of type" + LagrangianRelationType);
@@ -1087,14 +1079,12 @@ void LagrangianR::getGBlockDS(const int& DSNumber, SiconosMatrix& Block, const u
 
 void LagrangianR::saveRelationToXML() const
 {
-  IN("LagrangianR::saveRelationToXML\n");
   if (relationxml != NULL)
   {
     relationxml->setComputeInputPlugin(computeInputName);
     relationxml->setComputeOutputPlugin(computeOutputName);
   }
   else RuntimeException::selfThrow("LagrangianR::saveRelationToXML - object RelationXML does not exist");
-  OUT("LagrangianR::saveRelationToXML\n");
 }
 
 LagrangianR* LagrangianR::convert(Relation *r)
@@ -1105,7 +1095,6 @@ LagrangianR* LagrangianR::convert(Relation *r)
 
 void LagrangianR::display() const
 {
-  IN("LagrangianR::display\n");
   cout << "===== Lagrangian Relation display ===== " << endl;
   cout << "- Relation type: " << relationType << endl;
   if (interaction != NULL) cout << "- Interaction id" << interaction->getId() << endl;
@@ -1121,5 +1110,4 @@ void LagrangianR::display() const
       cout << " -> NULL " << endl;
   }
   cout << "===================================== " << endl;
-  OUT("LagrangianR::display\n");
 }

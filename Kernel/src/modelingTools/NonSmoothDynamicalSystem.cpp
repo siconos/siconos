@@ -22,6 +22,7 @@
 #include "LagrangianDS.h"
 #include "LagrangianLinearTIDS.h"
 #include "LinearDS.h"
+#include "LinearTIDS.h"
 #include "LinearEC.h"
 #include "LinearTIEC.h"
 #include "LagrangianEC.h"
@@ -60,6 +61,8 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
         DSVector[i] = new DynamicalSystem(*dsTmp);
       else if (type ==  LDS)
         DSVector[i] = new LinearDS(*dsTmp);
+      else if (type ==  LITIDS)
+        DSVector[i] = new LinearTIDS(*dsTmp);
       else if (type ==  LNLDS)
         DSVector[i] = new LagrangianDS(*dsTmp);
       else if (type ==  LTIDS)
@@ -136,17 +139,22 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* 
         DSVector[i] = new LagrangianDS(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
         isDSVectorAllocatedIn[i] = true;
       }
-      else if (type == LAGRANGIAN_TIME_INVARIANTDS_TAG)  // Lagrangian Linear Time Invariant
+      else if (type == LAGRANGIAN_TIDS_TAG)  // Lagrangian Linear Time Invariant
       {
         DSVector[i] = new LagrangianLinearTIDS(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
         isDSVectorAllocatedIn[i] = true;
       }
-      else if (type == LINEAR_SYSTEMDS_TAG)  // Linear DS
+      else if (type == LINEAR_DS_TAG)  // Linear DS
       {
         DSVector[i] = new LinearDS(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
         isDSVectorAllocatedIn[i] = true;
       }
-      else if (type == NON_LINEAR_SYSTEMDS_TAG)  // Non linear DS
+      else if (type == LINEAR_TIDS_TAG)  // Linear DS
+      {
+        DSVector[i] = new LinearTIDS(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
+        isDSVectorAllocatedIn[i] = true;
+      }
+      else if (type == NON_LINEAR_DS_TAG)  // Non linear DS
       {
         DSVector[i] = new DynamicalSystem(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
         isDSVectorAllocatedIn[i] = true;
@@ -225,7 +233,6 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* 
 
 NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 {
-  IN("NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem\n");
   unsigned int i;
 
   if (DSVector.size() > 0)
@@ -261,15 +268,12 @@ NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
     delete topology;
     topology = NULL;
   }
-
-  OUT("NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem\n");
 }
 
 // --- GETTERS/SETTERS ---
 
 DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystemPtr(const int& nb) const
 {
-  IN("DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystem(int nb)\n");
   if ((unsigned int)nb >= DSVector.size())
     RuntimeException::selfThrow("NonSmoothDynamicalSystem - getDynamicalSystem : \'nb\' is out of range");
   return DSVector[nb];
@@ -380,8 +384,6 @@ bool NonSmoothDynamicalSystem::hasInteractionNumber(const int& nb) const
 
 void NonSmoothDynamicalSystem::saveNSDSToXML()
 {
-  IN("NonSmoothDynamicalSystem::saveNSDSToXML\n");
-
   if (nsdsxml != NULL)
   {
     int size, i;
@@ -396,6 +398,8 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
       else if (DSVector[i]->getType() == LTIDS)
         (static_cast<LagrangianLinearTIDS*>(DSVector[i]))->saveDSToXML();
       else if (DSVector[i]->getType() == LDS)
+        (static_cast<LinearDS*>(DSVector[i]))->saveDSToXML();
+      else if (DSVector[i]->getType() == LITIDS)
         (static_cast<LinearDS*>(DSVector[i]))->saveDSToXML();
       else if (DSVector[i]->getType() == NLDS)
         DSVector[i]->saveDSToXML();
@@ -422,14 +426,10 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
       interactionVector[i]->saveInteractionToXML();
   }
   else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveNSDSToXML - The NonSmoothDynamicalSystemXML object doesn't exists");
-
-  OUT("NonSmoothDynamicalSystem::saveNSDSToXML\n");
 }
 
 void NonSmoothDynamicalSystem::display() const
 {
-  IN("NonSmoothDynamicalSystem::display\n");
-
   cout << " ===== Non Smooth Dynamical System display ===== " << endl;
   cout << "| Adress of this object = " << this << endl;
   cout << "| isBVP = " << BVP << endl;
@@ -456,17 +456,13 @@ void NonSmoothDynamicalSystem::display() const
       cout << " interaction -> NULL " << endl;
   }
   cout << "===================================================" << endl;
-
-  OUT("NonSmoothDynamicalSystem::display\n");
 }
 
 void NonSmoothDynamicalSystem::addDynamicalSystem(DynamicalSystem *ds)
 {
-  IN("NonSmoothDynamicalSystem::addDynamicalSystem\n");
-  ds->setNSDSPtr(this);
+  ds->setNonSmoothDynamicalSystemPtr(this);
   DSVector.push_back(ds);
   isDSVectorAllocatedIn.push_back(false);
-  OUT("NonSmoothDynamicalSystem::addDynamicalSystem\n");
 }
 
 void NonSmoothDynamicalSystem::addInteraction(Interaction *inter)

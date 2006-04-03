@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "DynamicalSystemXML.h"
 
 // to be deleted thanks to factories:
@@ -27,25 +27,46 @@
 
 using namespace std;
 
+void DynamicalSystemXML::loadBoundaryConditionXML(xmlNode * rootBoundaryConditionNode)
+{
+  if (rootBoundaryConditionNode == NULL)  //BoundaryCondition is not defined
+  {
+    boundaryConditionXML = NULL;
+  }
+  else
+  {
+    xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(rootBoundaryConditionNode);
+    string type((char*)node->name);
+    if (type == NON_LINEARBC_TAG)
+      boundaryConditionXML = new NLinearBCXML(node);
 
+    else if (type == LINEARBC_TAG)
+      boundaryConditionXML = new LinearBCXML(node);
+
+    else if (type == PERIODICBC_TAG)
+      boundaryConditionXML = new PeriodicBCXML(node);
+
+    else
+      XMLException::selfThrow("DynamicalSystemXML : undefined boundary condition type : " + type);
+  }
+}
 
 DynamicalSystemXML::DynamicalSystemXML():
-  rootDynamicalSystemXMLNode(NULL), parentNode(NULL), boundaryConditionXML(NULL), xMemoryXML(NULL), xDotMemoryXML(NULL), rMemoryXML(NULL),
-  idNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL), xDotNode(NULL), xMemoryNode(NULL), xDotMemoryNode(NULL),
-  stepsInMemoryNode(NULL), vectorFieldNode(NULL), computeJacobianXNode(NULL), boundaryConditionNode(NULL),
-  dsInputOutputNode(NULL),  rNode(NULL), rMemoryNode(NULL), uSizeNode(NULL), uNode(NULL), TNode(NULL)
+  rootDynamicalSystemXMLNode(NULL), parentNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL),
+  stepsInMemoryNode(NULL), xMemoryNode(NULL), xDotMemoryNode(NULL), rMemoryNode(NULL),
+  vectorFieldNode(NULL), jacobianXNode(NULL), boundaryConditionNode(NULL), dsInputOutputNode(NULL),
+  uSizeNode(NULL), uNode(NULL), TNode(NULL),
+  boundaryConditionXML(NULL), xMemoryXML(NULL), xDotMemoryXML(NULL), rMemoryXML(NULL)
 {}
 
-
-DynamicalSystemXML::DynamicalSystemXML(xmlNode * DSNode, const bool& isBVP):
-  rootDynamicalSystemXMLNode(DSNode), parentNode(NULL), boundaryConditionXML(NULL), xMemoryXML(NULL), xDotMemoryXML(NULL), rMemoryXML(NULL),
-  idNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL), xDotNode(NULL), xMemoryNode(NULL), xDotMemoryNode(NULL),
-  stepsInMemoryNode(NULL), vectorFieldNode(NULL), computeJacobianXNode(NULL), boundaryConditionNode(NULL),
-  dsInputOutputNode(NULL),  rNode(NULL), rMemoryNode(NULL), uSizeNode(NULL), uNode(NULL), TNode(NULL)
+DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, const bool& isBVP):
+  rootDynamicalSystemXMLNode(DSNode), parentNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL),
+  stepsInMemoryNode(NULL), xMemoryNode(NULL), xDotMemoryNode(NULL), rMemoryNode(NULL),
+  vectorFieldNode(NULL), jacobianXNode(NULL), boundaryConditionNode(NULL), dsInputOutputNode(NULL),
+  uSizeNode(NULL), uNode(NULL), TNode(NULL),
+  boundaryConditionXML(NULL), xMemoryXML(NULL), xDotMemoryXML(NULL), rMemoryXML(NULL)
 {
-  xmlNode *node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, ID_ATTRIBUTE)) != NULL)
-    idNode = node;
+  xmlNodePtr node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_N)) != NULL)
     nNode = node;
@@ -56,8 +77,8 @@ DynamicalSystemXML::DynamicalSystemXML(xmlNode * DSNode, const bool& isBVP):
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_X)) != NULL)
     xNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_XDOT)) != NULL)
-    xDotNode = node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_STEPSINMEMORY)) != NULL)
+    stepsInMemoryNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_XMEMORY)) != NULL)
   {
@@ -71,29 +92,24 @@ DynamicalSystemXML::DynamicalSystemXML(xmlNode * DSNode, const bool& isBVP):
     xDotMemoryXML = new SiconosMemoryXML(xDotMemoryNode, parentNode, DS_XDOTMEMORY);
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_STEPSINMEMORY)) != NULL)
-    stepsInMemoryNode = node;
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_VECTORFIELD)) != NULL)
-    vectorFieldNode = node;
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_COMPUTEJACOBIANX)) != NULL)
-    computeJacobianXNode = node;
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, BOUNDARYCONDITION_TAG)) != NULL)
-  {
-    loadBoundaryConditionXML(node);
-    boundaryConditionNode = node;
-  }
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_R)) != NULL)
-    rNode = node;
-
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_RMEMORY)) != NULL)
   {
     rMemoryNode = node;
     rMemoryXML = new SiconosMemoryXML(rMemoryNode, parentNode, DS_RMEMORY);
   }
+
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_VECTORFIELD)) != NULL)
+    vectorFieldNode = node;
+
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_JACOBIANX)) != NULL)
+    jacobianXNode = node;
+
+  // BC NOT YET IMPLEMENTED
+  //   if ((node=SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, BOUNDARYCONDITION_TAG)) !=NULL)
+  //     {
+  //       loadBoundaryConditionXML(node);
+  //       boundaryConditionNode = node;
+  //     }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, "uSize")) != NULL)
     uSizeNode = node;
@@ -113,42 +129,139 @@ DynamicalSystemXML::~DynamicalSystemXML()
   if (xDotMemoryXML != NULL) delete xDotMemoryXML;
 }
 
-void DynamicalSystemXML::loadBoundaryConditionXML(xmlNode * rootBoundaryConditionNode)
+void DynamicalSystemXML::setXMemory(const SiconosMemory& smem)
 {
-  if (rootBoundaryConditionNode == NULL)  //BoundaryCondition is not defined
+  if (!hasXMemory())
   {
-    boundaryConditionXML = NULL;
+    xMemoryXML = new SiconosMemoryXML(NULL, rootDynamicalSystemXMLNode, DS_XMEMORY);
+    xMemoryNode = xMemoryXML->getSiconosMemoryXMLNode();
+    xMemoryXML->setSiconosMemorySize(smem.getMemorySize());
+    xMemoryXML->setSiconosMemoryVector(smem.getVectorMemory());
   }
   else
   {
-    //string type = SiconosDOMTreeTools::getStringAttributeValue(rootBoundaryConditionNode, TYPE_ATTRIBUTE);
-    xmlNode *node = SiconosDOMTreeTools::findNodeChild(rootBoundaryConditionNode);
-    string type((char*)node->name);
-    if (type == NON_LINEARBC_TAG)
-      boundaryConditionXML = new NLinearBCXML(node);
-
-    else if (type == LINEARBC_TAG)
-      boundaryConditionXML = new LinearBCXML(node);
-
-    else if (type == PERIODICBC_TAG)
-      boundaryConditionXML = new PeriodicBCXML(node);
-
-    else
-      XMLException::selfThrow("DynamicalSystemXML : undefined boundary condition type : " + type);
+    xMemoryXML->setSiconosMemorySize(smem.getMemorySize());
+    xMemoryXML->setSiconosMemoryVector(smem.getVectorMemory());
   }
+}
+
+void DynamicalSystemXML::setXDotMemory(const SiconosMemory& smem)
+{
+
+  if (!hasXDotMemory())
+  {
+    xDotMemoryXML = new SiconosMemoryXML(NULL, rootDynamicalSystemXMLNode, DS_XDOTMEMORY);
+    xDotMemoryNode = xDotMemoryXML->getSiconosMemoryXMLNode();
+
+    xDotMemoryXML->setSiconosMemorySize(smem.getMemorySize());
+    xDotMemoryXML->setSiconosMemoryVector(smem.getVectorMemory());
+  }
+  else
+  {
+    xDotMemoryXML->setSiconosMemorySize(smem.getMemorySize());
+    xDotMemoryXML->setSiconosMemoryVector(smem.getVectorMemory());
+  }
+}
+
+void DynamicalSystemXML::setRMemory(const SiconosMemory& smem)
+{
+  if (!hasRMemory())
+  {
+    rMemoryXML = new SiconosMemoryXML(NULL, rootDynamicalSystemXMLNode, DS_RMEMORY);
+    rMemoryNode = rMemoryXML->getSiconosMemoryXMLNode();
+    rMemoryXML->setSiconosMemorySize(smem.getMemorySize());
+    rMemoryXML->setSiconosMemoryVector(smem.getVectorMemory());
+  }
+  else
+  {
+    rMemoryXML->setSiconosMemorySize(smem.getMemorySize());
+    rMemoryXML->setSiconosMemoryVector(smem.getVectorMemory());
+  }
+}
+
+void DynamicalSystemXML::setStepsInMemory(const unsigned int& nb)
+{
+  if (!hasStepsInMemory())
+    stepsInMemoryNode = SiconosDOMTreeTools::createIntegerNode(rootDynamicalSystemXMLNode, DS_STEPSINMEMORY, nb);
+  else SiconosDOMTreeTools::setIntegerContentValue(stepsInMemoryNode, nb);
+}
+
+void DynamicalSystemXML::setVectorFieldVector(const SiconosVector&v)
+{
+  SiconosDOMTreeTools::setSiconosVectorNodeValue(vectorFieldNode, v);
+}
+
+void DynamicalSystemXML::setVectorFieldPlugin(const std::string& plugin)
+{
+  if (vectorFieldNode == NULL)
+  {
+    vectorFieldNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, DS_VECTORFIELD);
+    xmlNewProp(vectorFieldNode, (xmlChar*)("vectorPlugin"), (xmlChar*)plugin.c_str());
+  }
+  else
+    SiconosDOMTreeTools::setStringAttributeValue(vectorFieldNode, "vectorPlugin", plugin);
+}
+
+void DynamicalSystemXML::setJacobianXMatrix(const SiconosMatrix&m)
+{
+  SiconosDOMTreeTools::setSiconosMatrixNodeValue(jacobianXNode, m);
+}
+
+void DynamicalSystemXML::setJacobianXPlugin(const std::string& plugin)
+{
+  if (jacobianXNode == NULL)
+  {
+    jacobianXNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, DS_JACOBIANX);
+    xmlNewProp(jacobianXNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
+  }
+  else
+    SiconosDOMTreeTools::setStringAttributeValue(jacobianXNode, "matrixPlugin", plugin);
+}
+
+void DynamicalSystemXML::setUVector(const SiconosVector& v)
+{
+  if (uNode != NULL)
+    SiconosDOMTreeTools::setSiconosVectorNodeValue(uNode, v);
+  else uNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, DS_U, v);
+}
+
+void DynamicalSystemXML::setUPlugin(const std::string& plugin)
+{
+  if (uNode == NULL)
+  {
+    uNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, "u");
+    xmlNewProp(uNode, (xmlChar*)("vectorPlugin"), (xmlChar*)plugin.c_str());
+  }
+  else
+    SiconosDOMTreeTools::setStringAttributeValue(uNode, "vectorPlugin", plugin);
+}
+
+void DynamicalSystemXML::setT(const SiconosMatrix &m)
+{
+  if (TNode != NULL)
+    SiconosDOMTreeTools::setSiconosMatrixNodeValue(TNode, m);
+  else TNode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, DS_T, m);
+}
+
+void DynamicalSystemXML::setTPlugin(const std::string& plugin)
+{
+  if (TNode == NULL)
+  {
+    TNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, "T");
+    xmlNewProp(TNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
+  }
+  else
+    SiconosDOMTreeTools::setStringAttributeValue(TNode, "matrixPlugin", plugin);
 }
 
 void DynamicalSystemXML::updateDynamicalSystemXML(xmlNode* newRootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)
 {
-  IN("DynamicalSystemXML::updateDynamicalSystemXML\n");
   rootDynamicalSystemXMLNode = newRootDSXMLNode;
   loadDynamicalSystem(ds);
-  OUT("DynamicalSystemXML::updateDynamicalSystemXML\n");
 }
 
 void DynamicalSystemXML::loadDynamicalSystem(DynamicalSystem* ds)
 {
-  IN("DynamicalSystemXML::loadDynamicalSystem( DynamicalSystem* ds)\n");
   string type;
   xmlNode* node;
 
@@ -193,9 +306,7 @@ void DynamicalSystemXML::loadDynamicalSystem(DynamicalSystem* ds)
       static_cast<PeriodicBCXML*>(boundaryConditionXML)->updateBoundaryConditionXML(node); //, ds->getBoundaryCondition() );
     }
     else
-    {
-      XMLException::selfThrow("DynamicalSystemXML - loadDynamicalSystem error : undefined DynamicalSystem type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
-    }
+      XMLException::selfThrow("DynamicalSystemXML - loadDynamicalSystem error : undefined DynamicalSystem type : " + type);
   }
 
   if (ds->getDSInputOutputs().size() > 0)
@@ -203,11 +314,11 @@ void DynamicalSystemXML::loadDynamicalSystem(DynamicalSystem* ds)
     int number;
     char num[32];
     map<int, DSInputOutputXML*>::iterator itdsio;
-    xmlNode *dsioDefinitionNode, *nsdsNode;
+    xmlNodePtr dsioDefinitionNode, nsdsNode;
     DSInputOutputXML *dsioXML;
 
-    nsdsNode = ds->getNSDSPtr()->getNonSmoothDynamicalSystemXMLPtr()->getNonSmoothDynamicalSystemXMLNode();
-    dsioDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)nsdsNode, DSINPUTOUTPUT_DEFINITION_TAG);
+    nsdsNode = ds->getNonSmoothDynamicalSystemPtr()->getNonSmoothDynamicalSystemXMLPtr()->getNonSmoothDynamicalSystemXMLNode();
+    dsioDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)nsdsNode, DSINPUTOUTPUT_DEFINITION_TAG);
     if (dsioDefinitionNode == NULL)
       dsioDefinitionNode = xmlNewChild(nsdsNode, NULL, (xmlChar*)DSINPUTOUTPUT_DEFINITION_TAG.c_str(), NULL);
 
@@ -270,21 +381,19 @@ void DynamicalSystemXML::loadDynamicalSystem(DynamicalSystem* ds)
         }
         else cout << "DynamicalSystemXML - loadDynamicalSystem : the DSInputOutput type : " << ds->getDSInputOutput(i)->getType() << " already exists!" << endl;
       }
-      else cout << "### strange, DSIOXML != NULL :gratgrat:" << endl;
+      else cout << "### DynamicalSystemXML updateDSInputOutputXML, DSIOXML != NULL" << endl;
     }
   }
-  OUT("DynamicalSystemXML::loadDynamicalSystem( DynamicalSystem* ds)\n");
 }
 
-DSInputOutputXML* DynamicalSystemXML::getDSInputOutputXML(int number)
+DSInputOutputXML* DynamicalSystemXML::getDSInputOutputXML(const int& number)
 {
   map<int, DSInputOutputXML*>::iterator it;
 
   it = dsInputOutputXMLMap.find(number);
   if (it == dsInputOutputXMLMap.end())
-  {
     return NULL;
-  }
+
   return dsInputOutputXMLMap[number];
 }
 

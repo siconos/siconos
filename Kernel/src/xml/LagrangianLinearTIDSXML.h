@@ -39,7 +39,16 @@ const std::string LTIDS_C = "C";
 
 class LagrangianLinearTIDSXML : public LagrangianDSXML
 {
+private:
+
+  xmlNode * KNode;
+  xmlNode * CNode;
+
 public:
+
+  /** \fn LagrangianLinearTIDSXML()
+   *   \brief default constructor
+   */
   LagrangianLinearTIDSXML();
 
   /** \fn LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSNode, int number)
@@ -49,48 +58,48 @@ public:
    */
   LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSNode, bool isBVP);
 
-  /** \fn SimpleMatrix getK()
+  /** \fn const SimpleMatrix getK() const
    *   \brief Return the K of the LagrangianLinearTIDSXML
    *   \return The K SimpleMatrix of the LagrangianLinearTIDSXML
    */
-  inline SimpleMatrix getK()
+  inline const SimpleMatrix getK() const
   {
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(this->KNode);
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(KNode);
   }
 
   /** \fn void setK(SiconosMatrix *m)
    *   \brief allows to save the K of the LagrangianLinearTIDSXML
    *   \return The K SiconosMatrix to save
    */
-  inline void setK(SiconosMatrix *m)
+  inline void setK(const SiconosMatrix& m)
   {
-    if (this->KNode == NULL)
+    if (KNode == NULL)
     {
-      this->KNode = SiconosDOMTreeTools::createMatrixNode(this->rootDynamicalSystemXMLNode, LTIDS_K, *m);
+      KNode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, LTIDS_K, m);
     }
-    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->KNode, *m);
+    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(KNode, m);
   }
 
-  /** \fn SimpleMatrix getC()
+  /** \fn const SimpleMatrix getC() const
    *   \brief Return the C of the LagrangianLinearTIDSXML
    *   \return The C SimpleMatrix of the LagrangianLinearTIDSXML
    */
-  inline SimpleMatrix getC()
+  inline const SimpleMatrix getC() const
   {
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(this->CNode);
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(CNode);
   }
 
   /** \fn void setC(SiconosMatrix *m)
    *   \brief allows to save the C of the LagrangianLinearTIDSXML
    *   \return The C SiconosMatrix to save
    */
-  inline void setC(SiconosMatrix *m)
+  inline void setC(const SiconosMatrix& m)
   {
-    if (this->CNode == NULL)
+    if (CNode == NULL)
     {
-      this->CNode = SiconosDOMTreeTools::createMatrixNode(this->rootDynamicalSystemXMLNode, LTIDS_C, *m);
+      CNode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, LTIDS_C, m);
     }
-    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->CNode, *m);
+    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(CNode, m);
   }
 
 
@@ -106,7 +115,7 @@ public:
    *  \brief determines if K is defined in the DOM tree
    *  \return bool : true if K is defined, false otherwise
    */
-  inline bool hasK()
+  inline const bool hasK() const
   {
     return (KNode != NULL);
   }
@@ -115,19 +124,10 @@ public:
    *  \brief determines if C is defined in the DOM tree
    *  \return bool : true if C is defined, false otherwise
    */
-  inline bool hasC()
+  inline const bool hasC() const
   {
     return (CNode != NULL);
   }
-
-
-private:
-
-  //Nodes
-
-  xmlNode * KNode;
-  xmlNode * CNode;
-
 };
 
 #endif

@@ -30,13 +30,13 @@ extern "C" void vectorField(const unsigned int& sizeOfX, const double *time, con
   printf("Warning: call of the function 'vectorField' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
 
-extern "C" void computeJacobianX(const unsigned int &sizeOfX, const double *time, const double *x, double *jacob, double* param)
+extern "C" void jacobianX(const unsigned int &sizeOfX, const double *time, const double *x, double *jacob, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); time; x (pointer to x vector);
    * output parameter : jacob (pointer to JacobianX matrix)
    */
 
-  printf("Warning: call of the function 'computeJacobianX' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
+  printf("Warning: call of the function 'jacobianX' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
 
 
@@ -71,7 +71,7 @@ extern "C" void computeT(const unsigned int& sizeOfU, const unsigned int& sizeOf
 // Plugins for Fext, Fint, NNL (vectors), Mass, JacobianQNNL, JacobianVelocityNNL,
 // JacobianQFint and JacobianVelocityFint (matrices)
 
-extern "C" void computeFInt(const unsigned int *sizeOfq, const double *time, const double *q, const double *velocity, double *fInt, double * param)
+extern "C" void computeFInt(const unsigned int&sizeOfq, const double *time, const double *q, const double *velocity, double *fInt, double * param)
 {
   /* input parameter : sizeOfq (size of the vector q); time; q (pointer to q vector); velocity (pointer to velocity vector);
    * output parameter : fInt (pointer to Fint *vector)
@@ -81,7 +81,7 @@ extern "C" void computeFInt(const unsigned int *sizeOfq, const double *time, con
 
 }
 
-extern "C" void computeFExt(const unsigned int *sizeOfq, const double *time, double *fExt, double *param)
+extern "C" void computeFExt(const unsigned int&sizeOfq, const double *time, double *fExt, double *param)
 {
   /* input parameter : sizeOfq (size of the vector q); time; q (pointer to q vector);
    * param: list of parameter to customize fExt (amplitude, pulsation ...)
@@ -92,7 +92,7 @@ extern "C" void computeFExt(const unsigned int *sizeOfq, const double *time, dou
 
 }
 
-extern "C" void computeNNL(const unsigned int *sizeOfq, const double *q, const double *velocity, double *NNL, double *param)
+extern "C" void computeNNL(const unsigned int&sizeOfq, const double *q, const double *velocity, double *NNL, double *param)
 {
   /* input parameter : sizeOfq (size of the vector q); q (pointer to q vector); velocity (pointer to velocity vector);
    * output parameter : Q (pointer to Q vector)
@@ -103,7 +103,7 @@ extern "C" void computeNNL(const unsigned int *sizeOfq, const double *q, const d
 }
 
 
-extern "C" void computeMass(const unsigned int *sizeOfq, const double *time, const double *q, double *mass, double* param)
+extern "C" void computeMass(const unsigned int&sizeOfq, const double *q, double *mass, double* param)
 {
   /* input parameter : sizeOfq (size of the vector q); time ; q (pointer to q vector);
    * output parameter : mass (pointer to mass matrix)
@@ -112,7 +112,7 @@ extern "C" void computeMass(const unsigned int *sizeOfq, const double *time, con
 }
 
 
-extern "C" void computeJacobianQFInt(const unsigned int *sizeOfq, const double *time, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void computeJacobianQFInt(const unsigned int&sizeOfq, const double *time, const double *q, const double *velocity, double *jacob, double* param)
 {
   /* input parameter : sizeOfq (size of the vector q); time; q (pointer to q vector); velocity (pointer to velocity vector);
    * output parameter : jacob (pointer to JacobianCoordFint *matrix)
@@ -121,17 +121,17 @@ extern "C" void computeJacobianQFInt(const unsigned int *sizeOfq, const double *
   printf("Warning: call of the function 'computeJacobianQFInt' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
 
-extern "C" void computeJacobianVelocityFInt(const unsigned int *sizeOfq, const double *time, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void computeJacobianVelocityFInt(const unsigned int&sizeOfq, const double *time, const double *q, const double *velocity, double *jacob, double* param)
 {
   printf("Warning: call of the function 'computeJacobianVelocityFInt' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
 
-extern "C" void computeJacobianQNNL(const unsigned int *sizeOfq, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void computeJacobianQNNL(const unsigned int&sizeOfq, const double *q, const double *velocity, double *jacob, double* param)
 {
   printf("Warning: call of the function 'computeJacobianQNNL' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
 
-extern "C" void computeJacobianVelocityNNL(const unsigned int *sizeOfq, const double *q, const  double *velocity, double *jacob, double* param)
+extern "C" void computeJacobianVelocityNNL(const unsigned int&sizeOfq, const double *q, const  double *velocity, double *jacob, double* param)
 {
   printf("Warning: call of the function 'computeJacobianVelocityNNL' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }

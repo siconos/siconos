@@ -167,17 +167,12 @@ void Moreau::computeW(const double& t)
       isWAllocatedIn = true;
     }
     // Compute Mass matrix (if loaded from plugin)
-    if (d->getIsLDSPlugin(0))
-      d->computeMass();
+    d->computeMass();
     // Compute and get Jacobian (if loaded from plugin)
-    if (d->getIsLDSPlugin(4))
-      d->computeJacobianQFInt(t);
-    if (d->getIsLDSPlugin(5))
-      d->computeJacobianVelocityFInt(t);
-    if (d->getIsLDSPlugin(6))
-      d->computeJacobianQNNL();
-    if (d->getIsLDSPlugin(7))
-      d->computeJacobianVelocityNNL();
+    d->computeJacobianQFInt(t);
+    d->computeJacobianVelocityFInt(t);
+    d->computeJacobianQNNL();
+    d->computeJacobianVelocityNNL();
 
     SiconosMatrix *KFint, *KQNL, *CFint, *CQNL ;
     KFint = d->getJacobianQFIntPtr();
@@ -411,8 +406,6 @@ void Moreau::integrate()
     //                      ndof, &qold(0),&vold(0),
     //                      &W(0,0),&K(0,0),&C(0,0),fext,
     //                      &v(0),&q(0))
-    d->setIsDSUp(false); // to reset isDSUp bool, see LagrangianDS.
-
   }
   else RuntimeException::selfThrow("Moreau::integrate - not yet implemented for Dynamical system type :" + ds->getType());
 }

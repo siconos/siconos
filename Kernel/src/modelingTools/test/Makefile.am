@@ -23,9 +23,9 @@ TESTS_ENVIRONMENT = LD_LIBRARY_PATH=$(top_srcdir)/src/plugin/:$(top_builddir)/sr
 
 check_PROGRAMS = test1
 TESTS = $(check_PROGRAMS)
-test1_SOURCES = RelationTest.cpp LinearTIRTest.cpp LagrangianRTest.cpp LagrangianLinearRTest.cpp DynamicalSystemTest.cpp LinearDSTest.cpp TestMain.cpp \
-RelationTest.h LinearTIRTest.h LagrangianRTest.h LagrangianLinearRTest.h DynamicalSystemTest.h LinearDSTest.h
-include_HEADERS =RelationTest.h LinearTIRTest.h LagrangianRTest.h LagrangianLinearRTest.h DynamicalSystemTest.h LinearDSTest.h
+test1_SOURCES = RelationTest.cpp LinearTIRTest.cpp LagrangianRTest.cpp LagrangianLinearRTest.cpp DynamicalSystemTest.cpp LinearDSTest.cpp LagrangianDSTest.cpp TestMain.cpp \
+RelationTest.h LinearTIRTest.h LagrangianRTest.h LagrangianLinearRTest.h DynamicalSystemTest.h LinearDSTest.h LagrangianDSTest.h
+include_HEADERS =RelationTest.h LinearTIRTest.h LagrangianRTest.h LagrangianLinearRTest.h DynamicalSystemTest.h LinearDSTest.h LagrangianDSTest.h
 test1_INCLUDES = $(CPPUNIT_CFLAGS)
 test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
 

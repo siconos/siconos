@@ -98,8 +98,8 @@ void DynamicalSystemTest::testBuildDynamicalSystem1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1E : ", ds->getX0() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1F : ", ds->getU() == *u0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1G : ", ds->getT() == *T0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1H : ", ds->getIsPlugin()[0] == false, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1I : ", ds->getIsPlugin()[1] == false, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1H : ", ds->isPlugged("vectorField"), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1I : ", ds->isPlugged("jacobianX"), true);
 
   delete ds;
   cout << "--> Constructor xml test ended with success." << endl;
@@ -116,8 +116,8 @@ void DynamicalSystemTest::testBuildDynamicalSystem2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2C : ", ds->getId() == "testDS2", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2E : ", ds->getX0() == 2 * *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2F : ", ds->getIsPlugin()[0] == true, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2G : ", ds->getIsPlugin()[1] == true, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2F : ", ds->isPlugged("vectorField"), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2G : ", ds->isPlugged("jacobianX"), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2H : ", ds->getUSize() == 2, true);
 
   double time = 1.5;
@@ -126,7 +126,6 @@ void DynamicalSystemTest::testBuildDynamicalSystem2()
   SimpleVector * x01 = new SimpleVector(2);
   (*x01)(0) = 2;
   (*x01)(1) = 4;
-  ds->getU().display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2I : ", ds->getU() == time* *x01, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2J : ", ds->getT() == *T0, true);
   delete x01;
@@ -167,8 +166,8 @@ void DynamicalSystemTest::testBuildDynamicalSystem4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4E : ", ds2->getX0() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4F : ", ds2->getU() == *u0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4G : ", ds2->getT() == *T0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4H : ", ds2->getIsPlugin()[0] == false, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4I : ", ds2->getIsPlugin()[1] == false, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4H : ", ds2->isPlugged("vectorField"), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4I : ", ds2->isPlugged("jacobianX"), true);
 
   delete ds1;
   delete ds2;

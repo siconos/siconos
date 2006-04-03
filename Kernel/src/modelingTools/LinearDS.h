@@ -54,11 +54,33 @@ class LinearDSXML;
  * \f]
  * and so A should always be specified.
  *
+ * Links with DynamicalSystem are:
+ *
+ * \f[
+ *   f(x,t) = A(t)x(t) + b(t) \\
+ *   jacobianX = A(t)
+ * \f]
+ *
+ *  Thus, the main steps for LinearDS handling consist in:
+ *
+ *  - Construction: A is required and must be set as a matrix or a plug-in. b is optional, and can be given as a vector or a plug-in.
+ *  - Initialization: compute values at time=t0 (vectorField, jacobianX, A ...), usually done when calling strategy->initialize.
+ *  - Computation a time t, by calling "compute" functions
+ *      => computeA or computeJacobianX, same result.
+ *      => computeB
+ *      => computeVectorField, compute xDot = Ax + b + Tu
+ *      => computeU and computeT (from DynamicalSystem class)
+ *
+ * Any call to a plug-in requires that it has been set correctly before simulation using one of the following:
+ *   => setComputeJacobianXFunction or setComputeA (same result)
+ *   => setComputeBFunction
+ *   Warning: setVectorFieldFunction is useless in LinearDS case, since xDot is computed using A, b,u and T.
+ *
  **/
 
 class LinearDS : public DynamicalSystem
 {
-private:
+protected:
 
   /** matrix specific to the LinearDS \f$ A \in R^{n \times n}  \f$*/
   SiconosMatrix *A;
@@ -77,12 +99,6 @@ private:
    */
   void (*computeBPtr)(const unsigned int &, const double*, double*, double*);
 
-  /** Flags to know if pointers have been allocated inside constructors or not */
-  bool isBAllocatedIn;
-
-  /** Flag to check if jacobianX (A) and/or b is a plug-in or not - isLDSPlugin[0] for A, [1] for b.*/
-  std::deque<bool> isLDSPlugin;
-
   /** \fn LinearDS()
    *  \brief default constructor
    */
@@ -98,7 +114,7 @@ public:
    *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
    *  \exception RuntimeException
    */
-  LinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
+  LinearDS(DynamicalSystemXML *, NonSmoothDynamicalSystem* = NULL);
 
   /** \fn LinearDS(int number, int n, SiconosVector* x0, NSDS * nsds)
    *  \brief constructor from a set of data
@@ -120,8 +136,18 @@ public:
    *  \param SiconosMatrix : matrix A
    *  \exception RuntimeException
    */
-  LinearDS(const int& newNumber, const SiconosVector& newX0,
-           const SiconosMatrix& newA);
+  LinearDS(const int&, const SiconosVector&, const SiconosMatrix&);
+
+  /** \fn LinearDS( const int& newNumber, const SiconosVector& newX0,
+   *                const SiconosMatrix& newA, const SiconosVector& newB)
+   *  \brief constructor from a set of data
+   *  \param int : reference number of the DynamicalSystem
+   *  \param SiconosVector : the initial state of this DynamicalSystem
+   *  \param SiconosMatrix : matrix A
+   *  \param SiconosVector : b
+   *  \exception RuntimeException
+   */
+  LinearDS(const int&, const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
 
   /** \fn LinearDS(const LinearDS &)
    *  \brief copy constructor
@@ -137,14 +163,20 @@ public:
 
   /** \fn ~LinearDS()
    *  \brief destructor */
-  ~LinearDS();
+  virtual ~LinearDS();
+
+  /** \fn bool checkDynamicalSystem()
+   *  \brief check that the system is complete (ie all required data are well set)
+   * \return a bool
+   */
+  virtual bool checkDynamicalSystem();
 
   /** \fn void initialize(const double& = 0, const unsigned int& = 1) ;
    *  \brief dynamical system initialization function: mainly set memory and compute value for initial state values.
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  void initialize(const double& = 0, const unsigned int& = 1) ;
+  virtual void initialize(const double& = 0, const unsigned int& = 1) ;
 
   // --- getter and setter ---
 
@@ -223,15 +255,6 @@ public:
    */
   void setBPtr(SimpleVector *);
 
-  /** \fn  std::deque<bool> getIsLDSPlugin() const
-   *  \brief get boolean vector that checks if members are loaded from plugin or not
-   *  \return a vector of bool
-   */
-  inline const std::deque<bool> getIsLDSPlugin() const
-  {
-    return isLDSPlugin;
-  }
-
   // --- plugins related functions
 
   /** \fn  std::string getAFunctionName() const
@@ -249,7 +272,7 @@ public:
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeAFunction(const std::string &, const std::string &);
+  virtual void setComputeAFunction(const std::string &, const std::string &);
 
   /** \fn  std::string getBFunctionName() const
   *  \brief get name of function that computes b (if b from plugin)
@@ -266,7 +289,7 @@ public:
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeBFunction(const std::string &, const std::string &);
+  virtual void setComputeBFunction(const std::string &, const std::string &);
 
   /** \fn void setVectorFieldFunction(const string&, const string&)
    *  \brief overload corresponding function of DS -> did nothing.
@@ -282,14 +305,14 @@ public:
    *  \param the string functionName : function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianXFunction(const std::string & pluginPath, const std::string & functionName);
+  virtual void setComputeJacobianXFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void vectorField (const double& time)
    * \brief compute the vector field Ax+b
    * \param double time : current time
    *  \exception RuntimeException
    */
-  void computeVectorField(const double&);
+  virtual void computeVectorField(const double&);
 
   /** \fn void computeA(const double& time)
    *  \brief default function to compute matrix A => same action as computeJacobianX
@@ -314,7 +337,7 @@ public:
   /** \fn void display()
    *  \brief data display on screen
    */
-  void display() const;
+  virtual void display() const;
 
   /** \fn LinearDS* convert (DynamicalSystem* ds)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.

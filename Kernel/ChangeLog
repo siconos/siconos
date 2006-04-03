@@ -28,6 +28,10 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 
 Changes:
 
+2006-03-28 Franck Perignon <franck.perignon@inrialpes.fr>
+                                                                               
+	* Add LinearTIDS class
+
 2006-03-22 Franck Perignon <franck.perignon@inrialpes.fr>
                                                                                
 	* Set correct links between DynamicalSystem and its derived classes.
@@ -66,7 +70,7 @@ Changes:
 	  autotools version. 
 
 --------------------------------------------------------------------------------
-  v1.1.4 -  (release 428)
+  v1.1.2 -  (release 428)
 --------------------------------------------------------------------------------	
 Notes:  bugs fixing version
 
@@ -93,7 +97,7 @@ Changes:
 	to neglect -lcrt2.o option at linking on MacOsX. This bug will 
 	be normally corrected in further version of autoconf.
 --------------------------------------------------------------------------------
-  v1.1.4 - February 2006 (release 421)
+  v1.1.1 - February 2006 (release 421)
 --------------------------------------------------------------------------------
 	
 Notes:

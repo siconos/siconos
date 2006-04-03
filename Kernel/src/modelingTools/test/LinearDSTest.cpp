@@ -38,7 +38,6 @@ void LinearDSTest::setUp()
   (*b0)(1) = 5;
   (*b0)(2) = 6;
 
-
   A0 = new SimpleMatrix("matA0.dat", true);
 
   // parse xml file:
@@ -55,13 +54,11 @@ void LinearDSTest::setUp()
   }
 
   // get rootNode
-
   if (xmlStrcmp(cur->name, (const xmlChar *) "SiconosModel"))
   {
     XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
     xmlFreeDoc(doc);
   }
-
   // look for NSDS node
   xmlNode* nodetmp = SiconosDOMTreeTools::findNodeChild(cur, "NSDS");
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "DS_Definition");
@@ -98,8 +95,8 @@ void LinearDSTest::testBuildLinearDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS1E : ", ds->getX0() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS1F : ", ds->getB() == *b0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS1G : ", ds->getA() == *A0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS1H : ", ds->getIsLDSPlugin()[0] == false, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS1I : ", ds->getIsLDSPlugin()[1] == false, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS1H : ", ds->isPlugged("jacobianX"), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS1I : ", ds->isPlugged("b"), false);
   delete ds;
   cout << "--> Constructor xml test ended with success." << endl;
 }
@@ -114,8 +111,8 @@ void LinearDSTest::testBuildLinearDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2C : ", ds->getId() == "testDS2", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2E : ", ds->getX0() == 2 * *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2F : ", ds->getIsLDSPlugin()[0] == true, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2G : ", ds->getIsLDSPlugin()[1] == true, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2F : ", ds->isPlugged("jacobianX"), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2G : ", ds->isPlugged("b"), true);
 
   double time = 1.5;
   ds->computeB(time);
@@ -197,8 +194,8 @@ void LinearDSTest::testBuildLinearDS4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS4E : ", ds2->getX0() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS4F : ", ds2->getB() == *b0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS4G : ", ds2->getA() == *A0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS4H : ", ds2->getIsLDSPlugin()[0] == false, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS4I : ", ds2->getIsLDSPlugin()[1] == false, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS4H : ", ds2->isPlugged("jacobianX"), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS4I : ", ds2->isPlugged("b"), false);
 
   delete ds1;
   delete ds2;
