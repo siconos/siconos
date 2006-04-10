@@ -48,16 +48,14 @@ class SiconosMemoryXML;
 const std::string DS_N = "n";
 const std::string DS_X0 = "x0";
 const std::string DS_X = "x";
-const std::string DS_XDOT = "xDot";
 const std::string DS_R = "R";
 const std::string DS_U = "u";
 const std::string DS_T = "T";
 const std::string DS_XMEMORY = "xMemory";
-const std::string DS_XDOTMEMORY = "xDotMemory";
 const std::string DS_RMEMORY = "RMemory";
 const std::string DS_STEPSINMEMORY = "StepsInMemory";
-const std::string DS_VECTORFIELD = "vectorField";
-const std::string DS_JACOBIANX = "jacobianX";
+const std::string DS_F = "f";
+const std::string DS_JACOBIANXF = "jacobianXF";
 const std::string DS_MATRIXPLUGIN = "matrixPlugin";
 const std::string DS_VECTORPLUGIN = "vectorPlugin";
 
@@ -73,10 +71,9 @@ protected:
   xmlNodePtr xNode;/**<  state (usefull is start from recovery xml-file*/
   xmlNodePtr stepsInMemoryNode; /**< size of memory */
   xmlNodePtr xMemoryNode;/**<  memory vector for x*/
-  xmlNodePtr xDotMemoryNode;/**< memory vector for xDot (usefull?) */
   xmlNodePtr rMemoryNode;/**< memory vector for r */
-  xmlNodePtr vectorFieldNode;/**< f(x,t) */
-  xmlNodePtr jacobianXNode;/**< jacobian of f according to x */
+  xmlNodePtr fNode;/**< f(x,t) */
+  xmlNodePtr jacobianXFNode;/**< jacobian of f according to x */
   xmlNodePtr boundaryConditionNode;/**< boundary conditions */
   xmlNodePtr dsInputOutputNode;/**< ds input-output */
   xmlNodePtr uSizeNode;/**< size of control vector */
@@ -85,7 +82,6 @@ protected:
 
   BoundaryConditionXML * boundaryConditionXML;/**< Boundary conditions obxml object */
   SiconosMemoryXML * xMemoryXML;/** <xml object for xMemory*/
-  SiconosMemoryXML * xDotMemoryXML;/**<xml object for xDotMemory*/
   SiconosMemoryXML * rMemoryXML;/**<xml object for rMemory*/
   std::map<int, DSInputOutputXML*> dsInputOutputXMLMap;/**< list of dsinput-output, with an int as a key identifier*/
   std::vector<int> definedDSInputOutputNumbers;/**<  useless at the time */
@@ -250,21 +246,6 @@ public:
    */
   void setXMemory(const SiconosMemory&);
 
-  /** \fn SiconosMemoryXML* getXDotMemoryXML() const
-   *   \brief Returns the xDotMemoryXML* of the DynamicalSystemXML
-   *   \return SiconosMemoryXML*
-   */
-  inline SiconosMemoryXML* getXDotMemoryXML() const
-  {
-    return xDotMemoryXML;
-  }
-
-  /** \fn void setXDotMemory(const SiconosMemory& )
-   *   \brief to save the xDotMemory of the DynamicalSystemXML
-   *   \param SiconosMemory* smem : SiconosMemory to save
-   */
-  void setXDotMemory(const SiconosMemory&);
-
   /** \fn SiconosMemoryXML* getRMemoryXML() const
    *   \brief Returns the rMemoryXML* of the DynamicalSystemXML
    *   \return SiconosMemoryXML*
@@ -289,75 +270,75 @@ public:
     return boundaryConditionXML;
   }
 
-  // === VectorField ===
-  /** \fn inline string getVectorFieldPlugin()
-   *  \brief Return the name of the vectorField plug-in
+  // === f ===
+  /** \fn inline string getFPlugin()
+   *  \brief Return the name of the f plug-in
    *  \return a string
    */
-  inline const std::string getVectorFieldPlugin() const
+  inline const std::string getFPlugin() const
   {
-    if (!isVectorFieldPlugin())
-      XMLException::selfThrow("DynamicalSystemXML - getVectorFieldPlugin : vectorField is not calculated from a plugin since a vectorField vector is given.");
-    return  SiconosDOMTreeTools::getStringAttributeValue(vectorFieldNode, "vectorPlugin");
+    if (!isFPlugin())
+      XMLException::selfThrow("DynamicalSystemXML - getFPlugin : f is not calculated from a plugin since a f vector is given.");
+    return  SiconosDOMTreeTools::getStringAttributeValue(fNode, "vectorPlugin");
   }
 
-  /** \fn const SimpleVector getVectorFieldVector() const
-   *   \brief return vectorField vector
+  /** \fn const SimpleVector getFVector() const
+   *   \brief return f vector
    *   \return SimpleVector
    */
-  inline const SimpleVector getVectorFieldVector() const
+  inline const SimpleVector getFVector() const
   {
-    if (isVectorFieldPlugin())
-      XMLException::selfThrow("DynamicalSystemXML - getVectorFieldVector : vectorField vector is not given since vectorField is calculated using a plug-in");
-    return  SiconosDOMTreeTools::getSiconosVectorValue(vectorFieldNode);
+    if (isFPlugin())
+      XMLException::selfThrow("DynamicalSystemXML - getFVector : f vector is not given since f is calculated using a plug-in");
+    return  SiconosDOMTreeTools::getSiconosVectorValue(fNode);
   }
 
-  /** \fn void setVectorFieldVector(const SiconosVector& v)
-   *   \brief to save the vectorField vector
+  /** \fn void setFVector(const SiconosVector& v)
+   *   \brief to save the f vector
    *   \param a SiconosVector
    */
-  void setVectorFieldVector(const SiconosVector&v);
+  void setFVector(const SiconosVector&v);
 
-  /** \fn void setVectorFieldPlugin(const string& plugin)
-   *   \brief to save the VectorField plugin
+  /** \fn void setFPlugin(const string& plugin)
+   *   \brief to save the F plugin
    *   \param a string (name of the plug-in)
    */
-  void setVectorFieldPlugin(const std::string& plugin);
+  void setFPlugin(const std::string& plugin);
 
-  // === JacobianX ===
-  /** \fn inline string getJacobianXPlugin()
-   *  \brief Return the name of the jacobianX plug-in
+  // === JacobianXF ===
+  /** \fn inline string getJacobianXFPlugin()
+   *  \brief Return the name of the jacobianXF plug-in
    *  \return a string
    */
-  inline const std::string getJacobianXPlugin() const
+  inline const std::string getJacobianXFPlugin() const
   {
-    if (!isJacobianXPlugin())
-      XMLException::selfThrow("DynamicalSystemXML - getJacobianXPlugin : jacobianX is not calculated from a plugin since a jacobianX matrix is given.");
-    return  SiconosDOMTreeTools::getStringAttributeValue(jacobianXNode, "matrixPlugin");
+    if (!isJacobianXFPlugin())
+      XMLException::selfThrow("DynamicalSystemXML - getJacobianXFPlugin : jacobianXF is not calculated from a plugin since a jacobianXF matrix is given.");
+    return  SiconosDOMTreeTools::getStringAttributeValue(jacobianXFNode, "matrixPlugin");
   }
 
-  /** \fn const SimpleMatrix getJacobianXMatrix() const
-   *   \brief return jacobianX matrix
+  /** \fn const SimpleMatrix getJacobianXFMatrix() const
+   *   \brief return jacobianXF matrix
    *   \return SimpleMatrix
    */
-  inline const SimpleMatrix getJacobianXMatrix() const
+  inline const SimpleMatrix getJacobianXFMatrix() const
   {
-    if (isJacobianXPlugin())
-      XMLException::selfThrow("DynamicalSystemXML - getJacobianXMatrix : jacobianX matrix is not given since jacobianX is calculated using a plug-in");
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(jacobianXNode);
+    if (isJacobianXFPlugin())
+      XMLException::selfThrow("DynamicalSystemXML - getJacobianXFMatrix : jacobianXF matrix is not given since jacobianXF is calculated using a plug-in");
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(jacobianXFNode);
   }
 
-  /** \fn void setJacobianXMatrix(const SiconosMatrix& v)
-   *   \brief to save the jacobianX matrix
+  /** \fn void setJacobianXFMatrix(const SiconosMatrix& v)
+   *   \brief to save the jacobianXF matrix
    *   \param a SiconosMatrix
    */
-  void setJacobianXMatrix(const SiconosMatrix&v);
+  void setJacobianXFMatrix(const SiconosMatrix&v);
 
-  /** \fn void setJacobianXPlugin(const string& plugin)
-   *   \brief to save the JacobianX plugin of the LagrangianDSXML
+  /** \fn void setJacobianXFPlugin(const string& plugin)
+   *   \brief to save the JacobianXF plugin of the LagrangianDSXML
    *   \param a string (name of the plug-in)
    */
-  void setJacobianXPlugin(const std::string& plugin);
+  void setJacobianXFPlugin(const std::string& plugin);
 
   /** \fn int getUSize()
    *   \brief get size of vector u
@@ -499,15 +480,6 @@ public:
     return (xMemoryNode != NULL);
   }
 
-  /** \fn bool hasXDotMemory()  const
-   *  \brief returns true if xDotMemoryNode is defined
-   *  \return true if xDotMemoryNode is defined
-   */
-  inline bool hasXDotMemory() const
-  {
-    return (xDotMemoryNode != NULL);
-  }
-
   /** \fn bool hasRMemory() const
    *  \brief returns true if RMemory is defined
    *  \return true if RMemory is defined
@@ -517,22 +489,22 @@ public:
     return (rMemoryNode != NULL);
   }
 
-  /** \fn bool hasVectorField() const
-   *  \brief returns true if vectorFieldNode is defined
-   *  \return true if vectorFieldNode is defined
+  /** \fn bool hasF() const
+   *  \brief returns true if fNode is defined
+   *  \return true if fNode is defined
    */
-  inline bool hasVectorField() const
+  inline bool hasF() const
   {
-    return (vectorFieldNode != NULL);
+    return (fNode != NULL);
   }
 
-  /** \fn bool hasJacobianX() const
-   *  \brief returns true if jacobianXNode is defined
-   *  \return true if jacobianXNode is defined
+  /** \fn bool hasJacobianXF() const
+   *  \brief returns true if jacobianXFNode is defined
+   *  \return true if jacobianXFNode is defined
    */
-  inline bool hasJacobianX() const
+  inline bool hasJacobianXF() const
   {
-    return (jacobianXNode != NULL);
+    return (jacobianXFNode != NULL);
   }
 
   /** \fn bool hasBoundaryCondition() const
@@ -546,7 +518,7 @@ public:
 
   /** \fn bool hasUSize() const
   *  \brief returns true if uSizeNode is defined
-  *  \return true if jacobianXNode is defined
+  *  \return true if jacobianXFNode is defined
   */
   inline bool hasUSize() const
   {
@@ -555,7 +527,7 @@ public:
 
   /** \fn bool hasU() const
   *  \brief returns true if uNode is defined
-  *  \return true if jacobianXNode is defined
+  *  \return true if jacobianXFNode is defined
   */
   inline bool hasU() const
   {
@@ -564,27 +536,27 @@ public:
 
   /** \fn bool hasT() const
   *  \brief returns true if TNode is defined
-  *  \return true if jacobianXNode is defined
+  *  \return true if jacobianXFNode is defined
   */
   inline bool hasT() const
   {
     return (TNode != NULL);
   }
 
-  /** \fn bool isVectorFieldPlugin()
-   *   \brief Return true if vectorField is calculated from a plugin
+  /** \fn bool isFPlugin()
+   *   \brief Return true if f is calculated from a plugin
    */
-  inline bool isVectorFieldPlugin() const
+  inline bool isFPlugin() const
   {
-    return xmlHasProp((xmlNodePtr)vectorFieldNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
+    return xmlHasProp((xmlNodePtr)fNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
   }
 
-  /** \fn bool isJacobianXPlugin()
-   *   \brief Return true if jacobianX is calculated from a plugin
+  /** \fn bool isJacobianXFPlugin()
+   *   \brief Return true if jacobianXF is calculated from a plugin
    */
-  inline bool isJacobianXPlugin() const
+  inline bool isJacobianXFPlugin() const
   {
-    return xmlHasProp((xmlNodePtr)jacobianXNode, (xmlChar *) DS_MATRIXPLUGIN.c_str());
+    return xmlHasProp((xmlNodePtr)jacobianXFNode, (xmlChar *) DS_MATRIXPLUGIN.c_str());
   }
 
   /** \fn bool isUPlugin()

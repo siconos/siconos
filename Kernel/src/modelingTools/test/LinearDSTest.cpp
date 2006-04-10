@@ -95,7 +95,7 @@ void LinearDSTest::testBuildLinearDS1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS1E : ", ds->getX0() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS1F : ", ds->getB() == *b0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS1G : ", ds->getA() == *A0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS1H : ", ds->isPlugged("jacobianX"), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS1H : ", ds->isPlugged("A"), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS1I : ", ds->isPlugged("b"), false);
   delete ds;
   cout << "--> Constructor xml test ended with success." << endl;
@@ -111,7 +111,7 @@ void LinearDSTest::testBuildLinearDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2C : ", ds->getId() == "testDS2", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2E : ", ds->getX0() == 2 * *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2F : ", ds->isPlugged("jacobianX"), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2F : ", ds->isPlugged("A"), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2G : ", ds->isPlugged("b"), true);
 
   double time = 1.5;
@@ -130,11 +130,11 @@ void LinearDSTest::testBuildLinearDS2()
   (*u0)(1) = 6;
   SiconosMatrix *T0 = new SimpleMatrix("matT0.dat", true);
 
-  ds->computeVectorField(time);
+  ds->computeRhs(time);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2K : ", ds->getU() == *u0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2L : ", ds->getT() == *T0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2M : ", (*(ds->getXDotPtr())) == (*(ds->getAPtr()) * 2 * *x0 + ds->getB() + * (ds->getTPtr())**(ds->getUPtr())), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2M : ", (*(ds->getRhsPtr())) == (*(ds->getAPtr()) * 2 * *x0 + ds->getB() + * (ds->getTPtr())**(ds->getUPtr())), true);
 
   delete T0;
   delete u0;
@@ -158,7 +158,7 @@ void LinearDSTest::testBuildLinearDS3()
   double time = 1.5;
   ds->computeA(time);
   ds->computeB(time);
-  ds->computeVectorField(time);
+  ds->computeRhs(time);
   SimpleVector * x01 = new SimpleVector(3);
   (*x01)(0) = 0;
   (*x01)(1) = 1;
@@ -166,7 +166,7 @@ void LinearDSTest::testBuildLinearDS3()
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3I : ", ds->getB() == time* *x01, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3J : ", ds->getA() == 2 * *A0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3E : ", ds->getXDot() == (time* *x01 + 2 * *A0 **x0) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3E : ", ds->getRhs() == (time* *x01 + 2 * *A0 **x0) , true);
 
   ds->setUSize(3);
   ds->setComputeUFunction("TestPlugin.so", "computeU");
@@ -174,8 +174,8 @@ void LinearDSTest::testBuildLinearDS3()
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3K : ", ds->getU() == time **x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3L : ", ds->getTPtr() == NULL, true);
-  ds->computeVectorField(time);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2M : ", *(ds->getXDotPtr()) == (2 * *A0 * *x0 + ds->getB() + time**x0), true);
+  ds->computeRhs(time);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2M : ", *(ds->getRhsPtr()) == (2 * *A0 * *x0 + ds->getB() + time**x0), true);
   delete ds;
   cout << "--> Constructor 3 test ended with success." << endl;
 }
@@ -194,7 +194,7 @@ void LinearDSTest::testBuildLinearDS4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS4E : ", ds2->getX0() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS4F : ", ds2->getB() == *b0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS4G : ", ds2->getA() == *A0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS4H : ", ds2->isPlugged("jacobianX"), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS4H : ", ds2->isPlugged("A"), false);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS4I : ", ds2->isPlugged("b"), false);
 
   delete ds1;
@@ -209,7 +209,7 @@ void LinearDSTest::testSetA()
   LinearDS * ds1 = new LinearDS(tmpxml2);
   ds1->setA(*A0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAa : ", ds1->getA() == *A0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAb : ", *(ds1->getJacobianXPtr()) == *A0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAb : ", *(ds1->getJacobianXFPtr()) == *A0, true);
   delete ds1;
   cout << "--> setA test ended with success." << endl;
 }
@@ -221,7 +221,7 @@ void LinearDSTest::testSetAPtr()
   LinearDS * ds1 = new LinearDS(tmpxml2);
   ds1->setAPtr(A0);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAPtr : ", ds1->getAPtr() == A0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAb : ", ds1->getJacobianXPtr() == A0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetAb : ", ds1->getJacobianXFPtr() == A0, true);
   delete ds1;
   cout << "--> setAPtr test ended with success." << endl;
 }

@@ -70,7 +70,7 @@ class SiconosSharedLibrary;
  *    - \f$ r \in R^{n} \f$  the input due to the Non Smooth Interaction.
  *    - \f$ u \in R^{uSize}\f$ a "control" term
  *
- *  The function \f$ f : R^{n} \times R  \mapsto  R^{n}   \f$ defines the VectorField.
+ *  with \f$ f : R^{n} \times R  \mapsto  R^{n}   \f$ .
  *
  *
  * By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
@@ -80,11 +80,9 @@ class SiconosSharedLibrary;
  * \f]
  * To define a boundary Value Problem, the pointer on  a BoundaryCondition must be set.
  *
- * \todo One word on the bilateral constraint
+ * \f$ f(x,t) \f$ is a plug-in function, and can be computed using computeF(t).
+ * rhs is computed thanks to computeRhs(t).
  *
- *
- * Particular cases such as linear system (LinearDS) or
- * Lagrangian Non Linear System (LagrangianDS)  are specialization of this class.
  *
  * \todo Add a pointer to an object Constraint .
  */
@@ -117,11 +115,8 @@ protected:
   /** the  previous state vectors stored in memory*/
   SiconosMemory *xMemory;
 
-  /** the time derivative of the state x (the velocity) */
-  SiconosVector *xDot;
-
-  /** the  previous xDot vectors */
-  SiconosMemory *xDotMemory;
+  /** the right hand side of the equation */
+  SiconosVector *rhs;
 
   /** the  free state vector (state vector for r=0) */
   SiconosVector *xFree;
@@ -132,8 +127,8 @@ protected:
   /**  the previous r vectors */
   SiconosMemory *rMemory;
 
-  /** Gradient of the vectorfield \f$ f(x,t) \f$ with respect to \f$ x\f$*/
-  SiconosMatrix *jacobianX;
+  /** Gradient of \f$ f(x,t) \f$ with respect to \f$ x\f$*/
+  SiconosMatrix *jacobianXF;
 
   /** size of vector u */
   unsigned int uSize;
@@ -159,23 +154,21 @@ protected:
   /** vector of the DS Inputs-Outputs of the Dynamical System */
   std::vector<DSInputOutput*> dsioVector;
 
-  /** Parameters list, argument of plug-in. What are those parameters depends on user´s choice.
-   *  The order corresponds to the one of the plug-in list below :
-   *  vectorField, jacobianX, u and T
-   */
-  std::vector<SimpleVector*> parametersList0; // -> Size = 4
-  std::deque<bool> isParametersList0AllocatedIn;
+  /** Parameters list, last argument of plug-in functions. What are those parameters depends on user´s choice.
+   *  This a list of pointer to SimpleVector. Each one is identified thanks to a key which is the plug-in name.
+   * A flag is also added in the isAllocatedIn map to check inside-class memory allocation for this object.*/
+  std::map<std::string, SimpleVector*> parametersList;
 
   // --- plugins ---
 
   /** class for plugin managing (open, close librairy...) */
   SiconosSharedLibrary cShared;
 
-  /* the name of the plugin used to compute the vectorField */
-  std::string  vectorFieldFunctionName;
+  /* the name of the plugin used to compute f(x,t) */
+  std::string  computeFFunctionName;
 
-  /* the name of the plugin used to compute the JacobianX */
-  std::string  computeJacobianXFunctionName;
+  /* the name of the plugin used to compute the jacobian of f according to x */
+  std::string  computeJacobianXFFunctionName;
 
   /* the name of the plugin used to compute u */
   std::string  computeUFunctionName;
@@ -184,29 +177,29 @@ protected:
   std::string  computeTFunctionName;
 
   /** Flag to check if operators are plugged or not (and thus constant)
-   * For example isPlugin["jacobianX"] = false, means that jacobianX is constant,
-   * then computeJacobianX does not change its value, and not plugged.*/
+   * For example isPlugin["jacobianXF"] = false, means that jacobianXF is constant,
+   * then computeJacobianXF does not change its value, and not plugged.*/
   std::map<std::string, bool> isPlugin;
 
-  /** \fn void (*vectorFieldPtr) (const unsigned int& sizeOfX, const double* t, const double* x, double* xDot, double* param)
-   *  \brief pointer on function to compute vectorfield
+  /** \fn void (*computeFPtr) (const unsigned int& sizeOfX, const double* t, const double* x, double* f, double* param)
+   *  \brief pointer on function to compute f(x,t)
    *  \param unsigned int& sizeOfX : the size of the vector x
    *  \param double* time : current time
    *  \param double* x : the pointer to the first element of the vector x
-   *  \param double* xDot : the pointer to the first element of the vector x
+   *  \param double* f : the pointer to the first element of the vector f(x,t)
    *    \param double* param   : a vector of user-defined parameters
    */
-  void (*vectorFieldPtr)(const unsigned int&, const double*, const double*, double*, double*);
+  void (*computeFPtr)(const unsigned int&, const double*, const double*, double*, double*);
 
-  /** \fn void (*computeJacobianXPtr)(const unsigned int& sizeOfX, const double* t, const double* x, double* jacobianX, double* param)
-   *  \brief  Pointer on function to compute the gradient of the vector field with the respect to the state  \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
+  /** \fn void (*computeJacobianXFPtr)(const unsigned int& sizeOfX, const double* t, const double* x, double* jacobianXF, double* param)
+   *  \brief  Pointer on function to compute the gradient of f(x,t) with respect to the state  \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param unsigned int& sizeOfX : size of vector x
    *  \param double* time : current time
    *  \param double* xPtr : pointer to the first element of x
-   *  \param double* jacobianXPtr : pointer to the first element of jacobianX matrix (in-out parameter)
+   *  \param double* jacobianXFPtr : pointer to the first element of jacobianXF matrix (in-out parameter)
    *    \param double* param   : a vector of user-defined parameters
    */
-  void (*computeJacobianXPtr)(const unsigned int&, const double*, const double*, double*, double*);
+  void (*computeJacobianXFPtr)(const unsigned int&, const double*, const double*, double*, double*);
 
   /** \fn void (*computeUPtr)(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* t, const double* x, double* u, double* param)
    *  \brief  Pointer on function to compute u
@@ -248,17 +241,23 @@ protected:
    */
   virtual void fillDsioFromXml();
 
-  /** \fn initAllocationFlags(const bool& val);
-   *  \brief set all allocation flags (isAllocated map) to val
-   *  \param a bool
+  /** \fn initAllocationFlags(const bool& = true);
+   *  \brief set all allocation flags (isAllocated map)
+   *  \param bool: = if true (default) set default configuration, else set all to false
    */
-  virtual void initAllocationFlags(const bool&);
+  virtual void initAllocationFlags(const bool & = true);
 
   /** \fn initPluginFlags(const bool& val);
    *  \brief set all plug-in flags (isPlugin map) to val
    *  \param a bool
    */
   virtual void initPluginFlags(const bool&);
+
+  /** \fn initParameter(const string& id);
+   *  \brief init parameter vector corresponding to id to a SimpleVector* of size 1
+   *  \param a string, id of the plug-in
+   */
+  void initParameter(const std::string&);
 
   /** \fn DynamicalSystem();
    *  \brief default constructor
@@ -278,17 +277,17 @@ public:
   DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
   /** \fn DynamicalSystem(DynamicalSystemXML * nsdsXML, const unsigned int& number, const unsigned int& n,
-      const SiconosVector& x0, const string& vectorFieldPlugin)
-      *  \brief constructor from a set of data
-      *  \param int : reference number for this DynamicalSystem
-      *  \param int : dimension of this DynamicalSystem
-      *  \param SiconosVector : initial state of this DynamicalSystem
-      *  \param string : plugin name for vectorField of this DynamicalSystem (optional)
-      *  \param string : plugin name for jacobianX of this DynamicalSystem (optional)
-      *  \exception RuntimeException
-      */
+   * const SiconosVector& x0, const string& fPlugin = "DefaultPlugin:f, const string& jacobianXFPlugin = "DefaultPlugin:jacobianXF)
+   *  \brief constructor from a set of data
+   *  \param int : reference number for this DynamicalSystem
+   *  \param int : dimension of this DynamicalSystem
+   *  \param SiconosVector : initial state of this DynamicalSystem
+   *  \param string : plugin name for f of this DynamicalSystem (optional)
+   *  \param string : plugin name for jacobianXF of this DynamicalSystem (optional)
+   *  \exception RuntimeException
+   */
   DynamicalSystem(const int&, const unsigned int&, const SiconosVector&,
-                  const std::string& = "DefaultPlugin:vectorField", const std::string& = "DefaultPlugin:jacobianX");
+                  const std::string& = "DefaultPlugin:computeF", const std::string& = "DefaultPlugin:computeJacobianXF");
 
   /** \fn DynamicalSystem(const DynamicalSystem &)
    *  \brief copy constructor
@@ -509,70 +508,38 @@ public:
    */
   void setXMemoryPtr(SiconosMemory *);
 
-  // ---  XDot ---
+  // ---  Rhs ---
 
-  /** \fn  const SimpleVector getXDot(void) const
-   *  \brief get the value of xDot derivative of the state of the DynamicalSystem
+  /** \fn  const SimpleVector getRhs(void) const
+   *  \brief get the value of rhs derivative of the state of the DynamicalSystem
    *  \return SimpleVector
    * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
    */
-  inline const SimpleVector getXDot() const
+  inline const SimpleVector getRhs() const
   {
-    return *xDot;
+    return *rhs;
   }
 
-  /** \fn SiconosVector* getXDotPtr(void) const
-   *  \brief get xDot, the derivative of the state of the DynamicalSystem
+  /** \fn SiconosVector* getRhsPtr(void) const
+   *  \brief get rhs, the derivative of the state of the DynamicalSystem
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVector* getXDotPtr() const
+  inline SiconosVector* getRhsPtr() const
   {
-    return xDot;
+    return rhs;
   }
 
-  /** \fn void setXDot (const SiconosVector& newValue)
-   *  \brief set the value of xDot to newValue
+  /** \fn void setRhs (const SiconosVector& newValue)
+   *  \brief set the value of rhs to newValue
    *  \param SiconosVector newValue
    */
-  void setXDot(const SiconosVector&);
+  void setRhs(const SiconosVector&);
 
-  /** \fn void setXDotPtr(SiconosVector* newPtr)
-   *  \brief set xDot to pointer newPtr
+  /** \fn void setRhsPtr(SiconosVector* newPtr)
+   *  \brief set rhs to pointer newPtr
    *  \param SiconosVector * newPtr
    */
-  void setXDotPtr(SiconosVector *);
-
-  // XDot memory
-
-  /** \fn  const SiconosMemory getXDotMemory(void) const
-   *  \brief get the value of xDotMemory
-   *  \return a SiconosMemory
-   */
-  inline const SiconosMemory getXDotMemory() const
-  {
-    return *xDotMemory;
-  }
-
-  /** \fn SiconosMemory getXDotMemoryPtr(void) const
-   *  \brief get all the values of the state vector xDot stored in memory
-   *  \return a memory
-   */
-  inline SiconosMemory* getXDotMemoryPtr() const
-  {
-    return xDotMemory;
-  }
-
-  /** \fn void setXDotMemory(const SiconosMemory &)
-   *  \brief set the value of xDotMemory
-   *  \param a ref on a SiconosMemory
-   */
-  void setXDotMemory(const SiconosMemory&);
-
-  /** \fn void setXDotMemory(SiconosMemory * newPtr)
-   *  \brief set xDotMemory to pointer newPtr
-   *  \param a ref on a SiconosMemory
-   */
-  void setXDotMemoryPtr(SiconosMemory *);
+  void setRhsPtr(SiconosVector *);
 
   // --- XFree ---
 
@@ -672,37 +639,37 @@ public:
    */
   void setRMemoryPtr(SiconosMemory *);
 
-  // --- JacobianX ---
+  // --- JacobianXF ---
 
-  /** \fn  const SimpleMatrix getJacobianX(void) const
-   *  \brief get the value of JacobianX
+  /** \fn  const SimpleMatrix getJacobianXF(void) const
+   *  \brief get the value of JacobianXF
    *  \return SimpleMatrix
    */
-  inline const SimpleMatrix getJacobianX() const
+  inline const SimpleMatrix getJacobianXF() const
   {
-    return *jacobianX;
+    return *jacobianXF;
   }
 
-  /** \fn SiconosMatrix* getJacobianXPtr(void) const
-   *  \brief get JacobianX
+  /** \fn SiconosMatrix* getJacobianXFPtr(void) const
+   *  \brief get JacobianXF
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianXPtr() const
+  inline SiconosMatrix* getJacobianXFPtr() const
   {
-    return jacobianX;
+    return jacobianXF;
   }
 
-  /** \fn void setJacobianX (const SiconosMatrix& newValue)
-   *  \brief set the value of JacobianX to newValue
+  /** \fn void setJacobianXF (const SiconosMatrix& newValue)
+   *  \brief set the value of JacobianXF to newValue
    *  \param SiconosMatrix newValue
    */
-  virtual void setJacobianX(const SiconosMatrix&);
+  virtual void setJacobianXF(const SiconosMatrix&);
 
-  /** \fn void setJacobianXPtr(SiconosMatrix* newPtr)
-   *  \brief set JacobianX to pointer newPtr
+  /** \fn void setJacobianXFPtr(SiconosMatrix* newPtr)
+   *  \brief set JacobianXF to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  virtual void setJacobianXPtr(SiconosMatrix *newPtr);
+  virtual void setJacobianXFPtr(SiconosMatrix *newPtr);
 
   // uSize
 
@@ -966,8 +933,8 @@ public:
   virtual void initMemory(const unsigned int&) ;
 
   /** \fn virtual void swapInMemory(void);
-   * \brief push the current values of x, xDot and r in the stored previous values
-   *  xMemory, xDotMemory, rMemory,
+   * \brief push the current values of x and r in the stored previous values
+   *  xMemory and rMemory,
    */
   virtual void swapInMemory();
 
@@ -975,22 +942,22 @@ public:
 
   // --- getters for plugin functions names ---
 
-  /** \fn  std::string getVectorFieldFunctionName() const
-   *  \brief get name of function that computes vectorField (if vectorField from plugin)
+  /** \fn  std::string getComputeFFunctionName() const
+   *  \brief get name of function that computes f (if f from plugin)
    *  \return a string
    */
-  inline const std::string getVectorFieldFunctionName() const
+  inline const std::string getComputeFFunctionName() const
   {
-    return vectorFieldFunctionName;
+    return computeFFunctionName;
   }
 
-  /** \fn  std::string getComputeJacobianXFunctionName() const
-   *  \brief get name of function that computes computeJacobianX (if computeJacobianX from plugin)
+  /** \fn  std::string getComputeJacobianXFFunctionName() const
+   *  \brief get name of function that computes computeJacobianXF (if computeJacobianXF from plugin)
    *  \return a string
    */
-  inline const std::string getComputeJacobianXFunctionName() const
+  inline const std::string getComputeJacobianXFFunctionName() const
   {
-    return computeJacobianXFunctionName;
+    return computeJacobianXFFunctionName;
   }
 
   /** \fn  std::string getComputeUFunctionName() const
@@ -1013,24 +980,24 @@ public:
 
   // --- setters for functions to compute plugins ---
 
-  /** \fn void setVectorFieldFunction(const string&, const string&)
-   *  \brief allow to set a specified function to compute vector field
+  /** \fn void setComputeFFunction(const string&, const string&)
+   *  \brief to set a specified function to compute f(x,t)
    *  \param string pluginPath : the complete path to the plugin
    *  \param string functionName : the function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  virtual void setVectorFieldFunction(const std::string & pluginPath, const std::string& functionName);
+  virtual void setComputeFFunction(const std::string & pluginPath, const std::string& functionName);
 
-  /** \fn void setComputeJacobianXFunction(const string&, const string&)
-   *  \brief allow to set a specified function to compute jacobianX
+  /** \fn void setComputeJacobianXFFunction(const string&, const string&)
+   *  \brief to set a specified function to compute jacobianXF
    *  \param string pluginPath : the complete path to the plugin
    *  \param the string functionName : function name to use in this library
    *  \exception SiconosSharedLibraryException
    */
-  virtual void setComputeJacobianXFunction(const std::string & pluginPath, const std::string & functionName);
+  virtual void setComputeJacobianXFFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void setComputeUFunction(const string&, const string&)
-   *  \brief allow to set a specified function to compute u
+   *  \brief to set a specified function to compute u
    *  \param string pluginPath : the complete path to the plugin
    *  \param the string functionName : function name to use in this library
    *  \exception SiconosSharedLibraryException
@@ -1038,7 +1005,7 @@ public:
   void setComputeUFunction(const std::string & pluginPath, const std::string & functionName);
 
   /** \fn void setComputeTFunction(const string&, const string&)
-   *  \brief allow to set a specified function to compute T
+   *  \brief to set a specified function to compute T
    *  \param string pluginPath : the complete path to the plugin
    *  \param the string functionName : function name to use in this library
    *  \exception SiconosSharedLibraryException
@@ -1047,67 +1014,85 @@ public:
 
   // -- parametersList --
 
-  /** \fn vector<SimpleVector*> getParametersListVector(unsigned int & index) const
-   *  \brief get the parameter list at position index
-   *  \return SimpleVector
+  /** \fn map<string, SimpleVector*> getParameters() const
+   *  \brief get the full map of parameters
+   *  \return a map<string,SimpleVector*>
    */
-  virtual inline std::vector<SimpleVector*> getParametersListVector() const
+  inline std::map<std::string, SimpleVector*> getParameters() const
   {
-    return parametersList0;
-  }
+    return parametersList;
+  };
 
-  /** \fn  const SimpleVector getParametersList(const unsigned int & index) const
-   *  \brief get the parameter list at position index
-   *  \return SimpleVector
+  /** \fn  const SimpleVector getParameter(const string & id) const
+   *  \brief get the vector of parameters corresponding to plug-in function named id
+   *  \return a SimpleVector
    */
-  virtual inline const SimpleVector getParametersList(const unsigned int & index) const
+  inline const SimpleVector getParameter(const std::string& id)
   {
-    return *(parametersList0[index]);
-  }
+    return *(parametersList[id]);
+  };
 
-  /** \fn SimpleVector* getParametersListPtr(const unsigned int & index) const
-   *  \brief get the pointer on the parameter list at position index
-   *  \return pointer on a SimpleVector
+  /** \fn SimpleVector* getParameterPtr(const string& id) const
+   *  \brief get the pointer to the vector of parameters corresponding to plug-in function named id
+   *  \return a pointer on a SimpleVector
    */
-  virtual inline SimpleVector* getParametersListPtr(const unsigned int & index) const
+  inline SimpleVector* getParameterPtr(const std::string& id)
   {
-    return parametersList0[index];
-  }
+    return parametersList[id];
+  };
 
-  /** \fn void setParametersListVector(const std::vector<SimpleVector*>& newVector)
-   *  \brief set vector parameterList0 to newVector
-   *  \param vector<SimpleVector*>
+  /** \fn void setParameters(const std::map<string, SimpleVector*>& newMap)
+   *  \brief set the map for parameters
+   *  \param a map<string, SimpleVector*>
    */
-  virtual void setParametersListVector(const std::vector<SimpleVector*>&);
+  void setParameters(const std::map<std::string, SimpleVector*>&);
 
-  /** \fn void setParametersList (const SimpleVector& newValue, const unsigned int & index)
-   *  \brief set the value of parameterList0[index] to newValue
-   *  \param SimpleVector newValue
+  /** \fn void setParameter(const SimpleVector& newValue, const string& id)
+   *  \brief set vector corresponding to plug-in function named id to newValue
+   *  \param a SimpleVector
+   *  \param a string
    */
-  virtual void setParametersList(const SimpleVector&, const unsigned int &);
+  void setParameter(const SimpleVector&, const std::string&);
 
-  /** \fn void setParametersListPtr(SimpleVector* newPtr, const unsigned int & index)
-   *  \brief set parametersList0[index] to pointer newPtr
-   *  \param SimpleVector * newPtr
+  /** \fn void setParameterPtr(SimpleVector* newPtr, const string& id)
+   *  \brief set vector corresponding to plug-in function named id to newPtr (!! pointer link !!)
+   *  \param a pointer to SimpleVector
+   *  \param a string
    */
-  virtual  void setParametersListPtr(SimpleVector *newPtr, const unsigned int & index);
+  void setParameterPtr(SimpleVector *, const std::string&);
 
   // --- compute plugin functions ---
 
-  /** \fn void vectorField (const double& time)
-   * \brief Default function to compute the vector field \f$ f: (x,t) \in R^{n} \times R  \mapsto  R^{n}\f$
+  /** \fn void computeF(const double& time)
+   * \brief Default function to compute \f$ f: (x,t)\f$
    * \param double time : current time
    *  \exception RuntimeException
    */
-  virtual void computeVectorField(const double&);
+  virtual void computeF(const double&);
 
-  /** \fn static void computeJacobianX (const double& time)
-   *  \brief Default function to compute the gradient of the vector field with the respect
-   *  to the state  \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
+  /** \fn static void computeJacobianXF (const double& time, const bool & =false)
+   *  \brief Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
    *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  virtual void computeJacobianX(const double&);
+  virtual void computeJacobianXF(const double&, const bool & = false);
+
+  /** \fn void computeRhs(const double& time, const bool & =false)
+   *  \brief Default function to the right-hand side term
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \exception RuntimeException
+   */
+  virtual void computeRhs(const double&, const bool & = false);
+
+  /** \fn void computeJacobianXRhs(const double& time, const bool & =false)
+   *  \brief Default function to jacobian of the right-hand side term according to x
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \exception RuntimeException
+   */
+  virtual void computeJacobianXRhs(const double&, const bool & = false);
 
   /** \fn static void computeU (const double&)
    *  \brief Default function to compute u
@@ -1117,7 +1102,7 @@ public:
   virtual void computeU(const double&);
 
   /** \fn static void computeU (const double&)
-   *  \brief function to compute u when x and xDot are not those of the current object.
+   *  \brief function to compute u when x is not those of the current object.
    *  \param double time : current time
    *  \param SiconosVector* : pointer to a x value
    *  \exception RuntimeException
@@ -1182,24 +1167,6 @@ public:
    *  \brief print the data of the dynamical system on the standard output
    */
   virtual void display() const;
-
-  /** \var typedef void (*vfPtr) (const unsigned int& sizeOfX, double* time, double* x, double* xDot double* param);
-   *  \brief signature of plugin function computing the vectorfield
-   */
-  typedef void (*vfPtr)(const unsigned int&, const double*, const double*, double*, double*);
-
-  /** \fn vfPtr getVectorFieldPtr()
-   *  \brief return the function adress of the plugin computing vectorfield
-   *  \param int* sizeOfX : the size of the vector x
-   *  \param double* time : current time
-   *  \param double* x : the pointer to the first element of the vector x
-   *  \param double* xDot : the pointer to the first element of the vector xDot (in-out)
-   *    \param double* param   : a vector of user-defined parameters (in-out)
-   */
-  vfPtr getVectorFieldPtr()
-  {
-    return *vectorFieldPtr;
-  }
 
   /** \fn void dsConvergenceIndicator()
    *  \brief Default function for computing an indicator of convergence

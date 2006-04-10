@@ -40,7 +40,7 @@ class LinearDSXML;
  *    - \f$x \in R^{n} \f$ is the state,
  *    - \f$r \in R^{n} \f$  the input due to the Non Smooth Interaction.
  *
- *  The  VectorField is specialized by
+ *  The  rhs is specialized by
  *    - \f$A \in R^{n\times n} \f$
  *    - \f$b \in R^{n} \f$
  *    - \f$u \in R^{uSize} \f$
@@ -69,7 +69,7 @@ class LinearDSXML;
  * To build and use a linearDS, you first need to call a constructor, with A as a required data.
  * Then, this system has to be initialized -> compute members value at time t0. This is usually done during call to strategy->initialize.
  * Finally, the state of the DS can be obtained by calling "compute" functions. In LinearTIDS case, since A and b are fixed, you can
- * only call computeVectorField(time), to compute xDot = Ax+b+Tu.
+ * only call computeRhs(time), to compute rhs = Ax+b+Tu.
  *
  **/
 
@@ -142,36 +142,21 @@ public:
    */
   //  void initialize(const double& = 0, const unsigned int& = 1) ;
 
-  /** \fn void setComputeJacobianXFunction(const string&, const string&)
-   *  \brief set a specified function to compute jacobianX=A
-   *  \param string pluginPath : the complete path to the plugin
-   *  \param the string functionName : function name to use in this library
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeJacobianXFunction(const std::string & pluginPath, const std::string & functionName);
-
-  /** \fn void setComputeAFunction(const string& libPath,const string& functionName)
-   *  \brief set a specified function to compute the matrix A => same action as setComputeJacobianXFunction
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeAFunction(const std::string &, const std::string &);
-
-  /** \fn void setComputeBFunction(const string& libPath,const string& functionName);
-   *  \brief set a specified function to compute the vector b
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeBFunction(const std::string &, const std::string &);
-
-  /** \fn void vectorField (const double& time)
-   * \brief compute the vector field Ax+b
-   * \param double time : current time
+  /** \fn void computeRhs(const double& time, const bool & =false)
+   *  \brief Default function to the right-hand side term
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  void computeVectorField(const double&);
+  void computeRhs(const double&, const bool & = false);
+
+  /** \fn static void computeJacobianXRhs(const double& time, const bool & =false)
+   *  \brief Default function to jacobian of the right-hand side term according to x
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \exception RuntimeException
+   */
+  void computeJacobianXRhs(const double&, const bool & = false);
 
   /** \fn void display()
    *  \brief data display on screen

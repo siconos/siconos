@@ -19,8 +19,8 @@
 #include "LagrangianLinearTIDSXML.h"
 using namespace std;
 
-LagrangianLinearTIDSXML::LagrangianLinearTIDSXML()
-  : LagrangianDSXML(), KNode(NULL), CNode(NULL)
+LagrangianLinearTIDSXML::LagrangianLinearTIDSXML():
+  LagrangianDSXML(), KNode(NULL), CNode(NULL)
 {}
 
 LagrangianLinearTIDSXML::LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSNode, bool isBVP):
@@ -37,9 +37,7 @@ LagrangianLinearTIDSXML::LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSN
 
 void LagrangianLinearTIDSXML::updateDynamicalSystemXML(xmlNode* newRootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)
 {
-  IN("LagrangianLinearTIDSXML::updateDynamicalSystemXML\n");
   rootDynamicalSystemXMLNode = newRootDSXMLNode;
   loadDynamicalSystem(ds);
-  OUT("LagrangianLinearTIDSXML::updateDynamicalSystemXML\n");
 }
 

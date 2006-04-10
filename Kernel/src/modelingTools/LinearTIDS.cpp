@@ -51,7 +51,7 @@ LinearTIDS::LinearTIDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* new
   else
     RuntimeException::selfThrow("LinearTIDS - xml constructor, xml file = NULL");
 
-  isPlugin["jacobianX"] = false;
+  isPlugin["A"] = false;
   isPlugin["b"] = false;
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
@@ -81,7 +81,7 @@ LinearTIDS::LinearTIDS(const LinearTIDS & lds):
   LinearDS(lds)
 {
   DSType = LITIDS;
-  isPlugin["jacobianX"] = false;
+  isPlugin["A"] = false;
   isPlugin["b"] = false;
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
@@ -91,7 +91,7 @@ LinearTIDS::LinearTIDS(const DynamicalSystem & newDS):
   LinearDS(newDS)
 {
   DSType = LITIDS;
-  isPlugin["jacobianX"] = false;
+  isPlugin["A"] = false;
   isPlugin["b"] = false;
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
@@ -109,7 +109,6 @@ LinearTIDS::~LinearTIDS()
 //   // Initialize memory vectors
 //   initMemory(sizeOfMemory);
 
-//   computeVectorField(time);// If necessary, this will also compute A, b, u and T
 // }
 
 bool LinearTIDS::checkDynamicalSystem()
@@ -135,55 +134,36 @@ bool LinearTIDS::checkDynamicalSystem()
     output = false;
   }
 
-  // neither vectorField nor jacobianX can be plugged.
-  if (isPlugin["vectorField"] || isPlugin["jacobianX"])
-  {
-    RuntimeException::selfThrow("LinearDS::checkDynamicalSystem - vectorField and/or its Jacobian is/are plugged and should not be.");
-    output = false;
-  }
   return output;
 }
 
-void LinearTIDS::setComputeJacobianXFunction(const string& pluginPath, const string& functionName)
+void LinearTIDS::computeRhs(const double& time, const bool&)
 {
-  cout << " /!\\ LinearTIDS setComputeJacobianXFunction: useless function, neither A or jacobianX can be a plug-in for this kind of system." << endl;
-}
-
-void LinearTIDS::setComputeAFunction(const string& pluginPath, const string& functionName)
-{
-  cout << " /!\\ LinearTIDS : setComputeAFunction useless function, A can not be a plug-in for this kind of system." << endl;
-}
-
-void LinearTIDS::setComputeBFunction(const string& pluginPath, const string& functionName)
-{
-  cout << " /!\\ LinearTIDS : setComputeBFunction useless function, b can not be a plug-in for this kind of system." << endl;
-}
-
-void LinearTIDS::computeVectorField(const double& time)
-{
-  // compute xDot = vectorField
-  *xDot = *A * *x;
+  // compute right-hand side
+  *rhs = *A * *x;
 
   // add b if required
   if (b != NULL)
-    *xDot += *b;
+    *rhs += *b;
 
   // compute and add Tu if required
-  if (u != NULL && T != NULL)
+  if (u != NULL)
   {
     if (isPlugin["u"]) // if u is a plug-in function
       computeU(time);
-    if (isPlugin["T"]) // if T is a plug-in function
-      computeT();
-    *xDot += *T ** u;
-  }
-  else if (u != NULL && T == NULL)
-  {
-    if (isPlugin["u"]) // if u is a plug-in function
-      computeU(time);
-    *xDot += * u;
+    if (T != NULL)
+    {
+      if (isPlugin["T"]) // if T is a plug-in function
+        computeT();
+      *rhs += *T ** u;
+    }
+    else
+      *rhs += * u;
   }
 }
+
+void LinearTIDS::computeJacobianXRhs(const double& time, const bool&)
+{}
 
 void LinearTIDS::display() const
 {

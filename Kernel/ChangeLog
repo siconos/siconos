@@ -28,6 +28,15 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 
 Changes:
 
+2006-04-10 Franck Perignon <franck.perignon@inrialpes.fr>
+
+	* Review DS and derived classes: remove vectorField/xDot
+	   -> rhs (right-hand side) = f(x,t) + Tu
+	  add computeRhs and computeJacobianXRhs in all derived classes, 
+	  plug-in for f(x,t) and its Jacobian. 
+	  Add/correct initialize(t) function in all DS classes, to compute/reset
+	  state at time t. 
+
 2006-03-28 Franck Perignon <franck.perignon@inrialpes.fr>
                                                                                
 	* Add LinearTIDS class

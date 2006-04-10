@@ -65,8 +65,7 @@ class LagrangianLinearTIDSXML;
  *
  *
  *
- * As for the master Class LagrangianDS, the state of the master class DynamicalSystem is defined by \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$ and then \f$ n= 2 ndof \f$ and the VectorField
- * is specified as :
+ * As for the master Class LagrangianDS, the state of the master class DynamicalSystem is defined by \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$ and then \f$ n= 2 ndof \f$ and the rhs is given by:
  * \f[
  * f(x,t) = \left[\begin{array}{cc}
  *  0_{ndof \times ndof} & I_{ndof \times ndof} \\
@@ -96,11 +95,22 @@ private:
   /** specific matrix for a LagrangianLinearTIDS */
   SiconosMatrix *C;
 
-  /** \fn initAllocationFlags(const bool& val);
-   *  \brief set all allocation flags of Lagrangian (isAllocated map) to val
+  /** \fn void connectToDS()
+   *  \brief set links with DS members
+   */
+  void connectToDS();
+
+  /** \fn initAllocationFlags(const bool& = true);
+   *  \brief set all allocation flags (isAllocated map)
+   *  \param bool: value for flags
+   */
+  void initAllocationFlags(const bool& = true);
+
+  /** \fn initPluginFlags(const bool& val);
+   *  \brief set all plug-in flags (isPlugin map) to val
    *  \param a bool
    */
-  void initAllocationFlags(const bool&);
+  void initPluginFlags(const bool&);
 
 public:
 
@@ -131,24 +141,6 @@ public:
                        const SiconosMatrix&, const SiconosMatrix&);
 
   /** \fn LagrangianLinearTIDS(int number, int ndof,
-   *  SiconosVector* q0, SiconosVector* velocity0,
-   *   string massName, SiconosMatrix* K, SiconosMatrix* C)
-   *  \brief constructor from a set of data
-   *  \param int : the number for this DynamicalSystem
-   *  \param int : dimension of this DynamicalSystem
-   *  \param SimpleVector: initial coordinates of this DynamicalSystem
-   *  \param SimpleVector : initial velocity of this DynamicalSystem
-   *  \param string : name of the mass plugin
-   *  \param SiconosMatrix : matrix K of this DynamicalSystem
-   *  \param SiconosMatrix : matrix C of this DynamicalSystem
-   *  \exception RuntimeException
-   */
-  LagrangianLinearTIDS(const int&, const unsigned int& ndof,
-                       const SimpleVector&, const SimpleVector&,
-                       const std::string&,  const SiconosMatrix&,
-                       const SiconosMatrix&);
-
-  /** \fn LagrangianLinearTIDS(int number, int ndof,
    *   SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass)
    *  \brief constructor from a set of data
    *  \param int : the number for this DynamicalSystem
@@ -161,21 +153,6 @@ public:
   LagrangianLinearTIDS(const int&, const unsigned int& ndof,
                        const SimpleVector&, const SimpleVector&,
                        const SiconosMatrix&);
-
-  /** \fn LagrangianLinearTIDS(int number, int ndof,
-   *  SiconosVector* q0, SiconosVector* velocity0,
-   *   string massName, SiconosMatrix* K, SiconosMatrix* C)
-   *  \brief constructor from a set of data
-   *  \param int : the number for this DynamicalSystem
-   *  \param int : dimension of this DynamicalSystem
-   *  \param SimpleVector: initial coordinates of this DynamicalSystem
-   *  \param SimpleVector : initial velocity of this DynamicalSystem
-   *  \param string : name of the mass plugin
-   *  \exception RuntimeException
-   */
-  LagrangianLinearTIDS(const int&, const unsigned int& ndof,
-                       const SimpleVector&, const SimpleVector&,
-                       const std::string&);
 
   /** \fn LagrangianLinearTIDS(const DynamicalSystem &)
    *  \brief copy constructor
@@ -263,20 +240,21 @@ public:
    */
   void setCPtr(SiconosMatrix *newPtr) ;
 
-  /** \fn void vectorField (const double& time)
-   * \brief Default function to compute the vector field \f$ f: (x,t) \in R^{n} \times R  \mapsto  R^{n}\f$
-   * \param double time : current time
-   *  \exception RuntimeException
-   */
-  void computeVectorField(const double&);
-
-  /** \fn static void computeJacobianX (const double& time)
-   *  \brief Default function to compute the gradient of the vector field with the respect
-   *  to the state  \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
+  /** \fn void computeRhs(const double& time, const bool & =false)
+   *  \brief Default function to the right-hand side term
    *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  void computeJacobianX(const double&);
+  void computeRhs(const double&, const bool & = false);
+
+  /** \fn void computeJacobianXRhs(const double& time, const bool & =false)
+   *  \brief Default function to jacobian of the right-hand side term according to x
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \exception RuntimeException
+   */
+  void computeJacobianXRhs(const double&, const bool & = false);
 
   // --- Miscellaneous ---
 

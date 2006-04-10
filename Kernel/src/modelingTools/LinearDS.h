@@ -40,7 +40,7 @@ class LinearDSXML;
  *    - \f$x \in R^{n} \f$ is the state,
  *    - \f$r \in R^{n} \f$  the input due to the Non Smooth Interaction.
  *
- *  The  VectorField is specialized by
+ *  The  right-hand side is described by
  *    - \f$A \in R^{n\times n} \f$
  *    - \f$b \in R^{n} \f$
  *    - \f$u \in R^{uSize} \f$
@@ -64,17 +64,16 @@ class LinearDSXML;
  *  Thus, the main steps for LinearDS handling consist in:
  *
  *  - Construction: A is required and must be set as a matrix or a plug-in. b is optional, and can be given as a vector or a plug-in.
- *  - Initialization: compute values at time=t0 (vectorField, jacobianX, A ...), usually done when calling strategy->initialize.
+ *  - Initialization: compute values at time=t0 (rhs, jacobianXF, A ...), usually done when calling strategy->initialize.
  *  - Computation a time t, by calling "compute" functions
- *      => computeA or computeJacobianX, same result.
+ *      => computeA or computeJacobianXF, same result.
  *      => computeB
- *      => computeVectorField, compute xDot = Ax + b + Tu
+ *      => computeRhs, compute xDot = Ax + b + Tu
  *      => computeU and computeT (from DynamicalSystem class)
  *
  * Any call to a plug-in requires that it has been set correctly before simulation using one of the following:
- *   => setComputeJacobianXFunction or setComputeA (same result)
+ *   => setComputeJacobianXFFunction or setComputeA (same result)
  *   => setComputeBFunction
- *   Warning: setVectorFieldFunction is useless in LinearDS case, since xDot is computed using A, b,u and T.
  *
  **/
 
@@ -87,8 +86,20 @@ protected:
   /** strength vector */
   SimpleVector *b;
 
+  /* the name of the plugin used to compute A */
+  std::string  computeAFunctionName;
+
   /* the name of the plugin used to compute b */
-  std::string  bFunctionName;
+  std::string  computeBFunctionName;
+
+  /** \fn void (*APtr) (const unsigned int & sizeOfA, const double* t, double* A, double* param)
+   *  \brief pointer on function to compute A
+   *  \param unsigned int sizeOfA = n, dim of square matrix A (nXn)
+   *  \param double* time : current time
+   *  \param double* A : the pointer to the first element of the matrix b
+   *    \param double* param   : a vector of user-defined parameters
+   */
+  void (*APtr)(const unsigned int &, const double*, double*, double*);
 
   /** \fn void (*bPtr) (const unsigned int & sizeOfB, const double* t, double* b, double* param)
    *  \brief pointer on function to compute b
@@ -97,7 +108,19 @@ protected:
    *  \param double* b : the pointer to the first element of the vector b
    *    \param double* param   : a vector of user-defined parameters
    */
-  void (*computeBPtr)(const unsigned int &, const double*, double*, double*);
+  void (*bPtr)(const unsigned int &, const double*, double*, double*);
+
+  /** \fn initAllocationFlags(const bool& = true);
+   *  \brief set all allocation flags (isAllocated map)
+   *  \param bool: = if true (default) set default configuration, else set all to false
+   */
+  virtual void initAllocationFlags(const bool & = true);
+
+  /** \fn initPluginFlags(const bool& val);
+   *  \brief set all plug-in flags (isPlugin map) to val
+   *  \param a bool
+   */
+  virtual void initPluginFlags(const bool&);
 
   /** \fn LinearDS()
    *  \brief default constructor
@@ -121,11 +144,11 @@ public:
    *  \param int : reference number of this DynamicalSystem
    *  \param int : dimension of this DynamicalSystem
    *  \param SiconosVector : the initial state of this DynamicalSystem
-   *  \param string: plugin for A=jacobianX (optional)
+   *  \param string: plugin for A (optional)
    *  \param string: plugin for b (optional)
    *  \exception RuntimeException
    */
-  LinearDS(const int&, const unsigned int&, const SiconosVector&, const std::string& = "DefaultPlugin:jacobianX",
+  LinearDS(const int&, const unsigned int&, const SiconosVector&, const std::string& = "DefaultPlugin:computeA",
            const std::string& = "DefaultPlugin:computeB");
 
   /** \fn LinearDS( const int& newNumber, const SiconosVector& newX0,
@@ -211,17 +234,17 @@ public:
    */
   void setAPtr(SiconosMatrix *);
 
-  /** \fn void setJacobianX (const SiconosMatrix& newValue)
-   *  \brief set the value of JacobianX to newValue
+  /** \fn void setJacobianXF (const SiconosMatrix& newValue)
+   *  \brief set the value of JacobianXF to newValue
    *  \param SiconosMatrix newValue
    */
-  void setJacobianX(const SiconosMatrix&);
+  void setJacobianXF(const SiconosMatrix&);
 
-  /** \fn void setJacobianXPtr(SiconosMatrix* newPtr)
-   *  \brief set JacobianX to pointer newPtr
+  /** \fn void setJacobianXFPtr(SiconosMatrix* newPtr)
+   *  \brief set JacobianXF to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  void setJacobianXPtr(SiconosMatrix *newPtr);
+  void setJacobianXFPtr(SiconosMatrix *newPtr);
 
   // --- b ---
 
@@ -257,30 +280,30 @@ public:
 
   // --- plugins related functions
 
-  /** \fn  std::string getAFunctionName() const
-   *  \brief get name of function that computes A = jacobianX
+  /** \fn  std::string getComputeAFunctionName() const
+   *  \brief get name of function that computes A = jacobianXF
    *  \return a string
    */
-  inline const std::string getAFunctionName() const
+  inline const std::string getComputeAFunctionName() const
   {
-    return computeJacobianXFunctionName;
+    return computeAFunctionName;
   }
 
   /** \fn void setComputeAFunction(const string& libPath,const string& functionName)
-   *  \brief set a specified function to compute the matrix A => same action as setComputeJacobianXFunction
+   *  \brief set a specified function to compute the matrix A => same action as setComputeJacobianXFFunction
    *  \param string : the complete path to the plugin
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
   virtual void setComputeAFunction(const std::string &, const std::string &);
 
-  /** \fn  std::string getBFunctionName() const
+  /** \fn  std::string getComputeBFunctionName() const
   *  \brief get name of function that computes b (if b from plugin)
   *  \return a string
   */
-  inline const std::string getBFunctionName() const
+  inline const std::string getComputeBFunctionName() const
   {
-    return bFunctionName;
+    return computeBFunctionName;
   }
 
   /** \fn void setComputeBFunction(const string& libPath,const string& functionName);
@@ -291,31 +314,8 @@ public:
    */
   virtual void setComputeBFunction(const std::string &, const std::string &);
 
-  /** \fn void setVectorFieldFunction(const string&, const string&)
-   *  \brief overload corresponding function of DS -> did nothing.
-   *  \param string pluginPath : the complete path to the plugin
-   *  \param string functionName : the function name to use in this library
-   *  \exception SiconosSharedLibraryException
-   */
-  void setVectorFieldFunction(const std::string & pluginPath, const std::string& functionName);
-
-  /** \fn void setComputeJacobianXFunction(const string&, const string&)
-   *  \brief set a specified function to compute jacobianX=A
-   *  \param string pluginPath : the complete path to the plugin
-   *  \param the string functionName : function name to use in this library
-   *  \exception SiconosSharedLibraryException
-   */
-  virtual void setComputeJacobianXFunction(const std::string & pluginPath, const std::string & functionName);
-
-  /** \fn void vectorField (const double& time)
-   * \brief compute the vector field Ax+b
-   * \param double time : current time
-   *  \exception RuntimeException
-   */
-  virtual void computeVectorField(const double&);
-
   /** \fn void computeA(const double& time)
-   *  \brief default function to compute matrix A => same action as computeJacobianX
+   *  \brief default function to compute matrix A => same action as computeJacobianXF
    *  \exception RuntimeException
    */
   void computeA(const double&);
@@ -325,6 +325,37 @@ public:
    *  \exception RuntimeException
    */
   void computeB(const double&);
+
+  /** \fn void computeF(const double& time)
+   * \brief Default function to compute \f$ f: (x,t)\f$
+   * \param double time : current time
+   *  \exception RuntimeException
+   */
+  virtual void computeF(const double&);
+
+  /** \fn static void computeJacobianXF (const double& time, const bool & =false)
+   *  \brief Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \exception RuntimeException
+   */
+  virtual void computeJacobianXF(const double&, const bool & = false);
+
+  /** \fn void computeRhs(const double& time, const bool & =false)
+   *  \brief Default function to the right-hand side term
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \exception RuntimeException
+   */
+  virtual void computeRhs(const double&, const bool & = false);
+
+  /** \fn void computeJacobianXRhs(const double& time, const bool & =false)
+   *  \brief Default function to jacobian of the right-hand side term according to x
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \exception RuntimeException
+   */
+  virtual void computeJacobianXRhs(const double&, const bool & = false);
 
   // --- xml related functions ---
 

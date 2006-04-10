@@ -403,9 +403,8 @@
 						<xsd:element name="x" type="vector" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="StepsInMemory" type="xsd:nonNegativeInteger" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="xMemory" type="memory" minOccurs='0' maxOccurs='1'/>
-						<xsd:element name="xDotMemory" type="memory" minOccurs='0' maxOccurs='1'/>
-						<xsd:element name="vectorField" type="matrix" minOccurs="1" maxOccurs="1"/>
-						<xsd:element name="jacobianX" type="matrix" minOccurs="1" maxOccurs="1"/>
+						<xsd:element name="f" type="matrix" minOccurs="1" maxOccurs="1"/>
+						<xsd:element name="jacobianXF" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="RMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="T" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="u" type="vector" minOccurs="1" maxOccurs="1"/>
@@ -425,7 +424,6 @@
 						<xsd:element name="x" type="vector" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="StepsInMemory" type="xsd:nonNegativeInteger" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="xMemory" type="memory" minOccurs='0' maxOccurs='1'/>
-						<xsd:element name="xDotMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="RMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="T" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="u" type="vector" minOccurs="1" maxOccurs="1"/>
@@ -448,7 +446,6 @@
 						<xsd:element name="x" type="vector" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="StepsInMemory" type="xsd:nonNegativeInteger" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="xMemory" type="memory" minOccurs='0' maxOccurs='1'/>
-						<xsd:element name="xDotMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="RMemory" type="memory" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="T" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="u" type="vector" minOccurs="1" maxOccurs="1"/>

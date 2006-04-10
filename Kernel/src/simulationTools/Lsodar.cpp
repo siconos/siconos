@@ -165,12 +165,12 @@ void Lsodar::f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal 
     (*xtmp)(i) = x[i];
   ds->setX(*xtmp);
 
-  // Compute the vector field (=f) for the current ds
+  // Compute the vector field (= f + Tu) for the current ds
   double t = *time;
-  ds->computeVectorField(t);
+  ds->computeRhs(t);
 
   // Save xdot values from dynamical system into current xdot (in-out parameter)
-  SiconosVector * xtmp2 = ds->getXDotPtr();
+  SiconosVector * xtmp2 = ds->getRhsPtr();
   for (unsigned int i = 0; i < size; i++) /// Warning: copy !!
     xdot[i] = (*xtmp2)(i);
 
@@ -191,12 +191,12 @@ void Lsodar::jacobianF(integer *sizeOfX, doublereal *time, doublereal *x, intege
     (*xtmp)(i) = x[i];
   ds->setX(*xtmp);
 
-  // Compute the vector field (=f) for the current ds
+  // Compute the jacobian of the vector field according to x for the current ds
   double t = *time;
-  ds->computeJacobianX(t);
+  ds->computeJacobianXRhs(t);
 
   // Save jacobianX values from dynamical system into current jacob (in-out parameter)
-  SiconosMatrix * jacotmp = ds->getJacobianXPtr();
+  SiconosMatrix * jacotmp = ds->getJacobianXFPtr();
 
   unsigned int k = 0;
   for (unsigned int j = 0; j < size; j++) /// Warning: copy !!

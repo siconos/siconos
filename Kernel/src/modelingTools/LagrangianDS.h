@@ -53,7 +53,7 @@ class LagrangianDSXML;
  * \f$ n= 2 ndof \f$
  * \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
  *
- * The VectorField is given by:
+ * The rhs is given by:
  * \f[
  * f(x,t) = \left[\begin{array}{c}
  *  \dot q  \\
@@ -92,8 +92,8 @@ class LagrangianDSXML;
  *        => computeJacobianVelocityFInt  (setComputeJacobianVelocityFIntFunction)
  *        => computeJacobianQNNL          (setComputeJacobianQNNLFunction)
  *        => computeJacobianVelocityNNL   (setComputeJacobianVelocityNNLFunction)
- *        => computeVectorField             Warning: no setVectorFieldFunction function. This depends only on NNL, FInt, FExt and Mass.
- *        => computeJacobianX               Warning: no setComputeJacobianXFunction. This depends only on NNL, FInt, FExt and Mass.
+ *        => computeRhs            (not set function)
+ *        => computeJacobianXRhs   (not set function)
  *
  *  \todo: add a check function (for example check that NNL plug-in given => jacobian required  ...)
  */
@@ -160,14 +160,6 @@ protected:
 
   /** class for manage plugin (open, close librairy...) */
   SiconosSharedLibrary cShared;
-
-  /** Parameters list, argument of plug-in. What are those parameters depends on user´s choice.
-   *  At the time, all plug-in functions have the same list.
-   *  The order corresponds to the one of the plug-in list below :
-   *  mass, FInt, FExt, NNL, jacobianQ and Velocity for FInt and NNL.
-   */
-  std::vector<SimpleVector*> parametersList; // -> Size = 8
-  std::deque<bool> isParametersListAllocatedIn;
 
   // pointers to functions member to compute plug-in functions
 
@@ -262,13 +254,13 @@ protected:
   /** \fn void connectToDS()
    *  \brief set links with DS members
    */
-  void connectToDS();
+  virtual void connectToDS();
 
-  /** \fn initAllocationFlags(const bool& val);
-   *  \brief set all allocation flags of Lagrangian (isAllocated map) to val
-   *  \param a bool
+  /** \fn initAllocationFlags(const bool& = true);
+   *  \brief set all allocation flags (isAllocated map)
+   *  \param bool: = if true (default) set default configuration, else set all to false
    */
-  virtual void initAllocationFlags(const bool&);
+  virtual void initAllocationFlags(const bool & = true);
 
   /** \fn initPluginFlags(const bool& val);
    *  \brief set all plug-in flags (isPlugin map) to val
@@ -985,6 +977,68 @@ public:
 
   // --- PLUGINS RELATED FUNCTIONS ---
 
+  /** \fn void setComputeMassFunction(const string pluginPath, const string functionName&)
+   *  \brief allow to set a specified function to compute the mass
+   *  \param string : the complete path to the plugin
+   *  \param string : the name of the function to use in this plugin
+   */
+  void setComputeMassFunction(const std::string & pluginPath, const std::string & functionName);
+
+  /** \fn void setComputeFIntFunction(const string& pluginPath, const string& functionName)
+   *  \brief allow to set a specified function to compute Fint
+   *  \param string : the complete path to the plugin
+   *  \param string : the name of the function to use in this plugin
+   */
+  void setComputeFIntFunction(const std::string & pluginPath, const std::string & functionName);
+
+  /** \fn void setComputeFExtFunction(const string& pluginPath, const string& functionName)
+   *  \brief allow to set a specified function to compute Fext
+   *  \param string : the complete path to the plugin
+   *  \param string : the name of the function to use in this plugin
+   *  \exception ICDLL_CSharedLibraryException
+   */
+  void setComputeFExtFunction(const std::string & pluginPath, const std::string & functionName);
+
+  /** \fn void setComputeNNLFunction(const string& pluginPath, const string& functionName)
+   *  \brief allow to set a specified function to compute the inertia
+   *  \param string : the complete path to the plugin
+   *  \param string : the name of the function to use in this plugin
+   *  \exception SiconosCSharedLibraryException
+   */
+  void setComputeNNLFunction(const std::string & pluginPath, const std::string & functionName);
+
+  /** \fn void setComputeJacobianQFIntFunction(const string& pluginPath, const string& functionName)
+   *  \brief allow to set a specified function to compute the gradient of the internal strength compared to the state
+   *  \param string : the complete path to the plugin
+   *  \param string : the name of the function to use in this plugin
+   *  \exception SiconosSharedLibraryException
+   */
+  void setComputeJacobianQFIntFunction(const std::string & pluginPath, const std::string & functionName);
+
+  /** \fn void setComputeJacobianVelocityFIntFunction(const string& pluginPath, const string& functionName)
+   *  \brief allow to set a specified function to compute the internal strength compared to the velocity
+   *  \param string : the complete path to the plugin
+   *  \param string : the name of the function to use in this plugin
+   *  \exception SiconosSharedLibraryException
+   */
+  void setComputeJacobianVelocityFIntFunction(const std::string & pluginPath, const std::string & functionName);
+
+  /** \fn void setComputeJacobianQNNLFunction(const string& pluginPath, const string& functionName)
+   *  \brief allow to set a specified function to compute the gradient of the the external strength compared to the state
+   *  \param string : the complete path to the plugin
+   *  \param string : the name of the function to use in this plugin
+   *  \exception SiconosSharedLibraryException
+   */
+  void setComputeJacobianQNNLFunction(const std::string & pluginPath, const std::string & functionName);
+
+  /** \fn void setComputeJacobianVelocityNNLFunction(const string& pluginPath, const string& functionName)
+   *  \brief allow to set a specified function to compute the external strength compared to the velocity
+   *  \param string : the complete path to the plugin
+   *  \param string : the name of the function to use in this plugin
+   *  \exception SiconosSharedLibraryException
+   */
+  void setComputeJacobianVelocityNNLFunction(const std::string & pluginPath, const std::string & functionName);
+
   /** \fn void computeMass()
    *  \brief default function to compute the mass
    *  \exception RuntimeException
@@ -1089,143 +1143,21 @@ public:
    */
   void computeInverseOfMass();
 
-  /** \fn void vectorField (const double& time, const bool & isDSup)
-   * \brief Default function to compute the vector field for Lagrangian
-   * \param double time : current time
-   * \param bool isDSup : flag to avoid recomputation of mass, fInt ...
-   */
-  virtual void computeVectorField(const double&, const bool &);
-
-  /** \fn static void computeJacobianX (const double& time, const bool & isDSup)
-   *  \brief to compute the gradient of the vector field with the respect
-   *  to the state
+  /** \fn void computeRhs(const double& time, const bool & =false)
+   *  \brief Default function to the right-hand side term
    *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of mass, fInt ...
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \exception RuntimeException
    */
-  virtual void computeJacobianX(const double&, const bool &);
+  virtual void computeRhs(const double&, const bool & = false);
 
-  /** \fn void setVectorFieldFunction(const string&, const string&)
-   *  \brief set a specified function to compute vector field
-   *  \param string pluginPath : the complete path to the plugin
-   *  \param string functionName : the function name to use in this library
+  /** \fn void computeJacobianXRhs(const double& time, const bool & =false)
+   *  \brief Default function to jacobian of the right-hand side term according to x
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \exception RuntimeException
    */
-  virtual void setVectorFieldFunction(const std::string & pluginPath, const std::string& functionName);
-
-  /** \fn void setComputeJacobianXFunction(const string&, const string&)
-   *  \brief set a specified function to compute jacobianX
-   *  \param string pluginPath : the complete path to the plugin
-   *  \param the string functionName : function name to use in this library
-   */
-  virtual void setComputeJacobianXFunction(const std::string & pluginPath, const std::string & functionName);
-
-  /** \fn void setComputeMassFunction(const string pluginPath, const string functionName&)
-   *  \brief allow to set a specified function to compute the mass
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   */
-  void setComputeMassFunction(const std::string & pluginPath, const std::string & functionName);
-
-  /** \fn void setComputeFIntFunction(const string& pluginPath, const string& functionName)
-   *  \brief allow to set a specified function to compute Fint
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   */
-  void setComputeFIntFunction(const std::string & pluginPath, const std::string & functionName);
-
-  /** \fn void setComputeFExtFunction(const string& pluginPath, const string& functionName)
-   *  \brief allow to set a specified function to compute Fext
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \exception ICDLL_CSharedLibraryException
-   */
-  void setComputeFExtFunction(const std::string & pluginPath, const std::string & functionName);
-
-  /** \fn void setComputeNNLFunction(const string& pluginPath, const string& functionName)
-   *  \brief allow to set a specified function to compute the inertia
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosCSharedLibraryException
-   */
-  void setComputeNNLFunction(const std::string & pluginPath, const std::string & functionName);
-
-  /** \fn void setComputeJacobianQFIntFunction(const string& pluginPath, const string& functionName)
-   *  \brief allow to set a specified function to compute the gradient of the internal strength compared to the state
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeJacobianQFIntFunction(const std::string & pluginPath, const std::string & functionName);
-
-  /** \fn void setComputeJacobianVelocityFIntFunction(const string& pluginPath, const string& functionName)
-   *  \brief allow to set a specified function to compute the internal strength compared to the velocity
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeJacobianVelocityFIntFunction(const std::string & pluginPath, const std::string & functionName);
-
-  /** \fn void setComputeJacobianQNNLFunction(const string& pluginPath, const string& functionName)
-   *  \brief allow to set a specified function to compute the gradient of the the external strength compared to the state
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeJacobianQNNLFunction(const std::string & pluginPath, const std::string & functionName);
-
-  /** \fn void setComputeJacobianVelocityNNLFunction(const string& pluginPath, const string& functionName)
-   *  \brief allow to set a specified function to compute the external strength compared to the velocity
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeJacobianVelocityNNLFunction(const std::string & pluginPath, const std::string & functionName);
-
-  // -- parametersList --
-
-  /** \fn vector<SimpleVector*> getParametersListVector(unsigned int & index) const
-   *  \brief get the parameter list at position index
-   *  \return SimpleVector
-   */
-  inline std::vector<SimpleVector*> getParametersListVector() const
-  {
-    return parametersList;
-  }
-
-  /** \fn  const SimpleVector getParametersList(const unsigned int & index) const
-   *  \brief get the parameter list at position index
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getParametersList(const unsigned int & index) const
-  {
-    return *(parametersList[index]);
-  }
-
-  /** \fn SimpleVector* getParametersListPtr(const unsigned int & index) const
-   *  \brief get the pointer on the parameter list at position index
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getParametersListPtr(const unsigned int & index) const
-  {
-    return parametersList[index];
-  }
-
-  /** \fn void setParametersListVector(const std::vector<SimpleVector*>& newVector)
-   *  \brief set vector parameterList to newVector
-   *  \param vector<SimpleVector*>
-   */
-  void setParametersListVector(const std::vector<SimpleVector*>&);
-
-  /** \fn void setParametersList (const SimpleVector& newValue, const unsigned int & index)
-   *  \brief set the value of parameterList[index] to newValue
-   *  \param SimpleVector newValue
-   */
-  void setParametersList(const SimpleVector&, const unsigned int &);
-
-  /** \fn void setParametersListPtr(SimpleVector* newPtr, const unsigned int & index)
-   *  \brief set parametersList[index] to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
-  void setParametersListPtr(SimpleVector *newPtr, const unsigned int & index);
+  virtual void computeJacobianXRhs(const double&, const bool & = false);
 
   // --- miscellaneous ---
 

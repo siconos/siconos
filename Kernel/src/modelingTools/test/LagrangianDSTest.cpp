@@ -89,6 +89,7 @@ void LagrangianDSTest::tearDown()
   delete q0;
   delete velocity0;
   delete u0;
+  delete mass;
 }
 
 // xml constructor (1), without plugin
@@ -148,15 +149,14 @@ void LagrangianDSTest::testBuildLagrangianDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2K : ", ds->getNNL() == *x02, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2L : ", ds->getMass() == M, true);
   M(0, 0) = 0;
-  M(0, 1) = 1;
-  M(0, 2) = 2;
-  M(1, 0) = 3;
+  M(0, 1) = 3;
+  M(0, 2) = 6;
+  M(1, 0) = 1;
   M(1, 1) = 4;
-  M(1, 2) = 5;
-  M(2, 0) = 6;
-  M(2, 1) = 7;
+  M(1, 2) = 7;
+  M(2, 0) = 2;
+  M(2, 1) = 5;
   M(2, 2) = 8;
-  ds->getJacobianQFIntPtr()->display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2M : ", ds->getJacobianQFInt() == M, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2N : ", ds->getJacobianVelocityFInt() == M, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2O : ", ds->getJacobianQNNL() == M, true);
@@ -224,13 +224,13 @@ void LagrangianDSTest::testBuildLagrangianDS4()
 
   map<string, bool> isPl = ds->getIsPlugin();
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4Q : ", isPl["fExt"], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4R : ", isPl["fInt"], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4S : ", isPl["NNL"], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianQFInt"], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianVelocityFInt"], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianQNNL"], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianVelocityNNL"], true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4Q : ", isPl["fExt"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4R : ", isPl["fInt"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4S : ", isPl["NNL"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianQFInt"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianVelocityFInt"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianQNNL"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4T : ", isPl["jacobianVelocityNNL"], false);
 
 
   delete ds;
@@ -253,13 +253,13 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   map<string, bool> isPl = ds->getIsPlugin();
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5M : ", isPl["mass"], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5Q : ", isPl["fExt"], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5R : ", isPl["fIxt"], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5S : ", isPl["NNL"], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianQFInt"], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianVelocityFInt"], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianQNNL"], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianVelocityNNL"], true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5Q : ", isPl["fExt"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5R : ", isPl["fInt"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5S : ", isPl["NNL"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianQFInt"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianVelocityFInt"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianQNNL"], false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5T : ", isPl["jacobianVelocityNNL"], false);
 
 
   delete ds;
@@ -275,9 +275,11 @@ void LagrangianDSTest::testBuildLagrangianDS6()
 
   LagrangianDS* ds = static_cast<LagrangianDS*>(ds2);
 
+  ds->setId("copyOfds2");
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6A : ", ds->getType() == LNLDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6B : ", ds->getNumber() == 8, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6C : ", ds->getId() == "testLAGDS2", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6B : ", ds->getNumber() == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6C : ", ds->getId() == "copyOfds2", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6D : ", ds->getNdof() == 3, true);
   double time = 1.5;
   ds->initialize(time);
@@ -288,26 +290,27 @@ void LagrangianDSTest::testBuildLagrangianDS6()
   (*x01)(1) = 1;
   (*x01)(2) = 2;
   SimpleVector * x02 = new SimpleVector(3);
-  (*x01)(0) = 0;
-  (*x01)(1) = 1 * (*q0)(1);
-  (*x01)(2) = 2 * (*q0)(2);
+  (*x02)(0) = 0;
+  (*x02)(1) = 1 * (*q0)(1);
+  (*x02)(2) = 2 * (*q0)(2);
 
   SimpleMatrix M(3, 3);
   M(0, 0) = 1;
   M(1, 1) = 2;
   M(2, 2) = 3;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6I : ", ds->getFExt() == time* *x01, true);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6I : ", ds->getFExt() == (time* *x01), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6J : ", ds->getFInt() == *x02, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6K : ", ds->getNNL() == *x02, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6L : ", ds->getMass() == M, true);
   M(0, 0) = 0;
-  M(0, 1) = 1;
-  M(0, 2) = 2;
-  M(1, 0) = 3;
+  M(0, 1) = 3;
+  M(0, 2) = 6;
+  M(1, 0) = 1;
   M(1, 1) = 4;
-  M(1, 2) = 5;
-  M(2, 0) = 6;
-  M(2, 1) = 7;
+  M(1, 2) = 7;
+  M(2, 0) = 2;
+  M(2, 1) = 5;
   M(2, 2) = 8;
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6M : ", ds->getJacobianQFInt() == M, true);
@@ -330,15 +333,15 @@ void LagrangianDSTest::testcomputeDS()
   DynamicalSystem * ds = new LagrangianDS(tmpxml2);
   LagrangianDS * copy = static_cast<LagrangianDS*>(ds);
   double time = 1.5;
-  ds->computeVectorField(time);
-  ds->computeJacobianX(time);
+  ds->computeRhs(time);
+  ds->computeJacobianXRhs(time);
   SimpleMatrix M(3, 3);
   M(0, 0) = 1;
   M(1, 1) = 2;
   M(2, 2) = 3;
   SimpleMatrix * zero = new SimpleMatrix(3, 3);
-  SiconosMatrix * jx = ds->getJacobianXPtr();
-  SiconosVector * vf = ds->getXDotPtr();
+  SiconosMatrix * jx = ds->getJacobianXFPtr();
+  SiconosVector * vf = ds->getRhsPtr();
   SiconosVector * r = ds->getRPtr();
 
 

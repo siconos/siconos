@@ -93,7 +93,12 @@ LagrangianDSXML::LagrangianDSXML(xmlNodePtr  LagrangianDSNode, const bool& isBVP
 }
 
 LagrangianDSXML::~LagrangianDSXML()
-{}
+{
+  if (velocityMemoryXML != NULL) delete velocityMemoryXML;
+  if (qMemoryXML != NULL) delete qMemoryXML;
+  qMemoryXML = NULL;
+  velocityMemoryXML = NULL;
+}
 
 void LagrangianDSXML::setQMemory(const SiconosMemory& smem)
 {

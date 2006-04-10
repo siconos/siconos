@@ -19,10 +19,54 @@
 #include "LagrangianLinearTIDS.h"
 using namespace std;
 
-void LagrangianLinearTIDS::initAllocationFlags(const bool& val)
+void LagrangianLinearTIDS::connectToDS()
 {
-  isAllocatedIn["C"] = val;
-  isAllocatedIn["K"] = val;
+  // This function set properly links with members of class DynamicalSystem and LagrangianDS and allocate memory if necessary.
+  // Warning: computation of jacobianX or FInt is done in initialize, not here, since this function is called at the
+  // end of constructor, and that operators are likely to be updated with set functions or else.
+
+  if (K != NULL || C != NULL)
+  {
+    // FInt
+    fInt = new SimpleVector(ndof);
+    isAllocatedIn["fInt"] =  true;
+
+    // jacobianXF
+    workMatrix["zero-matrix"] = new SimpleMatrix(ndof, ndof);
+    workMatrix["Id-matrix"] = new SimpleMatrix(ndof, ndof);
+    workMatrix["jacob-block10"] = new SimpleMatrix(ndof, ndof);
+    workMatrix["jacob-block11"] = new SimpleMatrix(ndof, ndof);
+    workMatrix["Id-matrix"]->eye();
+
+    jacobianXF = new BlockMatrix(workMatrix["zero-matrix"], workMatrix["Id-matrix"], workMatrix["jacob-block10"], workMatrix["jacob-block11"]);
+    isAllocatedIn["jacobianXF"] = true;
+  }
+
+  if (K != NULL)
+    jacobianQFInt = K;
+
+  if (C != NULL)
+    jacobianVelocityFInt = C;
+
+  // Remark: all other operators are NULL pointers (NNL, jacobian ...). See LagrangianTIDS description in User Manual for details.
+
+}
+void LagrangianLinearTIDS::initAllocationFlags(const bool& in)
+{
+  isAllocatedIn["C"] = in; // By default, neither K nor C are allocated in, whatever the value of in is.
+  isAllocatedIn["K"] = in;
+}
+
+void LagrangianLinearTIDS::initPluginFlags(const bool& val)
+{
+  // For LagrangianLinearTIDS, the only authorized plug-in is for fExt. All other plug-in flags are set to false.
+  isPlugin["mass"] = false;
+  isPlugin["fInt"] = false;
+  isPlugin["NNL"] = false;
+  isPlugin["jacobianQFInt"] = false;
+  isPlugin["jacobianVelocityFInt"] = false;
+  isPlugin["jacobianQNNL"] = false;
+  isPlugin["jacobianVelocityNNL"] = false;
 }
 
 // --- Default (private) constructor ---
@@ -37,21 +81,28 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(DynamicalSystemXML * dsXML,  NonSmoot
   LagrangianDS(dsXML, newNsds), K(NULL), C(NULL)
 {
   initAllocationFlags(true);
+  initPluginFlags(false);
+
   DSType = LTIDS;
   if (dsXML != NULL)
   {
     LagrangianLinearTIDSXML * lltidsxml = (static_cast <LagrangianLinearTIDSXML*>(dsxml));
     if (lltidsxml->hasK())
       K = new SimpleMatrix(lltidsxml->getK());
+    else isAllocatedIn["K"] = false;
     if (lltidsxml->hasC())
       C = new SimpleMatrix(lltidsxml->getC());
+    else isAllocatedIn["C"] = false;
   }
   else RuntimeException::selfThrow("LagrangianLinearTIDS::LagrangianLinearTIDS - DynamicalSystemXML paramater must not be NULL");
+
+  connectToDS();// set connections with FInt and jacobianX
+
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
-// --- Constructor from a set of data - Mass (from a matrix), K and C ---
+// --- Constructor from a set of data - Mass, K and C ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
     const SimpleVector& newQ0, const SimpleVector& newVelocity0,
     const SiconosMatrix& newMass, const SiconosMatrix& newK, const SiconosMatrix& newC):
@@ -63,85 +114,101 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned 
   if (newC.size(0) != ndof || newC.size(1) != ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between C and ndof");
 
+  initPluginFlags(false);
+
   K = new SimpleMatrix(newK);
   C = new SimpleMatrix(newC);
+  connectToDS(); // set connections with FInt and jacobianX
+
   DSType = LTIDS;
   initAllocationFlags(true);
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
-// --- Constructor from a set of data - Mass (from plugin), K and C ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
-    const SimpleVector& newQ0, const SimpleVector& newVelocity0,
-    const std::string& massName, const SiconosMatrix& newK, const SiconosMatrix& newC):
-  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, massName), K(NULL), C(NULL)
-{
-  if (newK.size(0) != ndof || newK.size(1) != ndof)
-    RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between K and ndof");
-
-  if (newC.size(0) != ndof || newC.size(1) != ndof)
-    RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between C and ndof");
-
-  K = new SimpleMatrix(newK);
-  C = new SimpleMatrix(newC);
-  DSType = LTIDS;
-  initAllocationFlags(true);
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
-}
-
-// --- Constructor from a set of data - Mass (from a matrix), no K and no C ---
+// --- Constructor from a set of data - Mass, no K and no C ---
 LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
     const SimpleVector& newQ0, const SimpleVector& newVelocity0,
     const SiconosMatrix& newMass):
   LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, newMass), K(NULL), C(NULL)
 {
+  initPluginFlags(false);
+
   DSType = LTIDS;
   initAllocationFlags(false);
+  // no connections with FInt or jacobianX since K and C are NULL.
+
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
-
-// --- Constructor from a set of data - Mass (from plugin), no K and no C ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
-    const SimpleVector& newQ0, const SimpleVector& newVelocity0,
-    const std::string& massName):
-  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, massName), K(NULL), C(NULL)
-{
-  DSType = LTIDS;
-  initAllocationFlags(false);
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
-}
-
-
 
 // Copy constructor
 LagrangianLinearTIDS::LagrangianLinearTIDS(const DynamicalSystem & newDS):
-  LagrangianDS(newDS), K(NULL), C(NULL)
+  LagrangianDS(), K(NULL), C(NULL) // warning: call default constructor of LagrangianDS !!
 {
   if (newDS.getType() != LTIDS)
     RuntimeException::selfThrow("LagrangianLinearTIDS - copy constructor: try to copy into a LagrangianLinearTIDS a DS of type: " + newDS.getType());
 
   DSType = LTIDS;
+  id = "copy";
+  stepsInMemory = newDS.getStepsInMemory();
 
-  // convert newDS to lagrangianLinearTIDS by keeping const options
+  // === convert newDS to lagrangianLinearTIDS and keeps const options ===
   const LagrangianLinearTIDS * ltids = static_cast<const LagrangianLinearTIDS*>(&newDS);
 
+  isPlugin = ltids ->getIsPlugin();
+  initPluginFlags(false); // set all plug-in to false but not fExt!
+  setParameters(newDS.getParameters());   // Copy !!
+
+  // === copy LagrangianDS up-class members ===
+  LagrangianDS::initAllocationFlags(); // default
+
+  ndof = ltids->getNdof();
+  mass = new SimpleMatrix(ltids->getMass());
+  q0 = new SimpleVector(ltids->getQ0());
+  q = new SimpleVector(ltids->getQ());
+  qFree = new SimpleVector(ltids->getQFree());
+  if (ltids->getQMemoryPtr() != NULL)
+    qMemory = new SiconosMemory(ltids->getQMemory());
+  else isAllocatedIn["qMemory"] = false;
+  velocity0 = new SimpleVector(ltids->getVelocity0());
+  velocity  = new SimpleVector(ltids->getVelocity0());
+  velocityFree = new SimpleVector(ltids->getVelocityFree());
+  if (ltids->getVelocityMemoryPtr() != NULL)
+    velocityMemory = new SiconosMemory(ltids->getVelocityMemory());
+  else isAllocatedIn["velocityMemory"] = false;
+  p = new SimpleVector(ltids->getP());
+  if (ltids->getFExtPtr() != NULL)
+  {
+    fExt = new SimpleVector(ltids->getFExt());
+    isAllocatedIn["fExt"] = true;
+  }
+
+  if (isPlugin["fExt"])
+  {
+    string functionName, pluginPath;
+    fExtFunctionName = ltids -> getFExtFunctionName();
+    functionName = cShared.getPluginFunctionName(fExtFunctionName);
+    pluginPath  = cShared.getPluginName(fExtFunctionName);
+    setComputeFExtFunction(pluginPath, functionName);
+  }
+
+  // === copy LagrangianLinearTIDS members ===
+  initAllocationFlags(false);
   if (ltids->getKPtr() != NULL)
   {
     K = new SimpleMatrix(ltids->getK());
     isAllocatedIn["K"] = true;
   }
-  else isAllocatedIn["K"] = false;
 
   if (ltids->getCPtr() != NULL)
   {
     C = new SimpleMatrix(ltids->getC());
     isAllocatedIn["C"] = true;
   }
-  else isAllocatedIn["C"] = false;
+
+  connectToDS(); // set connections with FInt and jacobianX
+
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
@@ -194,9 +261,9 @@ bool LagrangianLinearTIDS::checkDynamicalSystem()
     output = false;
   }
 
-  if (isPlugin["vectorField"] || isPlugin["jacobianX"])
+  if (isPlugin["f"] || isPlugin["jacobianXF"])
   {
-    RuntimeException::selfThrow("LagrangianLinearTIDS::checkDynamicalSystem - vectorField and/or ist Jacobian can not be plugged for a Lagrangian system.");
+    RuntimeException::selfThrow("LagrangianLinearTIDS::checkDynamicalSystem - f and/or its Jacobian can not be plugged for a Lagrangian system.");
     output = false;
   }
   return output;
@@ -216,30 +283,59 @@ void LagrangianLinearTIDS::initialize(const double& time, const unsigned int& si
   // Initialize memory vectors
   initMemory(sizeOfMemory);
 
-  // FInt
-  * fInt = *C ** velocity + *K **q;
+  bool flag = false;
 
-  computeFExt(time);
+  // === fExt, fInt, rhs and jacobianXRhs ===
 
-  // vectorField
-  // note that xDot(0) = velocity, with pointer link, must already be set.
-  SiconosVector* tmp = xDot->getVectorPtr(1); // Pointer link!
-  // Compute M-1
-  workMatrix["inverseOfMass"] = new SimpleMatrix(*mass);
-  workMatrix["inverseOfMass"]->PLUFactorizationInPlace();
-  workMatrix["inverseOfMass"]->PLUInverseInPlace();
+  // right-hand side
+  SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
+  vField ->zero();
 
-  *tmp = *(workMatrix["inverseOfMass"]) * (*fExt - *fInt);
+  // jacobianX:
+  if (K != NULL || C != NULL)
+  {
+    workMatrix["jacob-block10"]->zero(); // = -M^-1 K
+    workMatrix["jacob-block11"]->zero(); // = -M^-1 C
+  }
+
+  // Compute M-1 if necessary
+  if (fExt != NULL || K != NULL || C != NULL)
+  {
+    workMatrix["inverseOfMass"] = new SimpleMatrix(*mass);
+    workMatrix["inverseOfMass"]->PLUFactorizationInPlace();
+    workMatrix["inverseOfMass"]->PLUInverseInPlace();
+  }
+
+  // fExt and update rhs
+  if (fExt != NULL)
+  {
+    computeFExt(time);
+    *vField += *fExt;
+    flag = true;
+  }
+
+  // fInt and update jacobianXF
+  if (K != NULL)
+  {
+    *fInt += *K **q;
+    *workMatrix["jacob-block10"] -= *workMatrix["inverseOfMass"] * *K;
+    flag = true;
+  }
+  if (C != NULL)
+  {
+    *fInt += *C ** velocity;
+    *workMatrix["jacob-block11"] -= *workMatrix["inverseOfMass"] * *C;
+    flag = true;
+  }
+
+  if (flag)
+  {
+    if (fInt != NULL)
+      *vField -= *fInt;
+    *vField = *(workMatrix["inverseOfMass"])* *vField;
+  }
+
   // todo: use linearSolve to avoid inversion ? Or save M-1 to avoid re-computation. See this when "M" will be added in DS or LDS.
-
-  // jacobianX
-  SiconosMatrix * tmp2;
-  tmp2 = jacobianX->getBlockPtr(1, 0); // Pointer link!
-  // !!! jacobian of M according to q is not take into account at the time !!!
-  *tmp2 = -1 * *workMatrix["inverseOfMass"] * *K;
-  tmp2 = jacobianX->getBlockPtr(1, 1); // Pointer link!
-  *tmp2 = -1 * *workMatrix["inverseOfMass"] * *C;
-
   // \todo: control terms handling
 }
 
@@ -305,38 +401,69 @@ void LagrangianLinearTIDS::display() const
   cout << "=========================================================== " << endl;
 }
 
-void LagrangianLinearTIDS::computeVectorField(const double& time)
+void LagrangianLinearTIDS::computeRhs(const double& time, const bool &)
 {
+  // second argument is useless but present because of top-class function overloading.
+
   // note that xDot(0) = velocity with pointer link must already be set.
-
-  SiconosVector* tmp = xDot->getVectorPtr(1); // Pointer link!
-  // Compute M-1
-  map<string, SiconosMatrix*>::iterator it = workMatrix.find("inverseOfMass");
-  if (it == workMatrix.end()) // if it is the first call to computeVectorField or computeJacobianX
+  SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
+  vField->zero();
+  if (fExt != NULL || K != NULL || C != NULL) // else rhs = 0
   {
-    workMatrix["inverseOfMass"] = new SimpleMatrix(*mass);
-    workMatrix["inverseOfMass"]->PLUFactorizationInPlace();
-    workMatrix["inverseOfMass"]->PLUInverseInPlace();
+    // Compute M-1 if necessary - Only in the case where initialize has not been called before.
+    map<string, SiconosMatrix*>::iterator it = workMatrix.find("inverseOfMass");
+    if (it == workMatrix.end())
+    {
+      workMatrix["inverseOfMass"] = new SimpleMatrix(*mass);
+      workMatrix["inverseOfMass"]->PLUFactorizationInPlace();
+      workMatrix["inverseOfMass"]->PLUInverseInPlace();
+    }
+    bool flag = false;
+    if (fExt != NULL)
+    {
+      *vField += *fExt;
+      flag = true;
+    }
+    if (K != NULL)
+    {
+      *vField -= *K**q;
+      flag = true;
+    }
+    if (C != NULL)
+    {
+      *vField -= *C**velocity;
+      flag = true;
+    }
+    if (flag)
+      *vField = *(workMatrix["inverseOfMass"])**vField;
   }
-
-  *tmp = *(workMatrix["inverseOfMass"]) * (*fExt - *C ** velocity - *K **q);;
-  // todo: use linearSolve to avoid inversion ? Or save M-1 to avoid re-computation. See this when "M" will be added in DS or LDS.
 }
 
-void LagrangianLinearTIDS::computeJacobianX(const double& time)
+void LagrangianLinearTIDS::computeJacobianXRhs(const double& time, const bool &)
 {
-  SiconosMatrix* tmp = jacobianX->getBlockPtr(1, 0); // Pointer link!
-  // Compute M-1 if required
-  map<string, SiconosMatrix*>::iterator it = workMatrix.find("inverseOfMass");
-  if (it == workMatrix.end()) // if it is the first call to computeVectorField or computeJacobianX
+  // second argument is useless but present because of top-class function overloading.
+  if (K != NULL || C != NULL) // else jacobianX = 0
   {
-    workMatrix["inverseOfMass"] = new SimpleMatrix(*mass);
-    workMatrix["inverseOfMass"]->PLUFactorizationInPlace();
-    workMatrix["inverseOfMass"]->PLUInverseInPlace();
+    // Compute M-1 if required - Only in the case where initialize has not been called before.
+    map<string, SiconosMatrix*>::iterator it = workMatrix.find("inverseOfMass");
+    if (it == workMatrix.end())
+    {
+      workMatrix["inverseOfMass"] = new SimpleMatrix(*mass);
+      workMatrix["inverseOfMass"]->PLUFactorizationInPlace();
+      workMatrix["inverseOfMass"]->PLUInverseInPlace();
+    }
+
+    if (K != NULL)
+    {
+      workMatrix["jacob-block10"]->zero(); // = -M^-1 K
+      *workMatrix["jacob-block10"] -= *workMatrix["inverseOfMass"] * *K;
+    }
+    if (C != NULL)
+    {
+      workMatrix["jacob-block11"]->zero(); // = -M^-1 C
+      *workMatrix["jacob-block11"] -= *workMatrix["inverseOfMass"] * *C;
+    }
   }
-  *tmp = -1 * *workMatrix["inverseOfMass"] * *K;
-  tmp = jacobianX->getBlockPtr(1, 1); // Pointer link!
-  *tmp = -1 * *workMatrix["inverseOfMass"] * *C;
 }
 
 void LagrangianLinearTIDS::saveDSToXML()

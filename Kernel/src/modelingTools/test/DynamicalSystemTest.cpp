@@ -98,8 +98,8 @@ void DynamicalSystemTest::testBuildDynamicalSystem1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1E : ", ds->getX0() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1F : ", ds->getU() == *u0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1G : ", ds->getT() == *T0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1H : ", ds->isPlugged("vectorField"), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1I : ", ds->isPlugged("jacobianX"), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1H : ", ds->isPlugged("f"), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem1I : ", ds->isPlugged("jacobianXF"), true);
 
   delete ds;
   cout << "--> Constructor xml test ended with success." << endl;
@@ -116,8 +116,8 @@ void DynamicalSystemTest::testBuildDynamicalSystem2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2C : ", ds->getId() == "testDS2", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2D : ", ds->getN() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2E : ", ds->getX0() == 2 * *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2F : ", ds->isPlugged("vectorField"), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2G : ", ds->isPlugged("jacobianX"), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2F : ", ds->isPlugged("f"), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2G : ", ds->isPlugged("jacobianXF"), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2H : ", ds->getUSize() == 2, true);
 
   double time = 1.5;
@@ -138,7 +138,7 @@ void DynamicalSystemTest::testBuildDynamicalSystem2()
 void DynamicalSystemTest::testBuildDynamicalSystem3()
 {
   cout << "--> Test: constructor 3." << endl;
-  DynamicalSystem * ds = new DynamicalSystem(13, 3, *x0, "TestPlugin:vectorField", "TestPlugin:computeJacobianX");
+  DynamicalSystem * ds = new DynamicalSystem(13, 3, *x0, "TestPlugin:computeF", "TestPlugin:computeJacobianXF");
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem3A : ", ds->getType() == NLDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem3B : ", ds->getNumber() == 13, true);
@@ -146,8 +146,10 @@ void DynamicalSystemTest::testBuildDynamicalSystem3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem3D : ", ds->getX0() == *x0, true);
 
   double time = 1.5;
-  ds->computeVectorField(time);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem3E : ", ds->getXDot() == time* *x0, true);
+  cout << "--> Test: constructor 3." << endl;
+  ds->computeRhs(time);
+  cout << "--> Test: constructor 3." << endl;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem3E : ", ds->getRhs() == time* *x0, true);
   delete ds;
   cout << "--> Constructor 3 test ended with success." << endl;
 }
@@ -166,8 +168,8 @@ void DynamicalSystemTest::testBuildDynamicalSystem4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4E : ", ds2->getX0() == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4F : ", ds2->getU() == *u0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4G : ", ds2->getT() == *T0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4H : ", ds2->isPlugged("vectorField"), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4I : ", ds2->isPlugged("jacobianX"), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4H : ", ds2->isPlugged("f"), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem4I : ", ds2->isPlugged("jacobianXF"), true);
 
   delete ds1;
   delete ds2;
@@ -237,38 +239,6 @@ void DynamicalSystemTest::testSetX2()
   cout << "--> setX2 test ended with success." << endl;
 }
 
-// setXDot
-void DynamicalSystemTest::testSetXDot()
-{
-  cout << "--> Test: setXDot." << endl;
-  DynamicalSystem * ds1 = new DynamicalSystem(tmpxml2);
-  ds1->setXDot(*x0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetXDot : ", ds1->getXDot() == *x0, true);
-  delete ds1;
-  cout << "--> setXDot test ended with success." << endl;
-}
-
-// setXDotPtr
-void DynamicalSystemTest::testSetXDotPtr()
-{
-  cout << "--> Test: setXDotptr." << endl;
-  DynamicalSystem * ds1 = new DynamicalSystem(tmpxml2);
-  ds1->setXDotPtr(x0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetXDotPtr : ", ds1->getXDot() == *x0, true);
-  delete ds1;
-  cout << "--> setXDotPtr test ended with success." << endl;
-}
-
-// setXDot with exception
-void DynamicalSystemTest::testSetXDot2()
-{
-  cout << "--> Test: setXDot2." << endl;
-  DynamicalSystem * ds1 = new DynamicalSystem(tmpxml2);
-  ds1->setXDot(*u0);
-  delete ds1;
-  cout << "--> setXDot2 test ended with success." << endl;
-}
-
 // setXFree
 void DynamicalSystemTest::testSetXFree()
 {
@@ -334,35 +304,35 @@ void DynamicalSystemTest::testSetR2()
 }
 
 // set JacobianX
-void DynamicalSystemTest::testSetJacobianX()
+void DynamicalSystemTest::testSetJacobianXF()
 {
-  cout << "--> Test: setJacobianX." << endl;
+  cout << "--> Test: setJacobianXF." << endl;
   DynamicalSystem * ds1 = new DynamicalSystem(tmpxml2);
-  ds1->setJacobianX(*J0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetJacobianX : ", ds1->getJacobianX() == *J0, true);
+  ds1->setJacobianXF(*J0);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetJacobianX : ", ds1->getJacobianXF() == *J0, true);
   delete ds1;
-  cout << "--> setJacobianX test ended with success." << endl;
+  cout << "--> setJacobianXF test ended with success." << endl;
 }
 
 // setJacobianXPtr
-void DynamicalSystemTest::testSetJacobianXPtr()
+void DynamicalSystemTest::testSetJacobianXFPtr()
 {
-  cout << "--> Test: setJacobianXPtr." << endl;
+  cout << "--> Test: setJacobianXFPtr." << endl;
   DynamicalSystem * ds1 = new DynamicalSystem(tmpxml2);
-  ds1->setJacobianXPtr(J0);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetJacobianXPtr : ", ds1->getJacobianX() == *J0, true);
+  ds1->setJacobianXFPtr(J0);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetJacobianXFPtr : ", ds1->getJacobianXF() == *J0, true);
   delete ds1;
-  cout << "--> setJacobianXPtr test ended with success." << endl;
+  cout << "--> setJacobianXFPtr test ended with success." << endl;
 }
 
 // setJacobianX with exception
-void DynamicalSystemTest::testSetJacobianX2()
+void DynamicalSystemTest::testSetJacobianXF2()
 {
-  cout << "--> Test: setJacobianX2." << endl;
+  cout << "--> Test: setJacobianXF2." << endl;
   DynamicalSystem * ds1 = new DynamicalSystem(tmpxml2);
-  ds1->setJacobianX(*T0);
+  ds1->setJacobianXF(*T0);
   delete ds1;
-  cout << "--> setJacobianX2 test ended with success." << endl;
+  cout << "--> setJacobianXF2 test ended with success." << endl;
 }
 
 // setU
@@ -436,11 +406,9 @@ void DynamicalSystemTest::testInitMemory()
   DynamicalSystem * ds1 = new DynamicalSystem(tmpxml2);
   ds1->initMemory(2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem1 : ", ds1->getXMemoryPtr()->getMemorySize() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem2 : ", ds1->getXDotMemoryPtr()->getMemorySize() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem3 : ", ds1->getRMemoryPtr()->getMemorySize() == 2, true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem4 : ", ds1->getXMemoryPtr()->getNbVectorsInMemory() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem5 : ", ds1->getXDotMemoryPtr()->getNbVectorsInMemory() == 0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testInitMem6 : ", ds1->getRMemoryPtr()->getNbVectorsInMemory() == 0, true);
   delete ds1;
   cout << "--> initMemory test ended with success." << endl;
@@ -453,12 +421,10 @@ void DynamicalSystemTest::testSwap()
   cout << "--> Test: swap." << endl;
   DynamicalSystem * ds1 = new DynamicalSystem(tmpxml2);
   ds1->setX(*x0);
-  ds1->setXDot(*x0);
   ds1->setR(*x0);
   ds1->initMemory(1);
   ds1->swapInMemory();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap1 : ", *((ds1->getXMemoryPtr()->getVectorMemory())[0]) == *x0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap2 : ", *((ds1->getXDotMemoryPtr()->getVectorMemory())[0]) == *x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap3 : ", *((ds1->getRMemoryPtr()->getVectorMemory())[0]) == *x0, true);
   delete ds1;
   cout << "--> swap test ended with success." << endl;

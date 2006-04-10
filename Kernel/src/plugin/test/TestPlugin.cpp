@@ -20,6 +20,25 @@
 
 // ==== Dynamical System ====
 
+// vectorField
+extern "C" void computeF(const unsigned int& sizeOfX, const double *time, const double *x, double *fPtr, double* param)
+{
+  /* input parameter : sizeOfX (size of the vector X); time ; x (pointer to X vector);
+   * output parameter : xdot (pointer to Xdot vector)
+   */
+  for (unsigned int i = 0; i < sizeOfX; i++)
+    fPtr[i] = *time * x[i];
+}
+
+extern "C" void computeJacobianXF(const unsigned int &sizeOfX, const double *time, const double *x, double *jacob, double* param)
+{
+  /* input parameter : sizeOfX (size of the vector X); time; x (pointer to x vector);
+   * output parameter : jacob (pointer to JacobianX matrix)
+   */
+
+  printf("Call of the function 'computeJacobianX' of the basic plugin.\nYou have to implement this function.\n");
+}
+
 // function to compute u
 extern "C" void computeU(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* time, const double* xPtr, double* UPtr, double* param)
 {
@@ -56,32 +75,20 @@ extern "C" void computeT(const unsigned int& sizeOfU, const unsigned int& sizeOf
   }
 }
 
-// vectorField
-extern "C" void vectorField(const unsigned int& sizeOfX, const double *time, const double *x, double *xdot, double* param)
-{
-  /* input parameter : sizeOfX (size of the vector X); time ; x (pointer to X vector);
-   * output parameter : xdot (pointer to Xdot vector)
-   */
-  for (unsigned int i = 0; i < sizeOfX; i++)
-    xdot[i] = *time * x[i];
-}
-
-
-
-extern "C" void computeJacobianX(const unsigned int &sizeOfX, const double *time, const double *x, double *jacob, double* param)
-{
-  /* input parameter : sizeOfX (size of the vector X); time; x (pointer to x vector);
-   * output parameter : jacob (pointer to JacobianX matrix)
-   */
-
-  printf("Call of the function 'computeJacobianX' of the basic plugin.\nYou have to implement this function.\n");
-}
-
 
 // ===== Lagrangian DS  =====
 
 // Plugins for Fext, Fint, NNL (vectors), Mass, JacobianQNNL, JacobianVelocityNNL,
 // JacobianQFint and JacobianVelocityFint (matrices)
+
+extern "C" void computeMass(const unsigned int&sizeOfq, const double *q, double *mass, double* param)
+{
+  for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
+    mass[i] = 0;
+  mass[0] = 1;
+  mass[4] = 2;
+  mass[8] = 3;
+}
 
 extern "C" void computeFInt(const unsigned int&sizeOfq, const double *time, const double *q, const double *velocity, double *fInt, double * param)
 {
@@ -102,15 +109,6 @@ extern "C" void computeNNL(const unsigned int&sizeOfq, const double *q, const do
     NNL[i] = i * q[i];
 }
 
-
-extern "C" void computeMass(const unsigned int&sizeOfq, const double *q, double *mass, double* param)
-{
-  for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
-    mass[i] = 0;
-  mass[0] = 1;
-  mass[4] = 2;
-  mass[8] = 3;
-}
 
 
 extern "C" void computeJacobianQFInt(const unsigned int&sizeOfq, const double *time, const double *q, const double *velocity, double *jacob, double* param)
@@ -148,7 +146,7 @@ extern "C" void computeB(const unsigned int &sizeOfB, const double *time, double
     b[i] = *time * i ;
 
 }
-extern "C" void computeA(const unsigned int &sizeOfX, const double *time, const double *x, double *jacob, double* param)
+extern "C" void computeA(const unsigned int &sizeOfX, const double *time, double *jacob, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); time; x (pointer to x vector);
    * output parameter : jacob (pointer to JacobianX matrix)
