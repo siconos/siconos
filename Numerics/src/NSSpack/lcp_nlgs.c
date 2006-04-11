@@ -1,4 +1,4 @@
-/* Siconos-Numerics version 1.1.4, Copyright INRIA 2005-2006.
+/* Siconos-Numerics version 1.1.3, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -50,42 +50,41 @@
                 - iparamLCP[1] = ispeak  On enter, the output log identifiant:\n
                         0 : no output\n
                         >0: active screen output\n
-                - iparamLCP[2] = initmethod On enter, the method of initialization
-            0 : default w = q, z unchang
-
-it_end  On enter, the number of iterations performed by the algorithm.
+                - iparamLCP[2] = it_end  On enter, the number of iterations performed by the algorithm.
 
   \param dparamLCP  On enter/return a vector of doubles:\n
                 - dparamLCP[0] = tol     On enter, the tolerance required.
-                - dparamLCP[1] = res     On return, the final error value.
+                - dparamLCP[1] = omega   On enter, the relaxation parameter (not yet available).
+                - dparamLCP[2] = res     On return, the final error value.
 
-  \author Mathieu Renouf,  Vincent Acary(modification Max function, ...)
+  \author Mathieu Renouf
 
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
+
 #include "blaslapack.h"
+#include <math.h>
 
 void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
 
-  int n;
-  int incx = 1, incy = 1;
-  int incxn;
+  int n, incx, incy;
   int i, iter;
   int itermax, ispeak;
-
-  double qs, err, num, den;
+  int incxn;
+  double qs, err, num, den, zi;
   double tol, omega;
   double *ww, *diag;
-  double a1 = 1.0, b1 = 1.0;
+  double a1, b1;
 
   char NOTRANS = 'N';
 
   n = *nn;
+  incx = 1;
+  incy = 1;
   incxn = n;
   /* Recup input */
 
@@ -106,6 +105,8 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   diag = (double*)malloc(n * sizeof(double));
 
   /* Check for non trivial case */
+  integer totoincx;
+  totoincx = (integer)incx;
 
   qs = dnrm2_((integer *)&n , q , (integer *)&incx);
 
@@ -130,15 +131,14 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   for (i = 0 ; i < n ; ++i)
   {
     ww[i] = 0.;
+    w[i] = 0.;
   }
 
-  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
-  /* Intialization of w and z */
-  /*if(initmethod == 0) {*/
-  /* dcopy_( (integer *)&n , q , (integer *)&incx , w , (integer *)&incy );*/
-  /*dcopy_( (integer *)&n , ww , (integer *)&incx , z , (integer *)&incy );*/
-  /*}    else if(initmethod == 0) { */
+  /* Intialization of w */
 
+  incx = 1;
+  incy = 1;
+  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
 
   /* Preparation of the diagonal of the inverse matrix */
 
@@ -167,7 +167,8 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   iter = 0;
   err  = 1.;
 
-  qs   = -1.0;
+  incx = 1;
+  incy = 1;
 
   dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
 
@@ -176,41 +177,55 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
     ++iter;
 
-    dcopy_((integer *)&n , w , (integer *)&incx , ww , (integer *)&incy);   /* w --> ww */
-    dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);    /* q --> w */
+    incx = 1;
+    incy = 1;
+
+    dcopy_((integer *)&n , w , (integer *)&incx , ww , (integer *)&incy);
+    dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
 
     for (i = 0 ; i < n ; ++i)
     {
 
+      incx = n;
+      incy = 1;
+
       z[i] = 0.0;
 
-      /*      zi = -( q[i] + ddot_( (integer *)&n , &vec[i] , (integer *)&incxn , z , (integer *)&incy ))*diag[i]; */
+      zi = -(q[i] + ddot_((integer *)&n , &vec[i] , (integer *)&incx , z , (integer *)&incy)) * diag[i];
 
-      /*       if( zi < 0 ) z[i] = 0.0;  */
-      /*       else z[i] = zi; */
+      if (zi < 0) z[i] = 0.0;
+      else z[i] = zi;
 
-      z[i] = fmax(0.0, -(q[i] + ddot_((integer *)&n , &vec[i] , (integer *)&incxn , z , (integer *)&incy)) * diag[i]);
+      /* z[i]=fmax(0.0,-( q[i] + ddot_( (integer *)&n , &vec[i] , (integer *)&incxn , z , (integer *)&incy ))*diag[i]);*/
 
     }
 
     /* **** Criterium convergence **** */
 
+    incx =  1;
+    incy =  1;
+
+    a1 = 1.0;
+    b1 = 1.0;
 
     dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , (integer *)&incx , &b1 , w , (integer *)&incy);
 
+    qs   = -1.0;
     daxpy_((integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy);
 
     num = dnrm2_((integer *)&n, ww , (integer *)&incx);
     err = num * den;
 
-    /*     if( ispeak == 2 ){  */
-    /*       printf(" # i%d -- %g : ",iter,err); */
-    /*       for( i = 0 ; i < n ; ++i) printf(" %g",z[i]); */
-    /*       for( i = 0 ; i < n ; ++i) printf(" %g",w[i]); */
-    /*       printf("\n"); */
-    /*     } */
+    if (ispeak == 2)
+    {
+      printf(" # i%d -- %g : ", iter, err);
+      for (i = 0 ; i < n ; ++i) printf(" %g", z[i]);
+      for (i = 0 ; i < n ; ++i) printf(" %g", w[i]);
+      printf("\n");
+    }
 
     /* **** ********************* **** */
+
   }
 
   iparamLCP[2] = iter;
