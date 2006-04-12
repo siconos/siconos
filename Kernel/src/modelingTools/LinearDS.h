@@ -65,14 +65,14 @@ class LinearDSXML;
  *
  *  - Construction: A is required and must be set as a matrix or a plug-in. b is optional, and can be given as a vector or a plug-in.
  *  - Initialization: compute values at time=t0 (rhs, jacobianXF, A ...), usually done when calling strategy->initialize.
- *  - Computation a time t, by calling "compute" functions
- *      => computeA or computeJacobianXF, same result.
+ *  - Computation at time t, by calling "compute" functions
+ *      => computeA
  *      => computeB
- *      => computeRhs, compute xDot = Ax + b + Tu
+ *      => computeRhs, compute \f$ \dot x = Ax + b + Tu \f$
  *      => computeU and computeT (from DynamicalSystem class)
  *
  * Any call to a plug-in requires that it has been set correctly before simulation using one of the following:
- *   => setComputeJacobianXFFunction or setComputeA (same result)
+ *   => setComputeAFunction
  *   => setComputeBFunction
  *
  **/

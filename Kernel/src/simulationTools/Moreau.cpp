@@ -40,8 +40,9 @@ Moreau::Moreau(OneStepIntegratorXML *osiXML, TimeDiscretisation* td, DynamicalSy
   integratorXml = osiXML;
   integratorType = MOREAU_INTEGRATOR;
   // Memory allocation for W
-  int sizeW = (static_cast<LagrangianDS*>(ds))->getQPtr()->size();
+  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
   W = new SimpleMatrix(sizeW, sizeW);
+  isWAllocatedIn = true;
 
   // xml loading
   if (osiXML != NULL)
@@ -65,30 +66,15 @@ Moreau::Moreau(TimeDiscretisation* td, DynamicalSystem* ds, const double& newThe
 {
   integratorType = MOREAU_INTEGRATOR;
   // Memory allocation for W
-  string type = ds->getType();
-  if (type == LNLDS || type == LTIDS)
-  {
-    int sizeW = (static_cast<LagrangianDS*>(ds))->getQPtr()->size();
-    W = new SimpleMatrix(sizeW, sizeW);
-    isWAllocatedIn = true;
-  }
-  else if (type == LDS)
-  {
-    int sizeW = (static_cast<LinearDS*>(ds))->getN();
-    W = new SimpleMatrix(sizeW, sizeW);
-    isWAllocatedIn = true;
-  }
-  else
-    RuntimeException::selfThrow("Moreau::Moreau() - constructor from data - Not yet implemented for ds type " + type);
+  unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for Lagrangian ones.
+  W = new SimpleMatrix(sizeW, sizeW);
+  isWAllocatedIn = true;
 }
 
 Moreau::~Moreau()
 {
-  if (isWAllocatedIn)
-  {
-    delete W;
-    W = NULL;
-  }
+  if (isWAllocatedIn) delete W;
+  W = NULL;
   if (ds != NULL && ds->getType() == LNLDS) ds->freeTmpWorkVector("LagNLDSMoreau");
 }
 
@@ -101,7 +87,7 @@ void Moreau::setW(const SiconosMatrix& newValue)
 
   if (ds != NULL)
   {
-    unsigned int sizeW = (static_cast<LagrangianDS*>(ds))->getQPtr()->size();
+    unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
     if (line != sizeW) // check consistency between newValue and dynamical system size
       RuntimeException::selfThrow("Moreau::setW(newVal) - unconsistent dimension between newVal and dynamical system to be integrated ");
   }
@@ -129,7 +115,7 @@ void Moreau::setWPtr(SiconosMatrix *newPtr)
 
   if (ds != NULL)
   {
-    unsigned int sizeW = (static_cast<LagrangianDS*>(ds))->getQPtr()->size();
+    unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
     if (line != sizeW) // check consistency between newValue and dynamical system size
       RuntimeException::selfThrow("Moreau::setW(newVal) - unconsistent dimension between newVal and dynamical system to be integrated ");
   }
@@ -154,18 +140,18 @@ void Moreau::initialize()
 void Moreau::computeW(const double& t)
 {
   double h = timeDiscretisation->getH(); // time step
+  if (W == NULL)
+  {
+    unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
+    W = new SimpleMatrix(sizeW, sizeW);
+    isWAllocatedIn = true;
+  }
 
   // === Lagrangian dynamical system
   if (ds->getType() == LNLDS)
   {
     LagrangianDS* d = static_cast<LagrangianDS*>(ds);
     // Check if W is allocated; if not, do allocation.
-    if (W == NULL)
-    {
-      unsigned int size = d->getQPtr()->size();
-      W = new SimpleMatrix(size, size);
-      isWAllocatedIn = true;
-    }
     // Compute Mass matrix (if loaded from plugin)
     d->computeMass();
     // Compute and get Jacobian (if loaded from plugin)
@@ -190,13 +176,6 @@ void Moreau::computeW(const double& t)
   else if (ds->getType() == LTIDS)
   {
     LagrangianDS* d = static_cast<LagrangianDS*>(ds);
-    // Check if W is allocated; if not, do allocation.
-    if (W == NULL)
-    {
-      unsigned int size = d->getQPtr()->size();
-      W = new SimpleMatrix(size, size);
-      isWAllocatedIn = true;
-    }
     // Get K, C and Mass
     SiconosMatrix *M, *K, *C ;
     K = ((static_cast<LagrangianLinearTIDS*>(d))->getKPtr());
@@ -212,7 +191,7 @@ void Moreau::computeW(const double& t)
   {
     LinearDS* d = static_cast<LinearDS*>(ds);
     SiconosMatrix *I;
-    int size = d->getN();
+    unsigned int size = d->getN();
     // Check if W is allocated
     if (W == NULL)
     {
@@ -256,10 +235,9 @@ void Moreau::computeFreeState()
     // --- RESfree calculus ---
     //
     // Get state i (previous time step)
-    SimpleVector* vold, *qold;
+    SimpleVector* qold, *vold;
     qold = static_cast<SimpleVector*>(d->getQMemoryPtr()->getSiconosVector(0));
     vold = static_cast<SimpleVector*>(d->getVelocityMemoryPtr()->getSiconosVector(0));
-
     // Computation of the external forces
     d->computeFExt(told);
     SimpleVector FExt0 = d->getFExt();
@@ -317,7 +295,7 @@ void Moreau::computeFreeState()
     SiconosVector *xold = d->getXMemoryPtr()->getSiconosVector(0);
 
     unsigned int sizeX = xfree->size();
-    SimpleVector *xtmp = new SimpleVector(sizeX);
+    SiconosVector *xtmp = new SimpleVector(sizeX);
 
     SiconosMatrix *I = new SimpleMatrix(sizeX, sizeX);
     I->eye();
@@ -410,7 +388,7 @@ void Moreau::integrate()
   else RuntimeException::selfThrow("Moreau::integrate - not yet implemented for Dynamical system type :" + ds->getType());
 }
 
-void Moreau::integrate(const double& told, const double& t, const double& tout, const bool& iout)
+void Moreau::integrate(const double& told, const double& t, double& tout, bool& iout)
 {
   double h = timeDiscretisation->getH();
 
@@ -421,7 +399,6 @@ void Moreau::integrate(const double& told, const double& t, const double& tout, 
   }
   else if (ds->getType() == LTIDS)
   {
-    VL(("Moreau::integrate -- LTIDS\n"));
     // get the ds
     LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(ds);
     // get q and velocity pointers for current time step

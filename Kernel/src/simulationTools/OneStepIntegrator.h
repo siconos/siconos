@@ -198,7 +198,7 @@ public:
   virtual void initialize() = 0;
 
   /** \fn void nextStep()
-   *  \brief prepares the DynamicalSystem for the next time step, push x and xDot in Memory
+   *  \brief prepares the DynamicalSystem for the next time step, push x in Memory
    *  \param to be defined
    *  \exception to be defined
    *  \return void
@@ -217,14 +217,14 @@ public:
    */
   virtual void integrate() = 0;
 
-  /** \fn void integrate(const double&, const double&, const double&, const bool&)
+  /** \fn void integrate(const double&, const double&, double&, bool&)
    *  \brief integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param double: tinit, initial time
    *  \param double: tend, end time
    *  \param double: tout, real end time
    *  \param bool: true if tend is reached, else false.
    */
-  virtual void integrate(const double&, const double&, const double&, const bool&);
+  virtual void integrate(const double&, const double&, double&, bool&);
 
   /** \fn void updateState()
    *  \brief update the state of the DynamicalSystem attached to this Integrator

@@ -41,8 +41,8 @@ class LinearDSXML : public DynamicalSystemXML
 private:
 
   //Nodes
-  xmlNode * ANode; /**< A in xDot = Ax+b */
-  xmlNode * bNode; /**< b in xDot = Ax+b */
+  xmlNode * ANode; /**< A in \f$ \dot x = Ax+b \f$ */
+  xmlNode * bNode; /**< b in \f$ \dot x = Ax+b \f$ */
 
 public:
 

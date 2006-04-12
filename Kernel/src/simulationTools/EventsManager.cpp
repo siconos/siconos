@@ -161,9 +161,9 @@ Event* EventsManager::getNextEventPtr(Event* inputEvent) const
     RuntimeException::selfThrow("EventsManager getNextEventPtr(inputEvent), Event input is not present in the set ");
 
   if (next == unProcessedEvents.end())
-    RuntimeException::selfThrow("EventsManager getNextEventPtr(inputEvent), no next event, input is the last one in the list.");
-
-  return (*next);
+    return NULL; //RuntimeException::selfThrow("EventsManager getNextEventPtr(inputEvent), no next event, input is the last one in the list.");
+  else
+    return (*next);
 }
 
 Event* EventsManager::getNextEventPtr(const unsigned long int& inputTime) const
@@ -171,9 +171,9 @@ Event* EventsManager::getNextEventPtr(const unsigned long int& inputTime) const
   eventsContainer::iterator next = unProcessedEvents.upper_bound(getEventPtr(inputTime));
 
   if (next == unProcessedEvents.end())
-    RuntimeException::selfThrow("EventsManager getNextEventPtr(inputTime), no next event, the one corresponding to inputTime is the last one in the list.");
-
-  return (*next);
+    return NULL; //RuntimeException::selfThrow("EventsManager getNextEventPtr(inputTime), no next event, the one corresponding to inputTime is the last one in the list.");
+  else
+    return (*next);
 }
 
 const bool EventsManager::hasEvent(Event* event) const
@@ -296,9 +296,8 @@ void EventsManager::processEvents()
   // Remove event that occurs at time t (ie old current event) from unProcessedEvents set
   unProcessedEvents.erase(getEventPtr(t));
 
-  // Get new nextEvent
+  // Get new nextEvent (return NULL if currentEvent is the last one)
   nextEvent = getNextEventPtr(currentEvent->getTimeOfEvent());
-
 }
 
 //void EventsManager::saveEventsManagerToXML()

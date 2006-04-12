@@ -72,8 +72,7 @@
 <xsd:simpleType name="PossibleOneStepIntegratorValues">
    	<xsd:restriction base="xsd:string">
 	<xsd:enumeration value="Moreau"/>
-	<xsd:enumeration value="Adams"/>
-	<xsd:enumeration value="LSODAR"/>
+	<xsd:enumeration value="Lsodar"/>
    	</xsd:restriction>
 </xsd:simpleType>
 
@@ -823,21 +822,10 @@
 						</xsd:all>
 					</xsd:complexType>
 				</xsd:element>
-				
-				<xsd:element name="Adams">
+				<xsd:element name="Lsodar">
 					<xsd:complexType>
 						<xsd:all>
 							<xsd:element name="DS_Concerned" type="index_list" minOccurs="1" maxOccurs="1"/>
-							<xsd:element name="r" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
-						</xsd:all>
-					</xsd:complexType>
-				</xsd:element>
-				
-				<xsd:element name="LSODAR">
-					<xsd:complexType>
-						<xsd:all>
-							<xsd:element name="DS_Concerned" type="index_list" minOccurs="1" maxOccurs="1"/>
-							<xsd:element name="r" type="xsd:integer" minOccurs="0" maxOccurs="1"/>
 						</xsd:all>
 					</xsd:complexType>
 				</xsd:element>

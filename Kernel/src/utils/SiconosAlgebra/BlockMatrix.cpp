@@ -253,6 +253,14 @@ const LaGenMatDouble BlockMatrix::getLaGenMatDouble(const unsigned int& row, con
   return (getListOfBlocks()[index]->getLaGenMatDouble());
 }
 
+const LaGenMatDouble* BlockMatrix::getLaGenMatDoubleRef(const unsigned int& row, const unsigned int& col) const
+{
+  vector<unsigned int> index(2);
+  index[0] = row;
+  index[1] = col;
+  return (getListOfBlocks()[index]->getLaGenMatDoubleRef());
+}
+
 void BlockMatrix::setValue(const LaGenMatDouble& newMat, const unsigned int& row, const unsigned int& col)
 {
   vector<unsigned int> index(2);

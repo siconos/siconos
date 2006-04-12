@@ -151,14 +151,14 @@ public:
    */
   void integrate();
 
-  /** \fn void integrate(const double&, const double&, const double&, const bool&)
+  /** \fn void integrate(const double&, const double&, double&, bool&)
    *  \brief integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param double: tinit, initial time
    *  \param double: tend, end time
    *  \param double: tout, real end time
    *  \param bool: true if tend is reached, else false.
    */
-  void integrate(const double&, const double&, const double&, const bool&);
+  void integrate(const double&, const double&, double&, bool&);
 
   /** \fn void updateState()
    *  \brief updates the state of the Dynamical System

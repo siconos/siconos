@@ -119,6 +119,14 @@ public:
    */
   virtual const LaGenMatDouble getLaGenMatDouble(const unsigned int& = 0, const unsigned int& = 0) const = 0;
 
+  /** \fn LaGenMatDouble* getLaGenMatDoubleRef(const int& row = 0, const int& col = 0)
+   *  \brief get LaGenMatDouble matrix
+   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \return a LaGenMatDouble
+   */
+  virtual const LaGenMatDouble* getLaGenMatDoubleRef(const unsigned int& = 0, const unsigned int& = 0) const = 0;
+
   /** \fn setValue(const unsigned int& row, const unsigned int& col, const double& d)
    * \brief set the element matrix[row, col]
    * \param an integer col

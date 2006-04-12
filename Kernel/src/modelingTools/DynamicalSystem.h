@@ -392,7 +392,7 @@ public:
 
   // --- n ---
 
-  /** \fn const int getN(void) const;
+  /** \fn const unsigned int getN(void) const;
    *  \brief allow to get n, the dimension, i.e. the size of the state x of the DynamicalSystem
    *  \return the value of n
    */
@@ -401,13 +401,22 @@ public:
     return n;
   }
 
-  /** \fn void setN(const int&)
+  /** \fn void setN(const unsigned int&)
    *  \brief allows to set the value of n
    *  \param an integer to set the value of n
    */
-  inline void setN(const int& newN)
+  inline void setN(const unsigned int& newN)
   {
     n = newN;
+  }
+
+  /** \fn const unsigned int getDim(void) const;
+   *  \brief return the dim. of the system (n for first order, ndof for Lagrangian). Usefull to avoid if(typeOfDS) when size is required.
+   *  \return an unsigned int.
+   */
+  virtual inline const unsigned int getDim(void) const
+  {
+    return n;
   }
 
   // --- X0 ---

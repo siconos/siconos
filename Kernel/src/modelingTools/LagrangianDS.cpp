@@ -409,7 +409,7 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 
   initAllocationFlags();// default
 
-  // --- x, xDot and xFree update ---
+  // --- x, xFree, rhs ... update ---
 
   connectToDS();
 
@@ -694,7 +694,7 @@ void LagrangianDS::initialize(const double& time, const unsigned int& sizeOfMemo
   computeMass();
 
   // rhs
-  // note that xDot(0) = velocity, with pointer link, must already be set.
+  // note that rhs(0) = velocity, with pointer link, must already be set.
   SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
   vField->zero();
 
@@ -1527,7 +1527,7 @@ void LagrangianDS::computeInverseOfMass()
 void LagrangianDS::computeRhs(const double& time, const bool& isDSup)
 {
   // if isDSup == true, this means that there is no need to re-compute mass ...
-  // note that xDot(0) = velocity, with pointer link, must already be set.
+  // note that rhs(0) = velocity, with pointer link, must already be set.
   SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
   vField->zero();
   bool flag = false;

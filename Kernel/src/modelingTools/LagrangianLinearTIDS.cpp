@@ -405,7 +405,7 @@ void LagrangianLinearTIDS::computeRhs(const double& time, const bool &)
 {
   // second argument is useless but present because of top-class function overloading.
 
-  // note that xDot(0) = velocity with pointer link must already be set.
+  // note that rhs(0) = velocity with pointer link must already be set.
   SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
   vField->zero();
   if (fExt != NULL || K != NULL || C != NULL) // else rhs = 0

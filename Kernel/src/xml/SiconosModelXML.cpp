@@ -26,8 +26,6 @@ SiconosModelXML::SiconosModelXML():
   tNode(NULL), t0Node(NULL), TNode(NULL),
   nsdsXML(NULL), strategyXML(NULL)
 {
-  IN("SiconosModelXML::SiconosModelXML()\n");
-
   doc = xmlNewDoc((xmlChar*)"1.0");
   if (doc == NULL)
     XMLException::selfThrow("SiconosModelXML - Creation of the document aborted");
@@ -41,7 +39,6 @@ SiconosModelXML::SiconosModelXML():
   setDescription("no description");
   setDate("no date defined");
   setXMLSchema("no specific XML Schema defined");
-  OUT("SiconosModelXML::SiconosModelXML()\n");
 }
 
 
@@ -90,7 +87,7 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
 
       // Check that SICONOSPATH is set.
       if (getenv("SICONOSPATH") == NULL)
-        RuntimeException::selfThrow("Environment variable SICONOSPATH is not defined.");
+        RuntimeException::selfThrow("SiconosModel constructor: environment variable SICONOSPATH is undefined.");
 
       xmlSchemaFile = getenv("SICONOSPATH") + XML_SCHEMA;
     }
@@ -126,18 +123,18 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
     xmlSchemaFree(schema);
 
     if (xmlValid == 0)
-      cout << "SiconosModelXML - Your XML model file : " << siconosModelXMLFilePath << " is valid with respect to the schema" << endl;
+      cout << "SiconosModelXML - Your XML input file, " << siconosModelXMLFilePath << ", is valid with respect to the schema of reference." << endl;
     else if (xmlValid == -1)
       XMLException::selfThrow("SiconosModelXML - Internal or API error to verify your XML model file : " + (string)siconosModelXMLFilePath + ".");
     else //positive error code number returned
-      XMLException::selfThrow("SiconosModelXML - Your XML model file " + (string)siconosModelXMLFilePath + " does not respect the siconos schema.");
+      XMLException::selfThrow("SiconosModelXML - Your XML inout file " + (string)siconosModelXMLFilePath + " does not respect the Siconos schema.");
 
     //===== read model-nodes values in xml files ====
     loadModel(rootNode);
   }
   else // if siconosModelXMLFilePath == NULL
   {
-    doc = xmlNewDoc((xmlChar*)"1.0");
+    doc = xmlNewDoc((xmlChar*)"1.1.4");
     if (doc == NULL)
       XMLException::selfThrow("SiconosModelXML - Creation of the document aborted");
 
@@ -215,7 +212,7 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
     strategyXML = new StrategyXML(node, nsdsXML->getDSNumbers(), nsdsXML->getInteractionNumbers());
   else
   {
-    cout << "SiconosModelXML - loadModel Warning : optional tag " << STRATEGY_TAG << " not found." << endl;
+    cout << " /!\\ Warning: SiconosModelXML - loadModel: no tag " << STRATEGY_TAG << " found. This may not be a problem since this tag is optional ./!\\" << endl;
     timeNode = node;
     strategyXML = NULL;
   }
@@ -223,7 +220,6 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
 
 void SiconosModelXML::loadModel(Model * model)
 {
-  IN("SiconosModelXML::loadModel(Model * model)\n");
   if (model != NULL)
   {
     xmlNode* node;
@@ -273,7 +269,6 @@ void SiconosModelXML::loadModel(Model * model)
     }
   }
   else XMLException::selfThrow("SiconosModelXML::loadModel(Model * model) : no Model has been given.");
-  OUT("SiconosModelXML::loadModel(Model * model)\n");
 }
 
 
@@ -344,7 +339,6 @@ bool SiconosModelXML::checkSiconosDOMTreeCoherency()
   //  string errormsg;
   char errormsg[256];
   unsigned int i;
-  IN("SiconosModelXML::checkSiconosDOMTreeCoherency\n");
   /*
    * Matrices and Vector can come from the XML file, an external file or a plugin,
    * but can only come from one of these way of storage
@@ -381,8 +375,6 @@ bool SiconosModelXML::checkSiconosDOMTreeCoherency()
 
   // checks the Matrix and Vector type
   // \todo : verification of the type of all the matrices and vectors (from XML file, from external file, from a plugin)
-
-  OUT("SiconosModelXML::checkSiconosDOMTreeCoherency\n");
   return res;
 }
 

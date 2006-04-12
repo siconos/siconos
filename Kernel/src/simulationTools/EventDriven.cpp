@@ -70,7 +70,7 @@ void EventDriven::run()
     eventsManager->processEvents();
     count++;
   }
-  cout << "===== End of Event Driven simulation. " << count << " events have been processed. ==== " << endl;
+  cout << "===== End of Event Driven simulation." << count << " events have been processed. ==== " << endl;
 }
 
 void EventDriven::computeOneStep()
@@ -97,10 +97,11 @@ void EventDriven::advanceToEvent()
     // If not, ttmp is the real reached time.
     if (!iout)
     {
-      tout = min(tout, ttmp) ;
+      tout = min(tout, ttmp);
       isNewEventOccur = true;
     }
   }
+
   if (isNewEventOccur)
   {
     // Add an event into the events manager list

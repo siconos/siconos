@@ -19,6 +19,15 @@
 #include "Relation.h"
 using namespace std;
 
+void Relation::initParameter(const string& id)
+{
+  if (parametersList[id] == NULL)
+  {
+    parametersList[id] = new SimpleVector(1);
+    string alloc = "parameter_for_" + id;
+    isAllocatedIn[alloc] = true;
+  }
+}
 
 // Default constructor with optional interaction parameter
 Relation::Relation(Interaction* inter):
@@ -26,14 +35,6 @@ Relation::Relation(Interaction* inter):
   computeOutputName("none"), isOutputPlugged(false), isInputPlugged(false),
   computeOutputPtr(NULL), computeInputPtr(NULL)
 {
-  // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
-  parametersList0.reserve(2);
-  for (unsigned int i = 0; i < 2; ++i)
-    parametersList0.push_back(new SimpleVector(1));
-  isParametersList0AllocatedIn.resize(2, true);
-  vector<SimpleVector*>::iterator iter;
-  for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
-    (*iter)->zero();
 
   // Set plug-in default functions for h and g.
   setComputeOutputFunction("DefaultPlugin.so", "computeOutput");
@@ -53,15 +54,6 @@ Relation::Relation(RelationXML* relxml, Interaction* inter):
 {
   if (relationxml != NULL)
   {
-    // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
-    parametersList0.reserve(2);
-    for (unsigned int i = 0; i < 2; ++i)
-      parametersList0.push_back(new SimpleVector(1));
-    isParametersList0AllocatedIn.resize(2, true);
-    vector<SimpleVector*>::iterator iter;
-    for (iter = parametersList0.begin(); iter != parametersList0.end(); ++iter)
-      (*iter)->zero();
-
     string plugin;
     // computeInput
     if (relationxml->hasComputeInput())
@@ -104,9 +96,7 @@ Relation::Relation(const Relation& newRel, Interaction* inter):
   // Interaction can be set with optional parameter inter (default=NULL)
   // \todo: manage dsio copy when this class will be well implemented
 
-  // plug-in parameters initialization -> dim. 1 simple vectors. with v(0) = 0.
-  setParametersListVector(newRel.getParametersListVector());
-
+  setParameters(newRel.getParameters());   // Copy !!
   string plugin = computeInputName;
   setComputeInputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
   if (computeInputName == "DefaultPlugin:computeInput")
@@ -121,12 +111,13 @@ Relation::Relation(const Relation& newRel, Interaction* inter):
 
 Relation::~Relation()
 {
-  for (unsigned int i = 0; i < parametersList0.size(); ++i)
+  map<string, SimpleVector*>::iterator it;
+  for (it = parametersList.begin(); it != parametersList.end(); ++it)
   {
-    if (isParametersList0AllocatedIn[i]) delete parametersList0[i];
-    parametersList0[i] = NULL;
+    string alloc = "parameter_for_" + it->first;
+    if (isAllocatedIn[alloc]) delete it->second;
   }
-  isParametersList0AllocatedIn.resize(4, false);
+  parametersList.clear();
 }
 
 vector<DSInputOutput*> Relation::getDSInputOutputs(void)
@@ -155,29 +146,31 @@ void Relation::addDSInputOutput(DSInputOutput* dsio)
   dsioVector.push_back(dsio);
 }
 
-void Relation::setParametersListVector(const std::vector<SimpleVector*>& newVector)
+void Relation::setParameters(const std::map<string, SimpleVector*>& newMap)
 {
   // copy!!
-  for (unsigned int i = 0; i < parametersList0.size(); ++i)
+
+  map<string, SimpleVector*>::const_iterator it;
+  for (it = newMap.begin(); it != newMap.end(); ++it)
   {
-    if (isParametersList0AllocatedIn[i]) delete parametersList0[i];
-    *(parametersList0[i]) = *(newVector[i]);
-    isParametersList0AllocatedIn[i] = true;
+    parametersList[it->first] = new SimpleVector(*(it->second));
+    string alloc = "parameter_for_" + it->first;
+    isAllocatedIn[alloc] = true;
   }
 }
 
-void Relation::setParametersList(const SimpleVector& newValue, const unsigned int & index)
+void Relation::setParameter(const SimpleVector& newValue, const string& id)
 {
-  if (isParametersList0AllocatedIn[index]) delete parametersList0[index];
-  parametersList0[index] = new SimpleVector(newValue);
-  isParametersList0AllocatedIn[index] = true;
+  parametersList[id] = new SimpleVector(newValue);
+  string alloc = "parameter_for_" + id;
+  isAllocatedIn[alloc] = true;
 }
 
-void Relation::setParametersListPtr(SimpleVector *newPtr, const unsigned int & index)
+void Relation::setParameterPtr(SimpleVector *newPtr, const string& id)
 {
-  if (isParametersList0AllocatedIn[index]) delete parametersList0[index];
-  parametersList0[index] = newPtr;
-  isParametersList0AllocatedIn[index] = false;
+  parametersList[id] = newPtr;
+  string alloc = "parameter_for_" + id;
+  isAllocatedIn[alloc] = false;
 }
 
 void Relation::computeOutput(const double& time)
@@ -209,8 +202,8 @@ void Relation::computeOutput(const double& time)
   SimpleVector *y = interaction->getYPtr(0);
   SimpleVector *lambda = interaction->getLambdaPtr(0);
   unsigned int sizeY = y->size();
-  SimpleVector* param = parametersList0[0];
-  computeOutputPtr(&sizeX, &(*xTmp)(0), &time, &sizeY, &(*lambda)(0), &sizeU,  &(*uTmp)(0), &(*y)(0), &(*param)(0));
+  SimpleVector* param = parametersList["output"];
+  computeOutputPtr(sizeX, &(*xTmp)(0), &time, sizeY, &(*lambda)(0), sizeU,  &(*uTmp)(0), &(*y)(0), &(*param)(0));
   delete xTmp;
   delete uTmp;
 }
@@ -247,8 +240,8 @@ void Relation::computeFreeOutput(const double& time)
 
   SimpleVector *lambda = interaction->getLambdaPtr(0);
   unsigned int sizeY = yFree->size();
-  SimpleVector* param = parametersList0[0];
-  computeOutputPtr(&sizeX, &(*xTmp)(0), &time, &sizeY, &(*lambda)(0), &sizeU,  &(*uTmp)(0), &(*yFree)(0), &(*param)(0));
+  SimpleVector* param = parametersList["output"];
+  computeOutputPtr(sizeX, &(*xTmp)(0), &time, sizeY, &(*lambda)(0), sizeU,  &(*uTmp)(0), &(*yFree)(0), &(*param)(0));
   delete xTmp;
   delete uTmp;
 
@@ -284,8 +277,8 @@ void Relation::computeInput(const double& time)
   SimpleVector *lambda = interaction->getLambdaPtr(0);
   unsigned int sizeY = lambda->size();
 
-  SimpleVector* param = parametersList0[1];
-  computeInputPtr(&sizeY, &(*lambda)(0), &time, &(*r)(0), &(*param)(0));
+  SimpleVector* param = parametersList["input"];
+  computeInputPtr(sizeY, &(*lambda)(0), &time, &(*r)(0), &(*param)(0));
   delete r;
 }
 
@@ -294,6 +287,7 @@ void Relation::setComputeOutputFunction(const string& pluginPath, const string& 
   cShared.setFunction(&computeOutputPtr, pluginPath, functionName);
 
   string plugin;
+  initParameter("output");
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   computeOutputName = plugin + ":" + functionName;
   isOutputPlugged = true;
@@ -304,6 +298,7 @@ void Relation::setComputeInputFunction(const string& pluginPath, const string& f
   cShared.setFunction(&computeInputPtr, pluginPath, functionName);
 
   string plugin;
+  initParameter("input");
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   computeInputName = plugin + ":" + functionName;
   isInputPlugged = true;

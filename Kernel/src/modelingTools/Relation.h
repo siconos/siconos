@@ -92,38 +92,45 @@ protected:
   bool isOutputPlugged;
   bool isInputPlugged;
 
-  /** Parameters list, argument of plug-in. What are those parameters depends on user´s choice.
-   *  The order corresponds to the one of the plug-in list below :
-   *  computeOutput, computeInput
-   */
-  std::vector<SimpleVector*> parametersList0; // -> Size = 2
-  std::deque<bool> isParametersList0AllocatedIn;
+  /** Flags to know if pointers have been allocated inside constructors or not */
+  std::map<std::string, bool> isAllocatedIn;
 
-  /** \fn void (*computeOutputPtr)(const unsigned int* sizeX, const double* x, const double* time,
-                                   const unsigned int* sizeY, const double* lambda,
-           const unsigned int* sizeU, const double* u, double* y, double* param);
+  /** Parameters list, last argument of plug-in functions. What are those parameters depends on user´s choice.
+   *  This a list of pointer to SimpleVector. Each one is identified thanks to a key which is the plug-in name.
+   * A flag is also added in the isAllocatedIn map to check inside-class memory allocation for this object.*/
+  std::map<std::string, SimpleVector*> parametersList;
+
+  /** \fn void (*computeOutputPtr)(const unsigned int& sizeX, const double* x, const double* time,
+                                   const unsigned int& sizeY, const double* lambda,
+           const unsigned int& sizeU, const double* u, double* y, double* param);
    *  \brief computes y
-   *  \param unsigned int* sizeX : size of vector x
+   *  \param unsigned int& sizeX : size of vector x
    *  \param double* x : the pointer to the first element of the vector x
    *  \param double* time : the current time
-   *  \param unsigned int* sizeY : size of vector y and lambda.
+   *  \param unsigned int& sizeY : size of vector y and lambda.
    *  \param double* lambda : the pointer to the first element of the vector lambda
-   *  \param unsigned int* sizeU : size of vector u
+   *  \param unsigned int& sizeU : size of vector u
    *  \param double* u : the pointer to the first element of the vector u
    *  \param double* y : the pointer to the first element of the vector y (in-out parameter)
    *  \param double* param   : a vector of user-defined parameters
    */
-  void (*computeOutputPtr)(const unsigned int*, const double*, const double*, const unsigned int*, const double*, const unsigned int*, const double*, double*, double*);
+  void (*computeOutputPtr)(const unsigned int&, const double*, const double*, const unsigned int&, const double*, const unsigned int&, const double*, double*, double*);
 
-  /** \fn void (*computeInputPtr)(const unsigned int* sizeY, const double* lambda, const double* time, double* r, double* param);
+  /** \fn void (*computeInputPtr)(const unsigned int& sizeY, const double* lambda, const double* time, double* r, double* param);
    *  \brief computes r
-   *  \param unsigned int* sizeY : size of vector y and lambda.
+   *  \param unsigned int& sizeY : size of vector y and lambda.
    *  \param double* lambda : the pointer to the first element of the vector lambda
    *  \param double* time : the current time
    *  \param double* r : the pointer to the first element of the vector r (in-out parameter)
    *  \param double* param   : a vector of user-defined parameters
    */
-  void (*computeInputPtr)(const unsigned int*, const double*, const double*, double*, double*);
+  void (*computeInputPtr)(const unsigned int&, const double*, const double*, double*, double*);
+
+  /** \fn initParameter(const string& id);
+   *  \brief init parameter vector corresponding to id to a SimpleVector* of size 1
+   *  \param a string, id of the plug-in
+   */
+  void initParameter(const std::string&);
 
 public:
 
@@ -242,50 +249,52 @@ public:
 
   // -- parametersList --
 
-  /** \fn vector<SimpleVector*> getParametersListVector(unsigned int & index) const
-   *  \brief get the parameter list at position index
-   *  \return SimpleVector
+  /** \fn map<string, SimpleVector*> getParameters() const
+   *  \brief get the full map of parameters
+   *  \return a map<string,SimpleVector*>
    */
-  virtual inline std::vector<SimpleVector*> getParametersListVector() const
+  inline std::map<std::string, SimpleVector*> getParameters() const
   {
-    return parametersList0;
-  }
+    return parametersList;
+  };
 
-  /** \fn  const SimpleVector getParametersList(const unsigned int & index) const
-   *  \brief get the parameter list at position index
-   *  \return SimpleVector
+  /** \fn  const SimpleVector getParameter(const string & id) const
+   *  \brief get the vector of parameters corresponding to plug-in function named id
+   *  \return a SimpleVector
    */
-  virtual inline const SimpleVector getParametersList(const unsigned int & index) const
+  inline const SimpleVector getParameter(const std::string& id)
   {
-    return *(parametersList0[index]);
-  }
+    return *(parametersList[id]);
+  };
 
-  /** \fn SimpleVector* getParametersListPtr(const unsigned int & index) const
-   *  \brief get the pointer on the parameter list at position index
-   *  \return pointer on a SimpleVector
+  /** \fn SimpleVector* getParameterPtr(const string& id) const
+   *  \brief get the pointer to the vector of parameters corresponding to plug-in function named id
+   *  \return a pointer on a SimpleVector
    */
-  virtual inline SimpleVector* getParametersListPtr(const unsigned int & index) const
+  inline SimpleVector* getParameterPtr(const std::string& id)
   {
-    return parametersList0[index];
-  }
+    return parametersList[id];
+  };
 
-  /** \fn void setParametersListVector(const std::vector<SimpleVector*>& newVector)
-   *  \brief set vector parameterList0 to newVector
-   *  \param vector<SimpleVector*>
+  /** \fn void setParameters(const std::map<string, SimpleVector*>& newMap)
+   *  \brief set the map for parameters
+   *  \param a map<string, SimpleVector*>
    */
-  virtual void setParametersListVector(const std::vector<SimpleVector*>&);
+  void setParameters(const std::map<std::string, SimpleVector*>&);
 
-  /** \fn void setParametersList (const SimpleVector& newValue, const unsigned int & index)
-   *  \brief set the value of parameterList0[index] to newValue
-   *  \param SimpleVector newValue
+  /** \fn void setParameter(const SimpleVector& newValue, const string& id)
+   *  \brief set vector corresponding to plug-in function named id to newValue
+   *  \param a SimpleVector
+   *  \param a string
    */
-  virtual void setParametersList(const SimpleVector&, const unsigned int &);
+  void setParameter(const SimpleVector&, const std::string&);
 
-  /** \fn void setParametersListPtr(SimpleVector* newPtr, const unsigned int & index)
-   *  \brief set parametersList0[index] to pointer newPtr
-   *  \param SimpleVector * newPtr
+  /** \fn void setParameterPtr(SimpleVector* newPtr, const string& id)
+   *  \brief set vector corresponding to plug-in function named id to newPtr (!! pointer link !!)
+   *  \param a pointer to SimpleVector
+   *  \param a string
    */
-  virtual  void setParametersListPtr(SimpleVector *newPtr, const unsigned int & index);
+  void setParameterPtr(SimpleVector *, const std::string&);
 
   /** \fn void computeOutput(double time);
    *  \brief default function to compute y

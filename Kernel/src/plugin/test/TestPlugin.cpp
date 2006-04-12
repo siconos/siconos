@@ -160,8 +160,8 @@ extern "C" void computeA(const unsigned int &sizeOfX, const double *time, double
 
 // ===== RELATIONS ====
 
-extern "C" void y(const unsigned int* sizeOfX, const double* x, const double* time, const unsigned int* sizeOfY, const double* lambda,
-                  const unsigned int* sizeOfU, const double* u, double* y, double* param)
+extern "C" void y(const unsigned int& sizeOfX, const double* x, const double* time, const unsigned int& sizeOfY, const double* lambda,
+                  const unsigned int& sizeOfU, const double* u, double* y, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); x (pointer to x vector); time; lambda (pointer to lambda vector)
    * output parameter : y (pointer to vector y )
@@ -169,7 +169,7 @@ extern "C" void y(const unsigned int* sizeOfX, const double* x, const double* ti
   printf("Warning: call of the function 'computeOutput' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
 
-extern "C" void R(const unsigned int* sizeY, const double* lambda, const double* time, double* r, double* param)
+extern "C" void R(const unsigned int& sizeY, const double* lambda, const double* time, double* r, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); x (pointer to x vector); time; lambda (pointer to lambda vector)
    * output parameter : r (pointer to vector r )
@@ -179,46 +179,46 @@ extern "C" void R(const unsigned int* sizeY, const double* lambda, const double*
 
 // === Lagrangian Relations ===
 
-extern "C" void h0(const unsigned int* sizeDS, const double* q, const unsigned int* sizeY, double* y, double* param)
+extern "C" void h0(const unsigned int& sizeDS, const double* q, const unsigned int& sizeY, double* y, double* param)
 {
   printf("Call of the function 'h0' of the default plugin.\nYou have to implement this function.\n");
 }
 
-extern "C" void G0(const unsigned int* sizeDS, const double* q, const unsigned int* sizeY, double* G0, double* param)
+extern "C" void G0(const unsigned int& sizeDS, const double* q, const unsigned int& sizeY, double* G0, double* param)
 {
   printf("Call of the function 'G0' of the default plugin.\nYou have to implement this function.\n");
 }
 
-extern "C"  void h1(const unsigned int* sizeDS, const double* q, const double* time, const unsigned int* sizeY, double* y, double* param)
+extern "C"  void h1(const unsigned int& sizeDS, const double* q, const double* time, const unsigned int& sizeY, double* y, double* param)
 {
   printf("Call of the function 'h1' of the default plugin.\nYou have to implement this function.\n");
 }
 
 
-extern "C"    void G10(const unsigned int* sizeDS, const double* q, const double* time, const unsigned int* sizeY, double* G0, double* param)
+extern "C"    void G10(const unsigned int& sizeDS, const double* q, const double* time, const unsigned int& sizeY, double* G0, double* param)
 {
   printf("Call of the function 'G10' of the default plugin.\nYou have to implement this function.\n");
 }
 
 
-extern "C"    void G11(const unsigned int* sizeDS, const double* q, const double* time, const unsigned int* sizeY, double* G1, double* param)
+extern "C"    void G11(const unsigned int& sizeDS, const double* q, const double* time, const unsigned int& sizeY, double* G1, double* param)
 {
   printf("Call of the function 'G11' of the default plugin.\nYou have to implement this function.\n");
 }
 
-extern "C"  void h2(const unsigned int* sizeDS, const double* q, const double* lambda, const unsigned int* sizeY, double* y, double* param)
+extern "C"  void h2(const unsigned int& sizeDS, const double* q, const double* lambda, const unsigned int& sizeY, double* y, double* param)
 {
   printf("Call of the function 'h2' of the default plugin.\nYou have to implement this function.\n");
 }
 
 
-extern "C"    void G20(const unsigned int* sizeDS, const double* q, const double* lambda, const unsigned int* sizeY, double* y, double* param)
+extern "C"    void G20(const unsigned int& sizeDS, const double* q, const double* lambda, const unsigned int& sizeY, double* y, double* param)
 {
   printf("Call of the function 'G20' of the default plugin.\nYou have to implement this function.\n");
 }
 
 
-extern "C"    void G21(const unsigned int* sizeDS, const double* q, const double* lambda, const unsigned int* sizeY, double* y, double* param)
+extern "C"    void G21(const unsigned int& sizeDS, const double* q, const double* lambda, const unsigned int& sizeY, double* y, double* param)
 {
   printf("Call of the function 'G21' of the default plugin.\nYou have to implement this function.\n");
 }

@@ -529,7 +529,7 @@ SimpleVector operator / (const SimpleVector& v, const double& d)
 SimpleVector operator * (const SiconosMatrix &m, const SimpleVector &v)
 {
   SimpleVector sv(m.size(0));
-  Blas_Mat_Vec_Mult(m.getLaGenMatDouble(), v.lavd, sv.lavd, 1.0, 0.0);
+  Blas_Mat_Vec_Mult(*m.getLaGenMatDoubleRef(), v.lavd, sv.lavd, 1.0, 0.0);
   return sv;
 }
 
@@ -539,14 +539,14 @@ SimpleVector operator * (const SiconosMatrix &m, const SiconosVector &v)
   // "transform" v (which is simple or block vector) into a simple
   // not good -> to be optimized
   SimpleVector tmp(v);
-  Blas_Mat_Vec_Mult(m.getLaGenMatDouble(), tmp.lavd, sv.lavd, 1.0, 0.0);
+  Blas_Mat_Vec_Mult(*m.getLaGenMatDoubleRef(), tmp.lavd, sv.lavd, 1.0, 0.0);
   return sv;
 }
 
 SimpleVector operator * (const SimpleVector &v, const SiconosMatrix &m)
 {
   SimpleVector sv(m.size(1));
-  Blas_Mat_Trans_Vec_Mult(m.getLaGenMatDouble(), v.lavd, sv.lavd, 1.0, 0.0);
+  Blas_Mat_Trans_Vec_Mult(*m.getLaGenMatDoubleRef(), v.lavd, sv.lavd, 1.0, 0.0);
   return sv;
 }
 
@@ -556,14 +556,14 @@ SimpleVector operator * (const SiconosVector &v, const SiconosMatrix &m)
   // "transform" v (which is simple or block vector) into a simple
   // not good -> to be optimized
   SimpleVector tmp(v);
-  Blas_Mat_Trans_Vec_Mult(m.getLaGenMatDouble(), tmp.lavd, sv.lavd, 1.0, 0.0);
+  Blas_Mat_Trans_Vec_Mult(*m.getLaGenMatDoubleRef(), tmp.lavd, sv.lavd, 1.0, 0.0);
   return sv;
 }
 
 SimpleVector matTransVecMult(SiconosMatrix &m, SimpleVector &v)
 {
   SimpleVector sv(m.size(1));
-  Blas_Mat_Trans_Vec_Mult(m.getLaGenMatDouble(), v.lavd, sv.lavd, 1.0, 0.0);
+  Blas_Mat_Trans_Vec_Mult(*m.getLaGenMatDoubleRef(), v.lavd, sv.lavd, 1.0, 0.0);
   return sv;
 }
 
@@ -573,10 +573,10 @@ SimpleVector matTransVecMult(SiconosMatrix &m, SiconosVector &v)
   if (v.isBlock())
   {
     SimpleVector tmp(v);
-    Blas_Mat_Trans_Vec_Mult(m.getLaGenMatDouble(), tmp.lavd, sv.lavd, 1.0, 0.0);
+    Blas_Mat_Trans_Vec_Mult(*m.getLaGenMatDoubleRef(), tmp.lavd, sv.lavd, 1.0, 0.0);
   }
   else
-    Blas_Mat_Trans_Vec_Mult(m.getLaGenMatDouble(), v.getValues(), sv.lavd, 1.0, 0.0);
+    Blas_Mat_Trans_Vec_Mult(*m.getLaGenMatDoubleRef(), v.getValues(), sv.lavd, 1.0, 0.0);
 
   return sv;
 }

@@ -118,22 +118,14 @@ protected:
 
   /** G matrices that link Y[1] to dynamical system variables */
   std::vector<SiconosMatrix*> G;
-  std::deque<bool> isGAllocatedIn;
 
   /** Name of the plug-in used to compute G */
   std::vector<std::string>  GFunctionName;
 
-  /** Parameters list, argument of plug-in. What are those parameters depends on user´s choice.
-   *  The order corresponds to the one of the plug-in list below :
-   *  h0, G0 or h1, G10, G11 or h2, G20, G21.
-   */
-  std::vector<SimpleVector*> parametersList; // -> Size depends on problem type
-  std::deque<bool> isParametersListAllocatedIn;
-
   // === plug-in, depending on problem type, ie LagrangianRelationType value ===
 
   // --- Plug-in for scleronomic case -> h0(q), G0(q) ---
-  /** \fn void (*h0Ptr)(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfy, double* y, double * param=0);
+  /** \fn void (*h0Ptr)(const unsigned int& sizeOfq, const double* q, const unsigned int& sizeOfy, double* y, double * param=0);
    * \brief computes y = h(q)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
@@ -141,8 +133,8 @@ protected:
    * \param double*: output vector y (in-out parameter)
    * \param double*: vector of parameters
    */
-  void (*h0Ptr)(const unsigned int*, const double*, const unsigned int*, double*, double*);
-  /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfy, double* G, double * param);
+  void (*h0Ptr)(const unsigned int&, const double*, const unsigned int&, double*, double*);
+  /** \fn void (*G0Ptr)(const unsigned int& sizeOfq, const double* q, const unsigned int& sizeOfy, double* G, double * param);
    * \brief computes G(q)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
@@ -150,11 +142,11 @@ protected:
    * \param double*: output matrix G[0] (in-out parameter)
    * \param double*: vector of parameters
    */
-  void (*G0Ptr)(const unsigned int*, const double*, const unsigned int*, double*, double*);
+  void (*G0Ptr)(const unsigned int&, const double*, const unsigned int&, double*, double*);
 
   // --- plug-in for non-scleronomic case -> h1(q,t), G10(q,t), G11(q,t) ---
-  /** \fn void (*h1Ptr)(const unsigned int* sizeOfq, const double* q,
-   *                    const double* time, const unsigned int* sizeOfy,  double* y, double * param);
+  /** \fn void (*h1Ptr)(const unsigned int& sizeOfq, const double* q,
+   *                    const double* time, const unsigned int& sizeOfy,  double* y, double * param);
    * \brief computes y = h(q,t)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
@@ -163,10 +155,10 @@ protected:
    * \param double*: output vector y (in-out parameter)
    * \param double*: vector of parameters
    */
-  void (*h1Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*);
+  void (*h1Ptr)(const unsigned int&, const double*, const double*, const unsigned int&, double*, double*);
   // G0(q,t)
-  /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q,  const double* time,
-   *                    const unsigned int* sizeOfy,  double* G, double * param);
+  /** \fn void (*G0Ptr)(const unsigned int& sizeOfq, const double* q,  const double* time,
+   *                    const unsigned int& sizeOfy,  double* G, double * param);
    * \brief computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
@@ -175,10 +167,10 @@ protected:
    * \param double*: output matrix G[0] (in-out parameter)
    * \param double*: vector of parameters
    */
-  void (*G10Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*);
+  void (*G10Ptr)(const unsigned int&, const double*, const double*, const unsigned int&, double*, double*);
   // G1(q,t)
-  /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q, const double* time,
-   *                    const unsigned int* sizeOfy,  double* G, double * param);
+  /** \fn void (*G0Ptr)(const unsigned int& sizeOfq, const double* q, const double* time,
+   *                    const unsigned int& sizeOfy,  double* G, double * param);
    * \brief computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
@@ -187,12 +179,12 @@ protected:
    * \param double*: output matrix G[1] (in-out parameter)
    * \param double*: vector of parameters
    */
-  void (*G11Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*);
+  void (*G11Ptr)(const unsigned int&, const double*, const double*, const unsigned int&, double*, double*);
 
   // --- plug-in for scleronomic+lambda case -> h2(q,t), G20(q,t), G21(q,t) ---
 
-  /** \fn void (*h2Ptr)(const unsigned int* sizeOfq, const double* q,
-   *                    const double* lambda, const unsigned int* sizeOfy, double* y, double * param);
+  /** \fn void (*h2Ptr)(const unsigned int& sizeOfq, const double* q,
+   *                    const double* lambda, const unsigned int& sizeOfy, double* y, double * param);
    * \brief computes y = h(q,t)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
@@ -201,10 +193,10 @@ protected:
    * \param double*: output vector y (in-out parameter)
    * \param double*: vector of parameters
    */
-  void (*h2Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*);
+  void (*h2Ptr)(const unsigned int&, const double*, const double*, const unsigned int&, double*, double*);
   // G20(q,t)
-  /** \fn void (*G20Ptr)(const unsigned int* sizeOfq, const double* q,  const double* lambda,
-   *                    const unsigned int* sizeOfy, double* G, double * param);
+  /** \fn void (*G20Ptr)(const unsigned int& sizeOfq, const double* q,  const double* lambda,
+   *                    const unsigned int& sizeOfy, double* G, double * param);
    * \brief computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
@@ -213,10 +205,10 @@ protected:
    * \param double*: output matrix G[0] (in-out parameter)
    * \param double*: vector of parameters
    */
-  void (*G20Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*);
+  void (*G20Ptr)(const unsigned int&, const double*, const double*, const unsigned int&, double*, double*);
   // G1(q,t)
-  /** \fn void (*G0Ptr)(const unsigned int* sizeOfq, const double* q, const double* lambda,
-   *                    const unsigned int* sizeOfy, double* G, double * param);
+  /** \fn void (*G0Ptr)(const unsigned int& sizeOfq, const double* q, const double* lambda,
+   *                    const unsigned int& sizeOfy, double* G, double * param);
    * \brief computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
@@ -225,7 +217,7 @@ protected:
    * \param double*: output matrix G[1] (in-out parameter)
    * \param double*: vector of parameters
    */
-  void (*G21Ptr)(const unsigned int*, const double*, const double*, const unsigned int*, double*, double*);
+  void (*G21Ptr)(const unsigned int&, const double*, const double*, const unsigned int&, double*, double*);
 
   //\todo  ... other plug-in to be added if required ...
 
@@ -276,11 +268,6 @@ public:
   {
     return LagrangianRelationType;
   }
-
-  /** \fn  void initParametersList()
-   *  \brief initialize parametersList vector
-   */
-  void initParametersList();
 
   /** \fn  void manageGMemory();
    *  \brief check and/or allocate memory for G
@@ -392,53 +379,6 @@ public:
   {
     return GFunctionName[index];
   }
-
-  // -- parametersList --
-
-  /** \fn vector<SimpleVector*> getParametersListVector(unsigned int & index) const
-   *  \brief get the parameter list at position index
-   *  \return SimpleVector
-   */
-  inline std::vector<SimpleVector*> getParametersListVector() const
-  {
-    return parametersList;
-  }
-
-  /** \fn  const SimpleVector getParametersList(const unsigned int & index) const
-   *  \brief get the parameter list at position index
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getParametersList(const unsigned int & index) const
-  {
-    return *(parametersList[index]);
-  }
-
-  /** \fn SimpleVector* getParametersListPtr(const unsigned int & index) const
-   *  \brief get the pointer on the parameter list at position index
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getParametersListPtr(const unsigned int & index) const
-  {
-    return parametersList[index];
-  }
-
-  /** \fn void setParametersListVector(const std::vector<SimpleVector*>& newVector)
-   *  \brief set vector parameterList to newVector
-   *  \param vector<SimpleVector*>
-   */
-  void setParametersListVector(const std::vector<SimpleVector*>&);
-
-  /** \fn void setParametersList (const SimpleVector& newValue, const unsigned int & index)
-   *  \brief set the value of parameterList[index] to newValue
-   *  \param SimpleVector newValue
-   */
-  void setParametersList(const SimpleVector&, const unsigned int &);
-
-  /** \fn void setParametersListPtr(SimpleVector* newPtr, const unsigned int & index)
-   *  \brief set parametersList[index] to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
-  void setParametersListPtr(SimpleVector *newPtr, const unsigned int & index);
 
   /** \fn void computeH(const double & time);
    * \brief to compute y = h(q,v,t) using plug-in mechanism

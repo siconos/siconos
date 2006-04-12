@@ -33,8 +33,6 @@
 
 #include "OneStepIntegratorXML.h"
 
-const std::string LSODAR_R = "r";
-
 class LsodarXML : public OneStepIntegratorXML
 {
 public:

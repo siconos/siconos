@@ -157,7 +157,8 @@ void Lsodar::updateData()
 
 void Lsodar::f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
-  unsigned int size = *sizeOfX;
+  cout << "in f: " << *time << endl;
+  unsigned int size = *sizeOfX; // convert integer to unsigned int
   SimpleVector *xtmp = new SimpleVector(size) ;
 
   // copy x in a temporary SimpleVector, to set x in Dynamical system.
@@ -165,12 +166,12 @@ void Lsodar::f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal 
     (*xtmp)(i) = x[i];
   ds->setX(*xtmp);
 
-  // Compute the vector field (= f + Tu) for the current ds
+  // Compute the right-hand side ( xdot = f + Tu in DS) for the current ds
   double t = *time;
   ds->computeRhs(t);
 
-  // Save xdot values from dynamical system into current xdot (in-out parameter)
-  SiconosVector * xtmp2 = ds->getRhsPtr();
+  // Save rhs values from dynamical system into current xdot (in-out parameter)
+  SiconosVector * xtmp2 = ds->getRhsPtr(); // Pointer link !
   for (unsigned int i = 0; i < size; i++) /// Warning: copy !!
     xdot[i] = (*xtmp2)(i);
 
@@ -183,8 +184,14 @@ void Lsodar::g(integer * nEq, doublereal * time, doublereal* x, integer * ng, do
 
 void Lsodar::jacobianF(integer *sizeOfX, doublereal *time, doublereal *x, integer* ml, integer *mu,  doublereal *jacob, integer *nrowpd)
 {
-  unsigned int size = *sizeOfX;
-  SimpleVector *xtmp = new SimpleVector(size) ;;
+
+  // Remark: according to DLSODAR doc, each call to jacobian is preceded by a call to f with the same
+  // arguments NEQ, T, and Y.  Thus to gain some efficiency, intermediate quantities shared by both calculations may be
+  // saved in class members?
+  cout << "in jaco f: " <<  endl;
+
+  unsigned int size = *sizeOfX; // convert integer to unsigned int
+  SimpleVector *xtmp = new SimpleVector(size) ;
 
   // copy x in a temporary SimpleVector, to set x in Dynamical system.
   for (unsigned int i = 0; i < size; i++) /// Warning: copy !!
@@ -219,14 +226,11 @@ void Lsodar::initialize()
 
 void Lsodar::computeFreeState() // useless??
 {
-  IN("Lsodar::computeFreeState\n");
   integrate();
-  OUT("Lsodar::computeFreeState\n");
 }
 
 void Lsodar::integrate()
 {
-  IN("Lsodar::integrate\n");
   SiconosVector * y = ds->getXPtr();
 
   // get current LOCAL time discretisation vector;
@@ -247,7 +251,7 @@ void Lsodar::integrate()
   intData[5] = 0; // iopt
   intData[6] = 22 + intData[0] * max(16, (int)intData[0] + 9) + 3 * intData[1]; // lrw
   intData[7] = 20 + intData[0];  // liw
-  intData[8] = 2;   // jt
+  intData[8] = 1;   // jt
   // update memory size for doubleData and iwork according to intData values ...
   updateData();
 
@@ -290,46 +294,107 @@ void Lsodar::integrate()
   //      localTimeDiscretisation ->setK(k+1);
 
   if (intData[2] < 0) RuntimeException::selfThrow("Lsodar, integration failed (see opkdmain.f for details about istate value), istate = " + intData[2]);
-
-  OUT("Lsodar::integrate\n");
 }
 
-void Lsodar::integrate(const double& tinit, const double& tend, const double& tout, const bool& iout)
+void Lsodar::integrate(const double& tinit, const double& tend, double& tout, bool& iout)
 {
-  SiconosVector * y = ds->getXPtr();
 
-  doublereal tend_DR = tend  ;             // next point where output is desired (different from t!)
-  doublereal tinit_DR = tinit;              // current time
+  // For details on DLSODAR parameters, see opkdmain.f in Numerics/src/odepack
+
+  SiconosVector * x = ds->getXPtr(); // initial conditions
+
+  doublereal tend_DR = tend  ;       // next point where output is desired (different from t!)
+  doublereal tinit_DR = tinit;       // current (starting) time
 
   //   Integer parameters for LSODAR are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
-  intData[0] =  y->size();  // neq, number of equations, ie dim of y
+  intData[0] =  x->size();  // neq, number of equations, ie dim of x
   intData[1] = 0 ;  // ng, number of constraints
-  intData[2] = 1; // itol, 1 or 2 according as ATOL (below) is a scalar or an array.
-  intData[3] = 1; // itask
-  intData[4] = 1; // istate
-  intData[5] = 0; // iopt
+  intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
+  intData[3] = 1; // itask, an index specifying the task to be performed. 1: normal computation.
+  intData[4] = 1; // istate an index used for input and output to specify the the state of the calculation.
+  // On input:
+  //                 1: first call for the problem (initializations will be done).
+  //                 2: means this is not the first call, and the calculation is to continue normally, with no change in any input
+  //                    parameters except possibly TOUT and ITASK.
+  //                 3:  means this is not the first call, and the calculation is to continue normally, but with
+  //                     a change in input parameters other than TOUT and ITASK.
+  // On output:
+  //                 1: means nothing was done; TOUT = t and ISTATE = 1 on input.
+  //                 2: means the integration was performed successfully, and no roots were found.
+  //                 3: means the integration was successful, and one or more roots were found before satisfying the stop condition specified by ITASK. See JROOT.
+  //                 <0: error. See table below, in post.
+
+  intData[5] = 0; // iopt: 0 if no optional input else 1.
   intData[6] = 22 + intData[0] * max(16, (int)intData[0] + 9) + 3 * intData[1]; // lrw
   intData[7] = 20 + intData[0];  // liw
-  intData[8] = 2;   // jt
+  intData[8] = 1;   // jt, Jacobian type indicator.
+  //           1 means a user-supplied full (NEQ by NEQ) Jacobian.
+  //           2 means an internally generated (difference quotient) full Jacobian (using NEQ extra calls to f per df/dx value).
+  //           4 means a user-supplied banded Jacobian.
+  //           5 means an internally generated banded Jacobian (using ML+MU+1 extra calls to f per df/dx evaluation).
+
   // update memory size for doubleData and iwork according to intData values ...
   updateData();
 
   //   Doublereal parameters for LSODAR are saved in vector doubleData.
   //   The link with variable names in opkdmain.f is indicated in comments
-  *(doubleData[0]) = 0.0;
-  *(doubleData[1]) = 1.0e-6;
+  *(doubleData[0]) = 1.0e-9;      // rtol
+  *(doubleData[1]) = 1.0e-9;   // atol
 
-  // Pointers to function definition and initialisation thanks to wrapper:
+  // === Error handling in LSODAR===
+
+  //   parameters: itol, rtol, atol.
+  //   Control vector E = (E(i)) of estimated local errors in y:
+  //   max-norm of ( E(i)/EWT(i) )< 1
+  //   EWT = (EWT(i)) vector of positive error weights.
+  //   The values of RTOL and ATOL should all be non-negative.
+  //
+  //  ITOL    RTOL       ATOL          EWT(i)
+  //   1     scalar     scalar     RTOL*ABS(Y(i)) + ATOL
+  //   2     scalar     array      RTOL*ABS(Y(i)) + ATOL(i)
+  //   3     array      scalar     RTOL(i)*ABS(Y(i)) + ATOL
+  //   4     array      array      RTOL(i)*ABS(Y(i)) + ATOL(i)
+
+  // === Pointers to function ===
+  //  --> definition and initialisation thanks to wrapper:
   global_object = this; // Warning: global object must be initialized to current one before pointers to function initialisation.
-  fpointer pointerToF = Lsodar_f_wrapper;
-  jacopointer pointerToJacobianF = Lsodar_jacobianF_wrapper;
-  gpointer pointerToG;
-  pointerToG = Lsodar_g_wrapper;
 
-  F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*y)(0), &tinit_DR, &tend_DR, &(intData[2]), doubleData[0], doubleData[1], &(intData[3]), &(intData[4]), &(intData[5]), doubleData[2],
+  // function to compute the righ-hand side of xdot = f(x,t) + Tu
+  fpointer pointerToF = Lsodar_f_wrapper;
+
+  // function to compute the Jacobian/x of the rhs.
+  jacopointer pointerToJacobianF = Lsodar_jacobianF_wrapper; // function to compute the Jacobian/x of the rhs.
+
+  // function to compute the constraints
+  gpointer pointerToG;
+  pointerToG = Lsodar_g_wrapper; // function to compute the constraints
+
+  cout <<   "  "   << endl;
+
+
+  // === LSODAR CALL ===
+  F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*x)(0), &tinit_DR, &tend_DR, &(intData[2]), doubleData[0], doubleData[1], &(intData[3]), &(intData[4]), &(intData[5]), doubleData[2],
                    &(intData[6]), iwork, &(intData[7]), pointerToJacobianF, &(intData[8]), pointerToG, &(intData[1]), doubleData[3]);
 
+  tout  = tinit_DR; // real ouput time
+  iout  = intData[4];
+  // doubleData[2] = rwork
+  // doubleData[3] = jroot, jroot[i] = 0 if g(i) as a root a t, else jroot[i] = 0.
+  cout << "LSodar::integrate(...) ok - Istate = " << intData[4] << endl;
+
+  // === Post ===
+  if (intData[4] < 0) // if istate < 0 => LSODAR failed
+  {
+    cout << "LSodar::integrate(...) failed - Istate = " << intData[4] << endl;
+    cout << " -1 means excess work done on this call (perhaps wrong JT)." << endl;
+    cout << " -2 means excess accuracy requested (tolerances too small)." << endl;
+    cout << " -3 means illegal input detected (see printed message)." << endl;
+    cout << " -4 means repeated error test failures (check all inputs)." << endl;
+    cout << " -5 means repeated convergence failures (perhaps bad Jacobian supplied or wrong choice of JT or tolerances)." << endl;
+    cout << " -6 means error weight became zero during problem. (Solution component i vanished, and ATOL or ATOL(i) = 0.)" << endl;
+    cout << " -7 means work space insufficient to finish (see messages)." << endl;
+  }
 }
 
 

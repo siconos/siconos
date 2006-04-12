@@ -111,6 +111,13 @@ const LaGenMatDouble SimpleMatrix::getLaGenMatDouble(const unsigned int& row, co
   return mat;
 }
 
+const LaGenMatDouble* SimpleMatrix::getLaGenMatDoubleRef(const unsigned int& row, const unsigned int& col) const
+{
+  if (row != 0 || col != 0)
+    SiconosMatrixException::selfThrow("SimpleMatrix getLaGenMatDouble(row,col), row or col not equal to 0.");
+  return &mat;
+}
+
 void SimpleMatrix::setValue(const LaGenMatDouble& newMat, const unsigned int& row, const unsigned int& col)
 {
   if (row != 0 || col != 0)
@@ -655,15 +662,17 @@ void  SimpleMatrix::PLUInverseInPlace()
 
   // First step : Query for the optimal size for the workspace work(0,0)
   long int lwork = -1;
-  SimpleMatrix work(1, 1);
+  SimpleVector *  work = new SimpleVector(1);
 
-  F77NAME(dgetri)(&nbRow, &(mat(0, 0)), &lda, &((*(ipiv))(0)), &(work(0, 0)), &lwork, &info);
+  F77NAME(dgetri)(&nbRow, &(mat(0, 0)), &lda, &((*(ipiv))(0)), &((*work)(0)), &lwork, &info);
 
   // Second step :  allocation of the Workspace and computtuaion of the inverse.
-  lwork = static_cast<long int>(work(0, 0));
-  work.mat.resize(lwork, lwork);
+  lwork = (integer)(*work)(0);
 
-  F77NAME(dgetri)(&nbRow, &(mat(0, 0)), &lda, &((*(ipiv))(0)), &(work(0, 0)), &lwork, &info);
+  delete work;
+  work = new SimpleVector(lwork);
+
+  F77NAME(dgetri)(&nbRow, &(mat(0, 0)), &lda, &((*(ipiv))(0)), &((*work)(0)), &lwork, &info);
 
   //SUBROUTINE DGETRI( N, A, LDA, IPIV, WORK, LWORK, INFO )
 
@@ -671,6 +680,7 @@ void  SimpleMatrix::PLUInverseInPlace()
     SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace : Internal error in LAPACK: DGETRI ");
 
   isPLUInversed = true ;
+  delete work;
 
 }
 

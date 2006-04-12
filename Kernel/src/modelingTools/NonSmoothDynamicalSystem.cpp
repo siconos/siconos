@@ -174,7 +174,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* 
       interactionVector[i] = new Interaction(nsdsxml->getInteractionXML(nbInteractionTab[i]), this);
       isInteractionVectorAllocatedIn[i] = true;
     }
-    if (nbInteractionTab.size() == 0) cout << "NonSmoothDymamicalSystem xml Constructor, warning : no Interaction defined." << endl;
+    if (nbInteractionTab.size() == 0) cout << " /!\\ Warning: you do not defined any interaction in the NonSmoothDymamicalSystem (Constructor: xml). /!\\ " << endl;
 
     // built topology:
     topology = new Topology(this);

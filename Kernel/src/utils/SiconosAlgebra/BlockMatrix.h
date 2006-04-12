@@ -165,6 +165,14 @@ public:
    */
   const LaGenMatDouble getLaGenMatDouble(const unsigned int& = 0, const unsigned int& = 0) const;
 
+  /** \fn LaGenMatDouble* getLaGenMatDoubleRef(const int& row = 0, const int& col = 0)
+   *  \brief get LaGenMatDouble matrix
+   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+   *  \return a LaGenMatDouble
+   */
+  const LaGenMatDouble* getLaGenMatDoubleRef(const unsigned int& = 0, const unsigned int& = 0) const;
+
   /** \fn inline blocksMap getListOfBlocks() const {return matrixOfBlocks;};
    *  \brief get the map of blocks
    *  \return a blocksMap
