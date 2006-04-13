@@ -70,7 +70,7 @@ void EventDriven::run()
     eventsManager->processEvents();
     count++;
   }
-  cout << "===== End of Event Driven simulation." << count << " events have been processed. ==== " << endl;
+  cout << "===== End of Event Driven simulation. " << count << " events have been processed. ==== " << endl;
 }
 
 void EventDriven::computeOneStep()

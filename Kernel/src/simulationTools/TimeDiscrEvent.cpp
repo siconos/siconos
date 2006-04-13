@@ -36,5 +36,5 @@ TimeDiscrEvent::~TimeDiscrEvent()
 void TimeDiscrEvent::process()
 {
   //todo
-  cout << " Time Discr Event processing: nothing implemented" << endl;
+  // cout << " Time Discr Event processing: nothing implemented" << endl;
 }

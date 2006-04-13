@@ -186,7 +186,7 @@ const bool EventsManager::hasEvent(Event* event) const
 
 const bool EventsManager::hasNextEvent() const
 {
-  return (!unProcessedEvents.size() < 2); // minimum size of unProcessedEvents is one, since it contains currentEvent.
+  return (!(unProcessedEvents.size() < 2)); // minimum size of unProcessedEvents is one, since it contains currentEvent.
 }
 
 const double EventsManager::getTimeOfEvent(Event* event) const
