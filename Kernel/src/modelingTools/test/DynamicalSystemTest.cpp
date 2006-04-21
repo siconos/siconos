@@ -146,9 +146,7 @@ void DynamicalSystemTest::testBuildDynamicalSystem3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem3D : ", ds->getX0() == *x0, true);
 
   double time = 1.5;
-  cout << "--> Test: constructor 3." << endl;
   ds->computeRhs(time);
-  cout << "--> Test: constructor 3." << endl;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem3E : ", ds->getRhs() == time* *x0, true);
   delete ds;
   cout << "--> Constructor 3 test ended with success." << endl;

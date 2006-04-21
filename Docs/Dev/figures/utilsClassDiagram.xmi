@@ -6,11 +6,11 @@
    <XMI.exporterVersion>1.2.0</XMI.exporterVersion>
    <XMI.exporterEncoding>UnicodeUTF8</XMI.exporterEncoding>
   </XMI.documentation>
-  <XMI.model xmi.name="utilsClassDiagram" href="/scratch/Franck/New_Sico/siconos/trunk/Docs/Dev/Kernel_dev/figures/utilsClassDiagram.xmi" />
+  <XMI.model xmi.name="utilsClassDiagram" href="/scratch/Franck/SicoTmp/siconos/trunk/Docs/Dev/figures/utilsClassDiagram.xmi" />
   <XMI.metamodel xmi.name="UML" href="UML.xml" xmi.version="1.3" />
  </XMI.header>
  <XMI.content>
-  <docsettings viewid="2016" documentation="" uniqueid="2496" />
+  <docsettings viewid="2016" documentation="" uniqueid="2840" />
   <UML:Model>
    <UML:DataType stereotype="datatype" visibility="public" xmi.id="2017" name="int" />
    <UML:DataType stereotype="datatype" visibility="public" xmi.id="2018" name="char" />
@@ -228,129 +228,6 @@
     <UML:Operation visibility="public" xmi.id="2174" type="void" name="zero" />
     <UML:Operation visibility="public" xmi.id="2175" type="" name="~SimpleVector" />
     <UML:Attribute visibility="private" xmi.id="2070" value="" type="LaVectorDouble" name="lavd" />
-   </UML:Class>
-   <UML:Class stereotype="class" visibility="public" xmi.id="2176" name="CompositeVector" >
-    <UML:Operation visibility="public" xmi.id="2177" type="bool" name="!=" >
-     <UML:Parameter visibility="private" xmi.id="2178" value="" type="const CompositeVector &amp;" name="v" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2179" type="bool" name="!=" >
-     <UML:Parameter visibility="private" xmi.id="2180" value="" type="const SiconosVector &amp;" name="v" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2181" type="double &amp;" name="()" >
-     <UML:Parameter visibility="private" xmi.id="2182" value="" type="const unsigned int &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2183" type="CompositeVector" name="*" >
-     <UML:Parameter visibility="private" xmi.id="2184" value="" type="const CompositeVector &amp;" />
-     <UML:Parameter visibility="private" xmi.id="2185" value="" type="const double &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2186" type="SimpleVector" name="*" >
-     <UML:Parameter visibility="private" xmi.id="2187" value="" type="const SiconosMatrix &amp;" name="m" />
-     <UML:Parameter visibility="private" xmi.id="2188" value="" type="const CompositeVector &amp;" name="v" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2189" type="CompositeVector" name="*" >
-     <UML:Parameter visibility="private" xmi.id="2190" value="" type="const double &amp;" />
-     <UML:Parameter visibility="private" xmi.id="2191" value="" type="const CompositeVector &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2192" type="CompositeVector &amp;" name="*=" >
-     <UML:Parameter visibility="private" xmi.id="2193" value="" type="const double &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2194" type="CompositeVector" name="+" >
-     <UML:Parameter visibility="private" xmi.id="2195" value="" type="const CompositeVector &amp;" name="v1" />
-     <UML:Parameter visibility="private" xmi.id="2196" value="" type="const CompositeVector &amp;" name="v2" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2197" type="CompositeVector &amp;" name="+=" >
-     <UML:Parameter visibility="private" xmi.id="2198" value="" type="const CompositeVector &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2199" type="CompositeVector &amp;" name="+=" >
-     <UML:Parameter visibility="private" xmi.id="2200" value="" type="const SiconosVector &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2201" type="CompositeVector" name="-" >
-     <UML:Parameter visibility="private" xmi.id="2202" value="" type="const CompositeVector &amp;" name="v1" />
-     <UML:Parameter visibility="private" xmi.id="2203" value="" type="const CompositeVector &amp;" name="v2" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2204" type="CompositeVector &amp;" name="-=" >
-     <UML:Parameter visibility="private" xmi.id="2205" value="" type="const CompositeVector &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2206" type="CompositeVector &amp;" name="-=" >
-     <UML:Parameter visibility="private" xmi.id="2207" value="" type="const SiconosVector &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2208" type="CompositeVector" name="/" >
-     <UML:Parameter visibility="private" xmi.id="2209" value="" type="const CompositeVector &amp;" />
-     <UML:Parameter visibility="private" xmi.id="2210" value="" type="const double &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2211" type="CompositeVector &amp;" name="/=" >
-     <UML:Parameter visibility="private" xmi.id="2212" value="" type="const double &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2213" type="CompositeVector &amp;" name="=" >
-     <UML:Parameter visibility="private" xmi.id="2214" value="" type="const CompositeVector &amp;" name="v" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2215" type="CompositeVector &amp;" name="=" >
-     <UML:Parameter visibility="private" xmi.id="2216" value="" type="const SiconosVector &amp;" name="v" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2217" type="bool" name="==" >
-     <UML:Parameter visibility="private" xmi.id="2218" value="" type="const CompositeVector &amp;" name="v" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2219" type="bool" name="==" >
-     <UML:Parameter visibility="private" xmi.id="2220" value="" type="const SiconosVector &amp;" name="v" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2221" type="" name="CompositeVector" />
-    <UML:Operation visibility="public" xmi.id="2222" type="" name="CompositeVector" >
-     <UML:Parameter visibility="private" xmi.id="2223" value="" type="const CompositeVector &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2224" type="" name="CompositeVector" >
-     <UML:Parameter visibility="private" xmi.id="2225" value="" type="const SiconosVector &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2226" type="" name="CompositeVector" >
-     <UML:Parameter visibility="private" xmi.id="2227" value="" type="const SimpleVector &amp;" name="v" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2228" type="" name="CompositeVector" >
-     <UML:Parameter visibility="private" xmi.id="2229" value="" type="const std :: string &amp;" />
-     <UML:Parameter visibility="private" xmi.id="2230" value="" type="const bool &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2231" type="void" name="add" >
-     <UML:Parameter visibility="private" xmi.id="2232" value="" type="const SiconosVector &amp;" name="v" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2233" type="void" name="addPtr" >
-     <UML:Parameter visibility="private" xmi.id="2234" value="" type="SiconosVector *" name="v" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2235" type="CompositeVector" name="addition" >
-     <UML:Parameter visibility="private" xmi.id="2236" value="" type="const SiconosVector &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2237" type="void" name="display" />
-    <UML:Operation visibility="public" xmi.id="2238" type="double *" name="getArray" />
-    <UML:Operation visibility="public" xmi.id="2239" type="const double" name="getValue" >
-     <UML:Parameter visibility="private" xmi.id="2240" value="" type="const int unsigned &amp;" name="index" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2241" type="const LaVectorDouble" name="getValues" >
-     <UML:Parameter visibility="private" xmi.id="2242" value="" type="const int unsigned &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2243" type="SimpleVector" name="matTransVecMult" >
-     <UML:Parameter visibility="private" xmi.id="2244" value="" type="SiconosMatrix &amp;" />
-     <UML:Parameter visibility="private" xmi.id="2245" value="" type="CompositeVector &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2246" type="bool" name="read" >
-     <UML:Parameter visibility="private" xmi.id="2247" value="" type="const std :: string &amp;" />
-     <UML:Parameter visibility="private" xmi.id="2248" value="" type="const std :: string &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2249" type="void" name="setValue" >
-     <UML:Parameter visibility="private" xmi.id="2250" value="" type="const int unsigned &amp;" name="i" />
-     <UML:Parameter visibility="private" xmi.id="2251" value="" type="const double &amp;" name="d" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2252" type="void" name="setValues" >
-     <UML:Parameter visibility="private" xmi.id="2253" value="" type="const std :: vector &lt; double > &amp;" name="v" />
-     <UML:Parameter visibility="private" xmi.id="2254" value="" type="const int unsigned &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2255" type="unsigned int" name="size" >
-     <UML:Parameter visibility="private" xmi.id="2256" value="" type="const unsigned int &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2257" type="CompositeVector" name="subtraction" >
-     <UML:Parameter visibility="private" xmi.id="2258" value="" type="const SiconosVector &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2259" type="bool" name="write" >
-     <UML:Parameter visibility="private" xmi.id="2260" value="" type="const std :: string &amp;" />
-     <UML:Parameter visibility="private" xmi.id="2261" value="" type="const std :: string &amp;" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2262" type="" name="~CompositeVector" />
    </UML:Class>
    <UML:Class stereotype="class" visibility="public" xmi.id="2263" name="SiconosMatrix" >
     <UML:Operation visibility="public" xmi.id="2268" type="bool" name="!=" >
@@ -713,35 +590,482 @@ delete the SiconosVectors allocated in vectorMemory if memorySize > 0" visibilit
     </UML:Operation>
     <UML:Operation comment="destructor" visibility="public" xmi.id="2495" type="" name="~SiconosSharedLibraryException" />
    </UML:Class>
+   <UML:Class stereotype="class" visibility="public" xmi.id="2498" name="SimpleMatrix" >
+    <UML:Operation visibility="public" xmi.id="2503" type="double &amp;" name="()" >
+     <UML:Parameter visibility="private" xmi.id="2504" value="" type="const int &amp;" name="row" />
+     <UML:Parameter visibility="private" xmi.id="2505" value="" type="const int &amp;" name="col" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2506" type="double &amp;" name="()" >
+     <UML:Parameter visibility="private" xmi.id="2507" value="" type="const unsigned int &amp;" name="row" />
+     <UML:Parameter visibility="private" xmi.id="2508" value="" type="const unsigned int &amp;" name="col" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2509" type="SimpleMatrix" name="*" >
+     <UML:Parameter visibility="private" xmi.id="2510" value="" type="const SiconosMatrix &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2511" value="" type="const double &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2512" type="SimpleMatrix" name="*" >
+     <UML:Parameter visibility="private" xmi.id="2513" value="" type="const SimpleMatrix &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2514" value="" type="const SimpleMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2515" type="SimpleMatrix" name="*" >
+     <UML:Parameter visibility="private" xmi.id="2516" value="" type="const double &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2517" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2518" type="SimpleMatrix &amp;" name="*=" >
+     <UML:Parameter visibility="private" xmi.id="2519" value="" type="const double &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2520" type="SimpleMatrix" name="+" >
+     <UML:Parameter visibility="private" xmi.id="2521" value="" type="const SiconosMatrix &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2522" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2523" type="SimpleMatrix &amp;" name="+=" >
+     <UML:Parameter visibility="private" xmi.id="2524" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2525" type="SimpleMatrix" name="-" >
+     <UML:Parameter visibility="private" xmi.id="2526" value="" type="const SiconosMatrix &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2527" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2528" type="SimpleMatrix &amp;" name="-=" >
+     <UML:Parameter visibility="private" xmi.id="2529" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2530" type="SimpleMatrix" name="/" >
+     <UML:Parameter visibility="private" xmi.id="2531" value="" type="const SiconosMatrix &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2532" value="" type="const double &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2533" type="SimpleMatrix &amp;" name="=" >
+     <UML:Parameter visibility="private" xmi.id="2534" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2535" type="SimpleMatrix &amp;" name="=" >
+     <UML:Parameter visibility="private" xmi.id="2536" value="" type="const SimpleMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2537" type="bool" name="==" >
+     <UML:Parameter visibility="private" xmi.id="2538" value="" type="const SiconosMatrix &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2539" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2540" type="SimpleMatrix" name="BlockMatrixAssemble" >
+     <UML:Parameter visibility="private" xmi.id="2541" value="" type="const std :: vector &lt; SiconosMatrix * > &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2542" type="void" name="PLUFactorizationInPlace" />
+    <UML:Operation visibility="public" xmi.id="2543" type="void" name="PLUForwardBackwardInPlace" >
+     <UML:Parameter visibility="private" xmi.id="2544" value="" type="SiconosMatrix &amp;" name="B" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2545" type="void" name="PLUForwardBackwardInPlace" >
+     <UML:Parameter visibility="private" xmi.id="2546" value="" type="SiconosVector &amp;" name="B" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2547" type="void" name="PLUInverseInPlace" />
+    <UML:Operation visibility="protected" xmi.id="2548" type="" name="SimpleMatrix" />
+    <UML:Operation visibility="public" xmi.id="2549" type="" name="SimpleMatrix" >
+     <UML:Parameter visibility="private" xmi.id="2550" value="" type="const LaGenMatDouble &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2551" type="" name="SimpleMatrix" >
+     <UML:Parameter visibility="private" xmi.id="2552" value="" type="const LaVectorDouble &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2553" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2554" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2555" type="" name="SimpleMatrix" >
+     <UML:Parameter visibility="private" xmi.id="2556" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2557" type="" name="SimpleMatrix" >
+     <UML:Parameter visibility="private" xmi.id="2558" value="" type="const SimpleMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2559" type="" name="SimpleMatrix" >
+     <UML:Parameter visibility="private" xmi.id="2560" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2561" value="" type="const bool &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2562" type="" name="SimpleMatrix" >
+     <UML:Parameter visibility="private" xmi.id="2563" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2564" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2565" type="void" name="blockMatrixCopy" >
+     <UML:Parameter visibility="private" xmi.id="2566" value="" type="const SiconosMatrix &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2567" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2568" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2569" type="void" name="display" />
+    <UML:Operation visibility="public" xmi.id="2570" type="void" name="eye" />
+    <UML:Operation visibility="public" xmi.id="2571" type="double *" name="getArray" >
+     <UML:Parameter visibility="private" xmi.id="2572" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2573" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2574" type="void" name="getBlock" >
+     <UML:Parameter visibility="private" xmi.id="2575" value="" type="const std :: vector &lt; unsigned int > &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2576" value="" type="SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2577" type="void" name="getBlock" >
+     <UML:Parameter visibility="private" xmi.id="2578" value="" type="const std :: vector &lt; unsigned int > &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2579" value="" type="const std :: vector &lt; unsigned int > &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2580" value="" type="SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2581" type="SiconosMatrix *" name="getBlockPtr" >
+     <UML:Parameter visibility="private" xmi.id="2582" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2583" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2584" type="void" name="getCol" >
+     <UML:Parameter visibility="private" xmi.id="2585" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2586" value="" type="const SimpleVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2587" type="const LaGenMatDouble" name="getLaGenMatDouble" >
+     <UML:Parameter visibility="private" xmi.id="2588" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2589" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2590" type="const LaGenMatDouble *" name="getLaGenMatDoubleRef" >
+     <UML:Parameter visibility="private" xmi.id="2591" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2592" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2593" type="void" name="getRow" >
+     <UML:Parameter visibility="private" xmi.id="2594" value="" type="const unsigned int &amp;" name="i" />
+     <UML:Parameter visibility="private" xmi.id="2595" value="" type="const SimpleVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2596" type="bool" name="isFactorized" />
+    <UML:Operation visibility="public" xmi.id="2597" type="bool" name="isInversed" />
+    <UML:Operation visibility="public" xmi.id="2598" type="bool" name="isSquare" />
+    <UML:Operation visibility="public" xmi.id="2599" type="void" name="linearSolve" >
+     <UML:Parameter visibility="private" xmi.id="2600" value="" type="const SiconosMatrix &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2601" value="" type="SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2602" type="SimpleMatrix" name="multTranspose" >
+     <UML:Parameter visibility="private" xmi.id="2603" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2604" type="const double" name="normInf" />
+    <UML:Operation visibility="public" xmi.id="2605" type="SimpleMatrix" name="pow" >
+     <UML:Parameter visibility="private" xmi.id="2606" value="" type="const SimpleMatrix &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2607" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2608" type="bool" name="rawWrite" >
+     <UML:Parameter visibility="private" xmi.id="2609" value="" type="const std :: string &amp;" name="fileName" />
+     <UML:Parameter visibility="private" xmi.id="2610" value="" type="const std :: string &amp;" name="mode" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2611" type="bool" name="read" >
+     <UML:Parameter visibility="private" xmi.id="2612" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2613" value="" type="const std :: string &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2614" type="void" name="setCol" >
+     <UML:Parameter visibility="private" xmi.id="2615" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2616" value="" type="const SiconosVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2617" type="void" name="setRow" >
+     <UML:Parameter visibility="private" xmi.id="2618" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2619" value="" type="const SiconosVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2620" type="void" name="setValue" >
+     <UML:Parameter visibility="private" xmi.id="2621" value="" type="const LaGenMatDouble &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2622" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2623" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2624" type="void" name="setValue" >
+     <UML:Parameter visibility="private" xmi.id="2625" value="" type="const unsigned int &amp;" name="row" />
+     <UML:Parameter visibility="private" xmi.id="2626" value="" type="const unsigned int &amp;" name="col" />
+     <UML:Parameter visibility="private" xmi.id="2627" value="" type="const double &amp;" name="d" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2628" type="unsigned int" name="size" >
+     <UML:Parameter visibility="private" xmi.id="2629" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2630" type="bool" name="write" >
+     <UML:Parameter visibility="private" xmi.id="2631" value="" type="const std :: string &amp;" name="fileName" />
+     <UML:Parameter visibility="private" xmi.id="2632" value="" type="const std :: string &amp;" name="mode" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2633" type="void" name="zero" />
+    <UML:Operation visibility="public" xmi.id="2634" type="" name="~SimpleMatrix" />
+    <UML:Attribute visibility="private" xmi.id="2499" value="" type="LaVectorLongInt *" name="ipiv" />
+    <UML:Attribute visibility="private" xmi.id="2500" value="" type="bool" name="isPLUFactorized" />
+    <UML:Attribute visibility="private" xmi.id="2501" value="" type="bool" name="isPLUInversed" />
+    <UML:Attribute visibility="private" xmi.id="2502" value="" type="LaGenMatDouble" name="mat" />
+   </UML:Class>
+   <UML:Class stereotype="class" visibility="public" xmi.id="2635" name="BlockVector" >
+    <UML:Operation visibility="public" xmi.id="2636" type="double &amp;" name="()" >
+     <UML:Parameter visibility="private" xmi.id="2637" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2638" type="BlockVector" name="*" >
+     <UML:Parameter visibility="private" xmi.id="2639" value="" type="const BlockVector &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2640" value="" type="const double &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2641" type="SimpleVector" name="*" >
+     <UML:Parameter visibility="private" xmi.id="2642" value="" type="const SiconosMatrix &amp;" name="m" />
+     <UML:Parameter visibility="private" xmi.id="2643" value="" type="const BlockVector &amp;" name="v" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2644" type="BlockVector" name="*" >
+     <UML:Parameter visibility="private" xmi.id="2645" value="" type="const double &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2646" value="" type="const BlockVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2647" type="BlockVector &amp;" name="*=" >
+     <UML:Parameter visibility="private" xmi.id="2648" value="" type="const double &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2649" type="BlockVector" name="+" >
+     <UML:Parameter visibility="private" xmi.id="2650" value="" type="const BlockVector &amp;" name="v1" />
+     <UML:Parameter visibility="private" xmi.id="2651" value="" type="const BlockVector &amp;" name="v2" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2652" type="BlockVector &amp;" name="+=" >
+     <UML:Parameter visibility="private" xmi.id="2653" value="" type="const BlockVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2654" type="BlockVector &amp;" name="+=" >
+     <UML:Parameter visibility="private" xmi.id="2655" value="" type="const SiconosVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2656" type="BlockVector" name="-" >
+     <UML:Parameter visibility="private" xmi.id="2657" value="" type="const BlockVector &amp;" name="v1" />
+     <UML:Parameter visibility="private" xmi.id="2658" value="" type="const BlockVector &amp;" name="v2" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2659" type="BlockVector &amp;" name="-=" >
+     <UML:Parameter visibility="private" xmi.id="2660" value="" type="const BlockVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2661" type="BlockVector &amp;" name="-=" >
+     <UML:Parameter visibility="private" xmi.id="2662" value="" type="const SiconosVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2663" type="BlockVector" name="/" >
+     <UML:Parameter visibility="private" xmi.id="2664" value="" type="const BlockVector &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2665" value="" type="const double &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2666" type="BlockVector &amp;" name="/=" >
+     <UML:Parameter visibility="private" xmi.id="2667" value="" type="const double &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2668" type="BlockVector &amp;" name="=" >
+     <UML:Parameter visibility="private" xmi.id="2669" value="" type="const BlockVector &amp;" name="v" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2670" type="BlockVector &amp;" name="=" >
+     <UML:Parameter visibility="private" xmi.id="2671" value="" type="const SiconosVector &amp;" name="v" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2672" type="" name="BlockVector" />
+    <UML:Operation visibility="public" xmi.id="2673" type="" name="BlockVector" >
+     <UML:Parameter visibility="private" xmi.id="2674" value="" type="SimpleVector *" />
+     <UML:Parameter visibility="private" xmi.id="2675" value="" type="SimpleVector *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2676" type="" name="BlockVector" >
+     <UML:Parameter visibility="private" xmi.id="2677" value="" type="const BlockVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2678" type="" name="BlockVector" >
+     <UML:Parameter visibility="private" xmi.id="2679" value="" type="const SimpleVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2680" type="" name="BlockVector" >
+     <UML:Parameter visibility="private" xmi.id="2681" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2682" value="" type="const bool &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2683" type="" name="BlockVector" >
+     <UML:Parameter visibility="private" xmi.id="2684" value="" type="std :: vector &lt; SimpleVector * >" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2685" type="void" name="add" >
+     <UML:Parameter visibility="private" xmi.id="2686" value="" type="const SimpleVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2687" type="void" name="addPtr" >
+     <UML:Parameter visibility="private" xmi.id="2688" value="" type="SimpleVector *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2689" type="BlockVector" name="addition" >
+     <UML:Parameter visibility="private" xmi.id="2690" value="" type="const SiconosVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2691" type="void" name="display" />
+    <UML:Operation visibility="public" xmi.id="2692" type="double *" name="getArray" />
+    <UML:Operation visibility="public" xmi.id="2693" type="const double" name="getValue" >
+     <UML:Parameter visibility="private" xmi.id="2694" value="" type="const unsigned int &amp;" name="index" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2695" type="const LaVectorDouble" name="getValues" >
+     <UML:Parameter visibility="private" xmi.id="2696" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2697" type="SimpleVector *" name="getVectorPtr" >
+     <UML:Parameter visibility="private" xmi.id="2698" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2699" type="SimpleVector" name="matTransVecMult" >
+     <UML:Parameter visibility="private" xmi.id="2700" value="" type="SiconosMatrix &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2701" value="" type="BlockVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2702" type="bool" name="read" >
+     <UML:Parameter visibility="private" xmi.id="2703" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2704" value="" type="const std :: string &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2705" type="void" name="setValue" >
+     <UML:Parameter visibility="private" xmi.id="2706" value="" type="const unsigned int &amp;" name="i" />
+     <UML:Parameter visibility="private" xmi.id="2707" value="" type="const double &amp;" name="d" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2708" type="void" name="setValues" >
+     <UML:Parameter visibility="private" xmi.id="2709" value="" type="const std :: vector &lt; double > &amp;" name="v" />
+     <UML:Parameter visibility="private" xmi.id="2710" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2711" type="unsigned int" name="size" >
+     <UML:Parameter visibility="private" xmi.id="2712" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2713" type="BlockVector" name="subtraction" >
+     <UML:Parameter visibility="private" xmi.id="2714" value="" type="const SiconosVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2715" type="bool" name="write" >
+     <UML:Parameter visibility="private" xmi.id="2716" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2717" value="" type="const std :: string &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2718" type="void" name="zero" />
+    <UML:Operation visibility="public" xmi.id="2719" type="" name="~BlockVector" />
+   </UML:Class>
+   <UML:Class stereotype="class" visibility="public" xmi.id="2720" name="BlockMatrix" >
+    <UML:Operation visibility="public" xmi.id="2722" type="double &amp;" name="()" >
+     <UML:Parameter visibility="private" xmi.id="2723" value="" type="const int &amp;" name="row" />
+     <UML:Parameter visibility="private" xmi.id="2724" value="" type="const int &amp;" name="col" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2725" type="double &amp;" name="()" >
+     <UML:Parameter visibility="private" xmi.id="2726" value="" type="const unsigned int &amp;" name="row" />
+     <UML:Parameter visibility="private" xmi.id="2727" value="" type="const unsigned int &amp;" name="col" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2728" type="BlockMatrix &amp;" name="*=" >
+     <UML:Parameter visibility="private" xmi.id="2729" value="" type="const double &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2730" type="BlockMatrix &amp;" name="+=" >
+     <UML:Parameter visibility="private" xmi.id="2731" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2732" type="BlockMatrix &amp;" name="-=" >
+     <UML:Parameter visibility="private" xmi.id="2733" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2734" type="BlockMatrix &amp;" name="=" >
+     <UML:Parameter visibility="private" xmi.id="2735" value="" type="const BlockMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2736" type="BlockMatrix &amp;" name="=" >
+     <UML:Parameter visibility="private" xmi.id="2737" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="protected" xmi.id="2738" type="" name="BlockMatrix" />
+    <UML:Operation visibility="public" xmi.id="2739" type="" name="BlockMatrix" >
+     <UML:Parameter visibility="private" xmi.id="2740" value="" type="SiconosMatrix *" />
+     <UML:Parameter visibility="private" xmi.id="2741" value="" type="SiconosMatrix *" />
+     <UML:Parameter visibility="private" xmi.id="2742" value="" type="SiconosMatrix *" />
+     <UML:Parameter visibility="private" xmi.id="2743" value="" type="SiconosMatrix *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2744" type="" name="BlockMatrix" >
+     <UML:Parameter visibility="private" xmi.id="2745" value="" type="const BlockMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2746" type="" name="BlockMatrix" >
+     <UML:Parameter visibility="private" xmi.id="2747" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2748" type="" name="BlockMatrix" >
+     <UML:Parameter visibility="private" xmi.id="2749" value="" type="const std :: vector &lt; LaGenMatDouble > &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2750" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2751" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2752" type="" name="BlockMatrix" >
+     <UML:Parameter visibility="private" xmi.id="2753" value="" type="std :: vector &lt; SiconosMatrix * >" />
+     <UML:Parameter visibility="private" xmi.id="2754" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2755" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2756" type="void" name="PLUFactorizationInPlace" />
+    <UML:Operation visibility="public" xmi.id="2757" type="void" name="PLUForwardBackwardInPlace" >
+     <UML:Parameter visibility="private" xmi.id="2758" value="" type="SiconosMatrix &amp;" name="B" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2759" type="void" name="PLUForwardBackwardInPlace" >
+     <UML:Parameter visibility="private" xmi.id="2760" value="" type="SiconosVector &amp;" name="B" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2761" type="void" name="PLUInverseInPlace" />
+    <UML:Operation visibility="protected" xmi.id="2762" type="void" name="addInTab" >
+     <UML:Parameter visibility="private" xmi.id="2763" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2764" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2765" type="void" name="blockMatrixCopy" >
+     <UML:Parameter visibility="private" xmi.id="2766" value="" type="const SiconosMatrix &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2767" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2768" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2769" type="void" name="display" />
+    <UML:Operation visibility="public" xmi.id="2770" type="void" name="eye" />
+    <UML:Operation visibility="public" xmi.id="2771" type="double *" name="getArray" >
+     <UML:Parameter visibility="private" xmi.id="2772" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2773" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2774" type="void" name="getBlock" >
+     <UML:Parameter visibility="private" xmi.id="2775" value="" type="const std :: vector &lt; unsigned int > &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2776" value="" type="SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2777" type="void" name="getBlock" >
+     <UML:Parameter visibility="private" xmi.id="2778" value="" type="const std :: vector &lt; unsigned int > &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2779" value="" type="const std :: vector &lt; unsigned int > &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2780" value="" type="SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2781" type="SiconosMatrix *" name="getBlockPtr" >
+     <UML:Parameter visibility="private" xmi.id="2782" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2783" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2784" type="void" name="getCol" >
+     <UML:Parameter visibility="private" xmi.id="2785" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2786" value="" type="const SimpleVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2787" type="const LaGenMatDouble" name="getLaGenMatDouble" >
+     <UML:Parameter visibility="private" xmi.id="2788" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2789" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2790" type="const LaGenMatDouble *" name="getLaGenMatDoubleRef" >
+     <UML:Parameter visibility="private" xmi.id="2791" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2792" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2793" type="blocksMap" name="getListOfBlocks" />
+    <UML:Operation visibility="public" xmi.id="2794" type="void" name="getRow" >
+     <UML:Parameter visibility="private" xmi.id="2795" value="" type="const unsigned int &amp;" name="i" />
+     <UML:Parameter visibility="private" xmi.id="2796" value="" type="const SimpleVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2797" type="bool" name="isFactorized" />
+    <UML:Operation visibility="public" xmi.id="2798" type="bool" name="isInversed" />
+    <UML:Operation visibility="public" xmi.id="2799" type="bool" name="isSquare" />
+    <UML:Operation visibility="public" xmi.id="2800" type="void" name="linearSolve" >
+     <UML:Parameter visibility="private" xmi.id="2801" value="" type="const SiconosMatrix &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2802" value="" type="SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="protected" xmi.id="2803" type="void" name="makeTab" >
+     <UML:Parameter visibility="private" xmi.id="2804" value="" type="const unsigned int &amp;" name="row" />
+     <UML:Parameter visibility="private" xmi.id="2805" value="" type="const unsigned int &amp;" name="col" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2806" type="SimpleMatrix" name="multTranspose" >
+     <UML:Parameter visibility="private" xmi.id="2807" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2808" type="const double" name="normInf" />
+    <UML:Operation visibility="public" xmi.id="2809" type="bool" name="rawWrite" >
+     <UML:Parameter visibility="private" xmi.id="2810" value="" type="const std :: string &amp;" name="fileName" />
+     <UML:Parameter visibility="private" xmi.id="2811" value="" type="const std :: string &amp;" name="mode" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2812" type="bool" name="read" >
+     <UML:Parameter visibility="private" xmi.id="2813" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2814" value="" type="const std :: string &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2815" type="void" name="setCol" >
+     <UML:Parameter visibility="private" xmi.id="2816" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2817" value="" type="const SiconosVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2818" type="void" name="setRow" >
+     <UML:Parameter visibility="private" xmi.id="2819" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2820" value="" type="const SiconosVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2821" type="void" name="setValue" >
+     <UML:Parameter visibility="private" xmi.id="2822" value="" type="const LaGenMatDouble &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2823" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2824" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2825" type="void" name="setValue" >
+     <UML:Parameter visibility="private" xmi.id="2826" value="" type="const unsigned int &amp;" name="row" />
+     <UML:Parameter visibility="private" xmi.id="2827" value="" type="const unsigned int &amp;" name="col" />
+     <UML:Parameter visibility="private" xmi.id="2828" value="" type="const double &amp;" name="d" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2829" type="unsigned int" name="size" >
+     <UML:Parameter visibility="private" xmi.id="2830" value="" type="const unsigned int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2831" type="bool" name="write" >
+     <UML:Parameter visibility="private" xmi.id="2832" value="" type="const std :: string &amp;" name="fileName" />
+     <UML:Parameter visibility="private" xmi.id="2833" value="" type="const std :: string &amp;" name="mode" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2834" type="void" name="zero" />
+    <UML:Operation visibility="public" xmi.id="2835" type="" name="~BlockMatrix" />
+    <UML:Attribute visibility="private" xmi.id="2721" value="" type="blocksMap" name="matrixOfBlocks" />
+   </UML:Class>
+   <UML:DataType stereotype="datatype" visibility="public" xmi.id="2839" name="blocksMap" />
    <UML:Generalization child="2069" visibility="public" xmi.id="2390" parent="2025" />
-   <UML:Generalization child="2176" visibility="public" xmi.id="2391" parent="2025" />
-   <UML:Association visibility="public" xmi.id="2392" >
-    <UML:Association.connection>
-     <UML:AssociationEndRole visibility="public" aggregation="shared" type="2176" />
-     <UML:AssociationEndRole visibility="public" type="2069" />
-    </UML:Association.connection>
-   </UML:Association>
    <UML:Generalization child="2412" visibility="public" xmi.id="2433" parent="2428" />
    <UML:Generalization child="2420" visibility="public" xmi.id="2434" parent="2428" />
    <UML:Generalization child="2396" visibility="public" xmi.id="2436" parent="2428" />
    <UML:Generalization child="2404" visibility="public" xmi.id="2437" parent="2428" />
    <UML:Generalization child="2474" visibility="public" xmi.id="2482" parent="2428" />
    <UML:Generalization child="2488" visibility="public" xmi.id="2496" parent="2428" />
+   <UML:Generalization child="2498" visibility="public" xmi.id="2836" parent="2263" />
+   <UML:Generalization child="2635" visibility="public" xmi.id="2837" parent="2025" />
+   <UML:Generalization child="2720" visibility="public" xmi.id="2838" parent="2263" />
   </UML:Model>
   <diagrams>
-   <diagram snapgrid="0" showattsig="0" fillcolor="#ffffc0" zoom="100" showgrid="0" showopsig="0" usefillcolor="1" snapx="10" canvaswidth="1011" snapy="10" showatts="0" xmi.id="2016" documentation="" type="402" showops="0" showpackage="0" name="class diagram" localid="30000" showstereotype="0" showscope="0" snapcsgrid="0" font="Sans,10,-1,5,50,0,0,0,0,0" linecolor="#2f0dd5" canvasheight="836" >
+   <diagram snapgrid="0" showattsig="0" fillcolor="#ffffc0" zoom="100" showgrid="0" showopsig="0" usefillcolor="1" snapx="10" canvaswidth="935" snapy="10" showatts="0" xmi.id="2016" documentation="" type="402" showops="0" showpackage="0" name="class diagram" localid="30000" showstereotype="0" showscope="0" snapcsgrid="0" font="Sans,10,-1,5,50,0,0,0,0,0" linecolor="#2f0dd5" canvasheight="836" >
     <widgets>
-     <UML:ClassWidget usesdiagramfillcolour="1" width="100" showattsigs="603" usesdiagramusefillcolour="1" x="146" linecolour="none" y="76" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2025" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="98" showattsigs="603" usesdiagramusefillcolour="1" x="329" linecolour="none" y="99" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2263" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="93" showattsigs="603" usesdiagramusefillcolour="1" x="69" linecolour="none" y="167" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2069" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="117" showattsigs="603" usesdiagramusefillcolour="1" x="218" linecolour="none" y="167" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2176" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:FloatingTextWidget usesdiagramfillcolour="1" width="34" usesdiagramusefillcolour="1" x="163" linecolour="none" y="160" instancename="" posttext="" usesdiagramlinecolour="1" role="700" fillcolour="none" height="21" usefillcolor="1" pretext="" isinstance="0" xmi.id="2393" text="(1,n)" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="100" showattsigs="603" usesdiagramusefillcolour="1" x="102" linecolour="none" y="75" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2025" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="98" showattsigs="603" usesdiagramusefillcolour="1" x="312" linecolour="none" y="75" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2263" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="93" showattsigs="603" usesdiagramusefillcolour="1" x="60" linecolour="none" y="137" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2069" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
      <UML:ClassWidget usesdiagramfillcolour="1" width="159" showattsigs="603" usesdiagramusefillcolour="1" x="249" linecolour="none" y="352" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2396" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
      <UML:ClassWidget usesdiagramfillcolour="1" width="161" showattsigs="603" usesdiagramusefillcolour="1" x="420" linecolour="none" y="352" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2404" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
      <UML:ClassWidget usesdiagramfillcolour="1" width="122" showattsigs="603" usesdiagramusefillcolour="1" x="62" linecolour="none" y="282" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2420" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
      <UML:ClassWidget usesdiagramfillcolour="1" width="121" showattsigs="603" usesdiagramusefillcolour="1" x="331" linecolour="none" y="282" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2428" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
      <UML:ClassWidget usesdiagramfillcolour="1" width="99" showattsigs="603" usesdiagramusefillcolour="1" x="140" linecolour="none" y="352" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2412" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <boxwidget usesdiagramfillcolour="1" width="413" usesdiagramusefillcolour="1" x="48" linecolour="none" y="37" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="173" usefillcolor="1" isinstance="0" xmi.id="2438" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <boxwidget usesdiagramfillcolour="1" width="418" usesdiagramusefillcolour="1" x="48" linecolour="none" y="37" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="173" usefillcolor="1" isinstance="0" xmi.id="2438" font="Sans,10,-1,5,50,0,0,0,0,0" />
      <boxwidget usesdiagramfillcolour="1" width="762" usesdiagramusefillcolour="1" x="41" linecolour="none" y="234" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="181" usefillcolor="1" isinstance="0" xmi.id="2439" font="Sans,10,-1,5,50,0,0,0,0,0" />
      <UML:ClassWidget usesdiagramfillcolour="1" width="111" showattsigs="603" usesdiagramusefillcolour="1" x="547" linecolour="none" y="107" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2441" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
      <UML:ClassWidget usesdiagramfillcolour="1" width="171" showattsigs="603" usesdiagramusefillcolour="1" x="590" linecolour="none" y="352" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2474" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
@@ -750,25 +1074,16 @@ delete the SiconosVectors allocated in vectorMemory if memorySize > 0" visibilit
      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="131" usesdiagramusefillcolour="1" x="536" linecolour="none" y="79" instancename="" posttext="" usesdiagramlinecolour="1" role="700" fillcolour="none" height="21" usefillcolor="1" pretext="" isinstance="0" xmi.id="2485" text="SICONOS MEMORY" font="Sans,10,-1,5,50,0,0,0,0,0" />
      <UML:FloatingTextWidget usesdiagramfillcolour="1" width="148" usesdiagramusefillcolour="1" x="317" linecolour="none" y="240" instancename="" posttext="" usesdiagramlinecolour="1" role="700" fillcolour="none" height="21" usefillcolor="1" pretext="" isinstance="0" xmi.id="2486" text="SICONOS EXCEPTION" font="Sans,10,-1,5,50,0,0,0,0,0" />
      <UML:ClassWidget usesdiagramfillcolour="1" width="209" showattsigs="603" usesdiagramusefillcolour="1" x="537" linecolour="none" y="282" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2488" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="82" showattsigs="603" usesdiagramusefillcolour="1" x="372" linecolour="none" y="136" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2720" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="84" showattsigs="603" usesdiagramusefillcolour="1" x="175" linecolour="none" y="136" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2635" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="91" showattsigs="603" usesdiagramusefillcolour="1" x="273" linecolour="none" y="136" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2498" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
     </widgets>
     <messages/>
     <associations>
      <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="2025" widgetaid="2069" xmi.id="2390" >
       <linepath>
-       <startpoint startx="115" starty="167" />
-       <endpoint endx="179" endy="103" />
-      </linepath>
-     </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="2" widgetbid="2025" widgetaid="2176" xmi.id="2391" >
-      <linepath>
-       <startpoint startx="276" starty="167" />
-       <endpoint endx="212" endy="103" />
-      </linepath>
-     </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="2" indexb="1" widgetbid="2069" widgetaid="2176" xmi.id="2392" >
-      <linepath>
-       <startpoint startx="218" starty="180" />
-       <endpoint endx="162" endy="180" />
+       <startpoint startx="106" starty="137" />
+       <endpoint endx="135" endy="102" />
       </linepath>
      </UML:AssocWidget>
      <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="2" indexb="1" widgetbid="2428" widgetaid="2420" xmi.id="2434" >
@@ -801,10 +1116,28 @@ delete the SiconosVectors allocated in vectorMemory if memorySize > 0" visibilit
        <endpoint endx="427" endy="309" />
       </linepath>
      </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="2" indexa="1" visibilityB="200" totalcountb="2" indexb="1" widgetbid="2428" widgetaid="2488" roleBdoc="" roleAdoc="" type="500" changeabilityA="900" changeabilityB="900" visibilityA="200" >
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="2" indexb="1" widgetbid="2428" widgetaid="2488" xmi.id="2496" >
       <linepath>
        <startpoint startx="537" starty="295" />
        <endpoint endx="452" endy="295" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="2" widgetbid="2263" widgetaid="2720" xmi.id="2838" >
+      <linepath>
+       <startpoint startx="413" starty="136" />
+       <endpoint endx="377" endy="102" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="2" widgetbid="2025" widgetaid="2635" xmi.id="2837" >
+      <linepath>
+       <startpoint startx="217" starty="136" />
+       <endpoint endx="168" endy="102" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="2263" widgetaid="2498" xmi.id="2836" >
+      <linepath>
+       <startpoint startx="318" starty="136" />
+       <endpoint endx="344" endy="102" />
       </linepath>
      </UML:AssocWidget>
     </associations>
@@ -814,46 +1147,95 @@ delete the SiconosVectors allocated in vectorMemory if memorySize > 0" visibilit
    <listitem open="1" type="800" id="-1" label="Views" >
     <listitem open="1" type="801" id="-1" label="Logical View" >
      <listitem open="0" type="807" id="2016" label="class diagram" />
-     <listitem open="0" type="813" id="2176" label="CompositeVector" >
-      <listitem open="0" type="815" id="2179" label="!=" />
-      <listitem open="0" type="815" id="2177" label="!=" />
-      <listitem open="0" type="815" id="2181" label="()" />
-      <listitem open="0" type="815" id="2186" label="*" />
-      <listitem open="0" type="815" id="2189" label="*" />
-      <listitem open="0" type="815" id="2183" label="*" />
-      <listitem open="0" type="815" id="2192" label="*=" />
-      <listitem open="0" type="815" id="2194" label="+" />
-      <listitem open="0" type="815" id="2199" label="+=" />
-      <listitem open="0" type="815" id="2197" label="+=" />
-      <listitem open="0" type="815" id="2201" label="-" />
-      <listitem open="0" type="815" id="2206" label="-=" />
-      <listitem open="0" type="815" id="2204" label="-=" />
-      <listitem open="0" type="815" id="2208" label="/" />
-      <listitem open="0" type="815" id="2211" label="/=" />
-      <listitem open="0" type="815" id="2213" label="=" />
-      <listitem open="0" type="815" id="2215" label="=" />
-      <listitem open="0" type="815" id="2219" label="==" />
-      <listitem open="0" type="815" id="2217" label="==" />
-      <listitem open="0" type="815" id="2224" label="CompositeVector" />
-      <listitem open="0" type="815" id="2221" label="CompositeVector" />
-      <listitem open="0" type="815" id="2222" label="CompositeVector" />
-      <listitem open="0" type="815" id="2228" label="CompositeVector" />
-      <listitem open="0" type="815" id="2226" label="CompositeVector" />
-      <listitem open="0" type="815" id="2231" label="add" />
-      <listitem open="0" type="815" id="2233" label="addPtr" />
-      <listitem open="0" type="815" id="2235" label="addition" />
-      <listitem open="0" type="815" id="2237" label="display" />
-      <listitem open="0" type="815" id="2238" label="getArray" />
-      <listitem open="0" type="815" id="2239" label="getValue" />
-      <listitem open="0" type="815" id="2241" label="getValues" />
-      <listitem open="0" type="815" id="2243" label="matTransVecMult" />
-      <listitem open="0" type="815" id="2246" label="read" />
-      <listitem open="0" type="815" id="2249" label="setValue" />
-      <listitem open="0" type="815" id="2252" label="setValues" />
-      <listitem open="0" type="815" id="2255" label="size" />
-      <listitem open="0" type="815" id="2257" label="subtraction" />
-      <listitem open="0" type="815" id="2259" label="write" />
-      <listitem open="0" type="815" id="2262" label="~CompositeVector" />
+     <listitem open="0" type="813" id="2720" label="BlockMatrix" >
+      <listitem open="0" type="814" id="2721" label="matrixOfBlocks" />
+      <listitem open="0" type="815" id="2725" label="()" />
+      <listitem open="0" type="815" id="2722" label="()" />
+      <listitem open="0" type="815" id="2728" label="*=" />
+      <listitem open="0" type="815" id="2730" label="+=" />
+      <listitem open="0" type="815" id="2732" label="-=" />
+      <listitem open="0" type="815" id="2734" label="=" />
+      <listitem open="0" type="815" id="2736" label="=" />
+      <listitem open="0" type="815" id="2746" label="BlockMatrix" />
+      <listitem open="0" type="815" id="2752" label="BlockMatrix" />
+      <listitem open="0" type="815" id="2738" label="BlockMatrix" />
+      <listitem open="0" type="815" id="2744" label="BlockMatrix" />
+      <listitem open="0" type="815" id="2748" label="BlockMatrix" />
+      <listitem open="0" type="815" id="2739" label="BlockMatrix" />
+      <listitem open="0" type="815" id="2756" label="PLUFactorizationInPlace" />
+      <listitem open="0" type="815" id="2757" label="PLUForwardBackwardInPlace" />
+      <listitem open="0" type="815" id="2759" label="PLUForwardBackwardInPlace" />
+      <listitem open="0" type="815" id="2761" label="PLUInverseInPlace" />
+      <listitem open="0" type="815" id="2762" label="addInTab" />
+      <listitem open="0" type="815" id="2765" label="blockMatrixCopy" />
+      <listitem open="0" type="815" id="2769" label="display" />
+      <listitem open="0" type="815" id="2770" label="eye" />
+      <listitem open="0" type="815" id="2771" label="getArray" />
+      <listitem open="0" type="815" id="2777" label="getBlock" />
+      <listitem open="0" type="815" id="2774" label="getBlock" />
+      <listitem open="0" type="815" id="2781" label="getBlockPtr" />
+      <listitem open="0" type="815" id="2784" label="getCol" />
+      <listitem open="0" type="815" id="2787" label="getLaGenMatDouble" />
+      <listitem open="0" type="815" id="2790" label="getLaGenMatDoubleRef" />
+      <listitem open="0" type="815" id="2793" label="getListOfBlocks" />
+      <listitem open="0" type="815" id="2794" label="getRow" />
+      <listitem open="0" type="815" id="2797" label="isFactorized" />
+      <listitem open="0" type="815" id="2798" label="isInversed" />
+      <listitem open="0" type="815" id="2799" label="isSquare" />
+      <listitem open="0" type="815" id="2800" label="linearSolve" />
+      <listitem open="0" type="815" id="2803" label="makeTab" />
+      <listitem open="0" type="815" id="2806" label="multTranspose" />
+      <listitem open="0" type="815" id="2808" label="normInf" />
+      <listitem open="0" type="815" id="2809" label="rawWrite" />
+      <listitem open="0" type="815" id="2812" label="read" />
+      <listitem open="0" type="815" id="2815" label="setCol" />
+      <listitem open="0" type="815" id="2818" label="setRow" />
+      <listitem open="0" type="815" id="2821" label="setValue" />
+      <listitem open="0" type="815" id="2825" label="setValue" />
+      <listitem open="0" type="815" id="2829" label="size" />
+      <listitem open="0" type="815" id="2831" label="write" />
+      <listitem open="0" type="815" id="2834" label="zero" />
+      <listitem open="0" type="815" id="2835" label="~BlockMatrix" />
+     </listitem>
+     <listitem open="0" type="813" id="2635" label="BlockVector" >
+      <listitem open="0" type="815" id="2636" label="()" />
+      <listitem open="0" type="815" id="2644" label="*" />
+      <listitem open="0" type="815" id="2638" label="*" />
+      <listitem open="0" type="815" id="2641" label="*" />
+      <listitem open="0" type="815" id="2647" label="*=" />
+      <listitem open="0" type="815" id="2649" label="+" />
+      <listitem open="0" type="815" id="2654" label="+=" />
+      <listitem open="0" type="815" id="2652" label="+=" />
+      <listitem open="0" type="815" id="2656" label="-" />
+      <listitem open="0" type="815" id="2661" label="-=" />
+      <listitem open="0" type="815" id="2659" label="-=" />
+      <listitem open="0" type="815" id="2663" label="/" />
+      <listitem open="0" type="815" id="2666" label="/=" />
+      <listitem open="0" type="815" id="2668" label="=" />
+      <listitem open="0" type="815" id="2670" label="=" />
+      <listitem open="0" type="815" id="2678" label="BlockVector" />
+      <listitem open="0" type="815" id="2683" label="BlockVector" />
+      <listitem open="0" type="815" id="2673" label="BlockVector" />
+      <listitem open="0" type="815" id="2676" label="BlockVector" />
+      <listitem open="0" type="815" id="2672" label="BlockVector" />
+      <listitem open="0" type="815" id="2680" label="BlockVector" />
+      <listitem open="0" type="815" id="2685" label="add" />
+      <listitem open="0" type="815" id="2687" label="addPtr" />
+      <listitem open="0" type="815" id="2689" label="addition" />
+      <listitem open="0" type="815" id="2691" label="display" />
+      <listitem open="0" type="815" id="2692" label="getArray" />
+      <listitem open="0" type="815" id="2693" label="getValue" />
+      <listitem open="0" type="815" id="2695" label="getValues" />
+      <listitem open="0" type="815" id="2697" label="getVectorPtr" />
+      <listitem open="0" type="815" id="2699" label="matTransVecMult" />
+      <listitem open="0" type="815" id="2702" label="read" />
+      <listitem open="0" type="815" id="2705" label="setValue" />
+      <listitem open="0" type="815" id="2708" label="setValues" />
+      <listitem open="0" type="815" id="2711" label="size" />
+      <listitem open="0" type="815" id="2713" label="subtraction" />
+      <listitem open="0" type="815" id="2715" label="write" />
+      <listitem open="0" type="815" id="2718" label="zero" />
+      <listitem open="0" type="815" id="2719" label="~BlockVector" />
      </listitem>
      <listitem open="0" type="813" id="2420" label="RuntimeException" >
       <listitem open="0" type="815" id="2422" label="RuntimeException" />
@@ -1003,17 +1385,77 @@ delete the SiconosVectors allocated in vectorMemory if memorySize > 0" visibilit
       <listitem open="0" type="815" id="2409" label="selfThrow" />
       <listitem open="0" type="815" id="2411" label="~SiconosVectorException" />
      </listitem>
+     <listitem open="0" type="813" id="2498" label="SimpleMatrix" >
+      <listitem open="0" type="814" id="2499" label="ipiv" />
+      <listitem open="0" type="814" id="2500" label="isPLUFactorized" />
+      <listitem open="0" type="814" id="2501" label="isPLUInversed" />
+      <listitem open="0" type="814" id="2502" label="mat" />
+      <listitem open="0" type="815" id="2503" label="()" />
+      <listitem open="0" type="815" id="2506" label="()" />
+      <listitem open="0" type="815" id="2512" label="*" />
+      <listitem open="0" type="815" id="2509" label="*" />
+      <listitem open="0" type="815" id="2515" label="*" />
+      <listitem open="0" type="815" id="2518" label="*=" />
+      <listitem open="0" type="815" id="2520" label="+" />
+      <listitem open="0" type="815" id="2523" label="+=" />
+      <listitem open="0" type="815" id="2525" label="-" />
+      <listitem open="0" type="815" id="2528" label="-=" />
+      <listitem open="0" type="815" id="2530" label="/" />
+      <listitem open="0" type="815" id="2533" label="=" />
+      <listitem open="0" type="815" id="2535" label="=" />
+      <listitem open="0" type="815" id="2537" label="==" />
+      <listitem open="0" type="815" id="2540" label="BlockMatrixAssemble" />
+      <listitem open="0" type="815" id="2542" label="PLUFactorizationInPlace" />
+      <listitem open="0" type="815" id="2543" label="PLUForwardBackwardInPlace" />
+      <listitem open="0" type="815" id="2545" label="PLUForwardBackwardInPlace" />
+      <listitem open="0" type="815" id="2547" label="PLUInverseInPlace" />
+      <listitem open="0" type="815" id="2555" label="SimpleMatrix" />
+      <listitem open="0" type="815" id="2551" label="SimpleMatrix" />
+      <listitem open="0" type="815" id="2557" label="SimpleMatrix" />
+      <listitem open="0" type="815" id="2548" label="SimpleMatrix" />
+      <listitem open="0" type="815" id="2549" label="SimpleMatrix" />
+      <listitem open="0" type="815" id="2559" label="SimpleMatrix" />
+      <listitem open="0" type="815" id="2562" label="SimpleMatrix" />
+      <listitem open="0" type="815" id="2565" label="blockMatrixCopy" />
+      <listitem open="0" type="815" id="2569" label="display" />
+      <listitem open="0" type="815" id="2570" label="eye" />
+      <listitem open="0" type="815" id="2571" label="getArray" />
+      <listitem open="0" type="815" id="2574" label="getBlock" />
+      <listitem open="0" type="815" id="2577" label="getBlock" />
+      <listitem open="0" type="815" id="2581" label="getBlockPtr" />
+      <listitem open="0" type="815" id="2584" label="getCol" />
+      <listitem open="0" type="815" id="2587" label="getLaGenMatDouble" />
+      <listitem open="0" type="815" id="2590" label="getLaGenMatDoubleRef" />
+      <listitem open="0" type="815" id="2593" label="getRow" />
+      <listitem open="0" type="815" id="2596" label="isFactorized" />
+      <listitem open="0" type="815" id="2597" label="isInversed" />
+      <listitem open="0" type="815" id="2598" label="isSquare" />
+      <listitem open="0" type="815" id="2599" label="linearSolve" />
+      <listitem open="0" type="815" id="2602" label="multTranspose" />
+      <listitem open="0" type="815" id="2604" label="normInf" />
+      <listitem open="0" type="815" id="2605" label="pow" />
+      <listitem open="0" type="815" id="2608" label="rawWrite" />
+      <listitem open="0" type="815" id="2611" label="read" />
+      <listitem open="0" type="815" id="2614" label="setCol" />
+      <listitem open="0" type="815" id="2617" label="setRow" />
+      <listitem open="0" type="815" id="2620" label="setValue" />
+      <listitem open="0" type="815" id="2624" label="setValue" />
+      <listitem open="0" type="815" id="2628" label="size" />
+      <listitem open="0" type="815" id="2630" label="write" />
+      <listitem open="0" type="815" id="2633" label="zero" />
+      <listitem open="0" type="815" id="2634" label="~SimpleMatrix" />
+     </listitem>
      <listitem open="0" type="813" id="2069" label="SimpleVector" >
       <listitem open="0" type="814" id="2070" label="lavd" />
       <listitem open="0" type="815" id="2073" label="!=" />
       <listitem open="0" type="815" id="2071" label="!=" />
       <listitem open="0" type="815" id="2075" label="()" />
-      <listitem open="0" type="815" id="2086" label="*" />
-      <listitem open="0" type="815" id="2077" label="*" />
       <listitem open="0" type="815" id="2083" label="*" />
-      <listitem open="0" type="815" id="2089" label="*" />
       <listitem open="0" type="815" id="2080" label="*" />
       <listitem open="0" type="815" id="2092" label="*" />
+      <listitem open="0" type="815" id="2086" label="*" />
+      <listitem open="0" type="815" id="2077" label="*" />
+      <listitem open="0" type="815" id="2089" label="*" />
       <listitem open="0" type="815" id="2095" label="*=" />
       <listitem open="0" type="815" id="2097" label="+" />
       <listitem open="0" type="815" id="2100" label="+=" />
@@ -1027,10 +1469,10 @@ delete the SiconosVectors allocated in vectorMemory if memorySize > 0" visibilit
       <listitem open="0" type="815" id="2118" label="=" />
       <listitem open="0" type="815" id="2122" label="==" />
       <listitem open="0" type="815" id="2120" label="==" />
-      <listitem open="0" type="815" id="2124" label="SimpleVector" />
       <listitem open="0" type="815" id="2125" label="SimpleVector" />
       <listitem open="0" type="815" id="2127" label="SimpleVector" />
       <listitem open="0" type="815" id="2129" label="SimpleVector" />
+      <listitem open="0" type="815" id="2124" label="SimpleVector" />
       <listitem open="0" type="815" id="2131" label="SimpleVector" />
       <listitem open="0" type="815" id="2134" label="SimpleVector" />
       <listitem open="0" type="815" id="2136" label="add" />
@@ -1041,8 +1483,8 @@ delete the SiconosVectors allocated in vectorMemory if memorySize > 0" visibilit
       <listitem open="0" type="815" id="2144" label="getBlock" />
       <listitem open="0" type="815" id="2147" label="getValue" />
       <listitem open="0" type="815" id="2149" label="getValues" />
-      <listitem open="0" type="815" id="2154" label="matTransVecMult" />
       <listitem open="0" type="815" id="2151" label="matTransVecMult" />
+      <listitem open="0" type="815" id="2154" label="matTransVecMult" />
       <listitem open="0" type="815" id="2157" label="norm" />
       <listitem open="0" type="815" id="2158" label="read" />
       <listitem open="0" type="815" id="2161" label="setValue" />
@@ -1060,7 +1502,8 @@ delete the SiconosVectors allocated in vectorMemory if memorySize > 0" visibilit
       <listitem open="0" type="815" id="2416" label="selfThrow" />
       <listitem open="0" type="815" id="2419" label="~XMLException" />
      </listitem>
-     <listitem open="0" type="830" id="-1" label="Datatypes" >
+     <listitem open="1" type="830" id="-1" label="Datatypes" >
+      <listitem open="1" type="829" id="2839" label="blocksMap" />
       <listitem open="1" type="829" id="2019" label="bool" />
       <listitem open="1" type="829" id="2018" label="char" />
       <listitem open="1" type="829" id="2021" label="double" />

@@ -17,13 +17,17 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "EventsManager.h"
+#include <limits> // for ULONG_MAX
 using namespace std;
 
 // PRIVATE METHODS
 
 const unsigned long int EventsManager::doubleToIntTime(const double& doubleTime) const
 {
-  return (unsigned long int)ceil(doubleTime / tick);
+  double res = ceil(doubleTime / tick);
+  if (res > ULONG_MAX) // check if res value can be converted to unsigned long int.
+    RuntimeException::selfThrow("EventsManager doubleToIntTime, conversion results in an overflow value > ULONG_MAX, max value for unsigned long int. Try to change tick value. ULONG_MAX=" + ULONG_MAX);
+  return (unsigned long int)res;
 }
 
 const double EventsManager::intToDoubleTime(const unsigned long int& intTime) const
@@ -40,6 +44,7 @@ const bool EventsManager::insertEvent(const string& type, const double& time)
   unsigned long int intTime;
 
   // convert input double time to unsigned int
+
   intTime = doubleToIntTime(time);
 
   checkEventSet checkSchedule; // to check if insertion succeed or not.

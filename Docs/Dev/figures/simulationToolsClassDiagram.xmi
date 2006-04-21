@@ -6,11 +6,11 @@
    <XMI.exporterVersion>1.2.0</XMI.exporterVersion>
    <XMI.exporterEncoding>UnicodeUTF8</XMI.exporterEncoding>
   </XMI.documentation>
-  <XMI.model xmi.name="simulationToolsClassDiagram" href="/scratch/Franck/New_Sico/siconos/trunk/Docs/Dev/Kernel_dev/figures/simulationToolsClassDiagram.xmi" />
+  <XMI.model xmi.name="simulationToolsClassDiagram" href="/scratch/Franck/SicoTmp/siconos/trunk/Docs/Dev/figures/simulationToolsClassDiagram.xmi" />
   <XMI.metamodel xmi.name="UML" href="UML.xml" xmi.version="1.3" />
  </XMI.header>
  <XMI.content>
-  <docsettings viewid="1365" documentation="" uniqueid="2021" />
+  <docsettings viewid="1365" documentation="" uniqueid="2293" />
   <UML:Model>
    <UML:DataType stereotype="datatype" visibility="public" xmi.id="1366" name="int" />
    <UML:DataType stereotype="datatype" visibility="public" xmi.id="1367" name="char" />
@@ -20,25 +20,6 @@
    <UML:DataType stereotype="datatype" visibility="public" xmi.id="1371" name="long" />
    <UML:DataType stereotype="datatype" visibility="public" xmi.id="1372" name="short" />
    <UML:DataType stereotype="datatype" visibility="public" xmi.id="1373" name="string" />
-   <UML:Class stereotype="class" visibility="public" xmi.id="1374" name="Adams" >
-    <UML:Operation visibility="protected" xmi.id="1376" type="" name="Adams" />
-    <UML:Operation visibility="public" xmi.id="1377" type="" name="Adams" >
-     <UML:Parameter visibility="private" xmi.id="1378" value="" type="OneStepIntegratorXML *" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1379" type="" name="Adams" >
-     <UML:Parameter visibility="private" xmi.id="1380" value="" type="TimeDiscretisation *" />
-     <UML:Parameter visibility="private" xmi.id="1381" value="" type="DynamicalSystem *" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1382" type="Adams *" name="convert" ownerScope="classifier" >
-     <UML:Parameter visibility="private" xmi.id="1383" value="" type="OneStepIntegrator *" name="osi" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1384" type="const int" name="getR" />
-    <UML:Operation visibility="public" xmi.id="1385" type="void" name="setR" >
-     <UML:Parameter visibility="private" xmi.id="1386" value="" type="const int &amp;" name="newR" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1387" type="" name="~Adams" />
-    <UML:Attribute visibility="private" xmi.id="1375" value="" type="int" name="r" />
-   </UML:Class>
    <UML:Class stereotype="class" visibility="public" xmi.id="1388" name="OneStepNSProblem" >
     <UML:Operation visibility="public" xmi.id="1394" type="" name="OneStepNSProblem" />
     <UML:Operation visibility="public" xmi.id="1395" type="" name="OneStepNSProblem" >
@@ -645,76 +626,325 @@
     <UML:Attribute visibility="private" xmi.id="1903" value="" type="SimpleVector *" name="p" />
    </UML:Class>
    <UML:DataType stereotype="datatype" visibility="public" xmi.id="1938" name=")" />
-   <UML:Class stereotype="class" visibility="public" xmi.id="1939" name="DFC_2D" >
-    <UML:Operation visibility="public" xmi.id="1949" type="" name="DFC_2D" />
-    <UML:Operation visibility="public" xmi.id="1950" type="" name="DFC_2D" >
-     <UML:Parameter visibility="private" xmi.id="1951" value="" type="OneStepNSProblemXML *" />
-     <UML:Parameter visibility="private" xmi.id="1952" value="" type="Strategy *" />
+   <UML:Class stereotype="class" visibility="public" xmi.id="2023" name="Solver" >
+    <UML:Operation visibility="protected" xmi.id="2028" type="" name="Solver" />
+    <UML:Operation visibility="public" xmi.id="2029" type="" name="Solver" >
+     <UML:Parameter visibility="private" xmi.id="2030" value="" type="SolverXML *" />
+     <UML:Parameter visibility="private" xmi.id="2031" value="" type="const std :: string &amp;" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1953" type="void" name="compute" >
-     <UML:Parameter visibility="private" xmi.id="1954" value="" type="const double &amp;" />
+    <UML:Operation visibility="public" xmi.id="2032" type="" name="Solver" >
+     <UML:Parameter visibility="private" xmi.id="2033" value="" type="const Solver &amp;" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1955" type="void" name="computeM" />
-    <UML:Operation visibility="public" xmi.id="1956" type="void" name="computeQ" >
-     <UML:Parameter visibility="private" xmi.id="1957" value="" type="const double &amp;" name="time" />
+    <UML:Operation visibility="public" xmi.id="2034" type="" name="Solver" >
+     <UML:Parameter visibility="private" xmi.id="2035" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2036" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2037" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2038" value="" type="const double &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2039" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2040" value="" type="const double &amp;" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1958" type="DFC_2D *" name="convert" ownerScope="classifier" >
-     <UML:Parameter visibility="private" xmi.id="1959" value="" type="OneStepNSProblem *" name="osnsp" />
+    <UML:Operation visibility="public" xmi.id="2041" type="void" name="display" />
+    <UML:Operation visibility="public" xmi.id="2042" type="const unsigned int" name="getMaxIter" />
+    <UML:Operation visibility="public" xmi.id="2043" type="const double" name="getSearchDirection" />
+    <UML:Operation visibility="public" xmi.id="2044" type="method *" name="getSolvingMethodPtr" />
+    <UML:Operation visibility="public" xmi.id="2045" type="const double" name="getTolerance" />
+    <UML:Operation visibility="public" xmi.id="2046" type="void" name="saveSolverToXML" />
+    <UML:Operation visibility="public" xmi.id="2047" type="void" name="setMaxIter" >
+     <UML:Parameter visibility="private" xmi.id="2048" value="" type="const unsigned int &amp;" name="newVal" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1960" type="void" name="display" />
-    <UML:Operation visibility="public" xmi.id="1961" type="const SiconosMatrix" name="getM" />
-    <UML:Operation visibility="public" xmi.id="1962" type="SiconosMatrix *" name="getMPtr" />
-    <UML:Operation visibility="public" xmi.id="1963" type="const int" name="getNDfc_2D" />
-    <UML:Operation visibility="public" xmi.id="1964" type="const SimpleVector" name="getQ" />
-    <UML:Operation visibility="public" xmi.id="1965" type="SimpleVector *" name="getQPtr" />
-    <UML:Operation visibility="public" xmi.id="1966" type="const SimpleVector" name="getW" />
-    <UML:Operation visibility="public" xmi.id="1967" type="SimpleVector *" name="getWPtr" />
-    <UML:Operation visibility="public" xmi.id="1968" type="const SimpleVector" name="getZ" />
-    <UML:Operation visibility="public" xmi.id="1969" type="SimpleVector *" name="getZPtr" />
-    <UML:Operation visibility="public" xmi.id="1970" type="void" name="preDFC_2D" >
-     <UML:Parameter visibility="private" xmi.id="1971" value="" type="const double &amp;" />
+    <UML:Operation visibility="public" xmi.id="2049" type="void" name="setNonSmoothPbType" >
+     <UML:Parameter visibility="private" xmi.id="2050" value="" type="const std :: string &amp;" name="newVal" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1972" type="void" name="saveMToXML" />
-    <UML:Operation visibility="public" xmi.id="1973" type="void" name="saveNSProblemToXML" />
-    <UML:Operation visibility="public" xmi.id="1974" type="void" name="saveQToXML" />
-    <UML:Operation visibility="public" xmi.id="1975" type="void" name="setM" >
-     <UML:Parameter visibility="private" xmi.id="1976" value="" type="const SiconosMatrix &amp;" name="newValue" />
+    <UML:Operation visibility="public" xmi.id="2051" type="void" name="setNormType" >
+     <UML:Parameter visibility="private" xmi.id="2052" value="" type="const std :: string &amp;" name="newVal" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1977" type="void" name="setMPtr" >
-     <UML:Parameter visibility="private" xmi.id="1978" value="" type="SiconosMatrix *" name="newPtr" />
+    <UML:Operation visibility="public" xmi.id="2053" type="void" name="setSearchDirection" >
+     <UML:Parameter visibility="private" xmi.id="2054" value="" type="const double &amp;" name="newVal" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1979" type="void" name="setNDfc_2D" >
-     <UML:Parameter visibility="private" xmi.id="1980" value="" type="const int &amp;" name="newValue" />
+    <UML:Operation visibility="public" xmi.id="2055" type="void" name="setSolverAlgorithmName" >
+     <UML:Parameter visibility="private" xmi.id="2056" value="" type="const std :: string &amp;" name="newVal" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1981" type="void" name="setQ" >
-     <UML:Parameter visibility="private" xmi.id="1982" value="" type="const SimpleVector &amp;" name="newValue" />
+    <UML:Operation visibility="protected" xmi.id="2057" type="void" name="setSolvingMethod" />
+    <UML:Operation visibility="public" xmi.id="2058" type="void" name="setTolerance" >
+     <UML:Parameter visibility="private" xmi.id="2059" value="" type="const double &amp;" name="newVal" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1983" type="void" name="setQPtr" >
-     <UML:Parameter visibility="private" xmi.id="1984" value="" type="SimpleVector *" name="newPtr" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1985" type="void" name="setW" >
-     <UML:Parameter visibility="private" xmi.id="1986" value="" type="const SimpleVector &amp;" name="newValue" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1987" type="void" name="setWPtr" >
-     <UML:Parameter visibility="private" xmi.id="1988" value="" type="SimpleVector *" name="newPtr" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1989" type="void" name="setZ" >
-     <UML:Parameter visibility="private" xmi.id="1990" value="" type="const SimpleVector &amp;" name="newValue" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1991" type="void" name="setZPtr" >
-     <UML:Parameter visibility="private" xmi.id="1992" value="" type="SimpleVector *" name="newPtr" />
-    </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1993" type="" name="~DFC_2D" />
-    <UML:Attribute visibility="private" xmi.id="1940" value="" type="SiconosMatrix *" name="M" />
-    <UML:Attribute visibility="private" xmi.id="1941" value="" type="bool" name="isMAllocatedIn" />
-    <UML:Attribute visibility="private" xmi.id="1942" value="" type="bool" name="isQAllocatedIn" />
-    <UML:Attribute visibility="private" xmi.id="1943" value="" type="bool" name="isWAllocatedIn" />
-    <UML:Attribute visibility="private" xmi.id="1944" value="" type="bool" name="isZAllocatedIn" />
-    <UML:Attribute visibility="private" xmi.id="1945" value="" type="int" name="nDfc_2D" />
-    <UML:Attribute visibility="private" xmi.id="1946" value="" type="SimpleVector *" name="q" />
-    <UML:Attribute visibility="private" xmi.id="1947" value="" type="SimpleVector *" name="w" />
-    <UML:Attribute visibility="private" xmi.id="1948" value="" type="SimpleVector *" name="z" />
+    <UML:Operation visibility="public" xmi.id="2060" type="" name="~Solver" />
+    <UML:Attribute visibility="protected" xmi.id="2024" value="" type="unsigned int" name="maxIter" />
+    <UML:Attribute visibility="protected" xmi.id="2025" value="" type="double" name="searchDirection" />
+    <UML:Attribute visibility="protected" xmi.id="2026" value="" type="method *" name="solvingMethod" />
+    <UML:Attribute visibility="protected" xmi.id="2027" value="" type="double" name="tolerance" />
    </UML:Class>
+   <UML:Class stereotype="class" visibility="public" xmi.id="2061" name="FrictionContact" >
+    <UML:Operation visibility="public" xmi.id="2070" type="" name="FrictionContact" />
+    <UML:Operation visibility="public" xmi.id="2071" type="" name="FrictionContact" >
+     <UML:Parameter visibility="private" xmi.id="2072" value="" type="OneStepNSProblemXML *" />
+     <UML:Parameter visibility="private" xmi.id="2073" value="" type="Strategy *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2074" type="" name="FrictionContact" >
+     <UML:Parameter visibility="private" xmi.id="2075" value="" type="Strategy *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2076" type="" name="FrictionContact" >
+     <UML:Parameter visibility="private" xmi.id="2077" value="" type="Strategy *" />
+     <UML:Parameter visibility="private" xmi.id="2078" value="" type="Solver *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2079" type="void" name="assembleM" />
+    <UML:Operation visibility="public" xmi.id="2080" type="void" name="compute" >
+     <UML:Parameter visibility="private" xmi.id="2081" value="" type="const double &amp;" name="time" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2082" type="void" name="computeAllBlocks" />
+    <UML:Operation visibility="public" xmi.id="2083" type="void" name="computeDiagonalBlocksLagrangianR" >
+     <UML:Parameter visibility="private" xmi.id="2084" value="" type="Relation *" />
+     <UML:Parameter visibility="private" xmi.id="2085" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2086" value="" type="std :: vector &lt; DynamicalSystem * >" />
+     <UML:Parameter visibility="private" xmi.id="2087" value="" type="std :: map &lt; DynamicalSystem *" />
+     <UML:Parameter visibility="private" xmi.id="2088" value="" type="SiconosMatrix * >" />
+     <UML:Parameter visibility="private" xmi.id="2089" value="" type="const double &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2090" value="" type="SiconosMatrix *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2091" type="void" name="computeExtraDiagonalBlocksLagrangianR" >
+     <UML:Parameter visibility="private" xmi.id="2092" value="" type="Relation *" />
+     <UML:Parameter visibility="private" xmi.id="2093" value="" type="Relation *" />
+     <UML:Parameter visibility="private" xmi.id="2094" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2095" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2096" value="" type="std :: vector &lt; DynamicalSystem * >" />
+     <UML:Parameter visibility="private" xmi.id="2097" value="" type="std :: map &lt; DynamicalSystem *" />
+     <UML:Parameter visibility="private" xmi.id="2098" value="" type="SiconosMatrix * >" />
+     <UML:Parameter visibility="private" xmi.id="2099" value="" type="const double &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2100" value="" type="SiconosMatrix *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2101" type="virtual void" isAbstract="true" name="computeQ" >
+     <UML:Parameter visibility="private" xmi.id="2102" value="" type="const double &amp;" name="time" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2103" type="FrictionContact *" name="convert" ownerScope="classifier" >
+     <UML:Parameter visibility="private" xmi.id="2104" value="" type="OneStepNSProblem *" name="osnsp" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2105" type="void" name="display" />
+    <UML:Operation visibility="public" xmi.id="2106" type="const SimpleMatrix" name="getM" />
+    <UML:Operation visibility="public" xmi.id="2107" type="SiconosMatrix *" name="getMPtr" />
+    <UML:Operation visibility="public" xmi.id="2108" type="const SimpleVector" name="getQ" />
+    <UML:Operation visibility="public" xmi.id="2109" type="SimpleVector *" name="getQPtr" />
+    <UML:Operation visibility="public" xmi.id="2110" type="const SimpleVector" name="getW" />
+    <UML:Operation visibility="public" xmi.id="2111" type="SimpleVector *" name="getWPtr" />
+    <UML:Operation visibility="public" xmi.id="2112" type="const SimpleVector" name="getZ" />
+    <UML:Operation visibility="public" xmi.id="2113" type="SimpleVector *" name="getZPtr" />
+    <UML:Operation visibility="public" xmi.id="2114" type="void" name="initialize" />
+    <UML:Operation visibility="public" xmi.id="2115" type="void" name="postFrictionContact" >
+     <UML:Parameter visibility="private" xmi.id="2116" value="" type="const SimpleVector &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2117" value="" type="const SimpleVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2118" type="void" name="preFrictionContact" >
+     <UML:Parameter visibility="private" xmi.id="2119" value="" type="const double &amp;" name="time" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2120" type="void" name="saveMToXML" />
+    <UML:Operation visibility="public" xmi.id="2121" type="void" name="saveNSProblemToXML" />
+    <UML:Operation visibility="public" xmi.id="2122" type="void" name="saveQToXML" />
+    <UML:Operation visibility="public" xmi.id="2123" type="void" name="setM" >
+     <UML:Parameter visibility="private" xmi.id="2124" value="" type="const SiconosMatrix &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2125" type="void" name="setMPtr" >
+     <UML:Parameter visibility="private" xmi.id="2126" value="" type="SiconosMatrix *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2127" type="void" name="setQ" >
+     <UML:Parameter visibility="private" xmi.id="2128" value="" type="const SimpleVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2129" type="void" name="setQPtr" >
+     <UML:Parameter visibility="private" xmi.id="2130" value="" type="SimpleVector *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2131" type="void" name="setW" >
+     <UML:Parameter visibility="private" xmi.id="2132" value="" type="const SimpleVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2133" type="void" name="setWPtr" >
+     <UML:Parameter visibility="private" xmi.id="2134" value="" type="SimpleVector *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2135" type="void" name="setZ" >
+     <UML:Parameter visibility="private" xmi.id="2136" value="" type="const SimpleVector &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2137" type="void" name="setZPtr" >
+     <UML:Parameter visibility="private" xmi.id="2138" value="" type="SimpleVector *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2139" type="void" name="updateBlocks" />
+    <UML:Operation visibility="public" xmi.id="2140" type="virtual " name="~FrictionContact" />
+    <UML:Attribute visibility="protected" xmi.id="2062" value="" type="SiconosMatrix *" name="M" />
+    <UML:Attribute visibility="protected" xmi.id="2063" value="" type="bool" name="isMAllocatedIn" />
+    <UML:Attribute visibility="protected" xmi.id="2064" value="" type="bool" name="isQAllocatedIn" />
+    <UML:Attribute visibility="protected" xmi.id="2065" value="" type="bool" name="isWAllocatedIn" />
+    <UML:Attribute visibility="protected" xmi.id="2066" value="" type="bool" name="isZAllocatedIn" />
+    <UML:Attribute visibility="protected" xmi.id="2067" value="" type="SimpleVector *" name="q" />
+    <UML:Attribute visibility="protected" xmi.id="2068" value="" type="SimpleVector *" name="w" />
+    <UML:Attribute visibility="protected" xmi.id="2069" value="" type="SimpleVector *" name="z" />
+   </UML:Class>
+   <UML:Class stereotype="class" visibility="public" xmi.id="2141" name="FrictionContact3D" >
+    <UML:Operation visibility="public" xmi.id="2142" type="" name="FrictionContact3D" />
+    <UML:Operation visibility="public" xmi.id="2143" type="" name="FrictionContact3D" >
+     <UML:Parameter visibility="private" xmi.id="2144" value="" type="OneStepNSProblemXML *" />
+     <UML:Parameter visibility="private" xmi.id="2145" value="" type="Strategy *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2146" type="" name="FrictionContact3D" >
+     <UML:Parameter visibility="private" xmi.id="2147" value="" type="Strategy *" />
+     <UML:Parameter visibility="private" xmi.id="2148" value="" type="Solver *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2149" type="" name="FrictionContact3D" >
+     <UML:Parameter visibility="private" xmi.id="2150" value="" type="Strategy *" />
+     <UML:Parameter visibility="private" xmi.id="2151" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2152" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2153" value="" type="const double &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2154" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2155" value="" type="const double &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2156" type="void" name="computeQ" >
+     <UML:Parameter visibility="private" xmi.id="2157" value="" type="const double &amp;" name="time" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2158" type="FrictionContact3D *" name="convert" ownerScope="classifier" >
+     <UML:Parameter visibility="private" xmi.id="2159" value="" type="OneStepNSProblem *" name="osnsp" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2160" type="" name="~FrictionContact3D" />
+   </UML:Class>
+   <UML:Class stereotype="class" visibility="public" xmi.id="2161" name="FrictionContact2D" >
+    <UML:Operation visibility="public" xmi.id="2162" type="" name="FrictionContact2D" />
+    <UML:Operation visibility="public" xmi.id="2163" type="" name="FrictionContact2D" >
+     <UML:Parameter visibility="private" xmi.id="2164" value="" type="OneStepNSProblemXML *" />
+     <UML:Parameter visibility="private" xmi.id="2165" value="" type="Strategy *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2166" type="" name="FrictionContact2D" >
+     <UML:Parameter visibility="private" xmi.id="2167" value="" type="Strategy *" />
+     <UML:Parameter visibility="private" xmi.id="2168" value="" type="Solver *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2169" type="" name="FrictionContact2D" >
+     <UML:Parameter visibility="private" xmi.id="2170" value="" type="Strategy *" />
+     <UML:Parameter visibility="private" xmi.id="2171" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2172" value="" type="const unsigned int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2173" value="" type="const double &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2174" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2175" value="" type="const double &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2176" type="void" name="computeQ" >
+     <UML:Parameter visibility="private" xmi.id="2177" value="" type="const double &amp;" name="time" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2178" type="FrictionContact2D *" name="convert" ownerScope="classifier" >
+     <UML:Parameter visibility="private" xmi.id="2179" value="" type="OneStepNSProblem *" name="osnsp" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2180" type="" name="~FrictionContact2D" />
+   </UML:Class>
+   <UML:Class stereotype="class" visibility="public" xmi.id="2181" name="NonSmoothEvent" >
+    <UML:Operation visibility="protected" xmi.id="2182" type="" name="NonSmoothEvent" />
+    <UML:Operation visibility="public" xmi.id="2183" type="" name="NonSmoothEvent" >
+     <UML:Parameter visibility="private" xmi.id="2184" value="" type="const NonSmoothEvent &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2185" type="" name="NonSmoothEvent" >
+     <UML:Parameter visibility="private" xmi.id="2186" value="" type="const unsigned long int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2187" type="void" name="process" />
+    <UML:Operation visibility="public" xmi.id="2188" type="" name="~NonSmoothEvent" />
+   </UML:Class>
+   <UML:Class stereotype="class" visibility="public" xmi.id="2189" name="Event" >
+    <UML:Operation visibility="protected" xmi.id="2191" type="" name="Event" />
+    <UML:Operation visibility="public" xmi.id="2192" type="" name="Event" >
+     <UML:Parameter visibility="private" xmi.id="2193" value="" type="const Event &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2194" type="" name="Event" >
+     <UML:Parameter visibility="private" xmi.id="2195" value="" type="const unsigned long int &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2196" value="" type="const std :: string &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2197" type="void" name="display" />
+    <UML:Operation visibility="public" xmi.id="2198" type="const unsigned long int" name="getTimeOfEvent" />
+    <UML:Operation visibility="public" xmi.id="2199" type="virtual void" isAbstract="true" name="process" />
+    <UML:Operation visibility="public" xmi.id="2200" type="virtual " name="~Event" />
+    <UML:Attribute visibility="protected" xmi.id="2190" value="" type="const unsigned long int" name="timeOfEvent" />
+   </UML:Class>
+   <UML:Class stereotype="class" visibility="public" xmi.id="2201" name="EventsManager" >
+    <UML:Operation visibility="public" xmi.id="2208" type="" name="EventsManager" >
+     <UML:Parameter visibility="private" xmi.id="2209" value="" type="const EventsManager &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2210" type="" name="EventsManager" >
+     <UML:Parameter visibility="private" xmi.id="2211" value="" type="const double &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2212" value="" type="Strategy *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2213" type="void" name="display" />
+    <UML:Operation visibility="protected" xmi.id="2214" type="const unsigned long int" name="doubleToIntTime" >
+     <UML:Parameter visibility="private" xmi.id="2215" value="" type="const double &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2216" type="const double" name="getCurrentTime" />
+    <UML:Operation visibility="public" xmi.id="2217" type="Event *" name="getEventPtr" >
+     <UML:Parameter visibility="private" xmi.id="2218" value="" type="const unsigned long int &amp;" name="inputTime" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2219" type="const unsigned long int" name="getIntTimeOfEvent" >
+     <UML:Parameter visibility="private" xmi.id="2220" value="" type="Event *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2221" type="Event *" name="getNextEventPtr" >
+     <UML:Parameter visibility="private" xmi.id="2222" value="" type="Event *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2223" type="Event *" name="getNextEventPtr" >
+     <UML:Parameter visibility="private" xmi.id="2224" value="" type="const unsigned long int &amp;" name="inputTime" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2225" type="const double" name="getNextTime" />
+    <UML:Operation visibility="public" xmi.id="2226" type="const eventsContainer" name="getPastEvents" />
+    <UML:Operation visibility="public" xmi.id="2227" type="Strategy *" name="getStrategyPtr" />
+    <UML:Operation visibility="public" xmi.id="2228" type="const double" name="getTick" />
+    <UML:Operation visibility="public" xmi.id="2229" type="const double" name="getTimeOfEvent" >
+     <UML:Parameter visibility="private" xmi.id="2230" value="" type="Event *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2231" type="const eventsContainer" name="getUnProcessedEvents" />
+    <UML:Operation visibility="public" xmi.id="2232" type="const bool" name="hasEvent" >
+     <UML:Parameter visibility="private" xmi.id="2233" value="" type="Event *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2234" type="const bool" name="hasNextEvent" />
+    <UML:Operation visibility="public" xmi.id="2235" type="void" name="initialize" />
+    <UML:Operation visibility="protected" xmi.id="2236" type="const bool" name="insertEvent" >
+     <UML:Parameter visibility="private" xmi.id="2237" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2238" value="" type="const double &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="protected" xmi.id="2239" type="const double" name="intToDoubleTime" >
+     <UML:Parameter visibility="private" xmi.id="2240" value="" type="const unsigned long int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2241" type="void" name="processEvents" />
+    <UML:Operation visibility="public" xmi.id="2242" type="void" name="removeEvent" >
+     <UML:Parameter visibility="private" xmi.id="2243" value="" type="Event *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2244" type="const bool" name="scheduleEvent" >
+     <UML:Parameter visibility="private" xmi.id="2245" value="" type="const std :: string &amp;" />
+     <UML:Parameter visibility="private" xmi.id="2246" value="" type="const double &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2247" type="void" name="scheduleTimeDiscretisation" >
+     <UML:Parameter visibility="private" xmi.id="2248" value="" type="TimeDiscretisation *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2249" type="void" name="setStrategyPtr" >
+     <UML:Parameter visibility="private" xmi.id="2250" value="" type="Strategy *" name="str" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2251" type="" name="~EventsManager" />
+    <UML:Attribute visibility="protected" xmi.id="2204" value="" type="eventsContainer" name="pastEvents" />
+    <UML:Attribute visibility="protected" xmi.id="2206" value="" type="const double" name="tick" />
+    <UML:Attribute visibility="protected" xmi.id="2207" value="" type="eventsContainer" name="unProcessedEvents" />
+   </UML:Class>
+   <UML:Class stereotype="class" visibility="public" xmi.id="2252" name="EventsComparison" >
+    <UML:Operation visibility="public" xmi.id="2254" type="bool" name="()" >
+     <UML:Parameter visibility="private" xmi.id="2255" value="" type="Event *" />
+     <UML:Parameter visibility="private" xmi.id="2256" value="" type="Event *" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2257" type="bool" name="==" >
+     <UML:Parameter visibility="private" xmi.id="2258" value="" type="const EventsComparison &amp;" name="rc" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2259" type="" name="EventsComparison" >
+     <UML:Parameter visibility="private" xmi.id="2260" value="" type="cmp_mode" name="m" />
+    </UML:Operation>
+    <UML:Attribute visibility="private" xmi.id="2253" value="" type="cmp_mode" name="mode" />
+   </UML:Class>
+   <UML:Class stereotype="class" visibility="public" xmi.id="2261" name="TimeDiscrEvent" >
+    <UML:Operation visibility="protected" xmi.id="2262" type="" name="TimeDiscrEvent" />
+    <UML:Operation visibility="public" xmi.id="2263" type="" name="TimeDiscrEvent" >
+     <UML:Parameter visibility="private" xmi.id="2264" value="" type="const TimeDiscrEvent &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2265" type="" name="TimeDiscrEvent" >
+     <UML:Parameter visibility="private" xmi.id="2266" value="" type="const unsigned long int &amp;" />
+    </UML:Operation>
+    <UML:Operation visibility="public" xmi.id="2267" type="void" name="process" />
+    <UML:Operation visibility="public" xmi.id="2268" type="" name="~TimeDiscrEvent" />
+   </UML:Class>
+   <UML:Enum stereotype="enum" visibility="public" xmi.id="2274" name="cmp_mode" >
+    <UML:EnumLiteral visibility="public" xmi.id="2275" name="normal" />
+    <UML:EnumLiteral visibility="public" xmi.id="2276" name="reverse" />
+   </UML:Enum>
+   <UML:DataType stereotype="datatype" visibility="public" xmi.id="2277" name="checkEventSet" />
+   <UML:DataType stereotype="datatype" visibility="public" xmi.id="2278" name="eventsContainer" />
    <UML:Association visibility="public" xmi.id="1393" >
     <UML:Association.connection>
      <UML:AssociationEndRole visibility="public" aggregation="shared" type="1388" />
@@ -739,7 +969,6 @@
      <UML:AssociationEndRole visibility="protected" type="1476" name="timeDiscretisation" />
     </UML:Association.connection>
    </UML:Association>
-   <UML:Generalization child="1374" visibility="public" xmi.id="1929" parent="1472" />
    <UML:Generalization child="1590" visibility="public" xmi.id="1930" parent="1392" />
    <UML:Generalization child="1601" visibility="public" xmi.id="1931" parent="1388" />
    <UML:Generalization child="1705" visibility="public" xmi.id="1932" parent="1472" />
@@ -747,7 +976,6 @@
    <UML:Generalization child="1750" visibility="public" xmi.id="1934" parent="1388" />
    <UML:Generalization child="1759" visibility="public" xmi.id="1935" parent="1472" />
    <UML:Generalization child="1899" visibility="public" xmi.id="1937" parent="1388" />
-   <UML:Generalization child="1939" visibility="public" xmi.id="1994" parent="1388" />
    <UML:Association visibility="public" xmi.id="2007" >
     <UML:Association.connection>
      <UML:AssociationEndRole visibility="public" aggregation="shared" type="1392" />
@@ -772,106 +1000,209 @@
      <UML:AssociationEndRole visibility="public" type="1476" />
     </UML:Association.connection>
    </UML:Association>
+   <UML:Association visibility="public" xmi.id="2202" >
+    <UML:Association.connection>
+     <UML:AssociationEndRole visibility="public" aggregation="shared" type="2201" />
+     <UML:AssociationEndRole visibility="protected" type="2189" name="currentEvent" />
+    </UML:Association.connection>
+   </UML:Association>
+   <UML:Association visibility="public" xmi.id="2205" >
+    <UML:Association.connection>
+     <UML:AssociationEndRole visibility="public" aggregation="shared" type="2201" />
+     <UML:AssociationEndRole visibility="protected" type="1512" name="strategy" />
+    </UML:Association.connection>
+   </UML:Association>
+   <UML:Generalization child="2061" visibility="public" xmi.id="2269" parent="1388" />
+   <UML:Generalization child="2141" visibility="public" xmi.id="2270" parent="2061" />
+   <UML:Generalization child="2161" visibility="public" xmi.id="2271" parent="2061" />
+   <UML:Generalization child="2181" visibility="public" xmi.id="2272" parent="2189" />
+   <UML:Generalization child="2261" visibility="public" xmi.id="2273" parent="2189" />
+   <UML:Association visibility="public" xmi.id="2283" >
+    <UML:Association.connection>
+     <UML:AssociationEndRole visibility="public" aggregation="shared" type="2201" />
+     <UML:AssociationEndRole visibility="public" type="1590" />
+    </UML:Association.connection>
+   </UML:Association>
+   <UML:Association visibility="public" xmi.id="2285" >
+    <UML:Association.connection>
+     <UML:AssociationEndRole visibility="public" aggregation="shared" type="1388" />
+     <UML:AssociationEndRole visibility="public" type="2023" />
+    </UML:Association.connection>
+   </UML:Association>
+   <UML:Association visibility="public" xmi.id="2291" >
+    <UML:Association.connection>
+     <UML:AssociationEndRole visibility="public" aggregation="shared" type="2201" />
+     <UML:AssociationEndRole visibility="public" type="1476" />
+    </UML:Association.connection>
+   </UML:Association>
+   <UML:Association visibility="public" xmi.id="2292" >
+    <UML:Association.connection>
+     <UML:AssociationEndRole visibility="public" aggregation="shared" type="2201" />
+     <UML:AssociationEndRole visibility="public" type="2189" />
+    </UML:Association.connection>
+   </UML:Association>
+   <UML:Association visibility="public" xmi.id="2293" >
+    <UML:Association.connection>
+     <UML:AssociationEndRole visibility="public" aggregation="shared" type="2189" />
+     <UML:AssociationEndRole visibility="public" type="2252" />
+    </UML:Association.connection>
+   </UML:Association>
   </UML:Model>
   <diagrams>
-   <diagram snapgrid="0" showattsig="0" fillcolor="#ffffc0" zoom="100" showgrid="0" showopsig="0" usefillcolor="1" snapx="10" canvaswidth="1011" snapy="10" showatts="0" xmi.id="1365" documentation="" type="402" showops="0" showpackage="0" name="class diagram" localid="30000" showstereotype="0" showscope="0" snapcsgrid="0" font="Sans,10,-1,5,50,0,0,0,0,0" linecolor="#2f0dd5" canvasheight="836" >
+   <diagram snapgrid="0" showattsig="0" fillcolor="#ffffc0" zoom="100" showgrid="0" showopsig="0" usefillcolor="1" snapx="10" canvaswidth="858" snapy="10" showatts="0" xmi.id="1365" documentation="" type="402" showops="0" showpackage="0" name="class diagram" localid="30000" showstereotype="0" showscope="0" snapcsgrid="0" font="Sans,10,-1,5,50,0,0,0,0,0" linecolor="#2f0dd5" canvasheight="836" >
     <widgets>
-     <UML:ClassWidget usesdiagramfillcolour="1" width="61" showattsigs="603" usesdiagramusefillcolour="1" x="271" linecolour="none" y="18" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1392" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="123" showattsigs="603" usesdiagramusefillcolour="1" x="240" linecolour="none" y="183" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1472" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="133" showattsigs="603" usesdiagramusefillcolour="1" x="454" linecolour="none" y="184" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1388" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="125" showattsigs="603" usesdiagramusefillcolour="1" x="24" linecolour="none" y="183" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1476" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="56" showattsigs="603" usesdiagramusefillcolour="1" x="208" linecolour="none" y="276" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1374" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="56" showattsigs="603" usesdiagramusefillcolour="1" x="337" linecolour="none" y="276" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1759" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="56" showattsigs="603" usesdiagramusefillcolour="1" x="273" linecolour="none" y="276" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1705" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="56" showattsigs="603" usesdiagramusefillcolour="1" x="417" linecolour="none" y="274" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1899" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="56" showattsigs="603" usesdiagramusefillcolour="1" x="479" linecolour="none" y="274" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1601" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="58" showattsigs="603" usesdiagramusefillcolour="1" x="542" linecolour="none" y="274" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1939" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="83" showattsigs="603" usesdiagramusefillcolour="1" x="35" linecolour="none" y="42" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1590" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="96" showattsigs="603" usesdiagramusefillcolour="1" x="47" linecolour="none" y="93" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1739" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:ClassWidget usesdiagramfillcolour="1" width="56" showattsigs="603" usesdiagramusefillcolour="1" x="607" linecolour="none" y="274" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1750" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
-     <UML:FloatingTextWidget usesdiagramfillcolour="1" width="15" usesdiagramusefillcolour="1" x="157" linecolour="none" y="176" instancename="" posttext="" usesdiagramlinecolour="1" role="700" fillcolour="none" height="21" usefillcolor="1" pretext="" isinstance="0" xmi.id="2012" text="1" font="Sans,10,-1,5,50,0,0,0,0,0" />
-     <UML:FloatingTextWidget usesdiagramfillcolour="1" width="15" usesdiagramusefillcolour="1" x="73" linecolour="none" y="164" instancename="" posttext="" usesdiagramlinecolour="1" role="700" fillcolour="none" height="21" usefillcolor="1" pretext="" isinstance="0" xmi.id="2013" text="1" font="Sans,10,-1,5,50,0,0,0,0,0" />
-     <UML:FloatingTextWidget usesdiagramfillcolour="1" width="34" usesdiagramusefillcolour="1" x="307" linecolour="none" y="163" instancename="" posttext="" usesdiagramlinecolour="1" role="700" fillcolour="none" height="21" usefillcolor="1" pretext="" isinstance="0" xmi.id="2014" text="(1,n)" font="Sans,10,-1,5,50,0,0,0,0,0" />
-     <UML:FloatingTextWidget usesdiagramfillcolour="1" width="15" usesdiagramusefillcolour="1" x="524" linecolour="none" y="164" instancename="" posttext="" usesdiagramlinecolour="1" role="700" fillcolour="none" height="21" usefillcolor="1" pretext="" isinstance="0" xmi.id="2015" text="1" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="61" showattsigs="603" usesdiagramusefillcolour="1" x="283" linecolour="none" y="16" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1392" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="123" showattsigs="603" usesdiagramusefillcolour="1" x="454" linecolour="none" y="20" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1472" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="133" showattsigs="603" usesdiagramusefillcolour="1" x="356" linecolour="none" y="144" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1388" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="125" showattsigs="603" usesdiagramusefillcolour="1" x="213" linecolour="none" y="84" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1476" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="56" showattsigs="603" usesdiagramusefillcolour="1" x="453" linecolour="none" y="73" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1759" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="56" showattsigs="603" usesdiagramusefillcolour="1" x="520" linecolour="none" y="73" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1705" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="56" showattsigs="603" usesdiagramusefillcolour="1" x="342" linecolour="none" y="203" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1899" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="56" showattsigs="603" usesdiagramusefillcolour="1" x="380" linecolour="none" y="239" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1601" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="83" showattsigs="603" usesdiagramusefillcolour="1" x="63" linecolour="none" y="78" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1590" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="96" showattsigs="603" usesdiagramusefillcolour="1" x="53" linecolour="none" y="12" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1739" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="56" showattsigs="603" usesdiagramusefillcolour="1" x="549" linecolour="none" y="144" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="1750" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:FloatingTextWidget usesdiagramfillcolour="1" width="15" usesdiagramusefillcolour="1" x="240" linecolour="none" y="63" instancename="" posttext="" usesdiagramlinecolour="1" role="700" fillcolour="none" height="21" usefillcolor="1" pretext="" isinstance="0" xmi.id="2012" text="1" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:FloatingTextWidget usesdiagramfillcolour="1" width="15" usesdiagramusefillcolour="1" x="113" linecolour="none" y="120" instancename="" posttext="" usesdiagramlinecolour="1" role="700" fillcolour="none" height="21" usefillcolor="1" pretext="" isinstance="0" xmi.id="2013" text="1" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:FloatingTextWidget usesdiagramfillcolour="1" width="34" usesdiagramusefillcolour="1" x="418" linecolour="none" y="8" instancename="" posttext="" usesdiagramlinecolour="1" role="700" fillcolour="none" height="21" usefillcolor="1" pretext="" isinstance="0" xmi.id="2014" text="(1,n)" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:FloatingTextWidget usesdiagramfillcolour="1" width="15" usesdiagramusefillcolour="1" x="327" linecolour="none" y="133" instancename="" posttext="" usesdiagramlinecolour="1" role="700" fillcolour="none" height="21" usefillcolor="1" pretext="" isinstance="0" xmi.id="2015" text="1" font="Sans,10,-1,5,50,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="56" showattsigs="603" usesdiagramusefillcolour="1" x="93" linecolour="none" y="210" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2189" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="126" showattsigs="603" usesdiagramusefillcolour="1" x="198" linecolour="none" y="271" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2252" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="104" showattsigs="603" usesdiagramusefillcolour="1" x="70" linecolour="none" y="145" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2201" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="105" showattsigs="603" usesdiagramusefillcolour="1" x="453" linecolour="none" y="193" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2061" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="120" showattsigs="603" usesdiagramusefillcolour="1" x="588" linecolour="none" y="264" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2161" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="120" showattsigs="603" usesdiagramusefillcolour="1" x="443" linecolour="none" y="263" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2141" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="119" showattsigs="603" usesdiagramusefillcolour="1" x="52" linecolour="none" y="271" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2181" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="56" showattsigs="603" usesdiagramusefillcolour="1" x="269" linecolour="none" y="144" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2023" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:ClassWidget usesdiagramfillcolour="1" width="109" showattsigs="603" usesdiagramusefillcolour="1" x="176" linecolour="none" y="210" showopsigs="603" instancename="" usesdiagramlinecolour="1" fillcolour="none" height="27" usefillcolor="1" showattributes="0" isinstance="0" xmi.id="2261" showoperations="0" showpackage="0" showscope="0" showstereotype="0" font="Sans,10,-1,5,75,0,0,0,0,0" />
+     <UML:FloatingTextWidget usesdiagramfillcolour="1" width="34" usesdiagramusefillcolour="1" x="131" linecolour="none" y="190" instancename="" posttext="" usesdiagramlinecolour="1" role="700" fillcolour="none" height="21" usefillcolor="1" pretext="" isinstance="0" xmi.id="2284" text="(1,p)" font="Sans,10,-1,5,50,0,0,0,0,0" />
     </widgets>
     <messages/>
     <associations>
-     <UML:AssocWidget totalcounta="4" indexa="2" totalcountb="2" indexb="1" widgetbid="1472" widgetaid="1392" xmi.id="2007" >
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="1472" widgetaid="1392" xmi.id="2007" >
       <linepath>
-       <startpoint startx="301" starty="45" />
-       <endpoint endx="301" endy="183" />
+       <startpoint startx="344" starty="29" />
+       <endpoint endx="454" endy="29" />
       </linepath>
      </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="1" widgetbid="1472" widgetaid="1374" xmi.id="1929" >
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="1472" widgetaid="1759" xmi.id="1935" >
       <linepath>
-       <startpoint startx="236" starty="276" />
-       <endpoint endx="270" endy="210" />
+       <startpoint startx="481" starty="73" />
+       <endpoint endx="495" endy="47" />
       </linepath>
      </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="3" widgetbid="1472" widgetaid="1759" xmi.id="1935" >
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="2" widgetbid="1472" widgetaid="1705" xmi.id="1932" >
       <linepath>
-       <startpoint startx="365" starty="276" />
-       <endpoint endx="332" endy="210" />
+       <startpoint startx="548" starty="73" />
+       <endpoint endx="536" endy="47" />
       </linepath>
      </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="2" widgetbid="1472" widgetaid="1705" xmi.id="1932" >
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="1" widgetbid="1388" widgetaid="1899" xmi.id="1937" >
       <linepath>
-       <startpoint startx="301" starty="276" />
-       <endpoint endx="301" endy="210" />
+       <startpoint startx="370" starty="203" />
+       <endpoint endx="389" endy="171" />
       </linepath>
      </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="5" indexb="1" widgetbid="1388" widgetaid="1899" xmi.id="1937" >
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="2" widgetbid="1388" widgetaid="1601" xmi.id="1931" >
       <linepath>
-       <startpoint startx="445" starty="274" />
-       <endpoint endx="480" endy="211" />
+       <startpoint startx="408" starty="239" />
+       <endpoint endx="422" endy="171" />
       </linepath>
      </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="5" indexb="2" widgetbid="1388" widgetaid="1601" xmi.id="1931" >
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="2" widgetbid="1392" widgetaid="1590" xmi.id="1930" >
       <linepath>
-       <startpoint startx="507" starty="274" />
-       <endpoint endx="507" endy="211" />
+       <startpoint startx="104" starty="78" />
+       <endpoint endx="283" endy="34" />
       </linepath>
      </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="5" indexb="3" widgetbid="1388" widgetaid="1939" xmi.id="1994" >
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="1392" widgetaid="1739" xmi.id="1933" >
       <linepath>
-       <startpoint startx="571" starty="274" />
-       <endpoint endx="533" endy="211" />
+       <startpoint startx="149" starty="25" />
+       <endpoint endx="283" endy="25" />
       </linepath>
      </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="1392" widgetaid="1590" xmi.id="1930" >
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="2" indexb="1" widgetbid="1388" widgetaid="1750" xmi.id="1934" >
       <linepath>
-       <startpoint startx="118" starty="55" />
-       <endpoint endx="271" endy="27" />
+       <startpoint startx="549" starty="157" />
+       <endpoint endx="489" endy="157" />
       </linepath>
      </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="2" widgetbid="1392" widgetaid="1739" xmi.id="1933" >
+     <UML:AssocWidget totalcounta="3" indexa="2" totalcountb="3" indexb="2" widgetbid="1476" widgetaid="1472" xmi.id="2010" >
       <linepath>
-       <startpoint startx="95" starty="93" />
-       <endpoint endx="271" endy="36" />
+       <startpoint startx="454" starty="38" />
+       <endpoint endx="296" endy="84" />
       </linepath>
      </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="5" indexb="4" widgetbid="1388" widgetaid="1750" xmi.id="1934" >
+     <UML:AssocWidget totalcounta="3" indexa="2" totalcountb="2" indexb="1" widgetbid="1388" widgetaid="1392" xmi.id="2011" >
       <linepath>
-       <startpoint startx="635" starty="274" />
-       <endpoint endx="560" endy="211" />
+       <startpoint startx="323" starty="43" />
+       <endpoint endx="422" endy="144" />
       </linepath>
      </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="2" indexb="1" widgetbid="1476" widgetaid="1472" xmi.id="2010" >
+     <UML:AssocWidget totalcounta="3" indexa="1" totalcountb="3" indexb="1" widgetbid="1476" widgetaid="1392" xmi.id="2021" >
       <linepath>
-       <startpoint startx="240" starty="196" />
-       <endpoint endx="149" endy="196" />
+       <startpoint startx="303" starty="43" />
+       <endpoint endx="254" endy="84" />
       </linepath>
      </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="4" indexa="3" totalcountb="2" indexb="1" widgetbid="1388" widgetaid="1392" xmi.id="2011" >
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="4" indexb="3" widgetbid="1388" widgetaid="2061" xmi.id="2269" >
       <linepath>
-       <startpoint startx="316" starty="45" />
-       <endpoint endx="520" endy="184" />
+       <startpoint startx="505" starty="193" />
+       <endpoint endx="455" endy="171" />
       </linepath>
      </UML:AssocWidget>
-     <UML:AssocWidget totalcounta="4" indexa="1" totalcountb="2" indexb="1" widgetbid="1476" widgetaid="1392" xmi.id="2021" >
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="2" widgetbid="2061" widgetaid="2161" xmi.id="2271" >
       <linepath>
-       <startpoint startx="286" starty="45" />
-       <endpoint endx="86" endy="183" />
+       <startpoint startx="648" starty="264" />
+       <endpoint endx="523" endy="220" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="2061" widgetaid="2141" xmi.id="2270" >
+      <linepath>
+       <startpoint startx="503" starty="263" />
+       <endpoint endx="488" endy="220" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="3" indexb="1" widgetbid="2189" widgetaid="2181" xmi.id="2272" >
+      <linepath>
+       <startpoint startx="111" starty="271" />
+       <endpoint endx="111" endy="237" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="2" indexb="1" widgetbid="2189" widgetaid="2261" xmi.id="2273" >
+      <linepath>
+       <startpoint startx="176" starty="223" />
+       <endpoint endx="149" endy="223" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="3" indexa="1" totalcountb="2" indexb="1" widgetbid="1590" widgetaid="2201" xmi.id="2283" >
+      <linepath>
+       <startpoint startx="104" starty="145" />
+       <endpoint endx="104" endy="105" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="2" indexb="1" widgetbid="2023" widgetaid="1388" xmi.id="2285" >
+      <linepath>
+       <startpoint startx="356" starty="157" />
+       <endpoint endx="325" endy="157" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="3" indexa="2" totalcountb="2" indexb="1" widgetbid="1476" widgetaid="2201" xmi.id="2291" >
+      <linepath>
+       <startpoint startx="139" starty="145" />
+       <endpoint endx="275" endy="111" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="2" indexa="1" totalcountb="2" indexb="1" widgetbid="2189" widgetaid="2201" xmi.id="2292" >
+      <linepath>
+       <startpoint startx="122" starty="172" />
+       <endpoint endx="121" endy="210" />
+      </linepath>
+     </UML:AssocWidget>
+     <UML:AssocWidget totalcounta="3" indexa="2" totalcountb="2" indexb="1" widgetbid="2252" widgetaid="2189" xmi.id="2293" >
+      <linepath>
+       <startpoint startx="130" starty="237" />
+       <endpoint endx="261" endy="271" />
       </linepath>
      </UML:AssocWidget>
     </associations>
@@ -881,56 +1212,15 @@
    <listitem open="1" type="800" id="-1" label="Views" >
     <listitem open="1" type="801" id="-1" label="Logical View" >
      <listitem open="0" type="807" id="1365" label="class diagram" />
-     <listitem open="0" type="813" id="1374" label="Adams" >
-      <listitem open="0" type="814" id="1375" label="r" />
-      <listitem open="0" type="815" id="1379" label="Adams" />
-      <listitem open="0" type="815" id="1376" label="Adams" />
-      <listitem open="0" type="815" id="1377" label="Adams" />
-      <listitem open="0" type="815" id="1382" label="convert" />
-      <listitem open="0" type="815" id="1384" label="getR" />
-      <listitem open="0" type="815" id="1385" label="setR" />
-      <listitem open="0" type="815" id="1387" label="~Adams" />
-     </listitem>
-     <listitem open="0" type="813" id="1939" label="DFC_2D" >
-      <listitem open="0" type="814" id="1940" label="M" />
-      <listitem open="0" type="814" id="1941" label="isMAllocatedIn" />
-      <listitem open="0" type="814" id="1942" label="isQAllocatedIn" />
-      <listitem open="0" type="814" id="1943" label="isWAllocatedIn" />
-      <listitem open="0" type="814" id="1944" label="isZAllocatedIn" />
-      <listitem open="0" type="814" id="1945" label="nDfc_2D" />
-      <listitem open="0" type="814" id="1946" label="q" />
-      <listitem open="0" type="814" id="1947" label="w" />
-      <listitem open="0" type="814" id="1948" label="z" />
-      <listitem open="0" type="815" id="1950" label="DFC_2D" />
-      <listitem open="0" type="815" id="1949" label="DFC_2D" />
-      <listitem open="0" type="815" id="1953" label="compute" />
-      <listitem open="0" type="815" id="1955" label="computeM" />
-      <listitem open="0" type="815" id="1956" label="computeQ" />
-      <listitem open="0" type="815" id="1958" label="convert" />
-      <listitem open="0" type="815" id="1960" label="display" />
-      <listitem open="0" type="815" id="1961" label="getM" />
-      <listitem open="0" type="815" id="1962" label="getMPtr" />
-      <listitem open="0" type="815" id="1963" label="getNDfc_2D" />
-      <listitem open="0" type="815" id="1964" label="getQ" />
-      <listitem open="0" type="815" id="1965" label="getQPtr" />
-      <listitem open="0" type="815" id="1966" label="getW" />
-      <listitem open="0" type="815" id="1967" label="getWPtr" />
-      <listitem open="0" type="815" id="1968" label="getZ" />
-      <listitem open="0" type="815" id="1969" label="getZPtr" />
-      <listitem open="0" type="815" id="1970" label="preDFC_2D" />
-      <listitem open="0" type="815" id="1972" label="saveMToXML" />
-      <listitem open="0" type="815" id="1973" label="saveNSProblemToXML" />
-      <listitem open="0" type="815" id="1974" label="saveQToXML" />
-      <listitem open="0" type="815" id="1975" label="setM" />
-      <listitem open="0" type="815" id="1977" label="setMPtr" />
-      <listitem open="0" type="815" id="1979" label="setNDfc_2D" />
-      <listitem open="0" type="815" id="1981" label="setQ" />
-      <listitem open="0" type="815" id="1983" label="setQPtr" />
-      <listitem open="0" type="815" id="1985" label="setW" />
-      <listitem open="0" type="815" id="1987" label="setWPtr" />
-      <listitem open="0" type="815" id="1989" label="setZ" />
-      <listitem open="0" type="815" id="1991" label="setZPtr" />
-      <listitem open="0" type="815" id="1993" label="~DFC_2D" />
+     <listitem open="0" type="813" id="2189" label="Event" >
+      <listitem open="0" type="814" id="2190" label="timeOfEvent" />
+      <listitem open="0" type="815" id="2194" label="Event" />
+      <listitem open="0" type="815" id="2191" label="Event" />
+      <listitem open="0" type="815" id="2192" label="Event" />
+      <listitem open="0" type="815" id="2197" label="display" />
+      <listitem open="0" type="815" id="2198" label="getTimeOfEvent" />
+      <listitem open="0" type="815" id="2199" label="process" />
+      <listitem open="0" type="815" id="2200" label="~Event" />
      </listitem>
      <listitem open="0" type="813" id="1590" label="EventDriven" >
       <listitem open="0" type="815" id="1592" label="EventDriven" />
@@ -938,6 +1228,107 @@
       <listitem open="0" type="815" id="1595" label="convert" />
       <listitem open="0" type="815" id="1597" label="createStrategy" />
       <listitem open="0" type="815" id="1600" label="~EventDriven" />
+     </listitem>
+     <listitem open="0" type="813" id="2252" label="EventsComparison" >
+      <listitem open="0" type="814" id="2253" label="mode" />
+      <listitem open="0" type="815" id="2254" label="()" />
+      <listitem open="0" type="815" id="2257" label="==" />
+      <listitem open="0" type="815" id="2259" label="EventsComparison" />
+     </listitem>
+     <listitem open="0" type="813" id="2201" label="EventsManager" >
+      <listitem open="0" type="814" id="2204" label="pastEvents" />
+      <listitem open="0" type="814" id="2206" label="tick" />
+      <listitem open="0" type="814" id="2207" label="unProcessedEvents" />
+      <listitem open="0" type="815" id="2208" label="EventsManager" />
+      <listitem open="0" type="815" id="2210" label="EventsManager" />
+      <listitem open="0" type="815" id="2213" label="display" />
+      <listitem open="0" type="815" id="2214" label="doubleToIntTime" />
+      <listitem open="0" type="815" id="2216" label="getCurrentTime" />
+      <listitem open="0" type="815" id="2217" label="getEventPtr" />
+      <listitem open="0" type="815" id="2219" label="getIntTimeOfEvent" />
+      <listitem open="0" type="815" id="2223" label="getNextEventPtr" />
+      <listitem open="0" type="815" id="2221" label="getNextEventPtr" />
+      <listitem open="0" type="815" id="2225" label="getNextTime" />
+      <listitem open="0" type="815" id="2226" label="getPastEvents" />
+      <listitem open="0" type="815" id="2227" label="getStrategyPtr" />
+      <listitem open="0" type="815" id="2228" label="getTick" />
+      <listitem open="0" type="815" id="2229" label="getTimeOfEvent" />
+      <listitem open="0" type="815" id="2231" label="getUnProcessedEvents" />
+      <listitem open="0" type="815" id="2232" label="hasEvent" />
+      <listitem open="0" type="815" id="2234" label="hasNextEvent" />
+      <listitem open="0" type="815" id="2235" label="initialize" />
+      <listitem open="0" type="815" id="2236" label="insertEvent" />
+      <listitem open="0" type="815" id="2239" label="intToDoubleTime" />
+      <listitem open="0" type="815" id="2241" label="processEvents" />
+      <listitem open="0" type="815" id="2242" label="removeEvent" />
+      <listitem open="0" type="815" id="2244" label="scheduleEvent" />
+      <listitem open="0" type="815" id="2247" label="scheduleTimeDiscretisation" />
+      <listitem open="0" type="815" id="2249" label="setStrategyPtr" />
+      <listitem open="0" type="815" id="2251" label="~EventsManager" />
+     </listitem>
+     <listitem open="0" type="813" id="2061" label="FrictionContact" >
+      <listitem open="0" type="814" id="2062" label="M" />
+      <listitem open="0" type="814" id="2063" label="isMAllocatedIn" />
+      <listitem open="0" type="814" id="2064" label="isQAllocatedIn" />
+      <listitem open="0" type="814" id="2065" label="isWAllocatedIn" />
+      <listitem open="0" type="814" id="2066" label="isZAllocatedIn" />
+      <listitem open="0" type="814" id="2067" label="q" />
+      <listitem open="0" type="814" id="2068" label="w" />
+      <listitem open="0" type="814" id="2069" label="z" />
+      <listitem open="0" type="815" id="2076" label="FrictionContact" />
+      <listitem open="0" type="815" id="2070" label="FrictionContact" />
+      <listitem open="0" type="815" id="2071" label="FrictionContact" />
+      <listitem open="0" type="815" id="2074" label="FrictionContact" />
+      <listitem open="0" type="815" id="2079" label="assembleM" />
+      <listitem open="0" type="815" id="2080" label="compute" />
+      <listitem open="0" type="815" id="2082" label="computeAllBlocks" />
+      <listitem open="0" type="815" id="2083" label="computeDiagonalBlocksLagrangianR" />
+      <listitem open="0" type="815" id="2091" label="computeExtraDiagonalBlocksLagrangianR" />
+      <listitem open="0" type="815" id="2101" label="computeQ" />
+      <listitem open="0" type="815" id="2103" label="convert" />
+      <listitem open="0" type="815" id="2105" label="display" />
+      <listitem open="0" type="815" id="2106" label="getM" />
+      <listitem open="0" type="815" id="2107" label="getMPtr" />
+      <listitem open="0" type="815" id="2108" label="getQ" />
+      <listitem open="0" type="815" id="2109" label="getQPtr" />
+      <listitem open="0" type="815" id="2110" label="getW" />
+      <listitem open="0" type="815" id="2111" label="getWPtr" />
+      <listitem open="0" type="815" id="2112" label="getZ" />
+      <listitem open="0" type="815" id="2113" label="getZPtr" />
+      <listitem open="0" type="815" id="2114" label="initialize" />
+      <listitem open="0" type="815" id="2115" label="postFrictionContact" />
+      <listitem open="0" type="815" id="2118" label="preFrictionContact" />
+      <listitem open="0" type="815" id="2120" label="saveMToXML" />
+      <listitem open="0" type="815" id="2121" label="saveNSProblemToXML" />
+      <listitem open="0" type="815" id="2122" label="saveQToXML" />
+      <listitem open="0" type="815" id="2123" label="setM" />
+      <listitem open="0" type="815" id="2125" label="setMPtr" />
+      <listitem open="0" type="815" id="2127" label="setQ" />
+      <listitem open="0" type="815" id="2129" label="setQPtr" />
+      <listitem open="0" type="815" id="2131" label="setW" />
+      <listitem open="0" type="815" id="2133" label="setWPtr" />
+      <listitem open="0" type="815" id="2135" label="setZ" />
+      <listitem open="0" type="815" id="2137" label="setZPtr" />
+      <listitem open="0" type="815" id="2139" label="updateBlocks" />
+      <listitem open="0" type="815" id="2140" label="~FrictionContact" />
+     </listitem>
+     <listitem open="0" type="813" id="2161" label="FrictionContact2D" >
+      <listitem open="0" type="815" id="2169" label="FrictionContact2D" />
+      <listitem open="0" type="815" id="2163" label="FrictionContact2D" />
+      <listitem open="0" type="815" id="2162" label="FrictionContact2D" />
+      <listitem open="0" type="815" id="2166" label="FrictionContact2D" />
+      <listitem open="0" type="815" id="2176" label="computeQ" />
+      <listitem open="0" type="815" id="2178" label="convert" />
+      <listitem open="0" type="815" id="2180" label="~FrictionContact2D" />
+     </listitem>
+     <listitem open="0" type="813" id="2141" label="FrictionContact3D" >
+      <listitem open="0" type="815" id="2149" label="FrictionContact3D" />
+      <listitem open="0" type="815" id="2143" label="FrictionContact3D" />
+      <listitem open="0" type="815" id="2146" label="FrictionContact3D" />
+      <listitem open="0" type="815" id="2142" label="FrictionContact3D" />
+      <listitem open="0" type="815" id="2156" label="computeQ" />
+      <listitem open="0" type="815" id="2158" label="convert" />
+      <listitem open="0" type="815" id="2160" label="~FrictionContact3D" />
      </listitem>
      <listitem open="0" type="813" id="1601" label="LCP" >
       <listitem open="0" type="814" id="1602" label="M" />
@@ -1020,6 +1411,13 @@
       <listitem open="0" type="815" id="1735" label="setWPtr" />
       <listitem open="0" type="815" id="1737" label="updateState" />
       <listitem open="0" type="815" id="1738" label="~Moreau" />
+     </listitem>
+     <listitem open="0" type="813" id="2181" label="NonSmoothEvent" >
+      <listitem open="0" type="815" id="2185" label="NonSmoothEvent" />
+      <listitem open="0" type="815" id="2182" label="NonSmoothEvent" />
+      <listitem open="0" type="815" id="2183" label="NonSmoothEvent" />
+      <listitem open="0" type="815" id="2187" label="process" />
+      <listitem open="0" type="815" id="2188" label="~NonSmoothEvent" />
      </listitem>
      <listitem open="0" type="813" id="1472" label="OneStepIntegrator" >
       <listitem open="0" type="814" id="1473" label="ds" />
@@ -1114,6 +1512,30 @@
       <listitem open="0" type="815" id="1757" label="saveNSProblemToXML" />
       <listitem open="0" type="815" id="1758" label="~Relay" />
      </listitem>
+     <listitem open="0" type="813" id="2023" label="Solver" >
+      <listitem open="0" type="814" id="2024" label="maxIter" />
+      <listitem open="0" type="814" id="2025" label="searchDirection" />
+      <listitem open="0" type="814" id="2026" label="solvingMethod" />
+      <listitem open="0" type="814" id="2027" label="tolerance" />
+      <listitem open="0" type="815" id="2032" label="Solver" />
+      <listitem open="0" type="815" id="2034" label="Solver" />
+      <listitem open="0" type="815" id="2028" label="Solver" />
+      <listitem open="0" type="815" id="2029" label="Solver" />
+      <listitem open="0" type="815" id="2041" label="display" />
+      <listitem open="0" type="815" id="2042" label="getMaxIter" />
+      <listitem open="0" type="815" id="2043" label="getSearchDirection" />
+      <listitem open="0" type="815" id="2044" label="getSolvingMethodPtr" />
+      <listitem open="0" type="815" id="2045" label="getTolerance" />
+      <listitem open="0" type="815" id="2046" label="saveSolverToXML" />
+      <listitem open="0" type="815" id="2047" label="setMaxIter" />
+      <listitem open="0" type="815" id="2049" label="setNonSmoothPbType" />
+      <listitem open="0" type="815" id="2051" label="setNormType" />
+      <listitem open="0" type="815" id="2053" label="setSearchDirection" />
+      <listitem open="0" type="815" id="2055" label="setSolverAlgorithmName" />
+      <listitem open="0" type="815" id="2057" label="setSolvingMethod" />
+      <listitem open="0" type="815" id="2058" label="setTolerance" />
+      <listitem open="0" type="815" id="2060" label="~Solver" />
+     </listitem>
      <listitem open="0" type="813" id="1392" label="Strategy" >
       <listitem open="0" type="814" id="1506" label="isNsPbAllocatedIn" />
       <listitem open="0" type="814" id="1507" label="isTimeDiscrAllocatedIn" />
@@ -1156,6 +1578,13 @@
       <listitem open="0" type="815" id="1586" label="setType" />
       <listitem open="0" type="815" id="1588" label="update" />
       <listitem open="0" type="815" id="1589" label="~Strategy" />
+     </listitem>
+     <listitem open="0" type="813" id="2261" label="TimeDiscrEvent" >
+      <listitem open="0" type="815" id="2265" label="TimeDiscrEvent" />
+      <listitem open="0" type="815" id="2262" label="TimeDiscrEvent" />
+      <listitem open="0" type="815" id="2263" label="TimeDiscrEvent" />
+      <listitem open="0" type="815" id="2267" label="process" />
+      <listitem open="0" type="815" id="2268" label="~TimeDiscrEvent" />
      </listitem>
      <listitem open="0" type="813" id="1476" label="TimeDiscretisation" >
       <listitem open="0" type="814" id="1771" label="constant" />
@@ -1215,13 +1644,16 @@
       <listitem open="1" type="829" id="1938" label=")" />
       <listitem open="1" type="829" id="1368" label="bool" />
       <listitem open="1" type="829" id="1367" label="char" />
+      <listitem open="1" type="829" id="2277" label="checkEventSet" />
       <listitem open="1" type="829" id="1370" label="double" />
+      <listitem open="1" type="829" id="2278" label="eventsContainer" />
       <listitem open="1" type="829" id="1369" label="float" />
       <listitem open="1" type="829" id="1366" label="int" />
       <listitem open="1" type="829" id="1371" label="long" />
       <listitem open="1" type="829" id="1372" label="short" />
       <listitem open="1" type="829" id="1373" label="string" />
      </listitem>
+     <listitem open="1" type="831" id="2274" label="cmp_mode" />
     </listitem>
     <listitem open="1" type="802" id="-1" label="Use Case View" />
     <listitem open="1" type="821" id="-1" label="Component View" />

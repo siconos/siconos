@@ -110,10 +110,12 @@ void DynamicalSystem::initAllocationFlags(const bool& in) // default in = true.
     isAllocatedIn["x"] = true;
     isAllocatedIn["xMemory"] = false;
     isAllocatedIn["rhs"] = true; // always allocated ??
+    isAllocatedIn["jacobianXRhs"] = true;
     isAllocatedIn["xFree"] = true;
     isAllocatedIn["r"] = true;
     isAllocatedIn["rMemory"] = false;
-    isAllocatedIn["jacobianXF"] = true;
+    isAllocatedIn["f"] = false;
+    isAllocatedIn["jacobianXF"] = false;
     isAllocatedIn["u"] = false;
     isAllocatedIn["T"] = false;
   }
@@ -123,9 +125,11 @@ void DynamicalSystem::initAllocationFlags(const bool& in) // default in = true.
     isAllocatedIn["x"] = false;
     isAllocatedIn["xMemory"] = false;
     isAllocatedIn["rhs"] = false;
+    isAllocatedIn["jacobianXRhs"] = false;
     isAllocatedIn["xFree"] = false;
     isAllocatedIn["r"] = false;
     isAllocatedIn["rMemory"] = false;
+    isAllocatedIn["f"] = false;
     isAllocatedIn["jacobianXF"] = false;
     isAllocatedIn["u"] = false;
     isAllocatedIn["T"] = false;
@@ -155,7 +159,7 @@ void DynamicalSystem::initParameter(const string& id)
 // Default constructor (private)
 DynamicalSystem::DynamicalSystem():
   DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL),
-  rhs(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianXF(NULL),
+  rhs(NULL), jacobianXRhs(NULL), xFree(NULL), r(NULL), rMemory(NULL), f(NULL), jacobianXF(NULL),
   uSize(0), u(NULL), T(NULL), stepsInMemory(1), BC(NULL), dsxml(NULL),
   computeFFunctionName("none"), computeJacobianXFFunctionName("none"), computeUFunctionName("none"),
   computeTFunctionName("none"), computeFPtr(NULL), computeJacobianXFPtr(NULL),
@@ -168,7 +172,7 @@ DynamicalSystem::DynamicalSystem():
 // From XML file (warning: newNsds is optional, default = NULL)
 DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
   DSType(NLDS), nsds(newNsds), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL),
-  rhs(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianXF(NULL),
+  rhs(NULL), jacobianXRhs(NULL), xFree(NULL), r(NULL), rMemory(NULL), f(NULL), jacobianXF(NULL),
   uSize(0), u(NULL), T(NULL), stepsInMemory(1), BC(NULL), dsxml(dsXML),
   computeFFunctionName("none"), computeJacobianXFFunctionName("none"), computeUFunctionName("none"),
   computeTFunctionName("none"), computeFPtr(NULL), computeJacobianXFPtr(NULL),
@@ -209,10 +213,11 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
     // Then we can not set exception if they are not given. By default, they are connected to defaultPlugin
     // and isPlugin corresponding flag has to be set in the derived class.
 
-    // rhs and f
+    // rhs and f   Warning: Only rhs is allocated, f  points to the same memory location!!!
     rhs = new SimpleVector(n); // rhs is always allocated by default.
     if (dsxml->hasF())
     {
+      f = rhs ; // POINTER LINK
       if (dsxml->isFPlugin())
       {
         plugin = dsxml->getFPlugin();
@@ -228,21 +233,26 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
       }
     }
     else // set f plug-in to default. Usefull?
+    {
+      f = rhs ; // POINTER LINK
       setComputeFFunction("DefaultPlugin.so", "computeF"); // this set isPlugin["f"] to true.
+    }
     //RuntimeException::selfThrow("DynamicalSystem:: xml constructor,f input is missing.");
 
-    // jacobianXF
+    // jacobianXF  Warning: Only jacobianXRhs is allocated, jacobianXF points to the same memory location!!!
     if (dsxml->hasJacobianXF())
     {
       if (dsxml->isJacobianXFPlugin())
       {
-        jacobianXF = new SimpleMatrix(n, n);
+        jacobianXRhs = new SimpleMatrix(n, n);
+        jacobianXF = jacobianXRhs; // POINTER LINK
         plugin = dsxml->getJacobianXFPlugin();
         setComputeJacobianXFFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));     // this set isPlugin["jacobianXF"] to true
       }
       else // This means that jacobianXF is constant
       {
-        jacobianXF = new SimpleMatrix(dsxml->getJacobianXFMatrix());
+        jacobianXRhs = new SimpleMatrix(dsxml->getJacobianXFMatrix());
+        jacobianXF = jacobianXRhs; // POINTER LINK
         if (jacobianXF->size(0) != n || jacobianXF->size(1) != n)
           RuntimeException::selfThrow("DynamicalSystem:: xml constructor, jacobianXF size differs from n!");
         isPlugin["jacobianXF"] = false;
@@ -250,7 +260,8 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
     }
     else
     {
-      jacobianXF = new SimpleMatrix(n, n);
+      jacobianXRhs = new SimpleMatrix(n, n);
+      jacobianXF = jacobianXRhs; // POINTER LINK
       setComputeJacobianXFFunction("DefaultPlugin.so", "computeJacobianXF"); // this set isPlugin["jacobianXF"] to true.
     }
 
@@ -339,7 +350,7 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
 DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN, const SiconosVector& newX0,
                                  const string& fPlugin, const string& jacobianXFPlugin):
   DSType(NLDS), nsds(NULL), number(newNumber), id("none"), n(newN), x0(NULL), x(NULL), xMemory(NULL),
-  rhs(NULL), xFree(NULL), r(NULL), rMemory(NULL), jacobianXF(NULL), uSize(0), u(NULL),
+  rhs(NULL), jacobianXRhs(NULL), xFree(NULL), r(NULL), rMemory(NULL), f(NULL), jacobianXF(NULL), uSize(0), u(NULL),
   T(NULL), stepsInMemory(1), BC(NULL), dsxml(NULL),
   computeFFunctionName("none"), computeJacobianXFFunctionName("none"), computeUFunctionName("none"),
   computeTFunctionName("none"), computeFPtr(NULL), computeJacobianXFPtr(NULL),
@@ -359,10 +370,12 @@ DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN,
 
   // right-hand side
   rhs = new SimpleVector(n);
+  f = rhs ; // No allocation for f !!! Pointer link.
   setComputeFFunction(cShared.getPluginName(fPlugin), cShared.getPluginFunctionName(fPlugin));
 
   // jacobianXF
-  jacobianXF = new SimpleMatrix(n, n);
+  jacobianXRhs = new SimpleMatrix(n, n);
+  jacobianXF = jacobianXRhs; // No allocation !!! Pointer link.
   setComputeJacobianXFFunction(cShared.getPluginName(jacobianXFPlugin), cShared.getPluginFunctionName(jacobianXFPlugin));
 
   initAllocationFlags();
@@ -377,8 +390,8 @@ DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN,
 // copy constructor
 DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
   DSType(NLDS), nsds(newDS.getNonSmoothDynamicalSystemPtr()), number(-2), id("copy"), n(newDS.getN()),
-  x0(NULL), x(NULL), xMemory(NULL), rhs(NULL),
-  xFree(NULL), r(NULL), rMemory(NULL), jacobianXF(NULL), uSize(newDS.getUSize()), u(NULL), T(NULL),
+  x0(NULL), x(NULL), xMemory(NULL), rhs(NULL), jacobianXRhs(NULL),
+  xFree(NULL), r(NULL), rMemory(NULL), f(NULL), jacobianXF(NULL), uSize(newDS.getUSize()), u(NULL), T(NULL),
   stepsInMemory(newDS.getStepsInMemory()), BC(NULL), dsxml(NULL),
   computeFFunctionName(newDS.getComputeFFunctionName()), computeJacobianXFFunctionName(newDS. getComputeJacobianXFFunctionName()),
   computeUFunctionName(newDS.getComputeUFunctionName()), computeTFunctionName(newDS.getComputeTFunctionName()),
@@ -402,6 +415,7 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
   x0 = new SimpleVector(newDS.getX0());
   x = new SimpleVector(newDS.getX());
   rhs = new SimpleVector(newDS.getRhs());
+  f = rhs;  // POINTER LINK
   xFree = new SimpleVector(newDS.getXFree());
   //    }
   initAllocationFlags();
@@ -411,10 +425,12 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
   else
     r = new SimpleVector(n);
 
-  if (newDS.getJacobianXFPtr() != NULL)
-    jacobianXF = new SimpleMatrix(newDS.getJacobianXF());
+  if (newDS.getJacobianXRhsPtr() != NULL)
+    jacobianXRhs = new SimpleMatrix(newDS.getJacobianXRhs());
   else
-    jacobianXF = new SimpleMatrix(n, n);
+    jacobianXRhs = new SimpleMatrix(n, n);
+
+  jacobianXF = jacobianXRhs; // POINTER LINK
 
   if (newDS.getXMemoryPtr() != NULL)
   {
@@ -497,12 +513,16 @@ DynamicalSystem::~DynamicalSystem()
   xMemory = NULL;
   if (isAllocatedIn["rhs"]) delete rhs;
   rhs = NULL;
+  if (isAllocatedIn["jacobianXRhs"]) delete jacobianXRhs;
+  jacobianXRhs = NULL;
   if (isAllocatedIn["xFree"]) delete xFree;
   xFree = NULL;
   if (isAllocatedIn["r"]) delete r;
   r = NULL;
   if (isAllocatedIn["rMemory"]) delete rMemory;
   rMemory = NULL;
+  if (isAllocatedIn["f"]) delete f;
+  f = NULL;
   if (isAllocatedIn["jacobianXF"]) delete jacobianXF;
   jacobianXF = NULL;
   if (isAllocatedIn["u"]) delete u;
@@ -675,6 +695,35 @@ void DynamicalSystem::setRhsPtr(SiconosVector* newPtr)
   isAllocatedIn["rhs"] = false;
 }
 
+void DynamicalSystem::setJacobianXRhs(const SiconosMatrix& newValue)
+{
+  // check dimensions ...
+  if (newValue.size(0) != n || newValue.size(1) != n)
+    RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhs - inconsistent sizes between jacobianXRhs input and n - Maybe you forget to set n?");
+
+  if (jacobianXRhs != NULL)
+    *jacobianXRhs = newValue;
+
+  else
+  {
+    jacobianXRhs = new SimpleMatrix(newValue);
+    isAllocatedIn["jacobianXRhs"] = true;
+  }
+  isPlugin["jacobianXRhs"] = false;
+}
+
+void DynamicalSystem::setJacobianXRhsPtr(SiconosMatrix *newPtr)
+{
+  // check dimensions ...
+  if (newPtr->size(0) != n || newPtr->size(1) != n)
+    RuntimeException::selfThrow("DynamicalSystem::setJacobianXRhsPtr - inconsistent sizes between jacobianXRhs input and n - Maybe you forget to set n?");
+
+  if (isAllocatedIn["jacobianXRhs"]) delete jacobianXRhs;
+  jacobianXRhs = newPtr;
+  isAllocatedIn["jacobianXRhs"] = false;
+  isPlugin["jacobianXRhs"] = false;
+}
+
 void DynamicalSystem::setXFree(const SiconosVector& newValue)
 {
   // check dimensions ...
@@ -753,6 +802,36 @@ void DynamicalSystem::setRMemoryPtr(SiconosMemory * newPtr)
   if (isAllocatedIn["rMemory"]) delete rMemory;
   rMemory = newPtr;
   isAllocatedIn["rMemory"] = false;
+}
+
+void DynamicalSystem::setF(const SiconosVector& newValue)
+{
+  // check dimensions ...
+  if (newValue.size() != n)
+    RuntimeException::selfThrow("DynamicalSystem::setF - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
+
+  if (f != NULL)
+    *f = newValue;
+
+  else
+  {
+    if (newValue.isBlock())
+      f = new BlockVector(newValue);
+    else
+      f = new SimpleVector(newValue);
+    isAllocatedIn["f"] = true;
+  }
+}
+
+void DynamicalSystem::setFPtr(SiconosVector* newPtr)
+{
+  // check dimensions ...
+  if (newPtr->size() != n)
+    RuntimeException::selfThrow("DynamicalSystem::setFPtr - inconsistent sizes between x0 input and n - Maybe you forget to set n?");
+
+  if (isAllocatedIn["f"]) delete f;
+  f = newPtr;
+  isAllocatedIn["f"] = false;
 }
 
 void DynamicalSystem::setJacobianXF(const SiconosMatrix& newValue)
@@ -884,8 +963,8 @@ void DynamicalSystem::initialize(const double& time, const unsigned int& sizeOfM
   rhs->zero();
   computeRhs(time); // this will compute, if required, f, u and T.
 
-  jacobianXF->zero();
-  computeJacobianXF(time);
+  jacobianXRhs->zero();
+  computeJacobianXRhs(time);
 
 }
 
@@ -1035,7 +1114,7 @@ void DynamicalSystem::computeF(const double& time)
     if (computeFPtr == NULL)
       RuntimeException::selfThrow("DynamicalSystem::computeVF() f is not linked to a plugin function");
     SimpleVector* param = parametersList["f"];
-    computeFPtr(n, &time, &(*x)(0) , &(*rhs)(0), &(*param)(0)); // warning: f is saved in rhs!!
+    computeFPtr(n, &time, &(*x)(0) , &(*f)(0), &(*param)(0)); // warning: f is saved in rhs!!
   }
   // else nothing!
 }
@@ -1059,7 +1138,9 @@ void DynamicalSystem::computeRhs(const double& time, const bool&)
 
   // compute rhs = f + Tu.
 
-  computeF(time); // this compute f and save it into rhs vector.
+  computeF(time);
+
+  // Mind that at the time f = rhs (pointer equality)
 
   if (u != NULL)
   {
@@ -1082,8 +1163,12 @@ void DynamicalSystem::computeJacobianXRhs(const double& time, const bool&)
 
   // compute jacobian of rhs according to x, = jacobianXF + jacobianXT.u.
 
-  // Not yet implemented.
-  RuntimeException::selfThrow("DynamicalSystem::computeJacobianXRhs() not yet implemented.");
+  computeJacobianXF(time); // this compute f and save it into rhs vector.
+  // Mind that at the time jacobianXF = jacobianXRhs (pointer equality)
+
+  // Warning: at the time no jacobianXT is taken into account !!!
+
+
 }
 
 void DynamicalSystem::computeU(const double& time)

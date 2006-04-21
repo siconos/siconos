@@ -157,7 +157,6 @@ void Lsodar::updateData()
 
 void Lsodar::f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
-  cout << "in f: " << *time << endl;
   unsigned int size = *sizeOfX; // convert integer to unsigned int
   SimpleVector *xtmp = new SimpleVector(size) ;
 
@@ -298,7 +297,6 @@ void Lsodar::integrate()
 
 void Lsodar::integrate(const double& tinit, const double& tend, double& tout, bool& iout)
 {
-
   // For details on DLSODAR parameters, see opkdmain.f in Numerics/src/odepack
 
   SiconosVector * x = ds->getXPtr(); // initial conditions
@@ -370,18 +368,14 @@ void Lsodar::integrate(const double& tinit, const double& tend, double& tout, bo
   gpointer pointerToG;
   pointerToG = Lsodar_g_wrapper; // function to compute the constraints
 
-  cout <<   "  "   << endl;
-
-
   // === LSODAR CALL ===
   F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*x)(0), &tinit_DR, &tend_DR, &(intData[2]), doubleData[0], doubleData[1], &(intData[3]), &(intData[4]), &(intData[5]), doubleData[2],
                    &(intData[6]), iwork, &(intData[7]), pointerToJacobianF, &(intData[8]), pointerToG, &(intData[1]), doubleData[3]);
 
   tout  = tinit_DR; // real ouput time
-  iout  = intData[4];
+  iout  = true;
   // doubleData[2] = rwork
   // doubleData[3] = jroot, jroot[i] = 0 if g(i) as a root a t, else jroot[i] = 0.
-  cout << "LSodar::integrate(...) ok - Istate = " << intData[4] << endl;
 
   // === Post ===
   if (intData[4] < 0) // if istate < 0 => LSODAR failed
@@ -394,6 +388,7 @@ void Lsodar::integrate(const double& tinit, const double& tend, double& tout, bo
     cout << " -5 means repeated convergence failures (perhaps bad Jacobian supplied or wrong choice of JT or tolerances)." << endl;
     cout << " -6 means error weight became zero during problem. (Solution component i vanished, and ATOL or ATOL(i) = 0.)" << endl;
     cout << " -7 means work space insufficient to finish (see messages)." << endl;
+    RuntimeException::selfThrow("Lsodar, integration failed");
   }
 }
 

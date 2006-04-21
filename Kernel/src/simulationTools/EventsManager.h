@@ -55,7 +55,7 @@
 class Strategy;
 
 // tick default value
-const double DEFAULT_TICK = 1e-09;
+const double DEFAULT_TICK = 1e-06;
 
 // The list of events, sort using operator defined in class EventsComparison.
 //typedef std::set<Event*,RuntimeCmp<Event*> > eventsContainer;
@@ -100,7 +100,7 @@ protected:
    *  See doubleToIntTime function for details. Note that max unsigned long int value is
    * given by constant ULONG_MAX, from limits.h.
    */
-  const double tick;
+  double tick;
 
   /* link to the strategy that owns this manager*/
   Strategy * strategy;
@@ -212,10 +212,20 @@ public:
     return tick ;
   };
 
+  /** \fn inline void setTick(const double& newTick) const
+  *  \brief set tick value
+  *  \param a double
+  */
+  inline void setTick(const double & newTick)
+  {
+    std::cout << "Warning: you change tick value for EventsManager -> a new initialization of the object is required. " << std::endl;
+    tick = newTick;
+  };
+
   /** \fn Strategy* getStrategyPtr()
-   *  \brief get the Strategy
-   *  \return a pointer to Strategy
-   */
+    *  \brief get the Strategy
+    *  \return a pointer to Strategy
+    */
   inline Strategy* getStrategyPtr() const
   {
     return strategy;

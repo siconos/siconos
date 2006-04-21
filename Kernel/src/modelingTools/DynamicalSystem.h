@@ -81,8 +81,22 @@ class SiconosSharedLibrary;
  * To define a boundary Value Problem, the pointer on  a BoundaryCondition must be set.
  *
  * \f$ f(x,t) \f$ is a plug-in function, and can be computed using computeF(t).
- * rhs is computed thanks to computeRhs(t).
+ * Its Jacobian according to x is denoted jacobianXF, and computed thanks to computeJacobianXF(t).
+ * f and jacobianXF can be plugged to external functions thanks to setComputeFFunction/setComputeJacobianXFFunction.
  *
+ * Right-hand side of the equation is denoted rhs and is computed thanks to computeRhs(t).
+ *
+ * \f[ rhs(x,t) =  f(x,t) + T(x) u(x,t)\f]
+ *
+ * Its Jacobian according to x is jacobianXRhs:
+ *
+ *  \f[
+ *   jacobianXRhs = \nabla_xrhs(x,t) = \nabla_xf(x,t) + \nabla_xT(x)U(x,t)
+ *  \f]
+ *
+ * At the time, \f$\nabla_xT(x)\f$ is never taken into account.
+ * Moreover, in order to avoid useless memory allocation,
+ * we try to re-use the same memory location for f and rhs (and for jacobianXRhs and jacobianXF).
  *
  * \todo Add a pointer to an object Constraint .
  */
@@ -118,6 +132,9 @@ protected:
   /** the right hand side of the equation */
   SiconosVector *rhs;
 
+  /** jacobian according to X of this rhs */
+  SiconosMatrix * jacobianXRhs;
+
   /** the  free state vector (state vector for r=0) */
   SiconosVector *xFree;
 
@@ -126,6 +143,9 @@ protected:
 
   /**  the previous r vectors */
   SiconosMemory *rMemory;
+
+  /** f(x,t) */
+  SiconosVector *f;
 
   /** Gradient of \f$ f(x,t) \f$ with respect to \f$ x\f$*/
   SiconosMatrix *jacobianXF;
@@ -550,6 +570,38 @@ public:
    */
   void setRhsPtr(SiconosVector *);
 
+  // --- JacobianXRhs ---
+
+  /** \fn  const SimpleMatrix getJacobianXRhs(void) const
+   *  \brief get the value of JacobianXRhs
+   *  \return SimpleMatrix
+   */
+  inline const SimpleMatrix getJacobianXRhs() const
+  {
+    return *jacobianXRhs;
+  }
+
+  /** \fn SiconosMatrix* getJacobianXRhsPtr(void) const
+   *  \brief get JacobianXRhs
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getJacobianXRhsPtr() const
+  {
+    return jacobianXRhs;
+  }
+
+  /** \fn void setJacobianXRhs (const SiconosMatrix& newValue)
+   *  \brief set the value of JacobianXRhs to newValue
+   *  \param SiconosMatrix newValue
+   */
+  virtual void setJacobianXRhs(const SiconosMatrix&);
+
+  /** \fn void setJacobianXRhsPtr(SiconosMatrix* newPtr)
+   *  \brief set JacobianXRhs to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  virtual void setJacobianXRhsPtr(SiconosMatrix *newPtr);
+
   // --- XFree ---
 
   /** \fn  const SimpleVector getXFree(void) const
@@ -647,6 +699,39 @@ public:
    *  \param a ref on a SiconosMemory
    */
   void setRMemoryPtr(SiconosMemory *);
+
+  // ---  F ---
+
+  /** \fn  const SimpleVector getF(void) const
+   *  \brief get the value of f derivative of the state of the DynamicalSystem
+   *  \return SimpleVector
+   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   */
+  inline const SimpleVector getF() const
+  {
+    return *f;
+  }
+
+  /** \fn SiconosVector* getFPtr(void) const
+   *  \brief get f, the derivative of the state of the DynamicalSystem
+   *  \return pointer on a SiconosVector
+   */
+  inline SiconosVector* getFPtr() const
+  {
+    return f;
+  }
+
+  /** \fn void setF (const SiconosVector& newValue)
+   *  \brief set the value of f to newValue
+   *  \param SiconosVector newValue
+   */
+  void setF(const SiconosVector&);
+
+  /** \fn void setFPtr(SiconosVector* newPtr)
+   *  \brief set f to pointer newPtr
+   *  \param SiconosVector * newPtr
+   */
+  void setFPtr(SiconosVector *);
 
   // --- JacobianXF ---
 

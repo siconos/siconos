@@ -49,8 +49,8 @@ void EventDriven::setEventsManagerPtr(EventsManager*)
 
 void EventDriven::initialize()
 {
-  eventsManager = new EventsManager();
-  eventsManager->setStrategyPtr(this);
+  eventsManager = new EventsManager(DEFAULT_TICK, this); //
+  //  eventsManager->setStrategyPtr(this);
   // Review eventsManager constructor? Strategy as a required input? Or set as here?
   eventsManager->initialize();
 }
@@ -100,6 +100,10 @@ void EventDriven::advanceToEvent()
       tout = min(tout, ttmp);
       isNewEventOccur = true;
     }
+
+    // Update DS state. Here?
+    //(*it)->getDynamicalSystemPtr()->computeRhs(tend);
+
   }
 
   if (isNewEventOccur)
@@ -109,12 +113,13 @@ void EventDriven::advanceToEvent()
     if (!isScheduleOk) cout << " EventDriven advanceToEvent warning: try to add an already existing event" << endl;
     else
     {
+      bool iout;
       // restart integration from tinit to tout
       for (it = integratorVector.begin(); it != integratorVector.end(); ++it)
       {
         // Add something to "reset" the OSI state as it was a tinit.
 
-        bool iout = false;
+        iout = false;
         (*it)->integrate(tinit, tout, ttmp, iout); // integrate must return a flag telling if tend has been reached or not.
         // If not, ttmp is the real reached time.
         if (!iout)
@@ -122,6 +127,7 @@ void EventDriven::advanceToEvent()
       }
     }
   }
+
 }
 
 EventDriven* EventDriven::convert(Strategy *str)
