@@ -303,12 +303,16 @@ void LCP::computeAllBlocks()
     // Get Wi matrix of each DS concerned by the interaction and assemble global matrix W
     OneStepIntegrator * Osi;
     map<DynamicalSystem*, SiconosMatrix*> W;
+    map<DynamicalSystem*, double> theta;
 
     for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
     {
       Osi = strategy->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
       if (Osi->getType() == MOREAU_INTEGRATOR)
+      {
         W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr();  // get its W matrix
+        theta[*itDS] = (static_cast<Moreau*>(Osi))->getTheta();  // get its theta
+      }
       else
         RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
     }
@@ -318,7 +322,7 @@ void LCP::computeAllBlocks()
     relationType = RCurrent->getType();
 
     if (relationType == LINEARTIRELATION)
-      computeDiagonalBlocksLinearTIR(RCurrent, sizeInteraction, vDS, W, h, currentMatrixBlock);
+      computeDiagonalBlocksLinearTIR(RCurrent, sizeInteraction, vDS, W, theta, h, currentMatrixBlock);
     else if (relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION)
       computeDiagonalBlocksLagrangianR(RCurrent, sizeInteraction, vDS, W, h, currentMatrixBlock);
     //else if (relationType == LAGRANGIANRELATION)
@@ -363,8 +367,8 @@ void LCP::computeAllBlocks()
         string RlinkedType = RLinked->getType();
         if (relationType == LINEARTIRELATION && RlinkedType == LINEARTIRELATION)
         {
-          computeExtraDiagonalBlocksLinearTIR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, h, coupledInteractionsBlock);
-          computeExtraDiagonalBlocksLinearTIR(RLinked, RCurrent, linkedInteractionSize, sizeInteraction, commonDS, W, h, coupledInteractionsBlockSym);
+          computeExtraDiagonalBlocksLinearTIR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, theta, h, coupledInteractionsBlock);
+          computeExtraDiagonalBlocksLinearTIR(RLinked, RCurrent, linkedInteractionSize, sizeInteraction, commonDS, W, theta, h, coupledInteractionsBlockSym);
         }
         //else if (relationType == LAGRANGIANLINEARRELATION && RlinkedType== LAGRANGIANLINEARRELATION)
         //computeExtraDiagonalBlocksLagrangianLinearR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS,W,h,coupledInteractionsBlock);
@@ -381,7 +385,7 @@ void LCP::computeAllBlocks()
 }
 
 void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeInteraction, vector<DynamicalSystem*> vDS,
-    map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* currentMatrixBlock)
+    map<DynamicalSystem*, SiconosMatrix*> W, map<DynamicalSystem*, double> theta, const double& h, SiconosMatrix* currentMatrixBlock)
 {
   // convert to linearTIR
   LinearTIR *LTIR = static_cast<LinearTIR*>(R);
@@ -428,7 +432,7 @@ void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeI
         C->getRow(i, *Crow);
 
         // compute currentLine
-        *currentLine +=  h* *Crow * (*W[*itDS]* *B);
+        *currentLine +=  h * theta[*itDS] * *Crow * (*W[*itDS] * *B);
         delete C;
         delete B;
         delete Crow;
@@ -452,7 +456,7 @@ void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeI
       B = new SimpleMatrix(sizeDS, sizeInteraction);
       LTIR->getCBlockDSPtr(*itDS, *C);
       LTIR->getBBlockDSPtr(*itDS, *B);
-      *currentMatrixBlock += h * *C * (*W[*itDS] * *B);
+      *currentMatrixBlock += h * theta[*itDS] * *C * (*W[*itDS] * *B);
       delete C;
       delete B;
     }
@@ -460,8 +464,8 @@ void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeI
 }
 
 void LCP::computeExtraDiagonalBlocksLinearTIR(Relation * RCurrent, Relation* RLinked, const unsigned int& sizeInteraction,
-    const unsigned int& linkedInteractionSize, vector<DynamicalSystem*> commonDS,
-    map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* coupledInteractionsBlock)
+    const unsigned int& linkedInteractionSize, vector<DynamicalSystem*> commonDS, map<DynamicalSystem*, SiconosMatrix*> W,
+    map<DynamicalSystem*, double> theta, const double& h, SiconosMatrix* coupledInteractionsBlock)
 {
   // convert to linearTIR
   LinearTIR *LTIR1 = static_cast<LinearTIR*>(RCurrent);
@@ -497,7 +501,7 @@ void LCP::computeExtraDiagonalBlocksLinearTIR(Relation * RCurrent, Relation* RLi
         Crow = new SimpleVector(sizeDS);
         C->getRow(i, *Crow);
         // compute currentLine
-        *currentLine +=   *Crow * (*W[*itDS]* *B);
+        *currentLine +=   h * theta[*itDS] * *Crow * (*W[*itDS]* *B);
         delete Crow;
         delete C;
         delete B;
@@ -519,7 +523,7 @@ void LCP::computeExtraDiagonalBlocksLinearTIR(Relation * RCurrent, Relation* RLi
       B = new SimpleMatrix(sizeDS, linkedInteractionSize);
       LTIR1->getCBlockDSPtr(*itDS, *C);
       LTIR2->getBBlockDSPtr(*itDS, *B);
-      *coupledInteractionsBlock +=  *C * (*W[*itDS] * *B);
+      *coupledInteractionsBlock +=  h * theta[*itDS] * *C * (*W[*itDS] * *B);
       delete C;
       delete B;
     }

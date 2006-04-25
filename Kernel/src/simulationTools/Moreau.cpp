@@ -140,6 +140,7 @@ void Moreau::initialize()
 void Moreau::computeW(const double& t)
 {
   double h = timeDiscretisation->getH(); // time step
+  // Check if W is allocated; if not, do allocation.
   if (W == NULL)
   {
     unsigned int sizeW = ds->getDim(); // n for first order systems, ndof for lagrangian.
@@ -151,7 +152,6 @@ void Moreau::computeW(const double& t)
   if (ds->getType() == LNLDS)
   {
     LagrangianDS* d = static_cast<LagrangianDS*>(ds);
-    // Check if W is allocated; if not, do allocation.
     // Compute Mass matrix (if loaded from plugin)
     d->computeMass();
     // Compute and get Jacobian (if loaded from plugin)
@@ -291,18 +291,19 @@ void Moreau::computeFreeState()
   {
     LinearDS *d = static_cast<LinearDS*>(ds);
 
-    SiconosVector *xfree = d->getXFreePtr();
-    SiconosVector *xold = d->getXMemoryPtr()->getSiconosVector(0);
+    SimpleVector *xfree = static_cast<SimpleVector*>(d->getXFreePtr());
+    SimpleVector *xold = static_cast<SimpleVector*>(d->getXMemoryPtr()->getSiconosVector(0));
+    SimpleVector *rold = static_cast<SimpleVector*>(ds->getRMemoryPtr()->getSiconosVector(0));
 
     unsigned int sizeX = xfree->size();
-    SiconosVector *xtmp = new SimpleVector(sizeX);
+    SimpleVector *xtmp = new SimpleVector(sizeX);
 
     SiconosMatrix *I = new SimpleMatrix(sizeX, sizeX);
     I->eye();
     // Warning: A is supposed to be constant, not time dependent.
     SiconosMatrix *A = d->getAPtr();
 
-    *xtmp = (*I + h * (1.0 - theta) * *A) * *xold;
+    *xtmp = ((*I + h * (1.0 - theta) * *A) * *xold) + (h * (1.0 - theta) * *rold);
     delete I;
 
     // Warning: b is supposed to be constant, not time dependent.
@@ -480,7 +481,7 @@ void Moreau::updateState()
     SiconosVector* x = ds->getXPtr();
     SiconosVector* xFree = ds->getXFreePtr();
 
-    *x = *xFree + h * *W * *(ds->getRPtr()) ;
+    *x = *xFree + (h * theta * *W * *(ds->getRPtr())) ;
   }
   else RuntimeException::selfThrow("Moreau::updateState - not yet implemented for Dynamical system type: " + dsType);
 }

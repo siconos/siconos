@@ -264,14 +264,17 @@ public:
    */
   void computeAllBlocks();
 
-  /** \fn void computeDiagonalBlocksLinearTIR(Relation *, unsigned int sizeInteraction, vector<DynamicalSystem*>, SiconosMatrix*)
+  /** \fn void computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeInteraction, vector<DynamicalSystem*> vDS,
+   * map<DynamicalSystem*, SiconosMatrix*> W, map<DynamicalSystem*, double> theta, const double& h, SiconosMatrix* currentMatrixBlock)
    * \brief compute diagonal block-matrices for a LinearTIR
    */
-  void computeDiagonalBlocksLinearTIR(Relation *, const unsigned int&, std::vector<DynamicalSystem*>, std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
+  void computeDiagonalBlocksLinearTIR(Relation *, const unsigned int&, std::vector<DynamicalSystem*>,
+                                      std::map<DynamicalSystem*, SiconosMatrix*>, std::map<DynamicalSystem*, double>, const double&, SiconosMatrix*);
 
 
-  void computeExtraDiagonalBlocksLinearTIR(Relation *, Relation*, const unsigned int&, const unsigned int&, std::vector<DynamicalSystem*>,
-      std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
+  void computeExtraDiagonalBlocksLinearTIR(Relation *, Relation*, const unsigned int&, const unsigned int&,
+      std::vector<DynamicalSystem*>, std::map<DynamicalSystem*, SiconosMatrix*>, std::map<DynamicalSystem*, double>,
+      const double&, SiconosMatrix*);
 
   void computeDiagonalBlocksLagrangianR(Relation *, const unsigned int&, std::vector<DynamicalSystem*>, std::map < DynamicalSystem*,
                                         SiconosMatrix* > , const double&, SiconosMatrix*);
