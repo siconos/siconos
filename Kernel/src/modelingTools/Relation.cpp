@@ -189,7 +189,7 @@ void Relation::computeOutput(const double& time)
   {
     // Put x and u of each DS into a block
     // Warning: use copy constructors, no link between pointers
-    if ((*it)->getType() != LDS)
+    if (((*it)->getType() != LDS) && ((*it)->getType() != LITIDS))
       RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented for DS type " + (*it)->getType());
 
     xTmp->add((*it)->getX());
@@ -225,7 +225,7 @@ void Relation::computeFreeOutput(const double& time)
   {
     // Put xFree and u of each DS into a block
     // Warning: use copy constructors, no link between pointers
-    if ((*it)->getType() != LDS)
+    if (((*it)->getType() != LDS) && ((*it)->getType() != LITIDS))
       RuntimeException::selfThrow("LinearTIR - computeFreeOutput: not yet implemented for DS type " + (*it)->getType());
 
     xTmp->add((*it)->getXFree());

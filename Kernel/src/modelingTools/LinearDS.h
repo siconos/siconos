@@ -33,13 +33,13 @@ class LinearDSXML;
  *
  *  This class represents first order linear systems of the form:
  * \f[
- * \dot x = A(t)x(t)+T u(t)+b(t)+r,
+ * Mxdot \dot x = A(t)x(t)+T u(t)+b(t)+r,
  *  x(t_0)=x_0
  * \f]
  * where
  *    - \f$x \in R^{n} \f$ is the state,
  *    - \f$r \in R^{n} \f$  the input due to the Non Smooth Interaction.
- *
+ *    - \f$Mxdot \in R^{n\times n} \f$ is an optional constant invertible matrix
  *  The  right-hand side is described by
  *    - \f$A \in R^{n\times n} \f$
  *    - \f$b \in R^{n} \f$
@@ -83,6 +83,9 @@ protected:
 
   /** matrix specific to the LinearDS \f$ A \in R^{n \times n}  \f$*/
   SiconosMatrix *A;
+
+  SiconosMatrix *Mxdot;
+
   /** strength vector */
   SimpleVector *b;
 
@@ -245,6 +248,46 @@ public:
    *  \param SiconosMatrix * newPtr
    */
   void setJacobianXFPtr(SiconosMatrix *newPtr);
+
+  // --- Mxdot ---
+  /** \fn  const SimpleMatrix getMxdotSimple() const
+   *  \brief get the value of Mxdot
+   *  \return SimpleMatrix
+   */
+  inline const SimpleMatrix getMxdotSimple() const
+  {
+    return *Mxdot;
+  }
+
+  /** \fn  const BlockMatrix getMxdotBlock() const
+   *  \brief get the value of Mxdot
+   *  \return BlockMatrix
+   */
+  inline const BlockMatrix getMxdotBlock() const
+  {
+    return *Mxdot;
+  }
+
+  /** \fn SiconosMatrix* getMxdotPtr() const
+   *  \brief get Mxdot
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getMxdotPtr() const
+  {
+    return Mxdot;
+  }
+
+  /** \fn void setMxdot (const SimpleMatrix& newValue)
+   *  \brief set the value of Mxdot to newValue
+   *  \param SimpleMatrix newValue
+   */
+  void setMxdot(const SimpleMatrix& newValue);
+
+  /** \fn void setMxdotPtr(SiconosMatrix* newPtr)
+   *  \brief set Mxdot to pointer newPtr
+   *  \param SiconosMatrix * newPtr
+   */
+  void setMxdotPtr(SiconosMatrix *);
 
   // --- b ---
 

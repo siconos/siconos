@@ -34,6 +34,7 @@
 #include "DynamicalSystemXML.h"
 
 const std::string LDS_A = "A";
+const std::string LDS_Mxdot = "Mxdot";
 const std::string LDS_B = "b";
 
 class LinearDSXML : public DynamicalSystemXML
@@ -41,8 +42,9 @@ class LinearDSXML : public DynamicalSystemXML
 private:
 
   //Nodes
-  xmlNode * ANode; /**< A in \f$ \dot x = Ax+b \f$ */
-  xmlNode * bNode; /**< b in \f$ \dot x = Ax+b \f$ */
+  xmlNode * ANode; /**< A in \f$ Mxdot \dot x = Ax+b \f$ */
+  xmlNode * MxdotNode; /**< Mxdot in \f$ Mxdot \dot x = Ax+b \f$ */
+  xmlNode * bNode; /**< b in \f$ Mxdot \dot x = Ax+b \f$ */
 
 public:
 
@@ -87,7 +89,7 @@ public:
 
   /** \fn void setA(const SiconosMatrix& m)
    *   \brief to save the A of the LinearDSXML
-   *   \return The A SiconosMatrix to save
+   *   \param The A SiconosMatrix to save
    */
   void setA(const SiconosMatrix& m);
 
@@ -96,6 +98,21 @@ public:
    *   \param a string (name of the plug-in)
    */
   void setAPlugin(const std::string& plugin);
+
+  /** \fn const SimpleMatrix getMxdot() const
+   *   \brief return the optional matrix Mxdot of the LinearDSXML
+   *   \return a SimpleMatrix
+   */
+  inline const SimpleMatrix getMxdot() const
+  {
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(MxdotNode);
+  }
+
+  /** \fn void setMxdot(const SiconosMatrix& m)
+   *   \brief to save the optional Mxdot of the LinearDSXML
+   *   \param The Mxdot SiconosMatrix to save
+   */
+  void setMxdot(const SiconosMatrix& m);
 
   /** \fn inline const string getBPlugin() const
    *   \brief Return the b plug-in name of the LinearDSXML
@@ -122,7 +139,7 @@ public:
 
   /** \fn inline void setB(SiconosVector *v)
    *   \brief to save the b vector of the LinearDSXML
-   *   \return The b SimpleVector to save
+   *   \param The b SimpleVector to save
    */
   void setB(const SiconosVector& v);
 
@@ -155,6 +172,15 @@ public:
   inline bool hasA() const
   {
     return (ANode != NULL);
+  }
+
+  /** \fn bool hasMxdot() const
+   *  \brief returns true if MxdotNode is defined
+   *  \return true if MxdotNode is defined
+   */
+  inline bool hasMxdot() const
+  {
+    return (MxdotNode != NULL);
   }
 
   /** \fn bool hasB() const

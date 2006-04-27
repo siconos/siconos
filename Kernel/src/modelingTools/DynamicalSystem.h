@@ -24,6 +24,7 @@
 #include "check.h"
 
 #include "SimpleMatrix.h"
+#include "BlockMatrix.h"
 #include "SimpleVector.h"
 #include "SiconosMemory.h"
 #include "SiconosSharedLibrary.h"
@@ -50,6 +51,7 @@ class DSInputOutput;
 class DynamicalSystemXML;
 class SiconosVector;
 class SimpleMatrix;
+class BlockMatrix;
 class SiconosMemory;
 class SiconosSharedLibrary;
 

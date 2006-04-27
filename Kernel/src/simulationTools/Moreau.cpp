@@ -21,6 +21,7 @@
 #include "LagrangianLinearTIDS.h"
 #include "LagrangianDS.h"
 #include "LinearDS.h"
+#include "LinearTIDS.h"
 
 using namespace std;
 
@@ -187,9 +188,10 @@ void Moreau::computeW(const double& t)
   }
 
   // === Linear dynamical system ===
-  else if (ds->getType() == LDS)
+  else if (ds->getType() == LDS || ds->getType() == LITIDS)
   {
     LinearDS* d = static_cast<LinearDS*>(ds);
+
     SiconosMatrix *I;
     unsigned int size = d->getN();
     // Check if W is allocated
@@ -198,13 +200,26 @@ void Moreau::computeW(const double& t)
       W = new SimpleMatrix(size, size);
       isWAllocatedIn = true;
     }
-    I = new SimpleMatrix(size, size);
-    I->eye();
-    *W = *I - (h * theta * (d->getA()));
-    delete I;
+
+    // Deals with Mxdot
+    if (d->getMxdotPtr() == NULL)
+    {
+      I = new SimpleMatrix(size, size);
+      I->eye();
+      *W = *I - (h * theta * (d->getA()));
+      delete I;
+    }
+    else
+    {
+      I = d->getMxdotPtr();
+      *W = *I - (h * theta * (d->getA()));
+    }
+
   }
+
   // === ===
   else RuntimeException::selfThrow("Moreau::computeW - not yet implemented for Dynamical system type :" + ds->getType());
+
   // LU factorization of W
   W->PLUFactorizationInPlace();
   // At the time, W inverse is saved in Moreau object -> \todo: to be reviewed: use forwarBackward in OneStepNS formalize to avoid inversion of W => work on Mlcp
@@ -287,7 +302,7 @@ void Moreau::computeFreeState()
     *qfree = (*qold) + h * (theta * (*vfree) + (1.0 - theta) * (*vold));
     delete RESfree;
   }
-  else if (dstyp == LDS)
+  else if (dstyp == LDS || dstyp == LITIDS)
   {
     LinearDS *d = static_cast<LinearDS*>(ds);
 
@@ -298,13 +313,23 @@ void Moreau::computeFreeState()
     unsigned int sizeX = xfree->size();
     SimpleVector *xtmp = new SimpleVector(sizeX);
 
-    SiconosMatrix *I = new SimpleMatrix(sizeX, sizeX);
-    I->eye();
     // Warning: A is supposed to be constant, not time dependent.
     SiconosMatrix *A = d->getAPtr();
 
-    *xtmp = ((*I + h * (1.0 - theta) * *A) * *xold) + (h * (1.0 - theta) * *rold);
-    delete I;
+    SiconosMatrix *I;
+    // Deals with Mxdot
+    if (d->getMxdotPtr() == NULL)
+    {
+      I = new SimpleMatrix(sizeX, sizeX);
+      I->eye();
+      *xtmp = ((*I + h * (1.0 - theta) * *A) * *xold) + (h * (1.0 - theta) * *rold);
+      delete I;
+    }
+    else
+    {
+      I = d->getMxdotPtr();
+      *xtmp = ((*I + h * (1.0 - theta) * *A) * *xold) + (h * (1.0 - theta) * *rold);
+    }
 
     // Warning: b is supposed to be constant, not time dependent.
     SimpleVector *b = d->getBPtr();
@@ -476,7 +501,7 @@ void Moreau::updateState()
     }
     // Remark: for Linear system, W is already saved in object member w
   }
-  else if (dsType == LDS)
+  else if (dsType == LDS || dsType == LITIDS)
   {
     SiconosVector* x = ds->getXPtr();
     SiconosVector* xFree = ds->getXFreePtr();
