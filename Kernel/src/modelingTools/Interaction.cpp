@@ -139,7 +139,6 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
 
     // --- Dynamical Systems ---
     unsigned int sizeDS ;
-    vector<int> listDS;
     if (nsds != NULL)
     {
       // Get a list of DS concerned from xml
@@ -148,7 +147,8 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
         vectorDS = nsds->getDynamicalSystems();
       else
       {
-        listDS = interactionxml->getDSConcerned();
+        vector<int> listDS;
+        interactionxml->getDSConcerned(listDS);
         sizeDS = listDS.size();
         vectorDS.resize(sizeDS, NULL);
         for (unsigned int i = 0; i < sizeDS; i++)

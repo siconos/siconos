@@ -42,10 +42,10 @@ public:
 
   /** \fn DSInputOutputXML(xmlNode * , vector<int> )
    *   \brief Build a DSInputOutputXML object from a DOM tree describing a DSInputOutput
-   *   \param xmlNode* : the DSInputOutput DOM tree
+   *   \param xmlNodePtr  : the DSInputOutput DOM tree
    //   *   \param vector<int>  : vector of DSXML numbers to verify DS concerned by the DSInputOutput (identified by number) exists
    */
-  DSInputOutputXML(xmlNode*/*, vector<int>*/);
+  DSInputOutputXML(xmlNodePtr /*, vector<int>*/);
   virtual ~DSInputOutputXML();
 
   /** \fn inline string getComputeInputPlugin()
@@ -146,7 +146,7 @@ public:
    */
   inline int getNumber()
   {
-    return SiconosDOMTreeTools::getIntegerAttributeValue(this->rootDSIOXMLNode, NUMBER_ATTRIBUTE);
+    return SiconosDOMTreeTools::getAttributeValue<int>(rootDSIOXMLNode, NUMBER_ATTRIBUTE);
   }
 
   /** \fn string getType()
@@ -159,11 +159,11 @@ public:
     return type;
   }
 
-  /** \fn xmlNode* getNode()
+  /** \fn xmlNodePtr  getNode()
    *   \brief Return the node of the DSInputOutputXML
-   *   \return xmlNode* : the node of the RelationXML in the DOM tree
+   *   \return xmlNodePtr  : the node of the RelationXML in the DOM tree
    */
-  inline xmlNode* getNode()const
+  inline xmlNodePtr  getNode()const
   {
     return this->rootDSIOXMLNode;
   }
@@ -191,12 +191,12 @@ public:
   //      else SiconosDOMTreeTools::setSiconosMatrixValue(this->HNode, H);
   //    }
 
-  /** \fn void updateDSInputOutputXML( xmlNode* node, DSInputOutput* dsio );
+  /** \fn void updateDSInputOutputXML( xmlNodePtr  node, DSInputOutput* dsio );
    *   \brief makes the operations to create the DSInputOutput of the DynamicalSystem
-   *   \param xmlNode* : the root node of the DSInputOutputXML
+   *   \param xmlNodePtr  : the root node of the DSInputOutputXML
    *   \param DSInputOutput* : the Relation of this DSInputOutputXML
    */
-  void updateDSInputOutputXML(xmlNode* node, DSInputOutput* dsio);
+  void updateDSInputOutputXML(xmlNodePtr  node, DSInputOutput* dsio);
 
   /** \fn vector<int> getDSConcerned()
    *   \brief Return the DSs concerned by the DSInputOutputXML

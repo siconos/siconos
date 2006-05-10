@@ -209,7 +209,7 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
 
   // Strategy tag (optional)
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, STRATEGY_TAG)) != NULL)
-    strategyXML = new StrategyXML(node, nsdsXML->getDSNumbers(), nsdsXML->getInteractionNumbers());
+    strategyXML = new StrategyXML(node);
   else
   {
     cout << " /!\\ Warning: SiconosModelXML - loadModel: no tag " << STRATEGY_TAG << " found. This may not be a problem since this tag is optional ./!\\" << endl;

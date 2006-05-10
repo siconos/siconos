@@ -46,10 +46,9 @@ public:
   /** \fn FrictionContactXML(xmlNode * FrictionContactNode)
    *   \brief Build a FrictionContactXML object from a DOM tree describing a FrictionContact
    *   \param FrictionContactNode : the FrictionContact DOM tree
-   *   \param vector<int> definedInteractionNumbers : the Interaction numbers effectivly defined in the model
    *   \exception XMLException : if a property of the FrictionContact lacks in the DOM tree
    */
-  FrictionContactXML(xmlNode * FrictionContactNode, std::vector<int> definedInteractionNumbers);
+  FrictionContactXML(xmlNode * FrictionContactNode);
 
   ~FrictionContactXML();
 

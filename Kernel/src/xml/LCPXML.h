@@ -51,10 +51,9 @@ public:
   /** \fn LCPXML(xmlNode * LCPNode)
    *   \brief Build a LCPXML object from a DOM tree describing a LCP
    *   \param LCPNode : the LCP DOM tree
-   *   \param vector<int> definedInteractionNumbers : the Interaction numbers effectivly defined in the model
    *   \exception XMLException : if a property of the LCP lacks in the DOM tree
    */
-  LCPXML(xmlNode * LCPNode, std::vector<int> definedInteractionNumbers);
+  LCPXML(xmlNode * LCPNode);
 
   /** \fn LCPXML()
    *   \brief Destructor

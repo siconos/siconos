@@ -22,8 +22,8 @@ using namespace std;
 LCPXML::LCPXML() : OneStepNSProblemXML(), MNode(NULL), qNode(NULL)
 {}
 
-LCPXML::LCPXML(xmlNode * OSNSNode, vector<int> definedInteractionNumbers):
-  OneStepNSProblemXML(OSNSNode, definedInteractionNumbers), MNode(NULL), qNode(NULL)
+LCPXML::LCPXML(xmlNode * OSNSNode):
+  OneStepNSProblemXML(OSNSNode), MNode(NULL), qNode(NULL)
 {
   // OSNSNode == "OneStepNSProblem"
   // problemTypeNode = "LCP"

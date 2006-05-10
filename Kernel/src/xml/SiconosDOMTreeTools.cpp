@@ -19,7 +19,7 @@
 #include "SiconosDOMTreeTools.h"
 using namespace std;
 
-SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNode * vectorNode)
+SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNodePtr vectorNode)
 {
   if (vectorNode == NULL)
     XMLException::selfThrow("SiconosDOMTreeTools - getSiconosVectorValue, node == NULL ");
@@ -33,12 +33,14 @@ SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNode * vectorNo
   else
   {
     //Size
-    unsigned int size = getIntegerAttributeValue(vectorNode, SDTT_VECTORSIZE);
+    unsigned int size = getAttributeValue<unsigned int>(vectorNode, SDTT_VECTORSIZE);
 
     //Content
-    xmlChar* tmp = xmlNodeGetContent((xmlNode *)vectorNode);
+    xmlChar* tmp = xmlNodeGetContent((xmlNodePtr)vectorNode);
     string vectorContent = (char *)tmp;
-    SimpleVector v(string2Vector(vectorContent, size));
+    vector<double> tmpV;
+    string2Vector(vectorContent, tmpV);
+    SimpleVector v(tmpV);
     xmlFree(tmp);
 
     if (v.size() != size)
@@ -50,55 +52,7 @@ SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNode * vectorNo
   }
 }
 
-vector<int> SiconosDOMTreeTools::getIntVector(const xmlNode * vectorNode)
-{
-  if (vectorNode == NULL)
-    XMLException::selfThrow("SiconosDOMTreeTools - getIntVector, node == NULL ");
-
-  // vector loading, 3 options:
-  //  - size of the vector + list of values
-  //  - read from a file
-  //  - read from a plug-in
-
-  vector<int> outputVector; // the vector to be read ...
-  unsigned int size;        // ... and its size
-
-  if (xmlHasProp((xmlNodePtr)vectorNode, (xmlChar *)SDTT_VECTORFILE.c_str()))
-  {
-    // Case 1: read from an ascii file
-    string fileName = getStringAttributeValue(vectorNode, SDTT_VECTORFILE);
-    ifstream in(fileName.c_str());
-    in >> size;
-    outputVector.reserve(size);
-    int tmp;
-    for (unsigned int i = 0; i < size; i++)
-    {
-      in >> tmp ;
-      outputVector.push_back(tmp);
-    }
-  }
-  else if (xmlHasProp((xmlNodePtr)vectorNode, (xmlChar *)SDTT_VECTORPLUGIN.c_str()))
-  {
-    // Case 2: read using a plug-in
-    XMLException::selfThrow("SiconosDOMTreeTools - getIntVector using a plug-in, not yet implemented");
-  }
-  else
-  {
-    // Case 3: read from a list of values
-    //Size
-    size = getIntegerAttributeValue(vectorNode, SDTT_VECTORSIZE);
-
-    outputVector.resize(size);
-    xmlChar* tmp = xmlNodeGetContent((xmlNode *)vectorNode);
-    string vOut = (char*)tmp;
-    xmlFree(tmp);
-    outputVector = string2Vector(vOut);
-  }
-
-  return outputVector;
-}
-
-SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNode * siconosMatrixNode)
+SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNodePtr siconosMatrixNode)
 {
   if (siconosMatrixNode == NULL)
     XMLException::selfThrow("SiconosDOMTreeTools - getSiconosMatrixValue, node == NULL");
@@ -112,11 +66,11 @@ SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNode * siconosM
   {
     //The matrix is precised in the XML DOM Tree
     //number of lines
-    unsigned int matrixRowSize = getIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXROWSIZE);
+    unsigned int matrixRowSize = getAttributeValue<unsigned int>(siconosMatrixNode, SDTT_MATRIXROWSIZE);
     //number of columns
-    unsigned int matrixColSize = getIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXCOLSIZE);
+    unsigned int matrixColSize = getAttributeValue<unsigned int>(siconosMatrixNode, SDTT_MATRIXCOLSIZE);
 
-    xmlNode *node = SiconosDOMTreeTools::findNodeChild(siconosMatrixNode, SDTT_ROW);
+    xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(siconosMatrixNode, SDTT_ROW);
     unsigned int i = 0;
     SimpleMatrix matrix(matrixRowSize, matrixColSize);
     SimpleVector *v = new SimpleVector(matrixColSize);
@@ -138,7 +92,7 @@ SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNode * siconosM
 }
 
 
-bool SiconosDOMTreeTools::hasAttributeValue(const xmlNode * node, const string& attributeName)
+bool SiconosDOMTreeTools::hasAttributeValue(const xmlNodePtr node, const string& attributeName)
 {
   if (xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
     return true;
@@ -146,99 +100,25 @@ bool SiconosDOMTreeTools::hasAttributeValue(const xmlNode * node, const string& 
     return false;
 }
 
-string SiconosDOMTreeTools::getStringAttributeValue(const xmlNode * node, const string& attributeName)
+string SiconosDOMTreeTools::getStringAttributeValue(const xmlNodePtr node, const string& attributeName)
 {
   if (!xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
     XMLException::selfThrow("SiconosDOMTreeTools - getStringAttributeValue : the attribute " + attributeName + " doesn't exist in tag " + (char*)node->name);
-  xmlChar* tmp = xmlGetProp((xmlNode*)node, (xmlChar *)(attributeName.c_str()));
+  xmlChar* tmp = xmlGetProp((xmlNodePtr)node, (xmlChar *)(attributeName.c_str()));
   string vOut = (char*)tmp;
   xmlFree(tmp);
   return vOut;
 }
 
-int SiconosDOMTreeTools::getIntegerAttributeValue(const xmlNode * node, const string& attributeName)
+string SiconosDOMTreeTools::getStringContentValue(const xmlNodePtr node)
 {
-  if (!xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
-    XMLException::selfThrow("SiconosDOMTreeTools - getIntegerAttributeValue : the attribute " + attributeName + " doesn't exist in tag " + (char*)node->name);
-  xmlChar* tmp = xmlGetProp((xmlNode *)node, (xmlChar *)attributeName.c_str());
-  string vOut = (char*)tmp;
-  xmlFree(tmp);
-  return atoi(vOut.c_str());
-}
-
-
-double SiconosDOMTreeTools::getDoubleAttributeValue(const xmlNode * node, const string&  attributeName)
-{
-  double propDoubleValue;
-
-  if (!xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
-    XMLException::selfThrow("SiconosDOMTreeTools - getDoubleAttributeValue : the attribute " + attributeName + " doesn't exist in tag " + (char*)node->name);
-  xmlChar* tmp = xmlGetProp((xmlNode *)node, (xmlChar *)attributeName.c_str());
-  string vOut = (char*)tmp;
-  xmlFree(tmp);
-  stringstream sstr;
-  sstr <<  vOut;
-  sstr >> propDoubleValue;
-  return propDoubleValue;
-}
-
-bool SiconosDOMTreeTools::getBooleanAttributeValue(const xmlNode * node, const string& attributeName)
-{
-  if (!xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
-    XMLException::selfThrow("SiconosDOMTreeTools - getBooleanAttributeValue : the attribute " + attributeName + " doesn't exist in tag " + (char*)node->name);
-  bool propBooleanValue = false;
-  xmlChar* tmp = xmlGetProp((xmlNode *)node, (xmlChar *)attributeName.c_str());
-  string val = (char  *)tmp;
-  xmlFree(tmp);
-  if (val == "true") propBooleanValue = true;
-  return propBooleanValue;
-}
-
-string SiconosDOMTreeTools::getStringContentValue(const xmlNode * node)
-{
-  xmlChar* tmp = xmlNodeGetContent((xmlNode *)node);
+  xmlChar* tmp = xmlNodeGetContent((xmlNodePtr)node);
   string vOut = (char*)tmp;
   xmlFree(tmp);
   return vOut;
 }
 
-
-int SiconosDOMTreeTools::getIntegerContentValue(const xmlNode * node)
-{
-  xmlChar* tmp = xmlNodeGetContent((xmlNode *)node);
-  string vOut = (char*)tmp;
-  xmlFree(tmp);
-  return atoi(vOut.c_str());
-}
-
-
-double SiconosDOMTreeTools::getDoubleContentValue(const xmlNode * node)
-{
-  xmlChar* tmp = xmlNodeGetContent((xmlNode *)node);
-  string vOut = (char*)tmp;
-  xmlFree(tmp);
-  return atof(vOut.c_str());
-}
-
-bool SiconosDOMTreeTools::getBooleanContentValue(const xmlNode * node)
-{
-  xmlChar* tmp = xmlNodeGetContent((xmlNode *)node);
-  string vOut = (char*)tmp;
-  xmlFree(tmp);
-  if (vOut == "0") return true;
-  else return false;
-}
-
-vector<int> SiconosDOMTreeTools::getVectorIntContentValue(const xmlNode * vectorNode)
-{
-  xmlChar* tmp = xmlNodeGetContent((xmlNode *)vectorNode);
-  string vOut = (char*)tmp;
-  xmlFree(tmp);
-  return string2Vector(vOut);
-}
-
-
-void SiconosDOMTreeTools::setSiconosVectorNodeValue(const xmlNode * siconosVectorNode, const SiconosVector& v)
+void SiconosDOMTreeTools::setSiconosVectorNodeValue(const xmlNodePtr siconosVectorNode, const SiconosVector& v)
 {
   /*
    * if vector size > vectorMaxSize then put the vector in a file linked to the XML file
@@ -252,7 +132,7 @@ void SiconosDOMTreeTools::setSiconosVectorNodeValue(const xmlNode * siconosVecto
   {
     //The vector is defined in the XML DOM Tree
     //Size
-    unsigned int size = getIntegerAttributeValue(siconosVectorNode, SDTT_VECTORSIZE);
+    unsigned int size = getAttributeValue<unsigned int>(siconosVectorNode, SDTT_VECTORSIZE);
 
     string vectorName = (char*)siconosVectorNode->name;
     if (size != v.size())
@@ -264,7 +144,7 @@ void SiconosDOMTreeTools::setSiconosVectorNodeValue(const xmlNode * siconosVecto
   }
 }
 
-void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNode * siconosMatrixNode, const SiconosMatrix& matrix)
+void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNodePtr siconosMatrixNode, const SiconosMatrix& matrix)
 {
   /*
    * if matrix size > xxx then put the matrix in a file linked to the XML file
@@ -278,9 +158,9 @@ void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNode * siconosMatri
   {
     //The matrix is precised in the XML DOM Tree
     //lineSize
-    unsigned int matrixColSize = getIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXCOLSIZE);
+    unsigned int matrixColSize = getAttributeValue<unsigned int>(siconosMatrixNode, SDTT_MATRIXCOLSIZE);
     //rowSize
-    unsigned int matrixRowSize = getIntegerAttributeValue(siconosMatrixNode, SDTT_MATRIXROWSIZE);
+    unsigned int matrixRowSize = getAttributeValue<unsigned int>(siconosMatrixNode, SDTT_MATRIXROWSIZE);
 
     string matrixName = (char*)siconosMatrixNode->name;
 
@@ -290,7 +170,7 @@ void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNode * siconosMatri
     if (matrixRowSize != matrix.size(0))
       XMLException::selfThrow("SiconosDOMTreeTools - setSiconosMatrixValue : the " + matrixName + " matrix row size you want to save is different of the row size defined for it in xml");
 
-    xmlNode *node = SiconosDOMTreeTools::findNodeChild(siconosMatrixNode, SDTT_ROW);
+    xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(siconosMatrixNode, SDTT_ROW);
 
     unsigned int i = 0;
     SimpleVector * matRow = new SimpleVector(matrix.size(1));
@@ -305,16 +185,16 @@ void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNode * siconosMatri
   }
 }
 
-void SiconosDOMTreeTools::setStringAttributeValue(const xmlNode * node, const string attributeName, const string value)
+void SiconosDOMTreeTools::setStringAttributeValue(const xmlNodePtr  node, const string attributeName, const string value)
 {
   if (xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
-    xmlSetProp((xmlNode *) node, (xmlChar *)attributeName.c_str(), (xmlChar *)(value.c_str()));
+    xmlSetProp((xmlNodePtr) node, (xmlChar *)attributeName.c_str(), (xmlChar *)(value.c_str()));
   else
     XMLException::selfThrow("SiconosDOMTreeTools - setStringAttributeValue : the attribute " + attributeName + " doesn't exist in tag " + (char*)node->name);
 }
 
 
-void SiconosDOMTreeTools::setIntegerAttributeValue(const xmlNode * node, const string attributeName, const int value)
+void SiconosDOMTreeTools::setIntegerAttributeValue(const xmlNodePtr  node, const string attributeName, const int value)
 {
   if (xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
   {
@@ -322,13 +202,13 @@ void SiconosDOMTreeTools::setIntegerAttributeValue(const xmlNode * node, const s
     stringstream sstr;
     sstr << value;
     sstr >> stringValue;
-    xmlSetProp((xmlNode *) node, (xmlChar *)attributeName.c_str(), (xmlChar *) stringValue.c_str());
+    xmlSetProp((xmlNodePtr) node, (xmlChar *)attributeName.c_str(), (xmlChar *) stringValue.c_str());
   }
   else
     XMLException::selfThrow("SiconosDOMTreeTools - setIntegerAttributeValue : the attribute " + attributeName + "doesn't exist in tag " + (char*)node->name);
 }
 
-void SiconosDOMTreeTools::setDoubleAttributeValue(const xmlNode * node, const string attributeName, const double value)
+void SiconosDOMTreeTools::setDoubleAttributeValue(const xmlNodePtr  node, const string attributeName, const double value)
 {
   if (xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
   {
@@ -336,55 +216,55 @@ void SiconosDOMTreeTools::setDoubleAttributeValue(const xmlNode * node, const st
     stringstream sstr;
     sstr << value;
     sstr >> stringValue;
-    xmlSetProp((xmlNode *) node, (xmlChar *)attributeName.c_str(), (xmlChar *) stringValue.c_str());
+    xmlSetProp((xmlNodePtr) node, (xmlChar *)attributeName.c_str(), (xmlChar *) stringValue.c_str());
   }
   else
     XMLException::selfThrow("SiconosDOMTreeTools - setDoubleAttributeValue : the attribute " + attributeName + " doesn't exist in tag " + (char*)node->name);
 }
 
 
-void SiconosDOMTreeTools::setBooleanAttributeValue(const xmlNode * node, const string attributeName, const bool value)
+void SiconosDOMTreeTools::setBooleanAttributeValue(const xmlNodePtr  node, const string attributeName, const bool value)
 {
   if (xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
   {
     string stringValue = "false";
     if (value) stringValue = "true";
-    xmlSetProp((xmlNode *) node, (xmlChar *)attributeName.c_str(), (xmlChar *) stringValue.c_str());
+    xmlSetProp((xmlNodePtr) node, (xmlChar *)attributeName.c_str(), (xmlChar *) stringValue.c_str());
   }
   else
     XMLException::selfThrow("SiconosDOMTreeTools - setBooleanAttributeValue : the attribute " + attributeName + " doesn't exist in tag " + (char*)node->name);
 }
 
 
-void SiconosDOMTreeTools::setStringContentValue(const xmlNode * node, const string value)
+void SiconosDOMTreeTools::setStringContentValue(const xmlNodePtr  node, const string value)
 {
-  xmlNodeSetContent((xmlNode *) node, (xmlChar *)value.c_str());
+  xmlNodeSetContent((xmlNodePtr) node, (xmlChar *)value.c_str());
 }
 
 
-void SiconosDOMTreeTools::setIntegerContentValue(const xmlNode * node, const int value)
-{
-  string stringValue;
-  stringstream sstr;
-
-  sstr << value;
-  sstr >> stringValue;
-  xmlNodeSetContent((xmlNode *) node, (xmlChar *)stringValue.c_str());
-}
-
-
-void SiconosDOMTreeTools::setDoubleContentValue(const xmlNode * node, const double value)
+void SiconosDOMTreeTools::setIntegerContentValue(const xmlNodePtr  node, const int value)
 {
   string stringValue;
   stringstream sstr;
 
   sstr << value;
   sstr >> stringValue;
-  xmlNodeSetContent((xmlNode *) node, (xmlChar *)stringValue.c_str());
+  xmlNodeSetContent((xmlNodePtr) node, (xmlChar *)stringValue.c_str());
 }
 
 
-void SiconosDOMTreeTools::setVectorIntContentValue(const xmlNode * vectorNode, const vector<int> v)
+void SiconosDOMTreeTools::setDoubleContentValue(const xmlNodePtr  node, const double value)
+{
+  string stringValue;
+  stringstream sstr;
+
+  sstr << value;
+  sstr >> stringValue;
+  xmlNodeSetContent((xmlNodePtr) node, (xmlChar *)stringValue.c_str());
+}
+
+
+void SiconosDOMTreeTools::setVectorIntContentValue(const xmlNodePtr  vectorNode, const vector<int> v)
 {
   char element[100];
   string vectorContent = "";
@@ -402,17 +282,17 @@ void SiconosDOMTreeTools::setVectorIntContentValue(const xmlNode * vectorNode, c
     else vectorContent = element;
     i++;
   }
-  xmlNodeSetContent((xmlNode *) vectorNode, (xmlChar *)vectorContent.c_str());
+  xmlNodeSetContent((xmlNodePtr) vectorNode, (xmlChar *)vectorContent.c_str());
 }
 
 // -----------------
 
-xmlNode* SiconosDOMTreeTools::createMatrixNode(xmlNode* rootNode, const string& name, const SiconosMatrix& matrix)
+xmlNodePtr SiconosDOMTreeTools::createMatrixNode(xmlNodePtr rootNode, const string& name, const SiconosMatrix& matrix)
 {
   /*
    * \todo if the SiconosMatrix is too big, the SiconosMatrix must be saved in an extern file and only the name of this file must be written in the XML file
    */
-  xmlNode *node;
+  xmlNodePtr node;
   node = xmlNewNode(NULL, BAD_CAST name.c_str());
   //  node = xmlNewChild(rootNode, NULL, BAD_CAST name.c_str(), NULL);
 
@@ -424,7 +304,7 @@ xmlNode* SiconosDOMTreeTools::createMatrixNode(xmlNode* rootNode, const string& 
   sstr2 << matrix.size(0);
   sstr2 >> row;
 
-  xmlNode* rowNode;
+  xmlNodePtr  rowNode;
 
   xmlNewProp(node, (xmlChar*)(SDTT_MATRIXCOLSIZE.c_str()), (xmlChar*)col.c_str());
   xmlNewProp(node, (xmlChar*)(SDTT_MATRIXROWSIZE.c_str()), (xmlChar*)row.c_str());
@@ -444,9 +324,9 @@ xmlNode* SiconosDOMTreeTools::createMatrixNode(xmlNode* rootNode, const string& 
   return node;
 }
 
-xmlNode* SiconosDOMTreeTools::createVectorNode(xmlNode* rootNode, const string& name, const  SiconosVector& v)
+xmlNodePtr  SiconosDOMTreeTools::createVectorNode(xmlNodePtr  rootNode, const string& name, const  SiconosVector& v)
 {
-  xmlNode *node;
+  xmlNodePtr node;
 
   if (v.size() < VECTOR_MAX_SIZE)
   {
@@ -478,9 +358,9 @@ xmlNode* SiconosDOMTreeTools::createVectorNode(xmlNode* rootNode, const string& 
   return node;
 }
 
-xmlNode* SiconosDOMTreeTools::createVectorIntNode(xmlNode* rootNode, const string name, vector<int> v)
+xmlNodePtr  SiconosDOMTreeTools::createVectorIntNode(xmlNodePtr  rootNode, const string name, vector<int> v)
 {
-  xmlNode *node;
+  xmlNodePtr node;
   node = xmlNewNode(NULL, BAD_CAST name.c_str());
 
   setVectorIntContentValue(node, v);
@@ -490,7 +370,7 @@ xmlNode* SiconosDOMTreeTools::createVectorIntNode(xmlNode* rootNode, const strin
   return node;
 }
 
-xmlNode* SiconosDOMTreeTools::createDoubleNode(xmlNode* rootNode, const string name, const double d)
+xmlNodePtr  SiconosDOMTreeTools::createDoubleNode(xmlNodePtr  rootNode, const string name, const double d)
 {
   string stringValue;
   stringstream sstr;
@@ -498,15 +378,15 @@ xmlNode* SiconosDOMTreeTools::createDoubleNode(xmlNode* rootNode, const string n
   sstr << d;
   sstr >> stringValue;
 
-  xmlNode *node;
+  xmlNodePtr node;
   node = xmlNewNode(NULL, BAD_CAST name.c_str());
 
-  xmlNodeSetContent((xmlNode *) node, (xmlChar *)stringValue.c_str());
+  xmlNodeSetContent((xmlNodePtr) node, (xmlChar *)stringValue.c_str());
   xmlAddChildList(rootNode, node);
   return node;
 }
 
-xmlNode* SiconosDOMTreeTools::createIntegerNode(xmlNode* rootNode, const string name, const int i)
+xmlNodePtr  SiconosDOMTreeTools::createIntegerNode(xmlNodePtr  rootNode, const string name, const int i)
 {
   string stringValue;
   stringstream sstr;
@@ -514,57 +394,57 @@ xmlNode* SiconosDOMTreeTools::createIntegerNode(xmlNode* rootNode, const string 
   sstr << i;
   sstr >> stringValue;
 
-  xmlNode *node;
+  xmlNodePtr node;
   node = xmlNewNode(NULL, BAD_CAST name.c_str());
 
-  xmlNodeSetContent((xmlNode *) node, (xmlChar *)stringValue.c_str());
+  xmlNodeSetContent((xmlNodePtr) node, (xmlChar *)stringValue.c_str());
   xmlAddChildList(rootNode, node);
   return node;
 }
 
-xmlNode* SiconosDOMTreeTools::createBooleanNode(xmlNode* rootNode, const string name, const bool b)
+xmlNodePtr  SiconosDOMTreeTools::createBooleanNode(xmlNodePtr  rootNode, const string name, const bool b)
 {
   string stringValue;
 
-  xmlNode *node;
+  xmlNodePtr node;
   node = xmlNewNode(NULL, BAD_CAST name.c_str());
 
   if (b) stringValue = "true";
   else stringValue = "false";
-  xmlNodeSetContent((xmlNode *) node, (xmlChar *)stringValue.c_str());
+  xmlNodeSetContent((xmlNodePtr) node, (xmlChar *)stringValue.c_str());
 
   xmlAddChildList(rootNode, node);
   return node;
 }
 
-xmlNode* SiconosDOMTreeTools::createStringNode(xmlNode* rootNode, const string name, const string s)
+xmlNodePtr  SiconosDOMTreeTools::createStringNode(xmlNodePtr  rootNode, const string name, const string s)
 {
-  xmlNode *node;
+  xmlNodePtr node;
   node = xmlNewNode(NULL, BAD_CAST name.c_str());
 
   //  string str = "\"" + s + "\"";
   string str = s;
-  xmlNodeSetContent((xmlNode *) node, (xmlChar *)str.c_str());
+  xmlNodeSetContent((xmlNodePtr) node, (xmlChar *)str.c_str());
 
   xmlAddChildList(rootNode, node);
   return node;
 }
 
-xmlNode* SiconosDOMTreeTools::createSingleNode(xmlNode* rootNode, const string name)
+xmlNodePtr  SiconosDOMTreeTools::createSingleNode(xmlNodePtr  rootNode, const string name)
 {
-  xmlNode *node;
+  xmlNodePtr node;
   node = xmlNewNode(NULL, BAD_CAST name.c_str());
 
   xmlAddChildList(rootNode, node);
   return node;
 }
 
-void SiconosDOMTreeTools::createStringAttribute(xmlNode* node, const string name, const string s)
+void SiconosDOMTreeTools::createStringAttribute(xmlNodePtr  node, const string name, const string s)
 {
   xmlNewProp(node, (xmlChar*)(name.c_str()), (xmlChar*)s.c_str());
 }
 
-void SiconosDOMTreeTools::createBooleanAttribute(xmlNode* node, const string s, const bool b)
+void SiconosDOMTreeTools::createBooleanAttribute(xmlNodePtr  node, const string s, const bool b)
 {
   string stringValue;
   if (b) stringValue = "true";
@@ -574,9 +454,9 @@ void SiconosDOMTreeTools::createBooleanAttribute(xmlNode* node, const string s, 
 
 // -----------------
 
-xmlNode * SiconosDOMTreeTools::findNodeChild(const xmlNode * node, const string& childNodeName)
+xmlNodePtr  SiconosDOMTreeTools::findNodeChild(const xmlNodePtr  node, const string& childNodeName)
 {
-  xmlNode *childNode = NULL;
+  xmlNodePtr childNode = NULL;
 
   for (childNode = node->children; childNode; childNode = childNode->next)
   {
@@ -591,9 +471,9 @@ xmlNode * SiconosDOMTreeTools::findNodeChild(const xmlNode * node, const string&
   return NULL;
 }
 
-xmlNode * SiconosDOMTreeTools::findNodeChild(const xmlNode * node)
+xmlNodePtr  SiconosDOMTreeTools::findNodeChild(const xmlNodePtr  node)
 {
-  xmlNode *childNode = NULL;
+  xmlNodePtr childNode = NULL;
 
   for (childNode = node->children; childNode; childNode = childNode->next)
   {
@@ -607,9 +487,9 @@ xmlNode * SiconosDOMTreeTools::findNodeChild(const xmlNode * node)
 }
 
 
-xmlNode * SiconosDOMTreeTools::findFollowNode(const xmlNode * node, const string& followNodeName)
+xmlNodePtr  SiconosDOMTreeTools::findFollowNode(const xmlNodePtr  node, const string& followNodeName)
 {
-  xmlNode * n = (xmlNode *)node->next;
+  xmlNodePtr  n = (xmlNodePtr)node->next;
   while (n != NULL)
   {
     if (n->type == XML_ELEMENT_NODE)
@@ -624,9 +504,9 @@ xmlNode * SiconosDOMTreeTools::findFollowNode(const xmlNode * node, const string
   return NULL;
 }
 
-xmlNode * SiconosDOMTreeTools::findFollowNode(const xmlNode * node)
+xmlNodePtr  SiconosDOMTreeTools::findFollowNode(const xmlNodePtr  node)
 {
-  xmlNode * n = (xmlNode *)node->next;
+  xmlNodePtr  n = (xmlNodePtr)node->next;
   while (n != NULL)
   {
     if (n->type == XML_ELEMENT_NODE)
@@ -639,101 +519,7 @@ xmlNode * SiconosDOMTreeTools::findFollowNode(const xmlNode * node)
   return NULL;
 }
 
-
-int SiconosDOMTreeTools::findNextfigureIndex(const string& s, const int& start)
-{
-  int res = -1;
-  int cpt = start;
-  int len = s.length();
-
-  // Exception : out of range
-  if (start >= len)
-    XMLException::selfThrow("SiconosDOMTreeTools - findNextBlankIndex : the index given in parameter is greather than the size of the string");
-
-  while ((cpt < len) && (res == -1))
-  {
-    if (s[cpt] == ' ')
-      cpt++;
-    else res = cpt;
-  }
-  return res;
-}
-
-
-int SiconosDOMTreeTools::findNextBlankIndex(const string& s, const int& start)
-{
-  int res = -1;
-  int cpt = start;
-  int len = s.length();
-
-  // Exception : out of range
-  if (start >= len)
-    XMLException::selfThrow("SiconosDOMTreeTools - findNextBlankIndex : the index given in parameter is greather than the size of the string");
-
-  while ((cpt < len) && (res == -1))
-  {
-    if (s[cpt] != ' ')
-      cpt++;
-    else res = cpt;
-  }
-  return res;
-}
-
-
-vector<double> SiconosDOMTreeTools::string2Vector(const string& vectorContent, const int& size)
-{
-  vector <double> vect(size);
-  int start = 0, nb = 0, end = 0;
-  string stmp1, stmp2 = vectorContent;
-
-  // suppresses tabs and line breaks.
-  for (unsigned int i = 0; i < vectorContent.length(); i++)
-    if (vectorContent[i] == '\n' || vectorContent[i] == '\t')
-    {
-      stmp2[i] = ' ';
-    }
-
-  while ((nb < size) && (end != -1))
-  {
-    start = findNextfigureIndex(stmp2, end);
-    end = findNextBlankIndex(stmp2, start);
-    stmp1 = stmp2.substr(start, end - start);
-    vect[nb] = atof(stmp1.c_str());
-    nb++;
-  }
-  return vect;
-}
-
-
-vector<int> SiconosDOMTreeTools::string2Vector(const string& vectorContent)
-{
-
-  vector <int> vect;
-  int start = 0, nb = 0, end = 0;
-  string stmp1, stmp2 = vectorContent;
-
-  // suppresses tabs and line breaks.
-  for (unsigned int i = 0; i < vectorContent.length(); i++)
-  {
-    if (vectorContent[i] == '\n' || vectorContent[i] == '\t')
-    {
-      stmp2[i] = ' ';
-    }
-  }
-
-  while (end != -1)
-  {
-    start = findNextfigureIndex(stmp2, end);
-    end = findNextBlankIndex(stmp2, start);
-    stmp1 = stmp2.substr(start, end - start);
-    vect.push_back(atoi(stmp1.c_str()));
-    nb++;
-  }
-  return vect;
-}
-
-
-SimpleVector SiconosDOMTreeTools::getSiconosRowMatrixValue(const xmlNode * siconosMatrixRowNode, const int& colSize)
+SimpleVector SiconosDOMTreeTools::getSiconosRowMatrixValue(const xmlNodePtr  siconosMatrixRowNode, const int& colSize)
 {
   if (xmlHasProp((xmlNodePtr) siconosMatrixRowNode, (xmlChar *)SDTT_VECTORFILE.c_str())) //row is defined in a extern ascii file
   {
@@ -744,15 +530,17 @@ SimpleVector SiconosDOMTreeTools::getSiconosRowMatrixValue(const xmlNode * sicon
   {
     //The row is precised in the XML DOM Tree
     //Content
-    xmlChar * tmp =  xmlNodeGetContent((xmlNode *) siconosMatrixRowNode);
+    xmlChar * tmp =  xmlNodeGetContent((xmlNodePtr) siconosMatrixRowNode);
     string vectorContent = (char *)tmp;
-    SimpleVector v(string2Vector(vectorContent.c_str(), colSize));
+    vector<double> tmpV;
+    string2Vector(vectorContent, tmpV);
+    SimpleVector v(tmpV);
     xmlFree(tmp);
     return v;
   }
 }
 
-void SiconosDOMTreeTools::setSiconosRowMatrixValue(const xmlNode * siconosMatrixRowNode, const SiconosVector &v, const unsigned int& colSize)
+void SiconosDOMTreeTools::setSiconosRowMatrixValue(const xmlNodePtr  siconosMatrixRowNode, const SiconosVector &v, const unsigned int& colSize)
 {
   if (colSize != v.size())
     XMLException::selfThrow("SiconosDOMTreeTools - setSiconosRowMatrixValue : a row size you want to save is different of the matrix size defined in xml");
@@ -775,16 +563,16 @@ void SiconosDOMTreeTools::setSiconosRowMatrixValue(const xmlNode * siconosMatrix
   xmlNodeSetContent((xmlNodePtr)siconosMatrixRowNode, (xmlChar *)(vectorContent.c_str()));
 }
 
-int SiconosDOMTreeTools::getNodeChildrenNumber(const xmlNode *node)
+int SiconosDOMTreeTools::getNodeChildrenNumber(const xmlNodePtr node)
 {
   int res = 0;
-  xmlNode *n;
+  xmlNodePtr n;
 
   if ((node == NULL) && (node->type != XML_ELEMENT_NODE))
     res = -1;
   else
   {
-    n = SiconosDOMTreeTools::findNodeChild((const xmlNode*) node);
+    n = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr) node);
     //if( n != NULL ) res++;
 
     while (n != NULL)

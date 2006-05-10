@@ -55,7 +55,7 @@ public:
   */
   inline double getE()
   {
-    return  SiconosDOMTreeTools::getDoubleContentValue(this->ENode);
+    return  SiconosDOMTreeTools::getContentValue<double>(this->ENode);
   }
 
   /** \fn void setE(double e)

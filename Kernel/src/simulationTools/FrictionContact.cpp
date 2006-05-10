@@ -277,23 +277,17 @@ void FrictionContact::computeAllBlocks()
     globalDSSize = 0;
     vector<DynamicalSystem*>::iterator itDS;
     for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
-    {
-      dsType = (*itDS)->getType();
-      if (dsType == LNLDS || dsType == LTIDS)
-        globalDSSize += (*itDS)->getN() / 2;
-      else
-        globalDSSize += (*itDS)->getN();
-    }
+      globalDSSize += (*itDS)->getDim();
 
     // Get Wi matrix of each DS concerned by the interaction and assemble global matrix W
-    OneStepIntegrator * Osi;
+    OneStepIntegrator * Osi ;
     map<DynamicalSystem*, SiconosMatrix*> W;
 
     for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
     {
       Osi = strategy->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
-      if (Osi->getType() == MOREAU_INTEGRATOR)
-        W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr();  // get its W matrix
+      if (Osi->getType() == "Moreau")
+        W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr(*itDS);  // get its W matrix
       else
         RuntimeException::selfThrow("FrictionContact::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
     }
@@ -559,8 +553,8 @@ void FrictionContact::updateBlocks()
     for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
     {
       Osi = strategy->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
-      if (Osi->getType() == MOREAU_INTEGRATOR)
-        W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr();  // get its W matrix
+      if (Osi->getType() == "Moreau")
+        W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr(*itDS);  // get its W matrix
       else
         RuntimeException::selfThrow("FrictionContact::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
     }

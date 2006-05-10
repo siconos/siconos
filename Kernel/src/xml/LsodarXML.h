@@ -44,12 +44,8 @@ public:
    *   \param LsodarNode : the Lsodar DOM tree
    *   \param map<int, bool> definedDSNumbers : to know if DS numbers are not used by another OneStepIntegrator
    */
-  LsodarXML(xmlNode * LsodarNode,  std::map<int, bool> definedDSNumbers);
-
-
+  LsodarXML(xmlNode * LsodarNode);
 private:
-
-  //Nodes
 };
 
 

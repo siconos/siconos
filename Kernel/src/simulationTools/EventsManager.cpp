@@ -61,14 +61,18 @@ const bool EventsManager::insertEvent(const string& type, const double& time)
 
 // PUBLIC METHODS
 
+// RuntimeCmp object used to sort Events in the sets (pastEvents and unProcessedEvents.
+// !!! \todo Find a way to avoid global variable ... !!!
+RuntimeCmp<Event> compareEvents(&Event::getTimeOfEvent);
+
 // Default/from data constructor
 EventsManager::EventsManager(const double& inputTick, Strategy * newStrat):
-  currentEvent(NULL), nextEvent(NULL), tick(inputTick), strategy(newStrat)
+  pastEvents(compareEvents), unProcessedEvents(compareEvents), currentEvent(NULL), nextEvent(NULL), tick(inputTick), strategy(newStrat)
 {}
 
 // copy constructor
 EventsManager::EventsManager(const EventsManager& newManager):
-  currentEvent(NULL), nextEvent(NULL), tick(newManager.getTick()), strategy(newManager.getStrategyPtr())
+  pastEvents(compareEvents), unProcessedEvents(compareEvents), currentEvent(NULL), nextEvent(NULL), tick(newManager.getTick()), strategy(newManager.getStrategyPtr())
 {
   // ?? allow copy of Events ?? => no.
   RuntimeException::selfThrow("EventsManager copy constructor, not yet implemented, please avoid copy!");

@@ -16,11 +16,11 @@
 #
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
-# Makefile.am --- SICONOS
+# Makefile.am --- SICONOS - SiconosAlgebra
 
 include $(top_srcdir)/config/Make-rules
 
-SUBDIRS = SiconosTemplates SiconosException SiconosSharedLibrary SiconosAlgebra SiconosMemory contract
+EXTRA_DIST = RuntimeCmp.h
 
-
+include_HEADERS = RuntimeCmp.h
 

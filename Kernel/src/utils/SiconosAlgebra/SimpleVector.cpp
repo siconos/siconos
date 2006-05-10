@@ -90,14 +90,14 @@ SimpleVector::~SimpleVector()
 
 void SimpleVector::display() const
 {
-  cout << "=== Simple vector display === " << "of size " << size() << endl;
+  cout << "=== Simple vector of size " << size() << ":" << endl;
   if (size() <= M_MAXSIZEFORDISPLAY)
   {
     for (unsigned int i = 0; i < size(); i++)
       cout << lavd(i) << " ";
   }
   else cout << "Display SiconosVector : vector too large" << endl;
-  cout << endl << " ========== " << endl;
+  cout << endl << "=================================== " << endl;
 }
 
 double& SimpleVector::operator()(const int unsigned& index) const

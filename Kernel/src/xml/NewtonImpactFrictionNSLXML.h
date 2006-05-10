@@ -58,7 +58,7 @@ public:
    */
   inline const double getEn() const
   {
-    return  SiconosDOMTreeTools::getDoubleContentValue(enNode);
+    return  SiconosDOMTreeTools::getContentValue<double>(enNode);
   }
 
   /** \fn void setEn(const double& en)
@@ -87,7 +87,7 @@ public:
    */
   inline const double getEt() const
   {
-    return  SiconosDOMTreeTools::getDoubleContentValue(etNode);
+    return  SiconosDOMTreeTools::getContentValue<double>(etNode);
   }
 
   /** \fn void setEt(const double& et)
@@ -116,7 +116,7 @@ public:
    */
   inline const double getMu() const
   {
-    return  SiconosDOMTreeTools::getDoubleContentValue(muNode);
+    return  SiconosDOMTreeTools::getContentValue<double>(muNode);
   }
 
   /** \fn void setMu(const double& mu)

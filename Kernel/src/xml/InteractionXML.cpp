@@ -35,18 +35,18 @@ using namespace std;
 
 InteractionXML::InteractionXML():
   rootInteractionXMLNode(NULL), idNode(NULL), nInterNode(NULL),
-  yNode(NULL),   lambdaNode(NULL),
-  dsConcernedNode(NULL), dsListNode(NULL),  relationXML(NULL), nSLawXML(NULL),
+  yNode(NULL), lambdaNode(NULL),
+  dsConcernedNode(NULL),  relationXML(NULL), nSLawXML(NULL),
   isRelationXMLAllocatedIn(false), isNsLawXMLAllocatedIn(false)
 {}
 
-InteractionXML::InteractionXML(xmlNode * interactionNode, vector<int> definedNumbers):
+InteractionXML::InteractionXML(xmlNodePtr  interactionNode, vector<int> definedNumbers):
   rootInteractionXMLNode(interactionNode), idNode(NULL), nInterNode(NULL),
   yNode(NULL),   lambdaNode(NULL),
-  dsConcernedNode(NULL), dsListNode(NULL), relationXML(NULL), nSLawXML(NULL),
+  dsConcernedNode(NULL), relationXML(NULL), nSLawXML(NULL),
   isRelationXMLAllocatedIn(false), isNsLawXMLAllocatedIn(false)
 {
-  xmlNode *node, *node2;
+  xmlNodePtr node, node2;
   string type;
 
   // id (optional)
@@ -66,23 +66,12 @@ InteractionXML::InteractionXML(xmlNode * interactionNode, vector<int> definedNum
     lambdaNode = node;
   // dsConcerned (required)
   if ((node = SiconosDOMTreeTools::findNodeChild(interactionNode, INTERACTION_DS_CONCERNED)) != NULL)
-  {
     dsConcernedNode = node;
-    // Check if all ds are concerned or not
-    if (! hasAll())
-    {
-      // Get the DSList node
-      if (SiconosDOMTreeTools::findNodeChild(dsConcernedNode, INDEX_LIST) != NULL)
-        dsListNode = SiconosDOMTreeTools::findNodeChild(dsConcernedNode, INDEX_LIST);
-      else
-        XMLException::selfThrow("tag DSlist not found.");
-    }
-  }
   else
     XMLException::selfThrow("InteractionXML - xml constructor, tag " + INTERACTION_DS_CONCERNED + " not found.");
 
   // Relation and Non Smooth Law (required)
-  if ((node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)interactionNode, INTERACTION_CONTENT_TAG)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)interactionNode, INTERACTION_CONTENT_TAG)) != NULL)
   {
     // the first child is the Relation
     if ((node2 = SiconosDOMTreeTools::findNodeChild(node)) != NULL)
@@ -142,21 +131,18 @@ InteractionXML::~InteractionXML()
 
 }
 
-void InteractionXML::updateInteractionXML(xmlNode* node, Interaction* inter)
+void InteractionXML::updateInteractionXML(xmlNodePtr  node, Interaction* inter)
 {
-  IN("InteractionXML::updateInteractionXML\n");
   rootInteractionXMLNode = node;
   loadInteraction(inter);
-  OUT("InteractionXML::updateInteractionXML\n");
 }
 
 // warning: this function has not been reviewed for multiple DS loading !!
 void InteractionXML::loadInteraction(Interaction* inter)
 {
-  IN("InteractionXML::loadInteraction( Interaction* )\n");
   string type;
   string tmp;
-  xmlNode* node;
+  xmlNodePtr  node;
   RelationXML* newRelationXml;
   NonSmoothLawXML* nslxml;
 
@@ -165,7 +151,7 @@ void InteractionXML::loadInteraction(Interaction* inter)
     /*
      * Creation of the RelationXML object
      */
-    xmlNode *InteractionContentNode;
+    xmlNodePtr InteractionContentNode;
     if (inter->getRelationPtr() != NULL)
     {
       type = inter->getRelationPtr()->getType();
@@ -299,24 +285,31 @@ void InteractionXML::loadInteraction(Interaction* inter)
     else RuntimeException::selfThrow("InteractionXML::loadInteraction - There's no NonSmoothLaw in this Interaction, the XML platform can't be built");
   }
   else XMLException::selfThrow("InteractionXML - loadInteraction( Interaction* ) Error : no rootInteractionXMLNode is defined.");
-  OUT("InteractionXML::loadInteraction( Interaction* )\n");
 }
 
 bool InteractionXML::hasAll() const
 {
   if (SiconosDOMTreeTools::hasAttributeValue(dsConcernedNode, ALL_ATTRIBUTE))
-    return SiconosDOMTreeTools::getBooleanAttributeValue(dsConcernedNode, ALL_ATTRIBUTE);
+    return SiconosDOMTreeTools::getAttributeValue<bool>(dsConcernedNode, ALL_ATTRIBUTE);
   else return false;
 }
 
 void InteractionXML::setAll(const bool& all)
 {
-  if (hasAll() == false)
+  if (!hasAll())
   {
-    if (all == true)
+    if (all)
       xmlNewProp(dsConcernedNode, (xmlChar*)ALL_ATTRIBUTE.c_str(), (xmlChar*)"true");
   }
-  else if (all == false)
+  else if (!all)
     xmlRemoveProp(xmlHasProp(dsConcernedNode, (xmlChar*)INTERACTION_DS_CONCERNED.c_str()));
 }
 
+
+void InteractionXML::getDSConcerned(vector<int>& dsNumbers)
+{
+  if (!hasAll())
+    SiconosDOMTreeTools::getVector(dsConcernedNode, dsNumbers);
+  else
+    XMLException::selfThrow("InteractionXML::getDSConcerned - No list of ds, all parameter = true.");
+}

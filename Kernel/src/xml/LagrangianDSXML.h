@@ -306,7 +306,7 @@ public:
    */
   inline void setFintVector(const SiconosVector&v)
   {
-    if (hasFint())
+    if (!hasFint())
     {
       FintNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LNLDS_FINT, v);
     }
@@ -633,7 +633,7 @@ public:
    */
   inline const unsigned int getNdof() const
   {
-    return  SiconosDOMTreeTools::getIntegerContentValue(ndofNode);
+    return  SiconosDOMTreeTools::getContentValue<unsigned int>(ndofNode);
   }
 
   /** \fn void setNdof(const unsigned int& i)

@@ -21,22 +21,16 @@
 using namespace std;
 
 // --- Default constructor ---
-TimeStepping::TimeStepping(Model * newModel): Strategy(newModel)
-{
-  strategyType = "TimeStepping";
-}
+TimeStepping::TimeStepping(Model * newModel): Strategy(newModel, "TimeStepping")
+{}
 
 // --- From Model ---
-TimeStepping::TimeStepping(Model& newModel): Strategy(newModel)
-{
-  strategyType = "TimeStepping";
-}
+TimeStepping::TimeStepping(Model& newModel): Strategy(newModel, "TimeStepping")
+{}
 
 // --- XML constructor ---
-TimeStepping::TimeStepping(StrategyXML* strxml, Model *newModel): Strategy(strxml, newModel)
-{
-  strategyType = "TimeStepping";
-}
+TimeStepping::TimeStepping(StrategyXML* strxml, Model *newModel): Strategy(strxml, newModel, "TimeStepping")
+{}
 
 // --- Destructor ---
 TimeStepping::~TimeStepping()

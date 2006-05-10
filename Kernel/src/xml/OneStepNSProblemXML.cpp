@@ -26,7 +26,7 @@ OneStepNSProblemXML::OneStepNSProblemXML():
   interactionListNode(NULL), solverNode(NULL), solverXML(NULL), isSolverXMLAllocatedIn(false)
 {}
 
-OneStepNSProblemXML::OneStepNSProblemXML(xmlNode * oneStepNSProblemXMLNode, vector<int> definedInteractionNumbers):
+OneStepNSProblemXML::OneStepNSProblemXML(xmlNode * oneStepNSProblemXMLNode):
   rootNode(oneStepNSProblemXMLNode), problemTypeNode(NULL), dimNode(NULL), interactionConcernedNode(NULL),
   interactionListNode(NULL), solverNode(NULL), solverXML(NULL), isSolverXMLAllocatedIn(false)
 {
@@ -88,7 +88,7 @@ void OneStepNSProblemXML::setDimNSProblem(const int& n)
 bool OneStepNSProblemXML::hasAll() const
 {
   if (SiconosDOMTreeTools::hasAttributeValue(interactionConcernedNode, ALL_ATTRIBUTE))
-    return SiconosDOMTreeTools::getBooleanAttributeValue(interactionConcernedNode, ALL_ATTRIBUTE);
+    return SiconosDOMTreeTools::getAttributeValue<bool>(interactionConcernedNode, ALL_ATTRIBUTE);
   else return false;
 }
 void OneStepNSProblemXML::setAll(const bool& all)

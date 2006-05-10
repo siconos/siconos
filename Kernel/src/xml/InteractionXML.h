@@ -52,29 +52,50 @@ const std::string INTERACTION_Y = "y";
 const std::string INTERACTION_LAMBDA = "lambda";
 const std::string INTERACTION_NINTER = "nInter";
 const std::string INTERACTION_DS_CONCERNED = "DS_Concerned";
-const std::string INTERACTION_INTERACTWITHDS_NUMBER = "interactsWithDS_Number";
 const std::string INTERACTION_DS_LIST = "DSList";
 
 class InteractionXML
 {
+private:
+
+  //Nodes
+  xmlNodePtr  rootInteractionXMLNode;
+
+  xmlNodePtr  idNode;
+  xmlNodePtr  nInterNode;
+  xmlNodePtr  yNode;
+  xmlNodePtr  lambdaNode;
+  xmlNodePtr  dsConcernedNode;
+
+  //Relation
+  RelationXML *relationXML;
+
+  //NSLAW
+  NonSmoothLawXML *nSLawXML;
+
+  /** Flags to know if pointers have been allocated inside constructors or not */
+
+  bool isRelationXMLAllocatedIn;
+  bool isNsLawXMLAllocatedIn;
+
 public:
   InteractionXML();
 
-  /** \fn InteractionXML(xmlNode * rootNodeInteraction, int number)
+  /** \fn InteractionXML(xmlNodePtr  rootNodeInteraction, int number)
    *   \brief Build a InteractionXML object from a DOM tree describing a Interaction
-   *   \param xmlNode * interactionNode : the Interaction DOM tree
+   *   \param xmlNodePtr  interactionNode : the Interaction DOM tree
    *   \param vector<int> definedDSNumbers : vector of DSXML numbers to verify DS concerned by the interaction (identified by number) exists
    */
-  InteractionXML(xmlNode * interactionNode, std::vector<int> definedDSNumbers);
+  InteractionXML(xmlNodePtr  interactionNode, std::vector<int> definedDSNumbers);
 
   ~InteractionXML();
 
 
-  /** \fn xmlNode* getInteractionXMLNode()
+  /** \fn xmlNodePtr  getInteractionXMLNode()
    *   \brief Return the root node of the InteractionXML
-   *   \return xmlNode* : the root node
+   *   \return xmlNodePtr  : the root node
    */
-  inline xmlNode* getInteractionXMLNode()
+  inline xmlNodePtr  getInteractionXMLNode()
   {
     return rootInteractionXMLNode;
   }
@@ -85,7 +106,7 @@ public:
    */
   inline int getNumber()
   {
-    return SiconosDOMTreeTools::getIntegerAttributeValue(rootInteractionXMLNode, NUMBER_ATTRIBUTE);
+    return SiconosDOMTreeTools::getAttributeValue<int>(rootInteractionXMLNode, NUMBER_ATTRIBUTE);
   }
 
   /** \fn void setNumber(int i)
@@ -134,7 +155,7 @@ public:
    */
   inline int getNInter()
   {
-    return SiconosDOMTreeTools::getIntegerContentValue(nInterNode);
+    return SiconosDOMTreeTools::getContentValue<int>(nInterNode);
   }
 
   /** \fn void setNumber(int i)
@@ -211,25 +232,11 @@ public:
   }
 
 
-  /** \fn vector<int> getDSConcerned()
-   *   \brief Return the list of ds numbers concerned by the InteractionXML
-   *   \return a vector of int
+  /** \fn void getDSConcerned(vector<int>& dsNumbers)
+   *   \brief fill-in the list of ds-numbers of the interaction
+   *   \param a vector of int
    */
-  inline std::vector<int> getDSConcerned()
-  {
-    if (dsListNode == NULL)
-      XMLException::selfThrow("dsList node == NULL");
-    return SiconosDOMTreeTools::getVectorIntContentValue(dsListNode);
-  }
-
-  /** \fn SimpleVector getDSConcernedVector()
-   *   \brief Return the DSs concerned by the InteractionXML
-   *   \return a simple vector which contains a list of DS number
-   */
-  inline SimpleVector getDSConcernedVector()
-  {
-    return SiconosDOMTreeTools::getSiconosVectorValue(dsListNode);
-  }
+  void getDSConcerned(std::vector<int>& dsNumbers);
 
   /** \fn SimpleVector setDSConcernedVector()
    *   \brief set the DSs concerned by the InteractionXML
@@ -255,12 +262,12 @@ public:
     return nSLawXML;
   }
 
-  /** \fn void updateInteractionXML( xmlNode* node, Interaction* inter );
+  /** \fn void updateInteractionXML( xmlNodePtr  node, Interaction* inter );
    *   \brief makes the operations to add an Interaction to the NSDS
-   *   \param xmlNode* : the root node of the InteractionXML
+   *   \param xmlNodePtr  : the root node of the InteractionXML
    *   \param Interaction* : the Interaction of this InteractionXML
    */
-  void updateInteractionXML(xmlNode* node, Interaction* inter);
+  void updateInteractionXML(xmlNodePtr  node, Interaction* inter);
 
   /** \fn void loadInteraction( Interaction* )
    *   \brief loads the data of the Interaction into the InteractionXML (in the DOM tree)
@@ -279,30 +286,6 @@ public:
    *   \param bool : the value to assign to the attribute
    */
   void setAll(const bool&) ;
-
-private:
-
-  //Nodes
-  xmlNode * rootInteractionXMLNode;
-
-  xmlNode * idNode;
-  xmlNode * nInterNode;
-  xmlNode * yNode;
-  xmlNode * lambdaNode;
-  xmlNode * dsConcernedNode;
-  // Node that contains a list (vector) of the ds concerned by this interaction
-  xmlNode * dsListNode;
-
-  //Relation
-  RelationXML *relationXML;
-
-  //NSLAW
-  NonSmoothLawXML *nSLawXML;
-
-  /** Flags to know if pointers have been allocated inside constructors or not */
-
-  bool isRelationXMLAllocatedIn;
-  bool isNsLawXMLAllocatedIn;
 
 };
 

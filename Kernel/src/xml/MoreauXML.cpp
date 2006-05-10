@@ -19,19 +19,41 @@
 #include "MoreauXML.h"
 using namespace std;
 
-MoreauXML::MoreauXML(): OneStepIntegratorXML(), WNode(NULL), ThetaNode(NULL)
+MoreauXML::MoreauXML(): OneStepIntegratorXML(), thetaNode(NULL), WNode(NULL)
 {}
 
-MoreauXML::MoreauXML(xmlNode * MoreauNode, map<int, bool> definedDSNumbers):
-  OneStepIntegratorXML(MoreauNode, definedDSNumbers), WNode(NULL), ThetaNode(NULL)
+MoreauXML::MoreauXML(xmlNodePtr MoreauNode):
+  OneStepIntegratorXML(MoreauNode), thetaNode(NULL), WNode(NULL)
 {
-  xmlNode *node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(MoreauNode, MOREAU_W)) != NULL)
+  xmlNodePtr node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(MoreauNode, "W")) != NULL)
     WNode = node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(MoreauNode, MOREAU_THETA)) != NULL)
-    ThetaNode = node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(MoreauNode, "Theta")) != NULL)
+    thetaNode = node;
 }
 
 MoreauXML::~MoreauXML()
 {}
 
+void MoreauXML::getTheta(vector<double>& values) const
+{
+  if (hasThetaList())
+    SiconosDOMTreeTools::getVector(thetaNode, values);
+  else
+    XMLException::selfThrow("MoreauXML::getTheta - No list of theta in xml tag.");
+}
+
+void MoreauXML::setTheta(const vector<double>& v)
+{
+  XMLException::selfThrow("OneStepIntegratorXML::setTheta - not yet implemented.");
+  //   if( !hasTheta()) // create the node if it does not exist
+  //     thetaNode = SiconosDOMTreeTools::createVectorNode(rootNode,  "Theta", v);
+  //   else SiconosDOMTreeTools::setSiconosVectorNodeValue(thetaNode, v);
+}
+
+const double MoreauXML::getSingleTheta() const
+{
+  if (!hasAllTheta())
+    XMLException::selfThrow("MoreauXml getSingleTheta: the attribute all is not present in the tag theta");
+  return SiconosDOMTreeTools::getAttributeValue<double>(thetaNode, "all");
+}

@@ -954,9 +954,8 @@ extern "C" int sicOneStepIntegratorMoreau(double *theta)
     // One Step integrator s
     vector <OneStepIntegrator *> vOSI;
     vOSI.resize(dsNumber, NULL);
-    TimeDiscretisation *t = GLOB_STRATEGIE->getTimeDiscretisationPtr();
     for (i = 0; i < dsNumber; i++)
-      vOSI[i] = new Moreau(t, GLOB_VECTOR_DS[i], theta[i]);
+      vOSI[i] = new Moreau(GLOB_VECTOR_DS[i], theta[i], GLOB_STRATEGIE);
 
     GLOB_STRATEGIE->setOneStepIntegrators(vOSI);
   }

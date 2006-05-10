@@ -31,17 +31,10 @@ StrategyXML::StrategyXML():
   strategyNode(NULL), oneStepNSProblemXML(NULL), timeDiscretisationXML(NULL)
 {}
 
-StrategyXML::StrategyXML(xmlNode * rootStrategyNode, vector<int> definedNumberDS, vector<int> definedNumberInteraction):
+StrategyXML::StrategyXML(xmlNodePtr  rootStrategyNode):
   strategyNode(rootStrategyNode), oneStepNSProblemXML(NULL), timeDiscretisationXML(NULL)
 {
-  // Fill map of available DS
-  unsigned int size = definedNumberDS.size();
-  for (unsigned int i = 0; i < size; i++)
-    DSAvailabilityMap[definedNumberDS[i]] = true;
-
-  definedNumberInteractionVector = definedNumberInteraction;
-
-  xmlNode *node;
+  xmlNodePtr node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(strategyNode, LMGC90_STRATEGY_TAG)) == NULL)
   {
@@ -54,18 +47,18 @@ StrategyXML::StrategyXML(xmlNode * rootStrategyNode, vector<int> definedNumberDS
     // === OneStepIntegrator data loading ===
     if ((node = SiconosDOMTreeTools::findNodeChild(strategyNode, ONESTEPINTEGRATOR_DEFINITION_TAG)) != NULL)
     {
-      xmlNode *OSInode;
+      xmlNodePtr OSInode;
       string type; // OneStepIntegrator type
-      if ((OSInode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)node)) == NULL)
+      if ((OSInode = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)node)) == NULL)
         XMLException::selfThrow("StrategyXML - ERROR : at least one " + ONESTEPINTEGRATOR_TAG + " must be declared.");
       while (OSInode != NULL)
       {
         type = (char*)OSInode->name;
         if (type == MOREAU_TAG)
-          oneStepIntegratorXMLVector.push_back(new MoreauXML(OSInode, DSAvailabilityMap));
+          oneStepIntegratorXMLVector.push_back(new MoreauXML(OSInode));
 
         else if (type == LSODAR_TAG)
-          oneStepIntegratorXMLVector.push_back(new LsodarXML(OSInode, DSAvailabilityMap));
+          oneStepIntegratorXMLVector.push_back(new LsodarXML(OSInode));
         else
           XMLException::selfThrow("StrategyXML, Integrator loading : undefined OneStepIntegrator type : " + type);
 
@@ -80,20 +73,20 @@ StrategyXML::StrategyXML(xmlNode * rootStrategyNode, vector<int> definedNumberDS
   // === OneStepNSProblem data loading ===
   if ((node = SiconosDOMTreeTools::findNodeChild(strategyNode, ONESTEPNSPROBLEM_TAG)) != NULL)
   {
-    xmlNode *NSnode = SiconosDOMTreeTools::findNodeChild(node);
+    xmlNodePtr NSnode = SiconosDOMTreeTools::findNodeChild(node);
 
     // !!! first node MUST be formulation for solving ie NSPB type!!!
     if (NSnode != NULL)
     {
       string type((char*)NSnode->name);
       if (type == LCP_TAG)
-        oneStepNSProblemXML = new LCPXML(node, definedNumberInteractionVector);
+        oneStepNSProblemXML = new LCPXML(node);
 
       else if (type == QP_TAG)
-        oneStepNSProblemXML = new QPXML(node, definedNumberInteractionVector);
+        oneStepNSProblemXML = new QPXML(node);
 
       else if (type == FrictionContact2D_TAG || type == FrictionContact3D_TAG)
-        oneStepNSProblemXML = new FrictionContactXML(node, definedNumberInteractionVector);
+        oneStepNSProblemXML = new FrictionContactXML(node);
 
       else if (type == RELAY_TAG) //--Not implemented for the moment
         XMLException::selfThrow("StrategyXML constructor, following OneStepNSProblem is not yet implemented: " + type);
@@ -122,123 +115,124 @@ StrategyXML::~StrategyXML()
 }
 
 // To be reviewed ...
-void StrategyXML::saveStrategy2XML(xmlNode* node, Strategy* str)
+void StrategyXML::saveStrategy2XML(xmlNodePtr  node, Strategy* str)
 {
-  strategyNode = node;
-  string type, tmp;
-  xmlNode *integratorDefinitionNode;
-  OneStepIntegratorXML* osixml;
-  OneStepNSProblemXML* osnspbxml;
-  TimeDiscretisationXML* tdxml;
-  int i;
+  XMLException::selfThrow("StrategyXML saveStrategy2XML, not yet implemented");
 
-  if (strategyNode != NULL)
-  {
-    // === TimeDiscretisation node ===
-    if (str->getTimeDiscretisationPtr()->getTimeDiscretisationXMLPtr() == NULL)
-    {
-      node = xmlNewChild(strategyNode, NULL, (xmlChar*)TIMEDISCRETISATION_TAG.c_str(), NULL);
-      if (str->getTimeDiscretisationPtr()->isConstant())
-        xmlNewProp(node, (xmlChar*)TD_ISCONSTANT.c_str(), (xmlChar*)"true");
+  //   strategyNode = node;
+  //   string type, tmp;
+  //   xmlNodePtr integratorDefinitionNode;
+  //   OneStepIntegratorXML* osixml;
+  //   OneStepNSProblemXML* osnspbxml;
+  //   TimeDiscretisationXML* tdxml;
+  //   int i;
 
-      tdxml = new TimeDiscretisationXML();
+  //   if( strategyNode != NULL )
+  //     {
+  //       // === TimeDiscretisation node ===
+  //       if( str->getTimeDiscretisationPtr()->getTimeDiscretisationXMLPtr() == NULL )
+  //  {
+  //    node = xmlNewChild( strategyNode, NULL, (xmlChar*)TIMEDISCRETISATION_TAG.c_str(), NULL );
+  //    if(str->getTimeDiscretisationPtr()->isConstant())
+  //      xmlNewProp( node, (xmlChar*)TD_ISCONSTANT.c_str(), (xmlChar*)"true" );
 
-      // linkage between the TimeDiscretisation and his TimeDiscretisationXML
-      str->getTimeDiscretisationPtr()->setTimeDiscretisationXMLPtr(tdxml);
+  //    tdxml = new TimeDiscretisationXML();
 
-      // creation of the TimeDiscretisationXML
-      tdxml->updateTimeDiscretisationXML(node, str->getTimeDiscretisationPtr());
+  //    // linkage between the TimeDiscretisation and his TimeDiscretisationXML
+  //    str->getTimeDiscretisationPtr()->setTimeDiscretisationXMLPtr( tdxml );
 
-      timeDiscretisationXML = tdxml;
-    }
+  //    // creation of the TimeDiscretisationXML
+  //    tdxml->updateTimeDiscretisationXML( node, str->getTimeDiscretisationPtr() );
 
-    if (SiconosDOMTreeTools::findNodeChild((const xmlNode*)strategyNode, LMGC90_STRATEGY_TAG) == NULL)
-    {
-      // === integrator_Definition node ===
-      if (!hasOneStepIntegratorXML())
-        integratorDefinitionNode = xmlNewChild(strategyNode, NULL, (xmlChar*)ONESTEPINTEGRATOR_DEFINITION_TAG.c_str(), NULL);
+  //    timeDiscretisationXML = tdxml;
+  //  }
 
-      // creation of the OneStepIntegratorXML objects
-      for (i = 0; i < str->getOneStepIntegratorVectorSize(); i++)
-      {
-        if (str->getOneStepIntegrator(i)->getOneStepIntegratorXMLPtr() == NULL)
-        {
-          type = str->getOneStepIntegrator(i)->getType();
-          if (type == MOREAU_TAG)
-          {
-            node = xmlNewChild(integratorDefinitionNode, NULL, (xmlChar*)MOREAU_TAG.c_str(), NULL);
-            osixml = new MoreauXML();
+  //       if( SiconosDOMTreeTools::findNodeChild((const xmlNodePtr )strategyNode, LMGC90_STRATEGY_TAG) == NULL )
+  //  {
+  //    // === integrator_Definition node ===
+  //    if( !hasOneStepIntegratorXML() )
+  //      integratorDefinitionNode = xmlNewChild(strategyNode, NULL, (xmlChar*)ONESTEPINTEGRATOR_DEFINITION_TAG.c_str(), NULL);
 
-            // linkage between the OneStepIntegrator and his OneStepIntegratorXML
-            str->getOneStepIntegrator(i)->setOneStepIntegratorXMLPtr(osixml);
+  //    // creation of the OneStepIntegratorXML objects
+  //    for(i=0; i < str->getOneStepIntegratorVectorSize(); i++)
+  //      {
+  //        if( str->getOneStepIntegrator(i)->getOneStepIntegratorXMLPtr() == NULL )
+  //    {
+  //      type = str->getOneStepIntegrator(i)->getType();
+  //      if (type == MOREAU_TAG)
+  //        {
+  //          node = xmlNewChild( integratorDefinitionNode, NULL, (xmlChar*)MOREAU_TAG.c_str(), NULL );
+  //          osixml = new MoreauXML();
 
-            // creation of the OneStepIntegratorXML
-            static_cast<MoreauXML*>(osixml)->updateOneStepIntegratorXML(node, str->getOneStepIntegrator(i));
+  //          // linkage between the OneStepIntegrator and his OneStepIntegratorXML
+  //          str->getOneStepIntegrator(i)->setOneStepIntegratorXMLPtr( osixml );
 
-            oneStepIntegratorXMLVector.push_back(osixml);
-          }
-          else if (type == LSODAR_TAG)
-          {
-            node = xmlNewChild(integratorDefinitionNode, NULL, (xmlChar*)LSODAR_TAG.c_str(), NULL);
-            osixml = new LsodarXML();
+  //          // creation of the OneStepIntegratorXML
+  //          static_cast<MoreauXML*>(osixml)->updateOneStepIntegratorXML( node, str->getOneStepIntegrator(i) );
 
-            // linkage between the OneStepIntegrator and his OneStepIntegratorXML
-            str->getOneStepIntegrator(i)->setOneStepIntegratorXMLPtr(osixml);
+  //          oneStepIntegratorXMLVector.push_back( osixml );
+  //        }
+  //      else if (type == LSODAR_TAG)
+  //        {
+  //          node = xmlNewChild( integratorDefinitionNode, NULL, (xmlChar*)LSODAR_TAG.c_str(), NULL );
+  //          osixml = new LsodarXML();
 
-            // creation of the OneStepIntegratorXML
-            static_cast<LsodarXML*>(osixml)->updateOneStepIntegratorXML(node, str->getOneStepIntegrator(i));
+  //          // linkage between the OneStepIntegrator and his OneStepIntegratorXML
+  //          str->getOneStepIntegrator(i)->setOneStepIntegratorXMLPtr( osixml );
 
-            this->oneStepIntegratorXMLVector.push_back(osixml);
-          }
-          else
-            XMLException::selfThrow("StrategyXML - saveStrategy2XML ERROR : undefined integrator type : " + type);
-        }
-      }
-    }
-    else
-      XMLException::selfThrow("StrategyXML - saveStrategy2XML ERROR : LMGC90 strategy not yet implemented");
+  //          // creation of the OneStepIntegratorXML
+  //          static_cast<LsodarXML*>(osixml)->updateOneStepIntegratorXML( node, str->getOneStepIntegrator(i) );
 
-    // === OneStepNSProblemXML ===
-    if (str->getOneStepNSProblemPtr() != NULL)
-    {
-      if (!hasOneStepNSProblemXML())
-        node = xmlNewChild(strategyNode, NULL, (xmlChar*)ONESTEPNSPROBLEM_TAG.c_str(), NULL);
+  //          this->oneStepIntegratorXMLVector.push_back( osixml );
+  //        }
+  //      else
+  //        XMLException::selfThrow("StrategyXML - saveStrategy2XML ERROR : undefined integrator type : " + type );
+  //    }
+  //      }
+  //  }
+  //       else
+  //  XMLException::selfThrow("StrategyXML - saveStrategy2XML ERROR : LMGC90 strategy not yet implemented");
 
-      if (str->getOneStepNSProblemPtr()->getOneStepNSProblemXML() == NULL)
-      {
-        type = str->getOneStepNSProblemPtr()->getType();
-        if (type == LCP_TAG)
-        {
-          xmlNewChild(node, NULL, (xmlChar*)LCP_TAG.c_str(), NULL);
-          osnspbxml = new LCPXML();
+  //       // === OneStepNSProblemXML ===
+  //       if( str->getOneStepNSProblemPtr() != NULL )
+  //  {
+  //    if( !hasOneStepNSProblemXML() )
+  //      node = xmlNewChild(strategyNode, NULL, (xmlChar*)ONESTEPNSPROBLEM_TAG.c_str(), NULL );
 
-          // linkage between the OneStepNSProblem and his OneStepNSProblemXML
-          str->getOneStepNSProblemPtr()->setOneStepNSProblemXML(osnspbxml);
+  //    if( str->getOneStepNSProblemPtr()->getOneStepNSProblemXML() == NULL )
+  //      {
+  //        type = str->getOneStepNSProblemPtr()->getType();
+  //        if (type == LCP_TAG)
+  //    {
+  //      xmlNewChild( node, NULL, (xmlChar*)LCP_TAG.c_str(), NULL );
+  //      osnspbxml = new LCPXML();
 
-          // creation of the OneStepNSProblemXML
-          osnspbxml->updateOneStepNSProblemXML(node, str->getOneStepNSProblemPtr());
+  //      // linkage between the OneStepNSProblem and his OneStepNSProblemXML
+  //      str->getOneStepNSProblemPtr()->setOneStepNSProblemXML( osnspbxml );
 
-          oneStepNSProblemXML = osnspbxml;
-        }
-        else if (type == QP_TAG)
-        {
-          xmlNewChild(node, NULL, (xmlChar*)QP_TAG.c_str(), NULL);
-          osnspbxml = new QPXML();
+  //      // creation of the OneStepNSProblemXML
+  //      osnspbxml->updateOneStepNSProblemXML( node, str->getOneStepNSProblemPtr() );
 
-          // linkage between the OneStepNSProblem and his OneStepNSProblemXML
-          str->getOneStepNSProblemPtr()->setOneStepNSProblemXML(osnspbxml);
+  //      oneStepNSProblemXML = osnspbxml;
+  //    }
+  //        else if (type == QP_TAG)
+  //    {
+  //      xmlNewChild( node, NULL, (xmlChar*)QP_TAG.c_str(), NULL );
+  //      osnspbxml = new QPXML();
 
-          // creation of the OneStepNSProblemXML
-          osnspbxml->updateOneStepNSProblemXML(node, str->getOneStepNSProblemPtr());
+  //      // linkage between the OneStepNSProblem and his OneStepNSProblemXML
+  //      str->getOneStepNSProblemPtr()->setOneStepNSProblemXML( osnspbxml );
 
-          oneStepNSProblemXML = osnspbxml;
-        }
-        else
-          XMLException::selfThrow("StrategyXML - loadStrategy ERROR : undefined OneStepNSProblem type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
-      }
-    }
-  }
-  else XMLException::selfThrow("StrategyXML - loadStrategy ERROR : no strategyNode defined.");
-  OUT("StrategyXML::loadStrategy\n");
+  //      // creation of the OneStepNSProblemXML
+  //      osnspbxml->updateOneStepNSProblemXML( node, str->getOneStepNSProblemPtr() );
+
+  //      oneStepNSProblemXML = osnspbxml;
+  //    }
+  //        else
+  //    XMLException::selfThrow("StrategyXML - loadStrategy ERROR : undefined OneStepNSProblem type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
+  //      }
+  //  }
+  //     }
+  //   else XMLException::selfThrow("StrategyXML - loadStrategy ERROR : no strategyNode defined.");
 }
 

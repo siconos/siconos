@@ -56,7 +56,7 @@ public:
    */
   inline double getC()
   {
-    return  SiconosDOMTreeTools::getDoubleContentValue(this->CNode);
+    return  SiconosDOMTreeTools::getContentValue<double>(this->CNode);
   }
 
   /** \fn double getD()
@@ -65,7 +65,7 @@ public:
    */
   inline double getD()
   {
-    return  SiconosDOMTreeTools::getDoubleContentValue(this->DNode);
+    return  SiconosDOMTreeTools::getContentValue<double>(this->DNode);
   }
 
   /** \fn void setC(double c)

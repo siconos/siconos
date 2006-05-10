@@ -26,10 +26,9 @@ EqualityConstraintXML::EqualityConstraintXML()
   this->computeOutputNode = NULL;
 }
 
-EqualityConstraintXML::EqualityConstraintXML(xmlNode *ecNode, vector<int> definedDSNumbers)
+EqualityConstraintXML::EqualityConstraintXML(xmlNodePtr ecNode, vector<int> definedDSNumbers)
 {
-  IN("EqualityConstraintXML::EqualityConstraintXML(xmlNode*)\n");
-  xmlNode *node;
+  xmlNodePtr node;
   //  string type ( (char*)ecNode->name );
   this->rootNode = ecNode;
 
@@ -39,7 +38,7 @@ EqualityConstraintXML::EqualityConstraintXML(xmlNode *ecNode, vector<int> define
   }
   else
   {
-    XMLException::selfThrow("EqualityConstraintXML - EqualityConstraintXML(xmlNode *ecNode) error : tag " + EQUALITYCONSTRAINT_G + " not found.");
+    XMLException::selfThrow("EqualityConstraintXML - EqualityConstraintXML(xmlNodePtr ecNode) error : tag " + EQUALITYCONSTRAINT_G + " not found.");
   }
 
   if ((node = SiconosDOMTreeTools::findNodeChild(this->rootNode, COMPUTE_INPUT_TAG)) != NULL)
@@ -49,7 +48,7 @@ EqualityConstraintXML::EqualityConstraintXML(xmlNode *ecNode, vector<int> define
     //      //if( SiconosDOMTreeTools::getStringAttributeValue(this->rootRelationXMLNode, RELATION_TYPE) == RELATION_LNL )
     //      if( LAGRANGIAN_NON_LINEAR_RELATION_TAG == type )
     //      {
-    //      XMLException::selfThrow("RelationXML - RelationXML::RelationXML(xmlNode *relationNode) error : tag " + COMPUTE_INPUT_TAG + " not found.");
+    //      XMLException::selfThrow("RelationXML - RelationXML::RelationXML(xmlNodePtr relationNode) error : tag " + COMPUTE_INPUT_TAG + " not found.");
     //      }
     /*else*/ cout << "EqualityConstraintXML - EqualityConstraintXML::EqualityConstraintXML - Warning : tag " << COMPUTE_INPUT_TAG << " not found. This is attribute is optional for this relation" << endl;
     this->computeInputNode = NULL;
@@ -64,7 +63,7 @@ EqualityConstraintXML::EqualityConstraintXML(xmlNode *ecNode, vector<int> define
     //      //if( SiconosDOMTreeTools::getStringAttributeValue(this->rootRelationXMLNode, RELATION_TYPE) == RELATION_LNL )
     //      if( LAGRANGIAN_NON_LINEAR_RELATION_TAG == type )
     //      {
-    //      XMLException::selfThrow("RelationXML - RelationXML::RelationXML(xmlNode *relationNode) error : tag " + COMPUTE_OUTPUT_TAG + " not found.");
+    //      XMLException::selfThrow("RelationXML - RelationXML::RelationXML(xmlNodePtr relationNode) error : tag " + COMPUTE_OUTPUT_TAG + " not found.");
     //      }
     /*else*/ cout << "EqualityConstraintXML - EqualityConstraintXML::EqualityConstraintXML - Warning : tag " << COMPUTE_OUTPUT_TAG << " not found. This is attribute is optional for this relation" << endl;
     this->computeOutputNode = NULL;
@@ -77,26 +76,22 @@ EqualityConstraintXML::EqualityConstraintXML(xmlNode *ecNode, vector<int> define
   }
   else
   {
-    XMLException::selfThrow("EqualityConstraintXML - EqualityConstraintXML(xmlNode *ecNode) error : tag " + EQUALITYCONSTRAINT_DSIO_CONCERNED + " not found.");
+    XMLException::selfThrow("EqualityConstraintXML - EqualityConstraintXML(xmlNodePtr ecNode) error : tag " + EQUALITYCONSTRAINT_DSIO_CONCERNED + " not found.");
   }
-  OUT("EqualityConstraintXML::EqualityConstraintXML(xmlNode*)\n");
 }
 
 EqualityConstraintXML::~EqualityConstraintXML()
 {}
 
 
-void EqualityConstraintXML::loadECConcernedDSIO(xmlNode * DSIOConcernedNode/*, vector<int> definedDSNumbers*/)
+void EqualityConstraintXML::loadECConcernedDSIO(xmlNodePtr  DSIOConcernedNode/*, vector<int> definedDSNumbers*/)
 {
-  IN("EqualityConstraintXML::loadECConcernedDSIO\n ");
-
-  xmlNode *DSIOnode;
+  xmlNodePtr DSIOnode;
   int number;
-  //int size = SiconosDOMTreeTools::getIntegerAttributeValue(DSConcernedNode, INTERACTION_SIZE);
   int size = 0;
   int i = 0;
 
-  if ((DSIOnode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)DSIOConcernedNode, DSINPUTOUTPUT_TAG)) == NULL)
+  if ((DSIOnode = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)DSIOConcernedNode, DSINPUTOUTPUT_TAG)) == NULL)
   {
     XMLException::selfThrow("EqualityConstraintXML - loadECConcernedDSIO error : at least one couple of " + DSINPUTOUTPUT_TAG + " must be declared in " + EQUALITYCONSTRAINT_DSIO_CONCERNED + " tag.");
   }
@@ -104,7 +99,7 @@ void EqualityConstraintXML::loadECConcernedDSIO(xmlNode * DSIOConcernedNode/*, v
   size = SiconosDOMTreeTools::getNodeChildrenNumber(DSIOConcernedNode);
   while ((DSIOnode != NULL) && (i < size))
   {
-    number = SiconosDOMTreeTools::getIntegerAttributeValue(DSIOnode, NUMBER_ATTRIBUTE);
+    number = SiconosDOMTreeTools::getAttributeValue<int>(DSIOnode, NUMBER_ATTRIBUTE);
 
     // \todo : verifying that the DS are defined before
     //    j = 0;
@@ -124,15 +119,13 @@ void EqualityConstraintXML::loadECConcernedDSIO(xmlNode * DSIOConcernedNode/*, v
 
     i++;
   }
-
-  OUT("EqualityConstraintXML::loadECConcernedDSIO\n ");
 }
 
 void EqualityConstraintXML::setDSIOConcerned(vector<int> dsioConcerned)
 {
   if (this->dsioConcernedNode == NULL)
   {
-    xmlNode* node;
+    xmlNodePtr  node;
 
     //    // conversion of the vector<DynamicalSystem*> in vector< vector<int> >
     //    this->dsVector.clear();
@@ -163,9 +156,7 @@ void EqualityConstraintXML::setDSIOConcerned(vector<int> dsioConcerned)
   }
 }
 
-void EqualityConstraintXML::updateEqualityConstraintXML(xmlNode* node, EqualityConstraint* ec)
+void EqualityConstraintXML::updateEqualityConstraintXML(xmlNodePtr  node, EqualityConstraint* ec)
 {
-  IN("EqualityConstraintXML::updateEqualityConstraintXML\n");
-  this->rootNode = node;
-  OUT("EqualityConstraintXML::updateEqualityConstraintXML\n");
+  rootNode = node;
 }

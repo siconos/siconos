@@ -123,20 +123,9 @@
 		<OneStepIntegrator_Definition>
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
 			<Moreau>
-				<DS_Concerned size='1'> <!-- Scaling -->
-					<DS number='1'/>
-				</DS_Concerned>		
-				<Theta> 0.5</Theta>
+				<DS_Concerned vectorSize='2'>1 2</DS_Concerned>		
+				<Theta vectorSize='2'> 0.5 1</Theta>
 			</Moreau>					
-
-			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
-			<Moreau>
-				<DS_Concerned size='1'>				
-					<DS number='2'/>
-				</DS_Concerned>
-				<Theta> 1.0</Theta>
-			</Moreau>					
-
 		</OneStepIntegrator_Definition>
 
 		<!-- One Step NS Problem of th Strategy-->

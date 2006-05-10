@@ -308,7 +308,7 @@ public:
    */
   inline const double getTCurrent() const
   {
-    return SiconosDOMTreeTools::getDoubleContentValue(tNode);
+    return SiconosDOMTreeTools::getContentValue<double>(tNode);
   }
 
   /** \fn double getT0()
@@ -317,7 +317,7 @@ public:
    */
   inline const double getT0() const
   {
-    return  SiconosDOMTreeTools::getDoubleContentValue(t0Node);
+    return  SiconosDOMTreeTools::getContentValue<double>(t0Node);
   }
 
   /** \fn double getT()
@@ -326,7 +326,7 @@ public:
    */
   inline const double getT() const
   {
-    return SiconosDOMTreeTools::getDoubleContentValue(TNode);
+    return SiconosDOMTreeTools::getContentValue<double>(TNode);
   }
 
   /** \fn void setT0(double)

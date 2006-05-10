@@ -41,12 +41,12 @@ public:
 
   EqualityConstraintXML();
 
-  /** \fn EqualityConstraintXML(xmlNode * , vector<int> )
+  /** \fn EqualityConstraintXML(xmlNodePtr  , vector<int> )
   *   \brief Build a EqualityConstraintXML object from a DOM tree describing a EqualityConstraint
-  *   \param xmlNode* : the EqualityConstraint DOM tree
+  *   \param xmlNodePtr  : the EqualityConstraint DOM tree
   *   \param vector<int>  : vector of DSXML numbers to verify DS concerned by the EqualityConstraint (identified by number) exists
   */
-  EqualityConstraintXML(xmlNode*, std::vector<int>);
+  EqualityConstraintXML(xmlNodePtr , std::vector<int>);
   virtual ~EqualityConstraintXML();
 
 
@@ -56,7 +56,7 @@ public:
   */
   inline int getNumber()
   {
-    return SiconosDOMTreeTools::getIntegerAttributeValue(this->rootNode, NUMBER_ATTRIBUTE);
+    return SiconosDOMTreeTools::getAttributeValue<int>(rootNode, NUMBER_ATTRIBUTE);
   }
 
 
@@ -108,12 +108,12 @@ public:
   */
   void setDSIOConcerned(std::vector<int>);
 
-  /** \fn void updateEqualityConstraintXML( xmlNode* node, EqualityConstraint* ec );
+  /** \fn void updateEqualityConstraintXML( xmlNodePtr  node, EqualityConstraint* ec );
   *   \brief makes the operations to create the EqualityConstraint of the Non Smooth Dynamical System
-  *   \param xmlNode* : the root node of the EqualityConstraintXML
+  *   \param xmlNodePtr  : the root node of the EqualityConstraintXML
   *   \param EqualityConstraint* : the Relation of this EqualityConstraintXML
   */
-  void updateEqualityConstraintXML(xmlNode* node, EqualityConstraint* ec);
+  void updateEqualityConstraintXML(xmlNodePtr  node, EqualityConstraint* ec);
 
 
   ///////////////////////////////
@@ -208,23 +208,23 @@ public:
   }
 
 protected :
-  xmlNode * rootNode;
-  xmlNode * GNode;
-  xmlNode * dsioConcernedNode;
+  xmlNodePtr  rootNode;
+  xmlNodePtr  GNode;
+  xmlNodePtr  dsioConcernedNode;
 
-  xmlNode * computeInputNode;
-  xmlNode * computeOutputNode;
+  xmlNodePtr  computeInputNode;
+  xmlNodePtr  computeOutputNode;
 
   /* vector of DSIO numbers*/
   std::vector<int> definedDSIONumbers;
 
 private :
-  /** \fn loadECConcernedDSIO(xmlNode * , vector<int>)
+  /** \fn loadECConcernedDSIO(xmlNodePtr  , vector<int>)
   *   \brief load the DSs concerned by this interaction
-  *   \param xmlNode * : the DOM tree node of DSIO concerned by the EqualityConstraint
+  *   \param xmlNodePtr  : the DOM tree node of DSIO concerned by the EqualityConstraint
   // *   \param vector<int> : vector of DSXML numbers to verify DS concerned by the interaction (identified by number) exists
   */
-  void loadECConcernedDSIO(xmlNode * DSIOConcernedNode/*, std::vector<int> definedDSNumbers*/);
+  void loadECConcernedDSIO(xmlNodePtr  DSIOConcernedNode/*, std::vector<int> definedDSNumbers*/);
 };
 
 #endif // EQUALITYCONSTRAINTXML_H

@@ -23,8 +23,8 @@ FrictionContactXML::FrictionContactXML() :
   OneStepNSProblemXML(), MNode(NULL), qNode(NULL)
 {}
 
-FrictionContactXML::FrictionContactXML(xmlNode * FrictionContactNode, vector<int> definedInteractionNumbers)
-  : OneStepNSProblemXML(FrictionContactNode, definedInteractionNumbers), MNode(NULL), qNode(NULL)
+FrictionContactXML::FrictionContactXML(xmlNode * FrictionContactNode)
+  : OneStepNSProblemXML(FrictionContactNode), MNode(NULL), qNode(NULL)
 {}
 
 FrictionContactXML::~FrictionContactXML() {}

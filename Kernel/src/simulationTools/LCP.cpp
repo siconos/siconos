@@ -308,10 +308,10 @@ void LCP::computeAllBlocks()
     for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
     {
       Osi = strategy->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
-      if (Osi->getType() == MOREAU_INTEGRATOR)
+      if (Osi->getType() == "Moreau")
       {
-        W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr();  // get its W matrix
-        theta[*itDS] = (static_cast<Moreau*>(Osi))->getTheta();  // get its theta
+        W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr(*itDS);  // get its W matrix
+        theta[*itDS] = (static_cast<Moreau*>(Osi))->getTheta(*itDS);  // get its theta
       }
       else
         RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
@@ -734,8 +734,8 @@ void LCP::updateBlocks()
     for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
     {
       Osi = strategy->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
-      if (Osi->getType() == MOREAU_INTEGRATOR)
-        W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr();  // get its W matrix
+      if (Osi->getType() == "Moreau")
+        W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr(*itDS);  // get its W matrix
       else
         RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
     }

@@ -116,7 +116,7 @@ public:
    */
   inline const int getNumber() const
   {
-    return SiconosDOMTreeTools::getIntegerAttributeValue(rootDynamicalSystemXMLNode, NUMBER_ATTRIBUTE);
+    return SiconosDOMTreeTools::getAttributeValue<int>(rootDynamicalSystemXMLNode, NUMBER_ATTRIBUTE);
   }
 
   /** \fn const string getType() const
@@ -162,7 +162,7 @@ public:
    */
   inline const unsigned int getN() const
   {
-    return  SiconosDOMTreeTools::getIntegerContentValue(nNode);
+    return  SiconosDOMTreeTools::getContentValue<unsigned int>(nNode);
   }
 
   /** \fn void setN(const unsigned int& n)
@@ -222,7 +222,7 @@ public:
    */
   inline const unsigned int getStepsInMemory() const
   {
-    return  SiconosDOMTreeTools::getIntegerContentValue(stepsInMemoryNode);
+    return  SiconosDOMTreeTools::getContentValue<unsigned int>(stepsInMemoryNode);
   }
 
   /** \fn inline void setStepsInMemory(const unsigned int& nb)
@@ -347,7 +347,7 @@ public:
   {
     if (!hasUSize())
       XMLException::selfThrow("DynamicalSystemXML - getUSize: this node does not exist");
-    return  SiconosDOMTreeTools::getIntegerContentValue(uSizeNode);
+    return  SiconosDOMTreeTools::getContentValue<unsigned int>(uSizeNode);
   }
 
   /** \fn void setUSize(const unsigned int& us)

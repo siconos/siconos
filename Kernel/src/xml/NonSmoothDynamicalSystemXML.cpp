@@ -40,12 +40,11 @@ using namespace std;
 NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(): NonSmoothDynamicalSystemNode(NULL)
 {}
 
-NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNode * rootNSDSNode): NonSmoothDynamicalSystemNode(rootNSDSNode)
+NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNodePtr  rootNSDSNode): NonSmoothDynamicalSystemNode(rootNSDSNode)
 {
-  IN("NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNode * rootNSDSNode)\n");
   if (rootNSDSNode != NULL)
   {
-    xmlNode *node;
+    xmlNodePtr node;
 
     if ((node = SiconosDOMTreeTools::findNodeChild(NonSmoothDynamicalSystemNode, LMGC90_NSDS_TAG)) == NULL)
     {
@@ -66,7 +65,6 @@ NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNode * rootNSDSNode)
     }
     else cout << "NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem : no dynamical systems defined, use of LMGC90 tag." << endl;
   }
-  OUT("NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNode * rootNSDSNode)\n");
 }
 
 NonSmoothDynamicalSystemXML::~NonSmoothDynamicalSystemXML()
@@ -134,12 +132,11 @@ EqualityConstraintXML* NonSmoothDynamicalSystemXML::getEqualityConstraintXML(int
 
 void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
 {
-  IN("NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* nsds )\n");
   string type;
   string tmp;
-  xmlNode* node, *ecDsioNode;
-  xmlNode* dsDefinitionNode;
-  xmlNode* interactionDefinitionNode, *ecDefinitionNode;
+  xmlNodePtr  node, ecDsioNode;
+  xmlNodePtr  dsDefinitionNode;
+  xmlNodePtr  interactionDefinitionNode, ecDefinitionNode;
   DynamicalSystemXML* dsxml;
   InteractionXML* interactionXML;
   EqualityConstraintXML *ecXML;
@@ -155,10 +152,10 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(NonSmoothDynamica
     setBVP(nsds->isBVP());
 
     // at first, we check whether we the tag is LMGC90 tag
-    if (SiconosDOMTreeTools::findNodeChild((const xmlNode*)NonSmoothDynamicalSystemNode, LMGC90_NSDS_TAG) == NULL)
+    if (SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)NonSmoothDynamicalSystemNode, LMGC90_NSDS_TAG) == NULL)
     {
       // creation of the DS_Definition node if necessary
-      dsDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)NonSmoothDynamicalSystemNode, DYNAMICAL_SYSTEM_DEFINITION_TAG);
+      dsDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)NonSmoothDynamicalSystemNode, DYNAMICAL_SYSTEM_DEFINITION_TAG);
       if (dsDefinitionNode == NULL)
         dsDefinitionNode = xmlNewChild(NonSmoothDynamicalSystemNode, NULL, (xmlChar*)DYNAMICAL_SYSTEM_DEFINITION_TAG.c_str(), NULL);
 
@@ -263,7 +260,7 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(NonSmoothDynamica
     // creation of the EqualityConstraint_Defintion if necessary
     if (nsds->getEqualityConstraints().size() > 0)
     {
-      ecDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)NonSmoothDynamicalSystemNode, EQUALITYCONSTRAINT_DEFINITION_TAG);
+      ecDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)NonSmoothDynamicalSystemNode, EQUALITYCONSTRAINT_DEFINITION_TAG);
       if (ecDefinitionNode == NULL)
         ecDefinitionNode = xmlNewChild(NonSmoothDynamicalSystemNode, NULL, (xmlChar*)EQUALITYCONSTRAINT_DEFINITION_TAG.c_str(), NULL);
 
@@ -374,7 +371,7 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(NonSmoothDynamica
     // creation of the Interaction_Defintion if necessary
     if (nsds->getInteractionVectorSize() > 0)
     {
-      interactionDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNode*)NonSmoothDynamicalSystemNode, INTERACTION_DEFINITION_TAG);
+      interactionDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)NonSmoothDynamicalSystemNode, INTERACTION_DEFINITION_TAG);
       if (interactionDefinitionNode == NULL)
         interactionDefinitionNode = xmlNewChild(NonSmoothDynamicalSystemNode, NULL, (xmlChar*)INTERACTION_DEFINITION_TAG.c_str(), NULL);
 
@@ -412,13 +409,12 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(NonSmoothDynamica
     }
   }
   else XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* nsds ) Error : no NonSmoothDynamicalSystemNode is defined.");
-  OUT("NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* nsds )\n");
 }
 
 
-void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNode * rootDSNode)
+void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNodePtr  rootDSNode)
 {
-  xmlNode *node;
+  xmlNodePtr node;
   int number; //Number of a DS
   map<int, DynamicalSystemXML*>::iterator i;
   string type; //Type of DS
@@ -426,7 +422,7 @@ void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNode * rootDSNode)
 
   isbvp = isBVP();
 
-  node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)rootDSNode);
+  node = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)rootDSNode);
   if (node == NULL)
     XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDynamicalSystemXML error : at least one " + DYNAMICAL_SYSTEM_TAG + " must be declared.");
 
@@ -434,7 +430,7 @@ void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNode * rootDSNode)
   {
     DynamicalSystemXML *dsxml;
 
-    number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
+    number = SiconosDOMTreeTools::getAttributeValue<int>(node, NUMBER_ATTRIBUTE);
     i = DSXMLMap.find(number);
     // we can only add a DS if his number is not already defined
     if (i == DSXMLMap.end())
@@ -444,25 +440,25 @@ void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNode * rootDSNode)
 
       if (type == LAGRANGIAN_NON_LINEARDS_TAG)
       {
-        dsxml = new LagrangianDSXML((xmlNode *)node, isbvp);
+        dsxml = new LagrangianDSXML((xmlNodePtr)node, isbvp);
         DSXMLMap[number] = dsxml;
         dsxml->setDSInputOutputXML(getDSInputOutputXMLRelatingToDS(number));
       }
       else if (type == LAGRANGIAN_TIDS_TAG)
       {
-        dsxml = new LagrangianLinearTIDSXML((xmlNode *)node, isbvp);
+        dsxml = new LagrangianLinearTIDSXML((xmlNodePtr)node, isbvp);
         DSXMLMap[number] = dsxml;
         dsxml->setDSInputOutputXML(getDSInputOutputXMLRelatingToDS(number));
       }
       else if (type == LINEAR_DS_TAG)
       {
-        dsxml = new LinearDSXML((xmlNode *)node, isbvp);
+        dsxml = new LinearDSXML((xmlNodePtr)node, isbvp);
         DSXMLMap[number] = dsxml;
         dsxml->setDSInputOutputXML(getDSInputOutputXMLRelatingToDS(number));
       }
       else if (type == NON_LINEAR_DS_TAG)
       {
-        dsxml = new DynamicalSystemXML((xmlNode *)node, isbvp);
+        dsxml = new DynamicalSystemXML((xmlNodePtr)node, isbvp);
         DSXMLMap[number] = dsxml;
         dsxml->setDSInputOutputXML(getDSInputOutputXMLRelatingToDS(number));
       }
@@ -495,24 +491,24 @@ map<int, DSInputOutputXML*> NonSmoothDynamicalSystemXML::getDSInputOutputXMLRela
   return m;
 }
 
-void NonSmoothDynamicalSystemXML::loadInteractionXML(xmlNode * rootInteractionNode)
+void NonSmoothDynamicalSystemXML::loadInteractionXML(xmlNodePtr  rootInteractionNode)
 {
-  xmlNode *node;
+  xmlNodePtr node;
   int number; //Number of an Interaction
   map<int, InteractionXML*>::iterator i;
 
-  node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)rootInteractionNode, INTERACTION_TAG);
+  node = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)rootInteractionNode, INTERACTION_TAG);
 
   while (node != NULL)
   {
     InteractionXML *interxml;
-    number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
+    number = SiconosDOMTreeTools::getAttributeValue<int>(node, NUMBER_ATTRIBUTE);
 
     i = interactionXMLMap.find(number);
     if (i == interactionXMLMap.end())
     {
       definedInteractionNumbers.push_back(number);
-      interxml = new InteractionXML((xmlNode *)node, definedDSNumbers);
+      interxml = new InteractionXML((xmlNodePtr)node, definedDSNumbers);
       interactionXMLMap[number] = interxml;
     }
     else
@@ -522,25 +518,25 @@ void NonSmoothDynamicalSystemXML::loadInteractionXML(xmlNode * rootInteractionNo
   }
 }
 
-void NonSmoothDynamicalSystemXML::loadEqualityConstraintXML(xmlNode * rootECNode)
+void NonSmoothDynamicalSystemXML::loadEqualityConstraintXML(xmlNodePtr  rootECNode)
 {
-  xmlNode *node;
+  xmlNodePtr node;
   int number; //Number of an EqualityCopnstraint
   map<int, EqualityConstraintXML*>::iterator i;
 
-  node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)rootECNode);
+  node = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)rootECNode);
 
   while (node != NULL)
   {
     EqualityConstraintXML *ecxml;
 
-    number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
+    number = SiconosDOMTreeTools::getAttributeValue<int>(node, NUMBER_ATTRIBUTE);
 
     i = equalityConstraintXMLMap.find(number);
     if (i == equalityConstraintXMLMap.end())
     {
       definedEqualityConstraintNumbers.push_back(number);
-      ecxml = new EqualityConstraintXML((xmlNode *)node, definedDSNumbers);
+      ecxml = new EqualityConstraintXML((xmlNodePtr)node, definedDSNumbers);
       equalityConstraintXMLMap[number] = ecxml;
     }
     else
@@ -552,20 +548,20 @@ void NonSmoothDynamicalSystemXML::loadEqualityConstraintXML(xmlNode * rootECNode
   }
 }
 
-void NonSmoothDynamicalSystemXML::loadDSInputOutputXML(xmlNode * rootdsioNode)
+void NonSmoothDynamicalSystemXML::loadDSInputOutputXML(xmlNodePtr  rootdsioNode)
 {
-  xmlNode *node;
+  xmlNodePtr node;
   int number;
   string type;
   map<int, DSInputOutputXML*>::iterator i;
   DSInputOutputXML *dsioxml;
 
-  node = SiconosDOMTreeTools::findNodeChild((const xmlNode*)rootdsioNode);
+  node = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)rootdsioNode);
 
 
   while (node != NULL)
   {
-    number = SiconosDOMTreeTools::getIntegerAttributeValue(node, NUMBER_ATTRIBUTE);
+    number = SiconosDOMTreeTools::getAttributeValue<int>(node, NUMBER_ATTRIBUTE);
     type = (char*)node->name;
 
     i = dsInputOutputXMLMap.find(number);
@@ -574,25 +570,25 @@ void NonSmoothDynamicalSystemXML::loadDSInputOutputXML(xmlNode * rootdsioNode)
       if (type == LINEAR_DSIO_TAG)
       {
         definedDSInputOutputNumbers.push_back(number);
-        dsioxml = new LinearDSIOXML((xmlNode *)node/*, definedDSNumbers*/);
+        dsioxml = new LinearDSIOXML((xmlNodePtr)node/*, definedDSNumbers*/);
         dsInputOutputXMLMap[number] = dsioxml;
       }
       else if (type == NON_LINEAR_DSIO_TAG)
       {
         definedDSInputOutputNumbers.push_back(number);
-        dsioxml = new DSInputOutputXML((xmlNode *)node/*, definedDSNumbers*/);
+        dsioxml = new DSInputOutputXML((xmlNodePtr)node/*, definedDSNumbers*/);
         dsInputOutputXMLMap[number] = dsioxml;
       }
       else if (type == LAGRANGIAN_DSIO_TAG)
       {
         definedDSInputOutputNumbers.push_back(number);
-        dsioxml = new LagrangianDSIOXML((xmlNode *)node/*, definedDSNumbers*/);
+        dsioxml = new LagrangianDSIOXML((xmlNodePtr)node/*, definedDSNumbers*/);
         dsInputOutputXMLMap[number] = dsioxml;
       }
       else if (type == LAGRANGIAN_LINEAR_DSIO_TAG)
       {
         definedDSInputOutputNumbers.push_back(number);
-        dsioxml = new LagrangianLinearDSIOXML((xmlNode *)node/*, definedDSNumbers*/);
+        dsioxml = new LagrangianLinearDSIOXML((xmlNodePtr)node/*, definedDSNumbers*/);
         dsInputOutputXMLMap[number] = dsioxml;
       }
       else
@@ -607,11 +603,9 @@ void NonSmoothDynamicalSystemXML::loadDSInputOutputXML(xmlNode * rootdsioNode)
   }
 }
 
-void NonSmoothDynamicalSystemXML::updateNonSmoothDynamicalSystemXML(xmlNode* node, NonSmoothDynamicalSystem* nsds)
+void NonSmoothDynamicalSystemXML::updateNonSmoothDynamicalSystemXML(xmlNodePtr  node, NonSmoothDynamicalSystem* nsds)
 {
-  IN("NonSmoothDynamicalSystemXML::updateNonSmoothDynamicalSystemXML\n");
   NonSmoothDynamicalSystemNode = node;
   loadNonSmoothDynamicalSystem(nsds);
-  OUT("NonSmoothDynamicalSystemXML::updateNonSmoothDynamicalSystemXML\n");
 }
 

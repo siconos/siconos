@@ -96,10 +96,8 @@
 		<OneStepIntegrator_Definition>
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
 			<Moreau>
-				<DS_Concerned size='1'> <!-- Scaling -->
-					<DS number='1'/>
-				</DS_Concerned>		
-				<Theta> 0.5</Theta>
+				<DS_Concerned vectorSize='1'>1</DS_Concerned>		
+				<Theta vectorSize='1'> 0.5</Theta>
 			</Moreau>					
 		</OneStepIntegrator_Definition>
 

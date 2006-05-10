@@ -383,6 +383,16 @@ public:
     return number;
   }
 
+  /** \fn const int getNumberForSorting(void) const;
+   *  \brief same as getNumber, but return an unsigned long int, used for set<DynamicalSystem*> in OSI
+   *   as sorting criterion.
+   *  \return the value of number
+   */
+  inline const unsigned long int getNumberForSorting() const
+  {
+    return number;
+  }
+
   /** \fn void setNumber(const int&)
    *  \brief allows to set the value of number
    *  \param an integer to set the value of number

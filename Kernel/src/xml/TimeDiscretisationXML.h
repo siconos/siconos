@@ -85,7 +85,7 @@ public:
    */
   inline double getH() const
   {
-    return  SiconosDOMTreeTools::getDoubleContentValue(hNode);
+    return  SiconosDOMTreeTools::getContentValue<double>(hNode);
   }
 
   /** \fn void setH(const double& d)
@@ -106,7 +106,7 @@ public:
    */
   inline int getN() const
   {
-    return SiconosDOMTreeTools::getIntegerContentValue(NNode);
+    return SiconosDOMTreeTools::getContentValue<int>(NNode);
   }
 
   /** \fn inline void setN(int i)
@@ -151,7 +151,7 @@ public:
   inline double getHMin()const
   {
     if (hasHMin())
-      return SiconosDOMTreeTools::getDoubleContentValue(hMinNode);
+      return SiconosDOMTreeTools::getContentValue<double>(hMinNode);
     else return -1.0;
   }
 
@@ -175,7 +175,7 @@ public:
   inline double getHMax() const
   {
     if (hasHMax())
-      return SiconosDOMTreeTools::getDoubleContentValue(hMaxNode);
+      return SiconosDOMTreeTools::getContentValue<double>(hMaxNode);
     else return -1.0;
   }
 
@@ -215,7 +215,7 @@ public:
    */
   inline bool isConstant() const
   {
-    return SiconosDOMTreeTools::getBooleanAttributeValue(rootNode, TD_ISCONSTANT);
+    return SiconosDOMTreeTools::getAttributeValue<bool>(rootNode, TD_ISCONSTANT);
   }
 
   /** \fn bool hasH()

@@ -35,151 +35,121 @@
 class OneStepIntegrator;
 
 // Tags
-const std::string OSI_R = "r";
-const std::string OSI_DS_CONCERNED = "DS_Concerned";
+const std::string INTERACTIONS_CONCERNED = "Interactions_Concerned";
 
 class OneStepIntegratorXML
 {
+protected:
+
+  /** root node (tag OneStepIntegrator) */
+  xmlNodePtr rootNode;
+
+  /** DSConcerned node (tag DS_Concerned)
+   * Child of rootIntegratorXMLNode */
+  xmlNodePtr DSConcernedNode;
+
+  /** interactionConcerned node (tag Interactions_Concerned)
+   * Child of rootIntegratorXMLNode */
+  xmlNodePtr interactionsConcernedNode;
+
 public:
 
   OneStepIntegratorXML();
 
   /** \fn OneStepIntegratorXML(xmlNode * OneStepIntegratorNode, map<int, bool> definedDSNumbers)
-   *   \brief Build a OneStepIntegratorXML object from a DOM tree describing a OneStepIntegrator
+   *   \brief Build a OneStepIntegratorXML object from the DOM tree
    *   \param OneStepIntegratorNode : the OneStepIntegrator DOM tree
-   *   \param map<int, bool> definedDSNumbers : the DS numbers effectivly defined in the model
-   *   \exception XMLException : if a property of the OneStepIntegrator lacks in the DOM tree
    */
-  OneStepIntegratorXML(xmlNode * OneStepIntegratorNode, std::map<int, bool> definedDSNumbers);
+  OneStepIntegratorXML(xmlNodePtr OneStepIntegratorNode);
 
-  virtual ~OneStepIntegratorXML();
-
-
-  /** \fn int getR()
-   *   \brief Return r of the OneStepIntegrator
-   *   \return The r integer of the OneStepIntegrator
+  /** \fn ~OneStepIntegratorXML();
+   *   \brief destructor
    */
-  inline int getR()
+  virtual ~OneStepIntegratorXML() {};
+
+  /** \fn xmlNodePtr getRootNode() const
+   *   \brief get the root node of the OneStepIntegratorXML
+   *   \return xmlNodePtr
+   */
+  inline xmlNodePtr getRootNode() const
   {
-    return SiconosDOMTreeTools::getIntegerContentValue(this->rNode);
+    return rootNode;
   }
 
-  /** \fn void setR(int r)
-   *   \brief allows to save r of the OneStepIntegrator
-   *   \param The r integer to save
+  /** \fn xmlNodePtr getDSConcernedNode() const
+   *   \brief get the DSConcerned node of the OneStepIntegratorXML
+   *   \return xmlNodePtr
    */
-  inline void setR(int r)
+  inline xmlNodePtr getDSConcernedNode() const
   {
-    if (this->hasR() == false)
-    {
-      this->rNode = SiconosDOMTreeTools::createIntegerNode(this->rootIntegratorXMLNode, OSI_R, r);
-    }
-    else SiconosDOMTreeTools::setIntegerContentValue(this->rNode, r);
+    return DSConcernedNode;
   }
 
-  /** \fn bool hasR()
-   *   \brief determines if the r value is defined for this integrator
-   *   \return bool : true if r is defined
+  /** \fn xmlNodePtr getInteractionsConcernedNode() const
+   *   \brief get the interactionsConcerned node of the OneStepIntegratorXML
+   *   \return xmlNodePtr
    */
-  inline bool hasR()
+  inline xmlNodePtr getInteractionsConcernedNode() const
   {
-    return (this->rNode != NULL);
+    return interactionsConcernedNode;
   }
 
-  /** \fn vector<int> getDSConcerned()
-   *   \brief Return the DS numbers of the OneStepIntegrator
-   *   \return The DS numbers vector of the OneStepIntegrator
-   */
-  inline std::vector<int> getDSConcerned()
-  {
-    return this->DSNumbersVector;
-  }
-
-  /** \fn vector<int> getDSConcerned()
-   *   \brief Return the DS numbers of the OneStepIntegrator
-   *   \return The DS numbers vector of the OneStepIntegrator
-   */
-  void setDSConcerned(std::vector<int>* ds);
-
-
-  /** \fn string getType()
+  /** \fn cosnt string getType() const
    *   \brief Return the type of the OneStepIntegratorXML
-   *   \return The string type of the OneStepIntegratorXML
+   *   \return a string
    */
-  inline std::string getType()
+  inline const std::string getType() const
   {
-    //return SiconosDOMTreeTools::getStringAttributeValue(this->rootIntegratorXMLNode, OSI_TYPE);
-    std::string type((char*)this->rootIntegratorXMLNode->name);
-    return type;
+    return (char*)rootNode->name;
   }
 
-  /** \fn xmlNode* getNode()
-   *   \brief allow to get the root node of the OneStepIntegratorXML
-   *   \return xmlNode* : the root node of the OneStepIntegratorXML
+  /** \fn bool hasDSList()
+   *  \brief true if tag DSConcerned is present
+   *  \return a bool
    */
-  inline xmlNode* getNode() const
+  inline bool hasDSList()
   {
-    return (xmlNode*)this->rootIntegratorXMLNode;
+    return !(DSConcernedNode == NULL);
   }
 
-  /** \fn void updateOneStepIntegratorXML( xmlNode* , OneStepIntegrator*  )
-   *   \brief makes the operations to create a OneStepIntegratorXML to the StrategyXML
-   *   \param xmlNode* : the root node of the OneStepIntegratorXML
-   *   \param Strategy* : the OneStepIntegrator of this OneStepIntegratorXML
+  /** \fn bool hasInteractionsList()
+   *  \brief true if tag interactionsConcernedNode is present
+   *  \return a bool
    */
-  void updateOneStepIntegratorXML(xmlNode* node, OneStepIntegrator* osi);
-
-  /** \fn bool hasAll()
-   *  \brief All is an attribute of the DS_Concerned tag
-   *  \return bool : true if attribute all is defined
-   */
-  inline bool hasAll()
+  inline bool hasInteractionsList()
   {
-    if (SiconosDOMTreeTools::hasAttributeValue(this->DSConcernedNode, ALL_ATTRIBUTE))
-      return SiconosDOMTreeTools::getBooleanAttributeValue(this->DSConcernedNode, ALL_ATTRIBUTE);
-    else return false;
+    return !(interactionsConcernedNode == NULL);
   }
 
-  /** \fn void setAll(bool all)
-   *   \brief Allows to modify the attribute "all" of the DS_concerned tag
-   *   \param bool : the value to assign to the attribute
+  /** \fn bool hasAllDS()
+   *  \brief attribute of the DSConcerned tag - True if all DS of the nsDS are concerned
+   *  \return a bool
    */
-  inline void setAll(bool all)
+  inline bool hasAllDS() const
   {
-    if (this->hasAll() == false)
-    {
-      if (all == true)
-        xmlNewProp(this->DSConcernedNode, (xmlChar*)ALL_ATTRIBUTE.c_str(), (xmlChar*)"true");
-    }
-    else
-    {
-      if (all == false)
-        xmlRemoveProp(xmlHasProp(this->DSConcernedNode, (xmlChar*)ALL_ATTRIBUTE.c_str()));
-    }
+    return SiconosDOMTreeTools::hasAttributeValue(DSConcernedNode, ALL_ATTRIBUTE);
   }
 
-protected:
-  //Nodes
-  xmlNode * rNode;
-  xmlNode * rootIntegratorXMLNode;
-  xmlNode * DSConcernedNode;
-
-private:
-
-  //DSs (DS numbers)
-  std::vector<int> DSNumbersVector;
-
-  //Methods
-
-
-  /** \fn loadOneStepIntegratonConcernedDS(xmlNode * DSConcernedNode, vector<int> definedDSNumbers)
-   *   \brief load the DS numbers of the OneStepIntegrator
-   *   \param xmlNode * DSConcernedNode : the DOM tree node of the concerned DS
-   *   \param map<int, bool> definedDSNumbers : the DS numbers effectivly defined in the model
-   *   \exception XMLException : if a DS of the OneStepIntegrator has not been defined in the model or is already used by another OneStepIntegrator
+  /** \fn bool hasAllInteractions()
+   *  \brief attribute of the interactionsConcerned tag - True if all the interactions of the nsds are concerned
+   *  \return a bool
    */
-  void loadOneStepIntegratorConcernedDS(xmlNode * DSConcernedNode, std::map<int, bool> definedDSNumbers);
+  inline bool hasAllInteractions() const
+  {
+    return SiconosDOMTreeTools::hasAttributeValue(interactionsConcernedNode, ALL_ATTRIBUTE);
+  }
 
+  /** \fn getDSNumbers(vector<int>&)
+   *  \brief return a vector<int> of ds numbers related to the OSI
+   *  \param in-out vector<int>
+   */
+  void getDSNumbers(std::vector<int>&);
+
+  /** \fn getInteractionsNumbers(vector<int>&)
+   *  \brief return a vector<int> of interactions numbers related to the OSI
+   *  \param in-out vector<int>
+   */
+  void getInteractionsNumbers(std::vector<int>&);
 };
 
 

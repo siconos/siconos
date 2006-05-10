@@ -142,12 +142,12 @@ SimpleVector* BlockVector::getVectorPtr(const unsigned int& i)
 
 void BlockVector::display() const
 {
-  cout << "=== Block Display === " << endl;
+  cout << "=== Block vector display === " << endl;
   const int sizeV = svref.size();
-  cout << "with " << sizeV << " simple vectors" << endl;
+  cout << "It handles " << sizeV << " simple vector(s)" << endl;
   for (int i = 0; i < sizeV; i ++)
   {
-    cout << "Vector number " << i << endl;
+    cout << "Vector number " << i << ":" << endl;
     svref[i]->display();
   }
   cout << endl << " ======================== " << endl;

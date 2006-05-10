@@ -83,13 +83,12 @@ public:
    */
   OneStepNSProblemXML();
 
-  /** \fn OneStepNSProblemXML(xmlNode * OneStepNSProblemNode, std::vector<int> definedInteractionNumbers)
+  /** \fn OneStepNSProblemXML(xmlNode * OneStepNSProblemNode)
    *   \brief Build a OneStepNSProblemXML object from a DOM tree describing a OneStepNSProblem
    *   \param OneStepNSProblemNode : the OneStepNSProblem DOM tree
-   *   \param vector<int> definedInteractionNumbers : the Interaction numbers effectivly defined in the model
    *   \exception XMLException : if a property of the OneStepNSProblemXML lacks in the DOM tree
    */
-  OneStepNSProblemXML(xmlNode *, std::vector<int>);
+  OneStepNSProblemXML(xmlNode *);
 
   /** \fn OneStepNSProblemXML()
    *   \brief Destructor
@@ -112,7 +111,7 @@ public:
    */
   inline int getDimNSProblem() const
   {
-    return SiconosDOMTreeTools::getIntegerContentValue(dimNode);
+    return SiconosDOMTreeTools::getContentValue<int>(dimNode);
   }
 
   /** \fn void setDimNSProblem(const int& n)

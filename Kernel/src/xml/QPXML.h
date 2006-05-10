@@ -48,10 +48,9 @@ public:
   /** \fn QPXML(xmlNode * QPNode)
   *   \brief Build a QPXML object from a DOM tree describing a QP
   *   \param QPNode : the QP DOM tree
-  *   \param vector<int> definedInteractionNumbers : the Interaction numbers effectivly defined in the model
   *   \exception XMLException : if a property of the QP lacks in the DOM tree
   */
-  QPXML(xmlNode * QPNode, std::vector<int> definedInteractionNumbers);
+  QPXML(xmlNode * QPNode);
 
   ~QPXML();
 

@@ -34,7 +34,6 @@ Model::Model(char *xmlFile):
   date("none"), xmlSchema(XML_SCHEMA),
   isNsdsAllocatedIn(true), isStrategyAllocatedIn(false), isModelXmlAllocatedIn(true)
 {
-  IN("Model::Model xml\n");
   if (xmlFile != NULL)
   {
     // Built DOMtree
@@ -65,7 +64,6 @@ Model::Model(char *xmlFile):
     }
   }
   else RuntimeException::selfThrow("Model: xml constructor, xmlfile = NULL");
-  OUT("Model::Model xml\n");
 }
 
 // --- From a minimum set of data ---
@@ -75,24 +73,20 @@ Model::Model(const double& newT0, const double& newT, const string& newTitle, co
   author(newAuthor), description(newDescription), date(newDate), xmlSchema(newSchema),
   isNsdsAllocatedIn(false), isStrategyAllocatedIn(false), isModelXmlAllocatedIn(false)
 {
-  IN("Model::constructor from min data\n");
   if (newT > t0) T = newT;
   else if (newT > 0 && newT <= t0)
     RuntimeException::selfThrow("Model::constructor from min data: Warning, final T lower than t0");
   // else no T in the model!
-  OUT("Model::constructor from min data\n");
 }
 
 Model::~Model()
 {
-  IN("Model::~Model()\n");
   if (isNsdsAllocatedIn) delete nsds;
   nsds = NULL;
   if (isStrategyAllocatedIn) delete strat;
   strat = NULL;
   if (isModelXmlAllocatedIn) delete modelxml;
   modelxml = NULL;
-  OUT("Model::~Model()\n");
 }
 
 // --- SETTERS ---
@@ -134,8 +128,6 @@ void Model::setSiconosModelXMLPtr(SiconosModelXML *newPtr)
 // --- XML RELATED FUNCTIONS ---
 void Model::saveToXMLFile(char* xmlFile)
 {
-  IN("Model::saveToXMLFile\n");
-
   cout << "## Model->checkXMLPlatform()" << endl;
   //   the first operation to do is to check the XML objects
   checkXMLPlatform();
@@ -151,22 +143,17 @@ void Model::saveToXMLFile(char* xmlFile)
   cout << "## Model->saveSiconosModelInXMLFile()" << endl;
   //   saves in a file the DOM tree
   modelxml->saveSiconosModelInXMLFile(xmlFile);
-  OUT("Model::saveToXMLFile\n");
 }
 
 void Model::saveToDOMTree()
 {
-  IN("Model::saveToDOMTree\n");
   checkXMLPlatform();
   savePlatformToXML();
   checkXMLDOMTree();
-  OUT("Model::saveToDOMTree\n");
 }
 
 void Model::savePlatformToXML()
 {
-  IN("Model::savePlatformToXML\n");
-
   // update of the data of the Model
   modelxml->setT0(t0);
   modelxml->setT(T);
@@ -194,8 +181,6 @@ void Model::savePlatformToXML()
   }
   else //RuntimeException::selfThrow("Model::saveToXML - object StrategyXML does not exist");
     cout << "Model::saveToXML - Warning : No Strategy is defined" << endl;
-
-  OUT("Model::savePlatformToXML\n");
 }
 
 bool Model::checkXMLDOMTree()
@@ -211,8 +196,6 @@ bool Model::checkXMLDOMTree()
 
 void Model::checkXMLPlatform()
 {
-  IN("Model::checkXMLPlatform\n");
-
   if (modelxml != NULL)
   {
     if (modelxml->getNonSmoothDynamicalSystemXML() != NULL)
@@ -258,8 +241,6 @@ void Model::checkXMLPlatform()
     modelxml = new SiconosModelXML();
     modelxml->loadModel(this);
   }
-
-  OUT("Model::checkXMLPlatform\n");
 }
 
 
@@ -348,7 +329,6 @@ int Model::xmlSchemaValidated(string xmlFile, string xmlSchema)
 
 void Model::display() const
 {
-  IN("Model::display\n");
   cout << " ===== Model display =====" << endl;
   cout << "| current time = " << t << endl;
   cout << "| t0 (initial time) = " << t0 << endl;
@@ -368,7 +348,6 @@ void Model::display() const
   cout << "| title = " << title << endl;
   cout << "| xmlSchema = " << xmlSchema << endl;
   cout << "============================" << endl;
-  OUT("Model::display\n");
 }
 
 //=======================================================

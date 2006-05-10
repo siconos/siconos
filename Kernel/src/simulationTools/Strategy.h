@@ -32,6 +32,7 @@
 #include <iostream>
 #include <vector>
 #include <deque>
+#include <set>
 
 class Model;
 class OneStepIntegrator;
@@ -56,7 +57,15 @@ class StrategyXML;
  *       without a strategy as argument.
  *       Moreover, there is no strategy->setTimeDiscretisation() function
  */
+
+/** vector of OneStepIntegrator */
 typedef std::vector<OneStepIntegrator*> vectorOfOSIPtr;
+
+/** iterator through vector of OSI*/
+typedef std::vector<OneStepIntegrator*>::iterator OSIIterator;
+
+/** const iterator through vector of OSI*/
+typedef std::vector<OneStepIntegrator*>::const_iterator constOSIIterator;
 
 class Strategy
 {
@@ -90,47 +99,53 @@ protected:
 
 public:
 
-  /** \fn Strategy(Model* = NULL)
+  /** \fn Strategy(Model* = NULL, const string& id = "undefined")
    *  \brief default constructor
    *  \param a pointer to the model that owns this strategy. NULL Model leads to exception
+   *  \param string: strategy type, default = undefined
    */
-  Strategy(Model* = NULL);
+  Strategy(Model* = NULL, const std::string& = "undefined");
 
-  /** \fn Strategy(Model&)
+  /** \fn Strategy(Model&,const std::string& = "undefined")
    *  \brief constructor from Model => avoid this function, prefer the one with Model*
    *  \param a Model.
+   *  \param string: strategy type, default = undefined
    */
-  Strategy(Model&);
+  Strategy(Model&, const std::string& = "undefined");
 
-  /** \fn Strategy(vector<OneStepIntegrator*>, OneStepNSProblem*, Model*)
+  /** \fn Strategy(vector<OneStepIntegrator*>, OneStepNSProblem*, Model*, const std::string& = "undefined")
    *  \brief constructor from a given set of data (1)
    *  \param the vector of osi
    *  \param pointer on a OneStepNSProblem
    *  \param the model that owns this strategy
+   *  \param string: strategy type, default = undefined
    */
-  Strategy(vectorOfOSIPtr, OneStepNSProblem *, Model*);
+  Strategy(vectorOfOSIPtr, OneStepNSProblem *, Model*, const std::string& = "undefined");
 
-  /** \fn Strategy(vector<OneStepIntegrator*>, Model*)
+  /** \fn Strategy(vector<OneStepIntegrator*>, Model*, const std::string& = "undefined")
    *  \brief constructor from a given set of data (2)
    *  \param the vector of osi
    *  \param the model that owns this strategy
    *   with previous constructor)
+   *  \param string: strategy type, default = undefined
    */
-  Strategy(vectorOfOSIPtr, Model*);
+  Strategy(vectorOfOSIPtr, Model*, const std::string& = "undefined");
 
-  /** \fn Strategy(OneStepNSProblem *, Model* )
+  /** \fn Strategy(OneStepNSProblem *, Model* , const std::string& = "undefined")
    *  \brief constructor from a given set of data (3)
    *  \param pointer to a OneStepNSProblem
    *  \param the model that owns this strategy
+   *  \param string: strategy type, default = undefined
    */
-  Strategy(OneStepNSProblem *, Model*);
+  Strategy(OneStepNSProblem *, Model*, const std::string& = "undefined");
 
-  /** \fn Strategy(StrategyXML*, Model*)
+  /** \fn Strategy(StrategyXML*, Model*, const std::string& = "undefined")
    *  \brief constructor with XML object of the Strategy
    *  \param StrategyXML* : the XML object corresponding
    *  \param the model which owns this strategy  (optional parameter)
+   *  \param string: strategy type, default = undefined
    */
-  Strategy(StrategyXML*, Model*);
+  Strategy(StrategyXML*, Model*, const std::string& = "undefined");
 
   /** \fn ~Strategy()
    *  \brief destructor
@@ -293,10 +308,7 @@ public:
    *  \brief add an Integrator into the vector of Integrators
    *  \param the OneStepIntegrator to add
    */
-  void addOneStepIntegrator(OneStepIntegrator *osi)
-  {
-    integratorVector.push_back(osi);
-  };
+  void addOneStepIntegrator(OneStepIntegrator *osi);
 
   /** \fn void computeFreeState()
    *  \brief integrates all the DynamicalSystem taking not into account nslaw, reactions ...
@@ -364,7 +376,7 @@ public:
    *  \param double : the theta value
    *  \return OneStepIntegrator* : the OneStepIntegrator created
    */
-  OneStepIntegrator* addMoreau(TimeDiscretisation* td, DynamicalSystem* ds, const double& theta);
+  OneStepIntegrator* addMoreau(TimeDiscretisation* , DynamicalSystem* , const double&);
 
   /** \fn OneStepIntegrator* addLsodar(TimeDiscretisation* td, DynamicalSystem* ds)
    *  \brief allows to add an Lsodar integrator to the Strategy
@@ -372,14 +384,19 @@ public:
    *  \param DynamicalSystem* : the DynamicalSystem that OneStepIntegrator must integrate
    *  \return OneStepIntegrator* : the OneStepIntegrator created
    */
-  OneStepIntegrator* addLsodar(TimeDiscretisation* td, DynamicalSystem* ds);
+  OneStepIntegrator* addLsodar(TimeDiscretisation* , DynamicalSystem*);
 
   /** \fn bool hasDynamicalSystemIntegrator( DynamicalSystem* ds) const
-   *  \brief checks if a DynamicalSystem owns already an OneStepIntegrator
-   *  \return bool : false if the DynamicalSystem has no OneStepIntegrator, else true
+   *  \brief check if ds is already present in an OSI of the strategy.
+   *  \return a bool
    */
-  bool hasDynamicalSystemIntegrator(DynamicalSystem* ds) const ;
+  bool hasDynamicalSystemIntegrator(DynamicalSystem*) const ;
 
+  /** \fn bool hasDynamicalSystemIntegrator( OneStepIntegrator* osi) const
+   *  \brief check if a DynamicalSystem of osi is already present in another OSI of the strategy.
+   *  \return a bool
+   */
+  bool hasDynamicalSystemIntegrator(OneStepIntegrator*) const ;
 };
 
 #endif // STRATEGY_H

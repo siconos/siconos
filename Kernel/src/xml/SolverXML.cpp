@@ -34,7 +34,7 @@ string SolverXML::getType() const
 unsigned int SolverXML::getMaxIter() const
 {
   if (xmlHasProp(rootNode, (xmlChar *)"maxIter"))
-    return SiconosDOMTreeTools::getIntegerAttributeValue(rootNode, "maxIter");
+    return SiconosDOMTreeTools::getAttributeValue<int>(rootNode, "maxIter");
   else return DEFAULT_ITER;
 }
 

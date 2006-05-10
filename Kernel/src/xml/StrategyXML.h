@@ -48,7 +48,7 @@ class StrategyXML
 private:
 
   /* root node for strategy */
-  xmlNode *strategyNode;
+  xmlNodePtr strategyNode;
 
   /* vector of OneStepIntegratorXML* */
   std::vector<OneStepIntegratorXML*> oneStepIntegratorXMLVector;
@@ -60,10 +60,6 @@ private:
   /* TimeDiscretisationXML */
   TimeDiscretisationXML *timeDiscretisationXML;
 
-  //---
-  /* Map of availables DS : DS defined in the model / for OneStepIntegrator : to know if a DS is already used by another OneStepIntegrator or if well defined */
-  std::map<int, bool> DSAvailabilityMap;
-
   /* Vector of defined Interaction in the model / for OneStepNSProblem : to know if an interactiion is well defined*/
   std::vector<int> definedNumberInteractionVector;
 
@@ -73,14 +69,12 @@ public:
   StrategyXML();
 
 
-  /** \fn StrategyXML(xmlNode * rootStrategyNode)
+  /** \fn StrategyXML(xmlNodePtr  rootStrategyNode)
    *   \brief Build a StrategyXML object from a DOM tree describing a Strategy - verifying DS indicated by numbers in OneStepIntegrators exist
    *   \param rootNSDSNode : the NSDS DOM tree
-   *   \param definedNumberDS : the numbers of the defined DS in the Model
-   *   \param definedNumberInteraction : the numbers of the defined Interaction in the Model
    *   \exception XMLException : if a property of the LagrangianLinearR lacks in the DOM tree
    */
-  StrategyXML(xmlNode * rootStrategyNode, std::vector<int> definedNumberDS, std::vector<int> definedNumberInteraction);
+  StrategyXML(xmlNodePtr  rootStrategyNode);
 
   // --- Destructor ---
   ~StrategyXML();
@@ -142,13 +136,13 @@ public:
     return definedNumberInteractionVector;
   }
 
-  /** \fn inline xmlNode* getNode()
+  /** \fn inline xmlNodePtr  getNode()
    *  \brief allows to get the root node of the Strategy
    *  \return xmlNode : the rootNode of the Strategy
    */
-  inline xmlNode* getNode()
+  inline xmlNodePtr  getNode()
   {
-    return (xmlNode*)strategyNode;
+    return (xmlNodePtr)strategyNode;
   }
 
 
@@ -161,12 +155,12 @@ public:
     return (oneStepNSProblemXML != NULL);
   }
 
-  /** \fn void saveStrategy2XML( xmlNode* node, Strategy* str )
+  /** \fn void saveStrategy2XML( xmlNodePtr  node, Strategy* str )
    *   \brief save data of str into the DOM tree
-   *   \param xmlNode* : the root node of the StrategyXML
+   *   \param xmlNodePtr  : the root node of the StrategyXML
    *   \param Strategy* : the Strategy of this StrategyXML
    */
-  void saveStrategy2XML(xmlNode* , Strategy*);
+  void saveStrategy2XML(xmlNodePtr  , Strategy*);
 };
 
 

@@ -54,26 +54,34 @@ private:
   /** iwork */
   integer * iwork;
 
-  /** \fn Lsodar()
+  /** temporary vector to save x values */
+  BlockVector* xWork;
+
+  /** \fn Lsodar(Strategy* = NULL)
    *  \brief default constructor
+   *  \param Strategy * : the strategy that owns the osi, default = NULL
    */
-  Lsodar();
+  Lsodar(Strategy* = NULL);
 
 public:
 
-  /** \fn Lsodar(OneStepIntegratorXML*)
+  /** \fn Lsodar(OneStepIntegratorXML*, Strategy* = NULL)
    *  \brief constructor from xml file
    *  \param OneStepIntegratorXML* : the XML object
+   *  \param Strategy * : the strategy that owns the osi, default = NULL
    */
-  Lsodar(OneStepIntegratorXML*);
+  Lsodar(OneStepIntegratorXML*, Strategy* = NULL);
 
   /** \fn Lsodar(TimeDiscretisation*, DynamicalSystem* )
    *  \brief constructor from a minimum set of data
-   *  \param TimeDiscretisation* : the TimeDiscretisation of the OneStepIntegrator
    *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
+   *  \param Strategy * : the strategy that owns the osi, default = NULL
    */
-  Lsodar(TimeDiscretisation*, DynamicalSystem*);
+  Lsodar(DynamicalSystem* , Strategy* = NULL);
 
+  /** \fn ~Lsodar()
+   *  \brief destructor
+   */
   ~Lsodar();
 
   /** \fn TimeDiscretisation* getTimeDiscretisationPtr()
@@ -174,6 +182,21 @@ public:
    */
   void updateData();
 
+  /** \fn void fillXWork(doublereal * x)
+   *  \brief fill xWork with a doublereal
+   */
+  void fillXWork(doublereal *) ;
+
+  /** \fn void computeRhs(const double& t) ;
+   *  \brief compute rhs(t) for all dynamical systems in the set
+   */
+  void computeRhs(const double&) ;
+
+  /** \fn void computeJacobianRhs(const double& t) ;
+   *  \brief compute jacobian of the rhs at time t for all dynamical systems in the set
+   */
+  void computeJacobianRhs(const double&) ;
+
   void f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot);
 
   void g(integer * nEq, doublereal * time, doublereal* x, integer * ng, doublereal * gOut);
@@ -189,11 +212,6 @@ public:
    *   \brief compute the free state of the dynamical system
    */
   void computeFreeState();
-
-  /** \fn void integrate()
-   *   \brief integrates the dynamical system
-   */
-  void integrate();
 
   /** \fn void integrate(const double&, const double&, double&, bool&)
    *  \brief integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
@@ -215,6 +233,12 @@ public:
    * \return a pointer on the integrator if it is of the right type, NULL otherwise
    */
   //static Lsodar* convert (OneStepIntegrator* osi);
+
+  /** \fn void display()
+   *  \brief print the data to the screen
+   */
+  void display() const;
+
 
 };
 

@@ -19,6 +19,7 @@
 #ifndef ONESTEPINTEGRATOR_H
 #define ONESTEPINTEGRATOR_H
 
+#include "RuntimeCmp.h"
 #include "TimeDiscretisation.h"
 #include "DynamicalSystem.h"
 #include "SiconosMatrix.h"
@@ -30,14 +31,12 @@
 #include "check.h"
 #include <iostream>
 #include <vector>
-
-const std::string MOREAU_INTEGRATOR = "Moreau";
-const std::string ADAMS_INTEGRATOR = "Adams";
-const std::string LSODAR_INTEGRATOR = "LSODAR";
+#include <set>
 
 class DynamicalSystem;
 class TimeDiscretisation;
 class OneStepIntegratorXML;
+class Strategy;
 
 /** \class OneStepIntegrator
  *  \brief It's the generic object which can integre a DynamicalSystem
@@ -47,50 +46,72 @@ class OneStepIntegratorXML;
  *
  * !!! This is a virtual class, interface for some specific integrators !!!
  *
- * At the time, available integrators are: Moreau, LSodar and Adams.
+ * At the time, available integrators are: Moreau and Lsodar
  *
+ * dsSet, interactionsSet ... are defined in Strategy.h
  */
+
+/** set of Dynamical Systems */
+typedef std::set<DynamicalSystem*, RuntimeCmp<DynamicalSystem> > dsSet;
+
+/** set of Interactions */
+typedef std::set<Interaction*> interactionSet;
+
+/** iterator through a set of Dynamical Systems */
+typedef dsSet::iterator dsIterator;
+
+/** iterator through a set of Interactions */
+typedef interactionSet::iterator interactionIterator;
+
 class OneStepIntegrator
 {
 protected:
 
-  // -- Members --
-  /** type of the Integrator */
+  /** type/name of the Integrator */
   std::string integratorType;
 
-  /** The DynamicalSystem to integrate */
-  DynamicalSystem *ds;
+  /** a set of DynamicalSystem to integrate */
+  dsSet dsList;
+
+  /** a set of Interactions to define a list of *
+   * dynamical systems to be integrated, with some *
+   * constraints to be taken into account */
+  interactionSet interactionsList;
 
   /** size of the memory for the integrator */
-  int sizeMem;
+  unsigned int sizeMem;
 
-  /** The time discretisation */
-  TimeDiscretisation *timeDiscretisation;
+  /** A link to the strategy that owns this OSI */
+  Strategy * strategyLink;
 
   /** the corresponding XML object */
   OneStepIntegratorXML *integratorXml;
 
   // -- Default constructor --
-  /** \fn OneStepIntegrator()
+  /** \fn OneStepIntegrator(const std::string& = "undefined", Strategy* = NULL)
    *  \brief default constructor
+   *  \param string, integrator type/name
+   *  \param Strategy * : the strategy that owns the osi, default = NULL
    */
-  OneStepIntegrator();
+  OneStepIntegrator(const std::string& = "undefined", Strategy* = NULL);
 
 public:
 
-  /** \fn OneStepIntegrator(OneStepIntegratorXML*)
+  /** \fn OneStepIntegrator(const std::string&, OneStepIntegratorXML*, Strategy* = NULL)
    *  \brief constructor from xml file
+   *  \param string, integrator type/name
    *  \param OneStepIntegratorXML* : the corresponding XML object
+   *  \param Strategy * : the strategy that owns the osi, default = NULL
    */
-  OneStepIntegrator(OneStepIntegratorXML*);
+  OneStepIntegrator(const std::string&, OneStepIntegratorXML*, Strategy* = NULL);
 
-  /** \fn OneStepIntegrator(TimeDiscretisation*, DynamicalSystem* )
+  /** \fn OneStepIntegrator(const std::string&, const dsSet& , Strategy* = NULL)
    *  \brief constructor from a minimum set of data
-   *  \param TimeDiscretisation* : the TimeDiscretisation of the OneStepIntegrator
+   *  \param string, integrator type/name
    *  \param DynamicalSystem* : the DynamicalSystem to be integrated
+   *  \param Strategy * : the strategy that owns the osi, default = NULL
    */
-  OneStepIntegrator(TimeDiscretisation*, DynamicalSystem*);
-
+  OneStepIntegrator(const std::string&, const dsSet&, Strategy* = NULL);
 
   /** \fn ~OneStepIntegrator()
    *  \brief destructor
@@ -117,23 +138,47 @@ public:
     integratorType = newType;
   }
 
-  /** \fn DynamicalSystem* getDynamicalSystemPtr()
+  /** \fn dsSet getDynamicalSystemsList()
+    *  \brief get the set of DynamicalSystem associated with the Integrator
+    *  \return a dsSet
+    */
+  inline dsSet getDynamicalSystemsList() const
+  {
+    return dsList;
+  };
+
+  /** \fn void setDynamicalSystemsList(const dsSet&)
+   *  \brief set the DynamicalSystem list of this Integrator
+   *  \param a dsSet
+   */
+  void setDynamicalSystemsList(const dsSet&);
+
+  /** \fn interactionSet getInteractionsList()
+    *  \brief get the set of Interaction associated with the Integrator
+    *  \return an interactionSet
+    */
+  inline interactionSet getInteractionsList() const
+  {
+    return interactionsList;
+  };
+
+  /** \fn void setInteractionsList(const interactionSet&)
+   *  \brief set the Interaction list of this Integrator
+   *  \param an interactionSet
+   */
+  void setInteractionsList(const interactionSet&);
+
+  /** \fn * getDynamicalSystemPtr()
     *  \brief get the DynamicalSystem associated with the Integrator
     *  \return a DS
     */
-  inline DynamicalSystem* getDynamicalSystemPtr() const
-  {
-    return ds;
-  };
+  //  inline DynamicalSystem* getDynamicalSystemPtr() const {return ds;};
 
   /** \fn void setDynamicalSystemPtr(DynamicalSystem*)
    *  \brief set the DynamicalSystem of this Integrator
    *  \param a pointer to a DynamicalSystem
    */
-  inline void setDynamicalSystemPtr(DynamicalSystem* newDs)
-  {
-    ds = newDs;
-  };
+  //inline void setDynamicalSystemPtr(DynamicalSystem* newDs) {ds = newDs;};
 
   /** \fn const unsigned int getSizeMem() const
    *  \brief get sizeMem value
@@ -153,28 +198,29 @@ public:
     sizeMem = newValue;
   };
 
-  /** \fn TimeDiscretisation* getTimeDiscretisationPtr()
-   *  \brief get the TimeDiscretisation pointer
-   *  \return a pointer on the TimeDiscretisation
-   */
-  inline TimeDiscretisation* getTimeDiscretisationPtr() const
+  /** \fn inline Strategy* getStrategyPtr()
+    *  \brief get the Strategy that owns the OneStepIntegrator
+    *  \return a pointer to Strategy
+    */
+  inline Strategy* getStrategyPtr() const
   {
-    return timeDiscretisation;
-  };
+    return strategyLink;
+  }
 
-  /** \fn void setTimeDiscretisationPtr(TimeDiscretisation*)
-   *  \brief set the TimeDiscretisation pointer
-   *  \param a pointer on a TimeDiscretisation
+  /** \fn inline void setStrategyPtr(Strategy*)
+   *  \brief set the Strategy of the OneStepIntegrator
+   *  \param a pointer to Strategy
    */
-  inline void setTimeDiscretisationPtr(TimeDiscretisation* td)
+  inline void setStrategyPtr(Strategy* newS)
   {
-    timeDiscretisation = td;
-  };
+    std::cout << "OneStepIntegrator::setStrategyPtr - Warning: this operation requires a re-initialisation of the integrator." << std::endl;
+    strategyLink = newS;
+  }
 
   /** \fn inline OneStepIntegratorXML* getOneStepIntegratorXMLPtr()
-   *  \brief get the OneStepIntegratorXML of the OneStepIntegrator
-   *  \return a pointer on the OneStepIntegratorXML of the OneStepIntegrator
-   */
+    *  \brief get the OneStepIntegratorXML of the OneStepIntegrator
+    *  \return a pointer on the OneStepIntegratorXML of the OneStepIntegrator
+    */
   inline OneStepIntegratorXML* getOneStepIntegratorXMLPtr() const
   {
     return integratorXml;
@@ -188,7 +234,6 @@ public:
   {
     integratorXml = newIntegratorXml;
   }
-
 
   // --- OTHERS ... ---
 
@@ -206,16 +251,9 @@ public:
   virtual void nextStep();
 
   /** \fn void computeFreeState()
-   *  \brief set r = 0 and integrates the DS
-   *  \exception RuntimeException if the integration method for this type of DS is not implemented
-   *  \return void
+   *  \brief integrates the Dynamical System linked to this integrator without boring the constraints
    */
   virtual void computeFreeState() = 0;
-
-  /** \fn void integrate()
-   *  \brief not implemented
-   */
-  virtual void integrate() = 0;
 
   /** \fn void integrate(const double&, const double&, double&, bool&)
    *  \brief integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
@@ -224,7 +262,7 @@ public:
    *  \param double: tout, real end time
    *  \param bool: true if tend is reached, else false.
    */
-  virtual void integrate(const double&, const double&, double&, bool&);
+  virtual void integrate(const double&, const double&, double&, bool&) = 0;
 
   /** \fn void updateState()
    *  \brief update the state of the DynamicalSystem attached to this Integrator

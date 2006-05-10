@@ -141,7 +141,7 @@ bool DiodeBridge()
     TimeDiscretisation* TiDiscRLCD = new TimeDiscretisation(h_step, StratDiodeBridge);
 
     double theta = 1;
-    Moreau* OSI_RLCD = new Moreau(TiDiscRLCD, LSDiodeBridge, theta);
+    Moreau* OSI_RLCD = new Moreau(LSDiodeBridge, theta, StratDiodeBridge);
 
     vector<OneStepIntegrator*> vOSI_RLCD(1);
     vOSI_RLCD[0] = OSI_RLCD;

@@ -34,7 +34,7 @@ LagrangianRXML::LagrangianRXML(xmlNode * LNLRelationNode)
   if ((node = SiconosDOMTreeTools::findNodeChild(rootRelationXMLNode, "G")) != NULL)
   {
     // get number of G functions given
-    unsigned int size = SiconosDOMTreeTools::getIntegerAttributeValue(node, "number");
+    unsigned int size = SiconosDOMTreeTools::getAttributeValue<unsigned int>(node, "number");
     if (size == 0)
       XMLException::selfThrow("LagrangianRXML:: constructor, G number = 0");
     GNode.resize(size, NULL);

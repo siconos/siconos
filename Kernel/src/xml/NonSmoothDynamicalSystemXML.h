@@ -52,22 +52,22 @@ class NonSmoothDynamicalSystemXML
 public:
   NonSmoothDynamicalSystemXML();
 
-  /** \fn NonSmoothDynamicalSystemXML(xmlNode * rootNSDSNode)
+  /** \fn NonSmoothDynamicalSystemXML(xmlNodePtr  rootNSDSNode)
    *   \brief Build an NonSmoothDynamicalSystemXML object from a DOM tree describing an NonSmoothDynamicalSystem
    *   \param rootNSDSNode : the NSDS DOM tree
    */
-  NonSmoothDynamicalSystemXML(xmlNode * rootNSDSNode);
+  NonSmoothDynamicalSystemXML(xmlNodePtr  rootNSDSNode);
 
   ~NonSmoothDynamicalSystemXML();
 
   ///* return a DSs Map */
   //inline map<int, DynamicalSystemXML> getDSMap() const;
 
-  /** \fn xmlNode* getNonSmoothDynamicalSystemXMLNode()
+  /** \fn xmlNodePtr  getNonSmoothDynamicalSystemXMLNode()
    *   \brief Return the root node of the NonSmoothDynamicalSystemXML
-   *   \return xmlNode* : the root node
+   *   \return xmlNodePtr  : the root node
    */
-  inline xmlNode* getNonSmoothDynamicalSystemXMLNode()
+  inline xmlNodePtr  getNonSmoothDynamicalSystemXMLNode()
   {
     return NonSmoothDynamicalSystemNode;
   }
@@ -132,7 +132,7 @@ public:
   inline bool isBVP()
   {
     if (SiconosDOMTreeTools::hasAttributeValue(this->NonSmoothDynamicalSystemNode, NSDS_BVP))
-      return SiconosDOMTreeTools::getBooleanAttributeValue(NonSmoothDynamicalSystemNode, NSDS_BVP);
+      return SiconosDOMTreeTools::getAttributeValue<bool>(NonSmoothDynamicalSystemNode, NSDS_BVP);
     else return false;
   }
 
@@ -153,12 +153,12 @@ public:
     }
   }
 
-  /** \fn void updateNonSmoothDynamicalSystemXML(xmlNode*, NonSmoothDynamicalSystem*)
+  /** \fn void updateNonSmoothDynamicalSystemXML(xmlNodePtr , NonSmoothDynamicalSystem*)
    *   \brief makes the operations to add a NonSmoothDynamicalSystem to the SiconosModelXML
-   *   \param xmlNode* : the root node for the NonSmoothDynamicalSystemXML
+   *   \param xmlNodePtr  : the root node for the NonSmoothDynamicalSystemXML
    *   \param NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem of this NonSmoothDynamicalSystemXML
    */
-  void updateNonSmoothDynamicalSystemXML(xmlNode*, NonSmoothDynamicalSystem*);
+  void updateNonSmoothDynamicalSystemXML(xmlNodePtr , NonSmoothDynamicalSystem*);
 
   /** \fn void loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* )
    *   \brief loads the data of the NonSmoothDynamicalSystem into the NonSmoothDynamicalSystemXML (in the DOM tree)
@@ -168,7 +168,7 @@ public:
 
 
 private:
-  xmlNode *NonSmoothDynamicalSystemNode;
+  xmlNodePtr NonSmoothDynamicalSystemNode;
 
   /* Map of DSs */
   std::map<int, DynamicalSystemXML*> DSXMLMap;
@@ -197,33 +197,33 @@ private:
 
   void loadNonSmoothDynamicalSystem();
 
-  /** \fn loadDynamicalSystemXML(xmlNode * rootDSNode)
+  /** \fn loadDynamicalSystemXML(xmlNodePtr  rootDSNode)
    *   \brief Builds DynamicalSystemXML objects from a DOM tree describing DSs
-   *   \param xmlNode* : the DSs DOM tree
+   *   \param xmlNodePtr  : the DSs DOM tree
    *   \exception XMLException : if a property of the NonSmoothDynamicalSystem lacks in the DOM tree
    */
-  void loadDynamicalSystemXML(xmlNode * rootDSNode);
+  void loadDynamicalSystemXML(xmlNodePtr  rootDSNode);
 
-  /** \fn loadInteractionXML(xmlNode * rootInteractionNode)
+  /** \fn loadInteractionXML(xmlNodePtr  rootInteractionNode)
    *   \brief Builds InteractionXML objects from a DOM tree describing Interactions
-   *   \param xmlNode* : the Interactions DOM tree
+   *   \param xmlNodePtr  : the Interactions DOM tree
    *   \exception XMLException : if a number relating to an Interaction declares in the NonSmoothDynamicalSystem is already used
    */
-  void loadInteractionXML(xmlNode * rootInteractionNode);
+  void loadInteractionXML(xmlNodePtr  rootInteractionNode);
 
-  /** \fn void loadEqualityConstraintXML(xmlNode * rootECNode)
+  /** \fn void loadEqualityConstraintXML(xmlNodePtr  rootECNode)
    *   \brief Builds EqualityConstraintXML objects from a DOM tree describing EqualityConstraints
-   *   \param xmlNode* : the EqualityConstraints DOM tree
+   *   \param xmlNodePtr  : the EqualityConstraints DOM tree
    *   \exception XMLException : if a number relating to an EqualityConstraint declares in the NonSmoothDynamicalSystem is already used
    */
-  void loadEqualityConstraintXML(xmlNode * rootECNode);
+  void loadEqualityConstraintXML(xmlNodePtr  rootECNode);
 
-  /** \fn void loadDSInputOutputXML(xmlNode * )
+  /** \fn void loadDSInputOutputXML(xmlNodePtr  )
    *   \brief Builds DSInputOutputXML objects from a DOM tree describing DSInputOutputs
-   *   \param xmlNode* : the DSInputOutputs DOM tree
+   *   \param xmlNodePtr  : the DSInputOutputs DOM tree
    *   \exception XMLException : if a number relating to an DSInputOutput declares in the NonSmoothDynamicalSystem is already used
    */
-  void loadDSInputOutputXML(xmlNode * rootdsioNode);
+  void loadDSInputOutputXML(xmlNodePtr  rootdsioNode);
 
   /** \fn map<int, DSInputOutputXML*> getDSInputOutputXMLRelatingToDS( int number )
    *   \brief selects the DSInputOutputXML objects relating to a specific DynamicalSystem

@@ -33,41 +33,58 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  *
  * \todo Add the LU Factorization of W in the initialization,  and adapt the resolution in the iteration
  */
+
+/** map of SiconosMatrix; key = the related DS*/
+typedef std::map<DynamicalSystem*, SiconosMatrix*> mapOfMatrices;
+
+/** map of SiconosMatrix; key = the related DS*/
+typedef std::map<DynamicalSystem*, bool> mapOfBool;
+
+/** map of double; key = the related DS */
+typedef std::map<DynamicalSystem*, double> mapOfDouble;
+
+/** iterator through a map of matrices */
+typedef mapOfMatrices::iterator matIterator;
+
+/** iterator through a map of double */
+typedef mapOfDouble::iterator doubleIterator;
+
+
 class Moreau : public OneStepIntegrator
 {
 private:
 
-  /** \fn Moreau()
+  /** Stl map that associates a W Moreau matrix to each DynamicalSystem of the OSI */
+  mapOfMatrices WMap;
+
+  /** Stl map that associates a theta parameter for the integration scheme to each DynamicalSystem of the OSI */
+  mapOfDouble thetaMap;
+
+  /** Stl map that associates a bool to each DynamicalSystem of the OSI - If true, then W has been allocated inside the class.*/
+  mapOfBool isWAllocatedInMap;
+
+  /** \fn Moreau(Strategy* = NULL)
    *  \brief Default constructor
+   *  \param Strategy * : the strategy that owns the osi, default = NULL
    */
-  Moreau();
-
-  /** a specific matrix of the Moreau Integrator */
-  SiconosMatrix *W;
-
-  /** boolean indicator, to check whether W has been allocated in the present class or not */
-  bool isWAllocatedIn;
-
-  /** parameter of the theta-method */
-  double theta;
+  Moreau(Strategy*);
 
 public:
 
-  /** \fn Moreau(OneStepIntegratorXML*,TimeDiscretisation*, DynamicalSystem* )
+  /** \fn Moreau(OneStepIntegratorXML*,Strategy* = NULL);
    *  \brief constructor from xml file
    *  \param OneStepIntegratorXML* : the XML object corresponding
-   *  \param TimeDiscretisation* : the TimeDiscretisation of the OneStepIntegrator
-   *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
+   *  \param Strategy * : the strategy that owns the osi, default = NULL
    */
-  Moreau(OneStepIntegratorXML*, TimeDiscretisation*, DynamicalSystem*);
+  Moreau(OneStepIntegratorXML*, Strategy* = NULL);
 
-  /** \fn Moreau(TimeDiscretisation*, DynamicalSystem* , const double& theta)
-   *  \brief constructor from a minimum set of data
-   *  \param TimeDiscretisation* : the TimeDiscretisation of the OneStepIntegrator
+  /** \fn Moreau(DynamicalSystem* , const double&, Strategy* = NULL)
+   *  \brief constructor from a minimum set of data: one DS and its theta
    *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
+   *  \param Strategy * : the strategy that owns the osi, default = NULL
    */
-  Moreau(TimeDiscretisation*, DynamicalSystem*, const double& theta);
+  Moreau(DynamicalSystem*, const double&, Strategy* = NULL);
 
   /** \fn ~Moreau()
    *  \brief destructor
@@ -77,55 +94,88 @@ public:
   // --- GETTERS/SETTERS ---
   // -- W --
 
-  /** \fn  const SimpleMatrix getW(void) const
-   *  \brief get the value of W
+  /** \fn mapOfMatrices getWMap()
+    *  \brief get W map
+    *  \return a mapOfMatrices
+    */
+  inline mapOfMatrices getWMap() const
+  {
+    return WMap;
+  };
+
+  /** \fn mapOfMatrices getIsWAllocatedInMap()
+    *  \brief get isWAllocatedIn map
+    *  \return a mapOfBool
+    */
+  inline mapOfBool getIsWAllocatedInMap() const
+  {
+    return isWAllocatedInMap;
+  };
+
+  /** \fn void setWMap(const mapOfMatrices& newMap)
+   *  \brief set W map to newMap
+   *  \param a mapOfMatrices
+   */
+  void setWMap(const mapOfMatrices&);
+
+  /** \fn const SimpleMatrix getW(DynamicalSystem* ds = NULL) const
+   *  \brief get the value of W corresponding to DynamicalSystem ds
+   * \param a pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case
    *  \return SimpleMatrix
    */
-  inline const SimpleMatrix getW() const
-  {
-    return *W;
-  }
+  const SimpleMatrix getW(DynamicalSystem* = NULL);
 
-  /** \fn SiconosMatrix* getWPtr(void) const
-   *  \brief get W
-   *  \return pointer on a SiconosMatrix
+  /**\fn SiconosMatrix* getWPtr(DynamicalSystem * ds) const
+   * \brief get W corresponding to DynamicalSystem ds
+   * \param a pointer to DynamicalSystem, optional, default = NULL. get W[0] in that case
+   * \return pointer to a SiconosMatrix
    */
-  inline SiconosMatrix* getWPtr() const
-  {
-    return W;
-  }
+  SiconosMatrix* getWPtr(DynamicalSystem* ds);
 
-  /** \fn void setW (const SiconosMatrix& newValue)
-   *  \brief set the value of W to newValue
-   *  \param SiconosMatrix newValue
+  /**\fn void setW (const SiconosMatrix& newValue, DynamicalSystem* ds)
+   * \brief set the value of W[ds] to newValue
+   * \param SiconosMatrix newValue
+   * \param a pointer to DynamicalSystem,
    */
-  void setW(const SiconosMatrix& newValue);
+  void setW(const SiconosMatrix&, DynamicalSystem*);
 
-  /** \fn void setWPtr(SiconosMatrix* newPtr)
-   *  \brief set W to pointer newPtr
-   *  \param SiconosMatrix * newPtr
+  /**\fn void setWPtr(SiconosMatrix* newPtr, DynamicalSystem* ds)
+   * \brief set W[ds] to pointer newPtr
+   * \param SiconosMatrix * newPtr
+   * \param a pointer to DynamicalSystem
    */
-  void setWPtr(SiconosMatrix *newPtr);
+  void setWPtr(SiconosMatrix *newPtr, DynamicalSystem*);
 
   // -- theta --
 
-  /** \fn const double getTheta() const
-   *  \brief allows to get the double value theta of the Moreau's Integrator
-   *  \return double value theta
-   */
-  inline const double getTheta() const
+  /** \fn mapOfDouble getThetaMap()
+    *  \brief get theta map
+    *  \return a mapOfDouble
+    */
+  inline mapOfDouble getThetaMap() const
   {
-    return theta;
-  }
+    return thetaMap;
+  };
 
-  /** \fn double setTheta(const double&)
-   *  \brief set the value of theta
-   *  \param ref on a double
+  /** \fn void setThetaMap(const mapOfDouble&)
+   *  \brief set theta map
+   *  \param a mapOfDouble
    */
-  inline void setTheta(const double& newTheta)
-  {
-    theta = newTheta;
-  }
+  void setThetaMap(const mapOfDouble&);
+
+  /** \fn const double getTheta(DynamicalSystem* ds)
+   *  \brief get thetaMap[ds]
+   *  \param a DynamicalSystem
+   *  \return a double
+   */
+  const double getTheta(DynamicalSystem*);
+
+  /** \fn double setTheta(const double&, DynamicalSystem* ds)
+   *  \brief set the value of thetaMap[ds]
+   *  \param a double
+   *  \param a DynamicalSystem
+   */
+  void setTheta(const double&, DynamicalSystem*);
 
   // --- OTHER FUNCTIONS ---
 
@@ -135,21 +185,17 @@ public:
    */
   void initialize();
 
-  /** \fn void computeW(const double& t)
-   *  \brief compute W Moreau matrix at time t
+  /** \fn void computeW(const double& t, DynamicalSystem* ds)
+   *  \brief compute WMap[ds] Moreau matrix at time t
    *  \param the time (double)
+   *  \param a pointer to DynamicalSystem
    */
-  void computeW(const double&);
+  void computeW(const double&, DynamicalSystem*);
 
   /** \fn void computeFreeState()
    *  \brief integrates the Dynamical System linked to this integrator without boring the constraints
    */
   void computeFreeState();
-
-  /** \fn void integrate()
-   *  \brief makes computations to integrate the data of a Dynamical System with the Moreau Integrator
-   */
-  void integrate();
 
   /** \fn void integrate(const double&, const double&, double&, bool&)
    *  \brief integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
@@ -180,7 +226,7 @@ public:
   /** \fn display()
    *  \brief Displays the data of the Moreau's integrator
    */
-  void display() const;
+  void display();
 
   /** \fn Moreau* convert (OneStepIntegrator* osi)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.

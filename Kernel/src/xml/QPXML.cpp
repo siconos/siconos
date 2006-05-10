@@ -22,8 +22,8 @@ using namespace std;
 QPXML::QPXML() : OneStepNSProblemXML(), QNode(NULL), pNode(NULL)
 {}
 
-QPXML::QPXML(xmlNode * QPNode, vector<int> definedInteractionNumbers)
-  : OneStepNSProblemXML(QPNode, definedInteractionNumbers), QNode(NULL), pNode(NULL)
+QPXML::QPXML(xmlNode * QPNode)
+  : OneStepNSProblemXML(QPNode), QNode(NULL), pNode(NULL)
 {
   xmlNode *node, *qpModelNode;
 

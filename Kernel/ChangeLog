@@ -28,6 +28,11 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 
 Changes:
 
+2006-05-02 Franck Perignon <franck.perignon@inrialpes.fr>
+        * various changes in SiconosDOMTreeTools, StrategyXML and OSIXML. 
+	* review Moreau/Lsodar/OSI 
+	* add SiconosTemplates directory in src/utils
+
 2006-04-10 Franck Perignon <franck.perignon@inrialpes.fr>
 
 	* Review DS and derived classes: remove vectorField/xDot

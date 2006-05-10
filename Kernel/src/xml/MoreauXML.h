@@ -17,13 +17,11 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 /** \class MoreauXML
- *   \brief This class manages Moreau data part
+ *   \brief read Moreau-related nodes in DOM tree
  *  \author SICONOS Development Team - copyright INRIA
  *   \version 1.1.4.
  *   \date 05/17/2004
  *
- *
- * MoreauXML allows to manage data of a Moreau DOM tree.
  */
 
 #ifndef __MOREAUXML__
@@ -31,32 +29,36 @@
 
 #include "OneStepIntegratorXML.h"
 
-const std::string MOREAU_R = "r";
-const std::string MOREAU_W = "W";
-const std::string MOREAU_THETA = "Theta";
-
 class MoreauXML : public OneStepIntegratorXML
 {
+private:
+
+  /** theta list node */
+  xmlNode * thetaNode;
+
+  /** W list node */
+  xmlNode * WNode;
+
 public:
   MoreauXML();
 
-  /** \fn MoreauXML(xmlNode * MoreauNode)
+  /** \fn MoreauXML(xmlNodePtr MoreauNode)
    *   \brief Build a MoreauXML object from a DOM tree describing Moreau OneStepIntegrator
    *   \param xmlNode * MoreauNode : the Moreau DOM tree
-   *   \param map<int, bool> definedDSNumbers : to know if DS numbers are not used by another OneStepIntegrator
    *   \exception XMLException : if the W property of the Moreau lacks in the DOM tree
    */
-  MoreauXML(xmlNode * MoreauNode, std::map<int, bool> definedDSNumbers);
+  MoreauXML(xmlNode * MoreauNode);
 
-  // Destructor
+  /** \fn ~MoreauXML()
+   * Destructor
+   */
   ~MoreauXML();
 
-
-  /** \fn bool hasW()
+  /** \fn bool hasWList()
    *  \brief return true if wNode is defined
    *  \return true if wNode is defined
    */
-  inline bool hasW()
+  inline bool hasWList()
   {
     return (WNode != NULL);
   }
@@ -65,62 +67,59 @@ public:
    *   \brief Return the w of the OneStepIntegratorXML
    *   \return SimpleMatrix : the w of the OneStepIntegratorXML
    */
-  inline SimpleMatrix getW()
-  {
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(WNode);
-  }
+  // inline SimpleMatrix getW()
+  // {
+  //  return  SiconosDOMTreeTools::getSiconosMatrixValue(WNode);
+  //}
 
   /** \fn void setW(SiconosMatrix *m)
    *   \brief allows to save the w of the OneStepIntegratorXML
    *   \param SiconosMatrix* : the w to save
    */
-  inline void setW(SiconosMatrix *m)
-  {
-    if (hasW() == false)
-    {
-      WNode = SiconosDOMTreeTools::createMatrixNode(rootIntegratorXMLNode, MOREAU_W, *m);
-    }
-    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(WNode, *m);
-  }
+  //  inline void setW(SiconosMatrix *m)
+  //{
+  //  if( hasW() == false )
+  //{
+  //  WNode = SiconosDOMTreeTools::createMatrixNode(rootIntegratorXMLNode, MOREAU_W, *m);
+  //}
+  //  else SiconosDOMTreeTools::setSiconosMatrixNodeValue(WNode, *m);
+  //}
 
-  /** \fn bool hasTheta()
+  /** \fn bool hasThetaList()
    *  \brief return true if ThetaNode is defined
    *  \return true if ThetaNode is defined
    */
-  inline bool hasTheta()
+  inline bool hasThetaList() const
   {
-    return (ThetaNode != NULL);
+    return (thetaNode != NULL);
   }
 
-  /** \fn SimpleMatrix getTheta()
-   *   \brief Return the theta of the OneStepIntegratorXML
-   *   \return SimpleMatrix : the theta of the OneStepIntegratorXML
+  /** \fn void getTheta(vector<double>&)
+   *   \brief fill a vector<double> with given theta values
+   *   \param: in-out vector<double>
    */
-  inline const double getTheta() const
-  {
-    return  SiconosDOMTreeTools::getDoubleContentValue(ThetaNode);
-  }
+  void getTheta(std::vector<double>&) const;
 
-  /** \fn void setTheta(double t)
-   *   \brief allows to save  Theta of the OneStepIntegratorXML
-   *   \param double t : the Theta to save
+  /** \fn void setTheta(const vector<double&>)
+   *   \brief save  theta values in xml ouput file or DOMtree
+   *   \param vector<double>
    */
-  inline void setTheta(const double& t)
+  void setTheta(const std::vector<double>&);
+
+  /** \fn const double getSingleTheta() const
+   *   \brief get value of attribute all in theta node -> ie if one single value for all theta is given
+   *   \return a double
+   */
+  const double getSingleTheta() const;
+
+  /** \fn bool hasAllTheta()
+   *  \brief attribute of the theta tag - all = val if all theta have the same value, whatever the ds is.
+   *  \return a bool
+   */
+  inline bool hasAllTheta() const
   {
-    if (hasTheta() == false)
-    {
-      ThetaNode = SiconosDOMTreeTools::createDoubleNode(rootIntegratorXMLNode, MOREAU_THETA, t);
-    }
-    else SiconosDOMTreeTools::setDoubleContentValue(ThetaNode, t);
+    return SiconosDOMTreeTools::hasAttributeValue(thetaNode, ALL_ATTRIBUTE);
   }
-private:
-
-  //Nodes
-  xmlNode * WNode;
-  xmlNode * ThetaNode;
-
 
 };
-
-
 #endif

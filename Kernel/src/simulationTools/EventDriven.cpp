@@ -21,22 +21,16 @@
 using namespace std;
 
 // --- Default constructor ---
-EventDriven::EventDriven(Model* newModel): Strategy(newModel)
-{
-  strategyType = "EventDriven";
-}
+EventDriven::EventDriven(Model* newModel): Strategy(newModel, "EventDriven")
+{}
 
 // --- From Model ---
-EventDriven::EventDriven(Model& newModel): Strategy(newModel)
-{
-  strategyType = "EventDriven";
-}
+EventDriven::EventDriven(Model& newModel): Strategy(newModel, "EventDriven")
+{}
 
 // --- XML constructor ---
-EventDriven::EventDriven(StrategyXML* strxml, Model *newModel): Strategy(strxml, newModel)
-{
-  strategyType = "EventDriven";
-}
+EventDriven::EventDriven(StrategyXML* strxml, Model *newModel): Strategy(strxml, newModel, "EventDriven")
+{}
 
 // --- Destructor ---
 EventDriven::~EventDriven()
@@ -44,14 +38,13 @@ EventDriven::~EventDriven()
 
 void EventDriven::setEventsManagerPtr(EventsManager*)
 {
-  // TODO if required ??
+  // TODO IF NECESSARY?
 }
 
 void EventDriven::initialize()
 {
+  Strategy::initialize();
   eventsManager = new EventsManager(DEFAULT_TICK, this); //
-  //  eventsManager->setStrategyPtr(this);
-  // Review eventsManager constructor? Strategy as a required input? Or set as here?
   eventsManager->initialize();
 }
 
@@ -84,6 +77,7 @@ void EventDriven::computeOneStep()
 void EventDriven::advanceToEvent()
 {
   // Get double value of init time (currentEvent time) and final time (nextEvent time)
+
   double tinit = eventsManager->getCurrentTime();
   double tend =  eventsManager->getNextTime();
   double tout, ttmp = tend;

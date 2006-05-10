@@ -57,7 +57,7 @@ public:
    */
   inline int getSiconosMemorySize()
   {
-    return SiconosDOMTreeTools::getIntegerAttributeValue(memoryNode, SM_MEMORYSIZE);
+    return SiconosDOMTreeTools::getAttributeValue<int>(memoryNode, NUMBER_ATTRIBUTE);
   }
 
   /** \fn void setSiconosMemoryVector(deque<SiconosVector*> v)

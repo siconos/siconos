@@ -44,7 +44,7 @@
 #include "Strategy.h"
 #include "TimeDiscrEvent.h"
 #include "NonSmoothEvent.h"
-#include "EventsComparison.h"
+#include "RuntimeCmp.h"
 #include<set>
 #include<deque>
 #include<string>
@@ -57,15 +57,12 @@ class Strategy;
 // tick default value
 const double DEFAULT_TICK = 1e-06;
 
-// The list of events, sort using operator defined in class EventsComparison.
-//typedef std::set<Event*,RuntimeCmp<Event*> > eventsContainer;
-/*  A stl container of type "set" is used at the time
+/** set of events, with a RuntimeCmp based on Event time value (unsigned int) to compare Events
+ *  A stl container of type "set" is used at the time
  *  \Warning This may be not the best choice => review all possibilities */
-typedef std::set<Event*, EventsComparison > eventsContainer; // sort in a chronological way
+typedef std::set<Event*, RuntimeCmp<Event> > eventsContainer; // sort in a chronological way
 
-//typedef std::set<Event*,EventsComparison(reverse) > reverseEventsContainer; // reverse sorting.
-
-// return value for insert and erase in set -> checkEventSet.second is a bool
+/** return value for insert and erase in set -> checkEventSet.second is a bool */
 typedef std::pair<eventsContainer::iterator, bool> checkEventSet;
 
 class EventsManager
