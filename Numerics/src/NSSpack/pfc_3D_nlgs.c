@@ -78,21 +78,18 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
   FILE *f101;
 
-  int n, in, it, ispeak, itermax, nc, i, iter;
-  double err, zn , zt, den, num, dft, dfn, tol, mu;
+  int n, in, it, is, ispeak, itermax, nc, i, iter;
+  double err, zn , zt, zs, den, mrn, num, tol, mu, mu2;
   double qs, a1, b1;
   integer incx, incy;
-  double *det, *bfd, *ww;
+  double *diag, *ww;
   char NOTRANS = 'N';
 
-  printf("pfc_3D_* Algorithms are not reliable yet, report to siconos.gforge.inria.fr if you need it soon \n");
-  return ;
-
   ispeak = 0;
-  nc    = *nn;
-  incx = 1;
-  incy = 1;
-  n    = 2 * nc;
+  nc     = *nn;
+  incx   = 1;
+  incy   = 1;
+  n      = 3 * nc;
 
   /* Recup input */
 
@@ -101,6 +98,7 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
   mu  = dparamLCP[0];
   tol = dparamLCP[1];
+  mu2 = mu * mu;
 
   /* Initialize output */
 
@@ -114,9 +112,8 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
   /* Allocation */
 
-  ww  = (double*)malloc(n * sizeof(double));
-  det = (double*)malloc(nc * sizeof(double));
-  bfd = (double*)malloc(nc * sizeof(double));
+  ww   = (double*)malloc(n * sizeof(double));
+  diag = (double*)malloc(n * sizeof(double));
 
   /* Check for non trivial case */
 
@@ -134,8 +131,7 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     }
 
     free(ww);
-    free(det);
-    free(bfd);
+    free(diag);
     *info = 0;
     return;
   }
@@ -157,7 +153,7 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
 
   for (i = 0 ; i < nc ; ++i)
   {
-    in = 2 * i;
+    in = 3 * i;
     if (fabs(vec[in * n + in]) < 1e-16)
     {
 
@@ -168,17 +164,16 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
       }
 
       *info = 2;
-      free(det);
-      free(bfd);
+      free(diag);
       free(ww);
 
       return;
     }
     else
     {
-      it = 2 * i + 1;
-      det[i] = vec[in * (n + 1)] * vec[it * (n + 1)] - vec[it * n + in] * vec[in * n + it];
-      bfd[i] = mu * vec[it * n + in] / vec[in * (n + 1)];
+      diag[in  ] = 1.0 / vec[(in) * n + in  ];
+      diag[in + 1] = 1.0 / vec[(in + 1) * n + in + 1];
+      diag[in + 2] = 1.0 / vec[(in + 2) * n + in + 2];
     }
   }
 
@@ -206,45 +201,40 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     for (i = 0 ; i < nc ; ++i)
     {
 
-      in = 2 * i;
-      it = 2 * i + 1;
+      in = 3 * i;
+      it = 3 * i + 1;
+      is = 3 * i + 2;
 
       incx = n;
       incy = 1;
 
       z[in] = 0.0;
       z[it] = 0.0;
+      z[is] = 0.0;
 
       zn = q[in] + ddot_((integer *)&n , &vec[in] , &incx , z , &incy);
       zt = q[it] + ddot_((integer *)&n , &vec[it] , &incx , z , &incy);
+      zs = q[is] + ddot_((integer *)&n , &vec[is] , &incx , z , &incy);
 
       if (zn > 0.0)
       {
-        z[2 * i  ] = 0.0;
-        z[2 * i + 1] = 0.0;
+        z[3 * i  ] = 0.0;
+        z[3 * i + 1] = 0.0;
+        z[3 * i + 2] = 0.0;
       }
       else
       {
-        dft = vec[in * (n + 1)] * zt - vec[in * n + it ] * zn;
-        dfn = -vec[it * n + in ] * zt - vec[it * (n + 1)] * zn;
+        z[in] = -zn * diag[in];
+        z[it] = -zt * diag[it];
+        z[is] = -zs * diag[is];
 
-        a1 = dft + mu * dfn;
-        b1 = dft - mu * dfn;
+        mrn = z[it] * z[it] + z[is] * z[is];
 
-        if (a1 > 0.0)
+        if (mrn > mu2 * z[in]*z[in])
         {
-          z[2 * i  ] = -(zn / vec[in * (n + 1)]) / (1 - bfd[i]);
-          z[2 * i + 1] = -mu * z[2 * i];
-        }
-        else if (b1 > 0.0)
-        {
-          z[2 * i  ] = -(zn / vec[in * (n + 1)]) / (1 + bfd[i]);
-          z[2 * i + 1] =  mu * z[2 * i];
-        }
-        else
-        {
-          z[2 * i  ] = -dfn / det[i];
-          z[2 * i + 1] = -dft / det[i];
+          num = mu * z[in] / sqrt(mrn);
+          z[it] = z[it] * num;
+          z[is] = z[is] * num;
         }
       }
     }
@@ -293,8 +283,7 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     else *info = 0;
   }
 
-  free(bfd);
-  free(det);
+  free(diag);
   free(ww);
 
   if (ispeak == 2) fclose(f101);

@@ -74,11 +74,6 @@ int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , do
 
   clock_t t1, t2;
 
-  printf("pfc_3D_* Algorithms are not reliable yet, report to siconos.gforge.inria.fr if you need it soon \n");
-  return ;
-
-
-
   for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
   for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
 
@@ -100,20 +95,21 @@ int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , do
     pt->pfc_3D.err  = dparamLCP[2];
 
   }
-  else if (strcmp(pt->pfc_3D.name , pfckey2) == 0)
-  {
+  /*
+  else if( strcmp( pt->pfc_3D.name , pfckey2 ) == 0 ){
 
     iparamLCP[0] = pt->pfc_3D.itermax;
     iparamLCP[1] = pt->pfc_3D.chat;
     dparamLCP[0] = pt->pfc_3D.mu;
     dparamLCP[1] = pt->pfc_3D.tol;
 
-    pfc_3D_cpg(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+    pfc_3D_cpg( n , vec , q , z , w , &info , iparamLCP , dparamLCP );
 
     pt->pfc_3D.iter = iparamLCP[2];
     pt->pfc_3D.err  = dparamLCP[2];
 
   }
+  */
   else printf("Warning : Unknown solving method : %s\n", pt->pfc_3D.name);
 
   t2 = clock();
