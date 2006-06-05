@@ -28,7 +28,6 @@ DSInputOutputXML::DSInputOutputXML()
 
 DSInputOutputXML::DSInputOutputXML(xmlNodePtr dsioNode/*, vector<int> definedDSNumbers*/)
 {
-  IN("DSInputOutputXML::DSInputOutputXML(xmlNodePtr )\n");
   xmlNodePtr node;
   string type((char*)dsioNode->name);
   this->rootDSIOXMLNode = dsioNode;
@@ -60,7 +59,6 @@ DSInputOutputXML::DSInputOutputXML(xmlNodePtr dsioNode/*, vector<int> definedDSN
   {
     XMLException::selfThrow("DSInputOutputXML - DSInputOutputXML(xmlNodePtr dsioNode) error : tag " + DS_CONCERNED + " not found.");
   }
-  OUT("DSInputOutputXML::DSInputOutputXML(xmlNodePtr )\n");
 }
 
 DSInputOutputXML::~DSInputOutputXML()
@@ -69,8 +67,6 @@ DSInputOutputXML::~DSInputOutputXML()
 
 void DSInputOutputXML::loadDSIOConcernedDS(xmlNodePtr  DSConcernedNode/*, vector<int> definedDSNumbers*/)
 {
-  IN("DSInputOutputXML::loadDSIOConcernedDS\n ");
-
   xmlNodePtr DSnode;
   int number;
   int size = 0;
@@ -104,15 +100,11 @@ void DSInputOutputXML::loadDSIOConcernedDS(xmlNodePtr  DSConcernedNode/*, vector
 
     i++;
   }
-
-  OUT("DSInputOutputXML::loadDSIOConcernedDS\n ");
 }
 
 void DSInputOutputXML::updateDSInputOutputXML(xmlNodePtr  node, DSInputOutput* dsio)
 {
-  IN("DSInputOutputXML::updateDSInputOutputXML\n");
   this->rootDSIOXMLNode = node;
-  OUT("DSInputOutputXML::updateDSInputOutputXML\n");
 }
 
 void DSInputOutputXML::setDSConcerned(vector<int> dsConcerned)

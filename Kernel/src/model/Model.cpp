@@ -201,7 +201,7 @@ void Model::checkXMLPlatform()
     if (modelxml->getNonSmoothDynamicalSystemXML() != NULL)
     {
       // we must create/update the DynamicalSystemXMLs
-      nsds->getNonSmoothDynamicalSystemXMLPtr()->updateNonSmoothDynamicalSystemXML(modelxml->getNonSmoothDynamicalSystemXML()->getNonSmoothDynamicalSystemXMLNode(), nsds);
+      nsds->getNonSmoothDynamicalSystemXMLPtr()->updateNonSmoothDynamicalSystemXML(modelxml->getNonSmoothDynamicalSystemXML()->getRootNode(), nsds);
     }
     else if (nsds != NULL)
     {
@@ -227,7 +227,7 @@ void Model::checkXMLPlatform()
       }
       else
       {
-        strat->getStrategyXMLPtr()->saveStrategy2XML(modelxml->getStrategyXML()->getNode(), strat);
+        strat->getStrategyXMLPtr()->saveStrategy2XML(modelxml->getStrategyXML()->getRootNode(), strat);
       }
     }
   }

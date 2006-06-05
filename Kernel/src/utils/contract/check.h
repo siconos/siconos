@@ -53,16 +53,6 @@
 extern "C" {
 #endif
 
-#ifdef WITHOUT_NANA
-#include <fake_nana.h>
-#endif
-
-
-#ifndef WITHOUT_NANA
-#include <nana.h>
-#endif
-
-
 #include <string>
 
   /*
@@ -145,26 +135,6 @@ extern "C" {
    *   exists buts it too ugly for me. Perhaps if someone is interested
    *   I'll build it; personally I find termination the least of my problems!
    */
-
-
-  /*
-   * OUT(e) - verbose output
-   */
-
-
-
-
-#define OUT(e) \
-VL(("<<<<< "));VL((e))
-
-
-#define IN(e) \
-VL((">>>>> "));VL((e))
-
-
-
-
-
 
 #ifndef __cplusplus
 }

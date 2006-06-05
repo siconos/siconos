@@ -244,10 +244,10 @@ public:
    */
   void computeAllBlocks();
 
-  void computeDiagonalBlocksLagrangianR(Relation *, const unsigned int&, std::vector<DynamicalSystem*>, std::map < DynamicalSystem*,
+  void computeDiagonalBlocksLagrangianR(Relation *, const unsigned int&, const DSSet&, std::map < DynamicalSystem*,
                                         SiconosMatrix* > , const double&, SiconosMatrix*);
 
-  void computeExtraDiagonalBlocksLagrangianR(Relation *, Relation*, const unsigned int&, const unsigned int&, std::vector<DynamicalSystem*>,
+  void computeExtraDiagonalBlocksLagrangianR(Relation *, Relation*, const unsigned int&, const unsigned int&, const DSSet&,
       std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
 
   /** \fn void updateBlocks();

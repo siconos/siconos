@@ -36,11 +36,20 @@
 #include "OneStepIntegratorXML.h"
 #include "OneStepNSProblemXML.h"
 #include "TimeDiscretisationXML.h"
+#include <set>
 
 class Strategy;
 class OneStepIntegratorXML;
 class OneStepNSProblemXML;
 class TimeDiscretisationXML;
+
+/** set of OneStepIntegratorXML */
+typedef std::set<OneStepIntegratorXML*> SetOfOSIXML;
+
+/** iterator through SetOfInteractionXML */
+typedef SetOfOSIXML::iterator SetOfOSIXMLIt;
+
+
 
 class StrategyXML
 {
@@ -48,57 +57,63 @@ class StrategyXML
 private:
 
   /* root node for strategy */
-  xmlNodePtr strategyNode;
+  xmlNodePtr rootNode;
 
-  /* vector of OneStepIntegratorXML* */
-  std::vector<OneStepIntegratorXML*> oneStepIntegratorXMLVector;
+  /* set of OneStepIntegratorXML* */
+  SetOfOSIXML OSIXMLSet;
 
-  /* OneStepNSProblemXML - maybe not defined */
+  /* OneStepNSProblemXML - Optional value, default = NULL */
   OneStepNSProblemXML *oneStepNSProblemXML;
-
 
   /* TimeDiscretisationXML */
   TimeDiscretisationXML *timeDiscretisationXML;
 
-  /* Vector of defined Interaction in the model / for OneStepNSProblem : to know if an interactiion is well defined*/
-  std::vector<int> definedNumberInteractionVector;
-
 public:
 
-  // --- Default constructor ---
+  /** \fn StrategyXML()
+   *   \brief Default constructor
+   */
   StrategyXML();
 
-
-  /** \fn StrategyXML(xmlNodePtr  rootStrategyNode)
-   *   \brief Build a StrategyXML object from a DOM tree describing a Strategy - verifying DS indicated by numbers in OneStepIntegrators exist
-   *   \param rootNSDSNode : the NSDS DOM tree
-   *   \exception XMLException : if a property of the LagrangianLinearR lacks in the DOM tree
+  /** \fn StrategyXML(xmlNodePtr rootStrategyNode)
+   *   \brief Build a StrategyXML object from a DOM tree describing a Strategy
+   *   \param the Strategy xml node
    */
-  StrategyXML(xmlNodePtr  rootStrategyNode);
+  StrategyXML(xmlNodePtr rootStrategyNode);
 
-  // --- Destructor ---
+  /** \fn ~StrategyXML()
+   *  \brief destructor
+   */
   ~StrategyXML();
 
   // --- GETTERS/SETTERS ---
-  /** \fn vector<OneStepIntegratorXML*> getOneStepIntegratorXML()
-   *   \brief Ables to have the OneStepIntegratorXMLs of a StrategyXML
-   *   \return the a vector containing OneStepIntegratorXMLs
-   */
-  inline std::vector<OneStepIntegratorXML*> getOneStepIntegratorXML()
-  {
-    return oneStepIntegratorXMLVector;
-  }
 
-  /** \fn bool hasOneStepIntegratorXML()
-   *   \brief Allows to know if the StrategyXML owns one or more OneStepIntegratorXML
-   *   \return bool : false if no OneStepIntegratorXML exists in this StratgeyXML
-   *                  true otherwise
+  /** \fn xmlNodePtr getRootNode()
+   *  \brief Return the root node of the Strategy -> tag "Strategy"
+   *  \return xmlNodePtr  : the root node
    */
-  inline bool hasOneStepIntegratorXML()
+  inline xmlNodePtr getRootNode()
   {
-    return (oneStepIntegratorXMLVector.size() >= 1);
-  }
+    return rootNode;
+  };
 
+  /** \fn const SetOfOSIXML getOneStepIntegratorsXML()
+   *   \brief get the set of OneStepIntegratorXML
+   *   \return a SetOfOSIXML
+   */
+  inline const SetOfOSIXML getOneStepIntegratorsXML() const
+  {
+    return OSIXMLSet;
+  };
+
+  /** \fn const bool hasOneStepIntegratorXML() const
+   *   \brief true if set of OneStepIntegratorXML is not empty
+   *   \return a bool
+   */
+  inline const bool hasOneStepIntegratorXML() const
+  {
+    return !(OSIXMLSet.empty());
+  }
 
   /** \fn * OneStepNSProblemXML getOneStepNSProblemXMLPtr()
    *   \brief Return the OneStepNSProblemXML pointer of the StrategyXML
@@ -124,33 +139,14 @@ public:
    */
   inline std::string  getStrategyXMLType()
   {
-    return SiconosDOMTreeTools::getStringAttributeValue(strategyNode, TYPE_ATTRIBUTE);
+    return SiconosDOMTreeTools::getStringAttributeValue(rootNode, TYPE_ATTRIBUTE);
   }
-
-  /** \fn inline vector<int> getDefinedNumberInteractionVector()
-   *  \brief allows to get the number of the Interactions which are already defined
-   *  \return vector<int> : the vector of the number of the Interactions already defined
-   */
-  inline std::vector<int> getDefinedNumberInteractionVector()
-  {
-    return definedNumberInteractionVector;
-  }
-
-  /** \fn inline xmlNodePtr  getNode()
-   *  \brief allows to get the root node of the Strategy
-   *  \return xmlNode : the rootNode of the Strategy
-   */
-  inline xmlNodePtr  getNode()
-  {
-    return (xmlNodePtr)strategyNode;
-  }
-
 
   /** \fn bool hasOneStepNSProblemXML()
    *   \brief determines if the Strategy has a OneStepNSProblemXML
    *   \return bool :  false if the oneStepNSProblemXML* is NULL
    */
-  inline bool hasOneStepNSProblemXML()
+  inline const bool hasOneStepNSProblemXML() const
   {
     return (oneStepNSProblemXML != NULL);
   }

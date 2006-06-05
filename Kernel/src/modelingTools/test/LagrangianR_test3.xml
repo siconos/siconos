@@ -42,12 +42,11 @@
 			</LagrangianLinearTIDS>
 		</DS_Definition>
 		<!-- Interactions defined in the problem -->		
-			<Interaction number='12'>
+			<Interaction number='12' Id='Ball-Ground'>
 				<Id>Ball-Ground</Id>
-				<nInter> 1 </nInter>
+				<size> 1 </size>
 				<!-- List of couple of DS concerned by this interaction -->
-		               <DS_Concerned all='true'>
-                               </DS_Concerned>									
+		               <DS_Concerned all='true'></DS_Concerned>
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
 					<LagrangianRelation type="scleronomic+lambda">

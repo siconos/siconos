@@ -65,10 +65,8 @@ void RelayNSL::display() const
 
 void RelayNSL::saveNonSmoothLawToXML()
 {
-  IN("RelayNSL::saveNonSmoothLawToXML\n");
   static_cast<RelayNSLXML*>(nslawxml)->setC(c);
   static_cast<RelayNSLXML*>(nslawxml)->setD(d);
-  OUT("RelayNSL::saveNonSmoothLawToXML\n");
 }
 
 RelayNSL* RelayNSL::convert(NonSmoothLaw* nsl)

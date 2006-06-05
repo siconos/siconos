@@ -31,7 +31,6 @@ SiconosMemory::SiconosMemory(const unsigned int& newValue):
 SiconosMemory::SiconosMemory(SiconosMemoryXML *memXML, const unsigned int& newMemorySize):
   memorySize(newMemorySize), nbVectorsInMemory(0), memoryXML(memXML)
 {
-  IN("SiconosMemory(int memorySize, SiconosMemoryXML *memoryXML)\n");
   if (memoryXML != NULL)
   {
     // Convention: memorySize==1 (default value) means read its value in xml file (only for this constructor)
@@ -78,14 +77,12 @@ SiconosMemory::SiconosMemory(SiconosMemoryXML *memXML, const unsigned int& newMe
   }
   else
     SiconosMemoryException::selfThrow("SiconosMemory, xml constructor: xml file==NULL");
-  OUT("SiconosMemory(int memorySize, SiconosMemoryXML *memoryXML)\n");
 }
 
 // copy of a std::vector of siconos vectors
 SiconosMemory::SiconosMemory(const deque<SiconosVector*>& V):
   memorySize(V.size()), nbVectorsInMemory(V.size()), memoryXML(NULL)
 {
-  IN("SiconosMemory(vector<SiconosVector*> V)\n");
   unsigned int sizeV = V.size();
 
   memorySize = sizeV;
@@ -99,15 +96,12 @@ SiconosMemory::SiconosMemory(const deque<SiconosVector*>& V):
     isVectorMemoryAllocated.push_back(true);
     *(vectorMemory[i]) = *(V[i]);
   }
-
-  OUT("SiconosMemory(vector<SiconosVector*> V)\n");
 }
 
 // copy of a std::vector of siconos vectors  + memorySize
 SiconosMemory::SiconosMemory(const unsigned int& newMemorySize, const  deque<SiconosVector*>& V):
   memorySize(newMemorySize), nbVectorsInMemory(V.size()), memoryXML(NULL)
 {
-  IN("SiconosMemory(int memorySize, vector<SiconosVector*> V)\n");
   if (newMemorySize < V.size())
     SiconosMemoryException::selfThrow("SiconosMemory(int memorySize, vector<SiconosVector*> V) : V.size > memorySize");
   else
@@ -122,14 +116,12 @@ SiconosMemory::SiconosMemory(const unsigned int& newMemorySize, const  deque<Sic
       *(vectorMemory[i]) = *(V[i]);
     }
   }
-  OUT("SiconosMemory(int memorySize, vector<SiconosVector*> V)\n");
 }
 
 // copy
 SiconosMemory::SiconosMemory(const SiconosMemory&  source):
   memorySize(source.memorySize), nbVectorsInMemory(source.nbVectorsInMemory), memoryXML(NULL)
 {
-  IN("SiconosMemory(const SiconosMemory&  source) \n");
   for (unsigned int i = 0; i < nbVectorsInMemory; i++)
   {
     if (source.vectorMemory[i]->isBlock())
@@ -138,14 +130,11 @@ SiconosMemory::SiconosMemory(const SiconosMemory&  source):
       vectorMemory.push_back(new SimpleVector(*(source.vectorMemory[i])));
     isVectorMemoryAllocated.push_back(true);
   }
-
-  OUT("SiconosMemory(const SiconosMemory&  source) \n");
 }
 
 // Destructor
 SiconosMemory::~SiconosMemory()
 {
-  IN("~SiconosMemory()\n");
   for (unsigned int i = 0; i < nbVectorsInMemory; i++)
   {
     if (isVectorMemoryAllocated[i])
@@ -156,15 +145,12 @@ SiconosMemory::~SiconosMemory()
   }
   vectorMemory.clear();
   isVectorMemoryAllocated.clear();
-  OUT("~SiconosMemory()\n");
 }
 
 // --- GETTERS/SETTERS ---
 
 void SiconosMemory::setVectorMemory(const deque<SiconosVector*>& V)
 {
-  IN("SiconosMemory::setVectorMemory(vector<SiconosVector*> V)\n");
-
   for (unsigned int i = 0; i < vectorMemory.size(); i++)
     if (isVectorMemoryAllocated[i])
     {
@@ -187,8 +173,6 @@ void SiconosMemory::setVectorMemory(const deque<SiconosVector*>& V)
     isVectorMemoryAllocated.push_back(true);
     *(vectorMemory[i]) = *(V[i]);
   }
-
-  OUT("SiconosMemory::setVectorMemory(vector<SiconosVector*> V)\n");
 }
 
 SiconosVector* SiconosMemory::getSiconosVector(const unsigned int& index) const
@@ -201,7 +185,6 @@ SiconosVector* SiconosMemory::getSiconosVector(const unsigned int& index) const
 
 void SiconosMemory::swap(const SiconosVector& v)
 {
-  IN("SiconosMemory::swap(SiconosVector* v)\n");
   unsigned int i;
   SiconosVector* tmp;
   double tmp2;
@@ -233,7 +216,6 @@ void SiconosMemory::swap(const SiconosVector& v)
     vectorMemory[0] = tmp;
     isVectorMemoryAllocated[0] = tmp2;
   }
-  OUT("SiconosMemory::swap(SiconosVector* v)\n");
 }
 
 
@@ -258,8 +240,6 @@ void SiconosMemory::display() const
 // If necessary, use copy constructor instead
 SiconosMemory& SiconosMemory::operator = (const SiconosMemory& source)
 {
-  IN("SiconosMemory::operator = (const SiconosMemory& source)\n");
-
   // error if vector have not the same size
   if (memorySize != source.memorySize)
     SiconosMemoryException::selfThrow("SiconosMemory, operator =, vectors have not the same size.");
@@ -282,7 +262,6 @@ SiconosMemory& SiconosMemory::operator = (const SiconosMemory& source)
   // Warning: do not copy isVectorMemoryAllocatedIn to avoid double memory deallocation
   memoryXML = source.memoryXML;
 
-  OUT("SiconosMemory::operator = (const SiconosMemory& source)\n");
   return *this;
 }
 

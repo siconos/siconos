@@ -17,14 +17,15 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 /** \class NonSmoothDynamicalSystemXML
- *   \brief This class manages NonSmoothDynamicalSystem data part
+ *   \brief xml data management for NonSmoothDynamicalSystem
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.1.4.
- *   \date 04/04/2004
+ *  \version 1.1.4.
+ *  \date 04/04/2004
  *
+ * At the time, only DynamicalSystem and Interaction objects are handles by NonSmoothDynamicalSystem.
+ * DSIO and EqualityConstraint are not. Thus all objects and functions related to those two classes are to be reviewed in the present class.
+ * This should be done, if possible, in the same way as for DS and Interactions (with set in the place of map etc ...)
  *
- *
- * NonSmoothDynamicalSystemXML allows to get DSXMLs and InteractionXMLs from a DOM tree.
  */
 
 #ifndef __NonSmoothDynamicalSystemXML__
@@ -38,6 +39,8 @@
 #include "InteractionXML.h"
 #include "DSInputOutputXML.h"
 #include "DynamicalSystemXML.h"
+#include <set>
+#include <map>
 
 class NonSmoothDynamicalSystem;
 class InteractionXML;
@@ -47,134 +50,28 @@ class DSInputOutputXML;
 
 const std::string NSDS_BVP = "bvp";
 
+/** set of DSXML */
+typedef std::set<DynamicalSystemXML*> SetOfDSXML;
+
+/** iterator through setOfDSXML */
+typedef SetOfDSXML::iterator SetOfDSXMLIt;
+
+/** set of InteractionXML */
+typedef std::set<InteractionXML*> SetOfInteractionsXML;
+
+/** iterator through SetOfInteractionXML */
+typedef SetOfInteractionsXML::iterator SetOfInteractionsXMLIt;
+
 class NonSmoothDynamicalSystemXML
 {
-public:
-  NonSmoothDynamicalSystemXML();
-
-  /** \fn NonSmoothDynamicalSystemXML(xmlNodePtr  rootNSDSNode)
-   *   \brief Build an NonSmoothDynamicalSystemXML object from a DOM tree describing an NonSmoothDynamicalSystem
-   *   \param rootNSDSNode : the NSDS DOM tree
-   */
-  NonSmoothDynamicalSystemXML(xmlNodePtr  rootNSDSNode);
-
-  ~NonSmoothDynamicalSystemXML();
-
-  ///* return a DSs Map */
-  //inline map<int, DynamicalSystemXML> getDSMap() const;
-
-  /** \fn xmlNodePtr  getNonSmoothDynamicalSystemXMLNode()
-   *   \brief Return the root node of the NonSmoothDynamicalSystemXML
-   *   \return xmlNodePtr  : the root node
-   */
-  inline xmlNodePtr  getNonSmoothDynamicalSystemXMLNode()
-  {
-    return NonSmoothDynamicalSystemNode;
-  }
-
-  /** \fn DynamicalSystemXML* getDynamicalSystemXML(int number)
-   *   \brief Return the DynamicalSystemXML with id number
-   *   \param int number : the number of the DynamicalSystemXML to return
-   *   \return the DynamicalSystemXML of number number NULL if doesn't exist
-   */
-  DynamicalSystemXML* getDynamicalSystemXML(int number);
-
-  /** \fn InteractionXML* getInteractionXML(int number)
-   *   \brief Return the InteracionXML with id number
-   *   \param number : int number : the number of the InteractionXML to return
-   *  \exception XMLException
-   *   \return the InteractionXML of number number, NULL if doesn't exist
-   */
-  InteractionXML* getInteractionXML(int number);
-
-  /** \fn EqualityConstraintXML* getEqualityConstraintXML(int number)
-   *   \brief Return the EqualityConstraintXML with id number
-   *   \param number : int number : the number of the EqualityConstraintXML to return
-   *  \exception XMLException
-   *   \return the EqualityConstraintXML of number number, NULL if doesn't exist
-   */
-  EqualityConstraintXML* getEqualityConstraintXML(int number);
-
-
-  /** \fn inline vector<int> getDSNumbers();
-   *   \brief Allows to know the defined DS
-   *  \exception XMLException
-   *   \return vector DS numbers
-   */
-  inline std::vector<int> getDSNumbers()
-  {
-    return definedDSNumbers;
-  }
-
-  /** \fn inline vector<int> getInteractionNumbers();
-   *   \brief Allows to know the defined interactions
-   *   \return vector Interactions integer numbers
-   */
-  inline std::vector<int> getInteractionNumbers()
-  {
-    return definedInteractionNumbers;
-  }
-
-  /** \fn inline vector<int> getEqualityConstraintNumbers();
-   *   \brief Allows to know the defined EqualityConstraints
-   *   \return vector EqualityConstraints integer numbers
-   */
-  inline std::vector<int> getEqualityConstraintNumbers()
-  {
-    return definedEqualityConstraintNumbers;
-  }
-
-
-  /** \fn bool isBVP()
-   *   \brief Allows to know if the NonSmoothDynamicalSystem is BVP or not
-   *   \return True if the NonSmoothDynamicalSystem is BVP false otherwise
-   */
-  inline bool isBVP()
-  {
-    if (SiconosDOMTreeTools::hasAttributeValue(this->NonSmoothDynamicalSystemNode, NSDS_BVP))
-      return SiconosDOMTreeTools::getAttributeValue<bool>(NonSmoothDynamicalSystemNode, NSDS_BVP);
-    else return false;
-  }
-
-  /** \fn void setBVP(bool)
-   *   \brief Allows to define if the NonSmoothDynamicalSystem is BVP
-   *   \param True if the NonSmoothDynamicalSystem is BVP false otherwise
-   */
-  inline void setBVP(bool b)
-  {
-    if (!(SiconosDOMTreeTools::hasAttributeValue(this->NonSmoothDynamicalSystemNode, NSDS_BVP)))
-    {
-      //if( b ) SiconosDOMTreeTools::setBooleanAttributeValue(this->NonSmoothDynamicalSystemNode, NSDS_BVP, true);
-      if (b == true) xmlNewProp(NonSmoothDynamicalSystemNode, (xmlChar*)NSDS_BVP.c_str(), (xmlChar*)"true");
-    }
-    else
-    {
-      if (b == false) xmlRemoveProp(xmlHasProp(NonSmoothDynamicalSystemNode, (xmlChar*)NSDS_BVP.c_str()));
-    }
-  }
-
-  /** \fn void updateNonSmoothDynamicalSystemXML(xmlNodePtr , NonSmoothDynamicalSystem*)
-   *   \brief makes the operations to add a NonSmoothDynamicalSystem to the SiconosModelXML
-   *   \param xmlNodePtr  : the root node for the NonSmoothDynamicalSystemXML
-   *   \param NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem of this NonSmoothDynamicalSystemXML
-   */
-  void updateNonSmoothDynamicalSystemXML(xmlNodePtr , NonSmoothDynamicalSystem*);
-
-  /** \fn void loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* )
-   *   \brief loads the data of the NonSmoothDynamicalSystem into the NonSmoothDynamicalSystemXML (in the DOM tree)
-   *   \param NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem of this NonSmoothDynamicalSystemXML
-   */
-  void loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem*);
-
-
 private:
-  xmlNodePtr NonSmoothDynamicalSystemNode;
+  xmlNodePtr rootNode;
 
   /* Map of DSs */
-  std::map<int, DynamicalSystemXML*> DSXMLMap;
+  SetOfDSXML DSXMLSet;
 
-  /* Map of interactions */
-  std::map<int, InteractionXML*> interactionXMLMap;
+  /* set of InteractionXML */
+  SetOfInteractionsXML interactionsXMLSet;
 
   /* Map of EqualityConstraints */
   std::map<int, EqualityConstraintXML*> equalityConstraintXMLMap;
@@ -182,20 +79,11 @@ private:
   /* Map of DSInputOutputs */
   std::map<int, DSInputOutputXML*> dsInputOutputXMLMap;
 
-
   /* vector of DSInputOutput numbers*/
   std::vector<int> definedDSInputOutputNumbers;
 
-  /* vector of DS numbers*/
-  std::vector<int> definedDSNumbers;
-
-  /* vector of Interaction numbers*/
-  std::vector<int> definedInteractionNumbers;
-
   /* vector of EqualityConstraint numbers*/
   std::vector<int> definedEqualityConstraintNumbers;
-
-  void loadNonSmoothDynamicalSystem();
 
   /** \fn loadDynamicalSystemXML(xmlNodePtr  rootDSNode)
    *   \brief Builds DynamicalSystemXML objects from a DOM tree describing DSs
@@ -204,12 +92,7 @@ private:
    */
   void loadDynamicalSystemXML(xmlNodePtr  rootDSNode);
 
-  /** \fn loadInteractionXML(xmlNodePtr  rootInteractionNode)
-   *   \brief Builds InteractionXML objects from a DOM tree describing Interactions
-   *   \param xmlNodePtr  : the Interactions DOM tree
-   *   \exception XMLException : if a number relating to an Interaction declares in the NonSmoothDynamicalSystem is already used
-   */
-  void loadInteractionXML(xmlNodePtr  rootInteractionNode);
+  void loadNonSmoothDynamicalSystem();
 
   /** \fn void loadEqualityConstraintXML(xmlNodePtr  rootECNode)
    *   \brief Builds EqualityConstraintXML objects from a DOM tree describing EqualityConstraints
@@ -230,6 +113,125 @@ private:
    *   \param map<int, DSInputOutputXML*> : the map containing the DSInputOutputXML for a specific DynamicalSystem
    */
   std::map<int, DSInputOutputXML*> getDSInputOutputXMLRelatingToDS(int number);
+
+public:
+
+  /** \fn  NonSmoothDynamicalSystemXML();
+   *   \brief Default constructor
+   */
+  NonSmoothDynamicalSystemXML();
+
+  /** \fn NonSmoothDynamicalSystemXML(xmlNodePtr  rootNSDSNode)
+   *   \brief Build an NonSmoothDynamicalSystemXML object from a DOM tree describing an NonSmoothDynamicalSystem
+   *   \param rootNSDSNode : the NSDS DOM tree
+   */
+  NonSmoothDynamicalSystemXML(xmlNodePtr  rootNSDSNode);
+
+  /** \fn ~NonSmoothDynamicalSystemXML();
+   *   \brief Destructor
+   */
+  ~NonSmoothDynamicalSystemXML();
+
+  /** \fn xmlNodePtr getRootNode()
+   *   \brief Return the root node of the NonSmoothDynamicalSystemXML -> tag NSDS
+   *   \return xmlNodePtr  : the root node
+   */
+  inline xmlNodePtr getRootNode()
+  {
+    return rootNode;
+  };
+
+  /** \fn const bool isBVP() const
+   *  \brief check if the NonSmoothDynamicalSystem is BVP or not
+   *  \return a bool
+   */
+  inline const bool isBVP() const
+  {
+    return SiconosDOMTreeTools::hasAttributeValue(rootNode, NSDS_BVP);
+  };
+
+  /** \fn void setBVP(const bool&)
+   *   \brief set isbvp attribute of rootNode
+   *   \param a bool
+   */
+  inline void setBVP(const bool& b)
+  {
+    if (!(SiconosDOMTreeTools::hasAttributeValue(rootNode, NSDS_BVP)))
+    {
+      if (b) xmlNewProp(rootNode, (xmlChar*)NSDS_BVP.c_str(), (xmlChar*)"true");
+    }
+    else
+    {
+      if (!b) xmlRemoveProp(xmlHasProp(rootNode, (xmlChar*)NSDS_BVP.c_str()));
+    }
+  }
+
+  /** \fn const SetOfDSXML getDynamicalSystemsXML()
+   *   \brief get the set of DynamicalSystemXML
+   *   \return a SetOfDSXML
+   */
+  inline const SetOfDSXML getDynamicalSystemsXML() const
+  {
+    return DSXMLSet;
+  };
+
+  /** \fn const bool hasDynamicalSystemXML() const
+   *   \brief true if set of DynamicalSystemXML is not empty
+   *   \return a bool
+   */
+  inline const bool hasDynamicalSystemXML() const
+  {
+    return !(DSXMLSet.empty());
+  }
+
+  /** \fn const SetOfInteractionsXML getInteractionsXML()
+   *   \brief get the set of InteractionsXML
+   *   \return a SetOfInteractionsXML
+   */
+  inline const SetOfInteractionsXML getInteractionsXML() const
+  {
+    return interactionsXMLSet;
+  };
+
+  /** \fn const bool hasInteractionsXML() const
+   *  \brief true if set of InteractionsXML is not empty
+   *  \return a bool
+   */
+  inline const bool hasInteractionsXML() const
+  {
+    return !(interactionsXMLSet.empty());
+  };
+
+  /** \fn EqualityConstraintXML* getEqualityConstraintXML(int number)
+   *   \brief Return the EqualityConstraintXML with id number
+   *   \param number : int number : the number of the EqualityConstraintXML to return
+   *  \exception XMLException
+   *   \return the EqualityConstraintXML of number number, NULL if doesn't exist
+   */
+  EqualityConstraintXML* getEqualityConstraintXML(int number);
+
+  /** \fn inline vector<int> getEqualityConstraintNumbers();
+   *   \brief to get EqualityConstraintXML numbers
+   *   \return vector EqualityConstraints integer numbers
+   */
+  inline std::vector<int> getEqualityConstraintNumbers()
+  {
+    return definedEqualityConstraintNumbers;
+  }
+
+  /** \fn void updateNonSmoothDynamicalSystemXML(xmlNodePtr , NonSmoothDynamicalSystem*)
+   *   \brief makes the operations to add a NonSmoothDynamicalSystem to the SiconosModelXML
+   *   \param xmlNodePtr  : the root node for the NonSmoothDynamicalSystemXML
+   *   \param NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem of this NonSmoothDynamicalSystemXML
+   */
+  void updateNonSmoothDynamicalSystemXML(xmlNodePtr , NonSmoothDynamicalSystem*);
+
+  /** \fn void loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* )
+   *   \brief loads the data of the NonSmoothDynamicalSystem into the NonSmoothDynamicalSystemXML (in the DOM tree)
+   *   \param NonSmoothDynamicalSystem* : the NonSmoothDynamicalSystem of this NonSmoothDynamicalSystemXML
+   */
+  void loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem*);
+
 
 };
 

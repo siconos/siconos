@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "NonSmoothDynamicalSystem.h"
 
 // includes to be deleted thanks to factories
@@ -40,222 +40,177 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const bool& isBvp):
   isTopologyAllocatedIn = true;
 }
 
-// copy constructor
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem& nsds):
-  BVP(false), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)
-{
-  BVP = nsds.isBVP();
-  unsigned int i;
-  DSVector.resize(nsds.getDynamicalSystems().size(), NULL);
-
-  isDSVectorAllocatedIn.resize(DSVector.size(), false);
-  DynamicalSystem * dsTmp;
-  for (i = 0; i < DSVector.size(); i++)
-  {
-    dsTmp = nsds.getDynamicalSystemPtr(i);
-    if (dsTmp != NULL)
-    {
-      // \todo use factories to improve this copy.
-      string type = dsTmp ->getType();
-      if (type ==  NLDS)
-        DSVector[i] = new DynamicalSystem(*dsTmp);
-      else if (type ==  LDS)
-        DSVector[i] = new LinearDS(*dsTmp);
-      else if (type ==  LITIDS)
-        DSVector[i] = new LinearTIDS(*dsTmp);
-      else if (type ==  LNLDS)
-        DSVector[i] = new LagrangianDS(*dsTmp);
-      else if (type ==  LTIDS)
-        DSVector[i] = new LagrangianLinearTIDS(*dsTmp);
-      else
-        RuntimeException::selfThrow("NonSmoothDynamicalSystem::copy constructor, unknown Dynamical system type:" + type);
-      isDSVectorAllocatedIn[i] = true;
-    }
-  }
-  interactionVector.resize(nsds.getInteractions().size(), NULL);
-  isInteractionVectorAllocatedIn.resize(interactionVector.size(), false);
-  Interaction * interTmp;
-  for (i = 0; i < interactionVector.size(); i++)
-  {
-    interTmp = nsds.getInteractionPtr(i);
-    if (interTmp != NULL)
-    {
-      interactionVector[i] = new Interaction(*interTmp);
-      isInteractionVectorAllocatedIn[i] = true;
-    }
-  }
-
-  topology = new Topology(this); // \todo use a copy constructor for topology?
-  isTopologyAllocatedIn = true;
-
-  /*  \todo: add this part when EC will be well-implemented
-  ecVector.resize(nsds.getEqualityConstraints.size(), NULL);
-  isEcVectorAllocatedIn.resize(ecVector.size(), false);
-  equalityConstraint * ecTmp;
-  for(i=0; i< ecVector.size();i++)
-    {
-      ecTmp = nsds.getEqualityConstraintPtr(i);
-      if(ecTmp != NULL)
-  {
-    string typeEc = ecTmp->getType() ;
-    if( typeEc == LINEAREC )
-      ecVector[i] = new LinearEC( *ecTmp) ;
-    else if( typeEc == LINEARTIEC )
-      ecVector[i] = new LinearTIEC( *ecTmp) ;
-    else if( typeEc == NLINEAREC )
-      ecVector[i] = new NonLinearEC( *ecTmp) ;
-    else if( typeEc == LAGRANGIANEC )
-      ecVector[i] = new LagrangianEC( *ecTmp) ;
-    else if( typeEc == LAGRANGIANLINEAREC )
-      ecVector[i] = new LagrangianLinearEC( *ecTmp) ;
-    else
-      RuntimeException::selfThrow("NonSmoothDynamicalSystem::copy constructor, unknown Equality constraint type:"+typeEc);
-    isEcVectorAllocatedIn[i] = true;
-  }
-    }
-  */
-
-  // Warning: xml link is not copied.
-}
-
 // xml constuctor
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* newNsdsxml):
-  BVP(false), nsdsxml(newNsdsxml), isTopologyAllocatedIn(false)
+  BVP(false), topology(NULL), nsdsxml(newNsdsxml), isTopologyAllocatedIn(false)
 {
-  if (nsdsxml != NULL)
+  if (nsdsxml == NULL)
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: xml constructor, xml file=NULL");
+
+  // === DS Vector fill-in: we sweep the list of DSXML and for each of them, add a new DynamicalSystem in the set allDS. ===
+  SetOfDSXML dsList = nsdsxml->getDynamicalSystemsXML();
+  SetOfDSXMLIt it;
+  CheckInsertDS checkDS;
+  string type;
+  for (it = dsList.begin(); it != dsList.end(); ++it)
   {
-    unsigned int i = 0;
-    // DS Vector fill-in
-    vector<int> nbDStab = nsdsxml->getDSNumbers();
-    unsigned int size = nbDStab.size();
-    DSVector.resize(size, NULL);
-    isDSVectorAllocatedIn.resize(size, false);
+    type = (*it)->getType();
+    if (type  == LAGRANGIAN_NON_LINEARDS_TAG)  // LagrangianDS
+      checkDS = allDS.insert(new LagrangianDS(*it , this));
+    else if (type == LAGRANGIAN_TIDS_TAG)  // Lagrangian Linear Time Invariant
+      checkDS = allDS.insert(new LagrangianLinearTIDS(*it, this));
+    else if (type == LINEAR_DS_TAG)  // Linear DS
+      checkDS = allDS.insert(new LinearDS(*it, this));
+    else if (type == LINEAR_TIDS_TAG)  // Linear DS
+      checkDS = allDS.insert(new LinearTIDS(*it, this));
+    else if (type == NON_LINEAR_DS_TAG)  // Non linear DS
+      checkDS = allDS.insert(new DynamicalSystem(*it, this));
+    else RuntimeException::selfThrow("NonSmoothDynamicalSystem::xml constructor, wrong Dynamical System type" + type);
+    // checkDS.first is an iterator that points to the DS inserted into the set.
+    isDSAllocatedIn[*(checkDS.first)] = true ;
+  }
 
-    for (i = 0; i < size; i++)
-    {
-      string type = (nsdsxml->getDynamicalSystemXML(nbDStab[i]))->getType();
-      if (type  == LAGRANGIAN_NON_LINEARDS_TAG)  // LagrangianDS
-      {
-        DSVector[i] = new LagrangianDS(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
-        isDSVectorAllocatedIn[i] = true;
-      }
-      else if (type == LAGRANGIAN_TIDS_TAG)  // Lagrangian Linear Time Invariant
-      {
-        DSVector[i] = new LagrangianLinearTIDS(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
-        isDSVectorAllocatedIn[i] = true;
-      }
-      else if (type == LINEAR_DS_TAG)  // Linear DS
-      {
-        DSVector[i] = new LinearDS(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
-        isDSVectorAllocatedIn[i] = true;
-      }
-      else if (type == LINEAR_TIDS_TAG)  // Linear DS
-      {
-        DSVector[i] = new LinearTIDS(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
-        isDSVectorAllocatedIn[i] = true;
-      }
-      else if (type == NON_LINEAR_DS_TAG)  // Non linear DS
-      {
-        DSVector[i] = new DynamicalSystem(nsdsxml->getDynamicalSystemXML(nbDStab[i]), this);
-        isDSVectorAllocatedIn[i] = true;
-      }
-      else RuntimeException::selfThrow("NonSmoothDynamicalSystem::xml constructor, wrong Dynamical System type" + type);
-    }
+  // ===  The same process is applied for Interactions ===
+  SetOfInteractionsXML  interactionsList = nsdsxml->getInteractionsXML();
+  SetOfInteractionsXMLIt it2;
+  CheckInsertInteraction checkInter;
+  for (it2 = interactionsList.begin(); it2 != interactionsList.end(); ++it2)
+  {
+    checkInter = allInteractions.insert(new Interaction(*it2, this));
+    // checkInter.first is an iterator that points to the Interaction inserted into the set.
+    isInteractionAllocatedIn[*(checkInter.first)] = true;
+  }
 
-    // Interaction vector fill-in
-    vector<int> nbInteractionTab = nsdsxml->getInteractionNumbers();
-    //int ds1, ds2;
-    unsigned int sizeInter = nbInteractionTab.size();
-    interactionVector.resize(sizeInter, NULL);
-    isInteractionVectorAllocatedIn.resize(sizeInter, false);
-    for (i = 0; i < sizeInter; i++)
-    {
-      // Creation of the Interaction
-      interactionVector[i] = new Interaction(nsdsxml->getInteractionXML(nbInteractionTab[i]), this);
-      isInteractionVectorAllocatedIn[i] = true;
-    }
-    if (nbInteractionTab.size() == 0) cout << " /!\\ Warning: you do not defined any interaction in the NonSmoothDymamicalSystem (Constructor: xml). /!\\ " << endl;
+  if (allInteractions.size() == 0) cout << " /!\\ Warning: you do not defined any interaction in the NonSmoothDymamicalSystem (Constructor: xml). /!\\ " << endl;
 
-    // built topology:
-    topology = new Topology(this);
-    isTopologyAllocatedIn = true;
+  // built topology:
+  topology = new Topology(this);
+  isTopologyAllocatedIn = true;
 
-    // Algebraic constraints fill-in
-    // get all the EqualityConstraintXML objects then create the EqualityConstraint for this EqualityConstraintXML
-    // \todo: uncomment this part when EC will be well-implemented
-    /*      vector<int> nbECtab = nsdsxml->getEqualityConstraintNumbers();
+  // Algebraic constraints fill-in
+  // get all the EqualityConstraintXML objects then create the EqualityConstraint for this EqualityConstraintXML
+  // \todo: uncomment this part when EC will be well-implemented
+  /*      vector<int> nbECtab = nsdsxml->getEqualityConstraintNumbers();
     for( i=0; i<nbECtab.size(); i++ )
     {
     EqualityConstraint *ec;
     if((nsdsxml->getEqualityConstraintXML( nbECtab[i]) )->getType() == LINEAR_EC_TAG )
     {
-      ec = new LinearEC();
-      ecVector.push_back( ec );
-      isEcVectorAllocatedIn.push_back(true);
-      (static_cast<LinearEC*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
+    ec = new LinearEC();
+    ecVector.push_back( ec );
+    isEcVectorAllocatedIn.push_back(true);
+    (static_cast<LinearEC*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
     }
     else if((nsdsxml->getEqualityConstraintXML( nbECtab[i]) )->getType() == NON_LINEAR_EC_TAG )
     {
-      ec = new EqualityConstraint();
-      ecVector.push_back( ec );
-      isEcVectorAllocatedIn.push_back(true);
-      (static_cast<EqualityConstraint*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
+    ec = new EqualityConstraint();
+    ecVector.push_back( ec );
+    isEcVectorAllocatedIn.push_back(true);
+    (static_cast<EqualityConstraint*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
     }
     else if((nsdsxml->getEqualityConstraintXML( nbECtab[i]) )->getType() == LINEAR_TIME_INVARIANT_EC_TAG )
     {
-      ec = new LinearTIEC();
-      ecVector.push_back( ec );
-      isEcVectorAllocatedIn.push_back(true);
-      (static_cast<LinearTIEC*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
+    ec = new LinearTIEC();
+    ecVector.push_back( ec );
+    isEcVectorAllocatedIn.push_back(true);
+    (static_cast<LinearTIEC*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
     }
     else if((nsdsxml->getEqualityConstraintXML( nbECtab[i]) )->getType() == LAGRANGIAN_EC_TAG )
     {
-      ec = new LagrangianEC();
-      ecVector.push_back( ec );
-      isEcVectorAllocatedIn.push_back(true);
-      (static_cast<LagrangianEC*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
+    ec = new LagrangianEC();
+    ecVector.push_back( ec );
+    isEcVectorAllocatedIn.push_back(true);
+    (static_cast<LagrangianEC*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
     }
     else if((nsdsxml->getEqualityConstraintXML( nbECtab[i]) )->getType() == LAGRANGIAN_LINEAR_EC_TAG )
     {
-      ec = new LagrangianLinearEC();
-      ecVector.push_back( ec );
-      isEcVectorAllocatedIn.push_back(true);
-      (static_cast<LagrangianLinearEC*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
+    ec = new LagrangianLinearEC();
+    ecVector.push_back( ec );
+    isEcVectorAllocatedIn.push_back(true);
+    (static_cast<LagrangianLinearEC*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
     }
     else RuntimeException::selfThrow("NonSmoothDynamicalSystem:: xml constructor, wrong kind of algebraic constraints");
     }
-    */
-  }
-  else RuntimeException::selfThrow("NonSmoothDynamicalSystem:: xml constructor, xml file=NULL");
+  */
 }
 
+// copy constructor
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem& nsds):
+  BVP(false), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)
+{
+  BVP = nsds.isBVP();
+
+  // === copy of DynamicalSystems ===
+  allDS = nsds.getDynamicalSystems(); // Warning!! This is a false copy, since pointers links remains between DS of each set
+  DSIterator it;
+  for (it = allDS.begin(); it != allDS.end(); ++it)
+    isDSAllocatedIn[*it] = false;
+
+  // === copy of Interactions ===
+  allInteractions = nsds.getInteractions(); // Warning!! This is a false copy, since pointers links remains between Interactions of each set
+  InteractionsIterator it2;
+  for (it2 = allInteractions.begin(); it2 != allInteractions.end(); ++it2)
+    isInteractionAllocatedIn[*it2] = false;
+
+  topology = new Topology(this); // \todo use a copy constructor for topology?
+  isTopologyAllocatedIn = true;
+
+  /*  \todo: add this part when EC will be well-implemented
+      ecVector.resize(nsds.getEqualityConstraints.size(), NULL);
+      isEcVectorAllocatedIn.resize(ecVector.size(), false);
+      equalityConstraint * ecTmp;
+      for(i=0; i< ecVector.size();i++)
+      {
+      ecTmp = nsds.getEqualityConstraintPtr(i);
+      if(ecTmp != NULL)
+      {
+      string typeEc = ecTmp->getType() ;
+      if( typeEc == LINEAREC )
+      ecVector[i] = new LinearEC( *ecTmp) ;
+      else if( typeEc == LINEARTIEC )
+      ecVector[i] = new LinearTIEC( *ecTmp) ;
+      else if( typeEc == NLINEAREC )
+      ecVector[i] = new NonLinearEC( *ecTmp) ;
+      else if( typeEc == LAGRANGIANEC )
+      ecVector[i] = new LagrangianEC( *ecTmp) ;
+      else if( typeEc == LAGRANGIANLINEAREC )
+      ecVector[i] = new LagrangianLinearEC( *ecTmp) ;
+      else
+      RuntimeException::selfThrow("NonSmoothDynamicalSystem::copy constructor, unknown Equality constraint type:"+typeEc);
+      isEcVectorAllocatedIn[i] = true;
+      }
+      }
+  */
+
+  // Warning: xml link is not copied.
+}
 // \todo add a  constructor from data ?
 
 NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 {
-  unsigned int i;
-
-  if (DSVector.size() > 0)
+  // == delete DS ==
+  DSIterator it;
+  for (it = allDS.begin(); it != allDS.end(); ++it)
   {
-    for (i = 0; i < DSVector.size(); i++)
-    {
-      if (isDSVectorAllocatedIn[i]) delete DSVector[i];
-      DSVector[i] = NULL;
-    }
+    if (isDSAllocatedIn[*it]) delete *it;
   }
-  DSVector.clear();
 
-  for (i = 0; i < interactionVector.size(); i++)
+  allDS.clear();
+  isDSAllocatedIn.clear();
+
+  // == delete Interactions ==
+  InteractionsIterator it2;
+  for (it2 = allInteractions.begin(); it2 != allInteractions.end(); ++it2)
   {
-    if (isInteractionVectorAllocatedIn[i])
-      delete interactionVector[i];
-    interactionVector[i] = NULL;
+    if (isInteractionAllocatedIn[*it2]) delete *it2;
   }
-  interactionVector.clear();
+
+  allInteractions.clear();
+  isInteractionAllocatedIn.clear();
 
   if (ecVector.size() > 0)
   {
-    for (i = 0; i < ecVector.size(); i++)
+    for (unsigned int i = 0; i < ecVector.size(); i++)
     {
       if (isEcVectorAllocatedIn[i]) delete ecVector[i];
       ecVector[i] = NULL;
@@ -270,73 +225,113 @@ NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
   }
 }
 
-// --- GETTERS/SETTERS ---
+// === DynamicalSystems management ===
 
 DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystemPtr(const int& nb) const
 {
-  if ((unsigned int)nb >= DSVector.size())
-    RuntimeException::selfThrow("NonSmoothDynamicalSystem - getDynamicalSystem : \'nb\' is out of range");
-  return DSVector[nb];
+  // Mind that DS are sorted in a growing order according to their id number.
+  DSIterator it = allDS.begin();
+  for (int i = 0; i < nb; ++i)
+    it++;
+
+  if (it == allDS.end())
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem - getDynamicalSystemPtr(nb) : nb is out of range");
+
+  return *it;
 }
 
 DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystemPtrNumber(const int& nb) const
 {
-  unsigned int i = 0;
-  while (DSVector[i]->getNumber() != nb && i < DSVector.size())
-  {
-    i++ ;
-  }
-  if (i > DSVector.size())
-    RuntimeException::selfThrow("NonSmoothDynamicalSystem::getDynamicalSystemOnNumber, out of range or chosen DSVector == NULL");
-  return DSVector[i];
+  if (! allDS.isDSIn(nb)) // if ds number nb is not in the set ...
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem::getDynamicalSystemOnNumber(nb), DS number nb is not in the set.");
+
+  return allDS.getDynamicalSystem(nb);
 }
 
-void NonSmoothDynamicalSystem::setDynamicalSystems(const std::vector<DynamicalSystem*>& newVect)
+void NonSmoothDynamicalSystem::setDynamicalSystems(const DSSet& newVect)
 {
-  for (unsigned int i = 0; i < DSVector.size(); i++)
+  // clear old set
+  DSIterator it;
+  for (it = allDS.begin(); it != allDS.end(); ++it)
   {
-    if (isDSVectorAllocatedIn[i]) delete DSVector[i];
+    if (isDSAllocatedIn[*it]) delete *it;
   }
-  DSVector = newVect;
-  isDSVectorAllocatedIn.clear();
-  isDSVectorAllocatedIn.resize(newVect.size(), false);
+
+  allDS.clear();
+  isDSAllocatedIn.clear();
+
+  // copy the new one
+  allDS = newVect;
+  for (it = allDS.begin(); it != allDS.end(); ++it)
+    isDSAllocatedIn[*it] = false;
+
+  topology->setUpToDate(false);
 }
+
+const bool NonSmoothDynamicalSystem::hasDynamicalSystemNumber(const int& nb) const
+{
+  return allDS.isDSIn(nb);
+}
+
+const bool NonSmoothDynamicalSystem::hasDynamicalSystem(DynamicalSystem* ds) const
+{
+  return allDS.isDSIn(ds);
+}
+
+// === Interactions management ===
 
 Interaction* NonSmoothDynamicalSystem::getInteractionPtr(const int& nb) const
 {
-  if ((unsigned int)nb >= interactionVector.size())
-    RuntimeException::selfThrow("NonSmoothDynamicalSystem - getInteraction : \'nb\' is out of range");
-  return interactionVector[nb];
+  // Mind that Interactions are sorted in a growing order according to their id number.
+  InteractionsIterator it = allInteractions.begin();
+  for (int i = 0; i < nb; ++i)
+    it++;
+
+  if (it == allInteractions.end())
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem - getInteractionPtr(nb) : nb is out of range");
+
+  return *it;
 }
 
 Interaction* NonSmoothDynamicalSystem::getInteractionPtrNumber(const int& nb) const
 {
-  for (unsigned int i = 0; i < interactionVector.size(); i++)
-  {
-    if (interactionVector[i] != NULL)
-      if (interactionVector[i]->getNumber() == nb)
-      {
-        return interactionVector[i];
-      }
-  }
-  RuntimeException::selfThrow("NonSmoothDynamicalSystem::getInteractionOnNumber : interactionVector[i] == NULL");
-  return NULL;
+  if (! allInteractions.isInteractionIn(nb)) // if Interaction number nb is not in the set ...
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem::getInteractionOnNumber(nb), Interaction number nb is not in the set.");
+
+  return allInteractions.getInteraction(nb);
 }
 
-void NonSmoothDynamicalSystem::setInteractions(const std::vector<Interaction*>& newVect)
+void NonSmoothDynamicalSystem::setInteractions(const InteractionsSet& newVect)
 {
-  for (unsigned int i = 0; i < interactionVector.size(); i++)
+  // clear old set
+  InteractionsIterator it;
+  for (it = allInteractions.begin(); it != allInteractions.end(); ++it)
   {
-    if (isInteractionVectorAllocatedIn[i]) delete interactionVector[i];
+    if (isInteractionAllocatedIn[*it]) delete *it;
   }
-  interactionVector = newVect;
-  isInteractionVectorAllocatedIn.clear();
-  isInteractionVectorAllocatedIn.resize(newVect.size(), false);
 
-  // the topology should be updated
+  allInteractions.clear();
+  isInteractionAllocatedIn.clear();
+
+  // copy the new one
+  allInteractions = newVect;
+  for (it = allInteractions.begin(); it != allInteractions.end(); ++it)
+    isInteractionAllocatedIn[*it] = false;
+
   topology->setUpToDate(false);
-
 }
+
+const bool NonSmoothDynamicalSystem::hasInteractionNumber(const int& nb) const
+{
+  return allInteractions.isInteractionIn(nb);
+}
+
+const bool NonSmoothDynamicalSystem::hasInteraction(Interaction* inter) const
+{
+  return allInteractions.isInteractionIn(inter);
+}
+
+// === EqualityConstraints management ===
 
 EqualityConstraint* NonSmoothDynamicalSystem::getEqualityConstraintPtr(const int& i) const
 {
@@ -356,31 +351,7 @@ void NonSmoothDynamicalSystem::setEqualityConstraints(const std::vector<Equality
   isEcVectorAllocatedIn.resize(newVect.size(), false);
 }
 
-// --- OTHER FUNCTIONS ---
-
-bool NonSmoothDynamicalSystem::hasDynamicalSystemNumber(const int& nb) const
-{
-  bool hasDS = false;
-  for (unsigned int i = 0; i < DSVector.size(); i++)
-  {
-    if (DSVector[i]->getNumber() == nb)
-      hasDS = true;
-  }
-  return hasDS;
-}
-
-bool NonSmoothDynamicalSystem::hasInteractionNumber(const int& nb) const
-{
-  bool hasInter = false;
-  for (unsigned int i = 0; i < interactionVector.size(); i++)
-  {
-    if (interactionVector[i] != NULL)
-      if (interactionVector[i]->getNumber() == nb)
-        hasInter = true;
-  }
-  return hasInter;
-}
-// Xml management functions
+// === Xml management functions ===
 
 void NonSmoothDynamicalSystem::saveNSDSToXML()
 {
@@ -390,19 +361,19 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
 
     nsdsxml->setBVP(BVP);// no need to change the value of BVP, it mustn't change anyway
 
-    size = DSVector.size();
-    for (i = 0; i < size; i++)
+    DSIterator it;
+    for (it = allDS.begin(); it != allDS.end(); ++it)
     {
-      if (DSVector[i]->getType() == LNLDS)
-        (static_cast<LagrangianDS*>(DSVector[i]))->saveDSToXML();
-      else if (DSVector[i]->getType() == LTIDS)
-        (static_cast<LagrangianLinearTIDS*>(DSVector[i]))->saveDSToXML();
-      else if (DSVector[i]->getType() == LDS)
-        (static_cast<LinearDS*>(DSVector[i]))->saveDSToXML();
-      else if (DSVector[i]->getType() == LITIDS)
-        (static_cast<LinearDS*>(DSVector[i]))->saveDSToXML();
-      else if (DSVector[i]->getType() == NLDS)
-        DSVector[i]->saveDSToXML();
+      if ((*it)->getType() == LNLDS)
+        (static_cast<LagrangianDS*>((*it)))->saveDSToXML();
+      else if ((*it)->getType() == LTIDS)
+        (static_cast<LagrangianLinearTIDS*>((*it)))->saveDSToXML();
+      else if ((*it)->getType() == LDS)
+        (static_cast<LinearDS*>((*it)))->saveDSToXML();
+      else if ((*it)->getType() == LITIDS)
+        (static_cast<LinearDS*>((*it)))->saveDSToXML();
+      else if ((*it)->getType() == NLDS)
+        (*it)->saveDSToXML();
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of DynamicalSystem");
     }
 
@@ -421,9 +392,10 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
         (static_cast<LagrangianLinearEC*>(ecVector[i]))->saveEqualityConstraintToXML();
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of EqualityConstraint");
     }
-    size = interactionVector.size();
-    for (i = 0; i < size; i++)
-      interactionVector[i]->saveInteractionToXML();
+
+    InteractionsIterator it2;
+    for (it2 = allInteractions.begin(); it2 != allInteractions.end(); ++it2)
+      (*it2)->saveInteractionToXML();
   }
   else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveNSDSToXML - The NonSmoothDynamicalSystemXML object doesn't exists");
 }
@@ -431,44 +403,25 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
 void NonSmoothDynamicalSystem::display() const
 {
   cout << " ===== Non Smooth Dynamical System display ===== " << endl;
-  cout << "| Adress of this object = " << this << endl;
-  cout << "| isBVP = " << BVP << endl;
-  if (nsdsxml != NULL)
-    cout << "| &nsdsxml (xml link) = " << nsdsxml << endl;
-  else
-    cout << "| &nsdsxml (xml link) -> NULL " << endl;
-  cout << "Dynamical systems list:" << endl;
-  vector<DynamicalSystem*>::const_iterator itDS;
-  for (itDS = DSVector.begin(); itDS != DSVector.end(); itDS++)
-  {
-    if ((*itDS) != NULL)
-      (*itDS)->display();
-    else
-      cout << " DS-> NULL " << endl;
-  }
-  cout << "Interactions of this system:" << endl;
-  vector<Interaction*>::const_iterator it;
-  for (it = interactionVector.begin(); it != interactionVector.end(); it++)
-  {
-    if ((*it) != NULL)
-      (*it)->display();
-    else
-      cout << " interaction -> NULL " << endl;
-  }
+  cout << "---> isBVP = " << BVP << endl;
+  allDS.display();
+  allInteractions.display();
   cout << "===================================================" << endl;
 }
 
-void NonSmoothDynamicalSystem::addDynamicalSystem(DynamicalSystem *ds)
+void NonSmoothDynamicalSystem::addDynamicalSystemPtr(DynamicalSystem *ds)
 {
   ds->setNonSmoothDynamicalSystemPtr(this);
-  DSVector.push_back(ds);
-  isDSVectorAllocatedIn.push_back(false);
+  allDS.insert(ds);
+  isDSAllocatedIn[ds] = false;
+  topology->setUpToDate(false);
 }
 
-void NonSmoothDynamicalSystem::addInteraction(Interaction *inter)
+void NonSmoothDynamicalSystem::addInteractionPtr(Interaction *inter)
 {
-  interactionVector.push_back(inter);
-  isInteractionVectorAllocatedIn.push_back(false);
+  inter->setNonSmoothDynamicalSystemPtr(this);
+  allInteractions.insert(inter);
+  isInteractionAllocatedIn[inter] = false;
   // the topology should be updated
   topology->setUpToDate(false);
 }
@@ -482,9 +435,9 @@ void NonSmoothDynamicalSystem::addEqualityConstraint(EqualityConstraint* ec)
 double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
 {
   // calculate the max value of all DS convergence indicators
-  double convergenceIndicator = (* DSVector.begin()) -> dsConvergenceIndicator();
-  vector <DynamicalSystem*>::iterator iter;
-  for (iter = DSVector.begin(); iter != DSVector.end(); ++iter)
+  double convergenceIndicator = (* allDS.begin()) -> dsConvergenceIndicator();
+  DSIterator iter;
+  for (iter = allDS.begin(); iter != allDS.end(); ++iter)
   {
     double dsIndic = (*iter)->dsConvergenceIndicator();
     if (convergenceIndicator > dsIndic) convergenceIndicator = dsIndic;

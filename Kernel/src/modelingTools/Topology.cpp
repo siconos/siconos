@@ -56,10 +56,31 @@ Topology::~Topology()
   nsds = NULL;
 }
 
+Interaction* Topology::getInteractionPtrNumber(const int& nb) const
+{
+  if (! allInteractions.isInteractionIn(nb)) // if Interaction number nb is not in the set ...
+    RuntimeException::selfThrow("Topology::getInteractionOnNumber(nb), Interaction number nb is not in the set.");
+
+  return allInteractions.getInteraction(nb);
+}
+
+void Topology::setInteractions(const InteractionsSet& newVect)
+{
+  // clear old set
+  allInteractions.clear();
+  // copy the new one
+  allInteractions = newVect;
+}
+
+const bool Topology::hasInteraction(Interaction* inter) const
+{
+  return allInteractions.isInteractionIn(inter);
+}
+
 void Topology::updateTopology()
 {
   //-- Get all the interactions --
-  vector<Interaction*> listInteractions = nsds->getInteractions();
+  InteractionsSet listInteractions = nsds->getInteractions();
 
   //-- Fill RelativeDegreesMaps in --
   computeRelativeDegreesMap();
@@ -75,12 +96,12 @@ void Topology::updateTopology()
 
 
   // -- Compute sizeOutput  ( ie sum of all interactions sizes) --
-  vector<Interaction*>::iterator it;
+  InteractionsIterator it;
   // loop through interactions list
   unsigned int size;
   for (it = listInteractions.begin(); it != listInteractions.end(); it++)
   {
-    size = (*it)->getNInteraction();
+    size = (*it)->getInteractionSize();
 
     // initialization of indexMax and effectiveIndexes
 
@@ -110,15 +131,15 @@ void Topology::computeEffectiveSizeOutput()
   effectiveSizeOutput = 0;
 
   // Get all the interactions
-  vector<Interaction*> listInteractions = nsds->getInteractions();
+  InteractionsSet listInteractions = nsds->getInteractions();
 
-  vector<Interaction*>::iterator it;
+  InteractionsIterator it;
   // loop over interactions list
   for (it = listInteractions.begin(); it != listInteractions.end(); it++)
   {
     // loop over ouput vector
     unsigned int j;
-    for (j = 0; j < (*it)->getNInteraction(); j++)
+    for (j = 0; j < (*it)->getInteractionSize(); j++)
       effectiveSizeOutput += (indexMaxMap[*it])[j] - (indexMinMap[*it])[j] + 1 ;
   }
 }
@@ -128,7 +149,7 @@ unsigned int Topology::computeEffectiveSizeOutput(Interaction * inter)
   unsigned int sizeOutput = 0;
   unsigned int j;
   // loop over ouput vector
-  for (j = 0; j < inter->getNInteraction(); j++)
+  for (j = 0; j < inter->getInteractionSize(); j++)
     sizeOutput += indexMaxMap[inter][j] - indexMinMap[inter][j] + 1 ;
   return sizeOutput;
 }
@@ -136,36 +157,28 @@ unsigned int Topology::computeEffectiveSizeOutput(Interaction * inter)
 // Linked interactions map computing:
 void Topology::computeLinkedInteractionMap()
 {
-  vector<DynamicalSystem*> dsOrig, dsLinked;
+  DSSet dsOrig, dsLinked;
 
   // Get all the interactions
-  vector<Interaction*> listInteractions = nsds->getInteractions();
+  InteractionsSet listInteractions = nsds->getInteractions();
 
   linkedInteractionMap.clear();
 
-  vector<Interaction*>::iterator itOrig;
+  InteractionsIterator itOrig;
 
   // -- loop over all the interactions of the NonSmoothDynamicalSystem --
   for (itOrig = listInteractions.begin(); itOrig != listInteractions.end(); itOrig++)
   {
     dsOrig = (*itOrig)->getDynamicalSystems();
 
-    vector<Interaction*>::iterator itLinked;
+    InteractionsIterator itLinked;
     // -- check all other interactions --
     for (itLinked = listInteractions.begin(); itLinked != listInteractions.end() && itLinked != itOrig; itLinked++)
     {
       // list of ds of the second interaction
       dsLinked = (*itLinked)->getDynamicalSystems();
 
-      vector<DynamicalSystem*> commonDS;  // list of ds common to both interactions
-      vector<DynamicalSystem*>::iterator itDS;
-
-      // compare list of DS of the 2 interactions
-      for (unsigned int k = 0; k < dsLinked.size(); k++)
-      {
-        itDS = find(dsOrig.begin(), dsOrig.end(), dsLinked[k]);
-        if (itDS != dsOrig.end()) commonDS.push_back(*itDS);
-      }
+      DSSet commonDS = intersection(dsOrig, dsLinked); // list of ds common to both interactions
 
       // built linkedInteractionMap
       if (commonDS.size() != 0)
@@ -182,9 +195,9 @@ void Topology::computeInteractionEffectivePositionMap()
   interactionEffectivePositionMap.clear();
 
   // Get all the interactions
-  vector<Interaction*> listInteractions = nsds->getInteractions();
+  InteractionsSet listInteractions = nsds->getInteractions();
 
-  vector<Interaction*>::iterator it;
+  InteractionsIterator it;
   unsigned int currentEffectivePosition = 0;
 
   // loop through interactions list
@@ -203,10 +216,10 @@ void Topology::computeRelativeDegreesMap()
   relativeDegreesMap.clear();
 
   // Get all the interactions
-  vector<Interaction*> listInteractions = nsds->getInteractions();
+  InteractionsSet listInteractions = nsds->getInteractions();
 
   // loop through interactions list
-  vector<Interaction*>::iterator it;
+  InteractionsIterator it;
   for (it = listInteractions.begin(); it != listInteractions.end(); it++)
     relativeDegreesMap[(*it) ] = computeRelativeDegrees(*it) ;
 }
@@ -221,7 +234,7 @@ vector<unsigned int> Topology::computeRelativeDegrees(Interaction * inter)
   string relationType = relation->getType();
 
   vector<unsigned int> relativeDegree;
-  unsigned int sizeInter = inter->getNInteraction();
+  unsigned int sizeInter = inter->getInteractionSize();
 
   // loop over various non smooth law types
   // \todo check isTimeInvariant properly
@@ -254,10 +267,10 @@ void Topology::computeIndexMinMap()
   indexMinMap.clear();
 
   // Get all the interactions
-  vector<Interaction*> listInteractions = nsds->getInteractions();
+  InteractionsSet listInteractions = nsds->getInteractions();
 
   // loop through interactions list
-  vector<Interaction*>::iterator it;
+  InteractionsIterator it;
   for (it = listInteractions.begin(); it != listInteractions.end(); it++)
     indexMinMap[(*it) ] = computeIndexMin(*it);
 
@@ -273,7 +286,7 @@ vector<unsigned int> Topology::computeIndexMin(Interaction * inter)
   string relationType = relation->getType();
 
   vector<unsigned int> indexMin;
-  unsigned int sizeInter = inter->getNInteraction();
+  unsigned int sizeInter = inter->getInteractionSize();
 
   // loop over various non smooth law types
   if (nslawType == COMPLEMENTARITYCONDITIONNSLAW)

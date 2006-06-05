@@ -67,11 +67,9 @@ void NewtonImpactFrictionNSL::display() const
 
 void NewtonImpactFrictionNSL::saveNonSmoothLawToXML()
 {
-  IN("NewtonImpactFrictionNSL::saveNonSmoothLawToXML\n");
   static_cast<NewtonImpactFrictionNSLXML*>(nslawxml)->setEn(en);
   static_cast<NewtonImpactFrictionNSLXML*>(nslawxml)->setEt(et);
   static_cast<NewtonImpactFrictionNSLXML*>(nslawxml)->setMu(mu);
-  OUT("NewtonImpactFrictionNSL::saveNonSmoothLawToXML\n");
 }
 
 NewtonImpactFrictionNSL* NewtonImpactFrictionNSL::convert(NonSmoothLaw* nsl)

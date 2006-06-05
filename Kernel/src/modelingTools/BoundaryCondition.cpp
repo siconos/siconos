@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 #include "BoundaryCondition.h"
 using namespace std;
@@ -36,7 +36,6 @@ BoundaryCondition::~BoundaryCondition()
 
 void BoundaryCondition::fillBCWithBCXML()
 {
-  OUT("BoundaryCondition::fillBCWithBCXML\n");
   if (this->bcXML != NULL)
   {}
   else RuntimeException::selfThrow("BoundaryCondition::fillBCWithBCXML - BoundaryConditionXML object not exists");

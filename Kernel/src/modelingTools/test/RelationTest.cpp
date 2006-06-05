@@ -90,7 +90,7 @@ void RelationTest::testBuildRelation1()
 // xml constructor
 void RelationTest::testBuildRelation2()
 {
-  Interaction * inter = (nsds->getInteractions())[0];
+  Interaction * inter = nsds->getInteractionPtrNumber(1);
   Relation * R1 = new Relation(tmpxml1, inter);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation2a : ", R1->getInteractionPtr()->getId() == "test-of-rel", true);

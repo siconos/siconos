@@ -36,13 +36,12 @@
 			</LagrangianLinearTIDS>
 		</DS_Definition>
 		<Interaction_Definition>
-			<Interaction number='1'>
-				<Id>test-of-rel</Id>
-				<nInter> 2 </nInter>
+			<Interaction number='1' Id='test-of-rel'>
+				<size> 2 </size>
 				<!-- List of couple of DS concerned by this interaction -->
-		               <DS_Concerned vectorSize='2' >3 4</DS_Concerned>
-                               <!-- Relation of this interaction -->				
-			       <Interaction_Content>		
+		                <DS_Concerned vectorSize='2' >3 4</DS_Concerned>
+                                <!-- Relation of this interaction -->				
+			        <Interaction_Content>		
 					<LinearTimeInvariantRelation>
    					<computeInput plugin="TestPlugin:R"/>
 					<computeOutput plugin="TestPlugin:y"/>
@@ -52,7 +51,7 @@
 						<e>0.9</e>				
 					</NewtonImpactLaw>
 				</Interaction_Content>	
-			</Interaction>				
+		        </Interaction>				
 		</Interaction_Definition>		
 	</NSDS>
 </SiconosModel>

@@ -33,7 +33,7 @@ libSiconosXml_la_SOURCES = SolverXML.cpp BoundaryConditionXML.cpp FrictionContac
 		LagrangianLinearECXML.cpp LagrangianLinearRXML.cpp LagrangianDSXML.cpp LagrangianRXML.cpp \
 		LagrangianLinearTIDSXML.cpp LCPXML.cpp LinearBCXML.cpp LinearDSIOXML.cpp \
 		LinearDSXML.cpp LinearECXML.cpp LinearTIECXML.cpp LinearTIRXML.cpp\
-		LsodarXML.cpp MoreauXML.cpp NewtonImpactLawNSLXML.cpp NewtonImpactFrictionNSLXML.cpp NLinearBCXML.cpp \
+		LsodarXML.cpp MoreauXML.cpp NewtonImpactNSLXML.cpp NewtonImpactFrictionNSLXML.cpp NLinearBCXML.cpp \
 		NonSmoothLawXML.cpp NonSmoothDynamicalSystemXML.cpp OneStepIntegratorXML.cpp OneStepNSProblemXML.cpp \
 		PeriodicBCXML.cpp QPXML.cpp RelationXML.cpp RelayNSLXML.cpp SiconosDOMTreeTools.cpp \
 		SiconosMemoryXML.cpp SiconosModelXML.cpp StrategyXML.cpp TimeDiscretisationXML.cpp \
@@ -42,7 +42,7 @@ libSiconosXml_la_SOURCES = SolverXML.cpp BoundaryConditionXML.cpp FrictionContac
 		LagrangianLinearECXML.h LagrangianLinearRXML.h LagrangianDSXML.h LagrangianRXML.h \
 		LagrangianLinearTIDSXML.h LCPXML.h LinearBCXML.h LinearDSIOXML.h LinearECXML.h \
 		LinearDSXML.h LinearTIECXML.h LinearTIRXML.h LsodarXML.h MoreauXML.h \
-		NewtonImpactLawNSLXML.h NewtonImpactFrictionNSLXML.h NLinearBCXML.h NonSmoothLawXML.h NonSmoothDynamicalSystemXML.h \
+		NewtonImpactNSLXML.h NewtonImpactFrictionNSLXML.h NLinearBCXML.h NonSmoothLawXML.h NonSmoothDynamicalSystemXML.h \
 		OneStepIntegratorXML.h OneStepNSProblemXML.h PeriodicBCXML.h QPXML.h RelationXML.h \
 		RelayNSLXML.h SiconosDOMTreeTools.h SiconosMemoryXML.h SiconosModelXML.h \
 		StrategyXML.h TimeDiscretisationXML.h XMLTagsName.h
@@ -54,7 +54,7 @@ include_HEADERS = SolverXML.h BoundaryConditionXML.h FrictionContactXML.h Comple
 		LagrangianLinearRXML.h LagrangianDSXML.h \
 		LagrangianRXML.h LagrangianLinearTIDSXML.h LCPXML.h LinearBCXML.h \
 		LinearDSIOXML.h LinearECXML.h LinearDSXML.h LinearTIECXML.h LinearTIRXML.h \
-		LsodarXML.h MoreauXML.h NewtonImpactLawNSLXML.h NewtonImpactFrictionNSLXML.h NLinearBCXML.h NonSmoothLawXML.h \
+		LsodarXML.h MoreauXML.h NewtonImpactNSLXML.h NewtonImpactFrictionNSLXML.h NLinearBCXML.h NonSmoothLawXML.h \
 		NonSmoothDynamicalSystemXML.h OneStepIntegratorXML.h OneStepNSProblemXML.h PeriodicBCXML.h QPXML.h \
 		RelationXML.h RelayNSLXML.h SiconosDOMTreeTools.h SiconosMemoryXML.h \
 		SiconosModelXML.h StrategyXML.h TimeDiscretisationXML.h XMLTagsName.h

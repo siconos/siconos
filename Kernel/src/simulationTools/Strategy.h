@@ -59,13 +59,16 @@ class StrategyXML;
  */
 
 /** vector of OneStepIntegrator */
-typedef std::vector<OneStepIntegrator*> vectorOfOSIPtr;
+typedef std::set<OneStepIntegrator*> OSISet;
 
 /** iterator through vector of OSI*/
-typedef std::vector<OneStepIntegrator*>::iterator OSIIterator;
+typedef OSISet::iterator OSIIterator;
 
 /** const iterator through vector of OSI*/
-typedef std::vector<OneStepIntegrator*>::const_iterator constOSIIterator;
+typedef OSISet::const_iterator ConstOSIIterator;
+
+/** return type value for insert function - bool = false if insertion failed. */
+typedef std::pair<OSISet::iterator, bool> CheckInsertOSI;
 
 class Strategy
 {
@@ -81,7 +84,10 @@ protected:
   TimeDiscretisation *timeDiscretisation;
 
   /** the dynamical systems integrators */
-  vectorOfOSIPtr integratorVector;
+  OSISet allOSI;
+
+  /** inside-class allocation flags*/
+  std::map<OneStepIntegrator*, bool> isOSIAllocatedIn;
 
   /** the non smooth problem */
   OneStepNSProblem *nsProblem;
@@ -95,7 +101,6 @@ protected:
   /** Flags to check wheter pointers were allocated in the present class constructors or not */
   bool isTimeDiscretisationAllocatedIn;
   bool isNSProblemAllocatedIn;
-  std::deque<bool> isIntegratorVectorAllocatedIn;
 
 public:
 
@@ -113,23 +118,23 @@ public:
    */
   Strategy(Model&, const std::string& = "undefined");
 
-  /** \fn Strategy(vector<OneStepIntegrator*>, OneStepNSProblem*, Model*, const std::string& = "undefined")
+  /** \fn Strategy(const OSISet&, OneStepNSProblem*, Model*, const std::string& = "undefined")
    *  \brief constructor from a given set of data (1)
-   *  \param the vector of osi
-   *  \param pointer on a OneStepNSProblem
+   *  \param a set of osi
+   *  \param pointer to a OneStepNSProblem
    *  \param the model that owns this strategy
    *  \param string: strategy type, default = undefined
    */
-  Strategy(vectorOfOSIPtr, OneStepNSProblem *, Model*, const std::string& = "undefined");
+  Strategy(const OSISet&, OneStepNSProblem *, Model*, const std::string& = "undefined");
 
-  /** \fn Strategy(vector<OneStepIntegrator*>, Model*, const std::string& = "undefined")
+  /** \fn Strategy(const OSISet&, Model*, const std::string& = "undefined")
    *  \brief constructor from a given set of data (2)
-   *  \param the vector of osi
+   *  \param a set of osi
    *  \param the model that owns this strategy
    *   with previous constructor)
    *  \param string: strategy type, default = undefined
    */
-  Strategy(vectorOfOSIPtr, Model*, const std::string& = "undefined");
+  Strategy(const OSISet&, Model*, const std::string& = "undefined");
 
   /** \fn Strategy(OneStepNSProblem *, Model* , const std::string& = "undefined")
    *  \brief constructor from a given set of data (3)
@@ -208,35 +213,28 @@ public:
    */
   void setTimeDiscretisationPtr(TimeDiscretisation*);
 
-  /** \fn vector<OneStepIntegrator*> getOneStepIntegrators(void)
+  /** \fn const OSISet getOneStepIntegrators()
    *  \brief get all the Integrators of the Strategy
-   *  \return a vector of OneStepIntegrator*
-   *  \exception RuntimeException
+   *  \return an OSISset
    */
-  inline vectorOfOSIPtr getOneStepIntegrators() const
+  inline const OSISet getOneStepIntegrators() const
   {
-    return integratorVector;
+    return allOSI;
   };
 
-  /** \fn void setOneStepIntegrators(vector<OneStepIntegrator*>)
-   *  \brief set the vector of Integrators
-   *  \param a vector of OneStepIntegrator to set
+  /** \fn void setOneStepIntegrators(const OSISet&)
+   *  \brief set the Integrators of the Strategy
+   *  \param an OSISset
    */
-  void setOneStepIntegrators(const vectorOfOSIPtr vOSI);
+  void setOneStepIntegrators(const OSISet&);
 
-  /** \fn OneStepIntegrator* getOneStepIntegrator(const int&)
-   *  \brief get one Integrator of the Strategy
-   *  \return one OneStepIntegrator* if it exists else return exception
+  /** \fn inline const unsigned int getNumberOfOSI()
+   *  \brief get the number of OSIs in the Strategy (ie the size of allOSI)
+   *  \return an unsigned int
    */
-  OneStepIntegrator* getOneStepIntegrator(const int&) const;
-
-  /** \fn inline int getOneStepIntegratorVectorSize()
-   *  \brief get the size of the vector of Integrators
-   *  \return int : the size of integratorVector
-   */
-  inline const int getOneStepIntegratorVectorSize() const
+  inline const unsigned int getNumberOfOSI() const
   {
-    return integratorVector.size();
+    return allOSI.size();
   }
 
   /** \fn OneStepNSProblem* getOneStepNSProblemPtr(void)
@@ -304,11 +302,11 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** \fn void addOneStepIntegrator(OneStepIntegrator*)
-   *  \brief add an Integrator into the vector of Integrators
-   *  \param the OneStepIntegrator to add
+  /** \fn void addOneStepIntegratorPtr(OneStepIntegrator*)
+   *  \brief add an Integrator into allOSI (pointer link, no copy!)
+   *  \param a pointer to a OneStepIntegrator
    */
-  void addOneStepIntegrator(OneStepIntegrator *osi);
+  void addOneStepIntegratorPtr(OneStepIntegrator *);
 
   /** \fn void computeFreeState()
    *  \brief integrates all the DynamicalSystem taking not into account nslaw, reactions ...
@@ -363,28 +361,6 @@ public:
    *  \exception RuntimeException
    */
   virtual void saveStrategyToXML();
-
-  // --- FUNCTIONS TO CREATE OR ADD VARIOUS OBJECTS ---
-
-  //===========================================
-
-  /** \fn OneStepIntegrator* addMoreau(TimeDiscretisation* td, DynamicalSystem* ds,
-                                       const double& theta)
-   *  \brief allows to add an Moreau integrator to the Strategy
-   *  \param TimeDiscretisation* : the TimeDiscretisation of the OneStepIntegrator
-   *  \param DynamicalSystem* : the DynamicalSystem that OneStepIntegrator must integrate
-   *  \param double : the theta value
-   *  \return OneStepIntegrator* : the OneStepIntegrator created
-   */
-  OneStepIntegrator* addMoreau(TimeDiscretisation* , DynamicalSystem* , const double&);
-
-  /** \fn OneStepIntegrator* addLsodar(TimeDiscretisation* td, DynamicalSystem* ds)
-   *  \brief allows to add an Lsodar integrator to the Strategy
-   *  \param TimeDiscretisation* : the TimeDiscretisation of the OneStepIntegrator
-   *  \param DynamicalSystem* : the DynamicalSystem that OneStepIntegrator must integrate
-   *  \return OneStepIntegrator* : the OneStepIntegrator created
-   */
-  OneStepIntegrator* addLsodar(TimeDiscretisation* , DynamicalSystem*);
 
   /** \fn bool hasDynamicalSystemIntegrator( DynamicalSystem* ds) const
    *  \brief check if ds is already present in an OSI of the strategy.

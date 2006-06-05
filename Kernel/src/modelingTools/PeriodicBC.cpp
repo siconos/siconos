@@ -37,7 +37,6 @@ void PeriodicBC::fillBCWithBCXML()
 {
   if (this->bcXML != NULL)
   {
-    OUT("PeriodicBC::fillBCWithBCXML\n");
   }
   else RuntimeException::selfThrow("PeriodicBC::fillBCWithBCXML - The BoundaryConditionXML object doesn't exists");
 }
@@ -47,7 +46,6 @@ void PeriodicBC::saveBCToXML()
   cout << "PeriodicBC::saveBCToXML - " << this->bcXML << endl;
   if (this->bcXML != NULL)
   {
-    OUT("PeriodicBC::saveBCToXML\n");
   }
   else RuntimeException::selfThrow("PeriodicBC::saveBCToXML - The BoundaryConditionXML object doesn't exists");
 }

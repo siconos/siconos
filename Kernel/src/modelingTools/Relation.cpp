@@ -33,7 +33,7 @@ void Relation::initParameter(const string& id)
 Relation::Relation(Interaction* inter):
   relationType("Relation"), interaction(inter), relationxml(NULL), computeInputName("none"),
   computeOutputName("none"), isOutputPlugged(false), isInputPlugged(false),
-  computeOutputPtr(NULL), computeInputPtr(NULL)
+  computeOutputPtr(NULL), computeInputPtr(NULL), number(0)
 {
 
   // Set plug-in default functions for h and g.
@@ -50,7 +50,7 @@ Relation::Relation(RelationXML* relxml, Interaction* inter):
   relationType("Relation"), interaction(inter), relationxml(relxml),
   computeInputName("none"), computeOutputName("none"),
   isOutputPlugged(true), isInputPlugged(true),
-  computeOutputPtr(NULL), computeInputPtr(NULL)
+  computeOutputPtr(NULL), computeInputPtr(NULL), number(0)
 {
   if (relationxml != NULL)
   {
@@ -90,7 +90,7 @@ Relation::Relation(const Relation& newRel, Interaction* inter):
   relationType(newRel.getType()), interaction(inter), relationxml(NULL),
   computeInputName(newRel.getComputeInputName()), computeOutputName(newRel.getComputeOutputName()),
   isOutputPlugged(true), isInputPlugged(true),
-  computeOutputPtr(NULL), computeInputPtr(NULL)
+  computeOutputPtr(NULL), computeInputPtr(NULL), number(0)
 {
   // \warning:  interaction, relationxml and dsioVector are not copied !
   // Interaction can be set with optional parameter inter (default=NULL)
@@ -181,10 +181,10 @@ void Relation::computeOutput(const double& time)
   if (computeOutputPtr == NULL)
     RuntimeException::selfThrow("computeOutput() is not linked to a plugin function");
 
-  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+  DSSet vDS = interaction->getDynamicalSystems();
   BlockVector *xTmp = new BlockVector();
   BlockVector *uTmp = new BlockVector();
-  vector<DynamicalSystem*>::iterator it;
+  DSIterator it;
   for (it = vDS.begin(); it != vDS.end(); it++)
   {
     // Put x and u of each DS into a block
@@ -216,10 +216,10 @@ void Relation::computeFreeOutput(const double& time)
   if (computeOutputPtr == NULL)
     RuntimeException::selfThrow("computeOutput() is not linked to a plugin function");
 
-  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+  DSSet vDS = interaction->getDynamicalSystems();
   BlockVector *xTmp = new BlockVector();
   BlockVector *uTmp = new BlockVector();
-  vector<DynamicalSystem*>::iterator it;
+  DSIterator it;
 
   for (it = vDS.begin(); it != vDS.end(); it++)
   {
@@ -256,8 +256,8 @@ void Relation::computeInput(const double& time)
   if (computeInputPtr == NULL)
     RuntimeException::selfThrow("computeInput() is not linked to a plugin function");
 
-  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-  vector<DynamicalSystem*>::iterator it;
+  DSSet vDS = interaction->getDynamicalSystems();
+  DSIterator it;
   BlockVector *r = new BlockVector();
   for (it = vDS.begin(); it != vDS.end(); it++)
   {
@@ -306,8 +306,6 @@ void Relation::setComputeInputFunction(const string& pluginPath, const string& f
 
 void Relation::display() const
 {
-  IN("Relation::display\n");
-
   cout << "===== Relation display ===== " << endl;
   cout << "- Relation type: " << relationType << endl;
   if (interaction != NULL) cout << "- Interaction id" << interaction->getId() << endl;
@@ -315,7 +313,6 @@ void Relation::display() const
   cout << "- Input plug-in name: " << computeInputName << endl;
   cout << "- Output plug-in name: " << computeOutputName << endl;
   cout << "===================================== " << endl;
-  OUT("Relation::display\n");
 }
 
 void Relation::saveRelationToXML() const

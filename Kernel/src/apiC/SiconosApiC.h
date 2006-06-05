@@ -157,7 +157,7 @@ extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int sicNewtonImpactLawNSL(int nIdInteraction, double e);
+int sicNewtonImpactNSL(int nIdInteraction, double e);
 
 extern
 #ifdef __cplusplus

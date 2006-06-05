@@ -47,8 +47,6 @@ TimeDiscretisationXML::TimeDiscretisationXML(xmlNode * timeDiscretisationNode):
 
 void TimeDiscretisationXML::updateTimeDiscretisationXML(xmlNode* node, TimeDiscretisation* td)
 {
-  IN("TimeDiscretisation::updateTimeDiscretisationXML\n");
   rootNode = node;
-  OUT("TimeDiscretisation::updateTimeDiscretisationXML\n");
 }
 

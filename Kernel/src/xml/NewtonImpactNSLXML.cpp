@@ -16,26 +16,21 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "NewtonImpactLawNSLXML.h"
+#include "NewtonImpactNSLXML.h"
 using namespace std;
 
-NewtonImpactLawNSLXML::NewtonImpactLawNSLXML()
+NewtonImpactNSLXML::NewtonImpactNSLXML()
 {
-  this->ENode = NULL;
+  ENode = NULL;
 }
 
-NewtonImpactLawNSLXML::NewtonImpactLawNSLXML(xmlNode * NewtonImpactLawNSLNode)
-  : NonSmoothLawXML(NewtonImpactLawNSLNode)
+NewtonImpactNSLXML::NewtonImpactNSLXML(xmlNode * NewtonImpactNSLNode)
+  : NonSmoothLawXML(NewtonImpactNSLNode)
 {
   xmlNode *node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(NewtonImpactLawNSLNode, NEWTON_E)) != NULL)
-  {
-    this->ENode = node;
-  }
+  if ((node = SiconosDOMTreeTools::findNodeChild(NewtonImpactNSLNode, NEWTON_E)) != NULL)
+    ENode = node;
   else
-  {
-    XMLException::selfThrow("NewtonImpactLawNSLXML - constructor error : tag " + NEWTON_E + " not found.");
-  }
-
+    XMLException::selfThrow("NewtonImpactNSLXML - constructor error : tag " + NEWTON_E + " not found.");
 }

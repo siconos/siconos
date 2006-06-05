@@ -71,6 +71,11 @@
 
 \newcommand{\DP}[2]{\displaystyle \frac{\partial {#1}}{\partial {#2}}}
 
+% c++ variables writting
+\newcommand{\varcpp}[1]{\textit{#1}}
+% itemize
+\newcommand{\bei}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
 
 \newcommand{\ie}{i.e.}
 \newcommand{\eg}{e.g.}
@@ -144,6 +149,32 @@
 %\vspace{-1.5em}\ding{111}
 \end{flushright}%
 \end{ndr1va}%
+%\centerline{---oOo---}
+}
+
+\makeatother
+%----------------------------------------------------------------------
+%             Redaction note environnement V.ACARY
+%----------------------------------------------------------------------
+\makeatletter
+\theoremheaderfont{\scshape}
+\theoremstyle{marginbreak}
+\theorembodyfont{\upshape}
+%\newtheorem{rque}{\bf Remarque}[chapter]
+%\newtheorem{rque1}{\bf \fsc{Remarque}}[chapter] !!! \fsc est une commande french
+\newtheorem{ndr1fp}{\textbf{\textsc{Redaction note F. PERIGNON}}}[section]
+
+\newenvironment{ndrfp}%
+{%
+\tt
+%\centerline{---oOo---}
+\noindent\begin{ndr1fp}%
+}%
+{%
+\begin{flushright}%
+%\vspace{-1.5em}\ding{111}
+\end{flushright}%
+\end{ndr1fp}%
 %\centerline{---oOo---}
 }
 

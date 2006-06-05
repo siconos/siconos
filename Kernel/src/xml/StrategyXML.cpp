@@ -28,50 +28,53 @@
 using namespace std;
 
 StrategyXML::StrategyXML():
-  strategyNode(NULL), oneStepNSProblemXML(NULL), timeDiscretisationXML(NULL)
+  rootNode(NULL), oneStepNSProblemXML(NULL), timeDiscretisationXML(NULL)
 {}
 
-StrategyXML::StrategyXML(xmlNodePtr  rootStrategyNode):
-  strategyNode(rootStrategyNode), oneStepNSProblemXML(NULL), timeDiscretisationXML(NULL)
+StrategyXML::StrategyXML(xmlNodePtr rootStrategyNode):
+  rootNode(rootStrategyNode), oneStepNSProblemXML(NULL), timeDiscretisationXML(NULL)
 {
   xmlNodePtr node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(strategyNode, LMGC90_STRATEGY_TAG)) == NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LMGC90_STRATEGY_TAG)) == NULL)
   {
     // === TimeDiscretisation data loading ===
-    if ((node = SiconosDOMTreeTools::findNodeChild(strategyNode, TIMEDISCRETISATION_TAG)) != NULL)
+    if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, TIMEDISCRETISATION_TAG)) != NULL)
       timeDiscretisationXML = new TimeDiscretisationXML(node);
     else
       XMLException::selfThrow("StrategyXML - strategy XML constructor  ERROR : tag " + TIMEDISCRETISATION_TAG + " not found.");
 
     // === OneStepIntegrator data loading ===
-    if ((node = SiconosDOMTreeTools::findNodeChild(strategyNode, ONESTEPINTEGRATOR_DEFINITION_TAG)) != NULL)
+    if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, ONESTEPINTEGRATOR_DEFINITION_TAG)) != NULL)
     {
-      xmlNodePtr OSInode;
-      string type; // OneStepIntegrator type
-      if ((OSInode = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)node)) == NULL)
+      xmlNodePtr OSINode = SiconosDOMTreeTools::findNodeChild(node);
+      if (OSINode == NULL) // At least one OSI must be described in the xml file.
         XMLException::selfThrow("StrategyXML - ERROR : at least one " + ONESTEPINTEGRATOR_TAG + " must be declared.");
-      while (OSInode != NULL)
+
+      string typeOSI; // OneStepIntegrator type
+      while (OSINode != NULL)
       {
-        type = (char*)OSInode->name;
-        if (type == MOREAU_TAG)
-          oneStepIntegratorXMLVector.push_back(new MoreauXML(OSInode));
+        typeOSI = (char*)OSINode->name;
+        if (typeOSI == MOREAU_TAG)
+          OSIXMLSet.insert(new MoreauXML(OSINode));
 
-        else if (type == LSODAR_TAG)
-          oneStepIntegratorXMLVector.push_back(new LsodarXML(OSInode));
+        else if (typeOSI == LSODAR_TAG)
+          OSIXMLSet.insert(new LsodarXML(OSINode));
+
         else
-          XMLException::selfThrow("StrategyXML, Integrator loading : undefined OneStepIntegrator type : " + type);
+          XMLException::selfThrow("StrategyXML, Integrator loading : undefined OneStepIntegrator type: " + typeOSI);
 
-        OSInode = SiconosDOMTreeTools::findFollowNode(OSInode);
+        // go to next node
+        OSINode = SiconosDOMTreeTools::findFollowNode(OSINode);
       }
     }
     else
       XMLException::selfThrow("StrategyXML - ERROR : tag " + ONESTEPINTEGRATOR_DEFINITION_TAG + " not found.");
   }
-  else cout << "StrategyXML - strategy XML constructor  : no integrators defined, use of LMGC90 tag." << endl;
+  else cout << "StrategyXML - Constructor : the Strategy is not defined -> the LMGC90 tag is used." << endl;
 
   // === OneStepNSProblem data loading ===
-  if ((node = SiconosDOMTreeTools::findNodeChild(strategyNode, ONESTEPNSPROBLEM_TAG)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, ONESTEPNSPROBLEM_TAG)) != NULL)
   {
     xmlNodePtr NSnode = SiconosDOMTreeTools::findNodeChild(node);
 
@@ -106,12 +109,11 @@ StrategyXML::~StrategyXML()
   if (oneStepNSProblemXML != NULL)
     delete oneStepNSProblemXML;
 
-  if (oneStepIntegratorXMLVector.size() > 0)
-  {
-    for (unsigned int i = 0; i < oneStepIntegratorXMLVector.size(); i++)
-      delete oneStepIntegratorXMLVector[i];
-    oneStepIntegratorXMLVector.clear();
-  }
+  // Delete OSIXML set ...
+  SetOfOSIXMLIt it;
+  for (it = OSIXMLSet.begin(); it != OSIXMLSet.end(); ++it)
+    if ((*it) != NULL) delete(*it);
+  OSIXMLSet.clear();
 }
 
 // To be reviewed ...
@@ -119,7 +121,7 @@ void StrategyXML::saveStrategy2XML(xmlNodePtr  node, Strategy* str)
 {
   XMLException::selfThrow("StrategyXML saveStrategy2XML, not yet implemented");
 
-  //   strategyNode = node;
+  //   rootNode = node;
   //   string type, tmp;
   //   xmlNodePtr integratorDefinitionNode;
   //   OneStepIntegratorXML* osixml;
@@ -127,12 +129,12 @@ void StrategyXML::saveStrategy2XML(xmlNodePtr  node, Strategy* str)
   //   TimeDiscretisationXML* tdxml;
   //   int i;
 
-  //   if( strategyNode != NULL )
+  //   if( rootNode != NULL )
   //     {
   //       // === TimeDiscretisation node ===
   //       if( str->getTimeDiscretisationPtr()->getTimeDiscretisationXMLPtr() == NULL )
   //  {
-  //    node = xmlNewChild( strategyNode, NULL, (xmlChar*)TIMEDISCRETISATION_TAG.c_str(), NULL );
+  //    node = xmlNewChild( rootNode, NULL, (xmlChar*)TIMEDISCRETISATION_TAG.c_str(), NULL );
   //    if(str->getTimeDiscretisationPtr()->isConstant())
   //      xmlNewProp( node, (xmlChar*)TD_ISCONSTANT.c_str(), (xmlChar*)"true" );
 
@@ -147,11 +149,11 @@ void StrategyXML::saveStrategy2XML(xmlNodePtr  node, Strategy* str)
   //    timeDiscretisationXML = tdxml;
   //  }
 
-  //       if( SiconosDOMTreeTools::findNodeChild((const xmlNodePtr )strategyNode, LMGC90_STRATEGY_TAG) == NULL )
+  //       if( SiconosDOMTreeTools::findNodeChild((const xmlNodePtr )rootNode, LMGC90_STRATEGY_TAG) == NULL )
   //  {
   //    // === integrator_Definition node ===
   //    if( !hasOneStepIntegratorXML() )
-  //      integratorDefinitionNode = xmlNewChild(strategyNode, NULL, (xmlChar*)ONESTEPINTEGRATOR_DEFINITION_TAG.c_str(), NULL);
+  //      integratorDefinitionNode = xmlNewChild(rootNode, NULL, (xmlChar*)ONESTEPINTEGRATOR_DEFINITION_TAG.c_str(), NULL);
 
   //    // creation of the OneStepIntegratorXML objects
   //    for(i=0; i < str->getOneStepIntegratorVectorSize(); i++)
@@ -197,7 +199,7 @@ void StrategyXML::saveStrategy2XML(xmlNodePtr  node, Strategy* str)
   //       if( str->getOneStepNSProblemPtr() != NULL )
   //  {
   //    if( !hasOneStepNSProblemXML() )
-  //      node = xmlNewChild(strategyNode, NULL, (xmlChar*)ONESTEPNSPROBLEM_TAG.c_str(), NULL );
+  //      node = xmlNewChild(rootNode, NULL, (xmlChar*)ONESTEPNSPROBLEM_TAG.c_str(), NULL );
 
   //    if( str->getOneStepNSProblemPtr()->getOneStepNSProblemXML() == NULL )
   //      {
@@ -233,6 +235,6 @@ void StrategyXML::saveStrategy2XML(xmlNodePtr  node, Strategy* str)
   //      }
   //  }
   //     }
-  //   else XMLException::selfThrow("StrategyXML - loadStrategy ERROR : no strategyNode defined.");
+  //   else XMLException::selfThrow("StrategyXML - loadStrategy ERROR : no rootNode defined.");
 }
 

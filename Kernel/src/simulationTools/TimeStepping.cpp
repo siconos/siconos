@@ -44,12 +44,7 @@ TimeStepping* TimeStepping::convert(Strategy *str)
 
 void TimeStepping::initialize()
 {
-  // initialization of the OneStepIntegrators
-  for (unsigned int i = 0; i < integratorVector.size(); i++)
-    integratorVector[i]->initialize();
-  // initialization of  OneStepNonSmoothProblem
-  if (nsProblem != NULL)
-    nsProblem->initialize();
+  Strategy::initialize();
 }
 
 void TimeStepping::run()

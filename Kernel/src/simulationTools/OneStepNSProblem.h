@@ -75,7 +75,7 @@ protected:
   unsigned int dim;
 
   /** all the Interactions known by the OneStepNSProblem */
-  std::vector< Interaction* > interactionVector;
+  InteractionsSet OSNSInteractions;
 
   /** all the Equality Constraints known by the OneStepNSProblem */
   std::vector< EqualityConstraint* > ecVector;
@@ -171,14 +171,20 @@ public:
     dim = newVal;
   }
 
-  /** \fn vector< Interaction* > getInteractions()
-   *  \brief get the the vector of Interaction
-   *  \return a vector stl
-   */
-  inline const std::vector< Interaction* > getInteractions() const
+  /** \fn const InteractionsSet getInteractions()
+    *  \brief get the set of Interactions associated with the NS Problem
+    *  \return an InteractionsSet
+    */
+  inline const InteractionsSet getInteractions() const
   {
-    return interactionVector;
-  }
+    return OSNSInteractions;
+  };
+
+  /** \fn void setInteractionst(const InteractionsSet&)
+   *  \brief set the Interaction list of this NS Problem
+   *  \param an InteractionsSet
+   */
+  void setInteractions(const InteractionsSet&);
 
   /** \fn Interaction* getInteractionPtr(const int&)
    *  \brief get a specific Interaction
@@ -186,15 +192,6 @@ public:
    *  \return a pointer on Interaction
    */
   Interaction* getInteractionPtr(const unsigned int&);
-
-  /** \fn void setInteractions(vector< Interaction* >)
-    *  \brief set the vector of Interaction
-    *  \param vector<Interaction*> : a vector stl
-    */
-  inline void setInteractions(const std::vector< Interaction* >& newVec)
-  {
-    interactionVector = newVec;
-  }
 
   /** \fn vector< EqualityConstraint* > getEqualityConstraints()
    *  \brief get the the vector of EqualityConstraint

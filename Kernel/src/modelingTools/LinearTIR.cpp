@@ -34,7 +34,7 @@ LinearTIR::LinearTIR(RelationXML* relxml, Interaction * inter):
     if (inter != NULL)
     {
       // get size of vector y from linked interaction
-      size = interaction->getNInteraction();
+      size = interaction->getInteractionSize();
     }
     // === Output ===
 
@@ -123,7 +123,7 @@ LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB, Inter
   if (inter != NULL)
   {
     // get size of vector y
-    unsigned int size = interaction->getNInteraction();
+    unsigned int size = interaction->getInteractionSize();
     if (sizeY != size)
       RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size with y vector for input vector or matrix");
   }
@@ -153,7 +153,7 @@ LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
 
   if (inter != NULL)
   {
-    unsigned int size = interaction->getNInteraction();
+    unsigned int size = interaction->getInteractionSize();
     if (size != sizeY)
       RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between C and y vector");
   }
@@ -272,7 +272,7 @@ void LinearTIR::setC(const SiconosMatrix& newValue)
   unsigned int sizeY;
   if (interaction != NULL)
   {
-    sizeY = interaction->getNInteraction();
+    sizeY = interaction->getInteractionSize();
     if (newValue.size(0) != sizeY)
       RuntimeException::selfThrow("LinearTIR - setC: inconsistent dimensions with problem size for input matrix C");
   }
@@ -297,7 +297,7 @@ void LinearTIR::setCPtr(SiconosMatrix *newPtr)
   if (isAllocatedIn[0]) delete C;
   if (interaction != NULL)
   {
-    unsigned int sizeY = interaction->getNInteraction();
+    unsigned int sizeY = interaction->getInteractionSize();
     if (newPtr->size(0) != sizeY)
       RuntimeException::selfThrow("LinearTIR - setCPtr: inconsistent dimensions with problem size for input matrix C");
   }
@@ -317,7 +317,7 @@ void LinearTIR::setD(const SiconosMatrix& newValue)
 
   if (interaction != NULL)
   {
-    unsigned int size = interaction->getNInteraction();
+    unsigned int size = interaction->getInteractionSize();
     if (size != sizeY)
       RuntimeException::selfThrow("LinearTIR - setD: inconsistent dimensions with problem size for input matrix D");
   }
@@ -344,7 +344,7 @@ void LinearTIR::setDPtr(SiconosMatrix *newPtr)
   if (isAllocatedIn[1])  delete D;
   if (interaction != NULL)
   {
-    unsigned int sizeY = interaction->getNInteraction();
+    unsigned int sizeY = interaction->getInteractionSize();
     if (newPtr->size(0) != sizeY || newPtr->size(1) != sizeY)
       RuntimeException::selfThrow("LinearTIR - setDPtr: inconsistent dimensions with problem size for input matrix D");
   }
@@ -360,7 +360,7 @@ void LinearTIR::setF(const SiconosMatrix& newValue)
   unsigned int sizeY = newValue.size(0);
   if (interaction != NULL)
   {
-    unsigned int size = interaction->getNInteraction();
+    unsigned int size = interaction->getInteractionSize();
     if (size != sizeY)
       RuntimeException::selfThrow("LinearTIR - setF: inconsistent dimensions with problem size for input matrix F");
   }
@@ -387,7 +387,7 @@ void LinearTIR::setFPtr(SiconosMatrix *newPtr)
   if (isAllocatedIn[2]) delete F;
   if (interaction != NULL)
   {
-    unsigned int sizeY = interaction->getNInteraction();
+    unsigned int sizeY = interaction->getInteractionSize();
     if (newPtr->size(0) != sizeY)
       RuntimeException::selfThrow("LinearTIR - setFPtr: inconsistent dimensions with problem size for input matrix F");
   }
@@ -403,7 +403,7 @@ void LinearTIR::setE(const SimpleVector& newValue)
   unsigned int sizeY = newValue.size();
   if (interaction != NULL)
   {
-    unsigned int size = interaction->getNInteraction();
+    unsigned int size = interaction->getInteractionSize();
     if (size != sizeY)
       RuntimeException::selfThrow("LinearTIR - setE: inconsistent dimensions with problem size for input vector e");
   }
@@ -430,7 +430,7 @@ void LinearTIR::setEPtr(SimpleVector *newPtr)
   if (isAllocatedIn[3]) delete e;
   if (interaction != NULL)
   {
-    unsigned int sizeY = interaction->getNInteraction();
+    unsigned int sizeY = interaction->getInteractionSize();
     if (newPtr->size() != sizeY)
       RuntimeException::selfThrow("LinearTIR - setEPtr: inconsistent dimensions with problem size for input matrix E");
   }
@@ -446,7 +446,7 @@ void LinearTIR::setB(const SiconosMatrix& newValue)
 
   if (interaction != NULL)
   {
-    unsigned int size = interaction->getNInteraction();
+    unsigned int size = interaction->getInteractionSize();
     if (size != sizeY)
       RuntimeException::selfThrow("LinearTIR - setB: inconsistent dimensions with problem size for input matrix B");
   }
@@ -471,7 +471,7 @@ void LinearTIR::setBPtr(SiconosMatrix *newPtr)
   if (isAllocatedIn[4]) delete B;
   if (interaction != NULL)
   {
-    unsigned int sizeY = interaction->getNInteraction();
+    unsigned int sizeY = interaction->getInteractionSize();
     if (newPtr->size(1) != sizeY)
       RuntimeException::selfThrow("LinearTIR - setBPtr: inconsistent dimensions with problem size for input matrix B");
   }
@@ -483,10 +483,8 @@ void LinearTIR::getCBlockDSPtr(DynamicalSystem * ds, SiconosMatrix& CBlock) cons
 {
   unsigned int k = 0;
 
-  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
-
-  vector<DynamicalSystem*>::iterator itDS;
-  itDS = vDS.begin();
+  DSSet vDS = interaction ->getDynamicalSystems();
+  DSIterator itDS = vDS.begin();
 
   // look for ds
   while (*itDS != ds && itDS != vDS.end())
@@ -513,10 +511,8 @@ void LinearTIR::getCBlockDSPtr(const int& DSNumber, SiconosMatrix& CBlock) const
 {
   unsigned int k = 0;
 
-  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
-
-  vector<DynamicalSystem*>::iterator itDS;
-  itDS = vDS.begin();
+  DSSet vDS = interaction ->getDynamicalSystems();
+  DSIterator itDS = vDS.begin();
 
   // look for DS number DSNumber ...
   while ((*itDS)->getNumber() != DSNumber && itDS != vDS.end())
@@ -543,10 +539,8 @@ void LinearTIR::getBBlockDSPtr(DynamicalSystem* ds, SiconosMatrix& BBlock) const
 {
   unsigned int k = 0;
 
-  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
-
-  vector<DynamicalSystem*>::iterator itDS;
-  itDS = vDS.begin();
+  DSSet vDS = interaction ->getDynamicalSystems();
+  DSIterator itDS = vDS.begin();
 
   while ((*itDS) != ds && itDS != vDS.end())
   {
@@ -572,10 +566,8 @@ void LinearTIR::getBBlockDSPtr(const int& DSNumber, SiconosMatrix& BBlock) const
 {
   unsigned int k = 0;
 
-  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
-
-  vector<DynamicalSystem*>::iterator itDS;
-  itDS = vDS.begin();
+  DSSet vDS = interaction ->getDynamicalSystems();
+  DSIterator itDS = vDS.begin();
 
   while ((*itDS)->getNumber() != DSNumber && itDS != vDS.end())
   {
@@ -599,14 +591,12 @@ void LinearTIR::getBBlockDSPtr(const int& DSNumber, SiconosMatrix& BBlock) const
 
 void LinearTIR::computeOutput(const double& time)
 {
-  IN("LinearTIR::computeOutput\n");
-
   if (!isOutputPlugged)
   {
-    vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+    DSSet vDS = interaction->getDynamicalSystems();
     BlockVector *xTmp = new BlockVector();
     BlockVector *uTmp = new BlockVector();
-    vector<DynamicalSystem*>::iterator it;
+    DSIterator it;
     for (it = vDS.begin(); it != vDS.end(); it++)
     {
       // Put x and u of each DS into a block
@@ -642,18 +632,15 @@ void LinearTIR::computeOutput(const double& time)
   }
   else
     Relation::computeOutput(time);
-
-  OUT("LinearTIR::computeOutput\n");
 }
 void LinearTIR::computeFreeOutput(const double& time)
 {
-  IN("LinearTIR::computeFreeOutput\n");
   if (!isOutputPlugged)
   {
-    vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
+    DSSet vDS = interaction->getDynamicalSystems();
     BlockVector *xTmp = new BlockVector();
     BlockVector *uTmp = new BlockVector();
-    vector<DynamicalSystem*>::iterator it;
+    DSIterator it;
 
     for (it = vDS.begin(); it != vDS.end(); it++)
     {
@@ -687,16 +674,14 @@ void LinearTIR::computeFreeOutput(const double& time)
   }
   else
     Relation::computeFreeOutput(time);
-
-  OUT("LinearTIR::computeFreeOutput\n");
 }
 
 void LinearTIR::computeInput(const double& time)
 {
   if (!isOutputPlugged)
   {
-    vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-    vector<DynamicalSystem*>::iterator it;
+    DSSet vDS = interaction->getDynamicalSystems();
+    DSIterator it;
     BlockVector *r = new BlockVector();
     for (it = vDS.begin(); it != vDS.end(); it++)
     {
@@ -745,7 +730,6 @@ void LinearTIR::display() const
 
 void LinearTIR::saveRelationToXML() const
 {
-  OUT("LinearTIR::saveRelationToXML\n");
   if (relationxml != NULL)
   {
     LinearTIRXML * lTIRxml = (static_cast<LinearTIRXML*>(relationxml));

@@ -65,8 +65,6 @@ deque<SiconosVector*> SiconosMemoryXML::getVectorMemoryValue()
 
 void SiconosMemoryXML::setVectorMemoryValue(const deque<SiconosVector*>& memory)
 {
-  IN("SiconosMemoryXML::setVectorMemoryValue\n");
-
   xmlNode *oldNode = SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY);
   xmlNode *node; /* oldNode is the node before node */
   string stringValue;
@@ -101,14 +99,10 @@ void SiconosMemoryXML::setVectorMemoryValue(const deque<SiconosVector*>& memory)
     oldNode = node;
     i++;
   }
-
-  OUT("SiconosMemoryXML::setVectorMemoryValue\n");
 }
 
 void SiconosMemoryXML::deleteUnusedMemoryNodes(const int& nbGoodNode)
 {
-  IN("SiconosMemoryXML::deleteUnusedMemoryNodes( int nbGoodNode )\n");
-
   xmlNode * node = SiconosDOMTreeTools::findNodeChild(memoryNode, SM_MEMORY);
   xmlNode * tmp;
 
@@ -128,6 +122,4 @@ void SiconosMemoryXML::deleteUnusedMemoryNodes(const int& nbGoodNode)
 
     node = tmp;
   }
-
-  OUT("SiconosMemoryXML::deleteUnusedMemoryNodes( int nbGoodNode )\n");
 }

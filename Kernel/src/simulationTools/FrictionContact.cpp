@@ -236,8 +236,8 @@ void FrictionContact::computeAllBlocks()
   map< Interaction*, vector<InteractionLink*> >::const_iterator itMapInter;
 
   // --- get interactions list ---
-  vector<Interaction*> listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  vector<Interaction*>::iterator iter;
+  InteractionsSet listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  InteractionsIterator iter;
 
   // --- get time step ---
   double h = strategy->getTimeDiscretisationPtr()->getH(); // time step
@@ -255,7 +255,7 @@ void FrictionContact::computeAllBlocks()
   {
     // the current interaction and its size
     Interaction *currentInteraction = *iter;
-    sizeInteraction = currentInteraction->getNInteraction();
+    sizeInteraction = currentInteraction->getInteractionSize();
     // relative degrees
     r = topology->getRelativeDegrees(currentInteraction);
     rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
@@ -270,12 +270,12 @@ void FrictionContact::computeAllBlocks()
     SiconosMatrix * currentMatrixBlock = diagonalBlocksMap[ currentInteraction ];
 
     // get DS list of the current interaction
-    vector<DynamicalSystem*> vDS = currentInteraction ->getDynamicalSystems();
+    DSSet vDS = currentInteraction ->getDynamicalSystems();
     unsigned int nbDS = vDS.size(); // number of DS
 
     // sum of all DS sizes
     globalDSSize = 0;
-    vector<DynamicalSystem*>::iterator itDS;
+    DSIterator itDS;
     for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
       globalDSSize += (*itDS)->getDim();
 
@@ -316,7 +316,7 @@ void FrictionContact::computeAllBlocks()
       for (itLink = ILV.begin(); itLink != ILV.end(); itLink++)
       {
         Interaction * linkedInteraction = (*itLink)->getLinkedInteractionPtr();
-        linkedInteractionSize = linkedInteraction->getNInteraction();
+        linkedInteractionSize = linkedInteraction->getInteractionSize();
         // relative degrees
         r = topology->getRelativeDegrees(linkedInteraction);
         rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
@@ -330,7 +330,7 @@ void FrictionContact::computeAllBlocks()
         coupledInteractionsBlockSym = extraDiagonalBlocksMap[linkedInteraction][currentInteraction];
 
         // get the list of common DS and their number
-        vector<DynamicalSystem*> commonDS = (*itLink)->getCommonDS();
+        DSSet commonDS = (*itLink)->getCommonDS();
         nbDS = commonDS.size();
 
         // get the relation of the current interaction
@@ -349,7 +349,7 @@ void FrictionContact::computeAllBlocks()
 
 }
 
-void FrictionContact::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& sizeInteraction, vector<DynamicalSystem*> vDS,
+void FrictionContact::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& sizeInteraction, const DSSet& vDS,
     map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* currentMatrixBlock)
 {
 
@@ -362,7 +362,7 @@ void FrictionContact::computeDiagonalBlocksLagrangianR(Relation * R, const unsig
   // - a block-row of G, that corresponds to a specific DS
   // - a block of tG, that corresponds to a specific DS
   SiconosMatrix *G;
-  vector<DynamicalSystem*>::iterator itDS;
+  DSIterator itDS;
   unsigned int sizeDS;
 
   bool isHomogeneous = false; // \todo to be defined with relative degrees
@@ -420,7 +420,7 @@ void FrictionContact::computeDiagonalBlocksLagrangianR(Relation * R, const unsig
 }
 
 void FrictionContact::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* RLinked, const unsigned int& sizeInteraction,
-    const unsigned int& linkedInteractionSize, vector<DynamicalSystem*> commonDS,
+    const unsigned int& linkedInteractionSize, const DSSet& commonDS,
     map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* coupledInteractionsBlock)
 {
   // Warning: we suppose that at this point, G and/or h have been computed through plug-in mechanism.
@@ -430,7 +430,7 @@ void FrictionContact::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent,
   LagrangianR *LR2 = static_cast<LagrangianR*>(RLinked);
   SiconosMatrix *Gcurrent, *Glinked;
   coupledInteractionsBlock->zero();
-  vector<DynamicalSystem*>::iterator itDS;
+  DSIterator itDS;
   unsigned int sizeDS;
   bool isHomogeneous = false; // \todo to be defined with relative degrees
 
@@ -498,8 +498,8 @@ void FrictionContact::updateBlocks()
   map< Interaction*, vector<InteractionLink*> >::const_iterator itMapInter;
 
   // --- get interactions list ---
-  vector<Interaction*> listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  vector<Interaction*>::iterator iter;
+  InteractionsSet listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  InteractionsIterator iter;
 
   // --- get time step ---
   double h = strategy->getTimeDiscretisationPtr()->getH(); // time step
@@ -517,7 +517,7 @@ void FrictionContact::updateBlocks()
   {
     // the current interaction and its size
     Interaction *currentInteraction = *iter;
-    sizeInteraction = currentInteraction->getNInteraction();
+    sizeInteraction = currentInteraction->getInteractionSize();
     // relative degrees
     r = topology->getRelativeDegrees(currentInteraction);
     rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
@@ -531,12 +531,12 @@ void FrictionContact::updateBlocks()
     SiconosMatrix * currentMatrixBlock = diagonalBlocksMap[ currentInteraction ];
 
     // get DS list of the current interaction
-    vector<DynamicalSystem*> vDS = currentInteraction ->getDynamicalSystems();
+    DSSet vDS = currentInteraction ->getDynamicalSystems();
     unsigned int nbDS = vDS.size(); // number of DS
 
     // sum of all DS sizes
     globalDSSize = 0;
-    vector<DynamicalSystem*>::iterator itDS;
+    DSIterator itDS;
     for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
     {
       dsType = (*itDS)->getType();
@@ -585,7 +585,7 @@ void FrictionContact::updateBlocks()
       for (itLink = ILV.begin(); itLink != ILV.end(); itLink++)
       {
         Interaction * linkedInteraction = (*itLink)->getLinkedInteractionPtr();
-        linkedInteractionSize = linkedInteraction->getNInteraction();
+        linkedInteractionSize = linkedInteraction->getInteractionSize();
         // relative degrees
         r = topology->getRelativeDegrees(linkedInteraction);
         rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
@@ -597,7 +597,7 @@ void FrictionContact::updateBlocks()
         coupledInteractionsBlockSym = extraDiagonalBlocksMap[linkedInteraction][currentInteraction];
 
         // get the list of common DS and their number
-        vector<DynamicalSystem*> commonDS = (*itLink)->getCommonDS();
+        DSSet commonDS = (*itLink)->getCommonDS();
         nbDS = commonDS.size();
 
         // get the relation of the current interaction
@@ -800,8 +800,8 @@ void FrictionContact::postFrictionContact(const SimpleVector& w, const SimpleVec
   Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   // --- get interactions list ---
-  vector<Interaction*> listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  vector<Interaction*>::iterator iter;
+  InteractionsSet listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  InteractionsIterator iter;
   // get Interaction position map
   map< Interaction* , SiconosMatrix*>::iterator itDiago;
   map< Interaction*, unsigned int>  interactionEffectivePositionMap =  topology->getInteractionEffectivePositionMap();
@@ -822,7 +822,7 @@ void FrictionContact::postFrictionContact(const SimpleVector& w, const SimpleVec
   {
     // the current interaction and its size
     Interaction *currentInteraction = *iter;
-    numberOfRelations = currentInteraction->getNInteraction();
+    numberOfRelations = currentInteraction->getInteractionSize();
 
     // Y vector of the interactions
     Y = currentInteraction -> getY();

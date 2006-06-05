@@ -53,8 +53,6 @@ public:
    */
   bool isVerified(void) const;
 
-  ///////////////////
-
   /** \fn void display()
    *  \brief print the data to the screen
    */

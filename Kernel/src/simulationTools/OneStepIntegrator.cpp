@@ -19,18 +19,14 @@
 #include "OneStepIntegrator.h"
 using namespace std;
 
-// RuntimeCmp object used to sort DynamicalSystems in the ds set
-// !!! \todo Find a way to avoid global variable ... !!!
-RuntimeCmp<DynamicalSystem> compareDS(&DynamicalSystem::getNumberForSorting);
-
 //-- Default constructor --
-OneStepIntegrator::OneStepIntegrator(const string& id, Strategy* newS): integratorType(id), dsList(compareDS), sizeMem(1), strategyLink(newS), integratorXml(NULL)
+OneStepIntegrator::OneStepIntegrator(const string& id, Strategy* newS): integratorType(id), sizeMem(1), strategyLink(newS), integratorXml(NULL)
 {
-  strategyLink->addOneStepIntegrator(this);
+  strategyLink->addOneStepIntegratorPtr(this);
 }
 
 // --- Xml constructor ---
-OneStepIntegrator::OneStepIntegrator(const string& id, OneStepIntegratorXML* osixml, Strategy* newS): integratorType(id), dsList(compareDS), sizeMem(1), strategyLink(newS), integratorXml(osixml)
+OneStepIntegrator::OneStepIntegrator(const string& id, OneStepIntegratorXML* osixml, Strategy* newS): integratorType(id), sizeMem(1), strategyLink(newS), integratorXml(osixml)
 {
   if (integratorXml == NULL)
     RuntimeException::selfThrow("OneStepIntegrator::xml constructor - OneStepIntegratorXML object == NULL");
@@ -38,7 +34,7 @@ OneStepIntegrator::OneStepIntegrator(const string& id, OneStepIntegratorXML* osi
   if (strategyLink == NULL)
     RuntimeException::selfThrow("OneStepIntegrator::xml constructor - StrategyLink == NULL");
 
-  strategyLink->addOneStepIntegrator(this);
+  strategyLink->addOneStepIntegratorPtr(this);
 
   // get a link to the NonSmoothDynamicalSystem.
   NonSmoothDynamicalSystem * nsds = strategyLink->getModelPtr()->getNonSmoothDynamicalSystemPtr();
@@ -46,15 +42,7 @@ OneStepIntegrator::OneStepIntegrator(const string& id, OneStepIntegratorXML* osi
   if (osixml->hasDSList())
   {
     if (osixml->hasAllDS()) // if flag all=true is present -> get all ds from the nsds
-    {
-      // In nsds DS are saved in a vector.
-      // Future version: saved them in a set? And then just call:
-      // dsList = nsds->getDynamicalSystems();
-      vector<DynamicalSystem*> tmpDS;
-      vector<DynamicalSystem*>::iterator it;
-      for (it = tmpDS.begin(); it != tmpDS.end(); ++it)
-        dsList.insert(*it);
-    }
+      OSIDynamicalSystems = nsds->getDynamicalSystems();
     else
     {
       // get list of ds numbers implicate in the OSI
@@ -63,7 +51,7 @@ OneStepIntegrator::OneStepIntegrator(const string& id, OneStepIntegratorXML* osi
       // get corresponding ds and insert them into the set.
       vector<int>::iterator it;
       for (it = dsNumbers.begin(); it != dsNumbers.end(); ++it)
-        dsList.insert(nsds->getDynamicalSystemPtrNumber(*it));
+        OSIDynamicalSystems.insert(nsds->getDynamicalSystemPtrNumber(*it));
     }
   }
 
@@ -74,11 +62,11 @@ OneStepIntegrator::OneStepIntegrator(const string& id, OneStepIntegratorXML* osi
     {
       // In nsds interactions are saved in a vector.
       // Future version: saved them in a set? And then just call:
-      // interactionsList = nsds -> getInteractions();
+      // OSIInteractions = nsds -> getInteractions();
       vector<Interaction*> tmpI;
       vector<Interaction*>::iterator it;
       for (it = tmpI.begin(); it != tmpI.end(); ++it)
-        interactionsList.insert(*it);
+        OSIInteractions.insert(*it);
     }
     else
     {
@@ -88,54 +76,52 @@ OneStepIntegrator::OneStepIntegrator(const string& id, OneStepIntegratorXML* osi
       // get corresponding interactions and insert them into the set.
       vector<int>::iterator it;
       for (it = interactionsNumbers.begin(); it != interactionsNumbers.end(); ++it)
-        interactionsList.insert(nsds->getInteractionPtrNumber(*it));
+        OSIInteractions.insert(nsds->getInteractionPtrNumber(*it));
     }
   }
 }
 
 // --- Constructor from a minimum set of data ---
-OneStepIntegrator::OneStepIntegrator(const string& id, const dsSet& listOfDs, Strategy* newS):
-  integratorType(id), dsList(compareDS), sizeMem(1), strategyLink(newS), integratorXml(NULL)
+OneStepIntegrator::OneStepIntegrator(const string& id, const DSSet& listOfDs, Strategy* newS):
+  integratorType(id), sizeMem(1), strategyLink(newS), integratorXml(NULL)
 {
-  strategyLink->addOneStepIntegrator(this);
+  strategyLink->addOneStepIntegratorPtr(this);
 }
 
 // --- Destructor ---
 OneStepIntegrator::~OneStepIntegrator()
 {
-  dsList.clear();
-  interactionsList.clear();
+  OSIDynamicalSystems.clear();
+  OSIInteractions.clear();
   integratorXml = NULL;
 }
 
-void OneStepIntegrator::setDynamicalSystemsList(const dsSet& newSet)
+void OneStepIntegrator::setDynamicalSystems(const DSSet& newSet)
 {
-  // Warning: pointers links between ds of newSet and dsList.
-  dsIterator it;
-  for (it = newSet.begin(); it != newSet.end(); ++it)
-    dsList.insert(*it);
+  // Warning: pointers links between ds of newSet and OSIDynamicalSystems.
+  OSIDynamicalSystems = newSet;
 }
 
-void OneStepIntegrator::setInteractionsList(const interactionSet& newSet)
+void OneStepIntegrator::setInteractions(const InteractionsSet& newSet)
 {
-  // Warning: pointers links between ds of newSet and dsList.
-  interactionIterator it;
+  // Warning: pointers links between ds of newSet and OSIDynamicalSystems.
+  InteractionsIterator it;
   for (it = newSet.begin(); it != newSet.end(); ++it)
-    interactionsList.insert(*it);
+    OSIInteractions.insert(*it);
 }
 
 void OneStepIntegrator::initialize()
 {
   double t0 = strategyLink->getTimeDiscretisationPtr()->getT0();
-  dsIterator it;
-  for (it = dsList.begin(); it != dsList.end(); ++it)
+  DSIterator it;
+  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
     (*it)->initialize(t0, sizeMem);
 }
 
 void OneStepIntegrator::nextStep()
 {
-  dsIterator it;
-  for (it = dsList.begin(); it != dsList.end(); ++it)
+  DSIterator it;
+  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
   {
     (*it)->swapInMemory();
     (*it)->getRPtr()->zero();

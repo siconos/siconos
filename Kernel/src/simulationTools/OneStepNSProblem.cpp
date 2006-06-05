@@ -38,7 +38,7 @@ OneStepNSProblem::OneStepNSProblem(OneStepNSProblemXML* osnspbxml, Strategy* new
   // read list of interactions and equality constraints concerned
   if (strategy != NULL)
   {
-    interactionVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+    OSNSInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
     ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
   }
   else cout << "OneStepNSPb xml-constructor - Warning: no strategy linked to OneStepPb" << endl;
@@ -50,7 +50,7 @@ OneStepNSProblem::OneStepNSProblem(Strategy * newStrat, Solver* newSolver):
 {
   if (strategy != NULL)
   {
-    interactionVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+    OSNSInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
     ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
   }
   else
@@ -87,9 +87,23 @@ OneStepNSProblem::~OneStepNSProblem()
 
 Interaction* OneStepNSProblem::getInteractionPtr(const unsigned int& nb)
 {
-  if (nb >= interactionVector.size())
-    RuntimeException::selfThrow("OneStepNSProblem::getInteractionPtr(const int& nb) - number greater than size of interaction vector");
-  return interactionVector[nb];
+  // Mind that Interactions are sorted in a growing order according to their id number.
+  InteractionsIterator it = OSNSInteractions.begin();
+  for (unsigned int i = 0; i < nb; ++i)
+    it++;
+
+  if (it == OSNSInteractions.end())
+    RuntimeException::selfThrow("OneStepNSProblem - getInteractionPtr(nb) : nb is out of range");
+
+  return *it;
+}
+
+void OneStepNSProblem::setInteractions(const InteractionsSet& newSet)
+{
+  // Warning: pointers links between ds of newSet and OSIDynamicalSystems.
+  InteractionsIterator it;
+  for (it = newSet.begin(); it != newSet.end(); ++it)
+    OSNSInteractions.insert(*it);
 }
 
 void OneStepNSProblem::setSolverPtr(Solver * newSolv)
@@ -101,16 +115,11 @@ void OneStepNSProblem::setSolverPtr(Solver * newSolv)
 
 void OneStepNSProblem::addInteraction(Interaction *interaction)
 {
-  interactionVector.push_back(interaction);
+  OSNSInteractions.insert(interaction);
 }
 
 void OneStepNSProblem::initialize()
 {
-  // update topology if necessary (ie take into account modifications in the NonSmoothDynamicalSystem)
-  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-  if (!(topology->isUpToDate()))
-    topology->updateTopology();
-
   updateOutput();
   updateInput();
 }
@@ -137,8 +146,8 @@ void OneStepNSProblem::computeEffectiveOutput()
   unsigned int globalSizeOutput = 0; // effective size of global vector y (ie including all interactions) = sum sizeOutput over all interactions
   unsigned int k;
   // === loop over the interactions ===
-  vector<Interaction*>::iterator it;
-  for (it = interactionVector.begin(); it != interactionVector.end(); it++)
+  InteractionsIterator it;
+  for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
   {
     // get the output vector (values for previous time step)
     vector<SimpleVector *> yOld = (*it)->getYOld();
@@ -277,25 +286,25 @@ void OneStepNSProblem::computeEffectiveOutput()
 }
 void OneStepNSProblem::nextStep()
 {
-  vector<Interaction*>::iterator it;
-  for (it = interactionVector.begin(); it != interactionVector.end(); it++)
+  InteractionsIterator it;
+  for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
     (*it)->swapInMemory();
 }
 
 void OneStepNSProblem::updateInput()
 {
-  vector<Interaction*>::iterator it;
+  InteractionsIterator it;
   double currentTime = strategy->getModelPtr()->getCurrentT();
 
-  for (it = interactionVector.begin(); it != interactionVector.end(); it++)
+  for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
     (*it)->getRelationPtr() -> computeInput(currentTime);
 }
 
 void OneStepNSProblem::updateOutput()
 {
-  vector<Interaction*>::iterator it;
+  InteractionsIterator it;
   double currentTime = strategy->getModelPtr()->getCurrentT();
-  for (it = interactionVector.begin(); it != interactionVector.end(); it++)
+  for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
     (*it)->getRelationPtr()->computeOutput(currentTime);
 }
 
@@ -310,15 +319,12 @@ void OneStepNSProblem::saveNSProblemToXML()
   {
     onestepnspbxml->setDimNSProblem(dim);
     vector<int> v;
-    for (unsigned int i = 0; i < interactionVector.size(); i++)
-      v.push_back(interactionVector[i]->getNumber());
+    InteractionsIterator it;
+    for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); ++it)
+      v.push_back((*it)->getNumber());
     //onestepnspbxml->setInteractionConcerned( v, allInteractionConcerned() );
 
-    /*
-     * save of the solving method to XML
-     */
-
-    //    onestepnspbxml->setSolver(solvingFormalisation, methodName, normType, tolerance, maxIter, searchDirection );
+    //onestepnspbxml->setSolver(solvingFormalisation, methodName, normType, tolerance, maxIter, searchDirection );
   }
   else RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - OneStepNSProblemXML object not exists");
 }
@@ -339,15 +345,15 @@ bool OneStepNSProblem::isOneStepNsProblemComplete() const
     isComplete = false;
   }
 
-  if (!(interactionVector.size() > 0))
+  if (!(OSNSInteractions.size() > 0))
   {
     cout << "OneStepNSProblem warning: interaction vector is empty" << endl;
     isComplete = false;
   }
   else
   {
-    vector< Interaction* >::const_iterator it;
-    for (it = interactionVector.begin(); it != interactionVector.end(); it++)
+    ConstInteractionsIterator it;
+    for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
       if (*it == NULL)
         cout << "OneStepNSProblem warning: an interaction points to NULL" << endl;
   }

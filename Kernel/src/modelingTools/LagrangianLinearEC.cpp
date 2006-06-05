@@ -21,9 +21,7 @@ using namespace std;
 
 LagrangianLinearEC::LagrangianLinearEC()
 {
-  IN("LagrangianLinearEC::LagrangianLinearEC()\n");
   this->type = LAGRANGIANLINEAREC;
-  OUT("LagrangianLinearEC::LagrangianLinearEC()\n");
 }
 
 LagrangianLinearEC::LagrangianLinearEC(EqualityConstraintXML* ecxml): LagrangianEC(ecxml)
@@ -35,10 +33,8 @@ LagrangianLinearEC::LagrangianLinearEC(EqualityConstraintXML* ecxml): Lagrangian
 
 LagrangianLinearEC::~LagrangianLinearEC()
 {
-  IN("LagrangianLinearEC::~LagrangianLinearEC()\n");
   if (h != NULL) delete h;
   if (b != NULL) delete b;
-  OUT("LagrangianLinearEC::~LagrangianLinearEC()\n");
 }
 
 LagrangianLinearEC::LagrangianLinearEC(const SiconosMatrix& newh, const SimpleVector& newb)
@@ -61,7 +57,6 @@ SiconosVector* LagrangianLinearEC::getBPtr(void)
 
 void LagrangianLinearEC::computeOutput(double time)
 {
-  IN("LagrangianLinearEC::computeOutput\n");
   /*
     vector<DynamicalSystem*> vDS = this->interaction->getDynamicalSystems();
 
@@ -115,14 +110,12 @@ void LagrangianLinearEC::computeOutput(double time)
     }
     else RuntimeException::selfThrow("The interaction doesn't contain the right number of Dynamical Systems");
   */
-  OUT("LagrangianLinearEC::computeOutput\n");
 }
 
 
 
 void LagrangianLinearEC::computeFreeOutput(double time)
 {
-  IN("LagrangianLinearEC::computeFreeOutput\n");
   /*
     vector<DynamicalSystem*> vDS = this->interaction->getDynamicalSystems();
 
@@ -181,12 +174,10 @@ void LagrangianLinearEC::computeFreeOutput(double time)
     }
     else RuntimeException::selfThrow("The interaction doesn't contain the right number of Dynamical Systems");
   */
-  OUT("LagrangianLinearEC::computeFreeOutput\n");
 }
 
 void LagrangianLinearEC::computeInput(double time)
 {
-  IN("LagrangianLinearEC::computeInput\n");
   /*
     vector<DynamicalSystem*> vDS = this->interaction->getDynamicalSystems();
 
@@ -241,12 +232,10 @@ void LagrangianLinearEC::computeInput(double time)
     }
     else RuntimeException::selfThrow("The interaction doesn't contain the right number of Dynamical Systems");
   */
-  OUT("LagrangianLinearEC::computeInput\n");
 }
 
 void LagrangianLinearEC::fillEqualityConstraintWithEqualityConstraintXML()
 {
-  OUT("LagrangianLinearEC::fillEqualityConstraintWithEqualityConstraintXML\n");
   EqualityConstraint::fillEqualityConstraintWithEqualityConstraintXML();
   if (this->ecXML != NULL)
   {
@@ -270,7 +259,6 @@ void LagrangianLinearEC::display() const
 
 void LagrangianLinearEC::saveEqualityConstraintToXML()
 {
-  IN("LagrangianLinearEC::saveEqualityConstraintToXML\n");
   EqualityConstraint::saveEqualityConstraintToXML();
   if (this->ecXML != NULL)
   {
@@ -280,7 +268,6 @@ void LagrangianLinearEC::saveEqualityConstraintToXML()
     //    this->display();
   }
   else RuntimeException::selfThrow("LagrangianLinearEC::saveEqualityConstraintToXML - object EqualityConstraintXML does not exist");
-  OUT("LagrangianLinearEC::saveEqualityConstraintToXML\n");
 }
 
 void LagrangianLinearEC::createEqualityConstraint(EqualityConstraintXML* ecXML, SiconosMatrix* H, SiconosVector* newb)

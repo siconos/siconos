@@ -43,19 +43,35 @@ class NonSmoothLawXML;
 
 class NonSmoothLaw
 {
+protected:
+
+  /** type of the NonSmoothLaw */
+  std::string nsLawType;
+
+  /** "size" of the NonSmoothLaw */
+  unsigned int nsLawSize;
+
+  /** the XML pbject linked to the NonSmoothLaw to read XML data */
+  NonSmoothLawXML *nslawxml;
+
 public:
 
-  /** \fn NonSmoothLaw()
-   *  \brief default constructor
+  /** \fn NonSmoothLaw(const unsigned int& = 1)
+   * \brief default constructor
+   * \param unsigned int, the non smooth law size, default = 1
    */
-  NonSmoothLaw();
+  NonSmoothLaw(const unsigned int& = 1);
 
-  /** \fn NonSmoothLaw(NonSmoothLawXML*)
+  /** \fn NonSmoothLaw(NonSmoothLawXML*, const unsigned int& = 1)
    *  \brief constructor with XML object of the NonSmoothLaw
    *  \param NonSmoothLawXML* : the XML object corresponding
+   *  \param unsigned int, the non smooth law size, default = 1
    */
-  NonSmoothLaw(NonSmoothLawXML*);
+  NonSmoothLaw(NonSmoothLawXML*, const unsigned int& = 1);
 
+  /** \fn ~NonSmoothLaw()
+   * \brief destructor
+   */
   virtual ~NonSmoothLaw();
 
   /** \fn bool isVerified()
@@ -100,6 +116,24 @@ public:
     nsLawType = newType;
   }
 
+  /** \fn inline unsigned int getNsLawSize()
+   *  \brief to get the nsLawSize
+   *  \return an unsigned int
+   */
+  inline const unsigned int getNsLawSize() const
+  {
+    return nsLawSize;
+  }
+
+  /** \fn inline string setNsLawSize(const unsigned int &)
+   *  \brief set the size of the nsLaw
+   *  \param an unsigned int
+   */
+  inline void setNsLawSize(const unsigned int newVal)
+  {
+    nsLawSize = newVal;
+  }
+
   /** \fn void saveNonSmoothLawToXML()
    *  \brief copy the data of the NonSmoothLaw to the XML tree
    *  \exception RuntimeException
@@ -111,14 +145,6 @@ public:
    *  \exception RuntimeException
    */
   virtual void display() const = 0;
-
-protected:
-
-  /** type of the NonSmoothLaw */
-  std::string nsLawType;
-
-  /** the XML pbject linked to the NonSmoothLaw to read XML data */
-  NonSmoothLawXML *nslawxml;
 
 };
 

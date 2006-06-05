@@ -1,27 +1,39 @@
+%$Id: macro.tex,v 1.10 2004/12/08 13:38:58 acary Exp $
 
 
+%\usepackage{a4wide}
+\textheight 25cm
+\textwidth 16.5cm
+\topmargin -1cm
+%\evensidemargin 0cm
+\oddsidemargin 0cm
+\evensidemargin0cm
+\usepackage{layout}
 
-\usepackage{a4wide}
+
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{minitoc}
-%\usepackage{glosstex}
+\usepackage{glosstex}
 \usepackage{colortbl}
 \usepackage{hhline}
 \usepackage{longtable}
 
+\usepackage{glosstex}
 \def\glossaryname{Glossary of Notation}
+\def\listacronymname{Acronyms}
 
+\usepackage[outerbars]{changebar}\setcounter{changebargrey}{20}
+\glxitemorderdefault{acr}{l}
 
-
-\usepackage{color}
+%\usepackage{color}
 \usepackage{graphicx,epsfig}
 \graphicspath{{figure/}}
 \usepackage[T1]{fontenc}
 \usepackage{rotating}
 
-\usepackage{algorithmic}
-\usepackage{algorithm}
+%\usepackage{algorithmic}
+%\usepackage{algorithm}
 \usepackage{ntheorem}
 \usepackage{natbib}
 
@@ -50,10 +62,20 @@
 \newcommand{\RR}{\mbox{\rm $I\!\!R$}}
 \newcommand{\NN}{\mbox{\rm $I\!\!N$}}
 
+\newcommand{\Mnn}{\mathcal M^{n\times n}}
+\newcommand{\Mnp}[2]{\ensuremath{\mathcal M^{#1\times #2}}}
+
+
+
 \newcommand{\Frac}[2]{\displaystyle \frac{#1}{#2}}
 
 \newcommand{\DP}[2]{\displaystyle \frac{\partial {#1}}{\partial {#2}}}
 
+% c++ variables writting
+\newcommand{\varcpp}[1]{\textit{#1}}
+% itemize
+\newcommand{\bei}{\begin{itemize}}
+\newcommand{\ei}{\end{itemize}}
 
 \newcommand{\ie}{i.e.}
 \newcommand{\eg}{e.g.}
@@ -64,11 +86,12 @@
 \def\En{{\rm I\! N}} 
 \def\Ec{{\rm I\! C}}
  
+\def\zc{\hat{z}}
+\def\wc{\hat{w}}
 
-
-
-
-
+\font\tete=cmr8 at 8 pt
+\font\titre= cmr12 at 20 pt 
+\font\titregras=cmbx12 at 20 pt
 
 %----------------------------------------------------------------------
 %                  Modification des subsubsections
@@ -130,9 +153,57 @@
 }
 
 \makeatother
+%----------------------------------------------------------------------
+%             Redaction note environnement V.ACARY
+%----------------------------------------------------------------------
+\makeatletter
+\theoremheaderfont{\scshape}
+\theoremstyle{marginbreak}
+\theorembodyfont{\upshape}
+%\newtheorem{rque}{\bf Remarque}[chapter]
+%\newtheorem{rque1}{\bf \fsc{Remarque}}[chapter] !!! \fsc est une commande french
+\newtheorem{ndr1fp}{\textbf{\textsc{Redaction note F. PERIGNON}}}[section]
 
+\newenvironment{ndrfp}%
+{%
+\tt
+%\centerline{---oOo---}
+\noindent\begin{ndr1fp}%
+}%
+{%
+\begin{flushright}%
+%\vspace{-1.5em}\ding{111}
+\end{flushright}%
+\end{ndr1fp}%
+%\centerline{---oOo---}
+}
 
-
+\makeatother
+%----------------------------------------------------------------------
+%                  Chapter head enviroment
+%----------------------------------------------------------------------
+\newenvironment{chapter_head}
+{%
+\begin{center}%
+-------------------- oOo --------------------\\%
+\ \\%
+\begin{minipage}[]{14cm}%
+\noindent\normalsize\advance\baselineskip-1pt %
+}%
+{%
+\par\end{minipage}%
+\ \\%
+\ \\%
+-------------------- oOo --------------------
+\end{center}%
+\vspace*{\stretch{1}}%
+\clearpage%
+\thispagestyle{empty}%
+\vspace*{\stretch{1}}%
+\minitoc%
+\vspace*{\stretch{2}}%
+\clearpage%
+}
 
 %%% Local Variables: 
 %%% mode: latex

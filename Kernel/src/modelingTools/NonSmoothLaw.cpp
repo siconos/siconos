@@ -22,10 +22,11 @@ using namespace std;
 // Constructors
 // warning -> this is an abstract class, so constructors are usefull only for
 // calls in derived classes constructors
-NonSmoothLaw::NonSmoothLaw(): nsLawType("none"), nslawxml(NULL)
+NonSmoothLaw::NonSmoothLaw(const unsigned int& newSize): nsLawType("none"), nsLawSize(newSize), nslawxml(NULL)
 {}
 
-NonSmoothLaw::NonSmoothLaw(NonSmoothLawXML* newNsLawXml): nsLawType("none"), nslawxml(newNsLawXml)
+NonSmoothLaw::NonSmoothLaw(NonSmoothLawXML* newNsLawXml, const unsigned int& newSize):
+  nsLawType("undefined"), nsLawSize(newSize), nslawxml(newNsLawXml)
 {}
 
 NonSmoothLaw::~NonSmoothLaw()

@@ -28,6 +28,7 @@
 #include "Strategy.h"
 #include "SiconosConst.h"
 #include "SiconosNumerics.h"
+#include "DSSet.h"
 #include "check.h"
 #include <iostream>
 #include <vector>
@@ -39,7 +40,7 @@ class OneStepIntegratorXML;
 class Strategy;
 
 /** \class OneStepIntegrator
- *  \brief It's the generic object which can integre a DynamicalSystem
+ *  \brief Generic object to manage DynamicalSystem(s) time-integration
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.1.4.
  *  \date (Creation) Apr 26, 2004
@@ -48,20 +49,8 @@ class Strategy;
  *
  * At the time, available integrators are: Moreau and Lsodar
  *
- * dsSet, interactionsSet ... are defined in Strategy.h
  */
 
-/** set of Dynamical Systems */
-typedef std::set<DynamicalSystem*, RuntimeCmp<DynamicalSystem> > dsSet;
-
-/** set of Interactions */
-typedef std::set<Interaction*> interactionSet;
-
-/** iterator through a set of Dynamical Systems */
-typedef dsSet::iterator dsIterator;
-
-/** iterator through a set of Interactions */
-typedef interactionSet::iterator interactionIterator;
 
 class OneStepIntegrator
 {
@@ -71,12 +60,12 @@ protected:
   std::string integratorType;
 
   /** a set of DynamicalSystem to integrate */
-  dsSet dsList;
+  DSSet OSIDynamicalSystems;
 
   /** a set of Interactions to define a list of *
    * dynamical systems to be integrated, with some *
    * constraints to be taken into account */
-  interactionSet interactionsList;
+  InteractionsSet OSIInteractions;
 
   /** size of the memory for the integrator */
   unsigned int sizeMem;
@@ -105,13 +94,13 @@ public:
    */
   OneStepIntegrator(const std::string&, OneStepIntegratorXML*, Strategy* = NULL);
 
-  /** \fn OneStepIntegrator(const std::string&, const dsSet& , Strategy* = NULL)
+  /** \fn OneStepIntegrator(const std::string&, const DSSet& , Strategy* = NULL)
    *  \brief constructor from a minimum set of data
    *  \param string, integrator type/name
    *  \param DynamicalSystem* : the DynamicalSystem to be integrated
    *  \param Strategy * : the strategy that owns the osi, default = NULL
    */
-  OneStepIntegrator(const std::string&, const dsSet&, Strategy* = NULL);
+  OneStepIntegrator(const std::string&, const DSSet&, Strategy* = NULL);
 
   /** \fn ~OneStepIntegrator()
    *  \brief destructor
@@ -138,35 +127,35 @@ public:
     integratorType = newType;
   }
 
-  /** \fn dsSet getDynamicalSystemsList()
+  /** \fn const DSSet getDynamicalSystems()
     *  \brief get the set of DynamicalSystem associated with the Integrator
-    *  \return a dsSet
+    *  \return a DSSet
     */
-  inline dsSet getDynamicalSystemsList() const
+  inline DSSet getDynamicalSystems() const
   {
-    return dsList;
+    return OSIDynamicalSystems;
   };
 
-  /** \fn void setDynamicalSystemsList(const dsSet&)
+  /** \fn void setDynamicalSystems(const DSSet&)
    *  \brief set the DynamicalSystem list of this Integrator
-   *  \param a dsSet
+   *  \param a DSSet
    */
-  void setDynamicalSystemsList(const dsSet&);
+  void setDynamicalSystems(const DSSet&);
 
-  /** \fn interactionSet getInteractionsList()
-    *  \brief get the set of Interaction associated with the Integrator
-    *  \return an interactionSet
+  /** \fn const InteractionsSet getInteractions()
+    *  \brief get the set of Interactions associated with the Integrator
+    *  \return an InteractionsSet
     */
-  inline interactionSet getInteractionsList() const
+  inline const InteractionsSet getInteractions() const
   {
-    return interactionsList;
+    return OSIInteractions;
   };
 
-  /** \fn void setInteractionsList(const interactionSet&)
+  /** \fn void setInteractionst(const InteractionsSet&)
    *  \brief set the Interaction list of this Integrator
-   *  \param an interactionSet
+   *  \param an InteractionsSet
    */
-  void setInteractionsList(const interactionSet&);
+  void setInteractions(const InteractionsSet&);
 
   /** \fn * getDynamicalSystemPtr()
     *  \brief get the DynamicalSystem associated with the Integrator

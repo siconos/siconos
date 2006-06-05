@@ -37,12 +37,6 @@
 
 ---++ Optional external libraries (advised for developers)
 
-   * nana
-      * actual version used with the platform: 2.5
-      * last version : 2.5
-      * known problems : compilation problems
-      * location : Gforge
-
    * cppunit
       * actual version used with the platform: 1.10.2
       * last version : 1.10.2

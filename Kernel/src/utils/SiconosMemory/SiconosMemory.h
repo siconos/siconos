@@ -173,10 +173,8 @@ public:
    */
   inline void saveMemorySizeToXML()
   {
-    IN("void SiconosMemory::saveMemorySizeToXML()\n");
     if (memoryXML != NULL) memoryXML->setSiconosMemorySize(memorySize);
     else SiconosMemoryException::selfThrow("SiconosMemory::saveMemorySizeToXML() - memoryXML object == NULL");
-    OUT("void SiconosMemory::saveMemorySizeToXML()\n");
   }
 
   SiconosMemory& operator = (const SiconosMemory&);

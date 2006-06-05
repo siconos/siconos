@@ -26,9 +26,11 @@
 #include "EqualityConstraint.h"
 #include "Topology.h"
 #include "NonSmoothDynamicalSystemXML.h"
-
+#include "DSSet.h"
+#include "InteractionsSet.h"
 #include "check.h"
 #include <iostream>
+#include <map>
 #include <vector>
 #include <string>
 
@@ -51,6 +53,36 @@ class NonSmoothDynamicalSystemXML;
 
 class NonSmoothDynamicalSystem
 {
+private:
+
+  /** TRUE if the NonSmoothDynamicalSystem is a boundary value problem*/
+  bool BVP;
+
+  /** contains all the Dynamic Systems of the simulation */
+  DSSet allDS;
+
+  /** inside-class allocation flags*/
+  std::map<DynamicalSystem*, bool> isDSAllocatedIn;
+
+  /** contains all the Interactions */
+  InteractionsSet allInteractions;
+
+  /** inside-class allocation flags*/
+  std::map<Interaction*, bool> isInteractionAllocatedIn;
+
+  /** contains the EqualityConstraints */
+  std::vector<EqualityConstraint*> ecVector;
+
+  /** the topology of the system */
+  Topology * topology;
+
+  /** the XML object linked to the NonSmoothDynamicalSystem to read XML data */
+  NonSmoothDynamicalSystemXML *nsdsxml;
+
+  /** Flags to check whether pointers were allocated in class constructors or not */
+  std::deque<bool> isEcVectorAllocatedIn;
+  bool isTopologyAllocatedIn;
+
 public:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -104,26 +136,28 @@ public:
     BVP = newBvp;
   }
 
-  /** \fn inline const int getDSVectorSize() const
-   *  \brief get the size of the vector of Dynamical Systems
-   *  \return int : the size of DSVector
-   */
-  inline const int getDSVectorSize() const
-  {
-    return DSVector.size();
-  }
+  // === DynamicalSystems management ===
 
-  /** \fn const vector<DynamicalSystem*> getDynamicalSystems()
-   *  \brief get all the DynamicalSystem of the NonSmoothDynamicalSystem problem
-   *  \return the vector of DS
+  /** \fn inline const unsigned int getNumberOfDS() const
+   *  \brief get the number of Dynamical Systems present in the NSDS (ie in allDS set)
+   *  \return an unsigned int
    */
-  inline const std::vector<DynamicalSystem*> getDynamicalSystems() const
+  inline const unsigned int getNumberOfDS() const
   {
-    return DSVector;
+    return allDS.size();
+  };
+
+  /** \fn const DSSet getDynamicalSystems()
+   *  \brief get all the DynamicalSystem of the NonSmoothDynamicalSystem problem (saved in a set)
+   *  \return a DSSet
+   */
+  inline const DSSet getDynamicalSystems() const
+  {
+    return allDS;
   }
 
   /** \fn DynamicalSystem* getDynamicalSystemPtr(const int& position)
-   *  \brief get DynamicalSystem at indix position in vector
+   *  \brief get DynamicalSystem at indix position in the set
    *  \param an int
    *  \return a pointer on DynamicalSystem
    */
@@ -136,49 +170,81 @@ public:
    */
   DynamicalSystem* getDynamicalSystemPtrNumber(const int&) const ;
 
-  /** \fn void setDynamicalSystems(const vector<DynamicalSystem*>&)
-   *  \brief set the vector of DynamicalSystems
-   *  \param vector<DynamicalSystem> : the new value for the vector
+  /** \fn void setDynamicalSystems(const DSSet&)
+   *  \brief to set allDS
+   *  \param a DSSet
    */
-  void setDynamicalSystems(const std::vector<DynamicalSystem*>&) ;
+  void setDynamicalSystems(const DSSet&) ;
 
-  /** \fn inline const int getInteractionVectorSize()  const
-   *  \brief get the size of the vector of Interactions
-   *  \return int
+  /** \fn const bool hasDynamicalSystemNumber(const int& N)  const
+   *  \brief check if DynamicalSystem number N exists
+   *  \param the identifier of the DynamicalSystem to get
+   *  \return bool
    */
-  inline const int getInteractionVectorSize() const
+  const bool hasDynamicalSystemNumber(const int&) const ;
+
+  /** \fn const bool hasDynamicalSystem(DynamicalSystem* ds)
+   *  \brief check if DynamicalSystem ds is in the set
+   *  \param a pointer to DynamicalSystem
+   *  \return a bool
+   */
+  const bool hasDynamicalSystem(DynamicalSystem*) const;
+
+  // === Interactions management ===
+
+  /** \fn inline const unsigned int getNumberOfInteractions() const
+   *  \brief get the number of Interactions present in the NSDS (ie in allInteractions set)
+   *  \return an unsigned int
+   */
+  inline const unsigned int getNumberOfInteractions() const
   {
-    return interactionVector.size();
+    return allInteractions.size();
+  };
+
+  /** \fn const InteractionsSet getInteractions()
+   *  \brief get all the Interactions of the NonSmoothDynamicalSystem problem (saved in a set)
+   *  \return an InteractionsSet
+   */
+  inline const InteractionsSet getInteractions() const
+  {
+    return allInteractions;
   }
 
-  /** \fn const vector<Interaction*> getInteractions() const
-   *  \brief get the vector of interactions
-   *  \return a vector
-   */
-  inline std::vector<Interaction*> getInteractions() const
-  {
-    return interactionVector;
-  }
-
-  /** \fn Interaction* getInteractionPtr(const int& N) const
-   *  \brief get interaction at position N in vectorInteraction
-   *  \param the position of the Interaction to get
-   *  \return a pointer on interaction
+  /** \fn Interaction* getInteractionPtr(const int& position)
+   *  \brief get Interaction at indix position in the set
+   *  \param an int
+   *  \return a pointer on Interaction
    */
   Interaction* getInteractionPtr(const int&) const ;
 
-  /** \fn Interaction* getInteractionPtrNumber(const int& N) const
-   *  \brief get interaction number N
-   *  \param the identifier of the Interaction to get
-   *  \return a pointer on interaction
+  /** \fn Interaction* getInteractionPtrNumber(const int& I)
+   *  \brief get Interaction number I
+   *  \param the id-number of the Interaction to get
+   *  \return a pointer on Interaction
    */
   Interaction* getInteractionPtrNumber(const int&) const ;
 
-  /** \fn void setInteractions(const vector<Interaction*>&)
-   *  \brief set the vector of interactions
-   *  \param vector<Interaction> : the new value for the vector
+  /** \fn void setInteractions(const InteractionsSet&)
+   *  \brief to set allInteractions
+   *  \param an InteractionsSet
    */
-  void setInteractions(const std::vector<Interaction*>&) ;
+  void setInteractions(const InteractionsSet&) ;
+
+  /** \fn const bool hasInteractionNumber(const int& N)
+   *  \brief check if Interaction number N exists
+   *  \param the identifier of the Interaction to get
+   *  \return bool
+   */
+  const bool hasInteractionNumber(const int&) const;
+
+  /** \fn const bool hasInteraction(Interaction * inter)
+   *  \brief check if Interaction inter is in the set
+   *  \param a pointer to Interaction
+   *  \return a bool
+   */
+  const bool hasInteraction(Interaction*) const;
+
+  // === Equality constraints management ===
 
   /** \fn vector<EqualityConstraint*> getEqualityConstraints(void)
    *  \brief get the vector of algebraic constraints
@@ -231,19 +297,6 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** \fn bool hasDynamicalSystemNumber(const int& N)  const
-   *  \brief check if DynamicalSystem number N exists
-   *  \param the identifier of the DynamicalSystem to get
-   *  \return bool
-   */
-  bool hasDynamicalSystemNumber(const int&) const ;
-  /** \fn bool hasInteractionNumber(const int& N)
-   *  \brief check if Interaction number N exists
-   *  \param the identifier of the Interaction to get
-   *  \return bool
-   */
-  bool hasInteractionNumber(const int&) const;
-
   /** \fn void saveNSDSToXML()
    *  \brief copy the data of the NonSmoothDynamicalSystem to the XML tree
    *  \exception RuntimeException
@@ -255,17 +308,17 @@ public:
    */
   void display() const;
 
-  /** \fn void addDynamicalSystem(DynamicalSystem*)
-   *  \brief add a DynamicalSystem to the NonSmoothDynamicalSystem
+  /** \fn void addDynamicalSystemPtr(DynamicalSystem*)
+   *  \brief add a DynamicalSystem into the NonSmoothDynamicalSystem (pointer link, no copy!)
    *  \param DynamicalSystem* : the DynamicalSystem to add
    */
-  void addDynamicalSystem(DynamicalSystem*);
+  void addDynamicalSystemPtr(DynamicalSystem*);
 
-  /** \fn void addInteraction(Interaction*)
-   *  \brief add an Interaction to the NonSmoothDynamicalSystem
+  /** \fn void addInteractionPtr(Interaction*)
+   *  \brief add an Interaction into the NonSmoothDynamicalSystem (pointer link, no copy!)
    *  \param Interaction : the Interaction to add
    */
-  void addInteraction(Interaction*);
+  void addInteractionPtr(Interaction*);
 
   /** \fn void addEqualityConstraint(EqualityConstraint*)
    *  \brief add an EqualityConstraint to the NonSmoothDynamicalSystem
@@ -278,31 +331,6 @@ public:
    *  \return a double
    */
   double nsdsConvergenceIndicator() ;
-
-private:
-  /** TRUE if the NonSmoothDynamicalSystem is a boundary value problem*/
-  bool BVP;
-
-  /** contains Dynamic systems of the simulation */
-  std::vector<DynamicalSystem*> DSVector;
-
-  /** contains the Interactions */
-  std::vector<Interaction*> interactionVector;
-
-  /** contains the EqualityConstraints */
-  std::vector<EqualityConstraint*> ecVector;
-
-  /** the topology of the system */
-  Topology * topology;
-
-  /** the XML object linked to the NonSmoothDynamicalSystem to read XML data */
-  NonSmoothDynamicalSystemXML *nsdsxml;
-
-  /** Flags to check wheter pointers were allocated in class constructors or not */
-  std::vector<bool> isDSVectorAllocatedIn;
-  std::vector<bool> isInteractionVectorAllocatedIn;
-  std::vector<bool> isEcVectorAllocatedIn;
-  bool isTopologyAllocatedIn;
 };
 
 #endif

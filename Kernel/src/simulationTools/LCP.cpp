@@ -21,7 +21,7 @@
 // includes to be deleted thanks to factories
 #include "Moreau.h"
 #include "LagrangianLinearR.h"
-#include "NewtonImpactLawNSL.h"
+#include "NewtonImpactNSL.h"
 #include "LinearTIR.h"
 
 using namespace std;
@@ -251,8 +251,8 @@ void LCP::computeAllBlocks()
   map< Interaction*, vector<InteractionLink*> >::const_iterator itMapInter;
 
   // --- get interactions list ---
-  vector<Interaction*> listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  vector<Interaction*>::iterator iter;
+  InteractionsSet listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  InteractionsIterator iter;
 
   // --- get time step ---
   double h = strategy->getTimeDiscretisationPtr()->getH(); // time step
@@ -270,7 +270,7 @@ void LCP::computeAllBlocks()
   {
     // the current interaction and its size
     Interaction *currentInteraction = *iter;
-    sizeInteraction = currentInteraction->getNInteraction();
+    sizeInteraction = currentInteraction->getInteractionSize();
     // relative degrees
     r = topology->getRelativeDegrees(currentInteraction);
     rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
@@ -285,20 +285,14 @@ void LCP::computeAllBlocks()
     SiconosMatrix * currentMatrixBlock = diagonalBlocksMap[ currentInteraction ];
 
     // get DS list of the current interaction
-    vector<DynamicalSystem*> vDS = currentInteraction ->getDynamicalSystems();
+    DSSet vDS = currentInteraction ->getDynamicalSystems();
     unsigned int nbDS = vDS.size(); // number of DS
 
     // sum of all DS sizes
     globalDSSize = 0;
-    vector<DynamicalSystem*>::iterator itDS;
+    DSIterator itDS;
     for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
-    {
-      dsType = (*itDS)->getType();
-      if (dsType == LNLDS || dsType == LTIDS)
-        globalDSSize += (*itDS)->getN() / 2;
-      else
-        globalDSSize += (*itDS)->getN();
-    }
+      globalDSSize += (*itDS)->getDim();
 
     // Get Wi matrix of each DS concerned by the interaction and assemble global matrix W
     OneStepIntegrator * Osi;
@@ -345,7 +339,7 @@ void LCP::computeAllBlocks()
       for (itLink = ILV.begin(); itLink != ILV.end(); itLink++)
       {
         Interaction * linkedInteraction = (*itLink)->getLinkedInteractionPtr();
-        linkedInteractionSize = linkedInteraction->getNInteraction();
+        linkedInteractionSize = linkedInteraction->getInteractionSize();
         // relative degrees
         r = topology->getRelativeDegrees(linkedInteraction);
         rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
@@ -359,7 +353,7 @@ void LCP::computeAllBlocks()
         coupledInteractionsBlockSym = extraDiagonalBlocksMap[linkedInteraction][currentInteraction];
 
         // get the list of common DS and their number
-        vector<DynamicalSystem*> commonDS = (*itLink)->getCommonDS();
+        DSSet commonDS = (*itLink)->getCommonDS();
         nbDS = commonDS.size();
 
         // get the relation of the current interaction
@@ -384,7 +378,7 @@ void LCP::computeAllBlocks()
 
 }
 
-void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeInteraction, vector<DynamicalSystem*> vDS,
+void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeInteraction, const DSSet& vDS,
     map<DynamicalSystem*, SiconosMatrix*> W, map<DynamicalSystem*, double> theta, const double& h, SiconosMatrix* currentMatrixBlock)
 {
   // convert to linearTIR
@@ -395,7 +389,7 @@ void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeI
   // - a block of B, that corresponds to a specific DS
   SiconosMatrix* D = LTIR->getDPtr();
   SiconosMatrix * C, *B;
-  vector<DynamicalSystem*>::iterator itDS;
+  DSIterator itDS;
   unsigned int sizeDS;
 
   bool isHomogeneous = false; // \todo to be defined with relative degrees
@@ -464,7 +458,7 @@ void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeI
 }
 
 void LCP::computeExtraDiagonalBlocksLinearTIR(Relation * RCurrent, Relation* RLinked, const unsigned int& sizeInteraction,
-    const unsigned int& linkedInteractionSize, vector<DynamicalSystem*> commonDS, map<DynamicalSystem*, SiconosMatrix*> W,
+    const unsigned int& linkedInteractionSize, const DSSet& commonDS, map<DynamicalSystem*, SiconosMatrix*> W,
     map<DynamicalSystem*, double> theta, const double& h, SiconosMatrix* coupledInteractionsBlock)
 {
   // convert to linearTIR
@@ -472,7 +466,7 @@ void LCP::computeExtraDiagonalBlocksLinearTIR(Relation * RCurrent, Relation* RLi
   LinearTIR *LTIR2 = static_cast<LinearTIR*>(RLinked);
   SiconosMatrix *C, *B;
   coupledInteractionsBlock->zero();
-  vector<DynamicalSystem*>::iterator itDS;
+  DSIterator itDS;
   unsigned int sizeDS;
   bool isHomogeneous = false; // \todo to be defined with relative degrees
   if (!isHomogeneous)
@@ -530,7 +524,7 @@ void LCP::computeExtraDiagonalBlocksLinearTIR(Relation * RCurrent, Relation* RLi
   }
 }
 
-void LCP::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& sizeInteraction, vector<DynamicalSystem*> vDS,
+void LCP::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& sizeInteraction, const DSSet& vDS,
     map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* currentMatrixBlock)
 {
 
@@ -543,7 +537,7 @@ void LCP::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& siz
   // - a block-row of G, that corresponds to a specific DS
   // - a block of tG, that corresponds to a specific DS
   SiconosMatrix *G;
-  vector<DynamicalSystem*>::iterator itDS;
+  DSIterator itDS;
   unsigned int sizeDS;
 
   bool isHomogeneous = false; // \todo to be defined with relative degrees
@@ -601,7 +595,7 @@ void LCP::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& siz
 }
 
 void LCP::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* RLinked, const unsigned int& sizeInteraction,
-    const unsigned int& linkedInteractionSize, vector<DynamicalSystem*> commonDS,
+    const unsigned int& linkedInteractionSize, const DSSet& commonDS,
     map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* coupledInteractionsBlock)
 {
   // Warning: we suppose that at this point, G and/or h have been computed through plug-in mechanism.
@@ -611,7 +605,7 @@ void LCP::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* R
   LagrangianR *LR2 = static_cast<LagrangianR*>(RLinked);
   SiconosMatrix *Gcurrent, *Glinked;
   coupledInteractionsBlock->zero();
-  vector<DynamicalSystem*>::iterator itDS;
+  DSIterator itDS;
   unsigned int sizeDS;
   bool isHomogeneous = false; // \todo to be defined with relative degrees
 
@@ -679,8 +673,8 @@ void LCP::updateBlocks()
   map< Interaction*, vector<InteractionLink*> >::const_iterator itMapInter;
 
   // --- get interactions list ---
-  vector<Interaction*> listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  vector<Interaction*>::iterator iter;
+  InteractionsSet listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  InteractionsIterator iter;
 
   // --- get time step ---
   double h = strategy->getTimeDiscretisationPtr()->getH(); // time step
@@ -698,7 +692,7 @@ void LCP::updateBlocks()
   {
     // the current interaction and its size
     Interaction *currentInteraction = *iter;
-    sizeInteraction = currentInteraction->getNInteraction();
+    sizeInteraction = currentInteraction->getInteractionSize();
     // relative degrees
     r = topology->getRelativeDegrees(currentInteraction);
     rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
@@ -712,12 +706,12 @@ void LCP::updateBlocks()
     SiconosMatrix * currentMatrixBlock = diagonalBlocksMap[ currentInteraction ];
 
     // get DS list of the current interaction
-    vector<DynamicalSystem*> vDS = currentInteraction ->getDynamicalSystems();
+    DSSet vDS = currentInteraction ->getDynamicalSystems();
     unsigned int nbDS = vDS.size(); // number of DS
 
     // sum of all DS sizes
     globalDSSize = 0;
-    vector<DynamicalSystem*>::iterator itDS;
+    DSIterator itDS;
     for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
     {
       dsType = (*itDS)->getType();
@@ -766,7 +760,7 @@ void LCP::updateBlocks()
       for (itLink = ILV.begin(); itLink != ILV.end(); itLink++)
       {
         Interaction * linkedInteraction = (*itLink)->getLinkedInteractionPtr();
-        linkedInteractionSize = linkedInteraction->getNInteraction();
+        linkedInteractionSize = linkedInteraction->getInteractionSize();
         // relative degrees
         r = topology->getRelativeDegrees(linkedInteraction);
         rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
@@ -778,7 +772,7 @@ void LCP::updateBlocks()
         coupledInteractionsBlockSym = extraDiagonalBlocksMap[linkedInteraction][currentInteraction];
 
         // get the list of common DS and their number
-        vector<DynamicalSystem*> commonDS = (*itLink)->getCommonDS();
+        DSSet commonDS = (*itLink)->getCommonDS();
         nbDS = commonDS.size();
 
         // get the relation of the current interaction
@@ -800,7 +794,6 @@ void LCP::updateBlocks()
 
 void LCP::preLCP(const double& time)
 {
-  IN("LCP::preLCP()\n");
   // compute M and q operators for LCP problem
 
   // get topology
@@ -847,7 +840,6 @@ void LCP::preLCP(const double& time)
     w->zero();
     z->zero();
   }
-  OUT("LCP::preLCP()\n");
 }
 
 void LCP::assembleM() //
@@ -945,7 +937,6 @@ void LCP::assembleM() //
 
 void LCP::computeQ(const double& time)
 {
-  IN("LCP::computeQ(void)\n");
   if (q == NULL)
   {
     q = new SimpleVector(nLcp);
@@ -964,8 +955,8 @@ void LCP::computeQ(const double& time)
   // --- get topology ---
   Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   // --- get interactions list ---
-  vector<Interaction*> listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  vector<Interaction*>::iterator iter;
+  InteractionsSet listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  InteractionsIterator iter;
   // get Interaction position map
   map< Interaction* , SiconosMatrix*>::iterator itDiago;
   map< Interaction*, unsigned int>  interactionEffectivePositionMap =  topology->getInteractionEffectivePositionMap();
@@ -981,7 +972,7 @@ void LCP::computeQ(const double& time)
   {
     // get current interaction, its relation and its nslaw
     currentInteraction = *iter;
-    unsigned int numberOfRelations = currentInteraction->getNInteraction();
+    unsigned int numberOfRelations = currentInteraction->getInteractionSize();
     R = currentInteraction->getRelationPtr();
     string relationType = R->getType();
     nslaw = currentInteraction->getNonSmoothLawPtr();
@@ -1020,7 +1011,7 @@ void LCP::computeQ(const double& time)
       {
         vector<unsigned int> indexMax = topology->getIndexMax(currentInteraction);
 
-        NewtonImpactLawNSL * newton = static_cast<NewtonImpactLawNSL*>(nslaw);
+        NewtonImpactNSL * newton = static_cast<NewtonImpactNSL*>(nslaw);
         double e = newton->getE();
         LLR->computeFreeOutput(time);
         if (topology->isTimeInvariant())
@@ -1063,7 +1054,6 @@ void LCP::computeQ(const double& time)
 
     delete yFree;
   }
-  OUT("LCP::computeQ(void)\n");
 }
 
 void LCP::compute(const double& time)
@@ -1092,8 +1082,8 @@ void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)
   Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   // --- get interactions list ---
-  vector<Interaction*> listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  vector<Interaction*>::iterator iter;
+  InteractionsSet listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  InteractionsIterator iter;
   // get Interaction position map
   map< Interaction* , SiconosMatrix*>::iterator itDiago;
   map< Interaction*, unsigned int>  interactionEffectivePositionMap =  topology->getInteractionEffectivePositionMap();
@@ -1114,7 +1104,7 @@ void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)
   {
     // the current interaction and its size
     Interaction *currentInteraction = *iter;
-    numberOfRelations = currentInteraction->getNInteraction();
+    numberOfRelations = currentInteraction->getInteractionSize();
 
     // Y vector of the interactions
     Y = currentInteraction -> getY();
@@ -1192,7 +1182,6 @@ void LCP::display() const
 
 void LCP::saveNSProblemToXML()
 {
-  IN("LCP::saveNSProblemToXML\n");
   OneStepNSProblem::saveNSProblemToXML();
   if (onestepnspbxml != NULL)
   {
@@ -1200,29 +1189,24 @@ void LCP::saveNSProblemToXML()
     (static_cast<LCPXML*>(onestepnspbxml))->setQ(*q);
   }
   else RuntimeException::selfThrow("LCP::saveNSProblemToXML - OneStepNSProblemXML object not exists");
-  OUT("LCP::saveNSProblemToXML\n");
 }
 
 void LCP::saveMToXML()
 {
-  IN("LCP::saveMToXML\n");
   if (onestepnspbxml != NULL)
   {
     (static_cast<LCPXML*>(onestepnspbxml))->setM(*M);
   }
   else RuntimeException::selfThrow("LCP::saveMToXML - OneStepNSProblemXML object not exists");
-  OUT("LCP::saveMToXML\n");
 }
 
 void LCP::saveQToXML()
 {
-  IN("LCP::saveQToXML\n");
   if (onestepnspbxml != NULL)
   {
     (static_cast<LCPXML*>(onestepnspbxml))->setQ(*q);
   }
   else RuntimeException::selfThrow("LCP::saveQToXML - OneStepNSProblemXML object not exists");
-  OUT("LCP::saveQToXML\n");
 }
 
 LCP* LCP::convert(OneStepNSProblem* osnsp)

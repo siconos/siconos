@@ -92,7 +92,7 @@ SimpleMatrix SiconosDOMTreeTools::getSiconosMatrixValue(const xmlNodePtr siconos
 }
 
 
-bool SiconosDOMTreeTools::hasAttributeValue(const xmlNodePtr node, const string& attributeName)
+const bool SiconosDOMTreeTools::hasAttributeValue(const xmlNodePtr node, const string& attributeName)
 {
   if (xmlHasProp((xmlNodePtr)node, (xmlChar *)attributeName.c_str()))
     return true;

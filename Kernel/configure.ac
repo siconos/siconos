@@ -118,7 +118,6 @@ AC_CHECK_FUNCS([floor gettimeofday])
 ###################################
 
 AC_ARG_ENABLE(cppunit,[  --enable-cppunit              use cppunit to pass unitary tests, default=no ])
-#AC_ARG_ENABLE(nana,[  --enable-nana              use nana to design by contract to pass unitary tests, default=no ])
 AC_ARG_ENABLE(debug,  [  --enable-debug              compiling with debugging symbols (-g), default=no ])
 AC_ARG_ENABLE(optimisation,  [  --enable-optimisation              compiling with optimiation symbols (O2), default=no ])
 AC_ARG_ENABLE(warnings,[  --enable-warnings            enable compilation warnings, default=yes])
@@ -129,8 +128,6 @@ AC_ARG_ENABLE(error-on-warning,[  --enable-erroronwarning     treat all compile 
 #################################
 AC_ARG_WITH(numerics,	
 	[  --with-numerics=path        indicates a local path of numerics lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
-#AC_ARG_WITH(nana,			
-#	[  --with-nana=path        indicates a local path of nana lib if the library is not installed in standard directories (/usr, /usr/local, ...)])
 
 #################################
 ## Checks for external libraries
@@ -165,16 +162,6 @@ AC_MSG_CHECKING([Libxml2])
 AM_PATH_XML2(2.6.16,,AC_MSG_ERROR([
 *** Libxml is required; Available at
 http://www.libxml.org/.]))
-
-# Nana Warning, by default we skip nana
-dnl AC_MSG_CHECKING([Nana])
-dnl if test "$enable_nana" = yes; then
-dnl ACX_CHECK_NANA([AC_SUBST(NANA_INCLUDES) AC_SUBST(NANA_LIBRARIES)], [AC_MSG_ERROR([Cannot find  Nana. Please install Nana  or use the option --with-nana.])])
-dnl CXX_WITHOUTNANA_FLAG=""
-dnl else
-dnl  AC_MSG_RESULT(option --enable-nana not selected : Warning : do not use nana)  
-CXX_WITHOUTNANA_FLAG="-DWITHOUT_NANA"
-dnl fi
 
 # Cppunit : Warning, by default we skip ccpunit
 AC_MSG_CHECKING([cppunit])
@@ -238,7 +225,7 @@ case "$target" in
       ;;
 esac
 
-CXXFLAGS="$CXXFLAGS $CXX_WITHOUTNANA_FLAG"
+CXXFLAGS="$CXXFLAGS"
 #CXXFLAGS="$CXXFLAGS "
 
 AC_MSG_RESULT("Architecture $ARCH  Compilation flag CXXFLAGS= $CXXFLAGS  Linking flag CXX_DYNLIB = $CXX_DYNLIB")
@@ -251,13 +238,11 @@ AC_SUBST(CXX_DYNLIB)
 #################################
 
 #SICONOS_EXT_INCLUDES
-#SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $NANA_INCLUDES $LAPACKPP_INCLUDES $XML_CPPFLAGS"
 SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $LAPACKPP_INCLUDES $XML_CPPFLAGS"
 AC_SUBST(SICONOS_EXT_INCLUDES)
 AC_MSG_RESULT("SICONOS_EXT_INCLUDES = $SICONOS_EXT_INCLUDES")
 
 #SICONOS_EXT_LDFLAGS
-#SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $NANA_LIBRARIES $LAPACKPP_LDFLAGS $LAPACKPP_LIBS $LAPACK_LIBS $BLAS_LIBS $XML_LIBS -ldl"
 SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $LAPACKPP_LDFLAGS $LAPACKPP_LIBS $LAPACK_LIBS $BLAS_LIBS $XML_LIBS -ldl"
 dnl case "$target" in
 dnl     *-linux*)

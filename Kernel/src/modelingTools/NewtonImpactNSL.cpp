@@ -16,33 +16,33 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "NewtonImpactLawNSL.h"
+#include "NewtonImpactNSL.h"
 using namespace std;
 
-NewtonImpactLawNSL::NewtonImpactLawNSL(): NonSmoothLaw(), e(0.0)
+NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(1), e(0.0)
 {
   nsLawType = NEWTONIMPACTNSLAW;
 }
 
-NewtonImpactLawNSL::NewtonImpactLawNSL(NonSmoothLawXML* nslawxml):
-  NonSmoothLaw(nslawxml), e(0.0)
+NewtonImpactNSL::NewtonImpactNSL(NonSmoothLawXML* nslawxml):
+  NonSmoothLaw(nslawxml, 1), e(0.0)
 {
   nsLawType = NEWTONIMPACTNSLAW;
   if (nslawxml != NULL)
-    e = (static_cast<NewtonImpactLawNSLXML*>(nslawxml))->getE();
-  else RuntimeException::selfThrow("NewtonImpactLawNSL:: xml constructor, xml file=NULL");
+    e = (static_cast<NewtonImpactNSLXML*>(nslawxml))->getE();
+  else RuntimeException::selfThrow("NewtonImpactNSL:: xml constructor, xml file=NULL");
 }
 
-NewtonImpactLawNSL::NewtonImpactLawNSL(const double& newE):
-  NonSmoothLaw(), e(newE)
+NewtonImpactNSL::NewtonImpactNSL(const double& newE):
+  NonSmoothLaw(1), e(newE)
 {
   nsLawType = NEWTONIMPACTNSLAW;
 }
 
-NewtonImpactLawNSL::~NewtonImpactLawNSL()
+NewtonImpactNSL::~NewtonImpactNSL()
 {}
 
-bool NewtonImpactLawNSL::isVerified() const
+bool NewtonImpactNSL::isVerified() const
 {
   bool res = false;
   // to do
@@ -50,23 +50,21 @@ bool NewtonImpactLawNSL::isVerified() const
   return res;
 }
 
-void NewtonImpactLawNSL::display() const
+void NewtonImpactNSL::display() const
 {
   cout << "===============================================================================" << endl;
   cout << "=== Newton impact (frictionless) non-smooth law coefficient of restitution: " << e << endl;
   cout << "===============================================================================" << endl;
 }
 
-void NewtonImpactLawNSL::saveNonSmoothLawToXML()
+void NewtonImpactNSL::saveNonSmoothLawToXML()
 {
-  IN("NewtonImpactLawNSL::saveNonSmoothLawToXML\n");
-  static_cast<NewtonImpactLawNSLXML*>(this->nslawxml)->setE(e);
-  OUT("NewtonImpactLawNSL::saveNonSmoothLawToXML\n");
+  static_cast<NewtonImpactNSLXML*>(this->nslawxml)->setE(e);
 }
 
-NewtonImpactLawNSL* NewtonImpactLawNSL::convert(NonSmoothLaw* nsl)
+NewtonImpactNSL* NewtonImpactNSL::convert(NonSmoothLaw* nsl)
 {
-  NewtonImpactLawNSL* nilnsl = dynamic_cast<NewtonImpactLawNSL*>(nsl);
+  NewtonImpactNSL* nilnsl = dynamic_cast<NewtonImpactNSL*>(nsl);
   return nilnsl;
 }
 

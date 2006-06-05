@@ -58,9 +58,7 @@ QPXML::~QPXML() {}
 
 void QPXML::updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb)
 {
-  IN("LCPXML::updateOneStepNSProblemXML\n");
   rootNode = node;
   problemTypeNode = SiconosDOMTreeTools::findNodeChild(rootNode);
-  OUT("LCPXML::updateOneStepNSProblemXML\n");
 }
 

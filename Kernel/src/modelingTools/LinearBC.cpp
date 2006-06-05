@@ -15,16 +15,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 #include "LinearBC.h"
 using namespace std;
 
 LinearBC::LinearBC(): BoundaryCondition()
 {
-  IN("LinearBC::LinearBC()\n");
   this->boundaryType = LINEARBC;
-  OUT("LinearBC::LinearBC()\n");
 }
 
 LinearBC::LinearBC(BoundaryConditionXML* bcxml): BoundaryCondition(bcxml)
@@ -42,7 +40,6 @@ LinearBC::~LinearBC()
 
 void LinearBC::fillBCWithBCXML()
 {
-  OUT("LinearBC::fillBCWithBCXML\n");
   if (this->bcXML != NULL)
   {
     omega = new SimpleVector(static_cast<LinearBCXML*>(this->bcXML)->getOmega());
@@ -54,7 +51,6 @@ void LinearBC::fillBCWithBCXML()
 
 void LinearBC::saveBCToXML()
 {
-  OUT("LinearBC::saveBCToXML\n");
   if (this->bcXML != NULL)
   {
     static_cast<LinearBCXML*>(this->bcXML)->setOmega(omega);
@@ -67,7 +63,6 @@ void LinearBC::saveBCToXML()
 void LinearBC::createBoundaryCondition(BoundaryConditionXML * bcXML,
                                        SiconosVector* newOmega, SiconosMatrix* newOmega0, SiconosMatrix* newOmegaT)
 {
-  IN("LinearBC::createBoundaryCondition\n");
   if (bcXML != NULL)
   {
     this->bcXML = bcXML;
@@ -81,7 +76,6 @@ void LinearBC::createBoundaryCondition(BoundaryConditionXML * bcXML,
     omegaT = new SimpleMatrix(*newOmegaT);
   }
   else RuntimeException::selfThrow("LinearBC::createBoundaryCondition - The omega, omega0 and/or omegaT matrices is/are missing");
-  OUT("LinearBC::createBoundaryCondition\n");
 }
 
 

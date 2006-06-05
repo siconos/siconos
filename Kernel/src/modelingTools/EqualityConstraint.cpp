@@ -66,7 +66,6 @@ void EqualityConstraint::addDSInputOutput(DSInputOutput* dsio)
 
 void EqualityConstraint::saveEqualityConstraintToXML()
 {
-  IN("EqualityConstraint::saveEqualityConstraintToXML\n");
   if (ecXML != NULL)
   {
     /*
@@ -77,7 +76,6 @@ void EqualityConstraint::saveEqualityConstraintToXML()
     ecXML->setG(G);
   }
   else RuntimeException::selfThrow("EqualityConstraint::saveEqualityConstraintToXML - object EqualityConstraintXML does not exist");
-  OUT("EqualityConstraint::saveEqualityConstraintToXML\n");
 }
 
 void EqualityConstraint::display() const

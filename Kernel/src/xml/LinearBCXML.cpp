@@ -69,8 +69,6 @@ void LinearBCXML::loadLinearBCProperties()
 
 void LinearBCXML::updateBoundaryConditionXML(xmlNode* node) //, BoundaryCondition* bc)
 {
-  IN("LinearBCXML::updateBoundaryConditionXML\n");
   this->rootBCNode = node;
-  OUT("LinearBCXML::updateBoundaryConditionXML\n");
 }
 

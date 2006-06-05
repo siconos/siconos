@@ -50,7 +50,7 @@
 #include "LagrangianLinearRXML.h"
 #include "LinearTIRXML.h"
 #include "NonSmoothLawXML.h"
-#include "NewtonImpactLawNSLXML.h"
+#include "NewtonImpactNSLXML.h"
 #include "NewtonImpactFrictionNSLXML.h"
 #include "RelayNSLXML.h"
 #include "ComplementarityConditionNSLXML.h"
@@ -93,7 +93,7 @@
 #include "NLinearBC.h"
 #include "NonSmoothLaw.h"
 #include "ComplementarityConditionNSL.h"
-#include "NewtonImpactLawNSL.h"
+#include "NewtonImpactNSL.h"
 #include "NewtonImpactFrictionNSL.h"
 #include "RelayNSL.h"
 #include "DSInputOutput.h"
@@ -125,7 +125,6 @@
 #include "Event.h"
 #include "NonSmoothEvent.h"
 #include "TimeDiscrEvent.h"
-#include "EventsComparison.h"
 #include "EventsManager.h"
 #include "OneStepNSProblem.h"
 #include "QP.h"
@@ -196,7 +195,7 @@ $1 = string(PyString_AsString($input));
 %include "LinearTIRXML.h"
 // ---
 %include "NonSmoothLawXML.h"
-%include "NewtonImpactLawNSLXML.h"
+%include "NewtonImpactNSLXML.h"
 %include "NewtonImpactFrictionNSLXML.h"
 %include "RelayNSLXML.h"
 %include "ComplementarityConditionNSLXML.h"
@@ -255,7 +254,7 @@ $1 = string(PyString_AsString($input));
 // ---
 %include "NonSmoothLaw.h"
 %include "RelayNSL.h"
-%include "NewtonImpactLawNSL.h"
+%include "NewtonImpactNSL.h"
 %include "NewtonImpactFrictionNSL.h"
 %include "ComplementarityConditionNSL.h"
 // ---
@@ -295,7 +294,6 @@ $1 = string(PyString_AsString($input));
 %include "Event.h"
 %include "NonSmoothEvent.h"
 %include "TimeDiscrEvent.h"
-%include "EventsComparison.h"
 %include "EventsManager.h"
 // ---
 %include "OneStepNSProblem.h"

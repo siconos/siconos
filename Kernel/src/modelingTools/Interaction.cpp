@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "Interaction.h"
 
 // includes to be deleted thanks to factories
@@ -24,7 +24,7 @@
 #include "LagrangianR.h"
 #include "ComplementarityConditionNSL.h"
 #include "RelayNSL.h"
-#include "NewtonImpactLawNSL.h"
+#include "NewtonImpactNSL.h"
 #include "NewtonImpactFrictionNSL.h"
 
 using namespace std;
@@ -33,18 +33,22 @@ using namespace std;
 
 // Copy constructor
 Interaction::Interaction(const Interaction& newI):
-  id(newI.getId()), number(newI.getNumber()), nInteraction(newI.getNInteraction()), sizeOfDS(newI.getSizeOfDS()),
-  nslaw(NULL), relation(NULL), interactionxml(NULL),
-  isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
+  id("interactionCopy"), number(-1), interactionSize(newI.getInteractionSize()),
+  numberOfRelations(newI.getNumberOfRelations()), sizeOfDS(newI.getSizeOfDS()), involvedDS(),
+  nslaw(NULL), relation(NULL), NSDS(newI.getNonSmoothDynamicalSystemPtr()), interactionxml(NULL), isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
 {
-  // Memory allocation and copy for simple vectors
-  unsigned int size = newI.getY().size();
-  y.resize(size, NULL);
-  yOld.resize(size, NULL);
-  lambda.resize(size, NULL);
-  lambdaOld.resize(size, NULL);
+  // Memory allocation and copy for y and lambda
 
-  for (unsigned int i = 0; i < size; i++)
+  cout << "Warning, Interaction copy constructor: you need to set an id and a number to the new interaction (default={interactionCopy,-1})." << endl;
+
+  unsigned int numberOfDerivatives = (newI.getY()).size();
+
+  y.resize(numberOfDerivatives, NULL);
+  yOld.resize(numberOfDerivatives, NULL);
+  lambda.resize(numberOfDerivatives, NULL);
+  lambdaOld.resize(numberOfDerivatives, NULL);
+
+  for (unsigned int i = 0; i < numberOfDerivatives; i++)
   {
     y[i] = new SimpleVector(*(newI.getYPtr(i)));
     yOld[i] = new SimpleVector(*(newI.getYOldPtr(i)));
@@ -52,27 +56,26 @@ Interaction::Interaction(const Interaction& newI):
     lambdaOld[i] = new SimpleVector(*(newI.getLambdaOldPtr(i)));
   }
 
-  isYAllocatedIn.resize(size, true);
-  isYOldAllocatedIn.resize(size, true);
-  isLambdaAllocatedIn.resize(size, true);
-  isLambdaOldAllocatedIn.resize(size, true);
+  isYAllocatedIn.resize(numberOfDerivatives, true);
+  isYOldAllocatedIn.resize(numberOfDerivatives, true);
+  isLambdaAllocatedIn.resize(numberOfDerivatives, true);
+  isLambdaOldAllocatedIn.resize(numberOfDerivatives, true);
 
-  vectorDS.clear();
-  vectorDS = newI.getDynamicalSystems();
+  involvedDS = newI.getDynamicalSystems(); // Warning: this keeps pointers links between Dynamical Systems of new I and this.
 
   // Nslaw (warning! nslaw is an abstract class)
   string NslawType = newI.getNonSmoothLawPtr()->getType();
   if (NslawType ==  COMPLEMENTARITYCONDITIONNSLAW)
     nslaw = new ComplementarityConditionNSL();
   else if (NslawType == NEWTONIMPACTNSLAW)
-    nslaw = new NewtonImpactLawNSL();
+    nslaw = new NewtonImpactNSL();
   else if (NslawType == NEWTONIMPACTFRICTIONNSLAW)
     nslaw = new NewtonImpactFrictionNSL();
   else if (NslawType == RELAYNSLAW)
     nslaw = new  RelayNSL();
   else RuntimeException::selfThrow("Interaction::copy constructor, unknown NSLAW type :" + nslaw->getType());
   isNsLawAllocatedIn = true;
-  *nslaw = *newI.getNonSmoothLawPtr();
+  *nslaw = *newI.getNonSmoothLawPtr(); // \todo: add a copy constructor in NonSmoothLaw class.
 
   // Relation
   string relationType = newI.getRelationPtr()->getType();
@@ -87,158 +90,123 @@ Interaction::Interaction(const Interaction& newI):
     relation = new LagrangianLinearR(*(newI.getRelationPtr()), this);
 
   else if (relationType == LAGRANGIANRELATION)
-    relation = new LagrangianR(*(newI.getRelationPtr()));
+    relation = new LagrangianR(*(newI.getRelationPtr()), this);
 
   else RuntimeException::selfThrow("Interaction::copy constructor, unknown relation type " + relation->getType());
   isRelationAllocatedIn = true;
+
   // \remark FP: we do not link xml object in the copy
 }
 
 // --- XML constructor ---
 Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * nsds):
-  id("none"), number(0), nInteraction(0), sizeOfDS(0), nslaw(NULL), relation(NULL), interactionxml(interxml),
+  id("undefined"), number(0), interactionSize(0), numberOfRelations(0), sizeOfDS(0),
+  nslaw(NULL), relation(NULL), NSDS(nsds), interactionxml(interxml),
   isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
 {
-  if (interactionxml != NULL)
+  if (interactionxml == NULL)
+    RuntimeException::selfThrow("Interaction::xml constructor, xmlfile = NULL");
+
+  // id and number
+  if (interactionxml->hasId()) id = interactionxml->getId();
+  number = interactionxml->getNumber();
+
+  // interaction size
+  interactionSize = interactionxml->getSize();
+
+  // Memory allocation for y and lambda
+  initialize();
+
+  // download xml values for y[0] and lambda[0] (optional)
+  if (interactionxml->hasY()) *(y[0]) = interactionxml->getY();
+  if (interactionxml->hasLambda()) *(lambda[0]) = interactionxml->getLambda();
+
+  // Old values are initialized with current values (for y and lambda)
+  swapInMemory();
+
+  // --- Dynamical Systems ---
+  unsigned int sizeDS ;
+  if (nsds != NULL)
   {
-    if (interactionxml->hasId()) id = interactionxml->getId();
-    number = interactionxml->getNumber();
-    nInteraction = interactionxml->getNInter();
-    // Memory allocation for simple vectors
+    // Get a list of DS concerned from xml
 
-    // \todo : compute size using relative degree
-    // for the moment, size = 2: we save y and yDot
-    unsigned int size = 2;
-    y.resize(size) ;
-    yOld.resize(size);
-    lambda.resize(size) ;
-    lambdaOld.resize(size);
-    for (unsigned int i = 0; i < size ; i++)
+    if (interactionxml->hasAllDS())
+      involvedDS = nsds->getDynamicalSystems(); // this results in a call to the copy constructor. Do not understand why ??
+
+    else
     {
-      y[i] = new SimpleVector(nInteraction);
-      yOld[i] = new SimpleVector(nInteraction);
-      lambda[i] = new SimpleVector(nInteraction);
-      lambdaOld[i] = new SimpleVector(nInteraction);
+      // get numbers of DS involved in the interaction from the xml input file.
+      vector<int> listDS;
+      interactionxml->getDSNumbers(listDS);
+
+      // get corresponding DS and insert them into the involvedDS set.
+      sizeDS = listDS.size();
+      for (unsigned int i = 0; i < sizeDS; i++)
+        involvedDS.insert(nsds->getDynamicalSystemPtrNumber(listDS[i]));
     }
 
-    isYAllocatedIn.resize(size, true);
-    isYOldAllocatedIn.resize(size, true);
-    isLambdaAllocatedIn.resize(size, true);
-    isLambdaOldAllocatedIn.resize(size, true);
-
-    initializeVectors(y);
-    initializeVectors(yOld);
-    initializeVectors(lambda);
-    initializeVectors(lambdaOld);
-
-    if (interactionxml->hasY()) *(y[0]) = interactionxml->getY();
-    if (interactionxml->hasLambda()) *(lambda[0]) = interactionxml->getLambda();
-
-    // Old values are initialized with current values
-    swapInMemory();
-
-    // --- Dynamical Systems ---
-    unsigned int sizeDS ;
-    if (nsds != NULL)
-    {
-      // Get a list of DS concerned from xml
-
-      if (interactionxml->hasAll())
-        vectorDS = nsds->getDynamicalSystems();
-      else
-      {
-        vector<int> listDS;
-        interactionxml->getDSConcerned(listDS);
-        sizeDS = listDS.size();
-        vectorDS.resize(sizeDS, NULL);
-        for (unsigned int i = 0; i < sizeDS; i++)
-          vectorDS[i] = nsds->getDynamicalSystemPtrNumber(listDS[i]);
-      }
-
-      computeSizeOfDS();
-    }
-    else cout << "Interaction constructor, warning: no dynamical systems linked to the interaction!" << endl;
-
-    // --- Non smooth law ---
-    string NslawType = interactionxml->getNonSmoothLawXML()->getType();
-    // ComplementarityConditionNSL
-    if (NslawType == COMPLEMENTARITY_CONDITION_NSLAW_TAG)
-      nslaw = new ComplementarityConditionNSL(interactionxml->getNonSmoothLawXML());
-    // RelayNSL
-    else if (NslawType == RELAY_NSLAW_TAG)
-      nslaw = new RelayNSL(interactionxml->getNonSmoothLawXML());
-    // NewtonImpactLawNSL
-    else if (NslawType == NEWTON_IMPACT_LAW_NSLAW_TAG)
-      nslaw = new NewtonImpactLawNSL(interactionxml->getNonSmoothLawXML());
-    // Newton impact friction law
-    else if (NslawType == NEWTON_IMPACT_FRICTION_NSLAW_TAG)
-      nslaw = new NewtonImpactFrictionNSL(interactionxml->getNonSmoothLawXML());
-    else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type :" + nslaw->getType());
-    isNsLawAllocatedIn = true;
-
-    // --- Relation ---
-    string relationType = interactionxml->getRelationXML()->getType();
-    // general relation
-    if (relationType == RELATION_TAG)
-      relation = new Relation(interactionxml->getRelationXML(), this);
-
-    // Linear relation
-    else if (relationType == LINEAR_TIME_INVARIANT_RELATION_TAG)
-      relation = new LinearTIR(interactionxml->getRelationXML(), this);
-
-    // Lagrangian non-linear relation
-    else if (relationType == LAGRANGIAN_RELATION_TAG)
-      relation = new LagrangianR(interactionxml->getRelationXML(), this);
-
-    // Lagrangian linear relation
-    else if (relationType == LAGRANGIAN_LINEAR_RELATION_TAG)
-      relation = new LagrangianLinearR(interactionxml->getRelationXML(), this);
-    else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + relation->getType());
-    isRelationAllocatedIn = true;
+    computeSizeOfDS();
   }
-  else RuntimeException::selfThrow("Interaction::xml constructor, xmlfile = NULL");
+  else cout << "Interaction constructor, warning: no dynamical systems linked to the interaction!" << endl;
+
+  // --- Non smooth law ---
+  string NslawType = interactionxml->getNonSmoothLawXML()->getType();
+  // ComplementarityConditionNSL
+  if (NslawType == COMPLEMENTARITY_CONDITION_NSLAW_TAG)
+    nslaw = new ComplementarityConditionNSL(interactionxml->getNonSmoothLawXML());
+  // RelayNSL
+  else if (NslawType == RELAY_NSLAW_TAG)
+    nslaw = new RelayNSL(interactionxml->getNonSmoothLawXML());
+  // NewtonImpactNSL
+  else if (NslawType == NEWTON_IMPACT_NSLAW_TAG)
+    nslaw = new NewtonImpactNSL(interactionxml->getNonSmoothLawXML());
+  // Newton impact friction law
+  else if (NslawType == NEWTON_IMPACT_FRICTION_NSLAW_TAG)
+    nslaw = new NewtonImpactFrictionNSL(interactionxml->getNonSmoothLawXML());
+  else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type :" + nslaw->getType());
+  isNsLawAllocatedIn = true;
+
+  // --- Relation ---
+  string relationType = interactionxml->getRelationXML()->getType();
+  // general relation
+  if (relationType == RELATION_TAG)
+    relation = new Relation(interactionxml->getRelationXML(), this);
+
+  // Linear relation
+  else if (relationType == LINEAR_TIME_INVARIANT_RELATION_TAG)
+    relation = new LinearTIR(interactionxml->getRelationXML(), this);
+
+  // Lagrangian non-linear relation
+  else if (relationType == LAGRANGIAN_RELATION_TAG)
+    relation = new LagrangianR(interactionxml->getRelationXML(), this);
+
+  // Lagrangian linear relation
+  else if (relationType == LAGRANGIAN_LINEAR_RELATION_TAG)
+    relation = new LagrangianLinearR(interactionxml->getRelationXML(), this);
+  else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + relation->getType());
+  isRelationAllocatedIn = true;
+
+  // check coherence between interactionSize and nsLawSize
+  if ((interactionSize % nslaw->getNsLawSize()) != 0)
+    RuntimeException::selfThrow("Interaction::xml constructor, inconsistency between interaction size and non smooth law size.");
+  // compute number of relations.
+  numberOfRelations = interactionSize / nslaw->getNsLawSize();
 }
 
 // --- Constructor from a set of data ---
 
-Interaction::Interaction(const string& newId, const int& newNumber, const int& nInter,
-                         vector<DynamicalSystem*> *dsConcerned):
-  id(newId), number(newNumber), nInteraction(nInter), sizeOfDS(0), nslaw(NULL),
-  relation(NULL), interactionxml(NULL), isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
+Interaction::Interaction(const string& newId, DSSet& dsConcerned, const int& newNumber, const int& nInter):
+  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), involvedDS(),
+  nslaw(NULL), relation(NULL), NSDS(NULL), interactionxml(NULL), isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
 {
-  // Memory allocation for simple vectors
-
-  // \todo : compute size using relative degree
-  // for the moment, size = 2: we save y and yDot
-  unsigned int size = 2;
-  y.resize(size) ;
-  yOld.resize(size);
-  lambda.resize(size);
-  lambdaOld.resize(size);
-  for (unsigned int i = 0; i < size ; i++)
-  {
-    y[i] = new SimpleVector(nInteraction);
-    yOld[i] = new SimpleVector(nInteraction);
-    lambda[i] = new SimpleVector(nInteraction);
-    lambdaOld[i] = new SimpleVector(nInteraction);
-  }
-
-  isYAllocatedIn.resize(size, true);
-  isYOldAllocatedIn.resize(size, true);
-  isLambdaAllocatedIn.resize(size, true);
-  isLambdaOldAllocatedIn.resize(size, true);
-
-  initializeVectors(y);
-  initializeVectors(yOld);
-  initializeVectors(lambda);
-  initializeVectors(lambdaOld);
-
-  vectorDS.clear();
-  if (dsConcerned != NULL) vectorDS = *dsConcerned;
-  else RuntimeException::selfThrow("Interaction::data constructor - The dsConcerned are not given");
+  // Memory allocation and initialization for y and lambda
+  initialize();
+  involvedDS = dsConcerned; // !! this keeps pointers link between DS in the set !!
   computeSizeOfDS();
 
+  cout << "Warning, Interaction(id,number, ...) constructor: neither relation nor nslaw has been set. This should be done later." << endl;
   // Remark(FP): neither nslaw nor relation are created in this constructor -> todo?
+  // this means that numberOfRelations is not computed -> set to one by default.
 }
 
 // --- DESTRUCTOR ---
@@ -264,6 +232,38 @@ Interaction::~Interaction()
   relation = NULL;
   if (isNsLawAllocatedIn) delete nslaw;
   nslaw = NULL;
+  NSDS = NULL;
+}
+
+void Interaction::initialize()
+{
+  // Memory allocation for y and lambda
+
+  // \todo : compute numberOfDerivatives using relative degree
+  // for the moment, numberOfDerivatives = 2: we save y and yDot
+  unsigned int numberOfDerivatives = 2;
+  y.resize(numberOfDerivatives) ;
+  yOld.resize(numberOfDerivatives);
+  lambda.resize(numberOfDerivatives);
+  lambdaOld.resize(numberOfDerivatives);
+  for (unsigned int i = 0; i < numberOfDerivatives ; i++)
+  {
+    y[i] = new SimpleVector(interactionSize);
+    yOld[i] = new SimpleVector(interactionSize);
+    lambda[i] = new SimpleVector(interactionSize);
+    lambdaOld[i] = new SimpleVector(interactionSize);
+  }
+
+  isYAllocatedIn.resize(numberOfDerivatives, true);
+  isYOldAllocatedIn.resize(numberOfDerivatives, true);
+  isLambdaAllocatedIn.resize(numberOfDerivatives, true);
+  isLambdaOldAllocatedIn.resize(numberOfDerivatives, true);
+
+  //  initializeVectors(y);
+  //  initializeVectors(yOld);
+  //  initializeVectors(lambda);
+  //  initializeVectors(lambdaOld);
+
 }
 
 // vector<SimpleVector*> initialization
@@ -277,7 +277,7 @@ void Interaction::initializeVectors(vector<SimpleVector*> inputVector)
 
 // --- GETTERS/SETTERS ---
 
-void Interaction::setY(const std::vector<SimpleVector*>& newVector)
+void Interaction::setY(const vectorOfSiconosVector& newVector)
 {
   // clear y
   for (unsigned int i = 0; i < y.size(); i++)
@@ -294,7 +294,7 @@ void Interaction::setY(const std::vector<SimpleVector*>& newVector)
   isYAllocatedIn.resize(size, true);
 }
 
-void Interaction::setYPtr(const std::vector<SimpleVector*>& newVector)
+void Interaction::setYPtr(const vectorOfSiconosVector& newVector)
 {
   // clear y
   for (unsigned int i = 0; i < y.size(); i++)
@@ -332,8 +332,8 @@ void Interaction::setYPtr(const unsigned int & index, SimpleVector* newY)
 {
   if (y.size() <= index)
     RuntimeException::selfThrow("Interaction::setYPtr, index out of range ");
-  if (newY->size() != nInteraction)
-    RuntimeException::selfThrow("Interaction::setYPtr, nInteraction differs from newY vector size ");
+  if (newY->size() != interactionSize)
+    RuntimeException::selfThrow("Interaction::setYPtr, interactionSize differs from newY vector size ");
 
   // set y[index]
   if (isYAllocatedIn[index]) delete y[index];
@@ -341,7 +341,7 @@ void Interaction::setYPtr(const unsigned int & index, SimpleVector* newY)
   isYAllocatedIn[index] = false ;
 }
 
-void Interaction::setYOld(const std::vector<SimpleVector*>& newVector)
+void Interaction::setYOld(const vectorOfSiconosVector& newVector)
 {
   // clear yOld
   for (unsigned int i = 0; i < yOld.size(); i++)
@@ -358,7 +358,7 @@ void Interaction::setYOld(const std::vector<SimpleVector*>& newVector)
   isYOldAllocatedIn.resize(size, true);
 }
 
-void Interaction::setYOldPtr(const std::vector<SimpleVector*>& newVector)
+void Interaction::setYOldPtr(const vectorOfSiconosVector& newVector)
 {
   // clear yOld
   for (unsigned int i = 0; i < yOld.size(); i++)
@@ -396,8 +396,8 @@ void Interaction::setYOldPtr(const unsigned int & index, SimpleVector* newYOld)
 {
   if (yOld.size() <= index)
     RuntimeException::selfThrow("Interaction::setYOldPtr, index out of range ");
-  if (newYOld->size() != nInteraction)
-    RuntimeException::selfThrow("Interaction::setYOldPtr, nInteraction differs from newYOld vector size ");
+  if (newYOld->size() != interactionSize)
+    RuntimeException::selfThrow("Interaction::setYOldPtr, interactionSize differs from newYOld vector size ");
 
   // set yOld[index]
   if (isYOldAllocatedIn[index]) delete yOld[index];
@@ -405,7 +405,7 @@ void Interaction::setYOldPtr(const unsigned int & index, SimpleVector* newYOld)
   isYOldAllocatedIn[index] = false ;
 }
 
-void Interaction::setLambda(const std::vector<SimpleVector*>& newVector)
+void Interaction::setLambda(const vectorOfSiconosVector& newVector)
 {
   // clear lambda
   for (unsigned int i = 0; i < lambda.size(); i++)
@@ -422,7 +422,7 @@ void Interaction::setLambda(const std::vector<SimpleVector*>& newVector)
   isLambdaAllocatedIn.resize(size, true);
 }
 
-void Interaction::setLambdaPtr(const std::vector<SimpleVector*>& newVector)
+void Interaction::setLambdaPtr(const vectorOfSiconosVector& newVector)
 {
   // clear lambda
   for (unsigned int i = 0; i < lambda.size(); i++)
@@ -460,8 +460,8 @@ void Interaction::setLambdaPtr(const unsigned int & index, SimpleVector* newLamb
 {
   if (lambda.size() <= index)
     RuntimeException::selfThrow("Interaction::setLambdaPtr, index out of range ");
-  if (newLambda->size() != nInteraction)
-    RuntimeException::selfThrow("Interaction::setLambdaPtr, nInteraction differs from newLambda vector size ");
+  if (newLambda->size() != interactionSize)
+    RuntimeException::selfThrow("Interaction::setLambdaPtr, interactionSize differs from newLambda vector size ");
 
   // set lambda[index]
   if (isLambdaAllocatedIn[index]) delete lambda[index];
@@ -469,7 +469,7 @@ void Interaction::setLambdaPtr(const unsigned int & index, SimpleVector* newLamb
   isLambdaAllocatedIn[index] = false ;
 }
 
-void Interaction::setLambdaOld(const std::vector<SimpleVector*>& newVector)
+void Interaction::setLambdaOld(const vectorOfSiconosVector& newVector)
 {
   // clear lambdaOld
   for (unsigned int i = 0; i < lambdaOld.size(); i++)
@@ -486,7 +486,7 @@ void Interaction::setLambdaOld(const std::vector<SimpleVector*>& newVector)
   isLambdaOldAllocatedIn.resize(size, true);
 }
 
-void Interaction::setLambdaOldPtr(const std::vector<SimpleVector*>& newVector)
+void Interaction::setLambdaOldPtr(const vectorOfSiconosVector& newVector)
 {
   // clear lambdaOld
   for (unsigned int i = 0; i < lambdaOld.size(); i++)
@@ -524,8 +524,8 @@ void Interaction::setLambdaOldPtr(const unsigned int & index, SimpleVector* newL
 {
   if (lambdaOld.size() <= index)
     RuntimeException::selfThrow("Interaction::setLambdaOldPtr, index out of range ");
-  if (newLambdaOld->size() != nInteraction)
-    RuntimeException::selfThrow("Interaction::setLambdaOldPtr, nInteraction differs from newLambdaOld vector size ");
+  if (newLambdaOld->size() != interactionSize)
+    RuntimeException::selfThrow("Interaction::setLambdaOldPtr, interactionSize differs from newLambdaOld vector size ");
 
   // set lambdaOld[index]
   if (isLambdaOldAllocatedIn[index]) delete lambdaOld[index];
@@ -534,29 +534,24 @@ void Interaction::setLambdaOldPtr(const unsigned int & index, SimpleVector* newL
 }
 
 
-void Interaction::setDynamicalSystems(const std::vector<DynamicalSystem*>& newVector)
+void Interaction::setDynamicalSystems(const DSSet& newSet)
 {
-  vectorDS.clear();
-  vectorDS = newVector;
+  involvedDS = newSet; // !! Pointers links between ds !!
   computeSizeOfDS();
 }
 
-DynamicalSystem* Interaction::getDynamicalSystemPtr(const int& number)
+DynamicalSystem* Interaction::getDynamicalSystemPtr(const int& nb)
 {
-  DynamicalSystem * tmpDS = NULL;
-  vector<DynamicalSystem*>::iterator it;
-  for (it = vectorDS.begin(); it != vectorDS.end(); ++it)
-    if ((*it)->getNumber() == number) tmpDS = (*it);
-
-  if (tmpDS == NULL)
-    RuntimeException::selfThrow("Interaction::getDynamicalSystemPtr(number), there is no DS which number is " + number);
-
-  return tmpDS;
+  if (! involvedDS.isDSIn(nb)) // if ds number nb is not in the set ...
+    RuntimeException::selfThrow("Interaction::getDynamicalSystemPtr(nb), DS number nb is not in the set.");
+  return involvedDS.getDynamicalSystem(number);
 }
 
-DynamicalSystem Interaction::getDynamicalSystem(const int& number)
+DynamicalSystem Interaction::getDynamicalSystem(const int& nb)
 {
-  return *getDynamicalSystemPtr(number);
+  if (! involvedDS.isDSIn(nb)) // if ds number nb is not in the set ...
+    RuntimeException::selfThrow("Interaction::getDynamicalSystem(nb), DS number nb is not in the set.");
+  return *(involvedDS.getDynamicalSystem(nb));
 }
 
 void Interaction::setRelationPtr(Relation* newRelation)
@@ -579,30 +574,19 @@ void Interaction::setNonSmoothLawPtr(NonSmoothLaw* newNslaw)
 void Interaction::computeSizeOfDS()
 {
   sizeOfDS = 0;
-  vector<DynamicalSystem*> vDS = getDynamicalSystems();
-  vector<DynamicalSystem*>::iterator it;
-  for (it = vDS.begin(); it != vDS.end(); it++)
-  {
-    string typeDS = (*it)->getType();
-    if (typeDS == LNLDS || typeDS == LTIDS)
-      sizeOfDS += (*it)->getN() / 2;
-    else
-      sizeOfDS += (*it)->getN();
-  }
+  DSIterator it;
+  for (it = involvedDS.begin(); it != involvedDS.end(); it++)
+    sizeOfDS += (*it)->getDim();
 }
 
 void Interaction::swapInMemory()
 {
-  IN("Interaction::swapInMemory(void)\n");
-
   for (unsigned int i = 0; i < y.size() ; i++)
   {
     *(yOld[i]) = *(y[i]) ;
     *(lambdaOld[i]) = *(lambda[i]);
     lambda[i]->zero();
   }
-
-  OUT("Interaction::swapInMemory(void)\n");
 }
 
 void Interaction::display() const
@@ -610,8 +594,7 @@ void Interaction::display() const
   cout << "======= Interaction display =======" << endl;
   cout << "| id : " << id << endl;
   cout << "| number : " << number << endl;
-  cout << "| Dynamical Systems linked to this Interaction : " << endl;
-  for (unsigned int i = 0; i < vectorDS.size() ; i++) cout << vectorDS[i] << endl;
+  involvedDS.display();
   cout << "| y : " << endl;
   if (y[0] != NULL) y[0]->display();
   else cout << "->NULL" << endl;
@@ -649,10 +632,10 @@ NonSmoothLaw* Interaction::createRelayNSL(const double& c, const double& d)
   return nslaw;
 }
 
-NonSmoothLaw* Interaction::createNewtonImpactLawNSL(const double& e)
+NonSmoothLaw* Interaction::createNewtonImpactNSL(const double& e)
 {
   if (isNsLawAllocatedIn) delete nslaw;
-  nslaw = new NewtonImpactLawNSL(e);
+  nslaw = new NewtonImpactNSL(e);
   isNsLawAllocatedIn = true;
   return nslaw;
 }
@@ -669,17 +652,16 @@ NonSmoothLaw* Interaction::createNewtonImpactFrictionNSL(const double& en, const
 
 void Interaction::saveInteractionToXML()
 {
-  IN("Interaction::saveInteractionToXML\n");
   /*
    * save the data of the Interaction
    */
 
   if (interactionxml != NULL)
   {
-    //  interactionxml->setDSConcerned( vectorDS );
+    //  interactionxml->setDSConcerned( involvedDS );
     interactionxml->setId(id);
     interactionxml->setNumber(number);
-    interactionxml->setNInter(nInteraction);
+    interactionxml->setSize(interactionSize);
     interactionxml->setY(*(y[0]));
     interactionxml->setLambda(*(lambda[0]));
   }
@@ -706,16 +688,14 @@ void Interaction::saveInteractionToXML()
   else if (nslaw->getType() == RELAYNSLAW)
     (static_cast<RelayNSL*>(nslaw))->saveNonSmoothLawToXML();
   else if (nslaw->getType() == NEWTONIMPACTNSLAW)
-    (static_cast<NewtonImpactLawNSL*>(nslaw))->saveNonSmoothLawToXML();
+    (static_cast<NewtonImpactNSL*>(nslaw))->saveNonSmoothLawToXML();
   else if (nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
     (static_cast<NewtonImpactFrictionNSL*>(nslaw))->saveNonSmoothLawToXML();
   else RuntimeException::selfThrow("Interaction::saveInteractionToXML - bad kind of NonSmoothLaw : " + nslaw->getType());
-
-  OUT("Interaction::saveInteractionToXML\n");
 }
 
 // Default (private) constructor
 Interaction::Interaction():
-  id("none"), number(0), nInteraction(0), sizeOfDS(0), nslaw(NULL), relation(NULL), interactionxml(NULL),
+  id("none"), number(0), interactionSize(0), sizeOfDS(0), nslaw(NULL), relation(NULL), interactionxml(NULL),
   isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
 {}

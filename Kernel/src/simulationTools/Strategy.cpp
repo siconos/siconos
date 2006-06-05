@@ -54,26 +54,34 @@ Strategy::Strategy(Model& newModel, const string& id):
 
 // --- Constructors from a given set of data ---
 
-// Vector of OSI + OSNS + Model
-Strategy::Strategy(vector<OneStepIntegrator*> newOsiVector, OneStepNSProblem* newNspb, Model* newModel, const string& id):
-  name("unnamed"), strategyType(id), timeDiscretisation(NULL), integratorVector(newOsiVector), nsProblem(newNspb), strategyxml(NULL), model(newModel),
+// set of OSI + OSNS + Model
+Strategy::Strategy(const OSISet& newOSIs, OneStepNSProblem* newNspb, Model* newModel, const string& id):
+  name("unnamed"), strategyType(id), timeDiscretisation(NULL), nsProblem(newNspb), strategyxml(NULL), model(newModel),
   isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
   if (model == NULL)
     RuntimeException::selfThrow("Strategy constructor - model == NULL.");
   model->setStrategyPtr(this);
+  allOSI = newOSIs;
+  OSIIterator it;
+  for (it = allOSI.begin(); it != allOSI.end(); ++it)
+    isOSIAllocatedIn[*it] = false;
   //isStrategyComplete();
 }
 
 // Vector of OSI + Model
 // Warning: copy of newOsiVector into integratorVector. That may be a bad construction way. Remove this constructor??
-Strategy::Strategy(vector<OneStepIntegrator*> newOsiVector, Model* newModel, const string& id):
-  name("unnamed"), strategyType(id), timeDiscretisation(NULL), integratorVector(newOsiVector), nsProblem(NULL), strategyxml(NULL), model(newModel),
+Strategy::Strategy(const OSISet& newOSIs, Model* newModel, const string& id):
+  name("unnamed"), strategyType(id), timeDiscretisation(NULL), nsProblem(NULL), strategyxml(NULL), model(newModel),
   isTimeDiscretisationAllocatedIn(false), isNSProblemAllocatedIn(false)
 {
   if (model == NULL)
     RuntimeException::selfThrow("Strategy constructor - model == NULL.");
   model->setStrategyPtr(this);
+  allOSI = newOSIs;
+  OSIIterator it;
+  for (it = allOSI.begin(); it != allOSI.end(); ++it)
+    isOSIAllocatedIn[*it] = false;
   //  isStrategyComplete();
 }
 
@@ -103,31 +111,28 @@ Strategy::Strategy(StrategyXML* strxml, Model *newModel, const string& id): stra
     model->setStrategyPtr(this);
 
     // --- OneStepIntegrators ---
-    // Get the OSI vector from xml
-    vector<OneStepIntegratorXML*> osiXMLVector = strategyxml->getOneStepIntegratorXML();
-    unsigned int sizeOsi = osiXMLVector.size();
-    integratorVector.reserve(sizeOsi);
+    SetOfOSIXML OSIXMLList = strategyxml->getOneStepIntegratorsXML();
+    SetOfOSIXMLIt it;
+    CheckInsertOSI checkOSI;
 
     string typeOfOSI;
-    // For each OSI ...
-    for (unsigned int i = 0; i < sizeOsi; i++)
+    for (it = OSIXMLList.begin(); it != OSIXMLList.end(); ++it)
     {
-      typeOfOSI = osiXMLVector[i]->getType();
+      typeOfOSI = (*it)->getType();
       // if OSI is a Moreau
       if (typeOfOSI == MOREAU_TAG)
-      {
-        integratorVector.push_back(new Moreau(osiXMLVector[i], this));
-        isIntegratorVectorAllocatedIn.push_back(true);
-      }
+        checkOSI = allOSI.insert(new Moreau(*it, this));
+
       else if (typeOfOSI == LSODAR_TAG) // if OSI is a Lsodar-type
-      {
-        integratorVector.push_back(new Lsodar(osiXMLVector[i]));
-        isIntegratorVectorAllocatedIn.push_back(true);
-      }
+        checkOSI = allOSI.insert(new Lsodar(*it, this));
+
       else RuntimeException::selfThrow("Strategy::xml constructor - unknown one-step integrator type: " + typeOfOSI);
+
+      // checkOSI.first is an iterator that points to the OSI inserted into the set.
+      isOSIAllocatedIn[*(checkOSI.first)] = true ;
     }
 
-    // OneStepNSProblem
+    // --- OneStepNSProblem ---
     if (strategyxml->hasOneStepNSProblemXML())
     {
       // we get all the numbers of the Interactions to link
@@ -178,15 +183,16 @@ Strategy::~Strategy()
   timeDiscretisation = NULL;
   if (isNSProblemAllocatedIn) delete nsProblem;
   nsProblem = NULL;
-  if (integratorVector.size() > 0)
+
+  // == delete OSI ==
+  OSIIterator it;
+  for (it = allOSI.begin(); it != allOSI.end(); ++it)
   {
-    for (unsigned int i = 0; i < integratorVector.size(); i++)
-    {
-      if (isIntegratorVectorAllocatedIn[i]) delete integratorVector[i];
-      integratorVector[i] = NULL;
-    }
-    integratorVector.clear();
+    if (isOSIAllocatedIn[*it]) delete *it;
   }
+
+  allOSI.clear();
+  isOSIAllocatedIn.clear();
 }
 
 // Check whether strategy is complete or not
@@ -218,43 +224,37 @@ void Strategy::setOneStepNSProblemPtr(OneStepNSProblem* nspb)
   isNSProblemAllocatedIn = false;
 }
 
-void Strategy::setOneStepIntegrators(const vector<OneStepIntegrator*> vOSI)
+void Strategy::setOneStepIntegrators(const OSISet& newVect)
 {
-  for (unsigned int i = 0; i < integratorVector.size(); i++)
+  // clear old set
+  OSIIterator it;
+  for (it = allOSI.begin(); it != allOSI.end(); ++it)
   {
-    if (isIntegratorVectorAllocatedIn[i])
-    {
-      delete integratorVector[i];
-      integratorVector[i] = NULL;
-    }
+    if (isOSIAllocatedIn[*it]) delete *it;
   }
-  integratorVector.clear();
-  integratorVector = vOSI;
-  isIntegratorVectorAllocatedIn.clear();
-  isIntegratorVectorAllocatedIn.resize(vOSI.size(), false);
-};
 
-OneStepIntegrator* Strategy::getOneStepIntegrator(const int& nb) const
-{
-  if ((unsigned int)nb >= integratorVector.size())
-    RuntimeException::selfThrow("Strategy - getIntegrator : \'nb\' is out of range");
-  return integratorVector[nb];
+  allOSI.clear();
+  isOSIAllocatedIn.clear();
+
+  // copy the new one
+  allOSI = newVect;
+  for (it = allOSI.begin(); it != allOSI.end(); ++it)
+    isOSIAllocatedIn[*it] = false;
 }
 
-void Strategy::addOneStepIntegrator(OneStepIntegrator *osi)
+void Strategy::addOneStepIntegratorPtr(OneStepIntegrator *osi)
 {
-  // add the osi if none of the present osi of the strategy already handle a ds of the new osi.
-  if (!hasDynamicalSystemIntegrator(osi))
-    integratorVector.push_back(osi);
-  else
-    RuntimeException::selfThrow("Strategy - addOneStepIntegrator: a Dynamical System of the new OSI has already an integrator among the osi of the strategy.");
+  allOSI.insert(osi);
+  isOSIAllocatedIn[osi] = false;
+  osi->setStrategyPtr(this);
 }
 
 
 void Strategy::computeFreeState()
 {
-  for (unsigned int i = 0; i < integratorVector.size(); i++)
-    integratorVector[i]->computeFreeState();
+  OSIIterator it;
+  for (it = allOSI.begin(); it != allOSI.end() ; ++it)
+    (*it)->computeFreeState();
 }
 
 void Strategy::nextStep()
@@ -263,8 +263,10 @@ void Strategy::nextStep()
   timeDiscretisation->increment();
   model->setCurrentT(model->getCurrentT() + timeDiscretisation->getH());
 
-  for (unsigned int i = 0; i < integratorVector.size(); i++)
-    integratorVector[i]->nextStep();
+  OSIIterator it;
+  for (it = allOSI.begin(); it != allOSI.end() ; ++it)
+    (*it)->nextStep();
+
   if (nsProblem != NULL)
     nsProblem->nextStep();
 }
@@ -281,10 +283,10 @@ void Strategy::update()
   if (nsProblem != NULL) nsProblem->updateInput();
 
   // compute state for each dynamical system
-  for (unsigned int i = 0; i < integratorVector.size(); i++)
-  {
-    integratorVector[i]->updateState();
-  }
+
+  OSIIterator it;
+  for (it = allOSI.begin(); it != allOSI.end() ; ++it)
+    (*it)->updateState();
 
   // compute output (y, ydot)
   if (nsProblem != NULL) nsProblem->updateOutput();
@@ -295,9 +297,15 @@ void Strategy::initialize()
   if (model == NULL)
     RuntimeException::selfThrow("Strategy initialization - model = NULL.");
 
+  // Initializes NSDS topology (if required)
+  // (ie takes into account modifications in the NonSmoothDynamicalSystem)
+  Topology * topology = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  if (!(topology->isUpToDate()))
+    topology->updateTopology();
+
   // initialization of the OneStepIntegrators
   OSIIterator itOsi;
-  for (itOsi = integratorVector.begin(); itOsi != integratorVector.end(); ++itOsi)
+  for (itOsi = allOSI.begin(); itOsi != allOSI.end(); ++itOsi)
     (*itOsi)->initialize();
 
   // initialization of  OneStepNonSmoothProblem
@@ -307,20 +315,20 @@ void Strategy::initialize()
 
 OneStepIntegrator* Strategy::getIntegratorOfDSPtr(const int& numberDS) const
 {
-  constOSIIterator itOSI  = integratorVector.begin();
+  ConstOSIIterator itOSI  = allOSI.begin();
 
-  //  dsIterator itDS;
-  dsSet dsList = (*itOSI)->getDynamicalSystemsList();
-  dsIterator itDS = dsList.begin();
+  //  DSIterator itDS;
+  DSSet dsList = (*itOSI)->getDynamicalSystems();
+  DSIterator itDS = dsList.begin();
   bool found = false;
-  while (!found && itOSI != integratorVector.end())
+  while (!found && itOSI != allOSI.end())
   {
     while ((*itDS)->getNumber() != numberDS && itDS != dsList.end())
       itDS++;
     if (itDS == dsList.end()) // if not found ...
     {
       itOSI++;
-      dsList = (*itOSI)->getDynamicalSystemsList();
+      dsList = (*itOSI)->getDynamicalSystems();
       itDS = dsList.begin();
     }
     else
@@ -330,11 +338,11 @@ OneStepIntegrator* Strategy::getIntegratorOfDSPtr(const int& numberDS) const
   return (*itOSI);
 
 
-  //   vector<OneStepIntegrator*>::const_iterator it  = integratorVector.begin();
-  //   while((*it)->getDynamicalSystemPtr()->getNumber() != numberDS && it!= integratorVector.end())
+  //   vector<OneStepIntegrator*>::const_iterator it  = allOSI.begin();
+  //   while((*it)->getDynamicalSystemPtr()->getNumber() != numberDS && it!= allOSI.end())
   //     it++;
 
-  //   if(it == integratorVector.end())
+  //   if(it == allOSI.end())
   //     RuntimeException::selfThrow("Strategy::getIntegratorOfDSPtr(numberDS), no integrator corresponds to this dynamical sytem");
 
   //   return (*it);
@@ -343,33 +351,23 @@ OneStepIntegrator* Strategy::getIntegratorOfDSPtr(const int& numberDS) const
 OneStepIntegrator* Strategy::getIntegratorOfDSPtr(DynamicalSystem * ds) const
 {
 
-  constOSIIterator itOSI  = integratorVector.begin();
+  ConstOSIIterator itOSI  = allOSI.begin();
 
-  dsIterator itDS = (*itOSI)->getDynamicalSystemsList().find(ds);
+  ConstDSIterator itDS = (*itOSI)->getDynamicalSystems().find(ds);
 
   // while ds is not in the set of the current osi, scan next osi ...
-  while (itDS == (*itOSI)->getDynamicalSystemsList().end() && itOSI != integratorVector.end())
+  while (itDS == (*itOSI)->getDynamicalSystems().end() && itOSI != allOSI.end())
   {
     itOSI++; // go to next osi in the list
     // check if ds is present in its set
-    itDS = (*itOSI)->getDynamicalSystemsList().find(ds);
+    itDS = (*itOSI)->getDynamicalSystems().find(ds);
   }
 
   // if ds is not find in any of the osi of the vector -> exception
-  if (itOSI == integratorVector.end())
+  if (itOSI == allOSI.end())
     RuntimeException::selfThrow("Strategy::getIntegratorOfDSPtr(ds), no integrator corresponds to this dynamical sytem");
 
   return (*itOSI);
-
-
-  //   vector<OneStepIntegrator*>::const_iterator it = integratorVector.begin();
-  //   while((*it)->getDynamicalSystemPtr() != ds && it!= integratorVector.end())
-  //     it++;
-
-  //   if(it == integratorVector.end())
-  //     RuntimeException::selfThrow("Strategy::getIntegratorOfDSPtr(ds), no integrator corresponds to this dynamical sytem");
-
-  // return (*it);
 }
 
 void Strategy::newtonSolve(const double& criterion, const unsigned int& maxStep)
@@ -408,14 +406,15 @@ void Strategy::saveStrategyToXML()
 {
   if (strategyxml != NULL)
   {
-    int size, i;
-    size = integratorVector.size();
-    for (i = 0; i < size; i++)
+    string typeOSI;
+    OSIIterator it;
+    for (it = allOSI.begin(); it != allOSI.end() ; ++it)
     {
-      if (integratorVector[i]->getType() == "Moreau")
-        (static_cast<Moreau*>(integratorVector[i]))->saveIntegratorToXML();
-      else if (integratorVector[i]->getType() == "Lsodar")
-        (static_cast<Lsodar*>(integratorVector[i]))->saveIntegratorToXML();
+      typeOSI = (*it)->getType();
+      if (typeOSI == "Moreau")
+        (static_cast<Moreau*>(*it))->saveIntegratorToXML();
+      else if (typeOSI == "Lsodar")
+        (static_cast<Lsodar*>(*it))->saveIntegratorToXML();
       else RuntimeException::selfThrow("Strategy::saveStrategyToXML - wrong type of OneStepIntegrator");
     }
 
@@ -437,41 +436,19 @@ void Strategy::saveStrategyToXML()
   else RuntimeException::selfThrow("Strategy::saveStrategyToXML - StrategyXML = NULL");
 }
 
-OneStepIntegrator* Strategy::addMoreau(TimeDiscretisation* td, DynamicalSystem* ds, const double& theta)
-{
-  if (hasDynamicalSystemIntegrator(ds))
-    RuntimeException::selfThrow("Strategy::addMoreau : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
-  OneStepIntegrator* osi;
-  osi = new Moreau(ds, theta, this);
-  integratorVector.push_back(osi);
-  isIntegratorVectorAllocatedIn.push_back(true);
-  return osi;
-}
-
-OneStepIntegrator* Strategy::addLsodar(TimeDiscretisation* td, DynamicalSystem* ds)
-{
-  if (hasDynamicalSystemIntegrator(ds))
-    RuntimeException::selfThrow("Strategy::addLsodar : Error - The DynamicalSystem of this OneStepIntegrator has already an integrator.");
-  OneStepIntegrator* osi;
-  osi = new Lsodar(ds, this);
-  integratorVector.push_back(osi);
-  isIntegratorVectorAllocatedIn.push_back(true);
-  return osi;
-}
-
 bool Strategy::hasDynamicalSystemIntegrator(DynamicalSystem* ds) const
 {
 
-  constOSIIterator itOSI;
-  dsIterator itDS;
+  ConstOSIIterator itOSI;
+  ConstDSIterator itDS;
   bool val = false; // true when ds found.
 
   // sweep list of OSI
-  for (itOSI = integratorVector.begin(); itOSI != integratorVector.end(); ++itOSI)
+  for (itOSI = allOSI.begin(); itOSI != allOSI.end(); ++itOSI)
   {
     // look for ds in each osi
-    itDS = ((*itOSI)->getDynamicalSystemsList()).find(ds);
-    if (itDS != ((*itOSI)->getDynamicalSystemsList()).end()) // if found ...
+    itDS = ((*itOSI)->getDynamicalSystems()).find(ds);
+    if (itDS != ((*itOSI)->getDynamicalSystems()).end()) // if found ...
     {
       val = true;
       break;
@@ -482,11 +459,11 @@ bool Strategy::hasDynamicalSystemIntegrator(DynamicalSystem* ds) const
 
 bool Strategy::hasDynamicalSystemIntegrator(OneStepIntegrator* osi) const
 {
-  dsIterator itDS;
+  DSIterator itDS;
   bool val = false; // true when ds found.
 
   // sweep list of ds of osi and check that none of its ds is already present in another osi of the strategy.
-  for (itDS = (osi->getDynamicalSystemsList()).begin(); itDS != (osi->getDynamicalSystemsList()).end(); ++itDS)
+  for (itDS = (osi->getDynamicalSystems()).begin(); itDS != (osi->getDynamicalSystems()).end(); ++itDS)
   {
     if (hasDynamicalSystemIntegrator(*itDS))
     {

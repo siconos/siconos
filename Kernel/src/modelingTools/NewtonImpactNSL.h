@@ -15,55 +15,59 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-#ifndef NEWTONIMPACTLAWNSLAW_H
-#define NEWTONIMPACTLAWNSLAW_H
+ */
+#ifndef NEWTONIMPACTNSL_H
+#define NEWTONIMPACTNSL_H
 
 #include "NonSmoothLaw.h"
-#include "NewtonImpactLawNSLXML.h"
+#include "NewtonImpactNSLXML.h"
 
-/** \class NewtonImpactLawNSL
+/** \class NewtonImpactNSL
  *  \brief Specific NonSmoothLaw for the Newton impact model
-*  \author SICONOS Development Team - copyright INRIA
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.1.4.
  *  \date (Creation) June 29, 2004
  *
- *
- * The class formalizes the Newton Impact law together with a complementarity condition. i.e.
+ * This class formalizes the Newton Impact law together with a complementarity condition. i.e.
  * \f[
  * \left\{\begin{array}{l}
  * y \geq 0, \lambda \geq 0, y^{T} \lambda=0\\
- *  if y \leq 0 \quad \mbox{then} \quad \dot y(t^{+}) - e \dot y(t^{-}) \geq 0,   \lambda \geq 0, (\dot y(t^{+}) - e \dot y(t^{-}))^{T} \lambda=0
+ *  if y \leq 0 \quad \mbox{then} \quad \dot y(t^{+}) - e \dot y(t^{-}) \geq 0, \quad  \lambda \geq 0, (\dot y(t^{+}) - e \dot y(t^{-}))^{T} \lambda=0
  * \end{array}\right.
  * \f]
  *
+ * nsLawSize is equal to 1.
  *
  */
 
 
-class NewtonImpactLawNSL : public NonSmoothLaw
+class NewtonImpactNSL : public NonSmoothLaw
 {
+
+private:
+  /** The Newton normal coefficient of restitution  */
+  double e;
 
 public:
 
-  /** \fn NewtonImpactLawNSL()
+  /** \fn NewtonImpactNSL()
    *  \brief default constructor
    */
-  NewtonImpactLawNSL();
+  NewtonImpactNSL();
 
-  /** \fn NewtonImpactLawNSL(NonSmoothLawXML*)
-   *  \brief constructor with XML object of the NewtonImpactLawNSL
+  /** \fn NewtonImpactNSL(NonSmoothLawXML*)
+   *  \brief constructor with XML object of the NewtonImpactNSL
    *  \param NonSmoothLawXML* : the XML object corresponding
    */
-  NewtonImpactLawNSL(NonSmoothLawXML*);
+  NewtonImpactNSL(NonSmoothLawXML*);
 
-  /** \fn NewtonImpactLawNSL(const double &e)
-   *  \brief constructor with the value of the NewtonImpactLawNSL attributes
+  /** \fn NewtonImpactNSL(const double &e)
+   *  \brief constructor with the value of the NewtonImpactNSL attributes
    *  \param a double value e
    */
-  NewtonImpactLawNSL(const double&);
+  NewtonImpactNSL(const double&);
 
-  ~NewtonImpactLawNSL();
+  ~NewtonImpactNSL();
 
   /** \fn bool isVerified(void);
    *  \brief check the ns law to see if it is verified
@@ -89,8 +93,6 @@ public:
     e = newVal;
   };
 
-  //////////////////////
-
   /** \fn void saveNonSmoothLawToXML()
    *  \brief copy the data of the NonSmoothLaw in the XML tree
    */
@@ -101,17 +103,12 @@ public:
    */
   void display() const;
 
-  /** \fn NewtonImpactLawNSL* convert (NonSmoothLaw* nsl)
+  /** \fn NewtonImpactNSL* convert (NonSmoothLaw* nsl)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param NonSmoothLaw* : the law which must be converted
    * \return a pointer on the law if it is of the right type, NULL otherwise
    */
-  static NewtonImpactLawNSL* convert(NonSmoothLaw* nsl);
-
-private:
-  /**  \brief The Newton coefficient of restitution
-   */
-  double e;
+  static NewtonImpactNSL* convert(NonSmoothLaw* nsl);
 };
 
-#endif // NewtonImpactLawNSL_H
+#endif // NewtonImpactNSL_H

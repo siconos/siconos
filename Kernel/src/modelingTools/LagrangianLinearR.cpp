@@ -50,7 +50,7 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
       if (inter != NULL)
       {
         // get size of vector y
-        unsigned int size = interaction->getNInteraction();
+        unsigned int size = interaction->getInteractionSize();
         if (row != size)
           RuntimeException::selfThrow("LagrangianLinearR:: xml constructor, inconsistent size with y vector for input vector or matrix");
 
@@ -71,7 +71,7 @@ LagrangianLinearR::LagrangianLinearR(RelationXML* relxml, Interaction* inter):
         {
           unsigned int rowD = LLRxml ->getD().size(0);
           unsigned int colD = LLRxml ->getD().size(1);
-          if (rowD != colD || (interaction != NULL && rowD !=  interaction->getNInteraction()))
+          if (rowD != colD || (interaction != NULL && rowD !=  interaction->getInteractionSize()))
             RuntimeException::selfThrow("LagrangianLinearR:: xml constructor, inconsistent size for input matrix D");
 
           D = new SimpleMatrix(LLRxml->getD());
@@ -116,7 +116,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
   if (inter != NULL)
   {
     // get size of vector y
-    unsigned int size = interaction->getNInteraction();
+    unsigned int size = interaction->getInteractionSize();
     if (row != size)
       RuntimeException::selfThrow("LagrangianLinearR:: constructor from data, inconsistent size with y vector for input vector or matrix");
 
@@ -150,7 +150,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, Interaction* int
   if (inter != NULL)
   {
     // get size of vector y
-    unsigned int size = interaction->getNInteraction();
+    unsigned int size = interaction->getInteractionSize();
     if (row != size)
       RuntimeException::selfThrow("LagrangianLinearR:: constructor from data, inconsistent size with y vector for input vector or matrix");
 
@@ -187,7 +187,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
   if (inter != NULL)
   {
     // get size of vector y
-    unsigned int size = interaction->getNInteraction();
+    unsigned int size = interaction->getInteractionSize();
     if (row != size)
       RuntimeException::selfThrow("LagrangianLinearR:: constructor from data, inconsistent size with y vector for input vector or matrix");
     H = G[0];
@@ -290,7 +290,7 @@ void LagrangianLinearR::setH(const SiconosMatrix& newValue)
 
   if (interaction != NULL)
   {
-    unsigned int size = interaction->getNInteraction();
+    unsigned int size = interaction->getInteractionSize();
     if (size != sizeY)
       RuntimeException::selfThrow("LagrangianLinearR - setH: inconsistent dimensions with problem size for input matrix H");
   }
@@ -316,7 +316,7 @@ void LagrangianLinearR::setHPtr(SiconosMatrix *newPtr)
   if (isAllocatedIn["H"]) delete H;
   if (interaction != NULL)
   {
-    unsigned int sizeY = interaction->getNInteraction();
+    unsigned int sizeY = interaction->getInteractionSize();
     if (newPtr->size(0) != sizeY)
       RuntimeException::selfThrow("LagrangianLinearR - setHPtr: inconsistent dimensions with problem size for input matrix H");
   }
@@ -331,7 +331,7 @@ void LagrangianLinearR::setB(const SimpleVector& newValue)
   unsigned int sizeY = newValue.size();
   if (interaction != NULL)
   {
-    unsigned int size = interaction->getNInteraction();
+    unsigned int size = interaction->getInteractionSize();
     if (size != sizeY)
       RuntimeException::selfThrow("LagrangianLinearR - setB: inconsistent dimensions with problem size for input vector b");
   }
@@ -368,7 +368,7 @@ void LagrangianLinearR::setD(const SiconosMatrix& newValue)
 
   if (interaction != NULL)
   {
-    unsigned int size = interaction->getNInteraction();
+    unsigned int size = interaction->getInteractionSize();
     if (size != sizeY)
       RuntimeException::selfThrow("LagrangianLinearR - setD: inconsistent dimensions with problem size for input matrix D");
   }
@@ -390,7 +390,7 @@ void LagrangianLinearR::setDPtr(SiconosMatrix *newPtr)
   if (isAllocatedIn["D"]) delete D;
   if (interaction != NULL)
   {
-    unsigned int sizeY = interaction->getNInteraction();
+    unsigned int sizeY = interaction->getInteractionSize();
     if (newPtr->size(0) != sizeY)
       RuntimeException::selfThrow("LagrangianLinearR - setDPtr: inconsistent dimensions with problem size for input matrix D");
   }
@@ -401,8 +401,8 @@ void LagrangianLinearR::setDPtr(SiconosMatrix *newPtr)
 void LagrangianLinearR::getHBlockDS(DynamicalSystem * ds, SiconosMatrix& Block) const
 {
   unsigned int k = 0;
-  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
-  vector<DynamicalSystem*>::iterator itDS;
+  DSSet vDS = interaction ->getDynamicalSystems();
+  DSIterator itDS;
   itDS = vDS.begin();
 
   // look for ds
@@ -429,9 +429,9 @@ void LagrangianLinearR::getHBlockDS(const int& DSNumber, SiconosMatrix& Block) c
 {
   unsigned int k = 0;
 
-  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
+  DSSet vDS = interaction ->getDynamicalSystems();
 
-  vector<DynamicalSystem*>::iterator itDS;
+  DSIterator itDS;
   itDS = vDS.begin();
 
   // look for DS number DSNumber ...
@@ -463,25 +463,24 @@ void LagrangianLinearR::computeOutput(const double& time)
   if (!isHPlugged)
   {
     // Get the DS concerned by the interaction of this relation
-    vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-    vector<LagrangianDS*> vLDS;
-
-    unsigned int size = vDS.size(), i;
+    DSSet vDS = interaction->getDynamicalSystems();
+    DSIterator it;
     BlockVector *qTmp = new BlockVector();
     BlockVector *velocityTmp = new BlockVector();
-    for (i = 0; i < size; i++)
+
+    string type;
+    LagrangianDS * lds;
+    for (it = vDS.begin(); it != vDS.end() ; ++it)
     {
       // check dynamical system type
-      if (vDS[i]->getType() != LTIDS && vDS[i]->getType() != LNLDS)
-        RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + vDS[i]->getType());
-
-      // convert vDS systems into LagrangianDS and put them in vLDS
-      vLDS.push_back(static_cast<LagrangianDS*>(vDS[i]));
-
+      type = (*it)->getType();
+      if (type != LTIDS && type != LNLDS)
+        RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + type);
+      lds = static_cast<LagrangianDS*>(*it);
       // Put q and velocity of each DS into a block
       // Warning: use copy constructors (add function), no link between pointers
-      qTmp->add(vLDS[i]->getQ());
-      velocityTmp->add(vLDS[i]->getVelocity());
+      qTmp->add(lds->getQ());
+      velocityTmp->add(lds->getVelocity());
     }
 
     // get y and yDot of the interaction
@@ -520,26 +519,28 @@ void LagrangianLinearR::computeFreeOutput(const double& time)
   if (!isHPlugged)
   {
     // Get the DS concerned by the interaction of this relation
-    vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-    vector<LagrangianDS*> vLDS;
+    DSSet vDS = interaction->getDynamicalSystems();
+    DSIterator it;
 
-    unsigned int size = vDS.size(), i;
     BlockVector *qFreeTmp = new BlockVector();
     BlockVector *velocityFreeTmp = new BlockVector();
 
-    for (i = 0; i < size; i++)
+    LagrangianDS* lds;
+    string type;
+    for (it = vDS.begin(); it != vDS.end(); ++it)
     {
       // check dynamical system type
-      if (vDS[i]->getType() != LTIDS && vDS[i]->getType() != LNLDS)
-        RuntimeException::selfThrow("LagrangianLinearR::computeFreeOutput not yet implemented for dynamical system of type " + vDS[i]->getType());
+      type = (*it)->getType();
+      if (type != LTIDS && type != LNLDS)
+        RuntimeException::selfThrow("LagrangianLinearR::computeFreeOutput not yet implemented for dynamical system of type " + type);
 
-      // convert vDS systems into LagrangianDS and put them in vLDS
-      vLDS.push_back(static_cast<LagrangianDS*>(vDS[i]));
+      // convert current DS into a LagrangianDS
+      lds = static_cast<LagrangianDS*>(*it);
 
       // Put qFree and velocityFree of each DS into a block
       // Warning: use copy constructors, no link between pointers
-      qFreeTmp->add(vLDS[i]->getQFree());
-      velocityFreeTmp->add(vLDS[i]->getVelocityFree());
+      qFreeTmp->add(lds->getQFree());
+      velocityFreeTmp->add(lds->getVelocityFree());
     }
 
     // get y and yDot of the interaction
@@ -570,27 +571,27 @@ void LagrangianLinearR::computeInput(const double& time)
   if (!isHPlugged)
   {
     // Get the DS concerned by the interaction of this relation
-    vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-    vector<LagrangianDS*> vLDS;
-    unsigned int numberDS = vDS.size(), i;
-    vLDS.resize(numberDS);
+    DSSet vDS = interaction->getDynamicalSystems();
+    DSIterator it;
 
     BlockVector *p = new BlockVector();
     string typeDS;
 
-    for (i = 0; i < numberDS; i++)
+    LagrangianDS* lds;
+    string type;
+    for (it = vDS.begin(); it != vDS.end(); ++it)
     {
       // check dynamical system type
-      typeDS = vDS[i] ->getType();
+      typeDS = (*it)->getType();
       if (typeDS != LTIDS && typeDS != LNLDS)
         RuntimeException::selfThrow("LagrangianLinearR::computeInput not yet implemented for this type of dynamical system " + typeDS);
 
-      // convert vDS systems into LagrangianDS and put them in vLDS
-      vLDS[i] = static_cast<LagrangianDS*>(vDS[i]);
-
+      // convert current DS into a LagrangianDS
+      lds = static_cast<LagrangianDS*>(*it);
       // Put p of each DS into a block
       // Warning: use addPtr -> link between pointers
-      p->addPtr(vLDS[i]->getPPtr());
+      p->addPtr(lds->getPPtr());
+
     }
 
     // get lambda of the concerned interaction

@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
+// \todo : create a work vector for all tmp vectors used in computeG, computeH ...
+
 #include "LagrangianR.h"
 using namespace std;
 
@@ -313,7 +315,7 @@ void LagrangianR::manageGMemory()
 {
   if (interaction != NULL)
   {
-    unsigned int sizeY = interaction->getNInteraction();
+    unsigned int sizeY = interaction->getInteractionSize();
     unsigned int sizeQ = interaction->getSizeOfDS();
     unsigned int size0, size1;
 
@@ -420,7 +422,7 @@ void LagrangianR::setGVector(const vector<SiconosMatrix*>& newVector)
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianR:: setGVector, no interaction linked to the current relation");
 
-  unsigned int sizeY = interaction->getNInteraction();
+  unsigned int sizeY = interaction->getInteractionSize();
   unsigned int sizeQ = interaction->getSizeOfDS();
 
   stringstream sstr;
@@ -470,7 +472,7 @@ void LagrangianR::setG(const SiconosMatrix& newValue, const unsigned int & index
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianR:: setG, no interaction linked to the current relation");
-  unsigned int sizeY = interaction->getNInteraction();
+  unsigned int sizeY = interaction->getInteractionSize();
   unsigned int sizeQ = interaction->getSizeOfDS();
   if (LagrangianRelationType == "scleronomic+lambda" && index == 1)
   {
@@ -505,7 +507,7 @@ void LagrangianR::setGPtr(SiconosMatrix *newPtr, const unsigned int & index)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianR:: setGPtr, no interaction linked to the current relation");
-  unsigned int sizeY = interaction->getNInteraction();
+  unsigned int sizeY = interaction->getInteractionSize();
   unsigned int sizeQ = interaction->getSizeOfDS();
   if (LagrangianRelationType == "scleronomic+lambda" && index == 1)
   {
@@ -605,27 +607,29 @@ void LagrangianR::computeH(const double& time)
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianR:computeH(): no interaction linked with relation");
 
-  unsigned int sizeY = interaction->getNInteraction();
+  unsigned int sizeY = interaction->getInteractionSize();
   unsigned int sizeQ = interaction->getSizeOfDS();
 
   // Get the DS concerned by the interaction of this relation
-  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-  vector<LagrangianDS*> vLDS;
-
-  unsigned int size = vDS.size(), i;
+  DSSet vDS = interaction->getDynamicalSystems();
+  DSIterator it;
+  string type;
   BlockVector *qTmp = new BlockVector();
-  for (i = 0; i < size; i++)
+
+  LagrangianDS* lds;
+  for (it = vDS.begin(); it != vDS.end(); ++it)
   {
+    type = (*it)->getType();
     // check dynamical system type
-    if (vDS[i]->getType() != LTIDS && vDS[i]->getType() != LNLDS)
-      RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + vDS[i]->getType());
+    if (type != LTIDS && type != LNLDS)
+      RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
-    vLDS.push_back(static_cast<LagrangianDS*>(vDS[i]));
+    lds = static_cast<LagrangianDS*>(*it);
 
     // Put q of each DS into a block
     // Warning: use copy constructors (add function), no link between pointers
-    qTmp->add(vLDS[i]->getQ());
+    qTmp->add(lds->getQ());
   }
 
   // get vector y of the current interaction
@@ -665,26 +669,28 @@ void LagrangianR::computeG(const double & time, const unsigned int & index)
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianR:computeG(): no interaction linked with relation");
 
-  unsigned int sizeY = interaction->getNInteraction();
+  unsigned int sizeY = interaction->getInteractionSize();
   unsigned int sizeQ = interaction->getSizeOfDS();
   // Get the DS concerned by the interaction of this relation
-  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-  vector<LagrangianDS*> vLDS;
-
-  unsigned int size = vDS.size(), i;
+  DSSet vDS = interaction->getDynamicalSystems();
+  DSIterator it;
+  string type;
   BlockVector *qTmp = new BlockVector();
-  for (i = 0; i < size; i++)
+
+  LagrangianDS* lds;
+  for (it = vDS.begin(); it != vDS.end(); ++it)
   {
+    type = (*it)->getType();
     // check dynamical system type
-    if (vDS[i]->getType() != LTIDS && vDS[i]->getType() != LNLDS)
-      RuntimeException::selfThrow("LagrangianLinearR::computeG not yet implemented for dynamical system of type: " + vDS[i]->getType());
+    if (type != LTIDS && type != LNLDS)
+      RuntimeException::selfThrow("LagrangianLinearR::computeG not yet implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
-    vLDS.push_back(static_cast<LagrangianDS*>(vDS[i]));
+    lds = static_cast<LagrangianDS*>(*it);
 
     // Put q of each DS into a block
     // Warning: use copy constructors (add function), no link between pointers
-    qTmp->add(vLDS[i]->getQ());
+    qTmp->add(lds->getQ());
   }
 
   // get vector lambda of the current interaction
@@ -751,29 +757,31 @@ void LagrangianR::computeOutput(const double& time)
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianR::computeOutput, no interaction linked with this relation");
 
-  unsigned int sizeY = interaction->getNInteraction();
+  unsigned int sizeY = interaction->getInteractionSize();
   unsigned int sizeQ = interaction->getSizeOfDS();
 
   // Get the DS concerned by the interaction of this relation
-  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-  vector<LagrangianDS*> vLDS;
-
-  unsigned int size = vDS.size(), i;
+  DSSet vDS = interaction->getDynamicalSystems();
+  DSIterator it;
+  string type;
   BlockVector *qTmp = new BlockVector();
   BlockVector *velocityTmp = new BlockVector();
-  for (i = 0; i < size; i++)
+
+  LagrangianDS* lds;
+  for (it = vDS.begin(); it != vDS.end(); ++it)
   {
+    type = (*it)->getType();
     // check dynamical system type
-    if (vDS[i]->getType() != LTIDS && vDS[i]->getType() != LNLDS)
-      RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + vDS[i]->getType());
+    if (type != LTIDS && type != LNLDS)
+      RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
-    vLDS.push_back(static_cast<LagrangianDS*>(vDS[i]));
+    lds = static_cast<LagrangianDS*>(*it);
 
-    // Put q and velocity of each DS into a block
+    // Put q of each DS into a block
     // Warning: use copy constructors (add function), no link between pointers
-    qTmp->add(vLDS[i]->getQ());
-    velocityTmp->add(vLDS[i]->getVelocity());
+    qTmp->add(lds->getQ());
+    velocityTmp->add(lds->getVelocity());
   }
 
   // get y and yDot of the interaction
@@ -857,29 +865,31 @@ void LagrangianR::computeFreeOutput(const double& time)
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianR::computeOutput, no interaction linked with this relation");
 
-  unsigned int sizeY = interaction->getNInteraction();
+  unsigned int sizeY = interaction->getInteractionSize();
   unsigned int sizeQ = interaction->getSizeOfDS();
 
   // Get the DS concerned by the interaction of this relation
-  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-  vector<LagrangianDS*> vLDS;
-
-  unsigned int size = vDS.size(), i;
+  DSSet vDS = interaction->getDynamicalSystems();
+  DSIterator it;
+  string type;
   BlockVector *qTmp = new BlockVector();
   BlockVector *velocityTmp = new BlockVector();
-  for (i = 0; i < size; i++)
+
+  LagrangianDS* lds;
+  for (it = vDS.begin(); it != vDS.end(); ++it)
   {
+    type = (*it)->getType();
     // check dynamical system type
-    if (vDS[i]->getType() != LTIDS && vDS[i]->getType() != LNLDS)
-      RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + vDS[i]->getType());
+    if (type != LTIDS && type != LNLDS)
+      RuntimeException::selfThrow("LagrangianLinearR::computeFreeOutput not yet implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
-    vLDS.push_back(static_cast<LagrangianDS*>(vDS[i]));
+    lds = static_cast<LagrangianDS*>(*it);
 
-    // Put q and velocity of each DS into a block
+    // Put q of each DS into a block
     // Warning: use copy constructors (add function), no link between pointers
-    qTmp->add(vLDS[i]->getQFree());
-    velocityTmp->add(vLDS[i]->getVelocityFree());
+    qTmp->add(lds->getQFree());
+    velocityTmp->add(lds->getVelocityFree());
   }
 
   // get y and yDot of the interaction
@@ -966,27 +976,25 @@ void LagrangianR::computeInput(const double& time)
     RuntimeException::selfThrow("LagrangianLinearR::computeInput, no interaction linked with this relation");
 
   // Get the DS concerned by the interaction of this relation
-  vector<DynamicalSystem*> vDS = interaction->getDynamicalSystems();
-  vector<LagrangianDS*> vLDS;
-  unsigned int numberDS = vDS.size(), i;
-  vLDS.resize(numberDS);
+  DSSet vDS = interaction->getDynamicalSystems();
+  DSIterator it;
+  string type;
 
   BlockVector *p = new BlockVector();
-  string typeDS;
-
-  for (i = 0; i < numberDS; i++)
+  LagrangianDS* lds;
+  for (it = vDS.begin(); it != vDS.end(); ++it)
   {
+    type = (*it)->getType();
     // check dynamical system type
-    typeDS = vDS[i] ->getType();
-    if (typeDS != LTIDS && typeDS != LNLDS)
-      RuntimeException::selfThrow("LagrangianLinearR::computeInput not yet implemented for this type of dynamical system " + typeDS);
+    if (type != LTIDS && type != LNLDS)
+      RuntimeException::selfThrow("LagrangianLinearR::computeInput not yet implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
-    vLDS[i] = static_cast<LagrangianDS*>(vDS[i]);
+    lds = static_cast<LagrangianDS*>(*it);
 
     // Put p of each DS into a block
     // Warning: use addPtr -> link between pointers
-    p->addPtr(vLDS[i]->getPPtr());
+    p->addPtr(lds->getPPtr());
   }
 
   // get lambda of the concerned interaction
@@ -1005,8 +1013,8 @@ void LagrangianR::computeInput(const double& time)
 void LagrangianR::getGBlockDS(DynamicalSystem * ds, SiconosMatrix& Block, const unsigned & index) const
 {
   unsigned int k = 0;
-  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
-  vector<DynamicalSystem*>::iterator itDS;
+  DSSet vDS = interaction ->getDynamicalSystems();
+  DSIterator itDS;
   itDS = vDS.begin();
 
   // look for ds
@@ -1033,10 +1041,9 @@ void LagrangianR::getGBlockDS(const int& DSNumber, SiconosMatrix& Block, const u
 {
   unsigned int k = 0;
 
-  vector<DynamicalSystem*> vDS = interaction ->getDynamicalSystems();
+  DSSet vDS = interaction ->getDynamicalSystems();
 
-  vector<DynamicalSystem*>::iterator itDS;
-  itDS = vDS.begin();
+  DSIterator itDS = vDS.begin();
 
   // look for DS number DSNumber ...
   while ((*itDS)->getNumber() != DSNumber && itDS != vDS.end())

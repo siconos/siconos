@@ -42,9 +42,8 @@
 			</LagrangianLinearTIDS>
 		</DS_Definition>
 		<!-- Interactions defined in the problem -->		
-			<Interaction number='12'>
-				<Id>Ball-Ground</Id>
-				<nInter> 1 </nInter>
+			<Interaction number='12' Id='Ball-Ground'>
+				<size> 1 </size>
 				<!-- List of couple of DS concerned by this interaction -->
 		               <DS_Concerned all='true'>
                                </DS_Concerned>									

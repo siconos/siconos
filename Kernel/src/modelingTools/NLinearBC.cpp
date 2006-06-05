@@ -35,7 +35,6 @@ NLinearBC::~NLinearBC()
 
 void NLinearBC::fillBCWithBCXML()
 {
-  OUT("NLinearBC::fillBCWithBCXML\n");
   if (this->bcXML != NULL)
   {
 
@@ -45,7 +44,6 @@ void NLinearBC::fillBCWithBCXML()
 
 void NLinearBC::saveBCToXML()
 {
-  OUT("NLinearBC::saveBCToXML\n");
   if (this->bcXML != NULL)
   {
 

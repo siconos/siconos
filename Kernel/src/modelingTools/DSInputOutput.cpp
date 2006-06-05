@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "DSInputOutput.h"
 using namespace std;
 
@@ -71,7 +71,6 @@ void DSInputOutput::display() const
 
 void DSInputOutput::fillDSInputOutputWithDSInputOutputXML()
 {
-  IN("DSInputOutput::fillDSInputOutputWithDSInputOutputXML\n");
   if (this->dsioxml != NULL)
   {
     string plugin;
@@ -99,24 +98,20 @@ void DSInputOutput::fillDSInputOutputWithDSInputOutputXML()
   }
   else RuntimeException::selfThrow("DSInputOutput::fillDSInputOutputWithDSInputOutputXML - object DSInputOutputXML does not exist");
 
-  OUT("DSInputOutput::fillDSInputOutputWithDSInputOutputXML\n");
 }
 
 void DSInputOutput::init()
 {
-  IN("DSInputOutput::init\n");
   this->number = 0;
   this->id = "none";
   this->dsioxml = NULL;
 
   this->setComputeOutputFunction("DefaultPlugin.so", "computeOutput");
   this->setComputeInputFunction("DefaultPlugin.so", "computeInput");
-  OUT("DSInputOutput::init\n");
 }
 
 void DSInputOutput::saveDSInputOutputToXML()
 {
-  IN("DSInputOutput::saveDSInputOutputToXML\n");
   if (this->dsioxml != NULL)
   {
     /*
@@ -126,7 +121,6 @@ void DSInputOutput::saveDSInputOutputToXML()
     this->dsioxml->setComputeOutputPlugin(this->computeOutputName);
   }
   else RuntimeException::selfThrow("DSInputOutput::saveDSInputOutputToXML - object DSInputOutputXML does not exist");
-  OUT("DSInputOutput::saveDSInputOutputToXML\n");
 }
 
 void DSInputOutput::createDSInputOutput(DSInputOutputXML * dsioXML, int number,

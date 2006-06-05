@@ -83,8 +83,8 @@ void EventDriven::advanceToEvent()
   double tout, ttmp = tend;
   bool isNewEventOccur = false;  // set to true if a new event occur during integration
   // call integrate method of each OSI, between tinit and tend.
-  vectorOfOSIPtr::iterator it;
-  for (it = integratorVector.begin(); it != integratorVector.end(); ++it)
+  OSIIterator it;
+  for (it = allOSI.begin(); it != allOSI.end(); ++it)
   {
     bool iout = false;
     (*it)->integrate(tinit, tend, ttmp, iout); // integrate must return a flag telling if tend has been reached or not.
@@ -109,7 +109,7 @@ void EventDriven::advanceToEvent()
     {
       bool iout;
       // restart integration from tinit to tout
-      for (it = integratorVector.begin(); it != integratorVector.end(); ++it)
+      for (it = allOSI.begin(); it != allOSI.end(); ++it)
       {
         // Add something to "reset" the OSI state as it was a tinit.
 

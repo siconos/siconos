@@ -16,23 +16,6 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/** \class InteractionXML
- *   \brief This class manages Interaction data part
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.1.4.
- *   \date (Creation) 04/12/2004
- *
-
- *
- * InteractionXML allows to manage data of a Interaction DOM tree.
- */
-
-
-
-/** \todo: review completely this class to adapt it to multiple DS loading (rather than only 2)
-    -> partially done. Not reviewed: setDSConcerned, loadInteraction.
-*/
-
 #ifndef __INTERACTIONXML__
 #define __INTERACTIONXML__
 
@@ -47,30 +30,43 @@ class DynamicalSystem;
 class Interaction;
 class NonSmoothLawXML;
 class RelationXML;
-
-const std::string INTERACTION_Y = "y";
-const std::string INTERACTION_LAMBDA = "lambda";
-const std::string INTERACTION_NINTER = "nInter";
-const std::string INTERACTION_DS_CONCERNED = "DS_Concerned";
-const std::string INTERACTION_DS_LIST = "DSList";
+/** \class InteractionXML
+ *   \brief XML data management for object Interaction
+ *  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.1.4.
+ *   \date (Creation) 04/12/2004
+ *
+ */
 
 class InteractionXML
 {
 private:
 
-  //Nodes
-  xmlNodePtr  rootInteractionXMLNode;
+  /** root node -> named "Interaction"*/
+  xmlNodePtr  rootNode;
 
-  xmlNodePtr  idNode;
-  xmlNodePtr  nInterNode;
+  /** size of the interaction (ie of y and lambda) */
+  xmlNodePtr  sizeNode;
+
+  /** y[0] */
   xmlNodePtr  yNode;
-  xmlNodePtr  lambdaNode;
-  xmlNodePtr  dsConcernedNode;
 
-  //Relation
+  /** lambda[0] */
+  xmlNodePtr  lambdaNode;
+
+  /** list of DS handled by the interaction */
+  xmlNodePtr  DSConcernedNode;
+
+  /** Relation node */
+  xmlNodePtr  relationNode;
+
+  /** Non smooth law*/
+  xmlNodePtr nsLawNode;
+
+  /** Relation xml object */
   RelationXML *relationXML;
 
-  //NSLAW
+  /** Non smooth law xml object*/
   NonSmoothLawXML *nSLawXML;
 
   /** Flags to know if pointers have been allocated inside constructors or not */
@@ -79,170 +75,244 @@ private:
   bool isNsLawXMLAllocatedIn;
 
 public:
+
+  /** \fn InteractionXML()
+   *   \brief Default constructor
+   */
   InteractionXML();
 
   /** \fn InteractionXML(xmlNodePtr  rootNodeInteraction, int number)
    *   \brief Build a InteractionXML object from a DOM tree describing a Interaction
    *   \param xmlNodePtr  interactionNode : the Interaction DOM tree
-   *   \param vector<int> definedDSNumbers : vector of DSXML numbers to verify DS concerned by the interaction (identified by number) exists
    */
-  InteractionXML(xmlNodePtr  interactionNode, std::vector<int> definedDSNumbers);
+  InteractionXML(xmlNodePtr);
 
+  /** \fn InteractionXML()
+   *   \brief Destructor
+   */
   ~InteractionXML();
 
-
-  /** \fn xmlNodePtr  getInteractionXMLNode()
+  /** \fn xmlNodePtr  getRootNode() const
    *   \brief Return the root node of the InteractionXML
-   *   \return xmlNodePtr  : the root node
+   *   \return xmlNodePtr
    */
-  inline xmlNodePtr  getInteractionXMLNode()
+  inline xmlNodePtr getRootNode() const
   {
-    return rootInteractionXMLNode;
+    return rootNode;
   }
 
-  /** \fn int getNumber()
-   *   \brief Return the number of the InteractionXML
-   *   \return The number of the InteractionXML
+  /** \fn const bool hasId() const
+   *  \brief return true if id attribute is present
+   *  \return a bool
    */
-  inline int getNumber()
+  inline const bool hasId() const
   {
-    return SiconosDOMTreeTools::getAttributeValue<int>(rootInteractionXMLNode, NUMBER_ATTRIBUTE);
+    return SiconosDOMTreeTools::hasAttributeValue(rootNode, ID_ATTRIBUTE);
+  };
+
+  /** \fn const bool hasNumber() const
+   *  \brief return true if number attribute is present
+   *  \return a bool
+   */
+  inline const bool hasNumber() const
+  {
+    return SiconosDOMTreeTools::hasAttributeValue(rootNode, NUMBER_ATTRIBUTE);
+  };
+
+  /** \fn const string getId() const
+   *   \brief Return the id of the Interaction (rootNode attribute)
+   *   \return a string
+   */
+  inline const std::string getId() const
+  {
+    if (!hasId())
+      XMLException::selfThrow("InteractionXML::getId(): id attribute is unset.");
+    return SiconosDOMTreeTools::getStringAttributeValue(rootNode, ID_ATTRIBUTE);
   }
 
-  /** \fn void setNumber(int i)
-   *   \brief allows to save the number of the InteractionXML
-   *   \return The number to save
+  /** \fn void setId(const string& )
+   *   \brief to save the id of the Interaction (rootNode attribute)
+   *   \param a string
    */
-  inline void setNumber(int i)
+  inline void setId(const std::string & newId)
   {
-    SiconosDOMTreeTools::setIntegerAttributeValue(rootInteractionXMLNode, NUMBER_ATTRIBUTE, i);
+    SiconosDOMTreeTools::setStringAttributeValue(rootNode, ID_ATTRIBUTE, newId);
   }
 
-  /** \fn bool hasId()
-   *  \brief return true if idNode is defined
-   *  \return true if idNode is defined
+  /** \fn const int getNumber() const
+   *   \brief Return the number of the Interaction (rootNode attribute)
+   *   \return an int
    */
-  inline bool hasId()
+  inline const int getNumber() const
   {
-    return (idNode != NULL);
+    if (!hasNumber())
+      XMLException::selfThrow("InteractionXML::getNumber(): number attribute is unset.");
+    return SiconosDOMTreeTools::getAttributeValue<int>(rootNode, NUMBER_ATTRIBUTE);
   }
 
-  /** \fn string getId()
-   *   \brief Return the id of the InteractionXML
-   *   \return The string id of the InteractionXML
+  /** \fn void setNumber(const int& i)
+   *  \brief to save the number of the Interaction (rootNode attribute)
+   *  \param an int
    */
-  inline std::string getId()
+  inline void setNumber(const int& i)
   {
-    return SiconosDOMTreeTools::getStringContentValue(idNode);
+    SiconosDOMTreeTools::setIntegerAttributeValue(rootNode, NUMBER_ATTRIBUTE, i);
   }
 
-  /** \fn void setId(string s)
-   *   \brief allows to save the id of the InteractionXML
-   *   \return The string id to save
+  /** \fn const bool hasSize() const
+   *  \brief return true if size node is present
+   *  \return a bool
    */
-  inline void setId(std::string s)
+  const bool hasSize() const
   {
-    if (hasId() == false)
-    {
-      idNode = SiconosDOMTreeTools::createStringNode(rootInteractionXMLNode, ID_ATTRIBUTE, s);
-    }
-    else SiconosDOMTreeTools::setStringContentValue(idNode, s);
+    return (sizeNode != NULL);
+  };
+
+  /** \fn const unsigned int getSize() const
+   *   \brief Return the size of the InteractionXML
+   *   \return an unsigned int
+   */
+  inline const unsigned int getSize() const
+  {
+    if (!hasSize())
+      XMLException::selfThrow("InteractionXML::getSize() : sizeNode == NULL");
+    return SiconosDOMTreeTools::getContentValue<int>(sizeNode);
   }
 
-  /** \fn int getNumber()
-   *   \brief Return the number of the InteractionXML
-   *   \return The number of the InteractionXML
+  /** \fn void setSize(const unsigned int& i)
+   *  \brief to save the size of the Interaction
+   *  \return an unsigned int
    */
-  inline int getNInter()
-  {
-    return SiconosDOMTreeTools::getContentValue<int>(nInterNode);
-  }
+  void setSize(const unsigned int&);
 
-  /** \fn void setNumber(int i)
-   *   \brief allows to save the number of the InteractionXML
-   *   \return The number to save
-   */
-  inline void setNInter(int nInter)
-  {
-    if (nInterNode == false)
-    {
-      nInterNode = SiconosDOMTreeTools::createIntegerNode(rootInteractionXMLNode, INTERACTION_NINTER, nInter);
-    }
-    else SiconosDOMTreeTools::setIntegerContentValue(nInterNode, nInter);
-  }
-
-  /** \fn bool hasY()
+  /** \fn const bool hasY() const
    *  \brief return true if yNode is defined
-   *  \return true if yNode is defined
+   *  \return a bool
    */
-  inline bool hasY()
+  inline const bool hasY() const
   {
     return (yNode != NULL);
   }
 
   /** \fn SimpleVector getY()
-   *   \brief Return y vector of the InteractionXML
-   *   \return SimpleVector : the y of the InteractionXML
+   *  \brief Return y vector of the InteractionXML
+   *  \return a SimpleVector
    */
-  inline SimpleVector getY()
+  inline SimpleVector getY() const
   {
+    if (!hasY())
+      XMLException::selfThrow("InteractionXML::getY() : yNode == NULL");
     return SiconosDOMTreeTools::getSiconosVectorValue(yNode);
   }
 
   /** \fn void setY(const SiconosVector *v)
-   *   \brief allows to save the y of the InteractionXML
-   *   \param SiconosVector* : the y to save
+   *   \brief to save y[0] of the Interaction
+   *   \param a SiconosVector*
    */
-  inline void setY(const SiconosVector& v)
-  {
-    if (hasY() == false)
-    {
-      yNode = SiconosDOMTreeTools::createVectorNode(rootInteractionXMLNode, INTERACTION_Y, v);
-    }
-    else SiconosDOMTreeTools::setSiconosVectorNodeValue(yNode, v);
-  }
+  void setY(const SiconosVector&);
 
-  /** \fn bool hasLambda()
+  /** \fn const bool hasLambda() const
    *  \brief return true if lambdaNode is defined
    *  \return true if lambdaNode is defined
    */
-  inline bool hasLambda()
+  inline const bool hasLambda() const
   {
     return (lambdaNode != NULL);
-  }
+  };
 
-  /** \fn SimpleVector getLambda()
-   *   \brief Return the lambda vector of the InteractionXML
-   *   \return SimpleVector : the lambda of the InteractionXML
+  /** \fn SimpleVector getLambda() const
+   *   \brief Return lambda[0] of the Interaction
+   *   \return a SimpleVector
    */
-  inline SimpleVector getLambda()
+  inline SimpleVector getLambda() const
   {
+    if (!hasLambda())
+      XMLException::selfThrow("InteractionXML::getLambda() : lambdaNode == NULL");
     return SiconosDOMTreeTools::getSiconosVectorValue(lambdaNode);
   }
 
   /** \fn void setLambda(const SiconosVector& v)
-   *   \brief allows to save the lambda of the InteractionXML
-   *   \return SiconosVector* : the lambda to save
+   *   \brief to save lambda[0]
+   *   \return a SiconosVector*
    */
-  inline void setLambda(const SiconosVector& v)
+  void setLambda(const SiconosVector&);
+
+  /** \fn const bool hasDSList() const
+   *  \brief true if tag DSConcerned is present
+   *  \return a bool
+   */
+  inline const bool hasDSList() const
   {
-    if (hasLambda() == false)
-      lambdaNode = SiconosDOMTreeTools::createVectorNode(rootInteractionXMLNode, INTERACTION_LAMBDA, v);
-    else SiconosDOMTreeTools::setSiconosVectorNodeValue(lambdaNode, v);
+    return !(DSConcernedNode == NULL);
   }
 
-
-  /** \fn void getDSConcerned(vector<int>& dsNumbers)
-   *   \brief fill-in the list of ds-numbers of the interaction
-   *   \param a vector of int
+  /** \fn xmlNodePtr getDSConcernedNode() const
+   *  \brief get the DSConcerned node
+   *  \return xmlNodePtr
    */
-  void getDSConcerned(std::vector<int>& dsNumbers);
+  inline xmlNodePtr getDSConcernedNode() const
+  {
+    return DSConcernedNode;
+  }
+
+  /** \fn bool hasAllDS()
+   *  \brief attribute of the DSConcerned tag - True if all DS of the NSDS are concerned
+   *  \return a bool
+   */
+  inline bool hasAllDS() const
+  {
+    if (SiconosDOMTreeTools::hasAttributeValue(DSConcernedNode, ALL_ATTRIBUTE))
+      return SiconosDOMTreeTools::getAttributeValue<bool>(DSConcernedNode, ALL_ATTRIBUTE);
+    else return false;
+  }
+
+  /** \fn getDSNumbers(vector<int>&)
+   *  \brief return a vector<int> of ds numbers related to the Interaction
+   *  \param in-out vector<int>
+   */
+  void getDSNumbers(std::vector<int>&);
 
   /** \fn SimpleVector setDSConcernedVector()
    *   \brief set the DSs concerned by the InteractionXML
    *   \param a SimpleVector which contains a list of DS number
    */
   //\todo inline SimpleVector setDSConcernedVector(){};
+
+  /** \fn const bool hasRelation() const
+   *  \brief true if tag relation is present
+   *  \return a bool
+   */
+  inline const bool hasRelation() const
+  {
+    return (relationNode != NULL);
+  };
+
+  /** \fn xmlNodePtr getRelation() const
+   *  \brief get the relation node
+   *  \return xmlNodePtr
+   */
+  inline xmlNodePtr getRelation() const
+  {
+    return relationNode;
+  }
+
+  /** \fn const bool hasNonSmoothLaw() const
+   *  \brief true if tag nonSmoothLaw is present
+   *  \return a bool
+   */
+  inline const bool hasNonSmoothLaw() const
+  {
+    return (nsLawNode != NULL);
+  };
+
+  /** \fn xmlNodePtr getNonSmoothLaw() const
+   *  \brief get the nsLawNode  node
+   *  \return xmlNodePtr
+   */
+  inline xmlNodePtr getNonSmoothLaw() const
+  {
+    return nsLawNode;
+  }
 
   /** \fn RelationXML* getRelationXML()
    *   \brief Return the relationXML of the InteractionXML
@@ -274,19 +344,6 @@ public:
    *   \param NSDS* : the Interaction of this InteractionXML
    */
   void loadInteraction(Interaction*);
-
-  /** \fn bool hasAll()
-   *  \brief All is an attribute of the DS_Concerned tag
-   *  \return bool : true if attribute all is defined
-   */
-  bool hasAll() const;
-
-  /** \fn void setAll(bool all)
-   *   \brief modify the attribute "all" of the DS_concerned tag
-   *   \param bool : the value to assign to the attribute
-   */
-  void setAll(const bool&) ;
-
 };
 
 #endif

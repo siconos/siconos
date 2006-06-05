@@ -126,6 +126,11 @@ protected:
    */
   void (*computeInputPtr)(const unsigned int&, const double*, const double*, double*, double*);
 
+  /** id number for the relation - Used for sorting in set<Relation*>
+   *  number = interaction number + an int. With interaction the Interaction that owns this relation.
+   */
+  unsigned long int number ;
+
   /** \fn initParameter(const string& id);
    *  \brief init parameter vector corresponding to id to a SimpleVector* of size 1
    *  \param a string, id of the plug-in
@@ -190,7 +195,7 @@ public:
   /** \fn void setInteractionPtr(Interaction* i)
    *  \brief set the Interaction which contains this Relation
    */
-  virtual inline void setInteractionPtr(Interaction* i)
+  inline void setInteractionPtr(Interaction* i)
   {
     interaction = i;
   }
@@ -295,6 +300,24 @@ public:
    *  \param a string
    */
   void setParameterPtr(SimpleVector *, const std::string&);
+
+  /** \fn const int getNumber(void) const;
+   *  \brief return id-number of the relation (used as a sorting criterion in set<Relation*>
+   *  \return an unsigned long int
+   */
+  inline const unsigned long int getNumber() const
+  {
+    return number;
+  }
+
+  /** \fn void setNumber(const unsigned long int&)
+   *  \brief set id-number of the relation
+   *  \param an unsigned long int
+   */
+  inline void setNumber(const unsigned long int& newNumber)
+  {
+    number = newNumber;
+  }
 
   /** \fn void computeOutput(double time);
    *  \brief default function to compute y

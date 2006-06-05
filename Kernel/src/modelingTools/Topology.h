@@ -26,13 +26,16 @@
 // const
 #include "SiconosConst.h"
 
+#include "InteractionsSet.h"
 #include <vector>
 #include <string>
 #include <map>
+#include <set>
 
 class NonSmoothDynamicalSystem;
 class InteractionLink;
 class Interaction;
+class SiconosMatrix;
 
 /** \class Topology
  *  \brief this class provides maps to describe the topology of interactions of a NonSmoothDynamicalSystem
@@ -42,12 +45,27 @@ class Interaction;
  *
  */
 
+/** vector that contains a sequel of sets of interactions*/
+typedef std::vector< InteractionsSet > VectorOfSetOfInteractions;
+
+/** Interaction -> Matrix map - Used for diagonal block-terms in LCP matrices or similar things */
+typedef std::map< Interaction*, SiconosMatrix* > InteractionMatrixMap ;
+
+/** Interaction ->( map Interaction->matrix) map */
+typedef std::map< Interaction* , InteractionMatrixMap >  InteractionMatrixMapOfMap  ;
+
 class Topology
 {
 
 private:
 
   // --- MEMBERS ---
+
+  /** the set of all the interactions of the system */
+  InteractionsSet allInteractions;
+
+  /** index sets vector (indexSets[0] is the set where y[0]=0, indexSets[1] where y[0] = 0 and y[1]=0 and so on */
+  VectorOfSetOfInteractions indexSets;
 
   /** map that lists all the interactions and their linked interactions through common DS */
   std::map< Interaction*, std::vector<InteractionLink*>  > linkedInteractionMap;
@@ -134,6 +152,44 @@ public:
   ~Topology();
 
   // === GETTERS/SETTERS ===
+
+  /** \fn const InteractionsSet getInteractions()
+   *  \brief get all the Interactions of the Topology problem (saved in a set)
+   *  \return an InteractionsSet
+   */
+  inline const InteractionsSet getInteractions() const
+  {
+    return allInteractions;
+  }
+
+  /** \fn Interaction* getInteractionPtrNumber(const int& I)
+   *  \brief get Interaction number I
+   *  \param the id-number of the Interaction to get
+   *  \return a pointer on Interaction
+   */
+  Interaction* getInteractionPtrNumber(const int&) const ;
+
+  /** \fn void setInteractions(const InteractionsSet&)
+   *  \brief to set allInteractions
+   *  \param an InteractionsSet
+   */
+  void setInteractions(const InteractionsSet&) ;
+
+  /** \fn const bool hasInteraction(Interaction * inter)
+   *  \brief check if Interaction inter is in the set
+   *  \param a pointer to Interaction
+   *  \return a bool
+   */
+  const bool hasInteraction(Interaction*) const;
+
+  /** \fn const VectorOfSetOfInteractions getIndexSets() const {return indexSets};
+   *  \brief get the vector of index sets
+   *  \return a VectorOfSetOfInteractions (a Vector of Sets Of Interactions)
+   */
+  inline const VectorOfSetOfInteractions getIndexSets() const
+  {
+    return indexSets;
+  };
 
   // --- effectiveSizeOutput ---
 

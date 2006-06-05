@@ -94,7 +94,7 @@ public:
     return interactionsConcernedNode;
   }
 
-  /** \fn cosnt string getType() const
+  /** \fn const string getType() const
    *   \brief Return the type of the OneStepIntegratorXML
    *   \return a string
    */
@@ -122,12 +122,14 @@ public:
   }
 
   /** \fn bool hasAllDS()
-   *  \brief attribute of the DSConcerned tag - True if all DS of the nsDS are concerned
+   *  \brief attribute of the DSConcerned tag - True if all DS of the NSDS are concerned
    *  \return a bool
    */
   inline bool hasAllDS() const
   {
-    return SiconosDOMTreeTools::hasAttributeValue(DSConcernedNode, ALL_ATTRIBUTE);
+    if (SiconosDOMTreeTools::hasAttributeValue(DSConcernedNode, ALL_ATTRIBUTE))
+      return SiconosDOMTreeTools::getAttributeValue<bool>(DSConcernedNode, ALL_ATTRIBUTE);
+    else return false;
   }
 
   /** \fn bool hasAllInteractions()
@@ -136,7 +138,9 @@ public:
    */
   inline bool hasAllInteractions() const
   {
-    return SiconosDOMTreeTools::hasAttributeValue(interactionsConcernedNode, ALL_ATTRIBUTE);
+    if (SiconosDOMTreeTools::hasAttributeValue(interactionsConcernedNode, ALL_ATTRIBUTE))
+      return SiconosDOMTreeTools::getAttributeValue<bool>(interactionsConcernedNode, ALL_ATTRIBUTE);
+    else return false;
   }
 
   /** \fn getDSNumbers(vector<int>&)

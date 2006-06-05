@@ -82,7 +82,7 @@ const std::string LAGRANGIAN_LINEAR_RELATION_TAG = "LagrangianLinearRelation";
 // - Non-smooth laws -
 const std::string COMPLEMENTARITY_CONDITION_NSLAW_TAG = "ComplementarityCondition";
 const std::string RELAY_NSLAW_TAG = "Relay";
-const std::string NEWTON_IMPACT_LAW_NSLAW_TAG = "NewtonImpactLaw";
+const std::string NEWTON_IMPACT_NSLAW_TAG = "NewtonImpactLaw";
 const std::string NEWTON_IMPACT_FRICTION_NSLAW_TAG = "NewtonImpactFrictionLaw";
 
 // DSIO

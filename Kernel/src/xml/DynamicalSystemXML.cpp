@@ -292,7 +292,7 @@ void DynamicalSystemXML::loadDynamicalSystem(DynamicalSystem* ds)
     xmlNodePtr dsioDefinitionNode, nsdsNode;
     DSInputOutputXML *dsioXML;
 
-    nsdsNode = ds->getNonSmoothDynamicalSystemPtr()->getNonSmoothDynamicalSystemXMLPtr()->getNonSmoothDynamicalSystemXMLNode();
+    nsdsNode = ds->getNonSmoothDynamicalSystemPtr()->getNonSmoothDynamicalSystemXMLPtr()->getRootNode();
     dsioDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)nsdsNode, DSINPUTOUTPUT_DEFINITION_TAG);
     if (dsioDefinitionNode == NULL)
       dsioDefinitionNode = xmlNewChild(nsdsNode, NULL, (xmlChar*)DSINPUTOUTPUT_DEFINITION_TAG.c_str(), NULL);

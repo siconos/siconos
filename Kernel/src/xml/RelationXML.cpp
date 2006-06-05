@@ -26,7 +26,6 @@ RelationXML::RelationXML():
 RelationXML::RelationXML(xmlNode *relationNode):
   rootRelationXMLNode(relationNode), computeInputNode(NULL), computeOutputNode(NULL)
 {
-  IN("RelationXML::RelationXML(xmlNode*)\n");
   xmlNode *node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootRelationXMLNode, COMPUTE_INPUT_TAG)) != NULL)
@@ -34,7 +33,6 @@ RelationXML::RelationXML(xmlNode *relationNode):
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootRelationXMLNode, COMPUTE_OUTPUT_TAG)) != NULL)
     computeOutputNode = node;
-  OUT("RelationXML::RelationXML(xmlNode*)\n");
 }
 
 RelationXML::~RelationXML()
@@ -63,9 +61,7 @@ void RelationXML::setComputeOutputPlugin(const string&  plugin)
 
 void RelationXML::updateRelationXML(xmlNode* node, Relation* rel)
 {
-  IN("RelationXML::updateRelationXML\n");
   rootRelationXMLNode = node;
-  OUT("RelationXML::updateRelationXML\n");
 }
 
 string RelationXML::getComputeInputPlugin() const

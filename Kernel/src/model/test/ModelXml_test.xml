@@ -89,12 +89,10 @@
 		<!-- Interactions defined in the problem -->		
 		<Interaction_Definition>
 			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
-			<Interaction number='1'>
-				<Id>Ball-Ground</Id>
-				<nInter> 1 </nInter>
+			<Interaction number='1' Id='Ball-Ground'>
+				<size> 1 </size>
 				<!-- List of couple of DS concerned by this interaction -->
-		               <DS_Concerned all='true'>
-                               </DS_Concerned>									
+		               <DS_Concerned all='true'></DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
 					<LagrangianLinearRelation>
@@ -122,18 +120,13 @@
 		<OneStepIntegrator_Definition>
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
 			<Moreau>
-				<DS_Concerned size='1'> <!-- Scaling -->
-					<DS number='1'/>
-				</DS_Concerned>		
-				<Theta> 1.0</Theta>
+				<DS_Concerned vectorSize='1'>1</DS_Concerned>		
+				<Theta vectorSize='1'>1.0</Theta>
 			</Moreau>					
-
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
 			<Moreau>
-				<DS_Concerned size='1'>				
-					<DS number='2'/>
-				</DS_Concerned>
-				<Theta> 0.5</Theta>
+				<DS_Concerned vectorSize='1'>2</DS_Concerned>
+				<Theta vectorSize='1'>0.5</Theta>
 			</Moreau>					
 
 		</OneStepIntegrator_Definition>

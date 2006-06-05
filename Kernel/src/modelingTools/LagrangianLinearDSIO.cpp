@@ -21,11 +21,9 @@ using namespace std;
 
 LagrangianLinearDSIO::LagrangianLinearDSIO()
 {
-  IN("LagrangianLinearDSIO::LagrangianLinearDSIO()\n");
   //  this->h = NULL;
   //  this->b = NULL;
   this->dsioType = LAGRANGIANLINEARDSIO; //"LagrangianLinearDSIO";
-  OUT("LagrangianLinearDSIO::LagrangianLinearDSIO()\n");
 }
 
 LagrangianLinearDSIO::LagrangianLinearDSIO(DSInputOutputXML* dsioXML): LagrangianDSIO()
@@ -53,8 +51,6 @@ SiconosVector* LagrangianLinearDSIO::getBPtr(void)
 
 void LagrangianLinearDSIO::computeOutput(double time)
 {
-  IN("LagrangianLinearDSIO::computeOutput\n");
-
   //  vector<DynamicalSystem*> vDS = this->interaction->getDynamicalSystems();
   //
   //  DynamicalSystem *ds1 ,*ds2;
@@ -111,15 +107,12 @@ void LagrangianLinearDSIO::computeOutput(double time)
   //    }
   //  }
   //  else RuntimeException::selfThrow("The interaction doesn't contain the right number of Dynamical Systems");
-
-  OUT("LagrangianLinearDSIO::computeOutput\n");
 }
 
 
 
 void LagrangianLinearDSIO::computeFreeOutput(double time)
 {
-  IN("LagrangianLinearDSIO::computeFreeOutput\n");
   //
   //
   //
@@ -179,12 +172,10 @@ void LagrangianLinearDSIO::computeFreeOutput(double time)
   //    }
   //  }
   //  else RuntimeException::selfThrow("The interaction doesn't contain the right number of Dynamical Systems");
-  OUT("LagrangianLinearDSIO::computeFreeOutput\n");
 }
 
 void LagrangianLinearDSIO::computeInput(double time)
 {
-  IN("LagrangianLinearDSIO::computeInput\n");
 
   //  vector<DynamicalSystem*> vDS = this->interaction->getDynamicalSystems();
   //
@@ -238,12 +229,10 @@ void LagrangianLinearDSIO::computeInput(double time)
   //    }
   //  }
   //  else RuntimeException::selfThrow("The interaction doesn't contain the right number of Dynamical Systems");
-  OUT("LagrangianLinearDSIO::computeInput\n");
 }
 
 void LagrangianLinearDSIO::fillDSInputOutputWithDSInputOutputXML()
 {
-  OUT("LagrangianLinearDSIO::fillDSInputOutputWithDSInputOutputXML\n");
   DSInputOutput::fillDSInputOutputWithDSInputOutputXML();
   if (this->dsioxml != NULL)
   {
@@ -269,7 +258,6 @@ void LagrangianLinearDSIO::display() const
 
 void LagrangianLinearDSIO::saveDSInputOutputToXML()
 {
-  IN("LagrangianLinearDSIO::saveDSInputOutputToXML\n");
   DSInputOutput::saveDSInputOutputToXML();
   if (this->dsioxml != NULL)
   {
@@ -277,7 +265,6 @@ void LagrangianLinearDSIO::saveDSInputOutputToXML()
     (static_cast<LagrangianLinearDSIOXML*>(this->dsioxml))->setB(b);
   }
   else RuntimeException::selfThrow("LagrangianLinearDSIO::saveDSInputOutputToXML - object DSInputOutputXML does not exist");
-  OUT("LagrangianLinearDSIO::saveDSInputOutputToXML\n");
 }
 
 void LagrangianLinearDSIO::createDSInputOutput(DSInputOutputXML * dsioXML,

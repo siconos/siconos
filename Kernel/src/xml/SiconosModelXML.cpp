@@ -336,43 +336,27 @@ bool SiconosModelXML::checkSiconosDOMTree()
 bool SiconosModelXML::checkSiconosDOMTreeCoherency()
 {
   bool res = true;
-  //  string errormsg;
-  char errormsg[256];
-  unsigned int i;
-  /*
-   * Matrices and Vector can come from the XML file, an external file or a plugin,
-   * but can only come from one of these way of storage
-   */
 
   // checks if the NSDS is BVP or not
   bool bvp = getNonSmoothDynamicalSystemXML()->isBVP();
-  if (bvp)
-  {
-    // the NSDS is BVP so the DynamicalSystems must have a BoundaryCondition
-    vector<int> definedDS = getNonSmoothDynamicalSystemXML()->getDSNumbers();
-    for (i = 0; i < definedDS.size(); i++)
-    {
-      if (getNonSmoothDynamicalSystemXML()->getDynamicalSystemXML(definedDS[i])->getBoundaryConditionXML() == NULL)
-      {
-        sprintf(errormsg, "SiconosModelXML::checkSiconosDOMTreeCoherency - the DynamicalSystem which 'id' is %i has no BoundariCondition whereas the NSDS is BVP", definedDS[i]);
-        XMLException::selfThrow(errormsg);
-      }
-    }
-  }
-  else
-  {
-    // the NSDS is not BVP so the DynamicalSystems must have no BoundaryCondition
-    vector<int> definedDS = getNonSmoothDynamicalSystemXML()->getDSNumbers();
-    for (i = 0; i < definedDS.size(); i++)
-    {
-      if (getNonSmoothDynamicalSystemXML()->getDynamicalSystemXML(definedDS[i])->getBoundaryConditionXML() != NULL)
-      {
-        sprintf(errormsg, "SiconosModelXML::checkSiconosDOMTreeCoherency - Warning : the DynamicalSystem which 'id' is %i has BoundariCondition whereas the NSDS is not BVP", definedDS[i]);
-        cout << errormsg << endl;
-      }
-    }
-  }
+  // get the set of DSXML of the NonSmoothDynamicalSystemXML.
+  SetOfDSXML dsSet = getNonSmoothDynamicalSystemXML()->getDynamicalSystemsXML();
+  SetOfDSXMLIt it;
 
+  // Check the consistency between presence of Boundary Condition in DS and the type of NSDS (bvp or not)
+  for (it = dsSet.begin(); it != dsSet.end() ; ++it)
+  {
+    if ((*it)->getBoundaryConditionXML() == NULL && bvp)
+    {
+      res = false;
+      XMLException::selfThrow("SiconosModelXML::checkSiconosDOMTreeCoherency - a DynamicalSystem has no BoundariCondition whereas the NSDS is BVP (DS number: " + (*it)->getNumber());
+    }
+    else if ((*it)->getBoundaryConditionXML() != NULL && !bvp)
+    {
+      res = false;
+      XMLException::selfThrow("SiconosModelXML::checkSiconosDOMTreeCoherency - a DynamicalSystem has BoundariCondition whereas the NSDS is not a BVP (DS number: " + (*it)->getNumber());
+    }
+  }
   // checks the Matrix and Vector type
   // \todo : verification of the type of all the matrices and vectors (from XML file, from external file, from a plugin)
   return res;

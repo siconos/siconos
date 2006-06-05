@@ -145,13 +145,13 @@ public:
 
   //-----------------
 
-  /** \fn static bool hasAttributeValue(const xmlNodePtr  node, const std::string attributeName)
+  /** \fn static const bool hasAttributeValue(const xmlNodePtr  node, const std::string attributeName) const
    *   \brief Returns the boolean value which shows if an attribut is defined or not
    *   \param node : the node who contents the attribute you want to if it exists
    *   \param attributeName : the attribute of the node you want to know if it exists
    *   \return true if the attribute exists, otherwise false
    */
-  static bool hasAttributeValue(const xmlNodePtr  node, const std::string& attributeName);
+  static const bool hasAttributeValue(const xmlNodePtr, const std::string&);
 
 
   /** \fn static string getStringAttributeValue(xmlNodePtr node, string attributeName)

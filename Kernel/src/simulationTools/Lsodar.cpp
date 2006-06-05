@@ -72,7 +72,7 @@ Lsodar::Lsodar(DynamicalSystem* ds, Strategy* newS):
   localTimeDiscretisation = strategyLink->getTimeDiscretisationPtr(); // warning: pointer link!
 
   // add ds in the set
-  dsList.insert(ds);
+  OSIDynamicalSystems.insert(ds);
 
   intData.resize(9);
   doubleData.resize(4);
@@ -164,9 +164,9 @@ void Lsodar::updateData()
 
 void Lsodar::fillXWork(doublereal * x)
 {
-  dsIterator it;
+  DSIterator it;
   unsigned int i = 0;
-  for (it = dsList.begin(); it != dsList.end(); ++it)
+  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
   {
     for (unsigned int j = i ; j < (*it)->getDim() ; ++j)
       (*xWork)(j) = x[i++];
@@ -175,16 +175,16 @@ void Lsodar::fillXWork(doublereal * x)
 
 void Lsodar::computeRhs(const double& t)
 {
-  dsIterator it;
-  for (it = dsList.begin(); it != dsList.end(); ++it)
+  DSIterator it;
+  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
     (*it)->computeRhs(t);
 
 }
 
 void Lsodar::computeJacobianRhs(const double& t)
 {
-  dsIterator it;
-  for (it = dsList.begin(); it != dsList.end(); ++it)
+  DSIterator it;
+  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
     (*it)->computeJacobianXRhs(t);
 }
 
@@ -199,9 +199,9 @@ void Lsodar::f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal 
   computeRhs(t);
 
   //
-  dsIterator it;
+  DSIterator it;
   unsigned int i = 0;
-  for (it = dsList.begin(); it != dsList.end(); ++it)
+  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
   {
     SiconosVector * xtmp2 = (*it)->getRhsPtr(); // Pointer link !
     for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
@@ -248,9 +248,9 @@ void Lsodar::jacobianF(integer *sizeOfX, doublereal *time, doublereal *x, intege
   computeJacobianRhs(t);
 
   // Save jacobianX values from dynamical system into current jacob (in-out parameter)
-  dsIterator it;
+  DSIterator it;
   unsigned int i = 0;
-  for (it = dsList.begin(); it != dsList.end(); ++it)
+  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
   {
     SiconosMatrix * jacotmp = (*it)->getJacobianXFPtr(); // Pointer link !
     for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
@@ -278,15 +278,12 @@ void Lsodar::jacobianF(integer *sizeOfX, doublereal *time, doublereal *x, intege
 
 void Lsodar::initialize()
 {
+  OneStepIntegrator::initialize();
   xWork = new BlockVector();
-  double t0 = strategyLink->getTimeDiscretisationPtr()->getT0();
-  dsIterator it;
-  for (it = dsList.begin(); it != dsList.end(); ++it)
-  {
-    (*it)->initialize(t0, sizeMem);
-    // initialize xWork with x values of the dynamical systems present in the set.
+  DSIterator it;
+  // initialize xWork with x values of the dynamical systems present in the set.
+  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
     xWork->addPtr(static_cast<SimpleVector*>((*it)->getXPtr()));
-  }
 }
 
 void Lsodar::computeFreeState() // useless??

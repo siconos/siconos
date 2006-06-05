@@ -20,9 +20,8 @@
 			</LagrangianLinearTIDS>
 		</DS_Definition>
 		<Interaction_Definition>
-			<Interaction number='1'>
-				<Id>test-of-rel</Id>
-				<nInter> 1 </nInter>
+			<Interaction number='1' Id='test-of-rel'>
+				<size> 1 </size>
 				<!-- List of DS concerned by this interaction -->
 		               <DS_Concerned all='true'>
                                </DS_Concerned>									

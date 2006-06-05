@@ -22,6 +22,7 @@
 #include "Interaction.h"
 #include "SiconosConst.h"
 #include "DynamicalSystem.h"
+#include "DSSet.h"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -49,7 +50,7 @@ private:
   Interaction *linkedInteraction;
 
   /* list of the common DynamicalSystem */
-  std::vector<DynamicalSystem*> commonDS;
+  DSSet commonDS;
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
@@ -60,12 +61,12 @@ private:
 
 public:
 
-  /** \fn InteractionLink((Interaction*, Interaction*, const std::vector<DynamicalSystem*>)
+  /** \fn InteractionLink((Interaction*, Interaction*, const DSSet&)
    *  \param Interaction *: a pointer to the origin interaction
    *  \param Interaction *: a pointer to the linked interaction
-   *  \param vector<DynamicalSystem*> : list of common DS
+   *  \param a DSSet: list of common DS
    */
-  InteractionLink(Interaction*, Interaction*, const std::vector<DynamicalSystem*>&);
+  InteractionLink(Interaction*, Interaction*, const DSSet&);
 
   /** \fn ~InteractionLink()
    *  \brief destructor
@@ -116,11 +117,11 @@ public:
 
   // --- commonDS ---
 
-  /** \fn vector<DynamicalSystem*> getCommonDS(void)
+  /** \fn const DSSet getCommonDS(void)
    *  \brief get the commonDS of this interactionLink
    *  \return a vector<DynamicalSystem*>
    */
-  inline const std::vector<DynamicalSystem*> getCommonDS() const
+  inline const DSSet getCommonDS() const
   {
     return commonDS;
   }
@@ -129,7 +130,7 @@ public:
    *  \brief set the commonDS of this interactionLink
    *  \param  a vector<DynamicalSystem*>
    */
-  inline void setCommonDS(const std::vector<DynamicalSystem*>& vs)
+  inline void setCommonDS(const DSSet& vs)
   {
     commonDS = vs;
   }

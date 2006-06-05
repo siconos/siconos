@@ -23,6 +23,5 @@
 const int NULL = 0;
 #endif
 
-
 #endif
 

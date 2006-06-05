@@ -72,7 +72,6 @@ FrictionContact3D::~FrictionContact3D()
 
 void FrictionContact3D::computeQ(const double& time)
 {
-  IN("FrictionContact3D::computeQ(void)\n");
   if (q == NULL)
   {
     q = new SimpleVector(dim);
@@ -91,8 +90,8 @@ void FrictionContact3D::computeQ(const double& time)
   // --- get topology ---
   Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   // --- get interactions list ---
-  vector<Interaction*> listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  vector<Interaction*>::iterator iter;
+  InteractionsSet listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  InteractionsIterator iter;
   // get Interaction position map
   map< Interaction* , SiconosMatrix*>::iterator itDiago;
   map< Interaction*, unsigned int>  interactionEffectivePositionMap =  topology->getInteractionEffectivePositionMap();
@@ -108,7 +107,7 @@ void FrictionContact3D::computeQ(const double& time)
   {
     // get current interaction, its relation and its nslaw
     currentInteraction = *iter;
-    unsigned int numberOfRelations = currentInteraction->getNInteraction();
+    unsigned int numberOfRelations = currentInteraction->getInteractionSize();
     R = currentInteraction->getRelationPtr();
     string relationType = R->getType();
     nslaw = currentInteraction->getNonSmoothLawPtr();
@@ -175,7 +174,6 @@ void FrictionContact3D::computeQ(const double& time)
 
     delete yFree;
   }
-  OUT("FrictionContact3D::computeQ(void)\n");
 }
 
 FrictionContact3D* FrictionContact3D::convert(OneStepNSProblem* osnsp)

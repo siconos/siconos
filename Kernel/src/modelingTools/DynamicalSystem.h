@@ -375,7 +375,7 @@ public:
   // --- Number ---
 
   /** \fn const int getNumber(void) const;
-   *  \brief allows to get the number of the DynamicalSystem
+   *  \brief to get the number of the DynamicalSystem
    *  \return the value of number
    */
   inline const int getNumber() const
@@ -384,7 +384,7 @@ public:
   }
 
   /** \fn const int getNumberForSorting(void) const;
-   *  \brief same as getNumber, but return an unsigned long int, used for set<DynamicalSystem*> in OSI
+   *  \brief same as getNumber, but return an unsigned long int, used for set<DynamicalSystem*> in OSI, NSDS ...
    *   as sorting criterion.
    *  \return the value of number
    */

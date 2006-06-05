@@ -22,15 +22,17 @@ using namespace std;
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
-InteractionLink::InteractionLink(Interaction* itOrig, Interaction* itLinked, const std::vector<DynamicalSystem*>& dsList):
-  originInteraction(itOrig), linkedInteraction(itLinked), commonDS(dsList)
-{}
+InteractionLink::InteractionLink(Interaction* itOrig, Interaction* itLinked, const DSSet& dsList):
+  originInteraction(itOrig), linkedInteraction(itLinked)
+{
+  commonDS = dsList;
+}
 
 InteractionLink::~InteractionLink()
 {
   originInteraction = NULL;
   linkedInteraction = NULL;
-  commonDS.resize(1, NULL);
+  commonDS.clear();
 }
 
 void InteractionLink::display() const
@@ -48,8 +50,7 @@ void InteractionLink::display() const
     cout << "-> NULL" << endl;
 
   cout << " common dynamical systems: " << endl;
-  for (unsigned int i = 0; i < commonDS.size(); i++)
-    commonDS[i]->display();
+  commonDS.display();
   cout << " =================================== " << endl;
 }
 

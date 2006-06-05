@@ -96,12 +96,12 @@ bool DiodeBridge()
 
     LinearDS* LSDiodeBridge = new LinearDS(1, init_state, LS_A);
 
-    NSDSDiodeBridge->addDynamicalSystem(LSDiodeBridge);
+    NSDSDiodeBridge->addDynamicalSystemPtr(LSDiodeBridge);
 
     // --- Interaction between linear system and non smooth system ---
 
-    vector< DynamicalSystem * >* Inter_DS = new vector< DynamicalSystem * >(1);
-    (*Inter_DS)[0] = LSDiodeBridge;
+    DSSet Inter_DS;
+    Inter_DS.insert(LSDiodeBridge);
 
     SiconosMatrix* Int_C = new SimpleMatrix(4, 2);
     Int_C->zero();
@@ -124,7 +124,7 @@ bool DiodeBridge()
     Int_B->setValue(0 , 2 , -1.0 / Cvalue);
     Int_B->setValue(0 , 3 , 1.0 / Cvalue);
 
-    Interaction* InterDiodeBridge = new Interaction("InterDiodeBridge", 1, 4, Inter_DS);
+    Interaction* InterDiodeBridge = new Interaction("InterDiodeBridge", Inter_DS, 1, 4);
 
     LinearTIR* LTIRDiodeBridge = new LinearTIR(*Int_C, *Int_B, InterDiodeBridge);
     LTIRDiodeBridge->setDPtr(Int_D);
@@ -132,7 +132,7 @@ bool DiodeBridge()
     InterDiodeBridge->setRelationPtr(LTIRDiodeBridge);
     InterDiodeBridge->createComplementarityConditionNSL();
 
-    NSDSDiodeBridge->addInteraction(InterDiodeBridge);
+    NSDSDiodeBridge->addInteractionPtr(InterDiodeBridge);
 
     // --- Strategy specification---
 
@@ -143,8 +143,8 @@ bool DiodeBridge()
     double theta = 1;
     Moreau* OSI_RLCD = new Moreau(LSDiodeBridge, theta, StratDiodeBridge);
 
-    vector<OneStepIntegrator*> vOSI_RLCD(1);
-    vOSI_RLCD[0] = OSI_RLCD;
+    set<OneStepIntegrator*> vOSI_RLCD;
+    vOSI_RLCD.insert(OSI_RLCD);
     StratDiodeBridge->setOneStepIntegrators(vOSI_RLCD);
     LCP* LCP_RLCD = new LCP(StratDiodeBridge, solverName, 101, 0.0001, "max", 0.6);
 
@@ -246,7 +246,6 @@ bool DiodeBridge()
     delete Int_B ;
     delete Int_D ;
     delete Int_C;
-    delete Inter_DS;
     delete LSDiodeBridge;
     delete NSDSDiodeBridge;
 

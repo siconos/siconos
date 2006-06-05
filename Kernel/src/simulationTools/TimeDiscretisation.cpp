@@ -323,7 +323,6 @@ void TimeDiscretisation::display() const
 
 void TimeDiscretisation::saveTimeDiscretisationToXML()
 {
-  IN("TimeDiscretisation::saveTimeDiscretisationToXML\n");
   if (timeDiscretisationXML != NULL)
   {
     timeDiscretisationXML->setH(h);
@@ -333,6 +332,5 @@ void TimeDiscretisation::saveTimeDiscretisationToXML()
     timeDiscretisationXML->setHMax(hMax);
   }
   else RuntimeException::selfThrow("TimeDiscretisation::saveTimeDiscretisationToXML - TimeDiscretisationXML object not exists");
-  OUT("TimeDiscretisation::saveTimeDiscretisationToXML\n");
 }
 

@@ -65,13 +65,10 @@
 		<!-- Interactions defined in the problem -->		
 		<Interaction_Definition>
 			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
-			<Interaction number='1'>
-				<Id>Ball-Ground</Id>
-				<nInter> 1 </nInter>
-				<!-- List of couple of DS concerned by this interaction -->
-	                        <DS_Concerned all='true'></DS_Concerned>									
-				<!-- Relation of this interaction -->				
-				<Interaction_Content>		
+			<Interaction number='1' Id='Ball-Ground'>
+				<size> 1 </size>
+	                        <DS_Concerned all='true'></DS_Concerned>
+					<Interaction_Content>		
 					<LagrangianLinearRelation>
 						<H matrixRowSize='1' matrixColSize='3'>
          	                                <row> 1.0  0.0  0.0</row>
@@ -85,13 +82,11 @@
 			</Interaction>				
 		</Interaction_Definition>		
 	</NSDS>
-	<!-- Strategy to use in order to solve the problem -->	
 	<Strategy type='TimeStepping'>
 
 		<TimeDiscretisation isConstant='true'>	
 			<h>0.005</h>
      		</TimeDiscretisation>				
-
 		<!-- One Step Integrators -->				
 		<OneStepIntegrator_Definition>
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			

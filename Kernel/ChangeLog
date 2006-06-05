@@ -28,6 +28,17 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 
 Changes:
 
+2006-05-21 Franck Perignon <franck.perignon@inrialpes.fr>
+        * add InteractionsSet class to manage set of Interactions for NSDS, Interaction, OSI ...
+	
+2006-05-17 Franck Perignon <franck.perignon@inrialpes.fr>
+        * add DSSet class to manage set of Dynamical Systems for NSDS, Interaction, OSI ...
+	* Change the way relation and nslaw are handled by Interaction. See Doc/Dev_Notes/Interaction for details
+	* add Doc/Dev_Notes/Interaction
+	
+2006-05-15 Franck Perignon <franck.perignon@inrialpes.fr>
+        * remove all nana related files and functions
+
 2006-05-02 Franck Perignon <franck.perignon@inrialpes.fr>
         * various changes in SiconosDOMTreeTools, StrategyXML and OSIXML. 
 	* review Moreau/Lsodar/OSI 
