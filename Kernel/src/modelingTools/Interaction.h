@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.4, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.2.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -51,7 +51,7 @@ class NonSmoothDynamicalSystem;
  *  \brief this class describes interaction between some dynamical systems (DS) (from 1 to NumberOfDS)
  *  Each interaction owns local variables  with relations between them, plus a non smooth law
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.1.4.
+ *  \version 1.2.0.
  *  \date (Creation) Apr 29, 2004
  *
  * An interaction represents the "link" between a set of Dynamical Systems (var: involvedDS) that interact alltogether through

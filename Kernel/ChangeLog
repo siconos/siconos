@@ -1,4 +1,4 @@
-# Siconos-Kernel version 1.1.4, Copyright INRIA 2005-2006.
+# Siconos-Kernel version 1.2.0, Copyright INRIA 2005-2006.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -23,10 +23,10 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
-  v1.1.X -  (current release)
+  v1.2.0 - (release 508)
 --------------------------------------------------------------------------------
 
-Changes:
+Main Changes:
 
 2006-05-21 Franck Perignon <franck.perignon@inrialpes.fr>
         * add InteractionsSet class to manage set of Interactions for NSDS, Interaction, OSI ...

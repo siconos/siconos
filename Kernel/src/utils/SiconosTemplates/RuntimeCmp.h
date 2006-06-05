@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.4, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.2.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -24,7 +24,7 @@
 /** \class class TFunctor
  *  \brief virtual functors class
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.1.4.
+ *  \version 1.2.0.
  *  \date (Creation) April 25, 2006
  *
  *  Note: this is strongly inspired from tutorial http://www.newty.de/fpt/functor.html
@@ -41,7 +41,7 @@ public:
 /** \class template <class TClass> class TSpecificFunctor : public TFunctor
  *  \brief derived template class for functors
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.1.4.
+ *  \version 1.2.0.
  *  \date (Creation) April 25, 2006
  *
  *  Note: this is strongly inspired from tutorial http://www.newty.de/fpt/functor.html
@@ -82,7 +82,7 @@ public:
  *  \brief Template to provide comparison operator in stl set or map
  *   see examples of using in EventsManager.h
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.1.4.
+ *  \version 1.2.0.
  *  \date (Creation) April 25, 2006
  *
  * Convention: objects to be compared must have a function of type:

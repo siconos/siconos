@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 1.1.4, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.2.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -134,7 +134,7 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
   }
   else // if siconosModelXMLFilePath == NULL
   {
-    doc = xmlNewDoc((xmlChar*)"1.1.4");
+    doc = xmlNewDoc((xmlChar*)"1.2.0");
     if (doc == NULL)
       XMLException::selfThrow("SiconosModelXML - Creation of the document aborted");
 

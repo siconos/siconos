@@ -1,4 +1,4 @@
- # Siconos-Front-End version 1.1.3, Copyright INRIA 2005-2006.
+ # Siconos-Front-End version 1.2.0, Copyright INRIA 2005-2006.
  # Siconos is a program dedicated to modeling, simulation and control
  # of non smooth dynamical systems.	
  # Siconos is a free software; you can redistribute it and/or modify
@@ -22,7 +22,7 @@ dnl configure script for SICONOS front-end
 dnl JB CHARLETY, 2005
 
 AC_PREREQ(2.59)
-AC_INIT([Siconos-Front-end],[1.1.3],[siconos.gforge.inria.fr])
+AC_INIT([Siconos-Front-end],[1.2.0],[siconos.gforge.inria.fr])
 
 dnl Checking host/target/build systems, for make, install etc.
 AC_CANONICAL_TARGET([])

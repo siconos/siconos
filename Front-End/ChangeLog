@@ -1,4 +1,4 @@
-# Siconos-Front-End version 1.1.3, Copyright INRIA 2005-2006.
+# Siconos-Front-End version 1.2.0, Copyright INRIA 2005-2006.
 # Siconos is a program dedicated to modeling, simulation and control
 # of non smooth dynamical systems.	
 # Siconos is a free software; you can redistribute it and/or modify
@@ -23,13 +23,13 @@ before it.
 
 
 --------------------------------------------------------------------------------
-  v1.1.X - February 2006 (current release)
+  v1.2.0 - (release 508)
 --------------------------------------------------------------------------------
 
 Notes:
 
 		
-Changes:
+Main changes:
 	
 2006-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
                                                                                
@@ -38,7 +38,7 @@ Changes:
 	  autotools version. 
 
 --------------------------------------------------------------------------------
-  v1.1.3 - February 2006 (release 428)
+  v1.1.2 - February 2006 (release 428)
 --------------------------------------------------------------------------------
 
 Notes: bugs fixing release
@@ -64,7 +64,7 @@ Changes:
 	MultiBeadsColumn/HuMAns_pa10,
 
 --------------------------------------------------------------------------------
-  v1.1.3 - February 2006 (release 421)
+  v1.1.1 - February 2006 (release 421)
 --------------------------------------------------------------------------------
 
 Notes:
