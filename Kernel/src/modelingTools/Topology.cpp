@@ -304,3 +304,6 @@ vector<unsigned int> Topology::computeIndexMin(Interaction * inter)
   return indexMin;
 }
 
+void Topology::updateIndexSets()
+{
+}

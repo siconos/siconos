@@ -409,6 +409,13 @@ public:
    */
   void computeInteractionEffectivePositionMap();
 
+  /** \fn void updateIndexSets();
+   *   \brief update all index sets of the topology, using current y and lambda values of Interactions.
+   */
+  void updateIndexSets();
+
+
+
 };
 
 #endif // TOPOLOGY_H

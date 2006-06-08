@@ -76,53 +76,67 @@ void EventDriven::computeOneStep()
 
 void EventDriven::advanceToEvent()
 {
-  // Get double value of init time (currentEvent time) and final time (nextEvent time)
 
+  // WARNING: this is supposed to work for only one OSI, including all the DS.
+  // To be reviewed for multiple OSI case (if it has sense?).
+
+  // ---> Step 1: integrate the smooth dynamics from current event to next event;
+  // Current event = last accessed event.
+  // Next event = next time step or first root of the 'g' function found by integrator (Lsodar)
   double tinit = eventsManager->getCurrentTime();
   double tend =  eventsManager->getNextTime();
-  double tout, ttmp = tend;
+  double tout = tend;
   bool isNewEventOccur = false;  // set to true if a new event occur during integration
-  // call integrate method of each OSI, between tinit and tend.
+  // call integrate method for each OSI, between tinit and tend.
   OSIIterator it;
   for (it = allOSI.begin(); it != allOSI.end(); ++it)
   {
     bool iout = false;
-    (*it)->integrate(tinit, tend, ttmp, iout); // integrate must return a flag telling if tend has been reached or not.
-    // If not, ttmp is the real reached time.
+    (*it)->integrate(tinit, tend, tout, iout); // integrate must return a flag telling if tend has been reached or not.
+    // If not, tout is the real reached time.
     if (!iout)
     {
-      tout = min(tout, ttmp);
       isNewEventOccur = true;
+      // Add an event into the events manager list
+      bool isScheduleOk = eventsManager->scheduleEvent("NonSmoothEvent", tout);
+      if (!isScheduleOk) cout << " EventDriven advanceToEvent warning: try to add an already existing event" << endl;
     }
-
-    // Update DS state. Here?
-    //(*it)->getDynamicalSystemPtr()->computeRhs(tend);
-
   }
 
-  if (isNewEventOccur)
+  // ---> Step 2: update Index sets according to temporary values obtained at previous step.
+
+  Topology * topology = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+
+  topology->updateIndexSets();  // This requires that y[i] values have been well computed and saved in Interactions.
+
+  // ---> Step 3: solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
+  VectorOfSetOfInteractions indexSets = topology->getIndexSets();
+
+  //  if( !(indexSets[1]-indexSets[2]).isEmpty() )
   {
-    // Add an event into the events manager list
-    bool isScheduleOk = eventsManager->scheduleEvent("NonSmoothEvent", tout);
-    if (!isScheduleOk) cout << " EventDriven advanceToEvent warning: try to add an already existing event" << endl;
-    else
-    {
-      bool iout;
-      // restart integration from tinit to tout
-      for (it = allOSI.begin(); it != allOSI.end(); ++it)
-      {
-        // Add something to "reset" the OSI state as it was a tinit.
-
-        iout = false;
-        (*it)->integrate(tinit, tout, ttmp, iout); // integrate must return a flag telling if tend has been reached or not.
-        // If not, ttmp is the real reached time.
-        if (!iout)
-          RuntimeException::selfThrow("EventDriven advanceToEvent, event management problem.");
-      }
-    }
+    // solve the LCP-impact => y[1],lambda[1]
+    computeOneStepNSProblem(); // solveLCPImpact();
+    // update indexSets
+    topology->updateIndexSets(); // Create an update function for each index set?
+    // check that IndexSet[1]\IndexSet[2] is now empty
+    //  if( !(indexSets[1]\indexSets[2]).isEmpty())
+    //RuntimeException::selfThrow("EventDriven advanceToEvent, error after impact-LCP solving.");
   }
 
+  //if( !((indexSets[2]).empty()) )
+  {
+    // solve LCP-acceleration
+    computeOneStepNSProblem(); //solveLCPAcceleration();
+    // for all index in IndexSets[2], update the index set according to y[2] and/or lambda[2] sign.
+    topology->updateIndexSets();
+  }
 }
+
+// void EventDriven::solveLCPImpact()
+// {}
+
+// void EventDriven::solveLCPAcceleration()
+// {}
 
 EventDriven* EventDriven::convert(Strategy *str)
 {

@@ -200,12 +200,14 @@ const DSSet intersection(const DSSet& s1, const DSSet& s2)
   return commonDS;
 }
 
-// const DSSet difference(const DSSet& s1, const DSSet& s2)
-// {
-//   DSSet commonDS;
+const DSSet operator - (const DSSet& s1, const DSSet& s2)
+{
 
-//   insert_iterator<DynamicalSystemSet> res_ins(commonDS.getSetOfDS(), commonDS.begin());
-//   set_intersection(s1.begin(), s1.end(), s2.begin(), s2.end(), res_ins,&DynamicalSystem::getNumberForSorting compareDS);
+  // output
+  DSSet commonDS;
 
-//   return commonDS;
-// }
+  set_difference(s1.setOfDS.begin(), s1.setOfDS.end(), s2.setOfDS.begin(), s2.setOfDS.end(),
+                 inserter(commonDS.setOfDS, commonDS.setOfDS.begin()), compareDS);
+
+  return commonDS;
+}

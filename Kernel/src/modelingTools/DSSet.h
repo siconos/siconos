@@ -186,10 +186,10 @@ public:
    */
   friend const DSSet intersection(const DSSet& s1, const DSSet& s2);
 
-  /** \fn const DSSet difference(const DSSet& s1, const DSSet& s2) const
+  /** \fn const DSSet operator-(const DSSet& s1, const DSSet& s2) const
    *  \brief return the difference betwee s1 and s2 (-> set_difference stl function)
    */
-  //friend const DSSet difference(const DSSet& s1, const DSSet& s2);
+  friend const DSSet operator-(const DSSet& s1, const DSSet& s2);
 };
 
 #endif

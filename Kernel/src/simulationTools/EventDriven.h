@@ -102,6 +102,15 @@ public:
    */
   void advanceToEvent();
 
+  /*   /\** \fn void solveLCPImpact() */
+  /*    *  \brief compute an LCP-impact (ie velocity level) -> compute y[1], lambda[1] */
+  /*    *\/ */
+  /*   void solveLCPImpact(); */
+
+  /*   /\** \fn void solveLCPAcceleration() */
+  /*    *  \brief compute an LCP-acceleration (ie acceleration level) -> compute y[2], lambda[2] */
+  /*    *\/ */
+  /*   void solveLCPAcceleration(); */
 
   /** \fn EventDriven* convert (Strategy* str)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
