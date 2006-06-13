@@ -27,6 +27,7 @@
 #include "SiconosConst.h"
 
 #include "InteractionsSet.h"
+#include "UnitaryRelationsSet.h"
 #include <vector>
 #include <string>
 #include <map>
@@ -36,6 +37,7 @@ class NonSmoothDynamicalSystem;
 class InteractionLink;
 class Interaction;
 class SiconosMatrix;
+class UnitaryRelationsSet;
 
 /** \class Topology
  *  \brief this class provides maps to describe the topology of interactions of a NonSmoothDynamicalSystem
@@ -43,16 +45,23 @@ class SiconosMatrix;
  *  \version 1.2.0.
  *  \date (Creation) July 20, 2005
  *
+ *
+ * Rule: no Unitary Relation can be created outside of the present class (ie the only calls to new UnitaryRelation(...) are part of Topology methods)
+ * Thus, no flags for inside-class allocation - All UnitaryRelation pointers are cleared during Topology destructor call.
+ *
  */
 
-/** vector that contains a sequel of sets of interactions*/
-typedef std::vector< InteractionsSet > VectorOfSetOfInteractions;
+/** vector that contains a sequel of sets of UnitaryRelations*/
+typedef std::vector< UnitaryRelationsSet > VectorOfSetOfUnitaryRelations;
 
 /** Interaction -> Matrix map - Used for diagonal block-terms in LCP matrices or similar things */
 typedef std::map< Interaction*, SiconosMatrix* > InteractionMatrixMap ;
 
 /** Interaction ->( map Interaction->matrix) map */
 typedef std::map< Interaction* , InteractionMatrixMap >  InteractionMatrixMapOfMap  ;
+
+/** tolerance value used in indexSets updating */
+const double TOLERANCE = 1e-8;
 
 class Topology
 {
@@ -65,7 +74,7 @@ private:
   InteractionsSet allInteractions;
 
   /** index sets vector (indexSets[0] is the set where y[0]=0, indexSets[1] where y[0] = 0 and y[1]=0 and so on */
-  VectorOfSetOfInteractions indexSets;
+  VectorOfSetOfUnitaryRelations indexSets;
 
   /** map that lists all the interactions and their linked interactions through common DS */
   std::map< Interaction*, std::vector<InteractionLink*>  > linkedInteractionMap;
@@ -108,6 +117,12 @@ private:
   Topology();
 
   // === OTHER PRIVATE FUNCTIONS ===
+
+  /** \fn const bool addInteractionInIndexSet(Interaction* inter)
+   *  \brief schedules the relations of Interaction inter in IndexSets[0] (ie creates UnitaryRelations)
+   * \param: a pointer to Interaction
+   */
+  const bool addInteractionInIndexSet(Interaction*);
 
   /** \fn void computeLinkedInteractionMap()
    *   \brief compute the linkedInteractionMap
@@ -182,13 +197,22 @@ public:
    */
   const bool hasInteraction(Interaction*) const;
 
-  /** \fn const VectorOfSetOfInteractions getIndexSets() const {return indexSets};
-   *  \brief get the vector of index sets
-   *  \return a VectorOfSetOfInteractions (a Vector of Sets Of Interactions)
+  /** \fn const VectorOfSetOfUnitaryRelations getIndexSets() const
+   *  \brief get indexSets (the whole vector)
+   *  \return a VectorOfSetOfUnitaryRelations
    */
-  inline const VectorOfSetOfInteractions getIndexSets() const
+  inline const VectorOfSetOfUnitaryRelations getIndexSets() const
   {
     return indexSets;
+  };
+
+  /** \fn const UnitaryRelationsSet getIndexSet(const unsigned int& i) const
+   *  \brief get indexSets[i]
+   *  \return a UnitaryRelationsSet
+   */
+  inline const UnitaryRelationsSet getIndexSet(const unsigned int& i) const
+  {
+    return indexSets[i];
   };
 
   // --- effectiveSizeOutput ---
@@ -414,7 +438,15 @@ public:
    */
   void updateIndexSets();
 
+  /** \fn void updateIndexSet(const unsigned int& i);
+   *   \brief update indexSets[i] of the topology, using current y and lambda values of Interactions.
+   */
+  void updateIndexSet(const unsigned int&);
 
+  /** \fn void updateIndexSetsWithDoubleCondition();
+   *   \brief update indexSets[1] and [2] (using current y and lambda values of Interactions) with conditions on y[2] AND lambda[2].
+   */
+  void updateIndexSetsWithDoubleCondition();
 
 };
 

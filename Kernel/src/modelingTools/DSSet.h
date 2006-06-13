@@ -165,6 +165,15 @@ public:
    */
   CheckInsertDS insert(DynamicalSystem*);
 
+  /** \fn inline const bool isEmpty() const
+   *  \brief true if the DS set is empty
+   *  \return a bool
+   */
+  inline const bool isEmpty() const
+  {
+    return setOfDS.empty();
+  };
+
   /** \fn void erase(DynamicalSystem* ds)
    *  \brief remove Dynamical System ds from the set
    *  \param a pointer to DynamicalSystem

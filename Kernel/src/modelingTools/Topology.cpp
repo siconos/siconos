@@ -20,6 +20,22 @@
 
 using namespace std;
 
+const bool Topology::addInteractionInIndexSet(Interaction * inter)
+{
+  unsigned int m = inter->getInteractionSize() ;
+  unsigned int nsLawSize = inter->getNonSmoothLawPtr()->getNsLawSize();
+  unsigned int pos = 0; // relative position of the relation in the y vector of the Interaction
+  CheckInsertUnitaryRelation checkUR;
+  bool res = true; // output value. False if insertion of one of the relations fails.
+  for (unsigned int i = 0; i < m; ++i)
+  {
+    checkUR = indexSets[0].insert(new UnitaryRelation(inter, pos));
+    pos = pos + nsLawSize;
+    if (checkUR.second == false) res = false;
+  }
+  return res;
+}
+
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // default
@@ -31,12 +47,31 @@ Topology::Topology():
 Topology::Topology(NonSmoothDynamicalSystem* newNsds):
   effectiveSizeOutput(0), isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(newNsds)
 {
+  // Creates indexSets vector. Its size depends on the relative degree of the system
+  // For this first draft, we set size == 3
+
+  indexSets.resize(3);
+
+  InteractionsSet interSet = nsds->getInteractions() ;
+
+  // -- Creates Unitary Relations and put them in indexSets[0] ---
+  // loop through interactions list (from NSDS)
+  InteractionsIterator it;
+  for (it = interSet.begin()  ; it != interSet.end(); ++it)
+    addInteractionInIndexSet(*it);
+
   updateTopology();
 }
 
 // destructor
 Topology::~Topology()
 {
+  // Clears all Unitary Relations of IndexSets[0]
+  UnitaryRelationIterator it;
+  for (it = indexSets[0].begin(); it != indexSets[0].end(); ++it)
+    delete *it;
+
+
   map< Interaction*, std::vector<InteractionLink*> >::iterator mapIt;
   // for all elements in the map ...
   for (mapIt = linkedInteractionMap.begin(); mapIt != linkedInteractionMap.end(); mapIt++)
@@ -55,6 +90,7 @@ Topology::~Topology()
   linkedInteractionMap.clear();
   nsds = NULL;
 }
+
 
 Interaction* Topology::getInteractionPtrNumber(const int& nb) const
 {
@@ -306,4 +342,52 @@ vector<unsigned int> Topology::computeIndexMin(Interaction * inter)
 
 void Topology::updateIndexSets()
 {
+  for (unsigned int i = 1; i < indexSets.size() ; ++i)
+    updateIndexSet(i);
 }
+
+
+void Topology::updateIndexSet(const unsigned int& i)
+{
+  if (i > indexSets.size())
+    RuntimeException::selfThrow("Topology::updateIndexSet(i), indexSets[i] does not exist.");
+
+  if (i == 0) // IndexSets[0] must not be updated by this function.
+    RuntimeException::selfThrow("Topology::updateIndexSet(i=0), indexSets[0] can not be updated.");
+
+  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
+  UnitaryRelationIterator it, itForFind;
+
+  for (it = indexSets[i - 1].begin(); it != indexSets[i - 1].end(); ++it)
+  {
+    // check if current Unitary Relation (ie *it) is in indexSets[i]
+    // if not itForFind = indexSets.end()
+    itForFind = indexSets[i].find(*it);
+
+    // if y[i-1] <=0, then the unitary relation is added in indexSets[i] (if it was not already there)
+    // else if y[i-1] > 0 and if the unitary relation was in the set, it is removed.
+    if ((*it)->getY(i - 1) <= 0 && itForFind == indexSets[i].end())
+      indexSets[i].insert(*it);
+    else if ((*it)->getY(i - 1) > 0 && itForFind != indexSets[i].end())
+      indexSets[i].erase(*it);
+  }
+}
+
+void Topology::updateIndexSetsWithDoubleCondition()
+{
+
+  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
+  UnitaryRelationIterator it, itForFind;
+
+  for (it = indexSets[2].begin(); it != indexSets[2].end(); ++it)
+  {
+    double gamma = (*it)->getY(2);
+    double F     = (*it)->getLambda(2);
+
+    if (gamma > 0 && F < TOLERANCE)
+      indexSets[2].erase(*it);
+    else if (gamma < TOLERANCE && F < TOLERANCE) // undetermined case
+      RuntimeException::selfThrow("Topology::updateIndexSetsWithDoubleCondition(), undetermined case.");
+  }
+}
+

@@ -110,25 +110,27 @@ void EventDriven::advanceToEvent()
   topology->updateIndexSets();  // This requires that y[i] values have been well computed and saved in Interactions.
 
   // ---> Step 3: solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
-  VectorOfSetOfInteractions indexSets = topology->getIndexSets();
+  VectorOfSetOfUnitaryRelations indexSets = topology->getIndexSets();
 
-  //  if( !(indexSets[1]-indexSets[2]).isEmpty() )
+  if (!(indexSets[1] - indexSets[2]).isEmpty())
   {
     // solve the LCP-impact => y[1],lambda[1]
     computeOneStepNSProblem(); // solveLCPImpact();
     // update indexSets
-    topology->updateIndexSets(); // Create an update function for each index set?
-    // check that IndexSet[1]\IndexSet[2] is now empty
-    //  if( !(indexSets[1]\indexSets[2]).isEmpty())
-    //RuntimeException::selfThrow("EventDriven advanceToEvent, error after impact-LCP solving.");
+    topology->updateIndexSet(1);
+    topology->updateIndexSet(2);
+
+    // check that IndexSet[1]-IndexSet[2] is now empty
+    if (!(indexSets[1] - indexSets[2]).isEmpty())
+      RuntimeException::selfThrow("EventDriven advanceToEvent, error after impact-LCP solving.");
   }
 
-  //if( !((indexSets[2]).empty()) )
+  if (!((indexSets[2]).isEmpty()))
   {
     // solve LCP-acceleration
     computeOneStepNSProblem(); //solveLCPAcceleration();
     // for all index in IndexSets[2], update the index set according to y[2] and/or lambda[2] sign.
-    topology->updateIndexSets();
+    topology->updateIndexSetsWithDoubleCondition();
   }
 }
 

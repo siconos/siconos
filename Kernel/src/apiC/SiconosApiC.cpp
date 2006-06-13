@@ -848,7 +848,9 @@ extern "C" int sicNonSmoothDynamicalSystem(int isBVP)
     if ((isBVP < 0) || (isBVP > 1))
       RuntimeException::selfThrow("siconos/C:: sicNSDSModel failed due to bad isBVP");
     // Create NSDS system connected with DS and Interactions
-    GLOB_NSDS = new NonSmoothDynamicalSystem(isBVP);
+    // Warning FP: NSDS constructor change -> add set of DS and set of Interactions in arguments list.
+    // => To be reviewed?
+    GLOB_NSDS = new NonSmoothDynamicalSystem(GLOB_SET_DS, GLOB_SET_INTERACTION, isBVP);
 
   }
   catch (SiconosException e)

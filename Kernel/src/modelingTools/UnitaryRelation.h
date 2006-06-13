@@ -19,13 +19,15 @@
 #ifndef UNITARYRELATION_H
 #define UNITARYRELATION_H
 
-#include "Interaction.h"
+//#include "Interaction.h"
 
 // tools
 #include "SimpleVector.h"
-
+#include "RuntimeException.h"
 // const
 #include "SiconosConst.h"
+
+class Interaction;
 
 /** \class UnitaryRelation
  *  \brief this class is an interface to single relations from Interactions
@@ -54,12 +56,12 @@ private:
    of mainInteraction, thus the relative position is equal to 2. */
   unsigned int relativePosition;
 
-public:
-
   /** \fn UnitaryRelation()
    *  \brief default constructor
    */
   UnitaryRelation();
+
+public:
 
   // === PUBLIC FUNCTIONS ===
 
@@ -71,22 +73,48 @@ public:
    */
   UnitaryRelation(const UnitaryRelation& inter);
 
+  /** \fn UnitaryRelation(Interaction* , const unsigned int&);
+   *  \brief constructor from a pointer to Interaction
+   *  \param Interaction * : Interaction object from which a list of relation will be "extracted"
+   *  \param unsigned int: give the relative position of the relation inside the y vector of the interaction
+   */
+  UnitaryRelation(Interaction* , const unsigned int&);
+
   /** \fn ~UnitaryRelation()
    * \brief destructor
    */
   ~UnitaryRelation();
 
-  /** \fn SimpleVector* getYPtr(const unsigned int& i) const
-   *  \brief get y[i], derivative number i of output for the present relation
-   *  \return pointer on a SimpleVector
+  /** \fn Interaction * getInteractionPtr() const
+   *  \brief get main interaction of this unitary relation
+   *  \return a pointer to Interaction
    */
-  SimpleVector* getYPtr(const unsigned int& i) const ;
+  inline Interaction* getInteractionPtr()
+  {
+    return mainInteraction;
+  } ;
 
-  /** \fn SimpleVector* getLambdaPtr(const unsigned int& i) const
-   *  \brief get lambda[i], derivative number i of input for the present relation
-   *  \return pointer on a SimpleVector
+  /** \fn const unsigned int getRelativePosition() const
+   *  \brief get relative position of the Unitary Relation
+   *  \return an unsigned int
    */
-  SimpleVector* getLambdaPtr(const unsigned int& i) const ;
+  inline const unsigned int getRelativePosition() const
+  {
+    return relativePosition;
+  } ;
+
+  /** \fn const double getY(const unsigned int& i) const
+   *  \brief get y[i], derivative number i of output for the present relation,
+   *  ie the value that will be used for indexSets computation. Warning: it depends on the nslaw type.
+   *  \return a double
+   */
+  const double getY(const unsigned int& i) const ;
+
+  /** \fn const double getLambda(const unsigned int& i) const
+   *  \brief get lambda[i], derivative number i of input for the present relation
+   *  \return a double
+   */
+  const double getLambda(const unsigned int& i) const ;
 
 
 };

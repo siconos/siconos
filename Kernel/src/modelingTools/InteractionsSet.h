@@ -166,6 +166,15 @@ public:
    */
   CheckInsertInteraction insert(Interaction*);
 
+  /** \fn inline const bool isEmpty() const
+   *  \brief true if the Interactions set is empty
+   *  \return a bool
+   */
+  inline const bool isEmpty() const
+  {
+    return setOfInteractions.empty();
+  };
+
   /** \fn void erase(Interaction* ds)
    *  \brief remove Dynamical System ds from the set
    *  \param a pointer to Interaction

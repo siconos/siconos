@@ -61,7 +61,6 @@ void LinearTIRTest::setUp()
   NonSmoothDynamicalSystemXML * nsdsxml = new NonSmoothDynamicalSystemXML(nodetmp);
   nsds = new NonSmoothDynamicalSystem(nsdsxml);
   delete nsdsxml;
-
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Definition");
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction");
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
@@ -82,7 +81,6 @@ void LinearTIRTest::setUp()
     XMLException::selfThrow("empty document");
     xmlFreeDoc(doc2);
   }
-
   // get rootNode
   if (xmlStrcmp(cur2->name, (const xmlChar *) "SiconosModel"))
   {

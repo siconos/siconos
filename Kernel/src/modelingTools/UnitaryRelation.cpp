@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "UnitaryRelation.h"
+#include "Interaction.h"
 
 using namespace std;
 
@@ -27,9 +28,16 @@ UnitaryRelation::UnitaryRelation(): mainInteraction(NULL), relativePosition(0)
 {}
 
 // Copy constructor
-UnitaryRelation::UnitaryRelation(const UnitaryRelation& newI): mainInteraction(NULL), relativePosition(0)
+UnitaryRelation::UnitaryRelation(const UnitaryRelation& newUR): mainInteraction(NULL), relativePosition(0)
 {
+  // Copy of Unitary relation is not allowed. Since they are identified/sorted in UnitaryRelationsSet thanks to their address (as pointers)
+  // a copy could results in two differents objects that will correspond to the same relation.
+  RuntimeException::selfThrow("UnitaryRelation copy constructor call: forbidden operation.");
 }
+
+// Data constructor
+UnitaryRelation::UnitaryRelation(Interaction* inter, const unsigned int& pos): mainInteraction(inter), relativePosition(pos)
+{}
 
 // --- DESTRUCTOR ---
 UnitaryRelation::~UnitaryRelation()
@@ -37,20 +45,17 @@ UnitaryRelation::~UnitaryRelation()
   mainInteraction = NULL;
 }
 
-SimpleVector* UnitaryRelation::getYPtr(const unsigned int& i) const
+const double UnitaryRelation::getY(const unsigned int& i) const
 {
-  //unsigned int nsLawSize = mainInteraction->getNonSmoothLawPtr()->getNsLawSize();
-
-  // get the block that corresponds to the current relation in vector y of the main Interaction
-  // Find a way to avoid copy? Modify BlockVector?
-
-  return mainInteraction->getYPtr(1);
+  // get the single value used to build indexSets
+  // Warning: the relativePosition depends on NsLawSize and/or type.
+  // This means that at the time, for the block of y that corresponds to the present relation, the first scalar value is used.
+  // For example, for friction, normal part is in first position, followed by the tangential parts.
+  return (*(mainInteraction->getYPtr(i)))(relativePosition);
 }
 
-SimpleVector* UnitaryRelation::getLambdaPtr(const unsigned int& i) const
+const double UnitaryRelation::getLambda(const unsigned int& i) const
 {
-  //unsigned int nsLawSize = mainInteraction->getNonSmoothLawPtr()->getNsLawSize();
-
-  // get the block that corresponds to the current relation in vector lambda of the main Interaction
-  return mainInteraction->getLambdaPtr(1);
+  // get the single value used to build indexSets
+  return (*(mainInteraction->getLambdaPtr(1)))(relativePosition);
 }

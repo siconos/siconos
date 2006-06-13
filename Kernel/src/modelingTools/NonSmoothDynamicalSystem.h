@@ -83,15 +83,13 @@ private:
   std::deque<bool> isEcVectorAllocatedIn;
   bool isTopologyAllocatedIn;
 
-public:
-
-  // --- CONSTRUCTORS/DESTRUCTOR ---
-
   /** \fn NonSmoothDynamicalSystem(const bool&)
    *  \brief default constructor
    *  \param (optional) a bool which determines if the problem is BVP (true) or IVP (false)
    */
   NonSmoothDynamicalSystem(const bool& = false);
+
+public:
 
   /** \fn NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem&)
    *  \brief copy constructor
@@ -105,6 +103,18 @@ public:
    */
   NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML*);
 
+  /** \fn NonSmoothDynamicalSystem(DSSet& ds, InteractionsSet& inter, const bool& isBvp = false)
+   *  \brief constructor from data - Warning: DS and Interactions are not copied, but links are created
+   *  between pointers of the two sets.
+   *  \param: a set of DS
+   *  \param: a set of Interactions
+   *  \param: a bool
+   */
+  NonSmoothDynamicalSystem(DSSet&, InteractionsSet&, const bool& = false);
+
+  /** \fn ~NonSmoothDynamicalSystem()
+   *  \brief destructor
+   */
   ~NonSmoothDynamicalSystem();
 
   // --- GETTERS/SETTERS ---

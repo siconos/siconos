@@ -32,13 +32,10 @@ using namespace std;
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
-// Default constructor (isBvp is optional, default = false)
+// Default (private) constructor (isBvp is optional, default = false)
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const bool& isBvp):
   BVP(isBvp), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)
-{
-  topology = new Topology(this); // \todo use a copy constructor for topology?
-  isTopologyAllocatedIn = true;
-}
+{}
 
 // xml constuctor
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* newNsdsxml):
@@ -81,9 +78,14 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* 
     isInteractionAllocatedIn[*(checkInter.first)] = true;
   }
 
-  if (allInteractions.size() == 0) cout << " /!\\ Warning: you do not defined any interaction in the NonSmoothDymamicalSystem (Constructor: xml). /!\\ " << endl;
+  // === Checks that sets are not empty ===
+  if (allDS.isEmpty())
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(xml, ...): the set of DS is empty.");
 
-  // built topology:
+  if (allInteractions.isEmpty())
+    cout << "Warning: NonSmoothDynamicalSystem:: constructor(xml, ...): the set of Interactions is empty." << endl;
+
+  // === Builds topology ===
   topology = new Topology(this);
   isTopologyAllocatedIn = true;
 
@@ -152,6 +154,13 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
   for (it2 = allInteractions.begin(); it2 != allInteractions.end(); ++it2)
     isInteractionAllocatedIn[*it2] = false;
 
+  // === Checks that sets are not empty ===
+  if (allDS.isEmpty())
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(xml, ...): the set of DS is empty.");
+
+  if (allInteractions.isEmpty())
+    cout << "Warning: NonSmoothDynamicalSystem:: constructor(xml, ...): the set of Interactions is empty." << endl;
+
   topology = new Topology(this); // \todo use a copy constructor for topology?
   isTopologyAllocatedIn = true;
 
@@ -184,7 +193,35 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
 
   // Warning: xml link is not copied.
 }
-// \todo add a  constructor from data ?
+
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DSSet& listOfDS, InteractionsSet& listOfInteractions, const bool& isBVP):
+  BVP(isBVP), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)
+{
+
+  // === Checks that sets are not empty ===
+  if (listOfDS.isEmpty())
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(DSSet, ...): the set of DS is empty.");
+
+  if (listOfInteractions.isEmpty())
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(...,InteractionsSet, ...): the set of Interactions is empty.");
+
+  // === "copy" listOfDS/listOfInteractions in allDS/allInteractions ===
+  // Warning: this a false copy, since = operator of those objects creates links between pointers of the sets.
+  allDS = listOfDS;
+  allInteractions = listOfInteractions;
+
+  // === initialize isXXAllocatedIn objects ===
+  DSIterator itDS;
+  InteractionsIterator itInter;
+  for (itDS = allDS.begin(); itDS != allDS.end(); ++itDS)
+    isDSAllocatedIn[*itDS] = false;
+  for (itInter = allInteractions.begin(); itInter != allInteractions.end(); ++itInter)
+    isInteractionAllocatedIn[*itInter] = false;
+
+  // === build topology ===
+  topology = new Topology(this);
+  isTopologyAllocatedIn = true;
+}
 
 NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 {
@@ -444,3 +481,4 @@ double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
   }
   return(convergenceIndicator);
 }
+
