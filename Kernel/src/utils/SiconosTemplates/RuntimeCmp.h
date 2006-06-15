@@ -32,6 +32,12 @@
 class TFunctor
 {
 public:
+
+  /** \fn virtual ~TFunctor();
+   *  \brief destructor
+   */
+  virtual ~TFunctor() {};
+
   /** \fn virtual const unsigned long int Call()
    *  \return unsigned long int
    */

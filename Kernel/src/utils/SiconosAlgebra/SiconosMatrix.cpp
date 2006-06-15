@@ -19,7 +19,7 @@
 #include "SiconosMatrix.h"
 using namespace std;
 
-// LAPACK F77 function not declared in lapack++.h
+// LAPACK F77 function not declared in lapackpp.h
 Extern  "C"
 {
   void F77NAME(dgetri)(integer * m, doublereal * A, integer * lda, integer * ipiv,

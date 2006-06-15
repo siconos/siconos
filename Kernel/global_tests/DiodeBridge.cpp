@@ -75,14 +75,6 @@ bool DiodeBridge()
   try
   {
 
-    // --- Model creation ---
-    Model DiodeBridge(t0, T, Modeltitle);
-
-    // --- Dynamical system creation ---
-    NonSmoothDynamicalSystem* NSDSDiodeBridge = new NonSmoothDynamicalSystem(false);
-    DiodeBridge.setNonSmoothDynamicalSystemPtr(NSDSDiodeBridge);
-
-
     // --- Dynamical system specification ---
     SimpleVector init_state(2);
     init_state.setValue(0 , Vinit);
@@ -90,13 +82,12 @@ bool DiodeBridge()
 
     SimpleMatrix LS_A(2, 2);
     LS_A.setValue(0 , 0 , 0.0);
+
     LS_A.setValue(0 , 1 , -1.0 / Cvalue);
     LS_A.setValue(1 , 0 , 1.0 / Lvalue);
     LS_A.setValue(1 , 1 , 0.0);
 
     LinearDS* LSDiodeBridge = new LinearDS(1, init_state, LS_A);
-
-    NSDSDiodeBridge->addDynamicalSystemPtr(LSDiodeBridge);
 
     // --- Interaction between linear system and non smooth system ---
 
@@ -132,7 +123,14 @@ bool DiodeBridge()
     InterDiodeBridge->setRelationPtr(LTIRDiodeBridge);
     InterDiodeBridge->createComplementarityConditionNSL();
 
-    NSDSDiodeBridge->addInteractionPtr(InterDiodeBridge);
+    // --- Dynamical system creation ---
+    InteractionsSet allInteractions;
+    allInteractions.insert(InterDiodeBridge);
+    NonSmoothDynamicalSystem* NSDSDiodeBridge = new NonSmoothDynamicalSystem(Inter_DS, allInteractions, false);
+
+    // --- Model creation ---
+    Model DiodeBridge(t0, T, Modeltitle);
+    DiodeBridge.setNonSmoothDynamicalSystemPtr(NSDSDiodeBridge);
 
     // --- Strategy specification---
 

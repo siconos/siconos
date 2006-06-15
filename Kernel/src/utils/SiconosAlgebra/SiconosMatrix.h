@@ -35,7 +35,7 @@
 #include "SimpleVector.h"
 #include "SiconosMatrixException.h"
 #include "check.h"
-#include <lapack++.h>
+#include <lapackpp.h>
 #include <string>
 #include <fstream>
 #include <iostream>

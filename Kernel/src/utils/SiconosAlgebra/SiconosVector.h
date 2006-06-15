@@ -23,7 +23,7 @@
 #include "SiconosConst.h"
 #include "check.h"
 #include <iostream>
-#include <lapack++.h>
+#include <lapackpp.h>
 #include <fstream>
 #include <vector>
 #include <string>
