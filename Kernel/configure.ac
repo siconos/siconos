@@ -151,6 +151,11 @@ ACX_LAPACK([  dnl action-if-found:  # This defines LAPACK_LIBS, BLAS_LIBS, and F
 AC_MSG_CHECKING([for Siconos/Numerics])
 ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-numerics.])])
 
+# Boost
+AC_MSG_CHECKING([for Boost])
+BOOST_VER="1.33.1"	# lib....so number
+AX_BOOST([1.33.1],[echo " YES "],[AC_MSG_ERROR([Cannot find Boost in a good version. Please install Boost, version >= 1.33.1 available at http://www.boost.org/.])])
+
 # Lapack++
 LAPACKPP_VER="1.12.0"	# lib....so number
 LAPACKPP_REL_VER="2.4.7" # Release number
