@@ -154,7 +154,7 @@ ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_
 # Boost
 AC_MSG_CHECKING([for Boost])
 BOOST_VER="1.33.1"	# lib....so number
-AX_BOOST([1.33.1],[echo " YES "],[AC_MSG_ERROR([Cannot find Boost in a good version. Please install Boost, version >= 1.33.1 available at http://www.boost.org/.])])
+AX_BOOST([$BOOST_VER],,[AC_MSG_ERROR([Cannot find Boost in a good version. Please install Boost, version >= $BOOST_VER available at http://www.boost.org/.])])
 
 # Lapack++
 LAPACKPP_VER="1.12.0"	# lib....so number
