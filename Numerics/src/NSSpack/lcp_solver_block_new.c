@@ -108,19 +108,22 @@
 
 void (*local_solver)(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                      int *iparamLCP , double *dparamLCP) = NULL;
-/*
- */
 
-int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , int *db , method *pt , double *z , /* in  */ double *w , int *it_end , int *itt_end , double *res)                                                       /* out */
+/* int lcp_solver_block( int *inb , int *iid , double *vec , double *q , int *dn , int *db , method *pt , double *z , double *w , int *it_end ,
+int *itt_end ,double *res ) */
+int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,
+                     int *itt_end , double *res)
+
 {
-
   const char mot1[15] = "LexicoLemke", mot2[10] = "NLGS", mot3[10] = "CPG";
   const char mot4[10] = "QP"         , mot5[10] = "NSQP", mot6[10] = "NewtonMin";
   const char mot7[10] = "Latin";
 
   int info;
-  int n, na, db2, db10;
-  int i, j, k, il, iblock;
+  int n, na, nbbl, nbblrow, blsizemax;
+  int rowprecbl, rowcurbl, indicrow, rowsize;
+  int colprecbl, colcurbl, indiccol, colsize;
+  int i, j, k;
   int iter, itermax, totaliter;
   int info1;
   int incx, incy;
@@ -128,7 +131,8 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   double a1, b1, tol;
   double qs, err, num, den;
 
-  double *ww, *rhs, *zl;
+  double *adrcurbl, *adrbldiag;
+  double *ww, *rhs;
 
   char NOTRANS = 'N';
 
@@ -143,9 +147,22 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   tol       = pt->lcp.tol;
   totaliter = 0;
 
-  n   = (*db) * (*dn);
-  db2 = (*db) * (*db);
-  db10 = (*db) * 10;
+  nbbl = blmat->nbblocks;
+  if (nbbl < 1)
+  {
+    printf(" Problem : Null LCP block matrix !!! \n");
+    return 1;
+  }
+
+  nbblrow = blmat->size;
+  n = 0;
+  blsizemax = 0;
+  for (i = 0 ; i < nbblrow ; i++)
+  {
+    k = blmat->blocksize[i];
+    n += k;
+    if (k > blsizemax) blsizemax = k;
+  }
 
   for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
   for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
@@ -206,8 +223,7 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
 
   ww   = (double*)malloc(n * sizeof(double));
-  rhs  = (double*)malloc((*db) * sizeof(double));
-  zl   = (double*)malloc((*db) * sizeof(double));
+  rhs  = (double*)malloc(blsizemax * sizeof(double));
 
   /* Check for non trivial case */
 
@@ -226,17 +242,33 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
     return info;
   }
 
-  for (i = 0 ; i < n ; ++i)
-  {
-    ww[i] = 0.;
-    w[i]  = 0.;
-  }
 
-  /* Intialization of w */
+  /* Initialization of z and w */
+
+  for (i = 0 ; i < n ; i++) z[i] = 0.;
 
   incx = 1;
   incy = 1;
   dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+
+
+  /*   test on matrix structure : is there null blocks rows ? */
+  rowprecbl = -1;
+  for (i = 0 ; i < nbbl ; i++)
+  {
+    rowcurbl = blmat->RowIndex[i];
+    if (rowcurbl > rowprecbl + 1)
+    {
+      printf(" Null blocks row in LCP matrix !!!\n");
+      return 1;
+    }
+    rowprecbl = rowcurbl;
+  }
+  if (rowcurbl != nbblrow - 1)
+  {
+    printf(" Null blocks row in LCP matrix !!!\n");
+    return 1;
+  }
 
   iter = 0;
   err  = 1.;
@@ -244,50 +276,83 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   while ((iter < itermax) && (err > tol))
   {
 
-    ++iter;
-    iblock = 0;
+    iter++;
 
     incx = 1;
     incy = 1;
 
     dcopy_((integer *)&n , w , (integer *)&incx , ww , (integer *)&incy);
 
-    for (i = 0 ; i < *dn ; ++i)
+    rowprecbl = -1;
+    rowsize = 0;
+    indicrow = 0;
+
+    for (i = 0 ; i < nbbl ; i++)
     {
-
-      na = inb[i];
-
-      incx = 1;
-      incy = 1;
-
-      for (j = 0 ; j < *db ; ++j) rhs[j] = q[(*db) * i + j];
-
-      for (j = 0 ; j < na ; ++j)
+      rowcurbl = blmat->RowIndex[i];
+      colcurbl = blmat->ColumnIndex[i];
+      if (rowcurbl != rowprecbl)   /*  new row  */
       {
-
-        k = iid[iblock] - 1;
-        if (i == k)
+        if (rowprecbl != -1)
         {
-          il = iblock;
-          ++iblock;
-          continue;
+          if (adrbldiag != NULL)
+          {
+            /* Local LCP resolution with NLGS algorithm */
+            (*local_solver)(&rowsize , adrbldiag , rhs , &z[indicrow] , &w[indicrow] , &info1 , iparamLCP , dparamLCP);
+          }
+          else
+          {
+            printf("NULL diagonal block in LCP !!!\n");
+            return 1;
+          }
         }
+        adrbldiag = NULL;
+
+        indiccol = 0;
+        for (j = 0 ; j < colcurbl ; j++) indiccol += blmat->blocksize[j];
+        colprecbl = colcurbl;
+
+        indicrow += rowsize;
+        for (j = rowprecbl + 1 ; j < rowcurbl ; j++) indicrow += blmat->blocksize[j];
+
+        rowprecbl = rowcurbl;
+        rowsize = blmat->blocksize[rowcurbl];
+        for (j = 0 ; j < rowsize ; j++) rhs[j] = q[indicrow + j];
+      }
+      if (rowcurbl == colcurbl)   /* diagonal block  */
+      {
+        adrbldiag = blmat->block[i];
+      }
+      else                        /* extra diagonal block  */
+      {
+        for (j = colprecbl ; j < colcurbl ; j++) indiccol += blmat->blocksize[j];
+        colprecbl = colcurbl;
+
+        rowsize = blmat->blocksize[rowcurbl];
+        colsize = blmat->blocksize[colcurbl];
+        adrcurbl = blmat->block[i];
+
         a1 = 1.;
         b1 = 1.;
         incx = 1;
         incy = 1;
-
-        dgemv_(&NOTRANS , (integer *)db , (integer *)db , &a1 , &vec[iblock * db2] , (integer *)db , &z[(*db)*k] , (integer *)&incx , &b1 , rhs , (integer *)&incy);
-        ++iblock;
-
+        dgemv_(&NOTRANS , (integer *)&rowsize , (integer *)&colsize , &a1 , adrcurbl , (integer *)&rowsize , &z[indiccol] ,
+               (integer *)&incx , &b1 , rhs , (integer *)&incy);
       }
-
-      /* Local LCP resolution with NLGS algorithm */
-
-      (*local_solver)(db , &vec[il * db2] , rhs , &z[(*db)*i] , &w[(*db)*i] , &info1 , iparamLCP , dparamLCP);
-
-      totaliter += iparamLCP[2];
     }
+
+    if (adrbldiag != NULL)
+    {
+      /* Local LCP resolution with NLGS algorithm */
+      (*local_solver)(&rowsize , adrbldiag , rhs , &z[indicrow] , &w[indicrow] , &info1 , iparamLCP , dparamLCP);
+    }
+    else
+    {
+      printf("NULL diagonal block in LCP !!!\n");
+      return 1;
+    }
+
+    totaliter += iparamLCP[2];
 
     /* **** Criterium convergence **** */
 
@@ -299,16 +364,13 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
 
     num = dnrm2_((integer *)&n, ww , (integer *)&incx);
     err = num * den;
-
     /* **** ********************* **** */
-
   }
 
   *it_end  = iter;
   *itt_end = totaliter;
   *res     = err;
 
-  free(zl);
   free(ww);
   free(rhs);
   local_solver = NULL;

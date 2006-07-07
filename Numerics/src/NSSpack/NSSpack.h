@@ -260,6 +260,28 @@ typedef union
 
 } method;
 
+/*!\struct SparseBlockStructuredMatrix
+
+    \brief To store sparse block matrices with square diagonal blocks
+    \brief Filling is done in the order M11,M12,...,M1N,M21,...,MNN
+    \param nbblocks         : the total number of non null blocks
+    \param **block          : *block contains the double values of one block
+                              **block is the list of non null blocks
+    \param size             : the number of blocks along a row (or column)
+    \param *blocksize       : the list of the sizes of diagonal (square) blocks
+    \param *RowIndex        : the list of non null blocks row indices
+    \param *ColumnIndex     : the list of non null blocks column indices
+*/
+
+typedef struct
+{
+  int nbblocks;
+  double **block;
+  int size;
+  int *blocksize;
+  int *RowIndex;
+  int *ColumnIndex;
+} SparseBlockStructuredMatrix;
 
 /*
  * header for C++ compiling / and C compiling
@@ -450,7 +472,13 @@ lcp_newton_min.c
  lcp_solver_block() is a generic interface for block matrices allowing the call of one of the @ref lcp solvers.
 
 */
-extern int lcp_solver_block(int *inb , int *iid , double *vec, double *q , int *nn , int *nb , method *pt , double *z , double *w , int *it_end , int *itt_end , double *res);
+/*
+extern int lcp_solver_block( int *inb , int *iid , double *vec, double *q , int *nn , int *nb , method *pt , double *z ,double *w , int *it_end , int *itt_end , double *res );
+*/
+
+extern int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,
+                            int *itt_end , double *res);
+
 
 /**@}*/
 
