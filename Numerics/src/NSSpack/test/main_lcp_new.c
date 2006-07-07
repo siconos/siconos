@@ -306,7 +306,7 @@ void test_lcp_series(int n , double *vec , double *q)
   printf("\n    Newton (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g | \n \n ", info7, method_lcp7.iter, method_lcp7.err, comp, diff);
 
 #endif
-
+  printf(" Freeing memory in test_lcp_series \n");
   free(z1);
   free(w1);
   free(z2);
@@ -323,6 +323,7 @@ void test_lcp_series(int n , double *vec , double *q)
   free(w7);
   free(z8);
   free(w8);
+  printf(" End freeing memory in test_lcp_series \n");
 
 
 }
@@ -330,10 +331,10 @@ void test_lcp_series(int n , double *vec , double *q)
  ******************************************************************************
  */
 
-void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM , double *q)
+void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 {
 
-  int i, dim;
+  int i, dim, dn, db;
   int incx = 1, incy = 1;
   int info1 = -1, info2 = -1, info3 = -1, info4 = -1, info5 = -1, info6 = -1, info7 = -1;
   int iter1, iter2, iter3, iter4, iter5, iter6, iter7;
@@ -344,6 +345,9 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 
   double *z1, *z2, *z3, *z4, *z5, *z6, *z7;
   double *w1, *w2, *w3, *w4, *w5, *w6, *w7;
+
+  dn = blmat->size;
+  db = blmat->blocksize[0];
 
   dim = dn * db;
 
@@ -380,7 +384,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 
   for (i = 0 ; i < dim ; ++i) z1[i] = 0.0;
 
-  info1 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp1 , z1 , w1 , &iter1 , &titer1 , &err1);
+  info1 = lcp_solver_block(blmat , q , &method_lcp1 , z1 , w1 , &iter1 , &titer1 , &err1);
 
   /* #2 CPG TEST */
 #ifdef BAVARD
@@ -388,7 +392,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 #endif
   for (i = 0 ; i < dim ; ++i) z2[i] = 0.0;
 
-  info2 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp2 , z2 , w2 , &iter2 , &titer2 , &err2);
+  info2 = lcp_solver_block(blmat , q , &method_lcp2 , z2 , w2 , &iter2 , &titer2 , &err2);
 
   /* #3 QP TEST */
 #ifdef BAVARD
@@ -396,7 +400,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 #endif
   for (i = 0 ; i < dim ; ++i) z4[i] = 0.0;
 
-  info4 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp4 , z4 , w4 , &iter4 , &titer4 , &err4);
+  info4 = lcp_solver_block(blmat , q , &method_lcp4 , z4 , w4 , &iter4 , &titer4 , &err4);
 
   /* #4 NSQP TEST */
 #ifdef BAVARD
@@ -404,7 +408,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 #endif
   for (i = 0 ; i < dim ; ++i) z5[i] = 0.0;
 
-  info5 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp5 , z5 , w5 , &iter5 , &titer5 , &err5);
+  info5 = lcp_solver_block(blmat , q , &method_lcp5 , z5 , w5 , &iter5 , &titer5 , &err5);
 
   /* #5 LEXICO LEMKE TEST */
 #ifdef BAVARD
@@ -420,7 +424,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
   titer6 = 0;
   err6 = 0.;
 
-  info6 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp6 , z6 , w6 , &iter6 , &titer6 , &err6);
+  info6 = lcp_solver_block(blmat , q , &method_lcp6 , z6 , w6 , &iter6 , &titer6 , &err6);
 
   /* #7 NEWTONMIN TEST */
 #ifdef BAVARD
@@ -428,7 +432,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 #endif
   for (i = 0 ; i < dim ; ++i) z7[i] = 0.0;
 
-  info7 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp7 , z7 , w7 , &iter7 , &titer7 , &err7);
+  info7 = lcp_solver_block(blmat , q , &method_lcp7 , z7 , w7 , &iter7 , &titer7 , &err7);
 
   /* #8 LATIN TEST */
 #ifdef BAVARD
@@ -436,7 +440,7 @@ void test_lcp_block_series(int dn , int db , int *inb , int * iid , double *vecM
 #endif
   for (i = 0 ; i < dim ; ++i) z3[i] = 0.0;
 
-  info3 = lcp_solver_block(inb , iid , vecM , q , &dn , &db , &method_lcp3 , z3 , w3 , &iter3 , &titer3 , &err3);
+  info3 = lcp_solver_block(blmat , q , &method_lcp3 , z3 , w3 , &iter3 , &titer3 , &err3);
 
 #ifdef BAVARD
   printf(" *** ************************************** ***\n");
@@ -526,7 +530,7 @@ void test_mmc(void)
   char val[20], vall[20];
 
   printf("* *** ******************** *** * \n");
-  printf("* ***        TEST MMC      *** * \n");
+  printf("* *** STARTING TEST MMC... *** * \n");
   printf("* *** ******************** *** * \n");
 
   // computation of the size of the problem
@@ -550,7 +554,7 @@ void test_mmc(void)
   printf("\n SIZE OF THE PROBLEM : %d \n", n);
   fclose(f1);
 
-  vecM = (double *)malloc(n * n * sizeof(double));
+  vecM = (double*)malloc(n * n * sizeof(double));
 
   /* Data loading of M and q */
 
@@ -579,7 +583,7 @@ void test_mmc(void)
   }
 
 
-  q = (double *)malloc(n * sizeof(double));
+  q = (double*)malloc(n * sizeof(double));
 
   for (i = 0 ; i < n ; ++i) q[i] = 0.0;
 
@@ -600,6 +604,11 @@ void test_mmc(void)
   free(vecM);
   free(q);
 
+  printf("* *** ******************** *** * \n");
+  printf("* *** END OF TEST MMC      *** * \n");
+  printf("* *** ******************** *** * \n");
+
+
 }
 
 void test_matrix(void)
@@ -618,6 +627,11 @@ void test_matrix(void)
 
   int iter;
   double criteria;
+
+  printf("* *** ******************** *** * \n");
+  printf("* *** STARTING TEST MATRIX *** * \n");
+  printf("* *** ******************** *** * \n");
+
 
   iter  = 0;
   criteria = 0.0;
@@ -763,6 +777,11 @@ void test_matrix(void)
     free(vecM);
     free(q);
   }
+  printf("* *** ******************** *** * \n");
+  printf("* *** END OF TEST MATRIX   *** * \n");
+  printf("* *** ******************** *** * \n");
+
+
 }
 
 /*
@@ -774,18 +793,22 @@ void test_blockmatrix(void)
 
   FILE *LCPfile;
 
-  int i, j, isol, NBTEST, itest;
+  int i, j, k, isol, NBTEST, itest;
   int dim , dim2;
   int dn, db, db2, nblock, itmp;
 
-  int *inb, *iid;
   double *q , *sol;
-  double *vecM;
 
   char val[20];
 
   int iter, titer;
   double criteria;
+  int *inb;
+  SparseBlockStructuredMatrix blmat;
+
+  printf("* *** ********************         *** * \n");
+  printf("* *** STARTING TEST BLOCKMATRIX... *** * \n");
+  printf("* *** ********************         *** * \n");
 
   iter  = 0;
   titer = 0;
@@ -825,23 +848,38 @@ void test_blockmatrix(void)
     fscanf(LCPfile , "%d" , &dn);
     fscanf(LCPfile , "%d" , &db);
 
-    nblock = 0;
+    blmat.size = dn;
+    blmat.blocksize = (int*) malloc(dn * sizeof(int));
+    for (i = 0 ; i < dn ; i++) blmat.blocksize[i] = db;
 
     inb  = (int*)malloc(dn * sizeof(int));
 
-    for (i = 0 ; i < dn ; ++i)
+    nblock = 0;
+    for (i = 0 ; i < dn ; i++)
     {
       fscanf(LCPfile , "%d" , &itmp);
       inb[i] = itmp;
       nblock += itmp;
     }
+    blmat.nbblocks = nblock;
 
-    iid  = (int*)malloc(nblock * sizeof(int));
+    blmat.RowIndex  = (int*)malloc(nblock * sizeof(int));
+    k = 0;
+    for (i = 0 ; i < dn ; i++)
+    {
+      itmp = inb[i];
+      for (j = 0 ; j < itmp ; j++)
+      {
+        blmat.RowIndex[k] = i;
+        k++;
+      }
+    }
 
-    for (i = 0 ; i < nblock ; ++i)
+    blmat.ColumnIndex  = (int*)malloc(nblock * sizeof(int));
+    for (i = 0 ; i < nblock ; i++)
     {
       fscanf(LCPfile , "%d" , &itmp);
-      iid[i] = itmp;
+      blmat.ColumnIndex[i] = itmp - 1;
     }
 
     dim  = db * dn;
@@ -850,19 +888,19 @@ void test_blockmatrix(void)
 
     q    = (double*)malloc(dim * sizeof(double));
     sol  = (double*)malloc(dim * sizeof(double));
-    vecM = (double*)malloc(dim2 * sizeof(double));
+    blmat.block = (double**)malloc(nblock * sizeof(double*));
+    for (i = 0 ; i < nblock ; i++) blmat.block[i] = (double*)malloc(db2 * sizeof(double));
 
     for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
     for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
-    for (i = 0 ; i < dim2 ; ++i) vecM[i] = 0.0;
 
 
-    for (i = 0 ; i < nblock ; ++i)
+    for (i = 0 ; i < nblock ; i++)
     {
-      for (j = 0 ; j < db2 ; ++j)
+      for (j = 0 ; j < db2 ; j++)
       {
         fscanf(LCPfile, "%s", val);
-        vecM[i * db2 + j] = atof(val);
+        blmat.block[i][j] = atof(val);
       }
     }
 
@@ -900,14 +938,21 @@ void test_blockmatrix(void)
     printf("\n");
 #endif
 
-    test_lcp_block_series(dn , db , inb , iid , vecM , q);
+    test_lcp_block_series(&blmat , q);
 
     free(sol);
-    free(vecM);
     free(q);
-    free(iid);
     free(inb);
+    free(blmat.RowIndex);
+    free(blmat.ColumnIndex);
+    free(blmat.blocksize);
+    for (i = 0 ; i < nblock ; i++) free(blmat.block[i]);
+    free(blmat.block);
+
   }
+  printf("* *** ********************     *** * \n");
+  printf("* *** END OF TEST BLOCKMATRIX  *** * \n");
+  printf("* *** ********************     *** * \n");
 }
 
 /*

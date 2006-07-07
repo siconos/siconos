@@ -1364,7 +1364,7 @@ void test_data(void)
   double qi, Mij;
   double *q, *vec;
 
-  char val[14];
+  char val[20];
 
   /* WARNING STATIC SIZE */
 
