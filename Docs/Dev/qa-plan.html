@@ -948,7 +948,7 @@ Siconos/Engine Siconos/Front-End Software Production</a></h4>
             </ul>
           </li>
           <li>3423 Model Formalisation Unit Production</li>
-          <li>3424 Numerical Strategy Unit Production</li>
+          <li>3424 Numerical Simulation Unit Production</li>
           <li>3425 LMGC90 Unit Production</li>
           <li>3426 XML schema 1.1 compliance</li>
         </ul>
@@ -1715,7 +1715,7 @@ This plan will highlight the communications between the various modules, to
 check the good unfolding of the communications. <br />
 In this document you will find two main parts :</p>
 <ul>
-  <li>a File part, which defines the development strategy used and the
+  <li>a File part, which defines the development simulation used and the
     satisfaction criteria.</li>
   <li>a Result part, which explain the results of the tests and analyze
   them.</li>
@@ -1730,7 +1730,7 @@ These integration tests are done during the development of each module within
 the assigned time. They began when the API was complete and when the
 development was enough advanced.
 <ul style="font-weight: bold;">
-  <li>Testing strategy</li>
+  <li>Testing simulation</li>
 </ul>
 The tests are built to check all the links between modules and that the
 communications are well done.<br />
@@ -1746,7 +1746,7 @@ test file is complete and exhaustive for all the objects the platform manages.
 <ul>
   <li><span style="font-weight: bold;">Development of the tests</span>
     <ul>
-      <li>Communication tests between strategy an the formalization (Work
+      <li>Communication tests between simulation an the formalization (Work
         breakdown structure.3611)</li>
       With this test, we verify that the communications between each
       OneStepIntegrator and his DynamicalSystem are well established, and
@@ -1764,7 +1764,7 @@ test file is complete and exhaustive for all the objects the platform manages.
       other object of the platform must be created. The basement of the
       platform id the "Model" object type. It is a Model that will launch the
       reading of the XML input file. When the XML objects are created, the
-      Model will begin to create and link the formalization ad strategy
+      Model will begin to create and link the formalization ad simulation
       objects to the XML objects. We ensure oneself of the exactitude of the
       result by checking the called functions during the unfolding of the
       test. All the methods called will print to the screen their name in a
@@ -1821,7 +1821,7 @@ simple example, but it allows to validate the stages order of the simulation,
 the functioning of mechanisms for saving and loading xml data as well as the
 plugins' mechanism of the platform.
 <ul style="font-weight: bold;">
-  <li>Testing strategy</li>
+  <li>Testing simulation</li>
 </ul>
 The test takes place in the following way : we read an input data file; file
 written with the moad, then we do computations on the desired number of

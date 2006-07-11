@@ -34,7 +34,6 @@
 #define __SOLVERXML__
 
 #include "SiconosDOMTreeTools.h"
-#include "Solver.h"
 
 class Solver;
 

@@ -22,27 +22,25 @@
 #include "LagrangianR.h"
 using namespace std;
 
-// Default constructor with optional interaction parameter
-LagrangianR::LagrangianR(Interaction* inter):
-  Relation(inter), LagrangianRelationType("default"), isHPlugged(false), hFunctionName("none"),
+// Default constructor
+LagrangianR::LagrangianR():
+  Relation(LAGRANGIANRELATION), LagrangianRelationType("default"), isHPlugged(false), hFunctionName("none"),
   h0Ptr(NULL), G0Ptr(NULL), h1Ptr(NULL), G10Ptr(NULL), G11Ptr(NULL), h2Ptr(NULL), G20Ptr(NULL), G21Ptr(NULL)
 {
   isOutputPlugged = false;
   isInputPlugged  = false;
-  relationType = LAGRANGIANRELATION;
   isHPlugged = false ;
 }
 
 // xml constructor
-LagrangianR::LagrangianR(RelationXML* relxml, Interaction* inter):
-  Relation(relxml, inter), LagrangianRelationType("none"), isHPlugged(true), hFunctionName("none"),
+LagrangianR::LagrangianR(RelationXML* relxml):
+  Relation(relxml, LAGRANGIANRELATION), LagrangianRelationType("none"), isHPlugged(true), hFunctionName("none"),
   h0Ptr(NULL), G0Ptr(NULL), h1Ptr(NULL), G10Ptr(NULL), G11Ptr(NULL), h2Ptr(NULL), G20Ptr(NULL), G21Ptr(NULL)
 {
 
   if (isOutputPlugged || isInputPlugged)
     RuntimeException::selfThrow("LagrangianR:: xml constructor, input and output plug-in must not be set for this kind of relation");
 
-  relationType = LAGRANGIANRELATION;
   LagrangianRXML * LRxml = static_cast<LagrangianRXML *>(relationxml);
   string plugin;
   // problem type
@@ -152,19 +150,13 @@ LagrangianR::LagrangianR(RelationXML* relxml, Interaction* inter):
       isGPlugged.push_back(false);
     }
   }
-
-  // check or set sizes for G
-  if (inter != NULL) // else this will be done during setInteractionPtr call by user
-    manageGMemory();
 }
 
 // constructor from a set of data
-LagrangianR::LagrangianR(const string& lagRelType, const string& computeH, const vector<string> & computeG, Interaction* inter):
-  Relation(inter), LagrangianRelationType(lagRelType), isHPlugged(true), hFunctionName("none"),
+LagrangianR::LagrangianR(const string lagRelType, const string computeH, const vector<string> & computeG):
+  Relation(LAGRANGIANRELATION), LagrangianRelationType(lagRelType), isHPlugged(true), hFunctionName("none"),
   h0Ptr(NULL), G0Ptr(NULL), h1Ptr(NULL), G10Ptr(NULL), G11Ptr(NULL), h2Ptr(NULL), G20Ptr(NULL), G21Ptr(NULL)
 {
-
-  relationType = LAGRANGIANRELATION;
   isOutputPlugged = false;
   isInputPlugged  = false;
 
@@ -199,14 +191,11 @@ LagrangianR::LagrangianR(const string& lagRelType, const string& computeH, const
   // G1 if necessary
   if (LagrangianRelationType == "rhenomorous" || LagrangianRelationType == "scleronomic+lambda")
     setComputeGFunction(cShared.getPluginName(computeG[1]), cShared.getPluginFunctionName(computeG[1]), 1);
-  // Memory allocation for G
-  if (inter != NULL)
-    manageGMemory();
 }
 
-// copy constructor (inter is optional)
-LagrangianR::LagrangianR(const Relation & newLNLR, Interaction* inter):
-  Relation(newLNLR, inter), LagrangianRelationType("none"), isHPlugged(true), hFunctionName("none"),
+// copy constructor
+LagrangianR::LagrangianR(const Relation & newLNLR):
+  Relation(newLNLR), LagrangianRelationType("none"), isHPlugged(true), hFunctionName("none"),
   h0Ptr(NULL), G0Ptr(NULL), h1Ptr(NULL), G10Ptr(NULL), G11Ptr(NULL)
 {
   if (relationType !=  LAGRANGIANRELATION && relationType !=  LAGRANGIANLINEARRELATION)
@@ -283,9 +272,6 @@ LagrangianR::LagrangianR(const Relation & newLNLR, Interaction* inter):
   }
   else
     RuntimeException::selfThrow("LagrangianR:: copy constructor, not yet implemented for problem of type" + LagrangianRelationType);
-
-  if (interaction != NULL)
-    manageGMemory();
 }
 
 LagrangianR::~LagrangianR()
@@ -311,6 +297,12 @@ LagrangianR::~LagrangianR()
   G21Ptr = NULL;
 }
 
+void LagrangianR::initialize()
+{
+  Relation::initialize();
+  manageGMemory();
+}
+
 void LagrangianR::manageGMemory()
 {
   if (interaction != NULL)
@@ -329,7 +321,7 @@ void LagrangianR::manageGMemory()
       size0 = G[0]->size(0);
       size1 = G[0]->size(1);
       if (size0 != sizeY || size1 != sizeQ)
-        RuntimeException::selfThrow("LagrangianR:: setInteractionPtr, inconsistent sizes for G[0] with interaction dimensions.");
+        RuntimeException::selfThrow("LagrangianR:: manageGMemory, inconsistent sizes for G[0] with interaction dimensions.");
     }
 
     if (LagrangianRelationType == "rhenomorous")
@@ -344,7 +336,7 @@ void LagrangianR::manageGMemory()
         size0 = G[1]->size(0);
         size1 = G[1]->size(1);
         if (size0 != sizeY || size1 != 1)
-          RuntimeException::selfThrow("LagrangianR:: setInteractionPtr, inconsistent sizes for G[1] with interaction dimensions.");
+          RuntimeException::selfThrow("LagrangianR:: manageGMemory, inconsistent sizes for G[1] with interaction dimensions.");
       }
     }
     if (LagrangianRelationType == "scleronomic+lambda")
@@ -359,7 +351,7 @@ void LagrangianR::manageGMemory()
         size0 = G[1]->size(0);
         size1 = G[1]->size(1);
         if (size0 != sizeY || size1 != sizeY)
-          RuntimeException::selfThrow("LagrangianR:: setInteractionPtr, inconsistent sizes for G[1] with interaction dimensions.");
+          RuntimeException::selfThrow("LagrangianR:: manageGMemory, inconsistent sizes for G[1] with interaction dimensions.");
       }
     }
   }
@@ -367,16 +359,7 @@ void LagrangianR::manageGMemory()
     cout << "LagrangianR::manageGMemory, no interaction linked to the current relation, can not set size for G" << endl;
 }
 
-void LagrangianR::setInteractionPtr(Interaction* newInter)
-{
-  interaction = newInter;
-  if (interaction != NULL)
-    manageGMemory();
-  else
-    RuntimeException::selfThrow("LagrangianR::setInteractionPtr, input interaction ==NULL ");
-}
-
-void LagrangianR::setLagrangianRelationType(const string & type)
+void LagrangianR::setLagrangianRelationType(const string  type)
 {
   // Warning: this function reset G to NULL !!
   stringstream sstr;
@@ -468,7 +451,7 @@ void LagrangianR::setGVector(const vector<SiconosMatrix*>& newVector)
   }
 }
 
-void LagrangianR::setG(const SiconosMatrix& newValue, const unsigned int & index)
+void LagrangianR::setG(const SiconosMatrix& newValue, const unsigned int  index)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianR:: setG, no interaction linked to the current relation");
@@ -503,7 +486,7 @@ void LagrangianR::setG(const SiconosMatrix& newValue, const unsigned int & index
   isGPlugged[index] = false;
 }
 
-void LagrangianR::setGPtr(SiconosMatrix *newPtr, const unsigned int & index)
+void LagrangianR::setGPtr(SiconosMatrix *newPtr, const unsigned int  index)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianR:: setGPtr, no interaction linked to the current relation");
@@ -534,7 +517,7 @@ void LagrangianR::setGPtr(SiconosMatrix *newPtr, const unsigned int & index)
   isGPlugged[index] = false;
 }
 
-void LagrangianR::setComputeHFunction(const string& pluginPath, const string& functionName)
+void LagrangianR::setComputeHFunction(const string pluginPath, const string functionName)
 {
   if (LagrangianRelationType == "scleronomic")
     cShared.setFunction(&h0Ptr, pluginPath, functionName);
@@ -553,7 +536,7 @@ void LagrangianR::setComputeHFunction(const string& pluginPath, const string& fu
   isHPlugged = true;
 }
 
-void LagrangianR::setComputeGFunction(const string& pluginPath, const string& functionName, const unsigned int & index)
+void LagrangianR::setComputeGFunction(const string pluginPath, const string functionName, const unsigned int  index)
 {
   if (index >= G.size())
     RuntimeException::selfThrow("LagrangianR:: setComputeGFunction, index out of range. Use rather setGVector?");
@@ -602,7 +585,7 @@ void LagrangianR::setComputeGFunction(const string& pluginPath, const string& fu
   isGPlugged[index] = true;
 }
 
-void LagrangianR::computeH(const double& time)
+void LagrangianR::computeH(const double time)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianR:computeH(): no interaction linked with relation");
@@ -611,7 +594,7 @@ void LagrangianR::computeH(const double& time)
   unsigned int sizeQ = interaction->getSizeOfDS();
 
   // Get the DS concerned by the interaction of this relation
-  DSSet vDS = interaction->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   DSIterator it;
   string type;
   BlockVector *qTmp = new BlockVector();
@@ -633,35 +616,46 @@ void LagrangianR::computeH(const double& time)
   }
 
   // get vector y of the current interaction
-  SimpleVector *y = interaction->getYPtr(0);
-  SimpleVector *lambda = interaction->getLambdaPtr(0);
+  SiconosVector *y = interaction->getYPtr(0);
+  SiconosVector *lambda = interaction->getLambdaPtr(0);
 
-  SimpleVector* param = parametersList["h"];
+  SiconosVector* param = parametersList["h"];
+
+  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  SimpleVector * qTmp2 = new SimpleVector(*qTmp);
+  SimpleVector * yTmp = new SimpleVector(*y);
 
   if (LagrangianRelationType == "scleronomic")
   {
     if (h0Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeH() is not linked to a plugin function");
-    h0Ptr(sizeQ, &(*qTmp)(0) , sizeY, &(*y)(0), &(*param)(0));
+    h0Ptr(sizeQ, &(*qTmp2)(0) , sizeY, &(*yTmp)(0), &(*param)(0));
   }
   else if (LagrangianRelationType == "rhenomorous")
   {
     if (h1Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeH() is not linked to a plugin function");
-    h1Ptr(sizeQ, &(*qTmp)(0), &time, sizeY,  &(*y)(0), &(*param)(0));
+    h1Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY,  &(*yTmp)(0), &(*param)(0));
   }
   else if (LagrangianRelationType == "scleronomic+lambda")
   {
+    SimpleVector * lambdaTmp = new SimpleVector(*lambda);
     if (h2Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeH() is not linked to a plugin function");
-    h2Ptr(sizeQ, &(*qTmp)(0), &(*lambda)(0), sizeY,  &(*y)(0), &(*param)(0));
+    h2Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY,  &(*yTmp)(0), &(*param)(0));
+    //*lambda = * lambdaTmp;
+    delete lambdaTmp;
   }
   else
     RuntimeException::selfThrow("LagrangianR::computeH,  not yet implemented for this type of constraints");
+
+  *y = *yTmp;
   delete qTmp;
+  delete qTmp2;
+  delete yTmp;
 }
 
-void LagrangianR::computeG(const double & time, const unsigned int & index)
+void LagrangianR::computeG(const double  time, const unsigned int  index)
 {
 
   if (index >= G.size())
@@ -672,7 +666,7 @@ void LagrangianR::computeG(const double & time, const unsigned int & index)
   unsigned int sizeY = interaction->getInteractionSize();
   unsigned int sizeQ = interaction->getSizeOfDS();
   // Get the DS concerned by the interaction of this relation
-  DSSet vDS = interaction->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   DSIterator it;
   string type;
   BlockVector *qTmp = new BlockVector();
@@ -694,8 +688,11 @@ void LagrangianR::computeG(const double & time, const unsigned int & index)
   }
 
   // get vector lambda of the current interaction
-  SimpleVector *lambda = interaction->getLambdaPtr(0);
-  SimpleVector* param;
+  SiconosVector *lambda = interaction->getLambdaPtr(0);
+  SiconosVector* param;
+
+  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  SimpleVector * qTmp2 = new SimpleVector(*qTmp);
 
   if (LagrangianRelationType == "scleronomic")
   {
@@ -703,7 +700,7 @@ void LagrangianR::computeG(const double & time, const unsigned int & index)
     SiconosMatrix * Gtmp = G[0];
     if (G0Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-    G0Ptr(sizeQ, &(*qTmp)(0), sizeY, &(*Gtmp)(0, 0), &(*param)(0));
+    G0Ptr(sizeQ, &(*qTmp2)(0), sizeY, &(*Gtmp)(0, 0), &(*param)(0));
   }
   else if (LagrangianRelationType == "rhenomorous")
   {
@@ -713,14 +710,14 @@ void LagrangianR::computeG(const double & time, const unsigned int & index)
       if (G10Ptr == NULL)
         RuntimeException::selfThrow("computeG() is not linked to a plugin function");
       param = parametersList["G10"];
-      G10Ptr(sizeQ, &(*qTmp)(0), &time, sizeY, &(*Gtmp)(0, 0), &(*param)(0));
+      G10Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*Gtmp)(0, 0), &(*param)(0));
     }
     else if (index == 1)
     {
       if (G11Ptr == NULL)
         RuntimeException::selfThrow("computeG() is not linked to a plugin function");
       param = parametersList["G11"];
-      G11Ptr(sizeQ, &(*qTmp)(0), &time, sizeY, &(*Gtmp)(0, 0), &(*param)(0));
+      G11Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*Gtmp)(0, 0), &(*param)(0));
     }
     else
       RuntimeException::selfThrow("LagrangianR::computeG, index out of range");
@@ -728,31 +725,35 @@ void LagrangianR::computeG(const double & time, const unsigned int & index)
   else if (LagrangianRelationType == "scleronomic+lambda")
   {
     SiconosMatrix * Gtmp = G[index];
+    SimpleVector * lambdaTmp = new SimpleVector(*lambda);
     if (index == 0)
     {
       if (G20Ptr == NULL)
         RuntimeException::selfThrow("computeG() is not linked to a plugin function");
       param = parametersList["G20"];
-      G20Ptr(sizeQ, &(*qTmp)(0), &(*lambda)(0), sizeY, &(*Gtmp)(0, 0), &(*param)(0));
+      G20Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY, &(*Gtmp)(0, 0), &(*param)(0));
     }
     else if (index == 1)
     {
       if (G21Ptr == NULL)
         RuntimeException::selfThrow("computeG() is not linked to a plugin function");
       param = parametersList["G21"];
-      G21Ptr(sizeQ, &(*qTmp)(0), &(*lambda)(0), sizeY, &(*Gtmp)(0, 0), &(*param)(0));
+      G21Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY, &(*Gtmp)(0, 0), &(*param)(0));
     }
     else
       RuntimeException::selfThrow("LagrangianR::computeG, index out of range");
+    //*lambda = * lambdaTmp;
+    delete lambdaTmp;
   }
   else
     RuntimeException::selfThrow("LagrangianR::computeG,  not yet implemented for this type of constraints");
 
   delete qTmp;
+  delete qTmp2;
 
 }
 
-void LagrangianR::computeOutput(const double& time)
+void LagrangianR::computeOutput(const double time)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianR::computeOutput, no interaction linked with this relation");
@@ -761,7 +762,7 @@ void LagrangianR::computeOutput(const double& time)
   unsigned int sizeQ = interaction->getSizeOfDS();
 
   // Get the DS concerned by the interaction of this relation
-  DSSet vDS = interaction->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   DSIterator it;
   string type;
   BlockVector *qTmp = new BlockVector();
@@ -785,11 +786,15 @@ void LagrangianR::computeOutput(const double& time)
   }
 
   // get y and yDot of the interaction
-  SimpleVector *y = interaction->getYPtr(0);
-  SimpleVector *yDot = interaction->getYPtr(1);
-  SimpleVector *lambda = interaction->getLambdaPtr(0);
-  SimpleVector *lambdaDot = interaction->getLambdaPtr(1);
-  SimpleVector* param;
+  SiconosVector *y = interaction->getYPtr(0);
+  SiconosVector *yDot = interaction->getYPtr(1);
+  SiconosVector *lambda = interaction->getLambdaPtr(0);
+  SiconosVector *lambdaDot = interaction->getLambdaPtr(1);
+  SiconosVector* param;
+
+  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  SimpleVector * qTmp2 = new SimpleVector(*qTmp);
+  SimpleVector * yTmp = new SimpleVector(*y);
 
   // y = h(...) and yDot = GqDot
   if (LagrangianRelationType == "scleronomic")
@@ -797,12 +802,12 @@ void LagrangianR::computeOutput(const double& time)
     if (h0Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeOutput() h0 is not linked to a plugin function");
     param = parametersList["h"];
-    h0Ptr(sizeQ, &(*qTmp)(0) , sizeY, &(*y)(0), &(*param)(0));
+    h0Ptr(sizeQ, &(*qTmp2)(0) , sizeY, &(*yTmp)(0), &(*param)(0));
     SiconosMatrix * Gtmp = G[0];
     if (G0Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G0"];
-    G0Ptr(sizeQ, &(*qTmp)(0), sizeY, &(*Gtmp)(0, 0), &(*param)(0));
+    G0Ptr(sizeQ, &(*qTmp2)(0), sizeY, &(*Gtmp)(0, 0), &(*param)(0));
     *yDot = *Gtmp * *velocityTmp;
   }
   // y = h(...) and yDot = G10qDot + G11
@@ -811,55 +816,61 @@ void LagrangianR::computeOutput(const double& time)
     if (h1Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeOutput() h1 is not linked to a plugin function");
     param = parametersList["h"];
-    h1Ptr(sizeQ, &(*qTmp)(0), &time, sizeY,  &(*y)(0), &(*param)(0));
+    h1Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY,  &(*yTmp)(0), &(*param)(0));
     SiconosMatrix * G0tmp = G[0];
     SiconosMatrix * G1tmp = G[1];
 
     if (G10Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G10"];
-    G10Ptr(sizeQ, &(*qTmp)(0), &time, sizeY, &(*G0tmp)(0, 0), &(*param)(0));
+    G10Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*G0tmp)(0, 0), &(*param)(0));
 
     if (G11Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G11"];
-    G11Ptr(sizeQ, &(*qTmp)(0), &time, sizeY, &(*G1tmp)(0, 0), &(*param)(0));
+    G11Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*G1tmp)(0, 0), &(*param)(0));
 
     // warning: G1 is a matrix
-    SimpleVector * Id = new SimpleVector(1);
+    SiconosVector * Id = new SimpleVector(1);
     (*Id)(0) = 1.0;
     *yDot = *G0tmp * *velocityTmp + *G1tmp * *Id;
     delete Id;
   }
   else if (LagrangianRelationType == "scleronomic+lambda")
   {
+    SimpleVector * lambdaTmp = new SimpleVector(*lambda);
     if (h1Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeOutput() h2 is not linked to a plugin function");
     param = parametersList["h"];
-    h2Ptr(sizeQ, &(*qTmp)(0), &(*lambda)(0), sizeY,  &(*y)(0), &(*param)(0));
+    h2Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY,  &(*yTmp)(0), &(*param)(0));
     SiconosMatrix * G0tmp = G[0];
     SiconosMatrix * G1tmp = G[1];
 
     if (G20Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G20"];
-    G20Ptr(sizeQ, &(*qTmp)(0), &(*lambda)(0), sizeY, &(*G0tmp)(0, 0), &(*param)(0));
+    G20Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY, &(*G0tmp)(0, 0), &(*param)(0));
 
     if (G21Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G21"];
-    G21Ptr(sizeQ, &(*qTmp)(0), &(*lambda)(0), sizeY, &(*G1tmp)(0, 0), &(*param)(0));
+    G21Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY, &(*G1tmp)(0, 0), &(*param)(0));
 
     *yDot = *G0tmp * *velocityTmp + *G1tmp * *lambdaDot;
+    delete lambdaTmp;
   }
   else
     RuntimeException::selfThrow("LagrangianR::computeOutput(),  not yet implemented for this type of constraints");
 
+  *y = *yTmp;
   // free memory
   delete qTmp;
+  delete yTmp;
   delete velocityTmp;
 }
-void LagrangianR::computeFreeOutput(const double& time)
+
+
+void LagrangianR::computeFreeOutput(const double time)
 {
   // warning: the only difference with computeOutput is that we get qFREE and velocityFREE instead of q and velocity.
   if (interaction == NULL)
@@ -869,7 +880,7 @@ void LagrangianR::computeFreeOutput(const double& time)
   unsigned int sizeQ = interaction->getSizeOfDS();
 
   // Get the DS concerned by the interaction of this relation
-  DSSet vDS = interaction->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   DSIterator it;
   string type;
   BlockVector *qTmp = new BlockVector();
@@ -893,11 +904,15 @@ void LagrangianR::computeFreeOutput(const double& time)
   }
 
   // get y and yDot of the interaction
-  SimpleVector *y = interaction->getYPtr(0);
-  SimpleVector *yDot = interaction->getYPtr(1);
-  SimpleVector *lambda = interaction->getLambdaPtr(0);
-  SimpleVector *lambdaDot = interaction->getLambdaPtr(1);
-  SimpleVector* param;
+  SiconosVector *y = interaction->getYPtr(0);
+  SiconosVector *yDot = interaction->getYPtr(1);
+  SiconosVector *lambda = interaction->getLambdaPtr(0);
+  SiconosVector *lambdaDot = interaction->getLambdaPtr(1);
+  SiconosVector* param;
+
+  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  SimpleVector * qTmp2 = new SimpleVector(*qTmp);
+  SimpleVector * yTmp = new SimpleVector(*y);
 
   // y = h(...) and yDot = GqDot
   if (LagrangianRelationType == "scleronomic")
@@ -905,12 +920,12 @@ void LagrangianR::computeFreeOutput(const double& time)
     if (h0Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeOutput() h0 is not linked to a plugin function");
     param = parametersList["h"];
-    h0Ptr(sizeQ, &(*qTmp)(0) , sizeY, &(*y)(0), &(*param)(0));
+    h0Ptr(sizeQ, &(*qTmp2)(0) , sizeY, &(*yTmp)(0), &(*param)(0));
     SiconosMatrix * Gtmp = G[0];
     if (G0Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G0"];
-    G0Ptr(sizeQ, &(*qTmp)(0), sizeY, &(*Gtmp)(0, 0), &(*param)(0));
+    G0Ptr(sizeQ, &(*qTmp2)(0), sizeY, &(*Gtmp)(0, 0), &(*param)(0));
 
     *yDot = *Gtmp * *velocityTmp;
   }
@@ -921,62 +936,67 @@ void LagrangianR::computeFreeOutput(const double& time)
     if (h1Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeOutput() h1 is not linked to a plugin function");
     param = parametersList["h"];
-    h1Ptr(sizeQ, &(*qTmp)(0), &time, sizeY,  &(*y)(0), &(*param)(0));
+    h1Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY,  &(*yTmp)(0), &(*param)(0));
     SiconosMatrix * G0tmp = G[0];
     SiconosMatrix * G1tmp = G[0];
 
     if (G10Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G10"];
-    G10Ptr(sizeQ, &(*qTmp)(0), &time, sizeY, &(*G0tmp)(0, 0), &(*param)(0));
+    G10Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*G0tmp)(0, 0), &(*param)(0));
 
     if (G11Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G11"];
-    G11Ptr(sizeQ, &(*qTmp)(0), &time, sizeY, &(*G1tmp)(0, 0), &(*param)(0));
+    G11Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*G1tmp)(0, 0), &(*param)(0));
 
     // warning: G1 is a matrix
-    SimpleVector * Id = new SimpleVector(1);
+    SiconosVector * Id = new SimpleVector(1);
     (*Id)(0) = 1.0;
     *yDot = *G0tmp * *velocityTmp + *G1tmp * *Id;
   }
   else if (LagrangianRelationType == "scleronomic+lambda")
   {
+    SimpleVector * lambdaTmp = new SimpleVector(*lambda);
     if (h1Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeOutput() h2 is not linked to a plugin function");
     param = parametersList["h"];
-    h2Ptr(sizeQ, &(*qTmp)(0), &(*lambda)(0), sizeY,  &(*y)(0), &(*param)(0));
+    h2Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY,  &(*yTmp)(0), &(*param)(0));
     SiconosMatrix * G0tmp = G[0];
     SiconosMatrix * G1tmp = G[1];
 
     if (G20Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G20"];
-    G20Ptr(sizeQ, &(*qTmp)(0), &(*lambda)(0), sizeY, &(*G0tmp)(0, 0), &(*param)(0));
+    G20Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY, &(*G0tmp)(0, 0), &(*param)(0));
 
     if (G21Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G21"];
-    G21Ptr(sizeQ, &(*qTmp)(0), &(*lambda)(0), sizeY, &(*G1tmp)(0, 0), &(*param)(0));
+    G21Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY, &(*G1tmp)(0, 0), &(*param)(0));
 
     *yDot = *G0tmp * *velocityTmp + *G1tmp * *lambdaDot;
+    delete lambdaTmp;
   }
   else
     RuntimeException::selfThrow("LagrangianR::computeOutput(),  not yet implemented for this type of constraints");
 
+  *y = *yTmp;
 
   // free memory
+  delete qTmp2;
   delete qTmp;
+  delete yTmp;
   delete velocityTmp;
 }
 
-void LagrangianR::computeInput(const double& time)
+void LagrangianR::computeInput(const double time)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianLinearR::computeInput, no interaction linked with this relation");
 
   // Get the DS concerned by the interaction of this relation
-  DSSet vDS = interaction->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   DSIterator it;
   string type;
 
@@ -998,7 +1018,7 @@ void LagrangianR::computeInput(const double& time)
   }
 
   // get lambda of the concerned interaction
-  SimpleVector *lambda = interaction->getLambdaPtr(1);
+  SiconosVector *lambda = interaction->getLambdaPtr(1);
 
   if (LagrangianRelationType == "scleronomic")
   {
@@ -1010,10 +1030,10 @@ void LagrangianR::computeInput(const double& time)
   delete p;
 }
 
-void LagrangianR::getGBlockDS(DynamicalSystem * ds, SiconosMatrix& Block, const unsigned & index) const
+void LagrangianR::getGBlockDS(DynamicalSystem * ds, SiconosMatrix& Block, const unsigned  index) const
 {
   unsigned int k = 0;
-  DSSet vDS = interaction ->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction ->getDynamicalSystems();
   DSIterator itDS;
   itDS = vDS.begin();
 
@@ -1037,11 +1057,11 @@ void LagrangianR::getGBlockDS(DynamicalSystem * ds, SiconosMatrix& Block, const 
   G[index]->getBlock(index_list, Block);
 }
 
-void LagrangianR::getGBlockDS(const int& DSNumber, SiconosMatrix& Block, const unsigned & index) const
+void LagrangianR::getGBlockDS(const int DSNumber, SiconosMatrix& Block, const unsigned  index) const
 {
   unsigned int k = 0;
 
-  DSSet vDS = interaction ->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction ->getDynamicalSystems();
 
   DSIterator itDS = vDS.begin();
 

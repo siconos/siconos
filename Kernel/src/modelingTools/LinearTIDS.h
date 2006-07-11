@@ -67,7 +67,7 @@ class LinearDSXML;
  * Setting a value to A, automatically set jacobianX.
  *
  * To build and use a linearDS, you first need to call a constructor, with A as a required data.
- * Then, this system has to be initialized -> compute members value at time t0. This is usually done during call to strategy->initialize.
+ * Then, this system has to be initialized -> compute members value at time t0. This is usually done during call to simulation->initialize.
  * Finally, the state of the DS can be obtained by calling "compute" functions. In LinearTIDS case, since A and b are fixed, you can
  * only call computeRhs(time), to compute rhs = Ax+b+Tu.
  *
@@ -94,16 +94,16 @@ public:
    */
   LinearTIDS(DynamicalSystemXML *, NonSmoothDynamicalSystem* = NULL);
 
-  /** \fn LinearTIDS(const int& ref, const unsigned int& n, const SiconosVector& x0, const SiconosMatrix& A);
+  /** \fn LinearTIDS(const int ref, const SiconosVector& x0, const SiconosMatrix& A);
    *  \brief constructor from a set of data
    *  \param int : reference number of this DynamicalSystem
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param SiconosMatrix: A
    *  \exception RuntimeException
    */
-  LinearTIDS(const int&, const SiconosVector&, const SiconosMatrix&);
+  LinearTIDS(const int, const SiconosVector&, const SiconosMatrix&);
 
-  /** \fn LinearTIDS(const int& ref, const unsigned int& n, const SiconosVector& x0, const SiconosMatrix& A, const SiconosVector& b);
+  /** \fn LinearTIDS(const int ref, const SiconosVector& x0, const SiconosMatrix& A, const SiconosVector& b);
    *  \brief constructor from a set of data
    *  \param int : reference number of this DynamicalSystem
    *  \param SiconosVector : the initial state of this DynamicalSystem
@@ -111,7 +111,7 @@ public:
    *  \param SiconosVector: b
    *  \exception RuntimeException
    */
-  LinearTIDS(const int&, const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
+  LinearTIDS(const int, const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
 
   /** \fn LinearTIDS(const LinearTIDS &)
    *  \brief copy constructor
@@ -135,28 +135,28 @@ public:
    */
   bool checkDynamicalSystem();
 
-  /** \fn void initialize(const double& = 0, const unsigned int& = 1) ;
+  /** \fn void initialize(const double = 0, const unsigned int = 1) ;
    *  \brief dynamical system initialization function: mainly set memory and compute value for initial state values.
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  //  void initialize(const double& = 0, const unsigned int& = 1) ;
+  //  void initialize(const double = 0, const unsigned int = 1) ;
 
-  /** \fn void computeRhs(const double& time, const bool & =false)
+  /** \fn void computeRhs(const double time, const bool  =false)
    *  \brief Default function to the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  void computeRhs(const double&, const bool & = false);
+  void computeRhs(const double, const bool  = false);
 
-  /** \fn static void computeJacobianXRhs(const double& time, const bool & =false)
+  /** \fn static void computeJacobianXRhs(const double time, const bool  =false)
    *  \brief Default function to jacobian of the right-hand side term according to x
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  void computeJacobianXRhs(const double&, const bool & = false);
+  void computeJacobianXRhs(const double, const bool  = false);
 
   /** \fn void display()
    *  \brief data display on screen

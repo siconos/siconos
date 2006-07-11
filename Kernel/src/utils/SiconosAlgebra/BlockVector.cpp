@@ -27,7 +27,7 @@ BlockVector::BlockVector(): SiconosVector()
 }
 
 // From a file
-BlockVector::BlockVector(const string& file, const bool& ascii): SiconosVector()
+BlockVector::BlockVector(const string file, const bool ascii): SiconosVector()
 {
   string mode;
   isBlockVector = true;
@@ -58,6 +58,7 @@ BlockVector::BlockVector(vector<SimpleVector*> v): SiconosVector()
   {
     svref.push_back(v[i]);
     tabindex.push_back(v[i]->size());
+    if (i > 0) tabindex[i] += tabindex[i - 1];
     isSvrefAllocatedIn.push_back(false);
   }
 }
@@ -90,6 +91,7 @@ BlockVector::BlockVector(SimpleVector* v1, SimpleVector* v2): SiconosVector()
   {
     svref.push_back(v2);
     tabindex.push_back(v2->size());
+    tabindex[1] += tabindex[0];
     isSvrefAllocatedIn.push_back(false);
   }
   else // If second parameter is a NULL pointer, then set this(2) to a SimpleVector of the same size as v1, and equal to 0.
@@ -97,6 +99,7 @@ BlockVector::BlockVector(SimpleVector* v1, SimpleVector* v2): SiconosVector()
     // This case is usefull to set xDot in LagrangianDS.
     svref.push_back(new SimpleVector(v1->size()));
     tabindex.push_back(v1->size());
+    tabindex[1] += tabindex[0];
     isSvrefAllocatedIn.push_back(true);
   }
 }
@@ -123,6 +126,21 @@ BlockVector::BlockVector(const BlockVector& v): SiconosVector()
     SiconosVectorException::selfThrow("BlockVector: copy constructor, auto copy");
 }
 
+// with two int: the number of blocks and the dim of each block
+BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dimOfaBlock): SiconosVector()
+{
+
+  isBlockVector = true;
+  svref.reserve(numberOfBlocks);
+  tabindex.reserve(numberOfBlocks);
+  for (unsigned int i = 0; i < numberOfBlocks; ++i)
+  {
+    svref.push_back(new SimpleVector(dimOfaBlock));
+    tabindex.push_back((i + 1)*dimOfaBlock);
+    isSvrefAllocatedIn.push_back(true);
+  }
+}
+
 BlockVector::~BlockVector()
 {
   for (unsigned int i = 0; i < svref.size(); i++)
@@ -132,7 +150,7 @@ BlockVector::~BlockVector()
   }
 }
 
-SimpleVector* BlockVector::getVectorPtr(const unsigned int& i)
+SimpleVector* BlockVector::getVectorPtr(const unsigned int i)
 {
   if (i > svref.size())
     SiconosVectorException::selfThrow("BlockVector:getVectorPtr(i), i out of range.");
@@ -153,14 +171,16 @@ void BlockVector::display() const
   cout << endl << " ======================== " << endl;
 }
 
-double& BlockVector::operator()(const int unsigned& index) const
+double& BlockVector::operator()(const int unsigned index) const
 {
   if (index > tabindex[tabindex.size() - 1])
     SiconosVectorException::selfThrow(" BlockVector::operator() -- index out of range");
 
   // locate which vector of svref corresponds to index
   unsigned int numVect = 0;
-  while (index >= tabindex[numVect] && numVect < tabindex.size()) numVect++;
+  while (index >= tabindex[numVect] && numVect < tabindex.size())
+    numVect++;
+
   // get position of required index in vector numVect
   unsigned int pos = 0;
   if (numVect == 0)
@@ -193,7 +213,7 @@ void BlockVector::addPtr(SimpleVector*v)
   isSvrefAllocatedIn.push_back(false);
 }
 
-void BlockVector::setValues(const vector<double>& v, const int unsigned& i)
+void BlockVector::setValues(const vector<double>& v, const int unsigned i)
 {
   if (svref.size() <= i)
     SiconosVectorException::selfThrow("BlockVector::setValues -- index out of range");
@@ -212,7 +232,7 @@ void BlockVector::setValues(const vector<double>& v, const int unsigned& i)
 }
 
 
-const LaVectorDouble BlockVector::getValues(const unsigned int& i) const
+const LaVectorDouble BlockVector::getValues(const unsigned int i) const
 {
   if (svref.size() <= i)
     SiconosVectorException::selfThrow("BlockVector::getValues -- index out of range");
@@ -221,7 +241,7 @@ const LaVectorDouble BlockVector::getValues(const unsigned int& i) const
   return svref[i]->getValues();
 }
 
-unsigned int BlockVector::size(const unsigned int& i) const
+unsigned int BlockVector::size(const unsigned int i) const
 {
   if (i > 1) SiconosVectorException::selfThrow("BlockVector::size(i) -- index i out of range");
   if (i == 0)
@@ -234,7 +254,7 @@ unsigned int BlockVector::size(const unsigned int& i) const
     return tabindex.size();
 }
 
-bool BlockVector::read(const string& fileName, const string& mode)
+bool BlockVector::read(const string fileName, const string mode)
 {
   // warning: this function reads the whole vector and overwrites existing values !!
   // to read only one part of the std::vector, use read for a SimpleVector and then
@@ -319,7 +339,7 @@ bool BlockVector::read(const string& fileName, const string& mode)
 }
 
 
-bool BlockVector::write(const string& fileName, const  string& mode) const
+bool BlockVector::write(const string fileName, const  string mode) const
 {
   bool res = false;
   if ((mode != "binary") && (mode != "ascii"))
@@ -426,13 +446,13 @@ BlockVector& BlockVector::operator = (const SiconosVector& v)
 //          SPECIFIC INTERNAL OPERATORS
 //==============================================================================
 
-BlockVector &BlockVector::operator*=(const double& d)
+BlockVector &BlockVector::operator*=(const double d)
 {
   *this = *this * d;
   return *this;
 }
 
-BlockVector &BlockVector::operator/=(const double& d)
+BlockVector &BlockVector::operator/=(const double d)
 {
   *this = *this / d;
   return *this;
@@ -507,7 +527,7 @@ BlockVector BlockVector::subtraction(const SiconosVector& v1) const
 //          SPECIFIC EXTERNAL OPERATORS
 //=============================================================================
 
-BlockVector operator * (const BlockVector& v, const double& d)
+BlockVector operator * (const BlockVector& v, const double d)
 {
   BlockVector tmp(v);
   unsigned int size = v.size();
@@ -517,7 +537,7 @@ BlockVector operator * (const BlockVector& v, const double& d)
 }
 
 
-BlockVector operator * (const double& d, const BlockVector& v)
+BlockVector operator * (const double d, const BlockVector& v)
 {
   BlockVector tmp(v);
   unsigned int size = v.size();
@@ -527,7 +547,7 @@ BlockVector operator * (const double& d, const BlockVector& v)
 }
 
 
-BlockVector operator / (const BlockVector& v, const double& d)
+BlockVector operator / (const BlockVector& v, const double d)
 {
   if (d == 0.0)
     SiconosVectorException::selfThrow(" BlockVector operator/   --- division by 0");

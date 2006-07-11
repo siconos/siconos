@@ -36,7 +36,7 @@ const double EventsManager::intToDoubleTime(const unsigned long int& intTime) co
 }
 
 // insert event functions.
-// schedule is required by strategy.
+// schedule is required by simulation.
 //  -> necessary to insert a new event AND to update current/past event
 // There are two different functions, to avoid multiple nextEvent update during initialize calls of insertEvent.
 const bool EventsManager::insertEvent(const string& type, const double& time)
@@ -66,13 +66,13 @@ const bool EventsManager::insertEvent(const string& type, const double& time)
 RuntimeCmp<Event> compareEvents(&Event::getTimeOfEvent);
 
 // Default/from data constructor
-EventsManager::EventsManager(const double& inputTick, Strategy * newStrat):
-  pastEvents(compareEvents), unProcessedEvents(compareEvents), currentEvent(NULL), nextEvent(NULL), tick(inputTick), strategy(newStrat)
+EventsManager::EventsManager(const double& inputTick, Simulation * newStrat):
+  pastEvents(compareEvents), unProcessedEvents(compareEvents), currentEvent(NULL), nextEvent(NULL), tick(inputTick), simulation(newStrat)
 {}
 
 // copy constructor
 EventsManager::EventsManager(const EventsManager& newManager):
-  pastEvents(compareEvents), unProcessedEvents(compareEvents), currentEvent(NULL), nextEvent(NULL), tick(newManager.getTick()), strategy(newManager.getStrategyPtr())
+  pastEvents(compareEvents), unProcessedEvents(compareEvents), currentEvent(NULL), nextEvent(NULL), tick(newManager.getTick()), simulation(newManager.getSimulationPtr())
 {
   // ?? allow copy of Events ?? => no.
   RuntimeException::selfThrow("EventsManager copy constructor, not yet implemented, please avoid copy!");
@@ -97,11 +97,11 @@ EventsManager::~EventsManager()
 
 void EventsManager::initialize()
 {
-  if (strategy == NULL)
-    RuntimeException::selfThrow("EventsManager initialize, no strategy linked to the manager.");
+  if (simulation == NULL)
+    RuntimeException::selfThrow("EventsManager initialize, no simulation linked to the manager.");
 
   // === get original, user, time discretisation. ===
-  TimeDiscretisation * td = strategy->getTimeDiscretisationPtr();
+  TimeDiscretisation * td = simulation->getTimeDiscretisationPtr();
 
   // === insert TimeDiscretisation into the unProcessedEvents set. ===
   scheduleTimeDiscretisation(td);
@@ -229,10 +229,10 @@ const double EventsManager::getNextTime() const
 void EventsManager::display() const
 {
   cout << "=== EventsManager data display ===" << endl;
-  if (strategy != NULL)
-    cout << "- This manager belongs to the strategy named \" " << strategy->getName() << "\", of type " << strategy->getType() << "." << endl;
+  if (simulation != NULL)
+    cout << "- This manager belongs to the simulation named \" " << simulation->getName() << "\", of type " << simulation->getType() << "." << endl;
   else
-    cout << "- No strategy linked to this manager." << endl;
+    cout << "- No simulation linked to this manager." << endl;
   cout << " - Tick: " << tick << endl;
   eventsContainer::iterator it;
   cout << " - The number of already processed events is: " << pastEvents.size() << endl;
@@ -248,7 +248,7 @@ const bool EventsManager::scheduleEvent(const string& type, const double& time)
 {
   // === get original, user, time discretisation. ===
   //     and check that t0 < time < T
-  TimeDiscretisation * td = strategy->getTimeDiscretisationPtr();
+  TimeDiscretisation * td = simulation->getTimeDiscretisationPtr();
   if (time < td->getT0() || time > td->getT())
     RuntimeException::selfThrow("EventsManager scheduleEvent(..., time), time out of bounds ([t0,T]).");
 

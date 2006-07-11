@@ -114,10 +114,10 @@
     <UML:Attribute visibility="private" xmi.id="2082" value="" type="xmlNode *" name="ENode" />
     <UML:Attribute visibility="private" xmi.id="2083" value="" type="xmlNode *" name="bNode" />
    </UML:Class>
-   <UML:Class stereotype="class" visibility="public" xmi.id="2108" name="StrategyXML" >
-    <UML:Operation visibility="public" xmi.id="2113" type="" name="StrategyXML" />
-    <UML:Operation visibility="public" xmi.id="2114" type="" name="StrategyXML" >
-     <UML:Parameter visibility="private" xmi.id="2115" value="" type="xmlNode *" name="rootStrategyNode" />
+   <UML:Class stereotype="class" visibility="public" xmi.id="2108" name="SimulationXML" >
+    <UML:Operation visibility="public" xmi.id="2113" type="" name="SimulationXML" />
+    <UML:Operation visibility="public" xmi.id="2114" type="" name="SimulationXML" >
+     <UML:Parameter visibility="private" xmi.id="2115" value="" type="xmlNode *" name="rootSimulationNode" />
      <UML:Parameter visibility="private" xmi.id="2116" value="" type="std :: vector &lt; int > definedNumberDS" />
      <UML:Parameter visibility="private" xmi.id="2117" value="" type="std :: vector &lt; int > definedNumberInteraction" />
     </UML:Operation>
@@ -132,19 +132,19 @@
     <UML:Operation visibility="protected" xmi.id="2125" type="void" name="loadOneStepNSProblemXML" >
      <UML:Parameter visibility="private" xmi.id="2126" value="" type="xmlNode *" name="rootOneStepNSProblemNode" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2127" type="void" name="loadStrategy" >
-     <UML:Parameter visibility="private" xmi.id="2128" value="" type="Strategy *" />
+    <UML:Operation visibility="public" xmi.id="2127" type="void" name="loadSimulation" >
+     <UML:Parameter visibility="private" xmi.id="2128" value="" type="Simulation *" />
     </UML:Operation>
-    <UML:Operation visibility="protected" xmi.id="2129" type="void" name="loadStrategyXML" />
+    <UML:Operation visibility="protected" xmi.id="2129" type="void" name="loadSimulationXML" />
     <UML:Operation visibility="protected" xmi.id="2130" type="void" name="loadTimeDiscretisationXML" >
      <UML:Parameter visibility="private" xmi.id="2131" value="" type="xmlNode *" name="rootTimeDiscretisationNode" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2132" type="void" name="updateStrategyXML" >
+    <UML:Operation visibility="public" xmi.id="2132" type="void" name="updateSimulationXML" >
      <UML:Parameter visibility="private" xmi.id="2133" value="" type="xmlNode *" name="node" />
-     <UML:Parameter visibility="private" xmi.id="2134" value="" type="Strategy *" name="str" />
+     <UML:Parameter visibility="private" xmi.id="2134" value="" type="Simulation *" name="str" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="2135" type="" name="~StrategyXML" />
-    <UML:Attribute visibility="private" xmi.id="2110" value="" type="xmlNode *" name="strategyNode" />
+    <UML:Operation visibility="public" xmi.id="2135" type="" name="~SimulationXML" />
+    <UML:Attribute visibility="private" xmi.id="2110" value="" type="xmlNode *" name="simulationNode" />
    </UML:Class>
    <UML:Class stereotype="class" visibility="public" xmi.id="2111" name="TimeDiscretisationXML" >
     <UML:Operation visibility="public" xmi.id="2426" type="" name="TimeDiscretisationXML" />

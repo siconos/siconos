@@ -21,12 +21,10 @@
 using namespace std;
 
 
-QP::QP(OneStepNSProblemXML* osnspbxml, Strategy* newStrat):
-  OneStepNSProblem(osnspbxml, newStrat), Q(NULL), p(NULL),
+QP::QP(OneStepNSProblemXML* osnspbxml, Simulation* newStrat):
+  OneStepNSProblem("QP", osnspbxml, newStrat), Q(NULL), p(NULL),
   isQAllocatedIn(true), isPAllocatedIn(true)
-{
-  nspbType = "QP";
-}
+{}
 
 QP::~QP()
 {}

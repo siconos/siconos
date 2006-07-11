@@ -17,28 +17,24 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/** \class StrategyXML
- *   \brief This class manages Strategy data part
+/** \class SimulationXML
+ *   \brief This class manages Simulation data part
  *  \author SICONOS Development Team - copyright INRIA
  *   \version 1.2.0.
  *   \date 05/17/2004
  *
  *
  *
- * StrategyXML allows to get OneStepIntegratorXMLs and OneStepNSProblemXMLs from a DOM tree.
+ * SimulationXML allows to get OneStepIntegratorXMLs and OneStepNSProblemXMLs from a DOM tree.
  */
-#ifndef __STRATEGYXML__
-#define __STRATEGYXML__
+#ifndef __SIMULATIONXML__
+#define __SIMULATIONXML__
 
-#include "Strategy.h"
 #include "SiconosDOMTreeTools.h"
 
-#include "OneStepIntegratorXML.h"
-#include "OneStepNSProblemXML.h"
-#include "TimeDiscretisationXML.h"
 #include <set>
 
-class Strategy;
+class Simulation;
 class OneStepIntegratorXML;
 class OneStepNSProblemXML;
 class TimeDiscretisationXML;
@@ -51,12 +47,12 @@ typedef SetOfOSIXML::iterator SetOfOSIXMLIt;
 
 
 
-class StrategyXML
+class SimulationXML
 {
 
 private:
 
-  /* root node for strategy */
+  /* root node for simulation */
   xmlNodePtr rootNode;
 
   /* set of OneStepIntegratorXML* */
@@ -70,26 +66,26 @@ private:
 
 public:
 
-  /** \fn StrategyXML()
+  /** \fn SimulationXML()
    *   \brief Default constructor
    */
-  StrategyXML();
+  SimulationXML();
 
-  /** \fn StrategyXML(xmlNodePtr rootStrategyNode)
-   *   \brief Build a StrategyXML object from a DOM tree describing a Strategy
-   *   \param the Strategy xml node
+  /** \fn SimulationXML(xmlNodePtr rootSimulationNode)
+   *   \brief Build a SimulationXML object from a DOM tree describing a Simulation
+   *   \param the Simulation xml node
    */
-  StrategyXML(xmlNodePtr rootStrategyNode);
+  SimulationXML(xmlNodePtr rootSimulationNode);
 
-  /** \fn ~StrategyXML()
+  /** \fn ~SimulationXML()
    *  \brief destructor
    */
-  ~StrategyXML();
+  ~SimulationXML();
 
   // --- GETTERS/SETTERS ---
 
   /** \fn xmlNodePtr getRootNode()
-   *  \brief Return the root node of the Strategy -> tag "Strategy"
+   *  \brief Return the root node of the Simulation -> tag "Simulation"
    *  \return xmlNodePtr  : the root node
    */
   inline xmlNodePtr getRootNode()
@@ -116,8 +112,8 @@ public:
   }
 
   /** \fn * OneStepNSProblemXML getOneStepNSProblemXMLPtr()
-   *   \brief Return the OneStepNSProblemXML pointer of the StrategyXML
-   *   \return the OneStepNSProblemXML pointer of the StrategyXML ; NULL if StrategyXML does not have
+   *   \brief Return the OneStepNSProblemXML pointer of the SimulationXML
+   *   \return the OneStepNSProblemXML pointer of the SimulationXML ; NULL if SimulationXML does not have
    */
   inline OneStepNSProblemXML * getOneStepNSProblemXMLPtr()
   {
@@ -125,25 +121,25 @@ public:
   }
 
   /** \fn TimeDiscretisationXML* getTimeDiscretisationXMLPtr()
-   *   \brief Return the TimeDiscretisationXML of the StrategyXML
-   *   \return the TimeDiscretisationXML of the StrategyXML
+   *   \brief Return the TimeDiscretisationXML of the SimulationXML
+   *   \return the TimeDiscretisationXML of the SimulationXML
    */
   inline TimeDiscretisationXML* getTimeDiscretisationXMLPtr()
   {
     return timeDiscretisationXML;
   }
 
-  /** \fn inline string getStrategyXMLType()
-   *   \brief Return the type of the Strategy
-   *   \return the type of the StrategyXML
+  /** \fn inline string getSimulationXMLType()
+   *   \brief Return the type of the Simulation
+   *   \return the type of the SimulationXML
    */
-  inline std::string  getStrategyXMLType()
+  inline std::string  getSimulationXMLType()
   {
     return SiconosDOMTreeTools::getStringAttributeValue(rootNode, TYPE_ATTRIBUTE);
   }
 
   /** \fn bool hasOneStepNSProblemXML()
-   *   \brief determines if the Strategy has a OneStepNSProblemXML
+   *   \brief determines if the Simulation has a OneStepNSProblemXML
    *   \return bool :  false if the oneStepNSProblemXML* is NULL
    */
   inline const bool hasOneStepNSProblemXML() const
@@ -151,12 +147,12 @@ public:
     return (oneStepNSProblemXML != NULL);
   }
 
-  /** \fn void saveStrategy2XML( xmlNodePtr  node, Strategy* str )
+  /** \fn void saveSimulation2XML( xmlNodePtr  node, Simulation* str )
    *   \brief save data of str into the DOM tree
-   *   \param xmlNodePtr  : the root node of the StrategyXML
-   *   \param Strategy* : the Strategy of this StrategyXML
+   *   \param xmlNodePtr  : the root node of the SimulationXML
+   *   \param Simulation* : the Simulation of this SimulationXML
    */
-  void saveStrategy2XML(xmlNodePtr  , Strategy*);
+  void saveSimulation2XML(xmlNodePtr  , Simulation*);
 };
 
 

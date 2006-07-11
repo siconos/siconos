@@ -37,7 +37,6 @@ private:
   //CPPUNIT_TEST(testBuildModel);
   CPPUNIT_TEST(testBuildModel1);
   CPPUNIT_TEST(testBuildModel2);
-  CPPUNIT_TEST(testSetStrategyPtr);
   CPPUNIT_TEST(testsetNonSmoothDynamicalSystemPtr);
   CPPUNIT_TEST(testsetSiconosModelXMLPtr);
   CPPUNIT_TEST(End);
@@ -47,7 +46,6 @@ private:
 
   void testBuildModel1();
   void testBuildModel2();
-  void testSetStrategyPtr();
   void testsetNonSmoothDynamicalSystemPtr();
   void testsetSiconosModelXMLPtr();
   void End();

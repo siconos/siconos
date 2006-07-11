@@ -23,10 +23,10 @@ using namespace std;
 
 // --- Default constructor ---
 TimeDiscretisation::TimeDiscretisation(): h(0.0), nSteps(0), tk(NULL), hMin(0.0), hMax(0.0), constant(0),
-  timeDiscretisationXML(NULL), k(0), strategy(NULL), isTkAllocatedIn(false), tdCase(0)
+  timeDiscretisationXML(NULL), k(0), simulation(NULL), isTkAllocatedIn(false), tdCase(0)
 {}
 
-void TimeDiscretisation::checkCase(const bool& hasTk, const bool& hasH, const bool& hasNSteps, const bool& hasT)
+void TimeDiscretisation::checkCase(const bool hasTk, const bool hasH, const bool hasNSteps, const bool hasT)
 {
   if (hasTk && hasT) tdCase = 1;     // Case of constructor I
   else if (hasTk && !hasT) tdCase = 2; // Case of constructor I
@@ -39,7 +39,7 @@ void TimeDiscretisation::checkCase(const bool& hasTk, const bool& hasH, const bo
   else tdCase = 0;
 }
 
-void TimeDiscretisation::compute(const int& tdCase)
+void TimeDiscretisation::compute(const int tdCase)
 {
   // load time min value from the model
   double t0 = getT0();
@@ -116,12 +116,12 @@ void TimeDiscretisation::compute(const int& tdCase)
 // --- CONSTRUCTORS ---
 
 // IO Constructors -> XML
-TimeDiscretisation::TimeDiscretisation(TimeDiscretisationXML * tdXML, Strategy* str):
+TimeDiscretisation::TimeDiscretisation(TimeDiscretisationXML * tdXML, Simulation* simu):
   h(0.0), nSteps(0), tk(NULL), hMin(0.0), hMax(0.0), constant(0), timeDiscretisationXML(tdXML),
-  k(0), strategy(str), isTkAllocatedIn(false), tdCase(0)
+  k(0), simulation(simu), isTkAllocatedIn(false), tdCase(0)
 {
-  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Strategy=NULL!");
-  strategy->setTimeDiscretisationPtr(this);
+  if (simulation == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Simulation=NULL!");
+  simulation->setTimeDiscretisationPtr(this);
 
   if (timeDiscretisationXML != NULL)
   {
@@ -157,13 +157,13 @@ TimeDiscretisation::TimeDiscretisation(TimeDiscretisationXML * tdXML, Strategy* 
 
 // --- Straightforward constructors ---
 
-// Provide tk and strategy (I)
-TimeDiscretisation::TimeDiscretisation(SimpleVector *newTk, Strategy* str):
+// Provide tk and simulation (I)
+TimeDiscretisation::TimeDiscretisation(SimpleVector *newTk, Simulation* simu):
   h(0), nSteps(0), tk(NULL), hMin(0), hMax(0), constant(1),
-  timeDiscretisationXML(NULL), k(0), strategy(str), isTkAllocatedIn(true), tdCase(0)
+  timeDiscretisationXML(NULL), k(0), simulation(simu), isTkAllocatedIn(true), tdCase(0)
 {
-  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation:: data constructor - Strategy=NULL!");
-  strategy->setTimeDiscretisationPtr(this);
+  if (simulation == NULL) RuntimeException::selfThrow("TimeDiscretisation:: data constructor - Simulation=NULL!");
+  simulation->setTimeDiscretisationPtr(this);
   // Allocate memory for tk and fill it
   tk = new SimpleVector(newTk->size());
   *tk = *newTk;
@@ -172,34 +172,34 @@ TimeDiscretisation::TimeDiscretisation(SimpleVector *newTk, Strategy* str):
 }
 
 // Provide h and nSteps, calculate tk (II)
-TimeDiscretisation::TimeDiscretisation(const double& newH, const unsigned int& newNSteps, Strategy* str):
+TimeDiscretisation::TimeDiscretisation(const double newH, const unsigned int newNSteps, Simulation* simu):
   h(newH), nSteps(newNSteps), tk(NULL), hMin(newH), hMax(newH), constant(1),
-  timeDiscretisationXML(NULL), k(0), strategy(str), isTkAllocatedIn(false), tdCase(0)
+  timeDiscretisationXML(NULL), k(0), simulation(simu), isTkAllocatedIn(false), tdCase(0)
 {
-  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::data constructor - Strategy=NULL!");
-  strategy->setTimeDiscretisationPtr(this);
+  if (simulation == NULL) RuntimeException::selfThrow("TimeDiscretisation::data constructor - Simulation=NULL!");
+  simulation->setTimeDiscretisationPtr(this);
   checkCase(0, 1, 1, hasT());
   compute(tdCase);
 }
 
 // Provide nSteps, calculate h and tk (III)
-TimeDiscretisation::TimeDiscretisation(const unsigned int& newNSteps, Strategy* str):
+TimeDiscretisation::TimeDiscretisation(const unsigned int newNSteps, Simulation* simu):
   h(0), nSteps(newNSteps), tk(NULL), hMin(0), hMax(0), constant(1),
-  timeDiscretisationXML(NULL), k(0), strategy(str), isTkAllocatedIn(false), tdCase(0)
+  timeDiscretisationXML(NULL), k(0), simulation(simu), isTkAllocatedIn(false), tdCase(0)
 {
-  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::data constructor - Strategy=NULL!");
-  strategy->setTimeDiscretisationPtr(this);
+  if (simulation == NULL) RuntimeException::selfThrow("TimeDiscretisation::data constructor - Simulation=NULL!");
+  simulation->setTimeDiscretisationPtr(this);
   checkCase(0, 0, 1, hasT());
   compute(tdCase);
 }
 
 // Provide h, calculate nSteps and tk (IV)
-TimeDiscretisation::TimeDiscretisation(const double& newH, Strategy* str):
+TimeDiscretisation::TimeDiscretisation(const double newH, Simulation* simu):
   h(newH), nSteps(0), tk(NULL), hMin(newH), hMax(newH), constant(1),
-  timeDiscretisationXML(NULL), k(0), strategy(str), isTkAllocatedIn(false), tdCase(0)
+  timeDiscretisationXML(NULL), k(0), simulation(simu), isTkAllocatedIn(false), tdCase(0)
 {
-  if (strategy == NULL) RuntimeException::selfThrow("TimeDiscretisation::data constructor - Strategy=NULL!");
-  strategy->setTimeDiscretisationPtr(this);
+  if (simulation == NULL) RuntimeException::selfThrow("TimeDiscretisation::data constructor - Simulation=NULL!");
+  simulation->setTimeDiscretisationPtr(this);
   checkCase(0, 1, 0, hasT());
   compute(tdCase);
 }
@@ -211,7 +211,7 @@ TimeDiscretisation::~TimeDiscretisation()
   tk = NULL;
 }
 
-void TimeDiscretisation::setH(const double& newH)
+void TimeDiscretisation::setH(const double newH)
 {
   h = newH;
   // depending on initial way of construction, the whole time discretisation
@@ -223,7 +223,7 @@ void TimeDiscretisation::setH(const double& newH)
   compute(tdCase);
 }
 
-void TimeDiscretisation::setNSteps(const unsigned int& newNSteps)
+void TimeDiscretisation::setNSteps(const unsigned int newNSteps)
 {
   nSteps = newNSteps;
   // depending on initial way of construction, the whole time discretisation
@@ -268,15 +268,15 @@ void TimeDiscretisation::setTkPtr(SimpleVector *newPtr)
 // --- Functions to manage t0 and T (data of the model)
 const double TimeDiscretisation::getT0() const
 {
-  return strategy->getModelPtr()->getT0();
+  return simulation->getModelPtr()->getT0();
 }
 
-void TimeDiscretisation::setT0(const double& newValue)
+void TimeDiscretisation::setT0(const double newValue)
 {
-  if (strategy->getModelPtr() == NULL)
+  if (simulation->getModelPtr() == NULL)
     RuntimeException::selfThrow("TimeDiscretisation::setT0, no Model linked to this time discretisation");
   (*tk)(0) = newValue;
-  strategy->getModelPtr()->t0 = newValue;
+  simulation->getModelPtr()->t0 = newValue;
   if (hasT() && newValue >= getT())
     RuntimeException::selfThrow("TimeDiscretisation::setT0, input value for t0 greater than T (final time).");
 
@@ -293,12 +293,12 @@ const bool TimeDiscretisation::hasT() const
 
 const double TimeDiscretisation::getT() const
 {
-  return strategy->getModelPtr()->getFinalT();
+  return simulation->getModelPtr()->getFinalT();
 }
 
-inline void TimeDiscretisation::setT(const double& newValue)
+inline void TimeDiscretisation::setT(const double newValue)
 {
-  strategy->getModelPtr()->setFinalT(newValue);
+  simulation->getModelPtr()->setFinalT(newValue);
   (*tk)(nSteps) = newValue;
 }
 

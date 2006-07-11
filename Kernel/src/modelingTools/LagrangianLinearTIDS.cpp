@@ -25,6 +25,8 @@ void LagrangianLinearTIDS::connectToDS()
   // Warning: computation of jacobianX or FInt is done in initialize, not here, since this function is called at the
   // end of constructor, and that operators are likely to be updated with set functions or else.
 
+  LagrangianDS::connectToDS();
+
   if (K != NULL || C != NULL)
   {
     // FInt
@@ -51,13 +53,13 @@ void LagrangianLinearTIDS::connectToDS()
   // Remark: all other operators are NULL pointers (NNL, jacobian ...). See LagrangianTIDS description in User Manual for details.
 
 }
-void LagrangianLinearTIDS::initAllocationFlags(const bool& in)
+void LagrangianLinearTIDS::initAllocationFlags(const bool in)
 {
   isAllocatedIn["C"] = in; // By default, neither K nor C are allocated in, whatever the value of in is.
   isAllocatedIn["K"] = in;
 }
 
-void LagrangianLinearTIDS::initPluginFlags(const bool& val)
+void LagrangianLinearTIDS::initPluginFlags(const bool val)
 {
   // For LagrangianLinearTIDS, the only authorized plug-in is for fExt. All other plug-in flags are set to false.
   isPlugin["mass"] = false;
@@ -84,26 +86,17 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(DynamicalSystemXML * dsXML,  NonSmoot
   initPluginFlags(false);
 
   DSType = LTIDS;
-  if (dsXML != NULL)
-  {
-    LagrangianLinearTIDSXML * lltidsxml = (static_cast <LagrangianLinearTIDSXML*>(dsxml));
-    if (lltidsxml->hasK())
-      K = new SimpleMatrix(lltidsxml->getK());
-    else isAllocatedIn["K"] = false;
-    if (lltidsxml->hasC())
-      C = new SimpleMatrix(lltidsxml->getC());
-    else isAllocatedIn["C"] = false;
-  }
-  else RuntimeException::selfThrow("LagrangianLinearTIDS::LagrangianLinearTIDS - DynamicalSystemXML paramater must not be NULL");
-
-  connectToDS();// set connections with FInt and jacobianX
-
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+  LagrangianLinearTIDSXML * lltidsxml = (static_cast <LagrangianLinearTIDSXML*>(dsxml));
+  if (lltidsxml->hasK())
+    K = new SimpleMatrix(lltidsxml->getK());
+  else isAllocatedIn["K"] = false;
+  if (lltidsxml->hasC())
+    C = new SimpleMatrix(lltidsxml->getC());
+  else isAllocatedIn["C"] = false;
 }
 
 // --- Constructor from a set of data - Mass, K and C ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
+LagrangianLinearTIDS::LagrangianLinearTIDS(const int newNumber, const unsigned int newNdof,
     const SimpleVector& newQ0, const SimpleVector& newVelocity0,
     const SiconosMatrix& newMass, const SiconosMatrix& newK, const SiconosMatrix& newC):
   LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, newMass), K(NULL), C(NULL)
@@ -118,16 +111,13 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned 
 
   K = new SimpleMatrix(newK);
   C = new SimpleMatrix(newC);
-  connectToDS(); // set connections with FInt and jacobianX
 
   DSType = LTIDS;
   initAllocationFlags(true);
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 // --- Constructor from a set of data - Mass, no K and no C ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(const int& newNumber, const unsigned int& newNdof,
+LagrangianLinearTIDS::LagrangianLinearTIDS(const int newNumber, const unsigned int newNdof,
     const SimpleVector& newQ0, const SimpleVector& newVelocity0,
     const SiconosMatrix& newMass):
   LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, newMass), K(NULL), C(NULL)
@@ -206,11 +196,6 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const DynamicalSystem & newDS):
     C = new SimpleMatrix(ltids->getC());
     isAllocatedIn["C"] = true;
   }
-
-  connectToDS(); // set connections with FInt and jacobianX
-
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 LagrangianLinearTIDS::~LagrangianLinearTIDS()
@@ -269,8 +254,13 @@ bool LagrangianLinearTIDS::checkDynamicalSystem()
   return output;
 }
 
-void LagrangianLinearTIDS::initialize(const double& time, const unsigned int& sizeOfMemory)
+void LagrangianLinearTIDS::initialize(const double time, const unsigned int sizeOfMemory)
 {
+  // Set variables of top-class DynamicalSystem
+  connectToDS(); // note that connection can not be done during constructor call, since user can complete the ds after (add plugin or anything else).
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+
   // set q and velocity to q0 and velocity0
   *q = *q0;
   *velocity = *velocity0;
@@ -401,7 +391,7 @@ void LagrangianLinearTIDS::display() const
   cout << "=========================================================== " << endl;
 }
 
-void LagrangianLinearTIDS::computeRhs(const double& time, const bool &)
+void LagrangianLinearTIDS::computeRhs(const double time, const bool)
 {
   // second argument is useless but present because of top-class function overloading.
 
@@ -439,7 +429,7 @@ void LagrangianLinearTIDS::computeRhs(const double& time, const bool &)
   }
 }
 
-void LagrangianLinearTIDS::computeJacobianXRhs(const double& time, const bool &)
+void LagrangianLinearTIDS::computeJacobianXRhs(const double time, const bool)
 {
   // second argument is useless but present because of top-class function overloading.
   if (K != NULL || C != NULL) // else jacobianX = 0

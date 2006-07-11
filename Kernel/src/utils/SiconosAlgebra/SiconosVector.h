@@ -83,11 +83,11 @@ public:
 
   // !!! WARNING : all the following functions are to be implemented in derivated classes !!!
 
-  /** \fn SiconosVector* getVectorPtr(const unsigned int&) const;
+  /** \fn SiconosVector* getVectorPtr(const unsigned int) const;
    *  \brief if this is a block vector return i-eme SimpleVector, else return this.
    * \return a pointer to a SimpleVector
    */
-  virtual SiconosVector* getVectorPtr(const unsigned int&) = 0;
+  virtual SiconosVector* getVectorPtr(const unsigned int) = 0;
 
   /** \fn std::vector<unsigned int> getTabIndex() const
    *  \brief get the index tab (usefull only for block vector, should not be used for simple) => avoid downcast
@@ -110,49 +110,49 @@ public:
   // for a BlockVector w that contains 2 SiconosVector of size 3
   // w(4) corresponds to the first element of the second vector.
 
-  /** \fn operator ()(const int unsigned& index)
+  /** \fn operator ()(const int unsigned index)
    *  \brief get the element at position i in the vector
    *  \param an integer i
    *  \exception SiconosVectorException
    *  \return a double
    */
-  virtual double& operator()(const int unsigned&) const = 0;
+  virtual double& operator()(const int unsigned) const = 0;
 
   /** \fn void setValue(const int unsigned index, const double d)
    *  \brief set the value of one element of the vector
    *  \param double d : the new value
    *  \param int index : the position of the element which is set
    */
-  virtual void setValue(const int unsigned&, const double&) = 0 ;
+  virtual void setValue(const int unsigned, const double) = 0 ;
 
   /** \fn double getValue(const int unsigned i)
    *  \brief get the value of index i element of the vector
    *  \param int index : the position of the element
    */
-  virtual const double getValue(const int unsigned& index) const = 0;
+  virtual const double getValue(const int unsigned index) const = 0;
 
-  /** \fn void setValues(const vector<double> v, const int& = 0)
+  /** \fn void setValues(const vector<double> v, const unsigned int = 0)
    *  \brief set the values of the vector to a new set of value
    *  \param vector<double> v
    *  \param optional, only for block vector, to set values of vector number i
    */
-  virtual void setValues(const std::vector<double>& v, const unsigned int& = 0) = 0;
+  virtual void setValues(const std::vector<double>& v, const unsigned int = 0) = 0;
 
-  /** \fn const LaVectorDouble getValues(const int& i) const
+  /** \fn const LaVectorDouble getValues(const unsigned int i) const
    *  \brief get the values saved in vector (depends on vector type)
    *  \param optional, only for block vector, to get values of vector number i
    *  \return a LaVectorDouble
    */
-  virtual const LaVectorDouble getValues(const int unsigned& = 0) const = 0;
+  virtual const LaVectorDouble getValues(const int unsigned = 0) const = 0;
 
-  /** \fn unsigned int size() const
+  /** \fn unsigned int size(const unsigned int = 0) const
    *  \brief get the vector size, ie the total number of (double)
    *  elements in the vector
    * \param (optional). =0 -> number of element in the vector
    *                    =1 -> number of subvectors if block vector
    *  \return int
    */
-  virtual unsigned int size(const unsigned int& = 0) const = 0 ;
+  virtual unsigned int size(const unsigned int = 0) const = 0 ;
 
   /** \fn bool read(std::string fileName, std::string mode = ASCII)
    *  \brief write the vector in a file
@@ -161,7 +161,7 @@ public:
    *  \exception SiconosVectorException
    *  \return true if no error
    */
-  virtual bool read(const std::string& , const std::string& = DEFAULT_FORMAT) = 0;
+  virtual bool read(const std::string , const std::string = DEFAULT_FORMAT) = 0;
 
   /** \fn bool write(std::string fileName, std::string mode = ASCII)
    *  \brief write the vector in a file
@@ -170,7 +170,7 @@ public:
    *  \exception SiconosVectorException
    *  \return true if no error
    */
-  virtual bool write(const std::string& , const std::string& = DEFAULT_FORMAT) const  = 0 ;
+  virtual bool write(const std::string , const std::string = DEFAULT_FORMAT) const  = 0 ;
 
   /** \fn double* getArray()
    *  \brief return the array of double values of the vector
@@ -223,7 +223,7 @@ public:
    *  \exception SiconosVectorException
    *  \return the result of the multiplication in the current vector
    */
-  virtual SiconosVector &operator*=(const double&) = 0;
+  virtual SiconosVector &operator*=(const double) = 0;
 
   /** \fn operator/=(const double)
    *  \brief divide the current vector with a double
@@ -231,7 +231,7 @@ public:
    *  \exception SiconosVectorException
    *  \return the result of the division in the current vector
    */
-  virtual SiconosVector &operator/=(const double&) = 0;
+  virtual SiconosVector &operator/=(const double) = 0;
 
   /** \fn operator=(const SiconosVector& v)
    *  \brief assignment operator

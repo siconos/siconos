@@ -19,15 +19,20 @@
 #ifndef UNITARYRELATION_H
 #define UNITARYRELATION_H
 
-//#include "Interaction.h"
-
 // tools
 #include "SimpleVector.h"
 #include "RuntimeException.h"
 // const
 #include "SiconosConst.h"
 
+#include <vector>
+
 class Interaction;
+class DynamicalSystem;
+class DynamicalSystemsSet;
+
+/** container for SiconosVectors*/
+typedef std::vector< SimpleVector* > VectorOfUnitaryVectors ;
 
 /** \class UnitaryRelation
  *  \brief this class is an interface to single relations from Interactions
@@ -39,6 +44,22 @@ class Interaction;
  * is sizeOfInteraction/nsLawSize. A UnitaryRelation is one of the relations of the Interaction. Actually, this class only provides an interface
  * to handle single relations, this for IndexSets used in Topology.
  * Each UnitaryRelation has a pointer to its "mother" Interaction  and methods to compute y, lambda and so on.
+ *
+ * - Blocks computation: in OneStepNSProblem, some operators/matrices are required to compute the blocks matrices (used for example for the assembly
+ * of Mlcp matrix).
+ * In the present class, three methods are available to get the required blocks:
+ *  getLeftBlockForDS, getRightBlockForDS and getExtraBlock, with the general model for block computation:
+ *
+ * block = getExtraBlock  +  getLeftBlockForDS * W * getRightBlockForDS
+ *
+ * Examples:
+ *   => LinearTIR, block = D + h*theta*C*W*B  (D != NULL only for blocks on the diagonal of the full-assembled matrix)
+ *    and thus getExtraBlock = D, getLeftBlockForDS = C, getRightBlockForDS = B.
+ *
+ *   => Lagrangian, block = G* W* transpose(G)  (G=H for lagrangian linear)
+ *     ie getExtraBlock = NULL, getLeftBlockForDS = getRightBlockForDS = G (transpose is done using matMultTranspose)
+ *
+ * Moreover, for, G, B, etc ... we only get the part corresponding to a specific DynamicalSystem (which belongs to the UnitaryRelation)
  *
  */
 
@@ -56,6 +77,9 @@ private:
    of mainInteraction, thus the relative position is equal to 2. */
   unsigned int relativePosition;
 
+  /** number of the relation, ie the number of the corresponding block vector in the main Interaction.*/
+  unsigned int number;
+
   /** \fn UnitaryRelation()
    *  \brief default constructor
    */
@@ -71,14 +95,15 @@ public:
    *  \brief copy constructor
    *  \param UnitaryRelation* : the object to copy
    */
-  UnitaryRelation(const UnitaryRelation& inter);
+  UnitaryRelation(const UnitaryRelation&);
 
-  /** \fn UnitaryRelation(Interaction* , const unsigned int&);
+  /** \fn UnitaryRelation(Interaction* , const unsigned int, const unsigned int);
    *  \brief constructor from a pointer to Interaction
    *  \param Interaction * : Interaction object from which a list of relation will be "extracted"
-   *  \param unsigned int: give the relative position of the relation inside the y vector of the interaction
+   *  \param unsigned int: gives the relative position of the relation inside the y vector of the interaction
+   *  \param unsigned int: gives the number of the block in y vector of the interaction that corresponds to the present unitary relation.
    */
-  UnitaryRelation(Interaction* , const unsigned int&);
+  UnitaryRelation(Interaction* , const unsigned int, const unsigned int);
 
   /** \fn ~UnitaryRelation()
    * \brief destructor
@@ -103,20 +128,113 @@ public:
     return relativePosition;
   } ;
 
-  /** \fn const double getY(const unsigned int& i) const
-   *  \brief get y[i], derivative number i of output for the present relation,
-   *  ie the value that will be used for indexSets computation. Warning: it depends on the nslaw type.
+  /** \fn const unsigned int getNumber() const
+   *  \brief get number of the Unitary Relation
+   *  \return an unsigned int
+   */
+  inline const unsigned int getNumber() const
+  {
+    return number;
+  };
+
+  /** \fn  const VectorOfUnitaryVectors getY() const
+   *  \brief get vector of output derivatives
+   *  \return a VectorOfUnitaryVectors
+   */
+  //  const std::vector< SimpleVector* > getY() const;
+  const VectorOfUnitaryVectors getY() const;
+
+  /** \fn SimpleVector* getYPtr(const unsigned int i) const
+   *  \brief get y[i], derivative number i of output
+   *  \return pointer on a SimpleVector
+   */
+  SiconosVector* getYPtr(const unsigned int) const;
+
+  /** \fn SimpleVector* getYOldPtr(const unsigned int i) const
+  *  \brief get yOld[i], derivative number i of output
+  *  \return pointer on a SimpleVector
+  */
+  SiconosVector* getYOldPtr(const unsigned int) const;
+
+  /** \fn  const VectorOfUnitaryVectors getLambda() const
+   *  \brief get vector of input derivatives
+   *  \return a VectorOfUnitaryVectors
+   */
+  //const std::vector< SimpleVector* > getLambda() const;
+  const  VectorOfUnitaryVectors getLambda() const;
+
+  /** \fn SimpleVector* getLambdaPtr(const unsigned int i) const
+   *  \brief get lambda[i], derivative number i of input
+   *  \return pointer on a SimpleVector
+   */
+  SiconosVector* getLambdaPtr(const unsigned int) const;
+
+  /** \fn double getYRef(const unsigned int i) const
+   *  \brief get y[i], derivative number i of output, value used to compute indexSets
    *  \return a double
    */
-  const double getY(const unsigned int& i) const ;
+  const double getYRef(const unsigned int) const;
 
-  /** \fn const double getLambda(const unsigned int& i) const
-   *  \brief get lambda[i], derivative number i of input for the present relation
+  /** \fn double getLambdaRef(const unsigned int i) const
+   *  \brief get lambda[i], derivative number i of output, value used to compute indexSets
    *  \return a double
    */
-  const double getLambda(const unsigned int& i) const ;
+  const double getLambdaRef(const unsigned int) const;
 
+  /** \fn const unsigned int getNonSmoothLawSize() const
+   *  \brief returns the size of the embedded non smooth law
+   *  \return an unsigned int
+   */
+  const unsigned int getNonSmoothLawSize() const;
 
+  /** \fn const string getNonSmoothLawType() const
+   *  \brief returns the type of the embedded non smooth law
+   *  \return a string
+   */
+  const std::string getNonSmoothLawType() const;
+
+  /** \fn const string getRelationType() const
+   *  \brief returns the size of the embedded non smooth law
+   *  \return an unsigned int
+   */
+  const std::string getRelationType() const;
+
+  /** \fn DynamicalSystemsSet getDynamicalSystems()
+   *  \brief get the DynamicalSystems of this Unitary
+   *  \return a DynamicalSystemsSet
+   */
+  DynamicalSystemsSet getDynamicalSystems() const;
+
+  /** void getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix*, const unsigned int& index = 0) const
+   *  \brief get the matrix used in block computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
+   *         We get only the part corresponding to ds.
+   *  \param a pointer to a dynamical system
+   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting block matrix
+   *  \param unsigned int (optional): gradient index (see relations for details)
+   */
+  void getLeftBlockForDS(DynamicalSystem *, SiconosMatrix*, const unsigned int = 0) const;
+
+  /** void getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix*, const unsigned int& index = 0) const
+   *  \brief get the matrix used in block computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
+   *         We get only the part corresponding to ds.
+   *  \param a pointer to a dynamical system
+   *  \param a pointer to SiconosMatrix (in-out parameter): the resulting block matrix
+   *  \param unsigned int (optional): gradient index (see relations for details)
+   */
+  void getRightBlockForDS(DynamicalSystem *, SiconosMatrix*, const unsigned int = 0) const;
+
+  /** void getExtraBlock(SiconosMatrix *) const
+   *  \brief get extra block corresponding to the present UR (see the top of this files for extra block meaning)
+   *  \param a pointer to a SiconosMatrix (in-out parameter)
+   */
+  void getExtraBlock(SiconosMatrix *) const;
+
+  /** void computeFreeOutput(const double time, SiconosVector* yFree)
+    *  \brief compute free value of y
+    *  \param a double (current time)
+    *  \param pointer to SiconosVector (in-out parameter), result
+    */
+  void computeFreeOutput(const double, SiconosVector*);
 };
 
 #endif // UNITARYRELATION_H

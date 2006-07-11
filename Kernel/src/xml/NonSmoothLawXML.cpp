@@ -19,17 +19,28 @@
 #include "NonSmoothLawXML.h"
 using namespace std;
 
-NonSmoothLawXML::NonSmoothLawXML(): rootNSLawXMLNode(NULL)
+NonSmoothLawXML::NonSmoothLawXML(): rootNode(NULL), sizeNode(NULL)
 {}
 
-NonSmoothLawXML::NonSmoothLawXML(xmlNodePtr node): rootNSLawXMLNode(node)
-{}
+NonSmoothLawXML::NonSmoothLawXML(xmlNodePtr node): rootNode(node), sizeNode(NULL)
+{
+  // size (optional)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "size")) != NULL)
+    sizeNode = node;
+}
 
 NonSmoothLawXML::~NonSmoothLawXML()
 {}
 
+void NonSmoothLawXML::setSize(const unsigned int newSize)
+{
+  if (!hasSize())
+    sizeNode = SiconosDOMTreeTools::createIntegerNode(rootNode, "size", newSize);
+  else SiconosDOMTreeTools::setIntegerContentValue(sizeNode, newSize);
+}
+
 void NonSmoothLawXML::updateNonSmoothLawXML(xmlNodePtr node, NonSmoothLaw* nsl)
 {
-  rootNSLawXMLNode = node;
+  rootNode = node;
 }
 

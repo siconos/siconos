@@ -117,7 +117,7 @@ InteractionXML::~InteractionXML()
   nSLawXML = NULL;
 }
 
-void InteractionXML::setSize(const unsigned int& newSize)
+void InteractionXML::setSize(const unsigned int newSize)
 {
   if (!hasSize())
     sizeNode = SiconosDOMTreeTools::createIntegerNode(rootNode, "size", newSize);

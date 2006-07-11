@@ -44,10 +44,11 @@ private:
 
 public:
 
-  /** \fn NewtonImpactFrictionNSL()
+  /** \fn NewtonImpactFrictionNSL(const unsigned int = 2)
    *  \brief default constructor
+   *  \param unsigned int: size of the ns law, default = 2
    */
-  NewtonImpactFrictionNSL();
+  NewtonImpactFrictionNSL(const unsigned int = 2);
 
   /** \fn NewtonImpactFrictionNSL(NonSmoothLawXML*)
    *  \brief constructor with XML object of the NewtonImpactFrictionNSL
@@ -55,13 +56,14 @@ public:
    */
   NewtonImpactFrictionNSL(NonSmoothLawXML*);
 
-  /** \fn NewtonImpactFrictionNSL(const double& en, const double& et, const double& mu)
+  /** \fn NewtonImpactFrictionNSL(const double en, const double et, const double mu, const unsigned int size)
    *  \brief constructor with the value of the NewtonImpactFrictionNSL attributes
    *  \param double : normal e coefficient
    *  \param double : tangent e coefficient
    *  \param double : friction coefficient
+   *  \param unsigned int: size of the ns law, default = 2
    */
-  NewtonImpactFrictionNSL(const double&, const double&, const double&);
+  NewtonImpactFrictionNSL(const double, const double, const double, const unsigned int);
 
   ~NewtonImpactFrictionNSL();
 
@@ -82,11 +84,11 @@ public:
     return en;
   };
 
-  /** \fn void setEn(const double&)
+  /** \fn void setEn(const double)
    *  \brief setter of en
    *  \param a double to set en
    */
-  inline void setEn(const double& newVal)
+  inline void setEn(const double newVal)
   {
     en = newVal;
   };
@@ -100,11 +102,11 @@ public:
     return et;
   };
 
-  /** \fn void setEt(const double&)
+  /** \fn void setEt(const double)
    *  \brief setter of et
    *  \param a double to set et
    */
-  inline void setEt(const double& newVal)
+  inline void setEt(const double newVal)
   {
     et = newVal;
   };
@@ -118,11 +120,11 @@ public:
     return mu;
   };
 
-  /** \fn void setMu(const double&)
+  /** \fn void setMu(const double)
    *  \brief setter of mu
    *  \param a double to set mu
    */
-  inline void setMu(const double& newVal)
+  inline void setMu(const double newVal)
   {
     mu = newVal;
   };

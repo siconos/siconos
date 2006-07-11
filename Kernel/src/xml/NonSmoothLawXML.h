@@ -32,7 +32,7 @@
 #define __NSLawXML__
 
 #include "SiconosDOMTreeTools.h"
-#include "NonSmoothLaw.h"
+//#include "NonSmoothLaw.h"
 
 class NonSmoothLaw;
 
@@ -40,7 +40,12 @@ class NonSmoothLaw;
 class NonSmoothLawXML
 {
 protected:
-  xmlNodePtr rootNSLawXMLNode;
+
+  /** rootNode */
+  xmlNodePtr rootNode;
+
+  /** size */
+  xmlNodePtr sizeNode;
 
 public:
 
@@ -65,7 +70,7 @@ public:
    */
   inline const std::string getType() const
   {
-    std::string type((char*) rootNSLawXMLNode->name);
+    std::string type((char*) rootNode->name);
     return type;
   }
 
@@ -75,8 +80,34 @@ public:
    */
   inline xmlNodePtr getNode() const
   {
-    return rootNSLawXMLNode;
+    return rootNode;
   }
+
+  /** \fn const bool hasSize() const
+  *  \brief return true if size node is present
+  *  \return a bool
+  */
+  const bool hasSize() const
+  {
+    return (sizeNode != NULL);
+  };
+
+  /** \fn const unsigned int getSize() const
+   *   \brief Return the size of the InteractionXML
+   *   \return an unsigned int
+   */
+  inline const unsigned int getSize() const
+  {
+    if (!hasSize())
+      XMLException::selfThrow("NonSmoothLawXML::getSize() : sizeNode == NULL");
+    return SiconosDOMTreeTools::getContentValue<int>(sizeNode);
+  }
+
+  /** \fn void setSize(const unsigned int& i)
+   *  \brief to save the size of the Interaction
+   *  \return an unsigned int
+   */
+  void setSize(const unsigned int);
 
   /** \fn void updateNonSmoothLawXML( xmlNodePtr node, NonSmoothLaw* nsl )
    *   \brief makes the operations to create the NonSmoothLaw of the Interaction

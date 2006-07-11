@@ -16,9 +16,14 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "StrategyXML.h"
+#include "SimulationXML.h"
 
-// includes to be deleted thanks to factories
+#include "OneStepIntegratorXML.h"
+#include "OneStepNSProblemXML.h"
+#include "TimeDiscretisationXML.h"
+
+// includes to be deleted thanks to factories ?
+
 #include "LsodarXML.h"
 #include "MoreauXML.h"
 #include "LCPXML.h"
@@ -27,29 +32,29 @@
 
 using namespace std;
 
-StrategyXML::StrategyXML():
+SimulationXML::SimulationXML():
   rootNode(NULL), oneStepNSProblemXML(NULL), timeDiscretisationXML(NULL)
 {}
 
-StrategyXML::StrategyXML(xmlNodePtr rootStrategyNode):
-  rootNode(rootStrategyNode), oneStepNSProblemXML(NULL), timeDiscretisationXML(NULL)
+SimulationXML::SimulationXML(xmlNodePtr rootSimulationNode):
+  rootNode(rootSimulationNode), oneStepNSProblemXML(NULL), timeDiscretisationXML(NULL)
 {
   xmlNodePtr node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LMGC90_STRATEGY_TAG)) == NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LMGC90_SIMULATION_TAG)) == NULL)
   {
     // === TimeDiscretisation data loading ===
     if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, TIMEDISCRETISATION_TAG)) != NULL)
       timeDiscretisationXML = new TimeDiscretisationXML(node);
     else
-      XMLException::selfThrow("StrategyXML - strategy XML constructor  ERROR : tag " + TIMEDISCRETISATION_TAG + " not found.");
+      XMLException::selfThrow("SimulationXML - simulation XML constructor  ERROR : tag " + TIMEDISCRETISATION_TAG + " not found.");
 
     // === OneStepIntegrator data loading ===
     if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, ONESTEPINTEGRATOR_DEFINITION_TAG)) != NULL)
     {
       xmlNodePtr OSINode = SiconosDOMTreeTools::findNodeChild(node);
       if (OSINode == NULL) // At least one OSI must be described in the xml file.
-        XMLException::selfThrow("StrategyXML - ERROR : at least one " + ONESTEPINTEGRATOR_TAG + " must be declared.");
+        XMLException::selfThrow("SimulationXML - ERROR : at least one " + ONESTEPINTEGRATOR_TAG + " must be declared.");
 
       string typeOSI; // OneStepIntegrator type
       while (OSINode != NULL)
@@ -62,16 +67,16 @@ StrategyXML::StrategyXML(xmlNodePtr rootStrategyNode):
           OSIXMLSet.insert(new LsodarXML(OSINode));
 
         else
-          XMLException::selfThrow("StrategyXML, Integrator loading : undefined OneStepIntegrator type: " + typeOSI);
+          XMLException::selfThrow("SimulationXML, Integrator loading : undefined OneStepIntegrator type: " + typeOSI);
 
         // go to next node
         OSINode = SiconosDOMTreeTools::findFollowNode(OSINode);
       }
     }
     else
-      XMLException::selfThrow("StrategyXML - ERROR : tag " + ONESTEPINTEGRATOR_DEFINITION_TAG + " not found.");
+      XMLException::selfThrow("SimulationXML - ERROR : tag " + ONESTEPINTEGRATOR_DEFINITION_TAG + " not found.");
   }
-  else cout << "StrategyXML - Constructor : the Strategy is not defined -> the LMGC90 tag is used." << endl;
+  else cout << "SimulationXML - Constructor : the Simulation is not defined -> the LMGC90 tag is used." << endl;
 
   // === OneStepNSProblem data loading ===
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, ONESTEPNSPROBLEM_TAG)) != NULL)
@@ -92,16 +97,16 @@ StrategyXML::StrategyXML(xmlNodePtr rootStrategyNode):
         oneStepNSProblemXML = new FrictionContactXML(node);
 
       else if (type == RELAY_TAG) //--Not implemented for the moment
-        XMLException::selfThrow("StrategyXML constructor, following OneStepNSProblem is not yet implemented: " + type);
+        XMLException::selfThrow("SimulationXML constructor, following OneStepNSProblem is not yet implemented: " + type);
 
       else
-        XMLException::selfThrow("StrategyXML constructor, undefined OneStepNSProblem type : " + type);
+        XMLException::selfThrow("SimulationXML constructor, undefined OneStepNSProblem type : " + type);
     }
   }
 }
 
 
-StrategyXML::~StrategyXML()
+SimulationXML::~SimulationXML()
 {
   if (timeDiscretisationXML != NULL)
     delete timeDiscretisationXML;
@@ -117,9 +122,9 @@ StrategyXML::~StrategyXML()
 }
 
 // To be reviewed ...
-void StrategyXML::saveStrategy2XML(xmlNodePtr  node, Strategy* str)
+void SimulationXML::saveSimulation2XML(xmlNodePtr  node, Simulation* str)
 {
-  XMLException::selfThrow("StrategyXML saveStrategy2XML, not yet implemented");
+  XMLException::selfThrow("SimulationXML saveSimulation2XML, not yet implemented");
 
   //   rootNode = node;
   //   string type, tmp;
@@ -149,7 +154,7 @@ void StrategyXML::saveStrategy2XML(xmlNodePtr  node, Strategy* str)
   //    timeDiscretisationXML = tdxml;
   //  }
 
-  //       if( SiconosDOMTreeTools::findNodeChild((const xmlNodePtr )rootNode, LMGC90_STRATEGY_TAG) == NULL )
+  //       if( SiconosDOMTreeTools::findNodeChild((const xmlNodePtr )rootNode, LMGC90_SIMULATION_TAG) == NULL )
   //  {
   //    // === integrator_Definition node ===
   //    if( !hasOneStepIntegratorXML() )
@@ -188,12 +193,12 @@ void StrategyXML::saveStrategy2XML(xmlNodePtr  node, Strategy* str)
   //          this->oneStepIntegratorXMLVector.push_back( osixml );
   //        }
   //      else
-  //        XMLException::selfThrow("StrategyXML - saveStrategy2XML ERROR : undefined integrator type : " + type );
+  //        XMLException::selfThrow("SimulationXML - saveSimulation2XML ERROR : undefined integrator type : " + type );
   //    }
   //      }
   //  }
   //       else
-  //  XMLException::selfThrow("StrategyXML - saveStrategy2XML ERROR : LMGC90 strategy not yet implemented");
+  //  XMLException::selfThrow("SimulationXML - saveSimulation2XML ERROR : LMGC90 simulation not yet implemented");
 
   //       // === OneStepNSProblemXML ===
   //       if( str->getOneStepNSProblemPtr() != NULL )
@@ -231,10 +236,10 @@ void StrategyXML::saveStrategy2XML(xmlNodePtr  node, Strategy* str)
   //      oneStepNSProblemXML = osnspbxml;
   //    }
   //        else
-  //    XMLException::selfThrow("StrategyXML - loadStrategy ERROR : undefined OneStepNSProblem type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
+  //    XMLException::selfThrow("SimulationXML - loadSimulation ERROR : undefined OneStepNSProblem type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?).");
   //      }
   //  }
   //     }
-  //   else XMLException::selfThrow("StrategyXML - loadStrategy ERROR : no rootNode defined.");
+  //   else XMLException::selfThrow("SimulationXML - loadSimulation ERROR : no rootNode defined.");
 }
 

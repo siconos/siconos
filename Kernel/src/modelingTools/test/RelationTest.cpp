@@ -61,6 +61,7 @@ void RelationTest::setUp()
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Definition");
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction");
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
+
   // get relation
   node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "Relation");
   tmpxml1 = new RelationXML(node1);
@@ -84,25 +85,24 @@ void RelationTest::testBuildRelation1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation1c : ", R1->getComputeOutputName() == "DefaultPlugin:computeOutput", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation1d : ", R1->getComputeInputName() == "DefaultPlugin:computeInput", true);
   delete R1;
-  cout << " Default Constructor Relation ok" << endl;
+  cout << "--> Default constructor  test ended with success." << endl;
 }
 
 // xml constructor
 void RelationTest::testBuildRelation2()
 {
-  Interaction * inter = nsds->getInteractionPtrNumber(1);
-  Relation * R1 = new Relation(tmpxml1, inter);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation2a : ", R1->getInteractionPtr()->getId() == "test-of-rel", true);
+  cout << "--> Test: constructor xml ." << endl;
+  Relation * R1 = new Relation(tmpxml1);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation2b : ", R1->getType() == "Relation", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation2c : ", R1->getComputeOutputName() == "TestPlugin:y", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation2d : ", R1->getComputeInputName() == "TestPlugin:R", true);
   delete R1;
-  cout << " xml Constructor relation ok" << endl;
+  cout << "--> Constructor xml test ended with success." << endl;
 }
 // copy constructor
 void RelationTest::testBuildRelation3()
 {
+  cout << "--> Test: copy constructor." << endl;
   Relation * R1 = new Relation();
   R1->setComputeInputFunction("TestPlugin.so", "R");
   R1->setComputeOutputFunction("TestPlugin.so", "y");
@@ -115,18 +115,9 @@ void RelationTest::testBuildRelation3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation3d : ", R2->getComputeInputName() == "TestPlugin:R", true);
   delete R2;
   delete R1;
-  cout << " copy Constructor relation ok" << endl;
+  cout << "--> Copy Constructor test ended with success." << endl;
 }
 
-
-// computeOutput
-/*void RelationTest::testComputeOutput()
-{}
-*/
-// computeInput
-/*void RelationTest::testComputeInput()
-{}
-*/
 void RelationTest::End()
 {
   cout << "====================================" << endl;

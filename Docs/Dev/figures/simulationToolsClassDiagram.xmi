@@ -24,10 +24,10 @@
     <UML:Operation visibility="public" xmi.id="1394" type="" name="OneStepNSProblem" />
     <UML:Operation visibility="public" xmi.id="1395" type="" name="OneStepNSProblem" >
      <UML:Parameter visibility="private" xmi.id="1396" value="" type="OneStepNSProblemXML *" />
-     <UML:Parameter visibility="private" xmi.id="1397" value="" type="Strategy *" />
+     <UML:Parameter visibility="private" xmi.id="1397" value="" type="Simulation *" />
     </UML:Operation>
     <UML:Operation visibility="public" xmi.id="1398" type="" name="OneStepNSProblem" >
-     <UML:Parameter visibility="private" xmi.id="1399" value="" type="Strategy *" />
+     <UML:Parameter visibility="private" xmi.id="1399" value="" type="Simulation *" />
      <UML:Parameter visibility="private" xmi.id="1400" value="" type="const std :: string &amp;" />
      <UML:Parameter visibility="private" xmi.id="1401" value="" type="const std :: string &amp;" />
      <UML:Parameter visibility="private" xmi.id="1402" value="" type="const int &amp;" />
@@ -55,7 +55,7 @@
     </UML:Operation>
     <UML:Operation visibility="public" xmi.id="1420" type="const unsigned int" name="getN" />
     <UML:Operation visibility="public" xmi.id="1421" type="OneStepNSProblemXML *" name="getOneStepNSProblemXML" />
-    <UML:Operation visibility="public" xmi.id="1422" type="Strategy *" name="getStrategyPtr" />
+    <UML:Operation visibility="public" xmi.id="1422" type="Simulation *" name="getSimulationPtr" />
     <UML:Operation visibility="public" xmi.id="1423" type="virtual void" name="initialize" />
     <UML:Operation visibility="public" xmi.id="1424" type="bool" name="isOneStepNsProblemComplete" />
     <UML:Operation visibility="public" xmi.id="1425" type="virtual void" name="nextStep" />
@@ -110,8 +110,8 @@
     <UML:Operation visibility="public" xmi.id="1463" type="void" name="setSolver" >
      <UML:Parameter visibility="private" xmi.id="1464" value="" type="const std :: string &amp;" name="newVal" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1465" type="void" name="setStrategy" >
-     <UML:Parameter visibility="private" xmi.id="1466" value="" type="Strategy *" name="str" />
+    <UML:Operation visibility="public" xmi.id="1465" type="void" name="setSimulation" >
+     <UML:Parameter visibility="private" xmi.id="1466" value="" type="Simulation *" name="str" />
     </UML:Operation>
     <UML:Operation visibility="public" xmi.id="1467" type="void" name="setType" >
      <UML:Parameter visibility="private" xmi.id="1468" value="" type="const std :: string &amp;" name="newVal" />
@@ -123,41 +123,41 @@
     <UML:Attribute visibility="protected" xmi.id="1390" value="" type="OneStepNSProblemXML *" name="onestepnspbxml" />
     <UML:Attribute visibility="protected" xmi.id="1391" value="" type="method" name="solvingMethod" />
    </UML:Class>
-   <UML:Class stereotype="class" visibility="public" xmi.id="1392" name="Strategy" >
-    <UML:Operation visibility="public" xmi.id="1512" type="" name="Strategy" />
-    <UML:Operation visibility="public" xmi.id="1513" type="" name="Strategy" >
+   <UML:Class stereotype="class" visibility="public" xmi.id="1392" name="Simulation" >
+    <UML:Operation visibility="public" xmi.id="1512" type="" name="Simulation" />
+    <UML:Operation visibility="public" xmi.id="1513" type="" name="Simulation" >
      <UML:Parameter visibility="private" xmi.id="1514" value="" type="OneStepNSProblem *" />
      <UML:Parameter visibility="private" xmi.id="1515" value="" type="Model *" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1516" type="" name="Strategy" >
-     <UML:Parameter visibility="private" xmi.id="1517" value="" type="StrategyXML *" />
+    <UML:Operation visibility="public" xmi.id="1516" type="" name="Simulation" >
+     <UML:Parameter visibility="private" xmi.id="1517" value="" type="SimulationXML *" />
      <UML:Parameter visibility="private" xmi.id="1518" value="" type="Model *" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1519" type="" name="Strategy" >
+    <UML:Operation visibility="public" xmi.id="1519" type="" name="Simulation" >
      <UML:Parameter visibility="private" xmi.id="1520" value="" type="TimeDiscretisation *" />
      <UML:Parameter visibility="private" xmi.id="1521" value="" type="Model *" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1522" type="" name="Strategy" >
+    <UML:Operation visibility="public" xmi.id="1522" type="" name="Simulation" >
      <UML:Parameter visibility="private" xmi.id="1523" value="" type="TimeDiscretisation *" />
      <UML:Parameter visibility="private" xmi.id="1524" value="" type="OneStepNSProblem *" />
      <UML:Parameter visibility="private" xmi.id="1525" value="" type="Model *" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1526" type="" name="Strategy" >
+    <UML:Operation visibility="public" xmi.id="1526" type="" name="Simulation" >
      <UML:Parameter visibility="private" xmi.id="1527" value="" type="TimeDiscretisation *" />
      <UML:Parameter visibility="private" xmi.id="1528" value="" type="std :: vector &lt; OneStepIntegrator * >" />
      <UML:Parameter visibility="private" xmi.id="1529" value="" type="Model *" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1530" type="" name="Strategy" >
+    <UML:Operation visibility="public" xmi.id="1530" type="" name="Simulation" >
      <UML:Parameter visibility="private" xmi.id="1531" value="" type="TimeDiscretisation *" />
      <UML:Parameter visibility="private" xmi.id="1532" value="" type="std :: vector &lt; OneStepIntegrator * >" />
      <UML:Parameter visibility="private" xmi.id="1533" value="" type="OneStepNSProblem *" />
      <UML:Parameter visibility="private" xmi.id="1534" value="" type="Model *" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1535" type="" name="Strategy" >
+    <UML:Operation visibility="public" xmi.id="1535" type="" name="Simulation" >
      <UML:Parameter visibility="private" xmi.id="1536" value="" type="std :: vector &lt; OneStepIntegrator * >" />
      <UML:Parameter visibility="private" xmi.id="1537" value="" type="Model *" />
     </UML:Operation>
-    <UML:Operation visibility="public" xmi.id="1538" type="" name="Strategy" >
+    <UML:Operation visibility="public" xmi.id="1538" type="" name="Simulation" >
      <UML:Parameter visibility="private" xmi.id="1539" value="" type="std :: vector &lt; OneStepIntegrator * >" />
      <UML:Parameter visibility="private" xmi.id="1540" value="" type="OneStepNSProblem *" />
      <UML:Parameter visibility="private" xmi.id="1541" value="" type="Model *" />
@@ -192,7 +192,7 @@
     </UML:Operation>
     <UML:Operation visibility="public" xmi.id="1563" type="const int" name="getOneStepIntegratorVectorSize" />
     <UML:Operation visibility="public" xmi.id="1564" type="OneStepNSProblem *" name="getOneStepNSProblemPtr" />
-    <UML:Operation visibility="public" xmi.id="1565" type="StrategyXML *" name="getStrategyXMLPtr" />
+    <UML:Operation visibility="public" xmi.id="1565" type="SimulationXML *" name="getSimulationXMLPtr" />
     <UML:Operation visibility="public" xmi.id="1566" type="TimeDiscretisation *" name="getTimeDiscretisationPtr" />
     <UML:Operation visibility="public" xmi.id="1567" type="bool" name="hasDynamicalSystemIntegrator" >
      <UML:Parameter visibility="private" xmi.id="1568" value="" type="DynamicalSystem *" name="ds" />

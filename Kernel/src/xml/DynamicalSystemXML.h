@@ -30,13 +30,11 @@
 #define __DynamicalSystemXML__
 
 #include "SiconosDOMTreeTools.h"
-#include "DynamicalSystem.h"
 
 #include "SiconosMemory.h"
 #include "SiconosMemoryXML.h"
 #include "BoundaryConditionXML.h"
 #include "DSInputOutputXML.h"
-#include "BoundaryCondition.h"
 
 class DynamicalSystem;
 class BoundaryCondition;

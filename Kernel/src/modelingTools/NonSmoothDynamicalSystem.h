@@ -26,7 +26,7 @@
 #include "EqualityConstraint.h"
 #include "Topology.h"
 #include "NonSmoothDynamicalSystemXML.h"
-#include "DSSet.h"
+#include "DynamicalSystemsSet.h"
 #include "InteractionsSet.h"
 #include "check.h"
 #include <iostream>
@@ -59,7 +59,7 @@ private:
   bool BVP;
 
   /** contains all the Dynamic Systems of the simulation */
-  DSSet allDS;
+  DynamicalSystemsSet allDS;
 
   /** inside-class allocation flags*/
   std::map<DynamicalSystem*, bool> isDSAllocatedIn;
@@ -103,14 +103,30 @@ public:
    */
   NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML*);
 
-  /** \fn NonSmoothDynamicalSystem(DSSet& ds, InteractionsSet& inter, const bool& isBvp = false)
+  /** \fn NonSmoothDynamicalSystem(DynamicalSystem* ds, Interaction* inter = NULL, const bool& isBvp = false)
+   *  \brief constructor from minimum data.
+   *  \param: a pointer to DynamicalSystem
+   *  \param: a pointer to Interaction
+   *  \param: a bool
+   */
+  NonSmoothDynamicalSystem(DynamicalSystem*, Interaction* = NULL, const bool& = false);
+
+  /** \fn NonSmoothDynamicalSystem(DynamicalSystemsSet& ds, InteractionsSet& inter, const bool& isBvp = false)
    *  \brief constructor from data - Warning: DS and Interactions are not copied, but links are created
    *  between pointers of the two sets.
    *  \param: a set of DS
    *  \param: a set of Interactions
    *  \param: a bool
    */
-  NonSmoothDynamicalSystem(DSSet&, InteractionsSet&, const bool& = false);
+  NonSmoothDynamicalSystem(DynamicalSystemsSet&, InteractionsSet&, const bool& = false);
+
+  /** \fn NonSmoothDynamicalSystem(DynamicalSystemsSet& ds, const bool& isBvp = false)
+   *  \brief constructor from data (only DS, no Interactions)
+   *  between pointers of the two sets.
+   *  \param: a set of DS
+   *  \param: a bool
+   */
+  NonSmoothDynamicalSystem(DynamicalSystemsSet&, const bool& = false);
 
   /** \fn ~NonSmoothDynamicalSystem()
    *  \brief destructor
@@ -157,11 +173,11 @@ public:
     return allDS.size();
   };
 
-  /** \fn const DSSet getDynamicalSystems()
+  /** \fn const DynamicalSystemsSet getDynamicalSystems()
    *  \brief get all the DynamicalSystem of the NonSmoothDynamicalSystem problem (saved in a set)
-   *  \return a DSSet
+   *  \return a DynamicalSystemsSet
    */
-  inline const DSSet getDynamicalSystems() const
+  inline const DynamicalSystemsSet getDynamicalSystems() const
   {
     return allDS;
   }
@@ -180,11 +196,11 @@ public:
    */
   DynamicalSystem* getDynamicalSystemPtrNumber(const int&) const ;
 
-  /** \fn void setDynamicalSystems(const DSSet&)
+  /** \fn void setDynamicalSystems(const DynamicalSystemsSet&)
    *  \brief to set allDS
-   *  \param a DSSet
+   *  \param a DynamicalSystemsSet
    */
-  void setDynamicalSystems(const DSSet&) ;
+  void setDynamicalSystems(const DynamicalSystemsSet&) ;
 
   /** \fn const bool hasDynamicalSystemNumber(const int& N)  const
    *  \brief check if DynamicalSystem number N exists

@@ -19,31 +19,28 @@
 #include "NewtonImpactFrictionNSL.h"
 using namespace std;
 
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL():
-  NonSmoothLaw(), en(0.0), et(0.0), mu(0.0)
-{
-  nsLawType = NEWTONIMPACTFRICTIONNSLAW;
-}
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(const unsigned int newSize):
+  NonSmoothLaw(NEWTONIMPACTFRICTIONNSLAW, newSize), en(0.0), et(0.0), mu(0.0)
+{}
 
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(NonSmoothLawXML* nslawxml):
-  NonSmoothLaw(nslawxml), en(0.0), et(0.0), mu(0.0)
+  NonSmoothLaw(NEWTONIMPACTFRICTIONNSLAW, nslawxml), en(0.0), et(0.0), mu(0.0)
 {
-  nsLawType = NEWTONIMPACTFRICTIONNSLAW;
-  if (nslawxml != NULL)
-  {
-    en = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getEn();
-    if ((static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->hasEt())
-      et = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getEt();
-    mu = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getMu();
-  }
-  else RuntimeException::selfThrow("NewtonImpactFrictionNSL:: xml constructor, xml file=NULL");
+  if (!nslawxml->hasSize()) // size is a required input for Friction
+    RuntimeException::selfThrow("NewtonImpactFrictionNSL:: xml constructor, size is a required xml input.");
+
+  if (size != 2 && size != 3)
+    RuntimeException::selfThrow("NewtonImpactFrictionNSL:: xml constructor, wrong size value = " + size);
+
+  en = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getEn();
+  if ((static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->hasEt())
+    et = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getEt();
+  mu = (static_cast<NewtonImpactFrictionNSLXML*>(nslawxml))->getMu();
 }
 
-NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(const double& newEn, const double& newEt, const double& newMu):
-  NonSmoothLaw(), en(newEn), et(newEt), mu(newMu)
-{
-  nsLawType = NEWTONIMPACTFRICTIONNSLAW;
-}
+NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(const double newEn, const double newEt, const double newMu, const unsigned int newSize):
+  NonSmoothLaw(NEWTONIMPACTFRICTIONNSLAW, newSize), en(newEn), et(newEt), mu(newMu)
+{}
 
 NewtonImpactFrictionNSL::~NewtonImpactFrictionNSL()
 {}

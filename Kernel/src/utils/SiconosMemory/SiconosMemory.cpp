@@ -23,12 +23,12 @@ using namespace std;
 
 
 // from data: memorySize
-SiconosMemory::SiconosMemory(const unsigned int& newValue):
+SiconosMemory::SiconosMemory(const unsigned int newValue):
   memorySize(newValue), nbVectorsInMemory(0), memoryXML(NULL)
 {}
 
 // from xml file + optional value of memorySize
-SiconosMemory::SiconosMemory(SiconosMemoryXML *memXML, const unsigned int& newMemorySize):
+SiconosMemory::SiconosMemory(SiconosMemoryXML *memXML, const unsigned int newMemorySize):
   memorySize(newMemorySize), nbVectorsInMemory(0), memoryXML(memXML)
 {
   if (memoryXML != NULL)
@@ -99,7 +99,7 @@ SiconosMemory::SiconosMemory(const deque<SiconosVector*>& V):
 }
 
 // copy of a std::vector of siconos vectors  + memorySize
-SiconosMemory::SiconosMemory(const unsigned int& newMemorySize, const  deque<SiconosVector*>& V):
+SiconosMemory::SiconosMemory(const unsigned int newMemorySize, const  deque<SiconosVector*>& V):
   memorySize(newMemorySize), nbVectorsInMemory(V.size()), memoryXML(NULL)
 {
   if (newMemorySize < V.size())
@@ -175,7 +175,7 @@ void SiconosMemory::setVectorMemory(const deque<SiconosVector*>& V)
   }
 }
 
-SiconosVector* SiconosMemory::getSiconosVector(const unsigned int& index) const
+SiconosVector* SiconosMemory::getSiconosVector(const unsigned int index) const
 {
   if (index >= nbVectorsInMemory)
     SiconosMemoryException::selfThrow("getSiconosVector(index) : inconsistent index value");
@@ -183,7 +183,7 @@ SiconosVector* SiconosMemory::getSiconosVector(const unsigned int& index) const
 }
 
 
-void SiconosMemory::swap(const SiconosVector& v)
+void SiconosMemory::swap(SiconosVector* v)
 {
   unsigned int i;
   SiconosVector* tmp;
@@ -193,17 +193,16 @@ void SiconosMemory::swap(const SiconosVector& v)
   if (nbVectorsInMemory < memorySize)
   {
     // allocate memory for the new vector
-    if (v.isBlock())
-      vectorMemory.push_front(new BlockVector(v));
+    if (v->isBlock())
+      vectorMemory.push_front(new BlockVector(*static_cast<BlockVector*>(v)));
     else
-      vectorMemory.push_front(new SimpleVector(v));
+      vectorMemory.push_front(new SimpleVector(*v));
     isVectorMemoryAllocated.push_front(true);
     nbVectorsInMemory ++;
-    *vectorMemory[0] = v;
   }
   else
   {
-    *vectorMemory[nbVectorsInMemory - 1] = v;
+    *vectorMemory[nbVectorsInMemory - 1] = *v;
     // Permutations to reorganise the vector
     tmp = vectorMemory[nbVectorsInMemory - 1];
     tmp2 = isVectorMemoryAllocated[nbVectorsInMemory - 1];

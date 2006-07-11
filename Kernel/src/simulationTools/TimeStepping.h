@@ -19,41 +19,49 @@
 #ifndef TIMESTEPPING_H
 #define TIMESTEPPING_H
 
-#include "Strategy.h"
+#include "Simulation.h"
+#include "Moreau.h"
+
 /** \class TimeStepping
- *  \brief Specific strategy, using time stepping schemes.
+ *  \brief Specific simulation, using time stepping schemes.
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.2.0.
  *  \date (Creation) Apr 26, 2004
  *
  */
-class TimeStepping : public Strategy
+class TimeStepping : public Simulation
 {
 public:
 
   /** \fn TimeStepping(Model * = NULL)
    *  \brief Default constructor
-   *  \param a pointer to the model that owns this strategy. NULL Model leads to exception
+   *  \param a pointer to the model that owns this simulation. NULL Model leads to exception
    */
   TimeStepping(Model* = NULL);
 
-  /** \fn TimeStepping(Model&)
-   *  \brief constructor from Model => avoid this function, prefer the one with Model*
-   *  \param a Model.
-   */
-  TimeStepping(Model&);
-
-  /** \fn TimeStepping(StrategyXML*, Model*)
+  /** \fn TimeStepping(SimulationXML*, Model*)
    *  \brief constructor with XML object for TimeStepping
-   *  \param StrategyXML* : the XML object corresponding
-   *  \param Model* : the Model which contains the Strategy
+   *  \param SimulationXML* : the XML object corresponding
+   *  \param Model* : the Model which contains the Simulation
    */
-  TimeStepping(StrategyXML*, Model*);
+  TimeStepping(SimulationXML*, Model*);
 
   ~TimeStepping();
 
+  /** \fn void addOneStepNSProblemPtr(OneStepNSProblem*)
+   *  \brief add a OneStepNSProblem of the Simulation (if its not the first, it needs to have an id clearly defined)
+   *  \param a pointer to OneStepNSProblem
+   */
+  void addOneStepNSProblemPtr(OneStepNSProblem*);
+
+  /** \fn virtual void updateIndexSet(const unsigned int i) = 0;
+   *  \brief update indexSets[i] of the topology, using current y and lambda values of Interactions.
+   *  \param unsigned int: the number of the set to be updated
+   */
+  void updateIndexSet(const unsigned int);
+
   /** \fn void initialize()
-   *  \brief executes the complete initialisation of Strategy (OneStepIntegrators, OneStepNSProblem, TImediscretisation) with the XML Object
+   *  \brief executes the complete initialisation of Simulation (OneStepIntegrators, OneStepNSProblem, TImediscretisation) with the XML Object
    */
   void initialize();
 
@@ -67,12 +75,17 @@ public:
    */
   void computeOneStep();
 
-  /** \fn TimeStepping* convert (Strategy* str)
+  /** \fn TimeStepping* convert (Simulation* str)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Strategy* : the Strategy which must be converted
-   * \return a pointer on the Strategy if it is of the right type, NULL otherwise
+   *  \param Simulation* : the Simulation which must be converted
+   * \return a pointer on the Simulation if it is of the right type, NULL otherwise
    */
-  static TimeStepping* convert(Strategy* str);
+  static TimeStepping* convert(Simulation* str);
 };
 
 #endif // TIMESTEPPING_H
+
+
+
+
+

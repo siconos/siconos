@@ -143,12 +143,6 @@ public:
     return setOfUnitaryRelations;
   }
 
-  /** \fn UnitaryRelation* getUnitaryRelation(const int& num)
-   *  \brief get Unitary Relation number num, if it is present in the set (else, exception)
-   *  \return a pointer to UnitaryRelation
-   */
-  UnitaryRelation* getUnitaryRelation(const int&) const;
-
   /** \fn bool isUnitaryRelationIn(UnitaryRelation* ur)
    *  \brief return true if ur is in the set
    *  \param a pointer to UnitaryRelation
@@ -162,13 +156,6 @@ public:
    *  \param a UnitaryRelationIterator
    */
   UnitaryRelationIterator find(UnitaryRelation*);
-
-  /** \fn UnitaryRelationIterator find(const int& num)
-   *  \brief same as find function of stl set
-   *  \param an int
-   *  \return a UnitaryRelationIterator
-   */
-  UnitaryRelationIterator find(const int&);
 
   /** \fn CheckInsertUnitaryRelation insert(UnitaryRelation* ur)
    *  \brief insert Unitary Relation ur into the set

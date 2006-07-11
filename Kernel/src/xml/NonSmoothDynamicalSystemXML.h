@@ -31,8 +31,6 @@
 #ifndef __NonSmoothDynamicalSystemXML__
 #define __NonSmoothDynamicalSystemXML__
 
-#include "NonSmoothDynamicalSystem.h"
-
 #include "SiconosDOMTreeTools.h"
 
 #include "EqualityConstraintXML.h"

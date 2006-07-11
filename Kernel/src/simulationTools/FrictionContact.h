@@ -72,34 +72,39 @@ protected:
 
 public:
 
-  /** \fn FrictionContact()
+  /** \fn FrictionContact(const string pbType)
    *  \brief default constructor
    */
-  FrictionContact();
+  FrictionContact(const std::string pbType = "FrictionContact2D");
 
-  /** \fn FrictionContact(OneStepNSProblemXML*, Strategy*=NULL)
+  /** \fn FrictionContact(const std::string pbType, OneStepNSProblemXML*, Simulation*)
    *  \brief xml constructor
+   *  \param string: problem type
    *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Strategy *: the strategy that owns the problem (optional)
+   *  \param Simulation *: the simulation that owns the problem
    */
-  FrictionContact(OneStepNSProblemXML*, Strategy* = NULL);
+  FrictionContact(const std::string, OneStepNSProblemXML*, Simulation*);
 
-  /** \fn FrictionContact(Strategy*)
+  /** \fn FrictionContact(const std::string pbType, Simulation *, const std::string);
    *  \brief constructor from data
-   *  \param Strategy *: the strategy that owns this problem
+   *  \param string: problem type
+   *  \param Simulation *: the simulation that owns this problem
+   *  \param string: id
    */
-  FrictionContact(Strategy *);
+  FrictionContact(const std::string pbType, Simulation *, const std::string);
 
-  /** \fn FrictionContact(Strategy*, const string& solverName, const string& newSolvingMethod, const int& maxIter,
-   *          const double & Tolerance=0, const string & NormType="none",
-   *          const double & SearchDirection=0)
+  /** \fn FrictionContact(const std::string pbType, Solver*, Simulation *, const std::string);
    *  \brief constructor from data
-   *  \param Strategy *: the strategy that owns this problem
+   *  \param string: problem type
    *  \param Solver* : pointer to object that contains solver algorithm and formulation
+   *  \param Simulation *: the simulation that owns this problem
+   *  \param string: id
    */
-  FrictionContact(Strategy * , Solver*);
+  FrictionContact(const std::string pbType, Solver*, Simulation *, const std::string);
 
-  // --- Destructror ---
+  /** \fn ~FrictionContact()
+   * \brief destructor
+   */
   virtual ~FrictionContact();
 
   // GETTERS/SETTERS
@@ -239,29 +244,13 @@ public:
    */
   void initialize();
 
-  /** \fn void computeAllBlocks()
-   * \brief compute all the blocks matrices necessary to assemble Mlcp
+  /** \fn void computeExtraDiagonalBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
+   *  \brief computes extra diagonal block-matrix that corresponds to UR1 and UR2
+   *  Move this to Unitary Relation class?
+   *  \param a pointer to UnitaryRelation
+   *  \param a pointer to UnitaryRelation
    */
-  void computeAllBlocks();
-
-  void computeDiagonalBlocksLagrangianR(Relation *, const unsigned int&, const DSSet&, std::map < DynamicalSystem*,
-                                        SiconosMatrix* > , const double&, SiconosMatrix*);
-
-  void computeExtraDiagonalBlocksLagrangianR(Relation *, Relation*, const unsigned int&, const unsigned int&, const DSSet&,
-      std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
-
-  /** \fn void updateBlocks();
-   *  \brief update blocks value for nonlinear relations
-   *  \return void
-   */
-  void updateBlocks();
-
-  /** \fn void preFrictionContact(const double& time)
-   *  \brief pre-treatment for FrictionContact
-   *  \param double : current time
-   *  \return void
-   */
-  void preFrictionContact(const double& time);
+  void computeBlock(UnitaryRelation*, UnitaryRelation*);
 
   /** \fn void assembleM()
    *  \brief built matrix M using already computed blocks
@@ -272,21 +261,27 @@ public:
    *  \brief compute vector q
    *  \param double : current time
    */
-  virtual void computeQ(const double& time) = 0;
+  void computeQ(const double time);
 
-  /** \fn void compute(const double& time)
+  /** \fn void preCompute(const double time)
+   *  \brief pre-treatment for LCP
+   *  \param double : current time
+   *  \return void
+   */
+  void preCompute(const double time);
+
+  /** \fn void compute(const double time)
    *  \brief Compute the unknown z and w and update the Interaction (y and lambda )
    *  \param double : current time
    *  \return void
    */
-  void compute(const double& time);
+  virtual void compute(const double time) = 0;
 
-  /** \fn void postFrictionContact(const SimpleVector& w, SimpleVector& z)
-   *  \brief post-treatment for FrictionContact
-   *  \param 2 simple vectors: output of FrictionContact solver
-   *  \return void
+  /** \fn void postCompute(SiconosVector*, SiconosVector*)
+   *  \brief post-treatment for LCP
+   *  \param 2 pointers to SiconosVector: output of LCP solver
    */
-  void postFrictionContact(const SimpleVector&, const SimpleVector&);
+  void postCompute(SiconosVector*, SiconosVector*) ;
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree

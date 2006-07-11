@@ -32,7 +32,7 @@
 #define __RelationXML__
 
 #include "SiconosDOMTreeTools.h"
-#include "Relation.h"
+//#include "Relation.h"
 
 class Relation;
 

@@ -68,7 +68,7 @@ public:
   inline void setEn(const double& en)
   {
     if (!hasEn())
-      enNode = SiconosDOMTreeTools::createDoubleNode(rootNSLawXMLNode, "en", en);
+      enNode = SiconosDOMTreeTools::createDoubleNode(rootNode, "en", en);
     else SiconosDOMTreeTools::setDoubleContentValue(enNode, en);
   }
 
@@ -97,7 +97,7 @@ public:
   inline void setEt(const double& et)
   {
     if (!hasEt())
-      etNode = SiconosDOMTreeTools::createDoubleNode(rootNSLawXMLNode, "et", et);
+      etNode = SiconosDOMTreeTools::createDoubleNode(rootNode, "et", et);
     else SiconosDOMTreeTools::setDoubleContentValue(etNode, et);
   }
 
@@ -126,7 +126,7 @@ public:
   inline void setMu(const double& mu)
   {
     if (!hasMu())
-      muNode = SiconosDOMTreeTools::createDoubleNode(rootNSLawXMLNode, "mu", mu);
+      muNode = SiconosDOMTreeTools::createDoubleNode(rootNode, "mu", mu);
     else SiconosDOMTreeTools::setDoubleContentValue(muNode, mu);
   }
 

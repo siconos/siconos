@@ -19,14 +19,14 @@
 #include "LinearDS.h"
 using namespace std;
 
-void LinearDS::initAllocationFlags(const bool& in) // default in = true.
+void LinearDS::initAllocationFlags(const bool in) // default in = true.
 {
   // isAllocatedIn["A"]=in; useless, since A is never allocated in, only link to jacobianXF
   isAllocatedIn["Mxdot"] = in;
   isAllocatedIn["b"] = in;
 }
 
-void LinearDS::initPluginFlags(const bool& val)
+void LinearDS::initPluginFlags(const bool val)
 {
   isPlugin["f"] = val;
   isPlugin["jacobianXF"] = val;
@@ -119,8 +119,8 @@ LinearDS::LinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds
 // to set or setCompute, depending on they are plugins or not.
 
 // From a minimum set of data, A and b connected to a plug-in
-LinearDS::LinearDS(const int& newNumber, const unsigned int& newN, const SiconosVector& newX0,
-                   const string& APlugin, const string& bPlugin):
+LinearDS::LinearDS(const int newNumber, const unsigned int newN, const SiconosVector& newX0,
+                   const string APlugin, const string bPlugin):
   DynamicalSystem(newNumber, newN, newX0),
   A(NULL), Mxdot(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
 {
@@ -135,7 +135,7 @@ LinearDS::LinearDS(const int& newNumber, const unsigned int& newN, const Siconos
 }
 
 // From a minimum set of data, A from a given matrix
-LinearDS::LinearDS(const int& newNumber, const SiconosVector& newX0, const SiconosMatrix& newA):
+LinearDS::LinearDS(const int newNumber, const SiconosVector& newX0, const SiconosMatrix& newA):
   DynamicalSystem(newNumber, newA.size(0), newX0),
   A(NULL), Mxdot(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
 {
@@ -152,7 +152,7 @@ LinearDS::LinearDS(const int& newNumber, const SiconosVector& newX0, const Sicon
 }
 
 // From a minimum set of data, A from a given matrix
-LinearDS::LinearDS(const int& newNumber, const SiconosVector& newX0, const SiconosMatrix& newA, const SiconosVector& newB):
+LinearDS::LinearDS(const int newNumber, const SiconosVector& newX0, const SiconosMatrix& newA, const SiconosVector& newB):
   DynamicalSystem(newNumber, newA.size(0), newX0),
   A(NULL), Mxdot(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
 {
@@ -306,7 +306,7 @@ bool LinearDS::checkDynamicalSystem()
   return output;
 }
 
-void LinearDS::initialize(const double& time, const unsigned int& sizeOfMemory)
+void LinearDS::initialize(const double time, const unsigned int sizeOfMemory)
 {
   // reset x to x0, xFree and r to zero.
   *x = *x0;
@@ -390,7 +390,7 @@ void LinearDS::setBPtr(SimpleVector *newPtr)
   isPlugin["b"] = false;
 }
 
-void LinearDS::setComputeAFunction(const string& pluginPath, const string& functionName)
+void LinearDS::setComputeAFunction(const string pluginPath, const string functionName)
 {
   if (jacobianXF == NULL)
   {
@@ -410,7 +410,7 @@ void LinearDS::setComputeAFunction(const string& pluginPath, const string& funct
   isPlugin["A"] = true;
 }
 
-void LinearDS::setComputeBFunction(const string& pluginPath, const string& functionName)
+void LinearDS::setComputeBFunction(const string pluginPath, const string functionName)
 {
   if (b == NULL)
   {
@@ -427,19 +427,19 @@ void LinearDS::setComputeBFunction(const string& pluginPath, const string& funct
   isPlugin["b"] = true;
 }
 
-void LinearDS::computeF(const double& time)// is it really necessary to reimplement this?
+void LinearDS::computeF(const double time)// is it really necessary to reimplement this?
 {
   if (isPlugin["A"])
     computeA(time);
 }
 
-void LinearDS::computeJacobianXF(const double& time, const bool&) // is it really necessary to reimplement this?
+void LinearDS::computeJacobianXF(const double time, const bool) // is it really necessary to reimplement this?
 {
   if (isPlugin["A"])
     computeA(time);
 }
 
-void LinearDS::computeA(const double& time)
+void LinearDS::computeA(const double time)
 {
   if (isPlugin["A"])
   {
@@ -451,7 +451,7 @@ void LinearDS::computeA(const double& time)
   // else nothing
 }
 
-void LinearDS::computeB(const double& time)
+void LinearDS::computeB(const double time)
 {
   if (isPlugin["b"])
   {
@@ -463,7 +463,7 @@ void LinearDS::computeB(const double& time)
   // else nothing
 }
 
-void LinearDS::computeRhs(const double& time, const bool&)
+void LinearDS::computeRhs(const double time, const bool)
 {
   // second argument is useless at the time - Used in derived classes
   // compute A=jacobianXF
@@ -497,7 +497,7 @@ void LinearDS::computeRhs(const double& time, const bool&)
   }
 }
 
-void LinearDS::computeJacobianXRhs(const double& time, const bool&)
+void LinearDS::computeJacobianXRhs(const double time, const bool)
 {
   if (isPlugin["A"])
     computeA(time);

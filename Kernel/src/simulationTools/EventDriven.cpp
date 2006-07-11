@@ -18,18 +18,16 @@
 */
 
 #include "EventDriven.h"
+#include "Lsodar.h"
+
 using namespace std;
 
 // --- Default constructor ---
-EventDriven::EventDriven(Model* newModel): Strategy(newModel, "EventDriven")
-{}
-
-// --- From Model ---
-EventDriven::EventDriven(Model& newModel): Strategy(newModel, "EventDriven")
+EventDriven::EventDriven(Model* newModel): Simulation(newModel, "EventDriven")
 {}
 
 // --- XML constructor ---
-EventDriven::EventDriven(StrategyXML* strxml, Model *newModel): Strategy(strxml, newModel, "EventDriven")
+EventDriven::EventDriven(SimulationXML* strxml, Model *newModel): Simulation(strxml, newModel, "EventDriven")
 {}
 
 // --- Destructor ---
@@ -41,9 +39,128 @@ void EventDriven::setEventsManagerPtr(EventsManager*)
   // TODO IF NECESSARY?
 }
 
+void EventDriven::updateIndexSet(const unsigned int i)
+{
+  if (i > indexSets.size())
+    RuntimeException::selfThrow("Topology::updateIndexSet(i), indexSets[i] does not exist.");
+
+  if (i == 0) // IndexSets[0] must not be updated by this function.
+    RuntimeException::selfThrow("Topology::updateIndexSet(i=0), indexSets[0] can not be updated.");
+
+  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
+  UnitaryRelationIterator it, itForFind;
+
+  double y;
+  for (it = indexSets[i - 1].begin(); it != indexSets[i - 1].end(); ++it)
+  {
+    // check if current Unitary Relation (ie *it) is in indexSets[i]
+    // (if not itForFind will be equal to indexSets.end())
+    itForFind = indexSets[i].find(*it);
+
+    // Get y[i-1] double value
+    y = (*it)->getYRef(i - 1);
+
+    // if y[i-1] <=0, then the unitary relation is added in indexSets[i] (if it was not already there)
+    // else if y[i-1] > 0 and if the unitary relation was in the set, it is removed.
+    if (y <= 0 && itForFind == indexSets[i].end())
+      indexSets[i].insert(*it);
+    else if (y > 0 && itForFind != indexSets[i].end())
+      indexSets[i].erase(*it);
+  }
+}
+
+void EventDriven::updateIndexSetsWithDoubleCondition()
+{
+
+  // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
+  UnitaryRelationIterator it, itForFind;
+
+  for (it = indexSets[2].begin(); it != indexSets[2].end(); ++it)
+  {
+    double gamma = (*it)->getYRef(2);
+    double F     = (*it)->getLambdaRef(2);
+
+    if (gamma > 0 && F < TOLERANCE)
+      indexSets[2].erase(*it);
+    else if (gamma < TOLERANCE && F < TOLERANCE) // undetermined case
+      RuntimeException::selfThrow("Topology::updateIndexSetsWithDoubleCondition(), undetermined case.");
+  }
+}
+
+void EventDriven::computeF(OneStepIntegrator* osi)
+{
+  // fill in xWork vector (ie all the x of the ds of this osi) with x
+  doublereal * x; // WHere from??
+  static_cast<Lsodar*>(osi)->fillXWork(x); //
+
+  //   // Compute the right-hand side ( xdot = f + Tu in DS) for all the ds
+  //   double t = *time;
+  //   computeRhs(t);
+
+  //   //
+  //   DSIterator it;
+  //   unsigned int i = 0;
+  //   for(it=OSIDynamicalSystems.begin();it!=OSIDynamicalSystems.end();++it)
+  //     {
+  //       SiconosVector * xtmp2 = (*it)->getRhsPtr(); // Pointer link !
+  //       for(unsigned int j = 0 ; j< (*it)->getDim() ; ++j)
+  //  xdot[i++] = (*xtmp2)(j);
+  //     }
+
+
+}
+
+void EventDriven::computeJacobianF(OneStepIntegrator* osi)
+{
+
+  //   // Remark A: according to DLSODAR doc, each call to jacobian is preceded by a call to f with the same
+  //   // arguments NEQ, T, and Y.  Thus to gain some efficiency, intermediate quantities shared by both calculations may be
+  //   // saved in class members?
+  //   cout <<"in jaco f: " <<  endl;
+
+  //   // fill in xWork vector (ie all the x of the ds of this osi) with x
+  //   fillXWork(x); // -> copy // Maybe this step is not necessary? because of remark A above
+
+  //   // Compute the jacobian of the vector field according to x for the current ds
+  //   double t = *time;
+  //   computeJacobianRhs(t);
+
+  //   // Save jacobianX values from dynamical system into current jacob (in-out parameter)
+  //   DSIterator it;
+  //   unsigned int i = 0;
+  //   for(it=OSIDynamicalSystems.begin();it!=OSIDynamicalSystems.end();++it)
+  //     {
+  //       SiconosMatrix * jacotmp = (*it)->getJacobianXFPtr(); // Pointer link !
+  //       for(unsigned int j = 0 ; j< (*it)->getDim() ; ++j)
+  //  {
+  //    for(unsigned k = 0 ; k < (*it)->getDim() ;++k)
+  //      jacob[i++] = (*jacotmp)(k,j);
+  //  }
+  //     }
+
+
+  //   // Save jacobianX values from dynamical system into current jacob (in-out parameter)
+  //   SiconosMatrix * jacotmp = ds->getJacobianXFPtr();
+
+  //   unsigned int k = 0;
+  //   for(unsigned int j = 0; j<size;j++) /// Warning: copy !!
+  //     {
+  //       for(unsigned i = 0 ; i<size ; i++)
+  //  {
+  //    jacob[k] = (*jacotmp)(i,j);
+  //    k++;
+  //  }
+  //     }
+  //   delete xtmp;
+}
+
+void EventDriven::computeG(OneStepIntegrator* osi)
+{
+}
+
 void EventDriven::initialize()
 {
-  Strategy::initialize();
+  Simulation::initialize();
   eventsManager = new EventsManager(DEFAULT_TICK, this); //
   eventsManager->initialize();
 }
@@ -105,20 +222,17 @@ void EventDriven::advanceToEvent()
 
   // ---> Step 2: update Index sets according to temporary values obtained at previous step.
 
-  Topology * topology = getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-
-  topology->updateIndexSets();  // This requires that y[i] values have been well computed and saved in Interactions.
+  updateIndexSets();  // This requires that y[i] values have been well computed and saved in Interactions.
 
   // ---> Step 3: solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
-  VectorOfSetOfUnitaryRelations indexSets = topology->getIndexSets();
 
   if (!(indexSets[1] - indexSets[2]).isEmpty())
   {
     // solve the LCP-impact => y[1],lambda[1]
     computeOneStepNSProblem(); // solveLCPImpact();
     // update indexSets
-    topology->updateIndexSet(1);
-    topology->updateIndexSet(2);
+    updateIndexSet(1);
+    updateIndexSet(2);
 
     // check that IndexSet[1]-IndexSet[2] is now empty
     if (!(indexSets[1] - indexSets[2]).isEmpty())
@@ -130,19 +244,12 @@ void EventDriven::advanceToEvent()
     // solve LCP-acceleration
     computeOneStepNSProblem(); //solveLCPAcceleration();
     // for all index in IndexSets[2], update the index set according to y[2] and/or lambda[2] sign.
-    topology->updateIndexSetsWithDoubleCondition();
+    updateIndexSetsWithDoubleCondition();
   }
 }
 
-// void EventDriven::solveLCPImpact()
-// {}
-
-// void EventDriven::solveLCPAcceleration()
-// {}
-
-EventDriven* EventDriven::convert(Strategy *str)
+EventDriven* EventDriven::convert(Simulation *str)
 {
   EventDriven* ed = dynamic_cast<EventDriven*>(str);
   return ed;
 }
-

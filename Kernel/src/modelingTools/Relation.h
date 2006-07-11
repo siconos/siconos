@@ -100,70 +100,69 @@ protected:
    * A flag is also added in the isAllocatedIn map to check inside-class memory allocation for this object.*/
   std::map<std::string, SimpleVector*> parametersList;
 
-  /** \fn void (*computeOutputPtr)(const unsigned int& sizeX, const double* x, const double* time,
-                                   const unsigned int& sizeY, const double* lambda,
-           const unsigned int& sizeU, const double* u, double* y, double* param);
+  /** \fn void (*computeOutputPtr)(const unsigned int sizeX, const double* x, const double* time,
+                                   const unsigned int sizeY, const double* lambda,
+           const unsigned int sizeU, const double* u, double* y, double* param);
    *  \brief computes y
-   *  \param unsigned int& sizeX : size of vector x
+   *  \param unsigned int sizeX : size of vector x
    *  \param double* x : the pointer to the first element of the vector x
    *  \param double* time : the current time
-   *  \param unsigned int& sizeY : size of vector y and lambda.
+   *  \param unsigned int sizeY : size of vector y and lambda.
    *  \param double* lambda : the pointer to the first element of the vector lambda
-   *  \param unsigned int& sizeU : size of vector u
+   *  \param unsigned int sizeU : size of vector u
    *  \param double* u : the pointer to the first element of the vector u
    *  \param double* y : the pointer to the first element of the vector y (in-out parameter)
    *  \param double* param   : a vector of user-defined parameters
    */
-  void (*computeOutputPtr)(const unsigned int&, const double*, const double*, const unsigned int&, const double*, const unsigned int&, const double*, double*, double*);
+  void (*computeOutputPtr)(const unsigned int, const double*, const double*, const unsigned int, const double*, const unsigned int, const double*, double*, double*);
 
-  /** \fn void (*computeInputPtr)(const unsigned int& sizeY, const double* lambda, const double* time, double* r, double* param);
+  /** \fn void (*computeInputPtr)(const unsigned int sizeY, const double* lambda, const double* time, double* r, double* param);
    *  \brief computes r
-   *  \param unsigned int& sizeY : size of vector y and lambda.
+   *  \param unsigned int sizeY : size of vector y and lambda.
    *  \param double* lambda : the pointer to the first element of the vector lambda
    *  \param double* time : the current time
    *  \param double* r : the pointer to the first element of the vector r (in-out parameter)
    *  \param double* param   : a vector of user-defined parameters
    */
-  void (*computeInputPtr)(const unsigned int&, const double*, const double*, double*, double*);
+  void (*computeInputPtr)(const unsigned int, const double*, const double*, double*, double*);
 
-  /** id number for the relation - Used for sorting in set<Relation*>
-   *  number = interaction number + an int. With interaction the Interaction that owns this relation.
-   */
-  unsigned long int number ;
-
-  /** \fn initParameter(const string& id);
+  /** \fn initParameter(const string id);
    *  \brief init parameter vector corresponding to id to a SimpleVector* of size 1
    *  \param a string, id of the plug-in
    */
-  void initParameter(const std::string&);
+  void initParameter(const std::string);
 
 public:
 
-  /** \fn Relation(Interaction* =NULL)
+  /** \fn Relation(const string = "undefined")
    *  \brief default constructor
-   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
+   *  \param a string that gives the type of the relation (optional)
    */
-  Relation(Interaction* = NULL);
+  Relation(const std::string = "Relation");
 
-  /** \fn Relation(RelationXML*)
+  /** \fn Relation(RelationXML*, const string = "undefined")
    *  \brief xml constructor
    *  \param RelationXML* : the XML object corresponding
-   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
+   *  \param a string that gives the type of the relation (optional)
    */
-  Relation(RelationXML*, Interaction* = NULL);
+  Relation(RelationXML*, const std::string = "Relation");
 
   /** \fn Relation(const Relation&)
    *  \brief copy constructor
    *  \param a relation to copy
-   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  warning: the interaction link is not copied, set a new one!
    */
-  Relation(const Relation&, Interaction* = NULL);
+  Relation(const Relation&);
 
   /** \fn ~Relation()
    *  \brief destructor
    */
   virtual ~Relation();
+
+  /** \fn initialize()
+   *  \brief initialize the relation (check sizes, memory allocation ...)
+   */
+  virtual void initialize();
 
   /** \fn inline RelationXML* getRelationXML()
    *  \brief allows to get the RelationXML* of the Relation
@@ -213,7 +212,7 @@ public:
    *  \brief get the name of computeInput function
    *  \return a string
    */
-  inline const std::string  getComputeInputName() const
+  inline const std::string getComputeInputName() const
   {
     return computeInputName;
   }
@@ -222,7 +221,7 @@ public:
    *  \brief get the name of computeOutput function
    *  \return a string
    */
-  inline const std::string  getComputeOutputName() const
+  inline const std::string getComputeOutputName() const
   {
     return computeOutputName;
   }
@@ -233,12 +232,12 @@ public:
    */
   std::vector<DSInputOutput*> getDSInputOutputs(void);
 
-  /** \fn DSInputOutput* getDSInputOutput(const int&)
+  /** \fn DSInputOutput* getDSInputOutput(const int)
    *  \brief allows to get one specific DSInputOutput, with its place in the vector of DSInputOutput
    *  \param int : the place of the DSInputOutput in the vector of DSInputOutput of the Relation
    *  \return DSInputOutput* : dsioVector[ i ] DSInputOutput
    */
-  DSInputOutput* getDSInputOutput(const unsigned int&);
+  DSInputOutput* getDSInputOutput(const unsigned int);
 
   /** \fn void setDSInputOutputs(vector<DSInputOutput*>)
    *  \brief allows to set all the DSInputOutputs of the Relation
@@ -263,20 +262,20 @@ public:
     return parametersList;
   };
 
-  /** \fn  const SimpleVector getParameter(const string & id) const
+  /** \fn  const SimpleVector getParameter(const string  id) const
    *  \brief get the vector of parameters corresponding to plug-in function named id
    *  \return a SimpleVector
    */
-  inline const SimpleVector getParameter(const std::string& id)
+  inline const SimpleVector getParameter(const std::string id)
   {
     return *(parametersList[id]);
   };
 
-  /** \fn SimpleVector* getParameterPtr(const string& id) const
+  /** \fn SimpleVector* getParameterPtr(const string id) const
    *  \brief get the pointer to the vector of parameters corresponding to plug-in function named id
    *  \return a pointer on a SimpleVector
    */
-  inline SimpleVector* getParameterPtr(const std::string& id)
+  inline SimpleVector* getParameterPtr(const std::string id)
   {
     return parametersList[id];
   };
@@ -287,58 +286,40 @@ public:
    */
   void setParameters(const std::map<std::string, SimpleVector*>&);
 
-  /** \fn void setParameter(const SimpleVector& newValue, const string& id)
+  /** \fn void setParameter(const SimpleVector& newValue, const string id)
    *  \brief set vector corresponding to plug-in function named id to newValue
    *  \param a SimpleVector
    *  \param a string
    */
-  void setParameter(const SimpleVector&, const std::string&);
+  void setParameter(const SimpleVector&, const std::string);
 
-  /** \fn void setParameterPtr(SimpleVector* newPtr, const string& id)
+  /** \fn void setParameterPtr(SimpleVector* newPtr, const string id)
    *  \brief set vector corresponding to plug-in function named id to newPtr (!! pointer link !!)
    *  \param a pointer to SimpleVector
    *  \param a string
    */
-  void setParameterPtr(SimpleVector *, const std::string&);
-
-  /** \fn const int getNumber(void) const;
-   *  \brief return id-number of the relation (used as a sorting criterion in set<Relation*>
-   *  \return an unsigned long int
-   */
-  inline const unsigned long int getNumber() const
-  {
-    return number;
-  }
-
-  /** \fn void setNumber(const unsigned long int&)
-   *  \brief set id-number of the relation
-   *  \param an unsigned long int
-   */
-  inline void setNumber(const unsigned long int& newNumber)
-  {
-    number = newNumber;
-  }
+  void setParameterPtr(SimpleVector *, const std::string);
 
   /** \fn void computeOutput(double time);
    *  \brief default function to compute y
    *  \param double : current time
    *  \exception RuntimeException
    */
-  virtual void computeOutput(const double&);
+  virtual void computeOutput(const double);
 
   /** \fn void computeFreeOutput(double time);
    *  \brief default function to compute y for the free state
    *  \param double : current time
    *  \exception RuntimeException
    */
-  virtual void computeFreeOutput(const double&);
+  virtual void computeFreeOutput(const double);
 
   /** \fn void computeInput(double time);
    *  \brief default function to compute r
    *  \param double : current time
    *  \exception RuntimeException
    */
-  virtual void computeInput(const double&);
+  virtual void computeInput(const double);
 
   /** \fn void setComputeOutputFunction(string pluginPath, string functionName)
    *  \brief allow to set a specified function to compute output
@@ -346,7 +327,7 @@ public:
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  virtual void setComputeOutputFunction(const std::string&, const std::string&);
+  virtual void setComputeOutputFunction(const std::string, const std::string);
 
   /** \fn void setComputeInputFunction(string pluginPath, string functionName)
    *  \brief allow to set a specified function to compute output
@@ -354,7 +335,7 @@ public:
    *  \param string : the function name to use in this plugin
    *  \exception SiconosSharedLibraryException
    */
-  virtual void setComputeInputFunction(const std::string&, const std::string&);
+  virtual void setComputeInputFunction(const std::string, const std::string);
 
   /** \fn  void display() const
    * \brief main relation members display
@@ -365,7 +346,6 @@ public:
    *  \brief copy the data of the Relation to the XML tree
    */
   virtual void saveRelationToXML() const;
-
 
 };
 

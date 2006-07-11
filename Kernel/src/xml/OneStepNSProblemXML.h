@@ -46,7 +46,6 @@
 #define __OneStepNSProblemXML__
 
 #include "SiconosDOMTreeTools.h"
-#include "OneStepNSProblem.h"
 #include "SolverXML.h"
 
 //Tags
@@ -182,11 +181,29 @@ public:
                  const double&, const unsigned int&, const double&);
 
   /** \fn void updateOneStepNSProblemXML( xmlNode* node, OneStepNSProblemXML* str )
-   *   \brief makes the operations to create a OneStepNSProblemXML to the StrategyXML
+   *   \brief makes the operations to create a OneStepNSProblemXML to the SimulationXML
    *   \param xmlNode* : the root node of the OneStepNSProblemXML
    *   \param OneStepNSProblem* : the OneStepNSProblem of this OneStepNSProblemXML
    */
   void updateOneStepNSProblemXML(xmlNode* , OneStepNSProblem*);
+
+  /** \fn int getId()
+   *   \brief Return the id of the OneStepNSProblem (attribute of the root node)
+   *   \return a string
+   */
+  inline std::string getId() const
+  {
+    return SiconosDOMTreeTools::getStringAttributeValue(rootNode, "id");
+  }
+
+  /** \fn int hasId()
+   *   \brief Return true if the id attribute of the rootNode is present.
+   *   \return a bool   */
+  inline bool hasId() const
+  {
+    return SiconosDOMTreeTools::hasAttributeValue(rootNode, "id");
+  }
+
 };
 
 

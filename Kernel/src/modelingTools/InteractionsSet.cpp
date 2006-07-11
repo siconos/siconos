@@ -21,16 +21,12 @@
 
 using namespace std;
 
-// RuntimeCmp object used to sort Interactions in the ds set
-// !!! \todo Find a way to avoid global variable ... !!!
-RuntimeCmp<Interaction> compareInteractions(&Interaction::getNumberForSorting);
-
 //-- Default constructor --
-InteractionsSet::InteractionsSet(): setOfInteractions(compareInteractions)
+InteractionsSet::InteractionsSet()
 {}
 
 //-- Copy constructor --
-InteractionsSet::InteractionsSet(const InteractionsSet& newSet): setOfInteractions(compareInteractions)
+InteractionsSet::InteractionsSet(const InteractionsSet& newSet)
 {
 
   // Warning: "false" copy since pointers links remain between Interactions of each set
@@ -71,7 +67,7 @@ InteractionsSet& InteractionsSet::operator=(const InteractionsSet& newSet)
   return *this;
 }
 
-Interaction* InteractionsSet::getInteraction(const int& num) const
+Interaction* InteractionsSet::getInteraction(const int num) const
 {
   ConstInteractionsIterator it;
   for (it = setOfInteractions.begin(); it != setOfInteractions.end(); ++it)
@@ -93,7 +89,7 @@ const bool InteractionsSet::isInteractionIn(Interaction* ds) const
   return out;
 }
 
-const bool InteractionsSet::isInteractionIn(const int& num) const
+const bool InteractionsSet::isInteractionIn(const int num) const
 {
   bool out = false;
   InteractionsIterator it;
@@ -114,7 +110,7 @@ InteractionsIterator InteractionsSet::find(Interaction* ds)
   return setOfInteractions.find(ds);
 }
 
-InteractionsIterator InteractionsSet::find(const int& num)
+InteractionsIterator InteractionsSet::find(const int num)
 {
   InteractionsIterator it;
   for (it = setOfInteractions.begin(); it != setOfInteractions.end(); ++it)
@@ -165,3 +161,24 @@ void InteractionsSet::display() const
   cout << "=============================================================================================" << endl;
 }
 
+const InteractionsSet intersection(const InteractionsSet& s1, const InteractionsSet& s2)
+{
+  // output
+  InteractionsSet commonInteractions;
+
+  set_intersection(s1.setOfInteractions.begin(), s1.setOfInteractions.end(), s2.setOfInteractions.begin(), s2.setOfInteractions.end(),
+                   inserter(commonInteractions.setOfInteractions, commonInteractions.setOfInteractions.begin()), compareInter());
+
+  return commonInteractions;
+}
+
+const InteractionsSet operator - (const InteractionsSet& s1, const InteractionsSet& s2)
+{
+  // output
+  InteractionsSet commonInteractions;
+
+  set_difference(s1.setOfInteractions.begin(), s1.setOfInteractions.end(), s2.setOfInteractions.begin(), s2.setOfInteractions.end(),
+                 inserter(commonInteractions.setOfInteractions, commonInteractions.setOfInteractions.begin()), compareInter());
+
+  return commonInteractions;
+}

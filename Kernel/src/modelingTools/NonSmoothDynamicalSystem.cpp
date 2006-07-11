@@ -49,6 +49,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* 
   SetOfDSXMLIt it;
   CheckInsertDS checkDS;
   string type;
+
   for (it = dsList.begin(); it != dsList.end(); ++it)
   {
     type = (*it)->getType();
@@ -194,13 +195,37 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
   // Warning: xml link is not copied.
 }
 
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DSSet& listOfDS, InteractionsSet& listOfInteractions, const bool& isBVP):
+// Constructor with one DS and one Interaction (optional, default = NULL).
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystem* newDS, Interaction* newInteraction, const bool& isBVP):
+  BVP(isBVP), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)
+{
+
+  // === Checks that sets are not empty ===
+  if (newDS == NULL)
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(DynamicalSystem* ds...): ds == NULL.");
+
+  // Note that Interaction == NULL is possible and has sense.
+
+  allDS.insert(newDS);
+  isDSAllocatedIn[newDS] = false;
+  if (newInteraction != NULL)
+  {
+    allInteractions.insert(newInteraction);
+    isInteractionAllocatedIn[newInteraction] = false;
+  }
+
+  // === build topology ===
+  topology = new Topology(this);
+  isTopologyAllocatedIn = true;
+}
+
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, InteractionsSet& listOfInteractions, const bool& isBVP):
   BVP(isBVP), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)
 {
 
   // === Checks that sets are not empty ===
   if (listOfDS.isEmpty())
-    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(DSSet, ...): the set of DS is empty.");
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(DynamicalSystemsSet, ...): the set of DS is empty.");
 
   if (listOfInteractions.isEmpty())
     RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(...,InteractionsSet, ...): the set of Interactions is empty.");
@@ -217,6 +242,29 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DSSet& listOfDS, Interactions
     isDSAllocatedIn[*itDS] = false;
   for (itInter = allInteractions.begin(); itInter != allInteractions.end(); ++itInter)
     isInteractionAllocatedIn[*itInter] = false;
+
+  // === build topology ===
+  topology = new Topology(this);
+  isTopologyAllocatedIn = true;
+}
+
+NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystemsSet& listOfDS, const bool& isBVP):
+  BVP(isBVP), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)
+{
+
+  // === Checks that sets are not empty ===
+  if (listOfDS.isEmpty())
+    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(DynamicalSystemsSet, ...): the set of DS is empty.");
+
+  // === "copy" listOfDS/listOfInteractions in allDS/allInteractions ===
+  // Warning: this a false copy, since = operator of those objects creates links between pointers of the sets.
+  allDS = listOfDS;
+
+  // === initialize isXXAllocatedIn objects ===
+  DSIterator itDS;
+  InteractionsIterator itInter;
+  for (itDS = allDS.begin(); itDS != allDS.end(); ++itDS)
+    isDSAllocatedIn[*itDS] = false;
 
   // === build topology ===
   topology = new Topology(this);
@@ -279,13 +327,13 @@ DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystemPtr(const int& nb) 
 
 DynamicalSystem* NonSmoothDynamicalSystem::getDynamicalSystemPtrNumber(const int& nb) const
 {
-  if (! allDS.isDSIn(nb)) // if ds number nb is not in the set ...
+  if (! allDS.isDynamicalSystemIn(nb)) // if ds number nb is not in the set ...
     RuntimeException::selfThrow("NonSmoothDynamicalSystem::getDynamicalSystemOnNumber(nb), DS number nb is not in the set.");
 
-  return allDS.getDynamicalSystem(nb);
+  return allDS.getDynamicalSystemPtr(nb);
 }
 
-void NonSmoothDynamicalSystem::setDynamicalSystems(const DSSet& newVect)
+void NonSmoothDynamicalSystem::setDynamicalSystems(const DynamicalSystemsSet& newVect)
 {
   // clear old set
   DSIterator it;
@@ -307,12 +355,12 @@ void NonSmoothDynamicalSystem::setDynamicalSystems(const DSSet& newVect)
 
 const bool NonSmoothDynamicalSystem::hasDynamicalSystemNumber(const int& nb) const
 {
-  return allDS.isDSIn(nb);
+  return allDS.isDynamicalSystemIn(nb);
 }
 
 const bool NonSmoothDynamicalSystem::hasDynamicalSystem(DynamicalSystem* ds) const
 {
-  return allDS.isDSIn(ds);
+  return allDS.isDynamicalSystemIn(ds);
 }
 
 // === Interactions management ===

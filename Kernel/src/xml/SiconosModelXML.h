@@ -27,7 +27,7 @@
  *
  * SiconosModelXML allows the verification of a Siconos XML data file thanks to an XML Schema.
  * All verifications can't be done with schema : others are done in the code, as the download of the XML file (download is stopped if error).
- * This class calls NonSmoothDynamicalSystemXML and StrategyXML classes to manage Siconos NSDS and Strategy data of a simulation.
+ * This class calls NonSmoothDynamicalSystemXML and SimulationXML classes to manage Siconos NSDS and Simulation data of a simulation.
  */
 #ifndef __MODELXML__
 #define __MODELXML__
@@ -37,14 +37,14 @@
 #include "SiconosDOMTreeTools.h"
 
 #include "NonSmoothDynamicalSystemXML.h"
-#include "StrategyXML.h"
+#include "SimulationXML.h"
 
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
 
 class Model;
 class NonSmoothDynamicalSystemXML;
-class StrategyXML;
+class SimulationXML;
 
 // warning: the xml_schema location must corresponds to the package name
 // provided in configure.ac (AC_INIT(package name ...)).
@@ -96,15 +96,15 @@ private:
   xmlNodePtr TNode;
   /** Non smooth dynamical system node. */
   NonSmoothDynamicalSystemXML *nsdsXML;
-  /** Strategy node. */
-  StrategyXML *strategyXML;
+  /** Simulation node. */
+  SimulationXML *simulationXML;
 
   const std::string  SICONOSPATH;
 
   /** \fn loadModel(xmlNode *)
    *  \brief Load model data from xml file
    *  \param xmlNode * : the root node of the Model
-   *  \exception XMLException : if a property of the SiconosModel (NSDS or Strategy or Time) lacks in the DOM tree
+   *  \exception XMLException : if a property of the SiconosModel (NSDS or Simulation or Time) lacks in the DOM tree
    */
   void loadModel(xmlNode *rootNode);
 
@@ -371,22 +371,22 @@ public:
     return nsdsXML;
   }
 
-  /** \fn getStrategyXML()
-   *   \brief This function allows to get the StrategyXML
-   *   \return The StrategyXML of the SiconosModelXML
+  /** \fn getSimulationXML()
+   *   \brief This function allows to get the SimulationXML
+   *   \return The SimulationXML of the SiconosModelXML
    */
-  inline StrategyXML* getStrategyXML() const
+  inline SimulationXML* getSimulationXML() const
   {
-    return strategyXML;
+    return simulationXML;
   }
 
-  /** \fn bool hasStrategy()
-   *   \brief determines if the Strategy is defined
-   *   \return bool :  false if the strategyXML* is NULL
+  /** \fn bool hasSimulation()
+   *   \brief determines if the Simulation is defined
+   *   \return bool :  false if the simulationXML* is NULL
    */
-  inline const bool hasStrategy() const
+  inline const bool hasSimulation() const
   {
-    return (strategyXML != NULL);
+    return (simulationXML != NULL);
   }
 
   /** \fn saveSiconosModelInXMLFile(char *siconosModelXMLFilePath)

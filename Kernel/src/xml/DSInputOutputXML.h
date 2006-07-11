@@ -31,7 +31,6 @@
 #define __DSInputOutputXML__
 
 #include "SiconosDOMTreeTools.h"
-#include "DSInputOutput.h"
 
 class DSInputOutput;
 

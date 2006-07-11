@@ -35,12 +35,12 @@ class QP : public OneStepNSProblem
 {
 public:
 
-  /** \fn QP(OneStepNSProblemXML*, Strategy*=NULL)
+  /** \fn QP(OneStepNSProblemXML*, Simulation*=NULL)
    *  \brief xml constructor
    *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Strategy *: the strategy that owns the problem (optional)
+   *  \param Simulation *: the simulation that owns the problem (optional)
    */
-  QP(OneStepNSProblemXML*, Strategy * = NULL);
+  QP(OneStepNSProblemXML*, Simulation * = NULL);
 
   ~QP();
 

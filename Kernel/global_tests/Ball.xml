@@ -66,12 +66,12 @@
 		<Interaction_Definition>
 			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
 			<Interaction number='1' Id='Ball-Ground'>
-				<size> 1 </size>
+				<size>1</size>
 	                        <DS_Concerned all='true'></DS_Concerned>
 					<Interaction_Content>		
 					<LagrangianLinearRelation>
 						<H matrixRowSize='1' matrixColSize='3'>
-         	                                <row> 1.0  0.0  0.0</row>
+         	                                <row>1.0  0.0  0.0</row>
 						</H>              
 					</LagrangianLinearRelation>			
 					<!-- NS Law of this interaction	-->
@@ -82,7 +82,7 @@
 			</Interaction>				
 		</Interaction_Definition>		
 	</NSDS>
-	<Strategy type='TimeStepping'>
+	<Simulation type='TimeStepping'>
 
 		<TimeDiscretisation isConstant='true'>	
 			<h>0.005</h>
@@ -92,15 +92,13 @@
 			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
 			<Moreau>
 				<DS_Concerned vectorSize='1'>1</DS_Concerned>		
-				<Theta vectorSize='1'> 0.5</Theta>
+				<Theta vectorSize='1'>0.5</Theta>
 			</Moreau>					
 		</OneStepIntegrator_Definition>
-
-		<!-- One Step NS Problem of th Strategy-->
 		<OneStepNSProblem>
 		 	<LCP>
 	                  <Solver type="QP" maxIter="101" />
 		 	</LCP>
 		 </OneStepNSProblem>
-	</Strategy>	
+	</Simulation>	
 </SiconosModel>

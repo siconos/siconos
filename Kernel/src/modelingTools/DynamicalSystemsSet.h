@@ -27,7 +27,7 @@
 
 class DynamicalSystem;
 
-/** \class DSSet
+/** \class DynamicalSystemsSet
  *  \brief set (stl) of pointers to Dynamical Systems - Useful for NSDS, Interaction, OSI ...
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.2.0.
@@ -42,23 +42,23 @@ class DynamicalSystem;
  */
 
 /** set of Dynamical Systems */
-typedef std::set<DynamicalSystem*, RuntimeCmp<DynamicalSystem> > DynamicalSystemSet;
+typedef std::set<DynamicalSystem*, RuntimeCmp<DynamicalSystem> > DSSet;
 
 /** iterator through a set of Dynamical Systems */
-typedef DynamicalSystemSet::iterator DSIterator;
+typedef DSSet::iterator DSIterator;
 
 /** const iterator through a set of Dynamical Systems */
-typedef DynamicalSystemSet::const_iterator ConstDSIterator;
+typedef DSSet::const_iterator ConstDSIterator;
 
 /** return type value for insert function - bool = false if insertion failed. */
-typedef std::pair<DynamicalSystemSet::iterator, bool> CheckInsertDS;
+typedef std::pair<DSSet::iterator, bool> CheckInsertDS;
 
-class DSSet
+class DynamicalSystemsSet
 {
 protected:
 
   /** a set of DynamicalSystem, sorted thanks to their id number */
-  DynamicalSystemSet setOfDS;
+  DSSet setOfDS;
 
   /** a map of bool to check inside-class allocation.
    *  isDSAllocatedIn[ds] = true if ds has been allocated in a method of the present class.
@@ -67,26 +67,26 @@ protected:
 
 public:
 
-  /** \fn DSSet()
+  /** \fn DynamicalSystemsSet()
    *  \brief default constructor
    */
-  DSSet();
+  DynamicalSystemsSet();
 
-  /** \fn DSSet(const DSSet&)
+  /** \fn DynamicalSystemsSet(const DynamicalSystemsSet&)
    *  \brief copy constructor
-   *  \param a DSSet to be copied
+   *  \param a DynamicalSystemsSet to be copied
    */
-  DSSet(const DSSet&);
+  DynamicalSystemsSet(const DynamicalSystemsSet&);
 
-  /** \fn ~DSSet()
+  /** \fn ~DynamicalSystemsSet()
    *  \brief destructor
    */
-  ~DSSet();
+  ~DynamicalSystemsSet();
 
-  /** \fn   DSSet& operator=( const DSSet& );
+  /** \fn   DynamicalSystemsSet& operator=( const DynamicalSystemsSet& );
    *  \brief assignment
    */
-  DSSet& operator=(const DSSet&);
+  DynamicalSystemsSet& operator=(const DynamicalSystemsSet&);
 
   /** \fn const unsigned int size() const
    *  \brief return the number of DS in the set
@@ -115,34 +115,34 @@ public:
     return setOfDS.end();
   }
 
-  /** \fn DynamicalSystemSet getSetOfDS()
+  /** \fn DSSet getSetOfDS()
    *  \brief return setOfDS
-   *  \return a DynamicalSystemSet
+   *  \return a DSSet
    */
-  inline const DynamicalSystemSet getSetOfDS() const
+  inline const DSSet getSetOfDS() const
   {
     return setOfDS;
   }
 
-  /** \fn DynamicalSystem* getDynamicalSystem(const int& num)
+  /** \fn DynamicalSystem* getDynamicalSystemPtr(const int num)
    *  \brief get Dynamical System number num, if it is present in the set (else, exception)
    *  \return a pointer to DynamicalSystem
    */
-  DynamicalSystem* getDynamicalSystem(const int&) const;
+  DynamicalSystem* getDynamicalSystemPtr(const int) const;
 
-  /** \fn bool isDSIn(DynamicalSystem* ds)
+  /** \fn bool isDynamicalSystemIn(DynamicalSystem* ds)
    *  \brief return true if ds is in the set
    *  \param a pointer to DynamicalSystem
    *  \return a bool
    */
-  const bool isDSIn(DynamicalSystem*) const;
+  const bool isDynamicalSystemIn(DynamicalSystem*) const;
 
-  /** \fn bool isDSIn(const int& num)
+  /** \fn bool isDynamicalSystemIn(const int num)
    *  \brief return true if DynamicalSystem number num is in the set
    *  \param an int
    *  \return a bool
    */
-  const bool isDSIn(const int&) const;
+  const bool isDynamicalSystemIn(const int) const;
 
   /** \fn DSIterator find(DynamicalSystem* ds)
    *  \brief same as find function of stl set
@@ -156,7 +156,7 @@ public:
    *  \param an int
    *  \return a DSIterator
    */
-  DSIterator find(const int&);
+  DSIterator find(const int);
 
   /** \fn CheckInsertDS insert(DynamicalSystem* ds)
    *  \brief insert Dynamical System ds into the set
@@ -190,15 +190,15 @@ public:
    */
   void display() const;
 
-  /** \fn const DSSet intersection(const DSSet& s1, const DSSet& s2) const
+  /** \fn const DynamicalSystemsSet intersection(const DynamicalSystemsSet& s1, const DynamicalSystemsSet& s2) const
    *  \brief return the intersection of s1 and s2 (-> set_intersection stl function)
    */
-  friend const DSSet intersection(const DSSet& s1, const DSSet& s2);
+  friend const DynamicalSystemsSet intersection(const DynamicalSystemsSet& s1, const DynamicalSystemsSet& s2);
 
-  /** \fn const DSSet operator-(const DSSet& s1, const DSSet& s2) const
+  /** \fn const DynamicalSystemsSet operator-(const DynamicalSystemsSet& s1, const DynamicalSystemsSet& s2) const
    *  \brief return the difference betwee s1 and s2 (-> set_difference stl function)
    */
-  friend const DSSet operator-(const DSSet& s1, const DSSet& s2);
+  friend const DynamicalSystemsSet operator-(const DynamicalSystemsSet& s1, const DynamicalSystemsSet& s2);
 };
 
 #endif

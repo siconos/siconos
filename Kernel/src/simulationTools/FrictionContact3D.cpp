@@ -26,153 +26,55 @@
 using namespace std;
 
 // Default constructor
-FrictionContact3D::FrictionContact3D(): FrictionContact()
-{
-  nspbType = "FrictionContact3D";
-}
+FrictionContact3D::FrictionContact3D(): FrictionContact("FrictionContact3D")
+{}
 
-// xml constructor
-FrictionContact3D::FrictionContact3D(OneStepNSProblemXML* osNsPbXml, Strategy* newStrat):
-  FrictionContact(osNsPbXml, newStrat)
-{
-  nspbType = "FrictionContact3D";
-  // === read solver related data ===
-  if (onestepnspbxml->hasSolver())
-    solver = new Solver(onestepnspbxml->getSolverXMLPtr(), nspbType);
-  else // solver = default one
-  {
-    solver = new Solver(nspbType, DEFAULT_SOLVER, DEFAULT_ITER, DEFAULT_TOL, DEFAULT_NORMTYPE, DEFAULT_SEARCHDIR);
-    cout << " Warning, no solver defined in non-smooth problem - Default one is used" << endl;
-    solver->display();
-  }
-  isSolverAllocatedIn = true;
-}
+// xml constructor (Simulation is optional)
+FrictionContact3D::FrictionContact3D(OneStepNSProblemXML* osNsPbXml, Simulation* newSimu):
+  FrictionContact("FrictionContact3D", osNsPbXml, newSimu)
+{}
 
-// Constructor from a set of data
-FrictionContact3D::FrictionContact3D(Strategy* newStrat, const string& newSolver,
-                                     const unsigned int& MaxIter, const double & Tolerance, const string & NormType,
-                                     const double & SearchDirection): FrictionContact(newStrat)
+// From data (the only required argument is the simulation)
+FrictionContact3D::FrictionContact3D(Simulation * newSimu, const string newId, const string newSolver, const unsigned int MaxIter,
+                                     const double  Tolerance, const string  NormType,
+                                     const double  SearchDirection): FrictionContact("FrictionContact3D", newSimu, newId)
 {
-  nspbType = "FrictionContact3D";
   // set solver:
   solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, NormType, SearchDirection);
   isSolverAllocatedIn = true;
 }
 
 // Constructor from a set of data
-FrictionContact3D::FrictionContact3D(Strategy* newStrat, Solver*  newSolver):
-  FrictionContact(newStrat, newSolver)
-{
-  nspbType = "FrictionContact3D";
-}
+FrictionContact3D::FrictionContact3D(Solver*  newSolver, Simulation* newSimu, const string newId):
+  FrictionContact("FrictionContact3D", newSolver, newSimu, newId)
+{}
 
 // destructor
 FrictionContact3D::~FrictionContact3D()
 {}
 
-void FrictionContact3D::computeQ(const double& time)
+void FrictionContact3D::compute(const double time)
 {
-  if (q == NULL)
+  // --- Prepare data for FrictionContact2D computing ---
+  preCompute(time);
+
+  // --- Call Numerics solver ---
+  if (sizeOutput != 0)
   {
-    q = new SimpleVector(dim);
-    isQAllocatedIn = true;
-  }
-  else if (q->size() != dim)
-  {
-    // reset q if it has a wrong size
-    if (isQAllocatedIn) delete q;
-    q = new SimpleVector(dim);
-    isQAllocatedIn = true;
-  }
+    int info;
+    int SizeOutput = (int)sizeOutput;
+    // get solving method and friction coefficient value.
+    method solvingMethod = *(solver->getSolvingMethodPtr());
+    Interaction * currentInteraction = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0);
+    // call Numerics method for 2D or 3D problem:
 
-  q->zero();
+    SizeOutput = SizeOutput / 3; // in pfc_3D, SizeOutput is the number of contact points.
+    solvingMethod.pfc_3D.mu = static_cast<NewtonImpactFrictionNSL*>(currentInteraction->getNonSmoothLawPtr())->getMu();
+    info = pfc_3D_solver(M->getArray(), q->getArray(), &SizeOutput, &solvingMethod  , z->getArray(), w->getArray());
 
-  // --- get topology ---
-  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-  // --- get interactions list ---
-  InteractionsSet listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  InteractionsIterator iter;
-  // get Interaction position map
-  map< Interaction* , SiconosMatrix*>::iterator itDiago;
-  map< Interaction*, unsigned int>  interactionEffectivePositionMap =  topology->getInteractionEffectivePositionMap();
-  unsigned int pos;
-  Relation *R;
-  NonSmoothLaw *nslaw;
-  vector<unsigned int> index ;
-  unsigned int effectiveSize ;
-  Interaction *currentInteraction ;
-  SimpleVector * yFree;
-  // --- loop over all the interactions ---
-  for (iter = listInteractions.begin(); iter != listInteractions.end(); ++iter)
-  {
-    // get current interaction, its relation and its nslaw
-    currentInteraction = *iter;
-    unsigned int numberOfRelations = currentInteraction->getInteractionSize();
-    R = currentInteraction->getRelationPtr();
-    string relationType = R->getType();
-    nslaw = currentInteraction->getNonSmoothLawPtr();
-    // position of current yFree in global (including all interactions) y vector
-    pos = interactionEffectivePositionMap[currentInteraction];
-    index = topology->getEffectiveIndexes(currentInteraction);
-
-    if (relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION)
-    {
-      LagrangianLinearR *LLR = static_cast<LagrangianLinearR*>(R);
-      if (nslaw->getType() == NEWTONIMPACTFRICTIONNSLAW)
-      {
-        vector<unsigned int> indexMax = topology->getIndexMax(currentInteraction);
-
-        NewtonImpactFrictionNSL * newton = static_cast<NewtonImpactFrictionNSL*>(nslaw);
-        double e = newton->getEn();
-        //double mu= newton->getMu();
-        LLR->computeFreeOutput(time);
-        if (topology->isTimeInvariant())
-        {
-          yFree = new SimpleVector(currentInteraction -> getY(1)); // copy, no pointer equality
-          // Only normal part has to be multiplied by e.
-          // even indexes corresponds to normal components of y.
-
-          SimpleVector * yDotOld = currentInteraction->getYOldPtr(1);
-          for (unsigned int i = 0; i < numberOfRelations; i = i + 3)
-            (*yFree)(i) += e * (*yDotOld)(i);
-
-          for (unsigned int i = 0; i < numberOfRelations; i++)
-            (*q)(i + pos) = (*yFree)(i);
-        }
-        else
-        {
-          // compute list of effective relations
-          unsigned int k = 0;
-          for (unsigned int j = 0; j < numberOfRelations; j++)
-          {
-            for (unsigned int i = 1; i < indexMax[j] + 1; i++)
-            {
-              index[k] = j;
-              k++;
-            }
-          }
-
-          effectiveSize = index.size();
-          yFree = new SimpleVector(effectiveSize); // we get only the "effective" relations
-          (currentInteraction->getY(1)).getBlock(index, *yFree); // copy, no pointer equality
-          SimpleVector * tmp =  new SimpleVector(effectiveSize);
-          (currentInteraction -> getYOld(1)).getBlock(index, *tmp);
-
-          for (unsigned int i = 0; i < numberOfRelations; i = i + 3)
-            (*yFree)(i) += e * (*tmp)(i);
-
-          delete tmp;
-          for (unsigned int i = 0; i < effectiveSize; i++)
-            (*q)(i + pos) = (*yFree)(i);
-        }
-      }
-      else
-        RuntimeException::selfThrow("FrictionContact3D::computeQ not yet implemented for NSlaw of type " + nslaw->getType() + "and for relation of type " + R->getType());
-    }
-    else
-      RuntimeException::selfThrow("FrictionContact3D::computeQ not yet implemented for relation of type " + R->getType());
-
-    delete yFree;
+    check_solver(info);
+    // --- Recover the desired variables from FrictionContact2D output ---
+    postCompute(w, z);
   }
 }
 

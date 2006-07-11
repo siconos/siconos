@@ -48,8 +48,8 @@ bool BouncingBall()
 
     // --- Model loading from xml file ---
     Model bouncingBall("./Ball.xml");
-    // --- Get and initialize the strategy ---
-    Strategy* s = bouncingBall.getStrategyPtr();
+    // --- Get and initialize the simulation ---
+    Simulation* s = bouncingBall.getSimulationPtr();
     s->initialize();
     // --- Get the time discretisation scheme ---
     TimeDiscretisation* t = s->getTimeDiscretisationPtr();
@@ -78,9 +78,7 @@ bool BouncingBall()
       k = t->getK();
       //  cout << " Pas " << k;
       // solve ...
-      s->computeFreeState();
-      s->computeOneStepNSProblem();
-      s->update();
+      s->computeOneStep();
 
       // --- Get values to be plotted ---
       dataPlot(k, 0) = k * t->getH();

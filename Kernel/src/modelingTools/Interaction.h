@@ -25,13 +25,14 @@
 #include "Relation.h"
 #include "RelationXML.h"
 #include "NonSmoothDynamicalSystem.h"
-#include "DSSet.h"
+#include "DynamicalSystemsSet.h"
 
 // IO (XML)
 #include "InteractionXML.h"
 
 // tools
 #include "SimpleVector.h"
+#include "BlockVector.h"
 
 // const
 #include "SiconosConst.h"
@@ -41,11 +42,12 @@
 #include <string>
 #include <set>
 
-class DSSet;
+class DynamicalSystemsSet;
 class NonSmoothLaw;
 class DynamicalSystem;
 class Relation;
 class NonSmoothDynamicalSystem;
+class InteractionXML;
 
 /** \class Interaction
  *  \brief this class describes interaction between some dynamical systems (DS) (from 1 to NumberOfDS)
@@ -68,15 +70,17 @@ class NonSmoothDynamicalSystem;
  * by a single equation.
  *
  * \todo save a number of derivatives of y depending on the relative degree (at the time, this number is set to 2)
- * \todo remove createRelay etc ...
  *
  */
 
-/** container for SiconosVectors*/
-typedef std::vector< SimpleVector* > vectorOfSiconosVector ;
+/** container for SiconosVectors */
+typedef std::vector< BlockVector* > VectorOfBlocks;
 
 /** iterator through vector of SimpleVector */
-typedef vectorOfSiconosVector::iterator vectorOfSiconosVectorIt;
+typedef VectorOfBlocks::iterator VectorOfBlocksIterator;
+
+/** type used for inside-class allocation checking */
+typedef std::deque<bool>  AllocationFlags;
 
 class Interaction
 {
@@ -104,19 +108,19 @@ private:
    * vector of output derivatives
    * y[0] is y, y[1] is yDot and so on
    */
-  vectorOfSiconosVector y;
+  VectorOfBlocks y;
 
   /** previous step values for y */
-  vectorOfSiconosVector yOld;
+  VectorOfBlocks yOld;
 
   /** result of the computeInput function */
-  vectorOfSiconosVector lambda;
+  VectorOfBlocks lambda;
 
   /** previous step values for lambda */
-  vectorOfSiconosVector lambdaOld;
+  VectorOfBlocks lambdaOld;
 
   /** the Dynamical Systems concerned by this interaction */
-  DSSet involvedDS;
+  DynamicalSystemsSet involvedDS;
 
   /** the Non-smooth Law of the interaction*/
   NonSmoothLaw *nslaw;
@@ -130,11 +134,14 @@ private:
   /** the XML object linked to the Interaction to read XML data */
   InteractionXML *interactionxml;
 
-  /** Flags to know if pointers have been allocated inside constructors or not */
-  std::deque<bool> isYAllocatedIn;
-  std::deque<bool> isYOldAllocatedIn;
-  std::deque<bool> isLambdaAllocatedIn;
-  std::deque<bool> isLambdaOldAllocatedIn;
+  /** Flags to know if pointers have been allocated inside constructors or not
+   *  isXXXAllocatedIn[i][j] = true means that the vector that corresponds to relation j in the derivative i of XXX
+   *  has been allocated inside the class.
+   */
+  AllocationFlags isYAllocatedIn;
+  AllocationFlags isYOldAllocatedIn;
+  AllocationFlags isLambdaAllocatedIn;
+  AllocationFlags isLambdaOldAllocatedIn;
   bool isRelationAllocatedIn;
   bool isNsLawAllocatedIn;
 
@@ -160,19 +167,21 @@ public:
   /** \fn Interaction(InteractionXML*)
    *  \brief constructor with XML object of the Interaction
    *  \param InteractionXML* : the XML object corresponding
-   *  \param NonSmoothDynamicalSystem : the nsds that owns this strategy (optional)
+   *  \param NonSmoothDynamicalSystem (optional)
    */
   Interaction(InteractionXML*, NonSmoothDynamicalSystem* = NULL);
 
-  /** \fn Interaction(const string&, DSSet& dsConcerned, const int& number,const int& nInter)
+  /** \fn Interaction(const string, DynamicalSystemsSet& dsConcerned, const int number,const int nInter, NonSmoothLaw*, Relation*)
    *  \brief constructor with a set of data
-   *  \param a DSSet: the set of DS involved in the Interaction
    *  \param string: the id of this Interaction
+   *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
    *  \param int : the number of this Interaction
-   *  \param int : the value of nInter for this Interaction (optional)
+   *  \param int : the value of interactionSize
+   *  \param NonSmoothLaw* : a pointer to the non smooth law
+   *  \param Relation* : a pointer to the Relation
    *  \exception RuntimeException
    */
-  Interaction(const std::string&, DSSet&, const int&, const int& = -1);
+  Interaction(const std::string, DynamicalSystemsSet&, const int, const int, NonSmoothLaw*, Relation*);
 
   /** \fn ~Interaction()
    * \brief destructor
@@ -184,11 +193,11 @@ public:
    */
   void initialize();
 
-  /** \fn void initializeVectors(vectorOfSiconosVector inputVector)
+  /** \fn void initializeVectors(VectorOfBlocks inputVector)
    *  \brief set all components of inputVector to zero
    *  \param a vector of SimpleVector*
    */
-  void initializeVectors(vectorOfSiconosVector);
+  void initializeVectors(VectorOfBlocks);
 
   // === GETTERS/SETTERS ===
 
@@ -205,7 +214,7 @@ public:
    *  \brief set the id of this Interaction
    *  \param the integer to set the id
    */
-  inline void setId(const int& newId)
+  inline void setId(const int newId)
   {
     id = newId;
   }
@@ -219,21 +228,11 @@ public:
     return number;
   }
 
-  /** \fn const int getNumberForSorting(void) const;
-   *  \brief same as getNumber, but return an unsigned long int, used for set<Interactions*> in OSI, NSDS ...
-   *   as sorting criterion.
-   *  \return the value of number
-   */
-  inline const unsigned long int getNumberForSorting() const
-  {
-    return number;
-  }
-
-  /** \fn void setNumber(const int&)
+  /** \fn void setNumber(const int)
    *  \brief set number
    *  \param int number : the value to set number
    */
-  inline void setNumber(const int& newNumber)
+  inline void setNumber(const int newNumber)
   {
     number = newNumber;
   }
@@ -247,11 +246,11 @@ public:
     return interactionSize;
   }
 
-  /** \fn void setInteractionSize(const unsigned int&)
+  /** \fn void setInteractionSize(const unsigned int)
    *  \brief set the dimension of the Interaction
    *  \param an unsigned int
    */
-  inline void setInteractionSize(const unsigned int& newVal)
+  inline void setInteractionSize(const unsigned int newVal)
   {
     interactionSize = newVal;
   }
@@ -265,11 +264,11 @@ public:
     return numberOfRelations;
   }
 
-  /** \fn void setNumberOfRelations(const unsigned int&)
+  /** \fn void setNumberOfRelations(const unsigned int)
    *  \brief set the number of relations
    *  \param an unsigned int
    */
-  inline void setNumberOfRelations(const unsigned int& newVal)
+  inline void setNumberOfRelations(const unsigned int newVal)
   {
     numberOfRelations = newVal;
   }
@@ -285,244 +284,244 @@ public:
 
   // -- y --
 
-  /** \fn  const vectorOfSiconosVector getY() const
+  /** \fn  const VectorOfBlocks getY() const
    *  \brief get vector of output derivatives
-   *  \return a vectorOfSiconosVector
+   *  \return a VectorOfBlocks
    */
-  inline const vectorOfSiconosVector getY() const
+  inline const VectorOfBlocks getY() const
   {
     return y;
   }
 
-  /** \fn  const SimpleVector getY(const unsigned int & i) const
+  /** \fn  const BlockVector getY(const unsigned int  i) const
    *  \brief get y[i], derivative number i of output
-   *  \return SimpleVector
+   *  \return BlockVector
    */
-  inline const SimpleVector getY(const unsigned int& i) const
+  inline const BlockVector getY(const unsigned int i) const
   {
     return *(y[i]);
   }
 
-  /** \fn SimpleVector* getYPtr(const unsigned int& i) const
+  /** \fn SiconosVector* getYPtr(const unsigned int i) const
    *  \brief get y[i], derivative number i of output
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getYPtr(const unsigned int& i) const
+  inline SiconosVector* getYPtr(const unsigned int i) const
   {
     return y[i];
   }
 
-  /** \fn void setY (const vectorOfSiconosVector& newVector)
+  /** \fn void setY (const VectorOfBlocks& newVector)
    *  \brief set the output vector y to newVector with copy of the y[i] (ie memory allocation)
-   *  \param vectorOfSiconosVector
+   *  \param VectorOfBlocks
    */
-  void setY(const vectorOfSiconosVector&);
+  void setY(const VectorOfBlocks&);
 
-  /** \fn void setYPtr (const vectorOfSiconosVector& newVector)
+  /** \fn void setYPtr (const VectorOfBlocks& newVector)
    *  \brief set the output vector y to newVector with direct pointer equality for the y[i]
-   *  \param vectorOfSiconosVector
+   *  \param VectorOfBlocks
    */
-  void setYPtr(const vectorOfSiconosVector&);
+  void setYPtr(const VectorOfBlocks&);
 
-  /** \fn void setY (const unsigned int & i, const SimpleVector& newValue);
+  /** \fn void setY (const unsigned int  i, const BlockVector& newValue);
    *  \brief set y[i] to newValue
-   *  \param a SimpleVector and an unsigned int
+   *  \param a BlockVector and an unsigned int
    */
-  void setY(const unsigned int &, const SimpleVector&);
+  void setY(const unsigned int , const BlockVector&);
 
-  /** \fn void setYPtr(const unsigned int & i, SimpleVector* newPtr)
+  /** \fn void setYPtr(const unsigned int  i, SiconosVector* newPtr)
    *  \brief set y[i] to pointer newPtr
-   *  \param a SimpleVector * and an unsigned int
+   *  \param a SiconosVector * and an unsigned int
    */
-  void setYPtr(const unsigned int &, SimpleVector *newPtr);
+  void setYPtr(const unsigned int , SiconosVector *newPtr);
 
   // -- yOld --
 
-  /** \fn  const vectorOfSiconosVector getYOld() const
+  /** \fn  const VectorOfBlocks getYOld() const
    *  \brief get vector of output derivatives
-   *  \return a vectorOfSiconosVector
+   *  \return a VectorOfBlocks
    */
-  inline const vectorOfSiconosVector getYOld() const
+  inline const VectorOfBlocks getYOld() const
   {
     return yOld;
   }
 
-  /** \fn  const SimpleVector getYOld(const unsigned int & i) const
+  /** \fn  const BlockVector getYOld(const unsigned int  i) const
    *  \brief get yOld[i], derivative number i of output
-   *  \return SimpleVector
+   *  \return BlockVector
    */
-  inline const SimpleVector getYOld(const unsigned int& i) const
+  inline const BlockVector getYOld(const unsigned int i) const
   {
     return *(yOld[i]);
   }
 
-  /** \fn SimpleVector* getYOldPtr(const unsigned int& i) const
+  /** \fn SiconosVector* getYOldPtr(const unsigned int i) const
    *  \brief get yOld[i], derivative number i of output
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getYOldPtr(const unsigned int& i) const
+  inline SiconosVector* getYOldPtr(const unsigned int i) const
   {
     return yOld[i];
   }
 
-  /** \fn void setYOld (const vectorOfSiconosVector& newVector)
+  /** \fn void setYOld (const VectorOfBlocks& newVector)
    *  \brief set the output vector yOld to newVector
-   *  \param vectorOfSiconosVector
+   *  \param VectorOfBlocks
    */
-  void setYOld(const vectorOfSiconosVector&);
+  void setYOld(const VectorOfBlocks&);
 
-  /** \fn void setYOldPtr(const vectorOfSiconosVector& newVector);
+  /** \fn void setYOldPtr(const VectorOfBlocks& newVector);
    *  \brief set vector yOld to newVector with direct pointer equality for the yOld[i]
-   *  \param vectorOfSiconosVector
+   *  \param VectorOfBlocks
    */
-  void setYOldPtr(const vectorOfSiconosVector&);
+  void setYOldPtr(const VectorOfBlocks&);
 
-  /** \fn void setYOld (const unsigned int & i, const SimpleVector& newValue);
+  /** \fn void setYOld (const unsigned int  i, const BlockVector& newValue);
    *  \brief set yOld[i] to newValue
-   *  \param a SimpleVector and an unsigned int
+   *  \param a BlockVector and an unsigned int
    */
-  void setYOld(const unsigned int &, const SimpleVector&);
+  void setYOld(const unsigned int , const BlockVector&);
 
-  /** \fn void setYOldPtr(const unsigned int & i, SimpleVector* newPtr)
+  /** \fn void setYOldPtr(const unsigned int  i, SiconosVector* newPtr)
    *  \brief set yOld[i] to pointer newPtr
-   *  \param a SimpleVector * and an unsigned int
+   *  \param a SiconosVector * and an unsigned int
    */
-  void setYOldPtr(const unsigned int &, SimpleVector *newPtr);
+  void setYOldPtr(const unsigned int , SiconosVector *newPtr);
 
   // -- lambda --
 
-  /** \fn  const vectorOfSiconosVector getLambda() const
+  /** \fn  const VectorOfBlocks getLambda() const
    *  \brief get vector of input derivatives
-   *  \return a vectorOfSiconosVector
+   *  \return a VectorOfBlocks
    */
-  inline const vectorOfSiconosVector getLambda() const
+  inline const VectorOfBlocks getLambda() const
   {
     return lambda;
   }
 
-  /** \fn  const SimpleVector getLambda(const unsigned int & i) const
+  /** \fn  const BlockVector getLambda(const unsigned int  i) const
    *  \brief get lambda[i], derivative number i of input
-   *  \return SimpleVector
+   *  \return BlockVector
    */
-  inline const SimpleVector getLambda(const unsigned int& i) const
+  inline const BlockVector getLambda(const unsigned int i) const
   {
     return *(lambda[i]);
   }
 
-  /** \fn SimpleVector* getLambdaPtr(const unsigned int& i) const
+  /** \fn SiconosVector* getLambdaPtr(const unsigned int i) const
    *  \brief get lambda[i], derivative number i of input
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getLambdaPtr(const unsigned int& i) const
+  inline SiconosVector* getLambdaPtr(const unsigned int i) const
   {
     return lambda[i];
   }
 
-  /** \fn void setLambda (const vectorOfSiconosVector& newVector)
+  /** \fn void setLambda (const VectorOfBlocks& newVector)
    *  \brief set the input vector lambda to newVector
-   *  \param vectorOfSiconosVector
+   *  \param VectorOfBlocks
    */
-  void setLambda(const vectorOfSiconosVector&);
+  void setLambda(const VectorOfBlocks&);
 
-  /** \fn void setLambdaPtr(const vectorOfSiconosVector& newVector);
+  /** \fn void setLambdaPtr(const VectorOfBlocks& newVector);
    *  \brief set vector lambda to newVector with direct pointer equality for the lambda[i]
-   *  \param vectorOfSiconosVector
+   *  \param VectorOfBlocks
    */
-  void setLambdaPtr(const vectorOfSiconosVector&);
+  void setLambdaPtr(const VectorOfBlocks&);
 
-  /** \fn void setLambda (const unsigned int & i, const SimpleVector& newValue);
+  /** \fn void setLambda (const unsigned int  i, const BlockVector& newValue);
    *  \brief set lambda[i] to newValue
-   *  \param a SimpleVector and an unsigned int
+   *  \param a BlockVector and an unsigned int
    */
-  void setLambda(const unsigned int &, const SimpleVector&);
+  void setLambda(const unsigned int , const BlockVector&);
 
-  /** \fn void setLambdaPtr(const unsigned int & i, SimpleVector* newPtr)
+  /** \fn void setLambdaPtr(const unsigned int  i, SiconosVector* newPtr)
    *  \brief set lambda[i] to pointer newPtr
-   *  \param a SimpleVector * and an unsigned int
+   *  \param a SiconosVector * and an unsigned int
    */
-  void setLambdaPtr(const unsigned int &, SimpleVector *newPtr);
+  void setLambdaPtr(const unsigned int , SiconosVector *newPtr);
 
   // -- lambdaOld --
 
-  /** \fn  const vectorOfSiconosVector getLambdaOld() const
+  /** \fn  const VectorOfBlocks getLambdaOld() const
    *  \brief get vector of input derivatives
-   *  \return a vectorOfSiconosVector
+   *  \return a VectorOfBlocks
    */
-  inline const vectorOfSiconosVector getLambdaOld() const
+  inline const VectorOfBlocks getLambdaOld() const
   {
     return lambdaOld;
   }
 
-  /** \fn  const SimpleVector getLambdaOld(const unsigned int & i) const
+  /** \fn  const BlockVector getLambdaOld(const unsigned int  i) const
    *  \brief get lambdaOld[i], derivative number i of input
-   *  \return SimpleVector
+   *  \return BlockVector
    */
-  inline const SimpleVector getLambdaOld(const unsigned int& i) const
+  inline const BlockVector getLambdaOld(const unsigned int i) const
   {
     return *(lambdaOld[i]);
   }
 
-  /** \fn SimpleVector* getLambdaOldPtr(const unsigned int& i) const
+  /** \fn SiconosVector* getLambdaOldPtr(const unsigned int i) const
    *  \brief get lambdaOld[i], derivative number i of input
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getLambdaOldPtr(const unsigned int& i) const
+  inline SiconosVector* getLambdaOldPtr(const unsigned int i) const
   {
     return lambdaOld[i];
   }
 
-  /** \fn void setLambdaOld (const vectorOfSiconosVector& newVector)
+  /** \fn void setLambdaOld (const VectorOfBlocks& newVector)
    *  \brief set the input vector lambdaOld to newVector
-   *  \param vectorOfSiconosVector
+   *  \param VectorOfBlocks
    */
-  void setLambdaOld(const vectorOfSiconosVector&);
+  void setLambdaOld(const VectorOfBlocks&);
 
-  /** \fn void setLambdaOldPtr(const vectorOfSiconosVector& newVector);
+  /** \fn void setLambdaOldPtr(const VectorOfBlocks& newVector);
    *  \brief set vector lambdaOld to newVector with direct pointer equality for the lambdaOld[i]
-   *  \param vectorOfSiconosVector
+   *  \param VectorOfBlocks
    */
-  void setLambdaOldPtr(const vectorOfSiconosVector&);
+  void setLambdaOldPtr(const VectorOfBlocks&);
 
-  /** \fn void setLambdaOld (const unsigned int & i, const SimpleVector& newValue);
+  /** \fn void setLambdaOld (const unsigned int  i, const BlockVector& newValue);
    *  \brief set lambdaOld[i] to newValue
-   *  \param a SimpleVector and an unsigned int
+   *  \param a BlockVector and an unsigned int
    */
-  void setLambdaOld(const unsigned int &, const SimpleVector&);
+  void setLambdaOld(const unsigned int , const BlockVector&);
 
-  /** \fn void setLambdaOldPtr(const unsigned int & i, SimpleVector* newPtr)
+  /** \fn void setLambdaOldPtr(const unsigned int  i, SiconosVector* newPtr)
    *  \brief set lambdaOld[i] to pointer newPtr
-   *  \param a SimpleVector * and an unsigned int
+   *  \param a SiconosVector * and an unsigned int
    */
-  void setLambdaOldPtr(const unsigned int &, SimpleVector *newPtr);
+  void setLambdaOldPtr(const unsigned int , SiconosVector *newPtr);
 
-  /** \fn DSSet getDynamicalSystems()
+  /** \fn DynamicalSystemsSet getDynamicalSystems()
    *  \brief get the DynamicalSystems of this Interaction
-   *  \return a DSSet
+   *  \return a DynamicalSystemsSet
    */
-  inline DSSet getDynamicalSystems() const
+  inline DynamicalSystemsSet getDynamicalSystems() const
   {
     return involvedDS;
   }
 
-  /** \fn void setDynamicalSystems(const DSSet&)
+  /** \fn void setDynamicalSystems(const DynamicalSystemsSet&)
    *  \brief set the involvedDS
-   *  \param a DSSet
+   *  \param a DynamicalSystemsSet
    */
-  void setDynamicalSystems(const DSSet&) ;
+  void setDynamicalSystems(const DynamicalSystemsSet&) ;
 
-  /** \fn DynamicalSystem* getDynamicalSystemPtr(const int&)
+  /** \fn DynamicalSystem* getDynamicalSystemPtr(const int)
    *  \brief get a specific DynamicalSystem
    *  \param the identification number of the wanted DynamicalSystem
    *  \return a pointer on Dynamical System
    */
-  DynamicalSystem* getDynamicalSystemPtr(const int&);
+  DynamicalSystem* getDynamicalSystemPtr(const int);
 
-  /** \fn DynamicalSystem getDynamicalSystemNumber(const int& nb)
+  /** \fn DynamicalSystem getDynamicalSystemNumber(const int nb)
    *  \brief get a specific DynamicalSystem
    *  \param the identification number of the wanted DynamicalSystem
    *  \return a Dynamical System
   */
-  DynamicalSystem getDynamicalSystem(const int&);
+  DynamicalSystem getDynamicalSystem(const int);
 
   /** \fn Relation* getRelationPtr(void)
    *  \brief get the Relation of this Interaction
@@ -606,36 +605,6 @@ public:
    *  \brief print the data to the screen
    */
   void display() const;
-
-  /** \fn NonSmoothLaw* createComplementarityConditionNSL()
-   *  \brief allows to create a ComplementarityConditionNSL non-smooth law for this Interaction
-   *  \return NonSmoothLaw* : the non-smooth law allocated
-   */
-  NonSmoothLaw* createComplementarityConditionNSL();
-
-  /** \fn NonSmoothLaw* createRelayNSL(const double& c, const double& d)
-   *  \brief allows to create a RelayNSL non-smooth law for this Interaction
-   *  \param double : the c value
-   *  \param double : the d value
-   *  \return NonSmoothLaw* : the non-smooth law allocated
-   */
-  NonSmoothLaw* createRelayNSL(const double&, const double&);
-
-  /** \fn NonSmoothLaw* createNewtonImpactNSL(const double& e)
-   *  \brief allows to create a NewtonImpactNSL non-smooth law for this Interaction
-   *  \param double : the e value
-   *  \return NonSmoothLaw* : the non-smooth law created
-   */
-  NonSmoothLaw* createNewtonImpactNSL(const double&);
-
-  /** \fn NonSmoothLaw* createNewtonImpactNSL(const double& en, const double& et, const double& mu)
-   *  \brief allows to create a NewtonImpactNSL non-smooth law for this Interaction
-   *  \param double : the en value
-   *  \param double : the et value
-   *  \param double : the mu value
-   *  \return NonSmoothLaw* : the non-smooth law created
-   */
-  NonSmoothLaw* createNewtonImpactFrictionNSL(const double&, const double&, const double&);
 
   // --- XML RELATED FUNCTIONS ---
 

@@ -51,12 +51,12 @@ public:
    */
   RelayNSL(NonSmoothLawXML*);
 
-  /** \fn RelayNSL(const double& c, const double& d)
+  /** \fn RelayNSL(const double c, const double d)
    *  \brief constructor with the value of the RelayNSL attributes
    *  \param a double value c
    *  \param a double value d
    */
-  RelayNSL(const double&, const double&);
+  RelayNSL(const double, const double);
 
   ~RelayNSL();
 

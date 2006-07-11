@@ -23,11 +23,12 @@
 #include "TimeDiscretisationXML.h"
 #include "RuntimeException.h"
 #include "check.h"
-#include "Strategy.h"
+#include "Simulation.h"
 #include <iostream>
 #include <vector>
 
-class Strategy;
+class Simulation;
+class TimeDiscretisationXML;
 
 /** \class TimeDiscretisation
  *  \brief The time discretisation scheme
@@ -44,12 +45,12 @@ class Strategy;
  *     how the timeDiscretisation will be compute, depending on the input.
  *   - compute the time discretisation members, using compute(tdCase) method.
  *
- * At the time, TimeDiscretisation is linked with the strategy, but this should change (one discretisation per integrator?).
+ * At the time, TimeDiscretisation is linked with the simulation, but this should change (one discretisation per integrator?).
  * That is s why get/set for \f$t_0\f$ and \f$T\f$ (from model) are encapsulate.
  * setT0 function is a friend of class Model, to allow t0 changes in Model without a call to setT0 of the model, which would
  * result in an infinite loop.
  *
- * Note that we forbid any construction of a TimeDiscretisation without a given (not NULL) strategy.
+ * Note that we forbid any construction of a TimeDiscretisation without a given (not NULL) simulation.
  *
  * \todo add a vector Memory for the previous time tk which have to be stored.
  *  The complete SimpleVector will be only used for a complete definition a priori of a variable timediscretisation.
@@ -82,8 +83,8 @@ private:
   /** Current step number*/
   int k;
 
-  /* the strategy of simulation */
-  Strategy* strategy;
+  /* the simulation of simulation */
+  Simulation* simulation;
 
   /** Flags to know if pointers have been allocated inside present class constructors or not */
   bool isTkAllocatedIn;
@@ -97,59 +98,59 @@ private:
    */
   TimeDiscretisation();
 
-  /** \fn const int checkCase(const bool&, const bool&,const bool&,const bool&) const;
+  /** \fn const int checkCase(const bool, const bool,const bool,const bool) const;
    *  \brief determine the way to compute TD values, according to which data are provided => set tdCase
    *  \param booleans indicated if tk, h, nSteps and T are present or not
    */
-  void checkCase(const bool&, const bool&, const bool&, const bool&);
+  void checkCase(const bool, const bool, const bool, const bool);
 
-  /** \fn void compute(const int&);
+  /** \fn void compute(const int);
    *  \brief to compute TD values according a case, depending on input values and provided
    *   by checkCase.
    *  \param an int to switch to the good case
    */
-  void compute(const int&);
+  void compute(const int);
 
 public:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
   // IO constructor -> xml
-  /** \fn TimeDiscretisation(TimeDiscretisationXML*, Strategy*)
+  /** \fn TimeDiscretisation(TimeDiscretisationXML*, Simulation*)
    *  \brief constructor with XML
    *  \param TimeDiscretisationXML* : the XML object corresponding
-   *  \param Strategy* : the strategy that owns this discretisation
+   *  \param Simulation* : the simulation that owns this discretisation
    */
-  TimeDiscretisation(TimeDiscretisationXML*, Strategy *);
+  TimeDiscretisation(TimeDiscretisationXML*, Simulation *);
 
   // --- Straightforward constructors ---
 
-  /** \fn TimeDiscretisation(SimpleVector *, Strategy*)
-   *  \brief constructor with tk and strategy as given data
+  /** \fn TimeDiscretisation(SimpleVector *, Simulation*)
+   *  \brief constructor with tk and simulation as given data
    *  \param pointer on  a SimpleVector that describes the discretisation
-   *  \param Strategy* : the strategy that owns this discretisation
+   *  \param Simulation* : the simulation that owns this discretisation
   */
-  TimeDiscretisation(SimpleVector *, Strategy*);
+  TimeDiscretisation(SimpleVector *, Simulation*);
 
-  /** \fn TimeDiscretisation(const double& newH, const unsigned int& newNSteps, Strategy* str)
-   *  \brief constructor with h, nSteps and strategy as given data
+  /** \fn TimeDiscretisation(const double newH, const unsigned int newNSteps, Simulation* str)
+   *  \brief constructor with h, nSteps and simulation as given data
    *  \param double (h), unsigned int (nSteps)
-   *  \param Strategy* : the strategy that owns this discretisation
+   *  \param Simulation* : the simulation that owns this discretisation
    */
-  TimeDiscretisation(const double& newH, const unsigned int& newNSteps, Strategy* str);
+  TimeDiscretisation(const double, const unsigned int, Simulation*);
 
-  /** \fn TimeDiscretisation(const unsigned int& newNSteps, Strategy* str)
-   *  \brief constructor with nSteps and strategy as given data
+  /** \fn TimeDiscretisation(const unsigned int newNSteps, Simulation* str)
+   *  \brief constructor with nSteps and simulation as given data
    *  \param int (nSteps)
-   *  \param Strategy* : the strategy that owns this discretisation
+   *  \param Simulation* : the simulation that owns this discretisation
   */
-  TimeDiscretisation(const unsigned int& newNSteps, Strategy* str);
+  TimeDiscretisation(const unsigned int, Simulation*);
 
-  /** \fn TimeDiscretisation(const double& newH, Strategy* str)
-   *  \brief constructor with h and strategy as given data
+  /** \fn TimeDiscretisation(const double newH, Simulation* str)
+   *  \brief constructor with h and simulation as given data
    *  \param double (h)
-   *  \param Strategy* : the strategy that owns this discretisation
+   *  \param Simulation* : the simulation that owns this discretisation
    */
-  TimeDiscretisation(const double& newH, Strategy* str);
+  TimeDiscretisation(const double, Simulation*);
 
   // Destructor
   ~TimeDiscretisation();
@@ -165,11 +166,11 @@ public:
     return h;
   };
 
-  /** \fn void setH(const double&)
+  /** \fn void setH(const double)
    *  \brief set the time step
    *  \param the new value for h
    */
-  void setH(const double& newH);
+  void setH(const double newH);
 
   /** \fn const unsigned int getNSteps() const
    *  \brief get the number of time steps
@@ -180,11 +181,11 @@ public:
     return nSteps;
   };
 
-  /** \fn void setNSteps(const unsigned int&)
+  /** \fn void setNSteps(const unsigned int)
    *  \brief set the number of time steps
    *  \param the new value for nSteps
    */
-  void setNSteps(const unsigned int& newNSteps);
+  void setNSteps(const unsigned int newNSteps);
 
   /** \fn  const SimpleVector getTk() const
    *  \brief get the value of tk
@@ -195,11 +196,11 @@ public:
     return *tk;
   }
 
-  /** \fn  const double getTk(const unsigned int& k) const
+  /** \fn  const double getTk(const unsigned int k) const
    *  \brief get the value of tk at step k
    *  \return a double
    */
-  inline const double getTk(const unsigned int & k) const
+  inline const double getTk(const unsigned int  k) const
   {
     return (*tk)(k);
   }
@@ -234,11 +235,11 @@ public:
     return hMin;
   };
 
-  /** \fn void setHMin(const double&)
+  /** \fn void setHMin(const double)
    *  \brief set hMin
    *  \param the new value for hMin
    */
-  inline void setHMin(const double& newhMin)
+  inline void setHMin(const double newhMin)
   {
     hMin = newhMin;
   };
@@ -252,11 +253,11 @@ public:
     return hMax;
   };
 
-  /** \fn void setHMax(const double&)
+  /** \fn void setHMax(const double)
    *  \brief set hMax
    *  \param the new value for hMax
    */
-  inline void setHMax(const double& newhMax)
+  inline void setHMax(const double newhMax)
   {
     hMax = newhMax;
   };
@@ -274,7 +275,7 @@ public:
    *  \brief set the value of "constant"
    *  \param a boolean
    */
-  inline void setConstant(const bool& newConstant)
+  inline void setConstant(const bool newConstant)
   {
     constant = newConstant;
   };
@@ -306,22 +307,22 @@ public:
     return k;
   }
 
-  /** \fn void setK(const int& newValue)
+  /** \fn void setK(const int newValue)
    *  \brief set the value of K
    *  \param int : the new value for k
    */
-  inline void setK(const int& newValue)
+  inline void setK(const int newValue)
   {
     k = newValue;
   }
 
-  /** \fn Strategy* getStrategyPtr(void)
-   *  \brief get the strategy
-   *  \return the strategy
+  /** \fn Simulation* getSimulationPtr(void)
+   *  \brief get the simulation
+   *  \return the simulation
    */
-  inline Strategy* getStrategyPtr() const
+  inline Simulation* getSimulationPtr() const
   {
-    return strategy;
+    return simulation;
   };
 
   // Getters and setters for time boundary value from model
@@ -332,11 +333,11 @@ public:
    */
   const double getT0() const ;
 
-  /** \fn void setT0(const double& newValue)
+  /** \fn void setT0(const double newValue)
    *  \brief set initial time (friend function of class Model)
    *  \param double : the new value for t0
    */
-  void setT0(const double& newValue);
+  void setT0(const double newValue);
 
   /** \fn const bool hasT() const
    *  \brief check if T, time max value is in the model or not
@@ -350,11 +351,11 @@ public:
    */
   const double getT() const;
 
-  /** \fn void setT(const double& newValue)
+  /** \fn void setT(const double newValue)
    *  \brief set time max value
    *  \param double : the new value for t
    */
-  void setT(const double& newValue);
+  void setT(const double newValue);
 
   // --- OTHER FUNCTIONS ---
   /** \fn void increment()

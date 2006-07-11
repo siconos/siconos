@@ -32,7 +32,7 @@ Model::Model(char *xmlFile):
   t(0.0), t0(0.0), T(-1.0), strat(NULL), nsds(NULL),
   modelxml(NULL), title("none"), author("nobody"), description("none"),
   date("none"), xmlSchema(XML_SCHEMA),
-  isNsdsAllocatedIn(true), isStrategyAllocatedIn(false), isModelXmlAllocatedIn(true)
+  isNsdsAllocatedIn(true), isSimulationAllocatedIn(false), isModelXmlAllocatedIn(true)
 {
   if (xmlFile != NULL)
   {
@@ -51,16 +51,16 @@ Model::Model(char *xmlFile):
     if (modelxml->hasXMLSchema())
       xmlSchema = modelxml->getXMLSchema();
 
-    // Memory allocation for nsds and strategy
+    // Memory allocation for nsds and simulation
     nsds = new NonSmoothDynamicalSystem(modelxml->getNonSmoothDynamicalSystemXML());
-    if (modelxml->hasStrategy())
+    if (modelxml->hasSimulation())
     {
-      isStrategyAllocatedIn = true;
-      if (modelxml->getStrategyXML()->getStrategyXMLType() == TIMESTEPPING_TAG)
-        strat = new TimeStepping(modelxml->getStrategyXML(), this);
-      else if (modelxml->getStrategyXML()->getStrategyXMLType() == EVENTDRIVEN_TAG)
-        strat = new EventDriven(modelxml->getStrategyXML(), this);
-      else RuntimeException::selfThrow("Model: xml constructor, wrong type of strategy" + (modelxml->getStrategyXML()->getStrategyXMLType()));
+      isSimulationAllocatedIn = true;
+      if (modelxml->getSimulationXML()->getSimulationXMLType() == TIMESTEPPING_TAG)
+        strat = new TimeStepping(modelxml->getSimulationXML(), this);
+      else if (modelxml->getSimulationXML()->getSimulationXMLType() == EVENTDRIVEN_TAG)
+        strat = new EventDriven(modelxml->getSimulationXML(), this);
+      else RuntimeException::selfThrow("Model: xml constructor, wrong type of simulation" + (modelxml->getSimulationXML()->getSimulationXMLType()));
     }
   }
   else RuntimeException::selfThrow("Model: xml constructor, xmlfile = NULL");
@@ -71,7 +71,7 @@ Model::Model(const double& newT0, const double& newT, const string& newTitle, co
              const string& newDescription, const string& newDate, const string& newSchema):
   t(newT0), t0(newT0), T(-1), strat(NULL), nsds(NULL), modelxml(NULL), title(newTitle),
   author(newAuthor), description(newDescription), date(newDate), xmlSchema(newSchema),
-  isNsdsAllocatedIn(false), isStrategyAllocatedIn(false), isModelXmlAllocatedIn(false)
+  isNsdsAllocatedIn(false), isSimulationAllocatedIn(false), isModelXmlAllocatedIn(false)
 {
   if (newT > t0) T = newT;
   else if (newT > 0 && newT <= t0)
@@ -83,7 +83,7 @@ Model::~Model()
 {
   if (isNsdsAllocatedIn) delete nsds;
   nsds = NULL;
-  if (isStrategyAllocatedIn) delete strat;
+  if (isSimulationAllocatedIn) delete strat;
   strat = NULL;
   if (isModelXmlAllocatedIn) delete modelxml;
   modelxml = NULL;
@@ -98,13 +98,13 @@ void Model::setT0(const double& newT0)
     t0 = newT0;
 }
 
-void Model::setStrategyPtr(Strategy *newPtr)
+void Model::setSimulationPtr(Simulation *newPtr)
 {
   // Warning: this function may be used carefully because of the links between Model and TimeDiscretisation
-  // The model of the strategy input MUST be the current model.
-  if (isStrategyAllocatedIn) delete strat;
+  // The model of the simulation input MUST be the current model.
+  if (isSimulationAllocatedIn) delete strat;
   strat = newPtr;
-  isStrategyAllocatedIn = false;
+  isSimulationAllocatedIn = false;
 }
 
 
@@ -167,20 +167,20 @@ void Model::savePlatformToXML()
   // save of the NonSmoothDynamicalSystem
   nsds->saveNSDSToXML();
 
-  // save of the Strategy
+  // save of the Simulation
 
   if (strat != NULL)
   {
     strat->getTimeDiscretisationPtr()->saveTimeDiscretisationToXML();
 
     if (strat->getType() == "TimeStepping")
-      (static_cast<TimeStepping*>(strat))->saveStrategyToXML();
+      (static_cast<TimeStepping*>(strat))->saveSimulationToXML();
     else if (strat->getType() == "EventDriven")
-      (static_cast<EventDriven*>(strat))->saveStrategyToXML();
-    else RuntimeException::selfThrow("Model::savePlatformToXML - bad kind of Strategy");
+      (static_cast<EventDriven*>(strat))->saveSimulationToXML();
+    else RuntimeException::selfThrow("Model::savePlatformToXML - bad kind of Simulation");
   }
-  else //RuntimeException::selfThrow("Model::saveToXML - object StrategyXML does not exist");
-    cout << "Model::saveToXML - Warning : No Strategy is defined" << endl;
+  else //RuntimeException::selfThrow("Model::saveToXML - object SimulationXML does not exist");
+    cout << "Model::saveToXML - Warning : No Simulation is defined" << endl;
 }
 
 bool Model::checkXMLDOMTree()
@@ -213,28 +213,28 @@ void Model::checkXMLPlatform()
 
     if ((strat != NULL))
     {
-      if (modelxml->getStrategyXML() == NULL)
+      if (modelxml->getSimulationXML() == NULL)
       {
         //
-        // no StrategyXML already exists, so no TimeDiscretisationXML, OneStepIntegratorXML and OneStepNSProblemXML are existing
-        // because these objects are required when a Strategy is defined in the XML input file
+        // no SimulationXML already exists, so no TimeDiscretisationXML, OneStepIntegratorXML and OneStepNSProblemXML are existing
+        // because these objects are required when a Simulation is defined in the XML input file
 
         // we must update all the Model to do
-        // the creation of the StrategyXML and of all the OneStepIntegratorXML and OneStepNSProblemXML
+        // the creation of the SimulationXML and of all the OneStepIntegratorXML and OneStepNSProblemXML
         //
         modelxml->loadModel(this);
         // \todo to be tested !!
       }
       else
       {
-        strat->getStrategyXMLPtr()->saveStrategy2XML(modelxml->getStrategyXML()->getRootNode(), strat);
+        strat->getSimulationXMLPtr()->saveSimulation2XML(modelxml->getSimulationXML()->getRootNode(), strat);
       }
     }
   }
   else
   {
     // in this case, we must create all the XML objects
-    // SiconosModelXML, NonSmoothDynamicalSystemXML, StrategyXML, ...
+    // SiconosModelXML, NonSmoothDynamicalSystemXML, SimulationXML, ...
 
     // to build all the XML objects, we must fold all the objects of the platform
 
@@ -333,7 +333,7 @@ void Model::display() const
   cout << "| current time = " << t << endl;
   cout << "| t0 (initial time) = " << t0 << endl;
   cout << "| T (final time) = " << T << endl;
-  cout << "| &strategy = " << endl;
+  cout << "| &simulation = " << endl;
   if (strat != NULL) cout << strat << endl;
   else cout << "-> NULL" << endl;
   cout << "| &nsds = " << endl;
@@ -356,38 +356,38 @@ void Model::display() const
 //
 //=======================================================
 
-Strategy* Model::createStrategy(string type)
+Simulation* Model::createSimulation(string type)
 {
-  if (isStrategyAllocatedIn) delete strat;
-  isStrategyAllocatedIn = false;
+  if (isSimulationAllocatedIn) delete strat;
+  isSimulationAllocatedIn = false;
   strat = NULL;
   if (type == "TimeStepping")
   {
     strat = new TimeStepping(NULL, this);
-    isStrategyAllocatedIn = true ;
+    isSimulationAllocatedIn = true ;
   }
   else if (type == "EventDriven")
   {
     strat = new EventDriven(NULL, this);
-    isStrategyAllocatedIn = true ;
+    isSimulationAllocatedIn = true ;
   }
-  else RuntimeException::selfThrow("Model::create Strategy:wrong type of strategy:" + type);
+  else RuntimeException::selfThrow("Model::create Simulation:wrong type of simulation:" + type);
   return strat;
 }
 
-Strategy* Model::createTimeStepping()
+Simulation* Model::createTimeStepping()
 {
-  if (isStrategyAllocatedIn) delete strat;
+  if (isSimulationAllocatedIn) delete strat;
   strat = new TimeStepping(NULL, this);
-  isStrategyAllocatedIn = true ;
+  isSimulationAllocatedIn = true ;
   return strat;
 }
 
-Strategy* Model::createTimeEventDriven()
+Simulation* Model::createTimeEventDriven()
 {
-  if (isStrategyAllocatedIn) delete strat;
+  if (isSimulationAllocatedIn) delete strat;
   strat = new EventDriven(NULL, this);
-  isStrategyAllocatedIn = true ;
+  isSimulationAllocatedIn = true ;
   return strat;
 }
 

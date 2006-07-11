@@ -45,15 +45,15 @@ public:
    * \param int : the size of the memory
    * memorySize is set with the parameter, and the memory is allocated for this number of SiconosVector
    */
-  SiconosMemory(const unsigned int&);
+  SiconosMemory(const unsigned int);
 
   /**
-   * \fn SiconosMemory(SiconosMemoryXML *, const unsigned int&=0)
+   * \fn SiconosMemory(SiconosMemoryXML *, const unsigned int=0)
    * \brief xml constructor + (optional) size of memory; if not set, size is read in xml file.
    * \param SiconosMemoryXML * : the XML object which contains the data of the memory
    * \param unsigned int : the size of the memory (OPTIONAL)
    */
-  SiconosMemory(SiconosMemoryXML *, const unsigned int& = 1);
+  SiconosMemory(SiconosMemoryXML *, const unsigned int = 1);
 
   /**
    * \fn SiconosMemory(deque<SiconosVector*>)
@@ -70,7 +70,7 @@ public:
    * \param deque<SiconosVector*> : the deque of siconosVector which must be stored
    * this constructor is useful if the deque given in parameters has a size lower than the normal size of the memory
    */
-  SiconosMemory(const unsigned int&, const std::deque<SiconosVector*>&);
+  SiconosMemory(const unsigned int, const std::deque<SiconosVector*>&);
 
   /**
    * \fn SiconosMemory(SiconosMemory&)
@@ -101,7 +101,7 @@ public:
    * \param int the position in the memory of the wanted SiconosVector
    * \return SiconosVector* if the parameter has its value in [0, nbVectorsInMemory[
    */
-  SiconosVector* getSiconosVector(const unsigned int&) const;
+  SiconosVector* getSiconosVector(const unsigned int) const;
 
   /**
    * \fn int getMemorySize()
@@ -118,7 +118,7 @@ public:
    * \brief set the max size of the SiconosMemory
    * \param int : the max size for this SiconosMemory
    */
-  inline void setSiconosMemorySize(const unsigned int& max)
+  inline void setSiconosMemorySize(const unsigned int max)
   {
     memorySize = max;
   };
@@ -153,13 +153,11 @@ public:
   }
 
   /**
-   * \fn void swap(const SiconosVector&)
-   * \brief puts a SiconosVector in the memory
+   * \fn void swap(SiconosVector*)
+   * \brief puts a SiconosVector into the memory
    * \param SiconosVector* : the SiconosVector we want to put in memory
-   * this function moves older SiconosVectors of vectorMemory of one position (this operation handles only pointers)
-   * and COPIES (the values of) the SiconosVector given in parameter in the position 0 of vectorMemory
    */
-  void swap(const SiconosVector&);
+  void swap(SiconosVector *);
 
   /**
    * \fn void swap(SiconosVector*)

@@ -18,128 +18,100 @@
 */
 #include "LCP.h"
 
-// includes to be deleted thanks to factories
-#include "Moreau.h"
+// includes to be deleted thanks to factories?
 #include "LagrangianLinearR.h"
-#include "NewtonImpactNSL.h"
 #include "LinearTIR.h"
 
 using namespace std;
 
-// Default constructor
-LCP::LCP(): OneStepNSProblem(), nLcp(0), w(NULL), z(NULL), M(NULL), q(NULL),
+// Default constructor (private)
+LCP::LCP():
+  OneStepNSProblem("LCP"), w(NULL), z(NULL), M(NULL), q(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
-{
-  nspbType = "LCP";
-}
+{}
 
 // xml constructor
-LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Strategy* newStrat):
-  OneStepNSProblem(onestepnspbxml, newStrat), nLcp(0), w(NULL), z(NULL), M(NULL), q(NULL),
+LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Simulation* newSimu):
+  OneStepNSProblem("LCP", onestepnspbxml, newSimu), w(NULL), z(NULL), M(NULL), q(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
 {
-  nspbType = "LCP";
-  // === read solver related data ===
-  if (onestepnspbxml->hasSolver())
-    solver = new Solver(onestepnspbxml->getSolverXMLPtr(), nspbType);
-  else // solver = default one
+  LCPXML * xmllcp = (static_cast<LCPXML*>(onestepnspbxml));
+
+  // If both q and M are given in xml file, check if sizes are consistent
+  if (xmllcp->hasQ() && xmllcp->hasM() && ((xmllcp->getM()).size(0) != (xmllcp->getQ()).size()))
+    RuntimeException::selfThrow("LCP: xml constructor, inconsistent sizes between given q and M");
+
+  // first nlcp is given by M matrix size in xml file
+  if (xmllcp->hasM())
   {
-    solver = new Solver(nspbType, DEFAULT_SOLVER, DEFAULT_ITER, DEFAULT_TOL, DEFAULT_NORMTYPE, DEFAULT_SEARCHDIR);
-    cout << " Warning, no solver defined in non-smooth problem - Default one is used" << endl;
-    solver->display();
+    sizeOutput = (xmllcp->getM()).size(0);
+    M = new SimpleMatrix(xmllcp->getM());
+    isMAllocatedIn = true;
   }
-  isSolverAllocatedIn = true;
 
-  if (onestepnspbxml != NULL)
+  if (xmllcp->hasQ())
   {
-    LCPXML * xmllcp = (static_cast<LCPXML*>(onestepnspbxml));
+    // get sizeOutput if necessary
+    if (M == NULL)
+      sizeOutput = (xmllcp->getQ()).size();
 
-    // If both q and M are given in xml file, check if sizes are consistent
-    if (xmllcp->hasQ() && xmllcp->hasM() && ((xmllcp->getM()).size(0) != (xmllcp->getQ()).size()))
-      RuntimeException::selfThrow("LCP: xml constructor, inconsistent sizes between given q and M");
-
-    // first nlcp is given by M matrix size in xml file
-    if (xmllcp->hasM())
-    {
-      nLcp = (xmllcp->getM()).size(0);
-      M = new SimpleMatrix(xmllcp->getM());
-      isMAllocatedIn = true;
-    }
-
-    if (xmllcp->hasQ())
-    {
-      // get nLcp if necessary
-      if (M == NULL)
-        nLcp = (xmllcp->getQ()).size();
-
-      q = new SimpleVector(xmllcp->getQ());
-      isQAllocatedIn = true;
-    }
-
+    q = new SimpleVector(xmllcp->getQ());
+    isQAllocatedIn = true;
   }
-  else RuntimeException::selfThrow("LCP: xml constructor, xml file=NULL");
 }
 
-// Constructor from a set of data
-LCP::LCP(Strategy* newStrat, const string& newSolver, const unsigned int& MaxIter,
-         const double & Tolerance, const string & NormType, const double & SearchDirection):
-  OneStepNSProblem(newStrat),
-  nLcp(0), w(NULL), z(NULL), M(NULL), q(NULL),
+// Constructor from a set of data (appart from Simulation and id, all arguments are optional)
+LCP::LCP(Simulation* newSimu, const string newId, const string newSolver, const unsigned int MaxIter,
+         const double  Tolerance, const string  NormType, const double  SearchDirection):
+  OneStepNSProblem("LCP", newSimu, newId), w(NULL), z(NULL), M(NULL), q(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
 {
-  nspbType = "LCP";
   // set solver:
   solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, NormType, SearchDirection);
   isSolverAllocatedIn = true;
 }
 
+// Constructor from a set of data
+LCP::LCP(Solver* newSolver, Simulation* newSimu, const string newId):
+  OneStepNSProblem("LCP", newSimu, newId, newSolver), w(NULL), z(NULL), M(NULL), q(NULL),
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
+{}
+
 // destructor
 LCP::~LCP()
 {
-  if (isWAllocatedIn)
-  {
-    delete w;
-    w = NULL;
-  }
-  if (isZAllocatedIn)
-  {
-    delete z;
-    z = NULL;
-  }
-  if (isMAllocatedIn)
-  {
-    delete M;
-    M = NULL;
-  }
-  if (isQAllocatedIn)
-  {
-    delete q;
-    q = NULL;
-  }
+  if (isWAllocatedIn) delete w;
+  w = NULL;
+  if (isZAllocatedIn) delete z;
+  z = NULL;
+  if (isMAllocatedIn) delete M;
+  M = NULL;
+  if (isQAllocatedIn) delete q;
+  q = NULL;
 }
 
 // Setters
 
 void LCP::setW(const SimpleVector& newValue)
 {
-  if (nLcp != newValue.size())
-    RuntimeException::selfThrow("LCP: setW, inconsistent size between given w size and problem size. You should set nLcp before");
+  if (sizeOutput != newValue.size())
+    RuntimeException::selfThrow("LCP: setW, inconsistent size between given w size and problem size. You should set sizeOutput before");
 
   if (w == NULL)
   {
-    w = new SimpleVector(nLcp);
+    w = new SimpleVector(sizeOutput);
     isWAllocatedIn = true;
   }
-  else if (w->size() != nLcp)
-    RuntimeException::selfThrow("LCP: setW, w size differs from nLcp");
+  else if (w->size() != sizeOutput)
+    RuntimeException::selfThrow("LCP: setW, w size differs from sizeOutput");
 
   *w = newValue;
 }
 
 void LCP::setWPtr(SimpleVector* newPtr)
 {
-  if (nLcp != newPtr->size())
-    RuntimeException::selfThrow("LCP: setWPtr, inconsistent size between given w size and problem size. You should set nLcp before");
+  if (sizeOutput != newPtr->size())
+    RuntimeException::selfThrow("LCP: setWPtr, inconsistent size between given w size and problem size. You should set sizeOutput before");
 
   if (isWAllocatedIn) delete w;
   w = newPtr;
@@ -149,12 +121,12 @@ void LCP::setWPtr(SimpleVector* newPtr)
 
 void LCP::setZ(const SimpleVector& newValue)
 {
-  if (nLcp != newValue.size())
-    RuntimeException::selfThrow("LCP: setZ, inconsistent size between given z size and problem size. You should set nLcp before");
+  if (sizeOutput != newValue.size())
+    RuntimeException::selfThrow("LCP: setZ, inconsistent size between given z size and problem size. You should set sizeOutput before");
 
   if (z == NULL)
   {
-    z = new SimpleVector(nLcp);
+    z = new SimpleVector(sizeOutput);
     isZAllocatedIn = true;
   }
 
@@ -163,8 +135,8 @@ void LCP::setZ(const SimpleVector& newValue)
 
 void LCP::setZPtr(SimpleVector* newPtr)
 {
-  if (nLcp != newPtr->size())
-    RuntimeException::selfThrow("LCP: setZPtr, inconsistent size between given z size and problem size. You should set nLcp before");
+  if (sizeOutput != newPtr->size())
+    RuntimeException::selfThrow("LCP: setZPtr, inconsistent size between given z size and problem size. You should set sizeOutput before");
 
   if (isZAllocatedIn) delete z;
   z = newPtr;
@@ -173,12 +145,12 @@ void LCP::setZPtr(SimpleVector* newPtr)
 
 void LCP::setM(const SiconosMatrix& newValue)
 {
-  if (nLcp != newValue.size(0) || nLcp != newValue.size(1))
-    RuntimeException::selfThrow("LCP: setM, inconsistent size between given M size and problem size. You should set nLcp before");
+  if (sizeOutput != newValue.size(0) || sizeOutput != newValue.size(1))
+    RuntimeException::selfThrow("LCP: setM, inconsistent size between given M size and problem size. You should set sizeOutput before");
 
   if (M == NULL)
   {
-    M = new SimpleMatrix(nLcp, nLcp);
+    M = new SimpleMatrix(sizeOutput, sizeOutput);
     isMAllocatedIn = true;
   }
 
@@ -187,8 +159,8 @@ void LCP::setM(const SiconosMatrix& newValue)
 
 void LCP::setMPtr(SiconosMatrix* newPtr)
 {
-  if (nLcp != newPtr->size(0) || nLcp != newPtr->size(1))
-    RuntimeException::selfThrow("LCP: setMPtr, inconsistent size between given M size and problem size. You should set nLcp before");
+  if (sizeOutput != newPtr->size(0) || sizeOutput != newPtr->size(1))
+    RuntimeException::selfThrow("LCP: setMPtr, inconsistent size between given M size and problem size. You should set sizeOutput before");
 
   if (isMAllocatedIn) delete M;
   M = newPtr;
@@ -198,12 +170,12 @@ void LCP::setMPtr(SiconosMatrix* newPtr)
 
 void LCP::setQ(const SimpleVector& newValue)
 {
-  if (nLcp != newValue.size())
-    RuntimeException::selfThrow("LCP: setQ, inconsistent size between given q size and problem size. You should set nLcp before");
+  if (sizeOutput != newValue.size())
+    RuntimeException::selfThrow("LCP: setQ, inconsistent size between given q size and problem size. You should set sizeOutput before");
 
   if (q == NULL)
   {
-    q = new SimpleVector(nLcp);
+    q = new SimpleVector(sizeOutput);
     isQAllocatedIn = true;
   }
 
@@ -212,8 +184,8 @@ void LCP::setQ(const SimpleVector& newValue)
 
 void LCP::setQPtr(SimpleVector* newPtr)
 {
-  if (nLcp != newPtr->size())
-    RuntimeException::selfThrow("LCP: setQPtr, inconsistent size between given q size and problem size. You should set nLcp before");
+  if (sizeOutput != newPtr->size())
+    RuntimeException::selfThrow("LCP: setQPtr, inconsistent size between given q size and problem size. You should set sizeOutput before");
 
   if (isQAllocatedIn) delete q;
   q = newPtr;
@@ -222,619 +194,52 @@ void LCP::setQPtr(SimpleVector* newPtr)
 
 void LCP::initialize()
 {
-
   // This function performs all steps that are not time dependant
   // General initialize for OneStepNSProblem
   OneStepNSProblem::initialize();
 
-  // compute all block-matrices and save them in OneStepNSProblem
-  computeAllBlocks();
-
   // get topology
-  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   // if all relative degrees are equal to 0 or 1
   if (topology->isTimeInvariant())
-  {
-    nLcp = topology->getEffectiveSizeOutput();
     assembleM();
-  }
 }
 
-void LCP::computeAllBlocks()
-{
-  // --- get topology ---
-  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-
-  // --- get linked-Interactions map ---
-  map< Interaction*, vector<InteractionLink*> > linkedInteractionMap = topology->getLinkedInteractionMap();
-  map< Interaction*, vector<InteractionLink*> >::const_iterator itMapInter;
-
-  // --- get interactions list ---
-  InteractionsSet listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  InteractionsIterator iter;
-
-  // --- get time step ---
-  double h = strategy->getTimeDiscretisationPtr()->getH(); // time step
-
-  string relationType, dsType;
-  unsigned int globalDSSize, sizeInteraction, linkedInteractionSize;
-
-  unsigned int sizeBlock, sizeLinkedBlock; // For each interaction, this size depends on relative degree(r), indexMin and the number of relations (j).
-  // sizeBlock = (r - indexMin)*j  ou = j si r=0.
-  vector<unsigned int> r; // relative degrees
-  unsigned int rMax;
-  vector<unsigned int> indexMin;
-  // --- loop over all the interactions ---
-  for (iter = listInteractions.begin(); iter != listInteractions.end(); ++iter)
-  {
-    // the current interaction and its size
-    Interaction *currentInteraction = *iter;
-    sizeInteraction = currentInteraction->getInteractionSize();
-    // relative degrees
-    r = topology->getRelativeDegrees(currentInteraction);
-    rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
-    if (rMax == 0) rMax = 1 ; // warning: review r=0 case
-    indexMin = topology->getIndexMin(currentInteraction);
-    sizeBlock = (rMax - indexMin[0]) * sizeInteraction;
-
-    // --- DIAGONAL BLOCKS MANAGEMENT ---
-
-    // matrix that corresponds to diagonal block for the current interaction
-    diagonalBlocksMap[ currentInteraction ] = new SimpleMatrix(sizeBlock, sizeBlock);
-    SiconosMatrix * currentMatrixBlock = diagonalBlocksMap[ currentInteraction ];
-
-    // get DS list of the current interaction
-    DSSet vDS = currentInteraction ->getDynamicalSystems();
-    unsigned int nbDS = vDS.size(); // number of DS
-
-    // sum of all DS sizes
-    globalDSSize = 0;
-    DSIterator itDS;
-    for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
-      globalDSSize += (*itDS)->getDim();
-
-    // Get Wi matrix of each DS concerned by the interaction and assemble global matrix W
-    OneStepIntegrator * Osi;
-    map<DynamicalSystem*, SiconosMatrix*> W;
-    map<DynamicalSystem*, double> theta;
-
-    for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
-    {
-      Osi = strategy->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
-      if (Osi->getType() == "Moreau")
-      {
-        W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr(*itDS);  // get its W matrix
-        theta[*itDS] = (static_cast<Moreau*>(Osi))->getTheta(*itDS);  // get its theta
-      }
-      else
-        RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
-    }
-
-    // get the relation of the current interaction and its type
-    Relation * RCurrent = currentInteraction -> getRelationPtr();
-    relationType = RCurrent->getType();
-
-    if (relationType == LINEARTIRELATION)
-      computeDiagonalBlocksLinearTIR(RCurrent, sizeInteraction, vDS, W, theta, h, currentMatrixBlock);
-    else if (relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION)
-      computeDiagonalBlocksLagrangianR(RCurrent, sizeInteraction, vDS, W, h, currentMatrixBlock);
-    //else if (relationType == LAGRANGIANRELATION)
-    //computeDiagonalBlocksLagrangianR(RCurrent, sizeInteraction,vDS,W,h,currentMatrixBlock);
-    else RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for relation of type " + relationType);
-
-    // --- EXTRA-DIAGONAL BLOCKS MANAGEMENT ---
-
-    // check if there are linked interactions with current one, and if so get them.
-    itMapInter = linkedInteractionMap.find(currentInteraction);
-    if (itMapInter != linkedInteractionMap.end())
-    {
-      vector<InteractionLink*> ILV = linkedInteractionMap[currentInteraction];
-      vector<InteractionLink*>::iterator itLink;
-
-      //map<Interaction*, SiconosMatrix*> tmpMap;
-      SiconosMatrix * coupledInteractionsBlock, *coupledInteractionsBlockSym;
-
-      // loop over LinkedInteractions
-      for (itLink = ILV.begin(); itLink != ILV.end(); itLink++)
-      {
-        Interaction * linkedInteraction = (*itLink)->getLinkedInteractionPtr();
-        linkedInteractionSize = linkedInteraction->getInteractionSize();
-        // relative degrees
-        r = topology->getRelativeDegrees(linkedInteraction);
-        rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
-        if (rMax == 0) rMax = 1 ; // warning: review r=0 case
-        indexMin = topology->getIndexMin(linkedInteraction);
-        sizeLinkedBlock = (rMax - indexMin[0]) * linkedInteractionSize;
-
-        (extraDiagonalBlocksMap[currentInteraction])[linkedInteraction] = new SimpleMatrix(sizeBlock, sizeLinkedBlock);
-        (extraDiagonalBlocksMap[linkedInteraction])[currentInteraction] = new SimpleMatrix(sizeLinkedBlock, sizeBlock);
-        coupledInteractionsBlock = extraDiagonalBlocksMap[currentInteraction][linkedInteraction];
-        coupledInteractionsBlockSym = extraDiagonalBlocksMap[linkedInteraction][currentInteraction];
-
-        // get the list of common DS and their number
-        DSSet commonDS = (*itLink)->getCommonDS();
-        nbDS = commonDS.size();
-
-        // get the relation of the current interaction
-        Relation * RLinked = linkedInteraction -> getRelationPtr();
-        string RlinkedType = RLinked->getType();
-        if (relationType == LINEARTIRELATION && RlinkedType == LINEARTIRELATION)
-        {
-          computeExtraDiagonalBlocksLinearTIR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, theta, h, coupledInteractionsBlock);
-          computeExtraDiagonalBlocksLinearTIR(RLinked, RCurrent, linkedInteractionSize, sizeInteraction, commonDS, W, theta, h, coupledInteractionsBlockSym);
-        }
-        //else if (relationType == LAGRANGIANLINEARRELATION && RlinkedType== LAGRANGIANLINEARRELATION)
-        //computeExtraDiagonalBlocksLagrangianLinearR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS,W,h,coupledInteractionsBlock);
-        else if ((relationType == LAGRANGIANRELATION || relationType == LAGRANGIANLINEARRELATION) && (RlinkedType == LAGRANGIANRELATION ||  RlinkedType == LAGRANGIANLINEARRELATION))
-        {
-          computeExtraDiagonalBlocksLagrangianR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, h, coupledInteractionsBlock);
-          computeExtraDiagonalBlocksLagrangianR(RLinked, RCurrent, linkedInteractionSize, sizeInteraction, commonDS, W, h, coupledInteractionsBlockSym);
-        }
-        else RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for relation of type " + relationType);
-      } // end of loop over linked interactions
-    }
-  } // end of loop over interactions -> increment current interaction
-
-}
-
-void LCP::computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeInteraction, const DSSet& vDS,
-    map<DynamicalSystem*, SiconosMatrix*> W, map<DynamicalSystem*, double> theta, const double& h, SiconosMatrix* currentMatrixBlock)
-{
-  // convert to linearTIR
-  LinearTIR *LTIR = static_cast<LinearTIR*>(R);
-  // For 1 relation, we need:
-  // - the corresponding row of D
-  // - a block-row of C, that corresponds to a specific DS
-  // - a block of B, that corresponds to a specific DS
-  SiconosMatrix* D = LTIR->getDPtr();
-  SiconosMatrix * C, *B;
-  DSIterator itDS;
-  unsigned int sizeDS;
-
-  bool isHomogeneous = false; // \todo to be defined with relative degrees
-  // isHomogeneous = true means that all relative degrees of the interaction are equal.
-
-  if (!isHomogeneous)
-  {
-    // the resulting row-block
-    SimpleVector * currentLine = new SimpleVector(sizeInteraction);
-    // a row of D corresponding to the a relation of the current interaction
-    SimpleVector * Drow = new SimpleVector(sizeInteraction);
-    // a row of C corresponding to a specific DS (its size depends on the DS size)
-    SimpleVector * Crow ;
-
-    // compute currentLine = Drow + h sum(j) Crow,j Wj  Bj, with j the list of DS of the
-    // current interaction.
-    // loop over the relations of the current interaction
-    for (unsigned int i = 0; i < sizeInteraction; i++)
-    {
-      // get row i of D
-      D->getRow(i, *Drow);
-      *currentLine = *Drow;
-      // loop over the DS of the current interaction
-      for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
-      {
-        sizeDS = (*itDS)->getN();
-        // get blocks corresponding to the current DS
-        C = new SimpleMatrix(sizeInteraction, sizeDS);
-        B = new SimpleMatrix(sizeDS, sizeInteraction);
-        LTIR->getCBlockDSPtr(*itDS, *C);
-        LTIR->getBBlockDSPtr(*itDS, *B);
-        // get row i of C
-        Crow = new SimpleVector(sizeDS);
-        C->getRow(i, *Crow);
-
-        // compute currentLine
-        *currentLine +=  h * theta[*itDS] * *Crow * (*W[*itDS] * *B);
-        delete C;
-        delete B;
-        delete Crow;
-      }
-      // save the result in currentMatrixBlock (and so in diagonalBlocksMap)
-      currentMatrixBlock->setRow(i, *currentLine);
-    }
-    delete currentLine;
-    delete Drow;
-  }
-  else
-  {
-    // the resulting block
-    *currentMatrixBlock = *D;
-    // loop over the DS of the current interaction
-    for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
-    {
-      sizeDS = (*itDS)->getN();
-      // get blocks corresponding to the current DS
-      C = new SimpleMatrix(sizeInteraction, sizeDS);
-      B = new SimpleMatrix(sizeDS, sizeInteraction);
-      LTIR->getCBlockDSPtr(*itDS, *C);
-      LTIR->getBBlockDSPtr(*itDS, *B);
-      *currentMatrixBlock += h * theta[*itDS] * *C * (*W[*itDS] * *B);
-      delete C;
-      delete B;
-    }
-  }
-}
-
-void LCP::computeExtraDiagonalBlocksLinearTIR(Relation * RCurrent, Relation* RLinked, const unsigned int& sizeInteraction,
-    const unsigned int& linkedInteractionSize, const DSSet& commonDS, map<DynamicalSystem*, SiconosMatrix*> W,
-    map<DynamicalSystem*, double> theta, const double& h, SiconosMatrix* coupledInteractionsBlock)
-{
-  // convert to linearTIR
-  LinearTIR *LTIR1 = static_cast<LinearTIR*>(RCurrent);
-  LinearTIR *LTIR2 = static_cast<LinearTIR*>(RLinked);
-  SiconosMatrix *C, *B;
-  coupledInteractionsBlock->zero();
-  DSIterator itDS;
-  unsigned int sizeDS;
-  bool isHomogeneous = false; // \todo to be defined with relative degrees
-  if (!isHomogeneous)
-  {
-    // the resulting row-block
-    SimpleVector * currentLine = new SimpleVector(sizeInteraction);
-    // a row of C corresponding to a specific DS (its size depends on the DS size)
-    SimpleVector * Crow ;
-    currentLine->zero();
-
-    // compute currentLine =  h sum(j) Crow,j Wj  Bj, with j the list of common DS
-    // C belongs to current Interaction and B to linked interaction
-    // loop over the relations of the current interaction
-    for (unsigned int i = 0; i < sizeInteraction; i++)
-    {
-      // loop over common DS
-      for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
-      {
-        sizeDS = (*itDS)->getN();
-        // get blocks corresponding to the current DS
-        C = new SimpleMatrix(sizeInteraction, sizeDS);
-        B = new SimpleMatrix(sizeDS, linkedInteractionSize);
-        LTIR1->getCBlockDSPtr(*itDS, *C);
-        LTIR2->getBBlockDSPtr(*itDS, *B);
-        // get row i of C
-        Crow = new SimpleVector(sizeDS);
-        C->getRow(i, *Crow);
-        // compute currentLine
-        *currentLine +=   h * theta[*itDS] * *Crow * (*W[*itDS]* *B);
-        delete Crow;
-        delete C;
-        delete B;
-      }
-      // save the result in currentMatrixBlock (and so in diagonalBlocksMap)
-      coupledInteractionsBlock->setRow(i, *currentLine);
-    }
-    delete currentLine;
-  }
-  else
-  {
-    // the resulting block
-    // loop over the DS of the current interaction
-    for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
-    {
-      sizeDS = (*itDS)->getN();
-      // get blocks corresponding to the current DS
-      C = new SimpleMatrix(sizeInteraction, sizeDS);
-      B = new SimpleMatrix(sizeDS, linkedInteractionSize);
-      LTIR1->getCBlockDSPtr(*itDS, *C);
-      LTIR2->getBBlockDSPtr(*itDS, *B);
-      *coupledInteractionsBlock +=  h * theta[*itDS] * *C * (*W[*itDS] * *B);
-      delete C;
-      delete B;
-    }
-  }
-}
-
-void LCP::computeDiagonalBlocksLagrangianR(Relation * R, const unsigned int& sizeInteraction, const DSSet& vDS,
-    map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* currentMatrixBlock)
-{
-
-  // Warning: we suppose that at this point, G and/or h have been computed through plug-in mechanism.
-
-  // convert to lagrangianR
-  LagrangianR *LR = static_cast<LagrangianR*>(R);
-
-  // For 1 relation, we need:
-  // - a block-row of G, that corresponds to a specific DS
-  // - a block of tG, that corresponds to a specific DS
-  SiconosMatrix *G;
-  DSIterator itDS;
-  unsigned int sizeDS;
-
-  bool isHomogeneous = false; // \todo to be defined with relative degrees
-  // isHomogeneous = true means that all relative degrees of the interaction are equal.
-  if (!isHomogeneous)
-  {
-    // the resulting row-block
-    SimpleVector * currentLine = new SimpleVector(sizeInteraction);
-    // a row of G corresponding to a specific DS (its size depends on the DS size)
-    SimpleVector * Grow ;
-
-    // compute currentLine = sum(j) Grow,j Wj  tGj, with j the list of DS of the
-    // current interaction.
-    // loop over the relations of the current interaction
-    for (unsigned int i = 0; i < sizeInteraction; i++)
-    {
-      currentLine->zero();
-      // loop over the DS of the current interaction
-      for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
-      {
-        sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
-        // get blocks corresponding to the current DS
-        G = new SimpleMatrix(sizeInteraction, sizeDS);
-        LR->getGBlockDS(*itDS, *G);
-        // get row i of G
-        Grow = new SimpleVector(sizeDS);
-        G->getRow(i, *Grow);
-
-        // compute currentLine
-        *currentLine +=  *Grow * (W[*itDS])->multTranspose(*G);
-        delete G;
-        delete Grow;
-      }
-      // save the result in currentMatrixBlock (and so in diagonalBlocksMap)
-      currentMatrixBlock->setRow(i, *currentLine);
-    }
-    delete currentLine;
-  }
-  else
-  {
-    // the resulting block
-    currentMatrixBlock->zero();
-    // loop over the DS of the current interaction
-    for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
-    {
-
-      sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
-      // get blocks corresponding to the current DS
-      G = new SimpleMatrix(sizeInteraction, sizeDS);
-      LR->getGBlockDS(*itDS, *G);
-      *currentMatrixBlock +=  *G * (W[*itDS])->multTranspose(*G);
-      delete G;
-    }
-  }
-}
-
-void LCP::computeExtraDiagonalBlocksLagrangianR(Relation * RCurrent, Relation* RLinked, const unsigned int& sizeInteraction,
-    const unsigned int& linkedInteractionSize, const DSSet& commonDS,
-    map<DynamicalSystem*, SiconosMatrix*> W, const double& h, SiconosMatrix* coupledInteractionsBlock)
-{
-  // Warning: we suppose that at this point, G and/or h have been computed through plug-in mechanism.
-
-  // convert to LagrangianLinear relation
-  LagrangianR *LR1 = static_cast<LagrangianR*>(RCurrent);
-  LagrangianR *LR2 = static_cast<LagrangianR*>(RLinked);
-  SiconosMatrix *Gcurrent, *Glinked;
-  coupledInteractionsBlock->zero();
-  DSIterator itDS;
-  unsigned int sizeDS;
-  bool isHomogeneous = false; // \todo to be defined with relative degrees
-
-  if (!isHomogeneous)
-  {
-    // the resulting row-block
-    SimpleVector * currentLine = new SimpleVector(linkedInteractionSize);
-    // a row of G corresponding to a specific DS (its size depends on the DS size)
-    SimpleVector * Grow ;
-    currentLine->zero();
-    // compute currentLine =  sum(j) Grow,j Wj  tGj, with j the list of common DS
-    // Grow belongs to current Interaction and tG to linked interaction
-    // loop over the relations of the current interaction
-    for (unsigned int i = 0; i < sizeInteraction; i++)
-    {
-      // loop over common DS
-      for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
-      {
-        sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
-        // get blocks corresponding to the current DS
-        Gcurrent = new SimpleMatrix(sizeInteraction, sizeDS);
-        Glinked = new SimpleMatrix(linkedInteractionSize, sizeDS);
-        LR1->getGBlockDS(*itDS, *Gcurrent);
-        LR2->getGBlockDS(*itDS, *Glinked);
-        // get row i of G
-        Grow = new SimpleVector(sizeDS);
-        Gcurrent->getRow(i, *Grow);
-        // compute currentLine
-        *currentLine +=  *Grow * (W[*itDS])->multTranspose(*Glinked);
-        delete Grow;
-        delete Gcurrent;
-        delete Glinked;
-      }
-      // save the result in currentMatrixBlock (and so in diagonalBlocksMap)
-      coupledInteractionsBlock->setRow(i, *currentLine);
-    }
-    delete currentLine;
-  }
-  else
-  {
-    // the resulting block
-    // loop over the DS of the current interaction
-    for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
-    {
-      sizeDS = (*itDS)->getN() / 2; // divided by 2 to get nDof
-      // get blocks corresponding to the current DS
-      Gcurrent = new SimpleMatrix(sizeInteraction, sizeDS);
-      Glinked = new SimpleMatrix(linkedInteractionSize, sizeDS);
-      LR1->getGBlockDS(*itDS, *Gcurrent);
-      LR2->getGBlockDS(*itDS, *Glinked);
-      *coupledInteractionsBlock += *Gcurrent * (W[*itDS])->multTranspose(*Glinked);
-      delete Gcurrent;
-      delete Glinked;
-    }
-  }
-}
-
-void LCP::updateBlocks()
-{
-  // --- get topology ---
-  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-
-  // --- get linked-Interactions map ---
-  map< Interaction*, vector<InteractionLink*> > linkedInteractionMap = topology->getLinkedInteractionMap();
-  map< Interaction*, vector<InteractionLink*> >::const_iterator itMapInter;
-
-  // --- get interactions list ---
-  InteractionsSet listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  InteractionsIterator iter;
-
-  // --- get time step ---
-  double h = strategy->getTimeDiscretisationPtr()->getH(); // time step
-
-  string relationType, dsType;
-  unsigned int globalDSSize, sizeInteraction, linkedInteractionSize;
-
-  unsigned int sizeBlock, sizeLinkedBlock; // For each interaction, this size depends on relative degree(r), indexMin and the number of relations (j).
-  // sizeBlock = (r - indexMin)*j  ou = j si r=0.
-  vector<unsigned int> r; // relative degrees
-  unsigned int rMax;
-  vector<unsigned int> indexMin;
-  // --- loop over all the interactions ---
-  for (iter = listInteractions.begin(); iter != listInteractions.end(); ++iter)
-  {
-    // the current interaction and its size
-    Interaction *currentInteraction = *iter;
-    sizeInteraction = currentInteraction->getInteractionSize();
-    // relative degrees
-    r = topology->getRelativeDegrees(currentInteraction);
-    rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
-    if (rMax == 0) rMax = 1 ; // warning: review r=0 case
-    indexMin = topology->getIndexMin(currentInteraction);
-    sizeBlock = (rMax - indexMin[0]) * sizeInteraction;
-
-    // --- DIAGONAL BLOCKS MANAGEMENT ---
-
-    // matrix that corresponds to diagonal block for the current interaction
-    SiconosMatrix * currentMatrixBlock = diagonalBlocksMap[ currentInteraction ];
-
-    // get DS list of the current interaction
-    DSSet vDS = currentInteraction ->getDynamicalSystems();
-    unsigned int nbDS = vDS.size(); // number of DS
-
-    // sum of all DS sizes
-    globalDSSize = 0;
-    DSIterator itDS;
-    for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
-    {
-      dsType = (*itDS)->getType();
-      if (dsType == LNLDS || dsType == LTIDS)
-        globalDSSize += (*itDS)->getN() / 2;
-      else
-        globalDSSize += (*itDS)->getN();
-    }
-
-    // Get Wi matrix of each DS concerned by the interaction and assemble global matrix W
-    OneStepIntegrator * Osi;
-    map<DynamicalSystem*, SiconosMatrix*> W;
-
-    for (itDS = vDS.begin(); itDS != vDS.end(); itDS++)
-    {
-      Osi = strategy->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
-      if (Osi->getType() == "Moreau")
-        W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr(*itDS);  // get its W matrix
-      else
-        RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
-    }
-
-    // get the relation of the current interaction and its type
-    Relation * RCurrent = currentInteraction -> getRelationPtr();
-    relationType = RCurrent->getType();
-
-    if (relationType == LAGRANGIANLINEARRELATION)
-    {}// Nothing to be done, blocks allready computed
-    else if (relationType == LAGRANGIANRELATION)
-      computeDiagonalBlocksLagrangianR(RCurrent, sizeInteraction, vDS, W, h, currentMatrixBlock);
-    else RuntimeException::selfThrow("LCP::updateBlocks not yet implemented for relation of type " + relationType);
-
-    // --- EXTRA-DIAGONAL BLOCKS MANAGEMENT ---
-
-    // check if there are linked interactions with current one, and if so get them.
-    itMapInter = linkedInteractionMap.find(currentInteraction);
-    if (itMapInter != linkedInteractionMap.end())
-    {
-      vector<InteractionLink*> ILV = linkedInteractionMap[currentInteraction];
-      vector<InteractionLink*>::iterator itLink;
-
-      //map<Interaction*, SiconosMatrix*> tmpMap;
-      SiconosMatrix * coupledInteractionsBlock, *coupledInteractionsBlockSym;
-
-      // loop over LinkedInteractions
-      for (itLink = ILV.begin(); itLink != ILV.end(); itLink++)
-      {
-        Interaction * linkedInteraction = (*itLink)->getLinkedInteractionPtr();
-        linkedInteractionSize = linkedInteraction->getInteractionSize();
-        // relative degrees
-        r = topology->getRelativeDegrees(linkedInteraction);
-        rMax = r[0]; // !!! we suppose the interaction is homogeneous !!!
-        if (rMax == 0) rMax = 1 ; // warning: review r=0 case
-        indexMin = topology->getIndexMin(linkedInteraction);
-        sizeLinkedBlock = (rMax - indexMin[0]) * linkedInteractionSize;
-
-        coupledInteractionsBlock = extraDiagonalBlocksMap[currentInteraction][linkedInteraction];
-        coupledInteractionsBlockSym = extraDiagonalBlocksMap[linkedInteraction][currentInteraction];
-
-        // get the list of common DS and their number
-        DSSet commonDS = (*itLink)->getCommonDS();
-        nbDS = commonDS.size();
-
-        // get the relation of the current interaction
-        Relation * RLinked = linkedInteraction -> getRelationPtr();
-        string RlinkedType = RLinked->getType();
-        if (relationType == LAGRANGIANLINEARRELATION && RlinkedType == LAGRANGIANLINEARRELATION)
-        {}// Nothing to be done, blocks allready computed
-        else if (relationType == LAGRANGIANRELATION || RlinkedType == LAGRANGIANRELATION)
-        {
-          computeExtraDiagonalBlocksLagrangianR(RCurrent, RLinked, sizeInteraction, linkedInteractionSize, commonDS, W, h, coupledInteractionsBlock);
-          computeExtraDiagonalBlocksLagrangianR(RLinked, RCurrent, linkedInteractionSize, sizeInteraction, commonDS, W, h, coupledInteractionsBlockSym);
-        }
-        else RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for relation of type " + relationType);
-      } // end of loop over linked interactions
-    }
-  } // end of loop over interactions -> increment current interaction
-
-}
-
-void LCP::preLCP(const double& time)
+void LCP::preCompute(const double time)
 {
   // compute M and q operators for LCP problem
 
-  // get topology
-  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-  // if relative degree is not equal to 0 or 1, check effective output
-  if (! topology->isTimeInvariant())
+  computeSizeOutput();
+  if (sizeOutput != 0)
   {
-    updateBlocks(); // compute blocks for NonLinear Relations, with G that has been computed during update of previous time step
-    computeEffectiveOutput();
-    nLcp = topology->getEffectiveSizeOutput();
-    if (nLcp != 0)
-      assembleM();
-  }
-
-  if (nLcp != 0)
-  {
+    updateBlocks();
+    assembleM();
     computeQ(time);
     // check z and w sizes and reset if necessary
     if (z == NULL)
     {
-      z = new SimpleVector(nLcp);
+      z = new SimpleVector(sizeOutput);
       isZAllocatedIn = true;
     }
-    else if (z->size() != nLcp)
+    else if (z->size() != sizeOutput)
     {
       // reset z if it has a wrong size
       if (isZAllocatedIn) delete z;
-      z = new SimpleVector(nLcp);
+      z = new SimpleVector(sizeOutput);
       isZAllocatedIn = true;
     }
 
     if (w == NULL)
     {
-      w = new SimpleVector(nLcp);
+      w = new SimpleVector(sizeOutput);
       isWAllocatedIn = true;
     }
-    else if (w->size() != nLcp)
+    else if (w->size() != sizeOutput)
     {
       // reset w if it has a wrong size
       if (isWAllocatedIn) delete w;
-      w = new SimpleVector(nLcp);
+      w = new SimpleVector(sizeOutput);
       isWAllocatedIn = true;
     }
     w->zero();
@@ -842,334 +247,241 @@ void LCP::preLCP(const double& time)
   }
 }
 
-void LCP::assembleM() //
+void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
 {
 
+  // Warning: we suppose that at this point, all non linear operators (G for lagrangian relation for example) have been computed through plug-in mechanism.
+
+  // Get dimension of the NonSmoothLaw (ie dim of the block)
+  unsigned int nslawSize1 = UR1->getNonSmoothLawSize();
+  unsigned int nslawSize2 = UR2->getNonSmoothLawSize();
+  // Check allocation
+  if (blocks[UR1][UR2] == NULL)
+    blocks[UR1][UR2] = new SimpleMatrix(nslawSize1, nslawSize2);
+
+  // Get DS common between UR1 and UR2
+  DynamicalSystemsSet commonDS = intersection(UR1->getDynamicalSystems(), UR2->getDynamicalSystems());
+  DSIterator itDS;
+
+  // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
+  MapOfMatrices W;
+  MapOfDouble Theta;
+  getOSIMaps(UR1, W, Theta);
+
+  SiconosMatrix* currentBlock = blocks[UR1][UR2];
+  currentBlock->zero();
+  SiconosMatrix *leftBlock, *rightBlock, *extraBlock;
+  unsigned int sizeDS;
+  string relationType1, relationType2;
+  double h = simulation->getTimeDiscretisationPtr()->getH();
+  bool flagRightBlock = false;
+
+  // General form of the block is :   block = a*extraBlock + b * leftBlock * OP * rightBlock
+  // a and b are scalars, OP a matrix depending on the integrator, the simulation type ...
+  // left, right and extra depend on the relation type and the non smooth law.
+
+  // loop over the common DS
+  for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
+  {
+    sizeDS = (*itDS)->getDim();
+    // get blocks corresponding to the current DS
+    // These blocks depends on the relation type.
+    leftBlock = new SimpleMatrix(nslawSize1, sizeDS);
+
+    UR1->getLeftBlockForDS(*itDS, leftBlock);
+    relationType1 = UR1->getRelationType();
+    relationType2 = UR2->getRelationType();
+    // Computing depends on relation type -> move this in UnitaryRelation method?
+    if (relationType1 == LINEARTIRELATION && relationType2 == LINEARTIRELATION)
+    {
+      rightBlock = new SimpleMatrix(sizeDS, nslawSize2);
+      UR2->getRightBlockForDS(*itDS, rightBlock);
+      *currentBlock += h * Theta[*itDS]* *leftBlock * (*W[*itDS] * *rightBlock); //left = C, right = B
+      if (UR1 == UR2)
+      {
+        extraBlock = new SimpleMatrix(nslawSize1, nslawSize1);
+        UR1->getExtraBlock(extraBlock);
+        *currentBlock += *extraBlock;// specific to LinearTIR, get D matrix added only on blocks of the diagonal.
+        delete extraBlock;
+      }
+      delete rightBlock;
+    }
+    else if ((relationType1 == LAGRANGIANRELATION || relationType1 == LAGRANGIANLINEARRELATION) && (relationType2 == LAGRANGIANRELATION ||  relationType2 == LAGRANGIANLINEARRELATION))
+    {
+      if (UR1 == UR2)
+        rightBlock = leftBlock ;
+      else
+      {
+        rightBlock = new SimpleMatrix(nslawSize2, sizeDS);
+        UR2->getLeftBlockForDS(*itDS, rightBlock);
+        // Warning: we use getLeft for Right block because right = transpose(left) and because of size checking inside the getBlock function,
+        // a getRight call will fail.
+        flagRightBlock = true;
+      }
+
+      *currentBlock +=  *leftBlock * (W[*itDS])->multTranspose(*rightBlock); // left = right = G or H
+    }
+    else RuntimeException::selfThrow("LCP::computeBlock not yet implemented for relation of type " + relationType1);
+    delete leftBlock;
+    if (flagRightBlock) delete rightBlock;
+  }
+}
+
+void LCP::assembleM() //
+{
+  // === Description ===
+  // For each Unitary Relation which is active (ie which is in indexSet[1] of the Simulation), named itRow (it corresponds to a row of block in M),
+  // and for each Unitary Relation connected to itRow and active, named itCol, we get the block[itRow][itCol] and copy it at the right place in M matrix of the LCP
+  //
+  // Note that if a Unitary Relation is connected to another one (ie if they have common DS), the corresponding block must be in blocks map. This is the role of
+  // updateBlocks() to ensure this.
+  // But the presence of a block in the map does not imply that its corresponding UR are active, since this block may have been computed at a previous time step.
+  // That is why we need to check if itCol is in indexSet1.
+  //
+  // See updateBlocks function for more details.
+
+  // === Memory allocation, if required ===
   if (M == NULL)
   {
-    M = new SimpleMatrix(nLcp, nLcp);
+    M = new SimpleMatrix(sizeOutput, sizeOutput);
     isMAllocatedIn = true;
   }
-  else if (M->size(0) != nLcp || M->size(1) != nLcp)
+  else if (M->size(0) != sizeOutput || M->size(1) != sizeOutput)
   {
     // reset M matrix if it has a wrong size
     if (isMAllocatedIn) delete M;
-    M = new SimpleMatrix(nLcp, nLcp);
+    M = new SimpleMatrix(sizeOutput, sizeOutput);
     isMAllocatedIn = true;
   }
   M->zero();
 
-  // get topology
-  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  // Get index set 1 from Simulation
+  UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
+  // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
-  map< Interaction* , SiconosMatrix*>::iterator itDiago;
-  //map< Interaction*, unsigned int>  interactionPositionMap =  topology->getInteractionPositionMap();
-
-  unsigned int pos, col;
-  unsigned int size, sizeLinked;
-
-  map< Interaction*, unsigned int>  interactionEffectivePositionMap =  topology->getInteractionEffectivePositionMap();
-  map< Interaction* , map<Interaction *, SiconosMatrix*> >::iterator itCoupled  ;
-  map<Interaction *, SiconosMatrix*>::iterator it;
-  SiconosMatrix *blockDiago , *coupledBlock;
-  // --- loop over all the interactions ---
-  for (itDiago = diagonalBlocksMap.begin(); itDiago != diagonalBlocksMap.end(); itDiago++)
+  unsigned int pos = 0, col = 0; // index position used for block copy into M, see below.
+  UnitaryRelationIterator itRow;
+  UnitaryMatrixColumnIterator itCol;
+  for (itRow = indexSet.begin(); itRow != indexSet.end(); ++itRow)
   {
-    // the current interaction
-    Interaction * currentInteraction = itDiago->first;
-    // and its corresponding diagonal block
-    blockDiago = itDiago->second;
-    pos = interactionEffectivePositionMap[ currentInteraction ];
-
-    // get, if they exist, the linked interactions
-    itCoupled = extraDiagonalBlocksMap.find(currentInteraction);
-
-    if (topology->isTimeInvariant())
+    for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
     {
-      // diagonal blocks
-      M->blockMatrixCopy(*blockDiago, pos, pos); // \todo avoid copy
-      // extra-diagonal blocks
-      if (itCoupled != extraDiagonalBlocksMap.end())
+      // *itRow and itCol are UnitaryRelation*.
+
+      // Check that itCol is in Index set 1
+      if ((indexSet.find((*itCol).first)) != indexSet.end())
       {
-        for (it = extraDiagonalBlocksMap[currentInteraction].begin(); it != extraDiagonalBlocksMap[currentInteraction].end(); it++)
-        {
-          coupledBlock = (*it).second;
-          col = interactionEffectivePositionMap[(*it).first ];
-          M->blockMatrixCopy(*coupledBlock, pos, col); // \todo avoid copy
-        }
+        pos = blocksPositions[*itRow];
+        col = blocksPositions[(*itCol).first];
+        // copy the block into Mlcp - pos/col: position in M (row and column) of first element of the copied block
+        M->blockMatrixCopy(*(blocks[*itRow][(*itCol).first]), pos, col); // \todo avoid copy
       }
     }
-    else
-    {
-      // get the "reduced" diagonal block for the current interaction
-      size = blockIndexesMap[currentInteraction].size();
-      SiconosMatrix * reducedBlock = new SimpleMatrix(size, size);
-      blockDiago->getBlock(blockIndexesMap[currentInteraction], blockIndexesMap[currentInteraction], *reducedBlock);
-
-      // diagonal blocks
-      M->blockMatrixCopy(*reducedBlock, pos, pos); // \todo avoid copy
-
-      // extra-diagonal blocks
-      SiconosMatrix * reducedCoupledBlock;
-
-      // if currentInteraction is coupled with another interaction ...
-      if (itCoupled != extraDiagonalBlocksMap.end())
-      {
-        // loop over linked interactions
-        for (it = extraDiagonalBlocksMap[currentInteraction].begin(); it != extraDiagonalBlocksMap[currentInteraction].end(); it++)
-        {
-          // get list of effective relations for linked interaction
-          Interaction * linkedInteraction = (*it).first;
-          sizeLinked = blockIndexesMap[linkedInteraction].size();
-          // get the corresponding "reduced" block
-          coupledBlock = (*it).second;
-          reducedCoupledBlock = new SimpleMatrix(size, sizeLinked);
-          coupledBlock->getBlock(blockIndexesMap[currentInteraction], blockIndexesMap[linkedInteraction], *reducedCoupledBlock);
-          col = interactionEffectivePositionMap[ linkedInteraction ];
-          M->blockMatrixCopy(*reducedCoupledBlock, pos, col); // \todo avoid copy
-          delete reducedCoupledBlock;
-        }
-      }
-      delete reducedBlock;
-    }
-  }// --- end of interactions loop ---
+  }
+  // === end of UnitaryRelations loop ===
 }
 
-void LCP::computeQ(const double& time)
+void LCP::computeQ(const double time)
 {
+
+  // === Memory allocation, if required ===
   if (q == NULL)
   {
-    q = new SimpleVector(nLcp);
+    q = new SimpleVector(sizeOutput);
     isQAllocatedIn = true;
   }
-  else if (q->size() != nLcp)
+  else if (q->size() != sizeOutput)
   {
     // reset q if it has a wrong size
     if (isQAllocatedIn) delete q;
-    q = new SimpleVector(nLcp);
+    q = new SimpleVector(sizeOutput);
     isQAllocatedIn = true;
   }
-
   q->zero();
 
-  // --- get topology ---
-  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-  // --- get interactions list ---
-  InteractionsSet listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  InteractionsIterator iter;
-  // get Interaction position map
-  map< Interaction* , SiconosMatrix*>::iterator itDiago;
-  map< Interaction*, unsigned int>  interactionEffectivePositionMap =  topology->getInteractionEffectivePositionMap();
-  unsigned int pos;
-  Relation *R;
-  NonSmoothLaw *nslaw;
-  vector<unsigned int> index ;
-  unsigned int effectiveSize ;
-  Interaction *currentInteraction ;
+  // === Get index set from Simulation ===
+  UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
   SimpleVector * yFree;
-  // --- loop over all the interactions ---
-  for (iter = listInteractions.begin(); iter != listInteractions.end(); ++iter)
+
+  // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
+
+  unsigned int pos = 0;
+  unsigned int nsLawSize;
+  UnitaryRelationIterator itCurrent, itLinked;
+  for (itCurrent = indexSet.begin(); itCurrent !=  indexSet.end(); ++itCurrent)
   {
-    // get current interaction, its relation and its nslaw
-    currentInteraction = *iter;
-    unsigned int numberOfRelations = currentInteraction->getInteractionSize();
-    R = currentInteraction->getRelationPtr();
-    string relationType = R->getType();
-    nslaw = currentInteraction->getNonSmoothLawPtr();
-    // position of current yFree in global (including all interactions) y vector
-    pos = interactionEffectivePositionMap[currentInteraction];
-    index = topology->getEffectiveIndexes(currentInteraction);
-    if (relationType == LINEARTIRELATION)
-    {
-      LinearTIR *LTIR = static_cast<LinearTIR*>(R);
-      string nslawType = nslaw->getType() ;
-      if (nslawType == COMPLEMENTARITYCONDITIONNSLAW)
-      {
-        LTIR->computeFreeOutput(); // free output is saved in y
-        if (topology->isTimeInvariant())
-        {
-          yFree = new SimpleVector(currentInteraction->getY(0));   // copy, no pointer equality
-          for (unsigned int i = 0; i < numberOfRelations; i++)
-            (*q)(i + pos) = (*yFree)(i);
-        }
-        else
-        {
-          effectiveSize = index.size();
-          yFree = new SimpleVector(effectiveSize); // we get only the "effective" relations
-          (currentInteraction->getY(0)).getBlock(index, *yFree); // copy, no pointer equality
-          for (unsigned int i = 0; i < effectiveSize; i++)
-            (*q)(i + pos) = (*yFree)(i);
-        }
-      }
-      else
-        RuntimeException::selfThrow("LCP::computeQ not yet implemented for NSlaw of type " + nslaw->getType() + "and for relation of type " + R->getType());
-    }
-    else if (relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION)
-    {
-      LagrangianLinearR *LLR = static_cast<LagrangianLinearR*>(R);
-      if (nslaw->getType() == NEWTONIMPACTNSLAW)
-      {
-        vector<unsigned int> indexMax = topology->getIndexMax(currentInteraction);
+    // *itCurrent is a UnitaryRelation*.
 
-        NewtonImpactNSL * newton = static_cast<NewtonImpactNSL*>(nslaw);
-        double e = newton->getE();
-        LLR->computeFreeOutput(time);
-        if (topology->isTimeInvariant())
-        {
-          yFree = new SimpleVector(currentInteraction -> getY(1)); // copy, no pointer equality
-          *yFree += e * currentInteraction -> getYOld(1);
-          for (unsigned int i = 0; i < numberOfRelations; i++)
-            (*q)(i + pos) = (*yFree)(i);
-        }
-        else
-        {
-          // compute list of effective relations
-          unsigned int k = 0;
-          for (unsigned int j = 0; j < numberOfRelations; j++)
-          {
-            for (unsigned int i = 1; i < indexMax[j] + 1; i++)
-            {
-              index[k] = j;
-              k++;
-            }
-          }
+    // Compute free output, this depends on the type of non smooth problem, on the relation type and on the non smooth law
+    nsLawSize = (*itCurrent)->getNonSmoothLawSize();
+    yFree = new SimpleVector(nsLawSize);
 
+    (*itCurrent)->computeFreeOutput(time, yFree); // free output is saved in y
 
-          effectiveSize = index.size();
-          yFree = new SimpleVector(effectiveSize); // we get only the "effective" relations
-          (currentInteraction->getY(1)).getBlock(index, *yFree); // copy, no pointer equality
-          SimpleVector * tmp =  new SimpleVector(effectiveSize);
-          (currentInteraction -> getYOld(1)).getBlock(index, *tmp);
-          *yFree += e * *tmp;
-          delete tmp;
-          for (unsigned int i = 0; i < effectiveSize; i++)
-            (*q)(i + pos) = (*yFree)(i);
-        }
-      }
-      else
-        RuntimeException::selfThrow("LCP::computeQ not yet implemented for NSlaw of type " + nslaw->getType() + "and for relation of type " + R->getType());
-    }
-    else
-      RuntimeException::selfThrow("LCP::computeQ not yet implemented for relation of type " + R->getType());
-
+    pos = blocksPositions[*itCurrent];
+    // Copy yFree at the right position in q.
+    for (unsigned int i = 0; i < yFree->size(); i++)
+      (*q)(i + pos) = (*yFree)(i);
     delete yFree;
   }
 }
 
-void LCP::compute(const double& time)
+void LCP::compute(const double time)
 {
   // --- Prepare data for LCP computing ---
-  preLCP(time);
+  preCompute(time);
 
   // --- Call Numerics solver ---
-  if (nLcp != 0)
+  if (sizeOutput != 0)
   {
     int info;
-    int Nlcp = (int)nLcp;
+    int Nlcp = (int)sizeOutput;
     method solvingMethod = *(solver->getSolvingMethodPtr());
     info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
 
     // \warning : info value and signification depends on solver type ...
     check_solver(info);
     // --- Recover the desired variables from LCP output ---
-    postLCP(*w, *z);
+    postCompute(w, z);
   }
 }
 
-void LCP::postLCP(const SimpleVector& w, const SimpleVector &z)
+void LCP::postCompute(SiconosVector* w, SiconosVector* z)
 {
-  // --- get topology ---
-  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
+  // === Get index set from Topology ===
+  UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
 
-  // --- get interactions list ---
-  InteractionsSet listInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  InteractionsIterator iter;
-  // get Interaction position map
-  map< Interaction* , SiconosMatrix*>::iterator itDiago;
-  map< Interaction*, unsigned int>  interactionEffectivePositionMap =  topology->getInteractionEffectivePositionMap();
+  // y and lambda vectors
+  //  vector< SimpleVector* >  Y, Lambda;
+  SimpleVector * y, *lambda;
 
-  vector<unsigned int> effectiveIndexes, indexMin;
-  unsigned int effectivePosition;
-  unsigned int effectiveSize, numberOfRelations ;
-  unsigned int i; // index of derivation for Y
-  unsigned int j; // number of relation in a specific interaction
-  unsigned int k;
-  unsigned int rMax; // maximum value for relative degrees
-  SimpleVector * tmpY, *tmpLambda;
-  vector< SimpleVector* >  Y, Lambda;
-  vector<unsigned int> r; // relative degrees
+  // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
 
-  // --- loop over all the interactions ---
-  for (iter = listInteractions.begin(); iter != listInteractions.end(); ++iter)
+  unsigned int pos = 0;
+  unsigned int nsLawSize;
+  UnitaryRelationIterator itCurrent, itLinked;
+
+  for (itCurrent = indexSet.begin(); itCurrent !=  indexSet.end(); ++itCurrent)
   {
-    // the current interaction and its size
-    Interaction *currentInteraction = *iter;
-    numberOfRelations = currentInteraction->getInteractionSize();
+    // *itCurrent is a UnitaryRelation*.
+    // size if a block that corresponds to the current UnitaryRelation
+    nsLawSize = (*itCurrent)->getNonSmoothLawSize();
+    // Get the relative position of UR-block in the vector w or z
+    pos = blocksPositions[*itCurrent];
 
-    // Y vector of the interactions
-    Y = currentInteraction -> getY();
-    // lambda vector
-    Lambda = currentInteraction ->getLambda();
+    // Get Y and Lambda for the current Unitary Relation
+    y = static_cast<SimpleVector*>((*itCurrent)-> getYPtr(levelMin));
+    lambda = static_cast<SimpleVector*>((*itCurrent)->getLambdaPtr(levelMin));
 
-    // relative degrees
-    r = topology->getRelativeDegrees(currentInteraction);
-    rMax = r[0]; // we suppose the interaction is homogeneous
-    if (rMax == 0) rMax = 1 ; // warning: review r=0 case
-
-    // get the list of relations that are constrained and the position vector
-    effectiveSize = topology->computeEffectiveSizeOutput(currentInteraction) ; // Improvement: save this value in Topology?
-    effectiveIndexes = topology->getEffectiveIndexes(currentInteraction);
-    indexMin = topology->getIndexMin(currentInteraction);
-    // 'offset' due to indexMin
-    /*      for(j=0;j<effectiveSize;j++)
-    effectiveIndexes[j] += indexMin[effectiveIndexes[j]]*numberOfRelations;
-    */
-    // Get the 'position' of vector corresponding to the current interaction, in the LCP output:
-    effectivePosition = topology->getInteractionEffectivePosition(currentInteraction);
-
-    // we consider that the interaction is homogeneous, ie all degrees are equals
-    tmpY = new SimpleVector(effectiveSize); // warning: review r=0 case
-    tmpLambda = new SimpleVector(effectiveSize);
-
-    unsigned int pos;
-    vector<unsigned int>::iterator itPos;
-    // First we get in w results corresponding to the current interaction
-
-    for (j = 0; j < effectiveSize ; j++)
-    {
-      (*tmpY)(j) =  w(j + effectivePosition);
-      (*tmpLambda)(j) = z(j + effectivePosition);
-    }
-
-    // then we save these results in Y and Lambda, only for effective relations
-    for (i = 0; i < rMax ; i++)
-    {
-      for (j = 0; j < numberOfRelations; j++)
-      {
-        pos = j * rMax + i;
-        for (k = 0; k < effectiveSize; k++)
-        {
-          // itPos = find(effectiveIndexes.begin(),effectiveIndexes.end(),pos);
-          // -> how can we get k/ effectiveIndex(k)=itPos ????
-          //if (itPos!=effectiveIndexes.end())
-          if (effectiveIndexes[k] == pos)
-          {
-            (*(Y[i]))(j) = (*tmpY)(k);
-            (*(Lambda[i]))(j) = (*tmpLambda)(k);
-          }
-        }
-      }
-    }
-    delete tmpY;
-    delete tmpLambda;
+    static_cast<SimpleVector*>(w)->getBlock(pos, nsLawSize, *y) ;
+    static_cast<SimpleVector*>(z)->getBlock(pos, nsLawSize, *lambda) ;
   }
 }
-
 
 void LCP::display() const
 {
   cout << "======= LCP display ======" << endl;
-  cout << "| nLcp : " << nLcp << endl;
+  cout << "| sizeOutput : " << sizeOutput << endl;
   cout << "| LCP Matrix M  : " << endl;
   if (M != NULL) M->display();
   else cout << "-> NULL" << endl;
@@ -1214,5 +526,4 @@ LCP* LCP::convert(OneStepNSProblem* osnsp)
   LCP* lcp = dynamic_cast<LCP*>(osnsp);
   return lcp;
 }
-
 

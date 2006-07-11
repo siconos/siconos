@@ -16,28 +16,35 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-#include "OneStepIntegrator.h"
+#include "OneStepIntegratorXML.h"
 using namespace std;
 
 //-- Default constructor --
-OneStepIntegrator::OneStepIntegrator(const string& id, Strategy* newS): integratorType(id), sizeMem(1), strategyLink(newS), integratorXml(NULL)
+OneStepIntegrator::OneStepIntegrator(): integratorType("undefined"), sizeMem(1), simulationLink(NULL), integratorXml(NULL)
+{}
+
+OneStepIntegrator::OneStepIntegrator(const string id, Simulation* newS): integratorType(id), sizeMem(1), simulationLink(newS), integratorXml(NULL)
 {
-  strategyLink->addOneStepIntegratorPtr(this);
+  if (simulationLink == NULL)
+    RuntimeException::selfThrow("OneStepIntegrator:: constructor(Id,simulation) - simulation == NULL");
+
+  simulationLink->addOneStepIntegratorPtr(this);
 }
 
 // --- Xml constructor ---
-OneStepIntegrator::OneStepIntegrator(const string& id, OneStepIntegratorXML* osixml, Strategy* newS): integratorType(id), sizeMem(1), strategyLink(newS), integratorXml(osixml)
+OneStepIntegrator::OneStepIntegrator(const string id, OneStepIntegratorXML* osixml, Simulation* newS):
+  integratorType(id), sizeMem(1), simulationLink(newS), integratorXml(osixml)
 {
   if (integratorXml == NULL)
     RuntimeException::selfThrow("OneStepIntegrator::xml constructor - OneStepIntegratorXML object == NULL");
 
-  if (strategyLink == NULL)
-    RuntimeException::selfThrow("OneStepIntegrator::xml constructor - StrategyLink == NULL");
+  if (simulationLink == NULL)
+    RuntimeException::selfThrow("OneStepIntegrator::xml constructor - SimulationLink == NULL");
 
-  strategyLink->addOneStepIntegratorPtr(this);
+  simulationLink->addOneStepIntegratorPtr(this);
 
   // get a link to the NonSmoothDynamicalSystem.
-  NonSmoothDynamicalSystem * nsds = strategyLink->getModelPtr()->getNonSmoothDynamicalSystemPtr();
+  NonSmoothDynamicalSystem * nsds = simulationLink->getModelPtr()->getNonSmoothDynamicalSystemPtr();
   // load DS list if present
   if (osixml->hasDSList())
   {
@@ -82,10 +89,14 @@ OneStepIntegrator::OneStepIntegrator(const string& id, OneStepIntegratorXML* osi
 }
 
 // --- Constructor from a minimum set of data ---
-OneStepIntegrator::OneStepIntegrator(const string& id, const DSSet& listOfDs, Strategy* newS):
-  integratorType(id), sizeMem(1), strategyLink(newS), integratorXml(NULL)
+OneStepIntegrator::OneStepIntegrator(const string id, const DynamicalSystemsSet& listOfDs, Simulation* newS):
+  integratorType(id), sizeMem(1), simulationLink(newS), integratorXml(NULL)
 {
-  strategyLink->addOneStepIntegratorPtr(this);
+  if (simulationLink == NULL)
+    RuntimeException::selfThrow("OneStepIntegrator:: constructor(Id,listDS,simulation) - simulation == NULL");
+
+  OSIDynamicalSystems = listOfDs; // Not a copy !! Links between DS* !!
+  simulationLink->addOneStepIntegratorPtr(this);
 }
 
 // --- Destructor ---
@@ -96,7 +107,7 @@ OneStepIntegrator::~OneStepIntegrator()
   integratorXml = NULL;
 }
 
-void OneStepIntegrator::setDynamicalSystems(const DSSet& newSet)
+void OneStepIntegrator::setDynamicalSystems(const DynamicalSystemsSet& newSet)
 {
   // Warning: pointers links between ds of newSet and OSIDynamicalSystems.
   OSIDynamicalSystems = newSet;
@@ -112,7 +123,7 @@ void OneStepIntegrator::setInteractions(const InteractionsSet& newSet)
 
 void OneStepIntegrator::initialize()
 {
-  double t0 = strategyLink->getTimeDiscretisationPtr()->getT0();
+  double t0 = simulationLink->getTimeDiscretisationPtr()->getT0();
   DSIterator it;
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
     (*it)->initialize(t0, sizeMem);

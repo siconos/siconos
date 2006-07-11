@@ -28,6 +28,20 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 
 Main Changes:
 
+2006-07-10 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Temporary blockVector version with copy of contain to provide contiguous save of
+	  values in Memory
+	* Remove InteractionLink class
+	* Update TimeStepping/OSNS/OSI (use of indexSets)
+	* Update all samples
+	* add "size" arg. in non smooth law
+	
+2006-06-28 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Review constructors for Interaction, Relation and NonSmooth Law
+
+2006-06-22 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Strategy renamed Simulation
+
 2006-06-07 Franck Perignon <franck.perignon@inrialpes.fr>
         * add UnitaryRelation class
 	* add UnitaryRelationsSet class -> IndexSets management in Topology

@@ -35,7 +35,7 @@ class Lsodar : public OneStepIntegrator
 private:
 
   /** The time discretisation, specific to Lsodar
-   *  This discretisation must include each time step of the strategy time
+   *  This discretisation must include each time step of the simulation time
    *  discretisation, plus all event detection time steps.
    */
   TimeDiscretisation *localTimeDiscretisation;
@@ -57,27 +57,26 @@ private:
   /** temporary vector to save x values */
   BlockVector* xWork;
 
-  /** \fn Lsodar(Strategy* = NULL)
+  /** \fn Lsodar()
    *  \brief default constructor
-   *  \param Strategy * : the strategy that owns the osi, default = NULL
    */
-  Lsodar(Strategy* = NULL);
+  Lsodar();
 
 public:
 
-  /** \fn Lsodar(OneStepIntegratorXML*, Strategy* = NULL)
+  /** \fn Lsodar(OneStepIntegratorXML*, Simulation*)
    *  \brief constructor from xml file
    *  \param OneStepIntegratorXML* : the XML object
-   *  \param Strategy * : the strategy that owns the osi, default = NULL
+   *  \param Simulation * : the simulation that owns the osi
    */
-  Lsodar(OneStepIntegratorXML*, Strategy* = NULL);
+  Lsodar(OneStepIntegratorXML*, Simulation*);
 
   /** \fn Lsodar(TimeDiscretisation*, DynamicalSystem* )
    *  \brief constructor from a minimum set of data
    *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param Strategy * : the strategy that owns the osi, default = NULL
+   *  \param Simulation * : the simulation that owns the osi
    */
-  Lsodar(DynamicalSystem* , Strategy* = NULL);
+  Lsodar(DynamicalSystem* , Simulation*);
 
   /** \fn ~Lsodar()
    *  \brief destructor
@@ -108,11 +107,11 @@ public:
     return intData;
   }
 
-  /** \fn  const integer getIntData(const unsigned int & i) const
+  /** \fn  const integer getIntData(const unsigned int  i) const
    *  \brief get intData[i]
    *  \return an integer
    */
-  inline const integer getIntData(const unsigned int& i) const
+  inline const integer getIntData(const unsigned int i) const
   {
     return intData[i];
   }
@@ -123,11 +122,11 @@ public:
    */
   void setIntData(const std::vector<integer>&);
 
-  /** \fn void setIntData (const unsigned int & i, const integer& newValue);
+  /** \fn void setIntData (const unsigned int  i, const integer newValue);
    *  \brief set intData[i] to newValue
    *  \param a unsigned int (index) and an integer (value)
    */
-  inline void setIntData(const unsigned int & i, const integer & newValue)
+  inline void setIntData(const unsigned int  i, const integer  newValue)
   {
     intData[i] = newValue;
   }
@@ -141,11 +140,11 @@ public:
     return doubleData;
   }
 
-  /** \fn  const doublereal getDoubleData(const unsigned int & i) const
+  /** \fn  const doublereal getDoubleData(const unsigned int  i) const
    *  \brief get doubleData[i]
    *  \return a pointer on doublereal.
    */
-  inline doublereal* getDoubleData(const unsigned int& i) const
+  inline doublereal* getDoubleData(const unsigned int i) const
   {
     return doubleData[i];
   }
@@ -156,11 +155,11 @@ public:
    */
   void setDoubleData(const std::vector<doublereal*>&);
 
-  /** \fn void setDoubleData (const unsigned int & i, doublereal* newPtr);
+  /** \fn void setDoubleData (const unsigned int  i, doublereal* newPtr);
    *  \brief set doubleData[i] to newPtr
    *  \param a unsigned int (index) and a pointer to doublereal
    */
-  // void setDoubleData(const unsigned int &, doublereal*);
+  // void setDoubleData(const unsigned int , doublereal*);
 
   /** \fn integer* getIwork() const
    *  \brief get iwork
@@ -187,15 +186,15 @@ public:
    */
   void fillXWork(doublereal *) ;
 
-  /** \fn void computeRhs(const double& t) ;
+  /** \fn void computeRhs(const double t) ;
    *  \brief compute rhs(t) for all dynamical systems in the set
    */
-  void computeRhs(const double&) ;
+  void computeRhs(const double) ;
 
-  /** \fn void computeJacobianRhs(const double& t) ;
+  /** \fn void computeJacobianRhs(const double t) ;
    *  \brief compute jacobian of the rhs at time t for all dynamical systems in the set
    */
-  void computeJacobianRhs(const double&) ;
+  void computeJacobianRhs(const double) ;
 
   void f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot);
 
@@ -213,14 +212,14 @@ public:
    */
   void computeFreeState();
 
-  /** \fn void integrate(const double&, const double&, double&, bool&)
+  /** \fn void integrate(const double, const double, double, bool)
    *  \brief integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param double: tinit, initial time
    *  \param double: tend, end time
    *  \param double: tout, real end time
    *  \param bool: true if tend is reached, else false.
    */
-  void integrate(const double&, const double&, double&, bool&);
+  void integrate(const double, const double, double, bool);
 
   /** \fn void updateState()
    *  \brief update the state of the DynamicalSystem attached to this Integrator

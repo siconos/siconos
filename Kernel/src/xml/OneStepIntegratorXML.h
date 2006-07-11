@@ -32,8 +32,6 @@
 #include "SiconosDOMTreeTools.h"
 #include "OneStepIntegrator.h"
 
-class OneStepIntegrator;
-
 // Tags
 const std::string INTERACTIONS_CONCERNED = "Interactions_Concerned";
 

@@ -20,14 +20,25 @@
 using namespace std;
 
 // default (private)
-SimpleVector::SimpleVector(): SiconosVector()
+SimpleVector::SimpleVector(): SiconosVector(), isOwner(true)
 {
   isBlockVector = false;
   lavd = LaVectorDouble();
 }
 
-SimpleVector::SimpleVector(const string& file, const bool& ascii):
-  SiconosVector()
+// with size
+SimpleVector::SimpleVector(const int unsigned newSize, double * addr):
+  SiconosVector(), isOwner(false)
+{
+  //   isBlockVector=false;
+  //   double * tmp = lavd.addr();
+  //   tmp = addr;
+  //   int * tmpSize = &(lavd.size());
+  //   *tmpSize = newSize;
+}
+
+SimpleVector::SimpleVector(const string file, const bool ascii):
+  SiconosVector(), isOwner(true)
 {
   isBlockVector = false;
   string mode;
@@ -38,7 +49,7 @@ SimpleVector::SimpleVector(const string& file, const bool& ascii):
 
 // copy from a std vector
 SimpleVector::SimpleVector(const vector<double>& v):
-  SiconosVector()
+  SiconosVector(), isOwner(true)
 {
   isBlockVector = false;
   setValues(v);
@@ -46,7 +57,7 @@ SimpleVector::SimpleVector(const vector<double>& v):
 
 // copy
 SimpleVector::SimpleVector(const SimpleVector& v):
-  SiconosVector()
+  SiconosVector(), isOwner(true)
 {
   isBlockVector = false;
   lavd = v.getValues();
@@ -54,7 +65,7 @@ SimpleVector::SimpleVector(const SimpleVector& v):
 
 // copy from SiconosVector
 SimpleVector::SimpleVector(const SiconosVector& v):
-  SiconosVector()
+  SiconosVector(), isOwner(true)
 {
   if (!v.isBlock())
   {
@@ -72,8 +83,8 @@ SimpleVector::SimpleVector(const SiconosVector& v):
 }
 
 // with size
-SimpleVector::SimpleVector(const int unsigned& size):
-  SiconosVector()
+SimpleVector::SimpleVector(const int unsigned size):
+  SiconosVector(), isOwner(true)
 {
   isBlockVector = false;
   // resize and init lavd
@@ -100,7 +111,7 @@ void SimpleVector::display() const
   cout << endl << "=================================== " << endl;
 }
 
-double& SimpleVector::operator()(const int unsigned& index) const
+double& SimpleVector::operator()(const int unsigned index) const
 {
   if ((int)index >= lavd.size())
     SiconosVectorException::selfThrow(" SimpleVector::operator()   -- index greater than vector size");
@@ -143,14 +154,14 @@ string SimpleVector::toString() const
   return vectorContent;
 }
 
-void SimpleVector::setValue(const int unsigned& index, const double& newVal)
+void SimpleVector::setValue(const int unsigned index, const double newVal)
 {
   if (index < 0 || (int)index > (lavd.size() - 1))
     SiconosVectorException::selfThrow("SimpleVector::setValue - wrong index value");
   lavd(index) = newVal;
 }
 
-void SimpleVector::setValues(const vector<double>& v, const int unsigned& index) // index default value = 0, useless for simpleVector BUT required for block vector
+void SimpleVector::setValues(const vector<double>& v, const int unsigned index) // index default value = 0, useless for simpleVector BUT required for block vector
 {
   if (v.size() < 0)
     SiconosVectorException::selfThrow("SimpleVector::setValues - negative vector size");
@@ -160,7 +171,7 @@ void SimpleVector::setValues(const vector<double>& v, const int unsigned& index)
     lavd(i) = v[i];
 }
 
-const double SimpleVector::getValue(const int unsigned& index) const
+const double SimpleVector::getValue(const int unsigned index) const
 {
   if (index < 0 || (int)index > (lavd.size() - 1))
     SiconosVectorException::selfThrow("SimpleVector::setValue - wrong index value");
@@ -185,7 +196,7 @@ void SimpleVector::getBlock(const vector<unsigned int>& index, SimpleVector& blo
   }
 }
 
-void SimpleVector::getBlock(const unsigned int& index , const unsigned int& nbval , SimpleVector& block) const
+void SimpleVector::getBlock(const unsigned int index , const unsigned int nbval , SimpleVector& block) const
 {
   if ((block.size() != nbval) || (index + nbval > size()))
     SiconosVectorException::selfThrow("SimpleVector::getBlock : wrong index or sizes");
@@ -195,7 +206,7 @@ void SimpleVector::getBlock(const unsigned int& index , const unsigned int& nbva
 
 }
 
-void SimpleVector::setBlock(const unsigned int& posi, const SiconosVector &v)
+void SimpleVector::setBlock(const unsigned int posi, const SiconosVector &v)
 {
   if (v.isBlock())
     SiconosVectorException::selfThrow("SimpleVector::setBlock : argument vector is composite");
@@ -207,13 +218,13 @@ void SimpleVector::setBlock(const unsigned int& posi, const SiconosVector &v)
     lavd(i + posi) = v.getValue(i);
 }
 
-unsigned int SimpleVector::size(const unsigned int& i) const
+unsigned int SimpleVector::size(const unsigned int i) const
 {
   if (i != 0)  SiconosVectorException::selfThrow("SimpleVector::size(i) - i!=0 -> not available");
   return lavd.size();
 }
 
-bool SimpleVector::read(const string& fileName, const string& mode)
+bool SimpleVector::read(const string fileName, const string mode)
 {
   bool res = false;
   int size, nbVectors;
@@ -271,7 +282,7 @@ bool SimpleVector::read(const string& fileName, const string& mode)
 }
 
 
-bool SimpleVector::write(const string& fileName, const string& mode) const
+bool SimpleVector::write(const string fileName, const string mode) const
 {
   bool res = false;
   if ((mode != "binary") && (mode != "ascii"))
@@ -406,14 +417,14 @@ SimpleVector &SimpleVector::operator-=(const SimpleVector &v)
 }
 
 
-SimpleVector &SimpleVector::operator*=(const double& d)
+SimpleVector &SimpleVector::operator*=(const double d)
 {
   lavd = lavd * d;
   return *this;
 }
 
 
-SimpleVector &SimpleVector::operator/=(const double& d)
+SimpleVector &SimpleVector::operator/=(const double d)
 {
   if (d == 0)
     SiconosVectorException::selfThrow(" SimpleVector::operator/ =   --division by 0");
@@ -477,7 +488,7 @@ SimpleVector operator - (const SiconosVector& v1, const SiconosVector& v2)
 /*******************************************************************************
  *          SPECIFIC EXTERNAL OPERATORS                                *
  *******************************************************************************/
-SimpleVector operator * (const SimpleVector& v, const double& d)
+SimpleVector operator * (const SimpleVector& v, const double d)
 {
   SimpleVector sv(v);
   Blas_Scale(d, sv.lavd);
@@ -485,7 +496,7 @@ SimpleVector operator * (const SimpleVector& v, const double& d)
 }
 
 
-SimpleVector operator * (const double& d, const SimpleVector& v)
+SimpleVector operator * (const double d, const SimpleVector& v)
 {
   SimpleVector sv(v);
   Blas_Scale(d, sv.lavd);
@@ -493,7 +504,7 @@ SimpleVector operator * (const double& d, const SimpleVector& v)
 }
 
 
-SimpleVector operator / (const SimpleVector& v, const double& d)
+SimpleVector operator / (const SimpleVector& v, const double d)
 {
   if (d == 0.0)
     SiconosVectorException::selfThrow(" SimpleVector operator / --- division by 0");

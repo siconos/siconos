@@ -26,16 +26,16 @@ include $(top_srcdir)/config/Make-rules
 SUBDIRS = test 
 
 noinst_LTLIBRARIES = libModelingTools.la
-libModelingTools_la_SOURCES =  DSSet.cpp InteractionsSet.cpp BoundaryCondition.cpp ComplementarityConditionNSL.cpp \
+libModelingTools_la_SOURCES =  DynamicalSystemsSet.cpp InteractionsSet.cpp BoundaryCondition.cpp ComplementarityConditionNSL.cpp \
 		DSInputOutput.cpp DynamicalSystem.cpp EqualityConstraint.cpp Interaction.cpp \
-		InteractionLink.cpp Topology.cpp \
+		Topology.cpp \
 		LagrangianDSIO.cpp LagrangianEC.cpp LagrangianLinearDSIO.cpp LagrangianLinearEC.cpp \
 		LagrangianLinearR.cpp LagrangianDS.cpp LagrangianR.cpp \
 		LagrangianLinearTIDS.cpp LinearBC.cpp LinearDSIO.cpp LinearDS.cpp LinearTIDS.cpp\
 		LinearEC.cpp LinearTIEC.cpp LinearTIR.cpp NewtonImpactNSL.cpp NewtonImpactFrictionNSL.cpp NLinearBC.cpp \
 		NonSmoothLaw.cpp NonSmoothDynamicalSystem.cpp PeriodicBC.cpp Relation.cpp RelayNSL.cpp UnitaryRelation.cpp\
 		UnitaryRelationsSet.cpp \
-		DSSet.h  InteractionsSet.h BoundaryCondition.h ComplementarityConditionNSL.h EqualityConstraint.h \
+		DynamicalSystemsSet.h  InteractionsSet.h BoundaryCondition.h ComplementarityConditionNSL.h EqualityConstraint.h \
 		DSInputOutput.h DynamicalSystem.h Interaction.h LagrangianDSIO.h LagrangianEC.h LagrangianLinearDSIO.h \
 		LagrangianLinearEC.h LagrangianLinearR.h LagrangianDS.h LagrangianR.h LagrangianLinearTIDS.h \
 		LinearBC.h LinearDSIO.h LinearEC.h LinearDS.h LinearTIDS.h LinearTIEC.h LinearTIR.h \
@@ -43,9 +43,9 @@ libModelingTools_la_SOURCES =  DSSet.cpp InteractionsSet.cpp BoundaryCondition.c
 		PeriodicBC.h Relation.h RelayNSL.h UnitaryRelation.h UnitaryRelationsSet.h
 libModelingTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
-include_HEADERS = DSSet.h InteractionsSet.h BoundaryCondition.h ComplementarityConditionNSL.h EqualityConstraint.h \
+include_HEADERS = DynamicalSystemsSet.h InteractionsSet.h BoundaryCondition.h ComplementarityConditionNSL.h EqualityConstraint.h \
 		DSInputOutput.h DynamicalSystem.h Interaction.h \
-		InteractionLink.h Topology.h \
+		Topology.h \
 		LagrangianDSIO.h LagrangianEC.h LagrangianLinearDSIO.h LagrangianLinearEC.h LagrangianLinearR.h \
 		LagrangianDS.h LagrangianR.h LagrangianLinearTIDS.h LinearBC.h LinearDSIO.h \
 		LinearEC.h LinearDS.h LinearTIDS.h LinearTIEC.h LinearTIR.h NewtonImpactNSL.h NewtonImpactFrictionNSL.h \

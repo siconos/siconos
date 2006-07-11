@@ -24,7 +24,7 @@ SiconosModelXML::SiconosModelXML():
   rootNode(NULL), timeNode(NULL), doc(NULL), xmlSchemaFile(XML_SCHEMA),
   titleNode(NULL), authorNode(NULL), descriptionNode(NULL), dateNode(NULL), xmlSchemaNode(NULL),
   tNode(NULL), t0Node(NULL), TNode(NULL),
-  nsdsXML(NULL), strategyXML(NULL)
+  nsdsXML(NULL), simulationXML(NULL)
 {
   doc = xmlNewDoc((xmlChar*)"1.0");
   if (doc == NULL)
@@ -46,7 +46,7 @@ SiconosModelXML::SiconosModelXML(char * siconosModelXMLFilePath):
   rootNode(NULL), timeNode(NULL), doc(NULL), xmlSchemaFile(XML_SCHEMA),
   titleNode(NULL), authorNode(NULL), descriptionNode(NULL), dateNode(NULL), xmlSchemaNode(NULL),
   tNode(NULL), t0Node(NULL), TNode(NULL),
-  nsdsXML(NULL), strategyXML(NULL)
+  nsdsXML(NULL), simulationXML(NULL)
 {
   if (siconosModelXMLFilePath != NULL)
   {
@@ -156,8 +156,8 @@ SiconosModelXML::~SiconosModelXML()
 
   delete nsdsXML;
   nsdsXML = NULL;
-  delete strategyXML;
-  strategyXML = NULL;
+  delete simulationXML;
+  simulationXML = NULL;
 }
 
 void SiconosModelXML::saveSiconosModelInXMLFile(char * siconosModelXMLFilePath)
@@ -207,14 +207,14 @@ void SiconosModelXML::loadModel(xmlNode *rootNode)
   }
   else XMLException::selfThrow("SiconosModelXML - loadModel error : tag " + SM_TIME + " not found.");
 
-  // Strategy tag (optional)
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, STRATEGY_TAG)) != NULL)
-    strategyXML = new StrategyXML(node);
+  // Simulation tag (optional)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, SIMULATION_TAG)) != NULL)
+    simulationXML = new SimulationXML(node);
   else
   {
-    cout << " /!\\ Warning: SiconosModelXML - loadModel: no tag " << STRATEGY_TAG << " found. This may not be a problem since this tag is optional ./!\\" << endl;
+    cout << " /!\\ Warning: SiconosModelXML - loadModel: no tag " << SIMULATION_TAG << " found. This may not be a problem since this tag is optional ./!\\" << endl;
     timeNode = node;
-    strategyXML = NULL;
+    simulationXML = NULL;
   }
 }
 
@@ -241,7 +241,7 @@ void SiconosModelXML::loadModel(Model * model)
      */
     if (model->getNonSmoothDynamicalSystemPtr() != NULL)
     {
-      //nsdsXML = new NonSmoothDynamicalSystemXML( xmlNewChild(rootNode, NULL, (xmlChar*)SM_STRATEGY.c_str(), NULL) );
+      //nsdsXML = new NonSmoothDynamicalSystemXML( xmlNewChild(rootNode, NULL, (xmlChar*)SM_SIMULATION.c_str(), NULL) );
       nsdsXML = new NonSmoothDynamicalSystemXML();
 
       // linkage between the NSDS and his NonSmoothDynamicalSystemXML
@@ -254,18 +254,18 @@ void SiconosModelXML::loadModel(Model * model)
     else nsdsXML = NULL;
 
     /*
-     * creation of the Strategy node
+     * creation of the Simulation node
      */
-    if (model->getStrategyPtr() != NULL)
+    if (model->getSimulationPtr() != NULL)
     {
-      strategyXML = new StrategyXML();
-      // linkage between the Strategy and his StrategyXML
-      model->getStrategyPtr()->setStrategyXMLPtr(strategyXML);
+      simulationXML = new SimulationXML();
+      // linkage between the Simulation and his SimulationXML
+      model->getSimulationPtr()->setSimulationXMLPtr(simulationXML);
 
-      // creation of the nodes of the Strategy with the right data
-      node = xmlNewChild(rootNode, NULL, (xmlChar*)STRATEGY_TAG.c_str(), NULL);
-      xmlNewProp(node, (xmlChar*)TYPE_ATTRIBUTE.c_str(), (xmlChar*)model->getStrategyPtr()->getType().c_str());
-      strategyXML->saveStrategy2XML(node, model->getStrategyPtr());
+      // creation of the nodes of the Simulation with the right data
+      node = xmlNewChild(rootNode, NULL, (xmlChar*)SIMULATION_TAG.c_str(), NULL);
+      xmlNewProp(node, (xmlChar*)TYPE_ATTRIBUTE.c_str(), (xmlChar*)model->getSimulationPtr()->getType().c_str());
+      simulationXML->saveSimulation2XML(node, model->getSimulationPtr());
     }
   }
   else XMLException::selfThrow("SiconosModelXML::loadModel(Model * model) : no Model has been given.");

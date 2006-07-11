@@ -70,47 +70,50 @@ private:
 
 public:
 
-  /** \fn LagrangianLinearR(RelationXML*, Interaction* =NULL)
+  /** \fn LagrangianLinearR(RelationXML*)
    *  \brief constructor with XML object of the parent class Relation
    *  \param RelationXML* : the XML object corresponding
-   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    */
-  LagrangianLinearR(RelationXML*, Interaction* = NULL);
+  LagrangianLinearR(RelationXML*);
 
   /** \fn LagrangianLinearR(const SiconosMatrix& H, const SimpleVector& q, Interaction* = NULL);
    *  \brief constructor with in parameters, the data needed to build this Relation
    *  \param a SiconosMatrix to set H
    *  \param a SimpleVector to set b
-   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    */
-  LagrangianLinearR(const SiconosMatrix&, const SimpleVector&, Interaction* = NULL);
+  LagrangianLinearR(const SiconosMatrix&, const SimpleVector&);
 
 
-  /** \fn LagrangianLinearR(const SiconosMatrix& H, Interaction* = NULL);
+  /** \fn LagrangianLinearR(const SiconosMatrix& H);
    *  \brief constructor with in parameters, the data needed to build this Relation
    *  \param a SiconosMatrix to set H
-   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    */
-  LagrangianLinearR(const SiconosMatrix&, Interaction* = NULL);
+  LagrangianLinearR(const SiconosMatrix&);
 
-  /** \fn LagrangianLinearR(const SiconosMatrix& H, const SimpleVector& q, const SiconosMatrix& D, Interaction* = NULL);
+  /** \fn LagrangianLinearR(const SiconosMatrix& H, const SimpleVector& q, const SiconosMatrix& D);
    *  \brief constructor with in parameters, the data needed to build this Relation
    *  \param a SiconosMatrix to set H
    *  \param a SimpleVector to set b
    *  \param a SiconosMatrix to set D
-   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
-   */
-  LagrangianLinearR(const SiconosMatrix&, const SimpleVector&, const SiconosMatrix&, Interaction* = NULL);
+    */
+  LagrangianLinearR(const SiconosMatrix&, const SimpleVector&, const SiconosMatrix&);
 
   /** \fn LagrangianLinearR(const Relation&)
    *  \brief copy constructor
    *  \param a relation to copy
-   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  warning: the interaction link is not copied, set a new one!
    */
-  LagrangianLinearR(const Relation &, Interaction* = NULL);
+  LagrangianLinearR(const Relation &);
 
+  /** \fn ~LagrangianLinearR()
+   *  \brief destructor
+   */
   ~LagrangianLinearR();
+
+  /** \fn initialize()
+   *  \brief initialize the relation (check sizes, memory allocation ...)
+   */
+  void initialize();
 
   // --- GETTERS/SETTERS
   // -- H --
@@ -209,12 +212,12 @@ public:
   void setDPtr(SiconosMatrix *);
 
 
-  /** \fn void getHBlockDS(const int&,SiconosMatrix&) const
+  /** \fn void getHBlockDS(const int,SiconosMatrix&) const
    *  \brief get in Matrix H the block corresponding to DS number int
    *  \param int, the ds number
    *  \param SiconosMatrix (in-out parameter): the resulting block matrix
    */
-  void getHBlockDS(const int&, SiconosMatrix&) const;
+  void getHBlockDS(const int, SiconosMatrix&) const;
 
 
   /** void getHBlockDS(DynamicalSystem * ds, SiconosMatrix&) const
@@ -231,21 +234,21 @@ public:
    *  \param double : current time
    *  \exception RuntimeException
    */
-  void computeFreeOutput(const double& time);
+  void computeFreeOutput(const double time);
 
   /** \fn void computeOutput(double time);
    *  \brief default function to compute y
    *  \param double : current time
    *  \exception RuntimeException
    */
-  void computeOutput(const double& time);
+  void computeOutput(const double time);
 
   /** \fn void computeInput(double time);
    *  \brief default function to compute lambda
    *  \param double : current time
    *  \exception RuntimeException
    */
-  void computeInput(const double& time);
+  void computeInput(const double time);
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the Relation to the XML tree

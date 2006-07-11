@@ -21,7 +21,7 @@
 
 #include "SiconosModelXML.h"
 #include "NonSmoothDynamicalSystem.h"
-#include "Strategy.h"
+#include "Simulation.h"
 #include "TimeDiscretisation.h"
 #include "check.h"
 #include "SiconosConst.h"
@@ -31,7 +31,7 @@
 
 
 class NonSmoothDynamicalSystem;
-class Strategy;
+class Simulation;
 class SiconosModelXML;
 class TimeDiscretisation;
 
@@ -55,8 +55,8 @@ private:
   /** final time of the simulation */
   double T;
 
-  /** The strategy to solve the NonSmoothDynamicalSystem */
-  Strategy *strat;
+  /** The simulation to solve the NonSmoothDynamicalSystem */
+  Simulation *strat;
 
   /** The NonSmoothDynamicalSystem of the simulation */
   NonSmoothDynamicalSystem * nsds;
@@ -69,7 +69,7 @@ private:
 
   /** Flags to check wheter pointers were allocated in class constructors or not */
   bool isNsdsAllocatedIn;
-  bool isStrategyAllocatedIn;
+  bool isSimulationAllocatedIn;
   bool isModelXmlAllocatedIn;
 
   /** \fn Model()
@@ -159,20 +159,20 @@ public:
     T = newValue;
   }
 
-  /** \fn inline Strategy* getStrategyPtr() const
-   *  \brief get the Strategy of the Model
-   *  \return a pointer on Strategy
+  /** \fn inline Simulation* getSimulationPtr() const
+   *  \brief get the Simulation of the Model
+   *  \return a pointer on Simulation
    */
-  inline Strategy* getStrategyPtr() const
+  inline Simulation* getSimulationPtr() const
   {
     return strat;
   }
 
-  /** \fn Strategy* setStrategyPtr(Strategy*)
-   *  \brief set the Strategy of the Model
-   *  \return a pointer on Strategy
+  /** \fn Simulation* setSimulationPtr(Simulation*)
+   *  \brief set the Simulation of the Model
+   *  \return a pointer on Simulation
    */
-  void setStrategyPtr(Strategy*);
+  void setSimulationPtr(Simulation*);
 
   /** \fn inline NonSmoothDynamicalSystem* getNonSmoothDynamicalSystemPtr() const
    *  \brief get the NonSmoothDynamicalSystem of the Model
@@ -377,23 +377,23 @@ public:
    *
    *//////////////////////////////////////////////////////
 
-  /** \fn Strategy* createStrategy(string type)
-   *  \brief allows to create a Strategy (EventDriven or TimeStepping)
-   *  \return Strategy* : the Strategy created
+  /** \fn Simulation* createSimulation(string type)
+   *  \brief allows to create a Simulation (EventDriven or TimeStepping)
+   *  \return Simulation* : the Simulation created
    */
-  Strategy* createStrategy(std::string  type);
+  Simulation* createSimulation(std::string  type);
 
-  /** \fn Strategy* createTimeStepping()
-   *  \brief allows to create a Strategy : TimeStepping
-   *  \return Strategy* : the Strategy created
+  /** \fn Simulation* createTimeStepping()
+   *  \brief allows to create a Simulation : TimeStepping
+   *  \return Simulation* : the Simulation created
    */
-  Strategy* createTimeStepping();
+  Simulation* createTimeStepping();
 
-  /** \fn Strategy* createTimeEventDriven()
-   *  \brief allows to create a Strategy : EventDriven
-   *  \return Strategy* : the Strategy created
+  /** \fn Simulation* createTimeEventDriven()
+   *  \brief allows to create a Simulation : EventDriven
+   *  \return Simulation* : the Simulation created
    */
-  Strategy* createTimeEventDriven();
+  Simulation* createTimeEventDriven();
 };
 
 #endif // MODEL_H

@@ -28,7 +28,11 @@ class SiconosMatrix;
 class SimpleVector : public SiconosVector
 {
 private:
+  /** lapack++ structure that handles double */
   LaVectorDouble lavd;
+
+  /** bool, false if this has been allocated in a parent blockVector by using the constructor with an address as input argument. */
+  bool isOwner;
 
   /** \fn SimpleVector()
    *  \brief default contructor
@@ -38,6 +42,13 @@ private:
 
 public:
 
+  /** \fn SimpleVector(const int size, double*)
+   *  \brief constructor used for blockVector, with the address of this as an input parameter.
+   *  \param int size
+   *  \param double *, address of this
+   */
+  SimpleVector(const unsigned int, double *);
+
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
   /** \fn SimpleVector (std::string file, bool ascii)
@@ -46,7 +57,7 @@ public:
    *  \param a boolean to indicate if the file is an ascii one
    *  \return SimpleVector
    */
-  SimpleVector(const std::string& , const bool&);
+  SimpleVector(const std::string , const bool);
 
   /** \fn SimpleVector(const std::vector<double> v)
    *  \brief contructor with a vector
@@ -75,7 +86,7 @@ public:
    *  \exception SiconosVectorException if size < 0
    *  \return SimpleVector
    */
-  SimpleVector(const unsigned int& size);
+  SimpleVector(const unsigned int size);
 
   /** \fn ~SiconosVector ()
    *  \brief destructor
@@ -84,11 +95,11 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** \fn SimpleVector* getVectorPtr(const unsigned int&) const;
+  /** \fn SimpleVector* getVectorPtr(const unsigned int) const;
    *  \brief return the current object. This function is really usefull only for block vector
    * \return a pointer to a SimpleVector
    */
-  inline SimpleVector* getVectorPtr(const unsigned int&)
+  inline SimpleVector* getVectorPtr(const unsigned int)
   {
     return this;
   };
@@ -114,40 +125,40 @@ public:
    */
   void display() const  ;
 
-  /** \fn operator()(const unsigned int &index)
+  /** \fn operator()(const unsigned int index)
    *  \brief get the element vector[i]
    *  \param an integer i
    *  \exception SiconosVectorException
    *  \return the element vector[i]
    */
-  double& operator()(const unsigned int &)  const;
+  double& operator()(const unsigned int)  const;
 
-  /** \fn void setValue(const int&, const double&)
+  /** \fn void setValue(const int, const double)
    *  \brief set the value of one element of the vector
    *  \param double d : the new value
    *  \param int index : the position of the element to be set
    */
-  void setValue(const unsigned int&, const double&);
+  void setValue(const unsigned int, const double);
 
-  /** \fn const double getValue(const int&) const
+  /** \fn const double getValue(const int) const
    *  \brief get the value of one element of the vector
    *  \param int index : the position of the element
    */
-  const double getValue(const unsigned int&) const;
+  const double getValue(const unsigned int) const;
 
-  /** \fn void setValues(const vector<double> v,  const int& = 0)
+  /** \fn void setValues(const vector<double> v,  const int = 0)
    *  \brief set the values of the vector to a new set of value
    *  \param vector<double> v
    *  \param: int, not used for Simple, only for block vector
    */
-  void setValues(const std::vector<double>& v, const unsigned int& = 0) ;
+  void setValues(const std::vector<double>& v, const unsigned int = 0) ;
 
   /** \fn const LaVectorDouble getValues() const
    *  \brief get lavd vector
    *  \return a LaVectorDouble
    *  \param: int, not used for Simple, only for block vector
    */
-  inline const LaVectorDouble getValues(const unsigned int& i = 0) const
+  inline const LaVectorDouble getValues(const unsigned int i = 0) const
   {
     return lavd;
   }
@@ -158,24 +169,24 @@ public:
    */
   void getBlock(const std::vector<unsigned int>& , SimpleVector&) const;
 
-  /** \fn void getBlock(const unsigned int& index ,const unsigned int& nbval , SimpleVector& block)
+  /** \fn void getBlock(const unsigned int index ,const unsigned int nbval , SimpleVector& block)
    *  \brief write block of "nbval" contiguous values starting from "index" into "block"
    *  \param 2 unsigned int for "index" and "nbval" and a SimpleVector (in-out paramater)
    */
-  void getBlock(const unsigned int& , const unsigned int& , SimpleVector&) const;
+  void getBlock(const unsigned int , const unsigned int , SimpleVector&) const;
 
-  /** \fn void setBlock(const unsigned int& posi, const SiconosVector &v)
+  /** \fn void setBlock(const unsigned int posi, const SiconosVector &v)
    *  \brief fill current vector from index posi with vector v values
    *  \param an unsigned int and a SiconosVector
    */
-  void setBlock(const unsigned int& , const SiconosVector &);
+  void setBlock(const unsigned int , const SiconosVector &);
 
   /** \fn unsigned int size() const
    *  \brief get the vector size
    *  \exception to be defined
    *  \return int : the vector size
    */
-  unsigned int size(const unsigned int& = 0) const  ;
+  unsigned int size(const unsigned int = 0) const  ;
 
   /** \fn bool read(std::string fileName, std::string mode = ASCII)
    *  \brief read the vector in a file
@@ -184,7 +195,7 @@ public:
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  bool read(const std::string&, const std::string& = DEFAULT_FORMAT) ;
+  bool read(const std::string, const std::string = DEFAULT_FORMAT) ;
 
   /** \fn bool write(std::string fileName, std::string mode = ASCII)
    *  \brief write the vector in a file
@@ -193,7 +204,7 @@ public:
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  bool write(const std::string& , const std::string& = DEFAULT_FORMAT) const  ;
+  bool write(const std::string , const std::string = DEFAULT_FORMAT) const  ;
 
   /** \fn double* getArray()
    *  \brief return the array of double values of the vector
@@ -235,8 +246,8 @@ public:
   // internal specific operators
   SimpleVector &operator+=(const SimpleVector &) ;
   SimpleVector &operator-=(const SimpleVector &) ;
-  SimpleVector &operator*=(const double&) ;
-  SimpleVector &operator/=(const double&) ;
+  SimpleVector &operator*=(const double) ;
+  SimpleVector &operator/=(const double) ;
   SimpleVector &operator = (const SimpleVector& v) ;
   /** \fn operator ==
    * \brief: v==w when (v-w).norm()<tolerance
@@ -253,9 +264,9 @@ public:
 
 
   // specific external operators
-  friend SimpleVector operator * (const SimpleVector& v, const double& d) ;
-  friend SimpleVector operator * (const double& d, const SimpleVector& v);
-  friend SimpleVector operator / (const SimpleVector&  v, const double& d);
+  friend SimpleVector operator * (const SimpleVector& v, const double d) ;
+  friend SimpleVector operator * (const double d, const SimpleVector& v);
+  friend SimpleVector operator / (const SimpleVector&  v, const double d);
   friend SimpleVector operator * (const SiconosMatrix &m, const SimpleVector &v);
   friend SimpleVector operator * (const SiconosMatrix &m, const SiconosVector &v);
   friend SimpleVector operator * (const SimpleVector &v, const SiconosMatrix &m);

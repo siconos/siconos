@@ -100,17 +100,17 @@ private:
    */
   void connectToDS();
 
-  /** \fn initAllocationFlags(const bool& = true);
+  /** \fn initAllocationFlags(const bool = true);
    *  \brief set all allocation flags (isAllocated map)
    *  \param bool: value for flags
    */
-  void initAllocationFlags(const bool& = true);
+  void initAllocationFlags(const bool = true);
 
-  /** \fn initPluginFlags(const bool& val);
+  /** \fn initPluginFlags(const bool val);
    *  \brief set all plug-in flags (isPlugin map) to val
    *  \param a bool
    */
-  void initPluginFlags(const bool&);
+  void initPluginFlags(const bool);
 
 public:
 
@@ -135,7 +135,7 @@ public:
    *  \param SiconosMatrix : matrix C of this DynamicalSystem
    *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(const int&, const unsigned int& ndof,
+  LagrangianLinearTIDS(const int, const unsigned int ndof,
                        const SimpleVector&, const SimpleVector&,
                        const SiconosMatrix&,
                        const SiconosMatrix&, const SiconosMatrix&);
@@ -150,7 +150,7 @@ public:
    *  \param SiconosMatrix : mass of this DynamicalSystem
    *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(const int&, const unsigned int& ndof,
+  LagrangianLinearTIDS(const int, const unsigned int ndof,
                        const SimpleVector&, const SimpleVector&,
                        const SiconosMatrix&);
 
@@ -169,12 +169,12 @@ public:
    */
   bool checkDynamicalSystem();
 
-  /** \fn void initialize(const double& = 0, const unsigned int& = 1) ;
+  /** \fn void initialize(const double = 0, const unsigned int = 1) ;
    *  \brief dynamical system initialization function: mainly set memory and compute value for initial state values.
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  void initialize(const double& = 0, const unsigned int& = 1) ;
+  void initialize(const double = 0, const unsigned int = 1) ;
 
   // --- GETTERS AND SETTERS ---
 
@@ -240,21 +240,21 @@ public:
    */
   void setCPtr(SiconosMatrix *newPtr) ;
 
-  /** \fn void computeRhs(const double& time, const bool & =false)
+  /** \fn void computeRhs(const double time, const bool  =false)
    *  \brief Default function to the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  void computeRhs(const double&, const bool & = false);
+  void computeRhs(const double, const bool  = false);
 
-  /** \fn void computeJacobianXRhs(const double& time, const bool & =false)
+  /** \fn void computeJacobianXRhs(const double time, const bool  =false)
    *  \brief Default function to jacobian of the right-hand side term according to x
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
-  void computeJacobianXRhs(const double&, const bool & = false);
+  void computeJacobianXRhs(const double, const bool  = false);
 
   // --- Miscellaneous ---
 

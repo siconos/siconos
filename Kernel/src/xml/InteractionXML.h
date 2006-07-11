@@ -20,7 +20,6 @@
 #define __INTERACTIONXML__
 
 #include "SiconosDOMTreeTools.h"
-#include "Interaction.h"
 
 #include "NonSmoothLawXML.h"
 #include "DynamicalSystem.h"
@@ -130,11 +129,11 @@ public:
     return SiconosDOMTreeTools::getStringAttributeValue(rootNode, ID_ATTRIBUTE);
   }
 
-  /** \fn void setId(const string& )
+  /** \fn void setId(const string )
    *   \brief to save the id of the Interaction (rootNode attribute)
    *   \param a string
    */
-  inline void setId(const std::string & newId)
+  inline void setId(const std::string  newId)
   {
     SiconosDOMTreeTools::setStringAttributeValue(rootNode, ID_ATTRIBUTE, newId);
   }
@@ -150,11 +149,11 @@ public:
     return SiconosDOMTreeTools::getAttributeValue<int>(rootNode, NUMBER_ATTRIBUTE);
   }
 
-  /** \fn void setNumber(const int& i)
+  /** \fn void setNumber(const int i)
    *  \brief to save the number of the Interaction (rootNode attribute)
    *  \param an int
    */
-  inline void setNumber(const int& i)
+  inline void setNumber(const int i)
   {
     SiconosDOMTreeTools::setIntegerAttributeValue(rootNode, NUMBER_ATTRIBUTE, i);
   }
@@ -179,11 +178,11 @@ public:
     return SiconosDOMTreeTools::getContentValue<int>(sizeNode);
   }
 
-  /** \fn void setSize(const unsigned int& i)
+  /** \fn void setSize(const unsigned int i)
    *  \brief to save the size of the Interaction
    *  \return an unsigned int
    */
-  void setSize(const unsigned int&);
+  void setSize(const unsigned int);
 
   /** \fn const bool hasY() const
    *  \brief return true if yNode is defined

@@ -70,7 +70,7 @@ const std::string DSINPUTOUTPUT_DEFINITION_TAG = "DSInputOutput_Definition";
 const std::string DYNAMICAL_SYSTEM_DEFINITION_TAG = "DS_Definition";
 const std::string INTERACTION_DEFINITION_TAG = "Interaction_Definition";
 const std::string LMGC90_NSDS_TAG = "DS_LMGC90";
-const std::string LMGC90_STRATEGY_TAG = "OneStepIntegrator_LMGC90";
+const std::string LMGC90_SIMULATION_TAG = "OneStepIntegrator_LMGC90";
 
 
 // Interaction
@@ -107,9 +107,9 @@ const std::string DS_CONCERNED = "DS_Concerned";
 // SiconosModel
 const std::string MODEL_TAG = "SiconosModel";
 const std::string NSDS_TAG = "NSDS";
-const std::string STRATEGY_TAG = "Strategy";
+const std::string SIMULATION_TAG = "Simulation";
 
-// Strategy
+// Simulation
 const std::string ONESTEPINTEGRATOR_DEFINITION_TAG = "OneStepIntegrator_Definition";
 const std::string ONESTEPINTEGRATOR_TAG = "OneStepIntegrator";
 const std::string ONESTEPNSPROBLEM_TAG = "OneStepNSProblem";

@@ -102,7 +102,7 @@ void DynamicalSystem::fillDsioFromXml()
   }
 }
 
-void DynamicalSystem::initAllocationFlags(const bool& in) // default in = true.
+void DynamicalSystem::initAllocationFlags(const bool in) // default in = true.
 {
   if (in) // set default, minimum required, configuration
   {
@@ -136,7 +136,7 @@ void DynamicalSystem::initAllocationFlags(const bool& in) // default in = true.
   }
 }
 
-void DynamicalSystem::initPluginFlags(const bool& val)
+void DynamicalSystem::initPluginFlags(const bool val)
 {
   isPlugin["f"] = val;
   isPlugin["jacobianXF"] = val;
@@ -144,7 +144,7 @@ void DynamicalSystem::initPluginFlags(const bool& val)
   isPlugin["T"] = val;
 }
 
-void DynamicalSystem::initParameter(const string& id)
+void DynamicalSystem::initParameter(const string id)
 {
   if (parametersList[id] == NULL)
   {
@@ -347,8 +347,8 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
 }
 
 // From a minimum set of data
-DynamicalSystem::DynamicalSystem(const int& newNumber, const unsigned int& newN, const SiconosVector& newX0,
-                                 const string& fPlugin, const string& jacobianXFPlugin):
+DynamicalSystem::DynamicalSystem(const int newNumber, const unsigned int newN, const SiconosVector& newX0,
+                                 const string fPlugin, const string jacobianXFPlugin):
   DSType(NLDS), nsds(NULL), number(newNumber), id("none"), n(newN), x0(NULL), x(NULL), xMemory(NULL),
   rhs(NULL), jacobianXRhs(NULL), xFree(NULL), r(NULL), rMemory(NULL), f(NULL), jacobianXF(NULL), uSize(0), u(NULL),
   T(NULL), stepsInMemory(1), BC(NULL), dsxml(NULL),
@@ -863,7 +863,7 @@ void DynamicalSystem::setJacobianXFPtr(SiconosMatrix *newPtr)
   isPlugin["jacobianXF"] = false;
 }
 
-void  DynamicalSystem::setUSize(const unsigned int& newUSize)
+void  DynamicalSystem::setUSize(const unsigned int newUSize)
 {
   if (isAllocatedIn["u"]) delete u;
   uSize = newUSize;
@@ -941,14 +941,14 @@ void DynamicalSystem::setBoundaryConditionPtr(BoundaryCondition *newBC)
   isAllocatedIn["BoundaryConditions"] = false;
 }
 
-DSInputOutput* DynamicalSystem::getDSInputOutput(const unsigned int& i)
+DSInputOutput* DynamicalSystem::getDSInputOutput(const unsigned int i)
 {
   if (i >= dsioVector.size())
     RuntimeException::selfThrow("DS - getDSInputOutput : \'i\' is out of range");
   return dsioVector[i];
 }
 
-void DynamicalSystem::initialize(const double& time, const unsigned int& sizeOfMemory)
+void DynamicalSystem::initialize(const double time, const unsigned int sizeOfMemory)
 {
 
   // reset x to x0, xFree and r to zero.
@@ -970,7 +970,7 @@ void DynamicalSystem::initialize(const double& time, const unsigned int& sizeOfM
 
 // ===== MEMORY MANAGEMENT FUNCTIONS =====
 
-void DynamicalSystem::initMemory(const unsigned int& steps)
+void DynamicalSystem::initMemory(const unsigned int steps)
 {
   if (steps == 0)
     cout << "Warning : DynamicalSystem::initMemory with size equal to zero" << endl;
@@ -989,13 +989,13 @@ void DynamicalSystem::initMemory(const unsigned int& steps)
 
 void DynamicalSystem::swapInMemory()
 {
-  xMemory->swap(*x);
-  rMemory->swap(*r);
+  xMemory->swap(x);
+  rMemory->swap(r);
 }
 
 // ===== COMPUTE PLUGINS FUNCTIONS =====
 
-void DynamicalSystem::setComputeFFunction(const string& pluginPath, const string& functionName)
+void DynamicalSystem::setComputeFFunction(const string pluginPath, const string functionName)
 {
   if (rhs == NULL) // Warning: f is saved in rhs.
   {
@@ -1013,7 +1013,7 @@ void DynamicalSystem::setComputeFFunction(const string& pluginPath, const string
   isPlugin["f"] = true;
 }
 
-void DynamicalSystem::setComputeJacobianXFFunction(const string& pluginPath, const string& functionName)
+void DynamicalSystem::setComputeJacobianXFFunction(const string pluginPath, const string functionName)
 {
   if (jacobianXF == NULL)
   {
@@ -1032,7 +1032,7 @@ void DynamicalSystem::setComputeJacobianXFFunction(const string& pluginPath, con
   isPlugin["jacobianXF"] = true;
 }
 
-void DynamicalSystem::setComputeUFunction(const string& pluginPath, const string& functionName)
+void DynamicalSystem::setComputeUFunction(const string pluginPath, const string functionName)
 {
   // since u is not allocated by default, memory must be reserved for it
   if (uSize == 0)
@@ -1056,7 +1056,7 @@ void DynamicalSystem::setComputeUFunction(const string& pluginPath, const string
   isPlugin["u"] = true;
 }
 
-void DynamicalSystem::setComputeTFunction(const string& pluginPath, const string& functionName)
+void DynamicalSystem::setComputeTFunction(const string pluginPath, const string functionName)
 {
   // since T is not allocated by default, memory must be reserved for it
   if (uSize == 0)
@@ -1093,21 +1093,21 @@ void DynamicalSystem::setParameters(const std::map<string, SimpleVector*>& newMa
   }
 }
 
-void DynamicalSystem::setParameter(const SimpleVector& newValue, const string& id)
+void DynamicalSystem::setParameter(const SimpleVector& newValue, const string id)
 {
   parametersList[id] = new SimpleVector(newValue);
   string alloc = "parameter_for_" + id;
   isAllocatedIn[alloc] = true;
 }
 
-void DynamicalSystem::setParameterPtr(SimpleVector *newPtr, const string& id)
+void DynamicalSystem::setParameterPtr(SimpleVector *newPtr, const string id)
 {
   parametersList[id] = newPtr;
   string alloc = "parameter_for_" + id;
   isAllocatedIn[alloc] = false;
 }
 
-void DynamicalSystem::computeF(const double& time)
+void DynamicalSystem::computeF(const double time)
 {
   if (isPlugin["f"])
   {
@@ -1119,7 +1119,7 @@ void DynamicalSystem::computeF(const double& time)
   // else nothing!
 }
 
-void DynamicalSystem::computeJacobianXF(const double& time, const bool&)
+void DynamicalSystem::computeJacobianXF(const double time, const bool)
 {
   // second argument is useless at the time - Used in derived classes
   if (isPlugin["jacobianXF"])
@@ -1132,7 +1132,7 @@ void DynamicalSystem::computeJacobianXF(const double& time, const bool&)
   // else nothing!
 }
 
-void DynamicalSystem::computeRhs(const double& time, const bool&)
+void DynamicalSystem::computeRhs(const double time, const bool)
 {
   // second argument is useless at the time - Used in derived classes
 
@@ -1157,7 +1157,7 @@ void DynamicalSystem::computeRhs(const double& time, const bool&)
   }
 }
 
-void DynamicalSystem::computeJacobianXRhs(const double& time, const bool&)
+void DynamicalSystem::computeJacobianXRhs(const double time, const bool)
 {
   // second argument is useless at the time - Used in derived classes
 
@@ -1171,7 +1171,7 @@ void DynamicalSystem::computeJacobianXRhs(const double& time, const bool&)
 
 }
 
-void DynamicalSystem::computeU(const double& time)
+void DynamicalSystem::computeU(const double time)
 {
   if (isPlugin["u"])
   {
@@ -1186,7 +1186,7 @@ void DynamicalSystem::computeU(const double& time)
   // else nothing!
 }
 
-void DynamicalSystem::computeU(const double& time, SiconosVector* xx)
+void DynamicalSystem::computeU(const double time, SiconosVector* xx)
 {
   if (isPlugin["u"])
   {

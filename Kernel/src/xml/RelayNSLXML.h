@@ -56,7 +56,7 @@ public:
    */
   inline double getC()
   {
-    return  SiconosDOMTreeTools::getContentValue<double>(this->CNode);
+    return  SiconosDOMTreeTools::getContentValue<double>(CNode);
   }
 
   /** \fn double getD()
@@ -65,7 +65,7 @@ public:
    */
   inline double getD()
   {
-    return  SiconosDOMTreeTools::getContentValue<double>(this->DNode);
+    return  SiconosDOMTreeTools::getContentValue<double>(DNode);
   }
 
   /** \fn void setC(double c)
@@ -74,11 +74,11 @@ public:
    */
   inline void setC(double c)
   {
-    if (this->CNode == NULL)
+    if (CNode == NULL)
     {
-      this->CNode = SiconosDOMTreeTools::createDoubleNode(this->rootNSLawXMLNode, RNSL_C, c);
+      CNode = SiconosDOMTreeTools::createDoubleNode(rootNode, RNSL_C, c);
     }
-    else SiconosDOMTreeTools::setDoubleContentValue(this->CNode, c);
+    else SiconosDOMTreeTools::setDoubleContentValue(CNode, c);
   }
 
   /** \fn void setD(double d)
@@ -87,11 +87,11 @@ public:
    */
   inline void setD(double d)
   {
-    if (this->DNode == NULL)
+    if (DNode == NULL)
     {
-      this->DNode = SiconosDOMTreeTools::createDoubleNode(this->rootNSLawXMLNode, RNSL_D, d);
+      DNode = SiconosDOMTreeTools::createDoubleNode(rootNode, RNSL_D, d);
     }
-    else SiconosDOMTreeTools::setDoubleContentValue(this->DNode, d);
+    else SiconosDOMTreeTools::setDoubleContentValue(DNode, d);
   }
 
 

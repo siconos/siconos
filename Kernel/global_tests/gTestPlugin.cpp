@@ -23,20 +23,10 @@
 
 const double m = 1; // ball mass
 const double g = 9.8; // gravity
-extern "C" void ballFExt(const unsigned int *sizeOfq, const double *time, double *fExt, double* param)
+extern "C" void ballFExt(const unsigned int sizeOfq, const double *time, double *fExt, double* param)
 {
-  /* input parameter : sizeOfq (size of the vector q); time; q (pointer to q vector);
-   * output parameter : fExt (pointer to Fext vector)
-   */
-
-  //  printf("Call of the function 'ballFExt' of the basic plugin.\nYou have to implement this function.\n");
-
-  int i;
-  int n = *sizeOfq;
-  for (i = 0; i < n; i++)
-  {
+  for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
-  }
 
   fExt[0] = -m * g;
 }
@@ -45,29 +35,19 @@ extern "C" void ballFExt(const unsigned int *sizeOfq, const double *time, double
 
 const double R = 0.5; // ball radius
 
-
-extern "C" void groundFExt(const unsigned int *sizeOfq, const double *time, double *fExt, double* param)
+extern "C" void groundFExt(const unsigned int sizeOfq, const double *time, double *fExt, double* param)
 {
-  /* input parameter : sizeOfq (size of the vector q); time; q (pointer to q vector);
-   * output patarmeter : fExt (pointer to Fext vector)
-   */
-
-  //  printf("Call of the function 'ballFExt' of the basic plugin.\nYou have to implement this function.\n");
-
-  int i;
-  int n = *sizeOfq;
-
-  for (i = 0; i < n; i++)
+  for (unsigned int i = 0; i < sizeOfq; i++)
     fExt[i] = 0.0;
 }
 
-extern "C" void h0(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfY, double* y, double* param)
+extern "C" void h0(const unsigned int sizeOfq, const double* q, const unsigned int* sizeOfY, double* y, double* param)
 {
   double R0 = 0.0;
   y[0] = q[0] + sqrt(R * R - q[1] * q[1]) - R0;
 }
 
-extern "C" void G0(const unsigned int* sizeOfq, const double* q, const unsigned int* sizeOfY, double* G, double* param)
+extern "C" void G0(const unsigned int sizeOfq, const double* q, const unsigned int* sizeOfY, double* G, double* param)
 {
   G[0] = 1.0;
   G[1] = -q[1] / (sqrt(R * R - q[1] * q[1]));

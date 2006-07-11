@@ -20,15 +20,12 @@
 using namespace std;
 
 RelayNSL::RelayNSL():
-  NonSmoothLaw(), c(0.0), d(0.0)
-{
-  nsLawType = RELAYNSLAW;
-}
+  NonSmoothLaw(RELAYNSLAW), c(0.0), d(0.0)
+{}
 
 RelayNSL::RelayNSL(NonSmoothLawXML* nslawxml):
-  NonSmoothLaw(nslawxml), c(0.0), d(0.0)
+  NonSmoothLaw(RELAYNSLAW, nslawxml), c(0.0), d(0.0)
 {
-  nsLawType = RELAYNSLAW;
   if (nslawxml != NULL)
   {
     c = (static_cast<RelayNSLXML*>(nslawxml))->getC();
@@ -37,11 +34,9 @@ RelayNSL::RelayNSL(NonSmoothLawXML* nslawxml):
   else RuntimeException::selfThrow("RelayNSL::xml constructor, xml file=NULL");
 }
 
-RelayNSL::RelayNSL(const double& newC, const double& newD):
-  NonSmoothLaw(), c(newC), d(newD)
-{
-  nsLawType = RELAYNSLAW;
-}
+RelayNSL::RelayNSL(const double newC, const double newD):
+  NonSmoothLaw(RELAYNSLAW), c(newC), d(newD)
+{}
 
 RelayNSL::~RelayNSL()
 {}

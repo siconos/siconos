@@ -60,7 +60,7 @@ void LagrangianDS::connectToDS()
   isPlugin["jacobianXF"] = false;
 }
 
-void LagrangianDS::initAllocationFlags(const bool& in)
+void LagrangianDS::initAllocationFlags(const bool in)
 {
   if (in) // initialize flag to true for required input data and to false for optional ones
   {
@@ -104,7 +104,7 @@ void LagrangianDS::initAllocationFlags(const bool& in)
   }
 }
 
-void LagrangianDS::initPluginFlags(const bool& val)
+void LagrangianDS::initPluginFlags(const bool val)
 {
   isPlugin["mass"] = val;
   isPlugin["fInt"] = val;
@@ -307,15 +307,10 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     }
     else *jacobianVelocityNNL = lgptr->getJacobianVelocityNNLMatrix();
   }
-
-  // set DynamicalClass members
-  connectToDS();
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 // From a set of data; Mass filled-in directly from a siconosMatrix
-LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
+LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
                            const SimpleVector& newQ0, const SimpleVector& newVelocity0,
                            const SiconosMatrix& newMass):
   DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
@@ -354,8 +349,6 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   //   jacobianVelocityNNL = new SimpleMatrix(ndof,ndof);
 
 
-  // === Settings and links for master dynamical system variables ===
-  connectToDS();
 
   setComputeMassFunction("DefaultPlugin.so", "computeMass");
   //   setComputeFIntFunction("DefaultPlugin.so", "computeFInt");
@@ -365,13 +358,11 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   //   setComputeJacobianVelocityFIntFunction("DefaultPlugin.so", "computeJacobianVelocityFInt");
   //   setComputeJacobianQNNLFunction("DefaultPlugin.so", "computeJacobianQNNL");
   //   setComputeJacobianVelocityNNLFunction("DefaultPlugin.so", "computeJacobianVelocityNNL");
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 // From a set of data - Mass loaded from a plugin
-LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
-                           const SimpleVector& newQ0, const SimpleVector& newVelocity0, const string& massName):
+LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
+                           const SimpleVector& newQ0, const SimpleVector& newVelocity0, const string massName):
   DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL),
   velocity0(NULL), velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL),
   fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL),
@@ -409,10 +400,6 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
 
   initAllocationFlags();// default
 
-  // --- x, xFree, rhs ... update ---
-
-  connectToDS();
-
   //   --- default plug-in ---
   //   setComputeFIntFunction("DefaultPlugin.so", "computeFInt");
   //   setComputeFExtFunction("DefaultPlugin.so", "computeFExt");
@@ -421,8 +408,6 @@ LagrangianDS::LagrangianDS(const int& newNumber, const unsigned int& newNdof,
   //   setComputeJacobianVelocityFIntFunction("DefaultPlugin.so", "computeJacobianVelocityFInt");
   //   setComputeJacobianQNNLFunction("DefaultPlugin.so", "computeJacobianQNNL");
   //   setComputeJacobianVelocityNNLFunction("DefaultPlugin.so", "computeJacobianVelocityNNL");
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 // copy constructor
@@ -576,11 +561,6 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
     pluginPath  = cShared.getPluginName(jacobianVelocityNNLFunctionName);
     setComputeJacobianVelocityNNLFunction(pluginPath, functionName);
   }
-
-  // Set variables of top-class DynamicalSystem
-  connectToDS();
-  bool res = checkDynamicalSystem();
-  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 // Destructor
@@ -676,8 +656,13 @@ bool LagrangianDS::checkDynamicalSystem()
   return output;
 }
 
-void LagrangianDS::initialize(const double& time, const unsigned int& sizeOfMemory)
+void LagrangianDS::initialize(const double time, const unsigned int sizeOfMemory)
 {
+  // Set variables of top-class DynamicalSystem
+  connectToDS(); // note that connection can not be done during constructor call, since user can complete the ds after (add plugin or anything else).
+  bool res = checkDynamicalSystem();
+  if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
+
   // set q and velocity to q0 and velocity0
   *q = *q0;
   *velocity = *velocity0;
@@ -1185,7 +1170,7 @@ void LagrangianDS::setJacobianVelocityNNLPtr(SiconosMatrix *newPtr)
 
 
 // --- Plugins related functions ---
-void LagrangianDS::setComputeMassFunction(const string& pluginPath, const string& functionName)
+void LagrangianDS::setComputeMassFunction(const string pluginPath, const string functionName)
 {
   if (mass == NULL)
   {
@@ -1203,7 +1188,7 @@ void LagrangianDS::setComputeMassFunction(const string& pluginPath, const string
   isPlugin["mass"] = true;
 }
 
-void LagrangianDS::setComputeFIntFunction(const string& pluginPath, const string& functionName)
+void LagrangianDS::setComputeFIntFunction(const string pluginPath, const string functionName)
 {
   if (fInt == NULL)
   {
@@ -1221,7 +1206,7 @@ void LagrangianDS::setComputeFIntFunction(const string& pluginPath, const string
   isPlugin["fInt"] = true;
 }
 
-void LagrangianDS::setComputeFExtFunction(const string& pluginPath, const string& functionName)
+void LagrangianDS::setComputeFExtFunction(const string pluginPath, const string functionName)
 {
   if (fExt == NULL)
   {
@@ -1239,7 +1224,7 @@ void LagrangianDS::setComputeFExtFunction(const string& pluginPath, const string
   isPlugin["fExt"] = true;
 }
 
-void LagrangianDS::setComputeNNLFunction(const string& pluginPath, const string& functionName)
+void LagrangianDS::setComputeNNLFunction(const string pluginPath, const string functionName)
 {
   if (NNL == NULL)
   {
@@ -1257,7 +1242,7 @@ void LagrangianDS::setComputeNNLFunction(const string& pluginPath, const string&
   isPlugin["NNL"] = true;
 }
 
-void LagrangianDS::setComputeJacobianQFIntFunction(const string& pluginPath, const string& functionName)
+void LagrangianDS::setComputeJacobianQFIntFunction(const string pluginPath, const string functionName)
 {
   if (jacobianQFInt == NULL)
   {
@@ -1275,7 +1260,7 @@ void LagrangianDS::setComputeJacobianQFIntFunction(const string& pluginPath, con
   isPlugin["jacobianQFInt"] = true;
 }
 
-void LagrangianDS::setComputeJacobianVelocityFIntFunction(const string& pluginPath, const string& functionName)
+void LagrangianDS::setComputeJacobianVelocityFIntFunction(const string pluginPath, const string functionName)
 {
   if (jacobianVelocityFInt == NULL)
   {
@@ -1293,7 +1278,7 @@ void LagrangianDS::setComputeJacobianVelocityFIntFunction(const string& pluginPa
   isPlugin["jacobianVelocityFInt"] = true;
 }
 
-void LagrangianDS::setComputeJacobianQNNLFunction(const string& pluginPath, const string& functionName)
+void LagrangianDS::setComputeJacobianQNNLFunction(const string pluginPath, const string functionName)
 {
   if (jacobianQNNL == NULL)
   {
@@ -1311,7 +1296,7 @@ void LagrangianDS::setComputeJacobianQNNLFunction(const string& pluginPath, cons
   isPlugin["jacobianQNNL"] = true;
 }
 
-void LagrangianDS::setComputeJacobianVelocityNNLFunction(const string& pluginPath, const string& functionName)
+void LagrangianDS::setComputeJacobianVelocityNNLFunction(const string pluginPath, const string functionName)
 {
   if (jacobianVelocityNNL == NULL)
   {
@@ -1352,7 +1337,7 @@ void LagrangianDS::computeMass(SimpleVector *q2)
   }
 }
 
-void LagrangianDS::computeFInt(const double& time)
+void LagrangianDS::computeFInt(const double time)
 {
   if (isPlugin["fInt"])
   {
@@ -1363,7 +1348,7 @@ void LagrangianDS::computeFInt(const double& time)
     computeFIntPtr(ndof, &time, &(*q)(0), &(*velocity)(0), &(*fInt)(0), &(*param)(0));
   }
 }
-void LagrangianDS::computeFInt(const double& time, SimpleVector *q2, SimpleVector *velocity2)
+void LagrangianDS::computeFInt(const double time, SimpleVector *q2, SimpleVector *velocity2)
 {
   if (isPlugin["fInt"])
   {
@@ -1375,7 +1360,7 @@ void LagrangianDS::computeFInt(const double& time, SimpleVector *q2, SimpleVecto
   }
 }
 
-void LagrangianDS::computeFExt(const double& time)
+void LagrangianDS::computeFExt(const double time)
 {
   if (isPlugin["fExt"])
   {
@@ -1411,7 +1396,7 @@ void LagrangianDS::computeNNL(SimpleVector *q2, SimpleVector *velocity2)
   }
 }
 
-void LagrangianDS::computeJacobianQFInt(const double& time)
+void LagrangianDS::computeJacobianQFInt(const double time)
 {
   if (isPlugin["jacobianQFInt"])
   {
@@ -1423,7 +1408,7 @@ void LagrangianDS::computeJacobianQFInt(const double& time)
   }
 }
 
-void LagrangianDS::computeJacobianQFInt(const double& time, SimpleVector *q2, SimpleVector *velocity2)
+void LagrangianDS::computeJacobianQFInt(const double time, SimpleVector *q2, SimpleVector *velocity2)
 {
   if (isPlugin["jacobianQFInt"])
   {
@@ -1435,7 +1420,7 @@ void LagrangianDS::computeJacobianQFInt(const double& time, SimpleVector *q2, Si
   }
 }
 
-void LagrangianDS::computeJacobianVelocityFInt(const double & time)
+void LagrangianDS::computeJacobianVelocityFInt(const double  time)
 {
   if (isPlugin["jacobianVelocityFInt"])
   {
@@ -1446,7 +1431,7 @@ void LagrangianDS::computeJacobianVelocityFInt(const double & time)
     computeJacobianVelocityFIntPtr(ndof, &time, &(*q)(0), &(*velocity)(0), &(*jacobianVelocityFInt)(0, 0), &(*param)(0));
   }
 }
-void LagrangianDS::computeJacobianVelocityFInt(const double & time, SimpleVector *q2, SimpleVector *velocity2)
+void LagrangianDS::computeJacobianVelocityFInt(const double  time, SimpleVector *q2, SimpleVector *velocity2)
 {
   if (isPlugin["jacobianVelocityFInt"])
   {
@@ -1524,7 +1509,7 @@ void LagrangianDS::computeInverseOfMass()
   }
 }
 
-void LagrangianDS::computeRhs(const double& time, const bool& isDSup)
+void LagrangianDS::computeRhs(const double time, const bool isDSup)
 {
   // if isDSup == true, this means that there is no need to re-compute mass ...
   // note that rhs(0) = velocity, with pointer link, must already be set.
@@ -1580,7 +1565,7 @@ void LagrangianDS::computeRhs(const double& time, const bool& isDSup)
   // todo: use linearSolve to avoid inversion ? Or save M-1 to avoid re-computation. See this when "M" will be added in DS or LDS.
 }
 
-void LagrangianDS::computeJacobianXRhs(const double& time, const bool& isDSup)
+void LagrangianDS::computeJacobianXRhs(const double time, const bool isDSup)
 {
 
   // if isDSup == true, this means that there is no need to re-compute mass ...
@@ -1766,9 +1751,10 @@ void LagrangianDS::display() const
 }
 
 // --- Functions for memory handling ---
-void LagrangianDS::initMemory(const unsigned int& steps)
+void LagrangianDS::initMemory(const unsigned int steps)
 {
   DynamicalSystem::initMemory(steps);
+
   // warning : depends on xml loading ??? To be reviewed
   //qMemory = new SiconosMemory( steps, qMemory.getSiconosMemoryXML() );
   //velocityMemory = new SiconosMemory( steps, velocityMemory.getSiconosMemoryXML() );
@@ -1784,8 +1770,8 @@ void LagrangianDS::initMemory(const unsigned int& steps)
 void LagrangianDS::swapInMemory()
 {
   DynamicalSystem::swapInMemory();
-  qMemory->swap(*q);
-  velocityMemory->swap(*velocity);
+  qMemory->swap(q);
+  velocityMemory->swap(velocity);
   // initialization of the reaction force due to the non smooth law
   p->zero();
 }

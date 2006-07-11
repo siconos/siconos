@@ -17,93 +17,125 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "OneStepNSProblem.h"
+#include "Moreau.h"
 using namespace std;
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
 // Default constructor
-OneStepNSProblem::OneStepNSProblem():
-  nspbType("undefined"), dim(0), solver(NULL), isSolverAllocatedIn(false),  strategy(NULL), onestepnspbxml(NULL)
+OneStepNSProblem::OneStepNSProblem(const string pbType):
+  nspbType(pbType), id(DEFAULT_OSNS_NAME), sizeOutput(0), solver(NULL), isSolverAllocatedIn(false),  simulation(NULL), onestepnspbxml(NULL),
+  levelMin(0), levelMax(0)
 {}
 
 // xml constructor
-OneStepNSProblem::OneStepNSProblem(OneStepNSProblemXML* osnspbxml, Strategy* newStrat):
-  nspbType("undefined"), dim(0), solver(NULL), isSolverAllocatedIn(false), strategy(newStrat), onestepnspbxml(osnspbxml)
+OneStepNSProblem::OneStepNSProblem(const string pbType, OneStepNSProblemXML* osnspbxml, Simulation* newSimu):
+  nspbType(pbType), id(DEFAULT_OSNS_NAME), sizeOutput(0), solver(NULL), isSolverAllocatedIn(false),  simulation(newSimu), onestepnspbxml(osnspbxml),
+  levelMin(0), levelMax(0)
 {
-  if (onestepnspbxml != NULL) // get dimension of the problem ...
-  {
-    if (onestepnspbxml->hasDim()) dim = onestepnspbxml->getDimNSProblem();
-  }
-  else RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file=NULL");
+  if (onestepnspbxml == NULL)
+    RuntimeException::selfThrow("OneStepNSProblem::xml constructor, xml file == NULL");
 
-  // read list of interactions and equality constraints concerned
-  if (strategy != NULL)
+  // === Checks simulation ===
+  if (newSimu == NULL)
+    RuntimeException::selfThrow("OneStepNSProblem::xml constructor(..., simulation), simulation == NULL");
+
+  // === get dimension of the problem ===
+  if (onestepnspbxml->hasDim()) sizeOutput = onestepnspbxml->getDimNSProblem();
+
+  // === get Id ===
+
+  if (onestepnspbxml->hasId()) id = onestepnspbxml->getId();
+  //else if( !(simulation->getOneStepNSProblems()).empty()) // An id is required if there is more than one OneStepNSProblem in the simulation
+  //RuntimeException::selfThrow("OneStepNSProblem::xml constructor, an id is required for the one step non smooth problem.");
+
+  // === read solver related data ===
+  if (onestepnspbxml->hasSolver())
+    solver = new Solver(onestepnspbxml->getSolverXMLPtr(), nspbType);
+  else // solver = default one
   {
-    OSNSInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-    ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
+    solver = new Solver(nspbType, DEFAULT_SOLVER, DEFAULT_ITER, DEFAULT_TOL, DEFAULT_NORMTYPE, DEFAULT_SEARCHDIR);
+    cout << " Warning, no solver defined in non-smooth problem - Default one is used" << endl;
+    solver->display();
   }
-  else cout << "OneStepNSPb xml-constructor - Warning: no strategy linked to OneStepPb" << endl;
+  isSolverAllocatedIn = true;
+
+  // === Link to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
+  OSNSInteractions = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
 }
 
-// Constructor with given strategy and a pointer on Solver
-OneStepNSProblem::OneStepNSProblem(Strategy * newStrat, Solver* newSolver):
-  nspbType("undefined"), dim(0), solver(newSolver), isSolverAllocatedIn(false), strategy(newStrat), onestepnspbxml(NULL)
+// Constructor with given simulation and a pointer on Solver (Warning, solver is an optional argument)
+OneStepNSProblem::OneStepNSProblem(const string pbType, Simulation * newSimu, string newId, Solver* newSolver):
+  nspbType(pbType), id(newId), sizeOutput(0), solver(newSolver), isSolverAllocatedIn(false),  simulation(newSimu), onestepnspbxml(NULL),
+  levelMin(0), levelMax(0)
 {
-  if (strategy != NULL)
-  {
-    OSNSInteractions = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
-    ecVector = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getEqualityConstraints();
-  }
-  else
-    RuntimeException::selfThrow("OneStepNSProblem:: constructor from strategy, given strategy == NULL");
+  // === Checks simulation ===
+  if (newSimu == NULL)
+    RuntimeException::selfThrow("OneStepNSProblem::xml constructor(..., simulation), simulation == NULL");
+
+  // === Links to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
+  OSNSInteractions = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
+
+  // === Adds this in the simulation set of OneStepNSProblem ===
+  // First checks the id if required.
+  if (!(simulation->getOneStepNSProblems()).empty() && id == DEFAULT_OSNS_NAME) // An id is required if there is more than one OneStepNSProblem in the simulation
+    RuntimeException::selfThrow("OneStepNSProblem::constructor(...). Since the simulation has several one step non smooth problem, an id is required for each of them.");
+  simulation->addOneStepNSProblemPtr(this);
 }
 
 OneStepNSProblem::~OneStepNSProblem()
 {
-  map< Interaction* , SiconosMatrix*>::iterator it;
-  for (it = diagonalBlocksMap.begin(); it != diagonalBlocksMap.end(); it++)
-  {
-    SiconosMatrix * tmp = (*it).second;
-    if (tmp != NULL)  delete tmp ;
-    tmp = NULL;
-  }
-
-  map< Interaction* , map<Interaction *, SiconosMatrix*> >::iterator it2;
-  map<Interaction *, SiconosMatrix*>::iterator it3;
-  for (it2 = extraDiagonalBlocksMap.begin(); it2 != extraDiagonalBlocksMap.end(); it2++)
-  {
-
-    for (it3 = ((*it2).second).begin(); it3 != ((*it2).second).end(); it3++)
-    {
-      SiconosMatrix * tmp = (*it3).second;
-      if (tmp != NULL)  delete tmp ;
-      tmp = NULL;
-    }
-  }
   if (isSolverAllocatedIn) delete solver;
   solver = NULL;
-  strategy = NULL;
+  simulation = NULL;
   onestepnspbxml = NULL;
+  clearBlocks();
+  OSNSInteractions.clear();
 }
 
-Interaction* OneStepNSProblem::getInteractionPtr(const unsigned int& nb)
+SiconosMatrix* OneStepNSProblem::getBlockPtr(UnitaryRelation* UR1, UnitaryRelation* UR2) const
 {
-  // Mind that Interactions are sorted in a growing order according to their id number.
-  InteractionsIterator it = OSNSInteractions.begin();
-  for (unsigned int i = 0; i < nb; ++i)
-    it++;
+  // if UR2 is not given or NULL, UR2=UR1, ie we get the diagonal block.
+  if (UR2 == NULL) UR2 = UR1;
 
-  if (it == OSNSInteractions.end())
-    RuntimeException::selfThrow("OneStepNSProblem - getInteractionPtr(nb) : nb is out of range");
+  ConstUnitaryMatrixRowIterator itRow = blocks.find(UR1);
+  // itRow: we get the map of blocks that corresponds to UR1.
+  // Then, thanks to itCol, we iterate through this map to find UR2 and the block that corresonds to UR1 and UR2
+  ConstUnitaryMatrixColumnIterator itCol = (itRow->second).find(UR2);
 
-  return *it;
+  if (itCol == (itRow->second).end()) // if UR1 and UR2 are not connected
+    RuntimeException::selfThrow("OneStepNSProblem - getBlockPtr(UR1,UR2) : no block corresonds to UR1 and UR2, ie the Unitary Relations are not connected.");
+
+  return itCol->second;
+
 }
 
-void OneStepNSProblem::setInteractions(const InteractionsSet& newSet)
+void OneStepNSProblem::setBlocks(const MapOfMapOfUnitaryMatrices& newMap)
 {
-  // Warning: pointers links between ds of newSet and OSIDynamicalSystems.
-  InteractionsIterator it;
-  for (it = newSet.begin(); it != newSet.end(); ++it)
-    OSNSInteractions.insert(*it);
+  clearBlocks();
+  blocks = newMap;
+  UnitaryMatrixRowIterator itRow;
+  UnitaryMatrixColumnIterator itCol;
+  for (itRow = blocks.begin(); itRow != blocks.end() ; ++itRow)
+  {
+    for (itCol = (itRow->second).begin(); itCol != (itRow->second).end(); ++itCol)
+      isBlockAllocatedIn[itRow->first][itCol->first] = false;
+  }
+}
+
+void OneStepNSProblem::clearBlocks()
+{
+  UnitaryMatrixRowIterator itRow;
+  UnitaryMatrixColumnIterator itCol;
+  for (itRow = blocks.begin(); itRow != blocks.end() ; ++itRow)
+  {
+    for (itCol = (itRow->second).begin(); itCol != (itRow->second).end(); ++itCol)
+    {
+      if (isBlockAllocatedIn[itRow->first][itCol->first])
+        delete blocks[itRow->first][itCol->first];
+    }
+  }
+  blocks.clear();
+  isBlockAllocatedIn.clear();
 }
 
 void OneStepNSProblem::setSolverPtr(Solver * newSolv)
@@ -113,177 +145,130 @@ void OneStepNSProblem::setSolverPtr(Solver * newSolv)
   isSolverAllocatedIn = false;
 }
 
-void OneStepNSProblem::addInteraction(Interaction *interaction)
+void OneStepNSProblem::computeUnitaryRelationsPositions()
 {
-  OSNSInteractions.insert(interaction);
+  // === Description ===
+  // For a block (diagonal or extra diagonal) corresponding to a Unitary Relation, we need to know the position of its first element
+  // in the full-matrix M of the LCP. (see assembleM, variable pos and col). This position depends on the previous blocks sizes.
+  //
+  // positions are saved in a map<UnitaryRelation*, unsigned int>, named blocksPositions.
+  //
+  // Move this function in topology? Or simulation?
+
+  // Get index sets from Topology
+  UnitaryRelationsSet indexSet = simulation->getIndexSet(1);
+  UnitaryRelationIterator it;
+  unsigned int pos = 0;
+
+  // For each Unitary Relation in indexSets[1], the position is given by the sum of the dimensions of non smooth laws of all previous Unitary Relations.
+  for (it = indexSet.begin(); it != indexSet.end(); ++it)
+  {
+    blocksPositions[*it] = pos;
+    pos += (*it)->getNonSmoothLawSize();
+  }
+}
+
+void OneStepNSProblem::computeSizeOutput()
+{
+  // Get required index sets from Simulation
+  VectorOfSetOfUnitaryRelations indexSets = simulation->getIndexSets();
+  sizeOutput = 0;
+  // For all UnitaryRelations in indexSets[levelMin...levelMax], we sum non smooth laws dimensions
+  UnitaryRelationIterator it;
+  for (unsigned int i = levelMin; i <= levelMax; ++i)
+  {
+    for (it = indexSets[i].begin(); it != indexSets[i].end(); ++it)
+      sizeOutput += (*it)->getNonSmoothLawSize();
+  }
+}
+
+void OneStepNSProblem::updateBlocks()
+{
+  // The present functions checks various conditions and possibly compute blocks matrices.
+  //
+  // Let URi and URj be two Unitary Relations.
+  //
+  // Things to be checked are:
+  //  1 - is the topology time invariant?
+  //  2 - does blocks[URi][URj] already exists (ie has been computed in a previous time step)?
+  //  3 - do we need to compute this block? A block is to be computed if URi and URj are in IndexSet1 AND if URi and URj have common DynamicalSystems.
+  //
+  // The possible cases are:
+  //
+  //  - If 1 and 2 are true then it does nothing. 3 is not checked.
+  //  - If 1 == true, 2 == false, 3 == false, it does nothing.
+  //  - If 1 == true, 2 == false, 3 == true, it computes the block.
+  //  - If 1==false, 2 is not checked, and the block is computed if 3==true.
+  //
+  UnitaryRelationsSet indexSet;
+  bool isTimeInvariant, isBlockRequired;
+  UnitaryRelationIterator itUR1, itUR2;
+
+  // Get index set from Simulation
+
+  indexSet = simulation->getIndexSet(levelMin);
+  isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
+  for (itUR1 = indexSet.begin(); itUR1 != indexSet.end(); ++itUR1)
+  {
+    for (itUR2 = indexSet.begin(); itUR2 != indexSet.end(); ++itUR2)
+    {
+      isBlockRequired = !(intersection((*itUR1)->getDynamicalSystems(), (*itUR2)->getDynamicalSystems())).isEmpty();
+
+      if (!isTimeInvariant && isBlockRequired)
+        computeBlock(*itUR1, *itUR2);
+      else if (isTimeInvariant && isBlockRequired)
+      {
+        if ((blocks.find(*itUR1)) != blocks.end())  // if blocks[UR1] exists
+        {
+          if ((blocks[*itUR1].find(*itUR2)) == (blocks[*itUR1].end()))   // if blocks[UR1][UR2] does not exist
+            computeBlock(*itUR1, *itUR2);
+        }
+        else computeBlock(*itUR1, *itUR2);
+      }
+    }
+  }
+}
+
+void OneStepNSProblem::computeAllBlocks()
+{
+  UnitaryRelationsSet indexSet = simulation->getIndexSet(0);
+
+  UnitaryRelationIterator itUR1, itUR2;
+
+  bool isBlockRequired;
+
+  for (itUR1 = indexSet.begin(); itUR1 != indexSet.end(); ++itUR1)
+  {
+    for (itUR2 = indexSet.begin(); itUR2 != indexSet.end(); ++itUR2)
+    {
+      isBlockRequired = !(intersection((*itUR1)->getDynamicalSystems(), (*itUR2)->getDynamicalSystems())).isEmpty();
+
+      if (isBlockRequired)
+        computeBlock(*itUR1, *itUR2);
+    }
+  }
+}
+
+void OneStepNSProblem::computeBlock(UnitaryRelation*, UnitaryRelation*)
+{
+  RuntimeException::selfThrow("OneStepNSProblem::computeBlock - not yet implemented for problem type =" + nspbType);
 }
 
 void OneStepNSProblem::initialize()
 {
+  // Checks that the set of Interactions is not empty -
+  // Empty set is not forbidden, then we just display a warning message.
+  if (OSNSInteractions.isEmpty())
+    //RuntimeException::selfThrow("OneStepNSProblem::initialize - The set of Interactions of this problem is empty.");
+    cout << "Warning, OneStepNSProblem::initialize, the set of Interactions of this problem is empty." << endl;
+
   updateOutput();
   updateInput();
+
+  updateBlocks();
+  computeSizeOutput();
 }
 
-void OneStepNSProblem::computeEffectiveOutput()
-{
-
-  // 3 steps to update the effective output, this for each interaction:
-  //  - compute prediction for y ( -> yp), this for the r-1 first derivatives, r being
-  //    the relative degree
-  //  - compute indexMax using this prediction
-  //  - compute effectiveIndexes, a list of the indexes for which constraints will be applied
-  //
-  //
-
-  // get topology of the NonSmooth Dynamical System
-  Topology * topology = strategy->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
-  // get time step
-  double pasH = strategy->getTimeDiscretisationPtr()->getH();
-
-  unsigned int i ; // index of derivation
-  unsigned int j ; // relation number
-  unsigned int sizeOutput; // effective size of vector y for a specific interaction
-  unsigned int globalSizeOutput = 0; // effective size of global vector y (ie including all interactions) = sum sizeOutput over all interactions
-  unsigned int k;
-  // === loop over the interactions ===
-  InteractionsIterator it;
-  for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
-  {
-    // get the output vector (values for previous time step)
-    vector<SimpleVector *> yOld = (*it)->getYOld();
-
-    // get relative degrees vector of this interaction (one relative degree for each relation!)
-    vector<unsigned int> relativeDegree = topology->getRelativeDegrees(*it);
-    unsigned int numberOfRelations = relativeDegree.size(); // this size corresponds to the interaction size, ie the number of relations
-
-    // --- prediction vector ---
-
-    // we compute yp[i], i =0..r-2. r is equal to the maximum value of all the relative degrees.
-    // For the moment we consider that the interaction is homegeneous, ie all the relations have the same degree.
-    // if r<2, no prediction, all relations are effective.
-    unsigned int sizeYp;
-
-    if (relativeDegree[0] != 0)  sizeYp = relativeDegree[0] - 1;
-    else sizeYp = 0;
-
-    if (sizeYp > 0)
-    {
-      // --- prediction vector ---
-
-      vector<SimpleVector *> yp;
-      yp.resize(sizeYp, NULL);
-      // allocate and initialize yp with yOld.
-      for (i = 0; i < sizeYp ; i++)
-        yp[i] = new SimpleVector(*yOld[i]);
-      // \todo the way prediction is calculated should be defined by user elsewhere
-      *(yp[0]) = *(yOld[0]) +  0.5 * pasH * *(yOld[1]) ;
-
-      // --- indexMax ---
-
-      // loop from 0 to relative degree to find the first yp>0
-      vector<unsigned int> indexMax;
-      indexMax.resize(numberOfRelations, 0);
-
-      NonSmoothLaw * nslaw = (*it) ->getNonSmoothLawPtr();
-      string nslawType = nslaw -> getType();
-
-      // loop over various non smooth law types
-      if (nslawType == COMPLEMENTARITYCONDITIONNSLAW || nslawType == NEWTONIMPACTNSLAW)
-      {
-        for (j = 0; j < numberOfRelations; j++)
-        {
-          for (i = 0; i < sizeYp; i++)
-          {
-            if ((*(yp[i]))(j) <= 0)
-              indexMax[j]++;
-            else
-              break;
-          }
-        }
-      }
-      else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
-      {
-        if (nspbType == "FrictionContact2D")
-        {
-          for (j = 0; j < numberOfRelations / 2; j++)
-          {
-            for (i = 0; i < sizeYp; i++)
-            {
-              if ((*(yp[i]))(2 * j) <= 0)
-                indexMax[2 * j]++;
-              else
-                break;
-            }
-            indexMax[2 * j + 1] = indexMax[2 * j];
-          }
-        }
-        else if (nspbType == "FrictionContact3D")
-        {
-          for (j = 0; j < numberOfRelations; j = j + 3)
-          {
-            for (i = 0; i < sizeYp; i++)
-            {
-              if ((*(yp[i]))(j) <= 0)
-                indexMax[j]++;
-              else
-                break;
-            }
-            indexMax[j + 1] = indexMax[j];
-            indexMax[j + 2] = indexMax[j];
-          }
-        }
-        else
-          RuntimeException::selfThrow("OneStepNSProblem::computeEffectiveOutput unknown Non smooth problem type: " + nslawType);
-      }
-      else
-        RuntimeException::selfThrow("OneStepNSProblem::computeEffectiveOutput not yet implemented for non smooth law of type " + nslawType);
-
-      topology->setIndexMax(*it, indexMax);
-
-      for (i = 0; i < sizeYp ; i++)
-        delete yp[i];
-
-      // --- effective indexes ---
-
-      // compute sizeOutput for the current interaction
-      sizeOutput = topology->computeEffectiveSizeOutput(*it);
-
-      vector<unsigned int> effectiveIndexes, blockIndexes, indexMin;
-      indexMin = topology->getIndexMin(*it);
-
-      effectiveIndexes.resize(sizeOutput, 0);
-      blockIndexes.resize(sizeOutput, 0);
-
-      k = 0;
-
-      for (j = 0; j < numberOfRelations; j++)
-      {
-        for (i = indexMin[j]; i < indexMax[j] + 1; i++)
-        {
-          effectiveIndexes[k] = i + j * (relativeDegree[j]);
-          blockIndexes[k] = i - indexMin[j] + j * (relativeDegree[j] - indexMin[j]);
-          k++;
-        }
-      }
-      topology->setEffectiveIndexes(*it, effectiveIndexes);
-      blockIndexesMap[*it] = blockIndexes;
-
-    }
-    else
-    {
-      // compute sizeOutput for the current interaction
-      sizeOutput = topology->computeEffectiveSizeOutput(*it);
-    }
-    globalSizeOutput   += sizeOutput;
-
-
-  }// == end of interactions loop ==
-
-  topology->setEffectiveSizeOutput(globalSizeOutput);
-
-  // compute effective positions map
-  topology->computeInteractionEffectivePositionMap();
-}
 void OneStepNSProblem::nextStep()
 {
   InteractionsIterator it;
@@ -294,7 +279,7 @@ void OneStepNSProblem::nextStep()
 void OneStepNSProblem::updateInput()
 {
   InteractionsIterator it;
-  double currentTime = strategy->getModelPtr()->getCurrentT();
+  double currentTime = simulation->getModelPtr()->getCurrentT();
 
   for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
     (*it)->getRelationPtr() -> computeInput(currentTime);
@@ -303,21 +288,23 @@ void OneStepNSProblem::updateInput()
 void OneStepNSProblem::updateOutput()
 {
   InteractionsIterator it;
-  double currentTime = strategy->getModelPtr()->getCurrentT();
+  double currentTime = simulation->getModelPtr()->getCurrentT();
   for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
     (*it)->getRelationPtr()->computeOutput(currentTime);
 }
 
-void OneStepNSProblem::compute(const double& time)
+void OneStepNSProblem::compute(const double time)
 {
-  RuntimeException::selfThrow("OneStepNSProblem::compute - not yet implemented for problem type =" + getType());
+  RuntimeException::selfThrow("OneStepNSProblem::compute - not yet implemented for problem type =" + nspbType);
 }
 
 void OneStepNSProblem::saveNSProblemToXML()
 {
+  // OUT OF DATE - TO BE REVIEWED
+
   if (onestepnspbxml != NULL)
   {
-    onestepnspbxml->setDimNSProblem(dim);
+    onestepnspbxml->setDimNSProblem(sizeOutput);
     vector<int> v;
     InteractionsIterator it;
     for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); ++it)
@@ -329,64 +316,7 @@ void OneStepNSProblem::saveNSProblemToXML()
   else RuntimeException::selfThrow("OneStepNSProblem::saveNSProblemToXML - OneStepNSProblemXML object not exists");
 }
 
-bool OneStepNSProblem::isOneStepNsProblemComplete() const
-{
-  bool isComplete = true;
-
-  if (nspbType != "LCP" || nspbType != "FrictionContact2D" || nspbType != "FrictionContact3D" || nspbType != "QP" || nspbType != "Relay")
-  {
-    cout << "OneStepNSProblem is not complete: unknown problem type " << nspbType << endl;
-    isComplete = false;
-  }
-
-  if (dim == 0)
-  {
-    cout << "OneStepNSProblem warning: problem size == 0" << endl;
-    isComplete = false;
-  }
-
-  if (!(OSNSInteractions.size() > 0))
-  {
-    cout << "OneStepNSProblem warning: interaction vector is empty" << endl;
-    isComplete = false;
-  }
-  else
-  {
-    ConstInteractionsIterator it;
-    for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
-      if (*it == NULL)
-        cout << "OneStepNSProblem warning: an interaction points to NULL" << endl;
-  }
-
-  if (!(ecVector.size() > 0))
-  {
-    cout << "OneStepNSProblem warning: equality constraints vector is empty" << endl;
-    isComplete = false;
-  }
-  else
-  {
-    vector< EqualityConstraint* >::const_iterator it;
-    for (it = ecVector.begin(); it != ecVector.end(); it++)
-      if (*it == NULL)
-        cout << "OneStepNSProblem warning: an equalityConstraint of the problem points to NULL" << endl;
-  }
-
-  if (strategy == NULL)
-  {
-    cout << "OneStepNSProblem warning: no strategy linked with the problem" << endl;
-    isComplete = false;
-  }
-
-  if (solver == NULL)
-  {
-    cout << "OneStepNSProblem warning: no solver defined in the problem" << endl;
-    isComplete = false;
-  }
-
-  return isComplete;
-}
-
-void OneStepNSProblem::check_solver(const int& info) const
+void OneStepNSProblem::check_solver(const int info) const
 {
   string solverName = solver->getSolverAlgorithmName();
   // info = 0 => ok
@@ -394,7 +324,8 @@ void OneStepNSProblem::check_solver(const int& info) const
   // \todo: chose a standard output for solver parameter "info", that do not depend on the solver -> Numerics part
   if (info != 0)
   {
-    cout << "OneStepNS computeOutput warning: output message from solver is equal to " << info << " => may have failed?" << endl;
+    cout << "OneStepNS computeOutput warning: output message from solver is equal to " << info << endl;
+    cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
     RuntimeException::selfThrow(" Non smooth problem, solver convergence failed");
     /*      if(info == 1)
     cout <<" reach max iterations number with solver " << solverName << endl;
@@ -416,5 +347,30 @@ void OneStepNSProblem::check_solver(const int& info) const
     else
     RuntimeException::selfThrow("Unknown error type in solver "+ solverName);
     */
+  }
+}
+
+void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& W, MapOfDouble& Theta)
+{
+  // === Gets W matrices and scalar Theta of each DS concerned by the UnitaryRelation ===
+  // Warning: restricted to Moreau OSI
+
+  OneStepIntegrator * Osi;
+
+  // Get the set of DS for the current UnitaryRelation
+  DynamicalSystemsSet URDS = UR->getDynamicalSystems();
+  DSIterator itDS;
+
+  // For each DS, find the corresponding W through the OneStepIntegrator Interface
+  for (itDS = URDS.begin(); itDS != URDS.end(); itDS++)
+  {
+    Osi = simulation->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
+    if (Osi->getType() == "Moreau")
+    {
+      W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr(*itDS);  // get its W matrix ( pointer link!)
+      Theta[*itDS] = (static_cast<Moreau*>(Osi))->getTheta(*itDS);
+    }
+    else
+      RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
   }
 }

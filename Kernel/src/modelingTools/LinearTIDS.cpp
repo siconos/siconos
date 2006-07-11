@@ -58,7 +58,7 @@ LinearTIDS::LinearTIDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* new
 }
 
 // From a minimum set of data, A from a plugin
-LinearTIDS::LinearTIDS(const int& newNumber, const SiconosVector& newX0, const SiconosMatrix& newA):
+LinearTIDS::LinearTIDS(const int newNumber, const SiconosVector& newX0, const SiconosMatrix& newA):
   LinearDS(newNumber, newX0, newA)
 {
   DSType = LITIDS;
@@ -67,7 +67,7 @@ LinearTIDS::LinearTIDS(const int& newNumber, const SiconosVector& newX0, const S
 }
 
 // From a minimum set of data, A from a plugin
-LinearTIDS::LinearTIDS(const int& newNumber, const SiconosVector& newX0,
+LinearTIDS::LinearTIDS(const int newNumber, const SiconosVector& newX0,
                        const SiconosMatrix& newA, const SiconosVector& newB):
   LinearDS(newNumber, newX0, newA, newB)
 {
@@ -100,7 +100,7 @@ LinearTIDS::LinearTIDS(const DynamicalSystem & newDS):
 LinearTIDS::~LinearTIDS()
 {}
 
-// void LinearTIDS::initialize(const double& time, const unsigned int& sizeOfMemory)
+// void LinearTIDS::initialize(const double time, const unsigned int sizeOfMemory)
 // {
 //   // reset x to x0, xFree and r to zero.
 //   *x = *x0;
@@ -137,7 +137,7 @@ bool LinearTIDS::checkDynamicalSystem()
   return output;
 }
 
-void LinearTIDS::computeRhs(const double& time, const bool&)
+void LinearTIDS::computeRhs(const double time, const bool)
 {
   // compute right-hand side
   *rhs = *A * *x;
@@ -162,7 +162,7 @@ void LinearTIDS::computeRhs(const double& time, const bool&)
   }
 }
 
-void LinearTIDS::computeJacobianXRhs(const double& time, const bool&)
+void LinearTIDS::computeJacobianXRhs(const double time, const bool)
 {}
 
 void LinearTIDS::display() const

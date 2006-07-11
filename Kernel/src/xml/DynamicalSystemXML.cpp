@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "DynamicalSystemXML.h"
+#include "DynamicalSystem.h"
 
 // to be deleted thanks to factories:
 #include "NLinearBCXML.h"

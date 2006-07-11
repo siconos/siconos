@@ -117,7 +117,7 @@ public:
   }
 
   /** \fn void updateOneStepNSProblemXML( xmlNode* node, OneStepNSProblemXML* str )
-  *   \brief makes the operations to create a OneStepNSProblemXML to the StrategyXML
+  *   \brief makes the operations to create a OneStepNSProblemXML to the SimulationXML
   *   \param xmlNode* : the root node of the OneStepNSProblemXML
   *   \param OneStepNSProblem* : the OneStepNSProblem of this OneStepNSProblemXML
   */

@@ -20,7 +20,9 @@
 #define MOREAU_H
 
 #include "OneStepIntegrator.h"
-#include "MoreauXML.h"
+
+class Simulation;
+class MoreauXML;
 
 const unsigned int MOREAUSTEPSINMEMORY = 1;
 
@@ -35,56 +37,70 @@ const unsigned int MOREAUSTEPSINMEMORY = 1;
  */
 
 /** map of SiconosMatrix; key = the related DS*/
-typedef std::map<DynamicalSystem*, SiconosMatrix*> mapOfMatrices;
+typedef std::map<DynamicalSystem*, SiconosMatrix*> MapOfMatrices;
 
 /** map of SiconosMatrix; key = the related DS*/
-typedef std::map<DynamicalSystem*, bool> mapOfBool;
+typedef std::map<DynamicalSystem*, bool> MapOfBool;
 
 /** map of double; key = the related DS */
-typedef std::map<DynamicalSystem*, double> mapOfDouble;
+typedef std::map<DynamicalSystem*, double> MapOfDouble;
 
 /** iterator through a map of matrices */
-typedef mapOfMatrices::iterator matIterator;
+typedef MapOfMatrices::iterator matIterator;
 
 /** iterator through a map of double */
-typedef mapOfDouble::iterator doubleIterator;
-
+typedef MapOfDouble::iterator doubleIterator;
 
 class Moreau : public OneStepIntegrator
 {
 private:
 
   /** Stl map that associates a W Moreau matrix to each DynamicalSystem of the OSI */
-  mapOfMatrices WMap;
+  MapOfMatrices WMap;
 
   /** Stl map that associates a theta parameter for the integration scheme to each DynamicalSystem of the OSI */
-  mapOfDouble thetaMap;
+  MapOfDouble thetaMap;
 
   /** Stl map that associates a bool to each DynamicalSystem of the OSI - If true, then W has been allocated inside the class.*/
-  mapOfBool isWAllocatedInMap;
+  MapOfBool isWAllocatedInMap;
 
-  /** \fn Moreau(Strategy* = NULL)
+  /** \fn Moreau()
    *  \brief Default constructor
-   *  \param Strategy * : the strategy that owns the osi, default = NULL
-   */
-  Moreau(Strategy*);
+    */
+  Moreau();
 
 public:
 
-  /** \fn Moreau(OneStepIntegratorXML*,Strategy* = NULL);
+  /** \fn Moreau(OneStepIntegratorXML*,Simulation*);
    *  \brief constructor from xml file
    *  \param OneStepIntegratorXML* : the XML object corresponding
-   *  \param Strategy * : the strategy that owns the osi, default = NULL
+   *  \param Simulation * : the simulation that owns the osi
    */
-  Moreau(OneStepIntegratorXML*, Strategy* = NULL);
+  Moreau(OneStepIntegratorXML*, Simulation*);
 
-  /** \fn Moreau(DynamicalSystem* , const double&, Strategy* = NULL)
+  /** \fn Moreau(DynamicalSystem* , const double, Simulation*)
    *  \brief constructor from a minimum set of data: one DS and its theta
    *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
    *  \param Theta value
-   *  \param Strategy * : the strategy that owns the osi, default = NULL
+   *  \param Simulation * : the simulation that owns the osi
    */
-  Moreau(DynamicalSystem*, const double&, Strategy* = NULL);
+  Moreau(DynamicalSystem*, const double, Simulation*);
+
+  /** \fn Moreau(DynamicalSystemsSet& , const double, Simulation*)
+   *  \brief constructor from a minimum set of data
+   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
+   *  \param theta value for all these DS.
+   *  \param Simulation * : the simulation that owns the osi
+   */
+  Moreau(DynamicalSystemsSet&, const double, Simulation*);
+
+  /** \fn Moreau(DynamicalSystemsSet& , const MapOfDouble&, Simulation*)
+   *  \brief constructor from a minimum set of data
+   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
+   *  \param Map of theta values for the DS.
+   *  \param Simulation * : the simulation that owns the osi
+   */
+  Moreau(DynamicalSystemsSet&, const MapOfDouble&, Simulation*);
 
   /** \fn ~Moreau()
    *  \brief destructor
@@ -94,29 +110,29 @@ public:
   // --- GETTERS/SETTERS ---
   // -- W --
 
-  /** \fn mapOfMatrices getWMap()
+  /** \fn MapOfMatrices getWMap()
     *  \brief get W map
-    *  \return a mapOfMatrices
+    *  \return a MapOfMatrices
     */
-  inline mapOfMatrices getWMap() const
+  inline MapOfMatrices getWMap() const
   {
     return WMap;
   };
 
-  /** \fn mapOfMatrices getIsWAllocatedInMap()
+  /** \fn MapOfMatrices getIsWAllocatedInMap()
     *  \brief get isWAllocatedIn map
-    *  \return a mapOfBool
+    *  \return a MapOfBool
     */
-  inline mapOfBool getIsWAllocatedInMap() const
+  inline MapOfBool getIsWAllocatedInMap() const
   {
     return isWAllocatedInMap;
   };
 
-  /** \fn void setWMap(const mapOfMatrices& newMap)
+  /** \fn void setWMap(const MapOfMatrices& newMap)
    *  \brief set W map to newMap
-   *  \param a mapOfMatrices
+   *  \param a MapOfMatrices
    */
-  void setWMap(const mapOfMatrices&);
+  void setWMap(const MapOfMatrices&);
 
   /** \fn const SimpleMatrix getW(DynamicalSystem* ds = NULL) const
    *  \brief get the value of W corresponding to DynamicalSystem ds
@@ -148,20 +164,20 @@ public:
 
   // -- theta --
 
-  /** \fn mapOfDouble getThetaMap()
+  /** \fn MapOfDouble getThetaMap()
     *  \brief get theta map
-    *  \return a mapOfDouble
+    *  \return a MapOfDouble
     */
-  inline mapOfDouble getThetaMap() const
+  inline MapOfDouble getThetaMap() const
   {
     return thetaMap;
   };
 
-  /** \fn void setThetaMap(const mapOfDouble&)
+  /** \fn void setThetaMap(const MapOfDouble&)
    *  \brief set theta map
-   *  \param a mapOfDouble
+   *  \param a MapOfDouble
    */
-  void setThetaMap(const mapOfDouble&);
+  void setThetaMap(const MapOfDouble&);
 
   /** \fn const double getTheta(DynamicalSystem* ds)
    *  \brief get thetaMap[ds]
@@ -170,12 +186,12 @@ public:
    */
   const double getTheta(DynamicalSystem*);
 
-  /** \fn double setTheta(const double&, DynamicalSystem* ds)
+  /** \fn double setTheta(const double, DynamicalSystem* ds)
    *  \brief set the value of thetaMap[ds]
    *  \param a double
    *  \param a DynamicalSystem
    */
-  void setTheta(const double&, DynamicalSystem*);
+  void setTheta(const double, DynamicalSystem*);
 
   // --- OTHER FUNCTIONS ---
 
@@ -185,26 +201,26 @@ public:
    */
   void initialize();
 
-  /** \fn void computeW(const double& t, DynamicalSystem* ds)
+  /** \fn void computeW(const double t, DynamicalSystem* ds)
    *  \brief compute WMap[ds] Moreau matrix at time t
    *  \param the time (double)
    *  \param a pointer to DynamicalSystem
    */
-  void computeW(const double&, DynamicalSystem*);
+  void computeW(const double, DynamicalSystem*);
 
   /** \fn void computeFreeState()
    *  \brief integrates the Dynamical System linked to this integrator without boring the constraints
    */
   void computeFreeState();
 
-  /** \fn void integrate(const double&, const double&, double&, bool&)
+  /** \fn void integrate(const double, const double, double, bool)
    *  \brief integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param double: tinit, initial time
    *  \param double: tend, end time
    *  \param double: tout, real end time
    *  \param bool: true if tend is reached, else false.
    */
-  void integrate(const double&, const double&, double&, bool&);
+  void integrate(const double, const double, double, bool);
 
   /** \fn void updateState()
    *  \brief updates the state of the Dynamical System

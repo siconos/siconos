@@ -73,7 +73,7 @@
 #include "OneStepIntegratorXML.h"
 #include "MoreauXML.h"
 #include "LsodarXML.h"
-#include "StrategyXML.h"
+#include "SimulationXML.h"
 #include "DSInputOutputXML.h"
 #include "EqualityConstraintXML.h"
 #include "LagrangianDSIOXML.h"
@@ -111,13 +111,16 @@
 #include "LagrangianEC.h"
 #include "LagrangianLinearEC.h"
 #include "Interaction.h"
-#include "InteractionLink.h"
 #include "Relation.h"
 #include "LagrangianR.h"
 #include "LagrangianLinearR.h"
 #include "LinearTIR.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "Topology.h"
+#include "DynamicalSystemsSet.h"
+#include "UnitaryRelation.h"
+#include "UnitaryRelationsSet.h"
+#include "InteractionsSet.h"
 
 
 #include "TimeDiscretisation.h"
@@ -136,7 +139,7 @@
 #include "OneStepIntegrator.h"
 #include "Moreau.h"
 #include "Lsodar.h"
-#include "Strategy.h"
+#include "Simulation.h"
 #include "EventDriven.h"
 #include "TimeStepping.h"
 
@@ -214,7 +217,7 @@ $1 = string(PyString_AsString($input));
 // ---
 %include "NonSmoothDynamicalSystemXML.h"
 
-// Xml - strategy
+// Xml - simulation
 %include "TimeDiscretisationXML.h"
 %include "SolverXML.h"
 // ---
@@ -227,7 +230,7 @@ $1 = string(PyString_AsString($input));
 %include "MoreauXML.h"
 %include "LsodarXML.h"
 // ---
-%include "StrategyXML.h"
+%include "SimulationXML.h"
 
 // Xml - EC and DSIO
 %include "DSInputOutputXML.h"
@@ -264,7 +267,6 @@ $1 = string(PyString_AsString($input));
 %include "LinearBC.h"
 // ---
 %include "Interaction.h"
-%include "InteractionLink.h"
 // ---
 %include "DynamicalSystem.h"
 %include "LinearDS.h"
@@ -284,8 +286,11 @@ $1 = string(PyString_AsString($input));
 %include "LinearTIEC.h"
 // ---
 %include "Topology.h"
+%include "DynamicalSystemsSet.h"
 %include "NonSmoothDynamicalSystem.h"
-
+%include "UnitaryRelation.h"
+%include "UnitaryRelationsSet.h"
+%include "InteractionsSet.h"
 
 
 // --- simulationTools ---
@@ -308,7 +313,7 @@ $1 = string(PyString_AsString($input));
 %include "Moreau.h"
 %include "Lsodar.h"
 // ---
-%include "Strategy.h"
+%include "Simulation.h"
 %include "EventDriven.h"
 %include "TimeStepping.h"
 

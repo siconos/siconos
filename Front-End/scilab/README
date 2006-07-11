@@ -37,7 +37,7 @@ deep siconos tree acces like proposed with python interface.
 
 This interface consists in :
  
- siconos.cpp : a C++ module with global objects (Model and Strategy)
+ siconos.cpp : a C++ module with global objects (Model and Simulation)
  and "C" functions which uses it.
 
  siconos.sci : interface "C" functions of siconos.cpp in scilab
@@ -50,7 +50,7 @@ Scilab function implemented:
  sicTimeGetH()
  sicTimeGetK()
  sicTimeGetN()
- sicInitStrategy()
+ sicInitSimulation()
  sicSTNextStep()
  sicSTComputeFreeState()
  sicSTcomputePb()

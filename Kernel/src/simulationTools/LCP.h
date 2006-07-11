@@ -53,9 +53,6 @@ class LCP : public OneStepNSProblem
 {
 private:
 
-  /** Size of the LCP */
-  unsigned int nLcp;
-
   /** contains the vector w of a LCP system */
   SimpleVector *w;
 
@@ -74,55 +71,46 @@ private:
   bool isMAllocatedIn;
   bool isQAllocatedIn;
 
-public:
-
-  /** \fn LCP()
+  /** \fn LCP();
    *  \brief default constructor
    */
   LCP();
 
-  /** \fn LCP(OneStepNSProblemXML*, Strategy*=NULL)
+public:
+
+  /** \fn LCP(OneStepNSProblemXML*, Simulation*)
    *  \brief xml constructor
    *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Strategy *: the strategy that owns the problem (optional)
+   *  \param Simulation *: the simulation that owns the problem
    */
-  LCP(OneStepNSProblemXML*, Strategy* = NULL);
+  LCP(OneStepNSProblemXML*, Simulation*);
 
-  /** \fn LCP(Strategy * , const std::string& =DEFAULT_SOLVER, const unsigned int& =DEFAULT_ITER, const double& =DEFAULT_TOL,
-   *          const std::string & = DEFAULT_NORMTYPE, const double & =DEFAULT_SEARCHDIR);
+  /** \fn LCP(Simulation *, const std::string id, const std::string =DEFAULT_SOLVER, const unsigned int =DEFAULT_ITER, const double =DEFAULT_TOL,
+   *          const std::string  = DEFAULT_NORMTYPE, const double  =DEFAULT_SEARCHDIR);
    *  \brief constructor from data
-   *  \param Strategy *: the strategy that owns this problem
+   *  \param Simulation *: the simulation that owns this problem
+   *  \param string : id
    *  \param string: solver name (optional)
    *  \param unsigned int   : MaxIter (optional) required if a solver is given
    *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
    *  \param string : NormType (optional) -> never used at the time
    *  \param double : SearchDirection (optional) -> for Latin
    */
-  LCP(Strategy * , const std::string& = DEFAULT_SOLVER, const unsigned int& = DEFAULT_ITER, const double& = DEFAULT_TOL,
-      const std::string& = DEFAULT_NORMTYPE, const double& = DEFAULT_SEARCHDIR);
+  LCP(Simulation *, const std::string,  const std::string = DEFAULT_SOLVER, const unsigned int = DEFAULT_ITER, const double = DEFAULT_TOL,
+      const std::string = DEFAULT_NORMTYPE, const double = DEFAULT_SEARCHDIR);
 
-  // --- Destructror ---
+  /** \fn LCP(Solver*, Simulation*, string id = DEFAULT_OSNS_NAME)
+   *  \brief constructor from data
+   *  \param Solver* : pointer to object that contains solver algorithm and formulation
+   *  \param Simulation *: the simulation that owns this problem
+   *  \param String: id of the problem (default = DEFAULT_OSNS_NAME)
+   */
+  LCP(Solver*, Simulation*, const std::string = DEFAULT_OSNS_NAME);
+
+  /** \fn ~LCP()
+   * \brief destructor
+   */
   ~LCP();
-
-  // GETTERS/SETTERS
-
-  /** \fn int getNLcp(void)
-   *  \brief get the size nLcp of the LCP
-   *  \return an int
-   */
-  inline const unsigned int getNLcp() const
-  {
-    return nLcp;
-  }
-
-  /** \fn void setNLcp(const int&)
-   *  \brief set the size of the LCP
-   *  \param the size
-   */
-  inline void setNLcp(const unsigned int& newValue)
-  {
-    nLcp = newValue;
-  }
 
   // --- W ---
   /** \fn  const SimpleVector getW(void) const
@@ -252,49 +240,18 @@ public:
    */
   void setQPtr(SimpleVector*);
 
-  // --- Others functions ---
-
   /** \fn void initialize()
    *  \brief initialize the LCP problem(compute topology ...)
    */
   void initialize();
 
-  /** \fn void computeAllBlocks()
-   * \brief compute all the blocks matrices necessary to assemble Mlcp
+  /** \fn void computeExtraDiagonalBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
+   *  \brief computes extra diagonal block-matrix that corresponds to UR1 and UR2
+   *  Move this to Unitary Relation class?
+   *  \param a pointer to UnitaryRelation
+   *  \param a pointer to UnitaryRelation
    */
-  void computeAllBlocks();
-
-  /** \fn void computeDiagonalBlocksLinearTIR(Relation * R, const unsigned int& sizeInteraction, const DSSet& vDS,
-   * map<DynamicalSystem*, SiconosMatrix*> W, map<DynamicalSystem*, double> theta, const double& h, SiconosMatrix* currentMatrixBlock)
-   * \brief compute diagonal block-matrices for a LinearTIR
-   */
-  void computeDiagonalBlocksLinearTIR(Relation *, const unsigned int&, const DSSet&,
-                                      std::map<DynamicalSystem*, SiconosMatrix*>, std::map<DynamicalSystem*, double>, const double&, SiconosMatrix*);
-
-
-  void computeExtraDiagonalBlocksLinearTIR(Relation *, Relation*, const unsigned int&, const unsigned int&,
-      const DSSet&, std::map<DynamicalSystem*, SiconosMatrix*>, std::map<DynamicalSystem*, double>,
-      const double&, SiconosMatrix*);
-
-  void computeDiagonalBlocksLagrangianR(Relation *, const unsigned int&, const DSSet&, std::map < DynamicalSystem*,
-                                        SiconosMatrix* > , const double&, SiconosMatrix*);
-
-
-  void computeExtraDiagonalBlocksLagrangianR(Relation *, Relation*, const unsigned int&, const unsigned int&, const DSSet&,
-      std::map<DynamicalSystem*, SiconosMatrix*>, const double&, SiconosMatrix*);
-
-  /** \fn void updateBlocks();
-   *  \brief update blocks value for nonlinear relations
-   *  \return void
-   */
-  void updateBlocks();
-
-  /** \fn void preLCP(const double& time)
-   *  \brief pre-treatment for LCP
-   *  \param double : current time
-   *  \return void
-   */
-  void preLCP(const double& time);
+  void computeBlock(UnitaryRelation*, UnitaryRelation*);
 
   /** \fn void assembleM()
    *  \brief built matrix M using already computed blocks
@@ -305,21 +262,27 @@ public:
    *  \brief compute vector q
    *  \param double : current time
    */
-  void computeQ(const double& time);
+  void computeQ(const double time);
 
-  /** \fn void compute(const double& time)
+  /** \fn void preCompute(const double time)
+   *  \brief pre-treatment for LCP
+   *  \param double : current time
+   *  \return void
+   */
+  void preCompute(const double time);
+
+  /** \fn void compute(const double time)
    *  \brief Compute the unknown z and w and update the Interaction (y and lambda )
    *  \param double : current time
    *  \return void
    */
-  void compute(const double& time);
+  void compute(const double time);
 
-  /** \fn void postLCP(const SimpleVector& w, SimpleVector& z)
+  /** \fn void postCompute(SiconosVector*, SiconosVector*)
    *  \brief post-treatment for LCP
-   *  \param 2 simple vectors: output of LCP solver
-   *  \return void
+   *  \param 2 pointers to SiconosVector: output of LCP solver
    */
-  void postLCP(const SimpleVector&, const SimpleVector&);
+  void postCompute(SiconosVector*, SiconosVector*) ;
 
   /** \fn void display()
    *  \brief print the data to the screen
@@ -350,7 +313,6 @@ public:
    * \return a pointer on the problem if it is of the right type, NULL otherwise
    */
   static LCP* convert(OneStepNSProblem* osnsp);
-
 
 };
 

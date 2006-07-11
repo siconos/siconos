@@ -166,14 +166,14 @@ void SiconosMemoryTest::testGetSiconosVector()
 void SiconosMemoryTest::testSwap()
 {
   SiconosMemory * tmp1 = new SiconosMemory(2);
-  tmp1->swap(*(V1[0]));
+  tmp1->swap((V1[0]));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(0)) == *(V1[0]), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : nbVectorsInMemory OK", tmp1->getNbVectorsInMemory() == 1, true);
-  tmp1->swap(*(V1[1]));
+  tmp1->swap((V1[1]));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(0)) == *(V1[1]), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(1)) == *(V1[0]), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : nbVectorsInMemory OK", tmp1->getNbVectorsInMemory() == 2, true);
-  tmp1->swap(*(V1[0]));
+  tmp1->swap((V1[0]));
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(0)) == *(V1[0]), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : vector OK", *(tmp1->getSiconosVector(1)) == *(V1[1]), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testSwap : nbVectorsInMemory OK", tmp1->getNbVectorsInMemory() == 2, true);

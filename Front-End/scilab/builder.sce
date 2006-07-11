@@ -16,7 +16,7 @@ libs  = [] 				// other libs needed for linking
 // for fortran coded interface use 'C2F(name)'
 
 table =['sicLoadModel',	'sicLoadModelInterface';
-        'sicInitStrategy', 'sicInitStrategyInterface';
+        'sicInitSimulation', 'sicInitSimulationInterface';
 	'sicTimeGetH', 'sicTimeGetHInterface';
 	'sicTimeGetK','sicTimeGetKInterface';
 	'sicTimeGetN', 'sicTimeGetNInterface';
@@ -42,7 +42,7 @@ table =['sicLoadModel',	'sicLoadModelInterface';
 	'sicNewtonImpactLawNSL','sicNewtonImpactLawNSLInterface';
 	'sicNonSmoothDynamicalSystem','sicNonSmoothDynamicalSystemInterface';
 	'sicModel', 'sicModelInterface';
-	'sicStrategyTimeStepping','sicStrategyTimeSteppingInterface';
+	'sicSimulationTimeStepping','sicSimulationTimeSteppingInterface';
 	'sicOneStepIntegratorMoreau','sicOneStepIntegratorMoreauInterface';
 	'sicOneStepNSProblemLCP','sicOneStepNSProblemLCPInterface';
 	'sicClean','sicCleanInterface'];

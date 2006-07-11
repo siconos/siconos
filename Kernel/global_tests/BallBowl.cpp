@@ -40,8 +40,8 @@ bool BallBowl()
     cout << " ******** Start Ball in a Bowl *********" << endl << endl << endl;
     // --- Model loading from xml file ---
     Model bouncingBall("./BallBowl.xml");
-    // --- Get and initialize the strategy ---
-    Strategy* s = bouncingBall.getStrategyPtr();
+    // --- Get and initialize the simulation ---
+    Simulation* s = bouncingBall.getSimulationPtr();
     s->initialize();
     // --- Get the time discretisation scheme ---
     TimeDiscretisation* t = s->getTimeDiscretisationPtr();
@@ -67,11 +67,7 @@ bool BallBowl()
       // get current time step
       k = t->getK();
       // solve ...
-      s->computeFreeState();
-      s->computeOneStepNSProblem();
-
-      // update
-      s->update();
+      s->computeOneStep();
 
       // --- Get values to be plotted ---
       //time

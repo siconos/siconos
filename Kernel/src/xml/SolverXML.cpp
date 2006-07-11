@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "SolverXML.h"
+#include "Solver.h" // For DEFAULT_XXX constants
+
 using namespace std;
 
 SolverXML::SolverXML(xmlNodePtr solverNode):

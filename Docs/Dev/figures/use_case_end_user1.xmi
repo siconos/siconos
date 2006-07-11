@@ -14,7 +14,7 @@
     <UML:Actor isSpecification="false" isLeaf="false" visibility="public" xmi.id="8" isRoot="false" isAbstract="false" name="End user" />
     <UML:UseCase isSpecification="false" isLeaf="false" visibility="public" xmi.id="9" isRoot="false" isAbstract="false" name="Scilab interface" />
     <UML:UseCase isSpecification="false" isLeaf="false" visibility="public" xmi.id="10" isRoot="false" isAbstract="false" name="Matlab interface" />
-    <UML:UseCase isSpecification="false" isLeaf="false" visibility="public" xmi.id="11" isRoot="false" isAbstract="false" name="Choose strategy simulation" />
+    <UML:UseCase isSpecification="false" isLeaf="false" visibility="public" xmi.id="11" isRoot="false" isAbstract="false" name="Choose simulation simulation" />
     <UML:UseCase isSpecification="false" isLeaf="false" visibility="public" xmi.id="12" isRoot="false" isAbstract="false" name="Drive computation" />
     <UML:UseCase isSpecification="false" isLeaf="false" visibility="public" xmi.id="13" isRoot="false" isAbstract="false" name="Determine simulation model" />
     <UML:Association isSpecification="false" visibility="public" xmi.id="21" name="" >

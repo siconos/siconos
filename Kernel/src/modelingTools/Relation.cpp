@@ -15,11 +15,11 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "Relation.h"
 using namespace std;
 
-void Relation::initParameter(const string& id)
+void Relation::initParameter(const string id)
 {
   if (parametersList[id] == NULL)
   {
@@ -29,11 +29,11 @@ void Relation::initParameter(const string& id)
   }
 }
 
-// Default constructor with optional interaction parameter
-Relation::Relation(Interaction* inter):
-  relationType("Relation"), interaction(inter), relationxml(NULL), computeInputName("none"),
+// Default constructor
+Relation::Relation(const string newType):
+  relationType(newType), interaction(NULL), relationxml(NULL), computeInputName("none"),
   computeOutputName("none"), isOutputPlugged(false), isInputPlugged(false),
-  computeOutputPtr(NULL), computeInputPtr(NULL), number(0)
+  computeOutputPtr(NULL), computeInputPtr(NULL)
 {
 
   // Set plug-in default functions for h and g.
@@ -41,59 +41,52 @@ Relation::Relation(Interaction* inter):
   setComputeInputFunction("DefaultPlugin.so", "computeInput");
   isOutputPlugged = false;
   isInputPlugged = false;
-  if (inter != NULL)
-    inter->setRelationPtr(this);
 }
 
 // xml constructor
-Relation::Relation(RelationXML* relxml, Interaction* inter):
-  relationType("Relation"), interaction(inter), relationxml(relxml),
+Relation::Relation(RelationXML* relxml, const string newType):
+  relationType(newType), interaction(NULL), relationxml(relxml),
   computeInputName("none"), computeOutputName("none"),
   isOutputPlugged(true), isInputPlugged(true),
-  computeOutputPtr(NULL), computeInputPtr(NULL), number(0)
+  computeOutputPtr(NULL), computeInputPtr(NULL)
 {
-  if (relationxml != NULL)
+  if (relationxml == NULL)
+    RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
+
+  string plugin;
+  // computeInput
+  if (relationxml->hasComputeInput())
   {
-    string plugin;
-    // computeInput
-    if (relationxml->hasComputeInput())
-    {
-      plugin = (relationxml)->getComputeInputPlugin();
-      setComputeInputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
-    }
-    else
-    {
-      setComputeInputFunction("DefaultPlugin.so", "computeInput");
-      isInputPlugged = false; //
-    }
-
-    // computeOutput
-    if (relationxml->hasComputeOutput())
-    {
-      plugin = (relationxml)->getComputeOutputPlugin();
-      setComputeOutputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
-    }
-    else
-    {
-      setComputeOutputFunction("DefaultPlugin.so", "computeOutput");
-      isOutputPlugged = false; //
-    }
-
-    if (inter != NULL)
-      inter->setRelationPtr(this);
+    plugin = (relationxml)->getComputeInputPlugin();
+    setComputeInputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
   }
-  else RuntimeException::selfThrow("Relation::fillRelationWithRelationXML - object RelationXML does not exist");
+  else
+  {
+    setComputeInputFunction("DefaultPlugin.so", "computeInput");
+    isInputPlugged = false; //
+  }
+
+  // computeOutput
+  if (relationxml->hasComputeOutput())
+  {
+    plugin = (relationxml)->getComputeOutputPlugin();
+    setComputeOutputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
+  }
+  else
+  {
+    setComputeOutputFunction("DefaultPlugin.so", "computeOutput");
+    isOutputPlugged = false; //
+  }
 }
 
-// copy constructor (inter is optional)
-Relation::Relation(const Relation& newRel, Interaction* inter):
-  relationType(newRel.getType()), interaction(inter), relationxml(NULL),
+// copy constructor
+Relation::Relation(const Relation& newRel):
+  relationType(newRel.getType()), interaction(NULL), relationxml(NULL),
   computeInputName(newRel.getComputeInputName()), computeOutputName(newRel.getComputeOutputName()),
   isOutputPlugged(true), isInputPlugged(true),
-  computeOutputPtr(NULL), computeInputPtr(NULL), number(0)
+  computeOutputPtr(NULL), computeInputPtr(NULL)
 {
   // \warning:  interaction, relationxml and dsioVector are not copied !
-  // Interaction can be set with optional parameter inter (default=NULL)
   // \todo: manage dsio copy when this class will be well implemented
 
   setParameters(newRel.getParameters());   // Copy !!
@@ -118,6 +111,7 @@ Relation::~Relation()
     if (isAllocatedIn[alloc]) delete it->second;
   }
   parametersList.clear();
+  interaction = NULL;
 }
 
 vector<DSInputOutput*> Relation::getDSInputOutputs(void)
@@ -125,7 +119,17 @@ vector<DSInputOutput*> Relation::getDSInputOutputs(void)
   return dsioVector;
 }
 
-DSInputOutput* Relation::getDSInputOutput(const unsigned int& i)
+void Relation::initialize()
+{
+  // Check connection with an Interaction
+  if (interaction == NULL)
+    RuntimeException::selfThrow("Relation - initialize: no interaction linked with the present relation.");
+
+  if (interaction->getRelationPtr() != this)
+    RuntimeException::selfThrow("Relation - initialize: inconsistent pointers links between the present relation and its interaction.");
+}
+
+DSInputOutput* Relation::getDSInputOutput(const unsigned int i)
 {
   if (i >= dsioVector.size())
     RuntimeException::selfThrow("Relation - getDSInputOutput : \'i\' is out of range");
@@ -159,21 +163,21 @@ void Relation::setParameters(const std::map<string, SimpleVector*>& newMap)
   }
 }
 
-void Relation::setParameter(const SimpleVector& newValue, const string& id)
+void Relation::setParameter(const SimpleVector& newValue, const string id)
 {
   parametersList[id] = new SimpleVector(newValue);
   string alloc = "parameter_for_" + id;
   isAllocatedIn[alloc] = true;
 }
 
-void Relation::setParameterPtr(SimpleVector *newPtr, const string& id)
+void Relation::setParameterPtr(SimpleVector *newPtr, const string id)
 {
   parametersList[id] = newPtr;
   string alloc = "parameter_for_" + id;
   isAllocatedIn[alloc] = false;
 }
 
-void Relation::computeOutput(const double& time)
+void Relation::computeOutput(const double time)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("Relation - computeOutput: relation is not connected to any interaction");
@@ -181,7 +185,7 @@ void Relation::computeOutput(const double& time)
   if (computeOutputPtr == NULL)
     RuntimeException::selfThrow("computeOutput() is not linked to a plugin function");
 
-  DSSet vDS = interaction->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   BlockVector *xTmp = new BlockVector();
   BlockVector *uTmp = new BlockVector();
   DSIterator it;
@@ -199,16 +203,35 @@ void Relation::computeOutput(const double& time)
   unsigned int sizeU = uTmp->size();
   unsigned int sizeX = xTmp->size();
 
-  SimpleVector *y = interaction->getYPtr(0);
-  SimpleVector *lambda = interaction->getLambdaPtr(0);
+  SiconosVector *y = interaction->getYPtr(0);
+  SiconosVector *lambda = interaction->getLambdaPtr(0);
   unsigned int sizeY = y->size();
-  SimpleVector* param = parametersList["output"];
-  computeOutputPtr(sizeX, &(*xTmp)(0), &time, sizeY, &(*lambda)(0), sizeU,  &(*uTmp)(0), &(*y)(0), &(*param)(0));
+  SiconosVector* param = parametersList["output"];
+
+
+  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  SimpleVector * xTmp2 = new SimpleVector(*xTmp);
+  SimpleVector * uTmp2 = new SimpleVector(*uTmp);
+
+  SimpleVector * yTmp = new SimpleVector(*y);
+  SimpleVector * lambdaTmp = new SimpleVector(*lambda);
+
+  computeOutputPtr(sizeX, &(*xTmp2)(0), &time, sizeY, &(*lambdaTmp)(0), sizeU,  &(*uTmp2)(0), &(*yTmp)(0), &(*param)(0));
+
+
+  // Rebuilt lambda/y from Tmp
+  *lambda = *lambdaTmp;
+  *y = *yTmp;
+
+  delete xTmp2;
+  delete uTmp2;
+  delete lambdaTmp;
+  delete yTmp;
   delete xTmp;
   delete uTmp;
 }
 
-void Relation::computeFreeOutput(const double& time)
+void Relation::computeFreeOutput(const double time)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("Relation - computeFreeOutput: relation is not connected to any interaction");
@@ -216,7 +239,7 @@ void Relation::computeFreeOutput(const double& time)
   if (computeOutputPtr == NULL)
     RuntimeException::selfThrow("computeOutput() is not linked to a plugin function");
 
-  DSSet vDS = interaction->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   BlockVector *xTmp = new BlockVector();
   BlockVector *uTmp = new BlockVector();
   DSIterator it;
@@ -233,22 +256,42 @@ void Relation::computeFreeOutput(const double& time)
       uTmp->add(*((*it)->getUPtr())) ;
   }
 
-  SimpleVector *yFree = interaction->getYPtr(0);
+  SiconosVector *yFree = interaction->getYPtr(0);
   // warning : yFree is saved in y !!
   unsigned int sizeU = uTmp->size();
   unsigned int sizeX = xTmp->size();
 
-  SimpleVector *lambda = interaction->getLambdaPtr(0);
+  SiconosVector *lambda = interaction->getLambdaPtr(0);
   unsigned int sizeY = yFree->size();
-  SimpleVector* param = parametersList["output"];
+  SiconosVector* param = parametersList["output"];
   computeOutputPtr(sizeX, &(*xTmp)(0), &time, sizeY, &(*lambda)(0), sizeU,  &(*uTmp)(0), &(*yFree)(0), &(*param)(0));
+  delete xTmp;
+  delete uTmp;
+
+  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  SimpleVector * xTmp2 = new SimpleVector(*xTmp);
+  SimpleVector * uTmp2 = new SimpleVector(*uTmp);
+
+  SimpleVector * yFreeTmp = new SimpleVector(*yFree);
+  SimpleVector * lambdaTmp = new SimpleVector(*lambda);
+
+  computeOutputPtr(sizeX, &(*xTmp2)(0), &time, sizeY, &(*lambdaTmp)(0), sizeU,  &(*uTmp2)(0), &(*yFreeTmp)(0), &(*param)(0));
+
+  // Rebuilt lambda/y from Tmp
+  *lambda = *lambdaTmp;
+  *yFree = *yFreeTmp;
+
+  delete xTmp2;
+  delete uTmp2;
+  delete lambdaTmp;
+  delete yFreeTmp;
   delete xTmp;
   delete uTmp;
 
   // \todo update y, yDot ... depending on the relative degree.
 }
 
-void Relation::computeInput(const double& time)
+void Relation::computeInput(const double time)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("Relation - computeInput: relation is not connected to any interaction");
@@ -256,7 +299,7 @@ void Relation::computeInput(const double& time)
   if (computeInputPtr == NULL)
     RuntimeException::selfThrow("computeInput() is not linked to a plugin function");
 
-  DSSet vDS = interaction->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   DSIterator it;
   BlockVector *r = new BlockVector();
   for (it = vDS.begin(); it != vDS.end(); it++)
@@ -274,15 +317,26 @@ void Relation::computeInput(const double& time)
       r->addPtr(static_cast<SimpleVector*>((*it)->getRPtr()));
   }
 
-  SimpleVector *lambda = interaction->getLambdaPtr(0);
+
+  SiconosVector *lambda = interaction->getLambdaPtr(0);
   unsigned int sizeY = lambda->size();
 
-  SimpleVector* param = parametersList["input"];
-  computeInputPtr(sizeY, &(*lambda)(0), &time, &(*r)(0), &(*param)(0));
+  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  SimpleVector * rTmp = new SimpleVector(*r);
+  SimpleVector * lambdaTmp = new SimpleVector(*lambda);
+
+  SiconosVector* param = parametersList["input"];
+  computeInputPtr(sizeY, &(*lambdaTmp)(0), &time, &(*rTmp)(0), &(*param)(0));
+
+  // Rebuilt lambda from lambdaTmp
+  *lambda = *lambdaTmp;
+  delete rTmp;
+  delete lambdaTmp;
+
   delete r;
 }
 
-void Relation::setComputeOutputFunction(const string& pluginPath, const string& functionName)
+void Relation::setComputeOutputFunction(const string pluginPath, const string functionName)
 {
   cShared.setFunction(&computeOutputPtr, pluginPath, functionName);
 
@@ -293,7 +347,7 @@ void Relation::setComputeOutputFunction(const string& pluginPath, const string& 
   isOutputPlugged = true;
 }
 
-void Relation::setComputeInputFunction(const string& pluginPath, const string& functionName)
+void Relation::setComputeInputFunction(const string pluginPath, const string functionName)
 {
   cShared.setFunction(&computeInputPtr, pluginPath, functionName);
 

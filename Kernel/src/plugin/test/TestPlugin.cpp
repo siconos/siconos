@@ -21,7 +21,7 @@
 // ==== Dynamical System ====
 
 // vectorField
-extern "C" void computeF(const unsigned int& sizeOfX, const double *time, const double *x, double *fPtr, double* param)
+extern "C" void computeF(const unsigned int  sizeOfX, const double *time, const double *x, double *fPtr, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); time ; x (pointer to X vector);
    * output parameter : xdot (pointer to Xdot vector)
@@ -30,7 +30,7 @@ extern "C" void computeF(const unsigned int& sizeOfX, const double *time, const 
     fPtr[i] = *time * x[i];
 }
 
-extern "C" void computeJacobianXF(const unsigned int &sizeOfX, const double *time, const double *x, double *jacob, double* param)
+extern "C" void computeJacobianXF(const unsigned int  sizeOfX, const double *time, const double *x, double *jacob, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); time; x (pointer to x vector);
    * output parameter : jacob (pointer to JacobianX matrix)
@@ -40,7 +40,7 @@ extern "C" void computeJacobianXF(const unsigned int &sizeOfX, const double *tim
 }
 
 // function to compute u
-extern "C" void computeU(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* time, const double* xPtr, double* UPtr, double* param)
+extern "C" void computeU(const unsigned int  sizeOfU, const unsigned int  sizeOfX, const double* time, const double* xPtr, double* UPtr, double* param)
 {
   /* input parameter :
    *  sizeOfU (size of the vector u)
@@ -60,7 +60,7 @@ extern "C" void computeU(const unsigned int& sizeOfU, const unsigned int& sizeOf
 }
 
 // function to compute T
-extern "C" void computeT(const unsigned int& sizeOfU, const unsigned int& sizeOfX, const double* xPtr, double* TPtr, double* param)
+extern "C" void computeT(const unsigned int  sizeOfU, const unsigned int  sizeOfX, const double* xPtr, double* TPtr, double* param)
 {
   /* input parameter :
    *  sizeOfU (size of the vector u)
@@ -81,7 +81,7 @@ extern "C" void computeT(const unsigned int& sizeOfU, const unsigned int& sizeOf
 // Plugins for Fext, Fint, NNL (vectors), Mass, JacobianQNNL, JacobianVelocityNNL,
 // JacobianQFint and JacobianVelocityFint (matrices)
 
-extern "C" void computeMass(const unsigned int&sizeOfq, const double *q, double *mass, double* param)
+extern "C" void computeMass(const unsigned int sizeOfq, const double *q, double *mass, double* param)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     mass[i] = 0;
@@ -90,20 +90,20 @@ extern "C" void computeMass(const unsigned int&sizeOfq, const double *q, double 
   mass[8] = 3;
 }
 
-extern "C" void computeFInt(const unsigned int&sizeOfq, const double *time, const double *q, const double *velocity, double *fInt, double * param)
+extern "C" void computeFInt(const unsigned int sizeOfq, const double *time, const double *q, const double *velocity, double *fInt, double * param)
 {
   for (unsigned int i = 0; i < sizeOfq; ++i)
     fInt[i] = i * q[i];
 }
 
 
-extern "C" void computeFExt(const unsigned int&sizeOfq, const double *time, double *fExt, double *param)
+extern "C" void computeFExt(const unsigned int sizeOfq, const double *time, double *fExt, double *param)
 {
   for (unsigned int i = 0; i < sizeOfq; ++i)
     fExt[i] = i**time;
 }
 
-extern "C" void computeNNL(const unsigned int&sizeOfq, const double *q, const double *velocity, double *NNL, double *param)
+extern "C" void computeNNL(const unsigned int sizeOfq, const double *q, const double *velocity, double *NNL, double *param)
 {
   for (unsigned int i = 0; i < sizeOfq; ++i)
     NNL[i] = i * q[i];
@@ -111,25 +111,25 @@ extern "C" void computeNNL(const unsigned int&sizeOfq, const double *q, const do
 
 
 
-extern "C" void computeJacobianQFInt(const unsigned int&sizeOfq, const double *time, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void computeJacobianQFInt(const unsigned int sizeOfq, const double *time, const double *q, const double *velocity, double *jacob, double* param)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
-extern "C" void computeJacobianVelocityFInt(const unsigned int&sizeOfq, const double *time, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void computeJacobianVelocityFInt(const unsigned int sizeOfq, const double *time, const double *q, const double *velocity, double *jacob, double* param)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
-extern "C" void computeJacobianQNNL(const unsigned int&sizeOfq, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void computeJacobianQNNL(const unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* param)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
 }
 
-extern "C" void computeJacobianVelocityNNL(const unsigned int&sizeOfq, const double *q, const  double *velocity, double *jacob, double* param)
+extern "C" void computeJacobianVelocityNNL(const unsigned int sizeOfq, const double *q, const  double *velocity, double *jacob, double* param)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
@@ -140,13 +140,13 @@ extern "C" void computeJacobianVelocityNNL(const unsigned int&sizeOfq, const dou
 
 // Plugins for A, B (matrices), u and f. See LinearDS.h
 
-extern "C" void computeB(const unsigned int &sizeOfB, const double *time, double* b, double *param)
+extern "C" void computeB(const unsigned int  sizeOfB, const double *time, double* b, double *param)
 {
   for (unsigned int i = 0; i < sizeOfB; i++)
     b[i] = *time * i ;
 
 }
-extern "C" void computeA(const unsigned int &sizeOfX, const double *time, double *jacob, double* param)
+extern "C" void computeA(const unsigned int  sizeOfX, const double *time, double *jacob, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); time; x (pointer to x vector);
    * output parameter : jacob (pointer to JacobianX matrix)
@@ -160,8 +160,8 @@ extern "C" void computeA(const unsigned int &sizeOfX, const double *time, double
 
 // ===== RELATIONS ====
 
-extern "C" void y(const unsigned int& sizeOfX, const double* x, const double* time, const unsigned int& sizeOfY, const double* lambda,
-                  const unsigned int& sizeOfU, const double* u, double* y, double* param)
+extern "C" void y(const unsigned int  sizeOfX, const double* x, const double* time, const unsigned int  sizeOfY, const double* lambda,
+                  const unsigned int  sizeOfU, const double* u, double* y, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); x (pointer to x vector); time; lambda (pointer to lambda vector)
    * output parameter : y (pointer to vector y )
@@ -169,7 +169,7 @@ extern "C" void y(const unsigned int& sizeOfX, const double* x, const double* ti
   printf("Warning: call of the function 'computeOutput' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
 
-extern "C" void R(const unsigned int& sizeY, const double* lambda, const double* time, double* r, double* param)
+extern "C" void R(const unsigned int  sizeY, const double* lambda, const double* time, double* r, double* param)
 {
   /* input parameter : sizeOfX (size of the vector X); x (pointer to x vector); time; lambda (pointer to lambda vector)
    * output parameter : r (pointer to vector r )
@@ -179,46 +179,46 @@ extern "C" void R(const unsigned int& sizeY, const double* lambda, const double*
 
 // === Lagrangian Relations ===
 
-extern "C" void h0(const unsigned int& sizeDS, const double* q, const unsigned int& sizeY, double* y, double* param)
+extern "C" void h0(const unsigned int  sizeDS, const double* q, const unsigned int  sizeY, double* y, double* param)
 {
   printf("Call of the function 'h0' of the default plugin.\nYou have to implement this function.\n");
 }
 
-extern "C" void G0(const unsigned int& sizeDS, const double* q, const unsigned int& sizeY, double* G0, double* param)
+extern "C" void G0(const unsigned int  sizeDS, const double* q, const unsigned int  sizeY, double* G0, double* param)
 {
   printf("Call of the function 'G0' of the default plugin.\nYou have to implement this function.\n");
 }
 
-extern "C"  void h1(const unsigned int& sizeDS, const double* q, const double* time, const unsigned int& sizeY, double* y, double* param)
+extern "C"  void h1(const unsigned int  sizeDS, const double* q, const double* time, const unsigned int  sizeY, double* y, double* param)
 {
   printf("Call of the function 'h1' of the default plugin.\nYou have to implement this function.\n");
 }
 
 
-extern "C"    void G10(const unsigned int& sizeDS, const double* q, const double* time, const unsigned int& sizeY, double* G0, double* param)
+extern "C"    void G10(const unsigned int  sizeDS, const double* q, const double* time, const unsigned int  sizeY, double* G0, double* param)
 {
   printf("Call of the function 'G10' of the default plugin.\nYou have to implement this function.\n");
 }
 
 
-extern "C"    void G11(const unsigned int& sizeDS, const double* q, const double* time, const unsigned int& sizeY, double* G1, double* param)
+extern "C"    void G11(const unsigned int  sizeDS, const double* q, const double* time, const unsigned int  sizeY, double* G1, double* param)
 {
   printf("Call of the function 'G11' of the default plugin.\nYou have to implement this function.\n");
 }
 
-extern "C"  void h2(const unsigned int& sizeDS, const double* q, const double* lambda, const unsigned int& sizeY, double* y, double* param)
+extern "C"  void h2(const unsigned int  sizeDS, const double* q, const double* lambda, const unsigned int  sizeY, double* y, double* param)
 {
   printf("Call of the function 'h2' of the default plugin.\nYou have to implement this function.\n");
 }
 
 
-extern "C"    void G20(const unsigned int& sizeDS, const double* q, const double* lambda, const unsigned int& sizeY, double* y, double* param)
+extern "C"    void G20(const unsigned int  sizeDS, const double* q, const double* lambda, const unsigned int  sizeY, double* y, double* param)
 {
   printf("Call of the function 'G20' of the default plugin.\nYou have to implement this function.\n");
 }
 
 
-extern "C"    void G21(const unsigned int& sizeDS, const double* q, const double* lambda, const unsigned int& sizeY, double* y, double* param)
+extern "C"    void G21(const unsigned int  sizeDS, const double* q, const double* lambda, const unsigned int  sizeY, double* y, double* param)
 {
   printf("Call of the function 'G21' of the default plugin.\nYou have to implement this function.\n");
 }

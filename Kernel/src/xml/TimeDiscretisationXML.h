@@ -264,7 +264,7 @@ public:
   }
 
   /** \fn void updateTimeDiscretisationXML(xmlNode*, TimeDiscretisation*)
-   *   \brief makes the operations to create the TimeDiscretisation of the StrategyXML
+   *   \brief makes the operations to create the TimeDiscretisation of the SimulationXML
    *   \param xmlNode* : the root node for the TimeDiscretisationXML
    *   \param NSDS* : the TimeDiscretisation of this TimeDiscretisationXML
    */

@@ -43,6 +43,7 @@ void ModelTest::testBuildModel1()
   cout << "=============================" << endl;
   char * xmlFile = "ModelXml_test.xml" ;
 
+  cout << "--> Test: constructor xml (1)." << endl;
   Model * M = new Model(xmlFile);
   //check that xml link is not NULL
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1a : ", M->getSiconosModelXMLPtr()!=NULL, true);
@@ -54,14 +55,15 @@ void ModelTest::testBuildModel1()
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1g : ", M->getXmlSchema()=="/share/SICONOS/SiconosModelSchema-V1.2.xsd", true);
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1h : ", M->getDescription()=="none", true);
   //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1i : ", M->getNonSmoothDynamicalSystemPtr()!=NULL, true);
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1j : ", M->getStrategyPtr()!=NULL, true);
+  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildModel1j : ", M->getSimulationPtr()!=NULL, true);
   delete M;
-  cout << " Constructor Model 1 (xml) ok" << endl;
+  cout << "--> Constructor xml test ended with success." << endl;
 }
 
 // data constructor (1)
 void ModelTest::testBuildModel2()
 {
+  cout << "--> Test: constructor xml (2)." << endl;
   Model * M = new Model(t0, T, "tryMxml", "SiconosTeam", "none", "Today", "/share/SICONOS/SiconosModelSchema-V1.2.xsd");
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMode2a : ", M->getSiconosModelXMLPtr() == NULL, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMode2b : ", M->getT0() == 0, true);
@@ -72,22 +74,9 @@ void ModelTest::testBuildModel2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMode2g : ", M->getXmlSchema() == "/share/SICONOS/SiconosModelSchema-V1.2.xsd", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMode2h : ", M->getDescription() == "none", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMode2i : ", M->getNonSmoothDynamicalSystemPtr() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMode2j : ", M->getStrategyPtr() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildMode2j : ", M->getSimulationPtr() == NULL, true);
   delete M;
-  cout << " Constructor Model 2 ok" << endl;
-}
-
-// set Strategy
-
-void ModelTest::testSetStrategyPtr()
-{
-
-  Model * M = new Model(t0, T);
-  Strategy * newStrat = new TimeStepping(M);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("test SetStrategyPtr : ", M->getStrategyPtr() == newStrat, true);
-  delete M;
-  cout << " test setStrategyPtr ok" << endl;
+  cout << "--> Constructor xml (2) test ended with success." << endl;
 }
 
 // setNonSmoothDynamicalSystem
@@ -105,13 +94,14 @@ void ModelTest::testsetNonSmoothDynamicalSystemPtr()
 // setSiconosModelXML
 void ModelTest::testsetSiconosModelXMLPtr()
 {
+  cout << "--> Test: setSiconosModelXMLPtr." << endl;
   SiconosModelXML * newMxml = new SiconosModelXML();
   Model * M = new Model(t0, T);
   M->setSiconosModelXMLPtr(newMxml);
   CPPUNIT_ASSERT_EQUAL_MESSAGE(" test setSiconosModelXMLPtr: ", M->getSiconosModelXMLPtr() == newMxml, true);
   delete M;
   delete newMxml;
-  cout << " test setSiconosModelXMLPtr ok " << endl;
+  cout << "--> setSiconosModelXMLPtr test ended with success." << endl;
 }
 void ModelTest::End()
 {

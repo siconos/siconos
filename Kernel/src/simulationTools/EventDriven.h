@@ -20,19 +20,19 @@
 #define EVENTDRIVEN_H
 
 /** \class EventDriven
- *  \brief Strategy based on event driven method, ie events detection (see theoretical manual for more details).
+ *  \brief Simulation based on event driven method, ie events detection (see theoretical manual for more details).
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.2.0.
  *  \date (Creation) Apr 26, 2004
  *
  */
 
-#include "Strategy.h"
+#include "Simulation.h"
 #include "EventsManager.h"
 
 class EventsManager;
 
-class EventDriven : public Strategy
+class EventDriven : public Simulation
 {
 
 private:
@@ -43,22 +43,16 @@ public:
 
   /** \fn EventDriven(Model * = NULL)
    *  \brief defaut constructor
-   *  \param a pointer to the model that owns this strategy. NULL Model leads to exception
+   *  \param a pointer to the model that owns this simulation. NULL Model leads to exception
    */
   EventDriven(Model * = NULL);
 
-  /** \fn EventDriven(Model&)
-   *  \brief constructor from Model => avoid this function, prefer the one with Model*
-   *  \param a Model.
-   */
-  EventDriven(Model&);
-
-  /** \fn EventDriven(StrategyXML*, Model*)
+  /** \fn EventDriven(SimulationXML*, Model*)
    *  \brief constructor with XML object of the EventDriven
-   *  \param StrategyXML* : the XML object corresponding
-   *  \param Model* : the Model which contains the Strategy
+   *  \param SimulationXML* : the XML object corresponding
+   *  \param Model* : the Model which contains the Simulation
    */
-  EventDriven(StrategyXML*, Model*);
+  EventDriven(SimulationXML*, Model*);
 
   /** \fn ~EventDriven()
    *  \brief destructor
@@ -82,8 +76,37 @@ public:
    */
   void setEventsManagerPtr(EventsManager*);
 
+  /** \fn virtual void updateIndexSet(const unsigned int i) = 0;
+   *  \brief update indexSets[i] of the topology, using current y and lambda values of Interactions.
+   *  \param unsigned int: the number of the set to be updated
+   */
+  void updateIndexSet(const unsigned int);
+
+  /** \fn void updateIndexSetsWithDoubleCondition();
+   *   \brief update indexSets[1] and [2] (using current y and lambda values of Interactions) with conditions on y[2] AND lambda[2].
+   */
+  void updateIndexSetsWithDoubleCondition();
+
+  /** \fn void computeF(OneStepIntegrator* osi)
+   *  \brief compute right-hand side of xdot = f(x,t), for the integrator osi.
+   *  \param pointer to OneStepIntegrator.
+   */
+  void computeF(OneStepIntegrator*);
+
+  /** \fn void computeJacobian(OneStepIntegrator*)
+   *  \brief compute jacobian of the right-hand side
+   *  \param pointer to OneStepIntegrator.
+   */
+  void computeJacobianF(OneStepIntegrator*);
+
+  /** \fn void computeG(OneStepIntegrator* osi)
+   *  \brief compute constraint function g(x,t,...) for osi.
+   *  \param pointer to OneStepIntegrator.
+   */
+  void computeG(OneStepIntegrator*);
+
   /** \fn void initialize()
-   *  \brief initialisation of the strategy
+   *  \brief initialisation of the simulation
    */
   void initialize();
 
@@ -102,22 +125,12 @@ public:
    */
   void advanceToEvent();
 
-  /*   /\** \fn void solveLCPImpact() */
-  /*    *  \brief compute an LCP-impact (ie velocity level) -> compute y[1], lambda[1] */
-  /*    *\/ */
-  /*   void solveLCPImpact(); */
-
-  /*   /\** \fn void solveLCPAcceleration() */
-  /*    *  \brief compute an LCP-acceleration (ie acceleration level) -> compute y[2], lambda[2] */
-  /*    *\/ */
-  /*   void solveLCPAcceleration(); */
-
-  /** \fn EventDriven* convert (Strategy* str)
+  /** \fn EventDriven* convert (Simulation* str)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Strategy* : the Strategy which must be converted
-   * \return a pointer on the Strategy if it is of the right type, NULL otherwise
+   *  \param Simulation* : the Simulation which must be converted
+   * \return a pointer on the Simulation if it is of the right type, NULL otherwise
    */
-  static EventDriven* convert(Strategy* str);
+  static EventDriven* convert(Simulation* str);
 
 };
 

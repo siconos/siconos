@@ -48,6 +48,7 @@ class LinearTIR : public Relation
 private:
   /** Relation is given by: \f$ y= C x + D \lambda + Fu + e \f$*/
   /** and \f$ r = B\lambda\f$ */
+
   /** \var C */
   SiconosMatrix* C;
   /** \var D*/
@@ -74,21 +75,19 @@ private:
 
 public:
 
-  /** \fn LinearTIR(RelationXML*, Interaction* =NULL)
+  /** \fn LinearTIR(RelationXML*)
    *  \brief xml constructor
    *  \param LinearTIRXML* : the XML object corresponding
-   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    */
-  LinearTIR(RelationXML*, Interaction* = NULL);
+  LinearTIR(RelationXML*);
 
   /** \fn void LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB)
    *  \brief create the Relation from a set of data
    *  \param SiconosMatrix : the matrix C
    *  \param SiconosMatrix : the matrix B
-   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  \exception RuntimeException
       */
-  LinearTIR(const SiconosMatrix& , const SiconosMatrix&, Interaction* = NULL);
+  LinearTIR(const SiconosMatrix& , const SiconosMatrix&);
 
   /** \fn void LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
    *                     const SiconosMatrix& newF, const SimpleVector& newE,
@@ -99,25 +98,28 @@ public:
    *  \param SiconosMatrix : F
    *  \param SimpleVectorx : e
    *  \param SiconosMatrix : B
-   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  \exception RuntimeException
    */
   LinearTIR(const SiconosMatrix& , const SiconosMatrix& ,
             const SiconosMatrix& , const SimpleVector& ,
-            const SiconosMatrix& , Interaction* = NULL);
+            const SiconosMatrix&);
 
   /** \fn LinearTIR(const Relation&)
    *  \brief copy constructor
    *  \param a relation to copy
-   *  \param Interaction*: a pointer to the interaction that owns this relation (optional)
    *  warning: the interaction link is not copied, set a new one!
    */
-  LinearTIR(const Relation &, Interaction* = NULL);
+  LinearTIR(const Relation &);
 
   /** \fn ~LinearTIR()
    *  \brief destructor
    */
   ~LinearTIR();
+
+  /** \fn initialize()
+   *  \brief initialize the relation (check sizes, memory allocation ...)
+   */
+  void initialize();
 
   // GETTERS/SETTERS
 
@@ -287,11 +289,11 @@ public:
    */
   void getCBlockDSPtr(DynamicalSystem*, SiconosMatrix&) const;
 
-  /** \fn void getCBlockDSPtr(const int & n, SiconosMatrix&) const
+  /** \fn void getCBlockDSPtr(const int  n, SiconosMatrix&) const
    *  \brief get block of C corresponding to DS number n
    *  \param an int and a SiconosMatrix (in-out parameter)
    */
-  void getCBlockDSPtr(const int &, SiconosMatrix&) const;
+  void getCBlockDSPtr(const int , SiconosMatrix&) const;
 
   /** \fn void getBBlockDSPtr(DynamicalSystem* ds, SiconosMatrix&) const
    *  \brief get block of B corresponding to ds
@@ -299,32 +301,32 @@ public:
    */
   void getBBlockDSPtr(DynamicalSystem* , SiconosMatrix&) const;
 
-  /** \fn void getBBlockDSPtr(const int & n , SiconosMatrix&) const
+  /** \fn void getBBlockDSPtr(const int  n , SiconosMatrix&) const
    *  \brief get block of B corresponding to DS number n
    *  \param an int and a SiconosMatrix (in-out parameter)
    */
-  void getBBlockDSPtr(const int &, SiconosMatrix&) const;
+  void getBBlockDSPtr(const int , SiconosMatrix&) const;
 
   // --- OTHER FUNCTIONS ---
 
-  /** \fn void computeOutput(const double& time)
+  /** \fn void computeOutput(const double time)
    *  \brief computes y
    *  \param double : current time
    */
-  void computeOutput(const double&);
+  void computeOutput(const double);
 
-  /** \fn void computeFreeOutput(const double& time)
+  /** \fn void computeFreeOutput(const double time)
    *  \brief computes yFree AND save it into y
    *  \param double : current time
    */
-  void computeFreeOutput(const double& = 0);
+  void computeFreeOutput(const double = 0);
 
   /** \fn void computeInput(double time);
    *  \brief default function to compute lambda
    *  \param double : current time
    *  \exception RuntimeException
    */
-  void computeInput(const double&);
+  void computeInput(const double);
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the Relation to the XML tree

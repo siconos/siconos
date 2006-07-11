@@ -20,7 +20,6 @@
 #define EQUALITYCONSTRAINTXML_H
 
 #include "SiconosDOMTreeTools.h"
-#include "EqualityConstraint.h"
 
 const std::string EQUALITYCONSTRAINT_G = "G";
 const std::string EQUALITYCONSTRAINT_DSIO_CONCERNED = "DSInputOutput_Concerned";

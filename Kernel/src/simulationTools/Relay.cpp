@@ -20,17 +20,12 @@
 #include "Relay.h"
 using namespace std;
 
-Relay::Relay(): OneStepNSProblem()
-{
-  nspbType = "Relay";
-}
+Relay::Relay(): OneStepNSProblem("Relay")
+{}
 
-Relay::Relay(OneStepNSProblemXML* osnspbxml, Strategy * newStrat):
-  OneStepNSProblem(osnspbxml, newStrat)
-{
-  nspbType = "Relay";
-
-}
+Relay::Relay(OneStepNSProblemXML* osnspbxml, Simulation * newStrat):
+  OneStepNSProblem("Relay", osnspbxml, newStrat)
+{}
 
 Relay::~Relay()
 {}

@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "Moreau.h"
+#include "MoreauXML.h"
 // includes to be deleted thanks to factories:
 #include "LagrangianLinearTIDS.h"
 #include "LagrangianDS.h"
@@ -28,11 +29,13 @@ using namespace std;
 
 
 // --- Default constructor ---
-Moreau::Moreau(Strategy* newS): OneStepIntegrator("Moreau", newS)
-{}
+Moreau::Moreau(): OneStepIntegrator()
+{
+  integratorType = "Moreau";
+}
 
 // --- xml constructor ---
-Moreau::Moreau(OneStepIntegratorXML * osiXML, Strategy* newS):
+Moreau::Moreau(OneStepIntegratorXML * osiXML, Simulation* newS):
   OneStepIntegrator("Moreau", newS)
 {
   // Note: we do not call xml constructor of OSI, but default one, since we need to download theta and DS at the same time.
@@ -60,14 +63,14 @@ Moreau::Moreau(OneStepIntegratorXML * osiXML, Strategy* newS):
   else
     moreauXml->getTheta(thetaXml);
 
-  NonSmoothDynamicalSystem * nsds = strategyLink->getModelPtr()->getNonSmoothDynamicalSystemPtr();
+  NonSmoothDynamicalSystem * nsds = simulationLink->getModelPtr()->getNonSmoothDynamicalSystemPtr();
 
   if (osiXML->hasAllDS()) // if flag all=true is present -> get all ds from the nsds
   {
     // In nsds DS are saved in a vector.
     // Future version: saved them in a set? And then just call:
     // OSIDynamicalSystems = nsds->getDynamicalSystems();
-    DSSet tmpDS = nsds->getDynamicalSystems();
+    DynamicalSystemsSet tmpDS = nsds->getDynamicalSystems();
     DSIterator it;
     unsigned int i = 0;
     for (it = tmpDS.begin(); it != tmpDS.end(); ++it)
@@ -104,13 +107,32 @@ Moreau::Moreau(OneStepIntegratorXML * osiXML, Strategy* newS):
 }
 
 // --- constructor from a minimum set of data ---
-Moreau::Moreau(DynamicalSystem* newDS, const double& newTheta, Strategy* newS): OneStepIntegrator("Moreau", newS)
+Moreau::Moreau(DynamicalSystem* newDS, const double newTheta, Simulation* newS): OneStepIntegrator("Moreau", newS)
 {
-  if (strategyLink == NULL)
-    RuntimeException::selfThrow("Moreau:: constructor (ds,theta,strategy) - strategy == NULL");
+  if (simulationLink == NULL)
+    RuntimeException::selfThrow("Moreau:: constructor (ds,theta,simulation) - simulation == NULL");
 
   OSIDynamicalSystems.insert(newDS);
   thetaMap[newDS] = newTheta;
+}
+
+// --- constructor from a set of data ---
+Moreau::Moreau(DynamicalSystemsSet& newDS, const double newTheta, Simulation* newS): OneStepIntegrator("Moreau", newDS, newS)
+{
+  if (simulationLink == NULL)
+    RuntimeException::selfThrow("Moreau:: constructor (setOfDS,theta,simulation) - simulation == NULL");
+
+  DSIterator itDS;
+  for (itDS = OSIDynamicalSystems.begin(); itDS != OSIDynamicalSystems.end(); ++itDS)
+    thetaMap[*itDS] = newTheta;
+}
+
+Moreau::Moreau(DynamicalSystemsSet& newDS, const MapOfDouble& newTheta, Simulation* newS): OneStepIntegrator("Moreau", newDS, newS)
+{
+  if (simulationLink == NULL)
+    RuntimeException::selfThrow("Moreau:: constructor (setOfDS,theta,simulation) - simulation == NULL");
+
+  thetaMap = newTheta;
 }
 
 Moreau::~Moreau()
@@ -126,7 +148,7 @@ Moreau::~Moreau()
     if (*itDS != NULL && (*itDS)->getType() == LNLDS)(*itDS)->freeTmpWorkVector("LagNLDSMoreau");
 }
 
-void Moreau::setWMap(const mapOfMatrices& newMap)
+void Moreau::setWMap(const MapOfMatrices& newMap)
 {
   // check sizes.
   if (newMap.size() != OSIDynamicalSystems.size())
@@ -210,7 +232,7 @@ void Moreau::setWPtr(SiconosMatrix *newPtr, DynamicalSystem* ds)
   isWAllocatedInMap[ds] = false;
 }
 
-void Moreau::setThetaMap(const mapOfDouble& newMap) // useless function ?
+void Moreau::setThetaMap(const MapOfDouble& newMap) // useless function ?
 {
   thetaMap = newMap;
 }
@@ -222,7 +244,7 @@ const double Moreau::getTheta(DynamicalSystem* ds)
   return thetaMap[ds];
 }
 
-void Moreau::setTheta(const double& newTheta, DynamicalSystem* ds)
+void Moreau::setTheta(const double newTheta, DynamicalSystem* ds)
 {
   if (ds == NULL)
     RuntimeException::selfThrow("Moreau::setTheta(val,ds) - ds == NULL");
@@ -233,7 +255,7 @@ void Moreau::initialize()
 {
   OneStepIntegrator::initialize();
   // Get initial time
-  double t0 = strategyLink->getTimeDiscretisationPtr()->getT0();
+  double t0 = simulationLink->getTimeDiscretisationPtr()->getT0();
   // Compute W(t0) for all ds
   DSIterator it;
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
@@ -244,14 +266,14 @@ void Moreau::initialize()
   }
 }
 
-void Moreau::computeW(const double& t, DynamicalSystem* ds)
+void Moreau::computeW(const double t, DynamicalSystem* ds)
 {
 
   if (ds == NULL)
     RuntimeException::selfThrow("Moreau::computeW(t,ds) - ds == NULL");
 
 
-  double h = strategyLink->getTimeDiscretisationPtr()->getH(); // time step
+  double h = simulationLink->getTimeDiscretisationPtr()->getH(); // time step
 
   double theta = thetaMap[ds];
   // Check if W is allocated; if not, do allocation.
@@ -286,7 +308,15 @@ void Moreau::computeW(const double& t, DynamicalSystem* ds)
     SiconosMatrix *M = d->getMassPtr();
 
     // Compute W
-    *W = *M + h * theta * (*CFint + *CQNL  + h * theta * (*KFint + *KQNL));
+    *W = *M ;
+    if (CFint != NULL)
+      *W += h * theta**CFint;
+    if (CQNL != NULL)
+      *W += h * theta**CQNL;
+    if (KFint != NULL)
+      *W +=  h * h * theta * theta**KFint;
+    if (KQNL != NULL)
+      *W += h * h * theta * theta**KQNL;
   }
   // === Lagrangian linear time invariant system ===
   else if (ds->getType() == LTIDS)
@@ -336,8 +366,8 @@ void Moreau::computeW(const double& t, DynamicalSystem* ds)
 void Moreau::computeFreeState()
 {
   // get current time, theta and time step
-  double t = strategyLink->getModelPtr()->getCurrentT();
-  double h = strategyLink->getTimeDiscretisationPtr()->getH();
+  double t = simulationLink->getModelPtr()->getCurrentT();
+  double h = simulationLink->getTimeDiscretisationPtr()->getH();
   // Previous time step (i)
   double told = t - h;
   /*
@@ -369,13 +399,17 @@ void Moreau::computeFreeState()
       qold = static_cast<SimpleVector*>(d->getQMemoryPtr()->getSiconosVector(0));
       vold = static_cast<SimpleVector*>(d->getVelocityMemoryPtr()->getSiconosVector(0));
       // Computation of the external forces
-      d->computeFExt(told);
-      SimpleVector FExt0 = d->getFExt();
-      d->computeFExt(t);
-      SimpleVector FExt1 = d->getFExt();
+      SimpleVector * FExt0 = NULL, *FExt1 = NULL;
+      if (d->getFExtPtr() != NULL)
+      {
+        d->computeFExt(told);
+        FExt0 = new SimpleVector(*(d->getFExtPtr()));
+        d->computeFExt(t);
+        FExt1 = d->getFExtPtr();
+      }
+
       // RESfree ...
-      SimpleVector *v = d->getVelocityPtr();
-      SimpleVector *RESfree = new SimpleVector(FExt1.size());
+      SimpleVector *RESfree = new SimpleVector(d->getDim());
       // Velocity free
       SimpleVector *vfree = d->getVelocityFreePtr();
 
@@ -385,21 +419,44 @@ void Moreau::computeFreeState()
       {
         // Get Mass (remark: M is computed for present state during computeW(t) )
         SiconosMatrix *M = d -> getMassPtr();
+        SimpleVector *v = d->getVelocityPtr();
+
+        // === Compute ResFree and vfree solution of Wk(v-vfree)=RESfree ===
+        *RESfree = *M * (*v - *vold);
+
         // Compute Qint and Fint
-        // for state i
+        // for state i, save it in XXX0 and then for state i+1 and save it in XXX1.
         // warning: get values and not pointers
-        d->computeNNL(qold, vold);
-        d->computeFInt(told, qold, vold);
-        SimpleVector QNL0 = d->getNNL();
-        SimpleVector FInt0 = d->getFInt();
-        // for present state
-        // warning: get values and not pointers
-        d->computeNNL();
-        d->computeFInt(t);
-        SimpleVector QNL1 = d->getNNL();
-        SimpleVector FInt1 = d->getFInt();
-        // Compute ResFree and vfree solution of Wk(v-vfree)=RESfree
-        *RESfree = *M * (*v - *vold) + h * ((1.0 - theta) * (QNL0 + FInt0 - FExt0) + theta * (QNL1 + FInt1 - FExt1));
+
+        SimpleVector *QNL0 = NULL, *QNL1 = NULL, *FInt0 = NULL, *FInt1 = NULL;
+        if (d->getNNLPtr() != NULL)
+        {
+          d->computeNNL(qold, vold);
+          QNL0 = new SimpleVector(*(d->getNNLPtr()));
+          d->computeNNL();
+          QNL1 = d->getNNLPtr();
+
+          *RESfree += h * ((1.0 - theta)**QNL0 + theta**QNL1);
+          delete QNL0;
+          QNL1 = NULL;
+        }
+        if (d->getFIntPtr() != NULL)
+        {
+          d->computeFInt(told, qold, vold);
+          FInt0 = new SimpleVector(*(d->getFIntPtr()));
+          d->computeFInt(t);
+          FInt1 = d->getFIntPtr();
+
+          *RESfree += h * ((1.0 - theta)**FInt0 + theta**FInt1);
+          delete FInt0;
+          FInt1 = NULL;
+        }
+        if (FExt0 != NULL)
+        {
+          *RESfree -=  h * ((1.0 - theta)**FExt0 + theta**FExt1);
+          delete FExt0;
+          FExt1 = NULL;
+        }
         *vfree = *v - *W * *RESfree;
       }
       // --- For linear Lagrangian LTIDS:
@@ -409,7 +466,14 @@ void Moreau::computeFreeState()
         SiconosMatrix * K = static_cast<LagrangianLinearTIDS*>(d)->getKPtr();
         SiconosMatrix * C = static_cast<LagrangianLinearTIDS*>(d)->getCPtr();
         // Compute ResFree and vfree
-        *RESfree = -h * (theta * FExt1 + (1.0 - theta) * FExt0 - (*C * *vold) - (*K * *qold) - h * theta * (*K * *vold));
+        *RESfree = h * ((*C * *vold) + (*K * *qold) + h * theta * (*K * *vold));
+        if (FExt0 != NULL)
+        {
+          *RESfree -= h * (theta**FExt1 + (1.0 - theta)**FExt0);
+          delete FExt0;
+          FExt1 = NULL;
+        }
+
         *vfree =  *vold - *W * *RESfree;
       }
       // calculate qfree (whereas it is useless for future computation)
@@ -474,9 +538,9 @@ void Moreau::computeFreeState()
 }
 
 
-void Moreau::integrate(const double& tinit, const double& tend, double& tout, bool& iout)
+void Moreau::integrate(const double tinit, const double tend, double tout, bool iout)
 {
-  double h = tend - tinit; //strategy->getTimeDiscretisationPtr()->getH();
+  double h = tend - tinit; //simulation->getTimeDiscretisationPtr()->getH();
   // iout and tout not used. iout is set to true by default.
   iout = true;
   tout = tend;
@@ -539,7 +603,7 @@ void Moreau::integrate(const double& tinit, const double& tend, double& tout, bo
 
 void Moreau::updateState()
 {
-  double h = strategyLink->getTimeDiscretisationPtr()->getH();
+  double h = simulationLink->getTimeDiscretisationPtr()->getH();
 
   DSIterator it;
   SiconosMatrix * W;
@@ -577,7 +641,7 @@ void Moreau::updateState()
       // --- Update W for general Lagrangian system
       if (dsType == LNLDS)
       {
-        double t = strategyLink->getModelPtr()->getCurrentT();
+        double t = simulationLink->getModelPtr()->getCurrentT();
         computeW(t, ds);
       }
       // Remark: for Linear system, W is already saved in object member w

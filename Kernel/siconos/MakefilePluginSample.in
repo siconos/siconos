@@ -21,7 +21,7 @@ include $(SICONOSPATH)/share/siconos-kernel/KernelConfig.sh
 
 SAMPLE_SOURCES = $(OBJ)
 SAMPLE_OBJ  = $(patsubst %.cpp,%.o,  $(SAMPLE_SOURCES))
-SAMPLE_EXE  = $(patsubst %.cpp,%_EXE,  $(SAMPLE_SOURCES))
+SAMPLE_EXE  = $(patsubst %.cpp,%.out,  $(SAMPLE_SOURCES))
 C_SOURCES = $(wildcard *.c)
 C_OBJ  = $(patsubst %.c,%.o,  $(C_SOURCES))
 
@@ -49,5 +49,5 @@ plugin:$(PLUGIN_OBJ) $(PLUGIN_LIB)
 	$(CXX) $(CXX_DYNLIB) $(C_OBJ) $< -o $@
 
 clean:	
-	rm -f *_EXE *.o *.output *.so;
+	rm -f *.out *.o *.output *.so;
 

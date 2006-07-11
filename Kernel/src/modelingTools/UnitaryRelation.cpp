@@ -16,19 +16,26 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
+#include "DynamicalSystemsSet.h"
 #include "UnitaryRelation.h"
-#include "Interaction.h"
+#include "LinearTIR.h"
+#include "LagrangianR.h"
+#include "NewtonImpactNSL.h"
+#include "NewtonImpactFrictionNSL.h"
 
 using namespace std;
+
+/** container for SiconosVectors */
+typedef std::vector< BlockVector* > VectorOfBlocks;
 
 // --- CONSTRUCTORS ---
 
 // Default (private) constructor
-UnitaryRelation::UnitaryRelation(): mainInteraction(NULL), relativePosition(0)
+UnitaryRelation::UnitaryRelation(): mainInteraction(NULL), relativePosition(0), number(0)
 {}
 
 // Copy constructor
-UnitaryRelation::UnitaryRelation(const UnitaryRelation& newUR): mainInteraction(NULL), relativePosition(0)
+UnitaryRelation::UnitaryRelation(const UnitaryRelation& newUR): mainInteraction(NULL), relativePosition(0), number(0)
 {
   // Copy of Unitary relation is not allowed. Since they are identified/sorted in UnitaryRelationsSet thanks to their address (as pointers)
   // a copy could results in two differents objects that will correspond to the same relation.
@@ -36,7 +43,7 @@ UnitaryRelation::UnitaryRelation(const UnitaryRelation& newUR): mainInteraction(
 }
 
 // Data constructor
-UnitaryRelation::UnitaryRelation(Interaction* inter, const unsigned int& pos): mainInteraction(inter), relativePosition(pos)
+UnitaryRelation::UnitaryRelation(Interaction* inter, const unsigned int pos, const unsigned int num): mainInteraction(inter), relativePosition(pos), number(num)
 {}
 
 // --- DESTRUCTOR ---
@@ -45,17 +52,214 @@ UnitaryRelation::~UnitaryRelation()
   mainInteraction = NULL;
 }
 
-const double UnitaryRelation::getY(const unsigned int& i) const
+const VectorOfUnitaryVectors UnitaryRelation::getY() const
+{
+  // A new object of type VectorOfUnitaryVectors is created but it handles pointers to BlockVectors,
+  // thus there is no copy of the "basic" SimpleVectors.
+
+  VectorOfUnitaryVectors tmp;
+  VectorOfBlocks interactionBlocks = mainInteraction->getY();
+
+  for (unsigned int i = 0; i < interactionBlocks.size(); ++i)
+    tmp[i] = interactionBlocks[i]->getVectorPtr(number);
+
+  return tmp;
+}
+
+SiconosVector* UnitaryRelation::getYPtr(const unsigned int i) const
+{
+  // i is the derivative number.
+  return ((mainInteraction->getYPtr(i))->getVectorPtr(number));
+}
+
+SiconosVector* UnitaryRelation::getYOldPtr(const unsigned int i) const
+{
+  // i is the derivative number.
+  return ((mainInteraction->getYOldPtr(i))->getVectorPtr(number));
+}
+
+const VectorOfUnitaryVectors UnitaryRelation::getLambda() const
+{
+  // A new object of type VectorOfUnitaryVectors is created but it handles pointers to BlockVectors,
+  // thus there is no copy of the "basic" SimpleVectors.
+  VectorOfUnitaryVectors tmp;
+  VectorOfBlocks interactionBlocks = mainInteraction->getLambda();
+
+  for (unsigned int i = 0; i < interactionBlocks.size(); ++i)
+    tmp[i] = interactionBlocks[i]->getVectorPtr(number);
+
+  return tmp;
+}
+
+SiconosVector* UnitaryRelation::getLambdaPtr(const unsigned int i) const
+{
+  // i is the derivative number.
+  return ((mainInteraction->getLambdaPtr(i))->getVectorPtr(number));
+}
+
+const double UnitaryRelation::getYRef(const unsigned int i) const
 {
   // get the single value used to build indexSets
   // Warning: the relativePosition depends on NsLawSize and/or type.
   // This means that at the time, for the block of y that corresponds to the present relation, the first scalar value is used.
   // For example, for friction, normal part is in first position, followed by the tangential parts.
-  return (*(mainInteraction->getYPtr(i)))(relativePosition);
+  return (*getYPtr(i))(0);
 }
 
-const double UnitaryRelation::getLambda(const unsigned int& i) const
+const double UnitaryRelation::getLambdaRef(const unsigned int i) const
 {
   // get the single value used to build indexSets
-  return (*(mainInteraction->getLambdaPtr(1)))(relativePosition);
+  return (*getLambdaPtr(i))(0);
+}
+
+const unsigned int UnitaryRelation::getNonSmoothLawSize() const
+{
+  return mainInteraction->getNonSmoothLawPtr()->getNsLawSize();
+}
+
+const string UnitaryRelation::getNonSmoothLawType() const
+{
+  return mainInteraction->getNonSmoothLawPtr()->getType();
+}
+
+const string UnitaryRelation::getRelationType() const
+{
+  return mainInteraction->getRelationPtr()->getType();
+}
+
+DynamicalSystemsSet UnitaryRelation::getDynamicalSystems() const
+{
+  return mainInteraction->getDynamicalSystems();
+}
+
+void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Block, const unsigned index) const
+{
+  unsigned int k = 0;
+  DynamicalSystemsSet vDS = mainInteraction ->getDynamicalSystems();
+  DSIterator itDS;
+  itDS = vDS.begin();
+
+  // look for ds and its position in G
+  while (*itDS != ds && itDS != vDS.end())
+  {
+    k += (*itDS)->getDim();
+    itDS++;
+  }
+
+  // check dimension
+  if ((*itDS)->getDim() != Block->size(1))
+    RuntimeException::selfThrow("UnitaryRelation::getLeftBlockForDS(DS, Block, ...): inconsistent sizes between Block and DS");
+
+  // get block, according to relation type
+  unsigned int l = k + (*itDS)->getDim() - 1;
+  vector<unsigned int> index_list(4);
+  unsigned int nslawsize = getNonSmoothLawSize();
+  index_list[0] = relativePosition;
+  index_list[1] = relativePosition + (nslawsize - 1);
+  index_list[2] = k;
+  index_list[3] = l;
+
+  SiconosMatrix * originalMatrix; // Complete matrix, Relation member.
+  string relationType = getRelationType();
+  if (relationType == LINEARTIRELATION)
+    originalMatrix = (static_cast<LinearTIR*>(mainInteraction->getRelationPtr()))->getCPtr();
+
+  else if ((relationType == LAGRANGIANRELATION || relationType == LAGRANGIANLINEARRELATION))
+    originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
+
+  else RuntimeException::selfThrow("UnitaryRelation::getBlockForDS, not yet implemented for relation of type " + relationType);
+
+  originalMatrix->getBlock(index_list, *Block);
+
+}
+
+void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Block, const unsigned index) const
+{
+  unsigned int k = 0;
+  DynamicalSystemsSet vDS = mainInteraction ->getDynamicalSystems();
+  DSIterator itDS;
+  itDS = vDS.begin();
+
+  // look for ds and its position in G
+  while (*itDS != ds && itDS != vDS.end())
+  {
+    k += (*itDS)->getDim();
+    itDS++;
+  }
+
+  // check dimension
+  if ((*itDS)->getDim() != Block->size(0))
+    RuntimeException::selfThrow("UnitaryRelation::getRightBlockForDS(DS, Block, ...): inconsistent sizes between Block and DS");
+
+  // get block, according to relation type
+  unsigned int l = k + (*itDS)->getDim() - 1;
+  vector<unsigned int> index_list(4);
+  unsigned int nslawsize = getNonSmoothLawSize();
+  index_list[0] = k;
+  index_list[1] = l;
+  index_list[2] = relativePosition;
+  index_list[3] = relativePosition + (nslawsize - 1);
+
+  SiconosMatrix * originalMatrix; // Complete matrix, Relation member.
+  string relationType = getRelationType();
+  if (relationType == LINEARTIRELATION)
+    originalMatrix = (static_cast<LinearTIR*>(mainInteraction->getRelationPtr()))->getBPtr();
+
+  //else if( (relationType == LAGRANGIANRELATION || relationType == LAGRANGIANLINEARRELATION))
+  // originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
+  // For Lagrangian systems, right block = transpose (left block) so we do not need to use the present function.
+  else RuntimeException::selfThrow("UnitaryRelation::getBlockForDS, not yet implemented for relation of type " + relationType);
+
+  originalMatrix->getBlock(index_list, *Block);
+}
+
+void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
+{
+  // !!! Warning: we suppose that D is block diagonal, ie that there is no coupling between UnitaryRelation through D !!!
+  // Any coupling between relations through D must be taken into account thanks to the nslaw (by "increasing" its dimension).
+
+  if (getRelationType() != LINEARTIRELATION)
+    RuntimeException::selfThrow("UnitaryRelation::getDPtr(), not yet implemented for relation of type " + getRelationType());
+
+  SiconosMatrix * D = static_cast<LinearTIR*>(mainInteraction->getRelationPtr())->getDPtr();
+  vector<unsigned int> index_list(4);
+  unsigned int nslawsize = getNonSmoothLawSize();
+  index_list[0] = relativePosition;
+  index_list[1] = relativePosition + (nslawsize - 1);
+  index_list[2] = index_list[0];
+  index_list[3] = index_list[1];
+  D->getBlock(index_list, *Block);
+}
+
+void UnitaryRelation::computeFreeOutput(const double time, SiconosVector* yFree)
+{
+  mainInteraction->getRelationPtr()->computeFreeOutput(time);
+  // Get relation and non smooth law types
+  string relationType = getRelationType();
+  string nslawType = getNonSmoothLawType();
+
+  if (relationType == LINEARTIRELATION && nslawType == COMPLEMENTARITYCONDITIONNSLAW)
+    (*yFree) = *(getYPtr(0));
+  else if ((relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION))
+  {
+    double e;
+    *yFree = *(getYPtr(1));
+    if (nslawType == NEWTONIMPACTNSLAW)
+    {
+      e = (static_cast<NewtonImpactNSL*>(mainInteraction->getNonSmoothLawPtr()))->getE();
+      *yFree += e**(static_cast<SimpleVector*>(getYOldPtr(1)));
+    }
+    else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
+    {
+      e = (static_cast<NewtonImpactFrictionNSL*>(mainInteraction->getNonSmoothLawPtr()))->getEn();
+      // Only the normal part is multiplied by e
+      (*yFree)(0) +=  e * (*(static_cast<SimpleVector*>(getYOldPtr(1))))(0);
+    }
+    else
+      RuntimeException::selfThrow("UnitaryRelation::computeFreeOutput not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType);
+
+    *yFree = *(getYPtr(1)) + e**(static_cast<SimpleVector*>(getYOldPtr(1)));
+  }
+  else
+    RuntimeException::selfThrow("UnitaryRelation::computeFreeOutput not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType);
 }

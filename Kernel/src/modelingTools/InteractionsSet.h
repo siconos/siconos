@@ -42,8 +42,17 @@ class Interaction;
  *
  */
 
+// Structure used for Interactions sorting. The address is used to compare two Interactions.
+struct compareInter
+{
+  bool operator()(const Interaction* I1, const Interaction* I2) const
+  {
+    return (I1 < I2);
+  }
+};
+
 /** set of Interactions */
-typedef std::set<Interaction*, RuntimeCmp<Interaction> > InterSet;
+typedef std::set<Interaction*, compareInter > InterSet;
 
 /** iterator through a set of Interactions */
 typedef InterSet::iterator InteractionsIterator;
@@ -98,6 +107,15 @@ public:
     return setOfInteractions.size();
   };
 
+  /** \fn const bool isEmpty() const
+   *  \brief return true if the set is empty, else false
+   *  \return a bool
+   */
+  inline const bool isEmpty() const
+  {
+    return setOfInteractions.empty();
+  };
+
   /** \fn InteractionsIterator begin() const
    *  \brief return iterator on the first element of setOfInteractions
    *  \return a InteractionsIterator
@@ -125,11 +143,11 @@ public:
     return setOfInteractions;
   }
 
-  /** \fn Interaction* getInteraction(const int& num)
+  /** \fn Interaction* getInteraction(const int num)
    *  \brief get Dynamical System number num, if it is present in the set (else, exception)
    *  \return a pointer to Interaction
    */
-  Interaction* getInteraction(const int&) const;
+  Interaction* getInteraction(const int) const;
 
   /** \fn bool isInteractionIn(Interaction* ds)
    *  \brief return true if ds is in the set
@@ -138,12 +156,12 @@ public:
    */
   const bool isInteractionIn(Interaction*) const;
 
-  /** \fn bool isInteractionIn(const int& num)
+  /** \fn bool isInteractionIn(const int num)
    *  \brief return true if Interaction number num is in the set
    *  \param an int
    *  \return a bool
    */
-  const bool isInteractionIn(const int&) const;
+  const bool isInteractionIn(const int) const;
 
   /** \fn InteractionsIterator find(Interaction* ds)
    *  \brief same as find function of stl set
@@ -152,12 +170,12 @@ public:
    */
   InteractionsIterator find(Interaction*);
 
-  /** \fn InteractionsIterator find(const int& num)
+  /** \fn InteractionsIterator find(const int num)
    *  \brief same as find function of stl set
    *  \param an int
    *  \return a InteractionsIterator
    */
-  InteractionsIterator find(const int&);
+  InteractionsIterator find(const int);
 
   /** \fn CheckInsertInteraction insert(Interaction* ds)
    *  \brief insert Dynamical System ds into the set
@@ -165,15 +183,6 @@ public:
    *  \return a CheckInsertInteraction (boolean type information)
    */
   CheckInsertInteraction insert(Interaction*);
-
-  /** \fn inline const bool isEmpty() const
-   *  \brief true if the Interactions set is empty
-   *  \return a bool
-   */
-  inline const bool isEmpty() const
-  {
-    return setOfInteractions.empty();
-  };
 
   /** \fn void erase(Interaction* ds)
    *  \brief remove Dynamical System ds from the set
@@ -191,6 +200,15 @@ public:
    */
   void display() const;
 
+  /** \fn const InteractionsSet intersection(const InteractionsSet& s1, const InteractionsSet& s2) const
+   *  \brief return the intersection of s1 and s2 (-> set_intersection stl function)
+   */
+  friend const InteractionsSet intersection(const InteractionsSet& s1, const InteractionsSet& s2);
+
+  /** \fn const InteractionsSet operator-(const InteractionsSet& s1, const InteractionsSet& s2) const
+   *  \brief return the difference betwee s1 and s2 (-> set_difference stl function)
+   */
+  friend const InteractionsSet operator-(const InteractionsSet& s1, const InteractionsSet& s2);
 };
 
 #endif

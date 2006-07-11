@@ -20,7 +20,6 @@
 #define TOPOLOGY_H
 
 #include "NonSmoothDynamicalSystem.h"
-#include "InteractionLink.h"
 #include "Interaction.h"
 
 // const
@@ -34,10 +33,11 @@
 #include <set>
 
 class NonSmoothDynamicalSystem;
-class InteractionLink;
+class InteractionsSet;
 class Interaction;
 class SiconosMatrix;
 class UnitaryRelationsSet;
+class UnitaryRelation;
 
 /** \class Topology
  *  \brief this class provides maps to describe the topology of interactions of a NonSmoothDynamicalSystem
@@ -51,18 +51,12 @@ class UnitaryRelationsSet;
  *
  */
 
-/** vector that contains a sequel of sets of UnitaryRelations*/
-typedef std::vector< UnitaryRelationsSet > VectorOfSetOfUnitaryRelations;
+/** map that links each unitary relation with its relative degree */
+typedef std::map< UnitaryRelation*, unsigned int > UnitaryRelationsIntMap;
 
-/** Interaction -> Matrix map - Used for diagonal block-terms in LCP matrices or similar things */
-typedef std::map< Interaction*, SiconosMatrix* > InteractionMatrixMap ;
-
-/** Interaction ->( map Interaction->matrix) map */
-typedef std::map< Interaction* , InteractionMatrixMap >  InteractionMatrixMapOfMap  ;
-
-/** tolerance value used in indexSets updating */
-const double TOLERANCE = 1e-8;
-
+/** and the corresponding iterators */
+typedef UnitaryRelationsIntMap::iterator IteratorForRelativeDegrees;
+typedef UnitaryRelationsIntMap::const_iterator ConstIteratorForRelativeDegrees;
 class Topology
 {
 
@@ -73,32 +67,11 @@ private:
   /** the set of all the interactions of the system */
   InteractionsSet allInteractions;
 
-  /** index sets vector (indexSets[0] is the set where y[0]=0, indexSets[1] where y[0] = 0 and y[1]=0 and so on */
-  VectorOfSetOfUnitaryRelations indexSets;
+  /** index set I0, ie a set of all the Unitary Relations - This corresponds to indexSets[0] of the Simulation */
+  UnitaryRelationsSet indexSet0;
 
-  /** map that lists all the interactions and their linked interactions through common DS */
-  std::map< Interaction*, std::vector<InteractionLink*>  > linkedInteractionMap;
-
-  /** map that links interactions with their relative degrees */
-  std::map< Interaction*, std::vector<unsigned int> > relativeDegreesMap;
-
-  /** map that links interactions with the minimum index concerned by the nslaw in Y (the output derivatives vector of an interaction) */
-  std::map< Interaction*, std::vector<unsigned int> > indexMinMap;
-
-  /** map that links interactions with the maximum index concerned by the nslaw in Y (the output derivatives vector of an interaction)
-   * indexMax <= relativeDegree - This map depends on the OneStepNSProblem*/
-  std::map< Interaction*, std::vector<unsigned int> > indexMaxMap;
-
-  /** global size of the effective output
-   * effectiveSizeOutput = sum(indexMax - indexMin) over interactions */
-  unsigned int effectiveSizeOutput;
-
-  /** map that links each interaction with a list of indexes, giving the effective relations.
-      An "effective" relation or output is one which is constrained.  */
-  std::map< Interaction* , std::vector<unsigned int> > effectiveIndexesMap ;
-
-  /** map that links interactions with their position in effective output vector */
-  std::map< Interaction*, unsigned int> interactionEffectivePositionMap;
+  /** map that links UnitaryRelations with their relative degrees */
+  UnitaryRelationsIntMap relativeDegrees;
 
   /** check if topology has been updated since nsds modifications occur */
   bool isTopologyUpToDate;
@@ -109,48 +82,23 @@ private:
   /** the NonSmoothDynamicalSystem that owns this topology */
   NonSmoothDynamicalSystem * nsds;
 
-  // === PRIVATE DEFAULT CONSTRUCTOR ===
+  // === PRIVATE FUNCTIONS ===
+
+  /** \fn const bool addInteractionInIndexSet(Interaction* inter)
+   *  \brief schedules the relations of Interaction inter in IndexSet0 (ie creates UnitaryRelations)
+   * \param: a pointer to Interaction
+   */
+  const bool addInteractionInIndexSet(Interaction*);
+
+  /** \fn void computeRelativeDegrees()
+   *   \brief compute the  RelativeDegrees Map
+   */
+  void computeRelativeDegrees();
 
   /** \fn Topology()
    *  \brief default constructor
    */
   Topology();
-
-  // === OTHER PRIVATE FUNCTIONS ===
-
-  /** \fn const bool addInteractionInIndexSet(Interaction* inter)
-   *  \brief schedules the relations of Interaction inter in IndexSets[0] (ie creates UnitaryRelations)
-   * \param: a pointer to Interaction
-   */
-  const bool addInteractionInIndexSet(Interaction*);
-
-  /** \fn void computeLinkedInteractionMap()
-   *   \brief compute the linkedInteractionMap
-   * \param: a vector<Interaction*> (list of the interactions of the nsds)
-   */
-  void computeLinkedInteractionMap();
-
-  /** \fn void computeRelativeDegreesMap()
-   *   \brief compute the  RelativeDegreesMap
-   */
-  void computeRelativeDegreesMap();
-
-  /** \fn vector<unsigned int> computeRelativeDegrees(Interaction *)
-   *  \brief compute relative degrees vector of a specific interaction
-   *  \param a pointer to Interaction
-   */
-  std::vector<unsigned int> computeRelativeDegrees(Interaction*);
-
-  /** \fn void computeIndexMinMap()
-   *   \brief compute the  IndexMinMap
-   */
-  void computeIndexMinMap();
-
-  /** \fn vector<unsigned int> computeIndexMin(Interaction *)
-   *  \brief compute relative degrees vector of a specific interaction
-   *  \param a pointer to Interaction
-   */
-  std::vector<unsigned int> computeIndexMin(Interaction*);
 
 public:
 
@@ -162,7 +110,7 @@ public:
    */
   Topology(NonSmoothDynamicalSystem*) ;
 
-  /** \fn Topology(const Topology&)
+  /** \fn ~Topology()
    *  \brief destructor */
   ~Topology();
 
@@ -177,13 +125,6 @@ public:
     return allInteractions;
   }
 
-  /** \fn Interaction* getInteractionPtrNumber(const int& I)
-   *  \brief get Interaction number I
-   *  \param the id-number of the Interaction to get
-   *  \return a pointer on Interaction
-   */
-  Interaction* getInteractionPtrNumber(const int&) const ;
-
   /** \fn void setInteractions(const InteractionsSet&)
    *  \brief to set allInteractions
    *  \param an InteractionsSet
@@ -197,186 +138,55 @@ public:
    */
   const bool hasInteraction(Interaction*) const;
 
-  /** \fn const VectorOfSetOfUnitaryRelations getIndexSets() const
-   *  \brief get indexSets (the whole vector)
-   *  \return a VectorOfSetOfUnitaryRelations
-   */
-  inline const VectorOfSetOfUnitaryRelations getIndexSets() const
-  {
-    return indexSets;
-  };
-
-  /** \fn const UnitaryRelationsSet getIndexSet(const unsigned int& i) const
-   *  \brief get indexSets[i]
+  /** \fn  const UnitaryRelationsSet getIndexSet0()
+   *  \brief get the index set of all Unitary Relations
    *  \return a UnitaryRelationsSet
    */
-  inline const UnitaryRelationsSet getIndexSet(const unsigned int& i) const
+  inline const UnitaryRelationsSet getIndexSet0() const
   {
-    return indexSets[i];
-  };
-
-  // --- effectiveSizeOutput ---
-
-  /** \fn const int getEffectiveSizeOutput() const
-   *  \brief get the value of effectiveSizeOutput
-   *  \return an unsigned int
-   */
-  inline const unsigned int getEffectiveSizeOutput() const
-  {
-    return effectiveSizeOutput;
-  }
-
-  /** \fn void setEffectiveSizeOutput(const int&)
-   *  \brief set the value of effectiveSizeOutput
-   *  \param an unsigned int
-   */
-  inline void setEffectiveSizeOutput(const unsigned int& newVal)
-  {
-    effectiveSizeOutput = newVal;
-  }
-
-  // --- linkedInteractionMap ---
-
-  /** \fn  map< Interaction*, std::vector<InteractionLink*>> getLinkedInteractionMap(void)
-   *  \brief get the linkedInteractionMap of this topology
-   *  \return a map < Interaction*, std::vector<InteractionLink*>>
-   */
-  inline const std::map< Interaction*, std::vector<InteractionLink*> > getLinkedInteractionMap() const
-  {
-    return linkedInteractionMap;
+    return indexSet0;
   }
 
   // --- relativeDegreesMap ---
 
-  /** \fn  map< Interaction*, std::vector<unsigned int> > getRelativeDegreesMap(void)
-   *  \brief get the relativeDegreesMap of this topology
-   *  \return a map < Interaction*, std::vector<unsigned int> >
+  /** \fn  UnitaryRelationsIntMap getRelativeDegrees()
+   *  \brief get the relativeDegrees Map of this topology
+   *  \return a UnitaryRelationsIntMap
    */
-  inline const std::map< Interaction*, std::vector<unsigned int> > getRelativeDegreesMap() const
+  inline const UnitaryRelationsIntMap getRelativeDegrees() const
   {
-    return relativeDegreesMap;
+    return relativeDegrees;
   }
 
-  /** \fn  vector<unsigned int>  getRelativeDegrees(Interaction*)
-   *  \brief get the relativeDegrees vector of a specific interaction
-   *  \param a pointer on interaction
-   *  \return a vector<unsigned int>
-   */
-  inline const std::vector<unsigned int> getRelativeDegrees(Interaction * Inter)
-  {
-    return relativeDegreesMap[Inter];
-  }
-
-  // --- indexMinMap ---
-
-  /** \fn  map< Interaction*, std::vector<unsigned int> > getIndexMinMap(void)
-   *  \brief get the indexMinMap of this topology
-   *  \return a map < Interaction*, std::vector<unsigned int> >
-   */
-  inline const std::map< Interaction*, std::vector<unsigned int> > getIndexMinMap() const
-  {
-    return indexMinMap;
-  }
-
-  /** \fn  vector<unsigned int>  getIndexMin(Interaction*)
-   *  \brief get the indexMin vector of a specific interaction
-   *  \param a pointer on interaction
-   *  \return a vector<unsigned int>
-   */
-  inline const std::vector<unsigned int> getIndexMin(Interaction * Inter)
-  {
-    return indexMinMap[Inter];
-  }
-
-  // --- indexMaxMap ---
-
-  /** \fn  map< Interaction*, std::vector<unsigned int> > getIndexMaxMap(void)
-   *  \brief get the indexMaxMap of this topology
-   *  \return a map < Interaction*, std::vector<unsigned int> >
-   */
-  inline const std::map< Interaction*, std::vector<unsigned int> > getIndexMaxMap() const
-  {
-    return indexMaxMap;
-  }
-
-  /** \fn  vector<unsigned int>  getIndexMax(Interaction*)
-   *  \brief get the indexMax vector of a specific interaction
-   *  \param a pointer on interaction
-   *  \return a vector<unsigned int>
-   */
-  inline const std::vector<unsigned int> getIndexMax(Interaction * Inter)
-  {
-    return indexMaxMap[Inter];
-  }
-
-  /** \fn  void  setIndexMax(Interaction*,vector<unsigned int> )
-   *  \brief set the indexMax vector of a specific interaction
-   *  \param a pointer on interaction
-   *  \param a vector of int to set indexMax
-   */
-  inline void setIndexMax(Interaction * inter, const std::vector<unsigned int>&  index)
-  {
-    indexMaxMap[inter] = index;
-  }
-
-  // --- effectiveIndexesMap ---
-
-  /** \fn  map< Interaction*, std::vector<unsigned int> > getEffectiveIndexesMap(void)
-   *  \brief get the effectiveIndexesMap of this topology
-   *  \return a map < Interaction*, std::vector<unsigned int> >
-   */
-  inline const std::map< Interaction*, std::vector<unsigned int> > getEffectiveIndexesMap() const
-  {
-    return effectiveIndexesMap;
-  }
-
-  /** \fn  vector<unsigned int>  getEffectiveIndexes(Interaction*)
-   *  \brief get the effectiveIndexes vector of a specific interaction
-   *  \param a pointer on interaction
-   *  \return a vector<unsigned int>
-   */
-  inline const std::vector<unsigned int> getEffectiveIndexes(Interaction * Inter)
-  {
-    return effectiveIndexesMap[Inter];
-  }
-
-  /** \fn  void  setEffectiveIndexes(Interaction*,vector<unsigned int> )
-   *  \brief set the effectiveIndexes vector of a specific interaction
-   *  \param a pointer on interaction
-   *  \param a vector of int to set effectiveIndexes
-   */
-  inline void setEffectiveIndexes(Interaction * inter, const std::vector<unsigned int>&  index)
-  {
-    effectiveIndexesMap[inter] = index;
-  }
-
-  // --- interactionEffectivePositionMap ---
-
-  /** \fn  map<Interaction*, int> getOriginDSIndex(void)
-   *  \brief get the interactionEffectivePositionMap of this topology
-   *  \return a map <Interaction*, int>
-   */
-  inline const std::map< Interaction*, unsigned int> getInteractionEffectivePositionMap() const
-  {
-    return interactionEffectivePositionMap;
-  }
-
-  /** \fn  unsigned int getOriginDSIndex(void)
-   *  \brief get the interactionEffectivePosition of a specific interaction
+  /** \fn const unsigned int getRelativeDegree(UnitaryRelation*) const
+   *  \brief get the relativeDegree vector of a specific UnitaryRelation
+   *  \param a pointer to UnitaryRelation
    *  \return an unsigned int
    */
-  inline const unsigned int getInteractionEffectivePosition(Interaction * inter)
+  inline const unsigned int getRelativeDegree(UnitaryRelation* UR)
   {
-    return interactionEffectivePositionMap[inter];
+    return relativeDegrees[UR];
   }
+
+  /** \fn const unsigned int getMaxRelativeDegree() const
+   *  \brief for all relative degrees (one per Unitary Relation), find the maximum value.
+   *  \return an unsigned int
+   */
+  const unsigned int getMaxRelativeDegree();
+
+  /** \fn const unsigned int getMinRelativeDegree() const
+   *  \brief for all relative degrees (one per Unitary Relation), find the minimum value.
+   *  \return an unsigned int
+   */
+  const unsigned int getMinRelativeDegree();
 
   // --- isTopologyUpToDate ---
 
-  /** \fn void  setUpToDate(const bool & val)
+  /** \fn void  setUpToDate(const bool val)
    *  \brief set isTopologyUpToDate to val
    *  \param a bool
    */
-  inline void setUpToDate(const bool & val)
+  inline void setUpToDate(const bool val)
   {
     isTopologyUpToDate = val;
   }
@@ -392,11 +202,11 @@ public:
 
   // --- isTopologyTimeInvariant ---
 
-  /** \fn void  setTimeInvariant(const bool & val)
+  /** \fn void  setTimeInvariant(const bool val)
    *  \brief set isTopologyTimeInvariant to val
    *  \param a bool
    */
-  inline void setTimeInvariant(const bool & val)
+  inline void setTimeInvariant(const bool val)
   {
     isTopologyTimeInvariant = val;
   }
@@ -410,43 +220,10 @@ public:
     return isTopologyTimeInvariant;
   }
 
-  /** \fn void updateTopology();
-   *   \brief update topology: compute the linkedInteraction, position and relativeDegree maps and sizeOutput
+  /** \fn void initialize();
+   *   \brief initializes the topology
    */
-  void updateTopology();
-
-  /** \fn void computeEffectiveSizeOutput()
-   *   \brief compute effectiveSizeOutput, ie count the total number
-   * of relations constrained
-   */
-  void computeEffectiveSizeOutput();
-
-  /** \fn unsigned int computeEffectiveSizeOutput(Interaction *)
-   *   \brief compute effectiveSizeOutput for a specific interaction
-   * \return an unsigned int
-   */
-  unsigned int computeEffectiveSizeOutput(Interaction *);
-
-  /** \fn void computeInteractionEffectivePositionMap()
-   *   \brief compute the interactionEffectivePositionMap
-   * \param: a vector<Interaction*> (list of the interactions of the nsds)
-   */
-  void computeInteractionEffectivePositionMap();
-
-  /** \fn void updateIndexSets();
-   *   \brief update all index sets of the topology, using current y and lambda values of Interactions.
-   */
-  void updateIndexSets();
-
-  /** \fn void updateIndexSet(const unsigned int& i);
-   *   \brief update indexSets[i] of the topology, using current y and lambda values of Interactions.
-   */
-  void updateIndexSet(const unsigned int&);
-
-  /** \fn void updateIndexSetsWithDoubleCondition();
-   *   \brief update indexSets[1] and [2] (using current y and lambda values of Interactions) with conditions on y[2] AND lambda[2].
-   */
-  void updateIndexSetsWithDoubleCondition();
+  void initialize();
 
 };
 

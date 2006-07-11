@@ -116,7 +116,7 @@ DOMtree building. <br />
   </li>
   <li><span style="font-weight: bold;">KernelObjectNameXML</span>,
 KernelObject being any object of modeling or simulation component
-(examples: InteractionXML, StrategyXML ...) :&nbsp; all those XML
+(examples: InteractionXML, SimulationXML ...) :&nbsp; all those XML
 objects have access to the specific branch of the DOM
 tree
 (through xmlNode pointers) which
@@ -156,7 +156,7 @@ they are required or optional and so on.<br />
 To check each information, the schema regroups the defined attributes
 in several tags relating to
 Model, NSDS, DynamicalSystem, Interaction, Relation and NonSmoothLaw,
-Strategy, TimeDiscretisation,
+Simulation, TimeDiscretisation,
 OneStepIntegrator, OneStepNSProblem. <br />
 <br />
 <span style="font-weight: bold;">XML input data file:<br />
@@ -207,7 +207,7 @@ following steps<br />
   <li> check data validity, according to xml schema. <br />
   </li>
   <li> save data into the DOMtree and call constructors for
-SiconosModelXML members (StrategyXml and NonSmoothDynamicalSystemXML)
+SiconosModelXML members (SimulationXml and NonSmoothDynamicalSystemXML)
 and so on with children of these
 objects, till the lowest level is reached. <br />
   </li>
@@ -217,8 +217,8 @@ platform
 is&nbsp; built: constructors for all children objects of the Model are
 called, with
 their corresponding XML object as argument:&nbsp;
-NonSmoothDynamicalSystem( NonSmoothDynamicalSystemXML ),&nbsp; Strategy
-( StrategyXML) ... and so on with DynamicalSystem, Interaction etc. <span
+NonSmoothDynamicalSystem( NonSmoothDynamicalSystemXML ),&nbsp; Simulation
+( SimulationXML) ... and so on with DynamicalSystem, Interaction etc. <span
  style="font-weight: bold;"></span><br />
 <h3><a name="xmlModelLoading"></a>Model saving in XML
 file<br />

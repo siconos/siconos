@@ -11,7 +11,7 @@ extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int sicInitStrategy();
+int sicInitSimulation();
 
 extern
 #ifdef __cplusplus
@@ -177,7 +177,7 @@ extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
-int sicStrategyTimeStepping(double h);
+int sicSimulationTimeStepping(double h);
 
 extern
 #ifdef __cplusplus

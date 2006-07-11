@@ -29,7 +29,7 @@
 
 #include "OneStepIntegratorXML.h"
 
-class MoreauXML : public OneStepIntegratorXML
+class MoreauXML: public OneStepIntegratorXML
 {
 private:
 

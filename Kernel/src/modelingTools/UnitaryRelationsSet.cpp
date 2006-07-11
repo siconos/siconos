@@ -67,20 +67,6 @@ UnitaryRelationsSet& UnitaryRelationsSet::operator=(const UnitaryRelationsSet& n
   return *this;
 }
 
-UnitaryRelation* UnitaryRelationsSet::getUnitaryRelation(const int& num) const
-{
-  ConstUnitaryRelationIterator it;
-  //   for(it=setOfUnitaryRelations.begin();it!=setOfUnitaryRelations.end();++it)
-  //     {
-  //       if(  ((*it)->getNumber()) == num )
-  //  break;
-  //     }
-  //   if(it==setOfUnitaryRelations.end())
-  //     RuntimeException::selfThrow("UnitaryRelationsSet::getUnitaryRelation(num): can not find this Dynamical System in the set.");
-
-  return *it;
-}
-
 const bool UnitaryRelationsSet::isUnitaryRelationIn(UnitaryRelation* ur) const
 {
   UnitaryRelationIterator it = setOfUnitaryRelations.find(ur);
@@ -92,17 +78,6 @@ const bool UnitaryRelationsSet::isUnitaryRelationIn(UnitaryRelation* ur) const
 UnitaryRelationIterator UnitaryRelationsSet::find(UnitaryRelation* ur)
 {
   return setOfUnitaryRelations.find(ur);
-}
-
-UnitaryRelationIterator UnitaryRelationsSet::find(const int& num)
-{
-  UnitaryRelationIterator it;
-  //   for(it=setOfUnitaryRelations.begin();it!=setOfUnitaryRelations.end();++it)
-  //     {
-  //       if(  ((*it)->getNumber()) == num )
-  //  break;
-  //     }
-  return it; // == this.end() if not found.
 }
 
 CheckInsertUnitaryRelation UnitaryRelationsSet::insert(UnitaryRelation* ur)
@@ -137,33 +112,34 @@ void UnitaryRelationsSet::clear()
 
 void UnitaryRelationsSet::display() const
 {
-  cout << "====> UnitaryRelationsSet display - The following Dynamical Systems are present in the set ( id - number):" << endl;
-  //   UnitaryRelationIterator it;
-  //   for(it=setOfUnitaryRelations.begin();it!=setOfUnitaryRelations.end();++it)
-  //     cout << "("<<(*it)->getId() << "," <<(*it)->getNumber() << "), ";
-  //   cout << endl;
+  cout << "====> UnitaryRelationsSet display: " << endl;
+  cout << "There is(are) " << setOfUnitaryRelations.size() << " Unitary Relation(s) in the set (see the list below)." << endl;
+  UnitaryRelationIterator it;
+  for (it = setOfUnitaryRelations.begin(); it != setOfUnitaryRelations.end(); ++it)
+    cout << "- UR belongs to Interaction named " << (*it)->getInteractionPtr()->getId() << ", for the relation number: " << (*it)->getRelativePosition() << endl;
+  cout << endl;
   cout << "=============================================================================================" << endl;
 }
 
 const UnitaryRelationsSet intersection(const UnitaryRelationsSet& s1, const UnitaryRelationsSet& s2)
 {
   // output
-  UnitaryRelationsSet commonUnitaryRelation;
+  UnitaryRelationsSet commonUnitaryRelations;
 
   //  insert_iterator<UnitaryRelationSet> res_ins(commonUnitaryRelation.getSetOfUnitaryRelations(), commonUnitaryRelation.getSetOfUnitaryRelations().begin());
   set_intersection(s1.setOfUnitaryRelations.begin(), s1.setOfUnitaryRelations.end(), s2.setOfUnitaryRelations.begin(), s2.setOfUnitaryRelations.end(),
-                   inserter(commonUnitaryRelation.setOfUnitaryRelations, commonUnitaryRelation.setOfUnitaryRelations.begin()), compareUR());
+                   inserter(commonUnitaryRelations.setOfUnitaryRelations, commonUnitaryRelations.setOfUnitaryRelations.begin()), compareUR());
 
-  return commonUnitaryRelation;
+  return commonUnitaryRelations;
 }
 
 const UnitaryRelationsSet operator - (const UnitaryRelationsSet& s1, const UnitaryRelationsSet& s2)
 {
   // output
-  UnitaryRelationsSet commonUnitaryRelation;
+  UnitaryRelationsSet commonUnitaryRelations;
 
   set_difference(s1.setOfUnitaryRelations.begin(), s1.setOfUnitaryRelations.end(), s2.setOfUnitaryRelations.begin(), s2.setOfUnitaryRelations.end(),
-                 inserter(commonUnitaryRelation.setOfUnitaryRelations, commonUnitaryRelation.setOfUnitaryRelations.begin()), compareUR());
+                 inserter(commonUnitaryRelations.setOfUnitaryRelations, commonUnitaryRelations.setOfUnitaryRelations.begin()), compareUR());
 
-  return commonUnitaryRelation;
+  return commonUnitaryRelations;
 }

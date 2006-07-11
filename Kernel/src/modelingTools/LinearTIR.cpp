@@ -20,113 +20,97 @@
 using namespace std;
 
 
-// xml constructor
-LinearTIR::LinearTIR(RelationXML* relxml, Interaction * inter):
-  Relation(relxml, inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
+// Default (private) constructor
+LinearTIR::LinearTIR():
+  Relation(LINEARTIRELATION), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
 {
-  relationType = LINEARTIRELATION;
-  if (relationxml != NULL)
+  isAllocatedIn.resize(5, false);
+}
+
+// xml constructor
+LinearTIR::LinearTIR(RelationXML* relxml):
+  Relation(relxml, LINEARTIRELATION), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
+{
+
+  LinearTIRXML * lTIRxml = static_cast<LinearTIRXML *>(relationxml);
+  isAllocatedIn.resize(5, false);
+  unsigned int sizeY, sizeX; // size of vector y and of vector x
+
+  // === Output ===
+
+  // get matrices values.
+  // The only required variables are C and B, other are optional.
+  // If ouput plug-in is provided ...
+  if (!isOutputPlugged) // ie connected to default plug-in
   {
-    LinearTIRXML * lTIRxml = static_cast<LinearTIRXML *>(relationxml);
-    isAllocatedIn.resize(5, false);
-    unsigned int sizeY, sizeX, size; // size of vector y and of vector x
-
-    if (inter != NULL)
+    if (lTIRxml->hasC())
     {
-      // get size of vector y from linked interaction
-      size = interaction->getInteractionSize();
+      sizeY = lTIRxml->getC().size(0);
+      sizeX = lTIRxml->getC().size(1);
     }
-    // === Output ===
+    else
+      RuntimeException::selfThrow("LinearTIR:: xml constructor: input matrix C is missing in xml file ");
 
-    // get matrices values.
-    // The only required variables are C and B, other are optional.
-    // If ouput plug-in is provided ...
-    if (!isOutputPlugged) // ie connected to default plug-in
+    C = new SimpleMatrix(lTIRxml->getC());
+    isAllocatedIn[0] = true;
+
+    if (lTIRxml->hasD())
     {
-      if (lTIRxml->hasC())
-      {
-        sizeY = lTIRxml->getC().size(0);
-        sizeX = lTIRxml->getC().size(1);
-      }
-      else
-        RuntimeException::selfThrow("LinearTIR:: xml constructor: input matrix C is missing in xml file ");
-
-      if (inter != NULL && size != sizeY)
-        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between C and y vector");
-
-      C = new SimpleMatrix(lTIRxml->getC());
-      isAllocatedIn[0] = true;
-
-      if (lTIRxml->hasD())
-      {
-        if (lTIRxml->getD().size(0) != sizeY || lTIRxml->getD().size(0) != sizeY)
-          RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between D and C");
-        D = new SimpleMatrix(lTIRxml->getD());
-        isAllocatedIn[1] = true;
-      }
-      if (lTIRxml->hasF())
-      {
-        if (lTIRxml->getF().size(0) != sizeY)
-          RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between F and C");
-        F = new SimpleMatrix(lTIRxml->getF());
-        isAllocatedIn[2] = true;
-      }
-      if (lTIRxml->hasE())
-
-      {
-        if (lTIRxml->getE().size() != sizeY)
-          RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between e and C");
-        e = new SimpleVector(lTIRxml->getE());
-        isAllocatedIn[3] = true;
-      }
+      if (lTIRxml->getD().size(0) != sizeY || lTIRxml->getD().size(0) != sizeY)
+        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between D and C");
+      D = new SimpleMatrix(lTIRxml->getD());
+      isAllocatedIn[1] = true;
     }
-    else if (lTIRxml->hasC() || lTIRxml->hasD() || lTIRxml->hasF() || lTIRxml->hasE())
-      cout << "Warning: LinearTIR xml constructor, you give plug-in function and matrices values for output definition -> conflict. Plug-in will be used." << endl;
-
-    // === Input (lambda/R) ===
-
-    if (!isInputPlugged) // ie input connected to default plug-in
+    if (lTIRxml->hasF())
     {
-      if (lTIRxml->hasB())
-      {
-        unsigned int sizeB = lTIRxml->getB().size(1);
-        if (inter != NULL && size != sizeB)
-          RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between B and y vector");
-
-        if (lTIRxml->getB().size(0) != sizeX || (C != NULL && sizeB != C->size(0)))
-          RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between B and ds vector");
-        B = new SimpleMatrix(lTIRxml->getB());
-        isAllocatedIn[4] = true;
-      }
-      else
-        RuntimeException::selfThrow("LinearTIR:: xml constructor: input matrix B is missing in xml file ");
+      if (lTIRxml->getF().size(0) != sizeY)
+        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between F and C");
+      F = new SimpleMatrix(lTIRxml->getF());
+      isAllocatedIn[2] = true;
     }
-    else if (lTIRxml->hasB())
-      cout << "Warning: LinearTIR xml constructor, you give plug-in function and matrices values for input definition -> conflict. Plug-in will be used." << endl;
+    if (lTIRxml->hasE())
+
+    {
+      if (lTIRxml->getE().size() != sizeY)
+        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between e and C");
+      e = new SimpleVector(lTIRxml->getE());
+      isAllocatedIn[3] = true;
+    }
   }
-  else RuntimeException::selfThrow("LinearTIR::xml constructor, xml file=NULL");
+  else if (lTIRxml->hasC() || lTIRxml->hasD() || lTIRxml->hasF() || lTIRxml->hasE())
+    cout << "Warning: LinearTIR xml constructor, you give plug-in function and matrices values for output definition -> conflict. Plug-in will be used." << endl;
+
+  // === Input (lambda/R) ===
+
+  if (!isInputPlugged) // ie input connected to default plug-in
+  {
+    if (lTIRxml->hasB())
+    {
+      unsigned int sizeB = lTIRxml->getB().size(1);
+
+      if (lTIRxml->getB().size(0) != sizeX || (C != NULL && sizeB != C->size(0)))
+        RuntimeException::selfThrow("LinearTIR:: xml constructor, inconsistent size between B and ds vector");
+      B = new SimpleMatrix(lTIRxml->getB());
+      isAllocatedIn[4] = true;
+    }
+    else
+      RuntimeException::selfThrow("LinearTIR:: xml constructor: input matrix B is missing in xml file ");
+  }
+  else if (lTIRxml->hasB())
+    cout << "Warning: LinearTIR xml constructor, you give plug-in function and matrices values for input definition -> conflict. Plug-in will be used." << endl;
 }
 
 // Minimum data (C, B) constructor
-LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB, Interaction* inter):
-  Relation(inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
+LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB):
+  Relation(LINEARTIRELATION), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
 {
   isOutputPlugged = false;
   isInputPlugged  = false;
-  relationType = LINEARTIRELATION;
   unsigned int sizeY, sizeX;
   sizeY = newC.size(0);
   sizeX = newC.size(1);
   if (newB.size(0) != sizeX || newB.size(1) != sizeY)
     RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between C and B");
-
-  if (inter != NULL)
-  {
-    // get size of vector y
-    unsigned int size = interaction->getInteractionSize();
-    if (sizeY != size)
-      RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size with y vector for input vector or matrix");
-  }
 
   C = new SimpleMatrix(sizeY, sizeX);
   B = new SimpleMatrix(sizeX, sizeY);
@@ -140,23 +124,15 @@ LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB, Inter
 // Constructor from a complete set of data
 LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
                      const SiconosMatrix& newF, const SimpleVector& newE,
-                     const SiconosMatrix& newB, Interaction* inter):
-  Relation(inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
+                     const SiconosMatrix& newB):
+  Relation(LINEARTIRELATION), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
 {
-  relationType = LINEARTIRELATION;
   isOutputPlugged = false;
   isInputPlugged  = false;
   unsigned int sizeY, sizeX; // size of vector y and of vector x
 
   sizeY = newC.size(0);
   sizeX = newC.size(1);
-
-  if (inter != NULL)
-  {
-    unsigned int size = interaction->getInteractionSize();
-    if (size != sizeY)
-      RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between C and y vector");
-  }
 
   C = new SimpleMatrix(sizeY, sizeX);
   *C = newC;
@@ -185,9 +161,9 @@ LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
   isAllocatedIn.resize(5, true);
 }
 
-// Copy constructor (inter is optional)
-LinearTIR::LinearTIR(const Relation & newLTIR, Interaction* inter):
-  Relation(newLTIR, inter), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
+// Copy constructor
+LinearTIR::LinearTIR(const Relation & newLTIR):
+  Relation(newLTIR), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
 {
   if (relationType != LINEARTIRELATION)
     RuntimeException::selfThrow("LinearTIR:: copy constructor, inconsistent relation types for copy");
@@ -262,6 +238,30 @@ LinearTIR::~LinearTIR()
     delete B;
     B = NULL;
   }
+}
+
+void LinearTIR::initialize()
+{
+  Relation::initialize();
+
+  // We get the size of the interaction and of the DS vector
+  unsigned int sizeRef = interaction->getInteractionSize();
+  unsigned int sizeDS  = interaction->getSizeOfDS();
+  // Check matrices sizes consistency with the data of the interaction (size of y vector and of the dynamical systems owns by the interaction).
+  if (C->size(1) != sizeDS || C->size(0) != sizeRef)
+    RuntimeException::selfThrow("LinearTIR::initialize inconsistent sizes between C matrix and the interaction.");
+  if (B->size(0) != sizeDS || B->size(1) != sizeRef)
+    RuntimeException::selfThrow("LinearTIR::initialize inconsistent sizes between B matrix and the interaction.");
+  if (D != NULL)
+    if (D->size(0) != sizeRef || D->size(1) != sizeRef)
+      RuntimeException::selfThrow("LinearTIR::initialize inconsistent sizes between D matrix and the interaction.");
+  // No tests for F at the time since u management is not fully implemented in DS. Todo!
+  //  if(F!=NULL)
+  //    if(F->size(0)!=sizeRef || F->size(1)!=sizeRef)
+  //      RuntimeException::selfThrow("LinearTIR::initialize inconsistent sizes between F matrix and the interaction.");
+  if (e != NULL)
+    if (e->size(0) != sizeRef)
+      RuntimeException::selfThrow("LinearTIR::initialize inconsistent sizes between e vector and the dimension of the interaction.");
 }
 
 // setters
@@ -483,7 +483,7 @@ void LinearTIR::getCBlockDSPtr(DynamicalSystem * ds, SiconosMatrix& CBlock) cons
 {
   unsigned int k = 0;
 
-  DSSet vDS = interaction ->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction ->getDynamicalSystems();
   DSIterator itDS = vDS.begin();
 
   // look for ds
@@ -507,11 +507,11 @@ void LinearTIR::getCBlockDSPtr(DynamicalSystem * ds, SiconosMatrix& CBlock) cons
   C->getBlock(index_list, CBlock);
 }
 
-void LinearTIR::getCBlockDSPtr(const int& DSNumber, SiconosMatrix& CBlock) const
+void LinearTIR::getCBlockDSPtr(const int DSNumber, SiconosMatrix& CBlock) const
 {
   unsigned int k = 0;
 
-  DSSet vDS = interaction ->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction ->getDynamicalSystems();
   DSIterator itDS = vDS.begin();
 
   // look for DS number DSNumber ...
@@ -539,7 +539,7 @@ void LinearTIR::getBBlockDSPtr(DynamicalSystem* ds, SiconosMatrix& BBlock) const
 {
   unsigned int k = 0;
 
-  DSSet vDS = interaction ->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction ->getDynamicalSystems();
   DSIterator itDS = vDS.begin();
 
   while ((*itDS) != ds && itDS != vDS.end())
@@ -562,11 +562,11 @@ void LinearTIR::getBBlockDSPtr(DynamicalSystem* ds, SiconosMatrix& BBlock) const
   B->getBlock(index_list, BBlock);
 }
 
-void LinearTIR::getBBlockDSPtr(const int& DSNumber, SiconosMatrix& BBlock) const
+void LinearTIR::getBBlockDSPtr(const int DSNumber, SiconosMatrix& BBlock) const
 {
   unsigned int k = 0;
 
-  DSSet vDS = interaction ->getDynamicalSystems();
+  DynamicalSystemsSet vDS = interaction ->getDynamicalSystems();
   DSIterator itDS = vDS.begin();
 
   while ((*itDS)->getNumber() != DSNumber && itDS != vDS.end())
@@ -589,11 +589,11 @@ void LinearTIR::getBBlockDSPtr(const int& DSNumber, SiconosMatrix& BBlock) const
   B->getBlock(index_list, BBlock);
 }
 
-void LinearTIR::computeOutput(const double& time)
+void LinearTIR::computeOutput(const double time)
 {
   if (!isOutputPlugged)
   {
-    DSSet vDS = interaction->getDynamicalSystems();
+    DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
     BlockVector *xTmp = new BlockVector();
     BlockVector *uTmp = new BlockVector();
     DSIterator it;
@@ -609,8 +609,8 @@ void LinearTIR::computeOutput(const double& time)
         uTmp->add(*((*it)->getUPtr())) ;
     }
 
-    SimpleVector *y = interaction->getYPtr(0);
-    SimpleVector *lambda = interaction->getLambdaPtr(0);
+    SiconosVector *y = interaction->getYPtr(0);
+    SiconosVector *lambda = interaction->getLambdaPtr(0);
 
     // compute y
     *y = *C * *xTmp;
@@ -633,11 +633,11 @@ void LinearTIR::computeOutput(const double& time)
   else
     Relation::computeOutput(time);
 }
-void LinearTIR::computeFreeOutput(const double& time)
+void LinearTIR::computeFreeOutput(const double time)
 {
   if (!isOutputPlugged)
   {
-    DSSet vDS = interaction->getDynamicalSystems();
+    DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
     BlockVector *xTmp = new BlockVector();
     BlockVector *uTmp = new BlockVector();
     DSIterator it;
@@ -654,7 +654,7 @@ void LinearTIR::computeFreeOutput(const double& time)
         uTmp->add(*((*it)->getUPtr())) ;
     }
 
-    SimpleVector *yFree = interaction->getYPtr(0);
+    SiconosVector *yFree = interaction->getYPtr(0);
     // warning : yFree is saved in y !!
 
     // compute yFree
@@ -676,11 +676,11 @@ void LinearTIR::computeFreeOutput(const double& time)
     Relation::computeFreeOutput(time);
 }
 
-void LinearTIR::computeInput(const double& time)
+void LinearTIR::computeInput(const double time)
 {
   if (!isOutputPlugged)
   {
-    DSSet vDS = interaction->getDynamicalSystems();
+    DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
     DSIterator it;
     BlockVector *r = new BlockVector();
     for (it = vDS.begin(); it != vDS.end(); it++)
@@ -698,7 +698,7 @@ void LinearTIR::computeInput(const double& time)
         r->addPtr(static_cast<SimpleVector*>((*it)->getRPtr()));
     }
 
-    SimpleVector *lambda = interaction->getLambdaPtr(0);
+    SiconosVector *lambda = interaction->getLambdaPtr(0);
 
     *r += *B * *lambda;
     delete r;
@@ -745,13 +745,5 @@ LinearTIR* LinearTIR::convert(Relation *r)
 {
   LinearTIR* ltir = dynamic_cast<LinearTIR*>(r);
   return ltir;
-}
-
-// Default (private) constructor
-LinearTIR::LinearTIR():
-  Relation(), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL)
-{
-  relationType = LINEARTIRELATION;
-  isAllocatedIn.resize(5, false);
 }
 

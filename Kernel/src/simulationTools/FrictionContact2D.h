@@ -36,50 +36,55 @@
 class FrictionContact2D : public FrictionContact
 {
 
-public:
+private:
 
-  /** \fn FrictionContact2D()
+  /** \fn FrictionContact2D();
    *  \brief default constructor
    */
   FrictionContact2D();
 
-  /** \fn FrictionContact2D(OneStepNSProblemXML*, Strategy*=NULL)
+public:
+
+  /** \fn FrictionContact2D(OneStepNSProblemXML*, Simulation*)
    *  \brief xml constructor
    *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Strategy *: the strategy that owns the problem (optional)
+   *  \param Simulation *: the simulation that owns the problem
    */
-  FrictionContact2D(OneStepNSProblemXML*, Strategy* = NULL);
+  FrictionContact2D(OneStepNSProblemXML*, Simulation*);
 
-  /** \fn FrictionContact2D(Strategy * , const std::string& =DEFAULT_SOLVER, const unsigned int& = DEFAULT_ITER, const double& = DEFAULT_TOL,
-   *                        const std::string & = DEFAULT_NORMTYPE, const double & = DEFAULT_SEARCHDIR);
+  /** \fn FrictionContact2D(Simulation * ,  const std::string, const std::string =DEFAULT_SOLVER, const unsigned int = DEFAULT_ITER, const double = DEFAULT_TOL,
+   *                        const std::string  = DEFAULT_NORMTYPE, const double  = DEFAULT_SEARCHDIR);
    *  \brief constructor from data
-   *  \param Strategy *: the strategy that owns this problem
+   *  \param Simulation *: the simulation that owns this problem
+   *  \param string: id of the problem
    *  \param string: solver name (optional)
    *  \param int : MaxIter (optional) required if a solver is given
    *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
    *  \param string : NormType (optional) -> never used at the time
    *  \param double : SearchDirection (optional) -> for Latin
    */
-  FrictionContact2D(Strategy * , const std::string& = DEFAULT_SOLVER, const unsigned int& = DEFAULT_ITER, const double& = DEFAULT_TOL,
-                    const std::string & = DEFAULT_NORMTYPE, const double & = DEFAULT_SEARCHDIR);
+  FrictionContact2D(Simulation * ,  const std::string, const std::string = DEFAULT_SOLVER, const unsigned int = DEFAULT_ITER, const double = DEFAULT_TOL,
+                    const std::string  = DEFAULT_NORMTYPE, const double  = DEFAULT_SEARCHDIR);
 
-  /** \fn FrictionContact2D(Strategy*, Solver*)
+  /** \fn FrictionContact2D(Solver*, Simulation*, const std::string id = DEFAULT_OSNS_NAME)
    *  \brief constructor from data
-   *  \param Strategy *: the strategy that owns this problem
    *  \param Solver* : pointer to object that contains solver algorithm and formulation
+   *  \param Simulation *: the simulation that owns this problem
+   *  \param String: id of the problem (default = DEFAULT_OSNS_NAME)
    */
-  FrictionContact2D(Strategy * , Solver*);
+  FrictionContact2D(Solver*, Simulation*, const std::string = DEFAULT_OSNS_NAME);
 
   // --- Destructror ---
   ~FrictionContact2D();
 
   // --- Others functions ---
 
-  /** \fn void computeQ (void)
-   *  \brief compute vector q
+  /** \fn void compute(const double time)
+   *  \brief Compute the unknown z and w and update the Interaction (y and lambda )
    *  \param double : current time
+   *  \return void
    */
-  void computeQ(const double& time);
+  void compute(const double time);
 
   /** \fn FrictionContact2D* convert (OneStepNSProblem* ds)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.

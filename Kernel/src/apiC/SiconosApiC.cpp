@@ -1,21 +1,21 @@
 /* Siconos-Kernel version 1.2.0, Copyright INRIA 2005-2006.
- * Siconos is a program dedicated to the modeling, the simulation and the control
- * of non smooth dynamical systems
- * Siconos is a free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- * Siconos is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Siconos; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- * Contact: Vincent ACARY vincent.acary@inrialpes.fr
- */
+* Siconos is a program dedicated to the modeling, the simulation and the control
+* of non smooth dynamical systems
+* Siconos is a free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+* Siconos is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Siconos; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*
+* Contact: Vincent ACARY vincent.acary@inrialpes.fr
+*/
 #include <iostream>
 #include "Model.h"
 #include "check.h"
@@ -59,9 +59,9 @@ using namespace std;
 
 Model *GLOB_MODEL;
 NonSmoothDynamicalSystem *GLOB_NSDS;
-Strategy *GLOB_STRATEGIE;
+Simulation *GLOB_SIMULATION;
 TimeDiscretisation *GLOB_TIME;
-DSSet GLOB_SET_DS;
+DynamicalSystemsSet GLOB_SET_DS;
 InteractionsSet GLOB_SET_INTERACTION;
 
 
@@ -88,7 +88,7 @@ extern "C" int sicLoadModel(char ModelXmlFile[])
   return ret;
 }
 
-extern "C" int sicInitStrategy()
+extern "C" int sicInitSimulation()
 {
   int ret = SIC_OK;
 
@@ -96,12 +96,12 @@ extern "C" int sicInitStrategy()
   {
     if (GLOB_MODEL != NULL)
     {
-      GLOB_STRATEGIE = GLOB_MODEL->getStrategyPtr();
-      GLOB_STRATEGIE->initialize();
+      GLOB_SIMULATION = GLOB_MODEL->getSimulationPtr();
+      GLOB_SIMULATION->initialize();
     }
     else
     {
-      RuntimeException::selfThrow("siconos/C:: sicInitStrategy failed");
+      RuntimeException::selfThrow("siconos/C:: sicInitSimulation failed");
     }
 
   }
@@ -112,7 +112,7 @@ extern "C" int sicInitStrategy()
   }
   catch (...)
   {
-    cout << "Exception caught in sicInitStrategy" << endl;
+    cout << "Exception caught in sicInitSimulation" << endl;
     ret = SIC_ERROR;
   }
 
@@ -123,8 +123,8 @@ extern "C" int sicTimGetH(double *H)
 {
   int ret = SIC_OK;
 
-  if (GLOB_STRATEGIE != NULL)
-    *H = GLOB_STRATEGIE->getTimeDiscretisationPtr()->getH();
+  if (GLOB_SIMULATION != NULL)
+    *H = GLOB_SIMULATION->getTimeDiscretisationPtr()->getH();
   else
     ret = SIC_ERROR;
 
@@ -135,8 +135,8 @@ extern "C" int  sicTimeGetN(int *N)
 {
   int ret = SIC_OK;
 
-  if (GLOB_STRATEGIE != NULL)
-    *N = GLOB_STRATEGIE->getTimeDiscretisationPtr()->getNSteps();
+  if (GLOB_SIMULATION != NULL)
+    *N = GLOB_SIMULATION->getTimeDiscretisationPtr()->getNSteps();
   else
     ret = SIC_ERROR;
 
@@ -147,8 +147,8 @@ extern "C" int  sicTimeGetK(int *K)
 {
   int ret = SIC_OK;
 
-  if (GLOB_STRATEGIE != NULL)
-    *K = GLOB_STRATEGIE->getTimeDiscretisationPtr()->getK();
+  if (GLOB_SIMULATION != NULL)
+    *K = GLOB_SIMULATION->getTimeDiscretisationPtr()->getK();
   else
     ret = SIC_ERROR;
 
@@ -159,8 +159,8 @@ extern "C" int sicSTNextStep()
 {
   int ret = SIC_OK;
 
-  if (GLOB_STRATEGIE != NULL)
-    GLOB_STRATEGIE->nextStep();
+  if (GLOB_SIMULATION != NULL)
+    GLOB_SIMULATION->nextStep();
   else
     ret = SIC_ERROR;
 
@@ -171,8 +171,8 @@ extern "C" int sicSTComputeFreeState()
 {
   int ret = SIC_OK;
 
-  if (GLOB_STRATEGIE != NULL)
-    GLOB_STRATEGIE->computeFreeState();
+  if (GLOB_SIMULATION != NULL)
+    GLOB_SIMULATION->computeFreeState();
   else
     ret = SIC_ERROR;
 
@@ -184,8 +184,8 @@ extern "C" int sicSTComputePb()
 {
   int ret = SIC_OK;
 
-  if (GLOB_STRATEGIE != NULL)
-    GLOB_STRATEGIE->computeOneStepNSProblem();
+  if (GLOB_SIMULATION != NULL)
+    GLOB_SIMULATION->computeOneStepNSProblem();
   else
     ret = SIC_ERROR;
 
@@ -196,8 +196,8 @@ extern "C" int sicSTnewtonSolve(double criterion, int maxIter)
 {
   int ret = SIC_OK;
 
-  if (GLOB_STRATEGIE != NULL)
-    GLOB_STRATEGIE->newtonSolve(criterion, maxIter);
+  if (GLOB_SIMULATION != NULL)
+    GLOB_SIMULATION->newtonSolve(criterion, maxIter);
   else
     ret = SIC_ERROR;
 
@@ -208,8 +208,8 @@ extern "C" int sicSTupdateState()
 {
   int ret = SIC_OK;
 
-  if (GLOB_STRATEGIE != NULL)
-    GLOB_STRATEGIE->update();
+  if (GLOB_SIMULATION != NULL)
+    GLOB_SIMULATION->update();
   else
     ret = SIC_ERROR;
 
@@ -219,7 +219,7 @@ extern "C" int sicSTupdateState()
 
 extern "C" void sicDebug(int *ret)
 {
-  // GLOB_STRATEGIE->update();
+  // GLOB_SIMULATION->update();
   cout << "--- Debug" << endl;
 
   // LagrangianDS* ball1 = static_cast<LagrangianDS*> (GLOB_MODEL->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
@@ -390,12 +390,12 @@ extern "C" int sicSetComputeMassFunction(int nIdDs, char *libname, char *func)
       st = SIC_ERROR;
     }
 
-    if (GLOB_SET_DS.getDynamicalSystem(nIdDs) == NULL)
+    if (GLOB_SET_DS.getDynamicalSystemPtr(nIdDs) == NULL)
     {
       RuntimeException::selfThrow("siconos/C:: sicSetComputeMassFunction failed");
       st = SIC_ERROR;
     }
-    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystem(nIdDs);
+    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystemPtr(nIdDs);
     static_cast<LagrangianDS*>(DS)->setComputeMassFunction(libname, func);
   }
   catch (SiconosException e)
@@ -425,12 +425,12 @@ extern "C" int sicSetComputeNNLFunction(int nIdDs, char *libname, char *func)
       RuntimeException::selfThrow("siconos/C:: sicSetComputeNNLFunction failed");
       st = SIC_ERROR;
     }
-    if (GLOB_SET_DS.getDynamicalSystem(nIdDs) == NULL)
+    if (GLOB_SET_DS.getDynamicalSystemPtr(nIdDs) == NULL)
     {
       RuntimeException::selfThrow("siconos/C:: sicSetComputeNNLFunction failed");
       st = SIC_ERROR;
     }
-    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystem(nIdDs);
+    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystemPtr(nIdDs);
     static_cast<LagrangianDS*>(DS)->setComputeNNLFunction(libname, func);
   }
   catch (SiconosException e)
@@ -460,12 +460,12 @@ extern "C" int sicSetComputeJacobianQNNLFunction(int nIdDs, char *libname, char 
       RuntimeException::selfThrow("siconos/C:: sicSetComputeJacobianQNNLFunction failed");
       st = SIC_ERROR;
     }
-    if (GLOB_SET_DS.getDynamicalSystem(nIdDs) == NULL)
+    if (GLOB_SET_DS.getDynamicalSystemPtr(nIdDs) == NULL)
     {
       RuntimeException::selfThrow("siconos/C:: sicSetComputeJacobianQNNLFunction failed");
       st = SIC_ERROR;
     }
-    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystem(nIdDs);
+    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystemPtr(nIdDs);
     static_cast<LagrangianDS*>(DS)->setComputeJacobianQNNLFunction(libname, func);
   }
   catch (SiconosException e)
@@ -495,12 +495,12 @@ extern "C" int  sicSetComputeJacobianVelocityNNLFunction(int nIdDs, char *libnam
       RuntimeException::selfThrow("siconos/C::  sicSetComputeJacobianVelocityNNLFunction");
       st = SIC_ERROR;
     }
-    if (GLOB_SET_DS.getDynamicalSystem(nIdDs) == NULL)
+    if (GLOB_SET_DS.getDynamicalSystemPtr(nIdDs) == NULL)
     {
       RuntimeException::selfThrow("siconos/C::  sicSetComputeJacobianVelocityNNLFunction failed");
       st = SIC_ERROR;
     }
-    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystem(nIdDs);
+    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystemPtr(nIdDs);
     static_cast<LagrangianDS*>(DS)-> setComputeJacobianVelocityNNLFunction(libname, func);
   }
   catch (SiconosException e)
@@ -530,12 +530,12 @@ extern "C" int sicSetComputeFIntFunction(int nIdDs, char *libname, char *func)
       RuntimeException::selfThrow("siconos/C:: sicSetComputeFIntFunction failed");
       st = SIC_ERROR;
     }
-    if (GLOB_SET_DS.getDynamicalSystem(nIdDs) == NULL)
+    if (GLOB_SET_DS.getDynamicalSystemPtr(nIdDs) == NULL)
     {
       RuntimeException::selfThrow("siconos/C:: sicSetComputeFIntFunction failed");
       st = SIC_ERROR;
     }
-    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystem(nIdDs);
+    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystemPtr(nIdDs);
     static_cast<LagrangianDS*>(DS)->setComputeFIntFunction(libname, func);
   }
   catch (SiconosException e)
@@ -565,12 +565,12 @@ extern "C" int sicSetComputeJacobianQFIntFunction(int nIdDs, char *libname, char
       RuntimeException::selfThrow("siconos/C:: sicSetComputeJacobianQFIntFunction failed");
       st = SIC_ERROR;
     }
-    if (GLOB_SET_DS.getDynamicalSystem(nIdDs) == NULL)
+    if (GLOB_SET_DS.getDynamicalSystemPtr(nIdDs) == NULL)
     {
       RuntimeException::selfThrow("siconos/C:: sicSetComputeJacobianQFIntFunction failed");
       st = SIC_ERROR;
     }
-    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystem(nIdDs);
+    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystemPtr(nIdDs);
     static_cast<LagrangianDS*>(DS)->setComputeJacobianQFIntFunction(libname, func);
   }
   catch (SiconosException e)
@@ -600,12 +600,12 @@ extern "C" int sicSetComputeJacobianVelocityFIntFunction(int nIdDs, char *libnam
       RuntimeException::selfThrow("siconos/C:: sicSetComputeJacobianVelocityFIntFunction failed");
       st = SIC_ERROR;
     }
-    if (GLOB_SET_DS.getDynamicalSystem(nIdDs) == NULL)
+    if (GLOB_SET_DS.getDynamicalSystemPtr(nIdDs) == NULL)
     {
       RuntimeException::selfThrow("siconos/C:: sicSetComputeJacobianVelocityFIntFunction failed");
       st = SIC_ERROR;
     }
-    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystem(nIdDs);
+    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystemPtr(nIdDs);
     static_cast<LagrangianDS*>(DS)->setComputeJacobianVelocityFIntFunction(libname, func);
   }
   catch (SiconosException e)
@@ -635,12 +635,12 @@ extern "C" int  sicSetComputeFExtFunction(int nIdDs, char *libname, char *func)
       RuntimeException::selfThrow("siconos/C::  setComputeFExtFunction failed");
       st = SIC_ERROR;
     }
-    if (GLOB_SET_DS.getDynamicalSystem(nIdDs) == NULL)
+    if (GLOB_SET_DS.getDynamicalSystemPtr(nIdDs) == NULL)
     {
       RuntimeException::selfThrow("siconos/C::  setComputeFExtFunction failed");
       st = SIC_ERROR;
     }
-    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystem(nIdDs);
+    DynamicalSystem *DS = GLOB_SET_DS.getDynamicalSystemPtr(nIdDs);
     static_cast<LagrangianDS*>(DS)-> setComputeFExtFunction(libname, func);
   }
   catch (SiconosException e)
@@ -674,7 +674,7 @@ extern "C" int sicInteraction(char *name, int nbDS, int *DS, int nbRel)
 
     // Compute sum of DS size and add DS into the set
     DSIterator it;
-    DSSet dsConcerned;
+    DynamicalSystemsSet dsConcerned;
     for (it = GLOB_SET_DS.begin(); it != GLOB_SET_DS.end(); ++it)
     {
       dimDS += (*it)->getDim();
@@ -682,11 +682,13 @@ extern "C" int sicInteraction(char *name, int nbDS, int *DS, int nbRel)
     }
 
     // Create object
-    Interaction *interaction = new  Interaction(name, dsConcerned, nId, nbRel);
+    // Warning FP: comment next line for fast debug. Review Interaction construction: first Nslaw and Relation and THEN interaction
+    // with nslaw and relation as arguments of the constructor list.
+    //Interaction *interaction = new  Interaction(name,dsConcerned, nId,nbRel, );
     // interaction->display();
 
     // Push the interaction on global DS vectors
-    GLOB_SET_INTERACTION.insert(interaction);
+    //GLOB_SET_INTERACTION.insert(interaction);
 
     cout << "Create Interaction Id " << nId << endl;
 
@@ -786,7 +788,7 @@ extern "C" int sicLagrangianR(int nIdInteraction, char *relationType, char *func
     vG.reserve(1);
     vG.push_back(funcG);
 
-    Relation * relation = new LagrangianR(relationType, funcH, vG, interaction);
+    Relation * relation = new LagrangianR(relationType, funcH, vG);
     interaction->setRelationPtr(relation);
   }
   catch (SiconosException e)
@@ -909,19 +911,19 @@ extern "C" int sicModel(double t0, double T)
   return nId;
 }
 
-extern "C" int sicStrategyTimeStepping(double h)
+extern "C" int sicSimulationTimeStepping(double h)
 {
   int nId = SIC_OK;
 
   try
   {
 
-    GLOB_STRATEGIE = new TimeStepping(GLOB_MODEL);
+    GLOB_SIMULATION = new TimeStepping(GLOB_MODEL);
 
     // Time discretisation
-    GLOB_TIME = new  TimeDiscretisation(h, GLOB_STRATEGIE);
+    GLOB_TIME = new  TimeDiscretisation(h, GLOB_SIMULATION);
 
-    GLOB_STRATEGIE->initialize();
+    GLOB_SIMULATION->initialize();
 
   }
   catch (SiconosException e)
@@ -931,7 +933,7 @@ extern "C" int sicStrategyTimeStepping(double h)
   }
   catch (...)
   {
-    cout << "Exception caught in sicStrategyTimeStepping" << endl;
+    cout << "Exception caught in sicSimulationTimeStepping" << endl;
     nId = SIC_ERROR;
   }
 
@@ -949,21 +951,21 @@ extern "C" int sicOneStepIntegratorMoreau(double *theta)
     int  dsNumber = GLOB_SET_DS.size();
 
     if (dsNumber == 0)
-      RuntimeException::selfThrow("siconos/C:: ssicStrategyTimeStepping failed due to DS empty");
+      RuntimeException::selfThrow("siconos/C:: ssicSimulationTimeStepping failed due to DS empty");
 
     // One Step integrator s
     set<OneStepIntegrator *> vOSI;
     DSIterator it;
     i = 0;
-    // \Warning Franck: corrections = consequences of Strategy/NSDS changes (vector<> => set<> )
+    // \Warning Franck: corrections = consequences of Simulation/NSDS changes (vector<> => set<> )
     // Thus this part has to be reviewed -> especially the way theta values are sorted?
     for (it = GLOB_SET_DS.begin(); it != GLOB_SET_DS.end(); ++it)
     {
-      vOSI.insert(new Moreau(*it, theta[i], GLOB_STRATEGIE));
+      vOSI.insert(new Moreau(*it, theta[i], GLOB_SIMULATION));
       i++;
     }
 
-    GLOB_STRATEGIE->setOneStepIntegrators(vOSI);
+    GLOB_SIMULATION->setOneStepIntegrators(vOSI);
   }
   catch (SiconosException e)
   {
@@ -987,8 +989,8 @@ extern "C" int sicOneStepNSProblemLCP(char *solverName, int maxiter, double tole
   try
   {
     // One Step problem
-    OneStepNSProblem * onsspb = new LCP(GLOB_STRATEGIE, solverName, maxiter, tolerance);
-    GLOB_STRATEGIE->setOneStepNSProblemPtr(onsspb);
+    //OneStepNSProblem * onsspb = new LCP(GLOB_SIMULATION,solverName,maxiter,tolerance);
+    //    GLOB_SIMULATION->setOneStepNSProblemPtr(onsspb);
 
     cout << "=== End of model loading === " << endl;
 
@@ -1012,7 +1014,7 @@ extern "C" int sicClean()
 {
   delete GLOB_MODEL;
   delete GLOB_NSDS;
-  delete GLOB_STRATEGIE;
+  delete GLOB_SIMULATION;
 
   DSIterator itDS;
   for (itDS = GLOB_SET_DS.begin(); itDS != GLOB_SET_DS.end(); ++itDS)

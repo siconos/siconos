@@ -25,7 +25,7 @@ extern int sci_gateway(char *name, gate_function f);
 
 
 /* Simulation control loop */
-extern int sicInitStrategyInterface(char *fname);
+extern int sicInitSimulationInterface(char *fname);
 
 extern int sicTimeGetHInterface(char *fname);
 
@@ -80,9 +80,9 @@ extern int sicNonSmoothDynamicalSystemInterface(char *fname);
 
 extern int sicModelInterface(char *fname);
 
-/* Simulation Strategy */
+/* Simulation Simulation */
 
-extern int sicStrategyTimeSteppingInterface(char *fname);
+extern int sicSimulationTimeSteppingInterface(char *fname);
 
 extern int sicOneStepIntegratorMoreauInterface(char *fname);
 

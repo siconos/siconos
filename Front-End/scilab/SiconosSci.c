@@ -35,13 +35,13 @@ int sicLoadModelInterface(char *fname)
 
 }
 
-int sicInitStrategyInterface(char *fname)
+int sicInitSimulationInterface(char *fname)
 {
   static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
   static int dimo1 = 1, dimo2 = 1, st;
 
 #ifdef _DEBUG
-  printf("sicInitStrategyInterface\n");
+  printf("sicInitSimulationInterface\n");
 #endif
 
 
@@ -52,7 +52,7 @@ int sicInitStrategyInterface(char *fname)
 
   CreateVar(1, "i", &dimo1, &dimo2, &st);
   /* Call function */
-  *istk(st) = sicInitStrategy();
+  *istk(st) = sicInitSimulation();
   /*  Return variable  */
   LhsVar(1) = 1;
 
@@ -1213,7 +1213,7 @@ int sicModelInterface(char *fname)
   return 0;
 }
 
-int sicStrategyTimeSteppingInterface(char *fname)
+int sicSimulationTimeSteppingInterface(char *fname)
 {
   static int minrhs = 1, maxrhs = 1, minlhs = 1, maxlhs = 1;
   static int dim1, dim2;
@@ -1221,7 +1221,7 @@ int sicStrategyTimeSteppingInterface(char *fname)
   static int dimo1 = 1, dimo2 = 1, st;
 
 #ifdef _DEBUG
-  printf("sicStrategyTimeSteppingInterface\n");
+  printf("sicSimulationTimeSteppingInterface\n");
 #endif
 
   /* Check number of inputs (rhs=3) and outputs (lhs=1) */
@@ -1232,7 +1232,7 @@ int sicStrategyTimeSteppingInterface(char *fname)
   GetRhsVar(1, "d", &dim1, &dim2, &h);
   if (!(dim1 * dim2 == 1))
   {
-    sciprint("Wrong parameter in sicStrategyTimeStepping (h has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicSimulationTimeStepping (h has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -1241,7 +1241,7 @@ int sicStrategyTimeSteppingInterface(char *fname)
   CreateVar(2, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicStrategyTimeStepping(*stk(h));
+  *istk(st) = sicSimulationTimeStepping(*stk(h));
 
   /*  Return variable  */
   LhsVar(1) = 2;

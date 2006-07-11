@@ -31,7 +31,7 @@
  *       scheduleEvent method.
  *     - Tick must be set at construction, and can not be change after.
  *
- *  Questions/Todo : link with strategy or TimeDiscretisation?
+ *  Questions/Todo : link with simulation or TimeDiscretisation?
  *              depends on what Event->process will need.
  */
 
@@ -41,7 +41,7 @@
 
 #include "SiconosConst.h"
 #include "RuntimeException.h"
-#include "Strategy.h"
+#include "Simulation.h"
 #include "TimeDiscrEvent.h"
 #include "NonSmoothEvent.h"
 #include "RuntimeCmp.h"
@@ -52,7 +52,7 @@
 
 //class EventsManagerXML;
 
-class Strategy;
+class Simulation;
 
 // tick default value
 const double DEFAULT_TICK = 1e-06;
@@ -99,8 +99,8 @@ protected:
    */
   double tick;
 
-  /* link to the strategy that owns this manager*/
-  Strategy * strategy;
+  /* link to the simulation that owns this manager*/
+  Simulation * simulation;
 
   /** \fn unsigned long int doubleToIntTime(const double&)
    *  \brief convert time from double to unsigned int according to tick.
@@ -131,7 +131,7 @@ public:
    *  \param an unsigned int
    *  \param a string
    */
-  EventsManager(const double& = DEFAULT_TICK, Strategy* = NULL);
+  EventsManager(const double& = DEFAULT_TICK, Simulation* = NULL);
 
   /** \fn EventsManager(EventsManagerXML*)
    *  \brief constructor with XML object of the EventsManager
@@ -219,22 +219,22 @@ public:
     tick = newTick;
   };
 
-  /** \fn Strategy* getStrategyPtr()
-    *  \brief get the Strategy
-    *  \return a pointer to Strategy
+  /** \fn Simulation* getSimulationPtr()
+    *  \brief get the Simulation
+    *  \return a pointer to Simulation
     */
-  inline Strategy* getStrategyPtr() const
+  inline Simulation* getSimulationPtr() const
   {
-    return strategy;
+    return simulation;
   }
 
-  /** \fn void setStrategyPtr(Strategy*)
-   *  \brief set the Strategy of the OneStepNSProblem
-   *  \param: a pointer on Strategy
+  /** \fn void setSimulationPtr(Simulation*)
+   *  \brief set the Simulation of the OneStepNSProblem
+   *  \param: a pointer on Simulation
    */
-  inline void setStrategyPtr(Strategy* str)
+  inline void setSimulationPtr(Simulation* str)
   {
-    strategy = str;
+    simulation = str;
   }
 
   /** \fn const bool hasEvent(Event* event) const

@@ -12,7 +12,7 @@
   <UML:Model isSpecification="false" isLeaf="false" isRoot="false" isAbstract="false" >
    <UML:Namespace.ownedElement>
     <UML:Actor isSpecification="false" isLeaf="false" visibility="public" xmi.id="13" isRoot="false" isAbstract="false" name="End user" />
-    <UML:UseCase isSpecification="false" isLeaf="false" visibility="public" xmi.id="14" isRoot="false" isAbstract="false" name="Choose strategy simulation" />
+    <UML:UseCase isSpecification="false" isLeaf="false" visibility="public" xmi.id="14" isRoot="false" isAbstract="false" name="Choose simulation simulation" />
     <UML:UseCase isSpecification="false" isLeaf="false" visibility="public" xmi.id="15" isRoot="false" isAbstract="false" name="Drive computation" />
     <UML:UseCase isSpecification="false" isLeaf="false" visibility="public" xmi.id="16" isRoot="false" isAbstract="false" name="Determine simulation model" />
     <UML:UseCase isSpecification="false" isLeaf="false" visibility="public" xmi.id="18" isRoot="false" isAbstract="false" name="Define output type" />

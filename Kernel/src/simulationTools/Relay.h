@@ -39,12 +39,12 @@ public:
    */
   Relay();
 
-  /** \fn Relay(OneStepNSProblemXML*, Strategy*=NULL)
+  /** \fn Relay(OneStepNSProblemXML*, Simulation*=NULL)
    *  \brief xml constructor
    *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Strategy *: the strategy that owns the problem (optional)
+   *  \param Simulation *: the simulation that owns the problem (optional)
    */
-  Relay(OneStepNSProblemXML*, Strategy * = NULL);
+  Relay(OneStepNSProblemXML*, Simulation * = NULL);
 
   ~Relay();
 

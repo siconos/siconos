@@ -15,6 +15,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ *
+ * Note: the size of this non smooth law is one by default, but can be set to any value.
+ * Size > 1 is usefull when D matrix in the relation is not null and not diagonal, to write the y = CX +Dlambda with only one
+ * interaction and one unitary relation.
  */
 #ifndef COMPLEMENTARITYCONDITIONNSLAW_H
 #define COMPLEMENTARITYCONDITIONNSLAW_H
@@ -34,16 +38,18 @@
 class ComplementarityConditionNSL : public NonSmoothLaw
 {
 public:
-  /** \fn ComplementarityConditionNSL()
+  /** \fn ComplementarityConditionNSL(const unsigned int = 1)
    *  \brief default constructor
+   *  \param: size of the non smooth law (optional default =1)
    */
-  ComplementarityConditionNSL();
+  ComplementarityConditionNSL(const unsigned int = 1);
 
-  /** \fn ComplementarityConditionNSL(NonSmoothLawXML*)
+  /** \fn ComplementarityConditionNSL(NonSmoothLawXML*, const unsigned int = 1)
    *  \brief constructor with XML object of the parent class NonSmoothLaw
    *  \param NonSmoothLawXML* : the XML object corresponding
+   *  \param: size of the non smooth law (optional default =1)
    */
-  ComplementarityConditionNSL(NonSmoothLawXML*);
+  ComplementarityConditionNSL(NonSmoothLawXML*, const unsigned int = 1);
 
   ~ComplementarityConditionNSL();
 

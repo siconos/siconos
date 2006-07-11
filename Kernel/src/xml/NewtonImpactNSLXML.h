@@ -69,7 +69,7 @@ public:
   inline void setE(const double& e)
   {
     if (!hasE())
-      ENode = SiconosDOMTreeTools::createDoubleNode(rootNSLawXMLNode, NEWTON_E, e);
+      ENode = SiconosDOMTreeTools::createDoubleNode(rootNode, NEWTON_E, e);
     else SiconosDOMTreeTools::setDoubleContentValue(ENode, e);
   }
 

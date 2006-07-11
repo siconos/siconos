@@ -18,6 +18,8 @@
 */
 
 #include "Lsodar.h"
+#include "EventDriven.h"
+
 using namespace std;
 
 // ===== Out of class objects and functions =====
@@ -46,30 +48,29 @@ extern "C" void Lsodar_jacobianF_wrapper(integer * sizeOfX, doublereal * time, d
 
 // ===== Lsodar methods =====
 
-Lsodar::Lsodar(Strategy* newS): OneStepIntegrator("Lsodar", newS), localTimeDiscretisation(NULL), isLocalTimeDiscretisationAllocatedIn(false), iwork(NULL)
+Lsodar::Lsodar(): OneStepIntegrator(), localTimeDiscretisation(NULL), isLocalTimeDiscretisationAllocatedIn(false), iwork(NULL)
 {
-  intData.resize(9);
-  doubleData.resize(4);
+  integratorType = "Lsodar";
 }
 
-Lsodar::Lsodar(OneStepIntegratorXML* osiXML, Strategy* newS):
+Lsodar::Lsodar(OneStepIntegratorXML* osiXML, Simulation* newS):
   OneStepIntegrator("Lsodar", osiXML, newS), localTimeDiscretisation(NULL), isLocalTimeDiscretisationAllocatedIn(false), iwork(NULL)
 {
-  // local time discretisasation is set by default to those of the strategy.
-  localTimeDiscretisation = strategyLink->getTimeDiscretisationPtr(); // warning: pointer link!
+  // local time discretisasation is set by default to those of the simulation.
+  localTimeDiscretisation = simulationLink->getTimeDiscretisationPtr(); // warning: pointer link!
   intData.resize(9);
   doubleData.resize(4);
 
 }
 
-Lsodar::Lsodar(DynamicalSystem* ds, Strategy* newS):
+Lsodar::Lsodar(DynamicalSystem* ds, Simulation* newS):
   OneStepIntegrator("Lsodar", newS), localTimeDiscretisation(NULL), isLocalTimeDiscretisationAllocatedIn(false), iwork(NULL)
 {
-  if (strategyLink == NULL)
-    RuntimeException::selfThrow("Lsodar:: constructor(ds,strategy) - strategy == NULL");
+  if (simulationLink == NULL)
+    RuntimeException::selfThrow("Lsodar:: constructor(ds,simulation) - simulation == NULL");
 
-  // local time discretisasation is set by default to those of the strategy.
-  localTimeDiscretisation = strategyLink->getTimeDiscretisationPtr(); // warning: pointer link!
+  // local time discretisasation is set by default to those of the simulation.
+  localTimeDiscretisation = simulationLink->getTimeDiscretisationPtr(); // warning: pointer link!
 
   // add ds in the set
   OSIDynamicalSystems.insert(ds);
@@ -173,7 +174,7 @@ void Lsodar::fillXWork(doublereal * x)
   }
 }
 
-void Lsodar::computeRhs(const double& t)
+void Lsodar::computeRhs(const double t)
 {
   DSIterator it;
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
@@ -181,7 +182,7 @@ void Lsodar::computeRhs(const double& t)
 
 }
 
-void Lsodar::computeJacobianRhs(const double& t)
+void Lsodar::computeJacobianRhs(const double t)
 {
   DSIterator it;
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
@@ -190,90 +191,17 @@ void Lsodar::computeJacobianRhs(const double& t)
 
 void Lsodar::f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
-
-  // fill in xWork vector (ie all the x of the ds of this osi) with x
-  fillXWork(x); // -> copy
-
-  // Compute the right-hand side ( xdot = f + Tu in DS) for all the ds
-  double t = *time;
-  computeRhs(t);
-
-  //
-  DSIterator it;
-  unsigned int i = 0;
-  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
-  {
-    SiconosVector * xtmp2 = (*it)->getRhsPtr(); // Pointer link !
-    for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
-      xdot[i++] = (*xtmp2)(j);
-  }
-
-  //   unsigned int size = *sizeOfX; // convert integer to unsigned int
-  //   SimpleVector *xtmp = new SimpleVector(size) ;
-
-  //   // copy x in a temporary SimpleVector, to set x in Dynamical system.
-  //   for(unsigned int i = 0; i<size;i++)  /// Warning: copy !!
-  //     (*xtmp)(i) = x[i];
-  //   ds->setX(*xtmp);
-
-  //   // Compute the right-hand side ( xdot = f + Tu in DS) for the current ds
-  //   double t = *time;
-  //   ds->computeRhs(t);
-
-  // Save rhs values from dynamical system into current xdot (in-out parameter)
-  //   SiconosVector * xtmp2 = ds->getRhsPtr(); // Pointer link !
-  //   for(unsigned int i = 0; i<size;i++) /// Warning: copy !!
-  //     xdot[i] = (*xtmp2)(i);
-
-  //   delete xtmp;
-  //   xtmp2 = NULL;
+  static_cast<EventDriven*>(simulationLink)->computeF(this);
 }
 
 void Lsodar::g(integer * nEq, doublereal * time, doublereal* x, integer * ng, doublereal * gOut)
-{}
+{
+  static_cast<EventDriven*>(simulationLink)->computeG(this);
+}
 
 void Lsodar::jacobianF(integer *sizeOfX, doublereal *time, doublereal *x, integer* ml, integer *mu,  doublereal *jacob, integer *nrowpd)
 {
-
-  // Remark A: according to DLSODAR doc, each call to jacobian is preceded by a call to f with the same
-  // arguments NEQ, T, and Y.  Thus to gain some efficiency, intermediate quantities shared by both calculations may be
-  // saved in class members?
-  cout << "in jaco f: " <<  endl;
-
-  // fill in xWork vector (ie all the x of the ds of this osi) with x
-  fillXWork(x); // -> copy // Maybe this step is not necessary? because of remark A above
-
-  // Compute the jacobian of the vector field according to x for the current ds
-  double t = *time;
-  computeJacobianRhs(t);
-
-  // Save jacobianX values from dynamical system into current jacob (in-out parameter)
-  DSIterator it;
-  unsigned int i = 0;
-  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
-  {
-    SiconosMatrix * jacotmp = (*it)->getJacobianXFPtr(); // Pointer link !
-    for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
-    {
-      for (unsigned k = 0 ; k < (*it)->getDim() ; ++k)
-        jacob[i++] = (*jacotmp)(k, j);
-    }
-  }
-
-
-  //   // Save jacobianX values from dynamical system into current jacob (in-out parameter)
-  //   SiconosMatrix * jacotmp = ds->getJacobianXFPtr();
-
-  //   unsigned int k = 0;
-  //   for(unsigned int j = 0; j<size;j++) /// Warning: copy !!
-  //     {
-  //       for(unsigned i = 0 ; i<size ; i++)
-  //  {
-  //    jacob[k] = (*jacotmp)(i,j);
-  //    k++;
-  //  }
-  //     }
-  //   delete xtmp;
+  static_cast<EventDriven*>(simulationLink)->computeJacobianF(this);
 }
 
 void Lsodar::initialize()
@@ -291,7 +219,7 @@ void Lsodar::computeFreeState() // useless??
   RuntimeException::selfThrow("Lsodar::computeFreeState not implemented for Lsodar-type One step integrator");
 }
 
-void Lsodar::integrate(const double& tinit, const double& tend, double& tout, bool& iout)
+void Lsodar::integrate(const double tinit, const double tend, double tout, bool iout)
 {
   // For details on DLSODAR parameters, see opkdmain.f in Numerics/src/odepack
 

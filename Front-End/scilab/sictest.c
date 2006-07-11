@@ -100,8 +100,8 @@ testHuMAns_pa10()
   /* Construct Model */
   sicModel(t0, T);
 
-  /* Strategy Model */
-  sicStrategyTimeStepping(h);
+  /* Simulation Model */
+  sicSimulationTimeStepping(h);
   Theta[0] = 0.5;
   sicOneStepIntegratorMoreau(Theta);
   sicOneStepNSProblemLCP("NLGS", 101, 0.001);
@@ -115,7 +115,7 @@ testHuMAns_pa10()
   }
 
   /* Simulation */
-  sicInitStrategy();
+  sicInitSimulation();
 
   sicTimeGetK(&k);
   sicTimeGetN(&N);
@@ -171,7 +171,7 @@ testMultiBeadsColumn()
   double H[NDOF * 2] = {0, 0, 0, 0, 0, 0};
   double b[1] = {0};
 
-  /* Strategy parameters */
+  /* Simulation parameters */
   double Theta[NDS];
 
   /* File data tracing */
@@ -239,14 +239,14 @@ testMultiBeadsColumn()
   /*Construct Model */
   sicModel(0.0, 10.0);
 
-  /* Strategy Model */
-  sicStrategyTimeStepping(0.001);
+  /* Simulation Model */
+  sicSimulationTimeStepping(0.001);
   sicOneStepIntegratorMoreau(Theta);
   sicOneStepNSProblemLCP("NSQP", 101, 0.0001);
 
 
   /* Simulation */
-  sicInitStrategy();
+  sicInitSimulation();
 
   sicTimeGetK(&k);
   sicTimeGetN(&N);
@@ -302,7 +302,7 @@ testThreeBeadsColumn()
 
   status = sicLoadModel("./ThreeBeadsColumn.xml");
 
-  sicInitStrategy();
+  sicInitSimulation();
 
   sicTimeGetK(&k);
   sicTimeGetN(&N);

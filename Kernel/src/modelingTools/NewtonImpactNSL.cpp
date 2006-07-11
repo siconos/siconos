@@ -19,25 +19,20 @@
 #include "NewtonImpactNSL.h"
 using namespace std;
 
-NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(1), e(0.0)
-{
-  nsLawType = NEWTONIMPACTNSLAW;
-}
+NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(NEWTONIMPACTNSLAW, 1), e(0.0)
+{}
 
 NewtonImpactNSL::NewtonImpactNSL(NonSmoothLawXML* nslawxml):
-  NonSmoothLaw(nslawxml, 1), e(0.0)
+  NonSmoothLaw(NEWTONIMPACTNSLAW, nslawxml), e(0.0)
 {
-  nsLawType = NEWTONIMPACTNSLAW;
   if (nslawxml != NULL)
     e = (static_cast<NewtonImpactNSLXML*>(nslawxml))->getE();
   else RuntimeException::selfThrow("NewtonImpactNSL:: xml constructor, xml file=NULL");
 }
 
 NewtonImpactNSL::NewtonImpactNSL(const double& newE):
-  NonSmoothLaw(1), e(newE)
-{
-  nsLawType = NEWTONIMPACTNSLAW;
-}
+  NonSmoothLaw(NEWTONIMPACTNSLAW, 1), e(newE)
+{}
 
 NewtonImpactNSL::~NewtonImpactNSL()
 {}

@@ -37,8 +37,11 @@ class BlockVector : public SiconosVector
 private:
   // A container of pointers on SiconosVector (that are to be SimpleVector : no Block of Block allowed
   std::vector<SimpleVector*> svref;
-  //
+  // tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i].
   std::vector<unsigned int> tabindex;
+
+  /** vector of double that contains the double values pointer by SimpleVectors in svref - Necessary to have contiguous values in memory (for Fortran routines ...) */
+  std::vector<double> workVector;
 
   /** Flags to check wheter pointers were allocated in class constructors or not */
   std::deque<bool> isSvrefAllocatedIn;
@@ -51,12 +54,12 @@ public:
    */
   BlockVector();
 
-  /** \fn BlockVector(const std::string&, const bool&)
+  /** \fn BlockVector(const std::string, const bool)
    *  \brief contructor from data by function read call
    *  \param a string
    *  \param a bool
    */
-  BlockVector(const std::string&, const bool&);
+  BlockVector(const std::string, const bool);
 
   /** \fn BlockVector(const SimpleVector& v)
    *  \brief contructor with a SimpleVector
@@ -83,6 +86,13 @@ public:
    */
   BlockVector(const BlockVector&);
 
+  /** \fn BlockVector(unsigned int i, unsigned int j)
+   *  \brief constructor with the number of blocks and their dimension (ie all blocks have the same dim)
+   *  \param unsigned int : number of blocks
+   *  \param unsigned int : dim of each block
+   */
+  BlockVector(unsigned int, unsigned int);
+
   /** \fn ~SiconosVector ()
    *  \brief destructor
    */
@@ -98,11 +108,11 @@ public:
     return svref;
   }
 
-  /** \fn SimpleVector* getVectorPtr(const unsigned int&) const;
+  /** \fn SimpleVector* getVectorPtr(const unsigned int) const;
    *  \brief return i-eme SimpleVector of svref
    * \return a pointer to a SimpleVector
    */
-  SimpleVector* getVectorPtr(const unsigned int&);
+  SimpleVector* getVectorPtr(const unsigned int);
 
   /** \fn std::vector<unsigned int> getTabIndex() const
    *  \brief get the index tab
@@ -133,14 +143,14 @@ public:
    *  \exception SiconosVectorException
    *  \return the element vector[i]
    */
-  double& operator()(const unsigned int&) const ;
+  double& operator()(const unsigned int) const ;
 
   /** \fn void setValue(const unsigned int index, const double d)
    *  \brief set the value of one element of the vector
    *  \param double d : the new value
    *  \param int index : the position of the element which is set
    */
-  inline void setValue(const unsigned int& i, const double& d)
+  inline void setValue(const unsigned int i, const double d)
   {
     (*this)(i) = d;
   }
@@ -149,7 +159,7 @@ public:
    *  \brief get the value of index i element of the vector
    *  \param unsigned int index : the position of the element
    */
-  inline const double getValue(const unsigned int& index) const
+  inline const double getValue(const unsigned int index) const
   {
     return (*this)(index);
   }
@@ -159,40 +169,40 @@ public:
   *  \param vector<double> v
   *  \param optional, the index of required vector in svref
   */
-  void setValues(const std::vector<double>& v, const unsigned int& = 0) ;
+  void setValues(const std::vector<double>& v, const unsigned int = 0) ;
 
   /** \fn const LaVectorDouble getValues() const
    *  \brief get the values saved in vector (depends on vector type)
    *  \param optional, the index of required vector in svref
    *  \return a LaVectorDouble
    */
-  const LaVectorDouble getValues(const unsigned int& = 0) const ;
+  const LaVectorDouble getValues(const unsigned int = 0) const ;
 
-  /** \fn unsigned int size(unsigned int & index) const
+  /** \fn unsigned int size(unsigned int  index) const
    *  \brief if index = 0, get the vector total-size (ie number of elements in vector)
    *         if index = 1, get the number of element in svref.
    *  \exception to be defined
    *  \return int : the vector size
    */
-  unsigned int size(const unsigned int& = 0) const  ;
+  unsigned int size(const unsigned int = 0) const  ;
 
-  /** \fn bool read(const std::string& fileName,const std::string& mode = ASCII)
+  /** \fn bool read(const std::string fileName,const std::string mode = ASCII)
    *  \brief write the vector in a file
    *  \param std::string fileName : the file to read
    *  \param std::string mode : ASCII or BINARY
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  bool read(const std::string &, const std::string& = DEFAULT_FORMAT) ;
+  bool read(const std::string , const std::string = DEFAULT_FORMAT) ;
 
-  /** \fn bool write(const string& fileName,const string& mode = ASCII)
+  /** \fn bool write(const string fileName,const string mode = ASCII)
    *  \brief write the vector in a file
    *  \param string fileName : the file to read
    *  \param string mode : ASCII or BINARY
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  bool write(const std::string& , const std::string& = DEFAULT_FORMAT) const  ;
+  bool write(const std::string , const std::string = DEFAULT_FORMAT) const  ;
 
   /** \fn double* getArray()
    *  \brief return the array of double values of the vector
@@ -227,8 +237,8 @@ public:
   // specific internal operators
   BlockVector &operator+=(const BlockVector &) ;
   BlockVector &operator-=(const BlockVector &) ;
-  BlockVector &operator*=(const double&) ;
-  BlockVector &operator/=(const double&) ;
+  BlockVector &operator*=(const double) ;
+  BlockVector &operator/=(const double) ;
   BlockVector &operator = (const BlockVector& v) ;
 
   /** \fn bool operator != (const SiconosVector& v) const;
@@ -246,9 +256,9 @@ public:
   //  friend BlockVector operator - (const BlockVector& v1, const SiconosVector& v2);
 
   // specific external operators
-  friend BlockVector operator * (const BlockVector&, const double&) ;
-  friend BlockVector operator * (const double&, const BlockVector&);
-  friend BlockVector operator / (const BlockVector&, const double&);
+  friend BlockVector operator * (const BlockVector&, const double) ;
+  friend BlockVector operator * (const double, const BlockVector&);
+  friend BlockVector operator / (const BlockVector&, const double);
   friend BlockVector operator + (const BlockVector& v1, const BlockVector& v2);
   friend BlockVector operator - (const BlockVector& v1, const BlockVector& v2);
   friend SimpleVector operator * (const SiconosMatrix &m, const BlockVector &v);

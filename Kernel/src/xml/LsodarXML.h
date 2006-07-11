@@ -27,9 +27,8 @@
  * LsodarXML allows to manage data of a Lsodar DOM tree.
  */
 
-
-#ifndef __LsodarXMLDEF__
-#define __LsodarXMLDEF__
+#ifndef __LsodarXML__
+#define __LsodarXML__
 
 #include "OneStepIntegratorXML.h"
 
