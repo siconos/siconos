@@ -66,6 +66,7 @@ Simulation::Simulation(Model * mainModel, const string id):
   else indexSets.resize(1);
 
   indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0();
+
   // Other index sets will be updated during initialize() call.
 }
 
@@ -106,20 +107,7 @@ Simulation::Simulation(SimulationXML* strxml, Model *newModel, const string id):
     isOSIAllocatedIn[*(checkOSI.first)] = true ;
   }
 
-  // === indexSets  ===
-
-  // The number of indexSets is given by the maximum value of relative degrees of the unitary relations.
-
-  // We first need to initialize the topology (computes UnitaryRelation sets, relative degrees ...)
-  model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->initialize();
-  unsigned int maxDegree = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
-
-  if (maxDegree != 0)
-    indexSets.resize(maxDegree);
-  else indexSets.resize(1);
-
-  indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0();
-  // Other index sets will be updated during initialize() call.
+  // === indexSets : computed during initialization ===
 
   // === OneStepNSProblems  ===
   // This depends on the type of strategy --> in derived class constructor
@@ -337,17 +325,39 @@ void Simulation::initialize()
   if (model == NULL)
     RuntimeException::selfThrow("Simulation initialization - model = NULL.");
 
+  // The number of indexSets is given by the maximum value of relative degrees of the unitary relations.
+
+  // We first need to initialize the topology (computes UnitaryRelation sets, relative degrees ...)
+  model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->initialize();
+  unsigned int maxDegree = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
+
+  if (maxDegree != 0)
+    indexSets.resize(maxDegree);
+  else indexSets.resize(1);
+
+  indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0();
+
+  // Interactions initialization (here, since level depends on the type of simulation)
+
+  // level corresponds to the number of Y and Lambda derivatives computed.
+
+  unsigned int level;
+  if (simulationType == "TimeStepping")
+    level = maxDegree - 1;
+  else if (simulationType == "EventDriven")
+    level = maxDegree;
+  else
+    RuntimeException::selfThrow("Simulation initialization - Unknown simulation type." + simulationType);
+
+  InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  InteractionsIterator it;
+  for (it = allInteractions.begin(); it != allInteractions.end(); ++it)
+    (*it)->initialize(level);
+
   // initialization of the OneStepIntegrators
   OSIIterator itOsi;
   for (itOsi = allOSI.begin(); itOsi != allOSI.end(); ++itOsi)
     (*itOsi)->initialize();
-
-  // initialization of  OneStepNonSmoothProblem
-  OSNSIterator itOsns;
-  for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
-    (itOsns->second)->initialize();
-
-  updateIndexSets();
 }
 
 void Simulation::computeFreeState()
@@ -393,9 +403,10 @@ void Simulation::update()
 
   // compute state for each dynamical system
 
+  double time = model->getCurrentT();
   OSIIterator it;
   for (it = allOSI.begin(); it != allOSI.end() ; ++it)
-    (*it)->updateState();
+    (*it)->updateState(time);
 
   // compute output (y, ydot)
   for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)

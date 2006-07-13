@@ -28,11 +28,37 @@ EventDriven::EventDriven(Model* newModel): Simulation(newModel, "EventDriven")
 
 // --- XML constructor ---
 EventDriven::EventDriven(SimulationXML* strxml, Model *newModel): Simulation(strxml, newModel, "EventDriven")
-{}
+{
+  // === One Step NS Problem ===
+  // We read data in the xml output (mainly Interactions concerned and solver) and assign them to
+  // both one step ns problems ("acceleration" and "impact").
+  // At the time, only LCP is available for Event Driven.
+
+  if (simulationxml->hasOneStepNSProblemXML())
+  {
+    // OneStepNSProblem - Memory allocation/construction
+    string type = simulationxml->getOneStepNSProblemXMLPtr()->getNSProblemType();
+    if (type == LCP_TAG)  // LCP
+    {
+      allNSProblems["acceleration"] = new LCP(simulationxml->getOneStepNSProblemXMLPtr(), this);
+      isNSProblemAllocatedIn[ allNSProblems["acceleration"] ] = true;
+      allNSProblems["impact"] = new LCP(simulationxml->getOneStepNSProblemXMLPtr(), this);
+      isNSProblemAllocatedIn[ allNSProblems["impact"] ] = true;
+    }
+    else
+      RuntimeException::selfThrow("EventDriven::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
+
+    allNSProblems["acceleration"]->setId("acceleration");
+    allNSProblems["impact"]->setId("impact");
+  }
+}
 
 // --- Destructor ---
 EventDriven::~EventDriven()
-{}
+{
+  if (eventsManager != NULL) delete eventsManager;
+  eventsManager = NULL;
+}
 
 void EventDriven::setEventsManagerPtr(EventsManager*)
 {
@@ -87,82 +113,111 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
   }
 }
 
-void EventDriven::computeF(OneStepIntegrator* osi)
+void EventDriven::initialize()
 {
-  // fill in xWork vector (ie all the x of the ds of this osi) with x
-  doublereal * x; // WHere from??
-  static_cast<Lsodar*>(osi)->fillXWork(x); //
+  Simulation::initialize();
 
-  //   // Compute the right-hand side ( xdot = f + Tu in DS) for all the ds
-  //   double t = *time;
-  //   computeRhs(t);
+  // === Events manager creation and initialization ===
+  eventsManager = new EventsManager(DEFAULT_TICK, this); //
+  eventsManager->initialize();
 
-  //   //
-  //   DSIterator it;
-  //   unsigned int i = 0;
-  //   for(it=OSIDynamicalSystems.begin();it!=OSIDynamicalSystems.end();++it)
-  //     {
-  //       SiconosVector * xtmp2 = (*it)->getRhsPtr(); // Pointer link !
-  //       for(unsigned int j = 0 ; j< (*it)->getDim() ; ++j)
-  //  xdot[i++] = (*xtmp2)(j);
-  //     }
+  // === OneStepNSProblem initialization. ===
+  // First check that there are 2 osns: one "impact" and one "acceleration"
+  if (allNSProblems.size() != 2)
+    RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have two non smooth problem. Here, there are " + allNSProblems.size());
 
+  if (allNSProblems.find("impact") == allNSProblems.end()) // ie if the impact problem does not exist
+    RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
+  if (allNSProblems.find("acceleration") == allNSProblems.end()) // ie if the impact problem does not exist
+    RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
 
+  // WARNING: only for Lagrangian systems - To be reviewed for other ones.
+  allNSProblems["impact"]->setLevels(1, 1);
+  allNSProblems["impact"]->initialize();
+  allNSProblems["acceleration"]->setLevels(2, 2);
+  allNSProblems["acceleration"]->initialize();
+
+  // === update all index sets ===
+  updateIndexSets();
 }
 
-void EventDriven::computeJacobianF(OneStepIntegrator* osi)
+void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
+  // Check osi type: only lsodar is allowed.
+  if (osi->getType() != "lsodar")
+    RuntimeException::selfThrow("EventDriven::computeF(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
+
+  Lsodar * lsodar = static_cast<Lsodar*>(osi);
+
+  // fill in xWork vector (ie all the x of the ds of this osi) with x
+  lsodar->fillXWork(sizeOfX, x);
+
+  double t = *time;
+
+  // update the DS of the OSI.
+  lsodar->updateState(t);
+
+  // solve a LCP "acceleration"
+
+  allNSProblems["acceleration"]->compute(t);
+  allNSProblems["acceleration"]->updateOutput();
+  allNSProblems["acceleration"]->updateInput();
+
+  // Compute the right-hand side ( xdot = f + Tu in DS) for all the ds
+
+  lsodar->computeRhs(t);
+
+  DynamicalSystemsSet dsOfTheOsi = lsodar->getDynamicalSystems();
+
+  DSIterator it;
+  unsigned int i = 0;
+  for (it = dsOfTheOsi.begin(); it != dsOfTheOsi.end(); ++it)
+  {
+    SiconosVector * xtmp2 = (*it)->getRhsPtr(); // Pointer link !
+    for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
+      xdot[i++] = (*xtmp2)(j);
+  }
+}
+
+void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, doublereal *time, doublereal *x,  doublereal *jacob)
+{
+
+  if (osi->getType() != "lsodar")
+    RuntimeException::selfThrow("EventDriven::computeF(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
+
+  Lsodar * lsodar = static_cast<Lsodar*>(osi);
 
   //   // Remark A: according to DLSODAR doc, each call to jacobian is preceded by a call to f with the same
   //   // arguments NEQ, T, and Y.  Thus to gain some efficiency, intermediate quantities shared by both calculations may be
   //   // saved in class members?
   //   cout <<"in jaco f: " <<  endl;
 
-  //   // fill in xWork vector (ie all the x of the ds of this osi) with x
-  //   fillXWork(x); // -> copy // Maybe this step is not necessary? because of remark A above
+  // fill in xWork vector (ie all the x of the ds of this osi) with x
+  // fillXWork(x); // -> copy // Maybe this step is not necessary? because of remark A above
 
-  //   // Compute the jacobian of the vector field according to x for the current ds
-  //   double t = *time;
-  //   computeJacobianRhs(t);
-
-  //   // Save jacobianX values from dynamical system into current jacob (in-out parameter)
-  //   DSIterator it;
-  //   unsigned int i = 0;
-  //   for(it=OSIDynamicalSystems.begin();it!=OSIDynamicalSystems.end();++it)
-  //     {
-  //       SiconosMatrix * jacotmp = (*it)->getJacobianXFPtr(); // Pointer link !
-  //       for(unsigned int j = 0 ; j< (*it)->getDim() ; ++j)
-  //  {
-  //    for(unsigned k = 0 ; k < (*it)->getDim() ;++k)
-  //      jacob[i++] = (*jacotmp)(k,j);
-  //  }
-  //     }
-
+  // Compute the jacobian of the vector field according to x for the current ds
+  double t = *time;
+  lsodar->computeJacobianRhs(t);
 
   //   // Save jacobianX values from dynamical system into current jacob (in-out parameter)
-  //   SiconosMatrix * jacotmp = ds->getJacobianXFPtr();
+  DynamicalSystemsSet dsOfTheOsi = lsodar->getDynamicalSystems();
 
-  //   unsigned int k = 0;
-  //   for(unsigned int j = 0; j<size;j++) /// Warning: copy !!
-  //     {
-  //       for(unsigned i = 0 ; i<size ; i++)
-  //  {
-  //    jacob[k] = (*jacotmp)(i,j);
-  //    k++;
-  //  }
-  //     }
-  //   delete xtmp;
+  DSIterator it;
+  unsigned int i = 0;
+  for (it = dsOfTheOsi.begin(); it != dsOfTheOsi.end(); ++it)
+  {
+    SiconosMatrix * jacotmp = (*it)->getJacobianXFPtr(); // Pointer link !
+    for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
+    {
+      for (unsigned k = 0 ; k < (*it)->getDim() ; ++k)
+        jacob[i++] = (*jacotmp)(k, j);
+    }
+  }
 }
 
 void EventDriven::computeG(OneStepIntegrator* osi)
 {
-}
-
-void EventDriven::initialize()
-{
-  Simulation::initialize();
-  eventsManager = new EventsManager(DEFAULT_TICK, this); //
-  eventsManager->initialize();
+  RuntimeException::selfThrow("EventDriven::computeG(osi, ...), not yet implemented");
 }
 
 // Run the whole simulation
@@ -178,6 +233,7 @@ void EventDriven::run()
     advanceToEvent();
     // update events
     eventsManager->processEvents();
+    update();
     count++;
   }
   cout << "===== End of Event Driven simulation. " << count << " events have been processed. ==== " << endl;
@@ -185,10 +241,29 @@ void EventDriven::run()
 
 void EventDriven::computeOneStep()
 {
-  cout << "EventDriven, compute One Step, not yet implemented." << endl;
-  //  advanceToEvent();
+  // Integrate system between "current" and "next" event of events manager.
+  advanceToEvent();
   // update events
-  //eventsManager->processEvents();
+  eventsManager->processEvents();
+  update();
+}
+
+void EventDriven::update()
+{
+  // compute input (lambda -> r)
+  OSNSIterator itOsns;
+  for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
+  {
+    (itOsns->second)->updateInput();
+    (itOsns->second)->updateOutput();
+    (itOsns->second)->nextStep();
+  }
+
+  updateIndexSets();
+
+  OSIIterator it;
+  for (it = allOSI.begin(); it != allOSI.end() ; ++it)
+    (*it)->nextStep();
 }
 
 void EventDriven::advanceToEvent()
@@ -229,7 +304,7 @@ void EventDriven::advanceToEvent()
   if (!(indexSets[1] - indexSets[2]).isEmpty())
   {
     // solve the LCP-impact => y[1],lambda[1]
-    computeOneStepNSProblem(); // solveLCPImpact();
+    computeOneStepNSProblem("impact"); // solveLCPImpact();
     // update indexSets
     updateIndexSet(1);
     updateIndexSet(2);
@@ -242,10 +317,13 @@ void EventDriven::advanceToEvent()
   if (!((indexSets[2]).isEmpty()))
   {
     // solve LCP-acceleration
-    computeOneStepNSProblem(); //solveLCPAcceleration();
+    computeOneStepNSProblem("acceleration"); //solveLCPAcceleration();
     // for all index in IndexSets[2], update the index set according to y[2] and/or lambda[2] sign.
     updateIndexSetsWithDoubleCondition();
   }
+
+  model->setCurrentT(tout);
+
 }
 
 EventDriven* EventDriven::convert(Simulation *str)

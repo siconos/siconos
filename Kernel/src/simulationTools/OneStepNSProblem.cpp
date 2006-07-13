@@ -18,6 +18,7 @@
  */
 #include "OneStepNSProblem.h"
 #include "Moreau.h"
+#include "LagrangianDS.h"
 using namespace std;
 
 // --- CONSTRUCTORS/DESTRUCTOR ---
@@ -281,8 +282,9 @@ void OneStepNSProblem::updateInput()
   InteractionsIterator it;
   double currentTime = simulation->getModelPtr()->getCurrentT();
 
+  // We compute inpute using lambda(levelMin).
   for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
-    (*it)->getRelationPtr() -> computeInput(currentTime);
+    (*it)->getRelationPtr() -> computeInput(currentTime, levelMin);
 }
 
 void OneStepNSProblem::updateOutput()
@@ -350,27 +352,39 @@ void OneStepNSProblem::check_solver(const int info) const
   }
 }
 
-void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& W, MapOfDouble& Theta)
+void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& centralBlocks, MapOfDouble& Theta)
 {
-  // === Gets W matrices and scalar Theta of each DS concerned by the UnitaryRelation ===
-  // Warning: restricted to Moreau OSI
+  // === OSI = MOREAU : gets W matrices and scalar Theta of each DS concerned by the UnitaryRelation ===
+  // === OSI = LSODAR : gets M matrices of each DS concerned by the UnitaryRelation, Theta remains empty ===
 
   OneStepIntegrator * Osi;
 
   // Get the set of DS for the current UnitaryRelation
   DynamicalSystemsSet URDS = UR->getDynamicalSystems();
   DSIterator itDS;
+  string osiType; // type of the current one step integrator
+  string dsType; // type of the current Dynamical System
 
   // For each DS, find the corresponding W through the OneStepIntegrator Interface
   for (itDS = URDS.begin(); itDS != URDS.end(); itDS++)
   {
     Osi = simulation->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
-    if (Osi->getType() == "Moreau")
+    osiType = Osi->getType();
+    if (osiType == "Moreau")
     {
-      W[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr(*itDS);  // get its W matrix ( pointer link!)
+      centralBlocks[*itDS] = (static_cast<Moreau*>(Osi))->getWPtr(*itDS);  // get its W matrix ( pointer link!)
       Theta[*itDS] = (static_cast<Moreau*>(Osi))->getTheta(*itDS);
     }
+    else if (osiType == "Lsodar") // Warning: LagrangianDS only at the time !!!
+    {
+      dsType = (*itDS)->getType();
+      if (dsType != LNLDS && dsType != LTIDS)
+        RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Lsodar Integrator with dynamical system of type " + dsType);
+
+      // get mass and inverse it ...
+      centralBlocks[*itDS] = (static_cast<LagrangianDS*>(*itDS))->getInverseOfMassPtr();
+    }
     else
-      RuntimeException::selfThrow("LCP::computeAllBlocks not yet implemented for Integrator of type " + Osi->getType());
+      RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Integrator of type " + osiType);
   }
 }

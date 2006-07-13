@@ -126,15 +126,12 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
   if ((interactionSize % nslaw->getNsLawSize()) != 0)
     RuntimeException::selfThrow("Interaction::xml constructor, inconsistency between interaction size and non smooth law size.");
 
-  // Memory allocation for y and lambda
-  initialize();
-
-  // download xml values for y[0] and lambda[0] (optional)
-  if (interactionxml->hasY()) *(y[0]) = interactionxml->getY();
-  if (interactionxml->hasLambda()) *(lambda[0]) = interactionxml->getLambda();
-
-  // Old values are initialized with current values (for y and lambda)
-  swapInMemory();
+  // download xml values for y[0] and lambda[0] forbidden since y and lambda are not allocated yet (this is
+  // done in initialize function, called by simulation !!)
+  if (interactionxml->hasY() ||  interactionxml->hasLambda())
+    RuntimeException::selfThrow("Interaction::xml constructor, y or lambda download is forbidden.");
+  // *(y[0]) = interactionxml->getY();
+  // if( interactionxml->hasLambda() ) *(lambda[0]) = interactionxml->getLambda();
 
 }
 
@@ -146,7 +143,6 @@ Interaction::Interaction(const string newId, DynamicalSystemsSet& dsConcerned, c
 {
   // Memory allocation and initialization for y and lambda
   involvedDS = dsConcerned; // !! this keeps pointers link between DS in the set !!
-  initialize();
 }
 
 // --- DESTRUCTOR ---
@@ -175,8 +171,11 @@ Interaction::~Interaction()
   NSDS = NULL;
 }
 
-void Interaction::initialize()
+void Interaction::initialize(const unsigned int numberOfDerivatives)
 {
+  // Warning: this function is called from Simulation initialize, since we need to know the relative degree and
+  // the type of simulation to size Y and Lambda.
+
   if (relation == NULL)
     RuntimeException::selfThrow("Interaction::initialize, relation == NULL");
   if (nslaw == NULL)
@@ -195,9 +194,8 @@ void Interaction::initialize()
 
   // Memory allocation for y and lambda
 
-  // \todo : compute numberOfDerivatives using relative degree
-  // for the moment, numberOfDerivatives = 2: we save y and yDot
-  unsigned int numberOfDerivatives = 2;
+  // Note that numberOfDerivatives depends on the type of simulation and on the relative degree.
+
   y.resize(numberOfDerivatives) ;
   yOld.resize(numberOfDerivatives);
   lambda.resize(numberOfDerivatives);
@@ -227,7 +225,11 @@ void Interaction::initialize()
   isLambdaAllocatedIn.resize(numberOfDerivatives, true);
   isLambdaOldAllocatedIn.resize(numberOfDerivatives, true);
 
+  // Old values are initialized with current values (for y and lambda)
+  swapInMemory();
+
 }
+
 // Initialization is required to avoid uninit memory reading (-> insure tests: READ_UNINIT_MEM)
 void Interaction::initializeVectors(VectorOfBlocks inputVector)
 {
@@ -530,7 +532,6 @@ void Interaction::setRelationPtr(Relation* newRelation)
   if (isRelationAllocatedIn) delete relation;
   relation = newRelation;
   isRelationAllocatedIn = false;
-  initialize();
 }
 
 void Interaction::setNonSmoothLawPtr(NonSmoothLaw* newNslaw)

@@ -224,7 +224,6 @@ public:
    *   \brief initializes the topology
    */
   void initialize();
-
 };
 
 #endif // TOPOLOGY_H

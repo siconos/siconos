@@ -320,6 +320,12 @@ void LinearDS::initialize(const double time, const unsigned int sizeOfMemory)
 
 }
 
+
+void LinearDS::update(const double time)
+{
+  computeRhs(time); // If necessary, this will also compute A, b, u and T
+}
+
 void LinearDS::setA(const SiconosMatrix& newValue)
 {
   setJacobianXF(newValue);
@@ -495,6 +501,9 @@ void LinearDS::computeRhs(const double time, const bool)
     else
       *rhs += * u;
   }
+
+  *rhs += * r; // Warning: r update is done in Interactions/Relations
+
 }
 
 void LinearDS::computeJacobianXRhs(const double time, const bool)

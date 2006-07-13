@@ -160,6 +160,8 @@ void LinearTIDS::computeRhs(const double time, const bool)
     else
       *rhs += * u;
   }
+
+  *rhs += * r; // Warning: r update is done in Interactions/Relations
 }
 
 void LinearTIDS::computeJacobianXRhs(const double time, const bool)

@@ -339,6 +339,12 @@ public:
    */
   virtual void initialize(const double = 0, const unsigned int = 1) ;
 
+  /** \fn void update(const double) ;
+   *  \brief dynamical system update: mainly call compute for all time or state depending functions (mass, FInt ...).
+   *  \param current time
+   */
+  virtual void update(const double);
+
   // === GETTERS AND SETTERS ===
 
   /** \fn const unsigned int getNdof() const
@@ -675,6 +681,12 @@ public:
   {
     return mass;
   }
+
+  /** \fn SiconosMatrix* getInverseOfMassPtr() const
+   *  \brief get inverse of Mass - Warning: in this function we do not checked that tha matrix is up to date. If M depends on q, it may require a recomputation before the get.
+   *  \return pointer to a SiconosMatrix
+   */
+  SiconosMatrix* getInverseOfMassPtr();
 
   /** \fn void setMass (const SiconosMatrix& newValue)
    *  \brief set the value of Mass to newValue
@@ -1152,7 +1164,7 @@ public:
    */
   void computeInverseOfMass();
 
-  /** \fn void computeRhs(const double time, const bool  =false)
+  /** \fn void computeRhs(const double time, const bool = false)
    *  \brief Default function to the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
@@ -1206,6 +1218,14 @@ public:
    * \return a double
    */
   virtual double dsConvergenceIndicator();
+
+  /** \fn   void computeQFree(const double, const unsigned int level, SiconosVector*);
+   *  \brief function to compute derivative number level of qFree
+   *  \param double: current time
+   *  \param unsigned int: derivative number
+   *  \param SimpleVector*: in-out parameter, qFree
+   */
+  void computeQFree(const double, const unsigned int, SiconosVector*);
 
 };
 

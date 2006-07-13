@@ -29,6 +29,7 @@
 
 #include "Simulation.h"
 #include "EventsManager.h"
+#include "LCP.h"
 
 class EventsManager;
 
@@ -87,17 +88,25 @@ public:
    */
   void updateIndexSetsWithDoubleCondition();
 
-  /** \fn void computeF(OneStepIntegrator* osi)
+  /** \fn void computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
    *  \brief compute right-hand side of xdot = f(x,t), for the integrator osi.
    *  \param pointer to OneStepIntegrator.
+   *  \param integer*, size of vector x
+   *  \param doublereal*, time
+   *  \param doublereal*, x:array of double
+   *  \param doublereal*, derivative of x (in-out parameter)
    */
-  void computeF(OneStepIntegrator*);
+  void computeF(OneStepIntegrator*, integer *, doublereal *, doublereal *, doublereal *);
 
-  /** \fn void computeJacobian(OneStepIntegrator*)
+  /** \fn void computeJacobian(OneStepIntegrator*, integer *sizeOfX, doublereal *time, doublereal *x,  doublereal *jacob)
    *  \brief compute jacobian of the right-hand side
    *  \param pointer to OneStepIntegrator.
+   *  \param integer*, size of vector x
+   *  \param doublereal*, time
+   *  \param doublereal*, x:array of double
+   *  \param doublereal*, jacobian of f according to x (in-out parameter)
    */
-  void computeJacobianF(OneStepIntegrator*);
+  void computeJacobianF(OneStepIntegrator*, integer *, doublereal *, doublereal *,  doublereal *);
 
   /** \fn void computeG(OneStepIntegrator* osi)
    *  \brief compute constraint function g(x,t,...) for osi.
@@ -114,6 +123,11 @@ public:
     *  \brief run the whole simulation
     */
   void run();
+
+  /** \fn void update()
+   *  \brief update input, output and indexSets.
+   */
+  void update();
 
   /** \fn void computeOneStep()
    *  \brief run simulation from one Event to the next

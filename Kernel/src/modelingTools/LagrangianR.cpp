@@ -990,7 +990,7 @@ void LagrangianR::computeFreeOutput(const double time)
   delete velocityTmp;
 }
 
-void LagrangianR::computeInput(const double time)
+void LagrangianR::computeInput(const double time, const unsigned int level)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianLinearR::computeInput, no interaction linked with this relation");
@@ -1018,7 +1018,7 @@ void LagrangianR::computeInput(const double time)
   }
 
   // get lambda of the concerned interaction
-  SiconosVector *lambda = interaction->getLambdaPtr(1);
+  SiconosVector *lambda = interaction->getLambdaPtr(level);
 
   if (LagrangianRelationType == "scleronomic")
   {

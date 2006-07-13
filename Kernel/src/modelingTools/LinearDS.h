@@ -202,7 +202,13 @@ public:
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  virtual void initialize(const double = 0, const unsigned int = 1) ;
+  void initialize(const double = 0, const unsigned int = 1) ;
+
+  /** \fn void update(const double) ;
+   *  \brief dynamical system update: mainly call compute for all time or state depending functions
+   *  \param current time
+   */
+  void update(const double);
 
   // --- getter and setter ---
 

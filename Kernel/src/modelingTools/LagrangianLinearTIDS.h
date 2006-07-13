@@ -176,6 +176,12 @@ public:
    */
   void initialize(const double = 0, const unsigned int = 1) ;
 
+  /** \fn void update(const double) ;
+   *  \brief dynamical system update: mainly call compute for all time or state depending functions (mass, FInt ...).
+   *  \param current time
+   */
+  void update(const double);
+
   // --- GETTERS AND SETTERS ---
 
   // -- K --

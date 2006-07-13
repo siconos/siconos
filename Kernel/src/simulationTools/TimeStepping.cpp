@@ -18,7 +18,6 @@
 */
 
 #include "TimeStepping.h"
-#include "LCP.h"
 #include "FrictionContact2D.h"
 #include "FrictionContact3D.h"
 
@@ -52,7 +51,7 @@ TimeStepping::TimeStepping(SimulationXML* strxml, Model *newModel): Simulation(s
       allNSProblems["timeStepping"] = new FrictionContact3D(simulationxml->getOneStepNSProblemXMLPtr(), this);
       isNSProblemAllocatedIn[ allNSProblems["timeStepping"] ] = true;
     }
-    else RuntimeException::selfThrow("Simulation::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
+    else RuntimeException::selfThrow("TimeStepping::xml constructor - wrong type of NSProblem: inexistant or not yet implemented");
 
     allNSProblems["timeStepping"]->setId("timeStepping");
 
@@ -63,12 +62,6 @@ TimeStepping::TimeStepping(SimulationXML* strxml, Model *newModel): Simulation(s
 // --- Destructor ---
 TimeStepping::~TimeStepping()
 {}
-
-TimeStepping* TimeStepping::convert(Simulation *str)
-{
-  TimeStepping* ts = dynamic_cast<TimeStepping*>(str);
-  return ts;
-}
 
 void TimeStepping::updateIndexSet(const unsigned int i)
 {
@@ -141,13 +134,7 @@ void TimeStepping::addOneStepNSProblemPtr(OneStepNSProblem* osns)
 
 void TimeStepping::initialize()
 {
-  if (model == NULL)
-    RuntimeException::selfThrow("Simulation initialization - model = NULL.");
-
-  // initialization of the OneStepIntegrators
-  OSIIterator itOsi;
-  for (itOsi = allOSI.begin(); itOsi != allOSI.end(); ++itOsi)
-    (*itOsi)->initialize();
+  Simulation::initialize();
 
   if (allNSProblems.size() > 1)
     RuntimeException::selfThrow("TimeStepping::initialize, at the time, a time stepping simulation can not have more than one non smooth problem.");
@@ -177,6 +164,7 @@ void TimeStepping::initialize()
     (itOsns->second)->initialize();
   }
 
+  // === update all index sets ===
   updateIndexSets();
 }
 
@@ -209,3 +197,10 @@ void TimeStepping::computeOneStep()
   // update
   update();
 }
+
+TimeStepping* TimeStepping::convert(Simulation *str)
+{
+  TimeStepping* ts = dynamic_cast<TimeStepping*>(str);
+  return ts;
+}
+

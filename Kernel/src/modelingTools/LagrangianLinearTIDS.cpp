@@ -329,6 +329,11 @@ void LagrangianLinearTIDS::initialize(const double time, const unsigned int size
   // \todo: control terms handling
 }
 
+void LagrangianLinearTIDS::update(const double time)
+{
+  if (fExt != NULL)
+    computeFExt(time);
+}
 
 void LagrangianLinearTIDS::setK(const SiconosMatrix& newValue)
 {
@@ -427,6 +432,8 @@ void LagrangianLinearTIDS::computeRhs(const double time, const bool)
     if (flag)
       *vField = *(workMatrix["inverseOfMass"])**vField;
   }
+
+  *vField += *p;
 }
 
 void LagrangianLinearTIDS::computeJacobianXRhs(const double time, const bool)

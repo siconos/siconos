@@ -264,9 +264,11 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   DSIterator itDS;
 
   // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
-  MapOfMatrices W;
-  MapOfDouble Theta;
-  getOSIMaps(UR1, W, Theta);
+  // If OSI = MOREAU, centralBlocks = W
+  // if OSI = LSODAR, centralBlocks = M (mass matrices)
+  MapOfMatrices centralBlocks;
+  MapOfDouble Theta; // If OSI = LSODAR, Theta remains empty
+  getOSIMaps(UR1, centralBlocks, Theta);
 
   SiconosMatrix* currentBlock = blocks[UR1][UR2];
   currentBlock->zero();
@@ -276,8 +278,11 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   double h = simulation->getTimeDiscretisationPtr()->getH();
   bool flagRightBlock = false;
 
-  // General form of the block is :   block = a*extraBlock + b * leftBlock * OP * rightBlock
-  // a and b are scalars, OP a matrix depending on the integrator, the simulation type ...
+  // Note that Lsodar is available only for Lagrangian systems at the time.
+  // Exception will be thrown for any other DS (in getOSIMaps)
+
+  // General form of the block is :   block = a*extraBlock + b * leftBlock * centralBlocks * rightBlock
+  // a and b are scalars, centralBlocks a matrix depending on the integrator (and on the DS), the simulation type ...
   // left, right and extra depend on the relation type and the non smooth law.
 
   // loop over the common DS
@@ -296,7 +301,7 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     {
       rightBlock = new SimpleMatrix(sizeDS, nslawSize2);
       UR2->getRightBlockForDS(*itDS, rightBlock);
-      *currentBlock += h * Theta[*itDS]* *leftBlock * (*W[*itDS] * *rightBlock); //left = C, right = B
+      *currentBlock += h * Theta[*itDS]* *leftBlock * (*centralBlocks[*itDS] * *rightBlock); //left = C, right = B
       if (UR1 == UR2)
       {
         extraBlock = new SimpleMatrix(nslawSize1, nslawSize1);
@@ -319,7 +324,7 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
         flagRightBlock = true;
       }
 
-      *currentBlock +=  *leftBlock * (W[*itDS])->multTranspose(*rightBlock); // left = right = G or H
+      *currentBlock +=  *leftBlock * (centralBlocks[*itDS])->multTranspose(*rightBlock); // left = right = G or H
     }
     else RuntimeException::selfThrow("LCP::computeBlock not yet implemented for relation of type " + relationType1);
     delete leftBlock;

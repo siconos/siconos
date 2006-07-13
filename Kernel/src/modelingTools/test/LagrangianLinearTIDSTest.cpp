@@ -211,6 +211,7 @@ void LagrangianLinearTIDSTest::testcomputeDS()
   DynamicalSystem * ds = new LagrangianLinearTIDS(tmpxml1);
   LagrangianLinearTIDS * copy = static_cast<LagrangianLinearTIDS*>(ds);
   double time = 1.5;
+  ds->initialize(time);
   ds->computeRhs(time);
   ds->computeJacobianXRhs(time);
 

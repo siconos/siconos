@@ -527,7 +527,7 @@ void LagrangianLinearR::computeFreeOutput(const double time)
     LagrangianR::computeFreeOutput(time);
 }
 
-void LagrangianLinearR::computeInput(const double time)
+void LagrangianLinearR::computeInput(const double time, const unsigned int level)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianLinearR::computeInput, no interaction linked with this relation");
@@ -559,14 +559,14 @@ void LagrangianLinearR::computeInput(const double time)
     }
 
     // get lambda of the concerned interaction
-    SiconosVector *lambda = interaction->getLambdaPtr(1);
+    SiconosVector *lambda = interaction->getLambdaPtr(level);
 
     // compute p = Ht lambda
     *p += matTransVecMult(*H, *lambda);
     delete p;
   }
   else
-    LagrangianR::computeInput(time);
+    LagrangianR::computeInput(time, level);
 }
 
 void LagrangianLinearR::saveRelationToXML() const

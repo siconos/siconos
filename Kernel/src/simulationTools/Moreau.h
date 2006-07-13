@@ -222,10 +222,11 @@ public:
    */
   void integrate(const double, const double, double, bool);
 
-  /** \fn void updateState()
+  /** \fn void updateState(const double)
    *  \brief updates the state of the Dynamical System
+   *  \param double: current time
    */
-  void updateState();
+  void updateState(const double);
 
   /** \fn void saveIntegratorToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree

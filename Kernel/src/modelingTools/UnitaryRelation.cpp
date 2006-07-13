@@ -257,8 +257,6 @@ void UnitaryRelation::computeFreeOutput(const double time, SiconosVector* yFree)
     }
     else
       RuntimeException::selfThrow("UnitaryRelation::computeFreeOutput not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType);
-
-    *yFree = *(getYPtr(1)) + e**(static_cast<SimpleVector*>(getYOldPtr(1)));
   }
   else
     RuntimeException::selfThrow("UnitaryRelation::computeFreeOutput not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType);

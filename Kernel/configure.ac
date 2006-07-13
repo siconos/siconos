@@ -55,9 +55,11 @@ AC_ARG_ENABLE(insure,
  ]
 )
 ]) # AC_PROG_INSURE
+   
+dnl Uncomment the line above and add --enable-insure to compile with insure
+dnl AC_PROG_INSURE
 
-dnl  AC_PROG_INSURE
-
+dnl Comment the following lines to compile with insure
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_F77
@@ -75,6 +77,7 @@ case $CXX_VER in
 esac
 AC_MSG_RESULT([ok ($CXX_VER)])   
 
+dnl End of comment for insure
 
 # checks for libtool
 AC_PROG_LIBTOOL

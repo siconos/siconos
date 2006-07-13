@@ -437,7 +437,7 @@ public:
    */
   void check_solver(const int) const;
 
-  /** \fn void getOSIMaps(UnitaryRelation* UR, MapOfMatrices& W, MapOfDouble& Theta)
+  /** \fn void getOSIMaps(UnitaryRelation* UR, MapOfMatrices& , MapOfDouble& Theta)
    *  \brief get the OSI-related matrices used to compute the current Unitary Relation block (Ex: for Moreau, W and Theta)
    *  \param a pointer to UnitaryRelation
    *  \param a MapOfMatrices(in-out parameter)

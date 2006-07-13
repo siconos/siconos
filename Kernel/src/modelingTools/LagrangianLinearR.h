@@ -243,12 +243,12 @@ public:
    */
   void computeOutput(const double time);
 
-  /** \fn void computeInput(double time);
+  /** \fn void computeInput(double time, const unsigned int);
    *  \brief default function to compute lambda
    *  \param double : current time
-   *  \exception RuntimeException
+   *  \param unsigned int: "derivative" order of lambda used to compute input
    */
-  void computeInput(const double time);
+  void computeInput(const double time, const unsigned int);
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the Relation to the XML tree

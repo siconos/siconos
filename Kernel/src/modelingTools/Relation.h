@@ -314,12 +314,12 @@ public:
    */
   virtual void computeFreeOutput(const double);
 
-  /** \fn void computeInput(double time);
+  /** \fn void computeInput(const double time, const unsigned int level);
    *  \brief default function to compute r
    *  \param double : current time
-   *  \exception RuntimeException
+   *  \param unsigned int: "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(const double);
+  virtual void computeInput(const double, const unsigned int);
 
   /** \fn void setComputeOutputFunction(string pluginPath, string functionName)
    *  \brief allow to set a specified function to compute output

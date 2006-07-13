@@ -188,10 +188,12 @@ public:
    */
   ~Interaction();
 
-  /** \fn void initialize()
+  /** \fn void initialize(const unsigned int)
    *  \brief allocate memory for y[i] and lambda[i] and set them to zero.
+   *   \param unsigned int: dim of Y and Lambda vector of Interactions (ie number of derivatives that
+   *          are taken into account). This is an input argument since it depends on the simulation type.
    */
-  void initialize();
+  void initialize(const unsigned int);
 
   /** \fn void initializeVectors(VectorOfBlocks inputVector)
    *  \brief set all components of inputVector to zero

@@ -218,7 +218,6 @@ void Relation::computeOutput(const double time)
 
   computeOutputPtr(sizeX, &(*xTmp2)(0), &time, sizeY, &(*lambdaTmp)(0), sizeU,  &(*uTmp2)(0), &(*yTmp)(0), &(*param)(0));
 
-
   // Rebuilt lambda/y from Tmp
   *lambda = *lambdaTmp;
   *y = *yTmp;
@@ -291,7 +290,7 @@ void Relation::computeFreeOutput(const double time)
   // \todo update y, yDot ... depending on the relative degree.
 }
 
-void Relation::computeInput(const double time)
+void Relation::computeInput(const double time, const unsigned int level)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("Relation - computeInput: relation is not connected to any interaction");
@@ -318,7 +317,7 @@ void Relation::computeInput(const double time)
   }
 
 
-  SiconosVector *lambda = interaction->getLambdaPtr(0);
+  SiconosVector *lambda = interaction->getLambdaPtr(level);
   unsigned int sizeY = lambda->size();
 
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.

@@ -638,12 +638,8 @@ void  SimpleMatrix::PLUFactorizationInPlace()
 
 void  SimpleMatrix::PLUInverseInPlace()
 {
-  if ((isPLUFactorized))
-  {
-  }
-  else
+  if (!isPLUFactorized)
     SiconosMatrixException::selfThrow(" SimpleMatrix::PLUInverseInPlace : This Matrix is not LU Factorized   with Partial pivoting");
-
 
   long int info;
 

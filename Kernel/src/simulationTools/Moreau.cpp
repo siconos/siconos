@@ -601,7 +601,7 @@ void Moreau::integrate(const double tinit, const double tend, double tout, bool 
   }
 }
 
-void Moreau::updateState()
+void Moreau::updateState(const double)
 {
   double h = simulationLink->getTimeDiscretisationPtr()->getH();
 

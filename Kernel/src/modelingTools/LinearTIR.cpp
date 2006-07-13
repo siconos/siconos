@@ -676,7 +676,7 @@ void LinearTIR::computeFreeOutput(const double time)
     Relation::computeFreeOutput(time);
 }
 
-void LinearTIR::computeInput(const double time)
+void LinearTIR::computeInput(const double time, const unsigned int level)
 {
   if (!isOutputPlugged)
   {
@@ -698,13 +698,13 @@ void LinearTIR::computeInput(const double time)
         r->addPtr(static_cast<SimpleVector*>((*it)->getRPtr()));
     }
 
-    SiconosVector *lambda = interaction->getLambdaPtr(0);
+    SiconosVector *lambda = interaction->getLambdaPtr(level);
 
     *r += *B * *lambda;
     delete r;
   }
   else
-    Relation::computeInput(time);
+    Relation::computeInput(time, level);
 }
 
 void LinearTIR::display() const

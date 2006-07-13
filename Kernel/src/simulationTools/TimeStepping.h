@@ -21,6 +21,7 @@
 
 #include "Simulation.h"
 #include "Moreau.h"
+#include "LCP.h"
 
 /** \class TimeStepping
  *  \brief Specific simulation, using time stepping schemes.

@@ -333,6 +333,7 @@ void LagrangianDSTest::testcomputeDS()
   DynamicalSystem * ds = new LagrangianDS(tmpxml2);
   LagrangianDS * copy = static_cast<LagrangianDS*>(ds);
   double time = 1.5;
+  ds->initialize(time);
   ds->computeRhs(time);
   ds->computeJacobianXRhs(time);
   SimpleMatrix M(3, 3);

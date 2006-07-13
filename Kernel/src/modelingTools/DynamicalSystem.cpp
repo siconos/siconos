@@ -968,6 +968,18 @@ void DynamicalSystem::initialize(const double time, const unsigned int sizeOfMem
 
 }
 
+void DynamicalSystem::update(const double time)
+{
+
+  // compute initial values for f and jacobianXF, initialize right-hand side.
+  rhs->zero();
+  computeRhs(time); // this will compute, if required, f, u and T.
+
+  jacobianXRhs->zero();
+  computeJacobianXRhs(time);
+
+}
+
 // ===== MEMORY MANAGEMENT FUNCTIONS =====
 
 void DynamicalSystem::initMemory(const unsigned int steps)
@@ -1155,6 +1167,8 @@ void DynamicalSystem::computeRhs(const double time, const bool)
     else
       *rhs += *u;
   }
+
+  *rhs += * r; // Warning: r update is done in Interactions/Relations
 }
 
 void DynamicalSystem::computeJacobianXRhs(const double time, const bool)

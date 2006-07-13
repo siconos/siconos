@@ -406,12 +406,12 @@ public:
    */
   virtual void computeFreeOutput(const double);
 
-  /** \fn void computeInput(double time);
+  /** \fn void computeInput(double time, const unsigned int level);
    *  \brief to compute p
    *  \param double : current time
-   *  \exception RuntimeException
+   *  \param unsigned int: "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(const double);
+  virtual void computeInput(const double, const unsigned int);
 
   /** \fn void getGBlockDS(const int,SiconosMatrix&, const unsigned int index = 0) const
    *  \brief get in Matrix G[index] the block corresponding to DS number int

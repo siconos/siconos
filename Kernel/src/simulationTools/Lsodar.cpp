@@ -79,6 +79,19 @@ Lsodar::Lsodar(DynamicalSystem* ds, Simulation* newS):
   doubleData.resize(4);
 }
 
+Lsodar::Lsodar(DynamicalSystemsSet& newDS, Simulation* newS):
+  OneStepIntegrator("Lsodar", newDS, newS), localTimeDiscretisation(NULL), isLocalTimeDiscretisationAllocatedIn(false), iwork(NULL)
+{
+  if (simulationLink == NULL)
+    RuntimeException::selfThrow("Lsodar:: constructor(DSSet,simulation) - simulation == NULL");
+
+  // local time discretisasation is set by default to those of the simulation.
+  localTimeDiscretisation = simulationLink->getTimeDiscretisationPtr(); // warning: pointer link!
+
+  intData.resize(9);
+  doubleData.resize(4);
+}
+
 Lsodar::~Lsodar()
 {
   global_object = NULL;
@@ -163,14 +176,19 @@ void Lsodar::updateData()
 }
 
 
-void Lsodar::fillXWork(doublereal * x)
+void Lsodar::fillXWork(integer* sizeOfX, doublereal * x)
 {
   DSIterator it;
   unsigned int i = 0;
+  unsigned int sizeX = (unsigned int)(*sizeOfX);
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
   {
     for (unsigned int j = i ; j < (*it)->getDim() ; ++j)
+    {
+      if (i > sizeX)
+        RuntimeException::selfThrow("Lsodar::fillXWork(x), inconsistent sizes.");
       (*xWork)(j) = x[i++];
+    }
   }
 }
 
@@ -179,7 +197,6 @@ void Lsodar::computeRhs(const double t)
   DSIterator it;
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
     (*it)->computeRhs(t);
-
 }
 
 void Lsodar::computeJacobianRhs(const double t)
@@ -191,7 +208,7 @@ void Lsodar::computeJacobianRhs(const double t)
 
 void Lsodar::f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
-  static_cast<EventDriven*>(simulationLink)->computeF(this);
+  static_cast<EventDriven*>(simulationLink)->computeF(this, sizeOfX, time, x, xdot);
 }
 
 void Lsodar::g(integer * nEq, doublereal * time, doublereal* x, integer * ng, doublereal * gOut)
@@ -201,7 +218,7 @@ void Lsodar::g(integer * nEq, doublereal * time, doublereal* x, integer * ng, do
 
 void Lsodar::jacobianF(integer *sizeOfX, doublereal *time, doublereal *x, integer* ml, integer *mu,  doublereal *jacob, integer *nrowpd)
 {
-  static_cast<EventDriven*>(simulationLink)->computeJacobianF(this);
+  static_cast<EventDriven*>(simulationLink)->computeJacobianF(this, sizeOfX, time, x, jacob);
 }
 
 void Lsodar::initialize()
@@ -222,8 +239,6 @@ void Lsodar::computeFreeState() // useless??
 void Lsodar::integrate(const double tinit, const double tend, double tout, bool iout)
 {
   // For details on DLSODAR parameters, see opkdmain.f in Numerics/src/odepack
-
-  //SiconosVector * x = ds->getXPtr(); // initial conditions
 
   doublereal tend_DR = tend  ;       // next point where output is desired (different from t!)
   doublereal tinit_DR = tinit;       // current (starting) time
@@ -317,8 +332,13 @@ void Lsodar::integrate(const double tinit, const double tend, double tout, bool 
 }
 
 
-void Lsodar::updateState()
-{}
+void Lsodar::updateState(const double time)
+{
+  // Compute all required (ie time-dependent) data for the DS of the OSI.
+  DSIterator it;
+  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
+    (*it)->update(time);
+}
 
 void Lsodar::display() const
 {

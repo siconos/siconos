@@ -256,10 +256,11 @@ public:
    */
   virtual void integrate(const double, const double, double, bool) = 0;
 
-  /** \fn void updateState()
+  /** \fn void updateState(const double time)
    *  \brief update the state of the DynamicalSystem attached to this Integrator
+   *  \param double: current time
    */
-  virtual void updateState() = 0;
+  virtual void updateState(const double) = 0;
 
   /** \fn void display()
    *  \brief print the data to the screen

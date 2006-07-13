@@ -88,12 +88,12 @@ class SiconosSharedLibrary;
  *
  * Right-hand side of the equation is denoted rhs and is computed thanks to computeRhs(t).
  *
- * \f[ rhs(x,t) =  f(x,t) + T(x) u(x,t)\f]
+ * \f[ rhs(x,t) =  f(x,t) + T(x) u(x,t) + r \f]
  *
  * Its Jacobian according to x is jacobianXRhs:
  *
  *  \f[
- *   jacobianXRhs = \nabla_xrhs(x,t) = \nabla_xf(x,t) + \nabla_xT(x)U(x,t)
+ *   jacobianXRhs = \nabla_xrhs(x,t) = \nabla_xf(x,t) + \nabla_xT(x)U(x,t) + \nabla_x r
  *  \f]
  *
  * At the time, \f$\nabla_xT(x)\f$ is never taken into account.
@@ -1029,6 +1029,12 @@ public:
    *  \param the size of the memory, default size = 1.
    */
   virtual void initialize(const double = 0, const unsigned int = 1) ;
+
+  /** \fn void update(const double) ;
+   *  \brief dynamical system update: mainly call compute for all time or state depending functions
+   *  \param current time
+   */
+  virtual void update(const double);
 
   // ===== MEMORY MANAGEMENT FUNCTIONS =====
 

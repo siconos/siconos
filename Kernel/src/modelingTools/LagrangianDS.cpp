@@ -754,6 +754,82 @@ void LagrangianDS::initialize(const double time, const unsigned int sizeOfMemory
   // \todo: control terms handling
 }
 
+void LagrangianDS::update(const double time)
+{
+
+  // compute plug-in values for mass, FInt etc ...
+  computeMass();
+  computeInverseOfMass();
+  // rhs
+  // note that rhs(0) = velocity, with pointer link, must already be set.
+  SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
+  vField->zero();
+
+  bool flag = false;
+  if (fExt != NULL)
+  {
+    computeFExt(time);
+    *vField += *fExt;
+    flag = true;
+  }
+  if (fInt != NULL)
+  {
+    computeFInt(time);
+    *vField -= *fInt;
+    flag = true;
+  }
+  if (NNL != NULL)
+  {
+    computeNNL();
+    *vField -= *NNL;
+    flag = true;
+  }
+  if (flag) // else vField = 0
+    *vField = *(workMatrix["inverseOfMass"])**vField;
+
+  // jacobianXF
+  if (jacobianQFInt != NULL || jacobianQNNL != NULL || jacobianVelocityFInt != NULL || jacobianVelocityNNL != NULL)
+  {
+    workMatrix["jacob-block10"]->zero();
+    workMatrix["jacob-block11"]->zero();
+  }
+
+  flag = false;
+  if (jacobianQFInt != NULL)
+  {
+    computeJacobianQFInt(time);
+    *workMatrix["jacob-block10"] -= *jacobianQFInt;
+    flag = true;
+  }
+  if (jacobianQNNL != NULL)
+  {
+    computeJacobianQNNL();
+    *workMatrix["jacob-block10"] -= *jacobianQNNL;
+    flag = true;
+  }
+  if (flag)
+    *workMatrix["jacob-block10"] = *workMatrix["inverseOfMass"] **workMatrix["jacob-block10"];
+
+  // !!! jacobian of M according to q is not take into account at the time !!!
+  flag = false;
+  if (jacobianVelocityFInt != NULL)
+  {
+    computeJacobianVelocityFInt(time);
+    *workMatrix["jacob-block11"] -= *jacobianVelocityFInt;
+    flag = true;
+  }
+  if (jacobianVelocityNNL != NULL)
+  {
+    computeJacobianVelocityNNL();
+    *workMatrix["jacob-block11"] -= *jacobianVelocityNNL;
+    flag = true;
+  }
+  if (flag)
+    *workMatrix["jacob-block11"] = *workMatrix["inverseOfMass"] * *workMatrix["jacob-block11"];
+
+  // \todo: control terms handling
+}
+
 // --- GETTERS/SETTERS ---
 
 void LagrangianDS::setQ(const SimpleVector& newValue)
@@ -959,6 +1035,15 @@ void LagrangianDS::setPPtr(SimpleVector *newPtr)
   if (isAllocatedIn["p"]) delete p;
   p = newPtr;
   isAllocatedIn["p"] = false;
+}
+
+SiconosMatrix * LagrangianDS::getInverseOfMassPtr()
+{
+  if (workMatrix.find("inverseOfMass") == workMatrix.end()) // ie if inverse of Mass has not been computed
+    RuntimeException::selfThrow("LagrangianDS - getInverseOfMassPtr: you need to compute this matrix first.");
+
+  // Warning: in this function we do not checked that tha matrix is up to date. If M depends on q, it may require a recomputation before the get.
+  return workMatrix["inverseOfMass"];
 }
 
 void LagrangianDS::setMass(const SiconosMatrix& newValue)
@@ -1513,8 +1598,11 @@ void LagrangianDS::computeRhs(const double time, const bool isDSup)
 {
   // if isDSup == true, this means that there is no need to re-compute mass ...
   // note that rhs(0) = velocity, with pointer link, must already be set.
+  cout << " LSLDLSDLSKLDSKLDSKLDLD" << endl;
   SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
+  cout << " LSLDLSDLSKLDSKLDSKLDLD" << endl;
   vField->zero();
+  cout << " LSLDLSDLSKLDSKLDSKLDLD" << endl;
   bool flag = false;
   if (!isDSup) // if it is necessary to re-compute mass, FInt ..., ie if they have not been compiled during the present time step
   {
@@ -1543,6 +1631,7 @@ void LagrangianDS::computeRhs(const double time, const bool isDSup)
   }
   else
   {
+    cout << "qqqqqqqqqqqqqqqqqqqqqq LSLDLSDLSKLDSKLDSKLDLD" << endl;
     if (fExt != NULL)
     {
       *vField += *fExt;
@@ -1558,15 +1647,28 @@ void LagrangianDS::computeRhs(const double time, const bool isDSup)
       *vField -= *NNL;
       flag = true;
     }
+    cout << "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq LSLDLSDLSKLDSKLDSKLDLD" << endl;
   }
+  cout << " LSLDLSDLSKLDSKLDSKLDLD" << endl;
 
   if (flag) // else vField = 0
-    *vField = *(workMatrix["inverseOfMass"])**vField;
+    *vField = *(workMatrix["inverseOfMass"])**vField ;
   // todo: use linearSolve to avoid inversion ? Or save M-1 to avoid re-computation. See this when "M" will be added in DS or LDS.
+
+  cout << " LSLDLSDLSKLDSKLDSKLDLD" << endl;
+  vField->display();
+
+  cout << " LSLDLSDLSKLDSKLDSKLDLD" << endl;
+
+  *vField += *p; // Warning: r update is done in Interactions/Relations
+
 }
 
 void LagrangianDS::computeJacobianXRhs(const double time, const bool isDSup)
 {
+
+  // jacobian_x of R ???? To do.
+
 
   // if isDSup == true, this means that there is no need to re-compute mass ...
   workMatrix["jacob-block10"]->zero();
@@ -1796,4 +1898,30 @@ double LagrangianDS::dsConvergenceIndicator()
     dsCvgIndic = diff->norm();
   delete diff;
   return (dsCvgIndic);
+}
+
+void LagrangianDS::computeQFree(const double time, const unsigned int level, SiconosVector* qFreeOut)
+{
+  // to compute qFree, derivative number level. Mainly used in EventDriven to compute second derivative
+  // of q for Output y computation.
+
+  if (qFreeOut->size() != ndof)
+    RuntimeException::selfThrow("LagrangianDS::computeQFree - Wrong size for output (different from ndof)");
+
+
+  if (level != 2)
+    RuntimeException::selfThrow("LagrangianDS::computeQFree - Only implemented for second derivative.");
+
+  // Warning: we suppose that all other operators are up to date (FInt, FExt ...)
+
+  qFreeOut->zero();
+  if (fInt != NULL)
+    *qFreeOut += *fInt;
+  if (fExt != NULL)
+    *qFreeOut -= *fExt;
+  if (NNL != NULL)
+    *qFreeOut += *NNL;
+
+  *qFreeOut = *workMatrix["inverseOfMass"]**qFreeOut;
+
 }

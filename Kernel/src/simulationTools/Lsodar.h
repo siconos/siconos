@@ -78,6 +78,13 @@ public:
    */
   Lsodar(DynamicalSystem* , Simulation*);
 
+  /** \fn Lsodar(DynamicalSystemsSet& , Simulation*)
+   *  \brief constructor from a list of Dynamical Systems
+   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
+   *  \param Simulation * : the simulation that owns the osi
+   */
+  Lsodar(DynamicalSystemsSet&, Simulation*);
+
   /** \fn ~Lsodar()
    *  \brief destructor
    */
@@ -181,10 +188,12 @@ public:
    */
   void updateData();
 
-  /** \fn void fillXWork(doublereal * x)
+  /** \fn void fillXWork(integer* sizeOfX, doublereal * x)
    *  \brief fill xWork with a doublereal
+   *  \param integer*, size of x array
+   *  \param doublereal* x:array of double
    */
-  void fillXWork(doublereal *) ;
+  void fillXWork(integer*, doublereal *) ;
 
   /** \fn void computeRhs(const double t) ;
    *  \brief compute rhs(t) for all dynamical systems in the set
@@ -221,10 +230,11 @@ public:
    */
   void integrate(const double, const double, double, bool);
 
-  /** \fn void updateState()
+  /** \fn void updateState(const double)
    *  \brief update the state of the DynamicalSystem attached to this Integrator
+   *  \param double: current time
    */
-  void updateState();
+  void updateState(const double);
 
   /** \fn Lsodar* convert (OneStepIntegrator* osi)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
