@@ -263,12 +263,14 @@ void OneStepNSProblem::initialize()
   if (OSNSInteractions.isEmpty())
     //RuntimeException::selfThrow("OneStepNSProblem::initialize - The set of Interactions of this problem is empty.");
     cout << "Warning, OneStepNSProblem::initialize, the set of Interactions of this problem is empty." << endl;
+  else
+  {
+    updateOutput();
+    updateInput();
 
-  updateOutput();
-  updateInput();
-
-  updateBlocks();
-  computeSizeOutput();
+    updateBlocks();
+    computeSizeOutput();
+  }
 }
 
 void OneStepNSProblem::nextStep()

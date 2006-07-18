@@ -299,6 +299,15 @@ public:
     return onestepnspbxml;
   }
 
+  /** \fn InteractionsSet getInteractions()
+   *  \brief get the Interactions set
+   *  \return an InteractionsSet
+   */
+  inline InteractionsSet getInteractions() const
+  {
+    return OSNSInteractions;
+  }
+
   /** \fn inline void setOneStepNSProblemXML(OneStepNSProblemXML* osnspb)
    *  \brief set the OneStepNSProblemXML
    *  \param a pointer on OneStepNSProblemXML

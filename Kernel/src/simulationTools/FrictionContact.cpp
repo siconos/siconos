@@ -199,7 +199,7 @@ void FrictionContact::initialize()
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
   // if all relative degrees are equal to 0 or 1
-  if (topology->isTimeInvariant())
+  if (topology->isTimeInvariant() &&   !OSNSInteractions.isEmpty())
     assembleM();
 }
 

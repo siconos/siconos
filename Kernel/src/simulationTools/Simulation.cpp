@@ -231,6 +231,13 @@ const bool Simulation::hasCommonDSInIntegrators(OneStepIntegrator* osi) const
   return val;
 }
 
+const UnitaryRelationsSet Simulation::getIndexSet(const unsigned int i) const
+{
+  if (i >= indexSets.size())
+    RuntimeException::selfThrow("Simulation - getIndexSet(i) - index set(i) does not exist.");
+  return indexSets[i];
+}
+
 OneStepNSProblem* Simulation::getOneStepNSProblemPtr(const std::string name)
 {
   if (!hasOneStepNSProblem(name))
@@ -315,26 +322,31 @@ void Simulation::initialize()
 
   // We first need to initialize the topology (computes UnitaryRelation sets, relative degrees ...)
   model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->initialize();
-  unsigned int maxDegree = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
-
-  // Interactions initialization (here, since level depends on the type of simulation)
-  // level corresponds to the number of Y and Lambda derivatives computed.
-  unsigned int level = maxDegree;
-  if (maxDegree == 0)
-    level++;
-
-  if (simulationType == "EventDriven")
-    level++;
 
   InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractions();
-  InteractionsIterator it;
-  for (it = allInteractions.begin(); it != allInteractions.end(); ++it)
-    (*it)->initializeMemory(level);
 
-  if (maxDegree != 0)
-    indexSets.resize(level);
-  else indexSets.resize(1);
-  indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0();
+  if (!allInteractions.isEmpty()) // ie if some Interactions have been declared
+  {
+    unsigned int maxDegree = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
+    // Interactions initialization (here, since level depends on the type of simulation)
+    // level corresponds to the number of Y and Lambda derivatives computed.
+    unsigned int level = maxDegree;
+
+    if (maxDegree == 0)
+      level = 1;
+
+    if (simulationType == "EventDriven")
+      level++;
+
+    InteractionsIterator it;
+    for (it = allInteractions.begin(); it != allInteractions.end(); ++it)
+      (*it)->initializeMemory(level);
+
+    if (maxDegree != 0)
+      indexSets.resize(level);
+    else indexSets.resize(1);
+    indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0();
+  }
 
   // initialization of the OneStepIntegrators
   OSIIterator itOsi;
@@ -386,6 +398,7 @@ void Simulation::newtonSolve(const double criterion, const unsigned int maxStep)
   {
     nbNewtonStep++;
     computeFreeState();
+    updateIndexSets();
     computeOneStepNSProblem("timeStepping");
     update();
     isNewtonConverge = newtonCheckConvergence(criterion);

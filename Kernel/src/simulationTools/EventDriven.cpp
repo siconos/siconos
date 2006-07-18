@@ -158,10 +158,12 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   lsodar->updateState(t);
 
   // solve a LCP "acceleration"
-
-  allNSProblems["acceleration"]->compute(t);
-  allNSProblems["acceleration"]->updateOutput();
-  allNSProblems["acceleration"]->updateInput();
+  if (!(allNSProblems["acceleration"]->getInteractions()).isEmpty())
+  {
+    allNSProblems["acceleration"]->compute(t);
+    allNSProblems["acceleration"]->updateOutput();
+    allNSProblems["acceleration"]->updateInput();
+  }
 
   // Compute the right-hand side ( xdot = f + Tu in DS) for all the ds
 

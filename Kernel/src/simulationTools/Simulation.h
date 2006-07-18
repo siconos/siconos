@@ -267,10 +267,7 @@ public:
    *  \brief get indexSets[i]
    *  \return a UnitaryRelationsSet
    */
-  inline const UnitaryRelationsSet getIndexSet(const unsigned int i) const
-  {
-    return indexSets[i];
-  };
+  const UnitaryRelationsSet getIndexSet(const unsigned int) const ;
 
   /** \fn const OneStepNSProblems getOneStepNSProblems() const
    *  \brief get allNSProblems
