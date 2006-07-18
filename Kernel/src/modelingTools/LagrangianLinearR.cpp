@@ -419,18 +419,18 @@ void LagrangianLinearR::getHBlockDS(const int DSNumber, SiconosMatrix& Block) co
   H->getBlock(index_list, Block);
 }
 
-void LagrangianLinearR::computeOutput(const double time)
+void LagrangianLinearR::computeOutput(const double time, const unsigned int derivativeNumber)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianLinearR::computeOutput, no interaction linked with this relation");
 
   if (!isHPlugged)
   {
+
     // Get the DS concerned by the interaction of this relation
     DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
     DSIterator it;
-    BlockVector *qTmp = new BlockVector();
-    BlockVector *velocityTmp = new BlockVector();
+    BlockVector *tmp = new BlockVector();
 
     string type;
     LagrangianDS * lds;
@@ -442,40 +442,33 @@ void LagrangianLinearR::computeOutput(const double time)
         RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + type);
       lds = static_cast<LagrangianDS*>(*it);
       // Put q and velocity of each DS into a block
-      // Warning: use copy constructors (add function), no link between pointers
-      qTmp->add(lds->getQ());
-      velocityTmp->add(lds->getVelocity());
+      if (derivativeNumber == 0)
+        tmp->addPtr(lds->getQPtr());
+      else if (derivativeNumber == 1)
+        tmp->addPtr(lds->getVelocityPtr());
     }
 
     // get y and yDot of the interaction
-    SiconosVector *y = interaction->getYPtr(0);
-    SiconosVector *yDot = interaction->getYPtr(1);
-    SiconosVector *lambda = interaction->getLambdaPtr(0);
-    SiconosVector *lambdaDot = interaction->getLambdaPtr(1);
-    // compute y and yDot
+    SiconosVector *y = interaction->getYPtr(derivativeNumber);
+    SiconosVector *lambda = interaction->getLambdaPtr(derivativeNumber);
+    //      SiconosVector *lambdaDot = interaction->getLambdaPtr(1);
+    // compute y or yDot
 
-    *y = (*H * *qTmp) ;
-
-    if (b != NULL)
+    *y = (*H * *tmp);
+    if (derivativeNumber == 0 && b != NULL)
       *y += *b;
 
-    *yDot = (*H * *velocityTmp);
-
     if (D != NULL)
-    {
       *y    += *D * *lambda ;
-      *yDot += *D * *lambdaDot ;
-    }
 
     // free memory
-    delete qTmp;
-    delete velocityTmp;
+    delete tmp;
   }
   else
-    LagrangianR::computeOutput(time);
+    LagrangianR::computeOutput(time, derivativeNumber);
 }
 
-void LagrangianLinearR::computeFreeOutput(const double time)
+void LagrangianLinearR::computeFreeOutput(const double time, const unsigned int derivativeNumber)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianLinearR::computeFreeOutput, no interaction linked with this relation");
@@ -486,8 +479,7 @@ void LagrangianLinearR::computeFreeOutput(const double time)
     DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
     DSIterator it;
 
-    BlockVector *qFreeTmp = new BlockVector();
-    BlockVector *velocityFreeTmp = new BlockVector();
+    BlockVector *freeTmp = new BlockVector();
 
     LagrangianDS* lds;
     string type;
@@ -502,29 +494,34 @@ void LagrangianLinearR::computeFreeOutput(const double time)
       lds = static_cast<LagrangianDS*>(*it);
 
       // Put qFree and velocityFree of each DS into a block
-      // Warning: use copy constructors, no link between pointers
-      qFreeTmp->add(lds->getQFree());
-      velocityFreeTmp->add(lds->getVelocityFree());
+      if (derivativeNumber == 0)
+        freeTmp->addPtr(lds->getQFreePtr());
+      else if (derivativeNumber == 1)
+        freeTmp->addPtr(lds->getVelocityFreePtr());
+      else RuntimeException::selfThrow("LagrangianLinearR::computeFreeOutput not yet implemented for derivative number: " + derivativeNumber);
     }
 
     // get y and yDot of the interaction
-    SiconosVector *y = interaction->getYPtr(0);
-    SiconosVector *yDot = interaction->getYPtr(1);
+    SiconosVector *y = interaction->getYPtr(derivativeNumber);
+    //SiconosVector *yDot = interaction->getYPtr(1);
     // compute y and yDot (!! values for free state)
 
-    *y = (*H * *qFreeTmp) ;
+    if (derivativeNumber == 0)
+    {
+      *y = (*H * *freeTmp) ;
 
-    if (b != NULL)
-      *y += *b;
-
-    *yDot = (*H * *velocityFreeTmp);
+      if (b != NULL)
+        *y += *b;
+    }
+    else if (derivativeNumber == 1)
+      *y = (*H * *freeTmp);
+    else RuntimeException::selfThrow("LagrangianLinearR::computeFreeOutput not yet implemented for derivative number: " + derivativeNumber);
 
     // free memory
-    delete qFreeTmp;
-    delete velocityFreeTmp;
+    delete freeTmp;
   }
   else
-    LagrangianR::computeFreeOutput(time);
+    LagrangianR::computeFreeOutput(time, derivativeNumber);
 }
 
 void LagrangianLinearR::computeInput(const double time, const unsigned int level)
@@ -559,9 +556,10 @@ void LagrangianLinearR::computeInput(const double time, const unsigned int level
     }
 
     // get lambda of the concerned interaction
-    SiconosVector *lambda = interaction->getLambdaPtr(level);
+    SiconosVector *lambda = interaction->getLambdaPtr(1);
 
     // compute p = Ht lambda
+
     *p += matTransVecMult(*H, *lambda);
     delete p;
   }

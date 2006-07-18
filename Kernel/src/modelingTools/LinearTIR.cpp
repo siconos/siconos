@@ -589,8 +589,11 @@ void LinearTIR::getBBlockDSPtr(const int DSNumber, SiconosMatrix& BBlock) const
   B->getBlock(index_list, BBlock);
 }
 
-void LinearTIR::computeOutput(const double time)
+void LinearTIR::computeOutput(const double time, const unsigned int)
 {
+  // Note that the second argument remains unamed since it is not used: for first order systems, we always compute
+  // y[0] (at the time).
+
   if (!isOutputPlugged)
   {
     DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
@@ -633,8 +636,11 @@ void LinearTIR::computeOutput(const double time)
   else
     Relation::computeOutput(time);
 }
-void LinearTIR::computeFreeOutput(const double time)
+void LinearTIR::computeFreeOutput(const double time, const unsigned int)
 {
+  // Note that the second argument remains unamed since it is not used: for first order systems, we always compute
+  // y[0] (at the time).
+
   if (!isOutputPlugged)
   {
     DynamicalSystemsSet vDS = interaction->getDynamicalSystems();

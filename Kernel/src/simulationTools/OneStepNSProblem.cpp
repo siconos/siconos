@@ -74,6 +74,7 @@ OneStepNSProblem::OneStepNSProblem(const string pbType, Simulation * newSimu, st
     RuntimeException::selfThrow("OneStepNSProblem::xml constructor(..., simulation), simulation == NULL");
 
   // === Links to the Interactions of the Non Smooth Dynamical System (through the Simulation) ===
+  // Warning: this means that all Interactions of the NSProblem are included in the OSNS !!
   OSNSInteractions = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getInteractions();
 
   // === Adds this in the simulation set of OneStepNSProblem ===

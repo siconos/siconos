@@ -128,7 +128,10 @@ void Topology::initialize()
   indexSet0.clear();
   InteractionsIterator it;
   for (it = allInteractions.begin()  ; it != allInteractions.end(); ++it)
+  {
+    (*it)->initialize();
     addInteractionInIndexSet(*it);
+  }
 
   //-- Fill RelativeDegreesMaps in --
   computeRelativeDegrees();

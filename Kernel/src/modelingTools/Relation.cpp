@@ -177,8 +177,11 @@ void Relation::setParameterPtr(SimpleVector *newPtr, const string id)
   isAllocatedIn[alloc] = false;
 }
 
-void Relation::computeOutput(const double time)
+void Relation::computeOutput(const double time, const unsigned int)
 {
+  // Note that the second argument remains unamed since it is not used: for first order systems, we always compute
+  // y[0] (at the time).
+
   if (interaction == NULL)
     RuntimeException::selfThrow("Relation - computeOutput: relation is not connected to any interaction");
 
@@ -230,8 +233,11 @@ void Relation::computeOutput(const double time)
   delete uTmp;
 }
 
-void Relation::computeFreeOutput(const double time)
+void Relation::computeFreeOutput(const double time, const unsigned int)
 {
+  // Note that the second argument remains unamed since it is not used: for first order systems, we always compute
+  // y[0] (at the time).
+
   if (interaction == NULL)
     RuntimeException::selfThrow("Relation - computeFreeOutput: relation is not connected to any interaction");
 

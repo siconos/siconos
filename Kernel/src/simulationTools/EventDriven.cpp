@@ -255,7 +255,40 @@ void EventDriven::update()
   for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
   {
     (itOsns->second)->updateInput();
-    (itOsns->second)->updateOutput();
+  }
+
+  //  ===> TODO : save levelMin and max in the Simulation?
+  unsigned int levelMax = 0 ;
+
+  if (model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree() != 0)
+    levelMax =  model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
+
+  double time = model->getCurrentT();
+  unsigned int levelMin;
+
+  // At the time, we consider that for all systems, levelMin is equal to the minimum value of the relative degree
+  // except for Lagrangian (Mechanical) Systems, where levelMin = 1.
+  // We get one Dynamical System of the OSI and check its type.
+  string DStype = (*(((*allOSI.begin())->getDynamicalSystems()).begin()))->getType();
+  if (DStype == LNLDS || DStype == LTIDS)
+    levelMin = 1;
+  else
+    levelMin = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree();
+
+  // ===> End of todo ...
+  if (levelMin > 0)
+  {
+    InteractionsIterator it;
+    InteractionsSet inter = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions();
+    for (it = inter.begin(); it != inter.end(); it++)
+    {
+      for (unsigned int i = 0; i <= levelMax; ++i)
+        (*it)->getRelationPtr()->computeOutput(time, i);
+    }
+  }
+
+  for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
+  {
     (itOsns->second)->nextStep();
   }
 

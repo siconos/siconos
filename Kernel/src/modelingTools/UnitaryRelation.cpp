@@ -233,16 +233,20 @@ void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
 
 void UnitaryRelation::computeFreeOutput(const double time, SiconosVector* yFree)
 {
-  mainInteraction->getRelationPtr()->computeFreeOutput(time);
   // Get relation and non smooth law types
   string relationType = getRelationType();
   string nslawType = getNonSmoothLawType();
 
   if (relationType == LINEARTIRELATION && nslawType == COMPLEMENTARITYCONDITIONNSLAW)
+  {
+    mainInteraction->getRelationPtr()->computeFreeOutput(time, 0);
     (*yFree) = *(getYPtr(0));
+  }
   else if ((relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION))
   {
     double e;
+    //mainInteraction->getRelationPtr()->computeFreeOutput(time,0);
+    mainInteraction->getRelationPtr()->computeFreeOutput(time, 1);
     *yFree = *(getYPtr(1));
     if (nslawType == NEWTONIMPACTNSLAW)
     {
@@ -261,3 +265,4 @@ void UnitaryRelation::computeFreeOutput(const double time, SiconosVector* yFree)
   else
     RuntimeException::selfThrow("UnitaryRelation::computeFreeOutput not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType);
 }
+

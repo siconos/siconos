@@ -229,26 +229,26 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** \fn void computeFreeOutput(double time);
+  /** \fn void computeFreeOutput(double time, const unsigned int = 0);
    *  \brief default function to compute y for the free state
    *  \param double : current time
-   *  \exception RuntimeException
+   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  void computeFreeOutput(const double time);
+  void computeFreeOutput(const double, const unsigned int = 0);
 
-  /** \fn void computeOutput(double time);
+  /** \fn void computeOutput(double time, const unsigned int = 0);
    *  \brief default function to compute y
    *  \param double : current time
-   *  \exception RuntimeException
+   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  void computeOutput(const double time);
+  void computeOutput(const double, const unsigned int = 0);
 
   /** \fn void computeInput(double time, const unsigned int);
    *  \brief default function to compute lambda
    *  \param double : current time
    *  \param unsigned int: "derivative" order of lambda used to compute input
    */
-  void computeInput(const double time, const unsigned int);
+  void computeInput(const double, const unsigned int);
 
   /** \fn void saveRelationToXML()
    *  \brief copy the data of the Relation to the XML tree

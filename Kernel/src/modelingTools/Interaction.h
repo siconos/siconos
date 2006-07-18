@@ -188,18 +188,17 @@ public:
    */
   ~Interaction();
 
-  /** \fn void initialize(const unsigned int)
+  /** \fn void initialize()
    *  \brief allocate memory for y[i] and lambda[i] and set them to zero.
+   */
+  void initialize();
+
+  /** \fn void initializeMemory(const unsigned int)
+   *  \brief build Y and Lambda stl vectors.
    *   \param unsigned int: dim of Y and Lambda vector of Interactions (ie number of derivatives that
    *          are taken into account). This is an input argument since it depends on the simulation type.
    */
-  void initialize(const unsigned int);
-
-  /** \fn void initializeVectors(VectorOfBlocks inputVector)
-   *  \brief set all components of inputVector to zero
-   *  \param a vector of SimpleVector*
-   */
-  void initializeVectors(VectorOfBlocks);
+  void initializeMemory(const unsigned int);
 
   // === GETTERS/SETTERS ===
 

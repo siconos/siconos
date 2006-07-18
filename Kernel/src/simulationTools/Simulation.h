@@ -390,7 +390,7 @@ public:
   /** \fn void update()
    *  \brief update input, state of each dynamical system and output
    */
-  virtual void update();
+  virtual void update() = 0;
 
   /** \fn void run()
    *  \brief run the simulation, from t0 to T

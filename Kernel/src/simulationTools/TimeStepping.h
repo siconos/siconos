@@ -66,6 +66,11 @@ public:
    */
   void initialize();
 
+  /** \fn void update()
+   *  \brief update input, state of each dynamical system and output
+   */
+  void update();
+
   /** \fn void run()
    *  \brief run the simulation, from t0 to T
    */

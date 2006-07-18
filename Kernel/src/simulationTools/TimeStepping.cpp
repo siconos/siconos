@@ -168,6 +168,84 @@ void TimeStepping::initialize()
   updateIndexSets();
 }
 
+void TimeStepping::update()
+{
+  // compute input (lambda -> r)
+  OSNSIterator itOsns;
+  for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
+    (itOsns->second)->updateInput();
+
+  // compute state for each dynamical system
+
+  double time = model->getCurrentT();
+  OSIIterator it;
+  for (it = allOSI.begin(); it != allOSI.end() ; ++it)
+    (*it)->updateState(time);
+
+  //  ===> TODO : save levelMin and max in the Simulation?
+  unsigned int levelMax = 0 ;
+
+  if (model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree() != 0)
+    levelMax =  model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree() - 1;
+
+  unsigned int levelMin;
+
+  // At the time, we consider that for all systems, levelMin is equal to the minimum value of the relative degree
+  // except for Lagrangian (Mechanical) Systems, where levelMin = 1.
+  // We get one Dynamical System of the OSI and check its type.
+  string DStype = (*(((*allOSI.begin())->getDynamicalSystems()).begin()))->getType();
+  if (DStype == LNLDS || DStype == LTIDS)
+    levelMin = 1;
+  else
+    levelMin = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree();
+
+  // ===> End of todo ...
+  if (levelMin > 0)
+  {
+    InteractionsIterator it;
+    InteractionsSet inter = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions();
+    for (it = inter.begin(); it != inter.end(); it++)
+    {
+      for (unsigned int i = 0; i <= levelMax; ++i)
+        (*it)->getRelationPtr()->computeOutput(time , i);
+    }
+  }
+
+  //   UnitaryRelationIterator itUR;
+
+  //   // We only need to updated relations for Unitary Relations that belongs to indexSets[0]-indexSets[level], since other y have
+  //   // been computed during OSNS compute call.
+
+  //   cout << "################################ IN UPDATE TIME STEPPING #########################" << endl;
+  //   // the case level == 1 corresponds to degree 0 or 1 systems, for which all the UR are active and thus
+  //   // already up to date.
+  //   if(levelMin>0)
+  //     {
+  //       for(itUR=indexSets[0].begin();itUR!=indexSets[0].end();++itUR)
+  //  {
+  //    for(unsigned int i = 0; i<levelMin; ++i)
+  //      {
+  //        cout << "First step ... of update" << i << endl;
+  //        (*itUR)->computeOutput(time,i);
+  //      }
+  //  }
+  //       UnitaryRelationsSet index = indexSets[0] - indexSets[levelMin];
+  //       // It is supposed to represent all the UR that have not been taken into account (ie "inactive") in the OSNS problem.
+  //       for(itUR=indexSets[0].begin();itUR!=indexSets[0].end();++itUR)
+  //  {
+  //    for(unsigned int i = levelMin; i<levelMax; ++i)
+  //      {
+  //        cout << "Second step ... of update" << i << endl;
+  //        (*itUR)->computeOutput(time,i);
+  //      }
+  //  }
+  //     }
+  //   cout << "################################ END UPDATE TIME STEPPING #########################" << endl;
+  // compute output (y, ydot)
+  //  for(itOsns=allNSProblems.begin();itOsns!=allNSProblems.end();++itOsns)
+  //(itOsns->second)->updateOutput();
+}
+
 void TimeStepping::run()
 {
   // Current Step
@@ -193,6 +271,7 @@ void TimeStepping::computeOneStep()
 {
   // solve ...
   computeFreeState();
+  updateIndexSets();
   computeOneStepNSProblem("timeStepping");
   // update
   update();

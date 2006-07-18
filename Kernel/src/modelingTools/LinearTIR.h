@@ -309,17 +309,19 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** \fn void computeOutput(const double time)
+  /** \fn void computeOutput(const double time, const unsigned int = 0)
    *  \brief computes y
    *  \param double : current time
+   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  void computeOutput(const double);
+  void computeOutput(const double, const unsigned int = 0);
 
   /** \fn void computeFreeOutput(const double time)
    *  \brief computes yFree AND save it into y
    *  \param double : current time
+   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  void computeFreeOutput(const double = 0);
+  void computeFreeOutput(const double = 0, const unsigned int = 0);
 
   /** \fn void computeInput(double time, const unsigned int);
    *  \brief default function to compute lambda

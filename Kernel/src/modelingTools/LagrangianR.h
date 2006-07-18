@@ -392,19 +392,40 @@ public:
    */
   void computeG(const double , const unsigned int = 0);
 
-  /** \fn void computeOutput(double time);
+  /** \fn void computeOutput(double time, const unsigned int = 0);
    *  \brief to compute output
    *  \param double : current time
-   *  \exception RuntimeException
+   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeOutput(const double);
+  virtual void computeOutput(const double, const unsigned int = 0);
 
-  /** \fn void computeFreeOutput(double time);
+  /** \fn void computY0(double time, SiconosVector*);
+   *  \brief to compute output y[0]
+   *  \param double : current time
+   *  \param a pointer to SiconosVector: q for all the DS
+   */
+  void computeY0(const double, SiconosVector*);
+
+  /** \fn void computY1(double time, SiconosVector*, SiconosVector*);
+   *  \brief to compute output y[1]
+   *  \param double : current time
+   *  \param a pointer to SiconosVector: q for all the DS
+   *  \param a pointer to SiconosVector: velocity for all the DS
+   */
+  void computeY1(const double, SiconosVector*, SiconosVector*);
+
+  /** \fn void computY2(double time);
+   *  \brief to compute output y[2]
+   *  \param double : current time
+   */
+  void computeY2(const double);
+
+  /** \fn void computeFreeOutput(double time, const unsigned int = 0);
    *  \brief to compute y for the free state
    *  \param double : current time
-   *  \exception RuntimeException
+   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeFreeOutput(const double);
+  virtual void computeFreeOutput(const double, const unsigned int = 0);
 
   /** \fn void computeInput(double time, const unsigned int level);
    *  \brief to compute p

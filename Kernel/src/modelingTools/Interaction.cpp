@@ -171,10 +171,8 @@ Interaction::~Interaction()
   NSDS = NULL;
 }
 
-void Interaction::initialize(const unsigned int numberOfDerivatives)
+void Interaction::initialize()
 {
-  // Warning: this function is called from Simulation initialize, since we need to know the relative degree and
-  // the type of simulation to size Y and Lambda.
 
   if (relation == NULL)
     RuntimeException::selfThrow("Interaction::initialize, relation == NULL");
@@ -186,12 +184,16 @@ void Interaction::initialize(const unsigned int numberOfDerivatives)
   relation->setInteractionPtr(this);
   relation->initialize();
 
-  if (nslaw == NULL)
-    RuntimeException::selfThrow("Interaction::initialize, nslaw == NULL");
-
   // compute number of relations.
   numberOfRelations = interactionSize / nslaw->getNsLawSize();
+}
 
+// Initialize and InitializeMemory are separated in to functions since we need to know the relative degree to know "numberOfDerivatives",
+// while numberOfRelations and the size of the non smooth law are required inputs to compute the relative degree.
+void Interaction::initializeMemory(const unsigned int numberOfDerivatives)
+{
+  // Warning: this function is called from Simulation initialize, since we need to know the relative degree and
+  // the type of simulation to size Y and Lambda.
   // Memory allocation for y and lambda
 
   // Note that numberOfDerivatives depends on the type of simulation and on the relative degree.
@@ -228,14 +230,6 @@ void Interaction::initialize(const unsigned int numberOfDerivatives)
   // Old values are initialized with current values (for y and lambda)
   swapInMemory();
 
-}
-
-// Initialization is required to avoid uninit memory reading (-> insure tests: READ_UNINIT_MEM)
-void Interaction::initializeVectors(VectorOfBlocks inputVector)
-{
-  VectorOfBlocksIterator iter;
-  for (iter = inputVector.begin(); iter != inputVector.end(); ++iter)
-    (*iter)->zero();
 }
 
 // --- GETTERS/SETTERS ---

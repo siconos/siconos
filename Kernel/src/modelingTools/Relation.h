@@ -300,19 +300,20 @@ public:
    */
   void setParameterPtr(SimpleVector *, const std::string);
 
-  /** \fn void computeOutput(double time);
+  /** \fn void computeOutput(double time, const unsigned int = 0);
    *  \brief default function to compute y
    *  \param double : current time
-   *  \exception RuntimeException
+   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeOutput(const double);
+  virtual void computeOutput(const double, const unsigned int = 0);
 
-  /** \fn void computeFreeOutput(double time);
+  /** \fn void computeFreeOutput(double time, const unsigned int = 0);
    *  \brief default function to compute y for the free state
    *  \param double : current time
+   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    *  \exception RuntimeException
    */
-  virtual void computeFreeOutput(const double);
+  virtual void computeFreeOutput(const double, const unsigned int = 0);
 
   /** \fn void computeInput(const double time, const unsigned int level);
    *  \brief default function to compute r
