@@ -472,13 +472,12 @@ lcp_newton_min.c
  lcp_solver_block() is a generic interface for block matrices allowing the call of one of the @ref lcp solvers.
 
 */
+
+extern int lcp_solver_block(int *inb , int *iid , double *vec, double *q , int *nn , int *nb , method *pt , double *z , double *w , int *it_end , int *itt_end , double *res);
+
 /*
-extern int lcp_solver_block( int *inb , int *iid , double *vec, double *q , int *nn , int *nb , method *pt , double *z ,double *w , int *it_end , int *itt_end , double *res );
+extern int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end , int *itt_end ,double *res );
 */
-
-extern int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,
-                            int *itt_end , double *res);
-
 
 /**@}*/
 
