@@ -32,7 +32,7 @@ check_PROGRAMS = test1  test2 test3  test4  test5
 TESTS = $(check_PROGRAMS)
 XFAIL_TESTS = $(check_PROGRAMS)
 
-test1_SOURCES = main_lcp.c
+test1_SOURCES = main_lcp_new.c
 include_HEADERS = 
 test1_INCLUDES = $(CPPUNIT_INCLUDES)
 test1_LDFLAGS =  $(CPPUNIT_LIBRARIES)  $(NSSPACK_LIB) $(SICONOS_EXT_LDFLAGS)

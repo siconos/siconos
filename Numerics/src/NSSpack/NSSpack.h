@@ -25,7 +25,7 @@
 
 /*!\file solverpack.h
   \author Nineb Sheherazade and Dubois Frederic.
-  Last Modifications : Mathieu Renouf
+  Last Modifications : Mathieu Renouf , Pascal Denoyelle
  */
 
 
@@ -263,14 +263,14 @@ typedef union
 /*!\struct SparseBlockStructuredMatrix
 
     \brief To store sparse block matrices with square diagonal blocks
-    \brief Filling is done in the order M11,M12,...,M1N,M21,...,MNN
+
     \param nbblocks         : the total number of non null blocks
-    \param **block          : *block contains the double values of one block
+    \param **block          : *block contains the double values of one block in Fortran storage (column by column)
                               **block is the list of non null blocks
     \param size             : the number of blocks along a row (or column)
     \param *blocksize       : the list of the sizes of diagonal (square) blocks
-    \param *RowIndex        : the list of non null blocks row indices
-    \param *ColumnIndex     : the list of non null blocks column indices
+    \param *RowIndex        : the list of *block row indices
+    \param *ColumnIndex     : the list of *block column indices
 */
 
 typedef struct
@@ -295,8 +295,12 @@ typedef struct
 
 extern "C" int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double *w);
 
-extern "C" int lcp_solver_block(int *inb , int *iid , double *vec, double *q , int *nn , int *nb , method *pt , double *z ,
-                                double *w , int *it_end , int *itt_end , double *res);
+/*
+extern "C" int lcp_solver_block( int *inb , int *iid , double *vec, double *q , int *nn , int *nb , method *pt , double *z ,
+         double *w , int *it_end , int *itt_end , double *res );
+*/
+extern "C" int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,
+                                int *itt_end , double *res);
 
 
 extern "C" void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem,
@@ -463,7 +467,7 @@ lcp_newton_min.c
    @{
 */
 
-/** \fn int extern lcp_solver_block( int *inb , int *iid , double *vec, double *q ,int *nn , int *nb , method *pt , double *z ,double *w , int *it_end , int *itt_end , double *res )
+/** \fn extern int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end , int *itt_end ,double *res );
 
  * \brief lcp_solver_block() is a generic interface for block matrices allowing the call of one of the @ref lcp solvers.
 */

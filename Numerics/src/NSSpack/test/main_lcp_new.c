@@ -306,7 +306,6 @@ void test_lcp_series(int n , double *vec , double *q)
   printf("\n    Newton (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g | \n \n ", info7, method_lcp7.iter, method_lcp7.err, comp, diff);
 
 #endif
-  printf(" Freeing memory in test_lcp_series \n");
   free(z1);
   free(w1);
   free(z2);
@@ -323,7 +322,6 @@ void test_lcp_series(int n , double *vec , double *q)
   free(w7);
   free(z8);
   free(w8);
-  printf(" End freeing memory in test_lcp_series \n");
 
 
 }
@@ -334,7 +332,7 @@ void test_lcp_series(int n , double *vec , double *q)
 void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 {
 
-  int i, dim, dn, db;
+  int i, dim;
   int incx = 1, incy = 1;
   int info1 = -1, info2 = -1, info3 = -1, info4 = -1, info5 = -1, info6 = -1, info7 = -1;
   int iter1, iter2, iter3, iter4, iter5, iter6, iter7;
@@ -346,10 +344,8 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
   double *z1, *z2, *z3, *z4, *z5, *z6, *z7;
   double *w1, *w2, *w3, *w4, *w5, *w6, *w7;
 
-  dn = blmat->size;
-  db = blmat->blocksize[0];
-
-  dim = dn * db;
+  dim = 0;
+  for (i = 0; i < blmat->size; i++) dim += blmat->blocksize[i];
 
   z1 = malloc(dim * sizeof(double));
   w1 = malloc(dim * sizeof(double));
@@ -495,6 +491,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
   comp = ddot_(&dim , z3 , &incx , w3 , &incy);
 
   printf("\n    LATIN  (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info3, iter3, titer3, err3, comp);
+  printf("\n \n");
 
 #endif
 
@@ -794,8 +791,8 @@ void test_blockmatrix(void)
   FILE *LCPfile;
 
   int i, j, k, isol, NBTEST, itest;
-  int dim , dim2;
-  int dn, db, db2, nblock, itmp;
+  int dim;
+  int sizebl;
 
   double *q , *sol;
 
@@ -803,7 +800,7 @@ void test_blockmatrix(void)
 
   int iter, titer;
   double criteria;
-  int *inb;
+
   SparseBlockStructuredMatrix blmat;
 
   printf("* *** ********************         *** * \n");
@@ -814,7 +811,7 @@ void test_blockmatrix(void)
   titer = 0;
   criteria = 0.0;
 
-  NBTEST = 2;
+  NBTEST = 6;
 
   /****************************************************************/
 #ifdef BAVARD
@@ -828,83 +825,95 @@ void test_blockmatrix(void)
     switch (itest)
     {
     case 0:
-      printf("\n\n MATHIEU2 LCP ");
-      if ((LCPfile = fopen("BLOCKMATRIX/mathieu1.dat", "r")) == NULL)
+      printf("\n\n BLOC22_MATHIEU1 LCP BLOCK");
+      if ((LCPfile = fopen("BLOCKMATRIX_NEW/bloc22_mathieu1.dat", "r")) == NULL)
       {
-        perror("fopen LCPfile: mathieu1.dat");
+        perror("fopen LCPfile: bloc22_mathieu1.dat");
         exit(1);
       }
       break;
+
     case 1:
-      printf("\n\n MATHIEU3 LCP ");
-      if ((LCPfile = fopen("BLOCKMATRIX/mathieu2.dat", "r")) == NULL)
+      printf("\n\n MONOBLOC_MATHIEU1 LCP BLOCK");
+      if ((LCPfile = fopen("BLOCKMATRIX_NEW/monobloc_mathieu1.dat", "r")) == NULL)
       {
-        perror("fopen LCPfile: mathieu2.dat");
+        perror("fopen LCPfile: monobloc_mathieu1.dat");
         exit(1);
       }
       break;
-    }
 
-    fscanf(LCPfile , "%d" , &dn);
-    fscanf(LCPfile , "%d" , &db);
-
-    blmat.size = dn;
-    blmat.blocksize = (int*) malloc(dn * sizeof(int));
-    for (i = 0 ; i < dn ; i++) blmat.blocksize[i] = db;
-
-    inb  = (int*)malloc(dn * sizeof(int));
-
-    nblock = 0;
-    for (i = 0 ; i < dn ; i++)
-    {
-      fscanf(LCPfile , "%d" , &itmp);
-      inb[i] = itmp;
-      nblock += itmp;
-    }
-    blmat.nbblocks = nblock;
-
-    blmat.RowIndex  = (int*)malloc(nblock * sizeof(int));
-    k = 0;
-    for (i = 0 ; i < dn ; i++)
-    {
-      itmp = inb[i];
-      for (j = 0 ; j < itmp ; j++)
+    case 2:
+      printf("\n\n MONOBLOC_ORTIZ LCP BLOCK");
+      if ((LCPfile = fopen("BLOCKMATRIX_NEW/monobloc_ortiz.dat", "r")) == NULL)
       {
-        blmat.RowIndex[k] = i;
-        k++;
+        perror("fopen LCPfile: monobloc_ortiz.dat");
+        exit(1);
       }
+      break;
+
+    case 3:
+      printf("\n\n BLOC22_ORTIZ LCP BLOCK");
+      if ((LCPfile = fopen("BLOCKMATRIX_NEW/bloc22_ortiz.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: bloc22_ortiz.dat");
+        exit(1);
+      }
+      break;
+
+    case 4:
+      printf("\n\n BLOC31_ORTIZ LCP BLOCK");
+      if ((LCPfile = fopen("BLOCKMATRIX_NEW/bloc31_ortiz.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: bloc31_ortiz.dat");
+        exit(1);
+      }
+      break;
+
+    case 5:
+      printf("\n\n BLOC3333_MATHIEU2 LCP BLOCK");
+      if ((LCPfile = fopen("BLOCKMATRIX_NEW/bloc3333_mathieu2.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: bloc3333_mathieu2.dat");
+        exit(1);
+      }
+      break;
+
     }
 
-    blmat.ColumnIndex  = (int*)malloc(nblock * sizeof(int));
-    for (i = 0 ; i < nblock ; i++)
+    fscanf(LCPfile , "%d" , &blmat.nbblocks);
+    fscanf(LCPfile , "%d" , &blmat.size);
+
+    blmat.blocksize = (int*) malloc(blmat.size * sizeof(int));
+    for (i = 0 ; i < blmat.size ; i++) fscanf(LCPfile , "%d" , &blmat.blocksize[i]);
+
+    blmat.RowIndex = (int*)malloc(blmat.nbblocks * sizeof(int));
+    blmat.ColumnIndex = (int*)malloc(blmat.nbblocks * sizeof(int));
+
+    for (i = 0 ; i < blmat.nbblocks ; i++)
     {
-      fscanf(LCPfile , "%d" , &itmp);
-      blmat.ColumnIndex[i] = itmp - 1;
+      fscanf(LCPfile , "%d" , &blmat.RowIndex[i]);
+      blmat.RowIndex[i]--;
+      fscanf(LCPfile , "%d" , &blmat.ColumnIndex[i]);
+      blmat.ColumnIndex[i]--;
     }
 
-    dim  = db * dn;
-    db2 = db * db;
-    dim2 = nblock * db2;
+    dim = 0;
+    for (i = 0; i < blmat.size; i++) dim += blmat.blocksize[i];
 
-    q    = (double*)malloc(dim * sizeof(double));
-    sol  = (double*)malloc(dim * sizeof(double));
-    blmat.block = (double**)malloc(nblock * sizeof(double*));
-    for (i = 0 ; i < nblock ; i++) blmat.block[i] = (double*)malloc(db2 * sizeof(double));
-
-    for (i = 0 ; i < dim ; ++i)  q[i]    = 0.0;
-    for (i = 0 ; i < dim ; ++i)  sol[i]  = 0.0;
-
-
-    for (i = 0 ; i < nblock ; i++)
+    q = (double*)malloc(dim * sizeof(double));
+    blmat.block = (double**)malloc(blmat.nbblocks * sizeof(double*));
+    for (i = 0 ; i < blmat.nbblocks ; i++)
     {
-      for (j = 0 ; j < db2 ; j++)
+      sizebl = blmat.blocksize[blmat.RowIndex[i]] * blmat.blocksize[blmat.ColumnIndex[i]];
+      blmat.block[i] = (double*)malloc(sizebl * sizeof(double));
+      for (j = 0 ; j < sizebl ; j++)
       {
         fscanf(LCPfile, "%s", val);
         blmat.block[i][j] = atof(val);
       }
     }
 
-    for (i = 0 ; i < dim ; ++i)
+    for (i = 0 ; i < dim ; i++)
     {
       fscanf(LCPfile , "%s" , val);
       q[i] = atof(val);
@@ -914,39 +923,35 @@ void test_blockmatrix(void)
 
     if (!feof(LCPfile))
     {
-
+      sol  = (double*)malloc(dim * sizeof(double));
       sol[0] = atof(val);
       isol = 1;
-      for (i = 1 ; i < dim ; ++i)
+      for (i = 1 ; i < dim ; i++)
       {
         fscanf(LCPfile , "%s" , val);
         sol[i] = atof(val);
       }
     }
     else
-    {
       isol = 0;
-      for (i = 0 ; i < dim ; ++i) sol[i] = 0.0;
-    }
 
     fclose(LCPfile);
 
 #ifdef BAVARD
     printf("\n exact solution : ");
-    if (isol) for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , sol[i]);
+    if (isol) for (i = 0 ; i < dim ; i++) printf(" %10.4g " , sol[i]);
     else printf(" unknown ");
     printf("\n");
 #endif
 
     test_lcp_block_series(&blmat , q);
 
-    free(sol);
+    if (isol) free(sol);
     free(q);
-    free(inb);
     free(blmat.RowIndex);
     free(blmat.ColumnIndex);
     free(blmat.blocksize);
-    for (i = 0 ; i < nblock ; i++) free(blmat.block[i]);
+    for (i = 0 ; i < blmat.nbblocks ; i++) free(blmat.block[i]);
     free(blmat.block);
 
   }

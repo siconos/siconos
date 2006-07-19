@@ -193,8 +193,8 @@ fi
 if test "$enable_debug" = yes; then
    AC_MSG_RESULT(option --enable-debug selected : compiling with the -g option)
    CXXFLAGS="-g -fbounds-check $CXXFLAGS"
-   CFLAGS="-g -fbounds-check $CFLAGS"
-   FFLAGS="-g -fbounds-check $FFLAGS"
+   CFLAGS="-g $CFLAGS"
+   FFLAGS="-g $FFLAGS"
 fi
 
 if test "$enable_optimisation" = yes; then

@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*!\file lcp_solver_block.c
+/*!\file lcp_solver_block_new.c
  *
  * This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
  * Try \f$(z,w)\f$ such that:\n
@@ -28,30 +28,24 @@
  *
  * This system of equalities and inequalities is solved thanks to @ref block_lcp solvers. */
 
-/*!\fn int lcp_solver_block( int *inb , int *iid , double *vec , double *q , int *dn , int *db , method *pt , double *z , double *w , int *it_end , int *itt_end ,double *res )
+/*!\fn int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,               int *itt_end ,double *res )
 *  lcp_solver_block is a generic interface allowing the call of one of the block LCP solvers.\n
 *
-* \param inb      On enter, an integer which contains the number of non nul block element on the block row.
-* \param iid      On enter, a vector of integers which contains the list of active block on each row.
-* \param vec      On enter, a vector of doubles which contains the components of the block matrices. Each block
-*                 matrix is stored as a fortran matrix and all matrices are stored also as a fortran allocation.
-* \param q        On enter, a vector of doubles which contains the components of the right hand side.
-
-* \param dn       On enter, an integer which contains the dimension of the problem.
-* \param db       On enter, an integer which contains the dimension of the block matrices.
+* \param blmat    On enter, the sparse block matrix M of the LCP
+* \param q        On enter, the vector of doubles of the LCP
 * \param pt       On enter, a union which contains a LCP structure
 *
 * \param z        On enter/return, a vector of doubles which contains the initial iterate for the LCP(q,M) and returns the solution of the problem.
 * \param w        On return, a vector of doubles which returns the solution of the problem.
-* \param it_end   On return, an integer which returns the final number of iterations or pivots
-* \param itt_end  On return, an interger which returns the total number of iterations or pivots.
-* \param res      On return, a doubles which returns the final value of error criteria.
+* \param it_end   On return, an integer which returns the final number of block iterations
+* \param itt_end  On return, an integer which returns the total number of local LCP iterations or pivots
+* \param res      On return, a double which returns the final value of error criteria.
 *
 * \return info    Integer identifiant for the solver result\n
 *                 0 : convergence\n
 *                 >0 : no convergence (see solver for specific info value)\n
 *
-* lcp_solver_block is a generic interface which consider LCP with a block structure. The global LCP is solved
+* lcp_solver_block is a generic interface which consider LCP with a sparse block structure. The global LCP is solved
 * as a succession of local LCP solved via lcp_solver.\n
 *
 * list Keywords to call solvers:
@@ -68,29 +62,30 @@
 * If we consider the matrix M and the right-hand-side q defined as
 *
 * \f$
-* M=\left[\begin{array}{cc|cc|cc|cc}
-*          1 & 2 & 0 & 0 & 3 &-1 & 0 & 0\\
-*          2 & 1 & 0 & 0 & 4 & 1 & 0 & 0\\
+* M=\left[\begin{array}{cccc|cc|cc}
+*          1 & 2 & 0 & 4   & 3 &-1   & 0 & 0\\
+*          2 & 1 & 0 & 0   & 4 & 1   & 0 & 0\\
+*          0 & 0 & 1 &-1   & 0 & 0   & 0 & 0\\
+*          5 & 0 &-1 & 6   & 0 & 6   & 0 & 0\\
 *          \hline
-*          0 & 0 & 1 &-1 & 0 & 0 & 2 & 2\\
-*          0 & 0 &-1 & 6 & 0 & 0 & 1 & 2\\
+*          0 & 0 & 0 & 0   & 1 & 0   & 0 & 5\\
+*          0 & 0 & 0 & 0   & 0 & 2   & 0 & 2\\
 *          \hline
-*          3 & 4 & 0 & 0 & 1 & 0 & 0 & 0\\
-*         -1 & 3 & 0 & 0 & 0 & 2 & 0 & 0\\
-*          \hline
-*          0 & 0 & 2 & 1 & 0 & 0 & 2 & 2\\
-*          0 & 0 & 2 & 2 & 0 & 0 & 2 & 2\\
-*        \end{array}\right] \quad, q=\left[\begin{array}{c}-1\\-1\\\hline 0\\-1\\\hline 1\\0\\\hline -1\\2\end{array}\right].
+*          0 & 0 & 2 & 1   & 0 & 0   & 2 & 2\\
+*          0 & 0 & 2 & 2   & 0 & 0   & -1 & 2\\
+*        \end{array}\right] \quad, q=\left[\begin{array}{c}-1\\-1\\0\\-1\\\hline 1\\0\\\hline -1\\2\end{array}\right].
 * \f$
 *
 * then
-* - the number of block is 4 (=dn) and the dimension of block is 2 (=db)
-* - the vector inb[dn] is equal to [2,2,2,2]
-* - the vector iid[dn*db] is equal to [1,3,2,4,1,3,2,4]
-* - the vector vec contains all block matrices stored as\n
-*   vec = { M11[1][1],M11[2][1],M11[1][2],M11[2][2],M12[1][1],M12[2][1],..., \n
-*           M43[1][2],M43[2][2],M44[1][1],M44[2][1],M44[1][2],M44[2][2]}\n
-* \author Mathieu Renouf
+* - the number of non null blocks is 6 (blmat.nbblocks) and the number of diagonal blocks is 3 (blmat.size)
+* - the vector blmat.blocksize of diagonal blocks sizes is equal to [4,2,2]
+* - the vectors blmat.ColumnIndex and blmat.RowIndex of non null blocks indices are equal to [1,2,2,3,1,3] and [1,1,2,2,3,3]
+* - the blmat.block contains all non null block matrices stored in Fortran order (column by column) as\n
+*   blmat.block[0] = {1,2,0,5,2,1,0,0,0,0,1,-1,4,0,-1,6}\n
+*   blmat.block[1] = {3,4,0,0,-1,1,0,6}\n
+*   ...\n
+*   blmat.block[5] = {2,-1,2,2}
+* \author Mathieu Renouf & Pascal Denoyelle
 */
 
 #include <stdio.h>
