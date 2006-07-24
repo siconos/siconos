@@ -284,7 +284,18 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   // General form of the block is :   block = a*extraBlock + b * leftBlock * centralBlocks * rightBlock
   // a and b are scalars, centralBlocks a matrix depending on the integrator (and on the DS), the simulation type ...
   // left, right and extra depend on the relation type and the non smooth law.
-
+  relationType1 = UR1->getRelationType();
+  relationType2 = UR2->getRelationType();
+  if (UR1 == UR2)
+  {
+    if (relationType1 == LINEARTIRELATION)
+    {
+      extraBlock = new SimpleMatrix(nslawSize1, nslawSize1);
+      UR1->getExtraBlock(extraBlock);
+      *currentBlock += *extraBlock;// specific to LinearTIR, get D matrix added only on blocks of the diagonal.
+      delete extraBlock;
+    }
+  }
   // loop over the common DS
   for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
   {
@@ -294,21 +305,12 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     leftBlock = new SimpleMatrix(nslawSize1, sizeDS);
 
     UR1->getLeftBlockForDS(*itDS, leftBlock);
-    relationType1 = UR1->getRelationType();
-    relationType2 = UR2->getRelationType();
     // Computing depends on relation type -> move this in UnitaryRelation method?
     if (relationType1 == LINEARTIRELATION && relationType2 == LINEARTIRELATION)
     {
       rightBlock = new SimpleMatrix(sizeDS, nslawSize2);
       UR2->getRightBlockForDS(*itDS, rightBlock);
       *currentBlock += h * Theta[*itDS]* *leftBlock * (*centralBlocks[*itDS] * *rightBlock); //left = C, right = B
-      if (UR1 == UR2)
-      {
-        extraBlock = new SimpleMatrix(nslawSize1, nslawSize1);
-        UR1->getExtraBlock(extraBlock);
-        *currentBlock += *extraBlock;// specific to LinearTIR, get D matrix added only on blocks of the diagonal.
-        delete extraBlock;
-      }
       delete rightBlock;
     }
     else if ((relationType1 == LAGRANGIANRELATION || relationType1 == LAGRANGIANLINEARRELATION) && (relationType2 == LAGRANGIANRELATION ||  relationType2 == LAGRANGIANLINEARRELATION))
