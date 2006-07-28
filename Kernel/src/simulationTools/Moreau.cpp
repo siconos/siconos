@@ -329,7 +329,11 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
     M = d->getMassPtr();
 
     // Compute W
-    *W = *M + h * theta * (*C + h * theta* *K);
+    *W = *M;
+    if (K != NULL)
+      *W += h * h * theta * theta* *K ;
+    if (C != NULL)
+      *W += h * theta* *C;
   }
 
   // === Linear dynamical system ===
@@ -466,7 +470,10 @@ void Moreau::computeFreeState()
         SiconosMatrix * K = static_cast<LagrangianLinearTIDS*>(d)->getKPtr();
         SiconosMatrix * C = static_cast<LagrangianLinearTIDS*>(d)->getCPtr();
         // Compute ResFree and vfree
-        *RESfree = h * ((*C * *vold) + (*K * *qold) + h * theta * (*K * *vold));
+        if (K != NULL)
+          *RESfree += h * ((*K * *qold) + h * theta * (*K * *vold));
+        if (C != NULL)
+          *RESfree += h * (*C * *vold);
         if (FExt0 != NULL)
         {
           *RESfree -= h * (theta**FExt1 + (1.0 - theta)**FExt0);
@@ -538,11 +545,10 @@ void Moreau::computeFreeState()
 }
 
 
-void Moreau::integrate(const double tinit, const double tend, double tout, bool iout)
+void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
 {
   double h = tend - tinit; //simulation->getTimeDiscretisationPtr()->getH();
-  // iout and tout not used. iout is set to true by default.
-  iout = true;
+
   tout = tend;
 
   DSIterator it;
@@ -576,8 +582,8 @@ void Moreau::integrate(const double tinit, const double tend, double tout, bool 
       K = d->getKPtr();
       C = d->getCPtr();
       // get p pointer
-      SimpleVector  *p;
-      p = d->getPPtr();
+      SiconosVector  *p;
+      p = d->getPPtr(2);
       // Inline Version
       // The method computeFExt does not allow to compute directly
       // as a function.  To do that, you have to call directly the function of the plugin
@@ -601,8 +607,10 @@ void Moreau::integrate(const double tinit, const double tend, double tout, bool 
   }
 }
 
-void Moreau::updateState(const double)
+void Moreau::updateState(const double, const unsigned int)
 {
+  // NOTE: at the time input arguments are unused - They are necessary because of OSI base class function interface.
+
   double h = simulationLink->getTimeDiscretisationPtr()->getH();
 
   DSIterator it;
@@ -623,7 +631,7 @@ void Moreau::updateState(const double)
       LagrangianDS* d = static_cast<LagrangianDS*>(ds);
       // get velocity free, p, velocity and q pointers
       SimpleVector *vfree = d->getVelocityFreePtr();
-      SimpleVector *p = d->getPPtr();
+      SiconosVector *p = d->getPPtr(2);
       SimpleVector *v = d->getVelocityPtr();
       SimpleVector *q = d->getQPtr();
       // Save value of q and v in stateTmp for future convergence computation

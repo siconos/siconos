@@ -1216,7 +1216,7 @@ void LagrangianR::computeInput(const double time, const unsigned int level)
 
     // Put p of each DS into a block
     // Warning: use addPtr -> link between pointers
-    p->addPtr(lds->getPPtr());
+    p->addPtr(lds->getPPtr(2));
   }
 
   // get lambda of the concerned interaction

@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "NonSmoothEvent.h"
+#include "EventDriven.h"
 using namespace std;
 
 // Default constructor
@@ -36,8 +37,63 @@ NonSmoothEvent::NonSmoothEvent(const unsigned long int& time): Event(time, "NonS
 NonSmoothEvent::~NonSmoothEvent()
 {}
 
-void NonSmoothEvent::process()
+void NonSmoothEvent::process(Simulation* simulation)
 {
-  //todo
-  cout << " Non smooth Event processing: nothing implemented" << endl;
+  //  cout << "Non Smooth Event ... " << endl;
+  if (!(simulation->getOneStepNSProblems().empty()))
+  {
+    EventDriven * eventDriven = static_cast<EventDriven*>(simulation);
+
+    // Compute y[0], y[1] and update index sets.
+
+    OSNSIterator itOsns;
+    OneStepNSProblems allOSNS = simulation->getOneStepNSProblems();
+    for (itOsns = allOSNS.begin(); itOsns != allOSNS.end(); ++itOsns)
+      //      for(itOsns=simulation->getOneStepNSProblems().begin();itOsns!=simulation->getOneStepNSProblems().end();++itOsns)
+      (itOsns->second)->updateOutput(0, 1);
+
+    simulation->updateIndexSets();
+
+    VectorOfSetOfUnitaryRelations indexSets = eventDriven->getIndexSets();
+    cout << " NS EVENT PROCESS " << indexSets[1].size() << " " << indexSets[2].size() << endl;
+    // ---> solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
+    if (!(indexSets[1] - indexSets[2]).isEmpty())
+    {
+      cout << "SOLVE LCP IMPACT " << endl;
+      // solve the LCP-impact => y[1],lambda[1]
+      eventDriven->computeOneStepNSProblem("impact"); // solveLCPImpact();
+
+      // compute p[1] and post-impact velocity
+      eventDriven->updateImpactState();
+
+      //  update indexSet that depends on y[1]
+      eventDriven->updateIndexSet(2);
+
+      // check that IndexSet[1]-IndexSet[2] is now empty
+      if (!(indexSets[1] - indexSets[2]).isEmpty())
+        RuntimeException::selfThrow("EventDriven advanceToEvent, error after impact-LCP solving.");
+    }
+
+    if (!((indexSets[2]).isEmpty()))
+    {
+      cout << "SOLVE LCP ACCELERATION " << endl;
+
+      // Update the state of the DS
+      OSIIterator itOSI;
+      double time = simulation->getModelPtr()->getCurrentT();
+      for (itOSI = simulation->getOneStepIntegrators().begin(); itOSI != simulation->getOneStepIntegrators().end() ; ++itOSI)
+        (*itOSI)->updateState(time, 2);
+
+      // solve LCP-acceleration
+      eventDriven->computeOneStepNSProblem("acceleration"); //solveLCPAcceleration();
+
+      // for all index in IndexSets[2], update the index set according to y[2] and/or lambda[2] sign.
+      eventDriven->updateIndexSetsWithDoubleCondition();
+    }
+
+    simulation->nextStep();
+
+  }
+  cout << "End of Non Smooth Event ... " << endl;
+
 }

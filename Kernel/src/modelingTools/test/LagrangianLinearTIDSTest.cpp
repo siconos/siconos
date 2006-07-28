@@ -216,7 +216,7 @@ void LagrangianLinearTIDSTest::testcomputeDS()
   ds->computeJacobianXRhs(time);
 
   SimpleMatrix * zero = new SimpleMatrix(3, 3);
-  SiconosMatrix * jx = ds->getJacobianXFPtr();
+  SiconosMatrix * jx = ds->getJacobianXRhsPtr();
   SiconosVector * vf = ds->getRhsPtr();
   SiconosVector * r = ds->getRPtr();
 

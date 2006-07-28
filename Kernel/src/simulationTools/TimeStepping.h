@@ -66,10 +66,16 @@ public:
    */
   void initialize();
 
-  /** \fn void update()
-   *  \brief update input, state of each dynamical system and output
+  /** \fn void nextStep()
+   *  \brief increments all the Integrators to next step of the simulation
    */
-  void update();
+  void nextStep();
+
+  /** \fn void update(const unsigned int)
+   *  \brief update input, state of each dynamical system and output
+   *  \param lambda order used to compute input
+   */
+  void update(const unsigned int);
 
   /** \fn void run()
    *  \brief run the simulation, from t0 to T

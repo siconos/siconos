@@ -56,10 +56,11 @@ public:
    */
   ~NonSmoothEvent();
 
-  /** \fn void process()
-   *  \brief
+  /** \fn void process(Simulation*)
+   *  \brief OSNS solving and IndexSets updating
+   *  \param Simulation*, the simulation that owns this Event (through the EventsManager)
    */
-  void process();
+  void process(Simulation*);
 };
 
 #endif // NonSmoothEvent_H

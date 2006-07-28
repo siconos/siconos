@@ -36,6 +36,8 @@
 #include<string>
 #include<iostream>
 
+class Simulation;
+
 const unsigned long int DEFAULT_EVENT_TIME = 0;
 const std::string DEFAULT_EVENT_TYPE = "undefined";
 
@@ -127,10 +129,11 @@ public:
    */
   void display() const ;
 
-  /** \fn virtual void process() = 0
+  /** \fn virtual void process(Simulation*) = 0
    *  \brief virtual function which actions depends on event type
+   * \param Simulation*, the simulation that owns this Event (through the EventsManager)
    */
-  virtual void process() = 0;
+  virtual void process(Simulation*) = 0;
 };
 
 #endif // Event_H

@@ -34,7 +34,7 @@ void LagrangianDS::connectToDS()
   isAllocatedIn["xFree"] = true;
 
   // r
-  r = new BlockVector(NULL, p);
+  r = new BlockVector(NULL, p[2]);
   isAllocatedIn["r"] = true;
   r->zero();
 
@@ -72,7 +72,9 @@ void LagrangianDS::initAllocationFlags(const bool in)
     isAllocatedIn["velocity"] = true;
     isAllocatedIn["velocityFree"] = true;
     isAllocatedIn["velocityMemory"] = false;
-    isAllocatedIn["p"] = true;
+    isAllocatedIn["p0"] = false;
+    isAllocatedIn["p1"] = false;
+    isAllocatedIn["p2"] = true;
     isAllocatedIn["mass"] = true;
     isAllocatedIn["fInt"] = false;
     isAllocatedIn["fExt"] = false;
@@ -92,7 +94,9 @@ void LagrangianDS::initAllocationFlags(const bool in)
     isAllocatedIn["velocity"] = false;
     isAllocatedIn["velocityFree"] = false;
     isAllocatedIn["velocityMemory"] = false;
-    isAllocatedIn["p"] = false;
+    isAllocatedIn["p0"] = false;
+    isAllocatedIn["p1"] = false;
+    isAllocatedIn["p2"] = false;
     isAllocatedIn["mass"] = false;
     isAllocatedIn["fInt"] = false;
     isAllocatedIn["fExt"] = false;
@@ -119,7 +123,7 @@ void LagrangianDS::initPluginFlags(const bool val)
 // -- Default constructor --
 LagrangianDS::LagrangianDS():
   DynamicalSystem(), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
-  velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL),
+  velocityFree(NULL), velocityMemory(NULL), mass(NULL), fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL),
   jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
   computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)
@@ -127,13 +131,14 @@ LagrangianDS::LagrangianDS():
   DSType = LNLDS;
   initAllocationFlags(false);
   initPluginFlags(false);
+  p.resize(3, NULL);
   // !!! No plug-in connection !!!
 }
 
 // --- Constructor from an xml file ---
 LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
   DynamicalSystem(), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
-  velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL), fInt(NULL), fExt(NULL),
+  velocityFree(NULL), velocityMemory(NULL), mass(NULL), fInt(NULL), fExt(NULL),
   NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
   computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)
@@ -186,7 +191,8 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
   velocityFree = new SimpleVector(ndof);
 
   // p
-  p = new SimpleVector(ndof);
+  p.resize(3, NULL);
+  p[2] = new SimpleVector(ndof);
 
   initAllocationFlags(); // Default configuration
 
@@ -314,7 +320,7 @@ LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
                            const SimpleVector& newQ0, const SimpleVector& newVelocity0,
                            const SiconosMatrix& newMass):
   DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
-  velocityFree(NULL), velocityMemory(NULL),   p(NULL), mass(NULL), fInt(NULL), fExt(NULL),
+  velocityFree(NULL), velocityMemory(NULL), mass(NULL), fInt(NULL), fExt(NULL),
   NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL), jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
   computeJacobianVelocityFIntPtr(NULL), computeJacobianQNNLPtr(NULL), computeJacobianVelocityNNLPtr(NULL)
@@ -335,7 +341,8 @@ LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
   velocity = new SimpleVector(*velocity0);
   velocityFree = new SimpleVector(ndof);
 
-  p = new SimpleVector(ndof);
+  p.resize(3, NULL);
+  p[2] = new SimpleVector(ndof);
 
   // set allocation flags: true for required input, false for others
   initAllocationFlags(); // Default
@@ -364,7 +371,7 @@ LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
 LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
                            const SimpleVector& newQ0, const SimpleVector& newVelocity0, const string massName):
   DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL),
-  velocity0(NULL), velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL),
+  velocity0(NULL), velocityFree(NULL), velocityMemory(NULL), mass(NULL),
   fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL),
   jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
@@ -385,7 +392,8 @@ LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
   velocity = new SimpleVector(*velocity0);
   velocityFree = new SimpleVector(ndof);
 
-  p = new SimpleVector(ndof);
+  p.resize(3, NULL);
+  p[2] = new SimpleVector(ndof);
 
   mass = new SimpleMatrix(ndof, ndof);
   setComputeMassFunction(cShared.getPluginName(massName), cShared.getPluginFunctionName(massName));
@@ -413,7 +421,7 @@ LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
 // copy constructor
 LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
   DynamicalSystem(), ndof(0), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL),
-  velocity(NULL), velocity0(NULL), velocityFree(NULL), velocityMemory(NULL), p(NULL), mass(NULL),
+  velocity(NULL), velocity0(NULL), velocityFree(NULL), velocityMemory(NULL), mass(NULL),
   fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL),
   jacobianQNNL(NULL), jacobianVelocityNNL(NULL),
   computeMassPtr(NULL), computeFIntPtr(NULL), computeFExtPtr(NULL), computeNNLPtr(NULL), computeJacobianQFIntPtr(NULL),
@@ -450,7 +458,21 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
     velocityMemory = new SiconosMemory(lnlds->getVelocityMemory());
   else isAllocatedIn["velocityMemory"] = false;
 
-  p = new SimpleVector(lnlds->getP());
+  p.resize(3, NULL);
+
+  for (unsigned int i = 0; i < 3; ++i)
+  {
+    if (lnlds->getPPtr(i) != NULL)
+    {
+      p[i] = new SimpleVector(lnlds->getP(i));
+      string stringValue;
+      stringstream sstr;
+      sstr << i;
+      sstr >> stringValue;
+      stringValue = "p" + stringValue;
+      isAllocatedIn[stringValue] = true;
+    }
+  }
 
   if (lnlds->getFIntPtr() != NULL)
   {
@@ -582,8 +604,12 @@ LagrangianDS::~LagrangianDS()
   velocityFree = NULL;
   if (isAllocatedIn["velocityMemory"])delete velocityMemory;
   velocityMemory = NULL;
-  if (isAllocatedIn["p"]) delete p ;
-  p = NULL;
+  if (isAllocatedIn["p0"]) delete p[0] ;
+  p[0] = NULL;
+  if (isAllocatedIn["p1"]) delete p[1] ;
+  p[1] = NULL;
+  if (isAllocatedIn["p2"]) delete p[2] ;
+  p[2] = NULL;
   if (isAllocatedIn["mass"]) delete mass;
   mass = NULL;
   if (isAllocatedIn["fInt"])delete fInt ;
@@ -670,7 +696,7 @@ void LagrangianDS::initialize(const double time, const unsigned int sizeOfMemory
   // reset r and free vectors
   qFree->zero();
   velocityFree->zero();
-  p->zero();
+  p[2]->zero();
 
   // Initialize memory vectors
   initMemory(sizeOfMemory);
@@ -1012,29 +1038,40 @@ void LagrangianDS::setVelocityMemoryPtr(SiconosMemory * newPtr)
   isAllocatedIn["velocityMemory"] = false;
 }
 
-void LagrangianDS::setP(const SimpleVector& newValue)
+void LagrangianDS::setP(const SimpleVector& newValue, const unsigned int level)
 {
   if (newValue.size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setP: inconsistent input vector size ");
 
-  if (p == NULL)
+  if (p[level] == NULL)
   {
-    p = new SimpleVector(newValue);
-    isAllocatedIn["p"] = true;
+    p[level] = new SimpleVector(newValue);
+    string stringValue;
+    stringstream sstr;
+    sstr << level;
+    sstr >> stringValue;
+    stringValue = "p" + stringValue;
+    isAllocatedIn[stringValue] = true;
   }
   else
-    *p = newValue;
+    *(p[level]) = newValue;
 }
 
-void LagrangianDS::setPPtr(SimpleVector *newPtr)
+void LagrangianDS::setPPtr(SimpleVector *newPtr, const unsigned int level)
 {
 
   if (newPtr->size() != ndof)
     RuntimeException::selfThrow("LagrangianDS - setPPtr: inconsistent input vector size ");
 
-  if (isAllocatedIn["p"]) delete p;
-  p = newPtr;
-  isAllocatedIn["p"] = false;
+  string stringValue;
+  stringstream sstr;
+  sstr << level;
+  sstr >> stringValue;
+  stringValue = "p" + stringValue;
+
+  if (isAllocatedIn[stringValue]) delete p[level];
+  p[level] = newPtr;
+  isAllocatedIn[stringValue] = false;
 }
 
 SiconosMatrix * LagrangianDS::getInverseOfMassPtr()
@@ -1598,11 +1635,8 @@ void LagrangianDS::computeRhs(const double time, const bool isDSup)
 {
   // if isDSup == true, this means that there is no need to re-compute mass ...
   // note that rhs(0) = velocity, with pointer link, must already be set.
-  cout << " LSLDLSDLSKLDSKLDSKLDLD" << endl;
   SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
-  cout << " LSLDLSDLSKLDSKLDSKLDLD" << endl;
   vField->zero();
-  cout << " LSLDLSDLSKLDSKLDSKLDLD" << endl;
   bool flag = false;
   if (!isDSup) // if it is necessary to re-compute mass, FInt ..., ie if they have not been compiled during the present time step
   {
@@ -1631,7 +1665,6 @@ void LagrangianDS::computeRhs(const double time, const bool isDSup)
   }
   else
   {
-    cout << "qqqqqqqqqqqqqqqqqqqqqq LSLDLSDLSKLDSKLDSKLDLD" << endl;
     if (fExt != NULL)
     {
       *vField += *fExt;
@@ -1647,20 +1680,13 @@ void LagrangianDS::computeRhs(const double time, const bool isDSup)
       *vField -= *NNL;
       flag = true;
     }
-    cout << "qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq LSLDLSDLSKLDSKLDSKLDLD" << endl;
   }
-  cout << " LSLDLSDLSKLDSKLDSKLDLD" << endl;
 
   if (flag) // else vField = 0
     *vField = *(workMatrix["inverseOfMass"])**vField ;
   // todo: use linearSolve to avoid inversion ? Or save M-1 to avoid re-computation. See this when "M" will be added in DS or LDS.
 
-  cout << " LSLDLSDLSKLDSKLDSKLDLD" << endl;
-  vField->display();
-
-  cout << " LSLDLSDLSKLDSKLDSKLDLD" << endl;
-
-  *vField += *p; // Warning: r update is done in Interactions/Relations
+  *vField += *(p[2]); // Warning: r update is done in Interactions/Relations
 
 }
 
@@ -1847,7 +1873,7 @@ void LagrangianDS::display() const
   if (velocityFree != NULL) velocityFree->display();
   else cout << "-> NULL" << endl;
   cout << "| p " << endl;
-  if (p != NULL) p->display();
+  if (p[2] != NULL) p[2]->display();
   else cout << "-> NULL" << endl;
   cout << "===================================== " << endl;
 }
@@ -1875,7 +1901,7 @@ void LagrangianDS::swapInMemory()
   qMemory->swap(q);
   velocityMemory->swap(velocity);
   // initialization of the reaction force due to the non smooth law
-  p->zero();
+  p[2]->zero();
 }
 
 LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)

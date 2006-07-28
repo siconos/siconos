@@ -56,10 +56,11 @@ public:
    */
   ~TimeDiscrEvent();
 
-  /** \fn void process()
+  /** \fn void process(Simulation*)
    *  \brief
+   *  \param Simulation*, the simulation that owns this Event (through the EventsManager)
    */
-  void process();
+  void process(Simulation*);
 };
 
 #endif // TimeDiscrEvent_H

@@ -209,7 +209,7 @@ extern "C" int sicSTupdateState()
   int ret = SIC_OK;
 
   if (GLOB_SIMULATION != NULL)
-    GLOB_SIMULATION->update();
+    GLOB_SIMULATION->update(1); // WARNING FP: update needs an input, ie the derivative order used for lambda to compute R
   else
     ret = SIC_ERROR;
 

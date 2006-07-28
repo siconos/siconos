@@ -355,7 +355,7 @@ void LagrangianDSTest::testcomputeDS()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", M**(jx->getBlockPtr(1, 0)) == (-1.0 * (copy->getJacobianQFInt() + copy->getJacobianQNNL())) , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", M**(jx->getBlockPtr(1, 1)) == -1.0 * (copy->getJacobianVelocityFInt() + copy->getJacobianVelocityNNL()) , true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSM : ", copy->getP() == *(r->getVectorPtr(1)), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSM : ", copy->getP(2) == *(r->getVectorPtr(1)), true);
   delete ds;
   cout << "--> computeDS test ended with success." << endl;
 

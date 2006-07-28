@@ -406,15 +406,18 @@ public:
    */
   void nextStep();
 
-  /** \fn void updateInput()
-   *  \brief compute r thanks to lambda
+  /** \fn void updateInput(int level = levelMin)
+   *  \brief compute r thanks to lambda[level]
+   *  \param unsigned int: lambda order, default = levelMin
    */
-  void updateInput();
+  void updateInput(int = -1);
 
-  /** \fn void updateOutput(void)
+  /** \fn void updateOutput(const  int = 0, int = levelMax)
    *  \brief compute output for all the interactions
+   *  \param  int: y min order to be computed, default = 0
+   *  \param  int: y max order to be computed, default = levelMax
    */
-  void updateOutput();
+  void updateOutput(const  int = 0, int = -1);
 
   /** \fn void preCompute(const double)
    *  \brief prepare data of the osns for solving

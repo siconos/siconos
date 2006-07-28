@@ -25,6 +25,7 @@
  *  \version 1.2.0.
  *  \date (Creation) Apr 26, 2004
  *
+ * WARNING: at the time mainly written for Lagrangian systems !!!
  */
 
 #include "Simulation.h"
@@ -39,6 +40,18 @@ class EventDriven : public Simulation
 private:
   /** tool to manage events */
   EventsManager* eventsManager;
+
+  /** flag used in DLSODAR -
+   *  As input: 1 if first call, else 2
+   *  As output: 2 if no root found, else 3
+   */
+  int istate;
+
+  /** current starting time for integration */
+  double tinit;
+
+  /** current ending time for integration */
+  double tend;
 
 public:
 
@@ -108,31 +121,47 @@ public:
    */
   void computeJacobianF(OneStepIntegrator*, integer *, doublereal *, doublereal *,  doublereal *);
 
-  /** \fn void computeG(OneStepIntegrator* osi)
+  /** \fn void computeG(OneStepIntegrator* osi, integer * nEq, doublereal * time, doublereal* x, integer * ng, doublereal * gOut)
    *  \brief compute constraint function g(x,t,...) for osi.
    *  \param pointer to OneStepIntegrator.
+   *  \param integer*, size of vector x
+   *  \param doublereal*, time
+   *  \param doublereal*, x:array of double
+   *  \param integer*, size of vector g (ie number of constraints)
+   *  \param doublereal*, g (in-out parameter)
    */
-  void computeG(OneStepIntegrator*);
+  void computeG(OneStepIntegrator*, integer *, doublereal *, doublereal*, integer *, doublereal*);
 
   /** \fn void initialize()
    *  \brief initialisation of the simulation
    */
   void initialize();
 
+  /** \fn void updateImpactState()
+   *  \brief update input for impact case (ie compute p[1])
+   */
+  void updateImpactState();
+
   /** \fn void simulateOneStep()
     *  \brief run the whole simulation
     */
   void run();
 
-  /** \fn void update()
+  /** \fn void update(const unsigned int)
    *  \brief update input, output and indexSets.
+   *  \param lambda order used to compute input
    */
-  void update();
+  void update(const unsigned int);
 
   /** \fn void computeOneStep()
    *  \brief run simulation from one Event to the next
    */
   void computeOneStep();
+
+  /** \fn void nextStep()
+   *  \brief increments all the Integrators to next step of the simulation
+   */
+  void nextStep();
 
   /** \fn void advanceToEvent()
    *  \brief run simulation from one Event to the next, according to events manager settings.

@@ -286,16 +286,14 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   // left, right and extra depend on the relation type and the non smooth law.
   relationType1 = UR1->getRelationType();
   relationType2 = UR2->getRelationType();
-  if (UR1 == UR2)
+  if (UR1 == UR2 &&  relationType1 == LINEARTIRELATION)
   {
-    if (relationType1 == LINEARTIRELATION)
-    {
-      extraBlock = new SimpleMatrix(nslawSize1, nslawSize1);
-      UR1->getExtraBlock(extraBlock);
-      *currentBlock += *extraBlock;// specific to LinearTIR, get D matrix added only on blocks of the diagonal.
-      delete extraBlock;
-    }
+    extraBlock = new SimpleMatrix(nslawSize1, nslawSize1);
+    UR1->getExtraBlock(extraBlock);
+    *currentBlock += *extraBlock;// specific to LinearTIR, get D matrix added only on blocks of the diagonal.
+    delete extraBlock;
   }
+
   // loop over the common DS
   for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
   {

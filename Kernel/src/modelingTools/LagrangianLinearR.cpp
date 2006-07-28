@@ -446,6 +446,11 @@ void LagrangianLinearR::computeOutput(const double time, const unsigned int deri
         tmp->addPtr(lds->getQPtr());
       else if (derivativeNumber == 1)
         tmp->addPtr(lds->getVelocityPtr());
+      else if (derivativeNumber == 2)
+      {
+        lds->computeRhs(time); // Maybe not necessary?
+        tmp->addPtr(static_cast<SimpleVector*>(lds->getRhsPtr()->getVectorPtr(1)));
+      }
     }
 
     // get y and yDot of the interaction
@@ -551,15 +556,16 @@ void LagrangianLinearR::computeInput(const double time, const unsigned int level
       lds = static_cast<LagrangianDS*>(*it);
       // Put p of each DS into a block
       // Warning: use addPtr -> link between pointers
-      p->addPtr(lds->getPPtr());
+      p->addPtr(lds->getPPtr(2));
 
     }
 
+    p->zero();
+
     // get lambda of the concerned interaction
-    SiconosVector *lambda = interaction->getLambdaPtr(1);
+    SiconosVector *lambda = interaction->getLambdaPtr(level);
 
     // compute p = Ht lambda
-
     *p += matTransVecMult(*H, *lambda);
     delete p;
   }

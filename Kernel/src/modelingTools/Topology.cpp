@@ -35,6 +35,7 @@ const bool Topology::addInteractionInIndexSet(Interaction * inter)
     pos = pos + nsLawSize;
     if (checkUR.second == false) res = false;
   }
+  numberOfConstraints += m * nsLawSize;
   return res;
 }
 
@@ -72,11 +73,11 @@ void Topology::computeRelativeDegrees()
 // --- CONSTRUCTORS/DESTRUCTOR ---
 
 // default
-Topology::Topology(): isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(NULL)
+Topology::Topology(): isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(NULL), numberOfConstraints(0)
 {}
 
 // with NonSmoothDynamicalSystem
-Topology::Topology(NonSmoothDynamicalSystem* newNsds): isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(newNsds)
+Topology::Topology(NonSmoothDynamicalSystem* newNsds): isTopologyUpToDate(false), isTopologyTimeInvariant(true), nsds(newNsds), numberOfConstraints(0)
 {}
 
 // destructor
@@ -90,14 +91,6 @@ Topology::~Topology()
   nsds = NULL;
 }
 
-void Topology::setInteractions(const InteractionsSet& newVect)
-{
-  // clear old set
-  allInteractions.clear();
-  // copy the new one
-  allInteractions = newVect;
-}
-
 const bool Topology::hasInteraction(Interaction* inter) const
 {
   return allInteractions.isInteractionIn(inter);
@@ -105,12 +98,18 @@ const bool Topology::hasInteraction(Interaction* inter) const
 
 const unsigned int Topology::getMaxRelativeDegree()
 {
+  if (relativeDegrees.empty())
+    RuntimeException::selfThrow("Topology::getMaxRelativeDegree, non-existent value, since the relative degrees map is empty.");
+
   ConstIteratorForRelativeDegrees it = max_element(relativeDegrees.begin(), relativeDegrees.end());
   return(it->second);
 }
 
 const unsigned int Topology::getMinRelativeDegree()
 {
+  if (relativeDegrees.empty())
+    RuntimeException::selfThrow("Topology::getMaxRelativeDegree, non-existent value, since the relative degrees map is empty.");
+
   ConstIteratorForRelativeDegrees it = min_element(relativeDegrees.begin(), relativeDegrees.end());
   return(it->second);
 }
@@ -127,7 +126,7 @@ void Topology::initialize()
   // loop through interactions list (from NSDS)
   indexSet0.clear();
   InteractionsIterator it;
-  for (it = allInteractions.begin()  ; it != allInteractions.end(); ++it)
+  for (it = allInteractions.begin()  ; it != allInteractions.end() ; ++it)
   {
     (*it)->initialize();
     addInteractionInIndexSet(*it);

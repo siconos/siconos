@@ -83,7 +83,7 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* 
   if (allDS.isEmpty())
     RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(xml, ...): the set of DS is empty.");
 
-  if (allInteractions.isEmpty())
+  if (allInteractions.isEmpty())  // Note: empty Interactions set is allowed.
     cout << "Warning: NonSmoothDynamicalSystem:: constructor(xml, ...): the set of Interactions is empty." << endl;
 
   // === Builds topology ===

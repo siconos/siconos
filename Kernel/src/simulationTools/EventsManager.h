@@ -102,21 +102,21 @@ protected:
   /* link to the simulation that owns this manager*/
   Simulation * simulation;
 
-  /** \fn unsigned long int doubleToIntTime(const double&)
+  /** \fn unsigned long int doubleToIntTime(const double)
    *  \brief convert time from double to unsigned int according to tick.
    */
-  const unsigned long int doubleToIntTime(const double&) const;
+  const unsigned long int doubleToIntTime(const double) const;
 
-  /** \fn double intToDoubleTime(const unsigned long int&) const;
+  /** \fn double intToDoubleTime(const unsigned long int) const;
    *  \brief convert time from unsigned int to double according to tick.
    */
-  const double intToDoubleTime(const unsigned long int&) const;
+  const double intToDoubleTime(const unsigned long int) const;
 
   /** \fn const bool insertEvent(Event*)
    *  \brief add a new Event in the unProcessedEvents list
    *  \return false if Event already exists
    */
-  const bool insertEvent(const std::string&, const double&);
+  const bool insertEvent(const std::string, const double);
 
 public:
 
@@ -126,12 +126,12 @@ public:
    */
   EventsManager(const EventsManager&);
 
-  /** \fn EventsManager(const double& = DEFAULT_TICK)
+  /** \fn EventsManager(const double = DEFAULT_TICK)
    *  \brief default constructor, with tick value as optional input
    *  \param an unsigned int
    *  \param a string
    */
-  EventsManager(const double& = DEFAULT_TICK, Simulation* = NULL);
+  EventsManager(const double = DEFAULT_TICK, Simulation* = NULL);
 
   /** \fn EventsManager(EventsManagerXML*)
    *  \brief constructor with XML object of the EventsManager
@@ -179,12 +179,12 @@ public:
     return unProcessedEvents ;
   };
 
-  /** \fn Events* getEventPtr(const unsigned long int& inputTime) const
+  /** \fn Events* getEventPtr(const unsigned long int inputTime) const
    *  \brief get the event that occurs at time inputTime
    *  \param an unsigned long int
    *  \return a pointer to Event
    */
-  Event* getEventPtr(const unsigned long int& inputTime) const;
+  Event* getEventPtr(const unsigned long int inputTime) const;
 
   /** \fn Events* getNextEventPtr(Event* inputEvent) const
    *  \brief get the event following inputEvent  ("following" defined with operator(s) comparison of events)
@@ -193,12 +193,12 @@ public:
    */
   Event* getNextEventPtr(Event*) const;
 
-  /** \fn Events* getNextEventPtr(const unsigned long int& inputTime) const
+  /** \fn Events* getNextEventPtr(const unsigned long int inputTime) const
    *  \brief get the event that follows the event at time inputTime  ("following" defined with operator(s) comparison of events)
    *  \param an unsigned long int
    *  \return a pointer to Event
    */
-  Event* getNextEventPtr(const unsigned long int& inputTime) const;
+  Event* getNextEventPtr(const unsigned long int inputTime) const;
 
   /** \fn inline const double getTick() const
    *  \brief get tick value
@@ -209,11 +209,11 @@ public:
     return tick ;
   };
 
-  /** \fn inline void setTick(const double& newTick) const
+  /** \fn inline void setTick(const double newTick) const
   *  \brief set tick value
   *  \param a double
   */
-  inline void setTick(const double & newTick)
+  inline void setTick(const double  newTick)
   {
     std::cout << "Warning: you change tick value for EventsManager -> a new initialization of the object is required. " << std::endl;
     tick = newTick;
@@ -282,7 +282,7 @@ public:
    *  \brief add a new Event in the unProcessedEvents list and update nextEvent value
    *  \return false if Event already exists
    */
-  const bool scheduleEvent(const std::string&, const double&);
+  const bool scheduleEvent(const std::string, const double);
 
   /** \fn void removeEvent(Event*)
    *  \brief remove an Event from the unProcessed events list

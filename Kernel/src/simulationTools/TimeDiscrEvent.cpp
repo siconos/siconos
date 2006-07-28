@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "TimeDiscrEvent.h"
+#include "TimeDiscretisation.h"
 using namespace std;
 
 // Default constructor
@@ -33,8 +34,22 @@ TimeDiscrEvent::TimeDiscrEvent(const unsigned long int& time): Event(time, "Time
 TimeDiscrEvent::~TimeDiscrEvent()
 {}
 
-void TimeDiscrEvent::process()
+void TimeDiscrEvent::process(Simulation* simulation)
 {
+  cout << "Time Discretisation Event ... " << endl;
+
+  OSNSIterator itOsns;
+  OneStepNSProblems allOSNS = simulation->getOneStepNSProblems();
+  //  for(itOsns=(simulation->getOneStepNSProblems()).begin();itOsns!=(simulation->getOneStepNSProblems()).end();++itOsns)
+  for (itOsns = allOSNS.begin(); itOsns != allOSNS.end(); ++itOsns)
+    (itOsns->second)->updateOutput(0, 1);
+
+  TimeDiscretisation * td =  simulation->getTimeDiscretisationPtr();
+  td->increment();
+  Model * model =  simulation->getModelPtr();
+  model->setCurrentT(model->getCurrentT() + td->getH());
+  simulation->nextStep();
+
   //todo
   // cout << " Time Discr Event processing: nothing implemented" << endl;
 }

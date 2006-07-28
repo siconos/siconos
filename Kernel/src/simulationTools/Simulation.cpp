@@ -42,13 +42,13 @@ using namespace std;
 // --- Default constructor (protected) ---
 Simulation::Simulation(const string type):
   name("unnamed"), simulationType(type), timeDiscretisation(NULL), isTimeDiscretisationAllocatedIn(false),
-  simulationxml(NULL), model(NULL)
+  simulationxml(NULL), model(NULL), levelMin(0), levelMax(0)
 {}
 
 // --- constructor with a Model and an id ---
 Simulation::Simulation(Model * mainModel, const string id):
   name("unnamed"), simulationType(id), timeDiscretisation(NULL), isTimeDiscretisationAllocatedIn(false),
-  simulationxml(NULL), model(mainModel)
+  simulationxml(NULL), model(mainModel), levelMin(0), levelMax(0)
 {
   if (model == NULL)
     RuntimeException::selfThrow("Simulation constructor - model == NULL.");
@@ -59,7 +59,7 @@ Simulation::Simulation(Model * mainModel, const string id):
 // --- xml constructor ---
 Simulation::Simulation(SimulationXML* strxml, Model *newModel, const string id):
   name("unnamed"), simulationType(id), timeDiscretisation(NULL), isTimeDiscretisationAllocatedIn(true),
-  simulationxml(strxml), model(newModel)
+  simulationxml(strxml), model(newModel), levelMin(0), levelMax(0)
 {
   if (simulationxml == NULL)
     RuntimeException::selfThrow("Simulation:: xml constructor - xml file = NULL");
@@ -322,36 +322,6 @@ void Simulation::initialize()
 
   // We first need to initialize the topology (computes UnitaryRelation sets, relative degrees ...)
   model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->initialize();
-
-  InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractions();
-
-  if (!allInteractions.isEmpty()) // ie if some Interactions have been declared
-  {
-    unsigned int maxDegree = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
-    // Interactions initialization (here, since level depends on the type of simulation)
-    // level corresponds to the number of Y and Lambda derivatives computed.
-    unsigned int level = maxDegree;
-
-    if (maxDegree == 0)
-      level = 1;
-
-    if (simulationType == "EventDriven")
-      level++;
-
-    InteractionsIterator it;
-    for (it = allInteractions.begin(); it != allInteractions.end(); ++it)
-      (*it)->initializeMemory(level);
-
-    if (maxDegree != 0)
-      indexSets.resize(level);
-    else indexSets.resize(1);
-    indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0();
-  }
-
-  // initialization of the OneStepIntegrators
-  OSIIterator itOsi;
-  for (itOsi = allOSI.begin(); itOsi != allOSI.end(); ++itOsi)
-    (*itOsi)->initialize();
 }
 
 void Simulation::computeFreeState()
@@ -400,7 +370,7 @@ void Simulation::newtonSolve(const double criterion, const unsigned int maxStep)
     computeFreeState();
     updateIndexSets();
     computeOneStepNSProblem("timeStepping");
-    update();
+    update(levelMin);
     isNewtonConverge = newtonCheckConvergence(criterion);
   }
   if (!isNewtonConverge)

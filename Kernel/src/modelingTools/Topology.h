@@ -82,6 +82,9 @@ private:
   /** the NonSmoothDynamicalSystem that owns this topology */
   NonSmoothDynamicalSystem * nsds;
 
+  /** Total number of (scalar) constraints in the problem, ie sum of all nslaw sizes of Unitary Relations of IndexSet0.*/
+  unsigned int numberOfConstraints;
+
   // === PRIVATE FUNCTIONS ===
 
   /** \fn const bool addInteractionInIndexSet(Interaction* inter)
@@ -124,12 +127,6 @@ public:
   {
     return allInteractions;
   }
-
-  /** \fn void setInteractions(const InteractionsSet&)
-   *  \brief to set allInteractions
-   *  \param an InteractionsSet
-   */
-  void setInteractions(const InteractionsSet&) ;
 
   /** \fn const bool hasInteraction(Interaction * inter)
    *  \brief check if Interaction inter is in the set
@@ -219,6 +216,15 @@ public:
   {
     return isTopologyTimeInvariant;
   }
+
+  /** \fn const unsigned int getNumberOfConstraints() const
+   *  \brief get the total number of scalar constraints
+   *  \return an unsigned int
+   */
+  inline const unsigned int getNumberOfConstraints()
+  {
+    return numberOfConstraints;
+  };
 
   /** \fn void initialize();
    *   \brief initializes the topology

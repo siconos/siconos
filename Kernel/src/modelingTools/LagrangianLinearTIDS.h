@@ -59,26 +59,35 @@ class LagrangianLinearTIDSXML;
  *
  *
  * The master Class LagrangianDS is specified as follows :
- *    -  \f$ M(q) = M q \f$
- *    -  \f$ Q(\dot q, q) = 0 \f$
- *    -  \f$ F_{Int}(\dot q , q , t) = -C \dot q - K q \f$
+ *
+ *    -  \f$ NNL(\dot q, q) = 0 \f$
+ *    -  \f$ F_{Int}(\dot q , q , t) = C \dot q + K q \f$
  *
  *
  *
- * As for the master Class LagrangianDS, the state of the master class DynamicalSystem is defined by \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$ and then \f$ n= 2 ndof \f$ and the rhs is given by:
+ * Links with first order DynamicalSystem top-class are:
+ *
+ * \f$ n= 2 ndof \f$
+ * \f$ x = \left[\begin{array}{c}q \\ \dot q\end{array}\right]\f$
+ *
+ * The rhs is given by:
  * \f[
- * f(x,t) = \left[\begin{array}{cc}
- *  0_{ndof \times ndof} & I_{ndof \times ndof} \\
- * M^{-1}(q)\left[   F_{Int}(\dot q , q , t)+F_{Ext}( q , t) -  Q(\dot q, q) \right]\\
+ * f(x,t) = \left[\begin{array}{c}
+ *  \dot q  \\
+ * M^{-1}(q)\left[F_{Ext}( q , t) - C \dot q - K q   \right]\\
  * \end{array}\right]
  * \f]
- *  and the input due to the non smooth law by
+ * Its jacobian is:
+ * \f[
+ * \nabla_{x}f(x,t) = \left[\begin{array}{cc}
+ *  0  & I \\
+ * -M^{-1}K  -M^{-1}C) \\
+ * \end{array}\right]
+ * \f]
+ *  The input due to the non smooth law is:
  * \f[
  * r = \left[\begin{array}{c}0 \\ p \end{array}\right]
  * \f]
- *
- * \todo Automatically, specify the function of LagrangianDS such as
- *          Mass, QNL Inertia , FInt = K q +c velocity,
  */
 class LagrangianLinearTIDS : public LagrangianDS
 {
@@ -285,6 +294,8 @@ public:
   {
     return 0.0;
   }
+
+  void initP1();
 };
 
 #endif // LAGRANGIANTIDS_H

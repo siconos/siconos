@@ -19,6 +19,7 @@
 
 #include "Lsodar.h"
 #include "EventDriven.h"
+#include "LagrangianLinearTIDS.h"
 
 using namespace std;
 
@@ -56,7 +57,7 @@ Lsodar::Lsodar(): OneStepIntegrator(), localTimeDiscretisation(NULL), isLocalTim
 Lsodar::Lsodar(OneStepIntegratorXML* osiXML, Simulation* newS):
   OneStepIntegrator("Lsodar", osiXML, newS), localTimeDiscretisation(NULL), isLocalTimeDiscretisationAllocatedIn(false), iwork(NULL)
 {
-  // local time discretisasation is set by default to those of the simulation.
+  // local time discretisation is set by default to those of the simulation.
   localTimeDiscretisation = simulationLink->getTimeDiscretisationPtr(); // warning: pointer link!
   intData.resize(9);
   doubleData.resize(4);
@@ -69,7 +70,7 @@ Lsodar::Lsodar(DynamicalSystem* ds, Simulation* newS):
   if (simulationLink == NULL)
     RuntimeException::selfThrow("Lsodar:: constructor(ds,simulation) - simulation == NULL");
 
-  // local time discretisasation is set by default to those of the simulation.
+  // local time discretisation is set by default to those of the simulation.
   localTimeDiscretisation = simulationLink->getTimeDiscretisationPtr(); // warning: pointer link!
 
   // add ds in the set
@@ -85,7 +86,7 @@ Lsodar::Lsodar(DynamicalSystemsSet& newDS, Simulation* newS):
   if (simulationLink == NULL)
     RuntimeException::selfThrow("Lsodar:: constructor(DSSet,simulation) - simulation == NULL");
 
-  // local time discretisasation is set by default to those of the simulation.
+  // local time discretisation is set by default to those of the simulation.
   localTimeDiscretisation = simulationLink->getTimeDiscretisationPtr(); // warning: pointer link!
 
   intData.resize(9);
@@ -162,15 +163,20 @@ void Lsodar::updateData()
   if (intData[0] == 1) sizeTol = 1;
   else sizeTol = intData[0];
   // Allocate memory for iwork
+
   if (iwork != NULL) delete iwork;
   iwork = new integer[intData[7]];
+
   // Allocate memory for doubleData ...
   if (doubleData[0] != NULL) delete doubleData[0];
   doubleData[0] = new doublereal[sizeTol] ;    // rtol, relative tolerance
+
   if (doubleData[1] != NULL) delete doubleData[1];
   doubleData[1] = new doublereal[sizeTol];  // atol, absolute tolerance
+
   if (doubleData[2] != NULL) delete doubleData[2];
   doubleData[2] = new doublereal[intData[6]]; // rwork
+
   if (doubleData[3] != NULL) delete doubleData[3];
   doubleData[3] = new doublereal[intData[1]]; // jroot
 }
@@ -213,7 +219,7 @@ void Lsodar::f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal 
 
 void Lsodar::g(integer * nEq, doublereal * time, doublereal* x, integer * ng, doublereal * gOut)
 {
-  static_cast<EventDriven*>(simulationLink)->computeG(this);
+  static_cast<EventDriven*>(simulationLink)->computeG(this, nEq, time, x, ng, gOut);
 }
 
 void Lsodar::jacobianF(integer *sizeOfX, doublereal *time, doublereal *x, integer* ml, integer *mu,  doublereal *jacob, integer *nrowpd)
@@ -226,27 +232,25 @@ void Lsodar::initialize()
   OneStepIntegrator::initialize();
   xWork = new BlockVector();
   DSIterator it;
+  string type;
   // initialize xWork with x values of the dynamical systems present in the set.
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
-    xWork->addPtr(static_cast<SimpleVector*>((*it)->getXPtr()));
-}
-
-void Lsodar::computeFreeState() // useless??
-{
-  RuntimeException::selfThrow("Lsodar::computeFreeState not implemented for Lsodar-type One step integrator");
-}
-
-void Lsodar::integrate(const double tinit, const double tend, double tout, bool iout)
-{
-  // For details on DLSODAR parameters, see opkdmain.f in Numerics/src/odepack
-
-  doublereal tend_DR = tend  ;       // next point where output is desired (different from t!)
-  doublereal tinit_DR = tinit;       // current (starting) time
+  {
+    type = (*it)->getType();
+    if (type == LTIDS)
+    {
+      xWork->addPtr((static_cast<LagrangianLinearTIDS*>(*it))->getQPtr()) ;
+      xWork->addPtr((static_cast<LagrangianLinearTIDS*>(*it))->getVelocityPtr()) ;
+    }
+    else
+      xWork->addPtr(static_cast<SimpleVector*>((*it)->getXPtr()));
+  }
 
   //   Integer parameters for LSODAR are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
-  intData[0] =  xWork->size(0);  // neq, number of equations, ie dim of x
-  intData[1] = 0 ;  // ng, number of constraints
+  intData[0] = xWork->size(0);  // neq, number of equations, ie dim of x
+  // ng, number of constraints:
+  intData[1] =  simulationLink->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getNumberOfConstraints();
   intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
   intData[3] = 1; // itask, an index specifying the task to be performed. 1: normal computation.
   intData[4] = 1; // istate an index used for input and output to specify the the state of the calculation.
@@ -276,8 +280,8 @@ void Lsodar::integrate(const double tinit, const double tend, double tout, bool 
 
   //   Doublereal parameters for LSODAR are saved in vector doubleData.
   //   The link with variable names in opkdmain.f is indicated in comments
-  *(doubleData[0]) = 1.0e-9;      // rtol
-  *(doubleData[1]) = 1.0e-9;   // atol
+  *(doubleData[0]) = 1.0e-7;      // rtol
+  *(doubleData[1]) = 1.0e-7;   // atol
 
   // === Error handling in LSODAR===
 
@@ -292,6 +296,21 @@ void Lsodar::integrate(const double tinit, const double tend, double tout, bool 
   //   2     scalar     array      RTOL*ABS(Y(i)) + ATOL(i)
   //   3     array      scalar     RTOL(i)*ABS(Y(i)) + ATOL
   //   4     array      array      RTOL(i)*ABS(Y(i)) + ATOL(i)
+}
+
+void Lsodar::computeFreeState() // useless??
+{
+  RuntimeException::selfThrow("Lsodar::computeFreeState not implemented for Lsodar-type One step integrator");
+}
+
+void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
+{
+  // For details on DLSODAR parameters, see opkdmain.f in Numerics/src/odepack
+
+  doublereal tend_DR = tend  ;       // next point where output is desired (different from t!)
+  doublereal tinit_DR = tinit;       // current (starting) time
+
+  intData[4] = istate;
 
   // === Pointers to function ===
   //  --> definition and initialisation thanks to wrapper:
@@ -308,11 +327,15 @@ void Lsodar::integrate(const double tinit, const double tend, double tout, bool 
   pointerToG = Lsodar_g_wrapper; // function to compute the constraints
 
   // === LSODAR CALL ===
-  F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*xWork)(0), &tinit_DR, &tend_DR, &(intData[2]), doubleData[0], doubleData[1], &(intData[3]), &(intData[4]), &(intData[5]), doubleData[2],
+
+  SimpleVector * xtmp = new SimpleVector(*xWork); // A copy of xWork is required since at the time, there are no contiguous values in memory for BlockVectors.
+
+
+  cout << "IN LSODAR 0 " << tinit_DR << " " << " " << tend_DR << " " << tout << endl;
+  F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*xtmp)(0), &tinit_DR, &tend_DR, &(intData[2]), doubleData[0], doubleData[1], &(intData[3]), &(intData[4]), &(intData[5]), doubleData[2],
                    &(intData[6]), iwork, &(intData[7]), pointerToJacobianF, &(intData[8]), pointerToG, &(intData[1]), doubleData[3]);
 
-  tout  = tinit_DR; // real ouput time
-  iout  = true;
+
   // doubleData[2] = rwork
   // doubleData[3] = jroot, jroot[i] = 0 if g(i) as a root a t, else jroot[i] = 0.
 
@@ -329,15 +352,43 @@ void Lsodar::integrate(const double tinit, const double tend, double tout, bool 
     cout << " -7 means work space insufficient to finish (see messages)." << endl;
     RuntimeException::selfThrow("Lsodar, integration failed");
   }
+
+  *xWork = *xtmp;
+  delete xtmp;
+  istate = intData[4];
+  tout  = tinit_DR; // real ouput time
+  tend  = tend_DR; // necessary for next start of DLSODAR
+  tinit = tinit_DR;
+  cout << "FIN IN LSODAR  " << tinit_DR << " " << " " << tend_DR << " " << tout << endl;
+
 }
 
 
-void Lsodar::updateState(const double time)
+void Lsodar::updateState(const double time, const unsigned int level)
 {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
   DSIterator it;
-  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
-    (*it)->update(time);
+  SiconosMatrix * invM;
+  SiconosVector * v, *impact, *vold;
+
+  if (level == 1) // ie impact case: compute velocity
+  {
+    for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
+    {
+      LagrangianDS* lds = static_cast<LagrangianDS*>(*it);
+      invM = lds->getInverseOfMassPtr();
+      v = lds->getVelocityPtr();
+      impact = lds->getPPtr();
+      vold = lds->getVelocityMemoryPtr()->getSiconosVector(0);
+      *v = *invM **impact + *vold;
+    }
+  }
+  else if (level == 2)// compute acceleration
+  {
+    for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
+      (*it)->update(time);
+  }
+  else RuntimeException::selfThrow("Lsodar::updateState(t,index), index is out of range.");
 }
 
 void Lsodar::display() const

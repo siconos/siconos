@@ -128,6 +128,12 @@ protected:
   /** A link to the Model which contains the Simulation */
   Model *model;
 
+  /** int used to set the minimal derivative order used in the OSNS variables */
+  unsigned int levelMin;
+
+  /** int used to set the maximal derivative order used in the OSNS variables */
+  unsigned int levelMax;
+
   /** \fn Simulation()
    *  \brief default constructor
    */
@@ -376,7 +382,7 @@ public:
   /** \fn void nextStep()
    *  \brief increments all the Integrators to next step of the simulation
    */
-  virtual void nextStep();
+  virtual void nextStep() = 0;
 
   /** \fn void computeOneStepNSProblem(const string = DEFAULT_OSNS_NAME)
    *  \brief computes the one step NS problem
@@ -384,10 +390,11 @@ public:
    */
   virtual void computeOneStepNSProblem(const std::string = DEFAULT_OSNS_NAME);
 
-  /** \fn void update()
+  /** \fn void update(const unsigned int)
    *  \brief update input, state of each dynamical system and output
+   *  \param lambda order used to compute input
    */
-  virtual void update() = 0;
+  virtual void update(const unsigned int) = 0;
 
   /** \fn void run()
    *  \brief run the simulation, from t0 to T

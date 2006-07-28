@@ -265,8 +265,8 @@ void OneStepNSProblem::initialize()
     cout << "Warning, OneStepNSProblem::initialize, the set of Interactions of this problem is empty." << endl;
   else
   {
+    updateInput(levelMin);
     updateOutput();
-    updateInput();
 
     updateBlocks();
     computeSizeOutput();
@@ -280,22 +280,32 @@ void OneStepNSProblem::nextStep()
     (*it)->swapInMemory();
 }
 
-void OneStepNSProblem::updateInput()
+void OneStepNSProblem::updateInput(int level)
 {
+  if (level == -1)
+    level = levelMin; // We use this since it is impossible to set levelMin as defaultValue in OneStepNSProblem.h
+
   InteractionsIterator it;
   double currentTime = simulation->getModelPtr()->getCurrentT();
 
   // We compute inpute using lambda(levelMin).
   for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
-    (*it)->getRelationPtr() -> computeInput(currentTime, levelMin);
+    (*it)->getRelationPtr() -> computeInput(currentTime, level);
 }
 
-void OneStepNSProblem::updateOutput()
+void OneStepNSProblem::updateOutput(const int level0, int level1)
 {
+
+  if (level1 == -1)
+    level1 = levelMax;
+
   InteractionsIterator it;
   double currentTime = simulation->getModelPtr()->getCurrentT();
   for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
-    (*it)->getRelationPtr()->computeOutput(currentTime);
+  {
+    for (int i = level0; i < level1; ++i)
+      (*it)->getRelationPtr()->computeOutput(currentTime , i);
+  }
 }
 
 void OneStepNSProblem::compute(const double time)

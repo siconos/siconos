@@ -64,7 +64,7 @@ class LagrangianDSXML;
  * \f[
  * \nabla_{x}f(x,t) = \left[\begin{array}{cc}
  *  0  & I \\
- * \nabla_{q}M^{-1}(q)\left[F_{Ext}( q , t) - F_{Int}(\dot q , q , t) - NNL(\dot q, q) \right]-M^{-1}(q)\left[\nabla_q(F_{Int}(\dot q , q , t)-NNL(\dot q, q))\right] & -M^{-1}(q)\left[\nabla_{\dot q}(F_{Int}(\dot q , q , t)-NNL(\dot q, q))\right] \\
+ * \nabla_{q}M^{-1}(q)\left[F_{Ext}( q , t) - F_{Int}(\dot q , q , t) - NNL(\dot q, q) \right]-M^{-1}(q)\left[\nabla_q(F_{Int}(\dot q , q , t)+NNL(\dot q, q))\right] & -M^{-1}(q)\left[\nabla_{\dot q}(F_{Int}(\dot q , q , t)+NNL(\dot q, q))\right] \\
  * \end{array}\right]
  * \f]
  *  The input due to the non smooth law is:
@@ -122,7 +122,9 @@ protected:
   SimpleVector *velocity0; /**< initial velocity of the system*/
   SimpleVector *velocityFree;/**<free Velocity*/
   SiconosMemory *velocityMemory;/**<memory of previous velocities of the system */
-  SimpleVector *p;/**<Reaction due to the non smooth law */
+
+  /** "Reaction" due to the non smooth law - The index corresponds to the dynamic level. */
+  std::vector<SimpleVector*> p;
 
   /** mass of the system */
   SiconosMatrix *mass;
@@ -632,35 +634,39 @@ public:
 
   // -- p --
 
-  /** \fn  const SimpleVector getP() const
-   *  \brief get the value of p
+  /** \fn  const SimpleVector getP(const unsigned int = 2) const
+   *  \brief get the value of p[index]
+   *  \param unsigned int, required level for p, default = 2
    *  \return SimpleVector
    */
-  inline const SimpleVector getP() const
+  inline const SimpleVector getP(const unsigned int level = 2) const
   {
-    return *p;
+    return *(p[level]);
   }
 
-  /** \fn SimpleVector* getPPtr() const
+  /** \fn SimpleVector* getPPtr(const unsigned int level = 2) const
    *  \brief get p
+   *  \param unsigned int, required level for p, default = 2
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getPPtr() const
+  inline SimpleVector* getPPtr(const unsigned int level = 2) const
   {
-    return p;
+    return p[level];
   }
 
-  /** \fn void setP (const SimpleVector& newValue)
+  /** \fn void setP (const SimpleVector& newValue, const unsigned int level = 2)
    *  \brief set the value of p to newValue
+   *  \param unsigned int, required level for p, default = 2
    *  \param SimpleVector newValue
    */
-  void setP(const SimpleVector&);
+  void setP(const SimpleVector&, const unsigned int level = 2);
 
-  /** \fn void setPPtr(SimpleVector* newPtr)
+  /** \fn void setPPtr(SiconosVector* newPtr, const unsigned int level = 2)
    *  \brief set P to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param unsigned int, required level for p, default = 2
+   *  \param SimpleVector * newPtr
    */
-  void setPPtr(SimpleVector *newPtr);
+  void setPPtr(SimpleVector *newPtr, const unsigned int level = 2);
 
   // -- Mass --
 

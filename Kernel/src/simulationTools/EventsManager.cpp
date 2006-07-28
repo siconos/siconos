@@ -22,7 +22,7 @@ using namespace std;
 
 // PRIVATE METHODS
 
-const unsigned long int EventsManager::doubleToIntTime(const double& doubleTime) const
+const unsigned long int EventsManager::doubleToIntTime(const double doubleTime) const
 {
   double res = ceil(doubleTime / tick);
   if (res > ULONG_MAX) // check if res value can be converted to unsigned long int.
@@ -30,7 +30,7 @@ const unsigned long int EventsManager::doubleToIntTime(const double& doubleTime)
   return (unsigned long int)res;
 }
 
-const double EventsManager::intToDoubleTime(const unsigned long int& intTime) const
+const double EventsManager::intToDoubleTime(const unsigned long int intTime) const
 {
   return tick * intTime;
 }
@@ -39,7 +39,7 @@ const double EventsManager::intToDoubleTime(const unsigned long int& intTime) co
 // schedule is required by simulation.
 //  -> necessary to insert a new event AND to update current/past event
 // There are two different functions, to avoid multiple nextEvent update during initialize calls of insertEvent.
-const bool EventsManager::insertEvent(const string& type, const double& time)
+const bool EventsManager::insertEvent(const string type, const double time)
 {
   unsigned long int intTime;
 
@@ -66,8 +66,8 @@ const bool EventsManager::insertEvent(const string& type, const double& time)
 RuntimeCmp<Event> compareEvents(&Event::getTimeOfEvent);
 
 // Default/from data constructor
-EventsManager::EventsManager(const double& inputTick, Simulation * newStrat):
-  pastEvents(compareEvents), unProcessedEvents(compareEvents), currentEvent(NULL), nextEvent(NULL), tick(inputTick), simulation(newStrat)
+EventsManager::EventsManager(const double inputTick, Simulation * newSimu):
+  pastEvents(compareEvents), unProcessedEvents(compareEvents), currentEvent(NULL), nextEvent(NULL), tick(inputTick), simulation(newSimu)
 {}
 
 // copy constructor
@@ -140,7 +140,7 @@ void EventsManager::scheduleTimeDiscretisation(TimeDiscretisation* td)
     isInsertOk = insertEvent("TimeDiscretisationEvent", (*tk)(i));
 }
 
-Event* EventsManager::getEventPtr(const unsigned long int& inputTime) const
+Event* EventsManager::getEventPtr(const unsigned long int inputTime) const
 {
   eventsContainer::iterator current;
   Event * searchedEvent = NULL;
@@ -175,7 +175,7 @@ Event* EventsManager::getNextEventPtr(Event* inputEvent) const
     return (*next);
 }
 
-Event* EventsManager::getNextEventPtr(const unsigned long int& inputTime) const
+Event* EventsManager::getNextEventPtr(const unsigned long int inputTime) const
 {
   eventsContainer::iterator next = unProcessedEvents.upper_bound(getEventPtr(inputTime));
 
@@ -244,7 +244,7 @@ void EventsManager::display() const
   cout << "===== End of EventsManager display =====" << endl;
 }
 
-const bool EventsManager::scheduleEvent(const string& type, const double& time)
+const bool EventsManager::scheduleEvent(const string type, const double time)
 {
   // === get original, user, time discretisation. ===
   //     and check that t0 < time < T
@@ -255,6 +255,7 @@ const bool EventsManager::scheduleEvent(const string& type, const double& time)
   // === Insert the event into the list ===
   bool isInsertOk = insertEvent(type, time);
   // update nextEvent value.(may have change because of insertion)
+
   nextEvent = getNextEventPtr(currentEvent);
   return isInsertOk;  // true if insert succeed.
 }
@@ -285,9 +286,10 @@ void EventsManager::processEvents()
 {
   // === process events ===
 
-  eventsContainer::iterator it;
-  for (it = unProcessedEvents.begin(); it != unProcessedEvents.end(); ++it)
-    (*it)->process();
+  //  eventsContainer::iterator it;
+  //for(it=unProcessedEvents.begin();it!=unProcessedEvents.end();++it)
+  //  (*it)->process(simulation);
+
 
   // === update current and next event pointed values ===
 
@@ -299,8 +301,9 @@ void EventsManager::processEvents()
   check = pastEvents.insert(getEventPtr(t));
   if (!check.second) RuntimeException::selfThrow("EventsManager, processEvents, event insertion in pastEvents failed.");
 
-  // Get new currentEvent
+  // Get new currentEvent and process it
   currentEvent = getNextEventPtr(t);
+  currentEvent->process(simulation);
 
   // Remove event that occurs at time t (ie old current event) from unProcessedEvents set
   unProcessedEvents.erase(getEventPtr(t));

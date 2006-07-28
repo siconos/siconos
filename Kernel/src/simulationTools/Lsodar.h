@@ -15,6 +15,8 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ *
+ * WARNING: at the time mainly written for Lagrangian systems !!!
  */
 #ifndef Lsodar_H
 #define Lsodar_H
@@ -221,20 +223,21 @@ public:
    */
   void computeFreeState();
 
-  /** \fn void integrate(const double, const double, double, bool)
+  /** \fn void integrate(double&, double&, double&, int&)
    *  \brief integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
    *  \param double: tinit, initial time
    *  \param double: tend, end time
    *  \param double: tout, real end time
-   *  \param bool: true if tend is reached, else false.
+   *  \param int&: in-out parameter, input: 1 for first call, else 2. Output: 2 if no root was found, else 3.
    */
-  void integrate(const double, const double, double, bool);
+  void integrate(double&, double&, double&, int&);
 
-  /** \fn void updateState(const double)
+  /** \fn void updateState(const double, const unsigned int)
    *  \brief update the state of the DynamicalSystem attached to this Integrator
    *  \param double: current time
+   *  \param unsigned int: level of interest for the dynamics
    */
-  void updateState(const double);
+  void updateState(const double, const unsigned int);
 
   /** \fn Lsodar* convert (OneStepIntegrator* osi)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.

@@ -15,19 +15,20 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 #include "EventDriven.h"
+#include "LagrangianLinearTIDS.h"
 #include "Lsodar.h"
 
 using namespace std;
 
 // --- Default constructor ---
-EventDriven::EventDriven(Model* newModel): Simulation(newModel, "EventDriven")
+EventDriven::EventDriven(Model* newModel): Simulation(newModel, "EventDriven"), istate(1), tinit(0), tend(0)
 {}
 
 // --- XML constructor ---
-EventDriven::EventDriven(SimulationXML* strxml, Model *newModel): Simulation(strxml, newModel, "EventDriven")
+EventDriven::EventDriven(SimulationXML* strxml, Model *newModel): Simulation(strxml, newModel, "EventDriven"), istate(1), tinit(0), tend(0)
 {
   // === One Step NS Problem ===
   // We read data in the xml output (mainly Interactions concerned and solver) and assign them to
@@ -117,34 +118,77 @@ void EventDriven::initialize()
 {
   Simulation::initialize();
 
+  InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractions();
+
+  if (!allInteractions.isEmpty()) // ie if some Interactions have been declared
+  {
+    levelMax = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
+    // Interactions initialization (here, since level depends on the type of simulation)
+    // level corresponds to the number of Y and Lambda derivatives computed.
+
+    if (levelMax == 0)
+      levelMax++;
+
+    InteractionsIterator it;
+    for (it = allInteractions.begin(); it != allInteractions.end(); ++it)
+      (*it)->initializeMemory(levelMax + 1);
+
+    indexSets.resize(levelMax + 1);
+    indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0();
+  }
+
+  // initialization of the OneStepIntegrators
+  OSIIterator itOsi;
+  DSIterator itDS;
+
+  for (itOsi = allOSI.begin(); itOsi != allOSI.end(); ++itOsi)
+  {
+    // We need to initialize p[1] for EventDriven simulation
+    for (itDS = (*itOsi)->getDynamicalSystems().begin(); itDS != (*itOsi)->getDynamicalSystems().end(); ++itDS)
+      (static_cast<LagrangianLinearTIDS*>(*itDS))->initP1();
+
+    (*itOsi)->initialize();
+  }
+
+
   // === Events manager creation and initialization ===
   eventsManager = new EventsManager(DEFAULT_TICK, this); //
   eventsManager->initialize();
+  tinit = eventsManager->getCurrentTime();
+  tend =  eventsManager->getNextTime();
 
-  // === OneStepNSProblem initialization. ===
-  // First check that there are 2 osns: one "impact" and one "acceleration"
-  if (allNSProblems.size() != 2)
-    RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have two non smooth problem. Here, there are " + allNSProblems.size());
+  if (!allNSProblems.empty()) // ie if some Interactions have been declared and a Non smooth problem built.
+  {
+    // === OneStepNSProblem initialization. ===
+    // First check that there are 2 osns: one "impact" and one "acceleration"
+    if (allNSProblems.size() != 2)
+      RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have two non smooth problem. Here, there are " + allNSProblems.size());
 
-  if (allNSProblems.find("impact") == allNSProblems.end()) // ie if the impact problem does not exist
-    RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
-  if (allNSProblems.find("acceleration") == allNSProblems.end()) // ie if the impact problem does not exist
-    RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
+    if (allNSProblems.find("impact") == allNSProblems.end()) // ie if the impact problem does not exist
+      RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
+    if (allNSProblems.find("acceleration") == allNSProblems.end()) // ie if the impact problem does not exist
+      RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
 
-  // WARNING: only for Lagrangian systems - To be reviewed for other ones.
-  allNSProblems["impact"]->setLevels(1, 1);
-  allNSProblems["impact"]->initialize();
-  allNSProblems["acceleration"]->setLevels(2, 2);
-  allNSProblems["acceleration"]->initialize();
+    // At the time, we consider that for all systems, levelMin is equal to the minimum value of the relative degree
+    levelMin = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree();
+    if (levelMin == 0)
+      levelMin++;
 
-  // === update all index sets ===
-  updateIndexSets();
+    // WARNING: only for Lagrangian systems - To be reviewed for other ones.
+    allNSProblems["impact"]->setLevels(levelMin - 1, levelMax - 1);
+    allNSProblems["impact"]->initialize();
+    allNSProblems["acceleration"]->setLevels(levelMin, levelMax);
+    allNSProblems["acceleration"]->initialize();
+
+    // === update all index sets ===
+    updateIndexSets();
+  }
 }
 
 void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
 {
   // Check osi type: only lsodar is allowed.
-  if (osi->getType() != "lsodar")
+  if (osi->getType() != "Lsodar")
     RuntimeException::selfThrow("EventDriven::computeF(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
   Lsodar * lsodar = static_cast<Lsodar*>(osi);
@@ -153,32 +197,35 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   lsodar->fillXWork(sizeOfX, x);
 
   double t = *time;
+  model->setCurrentT(t);
 
   // update the DS of the OSI.
-  lsodar->updateState(t);
+  lsodar->updateState(t, 2); // update based on the last saved values for the DS state, ie the ones computed by lsodar (x above)
 
   // solve a LCP "acceleration"
-  if (!(allNSProblems["acceleration"]->getInteractions()).isEmpty())
+  if (!allNSProblems.empty())
   {
-    allNSProblems["acceleration"]->compute(t);
-    allNSProblems["acceleration"]->updateOutput();
-    allNSProblems["acceleration"]->updateInput();
+    if (!(allNSProblems["acceleration"]->getInteractions()).isEmpty())
+    {
+      allNSProblems["acceleration"]->compute(t);
+      allNSProblems["acceleration"]->updateInput(2); // Necessary to compute DS state below
+    }
+    // Compute the right-hand side ( xdot = f + Tu + r in DS) for all the ds, with the new value of input.
+    lsodar->computeRhs(t);
   }
 
-  // Compute the right-hand side ( xdot = f + Tu in DS) for all the ds
-
-  lsodar->computeRhs(t);
-
+  // Get the required value, ie xdot for output.
   DynamicalSystemsSet dsOfTheOsi = lsodar->getDynamicalSystems();
-
+  SiconosVector * xtmp2; // The Right-Hand side
   DSIterator it;
   unsigned int i = 0;
   for (it = dsOfTheOsi.begin(); it != dsOfTheOsi.end(); ++it)
   {
-    SiconosVector * xtmp2 = (*it)->getRhsPtr(); // Pointer link !
-    for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
+    xtmp2 = (*it)->getRhsPtr(); // Pointer link !
+    for (unsigned int j = 0 ; j < (*it)->getN() ; ++j) // Warning: getN, not getDim !!!!
       xdot[i++] = (*xtmp2)(j);
   }
+  xtmp2 = NULL;
 }
 
 void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, doublereal *time, doublereal *x,  doublereal *jacob)
@@ -209,7 +256,7 @@ void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, dou
   for (it = dsOfTheOsi.begin(); it != dsOfTheOsi.end(); ++it)
   {
     SiconosMatrix * jacotmp = (*it)->getJacobianXFPtr(); // Pointer link !
-    for (unsigned int j = 0 ; j < (*it)->getDim() ; ++j)
+    for (unsigned int j = 0 ; j < (*it)->getN() ; ++j)
     {
       for (unsigned k = 0 ; k < (*it)->getDim() ; ++k)
         jacob[i++] = (*jacotmp)(k, j);
@@ -217,25 +264,66 @@ void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, dou
   }
 }
 
-void EventDriven::computeG(OneStepIntegrator* osi)
+void EventDriven::computeG(OneStepIntegrator* osi, integer * sizeOfX, doublereal* time, doublereal* x, integer * ng, doublereal * gOut)
 {
-  RuntimeException::selfThrow("EventDriven::computeG(osi, ...), not yet implemented");
+  UnitaryRelationIterator itUR;
+  unsigned int nsLawSize, k = 0 ;
+  SiconosVector * y = NULL, * lambda = NULL;
+
+  Lsodar * lsodar = static_cast<Lsodar*>(osi);
+
+  // fill in xWork vector (ie all the x of the ds of this osi) with x
+  lsodar->fillXWork(sizeOfX, x); // That may be not necessary? Check if computeF is called for each computeG.
+
+  // IN: - lambda[2] obtained during LCP call in computeF()
+  //     - y[0]: need to be updated.
+
+  if (!allNSProblems.empty())
+  {
+    OSNSIterator itOsns;
+    for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
+      (itOsns->second)->updateOutput(0, 0);
+  }
+
+  // If UR is in IndexSet2, g = lambda[2], else g = y[0]
+  for (itUR = indexSets[0].begin(); itUR != indexSets[0].end(); ++itUR)
+  {
+    nsLawSize = (*itUR)->getNonSmoothLawSize();
+    if (indexSets[2].find(*itUR) != indexSets[2].end()) // ie if the current Unitary Relation is in indexSets[2]
+    {
+      lambda = (*itUR)->getLambdaPtr(2);
+      for (unsigned int i = 0; i < nsLawSize; i++)
+        gOut[k++] = (*lambda)(i);
+      //cout << " +++++++++++++++ IN G type lambda" << gOut[k-1] << endl;
+    }
+    else
+    {
+      y = (*itUR)->getYPtr(0);
+      for (unsigned int i = 0; i < nsLawSize; i++)
+        gOut[k++] = (*y)(i);
+      //cout << " +++++++++++++++ IN G type y" << gOut[k-1] << endl;
+    }
+  }
+
+}
+
+void EventDriven::updateImpactState()
+{
+  double time = model->getCurrentT();
+  OSIIterator itOSI;
+  for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
+    (*itOSI)->updateState(time, 1);
 }
 
 // Run the whole simulation
 void EventDriven::run()
 {
-
   unsigned int count = 0; // events counter.
   // do simulation while events remains in the "future events" list of events manager.
   cout << " ==== Start of Event Driven simulation - This may take a while ... ====" << endl;
   while (eventsManager->hasNextEvent())
   {
-    // Integrate system between "current" and "next" event of events manager.
-    advanceToEvent();
-    // update events
-    eventsManager->processEvents();
-    update();
+    computeOneStep();
     count++;
   }
   cout << "===== End of Event Driven simulation. " << count << " events have been processed. ==== " << endl;
@@ -243,62 +331,55 @@ void EventDriven::run()
 
 void EventDriven::computeOneStep()
 {
-  // Integrate system between "current" and "next" event of events manager.
   advanceToEvent();
-  // update events
   eventsManager->processEvents();
-  update();
 }
 
-void EventDriven::update()
+void EventDriven::update(const unsigned int levelInput)
 {
-  // compute input (lambda -> r)
-  OSNSIterator itOsns;
-  for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
+  cout << "DEBUT :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
+  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getYPtr(0)->display();
+  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getYPtr(1)->display();
+  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getLambdaPtr(0)->display();
+  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getLambdaPtr(1)->display();
+
+
+  if (!allNSProblems.empty())
   {
-    (itOsns->second)->updateInput();
+    // compute input
+    OSNSIterator itOsns;
+    for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
+      (itOsns->second)->updateInput(levelInput);
+
+    double time = model->getCurrentT();
+
+    OSIIterator itOSI;
+    for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
+      (*itOSI)->updateState(time, levelInput);
+
+    for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
+      (itOsns->second)->updateOutput(levelInput, levelInput);
+
+    updateIndexSet(levelInput);
   }
+  cout << "FIN :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
+  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getYPtr(0)->display();
+  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getYPtr(1)->display();
+  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getLambdaPtr(0)->display();
+  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getLambdaPtr(1)->display();
 
-  //  ===> TODO : save levelMin and max in the Simulation?
-  unsigned int levelMax = 0 ;
+}
 
-  if (model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree() != 0)
-    levelMax =  model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
-
-  double time = model->getCurrentT();
-  unsigned int levelMin;
-
-  // At the time, we consider that for all systems, levelMin is equal to the minimum value of the relative degree
-  // except for Lagrangian (Mechanical) Systems, where levelMin = 1.
-  // We get one Dynamical System of the OSI and check its type.
-  string DStype = (*(((*allOSI.begin())->getDynamicalSystems()).begin()))->getType();
-  if (DStype == LNLDS || DStype == LTIDS)
-    levelMin = 1;
-  else
-    levelMin = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree();
-
-  // ===> End of todo ...
-  if (levelMin > 0)
-  {
-    InteractionsIterator it;
-    InteractionsSet inter = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions();
-    for (it = inter.begin(); it != inter.end(); it++)
-    {
-      for (unsigned int i = 0; i <= levelMax; ++i)
-        (*it)->getRelationPtr()->computeOutput(time, i);
-    }
-  }
-
-  for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
-  {
-    (itOsns->second)->nextStep();
-  }
-
-  updateIndexSets();
+void EventDriven::nextStep()
+{
 
   OSIIterator it;
   for (it = allOSI.begin(); it != allOSI.end() ; ++it)
     (*it)->nextStep();
+
+  OSNSIterator itOsns;
+  for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
+    (itOsns->second)->nextStep();
 }
 
 void EventDriven::advanceToEvent()
@@ -310,19 +391,37 @@ void EventDriven::advanceToEvent()
   // ---> Step 1: integrate the smooth dynamics from current event to next event;
   // Current event = last accessed event.
   // Next event = next time step or first root of the 'g' function found by integrator (Lsodar)
-  double tinit = eventsManager->getCurrentTime();
-  double tend =  eventsManager->getNextTime();
+
+  // if istate == 1 => first call. It this case we suppose that tinit and tend have been initialized before.
+
+  if (istate == 2) // ie no root found at previous step
+  {
+    tinit = eventsManager->getCurrentTime();
+    tend =  eventsManager->getNextTime();
+  }
+  else if (istate == 3) // ie a root has been found at previous step => no changes in tint/tend values (done by integrate)
+  {
+    istate = 2;
+    tinit = eventsManager->getCurrentTime();
+    tend =  eventsManager->getNextTime();
+  }
+
   double tout = tend;
   bool isNewEventOccur = false;  // set to true if a new event occur during integration
+
   // call integrate method for each OSI, between tinit and tend.
   OSIIterator it;
   for (it = allOSI.begin(); it != allOSI.end(); ++it)
   {
-    bool iout = false;
-    (*it)->integrate(tinit, tend, tout, iout); // integrate must return a flag telling if tend has been reached or not.
-    // If not, tout is the real reached time.
-    if (!iout)
+    //      DynamicalSystemsSet ds = (*it)->getDynamicalSystems();
+    //      (*ds.begin())->getXPtr()->display();
+
+
+    (*it)->integrate(tinit, tend, tout, istate); // integrate must return a flag telling if tend has been reached or not.
+
+    if (istate == 3)
     {
+      cout << "NEW EVENT !!! " << endl;
       isNewEventOccur = true;
       // Add an event into the events manager list
       bool isScheduleOk = eventsManager->scheduleEvent("NonSmoothEvent", tout);
@@ -330,35 +429,7 @@ void EventDriven::advanceToEvent()
     }
   }
 
-  // ---> Step 2: update Index sets according to temporary values obtained at previous step.
-
-  updateIndexSets();  // This requires that y[i] values have been well computed and saved in Interactions.
-
-  // ---> Step 3: solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
-
-  if (!(indexSets[1] - indexSets[2]).isEmpty())
-  {
-    // solve the LCP-impact => y[1],lambda[1]
-    computeOneStepNSProblem("impact"); // solveLCPImpact();
-    // update indexSets
-    updateIndexSet(1);
-    updateIndexSet(2);
-
-    // check that IndexSet[1]-IndexSet[2] is now empty
-    if (!(indexSets[1] - indexSets[2]).isEmpty())
-      RuntimeException::selfThrow("EventDriven advanceToEvent, error after impact-LCP solving.");
-  }
-
-  if (!((indexSets[2]).isEmpty()))
-  {
-    // solve LCP-acceleration
-    computeOneStepNSProblem("acceleration"); //solveLCPAcceleration();
-    // for all index in IndexSets[2], update the index set according to y[2] and/or lambda[2] sign.
-    updateIndexSetsWithDoubleCondition();
-  }
-
   model->setCurrentT(tout);
-
 }
 
 EventDriven* EventDriven::convert(Simulation *str)
