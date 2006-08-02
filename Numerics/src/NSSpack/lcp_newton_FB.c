@@ -169,7 +169,7 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
 
     for (i = 0; i < n; i++)
     {
-      if ((z[i] == 0) && (w[i] = 0))
+      if ((z[i] == 0) && (w[i] == 0))
       {
         beta[i] = 1.0;
       }
@@ -194,7 +194,7 @@ void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , i
     for (i = 0; i < n; i++)
     {
 
-      if ((z[i] == 0) && (w[i] = 0))
+      if ((z[i] == 0) && (w[i] == 0))
       {
         normi = sqrt(beta[i] * beta[i] + mbeta[i] * mbeta[i]);
         for (j = 0; j < n; j++)

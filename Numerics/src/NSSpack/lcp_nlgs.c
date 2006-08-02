@@ -112,21 +112,7 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
   if (ispeak > 0) printf("\n ||q||= %g \n", qs);
 
-  if (qs > 1e-16) den = 1.0 / qs;
-  else
-  {
-    for (i = 0 ; i < n ; ++i)
-    {
-      w[i] = 0.;
-      z[i] = 0.;
-    }
-
-    free(ww);
-    free(diag);
-
-    *info = 0;
-    return;
-  }
+  den = 1.0 / qs;
 
   for (i = 0 ; i < n ; ++i)
   {
@@ -150,7 +136,7 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
       if (ispeak > 0)
       {
         printf(" Warning negative diagonal term \n");
-        printf(" The local problem can be solved \n");
+        printf(" The local problem cannot be solved \n");
       }
 
       *info = 2;

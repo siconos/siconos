@@ -257,13 +257,13 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   {
     if (err > tol)
     {
-      printf(" No convergence of NLGS after %d iterations\n" , iter);
+      printf(" No convergence of NEWTON_MIN after %d iterations\n" , iter);
       printf(" The residue is : %g \n", err);
       *info = 1;
     }
     else
     {
-      printf(" Convergence of NLGS after %d iterations\n" , iter);
+      printf(" Convergence of NEWTON_MIN after %d iterations\n" , iter);
       printf(" The residue is : %g \n", err);
       *info = 0;
     }

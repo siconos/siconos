@@ -338,6 +338,10 @@ extern  "C" void lcp_newton_min(int *nn , double *vec , double *q , double *z , 
 extern  "C" void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                                int *iparamLCP , double *dparamLCP);
 
+extern  "C" int filter_result_LCP(int n, double *vec , double *q , double *z , double tol, int chat, double *w);
+
+extern  "C" int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , double *z , double tol, int chat, double *w);
+
 
 /* ******************************************* */
 
@@ -663,6 +667,9 @@ extern void lcp_newton_min(int *nn , double *vec , double *q , double *z , doubl
 extern void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                           int *iparamLCP , double *dparamLCP);
 
+extern  int filter_result_LCP(int n, double *vec , double *q , double *z , double tol, int chat, double *w);
+
+extern  int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , double *z , double tol, int chat, double *w);
 
 /* **************************** PR **************************************** */
 

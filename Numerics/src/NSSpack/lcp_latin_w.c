@@ -73,7 +73,6 @@
 
 
 
-
 void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *info, int *iparamLCP, double *dparamLCP)
 {
 
@@ -461,16 +460,12 @@ void lcp_latin_w(int *nn, double *vec, double *qq,  double *z, double *w, int *i
 
   if (err1 > errmax)
   {
-    if (iout > 0)
-      printf("No convergence after %d iterations, the residue is %g\n", iter1, err1);
-
+    if (iout > 0) printf("No convergence of LATIN_W after %d iterations, the residue is %g\n", iter1, err1);
     *info = 1;
   }
   else
   {
-    if (iout > 0)
-      printf("Convergence after %d iterations, the residue is %g \n", iter1, err1);
-
+    if (iout > 0) printf("Convergence of LATIN_W after %d iterations, the residue is %g \n", iter1, err1);
     *info = 0;
   }
 

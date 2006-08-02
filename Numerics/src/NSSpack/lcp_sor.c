@@ -155,7 +155,7 @@ void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *in
       if (ispeak > 0)
       {
         printf(" Warning negative diagonal term \n");
-        printf(" The local problem can be solved \n");
+        printf(" The local problem cannot be solved \n");
       }
 
       *info = 2;
@@ -225,13 +225,13 @@ void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *in
   {
     if (err > tol)
     {
-      printf(" No convergence of NLGS after %d iterations\n" , iter);
+      printf(" No convergence of SOR after %d iterations\n" , iter);
       printf(" The residue is : %g \n", err);
       *info = 1;
     }
     else
     {
-      printf(" Convergence of NLGS after %d iterations\n" , iter);
+      printf(" Convergence of SOR after %d iterations\n" , iter);
       printf(" The residue is : %g \n", err);
       *info = 0;
     }

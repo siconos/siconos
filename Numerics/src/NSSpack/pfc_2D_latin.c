@@ -410,9 +410,9 @@ void pfc_2D_latin(int *nn, double *vec, double *qq, double *z, double *w, int *i
     daxpy_((integer *)&n, &alpha, wc, &incx, znum1, &incy);
 
     nrhs = 1;
-    dtrtrs_(&uplo, &trans, &diag, (integer *)&n, (integer *)&nrhs, DPO, (integer *)&n, znum1, (integer *)&n, &info77);
+    dtrtrs_(&uplo, &trans, &diag, (integer *)&n, (integer *)&nrhs, DPO, (integer *)&n, znum1, (integer *)&n, (integer*)&info77);
 
-    dtrtrs_(&uplo, &notrans, &diag, (integer *)&n, (integer *)&nrhs, DPO, (integer *)&n, znum1, (integer *)&n, &info77);
+    dtrtrs_(&uplo, &notrans, &diag, (integer *)&n, (integer *)&nrhs, DPO, (integer *)&n, znum1, (integer *)&n, (integer*)&info77);
 
     dcopy_((integer *)&n, znum1, &incx, z, &incy);
 

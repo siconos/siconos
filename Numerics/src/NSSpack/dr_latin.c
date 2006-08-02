@@ -238,10 +238,10 @@ void dr_latin(double *vec, double *qq, int *nn, double * k_latin, double *a, dou
     daxpy_((integer *)&n, &alpha, wc, &incx, znum1, &incy);
 
     nrhs = 1;
-    dtrtrs_(&uplo, &trans, &diag, (integer *)&n, (integer *)&nrhs, DPO, (integer *)&n, znum1, (integer *)&n, &info2);
+    dtrtrs_(&uplo, &trans, &diag, (integer *)&n, (integer *)&nrhs, DPO, (integer *)&n, znum1, (integer *)&n, (integer*)&info2);
 
 
-    dtrtrs_(&uplo, &notrans, &diag, (integer *)&n, (integer *)&nrhs, DPO, (integer *)&n, znum1, (integer *)&n, &info2);
+    dtrtrs_(&uplo, &notrans, &diag, (integer *)&n, (integer *)&nrhs, DPO, (integer *)&n, znum1, (integer *)&n, (integer*)&info2);
 
     dcopy_((integer *)&n, znum1, &incx, z, &incy);
 

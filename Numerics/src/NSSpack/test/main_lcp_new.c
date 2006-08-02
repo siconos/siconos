@@ -100,14 +100,14 @@ void test_lcp_series(int n , double *vec , double *q)
 
   /* Method definition */
 
-  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp8 = { "Latin_w"    , 1000 , 1e-6 , 0.3 , 1.0 , 0.75 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp7 = { "NewtonMin",   10   , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp8 = { "Latin_w"    , 1000 , 1e-6 , 0.3 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp7 = { "NewtonMin",   10   , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
 
   nonsymmetric = 0;
 
@@ -229,13 +229,23 @@ void test_lcp_series(int n , double *vec , double *q)
 
 
 #ifdef BAVARD
-  printf(" *** ************************************** ***\n");
+  /*  printf(" *** ************************************** ***\n"); */
 
+  printf(" ****** z = ********************************\n");
   for (i = 0 ; i < n ; i++)
     printf("NLGS: %14.7e    CPG: %14.7e   LATIN: %14.7e    LATIN_w %14.7e \n", z1[i], z2[i], z3[i], z8[i]);
 
+  printf(" ****** w = ********************************\n");
   for (i = 0 ; i < n ; i++)
-    printf("\n QP: %14.7e     NSQP: %14.7e   Lemke: %14.7e    Newton: %14.7e ", z4[i], z5[i], z6[i], z7[i]);
+    printf("NLGS: %14.7e    CPG: %14.7e   LATIN: %14.7e    LATIN_w %14.7e \n", w1[i], w2[i], w3[i], w8[i]);
+
+  printf(" ****** z = ********************************\n");
+  for (i = 0 ; i < n ; i++)
+    printf("\n QP: %14.7e     NSQP: %14.7e   Lemke: %14.7e    Newton: %14.7e \n", z4[i], z5[i], z6[i], z7[i]);
+
+  printf(" ****** w = ********************************\n");
+  for (i = 0 ; i < n ; i++)
+    printf("\n QP: %14.7e     NSQP: %14.7e   Lemke: %14.7e    Newton: %14.7e \n", w4[i], w5[i], w6[i], w7[i]);
 
   printf("\n\n");
   printf(" INFO RESULT\n");
@@ -364,13 +374,13 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 
   /* Method definition */
 
-  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp7 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 0 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp7 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
 
 
   /* #1 NLGS TEST */
@@ -439,21 +449,37 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
   info3 = lcp_solver_block(blmat , q , &method_lcp3 , z3 , w3 , &iter3 , &titer3 , &err3);
 
 #ifdef BAVARD
-  printf(" *** ************************************** ***\n");
+  printf(" *** z ************************************** ***\n");
   printf("\n   NLGS RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z1[i]);
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z1[i]);
   printf("\n    CPG RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z2[i]);
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z2[i]);
   printf("\n     QP RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z4[i]);
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z4[i]);
   printf("\n   NSQP RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z5[i]);
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z5[i]);
   printf("\n  Lemke RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z6[i]);
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z6[i]);
   printf("\n Newton RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z7[i]);
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z7[i]);
   printf("\n  LATIN RESULT : ");
-  for (i = 0 ; i < dim ; ++i) printf(" %10.4g " , z3[i]);
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z3[i]);
+  printf("\n\n");
+  printf(" *** w ************************************** ***\n");
+  printf("\n   NLGS RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w1[i]);
+  printf("\n    CPG RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w2[i]);
+  printf("\n     QP RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w4[i]);
+  printf("\n   NSQP RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w5[i]);
+  printf("\n  Lemke RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w6[i]);
+  printf("\n Newton RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w7[i]);
+  printf("\n  LATIN RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w3[i]);
   printf("\n\n");
   printf(" INFO RESULT\n");
 
@@ -633,7 +659,7 @@ void test_matrix(void)
   iter  = 0;
   criteria = 0.0;
 
-  NBTEST = 8;
+  NBTEST = 9;
 
   /****************************************************************/
 #ifdef BAVARD
@@ -707,6 +733,14 @@ void test_matrix(void)
       if ((LCPfile = fopen("MATRIX/mathieu2.dat", "r")) == NULL)
       {
         perror("fopen LCPfile: mathieu2.dat");
+        exit(1);
+      }
+      break;
+    case 8:
+      printf("\n\n TRIVIAL 3 LCP ");
+      if ((LCPfile = fopen("MATRIX/trivial3.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: trivial3.dat");
         exit(1);
       }
       break;

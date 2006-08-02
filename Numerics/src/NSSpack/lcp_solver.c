@@ -58,6 +58,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
+#include "blaslapack.h"
+
 #ifndef MEXFLAG
 #include "NSSpack.h"
 #endif
@@ -70,13 +73,33 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   const char lcpkey7[15] = "LexicoLemke", lcpkey8[15] = "NewtonMin";
   const char lcpkey9[15] = "Latin_w", lcpkey10[15] = "NewtonFB", lcpkey11[15] = "SOR";
 
-  int i, info = 1;
+  int i, j, info = 1;
 
   int     iparamLCP[5];
   double  dparamLCP[5];
 
   for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
   for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
+
+  /*  limqpos = -1e-16 / sqrt((double) *n); */
+  i = 0;
+  while ((i < (*n - 1)) && (q[i] >= 0.)) i++;
+  if ((i == (*n - 1)) && (q[*n - 1] >= 0.))
+  {
+    /* TRIVIAL CASE : q >= 0
+     * z = 0 and w = q is solution of LCP(q,M)
+     */
+    for (j = 0 ; j < *n; j++)
+    {
+      z[j] = 0.0;
+      w[j] = q[j];
+    }
+    info = 0;
+    pt->lcp.iter = 0;
+    pt->lcp.err  = 0.;
+    if (pt->lcp.chat > 0) printf("Trivial case of LCP : positive vector q \n");
+    return info;
+  }
 
   if (strcmp(pt->lcp.name , lcpkey1) == 0)
   {
@@ -241,6 +264,9 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   }
 
   else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
+
+  /* Checking validity of z found  */
+  if (info == 0) info = filter_result_LCP(*n, vec, q, z, pt->lcp.tol, pt->lcp.chat, w);
 
   return info;
 

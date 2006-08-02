@@ -82,7 +82,7 @@ libNSSpack_la_SOURCES = NSSpack.h \
 	$(SWITCH) \
 	$(PR_SOURCES) \
 	$(DR_SOURCES) \
-	ql0001.f sortsn.f diffns.c
+	ql0001.f sortsn.f diffns.c filter_result_LCP.c filter_result_LCP_block.c
 
 
 libNSSpack_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)

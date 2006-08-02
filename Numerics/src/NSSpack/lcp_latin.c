@@ -69,7 +69,6 @@
 
 
 
-
 void lcp_latin(int *nn, double *vec, double *qq,  double *z, double *w, int *info, int *iparamLCP, double *dparamLCP)
 {
 
@@ -90,7 +89,6 @@ void lcp_latin(int *nn, double *vec, double *qq,  double *z, double *w, int *inf
   double  *k, *kinv, *DPO;
 
   char trans = 'T', notrans = 'N', uplo = 'U', diag = 'N';
-
 
 
   n = *nn;
@@ -303,9 +301,9 @@ void lcp_latin(int *nn, double *vec, double *qq,  double *z, double *w, int *inf
     nrhs = 1;
 
 
-    dtrtrs_(&uplo, &trans, &diag, (integer*)&n, (integer*)&nrhs, DPO, (integer*)&n, znum1, (integer*)&n, &info2);
+    dtrtrs_(&uplo, &trans, &diag, (integer*)&n, (integer*)&nrhs, DPO, (integer*)&n, znum1, (integer*)&n, (integer*)&info2);
 
-    dtrtrs_(&uplo, &notrans, &diag, (integer*)&n, (integer*)&nrhs, DPO, (integer*)&n, znum1, (integer*)&n, &info2);
+    dtrtrs_(&uplo, &notrans, &diag, (integer*)&n, (integer*)&nrhs, DPO, (integer*)&n, znum1, (integer*)&n, (integer*)&info2);
 
     dcopy_((integer*)&n, znum1, &incx, z, &incy);
 
@@ -415,26 +413,18 @@ void lcp_latin(int *nn, double *vec, double *qq,  double *z, double *w, int *inf
     iparamLCP[2] = it_end;
     dparamLCP[2] = res;
 
-
-
-
   }
-
 
 
 
   if (err1 > errmax)
   {
-    if (iout > 0)
-      printf("No convergence after %d iterations, the residue is %g\n", iter1, err1);
-
+    if (iout > 0) printf("No convergence of LATIN after %d iterations, the residue is %g\n", iter1, err1);
     *info = 1;
   }
   else
   {
-    if (iout > 0)
-      printf("Convergence after %d iterations, the residue is %g \n", iter1, err1);
-
+    if (iout > 0) printf("Convergence of LATIN after %d iterations, the residue is %g \n", iter1, err1);
     *info = 0;
   }
 

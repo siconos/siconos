@@ -97,25 +97,12 @@
 #endif
 #include "blaslapack.h"
 
-/*
- * Pointer function
- */
-
-void (*local_solver)(int *nn , double *vec , double *q , double *z , double *w , int *info ,
-                     int *iparamLCP , double *dparamLCP) = NULL;
-
-/* int lcp_solver_block( int *inb , int *iid , double *vec , double *q , int *dn , int *db , method *pt , double *z , double *w , int *it_end ,
-int *itt_end ,double *res ) */
 int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,
                      int *itt_end , double *res)
-
 {
-  const char mot1[15] = "LexicoLemke", mot2[10] = "NLGS", mot3[10] = "CPG";
-  const char mot4[10] = "QP"         , mot5[10] = "NSQP", mot6[10] = "NewtonMin";
-  const char mot7[10] = "Latin";
 
   int info;
-  int n, na, nbbl, nbblrow, blsizemax;
+  int n, nbbl, nbblrow, blsizemax;
   int rowprecbl, rowcurbl, indicrow, rowsize;
   int colprecbl, colcurbl, indiccol, colsize;
   int i, j, k;
@@ -131,10 +118,9 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
 
   char NOTRANS = 'N';
 
-  int     iparamLCP[5];
-  double  dparamLCP[5];
 
   *it_end   = 0;
+  *itt_end   = 0;
   *res      = 0.0;
   info      = 1;
   info1     = 1;
@@ -159,84 +145,28 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
     if (k > blsizemax) blsizemax = k;
   }
 
-  for (i = 0 ; i < 5 ; ++i) iparamLCP[i] = 0;
-  for (i = 0 ; i < 5 ; ++i) dparamLCP[i] = 0.0;
-
-  if (strcmp(pt->lcp.name , mot1) == 0)
+  i = 0;
+  while ((i < (n - 1)) && (q[i] >= 0.)) i++;
+  if ((i == (n - 1)) && (q[n - 1] >= 0.))
   {
-    /* Lexico Lemke */
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    local_solver = &lcp_lexicolemke;
+    /* TRIVIAL CASE : q >= 0
+     * z = 0 and w = q is solution of LCP(q,M)
+     */
+    for (j = 0 ; j < n; j++)
+    {
+      z[j] = 0.0;
+      w[j] = q[j];
+    }
+    if (pt->lcp.chat > 0) printf("Trivial case of block LCP : positive vector q \n");
+    return 0;
   }
-  else if (strcmp(pt->lcp.name , mot2) == 0)
-  {
-    /* NLGS */
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-    dparamLCP[1] = pt->lcp.relax;
-    local_solver = &lcp_nlgs;
-  }
-  else if (strcmp(pt->lcp.name , mot3) == 0)
-  {
-    /* CPG */
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-    local_solver = &lcp_cpg;
-  }
-  else if (strcmp(pt->lcp.name , mot4) == 0)
-  {
-    /* QP */
-    dparamLCP[0] = pt->lcp.tol;
-    local_solver = &lcp_qp;
-  }
-  else if (strcmp(pt->lcp.name , mot5) == 0)
-  {
-    /* NSQP */
-    dparamLCP[0] = pt->lcp.tol;
-    local_solver = &lcp_nsqp;
-  }
-  else if (strcmp(pt->lcp.name , mot6) == 0)
-  {
-    /* Newton Min */
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-    local_solver = &lcp_newton_min;
-  }
-  else if (strcmp(pt->lcp.name , mot7) == 0)
-  {
-    /* Latin */
-    iparamLCP[0] = pt->lcp.itermax;
-    iparamLCP[1] = pt->lcp.chat;
-    dparamLCP[0] = pt->lcp.tol;
-    dparamLCP[1] = pt->lcp.k_latin;
-    local_solver = &lcp_latin;
-  }
-  else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
 
   ww   = (double*)malloc(n * sizeof(double));
   rhs  = (double*)malloc(blsizemax * sizeof(double));
 
-  /* Check for non trivial case */
-
   incx = 1;
   qs = dnrm2_((integer *)&n , q , (integer *)&incx);
-
-  if (qs > 1e-16) den = 1.0 / qs;
-  else
-  {
-    for (i = 0 ; i < n ; ++i)
-    {
-      w[i] = 0.;
-      z[i] = 0.;
-    }
-    info = 0;
-    return info;
-  }
-
+  den = 1.0 / qs;
 
   /* Initialization of z and w */
 
@@ -292,8 +222,15 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
         {
           if (adrbldiag != NULL)
           {
-            /* Local LCP resolution with NLGS algorithm */
-            (*local_solver)(&rowsize , adrbldiag , rhs , &z[indicrow] , &w[indicrow] , &info1 , iparamLCP , dparamLCP);
+            /* Local LCP resolution  */
+            pt->lcp.iter = 0;
+            info1 = lcp_solver(adrbldiag , rhs , &rowsize , pt , &z[indicrow] , &w[indicrow]);
+            totaliter += pt->lcp.iter;
+            if (info1 > 0)
+            {
+              printf(" Sub LCP solver failed at global iteration %d in lcp_solver_block !!!\n", iter);
+              return 1;
+            }
           }
           else
           {
@@ -338,16 +275,21 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
 
     if (adrbldiag != NULL)
     {
-      /* Local LCP resolution with NLGS algorithm */
-      (*local_solver)(&rowsize , adrbldiag , rhs , &z[indicrow] , &w[indicrow] , &info1 , iparamLCP , dparamLCP);
+      /* Local LCP resolution  */
+      pt->lcp.iter = 0;
+      info1 = lcp_solver(adrbldiag , rhs , &rowsize , pt , &z[indicrow] , &w[indicrow]);
+      totaliter += pt->lcp.iter;
+      if (info1 > 0)
+      {
+        printf(" Sub LCP solver failed at global iteration %d in lcp_solver_block !!!\n", iter);
+        return 1;
+      }
     }
     else
     {
       printf("NULL diagonal block in LCP !!!\n");
       return 1;
     }
-
-    totaliter += iparamLCP[2];
 
     /* **** Criterium convergence **** */
 
@@ -368,28 +310,28 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
 
   free(ww);
   free(rhs);
-  local_solver = NULL;
+  /*  local_solver = NULL; */
 
   if (pt->lcp.chat > 0)
   {
     if (err > tol)
     {
-      printf(" No convergence of NLGS after %d iterations\n" , iter);
+      printf(" No convergence of lcp_solver_block after %d iterations\n" , iter);
       printf(" The residue is : %g \n", err);
-      info = 1;
+      return 1;
     }
     else
     {
-      printf(" Convergence of NLGS after %d iterations\n" , iter);
+      printf(" Convergence of lcp_solver_block after %d iterations\n" , iter);
       printf(" The residue is : %g \n", err);
-      info = 0;
     }
   }
   else
   {
-    if (err > tol) info = 1;
-    else info = 0;
+    if (err > tol) return 1;
   }
+
+  info = filter_result_LCP_block(blmat, q, z, tol, pt->lcp.chat, w);
 
   return info;
 

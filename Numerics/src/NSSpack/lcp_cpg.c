@@ -107,17 +107,7 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
 
   /*printf( " Norm: %g \n", qs );*/
 
-  if (qs > 1e-16) den = 1.0 / qs;
-  else
-  {
-    for (i = 0 ; i < n ; ++i)
-    {
-      w[i] = 0.;
-      z[i] = 0.;
-    }
-    *info = 9;
-    return;
-  }
+  den = 1.0 / qs;
 
   /* Allocations */
 
@@ -204,8 +194,8 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
 
       iparamLCP[2] = iter;
       dparamLCP[1] = err;
-
-      return (*info = 3);
+      *info = 3;
+      return;
     }
 
     rp  = ddot_((integer *)&n , pp , &incx , rr , &incy);
@@ -300,13 +290,14 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
   qs   = -1.0;
   dscal_((integer *)&n , &qs , w , &incx);
 
+
+  *info = 1;
   if (ispeak > 0)
   {
     if (err > tol)
     {
       printf(" No convergence of CPG after %d iterations\n" , iter);
       printf(" The residue is : %g \n", err);
-      *info = 1;
     }
     else
     {
@@ -315,7 +306,7 @@ void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *in
       *info = 0;
     }
   }
-  else if (err < tol) *info = 0;
+  else if (err <= tol) *info = 0;
 
   free(Mp);
   free(status);

@@ -356,6 +356,9 @@ extern  void F77NAME(dsysv)(const char *uplo, integer *n, integer *nrhs,
                             doublereal *B, integer *ldb,
                             doublereal *work, integer *lwork, integer *info);
 
+extern void F77NAME(dtrtrs)(char *uplo, char *trans, char *diag, integer *n,
+                            integer *nrhs, doublereal *a, integer *lda, doublereal *b, integer *ldb, integer *info);
+
 //******************** Lapack Utility Routines ************************
 
 extern void F77NAME(dgels)(char *trans, integer *m, integer *n, integer *nrhs, doublereal *A,
