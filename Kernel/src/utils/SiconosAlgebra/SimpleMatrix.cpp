@@ -486,9 +486,7 @@ SimpleMatrix& SimpleMatrix::operator+=(const SiconosMatrix &m)
   if (row != size(0) || col != size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::operator+=  inconsistent sizes");
 
-  for (unsigned int i = 0; i < row; i++)
-    for (unsigned int j = 0; j < col; j++)
-      mat(i, j) += (m.getLaGenMatDouble())(i, j);
+  mat = mat + m.getLaGenMatDouble();
   return *this;
 }
 
@@ -499,9 +497,7 @@ SimpleMatrix& SimpleMatrix::operator-=(const SiconosMatrix &m)
   if (row != size(0) || col != size(1))
     SiconosMatrixException::selfThrow("SimpleMatrix::operator-=  inconsistent sizes");
 
-  for (unsigned int i = 0; i < row; i++)
-    for (unsigned int j = 0; j < col; j++)
-      mat(i, j) -= (m.getLaGenMatDouble())(i, j);
+  mat = mat - m.getLaGenMatDouble();
   return *this;
 }
 
