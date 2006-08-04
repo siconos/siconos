@@ -203,24 +203,66 @@ void LCP::initialize()
 
   // if all relative degrees are equal to 0 or 1
   if (topology->isTimeInvariant() &&   !OSNSInteractions.isEmpty())
+  {
+    // computeSizeOutput and updateBlocks were already done in OneStepNSProblem::initialize
     assembleM();
+    if (sizeOutput != 0)
+    {
+      // check z and w sizes and reset if necessary
+      if (z == NULL)
+      {
+        z = new SimpleVector(sizeOutput);
+        isZAllocatedIn = true;
+      }
+      else if (z->size() != sizeOutput)
+      {
+        // reset z if it has a wrong size
+        if (isZAllocatedIn) delete z;
+        z = new SimpleVector(sizeOutput);
+        isZAllocatedIn = true;
+      }
+
+      if (w == NULL)
+      {
+        w = new SimpleVector(sizeOutput);
+        isWAllocatedIn = true;
+      }
+      else if (w->size() != sizeOutput)
+      {
+        // reset w if it has a wrong size
+        if (isWAllocatedIn) delete w;
+        w = new SimpleVector(sizeOutput);
+        isWAllocatedIn = true;
+      }
+
+      w->zero();
+      z->zero();
+    }
+  }
+
 }
 
 void LCP::preCompute(const double time)
 {
-  // compute M and q operators for LCP problem
+  // get topology
+  Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
-  computeSizeOutput();
+  // compute M and q operators for LCP problem
+  if (!topology->isTimeInvariant()) computeSizeOutput();
   if (sizeOutput != 0)
   {
-    updateBlocks();
-    assembleM();
+    if (!topology->isTimeInvariant())
+    {
+      updateBlocks();
+      assembleM();
+    }
     computeQ(time);
     // check z and w sizes and reset if necessary
     if (z == NULL)
     {
       z = new SimpleVector(sizeOutput);
       isZAllocatedIn = true;
+      z->zero();
     }
     else if (z->size() != sizeOutput)
     {
@@ -228,12 +270,14 @@ void LCP::preCompute(const double time)
       if (isZAllocatedIn) delete z;
       z = new SimpleVector(sizeOutput);
       isZAllocatedIn = true;
+      z->zero();
     }
 
     if (w == NULL)
     {
       w = new SimpleVector(sizeOutput);
       isWAllocatedIn = true;
+      w->zero();
     }
     else if (w->size() != sizeOutput)
     {
@@ -241,9 +285,8 @@ void LCP::preCompute(const double time)
       if (isWAllocatedIn) delete w;
       w = new SimpleVector(sizeOutput);
       isWAllocatedIn = true;
+      w->zero();
     }
-    w->zero();
-    z->zero();
   }
 }
 
@@ -286,14 +329,13 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   // left, right and extra depend on the relation type and the non smooth law.
   relationType1 = UR1->getRelationType();
   relationType2 = UR2->getRelationType();
-  if (UR1 == UR2 &&  relationType1 == LINEARTIRELATION)
+  if ((UR1 == UR2) && (relationType1 == LINEARTIRELATION))
   {
     extraBlock = new SimpleMatrix(nslawSize1, nslawSize1);
     UR1->getExtraBlock(extraBlock);
     *currentBlock += *extraBlock;// specific to LinearTIR, get D matrix added only on blocks of the diagonal.
     delete extraBlock;
   }
-
   // loop over the common DS
   for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
   {
