@@ -158,11 +158,11 @@ void OneStepNSProblem::computeUnitaryRelationsPositions()
   // Move this function in topology? Or simulation?
 
   // Get index sets from Topology
-  UnitaryRelationsSet indexSet = simulation->getIndexSet(1);
+  UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
   UnitaryRelationIterator it;
   unsigned int pos = 0;
 
-  // For each Unitary Relation in indexSets[1], the position is given by the sum of the dimensions of non smooth laws of all previous Unitary Relations.
+  // For each Unitary Relation in indexSets[levelMin], the position is given by the sum of the dimensions of non smooth laws of all previous Unitary Relations.
   for (it = indexSet.begin(); it != indexSet.end(); ++it)
   {
     blocksPositions[*it] = pos;
@@ -229,6 +229,9 @@ void OneStepNSProblem::updateBlocks()
       }
     }
   }
+
+  computeUnitaryRelationsPositions();
+
 }
 
 void OneStepNSProblem::computeAllBlocks()
