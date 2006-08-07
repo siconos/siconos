@@ -126,7 +126,10 @@ void OneStepIntegrator::initialize()
   double t0 = simulationLink->getTimeDiscretisationPtr()->getT0();
   DSIterator it;
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
+  {
+    (*it)->initFreeVectors(simulationLink->getType());
     (*it)->initialize(t0, sizeMem);
+  }
 }
 
 void OneStepIntegrator::nextStep()

@@ -231,38 +231,46 @@ void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
   D->getBlock(index_list, *Block);
 }
 
-void UnitaryRelation::computeFreeOutput(const double time, SiconosVector* yFree)
+void UnitaryRelation::computeEquivalentY(const double time, const unsigned int level, const string simulationType, SiconosVector* yOut)
 {
+
   // Get relation and non smooth law types
   string relationType = getRelationType();
   string nslawType = getNonSmoothLawType();
+  // Warning: first version with OneStepNSProblem as an input argument. But this means "inclusion" of simulationTools class into a
+  // modelingTools class => no!
+  //   string simulationType = osns->getSimulationPtr()->getType();
+  // unsigned int level = osns->getLevelMin(); // this corresponds to the derivative order (for y) used to compute yOut.
 
-  if (relationType == LINEARTIRELATION && nslawType == COMPLEMENTARITYCONDITIONNSLAW)
-  {
-    mainInteraction->getRelationPtr()->computeFreeOutput(time, 0);
-    (*yFree) = *(getYPtr(0));
-  }
-  else if ((relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION))
+  mainInteraction->getRelationPtr()->computeFreeOutput(time, level);
+
+  (*yOut) = *(getYPtr(level));
+
+  if ((relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION))
   {
     double e;
-    //mainInteraction->getRelationPtr()->computeFreeOutput(time,0);
-    mainInteraction->getRelationPtr()->computeFreeOutput(time, 1);
-    *yFree = *(getYPtr(1));
+
     if (nslawType == NEWTONIMPACTNSLAW)
     {
       e = (static_cast<NewtonImpactNSL*>(mainInteraction->getNonSmoothLawPtr()))->getE();
-      *yFree += e**(static_cast<SimpleVector*>(getYOldPtr(1)));
+      if (simulationType == "TimeStepping")
+        *yOut += e**(static_cast<SimpleVector*>(getYOldPtr(level)));
+      else if (simulationType == "EventDriven")
+        *yOut *= (1.0 + e);
+      else
+        RuntimeException::selfThrow("UnitaryRelation::computeEquivalentY not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
     }
     else if (nslawType == NEWTONIMPACTFRICTIONNSLAW)
     {
       e = (static_cast<NewtonImpactFrictionNSL*>(mainInteraction->getNonSmoothLawPtr()))->getEn();
       // Only the normal part is multiplied by e
-      (*yFree)(0) +=  e * (*(static_cast<SimpleVector*>(getYOldPtr(1))))(0);
+      if (simulationType == "TimeStepping")
+        (*yOut)(0) +=  e * (*(static_cast<SimpleVector*>(getYOldPtr(level))))(0);
+      else RuntimeException::selfThrow("UnitaryRelation::computeEquivalentY not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
+
     }
     else
-      RuntimeException::selfThrow("UnitaryRelation::computeFreeOutput not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType);
+      RuntimeException::selfThrow("UnitaryRelation::computeEquivalentY not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType);
   }
-  else
-    RuntimeException::selfThrow("UnitaryRelation::computeFreeOutput not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType);
 }
 

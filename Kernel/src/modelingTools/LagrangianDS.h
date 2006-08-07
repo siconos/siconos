@@ -334,6 +334,12 @@ public:
    */
   virtual bool checkDynamicalSystem();
 
+  /** \fn void initFreeVectors(const string)
+   *  \brief initialization of qFree, vFree
+   *  \param a string: the simulation type. For TimeStepping: memory allocation. For EventDriven: links (pointers) to q and velocity.
+   */
+  void initFreeVectors(const std::string);
+
   /** \fn void initialize(const double = 0, const unsigned int = 1) ;
    *  \brief dynamical system initialization function: mainly set memory and compute plug-in for initial state values.
    *  \param time of initialisation, default value = 0
@@ -599,6 +605,14 @@ public:
    *  \param SimpleVector * newPtr
    */
   void setVelocityFreePtr(SimpleVector *newPtr);
+
+  // -- acceleration --
+
+  /** \fn SimpleVector* getAccelerationPtr() const
+   *  \brief get acceleration
+   *  \return pointer on a SimpleVector
+   */
+  SimpleVector* getAccelerationPtr() const ;
 
   // Velocity memory
 

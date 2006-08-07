@@ -48,11 +48,11 @@
  *
  * member "LagrangianRelationType", set by user, defined h and G number of variables:
  *
- *   - scleronomic              -> h0(q), G0(q) (usual mechanical case)
- *   - rhenomorous              -> h1(q,t), G10(q,t), G11(q,t)
- *   - scleronomic+lambda       -> h2(q,lambda) , G20(q,lambda), G21(q,lambda)
- *   - scleronomic+control      -> h3(q,u), G30(q,u), G31(q,u)
- *   - rhenomourous+control     -> h4(q,t,u), G40(q,t,u), G41(q,t,u), G42(q,t,u)
+ *   - scleronomic                     -> h0(q), G0(q) (usual mechanical case)
+ *   - rhenomorous (ie time dependent) -> h1(q,t), G10(q,t), G11(q,t)
+ *   - scleronomic+lambda              -> h2(q,lambda) , G20(q,lambda), G21(q,lambda)
+ *   - scleronomic+control             -> h3(q,u), G30(q,u), G31(q,u)
+ *   - rhenomourous+control            -> h4(q,t,u), G40(q,t,u), G41(q,t,u), G42(q,t,u)
  *
  * Usually, G functions corresponds to jacobians of h compare to its variables. But it is up to user
  * to define these plug-in.

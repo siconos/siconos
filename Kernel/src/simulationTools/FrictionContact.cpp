@@ -342,28 +342,29 @@ void FrictionContact::computeQ(const double time)
 
   // === Get index set from Simulation ===
   UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
-  SimpleVector * yFree;
+  SimpleVector * yOut;
 
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
   unsigned int nsLawSize;
   UnitaryRelationIterator itCurrent, itLinked;
+  string simulationType = simulation->getType();
   for (itCurrent = indexSet.begin(); itCurrent !=  indexSet.end(); ++itCurrent)
   {
     // *itCurrent is a UnitaryRelation*.
 
     // Compute free output, this depends on the type of non smooth problem, on the relation type and on the non smooth law
     nsLawSize = (*itCurrent)->getNonSmoothLawSize();
-    yFree = new SimpleVector(nsLawSize);
+    yOut = new SimpleVector(nsLawSize);
 
-    (*itCurrent)->computeFreeOutput(time, yFree); // free output is saved in y
+    (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, yOut); // free output is saved in y
 
     pos = blocksPositions[*itCurrent];
-    // Copy yFree at the right position in q.
-    for (unsigned int i = 0; i < yFree->size(); i++)
-      (*q)(i + pos) = (*yFree)(i);
-    delete yFree;
+    // Copy yOut at the right position in q.
+    for (unsigned int i = 0; i < yOut->size(); i++)
+      (*q)(i + pos) = (*yOut)(i);
+    delete yOut;
   }
 }
 

@@ -36,8 +36,6 @@ TimeDiscrEvent::~TimeDiscrEvent()
 
 void TimeDiscrEvent::process(Simulation* simulation)
 {
-  cout << "Time Discretisation Event ... " << endl;
-
   OSNSIterator itOsns;
   OneStepNSProblems allOSNS = simulation->getOneStepNSProblems();
   //  for(itOsns=(simulation->getOneStepNSProblems()).begin();itOsns!=(simulation->getOneStepNSProblems()).end();++itOsns)

@@ -77,6 +77,14 @@ void EventDriven::updateIndexSet(const unsigned int i)
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
   UnitaryRelationIterator it, itForFind;
 
+  double borneInf;
+  if (i == 1)
+    borneInf = -1000;
+  else
+    borneInf = -TOLERANCE;
+
+  cout << " =============================== IN UPDATE INDEX SET ========================== num = " << i << endl;
+
   double y;
   for (it = indexSets[i - 1].begin(); it != indexSets[i - 1].end(); ++it)
   {
@@ -87,13 +95,25 @@ void EventDriven::updateIndexSet(const unsigned int i)
     // Get y[i-1] double value
     y = (*it)->getYRef(i - 1);
 
-    // if y[i-1] <=0, then the unitary relation is added in indexSets[i] (if it was not already there)
-    // else if y[i-1] > 0 and if the unitary relation was in the set, it is removed.
-    if (y <= 0 && itForFind == indexSets[i].end())
+    cout << " y = " << y << endl;
+
+    //       // if y[i-1] <=0, then the unitary relation is added in indexSets[i] (if it was not already there)
+    //       // else if y[i-1] > 0 and if the unitary relation was in the set, it is removed.
+    //       if( y <= 0 && itForFind==indexSets[i].end())
+    //  indexSets[i].insert(*it);
+    //       else if( y > 0 && itForFind!=indexSets[i].end())
+    //  indexSets[i].erase(*it);
+
+    if ((borneInf < y && y < TOLERANCE) &&  itForFind == indexSets[i].end())
       indexSets[i].insert(*it);
-    else if (y > 0 && itForFind != indexSets[i].end())
+    else if ((-TOLERANCE > y || y > TOLERANCE) &&  itForFind != indexSets[i].end())
       indexSets[i].erase(*it);
+
+    // Note if *it is already in the set, insert(*it) is supposed to have no effect. Same for erase when (*it) is not in the set.
+    // => to be reviewed in UnitaryRelationsSet
+
   }
+  cout << " =============================== OUT UPDATE INDEX SET ==========================" << endl;
 }
 
 void EventDriven::updateIndexSetsWithDoubleCondition()
@@ -110,7 +130,7 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
     if (gamma > 0 && F < TOLERANCE)
       indexSets[2].erase(*it);
     else if (gamma < TOLERANCE && F < TOLERANCE) // undetermined case
-      RuntimeException::selfThrow("Topology::updateIndexSetsWithDoubleCondition(), undetermined case.");
+      RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), undetermined case.");
   }
 }
 
@@ -140,11 +160,13 @@ void EventDriven::initialize()
   // initialization of the OneStepIntegrators
   OSIIterator itOsi;
   DSIterator itDS;
+  DynamicalSystemsSet osiDS;
 
   for (itOsi = allOSI.begin(); itOsi != allOSI.end(); ++itOsi)
   {
     // We need to initialize p[1] for EventDriven simulation
-    for (itDS = (*itOsi)->getDynamicalSystems().begin(); itDS != (*itOsi)->getDynamicalSystems().end(); ++itDS)
+    osiDS = (*itOsi)->getDynamicalSystems();
+    for (itDS = osiDS.begin(); itDS != osiDS.end(); ++itDS)
       (static_cast<LagrangianLinearTIDS*>(*itDS))->initP1();
 
     (*itOsi)->initialize();
@@ -199,6 +221,9 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   double t = *time;
   model->setCurrentT(t);
 
+  //   cout << " ================================= >> IN COMPUTE F  " << endl;
+  //   cout << "Time = " << t << endl;
+
   // update the DS of the OSI.
   lsodar->updateState(t, 2); // update based on the last saved values for the DS state, ie the ones computed by lsodar (x above)
 
@@ -230,7 +255,6 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
 
 void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, doublereal *time, doublereal *x,  doublereal *jacob)
 {
-
   if (osi->getType() != "lsodar")
     RuntimeException::selfThrow("EventDriven::computeF(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
@@ -304,13 +328,15 @@ void EventDriven::computeG(OneStepIntegrator* osi, integer * sizeOfX, doublereal
       //cout << " +++++++++++++++ IN G type y" << gOut[k-1] << endl;
     }
   }
-
 }
 
 void EventDriven::updateImpactState()
 {
   double time = model->getCurrentT();
   OSIIterator itOSI;
+  OSNSIterator itOsns;
+  for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
+    (itOsns->second)->updateInput(1);
   for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
     (*itOSI)->updateState(time, 1);
 }
@@ -401,7 +427,8 @@ void EventDriven::advanceToEvent()
   }
   else if (istate == 3) // ie a root has been found at previous step => no changes in tint/tend values (done by integrate)
   {
-    istate = 2;
+    istate = 1;
+
     tinit = eventsManager->getCurrentTime();
     tend =  eventsManager->getNextTime();
   }

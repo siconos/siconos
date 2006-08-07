@@ -111,7 +111,7 @@ void DynamicalSystem::initAllocationFlags(const bool in) // default in = true.
     isAllocatedIn["xMemory"] = false;
     isAllocatedIn["rhs"] = true; // always allocated ??
     isAllocatedIn["jacobianXRhs"] = true;
-    isAllocatedIn["xFree"] = true;
+    isAllocatedIn["xFree"] = false;
     isAllocatedIn["r"] = true;
     isAllocatedIn["rMemory"] = false;
     isAllocatedIn["f"] = false;
@@ -202,8 +202,6 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
     else x = new SimpleVector(*x0);
     if (x->size() != n)
       RuntimeException::selfThrow("DynamicalSystem:: xml constructor, x size differs from n!");
-
-    xFree = new SimpleVector(n);
 
     // r
     r = new SimpleVector(n);
@@ -363,7 +361,6 @@ DynamicalSystem::DynamicalSystem(const int newNumber, const unsigned int newN, c
   // x and related vectors
   x0 = new SimpleVector(newX0);
   x = new SimpleVector(*x0); // x is initialized with x0.
-  xFree = new SimpleVector(n);
 
   // r
   r = new SimpleVector(n);
@@ -416,7 +413,6 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
   x = new SimpleVector(newDS.getX());
   rhs = new SimpleVector(newDS.getRhs());
   f = rhs;  // POINTER LINK
-  xFree = new SimpleVector(newDS.getXFree());
   //    }
   initAllocationFlags();
 
@@ -579,6 +575,21 @@ bool DynamicalSystem::checkDynamicalSystem()
   return output;
 }
 
+void DynamicalSystem::initFreeVectors(const string type)
+{
+  if (type == "TimeStepping")
+  {
+    xFree = new SimpleVector(n);
+    isAllocatedIn["xFree"] = true;
+  }
+  else if (type == "EventDriven")
+  {
+    xFree = x;
+    isAllocatedIn["xFree"] = false;
+  }
+  else
+    RuntimeException::selfThrow("DynamicalSystem::initFreeVectors(simulationType) - Unknown simulation type.");
+}
 
 // Setters
 
@@ -952,9 +963,9 @@ void DynamicalSystem::initialize(const double time, const unsigned int sizeOfMem
 {
 
   // reset x to x0, xFree and r to zero.
-  *x = *x0;
   xFree->zero();
   r->zero();
+  *x = *x0;
 
   // Initialize memory vectors
   initMemory(sizeOfMemory);

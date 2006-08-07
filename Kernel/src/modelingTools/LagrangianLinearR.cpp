@@ -447,10 +447,7 @@ void LagrangianLinearR::computeOutput(const double time, const unsigned int deri
       else if (derivativeNumber == 1)
         tmp->addPtr(lds->getVelocityPtr());
       else if (derivativeNumber == 2)
-      {
-        lds->computeRhs(time); // Maybe not necessary?
-        tmp->addPtr(static_cast<SimpleVector*>(lds->getRhsPtr()->getVectorPtr(1)));
-      }
+        tmp->addPtr(static_cast<SimpleVector*>(lds->getAccelerationPtr()));
     }
 
     // get y and yDot of the interaction
@@ -503,6 +500,8 @@ void LagrangianLinearR::computeFreeOutput(const double time, const unsigned int 
         freeTmp->addPtr(lds->getQFreePtr());
       else if (derivativeNumber == 1)
         freeTmp->addPtr(lds->getVelocityFreePtr());
+      else if (derivativeNumber == 2) // Warning: no "accelerationFree", we get the last computed acceleration (ie rhs).
+        freeTmp->addPtr(lds->getAccelerationPtr());
       else RuntimeException::selfThrow("LagrangianLinearR::computeFreeOutput not yet implemented for derivative number: " + derivativeNumber);
     }
 
@@ -511,16 +510,10 @@ void LagrangianLinearR::computeFreeOutput(const double time, const unsigned int 
     //SiconosVector *yDot = interaction->getYPtr(1);
     // compute y and yDot (!! values for free state)
 
-    if (derivativeNumber == 0)
-    {
-      *y = (*H * *freeTmp) ;
+    *y = (*H * *freeTmp) ;
 
-      if (b != NULL)
-        *y += *b;
-    }
-    else if (derivativeNumber == 1)
-      *y = (*H * *freeTmp);
-    else RuntimeException::selfThrow("LagrangianLinearR::computeFreeOutput not yet implemented for derivative number: " + derivativeNumber);
+    if (derivativeNumber == 0 &&  b != NULL)
+      *y += *b;
 
     // free memory
     delete freeTmp;

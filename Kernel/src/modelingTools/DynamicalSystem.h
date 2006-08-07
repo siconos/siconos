@@ -330,6 +330,12 @@ public:
    */
   virtual bool checkDynamicalSystem();
 
+  /** \fn void initFreeVectors(const string)
+   *  \brief initialization of xFree
+   *  \param a string: the simulation type. For TimeStepping: memory allocation. For EventDriven: links (pointers) to q and velocity.
+   */
+  virtual void initFreeVectors(const std::string);
+
   // ===== GETTERS/SETTERS =====
 
   // --- type of DS ---

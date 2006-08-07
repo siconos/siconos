@@ -309,9 +309,9 @@ bool LinearDS::checkDynamicalSystem()
 void LinearDS::initialize(const double time, const unsigned int sizeOfMemory)
 {
   // reset x to x0, xFree and r to zero.
-  *x = *x0;
   xFree->zero();
   r->zero();
+  *x = *x0;
 
   // Initialize memory vectors
   initMemory(sizeOfMemory);

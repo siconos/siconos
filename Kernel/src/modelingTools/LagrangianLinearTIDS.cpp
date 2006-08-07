@@ -175,13 +175,11 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const DynamicalSystem & newDS):
   mass = new SimpleMatrix(ltids->getMass());
   q0 = new SimpleVector(ltids->getQ0());
   q = new SimpleVector(ltids->getQ());
-  qFree = new SimpleVector(ltids->getQFree());
   if (ltids->getQMemoryPtr() != NULL)
     qMemory = new SiconosMemory(ltids->getQMemory());
   else isAllocatedIn["qMemory"] = false;
   velocity0 = new SimpleVector(ltids->getVelocity0());
   velocity  = new SimpleVector(ltids->getVelocity0());
-  velocityFree = new SimpleVector(ltids->getVelocityFree());
   if (ltids->getVelocityMemoryPtr() != NULL)
     velocityMemory = new SiconosMemory(ltids->getVelocityMemory());
   else isAllocatedIn["velocityMemory"] = false;
@@ -295,14 +293,16 @@ void LagrangianLinearTIDS::initialize(const double time, const unsigned int size
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 
-  // set q and velocity to q0 and velocity0
-  *q = *q0;
-  *velocity = *velocity0;
-
   // reset r and free vectors
   qFree->zero();
   velocityFree->zero();
   p[2]->zero();
+
+  // Warning: ->zero for free vectors must be done before q/velocity initialization, because for EventDriven, qFree/vFree = q/v (pointers equality)
+
+  // set q and velocity to q0 and velocity0
+  *q = *q0;
+  *velocity = *velocity0;
 
   // Initialize memory vectors
   initMemory(sizeOfMemory);
@@ -427,10 +427,10 @@ void LagrangianLinearTIDS::display() const
 void LagrangianLinearTIDS::computeRhs(const double time, const bool)
 {
   // second argument is useless but present because of top-class function overloading.
-
   // note that rhs(0) = velocity with pointer link must already be set.
   SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
   vField->zero();
+
   if (fExt != NULL || K != NULL || C != NULL) // else rhs = 0
   {
     // Compute M-1 if necessary - Only in the case where initialize has not been called before.

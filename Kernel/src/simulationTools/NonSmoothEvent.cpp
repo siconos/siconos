@@ -49,12 +49,12 @@ void NonSmoothEvent::process(Simulation* simulation)
     OSNSIterator itOsns;
     OneStepNSProblems allOSNS = simulation->getOneStepNSProblems();
     for (itOsns = allOSNS.begin(); itOsns != allOSNS.end(); ++itOsns)
-      //      for(itOsns=simulation->getOneStepNSProblems().begin();itOsns!=simulation->getOneStepNSProblems().end();++itOsns)
       (itOsns->second)->updateOutput(0, 1);
 
     simulation->updateIndexSets();
 
     VectorOfSetOfUnitaryRelations indexSets = eventDriven->getIndexSets();
+
     cout << " NS EVENT PROCESS " << indexSets[1].size() << " " << indexSets[2].size() << endl;
     // ---> solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
     if (!(indexSets[1] - indexSets[2]).isEmpty())
@@ -65,13 +65,20 @@ void NonSmoothEvent::process(Simulation* simulation)
 
       // compute p[1] and post-impact velocity
       eventDriven->updateImpactState();
+      for (itOsns = allOSNS.begin(); itOsns != allOSNS.end(); ++itOsns)
+        (itOsns->second)->updateOutput(0, 1);
 
       //  update indexSet that depends on y[1]
-      eventDriven->updateIndexSet(2);
+      eventDriven->updateIndexSets();
 
       // check that IndexSet[1]-IndexSet[2] is now empty
-      if (!(indexSets[1] - indexSets[2]).isEmpty())
-        RuntimeException::selfThrow("EventDriven advanceToEvent, error after impact-LCP solving.");
+
+      indexSets = eventDriven->getIndexSets();
+
+      //    cout << " INDEX SIZES " << indexSets[1].size() << " " << indexSets[2].size() << endl;
+
+      //    if( !(indexSets[1]-indexSets[2]).isEmpty())
+      //RuntimeException::selfThrow("NonSmoothEvent::process, error after impact-LCP solving.");
     }
 
     if (!((indexSets[2]).isEmpty()))

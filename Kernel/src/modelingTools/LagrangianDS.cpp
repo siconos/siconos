@@ -66,11 +66,11 @@ void LagrangianDS::initAllocationFlags(const bool in)
   {
     isAllocatedIn["q0"] = true;
     isAllocatedIn["q"] = true;
-    isAllocatedIn["qFree"] = true;
+    isAllocatedIn["qFree"] = false;
     isAllocatedIn["qMemory"] = false;
     isAllocatedIn["velocity0"] = true;
     isAllocatedIn["velocity"] = true;
-    isAllocatedIn["velocityFree"] = true;
+    isAllocatedIn["velocityFree"] = false;
     isAllocatedIn["velocityMemory"] = false;
     isAllocatedIn["p0"] = false;
     isAllocatedIn["p1"] = false;
@@ -186,9 +186,6 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     velocity = new SimpleVector(lgptr->getVelocity0()); // same remark as for q
   else
     velocity = new SimpleVector(*velocity0);
-
-  qFree = new SimpleVector(ndof);
-  velocityFree = new SimpleVector(ndof);
 
   // p
   p.resize(3, NULL);
@@ -335,11 +332,9 @@ LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
   mass = new SimpleMatrix(newMass);
   q0 = new SimpleVector(newQ0);
   q = new SimpleVector(*q0);
-  qFree = new SimpleVector(ndof);
 
   velocity0 = new SimpleVector(newVelocity0);
   velocity = new SimpleVector(*velocity0);
-  velocityFree = new SimpleVector(ndof);
 
   p.resize(3, NULL);
   p[2] = new SimpleVector(ndof);
@@ -386,11 +381,9 @@ LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
   // -- Memory allocation for vector and matrix members --
   q0 = new SimpleVector(newQ0);
   q = new SimpleVector(*q0);
-  qFree = new SimpleVector(ndof);
 
   velocity0 = new SimpleVector(newVelocity0);
   velocity = new SimpleVector(*velocity0);
-  velocityFree = new SimpleVector(ndof);
 
   p.resize(3, NULL);
   p[2] = new SimpleVector(ndof);
@@ -445,7 +438,6 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
 
   q0 = new SimpleVector(lnlds->getQ0());
   q = new SimpleVector(lnlds->getQ());
-  qFree = new SimpleVector(lnlds->getQFree());
 
   if (lnlds->getQMemoryPtr() != NULL)
     qMemory = new SiconosMemory(lnlds->getQMemory());
@@ -453,7 +445,7 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
 
   velocity0 = new SimpleVector(lnlds->getVelocity0());
   velocity  = new SimpleVector(lnlds->getVelocity0());
-  velocityFree = new SimpleVector(lnlds->getVelocityFree());
+
   if (lnlds->getVelocityMemoryPtr() != NULL)
     velocityMemory = new SiconosMemory(lnlds->getVelocityMemory());
   else isAllocatedIn["velocityMemory"] = false;
@@ -682,6 +674,26 @@ bool LagrangianDS::checkDynamicalSystem()
   return output;
 }
 
+void LagrangianDS::initFreeVectors(const string type)
+{
+  if (type == "TimeStepping")
+  {
+    qFree = new SimpleVector(ndof);
+    velocityFree = new SimpleVector(ndof);
+    isAllocatedIn["qFree"] = true;
+    isAllocatedIn["velocityFree"] = true;
+  }
+  else if (type == "EventDriven")
+  {
+    qFree = q;
+    velocityFree = velocity;
+    isAllocatedIn["qFree"] = false;
+    isAllocatedIn["velocityFree"] = false;
+  }
+  else
+    RuntimeException::selfThrow("LagrangianDS::initFreeVectors(simulationType) - Unknown simulation type.");
+}
+
 void LagrangianDS::initialize(const double time, const unsigned int sizeOfMemory)
 {
   // Set variables of top-class DynamicalSystem
@@ -689,14 +701,14 @@ void LagrangianDS::initialize(const double time, const unsigned int sizeOfMemory
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 
-  // set q and velocity to q0 and velocity0
-  *q = *q0;
-  *velocity = *velocity0;
-
   // reset r and free vectors
   qFree->zero();
   velocityFree->zero();
   p[2]->zero();
+
+  // set q and velocity to q0 and velocity0
+  *q = *q0;
+  *velocity = *velocity0;
 
   // Initialize memory vectors
   initMemory(sizeOfMemory);
@@ -1018,6 +1030,11 @@ void LagrangianDS::setVelocityFreePtr(SimpleVector *newPtr)
   if (isAllocatedIn["velocityFree"]) delete velocityFree;
   velocityFree = newPtr;
   isAllocatedIn["velocityFree"] = false;
+}
+
+SimpleVector* LagrangianDS::getAccelerationPtr() const
+{
+  return static_cast<SimpleVector*>(rhs->getVectorPtr(1));
 }
 
 void LagrangianDS::setVelocityMemory(const SiconosMemory& newValue)

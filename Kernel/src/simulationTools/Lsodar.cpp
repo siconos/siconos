@@ -269,7 +269,7 @@ void Lsodar::initialize()
   intData[5] = 0; // iopt: 0 if no optional input else 1.
   intData[6] = 22 + intData[0] * max(16, (int)intData[0] + 9) + 3 * intData[1]; // lrw
   intData[7] = 20 + intData[0];  // liw
-  intData[8] = 1;   // jt, Jacobian type indicator.
+  intData[8] = 2;   // jt, Jacobian type indicator.
   //           1 means a user-supplied full (NEQ by NEQ) Jacobian.
   //           2 means an internally generated (difference quotient) full Jacobian (using NEQ extra calls to f per df/dx value).
   //           4 means a user-supplied banded Jacobian.
@@ -280,8 +280,8 @@ void Lsodar::initialize()
 
   //   Doublereal parameters for LSODAR are saved in vector doubleData.
   //   The link with variable names in opkdmain.f is indicated in comments
-  *(doubleData[0]) = 1.0e-7;      // rtol
-  *(doubleData[1]) = 1.0e-7;   // atol
+  *(doubleData[0]) = 1.0e-15;      // rtol
+  *(doubleData[1]) = 1.0e-15;   // atol
 
   // === Error handling in LSODAR===
 
@@ -330,14 +330,11 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 
   SimpleVector * xtmp = new SimpleVector(*xWork); // A copy of xWork is required since at the time, there are no contiguous values in memory for BlockVectors.
 
-
-  cout << "IN LSODAR 0 " << tinit_DR << " " << " " << tend_DR << " " << tout << endl;
   F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*xtmp)(0), &tinit_DR, &tend_DR, &(intData[2]), doubleData[0], doubleData[1], &(intData[3]), &(intData[4]), &(intData[5]), doubleData[2],
                    &(intData[6]), iwork, &(intData[7]), pointerToJacobianF, &(intData[8]), pointerToG, &(intData[1]), doubleData[3]);
 
-
   // doubleData[2] = rwork
-  // doubleData[3] = jroot, jroot[i] = 0 if g(i) as a root a t, else jroot[i] = 0.
+  // doubleData[3] = jroot, jroot[i] = 0 if g(i) has a root at t, else jroot[i] = 0.
 
   // === Post ===
   if (intData[4] < 0) // if istate < 0 => LSODAR failed
@@ -359,8 +356,6 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   tout  = tinit_DR; // real ouput time
   tend  = tend_DR; // necessary for next start of DLSODAR
   tinit = tinit_DR;
-  cout << "FIN IN LSODAR  " << tinit_DR << " " << " " << tend_DR << " " << tout << endl;
-
 }
 
 
@@ -369,7 +364,7 @@ void Lsodar::updateState(const double time, const unsigned int level)
   // Compute all required (ie time-dependent) data for the DS of the OSI.
   DSIterator it;
   SiconosMatrix * invM;
-  SiconosVector * v, *impact, *vold;
+  SiconosVector * v, *impact; //, *vold;
 
   if (level == 1) // ie impact case: compute velocity
   {
@@ -378,9 +373,14 @@ void Lsodar::updateState(const double time, const unsigned int level)
       LagrangianDS* lds = static_cast<LagrangianDS*>(*it);
       invM = lds->getInverseOfMassPtr();
       v = lds->getVelocityPtr();
-      impact = lds->getPPtr();
-      vold = lds->getVelocityMemoryPtr()->getSiconosVector(0);
-      *v = *invM **impact + *vold;
+      cout << " IN UPDATE STATE " << endl;
+      cout << "VITESSE AVANT : " << (*v)(0) << endl;
+      impact = lds->getPPtr(2);
+      cout << "IMPACT: " << (*impact)(0) << endl;
+      //vold = lds->getVelocityMemoryPtr()->getSiconosVector(0);
+      *v += *invM **impact;
+      cout << "VITESSE APRES : " << (*v)(0) << endl;
+      cout << " OUT UPDATE STATE " << endl;
     }
   }
   else if (level == 2)// compute acceleration

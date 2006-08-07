@@ -303,7 +303,7 @@ void OneStepNSProblem::updateOutput(const int level0, int level1)
   double currentTime = simulation->getModelPtr()->getCurrentT();
   for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
   {
-    for (int i = level0; i < level1; ++i)
+    for (int i = level0; i <= level1; ++i)
       (*it)->getRelationPtr()->computeOutput(currentTime , i);
   }
 }

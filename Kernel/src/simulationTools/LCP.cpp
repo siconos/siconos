@@ -205,9 +205,9 @@ void LCP::initialize()
   if (topology->isTimeInvariant() &&   !OSNSInteractions.isEmpty())
   {
     // computeSizeOutput and updateBlocks were already done in OneStepNSProblem::initialize
-    assembleM();
     if (sizeOutput != 0)
     {
+      assembleM();
       // check z and w sizes and reset if necessary
       if (z == NULL)
       {
@@ -240,53 +240,55 @@ void LCP::initialize()
     }
   }
 
+  // If topology is time-dependant, all the above commands are called during preCompute function.
 }
 
 void LCP::preCompute(const double time)
 {
+  // compute M and q operators for LCP problem
+
   // get topology
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
 
-  // compute M and q operators for LCP problem
-  if (!topology->isTimeInvariant()) computeSizeOutput();
+  if (!topology->isTimeInvariant())
+    computeSizeOutput();
+
   if (sizeOutput != 0)
   {
     if (!topology->isTimeInvariant())
     {
       updateBlocks();
       assembleM();
-    }
-    computeQ(time);
-    // check z and w sizes and reset if necessary
-    if (z == NULL)
-    {
-      z = new SimpleVector(sizeOutput);
-      isZAllocatedIn = true;
-      z->zero();
-    }
-    else if (z->size() != sizeOutput)
-    {
-      // reset z if it has a wrong size
-      if (isZAllocatedIn) delete z;
-      z = new SimpleVector(sizeOutput);
-      isZAllocatedIn = true;
-      z->zero();
-    }
+      // check z and w sizes and reset if necessary
+      if (z == NULL)
+      {
+        z = new SimpleVector(sizeOutput);
+        isZAllocatedIn = true;
+      }
+      else if (z->size() != sizeOutput)
+      {
+        // reset z if it has a wrong size
+        if (isZAllocatedIn) delete z;
+        z = new SimpleVector(sizeOutput);
+        isZAllocatedIn = true;
+      }
 
-    if (w == NULL)
-    {
-      w = new SimpleVector(sizeOutput);
-      isWAllocatedIn = true;
-      w->zero();
+      if (w == NULL)
+      {
+        w = new SimpleVector(sizeOutput);
+        isWAllocatedIn = true;
+      }
+      else if (w->size() != sizeOutput)
+      {
+        // reset w if it has a wrong size
+        if (isWAllocatedIn) delete w;
+        w = new SimpleVector(sizeOutput);
+        isWAllocatedIn = true;
+      }
     }
-    else if (w->size() != sizeOutput)
-    {
-      // reset w if it has a wrong size
-      if (isWAllocatedIn) delete w;
-      w = new SimpleVector(sizeOutput);
-      isWAllocatedIn = true;
-      w->zero();
-    }
+    w->zero();
+    z->zero();
+    computeQ(time);
   }
 }
 
@@ -329,13 +331,14 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   // left, right and extra depend on the relation type and the non smooth law.
   relationType1 = UR1->getRelationType();
   relationType2 = UR2->getRelationType();
-  if ((UR1 == UR2) && (relationType1 == LINEARTIRELATION))
+  if (UR1 == UR2 &&  relationType1 == LINEARTIRELATION)
   {
     extraBlock = new SimpleMatrix(nslawSize1, nslawSize1);
     UR1->getExtraBlock(extraBlock);
     *currentBlock += *extraBlock;// specific to LinearTIR, get D matrix added only on blocks of the diagonal.
     delete extraBlock;
   }
+
   // loop over the common DS
   for (itDS = commonDS.begin(); itDS != commonDS.end(); itDS++)
   {
@@ -400,6 +403,7 @@ void LCP::assembleM() //
     M = new SimpleMatrix(sizeOutput, sizeOutput);
     isMAllocatedIn = true;
   }
+
   M->zero();
 
   // Get index set 1 from Simulation
@@ -448,28 +452,29 @@ void LCP::computeQ(const double time)
 
   // === Get index set from Simulation ===
   UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
-  SimpleVector * yFree;
+  SimpleVector * yOut;
 
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
   unsigned int pos = 0;
   unsigned int nsLawSize;
   UnitaryRelationIterator itCurrent, itLinked;
+  string simulationType = simulation->getType();
   for (itCurrent = indexSet.begin(); itCurrent !=  indexSet.end(); ++itCurrent)
   {
     // *itCurrent is a UnitaryRelation*.
 
     // Compute free output, this depends on the type of non smooth problem, on the relation type and on the non smooth law
     nsLawSize = (*itCurrent)->getNonSmoothLawSize();
-    yFree = new SimpleVector(nsLawSize);
+    yOut = new SimpleVector(nsLawSize);
 
-    (*itCurrent)->computeFreeOutput(time, yFree); // free output is saved in y
+    (*itCurrent)->computeEquivalentY(time, levelMin, simulationType, yOut);
 
     pos = blocksPositions[*itCurrent];
-    // Copy yFree at the right position in q.
-    for (unsigned int i = 0; i < yFree->size(); i++)
-      (*q)(i + pos) = (*yFree)(i);
-    delete yFree;
+    // Copy yOut at the right position in q.
+    for (unsigned int i = 0; i < yOut->size(); i++)
+      (*q)(i + pos) = (*yOut)(i);
+    delete yOut;
   }
 }
 
@@ -484,6 +489,7 @@ void LCP::compute(const double time)
     int info;
     int Nlcp = (int)sizeOutput;
     method solvingMethod = *(solver->getSolvingMethodPtr());
+
     info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
 
     // \warning : info value and signification depends on solver type ...
@@ -519,8 +525,7 @@ void LCP::postCompute(SiconosVector* w, SiconosVector* z)
     // Get Y and Lambda for the current Unitary Relation
     y = static_cast<SimpleVector*>((*itCurrent)-> getYPtr(levelMin));
     lambda = static_cast<SimpleVector*>((*itCurrent)->getLambdaPtr(levelMin));
-
-    static_cast<SimpleVector*>(w)->getBlock(pos, nsLawSize, *y) ;
+    static_cast<SimpleVector*>(w)->getBlock(pos, nsLawSize, *y) ; // Warning: yEquivalent is saved in y !!
     static_cast<SimpleVector*>(z)->getBlock(pos, nsLawSize, *lambda) ;
   }
 }

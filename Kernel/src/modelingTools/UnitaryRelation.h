@@ -229,12 +229,14 @@ public:
    */
   void getExtraBlock(SiconosMatrix *) const;
 
-  /** void computeFreeOutput(const double time, SiconosVector* yFree)
+  /** void computeEquivalentY(const double time, const unsigned int, const string, SiconosVector*)
     *  \brief compute free value of y
     *  \param a double (current time)
+    *  \param unsigned int: derivative order for y
+    *  \param string: simulation type
     *  \param pointer to SiconosVector (in-out parameter), result
     */
-  void computeFreeOutput(const double, SiconosVector*);
+  void computeEquivalentY(const double, const unsigned int, const std::string, SiconosVector*);
 };
 
 #endif // UNITARYRELATION_H
