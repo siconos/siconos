@@ -159,19 +159,8 @@ void EventDriven::initialize()
 
   // initialization of the OneStepIntegrators
   OSIIterator itOsi;
-  DSIterator itDS;
-  DynamicalSystemsSet osiDS;
-
   for (itOsi = allOSI.begin(); itOsi != allOSI.end(); ++itOsi)
-  {
-    // We need to initialize p[1] for EventDriven simulation
-    osiDS = (*itOsi)->getDynamicalSystems();
-    for (itDS = osiDS.begin(); itDS != osiDS.end(); ++itDS)
-      (static_cast<LagrangianLinearTIDS*>(*itDS))->initP1();
-
     (*itOsi)->initialize();
-  }
-
 
   // === Events manager creation and initialization ===
   eventsManager = new EventsManager(DEFAULT_TICK, this); //
@@ -195,6 +184,9 @@ void EventDriven::initialize()
     levelMin = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMinRelativeDegree();
     if (levelMin == 0)
       levelMin++;
+
+    updateInput(levelMin);
+    updateOutput(0, levelMax);
 
     // WARNING: only for Lagrangian systems - To be reviewed for other ones.
     allNSProblems["impact"]->setLevels(levelMin - 1, levelMax - 1);
@@ -225,7 +217,7 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   //   cout << "Time = " << t << endl;
 
   // update the DS of the OSI.
-  lsodar->updateState(t, 2); // update based on the last saved values for the DS state, ie the ones computed by lsodar (x above)
+  lsodar->updateState(2); // update based on the last saved values for the DS state, ie the ones computed by lsodar (x above)
 
   // solve a LCP "acceleration"
   if (!allNSProblems.empty())
@@ -233,7 +225,7 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
     if (!(allNSProblems["acceleration"]->getInteractions()).isEmpty())
     {
       allNSProblems["acceleration"]->compute(t);
-      allNSProblems["acceleration"]->updateInput(2); // Necessary to compute DS state below
+      updateInput(2); // Necessary to compute DS state below
     }
     // Compute the right-hand side ( xdot = f + Tu + r in DS) for all the ds, with the new value of input.
     lsodar->computeRhs(t);
@@ -303,11 +295,7 @@ void EventDriven::computeG(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   //     - y[0]: need to be updated.
 
   if (!allNSProblems.empty())
-  {
-    OSNSIterator itOsns;
-    for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
-      (itOsns->second)->updateOutput(0, 0);
-  }
+    updateOutput(0, 0);
 
   // If UR is in IndexSet2, g = lambda[2], else g = y[0]
   for (itUR = indexSets[0].begin(); itUR != indexSets[0].end(); ++itUR)
@@ -332,13 +320,14 @@ void EventDriven::computeG(OneStepIntegrator* osi, integer * sizeOfX, doublereal
 
 void EventDriven::updateImpactState()
 {
-  double time = model->getCurrentT();
   OSIIterator itOSI;
   OSNSIterator itOsns;
-  for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
-    (itOsns->second)->updateInput(1);
+  // Compute input = R(lambda[1])
+  updateInput(1);
+
+  // Compute post-impact velocity
   for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
-    (*itOSI)->updateState(time, 1);
+    (*itOSI)->updateState(1);
 }
 
 // Run the whole simulation
@@ -363,37 +352,19 @@ void EventDriven::computeOneStep()
 
 void EventDriven::update(const unsigned int levelInput)
 {
-  cout << "DEBUT :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
-  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getYPtr(0)->display();
-  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getYPtr(1)->display();
-  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getLambdaPtr(0)->display();
-  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getLambdaPtr(1)->display();
-
-
   if (!allNSProblems.empty())
   {
     // compute input
-    OSNSIterator itOsns;
-    for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
-      (itOsns->second)->updateInput(levelInput);
-
-    double time = model->getCurrentT();
+    updateInput(levelInput);
 
     OSIIterator itOSI;
     for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
-      (*itOSI)->updateState(time, levelInput);
+      (*itOSI)->updateState(levelInput);
 
-    for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
-      (itOsns->second)->updateOutput(levelInput, levelInput);
+    updateOutput(levelInput, levelInput);
 
     updateIndexSet(levelInput);
   }
-  cout << "FIN :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::" << endl;
-  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getYPtr(0)->display();
-  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getYPtr(1)->display();
-  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getLambdaPtr(0)->display();
-  (*(model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions()).begin())->getLambdaPtr(1)->display();
-
 }
 
 void EventDriven::nextStep()
@@ -427,8 +398,7 @@ void EventDriven::advanceToEvent()
   }
   else if (istate == 3) // ie a root has been found at previous step => no changes in tint/tend values (done by integrate)
   {
-    istate = 1;
-
+    //istate = 1;
     tinit = eventsManager->getCurrentTime();
     tend =  eventsManager->getNextTime();
   }

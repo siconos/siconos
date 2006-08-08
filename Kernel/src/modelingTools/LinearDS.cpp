@@ -306,8 +306,10 @@ bool LinearDS::checkDynamicalSystem()
   return output;
 }
 
-void LinearDS::initialize(const double time, const unsigned int sizeOfMemory)
+void LinearDS::initialize(const string simulationType, const double time, const unsigned int sizeOfMemory)
 {
+  initFreeVectors(simulationType);
+
   // reset x to x0, xFree and r to zero.
   xFree->zero();
   r->zero();

@@ -1029,12 +1029,13 @@ public:
     delete tmpWorkVector[id];
   }
 
-  /** \fn void initialize(const double = 0, const unsigned int = 1) ;
+  /** \fn void initialize(const string, const double = 0, const unsigned int = 1) ;
    *  \brief dynamical system initialization function: mainly set memory and compute value for initial state values.
+   *  \param string: simulation type
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  virtual void initialize(const double = 0, const unsigned int = 1) ;
+  virtual void initialize(const std::string, const double = 0, const unsigned int = 1) ;
 
   /** \fn void update(const double) ;
    *  \brief dynamical system update: mainly call compute for all time or state depending functions
@@ -1291,6 +1292,12 @@ public:
    *  \return a double when DS is a Lagrangian
    */
   virtual double dsConvergenceIndicator();
+
+  /** \fn void resetNonSmoothPart()
+   *  \brief set R to zero
+   */
+  virtual void resetNonSmoothPart();
+
 
 };
 

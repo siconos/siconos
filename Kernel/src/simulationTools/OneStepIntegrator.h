@@ -240,7 +240,7 @@ public:
    *  \exception to be defined
    *  \return void
    */
-  virtual void nextStep();
+  void nextStep();
 
   /** \fn void computeFreeState()
    *  \brief integrates the Dynamical System linked to this integrator without constraints
@@ -256,23 +256,27 @@ public:
    */
   virtual void integrate(double&, double&, double&, int&) = 0;
 
-  /** \fn void updateState(const double time, const unsigned int)
+  /** \fn void resetNonSmoothPart();
+   *  \brief set to zero all the r vectors of the DynamicalSystems of the present OSI
+   */
+  void resetNonSmoothPart();
+
+  /** \fn void updateState(const unsigned int)
    *  \brief update the state of the DynamicalSystem attached to this Integrator
    *  \param unsigned int: level of interest for the dynamics
-   *  \param double: current time
    */
-  virtual void updateState(const double, const unsigned int) = 0;
+  virtual void updateState(const unsigned int) = 0;
 
   /** \fn void display()
    *  \brief print the data to the screen
    */
-  virtual  void display() const;
+  virtual void display() = 0;
 
   /** \fn void saveIntegratorToXML()
    *  \brief copy the data of the OneStepNSProblem to the XML tree
    *  \exception RuntimeException
    */
-  virtual void saveIntegratorToXML();
+  void saveIntegratorToXML();
 
 };
 

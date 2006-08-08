@@ -310,8 +310,6 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   doublereal tend_DR = tend  ;       // next point where output is desired (different from t!)
   doublereal tinit_DR = tinit;       // current (starting) time
 
-  intData[4] = istate;
-
   // === Pointers to function ===
   //  --> definition and initialisation thanks to wrapper:
   global_object = this; // Warning: global object must be initialized to current one before pointers to function initialisation.
@@ -329,9 +327,21 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   // === LSODAR CALL ===
 
   SimpleVector * xtmp = new SimpleVector(*xWork); // A copy of xWork is required since at the time, there are no contiguous values in memory for BlockVectors.
+  cout << " BEFORE "  << (*xtmp)(0) << " " << (*xtmp)(1) << " " << (*xtmp)(2) << " " << (*xtmp)(3) << " " << (*xtmp)(4) << " " << (*xtmp)(5) << " " << endl;
+  if (istate == 3)
+  {
+    istate = 1; // restart
+    (*xtmp)(0) += 2 * TOLERANCE;
+  }
+  cout << " IN " << (*xtmp)(0) << " " << (*xtmp)(1) << " " << (*xtmp)(2) << " " << (*xtmp)(3) << " " << (*xtmp)(4) << " " << (*xtmp)(5) << " " << endl;
+
+  intData[4] = istate;
+
 
   F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*xtmp)(0), &tinit_DR, &tend_DR, &(intData[2]), doubleData[0], doubleData[1], &(intData[3]), &(intData[4]), &(intData[5]), doubleData[2],
                    &(intData[6]), iwork, &(intData[7]), pointerToJacobianF, &(intData[8]), pointerToG, &(intData[1]), doubleData[3]);
+  cout << " AFTER "  << (*xtmp)(0) << " " << (*xtmp)(1) << " " << (*xtmp)(2) << " " << (*xtmp)(3) << " " << (*xtmp)(4) << " " << (*xtmp)(5) << " " << endl;
+
 
   // doubleData[2] = rwork
   // doubleData[3] = jroot, jroot[i] = 0 if g(i) has a root at t, else jroot[i] = 0.
@@ -359,7 +369,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 }
 
 
-void Lsodar::updateState(const double time, const unsigned int level)
+void Lsodar::updateState(const unsigned int level)
 {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
   DSIterator it;
@@ -375,7 +385,7 @@ void Lsodar::updateState(const double time, const unsigned int level)
       v = lds->getVelocityPtr();
       cout << " IN UPDATE STATE " << endl;
       cout << "VITESSE AVANT : " << (*v)(0) << endl;
-      impact = lds->getPPtr(2);
+      impact = lds->getPPtr(1);
       cout << "IMPACT: " << (*impact)(0) << endl;
       //vold = lds->getVelocityMemoryPtr()->getSiconosVector(0);
       *v += *invM **impact;
@@ -385,13 +395,14 @@ void Lsodar::updateState(const double time, const unsigned int level)
   }
   else if (level == 2)// compute acceleration
   {
+    double time = simulationLink->getModelPtr()->getCurrentT();
     for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
       (*it)->update(time);
   }
-  else RuntimeException::selfThrow("Lsodar::updateState(t,index), index is out of range.");
+  else RuntimeException::selfThrow("Lsodar::updateState(index), index is out of range. Index = " + level);
 }
 
-void Lsodar::display() const
+void Lsodar::display()
 {
   OneStepIntegrator::display();
   cout << " --- > Lsodar specific values: " << endl;

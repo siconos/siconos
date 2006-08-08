@@ -506,7 +506,7 @@ void LCP::postCompute(SiconosVector* w, SiconosVector* z)
 
   // y and lambda vectors
   //  vector< SimpleVector* >  Y, Lambda;
-  SimpleVector * y, *lambda;
+  SimpleVector *lambda, *y;
 
   // === Loop through "active" Unitary Relations (ie present in indexSets[1]) ===
 

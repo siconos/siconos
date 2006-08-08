@@ -36,11 +36,7 @@ TimeDiscrEvent::~TimeDiscrEvent()
 
 void TimeDiscrEvent::process(Simulation* simulation)
 {
-  OSNSIterator itOsns;
-  OneStepNSProblems allOSNS = simulation->getOneStepNSProblems();
-  //  for(itOsns=(simulation->getOneStepNSProblems()).begin();itOsns!=(simulation->getOneStepNSProblems()).end();++itOsns)
-  for (itOsns = allOSNS.begin(); itOsns != allOSNS.end(); ++itOsns)
-    (itOsns->second)->updateOutput(0, 1);
+  simulation->updateOutput(0, 1);
 
   TimeDiscretisation * td =  simulation->getTimeDiscretisationPtr();
   td->increment();

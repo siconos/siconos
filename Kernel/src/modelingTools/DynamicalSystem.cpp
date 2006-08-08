@@ -959,8 +959,9 @@ DSInputOutput* DynamicalSystem::getDSInputOutput(const unsigned int i)
   return dsioVector[i];
 }
 
-void DynamicalSystem::initialize(const double time, const unsigned int sizeOfMemory)
+void DynamicalSystem::initialize(const string simulationType, const double time, const unsigned int sizeOfMemory)
 {
+  initFreeVectors(simulationType);
 
   // reset x to x0, xFree and r to zero.
   xFree->zero();
@@ -1353,3 +1354,7 @@ double DynamicalSystem::dsConvergenceIndicator()
   return 0;
 }
 
+void DynamicalSystem::resetNonSmoothPart()
+{
+  r->zero();
+}

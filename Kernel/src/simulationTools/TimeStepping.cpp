@@ -173,6 +173,9 @@ void TimeStepping::initialize()
     if (levelMin != 0)
       levelMin--;
 
+    updateInput(levelMin);
+    updateOutput(0, levelMax);
+
     // initialization of  OneStepNonSmoothProblem
     OSNSIterator itOsns;
     for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
@@ -189,16 +192,14 @@ void TimeStepping::initialize()
 void TimeStepping::update(const unsigned int levelInput)
 {
   // compute input (lambda -> r)
-  OSNSIterator itOsns;
-  for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
-    (itOsns->second)->updateInput(levelInput);
+  updateInput(levelInput);
 
   // compute state for each dynamical system
 
   double time = model->getCurrentT();
   OSIIterator it;
   for (it = allOSI.begin(); it != allOSI.end() ; ++it)
-    (*it)->updateState(time, 1);
+    (*it)->updateState(levelInput);
 
   if (!allNSProblems.empty() && levelMin > 0)
   {

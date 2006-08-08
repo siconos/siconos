@@ -135,12 +135,13 @@ public:
    */
   bool checkDynamicalSystem();
 
-  /** \fn void initialize(const double = 0, const unsigned int = 1) ;
+  /** \fn void initialize(const std::string, const double = 0, const unsigned int = 1) ;
    *  \brief dynamical system initialization function: mainly set memory and compute value for initial state values.
+   *  \param string: simulation type
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  //  void initialize(const double = 0, const unsigned int = 1) ;
+  //  void initialize(const std::string, const double = 0, const unsigned int = 1) ;
 
   /** \fn void computeRhs(const double time, const bool  =false)
    *  \brief Default function to the right-hand side term

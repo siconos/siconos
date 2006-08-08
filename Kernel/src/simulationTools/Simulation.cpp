@@ -426,5 +426,40 @@ void Simulation::saveSimulationToXML()
   else RuntimeException::selfThrow("Simulation::saveSimulationToXML - SimulationXML = NULL");
 }
 
+void Simulation::updateInput(int level)
+{
+  if (level == -1)
+    level = levelMin; // We use this since it is impossible to set levelMin as defaultValue in OneStepNSProblem.h
+
+  double time = model->getCurrentT();
+  InteractionsSet allInter = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions();
+  InteractionsIterator it;
+
+  // First, r (or p) is set to zero in all DynamicalSystems.
+  OSIIterator itOSI;
+  for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
+    (*itOSI)->resetNonSmoothPart();
+
+  // We compute inpute using lambda(levelMin).
+  for (it = allInter.begin(); it != allInter.end(); it++)
+    (*it)->getRelationPtr() -> computeInput(time, level);
+}
+
+void Simulation::updateOutput(const int level0, int level1)
+{
+
+  if (level1 == -1)
+    level1 = levelMax;
+
+  double time = model->getCurrentT();
+  InteractionsSet allInter = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions();
+  InteractionsIterator it;
+
+  for (it = allInter.begin(); it != allInter.end(); it++)
+  {
+    for (int i = level0; i <= level1; ++i)
+      (*it)->getRelationPtr()->computeOutput(time , i);
+  }
+}
 
 

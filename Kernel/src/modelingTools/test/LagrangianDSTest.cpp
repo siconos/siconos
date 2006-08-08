@@ -127,7 +127,7 @@ void LagrangianDSTest::testBuildLagrangianDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2C : ", ds->getId() == "testLAGDS2", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2D : ", ds->getNdof() == 3, true);
   double time = 1.5;
-  ds->initialize(time);
+  ds->initialize("TimeStepping", time);
 
 
   SimpleVector * x01 = new SimpleVector(3);
@@ -178,7 +178,7 @@ void LagrangianDSTest::testBuildLagrangianDS3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2C : ", ds->getId() == "testLAGDS3", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2D : ", ds->getNdof() == 3, true);
   double time = 1.5;
-  ds->initialize(time);
+  ds->initialize("TimeStepping", time);
 
   SimpleMatrix M(3, 3);
   M(0, 0) = 1;
@@ -216,7 +216,7 @@ void LagrangianDSTest::testBuildLagrangianDS4()
 
   LagrangianDS * ds = new LagrangianDS(13, 3, *q0, *velocity0, (*mass));
   double time = 1.5;
-  ds->initialize(time);
+  ds->initialize("TimeStepping", time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4A : ", ds->getType() == LNLDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4B : ", ds->getNumber() == 13, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4D : ", ds->getNdof() == 3, true);
@@ -244,7 +244,7 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   string plugin = "TestPlugin:computeMass";
   DynamicalSystem * ds = new LagrangianDS(13, 3, *q0, *velocity0, plugin);
   double time = 1.5;
-  ds->initialize(time);
+  ds->initialize("TimeStepping", time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5A : ", ds->getType() == LNLDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5B : ", ds->getNumber() == 13, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5D : ", static_cast<LagrangianDS*>(ds)->getNdof() == 3, true);
@@ -282,7 +282,7 @@ void LagrangianDSTest::testBuildLagrangianDS6()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6C : ", ds->getId() == "copyOfds2", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6D : ", ds->getNdof() == 3, true);
   double time = 1.5;
-  ds->initialize(time);
+  ds->initialize("TimeStepping", time);
 
 
   SimpleVector * x01 = new SimpleVector(3);
@@ -333,7 +333,7 @@ void LagrangianDSTest::testcomputeDS()
   DynamicalSystem * ds = new LagrangianDS(tmpxml2);
   LagrangianDS * copy = static_cast<LagrangianDS*>(ds);
   double time = 1.5;
-  ds->initialize(time);
+  ds->initialize("TimeStepping", time);
   ds->computeRhs(time);
   ds->computeJacobianXRhs(time);
   SimpleMatrix M(3, 3);

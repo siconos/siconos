@@ -86,7 +86,7 @@ typedef OneStepNSProblems::iterator OSNSIterator;
 typedef OneStepNSProblems::const_iterator ConstOSNSIterator;
 
 /** tolerance value used in indexSets updating */
-const double TOLERANCE = 1e-8;
+const double TOLERANCE = 1e-5;
 
 /** default name for One Step NS Problem of the simulation */
 const std::string DEFAULT_OSNS_NAME = "unamed";
@@ -424,6 +424,20 @@ public:
    *  \exception RuntimeException
    */
   virtual void saveSimulationToXML();
+
+  /** \fn void updateInput(int level = levelMin)
+   *  \brief compute r thanks to lambda[level]
+   *  \param unsigned int: lambda order, default = levelMin
+   */
+  void updateInput(int = -1);
+
+  /** \fn void updateOutput(const  int = 0, int = levelMax)
+   *  \brief compute output for all the interactions
+   *  \param  int: y min order to be computed, default = 0
+   *  \param  int: y max order to be computed, default = levelMax
+   */
+  void updateOutput(const  int = 0, int = -1);
+
 };
 
 #endif // SIMULATION_H

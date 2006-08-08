@@ -74,7 +74,7 @@ void LagrangianDS::initAllocationFlags(const bool in)
     isAllocatedIn["velocityMemory"] = false;
     isAllocatedIn["p0"] = false;
     isAllocatedIn["p1"] = false;
-    isAllocatedIn["p2"] = true;
+    isAllocatedIn["p2"] = false;
     isAllocatedIn["mass"] = true;
     isAllocatedIn["fInt"] = false;
     isAllocatedIn["fExt"] = false;
@@ -186,10 +186,6 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     velocity = new SimpleVector(lgptr->getVelocity0()); // same remark as for q
   else
     velocity = new SimpleVector(*velocity0);
-
-  // p
-  p.resize(3, NULL);
-  p[2] = new SimpleVector(ndof);
 
   initAllocationFlags(); // Default configuration
 
@@ -310,6 +306,7 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
     }
     else *jacobianVelocityNNL = lgptr->getJacobianVelocityNNLMatrix();
   }
+  p.resize(3, NULL);
 }
 
 // From a set of data; Mass filled-in directly from a siconosMatrix
@@ -336,9 +333,6 @@ LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
   velocity0 = new SimpleVector(newVelocity0);
   velocity = new SimpleVector(*velocity0);
 
-  p.resize(3, NULL);
-  p[2] = new SimpleVector(ndof);
-
   // set allocation flags: true for required input, false for others
   initAllocationFlags(); // Default
 
@@ -360,6 +354,7 @@ LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
   //   setComputeJacobianVelocityFIntFunction("DefaultPlugin.so", "computeJacobianVelocityFInt");
   //   setComputeJacobianQNNLFunction("DefaultPlugin.so", "computeJacobianQNNL");
   //   setComputeJacobianVelocityNNLFunction("DefaultPlugin.so", "computeJacobianVelocityNNL");
+  p.resize(3, NULL);
 }
 
 // From a set of data - Mass loaded from a plugin
@@ -385,9 +380,6 @@ LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
   velocity0 = new SimpleVector(newVelocity0);
   velocity = new SimpleVector(*velocity0);
 
-  p.resize(3, NULL);
-  p[2] = new SimpleVector(ndof);
-
   mass = new SimpleMatrix(ndof, ndof);
   setComputeMassFunction(cShared.getPluginName(massName), cShared.getPluginFunctionName(massName));
   //   fInt = new SimpleVector(ndof);
@@ -409,6 +401,7 @@ LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
   //   setComputeJacobianVelocityFIntFunction("DefaultPlugin.so", "computeJacobianVelocityFInt");
   //   setComputeJacobianQNNLFunction("DefaultPlugin.so", "computeJacobianQNNL");
   //   setComputeJacobianVelocityNNLFunction("DefaultPlugin.so", "computeJacobianVelocityNNL");
+  p.resize(3, NULL);
 }
 
 // copy constructor
@@ -450,21 +443,7 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
     velocityMemory = new SiconosMemory(lnlds->getVelocityMemory());
   else isAllocatedIn["velocityMemory"] = false;
 
-  p.resize(3, NULL);
-
-  for (unsigned int i = 0; i < 3; ++i)
-  {
-    if (lnlds->getPPtr(i) != NULL)
-    {
-      p[i] = new SimpleVector(lnlds->getP(i));
-      string stringValue;
-      stringstream sstr;
-      sstr << i;
-      sstr >> stringValue;
-      stringValue = "p" + stringValue;
-      isAllocatedIn[stringValue] = true;
-    }
-  }
+  // Warning: p is not copied !!!
 
   if (lnlds->getFIntPtr() != NULL)
   {
@@ -575,6 +554,7 @@ LagrangianDS::LagrangianDS(const DynamicalSystem & newDS):
     pluginPath  = cShared.getPluginName(jacobianVelocityNNLFunctionName);
     setComputeJacobianVelocityNNLFunction(pluginPath, functionName);
   }
+  p.resize(3, NULL);
 }
 
 // Destructor
@@ -694,8 +674,31 @@ void LagrangianDS::initFreeVectors(const string type)
     RuntimeException::selfThrow("LagrangianDS::initFreeVectors(simulationType) - Unknown simulation type.");
 }
 
-void LagrangianDS::initialize(const double time, const unsigned int sizeOfMemory)
+// TEMPORARY FUNCTION: Must be called before this->initialize
+void LagrangianDS::initP(const string simulationType)
 {
+  if (simulationType == "TimeStepping")
+  {
+    p[1] = new SimpleVector(ndof);
+    isAllocatedIn["p1"] = true;
+    p[2] = p[1];
+    isAllocatedIn["p2"] = false;
+  }
+  else if (simulationType == "EventDriven")
+  {
+    p[1] = new SimpleVector(ndof);
+    isAllocatedIn["p1"] = true;
+    p[2] = new SimpleVector(ndof);
+    isAllocatedIn["p2"] = true;
+  }
+}
+
+void LagrangianDS::initialize(const string simulationType, const double time, const unsigned int sizeOfMemory)
+{
+  initFreeVectors(simulationType);
+
+  initP(simulationType);
+
   // Set variables of top-class DynamicalSystem
   connectToDS(); // note that connection can not be done during constructor call, since user can complete the ds after (add plugin or anything else).
   bool res = checkDynamicalSystem();
@@ -704,7 +707,8 @@ void LagrangianDS::initialize(const double time, const unsigned int sizeOfMemory
   // reset r and free vectors
   qFree->zero();
   velocityFree->zero();
-  p[2]->zero();
+  p[1]->zero();
+  if (isAllocatedIn["p2"]) p[2]->zero();
 
   // set q and velocity to q0 and velocity0
   *q = *q0;
@@ -1918,7 +1922,8 @@ void LagrangianDS::swapInMemory()
   qMemory->swap(q);
   velocityMemory->swap(velocity);
   // initialization of the reaction force due to the non smooth law
-  p[2]->zero();
+  p[1]->zero();
+  if (isAllocatedIn["p2"]) p[2]->zero();
 }
 
 LagrangianDS* LagrangianDS::convert(DynamicalSystem* ds)
@@ -1967,4 +1972,10 @@ void LagrangianDS::computeQFree(const double time, const unsigned int level, Sic
 
   *qFreeOut = *workMatrix["inverseOfMass"]**qFreeOut;
 
+}
+
+void LagrangianDS::resetNonSmoothPart()
+{
+  p[1]->zero();
+  if (isAllocatedIn["p2"]) p[2]->zero();
 }

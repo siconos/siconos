@@ -126,10 +126,7 @@ void OneStepIntegrator::initialize()
   double t0 = simulationLink->getTimeDiscretisationPtr()->getT0();
   DSIterator it;
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
-  {
-    (*it)->initFreeVectors(simulationLink->getType());
-    (*it)->initialize(t0, sizeMem);
-  }
+    (*it)->initialize(simulationLink->getType(), t0, sizeMem);
 }
 
 void OneStepIntegrator::nextStep()
@@ -138,11 +135,18 @@ void OneStepIntegrator::nextStep()
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
   {
     (*it)->swapInMemory();
-    (*it)->getRPtr()->zero();
+    (*it)->resetNonSmoothPart();
   }
 }
 
-void OneStepIntegrator::display() const
+void OneStepIntegrator::resetNonSmoothPart()
+{
+  DSIterator it;
+  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
+    (*it)->resetNonSmoothPart();
+}
+
+void OneStepIntegrator::display()
 {
   cout << "==== OneStepIntegrator display =====" << endl;
   cout << "| integratorType : " << integratorType << endl;

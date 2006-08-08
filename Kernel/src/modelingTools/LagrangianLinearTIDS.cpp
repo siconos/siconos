@@ -286,8 +286,12 @@ bool LagrangianLinearTIDS::checkDynamicalSystem()
   return output;
 }
 
-void LagrangianLinearTIDS::initialize(const double time, const unsigned int sizeOfMemory)
+void LagrangianLinearTIDS::initialize(const string simulationType, const double time, const unsigned int sizeOfMemory)
 {
+  initFreeVectors(simulationType);
+
+  initP(simulationType);
+
   // Set variables of top-class DynamicalSystem
   connectToDS(); // note that connection can not be done during constructor call, since user can complete the ds after (add plugin or anything else).
   bool res = checkDynamicalSystem();
@@ -511,9 +515,3 @@ LagrangianLinearTIDS* LagrangianLinearTIDS::convert(DynamicalSystem* ds)
   return ltids;
 }
 
-// TEMPORARY FUNCTION
-void LagrangianLinearTIDS::initP1()
-{
-  p[1] = new SimpleVector(ndof);
-  isAllocatedIn["p1"] = true;
-}

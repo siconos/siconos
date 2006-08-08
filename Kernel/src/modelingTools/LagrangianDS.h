@@ -340,12 +340,19 @@ public:
    */
   void initFreeVectors(const std::string);
 
-  /** \fn void initialize(const double = 0, const unsigned int = 1) ;
+  /** \fn void initP(const string)
+   *  \brief allocate memory for p[...] vectors
+   *  \param string: simulation type
+   */
+  void initP(const std::string);
+
+  /** \fn void initialize(const std::string, const double = 0, const unsigned int = 1) ;
    *  \brief dynamical system initialization function: mainly set memory and compute plug-in for initial state values.
+   *  \param string: simulation type
    *  \param time of initialisation, default value = 0
    *  \param the size of the memory, default size = 1.
    */
-  virtual void initialize(const double = 0, const unsigned int = 1) ;
+  virtual void initialize(const std::string, const double = 0, const unsigned int = 1) ;
 
   /** \fn void update(const double) ;
    *  \brief dynamical system update: mainly call compute for all time or state depending functions (mass, FInt ...).
@@ -1247,6 +1254,10 @@ public:
    */
   void computeQFree(const double, const unsigned int, SiconosVector*);
 
+  /** \fn void resetNonSmoothPart()
+   *  \brief set p[...] to zero
+   */
+  void resetNonSmoothPart();
 };
 
 #endif // LAGRANGIANNLDS_H

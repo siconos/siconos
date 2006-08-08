@@ -222,18 +222,11 @@ public:
    */
   void integrate(double&, double&, double&, int&);
 
-  /** \fn void updateState(const double, const unsigned int)
-   *  \brief updates the state of the Dynamical System
-   *  \param double: current time: not used at the time
+  /** \fn void updateState(const unsigned int)
+   *  \brief updates the state of the Dynamical Systems
    *  \param unsigned int: level of interest for the dynamics: not used at the time
    */
-  void updateState(const double, const unsigned int);
-
-  /** \fn void saveIntegratorToXML()
-   *  \brief copy the data of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
-   */
-  void saveIntegratorToXML();
+  void updateState(const unsigned int);
 
   /** \fn void saveWToXML()
    *  \brief copy the matrix W of the OneStepNSProblem to the XML tree

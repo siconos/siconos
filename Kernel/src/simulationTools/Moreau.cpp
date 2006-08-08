@@ -607,10 +607,8 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
   }
 }
 
-void Moreau::updateState(const double, const unsigned int)
+void Moreau::updateState(const unsigned int level)
 {
-  // NOTE: at the time input arguments are unused - They are necessary because of OSI base class function interface.
-
   double h = simulationLink->getTimeDiscretisationPtr()->getH();
 
   DSIterator it;
@@ -631,7 +629,7 @@ void Moreau::updateState(const double, const unsigned int)
       LagrangianDS* d = static_cast<LagrangianDS*>(ds);
       // get velocity free, p, velocity and q pointers
       SimpleVector *vfree = d->getVelocityFreePtr();
-      SiconosVector *p = d->getPPtr(2);
+      SiconosVector *p = d->getPPtr(level);
       SimpleVector *v = d->getVelocityPtr();
       SimpleVector *q = d->getQPtr();
       // Save value of q and v in stateTmp for future convergence computation
@@ -682,18 +680,6 @@ void Moreau::display()
     cout << "--> and corresponding theta is: " << thetaMap[*it] << endl;
   }
   cout << "================================" << endl;
-}
-
-void Moreau::saveIntegratorToXML()
-{
-  //  OneStepIntegrator::saveIntegratorToXML();
-  //if(integratorXml != NULL)
-  //{
-  //(static_cast<MoreauXML*>(integratorXml))->setTheta(theta );
-  //     (static_cast<MoreauXML*>(integratorXml))->setW(W);
-  //}
-  //else
-  RuntimeException::selfThrow("Moreau::saveIntegratorToXML - IntegratorXML not yet implemented.");
 }
 
 void Moreau::saveWToXML()

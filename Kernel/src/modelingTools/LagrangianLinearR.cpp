@@ -549,11 +549,9 @@ void LagrangianLinearR::computeInput(const double time, const unsigned int level
       lds = static_cast<LagrangianDS*>(*it);
       // Put p of each DS into a block
       // Warning: use addPtr -> link between pointers
-      p->addPtr(lds->getPPtr(2));
+      p->addPtr(lds->getPPtr(level));
 
     }
-
-    p->zero();
 
     // get lambda of the concerned interaction
     SiconosVector *lambda = interaction->getLambdaPtr(level);

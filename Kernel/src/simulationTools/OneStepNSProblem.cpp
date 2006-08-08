@@ -268,9 +268,6 @@ void OneStepNSProblem::initialize()
     cout << "Warning, OneStepNSProblem::initialize, the set of Interactions of this problem is empty." << endl;
   else
   {
-    updateInput(levelMin);
-    updateOutput();
-
     updateBlocks();
     computeSizeOutput();
   }
@@ -281,34 +278,6 @@ void OneStepNSProblem::nextStep()
   InteractionsIterator it;
   for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
     (*it)->swapInMemory();
-}
-
-void OneStepNSProblem::updateInput(int level)
-{
-  if (level == -1)
-    level = levelMin; // We use this since it is impossible to set levelMin as defaultValue in OneStepNSProblem.h
-
-  InteractionsIterator it;
-  double currentTime = simulation->getModelPtr()->getCurrentT();
-
-  // We compute inpute using lambda(levelMin).
-  for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
-    (*it)->getRelationPtr() -> computeInput(currentTime, level);
-}
-
-void OneStepNSProblem::updateOutput(const int level0, int level1)
-{
-
-  if (level1 == -1)
-    level1 = levelMax;
-
-  InteractionsIterator it;
-  double currentTime = simulation->getModelPtr()->getCurrentT();
-  for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)
-  {
-    for (int i = level0; i <= level1; ++i)
-      (*it)->getRelationPtr()->computeOutput(currentTime , i);
-  }
 }
 
 void OneStepNSProblem::compute(const double time)
@@ -342,7 +311,7 @@ void OneStepNSProblem::check_solver(const int info) const
   // \todo: chose a standard output for solver parameter "info", that do not depend on the solver -> Numerics part
   if (info != 0)
   {
-    cout << "OneStepNS computeOutput warning: output message from solver is equal to " << info << endl;
+    cout << "OneStepNS::check_solver warning: output message from solver is equal to " << info << endl;
     cout << "=> may have failed? (See Numerics solver documentation for details on the message meaning)." << endl;
     RuntimeException::selfThrow(" Non smooth problem, solver convergence failed");
     /*      if(info == 1)

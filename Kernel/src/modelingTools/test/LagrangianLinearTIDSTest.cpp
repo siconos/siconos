@@ -130,7 +130,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2()
   ds->setComputeFExtFunction("TestPlugin.so", "computeFExt");
 
   double time = 1.5;
-  ds->initialize(time);
+  ds->initialize("TimeStepping", time);
 
 
   SimpleVector * x01 = new SimpleVector(3);
@@ -164,7 +164,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS3()
   ds->setComputeFExtFunction("TestPlugin.so", "computeFExt");
 
   double time = 1.5;
-  ds->initialize(time);
+  ds->initialize("TimeStepping", time);
 
   SimpleVector * x01 = new SimpleVector(3);
   (*x01)(0) = 0;
@@ -211,7 +211,7 @@ void LagrangianLinearTIDSTest::testcomputeDS()
   DynamicalSystem * ds = new LagrangianLinearTIDS(tmpxml1);
   LagrangianLinearTIDS * copy = static_cast<LagrangianLinearTIDS*>(ds);
   double time = 1.5;
-  ds->initialize(time);
+  ds->initialize("TimeStepping", time);
   ds->computeRhs(time);
   ds->computeJacobianXRhs(time);
 

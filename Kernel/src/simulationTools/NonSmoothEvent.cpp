@@ -45,11 +45,7 @@ void NonSmoothEvent::process(Simulation* simulation)
     EventDriven * eventDriven = static_cast<EventDriven*>(simulation);
 
     // Compute y[0], y[1] and update index sets.
-
-    OSNSIterator itOsns;
-    OneStepNSProblems allOSNS = simulation->getOneStepNSProblems();
-    for (itOsns = allOSNS.begin(); itOsns != allOSNS.end(); ++itOsns)
-      (itOsns->second)->updateOutput(0, 1);
+    simulation->updateOutput(0, 1);
 
     simulation->updateIndexSets();
 
@@ -63,19 +59,18 @@ void NonSmoothEvent::process(Simulation* simulation)
       // solve the LCP-impact => y[1],lambda[1]
       eventDriven->computeOneStepNSProblem("impact"); // solveLCPImpact();
 
-      // compute p[1] and post-impact velocity
-      eventDriven->updateImpactState();
-      for (itOsns = allOSNS.begin(); itOsns != allOSNS.end(); ++itOsns)
-        (itOsns->second)->updateOutput(0, 1);
+      // compute p[1], post-impact velocity, y[1] and indexSet[2]
+      eventDriven->update(1);
 
-      //  update indexSet that depends on y[1]
-      eventDriven->updateIndexSets();
+      //    for(itOsns=allOSNS.begin();itOsns!=allOSNS.end();++itOsns)
+      //      (itOsns->second)->updateOutput(0);
+
+      //    //  update indexSet that depends on y[0]
+      //    eventDriven->updateIndexSet(1);
 
       // check that IndexSet[1]-IndexSet[2] is now empty
 
       indexSets = eventDriven->getIndexSets();
-
-      //    cout << " INDEX SIZES " << indexSets[1].size() << " " << indexSets[2].size() << endl;
 
       //    if( !(indexSets[1]-indexSets[2]).isEmpty())
       //RuntimeException::selfThrow("NonSmoothEvent::process, error after impact-LCP solving.");
@@ -87,9 +82,8 @@ void NonSmoothEvent::process(Simulation* simulation)
 
       // Update the state of the DS
       OSIIterator itOSI;
-      double time = simulation->getModelPtr()->getCurrentT();
       for (itOSI = simulation->getOneStepIntegrators().begin(); itOSI != simulation->getOneStepIntegrators().end() ; ++itOSI)
-        (*itOSI)->updateState(time, 2);
+        (*itOSI)->updateState(2);
 
       // solve LCP-acceleration
       eventDriven->computeOneStepNSProblem("acceleration"); //solveLCPAcceleration();

@@ -597,7 +597,7 @@ public:
    */
   void computeSizeOfDS();
 
-  /** \fn   void swapInMemory(void);
+  /** \fn void swapInMemory(void);
    * \brief   put values of y in yOld, the same for lambda
    */
   void swapInMemory();

@@ -232,12 +232,11 @@ public:
    */
   void integrate(double&, double&, double&, int&);
 
-  /** \fn void updateState(const double, const unsigned int)
-   *  \brief update the state of the DynamicalSystem attached to this Integrator
-   *  \param double: current time
+  /** \fn void updateState(const unsigned int)
+   *  \brief update the state of the DynamicalSystems attached to this Integrator
    *  \param unsigned int: level of interest for the dynamics
    */
-  void updateState(const double, const unsigned int);
+  void updateState(const unsigned int);
 
   /** \fn Lsodar* convert (OneStepIntegrator* osi)
    *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
@@ -249,7 +248,7 @@ public:
   /** \fn void display()
    *  \brief print the data to the screen
    */
-  void display() const;
+  void display();
 
 
 };
