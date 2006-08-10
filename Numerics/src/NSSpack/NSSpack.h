@@ -269,8 +269,8 @@ typedef union
                               **block is the list of non null blocks
     \param size             : the number of blocks along a row (or column)
     \param *blocksize       : the list of the sizes of diagonal (square) blocks
-    \param *RowIndex        : the list of *block row indices
-    \param *ColumnIndex     : the list of *block column indices
+    \param *RowIndex        : the list of *block row indices (first row = 0)
+    \param *ColumnIndex     : the list of *block column indices (first column = 0)
 */
 
 typedef struct
@@ -342,6 +342,7 @@ extern  "C" int filter_result_LCP(int n, double *vec , double *q , double *z , d
 
 extern  "C" int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , double *z , double tol, int chat, double *w);
 
+extern  "C" void freeSpBlMat(SparseBlockStructuredMatrix *blmat);
 
 /* ******************************************* */
 
@@ -670,6 +671,8 @@ extern void lcp_newton_FB(int *nn , double *vec , double *q , double *z , double
 extern  int filter_result_LCP(int n, double *vec , double *q , double *z , double tol, int chat, double *w);
 
 extern  int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , double *z , double tol, int chat, double *w);
+
+extern  void freeSpBlMat(SparseBlockStructuredMatrix *blmat);
 
 /* **************************** PR **************************************** */
 

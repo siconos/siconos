@@ -79,7 +79,7 @@
 * then
 * - the number of non null blocks is 6 (blmat.nbblocks) and the number of diagonal blocks is 3 (blmat.size)
 * - the vector blmat.blocksize of diagonal blocks sizes is equal to [4,2,2]
-* - the vectors blmat.ColumnIndex and blmat.RowIndex of non null blocks indices are equal to [1,2,2,3,1,3] and [1,1,2,2,3,3]
+* - the vectors blmat.ColumnIndex and blmat.RowIndex of non null blocks indices are equal to [0,1,1,2,0,2] and [0,0,1,1,2,2]
 * - the blmat.block contains all non null block matrices stored in Fortran order (column by column) as\n
 *   blmat.block[0] = {1,2,0,5,2,1,0,0,0,0,1,-1,4,0,-1,6}\n
 *   blmat.block[1] = {3,4,0,0,-1,1,0,6}\n
