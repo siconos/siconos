@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "LCP.h"
+#include <stdlib.h>
 
 // includes to be deleted thanks to factories?
 #include "LagrangianLinearR.h"
@@ -27,13 +28,15 @@ using namespace std;
 // Default constructor (private)
 LCP::LCP():
   OneStepNSProblem("LCP"), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false) ,
+  isMSparseBlock(false) , Mspbl(NULL)
 {}
 
 // xml constructor
 LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Simulation* newSimu):
   OneStepNSProblem("LCP", onestepnspbxml, newSimu), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false) ,
+  isMSparseBlock(false) , Mspbl(NULL)
 {
   LCPXML * xmllcp = (static_cast<LCPXML*>(onestepnspbxml));
 
@@ -64,7 +67,8 @@ LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Simulation* newSimu):
 LCP::LCP(Simulation* newSimu, const string newId, const string newSolver, const unsigned int MaxIter,
          const double  Tolerance, const string  NormType, const double  SearchDirection):
   OneStepNSProblem("LCP", newSimu, newId), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false) ,
+  isMSparseBlock(false) , Mspbl(NULL)
 {
   // set solver:
   solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, NormType, SearchDirection);
@@ -74,7 +78,8 @@ LCP::LCP(Simulation* newSimu, const string newId, const string newSolver, const 
 // Constructor from a set of data
 LCP::LCP(Solver* newSolver, Simulation* newSimu, const string newId):
   OneStepNSProblem("LCP", newSimu, newId, newSolver), w(NULL), z(NULL), M(NULL), q(NULL),
-  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false)
+  isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false) ,
+  isMSparseBlock(false) , Mspbl(NULL)
 {}
 
 // destructor
@@ -84,8 +89,11 @@ LCP::~LCP()
   w = NULL;
   if (isZAllocatedIn) delete z;
   z = NULL;
-  if (isMAllocatedIn) delete M;
+  if (isMAllocatedIn)
+    if (isMSparseBlock) freeSpBlMat(Mspbl);
+    else delete M;
   M = NULL;
+  Mspbl = NULL;
   if (isQAllocatedIn) delete q;
   q = NULL;
 }
@@ -145,6 +153,8 @@ void LCP::setZPtr(SimpleVector* newPtr)
 
 void LCP::setM(const SiconosMatrix& newValue)
 {
+  if (isMSparseBlock)
+    RuntimeException::selfThrow("LCP: setM, impossible since M is sparse by blocks.");
   if (sizeOutput != newValue.size(0) || sizeOutput != newValue.size(1))
     RuntimeException::selfThrow("LCP: setM, inconsistent size between given M size and problem size. You should set sizeOutput before");
 
@@ -159,6 +169,8 @@ void LCP::setM(const SiconosMatrix& newValue)
 
 void LCP::setMPtr(SiconosMatrix* newPtr)
 {
+  if (isMSparseBlock)
+    RuntimeException::selfThrow("LCP: setMPtr, impossible since M is sparse by blocks.");
   if (sizeOutput != newPtr->size(0) || sizeOutput != newPtr->size(1))
     RuntimeException::selfThrow("LCP: setMPtr, inconsistent size between given M size and problem size. You should set sizeOutput before");
 
@@ -264,6 +276,7 @@ void LCP::preCompute(const double time)
       {
         z = new SimpleVector(sizeOutput);
         isZAllocatedIn = true;
+        z->zero();
       }
       else if (z->size() != sizeOutput)
       {
@@ -271,12 +284,14 @@ void LCP::preCompute(const double time)
         if (isZAllocatedIn) delete z;
         z = new SimpleVector(sizeOutput);
         isZAllocatedIn = true;
+        z->zero();
       }
 
       if (w == NULL)
       {
         w = new SimpleVector(sizeOutput);
         isWAllocatedIn = true;
+        w->zero();
       }
       else if (w->size() != sizeOutput)
       {
@@ -284,10 +299,9 @@ void LCP::preCompute(const double time)
         if (isWAllocatedIn) delete w;
         w = new SimpleVector(sizeOutput);
         isWAllocatedIn = true;
+        w->zero();
       }
     }
-    w->zero();
-    z->zero();
     computeQ(time);
   }
 }
@@ -390,46 +404,119 @@ void LCP::assembleM() //
   //
   // See updateBlocks function for more details.
 
-  // === Memory allocation, if required ===
-  if (M == NULL)
-  {
-    M = new SimpleMatrix(sizeOutput, sizeOutput);
-    isMAllocatedIn = true;
-  }
-  else if (M->size(0) != sizeOutput || M->size(1) != sizeOutput)
-  {
-    // reset M matrix if it has a wrong size
-    if (isMAllocatedIn) delete M;
-    M = new SimpleMatrix(sizeOutput, sizeOutput);
-    isMAllocatedIn = true;
-  }
-
-  M->zero();
-
   // Get index set 1 from Simulation
   UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
-  // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
-
-  unsigned int pos = 0, col = 0; // index position used for block copy into M, see below.
   UnitaryRelationIterator itRow;
+  unsigned int pos = 0, col = 0; // index position used for block copy into M, see below.
   UnitaryMatrixColumnIterator itCol;
-  for (itRow = indexSet.begin(); itRow != indexSet.end(); ++itRow)
-  {
-    for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
-    {
-      // *itRow and itCol are UnitaryRelation*.
 
-      // Check that itCol is in Index set 1
-      if ((indexSet.find((*itCol).first)) != indexSet.end())
+  if (isMSparseBlock)    // sparse block matrix Mspbl assembling
+  {
+    int i;
+
+    Mspbl = new SparseBlockStructuredMatrix();
+    Mspbl->size = blocksPositions.size();
+    Mspbl->blocksize = (int*) malloc(Mspbl->size * sizeof(int));
+    for (itRow = indexSet.begin(); itRow != indexSet.end(); ++itRow)
+      Mspbl->blocksize[blocksIndexes[*itRow]] = blocksPositions[*itRow];
+    for (i = 0; i < Mspbl->size - 1; i++) Mspbl->blocksize[i] = Mspbl->blocksize[i + 1] - Mspbl->blocksize[i];
+    Mspbl->blocksize[Mspbl->size - 1] = sizeOutput - Mspbl->blocksize[Mspbl->size - 1];
+    isMAllocatedIn = true;
+
+    // computation of the number of non-null blocks
+    Mspbl->nbblocks = 0;
+    for (itRow = indexSet.begin(); itRow != indexSet.end(); ++itRow)
+      for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
+        if ((indexSet.find((*itCol).first)) != indexSet.end())(Mspbl->nbblocks)++;
+
+    // allocation of Mspbl coordinates vectors and non null block pointers vector
+    Mspbl->RowIndex = (int*)malloc(Mspbl->nbblocks * sizeof(int));
+    Mspbl->ColumnIndex = (int*)malloc(Mspbl->nbblocks * sizeof(int));
+    Mspbl->block = (double**)malloc(Mspbl->nbblocks * sizeof(double*));
+
+    // insertion of non null blocks pointers
+    // each one is set to SimpleMatrix "mat" address : only pointer copy
+    int nblins = 0;     // counter of blocks already inserted
+    int rowind, colind;
+    bool isMoreFar;
+
+    for (itRow = indexSet.begin(); itRow != indexSet.end(); ++itRow)
+    {
+      for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
       {
-        pos = blocksPositions[*itRow];
-        col = blocksPositions[(*itCol).first];
-        // copy the block into Mlcp - pos/col: position in M (row and column) of first element of the copied block
-        M->blockMatrixCopy(*(blocks[*itRow][(*itCol).first]), pos, col); // \todo avoid copy
+        if ((indexSet.find((*itCol).first)) != indexSet.end())
+        {
+          i = 0;
+          isMoreFar = true;
+          rowind = blocksIndexes[*itRow];
+          colind = blocksIndexes[(*itCol).first];
+          while (i < nblins && isMoreFar)
+          {
+            isMoreFar = (rowind > Mspbl->RowIndex[i]) || (rowind == Mspbl->RowIndex[i] && colind > Mspbl->ColumnIndex[i]);
+            i++;
+          }
+
+          if (!isMoreFar)  // insert new block among existing blocks
+          {
+            for (int j = nblins ; j >= i ; j--)
+            {
+              Mspbl->RowIndex[j] = Mspbl->RowIndex[j - 1];
+              Mspbl->ColumnIndex[j] = Mspbl->ColumnIndex[j - 1];
+              Mspbl->block[j] = Mspbl->block[j - 1];
+            }
+            Mspbl->RowIndex[i - 1] = rowind;
+            Mspbl->ColumnIndex[i - 1] = colind;
+            Mspbl->block[i - 1] = (blocks[*itRow][(*itCol).first])->getArray();
+          }
+          else      // insert new block at the end of existing blocks (i == nblins)
+          {
+            Mspbl->RowIndex[i] = rowind;
+            Mspbl->ColumnIndex[i] = colind;
+            Mspbl->block[i] = (blocks[*itRow][(*itCol).first])->getArray();
+          }
+          nblins++;
+        }
       }
     }
+
   }
-  // === end of UnitaryRelations loop ===
+  else      // full matrix M assembling
+  {
+    // === Memory allocation, if required ===
+    if (M == NULL)
+    {
+      M = new SimpleMatrix(sizeOutput, sizeOutput);
+      isMAllocatedIn = true;
+    }
+    else if (M->size(0) != sizeOutput || M->size(1) != sizeOutput)
+    {
+      // reset M matrix if it has a wrong size
+      if (isMAllocatedIn) delete M;
+      M = new SimpleMatrix(sizeOutput, sizeOutput);
+      isMAllocatedIn = true;
+    }
+
+    M->zero();
+    // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
+
+    for (itRow = indexSet.begin(); itRow != indexSet.end(); ++itRow)
+    {
+      for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
+      {
+        // *itRow and itCol are UnitaryRelation*.
+
+        // Check that itCol is in Index set 1
+        if ((indexSet.find((*itCol).first)) != indexSet.end())
+        {
+          pos = blocksPositions[*itRow];
+          col = blocksPositions[(*itCol).first];
+          // copy the block into Mlcp - pos/col: position in M (row and column) of first element of the copied block
+          M->blockMatrixCopy(*(blocks[*itRow][(*itCol).first]), pos, col); // \todo avoid copy
+        }
+      }
+    }
+    // === end of UnitaryRelations loop ===
+  }
 }
 
 void LCP::computeQ(const double time)
@@ -488,9 +575,15 @@ void LCP::compute(const double time)
   {
     int info;
     int Nlcp = (int)sizeOutput;
+    int iter, titer;
+    double err;
+
     method solvingMethod = *(solver->getSolvingMethodPtr());
 
-    info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
+    if (isMSparseBlock)
+      info = lcp_solver_block(Mspbl , q->getArray() , &solvingMethod , z->getArray() , w->getArray() , &iter , &titer , &err);
+    else
+      info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
 
     // \warning : info value and signification depends on solver type ...
     check_solver(info);

@@ -155,18 +155,24 @@ void OneStepNSProblem::computeUnitaryRelationsPositions()
   //
   // positions are saved in a map<UnitaryRelation*, unsigned int>, named blocksPositions.
   //
+  // The map of blocksIndexes (position of a block in the full matrix in number of blocks) is filled simultaneously to match
+  // the same order as blocksPositions.
+  //
   // Move this function in topology? Or simulation?
 
   // Get index sets from Topology
   UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
   UnitaryRelationIterator it;
   unsigned int pos = 0;
+  unsigned int blIndex = 0;
 
   // For each Unitary Relation in indexSets[levelMin], the position is given by the sum of the dimensions of non smooth laws of all previous Unitary Relations.
   for (it = indexSet.begin(); it != indexSet.end(); ++it)
   {
     blocksPositions[*it] = pos;
+    blocksIndexes[*it] = blIndex;
     pos += (*it)->getNonSmoothLawSize();
+    blIndex++;
   }
 }
 

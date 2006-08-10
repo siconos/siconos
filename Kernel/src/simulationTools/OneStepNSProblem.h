@@ -120,9 +120,14 @@ protected:
   MapOfMapOfBool isBlockAllocatedIn;
 
   /** map that links each UnitaryRelation with an int that gives the position of the corresponding block matrix
-   *  in the full matrix (M in LCP case)
+   *  in the full matrix (M in LCP case) in number of single elements
    */
   std::map< UnitaryRelation* , unsigned int > blocksPositions;
+
+  /** map that links each UnitaryRelation with an int that gives the position of the corresponding block matrix
+   *  in the full matrix (M in LCP case) in number of blocks (for use with block matrix storage)
+   */
+  std::map< UnitaryRelation* , unsigned int > blocksIndexes;
 
   /** Solver for Non Smooth Problem*/
   Solver* solver;

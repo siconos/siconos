@@ -71,6 +71,10 @@ private:
   bool isMAllocatedIn;
   bool isQAllocatedIn;
 
+  /** Flag telling if the LCP matrix is full or sparse by blocks */
+  bool isMSparseBlock;
+
+  SparseBlockStructuredMatrix *Mspbl;
   /** \fn LCP();
    *  \brief default constructor
    */
@@ -207,6 +211,16 @@ public:
    *  \param SiconosMatrix * newPtr
    */
   void setMPtr(SiconosMatrix *);
+
+  inline void setisMSparseBlock(bool val)
+  {
+    isMSparseBlock = val;
+  }
+
+  inline SparseBlockStructuredMatrix* getMspblPtr() const
+  {
+    return Mspbl;
+  }
 
   // --- Q ---
   /** \fn  const SimpleVector getQ(void) const
