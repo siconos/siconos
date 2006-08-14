@@ -33,6 +33,7 @@
 #include "NonSmoothLawXML.h"
 #include "Interaction.h"
 #include "SiconosConst.h"
+#include "NonSmoothLawFactory.h"
 
 const std::string COMPLEMENTARITYCONDITIONNSLAW = "ComplementarityNSL";
 const std::string NEWTONIMPACTNSLAW = "NewtonImpactNSL";

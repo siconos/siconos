@@ -16,32 +16,103 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "NonSmoothLaw.h"
+
+
+
+
+
+
+
+# include <iostream>
+# include <cstdlib>
+# include <string>
+# include <cstdio>
+
+
+# include "NonSmoothLawFactory.h"
+
+
 using namespace std;
 
-// Constructors
-// warning -> this is an abstract class, so constructors are usefull only for
-// calls in derived classes constructors
-NonSmoothLaw::NonSmoothLaw(const string newType, const unsigned int& newSize): nsLawType(newType), size(newSize), nslawxml(NULL)
-{}
 
-NonSmoothLaw::NonSmoothLaw(const string newType, NonSmoothLawXML* newNsLawXml):
-  nsLawType(newType), size(1), nslawxml(newNsLawXml)
+
+
+namespace NonSmoothLawFactory
 {
-  // Warning: default size = 1.
-  if (nslawxml == NULL)
-    RuntimeException::selfThrow("NonSmoothLaw:: xml constructor, xml file==NULL");
 
-  // Read size of the non smooth law, if given.
-  if (nslawxml->hasSize())
-    size = nslawxml->getSize();
+
+Registry& Registry :: get()
+{
+
+
+
+  static Registry instance ;
+  return instance ;
+
+
 }
 
-NonSmoothLaw::~NonSmoothLaw()
-{}
 
 
 
 
-AUTO_REGISTER_NONSMOOTHLAW("NonSmoothLaw" , NonSmoothLaw) ;
+
+
+void Registry :: add(const string& nom , object_creator creator)
+{
+
+
+
+  factory_map [ nom ] = creator ;
+
+}
+
+
+
+
+NonSmoothLaw* Registry :: instantiate(const std :: string& nom)
+{
+
+  std :: map < const std :: string , object_creator > :: iterator it = factory_map.find(nom) ;
+
+
+  if (it != factory_map.end())         // found a factory?
+  {
+
+    return (it-> second)() ;      // run our factory
+
+  }
+  return 0 ;    // no factory found
+
+}
+
+
+
+
+
+
+
+
+
+Registration :: Registration(const string& nom ,  object_creator creator)
+{
+
+
+  cout << "Abonnement de " << nom << endl << endl ;
+
+  Registry  ::get().add(nom,  creator) ;
+
+
+}
+
+
+
+}  // fin de namespace CharacterFactory
+
+
+
+
+
+
+
 
