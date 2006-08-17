@@ -25,8 +25,8 @@
 
 
 
-#ifndef _NONSMOOTHLAWFACTORY_H_        // This is supposed to avoid repeated inclusions
-#define _NONSMOOTHLAWFACTORY_H_        // of the header file
+#ifndef NONSMOOTHLAWFACTORY_H        // This is supposed to avoid repeated inclusions
+#define NONSMOOTHLAWFACTORY_H        // of the header file
 
 
 
@@ -112,6 +112,8 @@ public :
 
 # define AUTO_REGISTER_NONSMOOTHLAW( class_name , class_type ) Registration  _registration_ ## class_type( class_name , &factory<class_type>);
 
+//# define AUTO_REGISTER_CHARACTER( nom_classe , classe ) Registration  _registration_ ## classe( nom_classe , &factory<classe>);
+
 
 // ATTENTION: ne pas mettre d'espace entre "AUTO_REGISTER_CHARACTER" et la parenthese ouvrante qui suit, sinon ca ne compile pas.
 
@@ -119,7 +121,7 @@ public :
 
 }  // fin de namespace CharacterFactory
 
-#endif // ifndef _NONSMOOTHLAWFACTORY_H_
+#endif // ifndef NONSMOOTHLAWFACTORY_H
 
 
 

@@ -19,6 +19,7 @@
 #include "NewtonImpactNSL.h"
 using namespace std;
 
+
 NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(NEWTONIMPACTNSLAW, 1), e(0.0)
 {}
 
@@ -62,5 +63,7 @@ NewtonImpactNSL* NewtonImpactNSL::convert(NonSmoothLaw* nsl)
   NewtonImpactNSL* nilnsl = dynamic_cast<NewtonImpactNSL*>(nsl);
   return nilnsl;
 }
+
+
 
 

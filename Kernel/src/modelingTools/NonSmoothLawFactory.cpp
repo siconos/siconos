@@ -107,7 +107,7 @@ Registration :: Registration(const string& nom ,  object_creator creator)
 
 
 
-}  // fin de namespace CharacterFactory
+}  // fin de namespace NonSmoothLawfactory
 
 
 
