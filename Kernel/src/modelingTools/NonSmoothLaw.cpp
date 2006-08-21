@@ -16,11 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-
 #include "NonSmoothLaw.h"
 using namespace std;
-using namespace NonSmoothLawFactory;
-
 
 // Constructors
 // warning -> this is an abstract class, so constructors are usefull only for
@@ -33,19 +30,12 @@ NonSmoothLaw::NonSmoothLaw(const string newType, NonSmoothLawXML* newNsLawXml):
 {
   // Warning: default size = 1.
   if (nslawxml == NULL)
-    //    RuntimeException::selfThrow("NonSmoothLaw:: xml constructor, xml file==NULL");
+    RuntimeException::selfThrow("NonSmoothLaw:: xml constructor, xml file==NULL");
 
-    // Read size of the non smooth law, if given.
-    if (nslawxml->hasSize())
-      size = nslawxml->getSize();
+  // Read size of the non smooth law, if given.
+  if (nslawxml->hasSize())
+    size = nslawxml->getSize();
 }
 
 NonSmoothLaw::~NonSmoothLaw()
 {}
-
-
-
-// Since this is an abstract class, it cannot be registered
-
-//AUTO_REGISTER_NONSMOOTHLAW( "NonSmoothLaw" , NonSmoothLaw ) ;
-

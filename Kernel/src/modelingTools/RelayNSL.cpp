@@ -16,14 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-
-
 #include "RelayNSL.h"
 using namespace std;
-using namespace NonSmoothLawFactory;
-
-
-
 
 RelayNSL::RelayNSL():
   NonSmoothLaw(RELAYNSLAW), c(0.0), d(0.0)
@@ -37,7 +31,7 @@ RelayNSL::RelayNSL(NonSmoothLawXML* nslawxml):
     c = (static_cast<RelayNSLXML*>(nslawxml))->getC();
     d = (static_cast<RelayNSLXML*>(nslawxml))->getD();
   }
-  //else RuntimeException::selfThrow("RelayNSL::xml constructor, xml file=NULL");
+  else RuntimeException::selfThrow("RelayNSL::xml constructor, xml file=NULL");
 }
 
 RelayNSL::RelayNSL(const double newC, const double newD):
@@ -75,8 +69,4 @@ RelayNSL* RelayNSL::convert(NonSmoothLaw* nsl)
   RelayNSL* rnsl = dynamic_cast<RelayNSL*>(nsl);
   return rnsl;
 }
-
-
-
-AUTO_REGISTER_NONSMOOTHLAW("RelayNSL" , RelayNSL) ;
 
