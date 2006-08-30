@@ -337,7 +337,7 @@ operates.
  Quick installation notes for BOOST  
 ----------------------------------------------
 
-   *  Download Boost at http://sourceforge.net/project/showfiles.php?group_id
+   *  Download Boost at http://sourceforge.net/project/showfiles.php?group_id=7586 
    
    *  Download bjam. The recommended way to get Boost.Jam if you are using a Boost distribution is to  download a prebuilt executable from http://sourceforge.net/project/showfiles.php?group_id=7586&package_id=72941. 
    
