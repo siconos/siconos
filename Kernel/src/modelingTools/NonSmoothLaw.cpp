@@ -16,8 +16,11 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+
 #include "NonSmoothLaw.h"
 using namespace std;
+using namespace NonSmoothLawFactory;
+
 
 // Constructors
 // warning -> this is an abstract class, so constructors are usefull only for
@@ -39,3 +42,10 @@ NonSmoothLaw::NonSmoothLaw(const string newType, NonSmoothLawXML* newNsLawXml):
 
 NonSmoothLaw::~NonSmoothLaw()
 {}
+
+
+
+// Since this is an abstract class, it cannot be registered
+
+AUTO_REGISTER_NONSMOOTHLAW("NonSmoothLaw" , NonSmoothLaw) ;
+
