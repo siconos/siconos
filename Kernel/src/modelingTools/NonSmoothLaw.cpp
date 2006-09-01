@@ -17,8 +17,6 @@
 * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-// TEST
-
 #include "NonSmoothLaw.h"
 using namespace std;
 using namespace NonSmoothLawFactory;
