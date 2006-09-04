@@ -83,8 +83,6 @@ void EventDriven::updateIndexSet(const unsigned int i)
   else
     borneInf = -TOLERANCE;
 
-  cout << " =============================== IN UPDATE INDEX SET ========================== num = " << i << endl;
-
   double y;
   for (it = indexSets[i - 1].begin(); it != indexSets[i - 1].end(); ++it)
   {
@@ -94,8 +92,6 @@ void EventDriven::updateIndexSet(const unsigned int i)
 
     // Get y[i-1] double value
     y = (*it)->getYRef(i - 1);
-
-    cout << " y = " << y << endl;
 
     //       // if y[i-1] <=0, then the unitary relation is added in indexSets[i] (if it was not already there)
     //       // else if y[i-1] > 0 and if the unitary relation was in the set, it is removed.
@@ -113,7 +109,6 @@ void EventDriven::updateIndexSet(const unsigned int i)
     // => to be reviewed in UnitaryRelationsSet
 
   }
-  cout << " =============================== OUT UPDATE INDEX SET ==========================" << endl;
 }
 
 void EventDriven::updateIndexSetsWithDoubleCondition()
@@ -173,7 +168,7 @@ void EventDriven::initialize()
     // === OneStepNSProblem initialization. ===
     // First check that there are 2 osns: one "impact" and one "acceleration"
     if (allNSProblems.size() != 2)
-      RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have two non smooth problem. Here, there are " + allNSProblems.size());
+      RuntimeException::selfThrow(" EventDriven::initialize, \n an EventDriven simulation must have two non smooth problem.\n Here, there are " + allNSProblems.size());
 
     if (allNSProblems.find("impact") == allNSProblems.end()) // ie if the impact problem does not exist
       RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
@@ -210,11 +205,9 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   lsodar->fillXWork(sizeOfX, x);
 
+
   double t = *time;
   model->setCurrentT(t);
-
-  //   cout << " ================================= >> IN COMPUTE F  " << endl;
-  //   cout << "Time = " << t << endl;
 
   // update the DS of the OSI.
   lsodar->updateState(2); // update based on the last saved values for the DS state, ie the ones computed by lsodar (x above)
@@ -418,7 +411,6 @@ void EventDriven::advanceToEvent()
 
     if (istate == 3)
     {
-      cout << "NEW EVENT !!! " << endl;
       isNewEventOccur = true;
       // Add an event into the events manager list
       bool isScheduleOk = eventsManager->scheduleEvent("NonSmoothEvent", tout);

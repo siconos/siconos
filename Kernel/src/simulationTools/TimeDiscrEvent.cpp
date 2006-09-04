@@ -40,10 +40,5 @@ void TimeDiscrEvent::process(Simulation* simulation)
 
   TimeDiscretisation * td =  simulation->getTimeDiscretisationPtr();
   td->increment();
-  Model * model =  simulation->getModelPtr();
-  model->setCurrentT(model->getCurrentT() + td->getH());
   simulation->nextStep();
-
-  //todo
-  // cout << " Time Discr Event processing: nothing implemented" << endl;
 }

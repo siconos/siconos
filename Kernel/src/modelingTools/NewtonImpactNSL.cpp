@@ -18,9 +18,6 @@
 */
 #include "NewtonImpactNSL.h"
 using namespace std;
-using namespace NonSmoothLawFactory;
-using namespace NonSmoothLawFactoryFromXML;
-
 
 NewtonImpactNSL::NewtonImpactNSL(): NonSmoothLaw(NEWTONIMPACTNSLAW, 1), e(0.0)
 {}
@@ -65,9 +62,5 @@ NewtonImpactNSL* NewtonImpactNSL::convert(NonSmoothLaw* nsl)
   NewtonImpactNSL* nilnsl = dynamic_cast<NewtonImpactNSL*>(nsl);
   return nilnsl;
 }
-
-
-AUTO_REGISTER_NONSMOOTHLAW("NewtonImpactNSL" , NewtonImpactNSL) ;
-AUTO_REGISTER_NONSMOOTHLAWFROMXML("NewtonImpactNSL" , NewtonImpactNSL) ;
 
 

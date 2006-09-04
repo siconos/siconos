@@ -244,7 +244,7 @@ void UnitaryRelation::computeEquivalentY(const double time, const unsigned int l
 
   mainInteraction->getRelationPtr()->computeFreeOutput(time, level);
 
-  (*yOut) = *(getYPtr(level));
+  (*yOut) = *(getYPtr(level)); // yOut = yFree
 
   if ((relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION))
   {

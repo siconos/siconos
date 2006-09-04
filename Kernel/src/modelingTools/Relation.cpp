@@ -333,11 +333,10 @@ void Relation::computeInput(const double time, const unsigned int level)
   SiconosVector* param = parametersList["input"];
   computeInputPtr(sizeY, &(*lambdaTmp)(0), &time, &(*rTmp)(0), &(*param)(0));
 
-  // Rebuilt lambda from lambdaTmp
-  *lambda = *lambdaTmp;
+  *r = *rTmp;
+
   delete rTmp;
   delete lambdaTmp;
-
   delete r;
 }
 

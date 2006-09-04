@@ -39,7 +39,6 @@ NonSmoothEvent::~NonSmoothEvent()
 
 void NonSmoothEvent::process(Simulation* simulation)
 {
-  //  cout << "Non Smooth Event ... " << endl;
   if (!(simulation->getOneStepNSProblems().empty()))
   {
     EventDriven * eventDriven = static_cast<EventDriven*>(simulation);
@@ -51,11 +50,11 @@ void NonSmoothEvent::process(Simulation* simulation)
 
     VectorOfSetOfUnitaryRelations indexSets = eventDriven->getIndexSets();
 
-    cout << " NS EVENT PROCESS " << indexSets[1].size() << " " << indexSets[2].size() << endl;
     // ---> solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
     if (!(indexSets[1] - indexSets[2]).isEmpty())
     {
-      cout << "SOLVE LCP IMPACT " << endl;
+      simulation->nextStep();  // To save pre-impact values
+
       // solve the LCP-impact => y[1],lambda[1]
       eventDriven->computeOneStepNSProblem("impact"); // solveLCPImpact();
 
@@ -93,8 +92,5 @@ void NonSmoothEvent::process(Simulation* simulation)
     }
 
     simulation->nextStep();
-
   }
-  cout << "End of Non Smooth Event ... " << endl;
-
 }

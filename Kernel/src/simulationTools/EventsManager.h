@@ -186,6 +186,15 @@ public:
    */
   Event* getEventPtr(const unsigned long int inputTime) const;
 
+  /** \fn Events* getCurrentEventPtr() const
+   *  \brief get the current event
+   *  \return a pointer to Event
+   */
+  inline Event* getCurrentEventPtr() const
+  {
+    return currentEvent;
+  };
+
   /** \fn Events* getNextEventPtr(Event* inputEvent) const
    *  \brief get the event following inputEvent  ("following" defined with operator(s) comparison of events)
    *  \param a pointer to Event

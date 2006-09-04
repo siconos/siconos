@@ -297,11 +297,6 @@ void LagrangianLinearTIDS::initialize(const string simulationType, const double 
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 
-  // reset r and free vectors
-  qFree->zero();
-  velocityFree->zero();
-  p[2]->zero();
-
   // Warning: ->zero for free vectors must be done before q/velocity initialization, because for EventDriven, qFree/vFree = q/v (pointers equality)
 
   // set q and velocity to q0 and velocity0
@@ -433,39 +428,31 @@ void LagrangianLinearTIDS::computeRhs(const double time, const bool)
   // second argument is useless but present because of top-class function overloading.
   // note that rhs(0) = velocity with pointer link must already be set.
   SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
-  vField->zero();
 
-  if (fExt != NULL || K != NULL || C != NULL) // else rhs = 0
+  *vField = *p[2]; // Warning: p update is done in Interactions/Relations
+
+  // Compute M-1 if necessary - Only in the case where initialize has not been called before.
+  map<string, SiconosMatrix*>::iterator it = workMatrix.find("inverseOfMass");
+  if (it == workMatrix.end())
   {
-    // Compute M-1 if necessary - Only in the case where initialize has not been called before.
-    map<string, SiconosMatrix*>::iterator it = workMatrix.find("inverseOfMass");
-    if (it == workMatrix.end())
-    {
-      workMatrix["inverseOfMass"] = new SimpleMatrix(*mass);
-      workMatrix["inverseOfMass"]->PLUFactorizationInPlace();
-      workMatrix["inverseOfMass"]->PLUInverseInPlace();
-    }
-    bool flag = false;
-    if (fExt != NULL)
-    {
-      *vField += *fExt; // This supposes that fExt is up to date!!
-      flag = true;
-    }
-    if (K != NULL)
-    {
-      *vField -= *K**q;
-      flag = true;
-    }
-    if (C != NULL)
-    {
-      *vField -= *C**velocity;
-      flag = true;
-    }
-    if (flag)
-      *vField = *(workMatrix["inverseOfMass"])**vField;
+    workMatrix["inverseOfMass"] = new SimpleMatrix(*mass);
+    workMatrix["inverseOfMass"]->PLUFactorizationInPlace();
+    workMatrix["inverseOfMass"]->PLUInverseInPlace();
   }
 
-  *vField += *(workMatrix["inverseOfMass"])**p[2];
+  if (fExt != NULL || K != NULL || C != NULL) // else rhs = p
+  {
+    if (fExt != NULL)
+      *vField += *fExt; // This supposes that fExt is up to date!!
+
+    if (K != NULL)
+      *vField -= *K**q;
+
+    if (C != NULL)
+      *vField -= *C**velocity;
+  }
+
+  *vField = *(workMatrix["inverseOfMass"])**vField;
 }
 
 void LagrangianLinearTIDS::computeJacobianXRhs(const double time, const bool)

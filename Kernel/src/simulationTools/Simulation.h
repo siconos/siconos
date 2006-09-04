@@ -86,7 +86,7 @@ typedef OneStepNSProblems::iterator OSNSIterator;
 typedef OneStepNSProblems::const_iterator ConstOSNSIterator;
 
 /** tolerance value used in indexSets updating */
-const double TOLERANCE = 1e-5;
+const double TOLERANCE = 1e-8;
 
 /** default name for One Step NS Problem of the simulation */
 const std::string DEFAULT_OSNS_NAME = "unamed";

@@ -672,6 +672,9 @@ void LagrangianDS::initFreeVectors(const string type)
   }
   else
     RuntimeException::selfThrow("LagrangianDS::initFreeVectors(simulationType) - Unknown simulation type.");
+
+  qFree->zero();
+  velocityFree->zero();
 }
 
 // TEMPORARY FUNCTION: Must be called before this->initialize
@@ -703,12 +706,6 @@ void LagrangianDS::initialize(const string simulationType, const double time, co
   connectToDS(); // note that connection can not be done during constructor call, since user can complete the ds after (add plugin or anything else).
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
-
-  // reset r and free vectors
-  qFree->zero();
-  velocityFree->zero();
-  p[1]->zero();
-  if (isAllocatedIn["p2"]) p[2]->zero();
 
   // set q and velocity to q0 and velocity0
   *q = *q0;
@@ -799,35 +796,7 @@ void LagrangianDS::initialize(const string simulationType, const double time, co
 void LagrangianDS::update(const double time)
 {
 
-  // compute plug-in values for mass, FInt etc ...
-  computeMass();
-  computeInverseOfMass();
-  // rhs
-  // note that rhs(0) = velocity, with pointer link, must already be set.
-  SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
-  vField->zero();
-
-  bool flag = false;
-  if (fExt != NULL)
-  {
-    computeFExt(time);
-    *vField += *fExt;
-    flag = true;
-  }
-  if (fInt != NULL)
-  {
-    computeFInt(time);
-    *vField -= *fInt;
-    flag = true;
-  }
-  if (NNL != NULL)
-  {
-    computeNNL();
-    *vField -= *NNL;
-    flag = true;
-  }
-  if (flag) // else vField = 0
-    *vField = *(workMatrix["inverseOfMass"])**vField;
+  computeRhs(time, 0);
 
   // jacobianXF
   if (jacobianQFInt != NULL || jacobianQNNL != NULL || jacobianVelocityFInt != NULL || jacobianVelocityNNL != NULL)
@@ -836,7 +805,7 @@ void LagrangianDS::update(const double time)
     workMatrix["jacob-block11"]->zero();
   }
 
-  flag = false;
+  bool flag = false;
   if (jacobianQFInt != NULL)
   {
     computeJacobianQFInt(time);
@@ -1657,8 +1626,9 @@ void LagrangianDS::computeRhs(const double time, const bool isDSup)
   // if isDSup == true, this means that there is no need to re-compute mass ...
   // note that rhs(0) = velocity, with pointer link, must already be set.
   SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
-  vField->zero();
-  bool flag = false;
+
+  *vField = *(p[2]); // Warning: r update is done in Interactions/Relations
+
   if (!isDSup) // if it is necessary to re-compute mass, FInt ..., ie if they have not been compiled during the present time step
   {
     // compute M and M-1
@@ -1669,45 +1639,32 @@ void LagrangianDS::computeRhs(const double time, const bool isDSup)
     {
       computeFExt(time);
       *vField += *fExt;
-      flag = true;
     }
     if (fInt != NULL)
     {
       computeFInt(time);
       *vField -= *fInt;
-      flag = true;
     }
     if (NNL != NULL)
     {
       computeNNL();
       *vField -= *NNL;
-      flag = true;
     }
   }
   else
   {
     if (fExt != NULL)
-    {
       *vField += *fExt;
-      flag = true;
-    }
+
     if (fInt != NULL)
-    {
       *vField -= *fInt;
-      flag = true;
-    }
+
     if (NNL != NULL)
-    {
       *vField -= *NNL;
-      flag = true;
-    }
   }
 
-  if (flag) // else vField = 0
-    *vField = *(workMatrix["inverseOfMass"])**vField ;
+  *vField = *(workMatrix["inverseOfMass"])**vField ;
   // todo: use linearSolve to avoid inversion ? Or save M-1 to avoid re-computation. See this when "M" will be added in DS or LDS.
-
-  *vField += *(p[2]); // Warning: r update is done in Interactions/Relations
 
 }
 
