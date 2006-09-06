@@ -456,6 +456,7 @@ void LagrangianLinearR::computeOutput(const double time, const unsigned int deri
     //      SiconosVector *lambdaDot = interaction->getLambdaPtr(1);
     // compute y or yDot
 
+
     *y = (*H * *tmp);
     if (derivativeNumber == 0 && b != NULL)
       *y += *b;

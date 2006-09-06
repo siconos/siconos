@@ -254,10 +254,25 @@ const bool EventsManager::scheduleEvent(const string type, const double time)
 
   // === Insert the event into the list ===
   bool isInsertOk = insertEvent(type, time);
+
+  // Check if an event already exists at this time (=>isInsertOk == false), if so update its type
+  // Usually this corresponds to a Non Smooth Event that occurs at a user time-step.
+  if (!isInsertOk)
+  {
+    // convert time to the int format
+    unsigned long int t_int = doubleToIntTime(time) ;
+    // We first erase the existing element
+    unProcessedEvents.erase(getEventPtr(t_int));
+    // and then insert a new one at the same time but of a different type
+    isInsertOk = insertEvent(type, time);
+    if (currentEvent->getTimeOfEvent() == t_int)
+      currentEvent = getEventPtr(t_int);
+  }
+
   // update nextEvent value.(may have change because of insertion)
 
   nextEvent = getNextEventPtr(currentEvent);
-  return isInsertOk;  // true if insert succeed.
+  return isInsertOk;
 }
 
 void EventsManager::removeEvent(Event* event)
@@ -285,12 +300,6 @@ void EventsManager::removeEvent(Event* event)
 void EventsManager::processEvents()
 {
   // === process events ===
-
-  //  eventsContainer::iterator it;
-  //for(it=unProcessedEvents.begin();it!=unProcessedEvents.end();++it)
-  //  (*it)->process(simulation);
-
-
   // === update current and next event pointed values ===
 
   checkEventSet check; // to check if insertion succeed or not.

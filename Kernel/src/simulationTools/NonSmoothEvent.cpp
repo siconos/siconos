@@ -54,7 +54,6 @@ void NonSmoothEvent::process(Simulation* simulation)
     if (!(indexSets[1] - indexSets[2]).isEmpty())
     {
       simulation->nextStep();  // To save pre-impact values
-
       // solve the LCP-impact => y[1],lambda[1]
       eventDriven->computeOneStepNSProblem("impact"); // solveLCPImpact();
 
@@ -85,6 +84,7 @@ void NonSmoothEvent::process(Simulation* simulation)
         (*itOSI)->updateState(2);
 
       // solve LCP-acceleration
+      cout << "LCP acc solving ..." << endl;
       eventDriven->computeOneStepNSProblem("acceleration"); //solveLCPAcceleration();
 
       // for all index in IndexSets[2], update the index set according to y[2] and/or lambda[2] sign.

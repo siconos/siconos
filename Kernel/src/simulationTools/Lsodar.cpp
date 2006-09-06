@@ -184,18 +184,9 @@ void Lsodar::updateData()
 
 void Lsodar::fillXWork(integer* sizeOfX, doublereal * x)
 {
-  DSIterator it;
-  unsigned int i = 0;
   unsigned int sizeX = (unsigned int)(*sizeOfX);
-  for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
-  {
-    for (unsigned int j = i ; j < (*it)->getN() ; ++j)
-    {
-      if (i > sizeX)
-        RuntimeException::selfThrow("Lsodar::fillXWork(x), inconsistent sizes.");
-      (*xWork)(j) = x[i++];
-    }
-  }
+  for (unsigned int i = 0; i < sizeX ; ++i)
+    (*xWork)(i) = x[i];
 }
 
 void Lsodar::computeRhs(const double t)
@@ -335,7 +326,6 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
 
   intData[4] = istate;
 
-
   F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*xtmp)(0), &tinit_DR, &tend_DR, &(intData[2]), doubleData[0], doubleData[1], &(intData[3]), &(intData[4]), &(intData[5]), doubleData[2],
                    &(intData[6]), iwork, &(intData[7]), pointerToJacobianF, &(intData[8]), pointerToG, &(intData[1]), doubleData[3]);
 
@@ -361,7 +351,8 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   istate = intData[4];
   tout  = tinit_DR; // real ouput time
   tend  = tend_DR; // necessary for next start of DLSODAR
-  tinit = tinit_DR;
+
+  //  tinit = tinit_DR;
 }
 
 

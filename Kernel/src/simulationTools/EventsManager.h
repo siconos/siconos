@@ -55,7 +55,7 @@
 class Simulation;
 
 // tick default value
-const double DEFAULT_TICK = 1e-06;
+const double DEFAULT_TICK = 1e-07;
 
 /** set of events, with a RuntimeCmp based on Event time value (unsigned int) to compare Events
  *  A stl container of type "set" is used at the time
@@ -193,6 +193,15 @@ public:
   inline Event* getCurrentEventPtr() const
   {
     return currentEvent;
+  };
+
+  /** \fn void setNextEventPtr(Event* inputEvent) const
+   *  \brief set nextEvent to inputEvent
+   *  \param a pointer to Event
+   */
+  inline void setNextEventPtr(Event* inputEvent)
+  {
+    nextEvent = inputEvent;
   };
 
   /** \fn Events* getNextEventPtr(Event* inputEvent) const

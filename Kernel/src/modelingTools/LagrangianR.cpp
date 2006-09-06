@@ -759,8 +759,9 @@ void LagrangianR::computeOutput(const double time, const unsigned int derivative
   DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   DSIterator it;
   string type;
-  BlockVector *qTmp = new BlockVector();
-  BlockVector *velocityTmp = new BlockVector();
+  BlockVector *q0Tmp = new BlockVector(); // displacement
+  BlockVector *q1Tmp = new BlockVector(); // velocity
+  BlockVector *q2Tmp = new BlockVector(); // acceleration
 
   LagrangianDS* lds;
   for (it = vDS.begin(); it != vDS.end(); ++it)
@@ -773,138 +774,27 @@ void LagrangianR::computeOutput(const double time, const unsigned int derivative
     // convert vDS systems into LagrangianDS and put them in vLDS
     lds = static_cast<LagrangianDS*>(*it);
 
-    // Put q of each DS into a block
-    qTmp->addPtr(lds->getQPtr());
-    velocityTmp->addPtr(lds->getVelocityPtr());
+    // Put q/velocity/acceleration of each DS into a block
+    q0Tmp->addPtr(lds->getQPtr());
+    q1Tmp->addPtr(lds->getVelocityPtr());
+    q2Tmp->addPtr(static_cast<SimpleVector*>(lds->getAccelerationPtr()));
   }
 
   if (derivativeNumber == 0)
-    computeY0(time, qTmp);
+    computeY0(time, q0Tmp);
   else if (derivativeNumber == 1)
-    computeY1(time, qTmp, velocityTmp);
+    computeY1(time, q0Tmp, q1Tmp);
   else if (derivativeNumber == 2)
-    computeY2(time);
+    computeY2(time, q0Tmp, q2Tmp);
   else
     RuntimeException::selfThrow("LagrangianR::computeOutput, index out of range");
 
-  delete qTmp;
-  delete velocityTmp;
+  delete q0Tmp;
+  delete q1Tmp;
+  delete q2Tmp;
 
   // \todo: find a better way to compute various derivatives for various cases of relations (try to avoid
   // if statements ...)
-
-  //   if(interaction == NULL)
-  //     RuntimeException::selfThrow("LagrangianR::computeOutput, no interaction linked with this relation");
-
-  //   unsigned int sizeY = interaction->getInteractionSize();
-  //   unsigned int sizeQ = interaction->getSizeOfDS();
-
-  //   // Get the DS concerned by the interaction of this relation
-  //   DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
-  //   DSIterator it;
-  //   string type;
-  //   BlockVector *qTmp = new BlockVector();
-  //   BlockVector *velocityTmp = new BlockVector();
-
-  //   LagrangianDS* lds;
-  //   for(it=vDS.begin();it!=vDS.end();++it)
-  //     {
-  //       type = (*it)->getType();
-  //       // check dynamical system type
-  //       if(type!=LTIDS && type!=LNLDS)
-  //  RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: "+type);
-
-  //       // convert vDS systems into LagrangianDS and put them in vLDS
-  //       lds = static_cast<LagrangianDS*> (*it);
-
-  //       // Put q of each DS into a block
-  //       // Warning: use copy constructors (add function), no link between pointers
-  //       qTmp->add( lds->getQ() );
-  //       velocityTmp->add( lds->getVelocity() );
-  //     }
-
-  //   // get y and yDot of the interaction
-  //   SiconosVector *y = interaction->getYPtr(0);
-  //   SiconosVector *yDot = interaction->getYPtr(1);
-  //   SiconosVector *lambda = interaction->getLambdaPtr(0);
-  //   SiconosVector *lambdaDot = interaction->getLambdaPtr(1);
-  //   SiconosVector* param;
-
-  //   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  //   SimpleVector * qTmp2 = new SimpleVector(*qTmp);
-  //   SimpleVector * yTmp = new SimpleVector(*y);
-
-  //   // y = h(...) and yDot = GqDot
-  //   if(LagrangianRelationType == "scleronomic")
-  //     {
-  //       if (h0Ptr == NULL)
-  //  RuntimeException::selfThrow("LagrangianR:computeOutput() h0 is not linked to a plugin function");
-  //       param = parametersList["h"];
-  //       h0Ptr(sizeQ, &(*qTmp2)(0) , sizeY, &(*yTmp)(0), &(*param)(0));
-  //       SiconosMatrix * Gtmp = G[0];
-  //       if (G0Ptr == NULL)
-  //  RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-  //       param = parametersList["G0"];
-  //       G0Ptr(sizeQ, &(*qTmp2)(0), sizeY, &(*Gtmp)(0,0), &(*param)(0));
-  //       *yDot = *Gtmp * *velocityTmp;
-  //     }
-  //   // y = h(...) and yDot = G10qDot + G11
-  //   else if(LagrangianRelationType == "rhenomorous")
-  //     {
-  //       if (h1Ptr == NULL)
-  //  RuntimeException::selfThrow("LagrangianR:computeOutput() h1 is not linked to a plugin function");
-  //       param = parametersList["h"];
-  //       h1Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY,  &(*yTmp)(0), &(*param)(0));
-  //       SiconosMatrix * G0tmp = G[0];
-  //       SiconosMatrix * G1tmp = G[1];
-
-  //       if (G10Ptr == NULL)
-  //  RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-  //       param = parametersList["G10"];
-  //       G10Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*G0tmp)(0,0), &(*param)(0));
-
-  //       if (G11Ptr == NULL)
-  //  RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-  //       param = parametersList["G11"];
-  //       G11Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*G1tmp)(0,0), &(*param)(0));
-
-  //       // warning: G1 is a matrix
-  //       SiconosVector * Id = new SimpleVector(1);
-  //       (*Id)(0) = 1.0;
-  //       *yDot = *G0tmp * *velocityTmp + *G1tmp * *Id;
-  //       delete Id;
-  //     }
-  //   else if(LagrangianRelationType == "scleronomic+lambda")
-  //     {
-  //       SimpleVector * lambdaTmp = new SimpleVector(*lambda);
-  //       if (h1Ptr == NULL)
-  //  RuntimeException::selfThrow("LagrangianR:computeOutput() h2 is not linked to a plugin function");
-  //       param = parametersList["h"];
-  //       h2Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY,  &(*yTmp)(0), &(*param)(0));
-  //       SiconosMatrix * G0tmp = G[0];
-  //       SiconosMatrix * G1tmp = G[1];
-
-  //       if (G20Ptr == NULL)
-  //  RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-  //       param = parametersList["G20"];
-  //       G20Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY, &(*G0tmp)(0,0), &(*param)(0));
-
-  //       if (G21Ptr == NULL)
-  //  RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-  //       param = parametersList["G21"];
-  //       G21Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY, &(*G1tmp)(0,0), &(*param)(0));
-
-  //       *yDot = *G0tmp * *velocityTmp + *G1tmp * *lambdaDot;
-  //       delete lambdaTmp;
-  //     }
-  //   else
-  //     RuntimeException::selfThrow("LagrangianR::computeOutput(),  not yet implemented for this type of constraints");
-
-  //   *y=*yTmp;
-  //   // free memory
-  //   delete qTmp;
-  //   delete yTmp;
-  //   delete velocityTmp;
 }
 
 void LagrangianR::computeFreeOutput(const double time, const unsigned int derivativeNumber)
@@ -913,8 +803,9 @@ void LagrangianR::computeFreeOutput(const double time, const unsigned int deriva
   DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   DSIterator it;
   string type;
-  BlockVector *qTmp = new BlockVector();
-  BlockVector *velocityTmp = new BlockVector();
+  BlockVector *q0Tmp = new BlockVector(); // displacement
+  BlockVector *q1Tmp = new BlockVector(); // velocity
+  BlockVector *q2Tmp = new BlockVector(); // acceleration
 
   LagrangianDS* lds;
   for (it = vDS.begin(); it != vDS.end(); ++it)
@@ -927,138 +818,25 @@ void LagrangianR::computeFreeOutput(const double time, const unsigned int deriva
     // convert vDS systems into LagrangianDS and put them in vLDS
     lds = static_cast<LagrangianDS*>(*it);
 
-    // Put q of each DS into a block
-    qTmp->addPtr(lds->getQFreePtr());
-    velocityTmp->addPtr(lds->getVelocityFreePtr());
+    // Put q/velocity/acceleration of each DS into a block
+    q0Tmp->addPtr(lds->getQFreePtr());
+    q1Tmp->addPtr(lds->getVelocityFreePtr());
+    q2Tmp->addPtr(static_cast<SimpleVector*>(lds->getAccelerationPtr()));
   }
 
   if (derivativeNumber == 0)
-    computeY0(time, qTmp);
+    computeY0(time, q0Tmp);
   else if (derivativeNumber == 1)
-    computeY1(time, qTmp, velocityTmp);
+    computeY1(time, q0Tmp, q1Tmp);
   else if (derivativeNumber == 2)
-    computeY2(time);
+    computeY2(time, q0Tmp, q2Tmp);
   else
     RuntimeException::selfThrow("LagrangianR::computeOutput, index out of range");
 
-  delete qTmp;
-  delete velocityTmp;
+  delete q0Tmp;
+  delete q1Tmp;
+  delete q2Tmp;
   //   // warning: the only difference with computeOutput is that we get qFREE and velocityFREE instead of q and velocity.
-  //   if(interaction == NULL)
-  //     RuntimeException::selfThrow("LagrangianR::computeOutput, no interaction linked with this relation");
-
-  //   unsigned int sizeY = interaction->getInteractionSize();
-  //   unsigned int sizeQ = interaction->getSizeOfDS();
-
-  //   // Get the DS concerned by the interaction of this relation
-  //   DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
-  //   DSIterator it;
-  //   string type;
-  //   BlockVector *qTmp = new BlockVector();
-  //   BlockVector *velocityTmp = new BlockVector();
-
-  //   LagrangianDS* lds;
-  //   for(it=vDS.begin();it!=vDS.end();++it)
-  //     {
-  //       type = (*it)->getType();
-  //       // check dynamical system type
-  //       if(type!=LTIDS && type!=LNLDS)
-  //  RuntimeException::selfThrow("LagrangianR::computeFreeOutput not yet implemented for dynamical system of type: "+type);
-
-  //       // convert vDS systems into LagrangianDS and put them in vLDS
-  //       lds = static_cast<LagrangianDS*> (*it);
-
-  //       // Put q of each DS into a block
-  //       // Warning: use copy constructors (add function), no link between pointers
-  //       qTmp->add( lds->getQFree() );
-  //       velocityTmp->add( lds->getVelocityFree() );
-  //     }
-
-  //   // get y and yDot of the interaction
-  //   SiconosVector *y = interaction->getYPtr(0);
-  //   SiconosVector *yDot = interaction->getYPtr(1);
-  //   SiconosVector *lambda = interaction->getLambdaPtr(0);
-  //   SiconosVector *lambdaDot = interaction->getLambdaPtr(1);
-  //   SiconosVector* param;
-
-  //   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
-  //   SimpleVector * qTmp2 = new SimpleVector(*qTmp);
-  //   SimpleVector * yTmp = new SimpleVector(*y);
-
-  //   // y = h(...) and yDot = GqDot
-  //   if(LagrangianRelationType == "scleronomic")
-  //     {
-  //       if (h0Ptr == NULL)
-  //  RuntimeException::selfThrow("LagrangianR:computeOutput() h0 is not linked to a plugin function");
-  //       param = parametersList["h"];
-  //       h0Ptr(sizeQ, &(*qTmp2)(0) , sizeY, &(*yTmp)(0), &(*param)(0));
-  //       SiconosMatrix * Gtmp = G[0];
-  //       if (G0Ptr == NULL)
-  //  RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-  //       param = parametersList["G0"];
-  //       G0Ptr(sizeQ, &(*qTmp2)(0), sizeY, &(*Gtmp)(0,0), &(*param)(0));
-
-  //       *yDot = *Gtmp * *velocityTmp;
-  //     }
-
-  //   // y = h(...) and yDot = G10qDot + G11
-  //   else if(LagrangianRelationType == "rhenomorous")
-  //     {
-  //       if (h1Ptr == NULL)
-  //  RuntimeException::selfThrow("LagrangianR:computeOutput() h1 is not linked to a plugin function");
-  //       param = parametersList["h"];
-  //       h1Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY,  &(*yTmp)(0), &(*param)(0));
-  //       SiconosMatrix * G0tmp = G[0];
-  //       SiconosMatrix * G1tmp = G[0];
-
-  //       if (G10Ptr == NULL)
-  //  RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-  //       param = parametersList["G10"];
-  //       G10Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*G0tmp)(0,0), &(*param)(0));
-
-  //       if (G11Ptr == NULL)
-  //  RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-  //       param = parametersList["G11"];
-  //       G11Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*G1tmp)(0,0), &(*param)(0));
-
-  //       // warning: G1 is a matrix
-  //       SiconosVector * Id = new SimpleVector(1);
-  //       (*Id)(0) = 1.0;
-  //       *yDot = *G0tmp * *velocityTmp + *G1tmp * *Id;
-  //     }
-  //   else if(LagrangianRelationType == "scleronomic+lambda")
-  //     {
-  //       SimpleVector * lambdaTmp = new SimpleVector(*lambda);
-  //       if (h1Ptr == NULL)
-  //  RuntimeException::selfThrow("LagrangianR:computeOutput() h2 is not linked to a plugin function");
-  //       param = parametersList["h"];
-  //       h2Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY,  &(*yTmp)(0), &(*param)(0));
-  //       SiconosMatrix * G0tmp = G[0];
-  //       SiconosMatrix * G1tmp = G[1];
-
-  //       if (G20Ptr == NULL)
-  //  RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-  //       param = parametersList["G20"];
-  //       G20Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY, &(*G0tmp)(0,0), &(*param)(0));
-
-  //       if (G21Ptr == NULL)
-  //  RuntimeException::selfThrow("computeG() is not linked to a plugin function");
-  //       param = parametersList["G21"];
-  //       G21Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY, &(*G1tmp)(0,0), &(*param)(0));
-
-  //       *yDot = *G0tmp * *velocityTmp + *G1tmp * *lambdaDot;
-  //       delete lambdaTmp;
-  //     }
-  //   else
-  //     RuntimeException::selfThrow("LagrangianR::computeOutput(),  not yet implemented for this type of constraints");
-
-  //   *y = *yTmp;
-
-  //   // free memory
-  //   delete qTmp2;
-  //   delete qTmp;
-  //   delete yTmp;
-  //   delete velocityTmp;
 }
 
 void LagrangianR::computeY0(const double time, SiconosVector* qTmp)
@@ -1181,15 +959,38 @@ void LagrangianR::computeY1(const double time, SiconosVector* qTmp, SiconosVecto
     delete lambdaTmp;
   }
   else
-    RuntimeException::selfThrow("LagrangianR::computeOutput(),  not yet implemented for this type of constraints");
+    RuntimeException::selfThrow("LagrangianR::computeY1(),  not yet implemented for this type of constraints");
 
   // free memory
   delete qTmp2;
 }
 
-void LagrangianR::computeY2(const double time)
+void LagrangianR::computeY2(const double time, SiconosVector* q, SiconosVector* acceleration)
 {
-  RuntimeException::selfThrow("LagrangianR::computeY2 not yet implemented.");
+  if (interaction == NULL)
+    RuntimeException::selfThrow("LagrangianR::computeOutput, no interaction linked with this relation");
+
+  unsigned int sizeY = interaction->getInteractionSize();
+  unsigned int sizeQ = interaction->getSizeOfDS();
+  SiconosVector *y2 = interaction->getYPtr(2);
+  SiconosVector* param;
+
+  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  SimpleVector * qTmp = new SimpleVector(*q);
+
+  if (LagrangianRelationType == "scleronomic")
+  {
+    SiconosMatrix * Gtmp = G[0];
+    if (G0Ptr == NULL)
+      RuntimeException::selfThrow("computeG() is not linked to a plugin function");
+    param = parametersList["G0"];
+    G0Ptr(sizeQ, &(*qTmp)(0), sizeY, &(*Gtmp)(0, 0), &(*param)(0));
+    *y2 = *Gtmp * *acceleration;
+  }
+  else
+    RuntimeException::selfThrow("LagrangianR::computeY2 not yet implemented.");
+
+  delete qTmp;
 }
 
 void LagrangianR::computeInput(const double time, const unsigned int level)

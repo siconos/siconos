@@ -284,6 +284,9 @@ void EventDriven::computeG(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   lsodar->fillXWork(sizeOfX, x); // That may be not necessary? Check if computeF is called for each computeG.
 
+  double t = *time;
+  model->setCurrentT(t);
+
   // IN: - lambda[2] obtained during LCP call in computeF()
   //     - y[0]: need to be updated.
 
@@ -299,14 +302,12 @@ void EventDriven::computeG(OneStepIntegrator* osi, integer * sizeOfX, doublereal
       lambda = (*itUR)->getLambdaPtr(2);
       for (unsigned int i = 0; i < nsLawSize; i++)
         gOut[k++] = (*lambda)(i);
-      //cout << " +++++++++++++++ IN G type lambda" << gOut[k-1] << endl;
     }
     else
     {
       y = (*itUR)->getYPtr(0);
       for (unsigned int i = 0; i < nsLawSize; i++)
         gOut[k++] = (*y)(i);
-      //cout << " +++++++++++++++ IN G type y" << gOut[k-1] << endl;
     }
   }
 }
@@ -403,18 +404,16 @@ void EventDriven::advanceToEvent()
   OSIIterator it;
   for (it = allOSI.begin(); it != allOSI.end(); ++it)
   {
-    //      DynamicalSystemsSet ds = (*it)->getDynamicalSystems();
-    //      (*ds.begin())->getXPtr()->display();
-
-
     (*it)->integrate(tinit, tend, tout, istate); // integrate must return a flag telling if tend has been reached or not.
 
     if (istate == 3)
     {
       isNewEventOccur = true;
       // Add an event into the events manager list
-      bool isScheduleOk = eventsManager->scheduleEvent("NonSmoothEvent", tout);
-      if (!isScheduleOk) cout << " EventDriven advanceToEvent warning: try to add an already existing event" << endl;
+      eventsManager->scheduleEvent("NonSmoothEvent", tout);
+      // if isScheduleOk == false, ie if the schedule failed, this means that the NonSmoothEvent occurs at a time-discretisation step.
+      // => we only change the type of the concerned event, from "TimeDiscr" to "NonSmooth".
+      // See eventsManager::scheduleEvent for details.
     }
   }
 

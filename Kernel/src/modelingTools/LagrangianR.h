@@ -417,8 +417,10 @@ public:
   /** \fn void computY2(double time);
    *  \brief to compute output y[2]
    *  \param double : current time
+   *  \param a pointer to SiconosVector: q for all the DS
+   *  \param a pointer to SiconosVector: acceleration for all the DS
    */
-  void computeY2(const double);
+  void computeY2(const double, SiconosVector*, SiconosVector*);
 
   /** \fn void computeFreeOutput(double time, const unsigned int = 0);
    *  \brief to compute y for the free state
