@@ -61,7 +61,7 @@ Lsodar::Lsodar(OneStepIntegratorXML* osiXML, Simulation* newS):
   localTimeDiscretisation = simulationLink->getTimeDiscretisationPtr(); // warning: pointer link!
   intData.resize(9);
   doubleData.resize(4);
-
+  sizeMem = 2;
 }
 
 Lsodar::Lsodar(DynamicalSystem* ds, Simulation* newS):
@@ -78,6 +78,7 @@ Lsodar::Lsodar(DynamicalSystem* ds, Simulation* newS):
 
   intData.resize(9);
   doubleData.resize(4);
+  sizeMem = 2;
 }
 
 Lsodar::Lsodar(DynamicalSystemsSet& newDS, Simulation* newS):
@@ -91,6 +92,7 @@ Lsodar::Lsodar(DynamicalSystemsSet& newDS, Simulation* newS):
 
   intData.resize(9);
   doubleData.resize(4);
+  sizeMem = 2;
 }
 
 Lsodar::~Lsodar()
@@ -260,7 +262,7 @@ void Lsodar::initialize()
   intData[5] = 0; // iopt: 0 if no optional input else 1.
   intData[6] = 22 + intData[0] * max(16, (int)intData[0] + 9) + 3 * intData[1]; // lrw
   intData[7] = 20 + intData[0];  // liw
-  intData[8] = 2;   // jt, Jacobian type indicator.
+  intData[8] = 1;   // jt, Jacobian type indicator.
   //           1 means a user-supplied full (NEQ by NEQ) Jacobian.
   //           2 means an internally generated (difference quotient) full Jacobian (using NEQ extra calls to f per df/dx value).
   //           4 means a user-supplied banded Jacobian.

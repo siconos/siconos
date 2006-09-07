@@ -120,7 +120,7 @@ const std::string EVENTDRIVEN_TAG = "EventDriven";
 
 /*Types of OneStepIntegrator defined*/
 const std::string MOREAU_TAG = "Moreau";
-const std::string LSODAR_TAG = "LSODAR";
+const std::string LSODAR_TAG = "Lsodar";
 const std::string ADAMS_TAG = "Adams";
 
 /*Types of OneStepNSProblem defined*/

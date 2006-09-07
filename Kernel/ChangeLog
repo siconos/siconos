@@ -28,6 +28,9 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 
 Main Changes:
 
+2006-09-07 Franck Perignon <franck.perignon@inrialpes.fr>
+        * EventDriven for Lagrangian systems
+	
 2006-07-10 Franck Perignon <franck.perignon@inrialpes.fr>
         * Temporary blockVector version with copy of contain to provide contiguous save of
 	  values in Memory

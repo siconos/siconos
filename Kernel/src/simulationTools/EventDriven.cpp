@@ -205,7 +205,6 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   lsodar->fillXWork(sizeOfX, x);
 
-
   double t = *time;
   model->setCurrentT(t);
 
@@ -240,7 +239,7 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
 
 void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, doublereal *time, doublereal *x,  doublereal *jacob)
 {
-  if (osi->getType() != "lsodar")
+  if (osi->getType() != "Lsodar")
     RuntimeException::selfThrow("EventDriven::computeF(osi, ...), not yet implemented for a one step integrator of type " + osi->getType());
 
   Lsodar * lsodar = static_cast<Lsodar*>(osi);
@@ -248,13 +247,14 @@ void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, dou
   //   // Remark A: according to DLSODAR doc, each call to jacobian is preceded by a call to f with the same
   //   // arguments NEQ, T, and Y.  Thus to gain some efficiency, intermediate quantities shared by both calculations may be
   //   // saved in class members?
-  //   cout <<"in jaco f: " <<  endl;
+  cout << "in jaco f: " <<  endl;
 
   // fill in xWork vector (ie all the x of the ds of this osi) with x
   // fillXWork(x); // -> copy // Maybe this step is not necessary? because of remark A above
 
   // Compute the jacobian of the vector field according to x for the current ds
   double t = *time;
+  model->setCurrentT(t);
   lsodar->computeJacobianRhs(t);
 
   //   // Save jacobianX values from dynamical system into current jacob (in-out parameter)
@@ -408,6 +408,7 @@ void EventDriven::advanceToEvent()
 
     if (istate == 3)
     {
+      //    cout << "new event at time " << tout << endl;
       isNewEventOccur = true;
       // Add an event into the events manager list
       eventsManager->scheduleEvent("NonSmoothEvent", tout);

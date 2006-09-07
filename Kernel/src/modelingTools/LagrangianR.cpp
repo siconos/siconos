@@ -1030,6 +1030,7 @@ void LagrangianR::computeInput(const double time, const unsigned int level)
   }
   else
     RuntimeException::selfThrow("LagrangianR::computeInput,  not yet implemented for constraints of type" + LagrangianRelationType);
+
   delete p;
 }
 
