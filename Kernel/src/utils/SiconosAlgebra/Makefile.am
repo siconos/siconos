@@ -30,6 +30,6 @@ libSiconosAlgebra_la_SOURCES = SiconosVector.cpp SimpleVector.cpp BlockVector.cp
 			MySiconosVector.cpp MySimpleVector.cpp MySiconosMatrix.cpp MySimpleMatrix.cpp MyBlockMatrix.cpp ioObject.cpp ioMatrix.cpp ioVector.cpp\
 			SiconosVector.h SimpleVector.h BlockVector.h SiconosMatrix.h SimpleMatrix.h BlockMatrix.h\
 			MySiconosVector.h MySimpleVector.h MySiconosMatrix.h MySimpleMatrix.h MyBlockMatrix.h ioObject.h ioMatrix.h ioVector.h
-	include_HEADERS = SiconosVector.h SimpleVector.h BlockVector.h SiconosMatrix.h SimpleMatrix.h BlockMatrix.h\
+include_HEADERS = SiconosVector.h SimpleVector.h BlockVector.h SiconosMatrix.h SimpleMatrix.h BlockMatrix.h\
 			MySiconosVector.h MySimpleVector.h MySiconosMatrix.h MySimpleMatrix.h MyBlockMatrix.h ioObject.h ioMatrix.h ioVector.h
 libSiconosAlgebra_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
