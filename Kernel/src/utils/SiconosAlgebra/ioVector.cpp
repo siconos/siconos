@@ -114,10 +114,10 @@ bool ioVector::write(const MySiconosVector& m)
       outfile << '\n';
 
       DenseVect p;
-      if (m.GetNum() == 1)
-        p = m.GetDense();
-      else if (m.GetNum() == 2)
-        p = m.GetSparse();
+      if (m.getNum() == 1)
+        p = m.getDense();
+      else if (m.getNum() == 2)
+        p = m.getSparse();
 
       outfile << p;
     }
@@ -145,7 +145,7 @@ bool ioVector::write(const MySiconosVector& m)
       temporary->resize(col, false);
       *temporary = m;
       fwrite((char*)&col, sizeof(int), 1, outfile);
-      fwrite(temporary->GetDensePtr(), sizeof(DenseVect(col)), 1, outfile);
+      fwrite(temporary->getDensePtr(), sizeof(DenseVect(col)), 1, outfile);
 
     }
     else
@@ -176,10 +176,10 @@ bool ioVector::rawWrite(const MySiconosVector& m)
     if (m.isBlock() == false)
     {
       DenseVect p;
-      if (m.GetNum() == 1)
-        p = m.GetDense();
-      else if (m.GetNum() == 2)
-        p = m.GetSparse();
+      if (m.getNum() == 1)
+        p = m.getDense();
+      else if (m.getNum() == 2)
+        p = m.getSparse();
 
       outfile << p;
     }
@@ -205,7 +205,7 @@ bool ioVector::rawWrite(const MySiconosVector& m)
 
       temporary->resize(col, false);
       *temporary = m;
-      fwrite(temporary->GetDensePtr(), sizeof(DenseVect(col)), 1, outfile);
+      fwrite(temporary->getDensePtr(), sizeof(DenseVect(col)), 1, outfile);
 
     }
     else

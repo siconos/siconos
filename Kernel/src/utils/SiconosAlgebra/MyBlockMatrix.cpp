@@ -2,7 +2,7 @@
 
 //#define STDMAP 0
 
-void MyBlockMatrix::AddInTab(int row, int col)
+void MyBlockMatrix::addInTab(int row, int col)
 {
 
   tabRow.push_back(row);
@@ -17,7 +17,7 @@ void MyBlockMatrix::AddInTab(int row, int col)
     tabCol[nbCol - 1] += tabCol[nbCol - 2];
 }
 
-void MyBlockMatrix::MakeTab(int row, int col)
+void MyBlockMatrix::makeTab(int row, int col)
 {
 
   int dim;
@@ -76,7 +76,7 @@ MyBlockMatrix::MyBlockMatrix(const MySiconosMatrix &m)
   if (m.isBlock() == false)
     SiconosMatrixException::selfThrow("BlockMatrix copy constructor from a SimpleMatrix: forbidden operation.");
 
-  SetIsBlock(true);
+  setIsBlock(true);
   isBlockAllocatedIn.resize(m.size1() * m.size2());
   mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
 
@@ -124,7 +124,7 @@ MyBlockMatrix::MyBlockMatrix(const MySiconosMatrix &m)
 MyBlockMatrix::MyBlockMatrix(const MyBlockMatrix &m)
 {
 
-  SetIsBlock(true);
+  setIsBlock(true);
   isBlockAllocatedIn.resize(m.size1() * m.size2());
   mapped Mmap = m.map;
 
@@ -175,7 +175,7 @@ MyBlockMatrix::MyBlockMatrix(mapped& Mmap)
   int i = 0, j = 0;
   int row = Mmap.size1();
   int col = Mmap.size2();
-  SetIsBlock(true);
+  setIsBlock(true);
   isBlockAllocatedIn.resize(row * col);
   map.resize(row, col, false);
 
@@ -211,7 +211,7 @@ MyBlockMatrix::MyBlockMatrix(mapped& Mmap)
       }
     }
   }
-  MakeTab(row, col);
+  makeTab(row, col);
 }
 
 MyBlockMatrix::MyBlockMatrix(const std::vector<MySiconosMatrix* > &m, int row, int col)
@@ -219,7 +219,7 @@ MyBlockMatrix::MyBlockMatrix(const std::vector<MySiconosMatrix* > &m, int row, i
   if (m.size() != (row * col))
     SiconosMatrixException::selfThrow("BlockMatrix constructor from a vector<LaGenMatDouble>, number of blocks inconsistent with provided dimensions.");
 
-  SetIsBlock(true);
+  setIsBlock(true);
   isBlockAllocatedIn.resize(row * col);
   map.resize(row, col, false);
   tabRow.reserve(row);
@@ -234,7 +234,7 @@ MyBlockMatrix::MyBlockMatrix(const std::vector<MySiconosMatrix* > &m, int row, i
       //isBlockAllocatedIn.push_back (false);
     }
   }
-  MakeTab(row, col);
+  makeTab(row, col);
 }
 
 MyBlockMatrix::~MyBlockMatrix(void)
@@ -253,12 +253,12 @@ MyBlockMatrix::~MyBlockMatrix(void)
 }
 
 
-void MyBlockMatrix::GetBlock(int row, int col, MySiconosMatrix &m)const
+void MyBlockMatrix::getBlock(int row, int col, MySiconosMatrix &m)const
 {
   m = dynamic_cast<MySiconosMatrix&>(*(map(row, col)));
 }
 
-const std::deque<bool> MyBlockMatrix::GetBlockAllocated(void)const
+const std::deque<bool> MyBlockMatrix::getBlockAllocated(void)const
 {
   return isBlockAllocatedIn;
 }
@@ -279,11 +279,11 @@ const double MyBlockMatrix::normInf(void)const
   return norm;
 }
 
-void MyBlockMatrix::BlockMatrixCopy(const MySiconosMatrix &m, int row, int col)
+void MyBlockMatrix::blockMatrixCopy(const MySiconosMatrix &m, int row, int col)
 {
 
   if (m.isBlock() == true)
-    SiconosMatrixException::selfThrow("BlockMatrixCopy of a block to an other block is forbidden.");
+    SiconosMatrixException::selfThrow("blockMatrixCopy of a block to an other block is forbidden.");
 
 
   int nbRow = 0;
@@ -302,28 +302,28 @@ void MyBlockMatrix::BlockMatrixCopy(const MySiconosMatrix &m, int row, int col)
   isBlockAllocatedIn[nbRow * tabCol.size() + nbCol] = true;
 }
 
-int MyBlockMatrix::GetNum(void)const
+int MyBlockMatrix::getNum(void)const
 {
-  SiconosMatrixException::selfThrow("GetNum of a block is forbidden.");
+  SiconosMatrixException::selfThrow("getNum of a block is forbidden.");
 }
 
-void MyBlockMatrix::SetNum(int)
+void MyBlockMatrix::setNum(int)
 {
-  SiconosMatrixException::selfThrow("SetNum of a block is forbidden.");
+  SiconosMatrixException::selfThrow("setNum of a block is forbidden.");
 }
 
 
-void MyBlockMatrix::GetRow(int row, MySimpleVector &v)const
+void MyBlockMatrix::getRow(int row, MySimpleVector &v)const
 {
 
   int numRow = 0, posRow = row, start = 0, stop = 0, step = 0;
 
   if (row > size1() || row < 0)
-    SiconosMatrixException::selfThrow("GetRow : row is out of range");
+    SiconosMatrixException::selfThrow("getRow : row is out of range");
 
   // Verification of the size of the result vector
   if (v.size() != size2())
-    SiconosMatrixException::selfThrow("GetRow : inconsistent sizes");
+    SiconosMatrixException::selfThrow("getRow : inconsistent sizes");
 
   int nbCol = size2();
 
@@ -344,25 +344,25 @@ void MyBlockMatrix::GetRow(int row, MySimpleVector &v)const
     start = stop;
     stop += step;
     MySimpleVector tmp(DENSE, step);
-    (*map(numRow, j)).GetRow(posRow, tmp);
+    (*map(numRow, j)).getRow(posRow, tmp);
 
-    subrange(vect, start, stop) = tmp.GetDense();
+    subrange(vect, start, stop) = tmp.getDense();
   }
   MySimpleVector p(vect);
   v = p;
 }
 
-void MyBlockMatrix::GetCol(int col, MySimpleVector &v)const
+void MyBlockMatrix::getCol(int col, MySimpleVector &v)const
 {
 
   int numCol = 0, posCol = col, start = 0, stop = 0, step = 0;
 
   if (col > size2() || col < 0)
-    SiconosMatrixException::selfThrow("GetCol : col is out of range");
+    SiconosMatrixException::selfThrow("getCol : col is out of range");
 
   // Verification of the size of the result vector
   if (v.size() != size1())
-    SiconosMatrixException::selfThrow("Getcol : inconsistent sizes");
+    SiconosMatrixException::selfThrow("getcol : inconsistent sizes");
 
   int nbRow = size1();
 
@@ -382,15 +382,15 @@ void MyBlockMatrix::GetCol(int col, MySimpleVector &v)const
     start = stop;
     stop += step;
     MySimpleVector tmp(DENSE, step);
-    (*map(i, numCol)).GetCol(posCol, tmp);
+    (*map(i, numCol)).getCol(posCol, tmp);
 
-    subrange(vect, start, stop) = tmp.GetDense();
+    subrange(vect, start, stop) = tmp.getDense();
   }
   MySimpleVector p(vect);
   v = p;
 }
 
-void MyBlockMatrix::SetRow(int row, const MySimpleVector &v)
+void MyBlockMatrix::setRow(int row, const MySimpleVector &v)
 {
 
   int numRow = 0, posRow = row, start = 0, stop = 0, step = 0;
@@ -405,7 +405,7 @@ void MyBlockMatrix::SetRow(int row, const MySimpleVector &v)
     posRow -= tabRow[numRow - 1];
 
   DenseVect vect(size2());
-  vect = v.GetDense();
+  vect = v.getDense();
 
   for (int j = 0; j < tabCol.size(); j++)
   {
@@ -415,12 +415,12 @@ void MyBlockMatrix::SetRow(int row, const MySimpleVector &v)
     DenseVect tmp(step);
     tmp = subrange(vect, start, stop);
     MySimpleVector p(tmp);
-    (*map(numRow, j)).SetRow(posRow, p);
+    (*map(numRow, j)).setRow(posRow, p);
 
   }
 }
 
-void MyBlockMatrix::SetCol(int col, const MySimpleVector &v)
+void MyBlockMatrix::setCol(int col, const MySimpleVector &v)
 {
 
   int numCol = 0, posCol = col, start = 0, stop = 0, step = 0;
@@ -435,7 +435,7 @@ void MyBlockMatrix::SetCol(int col, const MySimpleVector &v)
     posCol -= tabCol[numCol - 1];
 
   DenseVect vect(size1());
-  vect = v.GetDense();
+  vect = v.getDense();
   for (int i = 0; i < tabRow.size(); i++)
   {
     step = (*map(i, numCol)).size1();
@@ -444,7 +444,7 @@ void MyBlockMatrix::SetCol(int col, const MySimpleVector &v)
     DenseVect tmp(step);
     tmp = subrange(vect, start, stop);
     MySimpleVector p(tmp);
-    (*map(i, numCol)).SetCol(posCol, p);
+    (*map(i, numCol)).setCol(posCol, p);
 
   }
 }
@@ -550,99 +550,99 @@ void MyBlockMatrix::eye(void)
 }
 
 // return the boost dense matrix of the block (i, j)
-const DenseMat  MyBlockMatrix::GetDense(int row, int col)const
+const DenseMat  MyBlockMatrix::getDense(int row, int col)const
 {
 
-  if ((*map(row, col)).GetNum() != 1);
-  SiconosMatrixException::selfThrow("DenseMat GetDense(int row, int col) : the matrix at (row, col) is not a Dense matrix");
+  if ((*map(row, col)).getNum() != 1);
+  SiconosMatrixException::selfThrow("DenseMat getDense(int row, int col) : the matrix at (row, col) is not a Dense matrix");
 
-  return (*map(row, col)).GetDense();
+  return (*map(row, col)).getDense();
 }
 
 // return the boost triangular matrix of the block (i, j)
-const TriangMat MyBlockMatrix::GetTriang(int row, int col)const
+const TriangMat MyBlockMatrix::getTriang(int row, int col)const
 {
 
-  if ((*map(row, col)).GetNum() != 2);
-  SiconosMatrixException::selfThrow("TriangMat GetTriang(int row, int col) : the matrix at (row, col) is not a Triangular matrix");
-  return (*map(row, col)).GetTriang();
+  if ((*map(row, col)).getNum() != 2);
+  SiconosMatrixException::selfThrow("TriangMat getTriang(int row, int col) : the matrix at (row, col) is not a Triangular matrix");
+  return (*map(row, col)).getTriang();
 }
 
 // return the boost symmetric matrix of the block (i, j)
-const SymMat MyBlockMatrix::GetSym(int row, int col)const
+const SymMat MyBlockMatrix::getSym(int row, int col)const
 {
 
-  if ((*map(row, col)).GetNum() != 3);
-  SiconosMatrixException::selfThrow("SymMat GetSym(int row, int col) : the matrix at (row, col) is not a Symmmetric matrix");
-  return (*map(row, col)).GetSym();
+  if ((*map(row, col)).getNum() != 3);
+  SiconosMatrixException::selfThrow("SymMat getSym(int row, int col) : the matrix at (row, col) is not a Symmmetric matrix");
+  return (*map(row, col)).getSym();
 }
 
 // return the boost sparse matrix of the block (i, j)
-const SparseMat  MyBlockMatrix::GetSparse(int row, int col)const
+const SparseMat  MyBlockMatrix::getSparse(int row, int col)const
 {
 
-  if ((*map(row, col)).GetNum() != 4);
-  SiconosMatrixException::selfThrow("SparseMat GetSparse(int row, int col) : the matrix at (row, col) is not a Sparse matrix");
+  if ((*map(row, col)).getNum() != 4);
+  SiconosMatrixException::selfThrow("SparseMat getSparse(int row, int col) : the matrix at (row, col) is not a Sparse matrix");
 
-  return (*map(row, col)).GetSparse();
+  return (*map(row, col)).getSparse();
 }
 
 // return the boost banded matrix of the block (i, j)
-const BandedMat  MyBlockMatrix::GetBanded(int row, int col)const
+const BandedMat  MyBlockMatrix::getBanded(int row, int col)const
 {
 
-  if ((*map(row, col)).GetNum() != 5);
-  SiconosMatrixException::selfThrow("BandedMat GetBanded(int row, int col) : the matrix at (row, col) is not a Banded matrix");
+  if ((*map(row, col)).getNum() != 5);
+  SiconosMatrixException::selfThrow("BandedMat getBanded(int row, int col) : the matrix at (row, col) is not a Banded matrix");
 
-  return (*map(row, col)).GetBanded();
+  return (*map(row, col)).getBanded();
 }
 
 // The following functions return the corresponding pointers
-const DenseMat*  MyBlockMatrix::GetDensePtr(int row, int col)const
+const DenseMat*  MyBlockMatrix::getDensePtr(int row, int col)const
 {
 
-  if ((*map(row, col)).GetNum() != 1);
-  SiconosMatrixException::selfThrow("DenseMat* GetDensePtr(int row, int col) : the matrix at (row, col) is not a Dense matrix");
+  if ((*map(row, col)).getNum() != 1);
+  SiconosMatrixException::selfThrow("DenseMat* getDensePtr(int row, int col) : the matrix at (row, col) is not a Dense matrix");
 
-  return (*map(row, col)).GetDensePtr();
+  return (*map(row, col)).getDensePtr();
 }
 
-const TriangMat* MyBlockMatrix::GetTriangPtr(int row, int col)const
+const TriangMat* MyBlockMatrix::getTriangPtr(int row, int col)const
 {
 
-  if ((*map(row, col)).GetNum() != 2);
-  SiconosMatrixException::selfThrow("TriangMat* GetTriangPtr(int row, int col) : the matrix at (row, col) is not a Triangular matrix");
+  if ((*map(row, col)).getNum() != 2);
+  SiconosMatrixException::selfThrow("TriangMat* getTriangPtr(int row, int col) : the matrix at (row, col) is not a Triangular matrix");
 
-  return (*map(row, col)).GetTriangPtr();
+  return (*map(row, col)).getTriangPtr();
 }
-const SymMat* MyBlockMatrix::GetSymPtr(int row, int col)const
+const SymMat* MyBlockMatrix::getSymPtr(int row, int col)const
 {
 
-  if ((*map(row, col)).GetNum() != 3);
-  SiconosMatrixException::selfThrow("SymMat* GetSymPtr(int row, int col) : the matrix at (row, col) is not a Symmmetric matrix");
-  return (*map(row, col)).GetSymPtr();
-}
-
-const SparseMat*  MyBlockMatrix::GetSparsePtr(int row, int col)const
-{
-
-  if ((*map(row, col)).GetNum() != 4);
-  SiconosMatrixException::selfThrow("SparseMat* GetSparsePtr(int row, int col) : the matrix at (row, col) is not a Sparse matrix");
-
-  return (*map(row, col)).GetSparsePtr();
+  if ((*map(row, col)).getNum() != 3);
+  SiconosMatrixException::selfThrow("SymMat* getSymPtr(int row, int col) : the matrix at (row, col) is not a Symmmetric matrix");
+  return (*map(row, col)).getSymPtr();
 }
 
-const BandedMat*  MyBlockMatrix::GetBandedPtr(int row, int col)const
+const SparseMat*  MyBlockMatrix::getSparsePtr(int row, int col)const
 {
 
-  if ((*map(row, col)).GetNum() != 5);
-  SiconosMatrixException::selfThrow("BandedMat* GetBandedPtr(int row, int col) : the matrix at (row, col) is not a Banded matrix");
+  if ((*map(row, col)).getNum() != 4);
+  SiconosMatrixException::selfThrow("SparseMat* getSparsePtr(int row, int col) : the matrix at (row, col) is not a Sparse matrix");
 
-  return (*map(row, col)).GetBandedPtr();
+  return (*map(row, col)).getSparsePtr();
+}
+
+const BandedMat*  MyBlockMatrix::getBandedPtr(int row, int col)const
+{
+
+  if ((*map(row, col)).getNum() != 5);
+  SiconosMatrixException::selfThrow("BandedMat* getBandedPtr(int row, int col) : the matrix at (row, col) is not a Banded matrix");
+
+  return (*map(row, col)).getBandedPtr();
 }
 
 // return the boost mapped matrix of a block matrix
-const mapped MyBlockMatrix::GetMap(void)const
+const mapped MyBlockMatrix::getMap(void)const
 {
   return map;
 }
