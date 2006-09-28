@@ -51,8 +51,15 @@ private:
   CPPUNIT_TEST(testNormInf);
   CPPUNIT_TEST(testGetBlock);
   CPPUNIT_TEST(testBlockMatrixCopy);
-  CPPUNIT_TEST(testOperators);
+  CPPUNIT_TEST(testTrans);
   CPPUNIT_TEST(testAssignment);
+  CPPUNIT_TEST(testOperators1);
+  CPPUNIT_TEST(testOperators2);
+  CPPUNIT_TEST(testOperators3);
+  CPPUNIT_TEST(testOperators4);
+  CPPUNIT_TEST(testOperators5);
+  CPPUNIT_TEST(testOperators6);
+  CPPUNIT_TEST(testOperators7);
   CPPUNIT_TEST(testMultTranspose);
   CPPUNIT_TEST(End);
 
@@ -92,8 +99,15 @@ private:
   void testNormInf();
   void testGetBlock();
   void testBlockMatrixCopy();
-  void testOperators();
+  void testTrans();
   void testAssignment();
+  void testOperators1();
+  void testOperators2();
+  void testOperators3();
+  void testOperators4();
+  void testOperators5();
+  void testOperators6();
+  void testOperators7();
   void testMultTranspose();
   void End();
 
@@ -114,6 +128,11 @@ private:
   MySimpleMatrix *SimM;
   string fic1, fic2;
   MySimpleVector* vect1, *vect2, *vect3;
+  DenseMat * D;
+  TriangMat *T;
+  SymMat *S;
+  BandedMat *B;
+  SparseMat *SP;
 
 public:
   void setUp();

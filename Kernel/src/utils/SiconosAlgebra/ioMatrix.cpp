@@ -36,11 +36,7 @@ bool ioMatrix::read(MySiconosMatrix& m)const
 
     std::ifstream infile(FileName.c_str(), std::ifstream::in);
     if (infile == NULL)
-    {
       SiconosMatrixException::selfThrow("function read error : Fail to open \"" + FileName + "\"");
-
-
-    }
 
     int row, col;
     infile >> row;
@@ -50,7 +46,6 @@ bool ioMatrix::read(MySiconosMatrix& m)const
     {
       DenseMat p(row, col);
       infile >> p;
-
       MySimpleMatrix tmp(p);
       m = tmp;
     }
