@@ -5,7 +5,7 @@
 #include "ioMatrix.h"
 
 
-MySimpleMatrix* ioMatrix::temporary = new MySimpleMatrix(DENSE);
+MySimpleMatrix* ioMatrix::temporary = new MySimpleMatrix(1, 1);
 bool ioMatrix::writeSimpleBinary = false;
 
 // Default private
@@ -301,7 +301,7 @@ bool ioMatrix::write(const MySiconosMatrix& m)
             l = (**it2).size2();
             fwrite((char*)&k, sizeof(int), 1, outfile);
             fwrite((char*)&l, sizeof(int), 1, outfile);
-            err = fwrite((*it2), sizeof(MySimpleMatrix(DENSE, k, l)), 1, outfile);
+            err = fwrite((*it2), sizeof(MySimpleMatrix(k, l)), 1, outfile);
           }
         }
       }
@@ -473,7 +473,7 @@ bool ioMatrix::rawWrite(const MySiconosMatrix& m)
             l = (**it2).size2();
             //fwrite((char*)&k, sizeof(int), 1, outfile);
             //fwrite((char*)&l, sizeof(int), 1, outfile);
-            err = fwrite((*it2), sizeof(MySimpleMatrix(DENSE, k, l)), 1, outfile);
+            err = fwrite((*it2), sizeof(MySimpleMatrix(k, l)), 1, outfile);
           }
         }
       }

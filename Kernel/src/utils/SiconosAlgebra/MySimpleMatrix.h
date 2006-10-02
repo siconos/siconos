@@ -39,21 +39,21 @@ class MySimpleMatrix: public MySiconosMatrix
 {
 private:
 
-  /** \var int num
-   * \brief an int which make a correspondance with Boost Matrices: 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat, 4->SparseMat, 5->BandedMat
+  /** \var unsigned int num
+   * \brief an unsigned int which make a correspondance with Boost Matrices: 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat, 4->SparseMat, 5->BandedMat
    */
-  int num;
+  unsigned int num;
 
   /** \var MyMat mat (See MySiconosMatrix.h for more details on MyMat type);
    * \brief union of The Boost Matrices : DenseMat, TriangMat, SymMat are encapsulated.
    */
   MyMat mat;
 
-  /** \fn MySimpleMatrix ()
-   *  \brief default constructor
-   *  \return MySimpleMatrix
+  /** \fn MySimpleMatrix (TYP = DENSE)
+   *  \brief constructor with the type of the Boost matrix
+   *  \param TYP
    */
-  MySimpleMatrix(void);
+  MySimpleMatrix(TYP = DENSE);
 
 public:
   /***************************** CONSTRUCTORS ****************************/
@@ -70,18 +70,14 @@ public:
    */
   MySimpleMatrix(const MySiconosMatrix&);
 
-  /** \fn MySimpleMatrix (TYP)
-   *  \brief constructor with the type of the Boost matrix
-   *  \param TYP
-   */
-  MySimpleMatrix(TYP);
-
-  /** \fn MySimpleMatrix (TYP, int, int)
+  /** \fn MySimpleMatrix (unsigned int, unsigned int, TYP = DENSE, unsigned int = 1, unsigned int = 1, )
    *  \brief constructor with the type and the dimension of the Boost matrix
+   *  \param 2 unsigned int (number of rows and columns)
    *  \param TYP
-   *  \param 2 int
+   *  \param unsigned int, if TYP==SPARSE, number of non-zero terms, if TYP == BANDED, number of diags. under the main diagonal
+   *  \param unsigned int, if TYP == BANDED, number of diags. over the main diagonal
    */
-  MySimpleMatrix(TYP, int, int);
+  MySimpleMatrix(unsigned int, unsigned int, TYP = DENSE, unsigned int = 1, unsigned int = 1);
 
   /** \fn MySimpleMatrix (const DenseMat&)
    *  \brief constructor with a DenseMat matrix (see MySiconosMatrix.h for details)
@@ -114,14 +110,14 @@ public:
   MySimpleMatrix(const SparseMat&);
 
 
-  /** \fn MySimpleMatrix (TYP, const std::vector<double>&, int, int=0)
+  /** \fn MySimpleMatrix (const std::vector<double>&, unsigned int, unsigned int=0, TYP = DENSE, unsigned int lower=0, unsigned int upper=0)
    *  \brief constructor with the type of the boost matrix, a vector of the values and the dimensions
    *  of the matrix, the integers upper and lower are useful only for BandedMat
    *  \param a TYP
    *  \param a std::vector<double>
-   *  \param 4 int
+   *  \param 4 unsigned int
    */
-  MySimpleMatrix(TYP , const std::vector<double>& , int row, int col = 0, int lower = 0, int upper = 0);
+  MySimpleMatrix(const std::vector<double>& , unsigned int, unsigned int = 0, TYP = DENSE, unsigned int = 0, unsigned int = 0);
 
   /** \fn MySimpleMatrix (std::string file, bool ascii)
    *  \brief constructor with an input file
@@ -136,92 +132,92 @@ public:
   ~MySimpleMatrix(void);
   //************************** GETTERS/SETTERS  **************************
 
-  /** \fn int getNum() const
+  /** \fn unsigned int getNum() const
    *  \brief get the attribute num of current matrix, useless for Block Matrix
-   * \return an int.
+   * \return an unsigned int.
    */
-  int getNum(void) const;
+  unsigned int getNum(void) const;
 
-  /** \fn DenseMat* getDense(int row = 0, int col = 0)
+  /** \fn DenseMat* getDense(unsigned int row = 0, unsigned int col = 0)
    *  \brief get DenseMat matrix
-   *  \param an int, position of the block (row) - Useless for MySimpleMatrix
-   *  \param an int, position of the block (column) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (row) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a DenseMat
    */
-  const DenseMat getDense(int = 0, int = 0) const;
+  const DenseMat getDense(unsigned int = 0, unsigned int = 0) const;
 
-  /** \fn TriangMat getTriang(int row = 0, int col = 0)
+  /** \fn TriangMat getTriang(unsigned int row = 0, unsigned int col = 0)
    *  \brief get TriangMat matrix
-   *  \param an int, position of the block (row) - Useless for MySimpleMatrix
-   *  \param an int, position of the block (column) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (row) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a TriangMat
    */
-  const TriangMat getTriang(int = 0, int = 0) const;
+  const TriangMat getTriang(unsigned int = 0, unsigned int = 0) const;
 
-  /** \fn SymMat getSym(int row = 0, int col = 0)
+  /** \fn SymMat getSym(unsigned int row = 0, unsigned int col = 0)
    *  \brief get SymMat matrix
-   *  \param an int, position of the block (row) - Useless for MySimpleMatrix
-   *  \param an int, position of the block (column) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (row) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a SymMat
    */
-  const SymMat getSym(int = 0, int = 0) const;
+  const SymMat getSym(unsigned int = 0, unsigned int = 0) const;
 
-  /** \fn BandedMat getBanded(int row = 0, int col = 0)
+  /** \fn BandedMat getBanded(unsigned int row = 0, unsigned int col = 0)
    *  \brief get BandedMat matrix
-   *  \param an int, position of the block (row) - Useless for MySimpleMatrix
-   *  \param an int, position of the block (column) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (row) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a BandedMat
    */
-  const BandedMat getBanded(int = 0, int = 0) const;
+  const BandedMat getBanded(unsigned int = 0, unsigned int = 0) const;
 
 
-  /** \fn SparseMat getSparse(int row = 0, int col = 0)
+  /** \fn SparseMat getSparse(unsigned int row = 0, unsigned int col = 0)
    *  \brief get SparseMat matrix
-   *  \param an int, position of the block (row) - Useless for MySimpleMatrix
-   *  \param an int, position of the block (column) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (row) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a SparseMat
    */
-  const SparseMat getSparse(int = 0, int = 0) const;
+  const SparseMat getSparse(unsigned int = 0, unsigned int = 0) const;
 
-  /** \fn DenseMat* getDensePtr(int row = 0, int col = 0)
+  /** \fn DenseMat* getDensePtr(unsigned int row = 0, unsigned int col = 0)
    *  \brief get a pointer on DenseMat matrix
-   *  \param an int, position of the block (row) - Useless for MySimpleMatrix
-   *  \param an int, position of the block (column) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (row) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a DenseMat*
    */
-  const DenseMat* getDensePtr(int = 0, int = 0) const;
+  const DenseMat* getDensePtr(unsigned int = 0, unsigned int = 0) const;
 
-  /** \fn TriangMat* getTriangPtr(int row = 0, int col = 0)
+  /** \fn TriangMat* getTriangPtr(unsigned int row = 0, unsigned int col = 0)
    *  \brief get a pointer on TriangMat matrix
-   *  \param an int, position of the block (row) - Useless for MySimpleMatrix
-   *  \param an int, position of the block (column) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (row) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a TriangMat*
    */
-  const TriangMat* getTriangPtr(int = 0, int = 0) const;
+  const TriangMat* getTriangPtr(unsigned int = 0, unsigned int = 0) const;
 
-  /** \fn SymMat* getSymPtr(int row = 0, int col = 0)
+  /** \fn SymMat* getSymPtr(unsigned int row = 0, unsigned int col = 0)
    *  \brief get a pointer on SymMat matrix
-   *  \param an int, position of the block (row) - Useless for MySimpleMatrix
-   *  \param an int, position of the block (column) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (row) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a SymMat*
    */
-  const SymMat* getSymPtr(int = 0, int = 0) const;
+  const SymMat* getSymPtr(unsigned int = 0, unsigned int = 0) const;
 
-  /** \fn BandedMat* getBandedPtr(int row = 0, int col = 0)
+  /** \fn BandedMat* getBandedPtr(unsigned int row = 0, unsigned int col = 0)
    *  \brief get a pointer on BandedMat matrix
-   *  \param an int, position of the block (row) - Useless for MySimpleMatrix
-   *  \param an int, position of the block (column) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (row) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a BandedMat*
    */
-  const BandedMat* getBandedPtr(int = 0, int = 0) const;
+  const BandedMat* getBandedPtr(unsigned int = 0, unsigned int = 0) const;
 
-  /** \fn SparseMat* getSparsePtr(int row = 0, int col = 0)
+  /** \fn SparseMat* getSparsePtr(unsigned int row = 0, unsigned int col = 0)
    *  \brief get a pointer on SparseMat matrix
-   *  \param an int, position of the block (row) - Useless for MySimpleMatrix
-   *  \param an int, position of the block (column) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (row) - Useless for MySimpleMatrix
+   *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a SparseMat*
    */
-  const SparseMat* getSparsePtr(int = 0, int = 0) const;
+  const SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const;
 
   /** \fn mapped getMap()
    *  \brief get mapped matrix
@@ -230,11 +226,11 @@ public:
    */
   const mapped getMap(void) const;
 
-  /** \fn void getBlock(int numCow, int numCol, MySiconosMatrix& block)
+  /** \fn void getBlock(unsigned int numCow, unsigned int numCol, MySiconosMatrix& block)
    *  \brief get block corresponding to lines given in numRow and columns in numCol
-   *  \param 2 int for indexes and a MySiconosMatrix (in-out paramater)
+   *  \param 2 unsigned int for indexes and a MySiconosMatrix (in-out paramater)
    */
-  void getBlock(int, int, MySiconosMatrix&) const;
+  void getBlock(unsigned int, unsigned int, MySiconosMatrix&) const;
 
   /** \fn const std::deque<bool> getBlockAllocated()const
    *   \brief get std::deque of bool
@@ -243,36 +239,36 @@ public:
    */
   const std::deque<bool> getBlockAllocated(void) const;
 
-  /** \fn void getRow(int index, MySimpleVector& vOut) const
+  /** \fn void getRow(unsigned int index, MySimpleVector& vOut) const
    *  \brief get row index of current matrix and save it into vOut
-   *  \param int: index of required line
+   *  \param unsigned int: index of required line
    *  \param ref to MySimpleVector: in-out parameter
    */
-  void getRow(int, MySimpleVector&) const;
+  void getRow(unsigned int, MySimpleVector&) const;
 
-  /** \fn void getCol(int index, MySimpleVector& vOut) const
+  /** \fn void getCol(unsigned int index, MySimpleVector& vOut) const
    *  \brief get column index of current matrix and save it into vOut
-   *  \param int: index of required column
+   *  \param unsigned int: index of required column
    *  \param ref to MySimpleVector: in-out parameter
    */
-  void getCol(int, MySimpleVector&) const;
+  void getCol(unsigned int, MySimpleVector&) const;
 
-  /** \fn void setNum(int n)
+  /** \fn void setNum(unsigned int n)
    *  \brief set the attribute num of current matrix with n
    */
-  void setNum(int);
+  void setNum(unsigned int);
 
-  /** \fn void setRow(int row, const MySimpleVector &v)
+  /** \fn void setRow(unsigned int row, const MySimpleVector &v)
    *  \brief set line row of the current matrix with vector v
-   *  \param an int and a MySimpleVector
+   *  \param an unsigned int and a MySimpleVector
    */
-  void setRow(int, const MySimpleVector&);
+  void setRow(unsigned int, const MySimpleVector&);
 
-  /** \fn void setCol(int col, const MySimpleVector &v)
+  /** \fn void setCol(unsigned int col, const MySimpleVector &v)
    *  \brief set column col of the current matrix with vector v
-   *  \param an int and a MySimpleVector
+   *  \param an unsigned int and a MySimpleVector
    */
-  void setCol(int, const MySimpleVector&);
+  void setCol(unsigned int, const MySimpleVector&);
 
   /** \fn void zero();
    *  \brief sets all the values of the matrix to 0.0
@@ -284,25 +280,25 @@ public:
    */
   void eye(void);
 
-  /** \fn  int size1 (void)const
+  /** \fn  unsigned int size1 (void)const
    *  \brief get the number of rows of the matrix
    *  \exception SiconosMatrixException
    *  \return the number of rows of the matrix
    */
-  int size1(void) const;
+  unsigned int size1(void) const;
 
-  /** \fn  int size2 (void)const
+  /** \fn  unsigned int size2 (void)const
    *  \brief get the number of columns of the matrix
    *  \exception SiconosMatrixException
    *  \return the number of columns of the matrix
    */
-  int size2(void) const;
+  unsigned int size2(void) const;
 
-  /** \fn  void resize (int nbrow, int nbcol, bool val = true)const
+  /** \fn  void resize (unsigned int nbrow, unsigned int nbcol, bool val = true)const
    *  \brief resize the matrix with nbrow rows and nbcol columns The existing elements of the matrix are preseved when specified.
    *  \exception SiconosMatrixException
    */
-  void resize(int, int, int = 0, int = 0, bool = true);
+  void resize(unsigned int, unsigned int, unsigned int = 0, unsigned int = 0, bool = true);
 
   /** \fn const double normInf() const;
    *  \brief compute the infinite norm of the matrix
@@ -317,32 +313,32 @@ public:
 
   // --- MATRICES HANDLING AND OPERATORS ---
 
-  /** \fn void blockMatrixCopy( MySiconosMatrix &blockMat, int, int)
+  /** \fn void blockMatrixCopy( MySiconosMatrix &blockMat, unsigned int, unsigned int)
    *  \brief copy the blockmatrix "blockMat" in the matrix "mat" at the position (xPos, yPos)
    *                    [0, 0, 0, 0].blockMatrixCopy([1], 0, 2) => mat = [0 0 1 0]
    *  \param MySiconosMatrix& : the block matrix to copy in the current matrix
-   *  \param int : the line position to start the copy of the blockmatrix
-   *  \param int : the column position to start the copy of the blockmatrix
+   *  \param unsigned int : the line position to start the copy of the blockmatrix
+   *  \param unsigned int : the column position to start the copy of the blockmatrix
    */
-  void blockMatrixCopy(const MySiconosMatrix&, int, int);
+  void blockMatrixCopy(const MySiconosMatrix&, unsigned int, unsigned int);
 
-  /** \fn double& operator() (int row, int col)
+  /** \fn double& operator() (unsigned int row, unsigned int col)
    *  \brief get or set the element matrix[i,j]
-   *  \param an int i
-   *  \param an int j
+   *  \param an unsigned int i
+   *  \param an unsigned int j
    *  \exception SiconosMatrixException
    *  \return the element matrix[i,j]
    */
-  double& operator()(int , int);
+  double& operator()(unsigned int , unsigned int);
 
-  /** \fn double operator() (int row, int col)const
+  /** \fn double operator() (unsigned int row, unsigned int col)const
    *  \brief get or set the element matrix[i,j]
-   *  \param an int i
-   *  \param an int j
+   *  \param an unsigned int i
+   *  \param an unsigned int j
    *  \exception SiconosMatrixException
    *  \return the element matrix[i,j]
    */
-  double operator()(int , int) const;
+  double operator()(unsigned int , unsigned int) const;
 
   /** \fn assignment operator
    *  \param MySiconosMatrix : the matrix to be copied
@@ -504,6 +500,6 @@ public:
    *  \param 2 MySiconosMatrix
    *  \return MySimpleMatrix : the result of the multiplication
    */
-  friend MySimpleMatrix multranspose(const MySiconosMatrix&, const MySiconosMatrix&);
+  friend MySimpleMatrix multTranspose(const MySiconosMatrix&, const MySiconosMatrix&);
 };
 #endif

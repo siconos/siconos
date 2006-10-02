@@ -2,14 +2,14 @@
 
 //#define STDMAP 0
 
-void MyBlockMatrix::addInTab(int row, int col)
+void MyBlockMatrix::addInTab(unsigned int row, unsigned int col)
 {
 
   tabRow.push_back(row);
   tabCol.push_back(col);
 
-  int nbRow = tabRow.size();
-  int nbCol = tabCol.size();
+  unsigned int nbRow = tabRow.size();
+  unsigned int nbCol = tabCol.size();
 
   if (nbRow > 1)
     tabRow[nbRow - 1] += tabRow[nbRow - 2];
@@ -17,17 +17,17 @@ void MyBlockMatrix::addInTab(int row, int col)
     tabCol[nbCol - 1] += tabCol[nbCol - 2];
 }
 
-void MyBlockMatrix::makeTab(int row, int col)
+void MyBlockMatrix::makeTab(unsigned int row, unsigned int col)
 {
 
-  int dim;
+  unsigned int dim;
   tabRow.clear();
   tabCol.clear();
 
   if (STDMAP == 1)
   {
     // Col sweeping
-    for (int j = 0; j < map.size2(); j++)
+    for (unsigned int j = 0; j < map.size2(); j++)
     {
       tabCol.push_back((*map(0, j)).size2());
       dim = tabCol.size();
@@ -35,7 +35,7 @@ void MyBlockMatrix::makeTab(int row, int col)
         tabCol[dim - 1] += tabCol[dim - 2];
     }
     // Row sweeping
-    for (int i = 0; i < map.size1(); i++)
+    for (unsigned int i = 0; i < map.size1(); i++)
     {
       tabRow.push_back((*map(i, 0)).size1());
       dim = tabRow.size();
@@ -83,10 +83,10 @@ MyBlockMatrix::MyBlockMatrix(const MySiconosMatrix &m)
   tabRow = (dynamic_cast<const MyBlockMatrix&>(m)).tabRow;
   tabCol = (dynamic_cast<const MyBlockMatrix&>(m)).tabCol;
 
-  int col = Mmap.size2();
-  int row = Mmap.size1();
+  unsigned int col = Mmap.size2();
+  unsigned int row = Mmap.size1();
   map.resize(row, col, false);
-  int i = 0, j = 0;
+  unsigned int i = 0, j = 0;
   // STDMAP = 1 means that we use the map::iterator of standard library, else we use the iterator of boost map
   if (STDMAP == 1)
   {
@@ -131,10 +131,10 @@ MyBlockMatrix::MyBlockMatrix(const MyBlockMatrix &m)
   tabRow = (dynamic_cast<const MyBlockMatrix&>(m)).tabRow;
   tabCol = (dynamic_cast<const MyBlockMatrix&>(m)).tabCol;
 
-  int col = Mmap.size2();
-  int row = Mmap.size1();
+  unsigned int col = Mmap.size2();
+  unsigned int row = Mmap.size1();
   map.resize(row, col, false);
-  int i = 0, j = 0;
+  unsigned int i = 0, j = 0;
 
   // STDMAP = 1 means that we use the map::iterator of standard library, else we use the iterator of boost map
   if (STDMAP == 1)
@@ -172,9 +172,9 @@ MyBlockMatrix::MyBlockMatrix(const MyBlockMatrix &m)
 MyBlockMatrix::MyBlockMatrix(mapped& Mmap)
 {
 
-  int i = 0, j = 0;
-  int row = Mmap.size1();
-  int col = Mmap.size2();
+  unsigned int i = 0, j = 0;
+  unsigned int row = Mmap.size1();
+  unsigned int col = Mmap.size2();
   setIsBlock(true);
   isBlockAllocatedIn.resize(row * col);
   map.resize(row, col, false);
@@ -214,9 +214,9 @@ MyBlockMatrix::MyBlockMatrix(mapped& Mmap)
   makeTab(row, col);
 }
 
-MyBlockMatrix::MyBlockMatrix(const std::vector<MySiconosMatrix* > &m, int row, int col)
+MyBlockMatrix::MyBlockMatrix(const std::vector<MySiconosMatrix* > &m, unsigned int row, unsigned int col)
 {
-  if (m.size() != (row * col))
+  if (m.size() != (unsigned int)(row * col))
     SiconosMatrixException::selfThrow("BlockMatrix constructor from a vector<LaGenMatDouble>, number of blocks inconsistent with provided dimensions.");
 
   setIsBlock(true);
@@ -225,12 +225,12 @@ MyBlockMatrix::MyBlockMatrix(const std::vector<MySiconosMatrix* > &m, int row, i
   tabRow.reserve(row);
   tabCol.reserve(col);
 
-  for (int i = 0; i < row; i++)
+  for (unsigned int i = 0; i < row; i++)
   {
-    for (int j = 0; j < col; j++)
+    for (unsigned int j = 0; j < col; j++)
     {
       map(i, j) = new MySimpleMatrix(*m [i * col + j]);
-      isBlockAllocatedIn[i * col + j] == true;
+      isBlockAllocatedIn[i * col + j] = true;
       //isBlockAllocatedIn.push_back (false);
     }
   }
@@ -239,8 +239,8 @@ MyBlockMatrix::MyBlockMatrix(const std::vector<MySiconosMatrix* > &m, int row, i
 
 MyBlockMatrix::~MyBlockMatrix(void)
 {
-  int row = map.size1();
-  int col = map.size2();
+  unsigned row = map.size1();
+  unsigned col = map.size2();
   // we call delete on the map only if the pointer was allocated
   for (unsigned i = 0; i < row; ++i)
   {
@@ -253,7 +253,7 @@ MyBlockMatrix::~MyBlockMatrix(void)
 }
 
 
-void MyBlockMatrix::getBlock(int row, int col, MySiconosMatrix &m)const
+void MyBlockMatrix::getBlock(unsigned int row, unsigned int col, MySiconosMatrix &m)const
 {
   m = dynamic_cast<MySiconosMatrix&>(*(map(row, col)));
 }
@@ -267,9 +267,9 @@ const double MyBlockMatrix::normInf(void)const
 {
   double sum = 0;
   double norm = 0;
-  for (int i = 0; i < size1(); i++)
+  for (unsigned int i = 0; i < size1(); i++)
   {
-    for (int j = 0; j < size2(); j++)
+    for (unsigned int j = 0; j < size2(); j++)
     {
       sum += (*this)(i, j);
     }
@@ -279,15 +279,15 @@ const double MyBlockMatrix::normInf(void)const
   return norm;
 }
 
-void MyBlockMatrix::blockMatrixCopy(const MySiconosMatrix &m, int row, int col)
+void MyBlockMatrix::blockMatrixCopy(const MySiconosMatrix &m, unsigned int row, unsigned int col)
 {
 
   if (m.isBlock() == true)
     SiconosMatrixException::selfThrow("blockMatrixCopy of a block to an other block is forbidden.");
 
 
-  int nbRow = 0;
-  int nbCol = 0;
+  unsigned int nbRow = 0;
+  unsigned int nbCol = 0;
 
   // Computation of the index row and the index column of the block corresponding
   while (row >= tabRow[nbRow] && nbRow < tabRow.size())
@@ -302,21 +302,21 @@ void MyBlockMatrix::blockMatrixCopy(const MySiconosMatrix &m, int row, int col)
   isBlockAllocatedIn[nbRow * tabCol.size() + nbCol] = true;
 }
 
-int MyBlockMatrix::getNum(void)const
+unsigned int MyBlockMatrix::getNum(void)const
 {
   SiconosMatrixException::selfThrow("getNum of a block is forbidden.");
 }
 
-void MyBlockMatrix::setNum(int)
+void MyBlockMatrix::setNum(unsigned int)
 {
   SiconosMatrixException::selfThrow("setNum of a block is forbidden.");
 }
 
 
-void MyBlockMatrix::getRow(int row, MySimpleVector &v)const
+void MyBlockMatrix::getRow(unsigned int row, MySimpleVector &v)const
 {
 
-  int numRow = 0, posRow = row, start = 0, stop = 0, step = 0;
+  unsigned int numRow = 0, posRow = row, start = 0, stop = 0, step = 0;
 
   if (row > size1() || row < 0)
     SiconosMatrixException::selfThrow("getRow : row is out of range");
@@ -324,8 +324,6 @@ void MyBlockMatrix::getRow(int row, MySimpleVector &v)const
   // Verification of the size of the result vector
   if (v.size() != size2())
     SiconosMatrixException::selfThrow("getRow : inconsistent sizes");
-
-  int nbCol = size2();
 
   // Determination of the row of the block corresponding
 
@@ -338,12 +336,12 @@ void MyBlockMatrix::getRow(int row, MySimpleVector &v)const
   // loop for copying the values into the vector
   DenseVect vect(size2());
 
-  for (int j = 0; j < tabCol.size(); j++)
+  for (unsigned int j = 0; j < tabCol.size(); j++)
   {
     step = (*map(numRow, j)).size2();
     start = stop;
     stop += step;
-    MySimpleVector tmp(DENSE, step);
+    MySimpleVector tmp(step);
     (*map(numRow, j)).getRow(posRow, tmp);
 
     subrange(vect, start, stop) = tmp.getDense();
@@ -352,10 +350,10 @@ void MyBlockMatrix::getRow(int row, MySimpleVector &v)const
   v = p;
 }
 
-void MyBlockMatrix::getCol(int col, MySimpleVector &v)const
+void MyBlockMatrix::getCol(unsigned int col, MySimpleVector &v)const
 {
 
-  int numCol = 0, posCol = col, start = 0, stop = 0, step = 0;
+  unsigned int numCol = 0, posCol = col, start = 0, stop = 0, step = 0;
 
   if (col > size2() || col < 0)
     SiconosMatrixException::selfThrow("getCol : col is out of range");
@@ -363,8 +361,6 @@ void MyBlockMatrix::getCol(int col, MySimpleVector &v)const
   // Verification of the size of the result vector
   if (v.size() != size1())
     SiconosMatrixException::selfThrow("getcol : inconsistent sizes");
-
-  int nbRow = size1();
 
   // Determination of the column of the block corresponding
   while (col >= tabCol[numCol] && numCol < tabCol.size())
@@ -376,12 +372,12 @@ void MyBlockMatrix::getCol(int col, MySimpleVector &v)const
   DenseVect vect(size1());
 
   // loop for copying the values into the vector
-  for (int i = 0; i < tabRow.size(); i++)
+  for (unsigned int i = 0; i < tabRow.size(); i++)
   {
     step = (*map(i, numCol)).size1();
     start = stop;
     stop += step;
-    MySimpleVector tmp(DENSE, step);
+    MySimpleVector tmp(step);
     (*map(i, numCol)).getCol(posCol, tmp);
 
     subrange(vect, start, stop) = tmp.getDense();
@@ -390,12 +386,12 @@ void MyBlockMatrix::getCol(int col, MySimpleVector &v)const
   v = p;
 }
 
-void MyBlockMatrix::setRow(int row, const MySimpleVector &v)
+void MyBlockMatrix::setRow(unsigned int row, const MySimpleVector &v)
 {
 
-  int numRow = 0, posRow = row, start = 0, stop = 0, step = 0;
+  unsigned int numRow = 0, posRow = row, start = 0, stop = 0, step = 0;
 
-  int nbCol = size2();
+  unsigned int nbCol = size2();
   assert(v.size() == nbCol);
 
   while (row >= tabRow[numRow] && numRow < tabRow.size())
@@ -407,7 +403,7 @@ void MyBlockMatrix::setRow(int row, const MySimpleVector &v)
   DenseVect vect(size2());
   vect = v.getDense();
 
-  for (int j = 0; j < tabCol.size(); j++)
+  for (unsigned int j = 0; j < tabCol.size(); j++)
   {
     step = (*map(numRow, j)).size2();
     start = stop;
@@ -420,12 +416,12 @@ void MyBlockMatrix::setRow(int row, const MySimpleVector &v)
   }
 }
 
-void MyBlockMatrix::setCol(int col, const MySimpleVector &v)
+void MyBlockMatrix::setCol(unsigned int col, const MySimpleVector &v)
 {
 
-  int numCol = 0, posCol = col, start = 0, stop = 0, step = 0;
+  unsigned int numCol = 0, posCol = col, start = 0, stop = 0, step = 0;
 
-  int nbRow = size1();
+  unsigned int nbRow = size1();
   assert(v.size() == nbRow);
 
   while (col >= tabCol[numCol] && numCol < tabCol.size())
@@ -436,7 +432,7 @@ void MyBlockMatrix::setCol(int col, const MySimpleVector &v)
 
   DenseVect vect(size1());
   vect = v.getDense();
-  for (int i = 0; i < tabRow.size(); i++)
+  for (unsigned int i = 0; i < tabRow.size(); i++)
   {
     step = (*map(i, numCol)).size1();
     start = stop;
@@ -509,8 +505,8 @@ void MyBlockMatrix::eye(void)
 
   if (STDMAP == 1)
   {
-    int col = map.size2();
-    int p = 0, q = 0;
+    unsigned int col = map.size2();
+    unsigned int p = 0, q = 0;
     mapped::array_type::iterator it;
     for (it = (map.data()).begin(); it != (map.data()).end(); ++it)
     {
@@ -550,93 +546,93 @@ void MyBlockMatrix::eye(void)
 }
 
 // return the boost dense matrix of the block (i, j)
-const DenseMat  MyBlockMatrix::getDense(int row, int col)const
+const DenseMat  MyBlockMatrix::getDense(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 1);
-  SiconosMatrixException::selfThrow("DenseMat getDense(int row, int col) : the matrix at (row, col) is not a Dense matrix");
+  SiconosMatrixException::selfThrow("DenseMat getDense(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Dense matrix");
 
   return (*map(row, col)).getDense();
 }
 
 // return the boost triangular matrix of the block (i, j)
-const TriangMat MyBlockMatrix::getTriang(int row, int col)const
+const TriangMat MyBlockMatrix::getTriang(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 2);
-  SiconosMatrixException::selfThrow("TriangMat getTriang(int row, int col) : the matrix at (row, col) is not a Triangular matrix");
+  SiconosMatrixException::selfThrow("TriangMat getTriang(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Triangular matrix");
   return (*map(row, col)).getTriang();
 }
 
 // return the boost symmetric matrix of the block (i, j)
-const SymMat MyBlockMatrix::getSym(int row, int col)const
+const SymMat MyBlockMatrix::getSym(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 3);
-  SiconosMatrixException::selfThrow("SymMat getSym(int row, int col) : the matrix at (row, col) is not a Symmmetric matrix");
+  SiconosMatrixException::selfThrow("SymMat getSym(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Symmmetric matrix");
   return (*map(row, col)).getSym();
 }
 
 // return the boost sparse matrix of the block (i, j)
-const SparseMat  MyBlockMatrix::getSparse(int row, int col)const
+const SparseMat  MyBlockMatrix::getSparse(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 4);
-  SiconosMatrixException::selfThrow("SparseMat getSparse(int row, int col) : the matrix at (row, col) is not a Sparse matrix");
+  SiconosMatrixException::selfThrow("SparseMat getSparse(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
 
   return (*map(row, col)).getSparse();
 }
 
 // return the boost banded matrix of the block (i, j)
-const BandedMat  MyBlockMatrix::getBanded(int row, int col)const
+const BandedMat  MyBlockMatrix::getBanded(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 5);
-  SiconosMatrixException::selfThrow("BandedMat getBanded(int row, int col) : the matrix at (row, col) is not a Banded matrix");
+  SiconosMatrixException::selfThrow("BandedMat getBanded(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Banded matrix");
 
   return (*map(row, col)).getBanded();
 }
 
 // The following functions return the corresponding pointers
-const DenseMat*  MyBlockMatrix::getDensePtr(int row, int col)const
+const DenseMat*  MyBlockMatrix::getDensePtr(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 1);
-  SiconosMatrixException::selfThrow("DenseMat* getDensePtr(int row, int col) : the matrix at (row, col) is not a Dense matrix");
+  SiconosMatrixException::selfThrow("DenseMat* getDensePtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Dense matrix");
 
   return (*map(row, col)).getDensePtr();
 }
 
-const TriangMat* MyBlockMatrix::getTriangPtr(int row, int col)const
+const TriangMat* MyBlockMatrix::getTriangPtr(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 2);
-  SiconosMatrixException::selfThrow("TriangMat* getTriangPtr(int row, int col) : the matrix at (row, col) is not a Triangular matrix");
+  SiconosMatrixException::selfThrow("TriangMat* getTriangPtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Triangular matrix");
 
   return (*map(row, col)).getTriangPtr();
 }
-const SymMat* MyBlockMatrix::getSymPtr(int row, int col)const
+const SymMat* MyBlockMatrix::getSymPtr(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 3);
-  SiconosMatrixException::selfThrow("SymMat* getSymPtr(int row, int col) : the matrix at (row, col) is not a Symmmetric matrix");
+  SiconosMatrixException::selfThrow("SymMat* getSymPtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Symmmetric matrix");
   return (*map(row, col)).getSymPtr();
 }
 
-const SparseMat*  MyBlockMatrix::getSparsePtr(int row, int col)const
+const SparseMat*  MyBlockMatrix::getSparsePtr(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 4);
-  SiconosMatrixException::selfThrow("SparseMat* getSparsePtr(int row, int col) : the matrix at (row, col) is not a Sparse matrix");
+  SiconosMatrixException::selfThrow("SparseMat* getSparsePtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Sparse matrix");
 
   return (*map(row, col)).getSparsePtr();
 }
 
-const BandedMat*  MyBlockMatrix::getBandedPtr(int row, int col)const
+const BandedMat*  MyBlockMatrix::getBandedPtr(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 5);
-  SiconosMatrixException::selfThrow("BandedMat* getBandedPtr(int row, int col) : the matrix at (row, col) is not a Banded matrix");
+  SiconosMatrixException::selfThrow("BandedMat* getBandedPtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Banded matrix");
 
   return (*map(row, col)).getBandedPtr();
 }
@@ -648,19 +644,19 @@ const mapped MyBlockMatrix::getMap(void)const
 }
 
 // return the number of rows of blocks
-int MyBlockMatrix::size1(void)const
+unsigned int MyBlockMatrix::size1(void)const
 {
   return tabRow[ tabRow.size() - 1 ];
 }
 
 // return the number of columns of blocks
-int MyBlockMatrix::size2(void)const
+unsigned int MyBlockMatrix::size2(void)const
 {
   return tabCol[ tabCol.size() - 1 ];
 }
 
 
-void MyBlockMatrix::resize(int row, int col, int lower, int upper, bool preserve)
+void MyBlockMatrix::resize(unsigned int row, unsigned int col, unsigned int lower, unsigned int upper, bool preserve)
 {
   if (lower != 0 || upper != 0)
     SiconosMatrixException::selfThrow("MyBlockMatrix::resize : lower or upper not equal to 0.0");
@@ -669,11 +665,11 @@ void MyBlockMatrix::resize(int row, int col, int lower, int upper, bool preserve
 
 // OPERATORS
 
-double& MyBlockMatrix::operator()(int row, int col)
+double& MyBlockMatrix::operator()(unsigned int row, unsigned int col)
 {
 
-  int nbRow = 0;
-  int nbCol = 0;
+  unsigned int nbRow = 0;
+  unsigned int nbCol = 0;
 
   while (row >= tabRow[nbRow] && nbRow < tabRow.size())
     nbRow ++;
@@ -681,8 +677,8 @@ double& MyBlockMatrix::operator()(int row, int col)
   while (col >= tabCol[nbCol] && nbCol < tabCol.size())
     nbCol ++;
 
-  int posRow = row;
-  int posCol = col;
+  unsigned int posRow = row;
+  unsigned int posCol = col;
 
   if (nbRow != 0)
     posRow -= tabRow[nbRow - 1];
@@ -692,11 +688,11 @@ double& MyBlockMatrix::operator()(int row, int col)
   return (*map(nbRow, nbCol))(posRow, posCol);
 }
 
-double MyBlockMatrix::operator()(int row, int col)const
+double MyBlockMatrix::operator()(unsigned int row, unsigned int col)const
 {
 
-  int nbRow = 0;
-  int nbCol = 0;
+  unsigned int nbRow = 0;
+  unsigned int nbCol = 0;
 
   while (row >= tabRow[nbRow] && nbRow < tabRow.size())
     nbRow ++;
@@ -704,8 +700,8 @@ double MyBlockMatrix::operator()(int row, int col)const
   while (col >= tabCol[nbCol] && nbCol < tabCol.size())
     nbCol ++;
 
-  int posRow = row;
-  int posCol = col;
+  unsigned int posRow = row;
+  unsigned int posCol = col;
 
   if (nbRow != 0)
     posRow -= tabRow[nbRow - 1];
@@ -730,8 +726,8 @@ const MyBlockMatrix& MyBlockMatrix::operator = (const MySiconosMatrix &m)
     tabRow = (dynamic_cast<const MyBlockMatrix&>(m)).tabRow;
     tabCol = (dynamic_cast<const MyBlockMatrix&>(m)).tabCol;
 
-    int col = tabCol.size();
-    int i = 0, j = 0;
+    unsigned int col = tabCol.size();
+    unsigned int i = 0, j = 0;
     if (STDMAP == 1)
     {
       mapped::array_type::iterator it;
@@ -789,8 +785,8 @@ const MyBlockMatrix& MyBlockMatrix::operator = (const MyBlockMatrix &m)
   tabRow = (dynamic_cast<const MyBlockMatrix&>(m)).tabRow;
   tabCol = (dynamic_cast<const MyBlockMatrix&>(m)).tabCol;
 
-  int col = tabCol.size();
-  int i = 0, j = 0;
+  unsigned int col = tabCol.size();
+  unsigned int i = 0, j = 0;
   if (STDMAP == 1)
   {
     mapped::array_type::iterator it;
@@ -834,7 +830,7 @@ const MyBlockMatrix& MyBlockMatrix::operator *= (double d)
 {
 
 
-  int col = tabCol.size();
+  unsigned int col = tabCol.size();
   if (STDMAP == 1)
   {
     mapped::array_type::iterator it;
@@ -851,7 +847,7 @@ const MyBlockMatrix& MyBlockMatrix::operator *= (double d)
   {
     mapped::iterator1 it;
     mapped::iterator2 it2;
-    int i = 0, j = 0;
+    unsigned int i = 0, j = 0;
     for (it = map.begin1(); it != map.end1(); ++it)
     {
       for (it2 = it.begin(); it2 != it.end(); it2++)
@@ -872,7 +868,7 @@ const MyBlockMatrix& MyBlockMatrix::operator *= (int d)
 {
 
 
-  int col = tabCol.size();
+  unsigned int col = tabCol.size();
   if (STDMAP == 1)
   {
     mapped::array_type::iterator it;
@@ -889,7 +885,7 @@ const MyBlockMatrix& MyBlockMatrix::operator *= (int d)
   {
     mapped::iterator1 it;
     mapped::iterator2 it2;
-    int i = 0, j = 0;
+    unsigned int i = 0, j = 0;
     for (it = map.begin1(); it != map.end1(); ++it)
     {
       for (it2 = it.begin(); it2 != it.end(); it2++)
@@ -908,7 +904,7 @@ const MyBlockMatrix& MyBlockMatrix::operator *= (int d)
 
 const MyBlockMatrix& MyBlockMatrix::operator /= (double d)
 {
-  int col = tabCol.size();
+  unsigned int col = tabCol.size();
   if (STDMAP == 1)
   {
     mapped::array_type::iterator it;
@@ -925,7 +921,7 @@ const MyBlockMatrix& MyBlockMatrix::operator /= (double d)
   {
     mapped::iterator1 it;
     mapped::iterator2 it2;
-    int i = 0, j = 0;
+    unsigned int i = 0, j = 0;
     for (it = map.begin1(); it != map.end1(); ++it)
     {
       for (it2 = it.begin(); it2 != it.end(); it2++)
@@ -944,7 +940,7 @@ const MyBlockMatrix& MyBlockMatrix::operator /= (double d)
 
 const MyBlockMatrix& MyBlockMatrix::operator /= (int d)
 {
-  int col = tabCol.size();
+  unsigned int col = tabCol.size();
   if (STDMAP == 1)
   {
     mapped::array_type::iterator it;
@@ -961,7 +957,7 @@ const MyBlockMatrix& MyBlockMatrix::operator /= (int d)
   {
     mapped::iterator1 it;
     mapped::iterator2 it2;
-    int i = 0, j = 0;
+    unsigned int i = 0, j = 0;
     for (it = map.begin1(); it != map.end1(); ++it)
     {
       for (it2 = it.begin(); it2 != it.end(); it2++)
@@ -988,12 +984,12 @@ const MyBlockMatrix& MyBlockMatrix::operator += (const MySiconosMatrix &m)
   if (m.isBlock() == true)
   {
     mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
-    int col = tabCol.size();
+    unsigned int col = tabCol.size();
 
     if (STDMAP == 1)
     {
       mapped::array_type::iterator it;
-      int i = 0, j = 0;
+      unsigned int i = 0, j = 0;
 
 
       for (it = (Mmap.data()).begin(); it != (Mmap.data()).end(); ++it)
@@ -1010,7 +1006,7 @@ const MyBlockMatrix& MyBlockMatrix::operator += (const MySiconosMatrix &m)
     {
       mapped::iterator1 it;
       mapped::iterator2 it2;
-      int i = 0, j = 0;
+      unsigned int i = 0, j = 0;
       for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
       {
         for (it2 = it.begin(); it2 != it.end(); it2++)
@@ -1029,10 +1025,10 @@ const MyBlockMatrix& MyBlockMatrix::operator += (const MySiconosMatrix &m)
   else
   {
     //SUM USING OPERATOR ()
-    for (int i = 0; i < size1(); i++)
+    for (unsigned int i = 0; i < size1(); i++)
     {
 
-      for (int j = 0; j < size2(); j++)
+      for (unsigned int j = 0; j < size2(); j++)
       {
         (*this)(i, j) += m(i, j);
       }
@@ -1051,12 +1047,12 @@ const MyBlockMatrix& MyBlockMatrix::operator -= (const MySiconosMatrix &m)
   if (m.isBlock() == true)
   {
     mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
-    int col = tabCol.size();
+    unsigned int col = tabCol.size();
 
     if (STDMAP == 1)
     {
       mapped::array_type::iterator it;
-      int i = 0, j = 0;
+      unsigned int i = 0, j = 0;
 
       for (it = (Mmap.data()).begin(); it != (Mmap.data()).end(); ++it)
       {
@@ -1072,7 +1068,7 @@ const MyBlockMatrix& MyBlockMatrix::operator -= (const MySiconosMatrix &m)
     {
       mapped::iterator1 it;
       mapped::iterator2 it2;
-      int i = 0, j = 0;
+      unsigned int i = 0, j = 0;
       for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
       {
         for (it2 = it.begin(); it2 != it.end(); it2++)
@@ -1091,9 +1087,9 @@ const MyBlockMatrix& MyBlockMatrix::operator -= (const MySiconosMatrix &m)
   else
   {
     //SUBSTRACTION USING OPERATOR ()
-    for (int i = 0; i < size1(); i++)
+    for (unsigned int i = 0; i < size1(); i++)
     {
-      for (int j = 0; j < size2(); j++)
+      for (unsigned int j = 0; j < size2(); j++)
       {
         (*this)(i, j) -= m(i, j);
       }

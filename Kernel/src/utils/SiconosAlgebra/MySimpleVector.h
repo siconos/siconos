@@ -42,45 +42,39 @@ class MySimpleVector: public MySiconosVector
 {
 private:
 
-  /** \var int num
-   * \brief an int which make a correspondance with Boost Matrices: 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat
+  /** \var unsigned int num
+   * \brief an unsigned int which make a correspondance with Boost Matrices: 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat
    */
-  int num;
+  unsigned int num;
 
   /** \var MyVect vect (See MySiconosMatrix.h for more details on MyMat type);
    * \brief union of The Boost Matrices : DenseVect, SparseVect are encapsulated.
    */
   MyVect vect;
 
-  /** \fn MySimpleVector ()
-   *  \brief default constructor
-   *  \return MySimpleVector
+  /** \fn MySimpleVector (TYP = DENSE)
+   *  \brief constructor with the type of the Boost vector
+   *  \param TYP
    */
-  MySimpleVector(void);
+  MySimpleVector(TYP = DENSE);
 
 public:
   /***************************** CONSTRUCTORS ****************************/
 
-  /** \fn MySimpleVector (TYP)
-   *  \brief constructor with the type of the Boost vector
-   *  \param TYP
-   */
-  MySimpleVector(TYP);
-
-  /** \fn MySimpleVector (TYP, int)
+  /** \fn MySimpleVector (unsigned int, TYP = DENSE)
    *  \brief constructor with the type and the dimension of the Boost vector
+   *  \param an unsigned int, dimension
    *  \param a TYP
-   *  \param an int
    */
-  MySimpleVector(TYP , int);
+  MySimpleVector(unsigned int , TYP = DENSE);
 
-  /** \fn MySimpleVector (TYP, const std::vector<double>&, int)
+  /** \fn MySimpleVector (const std::vector<double>&, unsigned int, TYP = DENSE)
    *  \brief constructor with the type of the boost vector, a std::vector of the values and the dimension of the vector
-   *  \param a TYP
    *  \param a std::vector<double>
-   *  \param an int
+   *  \param an unsigned int
+   *  \param a TYP
    */
-  MySimpleVector(TYP , const std::vector<double> , int);
+  MySimpleVector(const std::vector<double> , unsigned int , TYP = DENSE);
 
   /** \fn MySimpleVector (const MySimpleVector&)
    *  \brief copy constructor
@@ -131,18 +125,18 @@ public:
    */
   const double normInf(void)const;
 
-  /** \fn unsigned int size() const
+  /** \fn unsigned unsigned int size() const
    *  \brief get the vector size, ie the total number of (double)
    *  elements in the vector
-   *  \return int
+   *  \return unsigned int
    */
-  int size(void)const;
+  unsigned int size(void)const;
 
-  /** \fn  void resize (int nbcol, bool val = true)const
+  /** \fn  void resize (unsigned int nbcol, bool val = true)const
    *  \brief resize the vector with nbcol columns. The existing elements of the matrix are preseved when specified.
    *  \exception SiconosVectorException
    */
-  void resize(int, bool = true);
+  void resize(unsigned int, bool = true);
 
 
   /** \fn void display();
@@ -176,34 +170,34 @@ public:
    */
   const SparseVect* getSparsePtr(void)const;
 
-  /** \fn int getNum() const
+  /** \fn unsigned int getNum() const
    *  \brief get the attribute num of current vector
-   * \return an int.
+   * \return an unsigned int.
    */
-  int getNum(void)const;
+  unsigned int getNum(void)const;
 
-  /** \fn void setNum(int n)
+  /** \fn void setNum(unsigned int n)
    *  \brief set the attribute num of current vector with n
    */
-  void setNum(int);
+  void setNum(unsigned int);
 
   //************************** VECTORS HANDLING AND OPERATORS *******************************
 
-  /** \fn double& operator ()(int i)
+  /** \fn double& operator ()(unsigned int i)
    *  \brief get the element at position i in the vector
    *  \param an integer i
    *  \exception SiconosVectorException
    *  \return a double
    */
-  double& operator()(int);
+  double& operator()(unsigned int);
 
-  /** \fn double operator ()(int i)const
+  /** \fn double operator ()(unsigned int i)const
    *  \brief get the element at position i in the vector
    *  \param an integer i
    *  \exception SiconosVectorException
    *  \return a double
    */
-  double operator()(int)const;
+  double operator()(unsigned int)const;
 
   /** \fn operator * (const MySiconosVector &v)
    *  \brief multiply the current vector with the vector v

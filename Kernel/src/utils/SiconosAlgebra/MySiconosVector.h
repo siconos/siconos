@@ -100,11 +100,11 @@ public:
    */
   virtual ~MySiconosVector(void) = 0;
 
-  /** \fn int getNum() const
+  /** \fn unsigned int getNum() const
    *  \brief get the attribute num of current vector
-   * \return an int.
+   * \return an unsigned int.
    */
-  virtual int getNum(void)const = 0;
+  virtual unsigned int getNum(void)const = 0;
 
   /** \fn DenseVect getDense()
    *  \brief get the attribute if it's type is DenseVect
@@ -130,10 +130,10 @@ public:
    */
   virtual const SparseVect* getSparsePtr(void)const = 0;
 
-  /** \fn void setNum(int n)
+  /** \fn void setNum(unsigned int n)
    *  \brief set the attribute num of current vector with n
    */
-  virtual void setNum(int) = 0;
+  virtual void setNum(unsigned int) = 0;
 
   /** \fn void zero();
    *  \brief sets all the values of the vector to 0.0
@@ -143,15 +143,15 @@ public:
   /** \fn unsigned int size() const
    *  \brief get the vector size, ie the total number of (double)
    *  elements in the vector
-   *  \return int
+   *  \return unsigned int
    */
-  virtual int size(void)const = 0;
+  virtual unsigned int size(void)const = 0;
 
-  /** \fn  void resize (int nbcol, bool val = true)const
+  /** \fn  void resize (unsigned int nbcol, bool val = true)const
    *  \brief resize the vector with nbcol columns. The existing elements of the matrix are preseved when specified.
    *  \exception SiconosVectorException
    */
-  virtual void resize(int, bool = true) = 0;
+  virtual void resize(unsigned int, bool = true) = 0;
 
   /** \fn const double normInf() const;
    *  \brief compute the infinite norm of the vector
@@ -169,21 +169,21 @@ public:
   // for a BlockVector w that contains 2 SiconosVector of size 3
   // w(4) corresponds to the first element of the second vector.
 
-  /** \fn double& operator ()(int i)
+  /** \fn double& operator ()(unsigned int i)
    *  \brief get the element at position i in the vector
    *  \param an integer i
    *  \exception SiconosVectorException
    *  \return a double
    */
-  virtual double& operator()(int) = 0;
+  virtual double& operator()(unsigned int) = 0;
 
-  /** \fn double operator ()(int i)const
+  /** \fn double operator ()(unsigned int i)const
    *  \brief get the element at position i in the vector
    *  \param an integer i
    *  \exception SiconosVectorException
    *  \return a double
    */
-  virtual double operator()(int)const = 0;
+  virtual double operator()(unsigned int)const = 0;
 
   /** \fn operator * (const MySiconosVector &v)
    *  \brief multiply the current vector with the vector v

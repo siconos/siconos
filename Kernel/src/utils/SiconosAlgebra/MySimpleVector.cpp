@@ -5,13 +5,8 @@
 
 using namespace boost::numeric::ublas;
 
-//Default private
-MySimpleVector::MySimpleVector(void): num(0)
-{
-  setIsBlock(false);
-}
-
 /***************************** CONSTRUCTORS ****************************/
+// Default (private)
 MySimpleVector::MySimpleVector(TYP typ)
 {
   setIsBlock(false);
@@ -79,7 +74,7 @@ MySimpleVector::MySimpleVector(const SparseVect& m)
   num = 2;
 }
 
-MySimpleVector::MySimpleVector(TYP typ, int row)
+MySimpleVector::MySimpleVector(unsigned int row, TYP typ)
 {
   setIsBlock(false);
   if (typ == SPARSE)
@@ -94,11 +89,11 @@ MySimpleVector::MySimpleVector(TYP typ, int row)
   }
   else
   {
-    SiconosVectorException::selfThrow("constructor(TYP, int) : invalid type given");
+    SiconosVectorException::selfThrow("constructor(TYP, unsigned int) : invalid type given");
   }
 }
 
-MySimpleVector::MySimpleVector(TYP typ, const std::vector<double> v, int row)
+MySimpleVector::MySimpleVector(const std::vector<double> v, unsigned int row, TYP typ)
 {
   setIsBlock(false);
   if (typ == DENSE)
@@ -108,7 +103,7 @@ MySimpleVector::MySimpleVector(TYP typ, const std::vector<double> v, int row)
   }
   else
   {
-    SiconosVectorException::selfThrow("constructor(TYP, std::vector<double>, int) : invalid type given");
+    SiconosVectorException::selfThrow("constructor(TYP, std::vector<double>, unsigned int) : invalid type given");
   }
 }
 
@@ -140,18 +135,18 @@ MySimpleVector::~MySimpleVector(void)
 }
 
 /******************************** METHODS ******************************/
-int  MySimpleVector::getNum(void)const
+unsigned int  MySimpleVector::getNum(void)const
 {
   return num;
 }
-void MySimpleVector::setNum(int n)
+void MySimpleVector::setNum(unsigned int n)
 {
   num = n;
 }
 
 void MySimpleVector::zero(void)
 {
-  int size = (*this).size();
+  unsigned int size = (*this).size();
   if (num == 1)
   {
     zero_vector<double> p(size);
@@ -164,9 +159,9 @@ void MySimpleVector::zero(void)
   }
 }
 
-int MySimpleVector::size(void)const
+unsigned int MySimpleVector::size(void)const
 {
-  int n;
+  unsigned int n;
   if (num == 1)
     n = (vect.Dense)->size();
   if (num == 2)
@@ -175,7 +170,7 @@ int MySimpleVector::size(void)const
   return n;
 }
 
-void MySimpleVector::resize(int n, bool preserve)
+void MySimpleVector::resize(unsigned int n, bool preserve)
 {
 
   if (num == 1)
@@ -188,7 +183,7 @@ const DenseVect MySimpleVector::getDense(void)const
 {
 
   if (num != 1)
-    SiconosVectorException::selfThrow("DenseVect getDense(int row, int col) : the current vector is not a Dense vector");
+    SiconosVectorException::selfThrow("DenseVect getDense(unsigned int row, unsigned int col) : the current vector is not a Dense vector");
 
   return *vect.Dense;
 }
@@ -197,7 +192,7 @@ const SparseVect MySimpleVector::getSparse(void)const
 {
 
   if (num != 2)
-    SiconosVectorException::selfThrow("SparseVect getSparse(int row, int col) : the current vector is not a Sparse vector");
+    SiconosVectorException::selfThrow("SparseVect getSparse(unsigned int row, unsigned int col) : the current vector is not a Sparse vector");
 
   return *vect.Sparse;
 }
@@ -206,7 +201,7 @@ const DenseVect* MySimpleVector::getDensePtr(void)const
 {
 
   if (num != 1)
-    SiconosVectorException::selfThrow("DenseVect* getDensePtr(int row, int col) : the current vector is not a Dense vector");
+    SiconosVectorException::selfThrow("DenseVect* getDensePtr(unsigned int row, unsigned int col) : the current vector is not a Dense vector");
 
   return vect.Dense;
 }
@@ -215,7 +210,7 @@ const SparseVect* MySimpleVector::getSparsePtr(void)const
 {
 
   if (num != 2)
-    SiconosVectorException::selfThrow("SparseVect* getSparsePtr(int row, int col) : the current vector is not a Sparse vector");
+    SiconosVectorException::selfThrow("SparseVect* getSparsePtr(unsigned int row, unsigned int col) : the current vector is not a Sparse vector");
 
   return vect.Sparse;
 }
@@ -243,7 +238,7 @@ void MySimpleVector::display(void)const
 
 /***************************** OPERATORS ******************************/
 
-double& MySimpleVector::operator()(int row)
+double& MySimpleVector::operator()(unsigned int row)
 {
   double d;  // \Warning : warning at compile due to reference return?
   switch (num)
@@ -255,14 +250,14 @@ double& MySimpleVector::operator()(int row)
     d = ((*vect.Sparse)(row)).ref();
     break;
   default:
-    SiconosVectorException::selfThrow("operator() (int) : invalid type given");
+    SiconosVectorException::selfThrow("operator() (unsigned int) : invalid type given");
 
     break;
   }
   return d;
 }
 
-double MySimpleVector::operator()(int row)const
+double MySimpleVector::operator()(unsigned int row)const
 {
   double d;
   switch (num)
@@ -275,7 +270,7 @@ double MySimpleVector::operator()(int row)const
     break;
     break;
   default:
-    SiconosVectorException::selfThrow("operator() (int) : invalid type given");
+    SiconosVectorException::selfThrow("operator() (unsigned int) : invalid type given");
 
     break;
   }

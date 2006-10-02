@@ -4,9 +4,9 @@
 
 #include "ioVector.h"
 
-//MySimpleVector *tmp = new MySimpleVector(DENSE);
+//MySimpleVector *tmp = new MySimpleVector();
 
-MySimpleVector* ioVector::temporary = new MySimpleVector(DENSE);
+MySimpleVector* ioVector::temporary = new MySimpleVector(1);
 bool ioVector::writeSimpleBinary = false;
 
 // Default private

@@ -36,7 +36,7 @@ private:
   CPPUNIT_TEST(testConstructor0);
   CPPUNIT_TEST(testConstructor1);
   CPPUNIT_TEST(testConstructor2);
-  CPPUNIT_TEST(testConstructor3);
+  //  CPPUNIT_TEST(testConstructor3);
   CPPUNIT_TEST(testConstructor4);
   CPPUNIT_TEST(testConstructor5);
   CPPUNIT_TEST(testConstructor6);
@@ -60,6 +60,12 @@ private:
   CPPUNIT_TEST(testOperators5);
   CPPUNIT_TEST(testOperators6);
   CPPUNIT_TEST(testOperators7);
+  CPPUNIT_TEST(testOperators8);
+  CPPUNIT_TEST(testOperators9);
+  CPPUNIT_TEST(testOperators10);
+  CPPUNIT_TEST(testOperators11);
+  CPPUNIT_TEST(testOperators12);
+  CPPUNIT_TEST(testOperators13);
   CPPUNIT_TEST(testMultTranspose);
   CPPUNIT_TEST(End);
 
@@ -84,7 +90,7 @@ private:
   void testConstructor0();
   void testConstructor1();
   void testConstructor2();
-  void testConstructor3();
+  //  void testConstructor3();
   void testConstructor4();
   void testConstructor5();
   void testConstructor6();
@@ -108,6 +114,12 @@ private:
   void testOperators5();
   void testOperators6();
   void testOperators7();
+  void testOperators8();
+  void testOperators9();
+  void testOperators10();
+  void testOperators11();
+  void testOperators12();
+  void testOperators13();
   void testMultTranspose();
   void End();
 

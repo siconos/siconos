@@ -41,9 +41,9 @@ void MySimpleMatrixTest::setUp()
   v5[1] = 9;
   v5[2] = 10;
 
-  vect1 = new MySimpleVector(DENSE, v3, 2);
-  vect2 = new MySimpleVector(DENSE, v4, 2); // vect2 != vect1, but vect2 == SimM second column
-  vect3 = new MySimpleVector(DENSE, v5, 3); // vect3 != vect1, but vect3 == SimM second row
+  vect1 = new MySimpleVector(v3, 2);
+  vect2 = new MySimpleVector(v4, 2); // vect2 != vect1, but vect2 == SimM second column
+  vect3 = new MySimpleVector(v5, 3); // vect3 != vect1, but vect3 == SimM second row
 
   // Dense
   D = new DenseMat(2, 2);
@@ -71,43 +71,6 @@ void MySimpleMatrixTest::setUp()
   for (signed i = 0; i < signed(B->size1()); ++ i)
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
       (*B)(i, j) = 3 * i + j;
-
-
-  //   unsigned int i,j;
-  //   unsigned int Arow = 10;
-  //   unsigned int Acol = 10;
-  //   unsigned int Brow = 10;
-  //   unsigned int Bcol = 5;
-  //   unsigned int Vsize = 10;
-
-  //   A = new MySimpleMatrix(Arow, Acol);
-  //   B = new MySimpleMatrix(Brow, Bcol);
-  //   C = new MySimpleMatrix(5, 5);
-
-
-  //   /* init A, C */
-  //   srand( (unsigned)time( NULL ) );
-  //   for (i=0; i < Arow; i++)
-  //     for (unsigned int j=0; j < Acol; j++)
-  //       {
-  //  (*A)(i,j) = rand()%10+20;
-  //       }
-
-  //   /* init B */
-  //   for (i=0; i < Brow; i++)
-  //     for (j=0; j < Bcol; j++)
-  //       (*B)(i,j) = rand()%100-50;
-  //   for (i=0; i < 5; i++)
-  //     for (j=0; j < 5; j++)
-  //       (*C)(i,j) = rand()%100-50;
-
-
-  //   /* init SV */
-  //   vector<double> vtmp(Vsize);
-  //   for (i=0; i < Vsize; i++)
-  //     vtmp.at(i) = rand()%10+20;
-
-  //   SV = new SimpleVector(vtmp);
 }
 
 void MySimpleMatrixTest::tearDown()
@@ -126,7 +89,7 @@ void MySimpleMatrixTest::testConstructor0() // constructor with TYP and dim
   cout << "=== Simple Matrix tests start ...=== " << endl;
   cout << "====================================" << endl;
   cout << "--> Test: constructor 0." << endl;
-  MySimpleMatrix * test = new MySimpleMatrix(DENSE, 2, 3);
+  MySimpleMatrix * test = new MySimpleMatrix(2, 3);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->getNum() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor0 : ", test->size1() == 2, true);
@@ -151,14 +114,14 @@ void MySimpleMatrixTest::testConstructor2() // Copy constructor, from a MySicono
   cout << "--> Constructor (copy) test ended with success." << endl;
 }
 
-void MySimpleMatrixTest::testConstructor3()
-{
-  cout << "--> Test: constructor 3." << endl;
-  MySimpleMatrix * test = new MySimpleMatrix(SPARSE);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->getNum() == 4, true);
-  delete test;
-  cout << "--> Constructor 3 test ended with success." << endl;
-}
+// void MySimpleMatrixTest::testConstructor3()
+// {
+//   cout << "--> Test: constructor 3." << endl;
+//   MySimpleMatrix * test = new MySimpleMatrix(SPARSE);
+//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ",test->getNum() == 4, true);
+//   delete test;
+//   cout << "--> Constructor 3 test ended with success." << endl;
+// }
 
 void MySimpleMatrixTest::testConstructor4()
 {
@@ -213,26 +176,25 @@ void MySimpleMatrixTest::testConstructor9()
   const std::vector<double> v1(4, 1);
   const std::vector<double> v(6, 1);
   //DENSE
-  MySiconosMatrix *test1 = new MySimpleMatrix(DENSE, v1, 2, 2);
+  MySiconosMatrix *test1 = new MySimpleMatrix(v1, 2, 2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test1->getNum() == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test1->size1() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test1->size2() == 2, true);
   //TRIANGULAR
-  MySiconosMatrix *test2 = new MySimpleMatrix(TRIANGULAR, v1, 2, 2);
+  MySiconosMatrix *test2 = new MySimpleMatrix(v1, 2, 2, TRIANGULAR);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test2->getNum() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test2->size1() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test2->size2() == 2, true);
   //SYMMETRIC
-  MySiconosMatrix *test3 = new MySimpleMatrix(SYMMETRIC, v1, 2);
+  MySiconosMatrix *test3 = new MySimpleMatrix(v1, 2, 2, SYMMETRIC);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test3->getNum() == 3, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test3->size1() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test3->size2() == 2, true);
   //BANDED
-  MySiconosMatrix *test4 = new MySimpleMatrix(BANDED, v, 2, 2, 1, 1);
+  MySiconosMatrix *test4 = new MySimpleMatrix(v, 2, 2, BANDED, 1, 1);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test4->getNum() == 5, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test4->size1() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor9 : ", test4->size2() == 2, true);
-
   delete test4;
   delete test3;
   delete test2;
@@ -254,11 +216,11 @@ void MySimpleMatrixTest::testConstructor10()
 void MySimpleMatrixTest::testGetSetRowCol()
 {
   cout << "--> Test: get, set Row and Col." << endl;
-  MySimpleVector * tmp = new MySimpleVector(DENSE, 3);
+  MySimpleVector * tmp = new MySimpleVector(3);
   SimM->getRow(1, *tmp);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", *tmp == *vect3, true);
 
-  MySimpleVector * tmp2 = new MySimpleVector(DENSE, 2);
+  MySimpleVector * tmp2 = new MySimpleVector(2);
   SimM->getCol(1, *tmp2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", *tmp2 == *vect2, true);
 
@@ -357,7 +319,7 @@ void MySimpleMatrixTest::testGetBlock()
   cout << "--> Test: getBlock." << endl;
   MySiconosMatrix * full = new MySimpleMatrix(*SimM);
   full->resize(4, 5);
-  MySiconosMatrix * block = new MySimpleMatrix(DENSE, 2, 2);
+  MySiconosMatrix * block = new MySimpleMatrix(2, 2);
   full->getBlock(1, 1, *block);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetBlock: ", (*block)(0, 0) == 9 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetBlock: ", (*block)(0, 1) == 10 , true);
@@ -376,14 +338,14 @@ void MySimpleMatrixTest::testBlockMatrixCopy()
   MySiconosMatrix * full = new MySimpleMatrix(*SimM);
   full->resize(4, 5);
   full->blockMatrixCopy(*SicM, 2, 3);
-  MySiconosMatrix * block = new MySimpleMatrix(DENSE, 2, 2);
+  MySiconosMatrix * block = new MySimpleMatrix(2, 2);
   full->getBlock(2, 3, *block);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy: ", *block == *SicM , true);
   delete block;
   // Triang
   MySiconosMatrix * Tmp = new MySimpleMatrix(*T);
   full->blockMatrixCopy(*Tmp, 1, 2);
-  block = new MySimpleMatrix(DENSE, 3, 3);
+  block = new MySimpleMatrix(3, 3);
   full->getBlock(1, 2, *block);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy: ", *block == *Tmp , true);
   delete block;
@@ -391,7 +353,7 @@ void MySimpleMatrixTest::testBlockMatrixCopy()
   // Sym
   Tmp = new MySimpleMatrix(*S);
   full->blockMatrixCopy(*Tmp, 1, 2);
-  block = new MySimpleMatrix(DENSE, 3, 3);
+  block = new MySimpleMatrix(3, 3);
   full->getBlock(1, 2, *block);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy: ", *block == *Tmp , true);
   delete block;
@@ -399,7 +361,7 @@ void MySimpleMatrixTest::testBlockMatrixCopy()
   // Sparse
   Tmp = new MySimpleMatrix(*SP);
   full->blockMatrixCopy(*Tmp, 0, 1);
-  block = new MySimpleMatrix(DENSE, 4, 4);
+  block = new MySimpleMatrix(4, 4);
   full->getBlock(0, 1, *block);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy: ", *block == *Tmp , true);
   delete block;
@@ -407,7 +369,7 @@ void MySimpleMatrixTest::testBlockMatrixCopy()
   // Banded
   Tmp = new MySimpleMatrix(*B);
   full->blockMatrixCopy(*Tmp, 0, 1);
-  block = new MySimpleMatrix(DENSE, 4, 4);
+  block = new MySimpleMatrix(4, 4);
   full->getBlock(0, 1, *block);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy: ", *block == *Tmp , true);
   delete block;
@@ -423,8 +385,8 @@ void MySimpleMatrixTest::testTrans()
   MySiconosMatrix * ref = new MySimpleMatrix(*D);
   MySiconosMatrix * tRef = new MySimpleMatrix(*ref);
   *tRef = trans(*ref);
-  for (int i = 0; i < ref->size1(); ++i)
-    for (int j = 0 ; j < ref->size2(); ++j)
+  for (unsigned int i = 0; i < ref->size1(); ++i)
+    for (unsigned int j = 0 ; j < ref->size2(); ++j)
       if (i == j)
         CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef)(i, j) == (*ref)(i, j) , true);
       else
@@ -443,8 +405,8 @@ void MySimpleMatrixTest::testTrans()
   ref = new MySimpleMatrix(*SP);
   tRef = new MySimpleMatrix(*ref);
   *tRef = trans(*ref);
-  for (int i = 0; i < ref->size1(); ++i)
-    for (int j = 0 ; j < ref->size2(); ++j)
+  for (unsigned int i = 0; i < ref->size1(); ++i)
+    for (unsigned int j = 0 ; j < ref->size2(); ++j)
       if (i == j)
         CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef)(i, j) == (*ref)(i, j) , true);
       else
@@ -456,8 +418,8 @@ void MySimpleMatrixTest::testTrans()
   //   ref = new MySimpleMatrix(*B);
   //   tRef = new MySimpleMatrix(*ref);
   //   *tRef = trans(*ref);
-  //   for(int i = 0; i<ref->size1(); ++i)
-  //     for(int j = 0 ; j< ref->size2(); ++j)
+  //   for(unsigned int i = 0; i<ref->size1(); ++i)
+  //     for(unsigned int j = 0 ; j< ref->size2(); ++j)
   //       if(i==j)
   //  CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef)(i,j) == (*ref)(i,j) , true);
   //       else
@@ -538,30 +500,30 @@ void MySimpleMatrixTest::testOperators1()
   //+=, -=, *=, /= for a dense matrix
   MySiconosMatrix * tmp = new MySimpleMatrix(*D);
   *tmp += *SicM;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = 0 ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = 0 ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == (*SicM)(i, j) + (*D)(i, j) , true);
 
   double mult0 = 2.2;
   *tmp *= mult0;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = 0 ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = 0 ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2.2 * ((*SicM)(i, j) + (*D)(i, j)) , true);
 
   int mult = 2;
   *tmp *= mult;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = 0 ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = 0 ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 4.4 * ((*SicM)(i, j) + (*D)(i, j)) , true);
 
   *tmp /= mult;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = 0 ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = 0 ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2.2 * ((*SicM)(i, j) + (*D)(i, j)) , true);
 
   *tmp /= mult0;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = 0 ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = 0 ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == ((*SicM)(i, j) + (*D)(i, j)) , true);
 
   *tmp -= *SicM;
@@ -578,30 +540,30 @@ void MySimpleMatrixTest::testOperators2()
   MySiconosMatrix * tmp = new MySimpleMatrix(*T);
   MySiconosMatrix * tmp2 = new MySimpleMatrix(*T);
   *tmp += *tmp2;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = i ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = i ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2.0 * (*T)(i, j) , true);
 
   int mult = 2;
   double mult0 = 2.2;
   *tmp *= mult0;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = i ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = i ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2.0 * mult0 * (*T)(i, j)) < tol , true);
 
   *tmp *= mult;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = i ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = i ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2.0 * mult * mult0 * (*T)(i, j)) < tol , true);
 
   *tmp /= mult;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = i ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = i ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2.0 * mult0 * (*T)(i, j)) < tol , true);
 
   *tmp /= mult0;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = i ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = i ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2 * (*T)(i, j) , true);
 
   *tmp -= *tmp2;
@@ -621,30 +583,30 @@ void MySimpleMatrixTest::testOperators3()
   MySiconosMatrix * tmp = new MySimpleMatrix(*S);
   MySiconosMatrix * tmp2 = new MySimpleMatrix(*S);
   *tmp += *tmp2;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = i ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = i ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2.0 * (*S)(i, j) , true);
 
   int mult = 2;
   double mult0 = 2.2;
   *tmp *= mult0;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = i ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = i ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2.0 * mult0 * (*S)(i, j)) < tol , true);
 
   *tmp *= mult;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = i ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = i ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2.0 * mult * mult0 * (*S)(i, j)) < tol , true);
 
   *tmp /= mult;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = i ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = i ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2.0 * mult0 * (*S)(i, j)) < tol , true);
 
   *tmp /= mult0;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = i ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = i ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2 * (*S)(i, j) , true);
 
   *tmp -= *tmp2;
@@ -669,30 +631,30 @@ void MySimpleMatrixTest::testOperators4()
   MySiconosMatrix * tmp5 = new MySimpleMatrix(*S);
   tmp5->resize(4, 4);
   *tmp += *tmp2;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = 0 ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = 0 ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2.0 * (*SP)(i, j) , true);
 
   int mult = 2;
   double mult0 = 2.2;
   *tmp *= mult0;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = 0 ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = 0 ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2.0 * mult0 * (*SP)(i, j)) < tol , true);
 
   *tmp *= mult;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = 0 ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = 0 ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2.0 * mult * mult0 * (*SP)(i, j)) < tol , true);
 
   *tmp /= mult;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = 0 ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = 0 ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", ((*tmp)(i, j) - 2.0 * mult0 * (*SP)(i, j)) < tol , true);
 
   *tmp /= mult0;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = 0 ; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = 0 ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2 * (*SP)(i, j) , true);
 
   *tmp -= *tmp2;
@@ -701,17 +663,17 @@ void MySimpleMatrixTest::testOperators4()
 
   // += -= a triangular
   *tmp += *tmp3;
-  for (int i = 0; i < tmp->size1(); ++i)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
   {
-    for (int j = 0; j < i; ++j)
+    for (unsigned int j = 0; j < i; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == (*SP)(i, j) , true);
-    for (int j = i ; j < tmp->size2(); ++j)
+    for (unsigned int j = i ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == (*SP)(i, j) + (*tmp3)(i, j) , true);
   }
 
   *tmp -= *tmp3;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = 0; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = 0; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == (*SP)(i, j) , true);
 
   // += -= a banded
@@ -721,23 +683,23 @@ void MySimpleMatrixTest::testOperators4()
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == (*B)(i, j) + (*SP)(i, j) , true);
 
   *tmp -= *tmp4;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = 0; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = 0; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == (*SP)(i, j) , true);
 
   // += -= a sym
   *tmp += *tmp5;
-  for (int i = 0; i < tmp->size1(); ++i)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
   {
-    for (int j = 0; j < i; ++j)
+    for (unsigned int j = 0; j < i; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == (*SP)(i, j) + (*tmp5)(j, i) , true);
-    for (int j = i ; j < tmp->size2(); ++j)
+    for (unsigned int j = i ; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == (*SP)(i, j) + (*tmp5)(i, j) , true);
   }
 
   *tmp -= *tmp5;
-  for (int i = 0; i < tmp->size1(); ++i)
-    for (int j = 0; j < tmp->size2(); ++j)
+  for (unsigned int i = 0; i < tmp->size1(); ++i)
+    for (unsigned int j = 0; j < tmp->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == (*SP)(i, j) , true);
 
 
@@ -799,15 +761,15 @@ void MySimpleMatrixTest::testOperators6()
   // Dense +,-,* Dense
   MySiconosMatrix * tmp = new MySimpleMatrix(*D);
   MySiconosMatrix * tmp2 = new MySimpleMatrix(*SicM);
-  MySiconosMatrix * res = new MySimpleMatrix(DENSE, 2, 2);
+  MySiconosMatrix * res = new MySimpleMatrix(2, 2);
   *res = *tmp + *tmp2;
-  for (int i = 0; i < res->size1(); ++i)
-    for (int j = 0 ; j < res->size2(); ++j)
+  for (unsigned int i = 0; i < res->size1(); ++i)
+    for (unsigned int j = 0 ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == ((*SicM)(i, j) + (*D)(i, j)), true);
 
   *res = *tmp - *tmp2;
-  for (int i = 0; i < res->size1(); ++i)
-    for (int j = 0 ; j < res->size2(); ++j)
+  for (unsigned int i = 0; i < res->size1(); ++i)
+    for (unsigned int j = 0 ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == ((*D)(i, j) - (*SicM)(i, j)), true);
 
   *res = *tmp * *tmp2;
@@ -822,15 +784,15 @@ void MySimpleMatrixTest::testOperators6()
   // Triang +,-,* Triang
   tmp = new MySimpleMatrix(*T);
   tmp2 = new MySimpleMatrix(*T);
-  res = new MySimpleMatrix(TRIANGULAR, 3, 3);
+  res = new MySimpleMatrix(3, 3, TRIANGULAR);
   *res = *tmp + *tmp2;
-  for (int i = 0; i < res->size1(); ++i)
-    for (int j = i ; j < res->size2(); ++j)
+  for (unsigned int i = 0; i < res->size1(); ++i)
+    for (unsigned int j = i ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == ((*T)(i, j) + (*T)(i, j)), true);
 
   *res = *tmp - *tmp2;
-  for (int i = 0; i < res->size1(); ++i)
-    for (int j = i ; j < res->size2(); ++j)
+  for (unsigned int i = 0; i < res->size1(); ++i)
+    for (unsigned int j = i ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == 0, true);
 
   *res = *tmp * *tmp2;
@@ -843,15 +805,15 @@ void MySimpleMatrixTest::testOperators6()
   // Sym +,-,* Sym
   tmp = new MySimpleMatrix(*S);
   tmp2 = new MySimpleMatrix(*S);
-  res = new MySimpleMatrix(SYMMETRIC, 3, 3);
+  res = new MySimpleMatrix(3, 3, SYMMETRIC);
   *res = *tmp + *tmp2;
-  for (int i = 0; i < res->size1(); ++i)
-    for (int j = i ; j < res->size2(); ++j)
+  for (unsigned int i = 0; i < res->size1(); ++i)
+    for (unsigned int j = i ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == ((*S)(i, j) + (*S)(i, j)), true);
 
   *res = *tmp - *tmp2;
-  for (int i = 0; i < res->size1(); ++i)
-    for (int j = i ; j < res->size2(); ++j)
+  for (unsigned int i = 0; i < res->size1(); ++i)
+    for (unsigned int j = i ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == 0, true);
 
   *res = *tmp * *tmp2;
@@ -864,15 +826,15 @@ void MySimpleMatrixTest::testOperators6()
   // Sparse +,-,* Sparse
   tmp = new MySimpleMatrix(*SP);
   tmp2 = new MySimpleMatrix(*SP);
-  res = new MySimpleMatrix(SPARSE, 4, 4);
+  res = new MySimpleMatrix(4, 4, SPARSE);
   *res = *tmp + *tmp2;
-  for (int i = 0; i < res->size1(); ++i)
-    for (int j = 0 ; j < res->size2(); ++j)
+  for (unsigned int i = 0; i < res->size1(); ++i)
+    for (unsigned int j = 0 ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == ((*SP)(i, j) + (*SP)(i, j)), true);
 
   *res = *tmp - *tmp2;
-  for (int i = 0; i < res->size1(); ++i)
-    for (int j = 0 ; j < res->size2(); ++j)
+  for (unsigned int i = 0; i < res->size1(); ++i)
+    for (unsigned int j = 0 ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == 0, true);
 
   *res = *tmp * *tmp2;
@@ -885,7 +847,7 @@ void MySimpleMatrixTest::testOperators6()
   // Banded +,- Banded
   tmp = new MySimpleMatrix(*B);
   tmp2 = new MySimpleMatrix(*B);
-  res = new MySimpleMatrix(BANDED, 4, 4);
+  res = new MySimpleMatrix(4, 4, BANDED);
   *res = *tmp + *tmp2;
   for (signed i = 0; i < signed(B->size1()); ++ i)
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
@@ -915,62 +877,390 @@ void MySimpleMatrixTest::testOperators7()
   MySiconosMatrix * tmp4 = new MySimpleMatrix(*SP);
   MySiconosMatrix * tmp5 = new MySimpleMatrix(*B);
 
-  MySiconosMatrix * res = new MySimpleMatrix(DENSE, 4, 4);
+  MySiconosMatrix * res = new MySimpleMatrix(4, 4);
 
   // dense + ...
+  // ... triang
   *res = add(*tmp1, * tmp2);
-  for (int i = 0; i < res->size1(); ++i)
+  for (unsigned int i = 0; i < res->size1(); ++i)
   {
-    for (int j = i ; j < res->size2(); ++j)
+    for (unsigned int j = i ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) + (*tmp2)(i, j), true);
-    for (int j = 0 ; j < i; ++j)
+    for (unsigned int j = 0 ; j < i; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j), true);
   }
+  // ... Sym
   *res = add(*tmp1, * tmp3);
-  for (int i = 0; i < res->size1(); ++i)
+  for (unsigned int i = 0; i < res->size1(); ++i)
   {
-    for (int j = i ; j < res->size2(); ++j)
+    for (unsigned int j = i ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) + (*tmp3)(i, j), true);
-    for (int j = 0 ; j < i; ++j)
+    for (unsigned int j = 0 ; j < i; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) + (*tmp3)(j, i), true);
   }
+  // ... Sparse
   *res = add(*tmp1, * tmp4);
-  for (int i = 0; i < res->size1(); ++i)
-    for (int j = 0 ; j < res->size2(); ++j)
+  for (unsigned int i = 0; i < res->size1(); ++i)
+    for (unsigned int j = 0 ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) + (*tmp4)(i, j), true);
-
+  // ... Banded
   *res = add(*tmp1, * tmp5);
   for (signed i = 0; i < signed(B->size1()); ++ i)
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) + (*B)(i, j) , true);
 
   // dense - ...
+  // ... triangular
   *res = sub(*tmp1, * tmp2);
-  for (int i = 0; i < res->size1(); ++i)
+  for (unsigned int i = 0; i < res->size1(); ++i)
   {
-    for (int j = i ; j < res->size2(); ++j)
+    for (unsigned int j = i ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) - (*tmp2)(i, j), true);
-    for (int j = 0 ; j < i; ++j)
+    for (unsigned int j = 0 ; j < i; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j), true);
   }
+  // ... Sym
   *res = sub(*tmp1, * tmp3);
-  for (int i = 0; i < res->size1(); ++i)
+  for (unsigned int i = 0; i < res->size1(); ++i)
   {
-    for (int j = i ; j < res->size2(); ++j)
+    for (unsigned int j = i ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) - (*tmp3)(i, j), true);
-    for (int j = 0 ; j < i; ++j)
+    for (unsigned int j = 0 ; j < i; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) - (*tmp3)(j, i), true);
   }
+  // ... Sparse
   *res = sub(*tmp1, * tmp4);
-  for (int i = 0; i < res->size1(); ++i)
-    for (int j = 0 ; j < res->size2(); ++j)
+  for (unsigned int i = 0; i < res->size1(); ++i)
+    for (unsigned int j = 0 ; j < res->size2(); ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) - (*tmp4)(i, j), true);
-
+  // ... Banded
   *res = sub(*tmp1, * tmp5);
   for (signed i = 0; i < signed(B->size1()); ++ i)
     for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) - (*B)(i, j) , true);
 
+  // triang + ...
+  // ... dense
+  *res = add(*tmp2, * tmp1);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) + (*tmp2)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j), true);
+  }
+  // ... Sym
+  *res = add(*tmp2, * tmp3);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp2)(i, j) + (*tmp3)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(j, i), true);
+  }
+  // ... Sparse
+  *res = add(*tmp2, * tmp4);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) + (*tmp2)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j), true);
+  }
+
+  // ... Banded
+  *res = add(*tmp2, * tmp5);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      if (j >= i)
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp2)(i, j) + (*B)(i, j) , true);
+      else
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*B)(i, j) , true);
+
+  // triang - ...
+  // ... dense
+  *res = sub(*tmp2, * tmp1);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp2)(i, j) - (*tmp1)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp1)(i, j), true);
+  }
+  // ... Sym
+  *res = sub(*tmp2, * tmp3);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp2)(i, j) - (*tmp3)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp3)(j, i), true);
+  }
+  // ... Sparse
+  *res = sub(*tmp2, * tmp4);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp2)(i, j) - (*tmp4)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp4)(i, j), true);
+  }
+
+  // ... Banded
+  *res = sub(*tmp2, * tmp5);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      if (j >= i)
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp2)(i, j) - (*B)(i, j) , true);
+      else
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*B)(i, j) , true);
+
+  // sym + ...
+  // ... dense
+  *res = add(*tmp3, * tmp1);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) + (*tmp3)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) + (*tmp3)(j, i), true);
+  }
+  // ... triang
+  *res = add(*tmp3, * tmp2);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(i, j) + (*tmp2)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(j, i), true);
+  }
+  // ... Sparse
+  *res = add(*tmp3, * tmp4);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) + (*tmp3)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) + (*tmp3)(j, i), true);
+  }
+
+  // ... Banded
+  *res = add(*tmp3, * tmp5);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      if (j >= i)
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(i, j) + (*B)(i, j) , true);
+      else
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(j, i) + (*B)(i, j) , true);
+
+  // sym - ...
+  // ... dense
+  *res = sub(*tmp3, * tmp1);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(i, j) - (*tmp1)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(j, i) - (*tmp1)(i, j), true);
+  }
+  // ... triang
+  *res = sub(*tmp3, * tmp2);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(i, j) - (*tmp2)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(j, i), true);
+  }
+  // ... Sparse
+  *res = sub(*tmp3, * tmp4);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(i, j) - (*tmp4)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(j, i) - (*tmp4)(i, j), true);
+  }
+
+  // ... Banded
+  *res = sub(*tmp3, * tmp5);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      if (j >= i)
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(i, j) - (*B)(i, j) , true);
+      else
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(j, i) - (*B)(i, j) , true);
+
+  // sparse + ...
+  // ... dense
+  *res = add(*tmp4, * tmp1);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+    for (unsigned int j = 0 ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) + (*tmp4)(i, j), true);
+  // ... triang
+  *res = add(*tmp4, * tmp2);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) + (*tmp2)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j), true);
+  }
+  // ... Sym
+  *res = add(*tmp4, * tmp3);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) + (*tmp3)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) + (*tmp3)(j, i), true);
+  }
+  // ... Banded
+  *res = add(*tmp4, * tmp5);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) + (*B)(i, j) , true);
+
+  // sparse - ...
+  // ... dense
+  *res = sub(*tmp4, * tmp1);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+    for (unsigned int j = 0 ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) - (*tmp1)(i, j), true);
+  // ... triangular
+  *res = sub(*tmp4, * tmp2);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) - (*tmp2)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j), true);
+  }
+  // ... Sym
+  *res = sub(*tmp4, * tmp3);
+  for (unsigned int i = 0; i < res->size1(); ++i)
+  {
+    for (unsigned int j = i ; j < res->size2(); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) - (*tmp3)(i, j), true);
+    for (unsigned int j = 0 ; j < i; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) - (*tmp3)(j, i), true);
+  }
+  // ... Banded
+  *res = sub(*tmp4, * tmp5);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) - (*B)(i, j) , true);
+
+  // Banded + ...
+  // ... dense
+  *res = add(*tmp5, * tmp1);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+  {
+    for (signed j = 0; j < std::max(i - 1, 0); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j), true);
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j) + (*tmp5)(i, j) , true);
+    for (signed j = std::min(i + 2, signed(B->size2())); j < signed(B->size2()); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp1)(i, j), true);
+  }
+  // ... triang
+  *res = add(*tmp5, * tmp2);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+  {
+    for (signed j = 0; j < std::max(i - 1, 0); ++j)
+      if (j >= i) CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp2)(i, j), true);
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      if (j >= i)
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp2)(i, j) + (*tmp5)(i, j) , true);
+      else
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp5)(i, j) , true);
+    for (signed j = std::min(i + 2, signed(B->size2())); j < signed(B->size2()); ++j)
+      if (j >= i) CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp2)(i, j), true);
+  }
+  // ...sym
+  *res = add(*tmp5, * tmp3);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+  {
+    for (signed j = 0; j < std::max(i - 1, 0); ++j)
+      if (j >= i) CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(i, j), true);
+      else  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(j, i), true);
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      if (j >= i)
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(i, j) + (*tmp5)(i, j) , true);
+      else
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(j, i) + (*tmp5)(i, j) , true);
+    for (signed j = std::min(i + 2, signed(B->size2())); j < signed(B->size2()); ++j)
+      if (j >= i) CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(i, j), true);
+      else  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(j, i), true);
+  }
+  //... sparse
+  *res = add(*tmp5, * tmp4);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+  {
+    for (signed j = 0; j < std::max(i - 1, 0); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j), true);
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) + (*tmp5)(i, j) , true);
+    for (signed j = std::min(i + 2, signed(B->size2())); j < signed(B->size2()); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j), true);
+  }
+  // Banded - ...
+  // ... dense
+
+  *res = sub(*tmp5, * tmp1);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+  {
+    for (signed j = 0; j < std::max(i - 1, 0); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp1)(i, j), true);
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp5)(i, j) - (*tmp1)(i, j) , true);
+    for (signed j = std::min(i + 2, signed(B->size2())); j < signed(B->size2()); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp1)(i, j), true);
+  }
+
+  // ... triang
+  *res = sub(*tmp5, * tmp2);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+  {
+    for (signed j = 0; j < std::max(i - 1, 0); ++j)
+      if (j >= i) CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp2)(i, j), true);
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      if (j >= i)
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp5)(i, j) - (*tmp2)(i, j) , true);
+      else
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp5)(i, j) , true);
+    for (signed j = std::min(i + 2, signed(B->size2())); j < signed(B->size2()); ++j)
+      if (j >= i) CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp2)(i, j), true);
+  }
+
+  // ...sym
+  *res = sub(*tmp5, * tmp3);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+  {
+    for (signed j = 0; j < std::max(i - 1, 0); ++j)
+      if (j >= i) CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp3)(i, j), true);
+      else  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp3)(j, i), true);
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      if (j >= i)
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp5)(i, j) - (*tmp3)(i, j) , true);
+      else
+        CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp5)(i, j) - (*tmp3)(j, i) , true);
+    for (signed j = std::min(i + 2, signed(B->size2())); j < signed(B->size2()); ++j)
+      if (j >= i) CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp3)(i, j), true);
+      else  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp3)(j, i), true);
+  }
+
+  //... sparse
+  *res = sub(*tmp5, * tmp4);
+  for (signed i = 0; i < signed(B->size1()); ++ i)
+  {
+    for (signed j = 0; j < std::max(i - 1, 0); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp4)(i, j), true);
+    for (signed j = std::max(i - 1, 0); j < std::min(i + 2, signed(B->size2())); ++ j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp4)(i, j) + (*tmp5)(i, j) , true);
+    for (signed j = std::min(i + 2, signed(B->size2())); j < signed(B->size2()); ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == -(*tmp4)(i, j), true);
+  }
 
   delete tmp1;
   delete tmp2;
@@ -981,145 +1271,266 @@ void MySimpleMatrixTest::testOperators7()
 
   cout << "-->  test operators7 ended with success." << endl;
 }
+void MySimpleMatrixTest::testOperators8()
+{
+  cout << "--> Test: operator8." << endl;
+  MySiconosMatrix * tmp1 = new MySimpleMatrix(*D);
+  tmp1->resize(4, 4);
+  MySiconosMatrix * tmp2 = new MySimpleMatrix(*T);
+  tmp2->resize(4, 4);
+  MySiconosMatrix * tmp3 = new MySimpleMatrix(*S);
+  tmp3->resize(4, 4);
+  MySiconosMatrix * tmp4 = new MySimpleMatrix(*SP);
+  MySiconosMatrix * tmp5 = new MySimpleMatrix(*B);
+
+  MySiconosMatrix * res = new MySimpleMatrix(4, 4);
+
+  // Dense * ...
+  // triang
+  *res = prod(*tmp1, *tmp2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp1->getDense(), tmp2->getTriang())) == 0, true);
+  // Sym
+  *res = prod(*tmp1, *tmp3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp1->getDense(), tmp3->getSym())) == 0, true);
+  // Sparse
+  *res = prod(*tmp1, *tmp4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp1->getDense(), tmp4->getSparse())) == 0, true);
+  // Banded
+  *res = prod(*tmp1, *tmp5);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp1->getDense(), tmp5->getBanded())) == 0, true);
+  // triang * ...
+  // dense
+  *res = prod(*tmp2, *tmp1);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp2->getTriang(), tmp1->getDense())) == 0, true);
+  // Sym
+  *res = prod(*tmp2, *tmp3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp2->getTriang(), tmp3->getSym())) == 0, true);
+  // Sparse
+  *res = prod(*tmp2, *tmp4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp2->getTriang(), tmp4->getSparse())) == 0, true);
+  // Banded
+  *res = prod(*tmp2, *tmp5);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp2->getTriang(), tmp5->getBanded())) == 0, true);
+  // sym * ...
+  // dense
+  *res = prod(*tmp3, *tmp1);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp3->getSym(), tmp1->getDense())) == 0, true);
+  // triang
+  *res = prod(*tmp3, *tmp2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp3->getSym(), tmp2->getTriang())) == 0, true);
+  // Sparse
+  *res = prod(*tmp3, *tmp4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp3->getSym(), tmp4->getSparse())) == 0, true);
+  // Banded
+  *res = prod(*tmp3, *tmp5);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp3->getSym(), tmp5->getBanded())) == 0, true);
+  // Sparse * ...
+  // dense
+  *res = prod(*tmp4, *tmp1);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp4->getSparse(), tmp1->getDense())) == 0, true);
+  // triang
+  *res = prod(*tmp4, *tmp2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp4->getSparse(), tmp2->getTriang())) == 0, true);
+  // Sym
+  *res = prod(*tmp4, *tmp3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp4->getSparse(), tmp3->getSym())) == 0, true);
+  // Banded
+  *res = prod(*tmp4, *tmp5);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp4->getSparse(), tmp5->getBanded())) == 0, true);
+  // Banded * ...
+  // dense
+  *res = prod(*tmp5, *tmp1);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), tmp1->getDense())) == 0, true);
+  // triang
+  *res = prod(*tmp5, *tmp2);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), tmp2->getTriang())) == 0, true);
+  // Sparse
+  *res = prod(*tmp5, *tmp4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), tmp4->getSparse())) == 0, true);
+  // Sym
+  *res = prod(*tmp5, *tmp3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), tmp3->getSym())) == 0, true);
+
+  delete tmp1;
+  delete tmp2;
+  delete tmp3;
+  delete tmp4;
+  delete tmp5;
+  delete res;
+  cout << "-->  test operators8 ended with success." << endl;
+}
+
+void MySimpleMatrixTest::testOperators9()
+{
+  cout << "--> Test: operator9." << endl;
+  double m = 2.2;
+  int i = 3;
+  MySiconosMatrix * tmp1 = new MySimpleMatrix(*D);
+  MySiconosMatrix * res = new MySimpleMatrix(2, 2);
+  *res = m ** tmp1;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - tmp1->getDense()*m) == 0, true);
+  *res = i ** tmp1;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - tmp1->getDense()*i) == 0, true);
+  *res = *tmp1 * m;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - tmp1->getDense()*m) == 0, true);
+  *res = *tmp1 * i;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - tmp1->getDense()*i) == 0, true);
+  *res = *tmp1 / m;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - tmp1->getDense() / m) == 0, true);
+  *res = *tmp1 / i;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - tmp1->getDense() / i) == 0, true);
+  delete tmp1;
+  delete res;
+  cout << "-->  test operators9 ended with success." << endl;
+}
+
+void MySimpleMatrixTest::testOperators10()
+{
+  cout << "--> Test: operator10." << endl;
+  double m = 2.2;
+  int i = 3;
+  MySiconosMatrix * tmp1 = new MySimpleMatrix(*T);
+  MySiconosMatrix * res = new MySimpleMatrix(3, 3, TRIANGULAR);
+  *res = m ** tmp1;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getTriang() - tmp1->getTriang()*m) == 0, true);
+  *res = i ** tmp1;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getTriang() - tmp1->getTriang()*i) == 0, true);
+  *res = *tmp1 * m;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getTriang() - tmp1->getTriang()*m) == 0, true);
+  *res = *tmp1 * i;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getTriang() - tmp1->getTriang()*i) == 0, true);
+  *res = *tmp1 / m;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getTriang() - tmp1->getTriang() / m) == 0, true);
+  *res = *tmp1 / i;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getTriang() - tmp1->getTriang() / i) == 0, true);
+  delete tmp1;
+  delete res;
+  cout << "-->  test operators10 ended with success." << endl;
+}
+
+void MySimpleMatrixTest::testOperators11()
+{
+  cout << "--> Test: operator11." << endl;
+  double m = 2.2;
+  int i = 3;
+  MySiconosMatrix * tmp1 = new MySimpleMatrix(*S);
+  MySiconosMatrix * res = new MySimpleMatrix(3, 3, SYMMETRIC);
+  *res = m ** tmp1;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSym() - tmp1->getSym()*m) == 0, true);
+  *res = i ** tmp1;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSym() - tmp1->getSym()*i) == 0, true);
+  *res = *tmp1 * m;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSym() - tmp1->getSym()*m) == 0, true);
+  *res = *tmp1 * i;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSym() - tmp1->getSym()*i) == 0, true);
+  *res = *tmp1 / m;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSym() - tmp1->getSym() / m) == 0, true);
+  *res = *tmp1 / i;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSym() - tmp1->getSym() / i) == 0, true);
+  delete tmp1;
+  delete res;
+  cout << "-->  test operator11 ended with success." << endl;
+}
+
+void MySimpleMatrixTest::testOperators12()
+{
+  cout << "--> Test: operator12." << endl;
+  double m = 2.2;
+  int i = 3;
+  MySiconosMatrix * tmp1 = new MySimpleMatrix(*SP);
+  MySiconosMatrix * res = new MySimpleMatrix(4, 4, SPARSE);
+  *res = m ** tmp1;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse()*m) == 0, true);
+  *res = i ** tmp1;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse()*i) == 0, true);
+  *res = *tmp1 * m;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse()*m) == 0, true);
+  *res = *tmp1 * i;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse()*i) == 0, true);
+  *res = *tmp1 / m;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse() / m) == 0, true);
+  *res = *tmp1 / i;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getSparse() - tmp1->getSparse() / i) == 0, true);
+  delete tmp1;
+  delete res;
+  cout << "-->  test operators12 ended with success." << endl;
+}
+
+void MySimpleMatrixTest::testOperators13()
+{
+  cout << "--> Test: operator13." << endl;
+  double m = 2.2;
+  int i = 3;
+  MySiconosMatrix * tmp1 = new MySimpleMatrix(*B);
+  MySiconosMatrix * res = new MySimpleMatrix(4, 4, BANDED);
+  *res = m * *tmp1;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getBanded() - tmp1->getBanded()*m) == 0, true);
+  *res = i ** tmp1;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getBanded() - tmp1->getBanded()*i) == 0, true);
+  *res = *tmp1 * m;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getBanded() - tmp1->getBanded()*m) == 0, true);
+  *res = *tmp1 * i;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getBanded() - tmp1->getBanded()*i) == 0, true);
+  *res = *tmp1 / m;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getBanded() - tmp1->getBanded() / m) == 0, true);
+  *res = *tmp1 / i;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getBanded() - tmp1->getBanded() / i) == 0, true);
+  delete tmp1;
+  delete res;
+  cout << "-->  test operators13 ended with success." << endl;
+}
 
 
 void MySimpleMatrixTest::testMultTranspose()
 {
   cout << "--> Test: multTranspose." << endl;
-  //   MySimpleMatrix X(2,3);
-  //   X(0,0) = 1;  X(0,1) = 2;  X(0,2) = 3;
-  //   X(1,0) = 0;  X(1,1) = 1;  X(1,2) = 1;
-  //   MySimpleMatrix Y(3,3);
-  //   Y(0,0) = 2;  Y(0,1) = 0;  Y(0,2) = 1;
-  //   Y(1,0) = 3;  Y(1,1) = 1;  Y(1,2) = 0;
-  //   Y(2,0) = 1;  Y(2,1) = 0;  Y(2,2) = 2;
-  //   MySimpleMatrix Z(2,3);
-  //   Z(0,0) = 5;  Z(0,1) = 5;  Z(0,2) = 7;
-  //   Z(1,0) = 1;  Z(1,1) = 1;  Z(1,2) = 2;
+  MySiconosMatrix * tmp1 = new MySimpleMatrix(*D);
+  tmp1->resize(4, 4);
+  MySiconosMatrix * tmp2 = new MySimpleMatrix(*T);
+  tmp2->resize(4, 4);
+  MySiconosMatrix * tmp3 = new MySimpleMatrix(*S);
+  tmp3->resize(4, 4);
+  MySiconosMatrix * tmp4 = new MySimpleMatrix(*SP);
+  MySiconosMatrix * tmp5 = new MySimpleMatrix(*B);
 
-  //   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment :", X.multTranspose(Y)==Z, true);
+  MySiconosMatrix * res = new MySimpleMatrix(4, 4);
+  //Dense * ...
+  *res = multTranspose(*tmp1, *tmp1);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp1->getDense(), trans(tmp1->getDense()))) == 0, true);
+  *res = multTranspose(*tmp1, *tmp3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp1->getDense(), tmp3->getSym())) == 0, true);
+  *res = multTranspose(*tmp1, *tmp4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp1->getDense(), trans(tmp4->getSparse()))) == 0, true);
+  // Triang * ...
+  *res = multTranspose(*tmp2, *tmp1);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp2->getTriang(), trans(tmp1->getDense()))) == 0, true);
+  *res = multTranspose(*tmp2, *tmp3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp2->getTriang(), tmp3->getSym())) == 0, true);
+  *res = multTranspose(*tmp2, *tmp4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp2->getTriang(), trans(tmp4->getSparse()))) == 0, true);
+  // Sym * ...
+  *res = multTranspose(*tmp3, *tmp1);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp3->getSym(), trans(tmp1->getDense()))) == 0, true);
+  *res = multTranspose(*tmp3, *tmp3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == *tmp3 * *tmp3, true);
+  *res = multTranspose(*tmp3, *tmp4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp3->getSym(), trans(tmp4->getSparse()))) == 0, true);
+  // Sparse* ...
+  *res = multTranspose(*tmp4, *tmp1);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp4->getSparse(), trans(tmp1->getDense()))) == 0, true);
+  *res = multTranspose(*tmp4, *tmp3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp4->getSparse(), tmp3->getSym())) == 0, true);
+  *res = multTranspose(*tmp4, *tmp4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp4->getSparse(), trans(tmp4->getSparse()))) == 0, true);
+  // Banded * ...
+  *res = multTranspose(*tmp5, *tmp1);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), trans(tmp1->getDense()))) == 0, true);
+  *res = multTranspose(*tmp5, *tmp3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), tmp3->getSym())) == 0, true);
+  *res = multTranspose(*tmp5, *tmp4);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), trans(tmp4->getSparse()))) == 0, true);
   cout << "-->  test multTranspose ended with success." << endl;
 }
-
-// void MySimpleMatrixTest::testBlockMatrixCopy1()
-// {
-//   cout << "--> Test: BlockMatrixCopy1." << endl;
-//   MySimpleMatrix Aa(1,2), Bb(3,3), Cc(3,3);
-//   Aa(0,0) = 1.0; Aa(0,1) = 2.0;
-//   Bb(0,0) = 0.0; Bb(0,1) = 0.0; Bb(0,2) = 0.0;
-//   Bb(1,0) = 0.0; Bb(1,1) = 0.0; Bb(1,2) = 0.0;
-//   Bb(2,0) = 0.0; Bb(2,1) = 0.0; Bb(2,2) = 0.0;
-//   Cc(0,0) = 0.0; Cc(0,1) = 0.0; Cc(0,2) = 0.0;
-//   Cc(1,0) = 1.0; Cc(1,1) = 2.0; Cc(1,2) = 0.0;
-//   Cc(2,0) = 0.0; Cc(2,1) = 0.0; Cc(2,2) = 0.0;
-
-//   Bb.blockMatrixCopy( Aa, 1, 0);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy1 : B.blockMatrixCopy( A, x, y) ", Bb == Cc, true);
-//   cout << "-->  test BlockMatrixCopy1 ended with success." << endl;
-// }
-
-// void MySimpleMatrixTest::testBlockMatrixCopy2()
-// {
-//   cout << "--> Test: BlockMatrixCopy2." << endl;
-//   MySimpleMatrix Aa(1,1), Bb(1,1), Cc(1,1);
-//   Aa(0,0) = 1.0;
-//   Bb(0,0) = 0.0;
-//   Cc(0,0) = 1.0;
-
-//   Bb.blockMatrixCopy( Aa, 0, 0);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy2 : B.blockMatrixCopy( A, x, y) ", Bb == Cc,true);
-//   cout << "-->  test BlockMatrixCopy2 ended with success." << endl;
-// }
-
-// void MySimpleMatrixTest::testBlockMatrixCopy3()
-// {
-//   cout << "--> Test: BlockMatrixCopy3." << endl;
-//   MySiconosMatrix * Aa = new MySimpleMatrix(2,2);
-//   MySiconosMatrix * Bb = new MySimpleMatrix(4,4);
-//   MySiconosMatrix * Cc = new MySimpleMatrix(4,4);
-
-//   (*Aa)(0,0) = 1.0; (*Aa)(0,1) = 2.0;
-//   (*Aa)(1,0) = 3.0; (*Aa)(1,1) = 4.0;
-//   (*Bb)(0,0) = 0.0; (*Bb)(0,1) = 0.0; (*Bb)(0,2) = 0.0; (*Bb)(0,3) = 0.0;
-//   (*Bb)(1,0) = 0.0; (*Bb)(1,1) = 0.0; (*Bb)(1,2) = 0.0; (*Bb)(1,3) = 0.0;
-//   (*Bb)(2,0) = 0.0; (*Bb)(2,1) = 0.0; (*Bb)(2,2) = 0.0; (*Bb)(2,3) = 0.0;
-//   (*Bb)(3,0) = 0.0; (*Bb)(3,1) = 0.0; (*Bb)(3,2) = 0.0; (*Bb)(3,3) = 0.0;
-//   (*Cc)(0,0) = 1.0; (*Cc)(0,1) = 2.0; (*Cc)(0,2) = 0.0; (*Cc)(0,3) = 0.0;
-//   (*Cc)(1,0) = 3.0; (*Cc)(1,1) = 4.0; (*Cc)(1,2) = 0.0; (*Cc)(1,3) = 0.0;
-//   (*Cc)(2,0) = 0.0; (*Cc)(2,1) = 0.0; (*Cc)(2,2) = 0.0; (*Cc)(2,3) = 0.0;
-//   (*Cc)(3,0) = 0.0; (*Cc)(3,1) = 0.0; (*Cc)(3,2) = 0.0; (*Cc)(3,3) = 0.0;
-
-//   (*Bb).blockMatrixCopy( (*Aa), 0, 0);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy3 : B.blockMatrixCopy( A, x, y) ", (*Bb) == (*Cc),true);
-//   delete Aa;
-//   delete Bb;
-//   delete Cc;
-//   cout << "-->  test BlockMatrixCopy3 ended with success." << endl;
-// }
-
-// void MySimpleMatrixTest::testBlockMatrixCopy4()
-// {
-//   cout << "--> Test: BlockMatrixCopy4." << endl;
-//   MySiconosMatrix *Aa = new MySimpleMatrix(2,2), *Bb = new MySimpleMatrix(4,4), *Cc = new MySimpleMatrix(4,4);
-//   (*Aa)(0,0) = 1.0; (*Aa)(0,1) = 2.0;
-//   (*Aa)(1,0) = 3.0; (*Aa)(1,1) = 4.0;
-//   (*Bb)(0,0) = 0.0; (*Bb)(0,1) = 0.0; (*Bb)(0,2) = 0.0; (*Bb)(0,3) = 0.0;
-//   (*Bb)(1,0) = 0.0; (*Bb)(1,1) = 0.0; (*Bb)(1,2) = 0.0; (*Bb)(1,3) = 0.0;
-//   (*Bb)(2,0) = 0.0; (*Bb)(2,1) = 0.0; (*Bb)(2,2) = 0.0; (*Bb)(2,3) = 0.0;
-//   (*Bb)(3,0) = 0.0; (*Bb)(3,1) = 0.0; (*Bb)(3,2) = 0.0; (*Bb)(3,3) = 0.0;
-//   (*Cc)(0,0) = 0.0; (*Cc)(0,1) = 0.0; (*Cc)(0,2) = 0.0; (*Cc)(0,3) = 0.0;
-//   (*Cc)(1,0) = 0.0; (*Cc)(1,1) = 0.0; (*Cc)(1,2) = 0.0; (*Cc)(1,3) = 0.0;
-//   (*Cc)(2,0) = 0.0; (*Cc)(2,1) = 0.0; (*Cc)(2,2) = 1.0; (*Cc)(2,3) = 2.0;
-//   (*Cc)(3,0) = 0.0; (*Cc)(3,1) = 0.0; (*Cc)(3,2) = 3.0; (*Cc)(3,3) = 4.0;
-
-//   (*Bb).blockMatrixCopy( (*Aa), 2, 2);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy4 : B.blockMatrixCopy( A, x, y) ", (*Bb) == (*Cc),true);
-//   delete Aa;
-//   delete Bb;
-//   delete Cc;
-//   cout << "-->  test BlockMatrixCopy4 ended with success." << endl;
-// }
-
-// void MySimpleMatrixTest::testBlockMatrixCopyException1()
-// {
-//   MySiconosMatrix *Aa = new MySimpleMatrix(2,2), *Bb = new MySimpleMatrix(4,4);
-//   (*Bb).blockMatrixCopy( (*Aa), 3, 3);
-//   delete Aa;
-//   delete Bb;
-// }
-
-// void MySimpleMatrixTest::testBlockMatrixCopyException2()
-// {
-//   MySiconosMatrix *Aa = new MySimpleMatrix(6,6), *Bb = new MySimpleMatrix(4,4);
-//   (*Bb).blockMatrixCopy( (*Aa), 0, 0);
-//   delete Aa;
-//   delete Bb;
-// }
-
-
-// void MySimpleMatrixTest::testLinearSolve()
-// {
-//   cout << "--> Test: linearSolve." << endl;
-//   MySimpleMatrix X(10,5);
-//   A->linearSolve((*B), X);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testLinearSolve : A==A", (*A)==(*A), true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testLinearSolve : B==B", (*B)==(*B), true);
-//   CPPUNIT_ASSERT_EQUAL_MESSAGE("testLinearSolve 3: ", ((*A)*X)==(*B), true);
-//   cout << "--> linearSolve test ended with success." << endl;
-// }
-
-// void MySimpleMatrixTest::testSizeException()
-// {
-//   *A+(*B);
-// }
-
-// void MySimpleMatrixTest::testConstructorException()
-// {
-//   LaVectorDouble LVD(10);
-//   for (int i=0; i < LVD.size(); i++)
-//     LVD(i) = i;
-//   MySimpleMatrix X(LVD,4,2);
-// }
 
 void MySimpleMatrixTest::End()
 {

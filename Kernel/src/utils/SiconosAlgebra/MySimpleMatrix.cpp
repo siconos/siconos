@@ -2,10 +2,40 @@
 #include "ioMatrix.h"
 #include <cassert>
 
-//Default private
-MySimpleMatrix::MySimpleMatrix(void): num(0)
+// Build a Simple Matrix from its type (ie DENSE, TRIANGULAR, BANDED, SPARSE or SYMMETRIC)
+// => default (private) constructor
+MySimpleMatrix::MySimpleMatrix(TYP typ)
 {
   setIsBlock(false);
+  if (typ == DENSE)
+  {
+    mat.Dense = new DenseMat();
+    num = 1;
+  }
+  else if (typ == TRIANGULAR)
+  {
+    mat.Triang = new TriangMat();
+    num = 2;
+  }
+  else if (typ == SYMMETRIC)
+  {
+    mat.Sym = new SymMat();
+    num = 3;
+  }
+  else if (typ == SPARSE)
+  {
+    mat.Sparse = new SparseMat();
+    num = 4;
+  }
+  else if (typ == BANDED)
+  {
+    mat.Banded = new BandedMat();
+    num = 5;
+  }
+  else
+    SiconosMatrixException::selfThrow("constructor(TYP) : invalid type given");
+  zero();
+
 }
 /***************************** CONSTRUCTORS ****************************/
 
@@ -75,42 +105,7 @@ MySimpleMatrix::MySimpleMatrix(const MySiconosMatrix &smat)
     SiconosMatrixException::selfThrow("constructor(const MySiconosMatrix) : invalid parameter given");
 }
 
-// Build a Simple Matrix from its type (ie DENSE, TRIANGULAR, BANDED, SPARSE or SYMMETRIC)
-MySimpleMatrix::MySimpleMatrix(TYP typ)
-{
-  setIsBlock(false);
-  if (typ == DENSE)
-  {
-    mat.Dense = new DenseMat();
-    num = 1;
-  }
-  else if (typ == TRIANGULAR)
-  {
-    mat.Triang = new TriangMat();
-    num = 2;
-  }
-  else if (typ == SYMMETRIC)
-  {
-    mat.Sym = new SymMat();
-    num = 3;
-  }
-  else if (typ == SPARSE)
-  {
-    mat.Sparse = new SparseMat();
-    num = 4;
-  }
-  else if (typ == BANDED)
-  {
-    mat.Banded = new BandedMat();
-    num = 5;
-  }
-  else
-    SiconosMatrixException::selfThrow("constructor(TYP) : invalid type given");
-  zero();
-
-}
-
-MySimpleMatrix::MySimpleMatrix(TYP typ, int row, int col)
+MySimpleMatrix::MySimpleMatrix(unsigned int row, unsigned int col, TYP typ, unsigned int upper, unsigned int lower)
 {
   setIsBlock(false);
   if (typ == DENSE)
@@ -130,16 +125,16 @@ MySimpleMatrix::MySimpleMatrix(TYP typ, int row, int col)
   }
   else if (typ == SPARSE)
   {
-    mat.Sparse = new SparseMat();
+    mat.Sparse = new SparseMat(row, col, upper);
     num = 4;
   }
   else if (typ == BANDED)
   {
-    mat.Banded = new BandedMat();
+    mat.Banded = new BandedMat(row, col, upper, lower);
     num = 5;
   }
   else
-    SiconosMatrixException::selfThrow("constructor(TYP type, int row, int col) : invalid type or dimensions given");
+    SiconosMatrixException::selfThrow("constructor(TYP type, unsigned int row, unsigned int col) : invalid type or dimensions given");
   zero();
 }
 
@@ -178,7 +173,7 @@ MySimpleMatrix::MySimpleMatrix(const BandedMat& m)
   num = 5;
 }
 
-MySimpleMatrix::MySimpleMatrix(TYP typ, const std::vector<double> &v, int row, int col, int lower, int upper)
+MySimpleMatrix::MySimpleMatrix(const std::vector<double> &v, unsigned int row, unsigned int col, TYP typ, unsigned int lower, unsigned int upper)
 {
 
   if (((v.size()) != (unsigned int)row * col && (typ != SYMMETRIC && typ != BANDED)) || (v.size() != (unsigned int)row * row && typ == SYMMETRIC) || (typ == BANDED && ((v.size()) != (unsigned int)(std::max)(row, col) * (lower + 1 + upper))))
@@ -247,17 +242,17 @@ MySimpleMatrix::~MySimpleMatrix(void)
 }
 
 /******************************** METHODS ******************************/
-int  MySimpleMatrix::getNum(void)const
+unsigned int  MySimpleMatrix::getNum(void)const
 {
   return num;
 }
-void MySimpleMatrix::setNum(int n)
+void MySimpleMatrix::setNum(unsigned int n)
 {
   num = n;
 }
-int  MySimpleMatrix::size1(void)const
+unsigned int  MySimpleMatrix::size1(void)const
 {
-  int size1;
+  unsigned int size1;
   if (num == 1)
   {
     size1 = (*mat.Dense).size1();
@@ -280,9 +275,9 @@ int  MySimpleMatrix::size1(void)const
   }
   return size1;
 }
-int  MySimpleMatrix::size2(void)const
+unsigned int  MySimpleMatrix::size2(void)const
 {
-  int size2;
+  unsigned int size2;
   if (num == 1)
   {
     size2 = (*mat.Dense).size2();
@@ -306,7 +301,7 @@ int  MySimpleMatrix::size2(void)const
   return size2;
 }
 
-void MySimpleMatrix::resize(int row, int col, int lower, int upper, bool preserve)
+void MySimpleMatrix::resize(unsigned int row, unsigned int col, unsigned int lower, unsigned int upper, bool preserve)
 {
 
   if (num == 1)
@@ -331,122 +326,122 @@ void MySimpleMatrix::resize(int row, int col, int lower, int upper, bool preserv
   }
 }
 
-const DenseMat MySimpleMatrix::getDense(int row, int col)const
+const DenseMat MySimpleMatrix::getDense(unsigned int row, unsigned int col)const
 {
 
   if (num != 1)
-    SiconosMatrixException::selfThrow("DenseMat getDense(int row, int col) : the current matrix is not a Dense matrix");
+    SiconosMatrixException::selfThrow("DenseMat getDense(unsigned int row, unsigned int col) : the current matrix is not a Dense matrix");
 
   if (row != 0 || col != 0)
-    SiconosMatrixException::selfThrow("DenseMat getDense(int row, int col) : row or col not equal to 0.0");
+    SiconosMatrixException::selfThrow("DenseMat getDense(unsigned int row, unsigned int col) : row or col not equal to 0.0");
 
   return *mat.Dense;
 }
 
-const TriangMat MySimpleMatrix::getTriang(int row, int col)const
+const TriangMat MySimpleMatrix::getTriang(unsigned int row, unsigned int col)const
 {
 
   if (num != 2)
-    SiconosMatrixException::selfThrow("TriangMat getTriang(int row, int col) : the current matrix is not a Triangular matrix");
+    SiconosMatrixException::selfThrow("TriangMat getTriang(unsigned int row, unsigned int col) : the current matrix is not a Triangular matrix");
 
   if (row != 0 || col != 0)
-    SiconosMatrixException::selfThrow("TriangMat getTriang(int row, int col) : row or col not equal to 0.0");
+    SiconosMatrixException::selfThrow("TriangMat getTriang(unsigned int row, unsigned int col) : row or col not equal to 0.0");
 
   return *mat.Triang;
 }
 
-const SymMat MySimpleMatrix::getSym(int row, int col)const
+const SymMat MySimpleMatrix::getSym(unsigned int row, unsigned int col)const
 {
 
   if (num != 3)
-    SiconosMatrixException::selfThrow("SymMat getSym(int row, int col) : the current matrix is not a Symmetric matrix");
+    SiconosMatrixException::selfThrow("SymMat getSym(unsigned int row, unsigned int col) : the current matrix is not a Symmetric matrix");
 
   if (row != 0 || col != 0)
-    SiconosMatrixException::selfThrow("SymMat getSym(int row, int col) : row or col not equal to 0.0");
+    SiconosMatrixException::selfThrow("SymMat getSym(unsigned int row, unsigned int col) : row or col not equal to 0.0");
 
   return *mat.Sym;
 }
 
-const SparseMat MySimpleMatrix::getSparse(int row, int col)const
+const SparseMat MySimpleMatrix::getSparse(unsigned int row, unsigned int col)const
 {
 
   if (num != 4)
-    SiconosMatrixException::selfThrow("SparseMat getSparse(int row, int col) : the current matrix is not a Sparse matrix");
+    SiconosMatrixException::selfThrow("SparseMat getSparse(unsigned int row, unsigned int col) : the current matrix is not a Sparse matrix");
 
   if (row != 0 || col != 0)
-    SiconosMatrixException::selfThrow("SparseMat getSparse(int row, int col) : row or col not equal to 0.0");
+    SiconosMatrixException::selfThrow("SparseMat getSparse(unsigned int row, unsigned int col) : row or col not equal to 0.0");
 
   return *mat.Sparse;
 }
 
-const BandedMat MySimpleMatrix::getBanded(int row, int col)const
+const BandedMat MySimpleMatrix::getBanded(unsigned int row, unsigned int col)const
 {
 
   if (num != 5)
-    SiconosMatrixException::selfThrow("BandedMat getBanded(int row, int col) : the current matrix is not a Banded matrix");
+    SiconosMatrixException::selfThrow("BandedMat getBanded(unsigned int row, unsigned int col) : the current matrix is not a Banded matrix");
 
   if (row != 0 || col != 0)
-    SiconosMatrixException::selfThrow("BandedMat getBanded(int row, int col) : row or col not equal to 0.0");
+    SiconosMatrixException::selfThrow("BandedMat getBanded(unsigned int row, unsigned int col) : row or col not equal to 0.0");
 
   return *mat.Banded;
 }
 
-const DenseMat* MySimpleMatrix::getDensePtr(int row, int col)const
+const DenseMat* MySimpleMatrix::getDensePtr(unsigned int row, unsigned int col)const
 {
 
   if (num != 1)
-    SiconosMatrixException::selfThrow("DenseMat* getDensePtr(int row, int col) : the current matrix is not a Dense matrix");
+    SiconosMatrixException::selfThrow("DenseMat* getDensePtr(unsigned int row, unsigned int col) : the current matrix is not a Dense matrix");
 
   if (row != 0 || col != 0)
-    SiconosMatrixException::selfThrow("DenseMat* getDensePtr(int row, int col) : row or col not equal to 0.0");
+    SiconosMatrixException::selfThrow("DenseMat* getDensePtr(unsigned int row, unsigned int col) : row or col not equal to 0.0");
 
   return mat.Dense;
 }
 
-const TriangMat* MySimpleMatrix::getTriangPtr(int row, int col)const
+const TriangMat* MySimpleMatrix::getTriangPtr(unsigned int row, unsigned int col)const
 {
 
   if (num != 2)
-    SiconosMatrixException::selfThrow("TriangMat* getTriangPtr(int row, int col) : the current matrix is not a Triangular matrix");
+    SiconosMatrixException::selfThrow("TriangMat* getTriangPtr(unsigned int row, unsigned int col) : the current matrix is not a Triangular matrix");
 
   if (row != 0 || col != 0)
-    SiconosMatrixException::selfThrow("TriangMat* getTriangPtr(int row, int col) : row or col not equal to 0.0");
+    SiconosMatrixException::selfThrow("TriangMat* getTriangPtr(unsigned int row, unsigned int col) : row or col not equal to 0.0");
 
   return mat.Triang;
 }
 
-const SymMat* MySimpleMatrix::getSymPtr(int row, int col)const
+const SymMat* MySimpleMatrix::getSymPtr(unsigned int row, unsigned int col)const
 {
 
   if (num != 3)
-    SiconosMatrixException::selfThrow("SymMat* getSymPtr(int row, int col) : the current matrix is not a Symmetric matrix");
+    SiconosMatrixException::selfThrow("SymMat* getSymPtr(unsigned int row, unsigned int col) : the current matrix is not a Symmetric matrix");
 
   if (row != 0 || col != 0)
-    SiconosMatrixException::selfThrow("SymMat* getSymPtr(int row, int col) : row or col not equal to 0.0");
+    SiconosMatrixException::selfThrow("SymMat* getSymPtr(unsigned int row, unsigned int col) : row or col not equal to 0.0");
 
   return mat.Sym;
 }
 
-const SparseMat* MySimpleMatrix::getSparsePtr(int row, int col)const
+const SparseMat* MySimpleMatrix::getSparsePtr(unsigned int row, unsigned int col)const
 {
 
   if (num != 4)
-    SiconosMatrixException::selfThrow("SparseMat* getSparsePtr(int row, int col) : the current matrix is not a Sparse matrix");
+    SiconosMatrixException::selfThrow("SparseMat* getSparsePtr(unsigned int row, unsigned int col) : the current matrix is not a Sparse matrix");
 
   if (row != 0 || col != 0)
-    SiconosMatrixException::selfThrow("SparseMat* getSparsePtr(int row, int col) : row or col not equal to 0.0");
+    SiconosMatrixException::selfThrow("SparseMat* getSparsePtr(unsigned int row, unsigned int col) : row or col not equal to 0.0");
 
   return mat.Sparse;
 }
 
-const BandedMat* MySimpleMatrix::getBandedPtr(int row, int col)const
+const BandedMat* MySimpleMatrix::getBandedPtr(unsigned int row, unsigned int col)const
 {
 
   if (num != 5)
-    SiconosMatrixException::selfThrow("BandedMat* getBandedPtr(int row, int col) : the current matrix is not a Banded matrix");
+    SiconosMatrixException::selfThrow("BandedMat* getBandedPtr(unsigned int row, unsigned int col) : the current matrix is not a Banded matrix");
 
   if (row != 0 || col != 0)
-    SiconosMatrixException::selfThrow("BandedMat* getBandedPtr(int row, int col) : row or col not equal to 0.0");
+    SiconosMatrixException::selfThrow("BandedMat* getBandedPtr(unsigned int row, unsigned int col) : row or col not equal to 0.0");
 
   return mat.Banded;
 }
@@ -456,7 +451,7 @@ const mapped MySimpleMatrix::getMap(void)const
   SiconosMatrixException::selfThrow("mapped getMap : getMap is forbidden for MySimpleMatrix");
 }
 
-void MySimpleMatrix::blockMatrixCopy(const MySiconosMatrix &m, int i, int j)
+void MySimpleMatrix::blockMatrixCopy(const MySiconosMatrix &m, unsigned int i, unsigned int j)
 {
 
   if (num != 1)
@@ -468,13 +463,13 @@ void MySimpleMatrix::blockMatrixCopy(const MySiconosMatrix &m, int i, int j)
   if (j >= size2() || j < 0)
     SiconosMatrixException::selfThrow("blockMatriCopy : col_min given is out of range");
 
-  int num2 = m.getNum();
+  unsigned int num2 = m.getNum();
 
   //if(num==1){
   if (num2 == 1)
   {
-    int row_max = i + (m.getDense()).size1();
-    int col_max = j + (m.getDense()).size2();
+    unsigned int row_max = i + (m.getDense()).size1();
+    unsigned int col_max = j + (m.getDense()).size2();
     if (row_max > size1() || row_max < 0)
       SiconosMatrixException::selfThrow("blockMatriCopy : inconsistent sizes");
 
@@ -485,8 +480,8 @@ void MySimpleMatrix::blockMatrixCopy(const MySiconosMatrix &m, int i, int j)
   }
   else if (num2 == 2)
   {
-    int row_max = i + (m.getTriang()).size1();
-    int col_max = j + (m.getTriang()).size2();
+    unsigned int row_max = i + (m.getTriang()).size1();
+    unsigned int col_max = j + (m.getTriang()).size2();
     if (row_max > size1() || row_max < 0)
       SiconosMatrixException::selfThrow("blockMatriCopy : inconsistent sizes");
 
@@ -497,8 +492,8 @@ void MySimpleMatrix::blockMatrixCopy(const MySiconosMatrix &m, int i, int j)
   }
   else if (num2 == 3)
   {
-    int row_max = i + (m.getSym()).size1();
-    int col_max = j + (m.getSym()).size2();
+    unsigned int row_max = i + (m.getSym()).size1();
+    unsigned int col_max = j + (m.getSym()).size2();
     if (row_max > size1() || row_max < 0)
       SiconosMatrixException::selfThrow("blockMatriCopy : inconsistent sizes");
 
@@ -509,8 +504,8 @@ void MySimpleMatrix::blockMatrixCopy(const MySiconosMatrix &m, int i, int j)
   }
   else if (num2 == 4)
   {
-    int row_max = i + (m.getSparse()).size1();
-    int col_max = j + (m.getSparse()).size2();
+    unsigned int row_max = i + (m.getSparse()).size1();
+    unsigned int col_max = j + (m.getSparse()).size2();
     if (row_max > size1() || row_max < 0)
       SiconosMatrixException::selfThrow("blockMatriCopy : inconsistent sizes");
 
@@ -521,8 +516,8 @@ void MySimpleMatrix::blockMatrixCopy(const MySiconosMatrix &m, int i, int j)
   }
   else if (num2 == 5)
   {
-    int row_max = i + (m.getBanded()).size1();
-    int col_max = j + (m.getBanded()).size2();
+    unsigned int row_max = i + (m.getBanded()).size1();
+    unsigned int col_max = j + (m.getBanded()).size2();
     if (row_max > size1() || row_max < 0)
       SiconosMatrixException::selfThrow("blockMatriCopy : inconsistent sizes");
 
@@ -762,7 +757,7 @@ void MySimpleMatrix::blockMatrixCopy(const MySiconosMatrix &m, int i, int j)
   //   }
 }
 
-void MySimpleMatrix::getBlock(int row_min, int col_min, MySiconosMatrix &m)const
+void MySimpleMatrix::getBlock(unsigned int row_min, unsigned int col_min, MySiconosMatrix &m)const
 {
 
   // We only accept dense matrix for m.
@@ -775,7 +770,7 @@ void MySimpleMatrix::getBlock(int row_min, int col_min, MySiconosMatrix &m)const
   if (col_min >= size2() || row_min < 0)
     SiconosMatrixException::selfThrow("getBlock : col_min given is out of range");
   DenseMat q;
-  int row_max, col_max;
+  unsigned int row_max, col_max;
   if (num == 1)
   {
     row_max = m.getDense().size1() + row_min;
@@ -846,7 +841,7 @@ const std::deque<bool> MySimpleMatrix::getBlockAllocated(void)const
   SiconosMatrixException::selfThrow("std::deque<bool> getBlockAllocated : getBlockAllocated is forbidden for MySimpleMatrix");
 }
 
-void MySimpleMatrix::getRow(int r, MySimpleVector &vect)const
+void MySimpleMatrix::getRow(unsigned int r, MySimpleVector &vect)const
 {
 
   if (r >= size1() || r < 0)
@@ -880,7 +875,7 @@ void MySimpleMatrix::getRow(int r, MySimpleVector &vect)const
   vect = p;
 }
 
-void MySimpleMatrix::setRow(int r, const MySimpleVector &vect)
+void MySimpleMatrix::setRow(unsigned int r, const MySimpleVector &vect)
 {
 
   if (r >= size1() || r < 0)
@@ -946,7 +941,7 @@ void MySimpleMatrix::setRow(int r, const MySimpleVector &vect)
   }
 }
 
-void MySimpleMatrix::getCol(int r, MySimpleVector &vect)const
+void MySimpleMatrix::getCol(unsigned int r, MySimpleVector &vect)const
 {
 
   if (r >= size2() || r < 0)
@@ -980,7 +975,7 @@ void MySimpleMatrix::getCol(int r, MySimpleVector &vect)const
   vect = p;
 }
 
-void MySimpleMatrix::setCol(int r, const MySimpleVector &vect)
+void MySimpleMatrix::setCol(unsigned int r, const MySimpleVector &vect)
 {
 
   if (r >= size2() || r < 0)
@@ -1111,8 +1106,8 @@ void MySimpleMatrix::display(void)const
 
 void MySimpleMatrix::zero(void)
 {
-  int size1 = (*this).size1();
-  int size2 = (*this).size2();
+  unsigned int size1 = (*this).size1();
+  unsigned int size2 = (*this).size2();
   if (num == 1)
   {
     zero_matrix<double> p(size1, size2);
@@ -1142,8 +1137,8 @@ void MySimpleMatrix::zero(void)
 
 void MySimpleMatrix::eye(void)
 {
-  int size1 = (*this).size1();
-  int size2 = (*this).size2();
+  unsigned int size1 = (*this).size1();
+  unsigned int size2 = (*this).size2();
   if (num == 1)
   {
     identity_matrix<double> p(size1, size2);
@@ -1173,7 +1168,7 @@ void MySimpleMatrix::eye(void)
 
 /***************************** OPERATORS ******************************/
 
-double& MySimpleMatrix::operator()(int row, int col)
+double& MySimpleMatrix::operator()(unsigned int row, unsigned int col)
 {
   double d;
   switch (num)
@@ -1194,13 +1189,13 @@ double& MySimpleMatrix::operator()(int row, int col)
     d = (*mat.Banded)(row, col);
     break;
   default:
-    SiconosMatrixException::selfThrow("op() (int, int) : invalid type of matrix");
+    SiconosMatrixException::selfThrow("op() (unsigned int, unsigned int) : invalid type of matrix");
     break;
   }
   return d;
 }
 
-double MySimpleMatrix::operator()(int row, int col)const
+double MySimpleMatrix::operator()(unsigned int row, unsigned int col)const
 {
   double d;
   switch (num)
@@ -1221,7 +1216,7 @@ double MySimpleMatrix::operator()(int row, int col)const
     d = (*mat.Banded)(row, col);
     break;
   default:
-    SiconosMatrixException::selfThrow("op() (int, int) : invalid type of matrix");
+    SiconosMatrixException::selfThrow("op() (unsigned int, unsigned int) : invalid type of matrix");
     break;
   }
   return d;
@@ -2031,6 +2026,14 @@ MySimpleMatrix sub(const MySiconosMatrix &x, const MySiconosMatrix& m)
     {
       p = x.getSym() - q;
     }
+    else if (x.getNum() == 4)
+    {
+      p = x.getSparse() - q;
+    }
+    else if (x.getNum() == 5)
+    {
+      p = x.getBanded() - q;
+    }
     else
       SiconosMatrixException::selfThrow("Matrix function sub: invalid type of matrix");
 
@@ -2272,8 +2275,8 @@ MySimpleMatrix prod(const MySiconosMatrix &x, const MySiconosMatrix& m)
     }
     else if (x.getNum() == 2)
     {
-      t = prod(x.getTriang(), q);
-      return t;
+      p = prod(x.getTriang(), q);
+      return p;
     }
     else if (x.getNum() == 3)
     {
@@ -2282,8 +2285,8 @@ MySimpleMatrix prod(const MySiconosMatrix &x, const MySiconosMatrix& m)
     }
     else if (x.getNum() == 4)
     {
-      p = prod(x.getSparse(), q);
-      return p;
+      sp = prod(x.getSparse(), q);
+      return sp;
     }
     else if (x.getNum() == 5)
     {
@@ -2305,8 +2308,8 @@ MySimpleMatrix prod(const MySiconosMatrix &x, const MySiconosMatrix& m)
     }
     else if (x.getNum() == 2)
     {
-      t = prod(x.getTriang(), q);
-      return t;
+      p = prod(x.getTriang(), q);
+      return p;
     }
     else if (x.getNum() == 3)
     {
@@ -2320,8 +2323,8 @@ MySimpleMatrix prod(const MySiconosMatrix &x, const MySiconosMatrix& m)
     }
     else if (x.getNum() == 5)
     {
-      p = prod(x.getBanded(), q);
-      return p;
+      b = prod(x.getBanded(), q);
+      return b;
     }
     else
       SiconosMatrixException::selfThrow("Matrix function prod: invalid type of matrix");
@@ -2334,7 +2337,7 @@ MySimpleMatrix prod(const MySiconosMatrix &x, const MySiconosMatrix& m)
 
 }
 
-MySimpleMatrix multranspose(const MySiconosMatrix &x, const MySiconosMatrix &m)
+MySimpleMatrix multTranspose(const MySiconosMatrix &x, const MySiconosMatrix &m)
 {
   return prod(x, trans(m));
 }
@@ -2405,6 +2408,7 @@ MySimpleMatrix operator * (const MySiconosMatrix &m, int d)
   }
   else if (m.getNum() == 5)
   {
+    b.resize(m.size1(), m.size2(), (m.getBanded()).lower(), (m.getBanded()).upper(), false);
     b = m.getBanded() * d;
     return b;
   }
@@ -2441,6 +2445,7 @@ MySimpleMatrix operator * (double d, const MySiconosMatrix &m)
   }
   else if (m.getNum() == 5)
   {
+    b.resize(m.size1(), m.size2(), (m.getBanded()).lower(), (m.getBanded()).upper(), false);
     b = d * m.getBanded();
     return b;
   }
@@ -2477,6 +2482,7 @@ MySimpleMatrix operator * (int d, const MySiconosMatrix &m)
   }
   else if (m.getNum() == 5)
   {
+    b.resize(m.size1(), m.size2(), (m.getBanded()).lower(), (m.getBanded()).upper(), false);
     b = d * m.getBanded();
     return b;
   }
@@ -2513,6 +2519,7 @@ MySimpleMatrix operator / (const MySiconosMatrix &m, double d)
   }
   else if (m.getNum() == 5)
   {
+    b.resize(m.size1(), m.size2(), (m.getBanded()).lower(), (m.getBanded()).upper(), false);
     b = m.getBanded() / d;
     return b;
   }
@@ -2549,6 +2556,7 @@ MySimpleMatrix operator / (const MySiconosMatrix &m, int d)
   }
   else if (m.getNum() == 5)
   {
+    b.resize(m.size1(), m.size2(), (m.getBanded()).lower(), (m.getBanded()).upper(), false);
     b = m.getBanded() / d;
     return b;
   }
