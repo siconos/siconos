@@ -162,13 +162,13 @@ public:
    *  \brief get a pointer on DenseVect
    *  \return a DenseVect*
    */
-  const DenseVect* getDensePtr(void)const;
+  DenseVect* getDensePtr(void) const;
 
   /** \fn SparseVect* getSparsePtr()
    *  \brief get a pointer on SparseVect
    *  \return a SparseVect*
    */
-  const SparseVect* getSparsePtr(void)const;
+  SparseVect* getSparsePtr(void)const;
 
   /** \fn unsigned int getNum() const
    *  \brief get the attribute num of current vector

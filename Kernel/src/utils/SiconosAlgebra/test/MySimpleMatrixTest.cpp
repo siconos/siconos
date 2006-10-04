@@ -330,52 +330,52 @@ void MySimpleMatrixTest::testGetBlock()
   cout << "--> getBlock test ended with success." << endl;
 }
 
-void MySimpleMatrixTest::testBlockMatrixCopy()
+void MySimpleMatrixTest::testMatrixCopy()
 {
   cout << "--> Test: blockMatrixCopy." << endl;
   // 1 -- Copy into a dense matrix of a ...
   // Dense
   MySiconosMatrix * full = new MySimpleMatrix(*SimM);
   full->resize(4, 5);
-  full->blockMatrixCopy(*SicM, 2, 3);
+  full->matrixCopy(*SicM, 2, 3);
   MySiconosMatrix * block = new MySimpleMatrix(2, 2);
   full->getBlock(2, 3, *block);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy: ", *block == *SicM , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixCopy: ", *block == *SicM , true);
   delete block;
   // Triang
   MySiconosMatrix * Tmp = new MySimpleMatrix(*T);
-  full->blockMatrixCopy(*Tmp, 1, 2);
+  full->matrixCopy(*Tmp, 1, 2);
   block = new MySimpleMatrix(3, 3);
   full->getBlock(1, 2, *block);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy: ", *block == *Tmp , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixCopy: ", *block == *Tmp , true);
   delete block;
   delete Tmp;
   // Sym
   Tmp = new MySimpleMatrix(*S);
-  full->blockMatrixCopy(*Tmp, 1, 2);
+  full->matrixCopy(*Tmp, 1, 2);
   block = new MySimpleMatrix(3, 3);
   full->getBlock(1, 2, *block);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy: ", *block == *Tmp , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixCopy: ", *block == *Tmp , true);
   delete block;
   delete Tmp;
   // Sparse
   Tmp = new MySimpleMatrix(*SP);
-  full->blockMatrixCopy(*Tmp, 0, 1);
+  full->matrixCopy(*Tmp, 0, 1);
   block = new MySimpleMatrix(4, 4);
   full->getBlock(0, 1, *block);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy: ", *block == *Tmp , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixCopy: ", *block == *Tmp , true);
   delete block;
   delete Tmp;
   // Banded
   Tmp = new MySimpleMatrix(*B);
-  full->blockMatrixCopy(*Tmp, 0, 1);
+  full->matrixCopy(*Tmp, 0, 1);
   block = new MySimpleMatrix(4, 4);
   full->getBlock(0, 1, *block);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBlockMatrixCopy: ", *block == *Tmp , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixCopy: ", *block == *Tmp , true);
   delete block;
   delete Tmp;
   delete full;
-  cout << "-->  blockMatrixCopy test ended with success." << endl;
+  cout << "-->  matrixCopy test ended with success." << endl;
 }
 
 void MySimpleMatrixTest::testTrans()
@@ -1529,7 +1529,53 @@ void MySimpleMatrixTest::testMultTranspose()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), tmp3->getSym())) == 0, true);
   *res = multTranspose(*tmp5, *tmp4);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), trans(tmp4->getSparse()))) == 0, true);
+
+  delete tmp1;
+  delete tmp2;
+  delete tmp3;
+  delete tmp4;
+  delete tmp5;
   cout << "-->  test multTranspose ended with success." << endl;
+}
+void MySimpleMatrixTest::testPow()
+{
+  cout << "--> Test: pow." << endl;
+  // Dense
+  MySiconosMatrix * tmp1 = new MySimpleMatrix(*D);
+  MySiconosMatrix * res = new MySimpleMatrix(2, 2);
+  *res = pow(*tmp1, 3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == *tmp1**tmp1**tmp1, true);
+  delete res;
+  // Triang
+  MySiconosMatrix * tmp2 = new MySimpleMatrix(*T);
+  res = new MySimpleMatrix(3, 3, TRIANGULAR);
+  *res = pow(*tmp2, 3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == *tmp2**tmp2**tmp2, true);
+  delete res;
+  // Sym
+  MySiconosMatrix * tmp3 = new MySimpleMatrix(*S);
+  res = new MySimpleMatrix(3, 3, SYMMETRIC);
+  *res = pow(*tmp3, 3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == *tmp3**tmp3**tmp3, true);
+  delete res;
+  // Sparse
+  MySiconosMatrix * tmp4 = new MySimpleMatrix(*SP);
+  res = new MySimpleMatrix(4, 4, SPARSE);
+  *res = pow(*tmp4, 3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == *tmp4**tmp4**tmp4, true);
+  delete res;
+  // Banded
+  MySiconosMatrix * tmp5 = new MySimpleMatrix(*B);
+  res = new MySimpleMatrix(4, 4);
+  *res = pow(*tmp5, 3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == prod(*tmp5, *tmp5) == 0, true);
+  delete res;
+  delete tmp1;
+  delete tmp2;
+  delete tmp3;
+  delete tmp4;
+  delete tmp5;
+  cout << "-->  test pow ended with success." << endl;
 }
 
 void MySimpleMatrixTest::End()

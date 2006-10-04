@@ -40,7 +40,7 @@ void BlockMatrix::addInTab(const unsigned int& i, const unsigned int& j)
 
 void BlockMatrix::makeTab(const unsigned int& row, const unsigned int& col)
 {
-  blocksMap::iterator it;
+  //blocksMap::iterator it;
   tabRow.clear();
   tabCol.clear();
   vector<unsigned int> index(2);

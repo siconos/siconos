@@ -132,6 +132,33 @@ public:
   ~MySimpleMatrix(void);
   //************************** GETTERS/SETTERS  **************************
 
+  /** \fn bool isSquare()
+   *  \brief determines if the matrix is square
+   *  \return true if the matrix is square
+   */
+  inline bool isSquare() const
+  {
+    return (size1() == size2());
+  } ;
+
+  /** \fn bool isInversed()
+   *  \brief determines if the matrix has been inversed
+   *  \return true if the matrix is inversed
+   */
+  inline bool isInversed() const
+  {
+    return false;
+  }
+
+  /** \fn bool isfactorized()
+   *  \brief determines if the matrix has been factorized
+   *  \return true if the matrix is factorized
+   */
+  inline bool isFactorized() const
+  {
+    return false;
+  }
+
   /** \fn unsigned int getNum() const
    *  \brief get the attribute num of current matrix, useless for Block Matrix
    * \return an unsigned int.
@@ -185,7 +212,7 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a DenseMat*
    */
-  const DenseMat* getDensePtr(unsigned int = 0, unsigned int = 0) const;
+  DenseMat* getDensePtr(unsigned int = 0, unsigned int = 0) const;
 
   /** \fn TriangMat* getTriangPtr(unsigned int row = 0, unsigned int col = 0)
    *  \brief get a pointer on TriangMat matrix
@@ -193,7 +220,7 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a TriangMat*
    */
-  const TriangMat* getTriangPtr(unsigned int = 0, unsigned int = 0) const;
+  TriangMat* getTriangPtr(unsigned int = 0, unsigned int = 0) const;
 
   /** \fn SymMat* getSymPtr(unsigned int row = 0, unsigned int col = 0)
    *  \brief get a pointer on SymMat matrix
@@ -201,7 +228,7 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a SymMat*
    */
-  const SymMat* getSymPtr(unsigned int = 0, unsigned int = 0) const;
+  SymMat* getSymPtr(unsigned int = 0, unsigned int = 0) const;
 
   /** \fn BandedMat* getBandedPtr(unsigned int row = 0, unsigned int col = 0)
    *  \brief get a pointer on BandedMat matrix
@@ -209,7 +236,7 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a BandedMat*
    */
-  const BandedMat* getBandedPtr(unsigned int = 0, unsigned int = 0) const;
+  BandedMat* getBandedPtr(unsigned int = 0, unsigned int = 0) const;
 
   /** \fn SparseMat* getSparsePtr(unsigned int row = 0, unsigned int col = 0)
    *  \brief get a pointer on SparseMat matrix
@@ -217,7 +244,7 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a SparseMat*
    */
-  const SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const;
+  SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const;
 
   /** \fn mapped getMap()
    *  \brief get mapped matrix
@@ -231,6 +258,16 @@ public:
    *  \param 2 unsigned int for indexes and a MySiconosMatrix (in-out paramater)
    */
   void getBlock(unsigned int, unsigned int, MySiconosMatrix&) const;
+
+  /** \fn MySiconosMatrix* getBlockPtr(const unsigned int& row, const unsigned int& col)
+   *  \brief get block at position row-col, ie return this in SimpleMatrix case
+   *  \param unsigned int row
+   *  \param unsigned int col
+   */
+  inline MySiconosMatrix* getBlockPtr(unsigned int = 0, unsigned int = 0)
+  {
+    return this;
+  };
 
   /** \fn const std::deque<bool> getBlockAllocated()const
    *   \brief get std::deque of bool
@@ -313,14 +350,13 @@ public:
 
   // --- MATRICES HANDLING AND OPERATORS ---
 
-  /** \fn void blockMatrixCopy( MySiconosMatrix &blockMat, unsigned int, unsigned int)
-   *  \brief copy the blockmatrix "blockMat" in the matrix "mat" at the position (xPos, yPos)
-   *                    [0, 0, 0, 0].blockMatrixCopy([1], 0, 2) => mat = [0 0 1 0]
-   *  \param MySiconosMatrix& : the block matrix to copy in the current matrix
+  /** \fn void matrixCopy( MySiconosMatrix &blockMat, unsigned int, unsigned int)
+   *  \brief copy the matrix "blockMat" into the matrix "mat" at the position (xPos, yPos)
+   *  \param MySiconosMatrix& : the block matrix to be copied in the current matrix
    *  \param unsigned int : the line position to start the copy of the blockmatrix
    *  \param unsigned int : the column position to start the copy of the blockmatrix
    */
-  void blockMatrixCopy(const MySiconosMatrix&, unsigned int, unsigned int);
+  void matrixCopy(const MySiconosMatrix&, unsigned int, unsigned int);
 
   /** \fn double& operator() (unsigned int row, unsigned int col)
    *  \brief get or set the element matrix[i,j]
@@ -501,5 +537,18 @@ public:
    *  \return MySimpleMatrix : the result of the multiplication
    */
   friend MySimpleMatrix multTranspose(const MySiconosMatrix&, const MySiconosMatrix&);
+
+  /** \fn pow(const MySimpleMatrix& m1,  const unsigned int&);
+   *  \brief compute the power of the matrix (!)
+   *  \return a MySimpleMatrix
+   *  \exception SiconosMatrixException, if the power < 0
+   */
+  friend MySimpleMatrix pow(const MySimpleMatrix&, unsigned int);
+
+  /** \fn MySimpleMatrix BlockMatrixAssemble(vector<MySiconosMatrix*>);
+   *  \brief build a matrix from n matrices
+   *  \return a MySimpleMatrix
+   */
+  friend MySimpleMatrix BlockMatrixAssemble(const std::vector<MySiconosMatrix*>&);
 };
 #endif

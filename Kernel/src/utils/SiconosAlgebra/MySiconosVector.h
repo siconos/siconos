@@ -122,13 +122,13 @@ public:
    *  \brief get a pointer on DenseVect
    *  \return a DenseVect*
    */
-  virtual const DenseVect* getDensePtr(void)const = 0;
+  virtual DenseVect* getDensePtr(void)const = 0;
 
   /** \fn SparseVect* getSparsePtr()
    *  \brief get a pointer on SparseVect
    *  \return a SparseVect*
    */
-  virtual const SparseVect* getSparsePtr(void)const = 0;
+  virtual SparseVect* getSparsePtr(void)const = 0;
 
   /** \fn void setNum(unsigned int n)
    *  \brief set the attribute num of current vector with n

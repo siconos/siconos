@@ -137,7 +137,7 @@ bool ioMatrix::read(MySiconosMatrix& m)const
   else
   {
     SiconosMatrixException::selfThrow("Incorrect mode for reading");
-
+    return false;
   }
 }
 
@@ -312,7 +312,7 @@ bool ioMatrix::write(const MySiconosMatrix& m)
   else
   {
     SiconosMatrixException::selfThrow("Incorrect mode for writing");
-
+    return false;
   }
 }
 
@@ -484,22 +484,25 @@ bool ioMatrix::rawWrite(const MySiconosMatrix& m)
   else
   {
     SiconosMatrixException::selfThrow("Incorrect mode for writing");
+    return false;
   }
 }
 
 bool ioMatrix::read(MySiconosVector& m)const
 {
   SiconosMatrixException::selfThrow("ioMatrix::read(MySiconosVector&) is forbidden");
-
+  return false;
 }
 
 bool ioMatrix::write(const MySiconosVector& m)
 {
   SiconosMatrixException::selfThrow("ioMatrix::write(const MySiconosVector&) is forbidden");
+  return false;
 }
 
 bool ioMatrix::rawWrite(const MySiconosVector& m)
 {
   SiconosMatrixException::selfThrow("ioMatrix::rawWrite(const MySiconosVector&) is forbidden");
+  return false;
 }
 

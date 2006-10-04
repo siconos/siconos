@@ -89,7 +89,7 @@ class MySiconosMatrix;
 
 /**\brief mapped is a typedef of boost::ublas::numeric::mapped_matrix<MySiconosMatrix* >
  */
-typedef mapped_matrix<MySiconosMatrix* > mapped;
+typedef mapped_matrix<MySiconosMatrix*> mapped;
 
 class MySiconosMatrix
 {
@@ -107,22 +107,41 @@ protected:
     isBlockMatrix = val;
   }
 
+  /**\fn MySiconosMatrix (bool = false)
+   * \brief default constructor */
+  MySiconosMatrix(bool = false);
+
 public:
+
+  /**\fn ~MySiconosMatrix ()
+   * \brief Destructor. */
+  virtual ~MySiconosMatrix();
 
   /**\fn bool isBlock ()
    * \brief true if the matrix is block else false.
    * \return a bool.*/
-  inline bool isBlock(void)const
+  inline bool isBlock(void) const
   {
     return isBlockMatrix;
   }
 
-  /**\fn ~MySiconosMatrix ()
-   * \brief Destructor. */
-  virtual ~MySiconosMatrix(void) = 0;
+  /** \fn bool isSquare()
+   *  \brief determines if the matrix is square
+   *  \return true if the matrix is square
+   */
+  virtual bool isSquare() const = 0;
 
-  // ************ GETTERS/SETTERS ***************
+  /** \fn bool isInversed()
+   *  \brief determines if the matrix has been inversed
+   *  \return true if the matrix is inversed
+   */
+  virtual bool isInversed() const  = 0;
 
+  /** \fn bool isfactorized()
+   *  \brief determines if the matrix has been factorized
+   *  \return true if the matrix is factorized
+   */
+  virtual bool isFactorized() const  = 0;
 
   /** \fn unsigned int getNum() const = 0
    *  \brief get the attribute num of current matrix
@@ -176,7 +195,7 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a DenseMat*
    */
-  virtual const DenseMat* getDensePtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual  DenseMat* getDensePtr(unsigned int = 0, unsigned int = 0) const = 0;
 
   /** \fn TriangMat* getTriangPtr(unsigned int row = 0, unsigned int col = 0) const = 0
    *  \brief get a pointer on TriangMat matrix
@@ -184,7 +203,7 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a TriangMat*
    */
-  virtual const TriangMat* getTriangPtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual TriangMat* getTriangPtr(unsigned int = 0, unsigned int = 0) const = 0;
 
   /** \fn SymMat* getSymPtr(unsigned int row = 0, unsigned int col = 0) const = 0
    *  \brief get a pointer on SymMat matrix
@@ -192,7 +211,7 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a SymMat*
    */
-  virtual const SymMat* getSymPtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual SymMat* getSymPtr(unsigned int = 0, unsigned int = 0) const = 0;
 
   /** \fn BandedMat* getBandedPtr(unsigned int row = 0, unsigned int col = 0) const = 0
    *  \brief get a pointer on BandedMat matrix
@@ -200,7 +219,7 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a BandedMat*
    */
-  virtual const BandedMat* getBandedPtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual BandedMat* getBandedPtr(unsigned int = 0, unsigned int = 0) const = 0;
 
   /** \fn SparseMat* getSparsePtr(unsigned int row = 0, unsigned int col = 0) const = 0
    *  \brief get a pointer on SparseMat matrix
@@ -208,7 +227,7 @@ public:
    *  \param an unsigned int, position of the block (column) - Useless for MySimpleMatrix
    *  \return a SparseMat*
    */
-  virtual const SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const = 0;
+  virtual SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const = 0;
 
   /** \fn mapped getMap() const  = 0
    *  \brief get mapped matrix
@@ -225,12 +244,24 @@ public:
    */
   virtual void getBlock(unsigned int, unsigned int, MySiconosMatrix&) const = 0;
 
+  /** \fn MySiconosMatrix* getBlockPtr(const unsigned int& row, const unsigned int& col)
+   *  \brief get block at position row-col if BlockMatrix, else if SimpleMatrix return this
+   *  \param unsigned int row
+   *  \param unsigned int col
+   */
+  virtual MySiconosMatrix* getBlockPtr(unsigned int = 0, unsigned int = 0) = 0;
+
   /** \fn const std::deque<bool> getBlockAllocated() const = 0
    *   \brief get std::deque of bool
    *   \useless for MySimpleMatrix
    *   \return a std::deque<bool>
    */
   virtual const std::deque<bool> getBlockAllocated(void) const = 0;
+
+  /** \fn void setNum(unsigned int n)
+   *  \brief set the attribute num of current matrix with n
+   */
+  virtual void setNum(unsigned int) = 0;
 
   /** \fn void getRow(unsigned int index, MySimpleVector& vOut) const = 0
    *  \brief get row index of current matrix and save it into vOut
@@ -245,11 +276,6 @@ public:
    *  \param ref to MySimpleVector: in-out parameter
    */
   virtual void getCol(unsigned int, MySimpleVector&) const = 0;
-
-  /** \fn void setNum(unsigned int n)
-   *  \brief set the attribute num of current matrix with n
-   */
-  virtual void setNum(unsigned int) = 0;
 
   /** \fn void setRow(unsigned int row, const MySimpleVector &v)
    *  \brief set line row of the current matrix with vector v
@@ -310,14 +336,13 @@ public:
 
   // --- MATRICES HANDLING AND OPERATORS ---
 
-  /** \fn void blockMatrixCopy( MySiconosMatrix &blockMat, unsigned int, unsigned int) = 0
-   *  \brief copy the blockmatrix "blockMat" in the matrix "mat" at the position (xPos, yPos)
-   *                    [0, 0, 0, 0].blockMatrixCopy([1], 0, 2) => mat = [0 0 1 0]
-   *  \param MySiconosMatrix& : the block matrix to copy in the current matrix
+  /** \fn void matrixCopy( MySiconosMatrix &blockMat, unsigned int, unsigned int) = 0
+   *  \brief copy the matrix "blockMat" into the matrix "mat" at the position (xPos, yPos)
+   *  \param MySiconosMatrix& : the matrix to be copied in the current matrix
    *  \param unsigned int : the line position to start the copy of the blockmatrix
    *  \param unsigned int : the column position to start the copy of the blockmatrix
    */
-  virtual void blockMatrixCopy(const MySiconosMatrix&, unsigned int, unsigned int) = 0;
+  virtual void matrixCopy(const MySiconosMatrix&, unsigned int, unsigned int) = 0;
 
   // Note: in the following functions, row and col are general;
   // that means that for a MySimpleMatrix m, m(i,j) is index (i,j) element but

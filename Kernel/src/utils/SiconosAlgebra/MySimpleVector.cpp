@@ -197,16 +197,15 @@ const SparseVect MySimpleVector::getSparse(void)const
   return *vect.Sparse;
 }
 
-const DenseVect* MySimpleVector::getDensePtr(void)const
+DenseVect* MySimpleVector::getDensePtr(void) const
 {
-
   if (num != 1)
     SiconosVectorException::selfThrow("DenseVect* getDensePtr(unsigned int row, unsigned int col) : the current vector is not a Dense vector");
 
   return vect.Dense;
 }
 
-const SparseVect* MySimpleVector::getSparsePtr(void)const
+SparseVect* MySimpleVector::getSparsePtr(void)const
 {
 
   if (num != 2)

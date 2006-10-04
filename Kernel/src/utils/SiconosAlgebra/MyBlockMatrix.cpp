@@ -69,25 +69,21 @@ void MyBlockMatrix::makeTab(unsigned int row, unsigned int col)
   }
 }
 
-
-
-MyBlockMatrix::MyBlockMatrix(const MySiconosMatrix &m)
+MyBlockMatrix::MyBlockMatrix(const MySiconosMatrix &m): MySiconosMatrix(true)
 {
-  if (m.isBlock() == false)
+  if (!m.isBlock())
     SiconosMatrixException::selfThrow("BlockMatrix copy constructor from a SimpleMatrix: forbidden operation.");
 
-  setIsBlock(true);
-  isBlockAllocatedIn.resize(m.size1() * m.size2());
-  mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
-
-  tabRow = (dynamic_cast<const MyBlockMatrix&>(m)).tabRow;
-  tabCol = (dynamic_cast<const MyBlockMatrix&>(m)).tabCol;
-
+  // mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
+  mapped Mmap = m.getMap();
   unsigned int col = Mmap.size2();
   unsigned int row = Mmap.size1();
+  isBlockAllocatedIn.resize(col * row);
+
   map.resize(row, col, false);
   unsigned int i = 0, j = 0;
   // STDMAP = 1 means that we use the map::iterator of standard library, else we use the iterator of boost map
+
   if (STDMAP == 1)
   {
     mapped::array_type::iterator it;
@@ -119,24 +115,21 @@ MyBlockMatrix::MyBlockMatrix(const MySiconosMatrix &m)
       }
     }
   }
+  makeTab(row, col);
 }
 
-MyBlockMatrix::MyBlockMatrix(const MyBlockMatrix &m)
+MyBlockMatrix::MyBlockMatrix(const MyBlockMatrix &m): MySiconosMatrix(true)
 {
-
-  setIsBlock(true);
-  isBlockAllocatedIn.resize(m.size1() * m.size2());
-  mapped Mmap = m.map;
-
-  tabRow = (dynamic_cast<const MyBlockMatrix&>(m)).tabRow;
-  tabCol = (dynamic_cast<const MyBlockMatrix&>(m)).tabCol;
-
+  // mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
+  mapped Mmap = m.getMap();
   unsigned int col = Mmap.size2();
   unsigned int row = Mmap.size1();
+  isBlockAllocatedIn.resize(col * row);
+
   map.resize(row, col, false);
   unsigned int i = 0, j = 0;
-
   // STDMAP = 1 means that we use the map::iterator of standard library, else we use the iterator of boost map
+
   if (STDMAP == 1)
   {
     mapped::array_type::iterator it;
@@ -150,6 +143,7 @@ MyBlockMatrix::MyBlockMatrix(const MyBlockMatrix &m)
       isBlockAllocatedIn[(it->first) ] = true;
     }
   }
+
   else
   {
     mapped::iterator1 it;
@@ -167,15 +161,15 @@ MyBlockMatrix::MyBlockMatrix(const MyBlockMatrix &m)
       }
     }
   }
+  makeTab(row, col);
 }
 
-MyBlockMatrix::MyBlockMatrix(mapped& Mmap)
+MyBlockMatrix::MyBlockMatrix(mapped& Mmap): MySiconosMatrix(true)
 {
 
   unsigned int i = 0, j = 0;
   unsigned int row = Mmap.size1();
   unsigned int col = Mmap.size2();
-  setIsBlock(true);
   isBlockAllocatedIn.resize(row * col);
   map.resize(row, col, false);
 
@@ -214,34 +208,46 @@ MyBlockMatrix::MyBlockMatrix(mapped& Mmap)
   makeTab(row, col);
 }
 
-MyBlockMatrix::MyBlockMatrix(const std::vector<MySiconosMatrix* > &m, unsigned int row, unsigned int col)
+MyBlockMatrix::MyBlockMatrix(const std::vector<MySiconosMatrix* > &m, unsigned int row, unsigned int col): MySiconosMatrix(true)
 {
-  if (m.size() != (unsigned int)(row * col))
-    SiconosMatrixException::selfThrow("BlockMatrix constructor from a vector<LaGenMatDouble>, number of blocks inconsistent with provided dimensions.");
+  if (m.size() != (row * col))
+    SiconosMatrixException::selfThrow("BlockMatrix constructor from a vector<MySiconosMatrix*>, number of blocks inconsistent with provided dimensions.");
 
-  setIsBlock(true);
   isBlockAllocatedIn.resize(row * col);
   map.resize(row, col, false);
-  tabRow.reserve(row);
-  tabCol.reserve(col);
 
   for (unsigned int i = 0; i < row; i++)
   {
     for (unsigned int j = 0; j < col; j++)
     {
-      map(i, j) = new MySimpleMatrix(*m [i * col + j]);
-      isBlockAllocatedIn[i * col + j] = true;
-      //isBlockAllocatedIn.push_back (false);
+      map(i, j) = m [i * col + j];
+      isBlockAllocatedIn[i * col + j] = false;
     }
   }
   makeTab(row, col);
+}
+
+MyBlockMatrix::MyBlockMatrix(MySiconosMatrix* A, MySiconosMatrix* B, MySiconosMatrix* C, MySiconosMatrix* D): MySiconosMatrix(true)
+{
+  if (A->size1() != B->size1() || C->size1() != D->size1() ||  A->size2() != C->size2() ||  B->size2() != D->size2())
+    SiconosMatrixException::selfThrow("BlockMatrix constructor(A,B,C,D), inconsistent sizes between A, B, C or D MySiconosMatrices.");
+
+  isBlockAllocatedIn.resize(4, false);
+  map.resize(2, 2, false);
+  tabRow.reserve(2);
+  tabCol.reserve(2);
+  map(0, 0) = A;
+  map(0, 1) = B;
+  map(1, 0) = C;
+  map(1, 1) = D;
+  makeTab(2, 2);
 }
 
 MyBlockMatrix::~MyBlockMatrix(void)
 {
   unsigned row = map.size1();
   unsigned col = map.size2();
-  // we call delete on the map only if the pointer was allocated
+  // we call delete on the map only if the pointer has been allocated in the class
   for (unsigned i = 0; i < row; ++i)
   {
     for (unsigned j = 0; j < col; ++j)
@@ -252,21 +258,29 @@ MyBlockMatrix::~MyBlockMatrix(void)
   }
 }
 
-
-void MyBlockMatrix::getBlock(unsigned int row, unsigned int col, MySiconosMatrix &m)const
+// return the number of rows of blocks
+unsigned int MyBlockMatrix::size1(void)const
 {
-  m = dynamic_cast<MySiconosMatrix&>(*(map(row, col)));
+  return tabRow[ tabRow.size() - 1 ];
 }
 
-const std::deque<bool> MyBlockMatrix::getBlockAllocated(void)const
+// return the number of columns of blocks
+unsigned int MyBlockMatrix::size2(void)const
 {
-  return isBlockAllocatedIn;
+  return tabCol[ tabCol.size() - 1 ];
+}
+
+void MyBlockMatrix::resize(unsigned int row, unsigned int col, unsigned int lower, unsigned int upper, bool preserve)
+{
+  //   if(lower != 0 || upper != 0)
+  //     SiconosMatrixException::selfThrow("MyBlockMatrix::resize : lower or upper not equal to 0.0");
+  //   map.resize(row, col, preserve);
+  SiconosMatrixException::selfThrow("MyBlockMatrix::resize : forbidden for block matrices.");
 }
 
 const double MyBlockMatrix::normInf(void)const
 {
-  double sum = 0;
-  double norm = 0;
+  double sum = 0, norm = 0;
   for (unsigned int i = 0; i < size1(); i++)
   {
     for (unsigned int j = 0; j < size2(); j++)
@@ -279,204 +293,8 @@ const double MyBlockMatrix::normInf(void)const
   return norm;
 }
 
-void MyBlockMatrix::blockMatrixCopy(const MySiconosMatrix &m, unsigned int row, unsigned int col)
-{
-
-  if (m.isBlock() == true)
-    SiconosMatrixException::selfThrow("blockMatrixCopy of a block to an other block is forbidden.");
-
-
-  unsigned int nbRow = 0;
-  unsigned int nbCol = 0;
-
-  // Computation of the index row and the index column of the block corresponding
-  while (row >= tabRow[nbRow] && nbRow < tabRow.size())
-    nbRow ++;
-
-  while (col >= tabCol[nbCol] && nbCol < tabCol.size())
-    nbCol ++;
-  // we delete the block if it was allocated to avoid leak memory
-  if (isBlockAllocatedIn[nbRow * tabCol.size() + nbCol] == true)
-    delete map(nbRow, nbCol);
-  map(nbRow, nbCol) = new MySimpleMatrix(m);
-  isBlockAllocatedIn[nbRow * tabCol.size() + nbCol] = true;
-}
-
-unsigned int MyBlockMatrix::getNum(void)const
-{
-  SiconosMatrixException::selfThrow("getNum of a block is forbidden.");
-}
-
-void MyBlockMatrix::setNum(unsigned int)
-{
-  SiconosMatrixException::selfThrow("setNum of a block is forbidden.");
-}
-
-
-void MyBlockMatrix::getRow(unsigned int row, MySimpleVector &v)const
-{
-
-  unsigned int numRow = 0, posRow = row, start = 0, stop = 0, step = 0;
-
-  if (row > size1() || row < 0)
-    SiconosMatrixException::selfThrow("getRow : row is out of range");
-
-  // Verification of the size of the result vector
-  if (v.size() != size2())
-    SiconosMatrixException::selfThrow("getRow : inconsistent sizes");
-
-  // Determination of the row of the block corresponding
-
-  while (row >= tabRow[numRow] && numRow < tabRow.size())
-    numRow ++;
-  // Computation of the value of the index row into this block
-  if (numRow != 0)
-    posRow -= tabRow[numRow - 1];
-
-  // loop for copying the values into the vector
-  DenseVect vect(size2());
-
-  for (unsigned int j = 0; j < tabCol.size(); j++)
-  {
-    step = (*map(numRow, j)).size2();
-    start = stop;
-    stop += step;
-    MySimpleVector tmp(step);
-    (*map(numRow, j)).getRow(posRow, tmp);
-
-    subrange(vect, start, stop) = tmp.getDense();
-  }
-  MySimpleVector p(vect);
-  v = p;
-}
-
-void MyBlockMatrix::getCol(unsigned int col, MySimpleVector &v)const
-{
-
-  unsigned int numCol = 0, posCol = col, start = 0, stop = 0, step = 0;
-
-  if (col > size2() || col < 0)
-    SiconosMatrixException::selfThrow("getCol : col is out of range");
-
-  // Verification of the size of the result vector
-  if (v.size() != size1())
-    SiconosMatrixException::selfThrow("getcol : inconsistent sizes");
-
-  // Determination of the column of the block corresponding
-  while (col >= tabCol[numCol] && numCol < tabCol.size())
-    numCol ++;
-  // Computation of the value of the index column into this block
-  if (numCol != 0)
-    posCol -= tabCol[numCol - 1];
-
-  DenseVect vect(size1());
-
-  // loop for copying the values into the vector
-  for (unsigned int i = 0; i < tabRow.size(); i++)
-  {
-    step = (*map(i, numCol)).size1();
-    start = stop;
-    stop += step;
-    MySimpleVector tmp(step);
-    (*map(i, numCol)).getCol(posCol, tmp);
-
-    subrange(vect, start, stop) = tmp.getDense();
-  }
-  MySimpleVector p(vect);
-  v = p;
-}
-
-void MyBlockMatrix::setRow(unsigned int row, const MySimpleVector &v)
-{
-
-  unsigned int numRow = 0, posRow = row, start = 0, stop = 0, step = 0;
-
-  unsigned int nbCol = size2();
-  assert(v.size() == nbCol);
-
-  while (row >= tabRow[numRow] && numRow < tabRow.size())
-    numRow ++;
-
-  if (numRow != 0)
-    posRow -= tabRow[numRow - 1];
-
-  DenseVect vect(size2());
-  vect = v.getDense();
-
-  for (unsigned int j = 0; j < tabCol.size(); j++)
-  {
-    step = (*map(numRow, j)).size2();
-    start = stop;
-    stop += step;
-    DenseVect tmp(step);
-    tmp = subrange(vect, start, stop);
-    MySimpleVector p(tmp);
-    (*map(numRow, j)).setRow(posRow, p);
-
-  }
-}
-
-void MyBlockMatrix::setCol(unsigned int col, const MySimpleVector &v)
-{
-
-  unsigned int numCol = 0, posCol = col, start = 0, stop = 0, step = 0;
-
-  unsigned int nbRow = size1();
-  assert(v.size() == nbRow);
-
-  while (col >= tabCol[numCol] && numCol < tabCol.size())
-    numCol ++;
-
-  if (numCol != 0)
-    posCol -= tabCol[numCol - 1];
-
-  DenseVect vect(size1());
-  vect = v.getDense();
-  for (unsigned int i = 0; i < tabRow.size(); i++)
-  {
-    step = (*map(i, numCol)).size1();
-    start = stop;
-    stop += step;
-    DenseVect tmp(step);
-    tmp = subrange(vect, start, stop);
-    MySimpleVector p(tmp);
-    (*map(i, numCol)).setCol(posCol, p);
-
-  }
-}
-
-
-void MyBlockMatrix::display(void)const
-{
-
-  if (STDMAP == 1)
-  {
-    mapped::array_type Mmap = map.data();
-    mapped::array_type::iterator it;
-    for (it = Mmap.begin(); it != Mmap.end(); ++it)
-    {
-      (it->second)->display();
-    }
-  }
-  else
-  {
-    mapped Mmap = map;
-    mapped::iterator1 it;
-    mapped::iterator2 it2;
-    for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
-    {
-      for (it2 = it.begin(); it2 != it.end(); it2++)
-      {
-        (**it2).display();
-      }
-    }
-  }
-
-}
-
 void MyBlockMatrix::zero(void)
 {
-
   if (STDMAP == 1)
   {
     mapped::array_type::iterator it;
@@ -501,8 +319,6 @@ void MyBlockMatrix::zero(void)
 
 void MyBlockMatrix::eye(void)
 {
-
-
   if (STDMAP == 1)
   {
     unsigned int col = map.size2();
@@ -542,6 +358,157 @@ void MyBlockMatrix::eye(void)
         }
       }
     }
+  }
+}
+
+void MyBlockMatrix::display(void)const
+{
+  if (STDMAP == 1)
+  {
+    mapped::array_type Mmap = map.data();
+    mapped::array_type::iterator it;
+    for (it = Mmap.begin(); it != Mmap.end(); ++it)
+    {
+      (it->second)->display();
+    }
+  }
+  else
+  {
+    mapped Mmap = map;
+    mapped::iterator1 it;
+    mapped::iterator2 it2;
+    for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
+    {
+      for (it2 = it.begin(); it2 != it.end(); it2++)
+      {
+        (**it2).display();
+      }
+    }
+  }
+
+}
+
+void MyBlockMatrix::getBlock(unsigned int row, unsigned int col, MySiconosMatrix &m)const
+{
+  m = dynamic_cast<MySiconosMatrix&>(*(map(row, col)));
+}
+
+MySiconosMatrix* MyBlockMatrix::getBlockPtr(unsigned int row, unsigned int col)
+{
+  return map(row, col);
+}
+
+const std::deque<bool> MyBlockMatrix::getBlockAllocated(void)const
+{
+  return isBlockAllocatedIn;
+}
+
+unsigned int MyBlockMatrix::getNum(void)const
+{
+  SiconosMatrixException::selfThrow("getNum of a block is forbidden.");
+  return 0;
+}
+
+void MyBlockMatrix::setNum(unsigned int)
+{
+  SiconosMatrixException::selfThrow("setNum of a block is forbidden.");
+}
+
+void MyBlockMatrix::getRow(unsigned int r, MySimpleVector &v) const
+{
+  unsigned int numRow = 0, posRow = r, start = 0, stop = 0;
+
+  if (r > size1())
+    SiconosMatrixException::selfThrow("MyBlockMatrix:getRow : row number is out of range");
+
+  // Verification of the size of the result vector
+  if (v.size() != size2())
+    SiconosMatrixException::selfThrow("MyBlockMatrix:getRow : inconsistent sizes");
+
+  // Find the row-block number where "r" is
+  while (r >= tabRow[numRow] && numRow < tabRow.size())
+    numRow ++;
+
+  // Computation of the value of the index row into this block
+  if (numRow != 0)
+    posRow -= tabRow[numRow - 1];
+
+  for (unsigned int j = 0; j < tabCol.size(); j++)
+  {
+    start = stop;
+    stop += (*map(numRow, j)).size2();
+    subrange(*(v.getDensePtr()), start, stop) = row((*map(numRow, j)).getDense(), posRow);
+  }
+}
+
+void MyBlockMatrix::getCol(unsigned int c, MySimpleVector &v) const
+{
+  unsigned int numCol = 0, posCol = c, start = 0, stop = 0;
+
+  if (c > size2())
+    SiconosMatrixException::selfThrow("MyBlockMatrix:getCol : column number is out of range");
+
+  // Verification of the size of the result vector
+  if (v.size() != size1())
+    SiconosMatrixException::selfThrow("MyBlockMatrix:getcol : inconsistent sizes");
+
+  // Find the column-block number where "c" is
+  while (c >= tabCol[numCol] && numCol < tabCol.size())
+    numCol ++;
+
+  // Computation of the value of the index column into this block
+  if (numCol != 0)
+    posCol -= tabCol[numCol - 1];
+
+  for (unsigned int i = 0; i < tabRow.size(); i++)
+  {
+    start = stop;
+    stop += (*map(i, numCol)).size1();
+    subrange(*(v.getDensePtr()), start, stop) = column((*map(i, numCol)).getDense(), posCol);
+  }
+}
+
+void MyBlockMatrix::setRow(unsigned int r, const MySimpleVector &v)
+{
+
+  unsigned int numRow = 0, posRow = r, start = 0, stop = 0;
+
+  unsigned int nbCol = size2();
+  assert(v.size() == nbCol);
+
+  while (r >= tabRow[numRow] && numRow < tabRow.size())
+    numRow ++;
+
+  if (numRow != 0)
+    posRow -= tabRow[numRow - 1];
+
+  for (unsigned int j = 0; j < tabCol.size(); j++)
+  {
+    start = stop;
+    stop += (*map(numRow, j)).size2();
+    row(*((*map(numRow, j)).getDensePtr()), posRow) = subrange(*(v.getDensePtr()), start, stop);
+  }
+}
+
+void MyBlockMatrix::setCol(unsigned int col, const MySimpleVector &v)
+{
+
+  unsigned int numCol = 0, posCol = col, start = 0, stop = 0;
+
+  unsigned int nbRow = size1();
+  assert(v.size() == nbRow);
+
+  while (col >= tabCol[numCol] && numCol < tabCol.size())
+    numCol ++;
+
+  if (numCol != 0)
+    posCol -= tabCol[numCol - 1];
+
+  for (unsigned int i = 0; i < tabRow.size(); i++)
+  {
+    start = stop;
+    stop += (*map(i, numCol)).size1();
+    column(*((*map(i, numCol)).getDensePtr()), posCol) = subrange(*(v.getDensePtr()), start, stop);
   }
 }
 
@@ -594,7 +561,7 @@ const BandedMat  MyBlockMatrix::getBanded(unsigned int row, unsigned int col)con
 }
 
 // The following functions return the corresponding pointers
-const DenseMat*  MyBlockMatrix::getDensePtr(unsigned int row, unsigned int col)const
+DenseMat*  MyBlockMatrix::getDensePtr(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 1);
@@ -603,7 +570,7 @@ const DenseMat*  MyBlockMatrix::getDensePtr(unsigned int row, unsigned int col)c
   return (*map(row, col)).getDensePtr();
 }
 
-const TriangMat* MyBlockMatrix::getTriangPtr(unsigned int row, unsigned int col)const
+TriangMat* MyBlockMatrix::getTriangPtr(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 2);
@@ -611,7 +578,7 @@ const TriangMat* MyBlockMatrix::getTriangPtr(unsigned int row, unsigned int col)
 
   return (*map(row, col)).getTriangPtr();
 }
-const SymMat* MyBlockMatrix::getSymPtr(unsigned int row, unsigned int col)const
+SymMat* MyBlockMatrix::getSymPtr(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 3);
@@ -619,7 +586,7 @@ const SymMat* MyBlockMatrix::getSymPtr(unsigned int row, unsigned int col)const
   return (*map(row, col)).getSymPtr();
 }
 
-const SparseMat*  MyBlockMatrix::getSparsePtr(unsigned int row, unsigned int col)const
+SparseMat*  MyBlockMatrix::getSparsePtr(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 4);
@@ -628,7 +595,7 @@ const SparseMat*  MyBlockMatrix::getSparsePtr(unsigned int row, unsigned int col
   return (*map(row, col)).getSparsePtr();
 }
 
-const BandedMat*  MyBlockMatrix::getBandedPtr(unsigned int row, unsigned int col)const
+BandedMat*  MyBlockMatrix::getBandedPtr(unsigned int row, unsigned int col)const
 {
 
   if ((*map(row, col)).getNum() != 5);
@@ -643,24 +610,21 @@ const mapped MyBlockMatrix::getMap(void)const
   return map;
 }
 
-// return the number of rows of blocks
-unsigned int MyBlockMatrix::size1(void)const
+void MyBlockMatrix::matrixCopy(const MySiconosMatrix &m, unsigned int row, unsigned int col)
 {
-  return tabRow[ tabRow.size() - 1 ];
-}
+  if (m.isBlock())
+    SiconosMatrixException::selfThrow("MyBlockMatrix::matrixCopy of a block into an other block is forbidden.");
 
-// return the number of columns of blocks
-unsigned int MyBlockMatrix::size2(void)const
-{
-  return tabCol[ tabCol.size() - 1 ];
-}
+  if (row > tabRow.size() || col > tabCol.size())
+    SiconosMatrixException::selfThrow("MyBlockMatrix::matrixCopy(m,x,y), x or y is out of range.");
 
-
-void MyBlockMatrix::resize(unsigned int row, unsigned int col, unsigned int lower, unsigned int upper, bool preserve)
-{
-  if (lower != 0 || upper != 0)
-    SiconosMatrixException::selfThrow("MyBlockMatrix::resize : lower or upper not equal to 0.0");
-  map.resize(row, col, preserve);
+  if (isBlockAllocatedIn[row * tabCol.size() + col] == true)
+    *(map(row, col)) = m; // copy
+  else
+  {
+    map(row, col) = new MySimpleMatrix(m);
+    isBlockAllocatedIn[row * tabCol.size() + col] = true;
+  }
 }
 
 // OPERATORS
@@ -713,6 +677,9 @@ double MyBlockMatrix::operator()(unsigned int row, unsigned int col)const
 
 const MyBlockMatrix& MyBlockMatrix::operator = (const MySiconosMatrix &m)
 {
+  if (!m.isBlock())
+    SiconosMatrixException::selfThrow("operator = : BlockMatrix=MySimpleMatrix is a forbidden operation");
+
   if (&m == this) return *this;
 
   if (m.size1() != size1() || m.size2() != size2())
@@ -720,14 +687,18 @@ const MyBlockMatrix& MyBlockMatrix::operator = (const MySiconosMatrix &m)
     SiconosMatrixException::selfThrow("operator = (const MySiconosMatrix&): Left and Right values have inconsistent sizes.");
   }
 
-  if (m.isBlock() == true)
+  // Warning: we do not reallocate the blocks, but only copy the values. This means that
+  // all blocks are already allocated and that dim of m and mat are to be consistent.
+  // Thus, tabRow and tabCol remains unchanged.
+  if (m.isBlock())
   {
-    mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
-    tabRow = (dynamic_cast<const MyBlockMatrix&>(m)).tabRow;
-    tabCol = (dynamic_cast<const MyBlockMatrix&>(m)).tabCol;
-
-    unsigned int col = tabCol.size();
+    unsigned int n1 = (static_cast<MyBlockMatrix>(m)).numberOfBlockInARow();
+    unsigned int n2 = (static_cast<MyBlockMatrix>(m)).numberOfBlockInACol();
+    if (tabRow.size() != n1 || tabCol.size() != n2)
+      SiconosMatrixException::selfThrow("BlockMatrix operator = Left and Right blocks have inconsistent sizes.");
     unsigned int i = 0, j = 0;
+    mapped Mmap = m.getMap();
+    unsigned int col = Mmap.size2();
     if (STDMAP == 1)
     {
       mapped::array_type::iterator it;
@@ -736,12 +707,7 @@ const MyBlockMatrix& MyBlockMatrix::operator = (const MySiconosMatrix &m)
       {
         i = (it->first) / col;
         j = (it->first) - i * col;
-        if (isBlockAllocatedIn[i * col + j] == true)
-        {
-          delete(map(i, j));
-        }
-        map(i, j) = new MySimpleMatrix(*(it->second));
-        isBlockAllocatedIn[i * col + j] = true;
+        *(map(i, j)) = *(it->second);
       }
     }
     else
@@ -754,82 +720,33 @@ const MyBlockMatrix& MyBlockMatrix::operator = (const MySiconosMatrix &m)
         {
           i = it2.index1();
           j = it2.index2();
-          if (isBlockAllocatedIn[i * col + j] == true)
-          {
-            delete(map(i, j));
-          }
-          map(i, j) = new MySimpleMatrix(**it2);
-          isBlockAllocatedIn[i * col + j] = true;
+          *(map(i, j)) = **it2;
         }
       }
     }
-    return *this;
   }
-
-  else
+  else // if m is a MySimpleMatrix
   {
-    SiconosMatrixException::selfThrow("operator = : BlockMatrix=MySimpleMatrix is a forbidden operation");
-  }
-}
-
-const MyBlockMatrix& MyBlockMatrix::operator = (const MyBlockMatrix &m)
-{
-  if (&m == this) return *this;
-
-  if (m.size1() != size1() || m.size2() != size2())
-  {
-    SiconosMatrixException::selfThrow("operator = (const MyBlockMatrix): Left and Right values have inconsistent sizes.");
+    for (unsigned int i = 0; i < size1(); ++i)
+      for (unsigned int j = 0; j < size2(); ++j)
+        (*this)(i, j) = m(i, j);
   }
 
-  mapped Mmap = m.map;
-  tabRow = (dynamic_cast<const MyBlockMatrix&>(m)).tabRow;
-  tabCol = (dynamic_cast<const MyBlockMatrix&>(m)).tabCol;
-
-  unsigned int col = tabCol.size();
-  unsigned int i = 0, j = 0;
-  if (STDMAP == 1)
-  {
-    mapped::array_type::iterator it;
-
-    for (it = (Mmap.data()).begin(); it != (Mmap.data()).end(); ++it)
-    {
-      i = (it->first) / col;
-      j = (it->first) - i * col;
-      if (isBlockAllocatedIn[i * col + j] == true)
-      {
-        delete(map(i, j));
-      }
-      map(i, j) = new MySimpleMatrix(*(it->second));
-      isBlockAllocatedIn[i * col + j] = true;
-    }
-  }
-  else
-  {
-    //m.isBlock () = true because it's a BlockMatrix
-    mapped::iterator1 it;
-    mapped::iterator2 it2;
-    for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
-    {
-      for (it2 = it.begin(); it2 != it.end(); it2++)
-      {
-        i = it2.index1();
-        j = it2.index2();
-        if (isBlockAllocatedIn[i * col + j] == true)
-        {
-          delete(map(i, j));
-        }
-        map(i, j) = new MySimpleMatrix(**it2);
-        isBlockAllocatedIn[i * col + j] = true;
-      }
-    }
-  }
   return *this;
 }
 
+// const MyBlockMatrix& MyBlockMatrix::operator = (const MyBlockMatrix &m){
+//   if(&m == this) return *this;
+
+//   if(m.size1 () != size1 ()||m.size2 () != size2 ()){
+//     SiconosMatrixException::selfThrow("operator = (const MyBlockMatrix): Left and Right values have inconsistent sizes.");
+//   }
+
+//   return *this;
+// }
+
 const MyBlockMatrix& MyBlockMatrix::operator *= (double d)
 {
-
-
   unsigned int col = tabCol.size();
   if (STDMAP == 1)
   {
@@ -981,7 +898,7 @@ const MyBlockMatrix& MyBlockMatrix::operator += (const MySiconosMatrix &m)
     SiconosMatrixException::selfThrow("operator += (const MySiconosMatrix&): Left and Right values have inconsistent sizes.");
   }
 
-  if (m.isBlock() == true)
+  if (m.isBlock())
   {
     mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
     unsigned int col = tabCol.size();
