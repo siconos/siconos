@@ -409,11 +409,6 @@ unsigned int MyBlockMatrix::getNum(void)const
   return 0;
 }
 
-void MyBlockMatrix::setNum(unsigned int)
-{
-  SiconosMatrixException::selfThrow("setNum of a block is forbidden.");
-}
-
 void MyBlockMatrix::getRow(unsigned int r, MySimpleVector &v) const
 {
   unsigned int numRow = 0, posRow = r, start = 0, stop = 0;
@@ -618,13 +613,12 @@ void MyBlockMatrix::matrixCopy(const MySiconosMatrix &m, unsigned int row, unsig
   if (row > tabRow.size() || col > tabCol.size())
     SiconosMatrixException::selfThrow("MyBlockMatrix::matrixCopy(m,x,y), x or y is out of range.");
 
-  if (isBlockAllocatedIn[row * tabCol.size() + col] == true)
-    *(map(row, col)) = m; // copy
-  else
-  {
-    map(row, col) = new MySimpleMatrix(m);
-    isBlockAllocatedIn[row * tabCol.size() + col] = true;
-  }
+  // Check dim
+  if ((*map(row, col)).size1() != m.size1() || (*map(row, col)).size2() != m.size2())
+    SiconosMatrixException::selfThrow("MyBlockMatrix::matrixCopy(m,x,y), block(x,y) of current matrix and m have inconsistent sizes.");
+  *(map(row, col)) = m; // copy
+
+  // Warning: this suppose that no block of the matrix can be a NULL pointer.
 }
 
 // OPERATORS
@@ -675,11 +669,8 @@ double MyBlockMatrix::operator()(unsigned int row, unsigned int col)const
   return (*map(nbRow, nbCol))(posRow, posCol);
 }
 
-const MyBlockMatrix& MyBlockMatrix::operator = (const MySiconosMatrix &m)
+MyBlockMatrix& MyBlockMatrix::operator = (const MySiconosMatrix &m)
 {
-  if (!m.isBlock())
-    SiconosMatrixException::selfThrow("operator = : BlockMatrix=MySimpleMatrix is a forbidden operation");
-
   if (&m == this) return *this;
 
   if (m.size1() != size1() || m.size2() != size2())
@@ -735,7 +726,7 @@ const MyBlockMatrix& MyBlockMatrix::operator = (const MySiconosMatrix &m)
   return *this;
 }
 
-// const MyBlockMatrix& MyBlockMatrix::operator = (const MyBlockMatrix &m){
+// MyBlockMatrix& MyBlockMatrix::operator = (const MyBlockMatrix &m){
 //   if(&m == this) return *this;
 
 //   if(m.size1 () != size1 ()||m.size2 () != size2 ()){
@@ -745,20 +736,18 @@ const MyBlockMatrix& MyBlockMatrix::operator = (const MySiconosMatrix &m)
 //   return *this;
 // }
 
-const MyBlockMatrix& MyBlockMatrix::operator *= (double d)
+MyBlockMatrix& MyBlockMatrix::operator *= (double d)
 {
-  unsigned int col = tabCol.size();
+  //  unsigned int col = tabCol.size ();
   if (STDMAP == 1)
   {
     mapped::array_type::iterator it;
 
     for (it = (map.data()).begin(); it != (map.data()).end(); ++it)
-    {
-      if (isBlockAllocatedIn[(it->first)] == true)
-      {
+      if ((it->second) != NULL)
         *(it->second) *= d;
-      }
-    }
+      else
+        SiconosMatrixException::selfThrow("BlockMatrix operator *=, a block is a NULL pointer.");
   }
   else
   {
@@ -771,31 +760,28 @@ const MyBlockMatrix& MyBlockMatrix::operator *= (double d)
       {
         i = it2.index1();
         j = it2.index2();
-        if (isBlockAllocatedIn[i * col + j] == true)
-        {
+        if ((*it2) != NULL)
           (**it2) *= d;
-        }
+        else
+          SiconosMatrixException::selfThrow("BlockMatrix operator *=, a block is a NULL pointer.");
       }
     }
   }
   return *this;
 }
 
-const MyBlockMatrix& MyBlockMatrix::operator *= (int d)
+MyBlockMatrix& MyBlockMatrix::operator *= (int d)
 {
-
-
-  unsigned int col = tabCol.size();
   if (STDMAP == 1)
   {
     mapped::array_type::iterator it;
 
     for (it = (map.data()).begin(); it != (map.data()).end(); ++it)
     {
-      if (isBlockAllocatedIn[(it->first)] == true)
-      {
+      if ((it->second) != NULL)
         *(it->second) *= d;
-      }
+      else
+        SiconosMatrixException::selfThrow("BlockMatrix operator *=, a block is a NULL pointer.");
     }
   }
   else
@@ -809,29 +795,28 @@ const MyBlockMatrix& MyBlockMatrix::operator *= (int d)
       {
         i = it2.index1();
         j = it2.index2();
-        if (isBlockAllocatedIn[i * col + j] == true)
-        {
+        if ((*it2) != NULL)
           (**it2) *= d;
-        }
+        else
+          SiconosMatrixException::selfThrow("BlockMatrix operator *=, a block is a NULL pointer.");
       }
     }
   }
   return *this;
 }
 
-const MyBlockMatrix& MyBlockMatrix::operator /= (double d)
+MyBlockMatrix& MyBlockMatrix::operator /= (double d)
 {
-  unsigned int col = tabCol.size();
   if (STDMAP == 1)
   {
     mapped::array_type::iterator it;
 
     for (it = (map.data()).begin(); it != (map.data()).end(); ++it)
     {
-      if (isBlockAllocatedIn[(it->first)] == true)
-      {
+      if ((it->second) != NULL)
         *(it->second) /= d;
-      }
+      else
+        SiconosMatrixException::selfThrow("BlockMatrix operator /=, a block is a NULL pointer.");
     }
   }
   else
@@ -845,29 +830,28 @@ const MyBlockMatrix& MyBlockMatrix::operator /= (double d)
       {
         i = it2.index1();
         j = it2.index2();
-        if (isBlockAllocatedIn[i * col + j] == true)
-        {
+        if ((*it2) != NULL)
           (**it2) /= d;
-        }
+        else
+          SiconosMatrixException::selfThrow("BlockMatrix operator /=, a block is a NULL pointer.");
       }
     }
   }
   return *this;
 }
 
-const MyBlockMatrix& MyBlockMatrix::operator /= (int d)
+MyBlockMatrix& MyBlockMatrix::operator /= (int d)
 {
-  unsigned int col = tabCol.size();
   if (STDMAP == 1)
   {
     mapped::array_type::iterator it;
 
     for (it = (map.data()).begin(); it != (map.data()).end(); ++it)
     {
-      if (isBlockAllocatedIn[(it->first)] == true)
-      {
+      if ((it->second) != NULL)
         *(it->second) /= d;
-      }
+      else
+        SiconosMatrixException::selfThrow("BlockMatrix operator /=, a block is a NULL pointer.");
     }
   }
   else
@@ -881,17 +865,17 @@ const MyBlockMatrix& MyBlockMatrix::operator /= (int d)
       {
         i = it2.index1();
         j = it2.index2();
-        if (isBlockAllocatedIn[i * col + j] == true)
-        {
+        if ((*it2) != NULL)
           (**it2) /= d;
-        }
+        else
+          SiconosMatrixException::selfThrow("BlockMatrix operator /=, a block is a NULL pointer.");
       }
     }
   }
   return *this;
 }
 
-const MyBlockMatrix& MyBlockMatrix::operator += (const MySiconosMatrix &m)
+MyBlockMatrix& MyBlockMatrix::operator += (const MySiconosMatrix &m)
 {
   if (m.size1() != size1() || m.size2() != size2())
   {
@@ -913,10 +897,7 @@ const MyBlockMatrix& MyBlockMatrix::operator += (const MySiconosMatrix &m)
       {
         i = (it->first) / col;
         j = (it->first) - i * col;
-        if (isBlockAllocatedIn[(it->first)] == true)
-        {
-          *map(i, j) +=  *(it->second);
-        }
+        *map(i, j) +=  *(it->second);
       }
     }
     else
@@ -930,10 +911,7 @@ const MyBlockMatrix& MyBlockMatrix::operator += (const MySiconosMatrix &m)
         {
           i = it2.index1();
           j = it2.index2();
-          if (isBlockAllocatedIn[i * col + j] == true)
-          {
-            *map(i, j) += (**it2);
-          }
+          *map(i, j) += (**it2);
         }
       }
     }
@@ -954,7 +932,7 @@ const MyBlockMatrix& MyBlockMatrix::operator += (const MySiconosMatrix &m)
   return *this;
 }
 
-const MyBlockMatrix& MyBlockMatrix::operator -= (const MySiconosMatrix &m)
+MyBlockMatrix& MyBlockMatrix::operator -= (const MySiconosMatrix &m)
 {
   if (m.size1() != size1() || m.size2() != size2())
   {
@@ -975,10 +953,7 @@ const MyBlockMatrix& MyBlockMatrix::operator -= (const MySiconosMatrix &m)
       {
         i = (it->first) / col;
         j = (it->first) - i * col;
-        if (isBlockAllocatedIn[(it->first)] == true)
-        {
-          *map(i, j) -=  *(it->second);
-        }
+        *map(i, j) -=  *(it->second);
       }
     }
     else
@@ -992,10 +967,7 @@ const MyBlockMatrix& MyBlockMatrix::operator -= (const MySiconosMatrix &m)
         {
           i = it2.index1();
           j = it2.index2();
-          if (isBlockAllocatedIn[i * col + j] == true)
-          {
-            *map(i, j) -= (**it2);
-          }
+          *map(i, j) -= (**it2);
         }
       }
     }
@@ -1015,5 +987,22 @@ const MyBlockMatrix& MyBlockMatrix::operator -= (const MySiconosMatrix &m)
   return *this;
 }
 
+void MyBlockMatrix::PLUFactorizationInPlace()
+{
+  SiconosMatrixException::selfThrow(" MyBlockMatrix::PLUFactorizationInPlace: not yet implemented for Block Matrices.");
+}
 
+void MyBlockMatrix::PLUInverseInPlace()
+{
+  SiconosMatrixException::selfThrow(" MyBlockMatrix::PLUInverseInPlace: not yet implemented for Block Matrices.");
+}
 
+void MyBlockMatrix::PLUForwardBackwardInPlace(MySiconosMatrix &B)
+{
+  SiconosMatrixException::selfThrow(" MyBlockMatrix::PLUForwardBackwardInPlace: not yet implemented for Block Matrices.");
+}
+
+void MyBlockMatrix::PLUForwardBackwardInPlace(MySiconosVector &B)
+{
+  SiconosMatrixException::selfThrow(" MyBlockMatrix::PLUForwardBackwardInPlace: not yet implemented for Block Matrices.");
+}

@@ -22,9 +22,10 @@ include $(top_srcdir)/config/Make-rules
 
 check_PROGRAMS = test1
 TESTS = $(check_PROGRAMS)
-test1_SOURCES = SimpleVectorTest.cpp BlockVectorTest.cpp SimpleMatrixTest.cpp BlockMatrixTest.cpp MySimpleMatrixTest.cpp  MyBlockMatrixTest.cpp TestMain.cpp \
-SimpleVectorTest.h BlockVectorTest.h SimpleMatrixTest.h BlockMatrixTest.h MySimpleMatrixTest.h MyBlockMatrixTest.h	
-include_HEADERS =SimpleVectorTest.h BlockVectorTest.h SimpleMatrixTest.h BlockMatrixTest.h MySimpleMatrixTest.h MyBlockMatrixTest.h
+test1_SOURCES = SimpleVectorTest.cpp BlockVectorTest.cpp SimpleMatrixTest.cpp BlockMatrixTest.cpp MySimpleMatrixTest.cpp  MyBlockMatrixTest.cpp \
+		MySimpleVectorTest.cpp TestMain.cpp \
+		SimpleVectorTest.h BlockVectorTest.h SimpleMatrixTest.h BlockMatrixTest.h MySimpleMatrixTest.h MyBlockMatrixTest.h MySimpleVectorTest.h	
+include_HEADERS =SimpleVectorTest.h BlockVectorTest.h SimpleMatrixTest.h BlockMatrixTest.h MySimpleMatrixTest.h MyBlockMatrixTest.h MySimpleVectorTest.h
 test1_INCLUDES = $(CPPUNIT_CFLAGS)
 test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
 

@@ -29,6 +29,13 @@ Notes:
 
 Changes:
 
+2006-10-09 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Add cppunit tests for MySimple and MyBlock matrices (boost)
+	
+2006-09-26 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Add Boost matrices and vectors in Kernel (from Aziz branch) 
+	  (MySiconosMatrix, MySimpleMatrix, MyBlockMatrix, MySiconosVector,
+	   ioMatrix, ioVector classes)
 	
 --------------------------------------------------------------------------------
   v1.3.0 - 07 september 2006 (release 567)
@@ -58,7 +65,7 @@ Main Changes:
 	* add UnitaryRelationsSet class -> IndexSets management in Topology
 
 --------------------------------------------------------------------------------
-  v1.3.0 - (release 508)
+  v1.2.0 - (release 508)
 --------------------------------------------------------------------------------
 
 Main Changes:

@@ -15,43 +15,39 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
- */
-#ifndef __MySimpleMatrixTest__
-#define __MySimpleMatrixTest__
+*/
+#ifndef __MySiconosVectorTest__
+#define __MySiconosVectorTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "MySiconosVector.h"
+#include "MySimpleVector.h"
 #include "MySimpleMatrix.h"
+#include <math.h>
+#include <vector>
 
-using namespace std;
-
-class MySimpleMatrixTest : public CppUnit::TestFixture
+class MySimpleVectorTest : public CppUnit::TestFixture
 {
 
 
 private:
 
-  // test suite
-  CPPUNIT_TEST_SUITE(MySimpleMatrixTest);
+  // Name of the tests suite
+  CPPUNIT_TEST_SUITE(MySimpleVectorTest);
 
-  CPPUNIT_TEST(testConstructor0);
+  // tests to be done ...
+
+  //  CPPUNIT_TEST(testBuildMySimpleVector);
   CPPUNIT_TEST(testConstructor1);
   CPPUNIT_TEST(testConstructor2);
-  //CPPUNIT_TEST(testConstructor3);
+  CPPUNIT_TEST(testConstructor3);
   CPPUNIT_TEST(testConstructor4);
   CPPUNIT_TEST(testConstructor5);
   CPPUNIT_TEST(testConstructor6);
   CPPUNIT_TEST(testConstructor7);
-  CPPUNIT_TEST(testConstructor8);
-  CPPUNIT_TEST(testConstructor9);
-  CPPUNIT_TEST(testConstructor10);
-  CPPUNIT_TEST(testGetSetRowCol);
   CPPUNIT_TEST(testZero);
-  CPPUNIT_TEST(testEye);
+  CPPUNIT_TEST(testNorm);
   CPPUNIT_TEST(testResize);
-  CPPUNIT_TEST(testNormInf);
-  CPPUNIT_TEST(testGetBlock);
-  CPPUNIT_TEST(testMatrixCopy);
-  CPPUNIT_TEST(testTrans);
   CPPUNIT_TEST(testAssignment);
   CPPUNIT_TEST(testOperators1);
   CPPUNIT_TEST(testOperators2);
@@ -60,37 +56,22 @@ private:
   CPPUNIT_TEST(testOperators5);
   CPPUNIT_TEST(testOperators6);
   CPPUNIT_TEST(testOperators7);
-  CPPUNIT_TEST(testOperators8);
-  CPPUNIT_TEST(testOperators9);
-  CPPUNIT_TEST(testOperators10);
-  CPPUNIT_TEST(testOperators11);
-  CPPUNIT_TEST(testOperators12);
-  CPPUNIT_TEST(testOperators13);
-  CPPUNIT_TEST(testMultTranspose);
-  CPPUNIT_TEST(testPow);
-  CPPUNIT_TEST(testProd);
   CPPUNIT_TEST(End);
+
   CPPUNIT_TEST_SUITE_END();
 
-  void testConstructor0();
+  // \todo exception test
+
   void testConstructor1();
   void testConstructor2();
-  //  void testConstructor3();
+  void testConstructor3();
   void testConstructor4();
   void testConstructor5();
   void testConstructor6();
   void testConstructor7();
-  void testConstructor8();
-  void testConstructor9();
-  void testConstructor10();
-  void testGetSetRowCol();
   void testZero();
-  void testEye();
+  void testNorm();
   void testResize();
-  void testNormInf();
-  void testGetBlock();
-  void testMatrixCopy();
-  void testTrans();
   void testAssignment();
   void testOperators1();
   void testOperators2();
@@ -99,26 +80,14 @@ private:
   void testOperators5();
   void testOperators6();
   void testOperators7();
-  void testOperators8();
-  void testOperators9();
-  void testOperators10();
-  void testOperators11();
-  void testOperators12();
-  void testOperators13();
-  void testMultTranspose();
-  void testPow();
-  void testProd();
   void End();
+  // Members
 
-  MySiconosMatrix *SicM;
-  MySimpleMatrix *SimM;
-  string fic1, fic2;
-  MySimpleVector* vect1, *vect2, *vect3;
-  DenseMat * D;
-  TriangMat *T;
-  SymMat *S;
-  BandedMat *B;
-  SparseMat *SP;
+  MySiconosVector * ref;
+  std::vector<double> vq;
+  DenseVect * dv;
+  SparseVect * sv;
+  double tol;
 
 public:
   void setUp();
@@ -127,3 +96,7 @@ public:
 };
 
 #endif
+
+
+
+

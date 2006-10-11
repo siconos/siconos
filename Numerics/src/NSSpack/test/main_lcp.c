@@ -35,8 +35,6 @@
  *
  *  This system of equations and inequalities is solved thanks to lcp solvers\n
  *
- *        lemke_lcp (M,q,n,itermax,z,w,it_end,res,info) (under modifications)
-
  *        lcp_nlgs( n , M , q , z , w , info , iparam , dparam )
  *        lcp_cpg ( n , M , q , z , w , info , iparam , dparam )
  *        lcp_latin ( n , M , q , z , w , info , iparam , dparam )

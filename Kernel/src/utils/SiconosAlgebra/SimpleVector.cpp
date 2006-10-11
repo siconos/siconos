@@ -435,7 +435,7 @@ SimpleVector &SimpleVector::operator/=(const double d)
 bool operator==(const SiconosVector& v1, const SiconosVector& v2)
 {
   double norm = (v1 - v2).norm();
-  return(norm < tolerance);
+  return(norm < tolerance0);
 }
 
 //==================================================================================

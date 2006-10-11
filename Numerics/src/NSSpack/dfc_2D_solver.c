@@ -15,51 +15,51 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /*!\file dfc_2D_solver.c
 
-  This subroutine allows the dual resolution of contact problems with friction in the 2D case (DFC_2D).\n
+This subroutine allows the dual resolution of contact problems with friction in the 2D case (DFC_2D).\n
 
-  \fn int dfc_2D_solver( double *K1, double *F1, int *n, method *pt, double *U2 , double *F2 )
+\fn int dfc_2D_solver( double *K1, double *F1, int *n, method *pt, double *U2 , double *F2 )
 
 
-  \param K1           On enter, the stiffness, a vector of double (in which the components
-                       of the matrix have a Fortran storage),
+\param K1           On enter, the stiffness, a vector of double (in which the components
+of the matrix have a Fortran storage),
 
-  \param F1           On enter, the right hand side, a vector of double,
+\param F1           On enter, the right hand side, a vector of double,
 
-  \param n            On enter, the dimension of the DFC_2D problem, an integer,
+\param n            On enter, the dimension of the DFC_2D problem, an integer,
 
-  \param pt           0n enter, the union (::method) containing the DFC_2D structure,
-                         in this structure there is the following parameters:\n
-        - char   name:      the name of the solver we want to use (on enter),
-                          - int    itermax:   the maximum number of iteration required (on enter)
-        - double tol:       the tolerance required (on enter)
-        - double  mu:       the friction coefficient (on enter)
-        - int    *ddl_n:    contact in normal direction dof (not prescribed) (on enter)
-        - int    *ddl_tt:   contact in tangential direction dof (not prescribed) (on enter)
-        - int    *ddl_d:    prescribed dof (on enter)
-        - int    dim_tt:    dimension of ddl_tt (= dimension of ddl_n) (on enter)
-        - int    dim_d:     dimension of ddl_d (on enter)
-        - double *J1:       gap in normal contact direction (on enter)
-        - int    chat:      an integer that can make on or off the chattering (0=off, >0=on)(on enter)
-        - int    iter:      the number of iteration carry out (on return)
-        - double err:       the residue (on return) \n\n
+\param pt           0n enter, the union (::method) containing the DFC_2D structure,
+in this structure there is the following parameters:\n
+- char   name:      the name of the solver we want to use (on enter),
+- int    itermax:   the maximum number of iteration required (on enter)
+- double tol:       the tolerance required (on enter)
+- double  mu:       the friction coefficient (on enter)
+- int    *ddl_n:    contact in normal direction dof (not prescribed) (on enter)
+- int    *ddl_tt:   contact in tangential direction dof (not prescribed) (on enter)
+- int    *ddl_d:    prescribed dof (on enter)
+- int    dim_tt:    dimension of ddl_tt (= dimension of ddl_n) (on enter)
+- int    dim_d:     dimension of ddl_d (on enter)
+- double *J1:       gap in normal contact direction (on enter)
+- int    chat:      an integer that can make on or off the chattering (0=off, >0=on)(on enter)
+- int    iter:      the number of iteration carry out (on return)
+- double err:       the residue (on return) \n\n
 
-  This problem can be solved thanks to @ref dfc_2D solvers or thanks to @ref lcp solvers after:\n
- - either a condensation makes thanks to dfc_2D2cond_2D.c and cond_2D2dfc_2D.c,
- - or a new formulation of this problem in the LCP form due to the dfc_2D2lcp.c and lcp2dfc_2D.c routines.
+This problem can be solved thanks to @ref dfc_2D solvers or thanks to @ref lcp solvers after:\n
+- either a condensation makes thanks to dfc_2D2cond_2D.c and cond_2D2dfc_2D.c,
+- or a new formulation of this problem in the LCP form due to the dfc_2D2lcp.c and lcp2dfc_2D.c routines.
 
-  \param U2           On return, the solution of the problem, vector of double.
+\param U2           On return, the solution of the problem, vector of double.
 
-  \param F2           On return, the solution of the problem, vector of double.
+\param F2           On return, the solution of the problem, vector of double.
 
-  \return integer     0 - successful\n
-                      0 >  - otherwise (see specific solvers for more information about the log info)
+\return integer     0 - successful\n
+0 >  - otherwise (see specific solvers for more information about the log info)
 
-   \author Nineb Sheherazade
+\author Nineb Sheherazade
 
- */
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -132,7 +132,7 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
 
 
     cond_2D2dfc_2D(n , z , w ,  K1 , F1 , pt->dfc_2D.J1 ,  pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
-                   pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d,  U2 , F2);
+                   pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d, U2 , F2);
 
 
 
@@ -174,19 +174,14 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     dparamLCP[0] = pt->dfc_2D.tol;
     dparamLCP[1] = 1.0;
 
-    /*lcp_lemke( MM, q, &dim_q, & pt->dfc_2D.itermax, z, w, &it_end, &res, &info);*/
-
     lcp_lexicolemke(&dim_q , MM , q , z , w , &info , iparamLCP , dparamLCP);
-
-
-
 
     t2 = clock();
 
     printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
     lcp2dfc_2D(n , z , w ,  K1 , F1 , pt->dfc_2D.J1 ,  pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
-               pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d,  U2 , F2);
+               pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d, U2 , F2);
 
 
 
@@ -241,7 +236,7 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
     lcp2dfc_2D(n , z , w ,  K1 , F1 , pt->dfc_2D.J1 ,  pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
-               pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d,  U2 , F2);
+               pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d, U2 , F2);
 
 
     free(MM);
@@ -294,7 +289,7 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     printf("%.4lf seconds of processing\n", (t2 - t1) / (double)CLOCKS_PER_SEC);
 
     lcp2dfc_2D(n , z , w ,  K1 , F1 , pt->dfc_2D.J1 ,  pt->dfc_2D.ddl_n , pt->dfc_2D.ddl_tt , &pt->dfc_2D.dim_tt ,
-               pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d,  U2 , F2);
+               pt->dfc_2D.ddl_d , &pt->dfc_2D.dim_d, U2 , F2);
 
 
     free(MM);

@@ -28,7 +28,9 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 Notes:
 
 Changes:
-
+2006-10-09 Franck Perignon <franck.perignon@inrialpes.fr>
+                                                                               
+	* Remove lemke routines and keep only lexicoLemke
 	
 --------------------------------------------------------------------------------
   v1.3.0 - 07 september 2006 (release 567)
@@ -43,7 +45,7 @@ Changes:
 	* Review convergence criteria for LCP solvers
 	
 --------------------------------------------------------------------------------
-  v1.3.0 - (release 508)
+  v1.2.0 - (release 508)
 --------------------------------------------------------------------------------	
 Notes:
 

@@ -7,9 +7,8 @@ using namespace boost::numeric::ublas;
 
 /***************************** CONSTRUCTORS ****************************/
 // Default (private)
-MySimpleVector::MySimpleVector(TYP typ)
+MySimpleVector::MySimpleVector(TYP typ): MySiconosVector(false), num(1)
 {
-  setIsBlock(false);
   if (typ == DENSE)
   {
     vect.Dense = new DenseVect();
@@ -18,69 +17,19 @@ MySimpleVector::MySimpleVector(TYP typ)
   else if (typ == SPARSE)
   {
     vect.Sparse = new SparseVect();
-    num = 2;
+    num = 4;
   }
   else
-    SiconosVectorException::selfThrow("constructor(TYP) : invalid type given");
-
+    SiconosVectorException::selfThrow("MySimpleVector:constructor(TYP) : invalid type given");
+  zero();
 }
 
-MySimpleVector::MySimpleVector(const MySimpleVector &svect)
+MySimpleVector::MySimpleVector(unsigned int row, TYP typ): MySiconosVector(false), num(1)
 {
-  setIsBlock(false);
-  if (svect.getNum() == 1)
-  {
-    vect.Dense = new DenseVect(svect.getDense());
-    num = 1;
-  }
-  else if (svect.getNum() == 2)
-  {
-    vect.Sparse = new SparseVect(svect.getSparse());
-    num = 2;
-  }
-  else
-    SiconosVectorException::selfThrow("constructor(const MySimpleVector) : invalid type given");
-}
-
-MySimpleVector::MySimpleVector(const MySiconosVector &svect)
-{
-  setIsBlock(false);
-  assert(svect.isBlock() == false);
-  if (svect.getNum() == 1)
-  {
-    vect.Dense = new DenseVect(svect.getDense());
-    num = 1;
-  }
-  else if (svect.getNum() == 2)
-  {
-    vect.Sparse = new SparseVect(svect.getSparse());
-    num = 2;
-  }
-  else
-    SiconosVectorException::selfThrow("constructor(const MySiconosVector) : invalid type given");
-}
-
-MySimpleVector::MySimpleVector(const DenseVect& m)
-{
-  setIsBlock(false);
-  vect.Dense = new DenseVect(m);
-  num = 1;
-}
-
-MySimpleVector::MySimpleVector(const SparseVect& m)
-{
-  setIsBlock(false);
-  vect.Sparse = new SparseVect(m);
-  num = 2;
-}
-
-MySimpleVector::MySimpleVector(unsigned int row, TYP typ)
-{
-  setIsBlock(false);
   if (typ == SPARSE)
   {
     vect.Sparse = new SparseVect(row);
-    num = 2;
+    num = 4;
   }
   else if (typ == DENSE)
   {
@@ -89,29 +38,61 @@ MySimpleVector::MySimpleVector(unsigned int row, TYP typ)
   }
   else
   {
-    SiconosVectorException::selfThrow("constructor(TYP, unsigned int) : invalid type given");
+    SiconosVectorException::selfThrow("MySimpleVector::constructor(TYP, unsigned int) : invalid type given");
   }
+  zero();
 }
 
-MySimpleVector::MySimpleVector(const std::vector<double> v, unsigned int row, TYP typ)
+MySimpleVector::MySimpleVector(const std::vector<double> v, TYP typ): MySiconosVector(false), num(1)
 {
-  setIsBlock(false);
   if (typ == DENSE)
   {
-    vect.Dense = new DenseVect(row, v);
+    vect.Dense = new DenseVect(v.size(), v);
     num = 1;
   }
   else
   {
-    SiconosVectorException::selfThrow("constructor(TYP, std::vector<double>, unsigned int) : invalid type given");
+    SiconosVectorException::selfThrow("MySimpleVector::constructor(TYP, std::vector<double>, unsigned int) : invalid type given");
   }
 }
 
-MySimpleVector::MySimpleVector(const std::string &file, bool ascii)
+MySimpleVector::MySimpleVector(const MySimpleVector &svect): MySiconosVector(false), num(svect.getNum())
 {
+  if (num == 1)
+    vect.Dense = new DenseVect(svect.getDense());
 
-  setIsBlock(false);
-  num = 1;
+  else if (num == 4)
+    vect.Sparse = new SparseVect(svect.getSparse());
+
+  else
+    SiconosVectorException::selfThrow("MySimpleVector:constructor(const MySimpleVector) : invalid type given");
+}
+
+MySimpleVector::MySimpleVector(const MySiconosVector &svect): MySiconosVector(false), num(svect.getNum())
+{
+  assert(svect.isBlock() == false);
+  if (num == 1)
+    vect.Dense = new DenseVect(svect.getDense());
+
+  else if (num == 4)
+    vect.Sparse = new SparseVect(svect.getSparse());
+
+  else
+    SiconosVectorException::selfThrow("MySimpleVector:constructor(const MySiconosVector) : invalid type given");
+}
+
+MySimpleVector::MySimpleVector(const DenseVect& m): MySiconosVector(false), num(1)
+{
+  vect.Dense = new DenseVect(m);
+}
+
+MySimpleVector::MySimpleVector(const SparseVect& m): MySiconosVector(false), num(4)
+{
+  vect.Sparse = new SparseVect(m);
+}
+
+MySimpleVector::MySimpleVector(const std::string &file, bool ascii): MySiconosVector(false), num(1)
+{
   vect.Dense = new DenseVect();
   if (ascii)
   {
@@ -130,7 +111,7 @@ MySimpleVector::~MySimpleVector(void)
 {
   if (num == 1)
     delete(vect.Dense);
-  else if (num == 2)
+  else if (num == 4)
     delete(vect.Sparse);
 }
 
@@ -138,10 +119,6 @@ MySimpleVector::~MySimpleVector(void)
 unsigned int  MySimpleVector::getNum(void)const
 {
   return num;
-}
-void MySimpleVector::setNum(unsigned int n)
-{
-  num = n;
 }
 
 void MySimpleVector::zero(void)
@@ -152,11 +129,33 @@ void MySimpleVector::zero(void)
     zero_vector<double> p(size);
     *vect.Dense = p;
   }
-  else if (num == 2)
+  else //if(num==4)
   {
     zero_vector<double> p(size);
     *vect.Sparse = p;
   }
+}
+
+
+const double MySimpleVector::normInf(void)const
+{
+  double d;
+  if (num == 1)
+    d = norm_inf(*vect.Dense);
+  else if (num == 4)
+    d = norm_inf(*vect.Sparse);
+  return d;
+}
+
+
+const double MySimpleVector::norm(void)const
+{
+  double d;
+  if (num == 1)
+    d = norm_2(*vect.Dense);
+  else if (num == 4)
+    d = norm_2(*vect.Sparse);
+  return d;
 }
 
 unsigned int MySimpleVector::size(void)const
@@ -164,7 +163,7 @@ unsigned int MySimpleVector::size(void)const
   unsigned int n;
   if (num == 1)
     n = (vect.Dense)->size();
-  if (num == 2)
+  if (num == 4)
     n = (vect.Sparse)->size();
 
   return n;
@@ -175,7 +174,7 @@ void MySimpleVector::resize(unsigned int n, bool preserve)
 
   if (num == 1)
     (vect.Dense)->resize(n, preserve);
-  if (num == 2)
+  if (num == 4)
     (vect.Sparse)->resize(n, preserve);
 }
 
@@ -183,7 +182,7 @@ const DenseVect MySimpleVector::getDense(void)const
 {
 
   if (num != 1)
-    SiconosVectorException::selfThrow("DenseVect getDense(unsigned int row, unsigned int col) : the current vector is not a Dense vector");
+    SiconosVectorException::selfThrow("MySimpleVector::getDense(unsigned int row, unsigned int col) : the current vector is not a Dense vector");
 
   return *vect.Dense;
 }
@@ -191,8 +190,8 @@ const DenseVect MySimpleVector::getDense(void)const
 const SparseVect MySimpleVector::getSparse(void)const
 {
 
-  if (num != 2)
-    SiconosVectorException::selfThrow("SparseVect getSparse(unsigned int row, unsigned int col) : the current vector is not a Sparse vector");
+  if (num != 4)
+    SiconosVectorException::selfThrow("MySimpleVector::getSparse(unsigned int row, unsigned int col) : the current vector is not a Sparse vector");
 
   return *vect.Sparse;
 }
@@ -200,7 +199,7 @@ const SparseVect MySimpleVector::getSparse(void)const
 DenseVect* MySimpleVector::getDensePtr(void) const
 {
   if (num != 1)
-    SiconosVectorException::selfThrow("DenseVect* getDensePtr(unsigned int row, unsigned int col) : the current vector is not a Dense vector");
+    SiconosVectorException::selfThrow("MySimpleVector::getDensePtr(unsigned int row, unsigned int col) : the current vector is not a Dense vector");
 
   return vect.Dense;
 }
@@ -208,29 +207,18 @@ DenseVect* MySimpleVector::getDensePtr(void) const
 SparseVect* MySimpleVector::getSparsePtr(void)const
 {
 
-  if (num != 2)
-    SiconosVectorException::selfThrow("SparseVect* getSparsePtr(unsigned int row, unsigned int col) : the current vector is not a Sparse vector");
+  if (num != 4)
+    SiconosVectorException::selfThrow("MySimpleVector::getSparsePtr(unsigned int row, unsigned int col) : the current vector is not a Sparse vector");
 
   return vect.Sparse;
 }
-
-const double MySimpleVector::normInf(void)const
-{
-  double d;
-  if (num == 1)
-    d = norm_inf(*vect.Dense);
-  else if (num == 2)
-    d = norm_inf(*vect.Sparse);
-  return d;
-}
-
 
 void MySimpleVector::display(void)const
 {
   std::cout << "vect: " ;
   if (num == 1)
     std::cout << *vect.Dense << std::endl;
-  else if (num == 2)
+  else if (num == 4)
     std::cout << *vect.Sparse << std::endl;
 }
 
@@ -239,21 +227,10 @@ void MySimpleVector::display(void)const
 
 double& MySimpleVector::operator()(unsigned int row)
 {
-  double d;  // \Warning : warning at compile due to reference return?
-  switch (num)
-  {
-  case 1:
-    d = (*vect.Dense)(row);
-    break;
-  case 2:
-    d = ((*vect.Sparse)(row)).ref();
-    break;
-  default:
-    SiconosVectorException::selfThrow("operator() (unsigned int) : invalid type given");
-
-    break;
-  }
-  return d;
+  if (num == 1)
+    return (*vect.Dense)(row);
+  else
+    return (*vect.Sparse)(row).ref();
 }
 
 double MySimpleVector::operator()(unsigned int row)const
@@ -267,16 +244,14 @@ double MySimpleVector::operator()(unsigned int row)const
   case 2:
     d = ((*vect.Sparse)(row)).ref();
     break;
-    break;
   default:
     SiconosVectorException::selfThrow("operator() (unsigned int) : invalid type given");
-
     break;
   }
   return d;
 }
 
-const MySimpleVector& MySimpleVector::operator = (const MySiconosVector& m)
+MySimpleVector& MySimpleVector::operator = (const MySiconosVector& m)
 {
   switch (num)
   {
@@ -286,36 +261,28 @@ const MySimpleVector& MySimpleVector::operator = (const MySiconosVector& m)
     case 1:
       *vect.Dense = m.getDense();
       break;
-    case 2:
+    case 4:
       *vect.Dense = m.getSparse();
       break;
     default:
-      SiconosVectorException::selfThrow("operator = : invalid type given");
+      SiconosVectorException::selfThrow("MySimpleVector::operator = : invalid type given");
       break;
     }
     break;
-  case 2:
-    switch (m.getNum())
-    {
-    case 1:
-      *vect.Sparse = m.getDense();
-      break;
-    case 2:
+  case 4:
+    if (m.getNum() == 4)
       *vect.Sparse = m.getSparse();
-      break;
-    default:
-      SiconosVectorException::selfThrow("operator = : invalid type given");
-      break;
-    }
+    else
+      SiconosVectorException::selfThrow("MySimpleVector::operator = : can not set sparse = dense.");
     break;
   default:
-    SiconosVectorException::selfThrow("operator = : invalid type given");
+    SiconosVectorException::selfThrow("MySimpleVector::operator = : invalid type given");
     break;
   }
   return *this;
 }
 
-const MySimpleVector& MySimpleVector::operator = (const MySimpleVector& m)
+MySimpleVector& MySimpleVector::operator = (const MySimpleVector& m)
 {
   switch (num)
   {
@@ -325,30 +292,19 @@ const MySimpleVector& MySimpleVector::operator = (const MySimpleVector& m)
     case 1:
       *vect.Dense = m.getDense();
       break;
-    case 2:
+    case 4:
       *vect.Dense = m.getSparse();
       break;
     default:
-      SiconosVectorException::selfThrow("operator = : invalid type given");
+      SiconosVectorException::selfThrow("MySimpleVector::operator = : invalid type given");
       break;
     }
     break;
-  case 2:
-    switch (m.getNum())
-    {
-    case 1:
-      *vect.Sparse = m.getDense();
-      break;
-    case 2:
+  case 4:
+    if (m.getNum() == 4)
       *vect.Sparse = m.getSparse();
-      break;
-    default:
-      SiconosVectorException::selfThrow("operator = : invalid type given");
-      break;
-    }
-    break;
-  default:
-    SiconosVectorException::selfThrow("operator = : invalid type given");
+    else
+      SiconosVectorException::selfThrow("MySimpleVector::operator = : can not set sparse = dense.");
     break;
   }
   return *this;
@@ -357,14 +313,10 @@ const MySimpleVector& MySimpleVector::operator = (const MySimpleVector& m)
 bool operator == (const MySiconosVector &m, const MySiconosVector &x)
 {
   assert(m.isBlock() == false && x.isBlock() == false);
-  if (m.isBlock() ==  true || m.isBlock() == true)
-    SiconosVectorException::selfThrow("operator == : SimpleVector == BlockVector is forbidden");
-
-  double norm = (m - x).normInf();
-  return (norm < tolerance);
+  return ((m - x).norm() < tolerance);
 }
 
-const MySimpleVector& MySimpleVector::operator += (const MySiconosVector& m)
+MySimpleVector& MySimpleVector::operator += (const MySiconosVector& m)
 {
   switch (num)
   {
@@ -374,36 +326,27 @@ const MySimpleVector& MySimpleVector::operator += (const MySiconosVector& m)
     case 1:
       *vect.Dense += m.getDense();
       break;
-    case 2:
+    case 4:
       *vect.Dense += m.getSparse();
       break;
     default:
-      SiconosVectorException::selfThrow("operator += : invalid type given");
+      SiconosVectorException::selfThrow("MySimpleVector::operator += : invalid type given");
       break;
     }
     break;
-  case 2:
-    switch (m.getNum())
-    {
-    case 1:
-      *vect.Sparse += m.getDense();
-      break;
-    case 2:
+  case 4:
+    if (m.getNum() == 4)
       *vect.Sparse += m.getSparse();
-      break;
-    default:
-      SiconosVectorException::selfThrow("operator += : invalid type given");
-      break;
-    }
+    else SiconosVectorException::selfThrow("MySimpleVector::operator += : can not add a dense to a sparse.");
     break;
   default:
-    SiconosVectorException::selfThrow("operator += : invalid type given");
+    SiconosVectorException::selfThrow("MySimpleVector::operator += : invalid type given");
     break;
   }
   return *this;
 }
 
-const MySimpleVector& MySimpleVector::operator -= (const MySiconosVector& m)
+MySimpleVector& MySimpleVector::operator -= (const MySiconosVector& m)
 {
   switch (num)
   {
@@ -413,467 +356,329 @@ const MySimpleVector& MySimpleVector::operator -= (const MySiconosVector& m)
     case 1:
       *vect.Dense -= m.getDense();
       break;
-    case 2:
+    case 4:
       *vect.Dense -= m.getSparse();
       break;
     default:
-      SiconosVectorException::selfThrow("operator -= : invalid type given");
+      SiconosVectorException::selfThrow("MySimpleVector::operator -= : invalid type given");
       break;
     }
     break;
-  case 2:
-    switch (m.getNum())
-    {
-    case 1:
-      *vect.Sparse -= m.getDense();
-      break;
-    case 2:
+  case 4:
+    if (m.getNum() == 4)
       *vect.Sparse -= m.getSparse();
-      break;
-    default:
-      SiconosVectorException::selfThrow("operator -= : invalid type given");
-      break;
+    else SiconosVectorException::selfThrow("MySimpleVector::operator -= : can not sub a dense to a sparse.");
+    break;
+  default:
+    SiconosVectorException::selfThrow("MySimpleVector::operator -= : invalid type given");
+    break;
+  }
+  return *this;
+}
+
+MySimpleVector& MySimpleVector::operator *= (double m)
+{
+  switch (num)
+  {
+  case 1:
+    *vect.Dense *= m;
+    break;
+  case 4:
+    *vect.Sparse *= m;
+    break;
+  default:
+    SiconosVectorException::selfThrow("MySimpleVector::operator *=  : invalid type given");
+    break;
+  }
+  return *this;
+}
+
+MySimpleVector& MySimpleVector::operator *= (int m)
+{
+  switch (num)
+  {
+  case 1:
+    *vect.Dense *= m;
+    break;
+  case 4:
+    *vect.Sparse *= m;
+    break;
+  default:
+    SiconosVectorException::selfThrow("MySimpleVector::operator *=  : invalid type given");
+    break;
+  }
+  return *this;
+}
+
+MySimpleVector& MySimpleVector::operator /= (double m)
+{
+  switch (num)
+  {
+  case 1:
+    *vect.Dense /= m;
+    break;
+  case 4:
+    *vect.Sparse /= m;
+    break;
+  default:
+    SiconosVectorException::selfThrow("MySimpleVector::operator /=  : invalid type given");
+    break;
+  }
+  return *this;
+}
+
+MySimpleVector& MySimpleVector::operator /= (int m)
+{
+  switch (num)
+  {
+  case 1:
+    *vect.Dense /= m;
+    break;
+  case 4:
+    *vect.Sparse /= m;
+    break;
+  default:
+    SiconosVectorException::selfThrow("MySimpleVector::operator /=  : invalid type given");
+    break;
+  }
+  return *this;
+}
+
+const double inner_prod(const MySiconosVector &x, const MySiconosVector &m)
+{
+  double p;
+
+  if (x.size() != m.size())
+    SiconosVectorException::selfThrow("MySimpleVector::operator * (const MySiconosVector&): inconsistent sizes");
+
+  unsigned int num = m.getNum();
+  if (x.getNum() == num)
+  {
+    if (num == 1)
+    {
+      p = inner_prod(x.getDense(), m.getDense());
     }
-    break;
-  default:
-    SiconosVectorException::selfThrow("operator -= : invalid type given");
-    break;
+    else if (num == 4)
+    {
+      p = inner_prod(x.getSparse(), m.getSparse());
+    }
   }
-  return *this;
-}
-
-const MySimpleVector& MySimpleVector::operator *= (double m)
-{
-  switch (num)
+  else
   {
-  case 1:
-    *vect.Dense *= m;
-    break;
-  case 2:
-    *vect.Sparse *= m;
-    break;
-  default:
-    SiconosVectorException::selfThrow("operator *=  : invalid type given");
-    break;
+    if (num == 1)
+    {
+      p = inner_prod(x.getSparse(), m.getDense());
+    }
+    else if (num == 4)
+    {
+      p = inner_prod(x.getDense(), m.getSparse());
+    }
   }
-  return *this;
-}
-
-const MySimpleVector& MySimpleVector::operator *= (int m)
-{
-  switch (num)
-  {
-  case 1:
-    *vect.Dense *= m;
-    break;
-  case 2:
-    *vect.Sparse *= m;
-    break;
-  default:
-    SiconosVectorException::selfThrow("operator *=  : invalid type given");
-    break;
-  }
-  return *this;
-}
-
-const MySimpleVector& MySimpleVector::operator /= (double m)
-{
-  switch (num)
-  {
-  case 1:
-    *vect.Dense /= m;
-    break;
-  case 2:
-    *vect.Sparse /= m;
-    break;
-  default:
-    SiconosVectorException::selfThrow("operator /=  : invalid type given");
-    break;
-  }
-  return *this;
-}
-
-const MySimpleVector& MySimpleVector::operator /= (int m)
-{
-  switch (num)
-  {
-  case 1:
-    *vect.Dense /= m;
-    break;
-  case 2:
-    *vect.Sparse /= m;
-    break;
-  default:
-    SiconosVectorException::selfThrow("operator /=  : invalid type given");
-    break;
-  }
-  return *this;
+  return p;
 }
 
 MySimpleVector operator + (const MySimpleVector &x, const MySimpleVector &m)
 {
-  DenseVect p;
-  SparseVect s;
-
   if (x.size() != m.size())
-    SiconosVectorException::selfThrow("Vector addition: inconsistent sizes");
+    SiconosVectorException::selfThrow("MySimpleVector::Vector addition: inconsistent sizes");
 
-  if (x.getNum() != m.getNum())
-    SiconosVectorException::selfThrow("Vector addition: use function add in order to add vectors of different type");
+  unsigned int numX = x.getNum();
+  unsigned int numM = m.getNum();
 
-  if (x.getNum() == 1)
+  if (numX == numM)
   {
-    p = x.getDense() + m.getDense();
-    return p;
+    if (numX == 1)
+    {
+      DenseVect p = x.getDense() + m.getDense();
+      return p;
+    }
+    else
+    {
+      SparseVect s = x.getSparse() + m.getSparse();
+      return s;
+    }
   }
-  else if (x.getNum() == 2)
+  else
   {
-    s = x.getSparse() + m.getSparse();
-    return s;
+    DenseVect p;
+    if (numX == 1)
+    {
+      p = x.getDense() + m.getSparse();
+      return p;
+    }
+    else
+    {
+      p = x.getSparse() + m.getDense();
+      return p;
+    }
   }
 }
 
 MySimpleVector operator - (const MySimpleVector &x, const MySimpleVector &m)
 {
-  DenseVect p;
-  SparseVect s;
-
   if (x.size() != m.size())
-    SiconosVectorException::selfThrow("Vector subtraction: inconsistent sizes");
+    SiconosVectorException::selfThrow("MySimpleVector::Vector subtraction: inconsistent sizes");
 
-  if (x.getNum() != m.getNum())
-    SiconosVectorException::selfThrow("Vector subtraction: use function sub in order to subtract vectors of different type");
-
-  if (x.getNum() == 1)
+  unsigned int numX = x.getNum();
+  unsigned int numM = m.getNum();
+  if (numX == numM)
   {
-    p = x.getDense() - m.getDense();
-    return p;
-  }
-  else if (x.getNum() == 2)
-  {
-    s = x.getSparse() - m.getSparse();
-    return s;
-  }
-}
-
-double MySimpleVector::operator * (const MySiconosVector &x)
-{
-  double p;
-
-  if (x.size() != size())
-    SiconosVectorException::selfThrow("operator * (const MySiconosVector&): inconsistent sizes");
-
-  if (x.getNum() == num)
-  {
-    if (x.getNum() == 1)
+    if (numX == 1)
     {
-      p = inner_prod(x.getDense(), *vect.Dense);
+      DenseVect p = x.getDense() - m.getDense();
+      return p;
     }
-    else if (x.getNum() == 2)
+    else
     {
-      p = inner_prod(x.getSparse(), *vect.Sparse);
+      SparseVect s = x.getSparse() - m.getSparse();
+      return s;
     }
   }
   else
   {
-    SiconosVectorException::selfThrow("operator (const MySiconosVector&): use function inner_prod or outer_prod in order to multiply vectors of different type");
+    DenseVect p;
+    if (numX == 1)
+    {
+      p = x.getDense() - m.getSparse();
+      return p;
+    }
+    else
+    {
+      p = x.getSparse() - m.getDense();
+      return p;
+    }
   }
-  return p;
 }
 
-MySimpleVector add(const MySiconosVector &x, const MySiconosVector& m)
-{
-  DenseVect p;
-
-  if (x.size() != m.size())
-    SiconosVectorException::selfThrow("vector function add : inconsistent sizes");
-
-  if (m.getNum() == 1)
-  {
-    DenseVect q;
-    q = m.getDense();
-    if (x.getNum() == 1)
-    {
-      p = x.getDense() + q;
-    }
-    else if (x.getNum() == 2)
-    {
-      p = x.getSparse() + q;
-    }
-    else
-      SiconosVectorException::selfThrow("vector function add : invalid type of vector");
-  }
-  else if (m.getNum() == 2)
-  {
-    SparseVect q;
-    q = m.getSparse();
-    if (x.getNum() == 1)
-    {
-      p = x.getDense() + q;
-    }
-    else if (x.getNum() == 2)
-    {
-      p = x.getSparse() + q;
-    }
-    else
-      SiconosVectorException::selfThrow("vector function add : invalid type of vector");
-  }
-  else
-  {
-    SiconosVectorException::selfThrow("vector function add : invalid type of vector");
-  }
-  return p;
-}
-
-MySimpleVector sub(const MySiconosVector &x, const MySiconosVector& m)
-{
-  DenseVect p;
-
-  if (x.size() != m.size())
-    SiconosVectorException::selfThrow("vector function sub : inconsistent sizes");
-
-  if (m.getNum() == 1)
-  {
-    DenseVect q;
-    q = m.getDense();
-    if (x.getNum() == 1)
-    {
-      p = x.getDense() - q;
-    }
-    else if (x.getNum() == 2)
-    {
-      p = x.getSparse() - q;
-    }
-    else
-      SiconosVectorException::selfThrow("vector function sub : invalid type of vector");
-
-  }
-  else if (m.getNum() == 2)
-  {
-    SparseVect q;
-    q = m.getSparse();
-    if (x.getNum() == 1)
-    {
-      p = x.getDense() - q;
-    }
-    else if (x.getNum() == 2)
-    {
-      p = x.getSparse() - q;
-    }
-    else
-      SiconosVectorException::selfThrow("vector function sub : invalid type of vector");
-
-  }
-  else
-  {
-    SiconosVectorException::selfThrow("vector function sub : invalid type of vector");
-  }
-  return p;
-}
-
-double inner_prod(const MySiconosVector &x, const MySiconosVector& m)
-{
-  double p;
-
-  if (x.size() != m.size())
-    SiconosVectorException::selfThrow("vector function inner_prod : inconsistent sizes");
-
-  if (m.getNum() == 1)
-  {
-    DenseVect q;
-    q = m.getDense();
-    if (x.getNum() == 1)
-    {
-      p = inner_prod(x.getDense(), q);
-    }
-    else if (x.getNum() == 2)
-    {
-      p = inner_prod(x.getSparse(), q);
-    }
-    else
-      SiconosVectorException::selfThrow("vector function inner_prod : invalid type of vector");
-  }
-  else if (m.getNum() == 2)
-  {
-    SparseVect q;
-    q = m.getSparse();
-    if (x.getNum() == 1)
-    {
-      p = inner_prod(x.getDense(), q);
-    }
-    else if (x.getNum() == 2)
-    {
-      p = inner_prod(x.getSparse(), q);
-    }
-    else
-      SiconosVectorException::selfThrow("vector function inner_prod : invalid type of vector");
-
-  }
-  else
-  {
-    SiconosVectorException::selfThrow("vector function inner_prod : invalid type of vector");
-  }
-  return p;
-
-}
-
-
+// outer_prod(v,w) = trans(v)*w
 MySimpleMatrix outer_prod(const MySiconosVector &x, const MySiconosVector& m)
 {
   DenseMat p;
-
-  if (x.size() != m.size())
-    SiconosVectorException::selfThrow("vector function outer_prod : inconsistent sizes");
-
-  if (m.getNum() == 1)
+  unsigned int numM = m.getNum();
+  unsigned int numX = x.getNum();
+  if (numM == 1)
   {
-    DenseVect q;
-    q = m.getDense();
-    if (x.getNum() == 1)
-    {
-      p = outer_prod(x.getDense(), q);
-    }
-    else if (x.getNum() == 2)
-    {
-      p = outer_prod(x.getSparse(), q);
-    }
+    if (numX == 1)
+      p = outer_prod(x.getDense(), m.getDense());
+    else if (numX == 4)
+      p = outer_prod(x.getSparse(), m.getDense());
     else
       SiconosVectorException::selfThrow("vector function outer_prod : invalid type of vector");
   }
-  else if (m.getNum() == 2)
+  else if (numM == 4)
   {
-    SparseVect q;
-    q = m.getSparse();
-    if (x.getNum() == 1)
-    {
-      p = outer_prod(x.getDense(), q);
-    }
-    else if (x.getNum() == 2)
-    {
-      p = outer_prod(x.getSparse(), q);
-    }
+    if (numX == 1)
+      p = outer_prod(x.getDense(), m.getSparse());
+    else if (numX == 4)
+      p = outer_prod(x.getSparse(), m.getSparse());
     else
       SiconosVectorException::selfThrow("vector function outer_prod : invalid type of vector");
-
   }
   else
-  {
     SiconosVectorException::selfThrow("vector function outer_prod : invalid type of vector");
-  }
-  return p;
 
+  return p;
 }
 
 MySimpleVector operator * (const MySimpleVector &m, double d)
 {
-  DenseVect p;
-  SparseVect s;
-  if (m.getNum() != 1 || m.getNum() != 2)
+  if (m.getNum() != 1 && m.getNum() != 4)
     SiconosVectorException::selfThrow("opertor * (const MySimpleVector&, double) : invalid type of vector");
 
   if (m.getNum() == 1)
   {
-    p = m.getDense() * d;
+    DenseVect p = m.getDense() * d;
     return p;
   }
-  else if (m.getNum() == 2)
+  else// if(m.getNum()==4)
   {
-    s = m.getSparse() * d;
+    SparseVect s = m.getSparse() * d;
     return s;
   }
 }
 
 MySimpleVector operator * (const MySimpleVector &m, int d)
 {
-  DenseVect p;
-  SparseVect s;
-  if (m.getNum() != 1 || m.getNum() != 2)
+  if (m.getNum() != 1 && m.getNum() != 4)
     SiconosVectorException::selfThrow("opertor * (const MySimpleVector&, int) : invalid type of vector");
 
   if (m.getNum() == 1)
   {
-    p = m.getDense() * d;
+    DenseVect p = m.getDense() * d;
     return p;
   }
-  else if (m.getNum() == 2)
+  else // if(m.getNum()==4){
   {
-    s = m.getSparse() * d;
+    SparseVect s = m.getSparse() * d;
     return s;
   }
 }
 
 MySimpleVector operator * (double d, const MySimpleVector &m)
 {
-  DenseVect p;
-  SparseVect s;
-  if (m.getNum() != 1 || m.getNum() != 2)
+  if (m.getNum() != 1 && m.getNum() != 4)
     SiconosVectorException::selfThrow("opertor * (double, const MySimpleVector&) : invalid type of vector");
 
   if (m.getNum() == 1)
   {
-    p = d * m.getDense();
+    DenseVect p = d * m.getDense();
     return p;
   }
-  else if (m.getNum() == 2)
+  else // if(m.getNum()==4){
   {
-    s = d * m.getSparse();
+    SparseVect s = d * m.getSparse();
     return s;
   }
 }
 
 MySimpleVector operator * (int d, const MySimpleVector &m)
 {
-  DenseVect p;
-  SparseVect s;
-  if (m.getNum() != 1 || m.getNum() != 2)
+  if (m.getNum() != 1 && m.getNum() != 4)
     SiconosVectorException::selfThrow("opertor * (int, const MySimpleVector&) : invalid type of vector");
 
   if (m.getNum() == 1)
   {
-    p = d * m.getDense();
+    DenseVect p = d * m.getDense();
     return p;
   }
-  else if (m.getNum() == 2)
+  else
   {
-    s = d * m.getSparse();
+    // if(m.getNum()==4){
+    SparseVect s = d * m.getSparse();
     return s;
   }
 }
 
 MySimpleVector operator / (const MySimpleVector &m, double d)
 {
-  DenseVect p;
-  SparseVect s;
-  if (m.getNum() != 1 || m.getNum() != 2)
+  if (m.getNum() != 1 && m.getNum() != 4)
     SiconosVectorException::selfThrow("opertor / (const MySimpleVector&, double) : invalid type of vector");
 
   if (m.getNum() == 1)
   {
-    p = m.getDense() / d;
+    DenseVect p = m.getDense() / d;
     return p;
   }
-  else if (m.getNum() == 2)
+  else // if(m.getNum()==4){
   {
-    s = m.getSparse() / d;
+    SparseVect s = m.getSparse() / d;
     return s;
   }
 }
 
 MySimpleVector operator / (const MySimpleVector &m, int d)
 {
-  DenseVect p;
-  SparseVect s;
-  if (m.getNum() != 1 || m.getNum() != 2)
+  if (m.getNum() != 1 && m.getNum() != 4)
     SiconosVectorException::selfThrow("opertor / (const MySimpleVector&, int) : invalid type of vector");
 
   if (m.getNum() == 1)
   {
-    p = m.getDense() / d;
+    DenseVect p = m.getDense() / d;
     return p;
   }
-  else if (m.getNum() == 2)
+  else // if(m.getNum()==4){
   {
-    s = m.getSparse() / d;
+    SparseVect s = m.getSparse() / d;
     return s;
   }
 }

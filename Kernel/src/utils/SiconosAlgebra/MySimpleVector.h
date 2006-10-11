@@ -43,7 +43,8 @@ class MySimpleVector: public MySiconosVector
 private:
 
   /** \var unsigned int num
-   * \brief an unsigned int which make a correspondance with Boost Matrices: 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat
+   * \brief an unsigned int which make a correspondance with Boost Vector: 1 -> DenseVect, 4 -> SparseVect
+   * Note: 4 for sparse to keep the same num as for matrices.
    */
   unsigned int num;
 
@@ -52,7 +53,7 @@ private:
    */
   MyVect vect;
 
-  /** \fn MySimpleVector (TYP = DENSE)
+  /** \fn MySimpleVector(TYP = DENSE)
    *  \brief constructor with the type of the Boost vector
    *  \param TYP
    */
@@ -74,7 +75,7 @@ public:
    *  \param an unsigned int
    *  \param a TYP
    */
-  MySimpleVector(const std::vector<double> , unsigned int , TYP = DENSE);
+  MySimpleVector(const std::vector<double>, TYP = DENSE);
 
   /** \fn MySimpleVector (const MySimpleVector&)
    *  \brief copy constructor
@@ -114,23 +115,38 @@ public:
 
   /******************************** METHODS ******************************/
 
+  /** \fn MySiconosVector* getVectorPtr(const unsigned int) const;
+   *  \brief return the current object. This function is really usefull only for block vector
+   * \return a pointer to a SiconosVector
+   */
+  inline MySiconosVector* getVectorPtr(const unsigned int)
+  {
+    return this;
+  };
+
   /** \fn void zero();
    *  \brief sets all the values of the vector to 0.0
    */
-  void zero(void);
+  void zero();
 
   /** \fn const double normInf() const;
    *  \brief compute the infinite norm of the vector
    *  \return a double
    */
-  const double normInf(void)const;
+  const double normInf()const;
+
+  /** \fn double norm()
+   *  \brief return the Euclidian norm of the vector
+   *  \return a double
+   */
+  const double norm() const ;
 
   /** \fn unsigned unsigned int size() const
    *  \brief get the vector size, ie the total number of (double)
    *  elements in the vector
    *  \return unsigned int
    */
-  unsigned int size(void)const;
+  unsigned int size()const;
 
   /** \fn  void resize (unsigned int nbcol, bool val = true)const
    *  \brief resize the vector with nbcol columns. The existing elements of the matrix are preseved when specified.
@@ -176,11 +192,6 @@ public:
    */
   unsigned int getNum(void)const;
 
-  /** \fn void setNum(unsigned int n)
-   *  \brief set the attribute num of current vector with n
-   */
-  void setNum(unsigned int);
-
   //************************** VECTORS HANDLING AND OPERATORS *******************************
 
   /** \fn double& operator ()(unsigned int i)
@@ -199,63 +210,63 @@ public:
    */
   double operator()(unsigned int)const;
 
-  /** \fn operator * (const MySiconosVector &v)
-   *  \brief multiply the current vector with the vector v
-   *  \param a MySiconosVector
-   *  \return a MySimpleVector, the result of the multiplication
-   */
-  double operator * (const MySiconosVector&);
-
   /** \fn operator = (const MySiconosVector&)
    *  \param MySiconosVector : the vector to be copied
    */
-  const MySimpleVector& operator = (const MySiconosVector&);
+  MySimpleVector& operator = (const MySiconosVector&);
 
   /** \fn operator = (const MySiconosVector&)
    *  \param MySimpleVector : the vector to be copied
    */
-  const MySimpleVector& operator = (const MySimpleVector&);
+  MySimpleVector& operator = (const MySimpleVector&);
 
   /** \fn operator += (const MySiconosVector&)
    *  \param MySiconosVector : a vector to add
    */
-  const MySimpleVector& operator +=(const MySiconosVector&);
+  MySimpleVector& operator +=(const MySiconosVector&);
 
   /** \fn operator -= (const MySiconosVector&)
    *  \param MySiconosVector : a vector to subtract
    */
-  const MySimpleVector& operator -=(const MySiconosVector&);
+  MySimpleVector& operator -=(const MySiconosVector&);
 
   /** \fn operator /= (double)
    *  \param double, a scalar
    */
-  const MySimpleVector& operator /= (double);
+  MySimpleVector& operator /= (double);
 
   /** \fn operator /= (int)
    *  \param int, a scalar
    */
-  const MySimpleVector& operator /= (int);
+  MySimpleVector& operator /= (int);
 
   /** \fn operator*=(double)
    *  \brief multiply the current vector with a double
    *  \param a double
    *  \exception SiconosVectorException
    */
-  const MySimpleVector& operator *= (double);
+  MySimpleVector& operator *= (double);
 
   /** \fn operator*=(int)
    *  \brief multiply the current vector with an int
    *  \param an int
    *  \exception SiconosVectorException
    */
-  const MySimpleVector& operator *= (int);
+  MySimpleVector& operator *= (int);
 
+  /** \fn operator * (const MySiconosVector &v)
+   *  \brief multiply the current vector with the vector v
+   *  \param a MySiconosVector
+   *  \return a MySimpleVector, the result of the multiplication
+   */
+  //double operator * (const MySiconosVector&);
+  //  double operator * (const MySiconosVector&);
   /** \fn operator ==
    * \brief: A==B when (A-B).normInf()<tolerance
    * \param 2 MySiconosVector
    * \return a boolean
    */
-  friend  bool            operator ==(const MySiconosVector&, const MySiconosVector&);
+  friend  bool  operator ==(const MySiconosVector&, const MySiconosVector&);
 
   /** \fn operator + (const MySiconosVector& m1, const MySiconosVector& m2);
    *  \brief Addition of two vectors
@@ -325,34 +336,18 @@ public:
    */
   friend MySimpleVector operator / (const MySimpleVector&, int);
 
-  /** \fn add (const MySiconosVector& m1, const MySiconosVector& m2);
-   *  \brief Addition of two vectors
-   *  \param 2 MySiconosVector
-   *  \return a MySimpleVector
-   *  \exception SiconosVectorException, if the sizes are incompatible
-   */
-  friend MySimpleVector add(const MySiconosVector&, const MySiconosVector&);
-
-  /** \fn operator sub (const MySiconosVector& m1, const MySiconosVector& m2);
-   *  \brief Subtraction of two vectors
-   *  \param 2 MySiconosVector
-   *  \return a MySimpleVector
-   *  \exception SiconosVectorException, if the sizes are incompatible
-   */
-  friend MySimpleVector sub(const MySiconosVector&, const MySiconosVector&);
-
-  /** \fn inner_prod (const MySiconosVector& m1, const MySiconosVector& m2);
-   *  \brief compute the product trans(m1) * m2
-   *  \param 2 MySiconosMatrix
-   *  \return a double
-   */
-  friend double inner_prod(const MySiconosVector&, const MySiconosVector&);
-
   /** \fn outer_prod (const MySiconosVector& m1, const MySiconosVector& m2);
    *  \brief compute the product m1 * trans(m2)
-   *  \param 2 MySiconosMatrix
-   *  \return a MySimpleVector
+   *  \param 2 MySiconosVectors
+   *  \return a MySimpleMatrix
    */
   friend MySimpleMatrix outer_prod(const MySiconosVector&, const MySiconosVector&);
+
+  /** \fn const double inner_prod (const MySiconosVector& m1, const MySiconosVector& m2);
+   *  \brief compute dot product m1.m2
+   *  \param 2 MySiconosVectors
+   *  \return a double
+   */
+  friend const double inner_prod(const MySiconosVector&, const MySiconosVector&);
 };
 #endif

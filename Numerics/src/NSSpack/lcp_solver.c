@@ -73,6 +73,8 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   const char lcpkey7[15] = "LexicoLemke", lcpkey8[15] = "NewtonMin";
   const char lcpkey9[15] = "Latin_w", lcpkey10[15] = "NewtonFB", lcpkey11[15] = "SOR";
 
+  // Remark: Lemke = LexicoLemke. Only one solver is called: lexicoLemke.
+
   int i, j, info = 1;
 
   int     iparamLCP[5];
@@ -110,11 +112,6 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     lcp_lexicolemke(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
     pt->lcp.iter = iparamLCP[2];
-
-    /*  Old version of Lemke. Use LexicoLemke Directly */
-    /*     lcp_lemke( vec , q , n , &pt->lcp.itermax , z ,                  /\* in  *\/ */
-    /*         w , &pt->lcp.iter , &pt->lcp.err , &info );           /\* out *\/ */
-
   }
   /* **** Latin Solver **** */
 

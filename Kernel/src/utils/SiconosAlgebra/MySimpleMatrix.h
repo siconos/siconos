@@ -55,6 +55,26 @@ private:
    */
   MySimpleMatrix(TYP = DENSE);
 
+  /** \var LaVectorLongInt* ipiv;
+   * \brief The pivot indices obtained from DGETRF (PLUFactorizationInPlace)
+   */
+  std::vector<int> ipiv;
+
+  /** \var  bool isPLUFactorized;
+   * \brief  Boolean = true if the Matrix is PLU Factorized
+   */
+  bool isPLUFactorized;
+
+  /** \var  bool isPLUInversed;
+   * \brief  Boolean = true if the Matrix is Inversed in Place
+   */
+  bool isPLUInversed;
+
+  /** \fn void checkNum()
+   *  \brief check that num has a valid value
+   */
+  void checkNum();
+
 public:
   /***************************** CONSTRUCTORS ****************************/
 
@@ -290,11 +310,6 @@ public:
    */
   void getCol(unsigned int, MySimpleVector&) const;
 
-  /** \fn void setNum(unsigned int n)
-   *  \brief set the attribute num of current matrix with n
-   */
-  void setNum(unsigned int);
-
   /** \fn void setRow(unsigned int row, const MySimpleVector &v)
    *  \brief set line row of the current matrix with vector v
    *  \param an unsigned int and a MySimpleVector
@@ -379,42 +394,42 @@ public:
   /** \fn assignment operator
    *  \param MySiconosMatrix : the matrix to be copied
    */
-  const MySimpleMatrix& operator = (const MySiconosMatrix&);
+  MySimpleMatrix& operator = (const MySiconosMatrix&);
 
   /** \fn assignment operator
    *  \param MySimpleMatrix : the matrix to be copied
    */
-  const MySimpleMatrix& operator = (const MySimpleMatrix&);
+  MySimpleMatrix& operator = (const MySimpleMatrix&);
 
   /** \fn operator /=
    *  \param double, a scalar
    */
-  const MySimpleMatrix& operator /= (double);
+  MySimpleMatrix& operator /= (double);
 
   /** \fn operator /=
    *  \param int, a scalar
    */
-  const MySimpleMatrix& operator /= (int);
+  MySimpleMatrix& operator /= (int);
 
   /** \fn operator +=
    *  \param MySiconosMatrix : a matrix to add
    */
-  const MySimpleMatrix& operator +=(const MySiconosMatrix&);
+  MySimpleMatrix& operator +=(const MySiconosMatrix&);
 
   /** \fn operator -=
    *  \param MySiconosMatrix : a matrix to subtract
    */
-  const MySimpleMatrix& operator -=(const MySiconosMatrix&);
+  MySimpleMatrix& operator -=(const MySiconosMatrix&);
 
   /** \fn operator *=
    *  \param double, a scalar
    */
-  const MySimpleMatrix& operator *= (double);
+  MySimpleMatrix& operator *= (double);
 
   /** \fn operator *=
    *  \param int, a scalar
    */
-  const MySimpleMatrix& operator *= (int);
+  MySimpleMatrix& operator *= (int);
 
   /** \fn operator ==
    * \brief: A==B when (A-B).normInf()<tolerance
@@ -550,5 +565,37 @@ public:
    *  \return a MySimpleMatrix
    */
   friend MySimpleMatrix BlockMatrixAssemble(const std::vector<MySiconosMatrix*>&);
+
+  /** \fn MySimpleVector prod(const MySiconosMatrix&, const MySiconosVector&);
+   *  \brief compute the product matrix-vector
+   *  \return a MySimpleVector
+   */
+  friend MySimpleVector prod(const MySiconosMatrix&, const MySiconosVector&);
+
+  /** \fn  PLUFactorizationInPlace(void);
+   *  \brief computes an LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
+   *  The result is returned in this (InPlace). Based on Blas dgetrf function.
+   */
+  void PLUFactorizationInPlace(void);
+
+  /** \fn  SiconosMatrix  PLUInverseInPlace(void);
+   *  \brief  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
+   *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
+   */
+  void PLUInverseInPlace(void);
+
+  /** \fn SiconosMatrix  PLUForwardBackward(SiconosMatrix &B);
+   *  \brief solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
+   *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
+   *  \param input: the RHS matrix b - output: the result x
+   */
+  void PLUForwardBackwardInPlace(MySiconosMatrix &B);
+
+  /** \fn SiconosVector  PLUForwardBackward(SiconosVector &B);
+   *  \brief solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
+   *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
+   *  \param input: the RHS matrix b - output: the result x
+   */
+  void PLUForwardBackwardInPlace(MySiconosVector &B);
 };
 #endif

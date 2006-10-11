@@ -35,7 +35,6 @@
  *    - some specific parameters, which are required or not, depending on the used algorithm.
  *
  *  Available solvers algorithms are (and their required parameters):
- *   - Lemke (maxIter) => warning: not fully implemented in Numerics, do not use!
  *   - LexicoLemke (maxIter)
  *   - NLGS (Non Linear Gauss Seidel) (tolerance, maxIter)
  *   - NSQP (Non Smooth Quadratic Programming) (tolerance)

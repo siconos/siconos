@@ -48,11 +48,11 @@ using namespace boost::numeric::ublas;
 
 /** \brief DenseVect is a define of boost::ublas::numeric::vector<double, std::vector<double> >
  */
-#define DenseVect  vector<double,std::vector<double> >
+#define DenseVect  boost::numeric::ublas::vector<double,std::vector<double> >
 /** \brief SparseVect is a define of boost::ublas::numeric::mapped<double>
  */
 #define SparseVect mapped_vector<double>
-const double tolerance = 1e-10; // value used to compare matrices. Matrices A and B are equal when (A-B).normInf()<tolerance.
+const double tolerance = 1e-14; // value used to compare matrices. Matrices A and B are equal when (A-B).normInf()<tolerance.
 
 /** \brief TYP is an enumerated type of DENSE, TRIANGULAR, SYMMETRIC, SPARSE, BANDED. TYP is used to describe the type of matrix or vector we want to construct.
  */
@@ -62,8 +62,8 @@ enum TYP {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED};
  */
 union MyVect
 {
-  DenseVect *Dense;
-  SparseVect *Sparse;
+  DenseVect *Dense; // num = 1
+  SparseVect *Sparse; // num = 4
 };
 
 class MySiconosVector
@@ -75,14 +75,9 @@ protected:
    */
   bool isBlockVector;
 
-  /**\fn setIsBlock (bool)
-   * \brief set the value of isBlockVector.
-   * \param a bool to set isBlockVector (optional, default = false)
-   */
-  void setIsBlock(bool val)
-  {
-    isBlockVector = val;
-  }
+  /**\fn MySiconosVector (bool = false)
+   * \brief default constructor */
+  MySiconosVector(bool = false);
 
 public:
 
@@ -90,7 +85,7 @@ public:
    * \brief true if the vector is block else false.
    * \return a bool.
    */
-  inline  bool isBlock(void) const
+  inline bool isBlock(void) const
   {
     return isBlockVector;
   }
@@ -130,22 +125,17 @@ public:
    */
   virtual SparseVect* getSparsePtr(void)const = 0;
 
-  /** \fn void setNum(unsigned int n)
-   *  \brief set the attribute num of current vector with n
-   */
-  virtual void setNum(unsigned int) = 0;
-
   /** \fn void zero();
    *  \brief sets all the values of the vector to 0.0
    */
-  virtual void zero(void) = 0;
+  virtual void zero() = 0;
 
   /** \fn unsigned int size() const
    *  \brief get the vector size, ie the total number of (double)
    *  elements in the vector
    *  \return unsigned int
    */
-  virtual unsigned int size(void)const = 0;
+  virtual unsigned int size() const = 0;
 
   /** \fn  void resize (unsigned int nbcol, bool val = true)const
    *  \brief resize the vector with nbcol columns. The existing elements of the matrix are preseved when specified.
@@ -157,12 +147,24 @@ public:
    *  \brief compute the infinite norm of the vector
    *  \return a double
    */
-  virtual const double normInf(void)const = 0;
+  virtual const double normInf() const = 0;
+
+  /** \fn double norm()
+   *  \brief return the Euclidian norm of the vector
+   *  \return a double
+   */
+  virtual const double norm() const = 0 ;
 
   /** \fn void display();
    *  \brief display data on standard output
    */
   virtual void display(void)const = 0;
+
+  /** \fn MySiconosVector* getVectorPtr(const unsigned int) const;
+   *  \brief if this is a block vector return i-eme MySimpleVector, else return this.
+   * \return a pointer to a SimpleVector
+   */
+  virtual MySiconosVector* getVectorPtr(const unsigned int) = 0;
 
   // Note: in the following functions, index is a general one;
   // that means that for a SimpleVector v, v(i) is index i element but
@@ -190,46 +192,46 @@ public:
    *  \param a MySiconosVector
    *  \return a MySiconosVector, the result of the multiplication
    */
-  virtual double operator * (const MySiconosVector&) = 0;
+  //virtual double operator * (const MySiconosVector&) = 0;
 
   /** \fn operator = (const MySiconosVector&)
    *  \param MySiconosVector : the vector to be copied
    */
-  virtual const MySiconosVector& operator =(const MySiconosVector&) = 0;
+  virtual MySiconosVector& operator =(const MySiconosVector&) = 0;
 
   /** \fn operator += (const MySiconosVector&)
    *  \param MySiconosVector : a vector to add
    */
-  virtual const MySiconosVector& operator +=(const MySiconosVector&) = 0;
+  virtual MySiconosVector& operator +=(const MySiconosVector&) = 0;
 
   /** \fn operator -= (const MySiconosVector&)
    *  \param MySiconosVector : a vector to subtract
    */
-  virtual const MySiconosVector& operator -=(const MySiconosVector&) = 0;
+  virtual MySiconosVector& operator -=(const MySiconosVector&) = 0;
 
   /** \fn operator /= (double)
    *  \param double, a scalar
    */
-  virtual const MySiconosVector& operator /=(double) = 0;
+  virtual MySiconosVector& operator /=(double) = 0;
 
   /** \fn operator /= (int)
    *  \param int, a scalar
    */
-  virtual const MySiconosVector& operator /=(int) = 0;
+  virtual MySiconosVector& operator /=(int) = 0;
 
   /** \fn operator*=(double)
    *  \brief multiply the current vector with a double
    *  \param a double
    *  \exception SiconosVectorException
    */
-  virtual const MySiconosVector& operator *=(double) = 0;
+  virtual MySiconosVector& operator *=(double) = 0;
 
   /** \fn operator*=(int)
    *  \brief multiply the current vector with an int
    *  \param an int
    *  \exception SiconosVectorException
    */
-  virtual const MySiconosVector& operator *=(int) = 0;
+  virtual MySiconosVector& operator *=(int) = 0;
 };
 
 #endif

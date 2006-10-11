@@ -264,11 +264,6 @@ public:
    */
   unsigned int getNum()const;
 
-  /** \fn void setNum(unsigned int n)
-   *  \brief set the attribute num of current matrix with n
-   */
-  void  setNum(unsigned int);
-
   /** \fn void getRow(unsigned int index, MySimpleVector& vOut) const
    *  \brief get row index of current matrix and save it unsigned into vOut
    *  \param unsigned int: index of required line
@@ -414,43 +409,68 @@ public:
   /** \fn assignment operator
    *  \param MySiconosMatrix : the matrix to be copied
    */
-  const MyBlockMatrix& operator = (const MySiconosMatrix&);
+  MyBlockMatrix& operator = (const MySiconosMatrix&);
 
   /** \fn assignment operator
    *  \param MyBlockMatrix : the matrix to be copied
    */
-  //  const MyBlockMatrix& operator = (const MyBlockMatrix&);
+  //  MyBlockMatrix& operator = (const MyBlockMatrix&);
 
   /** \fn operator +=
    *  \param MySiconosMatrix : a matrix to add
    */
-  const MyBlockMatrix& operator +=(const MySiconosMatrix&);
+  MyBlockMatrix& operator +=(const MySiconosMatrix&);
 
   /** \fn operator -=
    *  \param MySiconosMatrix : a matrix to subtract
    */
-  const MyBlockMatrix& operator -=(const MySiconosMatrix&);
+  MyBlockMatrix& operator -=(const MySiconosMatrix&);
 
   /** \fn operator /=
    *  \param double, a scalar
    */
-  const MyBlockMatrix& operator /=(double);
+  MyBlockMatrix& operator /=(double);
 
   /** \fn operator /=
    *  \param int, a scalar
    */
-  const MyBlockMatrix& operator /=(int);
+  MyBlockMatrix& operator /=(int);
 
   /** \fn operator *=
    *  \param double, a scalar
    */
-  const MyBlockMatrix& operator *=(double);
+  MyBlockMatrix& operator *=(double);
 
   /** \fn operator *=
    *  \param int, a scalar
    */
-  const MyBlockMatrix& operator *=(int);
+  MyBlockMatrix& operator *=(int);
 
+  /** \fn  PLUFactorizationInPlace(void);
+   *  \brief computes an LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
+   *  The result is returned in this (InPlace). Based on Blas dgetrf function.
+   */
+  void PLUFactorizationInPlace(void);
+
+  /** \fn  SiconosMatrix  PLUInverseInPlace(void);
+   *  \brief  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
+   *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
+   */
+  void  PLUInverseInPlace(void);
+
+  /** \fn SiconosMatrix  PLUForwardBackward(SiconosMatrix &B);
+   *  \brief solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
+   *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
+   *  \param input: the RHS matrix b - output: the result x
+   */
+  void  PLUForwardBackwardInPlace(MySiconosMatrix &B);
+
+  /** \fn SiconosVector  PLUForwardBackward(SiconosVector &B);
+   *  \brief solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
+   *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
+   *  \param input: the RHS matrix b - output: the result x
+   */
+  void   PLUForwardBackwardInPlace(MySiconosVector &B);
 };
 
 #endif

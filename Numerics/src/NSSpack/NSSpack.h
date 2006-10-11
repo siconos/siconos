@@ -302,10 +302,6 @@ extern "C" int lcp_solver_block( int *inb , int *iid , double *vec, double *q , 
 extern "C" int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt , double *z , double *w , int *it_end ,
                                 int *itt_end , double *res);
 
-
-extern "C" void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem,
-                          double *wlem, int *it_end, double *res, int *info);
-
 extern  "C" void lcp_qp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                         int *iparamLCP , double *dparamLCP);
 
@@ -456,8 +452,6 @@ lcp_latin.c
 lcp_latin_w.c
 
 lcp_cpg.c
-
-lcp_lemke.c
 
 lcp_lexicolemke.c
 
@@ -632,11 +626,6 @@ extern int dfc_2D_solver(double *vec , double *q , int *n , method *pt , double 
  */
 
 /*  *********************************** LCP ******************************* */
-
-extern void lcp_lemke(double *vec, double *qqq, int *nn, int *itermax, double *zlem,
-                      double *wlem, int *it_end, double *res, int *info);
-
-
 extern void lcp_qp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                    int *iparamLCP , double *dparamLCP);
 

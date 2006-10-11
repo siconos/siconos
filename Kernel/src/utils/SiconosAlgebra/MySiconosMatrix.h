@@ -98,15 +98,6 @@ protected:
    * bool to check the type of the current matrix; true if block else false. */
   bool isBlockMatrix;
 
-  /**\fn setIsBlockMatrix (bool)
-   * \brief set the value of isBlockMatrix.
-   * \param a bool to set isBlockMatrix (optional, default = false)
-   */
-  inline void setIsBlock(bool val)
-  {
-    isBlockMatrix = val;
-  }
-
   /**\fn MySiconosMatrix (bool = false)
    * \brief default constructor */
   MySiconosMatrix(bool = false);
@@ -258,11 +249,6 @@ public:
    */
   virtual const std::deque<bool> getBlockAllocated(void) const = 0;
 
-  /** \fn void setNum(unsigned int n)
-   *  \brief set the attribute num of current matrix with n
-   */
-  virtual void setNum(unsigned int) = 0;
-
   /** \fn void getRow(unsigned int index, MySimpleVector& vOut) const = 0
    *  \brief get row index of current matrix and save it into vOut
    *  \param unsigned int: index of required line
@@ -371,38 +357,63 @@ public:
   /** \fn assignment operator
    *  \param MySiconosMatrix : the matrix to be copied
    */
-  virtual const MySiconosMatrix& operator  =(const MySiconosMatrix&) = 0;
+  virtual MySiconosMatrix& operator  =(const MySiconosMatrix&) = 0;
 
   /** \fn operator /= (double) = 0
    *  \param double, a scalar
    */
-  virtual const MySiconosMatrix& operator /=(double) = 0;
+  virtual MySiconosMatrix& operator /=(double) = 0;
 
   /** \fn operator /= (int) = 0
    *  \param int, a scalar
    */
-  virtual const MySiconosMatrix& operator /=(int) = 0;
+  virtual MySiconosMatrix& operator /=(int) = 0;
 
   /** \fn operator += (const MySiconosMatrix&) = 0
    *  \param MySiconosMatrix : a matrix to add
    */
-  virtual const MySiconosMatrix& operator +=(const MySiconosMatrix&) = 0;
+  virtual MySiconosMatrix& operator +=(const MySiconosMatrix&) = 0;
 
   /** \fn operator -= (const MySiconosMatrix&) = 0
    *  \param MySiconosMatrix : a matrix to subtract
    */
-  virtual const MySiconosMatrix& operator -=(const MySiconosMatrix&) = 0;
+  virtual MySiconosMatrix& operator -=(const MySiconosMatrix&) = 0;
 
   /** \fn operator *= (double) = 0
    *  \param double, a scalar
    */
-  virtual const MySiconosMatrix& operator *=(double) = 0;
+  virtual MySiconosMatrix& operator *=(double) = 0;
 
   /** \fn operator *= (int) = 0
    *  \param int, a scalar
    */
-  virtual const MySiconosMatrix& operator *=(int) = 0;
+  virtual MySiconosMatrix& operator *=(int) = 0;
 
+  /** \fn  PLUFactorizationInPlace(void);
+   *  \brief computes an LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
+   *  The result is returned in this (InPlace). Based on Blas dgetrf function.
+   */
+  virtual void PLUFactorizationInPlace(void) = 0;
+
+  /** \fn  SiconosMatrix  PLUInverseInPlace(void);
+   *  \brief  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
+   *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
+   */
+  virtual void  PLUInverseInPlace(void) = 0;
+
+  /** \fn SiconosMatrix  PLUForwardBackward(SiconosMatrix &B);
+   *  \brief solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
+   *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
+   *  \param input: the RHS matrix b - output: the result x
+   */
+  virtual void  PLUForwardBackwardInPlace(MySiconosMatrix &B) = 0;
+
+  /** \fn SiconosVector  PLUForwardBackward(SiconosVector &B);
+   *  \brief solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
+   *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
+   *  \param input: the RHS matrix b - output: the result x
+   */
+  virtual void   PLUForwardBackwardInPlace(MySiconosVector &B) = 0;
 };
 
 #endif

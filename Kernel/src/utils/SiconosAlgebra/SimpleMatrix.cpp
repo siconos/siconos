@@ -512,7 +512,7 @@ bool operator==(const SiconosMatrix& m1, const SiconosMatrix& m2)
   if (m1.isBlock() || m2.isBlock())
     SiconosMatrixException::selfThrow("SimpleMatrix comparison with a block matrix: not yet implemented.");
   double norm = (m1 - m2).normInf();
-  return(norm < tolerance);
+  return(norm < tolerance0);
 }
 
 /*************************************************/

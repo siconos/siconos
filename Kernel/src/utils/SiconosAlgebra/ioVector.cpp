@@ -45,18 +45,13 @@ bool ioVector::read(MySiconosVector& m)const
     int col;
     infile >> col;
 
-    if (m.isBlock() == false)
-    {
-      DenseVect p(col);
-      infile >> p;
-
-      MySimpleVector tmp(p);
-      m = tmp;
-    }
-    else
-    {
+    if (m.isBlock())
       SiconosVectorException::selfThrow(" ioVector::read : read BlockVector is not implemented");
-    }
+    DenseVect p(col);
+    infile >> p;
+
+    MySimpleVector tmp(p);
+    m = tmp;
     infile.close();
     return true;
   }
@@ -74,24 +69,20 @@ bool ioVector::read(MySiconosVector& m)const
     int err;
     fread((char*)&alpha, sizeof(int), 1, infile);
 
-    if (m.isBlock() == false)
-    {
-      DenseVect p(alpha);
-      err = fread(&p, sizeof(DenseVect(alpha)), 1, infile);
-      MySimpleVector tmp(p);
-      m = tmp;
-    }
-    else
-    {
+    if (m.isBlock())
       SiconosVectorException::selfThrow(" ioVector::read : read BlockVector is not implemented");
-    }
+
+    DenseVect p(alpha);
+    err = fread(&p, sizeof(DenseVect(alpha)), 1, infile);
+    MySimpleVector tmp(p);
+    m = tmp;
     fclose(infile);
     return true;
   }
   else
   {
     SiconosVectorException::selfThrow(" ioVector::read : incorrect mode for reading vector");
-
+    return false;
   }
 }
 
@@ -106,25 +97,21 @@ bool ioVector::write(const MySiconosVector& m)
     {
       SiconosVectorException::selfThrow(" ioVector::write : Fail to open file \"" + FileName + "\"");
     }
-    if (m.isBlock() == false)
-    {
-      int col;
-      col = m.size();
-      outfile << col;
-      outfile << '\n';
-
-      DenseVect p;
-      if (m.getNum() == 1)
-        p = m.getDense();
-      else if (m.getNum() == 2)
-        p = m.getSparse();
-
-      outfile << p;
-    }
-    else
-    {
+    if (m.isBlock())
       SiconosVectorException::selfThrow(" ioVector::write : write BlockVector is not implemented");
-    }
+
+    int col;
+    col = m.size();
+    outfile << col;
+    outfile << '\n';
+
+    DenseVect p;
+    if (m.getNum() == 1)
+      p = m.getDense();
+    else if (m.getNum() == 2)
+      p = m.getSparse();
+
+    outfile << p;
     outfile.close();
     return true;
   }
@@ -135,36 +122,30 @@ bool ioVector::write(const MySiconosVector& m)
     {
       SiconosVectorException::selfThrow(" ioVector::write : Fail to open file \"" + FileName + "\"");
     }
-    if (m.isBlock() == false)
-    {
-      writeSimpleBinary = true;
-
-      int col;
-      col = m.size();
-
-      temporary->resize(col, false);
-      *temporary = m;
-      fwrite((char*)&col, sizeof(int), 1, outfile);
-      fwrite(temporary->getDensePtr(), sizeof(DenseVect(col)), 1, outfile);
-
-    }
-    else
-    {
+    if (m.isBlock())
       SiconosVectorException::selfThrow(" ioVector::write : write BlockVector is not implemented");
-    }
+
+    writeSimpleBinary = true;
+
+    int col;
+    col = m.size();
+
+    temporary->resize(col, false);
+    *temporary = m;
+    fwrite((char*)&col, sizeof(int), 1, outfile);
+    fwrite(temporary->getDensePtr(), sizeof(DenseVect(col)), 1, outfile);
     fclose(outfile);
     return true;
   }
   else
   {
     SiconosVectorException::selfThrow(" ioVector::write : incorrect mode for writing vector");
-
+    return false;
   }
 }
 
 bool ioVector::rawWrite(const MySiconosVector& m)
 {
-
   if (Mode == "ascii")
   {
     std::ofstream outfile(FileName.c_str());
@@ -173,20 +154,16 @@ bool ioVector::rawWrite(const MySiconosVector& m)
     {
       SiconosVectorException::selfThrow(" ioVector::rawWrite : Fail to open file \"" + FileName + "\"");
     }
-    if (m.isBlock() == false)
-    {
-      DenseVect p;
-      if (m.getNum() == 1)
-        p = m.getDense();
-      else if (m.getNum() == 2)
-        p = m.getSparse();
-
-      outfile << p;
-    }
-    else
-    {
+    if (m.isBlock())
       SiconosVectorException::selfThrow(" ioVector::rawWrite : rawWrite BlockVector is not implemented");
-    }
+
+    DenseVect p;
+    if (m.getNum() == 1)
+      p = m.getDense();
+    else if (m.getNum() == 2)
+      p = m.getSparse();
+
+    outfile << p;
     outfile.close();
     return true;
   }
@@ -197,40 +174,39 @@ bool ioVector::rawWrite(const MySiconosVector& m)
     {
       SiconosVectorException::selfThrow(" ioVector::rawWrite : Fail to open file \"" + FileName + "\"");
     }
-    if (m.isBlock() == false)
-    {
-      int col;
-      col = m.size();
-      writeSimpleBinary = true;
-
-      temporary->resize(col, false);
-      *temporary = m;
-      fwrite(temporary->getDensePtr(), sizeof(DenseVect(col)), 1, outfile);
-
-    }
-    else
-    {
+    if (m.isBlock())
       SiconosVectorException::selfThrow(" ioVector::rawWrite : rawWrite BlockVector is not implemented");
-    }
+
+    int col;
+    col = m.size();
+    writeSimpleBinary = true;
+
+    temporary->resize(col, false);
+    *temporary = m;
+    fwrite(temporary->getDensePtr(), sizeof(DenseVect(col)), 1, outfile);
     fclose(outfile);
     return true;
   }
   else
   {
     SiconosVectorException::selfThrow(" ioVector::rawWrite : incorrect mode for writing vector");
+    return false;
   }
 }
 
 bool ioVector::read(MySiconosMatrix& m)const
 {
   SiconosVectorException::selfThrow(" ioVector::read(MySiconosMatrix&) is forbidden");
+  return false;
 }
 bool ioVector::write(const MySiconosMatrix& m)
 {
   SiconosVectorException::selfThrow(" ioVector::write(MySiconosMatrix&) is forbidden");
+  return false;
 }
 bool ioVector::rawWrite(const MySiconosMatrix& m)
 {
   SiconosVectorException::selfThrow(" ioVector::rawWrite(MySiconosMatrix&) is forbidden");
+  return false;
 }
 

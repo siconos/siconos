@@ -99,12 +99,12 @@ void MyBlockMatrixTest::testConstructor1() // Copy constructor, from a MyBlockMa
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->isBlock() == true, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->size1() == 5 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->size2() == 7, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->getBlockPtr(0, 0) == B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->getBlockPtr(0, 1) == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->getBlockPtr(0, 2) == D, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->getBlockPtr(1, 0) == E, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->getBlockPtr(1, 1) == F, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->getBlockPtr(1, 2) == G, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->getBlockPtr(0, 0)) == *B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->getBlockPtr(0, 1)) == *C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->getBlockPtr(0, 2)) == *D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->getBlockPtr(1, 0)) == *E, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->getBlockPtr(1, 1)) == *F, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", *(test->getBlockPtr(1, 2)) == *G, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->getTabRow() == tRow, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", test->getTabCol() == tCol, true);
   cout << "--> Constructor (copy) test ended with success." << endl;
@@ -118,12 +118,12 @@ void MyBlockMatrixTest::testConstructor2() // Copy constructor, from a MySiconos
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->isBlock() == true, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->size1() == 5 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->size2() == 7, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->getBlockPtr(0, 0) == B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->getBlockPtr(0, 1) == C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->getBlockPtr(0, 2) == D, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->getBlockPtr(1, 0) == E, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->getBlockPtr(1, 1) == F, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->getBlockPtr(1, 2) == G, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->getBlockPtr(0, 0)) == *B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->getBlockPtr(0, 1)) == *C, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->getBlockPtr(0, 2)) == *D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->getBlockPtr(1, 0)) == *E, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->getBlockPtr(1, 1)) == *F, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", *(test->getBlockPtr(1, 2)) == *G, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->getTabRow() == tRow, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", test->getTabCol() == tCol, true);
   cout << "--> Constructor (copy) test ended with success." << endl;
@@ -136,12 +136,12 @@ void MyBlockMatrixTest::testConstructor3() // Constructor from a mapped
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->isBlock() == true, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->size1() == 5 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->size2() == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->getBlockPtr(0, 0) == B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", test->getBlockPtr(1, 0) == E, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", *(test->getBlockPtr(0, 0)) == *B, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", *(test->getBlockPtr(1, 0)) == *E, true);
   std::vector<unsigned int> tmp = test->getTabRow();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tmp.size() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tmp[0] == 2, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tmp[1] == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tmp[1] == 5, true);
   tmp.clear();
   tmp = test->getTabCol();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tmp.size() == 1, true);
@@ -166,6 +166,7 @@ void MyBlockMatrixTest::testConstructor4() // Constructor from 4 MySiconosMatrix
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tmp[0] == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tmp[1] == 5, true);
   tmp.clear();
+  tmp = test->getTabCol();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tmp.size() == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tmp[0] == 2, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", tmp[1] == 6, true);
@@ -356,7 +357,6 @@ void MyBlockMatrixTest::testGetSetRowCol()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", (*A)(0, 1) == 1, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetSetRowCol : ", (*I)(0, 1) == 2, true);
 
-
   delete test;
   delete A;
   delete H;
@@ -378,7 +378,7 @@ void MyBlockMatrixTest::testGetBlock()
   (*G)(1, 0) = 12;
   (*G)(2, 0) = 4;
 
-  test->getBlock(2, 2, *block);
+  test->getBlock(1, 2, *block);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetBlock: ", (*block)(0, 0) == 1 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetBlock: ", (*block)(1, 0) == 12 , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetBlock: ", (*block)(2, 0) == 4 , true);
@@ -396,9 +396,8 @@ void MyBlockMatrixTest::testMatrixCopy()
   (*block)(0, 0) = 1;
   (*block)(1, 0) = 2;
   (*block)(2, 0) = 3;
-  test->matrixCopy(*block, 2, 2);
+  test->matrixCopy(*block, 1, 2);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testMatrixCopy: ", *G == *block , true);
-
   delete block;
   delete test;
   cout << "-->  matrixCopy test ended with success." << endl;
@@ -412,7 +411,6 @@ void MyBlockMatrixTest::testAssignment()
   for (unsigned int i = 0; i < 5 ; ++i)
     for (unsigned int j = 0; j < 7; ++j)
       (*ref)(i, j) = i + j;
-
   *test = *ref;
   for (unsigned int i = 0; i < 2; ++i)
   {
@@ -432,18 +430,22 @@ void MyBlockMatrixTest::testAssignment()
     for (unsigned int j = 0; j < 1; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*G)(i, j) == i + j + 8 , true);
   }
-
-  ref = new MyBlockMatrix(m, 2, 3);
+  delete ref;
+  ref = new MyBlockMatrix(*test);
+  ref->zero();
   *test = *ref;
   for (unsigned int i = 0; i < 5; ++i)
     for (unsigned int j = 0; j < 7; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*test)(i, j) == 0, true);
+  delete ref;
+  delete test;
   cout << "-->  test assignment ended with success." << endl;
 }
 
 void MyBlockMatrixTest::testOperators1()
 {
   cout << "--> Test: operators1." << endl;
+  double tol = 1e-14;
   MySiconosMatrix * tmp = new MyBlockMatrix(m, 2, 3);
   MySiconosMatrix * ref = new MySimpleMatrix(5, 7);
   for (unsigned int i = 0; i < 5 ; ++i)
@@ -460,68 +462,68 @@ void MyBlockMatrixTest::testOperators1()
   *tmp *= mult0;
   for (unsigned int i = 0; i < tmp->size1(); ++i)
     for (unsigned int j = 0 ; j < tmp->size2(); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2.2 * ((*ref)(i, j)) , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) - (mult0 * (*ref)(i, j)) < tol , true);
 
   int mult = 2;
   *tmp *= mult;
+
   for (unsigned int i = 0; i < tmp->size1(); ++i)
     for (unsigned int j = 0 ; j < tmp->size2(); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 4.4 * ((*ref)(i, j)) , true);
-
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) - mult * mult0 * (*ref)(i, j) < tol , true);
   *tmp /= mult;
   for (unsigned int i = 0; i < tmp->size1(); ++i)
     for (unsigned int j = 0 ; j < tmp->size2(); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2.2 * ((*ref)(i, j)) , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) - 2.2 * ((*ref)(i, j)) < tol , true);
 
   *tmp /= mult0;
   for (unsigned int i = 0; i < tmp->size1(); ++i)
     for (unsigned int j = 0 ; j < tmp->size2(); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == (*ref)(i, j) , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) - (*ref)(i, j) < tol , true);
 
   *tmp *= 3;
   *tmp -= *ref;
   for (unsigned int i = 0; i < tmp->size1(); ++i)
     for (unsigned int j = 0 ; j < tmp->size2(); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2 * (*ref)(i, j) , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) - 2 * (*ref)(i, j) < tol , true);
 
   // operators with a MyBlockMatrix
 
-  MySiconosMatrix * ref2 = new MyBlockMatrix(m, 3, 2);
+  MySiconosMatrix * ref2 = new MyBlockMatrix(m, 2, 3);
   *ref2 = *ref; // ref2 is initialized with ref
 
   tmp->zero();
   *tmp += *ref2;
   for (unsigned int i = 0; i < tmp->size1(); ++i)
     for (unsigned int j = 0 ; j < tmp->size2(); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == (*ref2)(i, j) , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) - (*ref2)(i, j) < tol , true);
 
   mult0 = 2.2;
   *tmp *= mult0;
   for (unsigned int i = 0; i < tmp->size1(); ++i)
     for (unsigned int j = 0 ; j < tmp->size2(); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2.2 * ((*ref2)(i, j)) , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) - 2.2 * ((*ref2)(i, j)) < tol , true);
 
   mult = 2;
   *tmp *= mult;
   for (unsigned int i = 0; i < tmp->size1(); ++i)
     for (unsigned int j = 0 ; j < tmp->size2(); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 4.4 * ((*ref2)(i, j)) , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) - 4.4 * ((*ref2)(i, j)) < tol , true);
 
   *tmp /= mult;
   for (unsigned int i = 0; i < tmp->size1(); ++i)
     for (unsigned int j = 0 ; j < tmp->size2(); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2.2 * ((*ref2)(i, j)) , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) - 2.2 * ((*ref2)(i, j)) < tol , true);
 
   *tmp /= mult0;
   for (unsigned int i = 0; i < tmp->size1(); ++i)
     for (unsigned int j = 0 ; j < tmp->size2(); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == (*ref2)(i, j) , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) - (*ref2)(i, j) < tol , true);
 
   *tmp *= 3;
   *tmp -= *ref2;
   for (unsigned int i = 0; i < tmp->size1(); ++i)
     for (unsigned int j = 0 ; j < tmp->size2(); ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) == 2 * (*ref2)(i, j) , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*tmp)(i, j) - 2 * (*ref2)(i, j) < tol , true);
   delete ref2;
   delete ref;
   delete tmp;
