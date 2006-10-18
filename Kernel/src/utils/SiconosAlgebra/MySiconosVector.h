@@ -30,33 +30,8 @@
 #ifndef __MySiconosVector__
 #define __MySiconosVector__
 
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/vector_sparse.hpp>
-#include <boost/numeric/ublas/vector_proxy.hpp>
-
-#include <iostream>
-#include <string>
-#include <vector>
-#include <cassert>
-#include <boost/numeric/ublas/expression_types.hpp>
-#include <boost/numeric/ublas/io.hpp>
-
+#include "SiconosAlgebra.h"
 #include "SiconosVectorException.h"
-
-
-using namespace boost::numeric::ublas;
-
-/** \brief DenseVect is a define of boost::ublas::numeric::vector<double, std::vector<double> >
- */
-#define DenseVect  boost::numeric::ublas::vector<double,std::vector<double> >
-/** \brief SparseVect is a define of boost::ublas::numeric::mapped<double>
- */
-#define SparseVect mapped_vector<double>
-const double tolerance = 1e-14; // value used to compare matrices. Matrices A and B are equal when (A-B).normInf()<tolerance.
-
-/** \brief TYP is an enumerated type of DENSE, TRIANGULAR, SYMMETRIC, SPARSE, BANDED. TYP is used to describe the type of matrix or vector we want to construct.
- */
-enum TYP {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED};
 
 /**\brief MyVect is an union of DenseVect pointer and SparseVect pointer
  */
@@ -99,31 +74,35 @@ public:
    *  \brief get the attribute num of current vector
    * \return an unsigned int.
    */
-  virtual unsigned int getNum(void)const = 0;
+  virtual unsigned int getNum() const = 0;
 
-  /** \fn DenseVect getDense()
+  /** \fn DenseVect getDense(unsigned int = 0)
    *  \brief get the attribute if it's type is DenseVect
+   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a DenseVect
    */
-  virtual const DenseVect getDense(void)const = 0;
+  virtual const DenseVect getDense(unsigned int = 0) const = 0;
 
-  /** \fn SparseVect getSparse()
+  /** \fn SparseVect getSparse(unsigned int = 0)
    *  \brief get the attribute if it's type is SparseVect
+   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a SparseVect
    */
-  virtual const SparseVect getSparse(void)const = 0;
+  virtual const SparseVect getSparse(unsigned int = 0) const = 0;
 
-  /** \fn DenseVect* getDensePtr()
+  /** \fn DenseVect* getDensePtr(unsigned int = 0)
    *  \brief get a pointer on DenseVect
+   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a DenseVect*
    */
-  virtual DenseVect* getDensePtr(void)const = 0;
+  virtual DenseVect* getDensePtr(unsigned int = 0) const = 0;
 
-  /** \fn SparseVect* getSparsePtr()
+  /** \fn SparseVect* getSparsePtr(unsigned int = 0)
    *  \brief get a pointer on SparseVect
+   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a SparseVect*
    */
-  virtual SparseVect* getSparsePtr(void)const = 0;
+  virtual SparseVect* getSparsePtr(unsigned int = 0) const = 0;
 
   /** \fn void zero();
    *  \brief sets all the values of the vector to 0.0
@@ -139,7 +118,9 @@ public:
 
   /** \fn  void resize (unsigned int nbcol, bool val = true)const
    *  \brief resize the vector with nbcol columns. The existing elements of the matrix are preseved when specified.
-   *  \exception SiconosVectorException
+   *  \param: dim of the resized vector
+   *  \param: a bool, true if old values are preserved else false. Default = true.
+   *  \exception for Block Vector, resizing not allowed.
    */
   virtual void resize(unsigned int, bool = true) = 0;
 
@@ -160,11 +141,26 @@ public:
    */
   virtual void display(void)const = 0;
 
-  /** \fn MySiconosVector* getVectorPtr(const unsigned int) const;
+  /** \fn MySiconosVector* getVectorPtr(unsigned int);
    *  \brief if this is a block vector return i-eme MySimpleVector, else return this.
    * \return a pointer to a SimpleVector
    */
-  virtual MySiconosVector* getVectorPtr(const unsigned int) = 0;
+  virtual MySiconosVector* getVectorPtr(unsigned int) = 0;
+
+  /** \fn void fill(double value);
+   *  \brief set all values of the vector component to value.
+   * \param a double
+   */
+  virtual void fill(double) = 0;
+
+  /** \fn unsigned int getNumberOfBlocks() const
+   *  \brief get the number of SimpleVector-Blocks - only usefull for BlockVector.
+   *  \return unsigned int
+   */
+  virtual unsigned int getNumberOfBlocks() const
+  {
+    return 1;
+  };
 
   // Note: in the following functions, index is a general one;
   // that means that for a SimpleVector v, v(i) is index i element but
@@ -185,14 +181,21 @@ public:
    *  \exception SiconosVectorException
    *  \return a double
    */
-  virtual double operator()(unsigned int)const = 0;
+  virtual double operator()(unsigned int) const = 0;
 
-  /** \fn operator * (const MySiconosVector &v)
-   *  \brief multiply the current vector with the vector v
-   *  \param a MySiconosVector
-   *  \return a MySiconosVector, the result of the multiplication
+  /** \fn MySiconosVector* operator[] (unsigned int i)
+   *  \brief get the vector at position i(ie this for Simple and block i for BlockVector)
+   *  \param an unsigned integer i
+   *  \return a MySiconosVector*
    */
-  //virtual double operator * (const MySiconosVector&) = 0;
+  virtual MySiconosVector* operator [](unsigned int) = 0;
+
+  /** \fn MySiconosVector* operator[] (unsigned int i)
+   *  \brief get the vector at position i(ie this for Simple and block i for BlockVector)
+   *  \param an unsigned integer i
+   *  \return a MySiconosVector*
+   */
+  virtual const MySiconosVector* operator [](unsigned int) const = 0;
 
   /** \fn operator = (const MySiconosVector&)
    *  \param MySiconosVector : the vector to be copied

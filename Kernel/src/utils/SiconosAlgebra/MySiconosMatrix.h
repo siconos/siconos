@@ -26,51 +26,16 @@
  *  See Derived classes for details.
  */
 
-
 #ifndef __MySiconosMatrix__
 #define __MySiconosMatrix__
 
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <boost/numeric/ublas/triangular.hpp>
-#include <boost/numeric/ublas/symmetric.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/banded.hpp>
-
-#include <iostream>
-#include <string>
-#include <vector>
-#include <deque>
-#include <cassert>
-#include <boost/numeric/ublas/expression_types.hpp>
-#include <boost/numeric/ublas/io.hpp>
-
+#include "SiconosAlgebra.h"
 #include "SiconosMatrixException.h"
 #include "MySimpleVector.h"
 
-using namespace boost::numeric::ublas;
+//using namespace boost::numeric::ublas;
 //class MySimpleVector;
-class MySimpleMatrix;
-
-/**\brief DenseMat is a typedef of boost::ublas::numeric::matrix<double, row_major, std::vector<double> >
- */
-typedef matrix<double, row_major, std::vector<double> > DenseMat;
-
-/**\brief TriangMat is a typedef of boost::ublas::numeric::triangular_matrix<double, upper, row_major, std::vector<double> >
- */
-typedef triangular_matrix<double, upper, row_major, std::vector<double> > TriangMat;
-
-/**\brief SymMat is a typedef of boost::ublas::numeric::symmetric_matrix<double, upper, row_major, std::vector<double> >
- */
-typedef symmetric_matrix<double, upper, row_major, std::vector<double> > SymMat;
-
-/**\brief BandedMat is a typedef of boost::ublas::numeric::banded_matrix<double, row_major, std::vector<double> >
- */
-typedef banded_matrix<double, row_major, std::vector<double> > BandedMat;
-
-/**\brief SparseMat is a typedef of boost::ublas::numeric::mapped_matrix<double>
- */
-typedef mapped_matrix<double> SparseMat;
+//class MySimpleMatrix;
 
 /**\brief MyMat is an union of DenseMat pointer, TriangMat pointer BandedMat, SparseMat and SymMat pointer
  */
@@ -82,14 +47,6 @@ union MyMat
   SparseMat *Sparse;
   BandedMat *Banded;
 };
-
-//enum TYP {DENSE=1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED};
-
-class MySiconosMatrix;
-
-/**\brief mapped is a typedef of boost::ublas::numeric::mapped_matrix<MySiconosMatrix* >
- */
-typedef mapped_matrix<MySiconosMatrix*> mapped;
 
 class MySiconosMatrix
 {
@@ -220,12 +177,12 @@ public:
    */
   virtual SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const = 0;
 
-  /** \fn mapped getMap() const  = 0
-   *  \brief get mapped matrix
+  /** \fn BlocksMat getAllBlocks() const  = 0
+   *  \brief get BlocksMat matrix
    *  \useless for MySimpleMatrix
-   *  \return a mapped
+   *  \return a BlocksMat
    */
-  virtual const mapped getMap(void) const = 0;
+  virtual const BlocksMat getAllBlocks(void) const = 0;
 
   /** \fn void getBlock(unsigned int numCow, unsigned int numCol, MySiconosMatrix& block) const  = 0
    *  \brief get block corresponding to lines given in numRow and columns in numCol

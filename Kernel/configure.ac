@@ -132,25 +132,25 @@ AC_ARG_ENABLE(error-on-warning,[  --enable-erroronwarning     treat all compile 
 AC_ARG_WITH(numerics,	
 	[  --with-numerics=path        indicates a local path of numerics lib if the library is not installed in standard directories (/usr, /usr/local, ...) ])
 
-#################################
-## Checks for external libraries
-#################################
+dnl #################################
+dnl ## Checks for external libraries
+dnl #################################
 
 # required version of the libraries
 
 dnl Check for Lapack
-ACX_LAPACK([  dnl action-if-found:  # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS],
- [
-  dnl action-if-not-found: 
-  AC_MSG_ERROR([Blas/Lapack was not found. 
-*** This makes this library unusable. Please get blas and lapack 
-*** installed. If you do have these installed, use the options 
-*** --with-blas=<libname> or --with-lapack=<libname> and/or set 
-*** the env variable LDFLAGS to include the appropriate linker 
-*** flags.])
-])
+dnl ACX_LAPACK([  dnl action-if-found:  # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS],
+dnl  [
+dnl   dnl action-if-not-found: 
+dnl   AC_MSG_ERROR([Blas/Lapack was not found. 
+dnl *** This makes this library unusable. Please get blas and lapack 
+dnl *** installed. If you do have these installed, use the options 
+dnl *** --with-blas=<libname> or --with-lapack=<libname> and/or set 
+dnl *** the env variable LDFLAGS to include the appropriate linker 
+dnl *** flags.])
+dnl ])
 
-# Numerics
+dnl # Numerics
 AC_MSG_CHECKING([for Siconos/Numerics])
 ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-numerics.])])
 
@@ -166,7 +166,7 @@ AC_MSG_CHECKING([for Lapack++])
 ACX_LAPACKPP([], [AC_MSG_ERROR([Cannot find  Lapack++ in a good version. Please install Lapack++, version >= $LAPACKPP_VER.])])
 
 # Libxml2
-AC_MSG_CHECKING([Libxml2])
+AC_MSG_CHECKING([for Libxml2])
 AM_PATH_XML2(2.6.16,,AC_MSG_ERROR([
 *** Libxml is required; Available at
 http://www.libxml.org/.]))
@@ -241,36 +241,20 @@ AC_MSG_RESULT("Architecture $ARCH  Compilation flag CXXFLAGS= $CXXFLAGS  Linking
 
 AC_SUBST(CXX_DYNLIB)
 
-#################################
-## LINK FLAGS
-#################################
+dnl #################################
+dnl ## LINK FLAGS
+dnl #################################
 
-#SICONOS_EXT_INCLUDES
+dnl #SICONOS_EXT_INCLUDES
 SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $LAPACKPP_INCLUDES $XML_CPPFLAGS $BOOST_CPPFLAGS"
 AC_SUBST(SICONOS_EXT_INCLUDES)
 AC_MSG_RESULT("SICONOS_EXT_INCLUDES = $SICONOS_EXT_INCLUDES")
 
-#SICONOS_EXT_LDFLAGS
-SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $LAPACKPP_LDFLAGS $LAPACKPP_LIBS $LAPACK_LIBS $BLAS_LIBS $XML_LIBS $ATLAS_LIBS -ldl"
-dnl case "$target" in
-dnl     *-linux*)
-dnl     AC_F77_LIBRARY_LDFLAGS	
-dnl       ;;
-dnl     *-apple-darwin*)
-dnl     # the flag for linking c anf f77 has to be defined
-dnl     # the macros  AC_F77_LIBRARY_LDFLAGS yields an error of link between C and F77
-dnl     FLIBS="" 
-dnl     case $CXX_VER in
-dnl      ( 3.*.* )
-dnl      FLIBS="-L/sw/lib -lg2c"
-dnl      ;;
-dnl     esac	
-dnl      ;;
-dnl esac
-echo $LAPACKPP_INCLUDES
+dnl #SICONOS_EXT_LDFLAGS
+SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $LAPACKPP_LDFLAGS $LAPACKPP_LIBS $LAPACK_LIBS $BLAS_LIBS $XML_LIBS -ldl"
 
 SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS $FLIBS -L/usr/lib/atlas -llapack_atlas"
-
+dnl SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS $FLIBS "
 AC_SUBST(SICONOS_EXT_LDFLAGS)
 AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
 
@@ -330,6 +314,7 @@ echo "
    F77 compiler flags:                  ${FFLAGS}
    Preprocessor flags:                  ${CPPFLAGS}
    Linking flags			${LDFLAGS}
+   Linking flags(2)			${LIBS}
    Siconos includes:                    ${SICONOS_EXT_INCLUDES}
    Siconos ld flags:                    ${SICONOS_EXT_LDFLAGS}"
 echo 

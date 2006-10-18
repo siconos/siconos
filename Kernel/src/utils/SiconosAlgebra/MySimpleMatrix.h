@@ -266,12 +266,12 @@ public:
    */
   SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const;
 
-  /** \fn mapped getMap()
-   *  \brief get mapped matrix
+  /** \fn BlocksMat getAllBlocks()
+   *  \brief get BlocksMat matrix
    *  \useless for MySimpleMatrix
-   *  \return a mapped
+   *  \return a BlocksMat
    */
-  const mapped getMap(void) const;
+  const BlocksMat getAllBlocks(void) const;
 
   /** \fn void getBlock(unsigned int numCow, unsigned int numCol, MySiconosMatrix& block)
    *  \brief get block corresponding to lines given in numRow and columns in numCol

@@ -1,12 +1,10 @@
 #include "MySimpleMatrix.h"
 #include "ioMatrix.h"
-#include <cassert>
 #include <boost/numeric/bindings/atlas/clapack.hpp>
 #include <boost/numeric/bindings/traits/std_vector.hpp>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
-#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/bindings/traits/ublas_vector2.hpp> // vector considered as matrix => necessary for bindings atlas-lapack
 
-//
 void MySimpleMatrix::checkNum()
 {
   if (num != 1 || num != 2 || num != 3 || num != 4 || num != 5)
@@ -417,10 +415,10 @@ BandedMat* MySimpleMatrix::getBandedPtr(unsigned int row, unsigned int col)const
   return mat.Banded;
 }
 
-const mapped MySimpleMatrix::getMap(void)const
+const BlocksMat MySimpleMatrix::getAllBlocks(void)const
 {
-  SiconosMatrixException::selfThrow("mapped getMap : getMap is forbidden for MySimpleMatrix");
-  const mapped a;
+  SiconosMatrixException::selfThrow("BlocksMat getAllBlocks : getAllBlocks is forbidden for MySimpleMatrix");
+  const BlocksMat a;
   return a;
 }
 
@@ -1148,13 +1146,13 @@ double& MySimpleMatrix::operator()(unsigned int row, unsigned int col)
     return (*mat.Sym)(row, col);
   else if (num == 4)
   {
-    std::cout << "MySimpleMatrix:operator() : warning, not well implemented for sparse matrices." << std::endl;
-    return (*mat.Sparse)(row, col).ref();
+    double *d = (*mat.Sparse).find_element(row, col);
+    double & ref = *d;
+    return ref;
   }
   else // if(num==5)
     return (*mat.Banded)(row, col);
 }
-
 
 double MySimpleMatrix::operator()(unsigned int row, unsigned int col) const
 {

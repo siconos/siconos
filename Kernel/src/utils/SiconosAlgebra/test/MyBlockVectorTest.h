@@ -15,59 +15,65 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
- */
-#ifndef __MyBlockMatrixTest__
-#define __MyBlockMatrixTest__
+*/
+#ifndef __MyBlockVectorTest__
+#define __MyBlockVectorTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "MyBlockMatrix.h"
+#include "MySiconosVector.h"
+#include "MyBlockVector.h"
+#include "MySimpleMatrix.h"
+#include <math.h>
+#include <vector>
 
-using namespace std;
-
-class MyBlockMatrixTest : public CppUnit::TestFixture
+class MyBlockVectorTest : public CppUnit::TestFixture
 {
 
 
 private:
 
-  // test suite
-  CPPUNIT_TEST_SUITE(MyBlockMatrixTest);
+  // Name of the tests suite
+  CPPUNIT_TEST_SUITE(MyBlockVectorTest);
 
-  CPPUNIT_TEST(testConstructor0);
+  // tests to be done ...
+
+  //  CPPUNIT_TEST(testBuildMyBlockVector);
   CPPUNIT_TEST(testConstructor1);
   CPPUNIT_TEST(testConstructor2);
   CPPUNIT_TEST(testConstructor3);
   CPPUNIT_TEST(testConstructor4);
   CPPUNIT_TEST(testZero);
-  CPPUNIT_TEST(testEye);
-  CPPUNIT_TEST(testNormInf);
-  CPPUNIT_TEST(testGetSetRowCol);
-  CPPUNIT_TEST(testGetBlock);
-  CPPUNIT_TEST(testMatrixCopy);
+  CPPUNIT_TEST(testNorm);
   CPPUNIT_TEST(testAssignment);
   CPPUNIT_TEST(testOperators1);
+  CPPUNIT_TEST(testOperators2);
+  CPPUNIT_TEST(testOperators3);
+  CPPUNIT_TEST(testOperators4);
   CPPUNIT_TEST(End);
+
   CPPUNIT_TEST_SUITE_END();
 
-  void testConstructor0();
+  // \todo exception test
+
   void testConstructor1();
   void testConstructor2();
   void testConstructor3();
   void testConstructor4();
-  void testGetSetRowCol();
   void testZero();
-  void testEye();
-  void testNormInf();
-  void testGetBlock();
-  void testMatrixCopy();
+  void testNorm();
   void testAssignment();
   void testOperators1();
+  void testOperators2();
+  void testOperators3();
+  void testOperators4();
   void End();
+  // Members
 
-  MySiconosMatrix *B, *C, *D, *E, *F, *G;
-  std::vector<MySiconosMatrix*> m;
-  std::vector<unsigned int> tRow, tCol;
-  BlocksMat * mapRef;
+  MySiconosVector * ref;
+  std::vector<double> vq;
+  DenseVect * dv;
+  SparseVect * sv;
+  double tol;
 
 public:
   void setUp();
@@ -76,3 +82,7 @@ public:
 };
 
 #endif
+
+
+
+

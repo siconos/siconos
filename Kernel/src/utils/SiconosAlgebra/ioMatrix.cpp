@@ -54,7 +54,7 @@ bool ioMatrix::read(MySiconosMatrix& m)const
       int nbRow = row;
       int nbCol = col;
       DenseMat p ;
-      mapped Mmap(nbRow, nbCol);
+      BlocksMat Mmap(nbRow, nbCol);
       for (int i = 0; i < nbRow; i++)
       {
         for (int j = 0; j < nbCol; j++)
@@ -106,7 +106,7 @@ bool ioMatrix::read(MySiconosMatrix& m)const
     else
     {
 
-      mapped mytest(alpha, beta);
+      BlocksMat mytest(alpha, beta);
       DenseMat p;
 
       int row, col;
@@ -173,7 +173,7 @@ bool ioMatrix::write(const MySiconosMatrix& m)
     }
     else
     {
-      mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).getMap();
+      BlocksMat Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).getAllBlocks();
       int col = Mmap.size2();
       int row = Mmap.size1();
       outfile << row << ' ' << col;
@@ -183,28 +183,27 @@ bool ioMatrix::write(const MySiconosMatrix& m)
       DenseMat p;
       if (STDMAP == 1)
       {
-        mapped::array_type::iterator it;
-        for (it = (Mmap.data()).begin(); it != (Mmap.data()).end(); ++it)
-        {
-          if ((it->second)->getNum() == 1)
-            p = (it->second)->getDense();
-          else if ((it->second)->getNum() == 2)
-            p = (it->second)->getTriang();
-          else if ((it->second)->getNum() == 3)
-            p = (it->second)->getSym();
+        //  BlocksMat::array_type::iterator it;
+        //  for(it=(Mmap.data ()).begin (); it!=(Mmap.data ()).end (); ++it){
+        //    if( (it->second)->getNum () == 1)
+        //      p = (it->second)->getDense ();
+        //    else if( (it->second)->getNum () == 2)
+        //      p = (it->second)->getTriang ();
+        //    else if( (it->second)->getNum () == 3)
+        //      p = (it->second)->getSym ();
 
-          k = p.size1();
-          l = p.size2();
-          outfile << k << ' ';
-          outfile << l << ' ';
-          outfile << p;
-          outfile << '\n';
-        }
+        //    k = p.size1 ();
+        //    l = p.size2 ();
+        //    outfile << k<<' ';
+        //    outfile << l <<' ';
+        //    outfile << p;
+        //    outfile << '\n';
+        //  }
       }
       else
       {
-        mapped::iterator1 it;
-        mapped::iterator2 it2;
+        BlocksMat::iterator1 it;
+        BlocksMat::iterator2 it2;
 
         for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
         {
@@ -254,7 +253,7 @@ bool ioMatrix::write(const MySiconosMatrix& m)
     }
     else
     {
-      mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).getMap();
+      BlocksMat Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).getAllBlocks();
       int col = Mmap.size2();
       int row = Mmap.size1();
       fwrite((char*)&row, sizeof(int), 1, outfile);
@@ -262,37 +261,33 @@ bool ioMatrix::write(const MySiconosMatrix& m)
       int k, l, err;
       if (STDMAP == 1)
       {
-        mapped::array_type::iterator it;
-        for (it = (Mmap.data()).begin(); it != (Mmap.data()).end(); ++it)
-        {
-          k = (it->second)->size1();
-          l = (it->second)->size2();
-          fwrite((char*)&k, sizeof(int), 1, outfile);
-          fwrite((char*)&l, sizeof(int), 1, outfile);
+        //  BlocksMat::array_type::iterator it;
+        //  for(it=(Mmap.data ()).begin (); it!=(Mmap.data ()).end (); ++it){
+        //    k = (it->second)->size1 ();
+        //    l = (it->second)->size2 ();
+        //    fwrite((char*)&k, sizeof(int), 1, outfile);
+        //    fwrite((char*)&l, sizeof(int), 1, outfile);
 
 
-          if ((it->second)->getNum() == 1)
-          {
-            const DenseMat *p = (it->second)->getDensePtr();
-            err = fwrite(p, sizeof(DenseMat(k, l)), 1, outfile);
-          }
-          else if ((it->second)->getNum() == 2)
-          {
-            const TriangMat *p = (it->second)->getTriangPtr();
-            err = fwrite(p, sizeof(TriangMat(k, l)), 1, outfile);
-          }
-          else if ((it->second)->getNum() == 3)
-          {
-            const SymMat *p = (it->second)->getSymPtr();
-            err = fwrite(p, sizeof(SymMat(k, l)), 1, outfile);
-          }
-        }
+        //    if( (it->second)->getNum () == 1){
+        //      const DenseMat *p = (it->second)->getDensePtr ();
+        //      err = fwrite(p, sizeof(DenseMat(k,l)), 1, outfile);
+        //    }
+        //    else if( (it->second)->getNum () == 2){
+        //      const TriangMat *p = (it->second)->getTriangPtr ();
+        //      err = fwrite(p, sizeof(TriangMat(k,l)), 1, outfile);
+        //    }
+        //    else if( (it->second)->getNum () == 3){
+        //      const SymMat *p = (it->second)->getSymPtr ();
+        //      err = fwrite(p, sizeof(SymMat(k,l)), 1, outfile);
+        //    }
+        //  }
       }
       else
       {
 
-        mapped::iterator1 it;
-        mapped::iterator2 it2;
+        BlocksMat::iterator1 it;
+        BlocksMat::iterator2 it2;
         for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
         {
           for (it2 = it.begin(); it2 != it.end(); it2 ++)
@@ -346,7 +341,7 @@ bool ioMatrix::rawWrite(const MySiconosMatrix& m)
     }
     else
     {
-      mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).getMap();
+      BlocksMat Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).getAllBlocks();
       //int col = Mmap.size2 ();
       //int row = Mmap.size1 ();
       //outfile << row << ' '<<col;
@@ -356,28 +351,27 @@ bool ioMatrix::rawWrite(const MySiconosMatrix& m)
       DenseMat p;
       if (STDMAP == 1)
       {
-        mapped::array_type::iterator it;
-        for (it = (Mmap.data()).begin(); it != (Mmap.data()).end(); ++it)
-        {
-          if ((it->second)->getNum() == 1)
-            p = (it->second)->getDense();
-          else if ((it->second)->getNum() == 2)
-            p = (it->second)->getTriang();
-          else if ((it->second)->getNum() == 3)
-            p = (it->second)->getSym();
+        //  BlocksMat::array_type::iterator it;
+        //  for(it=(Mmap.data ()).begin (); it!=(Mmap.data ()).end (); ++it){
+        //    if( (it->second)->getNum () == 1)
+        //      p = (it->second)->getDense ();
+        //    else if( (it->second)->getNum () == 2)
+        //      p = (it->second)->getTriang ();
+        //    else if( (it->second)->getNum () == 3)
+        //      p = (it->second)->getSym ();
 
-          //k = p.size1 ();
-          //l = p.size2 ();
-          //outfile << k <<' ';
-          //outfile << l <<' ';
-          //outfile << p;
-          outfile << '\n';
-        }
+        //    //k = p.size1 ();
+        //    //l = p.size2 ();
+        //    //outfile << k <<' ';
+        //    //outfile << l <<' ';
+        //    //outfile << p;
+        //    outfile << '\n';
+        //  }
       }
       else
       {
-        mapped::iterator1 it;
-        mapped::iterator2 it2;
+        BlocksMat::iterator1 it;
+        BlocksMat::iterator2 it2;
 
         for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
         {
@@ -426,7 +420,7 @@ bool ioMatrix::rawWrite(const MySiconosMatrix& m)
     }
     else
     {
-      mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).getMap();
+      BlocksMat Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).getAllBlocks();
       //int col = Mmap.size2 ();
       //int row = Mmap.size1 ();
       //fwrite((char*)&row, sizeof(int), 1, outfile);
@@ -434,37 +428,33 @@ bool ioMatrix::rawWrite(const MySiconosMatrix& m)
       int k, l, err;
       if (STDMAP == 1)
       {
-        mapped::array_type::iterator it;
-        for (it = (Mmap.data()).begin(); it != (Mmap.data()).end(); ++it)
-        {
-          k = (it->second)->size1();
-          l = (it->second)->size2();
-          //fwrite((char*)&k, sizeof(int), 1, outfile);
-          //fwrite((char*)&l, sizeof(int), 1, outfile);
+        //  BlocksMat::array_type::iterator it;
+        //  for(it=(Mmap.data ()).begin (); it!=(Mmap.data ()).end (); ++it){
+        //    k = (it->second)->size1 ();
+        //    l = (it->second)->size2 ();
+        //    //fwrite((char*)&k, sizeof(int), 1, outfile);
+        //    //fwrite((char*)&l, sizeof(int), 1, outfile);
 
 
-          if ((it->second)->getNum() == 1)
-          {
-            const DenseMat *p = (it->second)->getDensePtr();
-            err = fwrite(p, sizeof(DenseMat(k, l)), 1, outfile);
-          }
-          else if ((it->second)->getNum() == 2)
-          {
-            const TriangMat *p = (it->second)->getTriangPtr();
-            err = fwrite(p, sizeof(TriangMat(k, l)), 1, outfile);
-          }
-          else if ((it->second)->getNum() == 3)
-          {
-            const SymMat *p = (it->second)->getSymPtr();
-            err = fwrite(p, sizeof(SymMat(k, l)), 1, outfile);
-          }
-        }
+        //    if( (it->second)->getNum () == 1){
+        //      const DenseMat *p = (it->second)->getDensePtr ();
+        //      err = fwrite(p, sizeof(DenseMat(k,l)), 1, outfile);
+        //    }
+        //    else if( (it->second)->getNum () == 2){
+        //      const TriangMat *p = (it->second)->getTriangPtr ();
+        //      err = fwrite(p, sizeof(TriangMat(k,l)), 1, outfile);
+        //    }
+        //    else if( (it->second)->getNum () == 3){
+        //      const SymMat *p = (it->second)->getSymPtr ();
+        //      err = fwrite(p, sizeof(SymMat(k,l)), 1, outfile);
+        //    }
+        //  }
       }
       else
       {
 
-        mapped::iterator1 it;
-        mapped::iterator2 it2;
+        BlocksMat::iterator1 it;
+        BlocksMat::iterator2 it2;
         for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
         {
           for (it2 = it.begin(); it2 != it.end(); it2 ++)

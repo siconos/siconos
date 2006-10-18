@@ -33,19 +33,13 @@
 #ifndef __MyBlockMatrix__
 #define __MyBlockMatrix__
 
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/matrix_sparse.hpp>
-#include <vector>
-#include <deque>
-#include <cassert>
-
 #include "MySimpleMatrix.h"
 /** \constant STDMAP
  *  \brief if STDMAP then we use an iterator of std::map, else we use an iterator1 and an iterator2 of map_std of Boost
  */
 #define STDMAP 0
 
-using namespace boost::numeric::ublas;
+//using namespace boost::numeric::ublas;
 
 class MyBlockMatrix : public MySiconosMatrix
 {
@@ -54,7 +48,7 @@ private:
   /** \var map
    * \brief a map of the blocks that compose the matrix
    */
-  mapped map;
+  BlocksMat map;
 
   /** \var isBlockAllocatedIn
    * \brief a list of bool, to check inside-class allocation for SimpleMatrix blocks.
@@ -62,14 +56,14 @@ private:
   std::deque<bool> isBlockAllocatedIn;
 
   /** \var tabRow
-   * \brief list of blocks dimension (number of rows)
+   * \brief list of blocks dimension - tabRow[i] = tabRow[i-1] + ni, ni being the number of rows of block i.
    */
-  std::vector<unsigned int> tabRow;
+  Index tabRow;
 
   /** \var tabCol
-   * \brief list of blocks dimension (number of columns)
+   * \brief list of blocks dimension - tabCol[i] = tabCol[i-1] + ni, ni being the number of columns of block i.
    */
-  std::vector<unsigned int> tabCol;
+  Index tabCol;
 
   /** \fn void makeTab(unsigned int row, unsigned int col)
    *  \brief build tabRow and tabCol
@@ -104,11 +98,11 @@ public:
    */
   MyBlockMatrix(const MyBlockMatrix&);
 
-  /** \fn MyBlockMatrix (const mapped&  m)
+  /** \fn MyBlockMatrix (const BlocksMat&  m)
    *  \brief constructor with a map
    *  \param MyBlockMatrix
    */
-  MyBlockMatrix(mapped&);
+  MyBlockMatrix(BlocksMat&);
 
   /** \fn MyBlockMatrix (vector<MySiconosMatrix*>v, unsigned int row, unsigned int col)
    *  \brief constructor with a list of pointer to MySiconosMatrix (!links with pointer, no copy!)
@@ -220,20 +214,20 @@ public:
 
   // ******************************* GETTERS/SETTERS **************************
 
-  /** \fn inline std::vector<unsigned int> getTabRow() const
+  /** \fn inline Index getTabRow() const
    *  \brief get the vector tabRow
    *  \return a vector of int
    */
-  inline std::vector<unsigned int> getTabRow() const
+  inline Index getTabRow() const
   {
     return tabRow;
   };
 
-  /** \fn inline std::vector<unsigned int> getTabCol() const
+  /** \fn inline Index getTabCol() const
    *  \brief get the vector tabCol
    *  \return a vector of int
    */
-  inline std::vector<unsigned int> getTabCol() const
+  inline Index getTabCol() const
   {
     return tabCol;
   };
@@ -370,11 +364,11 @@ public:
    */
   SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0)const;
 
-  /** \fn mapped getMap() const
+  /** \fn BlocksMat getAllBlocks() const
    *  \brief get the objects that holds all the blocks.
-   *  \return a mapped
+   *  \return a BlocksMat
    */
-  const mapped getMap(void)const;
+  const BlocksMat getAllBlocks(void)const;
 
 
   //******************* MATRICES HANDLING AND OPERATORS ***********************
@@ -456,21 +450,21 @@ public:
    *  \brief  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
    *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
    */
-  void  PLUInverseInPlace(void);
+  void PLUInverseInPlace(void);
 
   /** \fn SiconosMatrix  PLUForwardBackward(SiconosMatrix &B);
    *  \brief solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
    *  \param input: the RHS matrix b - output: the result x
    */
-  void  PLUForwardBackwardInPlace(MySiconosMatrix &B);
+  void PLUForwardBackwardInPlace(MySiconosMatrix &B);
 
   /** \fn SiconosVector  PLUForwardBackward(SiconosVector &B);
    *  \brief solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
    *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
    *  \param input: the RHS matrix b - output: the result x
    */
-  void   PLUForwardBackwardInPlace(MySiconosVector &B);
+  void PLUForwardBackwardInPlace(MySiconosVector &B);
 };
 
 #endif

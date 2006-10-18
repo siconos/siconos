@@ -69,6 +69,14 @@ public:
    */
   MySimpleVector(unsigned int , TYP = DENSE);
 
+  /** \fn MySimpleVector (unsigned int, TYP = DENSE)
+   *  \brief constructor with the type and the dimension of the Boost vector and a default value
+   *  \param an unsigned int, dimension
+   *  \param double a, so that *this = [a a a ...]
+   *  \param a TYP (default = dense)
+   */
+  MySimpleVector(unsigned int , double, TYP = DENSE);
+
   /** \fn MySimpleVector (const std::vector<double>&, unsigned int, TYP = DENSE)
    *  \brief constructor with the type of the boost vector, a std::vector of the values and the dimension of the vector
    *  \param a std::vector<double>
@@ -115,14 +123,20 @@ public:
 
   /******************************** METHODS ******************************/
 
-  /** \fn MySiconosVector* getVectorPtr(const unsigned int) const;
+  /** \fn MySiconosVector* getVectorPtr(unsigned int) const;
    *  \brief return the current object. This function is really usefull only for block vector
    * \return a pointer to a SiconosVector
    */
-  inline MySiconosVector* getVectorPtr(const unsigned int)
+  inline MySiconosVector* getVectorPtr(unsigned int)
   {
     return this;
   };
+
+  /** \fn void fill(double value);
+   *  \brief set all values of the vector component to value.
+   * \param a double
+   */
+  void fill(double);
 
   /** \fn void zero();
    *  \brief sets all the values of the vector to 0.0
@@ -146,7 +160,7 @@ public:
    *  elements in the vector
    *  \return unsigned int
    */
-  unsigned int size()const;
+  unsigned int size() const;
 
   /** \fn  void resize (unsigned int nbcol, bool val = true)const
    *  \brief resize the vector with nbcol columns. The existing elements of the matrix are preseved when specified.
@@ -154,43 +168,47 @@ public:
    */
   void resize(unsigned int, bool = true);
 
-
   /** \fn void display();
    *  \brief display data on standard output
    */
-  void display(void)const;
+  void display(void) const;
 
   //************************** VECTORS GETTERS AND SETTERS *******************************
 
-  /** \fn DenseVect getDense()
+  /** \fn DenseVect getDense(unsigned int = 0)
    *  \brief get the attribute if it's type is DenseVect
+   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a DenseVect
    */
-  const DenseVect getDense(void)const;
+  const DenseVect getDense(unsigned int = 0) const;
 
-  /** \fn SparseVect getSparse()
+  /** \fn SparseVect getSparse(unsigned int = 0)
    *  \brief get the attribute if it's type is SparseVect
+   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a SparseVect
    */
-  const SparseVect getSparse(void)const;
+  const SparseVect getSparse(unsigned int = 0) const;
 
-  /** \fn DenseVect* getDensePtr()
+  /** \fn DenseVect* getDensePtr(unsigned int = 0)
    *  \brief get a pointer on DenseVect
+   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a DenseVect*
    */
-  DenseVect* getDensePtr(void) const;
+  DenseVect* getDensePtr(unsigned int = 0) const;
 
   /** \fn SparseVect* getSparsePtr()
    *  \brief get a pointer on SparseVect
+   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    *  \return a SparseVect*
    */
-  SparseVect* getSparsePtr(void)const;
+  SparseVect* getSparsePtr(unsigned int = 0) const;
 
   /** \fn unsigned int getNum() const
    *  \brief get the attribute num of current vector
+   *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    * \return an unsigned int.
    */
-  unsigned int getNum(void)const;
+  unsigned int getNum() const;
 
   //************************** VECTORS HANDLING AND OPERATORS *******************************
 
@@ -209,6 +227,26 @@ public:
    *  \return a double
    */
   double operator()(unsigned int)const;
+
+  /** \fn MySimpleVector* operator[] (unsigned int i)
+   *  \brief get the vector at position i(ie this for Simple and block i for BlockVector)
+   *  \param an unsigned integer i
+   *  \return a MySiconosVector*
+   */
+  inline MySimpleVector* operator [](unsigned int)
+  {
+    return this;
+  };
+
+  /** \fn MySimpleVector* operator[] (unsigned int i) const
+   *  \brief get the vector at position i(ie this for Simple and block i for BlockVector)
+   *  \param an unsigned integer i
+   *  \return a MySiconosVector*
+   */
+  inline const MySimpleVector* operator [](unsigned int) const
+  {
+    return this;
+  };
 
   /** \fn operator = (const MySiconosVector&)
    *  \param MySiconosVector : the vector to be copied

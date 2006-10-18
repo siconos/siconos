@@ -43,6 +43,25 @@ MySimpleVector::MySimpleVector(unsigned int row, TYP typ): MySiconosVector(false
   zero();
 }
 
+MySimpleVector::MySimpleVector(unsigned int row, double val, TYP typ): MySiconosVector(false), num(1)
+{
+  if (typ == SPARSE)
+  {
+    vect.Sparse = new SparseVect(row);
+    num = 4;
+  }
+  else if (typ == DENSE)
+  {
+    vect.Dense = new DenseVect(row);
+    num = 1;
+  }
+  else
+  {
+    SiconosVectorException::selfThrow("MySimpleVector::constructor(TYP, unsigned int) : invalid type given");
+  }
+  fill(val);
+}
+
 MySimpleVector::MySimpleVector(const std::vector<double> v, TYP typ): MySiconosVector(false), num(1)
 {
   if (typ == DENSE)
@@ -68,17 +87,26 @@ MySimpleVector::MySimpleVector(const MySimpleVector &svect): MySiconosVector(fal
     SiconosVectorException::selfThrow("MySimpleVector:constructor(const MySimpleVector) : invalid type given");
 }
 
-MySimpleVector::MySimpleVector(const MySiconosVector &svect): MySiconosVector(false), num(svect.getNum())
+MySimpleVector::MySimpleVector(const MySiconosVector &v): MySiconosVector(false), num(1)
 {
-  assert(svect.isBlock() == false);
-  if (num == 1)
-    vect.Dense = new DenseVect(svect.getDense());
-
-  else if (num == 4)
-    vect.Sparse = new SparseVect(svect.getSparse());
-
+  if (v.isBlock())
+  {
+    vect.Dense = new DenseVect(v.size());
+    for (unsigned int i = 0; i < size(); ++i)
+      (*vect.Dense)(i) = v(i);
+  }
   else
-    SiconosVectorException::selfThrow("MySimpleVector:constructor(const MySiconosVector) : invalid type given");
+  {
+    num = v.getNum();
+    if (num == 1)
+      vect.Dense = new DenseVect(v.getDense());
+
+    else if (num == 4)
+      vect.Sparse = new SparseVect(v.getSparse());
+
+    else
+      SiconosVectorException::selfThrow("MySimpleVector:constructor(const MySiconosVector) : invalid type given");
+  }
 }
 
 MySimpleVector::MySimpleVector(const DenseVect& m): MySiconosVector(false), num(1)
@@ -116,7 +144,7 @@ MySimpleVector::~MySimpleVector(void)
 }
 
 /******************************** METHODS ******************************/
-unsigned int  MySimpleVector::getNum(void)const
+unsigned int MySimpleVector::getNum() const
 {
   return num;
 }
@@ -178,7 +206,7 @@ void MySimpleVector::resize(unsigned int n, bool preserve)
     (vect.Sparse)->resize(n, preserve);
 }
 
-const DenseVect MySimpleVector::getDense(void)const
+const DenseVect MySimpleVector::getDense(unsigned int)const
 {
 
   if (num != 1)
@@ -187,7 +215,7 @@ const DenseVect MySimpleVector::getDense(void)const
   return *vect.Dense;
 }
 
-const SparseVect MySimpleVector::getSparse(void)const
+const SparseVect MySimpleVector::getSparse(unsigned int)const
 {
 
   if (num != 4)
@@ -196,7 +224,7 @@ const SparseVect MySimpleVector::getSparse(void)const
   return *vect.Sparse;
 }
 
-DenseVect* MySimpleVector::getDensePtr(void) const
+DenseVect* MySimpleVector::getDensePtr(unsigned int) const
 {
   if (num != 1)
     SiconosVectorException::selfThrow("MySimpleVector::getDensePtr(unsigned int row, unsigned int col) : the current vector is not a Dense vector");
@@ -204,7 +232,7 @@ DenseVect* MySimpleVector::getDensePtr(void) const
   return vect.Dense;
 }
 
-SparseVect* MySimpleVector::getSparsePtr(void)const
+SparseVect* MySimpleVector::getSparsePtr(unsigned int)const
 {
 
   if (num != 4)
@@ -213,7 +241,7 @@ SparseVect* MySimpleVector::getSparsePtr(void)const
   return vect.Sparse;
 }
 
-void MySimpleVector::display(void)const
+void MySimpleVector::display()const
 {
   std::cout << "vect: " ;
   if (num == 1)
@@ -222,6 +250,19 @@ void MySimpleVector::display(void)const
     std::cout << *vect.Sparse << std::endl;
 }
 
+void MySimpleVector::fill(double value)
+{
+  if (num == 4)
+  {
+    for (unsigned int i = 0; i < (vect.Sparse)->size(); ++i)
+      (vect.Sparse)->push_back(i, value);
+  }
+  else
+  {
+    for (unsigned int i = 0; i < (vect.Dense)->size(); ++i)
+      (vect.Dense)->insert_element(i, value);
+  }
+}
 
 /***************************** OPERATORS ******************************/
 

@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef __MySiconosVectorTest__
-#define __MySiconosVectorTest__
+#ifndef __MySimpleVectorTest__
+#define __MySimpleVectorTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "MySiconosVector.h"

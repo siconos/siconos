@@ -50,7 +50,7 @@ void MyBlockMatrixTest::setUp()
   tCol[1] = 6;
   tCol[2] = 7;
 
-  mapRef = new mapped(2, 1);
+  mapRef = new BlocksMat(2, 1);
   (*mapRef)(0, 0) = B;
   (*mapRef)(1, 0) = E;
 
@@ -129,7 +129,7 @@ void MyBlockMatrixTest::testConstructor2() // Copy constructor, from a MySiconos
   cout << "--> Constructor (copy) test ended with success." << endl;
 }
 
-void MyBlockMatrixTest::testConstructor3() // Constructor from a mapped
+void MyBlockMatrixTest::testConstructor3() // Constructor from a BlocksMat
 {
   cout << "--> Test: constructor 3." << endl;
   MyBlockMatrix * test = new MyBlockMatrix(*mapRef);

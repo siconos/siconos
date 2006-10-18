@@ -1,7 +1,5 @@
 #include "MyBlockMatrix.h"
 
-//#define STDMAP 0
-
 void MyBlockMatrix::addInTab(unsigned int row, unsigned int col)
 {
 
@@ -45,9 +43,9 @@ void MyBlockMatrix::makeTab(unsigned int row, unsigned int col)
   }
   else
   {
-    //mapped Mmap = map;
-    mapped::iterator1 it;
-    mapped::iterator2 it2;
+    //BlocksMat Mmap = map;
+    BlocksMat::iterator1 it;
+    BlocksMat::iterator2 it2;
 
     // Col sweeping
     for (it2 = map.begin2(); it2 != map.end2(); ++it2)
@@ -69,13 +67,17 @@ void MyBlockMatrix::makeTab(unsigned int row, unsigned int col)
   }
 }
 
+// Default (private)
+MyBlockMatrix::MyBlockMatrix(): MySiconosMatrix(true)
+{}
+
 MyBlockMatrix::MyBlockMatrix(const MySiconosMatrix &m): MySiconosMatrix(true)
 {
   if (!m.isBlock())
     SiconosMatrixException::selfThrow("BlockMatrix copy constructor from a SimpleMatrix: forbidden operation.");
 
-  // mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
-  mapped Mmap = m.getMap();
+  // BlocksMat Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
+  BlocksMat Mmap = m.getAllBlocks();
   unsigned int col = Mmap.size2();
   unsigned int row = Mmap.size1();
   isBlockAllocatedIn.resize(col * row);
@@ -86,22 +88,21 @@ MyBlockMatrix::MyBlockMatrix(const MySiconosMatrix &m): MySiconosMatrix(true)
 
   if (STDMAP == 1)
   {
-    mapped::array_type::iterator it;
+    //       BlocksMat::array_type::iterator it;
 
-    for (it = (Mmap.data()).begin(); it != (Mmap.data()).end(); ++it)
-    {
-      // Computation of index row and index column corresponding
-      i = (it->first) / col;
-      j = (it->first) - i * col;
-      map(i, j) = new MySimpleMatrix(*(it->second));
-      isBlockAllocatedIn[(it->first) ] = true;
-    }
+    //       for(it=(Mmap.data ()).begin (); it!=(Mmap.data ()).end (); ++it){
+    //  // Computation of index row and index column corresponding
+    //  i = (it->first)/col;
+    //  j = (it->first) - i * col;
+    //  map(i, j) = new MySimpleMatrix( *(it->second) );
+    //  isBlockAllocatedIn[ (it->first) ] = true;
+    //       }
   }
 
   else
   {
-    mapped::iterator1 it;
-    mapped::iterator2 it2;
+    BlocksMat::iterator1 it;
+    BlocksMat::iterator2 it2;
 
     for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
     {
@@ -120,8 +121,8 @@ MyBlockMatrix::MyBlockMatrix(const MySiconosMatrix &m): MySiconosMatrix(true)
 
 MyBlockMatrix::MyBlockMatrix(const MyBlockMatrix &m): MySiconosMatrix(true)
 {
-  // mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
-  mapped Mmap = m.getMap();
+  // BlocksMat Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
+  BlocksMat Mmap = m.getAllBlocks();
   unsigned int col = Mmap.size2();
   unsigned int row = Mmap.size1();
   isBlockAllocatedIn.resize(col * row);
@@ -132,22 +133,21 @@ MyBlockMatrix::MyBlockMatrix(const MyBlockMatrix &m): MySiconosMatrix(true)
 
   if (STDMAP == 1)
   {
-    mapped::array_type::iterator it;
+    //       BlocksMat::array_type::iterator it;
 
-    for (it = (Mmap.data()).begin(); it != (Mmap.data()).end(); ++it)
-    {
-      // Computation of index row and index column corresponding
-      i = (it->first) / col;
-      j = (it->first) - i * col;
-      map(i, j) = new MySimpleMatrix(*(it->second));
-      isBlockAllocatedIn[(it->first) ] = true;
-    }
+    //       for(it=(Mmap.data ()).begin (); it!=(Mmap.data ()).end (); ++it){
+    //  // Computation of index row and index column corresponding
+    //  i = (it->first)/col;
+    //  j = (it->first) - i * col;
+    //  map(i, j) = new MySimpleMatrix( *(it->second) );
+    //  isBlockAllocatedIn[ (it->first) ] = true;
+    //       }
   }
 
   else
   {
-    mapped::iterator1 it;
-    mapped::iterator2 it2;
+    BlocksMat::iterator1 it;
+    BlocksMat::iterator2 it2;
 
     for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
     {
@@ -164,7 +164,7 @@ MyBlockMatrix::MyBlockMatrix(const MyBlockMatrix &m): MySiconosMatrix(true)
   makeTab(row, col);
 }
 
-MyBlockMatrix::MyBlockMatrix(mapped& Mmap): MySiconosMatrix(true)
+MyBlockMatrix::MyBlockMatrix(BlocksMat& Mmap): MySiconosMatrix(true)
 {
 
   unsigned int i = 0, j = 0;
@@ -176,22 +176,21 @@ MyBlockMatrix::MyBlockMatrix(mapped& Mmap): MySiconosMatrix(true)
   // STDMAP = 1 means that we use the map::iterator of standard library, else we use the iterator of boost map
   if (STDMAP == 1)
   {
-    mapped::array_type::iterator it1;
+    //     BlocksMat::array_type::iterator it1;
 
-    for (it1 = (Mmap.data()).begin(); it1 != (Mmap.data()).end(); ++it1)
-    {
-      // Computation of index row and index column corresponding
-      i = (it1->first) / col;
-      j = (it1->first) - i * col;
-      map(i, j) = new MySimpleMatrix(*(it1->second));
-      isBlockAllocatedIn[(it1->first) ] = true;
-    }
+    //     for(it1=(Mmap.data ()).begin (); it1!=(Mmap.data ()).end (); ++it1){
+    //       // Computation of index row and index column corresponding
+    //       i = (it1->first)/col;
+    //       j = (it1->first) - i * col;
+    //       map(i, j) = new MySimpleMatrix( *(it1->second) );
+    //       isBlockAllocatedIn[ (it1->first) ] = true;
+    //     }
   }
   else
   {
 
-    mapped::iterator1 it;
-    mapped::iterator2 it2;
+    BlocksMat::iterator1 it;
+    BlocksMat::iterator2 it2;
 
     for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
     {
@@ -297,16 +296,15 @@ void MyBlockMatrix::zero(void)
 {
   if (STDMAP == 1)
   {
-    mapped::array_type::iterator it;
-    for (it = (map.data()).begin(); it != (map.data()).end(); ++it)
-    {
-      (it->second)->zero();
-    }
+    //     BlocksMat::array_type::iterator it;
+    //     for(it=(map.data ()).begin (); it!=(map.data ()).end (); ++it){
+    //       (it->second)->zero ();
+    //}
   }
   else
   {
-    mapped::iterator1 it;
-    mapped::iterator2 it2;
+    BlocksMat::iterator1 it;
+    BlocksMat::iterator2 it2;
     for (it = map.begin1(); it != map.end1(); ++it)
     {
       for (it2 = it.begin(); it2 != it.end(); it2++)
@@ -321,28 +319,25 @@ void MyBlockMatrix::eye(void)
 {
   if (STDMAP == 1)
   {
-    unsigned int col = map.size2();
-    unsigned int p = 0, q = 0;
-    mapped::array_type::iterator it;
-    for (it = (map.data()).begin(); it != (map.data()).end(); ++it)
-    {
-      p = (it->first) / col;
-      q = (it->first) - p * col;
-      if (p == q)
-      {
-        (it->second)->eye();
-      }
-      else
-      {
-        (it->second)->zero();
-      }
-    }
+    //     unsigned int col = map.size2 ();
+    //     unsigned int p =0, q =0;
+    //     BlocksMat::array_type::iterator it;
+    //     for(it=(map.data ()).begin (); it!=(map.data ()).end (); ++it){
+    //       p = (it->first)/col;
+    //       q = (it->first) - p * col;
+    //       if(p == q){
+    //  (it->second)->eye ();
+    //       }
+    //       else{
+    //  (it->second)->zero ();
+    //       }
+    //     }
   }
   else
   {
-    mapped Mmap = map;
-    mapped::iterator1 it;
-    mapped::iterator2 it2;
+    BlocksMat Mmap = map;
+    BlocksMat::iterator1 it;
+    BlocksMat::iterator2 it2;
 
     for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
     {
@@ -365,18 +360,17 @@ void MyBlockMatrix::display(void)const
 {
   if (STDMAP == 1)
   {
-    mapped::array_type Mmap = map.data();
-    mapped::array_type::iterator it;
-    for (it = Mmap.begin(); it != Mmap.end(); ++it)
-    {
-      (it->second)->display();
-    }
+    //     BlocksMat::array_type Mmap = map.data ();
+    //     BlocksMat::array_type::iterator it;
+    //     for(it=Mmap.begin (); it!=Mmap.end (); ++it){
+    //       (it->second)->display ();
+    //     }
   }
   else
   {
-    mapped Mmap = map;
-    mapped::iterator1 it;
-    mapped::iterator2 it2;
+    BlocksMat Mmap = map;
+    BlocksMat::iterator1 it;
+    BlocksMat::iterator2 it2;
     for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
     {
       for (it2 = it.begin(); it2 != it.end(); it2++)
@@ -599,8 +593,8 @@ BandedMat*  MyBlockMatrix::getBandedPtr(unsigned int row, unsigned int col)const
   return (*map(row, col)).getBandedPtr();
 }
 
-// return the boost mapped matrix of a block matrix
-const mapped MyBlockMatrix::getMap(void)const
+// return the boost BlocksMat matrix of a block matrix
+const BlocksMat MyBlockMatrix::getAllBlocks(void)const
 {
   return map;
 }
@@ -688,23 +682,23 @@ MyBlockMatrix& MyBlockMatrix::operator = (const MySiconosMatrix &m)
     if (tabRow.size() != n1 || tabCol.size() != n2)
       SiconosMatrixException::selfThrow("BlockMatrix operator = Left and Right blocks have inconsistent sizes.");
     unsigned int i = 0, j = 0;
-    mapped Mmap = m.getMap();
-    unsigned int col = Mmap.size2();
+    BlocksMat Mmap = m.getAllBlocks();
     if (STDMAP == 1)
     {
-      mapped::array_type::iterator it;
+      //    BlocksMat::array_type::iterator it;
+      //      unsigned int col = Mmap.size2();
 
-      for (it = (Mmap.data()).begin(); it != (Mmap.data()).end(); ++it)
-      {
-        i = (it->first) / col;
-        j = (it->first) - i * col;
-        *(map(i, j)) = *(it->second);
-      }
+      //    for(it=(Mmap.data ()).begin (); it!=(Mmap.data ()).end (); ++it)
+      //      {
+      //        i = (it->first)/col;
+      //        j = (it->first) - i * col;
+      //        *(map(i, j)) = *(it->second);
+      //      }
     }
     else
     {
-      mapped::iterator1 it;
-      mapped::iterator2 it2;
+      BlocksMat::iterator1 it;
+      BlocksMat::iterator2 it2;
       for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
       {
         for (it2 = it.begin(); it2 != it.end(); it2++)
@@ -741,18 +735,18 @@ MyBlockMatrix& MyBlockMatrix::operator *= (double d)
   //  unsigned int col = tabCol.size ();
   if (STDMAP == 1)
   {
-    mapped::array_type::iterator it;
+    //     BlocksMat::array_type::iterator it;
 
-    for (it = (map.data()).begin(); it != (map.data()).end(); ++it)
-      if ((it->second) != NULL)
-        *(it->second) *= d;
-      else
-        SiconosMatrixException::selfThrow("BlockMatrix operator *=, a block is a NULL pointer.");
+    //     for(it=(map.data ()).begin (); it!=(map.data ()).end (); ++it)
+    //       if( (it->second) != NULL)
+    //  *(it->second) *= d;
+    //       else
+    //  SiconosMatrixException::selfThrow("BlockMatrix operator *=, a block is a NULL pointer.");
   }
   else
   {
-    mapped::iterator1 it;
-    mapped::iterator2 it2;
+    BlocksMat::iterator1 it;
+    BlocksMat::iterator2 it2;
     unsigned int i = 0, j = 0;
     for (it = map.begin1(); it != map.end1(); ++it)
     {
@@ -774,20 +768,20 @@ MyBlockMatrix& MyBlockMatrix::operator *= (int d)
 {
   if (STDMAP == 1)
   {
-    mapped::array_type::iterator it;
+    //     BlocksMat::array_type::iterator it;
 
-    for (it = (map.data()).begin(); it != (map.data()).end(); ++it)
-    {
-      if ((it->second) != NULL)
-        *(it->second) *= d;
-      else
-        SiconosMatrixException::selfThrow("BlockMatrix operator *=, a block is a NULL pointer.");
-    }
+    //     for(it=(map.data ()).begin (); it!=(map.data ()).end (); ++it)
+    //       {
+    //  if( (it->second) != NULL)
+    //    *(it->second) *= d;
+    //  else
+    //    SiconosMatrixException::selfThrow("BlockMatrix operator *=, a block is a NULL pointer.");
+    //       }
   }
   else
   {
-    mapped::iterator1 it;
-    mapped::iterator2 it2;
+    BlocksMat::iterator1 it;
+    BlocksMat::iterator2 it2;
     unsigned int i = 0, j = 0;
     for (it = map.begin1(); it != map.end1(); ++it)
     {
@@ -809,20 +803,19 @@ MyBlockMatrix& MyBlockMatrix::operator /= (double d)
 {
   if (STDMAP == 1)
   {
-    mapped::array_type::iterator it;
+    //     BlocksMat::array_type::iterator it;
 
-    for (it = (map.data()).begin(); it != (map.data()).end(); ++it)
-    {
-      if ((it->second) != NULL)
-        *(it->second) /= d;
-      else
-        SiconosMatrixException::selfThrow("BlockMatrix operator /=, a block is a NULL pointer.");
-    }
+    //     for(it=(map.data ()).begin (); it!=(map.data ()).end (); ++it){
+    //       if( (it->second) != NULL)
+    //  *(it->second) /= d;
+    //       else
+    //  SiconosMatrixException::selfThrow("BlockMatrix operator /=, a block is a NULL pointer.");
+    //     }
   }
   else
   {
-    mapped::iterator1 it;
-    mapped::iterator2 it2;
+    BlocksMat::iterator1 it;
+    BlocksMat::iterator2 it2;
     unsigned int i = 0, j = 0;
     for (it = map.begin1(); it != map.end1(); ++it)
     {
@@ -844,20 +837,19 @@ MyBlockMatrix& MyBlockMatrix::operator /= (int d)
 {
   if (STDMAP == 1)
   {
-    mapped::array_type::iterator it;
+    //     BlocksMat::array_type::iterator it;
 
-    for (it = (map.data()).begin(); it != (map.data()).end(); ++it)
-    {
-      if ((it->second) != NULL)
-        *(it->second) /= d;
-      else
-        SiconosMatrixException::selfThrow("BlockMatrix operator /=, a block is a NULL pointer.");
-    }
+    //     for(it=(map.data ()).begin (); it!=(map.data ()).end (); ++it){
+    //       if( (it->second) != NULL)
+    //  *(it->second) /= d;
+    //       else
+    //  SiconosMatrixException::selfThrow("BlockMatrix operator /=, a block is a NULL pointer.");
+    //     }
   }
   else
   {
-    mapped::iterator1 it;
-    mapped::iterator2 it2;
+    BlocksMat::iterator1 it;
+    BlocksMat::iterator2 it2;
     unsigned int i = 0, j = 0;
     for (it = map.begin1(); it != map.end1(); ++it)
     {
@@ -884,26 +876,25 @@ MyBlockMatrix& MyBlockMatrix::operator += (const MySiconosMatrix &m)
 
   if (m.isBlock())
   {
-    mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
-    unsigned int col = tabCol.size();
+    BlocksMat Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
 
     if (STDMAP == 1)
     {
-      mapped::array_type::iterator it;
-      unsigned int i = 0, j = 0;
+      //    unsigned int col = tabCol.size ();
+      //       BlocksMat::array_type::iterator it;
+      //       unsigned int i=0, j=0;
 
 
-      for (it = (Mmap.data()).begin(); it != (Mmap.data()).end(); ++it)
-      {
-        i = (it->first) / col;
-        j = (it->first) - i * col;
-        *map(i, j) +=  *(it->second);
-      }
+      //       for(it=(Mmap.data ()).begin (); it!=(Mmap.data ()).end (); ++it){
+      //  i = (it->first)/col;
+      //  j = (it->first) - i * col;
+      //  *map(i, j) +=  *(it->second);
+      //       }
     }
     else
     {
-      mapped::iterator1 it;
-      mapped::iterator2 it2;
+      BlocksMat::iterator1 it;
+      BlocksMat::iterator2 it2;
       unsigned int i = 0, j = 0;
       for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
       {
@@ -941,25 +932,24 @@ MyBlockMatrix& MyBlockMatrix::operator -= (const MySiconosMatrix &m)
 
   if (m.isBlock() == true)
   {
-    mapped Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
-    unsigned int col = tabCol.size();
+    BlocksMat Mmap = (dynamic_cast<const MyBlockMatrix&>(m)).map;
 
     if (STDMAP == 1)
     {
-      mapped::array_type::iterator it;
-      unsigned int i = 0, j = 0;
+      //    unsigned int col = tabCol.size ();
+      //       BlocksMat::array_type::iterator it;
+      //       unsigned int i=0, j=0;
 
-      for (it = (Mmap.data()).begin(); it != (Mmap.data()).end(); ++it)
-      {
-        i = (it->first) / col;
-        j = (it->first) - i * col;
-        *map(i, j) -=  *(it->second);
-      }
+      //       for(it=(Mmap.data ()).begin (); it!=(Mmap.data ()).end (); ++it){
+      //  i = (it->first)/col;
+      //  j = (it->first) - i * col;
+      //    *map(i, j) -=  *(it->second);
+      //       }
     }
     else
     {
-      mapped::iterator1 it;
-      mapped::iterator2 it2;
+      BlocksMat::iterator1 it;
+      BlocksMat::iterator2 it2;
       unsigned int i = 0, j = 0;
       for (it = Mmap.begin1(); it != Mmap.end1(); ++it)
       {
