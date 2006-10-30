@@ -1,9 +1,9 @@
 #include "MySimpleMatrix.h"
 #include "ioMatrix.h"
-#include <boost/numeric/bindings/atlas/clapack.hpp>
-#include <boost/numeric/bindings/traits/std_vector.hpp>
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
-#include <boost/numeric/bindings/traits/ublas_vector2.hpp> // vector considered as matrix => necessary for bindings atlas-lapack
+// #include <boost/numeric/bindings/atlas/clapack.hpp>
+// #include <boost/numeric/bindings/traits/std_vector.hpp>
+// #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+// #include <boost/numeric/bindings/traits/ublas_vector2.hpp> // vector considered as matrix => necessary for bindings atlas-lapack
 
 void MySimpleMatrix::checkNum()
 {
@@ -2509,59 +2509,59 @@ MySimpleVector prod(const MySiconosMatrix& m, const MySiconosVector& v)
 
 void MySimpleMatrix::PLUFactorizationInPlace()
 {
-  if (num != 1)
-    SiconosMatrixException::selfThrow(" MySimpleMatrix::PLUFactorizationInPlace : only implemented for dense matrices.");
+  //   if(num!=1)
+  //     SiconosMatrixException::selfThrow(" MySimpleMatrix::PLUFactorizationInPlace : only implemented for dense matrices.");
 
-  ipiv.resize(size1());
-  int info = boost::numeric::bindings::atlas::getrf(*mat.Dense, ipiv);
-  if (info != 0)
-    std::cout << "MySimpleMatrix::PLUFactorizationInPlace warning: the matrix is singular." << std::endl;
-  isPLUFactorized = true;
+  //   ipiv.resize(size1());
+  //   int info = boost::numeric::bindings::atlas::getrf(*mat.Dense, ipiv);
+  //   if (info != 0)
+  //     std::cout<<"MySimpleMatrix::PLUFactorizationInPlace warning: the matrix is singular." << std::endl;
+  //   isPLUFactorized = true;
 }
 
 void MySimpleMatrix::PLUInverseInPlace()
 {
-  if (!isPLUFactorized)
-    PLUFactorizationInPlace();
+  //   if(!isPLUFactorized)
+  //     PLUFactorizationInPlace();
 
-  int info = boost::numeric::bindings::atlas::getri(*mat.Dense, ipiv);   // solve from factorization
-  if (info != 0)
-    SiconosMatrixException::selfThrow("MySimpleMatrix::PLUInverseInPlace failed, the matrix is singular.");
+  //   int info = boost::numeric::bindings::atlas::getri (*mat.Dense, ipiv);  // solve from factorization
+  //   if (info != 0)
+  //     SiconosMatrixException::selfThrow("MySimpleMatrix::PLUInverseInPlace failed, the matrix is singular.");
 
-  isPLUInversed = true;
+  //   isPLUInversed = true;
 }
 
 void MySimpleMatrix::PLUForwardBackwardInPlace(MySiconosMatrix &B)
 {
-  int info;
-  if (!isPLUFactorized) // call gesv => LU-factorize+solve
-  {
-    // solve system:
-    info = boost::numeric::bindings::atlas::gesv(*mat.Dense, *(B.getDensePtr()));
-    // B now contains solution:
-  }
-  else // call getrs: only solve using previous lu-factorization
-    info = boost::numeric::bindings::atlas::getrs(*mat.Dense, ipiv, *(B.getDensePtr()));
+  //   int info;
+  //   if(!isPLUFactorized) // call gesv => LU-factorize+solve
+  //     {
+  //       // solve system:
+  //       info = boost::numeric::bindings::atlas::gesv(*mat.Dense, *(B.getDensePtr()));
+  //       // B now contains solution:
+  //     }
+  //   else // call getrs: only solve using previous lu-factorization
+  //     info = boost::numeric::bindings::atlas::getrs (*mat.Dense, ipiv,*(B.getDensePtr()));
 
-  if (info != 0)
-    SiconosMatrixException::selfThrow("MySimpleMatrix::PLUForwardBackwardInPlace failed.");
+  //   if (info != 0)
+  //     SiconosMatrixException::selfThrow("MySimpleMatrix::PLUForwardBackwardInPlace failed.");
 }
 
 void MySimpleMatrix::PLUForwardBackwardInPlace(MySiconosVector &B)
 {
-  DenseMat tmpB(B.size(), 1);
-  column(tmpB, 0) = *(B.getDensePtr()); // Conversion of vector to matrix. Temporary solution.
-  int info;
-  if (!isPLUFactorized) // call gesv => LU-factorize+solve
-  {
-    // solve system:
-    info = boost::numeric::bindings::atlas::gesv(*mat.Dense, tmpB);
-    // B now contains solution:
-  }
-  else // call getrs: only solve using previous lu-factorization
-    info = boost::numeric::bindings::atlas::getrs(*mat.Dense, ipiv, tmpB);
+  //   DenseMat tmpB(B.size(),1);
+  //   column(tmpB,0) = *(B.getDensePtr()); // Conversion of vector to matrix. Temporary solution.
+  //   int info;
+  //   if(!isPLUFactorized) // call gesv => LU-factorize+solve
+  //     {
+  //       // solve system:
+  //       info = boost::numeric::bindings::atlas::gesv (*mat.Dense, tmpB);
+  //       // B now contains solution:
+  //     }
+  //   else // call getrs: only solve using previous lu-factorization
+  //     info = boost::numeric::bindings::atlas::getrs (*mat.Dense, ipiv,tmpB);
 
-  if (info != 0)
-    SiconosMatrixException::selfThrow("MySimpleMatrix::PLUForwardBackwardInPlace failed.");
-  *(B.getDensePtr()) = column(tmpB, 0);
+  //   if (info != 0)
+  //     SiconosMatrixException::selfThrow("MySimpleMatrix::PLUForwardBackwardInPlace failed.");
+  //   *(B.getDensePtr()) = column(tmpB,0);
 }
