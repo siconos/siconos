@@ -123,8 +123,7 @@ void DSInputOutput::saveDSInputOutputToXML()
   else RuntimeException::selfThrow("DSInputOutput::saveDSInputOutputToXML - object DSInputOutputXML does not exist");
 }
 
-void DSInputOutput::createDSInputOutput(DSInputOutputXML * dsioXML, int number,
-                                        string computeInput, string computeOutput)
+void DSInputOutput::createDSInputOutput(DSInputOutputXML * dsioXML, int number, string computeInput, string computeOutput)
 {
   if (dsioXML != NULL)
   {

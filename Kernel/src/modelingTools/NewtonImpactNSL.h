@@ -16,15 +16,17 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
+/*! \file NewtonImpactNSL.h
+
+*/
 #ifndef NEWTONIMPACTNSL_H
 #define NEWTONIMPACTNSL_H
 
 #include "NonSmoothLaw.h"
 #include "NewtonImpactNSLXML.h"
 
-/** \class NewtonImpactNSL
- *  \brief Specific NonSmoothLaw for the Newton impact model
- *  \author SICONOS Development Team - copyright INRIA
+//! Newton impact Non Smooth Law
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) June 29, 2004
  *
@@ -50,64 +52,55 @@ private:
 
 public:
 
-  /** \fn NewtonImpactNSL()
-   *  \brief default constructor
-   */
+  /** default constructor
+  */
   NewtonImpactNSL();
 
-  /** \fn NewtonImpactNSL(NonSmoothLawXML*)
-   *  \brief constructor with XML object of the NewtonImpactNSL
-   *  \param NonSmoothLawXML* : the XML object corresponding
-   */
+  /** constructor with XML object of the NewtonImpactNSL
+  *  \param NonSmoothLawXML* : the XML object corresponding
+  */
   NewtonImpactNSL(NonSmoothLawXML*);
 
-  /** \fn NewtonImpactNSL(const double &e)
-   *  \brief constructor with the value of the NewtonImpactNSL attributes
-   *  \param a double value e
-   */
+  /** constructor with the value of the NewtonImpactNSL attributes
+  *  \param a double value e
+  */
   NewtonImpactNSL(const double&);
 
   ~NewtonImpactNSL();
 
-  /** \fn bool isVerified(void);
-   *  \brief check the ns law to see if it is verified
-   *  \return a boolean value whioch determines if the NS Law is verified
-   */
+  /** check the ns law to see if it is verified
+  *  \return a boolean value whioch determines if the NS Law is verified
+  */
   bool isVerified() const;
 
-  /** \fn const double getE(void) const
-   *  \brief getter of e
-   *  \return the value of e
-   */
+  /** getter of e
+  *  \return the value of e
+  */
   inline const double getE() const
   {
     return e;
   };
 
-  /** \fn void setE(double)
-   *  \brief setter of e
-   *  \param a double to set e
-   */
+  /** setter of e
+  *  \param a double to set e
+  */
   inline void setE(const double& newVal)
   {
     e = newVal;
   };
 
-  /** \fn void saveNonSmoothLawToXML()
-   *  \brief copy the data of the NonSmoothLaw in the XML tree
-   */
+  /** copy the data of the NonSmoothLaw in the XML tree
+  */
   void saveNonSmoothLawToXML();
 
-  /** \fn void display()
-   *  \brief print the data to the screen
-   */
+  /** print the data to the screen
+  */
   void display() const;
 
-  /** \fn NewtonImpactNSL* convert (NonSmoothLaw* nsl)
-   *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param NonSmoothLaw* : the law which must be converted
-   * \return a pointer on the law if it is of the right type, NULL otherwise
-   */
+  /** encapsulates an operation of dynamic casting. Needed by Python interface.
+  *  \param NonSmoothLaw* : the law which must be converted
+  * \return a pointer on the law if it is of the right type, NULL otherwise
+  */
   static NewtonImpactNSL* convert(NonSmoothLaw* nsl);
 };
 

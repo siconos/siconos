@@ -27,7 +27,7 @@ AC_CANONICAL_TARGET([])
 AC_CONFIG_SRCDIR([src/model/Model.h])
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([config.h])
-
+AC_CONFIG_MACRO_DIR([macros])
 # SO version of all siconos shared libraries
 SICONOS_SO_CURRENT=1
 SICONOS_SO_REVISION=2
@@ -150,20 +150,30 @@ dnl *** the env variable LDFLAGS to include the appropriate linker
 dnl *** flags.])
 dnl ])
 
-dnl # Numerics
+dnl Numerics
 AC_MSG_CHECKING([for Siconos/Numerics])
 ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-numerics.])])
+
+dnl Check for Blas and Lapack
+ACX_LAPACK([
+  dnl action-if-found: 
+  AC_DEFINE(HAVE_LAPACKPP,1,[Define if you have LAPACK library.])
+  # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS
+], [
+  dnl action-if-not-found: 
+  AC_MSG_ERROR([Blas/Lapack was not found. 
+*** This means Lapack and matrix support cannot be compiled. 
+*** This makes this library unusable. Please get blas and lapack 
+*** installed. If you do have these installed, use the options 
+*** --with-blas=<libname> or --with-lapack=<libname> and/or set 
+*** the env variable LDFLAGS to include the appropriate linker 
+*** flags.])
+])
 
 # Boost
 AC_MSG_CHECKING([for Boost])
 BOOST_VER="1.33.1"	# lib....so number
 AX_BOOST([$BOOST_VER],,[AC_MSG_ERROR([Cannot find Boost in a good version. Please install Boost, version >= $BOOST_VER available at http://www.boost.org/.])])
-
-# Lapack++
-LAPACKPP_VER="1.12.0"	# lib....so number
-LAPACKPP_REL_VER="2.4.7" # Release number
-AC_MSG_CHECKING([for Lapack++])
-ACX_LAPACKPP([], [AC_MSG_ERROR([Cannot find  Lapack++ in a good version. Please install Lapack++, version >= $LAPACKPP_VER.])])
 
 # Libxml2
 AC_MSG_CHECKING([for Libxml2])
@@ -201,6 +211,8 @@ fi
 if test "$enable_debug" = yes; then
    AC_MSG_RESULT(option --enable-debug selected : compiling with the -g option)
    CXXFLAGS="-g -fbounds-check $CXXFLAGS"
+else
+   CXXFLAGS="-DNDEBUG -O2 $CXXFLAGS"
 fi
 
 if test "$enable_optimisation" = yes; then
@@ -245,21 +257,16 @@ dnl #################################
 dnl ## LINK FLAGS
 dnl #################################
 
-dnl #SICONOS_EXT_INCLUDES
-SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $LAPACKPP_INCLUDES $XML_CPPFLAGS $BOOST_CPPFLAGS"
+SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $XML_CPPFLAGS $BOOST_CPPFLAGS"
 AC_SUBST(SICONOS_EXT_INCLUDES)
-AC_MSG_RESULT("SICONOS_EXT_INCLUDES = $SICONOS_EXT_INCLUDES")
+dnl AC_MSG_RESULT("SICONOS_EXT_INCLUDES = $SICONOS_EXT_INCLUDES")
 
-dnl #SICONOS_EXT_LDFLAGS
-SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $LAPACKPP_LDFLAGS $LAPACKPP_LIBS $LAPACK_LIBS $BLAS_LIBS $XML_LIBS -ldl"
+SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $LAPACK_LIBS $BLAS_LIBS $XML_LIBS -ldl"
 
-dnl SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS $FLIBS -L/usr/lib/atlas -llapack_atlas"
-SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS $FLIBS"
-
-
+SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS $FLIBS" dnl  -L/usr/lib/atlas -llapack_atlas"
 dnl SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS $FLIBS "
 AC_SUBST(SICONOS_EXT_LDFLAGS)
-AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
+dnl AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
 
 #################################
 ## DOXYGEN 
@@ -299,7 +306,8 @@ AC_CONFIG_FILES([Makefile
                  src/utils/SiconosSharedLibrary/Makefile
                  src/utils/contract/Makefile
 		 src/utils/SiconosTemplates/Makefile
-                 src/xml/Makefile
+                 src/utils/boost/Makefile
+		 src/xml/Makefile
                  src/xml/test/Makefile
 		 global_tests/Makefile])
 AC_OUTPUT
@@ -316,14 +324,15 @@ echo "
    F77 Compiler:                        ${F77}
    F77 compiler flags:                  ${FFLAGS}
    Preprocessor flags:                  ${CPPFLAGS}
-   Linking flags			${LDFLAGS}
-   Linking flags(2)			${LIBS}
+dnl   Linking flags			${LDFLAGS}
+dnl   Linking flags(2)			${LIBS}
    Siconos includes:                    ${SICONOS_EXT_INCLUDES}
    Siconos ld flags:                    ${SICONOS_EXT_LDFLAGS}"
 echo 
 echo Type \'make \' to build the SICONOS platform
 echo Type \'make doc\' to generate the documentation.
-echo Type \'make install\' to install the platfrom
+echo Type \'make install\' to install the platform
 echo Type \'make check\' to run the test \(requires cppunit\)
 echo 
 echo Alternatively, you can \'make all\' to use the default configuration.
+

@@ -17,9 +17,21 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/** \class LagrangianRXML
- *   \brief This class manages Lagrangian Relation data
- *  \author SICONOS Development Team - copyright INRIA
+/*! \file LagrangianRXML.h
+
+*/
+
+#ifndef __LAGRANGIANRelationXML__
+#define __LAGRANGIANRelationXML__
+
+#include "RelationXML.h"
+#include "SimpleMatrix.h"
+#include <vector>
+
+const std::string LAGRANGIANR_MATRIXPLUGIN = "matrixPlugin";
+
+//! XML management for LagrangianR
+/**  \author SICONOS Development Team - copyright INRIA
  *   \version 1.3.0.
  *   \date 08/12/2004
  *
@@ -27,15 +39,6 @@
  *
  * LagrangianRXML allows to manage data of a LNLRelation DOM tree.
  */
-
-#ifndef __LAGRANGIANRelationXML__
-#define __LAGRANGIANRelationXML__
-
-#include "RelationXML.h"
-#include <vector>
-
-const std::string LAGRANGIANR_MATRIXPLUGIN = "matrixPlugin";
-
 class LagrangianRXML : public RelationXML
 {
 
@@ -49,19 +52,17 @@ public:
 
   LagrangianRXML();
 
-  /** \fn LagrangianRXML(xmlNode * LNLRelationNode)
-   *   \brief Build a LagrangianRXML object from a DOM tree describing a Relation with LNL type
-   *   \param LagrangianRXML : the LagrangianR DOM tree
-   *   \exception XMLException : if a property of the LagrangianLinear Relation lacks in the DOM tree
-   */
+  /** Build a LagrangianRXML object from a DOM tree describing a Relation with LNL type
+  *   \param LagrangianRXML : the LagrangianR DOM tree
+  *   \exception XMLException : if a property of the LagrangianLinear Relation lacks in the DOM tree
+  */
   LagrangianRXML(xmlNode * LNLRelationNode);
 
   ~LagrangianRXML();
 
-  /** \fn std::string  getLagrangianType() const;
-   *   \brief Returns the type of constraints in the Lagrangian relation
-   *   \return a string
-   */
+  /** Returns the type of constraints in the Lagrangian relation
+  *   \return a string
+  */
   inline std::string getLagrangianType() const
   {
     if (SiconosDOMTreeTools::hasAttributeValue(rootRelationXMLNode, "type"))
@@ -71,29 +72,26 @@ public:
 
   // === h matrix/Plug-in ===
 
-  /** \fn bool hasH()
-   *  \brief checks if h is defined in the DOM tree
-   *  \return a bool
-   */
+  /** checks if h is defined in the DOM tree
+  *  \return a bool
+  */
   inline bool hasH()
   {
     return (hNode != NULL);
   } const
 
-  /** \fn inline string getHPlugin()
-   *   \brief Return h plug-in name, if it exists
-   *   \return a string
-   *  \exception XMLException
-   */
+  /** Return h plug-in name, if it exists
+  *   \return a string
+  *  \exception XMLException
+  */
   inline std::string getHPlugin() const
   {
     return  SiconosDOMTreeTools::getStringAttributeValue(hNode, PLUGIN_ATTRIBUTE);
   }
 
-  /** \fn void setHPlugin(const string& plugin)
-   *   \brief to save the h plug-in name
-   *   \param a string
-   */
+  /** to save the h plug-in name
+  *   \param a string
+  */
   inline void setHPlugin(const std::string& plugin)
   {
     if (hNode == NULL)
@@ -107,42 +105,36 @@ public:
 
   // === G matrix/Plug-in ===
 
-  /** \fn bool isGPlugin(const unsigned int & = 0)
-   *   \brief Return true if G is computed with a plug-in
-   *   \return a bool
-   */
+  /** Return true if G is computed with a plug-in
+  *   \return a bool
+  */
   bool isGPlugin(const unsigned int & = 0) const;
 
-  /** \fn bool hasG(const unsigned int & = 0)
-   *  \brief checks if G is defined in the DOM tree
-   *  \return a bool
-   */
+  /** checks if G is defined in the DOM tree
+  *  \return a bool
+  */
   bool hasG(const unsigned int & = 0) const;
 
-  /** \fn inline string getGPlugin(const unsigned int & = 0)
-   *   \brief Return G plug-in name, if it exists
-   *   \return a string
-   *  \exception XMLException
-   */
+  /** Return G plug-in name, if it exists
+  *   \return a string
+  *  \exception XMLException
+  */
   std::string getGPlugin(const unsigned int & = 0) const ;
 
-  /** \fn SimpleMatrix getGMatrix(const unsigned int & = 0)
-   *   \brief Return the G matrix of the LagrangianRXML
-   *   \return a SimpleMatrix
-   *  \exception XMLException
-   */
+  /** Return the G matrix of the LagrangianRXML
+  *   \return a SimpleMatrix
+  *  \exception XMLException
+  */
   SimpleMatrix getGMatrix(const unsigned int & = 0) const;
 
-  /** \fn void setGPlugin(const string& plugin,const unsigned int & = 0)
-   *   \brief to save the G plug-in name
-   *   \param a string
-   */
+  /** to save the G plug-in name
+  *   \param a string
+  */
   void setGPlugin(const std::string& plugin, const unsigned int & = 0);
 
-  /** \fn void setGMatrix(SiconosMatrix *newMat,const unsigned int & = 0)
-   *   \brief to save the G matrix of the LagrangianRXML
-   *   \return a pointer to SiconosMatrix
-   */
+  /** to save the G matrix of the LagrangianRXML
+  *   \return a pointer to SiconosMatrix
+  */
   void setGMatrix(SiconosMatrix *newMat, const unsigned int & = 0);
 
 };

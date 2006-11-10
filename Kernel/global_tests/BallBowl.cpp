@@ -81,7 +81,6 @@ bool BallBowl()
     double tol = 1e-7;
     double norm = (dataPlot - (*dataRef)).normInf() ;
     cout << endl << endl;
-    dataPlot.rawWrite("result.dat", "ascii");
     if (norm < tol)
     {
       cout << " ******** BallBowl global test ended with success ********" << endl;

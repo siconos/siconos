@@ -16,6 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+/*! \file LinearTIDS.h
+
+*/
 #ifndef LINEARTIDS_H
 #define LINEARTIDS_H
 
@@ -24,9 +27,8 @@
 
 class LinearDSXML;
 
-/** \class LinearTIDS
- *  \brief First order linear systems - Inherits from DynamicalSystems
- *  \author SICONOS Development Team - copyright INRIA
+//! First order linear systems - Inherits from DynamicalSystems
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 29, 2004
  *
@@ -72,103 +74,82 @@ class LinearDSXML;
  * only call computeRhs(time), to compute rhs = Ax+b+Tu.
  *
  **/
-
 class LinearTIDS : public LinearDS
 {
 private:
 
-  /** \fn LinearTIDS()
-   *  \brief default constructor
-   */
+  /** default constructor
+  */
   LinearTIDS();
 
 public:
 
   /** === CONSTRUCTORS/DESTRUCTOR === */
 
-  /** \fn LinearTIDS(DynamicalSystemXML * nsdsXML)
-   *  \brief xml constructor
-   *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
-   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
-   *  \exception RuntimeException
-   */
+  /** xml constructor
+  *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
+  *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
+  *  \exception RuntimeException
+  */
   LinearTIDS(DynamicalSystemXML *, NonSmoothDynamicalSystem* = NULL);
 
-  /** \fn LinearTIDS(const int ref, const SiconosVector& x0, const SiconosMatrix& A);
-   *  \brief constructor from a set of data
-   *  \param int : reference number of this DynamicalSystem
-   *  \param SiconosVector : the initial state of this DynamicalSystem
-   *  \param SiconosMatrix: A
-   *  \exception RuntimeException
-   */
+  /** constructor from a set of data
+  *  \param int : reference number of this DynamicalSystem
+  *  \param SiconosVector : the initial state of this DynamicalSystem
+  *  \param SiconosMatrix: A
+  *  \exception RuntimeException
+  */
   LinearTIDS(const int, const SiconosVector&, const SiconosMatrix&);
 
-  /** \fn LinearTIDS(const int ref, const SiconosVector& x0, const SiconosMatrix& A, const SiconosVector& b);
-   *  \brief constructor from a set of data
-   *  \param int : reference number of this DynamicalSystem
-   *  \param SiconosVector : the initial state of this DynamicalSystem
-   *  \param SiconosMatrix: A
-   *  \param SiconosVector: b
-   *  \exception RuntimeException
-   */
+  /** constructor from a set of data
+  *  \param int : reference number of this DynamicalSystem
+  *  \param SiconosVector : the initial state of this DynamicalSystem
+  *  \param SiconosMatrix: A
+  *  \param SiconosVector: b
+  *  \exception RuntimeException
+  */
   LinearTIDS(const int, const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
 
-  /** \fn LinearTIDS(const LinearTIDS &)
-   *  \brief copy constructor
-   *  \param a Dynamical system to copy
-   */
+  /** copy constructor
+  *  \param a Dynamical system to copy
+  */
   LinearTIDS(const LinearTIDS &);
 
-  /** \fn LinearTIDS(const DynamicalSystem &)
-   *  \brief copy constructor
-   *  \param a Dynamical system to copy
-   */
+  /** copy constructor
+  *  \param a Dynamical system to copy
+  */
   LinearTIDS(const DynamicalSystem &);
 
-  /** \fn ~LinearTIDS()
-   *  \brief destructor */
+  /** destructor */
   ~LinearTIDS();
 
-  /** \fn bool checkDynamicalSystem()
-   *  \brief check that the system is complete (ie all required data are well set)
-   * \return a bool
-   */
+  /** check that the system is complete (ie all required data are well set)
+  * \return a bool
+  */
   bool checkDynamicalSystem();
 
-  /** \fn void initialize(const std::string, const double = 0, const unsigned int = 1) ;
-   *  \brief dynamical system initialization function: mainly set memory and compute value for initial state values.
-   *  \param string: simulation type
-   *  \param time of initialisation, default value = 0
-   *  \param the size of the memory, default size = 1.
-   */
-  //  void initialize(const std::string, const double = 0, const unsigned int = 1) ;
-
-  /** \fn void computeRhs(const double time, const bool  =false)
-   *  \brief Default function to the right-hand side term
+  /** Default function to the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    *  \exception RuntimeException
    */
   void computeRhs(const double, const bool  = false);
 
-  /** \fn static void computeJacobianXRhs(const double time, const bool  =false)
-   *  \brief Default function to jacobian of the right-hand side term according to x
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
-   *  \exception RuntimeException
-   */
+  /** Default function to jacobian of the right-hand side term according to x
+  *  \param double time : current time
+  *  \param bool isDSup : flag to avoid recomputation of operators
+  *  \exception RuntimeException
+  */
   void computeJacobianXRhs(const double, const bool  = false);
 
-  /** \fn void display()
-   *  \brief data display on screen
-   */
+  /** data display on screen
+  */
   void display() const;
 
-  /** \fn LinearTIDS* convert (DynamicalSystem* ds)
-   *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param DynamicalSystem* : the system which must be converted
-   * \return a pointer on the dynamical system if it is of the right type, NULL otherwise
-   */
+  /** encapsulates an operation of dynamic casting. Needed by Python interface.
+  *  \param DynamicalSystem* : the system which must be converted
+  * \return a pointer on the dynamical system if it is of the right type, NULL otherwise
+  */
   static LinearTIDS* convert(DynamicalSystem* ds);
 
 };

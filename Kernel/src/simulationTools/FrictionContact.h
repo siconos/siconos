@@ -16,16 +16,17 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+/*! \file
+  Fricton-Contact Non-Smooth Problem
+*/
 #ifndef FrictionContact_H
 #define FrictionContact_H
 
 #include "OneStepNSProblem.h"
 #include "FrictionContactXML.h"
 
-/** \class FrictionContact
- *  \brief This class is devoted to the formalization and the resolution of the
- * Linear Complementarity Problem (FrictionContact)
- *  \author SICONOS Development Team - copyright INRIA
+//! Formalization and Resolution of a Friction-Contact Problem
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Dec 15, 2005
  *
@@ -72,245 +73,212 @@ protected:
 
 public:
 
-  /** \fn FrictionContact(const string pbType)
-   *  \brief default constructor
-   */
+  /** default constructor
+  */
   FrictionContact(const std::string pbType = "FrictionContact2D");
 
-  /** \fn FrictionContact(const std::string pbType, OneStepNSProblemXML*, Simulation*)
-   *  \brief xml constructor
-   *  \param string: problem type
-   *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Simulation *: the simulation that owns the problem
-   */
+  /** xml constructor
+  *  \param string: problem type
+  *  \param OneStepNSProblemXML* : the XML linked-object
+  *  \param Simulation *: the simulation that owns the problem
+  */
   FrictionContact(const std::string, OneStepNSProblemXML*, Simulation*);
 
-  /** \fn FrictionContact(const std::string pbType, Simulation *, const std::string);
-   *  \brief constructor from data
-   *  \param string: problem type
-   *  \param Simulation *: the simulation that owns this problem
-   *  \param string: id
-   */
+  /** constructor from data
+  *  \param string: problem type
+  *  \param Simulation *: the simulation that owns this problem
+  *  \param string: id
+  */
   FrictionContact(const std::string pbType, Simulation *, const std::string);
 
-  /** \fn FrictionContact(const std::string pbType, Solver*, Simulation *, const std::string);
-   *  \brief constructor from data
-   *  \param string: problem type
-   *  \param Solver* : pointer to object that contains solver algorithm and formulation
-   *  \param Simulation *: the simulation that owns this problem
-   *  \param string: id
-   */
+  /** constructor from data
+  *  \param string: problem type
+  *  \param Solver* : pointer to object that contains solver algorithm and formulation
+  *  \param Simulation *: the simulation that owns this problem
+  *  \param string: id
+  */
   FrictionContact(const std::string pbType, Solver*, Simulation *, const std::string);
 
-  /** \fn ~FrictionContact()
-   * \brief destructor
-   */
+  /** destructor
+  */
   virtual ~FrictionContact();
 
   // GETTERS/SETTERS
 
   // --- W ---
-  /** \fn  const SimpleVector getW(void) const
-   *  \brief get the value of w, the initial state of the DynamicalSystem
-   *  \return SimpleVector
-   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
-   */
+  /** get the value of w, the initial state of the DynamicalSystem
+  *  \return SimpleVector
+  *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+  */
   inline const SimpleVector getW() const
   {
     return *w;
   }
 
-  /** \fn SimpleVector* getWPtr(void) const
-   *  \brief get w, the initial state of the DynamicalSystem
-   *  \return pointer on a SimpleVector
-   */
+  /** get w, the initial state of the DynamicalSystem
+  *  \return pointer on a SimpleVector
+  */
   inline SimpleVector* getWPtr() const
   {
     return w;
   }
 
-  /** \fn void setW(const SimpleVector& newValue)
-   *  \brief set the value of w to newValue
-   *  \param SimpleVector newValue
-   */
+  /** set the value of w to newValue
+  *  \param SimpleVector newValue
+  */
   void setW(const SimpleVector&);
 
-  /** \fn void setWPtr(SimpleVector* newPtr)
-   *  \brief set w to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
+  /** set w to pointer newPtr
+  *  \param SimpleVector * newPtr
+  */
   void setWPtr(SimpleVector*);
 
   // --- Z ---
-  /** \fn  const SimpleVector getZ(void) const
-   *  \brief get the value of z, the initial state of the DynamicalSystem
-   *  \return SimpleVector
-   *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
-   */
+  /** get the value of z, the initial state of the DynamicalSystem
+  *  \return SimpleVector
+  *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
+  */
   inline const SimpleVector getZ() const
   {
     return *z;
   }
 
-  /** \fn SimpleVector* getZPtr(void) const
-   *  \brief get z, the initial state of the DynamicalSystem
-   *  \return pointer on a SimpleVector
-   */
+  /** get z, the initial state of the DynamicalSystem
+  *  \return pointer on a SimpleVector
+  */
   inline SimpleVector* getZPtr() const
   {
     return z;
   }
 
-  /** \fn void setZ(const SimpleVector& newValue)
-   *  \brief set the value of z to newValue
-   *  \param SimpleVector newValue
-   */
+  /** set the value of z to newValue
+  *  \param SimpleVector newValue
+  */
   void setZ(const SimpleVector&);
 
-  /** \fn void setZPtr(SimpleVector* newPtr)
-   *  \brief set z to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
+  /** set z to pointer newPtr
+  *  \param SimpleVector * newPtr
+  */
   void setZPtr(SimpleVector*) ;
 
   // --- M ---
 
-  /** \fn  const SimpleMatrix getM(void) const
-   *  \brief get the value of M
-   *  \return SimpleMatrix
-   */
+  /** get the value of M
+  *  \return SimpleMatrix
+  */
   inline const SimpleMatrix getM() const
   {
     return *M;
   }
 
-  /** \fn SiconosMatrix* getMPtr(void) const
-   *  \brief get M
-   *  \return pointer on a SiconosMatrix
-   */
+  /** get M
+  *  \return pointer on a SiconosMatrix
+  */
   inline SiconosMatrix* getMPtr() const
   {
     return M;
   }
 
-  /** \fn void setM (const SiconosMatrix& newValue)
-   *  \brief set the value of M to newValue
-   *  \param SiconosMatrix newValue
-   */
+  /** set the value of M to newValue
+  *  \param SiconosMatrix newValue
+  */
   void setM(const SiconosMatrix&);
 
-  /** \fn void setMPtr(SiconosMatrix* newPtr)
-   *  \brief set M to pointer newPtr
-   *  \param SiconosMatrix * newPtr
-   */
+  /** set M to pointer newPtr
+  *  \param SiconosMatrix * newPtr
+  */
   void setMPtr(SiconosMatrix *);
 
   // --- Q ---
-  /** \fn  const SimpleVector getQ(void) const
-   *  \brief get the value of q, the initial state of the DynamicalSystem
-   *  \return SimpleVector
-   *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
-   */
+  /** get the value of q, the initial state of the DynamicalSystem
+  *  \return SimpleVector
+  *  \warning: SimpleVector is an abstract class => can not be an lvalue => return SimpleVector
+  */
   inline const SimpleVector getQ() const
   {
     return *q;
   }
 
-  /** \fn SimpleVector* getQPtr(void) const
-   *  \brief get q, the initial state of the DynamicalSystem
-   *  \return pointer on a SimpleVector
-   */
+  /** get q, the initial state of the DynamicalSystem
+  *  \return pointer on a SimpleVector
+  */
   inline SimpleVector* getQPtr() const
   {
     return q;
   }
 
-  /** \fn void setQ(const SimpleVector& newValue)
-   *  \brief set the value of q to newValue
-   *  \param SimpleVector newValue
-   */
+  /** set the value of q to newValue
+  *  \param SimpleVector newValue
+  */
   void setQ(const SimpleVector&);
 
-  /** \fn void setQPtr(SimpleVector* newPtr)
-   *  \brief set q to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
+  /** set q to pointer newPtr
+  *  \param SimpleVector * newPtr
+  */
   void setQPtr(SimpleVector*);
 
   // --- Others functions ---
 
-  /** \fn void initialize()
-   *  \brief initialize the FrictionContact problem(compute topology ...)
-   */
+  /** initialize the FrictionContact problem(compute topology ...)
+  */
   void initialize();
 
-  /** \fn void computeExtraDiagonalBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
-   *  \brief computes extra diagonal block-matrix that corresponds to UR1 and UR2
-   *  Move this to Unitary Relation class?
-   *  \param a pointer to UnitaryRelation
-   *  \param a pointer to UnitaryRelation
-   */
+  /** computes extra diagonal block-matrix that corresponds to UR1 and UR2
+  *  Move this to Unitary Relation class?
+  *  \param a pointer to UnitaryRelation
+  *  \param a pointer to UnitaryRelation
+  */
   void computeBlock(UnitaryRelation*, UnitaryRelation*);
 
-  /** \fn void assembleM()
-   *  \brief built matrix M using already computed blocks
-   */
+  /** built matrix M using already computed blocks
+  */
   void assembleM();
 
-  /** \fn void computeQ (void)
-   *  \brief compute vector q
-   *  \param double : current time
-   */
+  /** compute vector q
+  *  \param double : current time
+  */
   void computeQ(const double time);
 
-  /** \fn void preCompute(const double time)
-   *  \brief pre-treatment for LCP
-   *  \param double : current time
-   *  \return void
-   */
+  /** pre-treatment for LCP
+  *  \param double : current time
+  *  \return void
+  */
   void preCompute(const double time);
 
-  /** \fn void compute(const double time)
-   *  \brief Compute the unknown z and w and update the Interaction (y and lambda )
-   *  \param double : current time
-   *  \return void
-   */
+  /** Compute the unknown z and w and update the Interaction (y and lambda )
+  *  \param double : current time
+  *  \return void
+  */
   virtual void compute(const double time) = 0;
 
-  /** \fn void postCompute(SiconosVector*, SiconosVector*)
-   *  \brief post-treatment for LCP
-   *  \param 2 pointers to SiconosVector: output of LCP solver
-   */
+  /** post-treatment for LCP
+  *  \param 2 pointers to SiconosVector: output of LCP solver
+  */
   void postCompute(SiconosVector*, SiconosVector*) ;
 
-  /** \fn void saveRelationToXML()
-   *  \brief copy the data of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
-   */
+  /** copy the data of the OneStepNSProblem to the XML tree
+  *  \exception RuntimeException
+  */
   void saveNSProblemToXML();
 
-  /** \fn void saveMToXML()
-   *  \brief copy the matrix M of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
-   */
+  /** copy the matrix M of the OneStepNSProblem to the XML tree
+  *  \exception RuntimeException
+  */
   void saveMToXML();
 
-  /** \fn void saveQToXML()
-   *  \brief copy the vector q of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
-   */
+  /** copy the vector q of the OneStepNSProblem to the XML tree
+  *  \exception RuntimeException
+  */
   void saveQToXML();
 
-  /** \fn void display()
-   *  \brief print the data to the screen
-   */
+  /** print the data to the screen
+  */
   void display() const;
 
-  /** \fn FrictionContact* convert (OneStepNSProblem* ds)
-   *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param OneStepNSProblem* : the one step problem which must be converted
-   * \return a pointer on the problem if it is of the right type, NULL otherwise
-   */
+  /** encapsulates an operation of dynamic casting. Needed by Python interface.
+  *  \param OneStepNSProblem* : the one step problem which must be converted
+  * \return a pointer on the problem if it is of the right type, NULL otherwise
+  */
   static FrictionContact* convert(OneStepNSProblem* osnsp);
 };
 

@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "SiconosMemoryTest.h"
+#include "SimpleVector.h"
+#include "BlockVector.h"
 using namespace std;
 
 // test suite registration

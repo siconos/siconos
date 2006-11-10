@@ -15,57 +15,48 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-/** \class RuntimeException
-*   \brief This class represent a runtime exeption causing by the plateforme
-*  \author SICONOS Development Team - copyright INRIA
-*   \version 1.3.0.
-*   \date (Creation) 05/25/2004
-*
-*
-* RuntimeException can be throws for example when a pointer is used but not allocated
-* This exception can be catched by "catch(RuntimeException)" or "catch(SiconosException)"
-*
-*/
+ */
+/*! \file RuntimeException.h
+ */
 
 #ifndef __RuntimeException__
 #define __RuntimeException__
 
 #include "SiconosException.h"
 
+//! Runtime exceptions
+/**  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.3.0.
+ *   \date (Creation) 05/25/2004
+ *
+ *
+ * RuntimeException can be throws for example when a pointer is used but not allocated
+ * This exception can be catched by "catch(RuntimeException)" or "catch(SiconosException)"
+ *
+ */
 class RuntimeException: public SiconosException
 {
 public:
 
-  /**
-   * \fn RuntimeException()
-   * \brief constructor
+  /** constructor
    */
   RuntimeException();
 
-  /**
-   * \fn RuntimeException(const string& report)
-   * \brief constructor with a report
+  /** constructor with a report
    * \param string report : exception description
    */
   RuntimeException(const std::string& report);
 
-  /**
-   * \fn ~RuntimeException()
-   * \brief destructor
+  /** destructor
    */
   ~RuntimeException();
 
-  /**
-   * \fn static void selfThrow()
-   * \brief static function which throw a RuntimeException
+  /** static function which throw a RuntimeException
    * \exception RuntimeException
    */
   static void selfThrow() ;
 
-  /**
-   * \fn static void selfThrow(string report)
-   * \brief static function which throw a RuntimeException with a report
+  /** static function which throw a RuntimeException with a report
    * \param string report : exception description
    * \exception RuntimeException
    */

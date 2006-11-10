@@ -127,6 +127,7 @@ void DynamicalSystemTest::testBuildDynamicalSystem2()
   (*x01)(0) = 2;
   (*x01)(1) = 4;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2I : ", ds->getU() == time* *x01, true);
+
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2J : ", ds->getT() == *T0, true);
   delete x01;
   delete ds;

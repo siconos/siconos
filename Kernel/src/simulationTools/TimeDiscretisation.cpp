@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "TimeDiscretisation.h"
+#include "RuntimeException.h"
 using namespace std;
 
 // PRIVATE METHODS
@@ -158,7 +159,7 @@ TimeDiscretisation::TimeDiscretisation(TimeDiscretisationXML * tdXML, Simulation
 // --- Straightforward constructors ---
 
 // Provide tk and simulation (I)
-TimeDiscretisation::TimeDiscretisation(SimpleVector *newTk, Simulation* simu):
+TimeDiscretisation::TimeDiscretisation(SiconosVector *newTk, Simulation* simu):
   h(0), nSteps(0), tk(NULL), hMin(0), hMax(0), constant(1),
   timeDiscretisationXML(NULL), k(0), simulation(simu), isTkAllocatedIn(true), tdCase(0)
 {
@@ -235,7 +236,7 @@ void TimeDiscretisation::setNSteps(const unsigned int newNSteps)
   compute(tdCase);
 }
 
-void TimeDiscretisation::setTk(const SimpleVector& newValue)
+void TimeDiscretisation::setTk(const SiconosVector& newValue)
 {
   cout << " /!\\ TimeDiscretisation::setTk - Warning: you set a new tk vector, this will change nSteps and h values /!\\ " << endl;
 
@@ -253,7 +254,7 @@ void TimeDiscretisation::setTk(const SimpleVector& newValue)
   compute(tdCase);
 }
 
-void TimeDiscretisation::setTkPtr(SimpleVector *newPtr)
+void TimeDiscretisation::setTkPtr(SiconosVector *newPtr)
 {
   cout << " /!\\ TimeDiscretisation::setTk - Warning: you set a new tk vector, this will change nSteps and h values /!\\ " << endl;
 

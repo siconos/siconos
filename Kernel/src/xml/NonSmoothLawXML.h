@@ -16,17 +16,11 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/** \class NSLawXML
- *   \brief This class manages NSLaw data part
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.3.0.
- *   \date 05/13/2004
- *
- *
- *
- * NSLawXML allows to manage data of a NSLaw DOM tree.
- */
 
+/*! \file NonSmoothLawXML.h
+  \brief
+
+*/
 
 #ifndef __NSLawXML__
 #define __NSLawXML__
@@ -34,9 +28,20 @@
 #include "SiconosDOMTreeTools.h"
 //#include "NonSmoothLaw.h"
 
+
 class NonSmoothLaw;
 
 //const string NSLAW_TYPE = "type";
+
+//! XML management for NonSmoothLaw
+/**  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.3.0.
+ *   \date 05/13/2004
+ *
+ *
+ *
+ * NSLawXML allows to manage data of a NSLaw DOM tree.
+ */
 class NonSmoothLawXML
 {
 protected:
@@ -49,42 +54,36 @@ protected:
 
 public:
 
-  /** \fn NonSmoothLawXML()
-   *   \brief default constructor
-   */
+  /** default constructor
+  */
   NonSmoothLawXML();
 
-  /** \fn NonSmoothLawXML(xmlNodePtr);
-   *   \brief constructor from DOM tree data
-   */
+  /** constructor from DOM tree data
+  */
   NonSmoothLawXML(xmlNodePtr);
 
-  /** \fn ~NonSmoothLawXML()
-   *   \brief destructor
-   */
+  /** destructor
+  */
   virtual ~NonSmoothLawXML();
 
-  /** \fn const string getType() const
-   *   \brief get the type of non smooth law
-   *   \return a string
-   */
+  /** get the type of non smooth law
+  *   \return a string
+  */
   inline const std::string getType() const
   {
     std::string type((char*) rootNode->name);
     return type;
   }
 
-  /** \fn xmlNodePtr getNode()
-   *   \brief Return node named "NonSmoothLaw"
-   *   \return an xmlNodePtr
-   */
+  /** Return node named "NonSmoothLaw"
+  *   \return an xmlNodePtr
+  */
   inline xmlNodePtr getNode() const
   {
     return rootNode;
   }
 
-  /** \fn const bool hasSize() const
-  *  \brief return true if size node is present
+  /** return true if size node is present
   *  \return a bool
   */
   const bool hasSize() const
@@ -92,10 +91,9 @@ public:
     return (sizeNode != NULL);
   };
 
-  /** \fn const unsigned int getSize() const
-   *   \brief Return the size of the InteractionXML
-   *   \return an unsigned int
-   */
+  /** Return the size of the InteractionXML
+  *   \return an unsigned int
+  */
   inline const unsigned int getSize() const
   {
     if (!hasSize())
@@ -103,17 +101,15 @@ public:
     return SiconosDOMTreeTools::getContentValue<int>(sizeNode);
   }
 
-  /** \fn void setSize(const unsigned int& i)
-   *  \brief to save the size of the Interaction
-   *  \return an unsigned int
-   */
+  /** to save the size of the Interaction
+  *  \return an unsigned int
+  */
   void setSize(const unsigned int);
 
-  /** \fn void updateNonSmoothLawXML( xmlNodePtr node, NonSmoothLaw* nsl )
-   *   \brief makes the operations to create the NonSmoothLaw of the Interaction
-   *   \param xmlNodePtr : the root node of the NonSmoothLawXML
-   *   \param Relation* : the NonSmoothLaw of this NonSmoothLawXML
-   */
+  /** makes the operations to create the NonSmoothLaw of the Interaction
+  *   \param xmlNodePtr : the root node of the NonSmoothLawXML
+  *   \param Relation* : the NonSmoothLaw of this NonSmoothLawXML
+  */
   void updateNonSmoothLawXML(xmlNodePtr node, NonSmoothLaw* nsl);
 };
 

@@ -16,6 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+/*! \file UnitaryRelationsSet.h
+*/
+
 #ifndef UnitaryRelationsSET_H
 #define UnitaryRelationsSET_H
 
@@ -28,19 +31,6 @@
 
 class UnitaryRelation;
 
-/** \class UnitaryRelationsSet
- *  \brief set (stl) of pointers to Unitary Relation - Used in Index sets in Topology.
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.3.0.
- *  \date (Creation) June 8, 2006
- *
- * Unitary Relations pointers are sorted in according to their address
- * Only one occurence of a Unitary Relation can be present in the set.
- * Possible operations are insert, erase, get or check presence of an UR.
- *
- * Warning: any call to operator = or copy constructor results in a false copy: (if set1=set2, pointers to ds of set1 are equal to those of set2)
- *
- */
 
 // Structure used for sorting in Unitary Relation set. The address is used to compare two UR.
 struct compareUR
@@ -63,6 +53,18 @@ typedef URSet::const_iterator ConstUnitaryRelationIterator;
 /** return type value for insert function - bool = false if insertion failed. */
 typedef std::pair<URSet::iterator, bool> CheckInsertUnitaryRelation;
 
+//! Set (STL) of pointers to Unitary Relation - Used in Index sets in Topology.
+/**  \author SICONOS Development Team - copyright INRIA
+ *  \version 1.3.0.
+ *  \date (Creation) June 8, 2006
+ *
+ * Unitary Relations pointers are sorted in according to their address
+ * Only one occurence of a Unitary Relation can be present in the set.
+ * Possible operations are insert, erase, get or check presence of an UR.
+ *
+ * Warning: any call to operator = or copy constructor results in a false copy: (if set1=set2, pointers to ds of set1 are equal to those of set2)
+ *
+ */
 class UnitaryRelationsSet
 {
 protected:
@@ -77,117 +79,100 @@ protected:
 
 public:
 
-  /** \fn UnitaryRelationsSet()
-   *  \brief default constructor
-   */
+  /** default constructor
+  */
   UnitaryRelationsSet();
 
-  /** \fn UnitaryRelationsSet(const UnitaryRelationsSet&)
-   *  \brief copy constructor
-   *  \param a UnitaryRelationsSet to be copied
-   */
+  /** copy constructor
+  *  \param a UnitaryRelationsSet to be copied
+  */
   UnitaryRelationsSet(const UnitaryRelationsSet&);
 
-  /** \fn ~UnitaryRelationsSet()
-   *  \brief destructor
-   */
+  /** destructor
+  */
   ~UnitaryRelationsSet();
 
-  /** \fn   UnitaryRelationsSet& operator=( const UnitaryRelationsSet& );
-   *  \brief assignment
-   */
+  /** assignment
+  */
   UnitaryRelationsSet& operator=(const UnitaryRelationsSet&);
 
-  /** \fn const unsigned int size() const
-   *  \brief return the number of UnitaryRelations in the set
-   *  \return an unsigned int
-   */
+  /** return the number of UnitaryRelations in the set
+  *  \return an unsigned int
+  */
   inline const unsigned int size() const
   {
     return setOfUnitaryRelations.size();
   };
 
-  /** \fn const bool isEmpty() const
-   *  \brief return true if the set is empty, else false
-   *  \return a bool
-   */
+  /** return true if the set is empty, else false
+  *  \return a bool
+  */
   inline const bool isEmpty() const
   {
     return setOfUnitaryRelations.empty();
   };
 
-  /** \fn UnitaryRelationIterator begin() const
-   *  \brief return iterator on the first element of setOfUnitaryRelations
-   *  \return a UnitaryRelationIterator
-   */
+  /** return iterator on the first element of setOfUnitaryRelations
+  *  \return a UnitaryRelationIterator
+  */
   inline UnitaryRelationIterator begin() const
   {
     return setOfUnitaryRelations.begin();
   };
 
-  /** \fn UnitaryRelationIterator end() const
-   *  \brief return iterator on setOfUnitaryRelations.end()
-   *  \return a UnitaryRelationIterator
-   */
+  /** return iterator on setOfUnitaryRelations.end()
+  *  \return a UnitaryRelationIterator
+  */
   inline UnitaryRelationIterator end() const
   {
     return setOfUnitaryRelations.end();
   }
 
-  /** \fn URSet getSetOfUnitaryRelations()
-   *  \brief return setOfUnitaryRelations
-   *  \return a UnitaryRelationSet
-   */
+  /** return setOfUnitaryRelations
+  *  \return a UnitaryRelationSet
+  */
   inline const URSet getSetOfUnitaryRelations() const
   {
     return setOfUnitaryRelations;
   }
 
-  /** \fn bool isUnitaryRelationIn(UnitaryRelation* ur)
-   *  \brief return true if ur is in the set
-   *  \param a pointer to UnitaryRelation
-   *  \return a bool
-   */
+  /** return true if ur is in the set
+  *  \param a pointer to UnitaryRelation
+  *  \return a bool
+  */
   const bool isUnitaryRelationIn(UnitaryRelation*) const;
 
-  /** \fn UnitaryRelationIterator find(UnitaryRelation* ur)
-   *  \brief same as find function of stl set
-   *  \param a pointer to UnitaryRelation
-   *  \param a UnitaryRelationIterator
-   */
+  /** same as find function of stl set
+  *  \param a pointer to UnitaryRelation
+  *  \param a UnitaryRelationIterator
+  */
   UnitaryRelationIterator find(UnitaryRelation*);
 
-  /** \fn CheckInsertUnitaryRelation insert(UnitaryRelation* ur)
-   *  \brief insert Unitary Relation ur into the set
-   *  \param a pointer to UnitaryRelation
-   *  \return a CheckInsertUnitaryRelation ( boolean type information)
-   */
+  /** insert Unitary Relation ur into the set
+  *  \param a pointer to UnitaryRelation
+  *  \return a CheckInsertUnitaryRelation ( boolean type information)
+  */
   CheckInsertUnitaryRelation insert(UnitaryRelation*);
 
-  /** \fn void erase(UnitaryRelation* ur)
-   *  \brief remove Unitary Relation ur from the set
-   *  \param a pointer to UnitaryRelation
-   */
+  /** remove Unitary Relation ur from the set
+  *  \param a pointer to UnitaryRelation
+  */
   void erase(UnitaryRelation*);
 
-  /** \fn clear() {setOfUnitaryRelations.clear();};
-   *  \brief remove all Unitary Relations from the set
-   */
+  /** remove all Unitary Relations from the set
+  */
   void clear();
 
-  /** \fn void display() const
-   *  \brief screen-display of the numbers of the Unitary Relations present in the set.
-   */
+  /** screen-display of the numbers of the Unitary Relations present in the set.
+  */
   void display() const;
 
-  /** \fn const UnitaryRelationsSet intersection(const UnitaryRelationsSet& s1, const UnitaryRelationsSet& s2) const
-   *  \brief return the intersection of s1 and s2 (-> set_intersection stl function)
-   */
+  /** return the intersection of s1 and s2 (-> set_intersection stl function)
+  */
   friend const UnitaryRelationsSet intersection(const UnitaryRelationsSet& s1, const UnitaryRelationsSet& s2);
 
-  /** \fn const UnitaryRelationsSet operator-(const UnitaryRelationsSet& s1, const UnitaryRelationsSet& s2) const
-   *  \brief return the difference betwee s1 and s2 (-> set_difference stl function)
-   */
+  /** return the difference betwee s1 and s2 (-> set_difference stl function)
+  */
   friend const UnitaryRelationsSet operator-(const UnitaryRelationsSet& s1, const UnitaryRelationsSet& s2);
 };
 

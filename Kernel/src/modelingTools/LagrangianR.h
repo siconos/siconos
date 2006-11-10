@@ -16,6 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+/*! \file LagrangianR.h
+
+*/
 #ifndef LAGRANGIANRELATION_H
 #define LAGRANGIANRELATION_H
 
@@ -23,9 +26,11 @@
 #include "LagrangianRXML.h"
 #include "LagrangianDS.h"
 
-/** \class LagrangianR
- *  \brief Lagrangian (Non Linear) Relation
- *  \author SICONOS Development Team - copyright INRIA
+
+class LagrangianRXML;
+
+//! Lagrangian (Non Linear) Relation
+/** \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date Apr 27, 2004
  *  This class provides tools to describe non linear relation of the type:
@@ -91,9 +96,6 @@
  * Note also that usually only normal part definition is required for Y[0].
  *
  */
-
-class LagrangianRXML;
-
 class LagrangianR : public Relation
 {
 
@@ -125,17 +127,16 @@ protected:
   // === plug-in, depending on problem type, ie LagrangianRelationType value ===
 
   // --- Plug-in for scleronomic case -> h0(q), G0(q) ---
-  /** \fn void (*h0Ptr)(const unsigned int sizeOfq, const double* q, const unsigned int sizeOfy, double* y, double * param=0);
-   * \brief computes y = h(q)
-   * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
-   * \param double*: vector q (block of all DS q-vectors)
-   * \param unsigned int: size of output vector y
-   * \param double*: output vector y (in-out parameter)
-   * \param double*: vector of parameters
-   */
+  /** computes y = h(q)
+  * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
+  * \param double*: vector q (block of all DS q-vectors)
+  * \param unsigned int: size of output vector y
+  * \param double*: output vector y (in-out parameter)
+  * \param double*: vector of parameters
+  */
   void (*h0Ptr)(const unsigned int, const double*, const unsigned int, double*, double*);
-  /** \fn void (*G0Ptr)(const unsigned int sizeOfq, const double* q, const unsigned int sizeOfy, double* G, double * param);
-   * \brief computes G(q)
+
+  /** computes G(q)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
    * \param unsigned int: size of output vector y
@@ -145,9 +146,7 @@ protected:
   void (*G0Ptr)(const unsigned int, const double*, const unsigned int, double*, double*);
 
   // --- plug-in for non-scleronomic case -> h1(q,t), G10(q,t), G11(q,t) ---
-  /** \fn void (*h1Ptr)(const unsigned int sizeOfq, const double* q,
-   *                    const double* time, const unsigned int sizeOfy,  double* y, double * param);
-   * \brief computes y = h(q,t)
+  /** computes y = h(q,t)
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
    * \param double*: time
@@ -157,9 +156,7 @@ protected:
    */
   void (*h1Ptr)(const unsigned int, const double*, const double*, const unsigned int, double*, double*);
   // G0(q,t)
-  /** \fn void (*G0Ptr)(const unsigned int sizeOfq, const double* q,  const double* time,
-   *                    const unsigned int sizeOfy,  double* G, double * param);
-   * \brief computes jacobian compare to q of function h
+  /** computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
    * \param double*: time
@@ -168,10 +165,9 @@ protected:
    * \param double*: vector of parameters
    */
   void (*G10Ptr)(const unsigned int, const double*, const double*, const unsigned int, double*, double*);
+
   // G1(q,t)
-  /** \fn void (*G0Ptr)(const unsigned int sizeOfq, const double* q, const double* time,
-   *                    const unsigned int sizeOfy,  double* G, double * param);
-   * \brief computes jacobian compare to q of function h
+  /** computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
    * \param double*: time
@@ -183,21 +179,18 @@ protected:
 
   // --- plug-in for scleronomic+lambda case -> h2(q,t), G20(q,t), G21(q,t) ---
 
-  /** \fn void (*h2Ptr)(const unsigned int sizeOfq, const double* q,
-   *                    const double* lambda, const unsigned int sizeOfy, double* y, double * param);
-   * \brief computes y = h(q,t)
-   * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
-   * \param double*: vector q (block of all DS q-vectors)
-   * \param double*: vector lambda
-   * \param unsigned int: size of output vector y
-   * \param double*: output vector y (in-out parameter)
-   * \param double*: vector of parameters
-   */
+  /** computes y = h(q,t)
+  * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
+  * \param double*: vector q (block of all DS q-vectors)
+  * \param double*: vector lambda
+  * \param unsigned int: size of output vector y
+  * \param double*: output vector y (in-out parameter)
+  * \param double*: vector of parameters
+  */
   void (*h2Ptr)(const unsigned int, const double*, const double*, const unsigned int, double*, double*);
+
   // G20(q,t)
-  /** \fn void (*G20Ptr)(const unsigned int sizeOfq, const double* q,  const double* lambda,
-   *                    const unsigned int sizeOfy, double* G, double * param);
-   * \brief computes jacobian compare to q of function h
+  /** computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
    * \param double*: lambda
@@ -206,10 +199,9 @@ protected:
    * \param double*: vector of parameters
    */
   void (*G20Ptr)(const unsigned int, const double*, const double*, const unsigned int, double*, double*);
+
   // G1(q,t)
-  /** \fn void (*G0Ptr)(const unsigned int sizeOfq, const double* q, const double* lambda,
-   *                    const unsigned int sizeOfy, double* G, double * param);
-   * \brief computes jacobian compare to q of function h
+  /** computes jacobian compare to q of function h
    * \param unsigned int: sum of DS sizes, for DS involved in the interaction.
    * \param double*: vector q (block of all DS q-vectors)
    * \param double*: lambda
@@ -226,246 +218,213 @@ protected:
 
 public:
 
-  /** \fn LagrangianR();
-   * \brief default constructor
-   */
+  /** default constructor
+  */
   LagrangianR();
 
-  /** \fn void LagrangianR(RelationXML*)
-   *  \brief constructor from xml file
-   *  \param relationXML
-   *  \exception RuntimeException
-   */
+  /** constructor from xml file
+  *  \param relationXML
+  *  \exception RuntimeException
+  */
   LagrangianR(RelationXML*);
 
-  /** \fn void LagrangianR(const string relationType, const string computeH,const vector<string>& computeG)
-   *  \brief constructor from a set of data
-   *  \param string : the type of relation (scleronomic ...)
-   *  \param string : the name of the plugin for computeH
-   *  \param vector<string> : a list of names for the plugin for computeG (depends on relation type)
-   *  \exception RuntimeException
-   */
+  /** constructor from a set of data
+  *  \param string : the type of relation (scleronomic ...)
+  *  \param string : the name of the plugin for computeH
+  *  \param vector<string> : a list of names for the plugin for computeG (depends on relation type)
+  *  \exception RuntimeException
+  */
   LagrangianR(const std::string, const std::string, const std::vector<std::string>&);
 
-  /** \fn LagrangianR(const Relation&)
-   *  \brief copy constructor
-   *  \param a relation to copy
-   *  warning: the interaction link is not copied, set a new one!
-   */
+  /** copy constructor
+  *  \param a relation to copy
+  *  warning: the interaction link is not copied, set a new one!
+  */
   LagrangianR(const Relation &);
 
-  /** \fn ~LagrangianR()
-   *  \brief destructor
-   */
+  /** destructor
+  */
   virtual ~LagrangianR();
 
-  /** \fn initialize()
-   *  \brief initialize the relation (check sizes, memory allocation ...)
-   */
+  /** initialize the relation (check sizes, memory allocation ...)
+  */
   virtual void initialize();
 
-  /** \fn  std::string getLagrangianRelationType() const
-   *  \brief get the type of constraints of the relation (scleronomic ...)
-   *  \return a string
-   */
+  /** get the type of constraints of the relation (scleronomic ...)
+  *  \return a string
+  */
   inline const std::string getLagrangianRelationType() const
   {
     return LagrangianRelationType;
   }
 
-  /** \fn  void manageGMemory();
-   *  \brief check and/or allocate memory for G
-   */
+  /** check and/or allocate memory for G
+  */
   void manageGMemory();
 
-  /** \fn  std::string setLagrangianRelationType(const string  type)
-   *  \brief set the type of constraints of the relation (scleronomic ...) and adapt corresponding variables
-   * (resize G ...)
-   *  \param a string
-   */
+  /** set the type of constraints of the relation (scleronomic ...) and adapt corresponding variables
+  * (resize G ...)
+  *  \param a string
+  */
   void setLagrangianRelationType(const std::string);
 
   // -- G --
 
-  /** \fn  vector<SiconosMatrix*> getGVector() const
-   *  \brief get the vector of matrices G
-   *  \return vector<SiconosMatrix*>
-   */
+  /** get the vector of matrices G
+  *  \return vector<SiconosMatrix*>
+  */
   inline std::vector<SiconosMatrix*> getGVector() const
   {
     return G;
   }
 
-  /** \fn void setGVector(const vector<SiconosMatrix*>& newVector)
-   *  \brief set the value of G vector
-   *  \param vector<SiconosMatrix*>
-   */
+  /** set the value of G vector
+  *  \param vector<SiconosMatrix*>
+  */
   void setGVector(const std::vector<SiconosMatrix*> &);
 
-  /** \fn const SimpleMatrix getG(unsigned int index) const
-   *  \brief get matrix G[index]
-   *  \return a SimpleMatrix
-   */
+  /** get matrix G[index]
+  *  \return a SimpleMatrix
+  */
   inline const SimpleMatrix getG(const unsigned int  index = 0) const
   {
     return *(G[index]);
   }
 
-  /** \fn SiconosMatrix* getGPtr(const unsigned int index = 0) const
-   *  \brief get a pointer on matrix G[index]
-   *  \return a pointer on a SiconosMatrix
-   */
+  /** get a pointer on matrix G[index]
+  *  \return a pointer on a SiconosMatrix
+  */
   inline SiconosMatrix* getGPtr(const unsigned int index = 0) const
   {
     return G[index];
   }
 
-  /** \fn void setG(const SiconosMatrix& newValue, unsigned int index)
-   *  \brief set the value of G[index] to newValue
-   *  \param SiconosMatrix newValue
-   *  \param unsigned int: index position in G vector
-   */
+  /** set the value of G[index] to newValue
+  *  \param SiconosMatrix newValue
+  *  \param unsigned int: index position in G vector
+  */
   void setG(const SiconosMatrix&, const unsigned int = 0);
 
-  /** \fn void setGPtr(SiconosMatrix* newPtr,const unsigned int index )
-   *  \brief set G[index] to pointer newPtr
-   *  \param SiconosMatrix * newPtr
-   *  \param unsigned int: index position in G vector
-   */
+  /** set G[index] to pointer newPtr
+  *  \param SiconosMatrix * newPtr
+  *  \param unsigned int: index position in G vector
+  */
   void setGPtr(SiconosMatrix *newPtr, const unsigned int = 0);
 
 
-  /** \fn void setComputeHFunction(const string pluginPath, const string functionName)
-   *  \brief to set a specified function to compute function h(q,...)
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
+  /** to set a specified function to compute function h(q,...)
+  *  \param string : the complete path to the plugin
+  *  \param string : the name of the function to use in this plugin
+  *  \exception SiconosSharedLibraryException
+  */
   void setComputeHFunction(const std::string , const std::string);
 
-  /** \fn void setComputeGFunction(const string pluginPath, const string functionName, const unsigned int index)
-   *  \brief to set a specified function to compute G(q, ...)
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \param unsigned int: the index of G that must be computed (see introduction of this class for details on indexes)
-   *  \exception SiconosSharedLibraryException
-   */
+  /** to set a specified function to compute G(q, ...)
+  *  \param string : the complete path to the plugin
+  *  \param string : the name of the function to use in this plugin
+  *  \param unsigned int: the index of G that must be computed (see introduction of this class for details on indexes)
+  *  \exception SiconosSharedLibraryException
+  */
   void setComputeGFunction(const std::string , const std::string  , const unsigned int  = 0);
 
-  /** \fn  std::string getHFunctionName() const
-   *  \brief get name of function that computes h
-   *  \return a string
-   */
+  /** get name of function that computes h
+  *  \return a string
+  */
   inline const std::string getHFunctionName() const
   {
     return hFunctionName;
   }
 
-  /** \fn  std::vector<string> getGFunctionNameVector() const
-   *  \brief get list of names for functions that compute G
-   *  \return a vector of strings
-   */
+  /** get list of names for functions that compute G
+  *  \return a vector of strings
+  */
   inline const std::vector<std::string> getGFunctionNameVector() const
   {
     return GFunctionName;
   }
 
-  /** \fn  string getJacobianHFunctionName(const unsigned int index) const
-   *  \brief get names of functions that compute G[index]
-   *  \return a string
-   */
+  /** get names of functions that compute G[index]
+  *  \return a string
+  */
   inline std::string getGFunctionName(const unsigned int index = 0) const
   {
     return GFunctionName[index];
   }
 
-  /** \fn void computeH(const double  time);
-   * \brief to compute y = h(q,v,t) using plug-in mechanism
-   * \param: double, current time
-   */
+  /** to compute y = h(q,v,t) using plug-in mechanism
+  * \param: double, current time
+  */
   void computeH(const double);
 
-  /** \fn void computeG(const double  time, const unsigned int  index );
-   * \brief to compute G using plug-in mechanism. Index shows which G is to be computed
-   * \param: double, current time
-   * \param: unsigned int
-   */
+  /** to compute G using plug-in mechanism. Index shows which G is to be computed
+  * \param: double, current time
+  * \param: unsigned int
+  */
   void computeG(const double , const unsigned int = 0);
 
-  /** \fn void computeOutput(double time, const unsigned int = 0);
-   *  \brief to compute output
-   *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-   */
+  /** to compute output
+  *  \param double : current time
+  *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+  */
   virtual void computeOutput(const double, const unsigned int = 0);
 
-  /** \fn void computY0(double time, SiconosVector*);
-   *  \brief to compute output y[0]
-   *  \param double : current time
-   *  \param a pointer to SiconosVector: q for all the DS
-   */
+  /** to compute output y[0]
+  *  \param double : current time
+  *  \param a pointer to SiconosVector: q for all the DS
+  */
   void computeY0(const double, SiconosVector*);
 
-  /** \fn void computY1(double time, SiconosVector*, SiconosVector*);
-   *  \brief to compute output y[1]
-   *  \param double : current time
-   *  \param a pointer to SiconosVector: q for all the DS
-   *  \param a pointer to SiconosVector: velocity for all the DS
-   */
+  /** to compute output y[1]
+  *  \param double : current time
+  *  \param a pointer to SiconosVector: q for all the DS
+  *  \param a pointer to SiconosVector: velocity for all the DS
+  */
   void computeY1(const double, SiconosVector*, SiconosVector*);
 
-  /** \fn void computY2(double time);
-   *  \brief to compute output y[2]
-   *  \param double : current time
-   *  \param a pointer to SiconosVector: q for all the DS
-   *  \param a pointer to SiconosVector: acceleration for all the DS
-   */
+  /** to compute output y[2]
+  *  \param double : current time
+  *  \param a pointer to SiconosVector: q for all the DS
+  *  \param a pointer to SiconosVector: acceleration for all the DS
+  */
   void computeY2(const double, SiconosVector*, SiconosVector*);
 
-  /** \fn void computeFreeOutput(double time, const unsigned int = 0);
-   *  \brief to compute y for the free state
-   *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-   */
+  /** to compute y for the free state
+  *  \param double : current time
+  *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+  */
   virtual void computeFreeOutput(const double, const unsigned int = 0);
 
-  /** \fn void computeInput(double time, const unsigned int level);
-   *  \brief to compute p
-   *  \param double : current time
-   *  \param unsigned int: "derivative" order of lambda used to compute input
-   */
+  /** to compute p
+  *  \param double : current time
+  *  \param unsigned int: "derivative" order of lambda used to compute input
+  */
   virtual void computeInput(const double, const unsigned int);
 
-  /** \fn void getGBlockDS(const int,SiconosMatrix&, const unsigned int index = 0) const
-   *  \brief get in Matrix G[index] the block corresponding to DS number int
-   *  \param int, the ds number
-   *  \param SiconosMatrix (in-out parameter): the resulting block matrix
-   */
+  /** get in Matrix G[index] the block corresponding to DS number int
+  *  \param int, the ds number
+  *  \param SiconosMatrix (in-out parameter): the resulting block matrix
+  */
   void getGBlockDS(const int, SiconosMatrix&, const unsigned int = 0) const;
 
 
-  /** void getGBlockDS(DynamicalSystem * ds, SiconosMatrix&, const unsigned int index = 0) const
-   *  \brief get in Matrix G[index] the block corresponding to ds
+  /** get in Matrix G[index] the block corresponding to ds
    *  \param a pointer to a dynamical system
    *  \param SiconosMatrix (in-out parameter): the resulting block matrix
    */
   void getGBlockDS(DynamicalSystem *, SiconosMatrix&, const unsigned int = 0) const;
 
-  /** \fn void saveRelationToXML()
-   *  \brief copy the data of the Relation to the XML tree
-   */
+  /** copy the data of the Relation to the XML tree
+  */
   void saveRelationToXML() const;
 
-  /** \fn LagrangianR* convert (Relation *r)
-   *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Relation* : the relation which must be converted
-   * \return a pointer on the relation if it is of the right type, NULL otherwise
-   */
+  /** encapsulates an operation of dynamic casting. Needed by Python interface.
+  *  \param Relation* : the relation which must be converted
+  * \return a pointer on the relation if it is of the right type, NULL otherwise
+  */
   static LagrangianR* convert(Relation *r);
 
-  /** \fn  void display() const
-   * \brief main relation members display
-   */
+  /** main relation members display
+  */
   virtual void display() const;
 
 };

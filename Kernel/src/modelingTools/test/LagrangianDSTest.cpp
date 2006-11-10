@@ -348,12 +348,12 @@ void LagrangianDSTest::testcomputeDS()
 
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSI : ", *(vf->getVectorPtr(0)) == *velocity0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", M**(vf->getVectorPtr(1)) == (copy->getFExt() - copy->getFInt() - copy->getNNL()) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", prod(M, *(vf->getVectorPtr(1))) == (copy->getFExt() - copy->getFInt() - copy->getNNL()) , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSK : ", *(jx->getBlockPtr(0, 0)) == *zero, true);
   zero->eye();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSK : ", *(jx->getBlockPtr(0, 1)) == *zero, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", M**(jx->getBlockPtr(1, 0)) == (-1.0 * (copy->getJacobianQFInt() + copy->getJacobianQNNL())) , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", M**(jx->getBlockPtr(1, 1)) == -1.0 * (copy->getJacobianVelocityFInt() + copy->getJacobianVelocityNNL()) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->getBlockPtr(1, 0))) == (-1.0 * (copy->getJacobianQFInt() + copy->getJacobianQNNL())) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->getBlockPtr(1, 1))) == -1.0 * (copy->getJacobianVelocityFInt() + copy->getJacobianVelocityNNL()) , true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSM : ", copy->getP(2) == *(r->getVectorPtr(1)), true);
   delete ds;

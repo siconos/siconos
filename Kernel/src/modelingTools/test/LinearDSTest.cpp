@@ -134,7 +134,7 @@ void LinearDSTest::testBuildLinearDS2()
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2K : ", ds->getU() == *u0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2L : ", ds->getT() == *T0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2M : ", (*(ds->getRhsPtr())) == (*(ds->getAPtr()) * 2 * *x0 + ds->getB() + * (ds->getTPtr())**(ds->getUPtr())), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2M : ", (*(ds->getRhsPtr())) == prod(*(ds->getAPtr()), 2 * *x0) + ds->getB() + prod(*(ds->getTPtr()), *(ds->getUPtr())), true);
 
   delete T0;
   delete u0;
@@ -166,7 +166,7 @@ void LinearDSTest::testBuildLinearDS3()
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3I : ", ds->getB() == time* *x01, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3J : ", ds->getA() == 2 * *A0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3E : ", ds->getRhs() == (time* *x01 + 2 * *A0 **x0) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3E : ", ds->getRhs() == (time* *x01 + 2 * prod(*A0, *x0)) , true);
 
   ds->setUSize(3);
   ds->setComputeUFunction("TestPlugin.so", "computeU");
@@ -175,7 +175,7 @@ void LinearDSTest::testBuildLinearDS3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3K : ", ds->getU() == time **x0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS3L : ", ds->getTPtr() == NULL, true);
   ds->computeRhs(time);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2M : ", *(ds->getRhsPtr()) == (2 * *A0 * *x0 + ds->getB() + time**x0), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearDS2M : ", *(ds->getRhsPtr()) == (2 * prod(*A0 , *x0) + ds->getB() + time**x0), true);
   delete ds;
   cout << "--> Constructor 3 test ended with success." << endl;
 }

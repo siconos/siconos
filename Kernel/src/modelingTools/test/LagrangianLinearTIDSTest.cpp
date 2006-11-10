@@ -221,12 +221,12 @@ void LagrangianLinearTIDSTest::testcomputeDS()
   SiconosVector * r = ds->getRPtr();
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSI : ", *(vf->getVectorPtr(0)) == *velocity0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", *mass**(vf->getVectorPtr(1)) == (copy->getFExt() - *K**(copy->getQPtr()) - *C**(copy->getVelocityPtr())) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", prod(*mass, *(vf->getVectorPtr(1))) == (copy->getFExt() - prod(*K, *(copy->getQPtr())) - prod(*C, *(copy->getVelocityPtr()))) , true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSK : ", *(jx->getBlockPtr(0, 0)) == *zero, true);
   zero->eye();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSK : ", *(jx->getBlockPtr(0, 1)) == *zero, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", *mass**(jx->getBlockPtr(1, 0)) == (-1.0 * *K) , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", *mass**(jx->getBlockPtr(1, 1)) == (-1.0 * *C) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(*mass, *(jx->getBlockPtr(1, 0))) == (-1.0 * *K) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(*mass, *(jx->getBlockPtr(1, 1))) == (-1.0 * *C) , true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSM : ", copy->getP() == *(r->getVectorPtr(1)), true);
   delete ds;

@@ -16,17 +16,10 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/** \class LagrangianLinearTIDSXML
- *   \brief This class manages Lagrangian TIDS data
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.3.0.
- *   \date 05/11/2004
- *
- *
- *
- * LagrangianLinearTIDSXML allows to manage data of a LagrangianLinearTIDS DOM tree.
- */
 
+/*! \file LagrangianLinearTIDSXML.h
+
+*/
 
 #ifndef __LAGRANGIANTIDSXML__
 #define __LAGRANGIANTIDSXML__
@@ -36,7 +29,15 @@
 const std::string LTIDS_K = "K";
 const std::string LTIDS_C = "C";
 
-
+//! XML management for LagrangianLinearTIDS
+/**  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.3.0.
+ *   \date 05/11/2004
+ *
+ *
+ *
+ * LagrangianLinearTIDSXML allows to manage data of a LagrangianLinearTIDS DOM tree.
+ */
 class LagrangianLinearTIDSXML : public LagrangianDSXML
 {
 private:
@@ -46,31 +47,27 @@ private:
 
 public:
 
-  /** \fn LagrangianLinearTIDSXML()
-   *   \brief default constructor
-   */
+  /** default constructor
+  */
   LagrangianLinearTIDSXML();
 
-  /** \fn LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSNode, int number)
-   *   \brief Build a LagrangianLinearTIDSXML object from a DOM tree describing a LagrangianLinearTIDS
-   *   \param LagrangianLinearTIDSNode : the LagrangianLinearTIDS DOM tree
-   *   \param bool isBVP : if NonSmoothDynamicalSystem is BVP LagrangianLinearTIDS have boundary condition
-   */
+  /** Build a LagrangianLinearTIDSXML object from a DOM tree describing a LagrangianLinearTIDS
+  *   \param LagrangianLinearTIDSNode : the LagrangianLinearTIDS DOM tree
+  *   \param bool isBVP : if NonSmoothDynamicalSystem is BVP LagrangianLinearTIDS have boundary condition
+  */
   LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSNode, bool isBVP);
 
-  /** \fn const SimpleMatrix getK() const
-   *   \brief Return the K of the LagrangianLinearTIDSXML
-   *   \return The K SimpleMatrix of the LagrangianLinearTIDSXML
-   */
+  /** Return the K of the LagrangianLinearTIDSXML
+  *   \return The K SimpleMatrix of the LagrangianLinearTIDSXML
+  */
   inline const SimpleMatrix getK() const
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(KNode);
   }
 
-  /** \fn void setK(SiconosMatrix *m)
-   *   \brief allows to save the K of the LagrangianLinearTIDSXML
-   *   \return The K SiconosMatrix to save
-   */
+  /** allows to save the K of the LagrangianLinearTIDSXML
+  *   \return The K SiconosMatrix to save
+  */
   inline void setK(const SiconosMatrix& m)
   {
     if (KNode == NULL)
@@ -80,19 +77,17 @@ public:
     else SiconosDOMTreeTools::setSiconosMatrixNodeValue(KNode, m);
   }
 
-  /** \fn const SimpleMatrix getC() const
-   *   \brief Return the C of the LagrangianLinearTIDSXML
-   *   \return The C SimpleMatrix of the LagrangianLinearTIDSXML
-   */
+  /** Return the C of the LagrangianLinearTIDSXML
+  *   \return The C SimpleMatrix of the LagrangianLinearTIDSXML
+  */
   inline const SimpleMatrix getC() const
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(CNode);
   }
 
-  /** \fn void setC(SiconosMatrix *m)
-   *   \brief allows to save the C of the LagrangianLinearTIDSXML
-   *   \return The C SiconosMatrix to save
-   */
+  /** allows to save the C of the LagrangianLinearTIDSXML
+  *   \return The C SiconosMatrix to save
+  */
   inline void setC(const SiconosMatrix& m)
   {
     if (CNode == NULL)
@@ -103,27 +98,24 @@ public:
   }
 
 
-  /** \fn void updateDynamicalSystemXML(xmlNode*, DynamicalSystem*, BoundaryCondition*)
-   *   \brief makes the operations to add a DynamicalSystem to the NonSmoothDynamicalSystemXML
-   *   \param xmlNode* : the root node of this DynamicalSystem
-   *   \param DynamicalSystem* : the DynamicalSystem of this DynamicalSystemXML
-   *   \param BoundaryCondition* : the BoundaryCondition of the DS if the NonSmoothDynamicalSystem is BVP (optional)
-   */
+  /** makes the operations to add a DynamicalSystem to the NonSmoothDynamicalSystemXML
+  *   \param xmlNode* : the root node of this DynamicalSystem
+  *   \param DynamicalSystem* : the DynamicalSystem of this DynamicalSystemXML
+  *   \param BoundaryCondition* : the BoundaryCondition of the DS if the NonSmoothDynamicalSystem is BVP (optional)
+  */
   void updateDynamicalSystemXML(xmlNode*, DynamicalSystem*, BoundaryCondition* bc = NULL);
 
-  /** \fn bool hasK()
-   *  \brief determines if K is defined in the DOM tree
-   *  \return bool : true if K is defined, false otherwise
-   */
+  /** determines if K is defined in the DOM tree
+  *  \return bool : true if K is defined, false otherwise
+  */
   inline const bool hasK() const
   {
     return (KNode != NULL);
   }
 
-  /** \fn bool hasC()
-   *  \brief determines if C is defined in the DOM tree
-   *  \return bool : true if C is defined, false otherwise
-   */
+  /** determines if C is defined in the DOM tree
+  *  \return bool : true if C is defined, false otherwise
+  */
   inline const bool hasC() const
   {
     return (CNode != NULL);

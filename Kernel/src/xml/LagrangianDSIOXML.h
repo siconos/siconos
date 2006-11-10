@@ -17,15 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/** \class LagrangianDSIOXML
-*   \brief This class manages LagrangianDSIO DSInputOutput data
-*  \author SICONOS Development Team - copyright INRIA
-*   \version 1.3.0.
-*   \date 17/01/2005
-*
-*
-*
-* LagrangianDSIOXML allows to manage data of a LagrangianDSIO DOM tree.
+/*! \file LagrangianDSIOXML.h
+
 */
 
 
@@ -34,22 +27,29 @@
 
 #include "DSInputOutputXML.h"
 
+//! XML management for LagrangianDSIO
+/**  \author SICONOS Development Team - copyright INRIA
+*   \version 1.3.0.
+*   \date 17/01/2005
+*
+*
+*
+* LagrangianDSIOXML allows to manage data of a LagrangianDSIO DOM tree.
+*/
 class LagrangianDSIOXML : public DSInputOutputXML
 {
 public:
 
   LagrangianDSIOXML();
 
-  /** \fn LagrangianDSIOXML(xmlNode * , vector<int> )
-  *   \brief Build a DSInputOutputXML object from a DOM tree describing a DSInputOutput
+  /** Build a DSInputOutputXML object from a DOM tree describing a DSInputOutput
   *   \param xmlNode* : the DSInputOutput DOM tree
   //    *   \param vector<int>  : vector of DSXML numbers to verify DS concerned by the DSInputOutput (identified by number) exists
   */
   LagrangianDSIOXML(xmlNode * dsioNode/*, vector<int> definedDSNumbers */);
   ~LagrangianDSIOXML();
 
-  //    /** \fn int getComputeInputPlugin()
-  //    *   \brief Returns the computeInput plugin of the LagrangianDSIOXML
+  //    /** Returns the computeInput plugin of the LagrangianDSIOXML
   //    *   \return string which defines the plugin
   //    */
   //    inline string getComputeInputPlugin()
@@ -57,8 +57,7 @@ public:
   //      return  SiconosDOMTreeTools::getStringAttributeValue(this->computeInputNode, COMPUTE_INPUT_TAG);
   //    }
   //
-  //    /** \fn inline void setComputeInputPlugin(string plugin)
-  //    *   \brief saves the the computeInput plugin of the LagrangianDSIOXML
+  //    /** saves the the computeInput plugin of the LagrangianDSIOXML
   //    *   \param The string corresponding to the plugin to save
   //    */
   //    inline void setComputeInputPlugin(string plugin)
@@ -71,8 +70,7 @@ public:
   //      else SiconosDOMTreeTools::setStringAttributeValue(this->computeInputNode, PLUGIN_ATTRIBUTE, plugin);
   //    }
   //
-  //    /** \fn int getComputeOutputPlugin()
-  //    *   \brief Returns the computeOutput plugin of the LagrangianDSIOXML
+  //    /** Returns the computeOutput plugin of the LagrangianDSIOXML
   //    *   \return string which defines the plugin
   //    */
   //    inline string getComputeOutputPlugin()
@@ -80,8 +78,7 @@ public:
   //      return  SiconosDOMTreeTools::getStringAttributeValue(this->computeOutputNode, COMPUTE_OUTPUT_TAG);
   //    }
   //
-  //    /** \fn inline void setComputeOutputPlugin(string plugin)
-  //    *   \brief saves the the computeOutput plugin of the LagrangianDSIOXML
+  //    /** saves the the computeOutput plugin of the LagrangianDSIOXML
   //    *   \param The string corresponding to the plugin to save
   //    */
   //    inline void setComputeOutputPlugin(string plugin)

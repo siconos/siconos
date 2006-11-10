@@ -17,6 +17,8 @@
 // Contact: Vincent ACARY vincent.acary@inrialpes.fr
 //
 
+#include "blaslapack.h"
+
 typedef void (*fpointer)(integer *, doublereal *, doublereal *, doublereal *);
 typedef void (*gpointer)(integer *, doublereal *, doublereal*, integer *, doublereal *);
 typedef void (*jacopointer)(integer *, doublereal *, doublereal *, integer* , integer *,  doublereal *, integer *);

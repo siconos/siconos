@@ -15,6 +15,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ */
+/*! \file LinearTIR.h
+
 */
 #ifndef LINEARTIRELATION_H
 #define LINEARTIRELATION_H
@@ -22,9 +25,8 @@
 #include "Relation.h"
 #include "LinearTIRXML.h"
 
-/** \class LinearTIR
- *  \brief Linear Time Invariant Relation, derived from class Relation
- *  \author SICONOS Development Team - copyright INRIA
+//! Linear Time Invariant Relation, derived from class Relation
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date Apr 27, 2004
  *
@@ -68,31 +70,25 @@ private:
   /** the XML object linked to the LinearTIR to read XML data */
   // LinearTIRXML * lTIRxml;
 
-  /** \fn LinearTIR();
-   *  \brief Default (private) constructor
+  /** Default (private) constructor
    */
   LinearTIR();
 
 public:
 
-  /** \fn LinearTIR(RelationXML*)
-   *  \brief xml constructor
+  /** xml constructor
    *  \param LinearTIRXML* : the XML object corresponding
    */
   LinearTIR(RelationXML*);
 
-  /** \fn void LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB)
-   *  \brief create the Relation from a set of data
+  /** create the Relation from a set of data
    *  \param SiconosMatrix : the matrix C
    *  \param SiconosMatrix : the matrix B
    *  \exception RuntimeException
-      */
+   */
   LinearTIR(const SiconosMatrix& , const SiconosMatrix&);
 
-  /** \fn void LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
-   *                     const SiconosMatrix& newF, const SimpleVector& newE,
-   *                     const SiconosMatrix& newB)
-   *  \brief create the Relation from a set of data
+  /** create the Relation from a set of data
    *  \param SiconosMatrix : C
    *  \param SiconosMatrix : D
    *  \param SiconosMatrix : F
@@ -104,20 +100,17 @@ public:
             const SiconosMatrix& , const SimpleVector& ,
             const SiconosMatrix&);
 
-  /** \fn LinearTIR(const Relation&)
-   *  \brief copy constructor
+  /** copy constructor
    *  \param a relation to copy
    *  warning: the interaction link is not copied, set a new one!
    */
   LinearTIR(const Relation &);
 
-  /** \fn ~LinearTIR()
-   *  \brief destructor
+  /** destructor
    */
   ~LinearTIR();
 
-  /** \fn initialize()
-   *  \brief initialize the relation (check sizes, memory allocation ...)
+  /** initialize the relation (check sizes, memory allocation ...)
    */
   void initialize();
 
@@ -125,8 +118,7 @@ public:
 
   // -- C --
 
-  /** \fn  const SimpleMatrix getC() const
-   *  \brief get the value of C
+  /** get the value of C
    *  \return SimpleMatrix
    */
   inline const SimpleMatrix getC() const
@@ -134,8 +126,7 @@ public:
     return *C;
   }
 
-  /** \fn SiconosMatrix* getCPtr() const
-   *  \brief get C
+  /** get C
    *  \return pointer on a SiconosMatrix
    */
   inline SiconosMatrix* getCPtr() const
@@ -143,22 +134,19 @@ public:
     return C;
   }
 
-  /** \fn void setC (const SiconosMatrix& newValue)
-   *  \brief set the value of C to newValue
+  /** set the value of C to newValue
    *  \param SiconosMatrix newValue
    */
   void setC(const SiconosMatrix&);
 
-  /** \fn void setCPtr(SiconosMatrix* newPtr)
-   *  \brief set C to pointer newPtr
+  /** set C to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
   void setCPtr(SiconosMatrix *);
 
   // -- D --
 
-  /** \fn  const SimpleMatrix getD() const
-   *  \brief get the value of D
+  /** get the value of D
    *  \return SimpleMatrix
    */
   inline const SimpleMatrix getD() const
@@ -166,8 +154,7 @@ public:
     return *D;
   }
 
-  /** \fn SiconosMatrix* getDPtr() const
-   *  \brief get D
+  /** get D
    *  \return pointer on a SiconosMatrix
    */
   inline SiconosMatrix* getDPtr() const
@@ -175,22 +162,19 @@ public:
     return D;
   }
 
-  /** \fn void setD (const SiconosMatrix& newValue)
-   *  \brief set the value of D to newValue
+  /** set the value of D to newValue
    *  \param SiconosMatrix newValue
    */
   void setD(const SiconosMatrix&);
 
-  /** \fn void setDPtr(SiconosMatrix* newPtr)
-   *  \brief set D to pointer newPtr
+  /** set D to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
   void setDPtr(SiconosMatrix *);
 
   // -- F --
 
-  /** \fn  const SimpleMatrix getF() const
-   *  \brief get the value of F
+  /** get the value of F
    *  \return SimpleMatrix
    */
   inline const SimpleMatrix getF() const
@@ -198,8 +182,7 @@ public:
     return *F;
   }
 
-  /** \fn SiconosMatrix* getFPtr() const
-   *  \brief get F
+  /** get F
    *  \return pointer on a SiconosMatrix
    */
   inline SiconosMatrix* getFPtr() const
@@ -207,22 +190,19 @@ public:
     return F;
   }
 
-  /** \fn void setF (const SiconosMatrix& newValue)
-   *  \brief set the value of F to newValue
+  /** set the value of F to newValue
    *  \param SiconosMatrix newValue
    */
   void setF(const SiconosMatrix&);
 
-  /** \fn void setFPtr(SiconosMatrix* newPtr)
-   *  \brief set F to pointer newPtr
+  /** set F to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
   void setFPtr(SiconosMatrix *) ;
 
   // -- e --
 
-  /** \fn  const SimpleVector getE() const
-   *  \brief get the value of e
+  /** get the value of e
    *  \return SimpleVector
    */
   inline const SimpleVector getE() const
@@ -230,8 +210,7 @@ public:
     return *e;
   }
 
-  /** \fn SimpleVector* getEPtr() const
-   *  \brief get e
+  /** get e
    *  \return pointer on a SimpleVector
    */
   inline SimpleVector* getEPtr() const
@@ -239,22 +218,19 @@ public:
     return e;
   }
 
-  /** \fn void setE (const SimpleVector& newValue)
-   *  \brief set the value of e to newValue
+  /** set the value of e to newValue
    *  \param SimpleVector newValue
    */
   void setE(const SimpleVector&);
 
-  /** \fn void setEPtr(SimpleVector* newPtr)
-   *  \brief set E to pointer newPtr
+  /** set E to pointer newPtr
    *  \param SimpleVector * newPtr
    */
   void setEPtr(SimpleVector *);
 
   // -- B --
 
-  /** \fn  const SimpleMatrix getB() const
-   *  \brief get the value of B
+  /** get the value of B
    *  \return SimpleMatrix
    */
   inline const SimpleMatrix getB() const
@@ -262,8 +238,7 @@ public:
     return *B;
   }
 
-  /** \fn SiconosMatrix* getBPtr() const
-   *  \brief get B
+  /** get B
    *  \return pointer on a SiconosMatrix
    */
   inline SiconosMatrix* getBPtr() const
@@ -271,77 +246,65 @@ public:
     return B;
   }
 
-  /** \fn void setB (const SiconosMatrix& newValue)
-   *  \brief set the value of B to newValue
+  /** set the value of B to newValue
    *  \param SiconosMatrix newValue
    */
   void setB(const SiconosMatrix&);
 
-  /** \fn void setBPtr(SiconosMatrix* newPtr)
-   *  \brief set B to pointer newPtr
+  /** set B to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
   void setBPtr(SiconosMatrix *) ;
 
-  /** \fn void getCBlockDSPtr(DynamicalSystem* ds, SiconosMatrix&) const
-   *  \brief get block of C corresponding to ds
+  /** get block of C corresponding to ds
    *  \param a pointer to dynamical system and a SiconosMatrix (in-out parameter)
    */
   void getCBlockDSPtr(DynamicalSystem*, SiconosMatrix&) const;
 
-  /** \fn void getCBlockDSPtr(const int  n, SiconosMatrix&) const
-   *  \brief get block of C corresponding to DS number n
+  /** get block of C corresponding to DS number n
    *  \param an int and a SiconosMatrix (in-out parameter)
    */
   void getCBlockDSPtr(const int , SiconosMatrix&) const;
 
-  /** \fn void getBBlockDSPtr(DynamicalSystem* ds, SiconosMatrix&) const
-   *  \brief get block of B corresponding to ds
+  /** get block of B corresponding to ds
    *  \param a pointer to dynamical system and a SiconosMatrix (in-out parameter)
    */
   void getBBlockDSPtr(DynamicalSystem* , SiconosMatrix&) const;
 
-  /** \fn void getBBlockDSPtr(const int  n , SiconosMatrix&) const
-   *  \brief get block of B corresponding to DS number n
+  /** get block of B corresponding to DS number n
    *  \param an int and a SiconosMatrix (in-out parameter)
    */
   void getBBlockDSPtr(const int , SiconosMatrix&) const;
 
   // --- OTHER FUNCTIONS ---
 
-  /** \fn void computeOutput(const double time, const unsigned int = 0)
-   *  \brief computes y
+  /** computes y
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
   void computeOutput(const double, const unsigned int = 0);
 
-  /** \fn void computeFreeOutput(const double time)
-   *  \brief computes yFree AND save it into y
+  /** computes yFree AND save it into y
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
   void computeFreeOutput(const double = 0, const unsigned int = 0);
 
-  /** \fn void computeInput(double time, const unsigned int);
-   *  \brief default function to compute lambda
+  /** default function to compute lambda
    *  \param double : current time
    *  \param unsigned int: "derivative" order of lambda used to compute input
    */
   void computeInput(const double, const unsigned int);
 
-  /** \fn void saveRelationToXML()
-   *  \brief copy the data of the Relation to the XML tree
+  /** copy the data of the Relation to the XML tree
    */
   void saveRelationToXML() const;
 
-  /** \fn void display()
-   *  \brief print the data to the screen
+  /** print the data to the screen
    */
   void display() const;
 
-  /** \fn LinearTIR* convert (Relation *r)
-   *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
+  /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation * : the relation which must be converted
    * \return a pointer on the relation if it is of the right type, NULL otherwise
    */

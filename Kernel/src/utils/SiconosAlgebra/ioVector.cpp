@@ -1,27 +1,17 @@
-#include <fstream>
-#include <iostream>
-#include <stdio.h>
-
 #include "ioVector.h"
+#include "SimpleVector.h"
+#include "SiconosVectorException.h"
+#include <boost/numeric/ublas/io.hpp>
+#include<fstream>
+//SimpleVector *tmp = new SimpleVector();
 
-//MySimpleVector *tmp = new MySimpleVector();
-
-MySimpleVector* ioVector::temporary = new MySimpleVector(1);
+SimpleVector* ioVector::temporary = new SimpleVector(1);
 bool ioVector::writeSimpleBinary = false;
 
 // Default private
-ioVector::ioVector(void)
-{
-  FileName = "";
-  Mode = "ascii";
-}
+ioVector::ioVector(): ioObject() {}
 
-// Default public
-ioVector::ioVector(const std::string& file, const std::string& mode)
-{
-  FileName = file;
-  Mode = mode;
-}
+ioVector::ioVector(const std::string& file, const std::string& mode): ioObject(file, mode) {}
 
 ioVector::~ioVector(void)
 {
@@ -29,9 +19,8 @@ ioVector::~ioVector(void)
     delete(temporary);
 }
 
-bool ioVector::read(MySiconosVector& m)const
+const bool ioVector::read(SiconosVector& m) const
 {
-
 
   if (Mode == "ascii")
   {
@@ -50,7 +39,7 @@ bool ioVector::read(MySiconosVector& m)const
     DenseVect p(col);
     infile >> p;
 
-    MySimpleVector tmp(p);
+    SimpleVector tmp(p);
     m = tmp;
     infile.close();
     return true;
@@ -74,7 +63,7 @@ bool ioVector::read(MySiconosVector& m)const
 
     DenseVect p(alpha);
     err = fread(&p, sizeof(DenseVect(alpha)), 1, infile);
-    MySimpleVector tmp(p);
+    SimpleVector tmp(p);
     m = tmp;
     fclose(infile);
     return true;
@@ -86,9 +75,8 @@ bool ioVector::read(MySiconosVector& m)const
   }
 }
 
-bool ioVector::write(const MySiconosVector& m)
+const bool ioVector::write(const SiconosVector& m, const std::string&) const
 {
-
   if (Mode == "ascii")
   {
     std::ofstream outfile(FileName.c_str());
@@ -142,71 +130,5 @@ bool ioVector::write(const MySiconosVector& m)
     SiconosVectorException::selfThrow(" ioVector::write : incorrect mode for writing vector");
     return false;
   }
-}
-
-bool ioVector::rawWrite(const MySiconosVector& m)
-{
-  if (Mode == "ascii")
-  {
-    std::ofstream outfile(FileName.c_str());
-
-    if (!outfile.is_open())
-    {
-      SiconosVectorException::selfThrow(" ioVector::rawWrite : Fail to open file \"" + FileName + "\"");
-    }
-    if (m.isBlock())
-      SiconosVectorException::selfThrow(" ioVector::rawWrite : rawWrite BlockVector is not implemented");
-
-    DenseVect p;
-    if (m.getNum() == 1)
-      p = m.getDense();
-    else if (m.getNum() == 2)
-      p = m.getSparse();
-
-    outfile << p;
-    outfile.close();
-    return true;
-  }
-  else if (Mode == "binary")
-  {
-    FILE *outfile = fopen(FileName.c_str(), "wb");
-    if (outfile == NULL)
-    {
-      SiconosVectorException::selfThrow(" ioVector::rawWrite : Fail to open file \"" + FileName + "\"");
-    }
-    if (m.isBlock())
-      SiconosVectorException::selfThrow(" ioVector::rawWrite : rawWrite BlockVector is not implemented");
-
-    int col;
-    col = m.size();
-    writeSimpleBinary = true;
-
-    temporary->resize(col, false);
-    *temporary = m;
-    fwrite(temporary->getDensePtr(), sizeof(DenseVect(col)), 1, outfile);
-    fclose(outfile);
-    return true;
-  }
-  else
-  {
-    SiconosVectorException::selfThrow(" ioVector::rawWrite : incorrect mode for writing vector");
-    return false;
-  }
-}
-
-bool ioVector::read(MySiconosMatrix& m)const
-{
-  SiconosVectorException::selfThrow(" ioVector::read(MySiconosMatrix&) is forbidden");
-  return false;
-}
-bool ioVector::write(const MySiconosMatrix& m)
-{
-  SiconosVectorException::selfThrow(" ioVector::write(MySiconosMatrix&) is forbidden");
-  return false;
-}
-bool ioVector::rawWrite(const MySiconosMatrix& m)
-{
-  SiconosVectorException::selfThrow(" ioVector::rawWrite(MySiconosMatrix&) is forbidden");
-  return false;
 }
 

@@ -17,22 +17,16 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/** \class LinearTIRXML
- *   \brief This class manages LTIR Relation data
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.3.0.
- *   \date 05/13/2004
- *
- *
- *
- * LinearTIRXML allows to manage data of a LTIRelation DOM tree.
- */
+/*! \file LinearTIRXML.h
 
+*/
 
 #ifndef __LTIRelationXML__
 #define __LTIRelationXML__
 
 #include "RelationXML.h"
+#include "SimpleMatrix.h"
+#include "SimpleVector.h"
 
 const std::string  LTIR_C = "C";
 const std::string  LTIR_D = "D";
@@ -40,49 +34,56 @@ const std::string  LTIR_F = "F";
 const std::string  LTIR_E = "e";
 const std::string  LTIR_B = "B";
 
+class SimpleMatrix;
+class SimpleVector;
+
+//! XML management for LinearTIR
+/**  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.3.0.
+ *   \date 05/13/2004
+ *
+ *
+ *
+ * LinearTIRXML allows to manage data of a LTIRelation DOM tree.
+ */
 class LinearTIRXML : public RelationXML
 {
 public:
   LinearTIRXML();
 
-  /** \fn LinearTIRXML(xmlNode * LTIRelationNode)
-   *   \brief Build a LinearTIRXML object from a DOM tree describing a Relation with LTI type
-   *   \param LinearTIRXML : the LinearTIR DOM tree
-   *   \exception XMLException : if a property of the LinearTI Relation lacks in the DOM tree
-   */
+  /** Build a LinearTIRXML object from a DOM tree describing a Relation with LTI type
+  *   \param LinearTIRXML : the LinearTIR DOM tree
+  *   \exception XMLException : if a property of the LinearTI Relation lacks in the DOM tree
+  */
   LinearTIRXML(xmlNode * LTIRelationNode);
 
   ~LinearTIRXML();
 
-  /** \fn SimpleMatrix getC()
-   *   \brief Return the C of the LTIRelationXML
-   *   \return The C SimpleMatrix of the LTIRelationXML
-   */
+  /** Return the C of the LTIRelationXML
+  *   \return The C SimpleMatrix of the LTIRelationXML
+  */
   inline SimpleMatrix getC()
   {
     return SiconosDOMTreeTools::getSiconosMatrixValue(CNode);
   }
 
-  /** \fn SimpleMatrix getD()
-   *   \brief Return the D of the LTIRelationXML
-   *   \return The D SimpleMatrix of the LTIRelationXML
-   */
+  /** Return the D of the LTIRelationXML
+  *   \return The D SimpleMatrix of the LTIRelationXML
+  */
   inline SimpleMatrix getD()
   {
     return SiconosDOMTreeTools::getSiconosMatrixValue(DNode);
   }
 
-  /** \fn SimpleMatrix getF()
-   *   \brief Return the F of the LTIRelationXML
-   *   \return The F SimpleMatrix of the LTIRelationXML
-   */
+  /** Return the F of the LTIRelationXML
+  *   \return The F SimpleMatrix of the LTIRelationXML
+  */
   inline SimpleMatrix getF()
   {
     return SiconosDOMTreeTools::getSiconosMatrixValue(FNode);
   }
 
-  /** \fn SimpleVector getE()
-   *   \brief Return e of the LTIRelationXML
+  /** Return e of the LTIRelationXML
    *   \return SimpleVector : e of LTIRelationXML
    */
   inline SimpleVector getE()
@@ -90,47 +91,40 @@ public:
     return SiconosDOMTreeTools::getSiconosVectorValue(eNode);
   }
 
-  /** \fn SimpleMatrix getB()
-   *   \brief Return the B of the LTIRelationXML
-   *   \return The B SimpleMatrix of the LTIRelationXML
-   */
+  /** Return the B of the LTIRelationXML
+  *   \return The B SimpleMatrix of the LTIRelationXML
+  */
   inline SimpleMatrix getB()
   {
     return SiconosDOMTreeTools::getSiconosMatrixValue(BNode);
   }
 
-  /** \fn void setC(SiconosMatrix )
-   *   \brief Change the C matrix values (in xml file or external data file switch his origin position)
-   *   \param SiconosMatrix matrix : the new value for C matrix
-   */
+  /** Change the C matrix values (in xml file or external data file switch his origin position)
+  *   \param SiconosMatrix matrix : the new value for C matrix
+  */
   void setC(const SiconosMatrix&);
 
-  /** \fn void setD(SiconosMatrix )
-   *   \brief Change the D matrix values (in xml file or external data file switch his origin position)
-   *   \param SiconosMatrix matrix : the new value for D matrix
-   */
+  /** Change the D matrix values (in xml file or external data file switch his origin position)
+  *   \param SiconosMatrix matrix : the new value for D matrix
+  */
   void setD(const SiconosMatrix&);
 
-  /** \fn void setF(SiconosMatrix )
-   *   \brief Change the F matrix values (in xml file or external data file switch his origin position)
-   *   \param SiconosMatrix matrix : the new value for F matrix
-   */
+  /** Change the F matrix values (in xml file or external data file switch his origin position)
+  *   \param SiconosMatrix matrix : the new value for F matrix
+  */
   void setF(const SiconosMatrix&);
 
-  /** \fn void setE(SiconosVector )
-   *   \brief Change the e Vector values (in xml file or external data file switch his origin position)
-   *   \param SiconosVector *vector : new value of e
-   */
+  /** Change the e Vector values (in xml file or external data file switch his origin position)
+  *   \param SiconosVector *vector : new value of e
+  */
   void setE(const SiconosVector&);
 
-  /** \fn void setB(SiconosMatrix )
-    *   \brief Change the B matrix values (in xml file or external data file switch his origin position)
-    *   \param SiconosMatrix matrix : the new value for B matrix
-    */
+  /** Change the B matrix values (in xml file or external data file switch his origin position)
+  *   \param SiconosMatrix matrix : the new value for B matrix
+  */
   void setB(const SiconosMatrix&);
 
-  /** \fn bool hasXX()
-   * \brief return true if XXnode exists */
+  /** return true if XXnode exists */
   inline bool hasC() const
   {
     return (CNode != NULL);

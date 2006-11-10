@@ -16,12 +16,12 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+/*! \file
+*/
 #ifndef TIMEDISCRETISATION_H
 #define TIMEDISCRETISATION_H
 
-#include "SimpleVector.h"
 #include "TimeDiscretisationXML.h"
-#include "RuntimeException.h"
 #include "check.h"
 #include "Simulation.h"
 #include <iostream>
@@ -29,10 +29,12 @@
 
 class Simulation;
 class TimeDiscretisationXML;
+class SiconosVector;
+class SimpleVector;
 
-/** \class TimeDiscretisation
- *  \brief The time discretisation scheme
- *  \author SICONOS Development Team - copyright INRIA
+
+//! The time discretisation scheme
+/** \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 26, 2004
  *
@@ -55,7 +57,6 @@ class TimeDiscretisationXML;
  * \todo add a vector Memory for the previous time tk which have to be stored.
  *  The complete SimpleVector will be only used for a complete definition a priori of a variable timediscretisation.
  **/
-
 class TimeDiscretisation
 {
 private:
@@ -66,7 +67,7 @@ private:
   unsigned int nSteps;
 
   /** vector of time values at each step (=> size = nSteps) */
-  SimpleVector* tk;
+  SiconosVector* tk;
 
   /** contains the lowest possible time step value */
   double hMin;
@@ -93,63 +94,55 @@ private:
       Obtained with a call to checkCase(...) during construction.*/
   int tdCase;
 
-  /** \fn TimeDiscretisation()
-   *  \brief default constructor
-   */
+  /** default constructor
+  */
   TimeDiscretisation();
 
-  /** \fn const int checkCase(const bool, const bool,const bool,const bool) const;
-   *  \brief determine the way to compute TD values, according to which data are provided => set tdCase
-   *  \param booleans indicated if tk, h, nSteps and T are present or not
-   */
+  /** determine the way to compute TD values, according to which data are provided => set tdCase
+  *  \param booleans indicated if tk, h, nSteps and T are present or not
+  */
   void checkCase(const bool, const bool, const bool, const bool);
 
-  /** \fn void compute(const int);
-   *  \brief to compute TD values according a case, depending on input values and provided
-   *   by checkCase.
-   *  \param an int to switch to the good case
-   */
+  /** to compute TD values according a case, depending on input values and provided
+  *   by checkCase.
+  *  \param an int to switch to the good case
+  */
   void compute(const int);
 
 public:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
   // IO constructor -> xml
-  /** \fn TimeDiscretisation(TimeDiscretisationXML*, Simulation*)
-   *  \brief constructor with XML
-   *  \param TimeDiscretisationXML* : the XML object corresponding
-   *  \param Simulation* : the simulation that owns this discretisation
-   */
+  /** constructor with XML
+  *  \param TimeDiscretisationXML* : the XML object corresponding
+  *  \param Simulation* : the simulation that owns this discretisation
+  */
   TimeDiscretisation(TimeDiscretisationXML*, Simulation *);
 
   // --- Straightforward constructors ---
 
-  /** \fn TimeDiscretisation(SimpleVector *, Simulation*)
-   *  \brief constructor with tk and simulation as given data
-   *  \param pointer on  a SimpleVector that describes the discretisation
-   *  \param Simulation* : the simulation that owns this discretisation
+  /** constructor with tk and simulation as given data
+  *  \param pointer on  a SiconosVector that describes the discretisation
+  *  \param Simulation* : the simulation that owns this discretisation
   */
-  TimeDiscretisation(SimpleVector *, Simulation*);
+  TimeDiscretisation(SiconosVector *, Simulation*);
 
-  /** \fn TimeDiscretisation(const double newH, const unsigned int newNSteps, Simulation* str)
-   *  \brief constructor with h, nSteps and simulation as given data
-   *  \param double (h), unsigned int (nSteps)
-   *  \param Simulation* : the simulation that owns this discretisation
-   */
+  /** constructor with h, nSteps and simulation as given data
+  *  \param double (h), unsigned int (nSteps)
+  *  \param Simulation* : the simulation that owns this discretisation
+  */
   TimeDiscretisation(const double, const unsigned int, Simulation*);
 
-  /** \fn TimeDiscretisation(const unsigned int newNSteps, Simulation* str)
-   *  \brief constructor with nSteps and simulation as given data
-   *  \param int (nSteps)
-   *  \param Simulation* : the simulation that owns this discretisation
+  /** constructor with nSteps and simulation as given data
+  *  \param int (nSteps)
+  *  \param Simulation* : the simulation that owns this discretisation
   */
   TimeDiscretisation(const unsigned int, Simulation*);
 
-  /** \fn TimeDiscretisation(const double newH, Simulation* str)
-   *  \brief constructor with h and simulation as given data
-   *  \param double (h)
-   *  \param Simulation* : the simulation that owns this discretisation
-   */
+  /** constructor with h and simulation as given data
+  *  \param double (h)
+  *  \param Simulation* : the simulation that owns this discretisation
+  */
   TimeDiscretisation(const double, Simulation*);
 
   // Destructor
@@ -157,169 +150,149 @@ public:
 
   // --- GETTERS/SETTERS ---
 
-  /** \fn const double getH() const
-   *  \brief get the time step
-   *  \return the value of h
-   */
+  /** get the time step
+  *  \return the value of h
+  */
   inline const double getH() const
   {
     return h;
   };
 
-  /** \fn void setH(const double)
-   *  \brief set the time step
-   *  \param the new value for h
-   */
+  /** set the time step
+  *  \param the new value for h
+  */
   void setH(const double newH);
 
-  /** \fn const unsigned int getNSteps() const
-   *  \brief get the number of time steps
-   *  \return the value of nSteps
-   */
+  /** get the number of time steps
+  *  \return the value of nSteps
+  */
   inline const unsigned int getNSteps() const
   {
     return nSteps;
   };
 
-  /** \fn void setNSteps(const unsigned int)
-   *  \brief set the number of time steps
-   *  \param the new value for nSteps
-   */
+  /** set the number of time steps
+  *  \param the new value for nSteps
+  */
   void setNSteps(const unsigned int newNSteps);
 
-  /** \fn  const SimpleVector getTk() const
-   *  \brief get the value of tk
-   *  \return SimpleVector
-   */
+  /** get the value of tk
+  *  \return SimpleVector
+  */
   inline const SimpleVector getTk() const
   {
     return *tk;
   }
 
-  /** \fn  const double getTk(const unsigned int k) const
-   *  \brief get the value of tk at step k
-   *  \return a double
-   */
+  /** get the value of tk at step k
+  *  \return a double
+  */
   inline const double getTk(const unsigned int  k) const
   {
     return (*tk)(k);
   }
 
-  /** \fn SimpleVector* getTkPtr() const
-   *  \brief get tk
-   *  \return pointer on a SimpleVector
-   */
-  inline SimpleVector* getTkPtr() const
+  /** get tk
+  *  \return pointer on a SiconosVector
+  */
+  inline SiconosVector* getTkPtr() const
   {
     return tk;
   }
 
-  /** \fn void setTk (const SimpleVector& newValue)
-   *  \brief set the value of tk to newValue
-   *  \param SimpleVector newValue
-   */
-  void setTk(const SimpleVector& newValue);
+  /** set the value of tk to newValue
+  *  \param SiconosVector newValue
+  */
+  void setTk(const SiconosVector& newValue);
 
-  /** \fn void setTkPtr(SimpleVector* newPtr)
-   *  \brief set tk to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
-  void setTkPtr(SimpleVector *newPtr) ;
+  /** set tk to pointer newPtr
+  *  \param SiconosVector * newPtr
+  */
+  void setTkPtr(SiconosVector *newPtr) ;
 
-  /** \fn const double getHMin() const
-   *  \brief get hMin
-   *  \return a double
-   */
+  /** get hMin
+  *  \return a double
+  */
   inline const double getHMin() const
   {
     return hMin;
   };
 
-  /** \fn void setHMin(const double)
-   *  \brief set hMin
-   *  \param the new value for hMin
-   */
+  /** set hMin
+  *  \param the new value for hMin
+  */
   inline void setHMin(const double newhMin)
   {
     hMin = newhMin;
   };
 
-  /** \fn const double getHMax() const
-   *  \brief get hMax
-   *  \return a double
-   */
+  /** get hMax
+  *  \return a double
+  */
   inline const double getHMax() const
   {
     return hMax;
   };
 
-  /** \fn void setHMax(const double)
-   *  \brief set hMax
-   *  \param the new value for hMax
-   */
+  /** set hMax
+  *  \param the new value for hMax
+  */
   inline void setHMax(const double newhMax)
   {
     hMax = newhMax;
   };
 
-  /** \fn bool isConstant(void)
-   *  \brief get the value of "constant", true if the TimeDiscretisation is constant
-   *  \return a boolean
-   */
+  /** get the value of "constant", true if the TimeDiscretisation is constant
+  *  \return a boolean
+  */
   inline const bool isConstant() const
   {
     return constant;
   };
 
-  /** \fn void setConstant(bool)
-   *  \brief set the value of "constant"
-   *  \param a boolean
-   */
+  /** set the value of "constant"
+  *  \param a boolean
+  */
   inline void setConstant(const bool newConstant)
   {
     constant = newConstant;
   };
 
-  /** \fn inline TimeDiscretisationXML* getTimeDiscretisationXMLPtr()
-   *  \brief get the TimeDiscretisationXML of the TimeDiscretisation
-   *  \return a pointer on the TimeDiscretisationXML of the TimeDiscretisation
-   */
+  /** get the TimeDiscretisationXML of the TimeDiscretisation
+  *  \return a pointer on the TimeDiscretisationXML of the TimeDiscretisation
+  */
   inline TimeDiscretisationXML* getTimeDiscretisationXMLPtr() const
   {
     return timeDiscretisationXML;
   }
 
-  /** \fn inline void setTimeDiscretisationXMLPtr(TimeDiscretisationXML* timediscrxml)
-   *  \brief set the TimeDiscretisationXML of the TimeDiscretisation
-   *  \param TimeDiscretisationXML* : the pointer to set the TimeDiscretisationXML
-   */
+  /** set the TimeDiscretisationXML of the TimeDiscretisation
+  *  \param TimeDiscretisationXML* : the pointer to set the TimeDiscretisationXML
+  */
   inline void setTimeDiscretisationXMLPtr(TimeDiscretisationXML* timediscrxml)
   {
     timeDiscretisationXML = timediscrxml;
   }
 
-  /** \fn const int getK() const
-   *  \brief get the value of the current time step
-   *  \return the value of k
-   */
+  /** get the value of the current time step
+  *  \return the value of k
+  */
   inline const int getK() const
   {
     return k;
   }
 
-  /** \fn void setK(const int newValue)
-   *  \brief set the value of K
-   *  \param int : the new value for k
-   */
+  /** set the value of K
+  *  \param int : the new value for k
+  */
   inline void setK(const int newValue)
   {
     k = newValue;
   }
 
-  /** \fn Simulation* getSimulationPtr(void)
-   *  \brief get the simulation
-   *  \return the simulation
-   */
+  /** get the simulation
+  *  \return the simulation
+  */
   inline Simulation* getSimulationPtr() const
   {
     return simulation;
@@ -327,56 +300,48 @@ public:
 
   // Getters and setters for time boundary value from model
 
-  /** \fn const double getT0() const
-   *  \brief get time min value
-   *  \return the value of t0
-   */
+  /** get time min value
+  *  \return the value of t0
+  */
   const double getT0() const ;
 
-  /** \fn void setT0(const double newValue)
-   *  \brief set initial time (friend function of class Model)
-   *  \param double : the new value for t0
-   */
+  /** set initial time (friend function of class Model)
+  *  \param double : the new value for t0
+  */
   void setT0(const double newValue);
 
-  /** \fn const bool hasT() const
-   *  \brief check if T, time max value is in the model or not
-   *  \return a bool
-   */
+  /** check if T, time max value is in the model or not
+  *  \return a bool
+  */
   const bool hasT() const;
 
-  /** \fn const double getT() const
-   *  \brief get time max value
-   *  \return the value of T
-   */
+  /** get time max value
+  *  \return the value of T
+  */
   const double getT() const;
 
-  /** \fn void setT(const double newValue)
-   *  \brief set time max value
-   *  \param double : the new value for t
-   */
+  /** set time max value
+  *  \param double : the new value for t
+  */
   void setT(const double newValue);
 
   // --- OTHER FUNCTIONS ---
-  /** \fn void increment()
-   *  \brief time step increment
-   */
+  /** time step increment
+  */
   inline void increment()
   {
     k += 1;
   }
 
-  /** \fn void display()
-   *  \brief print the data to the screen
-   */
+  /** print the data to the screen
+  */
   void display() const;
 
   // --- XML Functions ---
 
-  /** \fn void saveTimeDiscretisationToXML()
-   *  \brief saves the TimeDiscretisation to the XML tree
-   *  \exception RuntimeException
-   */
+  /** saves the TimeDiscretisation to the XML tree
+  *  \exception RuntimeException
+  */
   void saveTimeDiscretisationToXML();
 };
 

@@ -310,7 +310,7 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
 }
 
 // From a set of data; Mass filled-in directly from a siconosMatrix
-LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
+LagrangianDS::LagrangianDS(int newNumber, unsigned int newNdof,
                            const SimpleVector& newQ0, const SimpleVector& newVelocity0,
                            const SiconosMatrix& newMass):
   DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL), velocity0(NULL),
@@ -358,8 +358,8 @@ LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
 }
 
 // From a set of data - Mass loaded from a plugin
-LagrangianDS::LagrangianDS(const int newNumber, const unsigned int newNdof,
-                           const SimpleVector& newQ0, const SimpleVector& newVelocity0, const string massName):
+LagrangianDS::LagrangianDS(int newNumber, unsigned int newNdof,
+                           const SimpleVector& newQ0, const SimpleVector& newVelocity0, const string& massName):
   DynamicalSystem(), ndof(newNdof), q(NULL), q0(NULL), qFree(NULL), qMemory(NULL), velocity(NULL),
   velocity0(NULL), velocityFree(NULL), velocityMemory(NULL), mass(NULL),
   fInt(NULL), fExt(NULL), NNL(NULL), jacobianQFInt(NULL), jacobianVelocityFInt(NULL),
@@ -696,7 +696,7 @@ void LagrangianDS::initP(const string simulationType)
   }
 }
 
-void LagrangianDS::initialize(const string simulationType, const double time, const unsigned int sizeOfMemory)
+void LagrangianDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
 {
   initFreeVectors(simulationType);
 
@@ -747,7 +747,7 @@ void LagrangianDS::initialize(const string simulationType, const double time, co
     flag = true;
   }
   if (flag) // else vField = 0
-    *vField = *(workMatrix["inverseOfMass"])**vField;
+    *vField = prod(*(workMatrix["inverseOfMass"]), *vField);
   // todo: use linearSolve to avoid inversion ? Or save M-1 to avoid re-computation. See this when "M" will be added in DS or LDS.
 
   // jacobianXF
@@ -1663,7 +1663,7 @@ void LagrangianDS::computeRhs(const double time, const bool isDSup)
       *vField -= *NNL;
   }
 
-  *vField = *(workMatrix["inverseOfMass"])**vField ;
+  *vField = prod(*(workMatrix["inverseOfMass"]), *vField) ;
   // todo: use linearSolve to avoid inversion ? Or save M-1 to avoid re-computation. See this when "M" will be added in DS or LDS.
 
 }
@@ -1927,7 +1927,7 @@ void LagrangianDS::computeQFree(const double time, const unsigned int level, Sic
   if (NNL != NULL)
     *qFreeOut += *NNL;
 
-  *qFreeOut = *workMatrix["inverseOfMass"]**qFreeOut;
+  *qFreeOut = prod(*workMatrix["inverseOfMass"], *qFreeOut);
 
 }
 

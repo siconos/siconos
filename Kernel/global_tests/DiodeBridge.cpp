@@ -78,8 +78,7 @@ bool DiodeBridge()
   {
     // --- Dynamical system specification ---
     SimpleVector init_state(2);
-    init_state.setValue(0 , Vinit);
-    init_state.setValue(1 , 0.0);
+    init_state(0) = Vinit;
 
     SimpleMatrix LS_A(2, 2);
     LS_A(0, 1) = -1.0 / Cvalue;

@@ -17,6 +17,10 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "SiconosMemory.h"
+#include "BlockVector.h"
+#include "SimpleVector.h"
+#include "SiconosMemoryException.h"
+
 using namespace std;
 
 // --- CONSTRUCTORS ---
@@ -61,11 +65,11 @@ SiconosMemory::SiconosMemory(SiconosMemoryXML *memXML, const unsigned int newMem
     for (i = 0; i < nbVectorsInMemory ; i++)
     {
       if (V[i]->isBlock())
-        vectorMemory.push_back(new BlockVector(V[i]->size()));
+        vectorMemory.push_back(new BlockVector(*V[i]));
+
       else
-        vectorMemory.push_back(new SimpleVector(V[i]->size()));
+        vectorMemory.push_back(new SimpleVector(*V[i]));
       isVectorMemoryAllocated.push_back(true);
-      *(vectorMemory[i]) = *(V[i]);
     }
 
     if (vAllocated)
@@ -90,11 +94,10 @@ SiconosMemory::SiconosMemory(const deque<SiconosVector*>& V):
   for (unsigned int i = 0; i < sizeV; i++)
   {
     if (V[i]->isBlock())
-      vectorMemory.push_back(new BlockVector(V[i]->size()));
+      vectorMemory.push_back(new BlockVector(*V[i]));
     else
-      vectorMemory.push_back(new SimpleVector(V[i]->size()));
+      vectorMemory.push_back(new SimpleVector(*V[i]));
     isVectorMemoryAllocated.push_back(true);
-    *(vectorMemory[i]) = *(V[i]);
   }
 }
 
@@ -109,11 +112,10 @@ SiconosMemory::SiconosMemory(const unsigned int newMemorySize, const  deque<Sico
     for (unsigned int i = 0; i < V.size(); i++)
     {
       if (V[i]->isBlock())
-        vectorMemory.push_back(new BlockVector(V[i]->size()));
+        vectorMemory.push_back(new BlockVector(*V[i]));
       else
-        vectorMemory.push_back(new SimpleVector(V[i]->size()));
+        vectorMemory.push_back(new SimpleVector(*V[i]));
       isVectorMemoryAllocated.push_back(true);
-      *(vectorMemory[i]) = *(V[i]);
     }
   }
 }
@@ -167,11 +169,10 @@ void SiconosMemory::setVectorMemory(const deque<SiconosVector*>& V)
   for (unsigned int i = 0; i < V.size(); i++)
   {
     if (V[i]->isBlock())
-      vectorMemory.push_back(new BlockVector(V[i]->size()));
+      vectorMemory.push_back(new BlockVector(*V[i]));
     else
-      vectorMemory.push_back(new SimpleVector(V[i]->size()));
+      vectorMemory.push_back(new SimpleVector(*V[i]));
     isVectorMemoryAllocated.push_back(true);
-    *(vectorMemory[i]) = *(V[i]);
   }
 }
 
@@ -194,7 +195,7 @@ void SiconosMemory::swap(SiconosVector* v)
   {
     // allocate memory for the new vector
     if (v->isBlock())
-      vectorMemory.push_front(new BlockVector(*static_cast<BlockVector*>(v)));
+      vectorMemory.push_front(new BlockVector(*v));
     else
       vectorMemory.push_front(new SimpleVector(*v));
     isVectorMemoryAllocated.push_front(true);

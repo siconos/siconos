@@ -92,7 +92,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
 {
   relationType = LAGRANGIANLINEARRELATION;
   unsigned int row = newH.size(0);
-  unsigned int row2 = newB.size(0) ;
+  unsigned int row2 = newB.size() ;
   if (row2 != row)
     RuntimeException::selfThrow("LagrangianLinearR:: constructor from data, inconsistent size between H and b");
 
@@ -132,7 +132,7 @@ LagrangianLinearR::LagrangianLinearR(const SiconosMatrix& newH, const SimpleVect
 {
   relationType = LAGRANGIANLINEARRELATION;
   unsigned int row = newH.size(0);
-  unsigned int row2 = newB.size(0);
+  unsigned int row2 = newB.size();
   unsigned int rowD = newD.size(0);
   unsigned int colD = newD.size(1);
 
@@ -239,7 +239,7 @@ void LagrangianLinearR::initialize()
     if (D->size(0) != sizeRef || D->size(1) != sizeRef)
       RuntimeException::selfThrow("LagrangianLinearR::initialize inconsistent sizes between D matrix and the interaction.");
   if (b != NULL)
-    if (b->size(0) != sizeRef)
+    if (b->size() != sizeRef)
       RuntimeException::selfThrow("LagrangianLinearR::initialize inconsistent sizes between b vector and the dimension of the interaction.");
 }
 
@@ -372,21 +372,17 @@ void LagrangianLinearR::getHBlockDS(DynamicalSystem * ds, SiconosMatrix& Block) 
   // look for ds
   while (*itDS != ds && itDS != vDS.end())
   {
-    k += (*itDS)->getN() / 2;
+    k += (*itDS)->getDim();
     itDS++;
   }
-  // check dimension
-  if ((*itDS)->getN() / 2 != Block.size(1))
+  // check dimensions
+  if ((*itDS)->getDim() != Block.size(1))
     RuntimeException::selfThrow("LagrangianLinearR - getHBlockDS: inconsistent sizes between HBlock and DS");
+  if (H->size(0) != Block.size(0))
+    RuntimeException::selfThrow("LagrangianLinearR - getHBlockDS: inconsistent sizes between HBlock and global H");
 
   // get block
-  unsigned int l = k + (*itDS)->getN() / 2 - 1;
-  vector<unsigned int> index_list(4);
-  index_list[0] = 0;
-  index_list[1] = H->size(0) - 1;
-  index_list[2] = k;
-  index_list[3] = l;
-  H->getBlock(index_list, Block);
+  H->getBlock(0, k, Block);
 }
 
 void LagrangianLinearR::getHBlockDS(const int DSNumber, SiconosMatrix& Block) const
@@ -401,22 +397,18 @@ void LagrangianLinearR::getHBlockDS(const int DSNumber, SiconosMatrix& Block) co
   // look for DS number DSNumber ...
   while ((*itDS)->getNumber() != DSNumber && itDS != vDS.end())
   {
-    k += (*itDS)->getN() / 2;
+    k += (*itDS)->getDim();
     itDS++;
   }
 
   // check dimension
-  if ((*itDS)->getN() / 2 != Block.size(1))
+  if ((*itDS)->getDim() != Block.size(1))
     RuntimeException::selfThrow("LagrangianLinearR - getHBlockDS: inconsistent sizes between HBlock and DS");
+  if (H->size(0) != Block.size(0))
+    RuntimeException::selfThrow("LagrangianLinearR - getHBlockDS: inconsistent sizes between HBlock and global H");
 
   // get block
-  unsigned int l = k + (*itDS)->getN() / 2 - 1;
-  vector<unsigned int> index_list(4);
-  index_list[0] = 0;
-  index_list[1] = H->size(0) - 1;
-  index_list[2] = k;
-  index_list[3] = l;
-  H->getBlock(index_list, Block);
+  H->getBlock(0, k, Block);
 }
 
 void LagrangianLinearR::computeOutput(const double time, const unsigned int derivativeNumber)
@@ -457,12 +449,12 @@ void LagrangianLinearR::computeOutput(const double time, const unsigned int deri
     // compute y or yDot
 
 
-    *y = (*H * *tmp);
+    *y = prod(*H, *tmp);
     if (derivativeNumber == 0 && b != NULL)
       *y += *b;
 
     if (D != NULL)
-      *y    += *D * *lambda ;
+      *y    += prod(*D, *lambda) ;
 
     // free memory
     delete tmp;
@@ -511,7 +503,7 @@ void LagrangianLinearR::computeFreeOutput(const double time, const unsigned int 
     //SiconosVector *yDot = interaction->getYPtr(1);
     // compute y and yDot (!! values for free state)
 
-    *y = (*H * *freeTmp) ;
+    *y = prod(*H, *freeTmp) ;
 
     if (derivativeNumber == 0 &&  b != NULL)
       *y += *b;
@@ -558,7 +550,7 @@ void LagrangianLinearR::computeInput(const double time, const unsigned int level
     SiconosVector *lambda = interaction->getLambdaPtr(level);
 
     // compute p = Ht lambda
-    *p += matTransVecMult(*H, *lambda);
+    *p += prod(trans(*H), *lambda);
     delete p;
   }
   else

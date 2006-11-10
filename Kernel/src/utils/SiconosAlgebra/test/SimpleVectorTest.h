@@ -16,14 +16,13 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef __SiconosVectorTest__
-#define __SiconosVectorTest__
+#ifndef __SimpleVectorTest__
+#define __SimpleVectorTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "SiconosVector.h"
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
-#include "BlockVector.h"
 #include <math.h>
 #include <vector>
 
@@ -39,62 +38,56 @@ private:
   // tests to be done ...
 
   //  CPPUNIT_TEST(testBuildSimpleVector);
-  CPPUNIT_TEST(testBuildSimpleVector1);
-  CPPUNIT_TEST(testBuildSimpleVector2);
-  CPPUNIT_TEST(testBuildSimpleVector3);
-  CPPUNIT_TEST(testBuildSimpleVector4);
+  CPPUNIT_TEST(testConstructor1);
+  CPPUNIT_TEST(testConstructor2);
+  CPPUNIT_TEST(testConstructor3);
+  CPPUNIT_TEST(testConstructor4);
+  CPPUNIT_TEST(testConstructor5);
+  CPPUNIT_TEST(testConstructor6);
+  CPPUNIT_TEST(testConstructor7);
   CPPUNIT_TEST(testZero);
-  CPPUNIT_TEST(testSetValue);
-  CPPUNIT_TEST(testGetValue);
-  CPPUNIT_TEST(testSetValues);
-  CPPUNIT_TEST(testGetValues);
-  CPPUNIT_TEST(testSize);
-  CPPUNIT_TEST(testReadWrite);
-  CPPUNIT_TEST(testOperatorPlusEqual);
-  CPPUNIT_TEST(testOperatorEqual);
-  CPPUNIT_TEST(testOperatorMultDivEqual);
-  CPPUNIT_TEST(testAddition);
-  CPPUNIT_TEST(testSubtraction);
-  CPPUNIT_TEST(testExternalOperatorPlusMoins);
-  CPPUNIT_TEST(testExternalOperatorMultDiv);
-  CPPUNIT_TEST(testExternalOperatorMultMat);
-  CPPUNIT_TEST(testExternalOperatorMatTransMult);
-  CPPUNIT_TEST(testOperatorAccess);
+  CPPUNIT_TEST(testNorm);
+  CPPUNIT_TEST(testResize);
+  CPPUNIT_TEST(testAssignment);
+  CPPUNIT_TEST(testOperators1);
+  CPPUNIT_TEST(testOperators2);
+  CPPUNIT_TEST(testOperators3);
+  CPPUNIT_TEST(testOperators4);
+  CPPUNIT_TEST(testOperators5);
+  CPPUNIT_TEST(testOperators6);
+  CPPUNIT_TEST(testOperators7);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  //void testBuildSimpleVector();
-  void testBuildSimpleVector1();
-  void testBuildSimpleVector2();
-  void testBuildSimpleVector3();
-  void testBuildSimpleVector4();
+  void testConstructor1();
+  void testConstructor2();
+  void testConstructor3();
+  void testConstructor4();
+  void testConstructor5();
+  void testConstructor6();
+  void testConstructor7();
   void testZero();
-  void testSetValue();
-  void testGetValue();
-  void testSetValues();
-  void testGetValues();
-  void testSize();
-  void testReadWrite();
-  void testOperatorPlusEqual();
-  void testOperatorEqual();
-  void testOperatorMultDivEqual();
-  void testAddition();
-  void testSubtraction();
-  void testExternalOperatorPlusMoins();
-  void testExternalOperatorMultDiv();
-  void testExternalOperatorMultMat();
-  void testExternalOperatorMatTransMult();
-  void testOperatorAccess();
+  void testNorm();
+  void testResize();
+  void testAssignment();
+  void testOperators1();
+  void testOperators2();
+  void testOperators3();
+  void testOperators4();
+  void testOperators5();
+  void testOperators6();
+  void testOperators7();
   void End();
   // Members
 
+  SiconosVector * ref;
   std::vector<double> vq;
-  std::vector<double> vdotq;
-  SimpleVector * u, *u2, *u3, *u4;
-  SiconosVector *nsv;
+  DenseVect * dv;
+  SparseVect * sv;
+  double tol;
 
 public:
   void setUp();

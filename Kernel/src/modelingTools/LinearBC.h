@@ -15,6 +15,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ */
+/*! \file LinearBC.h
+
 */
 #ifndef LINEARBC_H
 #define LINEARBC_H
@@ -23,9 +26,8 @@
 #include "LinearBCXML.h"
 #include "check.h"
 
-/** \class LinearBC
- *  \brief kind of BoundaryCondition
-*  \author SICONOS Development Team - copyright INRIA
+//! Linear Boundary Conditions
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) May 6, 2004
  *
@@ -35,21 +37,18 @@ class LinearBC : public BoundaryCondition
 {
 public:
 
-  /** \fn LinearBC();
-   *  \brief Basic constructor
+  /** Basic constructor
    */
   LinearBC();
 
-  /** \fn LinearBC(BoundaryConditionXML*);
-   *  \brief constructor with XML object
+  /** constructor with XML object
    *  \param The object XML which contains data of the boundary condition.
    */
   LinearBC(BoundaryConditionXML*);
 
   ~LinearBC();
 
-  /** \fn SimpleMatrix getOmega0(void)
-   *  \brief allow to get the SimpleMatrix omega0
+  /** allow to get the SimpleMatrix omega0
    *  \return the SimpleMatrix omega0
    */
   inline SimpleMatrix getOmega0(void) const
@@ -57,8 +56,7 @@ public:
     return *omega0;
   };
 
-  /** \fn SimpleMatrix getOmegaT(void)
-   *  \brief allow to get the SimpleMatrix omegaT
+  /** allow to get the SimpleMatrix omegaT
    *  \return the SimpleMatrix omegaT
    */
   inline SimpleMatrix getOmegaT(void) const
@@ -66,8 +64,7 @@ public:
     return *omegaT;
   };
 
-  /** \fn SimpleVector getOmega(void)
-   *  \brief get vector omega
+  /** get vector omega
    *  \return SimpleVector : value of omega
    */
   inline SimpleVector getOmega(void) const
@@ -76,8 +73,7 @@ public:
   };
 
 
-  /** \fn void setOmega0(SiconosMatrix)
-   *  \brief allow to set the SiconosMatrix omega0
+  /** allow to set the SiconosMatrix omega0
    *  \param the SiconosMatrix to set omega0
    */
   inline void setOmega0(SiconosMatrix &M)
@@ -85,8 +81,7 @@ public:
     *omega0 = M;
   };
 
-  /** \fn void setOmegaT(SiconosMatrix)
-   *  \brief allow to set the SiconosMatrix omegaT
+  /** allow to set the SiconosMatrix omegaT
    *  \param the SiconosMatrix to set omegaT
    */
   inline void setOmegaT(SiconosMatrix &M)
@@ -94,8 +89,7 @@ public:
     *omegaT = M;
   };
 
-  /** \fn void setOmega(SimpleVector&)
-   *  \brief set vector omega
+  /** set vector omega
    *  \param SimpleVector& : new value of omega
    */
   inline void setOmega(/*SiconosVector*/SimpleVector& v)
@@ -103,18 +97,12 @@ public:
     *omega = v;
   };
 
-
-  //////////////////////
-
-  /** \fn void saveBCToXML()
-   *  \brief copy the data of the BoundaryCondition to the XML tree
+  /** copy the data of the BoundaryCondition to the XML tree
    *  \exception RuntimeException
    */
   void saveBCToXML();
 
-  /** \fn void createBoundaryCondition(BoundaryConditionXML * bcXML,
-        SiconosVector* omega, SiconosMatrix* omega0, SiconosMatrix* omegaT)
-   *  \brief allows to create the BoundaryCondition with an xml file, or the needed data
+  /** allows to create the BoundaryCondition with an xml file, or the needed data
    *  \param BoundaryConditionXML* : the XML object for this BoundaryCondition
    *  \param SiconosVector* : the omega vector of this BoundaryCondition
    *  \param SiconosVector* : the omega0 matrix of this BoundaryCondition
@@ -125,20 +113,17 @@ public:
                                SiconosVector* omega = NULL,
                                SiconosMatrix* omega0 = NULL, SiconosMatrix* omegaT = NULL); //,DynamicalSystem* ds=NULL);
 
-  /** \fn LinearBC* convert (BoundaryCondition* bc)
-   *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
+  /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param BoundaryCondition* : the boundary condition which must be converted
    * \return a pointer on the boundary condition if it is of the right type, NULL otherwise
    */
   static LinearBC* convert(BoundaryCondition* bc);
 
 protected:
-  /** \fn void fillBCWithBCXML()
-   *  \brief uses the BoundaryConditionXML of the BoundaryCondition to fill the fields of this BoundaryCondition
+  /** uses the BoundaryConditionXML of the BoundaryCondition to fill the fields of this BoundaryCondition
    *  \exception RuntimeException
    */
   void fillBCWithBCXML();
-
 
 private:
   /** Initial matrix of boundary conditions */

@@ -34,7 +34,7 @@ LinearTIR::LinearTIR(RelationXML* relxml):
 
   LinearTIRXML * lTIRxml = static_cast<LinearTIRXML *>(relationxml);
   isAllocatedIn.resize(5, false);
-  unsigned int sizeY, sizeX; // size of vector y and of vector x
+  unsigned int sizeY = 0, sizeX = 0; // size of vector y and of vector x
 
   // === Output ===
 
@@ -148,7 +148,7 @@ LinearTIR::LinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
   F = new SimpleMatrix(sizeY, newF.size(1));
   *F = newF;
 
-  if (newE.size(0) != sizeY)
+  if (newE.size() != sizeY)
     RuntimeException::selfThrow("LinearTIR:: constructor from data, inconsistent size between e and C");
   e = new SimpleVector(sizeY);
   *e = newE;
@@ -260,7 +260,7 @@ void LinearTIR::initialize()
   //    if(F->size(0)!=sizeRef || F->size(1)!=sizeRef)
   //      RuntimeException::selfThrow("LinearTIR::initialize inconsistent sizes between F matrix and the interaction.");
   if (e != NULL)
-    if (e->size(0) != sizeRef)
+    if (e->size() != sizeRef)
       RuntimeException::selfThrow("LinearTIR::initialize inconsistent sizes between e vector and the dimension of the interaction.");
 }
 
@@ -496,15 +496,11 @@ void LinearTIR::getCBlockDSPtr(DynamicalSystem * ds, SiconosMatrix& CBlock) cons
   // check dimension
   if ((*itDS)->getN() != CBlock.size(1))
     RuntimeException::selfThrow("LinearTIR - getCBlockDSPtr: inconsistent sizes between CBlock and DS");
+  if (C->size(0) != CBlock.size(0))
+    RuntimeException::selfThrow("LinearTIR - getCBlockDSPtr: inconsistent sizes between CBlock and DS");
 
   // get block
-  unsigned int l = k + (*itDS)->getN() - 1;
-  vector<unsigned int> index_list(4);
-  index_list[0] = 0;
-  index_list[1] = C->size(0) - 1;
-  index_list[2] = k;
-  index_list[3] = l;
-  C->getBlock(index_list, CBlock);
+  C->getBlock(0, k, CBlock);
 }
 
 void LinearTIR::getCBlockDSPtr(const int DSNumber, SiconosMatrix& CBlock) const
@@ -524,15 +520,11 @@ void LinearTIR::getCBlockDSPtr(const int DSNumber, SiconosMatrix& CBlock) const
   // check dimension
   if ((*itDS)->getN() != CBlock.size(1))
     RuntimeException::selfThrow("LinearTIR - getCBlockDSPtr: inconsistent sizes between CBlock and DS");
+  if (C->size(0) != CBlock.size(0))
+    RuntimeException::selfThrow("LinearTIR - getCBlockDSPtr: inconsistent sizes between CBlock and DS");
 
   // get block
-  unsigned int l = k + (*itDS)->getN() - 1;
-  vector<unsigned int> index_list(4);
-  index_list[0] = 0;
-  index_list[1] = C->size(0) - 1;
-  index_list[2] = k;
-  index_list[3] = l;
-  C->getBlock(index_list, CBlock);
+  C->getBlock(0, k, CBlock);
 }
 
 void LinearTIR::getBBlockDSPtr(DynamicalSystem* ds, SiconosMatrix& BBlock) const
@@ -550,16 +542,11 @@ void LinearTIR::getBBlockDSPtr(DynamicalSystem* ds, SiconosMatrix& BBlock) const
   // check dimension
   if ((*itDS)->getN() != BBlock.size(0))
     RuntimeException::selfThrow("LinearTIR - getBBlockDSPtr: inconsistent sizes between BBlock and DS");
+  if (B->size(1) != BBlock.size(1))
+    RuntimeException::selfThrow("LinearTIR - getBBlockDSPtr: inconsistent sizes between BBlock and DS");
 
   // get block
-  unsigned int l = k + (*itDS)->getN() - 1;
-  vector<unsigned int> index_list(4);
-  index_list[0] = k;
-  index_list[1] = l;
-  index_list[2] = 0;
-  index_list[3] = B->size(1) - 1;
-
-  B->getBlock(index_list, BBlock);
+  B->getBlock(k, 0, BBlock);
 }
 
 void LinearTIR::getBBlockDSPtr(const int DSNumber, SiconosMatrix& BBlock) const
@@ -577,16 +564,11 @@ void LinearTIR::getBBlockDSPtr(const int DSNumber, SiconosMatrix& BBlock) const
   // check dimension
   if ((*itDS)->getN() != BBlock.size(0))
     RuntimeException::selfThrow("LinearTIR - getBBlockDSPtr: inconsistent sizes between BBlock and DS");
+  if (B->size(1) != BBlock.size(1))
+    RuntimeException::selfThrow("LinearTIR - getBBlockDSPtr: inconsistent sizes between BBlock and DS");
 
   // get block
-  unsigned int l = k + (*itDS)->getN() - 1;
-  vector<unsigned int> index_list(4);
-  index_list[0] = k;
-  index_list[1] = l;
-  index_list[2] = 0;
-  index_list[3] = B->size(1) - 1;
-
-  B->getBlock(index_list, BBlock);
+  B->getBlock(k, 0, BBlock);
 }
 
 void LinearTIR::computeOutput(const double time, const unsigned int)
@@ -616,13 +598,13 @@ void LinearTIR::computeOutput(const double time, const unsigned int)
     SiconosVector *lambda = interaction->getLambdaPtr(0);
 
     // compute y
-    *y = *C * *xTmp;
+    *y = prod(*C, *xTmp);
 
     if (D != NULL)
-      *y += *D * *lambda;
+      *y += prod(*D, *lambda);
 
     if (F != NULL)
-      *y += *F * *uTmp;
+      *y += prod(*F, *uTmp);
 
     if (e != NULL)
       *y += *e;
@@ -664,10 +646,10 @@ void LinearTIR::computeFreeOutput(const double time, const unsigned int)
     // warning : yFree is saved in y !!
 
     // compute yFree
-    *yFree = *C * *xTmp;
+    *yFree = prod(*C, *xTmp);
 
     if (F != NULL)
-      *yFree += *F * *uTmp ;
+      *yFree += prod(*F, *uTmp);
 
     if (e != NULL)
       *yFree += *e;
@@ -706,7 +688,7 @@ void LinearTIR::computeInput(const double time, const unsigned int level)
 
     SiconosVector *lambda = interaction->getLambdaPtr(level);
 
-    *r += *B * *lambda;
+    *r += prod(*B, *lambda);
     delete r;
   }
   else

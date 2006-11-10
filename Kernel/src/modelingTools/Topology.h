@@ -16,15 +16,15 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+
+/*! \file Topology.h
+
+*/
 #ifndef TOPOLOGY_H
 #define TOPOLOGY_H
 
-#include "NonSmoothDynamicalSystem.h"
-#include "Interaction.h"
-
 // const
 #include "SiconosConst.h"
-
 #include "InteractionsSet.h"
 #include "UnitaryRelationsSet.h"
 #include <vector>
@@ -39,24 +39,44 @@ class SiconosMatrix;
 class UnitaryRelationsSet;
 class UnitaryRelation;
 
-/** \class Topology
- *  \brief this class provides maps to describe the topology of interactions of a NonSmoothDynamicalSystem
- *  \author SICONOS Development Team - copyright INRIA
+
+/** map that links a UnitaryRelation* to an int - Used for Relative degrees */
+typedef std::map< UnitaryRelation*, unsigned int > UnitaryRelationsIntMap;
+
+/** iterator through UnitaryRelationsIntMap */
+typedef UnitaryRelationsIntMap::iterator IteratorForRelativeDegrees;
+/** const iterator through UnitaryRelationsIntMap */
+typedef UnitaryRelationsIntMap::const_iterator ConstIteratorForRelativeDegrees;
+
+//! This class describes the topology of the non-smooth dynamical system. It holds all the "potential" Unitary Relations and their Relative Degrees.
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) July 20, 2005
  *
+ *  Topology is built in NSDS constructors but initialized in Simulation->initialize(), ie when all Interactions have been clearly defined.
+ *
+ * Note that indexSet0 holds all the possible relations (declared by user) not only those which are "actives".
+ *
+ * Construction consists in:
+ *    - link with the NSDS that owns the topology.
+ *
+ * Initialization consists in:
+ *    - scan of all the interactions of the NSDS
+ *    - initialization of each interaction
+ *    - insertion of the relations of all the Interaction into indexSet0
+ *    - computation of all relative degrees
+ *
+ * Insertion of an Interaction into the set indexSet0: addInteractionInIndexSet(Interaction * inter)
+ *   for each relation of the interaction, it creates a new UnitaryRelation and inserts it into indexSet0
+ *   It also counts the total number of "constraints" in the system.
+ *
+ * Relative degrees computation: at the time, depends only on the non-smooth law type of each UnitaryRelation.
+ * Degrees are saved in a map that links each UnitaryRelation to an int, its relative degree.
  *
  * Rule: no Unitary Relation can be created outside of the present class (ie the only calls to new UnitaryRelation(...) are part of Topology methods)
  * Thus, no flags for inside-class allocation - All UnitaryRelation pointers are cleared during Topology destructor call.
  *
  */
-
-/** map that links each unitary relation with its relative degree */
-typedef std::map< UnitaryRelation*, unsigned int > UnitaryRelationsIntMap;
-
-/** and the corresponding iterators */
-typedef UnitaryRelationsIntMap::iterator IteratorForRelativeDegrees;
-typedef UnitaryRelationsIntMap::const_iterator ConstIteratorForRelativeDegrees;
 class Topology
 {
 
@@ -87,58 +107,50 @@ private:
 
   // === PRIVATE FUNCTIONS ===
 
-  /** \fn const bool addInteractionInIndexSet(Interaction* inter)
-   *  \brief schedules the relations of Interaction inter in IndexSet0 (ie creates UnitaryRelations)
-   * \param: a pointer to Interaction
-   */
+  /** schedules the relations of Interaction inter into IndexSet0 (ie creates the corresponding UnitaryRelations)
+  * \param: a pointer to Interaction
+  */
   const bool addInteractionInIndexSet(Interaction*);
 
-  /** \fn void computeRelativeDegrees()
-   *   \brief compute the  RelativeDegrees Map
-   */
+  /** compute the  RelativeDegrees Map
+  */
   void computeRelativeDegrees();
 
-  /** \fn Topology()
-   *  \brief default constructor
-   */
+  /** default constructor
+  */
   Topology();
 
 public:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
-  /** \fn Topology(NonSmoothDynamicalSystem*)
-   *  \brief constructor from nsds that owns that topology
-   * \param: a NonSmoothDynamicalSystem*
-   */
+  /** constructor from nsds that owns that topology
+  * \param: a NonSmoothDynamicalSystem*
+  */
   Topology(NonSmoothDynamicalSystem*) ;
 
-  /** \fn ~Topology()
-   *  \brief destructor */
+  /** destructor */
   ~Topology();
 
   // === GETTERS/SETTERS ===
 
-  /** \fn const InteractionsSet getInteractions()
-   *  \brief get all the Interactions of the Topology problem (saved in a set)
-   *  \return an InteractionsSet
-   */
+  /** get all the Interactions of the Topology problem (saved in a set)
+  *  \return an InteractionsSet
+  */
   inline const InteractionsSet getInteractions() const
   {
     return allInteractions;
   }
 
-  /** \fn const bool hasInteraction(Interaction * inter)
-   *  \brief check if Interaction inter is in the set
-   *  \param a pointer to Interaction
-   *  \return a bool
-   */
+  /** check if Interaction inter is in the set
+  *  \param a pointer to Interaction
+  *  \return a bool
+  */
   const bool hasInteraction(Interaction*) const;
 
-  /** \fn  const UnitaryRelationsSet getIndexSet0()
-   *  \brief get the index set of all Unitary Relations
-   *  \return a UnitaryRelationsSet
-   */
+  /** get the index set of all Unitary Relations
+  *  \return a UnitaryRelationsSet
+  */
   inline const UnitaryRelationsSet getIndexSet0() const
   {
     return indexSet0;
@@ -146,52 +158,46 @@ public:
 
   // --- relativeDegreesMap ---
 
-  /** \fn  UnitaryRelationsIntMap getRelativeDegrees()
-   *  \brief get the relativeDegrees Map of this topology
-   *  \return a UnitaryRelationsIntMap
-   */
+  /** get the relativeDegrees Map of this topology
+  *  \return a UnitaryRelationsIntMap
+  */
   inline const UnitaryRelationsIntMap getRelativeDegrees() const
   {
     return relativeDegrees;
   }
 
-  /** \fn const unsigned int getRelativeDegree(UnitaryRelation*) const
-   *  \brief get the relativeDegree vector of a specific UnitaryRelation
-   *  \param a pointer to UnitaryRelation
-   *  \return an unsigned int
-   */
+  /** get the relativeDegree vector of a specific UnitaryRelation
+  *  \param a pointer to UnitaryRelation
+  *  \return an unsigned int
+  */
   inline const unsigned int getRelativeDegree(UnitaryRelation* UR)
   {
     return relativeDegrees[UR];
   }
 
-  /** \fn const unsigned int getMaxRelativeDegree() const
-   *  \brief for all relative degrees (one per Unitary Relation), find the maximum value.
-   *  \return an unsigned int
-   */
+  /** for all relative degrees (one per Unitary Relation), find the maximum value.
+  *  \return an unsigned int
+  */
   const unsigned int getMaxRelativeDegree();
 
-  /** \fn const unsigned int getMinRelativeDegree() const
-   *  \brief for all relative degrees (one per Unitary Relation), find the minimum value.
-   *  \return an unsigned int
-   */
+  /** for all relative degrees (one per Unitary Relation), find the minimum value.
+  *  \return an unsigned int
+  */
   const unsigned int getMinRelativeDegree();
 
   // --- isTopologyUpToDate ---
 
-  /** \fn void  setUpToDate(const bool val)
-   *  \brief set isTopologyUpToDate to val
-   *  \param a bool
-   */
+  /** set isTopologyUpToDate to val
+  *  \param a bool
+  */
   inline void setUpToDate(const bool val)
   {
     isTopologyUpToDate = val;
   }
 
-  /** \fn bool isUpToDate()
-   *  \brief check if topology has been updated since modifications occurs on nsds
-   *  \return a bool
-   */
+  /** check if topology has been updated since modifications occurs on nsds
+  *  \return a bool
+  */
   inline bool isUpToDate()
   {
     return isTopologyUpToDate;
@@ -199,36 +205,32 @@ public:
 
   // --- isTopologyTimeInvariant ---
 
-  /** \fn void  setTimeInvariant(const bool val)
-   *  \brief set isTopologyTimeInvariant to val
-   *  \param a bool
-   */
+  /** set isTopologyTimeInvariant to val
+  *  \param a bool
+  */
   inline void setTimeInvariant(const bool val)
   {
     isTopologyTimeInvariant = val;
   }
 
-  /** \fn bool isTimeInvariant()
-   *  \brief check if all relative degrees are equal to 0 or 1
-   *  \return a bool
-   */
+  /** check if all relative degrees are equal to 0 or 1
+  *  \return a bool
+  */
   inline bool isTimeInvariant()
   {
     return isTopologyTimeInvariant;
   }
 
-  /** \fn const unsigned int getNumberOfConstraints() const
-   *  \brief get the total number of scalar constraints
-   *  \return an unsigned int
-   */
+  /** get the total number of scalar constraints
+  *  \return an unsigned int
+  */
   inline const unsigned int getNumberOfConstraints()
   {
     return numberOfConstraints;
   };
 
-  /** \fn void initialize();
-   *   \brief initializes the topology
-   */
+  /** initializes the topology (called in Simulation->initialize)
+  */
   void initialize();
 };
 

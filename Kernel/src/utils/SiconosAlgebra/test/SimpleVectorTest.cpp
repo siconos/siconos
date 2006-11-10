@@ -18,136 +18,168 @@
 */
 
 #include "SimpleVectorTest.h"
+
 using namespace std;
+using namespace boost::numeric::ublas;
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SimpleVectorTest);
 
 
 void SimpleVectorTest::setUp()
 {
-  u = new SimpleVector(5);
-  u->zero();
+  tol = 1e-14;
+  ref = new SimpleVector(5);
+  for (unsigned int i = 0; i < 5; ++i)
+    (*ref)(i) = i;
+
   vq.resize(5, 1);
-  vdotq.resize(5, 1);
-  for (int i = 0; i < 5; i++)
-  {
-    vq.at(i) = 1;
-    vdotq.at(i) = 2;
-  }
+  for (unsigned int i = 0; i < 5; i++)
+    vq[i] = i + 1;
 
-  u2 = new SimpleVector(vq);
-  u3 = new SimpleVector(3);
-  u4 = new SimpleVector(2);
-  u3->zero();
-  u4->zero();
-  u3 ->setValue(2, 12);
-  u4 ->setValue(0, 8);
-  nsv = new BlockVector(*u3);
-  (static_cast<BlockVector*>(nsv))->add(*u4);
-
+  dv = new DenseVect(3);
+  (*dv)(0) = 1;
+  (*dv)(1) = 2;
+  (*dv)(2) = 3;
+  sv = new SparseVect(5);
+  (*sv)(1) = 22;
 }
 
 void SimpleVectorTest::tearDown()
 {
-  delete nsv;
-  delete u4;
-  delete u3;
-  delete u2;
-  delete u;
+  delete ref;
+  delete dv;
+  delete sv;
 }
-
-// CONSTRUCTORS TESTS
-
-// Default  ->private
-/*void SimpleVectorTest::testBuildSimpleVector()
-{
-  SimpleVector * v = new SimpleVector();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector : ", v->isBlock(), false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector : ", v->size() == 0, true);
-  delete v;
-  cout << " Constructor SV 0 ok" << endl;
-}
-*/
-// from a file, see testRead
 
 // Copy from a std vector
-void SimpleVectorTest::testBuildSimpleVector1()
+void SimpleVectorTest::testConstructor1()
 {
   cout << "====================================" << endl;
-  cout << "=== Simple Vector tests start ...=== " << endl;
+  cout << "===  Simple Vector tests start ...=== " << endl;
   cout << "====================================" << endl;
   cout << "--> Test: constructor 1." << endl;
-  SimpleVector * v = new SimpleVector(vq);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", v->isBlock(), false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", v->size() == vq.size(), true);
+  SimpleVector * v = new SimpleVector(3);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->isBlock(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->size() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->getNum() == 1, true);
   for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector1 : ", (v->getValues())(i) == vq[i], true);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", (*v)(i) == 0, true);
+  delete v;
+  v = new SimpleVector(3, SPARSE);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->isBlock(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->size() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->getNum() == 4, true);
   delete v;
   cout << "--> Constructor 1 test ended with success." << endl;
 }
 
-// Copy
-void SimpleVectorTest::testBuildSimpleVector2()
+void SimpleVectorTest::testConstructor2()
 {
   cout << "--> Test: constructor 2." << endl;
-  SimpleVector *v = new SimpleVector(*u);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->isBlock(), false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->size() == u->size(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", *v == *u, true);
+  SimpleVector *v = new SimpleVector(vq);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", v->isBlock(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", v->size() == vq.size(), true);
+  for (unsigned int i = 0; i < v->size(); i++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor2 : ", (*v)(i) == vq[i], true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor1 : ", v->getNum() == 1, true);
   delete v;
   cout << "--> Constructor 2 test ended with success." << endl;
 }
 
-// copy from SiconosVector
-void SimpleVectorTest::testBuildSimpleVector3()
+// copy from a SiconosVector
+void SimpleVectorTest::testConstructor3()
 {
   cout << "--> Test: constructor 3." << endl;
-  // from a siconos which is a simple
   SiconosVector * tmp = new SimpleVector(vq);
   SimpleVector *v = new SimpleVector(*tmp);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->isBlock(), false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->size() == tmp->size(), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", *v == *tmp, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->isBlock(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->size() == vq.size(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", *v == *tmp, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->getNum() == 1, true);
   delete v;
   delete tmp;
+  tmp = new SimpleVector(3, SPARSE);
+  v = new SimpleVector(*tmp);
 
-  // from a siconos which is a block vector
-  tmp = static_cast<SiconosVector*>(u2);
-
-  SiconosVector * tmp2 = new BlockVector(*tmp);
-  (static_cast<BlockVector*>(tmp2))->add(*u2);
-  v = new SimpleVector(*tmp2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->isBlock(), false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", v->size() == 10, true);
-  for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector2 : ", (*v)(i) == 1, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->isBlock(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->size() == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", *v == *tmp, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor3 : ", v->getNum() == 4, true);
   delete v;
-  delete tmp2;
+  delete tmp;
   cout << "--> Constructor 3 test ended with success." << endl;
 }
 
 // with size
-void SimpleVectorTest::testBuildSimpleVector4()
+void SimpleVectorTest::testConstructor4()
 {
   cout << "--> Test: constructor 4." << endl;
-  unsigned int SIZE = 10;
-  SimpleVector *v = new SimpleVector(SIZE);
+  SimpleVector * tmp = new SimpleVector(vq);
+  SimpleVector *v = new SimpleVector(*tmp);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->size() == SIZE, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->isBlock(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->size() == vq.size(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", *v == *tmp, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->getNum() == 1, true);
   delete v;
+  delete tmp;
+  tmp = new SimpleVector(4, SPARSE);
+  v = new SimpleVector(*tmp);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->isBlock(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->size() == 4, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", *v == *tmp, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", v->getNum() == 4, true);
+  delete v;
+  delete tmp;
   cout << "--> Constructor 4 test ended with success." << endl;
 }
 
+void SimpleVectorTest::testConstructor5()
+{
+  cout << "--> Test: constructor 5." << endl;
+  SiconosVector * v = new SimpleVector(*dv);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->isBlock(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == dv->size(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", norm_inf(v->getDense() - *dv) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->getNum() == 1, true);
+  delete v;
+  cout << "--> Constructor 5 test ended with success." << endl;
+}
+void SimpleVectorTest::testConstructor6()
+{
+  cout << "--> Test: constructor 6." << endl;
+  SiconosVector * v = new SimpleVector(*sv);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", v->isBlock(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", v->size() == sv->size(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", norm_inf(v->getSparse() - *sv) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor6 : ", v->getNum() == 4, true);
+  delete v;
+  cout << "--> Constructor 6 test ended with success." << endl;
+}
+
+void SimpleVectorTest::testConstructor7()
+{
+  cout << "--> Test: constructor 7." << endl;
+  SiconosVector * v = new SimpleVector("vect.dat", 1);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", v->isBlock(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", v->size() == 4, true);
+  for (unsigned int i = 0; i < v->size(); i++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", (*v)(i) == i, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor7 : ", v->getNum() == 1, true);
+  delete v;
+  cout << "--> Constructor 7 test ended with success." << endl;
+}
 // destructor
 
 // zero
 void SimpleVectorTest::testZero()
 {
   cout << "--> Test: zero." << endl;
-  SimpleVector *v = new SimpleVector(vq);
+  SiconosVector *v = new SimpleVector(vq);
   v->zero();
   for (unsigned int i = 0; i < v->size(); i++)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("testZero : ", (*v)(i) == 0, true);
@@ -155,444 +187,292 @@ void SimpleVectorTest::testZero()
   cout << "--> zero test ended with success." << endl;
 }
 
-// toString
-// display
-
-// setValue
-void SimpleVectorTest::testSetValue()
+void SimpleVectorTest::testNorm()
 {
-  cout << "--> Test: setValue." << endl;
-  double a = 4;
-  int i = 2;
-  u->setValue(i, a);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValue : ", (*u)(2) == 4, true);
-  cout << "-->  setValue test ended with success." << endl;
-}
-
-// getValue
-void SimpleVectorTest::testGetValue()
-{
-  cout << "--> Test: getValue." << endl;
-  int i = 2;
-  u->setValue(i, 8);
-  u->getValue(i);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetValue : ", (*u)(2) == 8, true);
-  cout << "-->  getValue test ended with success." << endl;
-}
-
-// setValues
-void SimpleVectorTest::testSetValues()
-{
-  cout << "--> Test: setValues." << endl;
-  u->setValues(vq);
-  for (unsigned int i = 0; i < u->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetValues : ", (u->getValues())(i) == vq[i], true);
-  cout << "-->  setValues test ended with success." << endl;
-}
-
-// getValues
-void SimpleVectorTest::testGetValues()
-{
-  cout << "--> Test: getValues." << endl;
-  for (unsigned int i = 0; i < u->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetValues : ", (u2->getValues())(i) == 1, true);
-  cout << "-->  getValues test ended with success." << endl;
-}
-
-// size
-void SimpleVectorTest::testSize()
-{
-  cout << "--> Test: setSize." << endl;
-  int i = u2->size();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSize : ", i == 5, true);
-  cout << "-->  setSize test ended with success." << endl;
-}
-
-// write, read and read from a file constructor
-void SimpleVectorTest::testReadWrite()
-{
-  cout << "--> Test: readWrite." << endl;
-  // write u2 into an ascii file
-  bool isok = u2->write("testWrite_ascii.dat", "ascii");
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testReadWrite : ", isok == true, true);
-
-  // write u2 into a binary file
-  bool isok2 = u2->write("testWrite_bin.dat", "binary");
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testReadWrite : ", isok2 == true, true);
-
-  // load v from an ascii file
-  string input = "testWrite_ascii.dat";
-  SimpleVector * v = new SimpleVector(input, true);
-  // load v2 from a binary file
-  string input_bin = "testWrite_bin.dat";
-  SimpleVector *v2 = new SimpleVector(input_bin, false);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", v->size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", v->size() == v2->size(), true);
-  for (unsigned int i = 0; i < v->size(); i++)
-  {
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", (*v)(i) == (*v2)(i), true);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testRead : ", (*v)(i) == (*u2)(i), true);
-  }
-  delete v2;
+  cout << "--> Test: norm." << endl;
+  SiconosVector *v = new SimpleVector(*dv);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", v->normInf() == norm_inf(*dv), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", (v->norm() - norm_2(*dv)) < tol, true);
   delete v;
-  cout << "--> readWrite test ended with success." << endl;
+  cout << "--> norm test ended with success." << endl;
 }
 
-// getArray and norm: embedded blas or lapack functions => no tests
-
-// norm
+//resize
+void SimpleVectorTest::testResize()
+{
+  cout << "--> Test: resize." << endl;
+  SiconosVector *v = new SimpleVector(vq);
+  v->resize(6);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", v->isBlock(), false);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", v->size() == 6, true);
+  for (unsigned int i = 0; i < vq.size(); i++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", (*v)(i) == vq[i], true);
+  for (unsigned int i = vq.size(); i < v->size(); i++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", (*v)(i) == 0, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("test resize : ", v->getNum() == 1, true);
+  delete v;
+  cout << "-->  resize test ended with success." << endl;
+}
 
 // OPERATORS
 
-// += -=
-void SimpleVectorTest::testOperatorPlusEqual()
-{
-  cout << "--> Test: operatorPlusEqual." << endl;
-  SimpleVector *v = new SimpleVector(vq);
-
-  SiconosVector *sv = new SimpleVector(vq);
-  *v += *sv;
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", v->size() == vq.size(), true);
-  for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == 2 * (*sv)(i), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
-
-  *v -= *sv;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", v->size() == vq.size(), true);
-  for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == vq[i], true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
-
-  delete sv;
-
-  *v += *nsv;
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", v->size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(2) == 13, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(3) == 9, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(4) == 1, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
-
-  v->zero();
-  *v -= *nsv;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", v->size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(2) == -12, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(3) == -8, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(4) == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
-  delete v;
-  cout << "--> operatorPlusEqual test ended with success." << endl;
-}
-
 // =
-void SimpleVectorTest::testOperatorEqual()
+void SimpleVectorTest::testAssignment()
 {
-  cout << "--> Test: operatorEqual." << endl;
-  SimpleVector *v = new SimpleVector(vq);
-  SimpleVector *w = new SimpleVector(vdotq);
-  SiconosVector *z = new SimpleVector(vq);
+  cout << "--> Test: operators1." << endl;
+  SiconosVector *v = new SimpleVector(vq.size());
+  for (unsigned int i = 0; i < vq.size(); i++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment : ", (*v)(i) == 0, true);
+  SiconosVector *w = new SimpleVector(vq);
+  *v = *w;
+  for (unsigned int i = 0; i < vq.size(); i++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment : ", (*v)(i) == (*w)(i), true);
 
-  *v = *w ;
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", v->size() == w->size(), true);
-  for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == (*w)(i), true);
-
-  *v = *z;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", v->size() == z->size(), true);
-  for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == (*z)(i), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
-
-  *v = *nsv;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorEqual : ", v->size() == nsv->size(), true);
-  for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == (*nsv)(i), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildSimpleVector3 : ", v->isBlock(), false);
-
-
-  delete z;
-  delete w;
-  delete v;
-  cout << "--> operatorEqual test ended with success." << endl;
-}
-
-// *= , /=
-
-void SimpleVectorTest::testOperatorMultDivEqual()
-{
-  cout << "--> Test: operatorMultDivEqual." << endl;
-
-  double d = 2;
-
-  *u2 *= d;
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualSPC : ", u2->size() == 5, true);
-  for (unsigned int i = 0; i < u2->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorMultEqualGEN : ", (*u2)(i) == 2, true);
-
-  *u2 /= d;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorDivEqualSPC : ", u2->size() == 5, true);
-  for (unsigned int i = 0; i < u2->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorDivEqualGEN : ", (*u2)(i) == 1, true);
-  cout << "--> operatorMultDivEqual test ended with success." << endl;
-}
-
-// addition
-void SimpleVectorTest::testAddition()
-{
-  cout << "--> Test: addition." << endl;
-  SiconosVector * sv = new SimpleVector(*u2);
-
-  *u = u2->addition(*sv);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", u->size() == 5, true);
-  for (unsigned int i = 0; i < u->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*u)(i) == 2, true);
-
-  *u = u2->addition(*nsv);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", u->size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*u)(2) == 13, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*u)(3) == 9, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*u)(4) == 1, true);
-  delete sv;
-  cout << "--> addition test ended with success." << endl;
-}
-
-// subtraction
-void SimpleVectorTest::testSubtraction()
-{
-  cout << "--> Test: subtraction ." << endl;
-  SiconosVector * sv = new SimpleVector(*u2);
-
-  *u = u2->subtraction(*sv);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", u->size() == 5, true);
-  for (unsigned int i = 0; i < u->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*u)(i) == 0, true);
-
-  *u = u2->subtraction(*nsv);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", u->size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*u)(2) == -11, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*u)(3) == -7, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*u)(4) == 1, true);
-
-  delete sv;
-  cout << "--> subtraction test ended with success." << endl;
-}
-// +
-
-void SimpleVectorTest::testExternalOperatorPlusMoins()
-{
-  cout << "--> Test: externalOperatorPlusMoins ." << endl;
-  SimpleVector *v = new SimpleVector(5);
-  SiconosVector *nsv1 = new SimpleVector(vq);
-
-  *v = *nsv1 + *nsv1;
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", v->size() == vq.size(), true);
-  for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == 2, true);
-
-  *v = *nsv1 - *nsv1;
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", v->size() == vq.size(), true);
-  for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == 0, true);
-
-  delete nsv1;
-  SimpleVector *v2 = new SimpleVector(vdotq);
-
-  *v = *u2 + *v2;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", v->size() == vq.size(), true);
-  for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == 3, true);
-
-  *v = *u2 - *v2;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", v->size() == vq.size(), true);
-  for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == -1, true);
-
-  *v = *nsv + *nsv;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", v->size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(2) == 24, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(3) == 16, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(4) == 0, true);
-
-  *v = *nsv - *nsv;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", v->size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(2) == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(3) == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(4) == 0, true);
-
-  *v = *nsv + *v2;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", v->size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(2) == 14, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(3) == 10, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(4) == 2, true);
-
-  *v = *nsv - *v2;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", v->size() == 5, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(2) == 10, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(3) == 6, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(4) == -2, true);
-
-  delete v2;
-  delete v;
-  cout << "--> externalOperatorPlusMoins test ended with success." << endl;
-}
-
-// * /
-void SimpleVectorTest::testExternalOperatorMultDiv()
-{
-  cout << "--> Test: externalOperatorMultDiv ." << endl;
-  SimpleVector *v = new SimpleVector(5);
-  double d = 2;
-
-  *v = d * (*u2);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", v->size() == vq.size(), true);
-  for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == 2, true);
-
-  *v = (*u2) / d;
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorPlusGEN : ", v->size() == vq.size(), true);
-  for (unsigned int i = 0; i < v->size(); i++)
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorPlusEqualGEN : ", (*v)(i) == 0.5, true);
-
-  delete v;
-  cout << "--> externalOperatorMultDiv test ended with success." << endl;
-}
-
-// matTransVectMult
-
-void SimpleVectorTest::testExternalOperatorMultMat()
-{
-  cout << "--> Test: externalOperatorMultMat ." << endl;
-  SimpleMatrix m(2, 4);
-  m(0, 0) = 0;
-  m(0, 1) = 1;
-  m(0, 2) = -1;
-  m(0, 3) = 0;
-  m(1, 0) = 2;
-  m(1, 1) = 1;
-  m(1, 2) = -1;
-  m(1, 3) = -2;
-
-  SimpleVector *v = new SimpleVector(4);
-
-  (*v)(0) = 1;
-  (*v)(1) = 2;
-  (*v)(2) = 3;
-  (*v)(3) = 4;
-
-  SimpleVector res(2);
-  res(0) = -1;
-  res(1) = -7;
-
-  SimpleVector sv(2);
-  sv = m * *v;
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMultMat : ", sv == res, true);
-
-  SiconosVector * sv2 = new SimpleVector(4);
-  (*sv2)(0) = 1;
-  (*sv2)(1) = 2;
-  (*sv2)(2) = 3;
-  (*sv2)(3) = 4;
-  sv = m * (*sv2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMultMat : ", sv == res, true);
-
-  SiconosVector * sv3 = new BlockVector(*u4);
-  (static_cast<BlockVector*>(sv3))->add(*u4);
-  (*sv3)(0) = 1;
-  (*sv3)(1) = 2;
-  (*sv3)(2) = 3;
-  (*sv3)(3) = 4;
-  sv = m * (*sv3);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMultMat : ", sv == res, true);
-
-
-  delete sv3;
-  delete sv2;
-  delete v;
-  cout << "--> externalOperatorMultMat test ended with success." << endl;
-}
-
-void SimpleVectorTest::testExternalOperatorMatTransMult()
-{
-  cout << "--> Test: externalOperatorMatTransMult ." << endl;
-  SimpleMatrix m(4, 2);
-  m(0, 0) = 0;
-  m(0, 1) = 2;
-  m(1, 0) = 1;
-  m(1, 1) = 1;
-  m(2, 0) = -1;
-  m(2, 1) = -1;
-  m(3, 0) = 0;
-  m(3, 1) = -2;
-
-  SimpleVector *v = new SimpleVector(4);
-
-  (*v)(0) = 1;
-  (*v)(1) = 2;
-  (*v)(2) = 3;
-  (*v)(3) = 4;
-
-  SimpleVector res(2);
-  res(0) = -1;
-  res(1) = -7;
-
-  SimpleVector sv(2);
-  sv = matTransVecMult(m, *v);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMultMat : ", sv == res, true);
-
-  SiconosVector * sv2 = new SimpleVector(4);
-  (*sv2)(0) = 1;
-  (*sv2)(1) = 2;
-  (*sv2)(2) = 3;
-  (*sv2)(3) = 4;
-  sv = matTransVecMult(m, *sv2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMultMat : ", sv == res, true);
-
-  SiconosVector * sv3 = new BlockVector(*u4);
-  (static_cast<BlockVector*>(sv3))->add(*u4);
-  (*sv3)(0) = 1;
-  (*sv3)(1) = 2;
-  (*sv3)(2) = 3;
-  (*sv3)(3) = 4;
-  sv = matTransVecMult(m, *sv3);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testExternalOperatorMultMat : ", sv == res, true);
-
-
-  delete sv3;
-  delete sv2;
-  delete v;
-  cout << "--> externalOperatorMatTransMult test ended with success." << endl;
+  cout << "--> operators1 test ended with success." << endl;
 }
 
 // ()
-void SimpleVectorTest::testOperatorAccess()
+void SimpleVectorTest::testOperators1()
 {
-  cout << "--> Test: operatorAccess ." << endl;
-  SimpleVector *v = new SimpleVector(vq);
+  cout << "--> Test: operators1." << endl;
 
-  (*v)(2) = 10;
-
-  const double d = (*v)(1);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", v->isBlock(), false);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", v->size() == vq.size() , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", (*v)(2) != vq[2] , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", (v->getValues())(2) == 10 , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperatorAccessRef : ", d == 1, true);
-  delete v;
-  cout << "--> operatorAccess test ended with success." << endl;
+  cout << "--> operators1 test ended with success." << endl;
 }
+
+// +=, -=, *=, /=
+void SimpleVectorTest::testOperators2()
+{
+  cout << "--> Test: operators2." << endl;
+  SiconosVector *v = new SimpleVector(vq.size());
+  SiconosVector *w = new SimpleVector(vq);
+
+  // dense +=, -=, ... dense
+  *v += *w;
+  for (unsigned int i = 0; i < vq.size(); i++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", (*v)(i) == (*w)(i), true);
+  double mult = 2.2;
+  int mult1 = 2;
+  *v *= mult;
+  for (unsigned int i = 0; i < vq.size(); i++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", ((*v)(i) - mult * (*w)(i)) < tol, true);
+  *v *= mult1;
+  for (unsigned int i = 0; i < vq.size(); i++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", ((*v)(i) - mult1 * mult * (*w)(i)) < tol, true);
+  *v /= mult1;
+  for (unsigned int i = 0; i < vq.size(); i++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", ((*v)(i) - mult * (*w)(i)) < tol, true);
+  *v /= mult;
+  for (unsigned int i = 0; i < vq.size(); i++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", ((*v)(i) - (*w)(i)) < tol, true);
+  *v *= 3;
+  *v -= *w;
+  for (unsigned int i = 0; i < vq.size(); i++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", ((*v)(i) - 2 * (*w)(i)) < tol, true);
+  delete w;
+
+  // dense +=, -=, ... sparse
+  w = new SimpleVector(*sv);
+  v->resize(5);
+  v->zero();
+  *v += *w;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(v->getDense() - *sv) < tol, true);
+  *v *= 3;
+  *v -= *w;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(v->getDense() - 2 * *sv) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", v->getNum() == 1, true);
+  delete v;
+  // sparse += -= sparse
+  v = new SimpleVector(5, SPARSE);
+  *v += *w;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(v->getSparse() - *sv) < tol, true);
+  *v *= 3;
+  *v -= *w;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", norm_inf(v->getSparse() - 2 * *sv) < tol, true);
+  delete w;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators2 : ", v->getNum() == 4, true);
+  delete v;
+  cout << "--> operators2 test ended with success." << endl;
+}
+
+// inner_prod
+void SimpleVectorTest::testOperators3()
+{
+  cout << "--> Test: operators3." << endl;
+  SiconosVector *v = new SimpleVector(vq);
+  SiconosVector *w = new SimpleVector(vq);
+  double res;
+  // *
+  res = inner_prod(*v, *w); // dense*dense
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", res == 55, true);
+  delete w;
+  w = new SimpleVector(*sv);
+  res = inner_prod(*v, *w); // dense*sparse
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", res == 44, true);
+  delete v;
+  v = new SimpleVector(*sv);
+  res = inner_prod(*v, *w); // sparse*sparse
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", res == 484, true);
+  delete w;
+  w = new SimpleVector(vq);
+  res = inner_prod(*v, *w); // sparse*dense
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", res == 44, true);
+  cout << "--> operators3 test ended with success." << endl;
+}
+
+// vector * or / by double or int
+void SimpleVectorTest::testOperators4()
+{
+  cout << "--> Test: operators4." << endl;
+  SiconosVector *v = new SimpleVector(vq);
+  SiconosVector * res = new SimpleVector(5);
+  double mult = 2.2;
+  int mult1 = 2;
+  // *
+  *res = mult**v; // dense
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(res->getDense() - mult * v->getDense()) < tol, true);
+  res->zero();
+  *res = *v * mult; // dense
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(res->getDense() - mult * v->getDense()) < tol, true);
+  res->zero();
+  *res = mult1**v; // dense
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(res->getDense() - mult1 * v->getDense()) < tol, true);
+  res->zero();
+  *res = *v * mult1; // dense
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(res->getDense() - mult1 * v->getDense()) < tol, true);
+  res->zero();
+  *res = *v / mult; // dense
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(res->getDense() - v->getDense() / mult) < tol, true);
+  res->zero();
+  *res = *v / mult1; // dense
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(res->getDense() - v->getDense() / mult1) < tol, true);
+  res->zero();
+  delete v;
+  v = new SimpleVector(*sv);
+  delete res;
+  res = new SimpleVector(5, SPARSE);
+  *res = mult**v; // sparse
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(res->getSparse() - mult * v->getSparse()) < tol, true);
+  res->zero();
+  *res = *v * mult; // sparse
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(res->getSparse() - mult * v->getSparse()) < tol, true);
+  res->zero();
+  *res = mult1**v; // sparse
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(res->getSparse() - mult1 * v->getSparse()) < tol, true);
+  res->zero();
+  *res = *v * mult1; // sparse
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(res->getSparse() - mult1 * v->getSparse()) < tol, true);
+  res->zero();
+  *res = *v / mult; // sparse
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(res->getSparse() - v->getSparse() / mult) < tol, true);
+  res->zero();
+  *res = *v / mult1; // sparse
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators4 : ", norm_2(res->getSparse() - v->getSparse() / mult1) < tol, true);
+  delete res;
+  delete v;
+
+  cout << "--> operators4 test ended with success." << endl;
+}
+
+// +
+void SimpleVectorTest::testOperators5()
+{
+  cout << "--> Test: operators5." << endl;
+  SiconosVector *v = new SimpleVector(vq);
+  SiconosVector *w = new SimpleVector(vq);
+  SiconosVector * res = new SimpleVector(5);
+  SiconosVector * res2 = new SimpleVector(5, SPARSE);
+
+  *res = *v + *w; // dense+dense
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators5 : ", norm_2(res->getDense() - 2 * v->getDense()) < tol, true);
+  delete w;
+  w = new SimpleVector(*sv);
+  *res = *v + *w; // dense+sparse
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators5 : ", norm_2(res->getDense() - v->getDense() - w->getSparse()) < tol, true);
+  delete v;
+  v = new SimpleVector(*sv);
+  *res2 = *v + *w; // sparse+sparse
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators5 : ", norm_inf(res2->getSparse() - 2 * *sv) < tol, true);
+  delete w;
+  w = new SimpleVector(vq);
+  *res = *v + *w; // sparse+dense
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators5 : ", norm_2(res->getDense() - v->getSparse() - w->getDense()) < tol, true);
+  delete v;
+  delete w;
+  delete res;
+  delete res2;
+  cout << "--> operators5 test ended with success." << endl;
+}
+
+// -
+void SimpleVectorTest::testOperators6()
+{
+  cout << "--> Test: operators6." << endl;
+  SiconosVector *v = new SimpleVector(vq);
+  SiconosVector *w = new SimpleVector(vq);
+  SiconosVector * res = new SimpleVector(5);
+  SiconosVector * res2 = new SimpleVector(5, SPARSE);
+
+  *res = 2 * *v - *w; // dense-dense
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6 : ", norm_2(res->getDense() - v->getDense()) < tol, true);
+  delete w;
+  w = new SimpleVector(*sv);
+  *res = *v - *w; // dense-sparse
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6 : ", norm_2(res->getDense() - v->getDense() + w->getSparse()) < tol, true);
+  delete v;
+  v = new SimpleVector(*sv);
+  *res2 = 2 * *v - *w; // sparse-sparse
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6 : ", norm_inf(res2->getSparse() - *sv) < tol, true);
+  delete w;
+  w = new SimpleVector(vq);
+  *res = *v - *w; // sparse-dense
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators6 : ", norm_2(res->getDense() - v->getSparse() + w->getDense()) < tol, true);
+  delete v;
+  delete w;
+  delete res;
+  delete res2;
+  cout << "--> operators6 test ended with success." << endl;
+}
+
+// outer_prod(v,w) = trans(v)*w
+void SimpleVectorTest::testOperators7()
+{
+  cout << "--> Test: operators7." << endl;
+  SiconosVector *v = new SimpleVector(vq);
+  v->resize(3);
+  SiconosVector *w = new SimpleVector(vq);
+  SiconosMatrix *res = new SimpleMatrix(3, 5);
+  *res = outer_prod(*v, *w); // dense*dense
+  for (unsigned int i = 0 ; i < 3; ++i)
+    for (unsigned int j = 0; j < 5; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", ((*res)(i, j) - (*v)(i) * (*w)(j)) < tol , true);
+  delete w;
+  res->zero();
+  w = new SimpleVector(*sv);
+  *res = outer_prod(*v, *w); // dense*sparse
+  for (unsigned int i = 0 ; i < 3; ++i)
+    for (unsigned int j = 0; j < 5; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", ((*res)(i, j) - (*v)(i) * (w->getSparse())(j)) < tol , true);
+  delete v;
+  res->zero();
+  v = new SimpleVector(*sv);
+  *res = outer_prod(*v, *w); // sparse*sparse
+  for (unsigned int i = 0 ; i < 3; ++i)
+    for (unsigned int j = 0; j < 5; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", ((*res)(i, j) - (v->getSparse())(i) * (w->getSparse())(j)) < tol , true);
+  delete w;
+  res->zero();
+  w = new SimpleVector(vq);
+  *res = outer_prod(*v, *w); // sparse*dense
+  for (unsigned int i = 0 ; i < 3; ++i)
+    for (unsigned int j = 0; j < 5; ++j)
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", ((*res)(i, j) - (v->getSparse())(i) * (*w)(j)) < tol , true);
+
+  delete w;
+  delete v;
+  delete res;
+  cout << "--> operators7 test ended with success." << endl;
+}
+
 
 void SimpleVectorTest::End()
 {

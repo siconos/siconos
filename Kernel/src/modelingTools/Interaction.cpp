@@ -17,8 +17,6 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "Interaction.h"
-
-// includes to be deleted thanks to factories
 #include "LinearTIR.h"
 #include "LagrangianLinearR.h"
 #include "LagrangianR.h"
@@ -91,7 +89,7 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
     else
     {
       // get numbers of DS involved in the interaction from the xml input file.
-      vector<int> listDS;
+      std::vector<int> listDS;
       interactionxml->getDSNumbers(listDS);
 
       // get corresponding DS and insert them into the involvedDS set.
@@ -137,7 +135,7 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
 
 // --- Constructor from a set of data ---
 
-Interaction::Interaction(const string newId, DynamicalSystemsSet& dsConcerned, const int newNumber, const int nInter, NonSmoothLaw* newNSL, Relation* newRel):
+Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLaw* newNSL, Relation* newRel):
   id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), involvedDS(),
   nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL), isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
 {
@@ -173,7 +171,6 @@ Interaction::~Interaction()
 
 void Interaction::initialize()
 {
-
   if (relation == NULL)
     RuntimeException::selfThrow("Interaction::initialize, relation == NULL");
   if (nslaw == NULL)

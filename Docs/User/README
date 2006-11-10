@@ -1,0 +1,12 @@
+07 nov 2006 - F. Pérignon. 
+No complete User Manual at the time. All the following are just partial documentations. 
+
+- DynamicalSystemsInSiconos: a description of the various kinds of Dynamical Systems in Siconos (how to build, use them ...)
+
+- Template: short description of some samples
+
+- Old_Doc: out of date documentation, SUM (User Manual) for Kernel and Numerics.  
+- StlToolsShortTutorial: short overview on the way to use STL tools in a Siconos main file. 
+
+
+Note: macro.tex is required for all the .tex files present in subdirectories. 

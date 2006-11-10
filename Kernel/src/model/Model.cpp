@@ -27,6 +27,11 @@ using namespace std;
 
 // --- CONSTRUCTORS ---
 
+// --- Default (private) constructor ---
+Model::Model(): t(0.0), t0(0.0), T(0.0), strat(NULL), nsds(NULL),
+  modelxml(NULL), title("none"), author("nobody"), description("none"),
+  date("none"), xmlSchema("none")
+{}
 // -> xml
 Model::Model(char *xmlFile):
   t(0.0), t0(0.0), T(-1.0), strat(NULL), nsds(NULL),
@@ -67,7 +72,7 @@ Model::Model(char *xmlFile):
 }
 
 // --- From a minimum set of data ---
-Model::Model(const double& newT0, const double& newT, const string& newTitle, const string& newAuthor,
+Model::Model(double newT0, double newT, const string& newTitle, const string& newAuthor,
              const string& newDescription, const string& newDate, const string& newSchema):
   t(newT0), t0(newT0), T(-1), strat(NULL), nsds(NULL), modelxml(NULL), title(newTitle),
   author(newAuthor), description(newDescription), date(newDate), xmlSchema(newSchema),
@@ -356,7 +361,7 @@ void Model::display() const
 //
 //=======================================================
 
-Simulation* Model::createSimulation(string type)
+Simulation* Model::createSimulation(std::string type)
 {
   if (isSimulationAllocatedIn) delete strat;
   isSimulationAllocatedIn = false;
@@ -391,8 +396,3 @@ Simulation* Model::createTimeEventDriven()
   return strat;
 }
 
-// --- Default (private) constructor ---
-Model::Model(): t(0.0), t0(0.0), T(0.0), strat(NULL), nsds(NULL),
-  modelxml(NULL), title("none"), author("nobody"), description("none"),
-  date("none"), xmlSchema("none")
-{}

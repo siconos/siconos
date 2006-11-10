@@ -34,7 +34,7 @@ LinearTIEC::~LinearTIEC()
 
 void LinearTIEC::createEqualityConstraint(EqualityConstraintXML *ecXML ,
     int number,  SiconosMatrix *newG,
-    vector<DSInputOutput*> *dsioVector)
+    std::vector<DSInputOutput*> *dsioVector)
 {
   if (ecXML != NULL)
   {

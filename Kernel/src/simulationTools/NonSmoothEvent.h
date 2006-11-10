@@ -16,12 +16,14 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+/*! \file
+ Non-Smooth Events
+*/
 #ifndef NONSMOOTHEVENT_H
 #define NONSMOOTHEVENT_H
 
-/** \class NonSmoothEvent
- *  \brief class derived from Event one: events due to non smooth behavior (contact occurence ...)
- *  \author SICONOS Development Team - copyright INRIA
+//! Events due to non smooth behavior (contact occurence ...)
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) February 21, 2006
  *
@@ -39,27 +41,23 @@ private:
 
 public:
 
-  /** \fn NonSmoothEvent(const NonSmoothEvent&)
-   *  \brief copy constructor
-   *  \param the timeDiscrEvent to be copied
-   */
+  /** copy constructor
+  *  \param the timeDiscrEvent to be copied
+  */
   NonSmoothEvent(const NonSmoothEvent&);
 
-  /** \fn NonSmoothEvent(const unsigned long int&)
-   *  \brief constructor with time value as a parameter
-   *  \param an unsigned long int
-   */
+  /** constructor with time value as a parameter
+  *  \param an unsigned long int
+  */
   NonSmoothEvent(const unsigned long int&);
 
-  /** \fn ~NonSmoothEvent()
-   *  \brief destructor
-   */
+  /** destructor
+  */
   ~NonSmoothEvent();
 
-  /** \fn void process(Simulation*)
-   *  \brief OSNS solving and IndexSets updating
-   *  \param Simulation*, the simulation that owns this Event (through the EventsManager)
-   */
+  /** OSNS solving and IndexSets updating
+  *  \param Simulation*, the simulation that owns this Event (through the EventsManager)
+  */
   void process(Simulation*);
 };
 

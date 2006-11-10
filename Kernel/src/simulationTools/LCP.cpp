@@ -331,7 +331,7 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
 
   SiconosMatrix* currentBlock = blocks[UR1][UR2];
   currentBlock->zero();
-  SiconosMatrix *leftBlock, *rightBlock, *extraBlock;
+  SiconosMatrix *leftBlock = NULL, *rightBlock = NULL, *extraBlock = NULL;
   unsigned int sizeDS;
   string relationType1, relationType2;
   double h = simulation->getTimeDiscretisationPtr()->getH();
@@ -383,7 +383,7 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
         flagRightBlock = true;
       }
 
-      *currentBlock +=  *leftBlock * (centralBlocks[*itDS])->multTranspose(*rightBlock); // left = right = G or H
+      *currentBlock +=  *leftBlock * multTranspose(*centralBlocks[*itDS], *rightBlock); // left = right = G or H
     }
     else RuntimeException::selfThrow("LCP::computeBlock not yet implemented for relation of type " + relationType1);
     delete leftBlock;
@@ -511,7 +511,7 @@ void LCP::assembleM() //
           pos = blocksPositions[*itRow];
           col = blocksPositions[(*itCol).first];
           // copy the block into Mlcp - pos/col: position in M (row and column) of first element of the copied block
-          M->blockMatrixCopy(*(blocks[*itRow][(*itCol).first]), pos, col); // \todo avoid copy
+          M->matrixCopy(*(blocks[*itRow][(*itCol).first]), pos, col); // \todo avoid copy
         }
       }
     }
@@ -579,7 +579,6 @@ void LCP::compute(const double time)
     double err;
 
     method solvingMethod = *(solver->getSolvingMethodPtr());
-
     if (isMSparseBlock)
       info = lcp_solver_block(Mspbl , q->getArray() , &solvingMethod , z->getArray() , w->getArray() , &iter , &titer , &err);
     else
@@ -618,8 +617,10 @@ void LCP::postCompute(SiconosVector* w, SiconosVector* z)
     // Get Y and Lambda for the current Unitary Relation
     y = static_cast<SimpleVector*>((*itCurrent)-> getYPtr(levelMin));
     lambda = static_cast<SimpleVector*>((*itCurrent)->getLambdaPtr(levelMin));
-    static_cast<SimpleVector*>(w)->getBlock(pos, nsLawSize, *y) ; // Warning: yEquivalent is saved in y !!
-    static_cast<SimpleVector*>(z)->getBlock(pos, nsLawSize, *lambda) ;
+    // static_cast<SimpleVector*>(w)->getBlock(pos,nsLawSize, *y) ; // Warning: yEquivalent is saved in y !!
+    //static_cast<SimpleVector*>(z)->getBlock(pos,nsLawSize, *lambda) ;
+    w->getBlock(pos, *y) ; // Warning: yEquivalent is saved in y !!
+    z->getBlock(pos, *lambda) ;
   }
 }
 

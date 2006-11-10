@@ -16,15 +16,16 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+/*! \file
+  3-dimensional Friction-Contact Problem
+*/
 #ifndef FrictionContact3D_H
 #define FrictionContact3D_H
 
 #include "FrictionContact.h"
 
-/** \class FrictionContact3D
- *  \brief This class is devoted to the formalization and the resolution of the
- * Linear Complementarity Problem (FrictionContact3D)
- *  \author SICONOS Development Team - copyright INRIA
+//! Formalization and Resolution of a 2-dimensional Friction-Contact Problem
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Dec 15, 2005
  *
@@ -38,40 +39,35 @@ class FrictionContact3D : public FrictionContact
 
 private:
 
-  /** \fn FrictionContact3D();
-   *  \brief default constructor
-   */
+  /** default constructor
+  */
   FrictionContact3D();
 
 public:
 
-  /** \fn FrictionContact3D(OneStepNSProblemXML*, Simulation*)
-   *  \brief xml constructor
-   *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Simulation *: the simulation that owns the problem
-   */
+  /** xml constructor
+  *  \param OneStepNSProblemXML* : the XML linked-object
+  *  \param Simulation *: the simulation that owns the problem
+  */
   FrictionContact3D(OneStepNSProblemXML*, Simulation*);
 
-  /** \fn FrictionContact3D(Simulation * , const std::string, const std::string =DEFAULT_SOLVER, const unsigned int = DEFAULT_ITER, const double = DEFAULT_TOL,
-   *                        const std::string  = DEFAULT_NORMTYPE, const double  = DEFAULT_SEARCHDIR);
-   *  \brief constructor from data
-   *  \param Simulation *: the simulation that owns this problem
-   *  \param string: id of the problem
-   *  \param string: solver name (optional)
-   *  \param int : MaxIter (optional) required if a solver is given
-   *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
-   *  \param string : NormType (optional) -> never used at the time
-   *  \param double : SearchDirection (optional) -> for Latin
-   */
+  /** constructor from data
+  *  \param Simulation *: the simulation that owns this problem
+  *  \param string: id of the problem
+  *  \param string: solver name (optional)
+  *  \param int : MaxIter (optional) required if a solver is given
+  *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
+  *  \param string : NormType (optional) -> never used at the time
+  *  \param double : SearchDirection (optional) -> for Latin
+  */
   FrictionContact3D(Simulation * ,  const std::string, const std::string = DEFAULT_SOLVER, const unsigned int = DEFAULT_ITER, const double = DEFAULT_TOL,
                     const std::string  = DEFAULT_NORMTYPE, const double  = DEFAULT_SEARCHDIR);
 
-  /** \fn FrictionContact3D(Solver*, Simulation*, const std::string id = DEFAULT_OSNS_NAME)
-   *  \brief constructor from data
-   *  \param Solver* : pointer to object that contains solver algorithm and formulation
-   *  \param Simulation *: the simulation that owns this problem
-   *  \param String: id of the problem (default = DEFAULT_OSNS_NAME)
-   */
+  /** constructor from data
+  *  \param Solver* : pointer to object that contains solver algorithm and formulation
+  *  \param Simulation *: the simulation that owns this problem
+  *  \param String: id of the problem (default = DEFAULT_OSNS_NAME)
+  */
   FrictionContact3D(Solver*, Simulation *, const std::string = DEFAULT_OSNS_NAME);
 
   // --- Destructror ---
@@ -79,18 +75,16 @@ public:
 
   // --- Others functions ---
 
-  /** \fn void compute(const double time)
-   *  \brief Compute the unknown z and w and update the Interaction (y and lambda )
-   *  \param double : current time
-   *  \return void
-   */
+  /** Compute the unknown z and w and update the Interaction (y and lambda )
+  *  \param double : current time
+  *  \return void
+  */
   void compute(const double time);
 
-  /** \fn FrictionContact3D* convert (OneStepNSProblem* ds)
-   *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param OneStepNSProblem* : the one step problem which must be converted
-   * \return a pointer on the problem if it is of the right type, NULL otherwise
-   */
+  /** encapsulates an operation of dynamic casting. Needed by Python interface.
+  *  \param OneStepNSProblem* : the one step problem which must be converted
+  * \return a pointer on the problem if it is of the right type, NULL otherwise
+  */
   static FrictionContact3D* convert(OneStepNSProblem* osnsp);
 };
 

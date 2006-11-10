@@ -16,6 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+/*! \file LagrangianLinearR.h
+
+*/
 #ifndef LAGRANGIANLINEARRELATION_H
 #define LAGRANGIANLINEARRELATION_H
 
@@ -25,9 +28,8 @@
 #include "SimpleVector.h"
 #include "BlockVector.h"
 
-/** \class LagrangianLinearR
- *  \brief Lagrangian Linear Relation, derived from class LagrangianR
- *  \author SICONOS Development Team - copyright INRIA
+//! Lagrangian Linear Relation, derived from class LagrangianR
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 27, 2004
  *
@@ -43,15 +45,13 @@
  *  H is the only required input to built a LagrangianLinearR.
  *
  */
-
 class LagrangianLinearR : public LagrangianR
 {
 
 private:
 
-  /** \fn LagrangianLinearR()
-   *  \brief Default constructor
-   */
+  /** Default constructor
+  */
   LagrangianLinearR();
 
   /** H matrix such as y = Hq + ...*/
@@ -70,202 +70,174 @@ private:
 
 public:
 
-  /** \fn LagrangianLinearR(RelationXML*)
-   *  \brief constructor with XML object of the parent class Relation
-   *  \param RelationXML* : the XML object corresponding
-   */
+  /** constructor with XML object of the parent class Relation
+  *  \param RelationXML* : the XML object corresponding
+  */
   LagrangianLinearR(RelationXML*);
 
-  /** \fn LagrangianLinearR(const SiconosMatrix& H, const SimpleVector& q, Interaction* = NULL);
-   *  \brief constructor with in parameters, the data needed to build this Relation
-   *  \param a SiconosMatrix to set H
-   *  \param a SimpleVector to set b
-   */
+  /** constructor with in parameters, the data needed to build this Relation
+  *  \param a SiconosMatrix to set H
+  *  \param a SimpleVector to set b
+  */
   LagrangianLinearR(const SiconosMatrix&, const SimpleVector&);
 
 
-  /** \fn LagrangianLinearR(const SiconosMatrix& H);
-   *  \brief constructor with in parameters, the data needed to build this Relation
-   *  \param a SiconosMatrix to set H
-   */
+  /** constructor with in parameters, the data needed to build this Relation
+  *  \param a SiconosMatrix to set H
+  */
   LagrangianLinearR(const SiconosMatrix&);
 
-  /** \fn LagrangianLinearR(const SiconosMatrix& H, const SimpleVector& q, const SiconosMatrix& D);
-   *  \brief constructor with in parameters, the data needed to build this Relation
-   *  \param a SiconosMatrix to set H
-   *  \param a SimpleVector to set b
-   *  \param a SiconosMatrix to set D
-    */
+  /** constructor with in parameters, the data needed to build this Relation
+  *  \param a SiconosMatrix to set H
+  *  \param a SimpleVector to set b
+  *  \param a SiconosMatrix to set D
+   */
   LagrangianLinearR(const SiconosMatrix&, const SimpleVector&, const SiconosMatrix&);
 
-  /** \fn LagrangianLinearR(const Relation&)
-   *  \brief copy constructor
-   *  \param a relation to copy
-   *  warning: the interaction link is not copied, set a new one!
-   */
+  /** copy constructor
+  *  \param a relation to copy
+  *  warning: the interaction link is not copied, set a new one!
+  */
   LagrangianLinearR(const Relation &);
 
-  /** \fn ~LagrangianLinearR()
-   *  \brief destructor
-   */
+  /** destructor
+  */
   ~LagrangianLinearR();
 
-  /** \fn initialize()
-   *  \brief initialize the relation (check sizes, memory allocation ...)
-   */
+  /** initialize the relation (check sizes, memory allocation ...)
+  */
   void initialize();
 
   // --- GETTERS/SETTERS
   // -- H --
 
-  /** \fn  const SimpleMatrix getH() const
-   *  \brief get the value of H
-   *  \return SimpleMatrix
-   */
+  /** get the value of H
+  *  \return SimpleMatrix
+  */
   inline const SimpleMatrix getH() const
   {
     return *H;
   }
 
-  /** \fn SiconosMatrix* getHPtr() const
-   *  \brief get H
-   *  \return pointer on a SiconosMatrix
-   */
+  /** get H
+  *  \return pointer on a SiconosMatrix
+  */
   inline SiconosMatrix* getHPtr() const
   {
     return H;
   }
 
-  /** \fn void setH (const SiconosMatrix& newValue)
-   *  \brief set the value of H to newValue
-   *  \param SiconosMatrix newValue
-   */
+  /** set the value of H to newValue
+  *  \param SiconosMatrix newValue
+  */
   void setH(const SiconosMatrix&);
 
-  /** \fn void setHPtr(SiconosMatrix* newPtr)
-   *  \brief set H to pointer newPtr
-   *  \param SiconosMatrix * newPtr
-   */
+  /** set H to pointer newPtr
+  *  \param SiconosMatrix * newPtr
+  */
   void setHPtr(SiconosMatrix *);
   // -- b --
 
-  /** \fn  const SimpleVector getB() const
-   *  \brief get the value of b
-   *  \return SimpleVector
-   */
+  /** get the value of b
+  *  \return SimpleVector
+  */
   inline const SimpleVector getB() const
   {
     return *b;
   }
 
-  /** \fn SimpleVector* getBPtr() const
-   *  \brief get b
-   *  \return pointer on a SimpleVector
-   */
+  /** get b
+  *  \return pointer on a SimpleVector
+  */
   inline SimpleVector* getBPtr() const
   {
     return b;
   }
 
-  /** \fn void setB (const SimpleVector& newValue)
-   *  \brief set the value of b to newValue
-   *  \param SimpleVector newValue
-   */
+  /** set the value of b to newValue
+  *  \param SimpleVector newValue
+  */
   void setB(const SimpleVector&);
 
-  /** \fn void setBPtr(SimpleVector* newPtr)
-   *  \brief set B to pointer newPtr
-   *  \param SimpleVector * newPtr
-   */
+  /** set B to pointer newPtr
+  *  \param SimpleVector * newPtr
+  */
   void setBPtr(SimpleVector *);
 
   // -- D --
 
-  /** \fn  const SimpleMatrix getD() const
-   *  \brief get the value of D
-   *  \return SimpleMatrix
-   */
+  /** get the value of D
+  *  \return SimpleMatrix
+  */
   inline const SimpleMatrix getD() const
   {
     return *D;
   }
 
-  /** \fn SiconosMatrix* getDPtr() const
-   *  \brief get D
-   *  \return pointer on a SiconosMatrix
-   */
+  /** get D
+  *  \return pointer on a SiconosMatrix
+  */
   inline SiconosMatrix* getDPtr() const
   {
     return D;
   }
 
-  /** \fn void setD (const SiconosMatrix& newValue)
-   *  \brief set the value of D to newValue
-   *  \param SiconosMatrix newValue
-   */
+  /** set the value of D to newValue
+  *  \param SiconosMatrix newValue
+  */
   void setD(const SiconosMatrix&);
 
-  /** \fn void setDPtr(SiconosMatrix* newPtr)
-   *  \brief set D to pointer newPtr
-   *  \param SiconosMatrix * newPtr
-   */
+  /** set D to pointer newPtr
+  *  \param SiconosMatrix * newPtr
+  */
   void setDPtr(SiconosMatrix *);
 
 
-  /** \fn void getHBlockDS(const int,SiconosMatrix&) const
-   *  \brief get in Matrix H the block corresponding to DS number int
-   *  \param int, the ds number
-   *  \param SiconosMatrix (in-out parameter): the resulting block matrix
-   */
+  /** get in Matrix H the block corresponding to DS number int
+  *  \param int, the ds number
+  *  \param SiconosMatrix (in-out parameter): the resulting block matrix
+  */
   void getHBlockDS(const int, SiconosMatrix&) const;
 
-
-  /** void getHBlockDS(DynamicalSystem * ds, SiconosMatrix&) const
-   *  \brief get in Matrix H the block corresponding to ds
-   *  \param a pointer to a dynamical system
-   *  \param SiconosMatrix (in-out parameter): the resulting block matrix
-   */
+  /** get in Matrix H the block corresponding to ds
+  *  \param a pointer to a dynamical system
+  *  \param SiconosMatrix (in-out parameter): the resulting block matrix
+  */
   void getHBlockDS(DynamicalSystem *, SiconosMatrix&) const;
 
   // --- OTHER FUNCTIONS ---
 
-  /** \fn void computeFreeOutput(double time, const unsigned int = 0);
-   *  \brief default function to compute y for the free state
-   *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-   */
+  /** default function to compute y for the free state
+  *  \param double : current time
+  *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+  */
   void computeFreeOutput(const double, const unsigned int = 0);
 
-  /** \fn void computeOutput(double time, const unsigned int = 0);
-   *  \brief default function to compute y
-   *  \param double : current time
-   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-   */
+  /** default function to compute y
+  *  \param double : current time
+  *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+  */
   void computeOutput(const double, const unsigned int = 0);
 
-  /** \fn void computeInput(double time, const unsigned int);
-   *  \brief default function to compute lambda
-   *  \param double : current time
-   *  \param unsigned int: "derivative" order of lambda used to compute input
-   */
+  /** default function to compute lambda
+  *  \param double : current time
+  *  \param unsigned int: "derivative" order of lambda used to compute input
+  */
   void computeInput(const double, const unsigned int);
 
-  /** \fn void saveRelationToXML()
-   *  \brief copy the data of the Relation to the XML tree
-   *  \exception RuntimeException
-   */
+  /** copy the data of the Relation to the XML tree
+  *  \exception RuntimeException
+  */
   void saveRelationToXML() const;
 
-  /** \fn LagrangianLinearR* convert (Relation *r)
-   *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param Relation * : the relation which must be converted
-   * \return a pointer on the relation if it is of the right type, NULL otherwise
-   */
+  /** encapsulates an operation of dynamic casting. Needed by Python interface.
+  *  \param Relation * : the relation which must be converted
+  * \return a pointer on the relation if it is of the right type, NULL otherwise
+  */
   static LagrangianLinearR* convert(Relation *r);
 
-  /** \fn  void display() const
-   * \brief main relation members display
-   */
+  /** main relation members display
+  */
   void display() const;
 };
 

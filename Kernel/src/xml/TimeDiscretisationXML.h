@@ -16,26 +16,15 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-//$IId$
-
-/** \class TimeDiscretisationXML
- *   \brief This class manages Time Discretisation data
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.3.0.
- *   \date 05/17/2004
- *
- *
- *
- * TimeDiscretisationXML allows to manage data of a TimeDiscretisation DOM tree.
- */
-
+/*! \file
+*/
 
 #ifndef __TIMEDISCRETISATIONXML__
 #define __TIMEDISCRETISATIONXML__
 
 
 #include "SiconosDOMTreeTools.h"
-
+#include "SimpleVector.h"
 #include "TimeDiscretisation.h"
 
 class TimeDiscretisation;
@@ -48,50 +37,51 @@ const std::string  TD_HMAX = "hMax";
 const std::string  TD_ISCONSTANT = "isConstant";
 
 
+//! XML management for Time Discretisation
+/**  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.3.0.
+ *   \date 05/17/2004
+ *
+ */
 class TimeDiscretisationXML
 {
 public:
   TimeDiscretisationXML();
 
-  /** \fn TimeDiscretisationXML(xmlNode * TimeDiscretisationNode)
-   *   \brief Build a TimeDiscretisationXML object from a DOM tree describing a TimeDiscretisation
-   *   \param timeDiscretisationNode : the TimeDiscretisation DOM tree
-   *   \exception XMLException : if a property of the TimeDiscretisation lacks in the DOM tree
-   */
+  /** Build a TimeDiscretisationXML object from a DOM tree describing a TimeDiscretisation
+  *   \param timeDiscretisationNode : the TimeDiscretisation DOM tree
+  *   \exception XMLException : if a property of the TimeDiscretisation lacks in the DOM tree
+  */
   TimeDiscretisationXML(xmlNode * TimeDiscretisationNode);
 
 
-  /** \fn xmlNode* getRootNode()
-   *   \brief Gets the rootNode of the TimeDiscretisationXML
-   *   \return xmlNode* : the rootNode
-   */
+  /** Gets the rootNode of the TimeDiscretisationXML
+  *   \return xmlNode* : the rootNode
+  */
   inline xmlNode* getRootNode()
   {
     return rootNode;
   }
 
-  /** \fn void setRootNode(xmlNode*)
-   *   \brief sets the rootNode of the TimeDiscretisationXML
-   *   \param xmlNode* : the rootNode to set
-   */
+  /** sets the rootNode of the TimeDiscretisationXML
+  *   \param xmlNode* : the rootNode to set
+  */
   inline void setRootNode(xmlNode*node)
   {
     rootNode = node;
   }
 
-  /** \fn inline double getH()
-   *   \brief Return the h value of the TimeDiscretisation
-   *   \return The h double value of the TimeDiscretisation
-   */
+  /** Return the h value of the TimeDiscretisation
+  *   \return The h double value of the TimeDiscretisation
+  */
   inline double getH() const
   {
     return  SiconosDOMTreeTools::getContentValue<double>(hNode);
   }
 
-  /** \fn void setH(const double& d)
-   *   \brief allows to set the h value of the TimeDiscretisation
-   *   \param The h double value of the TimeDiscretisation
-   */
+  /** allows to set the h value of the TimeDiscretisation
+  *   \param The h double value of the TimeDiscretisation
+  */
   inline void setH(const double& d)
   {
     if (!hasH())
@@ -101,18 +91,16 @@ public:
     else SiconosDOMTreeTools::setDoubleContentValue(hNode, d);
   }
 
-  /** \fn inline void getN()
-   *   \brief return the N value of the TimeDiscretisation
-   */
+  /** return the N value of the TimeDiscretisation
+  */
   inline int getN() const
   {
     return SiconosDOMTreeTools::getContentValue<int>(NNode);
   }
 
-  /** \fn inline void setN(int i)
-   *   \brief allows to set the N value of the TimeDiscretisation
-   *   \param The N int value of the TimeDiscretisation
-   */
+  /** allows to set the N value of the TimeDiscretisation
+  *   \param The N int value of the TimeDiscretisation
+  */
   inline void setN(const int& i)
   {
     if (!hasN())
@@ -122,19 +110,17 @@ public:
     else SiconosDOMTreeTools::setIntegerContentValue(NNode, i);
   }
 
-  /** \fn inline SimpleVector getTk()
-   *   \brief Return the tk values of the TimeDiscretisation
-   *   \return SimpleVector : tk vector of the TimeDiscretisation
-   */
+  /** Return the tk values of the TimeDiscretisation
+  *   \return SimpleVector : tk vector of the TimeDiscretisation
+  */
   inline SimpleVector getTk() const
   {
     return SiconosDOMTreeTools::getSiconosVectorValue(tkNode);
   }
 
-  /** \fn void setTkNode(const SimpleVector& v)
-   *   \brief set the tk Node value of the TimeDiscretisation
-   *   \param The tk SiconosVector of the TimeDiscretisation
-   */
+  /** set the tk Node value of the TimeDiscretisation
+  *   \param The tk SiconosVector of the TimeDiscretisation
+  */
   inline void setTkNode(const SimpleVector& v)
   {
     if (!hasTk())
@@ -144,10 +130,9 @@ public:
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(tkNode, v);
   }
 
-  /** \fn inline double getHMin()
-   *   \brief Return the hMin value of the TimeDiscretisation / -1.0 if not defined
-   *   \return The hMin double value of the TimeDiscretisation
-   */
+  /** Return the hMin value of the TimeDiscretisation / -1.0 if not defined
+  *   \return The hMin double value of the TimeDiscretisation
+  */
   inline double getHMin()const
   {
     if (hasHMin())
@@ -155,10 +140,9 @@ public:
     else return -1.0;
   }
 
-  /** \fn void setHMin(const double& d)
-   *   \brief allows to set the hMin value of the TimeDiscretisation
-   *   \param The hMin double value of the TimeDiscretisation
-   */
+  /** allows to set the hMin value of the TimeDiscretisation
+  *   \param The hMin double value of the TimeDiscretisation
+  */
   inline void setHMin(const double& d)
   {
     if (!hasHMin())
@@ -168,10 +152,9 @@ public:
     else SiconosDOMTreeTools::setDoubleContentValue(hMinNode, d);
   }
 
-  /** \fn inline double getHMax()
-   *   \brief Return the hMax value of the TimeDiscretisation / -1.0 if not defined
-   *   \return The hMax double value of the TimeDiscretisation
-   */
+  /** Return the hMax value of the TimeDiscretisation / -1.0 if not defined
+  *   \return The hMax double value of the TimeDiscretisation
+  */
   inline double getHMax() const
   {
     if (hasHMax())
@@ -179,10 +162,9 @@ public:
     else return -1.0;
   }
 
-  /** \fn void setHMax(const double& d)
-   *   \brief allows to set the hMax value of the TimeDiscretisation
-   *   \param The hMax double value of the TimeDiscretisation
-   */
+  /** allows to set the hMax value of the TimeDiscretisation
+  *   \param The hMax double value of the TimeDiscretisation
+  */
   inline void setHMax(const double& d)
   {
     if (!hasHMax())
@@ -193,10 +175,9 @@ public:
   }
 
 
-  /** \fn inline void setConstant(const bool&)
-   *   \brief defines if the TimeDiscretisation is constant or not
-   *   \param bool : true if TimeDiscretisation is constant, false otherwise
-   */
+  /** defines if the TimeDiscretisation is constant or not
+  *   \param bool : true if TimeDiscretisation is constant, false otherwise
+  */
   inline void setConstant(const bool& b)
   {
     if (SiconosDOMTreeTools::hasAttributeValue(rootNode, TD_ISCONSTANT))
@@ -209,65 +190,58 @@ public:
     }
   }
 
-  /** \fn inline bool isConstant()
-   *   \brief Return true if the TimeDiscretisation is constant
-   *   \return A boolean value : true if TimeDiscretisation is constant, false otherwise
-   */
+  /** Return true if the TimeDiscretisation is constant
+  *   \return A boolean value : true if TimeDiscretisation is constant, false otherwise
+  */
   inline bool isConstant() const
   {
     return SiconosDOMTreeTools::getAttributeValue<bool>(rootNode, TD_ISCONSTANT);
   }
 
-  /** \fn bool hasH()
-   *  \brief returns true if hNode is defined
-   *  \return true if hNode is defined
-   */
+  /** returns true if hNode is defined
+  *  \return true if hNode is defined
+  */
   inline bool hasH() const
   {
     return (hNode != NULL);
   }
 
-  /** \fn bool hasN()
-   *  \brief returns true if NNode is defined
-   *  \return true if NNode is defined
-   */
+  /** returns true if NNode is defined
+  *  \return true if NNode is defined
+  */
   inline bool hasN() const
   {
     return (NNode != NULL);
   }
 
-  /** \fn bool hasTk()
-   *  \brief returns true if tkNode is defined
-   *  \return true if tkNode is defined
-   */
+  /** returns true if tkNode is defined
+  *  \return true if tkNode is defined
+  */
   inline bool hasTk() const
   {
     return (tkNode != NULL);
   }
 
-  /** \fn bool hasHMin()
-   *  \brief returns true if hMinNode is defined
-   *  \return true if hMinNode is defined
-   */
+  /** returns true if hMinNode is defined
+  *  \return true if hMinNode is defined
+  */
   inline bool hasHMin() const
   {
     return (hMinNode != NULL);
   }
 
-  /** \fn bool hasHMax()
-   *  \brief returns true if hMaxNode is defined
-   *  \return true if hMaxNode is defined
-   */
+  /** returns true if hMaxNode is defined
+  *  \return true if hMaxNode is defined
+  */
   inline bool hasHMax() const
   {
     return (hMaxNode != NULL);
   }
 
-  /** \fn void updateTimeDiscretisationXML(xmlNode*, TimeDiscretisation*)
-   *   \brief makes the operations to create the TimeDiscretisation of the SimulationXML
-   *   \param xmlNode* : the root node for the TimeDiscretisationXML
-   *   \param NSDS* : the TimeDiscretisation of this TimeDiscretisationXML
-   */
+  /** makes the operations to create the TimeDiscretisation of the SimulationXML
+  *   \param xmlNode* : the root node for the TimeDiscretisationXML
+  *   \param NSDS* : the TimeDiscretisation of this TimeDiscretisationXML
+  */
   void updateTimeDiscretisationXML(xmlNode*, TimeDiscretisation*);
 
 private:

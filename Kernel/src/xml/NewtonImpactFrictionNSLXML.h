@@ -16,23 +16,24 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/** \class NewtonImpactFrictionNSLXML
- *  \brief  This class manages NewtonImpactFrictionNSL data part
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.3.0.
- *  \date (Creation) March 22, 2005
- *
- *
- *
- * NewtonImpactFrictionNSLXMLdata xml management for NewtonImpactFrictionNSL
- * \bug
- */
+/*! \file
+
+*/
 
 #ifndef __NewtonImpactFrictionNSLXML__
 #define __NewtonImpactFrictionNSLXML__
 
 #include "NonSmoothLawXML.h"
 
+//! XML management for NewtonImpactFrictionNSL
+/**  \author SICONOS Development Team - copyright INRIA
+ *  \version 1.3.0.
+ *  \date (Creation) March 22, 2005
+ *
+ *
+ *
+ * NewtonImpactFrictionNSLXMLdata xml management for NewtonImpactFrictionNSL
+ */
 class NewtonImpactFrictionNSLXML : public NonSmoothLawXML
 {
 private:
@@ -41,30 +42,26 @@ private:
   xmlNode * muNode;
 
 public:
-  /** \fn NewtonImpactFrictionNSLXML()
-   *   \brief default constructor
-   */
+  /** default constructor
+  */
   NewtonImpactFrictionNSLXML();
 
-  /** \fn NewtonImpactFrictionNSLXML(xmlNodePtr)
-   *   \brief Build a NewtonImpactFrictionNSLXML object using DOM tree data loading
-   *   \param xmlNode* : the NewtonImpactFrictionNSL node in the DOM tree
-   */
+  /** Build a NewtonImpactFrictionNSLXML object using DOM tree data loading
+  *   \param xmlNode* : the NewtonImpactFrictionNSL node in the DOM tree
+  */
   NewtonImpactFrictionNSLXML(xmlNodePtr);
 
-  /** \fn const double getEn() const
-   *   \brief return the En of the NSLaw
-   *   \return a double
-   */
+  /** return the En of the NSLaw
+  *   \return a double
+  */
   inline const double getEn() const
   {
     return  SiconosDOMTreeTools::getContentValue<double>(enNode);
   }
 
-  /** \fn void setEn(const double& en)
-   *   \brief set en value
-   *   \param a double
-   */
+  /** set en value
+  *   \param a double
+  */
   inline void setEn(const double& en)
   {
     if (!hasEn())
@@ -72,28 +69,25 @@ public:
     else SiconosDOMTreeTools::setDoubleContentValue(enNode, en);
   }
 
-  /** \fn bool hasEn() const
-   *  \brief returns true if enNode is defined
-   *  \return a bool
-   */
+  /** returns true if enNode is defined
+  *  \return a bool
+  */
   inline bool hasEn() const
   {
     return (enNode != NULL);
   }
 
-  /** \fn const double getEt() const
-   *   \brief return the Et of the NSLaw
-   *   \return a double
-   */
+  /** return the Et of the NSLaw
+  *   \return a double
+  */
   inline const double getEt() const
   {
     return  SiconosDOMTreeTools::getContentValue<double>(etNode);
   }
 
-  /** \fn void setEt(const double& et)
-   *   \brief set et value
-   *   \param a double
-   */
+  /** set et value
+  *   \param a double
+  */
   inline void setEt(const double& et)
   {
     if (!hasEt())
@@ -101,28 +95,25 @@ public:
     else SiconosDOMTreeTools::setDoubleContentValue(etNode, et);
   }
 
-  /** \fn bool hasEt() const
-   *  \brief returns true if etNode is defined
-   *  \return a bool
-   */
+  /** returns true if etNode is defined
+  *  \return a bool
+  */
   inline bool hasEt() const
   {
     return (etNode != NULL);
   }
 
-  /** \fn const double getMu() const
-   *   \brief return mu value
-   *   \return a double
-   */
+  /** return mu value
+  *   \return a double
+  */
   inline const double getMu() const
   {
     return  SiconosDOMTreeTools::getContentValue<double>(muNode);
   }
 
-  /** \fn void setMu(const double& mu)
-   *   \brief set mu value
-   *   \param a double
-   */
+  /** set mu value
+  *   \param a double
+  */
   inline void setMu(const double& mu)
   {
     if (!hasMu())
@@ -130,10 +121,9 @@ public:
     else SiconosDOMTreeTools::setDoubleContentValue(muNode, mu);
   }
 
-  /** \fn bool hasMu() const
-   *  \brief return true if muNode is defined
-   *  \return a bool
-   */
+  /** return true if muNode is defined
+  *  \return a bool
+  */
   inline bool hasMu() const
   {
     return (muNode != NULL);

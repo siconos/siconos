@@ -19,6 +19,7 @@
 #ifndef SOLVERPACK_H
 #define SOLVERPACK_H
 
+#include "blaslapack.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

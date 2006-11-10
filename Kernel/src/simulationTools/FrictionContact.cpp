@@ -226,7 +226,7 @@ void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
 
   SiconosMatrix* currentBlock = blocks[UR1][UR2];
   currentBlock->zero();
-  SiconosMatrix *leftBlock, *rightBlock;
+  SiconosMatrix *leftBlock = NULL, *rightBlock = NULL;
   unsigned int sizeDS;
   string relationType1, relationType2;
   bool flagRightBlock = false;
@@ -260,7 +260,7 @@ void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
         flagRightBlock = true;
       }
 
-      *currentBlock +=  *leftBlock * (W[*itDS])->multTranspose(*rightBlock); // left = right = G or H
+      *currentBlock +=  *leftBlock * multTranspose(*(W[*itDS]), *rightBlock); // left = right = G or H
     }
     else RuntimeException::selfThrow("FrictionContact::computeBlock not yet implemented for relation of type " + relationType1);
     delete leftBlock;
@@ -315,7 +315,7 @@ void FrictionContact::assembleM() //
         pos = blocksPositions[*itRow];
         col = blocksPositions[(*itCol).first];
         // copy the block into Mlcp - pos/col: position in M (row and column) of first element of the copied block
-        M->blockMatrixCopy(*(blocks[*itRow][(*itCol).first]), pos, col); // \todo avoid copy
+        M->matrixCopy(*(blocks[*itRow][(*itCol).first]), pos, col); // \todo avoid copy
       }
     }
   }
@@ -418,7 +418,7 @@ void FrictionContact::compute(const double time)
   if (sizeOutput != 0)
   {
 
-    int info;
+    int info = 0;
     int SizeOutput = (int)sizeOutput;
     // get solving method and friction coefficient value.
     method solvingMethod = *(solver->getSolvingMethodPtr());
@@ -470,8 +470,10 @@ void FrictionContact::postCompute(SiconosVector* w, SiconosVector* z)
     y = static_cast<SimpleVector*>((*itCurrent)-> getYPtr(levelMin));
     lambda = static_cast<SimpleVector*>((*itCurrent)->getLambdaPtr(levelMin));
 
-    static_cast<SimpleVector*>(w)->getBlock(pos, nsLawSize, *y) ;
-    static_cast<SimpleVector*>(z)->getBlock(pos, nsLawSize, *lambda) ;
+    //      static_cast<SimpleVector*>(w)->getBlock(pos,nsLawSize, *y) ;
+    //      static_cast<SimpleVector*>(z)->getBlock(pos,nsLawSize, *lambda) ;
+    w->getBlock(pos, *y) ;
+    z->getBlock(pos, *lambda) ;
   }
 }
 

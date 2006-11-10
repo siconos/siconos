@@ -16,6 +16,10 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+
+/*! \file
+*/
+
 #ifndef SICONOSSHAREDLIBRARY_H
 #define SICONOSSHAREDLIBRARY_H
 
@@ -48,27 +52,23 @@ private:
 
 public:
 
-  /** \fn SiconosSharedLibrary(const unsigned int& n = 0)
-   *  \brief constructor
+  /**   Constructor
    *    \param unsigned int n, the number of plug-in that will be "connected" through the current object (optional)
    */
   SiconosSharedLibrary(const unsigned int& = 0);
 
-  /** \fn ~SiconosSharedLibrary(){}
-   *  \brief destructor
+  /** Destructor
    */
   ~SiconosSharedLibrary();
 
-  /** \fn PluginHandle loadPlugin(const std::string& pluginPath)
-   *  \brief load a plugin
+  /**   loads a plugin
    *  \param std::string pluginPath : full plugin path name
    *  \exception SiconosSharedLibraryException if plugin fail to open
    *  \return PluginHandle : plugin handle
    */
   PluginHandle loadPlugin(const std::string& pluginPath) ;
 
-  /** \fn void* getProcAddress(PluginHandle plugin, const std::string& procedure)
-   *  \brief get procedure address
+  /**   Gets procedure address
    *  \param PluginHandle plugin : plugin handle
    *  \param std::string procedure : procedure name
    *  \exception SiconosSharedLibraryException if procedure not found
@@ -76,43 +76,37 @@ public:
    */
   void* getProcAddress(PluginHandle plugin, const std::string& procedure);
 
-  /** \fn void closePlugin(PluginHandle plugin)
-   *  \brief close plugin
+  /**  Closes plugin
    *  \param PluginHandle plugin : plugin handle
    */
   void closePlugin(PluginHandle plugin);
 
-  /** \fn void closeAllPlugins()
-   *  \brief close all plugin set using the current object
+  /**   Closes all plugin set using the current object
    */
   void closeAllPlugins();
 
-  /** \fn std::string getSharedLibraryExtension()
-   *  \brief get shared library extension
+  /** Gets shared library extension
    *  \return library extension ("*.so" for UNIX or "*.dll" for WNT)
    */
   const std::string getSharedLibraryExtension() const ;
 
-  /** \fn void setFunction(void* functionPtr, PluginHandle pluginHandle, const std::string pluginPath&, const std::string functionName&)
-   *  \brief set a function pointer to a function in an external library. Don't use it directely
-   *  \param functionPtr : pointer to the function (in-out)
-   *  \param std::string : the complet path to the external plugin (in)
-   *  \param std::string : the name of the function to reference (in)
-   */
+  /** set a function pointer to a function in an external library. Don't use it directely
+  *  \param functionPtr : pointer to the function (in-out)
+  *  \param std::string : the complet path to the external plugin (in)
+  *  \param std::string : the name of the function to reference (in)
+  */
   void setFunction(void* functionPtr, const std::string& pluginPath, const std::string& functionName);
 
-  /** \fn std::string getPluginName(std::string )
-   *  \brief extract the plugin name from a std::string containing data to call a plugin function
-   *  \param std::string : its form is : "pluginName:functionName"
-   *  \return a std::string containing the plugin name
-   */
+  /** extract the plugin name from a std::string containing data to call a plugin function
+  *  \param std::string : its form is : "pluginName:functionName"
+  *  \return a std::string containing the plugin name
+  */
   const std::string getPluginName(const std::string&) const ;
 
-  /** \fn std::string getPluginFunctionName(std::string )
-   *  \brief extract the function name from a std::string containing data to call a plugin function
-   *  \param std::string : its form is : "pluginName:functionName"
-   *  \return a std::string containing the function name
-   */
+  /** extract the function name from a std::string containing data to call a plugin function
+  *  \param std::string : its form is : "pluginName:functionName"
+  *  \return a std::string containing the function name
+  */
   const std::string getPluginFunctionName(const std::string&) const ;
 
 };

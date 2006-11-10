@@ -34,7 +34,7 @@ EqualityConstraint::~EqualityConstraint()
   if (G != NULL) delete G;
 }
 
-vector<DSInputOutput*> EqualityConstraint::getDSInputOutputs(void)
+std::vector<DSInputOutput*> EqualityConstraint::getDSInputOutputs(void)
 {
   return dsioVector;
 }
@@ -46,7 +46,7 @@ DSInputOutput* EqualityConstraint::getDSInputOutput(const unsigned int& i)
   return dsioVector[i];
 }
 
-void EqualityConstraint::setDSInputOutputs(vector<DSInputOutput*> dsioVect)
+void EqualityConstraint::setDSInputOutputs(std::vector<DSInputOutput*> dsioVect)
 {
   dsioVector = dsioVect;
 }
@@ -196,7 +196,7 @@ void EqualityConstraint::fillEqualityConstraintWithEqualityConstraintXML()
 
 void EqualityConstraint::createEqualityConstraint(EqualityConstraintXML *newEcXML,
     int newNumber, SiconosMatrix *newG,
-    vector<DSInputOutput*> *newDsioVector)
+    std::vector<DSInputOutput*> *newDsioVector)
 {
   if (ecXML != NULL)
   {

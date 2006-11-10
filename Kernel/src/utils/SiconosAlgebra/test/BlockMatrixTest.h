@@ -21,42 +21,53 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "BlockMatrix.h"
-#include "SimpleMatrix.h"
 
 using namespace std;
 
 class BlockMatrixTest : public CppUnit::TestFixture
 {
 
+
 private:
 
   // test suite
   CPPUNIT_TEST_SUITE(BlockMatrixTest);
 
+  CPPUNIT_TEST(testConstructor0);
   CPPUNIT_TEST(testConstructor1);
   CPPUNIT_TEST(testConstructor2);
   CPPUNIT_TEST(testConstructor3);
   CPPUNIT_TEST(testConstructor4);
-  CPPUNIT_TEST(testGetLaGenMatDouble);
-  CPPUNIT_TEST(testSetValue);
+  CPPUNIT_TEST(testZero);
+  CPPUNIT_TEST(testEye);
+  CPPUNIT_TEST(testNormInf);
+  CPPUNIT_TEST(testGetSetRowCol);
+  CPPUNIT_TEST(testGetBlock);
+  CPPUNIT_TEST(testMatrixCopy);
   CPPUNIT_TEST(testAssignment);
-  CPPUNIT_TEST(testOperators);
+  CPPUNIT_TEST(testOperators1);
   CPPUNIT_TEST(End);
-
   CPPUNIT_TEST_SUITE_END();
 
+  void testConstructor0();
   void testConstructor1();
   void testConstructor2();
   void testConstructor3();
   void testConstructor4();
-  void testGetLaGenMatDouble();
-  void testSetValue();
+  void testGetSetRowCol();
+  void testZero();
+  void testEye();
+  void testNormInf();
+  void testGetBlock();
+  void testMatrixCopy();
   void testAssignment();
-  void testOperators();
+  void testOperators1();
   void End();
 
   SiconosMatrix *B, *C, *D, *E, *F, *G;
-  vector<SiconosMatrix*> m;
+  std::vector<SiconosMatrix*> m;
+  std::vector<unsigned int> tRow, tCol;
+  BlocksMat * mapRef;
 
 public:
   void setUp();

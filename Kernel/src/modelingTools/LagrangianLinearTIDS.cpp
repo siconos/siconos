@@ -286,7 +286,7 @@ bool LagrangianLinearTIDS::checkDynamicalSystem()
   return output;
 }
 
-void LagrangianLinearTIDS::initialize(const string simulationType, const double time, const unsigned int sizeOfMemory)
+void LagrangianLinearTIDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
 {
   initFreeVectors(simulationType);
 
@@ -333,13 +333,13 @@ void LagrangianLinearTIDS::initialize(const string simulationType, const double 
   // fInt and update jacobianXF
   if (K != NULL)
   {
-    *fInt += *K **q;
+    *fInt += prod(*K, *q);
     *workMatrix["jacob-block10"] -= *workMatrix["inverseOfMass"] * *K;
     flag = true;
   }
   if (C != NULL)
   {
-    *fInt += *C ** velocity;
+    *fInt += prod(*C, *velocity);
     *workMatrix["jacob-block11"] -= *workMatrix["inverseOfMass"] * *C;
     flag = true;
   }
@@ -348,7 +348,7 @@ void LagrangianLinearTIDS::initialize(const string simulationType, const double 
   {
     if (fInt != NULL)
       *vField -= *fInt;
-    *vField = *(workMatrix["inverseOfMass"])* *vField;
+    *vField = prod(*(workMatrix["inverseOfMass"]), *vField);
   }
 
   // todo: use linearSolve to avoid inversion ? Or save M-1 to avoid re-computation. See this when "M" will be added in DS or LDS.
@@ -446,13 +446,13 @@ void LagrangianLinearTIDS::computeRhs(const double time, const bool)
       *vField += *fExt; // This supposes that fExt is up to date!!
 
     if (K != NULL)
-      *vField -= *K**q;
+      *vField -= prod(*K, *q);
 
     if (C != NULL)
-      *vField -= *C**velocity;
+      *vField -= prod(*C, *velocity);
   }
 
-  *vField = *(workMatrix["inverseOfMass"])**vField;
+  *vField = prod(*(workMatrix["inverseOfMass"]), *vField);
 }
 
 void LagrangianLinearTIDS::computeJacobianXRhs(const double time, const bool)

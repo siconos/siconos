@@ -17,9 +17,21 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/** \class LagrangianLinearECXML
-*   \brief This class manages LagrangianLinear Relation data
-*  \author SICONOS Development Team - copyright INRIA
+/*! \file
+*/
+
+#ifndef _LagrangianLinearECXML_
+#define _LagrangianLinearECXML_
+
+#include "LagrangianECXML.h"
+#include "SimpleVector.h"
+#include "SimpleMatrix.h"
+
+const std::string LLEC_H = "H";
+const std::string LLEC_B = "b";
+
+//! XML management for LagrangianLinear Relation
+/**  \author SICONOS Development Team - copyright INRIA
 *   \version 1.3.0.
 *   \date 05/25/2004
 *
@@ -27,24 +39,13 @@
 *
 * LagrangianLinearECXML allows to manage data of a LagrangianLinearEC DOM tree.
 */
-
-
-#ifndef _LagrangianLinearECXML_
-#define _LagrangianLinearECXML_
-
-#include "LagrangianECXML.h"
-
-const std::string LLEC_H = "H";
-const std::string LLEC_B = "b";
-
 class LagrangianLinearECXML : public LagrangianECXML
 {
 public:
 
   LagrangianLinearECXML();
 
-  /** \fn LagrangianLinearECXML(xmlNode * , vector<int> )
-  *   \brief Build a EqualityConstraintXML object from a DOM tree describing a EqualityConstraint
+  /** Build a EqualityConstraintXML object from a DOM tree describing a EqualityConstraint
   *   \param xmlNode* : the EqualityConstraint DOM tree
   *   \param vector<int>  : vector of DSXML numbers to verify DS concerned by the EqualityConstraint (identified by number) exists
   */
@@ -52,33 +53,29 @@ public:
 
   ~LagrangianLinearECXML();
 
-  /** \fn SimpleMatrix getH()
-  *   \brief Return the H of the LagrangianLinearECXML
+  /** Return the H of the LagrangianLinearECXML
   *   \return The H SimpleMatrix of the LagrangianLinearECXML
   */
   inline SimpleMatrix getH()
   {
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(this->HNode);
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(HNode);
   }
 
 
-  /** \fn SimpleVector getB()
-  *   \brief Return b vector of the LLRelationXML
+  /** Return b vector of the LLRelationXML
   *   \return SimpleVector : b vector of the LLRelationXML
   */
-  inline /*SiconosVector*/SimpleVector getB()
+  inline SimpleVector getB()
   {
-    return  SiconosDOMTreeTools::getSiconosVectorValue(this->bNode);
+    return  SiconosDOMTreeTools::getSiconosVectorValue(bNode);
   }
 
-  /** \fn void setH(SiconosMatrix *matrix)
-  *   \brief Change the H matrix value (in xml file or external data file switch his origin position)
+  /** Change the H matrix value (in xml file or external data file switch his origin position)
   *   \param SiconosMatrix matrix : the new value for H matrix
   */
   void setH(SiconosMatrix *matrix);
 
-  /** \fn void setB(SiconosVector *vector)
-  *   \brief Change the b vector value (in xml file or external data file switch his origin position)
+  /** Change the b vector value (in xml file or external data file switch his origin position)
   *   \param SiconosVector vector : the new value for b vector
   */
   void setB(SiconosVector *vector);

@@ -62,9 +62,9 @@ void DynamicalSystem::fillBoundaryConditionsFromXml()
 // DSIO built-in (called from constructors)
 void DynamicalSystem::fillDsioFromXml()
 {
-  DSInputOutput *dsio;
+  DSInputOutput *dsio = NULL;
   // get the numbers of DSIO
-  vector<int> nbDSIOtab = dsxml->getDSInputOutputNumbers();
+  std::vector<int> nbDSIOtab = dsxml->getDSInputOutputNumbers();
   unsigned int sizeTab = nbDSIOtab.size();
   dsioVector.resize(sizeTab, NULL);
   isDsioAllocatedIn.resize(sizeTab, false);
@@ -144,7 +144,7 @@ void DynamicalSystem::initPluginFlags(const bool val)
   isPlugin["T"] = val;
 }
 
-void DynamicalSystem::initParameter(const string id)
+void DynamicalSystem::initParameter(const std::string id)
 {
   if (parametersList[id] == NULL)
   {
@@ -959,7 +959,7 @@ DSInputOutput* DynamicalSystem::getDSInputOutput(const unsigned int i)
   return dsioVector[i];
 }
 
-void DynamicalSystem::initialize(const string simulationType, const double time, const unsigned int sizeOfMemory)
+void DynamicalSystem::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
 {
   initFreeVectors(simulationType);
 
@@ -1174,7 +1174,7 @@ void DynamicalSystem::computeRhs(const double time, const bool)
     {
       if (isPlugin["T"]) // if T is a plug-in function
         computeT();
-      *rhs += *T**u;
+      *rhs += prod(*T, *u);
     }
     else
       *rhs += *u;

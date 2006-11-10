@@ -17,12 +17,15 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "Topology.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "Interaction.h"
+#include "InteractionsSet.h"
 
 using namespace std;
 
 const bool Topology::addInteractionInIndexSet(Interaction * inter)
 {
-  // Creates UnitaryRelations corresponding to inter and add them in indexSet0
+  // Creates UnitaryRelations corresponding to inter and add them into indexSet0
 
   unsigned int m = inter->getNumberOfRelations() ;
   unsigned int nsLawSize = inter->getNonSmoothLawPtr()->getNsLawSize();
@@ -31,10 +34,12 @@ const bool Topology::addInteractionInIndexSet(Interaction * inter)
   bool res = true; // output value. False if insertion of one of the relations fails.
   for (unsigned int i = 0; i < m; ++i)
   {
+    // each UnitaryRelation is of size "nsLawSize", at position pos and of number i.
     checkUR = indexSet0.insert(new UnitaryRelation(inter, pos, i));
-    pos = pos + nsLawSize;
+    pos += nsLawSize;
     if (checkUR.second == false) res = false;
   }
+
   numberOfConstraints += m * nsLawSize;
   return res;
 }
@@ -128,11 +133,13 @@ void Topology::initialize()
   InteractionsIterator it;
   for (it = allInteractions.begin()  ; it != allInteractions.end() ; ++it)
   {
+    // Initializes the current interaction
     (*it)->initialize();
+    // Adds its relation into indexSet0
     addInteractionInIndexSet(*it);
   }
 
-  //-- Fill RelativeDegreesMaps in --
+  //-- Fills RelativeDegreesMaps in --
   computeRelativeDegrees();
 
   isTopologyUpToDate = true;

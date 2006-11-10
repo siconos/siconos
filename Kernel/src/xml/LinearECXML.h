@@ -16,14 +16,16 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+
+/*! \file
+*/
 #ifndef LINEARECXML_H
 #define LINEARECXML_H
 
 #include "EqualityConstraintXML.h"
 
-/** \class LinearECXML
- *  \brief object to manage XML data of an Linear EqualityConstraint
-*  \author SICONOS Development Team - copyright INRIA
+//! XML management for Linear EqualityConstraint
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date 17/01/2005
  *
@@ -36,8 +38,7 @@ public:
 
   LinearECXML();
 
-  /** \fn LinearECXML(xmlNode * , vector<int> )
-  *   \brief Build a EqualityConstraintXML object from a DOM tree describing a EqualityConstraint
+  /** Build a EqualityConstraintXML object from a DOM tree describing a EqualityConstraint
   *   \param xmlNode* : the EqualityConstraint DOM tree
   *   \param vector<int>  : vector of DSXML numbers to verify DS concerned by the EqualityConstraint (identified by number) exists
   */

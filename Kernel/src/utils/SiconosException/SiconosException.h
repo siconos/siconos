@@ -15,57 +15,49 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-/** \class SiconosException
-*   \brief This class represent all the exeption in the Siconos platform
-*  \author SICONOS Development Team - copyright INRIA
-*   \version 1.3.0.
-*   \date (Creation) 05/25/2004
-*
-*
-* SiconosException should not be throws directly; prefer to use an inherit class
-* This exception can be catched by "catch(SiconosException)"
-*
-*/
+ */
+
+/*! \file SiconosException.h
+ */
 
 #ifndef __SiconosException__
 #define __SiconosException__
 
 #include <string>
 
+//! General Siconos Exception
+/**  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.3.0.
+ *   \date (Creation) 05/25/2004
+ *
+ *
+ * SiconosException should not be throws directly; prefer to use an inherit class
+ * This exception can be catched by "catch(SiconosException)"
+ *
+ */
 class SiconosException
 {
 public:
-
-  /**
-   * \fn SiconosException()
-   * \brief constructor
+  /** constructor
    */
   SiconosException();
 
-  /**
-   * \fn SiconosException(const string&)
-   * \brief constructor with a report
+  /** constructor with a report
    * \param string report : exception description
    */
   SiconosException(const std::string&);
 
-  /**
-   * \fn ~SiconosException()
-   * \brief destructor
-   */
+  /** destructor
+  */
   virtual ~SiconosException();
 
-  /**
-   * \fn string report()
-   * \brief return the report of the exception
+  /** return the report of the exception
    * \return string report : exception description
    */
   inline std::string report() const
   {
     return reportMsg;
   } ;
-
 
 protected:
   /** report message which describe the exception */

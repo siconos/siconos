@@ -15,21 +15,18 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
+ */
+/*! \file BoundaryConditionXML.h
+
 */
+
 #ifndef BOUNDARYCONDITIONXML_H
 #define BOUNDARYCONDITIONXML_H
 
 #include "SiconosDOMTreeTools.h"
-//#include "BoundaryCondition.h"
 
-//const string BC_TYPE = "type";
-//const string BC_NLINEAR = "NLinear";
-//const string BC_LINEAR = "Linear";
-//const string BC_PERIODIC = "Periodic";
-
-/** \class BoundaryConditionXML
- *  \brief describes the boundary conditions for a BVP NSDS
-*  \author SICONOS Development Team - copyright INRIA
+//! describes the boundary conditions for a BVP NSDS
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date May 24, 2004
  *
@@ -42,8 +39,7 @@ public:
   BoundaryConditionXML(xmlNode *);
   ~BoundaryConditionXML();
 
-  /** \fn int getType()
-   *  \brief Return the type of the BoundaryConditionXML
+  /** Return the type of the BoundaryConditionXML
    *  \return The string type of the BoundaryConditionXML
    */
   inline std::string getType()

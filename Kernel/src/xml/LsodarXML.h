@@ -16,9 +16,16 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/** \class LsodarXML
- *   \brief This class manages Lsodar data part
- *  \author SICONOS Development Team - copyright INRIA
+/*! \file
+*/
+
+#ifndef __LsodarXML__
+#define __LsodarXML__
+
+#include "OneStepIntegratorXML.h"
+
+//! XML management for Lsodar
+/**  \author SICONOS Development Team - copyright INRIA
  *   \version 1.3.0.
  *   \date 05/17/2004
  *
@@ -26,23 +33,16 @@
  *
  * LsodarXML allows to manage data of a Lsodar DOM tree.
  */
-
-#ifndef __LsodarXML__
-#define __LsodarXML__
-
-#include "OneStepIntegratorXML.h"
-
 class LsodarXML : public OneStepIntegratorXML
 {
 public:
 
   LsodarXML();
 
-  /** \fn LsodarXML(xmlNode * LsodarNode)
-   *   \brief Build a LsodarXML object from a DOM tree describing Lsodar OneStepIntegrator
-   *   \param LsodarNode : the Lsodar DOM tree
-   *   \param map<int, bool> definedDSNumbers : to know if DS numbers are not used by another OneStepIntegrator
-   */
+  /** Build a LsodarXML object from a DOM tree describing Lsodar OneStepIntegrator
+  *   \param LsodarNode : the Lsodar DOM tree
+  *   \param map<int, bool> definedDSNumbers : to know if DS numbers are not used by another OneStepIntegrator
+  */
   LsodarXML(xmlNode * LsodarNode);
 private:
 };

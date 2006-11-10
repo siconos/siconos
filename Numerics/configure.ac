@@ -141,12 +141,12 @@ AC_ARG_ENABLE(error-on-warning,[  --enable-erroronwarning     treat all compile 
 dnl Check for Lapack
 ACX_LAPACK([
   dnl action-if-found: 
-  AC_DEFINE(HAVE_LAPACKPP,1,[Define if you have LAPACK++ library.])
+  AC_DEFINE(HAVE_LAPACKPP,1,[Define if you have LAPACK library.])
   # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS
 ], [
   dnl action-if-not-found: 
   AC_MSG_ERROR([Blas/Lapack was not found. 
-*** This means Lapack++ and matrix support cannot be compiled. 
+*** This means Lapack and matrix support cannot be compiled. 
 *** This makes this library unusable. Please get blas and lapack 
 *** installed. If you do have these installed, use the options 
 *** --with-blas=<libname> or --with-lapack=<libname> and/or set 

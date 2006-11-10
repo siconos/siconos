@@ -153,7 +153,7 @@ LagrangianR::LagrangianR(RelationXML* relxml):
 }
 
 // constructor from a set of data
-LagrangianR::LagrangianR(const string lagRelType, const string computeH, const vector<string> & computeG):
+LagrangianR::LagrangianR(const string lagRelType, const string computeH, const std::vector<string> & computeG):
   Relation(LAGRANGIANRELATION), LagrangianRelationType(lagRelType), isHPlugged(true), hFunctionName("none"),
   h0Ptr(NULL), G0Ptr(NULL), h1Ptr(NULL), G10Ptr(NULL), G11Ptr(NULL), h2Ptr(NULL), G20Ptr(NULL), G21Ptr(NULL)
 {
@@ -400,7 +400,7 @@ void LagrangianR::setLagrangianRelationType(const string  type)
     manageGMemory();
 }
 
-void LagrangianR::setGVector(const vector<SiconosMatrix*>& newVector)
+void LagrangianR::setGVector(const std::vector<SiconosMatrix*>& newVector)
 {
   if (interaction == NULL)
     RuntimeException::selfThrow("LagrangianR:: setGVector, no interaction linked to the current relation");
@@ -915,7 +915,7 @@ void LagrangianR::computeY1(const double time, SiconosVector* qTmp, SiconosVecto
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G0"];
     G0Ptr(sizeQ, &(*qTmp2)(0), sizeY, &(*Gtmp)(0, 0), &(*param)(0));
-    *yDot = *Gtmp * *velocityTmp;
+    *yDot = prod(*Gtmp, *velocityTmp);
   }
   // y = h(...) and yDot = G10qDot + G11
   else if (LagrangianRelationType == "rhenomorous")
@@ -936,7 +936,7 @@ void LagrangianR::computeY1(const double time, SiconosVector* qTmp, SiconosVecto
     // warning: G1 is a matrix
     SiconosVector * Id = new SimpleVector(1);
     (*Id)(0) = 1.0;
-    *yDot = *G0tmp * *velocityTmp + *G1tmp * *Id;
+    *yDot = prod(*G0tmp, *velocityTmp) + prod(*G1tmp, *Id);
     delete Id;
   }
   else if (LagrangianRelationType == "scleronomic+lambda")
@@ -955,7 +955,7 @@ void LagrangianR::computeY1(const double time, SiconosVector* qTmp, SiconosVecto
     param = parametersList["G21"];
     G21Ptr(sizeQ, &(*qTmp2)(0), &(*lambdaTmp)(0), sizeY, &(*G1tmp)(0, 0), &(*param)(0));
 
-    *yDot = *G0tmp * *velocityTmp + *G1tmp * *lambdaDot;
+    *yDot = prod(*G0tmp, *velocityTmp) + prod(*G1tmp, *lambdaDot);
     delete lambdaTmp;
   }
   else
@@ -985,7 +985,7 @@ void LagrangianR::computeY2(const double time, SiconosVector* q, SiconosVector* 
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G0"];
     G0Ptr(sizeQ, &(*qTmp)(0), sizeY, &(*Gtmp)(0, 0), &(*param)(0));
-    *y2 = *Gtmp * *acceleration;
+    *y2 = prod(*Gtmp, *acceleration);
   }
   else
     RuntimeException::selfThrow("LagrangianR::computeY2 not yet implemented.");
@@ -1026,7 +1026,7 @@ void LagrangianR::computeInput(const double time, const unsigned int level)
   if (LagrangianRelationType == "scleronomic")
   {
     computeG(time, 0);
-    *p += matTransVecMult(*(G[0]), *lambda);
+    *p += prod(trans(*(G[0])), *lambda);
   }
   else
     RuntimeException::selfThrow("LagrangianR::computeInput,  not yet implemented for constraints of type" + LagrangianRelationType);
@@ -1044,21 +1044,17 @@ void LagrangianR::getGBlockDS(DynamicalSystem * ds, SiconosMatrix& Block, const 
   // look for ds
   while (*itDS != ds && itDS != vDS.end())
   {
-    k += (*itDS)->getN() / 2;
+    k += (*itDS)->getDim();
     itDS++;
   }
   // check dimension
-  if ((*itDS)->getN() / 2 != Block.size(1))
+  if ((*itDS)->getDim() != Block.size(1))
+    RuntimeException::selfThrow("LagrangianR - getGBlockDS: inconsistent sizes between GBlock and DS");
+  if (G[index]->size(0) != Block.size(0))
     RuntimeException::selfThrow("LagrangianR - getGBlockDS: inconsistent sizes between GBlock and DS");
 
   // get block
-  unsigned int l = k + (*itDS)->getN() / 2 - 1;
-  vector<unsigned int> index_list(4);
-  index_list[0] = 0;
-  index_list[1] = G[index]->size(0) - 1;
-  index_list[2] = k;
-  index_list[3] = l;
-  G[index]->getBlock(index_list, Block);
+  G[index]->getBlock(0, k, Block);
 }
 
 void LagrangianR::getGBlockDS(const int DSNumber, SiconosMatrix& Block, const unsigned  index) const
@@ -1072,22 +1068,18 @@ void LagrangianR::getGBlockDS(const int DSNumber, SiconosMatrix& Block, const un
   // look for DS number DSNumber ...
   while ((*itDS)->getNumber() != DSNumber && itDS != vDS.end())
   {
-    k += (*itDS)->getN() / 2;
+    k += (*itDS)->getDim();
     itDS++;
   }
 
   // check dimension
-  if ((*itDS)->getN() / 2 != Block.size(1))
+  if ((*itDS)->getDim() != Block.size(1))
     RuntimeException::selfThrow("LagrangianR - getGlockDS: inconsistent sizes between GBlock and DS");
+  if (G[index]->size(0) != Block.size(0))
+    RuntimeException::selfThrow("LagrangianR - getGBlockDS: inconsistent sizes between GBlock and DS");
 
   // get block
-  unsigned int l = k + (*itDS)->getN() / 2 - 1;
-  vector<unsigned int> index_list(4);
-  index_list[0] = 0;
-  index_list[1] = G[index]->size(0) - 1;
-  index_list[2] = k;
-  index_list[3] = l;
-  G[index]->getBlock(index_list, Block);
+  G[index]->getBlock(0, k, Block);
 }
 
 void LagrangianR::saveRelationToXML() const

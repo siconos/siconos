@@ -140,7 +140,7 @@ bool LinearTIDS::checkDynamicalSystem()
 void LinearTIDS::computeRhs(const double time, const bool)
 {
   // compute right-hand side
-  *rhs = *A * *x;
+  *rhs = prod(*A, *x);
 
   // add b if required
   if (b != NULL)
@@ -155,7 +155,7 @@ void LinearTIDS::computeRhs(const double time, const bool)
     {
       if (isPlugin["T"]) // if T is a plug-in function
         computeT();
-      *rhs += *T ** u;
+      *rhs += prod(*T, *u);
     }
     else
       *rhs += * u;

@@ -16,24 +16,10 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+/*! \file
+ Management of a Set (STL) of Events
+*/
 
-/** \class EventsManager
- *  \brief class that provides tools to handles events
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.3.0.
- *  \date (Creation) February 22, 2006
- *
- * Some rules:
- *     - Events can be removed or insert anywhere in the list
- *     - An event can not be modified (but removed!) => no setEvent(Event) function
- *     - All Events are created inside this class
- *       That means user can not create an Event and then insert it. He is forced to
- *       scheduleEvent method.
- *     - Tick must be set at construction, and can not be change after.
- *
- *  Questions/Todo : link with simulation or TimeDiscretisation?
- *              depends on what Event->process will need.
- */
 
 //#include "EventsManagerXML.h"
 #ifndef EVENTSMANAGER_H
@@ -50,8 +36,6 @@
 #include<string>
 #include<iostream>
 
-//class EventsManagerXML;
-
 class Simulation;
 
 // tick default value
@@ -65,6 +49,22 @@ typedef std::set<Event*, RuntimeCmp<Event> > eventsContainer; // sort in a chron
 /** return value for insert and erase in set -> checkEventSet.second is a bool */
 typedef std::pair<eventsContainer::iterator, bool> checkEventSet;
 
+//! Tools to handle a set of Events
+/**  \author SICONOS Development Team - copyright INRIA
+ *  \version 1.3.0.
+ *  \date (Creation) February 22, 2006
+ *
+ * Some rules:
+ *     - Events can be removed or insert anywhere in the list
+ *     - An event can not be modified (but removed!) => no setEvent(Event) function
+ *     - All Events are created inside this class
+ *       That means user can not create an Event and then insert it. He is forced to
+ *       scheduleEvent method.
+ *     - Tick must be set at construction, and can not be change after.
+ *
+ *  Questions/Todo : link with simulation or TimeDiscretisation?
+ *              depends on what Event->process will need.
+ */
 class EventsManager
 {
 protected:
@@ -102,65 +102,55 @@ protected:
   /* link to the simulation that owns this manager*/
   Simulation * simulation;
 
-  /** \fn unsigned long int doubleToIntTime(const double)
-   *  \brief convert time from double to unsigned int according to tick.
-   */
+  /** convert time from double to unsigned int according to tick.
+  */
   const unsigned long int doubleToIntTime(const double) const;
 
-  /** \fn double intToDoubleTime(const unsigned long int) const;
-   *  \brief convert time from unsigned int to double according to tick.
-   */
+  /** convert time from unsigned int to double according to tick.
+  */
   const double intToDoubleTime(const unsigned long int) const;
 
-  /** \fn const bool insertEvent(Event*)
-   *  \brief add a new Event in the unProcessedEvents list
-   *  \return false if Event already exists
-   */
+  /** add a new Event in the unProcessedEvents list
+  *  \return false if Event already exists
+  */
   const bool insertEvent(const std::string, const double);
 
 public:
 
-  /** \fn EventsManager(const EventsManager&)
-   *  \brief copy constructor
-   *  \param the eventsManager to be copied
-   */
+  /** copy constructor
+  *  \param the eventsManager to be copied
+  */
   EventsManager(const EventsManager&);
 
-  /** \fn EventsManager(const double = DEFAULT_TICK)
-   *  \brief default constructor, with tick value as optional input
-   *  \param an unsigned int
-   *  \param a string
-   */
+  /** default constructor, with tick value as optional input
+  *  \param an unsigned int
+  *  \param a string
+  */
   EventsManager(const double = DEFAULT_TICK, Simulation* = NULL);
 
-  /** \fn EventsManager(EventsManagerXML*)
-   *  \brief constructor with XML object of the EventsManager
-   *  \param a pointer to EventsManagerXML
-   */
+  /** constructor with XML object of the EventsManager
+  *  \param a pointer to EventsManagerXML
+  */
   // EventsManager(EventsManagerXML*);
 
-  /** \fn ~EventsManager()
-   *  \brief destructor
-   */
+  /** destructor
+  */
   ~EventsManager();
 
-  /** \fn initialize()
-  *  \brief manager initialization function
+  /** manager initialization function
   */
   void initialize();
 
-  /** \fn void scheduleTimeDiscretisation(TimeDiscretisation*);
-  *  \brief insert time discretisation into unProcessedEvents
+  /** insert time discretisation into unProcessedEvents
   *  this destroy any previous existing unProcessedEvents set.
   */
   void scheduleTimeDiscretisation(TimeDiscretisation*);
 
   // GETTERS/SETTERS
 
-  /** \fn inline const eventsContainer getPastEvents() const
-   *  \brief get the list of past Events
-   *  \return a set of Events*
-   */
+  /** get the list of past Events
+  *  \return a set of Events*
+  */
   inline const eventsContainer getPastEvents() const
   {
     return pastEvents ;
@@ -170,65 +160,57 @@ public:
    * Moreover, only EventsManager can create new Events.
    */
 
-  /** \fn inline const eventsContainer getUnProcessedEvents() const
-   *  \brief get the list of unProcessed Events
-   *  \return a set of Events*
-   */
+  /** get the list of unProcessed Events
+  *  \return a set of Events*
+  */
   inline const eventsContainer getUnProcessedEvents() const
   {
     return unProcessedEvents ;
   };
 
-  /** \fn Events* getEventPtr(const unsigned long int inputTime) const
-   *  \brief get the event that occurs at time inputTime
-   *  \param an unsigned long int
-   *  \return a pointer to Event
-   */
+  /** get the event that occurs at time inputTime
+  *  \param an unsigned long int
+  *  \return a pointer to Event
+  */
   Event* getEventPtr(const unsigned long int inputTime) const;
 
-  /** \fn Events* getCurrentEventPtr() const
-   *  \brief get the current event
-   *  \return a pointer to Event
-   */
+  /** get the current event
+  *  \return a pointer to Event
+  */
   inline Event* getCurrentEventPtr() const
   {
     return currentEvent;
   };
 
-  /** \fn void setNextEventPtr(Event* inputEvent) const
-   *  \brief set nextEvent to inputEvent
-   *  \param a pointer to Event
-   */
+  /** set nextEvent to inputEvent
+  *  \param a pointer to Event
+  */
   inline void setNextEventPtr(Event* inputEvent)
   {
     nextEvent = inputEvent;
   };
 
-  /** \fn Events* getNextEventPtr(Event* inputEvent) const
-   *  \brief get the event following inputEvent  ("following" defined with operator(s) comparison of events)
-   *  \param a pointer to Event
-   *  \return a pointer to Events
-   */
+  /** get the event following inputEvent  ("following" defined with operator(s) comparison of events)
+  *  \param a pointer to Event
+  *  \return a pointer to Events
+  */
   Event* getNextEventPtr(Event*) const;
 
-  /** \fn Events* getNextEventPtr(const unsigned long int inputTime) const
-   *  \brief get the event that follows the event at time inputTime  ("following" defined with operator(s) comparison of events)
-   *  \param an unsigned long int
-   *  \return a pointer to Event
-   */
+  /** get the event that follows the event at time inputTime  ("following" defined with operator(s) comparison of events)
+  *  \param an unsigned long int
+  *  \return a pointer to Event
+  */
   Event* getNextEventPtr(const unsigned long int inputTime) const;
 
-  /** \fn inline const double getTick() const
-   *  \brief get tick value
-   *  \return a double
-   */
+  /** get tick value
+  *  \return a double
+  */
   inline const double getTick() const
   {
     return tick ;
   };
 
-  /** \fn inline void setTick(const double newTick) const
-  *  \brief set tick value
+  /** set tick value
   *  \param a double
   */
   inline void setTick(const double  newTick)
@@ -237,79 +219,67 @@ public:
     tick = newTick;
   };
 
-  /** \fn Simulation* getSimulationPtr()
-    *  \brief get the Simulation
-    *  \return a pointer to Simulation
-    */
+  /** get the Simulation
+  *  \return a pointer to Simulation
+  */
   inline Simulation* getSimulationPtr() const
   {
     return simulation;
   }
 
-  /** \fn void setSimulationPtr(Simulation*)
-   *  \brief set the Simulation of the OneStepNSProblem
-   *  \param: a pointer on Simulation
-   */
+  /** set the Simulation of the OneStepNSProblem
+  *  \param: a pointer on Simulation
+  */
   inline void setSimulationPtr(Simulation* str)
   {
     simulation = str;
   }
 
-  /** \fn const bool hasEvent(Event* event) const
-   *  \brief check if event is present in past of unProcessedEvents list
-   *  \return a bool
-   */
+  /** check if event is present in past of unProcessedEvents list
+  *  \return a bool
+  */
   const bool hasEvent(Event*) const ;
 
-  /** \fn const bool hasNextEvent() const
-   *  \brief check if some events remain in unProcessedEvents list
-   *  \return a bool
-   */
+  /** check if some events remain in unProcessedEvents list
+  *  \return a bool
+  */
   const bool hasNextEvent() const ;
 
-  /** \fn const double getTimeOfEvent(Event*) const
-   *  \brief get the time (double format) of an event
-   *  \return a double
-   */
+  /** get the time (double format) of an event
+  *  \return a double
+  */
   const double getTimeOfEvent(Event*) const;
 
-  /** \fn const unsigned long int getIntTimeOfEvent(Event*) const
-   *  \brief get the time (int format) of an event
-   *  \return an unsigned long int
-   */
+  /** get the time (int format) of an event
+  *  \return an unsigned long int
+  */
   const unsigned long int getIntTimeOfEvent(Event*) const;
 
-  /** \fn const double getCurrentTime() const
-   *  \brief get the time of current event, in double format
-   *  \return a double
-   */
+  /** get the time of current event, in double format
+  *  \return a double
+  */
   const double getCurrentTime() const ;
 
-  /** \fn const double getNextTime() const
-   *  \brief get the time of next event, in double format
-   *  \return a double
-   */
+  /** get the time of next event, in double format
+  *  \return a double
+  */
   const double getNextTime() const ;
 
-  /** \fn void display()
-   *  \brief display EventsManager data
-   */
+  /** display EventsManager data
+  */
   void display() const ;
 
-  /** \fn const bool scheduleEvent(Event*)
-   *  \brief add a new Event in the unProcessedEvents list and update nextEvent value
-   *  \return false if Event already exists
-   */
+  /** add a new Event in the unProcessedEvents list and update nextEvent value
+  *  \return false if Event already exists
+  */
   const bool scheduleEvent(const std::string, const double);
 
-  /** \fn void removeEvent(Event*)
-   *  \brief remove an Event from the unProcessed events list
-   */
+  /** remove an Event from the unProcessed events list
+  */
   void removeEvent(Event*);
 
-  /** \fn void processEvents()
-   *  \brief run process functions of current event
-   */
+  /** run process functions of current event
+  */
   void processEvents();
 };
 

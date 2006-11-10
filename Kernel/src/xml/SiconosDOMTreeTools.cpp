@@ -17,6 +17,12 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "SiconosDOMTreeTools.h"
+#include "ioVector.h"
+#include "ioMatrix.h"
+#include "SimpleVector.h"
+#include "SimpleMatrix.h"
+#include "RuntimeException.h"
+
 using namespace std;
 
 SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNodePtr vectorNode)
@@ -126,7 +132,8 @@ void SiconosDOMTreeTools::setSiconosVectorNodeValue(const xmlNodePtr siconosVect
   if (xmlHasProp((xmlNodePtr)siconosVectorNode, (xmlChar *)SDTT_VECTORFILE.c_str())) //vector is defined in a extern ascii file
   {
     string file = getStringAttributeValue(siconosVectorNode, SDTT_VECTORFILE);
-    v.write(file, FILE_STORAGE); //For the moment only ASCII file are managed
+    ioVector io(file, FILE_STORAGE);
+    io.write(v);
   }
   else
   {
@@ -152,7 +159,8 @@ void SiconosDOMTreeTools::setSiconosMatrixNodeValue(const xmlNodePtr siconosMatr
   if (xmlHasProp((xmlNodePtr)siconosMatrixNode, (xmlChar *)SDTT_MATRIXFILE.c_str())) //matrix is defined in a extern ascii file
   {
     string file = getStringAttributeValue(siconosMatrixNode, SDTT_MATRIXFILE);
-    matrix.write(file, FILE_STORAGE); //For the moment only ASCII file are managed
+    ioMatrix io(file, FILE_STORAGE);
+    io.write(matrix);
   }
   else
   {

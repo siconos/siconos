@@ -16,31 +16,29 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+
+/*! \file Interaction.h
+  Interaction class and related typedef
+*/
+
+
 #ifndef INTERACTION_H
 #define INTERACTION_H
 
 // for composition ...
-#include "DynamicalSystem.h"
 #include "NonSmoothLaw.h"
 #include "Relation.h"
-#include "RelationXML.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "DynamicalSystemsSet.h"
 
 // IO (XML)
 #include "InteractionXML.h"
 
-// tools
-#include "SimpleVector.h"
-#include "BlockVector.h"
-
 // const
 #include "SiconosConst.h"
 
 // stl tools
 #include <vector>
-#include <string>
-#include <set>
 
 class DynamicalSystemsSet;
 class NonSmoothLaw;
@@ -49,29 +47,6 @@ class Relation;
 class NonSmoothDynamicalSystem;
 class InteractionXML;
 
-/** \class Interaction
- *  \brief this class describes interaction between some dynamical systems (DS) (from 1 to NumberOfDS)
- *  Each interaction owns local variables  with relations between them, plus a non smooth law
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.3.0.
- *  \date (Creation) Apr 29, 2004
- *
- * An interaction represents the "link" between a set of Dynamical Systems (var: involvedDS) that interact alltogether through
- * some relations (between state variables (x,R) and local ones (y,lambda)) completed by a non-smooth law.
- *
- * Thus, the interaction main members are:
- * - a set of Dynamical Systems that interacts, involvedDS.
- * - y and lambda (their size is interactionSize).
- *   stl vectors are used and y[i] (resp lambda[i]) represents the i-eme derivative of variable y (resp lambda)
- * - relation: a pointer to a Relation object that determines the type of relation and so the way it is computed.
- * - nslaw: the non smooth law
- *
- * Note that numberOfRelations is equal to interactionSize/nsLawSize. Thus a relation is not necessarily represented
- * by a single equation.
- *
- * \todo save a number of derivatives of y depending on the relative degree (at the time, this number is set to 2)
- *
- */
 
 /** container for SiconosVectors */
 typedef std::vector< BlockVector* > VectorOfBlocks;
@@ -82,6 +57,39 @@ typedef VectorOfBlocks::iterator VectorOfBlocksIterator;
 /** type used for inside-class allocation checking */
 typedef std::deque<bool>  AllocationFlags;
 
+//!  An Interaction describes the non-smooth interactions between a set of Dynamical Systems.
+/**
+ *  \author SICONOS Development Team - copyright INRIA
+ *  \version 1.3.0.
+ *  \date (Creation) Apr 29, 2004
+ *
+ * An interaction represents the "link" between a set of Dynamical Systems (var: involvedDS) that interact alltogether through
+ * some relations (between state variables (x,R) and local variables (y,lambda)) completed by a non-smooth law.
+ *
+ * Thus, the interaction main members are:
+ *
+ * - a set of Dynamical Systems (from 1 to ...) that interacts, named involvedDS.
+ *
+ * - relation: a pointer to a Relation object that determines the type of relation and so the way it is computed.
+ *   Warning: there is only one Relation object (ie only one type of relation for an interaction) but there can be several "relations", in the sense
+ *   of constraints equations between (y,lambda) and (x,r).
+ *
+ * - nslaw: the non smooth law
+ *
+ * - the local variables y and lambda (their size is interactionSize).
+ *   stl vectors are used and y[i] (resp lambda[i]) represents the i-eme derivative of variable y (resp lambda).
+ *
+ *   y is a container of BlockVector. Each block corresponds to a "unitary relation", a relation which size is the one of the non-smooth law.
+ *    => ySize = interactionSize = numberOfRelations * nsLawSize .
+ *   Same thing for lambda.
+ *
+ *  => all the relations of the interaction have the same non-smooth law.
+ *  => the number of relations is equal to interactionSize/nsLawSize. Thus a relation is not necessarily represented
+ *     by a single equation.
+ *
+ * \todo save a number of derivatives of y depending on the relative degree (at the time, this number is set to 2)
+ *
+ */
 class Interaction
 {
 
@@ -147,9 +155,7 @@ private:
 
   // === PRIVATE FUNCTIONS ===
 
-  /** \fn Interaction()
-   *  \brief default constructor
-   */
+  /** default constructor */
   Interaction();
 
   // === PUBLIC FUNCTIONS ===
@@ -158,61 +164,53 @@ public:
 
   // === CONSTRUCTORS/DESTRUCTOR ===
 
-  /** \fn Interaction(const Interaction&)
-   *  \brief copy constructor
+  /** copy constructor
    *  \param Interaction* : the object to copy
    */
   Interaction(const Interaction& inter);
 
-  /** \fn Interaction(InteractionXML*)
-   *  \brief constructor with XML object of the Interaction
+  /** constructor with XML object of the Interaction
    *  \param InteractionXML* : the XML object corresponding
    *  \param NonSmoothDynamicalSystem (optional)
    */
   Interaction(InteractionXML*, NonSmoothDynamicalSystem* = NULL);
 
-  /** \fn Interaction(const string, DynamicalSystemsSet& dsConcerned, const int number,const int nInter, NonSmoothLaw*, Relation*)
-   *  \brief constructor with a set of data
-   *  \param string: the id of this Interaction
-   *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
-   *  \param int : the number of this Interaction
-   *  \param int : the value of interactionSize
-   *  \param NonSmoothLaw* : a pointer to the non smooth law
-   *  \param Relation* : a pointer to the Relation
-   *  \exception RuntimeException
-   */
-  Interaction(const std::string, DynamicalSystemsSet&, const int, const int, NonSmoothLaw*, Relation*);
+  /** constructor with a set of data
+  *  \param string: the id of this Interaction
+  *  \param a DynamicalSystemsSet: the set of DS involved in the Interaction
+  *  \param int : the number of this Interaction
+  *  \param int : the value of interactionSize
+  *  \param NonSmoothLaw* : a pointer to the non smooth law
+  *  \param Relation* : a pointer to the Relation
+  *  \exception RuntimeException
+  */
+  Interaction(const std::string&, DynamicalSystemsSet&, int, int, NonSmoothLaw*, Relation*);
 
-  /** \fn ~Interaction()
-   * \brief destructor
+  /** destructor
    */
   ~Interaction();
 
-  /** \fn void initialize()
-   *  \brief allocate memory for y[i] and lambda[i] and set them to zero.
-   */
+  /** allocate memory for y[i] and lambda[i] and set them to zero.
+  */
   void initialize();
 
-  /** \fn void initializeMemory(const unsigned int)
-   *  \brief build Y and Lambda stl vectors.
-   *   \param unsigned int: dim of Y and Lambda vector of Interactions (ie number of derivatives that
-   *          are taken into account). This is an input argument since it depends on the simulation type.
-   */
+  /** build Y and Lambda stl vectors.
+  *   \param unsigned int: dim of Y and Lambda vector of Interactions (ie number of derivatives that
+  *          are taken into account). This is an input argument since it depends on the simulation type.
+  */
   void initializeMemory(const unsigned int);
 
   // === GETTERS/SETTERS ===
 
-  /** \fn const string getId() const
-   *  \brief get the id of this Interaction
-   *  \return the string, id of this Interaction
-   */
+  /** get the id of this Interaction
+  *  \return the string, id of this Interaction
+  */
   inline const std::string  getId() const
   {
     return id;
   }
 
-  /** \fn void setId(int)
-   *  \brief set the id of this Interaction
+  /** set the id of this Interaction
    *  \param the integer to set the id
    */
   inline void setId(const int newId)
@@ -220,8 +218,7 @@ public:
     id = newId;
   }
 
-  /** \fn const int getNumber() const
-   *  \brief get the value of number
+  /** get the value of number
    *  \return the value of number
    */
   inline const int getNumber() const
@@ -229,55 +226,49 @@ public:
     return number;
   }
 
-  /** \fn void setNumber(const int)
-   *  \brief set number
-   *  \param int number : the value to set number
-   */
+  /** set number
+  *  \param int number : the value to set number
+  */
   inline void setNumber(const int newNumber)
   {
     number = newNumber;
   }
 
-  /** \fn const unsigned int getInteractionSize() const
-   *  \brief get the dimension of the interaction (y and lambda size)
-   *  \return an unsigned int
-   */
+  /** get the dimension of the interaction (y and lambda size)
+  *  \return an unsigned int
+  */
   inline const unsigned int getInteractionSize() const
   {
     return interactionSize;
   }
 
-  /** \fn void setInteractionSize(const unsigned int)
-   *  \brief set the dimension of the Interaction
-   *  \param an unsigned int
-   */
+  /** set the dimension of the Interaction
+  *  \param an unsigned int
+  */
   inline void setInteractionSize(const unsigned int newVal)
   {
     interactionSize = newVal;
   }
 
-  /** \fn const unsigned int getNumberOfRelations() const
-   *  \brief get the number of relations in the interaction
-   *  \return an unsigned int
-   */
+  /** get the number of relations in the interaction
+  *  \return an unsigned int
+  */
   inline const unsigned int getNumberOfRelations() const
   {
     return numberOfRelations;
   }
 
-  /** \fn void setNumberOfRelations(const unsigned int)
-   *  \brief set the number of relations
-   *  \param an unsigned int
-   */
+  /** set the number of relations
+  *  \param an unsigned int
+  */
   inline void setNumberOfRelations(const unsigned int newVal)
   {
     numberOfRelations = newVal;
   }
 
-  /** \fn const unsigned int getSizeOfDS() const
-   *  \brief get the sum of DS sizes, for DS involved in interaction
-   *  \return an unsigned int
-   */
+  /** get the sum of DS sizes, for DS involved in interaction
+  *  \return an unsigned int
+  */
   inline const unsigned int getSizeOfDS() const
   {
     return sizeOfDS;
@@ -285,306 +276,266 @@ public:
 
   // -- y --
 
-  /** \fn  const VectorOfBlocks getY() const
-   *  \brief get vector of output derivatives
-   *  \return a VectorOfBlocks
-   */
+  /** get vector of output derivatives
+  *  \return a VectorOfBlocks
+  */
   inline const VectorOfBlocks getY() const
   {
     return y;
   }
 
-  /** \fn  const BlockVector getY(const unsigned int  i) const
-   *  \brief get y[i], derivative number i of output
-   *  \return BlockVector
-   */
+  /** get y[i], derivative number i of output
+  *  \return BlockVector
+  */
   inline const BlockVector getY(const unsigned int i) const
   {
     return *(y[i]);
   }
 
-  /** \fn SiconosVector* getYPtr(const unsigned int i) const
-   *  \brief get y[i], derivative number i of output
-   *  \return pointer on a SiconosVector
-   */
+  /** get y[i], derivative number i of output
+  *  \return pointer on a SiconosVector
+  */
   inline SiconosVector* getYPtr(const unsigned int i) const
   {
     return y[i];
   }
 
-  /** \fn void setY (const VectorOfBlocks& newVector)
-   *  \brief set the output vector y to newVector with copy of the y[i] (ie memory allocation)
-   *  \param VectorOfBlocks
-   */
+  /** set the output vector y to newVector with copy of the y[i] (ie memory allocation)
+  *  \param VectorOfBlocks
+  */
   void setY(const VectorOfBlocks&);
 
-  /** \fn void setYPtr (const VectorOfBlocks& newVector)
-   *  \brief set the output vector y to newVector with direct pointer equality for the y[i]
-   *  \param VectorOfBlocks
-   */
+  /** set the output vector y to newVector with direct pointer equality for the y[i]
+  *  \param VectorOfBlocks
+  */
   void setYPtr(const VectorOfBlocks&);
 
-  /** \fn void setY (const unsigned int  i, const BlockVector& newValue);
-   *  \brief set y[i] to newValue
-   *  \param a BlockVector and an unsigned int
-   */
+  /** set y[i] to newValue
+  *  \param a BlockVector and an unsigned int
+  */
   void setY(const unsigned int , const BlockVector&);
 
-  /** \fn void setYPtr(const unsigned int  i, SiconosVector* newPtr)
-   *  \brief set y[i] to pointer newPtr
-   *  \param a SiconosVector * and an unsigned int
-   */
+  /** set y[i] to pointer newPtr
+  *  \param a SiconosVector * and an unsigned int
+  */
   void setYPtr(const unsigned int , SiconosVector *newPtr);
 
   // -- yOld --
 
-  /** \fn  const VectorOfBlocks getYOld() const
-   *  \brief get vector of output derivatives
-   *  \return a VectorOfBlocks
-   */
+  /** get vector of output derivatives
+  *  \return a VectorOfBlocks
+  */
   inline const VectorOfBlocks getYOld() const
   {
     return yOld;
   }
 
-  /** \fn  const BlockVector getYOld(const unsigned int  i) const
-   *  \brief get yOld[i], derivative number i of output
-   *  \return BlockVector
-   */
+  /** get yOld[i], derivative number i of output
+  *  \return BlockVector
+  */
   inline const BlockVector getYOld(const unsigned int i) const
   {
     return *(yOld[i]);
   }
 
-  /** \fn SiconosVector* getYOldPtr(const unsigned int i) const
-   *  \brief get yOld[i], derivative number i of output
-   *  \return pointer on a SiconosVector
-   */
+  /** get yOld[i], derivative number i of output
+  *  \return pointer on a SiconosVector
+  */
   inline SiconosVector* getYOldPtr(const unsigned int i) const
   {
     return yOld[i];
   }
 
-  /** \fn void setYOld (const VectorOfBlocks& newVector)
-   *  \brief set the output vector yOld to newVector
-   *  \param VectorOfBlocks
-   */
+  /** set the output vector yOld to newVector
+  *  \param VectorOfBlocks
+  */
   void setYOld(const VectorOfBlocks&);
 
-  /** \fn void setYOldPtr(const VectorOfBlocks& newVector);
-   *  \brief set vector yOld to newVector with direct pointer equality for the yOld[i]
-   *  \param VectorOfBlocks
-   */
+  /** set vector yOld to newVector with direct pointer equality for the yOld[i]
+  *  \param VectorOfBlocks
+  */
   void setYOldPtr(const VectorOfBlocks&);
 
-  /** \fn void setYOld (const unsigned int  i, const BlockVector& newValue);
-   *  \brief set yOld[i] to newValue
-   *  \param a BlockVector and an unsigned int
-   */
+  /** set yOld[i] to newValue
+  *  \param a BlockVector and an unsigned int
+  */
   void setYOld(const unsigned int , const BlockVector&);
 
-  /** \fn void setYOldPtr(const unsigned int  i, SiconosVector* newPtr)
-   *  \brief set yOld[i] to pointer newPtr
-   *  \param a SiconosVector * and an unsigned int
-   */
+  /** set yOld[i] to pointer newPtr
+  *  \param a SiconosVector * and an unsigned int
+  */
   void setYOldPtr(const unsigned int , SiconosVector *newPtr);
 
   // -- lambda --
 
-  /** \fn  const VectorOfBlocks getLambda() const
-   *  \brief get vector of input derivatives
-   *  \return a VectorOfBlocks
-   */
+  /** get vector of input derivatives
+  *  \return a VectorOfBlocks
+  */
   inline const VectorOfBlocks getLambda() const
   {
     return lambda;
   }
 
-  /** \fn  const BlockVector getLambda(const unsigned int  i) const
-   *  \brief get lambda[i], derivative number i of input
-   *  \return BlockVector
-   */
+  /** get lambda[i], derivative number i of input
+  *  \return BlockVector
+  */
   inline const BlockVector getLambda(const unsigned int i) const
   {
     return *(lambda[i]);
   }
 
-  /** \fn SiconosVector* getLambdaPtr(const unsigned int i) const
-   *  \brief get lambda[i], derivative number i of input
-   *  \return pointer on a SiconosVector
-   */
+  /** get lambda[i], derivative number i of input
+  *  \return pointer on a SiconosVector
+  */
   inline SiconosVector* getLambdaPtr(const unsigned int i) const
   {
     return lambda[i];
   }
 
-  /** \fn void setLambda (const VectorOfBlocks& newVector)
-   *  \brief set the input vector lambda to newVector
-   *  \param VectorOfBlocks
-   */
+  /** set the input vector lambda to newVector
+  *  \param VectorOfBlocks
+  */
   void setLambda(const VectorOfBlocks&);
 
-  /** \fn void setLambdaPtr(const VectorOfBlocks& newVector);
-   *  \brief set vector lambda to newVector with direct pointer equality for the lambda[i]
-   *  \param VectorOfBlocks
-   */
+  /** set vector lambda to newVector with direct pointer equality for the lambda[i]
+  *  \param VectorOfBlocks
+  */
   void setLambdaPtr(const VectorOfBlocks&);
 
-  /** \fn void setLambda (const unsigned int  i, const BlockVector& newValue);
-   *  \brief set lambda[i] to newValue
-   *  \param a BlockVector and an unsigned int
-   */
+  /** set lambda[i] to newValue
+  *  \param a BlockVector and an unsigned int
+  */
   void setLambda(const unsigned int , const BlockVector&);
 
-  /** \fn void setLambdaPtr(const unsigned int  i, SiconosVector* newPtr)
-   *  \brief set lambda[i] to pointer newPtr
-   *  \param a SiconosVector * and an unsigned int
-   */
+  /** set lambda[i] to pointer newPtr
+  *  \param a SiconosVector * and an unsigned int
+  */
   void setLambdaPtr(const unsigned int , SiconosVector *newPtr);
 
   // -- lambdaOld --
 
-  /** \fn  const VectorOfBlocks getLambdaOld() const
-   *  \brief get vector of input derivatives
-   *  \return a VectorOfBlocks
-   */
+  /** get vector of input derivatives
+  *  \return a VectorOfBlocks
+  */
   inline const VectorOfBlocks getLambdaOld() const
   {
     return lambdaOld;
   }
 
-  /** \fn  const BlockVector getLambdaOld(const unsigned int  i) const
-   *  \brief get lambdaOld[i], derivative number i of input
-   *  \return BlockVector
-   */
+  /** get lambdaOld[i], derivative number i of input
+  *  \return BlockVector
+  */
   inline const BlockVector getLambdaOld(const unsigned int i) const
   {
     return *(lambdaOld[i]);
   }
 
-  /** \fn SiconosVector* getLambdaOldPtr(const unsigned int i) const
-   *  \brief get lambdaOld[i], derivative number i of input
-   *  \return pointer on a SiconosVector
-   */
+  /** get lambdaOld[i], derivative number i of input
+  *  \return pointer on a SiconosVector
+  */
   inline SiconosVector* getLambdaOldPtr(const unsigned int i) const
   {
     return lambdaOld[i];
   }
 
-  /** \fn void setLambdaOld (const VectorOfBlocks& newVector)
-   *  \brief set the input vector lambdaOld to newVector
-   *  \param VectorOfBlocks
-   */
+  /** set the input vector lambdaOld to newVector
+  *  \param VectorOfBlocks
+  */
   void setLambdaOld(const VectorOfBlocks&);
 
-  /** \fn void setLambdaOldPtr(const VectorOfBlocks& newVector);
-   *  \brief set vector lambdaOld to newVector with direct pointer equality for the lambdaOld[i]
-   *  \param VectorOfBlocks
-   */
+  /** set vector lambdaOld to newVector with direct pointer equality for the lambdaOld[i]
+  *  \param VectorOfBlocks
+  */
   void setLambdaOldPtr(const VectorOfBlocks&);
 
-  /** \fn void setLambdaOld (const unsigned int  i, const BlockVector& newValue);
-   *  \brief set lambdaOld[i] to newValue
-   *  \param a BlockVector and an unsigned int
-   */
+  /** set lambdaOld[i] to newValue
+  *  \param a BlockVector and an unsigned int
+  */
   void setLambdaOld(const unsigned int , const BlockVector&);
 
-  /** \fn void setLambdaOldPtr(const unsigned int  i, SiconosVector* newPtr)
-   *  \brief set lambdaOld[i] to pointer newPtr
-   *  \param a SiconosVector * and an unsigned int
-   */
+  /** set lambdaOld[i] to pointer newPtr
+  *  \param a SiconosVector * and an unsigned int
+  */
   void setLambdaOldPtr(const unsigned int , SiconosVector *newPtr);
 
-  /** \fn DynamicalSystemsSet getDynamicalSystems()
-   *  \brief get the DynamicalSystems of this Interaction
-   *  \return a DynamicalSystemsSet
-   */
+  /** get the DynamicalSystems of this Interaction
+  *  \return a DynamicalSystemsSet
+  */
   inline DynamicalSystemsSet getDynamicalSystems() const
   {
     return involvedDS;
   }
 
-  /** \fn void setDynamicalSystems(const DynamicalSystemsSet&)
-   *  \brief set the involvedDS
-   *  \param a DynamicalSystemsSet
-   */
+  /** set the involvedDS
+  *  \param a DynamicalSystemsSet
+  */
   void setDynamicalSystems(const DynamicalSystemsSet&) ;
 
-  /** \fn DynamicalSystem* getDynamicalSystemPtr(const int)
-   *  \brief get a specific DynamicalSystem
-   *  \param the identification number of the wanted DynamicalSystem
-   *  \return a pointer on Dynamical System
-   */
+  /** get a specific DynamicalSystem
+  *  \param the identification number of the wanted DynamicalSystem
+  *  \return a pointer on Dynamical System
+  */
   DynamicalSystem* getDynamicalSystemPtr(const int);
 
-  /** \fn DynamicalSystem getDynamicalSystemNumber(const int nb)
-   *  \brief get a specific DynamicalSystem
-   *  \param the identification number of the wanted DynamicalSystem
-   *  \return a Dynamical System
+  /** get a specific DynamicalSystem
+  *  \param the identification number of the wanted DynamicalSystem
+  *  \return a Dynamical System
   */
   DynamicalSystem getDynamicalSystem(const int);
 
-  /** \fn Relation* getRelationPtr(void)
-   *  \brief get the Relation of this Interaction
-   *  \return a pointer on this Relation
-   */
+  /** get the Relation of this Interaction
+  *  \return a pointer on this Relation
+  */
   inline Relation* getRelationPtr() const
   {
     return relation;
   }
 
-  /** \fn void setRelationPtr(Relation*)
-   *  \brief set the Relation of this Interaction
-   *  \param the relation* to set
-   */
+  /** set the Relation of this Interaction
+  *  \param the relation* to set
+  */
   void setRelationPtr(Relation* newRelation) ;
 
-  /** \fn NonSmoothLaw* getNonSmoothLawPtr(void)
-   *  \brief get the NonSmoothLaw of this Interaction
-   *  \return a pointer on this NonSmoothLaw
-   */
+  /** get the NonSmoothLaw of this Interaction
+  *  \return a pointer on this NonSmoothLaw
+  */
   inline NonSmoothLaw* getNonSmoothLawPtr() const
   {
     return nslaw;
   }
 
-  /** \fn void setNonSmoothLawPtr(NonSmoothLaw*)
-   *  \brief set the NonSmoothLaw of this Interaction
-   *  \param the NonSmoothLaw* to set
-   */
+  /** set the NonSmoothLaw of this Interaction
+  *  \param the NonSmoothLaw* to set
+  */
   void setNonSmoothLawPtr(NonSmoothLaw* newNslaw) ;
 
-  /** \fn NonSmoothDynamicalSystem* getNonSmoothDynamicalSystemPtr() const;
-   *  \brief get the NonSmoothDynamicalSystem that contains the current Interaction
-   *  \return NonSmoothDynamicalSystem*
-   */
+  /** get the NonSmoothDynamicalSystem that contains the current Interaction
+  *  \return NonSmoothDynamicalSystem*
+  */
   inline NonSmoothDynamicalSystem* getNonSmoothDynamicalSystemPtr() const
   {
     return NSDS;
   }
 
-  /** \fn void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem*);
-   *  \brief set the NonSmoothDynamicalSystem that contains the current Interaction
-   *  \param NonSmoothDynamicalSystem*
-   */
+  /** set the NonSmoothDynamicalSystem that contains the current Interaction
+  *  \param NonSmoothDynamicalSystem*
+  */
   inline void setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem *newNsds)
   {
     NSDS = newNsds;
   }
 
-  /** \fn inline InteractionXML* getInteractionXMLPtr()
-   *  \brief get the InteractionXML* of the Interaction
-   *  \return InteractionXML* : the pointer on the InteractionXML
-   */
+  /** get the InteractionXML* of the Interaction
+  *  \return InteractionXML* : the pointer on the InteractionXML
+  */
   inline InteractionXML* getInteractionXMLPtr() const
   {
     return interactionxml;
   }
 
-  /** \fn inline void setInteractionXMLPtr(InteractionXML* interxml)
-   *  \brief set the InteractionXML* of the Interaction
-   *  \param InteractionXML* :  the pointer to set
-   */
+  /** set the InteractionXML* of the Interaction
+  *  \param InteractionXML* :  the pointer to set
+  */
   inline void setInteractionXMLPtr(InteractionXML* interxml)
   {
     interactionxml = interxml;
@@ -592,27 +543,23 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** \fn void computeSizeOfDS()
-   * \brief compute sum of all interaction-involved DS sizes
-   */
+  /** compute sum of all interaction-involved DS sizes
+  */
   void computeSizeOfDS();
 
-  /** \fn void swapInMemory(void);
-   * \brief   put values of y in yOld, the same for lambda
-   */
+  /**   put values of y in yOld, the same for lambda
+  */
   void swapInMemory();
 
-  /** \fn void display()
-   *  \brief print the data to the screen
-   */
+  /** print the data to the screen
+  */
   void display() const;
 
   // --- XML RELATED FUNCTIONS ---
 
-  /** \fn void saveInteractionToXML()
-   *  \brief copy the data of the Interaction to the XML tree
-   *  \exception RuntimeException
-   */
+  /** copy the data of the Interaction to the XML tree
+  *  \exception RuntimeException
+  */
   void saveInteractionToXML();
 
 };

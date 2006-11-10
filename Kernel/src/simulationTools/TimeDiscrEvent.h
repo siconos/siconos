@@ -16,19 +16,20 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+/*! \file
+Time Discretisation Events
+*/
 #ifndef TIMEDISCREVENT_H
 #define TIMEDISCREVENT_H
 
-/** \class TimeDiscrEvent
- *  \brief class derived from Event one: events that corresponds to original time discretisation steps.
- *  \author SICONOS Development Team - copyright INRIA
+#include "Event.h"
+
+//! Events that corresponds to original time discretisation steps.
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) February 21, 2006
  *
  */
-
-#include "Event.h"
-
 class TimeDiscrEvent : public Event
 {
 
@@ -39,27 +40,23 @@ private:
 
 public:
 
-  /** \fn TimeDiscrEvent(const TimeDiscrEvent&)
-   *  \brief copy constructor
-   *  \param the timeDiscrEvent to be copied
-   */
+  /** copy constructor
+  *  \param the timeDiscrEvent to be copied
+  */
   TimeDiscrEvent(const TimeDiscrEvent&);
 
-  /** \fn TimeDiscrEvent(const unsigned long int&)
-   *  \brief constructor with time value as a parameter
-   *  \param an unsigned long int
-   */
+  /** constructor with time value as a parameter
+  *  \param an unsigned long int
+  */
   TimeDiscrEvent(const unsigned long int&);
 
-  /** \fn ~TimeDiscrEvent()
-   *  \brief destructor
-   */
+  /** destructor
+  */
   ~TimeDiscrEvent();
 
-  /** \fn void process(Simulation*)
-   *  \brief
-   *  \param Simulation*, the simulation that owns this Event (through the EventsManager)
-   */
+  /**
+  *  \param Simulation*, the simulation that owns this Event (through the EventsManager)
+  */
   void process(Simulation*);
 };
 

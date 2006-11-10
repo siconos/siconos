@@ -17,15 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/** \class NonSmoothLaw
- *  \brief this class contains non-smooth law
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.3.0.
- *  \date (Creation) May 05, 2004
- *
- *
- *
- */
+/*! \file NonSmoothLaw.h
+
+*/
 
 #ifndef NSLAW_H
 #define NSLAW_H
@@ -41,6 +35,14 @@ const std::string NEWTONIMPACTFRICTIONNSLAW = "NewtonImpactFrictionNSL";
 class Interaction;
 class NonSmoothLawXML;
 
+//! Non Smooth Laws Base Class
+/**  \author SICONOS Development Team - copyright INRIA
+ *  \version 1.3.0.
+ *  \date (Creation) May 05, 2004
+ *
+ *
+ *
+ */
 class NonSmoothLaw
 {
 protected:
@@ -56,95 +58,83 @@ protected:
 
 public:
 
-  /** \fn NonSmoothLaw(const string , const unsigned int& = 1)
-   * \brief default constructor
-   * \param string: type of the law (optional, default = none)
-   * \param unsigned int, the non smooth law size, default = 1
-   */
+  /** default constructor
+  * \param string: type of the law (optional, default = none)
+  * \param unsigned int, the non smooth law size, default = 1
+  */
   NonSmoothLaw(const std::string = "none", const unsigned int& = 1);
 
-  /** \fn NonSmoothLaw(const string , NonSmoothLawXML*)
-   *  \brief constructor with XML object of the NonSmoothLaw
-   * \param string: type of the law
-   *  \param NonSmoothLawXML* : the XML object corresponding
-   */
+  /** constructor with XML object of the NonSmoothLaw
+  * \param string: type of the law
+  *  \param NonSmoothLawXML* : the XML object corresponding
+  */
   NonSmoothLaw(const std::string , NonSmoothLawXML*);
 
-  /** \fn ~NonSmoothLaw()
-   * \brief destructor
-   */
+  /** destructor
+  */
   virtual ~NonSmoothLaw();
 
-  /** \fn bool isVerified()
-   *  \brief check if the NS law is verified
-   *  \return a boolean value whioch determines if the NS Law is verified
-   */
+  /** check if the NS law is verified
+  *  \return a boolean value whioch determines if the NS Law is verified
+  */
   virtual bool isVerified() const = 0;
 
-  /** \fn inline NonSmoothLawXML* getNonSmoothLawXML()
-   *  \brief get the NonSmoothLawXML of the NonSmoothLaw
-   *  \return the pointer on the NonSmoothLawXML of the NonSmoothLaw
-   */
+  /** get the NonSmoothLawXML of the NonSmoothLaw
+  *  \return the pointer on the NonSmoothLawXML of the NonSmoothLaw
+  */
   inline NonSmoothLawXML* getNonSmoothLawXML()
   {
     return nslawxml;
   }
 
-  /** \fn inline void setNonSmoothLawXML( NonSmoothLawXML* nslawxml )
-   *  \brief set the NonSmoothLawXML of the NonSmoothLaw
-   *  \param NonSmoothLawXML* : the pointer to set nslawxml
-   */
+  /** set the NonSmoothLawXML of the NonSmoothLaw
+  *  \param NonSmoothLawXML* : the pointer to set nslawxml
+  */
   inline void setNonSmoothLawXML(NonSmoothLawXML* newNslawxml)
   {
     nslawxml = newNslawxml;
   }
 
-  /** \fn inline string getType()
-   *  \brief allows to get the type of the NonSmoothLaw
-   *  \return string : the type of the NonSmoothLaw
-   */
+  /** allows to get the type of the NonSmoothLaw
+  *  \return string : the type of the NonSmoothLaw
+  */
   inline const std::string getType() const
   {
     return nsLawType;
   }
 
-  /** \fn inline string setType(const string &)
-   *  \brief set the type of the NonSmoothLaw
-   *  \param: string, the type of the NonSmoothLaw
-   */
+  /** set the type of the NonSmoothLaw
+  *  \param: string, the type of the NonSmoothLaw
+  */
   inline void setType(const std::string& newType)
   {
     nsLawType = newType;
   }
 
-  /** \fn inline unsigned int getNsLawSize()
-   *  \brief to get the size
-   *  \return an unsigned int
-   */
+  /** to get the size
+  *  \return an unsigned int
+  */
   inline const unsigned int getNsLawSize() const
   {
     return size;
   }
 
-  /** \fn inline string setNsLawSize(const unsigned int &)
-   *  \brief set the size of the nsLaw
-   *  \param an unsigned int
-   */
+  /** set the size of the nsLaw
+  *  \param an unsigned int
+  */
   inline void setNsLawSize(const unsigned int newVal)
   {
     size = newVal;
   }
 
-  /** \fn void saveNonSmoothLawToXML()
-   *  \brief copy the data of the NonSmoothLaw to the XML tree
-   *  \exception RuntimeException
-   */
+  /** copy the data of the NonSmoothLaw to the XML tree
+  *  \exception RuntimeException
+  */
   virtual void saveNonSmoothLawToXML() = 0;
 
-  /** \fn void display()
-   *  \brief display the data of the NonSmoothLaw on the standard output
-   *  \exception RuntimeException
-   */
+  /** display the data of the NonSmoothLaw on the standard output
+  *  \exception RuntimeException
+  */
   virtual void display() const = 0;
 
 };

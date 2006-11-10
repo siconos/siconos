@@ -17,6 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
+/*! \file LagrangianLinearTIDS.h
+
+*/
 #ifndef LAGRANGIANTIDS_H
 #define LAGRANGIANTIDS_H
 
@@ -25,15 +28,15 @@
 
 class LagrangianLinearTIDSXML;
 
-/** \class LagrangianLinearTIDS
- *  \brief class of Lagrangian systems with time invariant coefficients - Derived from LagrangianDS
- *  \author SICONOS Development Team - copyright INRIA
+//! Lagrangian Linear Systems with time invariant coefficients - Derived from LagrangianDS
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 29, 2004
  *
  *
  * The class LagrangianLinearTIDS  allows to define  and compute a generic ndof-dimensional
  * Lagrangian Linear Time Invariant Dynamical System of the form :
+ * where
  * \f[
  * M \ddot q + C \dot q + K q =  F_{Ext}(t) + p,
  * \f]
@@ -41,7 +44,8 @@ class LagrangianLinearTIDSXML;
  *    - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
  *    - \f$ \dot q  \in R^{ndof} \f$  the velocity, i. e. the time derivative of the  generalized coordinates.
  *    - \f$ \ddot q  \in R^{ndof} \f$  the acceleration, i. e. the second time derivative of the  generalized coordinates.
- *    - \f$ p  \in R^{ndof} \f$  the forces due to the Non Smooth Interaction. In particular case of Non Smooth evolution,  the variable p contains the impulse and not the force.
+ *    - \f$ p  \in R^{ndof} \f$  the forces due to the Non Smooth Interaction. In particular case of Non Smooth evolution,
+ *       the variable p contains the impulse and not the force.
  *    -  \f$ M \in  R^{ndof \times ndof} \f$ is Mass matrix stored in the SiconosMatrix mass.
  *    -  \f$ K \in  R^{ndof \times ndof} \f$ is the stiffness matrix stored in the SiconosMatrix K.
  *    -  \f$ C \in  R^{ndof \times ndof} \f$ is the viscosity matrix stored in the SiconosMatrix C.
@@ -93,9 +97,8 @@ class LagrangianLinearTIDS : public LagrangianDS
 {
 private:
 
-  /** \fn LagrangianLinearTIDS()
-   *  \brief default constructor
-   */
+  /** default constructor
+  */
   LagrangianLinearTIDS();
 
   /** specific matrix for a LagrangianLinearTIDS */
@@ -104,37 +107,30 @@ private:
   /** specific matrix for a LagrangianLinearTIDS */
   SiconosMatrix *C;
 
-  /** \fn void connectToDS()
-   *  \brief set links with DS members
-   */
+  /** set links with DS members
+  */
   void connectToDS();
 
-  /** \fn initAllocationFlags(const bool = true);
-   *  \brief set all allocation flags (isAllocated map)
-   *  \param bool: value for flags
-   */
+  /** set all allocation flags (isAllocated map)
+  *  \param bool: value for flags
+  */
   void initAllocationFlags(const bool = true);
 
-  /** \fn initPluginFlags(const bool val);
-   *  \brief set all plug-in flags (isPlugin map) to val
-   *  \param a bool
-   */
+  /** set all plug-in flags (isPlugin map) to val
+  *  \param a bool
+  */
   void initPluginFlags(const bool);
 
 public:
 
-  /** \fn LagrangianLinearTIDS(DynamicalSystemXML * dsXML)
-   *  \brief constructor from an xml file
-   *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
-   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
-   *  \exception RuntimeException
-   */
+  /** constructor from an xml file
+  *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
+  *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
+  *  \exception RuntimeException
+  */
   LagrangianLinearTIDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
-  /** \fn LagrangianLinearTIDS(int number, int ndof,
-   *   SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass,
-   *   SiconosMatrix* K, SiconosMatrix* C)
-   *  \brief constructor from a set of data
+  /** constructor from a set of data
    *  \param int : the number for this DynamicalSystem
    *  \param int : dimension of this DynamicalSystem
    *  \param SimpleVector: initial coordinates of this DynamicalSystem
@@ -144,14 +140,9 @@ public:
    *  \param SiconosMatrix : matrix C of this DynamicalSystem
    *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(const int, const unsigned int ndof,
-                       const SimpleVector&, const SimpleVector&,
-                       const SiconosMatrix&,
-                       const SiconosMatrix&, const SiconosMatrix&);
+  LagrangianLinearTIDS(const int, const unsigned int ndof, const SimpleVector&, const SimpleVector&, const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&);
 
-  /** \fn LagrangianLinearTIDS(int number, int ndof,
-   *   SiconosVector* q0, SiconosVector* velocity0, SiconosMatrix* mass)
-   *  \brief constructor from a set of data
+  /** constructor from a set of data
    *  \param int : the number for this DynamicalSystem
    *  \param int : dimension of this DynamicalSystem
    *  \param SimpleVector: initial coordinates of this DynamicalSystem
@@ -159,138 +150,119 @@ public:
    *  \param SiconosMatrix : mass of this DynamicalSystem
    *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(const int, const unsigned int ndof,
-                       const SimpleVector&, const SimpleVector&,
-                       const SiconosMatrix&);
+  LagrangianLinearTIDS(const int, const unsigned int ndof, const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
 
-  /** \fn LagrangianLinearTIDS(const DynamicalSystem &)
-   *  \brief copy constructor
-   *  \param a Dynamical system to copy
-   */
+  /** copy constructor
+  *  \param a Dynamical system to copy
+  */
   LagrangianLinearTIDS(const DynamicalSystem &);
 
   // destructor
   ~LagrangianLinearTIDS();
 
-  /** \fn bool checkDynamicalSystem()
-   *  \brief check that the system is complete (ie all required data are well set)
-   * \return a bool
-   */
+  /** check that the system is complete (ie all required data are well set)
+  * \return a bool
+  */
   bool checkDynamicalSystem();
 
-  /** \fn void initialize(const string, const double = 0, const unsigned int = 1) ;
-   *  \brief dynamical system initialization function: mainly set memory and compute value for initial state values.
-   *  \param string: simulation type
-   *  \param time of initialisation, default value = 0
-   *  \param the size of the memory, default size = 1.
-   */
-  void initialize(const std::string, const double = 0, const unsigned int = 1) ;
+  /** dynamical system initialization function: mainly set memory and compute value for initial state values.
+  *  \param string: simulation type
+  *  \param time of initialisation, default value = 0
+  *  \param the size of the memory, default size = 1.
+  */
+  void initialize(const std::string&, double = 0, unsigned int = 1) ;
 
-  /** \fn void update(const double) ;
-   *  \brief dynamical system update: mainly call compute for all time or state depending functions (mass, FInt ...).
-   *  \param current time
-   */
+  /** dynamical system update: mainly call compute for all time or state depending functions (mass, FInt ...).
+  *  \param current time
+  */
   void update(const double);
 
   // --- GETTERS AND SETTERS ---
 
   // -- K --
-  /** \fn  const SimpleMatrix getK() const
-   *  \brief get the value of K
-   *  \return SimpleMatrix
-   */
+  /** get the value of K
+  *  \return SimpleMatrix
+  */
   inline const SimpleMatrix getK() const
   {
     return *K;
   }
 
-  /** \fn SiconosMatrix* getKPtr() const
-   *  \brief get K
-   *  \return pointer on a SiconosMatrix
-   */
+  /** get K
+  *  \return pointer on a SiconosMatrix
+  */
   inline SiconosMatrix* getKPtr() const
   {
     return K;
   }
 
-  /** \fn void setK (const SiconosMatrix& newValue)
-   *  \brief set the value of K to newValue
-   *  \param SiconosMatrix newValue
-   */
+  /** set the value of K to newValue
+  *  \param SiconosMatrix newValue
+  */
   void setK(const SiconosMatrix&);
 
-  /** \fn void setKPtr(SiconosMatrix* newPtr)
-   *  \brief set K to pointer newPtr
-   *  \param SiconosMatrix * newPtr
-   */
+  /** set K to pointer newPtr
+  *  \param SiconosMatrix * newPtr
+  */
   void setKPtr(SiconosMatrix *newPtr);
 
   // -- C --
-  /** \fn  const SimpleMatrix getC() const
-   *  \brief get the value of C
-   *  \return SimpleMatrix
-   */
+  /** get the value of C
+  *  \return SimpleMatrix
+  */
   inline const SimpleMatrix getC() const
   {
     return *C;
   }
 
-  /** \fn SiconosMatrix* getCPtr() const
-   *  \brief get C
-   *  \return pointer on a SiconosMatrix
-   */
+  /** get C
+  *  \return pointer on a SiconosMatrix
+  */
   inline SiconosMatrix* getCPtr() const
   {
     return C;
   }
 
-  /** \fn void setC (const SiconosMatrix& newValue)
-   *  \brief set the value of C to newValue
-   *  \param SiconosMatrix newValue
-   */
+  /** set the value of C to newValue
+  *  \param SiconosMatrix newValue
+  */
   void setC(const SiconosMatrix&);
 
-  /** \fn void setCPtr(SiconosMatrix* newPtr)
-   *  \brief set C to pointer newPtr
-   *  \param SiconosMatrix * newPtr
-   */
+  /** set C to pointer newPtr
+  *  \param SiconosMatrix * newPtr
+  */
   void setCPtr(SiconosMatrix *newPtr) ;
 
-  /** \fn void computeRhs(const double time, const bool  =false)
-   *  \brief Default function to the right-hand side term
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
-   *  \exception RuntimeException
-   */
+  /** Default function to the right-hand side term
+  *  \param double time : current time
+  *  \param bool isDSup : flag to avoid recomputation of operators
+  *  \exception RuntimeException
+  */
   void computeRhs(const double, const bool  = false);
 
-  /** \fn void computeJacobianXRhs(const double time, const bool  =false)
-   *  \brief Default function to jacobian of the right-hand side term according to x
-   *  \param double time : current time
-   *  \param bool isDSup : flag to avoid recomputation of operators
-   *  \exception RuntimeException
-   */
+  /** Default function to jacobian of the right-hand side term according to x
+  *  \param double time : current time
+  *  \param bool isDSup : flag to avoid recomputation of operators
+  *  \exception RuntimeException
+  */
   void computeJacobianXRhs(const double, const bool  = false);
 
   // --- Miscellaneous ---
 
-  /** \fn void saveDSToXML()
-   *  \brief copy the data of the DS to the XML tree
-   *  \exception RuntimeException
-   */
+  /** copy the data of the DS to the XML tree
+  *  \exception RuntimeException
+  */
   void saveDSToXML();
 
-  /** \fn void display()
-   *  \brief print the data onto the screen
-   */
+  /** print the data onto the screen
+  */
   void display() const;
 
   static LagrangianLinearTIDS* convert(DynamicalSystem* ds);
 
-  /** \fn double dsConvergenceIndicator()
-   *  \brief overload LagrangianDS corresponding function
-   * \return a double, always zero.
-   */
+  /** overload LagrangianDS corresponding function
+  * \return a double, always zero.
+  */
   double dsConvergenceIndicator()
   {
     return 0.0;

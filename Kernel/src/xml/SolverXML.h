@@ -16,9 +16,18 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/** \class SolverXML
- *   \brief XML data management for class Solver
- *  \author SICONOS Development Team - copyright INRIA
+/*! \file
+*/
+
+#ifndef __SOLVERXML__
+#define __SOLVERXML__
+
+#include "SiconosDOMTreeTools.h"
+
+class Solver;
+
+//! XML management for Solver
+/**  \author SICONOS Development Team - copyright INRIA
  *   \version 1.3.0.
  *   \date 20/12/2005
  *
@@ -29,14 +38,6 @@
  *   - Solver parameters
  *   The tag solver is optional and, if omitted, solver type and parameters are set to default values (see Solver.h)
  */
-
-#ifndef __SOLVERXML__
-#define __SOLVERXML__
-
-#include "SiconosDOMTreeTools.h"
-
-class Solver;
-
 class SolverXML
 {
 protected:
@@ -46,21 +47,18 @@ protected:
 
 public:
 
-  /** \fn SolverXML(xmlNodePtr = NULL)
-   *  \brief default constructor
-   *  \param : rootNode
-   */
+  /** default constructor
+  *  \param : rootNode
+  */
   SolverXML(xmlNodePtr = NULL);
 
-  /** \fn ~SolverXML()
-   *  \brief destructor
-   */
+  /** destructor
+  */
   ~SolverXML();
 
-  /** \fn xmlNode* getRootNode()
-   *  \brief Return the node corresponding to the Solver
-   *  \return an xmlNodePtr
-   */
+  /** Return the node corresponding to the Solver
+  *  \return an xmlNodePtr
+  */
   inline xmlNodePtr getRootNode() const
   {
     return rootNode;
@@ -68,34 +66,29 @@ public:
 
   // Functions to get attributes of node "Solver"
 
-  /** \fn string getType() const
-   *  \brief return the name of the solver algorithm
-   *  \return a string
-   */
+  /** return the name of the solver algorithm
+  *  \return a string
+  */
   std::string getType() const;
 
-  /** \fn unsigned int getMaxIter() const
-   *  \brief Return the maximum number of iteration the algorithm can do
-   *  \return unsigned int
-   */
+  /** Return the maximum number of iteration the algorithm can do
+  *  \return unsigned int
+  */
   unsigned int getMaxIter() const;
 
-  /** \fn double getTolerance() const
-   *  \brief Return the tolerance value for the algorithm
-   *  \return double
-   */
+  /** Return the tolerance value for the algorithm
+  *  \return double
+  */
   double getTolerance() const;
 
-  /** \fn string getNormType() const
-   *  \brief Return norm type of the algorithm
-   *  \return a string
-   */
+  /** Return norm type of the algorithm
+  *  \return a string
+  */
   std::string getNormType() const;
 
-  /** \fn double getSearchDirection() const
-   *  \brief Return the searchDirection value
-   *  \return double
-   */
+  /** Return the searchDirection value
+  *  \return double
+  */
   double getSearchDirection() const;
 };
 

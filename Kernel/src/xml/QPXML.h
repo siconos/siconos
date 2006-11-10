@@ -16,37 +16,34 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-
-/** \class QPXML
-*   \brief This class manages Lagrangian QP data
-*  \author SICONOS Development Team - copyright INRIA
-*   \version 1.3.0.
-*   \date 05/18/2004
-*
-*
-*
-* QPXML allows to manage data of a QP DOM tree.
+/*! \file
 */
+
 
 
 #ifndef __QPXMLDEF__
 #define __QPXMLDEF__
 
 #include "OneStepNSProblemXML.h"
+#include "SimpleMatrix.h"
+#include "SimpleVector.h"
 
 class OneStepNSProblem;
 
 const std::string  QP_Q = "Q";
 const std::string  QP_P = "p";
 
-
+//! XML management for QP
+/**  \author SICONOS Development Team - copyright INRIA
+*   \version 1.3.0.
+*   \date 05/18/2004
+*/
 class QPXML : public OneStepNSProblemXML
 {
 public:
   QPXML();
 
-  /** \fn QPXML(xmlNode * QPNode)
-  *   \brief Build a QPXML object from a DOM tree describing a QP
+  /** Build a QPXML object from a DOM tree describing a QP
   *   \param QPNode : the QP DOM tree
   *   \exception XMLException : if a property of the QP lacks in the DOM tree
   */
@@ -54,8 +51,7 @@ public:
 
   ~QPXML();
 
-  /** \fn SimpleMatrix getQ()
-  *   \brief Return Q
+  /** Return Q
   *   \return The Q SimpleMatrix of the QP
   */
   inline SimpleMatrix getQ()
@@ -63,8 +59,7 @@ public:
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->QNode);
   }
 
-  /** \fn SimpleVector getP()
-  *   \brief Return p
+  /** Return p
   *   \return SimpleVector :  vector p of the QP
   */
   inline /*SiconosVector*/SimpleVector getP()
@@ -72,8 +67,7 @@ public:
     return SiconosDOMTreeTools::getSiconosVectorValue(this->pNode);
   }
 
-  /** \fn void setQ(const SiconosMatrix& m)
-  *   \brief allows  to save Q
+  /** allows  to save Q
   *   \param The Q SiconosMatrix to save
   */
   inline void setQ(const SiconosMatrix& m)
@@ -85,8 +79,7 @@ public:
     else SiconosDOMTreeTools::setSiconosMatrixNodeValue(this->QNode, m);
   }
 
-  /** \fn void setP(const SiconosVector&v)
-  *   \brief allows to save p
+  /** allows to save p
   *   \param SimpleVector* : vector p to save
   */
   inline void setP(const SiconosVector&v)
@@ -98,26 +91,23 @@ public:
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(this->pNode, v);
   }
 
-  /** \fn bool hasP()
-   *  \brief returns true if pNode is defined
-   *  \return true if pNode is defined
-   */
+  /** returns true if pNode is defined
+  *  \return true if pNode is defined
+  */
   inline bool hasP()
   {
     return (this->pNode != NULL);
   }
 
-  /** \fn bool hasQ()
-   *  \brief returns true if QNode is defined
-   *  \return true if QNode is defined
-   */
+  /** returns true if QNode is defined
+  *  \return true if QNode is defined
+  */
   inline bool hasQ()
   {
     return (this->QNode != NULL);
   }
 
-  /** \fn void updateOneStepNSProblemXML( xmlNode* node, OneStepNSProblemXML* str )
-  *   \brief makes the operations to create a OneStepNSProblemXML to the SimulationXML
+  /** makes the operations to create a OneStepNSProblemXML to the SimulationXML
   *   \param xmlNode* : the root node of the OneStepNSProblemXML
   *   \param OneStepNSProblem* : the OneStepNSProblem of this OneStepNSProblemXML
   */

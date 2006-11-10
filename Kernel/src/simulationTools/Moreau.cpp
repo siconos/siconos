@@ -426,7 +426,7 @@ void Moreau::computeFreeState()
         SimpleVector *v = d->getVelocityPtr();
 
         // === Compute ResFree and vfree solution of Wk(v-vfree)=RESfree ===
-        *RESfree = *M * (*v - *vold);
+        *RESfree = prod(*M, (*v - *vold));
 
         // Compute Qint and Fint
         // for state i, save it in XXX0 and then for state i+1 and save it in XXX1.
@@ -461,7 +461,7 @@ void Moreau::computeFreeState()
           delete FExt0;
           FExt1 = NULL;
         }
-        *vfree = *v - *W * *RESfree;
+        *vfree = *v - prod(*W, *RESfree);
       }
       // --- For linear Lagrangian LTIDS:
       else
@@ -471,9 +471,9 @@ void Moreau::computeFreeState()
         SiconosMatrix * C = static_cast<LagrangianLinearTIDS*>(d)->getCPtr();
         // Compute ResFree and vfree
         if (K != NULL)
-          *RESfree += h * ((*K * *qold) + h * theta * (*K * *vold));
+          *RESfree += h * (prod(*K, *qold) + h * theta * prod(*K, *vold));
         if (C != NULL)
-          *RESfree += h * (*C * *vold);
+          *RESfree += h * prod(*C, *vold);
         if (FExt0 != NULL)
         {
           *RESfree -= h * (theta**FExt1 + (1.0 - theta)**FExt0);
@@ -481,7 +481,7 @@ void Moreau::computeFreeState()
           FExt1 = NULL;
         }
 
-        *vfree =  *vold - *W * *RESfree;
+        *vfree =  *vold - prod(*W, *RESfree);
       }
       // calculate qfree (whereas it is useless for future computation)
       SimpleVector *qfree = d->getQFreePtr();
@@ -504,13 +504,13 @@ void Moreau::computeFreeState()
       {
         I = new SimpleMatrix(sizeX, sizeX);
         I->eye();
-        *xtmp = ((*I + h * (1.0 - theta) * *A) * *xold) + (h * (1.0 - theta) * *rold);
+        *xtmp =  prod((*I + h * (1.0 - theta) * *A), *xold) + (h * (1.0 - theta) * *rold);
         delete I;
       }
       else
       {
         I = d->getMxdotPtr();
-        *xtmp = ((*I + h * (1.0 - theta) * *A) * *xold) + (h * (1.0 - theta) * *rold);
+        *xtmp = prod((*I + h * (1.0 - theta) * *A), *xold) + (h * (1.0 - theta) * *rold);
       }
 
       // Warning: b is supposed to be constant, not time dependent.
@@ -534,10 +534,10 @@ void Moreau::computeFreeState()
         // get T
         SiconosMatrix *T = d->getTPtr();
 
-        *xtmp += h * *T * (theta * uCurrent + (1.0 - theta) * uOld);
+        *xtmp += h * prod(*T, (theta * uCurrent + (1.0 - theta) * uOld));
       }
 
-      *xfree = *W * *xtmp;
+      *xfree = prod(*W, *xtmp);
       delete xtmp;
     }
     else RuntimeException::selfThrow("Moreau::computeFreeState - not yet implemented for Dynamical system type: " + dstyp);
@@ -594,7 +594,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
       d->computeFExt(tend);
       SimpleVector FExt1 = d->getFExt();
       // velocity computation
-      *v = *vold + *W * (h * (theta * FExt1 + (1.0 - theta) * FExt0 - (*C * *vold) - (*K * *qold) - h * theta * (*K * *vold)) + *p);
+      *v = *vold + prod(*W, (h * (theta * FExt1 + (1.0 - theta) * FExt0 - prod(*C, *vold) - prod(*K, *qold) - h * theta * prod(*K, *vold)) + *p));
       // q computation
       *q = (*qold) + h * ((theta * (*v)) + (1.0 - theta) * (*vold));
       // Right Way  : Fortran 77 version with BLAS call
@@ -636,7 +636,7 @@ void Moreau::updateState(const unsigned int level)
       if (dsType == LNLDS)
         ds->addTmpWorkVector(v, "LagNLDSMoreau");
       // Compute velocity
-      *v = *vfree +  *W * *p;
+      *v = *vfree +  prod(*W, *p);
       // Compute q
       //  -> get previous time step state
       SimpleVector *vold = static_cast<SimpleVector*>(d->getVelocityMemoryPtr()->getSiconosVector(0));
@@ -657,7 +657,7 @@ void Moreau::updateState(const unsigned int level)
       SiconosVector* x = ds->getXPtr();
       SiconosVector* xFree = ds->getXFreePtr();
 
-      *x = *xFree + (h * theta * *W * *(ds->getRPtr())) ;
+      *x = *xFree + (h * theta * prod(*W, *(ds->getRPtr()))) ;
     }
     else RuntimeException::selfThrow("Moreau::updateState - not yet implemented for Dynamical system type: " + dsType);
     // Remark: for Linear system, W is already saved in object member w

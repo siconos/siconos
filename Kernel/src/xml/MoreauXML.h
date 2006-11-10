@@ -16,19 +16,20 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/** \class MoreauXML
- *   \brief read Moreau-related nodes in DOM tree
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.3.0.
- *   \date 05/17/2004
- *
- */
+/*! \file
+*/
 
 #ifndef __MOREAUXML__
 #define __MOREAUXML__
 
 #include "OneStepIntegratorXML.h"
 
+//! XML management for Moreau
+/**  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.3.0.
+ *   \date 05/17/2004
+ *
+ */
 class MoreauXML: public OneStepIntegratorXML
 {
 private:
@@ -42,40 +43,34 @@ private:
 public:
   MoreauXML();
 
-  /** \fn MoreauXML(xmlNodePtr MoreauNode)
-   *   \brief Build a MoreauXML object from a DOM tree describing Moreau OneStepIntegrator
-   *   \param xmlNode * MoreauNode : the Moreau DOM tree
-   *   \exception XMLException : if the W property of the Moreau lacks in the DOM tree
-   */
+  /** Build a MoreauXML object from a DOM tree describing Moreau OneStepIntegrator
+  *   \param xmlNode * MoreauNode : the Moreau DOM tree
+  *   \exception XMLException : if the W property of the Moreau lacks in the DOM tree
+  */
   MoreauXML(xmlNode * MoreauNode);
 
-  /** \fn ~MoreauXML()
-   * Destructor
-   */
+  /** Destructor */
   ~MoreauXML();
 
-  /** \fn bool hasWList()
-   *  \brief return true if wNode is defined
+  /** return true if wNode is defined
    *  \return true if wNode is defined
-   */
+  */
   inline bool hasWList()
   {
     return (WNode != NULL);
-  }
+  };
 
-  /** \fn SimpleMatrix getW()
-   *   \brief Return the w of the OneStepIntegratorXML
-   *   \return SimpleMatrix : the w of the OneStepIntegratorXML
-   */
+  /** Return the w of the OneStepIntegratorXML
+  *   \return SimpleMatrix : the w of the OneStepIntegratorXML
+  */
   // inline SimpleMatrix getW()
   // {
   //  return  SiconosDOMTreeTools::getSiconosMatrixValue(WNode);
   //}
 
-  /** \fn void setW(SiconosMatrix *m)
-   *   \brief allows to save the w of the OneStepIntegratorXML
-   *   \param SiconosMatrix* : the w to save
-   */
+  /** allows to save the w of the OneStepIntegratorXML
+  *   \param SiconosMatrix* : the w to save
+  */
   //  inline void setW(SiconosMatrix *m)
   //{
   //  if( hasW() == false )
@@ -85,37 +80,32 @@ public:
   //  else SiconosDOMTreeTools::setSiconosMatrixNodeValue(WNode, *m);
   //}
 
-  /** \fn bool hasThetaList()
-   *  \brief return true if ThetaNode is defined
-   *  \return true if ThetaNode is defined
-   */
+  /** return true if ThetaNode is defined
+  *  \return true if ThetaNode is defined
+  */
   inline bool hasThetaList() const
   {
     return (thetaNode != NULL);
   }
 
-  /** \fn void getTheta(vector<double>&)
-   *   \brief fill a vector<double> with given theta values
-   *   \param: in-out vector<double>
-   */
+  /** fill a vector<double> with given theta values
+  *   \param: in-out vector<double>
+  */
   void getTheta(std::vector<double>&) const;
 
-  /** \fn void setTheta(const vector<double&>)
-   *   \brief save  theta values in xml ouput file or DOMtree
-   *   \param vector<double>
-   */
+  /** save  theta values in xml ouput file or DOMtree
+  *   \param vector<double>
+  */
   void setTheta(const std::vector<double>&);
 
-  /** \fn const double getSingleTheta() const
-   *   \brief get value of attribute all in theta node -> ie if one single value for all theta is given
-   *   \return a double
-   */
+  /** get value of attribute all in theta node -> ie if one single value for all theta is given
+  *   \return a double
+  */
   const double getSingleTheta() const;
 
-  /** \fn bool hasAllTheta()
-   *  \brief attribute of the theta tag - all = val if all theta have the same value, whatever the ds is.
-   *  \return a bool
-   */
+  /** attribute of the theta tag - all = val if all theta have the same value, whatever the ds is.
+  *  \return a bool
+  */
   inline bool hasAllTheta() const
   {
     return SiconosDOMTreeTools::hasAttributeValue(thetaNode, ALL_ATTRIBUTE);

@@ -16,30 +16,27 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-
-/** \class PeriodicBCXML
-*   \brief This class manages Periodic BC data part
-*  \author SICONOS Development Team - copyright INRIA
-*   \version 1.3.0.
-*   \date 05/25/2004
-*
-*
-*
-* PeriodicBCXML allows to manage data of a PeriodicBC DOM tree.
+/*! \file
 */
+
 
 #ifndef __PERIODICBCXML__
 #define __PERIODICBCXML__
 #include "BoundaryConditionXML.h"
 
+//!  XML management for  PeriodicBC
+/**  \author SICONOS Development Team - copyright INRIA
+*   \version 1.3.0.
+*   \date 05/25/2004
+*
+*/
 class PeriodicBCXML : public BoundaryConditionXML
 {
 public:
 
   PeriodicBCXML();
 
-  /** \fn PeriodicBCXML(xmlNode * PeriodicBCNode)
-  *   \brief Build a PeriodicBCXML object from a DOM tree describing a PeriodicBC
+  /** Build a PeriodicBCXML object from a DOM tree describing a PeriodicBC
   *   \param xmlNode * PeriodicBCNode : the PeriodicBC DOM tree
   */
   PeriodicBCXML(xmlNode * PeriodicBCNode);
@@ -47,11 +44,10 @@ public:
   ~PeriodicBCXML();
 
 
-  /** \fn void updateBoundaryConditionXML( xmlNode* node)//, BoundaryCondition* bc )
-   *  \brief makes the operations to add a BoundaryCondition to the DynamicalSystemXML
-   *  \param xmlNode* : the root node of this BoundaryCondition
+  /** makes the operations to add a BoundaryCondition to the DynamicalSystemXML
+  *  \param xmlNode* : the root node of this BoundaryCondition
   //     *  \param BoundaryCondition* : the BoundaryCondition of the DS
-   */
+  */
   void updateBoundaryConditionXML(xmlNode* node/*, BoundaryCondition* bc */);
 };
 

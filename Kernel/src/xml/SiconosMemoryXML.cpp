@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "SiconosMemoryXML.h"
+#include "SimpleVector.h"
+
 using namespace std;
 
 SiconosMemoryXML::SiconosMemoryXML(): memoryNode(NULL), parentNode(NULL)

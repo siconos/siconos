@@ -20,6 +20,7 @@
 #include "Lsodar.h"
 #include "EventDriven.h"
 #include "LagrangianLinearTIDS.h"
+#include "odepack.h"
 
 using namespace std;
 
@@ -241,7 +242,7 @@ void Lsodar::initialize()
 
   //   Integer parameters for LSODAR are saved in vector intParam.
   //   The link with variable names in opkdmain.f is indicated in comments
-  intData[0] = xWork->size(0);  // neq, number of equations, ie dim of x
+  intData[0] = xWork->size();  // neq, number of equations, ie dim of x
   // ng, number of constraints:
   intData[1] =  simulationLink->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getNumberOfConstraints();
   intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
@@ -375,7 +376,7 @@ void Lsodar::updateState(const unsigned int level)
       q = lds->getQPtr();
       impact = lds->getPPtr(1);
 
-      *v += *invM **impact;
+      *v += prod(*invM, *impact);
       for (unsigned int i = 0; i < q->size(); ++i)
         (*q)(i) += 2 * TOLERANCE;
     }

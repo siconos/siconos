@@ -20,7 +20,7 @@
 #define __SiconosMemoryTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "BlockVector.h"
+#include "SiconosVector.h"
 #include "SiconosMemory.h"
 #include "SiconosMemoryException.h"
 #include <deque>

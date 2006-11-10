@@ -294,13 +294,13 @@ extern "C" int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, doubl
     // Is there a solution less stupid ?
     for (i = 0; i < nDof; i++)
     {
-      vQ0.setValue(i, Q0[i]);
-      vVel0.setValue(i, Vel0[i]);
+      vQ0(i) = Q0[i];
+      vVel0(i) = Vel0[i];
       for (j = 0; j < nDof; j++)
       {
-        mMass.setValue(i, j, Mass[j + i * nDof]);
-        mK.setValue(i, j, Mass[j + i * nDof]);
-        mC.setValue(i, j, Mass[j + i * nDof]);
+        mMass(i, j) = Mass[j + i * nDof];
+        mK(i, j) = Mass[j + i * nDof];
+        mC(i, j) = Mass[j + i * nDof];
       }
     }
 
@@ -347,8 +347,8 @@ extern "C" int sicLagrangianDS(int nDof, double *Q0, double *Vel0)
     // Is there a solution less stupid ?
     for (i = 0; i < nDof; i++)
     {
-      vQ0.setValue(i, Q0[i]);
-      vVel0.setValue(i, Vel0[i]);
+      vQ0(i) = Q0[i];
+      vVel0(i) = Vel0[i];
     }
     // Create the object
     LagrangianDS * DS = new LagrangianDS(nId, nDof, vQ0, vVel0);
@@ -711,7 +711,7 @@ extern "C" int sicInteraction(char *name, int nbDS, int *DS, int nbRel)
 
 extern "C" int sicLagrangianLinearR(int nIdInteraction, double *H, double *b)
 {
-  int nId, i, j, dimDS = 0, nbRel = 0;
+  int nId = 0, dimDS = 0, nbRel = 0;
 
 
   try
@@ -737,16 +737,16 @@ extern "C" int sicLagrangianLinearR(int nIdInteraction, double *H, double *b)
 
     // Vectors and Matrix initialisation with function parameters
     // Is there a solution less stupid ?
-    vb.setValue(0, 0);
-    for (i = 0; i < nbRel; i++)
+    //vb(0,0);
+    for (int i = 0; i < nbRel; i++)
     {
       vb(i) = b[i];
-      for (j = 0; j < dimDS; j++)
+      for (int j = 0; j < dimDS; j++)
       {
-        mH.setValue(i, j, H[i * nbRel + j]);
+        mH(i, j) = H[i * nbRel + j];
       }
     }
-    cout << "H(" << dimDS << ")=" << mH << endl;
+    //    cout <<"H("<<dimDS<<")="<< mH <<endl;
 
     Relation *relation = new LagrangianLinearR(mH, vb);
     interaction->setRelationPtr(relation);

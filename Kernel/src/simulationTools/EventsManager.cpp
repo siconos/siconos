@@ -129,7 +129,7 @@ void EventsManager::scheduleTimeDiscretisation(TimeDiscretisation* td)
   unProcessedEvents.clear();
 
   // === get tk ===
-  SimpleVector * tk = td->getTkPtr();
+  SiconosVector * tk = td->getTkPtr();
   unsigned int nSteps = tk->size(); // number of time steps
 
   // === insert tk into the unProcessedEvents set ===

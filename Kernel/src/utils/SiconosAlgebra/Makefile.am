@@ -26,11 +26,10 @@ include $(top_srcdir)/config/Make-rules
 SUBDIRS = test 
 
 noinst_LTLIBRARIES = libSiconosAlgebra.la
-libSiconosAlgebra_la_SOURCES = SiconosVector.cpp SimpleVector.cpp BlockVector.cpp SiconosMatrix.cpp SimpleMatrix.cpp BlockMatrix.cpp\
-			MySiconosVector.cpp MySimpleVector.cpp MyBlockVector.cpp MySiconosMatrix.cpp MySimpleMatrix.cpp MyBlockMatrix.cpp \
+libSiconosAlgebra_la_SOURCES = SiconosVector.cpp SimpleVector.cpp BlockVector.cpp SiconosMatrix.cpp SimpleMatrix.cpp BlockMatrix.cpp \
 			ioObject.cpp ioMatrix.cpp ioVector.cpp\
-			SiconosVector.h SimpleVector.h BlockVector.h SiconosMatrix.h SimpleMatrix.h BlockMatrix.h SiconosAlgebra.h\
-			MySiconosVector.h MySimpleVector.h MyBlockVector.h MySiconosMatrix.h MySimpleMatrix.h MyBlockMatrix.h ioObject.h ioMatrix.h ioVector.h
-include_HEADERS = SiconosVector.h SimpleVector.h BlockVector.h SiconosMatrix.h SimpleMatrix.h BlockMatrix.h SiconosAlgebra.h\
-			MySiconosVector.h MySimpleVector.h MyBlockVector.h MySiconosMatrix.h MySimpleMatrix.h MyBlockMatrix.h ioObject.h ioMatrix.h ioVector.h
+			SiconosAlgebra.h SiconosVector.h SimpleVector.h BlockVector.h SiconosMatrix.h SimpleMatrix.h BlockMatrix.h \
+			ioObject.h ioMatrix.h ioVector.h
+include_HEADERS = 	SiconosAlgebra.h SiconosVector.h SimpleVector.h BlockVector.h SiconosMatrix.h SimpleMatrix.h BlockMatrix.h \
+			ioObject.h ioMatrix.h ioVector.h
 libSiconosAlgebra_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)

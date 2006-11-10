@@ -306,7 +306,7 @@ bool LinearDS::checkDynamicalSystem()
   return output;
 }
 
-void LinearDS::initialize(const string simulationType, const double time, const unsigned int sizeOfMemory)
+void LinearDS::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
 {
   initFreeVectors(simulationType);
 
@@ -479,7 +479,7 @@ void LinearDS::computeRhs(const double time, const bool)
     computeA(time);
 
   // compute right-hand side
-  *rhs = *A * *x;
+  *rhs = prod(*A, *x);
 
   // compute and add b if required
   if (b != NULL)
@@ -498,7 +498,7 @@ void LinearDS::computeRhs(const double time, const bool)
     {
       if (isPlugin["T"]) // if T is a plug-in function
         computeT();
-      *rhs += *T ** u;
+      *rhs += prod(*T, * u);
     }
     else
       *rhs += * u;

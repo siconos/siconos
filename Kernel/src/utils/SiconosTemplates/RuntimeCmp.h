@@ -17,13 +17,15 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
+/*! \file RuntimeCmp.h
+
+*/
 
 #ifndef RUNTIMECMP_H
 #define RUNTIMECMP_H
 
-/** \class class TFunctor
- *  \brief virtual functors class
- *  \author SICONOS Development Team - copyright INRIA
+//! Virtual functors class
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) April 25, 2006
  *
@@ -33,25 +35,23 @@ class TFunctor
 {
 public:
 
-  /** \fn virtual ~TFunctor();
-   *  \brief destructor
+  /** destructor
    */
   virtual ~TFunctor() {};
 
-  /** \fn virtual const unsigned long int Call()
+  /**
    *  \return unsigned long int
    */
   virtual const unsigned long int Call() = 0;      // call using function
 };
 
-/** \class template <class TClass> class TSpecificFunctor : public TFunctor
- *  \brief derived template class for functors
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.3.0.
- *  \date (Creation) April 25, 2006
- *
- *  Note: this is strongly inspired from tutorial http://www.newty.de/fpt/functor.html
- */
+/** derived template class for functors
+*  \author SICONOS Development Team - copyright INRIA
+*  \version 1.3.0.
+*  \date (Creation) April 25, 2006
+*
+*  Note: this is strongly inspired from tutorial http://www.newty.de/fpt/functor.html
+*/
 template <class TClass> class TSpecificFunctor : public TFunctor
 {
 private:
@@ -62,7 +62,7 @@ private:
 
 public:
 
-  /** \fn TSpecificFunctor(TClass* _pt2Object, const unsigned long int(TClass::*_fpt)() const)
+  /**
    *  constructor - takes pointer to an object and pointer to a member and stores
    * them in two private variables
    * \param pointer to TClass
@@ -74,30 +74,27 @@ public:
     fpt = _fpt;
   };
 
-  /** \fn virtual const unsigned long int Call()
-   *  \brief override function "Call" that executes member function
-   *  \return unsigned long int
-   */
+  /** override function "Call" that executes member function
+  *  \return unsigned long int
+  */
   virtual const unsigned long int Call()
   {
     return (*pt2Object.*fpt)();
   };
 };
 
-/** \class template<class T> RuntimeCmp
- *  \brief Template to provide comparison operator in stl set or map
- *   see examples of using in EventsManager.h
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.3.0.
- *  \date (Creation) April 25, 2006
- *
- * Convention: objects to be compared must have a function of type:
- *  const unsigned long int name() const (whatever name is)
- * The comparison will be based on the return value of this function.
- *
- *  Note: this is strongly inspired from http://www.josuttis.com/libbook/
- */
-
+/** Template to provide comparison operator in stl set or map
+*   see examples of using in EventsManager.h
+*  \author SICONOS Development Team - copyright INRIA
+*  \version 1.3.0.
+*  \date (Creation) April 25, 2006
+*
+* Convention: objects to be compared must have a function of type:
+*  const unsigned long int name() const (whatever name is)
+* The comparison will be based on the return value of this function.
+*
+*  Note: this is strongly inspired from http://www.josuttis.com/libbook/
+*/
 template <class T> class RuntimeCmp
 {
 public:
@@ -115,17 +112,15 @@ private:
 
 public:
 
-  /** \fn RuntimeCmp(const unsigned long int(T::*_fpt)() const, cmp_mode m=normal)
-   * \brief  constructor for sorting criterion
-   *  default criterion uses value normal
-   * \param a pointer to function of type const unsigned long int(T::*_fpt)() const
-   */
+  /**  constructor for sorting criterion
+  *  default criterion uses value normal
+  * \param a pointer to function of type const unsigned long int(T::*_fpt)() const
+  */
   RuntimeCmp(const unsigned long int(T::*_fpt)() const, cmp_mode m = normal): mode(m), fpt(_fpt) {};
 
-  /** \fn  bool operator() (T* t1, T* t2) const
-   * \brief comparison of elements
-   * \param two pointers to T
-   */
+  /** comparison of elements
+  * \param two pointers to T
+  */
   bool operator()(T* t1, T* t2) const
   {
     // set functors and call pointers to function to get values to be compared
@@ -137,11 +132,10 @@ public:
 
     return mode == normal ? i1 < i2 : i2 < i1;
   }
-  /** \fn bool operator== (const RuntimeCmp& rc)
-   * \brief comparison of sorting criteria
-   * \param a RuntimeCmp
-   * \return a bool
-   */
+  /** comparison of sorting criteria
+  * \param a RuntimeCmp
+  * \return a bool
+  */
   bool operator== (const RuntimeCmp& rc)
   {
     return mode == rc.mode;

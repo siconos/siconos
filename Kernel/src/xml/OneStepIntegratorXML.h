@@ -16,14 +16,15 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/** \class OneStepIntegratorXML
- *   \brief This class manages OneStepIntegrator data part
- *  \author SICONOS Development Team - copyright INRIA
+
+/*! \file
+*/
+
+//! XML management for OneStepIntegrator
+/**  \author SICONOS Development Team - copyright INRIA
  *   \version 1.3.0.
  *   \date 05/17/2004
  *
- *
- * OneStepIntegratorXML allows to manage data of a OneStepIntegrator DOM tree.
  */
 
 #ifndef __OneStepIntegratorXML__
@@ -54,75 +55,66 @@ public:
 
   OneStepIntegratorXML();
 
-  /** \fn OneStepIntegratorXML(xmlNode * OneStepIntegratorNode, map<int, bool> definedDSNumbers)
-   *   \brief Build a OneStepIntegratorXML object from the DOM tree
-   *   \param OneStepIntegratorNode : the OneStepIntegrator DOM tree
-   */
+  /** Build a OneStepIntegratorXML object from the DOM tree
+  *   \param OneStepIntegratorNode : the OneStepIntegrator DOM tree
+  */
   OneStepIntegratorXML(xmlNodePtr OneStepIntegratorNode);
 
-  /** \fn ~OneStepIntegratorXML();
-   *   \brief destructor
-   */
+  /** destructor
+  */
   virtual ~OneStepIntegratorXML() {};
 
-  /** \fn xmlNodePtr getRootNode() const
-   *   \brief get the root node of the OneStepIntegratorXML
-   *   \return xmlNodePtr
-   */
+  /** get the root node of the OneStepIntegratorXML
+  *   \return xmlNodePtr
+  */
   inline xmlNodePtr getRootNode() const
   {
     return rootNode;
   }
 
-  /** \fn xmlNodePtr getDSConcernedNode() const
-   *   \brief get the DSConcerned node of the OneStepIntegratorXML
-   *   \return xmlNodePtr
-   */
+  /** get the DSConcerned node of the OneStepIntegratorXML
+  *   \return xmlNodePtr
+  */
   inline xmlNodePtr getDSConcernedNode() const
   {
     return DSConcernedNode;
   }
 
-  /** \fn xmlNodePtr getInteractionsConcernedNode() const
-   *   \brief get the interactionsConcerned node of the OneStepIntegratorXML
-   *   \return xmlNodePtr
-   */
+  /** get the interactionsConcerned node of the OneStepIntegratorXML
+  *   \return xmlNodePtr
+  */
   inline xmlNodePtr getInteractionsConcernedNode() const
   {
     return interactionsConcernedNode;
   }
 
-  /** \fn const string getType() const
-   *   \brief Return the type of the OneStepIntegratorXML
-   *   \return a string
-   */
+  /** Return the type of the OneStepIntegratorXML
+  *   \return a string
+  */
   inline const std::string getType() const
   {
     return (char*)rootNode->name;
   }
 
-  /** \fn bool hasDSList()
-   *  \brief true if tag DSConcerned is present
-   *  \return a bool
-   */
+  /** true if tag DSConcerned is present
+  *  \return a bool
+  */
   inline bool hasDSList()
   {
     return !(DSConcernedNode == NULL);
   }
 
-  /** \fn bool hasInteractionsList()
-   *  \brief true if tag interactionsConcernedNode is present
-   *  \return a bool
-   */
+  /** true if tag interactionsConcernedNode is present
+  *  \return a bool
+  */
   inline bool hasInteractionsList()
   {
     return !(interactionsConcernedNode == NULL);
   }
 
-  /** \fn bool hasAllDS()
-   *  \brief attribute of the DSConcerned tag - True if all DS of the NSDS are concerned
-   *  \return a bool
-   */
+  /** attribute of the DSConcerned tag - True if all DS of the NSDS are concerned
+  *  \return a bool
+  */
   inline bool hasAllDS() const
   {
     if (SiconosDOMTreeTools::hasAttributeValue(DSConcernedNode, ALL_ATTRIBUTE))
@@ -130,10 +122,9 @@ public:
     else return false;
   }
 
-  /** \fn bool hasAllInteractions()
-   *  \brief attribute of the interactionsConcerned tag - True if all the interactions of the nsds are concerned
-   *  \return a bool
-   */
+  /** attribute of the interactionsConcerned tag - True if all the interactions of the nsds are concerned
+  *  \return a bool
+  */
   inline bool hasAllInteractions() const
   {
     if (SiconosDOMTreeTools::hasAttributeValue(interactionsConcernedNode, ALL_ATTRIBUTE))
@@ -141,16 +132,14 @@ public:
     else return false;
   }
 
-  /** \fn getDSNumbers(vector<int>&)
-   *  \brief return a vector<int> of ds numbers related to the OSI
-   *  \param in-out vector<int>
-   */
+  /** return a vector<int> of ds numbers related to the OSI
+  *  \param in-out vector<int>
+  */
   void getDSNumbers(std::vector<int>&);
 
-  /** \fn getInteractionsNumbers(vector<int>&)
-   *  \brief return a vector<int> of interactions numbers related to the OSI
-   *  \param in-out vector<int>
-   */
+  /** return a vector<int> of interactions numbers related to the OSI
+  *  \param in-out vector<int>
+  */
   void getInteractionsNumbers(std::vector<int>&);
 };
 

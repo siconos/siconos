@@ -16,17 +16,11 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/** \class DSInputOutputXML
- *   \brief This class manages Relation data part
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.3.0.
- *   \date 17/01/2005
- *
- *
- *
- * DSInputOutputXML allows to manage data of a DSInputOutput DOM tree.
- */
 
+/*! \file DSInputOutputXML.h
+    \brief
+
+*/
 #ifndef __DSInputOutputXML__
 #define __DSInputOutputXML__
 
@@ -34,24 +28,30 @@
 
 class DSInputOutput;
 
+//! XML management for DSInputOutput
+/**  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.3.0.
+ *   \date 17/01/2005
+ *
+ * DSInputOutputXML allows to manage data of a DSInputOutput DOM tree.
+ */
 class DSInputOutputXML
 {
 public:
   DSInputOutputXML();
 
-  /** \fn DSInputOutputXML(xmlNode * , vector<int> )
-   *   \brief Build a DSInputOutputXML object from a DOM tree describing a DSInputOutput
-   *   \param xmlNodePtr  : the DSInputOutput DOM tree
-   //   *   \param vector<int>  : vector of DSXML numbers to verify DS concerned by the DSInputOutput (identified by number) exists
-   */
-  DSInputOutputXML(xmlNodePtr /*, vector<int>*/);
+  /** Build a DSInputOutputXML object from a DOM tree describing a DSInputOutput
+  *   \param xmlNodePtr  : the DSInputOutput DOM tree
+  */
+  DSInputOutputXML(xmlNodePtr);
+
+  /** Destructor */
   virtual ~DSInputOutputXML();
 
-  /** \fn inline string getComputeInputPlugin()
-   *   \brief Return the computeInput Plugin name of the DSInputOutputXML
-   *   \return The computeInput Plugin name of the DSInputOutputXML
-   *  \exception XMLException
-   */
+  /** Return the computeInput Plugin name of the DSInputOutputXML
+  *   \return The computeInput Plugin name of the DSInputOutputXML
+  *  \exception XMLException
+  */
   inline std::string getComputeInputPlugin()
   {
     if (!isComputeInputPlugin())
@@ -59,11 +59,10 @@ public:
     return  SiconosDOMTreeTools::getStringAttributeValue(this->computeInputNode, PLUGIN_ATTRIBUTE);
   }
 
-  /** \fn inline string getComputeOutputPlugin()
-   *   \brief Return the computeOutput Plugin name of the DSInputOutputXML
-   *   \return The computeOutput Plugin name of the DSInputOutputXML
-   *  \exception XMLException
-   */
+  /** Return the computeOutput Plugin name of the DSInputOutputXML
+  *   \return The computeOutput Plugin name of the DSInputOutputXML
+  *  \exception XMLException
+  */
   inline std::string getComputeOutputPlugin()
   {
     if (!isComputeOutputPlugin())
@@ -71,11 +70,10 @@ public:
     return  SiconosDOMTreeTools::getStringAttributeValue(this->computeOutputNode, PLUGIN_ATTRIBUTE);
   }
 
-  /** \fn void setComputeInputPlugin(string plugin)
-   *   \brief sets the computeInput Plugin name of the DSInputOutputXML
-   *   \param string :  The computeInput Plugin name of the DSInputOutputXML
-   *  \exception XMLException
-   */
+  /** sets the computeInput Plugin name of the DSInputOutputXML
+  *   \param string :  The computeInput Plugin name of the DSInputOutputXML
+  *  \exception XMLException
+  */
   inline void setComputeInputPlugin(std::string plugin)
   {
     if (this->computeInputNode == NULL)
@@ -86,11 +84,10 @@ public:
     else SiconosDOMTreeTools::setStringAttributeValue(this->computeInputNode, PLUGIN_ATTRIBUTE, plugin);
   }
 
-  /** \fn void setComputeOutputPlugin(string plugin)
-   *   \brief sets the computeOutput Plugin name of the DSInputOutputXML
-   *   \param string :  The computeOutput Plugin name of the DSInputOutputXML
-   *  \exception XMLException
-   */
+  /** sets the computeOutput Plugin name of the DSInputOutputXML
+  *   \param string :  The computeOutput Plugin name of the DSInputOutputXML
+  *  \exception XMLException
+  */
   inline void setComputeOutputPlugin(std::string plugin)
   {
     if (this->computeOutputNode == NULL)
@@ -101,75 +98,67 @@ public:
     else SiconosDOMTreeTools::setStringAttributeValue(this->computeOutputNode, PLUGIN_ATTRIBUTE, plugin);
   }
 
-  /** \fn bool isComputeInputPlugin()
-   *   \brief Return true if computeInput is calculated from a plugin
-   *   \return True if computeInput is calculated from plugin
-   */
+  /** Return true if computeInput is calculated from a plugin
+  *   \return True if computeInput is calculated from plugin
+  */
   inline bool isComputeInputPlugin()
   {
     return xmlHasProp((xmlNodePtr)computeInputNode, (xmlChar *) PLUGIN_ATTRIBUTE.c_str());
   }
 
-  /** \fn bool isComputeOutputPlugin()
-   *   \brief Return true if computeOutput is calculated from a plugin
-   *   \return True if computOutput is calculated from plugin
-   */
+  /** Return true if computeOutput is calculated from a plugin
+  *   \return True if computOutput is calculated from plugin
+  */
   inline bool isComputeOutputPlugin()
   {
     return xmlHasProp((xmlNodePtr)computeOutputNode, (xmlChar *) PLUGIN_ATTRIBUTE.c_str());
   }
 
 
-  /** \fn bool hasComputeInput()
-   *  \brief return true if computeInputNode is defined
-   *  \return true if computeInputNode is defined
-   */
+  /** return true if computeInputNode is defined
+  *  \return true if computeInputNode is defined
+  */
   inline bool hasComputeInput()
   {
     return (this->computeInputNode != NULL);
   }
 
-  /** \fn bool hasComputeOutput()
-   *  \brief return true if computeOutputNode is defined
-   *  \return true if computeOutputNode is defined
-   */
+  /** return true if computeOutputNode is defined
+  *  \return true if computeOutputNode is defined
+  */
   inline bool hasComputeOutput()
   {
     return (this->computeOutputNode != NULL);
   }
 
 
-  /** \fn int getNumber()
-   *   \brief Return the number of the DSInputOutputXML
-   *   \return The integer number of the DSInputOutputXML
-   */
+  /** Return the number of the DSInputOutputXML
+  *   \return The integer number of the DSInputOutputXML
+  */
   inline int getNumber()
   {
     return SiconosDOMTreeTools::getAttributeValue<int>(rootDSIOXMLNode, NUMBER_ATTRIBUTE);
   }
 
-  /** \fn string getType()
-   *   \brief Return the type of the DSInputOutputXML
-   *   \return The string type of the DSInputOutputXML
-   */
+  /** Return the type of the DSInputOutputXML
+  *   \return The string type of the DSInputOutputXML
+  */
   inline std::string getType()
   {
     std::string type((char*)this->rootDSIOXMLNode->name);
     return type;
   }
 
-  /** \fn xmlNodePtr  getNode()
-   *   \brief Return the node of the DSInputOutputXML
-   *   \return xmlNodePtr  : the node of the RelationXML in the DOM tree
-   */
+  /** Return the node of the DSInputOutputXML
+  *   \return xmlNodePtr  : the node of the RelationXML in the DOM tree
+  */
   inline xmlNodePtr  getNode()const
   {
     return this->rootDSIOXMLNode;
   }
 
 
-  //    /** \fn SimpleMatrix getH()
-  //    *   \brief Return H matrix of the DSInputOutputXML
+  //    /** Return H matrix of the DSInputOutputXML
   //    *   \return SimpleMatrix : the H matrix of the DSInputOutputXML
   //    */
   //    inline SimpleMatrix getH()
@@ -177,8 +166,7 @@ public:
   //      return SiconosDOMTreeTools::getSiconosMatrixValue(this->HNode);
   //    }
   //
-  //    /** \fn void setH(SiconosMatrix *H)
-  //    *   \brief allows to save the H matrix of the DSInputOutputXML
+  //    /** allows to save the H matrix of the DSInputOutputXML
   //    *   \param SiconosMatrix* : the H to save
   //    */
   //    inline void setH(SiconosMatrix *H)
@@ -190,26 +178,23 @@ public:
   //      else SiconosDOMTreeTools::setSiconosMatrixValue(this->HNode, H);
   //    }
 
-  /** \fn void updateDSInputOutputXML( xmlNodePtr  node, DSInputOutput* dsio );
-   *   \brief makes the operations to create the DSInputOutput of the DynamicalSystem
-   *   \param xmlNodePtr  : the root node of the DSInputOutputXML
-   *   \param DSInputOutput* : the Relation of this DSInputOutputXML
-   */
+  /** makes the operations to create the DSInputOutput of the DynamicalSystem
+  *   \param xmlNodePtr  : the root node of the DSInputOutputXML
+  *   \param DSInputOutput* : the Relation of this DSInputOutputXML
+  */
   void updateDSInputOutputXML(xmlNodePtr  node, DSInputOutput* dsio);
 
-  /** \fn vector<int> getDSConcerned()
-   *   \brief Return the DSs concerned by the DSInputOutputXML
-   *   \return the integer vector who contains the DSs concerned by the DSInputOutputXML
-   */
+  /** Return the DSs concerned by the DSInputOutputXML
+  *   \return the integer vector who contains the DSs concerned by the DSInputOutputXML
+  */
   inline std::vector<int> getDSConcerned()
   {
     return this->definedDSNumbers;
   }
 
-  /** \fn void setDSConcerned( vector<int> )
-   *   \brief allows to set the dynamical systems which are interacting together with this DSInputOutput
-   *   \param vector<int> : the dynamical system numbers
-   */
+  /** allows to set the dynamical systems which are interacting together with this DSInputOutput
+  *   \param vector<int> : the dynamical system numbers
+  */
   void setDSConcerned(std::vector<int>);
 
 
@@ -227,13 +212,11 @@ protected:
 
 private :
 
-  /** \fn loadDSIOConcernedDS(xmlNode * , vector<int>)
-   *   \brief load the DSs concerned by this interaction
-   *   \param xmlNode * DSConcernedNode : the DOM tree node of DS concerned by the interaction
-   //   *   \param vector<int> definedDSNumbers : vector of DSXML numbers to verify DS concerned by the interaction (identified by number) exists
-   *   \exception XMLException : if a DS number not exists
-   */
-  void loadDSIOConcernedDS(xmlNode * DSConcernedNode/*, std::vector<int> definedDSNumbers*/);
+  /** load the DSs concerned by this interaction
+  *   \param xmlNode * DSConcernedNode : the DOM tree node of DS concerned by the interaction
+  *   \exception XMLException : if a DS number not exists
+  */
+  void loadDSIOConcernedDS(xmlNode * DSConcernedNode);
 };
 
 

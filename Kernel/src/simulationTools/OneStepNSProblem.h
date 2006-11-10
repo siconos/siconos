@@ -16,30 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-
-/** \class OneStepNSProblem
- *  \brief It's the part of the Simulation which solve the Interactions
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 1.3.0.
- *  \date (Creation) Apr 26, 2004
- *
- *
- * This is an abstract class, that provides an interface to define a non smooth problem:
- *   -> a formulation (ie the way the problem is written)
- *   -> a solver (algorithm and solving formulation, that can be different from problem formulation)
- *   -> routines to compute the problem solution.
- *
- * The available problem formulation, given by derived classes, are:
- *  - LCP
- *  - FrictionContact2D and 3D
- *  - QP
- *  - Relay
- *
- *  See Solver class or Numerics documentation for details on algorithm name and parameters.
- *
- *  Note: simulation is a required input for construction of a OneStepNSProblem.
- *
- */
+/*! \file
+*/
 
 #ifndef ONESTEPNSPROBLEM_H
 #define ONESTEPNSPROBLEM_H
@@ -94,8 +72,28 @@ typedef std::map<DynamicalSystem*, SiconosMatrix*> MapOfMatrices;
 /** map of double; key = the related DS */
 typedef std::map<DynamicalSystem*, double> MapOfDouble;
 
-
-
+//! Non Smooth Problem Simulation
+/**  \author SICONOS Development Team - copyright INRIA
+ *  \version 1.3.0.
+ *  \date (Creation) Apr 26, 2004
+ *
+ *
+ * This is an abstract class, that provides an interface to define a non smooth problem:
+ *   -> a formulation (ie the way the problem is written)
+ *   -> a solver (algorithm and solving formulation, that can be different from problem formulation)
+ *   -> routines to compute the problem solution.
+ *
+ * The available problem formulation, given by derived classes, are:
+ *  - LCP
+ *  - FrictionContact2D and 3D
+ *  - QP
+ *  - Relay
+ *
+ *  See Solver class or Numerics documentation for details on algorithm name and parameters.
+ *
+ *  Note: simulation is a required input for construction of a OneStepNSProblem.
+ *
+ */
 class OneStepNSProblem
 {
 
@@ -157,212 +155,187 @@ protected:
 
   // --- CONSTRUCTORS/DESTRUCTOR ---
 
-  /** \fn OneStepNSProblem(const string = DEFAULT_OSNSPB)
-   *  \brief default constructor
-   *  \param string: problem type
-   */
+  /** default constructor
+  *  \param string: problem type
+  */
   OneStepNSProblem(const std::string = DEFAULT_OSNSPB);
 
 public:
 
-  /** \fn OneStepNSProblem(const string, OneStepNSProblemXML*, Simulation*)
-   *  \brief xml constructor
-   *  \param string: problem type
-   *  \param OneStepNSProblemXML* : the XML linked-object
-   *  \param Simulation *: the simulation that owns the problem
-   */
+  /** xml constructor
+  *  \param string: problem type
+  *  \param OneStepNSProblemXML* : the XML linked-object
+  *  \param Simulation *: the simulation that owns the problem
+  */
   OneStepNSProblem(const std::string, OneStepNSProblemXML*, Simulation *);
 
-  /** \fn OneStepNSProblem(const string, const string, Simulation*, Solver* = NULL)
-   *  \brief constructor from data
-   *  \param string: problem type
-   *  \param Simulation *: the simulation that owns this problem
-   *  \param string : id
-   *  \param Solver *: pointer on object that contains solver algorithm definition (optional)
-   */
+  /** constructor from data
+  *  \param string: problem type
+  *  \param Simulation *: the simulation that owns this problem
+  *  \param string : id
+  *  \param Solver *: pointer on object that contains solver algorithm definition (optional)
+  */
   OneStepNSProblem(const std::string, Simulation *, const std::string, Solver* = NULL);
 
-  /** \fn OneStepNSProblem()
-   *  \brief destructor
-   */
+  /** destructor
+  */
   virtual ~OneStepNSProblem();
 
   // --- GETTERS/SETTERS ---
 
-  /** \fn inline const string getType() const
-   *  \brief to get the type of the OneStepNSProblem
-   *  \return string
-   */
+  /** to get the type of the OneStepNSProblem
+  *  \return string
+  */
   inline std::string getType() const
   {
     return nspbType;
   }
 
-  /** \fn inline void setType(const string)
-   *  \brief set the type of the OneStepNSProblem
-   *  \param: string
-   */
+  /** set the type of the OneStepNSProblem
+  *  \param: string
+  */
   inline void setType(const std::string  newVal)
   {
     nspbType = newVal;
   }
 
-  /** \fn inline const string getId() const
-   *  \brief to get the id of the OneStepNSProblem
-   *  \return string
-   */
+  /** to get the id of the OneStepNSProblem
+  *  \return string
+  */
   inline std::string getId() const
   {
     return id;
   }
 
-  /** \fn inline void setId(const string)
-   *  \brief set the id of the OneStepNSProblem
-   *  \param: string
-   */
+  /** set the id of the OneStepNSProblem
+  *  \param: string
+  */
   inline void setId(const std::string newVal)
   {
     id = newVal;
   }
 
-  /** \fn const int getSizeOutput() const
-   *  \brief get dimension of the problem
-   *  \return an unsigned ing
-   */
+  /** get dimension of the problem
+  *  \return an unsigned ing
+  */
   inline const unsigned int getSizeOutput() const
   {
     return sizeOutput;
   }
 
-  /** \fn void setSizeOutput(const unsigned int)
-   *  \brief set the value of sizeOutput
-   *  \param an unsigned int
-   */
+  /** set the value of sizeOutput
+  *  \param an unsigned int
+  */
   inline void setSizeOutput(const unsigned int newVal)
   {
     sizeOutput = newVal;
   }
 
-  /** \fn const MapOfMapOfUnitaryMatrices getBlocks()
-    *  \brief get the blocks matrices map
-    *  \return a MapOfMapOfUnitaryMatrices
-    */
+  /** get the blocks matrices map
+  *  \return a MapOfMapOfUnitaryMatrices
+  */
   inline const MapOfMapOfUnitaryMatrices getBlocks() const
   {
     return blocks;
   };
 
-  /** \fn SiconosMatrix* getBlockPtr(UnitaryRelation* UR1, UnitaryRelation* UR2 = NULL) const
-   *  \brief get the block orresponding to UR1 and UR2
-   *  \param a pointer to UnitaryRelation, UR1
-   *  \param a pointer to UnitaryRelation, optional, default value = NULL, in that case UR2 = UR1 (ie get "diagonal" block)
-   *  \return a pointer to SiconosMatrix
-   */
+  /** get the block orresponding to UR1 and UR2
+  *  \param a pointer to UnitaryRelation, UR1
+  *  \param a pointer to UnitaryRelation, optional, default value = NULL, in that case UR2 = UR1 (ie get "diagonal" block)
+  *  \return a pointer to SiconosMatrix
+  */
   SiconosMatrix* getBlockPtr(UnitaryRelation*, UnitaryRelation* = NULL) const ;
 
-  /** \fn void setBlocks(const MapOfMapOfUnitaryMatrices&)
-   *  \brief set the map of unitary matrices
-   *  \param a MapOfMapOfUnitaryMatrices
-   */
+  /** set the map of unitary matrices
+  *  \param a MapOfMapOfUnitaryMatrices
+  */
   void setBlocks(const MapOfMapOfUnitaryMatrices&);
 
-  /** \fn void  clearBlocks()
-   *  \brief clear the map of blocks (ie release memory)
-   */
+  /** clear the map of blocks (ie release memory)
+  */
   void clearBlocks();
 
-  /** \fn Solver* getSolverPtr()
-   *  \brief get the Solver
-   *  \return a pointer on Solver
-   */
+  /** get the Solver
+  *  \return a pointer on Solver
+  */
   inline Solver* getSolverPtr() const
   {
     return solver;
   }
 
-  /** \fn void setSolverPtr(Solver*)
-   *  \brief set the Solver of the OneStepNSProblem
-   *  \param: a pointer on Solver
-   */
+  /** set the Solver of the OneStepNSProblem
+  *  \param: a pointer on Solver
+  */
   void setSolverPtr(Solver*);
 
-  /** \fn Simulation* getSimulationPtr()
-   *  \brief get the Simulation
-   *  \return a pointer on Simulation
-   */
+  /** get the Simulation
+  *  \return a pointer on Simulation
+  */
   inline Simulation* getSimulationPtr() const
   {
     return simulation;
   }
 
-  /** \fn inline OneStepNSProblemXML* getOneStepNSProblemXML()
-   *  \brief get the OneStepNSProblemXML
-   *  \return a pointer on OneStepNSProblemXML
-   */
+  /** get the OneStepNSProblemXML
+  *  \return a pointer on OneStepNSProblemXML
+  */
   inline OneStepNSProblemXML* getOneStepNSProblemXML() const
   {
     return onestepnspbxml;
   }
 
-  /** \fn InteractionsSet getInteractions()
-   *  \brief get the Interactions set
-   *  \return an InteractionsSet
-   */
+  /** get the Interactions set
+  *  \return an InteractionsSet
+  */
   inline InteractionsSet getInteractions() const
   {
     return OSNSInteractions;
   }
 
-  /** \fn inline void setOneStepNSProblemXML(OneStepNSProblemXML* osnspb)
-   *  \brief set the OneStepNSProblemXML
-   *  \param a pointer on OneStepNSProblemXML
-   */
+  /** set the OneStepNSProblemXML
+  *  \param a pointer on OneStepNSProblemXML
+  */
   inline void setOneStepNSProblemXML(OneStepNSProblemXML* osnspb)
   {
     onestepnspbxml = osnspb;
   }
 
-  /** \fn const int getLevelMin() const
-   *  \brief get level min value
-   *  \return an unsigned int
-   */
+  /** get level min value
+  *  \return an unsigned int
+  */
   inline const unsigned int getLevelMin() const
   {
     return levelMin;
   }
 
-  /** \fn void setLevelMin(const unsigned int)
-   *  \brief set the value of level min
-   *  \param an unsigned int
-   */
+  /** set the value of level min
+  *  \param an unsigned int
+  */
   inline void setLevelMin(const unsigned int newVal)
   {
     levelMin = newVal;
   }
 
-  /** \fn const int getLevelMax() const
-   *  \brief get level max value
-   *  \return an unsigned int
-   */
+  /** get level max value
+  *  \return an unsigned int
+  */
   inline const unsigned int getLevelMax() const
   {
     return levelMax;
   }
 
-  /** \fn void setLevelMax(const unsigned int)
-   *  \brief set the value of level  max
-   *  \param an unsigned int
-   */
+  /** set the value of level  max
+  *  \param an unsigned int
+  */
   inline void setLevelMax(const unsigned int newVal)
   {
     levelMax = newVal;
   }
 
-  /** \fn void setLevelMax(const unsigned int, const unsigned int)
-   *  \brief set the values of level min and max
-   *  \param an unsigned int (levelMin value)
-   *  \param an unsigned int (levelMax value)
-   */
+  /** set the values of level min and max
+  *  \param an unsigned int (levelMin value)
+  *  \param an unsigned int (levelMax value)
+  */
   inline void setLevels(const unsigned int newMin, const unsigned int newMax)
   {
     levelMin = newMin;
@@ -371,82 +344,69 @@ public:
 
   // --- OTHER FUNCTIONS ---
 
-  /** \fn void computeUnitaryRelationsPositions()
-  *  \brief fills in blocksPositions map, ie computes variables blocks positions in the full matrix (M in LCP case ...)
+  /** fills in blocksPositions map, ie computes variables blocks positions in the full matrix (M in LCP case ...)
   */
   void computeUnitaryRelationsPositions();
 
-  /** \fn void computeSizeOutput()
-   *  \brief compute SizeOutput, ie count the total number
-   *  of relations constrained
-   */
+  /** compute SizeOutput, ie count the total number
+  *  of relations constrained
+  */
   void computeSizeOutput();
 
-  /** \fn void  updateBlocks()
-   *  \brief compute blocks if necessary (this depends on the type of OSNS, on the indexSets ...)
-   */
+  /** compute blocks if necessary (this depends on the type of OSNS, on the indexSets ...)
+  */
   void updateBlocks();
 
-  /** \fn void computeAllBlocks()
-   *  \brief computes all diagonal and extra-diagonal block-matrices
-   */
+  /** computes all diagonal and extra-diagonal block-matrices
+  */
   void computeAllBlocks();
 
-  /** \fn void computeExtraDiagonalBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
-   *  \brief computes extra diagonal block-matrix that corresponds to UR1 and UR2
-   *  Move this to Unitary Relation class?
-   *  \param a pointer to UnitaryRelation
-   *  \param a pointer to UnitaryRelation
-   */
+  /** computes extra diagonal block-matrix that corresponds to UR1 and UR2
+  *  Move this to Unitary Relation class?
+  *  \param a pointer to UnitaryRelation
+  *  \param a pointer to UnitaryRelation
+  */
   virtual void computeBlock(UnitaryRelation*, UnitaryRelation*);
 
-  /** \fn void initialize()
-   *  \brief initialize the problem(compute topology ...)
-   */
+  /** initialize the problem(compute topology ...)
+  */
   virtual void initialize();
 
-  /** \fn void nextStep(void)
-   *  \brief prepares the problem for the next time step
-   *  \exception to be defined
-   */
+  /** prepares the problem for the next time step
+  *  \exception to be defined
+  */
   void nextStep();
 
-  /** \fn void preCompute(const double)
-   *  \brief prepare data of the osns for solving
-   *  param double : current time
-   */
+  /** prepare data of the osns for solving
+  *  param double : current time
+  */
   virtual void preCompute(const double) = 0;
 
-  /** \fn void compute(const double)
-   *  \brief make the computation so solve the NS problem
-   *  param double : current time
-   */
+  /** make the computation so solve the NS problem
+  *  param double : current time
+  */
   virtual void compute(const double) = 0;
 
-  /** \fn virtual void postCompute(SiconosVector*, SiconosVector*) = 0;
-   *  \brief post treatment for output of the solver
-   *  param two pointers to SiconosVector (ex: for LCP or Friction, w and z)
-   */
+  /** post treatment for output of the solver
+  *  param two pointers to SiconosVector (ex: for LCP or Friction, w and z)
+  */
   virtual void postCompute(SiconosVector*, SiconosVector*) = 0;
 
-  /** \fn void saveNSProblemToXML()
-   *  \brief copy the data of the OneStepNSProblem to the XML tree
-   *  \exception RuntimeException
-   */
+  /** copy the data of the OneStepNSProblem to the XML tree
+  *  \exception RuntimeException
+  */
   virtual void saveNSProblemToXML() = 0;
 
-  /** \fn void check_solver(const int info) const
-   *  \brief return exception and message if solver failed
-   *  \param: output from solve_... (Numerics routine)
-   */
+  /** return exception and message if solver failed
+  *  \param: output from solve_... (Numerics routine)
+  */
   void check_solver(const int) const;
 
-  /** \fn void getOSIMaps(UnitaryRelation* UR, MapOfMatrices& , MapOfDouble& Theta)
-   *  \brief get the OSI-related matrices used to compute the current Unitary Relation block (Ex: for Moreau, W and Theta)
-   *  \param a pointer to UnitaryRelation
-   *  \param a MapOfMatrices(in-out parameter)
-   *  \param a MapOfDouble(in-out parameter)
-   */
+  /** get the OSI-related matrices used to compute the current Unitary Relation block (Ex: for Moreau, W and Theta)
+  *  \param a pointer to UnitaryRelation
+  *  \param a MapOfMatrices(in-out parameter)
+  *  \param a MapOfDouble(in-out parameter)
+  */
   virtual void getOSIMaps(UnitaryRelation*, MapOfMatrices&, MapOfDouble&);
 
 };

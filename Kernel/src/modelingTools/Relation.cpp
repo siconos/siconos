@@ -104,7 +104,7 @@ Relation::Relation(const Relation& newRel):
 
 Relation::~Relation()
 {
-  map<string, SimpleVector*>::iterator it;
+  std::map<string, SimpleVector*>::iterator it;
   for (it = parametersList.begin(); it != parametersList.end(); ++it)
   {
     string alloc = "parameter_for_" + it->first;
@@ -114,7 +114,7 @@ Relation::~Relation()
   interaction = NULL;
 }
 
-vector<DSInputOutput*> Relation::getDSInputOutputs(void)
+std::vector<DSInputOutput*> Relation::getDSInputOutputs(void)
 {
   return dsioVector;
 }
@@ -136,7 +136,7 @@ DSInputOutput* Relation::getDSInputOutput(const unsigned int i)
   return dsioVector[i];
 }
 
-void Relation::setDSInputOutputs(vector<DSInputOutput*> dsioVect)
+void Relation::setDSInputOutputs(std::vector<DSInputOutput*> dsioVect)
 {
   dsioVector = dsioVect;
 }

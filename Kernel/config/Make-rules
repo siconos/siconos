@@ -48,6 +48,12 @@ SICONOSMEMORY_LIB = -L$(SICONOSMEMORY_PATH) -lSiconosMemory
 SICONOSCONTRACT_PATH = $(top_srcdir)/src/utils/contract
 SICONOSCONTRACT_INC = $(SICONOSCONTRACT_PATH)
 
+#--- boost bindings --------------------------------------
+BINDINGS_PATH = $(top_srcdir)/src/utils/src/utils/boost/numeric/bindings/
+BINDINGS_INC = $(BINDINGS_PATH)
+BINDINGSATLAS_PATH = $(top_srcdir)/src/utils/src/utils/boost/numeric/bindings/atlas/
+BINDINGSATLAS_INC = $(BINDINGSATLAS_PATH)
+
 #--- SiconosXml --------------------------------------
 SICONOSXML_PATH = $(top_srcdir)/src/xml
 SICONOSXML_INC = $(SICONOSXML_PATH)
@@ -84,7 +90,3 @@ INCLUDES = $(SICONOS_INCLUDES) $(SICONOS_EXT_INCLUDES)
 CXXCOMPILE = $(CXX) $(CXXFLAGS) $(INCLUDES)
 
 SICONOS_LIBS=-L$(top_srcdir)/src/ -lSiconosKernel
-#SICONOS_LIBS=$(MODEL_LIB) $(SIMULATIONTOOLS_LIB) $(MODELINGTOOLS_LIB) \
-#	$(SICONOSXML_LIB) $(SICONOSMEMORY_LIB) $(SICONOSALGEBRA_LIB) \
-#	$(SICONOSSHAREDLIBRARY_LIB) $(SICONOSEXCEPTION_LIB) $(SICONOS_EXT_LDFLAG#
-

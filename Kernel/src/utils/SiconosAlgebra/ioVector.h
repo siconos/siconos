@@ -17,100 +17,64 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/** \class ioVector
- *   \brief This class is an interface for read/write vectors in a file.
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.3.0.
- *   \date (Creation) 07/21/2006
- *
- */
+/*! \file ioVector.h
 
+*/
 
 #ifndef __ioVector__
 #define __ioVector__
 
 #include "ioObject.h"
 
+class SimpleVector;
+
+//! Interface for read/write vectors from/to a file.
+/**  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.3.0.
+ *   \date (Creation) 07/21/2006
+ *
+ */
 class ioVector : public ioObject
 {
 private :
 
-  /** \fn ioVector ()
-   *  \brief default constructor with Mode = "ascii"
+  /** default constructor with Mode = "ascii"
    */
-  ioVector(void);
+  ioVector();
 
 public :
-  /** \var static MySimpleVector *temporary
-   *  \brief used for storing vector read from a file when Mode = "binary"
+  /** static SimpleVector *temporary
+   * used for storing vector read from a file when Mode = "binary"
    */
-  static MySimpleVector* temporary;
+  static SimpleVector* temporary;
 
-  /** \var static bool writeSimpleBinary
-   *  \brief true if temporary is allocated, else false.
+  /** static bool writeSimpleBinary
+   * true if temporary is allocated, else false.
    */
   static bool writeSimpleBinary;
 
-  /** \fn ioVector (const std::string& file, const std::string& mode)
-   *  \brief constructor with FileName = file and Mode = mode
-   *  \param 2 std::string
-   */
+  /** constructor with FileName = file and Mode = mode
+  *  \param 2 std::string
+  */
   ioVector(const std::string&, const std::string&);
 
-  /** \fn ~ioVector ()
-   *  \brief destructor
-   */
+  /** destructor
+  */
   ~ioVector(void);
 
+  /** read the vector in the file "Filename" and write it into vector A
+  *  \param a SiconosVector
+  *  \exception SiconosVectorException
+  *  \return true if no error
+  */
+  const bool read(SiconosVector&) const;
 
-  /** \fn bool read(MySiconosVector &A)
-   *  \brief read the vector in the file "Filename" and write it into vector A
-   *  \param a MySiconosVector
-   *  \exception SiconosVectorException
-   *  \return true if no error
-   */
-  bool    read(MySiconosVector&)const;
-
-  /** \fn bool write(MySiconosVector &A)
-   *  \brief write the vector A in the file "Filename"
-   *  \param a MySiconosVector
-   *  \exception SiconosVectorException
-   *  \return true if no error
-   */
-  bool    write(const MySiconosVector&);
-
-  /** \fn bool rawWrite(MySiconosVector &A)
-   *  \brief write the vector A in the file "Filename" without its dimensions
-   *  \param a MySiconosVector
-   *  \exception SiconosVectorException
-   *  \return true if no error
-   */
-  bool    rawWrite(const MySiconosVector&);
-
-  /** \fn bool read(MySiconosMatrix &A)
-   *  \brief read the matrix in the file "Filename" and write it into matrix A, useless for ioVector
-   *  \param a MySiconosMatrix
-   *  \exception SiconosMatrixException
-   *  \return true if no error
-   */
-  bool    read(MySiconosMatrix&)const;
-
-  /** \fn bool write(MySiconosMatrix &A)
-   *  \brief write the matrix A in the file "Filename", useless for ioVector
-   *  \param a MySiconosMatrix
-   *  \exception SiconosMatrixException
-   *  \return true if no error
-   */
-  bool    write(const MySiconosMatrix&);
-
-  /** \fn bool rawWrite(MySiconosMatrix &A)
-   *  \brief write the matrix A in the file "Filename" without its dimensions, useless for ioVector
-   *  \param a MySiconosMatrix
-   *  \exception SiconosMatrixException
-   *  \return true if no error
-   */
-  bool    rawWrite(const MySiconosMatrix&);
-
-
+  /** write the vector A in the file "Filename"
+  *  \param a SiconosVector
+  *  \param a string: type of output - See on top of file for details
+  *  \exception SiconosVectorException
+  *  \return true if no error
+  */
+  const bool write(const SiconosVector&, const std::string& = "python") const;
 };
 #endif

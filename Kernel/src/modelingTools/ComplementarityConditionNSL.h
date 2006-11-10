@@ -20,61 +20,57 @@
  * Size > 1 is usefull when D matrix in the relation is not null and not diagonal, to write the y = CX +Dlambda with only one
  * interaction and one unitary relation.
  */
+/*! \file ComplementarityConditionNSL.h
+
+*/
 #ifndef COMPLEMENTARITYCONDITIONNSLAW_H
 #define COMPLEMENTARITYCONDITIONNSLAW_H
 
 #include "NonSmoothLaw.h"
 #include "ComplementarityConditionNSLXML.h"
 
-/** \class ComplementarityConditionNSL
- *  \brief NonSmoothLaw for complementarity models
- *  \author SICONOS Development Team - copyright INRIA
+//! Complementarity NonSmoothLaw
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 27, 2004
  *
  *
  **/
-
 class ComplementarityConditionNSL : public NonSmoothLaw
 {
 public:
-  /** \fn ComplementarityConditionNSL(const unsigned int = 1)
-   *  \brief default constructor
-   *  \param: size of the non smooth law (optional default =1)
-   */
+  /** default constructor
+  *  \param: size of the non smooth law (optional default =1)
+  */
   ComplementarityConditionNSL(const unsigned int = 1);
 
-  /** \fn ComplementarityConditionNSL(NonSmoothLawXML*, const unsigned int = 1)
-   *  \brief constructor with XML object of the parent class NonSmoothLaw
-   *  \param NonSmoothLawXML* : the XML object corresponding
-   *  \param: size of the non smooth law (optional default =1)
-   */
+  /** constructor with XML object of the parent class NonSmoothLaw
+  *  \param NonSmoothLawXML* : the XML object corresponding
+  *  \param: size of the non smooth law (optional default =1)
+  */
   ComplementarityConditionNSL(NonSmoothLawXML*, const unsigned int = 1);
 
+  /** Destructor */
   ~ComplementarityConditionNSL();
 
-  /** \fn bool isVerified(void);
-   *  \brief checks the ns law to see if it is verified
-   *  \return a boolean value whioch determines if the NS Law is verified
-   */
+  /** checks the ns law to see if it is verified
+  *  \return a boolean value whioch determines if the NS Law is verified
+  */
   bool isVerified(void) const;
 
-  /** \fn void display()
-   *  \brief print the data to the screen
-   */
+  /** print the data to the screen
+  */
   inline void display()const {};
 
-  /** \fn void saveNonSmoothLawToXML()
-   *  \brief copy the data of the NonSmoothLaw to the XML tree
-   *  \exception RuntimeException
-   */
+  /** copy the data of the NonSmoothLaw to the XML tree
+  *  \exception RuntimeException
+  */
   inline void saveNonSmoothLawToXML() {};
 
-  /** \fn ComplementarityConditionNSL* convert (NonSmoothLaw* nsl)
-   *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param NonSmoothLaw* : the law which must be converted
-   * \return a pointer on the law if it is of the right type, NULL otherwise
-   */
+  /** encapsulates an operation of dynamic casting. Needed by Python interface.
+  *  \param NonSmoothLaw* : the law which must be converted
+  * \return a pointer on the law if it is of the right type, NULL otherwise
+  */
   static ComplementarityConditionNSL* convert(NonSmoothLaw* nsl);
 };
 

@@ -18,6 +18,8 @@
  */
 #include "DynamicalSystemXML.h"
 #include "DynamicalSystem.h"
+#include "SimpleMatrix.h"
+#include "BoundaryCondition.h"
 
 // to be deleted thanks to factories:
 #include "NLinearBCXML.h"
@@ -239,7 +241,7 @@ void DynamicalSystemXML::updateDynamicalSystemXML(xmlNode* newRootDSXMLNode, Dyn
 void DynamicalSystemXML::loadDynamicalSystem(DynamicalSystem* ds)
 {
   string type;
-  xmlNode* node;
+  xmlNodePtr node = NULL;
 
   if (ds->getBoundaryConditionPtr() != NULL)
   {

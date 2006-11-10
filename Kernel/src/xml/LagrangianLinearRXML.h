@@ -17,9 +17,21 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/** \class LagrangianLinearRXML
- *   \brief This class manages LagrangianLinear Relation data
- *  \author SICONOS Development Team - copyright INRIA
+/*! \file LagrangianLinearRXML.h
+
+*/
+#ifndef __LLRelationXML__
+#define __LLRelationXML__
+
+#include "LagrangianRXML.h"
+#include "SimpleVector.h"
+#include "SimpleMatrix.h"
+
+const std::string  LLR_H = "H";
+const std::string  LLR_B = "b";
+
+//! XML management for LagrangianRXML
+/**  \author SICONOS Development Team - copyright INRIA
  *   \version 1.3.0.
  *   \date 05/25/2004
  *
@@ -27,14 +39,6 @@
  *
  * LagrangianLinearRXML allows to manage data of a LLRelation DOM tree.
  */
-
-#ifndef __LLRelationXML__
-#define __LLRelationXML__
-
-#include "LagrangianRXML.h"
-
-const std::string  LLR_H = "H";
-const std::string  LLR_B = "b";
 
 class LagrangianLinearRXML : public LagrangianRXML
 {
@@ -50,73 +54,64 @@ public:
 
   LagrangianLinearRXML();
 
-  /** \fn LagrangianLinearRXML(xmlNode * LLRelationNode)
-   *   \brief Build a LagrangianLinearRXML object from a DOM tree describing a Relation with LL type
-   *   \param LagrangianLinearRXML : the LagrangianLinearR DOM tree
-   *   \exception XMLException : if a property of the LagrangianLinear Relation lacks in the DOM tree
-   */
+  /** Build a LagrangianLinearRXML object from a DOM tree describing a Relation with LL type
+  *   \param LagrangianLinearRXML : the LagrangianLinearR DOM tree
+  *   \exception XMLException : if a property of the LagrangianLinear Relation lacks in the DOM tree
+  */
   LagrangianLinearRXML(xmlNode * LLRelationNode);
 
   ~LagrangianLinearRXML();
 
-  /** \fn SimpleMatrix getH()
-   *   \brief Return the H of the LLRelationXML
-   *   \return The H SimpleMatrix of the LLRelationXML
-   */
+  /** Return the H of the LLRelationXML
+  *   \return The H SimpleMatrix of the LLRelationXML
+  */
   inline SimpleMatrix getH()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(HNode);
   }
 
 
-  /** \fn SimpleVector getB()
-   *   \brief Return b vector of the LLRelationXML
-   *   \return SimpleVector : b vector of the LLRelationXML
-   */
+  /** Return b vector of the LLRelationXML
+  *   \return SimpleVector : b vector of the LLRelationXML
+  */
   inline /*SiconosVector*/SimpleVector getB()
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(bNode);
   }
 
-  /** \fn SimpleMatrix getD()
-   *   \brief Return the D of the LLRelationXML
-   *   \return The D SimpleMatrix of the LLRelationXML
-   */
+  /** Return the D of the LLRelationXML
+  *   \return The D SimpleMatrix of the LLRelationXML
+  */
   inline SimpleMatrix getD()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(DNode);
   }
 
-  /** \fn void setH(SiconosMatrix *matrix)
-   *   \brief Change the H matrix value (in xml file or external data file switch his origin position)
-   *   \param SiconosMatrix matrix : the new value for H matrix
-   */
+  /** Change the H matrix value (in xml file or external data file switch his origin position)
+  *   \param SiconosMatrix matrix : the new value for H matrix
+  */
   void setH(const SiconosMatrix&);
 
-  /** \fn void setB(SiconosVector *vector)
-   *   \brief Change the b vector value (in xml file or external data file switch his origin position)
-   *   \param SiconosVector vector : the new value for b vector
-   */
+  /** Change the b vector value (in xml file or external data file switch his origin position)
+  *   \param SiconosVector vector : the new value for b vector
+  */
   void setB(const SiconosVector&);
 
-  /** \fn void setD(SiconosMatrix *matrix)
-   *   \brief Change the D matrix value (in xml file or external data file switch his origin position)
-   *   \param SiconosMatrix matrix : the new value for D matrix
-   */
+  /** Change the D matrix value (in xml file or external data file switch his origin position)
+  *   \param SiconosMatrix matrix : the new value for D matrix
+  */
   void setD(const SiconosMatrix&);
 
 
-  /** \fn bool hasB() const
-   *   \brief return true if b is given in xmlfile
-   */
+  /** return true if b is given in xmlfile
+  */
   inline bool hasB() const
   {
     return (!(bNode == NULL));
   }
 
-  /** \fn bool hasD() const
-   *   \brief return true if D is given in xmlfile
-   */
+  /** return true if D is given in xmlfile
+  */
   inline bool hasD() const
   {
     return (!(DNode == NULL));

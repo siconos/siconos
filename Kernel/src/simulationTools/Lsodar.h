@@ -18,20 +18,20 @@
  *
  * WARNING: at the time mainly written for Lagrangian systems !!!
  */
+/*! \file
+ Lsodar solver (from odepack)
+*/
 #ifndef Lsodar_H
 #define Lsodar_H
 
 #include "OneStepIntegrator.h"
 #include "LsodarXML.h"
 
-/** \class Lsodar
- *  \brief It's a kind of single-step Integrator
- *  \author SICONOS Development Team - copyright INRIA
+//! Lsodar solver (odepack)
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 26, 2004
  */
-
-// ===== Lsodar class =====
 class Lsodar : public OneStepIntegrator
 {
 private:
@@ -59,152 +59,131 @@ private:
   /** temporary vector to save x values */
   BlockVector* xWork;
 
-  /** \fn Lsodar()
-   *  \brief default constructor
-   */
+  /** default constructor
+  */
   Lsodar();
 
 public:
 
-  /** \fn Lsodar(OneStepIntegratorXML*, Simulation*)
-   *  \brief constructor from xml file
-   *  \param OneStepIntegratorXML* : the XML object
-   *  \param Simulation * : the simulation that owns the osi
-   */
+  /** constructor from xml file
+  *  \param OneStepIntegratorXML* : the XML object
+  *  \param Simulation * : the simulation that owns the osi
+  */
   Lsodar(OneStepIntegratorXML*, Simulation*);
 
-  /** \fn Lsodar(TimeDiscretisation*, DynamicalSystem* )
-   *  \brief constructor from a minimum set of data
-   *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
-   *  \param Simulation * : the simulation that owns the osi
-   */
+  /** constructor from a minimum set of data
+  *  \param DynamicalSystem* : the DynamicalSystem linked to the OneStepIntegrator
+  *  \param Simulation * : the simulation that owns the osi
+  */
   Lsodar(DynamicalSystem* , Simulation*);
 
-  /** \fn Lsodar(DynamicalSystemsSet& , Simulation*)
-   *  \brief constructor from a list of Dynamical Systems
-   *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
-   *  \param Simulation * : the simulation that owns the osi
-   */
+  /** constructor from a list of Dynamical Systems
+  *  \param DynamicalSystemsSet : the list of DynamicalSystems to be integrated
+  *  \param Simulation * : the simulation that owns the osi
+  */
   Lsodar(DynamicalSystemsSet&, Simulation*);
 
-  /** \fn ~Lsodar()
-   *  \brief destructor
-   */
+  /** destructor
+  */
   ~Lsodar();
 
-  /** \fn TimeDiscretisation* getTimeDiscretisationPtr()
-   *  \brief get the TimeDiscretisation of lsodar
-   *  \return the TimeDiscretisation
-   */
+  /** get the TimeDiscretisation of lsodar
+  *  \return the TimeDiscretisation
+  */
   inline TimeDiscretisation* getTimeDiscretisationPtr() const
   {
     return localTimeDiscretisation;
   };
 
-  /** \fn void setTimeDiscretisationPtr(TimeDiscretisation*)
-   *  \brief set timeDiscretisation of lsodar
-   *  \param the TimeDiscretisation to set
-   */
+  /** set timeDiscretisation of lsodar
+  *  \param the TimeDiscretisation to set
+  */
   void setTimeDiscretisationPtr(TimeDiscretisation*);
 
-  /** \fn  const vector<integer> getIntData() const
-   *  \brief get vector of integer parameters for lsodar
-   *  \return a vector<integer>
-   */
+  /** get vector of integer parameters for lsodar
+  *  \return a vector<integer>
+  */
   inline const std::vector<integer> getIntData() const
   {
     return intData;
   }
 
-  /** \fn  const integer getIntData(const unsigned int  i) const
-   *  \brief get intData[i]
-   *  \return an integer
-   */
+  /** get intData[i]
+  *  \return an integer
+  */
   inline const integer getIntData(const unsigned int i) const
   {
     return intData[i];
   }
 
-  /** \fn void setIntData (const vector<integer>& newVector)
-   *  \brief set vector intData to newVector with a copy.
-   *  \param std::vector<integer>
-   */
+  /** set vector intData to newVector with a copy.
+  *  \param std::vector<integer>
+  */
   void setIntData(const std::vector<integer>&);
 
-  /** \fn void setIntData (const unsigned int  i, const integer newValue);
-   *  \brief set intData[i] to newValue
-   *  \param a unsigned int (index) and an integer (value)
-   */
+  /** set intData[i] to newValue
+  *  \param a unsigned int (index) and an integer (value)
+  */
   inline void setIntData(const unsigned int  i, const integer  newValue)
   {
     intData[i] = newValue;
   }
 
-  /** \fn  const vector<doublereal*> getDoubleData() const
-   *  \brief get vector of doublereal* parameters for lsodar
-   *  \return a vector<doublereal*>
-   */
+  /** get vector of doublereal* parameters for lsodar
+  *  \return a vector<doublereal*>
+  */
   inline const std::vector<doublereal*> getDoubleData() const
   {
     return doubleData;
   }
 
-  /** \fn  const doublereal getDoubleData(const unsigned int  i) const
-   *  \brief get doubleData[i]
-   *  \return a pointer on doublereal.
-   */
+  /** get doubleData[i]
+  *  \return a pointer on doublereal.
+  */
   inline doublereal* getDoubleData(const unsigned int i) const
   {
     return doubleData[i];
   }
 
-  /** \fn void setDoubleData (const vector<doublereal*>& newVector)
-   *  \brief set vector doubleData to newVector with a copy -> memory allocation
-   *  \param std::vector<doublereal*>
-   */
+  /** set vector doubleData to newVector with a copy -> memory allocation
+  *  \param std::vector<doublereal*>
+  */
   void setDoubleData(const std::vector<doublereal*>&);
 
-  /** \fn void setDoubleData (const unsigned int  i, doublereal* newPtr);
-   *  \brief set doubleData[i] to newPtr
-   *  \param a unsigned int (index) and a pointer to doublereal
-   */
+  /** set doubleData[i] to newPtr
+  *  \param a unsigned int (index) and a pointer to doublereal
+  */
   // void setDoubleData(const unsigned int , doublereal*);
 
-  /** \fn integer* getIwork() const
-   *  \brief get iwork
-   *  \return a pointer to integer
-   */
+  /** get iwork
+  *  \return a pointer to integer
+  */
   inline integer* getIwork() const
   {
     return iwork;
   }
 
-  /** \fn void setIwork (integer*)
-   *  \brief set iwork to newValue with a copy.
-   *  \param pointer to integer
-   */
+  /** set iwork to newValue with a copy.
+  *  \param pointer to integer
+  */
   void setIwork(integer*);
 
-  /** \fn void updateData()
-   *  \brief update doubleData and iwork memory size, when changes occur in intData.
-   */
+  /** update doubleData and iwork memory size, when changes occur in intData.
+  */
   void updateData();
 
-  /** \fn void fillXWork(integer* sizeOfX, doublereal * x)
-   *  \brief fill xWork with a doublereal
-   *  \param integer*, size of x array
-   *  \param doublereal* x:array of double
-   */
+  /** fill xWork with a doublereal
+  *  \param integer*, size of x array
+  *  \param doublereal* x:array of double
+  */
   void fillXWork(integer*, doublereal *) ;
 
-  /** \fn void computeRhs(const double t) ;
-   *  \brief compute rhs(t) for all dynamical systems in the set
-   */
+  /** compute rhs(t) for all dynamical systems in the set
+  */
   void computeRhs(const double) ;
 
-  /** \fn void computeJacobianRhs(const double t) ;
-   *  \brief compute jacobian of the rhs at time t for all dynamical systems in the set
-   */
+  /** compute jacobian of the rhs at time t for all dynamical systems in the set
+  */
   void computeJacobianRhs(const double) ;
 
   void f(integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot);
@@ -213,41 +192,35 @@ public:
 
   void jacobianF(integer *, doublereal *, doublereal *, integer *, integer *,  doublereal *, integer *);
 
-  /** \fn void initialize()
-   *  \brief initialise the integrator
-   */
+  /** initialise the integrator
+  */
   void initialize();
 
-  /** \fn void computeFreeState()
-   *   \brief compute the free state of the dynamical system
-   */
+  /** compute the free state of the dynamical system
+  */
   void computeFreeState();
 
-  /** \fn void integrate(double&, double&, double&, int&)
-   *  \brief integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
-   *  \param double: tinit, initial time
-   *  \param double: tend, end time
-   *  \param double: tout, real end time
-   *  \param int&: in-out parameter, input: 1 for first call, else 2. Output: 2 if no root was found, else 3.
-   */
+  /** integrate the system, between tinit and tend (->iout=true), with possible stop at tout (->iout=false)
+  *  \param double: tinit, initial time
+  *  \param double: tend, end time
+  *  \param double: tout, real end time
+  *  \param int&: in-out parameter, input: 1 for first call, else 2. Output: 2 if no root was found, else 3.
+  */
   void integrate(double&, double&, double&, int&);
 
-  /** \fn void updateState(const unsigned int)
-   *  \brief update the state of the DynamicalSystems attached to this Integrator
-   *  \param unsigned int: level of interest for the dynamics
-   */
+  /** update the state of the DynamicalSystems attached to this Integrator
+  *  \param unsigned int: level of interest for the dynamics
+  */
   void updateState(const unsigned int);
 
-  /** \fn Lsodar* convert (OneStepIntegrator* osi)
-   *  \brief encapsulates an operation of dynamic casting. Needed by Python interface.
-   *  \param OneStepIntegrator* : the integrator which must be converted
-   * \return a pointer on the integrator if it is of the right type, NULL otherwise
-   */
+  /** encapsulates an operation of dynamic casting. Needed by Python interface.
+  *  \param OneStepIntegrator* : the integrator which must be converted
+  * \return a pointer on the integrator if it is of the right type, NULL otherwise
+  */
   //static Lsodar* convert (OneStepIntegrator* osi);
 
-  /** \fn void display()
-   *  \brief print the data to the screen
-   */
+  /** print the data to the screen
+  */
   void display();
 
 

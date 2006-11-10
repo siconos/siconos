@@ -16,257 +16,285 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef BLOCKVECTOR_H
-#define BLOCKVECTOR_H
+
+/*! \file BlockVector.h
+
+*/
+
+#ifndef MYBLOCKVECTOR_H
+#define MYBLOCKVECTOR_H
 
 #include "SiconosVector.h"
-#include "SimpleVector.h"
 
 class SimpleVector;
 
-/** \class BlockVector
- *  \brief This class describes Block Vectors, containers of several Siconos Vectors (that should be SimpleVectors)
- *
+
+//! Object to handle block-vectors (ie list of SiconosVector*)
+/**
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *
  */
-
 class BlockVector : public SiconosVector
 {
 private:
   // A container of pointers on SiconosVector (that are to be SimpleVector : no Block of Block allowed
-  std::vector<SimpleVector*> svref;
-  // tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i].
-  std::vector<unsigned int> tabindex;
-
-  /** vector of double that contains the double values pointer by SimpleVectors in svref - Necessary to have contiguous values in memory (for Fortran routines ...) */
-  std::vector<double> workVector;
+  BlocksVect vect;
 
   /** Flags to check wheter pointers were allocated in class constructors or not */
-  std::deque<bool> isSvrefAllocatedIn;
+  std::deque<bool> isBlockAllocatedIn;
+
+  // tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i].
+  Index tabIndex;
 
 public:
 
-  // CONSTRUCTORS
-  /** \fn BlockVector()
-   *  \brief default contructor
-   */
+  /** default contructor
+  */
   BlockVector();
 
-  /** \fn BlockVector(const std::string, const bool)
-   *  \brief contructor from data by function read call
-   *  \param a string
-   *  \param a bool
-   */
-  BlockVector(const std::string, const bool);
+  /** contructor from data by function read call
+  *  \param a string
+  *  \param a bool
+  */
+  BlockVector(const std::string&, const bool);
 
-  /** \fn BlockVector(const SimpleVector& v)
-   *  \brief contructor with a SimpleVector
-   *  \param SimpleVector& v
-   */
-  BlockVector(const SimpleVector&);
+  /** contructor with a SiconosVector (copy)
+  *  \param SiconosVector& v
+  */
+  BlockVector(const SiconosVector&);
 
-  /** \fn BlockVector(vector<SimpleVector*> v)
-   *  \brief contructor with a list of SimpleVector*
-   *  \param a vector<SimpleVector*>
-   */
-  BlockVector(std::vector<SimpleVector*>);
-
-  /** \fn BlockVector(SimpleVector* v1, SimpleVector* v2)
-   *  \brief contructor with a 2 SimpleVectors
-   *  \param SimpleVector* v1
-   *  \param SimpleVector* v2
-   */
-  BlockVector(SimpleVector*, SimpleVector*);
-
-  /** \fn BlockVector(const BlockVector& v)
-   *  \brief copy contructor
-   *  \param BlockVector& v
-   */
+  /** copy contructor
+  *  \param BlockVector& v
+  */
   BlockVector(const BlockVector&);
 
-  /** \fn BlockVector(unsigned int i, unsigned int j)
-   *  \brief constructor with the number of blocks and their dimension (ie all blocks have the same dim)
-   *  \param unsigned int : number of blocks
-   *  \param unsigned int : dim of each block
-   */
+  /** contructor with a 2 SiconosVectors
+  *  \param SiconosVector* v1
+  *  \param SiconosVector* v2
+  */
+  BlockVector(SiconosVector*, SiconosVector*);
+
+  /** constructor with the number of Blocks and their dimension (ie all Blocks have the same dim)
+  *  \param unsigned int : number of Blocks
+  *  \param unsigned int : dim of each Block
+  */
   BlockVector(unsigned int, unsigned int);
 
-  /** \fn ~SiconosVector ()
-   *  \brief destructor
-   */
+  /** destructor
+  */
   ~BlockVector();
 
-  // GETTERS/SETTERS
-  /** \fn std::vector<SimpleVector*> getSvref() const
-   *  \brief get svref
-   * \return a standard vector of SimpleVector
-   */
-  inline std::vector<SimpleVector*> getSvref() const
-  {
-    return svref;
-  }
-
-  /** \fn SimpleVector* getVectorPtr(const unsigned int) const;
-   *  \brief return i-eme SimpleVector of svref
-   * \return a pointer to a SimpleVector
-   */
-  SimpleVector* getVectorPtr(const unsigned int);
-
-  /** \fn std::vector<unsigned int> getTabIndex() const
-   *  \brief get the index tab
-   * \return a standard vector of int
-   */
-  inline std::vector<unsigned int> getTabIndex() const
-  {
-    return tabindex;
-  }
-
-  /** \fn std::string toString();
-   * \brief put datas of the vector in a std::string
-   * useless for block ?
-   */
-  inline std::string toString() const
-  {
-    return "block!!";
-  }
-
-  /** \fn void display();
-   *  \brief display data on standard output
-   */
-  void display() const  ;
-
-  /** \fn operator (unsigned int index)
-   *  \brief get the element vector[i]
-   *  \param an unsigned integer i
-   *  \exception SiconosVectorException
-   *  \return the element vector[i]
-   */
-  double& operator()(const unsigned int) const ;
-
-  /** \fn void setValue(const unsigned int index, const double d)
-   *  \brief set the value of one element of the vector
-   *  \param double d : the new value
-   *  \param int index : the position of the element which is set
-   */
-  inline void setValue(const unsigned int i, const double d)
-  {
-    (*this)(i) = d;
-  }
-
-  /** \fn double getValue(const unsigned int i)
-   *  \brief get the value of index i element of the vector
-   *  \param unsigned int index : the position of the element
-   */
-  inline const double getValue(const unsigned int index) const
-  {
-    return (*this)(index);
-  }
-
-  /** \fn void setValues(const vector<double> v)
-  *  \brief set the values of the vector to a new set of value
-  *  \param vector<double> v
-  *  \param optional, the index of required vector in svref
+  /** get vect, ie all the vectors of the object
+  * \return a BlocksVect
   */
-  void setValues(const std::vector<double>& v, const unsigned int = 0) ;
+  inline BlocksVect getAllVect() const
+  {
+    return vect;
+  }
 
-  /** \fn const LaVectorDouble getValues() const
-   *  \brief get the values saved in vector (depends on vector type)
-   *  \param optional, the index of required vector in svref
-   *  \return a LaVectorDouble
-   */
-  const LaVectorDouble getValues(const unsigned int = 0) const ;
+  /** get the attribute num of current vector
+  * \return an unsigned int.
+  */
+  unsigned int getNum() const;
 
-  /** \fn unsigned int size(unsigned int  index) const
-   *  \brief if index = 0, get the vector total-size (ie number of elements in vector)
-   *         if index = 1, get the number of element in svref.
-   *  \exception to be defined
-   *  \return int : the vector size
-   */
-  unsigned int size(const unsigned int = 0) const  ;
+  /** get the attribute if it's type is DenseVect
+  *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
+  *  \return a DenseVect
+  */
+  const DenseVect getDense(unsigned int = 0) const;
 
-  /** \fn bool read(const std::string fileName,const std::string mode = ASCII)
-   *  \brief write the vector in a file
-   *  \param std::string fileName : the file to read
-   *  \param std::string mode : ASCII or BINARY
-   *  \exception SiconosMatrixException
-   *  \return true if no error
-   */
-  bool read(const std::string , const std::string = DEFAULT_FORMAT) ;
+  /** get the attribute if it's type is SparseVect
+  *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
+  *  \return a SparseVect
+  */
+  const SparseVect getSparse(unsigned int = 0) const;
 
-  /** \fn bool write(const string fileName,const string mode = ASCII)
-   *  \brief write the vector in a file
-   *  \param string fileName : the file to read
-   *  \param string mode : ASCII or BINARY
-   *  \exception SiconosMatrixException
-   *  \return true if no error
-   */
-  bool write(const std::string , const std::string = DEFAULT_FORMAT) const  ;
+  /** get a pointer on DenseVect
+  *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
+  *  \return a DenseVect*
+  */
+  DenseVect* getDensePtr(unsigned int = 0) const;
 
-  /** \fn double* getArray()
-   *  \brief return the array of double values of the vector
-   *  \exception SiconosVectorException
-   *  \return double* : the pointer on the array
-   */
-  double* getArray() const;
+  /** get a pointer on SparseVect
+  *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
+  *  \return a SparseVect*
+  */
+  SparseVect* getSparsePtr(unsigned int = 0) const;
 
-  /** \fn bool add(const SimpleVector& v)
-   *  \brief add a sub Vector in this vector
-   *  \param SimpleVector& v : the vector to add
-   *  \exception SiconosVectorException
-   */
-  void add(const  SimpleVector&) ;
+  /** return false if one of the block is a null pointer
+  * \return a bool
+  */
+  bool check() const;
 
-  /** \fn bool addPtr(SimpleVector* v)
-   *  \brief add a sub Vector in this vector
-   *  \param SiconosVector*
-   *  \exception SiconosVectorException
-   */
-  void addPtr(SimpleVector*) ;
+  /** return the array of double values of the vector
+  *  \exception SiconosVectorException
+  *  \param unsigned int: vector position (only for block vector)
+  *  \return double* : the pointer on the array
+  */
+  double* getArray(unsigned int = 0) const;
 
-  /** \fn void zero();
-   *  \brief set the values to 0.0
-   */
+  /** get block starting at pos and of size block.size()
+  *  \param an int, position of the first element of the required block
+  *  \param a SiconosVector, in-out parameter.
+  */
+  void getBlock(unsigned int, SiconosVector&) const;
+
+  /** sets all the values of the vector to 0.0
+  *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
+  */
   void zero();
 
-  // generic internal operators
-  BlockVector &operator+=(const SiconosVector &) ;
-  BlockVector &operator-=(const SiconosVector &) ;
-  BlockVector &operator = (const SiconosVector& v) ;
-  // specific internal operators
-  BlockVector &operator+=(const BlockVector &) ;
-  BlockVector &operator-=(const BlockVector &) ;
-  BlockVector &operator*=(const double) ;
-  BlockVector &operator/=(const double) ;
-  BlockVector &operator = (const BlockVector& v) ;
+  /** get the vector size, ie the total number of (double)
+  *  elements in the vector
+  *  \return unsigned int
+  */
+  inline unsigned int size() const
+  {
+    return tabIndex[tabIndex.size() - 1];
+  };
 
-  /** \fn bool operator != (const SiconosVector& v) const;
-   *  \brief compares two vectors (sizes and values).
-   *  \return bool
+  /** get the number of SimpleVector-Blocks
+  *  \return unsigned int
+  */
+  inline unsigned int getNumberOfBlocks() const
+  {
+    return tabIndex.size();
+  };
+
+  /** resize the vector with nbcol columns. The existing elements of the matrix are preseved when specified.
+  *  \exception SiconosVectorException
+  */
+  void resize(unsigned int, bool = true);
+
+  /** compute the infinite norm of the vector
+  *  \return a double
+  */
+  const double normInf() const;
+
+  /** return the Euclidian norm of the vector
+  *  \return a double
+  */
+  const double norm() const ;
+
+  /** display data on standard output
+  */
+  void display(void) const;
+
+  /** return i-eme SiconosVector of vect
+  * \return a SimpleVector
+  */
+  SimpleVector getVector(unsigned int) const;
+
+  /** return i-eme SiconosVector of vect
+  * \return a pointer to a SiconosVector
+  */
+  SiconosVector* getVectorPtr(unsigned int);
+
+  /** set all values of the vector component to value.
+  * \param a double
+  */
+  void fill(double);
+
+  /** get the index tab
+  * \return a standard vector of int
+  */
+  inline Index getTabIndex() const
+  {
+    return tabIndex;
+  }
+
+  /** put data of the vector into a string
+  */
+  std::string toString() const;
+
+  /** get the element at position i (warning: absolute position.)
+  *  \param an unsigned integer i
+  *  \return a reference to a double
+  */
+  double& operator()(unsigned int) ;
+
+  /** get the element at position i (warning: absolute position.)
+  *  \param an unsigned integer i
+  *  \return a double
+  */
+  double operator()(unsigned int) const;
+
+  /** get the vector at position i(ie this for Simple and block i for BlockVector)
+  *  \param an unsigned integer i
+  *  \return a SiconosVector*
+  */
+  SiconosVector* operator [](unsigned int) ;
+
+  /** get the vector at position i(ie this for Simple and block i for BlockVector)
+  *  \param an unsigned integer i
+  *  \return a SiconosVector*
+  */
+  const SiconosVector* operator [](unsigned int) const;
+
+  /** operator =
+   *  \param SiconosVector : the vector to be copied
    */
+  BlockVector& operator =(const SiconosVector&);
 
-  // generic internal operator for mixed operations
-  BlockVector addition(const SiconosVector&) const;
-  BlockVector subtraction(const SiconosVector&) const;
+  /** operator =
+   *  \param SiconosVector : the vector to be copied
+   */
+  BlockVector& operator =(const BlockVector&);
 
+  /** operator =
+   *  \param a DenseVect : the vector to be copied
+   */
+  BlockVector& operator = (const DenseVect&);
 
-  // generic external operators
-  //  friend BlockVector operator + (const BlockVector& v1, /*const*/ SiconosVector& v2);
-  //  friend BlockVector operator - (const BlockVector& v1, const SiconosVector& v2);
+  /** operator =
+   *  \param a DenseVect : the vector to be copied
+   */
+  BlockVector& operator = (const SparseVect&);
 
-  // specific external operators
-  friend BlockVector operator * (const BlockVector&, const double) ;
-  friend BlockVector operator * (const double, const BlockVector&);
-  friend BlockVector operator / (const BlockVector&, const double);
-  friend BlockVector operator + (const BlockVector& v1, const BlockVector& v2);
-  friend BlockVector operator - (const BlockVector& v1, const BlockVector& v2);
-  friend SimpleVector operator * (const SiconosMatrix &m, const BlockVector &v);
+  /** operator +=
+   *  \param SiconosVector : a vector to add
+   */
+  BlockVector& operator +=(const SiconosVector&);
 
-  friend SimpleVector matTransVecMult(SiconosMatrix &, BlockVector &);
+  /** operator -=
+   *  \param SiconosVector : a vector to subtract
+   */
+  BlockVector& operator -=(const SiconosVector&);
 
+  /** operator /=
+   *  \param double, a scalar
+   */
+  BlockVector& operator /=(double);
 
-  //
+  /** operator /=
+   *  \param int, a scalar
+   */
+  BlockVector& operator /=(int);
+
+  /** multiply the current vector with a double
+  *  \param a double
+  *  \exception SiconosVectorException
+  */
+  BlockVector& operator *=(double);
+
+  /** multiply the current vector with an int
+  *  \param an int
+  *  \exception SiconosVectorException
+  */
+  BlockVector& operator *=(int);
+
+  /** add a subvector in this vector: allocation and copy
+  *  \param SiconosVector& v : the vector to add
+  *  \exception SiconosVectorException
+  */
+  void add(const  SiconosVector&) ;
+
+  /** add a pointer to a subvector in this vector: no reallocation nor copy.
+  *  \param a pointer to SiconosVector*
+  *  \exception SiconosVectorException
+  */
+  void addPtr(SiconosVector*) ;
 };
 
 #endif

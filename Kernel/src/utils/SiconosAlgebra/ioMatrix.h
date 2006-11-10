@@ -17,100 +17,76 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-/** \class ioMatrix
- *   \brief This class is an interface for read/write matrices in a file.
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.3.0.
- *   \date (Creation) 07/21/2006
- *
- */
+/*! \file ioMatrix.h
+    \brief
 
+*/
 
 #ifndef __ioMatrix__
 #define __ioMatrix__
 
 #include "ioObject.h"
 
+class SimpleMatrix;
+
+//! Interface for read/write matrices from/to a file.
+/**  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.3.0.
+ *   \date (Creation) 07/21/2006
+ *  Type of Output for write function:
+ *    - "boost": boost way:
+ *                    [row,col] ((a00,a01,...),(a10,...),...
+ *    - "python"(default):
+ *                    a00 a01 a02 ...
+ *                    a10 ...
+ *    - "python2":    row col
+ *                    a00 a01 a02 ...
+ *                    a10 ...
+ *
+ *
+ */
 class ioMatrix : public ioObject
 {
 private :
 
-  /** \fn ioMatrix ()
-   *  \brief default constructor with Mode = "ascii"
-   */
-  ioMatrix(void);
+  /** default constructor with Mode = "ascii"
+  */
+  ioMatrix();
 
 public :
-  /** \var static MySimpleMatrix *temporary
-   *  \brief used for storing matrix written in a file when Mode = "binary"
+  /**static SimpleMatrix *temporary
+   * used for storing matrix written in a file when Mode = "binary"
    */
-  static MySimpleMatrix* temporary;
+  static SimpleMatrix* temporary;
 
-  /** \var static writeSimpleBinary
-   *  \brief true if temporary is allocated, else false.
+  /** static writeSimpleBinary
+   * true if temporary is allocated, else false.
    */
   static bool writeSimpleBinary;
 
-  /** \fn ioMatrix (const std::string& file, const std::string& mode)
-   *  \brief constructor with FileName = file and Mode = mode
+  /** constructor with FileName = file and Mode = mode
    *  \param 2 std::string
    */
   ioMatrix(const std::string&, const std::string&);
 
-  /** \fn ~ioMatrix ()
-   *  \brief destructor
+  /** destructor
    */
   ~ioMatrix(void);
 
-  /** \fn bool read(MySiconosMatrix &A)
-   *  \brief read the matrix in the file "Filename" and write it into matrix A
-   *  \param a MySiconosMatrix
+  /** read the matrix in the file "Filename" and write it into matrix A
+   *  \param a SiconosMatrix
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  bool    read(MySiconosMatrix&)const;
+  const bool read(SiconosMatrix&) const;
 
-  /** \fn bool write(MySiconosMatrix &A)
-   *  \brief write the matrix A in the file "Filename"
-   *  \param a MySiconosMatrix
+  /** write the matrix A in the file "Filename"
+   *  \param a SiconosMatrix
+   *  \param a string: type of output - See on top of file for details
    *  \exception SiconosMatrixException
    *  \return true if no error
    */
-  bool    write(const MySiconosMatrix&);
-
-  /** \fn bool rawWrite(MySiconosMatrix &A)
-   *  \brief write the matrix A in the file "Filename" without its dimensions
-   *  \param a MySiconosMatrix
-   *  \exception SiconosMatrixException
-   *  \return true if no error
-   */
-  bool    rawWrite(const MySiconosMatrix&);
-
-  /** \fn bool read(MySiconosVector &A)
-   *  \brief read the vector in the file "Filename" and write it into vector A, useless for ioMatrix
-   *  \param a MySiconosVector
-   *  \exception SiconosVectorException
-   *  \return true if no error
-   */
-  bool    read(MySiconosVector&)const;
-
-  /** \fn bool write(MySiconosVector &A)
-   *  \brief write the vector A in the file "Filename", useless for ioMatrix
-   *  \param a MySiconosVector
-   *  \exception SiconosVectorException
-   *  \return true if no error
-   */
-  bool    write(const MySiconosVector&);
-
-  /** \fn bool rawWrite(MySiconosVector &A)
-   *  \brief write the vector A in the file "Filename" without its dimensions, useless for ioMatrix
-   *  \param a MySiconosVector
-   *  \exception SiconosVectorException
-   *  \return true if no error
-   */
-  bool    rawWrite(const MySiconosVector&);
-
-
+  const bool write(const SiconosMatrix&, const std::string& = "python") const;
 
 };
 #endif

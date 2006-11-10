@@ -22,6 +22,7 @@
 #include "LagrangianR.h"
 #include "NewtonImpactNSL.h"
 #include "NewtonImpactFrictionNSL.h"
+#include "RuntimeException.h"
 
 using namespace std;
 
@@ -146,20 +147,11 @@ void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Blo
     itDS++;
   }
 
-  // check dimension
+  // check dimension (1)
   if ((*itDS)->getDim() != Block->size(1))
     RuntimeException::selfThrow("UnitaryRelation::getLeftBlockForDS(DS, Block, ...): inconsistent sizes between Block and DS");
 
-  // get block, according to relation type
-  unsigned int l = k + (*itDS)->getDim() - 1;
-  vector<unsigned int> index_list(4);
-  unsigned int nslawsize = getNonSmoothLawSize();
-  index_list[0] = relativePosition;
-  index_list[1] = relativePosition + (nslawsize - 1);
-  index_list[2] = k;
-  index_list[3] = l;
-
-  SiconosMatrix * originalMatrix; // Complete matrix, Relation member.
+  SiconosMatrix * originalMatrix = NULL; // Complete matrix, Relation member.
   string relationType = getRelationType();
   if (relationType == LINEARTIRELATION)
     originalMatrix = (static_cast<LinearTIR*>(mainInteraction->getRelationPtr()))->getCPtr();
@@ -169,7 +161,8 @@ void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Blo
 
   else RuntimeException::selfThrow("UnitaryRelation::getBlockForDS, not yet implemented for relation of type " + relationType);
 
-  originalMatrix->getBlock(index_list, *Block);
+  // get block
+  originalMatrix->getBlock(relativePosition, k, *Block);
 
 }
 
@@ -187,20 +180,11 @@ void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Bl
     itDS++;
   }
 
-  // check dimension
+  // check dimension (1)
   if ((*itDS)->getDim() != Block->size(0))
     RuntimeException::selfThrow("UnitaryRelation::getRightBlockForDS(DS, Block, ...): inconsistent sizes between Block and DS");
 
-  // get block, according to relation type
-  unsigned int l = k + (*itDS)->getDim() - 1;
-  vector<unsigned int> index_list(4);
-  unsigned int nslawsize = getNonSmoothLawSize();
-  index_list[0] = k;
-  index_list[1] = l;
-  index_list[2] = relativePosition;
-  index_list[3] = relativePosition + (nslawsize - 1);
-
-  SiconosMatrix * originalMatrix; // Complete matrix, Relation member.
+  SiconosMatrix * originalMatrix = NULL; // Complete matrix, Relation member.
   string relationType = getRelationType();
   if (relationType == LINEARTIRELATION)
     originalMatrix = (static_cast<LinearTIR*>(mainInteraction->getRelationPtr()))->getBPtr();
@@ -210,7 +194,7 @@ void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Bl
   // For Lagrangian systems, right block = transpose (left block) so we do not need to use the present function.
   else RuntimeException::selfThrow("UnitaryRelation::getBlockForDS, not yet implemented for relation of type " + relationType);
 
-  originalMatrix->getBlock(index_list, *Block);
+  originalMatrix->getBlock(k, relativePosition, *Block);
 }
 
 void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
@@ -222,13 +206,7 @@ void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
     RuntimeException::selfThrow("UnitaryRelation::getDPtr(), not yet implemented for relation of type " + getRelationType());
 
   SiconosMatrix * D = static_cast<LinearTIR*>(mainInteraction->getRelationPtr())->getDPtr();
-  vector<unsigned int> index_list(4);
-  unsigned int nslawsize = getNonSmoothLawSize();
-  index_list[0] = relativePosition;
-  index_list[1] = relativePosition + (nslawsize - 1);
-  index_list[2] = index_list[0];
-  index_list[3] = index_list[1];
-  D->getBlock(index_list, *Block);
+  D->getBlock(relativePosition, relativePosition, *Block);
 }
 
 void UnitaryRelation::computeEquivalentY(const double time, const unsigned int level, const string simulationType, SiconosVector* yOut)

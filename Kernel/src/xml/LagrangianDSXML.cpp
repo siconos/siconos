@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "LagrangianDSXML.h"
+#include "SiconosMemory.h"
+
 using namespace std;
 
 LagrangianDSXML::LagrangianDSXML() :

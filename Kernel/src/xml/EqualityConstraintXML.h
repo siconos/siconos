@@ -16,19 +16,23 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+/*! \file EqualityConstraintXML.h
+
+*/
+
 #ifndef EQUALITYCONSTRAINTXML_H
 #define EQUALITYCONSTRAINTXML_H
 
 #include "SiconosDOMTreeTools.h"
+#include "SimpleMatrix.h"
 
 const std::string EQUALITYCONSTRAINT_G = "G";
 const std::string EQUALITYCONSTRAINT_DSIO_CONCERNED = "DSInputOutput_Concerned";
-
+class SimpleMatrix;
 class EqualityConstraint;
 
-/** \class EqualityConstraintXML
- *  \brief object to manage XML data of an EqualityConstraint
-*  \author SICONOS Development Team - copyright INRIA
+//! XML management for EqualityConstraint
+/**  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date 17/01/2005
  *
@@ -40,8 +44,7 @@ public:
 
   EqualityConstraintXML();
 
-  /** \fn EqualityConstraintXML(xmlNodePtr  , vector<int> )
-  *   \brief Build a EqualityConstraintXML object from a DOM tree describing a EqualityConstraint
+  /** Build a EqualityConstraintXML object from a DOM tree describing a EqualityConstraint
   *   \param xmlNodePtr  : the EqualityConstraint DOM tree
   *   \param vector<int>  : vector of DSXML numbers to verify DS concerned by the EqualityConstraint (identified by number) exists
   */
@@ -49,8 +52,7 @@ public:
   virtual ~EqualityConstraintXML();
 
 
-  /** \fn int getNumber()
-  *   \brief Return the number of the EqualityConstraintXML
+  /** Return the number of the EqualityConstraintXML
   *   \return The integer number of the EqualityConstraintXML
   */
   inline int getNumber()
@@ -59,8 +61,7 @@ public:
   }
 
 
-  /** \fn int getType()
-  *   \brief Return the type of the EqualityConstraintXML
+  /** Return the type of the EqualityConstraintXML
   *   \return The string type of the EqualityConstraintXML
   */
   inline std::string getType()
@@ -69,8 +70,7 @@ public:
     return res;
   }
 
-  /** \fn SimpleMatrix getG()
-  *   \brief Return G matrix of the EqualityConstraintXML
+  /** Return G matrix of the EqualityConstraintXML
   *   \return SimpleMatrix : the G matrix of the EqualityConstraintXML
   */
   inline SimpleMatrix getG()
@@ -78,8 +78,7 @@ public:
     return SiconosDOMTreeTools::getSiconosMatrixValue(this->GNode);
   }
 
-  /** \fn void setG(SiconosMatrix *G)
-  *   \brief allows to save the G matrix of the EqualityConstraintXML
+  /** allows to save the G matrix of the EqualityConstraintXML
   *   \param SiconosMatrix* : the G to save
   */
   inline void setG(SiconosMatrix *G)
@@ -92,8 +91,7 @@ public:
   }
 
 
-  /** \fn vector<int> getDSIOConcerned()
-  *   \brief Return the DSIOs concerned by the EqualityConstraintXML
+  /** Return the DSIOs concerned by the EqualityConstraintXML
   *   \return the integer vector who contains the DSs concerned by the EqualityConstraintXML
   */
   inline std::vector<int> getDSIOConcerned()
@@ -101,14 +99,12 @@ public:
     return this->definedDSIONumbers;
   }
 
-  /** \fn void setDSIOConcerned( vector<int> )
-  *   \brief allows to set the dynamical systems which are interacting together with this EqualityConstraintXML
+  /** allows to set the dynamical systems which are interacting together with this EqualityConstraintXML
   *   \param vector<int> : the dynamical system numbers
   */
   void setDSIOConcerned(std::vector<int>);
 
-  /** \fn void updateEqualityConstraintXML( xmlNodePtr  node, EqualityConstraint* ec );
-  *   \brief makes the operations to create the EqualityConstraint of the Non Smooth Dynamical System
+  /** makes the operations to create the EqualityConstraint of the Non Smooth Dynamical System
   *   \param xmlNodePtr  : the root node of the EqualityConstraintXML
   *   \param EqualityConstraint* : the Relation of this EqualityConstraintXML
   */
@@ -116,11 +112,10 @@ public:
 
 
   ///////////////////////////////
-  /** \fn inline string getComputeInputPlugin()
-    *   \brief Return the computeInput Plugin name of the EqualityConstraintXML
-    *   \return The computeInput Plugin name of the EqualityConstraintXML
-    *  \exception XMLException
-    */
+  /** Return the computeInput Plugin name of the EqualityConstraintXML
+  *   \return The computeInput Plugin name of the EqualityConstraintXML
+  *  \exception XMLException
+  */
   inline std::string getComputeInputPlugin()
   {
     if (!isComputeInputPlugin())
@@ -128,8 +123,7 @@ public:
     return  SiconosDOMTreeTools::getStringAttributeValue(this->computeInputNode, PLUGIN_ATTRIBUTE);
   }
 
-  /** \fn inline string getComputeOutputPlugin()
-  *   \brief Return the computeOutput Plugin name of the EqualityConstraintXML
+  /** Return the computeOutput Plugin name of the EqualityConstraintXML
   *   \return The computeOutput Plugin name of the EqualityConstraintXML
   *  \exception XMLException
   */
@@ -140,8 +134,7 @@ public:
     return  SiconosDOMTreeTools::getStringAttributeValue(this->computeOutputNode, PLUGIN_ATTRIBUTE);
   }
 
-  /** \fn void setComputeInputPlugin(string plugin)
-  *   \brief sets the computeInput Plugin name of the EqualityConstraintXML
+  /** sets the computeInput Plugin name of the EqualityConstraintXML
   *   \param string :  The computeInput Plugin name of the EqualityConstraintXML
   *  \exception XMLException
   */
@@ -155,8 +148,7 @@ public:
     else SiconosDOMTreeTools::setStringAttributeValue(this->computeInputNode, PLUGIN_ATTRIBUTE, plugin);
   }
 
-  /** \fn void setComputeOutputPlugin(string plugin)
-  *   \brief sets the computeOutput Plugin name of the EqualityConstraintXML
+  /** sets the computeOutput Plugin name of the EqualityConstraintXML
   *   \param string :  The computeOutput Plugin name of the EqualityConstraintXML
   *  \exception XMLException
   */
@@ -170,8 +162,7 @@ public:
     else SiconosDOMTreeTools::setStringAttributeValue(this->computeOutputNode, PLUGIN_ATTRIBUTE, plugin);
   }
 
-  /** \fn bool isComputeInputPlugin()
-  *   \brief Return true if computeInput is calculated from a plugin
+  /** Return true if computeInput is calculated from a plugin
   *   \return True if computeInput is calculated from plugin
   */
   inline bool isComputeInputPlugin()
@@ -179,8 +170,7 @@ public:
     return xmlHasProp((xmlNodePtr)computeInputNode, (xmlChar *) PLUGIN_ATTRIBUTE.c_str());
   }
 
-  /** \fn bool isComputeOutputPlugin()
-  *   \brief Return true if computeOutput is calculated from a plugin
+  /** Return true if computeOutput is calculated from a plugin
   *   \return True if computOutput is calculated from plugin
   */
   inline bool isComputeOutputPlugin()
@@ -188,19 +178,17 @@ public:
     return xmlHasProp((xmlNodePtr)computeOutputNode, (xmlChar *) PLUGIN_ATTRIBUTE.c_str());
   }
 
-  /** \fn bool hasComputeInput()
-   *  \brief return true if computeInputNode is defined
-   *  \return true if computeInputNode is defined
-   */
+  /** return true if computeInputNode is defined
+  *  \return true if computeInputNode is defined
+  */
   inline bool hasComputeInput()
   {
     return (this->computeInputNode != NULL);
   }
 
-  /** \fn bool hasComputeOutput()
-   *  \brief return true if computeOutputNode is defined
-   *  \return true if computeOutputNode is defined
-   */
+  /** return true if computeOutputNode is defined
+  *  \return true if computeOutputNode is defined
+  */
   inline bool hasComputeOutput()
   {
     return (this->computeOutputNode != NULL);
@@ -218,8 +206,7 @@ protected :
   std::vector<int> definedDSIONumbers;
 
 private :
-  /** \fn loadECConcernedDSIO(xmlNodePtr  , vector<int>)
-  *   \brief load the DSs concerned by this interaction
+  /** load the DSs concerned by this interaction
   *   \param xmlNodePtr  : the DOM tree node of DSIO concerned by the EqualityConstraint
   // *   \param vector<int> : vector of DSXML numbers to verify DS concerned by the interaction (identified by number) exists
   */

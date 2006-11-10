@@ -16,21 +16,15 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/** \class FrictionContactXML
- *   \brief This class manages Lagrangian FrictionContact data
- *  \author SICONOS Development Team - copyright INRIA
- *   \version 1.3.0.
- *   \date 05/18/2004
- *
- *
- *
- * FrictionContactXML allows to manage data of a FrictionContact DOM tree.
- */
+/*! \file
+*/
 
 #ifndef __FrictionContactXML__
 #define __FrictionContactXML__
 
 #include "OneStepNSProblemXML.h"
+#include "SimpleMatrix.h"
+#include "SimpleVector.h"
 
 class OneStepNSProblem;
 
@@ -38,42 +32,44 @@ const std::string  FrictionContact_M = "M";
 const std::string  FrictionContact_Q = "q";
 
 
+/** XML management for FrictionContact
+ *  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.3.0.
+ *   \date 05/18/2004
+ *
+ */
 class FrictionContactXML : public OneStepNSProblemXML
 {
 public:
   FrictionContactXML();
 
-  /** \fn FrictionContactXML(xmlNode * FrictionContactNode)
-   *   \brief Build a FrictionContactXML object from a DOM tree describing a FrictionContact
-   *   \param FrictionContactNode : the FrictionContact DOM tree
-   *   \exception XMLException : if a property of the FrictionContact lacks in the DOM tree
-   */
+  /** Build a FrictionContactXML object from a DOM tree describing a FrictionContact
+  *   \param FrictionContactNode : the FrictionContact DOM tree
+  *   \exception XMLException : if a property of the FrictionContact lacks in the DOM tree
+  */
   FrictionContactXML(xmlNode * FrictionContactNode);
 
   ~FrictionContactXML();
 
-  /** \fn SimpleMatrix getM()
-   *   \brief Return M
-   *   \return The M SimpleMatrix of the FrictionContact
-   */
+  /** Return M
+  *   \return The M SimpleMatrix of the FrictionContact
+  */
   inline SimpleMatrix getM()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(MNode);
   }
 
-  /** \fn SimpleVector getQ()
-   *   \brief Return vector q
-   *   \return SimpleVector : q vector of the FrictionContact
-   */
+  /** Return vector q
+  *   \return SimpleVector : q vector of the FrictionContact
+  */
   inline SimpleVector getQ()
   {
     return SiconosDOMTreeTools::getSiconosVectorValue(qNode);
   }
 
-  /** \fn void setM(const SiconosMatrix &m)
-   *   \brief save M
-   *   \param The M SiconosMatrix to save
-   */
+  /** save M
+  *   \param The M SiconosMatrix to save
+  */
   inline void setM(const SiconosMatrix &m)
   {
     if (hasM() == false)
@@ -83,10 +79,9 @@ public:
     else SiconosDOMTreeTools::setSiconosMatrixNodeValue(MNode, m);
   }
 
-  /** \fn void setQ(const SiconosVector &q)
-   *   \brief save q
-   *   \param The q SiconosVector to save
-   */
+  /** save q
+  *   \param The q SiconosVector to save
+  */
   inline void setQ(const SiconosVector& q)
   {
     if (hasQ() == false)
@@ -96,29 +91,26 @@ public:
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(qNode, q);
   }
 
-  /** \fn bool hasM()
-   *  \brief returns true if MNode is defined
-   *  \return true if MNode is defined
-   */
+  /** returns true if MNode is defined
+  *  \return true if MNode is defined
+  */
   inline bool hasM()
   {
     return (MNode != NULL);
   }
 
-  /** \fn bool hasQ()
-   *  \brief returns true if qNode is defined
-   *  \return true if qNode is defined
-   */
+  /** returns true if qNode is defined
+  *  \return true if qNode is defined
+  */
   inline bool hasQ()
   {
     return (qNode != NULL);
   }
 
-  /** \fn void updateOneStepNSProblemXML( xmlNode* node, OneStepNSProblemXML* str )
-   *   \brief makes the operations to create a OneStepNSProblemXML to the SimulationXML
-   *   \param xmlNode* : the root node of the OneStepNSProblemXML
-   *   \param OneStepNSProblem* : the OneStepNSProblem of this OneStepNSProblemXML
-   */
+  /** makes the operations to create a OneStepNSProblemXML to the SimulationXML
+  *   \param xmlNode* : the root node of the OneStepNSProblemXML
+  *   \param OneStepNSProblem* : the OneStepNSProblem of this OneStepNSProblemXML
+  */
   void updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb);
 
 
