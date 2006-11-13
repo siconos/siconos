@@ -35,6 +35,7 @@ const bool ioMatrix::read(SiconosMatrix& m) const
   if (m.isBlock())
     SiconosMatrixException::selfThrow("ioMatrix::read not yet implemented for block matrix.");
 
+  infile.precision(15);
   DenseMat * p = m.getDensePtr();
 
   // Dim of the matrix are given in the first line.
@@ -84,6 +85,8 @@ const bool ioMatrix::write(const SiconosMatrix& m, const std::string& outputType
 
   if (m.isBlock())
     SiconosMatrixException::selfThrow("ioMatrix:: write error : not yet implemented for BlockMatrix");
+
+  outfile.precision(15);
 
   // Writing
 

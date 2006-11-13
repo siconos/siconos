@@ -32,8 +32,8 @@ numerics_lib="no"
 dynlib=no;    
 for ac_dir in $list_dir;
 	do  AC_MSG_CHECKING([for libSiconosNumerics.$libsuffix in $ac_dir])
-		   if test -r "$ac_dir/lib/libSiconosNumerics.$libsuffix" && test -r "$ac_dir/include/SiconosNumerics.h" ; then
-       			NUMERICS_INCLUDES="-I$ac_dir/include/"
+		   if test -r "$ac_dir/lib/libSiconosNumerics.$libsuffix" && test -r "$ac_dir/include/Siconos/SiconosNumerics.h" ; then
+       			NUMERICS_INCLUDES="-I$ac_dir/include/Siconos"
        			NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics"
        			NUMERICS_PATH="$ac_dir"
        			numerics_lib="yes"
@@ -51,7 +51,7 @@ if test "$numerics_lib" = "no" ; then
     do  AC_MSG_CHECKING([for libSiconosNumerics.a in $ac_dir])
         if test -r "$ac_dir/lib/libSiconosNumerics.a" ; then
 	    	numerics_lib="yes"
-		NUMERICS_INCLUDES="-I$ac_dir/include/"
+		NUMERICS_INCLUDES="-I$ac_dir/include/Siconos"
        		NUMERICS_LIBRARIES="-L$ac_dir/lib -lSiconosNumerics"
        		NUMERICS_PATH="$ac_dir"	    	   
 	    	AC_MSG_RESULT([yes, library $ac_dir/lib/libNumerics.a selected])

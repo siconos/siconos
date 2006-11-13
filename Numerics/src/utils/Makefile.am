@@ -18,7 +18,9 @@
 #	
 # Makefile.am --- SICONOS - src
 
+include $(top_srcdir)/config/Make-rules
+
 SUBDIRS = 
 EXTRA_DIST = 
 
-include_HEADERS = blaslapack.h f2c.h
+numerics_HEADERS = blaslapack.h f2c.h

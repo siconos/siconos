@@ -29,4 +29,4 @@ noinst_LTLIBRARIES = libodepack.la
 libodepack_la_SOURCES =  opkda1.f opkda2.f opkdmain.f
 libodepack_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
-include_HEADERS = odepack.h
+numerics_HEADERS = odepack.h

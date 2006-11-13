@@ -22,5 +22,5 @@ include $(top_srcdir)/config/Make-rules
 
 EXTRA_DIST = check.h
 
-include_HEADERS = check.h
+siconos_HEADERS = check.h
 

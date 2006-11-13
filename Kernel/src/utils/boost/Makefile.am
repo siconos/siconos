@@ -20,11 +20,10 @@
 
 include $(top_srcdir)/config/Make-rules
 
-atlasdir = $(includedir)/boost/numeric/bindings/atlas
-traitsdir = $(includedir)/boost/numeric/bindings/traits
-detaildir = $(includedir)/boost/numeric/bindings/traits/detail
+atlasdir = $(boostdir)/numeric/bindings/atlas
+traitsdir = $(boostdir)/numeric/bindings/traits
+detaildir = $(boostdir)/numeric/bindings/traits/detail
 
-# noinst_includedir = $includedir
 atlas_HEADERS = numeric/bindings/atlas/cblas1.hpp numeric/bindings/atlas/cblas2_overloads.hpp numeric/bindings/atlas/cblas_enum.hpp numeric/bindings/atlas/clapack.hpp numeric/bindings/atlas/cblas1_overloads.hpp \
 		  numeric/bindings/atlas/cblas3.hpp numeric/bindings/atlas/cblas.hpp numeric/bindings/atlas/clapack_inc.hpp numeric/bindings/atlas/cblas2.hpp numeric/bindings/atlas/cblas3_overloads.hpp \
 		  numeric/bindings/atlas/cblas_inc.hpp numeric/bindings/atlas/clapack_overloads.hpp
@@ -37,3 +36,4 @@ traits_HEADERS = numeric/bindings/traits/algorithm.hpp numeric/bindings/traits/s
 detail_HEADERS = numeric/bindings/traits/detail/array.hpp numeric/bindings/traits/detail/symm_herm_traits.hpp numeric/bindings/traits/detail/ublas_uplo.hpp \
 		 numeric/bindings/traits/detail/array_impl.hpp numeric/bindings/traits/detail/generate_const.hpp \
 		 numeric/bindings/traits/detail/ublas_ordering.hpp numeric/bindings/traits/detail/utils.hpp
+

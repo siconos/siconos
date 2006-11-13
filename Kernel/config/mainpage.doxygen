@@ -1,0 +1,66 @@
+/** \mainpage Siconos Kernel - API Documentation
+
+Homepage: http://siconos.gforge.inria.fr/
+
+Download page: https://gforge.inria.fr/frs/?group_id=9
+
+Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of Non Smooth Dynamical Systems.
+
+\section sect_quick Quick Start
+
+\section sect_plat Platforms
+
+Siconos v1.3.0 has been successfully compiled on the following platforms:
+- Linux/Unix gcc2.95.x, gcc3.x, gcc4.x
+- Mac OS X (note: this platform required to set 
+  FLIBS="-L/sw/lib -lfrtbegin -lg2c -lSystem" before 
+  the ./configure completed successfully.)
+
+If you have compiled Siconos on another platform successfully, then
+the maintainer would be glad to hear about that.
+
+\section sect_req Requirements
+
+- "blas", "lapack" and a Fortran compiler. On most Linuxes these are available
+as pre-compiled binaries under the name "blas" and "lapack". For
+SuSE 10.x, the Fortran compiler is available as package
+"gfortran". For SuSE 9.x, the Fortran compiler is available as
+package "gcc-g77".
+- Numerics 
+- libxml2
+- boost-ublas
+
+\section sect_opt Optional
+
+- cppunit 
+- 
+
+\section sect_compile Compile and Install
+
+\subsection compile_linux Linux/Unix
+
+For compilation, run the following commands:
+
+\verbatim
+ ./autogen.sh
+ ./configure --prefix=/your/install/path
+  make
+  make install
+\endverbatim
+
+Type <tt>./configure --help</tt> to see more information. After
+successful compilation, you can run various test programs by the
+command "make check" (requires cppunit v1.10.2 and option --enable-cppunit for configure). 
+
+\section sect_doc Documentation
+
+The documentation is in the header files. The comments in the
+header files are used by the <tt>doxygen</tt> tool for this
+auto-generated HTML documentation.
+
+\section sect_usage Library Usage
+
+2006-11-10, Franck Pérignon <franck.perignon@inrialpes.fr>
+
+
+*/

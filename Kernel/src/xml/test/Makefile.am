@@ -25,7 +25,7 @@ TESTS = $(check_PROGRAMS)
 test1_SOURCES = BoundaryConditionXMLTest.cpp LagrangianDSXMLTest.cpp OneStepIntegratorXMLTest.cpp SiconosMemoryXMLTest.cpp \
 		DynamicalSystemXMLTest.cpp LinearDSXMLTest.cpp RelayNSLXMLTest.cpp InteractionXMLTest.cpp LinearTIRXMLTest.cpp \
 		SiconosDOMTreeToolsTest.cpp TimeDiscretisationXMLTest.cpp TestMain.cpp
-include_HEADERS = BoundaryConditionXMLTest.h LagrangianDSXMLTest.h OneStepIntegratorXMLTest.h SiconosMemoryXMLTest.h \
+siconos_HEADERS = BoundaryConditionXMLTest.h LagrangianDSXMLTest.h OneStepIntegratorXMLTest.h SiconosMemoryXMLTest.h \
 		DynamicalSystemXMLTest.h LinearDSXMLTest.h RelayNSLXMLTest.h InteractionXMLTest.h LinearTIRXMLTest.h \
 		SiconosDOMTreeToolsTest.h TimeDiscretisationXMLTest.h
 test1_INCLUDES = $(CPPUNIT_CFLAGS)

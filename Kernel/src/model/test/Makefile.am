@@ -24,6 +24,6 @@ TESTS_ENVIRONMENT = LD_LIBRARY_PATH=$(top_srcdir)/src/plugin/:$(top_builddir)/sr
 check_PROGRAMS = test1
 TESTS = $(check_PROGRAMS)
 test1_SOURCES = ModelTest.cpp TestMain.cpp
-include_HEADERS = ModelTest.h 
+siconos_HEADERS = ModelTest.h 
 test1_INCLUDES = $(CPPUNIT_CFLAGS)
 test1_LDFLAGS = $(CPPUNIT_LIBS) $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)

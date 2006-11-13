@@ -43,7 +43,7 @@ libModelingTools_la_SOURCES =  DynamicalSystemsSet.cpp InteractionsSet.cpp Bound
 		PeriodicBC.h Relation.h RelayNSL.h UnitaryRelation.h UnitaryRelationsSet.h 
 libModelingTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
-include_HEADERS = DynamicalSystemsSet.h InteractionsSet.h BoundaryCondition.h ComplementarityConditionNSL.h EqualityConstraint.h \
+siconos_HEADERS = DynamicalSystemsSet.h InteractionsSet.h BoundaryCondition.h ComplementarityConditionNSL.h EqualityConstraint.h \
 		DSInputOutput.h DynamicalSystem.h Interaction.h \
 		Topology.h \
 		LagrangianDSIO.h LagrangianEC.h LagrangianLinearDSIO.h LagrangianLinearEC.h LagrangianLinearR.h \

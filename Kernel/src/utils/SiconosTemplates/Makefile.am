@@ -22,5 +22,5 @@ include $(top_srcdir)/config/Make-rules
 
 EXTRA_DIST = RuntimeCmp.h
 
-include_HEADERS = RuntimeCmp.h
+siconos_HEADERS = RuntimeCmp.h
 

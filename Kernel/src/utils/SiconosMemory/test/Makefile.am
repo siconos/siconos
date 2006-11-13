@@ -23,7 +23,7 @@ include $(top_srcdir)/config/Make-rules
 check_PROGRAMS = test1
 TESTS = $(check_PROGRAMS)
 test1_SOURCES = SiconosMemoryTest.cpp TestMain.cpp
-include_HEADERS = SiconosMemoryTest.h  
+siconos_HEADERS = SiconosMemoryTest.h  
 test1_INCLUDES = $(CPPUNIT_CFLAGS) $(SICONOS_INCLUDES)
 test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
 

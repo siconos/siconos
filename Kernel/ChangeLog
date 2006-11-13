@@ -29,6 +29,13 @@ Notes:
 
 Changes:
 
+2006-10-11 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Remove all lapack++ depencies; replace them by Boost-Ublas 
+	  Thus Vectors and Matrices are now fully based on Boost
+	* Review/update Doxygen doc - Based on v1.5.1.
+	  Model/reference file for doc: Interaction.h
+	* Add boost/bindings in the sources (src/boost)
+	
 2006-10-09 Franck Perignon <franck.perignon@inrialpes.fr>
         * Add cppunit tests for MySimple and MyBlock matrices (boost)
 	

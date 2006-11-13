@@ -88,4 +88,4 @@ libNSSpack_la_SOURCES = NSSpack.h \
 
 libNSSpack_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
-include_HEADERS = NSSpack.h SiconosNumerics_lab.h
+numerics_HEADERS = NSSpack.h SiconosNumerics_lab.h

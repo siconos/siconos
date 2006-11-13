@@ -49,3 +49,6 @@ F77COMPILE = $(F77) $(CFLAGS) $(INCLUDES)
 
 SICONOSNUMERICS_LIBS=-L$(top_srcdir)/src/ -lSiconosNumerics
 
+
+#--- Directory for include files ---
+numericsdir = $(includedir)/Siconos

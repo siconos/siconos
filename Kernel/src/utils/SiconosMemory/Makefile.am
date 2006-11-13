@@ -29,4 +29,4 @@ SUBDIRS = test
 noinst_LTLIBRARIES = libSiconosMemory.la
 libSiconosMemory_la_SOURCES = SiconosMemory.cpp 
 libSiconosMemory_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
-include_HEADERS = SiconosMemory.h
+siconos_HEADERS = SiconosMemory.h

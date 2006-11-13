@@ -52,8 +52,8 @@
 #include "Moreau.h"
 #include "LCP.h"
 #include "ComplementarityConditionNSL.h"
+#include "ioMatrix.h"
 #include <math.h>
-#include <sys/time.h>
 #include <iostream>
 
 using namespace std;
@@ -143,10 +143,9 @@ bool DiodeBridge()
 
     int k = TiDiscRLCD->getK(); // Current step
     int N = TiDiscRLCD->getNSteps(); // Number of time steps
-
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    SimpleMatrix dataPlot(N + 1, 7);
+    SimpleMatrix dataPlot(N, 7);
 
     // For the initial time step:
 
@@ -172,7 +171,7 @@ bool DiodeBridge()
     dataPlot(k, 6) = (InterDiodeBridge->getLambda(0))(2);
 
     // --- Time loop  ---
-    while (k < N)
+    while (k < N - 1)
     {
       StratDiodeBridge->nextStep();
 

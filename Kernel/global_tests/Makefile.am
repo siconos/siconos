@@ -5,7 +5,7 @@ check_PROGRAMS = MainTest
 TESTS = $(check_PROGRAMS)
 MainTest_SOURCES = BouncingBall.cpp DiodeBridge.cpp BallBowl.cpp FunctionTest.cpp GlobalTests.cpp MainTest.cpp \
 		    MainTest.h BallBowl.h FunctionTest.h GlobalTests.h
-include_HEADERS = MainTest.h FunctionTest.h GlobalTests.h
+siconos_HEADERS = MainTest.h FunctionTest.h GlobalTests.h
 MainTest_INCLUDES = $(CPPUNIT_CFLAGS)
 MainTest_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
 

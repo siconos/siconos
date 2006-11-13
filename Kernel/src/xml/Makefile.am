@@ -47,7 +47,7 @@ libSiconosXml_la_SOURCES = SiconosDOMTreeTools.cpp SiconosMemoryXML.cpp SolverXM
 		SiconosModelXML.h 
 
 libSiconosXml_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
-include_HEADERS = XMLTagsName.h SiconosDOMTreeTools.h SiconosMemoryXML.h SolverXML.h BoundaryConditionXML.h NLinearBCXML.h LinearBCXML.h \
+siconos_HEADERS = XMLTagsName.h SiconosDOMTreeTools.h SiconosMemoryXML.h SolverXML.h BoundaryConditionXML.h NLinearBCXML.h LinearBCXML.h \
 		PeriodicBCXML.h DynamicalSystemXML.h LinearDSXML.h \
 		LagrangianDSXML.h LagrangianLinearTIDSXML.h DSInputOutputXML.h LinearDSIOXML.h LagrangianDSIOXML.h \
 		LagrangianLinearDSIOXML.h NonSmoothLawXML.h NewtonImpactNSLXML.h NewtonImpactFrictionNSLXML.h \

@@ -18,6 +18,8 @@
 #	
 # Makefile.am --- SICONOS - src
 
+include $(top_srcdir)/config/Make-rules
+
 SUBDIRS =  odepack NSSpack utils
 EXTRA_DIST = 
 
@@ -25,4 +27,4 @@ lib_LTLIBRARIES = libSiconosNumerics.la
 libSiconosNumerics_la_LDFLAGS=  $(CXX_DYNLIB) -version-info $(SICONOSNUMERICS_SO_CURRENT):$(SICONOSNUMERICS_SO_REVISION):$(SICONOSNUMERICS_SO_AGE)
 libSiconosNumerics_la_SOURCES= dummy.cpp
 libSiconosNumerics_la_LIBADD = $(top_builddir)/src/odepack/libodepack.la $(top_builddir)/src/NSSpack/libNSSpack.la
-include_HEADERS = SiconosNumerics.h
+numerics_HEADERS = SiconosNumerics.h

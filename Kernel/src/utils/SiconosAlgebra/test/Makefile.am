@@ -24,7 +24,7 @@ check_PROGRAMS = test1
 TESTS = $(check_PROGRAMS)
 test1_SOURCES = SimpleVectorTest.cpp BlockVectorTest.cpp SimpleMatrixTest.cpp BlockMatrixTest.cpp TestMain.cpp \
 		SimpleVectorTest.h BlockVectorTest.h SimpleMatrixTest.h BlockMatrixTest.h 
-include_HEADERS =SimpleVectorTest.h BlockVectorTest.h SimpleMatrixTest.h BlockMatrixTest.h  
+siconos_HEADERS =SimpleVectorTest.h BlockVectorTest.h SimpleMatrixTest.h BlockMatrixTest.h  
 test1_INCLUDES = $(CPPUNIT_CFLAGS)
 test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
 

@@ -90,3 +90,11 @@ INCLUDES = $(SICONOS_INCLUDES) $(SICONOS_EXT_INCLUDES)
 CXXCOMPILE = $(CXX) $(CXXFLAGS) $(INCLUDES)
 
 SICONOS_LIBS=-L$(top_srcdir)/src/ -lSiconosKernel
+
+
+#--- Directory for include files ---
+
+siconosdir = $(includedir)/Siconos
+boostdir = $(siconosdir)/boost
+
+

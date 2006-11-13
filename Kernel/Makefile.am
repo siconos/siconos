@@ -25,8 +25,6 @@ ACLOCAL AMFLAGS = -I macros
 SUBDIRS = config src siconos global_tests #src must be compiled before main program
 #EXTRA_DIST = 
 
-includedir = $(includedir)/Siconos-Kernel
-
 doc:
 	$(MKDIR) $(top_srcdir)/doc
 	$(MKDIR) $(top_srcdir)/doc/api
