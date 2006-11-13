@@ -17,6 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "EventsManager.h"
+#include "TimeDiscretisationEvent.h"
+#include "NonSmoothEvent.h"
+#include "RuntimeCmp.h"
 #include <limits> // for ULONG_MAX
 using namespace std;
 
@@ -51,7 +54,7 @@ const bool EventsManager::insertEvent(const string type, const double time)
 
   // scan various possible types for events
   if (type == "TimeDiscretisationEvent")
-    checkSchedule = unProcessedEvents.insert(new TimeDiscrEvent(intTime));
+    checkSchedule = unProcessedEvents.insert(new TimeDiscretisationEvent(intTime));
   else if (type == "NonSmoothEvent")
     checkSchedule = unProcessedEvents.insert(new NonSmoothEvent(intTime));
   else

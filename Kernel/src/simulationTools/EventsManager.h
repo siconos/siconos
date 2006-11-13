@@ -28,15 +28,13 @@
 #include "SiconosConst.h"
 #include "RuntimeException.h"
 #include "Simulation.h"
-#include "TimeDiscrEvent.h"
-#include "NonSmoothEvent.h"
-#include "RuntimeCmp.h"
 #include<set>
 #include<deque>
 #include<string>
 #include<iostream>
 
 class Simulation;
+class Event;
 
 // tick default value
 const double DEFAULT_TICK = 1e-07;

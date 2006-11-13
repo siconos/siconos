@@ -251,74 +251,12 @@ void Model::checkXMLPlatform()
 
 void Model::checkModelCoherency()
 {
-  int number;
-  unsigned int i, j, k, cpt;
-  char num[32];
-  string error;
-
-
   // at first, checking the XML
   // if matrix and vector are well defined by example
   // if DynamicalSystems have BoundaryConditions when the NonSmoothDynamicalSystem is BVP for example
 
   if (modelxml->checkSiconosDOMTreeCoherency() == true) cout << "Data of the XML DOM tree are coherent." << endl;
   else cout << "Warning : Data of the XML DOM tree are not coherent." << endl;
-
-  // we can check here other properties that the platform must have
-  // the number of each EqualityConstraint must be unique
-  for (i = 0; i < nsds->getEqualityConstraints().size(); i++)
-  {
-    for (j = i + 1; j < nsds->getEqualityConstraints().size(); j++)
-    {
-      if (nsds->getEqualityConstraintPtr(i)->getNumber() == nsds->getEqualityConstraintPtr(j)->getNumber())
-      {
-        number = nsds->getEqualityConstraintPtr(j)->getNumber();
-        sprintf(num, "%d", number);
-        error = "/!\\ Error, 2 EqualityConstraints have the same number : ";
-        error += num;
-        error += " \n";
-        RuntimeException::selfThrow(error);
-      }
-    }
-  }
-
-  // the number of each DSInputOutput must be unique
-
-  // we get all the DSInputOutput numbers from all the DynamicalSystems
-  // and we can check if there are redundant numbers
-
-  cpt = 0; // cpt corresponds to the size of 'vec'
-  vector<int> vec;
-  for (i = 0; i < nsds->getDynamicalSystems().size(); i++)
-  {
-    for (j = 0; j < nsds->getDynamicalSystemPtr(i)->getDSInputOutputs().size(); j++)
-    {
-      if (cpt == 0)
-      {
-        vec.push_back(nsds->getDynamicalSystemPtr(i)->getDSInputOutput(0)->getNumber());
-        cpt++;
-      }
-      else
-      {
-        for (k = 0; k < cpt; k++)
-          if (vec[k] != nsds->getDynamicalSystemPtr(i)->getDSInputOutput(j)->getNumber())
-          {
-            vec.push_back(nsds->getDynamicalSystemPtr(i)->getDSInputOutput(j)->getNumber());
-            cpt++;
-            break;
-          }
-          else
-          {
-            number = vec[k];
-            sprintf(num, "%d", number);
-            error = "/!\\ Error, 2 DSInputOutputs have the same number : ";
-            error += num;
-            error += " \n";
-            RuntimeException::selfThrow(error);
-          }
-      }
-    }
-  }
 }
 
 int Model::xmlSchemaValidated(string xmlFile, string xmlSchema)

@@ -307,7 +307,6 @@ AC_CONFIG_FILES([Makefile
                  src/utils/contract/Makefile
 		 src/utils/SiconosTemplates/Makefile
                  src/utils/boost/Makefile
-                 src/utils/Stopwatch/Makefile
 		 src/xml/Makefile
                  src/xml/test/Makefile
 		 global_tests/Makefile])

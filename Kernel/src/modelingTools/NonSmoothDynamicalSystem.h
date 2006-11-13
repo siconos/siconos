@@ -25,7 +25,6 @@
 
 #include "DynamicalSystem.h"
 #include "Interaction.h"
-#include "EqualityConstraint.h"
 #include "Topology.h"
 #include "NonSmoothDynamicalSystemXML.h"
 #include "DynamicalSystemsSet.h"
@@ -41,7 +40,6 @@ enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
 
 class Interaction;
 class DynamicalSystem;
-class EqualityConstraint;
 class Topology;
 class NonSmoothDynamicalSystemXML;
 
@@ -69,9 +67,6 @@ private:
 
   /** inside-class allocation flags*/
   std::map<Interaction*, bool> isInteractionAllocatedIn;
-
-  /** contains the EqualityConstraints */
-  std::vector<EqualityConstraint*> ecVector;
 
   /** the topology of the system */
   Topology * topology;
@@ -246,30 +241,9 @@ public:
   */
   const bool hasInteraction(Interaction*) const;
 
-  // === Equality constraints management ===
-
-  /** get the vector of algebraic constraints
-  *  \return vector of EqualityConstraint
-  */
-  inline const std::vector<EqualityConstraint*> getEqualityConstraints(void) const
-  {
-    return ecVector;
-  }
-
-  /** get algebraic constraint at position N in vectorEc
-  *  \param int : the position of the ec to get
-  *  \return a pointer on EC
-  */
-  EqualityConstraint* getEqualityConstraintPtr(const int&) const;
-
-  /** set the vector of algebraic constraints
-  *  \param vector<EqualityConstraint*> : new value for the vector
-  */
-  void setEqualityConstraints(const std::vector<EqualityConstraint*>& newEcVect) ;
-
   /** get the topology of the system
-  *  \return a pointer on Topology
-  */
+   *  \return a pointer on Topology
+   */
   inline Topology* getTopologyPtr() const
   {
     return topology;
@@ -312,14 +286,9 @@ public:
   */
   void addInteractionPtr(Interaction*);
 
-  /** add an EqualityConstraint to the NonSmoothDynamicalSystem
-  *  \param EqualityConstraint* : the EqualityConstraint to add
-  */
-  void addEqualityConstraint(EqualityConstraint*);
-
   /** calculate an indicator that gives convergence information for the DSs
-  *  \return a double
-  */
+   *  \return a double
+   */
   double nsdsConvergenceIndicator() ;
 };
 

@@ -18,89 +18,7 @@
  */
 #include "DynamicalSystem.h"
 
-// includes to be deleted thanks to factories
-#include "LinearBC.h"
-#include "NLinearBC.h"
-#include "PeriodicBC.h"
-#include "LinearDSIO.h"
-#include "LagrangianDSIO.h"
-#include "LagrangianLinearDSIO.h"
-
 using namespace std;
-
-// Boundary conditions built-in (called from constructors)
-void DynamicalSystem::fillBoundaryConditionsFromXml()
-{
-  if (dsxml->getBoundaryConditionXML() != 0)
-  {
-    if (dsxml->getBoundaryConditionXML()->getType() == LINEARBC_TAG)
-    {
-      //  Linear BC
-      BC = new LinearBC();
-      static_cast<LinearBC*>(BC)->createBoundaryCondition(dsxml->getBoundaryConditionXML());
-      isAllocatedIn["BoundaryConditions"] = true;
-    }
-    else if (dsxml->getBoundaryConditionXML()->getType() == NON_LINEARBC_TAG)
-    {
-      // Non linear BC
-      BC = new NLinearBC();
-      static_cast<NLinearBC*>(BC)->createBoundaryCondition(dsxml->getBoundaryConditionXML());
-      isAllocatedIn["BoundaryConditions"] = true;
-    }
-
-    else if (dsxml->getBoundaryConditionXML()->getType() == PERIODICBC_TAG)
-    {
-      // Periodic BC
-      BC = new PeriodicBC();
-      static_cast<PeriodicBC*>(BC)->createBoundaryCondition(dsxml->getBoundaryConditionXML());
-      isAllocatedIn["BoundaryConditions"] = true;
-    }
-    else RuntimeException::selfThrow("DynamicalSystem::linkDynamicalSystemXML - bad kind of BoundaryCondition : " + dsxml->getBoundaryConditionXML()->getType());
-  }
-}
-
-// DSIO built-in (called from constructors)
-void DynamicalSystem::fillDsioFromXml()
-{
-  DSInputOutput *dsio = NULL;
-  // get the numbers of DSIO
-  std::vector<int> nbDSIOtab = dsxml->getDSInputOutputNumbers();
-  unsigned int sizeTab = nbDSIOtab.size();
-  dsioVector.resize(sizeTab, NULL);
-  isDsioAllocatedIn.resize(sizeTab, false);
-  for (unsigned int i = 0; i < sizeTab; i++)
-  {
-    if (dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LINEAR_DSIO_TAG)
-    {
-      // Linear DSIO
-      dsioVector[i] = new LinearDSIO();
-      isDsioAllocatedIn[i] = true;
-      static_cast<LinearDSIO*>(dsio)->createDSInputOutput(dsxml->getDSInputOutputXML(nbDSIOtab[i]));
-    }
-    else if (dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == NON_LINEAR_DSIO_TAG)
-    {
-      // Non linear DSIO
-      dsioVector[i] = new DSInputOutput();
-      isDsioAllocatedIn[i] = true;
-      static_cast<DSInputOutput*>(dsio)->createDSInputOutput(dsxml->getDSInputOutputXML(nbDSIOtab[i]));
-    }
-    else if (dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LAGRANGIAN_DSIO_TAG)
-    {
-      // Lagrangian DSIO
-      dsioVector[i] =  new LagrangianDSIO();
-      isDsioAllocatedIn[i] = true;
-      static_cast<LagrangianDSIO*>(dsio)->createDSInputOutput(dsxml->getDSInputOutputXML(nbDSIOtab[i]));
-    }
-    else if (dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType() == LAGRANGIAN_LINEAR_DSIO_TAG)
-    {
-      // Linear lagrangian DSIO
-      dsioVector[i] =  new LagrangianDSIO();
-      isDsioAllocatedIn[i] = true;
-      static_cast<LagrangianLinearDSIO*>(dsio)->createDSInputOutput(dsxml->getDSInputOutputXML(nbDSIOtab[i]));
-    }
-    else RuntimeException::selfThrow("DynamicalSystem::linkDynamicalSystemXML - bad kind of DSInputOutput: " + dsxml->getDSInputOutputXML(nbDSIOtab[i])->getType());
-  }
-}
 
 void DynamicalSystem::initAllocationFlags(const bool in) // default in = true.
 {
@@ -160,7 +78,7 @@ void DynamicalSystem::initParameter(const std::string id)
 DynamicalSystem::DynamicalSystem():
   DSType(NLDS), nsds(NULL), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL),
   rhs(NULL), jacobianXRhs(NULL), xFree(NULL), r(NULL), rMemory(NULL), f(NULL), jacobianXF(NULL),
-  uSize(0), u(NULL), T(NULL), stepsInMemory(1), BC(NULL), dsxml(NULL),
+  uSize(0), u(NULL), T(NULL), stepsInMemory(1), dsxml(NULL),
   computeFFunctionName("none"), computeJacobianXFFunctionName("none"), computeUFunctionName("none"),
   computeTFunctionName("none"), computeFPtr(NULL), computeJacobianXFPtr(NULL),
   computeUPtr(NULL), computeTPtr(NULL)
@@ -173,7 +91,7 @@ DynamicalSystem::DynamicalSystem():
 DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
   DSType(NLDS), nsds(newNsds), number(0), id("none"), n(0), x0(NULL), x(NULL), xMemory(NULL),
   rhs(NULL), jacobianXRhs(NULL), xFree(NULL), r(NULL), rMemory(NULL), f(NULL), jacobianXF(NULL),
-  uSize(0), u(NULL), T(NULL), stepsInMemory(1), BC(NULL), dsxml(dsXML),
+  uSize(0), u(NULL), T(NULL), stepsInMemory(1), dsxml(dsXML),
   computeFFunctionName("none"), computeJacobianXFFunctionName("none"), computeUFunctionName("none"),
   computeTFunctionName("none"), computeFPtr(NULL), computeJacobianXFPtr(NULL),
   computeUPtr(NULL), computeTPtr(NULL)
@@ -330,12 +248,6 @@ DynamicalSystem::DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalS
         *T = dsxml->getTMatrix();
       }
     }
-
-    // --- Boundary conditions ---
-    fillBoundaryConditionsFromXml();
-
-    // --- DS input-output ---
-    fillDsioFromXml();
   }
   else
     RuntimeException::selfThrow("DynamicalSystem::DynamicalSystem - DynamicalSystemXML paramater must not be NULL");
@@ -349,7 +261,7 @@ DynamicalSystem::DynamicalSystem(const int newNumber, const unsigned int newN, c
                                  const string fPlugin, const string jacobianXFPlugin):
   DSType(NLDS), nsds(NULL), number(newNumber), id("none"), n(newN), x0(NULL), x(NULL), xMemory(NULL),
   rhs(NULL), jacobianXRhs(NULL), xFree(NULL), r(NULL), rMemory(NULL), f(NULL), jacobianXF(NULL), uSize(0), u(NULL),
-  T(NULL), stepsInMemory(1), BC(NULL), dsxml(NULL),
+  T(NULL), stepsInMemory(1), dsxml(NULL),
   computeFFunctionName("none"), computeJacobianXFFunctionName("none"), computeUFunctionName("none"),
   computeTFunctionName("none"), computeFPtr(NULL), computeJacobianXFPtr(NULL),
   computeUPtr(NULL), computeTPtr(NULL)
@@ -389,7 +301,7 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
   DSType(NLDS), nsds(newDS.getNonSmoothDynamicalSystemPtr()), number(-2), id("copy"), n(newDS.getN()),
   x0(NULL), x(NULL), xMemory(NULL), rhs(NULL), jacobianXRhs(NULL),
   xFree(NULL), r(NULL), rMemory(NULL), f(NULL), jacobianXF(NULL), uSize(newDS.getUSize()), u(NULL), T(NULL),
-  stepsInMemory(newDS.getStepsInMemory()), BC(NULL), dsxml(NULL),
+  stepsInMemory(newDS.getStepsInMemory()), dsxml(NULL),
   computeFFunctionName(newDS.getComputeFFunctionName()), computeJacobianXFFunctionName(newDS. getComputeJacobianXFFunctionName()),
   computeUFunctionName(newDS.getComputeUFunctionName()), computeTFunctionName(newDS.getComputeTFunctionName()),
   computeFPtr(NULL), computeJacobianXFPtr(NULL),
@@ -491,8 +403,6 @@ DynamicalSystem::DynamicalSystem(const DynamicalSystem& newDS):
     setComputeTFunction(pluginPath, functionName);
   }
 
-  // \todo: manage copy of dsio and boundary conditions when these classes will be well implemented.
-
   // xml link is not copied.
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
@@ -533,14 +443,6 @@ DynamicalSystem::~DynamicalSystem()
     if (isAllocatedIn[alloc]) delete it->second;
   }
   parametersList.clear();
-
-  for (unsigned int i = 0; i < dsioVector.size(); i++)
-  {
-    if (isDsioAllocatedIn[i]) delete dsioVector[i];
-    dsioVector[i] = NULL;
-  }
-  if (isAllocatedIn["BoundaryConditions"]) delete BC;
-  BC = NULL;
 }
 
 bool DynamicalSystem::checkDynamicalSystem()
@@ -945,20 +847,6 @@ void DynamicalSystem::setTPtr(SiconosMatrix *newPtr)
   isPlugin["T"] = false;
 }
 
-void DynamicalSystem::setBoundaryConditionPtr(BoundaryCondition *newBC)
-{
-  if (isAllocatedIn["BoundaryConditions"]) delete BC;
-  BC = newBC;
-  isAllocatedIn["BoundaryConditions"] = false;
-}
-
-DSInputOutput* DynamicalSystem::getDSInputOutput(const unsigned int i)
-{
-  if (i >= dsioVector.size())
-    RuntimeException::selfThrow("DS - getDSInputOutput : \'i\' is out of range");
-  return dsioVector[i];
-}
-
 void DynamicalSystem::initialize(const string& simulationType, double time, unsigned int sizeOfMemory)
 {
   initFreeVectors(simulationType);
@@ -1263,52 +1151,6 @@ void DynamicalSystem::saveDSToXML()
 // Save data common to each system into the xml file
 void DynamicalSystem::saveDSDataToXML()
 {
-  //--- Boundary conditions ---
-  saveBCToXML();
-  // --- DS input-output ---
-  saveDSIOToXML();
-  if (dsxml != NULL)
-  {
-    dsxml->setId(id);
-    dsxml->setX0(*x0);
-    dsxml->setX(*x);
-    dsxml->setXMemory(*xMemory);
-    dsxml->setStepsInMemory(stepsInMemory);
-  }
-  else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - The DynamicalSystemXML object doesn't exists");
-}
-
-// Save boundary conditions to xml file
-void DynamicalSystem::saveBCToXML()
-{
-  if (BC != NULL)
-  {
-    if (BC->getType() == LINEARBC)
-      (static_cast<LinearBC*>(BC))->saveBCToXML();
-    else if (BC->getType() == NLINEARBC)
-      (static_cast<NLinearBC*>(BC))->saveBCToXML();
-    else if (BC->getType() == PERIODICBC)
-      (static_cast<PeriodicBC*>(BC))->saveBCToXML();
-    else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - bad kind of BoundaryCondition");
-  }
-}
-
-// Save DS Input-Output to xml file
-void DynamicalSystem::saveDSIOToXML()
-{
-  if (dsioVector.size() != 0)
-  {
-    for (unsigned int i = 0; i < dsioVector.size(); i++)
-    {
-      if (dsioVector[i]->getType() == LINEARDSIO)
-        (static_cast<LinearDSIO*>(dsioVector[i]))->saveDSInputOutputToXML();
-      else if (dsioVector[i]->getType() == NLINEARDSIO)
-        (static_cast<DSInputOutput*>(dsioVector[i]))->saveDSInputOutputToXML();
-      else if (dsioVector[i]->getType() == LAGRANGIANDSIO)
-        (static_cast<LagrangianDSIO*>(dsioVector[i]))->saveDSInputOutputToXML();
-      else RuntimeException::selfThrow("DynamicalSystem::saveDSToXML - bad kind of DSInputOuput");
-    }
-  }
 }
 
 // ===== MISCELLANEOUS ====

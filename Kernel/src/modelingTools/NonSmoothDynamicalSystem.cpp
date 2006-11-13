@@ -23,10 +23,6 @@
 #include "LagrangianLinearTIDS.h"
 #include "LinearDS.h"
 #include "LinearTIDS.h"
-#include "LinearEC.h"
-#include "LinearTIEC.h"
-#include "LagrangianEC.h"
-#include "LagrangianLinearEC.h"
 
 using namespace std;
 
@@ -89,52 +85,6 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* 
   // === Builds topology ===
   topology = new Topology(this);
   isTopologyAllocatedIn = true;
-
-  // Algebraic constraints fill-in
-  // get all the EqualityConstraintXML objects then create the EqualityConstraint for this EqualityConstraintXML
-  // \todo: uncomment this part when EC will be well-implemented
-  /*      vector<int> nbECtab = nsdsxml->getEqualityConstraintNumbers();
-    for( i=0; i<nbECtab.size(); i++ )
-    {
-    EqualityConstraint *ec;
-    if((nsdsxml->getEqualityConstraintXML( nbECtab[i]) )->getType() == LINEAR_EC_TAG )
-    {
-    ec = new LinearEC();
-    ecVector.push_back( ec );
-    isEcVectorAllocatedIn.push_back(true);
-    (static_cast<LinearEC*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
-    }
-    else if((nsdsxml->getEqualityConstraintXML( nbECtab[i]) )->getType() == NON_LINEAR_EC_TAG )
-    {
-    ec = new EqualityConstraint();
-    ecVector.push_back( ec );
-    isEcVectorAllocatedIn.push_back(true);
-    (static_cast<EqualityConstraint*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
-    }
-    else if((nsdsxml->getEqualityConstraintXML( nbECtab[i]) )->getType() == LINEAR_TIME_INVARIANT_EC_TAG )
-    {
-    ec = new LinearTIEC();
-    ecVector.push_back( ec );
-    isEcVectorAllocatedIn.push_back(true);
-    (static_cast<LinearTIEC*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
-    }
-    else if((nsdsxml->getEqualityConstraintXML( nbECtab[i]) )->getType() == LAGRANGIAN_EC_TAG )
-    {
-    ec = new LagrangianEC();
-    ecVector.push_back( ec );
-    isEcVectorAllocatedIn.push_back(true);
-    (static_cast<LagrangianEC*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
-    }
-    else if((nsdsxml->getEqualityConstraintXML( nbECtab[i]) )->getType() == LAGRANGIAN_LINEAR_EC_TAG )
-    {
-    ec = new LagrangianLinearEC();
-    ecVector.push_back( ec );
-    isEcVectorAllocatedIn.push_back(true);
-    (static_cast<LagrangianLinearEC*>(ec))->createEqualityConstraint( nsdsxml->getEqualityConstraintXML( nbECtab[i]) );
-    }
-    else RuntimeException::selfThrow("NonSmoothDynamicalSystem:: xml constructor, wrong kind of algebraic constraints");
-    }
-  */
 }
 
 // copy constructor
@@ -164,33 +114,6 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSyste
 
   topology = new Topology(this); // \todo use a copy constructor for topology?
   isTopologyAllocatedIn = true;
-
-  /*  \todo: add this part when EC will be well-implemented
-      ecVector.resize(nsds.getEqualityConstraints.size(), NULL);
-      isEcVectorAllocatedIn.resize(ecVector.size(), false);
-      equalityConstraint * ecTmp;
-      for(i=0; i< ecVector.size();i++)
-      {
-      ecTmp = nsds.getEqualityConstraintPtr(i);
-      if(ecTmp != NULL)
-      {
-      string typeEc = ecTmp->getType() ;
-      if( typeEc == LINEAREC )
-      ecVector[i] = new LinearEC( *ecTmp) ;
-      else if( typeEc == LINEARTIEC )
-      ecVector[i] = new LinearTIEC( *ecTmp) ;
-      else if( typeEc == NLINEAREC )
-      ecVector[i] = new NonLinearEC( *ecTmp) ;
-      else if( typeEc == LAGRANGIANEC )
-      ecVector[i] = new LagrangianEC( *ecTmp) ;
-      else if( typeEc == LAGRANGIANLINEAREC )
-      ecVector[i] = new LagrangianLinearEC( *ecTmp) ;
-      else
-      RuntimeException::selfThrow("NonSmoothDynamicalSystem::copy constructor, unknown Equality constraint type:"+typeEc);
-      isEcVectorAllocatedIn[i] = true;
-      }
-      }
-  */
 
   // Warning: xml link is not copied.
 }
@@ -292,16 +215,6 @@ NonSmoothDynamicalSystem::~NonSmoothDynamicalSystem()
 
   allInteractions.clear();
   isInteractionAllocatedIn.clear();
-
-  if (ecVector.size() > 0)
-  {
-    for (unsigned int i = 0; i < ecVector.size(); i++)
-    {
-      if (isEcVectorAllocatedIn[i]) delete ecVector[i];
-      ecVector[i] = NULL;
-    }
-  }
-  ecVector.clear();
 
   if (isTopologyAllocatedIn)
   {
@@ -416,34 +329,10 @@ const bool NonSmoothDynamicalSystem::hasInteraction(Interaction* inter) const
   return allInteractions.isInteractionIn(inter);
 }
 
-// === EqualityConstraints management ===
-
-EqualityConstraint* NonSmoothDynamicalSystem::getEqualityConstraintPtr(const int& i) const
-{
-  if ((unsigned int)i >= ecVector.size())
-    RuntimeException::selfThrow("NonSmoothDynamicalSystem - getEqualityConstraint : \'i\' is out of range");
-  return ecVector[i];
-}
-
-void NonSmoothDynamicalSystem::setEqualityConstraints(const std::vector<EqualityConstraint*>& newVect)
-{
-  for (unsigned int i = 0; i < ecVector.size(); i++)
-  {
-    if (isEcVectorAllocatedIn[i]) delete ecVector[i];
-  }
-  ecVector = newVect;
-  isEcVectorAllocatedIn.clear();
-  isEcVectorAllocatedIn.resize(newVect.size(), false);
-}
-
-// === Xml management functions ===
-
 void NonSmoothDynamicalSystem::saveNSDSToXML()
 {
   if (nsdsxml != NULL)
   {
-    int size, i;
-
     nsdsxml->setBVP(BVP);// no need to change the value of BVP, it mustn't change anyway
 
     DSIterator it;
@@ -460,22 +349,6 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
       else if ((*it)->getType() == NLDS)
         (*it)->saveDSToXML();
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of DynamicalSystem");
-    }
-
-    size = ecVector.size();
-    for (i = 0; i < size; i++)
-    {
-      if (ecVector[i]->getType() == LINEAREC)
-        (static_cast<LinearEC*>(ecVector[i]))->saveEqualityConstraintToXML();
-      else if (ecVector[i]->getType() == LINEARTIEC)
-        (static_cast<LinearTIEC*>(ecVector[i]))->saveEqualityConstraintToXML();
-      else if (ecVector[i]->getType() == NLINEAREC)
-        ecVector[i]->saveEqualityConstraintToXML();
-      else if (ecVector[i]->getType() == LAGRANGIANEC)
-        (static_cast<LagrangianEC*>(ecVector[i]))->saveEqualityConstraintToXML();
-      else if (ecVector[i]->getType() == LAGRANGIANLINEAREC)
-        (static_cast<LagrangianLinearEC*>(ecVector[i]))->saveEqualityConstraintToXML();
-      else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of EqualityConstraint");
     }
 
     InteractionsIterator it2;
@@ -509,12 +382,6 @@ void NonSmoothDynamicalSystem::addInteractionPtr(Interaction *inter)
   isInteractionAllocatedIn[inter] = false;
   // the topology should be updated
   topology->setUpToDate(false);
-}
-
-void NonSmoothDynamicalSystem::addEqualityConstraint(EqualityConstraint* ec)
-{
-  ecVector.push_back(ec);
-  isEcVectorAllocatedIn.push_back(true);
 }
 
 double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()

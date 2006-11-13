@@ -24,15 +24,6 @@
 #include "LagrangianDSXML.h"
 #include "LagrangianLinearTIDSXML.h"
 #include "LinearDSXML.h"
-// EC
-#include "LinearECXML.h"
-#include "LinearTIECXML.h"
-#include "LagrangianECXML.h"
-#include "LagrangianLinearECXML.h"
-// DSIO
-#include "LinearDSIOXML.h"
-#include "LagrangianDSIOXML.h"
-#include "LagrangianLinearDSIOXML.h"
 
 using namespace std;
 
@@ -48,10 +39,6 @@ NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNodePtr  rootNSDSNod
 
     if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LMGC90_NSDS_TAG)) == NULL)
     {
-      // at first, we load the DSInputOutputs because we need them to load properly the DynamicalSystemXML
-      if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DSINPUTOUTPUT_DEFINITION_TAG)) != NULL)
-        loadDSInputOutputXML(node);
-
       if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DYNAMICAL_SYSTEM_DEFINITION_TAG)) != NULL)
         loadDynamicalSystemXML(node);
       else
@@ -68,10 +55,6 @@ NonSmoothDynamicalSystemXML::NonSmoothDynamicalSystemXML(xmlNodePtr  rootNSDSNod
           interNode = SiconosDOMTreeTools::findFollowNode(interNode, INTERACTION_TAG);
         }
       }
-
-      // Uncomment the following lines when Equality Constraints will be well-implemented.
-      //if ((node=SiconosDOMTreeTools::findNodeChild(rootNode, EQUALITYCONSTRAINT_DEFINITION_TAG)) !=NULL)
-      // loadEqualityConstraintXML(node);
     }
     else cout << "NonSmoothDynamicalSystemXML -Constructor: the Non Smooth Dynamical System is not defined -> the LMGC90 tag is used." << endl;
   }
@@ -125,19 +108,6 @@ void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNodePtr  rootDSNode)
 
 // WARNING : FOLLOWING FUNCTIONS ARE OBSOLETE, USELESS OR AT LEAST TO BE REVIEWED WHEN DSIO AND EQUALITY CONSTRAINTS
 // WILL BE WELL IMPLEMENTED IN MODELING PACKAGE
-
-EqualityConstraintXML* NonSmoothDynamicalSystemXML::getEqualityConstraintXML(int number)
-{
-  map<int, EqualityConstraintXML*>::iterator it;
-
-  it = equalityConstraintXMLMap.find(number);
-  if (it == equalityConstraintXMLMap.end())
-  {
-    cout << "NonSmoothDynamicalSystemXML::getEqualityConstraintXML - Error : the EqualityConstraintXML number " << number << " does not exist!" << endl;
-    return NULL;
-  }
-  return equalityConstraintXMLMap[number];
-}
 
 void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(NonSmoothDynamicalSystem* nsds)
 {
@@ -419,111 +389,6 @@ void NonSmoothDynamicalSystemXML::loadNonSmoothDynamicalSystem(NonSmoothDynamica
   //  }
   //     }
   //   else XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadNonSmoothDynamicalSystem( NonSmoothDynamicalSystem* nsds ) Error : no rootNode is defined.");
-}
-
-
-map<int, DSInputOutputXML*> NonSmoothDynamicalSystemXML::getDSInputOutputXMLRelatingToDS(int number)
-{
-  map<int, DSInputOutputXML*> m;
-  vector<int> v;
-
-  map<int, DSInputOutputXML*>::iterator iter;
-  for (iter = dsInputOutputXMLMap.begin(); iter != dsInputOutputXMLMap.end(); iter++)
-  {
-    v = (*iter).second->getDSConcerned();
-    for (unsigned int i = 0; i < v.size(); i++)
-    {
-      if (v[i] == number)
-        m[(*iter).first] = (*iter).second;
-    }
-  }
-
-  return m;
-}
-
-void NonSmoothDynamicalSystemXML::loadEqualityConstraintXML(xmlNodePtr  rootECNode)
-{
-  //   xmlNodePtr node;
-  //   int number; //Number of an EqualityCopnstraint
-  //   map<int, EqualityConstraintXML*>::iterator i;
-
-  //   node = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr )rootECNode);
-
-  //   while(node!=NULL)
-  //     {
-  //       EqualityConstraintXML *ecxml;
-
-  //       number = SiconosDOMTreeTools::getAttributeValue<int>(node, NUMBER_ATTRIBUTE);
-
-  //       i = equalityConstraintXMLMap.find(number);
-  //       if (i == equalityConstraintXMLMap.end())
-  //  {
-  //    definedEqualityConstraintNumbers.push_back(number);
-  //    ecxml = new EqualityConstraintXML((xmlNodePtr )node, definedDSNumbers);
-  //    equalityConstraintXMLMap[number] = ecxml;
-  //  }
-  //       else
-  //  {
-  //    XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadEqualityConstraintXML error : wrong EQUALITYCONSTRAINT number : already exists.");
-  //  }
-
-  //       node = SiconosDOMTreeTools::findFollowNode(node);
-  //     }
-}
-
-void NonSmoothDynamicalSystemXML::loadDSInputOutputXML(xmlNodePtr  rootdsioNode)
-{
-  xmlNodePtr node;
-  int number;
-  string type;
-  map<int, DSInputOutputXML*>::iterator i;
-  DSInputOutputXML *dsioxml;
-
-  node = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)rootdsioNode);
-
-
-  while (node != NULL)
-  {
-    number = SiconosDOMTreeTools::getAttributeValue<int>(node, NUMBER_ATTRIBUTE);
-    type = (char*)node->name;
-
-    i = dsInputOutputXMLMap.find(number);
-    if (i == dsInputOutputXMLMap.end())
-    {
-      if (type == LINEAR_DSIO_TAG)
-      {
-        definedDSInputOutputNumbers.push_back(number);
-        dsioxml = new LinearDSIOXML((xmlNodePtr)node/*, definedDSNumbers*/);
-        dsInputOutputXMLMap[number] = dsioxml;
-      }
-      else if (type == NON_LINEAR_DSIO_TAG)
-      {
-        definedDSInputOutputNumbers.push_back(number);
-        dsioxml = new DSInputOutputXML((xmlNodePtr)node/*, definedDSNumbers*/);
-        dsInputOutputXMLMap[number] = dsioxml;
-      }
-      else if (type == LAGRANGIAN_DSIO_TAG)
-      {
-        definedDSInputOutputNumbers.push_back(number);
-        dsioxml = new LagrangianDSIOXML((xmlNodePtr)node/*, definedDSNumbers*/);
-        dsInputOutputXMLMap[number] = dsioxml;
-      }
-      else if (type == LAGRANGIAN_LINEAR_DSIO_TAG)
-      {
-        definedDSInputOutputNumbers.push_back(number);
-        dsioxml = new LagrangianLinearDSIOXML((xmlNodePtr)node/*, definedDSNumbers*/);
-        dsInputOutputXMLMap[number] = dsioxml;
-      }
-      else
-        XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDSInputOutputXML error : wrong DSInputOutput number : already exists.");
-    }
-    else
-    {
-      XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDSInputOutputXML error : wrong DSINPUTOUTPUT number : already exists.");
-    }
-
-    node = SiconosDOMTreeTools::findFollowNode(node);
-  }
 }
 
 void NonSmoothDynamicalSystemXML::updateNonSmoothDynamicalSystemXML(xmlNodePtr  node, NonSmoothDynamicalSystem* nsds)

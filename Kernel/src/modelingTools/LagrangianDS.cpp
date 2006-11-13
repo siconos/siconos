@@ -155,11 +155,6 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
   if (dsxml->hasId() == true) id = dsxml->getId();
   if (dsxml->hasStepsInMemory() == true) stepsInMemory = dsxml->getStepsInMemory();
 
-  // -- Boundary conditions --
-  fillBoundaryConditionsFromXml();
-  // -- DS input-output --
-  fillDsioFromXml();
-
   // --- Lagrangian class members ---
   // -- Lagrangian  xml object --
   LagrangianDSXML* lgptr = static_cast <LagrangianDSXML*>(dsxml);

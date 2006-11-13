@@ -114,11 +114,6 @@ Relation::~Relation()
   interaction = NULL;
 }
 
-std::vector<DSInputOutput*> Relation::getDSInputOutputs(void)
-{
-  return dsioVector;
-}
-
 void Relation::initialize()
 {
   // Check connection with an Interaction
@@ -127,27 +122,6 @@ void Relation::initialize()
 
   if (interaction->getRelationPtr() != this)
     RuntimeException::selfThrow("Relation - initialize: inconsistent pointers links between the present relation and its interaction.");
-}
-
-DSInputOutput* Relation::getDSInputOutput(const unsigned int i)
-{
-  if (i >= dsioVector.size())
-    RuntimeException::selfThrow("Relation - getDSInputOutput : \'i\' is out of range");
-  return dsioVector[i];
-}
-
-void Relation::setDSInputOutputs(std::vector<DSInputOutput*> dsioVect)
-{
-  dsioVector = dsioVect;
-}
-
-void Relation::addDSInputOutput(DSInputOutput* dsio)
-{
-  /*
-   *  in EqualityConstraint class, we don't create new objects in the DSInputOutput vector
-   *    => we only save a link (pointer) on the DSInputOutputs of the DynamicalSystems !!
-   */
-  dsioVector.push_back(dsio);
 }
 
 void Relation::setParameters(const std::map<string, SimpleVector*>& newMap)

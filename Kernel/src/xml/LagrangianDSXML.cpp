@@ -133,9 +133,3 @@ void LagrangianDSXML::setVelocityMemory(const SiconosMemory& smem)
     velocityMemoryXML->setSiconosMemoryVector(smem.getVectorMemory());
   }
 }
-
-void LagrangianDSXML::updateDynamicalSystemXML(xmlNodePtr  newRootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)
-{
-  rootDynamicalSystemXMLNode = newRootDSXMLNode;
-  loadDynamicalSystem(ds);
-}

@@ -30,29 +30,29 @@ Time Discretisation Events
  *  \date (Creation) February 21, 2006
  *
  */
-class TimeDiscrEvent : public Event
+class TimeDiscretisationEvent : public Event
 {
 
 private:
 
   /** Default constructor */
-  TimeDiscrEvent();
+  TimeDiscretisationEvent();
 
 public:
 
   /** copy constructor
   *  \param the timeDiscrEvent to be copied
   */
-  TimeDiscrEvent(const TimeDiscrEvent&);
+  TimeDiscretisationEvent(const TimeDiscretisationEvent&);
 
   /** constructor with time value as a parameter
   *  \param an unsigned long int
   */
-  TimeDiscrEvent(const unsigned long int&);
+  TimeDiscretisationEvent(const unsigned long int&);
 
   /** destructor
   */
-  ~TimeDiscrEvent();
+  ~TimeDiscretisationEvent();
 
   /**
   *  \param Simulation*, the simulation that owns this Event (through the EventsManager)
@@ -60,4 +60,4 @@ public:
   void process(Simulation*);
 };
 
-#endif // TimeDiscrEvent_H
+#endif // TimeDiscretisationEvent_H

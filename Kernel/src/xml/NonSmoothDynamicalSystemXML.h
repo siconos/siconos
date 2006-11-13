@@ -26,19 +26,14 @@
 
 #include "SiconosDOMTreeTools.h"
 
-#include "EqualityConstraintXML.h"
 #include "InteractionXML.h"
-#include "DSInputOutputXML.h"
 #include "DynamicalSystemXML.h"
 #include <set>
 #include <map>
 
 class NonSmoothDynamicalSystem;
 class InteractionXML;
-class EqualityConstraintXML;
 class DynamicalSystemXML;
-class DSInputOutputXML;
-
 const std::string NSDS_BVP = "bvp";
 
 /** set of DSXML */
@@ -59,10 +54,6 @@ typedef SetOfInteractionsXML::iterator SetOfInteractionsXMLIt;
 *  \version 1.3.0.
 *  \date 04/04/2004
 *
-* At the time, only DynamicalSystem and Interaction objects are handles by NonSmoothDynamicalSystem.
-* DSIO and EqualityConstraint are not. Thus all objects and functions related to those two classes are to be reviewed in the present class.
-* This should be done, if possible, in the same way as for DS and Interactions (with set in the place of map etc ...)
-*
 */
 class NonSmoothDynamicalSystemXML
 {
@@ -75,42 +66,13 @@ private:
   /* set of InteractionXML */
   SetOfInteractionsXML interactionsXMLSet;
 
-  /* Map of EqualityConstraints */
-  std::map<int, EqualityConstraintXML*> equalityConstraintXMLMap;
-
-  /* Map of DSInputOutputs */
-  std::map<int, DSInputOutputXML*> dsInputOutputXMLMap;
-
-  /* vector of DSInputOutput numbers*/
-  std::vector<int> definedDSInputOutputNumbers;
-
-  /* vector of EqualityConstraint numbers*/
-  std::vector<int> definedEqualityConstraintNumbers;
-
   /** Builds DynamicalSystemXML objects from a DOM tree describing DSs
-  *   \param xmlNodePtr  : the DSs DOM tree
-  *   \exception XMLException : if a property of the NonSmoothDynamicalSystem lacks in the DOM tree
-  */
+   *   \param xmlNodePtr  : the DSs DOM tree
+   *   \exception XMLException : if a property of the NonSmoothDynamicalSystem lacks in the DOM tree
+   */
   void loadDynamicalSystemXML(xmlNodePtr  rootDSNode);
 
   void loadNonSmoothDynamicalSystem();
-
-  /** Builds EqualityConstraintXML objects from a DOM tree describing EqualityConstraints
-  *   \param xmlNodePtr  : the EqualityConstraints DOM tree
-  *   \exception XMLException : if a number relating to an EqualityConstraint declares in the NonSmoothDynamicalSystem is already used
-  */
-  void loadEqualityConstraintXML(xmlNodePtr  rootECNode);
-
-  /** Builds DSInputOutputXML objects from a DOM tree describing DSInputOutputs
-  *   \param xmlNodePtr  : the DSInputOutputs DOM tree
-  *   \exception XMLException : if a number relating to an DSInputOutput declares in the NonSmoothDynamicalSystem is already used
-  */
-  void loadDSInputOutputXML(xmlNodePtr  rootdsioNode);
-
-  /** selects the DSInputOutputXML objects relating to a specific DynamicalSystem
-  *   \param map<int, DSInputOutputXML*> : the map containing the DSInputOutputXML for a specific DynamicalSystem
-  */
-  std::map<int, DSInputOutputXML*> getDSInputOutputXMLRelatingToDS(int number);
 
 public:
 
@@ -189,21 +151,6 @@ public:
   {
     return !(interactionsXMLSet.empty());
   };
-
-  /** Return the EqualityConstraintXML with id number
-  *   \param number : int number : the number of the EqualityConstraintXML to return
-  *  \exception XMLException
-  *   \return the EqualityConstraintXML of number number, NULL if doesn't exist
-  */
-  EqualityConstraintXML* getEqualityConstraintXML(int number);
-
-  /** to get EqualityConstraintXML numbers
-  *   \return vector EqualityConstraints integer numbers
-  */
-  inline std::vector<int> getEqualityConstraintNumbers()
-  {
-    return definedEqualityConstraintNumbers;
-  }
 
   /** makes the operations to add a NonSmoothDynamicalSystem to the SiconosModelXML
   *   \param xmlNodePtr  : the root node for the NonSmoothDynamicalSystemXML

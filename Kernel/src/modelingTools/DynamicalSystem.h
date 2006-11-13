@@ -35,7 +35,6 @@
 #include "SiconosSharedLibrary.h"
 
 #include "NonSmoothDynamicalSystem.h"
-#include "DSInputOutput.h"
 #include "DynamicalSystemXML.h"
 
 #include <string>
@@ -50,8 +49,6 @@ const std::string LITIDS = "LinearTIDS";
 const std::string NLDS = "NonLinearDS";
 
 class NonSmoothDynamicalSystem;
-class BoundaryCondition;
-class DSInputOutput;
 class DynamicalSystemXML;
 class SiconosVector;
 class SimpleMatrix;
@@ -171,14 +168,8 @@ protected:
   /** A container of vectors to save temporary values (for Newton convergence computation for example)*/
   std::map<const std::string, SimpleVector*> tmpWorkVector;
 
-  /** boundary conditions defined if the DynamicalSystem has some */
-  BoundaryCondition *BC;
-
   /** the XML object linked to the DynamicalSystem  */
   DynamicalSystemXML *dsxml;
-
-  /** vector of the DS Inputs-Outputs of the Dynamical System */
-  std::vector<DSInputOutput*> dsioVector;
 
   /** Parameters list, last argument of plug-in functions. What are those parameters depends on user´s choice.
    *  This a list of pointer to SimpleVector. Each one is identified thanks to a key which is the plug-in name.
@@ -248,18 +239,6 @@ protected:
 
   /** Flags to know if pointers have been allocated inside constructors or not */
   std::map<std::string, bool> isAllocatedIn;
-  /** dsio */
-  std::deque<bool> isDsioAllocatedIn;
-
-  /** uses the DynamicalSystemXML of the DynamicalSystem to fill BoundaryCondition fields
-   *  \exception RuntimeException
-   */
-  virtual void fillBoundaryConditionsFromXml();
-
-  /** uses the DynamicalSystemXML of the DynamicalSystem to fill DSIO vector
-   *  \exception RuntimeException
-   */
-  virtual void fillDsioFromXml();
 
   /** set all allocation flags (isAllocated map)
    *  \param bool: = if true (default) set default configuration, else set all to false
@@ -808,32 +787,6 @@ public:
     stepsInMemory = steps;
   }
 
-  // --- Boundary Conditions ---
-
-  /*\todo: to be finished when BC class will be allright */
-  /** get the value of BoundaryCondition
-   *  \return an object BoundaryCondition
-   */
-  //inline BoundaryCondition getBoundaryCondition() const { return *BC; }
-
-  /** get the BoundaryCondition
-   *  \return a pointer on the BoundaryCondition object
-   */
-  inline BoundaryCondition* getBoundaryConditionPtr() const
-  {
-    return BC;
-  }
-
-  /** set the Boundary Conditions
-   *  \param ref on an object BoundaryCondition
-   */
-  //inline void setBoundaryCondition(const BoundaryCondition& newBC) {*BC = newBC; }
-
-  /** set the BoundaryCondition pointer
-   *  \param BoundaryCondition *bc : the BoundaryCondition to set BC
-   */
-  void setBoundaryConditionPtr(BoundaryCondition *newBC);
-
   // --- dsxml ---
 
   /** get the object DynamicalSystemXML of the DynamicalSystem
@@ -850,38 +803,6 @@ public:
   inline void setDynamicalSystemXMLPtr(DynamicalSystemXML *newDsxml)
   {
     dsxml = newDsxml;
-  }
-
-  // --- DS input-output ---
-
-  /** allows to get all the DSInputOutput of the DynamicalSystem
-   *  \return the vector of DSInputOutput
-   */
-  inline std::vector<DSInputOutput*> getDSInputOutputs(void)
-  {
-    return dsioVector;
-  }
-
-  /** allows to get one specific DSInputOutput, with its place in the vector of DSInputOutput
-   *  \param int : the place of the DSInputOutput in the vector of DSInputOutput of the DynamicalSystem
-   *  \return DSInputOutput* : dsioVector[ i ] DSInputOutput
-   */
-  DSInputOutput* getDSInputOutput(const unsigned int);
-
-  /** allows to set all the DSInputOutputs of the DynamicalSystem
-   *  \param vector<DSInputOutput*> : the vector to set
-   */
-  inline void setDSInputOutputs(std::vector<DSInputOutput*> newDsioVect)
-  {
-    dsioVector = newDsioVect;
-  }
-
-  /** allows to add the DSInputOutput to the DynamicalSystem
-   *  \param DSInputOutput* : the DSInputOutput to add
-   */
-  inline void addDSInputOutput(DSInputOutput* dsio)
-  {
-    dsioVector.push_back(dsio);
   }
 
   // ===== TMP WORK VECTOR =====
@@ -1145,16 +1066,6 @@ public:
    *  \exception RuntimeException
    */
   virtual void saveDSDataToXML();
-
-  /** copy the Boundary Conditions data in the XML tree
-   *  \exception RuntimeException
-   */
-  virtual void saveBCToXML();
-
-  /** copy the DS Input-Output data in the XML tree
-   *  \exception RuntimeException
-   */
-  virtual void saveDSIOToXML();
 
   // ===== MISCELLANEOUS ====
 

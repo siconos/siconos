@@ -772,16 +772,6 @@ public:
   {
     return (velocityNode != NULL);
   }
-
-
-  /** makes the operations to add a DynamicalSystem to the NonSmoothDynamicalSystemXML
-  *   \param xmlNodePtr : the root node of this DynamicalSystem
-  *   \param DynamicalSystem* : the DynamicalSystem of this DynamicalSystemXML
-  *   \param BoundaryCondition* : the BoundaryCondition of the DS if the NonSmoothDynamicalSystem is BVP (optional)
-  */
-  void updateDynamicalSystemXML(xmlNodePtr, DynamicalSystem*, BoundaryCondition* bc = NULL);
-
-
 };
 
 #endif

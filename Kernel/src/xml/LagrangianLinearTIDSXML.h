@@ -97,14 +97,6 @@ public:
     else SiconosDOMTreeTools::setSiconosMatrixNodeValue(CNode, m);
   }
 
-
-  /** makes the operations to add a DynamicalSystem to the NonSmoothDynamicalSystemXML
-  *   \param xmlNode* : the root node of this DynamicalSystem
-  *   \param DynamicalSystem* : the DynamicalSystem of this DynamicalSystemXML
-  *   \param BoundaryCondition* : the BoundaryCondition of the DS if the NonSmoothDynamicalSystem is BVP (optional)
-  */
-  void updateDynamicalSystemXML(xmlNode*, DynamicalSystem*, BoundaryCondition* bc = NULL);
-
   /** determines if K is defined in the DOM tree
   *  \return bool : true if K is defined, false otherwise
   */

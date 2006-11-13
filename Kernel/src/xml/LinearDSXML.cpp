@@ -87,12 +87,3 @@ void LinearDSXML::setBPlugin(const std::string& plugin)
     SiconosDOMTreeTools::setStringAttributeValue(bNode, "vectorPlugin", plugin);
 }
 
-void LinearDSXML::updateDynamicalSystemXML(xmlNode* rootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)
-{
-  ANode = NULL;
-  MxdotNode = NULL;
-  bNode = NULL;
-  rootDynamicalSystemXMLNode = rootDSXMLNode;
-  loadDynamicalSystem(ds);
-}
-

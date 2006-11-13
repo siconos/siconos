@@ -16,25 +16,25 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "TimeDiscrEvent.h"
+#include "TimeDiscretisationEvent.h"
 #include "TimeDiscretisation.h"
 using namespace std;
 
 // Default constructor
-TimeDiscrEvent::TimeDiscrEvent(): Event(DEFAULT_EVENT_TIME, "TimeDiscretisationEvent")
+TimeDiscretisationEvent::TimeDiscretisationEvent(): Event(DEFAULT_EVENT_TIME, "TimeDiscretisationEvent")
 {}
 
 // copy constructor
-TimeDiscrEvent::TimeDiscrEvent(const TimeDiscrEvent& newTimeDiscrEvent): Event(newTimeDiscrEvent)
+TimeDiscretisationEvent::TimeDiscretisationEvent(const TimeDiscretisationEvent& newTimeDiscretisationEvent): Event(newTimeDiscretisationEvent)
 {}
 
-TimeDiscrEvent::TimeDiscrEvent(const unsigned long int& time): Event(time, "TimeDiscretisationEvent")
+TimeDiscretisationEvent::TimeDiscretisationEvent(const unsigned long int& time): Event(time, "TimeDiscretisationEvent")
 {}
 
-TimeDiscrEvent::~TimeDiscrEvent()
+TimeDiscretisationEvent::~TimeDiscretisationEvent()
 {}
 
-void TimeDiscrEvent::process(Simulation* simulation)
+void TimeDiscretisationEvent::process(Simulation* simulation)
 {
   simulation->updateOutput(0, 1);
 

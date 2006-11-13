@@ -54,7 +54,6 @@ const std::string LINEAR_DS_TAG = "LinearDS";
 const std::string LINEAR_TIDS_TAG = "LinearTIDS";
 const std::string NON_LINEAR_DS_TAG = "NonLinearDS";
 
-const std::string BOUNDARYCONDITION_TAG = "BoundaryCondition";
 const std::string INTERACTION_TAG = "Interaction";
 const std::string INTERACTION_CONTENT_TAG = "Interaction_Content";
 const std::string RELATION_CONTENT_TAG = "Relation_Content";
@@ -62,11 +61,7 @@ const std::string RELATION_CONTENT_TAG = "Relation_Content";
 // NSDS
 const std::string DYNAMICAL_SYSTEM_TAG = "DS";
 const std::string NON_SMOOTH_DYNAMICAL_SYSTEM_TAG = "NSDS";
-const std::string DSINPUTOUTPUT_TAG = "DSInputOutput";
-const std::string EQUALITYCONSTRAINT_TAG = "EqualityConstraint";
 
-const std::string EQUALITYCONSTRAINT_DEFINITION_TAG = "EqualityConstraint_Definition";
-const std::string DSINPUTOUTPUT_DEFINITION_TAG = "DSInputOutput_Definition";
 const std::string DYNAMICAL_SYSTEM_DEFINITION_TAG = "DS_Definition";
 const std::string INTERACTION_DEFINITION_TAG = "Interaction_Definition";
 const std::string LMGC90_NSDS_TAG = "DS_LMGC90";
@@ -85,21 +80,6 @@ const std::string RELAY_NSLAW_TAG = "Relay";
 const std::string NEWTON_IMPACT_NSLAW_TAG = "NewtonImpactLaw";
 const std::string NEWTON_IMPACT_FRICTION_NSLAW_TAG = "NewtonImpactFrictionLaw";
 
-// DSIO
-const std::string LINEAR_DSIO_TAG = "LinearDSIO";
-const std::string NON_LINEAR_DSIO_TAG = "NonLinearDSIO";
-const std::string LAGRANGIAN_DSIO_TAG = "LagrangianDSIO";
-const std::string LAGRANGIAN_LINEAR_DSIO_TAG = "LagrangianLinearDSIO";
-
-// EqualityConstraint
-const std::string LINEAR_EC_TAG = "LinearEC";
-const std::string NON_LINEAR_EC_TAG = "NonLinearEC";
-const std::string LINEAR_TIME_INVARIANT_EC_TAG = "LinearTIEC";
-const std::string LAGRANGIAN_EC_TAG = "LagrangianEC";
-const std::string LAGRANGIAN_LINEAR_EC_TAG = "LagrangianLinearEC";
-
-
-const std::string DSIO_CONCERNED = "DSInputOutput_Concerned";
 const std::string DS_CONCERNED = "DS_Concerned";
 
 //===========================================

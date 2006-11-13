@@ -26,8 +26,9 @@
 #include "SiconosConst.h"
 #include "Interaction.h"
 #include "RelationXML.h"
-#include "DSInputOutput.h"
 #include "check.h"
+#include "SiconosSharedLibrary.h"
+#include "SimpleVector.h"
 
 const std::string RELATION = "Relation";
 const std::string LINEARTIRELATION = "LinearTIR";
@@ -36,8 +37,6 @@ const std::string LAGRANGIANLINEARRELATION = "LagrangianLinearR";
 
 class Interaction;
 class RelationXML;
-class DSInputOutput;
-
 
 //! General Non Linear Relation (Base class for Relations).
 /**  \author SICONOS Development Team - copyright INRIA
@@ -63,9 +62,6 @@ class Relation
 {
 
 private:
-
-  /** contains a link to the DSInputOutput of the DynamicalSystems */
-  std::vector<DSInputOutput*> dsioVector;
 
 protected:
 
@@ -211,27 +207,6 @@ public:
   {
     return computeOutputName;
   }
-
-  /** allows to get all the DSInputOutput of the Relation
-  *  \return the vector of DSInputOutput
-  */
-  std::vector<DSInputOutput*> getDSInputOutputs(void);
-
-  /** allows to get one specific DSInputOutput, with its place in the vector of DSInputOutput
-  *  \param int : the place of the DSInputOutput in the vector of DSInputOutput of the Relation
-  *  \return DSInputOutput* : dsioVector[ i ] DSInputOutput
-  */
-  DSInputOutput* getDSInputOutput(const unsigned int);
-
-  /** allows to set all the DSInputOutputs of the Relation
-  *  \param vector<DSInputOutput*> : the vector to set
-  */
-  void setDSInputOutputs(std::vector<DSInputOutput*>);
-
-  /** allows to add the DSInputOutput to the Relation
-  *  \param DSInputOutput* : the DSInputOutput to add
-  */
-  void addDSInputOutput(DSInputOutput*);
 
   // -- parametersList --
 

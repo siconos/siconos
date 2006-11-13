@@ -19,55 +19,21 @@
 #include "DynamicalSystemXML.h"
 #include "DynamicalSystem.h"
 #include "SimpleMatrix.h"
-#include "BoundaryCondition.h"
-
-// to be deleted thanks to factories:
-#include "NLinearBCXML.h"
-#include "LinearBCXML.h"
-#include "PeriodicBCXML.h"
-#include "LinearDSIOXML.h"
-#include "LagrangianDSIOXML.h"
 
 using namespace std;
-
-void DynamicalSystemXML::loadBoundaryConditionXML(xmlNode * rootBoundaryConditionNode)
-{
-  if (rootBoundaryConditionNode == NULL)  //BoundaryCondition is not defined
-  {
-    boundaryConditionXML = NULL;
-  }
-  else
-  {
-    xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(rootBoundaryConditionNode);
-    string type((char*)node->name);
-    if (type == NON_LINEARBC_TAG)
-      boundaryConditionXML = new NLinearBCXML(node);
-
-    else if (type == LINEARBC_TAG)
-      boundaryConditionXML = new LinearBCXML(node);
-
-    else if (type == PERIODICBC_TAG)
-      boundaryConditionXML = new PeriodicBCXML(node);
-
-    else
-      XMLException::selfThrow("DynamicalSystemXML : undefined boundary condition type : " + type);
-  }
-}
 
 DynamicalSystemXML::DynamicalSystemXML():
   rootDynamicalSystemXMLNode(NULL), parentNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL),
   stepsInMemoryNode(NULL), xMemoryNode(NULL), rMemoryNode(NULL),
-  fNode(NULL), jacobianXFNode(NULL), boundaryConditionNode(NULL), dsInputOutputNode(NULL),
-  uSizeNode(NULL), uNode(NULL), TNode(NULL),
-  boundaryConditionXML(NULL), xMemoryXML(NULL), rMemoryXML(NULL)
+  fNode(NULL), jacobianXFNode(NULL), uSizeNode(NULL), uNode(NULL), TNode(NULL),
+  xMemoryXML(NULL), rMemoryXML(NULL)
 {}
 
 DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, const bool& isBVP):
   rootDynamicalSystemXMLNode(DSNode), parentNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL),
   stepsInMemoryNode(NULL), xMemoryNode(NULL), rMemoryNode(NULL),
-  fNode(NULL), jacobianXFNode(NULL), boundaryConditionNode(NULL), dsInputOutputNode(NULL),
-  uSizeNode(NULL), uNode(NULL), TNode(NULL),
-  boundaryConditionXML(NULL), xMemoryXML(NULL), rMemoryXML(NULL)
+  fNode(NULL), jacobianXFNode(NULL), uSizeNode(NULL), uNode(NULL), TNode(NULL),
+  xMemoryXML(NULL), rMemoryXML(NULL)
 {
   xmlNodePtr node;
 
@@ -101,13 +67,6 @@ DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, const bool& isBVP):
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_JACOBIANXF)) != NULL)
     jacobianXFNode = node;
 
-  // BC NOT YET IMPLEMENTED
-  //   if ((node=SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, BOUNDARYCONDITION_TAG)) !=NULL)
-  //     {
-  //       loadBoundaryConditionXML(node);
-  //       boundaryConditionNode = node;
-  //     }
-
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, "uSize")) != NULL)
     uSizeNode = node;
 
@@ -120,7 +79,6 @@ DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, const bool& isBVP):
 
 DynamicalSystemXML::~DynamicalSystemXML()
 {
-  if (boundaryConditionXML != NULL) delete boundaryConditionXML;
   if (rMemoryXML != NULL) delete rMemoryXML;
   if (xMemoryXML != NULL) delete xMemoryXML;
 }
@@ -231,158 +189,3 @@ void DynamicalSystemXML::setTPlugin(const std::string& plugin)
   else
     SiconosDOMTreeTools::setStringAttributeValue(TNode, "matrixPlugin", plugin);
 }
-
-void DynamicalSystemXML::updateDynamicalSystemXML(xmlNode* newRootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)
-{
-  rootDynamicalSystemXMLNode = newRootDSXMLNode;
-  loadDynamicalSystem(ds);
-}
-
-void DynamicalSystemXML::loadDynamicalSystem(DynamicalSystem* ds)
-{
-  string type;
-  xmlNodePtr node = NULL;
-
-  if (ds->getBoundaryConditionPtr() != NULL)
-  {
-    type = ds->getBoundaryConditionPtr()->getType();
-    node = xmlNewChild(rootDynamicalSystemXMLNode, NULL, (xmlChar*)BOUNDARYCONDITION_TAG.c_str(), NULL);
-    if (type == NLINEARBC)
-    {
-      //xmlNewProp( node, (xmlChar*)TYPE_ATTRIBUTE.c_str(), (xmlChar*)NON_LINEARBC_TAG.c_str() );
-      node = xmlNewChild(node, NULL, (xmlChar*)NON_LINEARBC_TAG.c_str(), NULL);
-      boundaryConditionXML = new NLinearBCXML();
-
-      // linkage between the DynamicalSystem and his DynamicalSystemXML
-      ds->getBoundaryConditionPtr()->setBoundaryConditionXML(boundaryConditionXML);
-
-      // creation of the DynamicalSystemXML
-      static_cast<NLinearBCXML*>(boundaryConditionXML)->updateBoundaryConditionXML(node);  //, ds->getBoundaryCondition() );
-    }
-    else if (type == LINEARBC)
-    {
-      //xmlNewProp( node, (xmlChar*)TYPE_ATTRIBUTE.c_str(), (xmlChar*)LINEARBC_TAG.c_str() );
-      node = xmlNewChild(node, NULL, (xmlChar*)LINEARBC_TAG.c_str(), NULL);
-      boundaryConditionXML = new LinearBCXML();
-
-      // linkage between the DynamicalSystem and his DynamicalSystemXML
-      ds->getBoundaryConditionPtr()->setBoundaryConditionXML(boundaryConditionXML);
-
-      // creation of the DynamicalSystemXML
-      static_cast<LinearBCXML*>(boundaryConditionXML)->updateBoundaryConditionXML(node); //, ds->getBoundaryCondition() );
-    }
-    else if (type == PERIODICBC)
-    {
-      //xmlNewProp( node, (xmlChar*)TYPE_ATTRIBUTE.c_str(), (xmlChar*)PERIODICBC_TAG.c_str() );
-      node = xmlNewChild(node, NULL, (xmlChar*)PERIODICBC_TAG.c_str(), NULL);
-      boundaryConditionXML = new PeriodicBCXML();
-
-      // linkage between the DynamicalSystem and his DynamicalSystemXML
-      ds->getBoundaryConditionPtr()->setBoundaryConditionXML(boundaryConditionXML);
-
-      // creation of the DynamicalSystemXML
-      static_cast<PeriodicBCXML*>(boundaryConditionXML)->updateBoundaryConditionXML(node); //, ds->getBoundaryCondition() );
-    }
-    else
-      XMLException::selfThrow("DynamicalSystemXML - loadDynamicalSystem error : undefined DynamicalSystem type : " + type);
-  }
-
-  if (ds->getDSInputOutputs().size() > 0)
-  {
-    int number;
-    char num[32];
-    map<int, DSInputOutputXML*>::iterator itdsio;
-    xmlNodePtr dsioDefinitionNode, nsdsNode;
-    DSInputOutputXML *dsioXML;
-
-    nsdsNode = ds->getNonSmoothDynamicalSystemPtr()->getNonSmoothDynamicalSystemXMLPtr()->getRootNode();
-    dsioDefinitionNode = SiconosDOMTreeTools::findNodeChild((const xmlNodePtr)nsdsNode, DSINPUTOUTPUT_DEFINITION_TAG);
-    if (dsioDefinitionNode == NULL)
-      dsioDefinitionNode = xmlNewChild(nsdsNode, NULL, (xmlChar*)DSINPUTOUTPUT_DEFINITION_TAG.c_str(), NULL);
-
-    for (unsigned int i = 0; i < ds->getDSInputOutputs().size(); i++)
-    {
-      if (ds->getDSInputOutput(i)->getDSInputOutputXML() == NULL)
-      {
-        number = ds->getDSInputOutput(i)->getNumber();
-        sprintf(num, "%d", number);
-        definedDSInputOutputNumbers.push_back(number);
-
-        // verifies if this DSInputOutput has a number which not used
-        itdsio = dsInputOutputXMLMap.find(number);
-        if (itdsio == dsInputOutputXMLMap.end())
-        {
-          if (ds->getDSInputOutput(i)->getType() == LINEARDSIO)
-          {
-            node = xmlNewChild(dsioDefinitionNode, NULL, (xmlChar*)LINEAR_DSIO_TAG.c_str(), NULL);
-            xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
-            //xmlNewChild( node, NULL, (xmlChar*)DSINPUTOUTPUT_H.c_str(), NULL );
-            dsioXML = new LinearDSIOXML();
-
-            // linkage between the DSInputOutput and his DSInputOutputXML
-            ds->getDSInputOutput(i)->setDSInputOutputXML(dsioXML);
-            dsioXML->updateDSInputOutputXML(node, ds->getDSInputOutput(i));
-            dsInputOutputXMLMap[number] = dsioXML;
-          }
-          else if (ds->getDSInputOutput(i)->getType() == NLINEARDSIO)
-          {
-            node = xmlNewChild(dsioDefinitionNode, NULL, (xmlChar*)NON_LINEAR_DSIO_TAG.c_str(), NULL);
-            xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
-            //xmlNewChild( node, NULL, (xmlChar*)DSINPUTOUTPUT_H.c_str(), NULL );
-            dsioXML = new DSInputOutputXML();
-
-            // linkage between the DSInputOutput and his DSInputOutputXML
-            ds->getDSInputOutput(i)->setDSInputOutputXML(dsioXML);
-            dsioXML->updateDSInputOutputXML(node, ds->getDSInputOutput(i));
-            dsInputOutputXMLMap[number] = dsioXML;
-          }
-          else if (ds->getDSInputOutput(i)->getType() == LAGRANGIANDSIO)
-          {
-            node = xmlNewChild(dsioDefinitionNode, NULL, (xmlChar*)LAGRANGIAN_DSIO_TAG.c_str(), NULL);
-            xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
-            //xmlNewChild( node, NULL, (xmlChar*)DSINPUTOUTPUT_H.c_str(), NULL );
-            dsioXML = new LagrangianDSIOXML();
-
-            // linkage between the DSInputOutput and his DSInputOutputXML
-            ds->getDSInputOutput(i)->setDSInputOutputXML(dsioXML);
-            dsioXML->updateDSInputOutputXML(node, ds->getDSInputOutput(i));
-            dsInputOutputXMLMap[number] = dsioXML;
-          }
-          else XMLException::selfThrow("DSXML - loadDynamicalSystem | Error : the DSInputOutput type : " + ds->getDSInputOutput(i)->getType() + " doesn't exist!");
-
-          /*  end of the save : saving the DynamicalSystem linked to this DSInputOutput */
-          node = xmlNewChild(node, NULL, (xmlChar*)DS_CONCERNED.c_str(), NULL);
-          node = xmlNewChild(node, NULL, (xmlChar*) DYNAMICAL_SYSTEM_TAG.c_str(), NULL);
-          number = ds->getNumber();
-          sprintf(num, "%d", number);
-          xmlNewProp(node, (xmlChar*)NUMBER_ATTRIBUTE.c_str(), (xmlChar*)num);
-        }
-        else cout << "DynamicalSystemXML - loadDynamicalSystem : the DSInputOutput type : " << ds->getDSInputOutput(i)->getType() << " already exists!" << endl;
-      }
-      else cout << "### DynamicalSystemXML updateDSInputOutputXML, DSIOXML != NULL" << endl;
-    }
-  }
-}
-
-DSInputOutputXML* DynamicalSystemXML::getDSInputOutputXML(const int& number)
-{
-  map<int, DSInputOutputXML*>::iterator it;
-
-  it = dsInputOutputXMLMap.find(number);
-  if (it == dsInputOutputXMLMap.end())
-    return NULL;
-
-  return dsInputOutputXMLMap[number];
-}
-
-void DynamicalSystemXML::setDSInputOutputXML(map<int, DSInputOutputXML*> m)
-{
-  definedDSInputOutputNumbers.clear();
-
-  map<int, DSInputOutputXML*>::iterator iter;
-  for (iter = m.begin(); iter != m.end(); iter++)
-    definedDSInputOutputNumbers.push_back((*iter).first);
-
-  dsInputOutputXMLMap = m;
-}
-

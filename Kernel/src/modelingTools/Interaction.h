@@ -30,7 +30,7 @@
 #include "Relation.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "DynamicalSystemsSet.h"
-
+#include "BlockVector.h"
 // IO (XML)
 #include "InteractionXML.h"
 
@@ -46,7 +46,6 @@ class DynamicalSystem;
 class Relation;
 class NonSmoothDynamicalSystem;
 class InteractionXML;
-
 
 /** container for SiconosVectors */
 typedef std::vector< BlockVector* > VectorOfBlocks;

@@ -29,14 +29,9 @@
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
 #include "SiconosMemoryXML.h"
-#include "BoundaryConditionXML.h"
-#include "DSInputOutputXML.h"
 
 class SiconosMemory;
 class DynamicalSystem;
-class BoundaryCondition;
-class BoundaryConditionXML;
-class DSInputOutputXML;
 class SiconosMemoryXML;
 
 //Tags
@@ -82,23 +77,12 @@ protected:
   xmlNodePtr rMemoryNode;/**< memory vector for r */
   xmlNodePtr fNode;/**< f(x,t) */
   xmlNodePtr jacobianXFNode;/**< jacobian of f according to x */
-  xmlNodePtr boundaryConditionNode;/**< boundary conditions */
-  xmlNodePtr dsInputOutputNode;/**< ds input-output */
   xmlNodePtr uSizeNode;/**< size of control vector */
   xmlNodePtr uNode;/**< control term */
   xmlNodePtr TNode;/**< coefficient of control term */
 
-  BoundaryConditionXML * boundaryConditionXML;/**< Boundary conditions obxml object */
   SiconosMemoryXML * xMemoryXML;/** <xml object for xMemory*/
   SiconosMemoryXML * rMemoryXML;/**<xml object for rMemory*/
-  std::map<int, DSInputOutputXML*> dsInputOutputXMLMap;/**< list of dsinput-output, with an int as a key identifier*/
-  std::vector<int> definedDSInputOutputNumbers;/**<  useless at the time */
-
-  /** Build BoundaryConditionXML object from a DOM tree describing BoundaryCondition
-  *   \param rootBoundaryConditionXMLNode : the BoundaryCondition DOM tree
-  *   \exception XMLException : if the type of the BoundaryCondition given in the DOM tree does not exist
-  */
-  void loadBoundaryConditionXML(xmlNodePtr rootBoundaryConditionNode);
 
 public:
 
@@ -247,14 +231,6 @@ public:
   *   \param SiconosMemory*
   */
   void setRMemory(const SiconosMemory&);
-
-  /** Returns the BoundaryConditionXML pointer of the DynamicalSystemXML
-  *   \return the BoundaryConditionXML pointer of the DynamicalSystemXML ; NULL if DynamicalSystemXML does not have
-  */
-  inline BoundaryConditionXML * getBoundaryConditionXML() const
-  {
-    return boundaryConditionXML;
-  }
 
   // === f ===
   /** Return the name of the f plug-in
@@ -467,14 +443,6 @@ public:
     return (jacobianXFNode != NULL);
   }
 
-  /** returns true if boundaryConditionNode is defined
-  *  \return true if boundaryConditionNode is defined
-  */
-  inline bool hasBoundaryCondition() const
-  {
-    return (boundaryConditionNode != NULL);
-  }
-
   /** returns true if uSizeNode is defined
   *  \return true if jacobianXFNode is defined
   */
@@ -526,44 +494,6 @@ public:
   {
     return xmlHasProp((xmlNodePtr)TNode, (xmlChar *) DS_MATRIXPLUGIN.c_str());
   }
-
-  /** prepare object(s) to add a DynamicalSystem to the NonSmoothDynamicalSystemXML
-  *   \param xmlNodePtr : the root node of this DynamicalSystem
-  *   \param DynamicalSystem* : the DynamicalSystem of this DynamicalSystemXML
-  *   \param BoundaryCondition* : the BoundaryCondition of the DynamicalSystem if the NonSmoothDynamicalSystem is BVP (optional)
-  */
-  void updateDynamicalSystemXML(xmlNodePtr, DynamicalSystem*, BoundaryCondition* bc = NULL);
-
-  /** loads the depending data of the DynamicalSystem into the DynamicalSystemXML (the BoundaryCondition if exists)
-  *   \param DynamicalSystem* : the DynamicalSystem of this DynamicalSystemXML
-  */
-  void loadDynamicalSystem(DynamicalSystem*);
-
-  /** Return the DSInputOutputXML with id number
-  *   \param number : int number : the number of the DSInputOutputXML to return
-  *  \exception XMLException
-  *   \return the DSInputOutputXML of number number, NULL if doesn't exist
-  */
-  DSInputOutputXML* getDSInputOutputXML(const int&);
-
-  /** Allows to know the defined DSInputOutputs
-  *   \return vector DSInputOutputs integer numbers
-  */
-  inline const std::vector<int> getDSInputOutputNumbers() const
-  {
-    return definedDSInputOutputNumbers;
-  }
-
-  /** Allows to know the defined DSInputOutputs
-  *   \return vector DSInputOutputs integer numbers
-  */
-  void setDSInputOutputXML(std::map<int, DSInputOutputXML*> m);
-
-  /** Builds DSInputOutputXML objects from a DOM tree describing DSInputOutputs
-  *   \param xmlNodePtr : the DSInputOutputs DOM tree
-  *   \exception XMLException : if a number relating to an DSInputOutput declares in the NSDS is already used
-  */
-  //void loadDSInputOutputXML(xmlNodePtr rootdsioNode);
 };
 
 #endif

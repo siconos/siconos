@@ -34,10 +34,3 @@ LagrangianLinearTIDSXML::LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSN
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LTIDS_C)) != NULL)
     CNode = node;
 }
-
-void LagrangianLinearTIDSXML::updateDynamicalSystemXML(xmlNode* newRootDSXMLNode, DynamicalSystem* ds, BoundaryCondition* bc)
-{
-  rootDynamicalSystemXMLNode = newRootDSXMLNode;
-  loadDynamicalSystem(ds);
-}
-
