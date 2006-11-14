@@ -1,0 +1,35 @@
+/*! \page sect_doc Siconos Help and Documentation.
+
+For all documentation and help see https://gforge.inria.fr/projects/siconos/
+
+There you can find:
+
+- forum (https://gforge.inria.fr/forum/?group_id=9)
+
+- bug trackers (https://gforge.inria.fr/tracker/?group_id=9)
+
+- mailing lists (https://gforge.inria.fr/mail/?group_id=9)
+
+- Doxygen auto-generated documentation for Numerics (http://siconos.gforge.inria.fr/Documentation/Numerics_Doxygen/) and Kernel (http://siconos.gforge.inria.fr/Documentation/Kernel_Doxygen/index.html). 
+
+- An overview of the Siconos European project (http://siconos.gforge.inria.fr/docDev/index.html)
+
+- A detailed design description (http://siconos.gforge.inria.fr/docDev/design.html)
+
+- A basic software development methodology (http://siconos.gforge.inria.fr/docDev/sdm.html)
+
+- A short overview of the Software design (http://siconos.gforge.inria.fr/Documentation/SiconosOverview/CapriSept2006.pdf)
+
+Available Manuals:
+
+- Siconos Installation Guide: how to download, install the platform, what are the required libraries ...
+
+- Getting Started with Siconos: a short tutorial on how to use Siconos and write your own samples in C++ or Python.
+
+- Siconos User Manual: fully detailed description of all the Siconos functionalities (based on Doxygen)
+
+- Siconos Theory Manual (in progress, not yet available)
+
+
+
+*/

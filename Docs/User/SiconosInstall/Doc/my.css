@@ -1,0 +1,30 @@
+/* $Id: inst.css,v 1.22 2004/07/09 01:52:53 jrobbins Exp $
+
+This file contains rules that extend or override the more basic
+formatting defined in readyset.css. Edit it to customize the fonts and
+colors. You are responsible for maintaining your own set of (optional)
+deltas from readyset.css defaults; this file is intended as an
+example.
+
+To make "Company Proprietary" appear on every page footer, uncomment the
+line "display: block !important;" in the legal1 style.
+
+*/
+
+h1 {
+ text-align:center;
+ background-repeat: no-repeat;
+ background-position: top left;
+ padding-bottom: 7px; 
+ padding-top: 7px; 
+}
+
+h2 {
+ background: #003399;
+ color: #ffffff; 
+ padding-left: 25px; 
+}
+
+h3 {
+ color: #003399;
+}

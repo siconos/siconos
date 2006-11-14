@@ -1,0 +1,48 @@
+/*! \page install Installing Siconos
+
+\section comp Compile and Install of Siconos
+
+Three steps:
+
+-# compile and install Siconos-Numerics
+-# compile and install Siconos-Kernel
+-# compile and install Siconos-Front-End (optional)
+
+Warning: before that, make sure you have read the section \ref prereq.
+
+\subsection compile_linux Linux/Unix
+
+For compilation of each package, run the following commands in Numerics/Kernel/FrontEnd directories:
+
+\verbatim
+ ./autogen.sh
+ ./configure 
+  make
+  make install
+\endverbatim
+
+Type <tt>./configure --help</tt> to see more information.
+
+Default installation path is /usr/local. \n
+To change that, type 
+\verbatim
+./configure --prefix=/your/install/path 
+\endverbatim
+
+Warning: depending on the installation path, you might be root to run make install.
+
+To run tests: 
+\verbatim
+ ./autogen.sh
+ ./configure --enable-cppunit 
+  make
+  make install
+  make check
+\endverbatim
+
+To generate Doxygen documentation:
+\verbatim
+make doc
+\endverbatim
+
+*/

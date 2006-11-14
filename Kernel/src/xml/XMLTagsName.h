@@ -42,10 +42,6 @@ const std::string COMPUTE_OUTPUT_TAG = "computeOutput";
 /*
  * the different node names we can encounter
  */
-// BoundaryCondition tags
-const std::string LINEARBC_TAG = "Linear";
-const std::string NON_LINEARBC_TAG = "NLinear";
-const std::string PERIODICBC_TAG = "Periodic";
 
 // DynamicalSystem tags
 const std::string LAGRANGIAN_TIDS_TAG = "LagrangianLinearTIDS";

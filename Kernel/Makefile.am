@@ -27,7 +27,6 @@ SUBDIRS = config src siconos global_tests #src must be compiled before main prog
 
 doc:
 	$(MKDIR) $(top_srcdir)/doc
-	$(MKDIR) $(top_srcdir)/doc/api
 	$(DOXYGEN) $(DOXYGEN_CFG)
 
 install-data-local: 

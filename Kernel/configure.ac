@@ -138,18 +138,6 @@ dnl #################################
 
 # required version of the libraries
 
-dnl Check for Lapack
-dnl ACX_LAPACK([  dnl action-if-found:  # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS],
-dnl  [
-dnl   dnl action-if-not-found: 
-dnl   AC_MSG_ERROR([Blas/Lapack was not found. 
-dnl *** This makes this library unusable. Please get blas and lapack 
-dnl *** installed. If you do have these installed, use the options 
-dnl *** --with-blas=<libname> or --with-lapack=<libname> and/or set 
-dnl *** the env variable LDFLAGS to include the appropriate linker 
-dnl *** flags.])
-dnl ])
-
 dnl Numerics
 AC_MSG_CHECKING([for Siconos/Numerics])
 ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-numerics.])])
@@ -157,7 +145,6 @@ ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_
 dnl Check for Blas and Lapack
 ACX_LAPACK([
   dnl action-if-found: 
-  AC_DEFINE(HAVE_LAPACKPP,1,[Define if you have LAPACK library.])
   # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS
 ], [
   dnl action-if-not-found: 

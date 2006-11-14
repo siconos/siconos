@@ -1,0 +1,30 @@
+/** \mainpage Siconos Installation Guide
+
+\section Introduction
+
+Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of Non Smooth Dynamical Systems. 
+
+Usefull links: 
+
+Siconos Homepage: http://siconos.gforge.inria.fr/
+
+Siconos download:
+https://gforge.inria.fr/frs/?group_id=9
+
+Help and Documentations:
+https://gforge.inria.fr/docman/?group_id=9
+
+\see \ref sect_doc.
+ 			
+\section sect_preface Aim of this document
+This manual explains how to download and install the Siconos platform. \n
+It also shortly describes the different required or optional libraries.\n
+Contents:
+- \subpage download 
+- \subpage prereq 
+- \subpage install
+
+
+2006-11-10, Franck Pérignon <franck.perignon@inrialpes.fr>
+
+*/

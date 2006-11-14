@@ -1,0 +1,67 @@
+/*! \page download Downloading Siconos
+
+Four packages are available:
+
+- \b Siconos-Numerics: shared dynamic library that provides low-level algorithms (Fortran and C) - Requires Blas-Lapack. 
+
+- \b Siconos-Kernel: high level C++ classes and methods, main package of the software. 
+
+- \b Siconos-Front-End: interfaces with "user-friendly" softwares, Scilab and Python
+
+- \b Siconos-Samples: a library of examples. 
+
+You need at least Numerics and Kernel. 
+
+\section tgz Source (tgz archives)
+
+The platform sources (.tgz) are available at the following address: 
+https://gforge.inria.fr/frs/?group_id=9
+
+To download the sources of any package of the
+Siconos software a login and a password are required.
+To get them, please send a mail to: 
+
+siconos-download@lists.gforge.inria.fr
+
+We ask that you fill out a request form to identify yourself and indicate your interest in Siconos.
+
+Please give us your:
+
+- name:
+
+- institution: 
+
+- mail:
+
+- interest in the Siconos software:
+
+
+You will automatically get login and password by e-mail. 
+
+Then you can log in and select the requested packages or files.
+
+\section svn Subversion
+
+If you are a developer of the platform, you can use subversion tools to get the software.
+First you need to connect to the gforge and add your ssh-key (see https://gforge.inria.fr/scm/?group_id=9).
+
+Then run in a terminal:
+\e 
+svn checkout --username yourlogin https://scm.gforge.inria.fr/svn/siconos
+\e 
+
+Other usefull commands:
+- svn up: bring your working copy $(B!H(Bup-to-date$(B!I(B with the repository.
+- svn commit: commit the new version of your file to the repository.
+- svn status: show you the state of any item in your working copy
+  (option -q: list only the files under version control)
+- svn add name: name (file or directory) will now be under version control (after the next commit).
+  Warning: if name is a directory, everything underneath name will be scheduled for addition.
+- svn delete name: delete name (next commit)  
+- svn diff: compare your version with the repository
+- svn help \e item: help on item
+
+For details on subversion see the online documentation at http://svnbook.red-bean.com/. 
+
+*/
+
