@@ -1,12 +1,17 @@
 /** \mainpage Siconos Kernel - API Documentation
 
-Homepage: http://siconos.gforge.inria.fr/
 
-Download page: https://gforge.inria.fr/frs/?group_id=9
+\section doxyKernel Introduction
 
-Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of Non Smooth Dynamical Systems.
+Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of Non Smooth Dynamical Systems. 
 
-\section sect_quick Quick Start
+Useful links: 
+
+<a href="http://siconos.gforge.inria.fr/">Siconos Home Page</a>.\n
+
+Siconos <a href="https://gforge.inria.fr/frs/?group_id=9">Download</a>.\n
+
+\ref SiconosDocList
 
 \section sect_plat Platforms
 

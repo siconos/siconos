@@ -36,22 +36,23 @@ Please give us your:
 - interest in the Siconos software:
 
 
-You will automatically get login and password by e-mail. 
+You will get login and password by e-mail.
 
 Then you can log in and select the requested packages or files.
 
 \section svn Subversion
 
 If you are a developer of the platform, you can use subversion tools to get the software.
-First you need to connect to the gforge and add your ssh-key (see https://gforge.inria.fr/scm/?group_id=9).
+First you need to connect to the Gforge and add your ssh-key (see https://gforge.inria.fr/scm/?group_id=9).
 
-Then run in a terminal:
-\e 
+Then run in a terminal: \n
+
+\verbatim
 svn checkout --username yourlogin https://scm.gforge.inria.fr/svn/siconos
-\e 
+\endverbatim
 
-Other usefull commands:
-- svn up: bring your working copy $(B!H(Bup-to-date$(B!I(B with the repository.
+Other useful commands:
+- svn up: bring your working copy "up-to-date" with the repository.
 - svn commit: commit the new version of your file to the repository.
 - svn status: show you the state of any item in your working copy
   (option -q: list only the files under version control)
@@ -61,7 +62,7 @@ Other usefull commands:
 - svn diff: compare your version with the repository
 - svn help \e item: help on item
 
-For details on subversion see the online documentation at http://svnbook.red-bean.com/. 
+For details on subversion see the on-line documentation at http://svnbook.red-bean.com/. 
 
 */
 

@@ -1,0 +1,28 @@
+/** \mainpage Getting Started with Siconos
+
+WARNING: IN PROCESS
+
+\section gettingStarted Introduction
+
+Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of Non Smooth Dynamical Systems. 
+
+Useful links: 
+
+<a href="http://siconos.gforge.inria.fr/">Siconos Home Page</a>.\n
+
+Siconos <a href="https://gforge.inria.fr/frs/?group_id=9">Download</a>.\n
+
+\ref SiconosDocList
+ 			
+\section preface Aim of this document
+In this manual we first give a short overview of the design of the platform. 
+...
+
+- \subpage overview \n
+- \subpage SiconosTutorial \n
+- \subpage usingxml \n
+- \subpage UsingPython \n
+
+2006-11-10, Franck Pérignon <franck.perignon@inrialpes.fr>
+
+*/

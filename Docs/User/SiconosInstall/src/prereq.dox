@@ -2,21 +2,18 @@
 
 \section req_libs Required libraries
 
-\subsection blas Blas (Basic Linear Algebra Subprograms), Lapack (Linear Algebra PACKage) and ATLAS (Automatically Tuned Linear Algebra Software). 
+\subsection atlas ATLAS (Automatically Tuned Linear Algebra Software). 
 
-On most Linuxes these are available as pre-compiled binaries under the name "blas" and "lapack".
+On most Linuxes this package is available as pre-compiled binary under the name atlas. You also need atlas-devel to include some required header files. \n
+Atlas usually comes with \b Blas (Basic Linear Algebra Subprograms) and \b Lapack (Linear Algebra PACKage). 
 
-Warning: you also need atlas-devel to include some required header files.
-
-On Fedora: yum install atlas atlas-devel lapack
-
+On Fedora: yum install atlas atlas-devel 
 
 About \b Blas: http://www.netlib.org/blas/
 
 About \b Lapack: http://www.netlib.org/lapack/
 
 About \b Atlas: http://math-atlas.sourceforge.net/
-
 
 \subsection xml libxml2
 The XML C parser and toolkit. Required for XML file reading and writing.

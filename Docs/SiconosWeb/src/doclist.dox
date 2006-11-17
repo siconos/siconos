@@ -1,0 +1,41 @@
+/*! \page SiconosDocList Siconos Help and Documentation.
+
+<em>
+All documentation files and help are located on <a href="https://gforge.inria.fr/projects/siconos/"> Siconos Gforge</a>\n
+The main documents you can find on these pages are listed below.
+</em>
+
+\section manuals Available Manuals:
+
+- \ref siconosInstall "Siconos Installation Guide": how to download, install the platform, what are the required libraries ...
+
+- \ref gettingStarted "Getting Started with Siconos": a short tutorial on how to use Siconos and write your own samples in C++ or Python.
+
+In Process:
+
+- Siconos User Manual: fully detailed description of all the Siconos functionalities (based on Doxygen)
+
+- Siconos Theory Manual (in progress, not yet available)
+
+\section docCode Code documentation 
+
+- A detailed <a href="http://siconos.gforge.inria.fr/docDev/design.html" >Design Description</a>. 
+
+- A basic software <a href="http://siconos.gforge.inria.fr/docDev/sdm.html" >Development Methodology</a>.
+
+- A <a href="http://siconos.gforge.inria.fr/Documentation/SiconosOverview/CapriSept2006.pdf"> Short Overview</a> of the Software design.
+
+- \ref doxyKernel "Doxygen Documentation for Kernel", auto-generated documentation for Siconos-Kernel
+
+- \ref doxyNumerics "Doxygen Documentation for Numerics", auto-generated documentation for Siconos-Numerics
+
+\section miscDoc Miscellaneous
+
+- An overview of the <a href="http://siconos.gforge.inria.fr/docDev/index.html" > Siconos European project</a>.
+
+- <a href="https://gforge.inria.fr/forum/?group_id=9" >Forum</a>.
+
+- <a href="https://gforge.inria.fr/tracker/?group_id=9">Bug Trackers</a>.
+
+- <a href="https://gforge.inria.fr/mail/?group_id=9">Mailing Lists</a>.
+*/
