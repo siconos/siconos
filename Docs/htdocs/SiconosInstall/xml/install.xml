@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='iso-8859-1' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.5.1">
+  <compounddef id="install" kind="page">
+    <compoundname>install</compoundname>
+    <title>Installing Siconos</title>
+    <detaileddescription>
+<sect1 id="install_1comp">
+<title>Compile and Install of Siconos</title>
+<para>Three steps:</para><para><orderedlist>
+<listitem><para>compile and install Siconos-Numerics</para></listitem><listitem><para>compile and install Siconos-Kernel</para></listitem><listitem><para>compile and install Siconos-Front-End (optional)</para></listitem></orderedlist>
+</para><para>Warning: before that, make sure you have read the section <ref refid="prereq" kindref="compound"><para>Prerequisite</para></ref> .</para><sect2 id="install_1compile_linux">
+<title>Linux/Unix</title>
+<para>For compilation of each package, run the following commands in Numerics/Kernel/FrontEnd directories:</para><para><verbatim>
+ ./autogen.sh
+ ./configure 
+  make
+  make install
+</verbatim></para><para>Type <computeroutput>./configure --help</computeroutput> to see more information.</para><para>Default installation path is /usr/local. <linebreak/>
+ To change that, type <verbatim>
+./configure --prefix=/your/install/path 
+</verbatim></para><para>Warning: depending on the installation path, you might be root to run make install.</para><para>To run tests: <verbatim>
+ ./autogen.sh
+ ./configure --enable-cppunit 
+  make
+  make install
+  make check
+</verbatim></para><para>To generate Doxygen documentation: <verbatim>
+make doc
+</verbatim> </para></sect2>
+</sect1>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

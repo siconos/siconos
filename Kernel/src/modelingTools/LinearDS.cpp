@@ -454,7 +454,7 @@ void LinearDS::computeA(const double time)
     if (APtr == NULL)
       RuntimeException::selfThrow("computeA() is not linked to a plugin function");
     SimpleVector* param = parametersList["A"];
-    APtr(n, &time, &(*A)(0, 0), &(*param)(0));
+    APtr(n, time, &(*A)(0, 0), &(*param)(0));
   }
   // else nothing
 }
@@ -466,7 +466,7 @@ void LinearDS::computeB(const double time)
     if (bPtr == NULL)
       RuntimeException::selfThrow("computeB() is not linked to a plugin function");
     SimpleVector* param = parametersList["b"];
-    bPtr(n, &time, &(*b)(0), &(*param)(0));
+    bPtr(n, time, &(*b)(0), &(*param)(0));
   }
   // else nothing
 }

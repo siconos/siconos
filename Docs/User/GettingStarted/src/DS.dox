@@ -1,0 +1,195 @@
+/*! \page dsInSiconos Dynamical Systems formulations in Siconos
+
+\author Franck Pérignon
+\version Siconos-Kernel 1.3.0 
+
+\section doc_dsIntro Introduction
+
+In Siconos, the class DynamicalSystem represent generic n-dimensional dynamical system of the form :
+\f{eqnarray*}\label{firstOrderSystem}
+  \dot x(t) &=& f(x,t) + T(x) u(x, t) + r \\
+  x(t_0)&=&x_0 
+\f}
+
+with: \n
+- x: the state of the system - Vector of size n. 
+- f(x,t): the vector field - Vector of size n
+- u(x, t): control term - Vector of size uSize.
+- T(x): n X uSize matrix, related to control term.
+- r: input due to non-smooth behavior - Vector of size n.
+
+\section doc_dsClassDiag Which are the available DynamicalSystems types? 
+
+\image html classDynamicalSystem.png
+
+As shown on the class diagram above, there are five possible formulations for dynamical systems in Siconos, three for first order systems and two for second order Lagrangian systems. The main class is DynamicalSystem, all other derived from this one.
+- DynamicalSystem: first order general non linear system.
+- LinearDS: first order, linear system.
+- LinearTIDS: first order linear system with time-invariant coefficients.
+- LagrangianDS: second order non linear Lagrangian system.
+- LagrangianLinearTIDS: second order linear system with time-invariant coefficients.
+
+\section doc_nlds General non linear first order dynamical systems: class DynamicalSystem
+This is the top class for dynamical systems. All other systems classes are derived from this one. 
+
+A general dynamical systems is described by the following set of n equations, completed with initial conditions:
+\f{eqnarray*}
+ \label{firstOrderSystem}
+  \dot x &=& f(x,t) + T(x) u(x, t) + r \\
+  x(t_0)&=&x_0 
+\f}
+
+The Jacobian matrix, \f$\nabla_x f(x,t)\f$, of f according to x, nX n square matrix, is also a member of the class. 
+
+Initial conditions are given by the member x_0, vector of size n. This corresponds to x value when
+simulation is starting, ie after a call to strategy->initialize(). \n
+
+There are plug-in functions in this class for f, its Jacobian, jacobianXF, u and T. All
+of them can handle a vector of user-defined parameters:
+
+<b> Required parameters:</b> n, x0, f (as a plug-in), its Jacobian.
+
+<b> Main functions of the class: </b>
+\code
+// For each plug-in it's first necessary to give the name and location of the function used to compute it
+// name of the library that contains your plugin, here your function is in MyPlugin.cpp
+string pluginPath = "MyPlugin.so";  
+// Warning: the name of the plugin file must end with the string "Plugin"
+// and the length of the string before "Plugin" must not exceed 6 letters. 
+// name you give to the function
+string functionName = "computeMyRhs";
+ds->setComputeRHS(pluginPath, functionName);
+// to compute right hand side of equation \ref firstOrderSystem (saved in member rhs)
+ds->computeRhs(time);
+// to compute the Jacobian according to x of the right-hand side.
+ds->computeJacobianXRhs(time); 
+// to compute f(x,t) and save it into rhs member.
+ds->computeF(time);
+// to compute the jacobian of f(x,t), and save it into member JacobianXF :
+ds->computeJacobianXF(time);
+\endcode
+The signature of each function (ie the number and type of arguments) must be exactly the same as the one given in Kernel/src/plugin/DefaultPlugin.cpp for the corresponding function. 
+
+\section doc_linDS First order linear dynamical systems: class LinearDS.
+
+Derived from DynamicalSystem, described by the set of n equations and initial conditions: 
+\f{eqnarray*}
+  \dot x(t) &=& A(t)x(t)+Tu(t)+b(t)+r \\
+  x(t_0)&=&x_0 
+\f}
+With:
+
+- A(t): nXn matrix, state independent but possibly time-dependent.
+- b(t): Vector of size n, possibly time-dependent.
+
+Other variables are those of DynamicalSystem class. \n
+A and B have corresponding plug-in functions. 
+
+Links with vectorField and its Jacobian are: 
+\f{eqnarray*}
+  f(x,t) &=& A(t)x(t)+b(t) \\
+  jacobianXF&=&\nabla_x f(x,t) = A(t) 
+\f}
+Main functions of the class:
+\code
+linds->computeRhs(time); // to compute Ax+b+Tu (saved in member rhs)
+linds->computeJacobianXRhs(time); // the jacobian
+// to compute A(t):
+setComputeAFunction(pluginPath, functionName);
+linds->computeA(time);
+// to compute b(t):
+setComputeBFunction(pluginPath, functionName);
+linds->computeB(time);
+\endcode
+
+\section doc_ltids First order time-invariant linear dynamical systems: class LinearTIDS
+
+Derived from DynamicalSystem, described by the set of n equations and initial conditions: 
+\f{eqnarray*}
+  \dot x(t) &=& Ax(t)+Tu(t)+b+r \\
+  x(t_0)&=&x_0 
+\f}
+With:
+
+- A(t): nXn constant matrix.
+- b(t): constant vector of size n.
+
+Other variables are those of DynamicalSystem class. \n
+
+Links with vectorField and its Jacobian are: 
+\f{eqnarray*}
+  f(x,t) &=& Ax(t)+b \\
+  jacobianXF&=&\nabla_x f(x,t) = A
+\f}
+Main functions of the class:
+\code
+ltids->computeRhs(time) // to compute Ax+b+Tu (saved in member rhs)
+ltids->computeJacobianXRhs(time) // to compute A(t).
+\endcode
+
+\section docLagDS Second order non linear Lagrangian dynamical systems: class LagrangianDS
+
+Lagrangian second order non linear systems are described by the following set of nDof equations + initial conditions:
+\f{eqnarray*}
+ M(q) \ddot q + NNL(\dot q, q) + F_{Int}(\dot q , q , t) &=& F_{Ext}(t) + p \\
+ q(t_0) &=& q0 \\
+ \dot q(t_0) &=& velocity0 
+\f}
+With:
+
+- M(q): nDofX nDof matrix of inertia.
+- q: state of the system - Vector of size nDof.
+- \f$\dot q\f$ or velocity: derivative of the state according to time - Vector of size nDof.
+- \f$NNL(\dot q, q)\f$:  non linear terms, time-independent - Vector of size nDof.
+- \f$F_{Int}(\dot q , q , t)\f$: time-dependent linear terms - Vector of size nDof.
+- \f$F_{Ext}(t)\f$: external forces, time-dependent BUT do not depend on state - Vector of size nDof.
+- p: input due to non-smooth behavior - Vector of size nDof.
+
+The following Jacobian are also member of this class:
+
+- jacobianQFInt = \f$\nabla_q F_{Int}(t,q,\dot q)\f$ - nDofX nDof matrix.
+- jacobianVelocityFInt = \f$\nabla_{\dot q} F_{Int}(t,q,\dot q)\f$ - nDof X nDof matrix.
+- jacobianQNNL = \f$\nabla_q NNL(q,\dot q)\f$ - nDof X nDof matrix.
+- jacobianVelocityNNL = \f$\nabla_{\dot q}NNL(q,\dot q)\f$ - nDof X nDof matrix.
+
+There are plug-in functions in this class for F_{int}, F_{Ext}, M, NNL and the four Jacobian matrices. All
+of them can handle a vector of user-defined parameters. \n
+Call computeOperator(...) to compute value for operator = {FInt, FExt, Mass, NNL, JacobianQFInt, JacobianVelocityFInt, JacobianQNNL,JacobianVelocityNNL}. For any of them, link with plug-in function must be set using setComputeOperatorFunction(pluginPath,pluginName).
+
+Links with first order dynamical system are: 
+With \f$0_{n}\f$ a vector of zero of size n, \f$0_{n X m}\f$ a n X m zero matrix and
+\f$I_{n X n}\f$, identity n X n matrix. \n
+
+Warning: control terms (Tu) are not fully implemented in Lagrangian systems. This will be part of future version.
+
+\section doc_dsLTIDS Second order linear and time-invariant Lagrangian dynamical systems: class LagrangianLinearTIDS
+
+\f{eqnarray*}
+M \ddot q + C \dot q + K q =  F_{Ext}(t) + p
+\f}
+
+With:
+
+- C: constant viscosity nDof X nDof matrix 
+- K: constant rigidity nDof X nDof matrix 
+
+And: 
+\f{eqnarray*}
+F_{Int} &=& C \dot q + K q \\
+NNL &=& 0_{nDof} 
+\f}
+
+\section doc_dsPlugin Dynamical Systems plug-in functions.
+
+See \ref doc_usingPlugin for details on how to use a plug-in in Siconos. \n
+
+- DynamicalSystem: \f$ f(x,t), \ \ \nabla_x f(x,t), \ \ T(x), \ \ u(x,t) \f$
+- LinearDS: A(t), b(t)
+- LagrangianDS: \f$ M(q), \ \ NNL(\dot q,q), \ \ F_{Int}(\dot q,q ,t), \ \ F_{Ext}(t), \ \ \nabla_q F_{Int}(t,q,\dot q), \ \ \nabla_{\dot q}F_{Int}(t,q,\dot q), \ \ \nabla_q NNL(q,\dot q), \ \ \nabla_{\dot q}NNL(q,\dot q) \f$.
+
+Mind that any item present in a class is also available in its derived classes. This means for example that \f$F_{Ext}(t)\f$ has a plug-in function for LagrangianLinearTIDS.\n
+
+Warning: if you create a new system using the copy constructor, any existing parameters in plug-in functions
+will also be copied. This means that no link between pointer for SimpleVector parameters will remain. 
+In that case it may be better to re-set properly your parameters for the new created dynamical system.
+*/

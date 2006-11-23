@@ -1,0 +1,94 @@
+\form#0:\begin{eqnarray} \label{firstOrderSystem} \dot x &=& f(x,t) + T(x) u(x, t) + r \\ x(t_0)&=&x_0 \end{eqnarray}
+\form#1:$\nabla_x f(x,t)$
+\form#2:$n\times n$
+\form#3:$x_0$
+\form#4:$n$
+\form#5:$f$
+\form#6:$jacobianXF$
+\form#7:$u$
+\form#8:$T$
+\form#9:$x0$
+\form#10:$f(x,t)$
+\form#11:\begin{eqnarray} \dot x &=& A(t)x(t)+Tu(t)+b(t)+r \\ x(t_0)&=&x_0 \end{eqnarray}
+\form#12:$A(t)$
+\form#13:$b(t)$
+\form#14:$A$
+\form#15:$B$
+\form#16:\begin{eqnarray} f(x,t) &=& A(t)x(t)+b(t) \\ jacobianXF&=&\nabla_x f(x,t) = A(t) \end{eqnarray}
+\form#17:$Ax+b+Tu$
+\form#18:\begin{eqnarray} \dot x &=& Ax(t)+Tu(t)+b+r \\ x(t_0)&=&x_0 \end{eqnarray}
+\form#19:\begin{eqnarray} f(x,t) &=& Ax(t)+b \\ jacobianXF&=&\nabla_x f(x,t) = A \end{eqnarray}
+\form#20:$nDof$
+\form#21:\begin{eqnarray} M(q) \ddot q + NNL(\dot q, q) + F_{Int}(\dot q , q , t) &=& F_{Ext}(t) + p \\ q(t_0) &=& q0 \\ \dot q(t_0) &=& velocity0 \end{eqnarray}
+\form#22:$M(q)$
+\form#23:$nDof\times nDof$
+\form#24:$q$
+\form#25:$\dot q$
+\form#26:$velocity$
+\form#27:$NNL(\dot q, q)$
+\form#28:$F_{Int}(\dot q , q , t)$
+\form#29:$F_{Ext}(t)$
+\form#30:$p$
+\form#31:$\nabla_q F_{Int}(t,q,\dot q)$
+\form#32:$\nabla_{\dot q} F_{Int}(t,q,\dot q)$
+\form#33:$\nabla_q NNL(q,\dot q)$
+\form#34:$\nabla_{\dot q}NNL(q,\dot q)$
+\form#35:$F_{int}$
+\form#36:$F_{Ext}$
+\form#37:$M$
+\form#38:$NNL$
+\form#39:$FInt$
+\form#40:$FExt$
+\form#41:$Mass$
+\form#42:$JacobianQFInt$
+\form#43:$JacobianVelocityFInt$
+\form#44:$JacobianQNNL$
+\form#45:$JacobianVelocityNNL$
+\form#46:$0_{n}$
+\form#47:$0_{n\times m}$
+\form#48:$n\times m$
+\form#49:$I_{n\times n}$
+\form#50:$Tu$
+\form#51:$\rightarrow$
+\form#52:\begin{eqnarray} M \ddot q + C \dot q + K q = F_{Ext}(t) + p \end{eqnarray}
+\form#53:$C$
+\form#54:$K$
+\form#55:\begin{eqnarray} F_{Int} &=& C \dot q + K q \\ NNL &=& 0_{nDof} \end{eqnarray}
+\form#56:$setParameter(yourVector, "id")$
+\form#57:$"id"$
+\form#58:$setParameterPtr(yourVector, "id")$
+\form#59:$param$
+\form#60:\begin{eqnarray}\label{firstOrderSystem} \dot x &=& f(x,t) + T(x) u(x, t) + r \\ x(t_0)&=&x_0 \end{eqnarray}
+\form#61:\begin{eqnarray}\label{firstOrderSystem} \dot x(t) &=& f(x,t) + T(x) u(x, t) + r \\ x(t_0)&=&x_0 \end{eqnarray}
+\form#62:\begin{eqnarray*}\label{firstOrderSystem} \dot x(t) &=& f(x,t) + T(x) u(x, t) + r \\ x(t_0)&=&x_0 \end{eqnarray*}
+\form#63:\begin{eqnarray*} \label{firstOrderSystem} \dot x &=& f(x,t) + T(x) u(x, t) + r \\ x(t_0)&=&x_0 \end{eqnarray*}
+\form#64:\begin{eqnarray*} \dot x(t) &=& A(t)x(t)+Tu(t)+b(t)+r \\ x(t_0)&=&x_0 \end{eqnarray*}
+\form#65:\begin{eqnarray*} f(x,t) &=& A(t)x(t)+b(t) \\ jacobianXF&=&\nabla_x f(x,t) = A(t) \end{eqnarray*}
+\form#66:\begin{eqnarray*} \dot x(t) &=& Ax(t)+Tu(t)+b+r \\ x(t_0)&=&x_0 \end{eqnarray*}
+\form#67:\begin{eqnarray*} f(x,t) &=& Ax(t)+b \\ jacobianXF&=&\nabla_x f(x,t) = A \end{eqnarray*}
+\form#68:\begin{eqnarray*} M(q) \ddot q + NNL(\dot q, q) + F_{Int}(\dot q , q , t) &=& F_{Ext}(t) + p \\ q(t_0) &=& q0 \\ \dot q(t_0) &=& velocity0 \end{eqnarray*}
+\form#69:$0_{n X m}$
+\form#70:$I_{n X n}$
+\form#71:\begin{eqnarray*} M \ddot q + C \dot q + K q = F_{Ext}(t) + p \end{eqnarray*}
+\form#72:\begin{eqnarray*} F_{Int} &=& C \dot q + K q \\ NNL &=& 0_{nDof} \end{eqnarray*}
+\form#73:$\nabla_xf(x,t)$
+\form#74:$F_{Int}(\dot q, q, t)$
+\form#75:$\nabla_qF_{Int}(\dot q, q, t)$
+\form#76:$\nabla_{\dot q}F_{Int}(\dot q, q, t)$
+\form#77:$\nabla_qNNL(\dot q, q)$
+\form#78:$\nabla_{\dot q}NNL(\dot q, q)$
+\form#79:$u_L(q,t)$
+\form#80:$T_L(q)$
+\form#81:$ \nabla_x f: (x,t) \in R^{n} \times R \mapsto R^{n \times n} $
+\form#82:$F_{int}(t,q,\dot q)$
+\form#83:$F_{Int}(\dot q , q , t), $
+\form#84:$, $
+\form#85:$NNL(\dot q,q)$
+\form#86:$F_{Int}(\dot q,q ,t), $
+\form#87:$f(x,t), \nabla_x f(x,t), T(x), u(x,t)$
+\form#88:$M(q), NNL(\dot q,q), F_{Int}(\dot q,q ,t), F_{Ext}(t), \nabla_q F_{Int}(t,q,\dot q), \nabla_{\dot q}F_{Int}(t,q,\dot q), \nabla_q NNL(q,\dot q), \nabla_{\dot q}NNL(q,\dot q)$
+\form#89:$ f(x,t), \nabla_x f(x,t), T(x), u(x,t) $
+\form#90:$ M(q), NNL(\dot q,q), F_{Int}(\dot q,q ,t), F_{Ext}(t), \nabla_q F_{Int}(t,q,\dot q), \nabla_{\dot q}F_{Int}(t,q,\dot q), \nabla_q NNL(q,\dot q), \nabla_{\dot q}NNL(q,\dot q) $
+\form#91:$ f(x,t), \ \ \nabla_x f(x,t), T(x), u(x,t) $
+\form#92:$ f(x,t), \ \ \nabla_x f(x,t), \ \ T(x), \ \ u(x,t) $
+\form#93:$ M(q), \ \ NNL(\dot q,q), \ \ F_{Int}(\dot q,q ,t), \ \ F_{Ext}(t), \ \ \nabla_q F_{Int}(t,q,\dot q), \ \ \nabla_{\dot q}F_{Int}(t,q,\dot q), \ \ \nabla_q NNL(q,\dot q), \ \ \nabla_{\dot q}NNL(q,\dot q) $

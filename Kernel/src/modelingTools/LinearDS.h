@@ -96,21 +96,21 @@ protected:
   /* the name of the plugin used to compute b */
   std::string  computeBFunctionName;
 
-  /** pointer on function to compute A
-  *  \param unsigned int sizeOfA = n, dim of square matrix A (nXn)
-  *  \param double* time : current time
-  *  \param double* A : the pointer to the first element of the matrix b
-  *    \param double* param   : a vector of user-defined parameters
-  */
-  void (*APtr)(const unsigned int , const double*, double*, double*);
+  /** LinearDS plug-in to compute A(t), id = "A"
+   * @param sizeOfA : size of square-matrix A
+   * @param time : current time
+   * @param[in,out] A : pointer to the first element of A
+   * @param[in,out] param  : a vector of user-defined parameters
+   */
+  void (*APtr)(unsigned int, double, double*, double*);
 
-  /** pointer on function to compute b
-  *  \param unsigned int sizeOfB : size of vector b
-  *  \param double* time : current time
-  *  \param double* b : the pointer to the first element of the vector b
-  *    \param double* param   : a vector of user-defined parameters
-  */
-  void (*bPtr)(const unsigned int , const double*, double*, double*);
+  /** LinearDS plug-in to compute b(t), id = "b"
+   * @param sizeOfB : size of vector b
+   * @param time : current time
+   * @param[in,out] b : pointer to the first element of b
+   * @param[in,out] param  : a vector of user-defined parameters
+   */
+  void (*bPtr)(unsigned int, double, double*, double*);
 
   /** set all allocation flags (isAllocated map)
   *  \param bool: = if true (default) set default configuration, else set all to false

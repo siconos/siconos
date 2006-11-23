@@ -1,5 +1,36 @@
 /*! \page SiconosTutorial Siconos Tutorial (C++)
 
+To run your own simulation using Siconos, you need to describe your system in a C++ file, let us call it main.cpp. 
+There are three main stages:
+-# the description of your Non Smooth Dynamical System
+-# the description of the way it will be simulated (which discretisation, which integrators, solvers ...)
+-# the simulation loop writing.
 
+Steps 1 and 2 lead to the building of a Model, which behavior is simulated in step 3.
 
+\section tutNSDS The Non Smooth Dynamical System
+A NonSmoothDynamicalSystem (NSDS) is a set of DynamicalSystems that may interact alltogether, in a non-smooth way. Thus, to build a NSDS you need to:
+- define some DynamicalSystems
+- define some Interactions (ie Relation and NonSmoothLaw)
+\subsection tutDS Dynamical Systems
+The DynamicalSystem class represents a n-dimensional set of ordinary differential equations. A full description of the various types of DynamicalSystem is available at page \ref dsInSiconos. \n
+To build your DynamicalSystem, you first have to determine its type (mainly first or second order, linear or not) and then a constructor that fits to your needs. 
+Whatever the constructor is, there are obsviously some minimum required data (initial conditions, ...). 
+Suppose you need to build a NSDS with two second order systems, Lagrangian, one linear and another one non linear.\n
+
+First we define a set of DynamicalSystems, useful object to handle all our systems:
+\code
+DynamicalSystemsSet allMyDS;
+\endcode
+
+\subsection tutInter Interactions
+\subsection tutMisc Misc
+\section tutSimu The Simulation
+\subsection tutTD Time Discretisation
+\subsection tutOSI One Step Integrator
+\subsection tutOSNS One Step Non Smooth Problem
+\section tutModel The Model
+\section tutSimLoop The Simulation Loop
+\subsection tutTS TimeStepping Case
+\subsection tutED EventDriven Case
 */

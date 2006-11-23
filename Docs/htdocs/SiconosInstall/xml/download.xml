@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='iso-8859-1' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.5.1">
+  <compounddef id="download" kind="page">
+    <compoundname>download</compoundname>
+    <title>Downloading Siconos</title>
+    <detaileddescription>
+<para>Four packages are available:</para><para><itemizedlist>
+<listitem><para><bold>Siconos-Numerics</bold>: shared dynamic library that provides low-level algorithms (Fortran and C) - Requires Blas-Lapack.</para></listitem></itemizedlist>
+</para><para><itemizedlist>
+<listitem><para><bold>Siconos-Kernel</bold>: high level C++ classes and methods, main package of the software.</para></listitem></itemizedlist>
+</para><para><itemizedlist>
+<listitem><para><bold>Siconos-Front-End</bold>: interfaces with &quot;user-friendly&quot; softwares, Scilab and Python</para></listitem></itemizedlist>
+</para><para><itemizedlist>
+<listitem><para><bold>Siconos-Samples</bold>: a library of examples.</para></listitem></itemizedlist>
+</para><para>You need at least Numerics and Kernel.</para><sect1 id="download_1tgz">
+<title>Source (tgz archives)</title>
+<para>The platform sources (.tgz) are available at the following address: <ulink url="https://gforge.inria.fr/frs/?group_id=9">https://gforge.inria.fr/frs/?group_id=9</ulink></para><para>To download the sources of any package of the Siconos software a login and a password are required. To get them, please send a mail to:</para><para><ulink url="mailto:siconos-download@lists.gforge.inria.fr">siconos-download@lists.gforge.inria.fr</ulink></para><para>We ask that you fill out a request form to identify yourself and indicate your interest in Siconos.</para><para>Please give us your:</para><para><itemizedlist>
+<listitem><para>name:</para></listitem></itemizedlist>
+</para><para><itemizedlist>
+<listitem><para>institution:</para></listitem></itemizedlist>
+</para><para><itemizedlist>
+<listitem><para>mail:</para></listitem></itemizedlist>
+</para><para><itemizedlist>
+<listitem><para>interest in the Siconos software:</para></listitem></itemizedlist>
+</para><para>You will get login and password by e-mail.</para><para>Then you can log in and select the requested packages or files.</para></sect1>
+<sect1 id="download_1svn">
+<title>Subversion</title>
+<para>If you are a developer of the platform, you can use subversion tools to get the software. First you need to connect to the Gforge and add your ssh-key (see <ulink url="https://gforge.inria.fr/scm/?group_id=9">https://gforge.inria.fr/scm/?group_id=9</ulink>).</para><para>Then run in a terminal: <linebreak/>
+</para><para><verbatim>
+svn checkout --username yourlogin https://scm.gforge.inria.fr/svn/siconos
+</verbatim></para><para>Other useful commands:<itemizedlist>
+<listitem><para>svn up: bring your working copy &quot;up-to-date&quot; with the repository.</para></listitem><listitem><para>svn commit: commit the new version of your file to the repository.</para></listitem><listitem><para>svn status: show you the state of any item in your working copy (option -q: list only the files under version control)</para></listitem><listitem><para>svn add name: name (file or directory) will now be under version control (after the next commit). Warning: if name is a directory, everything underneath name will be scheduled for addition.</para></listitem><listitem><para>svn delete name: delete name (next commit)</para></listitem><listitem><para>svn diff: compare your version with the repository</para></listitem><listitem><para>svn help <emphasis>item:</emphasis> help on item</para></listitem></itemizedlist>
+</para><para>For details on subversion see the on-line documentation at <ulink url="http://svnbook.red-bean.com/.">http://svnbook.red-bean.com/.</ulink> </para></sect1>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

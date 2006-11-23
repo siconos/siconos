@@ -1452,7 +1452,7 @@ void LagrangianDS::computeFInt(const double time)
       RuntimeException::selfThrow("computeFInt() is not linked to a plugin function");
 
     SimpleVector* param = parametersList["fInt"];
-    computeFIntPtr(ndof, &time, &(*q)(0), &(*velocity)(0), &(*fInt)(0), &(*param)(0));
+    computeFIntPtr(ndof, time, &(*q)(0), &(*velocity)(0), &(*fInt)(0), &(*param)(0));
   }
 }
 void LagrangianDS::computeFInt(const double time, SimpleVector *q2, SimpleVector *velocity2)
@@ -1463,7 +1463,7 @@ void LagrangianDS::computeFInt(const double time, SimpleVector *q2, SimpleVector
       RuntimeException::selfThrow("computeFInt() is not linked to a plugin function");
 
     SimpleVector* param = parametersList["fInt"];
-    computeFIntPtr(ndof, &time, &(*q2)(0), &(*velocity2)(0), &(*fInt)(0), &(*param)(0));
+    computeFIntPtr(ndof, time, &(*q2)(0), &(*velocity2)(0), &(*fInt)(0), &(*param)(0));
   }
 }
 
@@ -1475,7 +1475,7 @@ void LagrangianDS::computeFExt(const double time)
       RuntimeException::selfThrow("computeFExt() is not linked to a plugin function");
 
     SimpleVector* param = parametersList["fExt"];
-    computeFExtPtr(ndof, &time, &(*fExt)(0), &(*param)(0));
+    computeFExtPtr(ndof, time, &(*fExt)(0), &(*param)(0));
   }
 }
 
@@ -1511,7 +1511,7 @@ void LagrangianDS::computeJacobianQFInt(const double time)
       RuntimeException::selfThrow("computeJacobianQFInt() is not linked to a plugin function");
 
     SimpleVector* param = parametersList["jacobianQFInt"];
-    computeJacobianQFIntPtr(ndof, &time, &(*q)(0), &(*velocity)(0), &(*jacobianQFInt)(0, 0), &(*param)(0));
+    computeJacobianQFIntPtr(ndof, time, &(*q)(0), &(*velocity)(0), &(*jacobianQFInt)(0, 0), &(*param)(0));
   }
 }
 
@@ -1523,7 +1523,7 @@ void LagrangianDS::computeJacobianQFInt(const double time, SimpleVector *q2, Sim
       RuntimeException::selfThrow("computeJacobianQFInt() is not linked to a plugin function");
 
     SimpleVector* param = parametersList["jacobianQFInt"];
-    computeJacobianQFIntPtr(ndof, &time, &(*q2)(0), &(*velocity2)(0), &(*jacobianQFInt)(0, 0), &(*param)(0));
+    computeJacobianQFIntPtr(ndof, time, &(*q2)(0), &(*velocity2)(0), &(*jacobianQFInt)(0, 0), &(*param)(0));
   }
 }
 
@@ -1535,7 +1535,7 @@ void LagrangianDS::computeJacobianVelocityFInt(const double  time)
       RuntimeException::selfThrow("computeJacobianVelocityFInt() is not linked to a plugin function");
 
     SimpleVector* param = parametersList["jacobianVelocityFInt"];
-    computeJacobianVelocityFIntPtr(ndof, &time, &(*q)(0), &(*velocity)(0), &(*jacobianVelocityFInt)(0, 0), &(*param)(0));
+    computeJacobianVelocityFIntPtr(ndof, time, &(*q)(0), &(*velocity)(0), &(*jacobianVelocityFInt)(0, 0), &(*param)(0));
   }
 }
 void LagrangianDS::computeJacobianVelocityFInt(const double  time, SimpleVector *q2, SimpleVector *velocity2)
@@ -1546,7 +1546,7 @@ void LagrangianDS::computeJacobianVelocityFInt(const double  time, SimpleVector 
       RuntimeException::selfThrow("computeJacobianVelocityFInt() is not linked to a plugin function");
 
     SimpleVector* param = parametersList["jacobianVelocityFInt"];
-    computeJacobianVelocityFIntPtr(ndof, &time, &(*q2)(0), &(*velocity2)(0), &(*jacobianVelocityFInt)(0, 0), &(*param)(0));
+    computeJacobianVelocityFIntPtr(ndof, time, &(*q2)(0), &(*velocity2)(0), &(*jacobianVelocityFInt)(0, 0), &(*param)(0));
   }
 }
 

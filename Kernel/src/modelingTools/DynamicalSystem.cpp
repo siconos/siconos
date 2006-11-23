@@ -1026,7 +1026,7 @@ void DynamicalSystem::computeF(const double time)
     if (computeFPtr == NULL)
       RuntimeException::selfThrow("DynamicalSystem::computeVF() f is not linked to a plugin function");
     SimpleVector* param = parametersList["f"];
-    computeFPtr(n, &time, &(*x)(0) , &(*f)(0), &(*param)(0)); // warning: f is saved in rhs!!
+    computeFPtr(n, time, &(*x)(0) , &(*f)(0), &(*param)(0)); // warning: f is saved in rhs!!
   }
   // else nothing!
 }
@@ -1039,7 +1039,7 @@ void DynamicalSystem::computeJacobianXF(const double time, const bool)
     if (computeJacobianXFPtr == NULL)
       RuntimeException::selfThrow("DynamicalSystem::computeJacobianXF() is not linked to a plugin function");
     SimpleVector* param = parametersList["jacobianXF"];
-    computeJacobianXFPtr(n, &time, &(*x)(0), &(*jacobianXF)(0, 0), &(*param)(0));
+    computeJacobianXFPtr(n, time, &(*x)(0), &(*jacobianXF)(0, 0), &(*param)(0));
   }
   // else nothing!
 }
@@ -1095,7 +1095,7 @@ void DynamicalSystem::computeU(const double time)
       RuntimeException::selfThrow("DynamicalSystem::computeU(), warning: u = NULL");
 
     SimpleVector* param = parametersList["u"];
-    computeUPtr(uSize, n, &time, &(*x)(0), &(*u)(0), &(*param)(0));
+    computeUPtr(uSize, n, time, &(*x)(0), &(*u)(0), &(*param)(0));
   }
   // else nothing!
 }
@@ -1109,7 +1109,7 @@ void DynamicalSystem::computeU(const double time, SiconosVector* xx)
     if (u == NULL)
       RuntimeException::selfThrow("DynamicalSystem::computeU(), warning: u = NULL");
     SimpleVector* param = parametersList["u"];
-    computeUPtr(uSize, n, &time, &(*xx)(0), &(*u)(0), &(*param)(0));
+    computeUPtr(uSize, n, time, &(*xx)(0), &(*u)(0), &(*param)(0));
   }
   // else nothing!
 }

@@ -4,25 +4,80 @@ WARNING: IN PROCESS
 
 \section gettingStarted Introduction
 
-Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of Non Smooth Dynamical Systems. 
+Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of <b>Non Smooth Dynamical Systems</b>. 
 
-Useful links: 
+\e Useful \e links: 
 
-<a href="http://siconos.gforge.inria.fr/">Siconos Home Page</a>.\n
-
-Siconos <a href="https://gforge.inria.fr/frs/?group_id=9">Download</a>.\n
-
-\ref SiconosDocList
+- <a href="http://siconos.gforge.inria.fr/">Siconos Home Page</a>.
+- <a href="https://gforge.inria.fr/frs/?group_id=9">Siconos Download</a>.
+- \ref SiconosDocList
  			
 \section preface Aim of this document
-In this manual we first give a short overview of the design of the platform. 
-...
+This manual aims at giving user a short overview of the software functionnalities. It is also supposed to provide some guidelines on how
+to build its own simulation. \n
+However, this manual does not give a full description of all the classes, functions etc of Siconos. For this, you need to check directly
+in the Siconos Doxygen Documentation. \n
 
-- \subpage overview \n
-- \subpage SiconosTutorial \n
-- \subpage usingxml \n
-- \subpage UsingPython \n
+- \ref start_NSP 
 
-2006-11-10, Franck Pérignon <franck.perignon@inrialpes.fr>
+- \ref SiconosTutorial 
+ 
+- \ref usingxml 
+
+- \ref UsingPython 
+
+\section runSimu Running a simulation
+
+There are two different ways to run a simulation with Siconos: directly with a C++ input file or thanks to a specific interface, with Python or Scilab. \n
+
+<b> With a C++ input file </b> \n
+\ref First check that Siconos is well installed (see \ref siconosInstall "Siconos Installation Guide"). \n
+Create a directory for your example, where the following files must be present:
+- the main input cpp file 
+- all the xxxPlugin.cpp files necessary for your simulation (for details on plug-in see \ref doc_siconosPlugin)
+- the xml input file if you use xml data description
+
+Then just run: 
+\verbatim 
+siconos myInputFile.cpp
+\endverbatim
+The simulation will then start. Note that xxxPlugin.so and an executable, myInputFile.out are created in the current directory. 
+
+To clean up the directory: 
+\verbatim 
+siconos -c
+\endverbatim
+
+For verbose mode when running, add "-v" option to siconos. 
+
+Note: if siconos is not installed in the default, search path, you may have to give a full path name, that is SICONOS_INSTALL_DIRECTORY_NAME/siconos. \n
+Or just change your PATH variable:
+\verbatim 
+setenv PATH $PATH:SICONOS_INSTALL_DIRECTORY_NAME
+or
+PATH=$PATH:SICONOS_INSTALL_DIRECTORY_NAME
+export PATH
+\endverbatim
+ 
+<b> With Front-End (Scilab or Python) </b>\n
+First check that Siconos and Siconos Front-End are well installed. \n
+About Scilab and Python installation see \ref prereq.\n
+
+With Python:
+\verbatim 
+pySiconos myInputFile.py
+\endverbatim
+
+With Scilab
+\verbatim 
+scilab -f myInputFile.sci
+\endverbatim
+
+\section GSusingTheGuide How to use this guide? 
+
+For each topic, we first give a list of the concerned classes. This should help you to find the required header files and to access to more detailed documentation in the Doxygen. \n
+Then we describe the more common way to build objects (ie the constructors) and give a list of the more useful functions. 
+
+2006-11-10, Contact: <a href="mailto:franck.perignon@inrialpes.fr"> Franck Pérignon</a>
 
 */

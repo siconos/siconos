@@ -141,7 +141,6 @@ AC_ARG_ENABLE(error-on-warning,[  --enable-erroronwarning     treat all compile 
 dnl Check for Lapack
 ACX_LAPACK([
   dnl action-if-found: 
-  AC_DEFINE(HAVE_LAPACKPP,1,[Define if you have LAPACK library.])
   # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS
 ], [
   dnl action-if-not-found: 

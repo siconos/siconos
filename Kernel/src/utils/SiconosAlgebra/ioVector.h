@@ -33,6 +33,18 @@ class SimpleVector;
  *   \version 1.3.0.
  *   \date (Creation) 07/21/2006
  *
+ *
+ *   Type of Output for write function:
+ *    - "boost": boost way: \n
+ *                    [row] (a0, a1,..)
+ *    - "python"(default): \n
+ *                    row \n
+ *                    a0 a1 a2 ... \n
+ *    - "noDim": \n
+ *                    a0 a1 a2 ... \n
+ *
+ * Reading input format is the one corresponding to "python".
+ *
  */
 class ioVector : public ioObject
 {

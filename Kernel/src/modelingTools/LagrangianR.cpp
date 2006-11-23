@@ -635,7 +635,7 @@ void LagrangianR::computeH(const double time)
   {
     if (h1Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeH() is not linked to a plugin function");
-    h1Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY,  &(*yTmp)(0), &(*param)(0));
+    h1Ptr(sizeQ, &(*qTmp2)(0), time, sizeY,  &(*yTmp)(0), &(*param)(0));
   }
   else if (LagrangianRelationType == "scleronomic+lambda")
   {
@@ -710,14 +710,14 @@ void LagrangianR::computeG(const double  time, const unsigned int  index)
       if (G10Ptr == NULL)
         RuntimeException::selfThrow("computeG() is not linked to a plugin function");
       param = parametersList["G10"];
-      G10Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*Gtmp)(0, 0), &(*param)(0));
+      G10Ptr(sizeQ, &(*qTmp2)(0), time, sizeY, &(*Gtmp)(0, 0), &(*param)(0));
     }
     else if (index == 1)
     {
       if (G11Ptr == NULL)
         RuntimeException::selfThrow("computeG() is not linked to a plugin function");
       param = parametersList["G11"];
-      G11Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*Gtmp)(0, 0), &(*param)(0));
+      G11Ptr(sizeQ, &(*qTmp2)(0), time, sizeY, &(*Gtmp)(0, 0), &(*param)(0));
     }
     else
       RuntimeException::selfThrow("LagrangianR::computeG, index out of range");
@@ -870,7 +870,7 @@ void LagrangianR::computeY0(const double time, SiconosVector* qTmp)
     if (h1Ptr == NULL)
       RuntimeException::selfThrow("LagrangianR:computeOutput() h1 is not linked to a plugin function");
     param = parametersList["h"];
-    h1Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY,  &(*yTmp)(0), &(*param)(0));
+    h1Ptr(sizeQ, &(*qTmp2)(0), time, sizeY,  &(*yTmp)(0), &(*param)(0));
   }
   else if (LagrangianRelationType == "scleronomic+lambda")
   {
@@ -926,12 +926,12 @@ void LagrangianR::computeY1(const double time, SiconosVector* qTmp, SiconosVecto
     if (G10Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G10"];
-    G10Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*G0tmp)(0, 0), &(*param)(0));
+    G10Ptr(sizeQ, &(*qTmp2)(0), time, sizeY, &(*G0tmp)(0, 0), &(*param)(0));
 
     if (G11Ptr == NULL)
       RuntimeException::selfThrow("computeG() is not linked to a plugin function");
     param = parametersList["G11"];
-    G11Ptr(sizeQ, &(*qTmp2)(0), &time, sizeY, &(*G1tmp)(0, 0), &(*param)(0));
+    G11Ptr(sizeQ, &(*qTmp2)(0), time, sizeY, &(*G1tmp)(0, 0), &(*param)(0));
 
     // warning: G1 is a matrix
     SiconosVector * Id = new SimpleVector(1);

@@ -33,16 +33,20 @@ class SimpleMatrix;
 /**  \author SICONOS Development Team - copyright INRIA
  *   \version 1.3.0.
  *   \date (Creation) 07/21/2006
+ *
+ *
  *  Type of Output for write function:
  *    - "boost": boost way:
  *                    [row,col] ((a00,a01,...),(a10,...),...
  *    - "python"(default):
+ *                    row col
  *                    a00 a01 a02 ...
  *                    a10 ...
- *    - "python2":    row col
+ *    - "noDim":
  *                    a00 a01 a02 ...
  *                    a10 ...
  *
+ * Reading input format is the one corresponding to "python".
  *
  */
 class ioMatrix : public ioObject

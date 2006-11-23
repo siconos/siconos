@@ -198,42 +198,42 @@ protected:
    * then computeJacobianXF does not change its value, and not plugged.*/
   std::map<std::string, bool> isPlugin;
 
-  /** pointer on function to compute f(x,t)
-   *  \param unsigned int sizeOfX : the size of the vector x
-   *  \param double* time : current time
-   *  \param double* x : the pointer to the first element of the vector x
-   *  \param double* f : the pointer to the first element of the vector f(x,t)
-   *    \param double* param   : a vector of user-defined parameters
+  /** DynamicalSystem plug-in to compute f(x,t) - id="f".
+   *  @param  : the size of the vector x
+   *  @param  : current time
+   *  @param  : the pointer to the first element of the vector x
+   *  @param  : the pointer to the first element of the vector f(x,t)
+   *  @param  : a vector of user-defined parameters
    */
-  void (*computeFPtr)(const unsigned int, const double*, const double*, double*, double*);
+  void (*computeFPtr)(unsigned int, double, const double*, double*, double*);
 
-  /**   Pointer on function to compute the gradient of f(x,t) with respect to the state  \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
-   *  \param unsigned int sizeOfX : size of vector x
-   *  \param double* time : current time
-   *  \param double* xPtr : pointer to the first element of x
-   *  \param double* jacobianXFPtr : pointer to the first element of jacobianXF matrix (in-out parameter)
-   *    \param double* param   : a vector of user-defined parameters
+  /** DynamicalSystem plug-in to compute the gradient of f(x,t) with respect to the state: \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
+   * @param sizeOfX : size of vector x
+   * @param time : current time
+   * @param x : pointer to the first element of x
+   * @param[in,out] jacob : pointer to the first element of jacobianXF matrix
+   * @param[in,out] param   : a vector of user-defined parameters
    */
-  void (*computeJacobianXFPtr)(const unsigned int, const double*, const double*, double*, double*);
+  void (*computeJacobianXFPtr)(unsigned int, double, const double*, double*, double*);
 
-  /**   Pointer on function to compute u
-   *  \param int* sizeOfU : size of vector u
-   *  \param int* sizeOfX : size of vector x
-   *  \param double* time : current time
-   *  \param double* xPtr : pointer to the first element of x
-   *  \param double* UPtr : pointer to the first element of u vector (in-out parameter)
-   *    \param double* param   : a vector of user-defined parameters
+  /** DynamicalSystem plug-in to compute u(x,t)
+   * @param unsigned int sizeOfU : size of vector u
+   * @param unsigned int sizeOfX : size of vector x
+   * @param double time : current time
+   * @param double* x : pointer to the first element of x
+   * @param[in,out] double* u : pointer to the first element of u vector (in-out parameter)
+   * @param[in,out] double* param   : a vector of user-defined parameters
    */
-  void (*computeUPtr)(const unsigned int, const unsigned int, const double*, const double*, double*, double*);
+  void (*computeUPtr)(unsigned int, unsigned int, double, const double*, double*, double*);
 
-  /**   Pointer on function to compute T
-   *  \param unsigned int sizeOfU : size of vector u
-   *  \param unsigned int sizeOfX : size of vector X
-   *  \param double* x : pointer to the first element of X
-   *  \param double* T: pointer to the first element of T matrix (in-out parameter)
-   *    \param double* param   : a vector of user-defined parameters
+  /** DynamicalSystem plug-in to compute T(x)
+   * @param unsigned int sizeOfU : size of vector u
+   * @param unsigned int sizeOfX : size of vector X
+   * @param double* x : pointer to the first element of X
+   * @param[in,out] double* T: pointer to the first element of T matrix
+   * @param[in,out] double* param   : a vector of user-defined parameters
    */
-  void (*computeTPtr)(const unsigned int, const unsigned int, const double*, double*, double*);
+  void (*computeTPtr)(unsigned int, unsigned int, const double*, double*, double*);
 
   /** Flags to know if pointers have been allocated inside constructors or not */
 

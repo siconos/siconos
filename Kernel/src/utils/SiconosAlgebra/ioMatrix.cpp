@@ -65,7 +65,7 @@ const bool ioMatrix::read(SiconosMatrix& m) const
   //  DenseMat * p = m.getDensePtr();
   //  infile >> *p;
 
-
+  infile.close();
   return true;
 }
 
@@ -78,7 +78,7 @@ const bool ioMatrix::write(const SiconosMatrix& m, const std::string& outputType
   else if (Mode == "binary")
     outfile.open(FileName.c_str(), std::ofstream::binary);
   else
-    SiconosMatrixException::selfThrow("ioMatrix::write Incorrect mode for reading");
+    SiconosMatrixException::selfThrow("ioMatrix::write Incorrect mode for writing");
 
   if (!outfile.good())
     SiconosMatrixException::selfThrow("ioMatrix:: write error : Fail to open \"" + FileName + "\"");
@@ -89,6 +89,9 @@ const bool ioMatrix::write(const SiconosMatrix& m, const std::string& outputType
   outfile.precision(15);
 
   // Writing
+
+  if (outputType != "noDim")
+    outfile << m.size(0) << " " << m.size(1) << std::endl;
 
   if (m.getNum() == 1)
   {

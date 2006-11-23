@@ -193,7 +193,7 @@ void Relation::computeOutput(const double time, const unsigned int)
   SimpleVector * yTmp = new SimpleVector(*y);
   SimpleVector * lambdaTmp = new SimpleVector(*lambda);
 
-  computeOutputPtr(sizeX, &(*xTmp2)(0), &time, sizeY, &(*lambdaTmp)(0), sizeU,  &(*uTmp2)(0), &(*yTmp)(0), &(*param)(0));
+  computeOutputPtr(sizeX, &(*xTmp2)(0), time, sizeY, &(*lambdaTmp)(0), sizeU,  &(*uTmp2)(0), &(*yTmp)(0), &(*param)(0));
 
   // Rebuilt lambda/y from Tmp
   *lambda = *lambdaTmp;
@@ -243,7 +243,7 @@ void Relation::computeFreeOutput(const double time, const unsigned int)
   SiconosVector *lambda = interaction->getLambdaPtr(0);
   unsigned int sizeY = yFree->size();
   SiconosVector* param = parametersList["output"];
-  computeOutputPtr(sizeX, &(*xTmp)(0), &time, sizeY, &(*lambda)(0), sizeU,  &(*uTmp)(0), &(*yFree)(0), &(*param)(0));
+  computeOutputPtr(sizeX, &(*xTmp)(0), time, sizeY, &(*lambda)(0), sizeU,  &(*uTmp)(0), &(*yFree)(0), &(*param)(0));
   delete xTmp;
   delete uTmp;
 
@@ -254,7 +254,7 @@ void Relation::computeFreeOutput(const double time, const unsigned int)
   SimpleVector * yFreeTmp = new SimpleVector(*yFree);
   SimpleVector * lambdaTmp = new SimpleVector(*lambda);
 
-  computeOutputPtr(sizeX, &(*xTmp2)(0), &time, sizeY, &(*lambdaTmp)(0), sizeU,  &(*uTmp2)(0), &(*yFreeTmp)(0), &(*param)(0));
+  computeOutputPtr(sizeX, &(*xTmp2)(0), time, sizeY, &(*lambdaTmp)(0), sizeU,  &(*uTmp2)(0), &(*yFreeTmp)(0), &(*param)(0));
 
   // Rebuilt lambda/y from Tmp
   *lambda = *lambdaTmp;
@@ -305,7 +305,7 @@ void Relation::computeInput(const double time, const unsigned int level)
   SimpleVector * lambdaTmp = new SimpleVector(*lambda);
 
   SiconosVector* param = parametersList["input"];
-  computeInputPtr(sizeY, &(*lambdaTmp)(0), &time, &(*rTmp)(0), &(*param)(0));
+  computeInputPtr(sizeY, &(*lambdaTmp)(0), time, &(*rTmp)(0), &(*param)(0));
 
   *r = *rTmp;
 

@@ -167,79 +167,78 @@ protected:
 
   // pointers to functions member to compute plug-in functions
 
-  /**   Computes the mass
-   *  \param unsigned int sizeOfq : the size of the vector q
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* massPtr : the pointer to the first element of the matrix mass (in-out parameter)
-   *    \param double*: vector of parameters
+  /** LagrangianDS plug-in to compute mass(q,t) - id = "mass"
+   * @param sizeOfq : size of vector q
+   * @param q : pointer to the first element of q
+   * @param[in,out] mass : pointer to the first element of mass
+   * @param[in,out] param : a vector of user-defined parameters
    */
-  void (*computeMassPtr)(const unsigned int, const double*, double*, double*);
+  void (*computeMassPtr)(unsigned int, const double*, double*, double*);
 
-  /** computes the internal strengths
-   *  \param const unsigned int sizeOfq : the size of the vector q
-   *    \param int* time : the current time
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
-   *  \param double* fIntPtr : the pointer to the first element of the vector FInt (in-out parameter)
-   *    \param double*: vector of parameters
+  /** LagrangianDS plug-in to compute internal forces \f$F_{int}(t,q,\dot q)\f$ - id = "fInt"
+   * @param sizeOfq : size of vector q
+   * @param time : current time
+   * @param q : pointer to the first element of q
+   * @param velocity : pointer to the first element of velocity
+   * @param[in,out] fInt : pointer to the first element of fInt
+   * @param[in,out] param  : a vector of user-defined parameters
    */
-  void (*computeFIntPtr)(const unsigned int, const double*, const double*, const double*, double*, double*);
+  void (*computeFIntPtr)(unsigned int, double, const double*, const double*, double*, double*);
 
-  /** computes the external strengths
-   *  \param unsigned int sizeOfq : the size of the vector q
-   *    \param double* time : the current time
-   *  \param double* fExtPtr : the pointer to the first element of the vector FExt (in-out parameter)
-   *    \param double*: vector of parameters
+  /** LagrangianDS plug-in to compute external forces \f$F_{Ext}(t)\f$, id = "fExt"
+   * @param sizeOfq : size of vector q
+   * @param time : current time
+   * @param[in,out] fExt : pointer to the first element of fExt
+   * @param[in,out] param : a vector of user-defined parameters
    */
-  void (*computeFExtPtr)(const unsigned int, const double*, double*, double*);
+  void (*computeFExtPtr)(const unsigned int, double, double*, double*);
 
-  /** computes the inertia
-   *  \param unsigned int sizeOfq : the size of the vector q
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
-   *  \param double* NNLPtr : the pointer to the first element of the vector NNL (in-out parameter)
-   *    \param double*: vector of parameters
+  /** LagrangianDS plug-in to compute \f$NNL(\dot q, q)\f$, id = "NNL"
+   * @param sizeOfq : size of vector q
+   * @param q : pointer to the first element of q
+   * @param velocity : pointer to the first element of velocity
+   * @param[in,out] NNL : pointer to the first element of NNL
+   * @param[in,out] param  : a vector of user-defined parameters
    */
-  void (*computeNNLPtr)(const unsigned int, const double*, const double*, double*, double*);
+  void (*computeNNLPtr)(unsigned int, const double*, const double*, double*, double*);
 
-  /** computes the gradient of the the internal strength compared to the state
-   *  \param const unsigned int sizeOfq : the size of the vector q
-   *    \param double* time : the current time
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
-   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
-   *    \param double*: vector of parameters
+  /** LagrangianDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id = "jacobianQFInt"
+   * @param sizeOfq : size of vector q
+   * @param time : current time
+   * @param q : pointer to the first element of q
+   * @param velocity : pointer to the first element of velocity
+   * @param[in,out] jacob : pointer to the first element of the jacobian
+   * @param[in,out] param  : a vector of user-defined parameters
    */
-  void (*computeJacobianQFIntPtr)(const unsigned int, const double*, const double*, const double*, double*, double*);
+  void (*computeJacobianQFIntPtr)(unsigned int, double, const double*, const double*, double*, double*);
 
-  /** computes the gradient of the the internal strength compared to the velocity
-   *  \param unsigned int sizeOfq : the size of the vector q
-   *    \param double* time : the current time
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
-   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
-   *    \param double*: vector of parameters
+  /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}F_{Int}(\dot q, q, t)\f$, id = "jacobianVelocityFInt"
+   * @param sizeOfq : size of vector q
+   * @param time : current time
+   * @param q : pointer to the first element of q
+   * @param velocity : pointer to the first element of velocity
+   * @param[in,out] jacob : pointer to the first element of the jacobian
+   * @param[in,out] param  : a vector of user-defined parameters
    */
-  void (*computeJacobianVelocityFIntPtr)(const unsigned int, const double*, const double*, const double*, double*, double*);
+  void (*computeJacobianVelocityFIntPtr)(unsigned int, double, const double*, const double*, double*, double*);
 
-  /** computes the gradient of the the external strength compared to the state
-   *  \param unsigned int sizeOfq : the size of the vector q
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
-   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
-   *    \param double*: vector of parameters
+  /** LagrangianDS plug-in to compute \f$\nabla_qNNL(\dot q, q)\f$, id = "jacobianQNNL"
+   * @param sizeOfq : size of vector q
+   * @param q : pointer to the first element of q
+   * @param velocity : pointer to the first element of velocity
+   * @param[in,out] jacob : pointer to the first element of the jacobian
+   * @param[in,out] param  : a vector of user-defined parameters
    */
   void (*computeJacobianQNNLPtr)(const unsigned int, const double*, const double*, double*, double*);
 
-  /** computes the gradient of the the external strength compared to the velocity
-   *  \param unsigned int sizeOfq : the size of the vector q
-   *  \param double* qPtr : the pointer to the first element of the vector q
-   *  \param double* velocityPtr : the pointer to the first element of the vector velocity
-   *  \param double* jacobPtr : the pointer to the first element of the matrix JacobianQFInt (in-out parameter)
-   *    \param double*: vector of parameters
+  /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}NNL(\dot q, q)\f$, id = "jacobianVelocityNNL"
+   * @param sizeOfq : size of vector q
+   * @param q : pointer to the first element of q
+   * @param velocity : pointer to the first element of velocity
+   * @param[in,out] jacob : pointer to the first element of the jacobian
+   * @param[in,out] param  : a vector of user-defined parameters
    */
-  void (*computeJacobianVelocityNNLPtr)(const unsigned int, const double*, const double*, double*, double*);
-
+  void (*computeJacobianVelocityNNLPtr)(unsigned int, const double*, const double*, double*, double*);
 
   /** Specific variables to handle links with DynamicalSystem class */
   /** \var workMatrix
@@ -285,9 +284,7 @@ public:
    *  \param SiconosMatrix : mass matrix
    *  \exception RuntimeException
    */
-  LagrangianDS(int, unsigned int ,
-               const SimpleVector& , const SimpleVector& ,
-               const SiconosMatrix&);
+  LagrangianDS(int, unsigned int, const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
 
   /** constructor from a minimum set of data
    *  \param int : the number for this DynamicalSystem
@@ -297,9 +294,7 @@ public:
    *  \param string: plugin path to compute mass matrix
    *  \exception RuntimeException
    */
-  LagrangianDS(int, unsigned int ,
-               const SimpleVector& , const SimpleVector& ,
-               const std::string&  = "DefaultPlugin:computeMass");
+  LagrangianDS(int, unsigned int, const SimpleVector& , const SimpleVector&, const std::string& = "DefaultPlugin:computeMass");
 
   /** copy constructor
    *  \param a Dynamical system to copy
