@@ -25,15 +25,16 @@
 #include "Relation.h"
 #include "LinearTIRXML.h"
 
-//! Linear Time Invariant Relation, derived from class Relation
-/**  \author SICONOS Development Team - copyright INRIA
+/** Linear Time Invariant Relation, derived from class Relation
+ *
+ * \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date Apr 27, 2004
  *
  * This class defines and computes the Linear Time Invariant Relation defined by:
  *
  * \f[
- * y = h(x,t,\lambda,u,...) = C x + Fu + D \lambda + e
+ * y = h(x,t,\lambda,u,...) = C x + Fu + D \lambda + e \\
  *
  * R = g(\lambda,t) = B \lambda
  * \f]
@@ -92,7 +93,7 @@ public:
    *  \param SiconosMatrix : C
    *  \param SiconosMatrix : D
    *  \param SiconosMatrix : F
-   *  \param SimpleVectorx : e
+   *  \param SimpleVector  : e
    *  \param SiconosMatrix : B
    *  \exception RuntimeException
    */

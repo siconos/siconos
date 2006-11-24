@@ -86,13 +86,13 @@ class LagrangianRXML;
  *   - G is defined as a stl-vector of SiconosMatrix* and the number of G functions (ie size of vector G)
  *     depends on the number of variables in h.
  *
- * Friction case: in Y, components are in the following order:
- *   first relation, normal part
- *   first relation, tangential part
- *   ...
- *   relation n, normal part
- *   relation n, tangential part
- * and so on ...
+ * Friction case: in Y, components are in the following order:\n
+ *   first relation, normal part\n
+ *   first relation, tangential part\n
+ *   ...\n
+ *   relation n, normal part \n
+ *   relation n, tangential part\n
+ * and so on ...\n
  * Note also that usually only normal part definition is required for Y[0].
  *
  */

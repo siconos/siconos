@@ -20,11 +20,17 @@ in the Siconos Doxygen Documentation. \n
 
 - \ref start_NSP 
 
+- \ref doc_prelim
+
+- \ref runSimu
+
 - \ref SiconosTutorial 
  
 - \ref usingxml 
 
 - \ref UsingPython 
+
+- \ref usingDoc
 
 \section runSimu Running a simulation
 
@@ -34,7 +40,7 @@ There are two different ways to run a simulation with Siconos: directly with a C
 \ref First check that Siconos is well installed (see \ref siconosInstall "Siconos Installation Guide"). \n
 Create a directory for your example, where the following files must be present:
 - the main input cpp file 
-- all the xxxPlugin.cpp files necessary for your simulation (for details on plug-in see \ref doc_siconosPlugin)
+- all the xxxPlugin.cpp files necessary for your simulation (for details on plug-in see \ref doc_usingPlugin)
 - the xml input file if you use xml data description
 
 Then just run: 
@@ -73,7 +79,7 @@ With Scilab
 scilab -f myInputFile.sci
 \endverbatim
 
-\section GSusingTheGuide How to use this guide? 
+\section usingDoc How to use this guide? 
 
 For each topic, we first give a list of the concerned classes. This should help you to find the required header files and to access to more detailed documentation in the Doxygen. \n
 Then we describe the more common way to build objects (ie the constructors) and give a list of the more useful functions. 

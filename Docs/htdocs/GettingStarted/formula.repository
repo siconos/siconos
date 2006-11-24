@@ -92,3 +92,83 @@
 \form#91:$ f(x,t), \ \ \nabla_x f(x,t), T(x), u(x,t) $
 \form#92:$ f(x,t), \ \ \nabla_x f(x,t), \ \ T(x), \ \ u(x,t) $
 \form#93:$ M(q), \ \ NNL(\dot q,q), \ \ F_{Int}(\dot q,q ,t), \ \ F_{Ext}(t), \ \ \nabla_q F_{Int}(t,q,\dot q), \ \ \nabla_{\dot q}F_{Int}(t,q,\dot q), \ \ \nabla_q NNL(q,\dot q), \ \ \nabla_{\dot q}NNL(q,\dot q) $
+\form#94:\[ \left[\begin{array}{c} R_{\alpha}^i \\ R_{\alpha}^j \\ ... \end{array}\right] = B_{\alpha}\lambda_{\alpha} =\left[\begin{array}{c} B_{\alpha}^i \\ B_{\alpha}^j \\ ... \end{array}\right]\lambda_{\alpha} \]
+\form#95:\[ X=\left[\begin{array}{c} x_0 \\ x_1 \\ ... \end{array}\right], / or / Q= \left[\begin{array}{c} q_0 q_1 ... \end{array}\right] \]
+\form#96:$x_i(or / q_i)$
+\form#97:\[ X=\left[\begin{array}{c} x_0 \\ x_1 \\ ... \end{array}\right], \ or \ Q= \left[\begin{array}{c} q_0 q_1 ... \end{array}\right] \]
+\form#98:\[ X=\left[\begin{array}{c} x_0 \\ x_1 \\ ... \end{array}\right], \ or \ Q= \left[\begin{array}{c} q_0\\ q_1 ... \end{array}\right] \]
+\form#99:\[ X=\left[\begin{array}{c} x_0 \\ x_1 \\ ... \end{array}\right], \ or \ Q= \left[\begin{array}{c} q_0\\ q_1 \\ ... \end{array}\right] \]
+\form#100:$ x_i(or \ q_i)$
+\form#101:$ x_i \ (or \ q_i)$
+\form#102:$ \lambda $
+\form#103:$ \lambda[i] $
+\form#104:\[ R=\left[\begin{array}{c} r_0 \\ r_1 \\ ... \end{array}\right], \ or \ R= \left[\begin{array}{c} p_0\\ p_1 \\ ... \end{array}\right] \]
+\form#105:$ (y,\lambda) $
+\form#106:$ (X,R) $
+\form#107:\begin{eqnarray*} 0 \leq y \perp \lambda\geq 0 \end{eqnarray*}
+\form#108:\[ if \ y(t)=0,\ 0 \leq \dot y(t^+) +e \dot y(t^-) \perp \lambda\geq 0 \]
+\form#109:\[ \dot y =0, \|\lambda \| \leq 1 \\ \dot y \neq 0, \lambda = sign( y ) \]
+\form#110:\[ output = y = h(X,t,\lambda,u,...) input = R = g(\lambda,t) \]
+\form#111:\[ y = CX + FU + D \lambda + e \\ R = B \lambda \]
+\form#112:\[ y = h(q,...) \dot y = G(q,...)\dot q + ... R = G^t(q,...)\lambda \]
+\form#113:\[ y= H q + b + D\lambda \]
+\form#114:$ p$
+\form#115:\[ p= H^t \lambda \]
+\form#116:$ h(X,t,\lambda, u), \ \ g(\lambda,t) $
+\form#117:$ h0(q), G0(q), h1(q,t), G10(q,t), G11(q,t), h2(q,\lambda), G20(q,\lambda), G21(q,\lambda) $
+\form#118:\begin{eqnarray*} \dot y =0, \|\lambda \| \leq 1 \\ \dot y \neq 0, \lambda = sign( y ) \end{eqnarray*}
+\form#119:\begin{eqnarray*} output = y = h(X,t,\lambda,u,...) input = R = g(\lambda,t) \end{eqnarray*}
+\form#120:\begin{eqnarray*} y = CX + FU + D \lambda + e \\ R = B \lambda \end{eqnarray*}
+\form#121:\begin{eqnarray*} y = h(q,...) \dot y = G(q,...)\dot q + ... R = G^t(q,...)\lambda \end{eqnarray*}
+\form#122:\begin{eqnarray*} output = y = h(X,t,\lambda,u,...)\\ input = R = g(\lambda,t) \end{eqnarray*}
+\form#123:\begin{eqnarray*}{l} y = CX + FU + D \lambda + e \\ R = B \lambda \end{eqnarray*}
+\form#124:\begin{eqnarray*} output &= y =& h(X,t,\lambda,u,...)\\ input &= R =& g(\lambda,t) \end{eqnarray*}
+\form#125:\begin{eqnarray*} y &=& CX + FU + D \lambda + e \\ R &=& B \lambda \end{eqnarray*}
+\form#126:\begin{eqnarray*} y &=& h(q,...) \\ \dot y &=& G(q,...)\dot q + ...\\ R &=& G^t(q,...)\lambda \end{eqnarray*}
+\form#127:\begin{eqnarray*} y&=& H q + b + D\lambda \\ p&=& H^t \lambda \end{eqnarray*}
+\form#128:\begin{eqnarray*} \dot y &=&0, \|\lambda \| \leq 1 \\ \dot y &\neq& 0, \lambda = sign( y ) \end{eqnarray*}
+\form#129:$ h0(q), \ \ G0(q) \ \, \ \ h1(q,t), \ \ G10(q,t), \ \ G11(q,t), \ \ h2(q,\lambda), \ \ G20(q,\lambda), \ \ G21(q,\lambda) $
+\form#130:\begin{eqnarray*} y &=& h0(q) \\ \dot y &=& G0(q,...)\dot q \\ R &=& G0^t(q)\lambda \end{eqnarray*}
+\form#131:\begin{eqnarray*} y &=& h1(q,t) \\ \dot y &=& G10(q,t)\dot q + G11(q,t) \\ R &=& G10^t(q)\lambda \end{eqnarray*}
+\form#132:\begin{eqnarray*} y &=& h2(q,\lambda[0]) \\ \dot y &=& G20(q,t)\dot q + G21(q,t)\lambda[1] \\ R &=& G20^t(q)\lambda[0] \end{eqnarray*}
+\form#133:\begin{eqnarray*} y &=& h2(q,\lambda[0]) \\ \dot y &=& G20(q,t)\dot q + G21(q,t)\lambda[1] \\ R[i] &=& G20^t(q)\lambda[i] \end{eqnarray*}
+\form#134:\begin{eqnarray*} \dot y &=&0, \ d leq\lambda leq c \\ \dot y &\geq 0, \lambda = c \\ \dot y &\leq 0, \lambda = d \\ \end{eqnarray*}
+\form#135:\begin{eqnarray*} \dot y &=&0, \ d \leq \lambda \leq c \\ \dot y &\geq 0, \lambda = c \\ \dot y &\leq 0, \lambda = d \\ \end{eqnarray*}
+\form#136:\begin{eqnarray*} \dot y &=&0, \ d \leq \lambda \leq c \\ \dot y &\geq 0&, \lambda = c \\ \dot y &\leq 0&, \lambda = d \\ \end{eqnarray*}
+\form#137:\begin{eqnarray*} \dot y &=0&, \ d \leq \lambda \leq c \\ \dot y &\geq 0&, \ \lambda = c \\ \dot y &\leq 0&, \ \lambda = d \\ \end{eqnarray*}
+\form#138:\[ \left[\begin{array}{c} v_L'\\ i_L' \end{array}\right]= \left[\begin{array}{cc} 0 & \frac{-1}{C}\\ \frac{1}{L} & 0 \end{array}\right]. \left[\begin{array}{c} v_L\\ i_L \end{array}\right] + \left[\begin{array}{cccc} 0 & 0 & \frac{-1}{C} & \frac{1}{C}\\ 0 & 0 & 0 & 0 \end{array}\right]. \left[\begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array}\right] \]
+\form#139:\[ \left[\begin{array}{c} \dot v_L\\ \dot i_L \end{array}\right]= \left[\begin{array}{cc} 0 & \frac{-1}{C}\\ \frac{1}{L} & 0 \end{array}\right]. \left[\begin{array}{c} v_L\\ i_L \end{array}\right] + \left[\begin{array}{cccc} 0 & 0 & \frac{-1}{C} & \frac{1}{C}\\ 0 & 0 & 0 & 0 \end{array}\right]. \left[\begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array}\right] \]
+\form#140:$ x = \left[\begin{array}{c} \dot v_L\\ \dot i_L \end{array}\right] $
+\form#141:$ \lambda = \left[\begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array}\right] $
+\form#142:\[ \label{nlala} \left[\begin{array}{c} \dot v_L\\ \dot i_L \end{array}\right]= \left[\begin{array}{cc} 0 & \frac{-1}{C}\\ \frac{1}{L} & 0 \end{array}\right]. \left[\begin{array}{c} v_L\\ i_L \end{array}\right] + \left[\begin{array}{cccc} 0 & 0 & \frac{-1}{C} & \frac{1}{C}\\ 0 & 0 & 0 & 0 \end{array}\right]. \left[\begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array}\right] \]
+\form#143:\[ \dot x = C.x + D\lambda \]
+\form#144:$ C=\left[\begin{array}{cc} 0 & \frac{-1}{C}\\ \frac{1}{L} & 0 \end{array}\right] $
+\form#145:$ D= \left[\begin{array}{cccc} 0 & 0 & \frac{-1}{C} & \frac{1}{C}\\ 0 & 0 & 0 & 0 \end{array}\right] $
+\form#146:\[ \dot x = C.x + D.\lambda \]
+\form#147:$ y = \left( \begin{array}{c} i_{DR1}\\ i_{DF2}\\ -v_{DF1}\\ -v_{DR2} \end{array} \right) $
+\form#148:$ \begin{array}{l} 0 \leq -v_{DR1} \, \perp \, i_{DR1} \geq 0\\ 0 \leq -v_{DF2} \, \perp \, i_{DF2} \geq 0\\ 0 \leq i_{DF1} \, \perp \, -v_{DF1} \geq 0\\ 0 \leq i_{DR2} \, \perp \, -v_{DR2} \geq 0 \end{array} $
+\form#149:$ 0 \leq y \, \perp \, \lambda \geq $
+\form#150:$ \begin{array}{l} 0 \leq -v_{DR1} \, \perp \, i_{DR1} \geq 0\\ 0 \leq -v_{DF2} \, \perp \, i_{DF2} \geq 0\\ 0 \leq i_{DF1} \, \perp \, -v_{DF1} \geq 0\\ 0 \leq i_{DR2} \, \perp \, -v_{DR2} \geq 0 \end{array} \ \ \ \ \ $
+\form#151:\[ \begin{array}{l} 0 \leq -v_{DR1} \, \perp \, i_{DR1} \geq 0\\ 0 \leq -v_{DF2} \, \perp \, i_{DF2} \geq 0\\ 0 \leq i_{DF1} \, \perp \, -v_{DF1} \geq 0\\ 0 \leq i_{DR2} \, \perp \, -v_{DR2} \geq 0 \end{array} \]
+\form#152:\[ \left[ \begin{array}{c} i_{DR1}\\ i_{DF2}\\ -v_{DF1}\\ -v_{DR2} \end{array} \right] = \left[ \begin{array}{cc} 0 & 0\\ 0 & 0\\ -1 & 0\\ 1 & 0 \end{array} \right] \cdot \left[ \begin{array}{c} v_L\\ i_L \end{array} \right] + \left[ \begin{array}{cccc} \frac{1}{R} & \frac{1}{R} & -1 & 0\\ \frac{1}{R} & \frac{1}{R} & 0 & -1\\ 1 & 0 & 0 & 0\\ 0 & 1 & 0 & 0 \end{array} \right] \cdot \left[ \begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array} \right] \]
+\form#153:$ A=\left[\begin{array}{cc} 0 & \frac{-1}{C}\\ \frac{1}{L} & 0 \end{array}\right] $
+\form#154:$ r= \left[\begin{array}{cccc} 0 & 0 & \frac{-1}{C} & \frac{1}{C}\\ 0 & 0 & 0 & 0 \end{array}\right].\lambda $
+\form#155:\[ \dot x = A.x + r \]
+\form#156:$ y = Cx + D\lambda $
+\form#157:$ y=\left[ \begin{array}{c} i_{DR1}\\ i_{DF2}\\ -v_{DF1}\\ -v_{DR2} \end{array} \right] $
+\form#158:$ C = \left[ \begin{array}{cccc} \frac{1}{R} & \frac{1}{R} & -1 & 0\\ \frac{1}{R} & \frac{1}{R} & 0 & -1\\ 1 & 0 & 0 & 0\\ 0 & 1 & 0 & 0 \end{array} \right] $
+\form#159:$ D=\left[ \begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array} \right] $
+\form#160:\[ \begin{array}{l} 0 \leq -v_{DR1} \, \perp \, i_{DR1} \geq 0\\ 0 \leq -v_{DF2} \, \perp \, i_{DF2} \geq 0\\ 0 \leq i_{DF1} \, \perp \, -v_{DF1} \geq 0\\ 0 \leq i_{DR2} \, \perp \, -v_{DR2} \geq 0 \end{array} \ \ \ \ \ \ or \ \ \ \ \ \ 0 \leq y \, \perp \, \lambda \geq \]
+\form#161:$ y,\lambda $
+\form#162:$ \theta $
+\form#163:\[ \begin{array}{l} 0 \leq -v_{DR1} \, \perp \, i_{DR1} \geq 0\\ 0 \leq -v_{DF2} \, \perp \, i_{DF2} \geq 0\\ 0 \leq i_{DF1} \, \perp \, -v_{DF1} \geq 0\\ 0 \leq i_{DR2} \, \perp \, -v_{DR2} \geq 0 \end{array} \ \ \ \ \ \ or \ \ \ \ \ \ 0 \leq y \, \perp \, \lambda \geq 0 \]
+\form#164:$ q=(z,x,\theta) $
+\form#165:$ M\ddot q = F_{ext}(t) $
+\form#166:$ M = \left[\begin{array}{ccc} m &0 &0 \\ 0 & m & 0 \\ 0 & 0 & I \end{array}\right] $
+\form#167:$ M=\left[\begin{array}{ccc} m &0 &0 \\ 0 & m & 0 \\ 0 & 0 & I \end{array}\right] $
+\form#168:$ I = \frac{3}{5}mR^2 $
+\form#169:$ F_{ext} = \left[\begin{array}{c} -m g \\ 0 \\ 0 \end{array}\right] $
+\form#170:\[ M\ddot q = F_{ext}(t) \ \ with \ \ M=\left[\begin{array}{ccc} m &0 &0 \\ 0 & m & 0 \\ 0 & 0 & I \end{array}\right] \ \ , \ \ I = \frac{3}{5}mR^2 \ \ and \ \ F_{ext} = \left[\begin{array}{c} -m g \\ 0 \\ 0 \end{array}\right] \]
+\form#171:\[ z-R-h\geq 0 \]
+\form#172:\[ M\ddot q = F_{ext}(t) + p \ \ with \ \ M=\left[\begin{array}{ccc} m &0 &0 \\ 0 & m & 0 \\ 0 & 0 & I \end{array}\right] \ \ , \ \ I = \frac{3}{5}mR^2 \ \ and \ \ F_{ext} = \left[\begin{array}{c} -m g \\ 0 \\ 0 \end{array}\right] \]
+\form#173:$ (z_i-R_i)-(z_j-R_j)-h \geq 0 $

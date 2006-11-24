@@ -38,22 +38,24 @@ const std::string LAGRANGIANLINEARRELATION = "LagrangianLinearR";
 class Interaction;
 class RelationXML;
 
-//! General Non Linear Relation (Base class for Relations).
-/**  \author SICONOS Development Team - copyright INRIA
+/** General Non Linear Relation (Base class for Relations).
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 27, 2004
  *
  *    This class provides tools to define and describe relations of the type:
  * \f[
- * y = h(x,t,\lambda,u,...)
+ * y = h(x,t,\lambda,u,...)\\
  * R = g(\lambda,t)
  * \f]
  *  x, u, R are DynamicalSystem variables.
  *  x being the dof vector for all the DS involved in the interaction that owns the current relation.
  *  u is a control term (see DynamicalSystem class), R the input due to non-smooth behavior.
- *   \f[ y and \lambda \f] are specific variables of the interaction (see this class for more details).
+ *   \f$ y \ and \ \lambda \f$ are specific variables of the interaction (see this class for more details).
  * h and g are plugged on external functions, via plug-in mechanism (see SiconosSharedLibrary).
+ *
  * h <=> output
+ *
  * g <=> input
  *
  * They MUST be plugged -> to default plug-in functions if nothing else specified.

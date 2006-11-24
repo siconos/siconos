@@ -20,8 +20,9 @@
 Linear Complementarity Problem
 */
 
-//! Formalization and Resolution of a Linear Complementarity Problem (LCP)
-/**  \author SICONOS Development Team - copyright INRIA
+/** Formalization and Resolution of a Linear Complementarity Problem (LCP)
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 26, 2004
  *

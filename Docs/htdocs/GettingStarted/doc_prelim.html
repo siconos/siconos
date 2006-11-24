@@ -8,6 +8,7 @@
 <div class="tabs">
   <ul>
     <li><a href="index.html"><span>Main&nbsp;Page</span></a></li>
+    <li><a href="files.html"><span>Files</span></a></li>
     <li><a href="pages.html"><span>Related&nbsp;Pages</span></a></li>
   </ul></div>
 <h1><a class="anchor" name="doc_prelim">Preliminaries</a></h1><h2><a class="anchor" name="cppPrelim">
@@ -34,7 +35,7 @@ Any main.cpp should more or less looks like: <div class="fragment"><pre class="f
 <span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d9/d67/LagrangianDS_8h.html">LagrangianDS.h</a>"</span>
 <span class="comment">// ...</span>
 <span class="comment">// The main </span>
-<span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>* argv[])
+<span class="keywordtype">int</span> <a class="code" href="tmp_8cpp.html#0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>* argv[])
 {
   <span class="keywordflow">try</span>{
 
@@ -71,7 +72,7 @@ Creating a matrix:</a></h3>
 <span class="comment">// Read from a file</span>
 <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/dee/classSiconosMatrix.html">SiconosMatrix</a> * m2 = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d5c/classSimpleMatrix.html">SimpleMatrix</a>(<span class="stringliteral">"mat.dat"</span>,1); <span class="comment">// 1: ascii, 0:binary</span>
 </pre></div> <h3><a class="anchor" name="matIO">
-Matrix/Vector Input/Output:</a></h3>
+Matrix/Vector Input/Output</a></h3>
 <div class="fragment"><pre class="fragment"><span class="comment">// v is a vector, m a matrix</span>
 <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d7/d8d/classioVector.html">ioVector</a> myOutput (<span class="stringliteral">"MyData"</span>,<span class="stringliteral">"ascii"</span>); 
 myOutput.read(v); <span class="comment">// read v from file MyData</span>
@@ -101,32 +102,33 @@ w(2) = (*v)(0);
 m3 = m1*m2; <span class="comment">// equivalent to m3 = prod(m1,m2);</span>
 <span class="comment">// but you have to write</span>
 m3 = prod(m1,s); 
-</pre></div> In a general way, if you need efficiency, always prefer functions to overloaded operators.<h2><a class="anchor" name="tutGC">
+</pre></div> In a general way, if you need efficiency, always prefer functions to overloaded operators.<h2><a class="anchor" name="tutGCtemplate">
 Templates for main input file</a></h2>
 <div class="fragment"><pre class="fragment"><span class="comment">// Header files</span>
 <span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d3/d5a/Model_8h.html">Model.h</a>"</span>
-<span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d2/d3b/ioMatrix_8h.html">ioMatrix.h</a>"</span>
-<span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d41/TimeStepping_8h.html">TimeStepping.h</a>"</span>
 <span class="comment">// ...</span>
+<span class="keyword">using namespace </span>std;
 
 <span class="comment">// main program</span>
-<span class="keywordtype">int</span> main(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>* argv[])
+<span class="keywordtype">int</span> <a class="code" href="tmp_8cpp.html#0ddf1224851353fc92bfbff6f499fa97">main</a>(<span class="keywordtype">int</span> argc, <span class="keywordtype">char</span>* argv[])
 {
   <span class="comment">// Exception handling</span>
   <span class="keywordflow">try</span>{
+    <span class="comment">// == User-defined parameters ==</span>
         
     <span class="comment">// ================= Creation of the model =======================</span>
 
-    <span class="comment">// DynamicalSystem(s)</span>
-    <span class="comment">// Relations</span>
-    <span class="comment">// NonSmoothLaw</span>
-    <span class="comment">// Interaction</span>
-    <span class="comment">// NonSmoothDynamicalSystem </span>
-    <span class="comment">// Model</span>
-    <span class="comment">// Simulation</span>
-    <span class="comment">// TimeDiscretisation</span>
-    <span class="comment">// OneStepIntegrator</span>
-    <span class="comment">// OneStepNSProblem</span>
+    <span class="comment">// == Creation of the NonSmoothDynamicalSystem ==</span>
+    <span class="comment">// -- DynamicalSystem(s) --</span>
+    <span class="comment">// -- Interaction --</span>
+    <span class="comment">// - Relations - </span>
+    <span class="comment">// - NonSmoothLaw -</span>
+    <span class="comment">// -- NonSmoothDynamicalSystem --   </span>
+    <span class="comment">// -- Model --</span>
+    <span class="comment">// == Creation of the Simulation ==</span>
+    <span class="comment">// -- TimeDiscretisation --</span>
+    <span class="comment">// -- OneStepIntegrator --</span>
+    <span class="comment">// -- OneStepNSProblem --</span>
     <span class="comment">// ================================= Computation =================================</span>
 
     <span class="comment">// --- Initialisation of the simulation ---</span>
@@ -142,7 +144,10 @@ Templates for main input file</a></h2>
   <span class="keywordflow">catch</span>(...)
     {cout &lt;&lt; <span class="stringliteral">"Exception caught in \'mySample.cpp\'"</span> &lt;&lt; endl;}
 }
-</pre></div> <hr size="1"><address style="align: right;"><small>Generated on Thu Nov 23 14:17:57 2006 for Getting Started with Siconos by&nbsp;
+</pre></div><h2><a class="anchor" name="prelSTLTool">
+STL tools in Siconos</a></h2>
+Something about sets (STL) <br>
+ <hr size="1"><address style="align: right;"><small>Generated on Fri Nov 24 18:17:36 2006 for Getting Started with Siconos by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.1 </small></address>
 </body>

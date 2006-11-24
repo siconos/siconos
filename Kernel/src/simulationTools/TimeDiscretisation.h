@@ -33,14 +33,16 @@ class SiconosVector;
 class SimpleVector;
 
 
-//! The time discretisation scheme
-/** \author SICONOS Development Team - copyright INRIA
+/** The time discretisation scheme
+ *
+ * \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 26, 2004
  *
  * Two types of constructors:
  * - IO (at the time only xml)
  * - straightforward
+ *
  *  The construction process is always the same:
  *   - data loading (from io or as arguments of the straightforward constructor function)
  *   - available data checking using checkCase function. This sets the value of tdCase which tells us

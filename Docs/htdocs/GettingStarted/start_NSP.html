@@ -8,6 +8,7 @@
 <div class="tabs">
   <ul>
     <li><a href="index.html"><span>Main&nbsp;Page</span></a></li>
+    <li><a href="files.html"><span>Files</span></a></li>
     <li><a href="pages.html"><span>Related&nbsp;Pages</span></a></li>
   </ul></div>
 <h1><a class="anchor" name="start_NSP">Describing a Non Smooth Problem with Siconos</a></h1><h2><a class="anchor" name="start_modelinPrinciple">
@@ -21,7 +22,7 @@ Thus, first step in the process consists in defining some <b> Dynamical Systems<
  The union of relations and the corresponding non smooth law is what we call an <b><a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html">Interaction</a></b>, associated with one or more DynamicalSystems.<p>
 For details on :<ul>
 <li>DynamicalSystems see <a class="el" href="dsInSiconos.html">Dynamical Systems formulations in Siconos</a>. <br>
-</li><li>Interactions, Relations and Non Smooth Laws see interactionsInSiconos</li></ul>
+</li><li>Interactions, Relations and Non Smooth Laws see <a class="el" href="doc_Interactions.html">Siconos Interactions and related objects</a></li></ul>
 <p>
 As a simple example, consider the classical case of a ball bouncing on the floor describe <a class="el" href="">here</a>.<h2><a class="anchor" name="start_writingProcess">
 Writing Process</a></h2>
@@ -32,7 +33,7 @@ Any Siconos input file is composed of the following steps:<p>
 </li><li>built a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a>: all DynamicalSystems + all Interactions</li><li>define a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html">Simulation</a>: the way the behavior of the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a> will be computed<ul>
 <li>a type: <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d7/dc9/classTimeStepping.html">TimeStepping</a> or <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d2/dac/classEventDriven.html">EventDriven</a></li><li>define a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html">TimeDiscretisation</a></li><li>define some integrators for the DynamicalSystems (<a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d8/d72/classOneStepIntegrator.html">OneStepIntegrator</a>)</li><li>define a way to solve the non smooth problem (formulation + solver, the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/df/db1/classOneStepNSProblem.html">OneStepNSProblem</a>)</li></ul>
 </li><li>build the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d18/classModel.html">Model</a>: <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a> + associated <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html">Simulation</a></li><li>lead the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html">Simulation</a> (time loop) </li></ol>
-<hr size="1"><address style="align: right;"><small>Generated on Thu Nov 23 14:17:57 2006 for Getting Started with Siconos by&nbsp;
+<hr size="1"><address style="align: right;"><small>Generated on Fri Nov 24 18:17:36 2006 for Getting Started with Siconos by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.1 </small></address>
 </body>

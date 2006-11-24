@@ -24,15 +24,16 @@
 
 #include "NonSmoothLawXML.h"
 
-//! XML management for ComplementarityConditionNSL
-/**  \author SICONOS Development Team - copyright INRIA
-*   \version 1.3.0.
-*   \date 05/14/2004
-*
-*
-*
-* ComplementarityConditionNSLXML allows to manage data of a CCNSLaw DOM tree.
-*/
+/** XML management for ComplementarityConditionNSL
+ *
+ *  \author SICONOS Development Team - copyright INRIA
+ *   \version 1.3.0.
+ *   \date 05/14/2004
+ *
+ *
+ *
+ * ComplementarityConditionNSLXML allows to manage data of a CCNSLaw DOM tree.
+ */
 class ComplementarityConditionNSLXML : public NonSmoothLawXML
 {
 public:

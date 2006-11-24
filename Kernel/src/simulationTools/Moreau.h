@@ -45,8 +45,9 @@ typedef MapOfMatrices::iterator matIterator;
 typedef MapOfDouble::iterator doubleIterator;
 
 
-//! Moreau Time-Integrator for Dynamical Systems
-/**  \author SICONOS Development Team - copyright INRIA
+/**  Moreau Time-Integrator for Dynamical Systems
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 26, 2004
  *

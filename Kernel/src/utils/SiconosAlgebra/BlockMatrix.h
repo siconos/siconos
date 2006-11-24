@@ -31,17 +31,18 @@
  */
 #define STDMAP 0
 
-//! Object to handle block-matrices (ie lists of SimpleMatrix*)
-/**  \author SICONOS Development Team - copyright INRIA
+/** Object to handle block-matrices (ie lists of SimpleMatrix*)
+ *
+ * \author SICONOS Development Team - copyright INRIA
  *   \version 1.3.0.
  *   \date (Creation) 21/07/2006
  *
  *  A block matrix is a map of pointers to SimpleMatrix, with two indices as a key.
  *  This indices give row and column position of the block in the global matrix.
  *
- * If block 1 is n1xm1, block2 n2xm2, block3 n3xm3 ..., then:
- *  tabRow = [ n1 n1+n2 n1+n2+n3 ...]
- *  tabCol = [ m1 m1+m2 m1+m2+m3 ...]
+ * If block 1 is n1xm1, block2 n2xm2, block3 n3xm3 ..., then:\n
+ *  tabRow = [ n1 n1+n2 n1+n2+n3 ...] \n
+ *  tabCol = [ m1 m1+m2 m1+m2+m3 ...] \n
  *
  */
 class BlockMatrix : public SiconosMatrix

@@ -56,8 +56,8 @@ class BlockMatrix;
 class SiconosMemory;
 class SiconosSharedLibrary;
 
-//!  General First Order Non Linear Dynamical Systems
-/**
+/**  General First Order Non Linear Dynamical Systems
+ *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) April 29, 2004

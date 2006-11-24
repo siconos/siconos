@@ -38,8 +38,9 @@ class Simulation;
 class SiconosModelXML;
 class TimeDiscretisation;
 
-//! Objects that links the NonSmoothDynamicalSystem with its Simulation.
-/**  \author SICONOS Development Team - copyright INRIA
+/** Objects that links the NonSmoothDynamicalSystem with its Simulation.
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 26, 2004
  *

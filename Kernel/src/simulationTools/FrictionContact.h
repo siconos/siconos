@@ -34,16 +34,17 @@
  *
  * This class is devoted to the formalization and the resolution of
  * friction contact problems defined by :
- *  * \f[
+ * \f[
  * w =  q + M z
  * \f]
  * \f[
  * w \geq 0, z \geq 0,  z^{T} w =0
  * \f]
  * and a Coulomb friction law.
- * where
+ *
+ * With:
  *    - \f$w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknown,
- *    - \f$A \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
+ *    - \f$M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
  *
  * The present formulation corresponds to pfc2D and 3D of Numerics package.
  *

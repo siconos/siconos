@@ -29,8 +29,8 @@
 class SimpleVector;
 
 
-//! Object to handle block-vectors (ie list of SiconosVector*)
-/**
+/** Object to handle block-vectors (ie list of SiconosVector*)
+ *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *

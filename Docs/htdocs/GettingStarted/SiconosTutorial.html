@@ -8,42 +8,319 @@
 <div class="tabs">
   <ul>
     <li><a href="index.html"><span>Main&nbsp;Page</span></a></li>
+    <li><a href="files.html"><span>Files</span></a></li>
     <li><a href="pages.html"><span>Related&nbsp;Pages</span></a></li>
   </ul></div>
-<h1><a class="anchor" name="SiconosTutorial">Siconos Tutorial (C++)</a></h1>To run your own simulation using Siconos, you need to describe your system in a C++ file, let us call it main.cpp. There are three main stages:<ol type=1>
-<li>the description of your Non Smooth Dynamical System</li><li>the description of the way it will be simulated (which discretisation, which integrators, solvers ...)</li><li>the simulation loop writing.</li></ol>
+<h1><a class="anchor" name="SiconosTutorial">Siconos Tutorial (C++)</a></h1><h2><a class="anchor" name="tutorialDiodeBridge">
+Siconos Tutorial - A 4-diodes bridge wave rectifier</a></h2>
+In this tutorial, we will describe the step-by-step building of a Non Smooth Dynamical System and its simulation, to represent the system on the figure below:<p>
+<div align="center">
+<img src="diodeBridge.png" alt="diodeBridge.png">
+</div>
 <p>
-Steps 1 and 2 lead to the building of a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d18/classModel.html">Model</a>, which behavior is simulated in step 3.<h2><a class="anchor" name="tutNSDS">
-The Non Smooth Dynamical System</a></h2>
-A <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a> (NSDS) is a set of DynamicalSystems that may interact alltogether, in a non-smooth way. Thus, to build a NSDS you need to:<ul>
-<li>define some DynamicalSystems</li><li>define some Interactions (ie <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d1c/classRelation.html">Relation</a> and <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d3f/classNonSmoothLaw.html">NonSmoothLaw</a>) </li></ul>
-<h3><a class="anchor" name="tutDS">
-Dynamical Systems</a></h3>
-The <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a> class represents a n-dimensional set of ordinary differential equations. A full description of the various types of <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a> is available at page <a class="el" href="dsInSiconos.html">Dynamical Systems formulations in Siconos</a>. <br>
- To build your <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a>, you first have to determine its type (mainly first or second order, linear or not) and then a constructor that fits to your needs. Whatever the constructor is, there are obsviously some minimum required data (initial conditions, ...). Suppose you need to build a NSDS with two second order systems, Lagrangian, one linear and another one non linear.<br>
+In this sample, a LC oscillator initialized with a given voltage across the capacitor and a null current through the inductor provides the energy to a load resistance through a full-wave rectifier consisting of a 4 ideal diodes bridge. Both waves of the oscillating voltage across the LC are provided to the resistor with current flowing always in the same direction. The energy is dissipated in the resistor resulting in a damped oscillation.<p>
+To run your own simulation using Siconos, you need to describe your system in a C++ file, let us call it diodeBridge.cpp. First of all, create wherever you want a new directory, say <em>DiodeBridge</em>, where you save as diodeBridge.cpp the template given <a class="el" href="doc_prelim.html#tutGCtemplate">here</a>.<p>
+There are three main stages in the writing process:<ol type=1>
+<li>the description of your Non Smooth Dynamical System</li><li>the description of the way it will be simulated (which discretization, which integrators, solvers ...)</li><li>the simulation loop writing.</li></ol>
 <p>
-First we define a set of DynamicalSystems, useful object to handle all our systems: <div class="fragment"><pre class="fragment"><a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/df/d1e/classDynamicalSystemsSet.html">DynamicalSystemsSet</a> allMyDS;
-</pre></div><h3><a class="anchor" name="tutInter">
-Interactions</a></h3>
-<h3><a class="anchor" name="tutMisc">
-Misc</a></h3>
-<h2><a class="anchor" name="tutSimu">
-The Simulation</a></h2>
-<h3><a class="anchor" name="tutTD">
-Time Discretisation</a></h3>
-<h3><a class="anchor" name="tutOSI">
-One Step Integrator</a></h3>
-<h3><a class="anchor" name="tutOSNS">
-One Step Non Smooth Problem</a></h3>
-<h2><a class="anchor" name="tutModel">
-The Model</a></h2>
-<h2><a class="anchor" name="tutSimLoop">
-The Simulation Loop</a></h2>
-<h3><a class="anchor" name="tutTS">
-TimeStepping Case</a></h3>
-<h3><a class="anchor" name="tutED">
-EventDriven Case</a></h3>
-<hr size="1"><address style="align: right;"><small>Generated on Thu Nov 23 14:17:57 2006 for Getting Started with Siconos by&nbsp;
+Steps 1 and 2 lead to the building of a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d18/classModel.html">Model</a>, which behavior is simulated in step 3.<h3><a class="anchor" name="tut1NSDS">
+Building a NonSmoothDynamicalSystem</a></h3>
+To build a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a>, you need to clearly identify some DynamicalSystems and some Interactions, the last one being composed with Relations and Non Smooth Law. <br>
+ In the present case, the oscillator is a time-invariant linear dynamical system, and using the Kirchhoff current and voltage laws and branch constitutive equations, its Dynamics is written as: <p class="formulaDsp">
+<img class="formulaDsp" alt="\[ \left[\begin{array}{c} \dot v_L\\ \dot i_L \end{array}\right]= \left[\begin{array}{cc} 0 &amp; \frac{-1}{C}\\ \frac{1}{L} &amp; 0 \end{array}\right]. \left[\begin{array}{c} v_L\\ i_L \end{array}\right] + \left[\begin{array}{cccc} 0 &amp; 0 &amp; \frac{-1}{C} &amp; \frac{1}{C}\\ 0 &amp; 0 &amp; 0 &amp; 0 \end{array}\right]. \left[\begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array}\right] \]" src="form_139.png">
+<p>
+ and if we denote: <img class="formulaInl" alt="$ x = \left[\begin{array}{c} \dot v_L\\ \dot i_L \end{array}\right] $" src="form_140.png"> ,<img class="formulaInl" alt="$ \lambda = \left[\begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array}\right] $" src="form_141.png">, <img class="formulaInl" alt="$ A=\left[\begin{array}{cc} 0 &amp; \frac{-1}{C}\\ \frac{1}{L} &amp; 0 \end{array}\right] $" src="form_153.png"> and <img class="formulaInl" alt="$ r= \left[\begin{array}{cccc} 0 &amp; 0 &amp; \frac{-1}{C} &amp; \frac{1}{C}\\ 0 &amp; 0 &amp; 0 &amp; 0 \end{array}\right].\lambda $" src="form_154.png">, it results in: <p class="formulaDsp">
+<img class="formulaDsp" alt="\[ \dot x = A.x + r \]" src="form_155.png">
+<p>
+ which fits with formalism proposed by <a class="el" href="dsInSiconos.html#doc_ltids">LinearTIDS</a> class.<p>
+Then in DiodeBridge.cpp, you can start the construction of your <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a>. First define the required parameters, matrices and vectors.<p>
+<div class="fragment"><pre class="fragment"><span class="comment">// User-defined parameters</span>
+<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> ndof = 2;  <span class="comment">// number of degrees of freedom of your system </span>
+<span class="keywordtype">double</span> Lvalue = 1e-2;   <span class="comment">// inductance</span>
+<span class="keywordtype">double</span> Cvalue = 1e-6;   <span class="comment">// capacitance</span>
+<span class="keywordtype">double</span> Rvalue = 1e3;    <span class="comment">// resistance </span>
+
+<span class="comment">// DynamicalSystem(s)</span>
+<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/dee/classSiconosMatrix.html">SiconosMatrix</a> * A = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d5c/classSimpleMatrix.html">SimpleMatrix</a>(ndof,ndof); <span class="comment">// All components of A are automatically set to 0.</span>
+(*A)(0,1) = -1.0/Cvalue;
+(*A)(1,0) = 1.0/Lvalue;
+</pre></div> In the Doxygen documentation of class <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d6f/classLinearTIDS.html">LinearTIDS</a>, you can find a constructor with A, initial condition and a number that identify the system: <div class="fragment"><pre class="fragment"><span class="comment">// User-defined parameters</span>
+<span class="keywordtype">double</span> Vinit = 10.0;    <span class="comment">// initial voltage</span>
+
+<span class="comment">// -- DynamicalSystem(s) --</span>
+<span class="comment">// initial conditions vector</span>
+<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d8/d76/classSiconosVector.html">SiconosVector</a> * x0 = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a>(ndof);
+(*x0)(0) = Vinit;
+<span class="comment">// </span>
+<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a> * oscillator = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d6f/classLinearTIDS.html">LinearTIDS</a>(1,*x0,*A);
+</pre></div><p>
+From this point you have access to all the methods of <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d6f/classLinearTIDS.html">LinearTIDS</a> for oscillator, like:<p>
+<div class="fragment"><pre class="fragment">oscillator-&gt;display(); 
+oscillator-&gt;getNumber();
+oscillator-&gt;getAPtr(); 
+</pre></div><p>
+Note that as arguments of the constructor, we gave *A or *x0, not A or x0; that means there is a copy of the values of A and x0 into new components, hold by oscillator object.<br>
+ To build A it is also possible to use an external file of data. See <a class="el" href="doc_prelim.html#matIO">Matrix/Vector Input/Output</a> for details on that point.<br>
+<p>
+As a last step, we save our <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a> into a new object called <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/df/d1e/classDynamicalSystemsSet.html">DynamicalSystemsSet</a>, a set of systems as its name says. This sounds like nonsense since we have only one system, but that will be useful to handle our systems and pass them to the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a> or the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html">Interaction</a>.<p>
+<div class="fragment"><pre class="fragment"><a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/df/d1e/classDynamicalSystemsSet.html">DynamicalSystemsSet</a> allDS; 
+allDS.<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/df/d1e/classDynamicalSystemsSet.html#957ca929b79fd0207377d938845a55cd">insert</a>(oscillator);
+</pre></div><p>
+About sets handling, see <a class="el" href="doc_prelim.html#prelSTLTool">STL tools in Siconos</a>. <br>
+<p>
+You now need to describe some Interactions. <br>
+ First, there are some linear relations between voltage and current inside the diode, given by: <p class="formulaDsp">
+<img class="formulaDsp" alt="\[ \left[ \begin{array}{c} i_{DR1}\\ i_{DF2}\\ -v_{DF1}\\ -v_{DR2} \end{array} \right] = \left[ \begin{array}{cc} 0 &amp; 0\\ 0 &amp; 0\\ -1 &amp; 0\\ 1 &amp; 0 \end{array} \right] \cdot \left[ \begin{array}{c} v_L\\ i_L \end{array} \right] + \left[ \begin{array}{cccc} \frac{1}{R} &amp; \frac{1}{R} &amp; -1 &amp; 0\\ \frac{1}{R} &amp; \frac{1}{R} &amp; 0 &amp; -1\\ 1 &amp; 0 &amp; 0 &amp; 0\\ 0 &amp; 1 &amp; 0 &amp; 0 \end{array} \right] \cdot \left[ \begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array} \right] \]" src="form_152.png">
+<p>
+ equivalent to <img class="formulaInl" alt="$ y = Cx + D\lambda $" src="form_156.png">, with <img class="formulaInl" alt="$ y=\left[ \begin{array}{c} i_{DR1}\\ i_{DF2}\\ -v_{DF1}\\ -v_{DR2} \end{array} \right] $" src="form_157.png">, <img class="formulaInl" alt="$ C = \left[ \begin{array}{cccc} \frac{1}{R} &amp; \frac{1}{R} &amp; -1 &amp; 0\\ \frac{1}{R} &amp; \frac{1}{R} &amp; 0 &amp; -1\\ 1 &amp; 0 &amp; 0 &amp; 0\\ 0 &amp; 1 &amp; 0 &amp; 0 \end{array} \right] $" src="form_158.png"> and <img class="formulaInl" alt="$ D=\left[ \begin{array}{c} -v_{DR1}\\ -v_{DF2}\\ i_{DF1}\\ i_{DR2} \end{array} \right] $" src="form_159.png"><p>
+Completed by the relation between r and <img class="formulaInl" alt="$ \lambda $" src="form_102.png">, this corresponds to a Siconos <a class="el" href="doc_Interactions.html#docRelationLTI">LinearTIR</a>.<p>
+Looking into <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/db1/classLinearTIR.html">LinearTIR</a> class doxygen documentation, you will a find constructor with matrices B and C and another one with B, C, D, e and F. Choose the first one, D will be set later.<p>
+<div class="fragment"><pre class="fragment"><span class="comment">// -- Interaction --</span>
+<span class="comment">// - Relations - </span>
+<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> ninter = 4; <span class="comment">// dimension of your Interaction = size of y and lambda vectors</span>
+<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/dee/classSiconosMatrix.html">SiconosMatrix</a> * B = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d5c/classSimpleMatrix.html">SimpleMatrix</a>(ndof,ninter);
+(*B)(0,2) = -1.0/Cvalue ; 
+(*B)(0,3) = 1.0/Cvalue;
+Siconos* C = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d5c/classSimpleMatrix.html">SimpleMatrix</a>(ninter,ndof);
+(*C)(2,0) = -1.0;
+(*C)(3,0) = 1.0;
+
+<span class="comment">// the Relation:</span>
+<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/db1/classLinearTIR.html">LinearTIR</a> * myRelation = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/db1/classLinearTIR.html">LinearTIR</a>(*C,*B);
+</pre></div><p>
+If we stop here, all other potential components of the relation (D, F ...) are not build, that is to say they are equal to 0. So we need to build and set D.<p>
+<div class="fragment"><pre class="fragment"><a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/dee/classSiconosMatrix.html">SiconosMatrix</a>* D = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d5c/classSimpleMatrix.html">SimpleMatrix</a>(ninter,ninter);
+(*D)(0,0) = 1.0/Rvalue;  (*D)(0,1) = 1.0/Rvalue; (*D)(0,2) = -1.0; 
+(*D)(1,0) = 1.0/Rvalue;  (*D)(1,1) = 1.0/Rvalue; (*D)(1,3) = -1.0;  
+(*D)(2,0) = 1.0; 
+(*D)(3,1) = 1.0; 
+
+myRelation-&gt;setDPtr(D); 
+</pre></div><p>
+Any member of a class has a corresponding setXXX (and getXXX) function you can use at any time. Moreover, when this member is a pointer, there is also a setXXXPtr (or getXXXPtr) to work on the pointer, not on the object. The difference is important. Suppose in the case above that we use:<p>
+<div class="fragment"><pre class="fragment">myRelation-&gt;setD(*D); <span class="comment">// warning: *D, we give the contains of the pointer as argument</span>
+</pre></div><p>
+Then any change of D inside your main program will not affect the D matrix of myRelation, while with setDPtr(), since we pass the pointer, the matrix named D in your program and the one of myRelation are the same object (and are in the same place in memory). This difference is important when you intend to save memory space.<p>
+OK, now you have a relation but to complete the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html">Interaction</a>, you need a non-smooth law. <br>
+ On the figure below, the left-hand sketch displays the ideal diode characteristic and the right-hand sketch displays the usual exponential characteristic as stated by Shockley's law.<p>
+<div align="center">
+<img src="diodeNonSmooth.png" alt="diodeNonSmooth.png">
+</div>
+<p>
+Thus the behavior of each diode of the bridge, supposed to be ideal, can be described with a complementarity condition between current and reverse voltage (variables (<img class="formulaInl" alt="$ y,\lambda $" src="form_161.png">) ). Depending on the diode position in the bridge, y stands for the reverse voltage across the diode or for the diode current. <br>
+ Then, the complementarity conditions, results of the ideal diodes characteristics are given by:<br>
+<p>
+<p class="formulaDsp">
+<img class="formulaDsp" alt="\[ \begin{array}{l} 0 \leq -v_{DR1} \, \perp \, i_{DR1} \geq 0\\ 0 \leq -v_{DF2} \, \perp \, i_{DF2} \geq 0\\ 0 \leq i_{DF1} \, \perp \, -v_{DF1} \geq 0\\ 0 \leq i_{DR2} \, \perp \, -v_{DR2} \geq 0 \end{array} \ \ \ \ \ \ or \ \ \ \ \ \ 0 \leq y \, \perp \, \lambda \geq 0 \]" src="form_163.png">
+<p>
+<p>
+You will then use a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d15/classComplementarityConditionNSL.html">ComplementarityConditionNSL</a> object for your non-smooth law:<p>
+<div class="fragment"><pre class="fragment"><span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> nslawSize = 4; 
+<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d3f/classNonSmoothLaw.html">NonSmoothLaw</a> * myNslaw = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d15/classComplementarityConditionNSL.html">ComplementarityConditionNSL</a>(nslawSize);
+</pre></div><p>
+In that case, nslawSize is equivalent of the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html">Interaction</a> size. At this point you do not need to know more about that but if you need details on nslawSize meaning see <a class="el" href="doc_Interactions.html#docNSL">Non Smooth Laws</a>.<p>
+You are now ready to build the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html">Interaction</a>. As usual, you will find the required constructor in the doxygen documentation of <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html">Interaction</a>. As input, you need the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d1c/classRelation.html">Relation</a> and <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d3f/classNonSmoothLaw.html">NonSmoothLaw</a> pointers, a set of DynamicalSystems, the interaction size and some ids (a string and a number).<br>
+<p>
+<div class="fragment"><pre class="fragment"><span class="comment">// Choose a name and a number for your Interaction</span>
+string nameInter = <span class="stringliteral">"InterDiodeBridge"</span>; 
+<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numInter = 1;
+<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html">Interaction</a>* myInteraction = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html">Interaction</a>(nameInter,allDS,numInter,ninter, myNslaw, myRelation);
+</pre></div><p>
+All the objects required to build a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a> are now available:<p>
+<div class="fragment"><pre class="fragment"><a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a>* myNSDS = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a>(oscillator,myInteraction);
+</pre></div><p>
+This is the end of the first step: your system is now fully represented by the object myNSDS. Before dealing with the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html">Simulation</a>, first create the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d18/classModel.html">Model</a>, the object that handles the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a> and the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html">Simulation</a>. Building a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d18/classModel.html">Model</a> is an easy thing: just give some time boundaries for the future simulation and then associate your <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a> to the new <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d18/classModel.html">Model</a>.<p>
+<div class="fragment"><pre class="fragment"><span class="comment">// Model</span>
+<span class="keywordtype">double</span> t0 = 0; <span class="comment">// Initial time</span>
+<span class="keywordtype">double</span> T = 10; <span class="comment">// Total simulation time</span>
+<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d18/classModel.html">Model</a> * DiodeBridge = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d18/classModel.html">Model</a>(t0,T);
+DiodeBridge-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d18/classModel.html#4a9cff1325de97e11bb2e404602ace5e">setNonSmoothDynamicalSystemPtr</a>(myNSDS);
+</pre></div><h3><a class="anchor" name="tut1Simu">
+The Simulation</a></h3>
+You need now to define the way the behavior of you <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a> will be computed. That is the role of <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html">Simulation</a> object. Two different strategies are available at the time: <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d7/dc9/classTimeStepping.html">TimeStepping</a> or <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d2/dac/classEventDriven.html">EventDriven</a>. It's up to you to find the most adapted to your problem. For details on both of them, see <a class="el" href="docSimu.html">Siconos Simulation and related objects</a>. <br>
+ Other important objects of the simulation that are to be defined are the time discretisation, some integrators for the Dynamics and a method to formalize and solve the non smooth problem. <br>
+<p>
+For the Diode Bridge example, a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d7/dc9/classTimeStepping.html">TimeStepping</a> strategy will be used, with a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/de1/classMoreau.html">Moreau</a> integrator and a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d3/d48/classLCP.html">LCP</a> (Linear Complementarity Problem) formulation. First of all, it is necessary to create the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html">Simulation</a> object, and say "apply it to my non smooth system" which is done by associating the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html">Simulation</a> object with the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d18/classModel.html">Model</a>:<p>
+<div class="fragment"><pre class="fragment"><a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html">Simulation</a> * s = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d7/dc9/classTimeStepping.html">TimeStepping</a>(DiodeBridge);
+</pre></div><p>
+Then you can create the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html">TimeDiscretisation</a>. There are different constructors, depending on what you want to fix: step size, number of time steps ... Choose for example the one with the size of the time step. Since t0 and T are fixed in the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d18/classModel.html">Model</a>, the time discretisation is then clearly defined.<p>
+<div class="fragment"><pre class="fragment"><span class="keywordtype">double</span> h =  1.0e-6;  <span class="comment">// Time step</span>
+<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html">TimeDiscretisation</a> * td = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html">TimeDiscretisation</a>(h, s);
+</pre></div><p>
+Next, you have to define the a one-step integrator for all the DynamicalSystems. For <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d7/dc9/classTimeStepping.html">TimeStepping</a> scheme, the only available one is <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/de1/classMoreau.html">Moreau</a> where the integration of the equations over the time steps is based on a <img class="formulaInl" alt="$ \theta $" src="form_162.png"> method (see <a class="el" href="docSimu.html#docSimuMoreau">Moreau's Time Stepping</a> for details).<p>
+<div class="fragment"><pre class="fragment"><span class="keywordtype">double</span> theta = 0.5;
+<span class="comment">// One Step Integrator</span>
+<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/de1/classMoreau.html">Moreau</a>* myIntegrator = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/de1/classMoreau.html">Moreau</a>(oscillator,theta,s);
+</pre></div><p>
+After the integration of the Dynamics, the system is written as a Linear Complementarity Problem (see <a class="el" href="docSimu.html#docSimuLCP">LCP formalization and solving</a>), and solved thanks to a solver algorithm of type NSQP (Non Smooth Quadratic Programming).<p>
+<div class="fragment"><pre class="fragment"><span class="comment">// One Step non smooth problem</span>
+string solverName = <span class="stringliteral">"NLGS"</span>; <span class="comment">// non smooth problem solver algo name.</span>
+<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/df/db1/classOneStepNSProblem.html">OneStepNSProblem</a>* myLCP = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d3/d48/classLCP.html">LCP</a>(s, <span class="stringliteral">"LCP"</span>, solverName, 101, 0.0001, <span class="stringliteral">"max"</span>, 0.6 );
+</pre></div><p>
+Note that the simulation is always given as an input argument to the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html">TimeDiscretisation</a>, <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d8/d72/classOneStepIntegrator.html">OneStepIntegrator</a> and <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/df/db1/classOneStepNSProblem.html">OneStepNSProblem</a> constructors: all these objects are linked to one and only one simulation.<p>
+The <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d18/classModel.html">Model</a> is now complete and the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a> ready to be computed. This is the end of the second step.<h3><a class="anchor" name="tut1leadingSimu">
+Leading the Simulation Process</a></h3>
+From now on, you will work on the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d2d/classNonSmoothDynamicalSystem.html">NonSmoothDynamicalSystem</a> by calling some specific functions of the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html">Simulation</a>. <br>
+ The first and compulsory step of any simulation process in Siconos is the initialization of the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html">Simulation</a>:<p>
+<div class="fragment"><pre class="fragment">s-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html#9481a19739825525d7fc747739cab986">initialize</a>();
+</pre></div><p>
+If something is wrong in your <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d6/d18/classModel.html">Model</a>, that may be the point where error messages occur ...<p>
+Then the easiest way to run your simulation is to call<p>
+<div class="fragment"><pre class="fragment">s-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html#b754c23fba87f6a3ff77ca14bb84bcad">run</a>()
+</pre></div><p>
+But after that you only have access to values computed at the last time step, which might not be enough ... So that may be better to write a complete time loop like:<p>
+<div class="fragment"><pre class="fragment"><span class="keywordtype">int</span> k = td-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html#00bdac9ac3339ba4fd506d090b16800e">getK</a>(); <span class="comment">// Current step </span>
+<span class="keywordtype">int</span> N = td-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html#a6008d0dad03031590d9bb7ceb469eff">getNSteps</a>(); <span class="comment">// Number of time steps</span>
+<span class="keywordflow">while</span>(k &lt; N-1)  
+{       
+  s-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html#4e7874205670a4b5033c44e0ef8d2ec6">nextStep</a>();
+  <span class="comment">// get current time step</span>
+  k = td-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html#00bdac9ac3339ba4fd506d090b16800e">getK</a>();       
+  s-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html#1c127e04f06837a21b609f51af08dfa4">computeOneStep</a>();
+}  
+</pre></div><p>
+nextStep is mainly used to increment the time step and say that last computed values will be initial values for the next step. <br>
+ computeOneStep performs computation over the current time step. In the Moreau's time stepping case, it will first integrate the dynamics to obtain the so-called free-state, that is without non-smooth effect, then it formalizes and solves a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d3/d48/classLCP.html">LCP</a> before re-integrate the dynamics using the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d3/d48/classLCP.html">LCP</a> results. (This is a quite simplified view of the Time Stepping process so for details check <a class="el" href="docSimu.html#docSimuTS">TimeStepping scheme</a>). <br>
+ The problem of output still remains. To answer that, we create a matrix where required output data will be save:<p>
+<div class="fragment"><pre class="fragment"><span class="comment">// Before simulation loop</span>
+<span class="keywordtype">int</span> k = td-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html#00bdac9ac3339ba4fd506d090b16800e">getK</a>(); <span class="comment">// Current step </span>
+<span class="keywordtype">int</span> N = td-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html#a6008d0dad03031590d9bb7ceb469eff">getNSteps</a>(); <span class="comment">// Number of time steps</span>
+<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> outputSize = 7; <span class="comment">// number of required data</span>
+<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d5c/classSimpleMatrix.html">SimpleMatrix</a> dataPlot(N,outputSize);
+<span class="comment">// We get values for the initial time step: </span>
+<span class="comment">// time</span>
+dataPlot(k, 0) = k*h;
+<span class="comment">// inductor voltage</span>
+dataPlot(k, 1) = (oscillator-&gt;getX())(0);
+<span class="comment">// inductor current</span>
+dataPlot(k, 2) = (oscillator-&gt;getX())(1);
+<span class="comment">// diode R1 current</span>
+dataPlot(k, 3) = (myInteraction-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html#8b328bb56b6d8b09b4772f2f6afc9f65">getY</a>(0))(0);
+<span class="comment">// diode R1 voltage</span>
+dataPlot(k, 4) = -(myInteraction-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html#20861159b591bf25d591f2f7e7f9bc39">getLambda</a>(0))(0);
+<span class="comment">// diode F2 voltage </span>
+dataPlot(k, 5) = -(myInteraction-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html#20861159b591bf25d591f2f7e7f9bc39">getLambda</a>(0))(1);
+<span class="comment">// diode F1 current</span>
+dataPlot(k, 6) = (myInteraction-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html#20861159b591bf25d591f2f7e7f9bc39">getLambda</a>(0))(2);
+
+<span class="comment">// Simulation loop</span>
+<span class="keywordflow">while</span>(k &lt; N-1)  
+{       
+  s-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html#4e7874205670a4b5033c44e0ef8d2ec6">nextStep</a>();
+  <span class="comment">// get current time step</span>
+  k = td-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html#00bdac9ac3339ba4fd506d090b16800e">getK</a>();       
+  s-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d7b/classSimulation.html#1c127e04f06837a21b609f51af08dfa4">computeOneStep</a>();
+  dataPlot(k, 0) = k*h;
+  dataPlot(k, 1) = (oscillator-&gt;getX())(0);
+  dataPlot(k, 2) = (oscillator-&gt;getX())(1);
+  dataPlot(k, 3) = (myInteraction-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html#8b328bb56b6d8b09b4772f2f6afc9f65">getY</a>(0))(0);
+  dataPlot(k, 4) = -(myInteraction-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html#20861159b591bf25d591f2f7e7f9bc39">getLambda</a>(0))(0);
+  dataPlot(k, 5) = -(myInteraction-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html#20861159b591bf25d591f2f7e7f9bc39">getLambda</a>(0))(1);
+  dataPlot(k, 6) = (myInteraction-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d0c/classInteraction.html#20861159b591bf25d591f2f7e7f9bc39">getLambda</a>(0))(2);
+}  
+
+<span class="comment">// Write the results into the file "DiodeBridge.dat"</span>
+<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d0/d4a/classioMatrix.html">ioMatrix</a> io(<span class="stringliteral">"DiodeBridge.dat"</span>, <span class="stringliteral">"ascii"</span>);
+io.write(dataPlot);
+</pre></div><p>
+Do not forget to release memory for pointers at the end:<p>
+<div class="fragment"><pre class="fragment"><span class="keyword">delete</span> A;
+<span class="keyword">delete</span> x0;
+<span class="keyword">delete</span> oscillator;
+<span class="keyword">delete</span> B;
+<span class="keyword">delete</span> myRelation;
+<span class="keyword">delete</span> D;
+<span class="keyword">delete</span> myNslaw;
+<span class="keyword">delete</span> myRelation;
+<span class="keyword">delete</span> myNSDS;
+<span class="keyword">delete</span> DiodeBridge;
+<span class="keyword">delete</span> s;
+<span class="keyword">delete</span> td;
+<span class="keyword">delete</span> myIntegrator;
+<span class="keyword">delete</span> myLCP;
+</pre></div><p>
+To complete DiodeBridge.cpp, some header files are required:<p>
+<div class="fragment"><pre class="fragment"><span class="comment">// Header files</span>
+<span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d3/d5a/Model_8h.html">Model.h</a>"</span>
+<span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/dc7/LinearTIDS_8h.html">LinearTIDS.h</a>"</span>
+<span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d9/d52/LinearTIR_8h.html">LinearTIR.h</a>"</span>
+<span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d9/d27/ComplementarityConditionNSL_8h.html">ComplementarityConditionNSL.h</a>"</span>
+<span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d41/TimeStepping_8h.html">TimeStepping.h</a>"</span>
+<span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d2/d3b/ioMatrix_8h.html">ioMatrix.h</a>"</span>
+<span class="preprocessor">#include &lt;string&gt;</span>
+<span class="preprocessor">#include &lt;iostream&gt;</span>
+</pre></div><p>
+The full cpp file is available <a class="el" href="tutorialSample1.html">here</a><h3><a class="anchor" name="tutDiodeResults">
+Results</a></h3>
+You can now run in a terminal:<p>
+<div class="fragment"><pre class="fragment">
+siconos DiodeBridge.cpp
+</pre></div><p>
+Results are given on the figure below:<p>
+<div align="center">
+<img src="diodeBridgeResult.png" alt="diodeBridgeResult.png">
+</div>
+<h2><a class="anchor" name="tutorialMultiBalls">
+Siconos Tutorial - A columns of three beads</a></h2>
+Consider the figure below:<p>
+<div align="center">
+<img src="bouncingBall.png" alt="bouncingBall.png">
+<p><strong>.</strong></p></div>
+<p>
+We consider a ball of mass m and radius R, described by 3 generalized coordinates <img class="formulaInl" alt="$ q=(z,x,\theta) $" src="form_164.png">. The ball is subjected to the gravity g and a vertical external force f(t). The system is also constituted by a rigid plane, defined by its position $h$ with respect to the axis Oz. We assume that the position of the plane is fixed. <br>
+<p>
+The equation of motion of the ball is given by: <br>
+ <p class="formulaDsp">
+<img class="formulaDsp" alt="\[ M\ddot q = F_{ext}(t) + p \ \ with \ \ M=\left[\begin{array}{ccc} m &amp;0 &amp;0 \\ 0 &amp; m &amp; 0 \\ 0 &amp; 0 &amp; I \end{array}\right] \ \ , \ \ I = \frac{3}{5}mR^2 \ \ and \ \ F_{ext} = \left[\begin{array}{c} -m g \\ 0 \\ 0 \end{array}\right] \]" src="form_172.png">
+<p>
+ The ball bounces on the rigid plane, introducing a constraint on the position of the ball, given by: <p class="formulaDsp">
+<img class="formulaDsp" alt="\[ z-R-h\geq 0 \]" src="form_171.png">
+<p>
+<p>
+We also consider also that the behavior of the system at impact is governed by a Newton impact law with a coefficient of restitution <em>e</em>.<p>
+We suppose now that we have a column of N balls like the one above (mass and radius may be different, and if necessary, variables will be indexed by i, i being the number of the ball). Each ball is governed by a linear system like the one written for a single ball and may be in contact with the balls above and below it. This introduces some new constraints: <img class="formulaInl" alt="$ (z_i-R_i)-(z_j-R_j)-h \geq 0 $" src="form_173.png">, if ball i is on top of ball j.<p>
+Let us now start the writing of the input file. Like for the first tutorial, we create a new directory, multiBeads, and save the template given <a class="el" href="doc_prelim.html#tutGCtemplate">here</a> as multiBeads.cpp.<p>
+We start by setting some parameters, like the number of balls, their initial positions and velocities and so on. <div class="fragment"><pre class="fragment"><span class="comment">// User-defined main parameters </span>
+<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> dsNumber = 10;     <span class="comment">// the number of dynamical systems </span>
+<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> nDof = 3;           <span class="comment">// degrees of freedom for beads</span>
+<span class="keywordtype">double</span> increment_position = 1;   <span class="comment">// initial position increment from one DS to the following</span>
+<span class="keywordtype">double</span> increment_velocity = 0;   <span class="comment">// initial velocity increment from one DS to the following</span>
+<span class="keywordtype">double</span> t0 = 0;                   <span class="comment">// initial computation time</span>
+<span class="keywordtype">double</span> T = 10;                   <span class="comment">// final computation time </span>
+<span class="keywordtype">double</span> h = 0.005;                <span class="comment">// time step</span>
+<span class="keywordtype">double</span> position_init = 10.5;        <span class="comment">// initial position for lowest bead.</span>
+<span class="keywordtype">double</span> velocity_init = 0.0;      <span class="comment">// initial velocity for lowest bead.</span>
+
+
+<span class="comment">// -------------------------</span>
+<span class="comment">// --- Dynamical systems --- </span>
+<span class="comment">// -------------------------</span>
+
+    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i;
+    <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/df/d1e/classDynamicalSystemsSet.html">DynamicalSystemsSet</a> allDS; <span class="comment">// the list of DS</span>
+    <a class="code" href="d0/db5/DynamicalSystemsSet_8h.html#137b6e65fe98aaaecc03be2928ada3b2">CheckInsertDS</a> checkDS;
+    <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/dee/classSiconosMatrix.html">SiconosMatrix</a> *Mass = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/d5c/classSimpleMatrix.html">SimpleMatrix</a>(nDof,nDof);
+    Mass-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/dee/classSiconosMatrix.html#1a534199d0c0a0673e3ae9f46e52c929">eye</a>();
+
+    <span class="comment">// -- Initial positions and velocities --</span>
+    vector&lt;SimpleVector *&gt; q0;
+    vector&lt;SimpleVector *&gt; velocity0;
+    q0.resize(dsNumber,NULL);
+    velocity0.resize(dsNumber,NULL);
+
+    <span class="keywordflow">for</span> (i=0;i&lt;dsNumber;i++)
+      {
+        q0[i] = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a>(nDof);
+        velocity0[i] = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a>(nDof); 
+        (*(q0[i]))(0) = position_init;
+        (*(velocity0[i]))(0) = velocity_init;
+        checkDS = allDS.<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/df/d1e/classDynamicalSystemsSet.html#957ca929b79fd0207377d938845a55cd">insert</a>( <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d8/de0/classLagrangianLinearTIDS.html">LagrangianLinearTIDS</a>(i,nDof,*(q0[i]),*(velocity0[i]),*Mass));
+        <span class="comment">// checkDS.first is an iterator that points to the DS inserted above.</span>
+        (static_cast&lt;LagrangianDS*&gt;(*(checkDS.first)))-&gt;setComputeFExtFunction(<span class="stringliteral">"BeadsPlugin.so"</span>, <span class="stringliteral">"beadsFExt"</span>);
+        position_init+= increment_position;
+        velocity_init+= increment_velocity;
+      }
+</pre></div> <hr size="1"><address style="align: right;"><small>Generated on Fri Nov 24 18:17:36 2006 for Getting Started with Siconos by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.1 </small></address>
 </body>

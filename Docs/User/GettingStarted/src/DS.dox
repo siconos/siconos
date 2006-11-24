@@ -20,14 +20,16 @@ with: \n
 
 \section doc_dsClassDiag Which are the available DynamicalSystems types? 
 
+\b Classes: DynamicalSystem, LinearDS, LinearTIDS, LagrangianDS, LagrangianLinearTIDS.
+
 \image html classDynamicalSystem.png
 
 As shown on the class diagram above, there are five possible formulations for dynamical systems in Siconos, three for first order systems and two for second order Lagrangian systems. The main class is DynamicalSystem, all other derived from this one.
-- DynamicalSystem: first order general non linear system.
-- LinearDS: first order, linear system.
-- LinearTIDS: first order linear system with time-invariant coefficients.
-- LagrangianDS: second order non linear Lagrangian system.
-- LagrangianLinearTIDS: second order linear system with time-invariant coefficients.
+- \ref doc_nlds "DynamicalSystem": first order general non linear system.
+- \ref doc_linds "LinearDS": first order, linear system.
+- \ref doc_ltids "LinearTIDS": first order linear system with time-invariant coefficients.
+- \ref doc_lagds "LagrangianDS": second order non linear Lagrangian system.
+- \ref doc_lagtids "LagrangianLinearTIDS": second order linear system with time-invariant coefficients.
 
 \section doc_nlds General non linear first order dynamical systems: class DynamicalSystem
 This is the top class for dynamical systems. All other systems classes are derived from this one. 
@@ -70,7 +72,7 @@ ds->computeJacobianXF(time);
 \endcode
 The signature of each function (ie the number and type of arguments) must be exactly the same as the one given in Kernel/src/plugin/DefaultPlugin.cpp for the corresponding function. 
 
-\section doc_linDS First order linear dynamical systems: class LinearDS.
+\section doc_linds First order linear dynamical systems: class LinearDS.
 
 Derived from DynamicalSystem, described by the set of n equations and initial conditions: 
 \f{eqnarray*}
@@ -127,7 +129,7 @@ ltids->computeRhs(time) // to compute Ax+b+Tu (saved in member rhs)
 ltids->computeJacobianXRhs(time) // to compute A(t).
 \endcode
 
-\section docLagDS Second order non linear Lagrangian dynamical systems: class LagrangianDS
+\section doc_lagds Second order non linear Lagrangian dynamical systems: class LagrangianDS
 
 Lagrangian second order non linear systems are described by the following set of nDof equations + initial conditions:
 \f{eqnarray*}
@@ -162,7 +164,7 @@ With \f$0_{n}\f$ a vector of zero of size n, \f$0_{n X m}\f$ a n X m zero matrix
 
 Warning: control terms (Tu) are not fully implemented in Lagrangian systems. This will be part of future version.
 
-\section doc_dsLTIDS Second order linear and time-invariant Lagrangian dynamical systems: class LagrangianLinearTIDS
+\section doc_lagtids Second order linear and time-invariant Lagrangian dynamical systems: class LagrangianLinearTIDS
 
 \f{eqnarray*}
 M \ddot q + C \dot q + K q =  F_{Ext}(t) + p

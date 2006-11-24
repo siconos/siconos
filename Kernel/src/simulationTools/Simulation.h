@@ -71,8 +71,9 @@ const double TOLERANCE = 1e-8;
 /** default name for One Step NS Problem of the simulation */
 const std::string DEFAULT_OSNS_NAME = "unamed";
 
-//! Description of the simulation process (integrators, time discretisation ...)
-/**  \author SICONOS Development Team - copyright INRIA
+/** Description of the simulation process (integrators, time discretisation ...)
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Crestion) Apr 26, 2004
  *

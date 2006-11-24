@@ -77,7 +77,7 @@ SiconosMatrix * m = new SimpleMatrix(row,col);
 // Read from a file
 SiconosMatrix * m2 = new SimpleMatrix("mat.dat",1); // 1: ascii, 0:binary
 \endcode
-\subsection matIO Matrix/Vector Input/Output:
+\subsection matIO Matrix/Vector Input/Output
 \code
 // v is a vector, m a matrix
 ioVector myOutput ("MyData","ascii"); 
@@ -117,33 +117,34 @@ m3 = prod(m1,s);
 \endcode
 In a general way, if you need efficiency, always prefer functions to overloaded operators. 
 
-\section tutGC Templates for main input file
+\section tutGCtemplate Templates for main input file
 
 \code
 // Header files
 #include "Model.h"
-#include "ioMatrix.h"
-#include "TimeStepping.h"
 // ...
+using namespace std;
 
 // main program
 int main(int argc, char* argv[])
 {
   // Exception handling
   try{
+    // == User-defined parameters ==
 	
     // ================= Creation of the model =======================
 
-    // DynamicalSystem(s)
-    // Relations
-    // NonSmoothLaw
-    // Interaction
-    // NonSmoothDynamicalSystem	
-    // Model
-    // Simulation
-    // TimeDiscretisation
-    // OneStepIntegrator
-    // OneStepNSProblem
+    // == Creation of the NonSmoothDynamicalSystem ==
+    // -- DynamicalSystem(s) --
+    // -- Interaction --
+    // - Relations - 
+    // - NonSmoothLaw -
+    // -- NonSmoothDynamicalSystem --	
+    // -- Model --
+    // == Creation of the Simulation ==
+    // -- TimeDiscretisation --
+    // -- OneStepIntegrator --
+    // -- OneStepNSProblem --
     // ================================= Computation =================================
 
     // --- Initialisation of the simulation ---
@@ -161,5 +162,9 @@ int main(int argc, char* argv[])
 }
 
 \endcode
+
+\section prelSTLTool STL tools in Siconos
+
+Something about sets (STL) \n
 
 */

@@ -13,7 +13,7 @@ The union of relations and the corresponding non smooth law is what we call an \
 
 For details on :
 - DynamicalSystems see \ref dsInSiconos. \n
-- Interactions, Relations and Non Smooth Laws see \ref interactionsInSiconos
+- Interactions, Relations and Non Smooth Laws see \ref doc_Interactions
 
 As a simple example, consider the classical case of a ball bouncing on the floor describe \link bouncingBallSample here\endlink.
 

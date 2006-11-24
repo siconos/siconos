@@ -8,6 +8,7 @@
 <div class="tabs">
   <ul>
     <li><a href="index.html"><span>Main&nbsp;Page</span></a></li>
+    <li><a href="files.html"><span>Files</span></a></li>
     <li><a href="pages.html"><span>Related&nbsp;Pages</span></a></li>
   </ul></div>
 <h1><a class="anchor" name="doc_usingPlugin">Siconos Plug-in Functions</a></h1><b>What for? </b><br>
@@ -18,7 +19,7 @@ Some classes have pre-defined functions that can be "connected" to external user
 <b> What are the available plug-in?</b><p>
 All the plug-in functions are documented in file <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/d29/DefaultPlugin_8cpp.html">DefaultPlugin.cpp</a>. There you can find a complete list of the available plug-in, their signature (ie the <b>required</b> types of their arguments) and to which class they are linked. <br>
  At the time, there are plug-in for:<ul>
-<li>DynamicalSystems (see <a class="el" href="dsInSiconos.html#doc_dsPlugin">Dynamical Systems plug-in functions.</a>)</li><li>Relations (see doc_relPlugIn)</li></ul>
+<li>DynamicalSystems (see <a class="el" href="dsInSiconos.html#doc_dsPlugin">Dynamical Systems plug-in functions.</a>)</li><li>Relations (see <a class="el" href="doc_Interactions.html#doc_relPlugIn">Relations plug-in functions</a>)</li></ul>
 <p>
 <b> How to write your own plug-in? </b><p>
 Suppose that you want to define your own way to compute the internal forces for a pre-defined Lagrangian Dynamical System, named myDS.<p>
@@ -80,7 +81,7 @@ lds-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../.
    fExt[i] = cos(param[1]*time) + param[0] ;
 <span class="comment">// this means that Fext = cos(lambda t) + mu</span>
 }
-</pre></div> <hr size="1"><address style="align: right;"><small>Generated on Thu Nov 23 14:17:57 2006 for Getting Started with Siconos by&nbsp;
+</pre></div> <hr size="1"><address style="align: right;"><small>Generated on Fri Nov 24 18:17:36 2006 for Getting Started with Siconos by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.1 </small></address>
 </body>

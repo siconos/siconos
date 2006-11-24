@@ -61,7 +61,7 @@ class LinearDSXML;
  * Links with DynamicalSystem are:
  *
  * \f[
- *   f(x,t) = Ax(t) + b \\
+ *   f(x,t) = Ax(t) + b /  / , / /
  *   jacobianX = A
  * \f]
  *

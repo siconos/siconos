@@ -56,8 +56,8 @@ typedef VectorOfBlocks::iterator VectorOfBlocksIterator;
 /** type used for inside-class allocation checking */
 typedef std::deque<bool>  AllocationFlags;
 
-//!  An Interaction describes the non-smooth interactions between a set of Dynamical Systems.
-/**
+/**  An Interaction describes the non-smooth interactions between a set of Dynamical Systems.
+ *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 29, 2004

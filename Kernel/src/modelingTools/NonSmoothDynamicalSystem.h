@@ -43,8 +43,9 @@ class DynamicalSystem;
 class Topology;
 class NonSmoothDynamicalSystemXML;
 
-//! the Non Smooth Dynamical System composed with dynamical systems that interact alltogether.
-/**  \author SICONOS Development Team - copyright INRIA
+/** the Non Smooth Dynamical System composed with dynamical systems that interact alltogether.
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 23, 2004
  *

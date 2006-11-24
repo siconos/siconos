@@ -27,8 +27,9 @@
 
 class SimpleMatrix;
 
-//! Vectors (embedded various types of Boost-Ublas vectors of double).
-/**  \author SICONOS Development Team - copyright INRIA
+/** Vectors (embedded various types of Boost-Ublas vectors of double).
+ *
+ * \author SICONOS Development Team - copyright INRIA
  *   \version 1.3.0.
  *   \date (Creation) 07/21/2006
  *
