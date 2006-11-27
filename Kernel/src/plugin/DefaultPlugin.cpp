@@ -128,7 +128,7 @@ extern "C" void computeFInt(unsigned int sizeOfq, double time, const double *q, 
  * @param[in,out] fExt : pointer to the first element of fExt
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void computeFExt(const unsigned int sizeOfq, double time, double *fExt, double *param)
+extern "C" void computeFExt(unsigned int sizeOfq, double time, double *fExt, double *param)
 {
   printf("Warning: call of the function 'computeFExt' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }

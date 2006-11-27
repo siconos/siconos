@@ -121,8 +121,11 @@ void DynamicalSystemTest::testBuildDynamicalSystem2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem2H : ", ds->getUSize() == 2, true);
 
   double time = 1.5;
+  cout << "--> Test: constructor xml 2." << endl;
   ds->computeU(time);
+  cout << "--> Test: constructor xml 2." << endl;
   ds->computeT();
+  cout << "--> Test: constructor xml 2." << endl;
   SimpleVector * x01 = new SimpleVector(2);
   (*x01)(0) = 2;
   (*x01)(1) = 4;

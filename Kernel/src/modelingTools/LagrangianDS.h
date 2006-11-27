@@ -191,7 +191,7 @@ protected:
    * @param[in,out] fExt : pointer to the first element of fExt
    * @param[in,out] param : a vector of user-defined parameters
    */
-  void (*computeFExtPtr)(const unsigned int, double, double*, double*);
+  void (*computeFExtPtr)(unsigned int, double, double*, double*);
 
   /** LagrangianDS plug-in to compute \f$NNL(\dot q, q)\f$, id = "NNL"
    * @param sizeOfq : size of vector q
