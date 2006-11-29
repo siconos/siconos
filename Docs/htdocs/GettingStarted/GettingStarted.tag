@@ -98,6 +98,7 @@
     <name>docSimuED</name>
     <title>Event Driven algorithm</title>
     <filename>docSimuED</filename>
+    <docanchor file="docSimuED">docSimuEDLinkSico</docanchor>
     <docanchor file="docSimuED">docSimuEDPrinciple</docanchor>
     <docanchor file="docSimuED">docSimuEDImplementation</docanchor>
     <docanchor file="docSimuED">docSimuEDProcess</docanchor>
@@ -105,8 +106,9 @@
     <docanchor file="docSimuED">docSimuEDDetails</docanchor>
     <docanchor file="docSimuED">docSimuEDintegrate</docanchor>
     <docanchor file="docSimuED">docSimuEDEvent</docanchor>
+    <docanchor file="docSimuED">docSimuEDalgo</docanchor>
     <docanchor file="docSimuED">docSimuEDImpact</docanchor>
-    <docanchor file="docSimuED">docSimuEDSmoothDyn</docanchor>
+    <docanchor file="docSimuED">docSimuEDSmoothDynt</docanchor>
   </compound>
   <compound kind="page">
     <name>doc_Interactions</name>
@@ -129,14 +131,17 @@
     <name>docSimuMoreauTS</name>
     <title>Moreau&apos;s Time Stepping scheme</title>
     <filename>docSimuMoreauTS</filename>
-    <docanchor file="docSimuMoreauTS">docMoreauLDS</docanchor>
     <docanchor file="docSimuMoreauTS">docMoreauTDSumup</docanchor>
     <docanchor file="docSimuMoreauTS">docMorTDLDSRel</docanchor>
     <docanchor file="docSimuMoreauTS">docMoreauLDSTD</docanchor>
     <docanchor file="docSimuMoreauTS">docMoreauLag</docanchor>
+    <docanchor file="docSimuMoreauTS">docSimuTSDiscretisationLDS</docanchor>
+    <docanchor file="docSimuMoreauTS">docSimuTSimplem</docanchor>
     <docanchor file="docSimuMoreauTS">docMoreauTDDS</docanchor>
+    <docanchor file="docSimuMoreauTS">docSimuTSPrinciple</docanchor>
     <docanchor file="docSimuMoreauTS">docMorTDLDSNSL</docanchor>
     <docanchor file="docSimuMoreauTS">docMoreauTDNSlaw</docanchor>
+    <docanchor file="docSimuMoreauTS">docSimuTSProcess</docanchor>
     <docanchor file="docSimuMoreauTS">docMoreauTDLDSSumup</docanchor>
     <docanchor file="docSimuMoreauTS">docMoreauTDRel</docanchor>
   </compound>

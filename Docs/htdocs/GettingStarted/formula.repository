@@ -384,3 +384,62 @@
 \form#383:\begin{eqnarray*} \dot y^{+}(t_i) = \nabla_q h(q(t_i)) (M(q(t_i)))^{-1} \nabla_q^T h(q(t_i)) \lambda[1]_i + \dot y^{-}(t_i) \\ \\ 0\leq \dot y^{+}(t_i)+ e \dot y^{-}(t_i) \perp \lambda[1]_i \geq 0 \end{eqnarray*}
 \form#384:\begin{eqnarray*} \ddot y^+ = \nabla_q h(q) M^{-1}(q(t))(- F_{int}(t, q, v^+)+ F_{ext}(t) ) + \dot{ \nabla_q h(q)} v^+ +\nabla_q h(q) M^{-1} \nabla_q h(q(t))^T F^+(t) \\ \\ \end{eqnarray*}
 \form#385:\begin{eqnarray*} \ddot y^+ = \nabla_q h(q) M^{-1}(q(t))(- F_{int}(t, q, v^+)+ F_{ext}(t) ) + \dot{ \nabla_q h(q)} v^+ +\nabla_q h(q) M^{-1} \nabla_q h(q(t))^T F^+(t) \\ \\ 0 \leq \ddot y^+ \perp F^+ \geq 0 \end{eqnarray*}
+\form#386:\begin{eqnarray*} M(q(t_i))(v^{+}(t_i)- v^{-}(t_i)) = p_i, \\ U_N^{+}(t_i) = \nabla_q g(q(t_i)) v^{+}(t_i) \\ U_N^{-}(t_i) = Nabla_q g(q(t_i)) v^{-}(t_i) \\ p_i = \nabla_q^T g(q(t_i)) P_{N,i}\\ 0\leq U_N^{+}(t_i)+ e U_N^{-}(t_i) \perp P_{N,i} \geq 0 \end{eqnarray*}
+\form#387:$ U_N^{+}(t_i),P_{N,i} $
+\form#388:$ t_i $
+\form#389:\begin{eqnarray*} U_N^{+}(t_i) = \nabla_q g(q(t_i)) (M(q(t_i)))^{-1} \nabla_q^T g(q(t_i)) P_{N,i} + U_N^{-}(t_i) \\ 0\leq U_N^{+}(t_i)+ e U_N^{-}(t_i) \perp P_{N,i} \geq 0 \end{eqnarray*}
+\form#390:$ dt $
+\form#391:\begin{eqnarray*} M(q) \gamma^+ + F_{int}(t, q, v^+)&=& F_{ext}(t) + f^+ \quad (dt-a.e.) \end{eqnarray*}
+\form#392:$ f^+=f^-=f\, (dt-a.e.) $
+\form#393:\begin{eqnarray*} M(q(t)) \gamma^{+}(t) + F_{int}(t, q, v^+)= F_{ext}(t) + f^{+}(t)\\ g = g(q(t)) \\ f^+ = \nabla_q g(q(t))^T F^+(t) \\ 0 \leq g \perp F^+(t) \geq 0 \end{eqnarray*}
+\form#394:$ q(t) = q(t_0) +\int_{t_0}^t v^+(t)dt $
+\form#395:$ v = \dot q $
+\form#396:\begin{eqnarray*} M(q) \ddot q^+ + F_{int}(t, q, v^+)&=& F_{ext}(t) + f^+ \quad (dt-a.e.) \end{eqnarray*}
+\form#397:\begin{eqnarray*} M(q(t)) \ddot q^{+}(t) + F_{int}(t, q, v^+)= F_{ext}(t) + f^{+}(t)\\ y = h(q(t)) \\ f^+ = \nabla_q h(q(t))^T F^+(t) \\ 0 \leq y \perp F^+(t) \geq 0 \end{eqnarray*}
+\form#398:\begin{eqnarray*} M(q(t_i))(v^{+}(t_i)- v^{-}(t_i)) = p_i, \\ \dot y^{+}(t_i) = \nabla_q g(q(t_i)) v^{+}(t_i) \\ \dot y^{-}(t_i) = Nabla_q g(q(t_i)) v^{-}(t_i) \\ p_i = \nabla_q^T g(q(t_i)) P_{N,i}\\ 0\leq \dot y^{+}(t_i)+ e \dot y^{-}(t_i) \perp P_{N,i} \geq 0 \end{eqnarray*}
+\form#399:$ \dot y^{+}(t_i),P_{N,i} $
+\form#400:\begin{eqnarray*} \dot y^{+}(t_i) = \nabla_q g(q(t_i)) (M(q(t_i)))^{-1} \nabla_q^T g(q(t_i)) P_{N,i} + \dot y^{-}(t_i) \\ 0\leq \dot y^{+}(t_i)+ e \dot y^{-}(t_i) \perp P_{N,i} \geq 0 \end{eqnarray*}
+\form#401:\begin{eqnarray*} M(q(t_i))(v^{+}(t_i)- v^{-}(t_i)) = p_i, \\ \dot y^{+}(t_i) = \nabla_q g(q(t_i)) v^{+}(t_i) \\ \dot y^{-}(t_i) = \nabla_q g(q(t_i)) v^{-}(t_i) \\ p_i = \nabla_q^T g(q(t_i)) P_{N,i}\\ 0\leq \dot y^{+}(t_i)+ e \dot y^{-}(t_i) \perp P_{N,i} \geq 0 \end{eqnarray*}
+\form#402:\begin{eqnarray*} M(q(t_i))(v^{+}(t_i)- v^{-}(t_i)) = p_i, \\ \dot y^{+}(t_i) = \nabla_q h(q(t_i)) v^{+}(t_i) \\ \dot y^{-}(t_i) = \nabla_q h(q(t_i)) v^{-}(t_i) \\ p_i = \nabla_q^T h(q(t_i)) P_{N,i}\\ 0\leq \dot y^{+}(t_i)+ e \dot y^{-}(t_i) \perp P_{N,i} \geq 0 \end{eqnarray*}
+\form#403:$ M(q(t_i)) $
+\form#404:\begin{eqnarray*} \dot y^{+}(t_i) = \nabla_q h(q(t_i)) (M(q(t_i)))^{-1} \nabla_q^T h(q(t_i)) P_{N,i} + \dot y^{-}(t_i) \\ 0\leq \dot y^{+}(t_i)+ e \dot y^{-}(t_i) \perp P_{N,i} \geq 0 \end{eqnarray*}
+\form#405:\[ M(q)dv + F_{int}(t, q, v^+)dt=F_{ext}(t) + dr \]
+\form#406:\[ dv = \gamma dt + (v^+-v^-)\sum_i\delta_{t_i} + dv_s \\ dr = fdt + \sum_ip_i\delta_{t_i}+dr_s \]
+\form#407:$ \gamma =\ddot q $
+\form#408:$ \delta_{t_i} $
+\form#409:\[ q(t) = q(t_0) +\int_{t_0}^t v^+(t)dt \ with \ v = \dot q \]
+\form#410:\begin{eqnarray*} dv = \gamma dt + (v^+-v^-)\sum_i\delta_{t_i} + dv_s \\ dr = fdt + \sum_ip_i\delta_{t_i}+dr_s \end{eqnarray*}
+\form#411:$ I_1 = \{ ur_\alpha\in I_{0} , y_{\alpha} = 0 \} $
+\form#412:$ I_2 = \{ ur_\alpha\in I_{1} , \dot y_{\alpha} = 0 \} $
+\form#413:\begin{eqnarray*} M(q) \ddot q^{+} + F_{int}(t, q, v)= F_{ext} + \nabla_q h(q)^T F^+\\ \\ \ddot y^+ = \nabla_q h(q) \ddot q^+ + \dot{ \nabla_q ghq)} v^+ \\ \\ F^{+,\alpha} = 0, \quad \forall \alpha \in I_0-I_2 \\ \\ 0 \leq \ddot y^{+,\alpha} \perp F^{+,\alpha} \geq 0 \quad \forall \alpha \in I_2 \end{eqnarray*}
+\form#414:\begin{eqnarray*} M(q) \ddot q^{+} + F_{int}(t, q, v)= F_{ext} + \nabla_q h(q)^T F^+\\ \\ \ddot y^+ = \nabla_q h(q) \ddot q^+ + \dot{ \nabla_q h(q)} v^+ \\ \\ F^{+,\alpha} = 0, \quad \forall \alpha \in I_0-I_2 \\ \\ 0 \leq \ddot y^{+,\alpha} \perp F^{+,\alpha} \geq 0 \quad \forall \alpha \in I_2 \end{eqnarray*}
+\form#415:$ y^+ $
+\form#416:$ F^+ $
+\form#417:\begin{eqnarray*} \ddot y^+ = \nabla_q h(q) M^{-1}(q)(- F_{int}(t, q, v^+)+ F_{ext}(t) ) + \dot{ \nabla_q h(q)} v^+ +\nabla_q h(q) M^{-1} \nabla_q h(q(t))^T F^+(t) \\ \\ 0 \leq \ddot y^+ \perp F^+ \geq 0 \end{eqnarray*}
+\form#418:$ \ddot y^+ $
+\form#419:\begin{eqnarray*} M(q) \ddot q^{+} + F_{int}(t, q, v)= F_{ext} + \nabla_q h(q)^T F^+\\ \\ \ddot y^+ = \nabla_q h(q) \ddot q^+ + \dot{ \nabla_q h(q)} v^+ \\ \\ F^{+,\alpha} = 0, \quad \forall \alpha \in I_0-I_2 \\ \\ \ddot y^{+,\alpha} = 0 \quad \forall \alpha \in I_2 \end{eqnarray*}
+\form#420:$ \alpha \in I_2 $
+\form#421:\begin{eqnarray*} \ddot y^{+,\alpha} = \nabla_q h(q) M^{-1}(q)(- F_{int}(t, q, v^+)+ F_{ext}(t) ) + \dot{ \nabla_q h(q)} v^+ +\nabla_q h(q) M^{-1} \nabla_q h(q(t))^T F^{+,\alpha}(t) \\ \\ 0 \leq \ddot y^{+,\alpha} \perp F^{+,\alpha} \geq 0 \end{eqnarray*}
+\form#422:$ y, \dot y $
+\form#423:$ I_1, I_2 $
+\form#424:$ [t_k, t_{k+1}] $
+\form#425:\begin{eqnarray*} y^\alpha =0,\quad \forall \alpha \in I_0 - I_2 \\ \\ F^{+,\alpha} = 0, \quad \forall \alpha \in I_2 \end{eqnarray*}
+\form#426:$ I_1 - I_2 \neq \emptyset $
+\form#427:$ I_1 - I_2 =\emptyset $
+\form#428:$ I_2\neq \emptyset $
+\form#429:$ \ddot y_{\alpha} >0, F_{\alpha} = 0 $
+\form#430:$ \alpha $
+\form#431:$ \ddot y_{\alpha} =0, F_{\alpha}=0 $
+\form#432:\begin{eqnarray*} y^\alpha =0,\quad \forall \alpha \in I_0 - I_2 \\ or \\ F^{+,\alpha} = 0, \quad \forall \alpha \in I_2 \end{eqnarray*}
+\form#433:\begin{eqnarray*} y &=& h(Q) \\ \dot y &=& \nabla_q h(Q)\dot Q \\ P &=& \nabla_q h(Q)^t\lambda \end{eqnarray*}
+\form#434:\begin{eqnarray*} M(q) \ddot q^{+} + F_{int}(t, q, v)= F_{ext} + \nabla_q h(q)^T \lambda[2] \\ \\ y[2]^+ = \nabla_q h(q) \ddot q^+ + \dot{ \nabla_q h(q)} v^+ \\ \\ \lambda[2]_{\alpha} = 0, \quad \forall \alpha \in I_0-I_2 \\ \\ y[2]{+,\alpha} = 0 \quad \forall \alpha \in I_2 \end{eqnarray*}
+\form#435:\begin{eqnarray*} g(x,t) = y[0]_\alpha,\quad \forall \alpha \in I_0 - I_2 \\ or \\ g(x,t) = \lambda[2]_\alpha, \quad \forall \alpha \in I_2 \end{eqnarray*}
+\form#436:\begin{eqnarray*} y[1]^{+} = \nabla_q h(q(t_i)) (M(q(t_i)))^{-1} \nabla_q^T h(q(t_i))\lambda[1] + y[1]^{-} \\ 0\leq y[1]^{+} + e y[1]^{-} \lambda[1] \perp \geq 0 \end{eqnarray*}
+\form#437:\begin{eqnarray*} y[2]^{+,\alpha} = \nabla_q h(q) M^{-1}(q)(- F_{int}(t, q, v^+)+ F_{ext}(t) ) + \dot{ \nabla_q h(q)} v^+ +\nabla_q h(q) M^{-1} \nabla_q h(q(t))^T \lambda[2]^{+,\alpha} \\ \\ 0 \leq y[2]^{+,\alpha}\perp \lambda[2]^{+,\alpha} \geq 0 \end{eqnarray*}
+\form#438:\begin{eqnarray*} M(q) \ddot q + F_{int}(t, q, \dot q)= F_{ext} + \nabla_q h(q)^T \lambda[2] \\ \\ y[2] = \nabla_q h(q) \ddot q + \dot{ \nabla_q h(q)} \dot q \\ \\ \lambda[2]_{\alpha} = 0, \quad \forall \alpha \in I_0-I_2 \\ \\ y[2]_{\alpha} = 0 \quad \forall \alpha \in I_2 \end{eqnarray*}
+\form#439:\begin{eqnarray*} y[1]^{+} = \nabla_q h(q(t_i)) (M(q(t_i)))^{-1} \nabla_q^T h(q(t_i))\lambda[1] + y[1]^{-} \\ 0\leq y[1]^{+} + e y[1]^{-} \perp \lambda[1] \geq 0 \end{eqnarray*}
+\form#440:\begin{eqnarray*} y[2]^{\alpha} = \nabla_q h(q) M^{-1}(q)(- F_{int}(t, q, \dot q)+ F_{ext}(t) ) + \dot{ \nabla_q h(q)} \dot q +\nabla_q h(q) M^{-1} \nabla_q h(q(t))^T \lambda[2]^{\alpha} \\ \\ 0 \leq y[2]^{\alpha}\perp \lambda[2]^{\alpha} \geq 0 \end{eqnarray*}
+\form#441:\begin{eqnarray*} y[2]_{\alpha} = \nabla_q h(q) M^{-1}(q)(- F_{int}(t, q, \dot q)+ F_{ext}(t) ) + \dot{ \nabla_q h(q)} \dot q +\nabla_q h(q) M^{-1} \nabla_q h(q(t))^T \lambda[2]_{\alpha} \\ \\ 0 \leq y[2]_{\alpha}\perp \lambda[2]_{\alpha} \geq 0 \end{eqnarray*}
+\form#442:$ (y[2],lambda[2]) $
+\form#443:$ I_2 \neq \emptyset $
+\form#444:\begin{eqnarray*} W & = & (I - h \theta A)^{-1} \\ x_{free} &= & W(I + h (1-\theta) A) \cdot x_{i} \\ x_{i+1} &= & x_{free} + h W r_{i+1} \\ r_{i+1} &= & B \cdot \lambda_{i+1} \\ y_{i+1} &= & C \cdot x_{i+1} + D \cdot \lambda_{i+1}+ Fu_{i+1} \\ 0 \leq y_{i+1} \, &\perp& \, \lambda_{i+1} \geq 0 \end{eqnarray*}

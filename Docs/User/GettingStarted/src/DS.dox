@@ -72,7 +72,8 @@ ds->computeJacobianXF(time);
 \endcode
 The signature of each function (ie the number and type of arguments) must be exactly the same as the one given in Kernel/src/plugin/DefaultPlugin.cpp for the corresponding function. 
 
-\section doc_linds First order linear dynamical systems: class LinearDS.
+\section doc_linds First order linear dynamical systems
+class LinearDS.
 
 Derived from DynamicalSystem, described by the set of n equations and initial conditions: 
 \f{eqnarray*}
@@ -104,7 +105,8 @@ setComputeBFunction(pluginPath, functionName);
 linds->computeB(time);
 \endcode
 
-\section doc_ltids First order time-invariant linear dynamical systems: class LinearTIDS
+\section doc_ltids First order time-invariant linear dynamical systems
+ class LinearTIDS
 
 Derived from DynamicalSystem, described by the set of n equations and initial conditions: 
 \f{eqnarray*}
@@ -165,7 +167,9 @@ With \f$0_{n}\f$ a vector of zero of size n, \f$0_{n X m}\f$ a n X m zero matrix
 
 Warning: control terms (Tu) are not fully implemented in Lagrangian systems. This will be part of future version.
 
-\section doc_lagtids Second order linear and time-invariant Lagrangian dynamical systems: class LagrangianLinearTIDS
+\section doc_lagtids Second order linear and time-invariant Lagrangian dynamical systems.
+
+class LagrangianLinearTIDS
 
 \f{eqnarray*}
 M \ddot q + C \dot q + K q =  F_{Ext}(t) + p

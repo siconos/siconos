@@ -60,7 +60,8 @@ ds-&gt;computeF(time);
 <span class="comment">// to compute the jacobian of f(x,t), and save it into member JacobianXF :</span>
 ds-&gt;computeJacobianXF(time);
 </pre></div> The signature of each function (ie the number and type of arguments) must be exactly the same as the one given in <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d4/d29/DefaultPlugin_8cpp.html">Kernel/src/plugin/DefaultPlugin.cpp</a> for the corresponding function.<h2><a class="anchor" name="doc_linds">
-First order linear dynamical systems: class LinearDS.</a></h2>
+First order linear dynamical systems</a></h2>
+class <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d2/d3a/classLinearDS.html">LinearDS</a>.<p>
 Derived from <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a>, described by the set of n equations and initial conditions: <p class="formulaDsp">
 <img class="formulaDsp" alt="\begin{eqnarray*} \dot x(t) &amp;=&amp; A(t)x(t)+Tu(t)+b(t)+r \\ x(t_0)&amp;=&amp;x_0 \end{eqnarray*}" src="form_64.png">
 <p>
@@ -82,7 +83,8 @@ linds-&gt;computeA(time);
 setComputeBFunction(pluginPath, functionName);
 linds-&gt;computeB(time);
 </pre></div><h2><a class="anchor" name="doc_ltids">
-First order time-invariant linear dynamical systems: class LinearTIDS</a></h2>
+First order time-invariant linear dynamical systems</a></h2>
+class <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d1/d6f/classLinearTIDS.html">LinearTIDS</a><p>
 Derived from <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a>, described by the set of n equations and initial conditions: <p class="formulaDsp">
 <img class="formulaDsp" alt="\begin{eqnarray*} \dot x(t) &amp;=&amp; Ax(t)+Tu(t)+b+r \\ x(t_0)&amp;=&amp;x_0 \end{eqnarray*}" src="form_66.png">
 <p>
@@ -116,7 +118,8 @@ There are plug-in functions in this class for F_{int}, F_{Ext}, M, NNL and the f
 Links with first order dynamical system are: With <img class="formulaInl" alt="$0_{n}$" src="form_46.png"> a vector of zero of size n, <img class="formulaInl" alt="$0_{n X m}$" src="form_69.png"> a n X m zero matrix and <img class="formulaInl" alt="$I_{n X n}$" src="form_70.png">, identity n X n matrix. <br>
 <p>
 Warning: control terms (Tu) are not fully implemented in Lagrangian systems. This will be part of future version.<h2><a class="anchor" name="doc_lagtids">
-Second order linear and time-invariant Lagrangian dynamical systems: class LagrangianLinearTIDS</a></h2>
+Second order linear and time-invariant Lagrangian dynamical systems.</a></h2>
+class <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d8/de0/classLagrangianLinearTIDS.html">LagrangianLinearTIDS</a><p>
 <p class="formulaDsp">
 <img class="formulaDsp" alt="\begin{eqnarray*} M \ddot q + C \dot q + K q = F_{Ext}(t) + p \end{eqnarray*}" src="form_71.png">
 <p>
@@ -137,7 +140,7 @@ See <a class="el" href="doc_usingPlugin.html">Siconos Plug-in Functions</a> for 
 <p>
 Mind that any item present in a class is also available in its derived classes. This means for example that <img class="formulaInl" alt="$F_{Ext}(t)$" src="form_29.png"> has a plug-in function for <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d8/de0/classLagrangianLinearTIDS.html">LagrangianLinearTIDS</a>.<br>
 <p>
-Warning: if you create a new system using the copy constructor, any existing parameters in plug-in functions will also be copied. This means that no link between pointer for <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a> parameters will remain. In that case it may be better to re-set properly your parameters for the new created dynamical system. <hr size="1"><address style="align: right;"><small>Generated on Tue Nov 28 18:46:18 2006 for Getting Started with Siconos by&nbsp;
+Warning: if you create a new system using the copy constructor, any existing parameters in plug-in functions will also be copied. This means that no link between pointer for <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a> parameters will remain. In that case it may be better to re-set properly your parameters for the new created dynamical system. <hr size="1"><address style="align: right;"><small>Generated on Wed Nov 29 15:44:14 2006 for Getting Started with Siconos by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.1 </small></address>
 </body>

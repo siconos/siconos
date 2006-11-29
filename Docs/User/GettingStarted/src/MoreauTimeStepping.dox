@@ -1,0 +1,231 @@
+/*! \page docSimuMoreauTS Moreau's Time Stepping scheme
+
+<b> Foreword: </b> <em> At the time, Moreau's Time Stepping scheme is only implemented for first order linear systems and for Lagrangian systems. </em>
+
+\section docSimuTSPrinciple General Principle
+
+Roughtly speaking, this algorithm consists first in the discretisation of the whole system (dynamics + relations + non-smooth laws) over a time step. Then the system is integrated and that leads to the computation of some "free" solutions, ie without any constraints. Finally a Non-Smooth problem (usually a LCP) is formalized and solved to obtain the complete solution.
+
+\section docSimuTSimplem Implementation
+
+\b Related \b classes: TimeStepping, Moreau, LCP, FrictionContact
+
+The figure below represents the class architecture for TimeStepping simulation.
+
+\image html classTimeStepping.png
+
+
+We will now describe discretisation process for two differents cases: first order linear systems and then Lagrangian systems, linear and time invariant.
+
+\subsection docSimuTSDiscretisationLDS First order linear systems
+
+This section concerns LinearTIDS DynamicalSystems (see \ref dsInSiconos)
+\f{eqnarray*}
+\dot x &=& Ax + Tu + b + r   \\
+x(t_0) &=& x_0
+\f}
+with linear relations (LinearTIR): 
+\f{eqnarray*}
+y &=& CX + FU + D \lambda + e \\
+R &=& B \lambda
+\f}
+
+\subsubsection docMoreauLDSTD Time Discretisation of the Dynamics
+The integration of the ODE over a time step \f$ [t_i,t_{i+1}]\f$  of length \f$ h\f$  is :
+
+\f[
+\int_{t_i}^{t_{i+1}}\dot x\,dt = \int_{t_i}^{t_{i+1}} A \cdot x\,dt + \int_{t_i}^{t_{i+1}}(T \cdot u + b) dt + \int_{t_i}^{t_{i+1}}r\,dt   
+\f]
+The left-hand term is \f$ x(t_{i+1})-x(t_i)\f$ . \n
+Right-hand terms are approximated this way :
+
+\f$ \int_{t_i}^{t_{i+1}} A \cdot x\,dt\f$  is approximated using a \f$ \theta\f$ -method
+\f[
+\int_{t_i}^{t_{i+1}} A \cdot x\,dt \approx h \theta (A \cdot x(t_{i+1})) + h (1-\theta) (A \cdot x(t_{i}))
+\f]
+
+since the second integral comes from independent sources, it can be evaluated with whatever quadrature method, for
+instance a \f$ \theta\f$ -method 
+\f[
+\int_{t_i}^{t_{i+1}}(T \cdot u + b) dt \approx h \theta (T \cdot u(t_{i+1}) + b(t_{i+1})) + 
+                                                              h (1-\theta) (E \cdot u(t_{i}) + b(t_{i}))
+\f]
+
+the third integral is approximated like in an implicit Euler integration
+\f[
+\int_{t_i}^{t_{i+1}}r\,dt \approx h r(t_{i+1})
+\f]
+
+By replacing the accurate solution \f$ x(t_i)\f$  by the approximated value \f$ x_i\f$ , we get :
+\f[
+x_{i+1}-x_i = h \theta (A \cdot x_{i+1}) + h (1-\theta) (A \cdot x_{i}) + 
+              h \theta (T \cdot u(t_{i+1}) + b(t_{i+1})) + h (1-\theta) (T \cdot u(t_{i}) + b(t_{i})) + h r_{i+1}
+\f]
+Assuming that \f$ I - h \theta A\f$  is invertible, matrix \f$ W\f$  is defined as \f$ (I - h \theta A)^{-1}\f$ . We get then :
+\f[
+x_{i+1} = W(I + h (1-\theta) A) \cdot x_{i} + 
+            W (h \theta (T \cdot u(t_{i+1}) + b(t_{i+1})) + h (1-\theta) (T \cdot u(t_{i}) + b(t_{i}))) + h W r_{i+1}
+\f]
+An intermediate variable \f$ x_{free}\f$  related to the smooth part of the system is defined as :
+\f[
+x_{free} = W(I + h (1-\theta) A) \cdot x_{i} + 
+           W (h \theta (T \cdot u(t_{i+1}) + b(t_{i+1})) + h (1-\theta) (T \cdot u(t_{i}) + b(t_{i})))
+\f]
+Thus the calculus of \f$ x_{i+1}\f$  becomes :
+\f[
+x_{i+1} = x_{free} + h W r_{i+1}
+\f]
+
+\subsubsection docMorTDLDSRel Time discretization of the relations
+It comes straightforwardly :\n
+
+\f$ r_{i+1} = B \cdot \lambda_{i+1}\f$ \n
+
+\f$ y_{i+1} = C \cdot x_{i+1} + D \cdot \lambda_{i+1} + F \cdot u(t_{i+1}) + e \f$\n
+
+
+\subsubsection docMorTDLDSNSL Time discretization of the non-smooth law
+It comes straightforwardly :
+\f[
+0 \leq y_{i+1} \, \perp \, \lambda_{i+1} \geq 0
+\f]
+
+\subsubsection docMoreauTDLDSSumup Summary of the time discretized equations 
+These equations are summarized assuming that there is no source term and simplified relations as for the 
+electrical oscillator with full-wave rectifier.
+
+\f{eqnarray*}
+W & = & (I - h \theta A)^{-1} \\
+x_{free} &= & W(I + h (1-\theta) A) \cdot x_{i} \\
+x_{i+1} &= & x_{free} + h W r_{i+1} \\
+r_{i+1} &= & B \cdot \lambda_{i+1}  \\
+y_{i+1} &= & C \cdot x_{i+1} + D \cdot \lambda_{i+1}+ Fu_{i+1}   \\
+0 \leq y_{i+1} \, &\perp& \, \lambda_{i+1} \geq 0 
+\f}
+
+\subsection docMoreauLag Lagrangian Linear Systems case 
+
+We consider now Lagrangian Linear and Time Invariant systems (LagrangianLinearTIDS, see \ref doc_lagtids):
+\f{eqnarray*}
+M \ddot q + C \dot q + K q =  F_{Ext}(t) + p \\
+ q(t_0) = q0 \\
+ \dot q(t_0) = velocity0 
+\f}
+with Lagrangian Linear Relations (LagrangianR, see \ref docRelationLagLin):
+ \f{eqnarray*}
+ y&=& H q + b + D\lambda \\
+ p&=& H^t \lambda 
+ \f}
+
+\subsubsection docMoreauTDDS Time discretization of the dynamical system
+
+We provide in this section a time discretization method of the Lagrange dynmical system, consistent with the non smooth character of the solution. Let us consider here only the linear time invariant case. The equation  may be reformulated equivalently in terms of an integral over a time step \f$ [t_i,t_{i+1}] \f$ of length h such that :
+\f{eqnarray*}
+  \int_{[t_i,t_{i+1}]} M \ddot q + C \dot q + K q \,dt =  \int_{[t_i,t_{i+1}]} F_{ext}(t)\,dt +  \int_{[t_i,t_{i+1}]} r \,d\nu
+\f}
+
+Due to the non smooth character of the motion, the first term is integrated by an one order scheme( backward Euler-like) such that :
+\f{eqnarray*}
+   \int_{[t_i,t_{i+1}]} M \ddot q  \, dt \approx M (\dot q(t_{i+1})-\dot q(t_{i})) 
+\f}
+
+For simplicity sake, we note the approximation of q and \f$ \dot q \f$:
+\f{eqnarray*}
+  \dot q_{i+1}\approx\dot q(t_{i+1}),  \dot q_{i}\approx \dot q(t_{i})
+\f}
+
+ For the other terms, a \f$ \theta \f$-method is used :
+ \f{eqnarray*}
+\int_{[t_i,t_{i+1}]}  C \dot q + K q \,dt &\approx& h\left[\theta  (C \dot q_{i+1}+K q_{i+1}) + (1-\theta) (C \dot q_{i}+K q_{i})  \right]\\
+ \int_{[t_i,t_{i+1}]} F_{ext}(t) \,dt &\approx& h\left[\theta  F_{ext}(t_{i+1})+(1-\theta)  F_{ext}(t_{i})  \right]
+ \f}
+
+For the term which contains the reaction force, we state a new variable such that :
+\f{eqnarray*}
+  R_{i+1} = \frac  1 h \int_{[t_i,t_{i+1}]} r \,d\nu
+\f}
+
+The displacement is integrated through the velocity with :
+\f{eqnarray*}
+  q_{i+1} = q_{i} +  h\left[\theta  \dot q_{i+1}+(1-\theta)  \dot q_{i}  \right]\\
+\f}
+
+Finally, we obtain the time discretized equation of motion:
+\f{eqnarray*}
+  \left[M+h\theta C + h^2 \theta^2 K\right] (\dot q_{i+1} - \dot q_{i}) = - h  C \dot q_{i} - h K q_{i} - h^2 \theta  K \dot q_{i}
++  h\left[\theta  F_{ext}(t_{i+1})+(1-\theta)  F_{ext}(t_{i})  \right]  +h R_{i+1},
+\f}
+which can be written :
+\f{eqnarray*}
+   \dot q_{i+1} = \dot q_{free}  + h W R_{i+1}
+\f}
+where 
+\f{eqnarray*}
+  W &=&   \left[M+h\theta C + h^2 \theta^2 K\right]^{-1}\\
+ \dot q_{free} &=& \dot q_{i}+  W \left[   - h  C \dot q_{i} - h K q_{i} - h^2 \theta  K \dot q_{i}
++  h\left[\theta  F_{ext}(t_{i+1})+(1-\theta)  F_{ext}(t_{i})  \right]       \right]
+\f}
+
+The free velocity \f$ \dot q_{free}  \f$ correponds to the velocity of the system without any constraints.
+
+\subsubsection docMoreauTDRel Time discretization of the relations 
+The Time discretization of the relations is fully implicit and may be written as :
+\f{eqnarray*}
+      y_{i+1} &=& H^{T} q_{i+1} + b\\
+      \dot y_{i+1} &=& H^{T}\dot q_{i+1} \\
+      R_{i+1} &=& H \lambda_{i+1}
+\f}
+
+\subsubsection docMoreauTDNSlaw Time discretization of the Non Smooth laws
+
+A natural way of discretizing the unilateral constraint  leads to the following implicit discretization :
+\f{eqnarray*}
+  0 \leq y_{i+1} \perp  \lambda_{i+1}  \geq 0
+\f}
+
+In the Moreau's time--stepping, we use a reformulation of the unilateral constraints in terms of velocity:
+\f{eqnarray*}
+   If y(t) =0, \ then \ 0 \leq \dot y \perp  \lambda  \geq 0
+\f}
+which leads to the following discretisation :
+\f{eqnarray*}
+    If \ y^{p} \leq 0, \ then \ 0 \leq \dot y_{i+1} \perp  \lambda_{i+1}  \geq 0
+\f}
+ where \f$ y^{p} \f$ is a prediction of the position at time \f$ t_{i+1} \f$, for instance,    \f$ y^{p} = y_{i} + \frac{h}{2}  \dot y_i \f$.
+
+If we want to introduce now the Newton impact law, we consider an equivalent velocity defined by
+\f{eqnarray*}
+  \dot y^{e}_{i+1} = \dot y_{i+1} + e \dot y_{i}
+\f}
+and we apply the constraints directly on this velocity :
+\f{eqnarray*}
+    If \ y^{p} \leq 0, \ then \ 0 \leq \dot y^{e}_{i+1} \perp  \lambda_{i+1}  \geq 0
+\f}
+
+\subsubsection docMoreauTDSumup Summary of the time discretized equations 
+\f{eqnarray*}
+  \dot q_{i+1} &=& \dot q_{free}  + h W R_{i+1} \\
+  q_{i+1} &=& q_{i} +  h\left[\theta  \dot q_{i+1}+(1-\theta)  \dot q_{i}  \right] \\
+  \dot y_{i+1} &=& H^{T}\dot q_{i+1} \\
+  R_{i+1} &=& H \lambda_{i+1}\\
+  y^{p} &=& y_{i} + \frac{h}{2}  \dot y_i\\
+  If &y^{p}& \leq 0, \ then  \ 0 \leq \dot y^{e}_{i+1} \perp  \lambda_{i+1}  \geq 0
+\f}
+
+This set of equations can be reduced to a "condensed" system in terms of \f$ \dot y^{e}_{i+1} \f$ and \f$ {\lambda_{i+1}} \f$ :
+\f{eqnarray*}
+  \dot y^{e}_{i+1} &=&  H^{T} \dot q_{free} + h H^{T} W H \lambda_{i+1}  + e \dot y_{i}\\
+  y^{p} &=& y_{i} + \frac{h}{2}  \dot y_i\\
+  If &y^{p}& \leq 0, \ then \ 0 \leq \dot y^{e}_{i+1} \perp  \lambda_{i+1}  \geq 0
+\f}
+
+\subsection docSimuTSProcess The Simulation process
+
+Then, the steps of a Moreau's Time-Stepping simulation will be:
+
+Knowing all values at the beginning of the time step \f$ [t_i,t_{i+1}] \f$,
+
+-# compute the free solutions
+-# formalize and solve a LCP 
+-# update the state according to the LCP results
+*/
