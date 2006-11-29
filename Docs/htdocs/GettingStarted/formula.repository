@@ -443,3 +443,7 @@
 \form#442:$ (y[2],lambda[2]) $
 \form#443:$ I_2 \neq \emptyset $
 \form#444:\begin{eqnarray*} W & = & (I - h \theta A)^{-1} \\ x_{free} &= & W(I + h (1-\theta) A) \cdot x_{i} \\ x_{i+1} &= & x_{free} + h W r_{i+1} \\ r_{i+1} &= & B \cdot \lambda_{i+1} \\ y_{i+1} &= & C \cdot x_{i+1} + D \cdot \lambda_{i+1}+ Fu_{i+1} \\ 0 \leq y_{i+1} \, &\perp& \, \lambda_{i+1} \geq 0 \end{eqnarray*}
+\form#445:$ I_1 = \{ ur_\alpha\in I_{0} , y^p_{\alpha} = 0 \} $
+\form#446:$ I_level $
+\form#447:$ ur \in I_i $
+\form#448:$ ur \in I_level $

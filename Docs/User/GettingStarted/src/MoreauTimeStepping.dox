@@ -221,11 +221,50 @@ This set of equations can be reduced to a "condensed" system in terms of \f$ \do
 
 \subsection docSimuTSProcess The Simulation process
 
+As for Event-Driven, we introduce level index sets, with level = 0 for first order systems and level=1 for second order systems (this is related to the relative degrees but we won't get into details about that here). \n
+
+\f$ I_0 \f$ is the set of all the potential UnitaryRelations (UR). \n
+For second order systems: \n
+\f$ I_1 = \{ ur_\alpha\in I_{0} , y^p_{\alpha} = 0 \} \f$.  \n
+Thus, the LCP is built only for unitary relations that belongs to \f$ I_level \f$, level=0 for first order and level=1 for second order systems. 
+
 Then, the steps of a Moreau's Time-Stepping simulation will be:
 
 Knowing all values at the beginning of the time step \f$ [t_i,t_{i+1}] \f$,
 
 -# compute the free solutions
--# formalize and solve a LCP 
--# update the state according to the LCP results
+-# for \f$ ur \in I_level \f$ formalize and solve a LCP 
+-# update the state (according to the possibly LCP results)
+-# go to next time step
+
+\code
+TimeStepping * s = new TimeStepping(myModel);
+TimeDiscretisation * t = new TimeDiscretisation(timeStep,s);
+
+s->initialize();
+
+int k = t->getK(); // Current step 
+int N = t->getNSteps(); // Number of time steps
+
+// --- Time loop ---
+while(k < N)// for each time step ...
+{
+// transfer of state i+1 into state i and time incrementation
+s->nextStep();
+// get current time step
+k = t->getK();
+// compute xFree, or qFree,vFree
+s->computeFreeStep();
+// Update the index sets (ie compute prediction yp for Lagrangian Systems)
+s->updateIndexSets();
+// Formalize and solve a LCP
+computeOneStepNSProblem("timeStepping");
+// Update state, using last computed values
+s->update(level); // 
+}
+\endcode
+
+Note that all time-independent operators are computed during simulation initialisation.
+
+
 */
