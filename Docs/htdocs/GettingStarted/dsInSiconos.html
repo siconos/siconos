@@ -14,7 +14,7 @@
 <dl class="version" compact><dt><b>Version:</b></dt><dd>Siconos-Kernel 1.3.0</dd></dl>
 <h2><a class="anchor" name="doc_dsIntro">
 Introduction</a></h2>
-In Siconos, the class <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a> represent generic n-dimensional dynamical system of the form : <p class="formulaDsp">
+In Siconos, the class DynamicalSystem represent generic n-dimensional dynamical system of the form : <p class="formulaDsp">
 <img class="formulaDsp" alt="\begin{eqnarray*}\label{firstOrderSystem} \dot x(t) &amp;=&amp; f(x,t) + T(x) u(x, t) + r \\ x(t_0)&amp;=&amp;x_0 \end{eqnarray*}" src="form_62.png">
 <p>
 <p>
@@ -23,12 +23,12 @@ with: <br>
 <li>x: the state of the system - Vector of size n.</li><li>f(x,t): the vector field - Vector of size n</li><li>u(x, t): control term - Vector of size uSize.</li><li>T(x): n X uSize matrix, related to control term.</li><li>r: input due to non-smooth behavior - Vector of size n.</li></ul>
 <h2><a class="anchor" name="doc_dsClassDiag">
 Which are the available DynamicalSystems types?</a></h2>
-<b>Classes:</b> <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a>, <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d2/d3a/classLinearDS.html">LinearDS</a>, <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d6f/classLinearTIDS.html">LinearTIDS</a>, <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d8/d7f/classLagrangianDS.html">LagrangianDS</a>, <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d8/de0/classLagrangianLinearTIDS.html">LagrangianLinearTIDS</a>.<p>
+<b>Classes:</b> DynamicalSystem, LinearDS, LinearTIDS, LagrangianDS, LagrangianLinearTIDS.<p>
 <div align="center">
 <img src="classDynamicalSystem.png" alt="classDynamicalSystem.png">
 </div>
  <p>
-As shown on the class diagram above, there are five possible formulations for dynamical systems in Siconos, three for first order systems and two for second order Lagrangian systems. The main class is <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a>, all other derived from this one.<ul>
+As shown on the class diagram above, there are five possible formulations for dynamical systems in Siconos, three for first order systems and two for second order Lagrangian systems. The main class is DynamicalSystem, all other derived from this one.<ul>
 <li><a class="el" href="dsInSiconos.html#doc_nlds">DynamicalSystem</a>: first order general non linear system.</li><li><a class="el" href="dsInSiconos.html#doc_linds">LinearDS</a>: first order, linear system.</li><li><a class="el" href="dsInSiconos.html#doc_ltids">LinearTIDS</a>: first order linear system with time-invariant coefficients.</li><li><a class="el" href="dsInSiconos.html#doc_lagds">LagrangianDS</a>: second order non linear Lagrangian system.</li><li><a class="el" href="dsInSiconos.html#doc_lagtids">LagrangianLinearTIDS</a>: second order linear system with time-invariant coefficients.</li></ul>
 <h2><a class="anchor" name="doc_nlds">
 General non linear first order dynamical systems: class DynamicalSystem</a></h2>
@@ -58,17 +58,17 @@ ds-&gt;computeJacobianXRhs(time);
 ds-&gt;computeF(time);
 <span class="comment">// to compute the jacobian of f(x,t), and save it into member JacobianXF :</span>
 ds-&gt;computeJacobianXF(time);
-</pre></div> The signature of each function (ie the number and type of arguments) must be exactly the same as the one given in <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/d29/DefaultPlugin_8cpp.html">Kernel/src/plugin/DefaultPlugin.cpp</a> for the corresponding function.<h2><a class="anchor" name="doc_linds">
+</pre></div> The signature of each function (ie the number and type of arguments) must be exactly the same as the one given in Kernel/src/plugin/DefaultPlugin.cpp for the corresponding function.<h2><a class="anchor" name="doc_linds">
 First order linear dynamical systems</a></h2>
-class <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d2/d3a/classLinearDS.html">LinearDS</a>.<p>
-Derived from <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a>, described by the set of n equations and initial conditions: <p class="formulaDsp">
+class LinearDS.<p>
+Derived from DynamicalSystem, described by the set of n equations and initial conditions: <p class="formulaDsp">
 <img class="formulaDsp" alt="\begin{eqnarray*} \dot x(t) &amp;=&amp; A(t)x(t)+Tu(t)+b(t)+r \\ x(t_0)&amp;=&amp;x_0 \end{eqnarray*}" src="form_64.png">
 <p>
  With:<p>
 <ul>
 <li>A(t): nXn matrix, state independent but possibly time-dependent.</li><li>b(t): Vector of size n, possibly time-dependent.</li></ul>
 <p>
-Other variables are those of <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a> class. <br>
+Other variables are those of DynamicalSystem class. <br>
  A and B have corresponding plug-in functions.<p>
 Links with vectorField and its Jacobian are: <p class="formulaDsp">
 <img class="formulaDsp" alt="\begin{eqnarray*} f(x,t) &amp;=&amp; A(t)x(t)+b(t) \\ jacobianXF&amp;=&amp;\nabla_x f(x,t) = A(t) \end{eqnarray*}" src="form_65.png">
@@ -83,15 +83,15 @@ setComputeBFunction(pluginPath, functionName);
 linds-&gt;computeB(time);
 </pre></div><h2><a class="anchor" name="doc_ltids">
 First order time-invariant linear dynamical systems</a></h2>
-class <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d1/d6f/classLinearTIDS.html">LinearTIDS</a><p>
-Derived from <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a>, described by the set of n equations and initial conditions: <p class="formulaDsp">
+class LinearTIDS<p>
+Derived from DynamicalSystem, described by the set of n equations and initial conditions: <p class="formulaDsp">
 <img class="formulaDsp" alt="\begin{eqnarray*} \dot x(t) &amp;=&amp; Ax(t)+Tu(t)+b+r \\ x(t_0)&amp;=&amp;x_0 \end{eqnarray*}" src="form_66.png">
 <p>
  With:<p>
 <ul>
 <li>A(t): nXn constant matrix.</li><li>b(t): constant vector of size n.</li></ul>
 <p>
-Other variables are those of <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a> class. <br>
+Other variables are those of DynamicalSystem class. <br>
 <p>
 Links with vectorField and its Jacobian are: <p class="formulaDsp">
 <img class="formulaDsp" alt="\begin{eqnarray*} f(x,t) &amp;=&amp; Ax(t)+b \\ jacobianXF&amp;=&amp;\nabla_x f(x,t) = A \end{eqnarray*}" src="form_67.png">
@@ -100,7 +100,7 @@ Links with vectorField and its Jacobian are: <p class="formulaDsp">
 ltids-&gt;computeJacobianXRhs(time) <span class="comment">// to compute A(t).</span>
 </pre></div><h2><a class="anchor" name="doc_lagds">
 Second order non linear Lagrangian dynamical systems</a></h2>
-class <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d8/d7f/classLagrangianDS.html">LagrangianDS</a><p>
+class LagrangianDS<p>
 Lagrangian second order non linear systems are described by the following set of nDof equations + initial conditions: <p class="formulaDsp">
 <img class="formulaDsp" alt="\begin{eqnarray*} M(q) \ddot q + NNL(\dot q, q) + F_{Int}(\dot q , q , t) &amp;=&amp; F_{Ext}(t) + p \\ q(t_0) &amp;=&amp; q0 \\ \dot q(t_0) &amp;=&amp; velocity0 \end{eqnarray*}" src="form_68.png">
 <p>
@@ -118,7 +118,7 @@ Links with first order dynamical system are: With <img class="formulaInl" alt="$
 <p>
 Warning: control terms (Tu) are not fully implemented in Lagrangian systems. This will be part of future version.<h2><a class="anchor" name="doc_lagtids">
 Second order linear and time-invariant Lagrangian dynamical systems.</a></h2>
-class <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d8/de0/classLagrangianLinearTIDS.html">LagrangianLinearTIDS</a><p>
+class LagrangianLinearTIDS<p>
 <p class="formulaDsp">
 <img class="formulaDsp" alt="\begin{eqnarray*} M \ddot q + C \dot q + K q = F_{Ext}(t) + p \end{eqnarray*}" src="form_71.png">
 <p>
@@ -135,11 +135,11 @@ Dynamical Systems plug-in functions.</a></h2>
 See <a class="el" href="doc_usingPlugin.html">Siconos Plug-in Functions</a> for details on how to use a plug-in in Siconos. <br>
 <p>
 <ul>
-<li><a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a>: <img class="formulaInl" alt="$ f(x,t), \ \ \nabla_x f(x,t), \ \ T(x), \ \ u(x,t) $" src="form_92.png"></li><li><a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d2/d3a/classLinearDS.html">LinearDS</a>: A(t), b(t)</li><li><a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d8/d7f/classLagrangianDS.html">LagrangianDS</a>: <img class="formulaInl" alt="$ M(q), \ \ NNL(\dot q,q), \ \ F_{Int}(\dot q,q ,t), \ \ F_{Ext}(t), \ \ \nabla_q F_{Int}(t,q,\dot q), \ \ \nabla_{\dot q}F_{Int}(t,q,\dot q), \ \ \nabla_q NNL(q,\dot q), \ \ \nabla_{\dot q}NNL(q,\dot q) $" src="form_93.png">.</li></ul>
+<li>DynamicalSystem: <img class="formulaInl" alt="$ f(x,t), \ \ \nabla_x f(x,t), \ \ T(x), \ \ u(x,t) $" src="form_92.png"></li><li>LinearDS: A(t), b(t)</li><li>LagrangianDS: <img class="formulaInl" alt="$ M(q), \ \ NNL(\dot q,q), \ \ F_{Int}(\dot q,q ,t), \ \ F_{Ext}(t), \ \ \nabla_q F_{Int}(t,q,\dot q), \ \ \nabla_{\dot q}F_{Int}(t,q,\dot q), \ \ \nabla_q NNL(q,\dot q), \ \ \nabla_{\dot q}NNL(q,\dot q) $" src="form_93.png">.</li></ul>
 <p>
-Mind that any item present in a class is also available in its derived classes. This means for example that <img class="formulaInl" alt="$F_{Ext}(t)$" src="form_29.png"> has a plug-in function for <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d8/de0/classLagrangianLinearTIDS.html">LagrangianLinearTIDS</a>.<br>
+Mind that any item present in a class is also available in its derived classes. This means for example that <img class="formulaInl" alt="$F_{Ext}(t)$" src="form_29.png"> has a plug-in function for LagrangianLinearTIDS.<br>
 <p>
-Warning: if you create a new system using the copy constructor, any existing parameters in plug-in functions will also be copied. This means that no link between pointer for <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a> parameters will remain. In that case it may be better to re-set properly your parameters for the new created dynamical system. <hr size="1"><address style="align: right;"><small>Generated on Wed Nov 29 18:13:05 2006 for Getting Started with Siconos by&nbsp;
+Warning: if you create a new system using the copy constructor, any existing parameters in plug-in functions will also be copied. This means that no link between pointer for SimpleVector parameters will remain. In that case it may be better to re-set properly your parameters for the new created dynamical system. <hr size="1"><address style="align: right;"><small>Generated on Wed Nov 29 18:23:30 2006 for Getting Started with Siconos by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.1 </small></address>
 </body>
