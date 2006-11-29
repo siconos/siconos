@@ -41,7 +41,7 @@
 </sect1>
 <sect1 id="prereq_1sect_plat">
 <title>Platforms</title>
-<para>Siconos v1.3.0 has been successfully compiled on Linux Fedora Core 4 (gcc4.x)</para><para>For:</para><para><itemizedlist>
+<para>Siconos v2.0.0 has been successfully compiled on Linux Fedora Core 4 (gcc4.x)</para><para>For:</para><para><itemizedlist>
 <listitem><para>Mac OS X: the compilation has not been fully tested and may failed ...</para></listitem></itemizedlist>
 </para><para><itemizedlist>
 <listitem><para>Windows: not available at the time, but we would be really grateful for any contribution!</para></listitem></itemizedlist>

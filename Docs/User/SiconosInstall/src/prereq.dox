@@ -71,7 +71,7 @@ See http://www.stack.nl/~dimitri/doxygen/install.html for details.
 
 \section sect_plat Platforms
 
-Siconos v1.3.0 has been successfully compiled on Linux Fedora Core 4 (gcc4.x)
+Siconos v2.0.0 has been successfully compiled on Linux Fedora Core 4 (gcc4.x)
 
 For: 
 

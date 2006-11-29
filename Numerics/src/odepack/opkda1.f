@@ -1,4 +1,4 @@
-C Siconos-Numerics version 1.3.0, Copyright INRIA 2005-2006.
+C Siconos-Numerics version 2.0.0, Copyright INRIA 2005-2006.
 C Siconos is a program dedicated to modeling, simulation and control
 C of non smooth dynamical systems.	
 C Siconos is a free software; you can redistribute it and/or modify

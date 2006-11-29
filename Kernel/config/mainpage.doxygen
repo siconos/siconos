@@ -15,7 +15,7 @@ Siconos <a href="https://gforge.inria.fr/frs/?group_id=9">Download</a>.\n
 
 \section sect_plat Platforms
 
-Siconos v1.3.0 has been successfully compiled on the following platforms:
+Siconos v2.0.0 has been successfully compiled on the following platforms:
 - Linux/Unix gcc2.95.x, gcc3.x, gcc4.x
 - Mac OS X (note: this platform required to set 
   FLIBS="-L/sw/lib -lfrtbegin -lg2c -lSystem" before 
