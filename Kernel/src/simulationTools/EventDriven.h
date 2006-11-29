@@ -28,12 +28,14 @@
 
 class EventsManager;
 
-//! Simulation based on event driven method, ie events detection (see theoretical manual for more details).
-/**  \author SICONOS Development Team - copyright INRIA
+/** Simulation based on event driven method, ie events detection (see theoretical manual for more details).
+ *
+ * \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 26, 2004
  *
- * WARNING: at the time mainly written for Lagrangian systems !!!
+ * WARNING: at the time only written for Lagrangian systems !!!
+ *
  */
 class EventDriven : public Simulation
 {

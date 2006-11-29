@@ -24,8 +24,9 @@ Time Discretisation Events
 
 #include "Event.h"
 
-//! Events that corresponds to original time discretisation steps.
-/**  \author SICONOS Development Team - copyright INRIA
+/** Event that corresponds to user-defined time discretisation points
+ *
+ * \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) February 21, 2006
  *

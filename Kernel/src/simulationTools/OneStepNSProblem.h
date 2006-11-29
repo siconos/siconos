@@ -72,11 +72,11 @@ typedef std::map<DynamicalSystem*, SiconosMatrix*> MapOfMatrices;
 /** map of double; key = the related DS */
 typedef std::map<DynamicalSystem*, double> MapOfDouble;
 
-//! Non Smooth Problem Simulation
-/**  \author SICONOS Development Team - copyright INRIA
+/** Non Smooth Problem Formalization and Simulation
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 26, 2004
- *
  *
  * This is an abstract class, that provides an interface to define a non smooth problem:
  *   -> a formulation (ie the way the problem is written)

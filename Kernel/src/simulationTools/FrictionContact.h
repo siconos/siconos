@@ -25,8 +25,9 @@
 #include "OneStepNSProblem.h"
 #include "FrictionContactXML.h"
 
-//! Formalization and Resolution of a Friction-Contact Problem
-/**  \author SICONOS Development Team - copyright INRIA
+/** Formalization and Resolution of a Friction-Contact Problem
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Dec 15, 2005
  *

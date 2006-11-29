@@ -22,10 +22,14 @@
 #ifndef NONSMOOTHEVENT_H
 #define NONSMOOTHEVENT_H
 
-//! Events due to non smooth behavior (contact occurence ...)
-/**  \author SICONOS Development Team - copyright INRIA
+/** Events due to non smooth behavior (contact occurence...)
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) February 21, 2006
+ *
+ * Those events are detected during Simulation process (integration of the smooth part with a roots-finding algorithm)
+ * and scheduled into the EventsManager.
  *
  */
 

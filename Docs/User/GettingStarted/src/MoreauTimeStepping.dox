@@ -13,6 +13,7 @@ Roughtly speaking, this algorithm consists first in the discretisation of the wh
 The figure below represents the class architecture for TimeStepping simulation.
 
 \image html classTimeStepping.png
+\image latex classTimeStepping.eps "" width=10cm
 
 
 We will now describe discretisation process for two differents cases: first order linear systems and then Lagrangian systems, linear and time invariant.

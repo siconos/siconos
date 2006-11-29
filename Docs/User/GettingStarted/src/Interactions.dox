@@ -59,6 +59,7 @@ As an example consider again the case of a Ball bouncing on the ground:
 \b classes: NonSmoothLaw, ComplementarityConditionNSL, NewtonImpactNSL, NewtonImpactFrictionNLS, RelayNSL.
 
 \image html classNonSmoothLaw.png
+\image latex classNonSmoothLaw.eps "" width=10cm
 
 Each non-smooth law is characterized by a type (more or less the name of its class), a size, plus some specific variables depending on its type.
 
@@ -103,6 +104,7 @@ parameters: c and d
 \b classes: Relation, LinearTIR, LagrangianR, LagrangianLinearR.
 
 \image html classRelation.png
+\image latex classRelation.eps "" width=10cm
 
 A Relation defines the link between local variables of the Interaction and global variables of the DynamicalSystems.
 They fit with first order systems (Relation and LinearTIR) or second order Lagrangian ones (LagrangianR, LagrangianLinearR).

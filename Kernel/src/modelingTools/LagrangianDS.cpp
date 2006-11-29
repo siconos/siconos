@@ -816,7 +816,7 @@ void LagrangianDS::update(const double time)
   if (flag)
     *workMatrix["jacob-block10"] = *workMatrix["inverseOfMass"] **workMatrix["jacob-block10"];
 
-  // !!! jacobian of M according to q is not take into account at the time !!!
+  // !!! jacobian of M according to q is not taken into account at the time !!!
   flag = false;
   if (jacobianVelocityFInt != NULL)
   {

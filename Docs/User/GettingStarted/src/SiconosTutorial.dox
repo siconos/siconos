@@ -5,6 +5,7 @@
 In this tutorial, we will describe the step-by-step building of a Non Smooth Dynamical System and its simulation, to represent the system on the figure below:
 
 \image html diodeBridge.png
+\image latex diodeBridge.eps "" width=10cm
 
 In this sample, a LC oscillator initialized with a given voltage across the capacitor and a null current through the inductor provides the energy
 to a load resistance through a full-wave rectifier consisting of a 4 ideal diodes bridge. Both waves of the oscillating voltage across the LC are provided to the resistor with current flowing always in the same direction. The energy is dissipated in the resistor resulting in a damped oscillation.

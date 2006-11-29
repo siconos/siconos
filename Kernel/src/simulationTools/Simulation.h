@@ -71,7 +71,7 @@ const double TOLERANCE = 1e-8;
 /** default name for One Step NS Problem of the simulation */
 const std::string DEFAULT_OSNS_NAME = "unamed";
 
-/** Description of the simulation process (integrators, time discretisation ...)
+/** Description of the simulation process (integrators, time discretisation,...)
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
@@ -79,7 +79,7 @@ const std::string DEFAULT_OSNS_NAME = "unamed";
  *
  * !!! This is an abstract class !!!
  *
- * The available simulations are time stepping and event driven. See derived classes for more details.
+ * The available simulations are TimeStepping and EventDriven. See derived classes for more details.
  *
  * "Unitary block matrices" are saved in the simulation (using stl maps). They will be used to save block matrices corresponding
  * to diagonal or extra diagonal terms in OneStepNSProblem "complete" matrices, such as M in LCP formulation.

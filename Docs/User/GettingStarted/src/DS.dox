@@ -23,6 +23,7 @@ with: \n
 \b Classes: DynamicalSystem, LinearDS, LinearTIDS, LagrangianDS, LagrangianLinearTIDS.
 
 \image html classDynamicalSystem.png
+\image latex classDynamicalSystem.eps "" width=10cm
 
 As shown on the class diagram above, there are five possible formulations for dynamical systems in Siconos, three for first order systems and two for second order Lagrangian systems. The main class is DynamicalSystem, all other derived from this one.
 - \ref doc_nlds "DynamicalSystem": first order general non linear system.

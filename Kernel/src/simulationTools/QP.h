@@ -24,8 +24,9 @@
 #include "OneStepNSProblem.h"
 #include "QPXML.h"
 
-//! Quadratic Problem
-/**  \author SICONOS Development Team - copyright INRIA
+/** Quadratic Problem
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 26, 2004
  *

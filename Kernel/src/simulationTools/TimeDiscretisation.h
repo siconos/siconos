@@ -68,7 +68,7 @@ private:
   /** Number of time step */
   unsigned int nSteps;
 
-  /** vector of time values at each step (=> size = nSteps) */
+  /** vector of time values at each step (=> size = nSteps+1) */
   SiconosVector* tk;
 
   /** contains the lowest possible time step value */

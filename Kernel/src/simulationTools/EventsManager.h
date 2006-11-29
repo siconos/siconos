@@ -47,8 +47,9 @@ typedef std::set<Event*, RuntimeCmp<Event> > eventsContainer; // sort in a chron
 /** return value for insert and erase in set -> checkEventSet.second is a bool */
 typedef std::pair<eventsContainer::iterator, bool> checkEventSet;
 
-//! Tools to handle a set of Events
-/**  \author SICONOS Development Team - copyright INRIA
+/** Tools to handle a set of Events
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) February 22, 2006
  *

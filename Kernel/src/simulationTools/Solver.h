@@ -39,8 +39,9 @@ const double DEFAULT_SEARCHDIR = 0.6;
 
 class SolverXML;
 
-//! Non Smooth Solver
-/**  \author SICONOS Development Team - copyright INRIA
+/** Non Smooth Solver
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) December 19, 2005
  *

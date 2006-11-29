@@ -16,16 +16,23 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*! \file
+/*! \file LCP.h
 Linear Complementarity Problem
 */
+
+#ifndef LCP_H
+#define LCP_H
+
+#include "OneStepNSProblem.h"
+#include "LCPXML.h"
+
+class OneStepNSProblem;
 
 /** Formalization and Resolution of a Linear Complementarity Problem (LCP)
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 26, 2004
- *
  *
  * This class is devoted to the formalization and the resolution of the
  * Linear Complementarity Problem (LCP) defined by :
@@ -36,21 +43,13 @@ Linear Complementarity Problem
  * w \geq 0, z \geq 0,  z^{T} w =0
  * \f]
  * where
- *    - \f$w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknown,
- *    - \f$A \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
+ *    - \f$ w \in R^{n} \f$  and \f$z \in R^{n} \f$ are the unknowns,
+ *    - \f$ M \in R^{n \times n } \f$  and \f$q \in R^{n} \f$
  *
  * \todo Correct the computation of M with a correct concatenation process
  * \todo : add "recover" function to start from old values of z and w.
  *
  */
-#ifndef LCP_H
-#define LCP_H
-
-#include "OneStepNSProblem.h"
-#include "LCPXML.h"
-
-class OneStepNSProblem;
-
 class LCP : public OneStepNSProblem
 {
 private:

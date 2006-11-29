@@ -42,8 +42,9 @@ class TimeDiscretisation;
 class OneStepIntegratorXML;
 class Simulation;
 
-//! Generic object to manage DynamicalSystem(s) time-integration
-/**  \author SICONOS Development Team - copyright INRIA
+/**  Generic object to manage DynamicalSystem(s) time-integration
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) Apr 26, 2004
  *

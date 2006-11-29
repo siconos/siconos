@@ -33,15 +33,22 @@ class Simulation;
 const unsigned long int DEFAULT_EVENT_TIME = 0;
 const std::string DEFAULT_EVENT_TYPE = "undefined";
 
-//! virtual class that represents generic time events.
-/**  \author SICONOS Development Team - copyright INRIA
+/** virtual class that represents generic time events.
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 1.3.0.
  *  \date (Creation) February 21, 2006
  *
  *  This base class simply records the time at which the event will take place. A pure virtual function named process
  *  will be invoked to execute the event.
  *  The time is represented with an unsigned long int.
- *  TODO: define with more details what process is supposed to do in any case.
+ *
+ * Derived classes:
+ * - TimeDiscretisationEvent: events that corresponds to user-defined time-discretisation points
+ * - NonSmoothEvent: specific events, detected during simulation, when constraints are violated (thanks to roots-finding algorithm)
+ *
+ *
+ *  \todo: define with more details what process is supposed to do in any case.
  */
 
 class Event
