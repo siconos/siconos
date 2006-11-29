@@ -129,7 +129,8 @@ ltids->computeRhs(time) // to compute Ax+b+Tu (saved in member rhs)
 ltids->computeJacobianXRhs(time) // to compute A(t).
 \endcode
 
-\section doc_lagds Second order non linear Lagrangian dynamical systems: class LagrangianDS
+\section doc_lagds Second order non linear Lagrangian dynamical systems
+class LagrangianDS
 
 Lagrangian second order non linear systems are described by the following set of nDof equations + initial conditions:
 \f{eqnarray*}

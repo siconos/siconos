@@ -15,6 +15,11 @@
     <filename>DS_8dox</filename>
   </compound>
   <compound kind="file">
+    <name>EventDriven.dox</name>
+    <path>/scratch/Franck/MigrBoost/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>EventDriven_8dox</filename>
+  </compound>
+  <compound kind="file">
     <name>GettingStarted.dox</name>
     <path>/scratch/Franck/MigrBoost/siconos/trunk/Docs/User/GettingStarted/src/</path>
     <filename>GettingStarted_8dox</filename>
@@ -23,6 +28,11 @@
     <name>Interactions.dox</name>
     <path>/scratch/Franck/MigrBoost/siconos/trunk/Docs/User/GettingStarted/src/</path>
     <filename>Interactions_8dox</filename>
+  </compound>
+  <compound kind="file">
+    <name>MoreauTimeStepping.dox</name>
+    <path>/scratch/Franck/MigrBoost/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>MoreauTimeStepping_8dox</filename>
   </compound>
   <compound kind="file">
     <name>overview.dox</name>
@@ -85,6 +95,20 @@
     <docanchor file="dsInSiconos">doc_linds</docanchor>
   </compound>
   <compound kind="page">
+    <name>docSimuED</name>
+    <title>Event Driven algorithm</title>
+    <filename>docSimuED</filename>
+    <docanchor file="docSimuED">docSimuEDPrinciple</docanchor>
+    <docanchor file="docSimuED">docSimuEDImplementation</docanchor>
+    <docanchor file="docSimuED">docSimuEDProcess</docanchor>
+    <docanchor file="docSimuED">docSimuEDManager</docanchor>
+    <docanchor file="docSimuED">docSimuEDDetails</docanchor>
+    <docanchor file="docSimuED">docSimuEDintegrate</docanchor>
+    <docanchor file="docSimuED">docSimuEDEvent</docanchor>
+    <docanchor file="docSimuED">docSimuEDImpact</docanchor>
+    <docanchor file="docSimuED">docSimuEDSmoothDyn</docanchor>
+  </compound>
+  <compound kind="page">
     <name>doc_Interactions</name>
     <title>Siconos Interactions and related objects</title>
     <filename>doc_Interactions</filename>
@@ -100,6 +124,21 @@
     <docanchor file="doc_Interactions">docRelationLag</docanchor>
     <docanchor file="doc_Interactions">docInterIntro</docanchor>
     <docanchor file="doc_Interactions">docNSLNI</docanchor>
+  </compound>
+  <compound kind="page">
+    <name>docSimuMoreauTS</name>
+    <title>Moreau&apos;s Time Stepping scheme</title>
+    <filename>docSimuMoreauTS</filename>
+    <docanchor file="docSimuMoreauTS">docMoreauLDS</docanchor>
+    <docanchor file="docSimuMoreauTS">docMoreauTDSumup</docanchor>
+    <docanchor file="docSimuMoreauTS">docMorTDLDSRel</docanchor>
+    <docanchor file="docSimuMoreauTS">docMoreauLDSTD</docanchor>
+    <docanchor file="docSimuMoreauTS">docMoreauLag</docanchor>
+    <docanchor file="docSimuMoreauTS">docMoreauTDDS</docanchor>
+    <docanchor file="docSimuMoreauTS">docMorTDLDSNSL</docanchor>
+    <docanchor file="docSimuMoreauTS">docMoreauTDNSlaw</docanchor>
+    <docanchor file="docSimuMoreauTS">docMoreauTDLDSSumup</docanchor>
+    <docanchor file="docSimuMoreauTS">docMoreauTDRel</docanchor>
   </compound>
   <compound kind="page">
     <name>start_NSP</name>
@@ -144,9 +183,19 @@
     <name>docSimu</name>
     <title>Siconos Simulation and related objects</title>
     <filename>docSimu</filename>
-    <docanchor file="docSimu">docSimuTS</docanchor>
+    <docanchor file="docSimu">docSimuUR</docanchor>
+    <docanchor file="docSimu">docSimuLsodar</docanchor>
+    <docanchor file="docSimu">docSimuOSI</docanchor>
+    <docanchor file="docSimu">docSimuSolvers</docanchor>
+    <docanchor file="docSimu">docSimuOSIMoreau</docanchor>
+    <docanchor file="docSimu">docSimuTD</docanchor>
+    <docanchor file="docSimu">docSimuIntro</docanchor>
+    <docanchor file="docSimu">docSimuOSNS</docanchor>
+    <docanchor file="docSimu">docSimuTypes</docanchor>
+    <docanchor file="docSimu">docSimuIndexSets</docanchor>
+    <docanchor file="docSimu">docSimuFriction</docanchor>
+    <docanchor file="docSimu">docSimuEDindexSet</docanchor>
     <docanchor file="docSimu">docSimuLCP</docanchor>
-    <docanchor file="docSimu">docSimuMoreau</docanchor>
   </compound>
   <compound kind="page">
     <name>doc_usingPlugin</name>

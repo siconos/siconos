@@ -17,21 +17,21 @@
 <b> What is a plug-in? </b><p>
 Some classes have pre-defined functions that can be "connected" to external user-defined functions. Thus a plug-in consists in an "extern C" function, written in a specific file, that must be named "xxxPlugin.cpp", xxx being whatever you want.<p>
 <b> What are the available plug-in?</b><p>
-All the plug-in functions are documented in file <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/d29/DefaultPlugin_8cpp.html">DefaultPlugin.cpp</a>. There you can find a complete list of the available plug-in, their signature (ie the <b>required</b> types of their arguments) and to which class they are linked. <br>
+All the plug-in functions are documented in file <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d4/d29/DefaultPlugin_8cpp.html">DefaultPlugin.cpp</a>. There you can find a complete list of the available plug-in, their signature (ie the <b>required</b> types of their arguments) and to which class they are linked. <br>
  At the time, there are plug-in for:<ul>
 <li>DynamicalSystems (see <a class="el" href="dsInSiconos.html#doc_dsPlugin">Dynamical Systems plug-in functions.</a>)</li><li>Relations (see <a class="el" href="doc_Interactions.html#doc_relPlugIn">Relations plug-in functions</a>)</li></ul>
 <p>
 <b> How to write your own plug-in? </b><p>
 Suppose that you want to define your own way to compute the internal forces for a pre-defined Lagrangian Dynamical System, named myDS.<p>
 <ol type=1>
-<li>Check that a plug-in is available for what you want (ie see <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/d29/DefaultPlugin_8cpp.html">DefaultPlugin.cpp</a>).<br>
- In <a class="el" href="dsInSiconos.html#doc_dsPlugin">Dynamical Systems plug-in functions.</a>, you see that this plug-in exists and in <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/d29/DefaultPlugin_8cpp.html">DefaultPlugin.cpp</a> you find: <div class="fragment"><pre class="fragment"><span class="keyword">extern</span> <span class="stringliteral">"C"</span> <span class="keywordtype">void</span> <a class="code" href="d4/d29/DefaultPlugin_8cpp.html#55e32c3a2a4d74e68ca2e7513a51e081">computeFInt</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> sizeOfq, <span class="keywordtype">double</span> time, <span class="keyword">const</span> <span class="keywordtype">double</span> *q, 
+<li>Check that a plug-in is available for what you want (ie see <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d4/d29/DefaultPlugin_8cpp.html">DefaultPlugin.cpp</a>).<br>
+ In <a class="el" href="dsInSiconos.html#doc_dsPlugin">Dynamical Systems plug-in functions.</a>, you see that this plug-in exists and in <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d4/d29/DefaultPlugin_8cpp.html">DefaultPlugin.cpp</a> you find: <div class="fragment"><pre class="fragment"><span class="keyword">extern</span> <span class="stringliteral">"C"</span> <span class="keywordtype">void</span> <a class="code" href="d4/d29/DefaultPlugin_8cpp.html#55e32c3a2a4d74e68ca2e7513a51e081">computeFInt</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> sizeOfq, <span class="keywordtype">double</span> time, <span class="keyword">const</span> <span class="keywordtype">double</span> *q, 
                             <span class="keyword">const</span> <span class="keywordtype">double</span> *velocity, <span class="keywordtype">double</span> *fInt, <span class="keywordtype">double</span> * param)
 {...}
 </pre></div></li></ol>
 <p>
 <ol type=1>
-<li>Create xxxPlugin.cpp file and write your function as an "extern C", using the right signature as given in <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/d29/DefaultPlugin_8cpp.html">DefaultPlugin.cpp</a>.<br>
+<li>Create xxxPlugin.cpp file and write your function as an "extern C", using the right signature as given in <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d4/d29/DefaultPlugin_8cpp.html">DefaultPlugin.cpp</a>.<br>
  Thus, in myPlugin.cpp <div class="fragment"><pre class="fragment"><span class="keyword">extern</span> <span class="stringliteral">"C"</span> <span class="keywordtype">void</span> myFint(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> sizeOfq, <span class="keywordtype">double</span> time, <span class="keyword">const</span> <span class="keywordtype">double</span> *q, 
                        <span class="keyword">const</span> <span class="keywordtype">double</span> *velocity, <span class="keywordtype">double</span> *fInt, <span class="keywordtype">double</span> * param)
 {
@@ -47,41 +47,41 @@ From this point, each time you need to compute the internal forces in myDS, myFi
 </pre></div><p>
 <b> Plug-in parameters</b><br>
  In all the available plug-in of the platform, it is possible to set user-defined parameters. They consist in the last argument of the plug-in function (a double*). <br>
- To set a parameter for a specific function, call <em>setParameter</em> or <em>setParameterPtr( arg1, arg2)</em>, arg1 being a pointer to <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a> that contains the values of your parameter(s) and arg2 a string, the id of the function. This id is given for each plug-in in the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/d29/DefaultPlugin_8cpp.html">DefaultPlugin.cpp</a> documentation.<p>
-Example: suppose that you defined a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d8/d7f/classLagrangianDS.html">LagrangianDS</a> named lds, and want to set two parameters in the external forces, say <em>mu</em> and <em>lambda</em>. Then cpp input file looks like: <div class="fragment"><pre class="fragment"><span class="comment">// In the main file:</span>
+ To set a parameter for a specific function, call <em>setParameter</em> or <em>setParameterPtr( arg1, arg2)</em>, arg1 being a pointer to <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a> that contains the values of your parameter(s) and arg2 a string, the id of the function. This id is given for each plug-in in the <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d4/d29/DefaultPlugin_8cpp.html">DefaultPlugin.cpp</a> documentation.<p>
+Example: suppose that you defined a <a class="elRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d8/d7f/classLagrangianDS.html">LagrangianDS</a> named lds, and want to set two parameters in the external forces, say <em>mu</em> and <em>lambda</em>. Then cpp input file looks like: <div class="fragment"><pre class="fragment"><span class="comment">// In the main file:</span>
 <span class="keywordtype">double</span> mu , lambda;
 <span class="comment">// ... give mu and lambda the required values</span>
 <span class="comment">// ... declare and built your dynamical system</span>
-<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a> * lds = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d8/d7f/classLagrangianDS.html">LagrangianDS</a>(...);
+<a class="codeRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/dc/da1/classDynamicalSystem.html">DynamicalSystem</a> * lds = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d8/d7f/classLagrangianDS.html">LagrangianDS</a>(...);
 <span class="comment">// === First way, with setParameter function ===</span>
 <span class="comment">// declare and built a SimpleVector of size 2</span>
-<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a> parameters(2);
+<a class="codeRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a> parameters(2);
 parameters(0) = mu;
 parameters(1) = lambda;
 
-lds-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html#b2e3247353e404d94fed0e0579769580">setParameter</a>(parameters,<span class="stringliteral">"fExt"</span>);
+lds-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/dc/da1/classDynamicalSystem.html#b2e3247353e404d94fed0e0579769580">setParameter</a>(parameters,<span class="stringliteral">"fExt"</span>);
 <span class="comment">// In this case, if parameters values are change after this step,</span>
 <span class="comment">// this won't affect param values inside the dynamical system. </span>
 <span class="comment">//</span>
 <span class="comment">//=== Second way, with setParameterPtr function ===</span>
 <span class="comment">// declare and built a pointer to SimpleVector of size 2</span>
-<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a> * parameters = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a>(2);
+<a class="codeRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a> * parameters = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/d0/dd6/classSimpleVector.html">SimpleVector</a>(2);
 (*parameters)(0) = mu;
 (*parameters)(1) = lambda;
 
-lds-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/da1/classDynamicalSystem.html#b2e3247353e404d94fed0e0579769580">setParameter</a>(parameters,<span class="stringliteral">"fExt"</span>);
+lds-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../Doxygen/" href="../Doxygen/dc/da1/classDynamicalSystem.html#b2e3247353e404d94fed0e0579769580">setParameter</a>(parameters,<span class="stringliteral">"fExt"</span>);
 
 <span class="comment">// Warning: in that case, from this point any change in parameters</span>
 <span class="comment">// will affect param value in the dynamical system.</span>
 <span class="comment">//</span>
 <span class="comment">// Then in the plug-in file, you have access to the parameter values:</span>
-<span class="keyword">extern</span> <span class="stringliteral">"C"</span> <span class="keywordtype">void</span> <a class="code" href="d4/d29/DefaultPlugin_8cpp.html#c959e0a948f5b2f2e46462d1316b3666">computeFExt</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> sizeOfq, <span class="keywordtype">double</span> time, <span class="keywordtype">double</span>* fExt, <span class="keywordtype">double</span>* param)
+<span class="keyword">extern</span> <span class="stringliteral">"C"</span> <span class="keywordtype">void</span> <a class="code" href="d4/d29/DefaultPlugin_8cpp.html#2f9a92791a8054bb3d2167f4f677d6f1">computeFExt</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> sizeOfq, <span class="keywordtype">double</span> time, <span class="keywordtype">double</span>* fExt, <span class="keywordtype">double</span>* param)
 {
 <span class="keywordflow">for</span>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i = 0; i&lt;sizeOfq;++i)
    fExt[i] = cos(param[1]*time) + param[0] ;
 <span class="comment">// this means that Fext = cos(lambda t) + mu</span>
 }
-</pre></div> <hr size="1"><address style="align: right;"><small>Generated on Fri Nov 24 18:17:36 2006 for Getting Started with Siconos by&nbsp;
+</pre></div> <hr size="1"><address style="align: right;"><small>Generated on Tue Nov 28 18:46:19 2006 for Getting Started with Siconos by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.1 </small></address>
 </body>

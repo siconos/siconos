@@ -128,22 +128,22 @@ Lagrangian non linear relation, 3 different cases are available:
 - scleronomic: the constraints depend only on the state,
  \f{eqnarray*}
 y &=& h0(q) \\
-\dot y &=& G0(q,...)\dot q \\
-R &=& G0^t(q)\lambda 
+\dot y &=& G0(q)\dot q \\
+p &=& G0^t(q)\lambda 
 \f}
 
 - rhenomorous: the constraints depend on time and state
 \f{eqnarray*}
 y &=& h1(q,t) \\
 \dot y &=& G10(q,t)\dot q + G11(q,t) \\
-R &=& G10^t(q)\lambda 
+p &=& G10^t(q)\lambda 
 \f}
 
 - scleronomic+lambda: the constraints depends on state and \f$ \lambda \f$
 \f{eqnarray*}
 y &=& h2(q,\lambda[0]) \\
 \dot y &=& G20(q,t)\dot q + G21(q,t)\lambda[1] \\
-R[i] &=& G20^t(q)\lambda[i] 
+p[i] &=& G20^t(q)\lambda[i] 
 \f}
 
 \subsection docRelationLagLin  Lagrangian Linear Relation
