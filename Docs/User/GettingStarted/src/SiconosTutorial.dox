@@ -292,7 +292,7 @@ double h =  1.0e-6;  // Time step
 TimeDiscretisation * td = new TimeDiscretisation(h, s);
 \endcode
 
-Next, you have to define the a one-step integrator for all the DynamicalSystems. For TimeStepping scheme, the only available one is Moreau where the integration of the equations over the time steps is based on a \f$ \theta \f$ method (see \ref docSimuMoreau for details). 
+Next, you have to define the a one-step integrator for all the DynamicalSystems. For TimeStepping scheme, the only available one is Moreau where the integration of the equations over the time steps is based on a \f$ \theta \f$ method (see \ref docSimuMoreauTS for details). 
 
 \code
 double theta = 0.5;
@@ -347,7 +347,7 @@ while(k < N-1)
 nextStep is mainly used to increment the time step and say that last computed values will be initial values for the next step. \n
 computeOneStep performs computation over the current time step. In the Moreau's time stepping case, it will first integrate the dynamics to obtain the
 so-called free-state, that is without non-smooth effect, then it formalizes and solves a LCP before re-integrate the dynamics using the LCP results. 
-(This is a quite simplified view of the Time Stepping process so for details check \ref docSimuTS). \n
+(This is a quite simplified view of the Time Stepping process so for details check \ref docSimuMoreauTS). \n
 The problem of output still remains. To answer that, we create a matrix where required output data will be save:
 
 \code

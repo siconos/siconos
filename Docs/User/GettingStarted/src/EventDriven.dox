@@ -12,10 +12,11 @@ The principle of the event-driven is based on the time-decomposition of the dyna
 The figure below represents the class architecture for EventDriven simulation.
 
 \image html classEventDriven.png
+\image latex classEventDriven.eps "" width=10cm
 
 \subsection docSimuEDintegrate Integration of the smooth dynamics
 
-Between events, the dynamics are integrated thanks to Lsodar algorithm and with the function \link EventDriven::integrate integrate \endlink of EventDriven object. \n
+Between events, the dynamics are integrated thanks to Lsodar algorithm and with the function EventDriven::integrate. \n
 Considering two given functions f(x,t) and g(x,t), a call to integrate(tinit, tend, tout, iout) results in the integration of the function f(x,t) between tinit and tend, and search for roots of the function g(x,t). If roots are found, integration stops, and last time is saved in tout. \n
 The in-out parameter iout is an indicator that must be set to 1 at first call. If no root was found, it is equal to 2 if so to 3. \n
 Thus for an EventDriven simulation:
@@ -86,8 +87,7 @@ while(eventsManager->hasNextEvent())
 \section docSimuEDDetails Event Driven algorithm for Lagrangian systems
 
 \b Foreword: <em> At the time, the only available event-driven algorithm in Siconos is for Lagrangian dynamical systems, subjected to perfect unilateral constraints and with the Newton impact rules. \n
-A full description of such systems will be given in the Theoretical Manual and the results below are just a short and incomplete summary. \n
-</em>
+A full description of such systems will be given in the Theoretical Manual and the results below are just a short and incomplete summary.</em> \n
 
 Because of the unilateral constraints, the evolution of the considered system may be non-smooth. Some jumps can occur in the velocity and the "acceleration" may not be defined everywhere. The generalized coordinates, assumed to be absolutely continuous are:\n
 \f[ q(t) = q(t_0) +\int_{t_0}^t v^+(t)dt \ with \ v = \dot q \f]

@@ -64,7 +64,7 @@ TimeDiscretisation * td = new TimeDiscretisation(h, nSteps);
 \subsection docSimuOSI One Step Integrators
 
 OneStepIntegrator ("OSI") class defines how Dynamical Systems will be integrated over a time-step. Two types of integrators are available at the time in the platform:
- Moreau (see details in \ref docSimuMoreau) and Lsodar. \n
+ Moreau (see details in \ref docSimuMoreauTS) and Lsodar. \n
 To build an OSI, you need to provide a set of DynamicalSystems (and possibly a set of Interactions) and some specific values depending on the type of the integrator.
 Moreover, the "size of the memory" (variable sizeMem) can be set: it concerns the number of time steps for which states values are saved, but at the time no multi-steps integrators are available in Siconos, so keep default value, 1.
 
@@ -73,7 +73,7 @@ main functions:
 - updateState(...): computes DynamicalSystems states values 
 
 \subsubsection docSimuOSIMoreau Moreau
-Integration thanks to a theta-method. See \ref docSimuMoreau for a full description. 
+Integration thanks to a theta-method. See \ref docSimuMoreauTS for a full description. 
 
 Main variables: \f$ \theta \f$ (a double) and \f$ W \f$ (a matrix of double). One value of each parameter is attached to each DynamicalSystem concerned by the OSI through a map (STL). For example:
 \code
@@ -180,9 +180,9 @@ The set \f$ I_0 \f$ is saved in the Topology of the NonSmoothDynamicalSystem, an
 \f[ I_i = \{ UR\in I_{i-1} , y_{ur}[i-1] = 0 \} \f]
 with UR=UnitaryRelation, and \f$ y_{ur}[i-1] \f$ the i-1 derivative of the relation of ur. 
 
-\section docSimuTypes Simulation types and process
+\section docSimuTypes Simulation types and process 
 
-\ref docSimuMoreauTS
+\ref docSimuMoreauTS 
 
 \ref docSimuED 
 

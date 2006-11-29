@@ -36,7 +36,7 @@ You can also check on Related Pages tab on top of page for some other detailed d
 There are two different ways to run a simulation with Siconos: directly with a C++ input file or thanks to a specific interface, with Python or Scilab. \n
 
 <b> With a C++ input file </b> \n
-\ref First check that Siconos is well installed (see \ref siconosInstall "Siconos Installation Guide"). \n
+First check that Siconos is well installed (see \ref siconosInstall "Siconos Installation Guide"). \n
 Create a directory for your example, where the following files must be present:
 - the main input cpp file 
 - all the xxxPlugin.cpp files necessary for your simulation (for details on plug-in see \ref doc_usingPlugin)

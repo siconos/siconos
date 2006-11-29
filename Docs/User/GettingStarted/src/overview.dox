@@ -15,7 +15,7 @@ For details on :
 - DynamicalSystems see \ref dsInSiconos. \n
 - Interactions, Relations and Non Smooth Laws see \ref doc_Interactions
 
-As a simple example, consider the classical case of a ball bouncing on the floor describe \link bouncingBallSample here\endlink.
+As a simple example, consider the classical case of a ball bouncing on the floor.
 
 \section start_writingProcess Writing Process
 

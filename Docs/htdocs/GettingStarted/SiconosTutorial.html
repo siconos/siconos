@@ -146,7 +146,7 @@ Then you can create the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxyge
 <div class="fragment"><pre class="fragment"><span class="keywordtype">double</span> h =  1.0e-6;  <span class="comment">// Time step</span>
 <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html">TimeDiscretisation</a> * td = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html">TimeDiscretisation</a>(h, s);
 </pre></div><p>
-Next, you have to define the a one-step integrator for all the DynamicalSystems. For <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d7/dc9/classTimeStepping.html">TimeStepping</a> scheme, the only available one is <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/de1/classMoreau.html">Moreau</a> where the integration of the equations over the time steps is based on a <img class="formulaInl" alt="$ \theta $" src="form_162.png"> method (see docSimuMoreau for details).<p>
+Next, you have to define the a one-step integrator for all the DynamicalSystems. For <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d7/dc9/classTimeStepping.html">TimeStepping</a> scheme, the only available one is <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/de1/classMoreau.html">Moreau</a> where the integration of the equations over the time steps is based on a <img class="formulaInl" alt="$ \theta $" src="form_162.png"> method (see <a class="el" href="docSimuMoreauTS.html">Moreau's Time Stepping scheme</a> for details).<p>
 <div class="fragment"><pre class="fragment"><span class="keywordtype">double</span> theta = 0.5;
 <span class="comment">// One Step Integrator</span>
 <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/de1/classMoreau.html">Moreau</a>* myIntegrator = <span class="keyword">new</span> <a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/db/de1/classMoreau.html">Moreau</a>(oscillator,theta,s);
@@ -179,7 +179,7 @@ But after that you only have access to values computed at the last time step, wh
 }  
 </pre></div><p>
 nextStep is mainly used to increment the time step and say that last computed values will be initial values for the next step. <br>
- computeOneStep performs computation over the current time step. In the Moreau's time stepping case, it will first integrate the dynamics to obtain the so-called free-state, that is without non-smooth effect, then it formalizes and solves a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d3/d48/classLCP.html">LCP</a> before re-integrate the dynamics using the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d3/d48/classLCP.html">LCP</a> results. (This is a quite simplified view of the Time Stepping process so for details check docSimuTS). <br>
+ computeOneStep performs computation over the current time step. In the Moreau's time stepping case, it will first integrate the dynamics to obtain the so-called free-state, that is without non-smooth effect, then it formalizes and solves a <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d3/d48/classLCP.html">LCP</a> before re-integrate the dynamics using the <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d3/d48/classLCP.html">LCP</a> results. (This is a quite simplified view of the Time Stepping process so for details check <a class="el" href="docSimuMoreauTS.html">Moreau's Time Stepping scheme</a>). <br>
  The problem of output still remains. To answer that, we create a matrix where required output data will be save:<p>
 <div class="fragment"><pre class="fragment"><span class="comment">// Before simulation loop</span>
 <span class="keywordtype">int</span> k = td-&gt;<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/dc/d1e/classTimeDiscretisation.html#00bdac9ac3339ba4fd506d090b16800e">getK</a>(); <span class="comment">// Current step </span>
@@ -319,7 +319,7 @@ We start by setting some parameters, like the number of balls, their initial pos
         position_init+= increment_position;
         velocity_init+= increment_velocity;
       }
-</pre></div> <hr size="1"><address style="align: right;"><small>Generated on Wed Nov 29 16:29:10 2006 for Getting Started with Siconos by&nbsp;
+</pre></div> <hr size="1"><address style="align: right;"><small>Generated on Wed Nov 29 17:43:44 2006 for Getting Started with Siconos by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.1 </small></address>
 </body>
