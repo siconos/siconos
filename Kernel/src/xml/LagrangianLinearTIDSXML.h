@@ -29,8 +29,9 @@
 const std::string LTIDS_K = "K";
 const std::string LTIDS_C = "C";
 
-//! XML management for LagrangianLinearTIDS
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for LagrangianLinearTIDS
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date 05/11/2004
  *

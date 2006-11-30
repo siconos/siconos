@@ -30,8 +30,9 @@ const std::string SM_MEMORYSIZE = "sizeMax";
 
 const std::string SM_MEMORY = "Memory";
 
-//! XML management for SiconosMemory
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for SiconosMemory
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date 07/13/2004
  *

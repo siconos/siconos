@@ -15,9 +15,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /*! \file
-*/
+ */
 
 
 
@@ -33,43 +33,44 @@ class OneStepNSProblem;
 const std::string  QP_Q = "Q";
 const std::string  QP_P = "p";
 
-//! XML management for QP
-/**  \author SICONOS Development Team - copyright INRIA
-*   \version 2.0.0.
-*   \date 05/18/2004
-*/
+/** XML management for QP
+ *
+ *  \author SICONOS Development Team - copyright INRIA
+ *   \version 2.0.0.
+ *   \date 05/18/2004
+ */
 class QPXML : public OneStepNSProblemXML
 {
 public:
   QPXML();
 
   /** Build a QPXML object from a DOM tree describing a QP
-  *   \param QPNode : the QP DOM tree
-  *   \exception XMLException : if a property of the QP lacks in the DOM tree
-  */
+   *   \param QPNode : the QP DOM tree
+   *   \exception XMLException : if a property of the QP lacks in the DOM tree
+   */
   QPXML(xmlNode * QPNode);
 
   ~QPXML();
 
   /** Return Q
-  *   \return The Q SimpleMatrix of the QP
-  */
+   *   \return The Q SimpleMatrix of the QP
+   */
   inline SimpleMatrix getQ()
   {
     return  SiconosDOMTreeTools::getSiconosMatrixValue(this->QNode);
   }
 
   /** Return p
-  *   \return SimpleVector :  vector p of the QP
-  */
+   *   \return SimpleVector :  vector p of the QP
+   */
   inline /*SiconosVector*/SimpleVector getP()
   {
     return SiconosDOMTreeTools::getSiconosVectorValue(this->pNode);
   }
 
   /** allows  to save Q
-  *   \param The Q SiconosMatrix to save
-  */
+   *   \param The Q SiconosMatrix to save
+   */
   inline void setQ(const SiconosMatrix& m)
   {
     if (this->hasQ() == false)
@@ -80,8 +81,8 @@ public:
   }
 
   /** allows to save p
-  *   \param SimpleVector* : vector p to save
-  */
+   *   \param SimpleVector* : vector p to save
+   */
   inline void setP(const SiconosVector&v)
   {
     if (this->hasP() == false)
@@ -92,25 +93,25 @@ public:
   }
 
   /** returns true if pNode is defined
-  *  \return true if pNode is defined
-  */
+   *  \return true if pNode is defined
+   */
   inline bool hasP()
   {
     return (this->pNode != NULL);
   }
 
   /** returns true if QNode is defined
-  *  \return true if QNode is defined
-  */
+   *  \return true if QNode is defined
+   */
   inline bool hasQ()
   {
     return (this->QNode != NULL);
   }
 
   /** makes the operations to create a OneStepNSProblemXML to the SimulationXML
-  *   \param xmlNode* : the root node of the OneStepNSProblemXML
-  *   \param OneStepNSProblem* : the OneStepNSProblem of this OneStepNSProblemXML
-  */
+   *   \param xmlNode* : the root node of the OneStepNSProblemXML
+   *   \param OneStepNSProblem* : the OneStepNSProblem of this OneStepNSProblemXML
+   */
   void updateOneStepNSProblemXML(xmlNode* node, OneStepNSProblem* osnspb);
 
 

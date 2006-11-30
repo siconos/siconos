@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-%subst = ( "SiconosInstall.tag", "", "GettingStarted.tag", "", "DoxygenKernel.tag", "");
+%subst = ( "SiconosInstall.tag", "", "GettingStarted.tag", "", "DoxygenKernel.tag", "", "DoxygenNumerics.tag", "");
 $quiet   = 0;
 
 if (open(F,"search.cfg"))

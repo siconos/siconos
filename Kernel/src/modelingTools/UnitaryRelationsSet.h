@@ -32,7 +32,7 @@
 class UnitaryRelation;
 
 
-// Structure used for sorting in Unitary Relation set. The address is used to compare two UR.
+/** Structure used for sorting in Unitary Relation set. UR* are sorted according to their address. */
 struct compareUR
 {
   bool operator()(const UnitaryRelation* r1, const UnitaryRelation* r2) const
@@ -53,8 +53,9 @@ typedef URSet::const_iterator ConstUnitaryRelationIterator;
 /** return type value for insert function - bool = false if insertion failed. */
 typedef std::pair<URSet::iterator, bool> CheckInsertUnitaryRelation;
 
-//! Set (STL) of pointers to Unitary Relation - Used in Index sets in Topology.
-/**  \author SICONOS Development Team - copyright INRIA
+/** Set (STL) of pointers to Unitary Relation - Used in Index sets in Topology.
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) June 8, 2006
  *

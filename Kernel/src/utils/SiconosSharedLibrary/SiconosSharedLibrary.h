@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/*! \file
+/*! \file SiconosSharedLibrary.h
 */
 
 #ifndef SICONOSSHAREDLIBRARY_H
@@ -42,7 +42,13 @@ typedef HMODULE PluginHandle;
 typedef void* PluginHandle;
 #endif
 
-// --------------------------------------------------------------------------
+/** Plug-in utilities
+ *
+ * \author SICONOS Development Team - copyright INRIA
+ * \date (creation) 07/21/2006
+ *  Matrices can be either block or Simple.
+ *  See Derived classes for details.
+ */
 class SiconosSharedLibrary
 {
 private:

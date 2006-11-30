@@ -41,8 +41,9 @@ union Mat
 class SimpleVector;
 
 
-//! Virtual Interface for matrices in Siconos
-/** \author SICONOS Development Team - copyright INRIA
+/** Virtual Interface for matrices in Siconos
+ *
+ * \author SICONOS Development Team - copyright INRIA
  *  \author NDIAYE Abdel-Aziz
  *  \date (creation) 07/21/2006
  *  Matrices can be either block or Simple.
@@ -255,7 +256,6 @@ public:
   */
   virtual void eye(void) = 0;
 
-
   // --- MATRICES HANDLING AND OPERATORS ---
 
   /** copy the matrix "blockMat" into the matrix "mat" at the position (xPos, yPos)
@@ -278,6 +278,20 @@ public:
   *  \return the element matrix[i,j]
   */
   virtual double& operator()(unsigned int , unsigned int) = 0;
+
+  /** return the element matrix[i,j]
+   *  \param an unsigned int i
+   *  \param an unsigned int j
+   *  \return a double
+   */
+  virtual double getValue(unsigned int, unsigned int) = 0;
+
+  /** set the element matrix[i,j]
+   *  \param an unsigned int i
+   *  \param an unsigned int j
+   *  \param the value
+   */
+  virtual void setValue(unsigned int, unsigned int, double) = 0;
 
   /** get or set the element matrix[i,j]
   *  \param an unsigned int i

@@ -28,8 +28,9 @@
 #include "SimpleVector.h"
 #include "BlockVector.h"
 
-//! Lagrangian Linear Relation, derived from class LagrangianR
-/**  \author SICONOS Development Team - copyright INRIA
+/**  Lagrangian Linear Relation, derived from class LagrangianR
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) Apr 27, 2004
  *

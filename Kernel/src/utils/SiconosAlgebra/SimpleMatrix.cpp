@@ -1155,6 +1155,40 @@ void SimpleMatrix::eye(void)
 
 /***************************** OPERATORS ******************************/
 
+double SimpleMatrix::getValue(unsigned int row, unsigned int col)
+{
+  if (row >= size(0) || col >= size(1))
+    SiconosMatrixException::selfThrow("SimpleMatrix:getValue(index) : Index out of range");
+
+  if (num == 1)
+    return (*mat.Dense)(row, col);
+  else if (num == 2)
+    return (*mat.Triang)(row, col);
+  else if (num == 3)
+    return (*mat.Sym)(row, col);
+  else if (num == 4)
+    return (*mat.Sparse)(row, col);
+  else // if(num==5)
+    return (*mat.Banded)(row, col);
+}
+
+void SimpleMatrix::setValue(unsigned int row, unsigned int col, double value)
+{
+  if (row >= size(0) || col >= size(1))
+    SiconosMatrixException::selfThrow("SimpleMatrix:setValue : Index out of range");
+
+  if (num == 1)
+    (*mat.Dense)(row, col) = value;
+  else if (num == 2)
+    (*mat.Triang)(row, col) = value;
+  else if (num == 3)
+    (*mat.Sym)(row, col) = value ;
+  else if (num == 4)
+    (*mat.Sparse)(row, col) = value;
+  else // if(num==5)
+    (*mat.Banded)(row, col) = value;
+}
+
 double& SimpleMatrix::operator()(unsigned int row, unsigned int col)
 {
   if (row >= size(0) || col >= size(1))

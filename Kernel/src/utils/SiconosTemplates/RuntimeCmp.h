@@ -24,8 +24,9 @@
 #ifndef RUNTIMECMP_H
 #define RUNTIMECMP_H
 
-//! Virtual functors class
-/**  \author SICONOS Development Team - copyright INRIA
+/**  Virtual functors class
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) April 25, 2006
  *

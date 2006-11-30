@@ -16,12 +16,22 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+/*! \file SiconosMemoryException.h
+    \brief  SiconosMemoryException class
+
+*/
 #ifndef SICONOSMEMORYEXCEPTION_H
 #define SICONOSMEMORYEXCEPTION_H
 
 #include "SiconosException.h"
 
-// --------------------------------------------------------------------------
+/** Exceptions for SiconosMemory
+ *
+ * \author SICONOS Development Team - copyright INRIA
+ * \date (creation) 07/21/2006
+ *  Matrices can be either block or Simple.
+ *  See Derived classes for details.
+ */
 class SiconosMemoryException : public SiconosException
 {
 public:

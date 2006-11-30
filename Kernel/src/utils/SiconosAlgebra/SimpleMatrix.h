@@ -25,8 +25,9 @@
 
 #include "SiconosMatrix.h"
 
-//! Matrix (embedded various types of Boost matrices of double)
-/**  \author SICONOS Development Team - copyright INRIA
+/**  Matrix (embedded various types of Boost matrices of double)
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date (Creation) 07/21/2006
  *
@@ -339,6 +340,20 @@ public:
    */
   double& operator()(unsigned int , unsigned int);
 
+  /** return the element matrix[i,j]
+   *  \param an unsigned int i
+   *  \param an unsigned int j
+   *  \return a double
+   */
+  double getValue(unsigned int, unsigned int);
+
+  /** set the element matrix[i,j]
+   *  \param an unsigned int i
+   *  \param an unsigned int j
+   *  \param the value
+   */
+  void setValue(unsigned int, unsigned int, double);
+
   /** get or set the element matrix[i,j]
    *  \param an unsigned int i
    *  \param an unsigned int j
@@ -499,11 +514,6 @@ public:
    *  \exception SiconosMatrixException, if the power < 0
    */
   friend SimpleMatrix pow(const SimpleMatrix&, unsigned int);
-
-  /** build a matrix from n matrices
-   *  \return a SimpleMatrix
-   */
-  friend SimpleMatrix BlockMatrixAssemble(const std::vector<SiconosMatrix*>&);
 
   /** compute the product matrix-vector
    *  \return a SimpleVector

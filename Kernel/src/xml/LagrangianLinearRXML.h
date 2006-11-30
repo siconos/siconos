@@ -30,8 +30,9 @@
 const std::string  LLR_H = "H";
 const std::string  LLR_B = "b";
 
-//! XML management for LagrangianRXML
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for LagrangianRXML
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date 05/25/2004
  *

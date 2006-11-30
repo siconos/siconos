@@ -27,8 +27,9 @@ Newton-Impact Non-Smooth Law
 #include "NewtonImpactFrictionNSLXML.h"
 
 
-//! Newton Impact-Friction Non Smooth Law
-/**  \author SICONOS Development Team - copyright INRIA
+/** Newton Impact-Friction Non Smooth Law
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) March 22, 2005
  *

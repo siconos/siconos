@@ -25,8 +25,9 @@
 #include "SiconosException.h"
 #include <iostream>
 
-//! Exceptions related to XML management
-/**  \author SICONOS Development Team - copyright INRIA
+/** Exceptions related to XML management
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date (Creation) 05/25/2004
  *

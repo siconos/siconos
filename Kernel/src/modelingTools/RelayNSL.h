@@ -25,8 +25,9 @@
 #include "NonSmoothLaw.h"
 #include "RelayNSLXML.h"
 
-//! Relay Non Smooth Law
-/**  \author SICONOS Development Team - copyright INRIA
+/** Relay Non Smooth Law
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) Apr 27, 2004
  *

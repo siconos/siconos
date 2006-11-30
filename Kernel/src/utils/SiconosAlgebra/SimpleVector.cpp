@@ -302,6 +302,22 @@ std::string SimpleVector::toString() const
 
 /***************************** OPERATORS ******************************/
 
+double SimpleVector::getValue(unsigned int row)
+{
+  if (num == 1)
+    return (*vect.Dense)(row);
+  else
+    return (*vect.Sparse)(row);
+}
+
+void SimpleVector::setValue(unsigned int row, double value)
+{
+  if (num == 1)
+    (*vect.Dense)(row) = value ;
+  else
+    (*vect.Sparse)(row) = value;
+}
+
 double& SimpleVector::operator()(unsigned int row)
 {
   if (num == 1)

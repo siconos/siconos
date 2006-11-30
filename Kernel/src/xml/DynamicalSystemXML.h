@@ -54,8 +54,9 @@ class SiconosMatrix;
 class SimpleVector;
 class SiconosVector;
 
-//! XML management for DynamicalSystem
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for DynamicalSystem
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date 04/04/2004
  *

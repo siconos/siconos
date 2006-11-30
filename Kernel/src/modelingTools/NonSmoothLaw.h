@@ -35,8 +35,9 @@ const std::string NEWTONIMPACTFRICTIONNSLAW = "NewtonImpactFrictionNSL";
 class Interaction;
 class NonSmoothLawXML;
 
-//! Non Smooth Laws Base Class
-/**  \author SICONOS Development Team - copyright INRIA
+/** Non Smooth Laws Base Class
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) May 05, 2004
  *

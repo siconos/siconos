@@ -37,8 +37,9 @@ typedef std::set<OneStepIntegratorXML*> SetOfOSIXML;
 /** iterator through SetOfInteractionXML */
 typedef SetOfOSIXML::iterator SetOfOSIXMLIt;
 
-//! XML management for Simulation
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for Simulation
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date 05/17/2004
  *

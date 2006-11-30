@@ -283,6 +283,36 @@ std::string BlockVector::toString() const
 
 /***************************** OPERATORS ******************************/
 
+double BlockVector::getValue(unsigned int pos)
+{
+  unsigned int blockNum = 0;
+
+  while (pos >= tabIndex[blockNum] && blockNum < tabIndex.size())
+    blockNum ++;
+
+  unsigned int relativePos = pos;
+
+  if (blockNum != 0)
+    relativePos -= tabIndex[blockNum - 1];
+
+  return (*vect[blockNum])(relativePos);
+}
+
+void BlockVector::setValue(unsigned int pos, double value)
+{
+  unsigned int blockNum = 0;
+
+  while (pos >= tabIndex[blockNum] && blockNum < tabIndex.size())
+    blockNum ++;
+
+  unsigned int relativePos = pos;
+
+  if (blockNum != 0)
+    relativePos -= tabIndex[blockNum - 1];
+
+  (*vect[blockNum])(relativePos) = value;
+}
+
 double& BlockVector::operator()(unsigned int pos)
 {
   unsigned int blockNum = 0;

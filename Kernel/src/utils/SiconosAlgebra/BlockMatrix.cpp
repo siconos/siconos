@@ -653,9 +653,52 @@ void BlockMatrix::matrixCopy(const SiconosMatrix &m, unsigned int row, unsigned 
 
 // OPERATORS
 
+double BlockMatrix::getValue(unsigned int row, unsigned int col)
+{
+  unsigned int nbRow = 0;
+  unsigned int nbCol = 0;
+
+  while (row >= tabRow[nbRow] && nbRow < tabRow.size())
+    nbRow ++;
+
+  while (col >= tabCol[nbCol] && nbCol < tabCol.size())
+    nbCol ++;
+
+  unsigned int posRow = row;
+  unsigned int posCol = col;
+
+  if (nbRow != 0)
+    posRow -= tabRow[nbRow - 1];
+  if (nbCol != 0)
+    posCol -= tabCol[nbCol - 1];
+
+  return (*map(nbRow, nbCol))(posRow, posCol);
+}
+
+void BlockMatrix::setValue(unsigned int row, unsigned int col, double value)
+{
+  unsigned int nbRow = 0;
+  unsigned int nbCol = 0;
+
+  while (row >= tabRow[nbRow] && nbRow < tabRow.size())
+    nbRow ++;
+
+  while (col >= tabCol[nbCol] && nbCol < tabCol.size())
+    nbCol ++;
+
+  unsigned int posRow = row;
+  unsigned int posCol = col;
+
+  if (nbRow != 0)
+    posRow -= tabRow[nbRow - 1];
+  if (nbCol != 0)
+    posCol -= tabCol[nbCol - 1];
+
+  (*map(nbRow, nbCol))(posRow, posCol) = value;
+}
+
 double& BlockMatrix::operator()(unsigned int row, unsigned int col)
 {
-
   unsigned int nbRow = 0;
   unsigned int nbCol = 0;
 

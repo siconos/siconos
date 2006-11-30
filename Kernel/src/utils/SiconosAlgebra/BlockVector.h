@@ -208,6 +208,18 @@ public:
   */
   std::string toString() const;
 
+  /** return the element vector[i]
+   *  \param an unsigned int i
+   *  \return a double
+   */
+  double getValue(unsigned int);
+
+  /** set the element vector[i]
+   *  \param an unsigned int i
+   *  \param the value
+   */
+  void setValue(unsigned int, double);
+
   /** get the element at position i (warning: absolute position.)
   *  \param an unsigned integer i
   *  \return a reference to a double

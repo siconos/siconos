@@ -5,15 +5,12 @@
 
 Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of Non Smooth Dynamical Systems. 
 
-Useful links: 
+This API documentation is automatically generated from the software sources (.h and .cpp) thanks to doxygen tools. 
+You can also find other tools and documents (installation guide, tutorial ...) on <a href="http://siconos.gforge.inria.fr/">Siconos Home Page</a>.\n
 
-<a href="http://siconos.gforge.inria.fr/">Siconos Home Page</a>.\n
+To get and install the platform Siconos, see <a href="https://gforge.inria.fr/frs/?group_id=9">Download Section</a>.\n
 
-Siconos <a href="https://gforge.inria.fr/frs/?group_id=9">Download</a>.\n
-
-\ref SiconosDocList
-
-\section sect_plat Platforms
+\section sectplat Platforms
 
 Siconos v2.0.0 has been successfully compiled on the following platforms:
 - Linux/Unix gcc2.95.x, gcc3.x, gcc4.x
@@ -26,25 +23,21 @@ the maintainer would be glad to hear about that.
 
 \section sect_req Requirements
 
-- "blas", "lapack" and a Fortran compiler. On most Linuxes these are available
-as pre-compiled binaries under the name "blas" and "lapack". For
-SuSE 10.x, the Fortran compiler is available as package
-"gfortran". For SuSE 9.x, the Fortran compiler is available as
-package "gcc-g77".
-- Numerics 
+- Atlas ("blas" and "lapack") and a Fortran compiler. 
 - libxml2
-- boost-ublas
+- Boost-ublas
 
 \section sect_opt Optional
 
-- cppunit 
-- 
+- cppunit (required to run unit tests)
 
 \section sect_compile Compile and Install
 
 \subsection compile_linux Linux/Unix
 
 For compilation, run the following commands:
+
+For details see <a href="http://siconos.gforge.inria.fr/SiconosInstall/index.html">Siconos Installation Guide.</a> 
 
 \verbatim
  ./autogen.sh
@@ -57,15 +50,6 @@ Type <tt>./configure --help</tt> to see more information. After
 successful compilation, you can run various test programs by the
 command "make check" (requires cppunit v1.10.2 and option --enable-cppunit for configure). 
 
-\section sect_doc Documentation
-
-The documentation is in the header files. The comments in the
-header files are used by the <tt>doxygen</tt> tool for this
-auto-generated HTML documentation.
-
-\section sect_usage Library Usage
-
-2006-11-10, Franck Pérignon <franck.perignon@inrialpes.fr>
-
+2006-11-30, <a href="mailto:franck.perignon@inrialpes.fr">Franck Pérignon</a> 
 
 */

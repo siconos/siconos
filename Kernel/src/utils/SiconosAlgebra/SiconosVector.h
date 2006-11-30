@@ -36,8 +36,8 @@ union Vect
   SparseVect *Sparse; // num = 4
 };
 
-//! Abstract class to provide interface for vectors handling
-/**
+/** Abstract class to provide interface for vectors handling
+ *
  *  \author SICONOS Development Team - copyright INRIA
  *  \date (creation) 07/21/2006
  *  \version 2.0.0.
@@ -170,6 +170,18 @@ public:
   // that means that for a SimpleVector v, v(i) is index i element but
   // for a BlockVector w that contains 2 SiconosVector of size 3
   // w(4) corresponds to the first element of the second vector.
+
+  /** return the element vector[i]
+   *  \param an unsigned int i
+   *  \return a double
+   */
+  virtual double getValue(unsigned int) = 0;
+
+  /** set the element vector[i]
+   *  \param an unsigned int i
+   *  \param the value
+   */
+  virtual void setValue(unsigned int, double) =  0;
 
   /** get the element at position i in the vector
    *  \param an integer i

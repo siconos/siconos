@@ -205,11 +205,23 @@ public:
 
   //************************** VECTORS HANDLING AND OPERATORS *******************************
 
+  /** return the element vector[i]
+   *  \param an unsigned int i
+   *  \return a double
+   */
+  double getValue(unsigned int);
+
+  /** set the element vector[i]
+   *  \param an unsigned int i
+   *  \param the value
+   */
+  void setValue(unsigned int, double);
+
   /** get the element at position i in the vector
-  *  \param an integer i
-  *  \exception SiconosVectorException
-  *  \return a double
-  */
+   *  \param an integer i
+   *  \exception SiconosVectorException
+   *  \return a double
+   */
   double& operator()(unsigned int);
 
   /** get the element at position i in the vector

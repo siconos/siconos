@@ -25,8 +25,9 @@
 #include "NonSmoothLaw.h"
 #include "NewtonImpactNSLXML.h"
 
-//! Newton impact Non Smooth Law
-/**  \author SICONOS Development Team - copyright INRIA
+/** Newton impact Non Smooth Law
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) June 29, 2004
  *

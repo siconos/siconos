@@ -48,8 +48,9 @@ typedef UnitaryRelationsIntMap::iterator IteratorForRelativeDegrees;
 /** const iterator through UnitaryRelationsIntMap */
 typedef UnitaryRelationsIntMap::const_iterator ConstIteratorForRelativeDegrees;
 
-//! This class describes the topology of the non-smooth dynamical system. It holds all the "potential" Unitary Relations and their Relative Degrees.
-/**  \author SICONOS Development Team - copyright INRIA
+/**  This class describes the topology of the non-smooth dynamical system. It holds all the "potential" Unitary Relations and their Relative Degrees.
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) July 20, 2005
  *

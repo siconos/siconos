@@ -48,13 +48,13 @@ typedef std::set<InteractionXML*> SetOfInteractionsXML;
 /** iterator through SetOfInteractionXML */
 typedef SetOfInteractionsXML::iterator SetOfInteractionsXMLIt;
 
-//! XML management for NonSmoothDynamicalSystem
-/**
-*  \author SICONOS Development Team - copyright INRIA
-*  \version 2.0.0.
-*  \date 04/04/2004
-*
-*/
+/** XML management for NonSmoothDynamicalSystem
+ *
+ *  \author SICONOS Development Team - copyright INRIA
+ *  \version 2.0.0.
+ *  \date 04/04/2004
+ *
+ */
 class NonSmoothDynamicalSystemXML
 {
 private:

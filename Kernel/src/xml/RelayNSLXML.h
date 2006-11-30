@@ -28,8 +28,9 @@
 const std::string RNSL_C = "c";
 const std::string RNSL_D = "d";
 
-//!  XML management for RelayNSL
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for RelayNSL
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date 05/14/2004
  *

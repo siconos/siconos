@@ -27,8 +27,9 @@
 #include "SimpleMatrix.h"
 
 class OneStepNSProblem;
-//! XML management for LCP
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for LCP
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date 05/18/2004
  *

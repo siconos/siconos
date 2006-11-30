@@ -26,8 +26,9 @@
 
 class Solver;
 
-//! XML management for Solver
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for Solver
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date 20/12/2005
  *

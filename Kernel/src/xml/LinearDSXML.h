@@ -32,8 +32,9 @@ const std::string LDS_Mxdot = "Mxdot";
 const std::string LDS_B = "b";
 
 class SimpleMatrix;
-//! XML management for LinearDS
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for LinearDS
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date 05/11/2004
  *

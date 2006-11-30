@@ -297,7 +297,7 @@ const double TimeDiscretisation::getT() const
   return simulation->getModelPtr()->getFinalT();
 }
 
-inline void TimeDiscretisation::setT(const double newValue)
+void TimeDiscretisation::setT(const double newValue)
 {
   simulation->getModelPtr()->setFinalT(newValue);
   (*tk)(nSteps) = newValue;

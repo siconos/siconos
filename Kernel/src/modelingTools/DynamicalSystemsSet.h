@@ -42,8 +42,9 @@ typedef DSSet::const_iterator ConstDSIterator;
 /** return type value for insert function - bool = false if insertion failed. */
 typedef std::pair<DSSet::iterator, bool> CheckInsertDS;
 
-//! Set (STL) of pointers to Dynamical Systems - Useful for NSDS, Interaction, OSI ...
-/**  \author SICONOS Development Team - copyright INRIA
+/** Set (STL) of pointers to Dynamical Systems - Useful for NSDS, Interaction, OSI ...
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) May 17, 2006
  *

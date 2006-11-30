@@ -54,8 +54,9 @@ typedef InterSet::const_iterator ConstInteractionsIterator;
 /** return type value for insert function - bool = false if insertion failed. */
 typedef std::pair<InterSet::iterator, bool> CheckInsertInteraction;
 
-//! Set (STL) of pointers to Interactions - Useful for NSDS, Interaction, OSI ...
-/**  \author SICONOS Development Team - copyright INRIA
+/** Set (STL) of pointers to Interactions - Useful for NSDS, Interaction, OSI ...
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) May 17, 2006
  *

@@ -54,8 +54,9 @@ const std::string  SM_XMLSCHEMA = "SchemaXML";
 
 //const std::string  DEFAULT_XMLSCHEMA="/config/xmlschema/SiconosModelSchema-V1.2.xsd";
 
-//! XML management for Model
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for Model
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date 04/04/2004
  *

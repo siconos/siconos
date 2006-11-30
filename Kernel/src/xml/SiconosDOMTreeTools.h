@@ -55,8 +55,9 @@ class SimpleVector;
 class SiconosVector;
 class SiconosMatrix;
 
-//! Tool box for XML data handling in Siconos
-/**  \author SICONOS Development Team - copyright INRIA
+/** Toolbox for XML data handling in Siconos
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date 04/06/2004
  *

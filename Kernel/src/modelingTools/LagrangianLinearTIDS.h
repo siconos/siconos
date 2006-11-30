@@ -28,8 +28,9 @@
 
 class LagrangianLinearTIDSXML;
 
-//! Lagrangian Linear Systems with time invariant coefficients - Derived from LagrangianDS
-/**  \author SICONOS Development Team - copyright INRIA
+/** Lagrangian Linear Systems with time invariant coefficients - Derived from LagrangianDS
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) Apr 29, 2004
  *

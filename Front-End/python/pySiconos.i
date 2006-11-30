@@ -39,6 +39,8 @@
 #include "SiconosMatrix.h"
 #include "SimpleMatrix.h"
 #include "BlockMatrix.h"
+#include "ioMatrix.h"
+#include "ioVector.h"
 
 #include "SiconosMemory.h"
 #include "SiconosMemoryException.h"
@@ -155,6 +157,8 @@ $1 = string(PyString_AsString($input));
 %include "SiconosMatrix.h"
 %include "SimpleMatrix.h"
 %include "BlockMatrix.h"
+%include "ioMatrix.h"
+%include "ioVector.h"
 %include "SiconosMemoryException.h"
 %include "SiconosMemory.h"
 

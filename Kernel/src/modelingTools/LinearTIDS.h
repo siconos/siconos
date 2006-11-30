@@ -27,8 +27,9 @@
 
 class LinearDSXML;
 
-//! First order linear systems - Inherits from DynamicalSystems
-/**  \author SICONOS Development Team - copyright INRIA
+/** First order linear systems - Inherits from DynamicalSystems
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) Apr 29, 2004
  *

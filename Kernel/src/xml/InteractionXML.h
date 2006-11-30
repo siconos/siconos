@@ -33,8 +33,9 @@ class Interaction;
 class NonSmoothLawXML;
 class RelationXML;
 
-//! XML management for object Interaction
-/**  \author SICONOS Development Team - copyright INRIA
+/**  XML management for object Interaction
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date (Creation) 04/12/2004
  *

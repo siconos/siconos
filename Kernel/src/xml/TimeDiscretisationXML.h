@@ -37,8 +37,9 @@ const std::string  TD_HMAX = "hMax";
 const std::string  TD_ISCONSTANT = "isConstant";
 
 
-//! XML management for Time Discretisation
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for Time Discretisation
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date 05/17/2004
  *

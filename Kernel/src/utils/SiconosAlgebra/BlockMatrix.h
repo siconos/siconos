@@ -382,6 +382,20 @@ public:
   */
   double operator()(unsigned int, unsigned int)const;
 
+  /** return the element matrix[i,j]
+   *  \param an unsigned int i
+   *  \param an unsigned int j
+   *  \return a double
+   */
+  double getValue(unsigned int, unsigned int);
+
+  /** set the element matrix[i,j]
+   *  \param an unsigned int i
+   *  \param an unsigned int j
+   *  \param the value
+   */
+  void setValue(unsigned int, unsigned int, double);
+
   /**operator =
    *  \param SiconosMatrix : the matrix to be copied
    */

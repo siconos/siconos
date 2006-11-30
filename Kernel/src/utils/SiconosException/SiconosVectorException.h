@@ -25,8 +25,9 @@
 
 #include "SiconosException.h"
 
-//! Exception caused by a SiconosVector
-/**  \author SICONOS Development Team - copyright INRIA
+/** Exception caused by a SiconosVector
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date (Creation) 05/25/2004
  *

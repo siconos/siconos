@@ -37,8 +37,9 @@ const std::string  LTIR_B = "B";
 class SimpleMatrix;
 class SimpleVector;
 
-//! XML management for LinearTIR
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for LinearTIR
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date 05/13/2004
  *

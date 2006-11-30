@@ -26,8 +26,9 @@
 
 const std::string NEWTON_E = "e";
 
-//! XML management for NewtonImpactNSL
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for NewtonImpactNSL
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) June 29, 2004
  *

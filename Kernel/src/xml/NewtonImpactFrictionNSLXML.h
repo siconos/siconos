@@ -25,8 +25,9 @@
 
 #include "NonSmoothLawXML.h"
 
-//! XML management for NewtonImpactFrictionNSL
-/**  \author SICONOS Development Team - copyright INRIA
+/** XML management for NewtonImpactFrictionNSL
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.0.
  *  \date (Creation) March 22, 2005
  *

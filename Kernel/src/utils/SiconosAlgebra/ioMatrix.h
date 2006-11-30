@@ -29,8 +29,9 @@
 
 class SimpleMatrix;
 
-//! Interface for read/write matrices from/to a file.
-/**  \author SICONOS Development Team - copyright INRIA
+/** Interface for read/write matrices from/to a file.
+ *
+ *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.0.
  *   \date (Creation) 07/21/2006
  *
