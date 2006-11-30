@@ -23,17 +23,24 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
-  v1.3.x - (current release)
+  v2.0.x - (current release)
 --------------------------------------------------------------------------------	
 Notes:
 
 Changes:
+	
+--------------------------------------------------------------------------------
+  v2.0.0 - 30 Novembre 2006
+--------------------------------------------------------------------------------	
+Notes:
+
+Main Changes:
 2006-10-09 Franck Perignon <franck.perignon@inrialpes.fr>
                                                                                
 	* Remove lemke routines and keep only lexicoLemke
 	
 --------------------------------------------------------------------------------
-  v2.0.0 - 07 september 2006 (release 567)
+  v1.3.0 - 07 september 2006 (release 567)
 --------------------------------------------------------------------------------	
 Notes:
 

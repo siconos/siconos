@@ -23,11 +23,19 @@ before it.
 Do not hesitate to use the emacs mode Change Log for editing this file
 
 --------------------------------------------------------------------------------
-  v1.3.x - (current release)
+  v2.0.x - (current release)
 --------------------------------------------------------------------------------	
 Notes:
 
 Changes:
+
+	
+--------------------------------------------------------------------------------
+  v2.0.0 - 30 November 2006 (release 616) 
+--------------------------------------------------------------------------------	
+Notes:
+
+Main Changes:
 
 2006-10-11 Franck Perignon <franck.perignon@inrialpes.fr>
 	* Remove all lapack++ depencies; replace them by Boost-Ublas 
@@ -43,9 +51,9 @@ Changes:
         * Add Boost matrices and vectors in Kernel (from Aziz branch) 
 	  (MySiconosMatrix, MySimpleMatrix, MyBlockMatrix, MySiconosVector,
 	   ioMatrix, ioVector classes)
-	
---------------------------------------------------------------------------------
-  v2.0.0 - 07 september 2006 (release 567)
+
+-------------------------------------------------------------------------------
+  v1.3.0 - 07 september 2006 (release 567)
 --------------------------------------------------------------------------------	
 
 Main Changes:

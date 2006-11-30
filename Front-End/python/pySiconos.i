@@ -55,10 +55,6 @@
 #include "RelayNSLXML.h"
 #include "ComplementarityConditionNSLXML.h"
 #include "InteractionXML.h"
-#include "BoundaryConditionXML.h"
-#include "LinearBCXML.h"
-#include "PeriodicBCXML.h"
-#include "NLinearBCXML.h"
 #include "DynamicalSystemXML.h"
 #include "LagrangianDSXML.h"
 #include "LagrangianLinearTIDSXML.h"
@@ -74,42 +70,20 @@
 #include "MoreauXML.h"
 #include "LsodarXML.h"
 #include "SimulationXML.h"
-#include "DSInputOutputXML.h"
-#include "EqualityConstraintXML.h"
-#include "LagrangianDSIOXML.h"
-#include "LagrangianLinearDSIOXML.h"
-#include "LagrangianECXML.h"
-#include "LagrangianLinearECXML.h"
-#include "LinearDSIOXML.h"
-#include "LinearECXML.h"
-#include "LinearTIECXML.h"
 #include "SiconosModelXML.h"
 #include "XMLTagsName.h"
 
 
-#include "BoundaryCondition.h"
-#include "PeriodicBC.h"
-#include "LinearBC.h"
-#include "NLinearBC.h"
 #include "NonSmoothLaw.h"
 #include "ComplementarityConditionNSL.h"
 #include "NewtonImpactNSL.h"
 #include "NewtonImpactFrictionNSL.h"
 #include "RelayNSL.h"
-#include "DSInputOutput.h"
-#include "LinearDSIO.h"
-#include "LagrangianDSIO.h"
-#include "LagrangianLinearDSIO.h"
 #include "DynamicalSystem.h"
 #include "LinearDS.h"
 #include "LinearTIDS.h"
 #include "LagrangianDS.h"
 #include "LagrangianLinearTIDS.h"
-#include "EqualityConstraint.h"
-#include "LinearEC.h"
-#include "LinearTIEC.h"
-#include "LagrangianEC.h"
-#include "LagrangianLinearEC.h"
 #include "Interaction.h"
 #include "Relation.h"
 #include "LagrangianR.h"
@@ -127,7 +101,7 @@
 #include "Solver.h"
 #include "Event.h"
 #include "NonSmoothEvent.h"
-#include "TimeDiscrEvent.h"
+#include "TimeDiscretisationEvent.h"
 #include "EventsManager.h"
 #include "OneStepNSProblem.h"
 #include "QP.h"
@@ -204,11 +178,6 @@ $1 = string(PyString_AsString($input));
 %include "ComplementarityConditionNSLXML.h"
 // ---
 %include "InteractionXML.h"
-// ---
-%include "BoundaryConditionXML.h"
-%include "LinearBCXML.h"
-%include "PeriodicBCXML.h"
-%include "NLinearBCXML.h"
 // --- 
 %include "DynamicalSystemXML.h"
 %include "LagrangianDSXML.h"
@@ -232,17 +201,6 @@ $1 = string(PyString_AsString($input));
 // ---
 %include "SimulationXML.h"
 
-// Xml - EC and DSIO
-%include "DSInputOutputXML.h"
-%include "EqualityConstraintXML.h"
-%include "LagrangianDSIOXML.h"
-%include "LagrangianLinearDSIOXML.h"
-%include "LagrangianECXML.h"
-%include "LagrangianLinearECXML.h"
-%include "LinearDSIOXML.h"
-%include "LinearECXML.h"
-%include "LinearTIECXML.h"
-
 // Xml - model
 %include "SiconosModelXML.h"
 %include "XMLTagsName.h"
@@ -260,12 +218,6 @@ $1 = string(PyString_AsString($input));
 %include "NewtonImpactNSL.h"
 %include "NewtonImpactFrictionNSL.h"
 %include "ComplementarityConditionNSL.h"
-// ---
-%include "BoundaryCondition.h"
-%include "PeriodicBC.h"
-%include "NLinearBC.h"
-%include "LinearBC.h"
-// ---
 %include "Interaction.h"
 // ---
 %include "DynamicalSystem.h"
@@ -273,17 +225,6 @@ $1 = string(PyString_AsString($input));
 %include "LinearTIDS.h"
 %include "LagrangianDS.h"
 %include "LagrangianLinearTIDS.h"
-// ---
-%include "DSInputOutput.h"
-%include "LagrangianDSIO.h"
-%include "LagrangianLinearDSIO.h"
-%include "LinearDSIO.h"
-// ---
-%include "EqualityConstraint.h"
-%include "LagrangianEC.h"
-%include "LagrangianLinearEC.h"
-%include "LinearEC.h"
-%include "LinearTIEC.h"
 // ---
 %include "Topology.h"
 %include "DynamicalSystemsSet.h"
@@ -298,7 +239,7 @@ $1 = string(PyString_AsString($input));
 %include "Solver.h"
 %include "Event.h"
 %include "NonSmoothEvent.h"
-%include "TimeDiscrEvent.h"
+%include "TimeDiscretisationEvent.h"
 %include "EventsManager.h"
 // ---
 %include "OneStepNSProblem.h"
@@ -325,8 +266,6 @@ $1 = string(PyString_AsString($input));
 namespace std {
   %template(intVector) vector<int>;
   %template(doubleVector) vector<double>;
-  %template(dsioVector) vector<DSInputOutput*>;
   %template(dsVector) vector<DynamicalSystem*>;
-  %template(ecVector) vector<EqualityConstraint*>;
   %template(osiVector) vector<OneStepIntegrator*>;
 };

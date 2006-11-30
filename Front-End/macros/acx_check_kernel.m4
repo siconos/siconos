@@ -33,7 +33,7 @@ dynlib=no;
 for ac_dir in $list_dir;
 do  AC_MSG_CHECKING([for libSiconosKernel.$libsuffix in $ac_dir]) 
 	   if test -r "$ac_dir/lib/libSiconosKernel.$libsuffix" ; then
-       		KERNEL_INCLUDES="-I$ac_dir/include/"
+       		KERNEL_INCLUDES="-I$ac_dir/include/Siconos"
        		KERNEL_LIBRARIES="-L$ac_dir/lib -lSiconosKernel"
        		KERNEL_PATH="$ac_dir/"
        		kernel_lib="yes"
@@ -52,7 +52,7 @@ if test "$kernel_lib" = "no" ; then
     do  AC_MSG_CHECKING([for libSiconosKernel.a in $ac_dir])
         if test -r "$ac_dir/lib/libSiconosKernel.a" ; then
 	    	kernel_lib="yes"
-		KERNEL_INCLUDES="-I$ac_dir/include/"
+		KERNEL_INCLUDES="-I$ac_dir/include/Siconos"
        		KERNEL_LIBRARIES="-L$ac_dir/lib -lSiconosKernel"
        		KERNEL_PATH="$ac_dir/"	  
 		echo "yes"  	   
