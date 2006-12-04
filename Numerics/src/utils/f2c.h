@@ -72,12 +72,16 @@ typedef struct
   f2c_real r, i;
 } f2c_complex;
 
+/*
 The complex type inside LAPACK++ has to be compatible to the FORTRAN
 type, since LAPACK++ has to pass these values back and forth to the
 FORTRAN functions. Don't use this data type anywhere outside
 anymore. The included C++ class la::complex provides
 automatic conversion from and to this FORTRAN type. */
-typedef struct { doublereal r, i; } doublecomplex;
+typedef struct
+{
+  doublereal r, i;
+} doublecomplex;
 typedef long int logical;
 typedef short int shortlogical;
 
@@ -89,7 +93,7 @@ typedef short int shortlogical;
 #define Extern extern
 #endif
 
-extern int ungetc();    /* This is not declared in Sun's <stdio.h> * /
+extern int ungetc();    /* This is not declared in Sun's <stdio.h> */
 
 /* I/O stuff */
 #ifndef DOXYGEN_IGNORE
