@@ -8,6 +8,8 @@
 <div class="tabs">
   <ul>
     <li><a href="index.html"><span>Main&nbsp;Page</span></a></li>
+    <li><a href="namespaces.html"><span>Namespaces</span></a></li>
+    <li><a href="files.html"><span>Files</span></a></li>
     <li><a href="pages.html"><span>Related&nbsp;Pages</span></a></li>
   </ul></div>
 <h1><a class="anchor" name="SiconosTutorial">Siconos Tutorial (C++)</a></h1><h2><a class="anchor" name="tutorialDiodeBridge">
@@ -240,12 +242,12 @@ Do not forget to release memory for pointers at the end:<p>
 </pre></div><p>
 To complete DiodeBridge.cpp, some header files are required:<p>
 <div class="fragment"><pre class="fragment"><span class="comment">// Header files</span>
-<span class="preprocessor">#include "Model.h"</span>
-<span class="preprocessor">#include "LinearTIDS.h"</span>
-<span class="preprocessor">#include "LinearTIR.h"</span>
-<span class="preprocessor">#include "ComplementarityConditionNSL.h"</span>
+<span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d3/d5a/Model_8h.html">Model.h</a>"</span>
+<span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/dc7/LinearTIDS_8h.html">LinearTIDS.h</a>"</span>
+<span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d9/d52/LinearTIR_8h.html">LinearTIR.h</a>"</span>
+<span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d9/d27/ComplementarityConditionNSL_8h.html">ComplementarityConditionNSL.h</a>"</span>
 <span class="preprocessor">#include "TimeStepping.h"</span>
-<span class="preprocessor">#include "ioMatrix.h"</span>
+<span class="preprocessor">#include "<a class="codeRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d2/d3b/ioMatrix_8h.html">ioMatrix.h</a>"</span>
 <span class="preprocessor">#include &lt;string&gt;</span>
 <span class="preprocessor">#include &lt;iostream&gt;</span>
 </pre></div><p>
@@ -261,23 +263,19 @@ Results are given on the figure below:<p>
 </div>
 <h2><a class="anchor" name="tutorialMultiBalls">
 Siconos Tutorial - A columns of three beads</a></h2>
-Consider the figure below:<p>
+As described in the figure below, we consider a ball of mass m and radius R, described by 3 generalized coordinates <img class="formulaInl" alt="$ q=(z,x,\theta) $" src="form_164.png">. The ball is subjected to the gravity g and a vertical external force f(t). The system is also constituted by a rigid plane, defined by its position h with respect to the axis Oz. We assume that the position of the plane is fixed. <br>
+<p>
 <div align="center">
 <img src="bouncingBall.png" alt="bouncingBall.png">
 <p><strong>.</strong></p></div>
-<p>
-We consider a ball of mass m and radius R, described by 3 generalized coordinates <img class="formulaInl" alt="$ q=(z,x,\theta) $" src="form_164.png">. The ball is subjected to the gravity g and a vertical external force f(t). The system is also constituted by a rigid plane, defined by its position $h$ with respect to the axis Oz. We assume that the position of the plane is fixed. <br>
-<p>
+<h3><a class="anchor" name="tutMultiBallNSDS">
+Building the Non-Smooth Dynamical System</a></h3>
 The equation of motion of the ball is given by: <br>
  <p class="formulaDsp">
 <img class="formulaDsp" alt="\[ M\ddot q = F_{ext}(t) + p \ \ with \ \ M=\left[\begin{array}{ccc} m &amp;0 &amp;0 \\ 0 &amp; m &amp; 0 \\ 0 &amp; 0 &amp; I \end{array}\right] \ \ , \ \ I = \frac{3}{5}mR^2 \ \ and \ \ F_{ext} = \left[\begin{array}{c} -m g \\ 0 \\ 0 \end{array}\right] \]" src="form_172.png">
 <p>
- The ball bounces on the rigid plane, introducing a constraint on the position of the ball, given by: <p class="formulaDsp">
-<img class="formulaDsp" alt="\[ z-R-h\geq 0 \]" src="form_171.png">
 <p>
-<p>
-We also consider also that the behavior of the system at impact is governed by a Newton impact law with a coefficient of restitution <em>e</em>.<p>
-We suppose now that we have a column of N balls like the one above (mass and radius may be different, and if necessary, variables will be indexed by i, i being the number of the ball). Each ball is governed by a linear system like the one written for a single ball and may be in contact with the balls above and below it. This introduces some new constraints: <img class="formulaInl" alt="$ (z_i-R_i)-(z_j-R_j)-h \geq 0 $" src="form_173.png">, if ball i is on top of ball j.<p>
+For this tutorial, we will suppose now that we have a column of "dsNumber" balls like the one above (mass and radius may be different, and if necessary, variables will be indexed by i, i being the number of the ball). Each ball is governed by a linear system like the one written for a single ball and may be in contact with the balls above and below it.<p>
 Let us now start the writing of the input file. Like for the first tutorial, we create a new directory, multiBeads, and save the template given <a class="el" href="doc_prelim.html#tutGCtemplate">here</a> as multiBeads.cpp.<p>
 We start by setting some parameters, like the number of balls, their initial positions and velocities and so on. <div class="fragment"><pre class="fragment"><span class="comment">// User-defined main parameters </span>
 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> dsNumber = 10;     <span class="comment">// the number of dynamical systems </span>
@@ -289,38 +287,229 @@ We start by setting some parameters, like the number of balls, their initial pos
 <span class="keywordtype">double</span> h = 0.005;                <span class="comment">// time step</span>
 <span class="keywordtype">double</span> position_init = 10.5;        <span class="comment">// initial position for lowest bead.</span>
 <span class="keywordtype">double</span> velocity_init = 0.0;      <span class="comment">// initial velocity for lowest bead.</span>
-
-
-<span class="comment">// -------------------------</span>
+<span class="keywordtype">double</span> R = 0.1;                  <span class="comment">// balls radius</span>
+</pre></div><p>
+Then, we define some initial conditions for the balls, and create the corresponding Dynamical Systems, all of type Lagrangian, Linear and Time Invariant. All the systems are inserted in a container, a DynamicalSystemsSet, named allDS. <br>
+ From now on, to simplify writing, we suppose that all balls have the same mass, m = 1, and the same radius, R=0.1.<p>
+<div class="fragment"><pre class="fragment"><span class="comment">// -------------------------</span>
 <span class="comment">// --- Dynamical systems --- </span>
 <span class="comment">// -------------------------</span>
 
     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i;
-    DynamicalSystemsSet allDS; <span class="comment">// the list of DS</span>
-    CheckInsertDS checkDS;
+    <span class="comment">// A set of DS that will handle all the "balls"</span>
+    DynamicalSystemsSet allDS; 
+    <span class="comment">// mass matrix, set to identity</span>
     SiconosMatrix *Mass = <span class="keyword">new</span> SimpleMatrix(nDof,nDof);
     Mass-&gt;eye();
+    (*Mass)(2,2) = 3/5*R*R;
 
     <span class="comment">// -- Initial positions and velocities --</span>
+    <span class="comment">// q0[i] and v0[i] correspond to position and velocity of ball i. </span>
     vector&lt;SimpleVector *&gt; q0;
-    vector&lt;SimpleVector *&gt; velocity0;
+    vector&lt;SimpleVector *&gt; v0;
     q0.resize(dsNumber,NULL);
-    velocity0.resize(dsNumber,NULL);
+    v0.resize(dsNumber,NULL);
 
     <span class="keywordflow">for</span> (i=0;i&lt;dsNumber;i++)
       {
+        <span class="comment">// Memory allocation for q0[i] and v0[i]</span>
         q0[i] = <span class="keyword">new</span> SimpleVector(nDof);
         velocity0[i] = <span class="keyword">new</span> SimpleVector(nDof); 
+        <span class="comment">// set values</span>
         (*(q0[i]))(0) = position_init;
         (*(velocity0[i]))(0) = velocity_init;
-        checkDS = allDS.insert( <span class="keyword">new</span> LagrangianLinearTIDS(i,nDof,*(q0[i]),*(velocity0[i]),*Mass));
-        <span class="comment">// checkDS.first is an iterator that points to the DS inserted above.</span>
-        (static_cast&lt;LagrangianDS*&gt;(*(checkDS.first)))-&gt;setComputeFExtFunction(<span class="stringliteral">"BeadsPlugin.so"</span>, <span class="stringliteral">"beadsFExt"</span>);
+        <span class="comment">// Create a new Lagrangian Linear Dynamical System, with q0] and v0[i] as initial conditions,</span>
+        <span class="comment">// Mass as mass matrix and i as number of identification. </span>
+        <span class="comment">// The system is then inserted in allDS. </span>
+        allDS.insert( <span class="keyword">new</span> LagrangianLinearTIDS(i,nDof,*(q0[i]),*(velocity0[i]),*Mass));
+        <span class="comment">// Increment values for next system</span>
         position_init+= increment_position;
         velocity_init+= increment_velocity;
       }
-</pre></div> <hr size="1"><address style="align: right;"><small>Generated on Wed Nov 29 18:23:31 2006 for Getting Started with Siconos by&nbsp;
+</pre></div><p>
+Next, it is necessary to define the external forces, the gravity, applied on each ball. According to <a class="el" href="dsInSiconos.html#doc_dsPlugin">Dynamical Systems plug-in functions</a>, a plug-in function is available for those forces. (For details on plug-in functions, see <a class="el" href="doc_usingPlugin.html">Siconos Plug-in Functions</a>). Its signature (the type of its arguments) is given in <a class="elRef" doxygen="DoxygenKernel.tag:../../Doxygen/" href="../../Doxygen/d4/d29/DefaultPlugin_8cpp.html">DefaultPlugin.cpp</a>. So we copy it in a new file, say <a class="el" href="BeadsPlugin_8cpp.html">BeadsPlugin.cpp</a>, and we define an extern function, fExt. <br>
+<p>
+<div class="fragment"><pre class="fragment"><span class="keyword">const</span> <span class="keywordtype">double</span> m = 1; <span class="comment">// bead mass</span>
+<span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="BeadsPlugin_8cpp.html#6e550921d5c2c78c55be1c0d76512d45">g</a> = 9.81; <span class="comment">// gravity</span>
+<span class="keyword">extern</span> <span class="stringliteral">"C"</span> <span class="keywordtype">void</span> <a class="code" href="BeadsPlugin_8cpp.html#508c63154f0a2b82e57e24e3e63fb14f">fExt</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> sizeOfq, <span class="keywordtype">double</span> time, <span class="keywordtype">double</span> * <a class="code" href="BeadsPlugin_8cpp.html#508c63154f0a2b82e57e24e3e63fb14f">fExt</a>, <span class="keywordtype">double</span> *param)
+{
+  <span class="comment">// set fExt components to 0</span>
+  <span class="keywordflow">for</span> (<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> i = 0; i &lt; sizeOfq; i++)
+    fExt[i] = 0.0;
+  <span class="comment">// apply gravity</span>
+  fExt[0] = -m*g;
+} 
+</pre></div> <b>Warning:</b> <ul>
+<li>fExt must be an " extern "C" " function, and code is C, not C++.</li><li>the name of the plugin file, <a class="el" href="BeadsPlugin_8cpp.html">BeadsPlugin.cpp</a> here, must be xxxPlugin.cpp, xxx being whatever you want.</li></ul>
+<p>
+Now we have to say "use fExt from BeadsPlugin.cpp to compute the external forces of my systems". <br>
+ This is done thanks to "setComputeFExtFunction" function:<p>
+<div class="fragment"><pre class="fragment">   <span class="comment">//   </span>
+   <a class="code" href="d0/db5/DynamicalSystemsSet_8h.html#137b6e65fe98aaaecc03be2928ada3b2">CheckInsertDS</a> checkDS; 
+   <span class="keywordflow">for</span> (i=0;i&lt;dsNumber;i++)
+      {
+        ... 
+        <span class="comment">// Create and insert in allDS a new Lagrangian Linear Dynamical System ...</span>
+        checkDS = allDS.insert( <span class="keyword">new</span> LagrangianLinearTIDS(i,nDof,*(q0[i]),*(velocity0[i]),*Mass));
+        <span class="comment">// Note that we now use a CheckInsertDS object: checkDS.first is </span>
+        <span class="comment">// an iterator that points to the DS inserted above.</span>
+        <span class="comment">// </span>
+        <span class="comment">// Set the external forces for the last created system. </span>
+        (static_cast&lt;LagrangianDS*&gt;(*(checkDS.first)))-&gt;setComputeFExtFunction(<span class="stringliteral">"BeadsPlugin.so"</span>, <span class="stringliteral">"fExt"</span>);
+        <span class="comment">// A cast is required, since allDS handles DynamicalSystem*, not LagrangianLinearTIDS*. </span>
+        ...
+      }
+</pre></div><p>
+From this point, any call to the external forces of a system in allDS will result in a call to the function fExt defined in <a class="el" href="BeadsPlugin_8cpp.html">BeadsPlugin.cpp</a>.<br>
+ <b>Remark:</b> m and R are set inside the BeadsPlugin file but it would also be possible, and maybe better, to pass them as parameters in fExt function. See <a class="el" href="doc_usingPlugin.html">Siconos Plug-in Functions</a> for details on that option. <br>
+<p>
+Ok, now DynamicalSystems are clearly defined and all saved in allDS. Let's turn our attention to Interactions. In the same way, they will be handled by a container, an InteractionsSet, named allInteractions. For dsNumbers systems, there are dsNumbers-1 "bead-bead" Interactions plus one between the "bottom bead" and the floor. <br>
+<p>
+We start with bead-floor Interaction: the ball at the bottom bounces on the rigid plane, introducing a constraint on the position of the ball, given by: <p class="formulaDsp">
+<img class="formulaDsp" alt="\[ z-R-h\geq 0 \]" src="form_171.png">
+<p>
+ Thus, as a local variables of the Interaction, we introduce y as the distance between the ball and the floor and <img class="formulaInl" alt="$ \lambda $" src="form_102.png"> as the multiplier that corresponds to the reaction at contact. Then, <p class="formulaDsp">
+<img class="formulaDsp" alt="\begin{eqnarray*} y = Hq + b = [1 \ 0 \ 0] q - R - h \\ and \\ p = H^t \lambda \end{eqnarray*}" src="form_455.png">
+<p>
+ (next, we set h=0). <br>
+ Thus, at impact the unilateral constraint is such that: <p class="formulaDsp">
+<img class="formulaDsp" alt="\[ 0 \leq y \perp \lambda \geq 0 \]" src="form_450.png">
+<p>
+ completed with a Newton Impact law, for which we set the restitutive coefficient e to 0.9: <p class="formulaDsp">
+<img class="formulaDsp" alt="\[ if \ y=0, \ \dot y(t^+) = -e \dot y(t^-) \]" src="form_451.png">
+<p>
+ <img class="formulaInl" alt="$ t^+ $" src="form_452.png"> and <img class="formulaInl" alt="$ t^- $" src="form_453.png"> being post and pre-impact times. The first Interaction can then be constructed:<p>
+<div class="fragment"><pre class="fragment"><span class="comment">// -------------------</span>
+<span class="comment">// --- Interactions---</span>
+<span class="comment">// -------------------</span>
+InteractionsSet allInteractions;
+<span class="comment">// The total number of Interactions</span>
+<span class="keywordtype">int</span> interactionNumber = dsNumber;
+
+<span class="comment">// Interaction first bead and floor</span>
+<span class="comment">// A set for the systems handles by the "current" Interaction</span>
+DynamicalSystemsSet dsConcerned;
+<span class="comment">// Only the "bottom" bead is concerned by this first Interaction, therefore DynamicalSystem number 0.</span>
+dsConcerned.insert(allDS.getDynamicalSystemPtr(0)); 
+<span class="comment">// -- Newton impact law -- </span>
+<span class="keywordtype">double</span> e = 0.9;
+NonSmoothLaw * nslaw0 = <span class="keyword">new</span> NewtonImpactNSL(e);
+<span class="comment">// Lagrangian Relation</span>
+<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> interactionSize = 1; <span class="comment">// y vector size</span>
+SiconosMatrix *H = <span class="keyword">new</span> SimpleMatrix(interactionSize,nDof);
+(*H)(0,0) = 1.0;
+SiconosVector *b = <span class="keyword">new</span> SimpleVector(interactionSize);
+(*b)(0) = -R;
+Relation * relation0 = <span class="keyword">new</span> LagrangianLinearR(*H,*b);
+<span class="comment">// Interaction</span>
+<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> num = 0 ; <span class="comment">// an id number for the Interaction</span>
+Interaction * inter0 = <span class="keyword">new</span> Interaction(<span class="stringliteral">"floor"</span>, dsConcerned,num,interactionSize, nslaw0, relation0);
+allInteractions.insert(inter0);
+</pre></div><p>
+In the same way, the potential contact between two balls introduces some new constraints: <br>
+ <img class="formulaInl" alt="$ (z_i-R_i)-(z_j-R_j)-h \geq 0 $" src="form_173.png">, if ball i is on top of ball j. <br>
+<p>
+So if we consider the Interaction between ball i and j, y being the distance between two balls and <img class="formulaInl" alt="$ \lambda $" src="form_102.png"> the multiplier, we get: <br>
+ <p class="formulaDsp">
+<img class="formulaDsp" alt="\begin{eqnarray*} y = HQ + b = [-1 \ 0 \ 0 \ 1 \ 0 \ 0]Q + R_j-R_i-h \\ p = H^t \lambda \\ \end{eqnarray*}" src="form_456.png">
+<p>
+ with <p class="formulaDsp">
+<img class="formulaDsp" alt="\[ Q = \left[\begin{array}{c} q_j \\ q_i \end{array}\right] \]" src="form_457.png">
+<p>
+<p>
+With the same non smooth law as for the first Interaction. <div class="fragment"><pre class="fragment"><span class="comment">// A list of names for the Interactions</span>
+vector&lt;string&gt; id;
+<span class="keywordtype">id</span>.resize(interactionNumber-1);
+
+<a class="code" href="df/d6e/InteractionsSet_8h.html#99deecd827595cff8a7ae29a9b69866f">CheckInsertInteraction</a> checkInter;
+
+<span class="comment">// A vector that will handle all the relations</span>
+vector&lt;Relation*&gt; LLR(interactionNumber-2);
+
+<span class="comment">// </span>
+SiconosMatrix *H1 = <span class="keyword">new</span> SimpleMatrix(1,2*nDof);
+
+<span class="keywordflow">if</span> (dsNumber&gt;1)
+{
+ (*H1)(0,0) = -1.0;
+ (*H1)(0,3) = 1.0;
+ <span class="comment">// Since Ri=Rj and h=0, we do not need to set b.</span>
+ Relation * relation = <span class="keyword">new</span> LagrangianLinearR(*H1);
+ <span class="keywordflow">for</span> (i=1;(int)i&lt;interactionNumber-1;i++)
+  {
+   <span class="comment">// The systems handled by the current Interaction ...</span>
+   dsConcerned1.clear();
+   dsConcerned.insert(allDS.getDynamicalSystemPtr(i-1));
+   dsConcerned.insert(allDS.getDynamicalSystemPtr(i));
+   <span class="comment">// The id: "i"</span>
+   ostringstream ostr;
+   ostr &lt;&lt; i;
+   <span class="keywordtype">id</span>[i-1]= ostr.str();
+   <span class="comment">// The relations</span>
+   LLR[i-1] = <span class="keyword">new</span> LagrangianLinearR(*relation); <span class="comment">// we use copy constructor to built all relations</span>
+   checkInter = allInteractions.insert( <span class="keyword">new</span> Interaction(<span class="keywordtype">id</span>[i-1], dsConcerned1,i,interactionSize, nslaw0, LLR[i-1]));
+  }
+<span class="keyword">delete</span> relation;
+}
+</pre></div><p>
+Note that each Relation corresponds to one and only one Interaction (which is not the case of NonSmoothLaw); that's why we need to built a new Relation LLR[i-1] for each Interaction.<p>
+Everything is now ready to build the NonSmoothDynamicalSystem and the related Model:<p>
+<div class="fragment"><pre class="fragment">    <span class="comment">// --------------------------------</span>
+    <span class="comment">// --- NonSmoothDynamicalSystem --- </span>
+    <span class="comment">// --------------------------------</span>
+    NonSmoothDynamicalSystem * nsds = <span class="keyword">new</span> NonSmoothDynamicalSystem(allDS, allInteractions);
+    
+    <span class="comment">// -------------</span>
+    <span class="comment">// --- Model ---</span>
+    <span class="comment">// -------------</span>
+
+    Model * multiBeads = <span class="keyword">new</span> Model(t0,T); 
+    multiBeads-&gt;setNonSmoothDynamicalSystemPtr(nsds); <span class="comment">// set NonSmoothDynamicalSystem of this model</span>
+</pre></div><h3><a class="anchor" name="tutMultiBallSimu">
+The Simulation</a></h3>
+<h4><a class="anchor" name="tutMultiBallSimuTS">
+Time-Stepping scheme</a></h4>
+As a first example, we will use a Moreau's time-stepping scheme, where the non-smooth problem will be written as a LCP. The process is more or less the same as for the Diode Bridge case, so we won't detail it. The only difference is that now, the OneStepIntegrator handles several DynamicalSystems.<p>
+<div class="fragment"><pre class="fragment">    string solverName = <span class="stringliteral">"Lemke"</span>;      <span class="comment">// solver algorithm used for non-smooth problem</span>
+    <span class="keywordtype">double</span> h = 0.005;                <span class="comment">// time step</span>
+    Simulation* s = <span class="keyword">new</span> TimeStepping(multiBeads);
+
+    <span class="comment">// -- Time discretisation --</span>
+    TimeDiscretisation * t = <span class="keyword">new</span> TimeDiscretisation(h,s);
+
+    <span class="comment">// -- OneStepIntegrators --</span>
+    <span class="keywordtype">double</span> theta = 0.5000001; 
+    OneStepIntegrator * OSI = <span class="keyword">new</span> Moreau(allDS , theta ,s);
+    <span class="comment">// That means that all systems in allDS have the same theta value.  </span>
+
+    <span class="comment">// -- OneStepNsProblem --</span>
+    OneStepNSProblem * osnspb = <span class="keyword">new</span> LCP(s,<span class="stringliteral">"LCP"</span>,solverName,10001, 0.001);
+</pre></div><h4><a class="anchor" name="tutMultiBallSimuTS">
+Time-Stepping scheme</a></h4>
+In that second part, an event-driven algorithm is used to solve the problem. Event-Driven Simulation principle is detailed in <a class="el" href="docSimuED.html">Event Driven algorithm</a>. <br>
+<p>
+As for the Time-stepping, we first need to built the simulation and then its time-discretisation:<p>
+<div class="fragment"><pre class="fragment">EventDriven* s = <span class="keyword">new</span> EventDriven(multiBeads);
+TimeDiscretisation * t = <span class="keyword">new</span> TimeDiscretisation(h,s);
+</pre></div> <br>
+<br>
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript"> </script>
+<script type="text/javascript"> _uacct = "UA-796964-1"; urchinTracker(); </script>
+<hr size="1"><address ><small>Generated by <a href="mailto:franck.perignon@inrialpes.fr"> Franck Pérignon</a> on Tue Dec 5 14:46:21 2006 for Siconos Tutorial (C++), using&nbsp;
 <a href="http://www.doxygen.org/index.html">
-<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.1 </small></address>
-</body>
-</html>
+<img src="doxygen.png" alt="doxygen" align="middle" border="0"></a> 1.5.1 <br>
+Valid <a href="http://validator.w3.org/check?uri=referer" target="_blank" title="Check the XHTML validity of this page.">XHTML</a> &amp;
+<a href="http://jigsaw.w3.org/css-validator/check/referer" target="_blank" title="Check the CSS validity of this page.">CSS</a>.
+</small></address>
+<p>
+ <a href="http://jigsaw.w3.org/css-validator/">
+  <img style="border:0;width:88px;height:31px"
+       src="http://jigsaw.w3.org/css-validator/images/vcss" 
+       alt="Valid CSS!">
+ </a>
+</p>
+
+
+</BODY>
+</HTML>
+ 

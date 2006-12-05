@@ -447,3 +447,12 @@
 \form#446:$ I_level $
 \form#447:$ ur \in I_i $
 \form#448:$ ur \in I_level $
+\form#449:\begin{eqnarray} y = Hq + b = [1 0 0] q - R - h \\ and \\ p = H^t \lambda \end{eqnarray}
+\form#450:\[ 0 \leq y \perp \lambda \geq 0 \]
+\form#451:\[ if \ y=0, \ \dot y(t^+) = -e \dot y(t^-) \]
+\form#452:$ t^+ $
+\form#453:$ t^- $
+\form#454:\begin{eqnarray} y = HQ + b = [-1 0 0 1 0 0]Q + R_j-R_i-h \\ p = H^t \lambda \\ Q = [q_j q_i] \end{eqnarray}
+\form#455:\begin{eqnarray*} y = Hq + b = [1 \ 0 \ 0] q - R - h \\ and \\ p = H^t \lambda \end{eqnarray*}
+\form#456:\begin{eqnarray*} y = HQ + b = [-1 \ 0 \ 0 \ 1 \ 0 \ 0]Q + R_j-R_i-h \\ p = H^t \lambda \\ \end{eqnarray*}
+\form#457:\[ Q = \left[\begin{array}{c} q_j \\ q_i \end{array}\right] \]

@@ -23,9 +23,7 @@
 
 ---++ Required external libraries
 
-   * blas / lapack
-      * actual version used with the platform : 3.0
-      * location : http://www.netlib.org/
+   * atlas
 
 ---++ Optional external libraries
 
@@ -51,17 +49,13 @@ in Numerics directory:
 	- ./configure --prefix="the path where you want to install the platform" --other_options
 	- make
 	- make install (default install location: /usr/local) 
-	- make check (optional) : to run tests	
-	- make doc (optional)  : to generate Doxygen documentation
 
 for more details on configure options, type configure --help. 
 
-!!! WARNING: for autoconf version older that 2.59, you should use configure.ac.old rather than configure.ac.
-=> cp configure.ac.old configure.ac.
+To run tests : make check
 
-Run autoupdate -V to get autoconf version. 
-Anyway, the best solution is to install the last version of autoconf ...
-  
+To generate doc: make doc or launch doxywizard, load config/DoxygenNumerics.cfg and "start".
+Generated html or latex files are in ../Docs/htdocs/DoxygenNumerics. 
       
    * If you have a local installation of an external library, you can give its path to configure with the option --with-[library name]. You can get the possible options typing = ./configure --help. 
 

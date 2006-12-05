@@ -25,17 +25,23 @@ include $(top_srcdir)/config/Make-rules
 #       TEST_OPT = 
 #endif	
 
-SUBDIRS = src 
+SUBDIRS = src
 
 
 EXTRA_DIST = 
 
-
 doc:
-	$(RM) -rf $(top_srcdir)/doc
-	$(MKDIR) $(top_srcdir)/doc
-	$(MKDIR) $(top_srcdir)/doc/api
-	$(DOXYGEN) $(DOXYGEN_CFG)
+	@if ! test -d $(top_srcdir)/../Docs; then \
+	echo "Creation of ../Docs/htdocs/DoxygenNumerics."; \
+	$(MKDIR) $(top_srcdir)/../Docs; \
+	fi; \
+	if ! test -d $(top_srcdir)/../Docs/htdocs; then \
+	$(MKDIR) $(top_srcdir)/../Docs/htdocs; \
+	fi; \
+	if ! test -d $(top_srcdir)/../Docs/htdocs/DoxygenNumerics; then \
+	$(MKDIR) $(top_srcdir)/../Docs/htdocs/DoxygenNumerics;  fi; \
+	echo "Documentation files generated in ../Docs/htdocs/DoxygenNumerics ..."; 
+	cd $(top_srcdir)/config; $(DOXYGEN) DoxygenNumerics.cfg
 
 install-data-local: 
 	  @if test -d $(top_srcdir)/doc; then \

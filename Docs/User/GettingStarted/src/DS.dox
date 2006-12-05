@@ -187,7 +187,7 @@ F_{Int} &=& C \dot q + K q \\
 NNL &=& 0_{nDof} 
 \f}
 
-\section doc_dsPlugin Dynamical Systems plug-in functions.
+\section doc_dsPlugin Dynamical Systems plug-in functions
 
 See \ref doc_usingPlugin for details on how to use a plug-in in Siconos. \n
 

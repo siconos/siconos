@@ -9,6 +9,105 @@
     <docanchor file="index">usingDoc</docanchor>
     <docanchor file="index">preface</docanchor>
   </compound>
+  <compound kind="file">
+    <name>BeadsPlugin.cpp</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>BeadsPlugin_8cpp</filename>
+    <member kind="function">
+      <type>void</type>
+      <name>fExt</name>
+      <anchorfile>BeadsPlugin_8cpp.html</anchorfile>
+      <anchor>508c63154f0a2b82e57e24e3e63fb14f</anchor>
+      <arglist>(unsigned int sizeOfq, double time, double *fExt, double *param)</arglist>
+    </member>
+    <member kind="variable">
+      <type>const double</type>
+      <name>m</name>
+      <anchorfile>BeadsPlugin_8cpp.html</anchorfile>
+      <anchor>9990e99e87d163c58817550b21d35a83</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>const double</type>
+      <name>g</name>
+      <anchorfile>BeadsPlugin_8cpp.html</anchorfile>
+      <anchor>6e550921d5c2c78c55be1c0d76512d45</anchor>
+      <arglist></arglist>
+    </member>
+  </compound>
+  <compound kind="file">
+    <name>DS.dox</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>DS_8dox</filename>
+  </compound>
+  <compound kind="file">
+    <name>EventDriven.dox</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>EventDriven_8dox</filename>
+  </compound>
+  <compound kind="file">
+    <name>GettingStarted.dox</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>GettingStarted_8dox</filename>
+  </compound>
+  <compound kind="file">
+    <name>Interactions.dox</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>Interactions_8dox</filename>
+  </compound>
+  <compound kind="file">
+    <name>MoreauTimeStepping.dox</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>MoreauTimeStepping_8dox</filename>
+  </compound>
+  <compound kind="file">
+    <name>overview.dox</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>overview_8dox</filename>
+  </compound>
+  <compound kind="file">
+    <name>Preliminaries.dox</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>Preliminaries_8dox</filename>
+  </compound>
+  <compound kind="file">
+    <name>SiconosTutorial.dox</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>SiconosTutorial_8dox</filename>
+  </compound>
+  <compound kind="file">
+    <name>Simulation.dox</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>Simulation_8dox</filename>
+  </compound>
+  <compound kind="file">
+    <name>tmp.cpp</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>tmp_8cpp</filename>
+    <namespace>std</namespace>
+    <member kind="function">
+      <type>int</type>
+      <name>main</name>
+      <anchorfile>tmp_8cpp.html</anchorfile>
+      <anchor>0ddf1224851353fc92bfbff6f499fa97</anchor>
+      <arglist>(int argc, char *argv[])</arglist>
+    </member>
+  </compound>
+  <compound kind="file">
+    <name>usingPlugin.dox</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>usingPlugin_8dox</filename>
+  </compound>
+  <compound kind="file">
+    <name>UsingPython.dox</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>UsingPython_8dox</filename>
+  </compound>
+  <compound kind="file">
+    <name>UsingXML.dox</name>
+    <path>/scratch/Franck/CurrentSiconos/siconos/trunk/Docs/User/GettingStarted/src/</path>
+    <filename>UsingXML_8dox</filename>
+  </compound>
   <compound kind="page">
     <name>dsInSiconos</name>
     <title>Dynamical Systems formulations in Siconos</title>
@@ -101,10 +200,13 @@
     <title>Siconos Tutorial (C++)</title>
     <filename>SiconosTutorial</filename>
     <docanchor file="SiconosTutorial">tutorialDiodeBridge</docanchor>
+    <docanchor file="SiconosTutorial">tutMultiBallSimuTS</docanchor>
+    <docanchor file="SiconosTutorial">tutMultiBallSimu</docanchor>
     <docanchor file="SiconosTutorial">tut1Simu</docanchor>
     <docanchor file="SiconosTutorial">tutDiodeResults</docanchor>
     <docanchor file="SiconosTutorial">tutorialMultiBalls</docanchor>
     <docanchor file="SiconosTutorial">tut1NSDS</docanchor>
+    <docanchor file="SiconosTutorial">tutMultiBallNSDS</docanchor>
     <docanchor file="SiconosTutorial">tut1leadingSimu</docanchor>
   </compound>
   <compound kind="page">
@@ -144,5 +246,9 @@
     <name>usingxml</name>
     <title>Using XML</title>
     <filename>usingxml</filename>
+  </compound>
+  <compound kind="namespace">
+    <name>std</name>
+    <filename>namespacestd.html</filename>
   </compound>
 </tagfile>

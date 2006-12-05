@@ -26,8 +26,17 @@ SUBDIRS = config src siconos global_tests #src must be compiled before main prog
 #EXTRA_DIST = 
 
 doc:
-	$(MKDIR) $(top_srcdir)/doc
-	$(DOXYGEN) $(DOXYGEN_CFG)
+	@if ! test -d $(top_srcdir)/../Docs; then \
+	echo "Creation of ../Docs/htdocs/Doxygen."; \
+	$(MKDIR) $(top_srcdir)/../Docs; \
+	fi; \
+	if ! test -d $(top_srcdir)/../Docs/htdocs; then \
+	$(MKDIR) $(top_srcdir)/../Docs/htdocs; \
+	fi; \
+	if ! test -d $(top_srcdir)/../Docs/htdocs/Doxygen; then \
+	$(MKDIR) $(top_srcdir)/../Docs/htdocs/Doxygen;  fi; \
+	echo "Documentation files generated in ../Docs/htdocs/Doxygen ..."; 
+	cd $(top_srcdir)/config; $(DOXYGEN) DoxygenSiconos.cfg
 
 install-data-local: 
 	  @if test -d $(top_srcdir)/doc; then \

@@ -75,7 +75,7 @@ SimpleVector * parameters = new SimpleVector(2);
 (*parameters)(0) = mu;
 (*parameters)(1) = lambda;
 
-lds->setParameter(parameters,"fExt");
+lds->setParameterPtr(parameters,"fExt");
 
 // Warning: in that case, from this point any change in parameters
 // will affect param value in the dynamical system.
