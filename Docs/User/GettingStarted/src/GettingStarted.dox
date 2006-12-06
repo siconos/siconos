@@ -6,9 +6,10 @@ Siconos is a free (GNU license) software, dedicated to modeling, simulation and 
 
 \e Useful \e links: 
 
-- <a href="http://siconos.gforge.inria.fr/">Siconos Home Page</a>.
+- \ref siconosHomePage "Siconos Home Page"
 - <a href="https://gforge.inria.fr/frs/?group_id=9">Siconos Download</a>.
 - \ref SiconosDocList
+- \ref siconosExamplesManual "Siconos Examples Manual"
  			
 \section preface Aim of this document
 This manual aims at giving user a short overview of the software functionnalities. It is also supposed to provide some guidelines on how

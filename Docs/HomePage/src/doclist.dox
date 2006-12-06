@@ -11,6 +11,8 @@ The main documents you can find on these pages are listed below.
 
 - \ref gettingStarted "Getting Started with Siconos": a short tutorial on how to use Siconos and write your own samples in C++ or Python.
 
+- \ref siconosExamplesManual "Siconos Examples Manual": a collection of descriptions (physical problem + implementation) of some examples treated with Siconos.
+
 In Process:
 
 - Siconos User Manual: fully detailed description of all the Siconos functionalities (based on Doxygen)

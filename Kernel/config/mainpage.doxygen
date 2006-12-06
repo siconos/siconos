@@ -1,14 +1,14 @@
 /** \mainpage Siconos Kernel - API Documentation
+\anchor doxyKernel
 
-
-\section doxyKernel Introduction
+\section doxyKernelIntro Introduction
 
 Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of Non Smooth Dynamical Systems. 
 
 This API documentation is automatically generated from the software sources (.h and .cpp) thanks to doxygen tools. 
-You can also find other tools and documents (installation guide, tutorial ...) on <a href="http://siconos.gforge.inria.fr/">Siconos Home Page</a>.\n
+You can also find other tools and documents (installation guide, tutorial ...) on \ref siconosHomePage "Siconos Home Page".\n 
 
-To get and install the platform Siconos, see <a href="https://gforge.inria.fr/frs/?group_id=9">Download Section</a>.\n
+To get and install the platform Siconos, see \ref <a href="https://gforge.inria.fr/frs/?group_id=9">Download Section</a>.\n
 
 \section sectplat Platforms
 
@@ -37,7 +37,7 @@ the maintainer would be glad to hear about that.
 
 For compilation, run the following commands:
 
-For details see <a href="http://siconos.gforge.inria.fr/SiconosInstall/index.html">Siconos Installation Guide.</a> 
+For details see \ref installGuide "Siconos Installation Guide".
 
 \verbatim
  ./autogen.sh
@@ -50,6 +50,6 @@ Type <tt>./configure --help</tt> to see more information. After
 successful compilation, you can run various test programs by the
 command "make check" (requires cppunit v1.10.2 and option --enable-cppunit for configure). 
 
-2006-11-30, <a href="mailto:franck.perignon@inrialpes.fr">Franck Pérignon</a> 
+Contact: <a href="mailto:franck.perignon@inrialpes.fr">Franck Pérignon</a> 
 
 */
