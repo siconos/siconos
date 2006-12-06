@@ -708,16 +708,98 @@ As a first example, we will use a Moreau's time-stepping scheme, where the non-s
     OneStepNSProblem * osnspb = new LCP(s,"LCP",solverName,10001, 0.001);
 \endcode
 
-\subsubsection tutMultiBallSimuTS Event-Driven algorithm
+\subsubsection tutMultiBallSimuED Event-Driven algorithm
 
 In that second part, an event-driven algorithm is used to solve the problem. Event-Driven Simulation principle is detailed in \ref docSimuED. \n
+The dynamics is decomposed in "modes", time-intervalls where the dynamics is smooth and discrete events where the dynamics is non-smooth. \n
+In the present case, non smooth events will corresponds to impacts between balls. Each time such an event is detected, a non-smooth problem is formalized and solved (as a LCP here) while between events, the systems are integrated thanks to Lsodar, ODE solver with roots-finding algorithm. \n
 
 As for the Time-stepping, we first need to built the simulation and then its time-discretisation:
 
 \code
-EventDriven* s = new EventDriven(multiBeads);
+
+// The simulation belongs to Model multiBeads
+EventDriven* s = new EventDriven(multiBeads); 
 TimeDiscretisation * t = new TimeDiscretisation(h,s);
 \endcode
+
+Next step is the declaration of integrators for the dynamical systems.
+The integrator will handle all the DynamicalSystems of the Model. During integration of the systems, Lsodar will search for roots of some equations (the constraints ie the Interactions of the NonSmoothDynamicalSystem). The required OSI type is Lsodar, applied to allDS:
+
+\code
+OneStepIntegrator * OSI = new Lsodar(allDS,s); 
+\endcode
+
+Each time a root is found, a new NonSmoothEvent is created and it's then necessary to write and solve a non-smooth problem. We won't detail this here but just remember that this requires two LCP, one at "velocity" level, named impact, and another at "acceleration" level, named acceleration. 
+The whole event-driven algorithm for Lagrangian Systems is available here: docSimuEDDetails. 
+
+\code
+OneStepNSProblem * impact = new LCP(s, "impact",solverName,101, 0.0001,"max",0.6);
+OneStepNSProblem * acceleration = new LCP(s, "acceleration",solverName,101, 0.0001,"max",0.6);
+\endcode
+
+The Model is now complete, we can start the simulation process.
+
+\subsection tutMultiBallsRun Simulation Process
+
+\subsubsection tutMultiBallsRunTS Time-Stepping
+
+Once again, the process is the same as in the first tutorial and won't be detailed. \n
+Concerning the output, we save the position and velocity of all balls.
+
+\code
+s->initialize(); 
+
+int k = t->getK(); // Current step 
+int N = t->getNSteps(); // Number of time steps
+
+// Prepare output and save value for the initial time
+unsigned int outputSize = dsNumber*2+1;
+SimpleMatrix dataPlot(N+1,outputSize ); // Output data matrix
+// time
+dataPlot(k, 0) = k*t->getH();
+// Positions and velocities
+i = 0; // Remember that DS are sorted in a growing order according to their number.
+DSIterator it;
+for(it = allDS.begin();it!=allDS.end();++it)
+  {
+    dataPlot(k,(int)i*2+1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
+    dataPlot(k,(int)i*2+2) = static_cast<LagrangianLinearTIDS*>(*it)->getVelocity()(0);
+    i++;
+  }
+\endcode
+Note that we use a "DSIterator", which is no more than a pointer on a set of DynamicalSystems; allDS.begin() is a pointer on the first object handled by allDS and allDS.end() a pointer "just after" the last object handled by allDS. The current pointed system is then *it ("content of the pointer"). Thus, in the loop above, we sweep through all the DynamicalSystems and get the corresponding q and v. \n
+A static_cast is also required since allDS contains DynamicalSystem whereas we need functions specific to LagrangianDS (getQ ...). 
+
+Next, we write:
+\code
+while(k < N)	
+ {
+  s->nextStep();
+  // get current time step
+  k = t->getK();
+  // solve ... 
+  s->computeOneStep();
+  dataPlot(k, 0) = k*t->getH();
+  // 
+  i = 0;
+  for(it = allDS.begin();it!=allDS.end();++it)
+   {
+    dataPlot(k,(int)i*2+1) = static_cast<LagrangianLinearTIDS*>(*it)->getQ()(0);
+    dataPlot(k,(int)i*2+2) = static_cast<LagrangianLinearTIDS*>(*it)->getVelocity()(0);
+    i++;
+  }
+\endcode
+
+and for output file saving:
+
+\code
+ioMatrix io("result.dat", "ascii");
+io.write(dataPlot,"noDim");
+\endcode
+
+\subsubsection tutMultiBallRunED Event-Driven
+
 
 */
 

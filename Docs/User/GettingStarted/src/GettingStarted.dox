@@ -1,6 +1,6 @@
 /** \mainpage Getting Started with Siconos
-
-\section gettingStarted Introduction
+\anchor gettingStarted
+\section gsIntro Introduction
 
 Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of <b>Non Smooth Dynamical Systems</b>. 
 
