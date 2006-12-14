@@ -34,6 +34,8 @@
  *
  * SimpleMatrix is used in the platform to store matrices (mathematical object).
  *
+ * \todo: review resize function for Banded, Symetric and Triangular. Error in tests.
+ *
  */
 class SimpleMatrix: public SiconosMatrix
 {

@@ -34,7 +34,6 @@ AC_ARG_WITH(cppunit-exec-prefix,[  --with-cppunit-exec-prefix=PFX  Exec prefix w
     CPPUNIT_CFLAGS=`$CPPUNIT_CONFIG --cflags`
     CPPUNIT_LIBS=`$CPPUNIT_CONFIG --libs`
     cppunit_version=`$CPPUNIT_CONFIG --version`
-
     cppunit_major_version=`echo $cppunit_version | \
            sed 's/\([[0-9]]*\).\([[0-9]]*\).\([[0-9]]*\)/\1/'`
     cppunit_minor_version=`echo $cppunit_version | \

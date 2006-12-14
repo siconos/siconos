@@ -115,9 +115,9 @@ private:
   string fic1, fic2;
   SimpleVector* vect1, *vect2, *vect3;
   DenseMat * D;
-  TriangMat *T;
-  SymMat *S;
-  BandedMat *B;
+  TriangMat *T, *T2;
+  SymMat *S, *S2;
+  BandedMat *B, *B2;
   SparseMat *SP;
   double tol;
 

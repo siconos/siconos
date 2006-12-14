@@ -376,7 +376,7 @@ public:
 
   /** check the convergence of Newton algorithm
   */
-  bool Simulation::newtonCheckConvergence(const double criterion);
+  bool newtonCheckConvergence(const double criterion);
 
   // --- XML RELATED FUNCTIONS ---
 

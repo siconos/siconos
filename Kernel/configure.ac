@@ -74,6 +74,9 @@ case $CXX_VER in
      AC_MSG_ERROR(gcc 3 or superior is required.)
      exit 1;
      ;;
+     ( 4.1.*)
+     CXXFLAGS="-ffriend-injection";
+     ;;   
 esac
 AC_MSG_RESULT([ok ($CXX_VER)])   
 
@@ -172,7 +175,7 @@ http://www.libxml.org/.]))
 AC_MSG_CHECKING([cppunit])
 if test "$enable_cppunit" = yes; then
 AC_MSG_RESULT(option --enable-cppunit selected : able to run test suite)       
-AM_PATH_CPPUNIT(1.10.2,,AC_MSG_ERROR([Cannot find  cppunit in a good version.]))
+AM_PATH_CPPUNIT(1.10,,AC_MSG_ERROR([Cannot find  cppunit in a good version.]))
 else
  AC_MSG_RESULT(option --enable-cppunit not selected : Warning : unable to run test suite)  
 fi
@@ -183,9 +186,9 @@ fi
 
 # Default Flag
 if test "$enable_warnings" = no; then
-CXXFLAGS="-fPIC"
+CXXFLAGS="-fPIC $CXXFLAGS"
 else
-CXXFLAGS="-Wall -fPIC"
+CXXFLAGS="-Wall -fPIC $CXXFLAGS"
 fi
 
 #Optional flag
