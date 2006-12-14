@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.0.0, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 2.0.1, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -59,7 +59,7 @@ class SiconosSharedLibrary;
 /**  General First Order Non Linear Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.0.0.
+ *  \version 2.0.1.
  *  \date (Creation) April 29, 2004
  *
  * This class defines and computes a generic n-dimensional
