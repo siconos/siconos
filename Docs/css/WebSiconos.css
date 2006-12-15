@@ -1,81 +1,90 @@
-body {margin: 0} 
 BODY,H1,H2,H3,H4,H5,H6,P,CENTER,TD,TH,UL,DL,DIV {
-	font-family: Geneva, Arial, Helvetica, sans-serif;font-size:small;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	font-size:small;
 }
 
-H1 {
-	text-align: center;
-       font-size: 160%;
+body {
+	margin:0;
+	background-color: #F0FFF0;  
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	margin-left: 25px;
+	font-size:small;
 }
-H2 {
-       font-size: 120%;
-}
-H3 {
-       font-size: 100%;
-}
+/** Titles **/
+
 h1 {
-  color: #556B2F;
-  font-family: serif;
-  font-size: x-large;
-  font-weight: bold;
-  padding: 2px;
-  text-align: center;
-  margin-top: 15px;
-  margin-left: 25%;
-  margin-right: 25%;
-  margin-bottom: 2em;
-} 
-
+	/**color: #556B2F;**/
+	color: #2F6A44;
+	font-family: serif;
+	font-size: x-large;
+	font-weight: bold;
+	padding: 2px;
+	text-align: center;
+	margin-top: 20px;
+	margin-left: 25%;
+	margin-right: 25%;
+	margin-bottom: 20px;
+}
 h2 {
+  color: #2F6A44 ;
+  font-size: large ;
+  font-weight: bold;
   text-align: left;
   vertical-align: top;
-  font-weight: bold;
   margin-top: 20px;
-  margin-bottom:5px;
+  margin-bottom:10px;
   padding-bottom: 2px;
-  font-size: large !important;
-  background-color: transparent;
-  color: #2F6A44 ;
-  text-decoration: none;
 }
-
 h3 {
   color: #2F6A44;
+  font-size: medium;
+  font-weight: bold;
   text-align: left;
   vertical-align: top;
-  font-weight: bold;
   margin-top: 0.8em;
   margin-bottom:0.1em;
   padding-left: 8px;
   padding-top: 2px;
   padding-bottom: 2px;
-  font-size: medium;
 }
 h4 {
-  padding-left: 15px;
-  color: black !important;
-  font-weight: normal;
+  color: #2F6A44 ;
   font-size: small;
+  font-weight: bold;
+  text-align: left;
+  vertical-align: top;
+  margin-top: 0.8em;
+  margin-bottom:0.1em;
+  padding-left: 10px;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
+
+/** Doxygen utilities (from doxygen.css) **/ 
+
+/** class list, alphabetical index **/
 
 CAPTION { font-weight: bold }
 DIV.qindex {
 	width: 100%;
 	background-color: #e8eef2;
-	border: 1px solid #84b0c7;
+	border: 1px solid #2F6A44;
 	text-align: center;
 	margin: 2px;
 	padding: 2px;
 	line-height: 140%;
 }
+
+/** Navigation bar **/
+
 DIV.nav {
 	width: 100%;
-	background-color: #e8eef2;
-	border: 1px solid #84b0c7;
 	text-align: center;
 	margin: 2px;
 	padding: 2px;
 	line-height: 140%;
+	border-top:1px solid green;
+	border-bottom:1px solid green;
 }
 DIV.navtab {
        background-color: #e8eef2;
@@ -88,11 +97,13 @@ DIV.navtab {
 TD.navtab {
        font-size: 70%;
 }
+
 A.qindex {
        text-decoration: none;
        font-weight: bold;
-       color: #1A419D;
+       color:#2F6A44 ;
 }
+
 A.qindex:visited {
        text-decoration: none;
        font-weight: bold;
@@ -114,12 +125,44 @@ A.qindexHL:hover {
 	background-color: #6666cc;
 	color: #ffffff;
 }
-A.qindexHL:visited { text-decoration: none; background-color: #6666cc; color: #ffffff }
+A.qindexHL:visited {
+ text-decoration: none; 
+ background-color: #6666cc; 
+ color: #ffffff }
+
+/** list of classes **/
+
+A.el { 
+	text-decoration: none; 
+	font-weight: bold; 
+}
+A.elRef { font-weight: bold }
+
+/** Links **/
+
+a {
+ color: #2F6A44;
+ background-color: transparent;
+ text-decoration: none;
+}
+
+a:link { 
+  text-decoration : none;
+ background-color: transparent;
+}
+
+a:visited {color: #2A3798;}
+
+a:hover { text-decoration: underline;}
+
+/** Code insertion **/ 
+
 A.code
 {
 position:relative;
 text-decoration: none !important;
 }
+
 A.code:link 
 { 
 text-decoration: none !important;
@@ -132,18 +175,15 @@ text-decoration: none !important;
 font-weight: normal;
 color: #0000FF
 }
-A.codeRef:link { font-weight: normal; color: #0000FF;}
-A.codeRef:visited { font-weight: normal; color: #0000FF;}
-A:hover { text-decoration: none; background-color: #f2f2ff ;}
-DL.el 
-{ margin-left: -1cm ;
-font-weight:normal !important;
-}
+A.codeRef:link { 
+font-weight: normal; 
+color: #0000FF;}
+A.codeRef:visited {
+font-weight: normal; 
+color: #0000FF;}
 .fragment {
        font-family: monospace, fixed;
        font-size: 40pt;
-	font-weight: normal;
-width: 100%;
 }
 PRE.fragment {
        font-size: small;
@@ -158,8 +198,28 @@ PRE.fragment {
 	padding-right: 6px;
 	padding-top: 4px;
 	padding-bottom: 4px;
-width: 100%;
+	width: 95%;
 }
+/** Highlight for code **/ 
+
+P.formulaDsp { text-align: center;}
+IMG.formulaDsp {}
+IMG.formulaInl { vertical-align: middle;}
+SPAN.keyword       { color: #008000 }
+SPAN.keywordtype   { color: #604020 }
+SPAN.keywordflow   { color: #e08000 }
+SPAN.comment       { color: #800000 }
+SPAN.preprocessor  { color: #806020 }
+SPAN.stringliteral { color: #002080 }
+SPAN.charliteral   { color: #008080 }
+
+/** end of code environment **/ 
+
+DL.el 
+{ margin-left: -1cm ;
+font-weight:normal !important;
+}
+
 DIV.ah { background-color: black; font-weight: bold; color: #ffffff; margin-bottom: 3px; margin-top: 3px }
 
 DIV.groupHeader {
@@ -170,14 +230,6 @@ DIV.groupHeader {
 }
 DIV.groupText { margin-left: 16px; font-style: italic; font-size: 90% }
 
-body {
-	background-color: #F0FFF0;  
-	color: Black; 
-	border: 0px; 
-	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
-	margin-left: 25px;
-	width: 90%;
-	}
 
 TD.indexkey {
 	background-color: #e8eef2;
@@ -209,20 +261,6 @@ TR.memlist {
    background-color: #f0f0f0; 
 }
 
-/** Highlight for code **/ 
-
-P.formulaDsp { text-align: center;}
-IMG.formulaDsp {}
-IMG.formulaInl { vertical-align: middle;}
-SPAN.keyword       { color: #008000 }
-SPAN.keywordtype   { color: #604020 }
-SPAN.keywordflow   { color: #e08000 }
-SPAN.comment       { color: #800000 }
-SPAN.preprocessor  { color: #806020 }
-SPAN.stringliteral { color: #002080 }
-SPAN.charliteral   { color: #008080 }
-
-/** end of code environment **/ 
 
 .mdescLeft {
        padding: 0px 8px 4px 8px;
@@ -352,29 +390,6 @@ INPUT.search { font-size: 75%;
 
 TD.tiny      { font-size: 75%;
 }
-a { 
- color: #556B2F;
- background-color: transparent;
- text-decoration: none;
-}
-a:link { 
-  text-decoration : none;
- background-color: transparent;
-}
-
-a:visited { 
-  text-decoration : none;
- background-color: transparent;
-}
-
-a:active {
- background-color: transparent;
-}
-
-a:hover { 
-  text-decoration: underline;
- background-color: transparent;
-}
 .dirtab { padding: 4px;
           border-collapse: collapse;
           border: 1px solid #84b0c7;
@@ -435,47 +450,6 @@ HR { height: 1px;
   white-space: nowrap;
 }
 /* End Styling for detailed member documentation */
-
-DIV.tabs
-{
-   float            : left;
-   width            : 100%;
-   background       : none;
-   background-image : none !important; 
-   margin-bottom    : 4px;
-   border-bottom    : 2px solid maroon !important;
-}
-
-DIV.tabs UL
-{
-   margin           : 0px;
-   padding-left     : 10px;
-   list-style       : none;
-   border-bottom    : 2px solid maroon !important;
-}
-
-DIV.tabs LI, DIV.tabs FORM
-{
-   display          : inline;
-   margin           : 0px;
-   padding          : 0px;
-   border-bottom    : 2px solid maroon !important;
-}
-
-DIV.tabs FORM
-{
-   float            : right;
-}
-
-DIV.tabs A
-{
-   float            : left;
-   background       : none !important;
-   font-size        : x-small;
-   font-weight      : bold;
-   text-decoration  : none;
-   border-bottom    : 0px solid maroon !important;
-}
 
 DIV.tabs A:hover
 {
@@ -545,283 +519,7 @@ DIV.nav
    border           : none;
 }
 
-
-/**********************************************************************
- Links
-*/
-
-
 div.title_links { text-align: left }
-
-/**********************************************************************
- Body text
-*/
-
-body {
-  margin-left: 1em;
-  margin-right: 1em;
-  font-size:small;}
-
-div.question {
-  margin-top: 1em;
-  font-weight: bold ; 
-}
-
-div.answer {
-  color: black;
-  margin-left: 3em;
-}
-
-img {
-  border: 0em;
-}
-
-div.modified { 
-  margin-top: 2em ;
-  color : #999999 ; 
-  font-style: italic ;
-  text-align: left ;
-  font-size: 12px ;
-  }
-
-
-/*  */
-th.sectiontitle {background-color : #FFFFFF ; color : #1a750c}
-
-/*  */
-th.subsectiontitle {color: #FFA34F; font-size: 11px; font-weight : bold; background-color: #1a750c; height: 25px;}
-
-/*  */
-table.sectiontable {background-color : #FFFFFF;}
-
-/*  */
-table.subsectiontable {background-color: #FFFFFF ; border: 0px #1a750c solid;}
-
-/*  */
-table.elements {background-color: #FFFFFF ;}
-
-/*  */
-th.subsectiontitle a:link {color: #FFA34F; font-size: 11px; font-weight : bold; background-color: #1a750c; height: 25px;}
-
-/*  */
-th.subsectiontitle a:visited {color: #FFA34F; font-size: 11px; font-weight : bold; background-color: #1a750c; height: 25px;}
-
-/*  */
-td.row3 {vertical-align: top ; background-color: #EFEFEF; padding-left: 2px ; padding-right: 2px ;padding-bottom: 2px;}
-
-/*  */
-td.row1 {vertical-align: top ; background-color: #efe9da; padding-left: 2px ; padding-right: 2px; padding-bottom: 2px;}
-
-/*  */
-td.row2 {vertical-align: top ; background-color: #f4f1eb; padding-left: 2px ; padding-right: 2px; padding-bottom: 2px;}
-
-/* Menu */
-
-* td.menu {
-  text-align: left;
-  vertical-align: top;
-  background-color: #0080c0;
-  color: #ffffff;
-  font-weight: bold;
-  margin-top: 2.5em;
-  margin-bottom:1em;
-  padding-left: 4px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-  font-size: 16px;
-}
-
-* td.menu a:link { 
-  color: White; 
-  text-decoration : underline;
-}
-
-* td.menu a:visited { 
-  color: White; 
-  text-decoration : underline;
-}
-
-* td.menu a:active {
-  color: white;
-  background-color: Red;
-}
-
-* td.menu a:hover { 
-  text-decoration: underline;
-  color: white;
-  background-color: Red;
-}
-
-
-/*  */
-img {border: 0}
-
-
-/* Dates. */
-.date {color : #666666 ; font-size: 10px}
-
-/* FAQs */
-
-div.question {
-  margin-top: 1em;
-  font-weight: bold ; 
-  color: #0080c0 ;
-}
-
-div.answer {
-  color: black;
-  margin-left: 3em;
-}
-
-
-.title-header{
-	text-align: left;
-	font-size: small;
-	color: Gray;
-}
-#navigation-bar {
-	font-family: Arial, Helvetica, sans-serif; 
-	font-size: small; 
-	border-bottom: 1px solid green; 
-	border-top:1px solid green;
-	padding-top: 10px; 
-	padding-bottom: 10px; 
-	padding-left: 50px;
-	padding-right: 50px;  
-	background-color: #FAFAD2;  
-	color: #2F4F4F;  
-	white-space: nowrap;
-}
-#navigation-bar a {
-	color: Maroon; 
-	background-color: #FAFAD2;  
-	border: none;
-	text-decoration: none; 
-}
-
-#navigation-bar a:hover {
-	border: none;
-	text-decoration: underline;
-}
-
-/* For Top of the main page: menu + logos */
-#top-container {
-	position: absolute;
-	display: inline; 
-        width: 90%;
-	top: 10em;
-}
-#menu a{
-	text-decoration: none;
-	background-color: #F0FFF0;
-	font-weight: bold; 
-	font-size: medium;
-	display: block; 
-	color: #556B2F;
-	padding: 2px;
-	margin-top: 3px;
-	margin-bottom: 3px;
- 	margin-left: 10px;
-	width: 15%;
-	top: 15em;
-}
-#marge {
-	text-decoration: none;
-	text-align:center;
-	border-left: 1px solid #2F4F4F;
-	border-right: 1px solid #2F4F4F;
-	background-color: #F0FFF0;
-	font-weight: normal; 
-	width: 60%;
-	color: Black;
-	padding: 2px;
-	position:absolute;
-	left: 18%;
-	top: 8em;
-}
-
-#marge a{
-        text-decoration: underline;
-	border: 0px solid #2F4F4F;
-	background-color: #F0FFF0;
-	font-style: italic; 
-	color: maroon;
-	padding: 2px;
-	margin-top: 3px;
-	margin-bottom: 3px;
-}
-
-#menu a:hover {
-	background-color: #6B8E23;
-	color: White;
-	border: 1px solid #2F4F4F;
-	padding: 2px;
-}
-
-#marge a:hover{
-	text-decoration: underline;
-	border: 0px solid #2F4F4F;
-	background-color: #F0FFF0;
-	color: red;
-}
-
-#logos {
-	text-decoration: none;
-	border: 0px solid #2F4F4F;
-	background-color: #F0FFF0;
-	font-weight: normal; 
-	width: 15%;
-	color: Black;
-	padding: 2px;
-	position:absolute;
-	left: 80%;
-	top: 8em;
-}
-
-#logos a{
-        text-decoration: underline;
-	border: 0px solid #2F4F4F;
-	background-color: #F0FFF0;
-	font-weight: normal; 
-	font-style: italic; 
-	color: maroon;
-	padding: 2px;
-	margin-top: 3px;
-	margin-bottom: 3px;
-}
-
-#logos a:hover{
-	text-decoration: underline;
-	border: 0px solid #2F4F4F;
-	background-color: #F0FFF0;
-	color: red;
-}
-/*** end of top page **/
-
-#footer {
-	border: 1px solid green;
-	background-color: #FAFAD2;
-	color: #2F4F4F;
-	padding: 3px;
-	white-space: nowrap;
-	margin-bottom: 1em;
-	text-align: left;
-	vertical-align: middle;
-}
-#footer-text {
-	font-size: 0.7em;
-	text-align: left;
-	vertical-align: middle;
-}
-img {
-	margin: 0;
-	padding: 0;
-}
-.logo-img {
-	width: 88px;
-	margin: 0;
-	padding: 0;
-}
 
 /* for the tree view */
 .ftvtree {
@@ -829,8 +527,272 @@ img {
 	margin:0.5em;
 }
 .directory { font-size: 9pt; font-weight: bold; }
-.directory h3 { margin: 0px; font-size: 11pt; }
+.directory h3 { margin: 0px; margin-top: 1em; font-size: 11pt; }
 .directory > h3 { margin-top: 0; }
 .directory p { margin: 0px; white-space: nowrap; }
 .directory div { display: none; margin: 0px; }
 .directory img { vertical-align: -30%; }
+
+/*==========================*/ 
+/* Tabs list on top of page 
+/*==========================*/ 
+
+.tabsList
+{
+	padding: 3px 0px 4px 0px;
+	white-space: nowrap;
+	margin: 15px;
+}
+.tabsList a:hover{
+	background-color: #2F6A44;
+	color: #F0FFF0;
+}
+
+.tabsList ul span.divider
+{
+	display: none;
+}
+* html .TABSLIST
+{
+	padding: 0;	
+}
+.tabsList ul
+{
+	text-align: center;
+	list-style-type: none;
+	line-height: normal;
+	margin: 0;
+	padding-left: 10px;
+}
+
+.tabsList ul li
+{
+	display: inline;
+	white-space: nowrap;
+	margin: 0;
+}
+.tabsList ul li a, .tabsList ul li a:link, .tabsList ul li a:visited, .tabsList ul li a:active, .tabsList ul li a:hover
+{
+	margin: 0 -1px 0 0;
+	padding: 3px 10px 4px 10px;
+	border-left: solid -1px #000;
+	cursor: pointer;
+}
+
+.tabsList ul li a, .tabsList ul li a:link, .tabsList ul li a:visited, .tabsList ul li a:active, .tabsList ul li a:hover
+{
+	text-decoration: none;
+}
+
+/** Left vertical menus for Home Page **/
+.sidenotes {
+
+	margin: -10px 0 15px 0;
+
+}
+
+.sidenotes ul {
+
+	margin: 0;
+
+	padding: 0;
+
+	list-style-type: none;
+
+	display: block;
+
+}
+
+.sidenotes ul a {
+
+	border: none;
+
+	color: #666666;
+
+	display: block;
+
+}
+
+.sidenotes ul a:hover {
+
+	color: #000000;
+
+}
+
+.sidenotes ul li {
+
+	padding: 8px 5px 10px 5px;
+
+	border-bottom: #DDDDDD solid 1px;
+
+}
+
+.sidenotes ul li .title {
+
+	color: #333333;
+
+	font-weight: bold;
+
+	display: block;
+
+}
+
+.sidenotes ul li .date {
+
+	color: #999999;
+
+	font-size: 10px;
+
+	display: block;
+
+}
+
+.sidenotes ul li .more {
+
+	margin: -5px 0;
+
+	font-size: 10px;
+
+	text-align: right;
+
+	display: block;
+
+}
+
+.sidenotes ul li .more a {
+
+	color: #333333;
+
+	display: inline;
+
+}
+
+.sidenotes ul li .more a:hover {
+
+	color: #FF9900;
+
+}
+
+.sidenotes ul li .more a img {
+
+	padding-left: 3px;
+
+	vertical-align: baseline;
+
+}
+#side {
+
+	padding: 10px;
+
+	width:15%;
+
+	background-color: transparent;
+
+	line-height: 18px;
+
+	float: left;
+
+}
+
+#side .side_title {
+
+	margin-bottom: 10px;
+
+	padding: 0 0 5px 5px;
+
+	border-bottom: #DDDDDD solid 1px;
+
+	color: #333333;
+
+	font-size: 20px;
+
+	display: block;
+
+}
+
+#menu {
+
+	margin: -10px -10px 15px -10px;
+
+	padding: 10px;
+
+	line-height: normal;
+
+}
+
+#menu ul {
+
+	margin: 0;
+
+	padding: 0;
+
+	border-bottom: #DDDDDD solid 1px;
+
+	list-style-type: none;
+
+}
+
+#menu ul li {
+
+	border-top: #DDDDDD solid 1px;
+	padding-right: 10px;
+
+}
+
+#menu ul li a {
+
+	width: 100%;
+
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 10px;
+
+	border: none;
+
+	color: #666666;
+
+	text-decoration: none;
+
+	display: block;
+
+}
+
+#menu ul li a:hover {
+
+	background-color:#2F6A44; ;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 10px;
+
+	color: #F0FFF0;
+
+}
+
+#menu .pressed {
+
+	width: 100%;
+
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 10px;
+	
+	background-color: #F3F3F3;
+
+	color: #000000;
+
+	display: block;
+
+}
+
+#content {
+
+	margin: 0 0 0 15px;
+
+	width: 75%;
+
+	line-height: 18px;
+
+	float: left;
+
+}
+
