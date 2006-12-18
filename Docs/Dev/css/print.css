@@ -8,6 +8,7 @@ definitions on a printed page, so the dashed underlines are removed.
 
 h3, h4 {
  font-size: x-small;
+  color: #2F6A44;
 }
 
 body, textarea, pre, code {

@@ -15,7 +15,7 @@ table, th, td {
 
 .tabs th {
  border-right: 1px solid #333;
- background-color: #ddd !important;
+ background-color: #F0FFF0 !important;
  color: #fff;
  border-left: 3px solid #fff;
 }
@@ -32,11 +32,11 @@ table, th, td {
 }
 
 .tabs th, .tabs th a:link, .tabs th a:visited {
- color: #555;
+   color:#2F6A44;
 }
 
 .tabs td, .tabs td a:link, .tabs td a:visited {
- color: #fff;
+	color: #2F6A44;
 }
 
 .tabs a {
@@ -103,6 +103,14 @@ form {
 
 ol ol { list-style-type: lower-alpha; }
 ol ol ol { list-style-type: lower-roman; }
+
+a {
+ color: #2F6A44;
+ background-color: transparent;
+ text-decoration: none;
+}
+a:visited {color: #2A3798;}
+a:hover { text-decoration: underline;}
 
 td, th {
  padding: 2px 3px;
