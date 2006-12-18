@@ -1,31 +1,37 @@
 /** \mainpage Siconos Software Home Page 
 \anchor siconosHomePage
 \htmlonly
+<div class="logoleft">
+<a href="http:///www.inrialpes.fr/bipop/"><img src="logo_bipop.png" alt="BIPOP" border=none text-decoration=none></a>
+</div>
+<div class="logoright">
+<a href="http://www.inrialpes.fr/"><img src="http://devel.inria.fr/logo_inria.png" alt="INRIA" border=none text-decoration=none></a>
+</div>
     <div id="side">
               <div id="menu">
 		<ul>
 		  <li><a href="#aboutA"> About</a></li>
-		  <li><a href="#uLinks"> Useful links</a></li>
 		  <li><a href="#downloadHP"> Download</a></li>
-		  <li><a href="https://gforge.inria.fr/projects/siconos/"> Siconos forge</a></li>
+		  <li><a href="https://gforge.inria.fr/projects/siconos/"> Siconos Forge</a></li>
 		  <li><a href="#contacts"> Contacts</a></li>
 		  <li><a href="./SiconosDocList.html"> Documentation</a></li>
+		  <li><a href="#uLinks"> Useful links</a></li>
 		</ul>
 
               </div>
               <div class="side_title">Latest news</div>
         <div class="sidenotes">
           <ul>
-            <li><a href="#"><span class="title"><a href="https://gforge.inria.fr/frs/?group_id=9">Siconos Software v2.0.0 </a></span><span class="date">14.012.2006</span>Download the last release of the Siconos platform</a></li>
+            <li><a href="#"><span class="title"><a href="https://gforge.inria.fr/frs/?group_id=9">Siconos Software v2.0.0 </a></span><span class="date">14.12.2006</span>Download the last release of the Siconos platform</a></li>
           </ul>
 
         </div>
       </div>
-          <!-- Specific boby content start -->
-	  <div id="content">
+<!-- Specific boby content start -->
+ <div id="content">
 \endhtmlonly
-\section about About
 \anchor aboutA
+\section about About
 The Siconos Platform is a scientific computing software dedicated to the modeling, simulation, control and analysis of <b>Non Smooth Dynamical Systems (NSDS)</b>.
 This project belongs to the European project <a href="http://siconos.inrialpes.fr/">SICONOS</a>, dedicated to the modeling,
 the control the analysis and the simulation of the so-called "Non Smooth Dynamical system".\n
@@ -55,16 +61,25 @@ methods.
 This software is distributed under the
 <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a>
 \subsection publi Related publications
-You can find here some publications at the origin of this software on <a href="http://siconos.inrialpes.fr/"> Siconos European Project Home Page</a>
-\section news News
+You can find here some publications at the origin of this software on <a href="http://siconos.inrialpes.fr/"> Siconos European Project Home Page</a>.\n
+
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
 \anchor news
-- <em> December 14th 2006</em>: release 2.0.1 
+\section News News
+- <em> December 14th 2006</em>: release 2.0.1, patch for gcc4.1.1 compatibility (Fedora Core 6) 
+- <em> November 30th 2006</em>: release 2.0.0 
 - <em> September 7th 2006</em>: release 1.3.0 available on <a href="http://gforge.inria.fr/projects/siconos">Gforge</a> (include Event Driven algorithm)
 - <em> June 5th 2006:</em> release 1.2.0 
 - <em> November 30th 2005:</em> second release. 
 - <em> October 10th 2005:</em> first release is available.
-\section d Downloads
+
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
 \anchor downloadHP
+\section d Downloads
 
 The last stable release is 2.0.0 or 2.0.1 for Kernel.
 It has been succesfully tested on Fedora Core 4 and 6. 
@@ -86,8 +101,11 @@ Please give us your:
 You will automatically get login and password by e-mail. 
 Then you can log in on the <a href="https://gforge.inria.fr/frs/?group_id=9"> Siconos Gforge download page</a> and select the requested packages or files.
 
-\section c Contacts
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
 \anchor contacts
+\section c Contacts
 \subsection Mailing lists
  See Mailing lists at <a href="https://gforge.inria.fr/mail/?group_id=9">Gforge.</a>
 \subsection forum Forum
@@ -99,8 +117,11 @@ our bug tracker  on the  <a href="https://gforge.inria.fr/tracker/?group_id=9"> 
 <a href="mailto:vincent.acary@ nospam inrialpes.fr"> Vincent Acary</a>\n
 <a href="mailto:franck.perignon@ nospam inrialpes.fr"> Franck Pérignon</a>\n
 
-\section links Useful Links
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
 \anchor uLinks
+\section links Useful Links
 
 \subpage developments \n
 \subpage related \n

@@ -1,16 +1,31 @@
 /*! \page related Related projects and Platforms 
 
-\ref hybrid \n
-\ref ssp\n
-\ref ces\n
-\ref ems\n
+\htmlonly
+    <div id="side">
+              <div id="menu">
+		<ul>
+		  <li><a href="#HP_HS">Hybrid Systems</a></li>
+		  <li><a href="#HP_SSP">Scientific Software Packages</a></li>
+		  <li><a href="#HP_CES">Control Engineering Softwares</a></li>
+		  <li><a href="#HP_EMS">Engineering Mechanics Softwares</a></li>
+		</ul>
+              </div>
+    </div>
+ <div id="content">
 
+\endhtmlonly  
+
+\anchor HP_HS
 \section hybrid Hybrid Systems
 -# <a href="http://www-er.df.op.dlr.de/cacsd/hds/index.shtml">Virtual
 Action Group on <b>Hybrid</b> Dynamic <b>Systems</b> for CACSD</a> Technical Committee on Computer Aided <b>Control</b> System Design. 
 IEEE Technical Committee on <b>Hybrid</b> Dynamical <b>Systems</b>
 -# <a href="http://yoric.mit.edu/daepack/daepack.html"><b>DAEPACK</b></a> - Homepage for <b>DAEPACK</b> Project, a component library for combined symbolic/numeric analysis of FORTRAN models.
 
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+\anchor HP_SSP
 \section ssp Scientific Software Packages
 
 -# <a href="http://www-rocq.inria.fr/scilab/">Scilab</a> is a scientific software package for numerical computations providing a
@@ -22,6 +37,10 @@ other numerical experiments using a language that is mostly compatible with Matl
 creation of integrated systems that embed symbolic manipulations together with more established areas of computer science 
 (like computation- intense numeric applications, graphical interfaces, etc.) under one roof."
 
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+\anchor HP_CES
 \section ces Control Engineering Softwares
 
 -# <a href="http://www.modelica.org/">Modelica</a> Modeling of Complex Physical Systems. The object-oriented modeling
@@ -36,6 +55,10 @@ for a wide variety of applications."
 -# <a href="http://www.win.tue.nl/niconet/" style="font-weight: normal;">NICONET</a> is a European thematic network project with
 the aim of formalising and extending current collaboration with respect to robust numerical software for control systems analysis and synthesis.
 
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+\anchor HP_EMS
 \section ems Engineering Mechanics Softwares
 \subsection ems_1 Multibody systems
 

@@ -451,6 +451,47 @@ HR { height: 1px;
 }
 /* End Styling for detailed member documentation */
 
+DIV.tabs
+{
+   float            : left;
+   width            : 95%;
+   background       : none;
+   background-image : none !important; 
+   margin-bottom    : 10px;
+   border-bottom    : 1px solid #2F6A44 !important;
+}
+
+DIV.tabs UL
+{
+   margin           : 0px;
+   padding-left     : 5px;
+   list-style       : none;
+   border-bottom    : 1px solid #2F6A44 !important;
+}
+
+DIV.tabs LI, DIV.tabs FORM
+{
+   display          : inline;
+   margin           : 0px;
+   padding          : 0px;
+   border-bottom    : 0px solid #2F6A44 !important;
+}
+
+
+DIV.tabs FORM
+{
+   float            : right;
+}
+
+DIV.tabs A
+{
+   float            : left;
+   background       : none !important;
+   font-size        : x-small;
+   text-decoration  : none;
+   border-bottom    : 0px solid #2F6A44 !important;
+}
+
 DIV.tabs A:hover
 {
    background-position: 100% -150px;
@@ -459,7 +500,7 @@ DIV.tabs A:hover
 DIV.tabs A:link, DIV.tabs A:visited,
 DIV.tabs A:active, DIV.tabs A:hover
 {
-   color:black;
+   color:#2F6A44;
 }
 
 DIV.tabs SPAN
@@ -469,15 +510,15 @@ DIV.tabs SPAN
    display          : block;
    padding          : 5px 9px;
    white-space      : nowrap;
-   color:black;
+   color:#2F6A44;
 }
 
 DIV.tabs INPUT
-{
+{ 
    float            : right;
    display          : inline;
    font-size        : 1em;
-   border-bottom    : 2px solid maroon !important;
+   border-bottom    : 2px solid #2F6A44 !important;
 }
 
 DIV.tabs TD
@@ -485,7 +526,7 @@ DIV.tabs TD
    font-size        : x-small;
    font-weight      : bold;
    text-decoration  : none;
-   border-bottom    : 2px solid maroon !important;
+   border-bottom    : 2px solid #2F6A44 !important;
 }
 
 
@@ -496,8 +537,8 @@ DIV.tabs SPAN {float : none;}
 
 DIV.tabs A:hover SPAN
 {
-   background-position: 0% -150px;
-   color:red;
+	background-color: #2F6A44 !important;
+	color: #F0FFF0 !important;
 }
 
 DIV.tabs LI#current A
@@ -545,7 +586,11 @@ div.title_links { text-align: left }
 }
 .tabsList a:hover{
 	background-color: #2F6A44;
-	color: #F0FFF0;
+	color: #F0FFF0 !important;
+}
+
+.tabsList a:visited{
+	color: #2F6A44;
 }
 
 .tabsList ul span.divider

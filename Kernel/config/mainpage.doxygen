@@ -6,7 +6,7 @@
 Siconos is a free (GNU license) software, dedicated to modeling, simulation and control of Non Smooth Dynamical Systems. 
 
 This API documentation is automatically generated from the software sources (.h and .cpp) thanks to doxygen tools. 
-You can also find other tools and documents (installation guide, tutorial ...) on \ref siconosHomePage "Siconos Home Page".\n 
+You can also find other tools and documents (installation guide, tutorial ...) on \ref siconosHomePage "Siconos Home Page" (see tabs list on top of this page).\n 
 
 To get and install the platform Siconos, see \ref <a href="https://gforge.inria.fr/frs/?group_id=9">Download Section</a>.\n
 
@@ -33,7 +33,7 @@ the maintainer would be glad to hear about that.
 
 \section sect_compile Compile and Install
 
-\subsection compile_linux Linux/Unix
+\subsection compilelinux Linux/Unix
 
 For compilation, run the following commands:
 

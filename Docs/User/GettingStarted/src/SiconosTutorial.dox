@@ -459,9 +459,9 @@ The equation of motion of the ball is given by: \n
   0
   \end{array}\right] \f]
 For this tutorial, we will suppose now that we have a column of "dsNumber" balls like the one above (mass and radius may be different, and if necessary, variables will be indexed by i, i being the number of the ball). Each ball is governed by a linear system like the one written for a single ball and may be in contact with the balls above and below it.
-- \f$ Q(q,\dot q ): \b R^n  X \b R^n \mapsto \mathcal R^{n}\f$  is the non linear inertia term,
-- \f$ F(\dot q, q , t) : \b R^n  X \b R^n  X \b R \mapsto \mathcal R^{n}\f$  is the internal force of the system,
-- \f$ F_{ext}(t):  \b R \mapsto \mathcal R^{n}  \f$   is the given external force,
+- \f$ Q(q,\dot q ): \mathcal R^n  X \mathcal R^n \mapsto \mathcal R^{n}\f$  is the non linear inertia term,
+- \f$ F(\dot q, q , t) : \mathcal R^n  X \mathcal R^n  X \mathcal R \mapsto \mathcal R^{n}\f$  is the internal force of the system,
+- \f$ F_{ext}(t):  \mathcal R \mapsto \mathcal R^{n}  \f$   is the given external force,
 
 Let us now start the writing of the input file. Like for the first tutorial, we create a new directory, multiBeads, and save the template given \ref tutGCtemplate "here" as multiBeads.cpp. 
 

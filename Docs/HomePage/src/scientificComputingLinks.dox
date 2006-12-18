@@ -1,10 +1,21 @@
 /*! \page scientificComputing Scientific computing
 
-\ref generalSoftwares \n
-\ref scc \n
-\ref scp \n
-\ref sdns \n
+\htmlonly
+    <div id="side">
+              <div id="menu">
+		<ul>
+		  <li><a href="#HP_GSLSC">General Softwares and Libraries for Scientific Computing</a></li>
+		  <li><a href="#HP_SCCPP">Scientific Computing in C++</a></li>
+		  <li><a href="#HP_SCPy">Scientific Computing in Python</a></li>
+		  <li><a href="#HP_SDNS">Specific Developments for Non Smooth Systems</a></li>
+		</ul>
+              </div>
+    </div>
+ <div id="content">
 
+\endhtmlonly  
+
+\anchor HP_GSLSC
 \section generalSoftwares General Softwares and Libraries for Scientific Computing
 
 -# <a href="http://scilinux.sourceforge.net/"><b>SciLinux</b>: Environment for Scientific Computing on GNU/Linux</a>
@@ -21,6 +32,10 @@ software of interest to scientists and engineers.
 -# <a href="http://www.mathtools.net/"><b>Mathtools</b>.net: The technical computing portal</a>
 -# <a href="http://www.netlib.org/utk/people/JackDongarra/la-sw.html">Freely available software for linear Algebra on the Web a survey</a>
 
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+\anchor HP_SCCPP
 \section scc Scientific Computing in C++
 
 -# <a href="http://oonumerics.org/oon">The <b>Object Oriented Numerics Page</b></a>
@@ -33,6 +48,10 @@ Oriented Programming Paradigms in Scientific Computing</a>
 between interfaces and implementations of <b>TNT</b> components.
 -# <a href="http://www.osl.iu.edu/research/mtl/">The <b>Matrix Template Library</b></a>
 
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+\anchor HP_SCPy
 \section scp Scientific Computing in Python
 
 -# <a href="http://www.scipy.org">SciPy.org, </a>an open source library of scientific tools for Python.
@@ -55,6 +74,10 @@ for parallel computers. Konrad Hinsen's course, <a href="http://dirac.cnrs-orlea
 -# Pyfort, a Python / Fortran connection tool. See <a href="http://pyfortran.sourceforge.net">Pyfort Home Page</a>
 -# FPIG, a Python / Fortran connection tool. See <a href="http://cens.ioc.ee/projects/f2py2e">FPIG Home Page</a>.
 
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+\anchor HP_SDNS
 \section sdns Specific Developments for Non Smooth Systems
  
 None of the links of this page correponds to a member of the project.

@@ -1,13 +1,22 @@
 /*! \page developments Developments tools and libraries
+\htmlonly
+    <div id="side">
+              <div id="menu">
+		<ul>
+		  <li><a href="#HP_LAS">Legal Aspects of Software Development</a></li>
+		  <li><a href="#HP_SDM">Software design methodology </a></li>
+		  <li><a href="#HP_OOAD">Object Oriented analysis and design (OOAD)</a></li>
+		  <li><a href="#HP_ST">Software Technology</a></li>
+		  <li><a href="#HP_Misc">Miscellaneous</a></li>
+		</ul>
+              </div>
+    </div>
+ <div id="content">
 
- \ref legal "Legal Aspects of Software Development" \n
- \ref softwareDesign "Software design methodology" \n
- \ref objectOriented "Object Oriented analysis and design (OOAD)" \n
- \ref softwareTechnology "Software Technology" \n
- \ref miscLinks "Miscellaneous"
+\endhtmlonly  
 
-\section legal Legal Aspects of Software Development 
-
+\anchor HP_LAS
+\section legal Legal Aspects of Software Development
 \subsection sub1 Authorship, Ownership
 
 -# <a href="http://www.ipr-helpdesk.org/">IPR-Helpdesk</a>\n
@@ -29,6 +38,10 @@ A reference point for intellectual property rights inquiries throughout the Euro
 -# <a target="_top" href="http://www.fsf.org/philosophy/license-list.html">Free Software</a>
 and/or <a target="_top" href="http://www.opensource.org/licenses/">OpenSource</a> license(s).
 
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+\anchor HP_SDM
 \section softwareDesign Software Design Methodology 
 
 \subsection uml UML Development tools
@@ -49,8 +62,11 @@ and/or <a target="_top" href="http://www.opensource.org/licenses/">OpenSource</a
  This link contains a very large number of documents about an object oriented analysis and design of a Modeling Framework. For
 instance, see the <a href="http://www.esmf.ucar.edu/esmf_docs/ESMF_archdoc/ESMF_archdoc.html">DRAFT ESMF Architecture</a> documentation.
 
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+\anchor HP_OOAD
 \section objectOriented Object Oriented Analysis and design
-
 -# <a href="http://www.devel.lyx.org/references.php3">Recommended reading</a>
 -# <a href="http://www.mcs.vuw.ac.nz/courses/COMP201/2003T1/">Courses at Victoria University of Wellington</a>
 -# <a href="http://www.tdb.uu.se/%7Engssc/OOP01/module2/">Object oriented scientific programming</a> 
@@ -61,8 +77,11 @@ You can purchase this book directly from Addison-Wesley by phone at (800)822-633
 through most bookstores. All parties involved have graciously granted permission to create this HTML edition, maintained
 by <a href="http://gee.cs.oswego.edu/dl/"> Doug Lea</a>. Mail comments to <a  href="mailto:%5Bdl@cs.oswego.edu%5D"> dl\@cs.oswego.edu</a>
 
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+\anchor HP_ST
 \section softwareTechnology Software Technology
-
 -# <a target="_top" href="http://lush.sourceforge.net/">Lush</a>(GPL license) "is an object oriented programming language designed for
 researchers, experimenters, and engineers interested in large-scale numerical and graphic applications. Lush is designed to be used in situations where one would want to combine the flexibility of a high-level, loosely-typed interpreted language, with the efficiency of a
 strongly-typed, natively-compiled language, and with the easy integration of code written in C, C++, or other languages."
@@ -76,6 +95,10 @@ strongly-typed, natively-compiled language, and with the easy integration of cod
 -# <a target="_top" href="http://www.gnome.org/gnome-office/bonobo.shtml">bonobo/CORBA</a>
 -# <a href="http://george.ee.washington.edu/prog_docs/make/make.html#SEC68" add_date="918563590" last_visit="918563605" last_modified="918563586" id="rdf:#$wkCQU1">GNU make</a>
 
+\htmlonly
+<div class=horizontalline>  </div>
+\endhtmlonly
+\anchor HP_Misc
 \section miscLinks Miscellaneous 
 -# <a href="http://www.math.tu-cottbus.de/INSTITUT/lsnmwr/wr-links.html">Links for scientific computing</a>
 
