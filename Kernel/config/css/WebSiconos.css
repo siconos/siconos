@@ -620,7 +620,7 @@ div.title_links { text-align: left }
 {
 	margin: 0 -1px 0 0;
 	padding: 3px 10px 4px 10px;
-	border-left: solid -1px #000;
+	border-left: solid 0px #000;
 	cursor: pointer;
 }
 
