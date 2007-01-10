@@ -1,7 +1,8 @@
 #include "stack-c.h"
 #include <string.h>
+#include <stdio.h>
 #include "machine.h"
-#include "sun/link.h"
+//#include "sun/link.h"
 //#include "siconos.h"
 
 #ifdef WINDOWS
@@ -41,6 +42,8 @@ extern int sicSTcomputePbInterface(char *fname);
 
 extern int sicSTupdateStateInterface(char *fname);
 
+extern int sicSTComputeOneStepInterface(char *fname);
+
 extern int sicSTnewtonSolveInterface(char *fname);
 
 /* Pick Datas */
@@ -71,7 +74,7 @@ extern int sicLagrangianLinearRInterface(char *fname);
 
 extern int sicLagrangianRInterface(char *fname);
 
-extern int sicNewtonImpactLawNSLInterface(char *fname);
+extern int sicNewtonImpactNSLInterface(char *fname);
 
 extern int sicNonSmoothDynamicalSystemInterface(char *fname);
 

@@ -46,7 +46,7 @@ SiconosSharedLibrary::~SiconosSharedLibrary()
 PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath)
 {
   PluginHandle HandleRes;
-  //cout << "PluginPath   :  " << pluginPath << endl;
+  cout << "PluginPath   :  " << pluginPath << endl;
 #ifdef _SYS_WNT
   HandleRes = LoadLibrary(pluginPath.c_str());
 #endif
@@ -54,7 +54,10 @@ PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath)
   HandleRes = dlopen(pluginPath.c_str(), RTLD_LAZY);
   //cout << "dlerror() :" <<dlerror()<< endl;
   if (HandleRes == NULL)
+  {
+    cout << "dlerror() :" << dlerror() << endl;
     SiconosSharedLibraryException::selfThrow("SiconosSharedLibrary::loadPlugin, can not open or found " + pluginPath);
+  }
 #endif
   isPlugged.push_back(HandleRes);
   return HandleRes;

@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include "SiconosApiC.h"
 
@@ -6,12 +7,18 @@
 
 #define PA10_NDOF 3
 
+extern void testHuMAns_pa10();
+extern void testMultiBeadsColumn();
+extern void testThreeBeadsColumn();
+
 main()
 {
   /* testThreeBeadsColumn();*/
-  /* testMultiBeadsColumn();*/
-  testHuMAns_pa10();
+  testMultiBeadsColumn();
+  /*testHuMAns_pa10();*/
+  exit(0);
 }
+
 
 int error(char *Msg)
 {
@@ -19,7 +26,7 @@ int error(char *Msg)
   exit(-1);
 }
 
-testHuMAns_pa10()
+void testHuMAns_pa10()
 {
   /*  Dynamical System initial conditions */
   double q0[PA10_NDOF] = {1, 0, 0};
@@ -41,7 +48,6 @@ testHuMAns_pa10()
 
   int status, nId, idInter;
   int k, N;
-  int index;
   double plot[4];
   double dH;
   /* Interaction parameters */
@@ -76,7 +82,7 @@ testHuMAns_pa10()
   DS[0] = 0.0;
   idInter = sicInteraction("floor-arm", 1, DS, 2);
   sicLagrangianR(idInter, "scleronomic", "RobotPlugin:h2", "RobotPlugin:G2");
-  sicNewtonImpactLawNSL(idInter, e);
+  sicNewtonImpactNSL(idInter, e);
 
   H[0][0] = -1;
   H[1][0] = 1;
@@ -93,7 +99,7 @@ testHuMAns_pa10()
   b[5] = 3.14;
   idInter = sicInteraction("floor-arm2", 1, DS, 6);
   sicLagrangianLinearR(idInter, H, b);
-  sicNewtonImpactLawNSL(idInter, e2);
+  sicNewtonImpactNSL(idInter, e2);
 
   /* Construct NSDS */
   sicNonSmoothDynamicalSystem(0);
@@ -148,14 +154,14 @@ testHuMAns_pa10()
 }
 
 
-testMultiBeadsColumn()
+void testMultiBeadsColumn()
 {
   int dsNumber = NDS;   /* The number of dynamical systems */
   int nDof = NDOF;      /* degrees of freedoom fore beads */
   double inc_pos = 0.5; /* increment position from one DS to following */
   double inc_vel = 0;   /* increment velocity from one DS to following */
   char nameInter[32];
-  int i;
+  int i, index;
 
   /* Dynamical System (Beads) parameters */
   double Mass[NDOF * NDOF] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
@@ -181,7 +187,6 @@ testMultiBeadsColumn()
 
   int status, idInter;
   int k, N;
-  int index;
   double plot[4];
   double dH;
 
@@ -211,7 +216,7 @@ testMultiBeadsColumn()
   b[0] = 0;
   idInter = sicInteraction("floor", 1, DS, 1);
   sicLagrangianLinearR(idInter, H, b);
-  sicNewtonImpactLawNSL(idInter, 0.9);
+  sicNewtonImpactNSL(idInter, 0.9);
   /* Last Bead and ceiling */
   DS[0] = dsNumber - 1;
   DS[1] = 0;
@@ -219,7 +224,7 @@ testMultiBeadsColumn()
   b[0] = 1.5;
   idInter = sicInteraction("ceiling", 1, DS, 1);
   sicLagrangianLinearR(idInter, H, b);
-  sicNewtonImpactLawNSL(idInter, 0.9);
+  sicNewtonImpactNSL(idInter, 0.9);
   /* Between beads */
   H[0] = -1;
   H[3] = 1;
@@ -231,7 +236,7 @@ testMultiBeadsColumn()
     sprintf(nameInter, "inter%d\0", i);
     idInter = sicInteraction(nameInter, 2, DS, 1);
     sicLagrangianLinearR(idInter, H, b);
-    sicNewtonImpactLawNSL(idInter, 0.9);
+    sicNewtonImpactNSL(idInter, 0.9);
   }
 
   /*Construct NSDS */
@@ -259,11 +264,8 @@ testMultiBeadsColumn()
 
     status = sicTimeGetK(&k);
 
-    status = sicSTComputeFreeState();
+    status = sicSTComputeOneStep();
 
-    status = sicSTComputePb();
-
-    status = sicSTupdateState();
 
     status = sicTimeGetH(&dH);
 
@@ -283,7 +285,7 @@ testMultiBeadsColumn()
   fclose(fd);
 }
 
-testThreeBeadsColumn()
+void testThreeBeadsColumn()
 {
   FILE *fd;
 
@@ -317,11 +319,7 @@ testThreeBeadsColumn()
 
     status = sicTimeGetK(&k);
 
-    status = sicSTComputeFreeState();
-
-    status = sicSTComputePb();
-
-    status = sicSTupdateState();
+    status = sicSTComputeOneStep();
 
     status = sicTimeGetH(&H);
 

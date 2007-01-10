@@ -35,6 +35,7 @@ for i = 1:nBalls,
   xarc(0,0,sizeball,sizeball,0,360*64);
   //get handle on current entity (here the arc entity)
   arc(i)=get("hdl");
+ // Pb in Scilab 4.1
   arc(i).fill_mode="on";
   arc(i).foreground=i;
   arc(i).visible="on";  

@@ -191,7 +191,7 @@ int sicSTcomputePbInterface(char *fname)
   static int dimo1 = 1, dimo2 = 1, st;
 
 #ifdef _DEBUG
-  printf("sicSTcomputePbInterface\n");
+  printf("sicSTComputePbInterface\n");
 #endif
 
   /* Check number of inputs (rhs=1) and outputs (lhs=0) */
@@ -225,6 +225,29 @@ int sicSTupdateStateInterface(char *fname)
   CreateVar(1, "i", &dimo1, &dimo2, &st);
   /* Call function */
   *istk(st) = sicSTupdateState();
+  /*  Return variable  */
+  LhsVar(1) = 1;
+
+  return 0;
+}
+
+int sicSTComputeOneStepInterface(char *fname)
+{
+  static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicSTComputeOneStepInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=1) and outputs (lhs=0) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+
+  CreateVar(1, "i", &dimo1, &dimo2, &st);
+  /* Call function */
+  *istk(st) = sicSTComputeOneStep();
   /*  Return variable  */
   LhsVar(1) = 1;
 
@@ -1088,7 +1111,7 @@ int sicLagrangianRInterface(char *fname)
   return 0;
 }
 
-int sicNewtonImpactLawNSLInterface(char *fname)
+int sicNewtonImpactNSLInterface(char *fname)
 {
   static int minrhs = 2, maxrhs = 2, minlhs = 1, maxlhs = 1;
   static int dim1, dim2;
@@ -1096,7 +1119,7 @@ int sicNewtonImpactLawNSLInterface(char *fname)
   static int dimo1 = 1, dimo2 = 1, st;
 
 #ifdef _DEBUG
-  printf("sicNewtonImpactLawNSL\n");
+  printf("sicNewtonImpactNSL\n");
 #endif
 
   /* Check number of inputs (rhs=3) and outputs (lhs=1) */
@@ -1107,7 +1130,7 @@ int sicNewtonImpactLawNSLInterface(char *fname)
   GetRhsVar(1, "i", &dim1, &dim2, &nIdInteraction);
   if (!(dim1 * dim2 == 1))
   {
-    sciprint("Wrong parameter in sicNewtonImpactLawNSL (nIdInteraction has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicNewtonImpacNSL (nIdInteraction has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -1116,7 +1139,7 @@ int sicNewtonImpactLawNSLInterface(char *fname)
   GetRhsVar(2, "d", &dim1, &dim2, &e);
   if (!(dim1 * dim2 == 1))
   {
-    sciprint("Wrong parameter in sicNewtonImpactLawNSL has wrong size!)\r\n");
+    sciprint("Wrong parameter in sicNewtonImpactNSL has wrong size!)\r\n");
     Error(999);
     return 0;
   }
@@ -1124,7 +1147,7 @@ int sicNewtonImpactLawNSLInterface(char *fname)
   CreateVar(3, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicNewtonImpactLawNSL(*istk(nIdInteraction), *stk(e));
+  *istk(st) = sicNewtonImpactNSL(*istk(nIdInteraction), *stk(e));
 
   /*  Return variable  */
   LhsVar(1) = 3;

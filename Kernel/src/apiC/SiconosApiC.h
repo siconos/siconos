@@ -53,6 +53,12 @@ extern
 #ifdef __cplusplus
 "C"
 #endif /* __cplusplus */
+int sicSTComputeOneStep();
+
+extern
+#ifdef __cplusplus
+"C"
+#endif /* __cplusplus */
 int sicSTnewtonSolve(double criterion, int maxIter);
 
 extern
