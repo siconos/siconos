@@ -293,16 +293,16 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
     // Compute Mass matrix (if loaded from plugin)
     d->computeMass();
     // Compute and get Jacobian (if loaded from plugin)
-    d->computeJacobianQFInt(t);
-    d->computeJacobianVelocityFInt(t);
-    d->computeJacobianQNNL();
-    d->computeJacobianVelocityNNL();
+    d->computeJacobianFInt(0, t);
+    d->computeJacobianFInt(0, t);
+    d->computeJacobianNNL(0);
+    d->computeJacobianNNL(1);
 
     SiconosMatrix *KFint, *KQNL, *CFint, *CQNL ;
-    KFint = d->getJacobianQFIntPtr();
-    KQNL  = d->getJacobianQNNLPtr();
-    CFint = d->getJacobianVelocityFIntPtr();
-    CQNL  = d->getJacobianVelocityNNLPtr();
+    KFint = d->getJacobianFIntPtr(0);
+    KQNL  = d->getJacobianNNLPtr(0);
+    CFint = d->getJacobianFIntPtr(1);
+    CQNL  = d->getJacobianNNLPtr(1);
 
     // Get Mass matrix
     SiconosMatrix *M = d->getMassPtr();
@@ -342,8 +342,8 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
     LinearDS* d = static_cast<LinearDS*>(ds);
     SiconosMatrix *I;
     unsigned int size = d->getN();
-    // Deals with Mxdot
-    if (d->getMxdotPtr() == NULL)
+    // Deals with M
+    if (d->getMPtr() == NULL)
     {
       I = new SimpleMatrix(size, size);
       I->eye();
@@ -352,7 +352,7 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
     }
     else
     {
-      I = d->getMxdotPtr();
+      I = d->getMPtr();
       *W = *I - (h * theta * (d->getA()));
     }
   }
@@ -399,11 +399,11 @@ void Moreau::computeFreeState()
       // --- RESfree calculus ---
       //
       // Get state i (previous time step)
-      SimpleVector* qold, *vold;
+      SiconosVector* qold, *vold;
       qold = static_cast<SimpleVector*>(d->getQMemoryPtr()->getSiconosVector(0));
       vold = static_cast<SimpleVector*>(d->getVelocityMemoryPtr()->getSiconosVector(0));
       // Computation of the external forces
-      SimpleVector * FExt0 = NULL, *FExt1 = NULL;
+      SiconosVector * FExt0 = NULL, *FExt1 = NULL;
       if (d->getFExtPtr() != NULL)
       {
         d->computeFExt(told);
@@ -415,7 +415,7 @@ void Moreau::computeFreeState()
       // RESfree ...
       SimpleVector *RESfree = new SimpleVector(d->getDim());
       // Velocity free
-      SimpleVector *vfree = d->getVelocityFreePtr();
+      SiconosVector *vfree = d->getVelocityFreePtr();
 
       // --- Compute Velocity Free ---
       // For general Lagrangian system LNLDS:
@@ -423,7 +423,7 @@ void Moreau::computeFreeState()
       {
         // Get Mass (remark: M is computed for present state during computeW(t) )
         SiconosMatrix *M = d -> getMassPtr();
-        SimpleVector *v = d->getVelocityPtr();
+        SiconosVector *v = d->getVelocityPtr();
 
         // === Compute ResFree and vfree solution of Wk(v-vfree)=RESfree ===
         *RESfree = prod(*M, (*v - *vold));
@@ -432,7 +432,7 @@ void Moreau::computeFreeState()
         // for state i, save it in XXX0 and then for state i+1 and save it in XXX1.
         // warning: get values and not pointers
 
-        SimpleVector *QNL0 = NULL, *QNL1 = NULL, *FInt0 = NULL, *FInt1 = NULL;
+        SiconosVector *QNL0 = NULL, *QNL1 = NULL, *FInt0 = NULL, *FInt1 = NULL;
         if (d->getNNLPtr() != NULL)
         {
           d->computeNNL(qold, vold);
@@ -484,7 +484,7 @@ void Moreau::computeFreeState()
         *vfree =  *vold - prod(*W, *RESfree);
       }
       // calculate qfree (whereas it is useless for future computation)
-      SimpleVector *qfree = d->getQFreePtr();
+      SiconosVector *qfree = d->getQFreePtr();
       *qfree = (*qold) + h * (theta * (*vfree) + (1.0 - theta) * (*vold));
       delete RESfree;
     }
@@ -499,8 +499,8 @@ void Moreau::computeFreeState()
 
       SiconosMatrix *A = d->getAPtr();
       SiconosMatrix *I;
-      // Deals with Mxdot
-      if (d->getMxdotPtr() == NULL)
+      // Deals with M
+      if (d->getMPtr() == NULL)
       {
         I = new SimpleMatrix(sizeX, sizeX);
         I->eye();
@@ -509,7 +509,7 @@ void Moreau::computeFreeState()
       }
       else
       {
-        I = d->getMxdotPtr();
+        I = d->getMPtr();
         *xtmp = prod((*I + h * (1.0 - theta) * *A), *xold) + (h * (1.0 - theta) * *rold);
       }
 
@@ -570,7 +570,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
       // get the ds
       LagrangianLinearTIDS* d = static_cast<LagrangianLinearTIDS*>(ds);
       // get q and velocity pointers for current time step
-      SimpleVector *v, *q, *vold, *qold;
+      SiconosVector *v, *q, *vold, *qold;
       q = d->getQPtr();
       v = d->getVelocityPtr();
       // get q and velocity pointers for previous time step
@@ -628,10 +628,10 @@ void Moreau::updateState(const unsigned int level)
       // get dynamical system
       LagrangianDS* d = static_cast<LagrangianDS*>(ds);
       // get velocity free, p, velocity and q pointers
-      SimpleVector *vfree = d->getVelocityFreePtr();
+      SiconosVector *vfree = d->getVelocityFreePtr();
       SiconosVector *p = d->getPPtr(level);
-      SimpleVector *v = d->getVelocityPtr();
-      SimpleVector *q = d->getQPtr();
+      SiconosVector *v = d->getVelocityPtr();
+      SiconosVector *q = d->getQPtr();
       // Save value of q and v in stateTmp for future convergence computation
       if (dsType == LNLDS)
         ds->addTmpWorkVector(v, "LagNLDSMoreau");
@@ -639,8 +639,8 @@ void Moreau::updateState(const unsigned int level)
       *v = *vfree +  prod(*W, *p);
       // Compute q
       //  -> get previous time step state
-      SimpleVector *vold = static_cast<SimpleVector*>(d->getVelocityMemoryPtr()->getSiconosVector(0));
-      SimpleVector *qold = static_cast<SimpleVector*>(d->getQMemoryPtr()->getSiconosVector(0));
+      SiconosVector *vold = d->getVelocityMemoryPtr()->getSiconosVector(0);
+      SiconosVector *qold = d->getQMemoryPtr()->getSiconosVector(0);
       *q = *qold + h * (theta * *v + (1.0 - theta)* *vold);
       // set reaction to zero
       p->zero();

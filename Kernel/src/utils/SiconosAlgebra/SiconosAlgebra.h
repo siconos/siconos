@@ -97,10 +97,13 @@ class SiconosMatrix;
 /** A collection of pointers to matrices ; blocksMat is a typedef of boost::ublas::numeric::mapped_matrix<SiconosMatrix* > */
 typedef ublas::compressed_matrix<SiconosMatrix*> BlocksMat;
 
-/**  iterators for BlocksMat*/
+/**  iterator for BlocksMat*/
 typedef BlocksMat::iterator1 BlockIterator1;
+/**  iterator for BlocksMat*/
 typedef BlocksMat::iterator2 BlockIterator2;
+/**  iterator for BlocksMat*/
 typedef BlocksMat::const_iterator1 ConstBlockIterator1;
+/**  iterator for BlocksMat*/
 typedef BlocksMat::const_iterator2 ConstBlockIterator2;
 
 class SiconosVector;
@@ -108,6 +111,23 @@ class SiconosVector;
 typedef std::vector<SiconosVector*> BlocksVect;
 /** iterators for BlocksVect*/
 typedef BlocksVect::iterator BlockVectIterator;
+/** Const iterators for BlocksVect*/
 typedef BlocksVect::const_iterator ConstBlockVectIterator;
 #endif
+/** Some containers for vectors - Used for example to handle x and its derivatives in DynamicalSystem. */
+typedef std::vector<SiconosVector*> VectorOfVectors;
 
+/** Iterator through vector of vectors */
+typedef VectorOfVectors::iterator VectorOfVectorsIterator;
+
+/** Type used for inside-class allocation checking */
+typedef std::map<std::string, bool> AllocationFlagsMap;
+
+/** Type used for inside-class allocation checking */
+typedef std::deque<bool>  AllocationFlags;
+
+/** Some containers for matrices - Used for example to handle the various jacobian in LagrangianDS. */
+typedef std::vector<SiconosMatrix*> VectorOfMatrices;
+
+/** Iterator through vector of matrices */
+typedef VectorOfMatrices::iterator VectorOfMatricesIterator;

@@ -777,7 +777,7 @@ void LagrangianR::computeOutput(const double time, const unsigned int derivative
     // Put q/velocity/acceleration of each DS into a block
     q0Tmp->addPtr(lds->getQPtr());
     q1Tmp->addPtr(lds->getVelocityPtr());
-    q2Tmp->addPtr(static_cast<SimpleVector*>(lds->getAccelerationPtr()));
+    q2Tmp->addPtr(lds->getAccelerationPtr());
   }
 
   if (derivativeNumber == 0)

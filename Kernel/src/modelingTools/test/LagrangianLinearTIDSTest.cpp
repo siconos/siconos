@@ -114,7 +114,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS1()
 void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2()
 {
   cout << "--> Test: constructor 2." << endl;
-  LagrangianLinearTIDS * ds = new LagrangianLinearTIDS(8, 3, *q0, *velocity0, *mass, *K, *C);
+  LagrangianLinearTIDS * ds = new LagrangianLinearTIDS(8, *q0, *velocity0, *mass, *K, *C);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2A : ", ds->getType() == LTIDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2B : ", ds->getNumber() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2D : ", ds->getStepsInMemory() == 1, true);
@@ -148,7 +148,7 @@ void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS2()
 void LagrangianLinearTIDSTest::testBuildLagrangianLinearTIDS3()
 {
   cout << "--> Test: constructor 3." << endl;
-  LagrangianLinearTIDS * ds = new LagrangianLinearTIDS(8, 3, *q0, *velocity0, *mass);
+  LagrangianLinearTIDS * ds = new LagrangianLinearTIDS(8, *q0, *velocity0, *mass);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2A : ", ds->getType() == LTIDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2B : ", ds->getNumber() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearTIDS2D : ", ds->getStepsInMemory() == 1, true);

@@ -85,7 +85,7 @@ void RelationTest::testBuildRelation1()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation1c : ", R1->getComputeOutputName() == "DefaultPlugin:computeOutput", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation1d : ", R1->getComputeInputName() == "DefaultPlugin:computeInput", true);
   delete R1;
-  cout << "--> Default constructor  test ended with success." << endl;
+  cout << "--> Default constructor test ended with success." << endl;
 }
 
 // xml constructor

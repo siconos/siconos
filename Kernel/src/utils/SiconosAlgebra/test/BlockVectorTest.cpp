@@ -159,6 +159,49 @@ void BlockVectorTest::testConstructor4()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", tab[1] == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor4 : ", tab[2] == 12, true);
   delete v;
+  cout << "--> Constructor 4 test ended with success." << endl;
+}
+
+// Constructor for block of blocks
+void BlockVectorTest::testConstructor5()
+{
+  cout << "--> Test: constructor 5." << endl;
+  SiconosVector * q = new BlockVector(3, 3);
+  std::vector<SiconosVector*> in;
+  in.push_back((*q)[0]);
+  in.push_back((*q)[1]);
+  in.push_back((*q)[1]);
+  in.push_back((*q)[2]);
+  BlockVector * v = new BlockVector(2, 2, in);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->isBlock(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*v)[0]->isBlock(), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*v)[1]->isBlock(), true);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 12, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*v)[0]->size() == 6, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*v)[1]->size() == 6, true);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->getNumberOfBlocks() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*v)[0]->getNumberOfBlocks() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*v)[1]->getNumberOfBlocks() == 2, true);
+
+  for (unsigned int i = 0; i < v->size(); i++)
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*v)(i) == 0, true);
+  Index tab = v->getTabIndex();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab.size() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[0] == 6, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[1] == 12, true);
+  tab = (*v)[0]->getTabIndex();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab.size() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[0] == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[1] == 6, true);
+  tab = (*v)[1]->getTabIndex();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab.size() == 2, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[0] == 3, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", tab[1] == 6, true);
+
+  delete v;
+  delete q;
   cout << "--> Constructor 5 test ended with success." << endl;
 }
 

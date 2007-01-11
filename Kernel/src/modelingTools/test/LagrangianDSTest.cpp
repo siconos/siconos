@@ -126,9 +126,9 @@ void LagrangianDSTest::testBuildLagrangianDS2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2B : ", ds->getNumber() == 8, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2C : ", ds->getId() == "testLAGDS2", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2D : ", ds->getNdof() == 3, true);
+
   double time = 1.5;
   ds->initialize("TimeStepping", time);
-
 
   SimpleVector * x01 = new SimpleVector(3);
   (*x01)(0) = 0;
@@ -157,10 +157,12 @@ void LagrangianDSTest::testBuildLagrangianDS2()
   M(2, 0) = 2;
   M(2, 1) = 5;
   M(2, 2) = 8;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2M : ", ds->getJacobianQFInt() == M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2N : ", ds->getJacobianVelocityFInt() == M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2O : ", ds->getJacobianQNNL() == M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2P : ", ds->getJacobianVelocityNNL() == M, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2M : ", ds->getJacobianFInt(0) == M, true);
+  ds->getJacobianFInt(0).display();
+  ds->getJacobianFInt(1).display();
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2N : ", ds->getJacobianFInt(1) == M, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2O : ", ds->getJacobianNNL(0) == M, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2P : ", ds->getJacobianNNL(1) == M, true);
 
   delete x01;
   delete x02;
@@ -190,10 +192,10 @@ void LagrangianDSTest::testBuildLagrangianDS3()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3K : ", ds->getNNL() ==  4 * *q0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3L : ", ds->getMass() == M, true);
   M.zero();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3M : ", ds->getJacobianQFInt() == M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3N : ", ds->getJacobianVelocityFInt() == M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3O : ", ds->getJacobianQNNL() == M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3P : ", ds->getJacobianVelocityNNL() == M, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3M : ", ds->getJacobianFInt(0) == M, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3N : ", ds->getJacobianFInt(1) == M, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3O : ", ds->getJacobianNNL(0) == M, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS3P : ", ds->getJacobianNNL(1) == M, true);
 
   map<string, bool> isPl = ds->getIsPlugin();
 
@@ -214,7 +216,7 @@ void LagrangianDSTest::testBuildLagrangianDS4()
 {
   cout << "--> Test: constructor 4." << endl;
 
-  LagrangianDS * ds = new LagrangianDS(13, 3, *q0, *velocity0, (*mass));
+  LagrangianDS * ds = new LagrangianDS(13, *q0, *velocity0, (*mass));
   double time = 1.5;
   ds->initialize("TimeStepping", time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS4A : ", ds->getType() == LNLDS, true);
@@ -242,7 +244,7 @@ void LagrangianDSTest::testBuildLagrangianDS5()
 {
   cout << "--> Test: constructor 5." << endl;
   string plugin = "TestPlugin:computeMass";
-  DynamicalSystem * ds = new LagrangianDS(13, 3, *q0, *velocity0, plugin);
+  DynamicalSystem * ds = new LagrangianDS(13, *q0, *velocity0, plugin);
   double time = 1.5;
   ds->initialize("TimeStepping", time);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS5A : ", ds->getType() == LNLDS, true);
@@ -313,10 +315,10 @@ void LagrangianDSTest::testBuildLagrangianDS6()
   M(2, 1) = 5;
   M(2, 2) = 8;
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6M : ", ds->getJacobianQFInt() == M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6N : ", ds->getJacobianVelocityFInt() == M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6O : ", ds->getJacobianQNNL() == M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6P : ", ds->getJacobianVelocityNNL() == M, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6M : ", ds->getJacobianFInt(0) == M, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6N : ", ds->getJacobianFInt(1) == M, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6O : ", ds->getJacobianNNL(0) == M, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6P : ", ds->getJacobianNNL(1) == M, true);
 
   delete x01;
   delete x02;
@@ -352,8 +354,8 @@ void LagrangianDSTest::testcomputeDS()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSK : ", *(jx->getBlockPtr(0, 0)) == *zero, true);
   zero->eye();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSK : ", *(jx->getBlockPtr(0, 1)) == *zero, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->getBlockPtr(1, 0))) == (-1.0 * (copy->getJacobianQFInt() + copy->getJacobianQNNL())) , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->getBlockPtr(1, 1))) == -1.0 * (copy->getJacobianVelocityFInt() + copy->getJacobianVelocityNNL()) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->getBlockPtr(1, 0))) == (-1.0 * (copy->getJacobianFInt(0) + copy->getJacobianNNL(0))) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->getBlockPtr(1, 1))) == -1.0 * (copy->getJacobianFInt(1) + copy->getJacobianNNL(1)) , true);
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSM : ", copy->getP(2) == *(r->getVectorPtr(1)), true);
   delete ds;

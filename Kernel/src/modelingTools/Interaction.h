@@ -47,15 +47,6 @@ class Relation;
 class NonSmoothDynamicalSystem;
 class InteractionXML;
 
-/** container for SiconosVectors */
-typedef std::vector< BlockVector* > VectorOfBlocks;
-
-/** iterator through vector of SimpleVector */
-typedef VectorOfBlocks::iterator VectorOfBlocksIterator;
-
-/** type used for inside-class allocation checking */
-typedef std::deque<bool>  AllocationFlags;
-
 /**  An Interaction describes the non-smooth interactions between a set of Dynamical Systems.
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -115,16 +106,16 @@ private:
    * vector of output derivatives
    * y[0] is y, y[1] is yDot and so on
    */
-  VectorOfBlocks y;
+  VectorOfVectors y;
 
   /** previous step values for y */
-  VectorOfBlocks yOld;
+  VectorOfVectors yOld;
 
   /** result of the computeInput function */
-  VectorOfBlocks lambda;
+  VectorOfVectors lambda;
 
   /** previous step values for lambda */
-  VectorOfBlocks lambdaOld;
+  VectorOfVectors lambdaOld;
 
   /** the Dynamical Systems concerned by this interaction */
   DynamicalSystemsSet involvedDS;
@@ -276,9 +267,9 @@ public:
   // -- y --
 
   /** get vector of output derivatives
-  *  \return a VectorOfBlocks
+  *  \return a VectorOfVectors
   */
-  inline const VectorOfBlocks getY() const
+  inline const VectorOfVectors getY() const
   {
     return y;
   }
@@ -300,14 +291,14 @@ public:
   }
 
   /** set the output vector y to newVector with copy of the y[i] (ie memory allocation)
-  *  \param VectorOfBlocks
+  *  \param VectorOfVectors
   */
-  void setY(const VectorOfBlocks&);
+  void setY(const VectorOfVectors&);
 
   /** set the output vector y to newVector with direct pointer equality for the y[i]
-  *  \param VectorOfBlocks
+  *  \param VectorOfVectors
   */
-  void setYPtr(const VectorOfBlocks&);
+  void setYPtr(const VectorOfVectors&);
 
   /** set y[i] to newValue
   *  \param a BlockVector and an unsigned int
@@ -322,9 +313,9 @@ public:
   // -- yOld --
 
   /** get vector of output derivatives
-  *  \return a VectorOfBlocks
+  *  \return a VectorOfVectors
   */
-  inline const VectorOfBlocks getYOld() const
+  inline const VectorOfVectors getYOld() const
   {
     return yOld;
   }
@@ -346,14 +337,14 @@ public:
   }
 
   /** set the output vector yOld to newVector
-  *  \param VectorOfBlocks
+  *  \param VectorOfVectors
   */
-  void setYOld(const VectorOfBlocks&);
+  void setYOld(const VectorOfVectors&);
 
   /** set vector yOld to newVector with direct pointer equality for the yOld[i]
-  *  \param VectorOfBlocks
+  *  \param VectorOfVectors
   */
-  void setYOldPtr(const VectorOfBlocks&);
+  void setYOldPtr(const VectorOfVectors&);
 
   /** set yOld[i] to newValue
   *  \param a BlockVector and an unsigned int
@@ -368,9 +359,9 @@ public:
   // -- lambda --
 
   /** get vector of input derivatives
-  *  \return a VectorOfBlocks
+  *  \return a VectorOfVectors
   */
-  inline const VectorOfBlocks getLambda() const
+  inline const VectorOfVectors getLambda() const
   {
     return lambda;
   }
@@ -392,14 +383,14 @@ public:
   }
 
   /** set the input vector lambda to newVector
-  *  \param VectorOfBlocks
+  *  \param VectorOfVectors
   */
-  void setLambda(const VectorOfBlocks&);
+  void setLambda(const VectorOfVectors&);
 
   /** set vector lambda to newVector with direct pointer equality for the lambda[i]
-  *  \param VectorOfBlocks
+  *  \param VectorOfVectors
   */
-  void setLambdaPtr(const VectorOfBlocks&);
+  void setLambdaPtr(const VectorOfVectors&);
 
   /** set lambda[i] to newValue
   *  \param a BlockVector and an unsigned int
@@ -414,9 +405,9 @@ public:
   // -- lambdaOld --
 
   /** get vector of input derivatives
-  *  \return a VectorOfBlocks
+  *  \return a VectorOfVectors
   */
-  inline const VectorOfBlocks getLambdaOld() const
+  inline const VectorOfVectors getLambdaOld() const
   {
     return lambdaOld;
   }
@@ -438,14 +429,14 @@ public:
   }
 
   /** set the input vector lambdaOld to newVector
-  *  \param VectorOfBlocks
+  *  \param VectorOfVectors
   */
-  void setLambdaOld(const VectorOfBlocks&);
+  void setLambdaOld(const VectorOfVectors&);
 
   /** set vector lambdaOld to newVector with direct pointer equality for the lambdaOld[i]
-  *  \param VectorOfBlocks
+  *  \param VectorOfVectors
   */
-  void setLambdaOldPtr(const VectorOfBlocks&);
+  void setLambdaOldPtr(const VectorOfVectors&);
 
   /** set lambdaOld[i] to newValue
   *  \param a BlockVector and an unsigned int

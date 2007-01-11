@@ -23,22 +23,19 @@
 using namespace std;
 
 DynamicalSystemXML::DynamicalSystemXML():
-  rootDynamicalSystemXMLNode(NULL), parentNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL),
-  stepsInMemoryNode(NULL), xMemoryNode(NULL), rMemoryNode(NULL),
+  rootDynamicalSystemXMLNode(NULL), parentNode(NULL), x0Node(NULL), xNode(NULL),
+  stepsInMemoryNode(NULL), xMemoryNode(NULL), rMemoryNode(NULL), MNode(NULL),
   fNode(NULL), jacobianXFNode(NULL), uSizeNode(NULL), uNode(NULL), TNode(NULL),
   xMemoryXML(NULL), rMemoryXML(NULL)
 {}
 
 DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, const bool& isBVP):
-  rootDynamicalSystemXMLNode(DSNode), parentNode(NULL), nNode(NULL), x0Node(NULL), xNode(NULL),
-  stepsInMemoryNode(NULL), xMemoryNode(NULL), rMemoryNode(NULL),
+  rootDynamicalSystemXMLNode(DSNode), parentNode(NULL), x0Node(NULL), xNode(NULL),
+  stepsInMemoryNode(NULL), xMemoryNode(NULL), rMemoryNode(NULL), MNode(NULL),
   fNode(NULL), jacobianXFNode(NULL), uSizeNode(NULL), uNode(NULL), TNode(NULL),
   xMemoryXML(NULL), rMemoryXML(NULL)
 {
   xmlNodePtr node;
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_N)) != NULL)
-    nNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_X0)) != NULL)
     x0Node = node;
@@ -60,6 +57,9 @@ DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, const bool& isBVP):
     rMemoryNode = node;
     rMemoryXML = new SiconosMemoryXML(rMemoryNode, parentNode, DS_RMEMORY);
   }
+
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_M)) != NULL)
+    MNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, DS_F)) != NULL)
     fNode = node;
@@ -120,6 +120,14 @@ void DynamicalSystemXML::setStepsInMemory(const unsigned int& nb)
   if (!hasStepsInMemory())
     stepsInMemoryNode = SiconosDOMTreeTools::createIntegerNode(rootDynamicalSystemXMLNode, DS_STEPSINMEMORY, nb);
   else SiconosDOMTreeTools::setIntegerContentValue(stepsInMemoryNode, nb);
+}
+
+void DynamicalSystemXML::setM(const SiconosMatrix& m)
+{
+  if (MNode != NULL)
+    SiconosDOMTreeTools::setSiconosMatrixNodeValue(MNode, m);
+  else
+    MNode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, DS_M, m);
 }
 
 void DynamicalSystemXML::setFVector(const SiconosVector&v)

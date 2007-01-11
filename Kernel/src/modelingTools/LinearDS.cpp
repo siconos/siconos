@@ -21,9 +21,8 @@ using namespace std;
 
 void LinearDS::initAllocationFlags(const bool in) // default in = true.
 {
-  // isAllocatedIn["A"]=in; useless, since A is never allocated in, only link to jacobianXF
-  isAllocatedIn["Mxdot"] = in;
   isAllocatedIn["b"] = in;
+  // Note that A is never allocated. It is just a link to jacobianXF of base class.
 }
 
 void LinearDS::initPluginFlags(const bool val)
@@ -38,7 +37,7 @@ void LinearDS::initPluginFlags(const bool val)
 
 // Default constructor
 LinearDS::LinearDS():
-  DynamicalSystem(), A(NULL), Mxdot(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
+  DynamicalSystem(), A(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
 {
   DSType = LDS;
   initAllocationFlags(false);
@@ -47,7 +46,7 @@ LinearDS::LinearDS():
 
 // From xml file (newNsds is optional)
 LinearDS::LinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
-  DynamicalSystem(dsXML, newNsds), A(NULL), Mxdot(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
+  DynamicalSystem(dsXML, newNsds), A(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
 {
   if (dsXML != NULL)
   {
@@ -67,7 +66,7 @@ LinearDS::LinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds
     initPluginFlags(false);
 
     // A = jacobianXF
-    A = jacobianXF; // jacobianXF is allocated during DynamicalSystem constructor call
+    A = jacobianXF; // jacobianXF is allocated in DynamicalSystem constructor call.
 
     // reject case were jacobianXF plug-in is given
     if (ldsxml->hasJacobianXF())
@@ -86,13 +85,6 @@ LinearDS::LinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds
     }
     else
       RuntimeException::selfThrow("LinearDS - xml constructor, no input (plug-in or matrix) find for A.");
-
-    // Mxdot - Optional parameter supposed to be a SimpleMatrix with xml
-    if (ldsxml->hasMxdot())
-    {
-      Mxdot = new SimpleMatrix(ldsxml->getMxdot());
-      isAllocatedIn["Mxdot"] = true;
-    }
 
     // b - Optional parameter
     if (ldsxml->hasB())
@@ -121,13 +113,14 @@ LinearDS::LinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds
 // From a minimum set of data, A and b connected to a plug-in
 LinearDS::LinearDS(const int newNumber, const unsigned int newN, const SiconosVector& newX0,
                    const string APlugin, const string bPlugin):
-  DynamicalSystem(newNumber, newN, newX0),
-  A(NULL), Mxdot(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
+  DynamicalSystem(newNumber, newX0),
+  A(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
 {
   DSType = LDS;
   initAllocationFlags(false);
   initPluginFlags(false);
   A = jacobianXF; // jacobianXF is allocated during DynamicalSystem constructor call
+
   setComputeAFunction(cShared.getPluginName(APlugin), cShared.getPluginFunctionName(APlugin));
   setComputeBFunction(cShared.getPluginName(bPlugin), cShared.getPluginFunctionName(bPlugin));
   bool res = checkDynamicalSystem();
@@ -136,8 +129,8 @@ LinearDS::LinearDS(const int newNumber, const unsigned int newN, const SiconosVe
 
 // From a minimum set of data, A from a given matrix
 LinearDS::LinearDS(const int newNumber, const SiconosVector& newX0, const SiconosMatrix& newA):
-  DynamicalSystem(newNumber, newA.size(0), newX0),
-  A(NULL), Mxdot(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
+  DynamicalSystem(newNumber, newX0),
+  A(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
 {
   if (newA.size(0) != n || newA.size(1) != n)
     RuntimeException::selfThrow("LinearDS - constructor(number,x0,A): inconsistent dimensions with problem size for input matrix A");
@@ -147,14 +140,15 @@ LinearDS::LinearDS(const int newNumber, const SiconosVector& newX0, const Sicono
   DSType = LDS;
   A = jacobianXF; // jacobianXF is allocated during DynamicalSystem constructor call
   *A = newA;
+
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 }
 
 // From a minimum set of data, A from a given matrix
 LinearDS::LinearDS(const int newNumber, const SiconosVector& newX0, const SiconosMatrix& newA, const SiconosVector& newB):
-  DynamicalSystem(newNumber, newA.size(0), newX0),
-  A(NULL), Mxdot(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
+  DynamicalSystem(newNumber, newX0),
+  A(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
 {
   if (newA.size(0) != n || newA.size(1) != n)
     RuntimeException::selfThrow("LinearDS - constructor(number,x0,A,b): inconsistent dimensions with problem size for input matrix A");
@@ -174,7 +168,7 @@ LinearDS::LinearDS(const int newNumber, const SiconosVector& newX0, const Sicono
 
 // Copy constructor
 LinearDS::LinearDS(const LinearDS & lds):
-  DynamicalSystem(lds), A(NULL), Mxdot(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
+  DynamicalSystem(lds), A(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
 {
   DSType = LDS;
   initAllocationFlags(false);
@@ -183,14 +177,14 @@ LinearDS::LinearDS(const LinearDS & lds):
   A = jacobianXF; // jacobianXF is allocated during DynamicalSystem constructor call
   //*A =lds->getA(); // this may be useless, since jacobianXF copy has already been done?
 
-  if (lds.getMxdotPtr() != NULL)
+  if (lds.getMPtr() != NULL)
   {
-    if (lds.getMxdotPtr()->isBlock())
-      Mxdot = new BlockMatrix(lds.getMxdotBlock());
+    if (lds.getMPtr()->isBlock())
+      M = new BlockMatrix(lds.getMBlock());
     else
-      Mxdot = new SimpleMatrix(lds.getMxdotSimple());
+      M = new SimpleMatrix(lds.getMSimple());
 
-    isAllocatedIn["Mxdot"] = true;
+    isAllocatedIn["M"] = true;
   }
 
   if (lds.getBPtr() != NULL)
@@ -220,7 +214,7 @@ LinearDS::LinearDS(const LinearDS & lds):
 }
 
 LinearDS::LinearDS(const DynamicalSystem & newDS):
-  DynamicalSystem(newDS), A(NULL), Mxdot(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
+  DynamicalSystem(newDS), A(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
 {
   if (newDS.getType() != LDS || newDS.getType() != LITIDS)
     RuntimeException::selfThrow("LinearDS - copy constructor: try to copy into a LinearDS a DS of type: " + newDS.getType());
@@ -235,14 +229,14 @@ LinearDS::LinearDS(const DynamicalSystem & newDS):
   A = jacobianXF; // jacobianXF is allocated during DynamicalSystem constructor call
   //*A =lds->getA(); // this may be useless, since jacobianXF copy has already been done?
 
-  if (lds->getMxdotPtr() != NULL)
+  if (lds->getMPtr() != NULL)
   {
-    if (lds->getMxdotPtr()->isBlock())
-      Mxdot = new BlockMatrix(lds->getMxdotBlock());
+    if (lds->getMPtr()->isBlock())
+      M = new BlockMatrix(lds->getMBlock());
     else
-      Mxdot = new SimpleMatrix(lds->getMxdotSimple());
+      M = new SimpleMatrix(lds->getMSimple());
 
-    isAllocatedIn["Mxdot"] = true;
+    isAllocatedIn["M"] = true;
   }
 
   if (lds->getBPtr() != NULL)
@@ -273,9 +267,6 @@ LinearDS::LinearDS(const DynamicalSystem & newDS):
 
 LinearDS::~LinearDS()
 {
-  A = NULL ;
-  if (isAllocatedIn["Mxdot"]) delete Mxdot;
-  Mxdot = NULL;
   if (isAllocatedIn["b"]) delete b;
   b = NULL;
 }
@@ -313,7 +304,7 @@ void LinearDS::initialize(const string& simulationType, double time, unsigned in
   // reset x to x0, xFree and r to zero.
   xFree->zero();
   r->zero();
-  *x = *x0;
+  *x[0] = *x0;
 
   // Initialize memory vectors
   initMemory(sizeOfMemory);
@@ -354,26 +345,6 @@ void LinearDS::setJacobianXFPtr(SiconosMatrix *newPtr)
   A = jacobianXF;
   isPlugin["jacobianXF"] = false;
   isPlugin["A"] = false;
-}
-
-void LinearDS::setMxdot(const SimpleMatrix& newValue)
-{
-  if (newValue.size(0) != n || newValue.size(1) != n)
-    RuntimeException::selfThrow("LinearDS - setMxdot: inconsistent dimensions with problem size for input matrix Mxdot");
-
-  if (Mxdot == NULL)
-  {
-    Mxdot = new SimpleMatrix(n, n);
-    isAllocatedIn["Mxdot"] = true;
-  }
-  *Mxdot = newValue;
-}
-
-void LinearDS::setMxdotPtr(SiconosMatrix *newPtr)
-{
-  if (isAllocatedIn["Mxdot"]) delete Mxdot;
-  Mxdot = newPtr;
-  isAllocatedIn["Mxdot"] = false;
 }
 
 void LinearDS::setB(const SimpleVector& newValue)
@@ -453,7 +424,7 @@ void LinearDS::computeA(const double time)
   {
     if (APtr == NULL)
       RuntimeException::selfThrow("computeA() is not linked to a plugin function");
-    SimpleVector* param = parametersList["A"];
+    SiconosVector* param = parametersList["A"];
     APtr(n, time, &(*A)(0, 0), &(*param)(0));
   }
   // else nothing
@@ -465,7 +436,7 @@ void LinearDS::computeB(const double time)
   {
     if (bPtr == NULL)
       RuntimeException::selfThrow("computeB() is not linked to a plugin function");
-    SimpleVector* param = parametersList["b"];
+    SiconosVector* param = parametersList["b"];
     bPtr(n, time, &(*b)(0), &(*param)(0));
   }
   // else nothing
@@ -479,14 +450,14 @@ void LinearDS::computeRhs(const double time, const bool)
     computeA(time);
 
   // compute right-hand side
-  *rhs = prod(*A, *x);
+  *x[1] = prod(*A, *x[0]);
 
   // compute and add b if required
   if (b != NULL)
   {
     if (isPlugin["b"])
       computeB(time);
-    *rhs += *b;
+    *x[1] += *b;
   }
 
   // compute and add Tu if required
@@ -498,20 +469,46 @@ void LinearDS::computeRhs(const double time, const bool)
     {
       if (isPlugin["T"]) // if T is a plug-in function
         computeT();
-      *rhs += prod(*T, * u);
+      *x[1] += prod(*T, * u);
     }
     else
-      *rhs += * u;
+      *x[1] += * u;
   }
 
-  *rhs += * r; // Warning: r update is done in Interactions/Relations
+  *x[1] += * r; // Warning: r update is done in Interactions/Relations
 
+  if (M != NULL)
+  {
+    // compute M-1 at the first call of the present function
+    if (invM == NULL)
+    {
+      invM = new SimpleMatrix(*M);
+      invM->PLUFactorizationInPlace();
+      invM->PLUInverseInPlace();
+    }
+
+    *(x[1]) = prod(*invM, *(x[1]));
+  }
 }
 
 void LinearDS::computeJacobianXRhs(const double time, const bool)
 {
   if (isPlugin["A"])
     computeA(time);
+  if (M != NULL)
+  {
+    // compute M-1 at the first call of the present function
+    if (invM == NULL)
+    {
+      invM = new SimpleMatrix(*M);
+      invM->PLUFactorizationInPlace();
+      invM->PLUInverseInPlace();
+    }
+
+    *jacobianXRhs = prod(*invM, *A);
+  }
+  else
+    *jacobianXRhs = *A;
 }
 
 void LinearDS::display() const
@@ -520,9 +517,6 @@ void LinearDS::display() const
   cout << "=== Linear system display ===" << endl;
   cout << "- A " << endl;
   if (A != NULL) A->display();
-  else cout << "-> NULL" << endl;
-  cout << "- Mxdot " << endl;
-  if (Mxdot != NULL) Mxdot->display();
   else cout << "-> NULL" << endl;
   cout << "- b " << endl;
   if (b != NULL) b->display();
@@ -537,10 +531,8 @@ void LinearDS::saveDSToXML()
   // --- other data ---
   if (dsxml != NULL)
   {
-    dsxml->setN(n);
     static_cast<LinearDSXML*>(dsxml)->setA(*A);
 
-    if (Mxdot != NULL) static_cast<LinearDSXML*>(dsxml)->setMxdot(*Mxdot);
     // b
     if (b != NULL)
     {

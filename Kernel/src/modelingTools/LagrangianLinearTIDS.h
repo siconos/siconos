@@ -133,7 +133,6 @@ public:
 
   /** constructor from a set of data
    *  \param int : the number for this DynamicalSystem
-   *  \param int : dimension of this DynamicalSystem
    *  \param SimpleVector: initial coordinates of this DynamicalSystem
    *  \param SimpleVector : initial velocity of this DynamicalSystem
    *  \param SiconosMatrix : mass of this DynamicalSystem
@@ -141,17 +140,16 @@ public:
    *  \param SiconosMatrix : matrix C of this DynamicalSystem
    *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(const int, const unsigned int ndof, const SimpleVector&, const SimpleVector&, const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&);
+  LagrangianLinearTIDS(const int, const SimpleVector&, const SimpleVector&, const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&);
 
   /** constructor from a set of data
    *  \param int : the number for this DynamicalSystem
-   *  \param int : dimension of this DynamicalSystem
    *  \param SimpleVector: initial coordinates of this DynamicalSystem
    *  \param SimpleVector : initial velocity of this DynamicalSystem
    *  \param SiconosMatrix : mass of this DynamicalSystem
    *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(const int, const unsigned int ndof, const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
+  LagrangianLinearTIDS(const int, const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
 
   /** copy constructor
   *  \param a Dynamical system to copy

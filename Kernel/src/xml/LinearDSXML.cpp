@@ -20,11 +20,11 @@
 using namespace std;
 
 LinearDSXML::LinearDSXML() :
-  DynamicalSystemXML(), ANode(NULL), MxdotNode(NULL), bNode(NULL)
+  DynamicalSystemXML(), ANode(NULL), bNode(NULL)
 {}
 
 LinearDSXML::LinearDSXML(xmlNode * LinearDSNode, const bool& isBVP):
-  DynamicalSystemXML(LinearDSNode, isBVP), ANode(NULL), MxdotNode(NULL), bNode(NULL)
+  DynamicalSystemXML(LinearDSNode, isBVP), ANode(NULL), bNode(NULL)
 {
   xmlNode *node;
   // The only required node is A
@@ -33,8 +33,6 @@ LinearDSXML::LinearDSXML(xmlNode * LinearDSNode, const bool& isBVP):
     ANode = node;
   else
     XMLException::selfThrow("LinearDSXML - loadLinearDSProperties error : tag " + LDS_A + " not found.");
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LDS_Mxdot)) != NULL)
-    MxdotNode = node;
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LDS_B)) != NULL)
     bNode = node;
 }
@@ -59,14 +57,6 @@ void LinearDSXML::setAPlugin(const std::string& plugin)
   }
   else
     SiconosDOMTreeTools::setStringAttributeValue(ANode, "matrixPlugin", plugin);
-}
-
-void LinearDSXML::setMxdot(const SiconosMatrix& m)
-{
-  if (MxdotNode != NULL)
-    SiconosDOMTreeTools::setSiconosMatrixNodeValue(MxdotNode, m);
-  else
-    MxdotNode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, LDS_Mxdot, m);
 }
 
 void LinearDSXML::setB(const SiconosVector& v)

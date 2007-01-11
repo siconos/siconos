@@ -295,7 +295,7 @@ AC_CONFIG_FILES([Makefile
                  src/utils/SiconosMemory/test/Makefile
                  src/utils/SiconosSharedLibrary/Makefile
                  src/utils/contract/Makefile
-		 src/utils/SiconosTemplates/Makefile
+		 src/utils/SiconosTools/Makefile
                  src/utils/boost/Makefile
 		 src/xml/Makefile
                  src/xml/test/Makefile

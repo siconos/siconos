@@ -31,10 +31,6 @@ class DynamicalSystem;
 class DynamicalSystemsSet;
 class SimpleVector;
 
-
-/** container for SiconosVectors*/
-typedef std::vector< SiconosVector* > VectorOfUnitaryVectors ;
-
 /** Interface to single relations from Interactions
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -131,10 +127,10 @@ public:
   };
 
   /** get vector of output derivatives
-  *  \return a VectorOfUnitaryVectors
+  *  \return a VectorOfVectors
   */
   //  const std::vector< SimpleVector* > getY() const;
-  const VectorOfUnitaryVectors getY() const;
+  const VectorOfVectors getY() const;
 
   /** get y[i], derivative number i of output
   *  \return pointer on a SimpleVector
@@ -147,9 +143,9 @@ public:
   SiconosVector* getYOldPtr(const unsigned int) const;
 
   /** get vector of input derivatives
-  *  \return a VectorOfUnitaryVectors
+  *  \return a VectorOfVectors
   */
-  const  VectorOfUnitaryVectors getLambda() const;
+  const  VectorOfVectors getLambda() const;
 
   /** get lambda[i], derivative number i of input
   *  \return pointer on a SimpleVector

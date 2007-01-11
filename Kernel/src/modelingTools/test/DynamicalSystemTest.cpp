@@ -142,7 +142,7 @@ void DynamicalSystemTest::testBuildDynamicalSystem2()
 void DynamicalSystemTest::testBuildDynamicalSystem3()
 {
   cout << "--> Test: constructor 3." << endl;
-  DynamicalSystem * ds = new DynamicalSystem(13, 3, *x0, "TestPlugin:computeF", "TestPlugin:computeJacobianXF");
+  DynamicalSystem * ds = new DynamicalSystem(13, *x0, "TestPlugin:computeF", "TestPlugin:computeJacobianXF");
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem3A : ", ds->getType() == NLDS, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildDynamicalSystem3B : ", ds->getNumber() == 13, true);

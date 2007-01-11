@@ -36,7 +36,7 @@ class LinearDSXML;
  *
  *  This class represents first order linear systems of the form:
  * \f[
- * Mxdot \dot x = A(t)x(t)+T u(t)+b(t)+r,
+ * M \dot x = A(t)x(t)+T u(t)+b(t)+r,
  *  x(t_0)=x_0
  * \f]
  * where
@@ -61,7 +61,7 @@ class LinearDSXML;
  *
  * \f[
  *   f(x,t) = A(t)x(t) + b(t) \\
- *   jacobianX = A(t)
+ *   jacobianXF = A(t)
  * \f]
  *
  *  Thus, the main steps for LinearDS handling consist in:
@@ -71,7 +71,7 @@ class LinearDSXML;
  *  - Computation at time t, by calling "compute" functions
  *      => computeA
  *      => computeB
- *      => computeRhs, compute \f$ \dot x = Ax + b + Tu \f$
+ *      => computeRhs, compute \f$ \dot x = M^{-1}(Ax + b + Tu + r) \f$
  *      => computeU and computeT (from DynamicalSystem class)
  *
  * Any call to a plug-in requires that it has been set correctly before simulation using one of the following:
@@ -85,8 +85,6 @@ protected:
 
   /** matrix specific to the LinearDS \f$ A \in R^{n \times n}  \f$*/
   SiconosMatrix *A;
-
-  SiconosMatrix *Mxdot;
 
   /** strength vector */
   SimpleVector *b;
@@ -234,41 +232,6 @@ public:
   *  \param SiconosMatrix * newPtr
   */
   void setJacobianXFPtr(SiconosMatrix *newPtr);
-
-  // --- Mxdot ---
-  /** get the value of Mxdot
-  *  \return SimpleMatrix
-  */
-  inline const SimpleMatrix getMxdotSimple() const
-  {
-    return *Mxdot;
-  }
-
-  /** get the value of Mxdot
-  *  \return BlockMatrix
-  */
-  inline const BlockMatrix getMxdotBlock() const
-  {
-    return *Mxdot;
-  }
-
-  /** get Mxdot
-  *  \return pointer on a SiconosMatrix
-  */
-  inline SiconosMatrix* getMxdotPtr() const
-  {
-    return Mxdot;
-  }
-
-  /** set the value of Mxdot to newValue
-  *  \param SimpleMatrix newValue
-  */
-  void setMxdot(const SimpleMatrix& newValue);
-
-  /** set Mxdot to pointer newPtr
-  *  \param SiconosMatrix * newPtr
-  */
-  void setMxdotPtr(SiconosMatrix *);
 
   // --- b ---
 

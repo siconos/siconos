@@ -439,7 +439,7 @@ void LagrangianLinearR::computeOutput(const double time, const unsigned int deri
       else if (derivativeNumber == 1)
         tmp->addPtr(lds->getVelocityPtr());
       else if (derivativeNumber == 2)
-        tmp->addPtr(static_cast<SimpleVector*>(lds->getAccelerationPtr()));
+        tmp->addPtr(lds->getAccelerationPtr());
     }
 
     // get y and yDot of the interaction

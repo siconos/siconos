@@ -16,11 +16,10 @@
 #
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
-# Makefile.am --- SICONOS - SiconosAlgebra
 
 include $(top_srcdir)/config/Make-rules
 
-EXTRA_DIST = RuntimeCmp.h
+EXTRA_DIST = RuntimeCmp.h Tools.h
 
-siconos_HEADERS = RuntimeCmp.h
+siconos_HEADERS = RuntimeCmp.h Tools.h
 

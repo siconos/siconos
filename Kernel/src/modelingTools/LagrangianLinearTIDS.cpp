@@ -28,11 +28,11 @@ void LagrangianLinearTIDS::connectToDS()
   n = 2 * ndof;
 
   // x and related vectors
-  x = new BlockVector(q, velocity);
+  x[0] = new BlockVector(q[0], q[1]);
   isAllocatedIn["x"] = true;
   x0 = new BlockVector(q0, velocity0);
   isAllocatedIn["x0"] = true;
-  xFree = new BlockVector(qFree, velocityFree);
+  xFree = new BlockVector(qFree[0], qFree[1]);
   isAllocatedIn["xFree"] = true;
 
   // r
@@ -41,7 +41,7 @@ void LagrangianLinearTIDS::connectToDS()
   r->zero();
 
   // rhs // add conditional allocation ??
-  rhs = new BlockVector(velocity, NULL);
+  x[1] = new BlockVector(q[1], q[2]);
   isAllocatedIn["rhs"] = true;
 
   // jacobianXRhs
@@ -67,10 +67,10 @@ void LagrangianLinearTIDS::connectToDS()
   }
 
   if (K != NULL)
-    jacobianQFInt = K;
+    jacobianFInt[0] = K;
 
   if (C != NULL)
-    jacobianVelocityFInt = C;
+    jacobianFInt[0] = C;
 
   // Remark: all other operators are NULL pointers (NNL, jacobian ...). See LagrangianTIDS description in User Manual for details.
 
@@ -118,10 +118,9 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(DynamicalSystemXML * dsXML,  NonSmoot
 }
 
 // --- Constructor from a set of data - Mass, K and C ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(const int newNumber, const unsigned int newNdof,
-    const SimpleVector& newQ0, const SimpleVector& newVelocity0,
+LagrangianLinearTIDS::LagrangianLinearTIDS(const int newNumber, const SimpleVector& newQ0, const SimpleVector& newVelocity0,
     const SiconosMatrix& newMass, const SiconosMatrix& newK, const SiconosMatrix& newC):
-  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, newMass), K(NULL), C(NULL)
+  LagrangianDS(newNumber, newQ0, newVelocity0, newMass), K(NULL), C(NULL)
 {
   if (newK.size(0) != ndof || newK.size(1) != ndof)
     RuntimeException::selfThrow("LagrangianLinearTIDS - constructor from data, inconsistent size between K and ndof");
@@ -139,10 +138,9 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const int newNumber, const unsigned i
 }
 
 // --- Constructor from a set of data - Mass, no K and no C ---
-LagrangianLinearTIDS::LagrangianLinearTIDS(const int newNumber, const unsigned int newNdof,
-    const SimpleVector& newQ0, const SimpleVector& newVelocity0,
+LagrangianLinearTIDS::LagrangianLinearTIDS(const int newNumber, const SimpleVector& newQ0, const SimpleVector& newVelocity0,
     const SiconosMatrix& newMass):
-  LagrangianDS(newNumber, newNdof, newQ0, newVelocity0, newMass), K(NULL), C(NULL)
+  LagrangianDS(newNumber, newQ0, newVelocity0, newMass), K(NULL), C(NULL)
 {
   initPluginFlags(false);
 
@@ -174,12 +172,12 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const DynamicalSystem & newDS):
   ndof = ltids->getNdof();
   mass = new SimpleMatrix(ltids->getMass());
   q0 = new SimpleVector(ltids->getQ0());
-  q = new SimpleVector(ltids->getQ());
+  q[0] = new SimpleVector(ltids->getQ());
   if (ltids->getQMemoryPtr() != NULL)
     qMemory = new SiconosMemory(ltids->getQMemory());
   else isAllocatedIn["qMemory"] = false;
   velocity0 = new SimpleVector(ltids->getVelocity0());
-  velocity  = new SimpleVector(ltids->getVelocity0());
+  q[1]  = new SimpleVector(ltids->getVelocity0());
   if (ltids->getVelocityMemoryPtr() != NULL)
     velocityMemory = new SiconosMemory(ltids->getVelocityMemory());
   else isAllocatedIn["velocityMemory"] = false;
@@ -209,9 +207,9 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(const DynamicalSystem & newDS):
   if (isPlugin["fExt"])
   {
     string functionName, pluginPath;
-    fExtFunctionName = ltids -> getFExtFunctionName();
-    functionName = cShared.getPluginFunctionName(fExtFunctionName);
-    pluginPath  = cShared.getPluginName(fExtFunctionName);
+    pluginNames["fExt"] = ltids -> getFunctionName("fExt");
+    functionName = cShared.getPluginFunctionName(pluginNames["fExt"]);
+    pluginPath  = cShared.getPluginName(pluginNames["fExt"]);
     setComputeFExtFunction(pluginPath, functionName);
   }
 
@@ -297,11 +295,11 @@ void LagrangianLinearTIDS::initialize(const string& simulationType, double time,
   bool res = checkDynamicalSystem();
   if (!res) cout << "Warning: your dynamical system seems to be uncomplete (check = false)" << endl;
 
-  // Warning: ->zero for free vectors must be done before q/velocity initialization, because for EventDriven, qFree/vFree = q/v (pointers equality)
+  // Warning: ->zero for free vectors must be done before q/q[1] initialization, because for EventDriven, qFree[0]/vFree = q/v (pointers equality)
 
-  // set q and velocity to q0 and velocity0
-  *q = *q0;
-  *velocity = *velocity0;
+  // set q and q[1] to q0 and velocity0
+  *q[0] = *q0;
+  *q[1] = *velocity0;
 
   // Initialize memory vectors
   initMemory(sizeOfMemory);
@@ -311,7 +309,7 @@ void LagrangianLinearTIDS::initialize(const string& simulationType, double time,
   // === fExt, fInt, rhs and jacobianXRhs ===
 
   // right-hand side. vField corresponds to the second derivative of q.
-  SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
+  SiconosVector* vField = x[1]->getVectorPtr(1); // Pointer link!
   vField ->zero();
 
   // Compute M-1 if necessary
@@ -333,18 +331,18 @@ void LagrangianLinearTIDS::initialize(const string& simulationType, double time,
   // fInt and update jacobianXF
   if (K != NULL)
   {
-    *fInt += prod(*K, *q);
+    *fInt += prod(*K, *q[0]);
     *workMatrix["jacob-block10"] -= *workMatrix["inverseOfMass"] * *K;
     flag = true;
   }
   if (C != NULL)
   {
-    *fInt += prod(*C, *velocity);
+    *fInt += prod(*C, *q[1]);
     *workMatrix["jacob-block11"] -= *workMatrix["inverseOfMass"] * *C;
     flag = true;
   }
 
-  if (flag) // flag == true means that among Fext and Fint, one at least is not Null.
+  if (flag) // flag == true means that among FExt and Fint, one at least is not Null.
   {
     if (fInt != NULL)
       *vField -= *fInt;
@@ -426,8 +424,8 @@ void LagrangianLinearTIDS::display() const
 void LagrangianLinearTIDS::computeRhs(const double time, const bool)
 {
   // second argument is useless but present because of top-class function overloading.
-  // note that rhs(0) = velocity with pointer link must already be set.
-  SiconosVector* vField = rhs->getVectorPtr(1); // Pointer link!
+  // note that rhs(0) = q[1] with pointer link must already be set.
+  SiconosVector* vField = x[1]->getVectorPtr(1); // Pointer link!
 
   *vField = *p[2]; // Warning: p update is done in Interactions/Relations
 
@@ -446,10 +444,10 @@ void LagrangianLinearTIDS::computeRhs(const double time, const bool)
       *vField += *fExt; // This supposes that fExt is up to date!!
 
     if (K != NULL)
-      *vField -= prod(*K, *q);
+      *vField -= prod(*K, *q[0]);
 
     if (C != NULL)
-      *vField -= prod(*C, *velocity);
+      *vField -= prod(*C, *q[1]);
   }
 
   *vField = prod(*(workMatrix["inverseOfMass"]), *vField);
@@ -469,26 +467,25 @@ void LagrangianLinearTIDS::saveDSToXML()
   if (dsxml != NULL)
   {
     LagrangianDSXML* lgptr = static_cast <LagrangianDSXML*>(dsxml);
-    lgptr->setNdof(ndof);
     lgptr->setMMatrix(*mass);
-    lgptr->setQ(*q);
+    lgptr->setQ(*q[0]);
     lgptr->setQ0(*q0);
     lgptr->setQMemory(*qMemory);
-    lgptr->setVelocity(*velocity);
+    lgptr->setVelocity(*q[1]);
     lgptr->setVelocity0(*velocity0);
     lgptr->setVelocityMemory(*velocityMemory);
 
     // FExt
-    if (lgptr->hasFext())
+    if (lgptr->hasFExt())
     {
-      if (!lgptr->isFextPlugin())
+      if (!lgptr->isFExtPlugin())
       {
-        lgptr->setFextVector(*fExt);
+        lgptr->setFExtVector(*fExt);
       }
     }
     else
     {
-      lgptr->setFextPlugin(fExtFunctionName);
+      lgptr->setFExtPlugin(pluginNames["fExt"]);
     }
     (static_cast <LagrangianLinearTIDSXML*>(dsxml))->setK(*K);
     (static_cast <LagrangianLinearTIDSXML*>(dsxml))->setC(*C);

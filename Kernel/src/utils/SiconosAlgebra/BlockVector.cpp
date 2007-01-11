@@ -20,9 +20,10 @@
 #include "BlockVector.h"
 #include "SimpleVector.h"
 #include "SiconosVectorException.h"
+#include <vector>
 
 /***************************** CONSTRUCTORS ****************************/
-// Default (private)
+// Default
 BlockVector::BlockVector(): SiconosVector(true)
 {}
 
@@ -39,8 +40,10 @@ BlockVector::BlockVector(const BlockVector &v): SiconosVector(true)
   numberOfBlocks = tabIndex.size();
   for (unsigned int i = 0; i < numberOfBlocks; ++i)
   {
-    // Call copy-constructor of SimpleVector
-    vect.push_back(new SimpleVector(*v[i])) ;
+    if (!(v[i]->isBlock()))   // Call copy-constructor of SimpleVector
+      vect.push_back(new SimpleVector(*v[i])) ;
+    else
+      vect.push_back(new BlockVector(*v[i])) ;
     isBlockAllocatedIn.push_back(true);
   }
 }
@@ -49,24 +52,14 @@ BlockVector::BlockVector(const SiconosVector &v): SiconosVector(true)
 {
   if (v.isBlock())
   {
-    //       unsigned int numberOfBlocks;
-
-    //       SiconosVector* tmp1 = const_cast<SiconosVector*>(&v);
-    //       BlockVector * tmp = static_cast<BlockVector*>(tmp1);
-    //       tabIndex = tmp->getTabIndex();
-    //       numberOfBlocks = tabIndex.size();
-    //       for (unsigned int i=0;i < numberOfBlocks; ++i)
-    //  {
-    //    // Call copy-constructor of SimpleVector
-    //    vect.push_back(new SimpleVector(*(tmp->getVectorPtr(i)))) ;
-    //    isBlockAllocatedIn.push_back(true);
-    //  }
     unsigned int numberOfBlocks = v.getNumberOfBlocks();;
     tabIndex.resize(numberOfBlocks);
     for (unsigned int i = 0; i < numberOfBlocks; ++i)
     {
-      // Call copy-constructor of SimpleVector
-      vect.push_back(new SimpleVector(*v[i])) ;
+      if (!(v[i]->isBlock()))   // Call copy-constructor of SimpleVector
+        vect.push_back(new SimpleVector(*v[i])) ;
+      else
+        vect.push_back(new BlockVector(*v[i])) ;
       isBlockAllocatedIn.push_back(true);
       tabIndex[i] = v[i]->size();
       if (i > 0) tabIndex[i] += tabIndex[i - 1];
@@ -90,8 +83,6 @@ BlockVector::BlockVector(SiconosVector* v1, SiconosVector* v2): SiconosVector(tr
 
   if (v1 != NULL)
   {
-    if (v1->isBlock())
-      SiconosVectorException::selfThrow("BlockVector::constructor(v1,v2) : v1 is a block vector and cannot be added into another block vector.");
     vect.push_back(v1);
     tabIndex.push_back(v1->size());
     isBlockAllocatedIn.push_back(false);
@@ -106,8 +97,6 @@ BlockVector::BlockVector(SiconosVector* v1, SiconosVector* v2): SiconosVector(tr
   }
   if (v2 != NULL)
   {
-    if (v2->isBlock())
-      SiconosVectorException::selfThrow("BlockVector::constructor(v1,v2) : v2 is a block vector and cannot be added into another block vector.");
     vect.push_back(v2);
     tabIndex.push_back(v2->size());
     tabIndex[1] += tabIndex[0];
@@ -137,6 +126,26 @@ BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int dim): Siconos
   }
 }
 
+BlockVector::BlockVector(unsigned int numberOfBlocks, unsigned int numberOfSubBlocks, std::vector<SiconosVector*> blocks) : SiconosVector(true)
+{
+  unsigned int dim = numberOfSubBlocks * numberOfBlocks;
+  if (dim != blocks.size())
+    SiconosVectorException::selfThrow("BlockVector:constructor(unsigned int numberOfBlocks, unsigned int numberOfSubBlocks, std::vector<SiconosVector*> blocks), unconsistent dimension between blocks and numberOf...");
+
+  vect.resize(numberOfBlocks, NULL);
+  tabIndex.resize(numberOfBlocks);
+  unsigned int k = 0;
+  for (unsigned int i = 0; i < numberOfBlocks ; ++i)
+  {
+    vect[i] = new BlockVector() ;
+    for (unsigned int j = 0; j < numberOfSubBlocks ; ++j)
+      static_cast<BlockVector*>(vect[i])->addPtr(blocks[k++]);
+    isBlockAllocatedIn.push_back(true);
+    tabIndex[i] = vect[i]->size();
+    if (i > 0) tabIndex[i] += tabIndex[i - 1];
+  }
+}
+
 /****************************** DESTRUCTOR  ****************************/
 BlockVector::~BlockVector()
 {
@@ -156,6 +165,9 @@ unsigned int BlockVector::getNum() const
 
 const DenseVect BlockVector::getDense(unsigned int i) const
 {
+  if (vect[i]->isBlock())
+    SiconosVectorException::selfThrow("BlockVector::getDense(unsigned int num) : the vector[num] is a Block vector");
+
   if (vect[i]->getNum() != 1)
     SiconosVectorException::selfThrow("BlockVector::getDense(unsigned int num) : the vector[num] is not a Dense vector");
   return (vect[i])->getDense();
@@ -163,6 +175,9 @@ const DenseVect BlockVector::getDense(unsigned int i) const
 
 const SparseVect BlockVector::getSparse(unsigned int i)const
 {
+  if (vect[i]->isBlock())
+    SiconosVectorException::selfThrow("BlockVector::getSparse(unsigned int num) : the vector[num] is a Block vector");
+
   if (vect[i]->getNum() != 4)
     SiconosVectorException::selfThrow("BlockVector::getSparse(unsigned int num) : the vector[num] is not a Sparse vector");
   return (vect[i])->getSparse();
@@ -170,13 +185,18 @@ const SparseVect BlockVector::getSparse(unsigned int i)const
 
 DenseVect* BlockVector::getDensePtr(unsigned int i) const
 {
+  if (vect[i]->isBlock())
+    SiconosVectorException::selfThrow("BlockVector::getDensePtr(unsigned int num) : the vector[num] is a Block vector");
+
   if (vect[i]->getNum() != 1)
     SiconosVectorException::selfThrow("BlockVector::getDensePtr(unsigned int num) : the vector[num] is not a Dense vector");
   return (vect[i])->getDensePtr();
 }
 
-SparseVect* BlockVector::getSparsePtr(unsigned int i)const
+SparseVect* BlockVector::getSparsePtr(unsigned int i) const
 {
+  if (vect[i]->isBlock())
+    SiconosVectorException::selfThrow("BlockVector::getSparsePtr(unsigned int num) : the vector[num] is a Block vector");
 
   if (vect[i]->getNum() != 4)
     SiconosVectorException::selfThrow("BlockVector::getSparsePtr(unsigned int num) : the vector[num] is not a Sparse vector");
@@ -257,8 +277,12 @@ void BlockVector::display() const
 
 SimpleVector BlockVector::getVector(unsigned int num) const
 {
+
   if (vect[num] == NULL)
     SiconosVectorException::selfThrow("BlockVector::getVector(num), vector[num] == NULL pointer.");
+
+  if (vect[num]->isBlock())
+    SiconosVectorException::selfThrow("BlockVector::getVector(num), vector[num] is a Block. Use getVectorPtr()");
 
   return *(vect[num]);
 }
@@ -266,6 +290,27 @@ SimpleVector BlockVector::getVector(unsigned int num) const
 SiconosVector * BlockVector::getVectorPtr(unsigned int num)
 {
   return vect[num];
+}
+
+void BlockVector::setVector(unsigned int num, const SiconosVector& newV)
+{
+  if (vect[num] == NULL)
+    SiconosVectorException::selfThrow("BlockVector::setVector(num,v), this[num] == NULL pointer.");
+
+  if (newV.size() != (vect[num])->size())
+    SiconosVectorException::selfThrow("BlockVector::setVector(num,v), this[num] and v have unconsistent sizes.");
+
+  *vect[num] = newV ;
+}
+
+void BlockVector::setVectorPtr(unsigned int num, SiconosVector* newV)
+{
+  if (newV->size() != (vect[num])->size())
+    SiconosVectorException::selfThrow("BlockVector::setVectorPtr(num,v), this[num] and v have unconsistent sizes.");
+
+  if (isBlockAllocatedIn[num]) delete vect[num];
+  vect[num] = newV;
+  isBlockAllocatedIn[num] = false;
 }
 
 void BlockVector::fill(double value)
@@ -483,21 +528,23 @@ BlockVector& BlockVector::operator /= (int m)
 
 void BlockVector::add(const  SiconosVector& v)
 {
-  if (v.isBlock())
-    SiconosVectorException::selfThrow("BlockVector::add(v) : v is a block vector and cannot be added into another block vector.");
 
   unsigned int tabVal = v.size();
   if (tabIndex.size() != 0)
     tabVal += size();
-  vect.push_back(new SimpleVector(v)); // Copy
+  if (!v.isBlock())
+    vect.push_back(new SimpleVector(v)); // Copy
+  else
+    vect.push_back(new BlockVector(v)); // Copy
+
   isBlockAllocatedIn.push_back(true);
   tabIndex.push_back(tabVal);
 }
 
 void BlockVector::addPtr(SiconosVector* v)
 {
-  if (v->isBlock())
-    SiconosVectorException::selfThrow("BlockVector::addPtr(v) : v is a block vector and cannot be added into another block vector.");
+  if (v == NULL)
+    SiconosVectorException::selfThrow("BlockVector:addPtr(v), v is a NULL vector.");
 
   unsigned int tabVal = v->size();
   if (tabIndex.size() != 0)

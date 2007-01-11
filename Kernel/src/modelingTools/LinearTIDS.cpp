@@ -140,11 +140,11 @@ bool LinearTIDS::checkDynamicalSystem()
 void LinearTIDS::computeRhs(const double time, const bool)
 {
   // compute right-hand side
-  *rhs = prod(*A, *x);
+  *x[1] = prod(*A, *x[0]);
 
   // add b if required
   if (b != NULL)
-    *rhs += *b;
+    *x[1] += *b;
 
   // compute and add Tu if required
   if (u != NULL)
@@ -155,17 +155,44 @@ void LinearTIDS::computeRhs(const double time, const bool)
     {
       if (isPlugin["T"]) // if T is a plug-in function
         computeT();
-      *rhs += prod(*T, *u);
+      *x[1] += prod(*T, *u);
     }
     else
-      *rhs += * u;
+      *x[1] += * u;
   }
 
-  *rhs += * r; // Warning: r update is done in Interactions/Relations
+  *x[1] += * r; // Warning: r update is done in Interactions/Relations
+  if (M != NULL)
+  {
+    // compute M-1 at the first call of the present function
+    if (invM == NULL)
+    {
+      invM = new SimpleMatrix(*M);
+      invM->PLUFactorizationInPlace();
+      invM->PLUInverseInPlace();
+    }
+
+    *(x[1]) = prod(*invM, *(x[1]));
+  }
 }
 
 void LinearTIDS::computeJacobianXRhs(const double time, const bool)
-{}
+{
+  if (M != NULL)
+  {
+    // compute M-1 at the first call of the present function
+    if (invM == NULL)
+    {
+      invM = new SimpleMatrix(*M);
+      invM->PLUFactorizationInPlace();
+      invM->PLUInverseInPlace();
+    }
+
+    *jacobianXRhs = prod(*invM, *A);
+  }
+  else
+    *jacobianXRhs = *A;
+}
 
 void LinearTIDS::display() const
 {

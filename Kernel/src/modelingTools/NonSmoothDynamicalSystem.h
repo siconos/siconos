@@ -29,6 +29,7 @@
 #include "NonSmoothDynamicalSystemXML.h"
 #include "DynamicalSystemsSet.h"
 #include "InteractionsSet.h"
+#include "Control.h"
 #include "check.h"
 #include <iostream>
 #include <map>
@@ -38,10 +39,15 @@
 /** Available Dynamical Systems types*/
 enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
 
+
 class Interaction;
 class DynamicalSystem;
 class Topology;
 class NonSmoothDynamicalSystemXML;
+class Control;
+
+/** A map that links a DynamicalSystem to its related control object */
+typedef std::map<DynamicalSystem*, Control*> ControlHandler;
 
 /** the Non Smooth Dynamical System composed with dynamical systems that interact alltogether.
  *
@@ -78,6 +84,9 @@ private:
   /** Flags to check whether pointers were allocated in class constructors or not */
   std::deque<bool> isEcVectorAllocatedIn;
   bool isTopologyAllocatedIn;
+
+  /** A container that links each DynamicalSystem of the NSDS to a Control object */
+  ControlHandler dsControl;
 
   /** default constructor
   *  \param (optional) a bool which determines if the problem is BVP (true) or IVP (false)

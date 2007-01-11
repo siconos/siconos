@@ -22,22 +22,15 @@
 using namespace std;
 
 LagrangianDSXML::LagrangianDSXML() :
-  DynamicalSystemXML(), ndofNode(NULL), qNode(NULL), q0Node(NULL), qMemoryNode(NULL), velocityNode(NULL),
-  velocity0Node(NULL), velocityMemoryNode(NULL),  MNode(NULL), NNLNode(NULL), FintNode(NULL), FextNode(NULL), jacobianQFintNode(NULL),
-  jacobianVelocityFintNode(NULL), jacobianQNNLNode(NULL), jacobianVelocityNNLNode(NULL), qMemoryXML(NULL), velocityMemoryXML(NULL)
+  DynamicalSystemXML(), qNode(NULL), q0Node(NULL), qMemoryNode(NULL), velocityNode(NULL),
+  velocity0Node(NULL), velocityMemoryNode(NULL),  MNode(NULL), NNLNode(NULL), FIntNode(NULL), FExtNode(NULL), qMemoryXML(NULL), velocityMemoryXML(NULL)
 {}
 
 LagrangianDSXML::LagrangianDSXML(xmlNodePtr  LagrangianDSNode, const bool& isBVP)
-  : DynamicalSystemXML(LagrangianDSNode, isBVP), ndofNode(NULL), qNode(NULL), q0Node(NULL), qMemoryNode(NULL), velocityNode(NULL),
-    velocity0Node(NULL), velocityMemoryNode(NULL),  MNode(NULL), NNLNode(NULL), FintNode(NULL), FextNode(NULL), jacobianQFintNode(NULL),
-    jacobianVelocityFintNode(NULL), jacobianQNNLNode(NULL), jacobianVelocityNNLNode(NULL), qMemoryXML(NULL), velocityMemoryXML(NULL)
+  : DynamicalSystemXML(LagrangianDSNode, isBVP), qNode(NULL), q0Node(NULL), qMemoryNode(NULL), velocityNode(NULL),
+    velocity0Node(NULL), velocityMemoryNode(NULL),  MNode(NULL), NNLNode(NULL), FIntNode(NULL), FExtNode(NULL), qMemoryXML(NULL), velocityMemoryXML(NULL)
 {
   xmlNodePtr node;
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_NDOF)) != NULL)
-    ndofNode = node;
-  else
-    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_NDOF + " not found.");
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_Q)) != NULL)
     qNode = node;
@@ -76,22 +69,31 @@ LagrangianDSXML::LagrangianDSXML(xmlNodePtr  LagrangianDSNode, const bool& isBVP
     NNLNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_FINT)) != NULL)
-    FintNode = node;
+    FIntNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_FEXT)) != NULL)
-    FextNode = node;
+    FExtNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_JACOBIANQFINT)) != NULL)
-    jacobianQFintNode = node;
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_JACOBIANVELOCITYFINT)) != NULL)
-    jacobianVelocityFintNode = node;
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_JACOBIANQQNLINERTIA)) != NULL)
-    jacobianQNNLNode = node;
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_JACOBIANVELOCITYQNLINERTIA)) != NULL)
-    jacobianVelocityNNLNode = node;
+  jacobianNNLNode.resize(2, NULL);
+  jacobianFIntNode.resize(2, NULL);
+  std::string name;
+  for (unsigned int i = 0; i < 2; ++i)
+  {
+    name = "Jacobian";
+    if (i)
+      name += "QFInt";
+    else
+      name += "VelocityFInt";
+    if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, name)) != NULL)
+      jacobianFIntNode[i] = node;
+    name = "Jacobian";
+    if (i)
+      name += "QNNL";
+    else
+      name += "VelocityNNL";
+    if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, name)) != NULL)
+      jacobianNNLNode[i] = node;
+  }
 }
 
 LagrangianDSXML::~LagrangianDSXML()

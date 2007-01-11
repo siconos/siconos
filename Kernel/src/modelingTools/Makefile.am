@@ -31,12 +31,12 @@ libModelingTools_la_SOURCES =  DynamicalSystemsSet.cpp InteractionsSet.cpp Compl
 		LagrangianLinearR.cpp LagrangianDS.cpp LagrangianR.cpp \
 		LagrangianLinearTIDS.cpp LinearDS.cpp LinearTIDS.cpp\
 		LinearTIR.cpp NewtonImpactNSL.cpp NewtonImpactFrictionNSL.cpp NonSmoothLaw.cpp NonSmoothDynamicalSystem.cpp Relation.cpp RelayNSL.cpp \
-		UnitaryRelation.cpp UnitaryRelationsSet.cpp \
+		UnitaryRelation.cpp UnitaryRelationsSet.cpp Control.cpp\
 		DynamicalSystemsSet.h  InteractionsSet.h ComplementarityConditionNSL.h \
 		DynamicalSystem.h Interaction.h LagrangianLinearR.h LagrangianDS.h LagrangianR.h LagrangianLinearTIDS.h \
 		LinearDS.h LinearTIDS.h LinearTIR.h \
 		NewtonImpactNSL.h NewtonImpactFrictionNSL.h NonSmoothLaw.h NonSmoothDynamicalSystem.h \
-		Relation.h RelayNSL.h UnitaryRelation.h UnitaryRelationsSet.h 
+		Relation.h RelayNSL.h UnitaryRelation.h UnitaryRelationsSet.h Control.h
 libModelingTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
 siconos_HEADERS = DynamicalSystemsSet.h InteractionsSet.h ComplementarityConditionNSL.h \
@@ -44,4 +44,4 @@ siconos_HEADERS = DynamicalSystemsSet.h InteractionsSet.h ComplementarityConditi
 		Topology.h LagrangianLinearR.h LagrangianDS.h LagrangianR.h LagrangianLinearTIDS.h \
 		LinearDS.h LinearTIDS.h LinearTIR.h NewtonImpactNSL.h NewtonImpactFrictionNSL.h \
 		NonSmoothLaw.h NonSmoothDynamicalSystem.h Relation.h RelayNSL.h UnitaryRelation.h \
-		UnitaryRelationsSet.h 
+		UnitaryRelationsSet.h Control.h

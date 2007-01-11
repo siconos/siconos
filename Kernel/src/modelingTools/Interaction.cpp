@@ -231,7 +231,7 @@ void Interaction::initializeMemory(const unsigned int numberOfDerivatives)
 
 // --- GETTERS/SETTERS ---
 
-void Interaction::setY(const VectorOfBlocks& newVector)
+void Interaction::setY(const VectorOfVectors& newVector)
 {
   // clear y
   for (unsigned int i = 0; i < y.size(); i++)
@@ -249,7 +249,7 @@ void Interaction::setY(const VectorOfBlocks& newVector)
   isYAllocatedIn.resize(size, true);
 }
 
-void Interaction::setYPtr(const VectorOfBlocks& newVector)
+void Interaction::setYPtr(const VectorOfVectors& newVector)
 {
   // clear y
   for (unsigned int i = 0; i < y.size(); i++)
@@ -299,7 +299,7 @@ void Interaction::setYPtr(const unsigned int  index, SiconosVector* newY)
   isYAllocatedIn[index] = false ;
 }
 
-void Interaction::setYOld(const VectorOfBlocks& newVector)
+void Interaction::setYOld(const VectorOfVectors& newVector)
 {
   // clear yOld
   for (unsigned int i = 0; i < yOld.size(); i++)
@@ -316,7 +316,7 @@ void Interaction::setYOld(const VectorOfBlocks& newVector)
   isYOldAllocatedIn.resize(size, true);
 }
 
-void Interaction::setYOldPtr(const VectorOfBlocks& newVector)
+void Interaction::setYOldPtr(const VectorOfVectors& newVector)
 {
   // clear yOld
   for (unsigned int i = 0; i < yOld.size(); i++)
@@ -365,7 +365,7 @@ void Interaction::setYOldPtr(const unsigned int  index, SiconosVector* newYOld)
   isYOldAllocatedIn[index] = false ;
 }
 
-void Interaction::setLambda(const VectorOfBlocks& newVector)
+void Interaction::setLambda(const VectorOfVectors& newVector)
 {
   // clear lambda
   for (unsigned int i = 0; i < lambda.size(); i++)
@@ -382,7 +382,7 @@ void Interaction::setLambda(const VectorOfBlocks& newVector)
   isLambdaAllocatedIn.resize(size, true);
 }
 
-void Interaction::setLambdaPtr(const VectorOfBlocks& newVector)
+void Interaction::setLambdaPtr(const VectorOfVectors& newVector)
 {
   // clear lambda
   for (unsigned int i = 0; i < lambda.size(); i++)
@@ -431,7 +431,7 @@ void Interaction::setLambdaPtr(const unsigned int  index, SiconosVector* newLamb
   isLambdaAllocatedIn[index] = false ;
 }
 
-void Interaction::setLambdaOld(const VectorOfBlocks& newVector)
+void Interaction::setLambdaOld(const VectorOfVectors& newVector)
 {
   // clear lambdaOld
   for (unsigned int i = 0; i < lambdaOld.size(); i++)
@@ -448,7 +448,7 @@ void Interaction::setLambdaOld(const VectorOfBlocks& newVector)
   isLambdaOldAllocatedIn.resize(size, true);
 }
 
-void Interaction::setLambdaOldPtr(const VectorOfBlocks& newVector)
+void Interaction::setLambdaOldPtr(const VectorOfVectors& newVector)
 {
   // clear lambdaOld
   for (unsigned int i = 0; i < lambdaOld.size(); i++)

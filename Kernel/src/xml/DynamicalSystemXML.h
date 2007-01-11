@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 /*! \file DynamicalSystemXML.h
 
@@ -35,7 +35,6 @@ class DynamicalSystem;
 class SiconosMemoryXML;
 
 //Tags
-const std::string DS_N = "n";
 const std::string DS_X0 = "x0";
 const std::string DS_X = "x";
 const std::string DS_R = "R";
@@ -45,6 +44,7 @@ const std::string DS_XMEMORY = "xMemory";
 const std::string DS_RMEMORY = "RMemory";
 const std::string DS_STEPSINMEMORY = "StepsInMemory";
 const std::string DS_F = "f";
+const std::string DS_M = "M";
 const std::string DS_JACOBIANXF = "jacobianXF";
 const std::string DS_MATRIXPLUGIN = "matrixPlugin";
 const std::string DS_VECTORPLUGIN = "vectorPlugin";
@@ -70,12 +70,12 @@ protected:
 
   xmlNodePtr rootDynamicalSystemXMLNode;/**< root node  */
   xmlNodePtr parentNode; /**< node that owns root node (NonSmoothDynamicalSystemNode)  */
-  xmlNodePtr nNode;  /**< nimber of degrees of freedom  */
   xmlNodePtr x0Node;/**< initial state */
   xmlNodePtr xNode;/**<  state (usefull is start from recovery xml-file*/
   xmlNodePtr stepsInMemoryNode; /**< size of memory */
   xmlNodePtr xMemoryNode;/**<  memory vector for x*/
   xmlNodePtr rMemoryNode;/**< memory vector for r */
+  xmlNodePtr MNode; /**< M in \f$ M \dot x = Ax+b \f$ */
   xmlNodePtr fNode;/**< f(x,t) */
   xmlNodePtr jacobianXFNode;/**< jacobian of f according to x */
   xmlNodePtr uSizeNode;/**< size of control vector */
@@ -94,22 +94,22 @@ public:
   virtual ~DynamicalSystemXML();
 
   /** Build a DynamicalSystemXML object from the DynamicalSystem node of the xml DOMtree
-  *   \param an xmlNodePtr DynamicalSystemNode
-  *   \param bool isBVP : if true, NonSmoothDynamicalSystem is a Boundary value problem
-  */
+   *   \param an xmlNodePtr DynamicalSystemNode
+   *   \param bool isBVP : if true, NonSmoothDynamicalSystem is a Boundary value problem
+   */
   DynamicalSystemXML(xmlNodePtr DynamicalSystemNode, const bool&);
 
   /** Return the number of the DynamicalSystem
-  *   \return an integer
-  */
+   *   \return an integer
+   */
   inline const int getNumber() const
   {
     return SiconosDOMTreeTools::getAttributeValue<int>(rootDynamicalSystemXMLNode, NUMBER_ATTRIBUTE);
   }
 
   /** Return the type of the DynamicalSystem
-  *   \return a string
-  */
+   *   \return a string
+   */
   inline const std::string getType() const
   {
     std::string res((char*)rootDynamicalSystemXMLNode->name);
@@ -117,58 +117,40 @@ public:
   }
 
   /** Return the id of the DynamicalSystem
-  *   \return The string id of the DynamicalSystem
-  */
+   *   \return The string id of the DynamicalSystem
+   */
   inline const std::string getId() const
   {
     return SiconosDOMTreeTools::getStringAttributeValue(rootDynamicalSystemXMLNode, "Id");
   }
 
   /** return true if id is given
-  *  \return a bool
-  */
+   *  \return a bool
+   */
   inline bool hasId() const
   {
     return (xmlHasProp(rootDynamicalSystemXMLNode, (xmlChar*)"Id"));
   }
 
   /** to save the id of the DynamicalSystem
-  *   \param a string
-  */
+   *   \param a string
+   */
   inline void setId(const std::string& s)
   {
     SiconosDOMTreeTools::setStringAttributeValue(rootDynamicalSystemXMLNode, "Id", s);
   }
 
-  /** Return the number of degrees of freedom of the DynamicalSystem
-  *   \return an unsigned integer
-  */
-  inline const unsigned int getN() const
-  {
-    return  SiconosDOMTreeTools::getContentValue<unsigned int>(nNode);
-  }
-
-  /** to save the number of degrees of freedom of the DynamicalSystem
-  *   \param an unsigned int
-  */
-  inline void setN(const unsigned int& n)
-  {
-    if (!hasN())
-      nNode = SiconosDOMTreeTools::createIntegerNode(rootDynamicalSystemXMLNode, DS_N, n);
-    else SiconosDOMTreeTools::setIntegerContentValue(nNode, n);
-  }
-
   /** Returns initial state of the DynamicalSystem (x0)
-  *   \return a SimpleVector
-  */
+   *   \return a SimpleVector
+   */
   inline const SimpleVector getX0() const
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(x0Node);
   }
 
   /** save x0 of the DynamicalSystem
-  *   \param a SiconosVector
-  */
+   *   \param a SiconosVector
+   */
   inline void setX0(const SiconosVector& v)
   {
     if (!hasX0())
@@ -177,16 +159,16 @@ public:
   }
 
   /** Returns the x state-vector of the DynamicalSystem
-  *   \return SimpleVector
-  */
+   *   \return SimpleVector
+   */
   inline const SimpleVector getX() const
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(xNode);
   }
 
   /** save x of the DynamicalSystem
-  *   \param a SiconosVector
-  */
+   *   \param a SiconosVector
+   */
   inline void setX(const SiconosVector& v)
   {
     if (!hasX())
@@ -194,49 +176,62 @@ public:
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(xNode, v);
   }
 
+  /** return the optional matrix M of the LinearDSXML
+   *   \return a SimpleMatrix
+   */
+  inline const SimpleMatrix getM() const
+  {
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(MNode);
+  }
+
+  /** to save the optional M of the LinearDSXML
+   *   \param The M SiconosMatrix to save
+   */
+  void setM(const SiconosMatrix& m);
+
   /** Returns the steps in memory for the DynamicalSystemXML
-  *   \return The integer number of steps in memory for the DynamicalSystemXML
-  */
+   *   \return The integer number of steps in memory for the DynamicalSystemXML
+   */
   inline const unsigned int getStepsInMemory() const
   {
     return  SiconosDOMTreeTools::getContentValue<unsigned int>(stepsInMemoryNode);
   }
 
   /** to save the steps in memory for the DynamicalSystemXML
-  *   \param an unsigned int
-  */
+   *   \param an unsigned int
+   */
   void setStepsInMemory(const unsigned int&);
 
   /** Returns the xMemoryXML* of the DynamicalSystemXML
-  *   \return SiconosMemoryXML*
-  */
+   *   \return SiconosMemoryXML*
+   */
   inline SiconosMemoryXML* getXMemoryXML() const
   {
     return xMemoryXML;
   }
 
   /** to save the XMemory of the DynamicalSystemXML
-  *   \param SiconosMemory* smem : SiconosMemory to save
-  */
+   *   \param SiconosMemory* smem : SiconosMemory to save
+   */
   void setXMemory(const SiconosMemory&);
 
   /** Returns the rMemoryXML* of the DynamicalSystemXML
-  *   \return SiconosMemoryXML*
-  */
+   *   \return SiconosMemoryXML*
+   */
   inline SiconosMemoryXML* getRMemoryXML() const
   {
     return rMemoryXML;
   }
 
   /** to save the rMemory of the DynamicalSystemXML
-  *   \param SiconosMemory*
-  */
+   *   \param SiconosMemory*
+   */
   void setRMemory(const SiconosMemory&);
 
   // === f ===
   /** Return the name of the f plug-in
-  *  \return a string
-  */
+   *  \return a string
+   */
   inline const std::string getFPlugin() const
   {
     if (!isFPlugin())
@@ -245,8 +240,8 @@ public:
   }
 
   /** return f vector
-  *   \return SimpleVector
-  */
+   *   \return SimpleVector
+   */
   inline const SimpleVector getFVector() const
   {
     if (isFPlugin())
@@ -255,19 +250,19 @@ public:
   }
 
   /** to save the f vector
-  *   \param a SiconosVector
-  */
+   *   \param a SiconosVector
+   */
   void setFVector(const SiconosVector&v);
 
   /** to save the F plugin
-  *   \param a string (name of the plug-in)
-  */
+   *   \param a string (name of the plug-in)
+   */
   void setFPlugin(const std::string& plugin);
 
   // === JacobianXF ===
   /** Return the name of the jacobianXF plug-in
-  *  \return a string
-  */
+   *  \return a string
+   */
   inline const std::string getJacobianXFPlugin() const
   {
     if (!isJacobianXFPlugin())
@@ -276,8 +271,8 @@ public:
   }
 
   /** return jacobianXF matrix
-  *   \return SimpleMatrix
-  */
+   *   \return SimpleMatrix
+   */
   inline const SimpleMatrix getJacobianXFMatrix() const
   {
     if (isJacobianXFPlugin())
@@ -286,17 +281,17 @@ public:
   }
 
   /** to save the jacobianXF matrix
-  *   \param a SiconosMatrix
-  */
+   *   \param a SiconosMatrix
+   */
   void setJacobianXFMatrix(const SiconosMatrix&v);
 
   /** to save the JacobianXF plugin of the LagrangianDSXML
-  *   \param a string (name of the plug-in)
-  */
+   *   \param a string (name of the plug-in)
+   */
   void setJacobianXFPlugin(const std::string& plugin);
 
   /** get size of vector u
-  */
+   */
   inline const unsigned int getUSize() const
   {
     if (!hasUSize())
@@ -305,8 +300,8 @@ public:
   }
 
   /** to save the size of vector u
-  *   \param an unsigned int
-  */
+   *   \param an unsigned int
+   */
   inline void setUSize(const unsigned int& us)
   {
     if (!hasUSize())
@@ -317,8 +312,8 @@ public:
   // --- u ---
 
   /** Return the u plug-in name
-  *   \return a string
-  */
+   *   \return a string
+   */
   inline const std::string getUPlugin() const
   {
     if (!isUPlugin())
@@ -327,9 +322,9 @@ public:
   }
 
   /** Return u vector
-  *   \return a SimpleVector
-  *  \exception XMLException
-  */
+   *   \return a SimpleVector
+   *  \exception XMLException
+   */
   inline const SimpleVector getUVector() const
   {
     if (isUPlugin())
@@ -339,20 +334,20 @@ public:
   }
 
   /** to save the u vector
-  *   \param a SiconosVector
-  */
+   *   \param a SiconosVector
+   */
   void setUVector(const SiconosVector&);
 
   /** to save the u plugin
-  *   \param a string (name of the plug-in)
-  */
+   *   \param a string (name of the plug-in)
+   */
   void setUPlugin(const std::string& plugin);
 
   // --- T ---
 
   /** get T Matrix
-  *   \return a SimpleMatrix
-  */
+   *   \return a SimpleMatrix
+   */
   inline const SimpleMatrix getTMatrix() const
   {
     if (isTPlugin())
@@ -361,8 +356,8 @@ public:
   }
 
   /** get Plugin name to compute T
-  *  \exception XMLException
-  */
+   *  \exception XMLException
+   */
   inline const std::string getTPlugin() const
   {
     if (!isTPlugin())
@@ -371,126 +366,126 @@ public:
   }
 
   /** save T
-  *   \param The SiconosMatrix to save
-  */
+   *   \param The SiconosMatrix to save
+   */
   void setT(const SiconosMatrix &m);
 
   /** to save the T plugin
-  *   \param a string (name of the plug-in)
-  */
+   *   \param a string (name of the plug-in)
+   */
   void setTPlugin(const std::string& plugin);
 
-  /** returns true if nNode is defined
-  *  \return true if nNode is defined
-  */
-  inline bool hasN() const
-  {
-    return (nNode != NULL);
-  }
-
   /** returns true if x0Node is defined
-  *  \return true if x0Node is defined
-  */
+   *  \return true if x0Node is defined
+   */
   inline bool hasX0() const
   {
     return (x0Node != NULL);
   }
 
   /** returns true if xNode is defined
-  *  \return true if xNode is defined
-  */
+   *  \return true if xNode is defined
+   */
   inline bool hasX() const
   {
     return (xNode != NULL);
   }
 
   /** returns true if stepsInMemoryNode is defined
-  *  \return true if stepsInMemoryNode is defined
-  */
+   *  \return true if stepsInMemoryNode is defined
+   */
   inline bool hasStepsInMemory() const
   {
     return (stepsInMemoryNode != NULL);
   }
 
   /** returns true if xMemoryNode is defined
-  *  \return true if xMemoryNode is defined
-  */
+   *  \return true if xMemoryNode is defined
+   */
   inline bool hasXMemory()const
   {
     return (xMemoryNode != NULL);
   }
 
   /** returns true if RMemory is defined
-  *  \return true if RMemory is defined
-  */
+   *  \return true if RMemory is defined
+   */
   inline bool hasRMemory() const
   {
     return (rMemoryNode != NULL);
   }
 
+  /** returns true if MNode is defined
+   *  \return true if MNode is defined
+   */
+  inline bool hasM() const
+  {
+    return (MNode != NULL);
+  }
+
   /** returns true if fNode is defined
-  *  \return true if fNode is defined
-  */
+   *  \return true if fNode is defined
+   */
   inline bool hasF() const
   {
     return (fNode != NULL);
   }
 
   /** returns true if jacobianXFNode is defined
-  *  \return true if jacobianXFNode is defined
-  */
+   *  \return true if jacobianXFNode is defined
+   */
   inline bool hasJacobianXF() const
   {
     return (jacobianXFNode != NULL);
   }
 
   /** returns true if uSizeNode is defined
-  *  \return true if jacobianXFNode is defined
-  */
+   *  \return true if jacobianXFNode is defined
+   */
   inline bool hasUSize() const
   {
     return (uSizeNode != NULL);
   }
 
   /** returns true if uNode is defined
-  *  \return true if jacobianXFNode is defined
-  */
+   *  \return true if jacobianXFNode is defined
+   */
   inline bool hasU() const
   {
     return (uNode != NULL);
   }
 
   /** returns true if TNode is defined
-  *  \return true if jacobianXFNode is defined
-  */
+   *  \return true if jacobianXFNode is defined
+   */
   inline bool hasT() const
   {
     return (TNode != NULL);
   }
 
   /** Return true if f is calculated from a plugin
-  */
+   */
   inline bool isFPlugin() const
   {
     return xmlHasProp((xmlNodePtr)fNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
   }
 
   /** Return true if jacobianXF is calculated from a plugin
-  */
+   */
   inline bool isJacobianXFPlugin() const
   {
     return xmlHasProp((xmlNodePtr)jacobianXFNode, (xmlChar *) DS_MATRIXPLUGIN.c_str());
   }
 
   /** Return true if u is calculated from a plugin
-  */
+   */
   inline bool isUPlugin() const
   {
     return xmlHasProp((xmlNodePtr)uNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
   }
 
   /** Return true if T is calculated from a plugin
-  */
+   */
   inline bool isTPlugin() const
   {
     return xmlHasProp((xmlNodePtr)TNode, (xmlChar *) DS_MATRIXPLUGIN.c_str());

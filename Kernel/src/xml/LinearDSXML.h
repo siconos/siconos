@@ -28,7 +28,6 @@
 #include "DynamicalSystemXML.h"
 
 const std::string LDS_A = "A";
-const std::string LDS_Mxdot = "Mxdot";
 const std::string LDS_B = "b";
 
 class SimpleMatrix;
@@ -47,9 +46,8 @@ class LinearDSXML : public DynamicalSystemXML
 private:
 
   //Nodes
-  xmlNode * ANode; /**< A in \f$ Mxdot \dot x = Ax+b \f$ */
-  xmlNode * MxdotNode; /**< Mxdot in \f$ Mxdot \dot x = Ax+b \f$ */
-  xmlNode * bNode; /**< b in \f$ Mxdot \dot x = Ax+b \f$ */
+  xmlNode * ANode; /**< A in \f$ M \dot x = Ax+b \f$ */
+  xmlNode * bNode; /**< b in \f$ M \dot x = Ax+b \f$ */
 
 public:
 
@@ -96,19 +94,6 @@ public:
   *   \param a string (name of the plug-in)
   */
   void setAPlugin(const std::string& plugin);
-
-  /** return the optional matrix Mxdot of the LinearDSXML
-  *   \return a SimpleMatrix
-  */
-  inline const SimpleMatrix getMxdot() const
-  {
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(MxdotNode);
-  }
-
-  /** to save the optional Mxdot of the LinearDSXML
-  *   \param The Mxdot SiconosMatrix to save
-  */
-  void setMxdot(const SiconosMatrix& m);
 
   /** Return the b plug-in name of the LinearDSXML
   *   \return a string
@@ -161,14 +146,6 @@ public:
   inline bool hasA() const
   {
     return (ANode != NULL);
-  }
-
-  /** returns true if MxdotNode is defined
-  *  \return true if MxdotNode is defined
-  */
-  inline bool hasMxdot() const
-  {
-    return (MxdotNode != NULL);
   }
 
   /** returns true if bNode is defined

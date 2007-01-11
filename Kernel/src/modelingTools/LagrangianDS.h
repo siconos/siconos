@@ -29,6 +29,15 @@
 #include "BlockMatrix.h"
 #include<map>
 
+/** Map used to save the list of plug-in names. */
+typedef std::map<std::string, std::string> NamesList;
+
+/** Pointer to function for plug-in. For fInt and its jacobian. */
+typedef void (*FPtr6)(unsigned int, double, const double*, const double*, double*, double*);
+
+/** Pointer to function for plug-in. For NNL and its jacobian. */
+typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, double*);
+
 class LagrangianDSXML;
 
 /** Lagrangian non linear dynamical systems - Derived from DynamicalSystem -
@@ -101,7 +110,12 @@ class LagrangianDSXML;
  *        => computeRhs            (not set function)
  *        => computeJacobianXRhs   (not set function)
  *
- *  \todo: add a check function (for example check that NNL plug-in given => jacobian required  ...)
+ * About notation:
+ *    - q[i] is the derivative number i of q.
+ * Thus: q[0]=\f$ q \f$, global coordinates, q[1]=\f$ \dot q\f$, velocity, q[2]=\f$ \ddot q \f$, acceleration.
+ *    - qFree is the state of the system when no non-smooth effect is taken into account. qFree[i] corresponds to q[i]
+ *
+ *
  */
 class LagrangianDS : public DynamicalSystem
 {
@@ -112,56 +126,54 @@ protected:
   /** number of degrees of freedom of the system */
   unsigned int ndof;
 
-  /** coordinates of the system */
-  SimpleVector *q;
+  /** state of the system. See details on top of page. */
+  VectorOfVectors q;
+
   /** initial coordinates of the system */
-  SimpleVector *q0;
+  SiconosVector* q0;
+
+  /** initial velocity of the system */
+  SiconosVector* velocity0;
+
   /** free state of the system */
-  SimpleVector *qFree;
+  VectorOfVectors qFree;
+
   /** memory of previous coordinates of the system */
   SiconosMemory *qMemory;
 
-  SimpleVector *velocity;/**<velocity of the system*/
-  SimpleVector *velocity0; /**< initial velocity of the system*/
-  SimpleVector *velocityFree;/**<free Velocity*/
-  SiconosMemory *velocityMemory;/**<memory of previous velocities of the system */
+  /** memory of previous velocities of the system */
+  SiconosMemory *velocityMemory;
 
   /** "Reaction" due to the non smooth law - The index corresponds to the dynamic level. */
-  std::vector<SimpleVector*> p;
+  std::vector<SiconosVector*> p;
 
   /** mass of the system */
   SiconosMatrix *mass;
-  /** internal strength of the system */
-  SimpleVector *fInt;
-  /** external strength of the system */
-  SimpleVector *fExt;
-  /** non-linear inertia term of the system */
-  SimpleVector *NNL;
-  /** jacobian/coordinates of internal strength */
-  SiconosMatrix *jacobianQFInt;
-  /** jacobian/velocity of internal strength */
-  SiconosMatrix *jacobianVelocityFInt;
-  /** jacobian/coordinates of inertia */
-  SiconosMatrix *jacobianQNNL;
-  /** jacobian/velocity of inertie */
-  SiconosMatrix *jacobianVelocityNNL;
 
-  /* contains the name of the plugin used to compute the mass */
-  std::string  massFunctionName;
-  /* contains the name of the plugin used to compute fInt */
-  std::string  fIntFunctionName;
-  /* contains the name of the plugin used to compute fExt */
-  std::string  fExtFunctionName;
-  /* contains the name of the plugin used to compute jacobianQFInt */
-  std::string  jacobianQFIntFunctionName;
-  /* contains the name of the plugin used to compute jacobianQNNL */
-  std::string  jacobianQNNLFunctionName;
-  /* contains the name of the plugin used to compute jacobianVelocityFInt */
-  std::string  jacobianVelocityFIntFunctionName;
-  /* contains the name of the plugin used to compute jacobianVelocityNNL */
-  std::string  jacobianVelocityNNLFunctionName;
-  /* contains the name of the plugin used to compute NNL */
-  std::string  NNLFunctionName;
+  /** internal strength of the system */
+  SiconosVector *fInt;
+
+  /** jacobian/coordinates, jacobianFInt[0] and velocity, jacobianFInt[1], of internal strength */
+  VectorOfMatrices jacobianFInt;
+
+  /** external strength of the system */
+  SiconosVector *fExt;
+
+  /** non-linear inertia term of the system */
+  SiconosVector *NNL;
+
+  /** jacobian/coordinates, jacobianNNL[0] and velocity, jacobianNNL[1], of NNL */
+  VectorOfMatrices jacobianNNL;
+
+  /** fL(q[0],q[1],t)= fExt - fInt -NNL */
+  SiconosVector * fL;
+
+  /** jacobian/coordinates, jacobianFL[0], and velocity, jacobianFL[1], of fL */
+  VectorOfMatrices jacobianFL;
+
+  /* contains the names of the various plug-in. Example: pluginNames["mass"] is the function used to compute the mass.
+   Id are the names of the member (mass, fInt ...) */
+  NamesList pluginNames;
 
   /** class for manage plugin (open, close librairy...) */
   SiconosSharedLibrary cShared;
@@ -184,7 +196,7 @@ protected:
    * @param[in,out] fInt : pointer to the first element of fInt
    * @param[in,out] param  : a vector of user-defined parameters
    */
-  void (*computeFIntPtr)(unsigned int, double, const double*, const double*, double*, double*);
+  FPtr6 computeFIntPtr;
 
   /** LagrangianDS plug-in to compute external forces \f$F_{Ext}(t)\f$, id = "fExt"
    * @param sizeOfq : size of vector q
@@ -201,9 +213,9 @@ protected:
    * @param[in,out] NNL : pointer to the first element of NNL
    * @param[in,out] param  : a vector of user-defined parameters
    */
-  void (*computeNNLPtr)(unsigned int, const double*, const double*, double*, double*);
+  FPtr5 computeNNLPtr;
 
-  /** LagrangianDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id = "jacobianQFInt"
+  /** LagrangianDS plug-in to compute \f$\nabla_qF_{Int}(\dot q, q, t)\f$, id = "jacobianFInt0" and \f$\nabla_{\dot q}F_{Int}(\dot q, q, t)\f$, id = "jacobianFInt1"
    * @param sizeOfq : size of vector q
    * @param time : current time
    * @param q : pointer to the first element of q
@@ -211,35 +223,16 @@ protected:
    * @param[in,out] jacob : pointer to the first element of the jacobian
    * @param[in,out] param  : a vector of user-defined parameters
    */
-  void (*computeJacobianQFIntPtr)(unsigned int, double, const double*, const double*, double*, double*);
+  std::vector<FPtr6> computeJacobianFIntPtr;
 
-  /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}F_{Int}(\dot q, q, t)\f$, id = "jacobianVelocityFInt"
-   * @param sizeOfq : size of vector q
-   * @param time : current time
-   * @param q : pointer to the first element of q
-   * @param velocity : pointer to the first element of velocity
-   * @param[in,out] jacob : pointer to the first element of the jacobian
-   * @param[in,out] param  : a vector of user-defined parameters
-   */
-  void (*computeJacobianVelocityFIntPtr)(unsigned int, double, const double*, const double*, double*, double*);
-
-  /** LagrangianDS plug-in to compute \f$\nabla_qNNL(\dot q, q)\f$, id = "jacobianQNNL"
+  /** LagrangianDS plug-in to compute \f$\nabla_qNNL(\dot q, q)\f$, id = "jacobianNNL0" and \f$\nabla_{\dot q}NNL(\dot q, q)\f$, id = "jacobianNNL1"
    * @param sizeOfq : size of vector q
    * @param q : pointer to the first element of q
    * @param velocity : pointer to the first element of velocity
    * @param[in,out] jacob : pointer to the first element of the jacobian
    * @param[in,out] param  : a vector of user-defined parameters
    */
-  void (*computeJacobianQNNLPtr)(const unsigned int, const double*, const double*, double*, double*);
-
-  /** LagrangianDS plug-in to compute \f$\nabla_{\dot q}NNL(\dot q, q)\f$, id = "jacobianVelocityNNL"
-   * @param sizeOfq : size of vector q
-   * @param q : pointer to the first element of q
-   * @param velocity : pointer to the first element of velocity
-   * @param[in,out] jacob : pointer to the first element of the jacobian
-   * @param[in,out] param  : a vector of user-defined parameters
-   */
-  void (*computeJacobianVelocityNNLPtr)(unsigned int, const double*, const double*, double*, double*);
+  std::vector<FPtr5> computeJacobianNNLPtr;
 
   /** Specific variables to handle links with DynamicalSystem class */
   /** \var workMatrix
@@ -273,29 +266,24 @@ public:
   /** constructor from an xml file
    *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
    *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
-   *  \exception RuntimeException
    */
   LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
   /** constructor from a minimum set of data
    *  \param int : the number for this DynamicalSystem
-   *  \param int : the dimension of this DynamicalSystem
-   *  \param SimpleVector : initial coordinates of this DynamicalSystem
-   *  \param SimpleVector : initial velocity of this DynamicalSystem
+   *  \param SiconosVector : initial coordinates of this DynamicalSystem
+   *  \param SiconosVector : initial velocity of this DynamicalSystem
    *  \param SiconosMatrix : mass matrix
-   *  \exception RuntimeException
    */
-  LagrangianDS(int, unsigned int, const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
+  LagrangianDS(int, const SiconosVector&, const SiconosVector&, const SiconosMatrix&);
 
   /** constructor from a minimum set of data
    *  \param int : the number for this DynamicalSystem
-   *  \param int : the dimension of this DynamicalSystem
-   *  \param SimpleVector : initial coordinates of this DynamicalSystem
-   *  \param SimpleVector : initial velocity of this DynamicalSystem
+   *  \param SiconosVector : initial coordinates of this DynamicalSystem
+   *  \param SiconosVector : initial velocity of this DynamicalSystem
    *  \param string: plugin path to compute mass matrix
-   *  \exception RuntimeException
    */
-  LagrangianDS(int, unsigned int, const SimpleVector& , const SimpleVector&, const std::string& = "DefaultPlugin:computeMass");
+  LagrangianDS(int, const SiconosVector& , const SiconosVector&, const std::string& = "DefaultPlugin:computeMass");
 
   /** copy constructor
    *  \param a Dynamical system to copy
@@ -365,26 +353,26 @@ public:
    */
   inline const SimpleVector getQ() const
   {
-    return *q;
+    return *q[0];
   }
 
   /** get q
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getQPtr() const
+  inline SiconosVector* getQPtr() const
   {
-    return q;
+    return q[0];
   }
 
   /** set the value of q to newValue
-   *  \param SimpleVector newValue
+   *  \param SiconosVector newValue
    */
-  void setQ(const SimpleVector&);
+  void setQ(const SiconosVector&);
 
   /** set Q to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param SiconosVector * newPtr
    */
-  void setQPtr(SimpleVector *newPtr);
+  void setQPtr(SiconosVector *newPtr);
 
   // -- q0 --
 
@@ -397,50 +385,50 @@ public:
   }
 
   /** get q0
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getQ0Ptr() const
+  inline SiconosVector* getQ0Ptr() const
   {
     return q0;
   }
 
   /** set the value of q0 to newValue
-   *  \param SimpleVector newValue
+   *  \param SiconosVector newValue
    */
-  void setQ0(const SimpleVector&);
+  void setQ0(const SiconosVector&);
 
   /** set Q0 to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param SiconosVector * newPtr
    */
-  void setQ0Ptr(SimpleVector *newPtr);
+  void setQ0Ptr(SiconosVector *newPtr);
 
   // -- qFree --
 
-  /** get the value of qFree
+  /** get the value of qFree[0]
    *  \return SimpleVector
    */
   inline const SimpleVector getQFree() const
   {
-    return *qFree;
+    return *qFree[0];
   }
 
-  /** get qFree
-   *  \return pointer on a SimpleVector
+  /** get qFree[0]
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getQFreePtr() const
+  inline SiconosVector* getQFreePtr() const
   {
-    return qFree;
+    return qFree[0];
   }
 
-  /** set the value of qFree to newValue
-   *  \param SimpleVector newValue
+  /** set the value of qFree[0] to newValue
+   *  \param SiconosVector newValue
    */
-  void setQFree(const SimpleVector&);
+  void setQFree(const SiconosVector&);
 
   /** set QFree to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param SiconosVector * newPtr
    */
-  void setQFreePtr(SimpleVector *newPtr);
+  void setQFreePtr(SiconosVector *newPtr);
 
   // Q memory
 
@@ -477,26 +465,26 @@ public:
    */
   inline const SimpleVector getVelocity() const
   {
-    return *velocity;
+    return *q[1];
   }
 
   /** get velocity
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getVelocityPtr() const
+  inline SiconosVector* getVelocityPtr() const
   {
-    return velocity;
+    return q[1];
   }
 
   /** set the value of velocity to newValue
-   *  \param SimpleVector newValue
+   *  \param SiconosVector newValue
    */
-  void setVelocity(const SimpleVector&);
+  void setVelocity(const SiconosVector&);
 
   /** set Velocity to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param SiconosVector * newPtr
    */
-  void setVelocityPtr(SimpleVector *newPtr);
+  void setVelocityPtr(SiconosVector *newPtr);
 
   // -- velocity0 --
 
@@ -509,57 +497,57 @@ public:
   }
 
   /** get velocity0
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getVelocity0Ptr() const
+  inline SiconosVector* getVelocity0Ptr() const
   {
     return velocity0;
   }
 
   /** set the value of velocity0 to newValue
-   *  \param SimpleVector newValue
+   *  \param SiconosVector newValue
    */
-  void setVelocity0(const SimpleVector&);
+  void setVelocity0(const SiconosVector&);
 
   /** set Velocity0 to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param SiconosVector * newPtr
    */
-  void setVelocity0Ptr(SimpleVector *newPtr) ;
+  void setVelocity0Ptr(SiconosVector *newPtr) ;
 
-  // -- velocityFree --
+  // -- qFree[1] --
 
-  /** get the value of velocityFree
+  /** get the value of qFree[1]
    *  \return SimpleVector
    */
   inline const SimpleVector getVelocityFree() const
   {
-    return *velocityFree;
+    return *qFree[1];
   }
 
-  /** get velocityFree
-   *  \return pointer on a SimpleVector
+  /** get qFree[1]
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getVelocityFreePtr() const
+  inline SiconosVector* getVelocityFreePtr() const
   {
-    return velocityFree;
+    return qFree[1];
   }
 
-  /** set the value of velocityFree to newValue
-   *  \param SimpleVector newValue
+  /** set the value of qFree[1] to newValue
+   *  \param SiconosVector newValue
    */
-  void setVelocityFree(const SimpleVector&);
+  void setVelocityFree(const SiconosVector&);
 
   /** set VelocityFree to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param SiconosVector * newPtr
    */
-  void setVelocityFreePtr(SimpleVector *newPtr);
+  void setVelocityFreePtr(SiconosVector *newPtr);
 
   // -- acceleration --
 
   /** get acceleration
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  SimpleVector* getAccelerationPtr() const ;
+  SiconosVector* getAccelerationPtr() const ;
 
   // Velocity memory
 
@@ -602,24 +590,24 @@ public:
 
   /** get p
    *  \param unsigned int, required level for p, default = 2
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getPPtr(const unsigned int level = 2) const
+  inline SiconosVector* getPPtr(const unsigned int level = 2) const
   {
     return p[level];
   }
 
   /** set the value of p to newValue
    *  \param unsigned int, required level for p, default = 2
-   *  \param SimpleVector newValue
+   *  \param SiconosVector newValue
    */
-  void setP(const SimpleVector&, const unsigned int level = 2);
+  void setP(const SiconosVector&, const unsigned int level = 2);
 
   /** set P to pointer newPtr
    *  \param unsigned int, required level for p, default = 2
-   *  \param SimpleVector * newPtr
+   *  \param SiconosVector * newPtr
    */
-  void setPPtr(SimpleVector *newPtr, const unsigned int level = 2);
+  void setPPtr(SiconosVector *newPtr, const unsigned int level = 2);
 
   // -- Mass --
 
@@ -639,7 +627,8 @@ public:
     return mass;
   }
 
-  /** get inverse of Mass - Warning: in this function we do not checked that tha matrix is up to date. If M depends on q, it may require a recomputation before the get.
+  /** get inverse of Mass - Warning: in this function we do not checked that the matrix is up to date.
+   *  If M depends on q, it may require a recomputation before the get.
    *  \return pointer to a SiconosMatrix
    */
   SiconosMatrix* getInverseOfMassPtr();
@@ -665,22 +654,22 @@ public:
   }
 
   /** get fInt
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getFIntPtr() const
+  inline SiconosVector* getFIntPtr() const
   {
     return fInt;
   }
 
   /** set the value of fInt to newValue
-   *  \param SimpleVector newValue
+   *  \param SiconosVector newValue
    */
-  void setFInt(const SimpleVector&);
+  void setFInt(const SiconosVector&);
 
   /** set FInt to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param SiconosVector * newPtr
    */
-  void setFIntPtr(SimpleVector *newPtr);
+  void setFIntPtr(SiconosVector *newPtr);
 
   // -- Fext --
 
@@ -693,22 +682,22 @@ public:
   }
 
   /** get fExt
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getFExtPtr() const
+  inline SiconosVector* getFExtPtr() const
   {
     return fExt;
   }
 
   /** set the value of fExt to newValue
-   *  \param SimpleVector newValue
+   *  \param SiconosVector newValue
    */
-  void setFExt(const SimpleVector&);
+  void setFExt(const SiconosVector&);
 
   /** set FExt to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param SiconosVector * newPtr
    */
-  void setFExtPtr(SimpleVector *newPtr);
+  void setFExtPtr(SiconosVector *newPtr);
 
   // -- NNL --
 
@@ -721,197 +710,153 @@ public:
   }
 
   /** get NNL
-   *  \return pointer on a SimpleVector
+   *  \return pointer on a SiconosVector
    */
-  inline SimpleVector* getNNLPtr() const
+  inline SiconosVector* getNNLPtr() const
   {
     return NNL;
   }
 
   /** set the value of NNL to newValue
-   *  \param SimpleVector newValue
+   *  \param SiconosVector newValue
    */
-  void setNNL(const SimpleVector&);
+  void setNNL(const SiconosVector&);
 
   /** set NNL to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param SiconosVector * newPtr
    */
-  void setNNLPtr(SimpleVector *newPtr);
+  void setNNLPtr(SiconosVector *newPtr);
 
-  // -- Jacobian Q Fint --
+  // -- Jacobian Fint --
 
-  /** get the value of JacobianQFInt
+  /** get the value of JacobianFInt[i]
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \return SimpleMatrix
    */
-  inline const SimpleMatrix getJacobianQFInt() const
+  inline const SimpleMatrix getJacobianFInt(unsigned int i) const
   {
-    return *jacobianQFInt;
+    return *jacobianFInt[i];
   }
 
-  /** get JacobianQFInt
+  /** get JacobianFInt[i]
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianQFIntPtr() const
+  inline SiconosMatrix* getJacobianFIntPtr(unsigned int i) const
   {
-    return jacobianQFInt;
+    return jacobianFInt[i];
   }
 
-  /** set the value of JacobianQFInt to newValue
+  /** set the value of JacobianFInt to newValue
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param SiconosMatrix newValue
    */
-  void setJacobianQFInt(const SiconosMatrix&);
+  void setJacobianFInt(unsigned int, const SiconosMatrix&);
 
-  /** set JacobianQFInt to pointer newPtr
+  /** set JacobianFInt to pointer newPtr
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param SiconosMatrix * newPtr
    */
-  void setJacobianQFIntPtr(SiconosMatrix *newPtr);
+  void setJacobianFIntPtr(unsigned int, SiconosMatrix *newPtr);
 
-  // -- Jacobian velocity Fint --
+  // -- Jacobian NNL --
 
-  /** get the value of JacobianVelocityFInt
+  /** get the value of JacobianNNL
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \return SimpleMatrix
    */
-  inline const SimpleMatrix getJacobianVelocityFInt() const
+  inline const SimpleMatrix getJacobianNNL(unsigned int i) const
   {
-    return *jacobianVelocityFInt;
+    return *jacobianNNL[i];
   }
 
-  /** get JacobianVelocityFInt
+  /** get JacobianNNL
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianVelocityFIntPtr() const
+  inline SiconosMatrix* getJacobianNNLPtr(unsigned int i) const
   {
-    return jacobianVelocityFInt;
+    return jacobianNNL[i];
   }
 
-  /** set the value of JacobianVelocityFInt to newValue
+  /** set the value of JacobianNNL to newValue
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param SiconosMatrix newValue
    */
-  void setJacobianVelocityFInt(const SiconosMatrix&);
+  void setJacobianNNL(unsigned int, const SiconosMatrix&);
 
-  /** set JacobianVelocityFInt to pointer newPtr
+  /** set JacobianNNL to pointer newPtr
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param SiconosMatrix * newPtr
    */
-  void setJacobianVelocityFIntPtr(SiconosMatrix *newPtr);
+  void setJacobianNNLPtr(unsigned int, SiconosMatrix *newPtr);
 
-  // -- Jacobian Q NNL --
+  // -- fL --
 
-  /** get the value of JacobianQNNL
+  /** get the value of fL
+   *  \return SimpleVector
+   */
+  inline const SimpleVector getFL() const
+  {
+    return *fL;
+  }
+
+  /** get fL
+   *  \return pointer on a SiconosVector
+   */
+  inline SiconosVector* getFLPtr() const
+  {
+    return fL;
+  }
+
+  /** set the value of fL to newValue
+   *  \param SiconosVector newValue
+   */
+  void setFL(const SiconosVector&);
+
+  /** set FL to pointer newPtr
+   *  \param SiconosVector * newPtr
+   */
+  void setFLPtr(SiconosVector *newPtr);
+
+  // -- Jacobian fL --
+
+  /** get the value of JacobianFL
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \return SimpleMatrix
    */
-  inline const SimpleMatrix getJacobianQNNL() const
+  inline const SimpleMatrix getJacobianFL(unsigned int i) const
   {
-    return *jacobianQNNL;
+    return *jacobianFL[i];
   }
 
-  /** get JacobianQNNL
+  /** get JacobianFL
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \return pointer on a SiconosMatrix
    */
-  inline SiconosMatrix* getJacobianQNNLPtr() const
+  inline SiconosMatrix* getJacobianFLPtr(unsigned int i) const
   {
-    return jacobianQNNL;
+    return jacobianFL[i];
   }
 
-  /** set the value of JacobianQNNL to newValue
+  /** set the value of JacobianFL to newValue
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param SiconosMatrix newValue
    */
-  void setJacobianQNNL(const SiconosMatrix&);
+  void setJacobianFL(unsigned int, const SiconosMatrix&);
 
-  /** set JacobianQNNL to pointer newPtr
+  /** set JacobianFL to pointer newPtr
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param SiconosMatrix * newPtr
    */
-  void setJacobianQNNLPtr(SiconosMatrix *newPtr);
+  void setJacobianFLPtr(unsigned int, SiconosMatrix *newPtr);
 
-  // -- Jacobian velocity NNL --
-
-  /** get the value of JacobianVelocityNNL
-   *  \return SimpleMatrix
-   */
-  inline const SimpleMatrix getJacobianVelocityNNL() const
-  {
-    return *jacobianVelocityNNL;
-  }
-
-  /** get JacobianVelocityNNL
-   *  \return pointer on a SiconosMatrix
-   */
-  inline SiconosMatrix* getJacobianVelocityNNLPtr() const
-  {
-    return jacobianVelocityNNL;
-  }
-
-  /** set the value of JacobianVelocityNNL to newValue
-   *  \param SiconosMatrix newValue
-   */
-  void setJacobianVelocityNNL(const SiconosMatrix&);
-
-  /** set JacobianVelocityNNL to pointer newPtr
-   *  \param SiconosMatrix * newPtr
-   */
-  void setJacobianVelocityNNLPtr(SiconosMatrix *newPtr);
-
-  /** get name of function that computes mass (if mass from plugin)
+  /** get name of function that computes "name"
    *  \return a string
    */
-  inline const std::string getMassFunctionName() const
+  inline const std::string getFunctionName(const std::string& name) const
   {
-    return massFunctionName;
-  }
-
-  /** get name of function that computes fInt (if fInt from plugin)
-   *  \return a string
-   */
-  inline const std::string getFIntFunctionName() const
-  {
-    return fIntFunctionName;
-  }
-
-  /** get name of function that computes fExt (if fExt from plugin)
-   *  \return a string
-   */
-  inline const std::string getFExtFunctionName() const
-  {
-    return fExtFunctionName;
-  }
-
-  /** get name of function that computes NNL (if NNL from plugin)
-   *  \return a string
-   */
-  inline const std::string getNNLFunctionName() const
-  {
-    return NNLFunctionName;
-  }
-
-  /** get name of function that computes jacobianQFInt (if jacobianQFInt from plugin)
-   *  \return a string
-   */
-  inline const std::string getJacobianQFIntFunctionName() const
-  {
-    return jacobianQFIntFunctionName;
-  }
-
-  /** get name of function that computes jacobianVelocityFInt (if jacobianVelocityFInt from plugin)
-   *  \return a string
-   */
-  inline const std::string getJacobianVelocityFIntFunctionName() const
-  {
-    return jacobianVelocityFIntFunctionName;
-  }
-
-  /** get name of function that computes jacobianQNNL (if jacobianQNNL from plugin)
-   *  \return a string
-   */
-  inline const std::string getJacobianQNNLFunctionName() const
-  {
-    return jacobianQNNLFunctionName;
-  }
-
-  /** get name of function that computes jacobianVelocityNNL (if jacobianVelocityNNL from plugin)
-   *  \return a string
-   */
-  inline const std::string getJacobianVelocityNNLFunctionName() const
-  {
-    return jacobianVelocityNNLFunctionName;
+    return (pluginNames.find(name))->second;
   }
 
   // --- PLUGINS RELATED FUNCTIONS ---
@@ -931,151 +876,115 @@ public:
   /** allow to set a specified function to compute Fext
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
-   *  \exception ICDLL_CSharedLibraryException
    */
   void setComputeFExtFunction(const std::string  pluginPath, const std::string  functionName);
 
   /** allow to set a specified function to compute the inertia
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosCSharedLibraryException
    */
   void setComputeNNLFunction(const std::string  pluginPath, const std::string  functionName);
 
   /** allow to set a specified function to compute the gradient of the internal strength compared to the state
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianQFIntFunction(const std::string  pluginPath, const std::string  functionName);
-
-  /** allow to set a specified function to compute the internal strength compared to the velocity
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeJacobianVelocityFIntFunction(const std::string  pluginPath, const std::string  functionName);
+  void setComputeJacobianFIntFunction(unsigned int, const std::string  pluginPath, const std::string  functionName);
 
   /** allow to set a specified function to compute the gradient of the the external strength compared to the state
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosSharedLibraryException
    */
-  void setComputeJacobianQNNLFunction(const std::string  pluginPath, const std::string  functionName);
-
-  /** allow to set a specified function to compute the external strength compared to the velocity
-   *  \param string : the complete path to the plugin
-   *  \param string : the name of the function to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
-  void setComputeJacobianVelocityNNLFunction(const std::string  pluginPath, const std::string  functionName);
+  void setComputeJacobianNNLFunction(unsigned int, const std::string  pluginPath, const std::string  functionName);
 
   /** default function to compute the mass
-   *  \exception RuntimeException
    */
   void computeMass();
 
   /** function to compute the mass
-   *  \param double time : the current time, SimpleVector*: pointer on the state vector q
-   *  \exception RuntimeException
+   *  \param double time : the current time, SiconosVector*: pointer on the state vector q
    */
-  void computeMass(SimpleVector *);
+  void computeMass(SiconosVector *);
 
   /** default function to compute the internal strengths
    *  \param double time : the current time
-   *  \exception RuntimeException
    */
   void computeFInt(const double);
 
   /** function to compute the internal strengths
-   *  \param double time : the current time, SimpleVector*: pointers on the state vectors q and velocity
-   *  \exception RuntimeException
+   *  \param double time : the current time, SiconosVector*: pointers on the state vectors q and velocity
    */
-  void computeFInt(const double , SimpleVector *, SimpleVector *);
+  void computeFInt(const double , SiconosVector *, SiconosVector *);
 
   /** default function to compute the external strengths
    *  \param double time : the current time
-   *  \exception RuntimeException
    */
   void computeFExt(const double);
 
   /** default function to compute the inertia
-   *  \exception RuntimeException
    */
   void computeNNL();
 
   /** function to compute the inertia
-   *  \param SimpleVector*: pointers on the state vectors q and velocity
-   *  \exception RuntimeException
+   *  \param SiconosVector*: pointers on the state vectors q and velocity
    */
-  void computeNNL(SimpleVector *q, SimpleVector *velocity);
+  void computeNNL(SiconosVector *q, SiconosVector *velocity);
 
   /** default function to compute the gradient of the internal strengths compared to the state
    *  \param double time : the current time
-   *  \exception RuntimeException
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    */
-  void computeJacobianQFInt(const double);
+  void computeJacobianFInt(unsigned int, const double);
 
   /** function to compute the gradient of the internal strengths compared to state q
-   *  \param double time : the current time, SimpleVector*: pointers on the state vectors q and velocity
-   *  \exception RuntimeException
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
+   *  \param double time : the current time, SiconosVector*: pointers on the state vectors q and velocity
    */
-  void computeJacobianQFInt(const double , SimpleVector *q, SimpleVector *velocity);
-
-  /** function to compute the gradient of the internal strengths compared to velocity
-   *  \param double time : the current time
-   *  \exception RuntimeException
-   */
-  void computeJacobianVelocityFInt(const double);
-
-  /** function to compute the gradient of the internal strengths compared to velocity
-   *  \param double time : the current time, SimpleVector*: pointers on the state vectors q and velocity
-   *  \exception RuntimeException
-   */
-  void computeJacobianVelocityFInt(const double , SimpleVector *q, SimpleVector *velocity);
+  void computeJacobianFInt(unsigned int, const double , SiconosVector *q, SiconosVector *velocity);
 
   /** function to compute the gradient of the inertia strengths compared to the state q
-   *  \exception RuntimeException
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    */
-  void computeJacobianQNNL();
+  void computeJacobianNNL(unsigned int);
 
   /** function to compute the gradient of the inertia strengths compared to the state q
-   *  \param SimpleVector*: pointers on the state vectors q and velocity
-   *  \exception RuntimeException
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
+   *  \param SiconosVector*: pointers on the state vectors q and velocity
    */
-  void computeJacobianQNNL(SimpleVector *q, SimpleVector *velocity);
-
-  /** function to compute the gradient of the inertia strengths compared to velocity
-   */
-  void computeJacobianVelocityNNL();
-
-  /** function to compute the gradient of the inertia strengths compared to velocity
-   *  \param SimpleVector*: pointers on the state vectors q and velocity
-   */
-  void computeJacobianVelocityNNL(SimpleVector *q, SimpleVector *velocity);
+  void computeJacobianNNL(unsigned int, SiconosVector *q, SiconosVector *velocity);
 
   /** function to compute inverse of the mass matrix
    */
   void computeInverseOfMass();
 
-  /** Default function to the right-hand side term
+  /** Default function to compute the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
-   *  \exception RuntimeException
    */
   virtual void computeRhs(const double, const bool  = false);
 
-  /** Default function to jacobian of the right-hand side term according to x
+  /** Default function to compute jacobian of the right-hand side term according to x
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
-   *  \exception RuntimeException
    */
   virtual void computeJacobianXRhs(const double, const bool  = false);
+
+  /** Default function to compute fL
+   *  \param double, the current time
+   */
+  virtual void computeFL(double time);
+
+  /** Default function to compute the jacobian of fL
+   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
+   *  \param double, the current time
+   */
+  virtual void computeJacobianFL(unsigned int, double);
 
   // --- miscellaneous ---
 
   /** copy the data of the DS to the XML tree
-   *  \exception RuntimeException
    */
   virtual void saveDSToXML();
 
@@ -1108,7 +1017,7 @@ public:
   /** function to compute derivative number level of qFree
    *  \param double: current time
    *  \param unsigned int: derivative number
-   *  \param SimpleVector*: in-out parameter, qFree
+   *  \param SiconosVector*: in-out parameter, qFree
    */
   void computeQFree(const double, const unsigned int, SiconosVector*);
 

@@ -26,9 +26,6 @@
 
 using namespace std;
 
-/** container for SiconosVectors */
-typedef std::vector< BlockVector* > VectorOfBlocks;
-
 // --- CONSTRUCTORS ---
 
 // Default (private) constructor
@@ -53,13 +50,13 @@ UnitaryRelation::~UnitaryRelation()
   mainInteraction = NULL;
 }
 
-const VectorOfUnitaryVectors UnitaryRelation::getY() const
+const VectorOfVectors UnitaryRelation::getY() const
 {
-  // A new object of type VectorOfUnitaryVectors is created but it handles pointers to BlockVectors,
+  // A new object of type VectorOfVectors is created but it handles pointers to BlockVectors,
   // thus there is no copy of the "basic" SimpleVectors.
 
-  VectorOfUnitaryVectors tmp;
-  VectorOfBlocks interactionBlocks = mainInteraction->getY();
+  VectorOfVectors tmp;
+  VectorOfVectors interactionBlocks = mainInteraction->getY();
 
   for (unsigned int i = 0; i < interactionBlocks.size(); ++i)
     tmp[i] = interactionBlocks[i]->getVectorPtr(number);
@@ -79,12 +76,12 @@ SiconosVector* UnitaryRelation::getYOldPtr(const unsigned int i) const
   return ((mainInteraction->getYOldPtr(i))->getVectorPtr(number));
 }
 
-const VectorOfUnitaryVectors UnitaryRelation::getLambda() const
+const VectorOfVectors UnitaryRelation::getLambda() const
 {
-  // A new object of type VectorOfUnitaryVectors is created but it handles pointers to BlockVectors,
+  // A new object of type VectorOfVectors is created but it handles pointers to BlockVectors,
   // thus there is no copy of the "basic" SimpleVectors.
-  VectorOfUnitaryVectors tmp;
-  VectorOfBlocks interactionBlocks = mainInteraction->getLambda();
+  VectorOfVectors tmp;
+  VectorOfVectors interactionBlocks = mainInteraction->getLambda();
 
   for (unsigned int i = 0; i < interactionBlocks.size(); ++i)
     tmp[i] = interactionBlocks[i]->getVectorPtr(number);

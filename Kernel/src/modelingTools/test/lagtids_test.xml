@@ -25,7 +25,6 @@
 	<!-- DSs defined in the problem -->
 		<DS_Definition>		
 			<LagrangianLinearTIDS number='13' Id="testLAGTIDS1">
-				<ndof>3</ndof>								
 				<StepsInMemory>2</StepsInMemory>				
 				<q0 vectorSize='3'>
 					1.0 2.0 3.0
@@ -48,7 +47,7 @@
 					<row>2.0 3.0 1.0</row>
 					<row>8.0 8.0 9.0</row>
 				</C>			
-				<Fext vectorPlugin="TestPlugin:computeFExt"/>
+				<FExt vectorPlugin="TestPlugin:computeFExt"/>
 			</LagrangianLinearTIDS>
 		</DS_Definition>
 	</NSDS>

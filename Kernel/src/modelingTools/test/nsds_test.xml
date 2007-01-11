@@ -48,7 +48,6 @@
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 1.0</row>
 				</M>			
-				<ndof>3</ndof>								
 			</LagrangianLinearTIDS>
 			
 			<LagrangianLinearTIDS number='8' Id="Ground"> 
@@ -62,7 +61,6 @@
 				<M matrixRowSize='1' matrixColSize='1'>	
 					<row>1.0 </row>
 				</M>			
-				<ndof>1</ndof>								
 			</LagrangianLinearTIDS>	
 		</DS_Definition>
 

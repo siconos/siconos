@@ -352,7 +352,6 @@
 			<xsd:element name="NonLinearDS">
 				<xsd:complexType>
 					<xsd:all>
-						<xsd:element name="n" type="xsd:positiveInteger" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="x0" type="vector" minOccurs='1' maxOccurs='1'/>
 						<xsd:element name="x" type="vector" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="StepsInMemory" type="xsd:nonNegativeInteger" minOccurs='0' maxOccurs='1'/>
@@ -373,7 +372,6 @@
 			<xsd:element name="LinearDS">
 				<xsd:complexType>
 					<xsd:all>
-						<xsd:element name="n" type="xsd:positiveInteger" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="x0" type="vector" minOccurs='1' maxOccurs='1'/>
 						<xsd:element name="x" type="vector" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="StepsInMemory" type="xsd:nonNegativeInteger" minOccurs='0' maxOccurs='1'/>
@@ -395,7 +393,6 @@
 			<xsd:element name="LinearTIDS">
 				<xsd:complexType>
 					<xsd:all>
-						<xsd:element name="n" type="xsd:positiveInteger" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="x0" type="vector" minOccurs='1' maxOccurs='1'/>
 						<xsd:element name="x" type="vector" minOccurs='0' maxOccurs='1'/>
 						<xsd:element name="StepsInMemory" type="xsd:nonNegativeInteger" minOccurs='0' maxOccurs='1'/>
@@ -423,7 +420,6 @@
 						<xsd:element name="u" type="vector" minOccurs="0" maxOccurs="1"/>
  						<xsd:element name="uSize" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
   						<xsd:element name="BoundaryCondition" type="BoundaryCondition" minOccurs='0' maxOccurs='1'/>
-						<xsd:element name="ndof" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="q0" type="vector" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="qMemory" type="memory" minOccurs="0" maxOccurs="1"/>
@@ -431,11 +427,11 @@
 						<xsd:element name="Velocity0" type="vector" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="VelocityMemory" type="memory" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="M" type="matrix" minOccurs="1" maxOccurs="1"/>
-						<xsd:element name="Fint" type="vector" minOccurs="0" maxOccurs="1"/>
-						<xsd:element name="Fext" type="vector" minOccurs="0" maxOccurs="1"/>
+						<xsd:element name="FInt" type="vector" minOccurs="0" maxOccurs="1"/>
+						<xsd:element name="FExt" type="vector" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="NNL" type="vector" minOccurs="1" maxOccurs="1"/>
-						<xsd:element name="JacobianQFint" type="matrix" minOccurs="0" maxOccurs="1"/>
-						<xsd:element name="JacobianVelocityFint" type="matrix" minOccurs="0" maxOccurs="1"/>
+						<xsd:element name="JacobianQFInt" type="matrix" minOccurs="0" maxOccurs="1"/>
+						<xsd:element name="JacobianVelocityFInt" type="matrix" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="JacobianQNNL" type="matrix" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="JacobianVelocityNNL" type="matrix" minOccurs="0" maxOccurs="1"/>
 					</xsd:all>
@@ -452,14 +448,13 @@
 						<xsd:element name="u" type="vector" minOccurs="0" maxOccurs="1"/>
    						<xsd:element name="uSize" type="xsd:positiveInteger" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="BoundaryCondition" type="BoundaryCondition" minOccurs='0' maxOccurs='1'/>
-						<xsd:element name="ndof" type="xsd:integer" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="q" type="vector" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="q0" type="vector" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="qMemory" type="memory" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="Velocity" type="vector" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="Velocity0" type="vector" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="VelocityMemory" type="memory" minOccurs="0" maxOccurs="1"/>
-						<xsd:element name="Fext" type="vector" minOccurs="0" maxOccurs="1"/>
+						<xsd:element name="FExt" type="vector" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="M" type="matrix" minOccurs="1" maxOccurs="1"/>
 						<xsd:element name="K" type="matrix" minOccurs="0" maxOccurs="1"/>
 						<xsd:element name="C" type="matrix" minOccurs="0" maxOccurs="1"/>

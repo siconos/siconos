@@ -46,7 +46,7 @@ SiconosSharedLibrary::~SiconosSharedLibrary()
 PluginHandle SiconosSharedLibrary::loadPlugin(const string& pluginPath)
 {
   PluginHandle HandleRes;
-  cout << "PluginPath   :  " << pluginPath << endl;
+  //  cout << "PluginPath   :  " << pluginPath << endl;
 #ifdef _SYS_WNT
   HandleRes = LoadLibrary(pluginPath.c_str());
 #endif

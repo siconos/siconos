@@ -29,7 +29,9 @@ Notes:
 
 Changes:
 
-	
+2007-01-10 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Add Control class + resulting changes in DynamicalSystem, NSDS ...
+		
 --------------------------------------------------------------------------------
   v2.0.1 - 14 December 2006 (release 626) 
 --------------------------------------------------------------------------------	

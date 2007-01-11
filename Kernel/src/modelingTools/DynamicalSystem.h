@@ -65,7 +65,7 @@ class SiconosSharedLibrary;
  * This class defines and computes a generic n-dimensional
  * dynamical system of the form :
  * \f[
- * \dot x = f(x,t) + T(x) u(x,t) + r,
+ * M \dot x = f(x,t) + T(x) u(x,t) + r,
  * \f]
  * where
  *    - \f$x \in R^{n} \f$ is the state.
@@ -73,6 +73,7 @@ class SiconosSharedLibrary;
  *    - \f$ u \in R^{uSize}\f$ a "control" term.
  *
  *  with \f$ f : R^{n} \times R  \mapsto  R^{n}   \f$ .
+ *  and M a nXn matrix.
  *
  * By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
  * and the initial conditions are given by
@@ -85,10 +86,10 @@ class SiconosSharedLibrary;
  * Its Jacobian according to x is denoted jacobianXF, and computed thanks to computeJacobianXF(t).
  * f and jacobianXF can be plugged to external functions thanks to setComputeFFunction/setComputeJacobianXFFunction.
  *
- * Right-hand side of the equation is denoted rhs and is computed thanks to computeRhs(t).
+ * Right-hand side of the equation is computed thanks to computeRhs(t).
  *
  * \f[
- *    rhs(x,t) =  f(x,t) + T(x) u(x,t) + r
+ *    \dot x =  M^{-1}(f(x,t) + T(x) u(x,t) + r)
  * \f]
  *
  * Its Jacobian according to x is jacobianXRhs:
@@ -97,18 +98,18 @@ class SiconosSharedLibrary;
  *   jacobianXRhs = \nabla_xrhs(x,t) = \nabla_xf(x,t) + \nabla_xT(x)U(x,t) + \nabla_x r
  *  \f]
  *
- * At the time, \f$\nabla_xT(x)\f$ is never taken into account.
- * Moreover, in order to avoid useless memory allocation,
- * we try to re-use the same memory location for f and rhs (and for jacobianXRhs and jacobianXF).
+ * At the time:
+ *  - \f$\nabla_xT(x)\f$ is never taken into account.
+ *  - M is considered to be constant. (ie no plug-in, no jacobian ...)
+ *  - M is not allocated by default. The only way to use M is setM or setMPtr.
  *
- * \todo Add a pointer to an object Constraint .
  */
 class DynamicalSystem
 {
 protected:
 
   /** Dynamical System type: General Dynamical System (NLDS) LagrangianDS (LNLDS),
-      LagrangianLinearTIDS (LTIDS), LinearDS (LDS)*/
+      LagrangianLinearTIDS (LTIDS), LinearDS (LDS) or LinearTIDS (LITIDS)*/
   std::string  DSType;
 
   /** NonSmoothDynamicalSystem owner of this DynamicalSystem */
@@ -120,23 +121,20 @@ protected:
   /** the name of the DS ("ball", "solid1254", etc.)*/
   std::string  id;
 
-  /** the dimension of the system (i.e. size of the state vector x)*/
+  /** the dimension of the system (i.e. size of the state vector x) */
   unsigned int n;
 
   /** initial state of the system */
   SiconosVector *x0;
 
-  /** state of the system, \f$  x \in R^{n}\f$ */
-  SiconosVector *x;
+  /** state of the system, \f$  x \in R^{n}\f$ - Container, with \f$ x[0]=\f$ x \f$ , x[1]= \f$ \dot x \f$ . */
+  VectorOfVectors x;
 
   /** the  previous state vectors stored in memory*/
   SiconosMemory *xMemory;
 
-  /** the right hand side of the equation */
-  SiconosVector *rhs;
-
-  /** jacobian according to X of this rhs */
-  SiconosMatrix * jacobianXRhs;
+  /** jacobian according to x of the right-hand side (\f$ \dot x = f(x,t) + Tu +r \f$) */
+  SiconosMatrix *jacobianXRhs;
 
   /** the  free state vector (state vector for r=0) */
   SiconosVector *xFree;
@@ -146,6 +144,12 @@ protected:
 
   /**  the previous r vectors */
   SiconosMemory *rMemory;
+
+  /** Matrix coefficient of \f$ \dot x \f$ */
+  SiconosMatrix *M;
+
+  /** Inverse of M Matrix (Warning: may not exist) */
+  SiconosMatrix *invM;
 
   /** f(x,t) */
   SiconosVector *f;
@@ -166,15 +170,15 @@ protected:
   unsigned int stepsInMemory;
 
   /** A container of vectors to save temporary values (for Newton convergence computation for example)*/
-  std::map<const std::string, SimpleVector*> tmpWorkVector;
+  std::map<const std::string, SiconosVector*> tmpWorkVector;
 
   /** the XML object linked to the DynamicalSystem  */
   DynamicalSystemXML *dsxml;
 
-  /** Parameters list, last argument of plug-in functions. What are those parameters depends on user´s choice.
-   *  This a list of pointer to SimpleVector. Each one is identified thanks to a key which is the plug-in name.
+  /** Parameters list, last argument of plug-in functions. What are those parameters depends on user's choice.
+   *  This a list of pointer to SiconosVector. Each one is identified thanks to a key which is the plug-in name.
    * A flag is also added in the isAllocatedIn map to check inside-class memory allocation for this object.*/
-  std::map<std::string, SimpleVector*> parametersList;
+  std::map<std::string, SiconosVector*> parametersList;
 
   // --- plugins ---
 
@@ -238,7 +242,7 @@ protected:
   /** Flags to know if pointers have been allocated inside constructors or not */
 
   /** Flags to know if pointers have been allocated inside constructors or not */
-  std::map<std::string, bool> isAllocatedIn;
+  AllocationFlagsMap isAllocatedIn;
 
   /** set all allocation flags (isAllocated map)
    *  \param bool: = if true (default) set default configuration, else set all to false
@@ -250,14 +254,15 @@ protected:
    */
   virtual void initPluginFlags(const bool);
 
-  /** init parameter vector corresponding to id to a SimpleVector* of size 1
+  /** init parameter vector corresponding to id to a SiconosVector* of size 1
    *  \param a string, id of the plug-in
    */
   void initParameter(const std::string);
 
   /** default constructor
+   * \param string: the type of the system, default=NLDS, non-linear first order system.
    */
-  DynamicalSystem();
+  DynamicalSystem(const std::string = NLDS);
 
 public:
 
@@ -272,13 +277,12 @@ public:
 
   /** constructor from a set of data
    *  \param int : reference number for this DynamicalSystem
-   *  \param int : dimension of this DynamicalSystem
    *  \param SiconosVector : initial state of this DynamicalSystem
    *  \param string : plugin name for f of this DynamicalSystem (optional)
    *  \param string : plugin name for jacobianXF of this DynamicalSystem (optional)
    *  \exception RuntimeException
    */
-  DynamicalSystem(const int, const unsigned int, const SiconosVector&,
+  DynamicalSystem(const int, const SiconosVector&,
                   const std::string = "DefaultPlugin:computeF", const std::string = "DefaultPlugin:computeJacobianXF");
 
   /** copy constructor
@@ -442,29 +446,29 @@ public:
 
   // --- X ---
 
-  /** get the value of x, the state of the DynamicalSystem
+  /** get the value of \f$ x \f$, the state of the DynamicalSystem
    *  \return SimpleVector
    * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
    */
   inline const SimpleVector getX() const
   {
-    return *x;
+    return *(x[0]);
   }
 
-  /** get x, the state of the DynamicalSystem
+  /** get \f$ x \f$ (pointer), the state of the DynamicalSystem.
    *  \return pointer on a SiconosVector
    */
   inline SiconosVector* getXPtr() const
   {
-    return x;
+    return x[0];
   }
 
-  /** set the value of x to newValue
+  /** set the value of \f$ x \f$ (ie (*x)[0]) to newValue
    *  \param SiconosVector newValue
    */
   void setX(const SiconosVector&);
 
-  /** set x to pointer newPtr
+  /** set \f$ x \f$ (ie (*x)[0]) to pointer newPtr
    *  \param SiconosVector * newPtr
    */
   void setXPtr(SiconosVector *);
@@ -499,36 +503,36 @@ public:
 
   // ---  Rhs ---
 
-  /** get the value of rhs derivative of the state of the DynamicalSystem
+  /** get the value of the right-hand side, \f$ \dot x \f$, derivative of the state of the DynamicalSystem.
    *  \return SimpleVector
    * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
    */
   inline const SimpleVector getRhs() const
   {
-    return *rhs;
+    return *(x[1]);
   }
 
-  /** get rhs, the derivative of the state of the DynamicalSystem
-   *  \return pointer on a SiconosVector
+  /** get the right-hand side, \f$ \dot x \f$, the derivative of the state of the DynamicalSystem.
+   *  \return a pointer on a SiconosVector
    */
   inline SiconosVector* getRhsPtr() const
   {
-    return rhs;
+    return x[1];
   }
 
-  /** set the value of rhs to newValue
+  /** set the value of the right-hand side, \f$ \dot x \f$, to newValue
    *  \param SiconosVector newValue
    */
   void setRhs(const SiconosVector&);
 
-  /** set rhs to pointer newPtr
+  /** set right-hand side, \f$ \dot x \f$, to pointer newPtr
    *  \param SiconosVector * newPtr
    */
   void setRhsPtr(SiconosVector *);
 
   // --- JacobianXRhs ---
 
-  /** get the value of JacobianXRhs
+  /** get the value of the gradient according to \f$ x \f$ of the right-hand side
    *  \return SimpleMatrix
    */
   inline const SimpleMatrix getJacobianXRhs() const
@@ -536,7 +540,7 @@ public:
     return *jacobianXRhs;
   }
 
-  /** get JacobianXRhs
+  /** get gradient according to \f$ x \f$ of the right-hand side (pointer)
    *  \return pointer on a SiconosMatrix
    */
   inline SiconosMatrix* getJacobianXRhsPtr() const
@@ -639,6 +643,76 @@ public:
    *  \param a ref on a SiconosMemory
    */
   void setRMemoryPtr(SiconosMemory *);
+
+  // --- M ---
+  /** get the value of M
+  *  \return SimpleMatrix
+  */
+  inline const SimpleMatrix getMSimple() const
+  {
+    return *M;
+  }
+
+  /** get the value of M
+  *  \return BlockMatrix
+  */
+  inline const BlockMatrix getMBlock() const
+  {
+    return *M;
+  }
+
+  /** get M
+  *  \return pointer on a SiconosMatrix
+  */
+  inline SiconosMatrix* getMPtr() const
+  {
+    return M;
+  }
+
+  /** set the value of M to newValue
+  *  \param SimpleMatrix newValue
+  */
+  void setM(const SiconosMatrix&);
+
+  /** link M with a new pointer
+   *  \param a pointer to SiconosMatrix
+   */
+  void setMPtr(SiconosMatrix *);
+
+  // --- invM ---
+  /** get the value of invM
+  *  \return SimpleMatrix
+  */
+  inline const SimpleMatrix getInvMSimple() const
+  {
+    return *invM;
+  }
+
+  /** get the value of invM
+  *  \return BlockMatrix
+  */
+  inline const BlockMatrix getInvMBlock() const
+  {
+    return *invM;
+  }
+
+  /** get invM
+  *  \return pointer on a SiconosMatrix
+  */
+  inline SiconosMatrix* getInvMPtr() const
+  {
+    return invM;
+  }
+
+  /** set the value of invM to newValue
+  *  \param SimpleMatrix newValue
+  */
+  void setInvM(const SiconosMatrix&);
+
+  /** link invM with a new pointer
+   *  \param a pointer to SiconosMatrix
+   */
+  void setInvMPtr(SiconosMatrix *);
 
   // ---  F ---
 
@@ -810,7 +884,7 @@ public:
   /** get the vector of temporary saved vector
    *  \return a std vector
    */
-  inline std::map<const std::string , SimpleVector*> getTmpWorkVector()
+  inline std::map<const std::string , SiconosVector*> getTmpWorkVector()
   {
     return tmpWorkVector;
   }
@@ -818,24 +892,24 @@ public:
   /** get a temporary saved vector, ref by id
    *  \return a std vector
    */
-  inline SimpleVector* getTmpWorkVector(const std::string  id)
+  inline SiconosVector* getTmpWorkVector(const std::string  id)
   {
     return tmpWorkVector[id];
   }
 
   /** set TmpWorkVector
-   *  \param a map<std::string , SimpleVector*>
+   *  \param a map<std::string , SiconosVector*>
    */
-  inline void setTmpWorkVector(std::map<const std::string , SimpleVector*> newVect)
+  inline void setTmpWorkVector(std::map<const std::string , SiconosVector*> newVect)
   {
     tmpWorkVector = newVect;
   }
 
   /** to add a temporary vector
-   *  \param a SimpleVector*
+   *  \param a SiconosVector*
    *  \param a string id
    */
-  inline void addTmpWorkVector(SimpleVector* newVal, const std::string id)
+  inline void addTmpWorkVector(SiconosVector* newVal, const std::string id)
   {
     *tmpWorkVector[id] = *newVal;
   }
@@ -950,9 +1024,9 @@ public:
   // -- parametersList --
 
   /** get the full map of parameters
-   *  \return a map<string,SimpleVector*>
+   *  \return a map<string,SiconosVector*>
    */
-  inline std::map<std::string, SimpleVector*> getParameters() const
+  inline std::map<std::string, SiconosVector*> getParameters() const
   {
     return parametersList;
   };
@@ -966,29 +1040,29 @@ public:
   };
 
   /** get the pointer to the vector of parameters corresponding to plug-in function named id
-   *  \return a pointer on a SimpleVector
+   *  \return a pointer on a SiconosVector
    */
-  inline SimpleVector* getParameterPtr(const std::string id)
+  inline SiconosVector* getParameterPtr(const std::string id)
   {
     return parametersList[id];
   };
 
   /** set the map for parameters
-   *  \param a map<string, SimpleVector*>
+   *  \param a map<string, SiconosVector*>
    */
-  void setParameters(const std::map<std::string, SimpleVector*>&);
+  void setParameters(const std::map<std::string, SiconosVector*>&);
 
   /** set vector corresponding to plug-in function named id to newValue
-   *  \param a SimpleVector
+   *  \param a SiconosVector
    *  \param a string
    */
-  void setParameter(const SimpleVector&, const std::string);
+  void setParameter(const SiconosVector&, const std::string);
 
   /** set vector corresponding to plug-in function named id to newPtr (!! pointer link !!)
-   *  \param a pointer to SimpleVector
+   *  \param a pointer to SiconosVector
    *  \param a string
    */
-  void setParameterPtr(SimpleVector *, const std::string);
+  void setParameterPtr(SiconosVector *, const std::string);
 
   // --- compute plugin functions ---
 

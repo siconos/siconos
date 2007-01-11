@@ -40,6 +40,7 @@ private:
   CPPUNIT_TEST(testConstructor2);
   CPPUNIT_TEST(testConstructor3);
   CPPUNIT_TEST(testConstructor4);
+  CPPUNIT_TEST(testConstructor5);
   CPPUNIT_TEST(testZero);
   CPPUNIT_TEST(testNorm);
   CPPUNIT_TEST(testAssignment);
@@ -57,6 +58,7 @@ private:
   void testConstructor2();
   void testConstructor3();
   void testConstructor4();
+  void testConstructor5();
   void testZero();
   void testNorm();
   void testAssignment();

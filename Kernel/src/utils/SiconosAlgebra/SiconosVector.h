@@ -154,6 +154,11 @@ public:
    */
   virtual void fill(double) = 0;
 
+  /** get the index tab
+   * \return a standard vector of int
+   */
+  virtual Index getTabIndex() const ;
+
   /** get the number of SimpleVector-Blocks - only usefull for BlockVector.
    *  \return unsigned int
    */
@@ -256,6 +261,16 @@ public:
    *  \param an int
    */
   virtual SiconosVector& operator *=(int) = 0;
+
+  /** add a subvector in this vector: allocation and copy
+   *  \param SiconosVector& v : the vector to add
+   */
+  virtual void add(const  SiconosVector&) ;
+
+  /** add a pointer to a subvector in this vector: no reallocation nor copy.
+   *  \param a pointer to SiconosVector*
+   */
+  virtual void addPtr(SiconosVector*) ;
 };
 
 #endif

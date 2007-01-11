@@ -25,7 +25,6 @@
 	<!-- DSs defined in the problem -->
 		<DS_Definition>		
 			<NonLinearDS number='13' Id="testDS1">
-			        <n> 3 </n>
 	 			<StepsInMemory>2</StepsInMemory>				
 				<x0 vectorSize='3'>
 					1.0 2.0 3.0
@@ -41,7 +40,6 @@
 				</T>			
 			</NonLinearDS>
 			<NonLinearDS number='2' Id="testDS2">
-			        <n> 3 </n>
 				<x0 vectorSize='3'>
 					2.0 4.0 6.0
 				</x0>

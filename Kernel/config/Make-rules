@@ -21,8 +21,8 @@
 # INTERNAL LIBRARIES
 
 #--- SiconosTemplates --------------------------------------
-SICONOSTEMPLATES_PATH = $(top_srcdir)/src/utils/SiconosTemplates
-SICONOSTEMPLATES_INC = $(SICONOSTEMPLATES_PATH)
+SICONOSTOOLS_PATH = $(top_srcdir)/src/utils/SiconosTools
+SICONOSTOOLS_INC = $(SICONOSTOOLS_PATH)
 
 #--- SiconosException --------------------------------------
 SICONOSEXCEPTION_PATH = $(top_srcdir)/src/utils/SiconosException
@@ -82,7 +82,7 @@ APIC_LIB = -L$(APIC_PATH) -lSiconosApiC
 # INCLUDES
 
 #--- INCLUDE -----------------------------------
-SICONOS_INCLUDES = -I$(top_srcdir)/src/utils/ -I$(SICONOSTEMPLATES_INC) -I$(SICONOSEXCEPTION_INC) -I$(SICONOSSHAREDLIBRARY_INC) -I$(SICONOSALGEBRA_INC)  -I$(SICONOSMEMORY_INC) -I$(SICONOSCONTRACT_INC) \
+SICONOS_INCLUDES = -I$(top_srcdir)/src/utils/ -I$(SICONOSTOOLS_INC) -I$(SICONOSEXCEPTION_INC) -I$(SICONOSSHAREDLIBRARY_INC) -I$(SICONOSALGEBRA_INC)  -I$(SICONOSMEMORY_INC) -I$(SICONOSCONTRACT_INC) \
 -I$(SICONOSXML_INC) -I$(MODELINGTOOLS_INC) -I$(SIMULATIONTOOLS_INC) -I$(MODEL_INC) -I$(APIC_INC) 
 
 # COMPILE FLAGS

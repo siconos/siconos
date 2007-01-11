@@ -331,7 +331,7 @@ extern "C" int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, doubl
     //DynamicalSystem *DS = new LagrangianLinearTIDS(nId,nDof,vQ0,vVel0,mMass,mK,mC);
 
     // Push the LagrangianLinearTIDS on global DS vectors
-    GLOB_CHECK_DS = GLOB_SET_DS->insert(new LagrangianLinearTIDS(nId, nDof, vQ0, vVel0, mMass, mK, mC));
+    GLOB_CHECK_DS = GLOB_SET_DS->insert(new LagrangianLinearTIDS(nId, vQ0, vVel0, mMass, mK, mC));
     // Set the Fext
     (static_cast<LagrangianDS*>(*(GLOB_CHECK_DS.first)))->setComputeFExtFunction(libname, fctname);
 
@@ -375,7 +375,7 @@ extern "C" int sicLagrangianDS(int nDof, double *Q0, double *Vel0)
       vVel0(i) = Vel0[i];
     }
     // Create the object
-    LagrangianDS * DS = new LagrangianDS(nId, nDof, vQ0, vVel0);
+    LagrangianDS * DS = new LagrangianDS(nId, vQ0, vVel0);
     /*
       DS->setComputeFIntFunction(libname,fctFInt);
       DS->setComputeJacobianQFIntFunction(libname,fctJacFInt);
@@ -490,7 +490,7 @@ extern "C" int sicSetComputeJacobianQNNLFunction(int nIdDs, char *libname, char 
       st = SIC_ERROR;
     }
     DynamicalSystem *DS = GLOB_SET_DS->getDynamicalSystemPtr(nIdDs);
-    static_cast<LagrangianDS*>(DS)->setComputeJacobianQNNLFunction(libname, func);
+    static_cast<LagrangianDS*>(DS)->setComputeJacobianNNLFunction(0, libname, func);
   }
   catch (SiconosException e)
   {
@@ -525,7 +525,7 @@ extern "C" int  sicSetComputeJacobianVelocityNNLFunction(int nIdDs, char *libnam
       st = SIC_ERROR;
     }
     DynamicalSystem *DS = GLOB_SET_DS->getDynamicalSystemPtr(nIdDs);
-    static_cast<LagrangianDS*>(DS)-> setComputeJacobianVelocityNNLFunction(libname, func);
+    static_cast<LagrangianDS*>(DS)-> setComputeJacobianNNLFunction(1, libname, func);
   }
   catch (SiconosException e)
   {
@@ -595,7 +595,7 @@ extern "C" int sicSetComputeJacobianQFIntFunction(int nIdDs, char *libname, char
       st = SIC_ERROR;
     }
     DynamicalSystem *DS = GLOB_SET_DS->getDynamicalSystemPtr(nIdDs);
-    static_cast<LagrangianDS*>(DS)->setComputeJacobianQFIntFunction(libname, func);
+    static_cast<LagrangianDS*>(DS)->setComputeJacobianFIntFunction(0, libname, func);
   }
   catch (SiconosException e)
   {
@@ -630,7 +630,7 @@ extern "C" int sicSetComputeJacobianVelocityFIntFunction(int nIdDs, char *libnam
       st = SIC_ERROR;
     }
     DynamicalSystem *DS = GLOB_SET_DS->getDynamicalSystemPtr(nIdDs);
-    static_cast<LagrangianDS*>(DS)->setComputeJacobianVelocityFIntFunction(libname, func);
+    static_cast<LagrangianDS*>(DS)->setComputeJacobianFIntFunction(1, libname, func);
   }
   catch (SiconosException e)
   {
