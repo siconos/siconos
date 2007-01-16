@@ -28,6 +28,11 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 Notes:
 
 Changes:
+2007-01-16 Vincent  Acary <Vincent.Acary@inrialpes.fr>
+	* configure.ac :
+	Move check for Lapack and Blas into the check macro for Numerics. 
+	Should be replaced in future by only Atlas checking
+	*
 
 2007-01-10 Franck Perignon <franck.perignon@inrialpes.fr>
 	* Add Control class + resulting changes in DynamicalSystem, NSDS ...

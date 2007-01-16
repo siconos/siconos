@@ -145,20 +145,14 @@ dnl Numerics
 AC_MSG_CHECKING([for Siconos/Numerics])
 ACX_CHECK_NUMERICS([AC_SUBST(NUMERICS_INCLUDES) AC_SUBST(NUMERICS_LIBRARIES) AC_SUBST(NUMERICS_PATH)], [AC_MSG_ERROR([Cannot find  Numerics. Please install it or use the option --with-numerics.])])
 
-dnl Check for Blas and Lapack
-ACX_LAPACK([
-  dnl action-if-found: 
-  # This defines LAPACK_LIBS, BLAS_LIBS, and FLIBS
-], [
-  dnl action-if-not-found: 
-  AC_MSG_ERROR([Blas/Lapack was not found. 
-*** This means Lapack and matrix support cannot be compiled. 
-*** This makes this library unusable. Please get blas and lapack 
-*** installed. If you do have these installed, use the options 
-*** --with-blas=<libname> or --with-lapack=<libname> and/or set 
-*** the env variable LDFLAGS to include the appropriate linker 
-*** flags.])
-])
+dnl Check for Atlas
+AQ_CHECK_ATLAS
+if test "$atlas_available" = "yes"; then
+    AC_MSG_RESULT([Atlas OK])  
+ else
+    AC_MSG_ERROR([Cannot find  Atlas. Please install it or use the option  --with-atlas-libs=DIR  to add ATLAS library path.]) 
+fi
+
 
 # Boost
 AC_MSG_CHECKING([for Boost])
@@ -251,9 +245,9 @@ SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $XML_CPPFLAGS $BOOST_CPPFLAGS"
 AC_SUBST(SICONOS_EXT_INCLUDES)
 dnl AC_MSG_RESULT("SICONOS_EXT_INCLUDES = $SICONOS_EXT_INCLUDES")
 
-SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES $LAPACK_LIBS $BLAS_LIBS $XML_LIBS -ldl"
+SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES  $atlas_libraries $atlas_lib $XML_LIBS -ldl"
 
-SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS $FLIBS" dnl  -L/usr/lib/atlas -llapack_atlas"
+SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS " dnl  -L/usr/lib/atlas -llapack_atlas"
 dnl SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS $FLIBS "
 AC_SUBST(SICONOS_EXT_LDFLAGS)
 dnl AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
