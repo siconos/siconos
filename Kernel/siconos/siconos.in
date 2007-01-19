@@ -120,6 +120,7 @@ while getopts chv OPTION
   esac
 done
 
+
 # Clean action (ie call siconos -c)
 if "$clean" = "true"; then
     if [ $# -eq 2 ]; then
@@ -187,7 +188,14 @@ if "$sample" = "true"; then
 # plugin compilation
 compilePlugins;
 # sample compilation
-DIR_SAMPLE=`dirname $1`;
+
+args=$#          
+lastarg=${!args}
+
+
+DIR_SAMPLE=`dirname $lastarg`;
+
+
 echo;
 
 if [ ! -d $DIR_SAMPLE ]; then
@@ -196,12 +204,12 @@ if [ ! -d $DIR_SAMPLE ]; then
 else
     cd $DIR_SAMPLE;
     if test "${silent}" = "true"; then
-	make -s -f $SICONOS_SHAREPATH/MakefilePluginSample OBJ=`basename $1` sample run
+	make -s -f $SICONOS_SHAREPATH/MakefilePluginSample OBJ=`basename $lastarg` sample run
     else
 	echo;
 	echo " ***** Current sample compilation and linking *****"
 	echo;
-	make -f $SICONOS_SHAREPATH/MakefilePluginSample OBJ=`basename $2` sample run
+	make -f $SICONOS_SHAREPATH/MakefilePluginSample OBJ=`basename $lastarg` sample run
     fi;
     cd $DIR;
 fi;
