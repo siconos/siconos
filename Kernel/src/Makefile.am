@@ -21,10 +21,13 @@
 SUBDIRS =  utils plugin modelingTools simulationTools model xml apiC
 EXTRA_DIST = 
 
-lib_LTLIBRARIES = libSiconosKernel.la
-libSiconosKernel_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE) -no-undefined
+libSiconosKernel_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+        $(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CCFLAGS) \
+        $(CCFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+lib_LTLIBRARIES= libSiconosKernel.la
+libSiconosKernel_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE) -undefined warning
 libSiconosKernel_la_SOURCES=
-libSiconosKernel_la_LIBADD = $(top_builddir)/src/model/libModel.la \
+libSiconosKernel_la_LIBADD= $(top_builddir)/src/model/libModel.la \
 	$(top_builddir)/src/simulationTools/libSimulationTools.la \
 	$(top_builddir)/src/modelingTools/libModelingTools.la \
 	$(top_builddir)/src/xml/libSiconosXml.la \
