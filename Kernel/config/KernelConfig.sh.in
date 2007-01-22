@@ -22,4 +22,4 @@ CXXFLAGS=@CXXFLAGS@
 CXX_DYNLIB=@CXX_DYNLIB@
 
 # Linking flags for packages that call libKernel (Front-End ...)
-SICONOS_LDFLAGS = -L@prefix@/lib  -lSiconosKernel @SICONOS_EXT_LDFLAGS@
+SICONOS_LDFLAGS = -L@prefix@/lib  -lSiconosKernel @SICONOS_EXT_LIBS@

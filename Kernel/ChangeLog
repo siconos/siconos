@@ -28,11 +28,20 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 Notes:
 
 Changes:
+	
+2007-01-16 Vincent  Acary <Vincent.Acary@inrialpes.fr>
+	* configure.ac, MakefilePluginSample.in, ... :
+	Change the name of the variable SICONOS_EXT_LDFLAGS into 
+	SICONOS_EXT_LIBS. Change MakefilePluginSample.am to avoid the use of
+	KernelCOnfig.sh (future remove).  Add some bad tricks to allow the use
+	of the original ATLAS sources. Compilation and execution works on 
+	MacOsX(intel).
+	
 2007-01-16 Vincent  Acary <Vincent.Acary@inrialpes.fr>
 	* configure.ac :
 	Move check for Lapack and Blas into the check macro for Numerics. 
 	Should be replaced in future by only Atlas checking
-	*
+	
 
 2007-01-10 Franck Perignon <franck.perignon@inrialpes.fr>
 	* Add Control class + resulting changes in DynamicalSystem, NSDS ...

@@ -152,6 +152,20 @@ if test "$atlas_available" = "yes"; then
  else
     AC_MSG_ERROR([Cannot find  Atlas. Please install it or use the option  --with-atlas-libs=DIR  to add ATLAS library path.]) 
 fi
+case "$target" in
+    *-linux*)
+      ATLAS_LIBS="$atlas_libraries $atlas_lib"
+      ATLAS_INCLUDES=""
+      ;;
+    *-apple-darwin*)
+      ATLAS_LIBS="/usr/local/lib/atlas/libcblas.a /usr/local/lib/atlas/liblapack.a /usr/local/lib/atlas/libatlas.a "
+      ATLAS_INCLUDES="-I/usr/local/include/atlas"
+      ;; 
+    *)
+      ATLAS_LIBS="$atlas_libraries $atlas_lib"
+      ATLAS_INCLUDES=""     
+      ;;
+esac
 
 
 # Boost
@@ -180,9 +194,9 @@ fi
 
 # Default Flag
 if test "$enable_warnings" = no; then
-CXXFLAGS="-fPIC $CXXFLAGS"
+CXXFLAGS="$CXXFLAGS"
 else
-CXXFLAGS="-Wall -fPIC $CXXFLAGS"
+CXXFLAGS="-Wall  $CXXFLAGS"
 fi
 
 #Optional flag
@@ -241,16 +255,15 @@ dnl #################################
 dnl ## LINK FLAGS
 dnl #################################
 
-SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $XML_CPPFLAGS $BOOST_CPPFLAGS"
+SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $ATLAS_INCLUDES $XML_CPPFLAGS $BOOST_CPPFLAGS"
 AC_SUBST(SICONOS_EXT_INCLUDES)
-dnl AC_MSG_RESULT("SICONOS_EXT_INCLUDES = $SICONOS_EXT_INCLUDES")
 
-SICONOS_EXT_LDFLAGS="$NUMERICS_LIBRARIES  $atlas_libraries $atlas_lib $XML_LIBS -ldl"
 
-SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS " dnl  -L/usr/lib/atlas -llapack_atlas"
-dnl SICONOS_EXT_LDFLAGS="$SICONOS_EXT_LDFLAGS $LIBS $FLIBS "
-AC_SUBST(SICONOS_EXT_LDFLAGS)
-dnl AC_MSG_RESULT("SICONOS_EXT_LDFLAGS = $SICONOS_EXT_LDFLAGS")
+SICONOS_EXT_LIBS="$ATLAS_LIBS $NUMERICS_LIBRARIES  $XML_LIBS -ldl"
+SICONOS_EXT_LIBS="$SICONOS_EXT_LIBS $LIBS " dnl  -L/usr/lib/atlas -llapack_atlas"
+
+AC_SUBST(SICONOS_EXT_LIBS)
+
 
 #################################
 ## DOXYGEN 
@@ -310,8 +323,8 @@ echo "
    Preprocessor flags:                  ${CPPFLAGS}
 dnl   Linking flags			${LDFLAGS}
 dnl   Linking flags(2)			${LIBS}
-   Siconos includes:                    ${SICONOS_EXT_INCLUDES}
-   Siconos ld flags:                    ${SICONOS_EXT_LDFLAGS}"
+   Siconos external includes:           ${SICONOS_EXT_INCLUDES}
+   Siconos lexternal libs :             ${SICONOS_EXT_LIBS}"
 echo 
 echo Type \'make \' to build the SICONOS platform
 echo Type \'make doc\' to generate the documentation.

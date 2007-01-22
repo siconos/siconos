@@ -17,7 +17,11 @@
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
 SICONOSPATH=@prefix@
-include $(SICONOSPATH)/share/siconos-kernel/KernelConfig.sh
+CXX=@CXX@
+CXXFLAGS=@CXXFLAGS@
+CXX_DYNLIB=@CXX_DYNLIB@
+
+
 
 SAMPLE_SOURCES = $(OBJ)
 SAMPLE_OBJ  = $(patsubst %.cpp,%.o,  $(SAMPLE_SOURCES))
@@ -28,10 +32,11 @@ C_OBJ  = $(patsubst %.c,%.o,  $(C_SOURCES))
 sample:$(SAMPLE_OBJ) $(SAMPLE_EXE)
 
 .cpp.o:
-	$(CXX) -c $(CXXFLAGS) $(LIBEXT_INCLUDES) -I $(SICONOSPATH)/include $<
+	$(CXX) -c $(CXXFLAGS) -fPIC @SICONOS_EXT_INCLUDES@ -I $(SICONOSPATH)/include $<
 
 $(SAMPLE_EXE):$(SAMPLE_OBJ)
-	$(CXX) -o $@ $< $(SICONOS_LDFLAGS) 
+	$(CXX) -o $@ $<  -L@prefix@/lib  -lSiconosKernel @SICONOS_EXT_LIBS@
+
 
 run:$(SAMPLE_EXE) 
 	./$(SAMPLE_EXE) 
@@ -43,7 +48,7 @@ PLUGIN_LIB = $(patsubst %.cpp,%.so,  $(PLUGIN_SOURCES))
 plugin:$(PLUGIN_OBJ) $(PLUGIN_LIB)
 
 .c.o:
-	$(CC) -c $(CXXFLAGS) $<
+	$(CC) -c $(CXXFLAGS)-fPIC  $<
 
 %.so:%.cpp $(C_OBJ)
 	$(CXX) $(CXX_DYNLIB) $(C_OBJ) $< -o $@
