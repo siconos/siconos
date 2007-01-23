@@ -29,7 +29,7 @@ Notes:
 
 Changes:
 	
-2007-01-16 Vincent  Acary <Vincent.Acary@inrialpes.fr>
+2007-01-23 Vincent  Acary <Vincent.Acary@inrialpes.fr>
 	* configure.ac, MakefilePluginSample.in, ... :
 	Change the name of the variable SICONOS_EXT_LDFLAGS into 
 	SICONOS_EXT_LIBS. Change MakefilePluginSample.am to avoid the use of

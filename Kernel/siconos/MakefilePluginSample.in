@@ -35,7 +35,7 @@ sample:$(SAMPLE_OBJ) $(SAMPLE_EXE)
 	$(CXX) -c $(CXXFLAGS) -fPIC @SICONOS_EXT_INCLUDES@ -I $(SICONOSPATH)/include $<
 
 $(SAMPLE_EXE):$(SAMPLE_OBJ)
-	$(CXX) -o $@ $<  -L@prefix@/lib  -lSiconosKernel @SICONOS_EXT_LIBS@
+	$(CXX) $(CXXFLAGS) -o $@ $< -L@prefix@/lib  -lSiconosKernel   @SICONOS_EXT_LIBS@   
 
 
 run:$(SAMPLE_EXE) 

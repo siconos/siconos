@@ -158,7 +158,8 @@ case "$target" in
       ATLAS_INCLUDES=""
       ;;
     *-apple-darwin*)
-      ATLAS_LIBS="/usr/local/lib/atlas/libcblas.a /usr/local/lib/atlas/liblapack.a /usr/local/lib/atlas/libatlas.a "
+      #ATLAS_LIBS="-L/usr/local/lib/atlas/ -latlas -lcblas -lf77blas -llapack -latlas"
+      ATLAS_LIBS="/usr/local/lib/atlas/libatlas.a /usr/local/lib/atlas/liblapack.a /usr/local/lib/atlas/libcblas.a /usr/local/lib/atlas/libcf77blas.a"
       ATLAS_INCLUDES="-I/usr/local/include/atlas"
       ;; 
     *)
@@ -259,7 +260,7 @@ SICONOS_EXT_INCLUDES="$NUMERICS_INCLUDES $ATLAS_INCLUDES $XML_CPPFLAGS $BOOST_CP
 AC_SUBST(SICONOS_EXT_INCLUDES)
 
 
-SICONOS_EXT_LIBS="$ATLAS_LIBS $NUMERICS_LIBRARIES  $XML_LIBS -ldl"
+SICONOS_EXT_LIBS="$NUMERICS_LIBRARIES $ATLAS_LIBS $XML_LIBS -ldl"
 SICONOS_EXT_LIBS="$SICONOS_EXT_LIBS $LIBS " dnl  -L/usr/lib/atlas -llapack_atlas"
 
 AC_SUBST(SICONOS_EXT_LIBS)
