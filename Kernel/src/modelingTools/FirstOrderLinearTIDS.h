@@ -16,16 +16,16 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*! \file LinearTIDS.h
+/*! \file FirstOrderLinearTIDS.h
 
 */
 #ifndef LINEARTIDS_H
 #define LINEARTIDS_H
 
-#include "LinearDSXML.h"
-#include "LinearDS.h"
+#include "FirstOrderLinearDSXML.h"
+#include "FirstOrderLinearDS.h"
 
-class LinearDSXML;
+class FirstOrderLinearDSXML;
 
 /** First order linear systems - Inherits from DynamicalSystems
  *
@@ -36,7 +36,7 @@ class LinearDSXML;
  *
  *  This class represents first order linear systems of the form:
  * \f[
- * \dot x = Ax(t)+T u(t)+b+r,
+ * \dot x = Ax(t) + b + r,
  *  x(t_0)=x_0
  * \f]
  * where
@@ -46,42 +46,26 @@ class LinearDSXML;
  *  The  rhs is specialized by
  *    - \f$A \in R^{n\times n} \f$
  *    - \f$b \in R^{n} \f$
- *    - \f$u \in R^{uSize} \f$
- *    - \f$T \in R^{n\times uSize} \f$
- *        warning: T and u are members of DynamicalSystem class.
  *
- * The "minimal" form is
- * \f[
- * \dot x = Ax(t),
- *  x(t_0)=x_0
- * \f]
- * and so A should always be specified.
  *
- * This class inherits from LinearDS one. The difference is that here A and b do not depends on time.
+ * This class inherits from FirstOrderLinearDS one. The difference is that here A and b do not depend on time.
  *
- * Links with DynamicalSystem are:
- *
- * \f[
- *   f(x,t) = Ax(t) + b /  / , / /
- *   jacobianX = A
- * \f]
  *
  * A and b are constant matrix or vector, and thus can not be set using a plug-in.
- * Setting a value to A, automatically set jacobianX.
  *
  * To build and use a linearDS, you first need to call a constructor, with A as a required data.
  * Then, this system has to be initialized -> compute members value at time t0. This is usually done during call to simulation->initialize.
- * Finally, the state of the DS can be obtained by calling "compute" functions. In LinearTIDS case, since A and b are fixed, you can
- * only call computeRhs(time), to compute rhs = Ax+b+Tu.
+ * Finally, the state of the DS can be obtained by calling "compute" functions. In FirstOrderLinearTIDS case, since A and b are fixed, you can
+ * only call computeRhs(time), to compute rhs = Ax+b.
  *
  **/
-class LinearTIDS : public LinearDS
+class FirstOrderLinearTIDS : public FirstOrderLinearDS
 {
 private:
 
   /** default constructor
   */
-  LinearTIDS();
+  FirstOrderLinearTIDS();
 
 public:
 
@@ -92,7 +76,7 @@ public:
   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
   *  \exception RuntimeException
   */
-  LinearTIDS(DynamicalSystemXML *, NonSmoothDynamicalSystem* = NULL);
+  FirstOrderLinearTIDS(DynamicalSystemXML *, NonSmoothDynamicalSystem* = NULL);
 
   /** constructor from a set of data
   *  \param int : reference number of this DynamicalSystem
@@ -100,7 +84,7 @@ public:
   *  \param SiconosMatrix: A
   *  \exception RuntimeException
   */
-  LinearTIDS(const int, const SiconosVector&, const SiconosMatrix&);
+  FirstOrderLinearTIDS(int, const SiconosVector&, const SiconosMatrix&);
 
   /** constructor from a set of data
   *  \param int : reference number of this DynamicalSystem
@@ -109,25 +93,15 @@ public:
   *  \param SiconosVector: b
   *  \exception RuntimeException
   */
-  LinearTIDS(const int, const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
-
-  /** copy constructor
-  *  \param a Dynamical system to copy
-  */
-  LinearTIDS(const LinearTIDS &);
-
-  /** copy constructor
-  *  \param a Dynamical system to copy
-  */
-  LinearTIDS(const DynamicalSystem &);
+  FirstOrderLinearTIDS(int, const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
 
   /** destructor */
-  ~LinearTIDS();
+  ~FirstOrderLinearTIDS();
 
-  /** check that the system is complete (ie all required data are well set)
-  * \return a bool
-  */
-  bool checkDynamicalSystem();
+  /** Initialization function for the rhs and its jacobian.
+   *  \param time of initialization.
+   */
+  void initRhs(double) ;
 
   /** Default function to the right-hand side term
    *  \param double time : current time
@@ -151,7 +125,7 @@ public:
   *  \param DynamicalSystem* : the system which must be converted
   * \return a pointer on the dynamical system if it is of the right type, NULL otherwise
   */
-  static LinearTIDS* convert(DynamicalSystem* ds);
+  static FirstOrderLinearTIDS* convert(DynamicalSystem* ds);
 
 };
 

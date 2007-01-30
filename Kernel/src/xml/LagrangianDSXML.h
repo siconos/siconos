@@ -26,6 +26,9 @@
 #define __LAGRANGIANNLDSXML__
 
 #include "DynamicalSystemXML.h"
+#include "SiconosMemoryXML.h"
+#include "SiconosMemory.h"
+#include "SimpleMatrix.h"
 #include <vector>
 
 class DynamicalSystemXML ;
@@ -33,30 +36,20 @@ class DynamicalSystemXML ;
 const std::string LNLDS_Q = "q";
 const std::string LNLDS_Q0 = "q0";
 const std::string LNLDS_QMEMORY = "qMemory";
-
 const std::string LNLDS_VELOCITY = "Velocity";
 const std::string LNLDS_VELOCITY0 = "Velocity0";
 const std::string LNLDS_VELOCITYMEMORY = "VelocityMemory";
-
 const std::string LNLDS_QNLINERTIA = "NNL";
 const std::string LNLDS_FINT = "FInt";
 const std::string LNLDS_FEXT = "FExt";
-
-const std::string LNLDS_M = "M";
-const std::string LNLDS_MATRIXPLUGIN = "matrixPlugin";
-const std::string LNLDS_VECTORPLUGIN = "vectorPlugin";
-
-#include "check.h"
+const std::string LNLDS_Mass = "Mass";
 
 /** XML management for LagrangianDS
  *
  *  \author SICONOS Development Team - copyright INRIA
- *   \version 2.0.1.
- *   \date 05/11/2004
+ *  \version 2.0.1.
+ *  \date 05/11/2004
  *
- *
- *
- * LagrangianDSXML allows to manage data of a LagrangianDS DOM tree.
  */
 class LagrangianDSXML : public DynamicalSystemXML
 {
@@ -65,12 +58,10 @@ protected:
   xmlNodePtr qNode;
   xmlNodePtr q0Node;
   xmlNodePtr qMemoryNode;
-
   xmlNodePtr velocityNode;
   xmlNodePtr velocity0Node;
   xmlNodePtr velocityMemoryNode;
-
-  xmlNodePtr MNode;
+  xmlNodePtr MassNode;
   xmlNodePtr NNLNode;
   xmlNodePtr FIntNode;
   xmlNodePtr FExtNode;
@@ -81,18 +72,19 @@ protected:
   SiconosMemoryXML * qMemoryXML;
   SiconosMemoryXML * velocityMemoryXML;
 
-public:
-
   // === Constructors - Destructor ===
   LagrangianDSXML();
 
-  virtual ~LagrangianDSXML();
+public:
 
   /** Build a LagrangianDSXML object from a DOM tree describing a DS
    *   \param xmlNodePtr LagrangianDSNode : the LagrangianDS DOM tree
    *   \param bool isBVP : if NonSmoothDynamicalSystem is BVP LagrangianDS have boundary condition
    */
-  LagrangianDSXML(xmlNodePtr, const bool&);
+  LagrangianDSXML(xmlNodePtr, bool);
+
+  /** Destructor */
+  virtual ~LagrangianDSXML();
 
   // Functions for members loading/setting
 
@@ -111,7 +103,7 @@ public:
   inline void setQ(const SiconosVector &v)
   {
     if (!hasQ())
-      qNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LNLDS_Q, v);
+      qNode = SiconosDOMTreeTools::createVectorNode(rootNode, LNLDS_Q, v);
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(qNode, v);
   }
 
@@ -130,7 +122,7 @@ public:
   inline void  setQ0(const SiconosVector&v)
   {
     if (q0Node == NULL)
-      q0Node = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LNLDS_Q0, v);
+      q0Node = SiconosDOMTreeTools::createVectorNode(rootNode, LNLDS_Q0, v);
     else
       SiconosDOMTreeTools::setSiconosVectorNodeValue(q0Node, v);
   }
@@ -165,7 +157,7 @@ public:
   inline void setVelocity(const SiconosVector & v)
   {
     if (!hasVelocity())
-      velocityNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LNLDS_VELOCITY, v);
+      velocityNode = SiconosDOMTreeTools::createVectorNode(rootNode, LNLDS_VELOCITY, v);
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(velocityNode, v);
   }
 
@@ -185,7 +177,7 @@ public:
   {
     if (velocity0Node == NULL)
     {
-      velocity0Node = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LNLDS_VELOCITY0, v);
+      velocity0Node = SiconosDOMTreeTools::createVectorNode(rootNode, LNLDS_VELOCITY0, v);
     }
     else
       SiconosDOMTreeTools::setSiconosVectorNodeValue(velocity0Node, v);
@@ -214,7 +206,7 @@ public:
   {
     if (!isNNLPlugin())
       XMLException::selfThrow("LagrangianDSXML - getNNLPlugin : NNL is not calculated from a plugin ; NNL vector is given");
-    return  SiconosDOMTreeTools::getStringAttributeValue(NNLNode, LNLDS_VECTORPLUGIN);
+    return  SiconosDOMTreeTools::getStringAttributeValue(NNLNode, DS_VECTORPLUGIN);
   }
 
   /** Return the NNL vector of the LagrangianDSXML
@@ -235,10 +227,10 @@ public:
   {
     if (NNLNode == NULL)
     {
-      NNLNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, LNLDS_QNLINERTIA);
-      xmlNewProp(NNLNode, (xmlChar*)(LNLDS_VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
+      NNLNode = SiconosDOMTreeTools::createSingleNode(rootNode, LNLDS_QNLINERTIA);
+      xmlNewProp(NNLNode, (xmlChar*)(DS_VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
-    else SiconosDOMTreeTools::setStringAttributeValue(NNLNode, LNLDS_VECTORPLUGIN, plugin);
+    else SiconosDOMTreeTools::setStringAttributeValue(NNLNode, DS_VECTORPLUGIN, plugin);
   }
 
   /** allows to save the NNL vector of the LagrangianDSXML
@@ -248,7 +240,7 @@ public:
   {
     if (NNLNode == NULL)
     {
-      NNLNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LNLDS_QNLINERTIA, v);
+      NNLNode = SiconosDOMTreeTools::createVectorNode(rootNode, LNLDS_QNLINERTIA, v);
     }
     else
       SiconosDOMTreeTools::setSiconosVectorNodeValue(NNLNode, v);
@@ -263,7 +255,7 @@ public:
   {
     if (!isFIntPlugin())
       XMLException::selfThrow("LagrangianDSXML - getFIntPlugin : FInt is not calculated from a plugin ; FInt vector is given");
-    return  SiconosDOMTreeTools::getStringAttributeValue(FIntNode, LNLDS_VECTORPLUGIN);
+    return  SiconosDOMTreeTools::getStringAttributeValue(FIntNode, DS_VECTORPLUGIN);
   }
 
   /** Return the internal forces vector of the LagrangianDSXML
@@ -284,7 +276,7 @@ public:
   {
     if (!hasFInt())
     {
-      FIntNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LNLDS_FINT, v);
+      FIntNode = SiconosDOMTreeTools::createVectorNode(rootNode, LNLDS_FINT, v);
     }
     else SiconosDOMTreeTools::setSiconosVectorNodeValue(FIntNode, v);
   }
@@ -296,10 +288,10 @@ public:
   {
     if (FIntNode == NULL)
     {
-      FIntNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, LNLDS_FINT);
-      xmlNewProp(FIntNode, (xmlChar*)(LNLDS_VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
+      FIntNode = SiconosDOMTreeTools::createSingleNode(rootNode, LNLDS_FINT);
+      xmlNewProp(FIntNode, (xmlChar*)(DS_VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
-    else SiconosDOMTreeTools::setStringAttributeValue(FIntNode, LNLDS_VECTORPLUGIN, plugin);
+    else SiconosDOMTreeTools::setStringAttributeValue(FIntNode, DS_VECTORPLUGIN, plugin);
   }
 
   // === FExt ===
@@ -311,7 +303,7 @@ public:
   {
     if (!isFExtPlugin())
       XMLException::selfThrow("LagrangianDSXML - getFExtPlugin : FExt is not calculated from a plugin ; FExt vector is given");
-    return  SiconosDOMTreeTools::getStringAttributeValue(FExtNode, LNLDS_VECTORPLUGIN);
+    return  SiconosDOMTreeTools::getStringAttributeValue(FExtNode, DS_VECTORPLUGIN);
   }
 
   /** Return the external forces vector of the LagrangianDSXML
@@ -341,12 +333,12 @@ public:
   {
     if (FExtNode == NULL)
     {
-      FExtNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, LNLDS_FEXT);
-      xmlNewProp(FExtNode, (xmlChar*)(LNLDS_VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
+      FExtNode = SiconosDOMTreeTools::createSingleNode(rootNode, LNLDS_FEXT);
+      xmlNewProp(FExtNode, (xmlChar*)(DS_VECTORPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
     else
     {
-      SiconosDOMTreeTools::setStringAttributeValue(FExtNode, LNLDS_VECTORPLUGIN, plugin);
+      SiconosDOMTreeTools::setStringAttributeValue(FExtNode, DS_VECTORPLUGIN, plugin);
     }
   }
 
@@ -358,7 +350,7 @@ public:
   {
     if (!isJacobianFIntPlugin(i))
       XMLException::selfThrow("LagrangianDSXML - getJacobianFIntPlugin(i) : JacobianFInt is not calculated from a plugin ; JacobianFInt matrix is given. i=" + i);
-    return  SiconosDOMTreeTools::getStringAttributeValue(jacobianFIntNode[i], LNLDS_MATRIXPLUGIN);
+    return  SiconosDOMTreeTools::getStringAttributeValue(jacobianFIntNode[i], DS_MATRIXPLUGIN);
   }
 
   /** Return the JacobianFInt matrix
@@ -386,8 +378,8 @@ public:
       name += "VelocityFInt";
     if (jacobianFIntNode[i] == NULL)
     {
-      jacobianFIntNode[i] = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, name);
-      xmlNewProp(jacobianFIntNode[i], (xmlChar*)(LNLDS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
+      jacobianFIntNode[i] = SiconosDOMTreeTools::createSingleNode(rootNode, name);
+      xmlNewProp(jacobianFIntNode[i], (xmlChar*)(DS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
     else SiconosDOMTreeTools::setStringAttributeValue(jacobianFIntNode[i], name, plugin);
   }
@@ -409,7 +401,7 @@ public:
   {
     if (!isJacobianNNLPlugin(i))
       XMLException::selfThrow("LagrangianDSXML - getJacobianNNLPlugin : JacobianNNL is not calculated from a plugin ; JacobianNNL matrix is given. i=" + i);
-    return  SiconosDOMTreeTools::getStringAttributeValue(jacobianNNLNode[i], LNLDS_MATRIXPLUGIN);
+    return  SiconosDOMTreeTools::getStringAttributeValue(jacobianNNLNode[i], DS_MATRIXPLUGIN);
   }
 
   /** Get the Jacobian NNL matrix.
@@ -437,8 +429,8 @@ public:
       name += "VelocityNNL";
     if (jacobianNNLNode[i] == NULL)
     {
-      jacobianNNLNode[i] = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, name);
-      xmlNewProp(jacobianNNLNode[i], (xmlChar*)(LNLDS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
+      jacobianNNLNode[i] = SiconosDOMTreeTools::createSingleNode(rootNode, name);
+      xmlNewProp(jacobianNNLNode[i], (xmlChar*)(DS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
     else SiconosDOMTreeTools::setStringAttributeValue(jacobianNNLNode[i], name, plugin);
   }
@@ -452,62 +444,62 @@ public:
     SiconosDOMTreeTools::setSiconosMatrixNodeValue(jacobianNNLNode[i], m);
   }
 
-  /** Return the M Plug-in name of the LagrangianDSXML
-   *   \return The M Plug-in name of the LagrangianDSXML
+  /** Return the Mass Plug-in name of the LagrangianDSXML
+   *   \return The Mass Plug-in name of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline const std::string getMPlugin() const
+  inline const std::string getMassPlugin() const
   {
-    if (!isMPlugin())
-      XMLException::selfThrow("LagrangianDSXML - getMPlugin : M is not calculated from a plugin ; M matrix is given");
-    return  SiconosDOMTreeTools::getStringAttributeValue(MNode, LNLDS_MATRIXPLUGIN);
+    if (!isMassPlugin())
+      XMLException::selfThrow("LagrangianDSXML - getMPlugin : Mass is not calculated from a plugin ; Mass matrix is given");
+    return  SiconosDOMTreeTools::getStringAttributeValue(MassNode, DS_MATRIXPLUGIN);
   }
 
-  /** Return the M matrix of the LagrangianDSXML
-   *   \return The M SimpleMatrix of the LagrangianDSXML
+  /** Return the Mass matrix of the LagrangianDSXML
+   *   \return The Mass SimpleMatrix of the LagrangianDSXML
    *  \exception XMLException
    */
-  inline const SimpleMatrix getMMatrix() const
+  inline const SimpleMatrix getMassMatrix() const
   {
-    if (isMPlugin())
-      XMLException::selfThrow("LagrangianDSXML - getMMatrix : M matrix is not given ; M is calculated from a plugin");
+    if (isMassPlugin())
+      XMLException::selfThrow("LagrangianDSXML - getMMatrix : Mass matrix is not given ; Mass is calculated from a plugin");
 
-    return  SiconosDOMTreeTools::getSiconosMatrixValue(MNode);
+    return  SiconosDOMTreeTools::getSiconosMatrixValue(MassNode);
   }
 
-  /** allows to save the jacobianVelocityNNLPlugin plugin of the LagrangianDSXML
+  /** To save the Mass plugin of the LagrangianDSXML
    *   \param string : the string which contains the name and the location of the plugin
    */
-  inline void setMPlugin(const std::string& plugin)
+  inline void setMassPlugin(const std::string& plugin)
   {
-    if (MNode == NULL)
+    if (MassNode == NULL)
     {
-      MNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, LNLDS_M);
-      xmlNewProp(MNode, (xmlChar*)(LNLDS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
+      MassNode = SiconosDOMTreeTools::createSingleNode(rootNode, LNLDS_Mass);
+      xmlNewProp(MassNode, (xmlChar*)(DS_MATRIXPLUGIN.c_str()), (xmlChar*)plugin.c_str());
     }
     else
-      SiconosDOMTreeTools::setStringAttributeValue(MNode, LNLDS_MATRIXPLUGIN, plugin);
+      SiconosDOMTreeTools::setStringAttributeValue(MassNode, DS_MATRIXPLUGIN, plugin);
   }
 
   /** allows to save the M matrix of the LagrangianDSXML
    *   \return The M SiconosMatrix to save
    */
-  inline void setMMatrix(const SiconosMatrix& m)
+  inline void setMassMatrix(const SiconosMatrix& m)
   {
-    if (MNode == NULL)
+    if (MassNode == NULL)
     {
-      MNode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, LNLDS_M, m);
+      MassNode = SiconosDOMTreeTools::createMatrixNode(rootNode, LNLDS_Mass, m);
     }
-    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(MNode, m);
+    else SiconosDOMTreeTools::setSiconosMatrixNodeValue(MassNode, m);
   }
 
   /** Return true if M is calculated from a plugin
    *  \return a bool
    *   \return True if M is calculated from plugin
    */
-  inline const bool isMPlugin() const
+  inline const bool isMassPlugin() const
   {
-    return xmlHasProp((xmlNodePtr)MNode, (xmlChar *) LNLDS_MATRIXPLUGIN.c_str());
+    return xmlHasProp(MassNode, (xmlChar *) DS_MATRIXPLUGIN.c_str());
   }
 
   /** Return true if M only given by a Matrix
@@ -515,7 +507,7 @@ public:
    */
   inline const bool isMMatrix() const
   {
-    return !(xmlHasProp((xmlNodePtr)MNode, (xmlChar *) LNLDS_MATRIXPLUGIN.c_str()));
+    return !(xmlHasProp(MassNode, (xmlChar *) DS_MATRIXPLUGIN.c_str()));
   }
 
   /** Return true if QLNInertia is calculated from a plugin
@@ -523,7 +515,7 @@ public:
    */
   inline const bool isNNLPlugin() const
   {
-    return xmlHasProp((xmlNodePtr)NNLNode, (xmlChar *) LNLDS_VECTORPLUGIN.c_str());
+    return xmlHasProp(NNLNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
   }
 
   /** Return true if FInt is calculated from a plugin
@@ -531,7 +523,7 @@ public:
    */
   inline const bool isFIntPlugin() const
   {
-    return xmlHasProp((xmlNodePtr)FIntNode, (xmlChar *) LNLDS_VECTORPLUGIN.c_str());
+    return xmlHasProp(FIntNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
   }
 
   /** Return true if FExt is calculated from a plugin
@@ -539,7 +531,7 @@ public:
    */
   inline const bool isFExtPlugin() const
   {
-    return xmlHasProp((xmlNodePtr)FExtNode, (xmlChar *) LNLDS_VECTORPLUGIN.c_str());
+    return xmlHasProp(FExtNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
   }
 
   /** Return true if JacobianFInt is calculated from a plugin
@@ -548,7 +540,7 @@ public:
    */
   inline const bool isJacobianFIntPlugin(unsigned int i) const
   {
-    return xmlHasProp((xmlNodePtr)jacobianFIntNode[i], (xmlChar *) LNLDS_MATRIXPLUGIN.c_str());
+    return xmlHasProp(jacobianFIntNode[i], (xmlChar *) DS_MATRIXPLUGIN.c_str());
   }
 
   /** Return true if Jacobian NNL is calculated from a plugin
@@ -557,7 +549,23 @@ public:
    */
   inline const bool isJacobianNNLPlugin(unsigned int i) const
   {
-    return xmlHasProp((xmlNodePtr)jacobianNNLNode[i], (xmlChar *) LNLDS_MATRIXPLUGIN.c_str());
+    return xmlHasProp(jacobianNNLNode[i], (xmlChar *) DS_MATRIXPLUGIN.c_str());
+  }
+
+  /** determines if Mass is defined in the DOM tree
+   *  \return a bool
+   */
+  inline const bool hasQ0() const
+  {
+    return (q0Node != NULL);
+  }
+
+  /** determines if Mass is defined in the DOM tree
+   *  \return a bool
+   */
+  inline const bool hasVelocity0() const
+  {
+    return (velocity0Node != NULL);
   }
 
   /** determines if Mass is defined in the DOM tree
@@ -565,7 +573,7 @@ public:
    */
   inline const bool hasMass() const
   {
-    return (MNode != NULL);
+    return (MassNode != NULL);
   }
 
   /** determines if FInt is defined in the DOM tree

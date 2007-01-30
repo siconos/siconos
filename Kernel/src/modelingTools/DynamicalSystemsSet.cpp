@@ -17,10 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "DynamicalSystemsSet.h"
-#include "LagrangianDS.h"
 #include "LagrangianLinearTIDS.h"
-#include "LinearDS.h"
-#include "LinearTIDS.h"
+#include "FirstOrderLinearTIDS.h"
 
 using namespace std;
 

@@ -16,28 +16,27 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef __LinearDSTest__
-#define __LinearDSTest__
+#ifndef __FirstOrderLinearDSTest__
+#define __FirstOrderLinearDSTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "LinearDS.h"
+#include "FirstOrderLinearDS.h"
 #include "RuntimeException.h"
 #include "XMLException.h"
 
-class LinearDSTest : public CppUnit::TestFixture
+class FirstOrderLinearDSTest : public CppUnit::TestFixture
 {
 
 private:
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(LinearDSTest);
+  CPPUNIT_TEST_SUITE(FirstOrderLinearDSTest);
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildLinearDS1);
-  CPPUNIT_TEST(testBuildLinearDS2);
-  CPPUNIT_TEST(testBuildLinearDS3);
-  CPPUNIT_TEST(testBuildLinearDS4);
+  CPPUNIT_TEST(testBuildFirstOrderLinearDS1);
+  CPPUNIT_TEST(testBuildFirstOrderLinearDS2);
+  CPPUNIT_TEST(testBuildFirstOrderLinearDS3);
   CPPUNIT_TEST(testSetA);
   CPPUNIT_TEST(testSetAPtr);
   CPPUNIT_TEST(testSetB);
@@ -48,10 +47,9 @@ private:
 
   // \todo exception test
 
-  void testBuildLinearDS1();
-  void testBuildLinearDS2();
-  void testBuildLinearDS3();
-  void testBuildLinearDS4();
+  void testBuildFirstOrderLinearDS1();
+  void testBuildFirstOrderLinearDS2();
+  void testBuildFirstOrderLinearDS3();
   void testSetA();
   void testSetAPtr();
   void testSetB();
@@ -63,7 +61,7 @@ private:
   SimpleVector * x0, *b0;
   SiconosMatrix *A0, *J0;
   xmlNode * node1 , *node2;
-  LinearDSXML* tmpxml1, * tmpxml2;
+  FirstOrderLinearDSXML* tmpxml1, * tmpxml2;
 public:
   void setUp();
   void tearDown();

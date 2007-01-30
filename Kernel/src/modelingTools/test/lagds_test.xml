@@ -32,11 +32,11 @@
 				<Velocity0  vectorSize='3'>
 					4.0 5.0 6.0
 				</Velocity0>
-				<M matrixRowSize='3' matrixColSize='3'>	
+				<Mass matrixRowSize='3' matrixColSize='3'>	
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 1.0</row>
-				</M>			
+				</Mass>			
 			</LagrangianDS>
 			<LagrangianDS number='8' Id="testLAGDS2">
 				<StepsInMemory>1</StepsInMemory>				
@@ -47,22 +47,13 @@
 					4.0 5.0 6.0
 				</Velocity0>
 				<FExt vectorPlugin="TestPlugin:computeFExt"/>
-				<M matrixPlugin="TestPlugin:computeMass"/>
+				<Mass matrixPlugin="TestPlugin:computeMass"/>
 				<FInt vectorPlugin="TestPlugin:computeFInt"/>
 				<JacobianQFInt matrixPlugin="TestPlugin:computeJacobianQFInt"/>
 				<JacobianVelocityFInt matrixPlugin="TestPlugin:computeJacobianVelocityFInt"/>
 				<NNL vectorPlugin="TestPlugin:computeNNL"/>
 				<JacobianQNNL matrixPlugin="TestPlugin:computeJacobianQNNL"/>
 				<JacobianVelocityNNL matrixPlugin="TestPlugin:computeJacobianVelocityNNL"/>
-                                <uSize> 2 </uSize>
-				<u vectorSize='2'>
-					4.0 5.0
-				</u>
-				<T matrixRowSize='3' matrixColSize='2'>	
-					<row>2.0 2.0 </row>
-					<row>4.0 4.0 </row>
-					<row>6.0 6.0 </row>
-				</T>			
 			</LagrangianDS>
 			<LagrangianDS number='4' Id="testLAGDS3">
 				<StepsInMemory>1</StepsInMemory>				
@@ -75,7 +66,7 @@
 				<FExt vectorSize='3'>
 					2 4 6
 				</FExt>
-				<M matrixPlugin="TestPlugin:computeMass"/>
+				<Mass matrixPlugin="TestPlugin:computeMass"/>
 				<FInt vectorSize='3'>
 					3 6 9
 				</FInt>

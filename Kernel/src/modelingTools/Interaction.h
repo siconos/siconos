@@ -467,11 +467,11 @@ public:
   */
   DynamicalSystem* getDynamicalSystemPtr(const int);
 
-  /** get a specific DynamicalSystem
-  *  \param the identification number of the wanted DynamicalSystem
-  *  \return a Dynamical System
-  */
-  DynamicalSystem getDynamicalSystem(const int);
+  /** get a specific DynamicalSystem. Out of date function?
+   *  \param the identification number of the wanted DynamicalSystem
+   *  \param a Dynamical System: out-parameter
+   */
+  void getDynamicalSystem(const int, DynamicalSystem&);
 
   /** get the Relation of this Interaction
   *  \return a pointer on this Relation

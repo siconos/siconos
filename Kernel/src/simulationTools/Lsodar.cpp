@@ -231,7 +231,7 @@ void Lsodar::initialize()
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
   {
     type = (*it)->getType();
-    if (type == LTIDS)
+    if (type == LLTIDS)
     {
       xWork->addPtr((static_cast<LagrangianLinearTIDS*>(*it))->getQPtr()) ;
       xWork->addPtr((static_cast<LagrangianLinearTIDS*>(*it))->getVelocityPtr()) ;
@@ -363,22 +363,17 @@ void Lsodar::updateState(const unsigned int level)
 {
   // Compute all required (ie time-dependent) data for the DS of the OSI.
   DSIterator it;
-  SiconosMatrix * invM;
-  SiconosVector * v, *q, *impact; //, *vold;
 
   if (level == 1) // ie impact case: compute velocity
   {
+    SiconosVector *q;
     for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
     {
       LagrangianDS* lds = static_cast<LagrangianDS*>(*it);
-      invM = lds->getInverseOfMassPtr();
-      v = lds->getVelocityPtr();
+      lds->computePostImpactVelocity();
       q = lds->getQPtr();
-      impact = lds->getPPtr(1);
-
-      *v += prod(*invM, *impact);
       for (unsigned int i = 0; i < q->size(); ++i)
-        (*q)(i) += 2 * TOLERANCE;
+        (*q)(i) += 2 * TOLERANCE; // Move this into DS???
     }
   }
   else if (level == 2)// compute acceleration

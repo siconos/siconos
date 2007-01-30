@@ -44,11 +44,11 @@
 					0.0 0.0 0.0
 				</Velocity0>
 				<FExt vectorPlugin="gTestPlugin:ballFExt"/>
-				<M matrixRowSize='3' matrixColSize='3'>	
+				<Mass matrixRowSize='3' matrixColSize='3'>	
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 1.0</row>
-				</M>			
+				</Mass>			
 				<K matrixRowSize='3' matrixColSize='3'>
 					<row>0.0 0.0 0.0</row>
 					<row>0.0 0.0 0.0</row>
@@ -70,9 +70,9 @@
 					0.0
 				</Velocity0>
 				<FExt vectorPlugin="gTestPlugin:groundFExt"/>
-				<M matrixRowSize='1' matrixColSize='1'>	
+				<Mass matrixRowSize='1' matrixColSize='1'>	
 					<row>1.0 </row>
-				</M>			
+				</Mass>			
 				<K matrixRowSize='1' matrixColSize='1'>
 					<row>0.0</row>
 				</K>

@@ -19,10 +19,8 @@
 #include "NonSmoothDynamicalSystem.h"
 
 // includes to be deleted thanks to factories
-#include "LagrangianDS.h"
 #include "LagrangianLinearTIDS.h"
-#include "LinearDS.h"
-#include "LinearTIDS.h"
+#include "FirstOrderLinearTIDS.h"
 
 using namespace std;
 
@@ -54,11 +52,11 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* 
     else if (type == LAGRANGIAN_TIDS_TAG)  // Lagrangian Linear Time Invariant
       checkDS = allDS.insert(new LagrangianLinearTIDS(*it, this));
     else if (type == LINEAR_DS_TAG)  // Linear DS
-      checkDS = allDS.insert(new LinearDS(*it, this));
+      checkDS = allDS.insert(new FirstOrderLinearDS(*it, this));
     else if (type == LINEAR_TIDS_TAG)  // Linear DS
-      checkDS = allDS.insert(new LinearTIDS(*it, this));
+      checkDS = allDS.insert(new FirstOrderLinearTIDS(*it, this));
     else if (type == NON_LINEAR_DS_TAG)  // Non linear DS
-      checkDS = allDS.insert(new DynamicalSystem(*it, this));
+      checkDS = allDS.insert(new FirstOrderNonLinearDS(*it, this));
     else RuntimeException::selfThrow("NonSmoothDynamicalSystem::xml constructor, wrong Dynamical System type" + type);
     // checkDS.first is an iterator that points to the DS inserted into the set.
     isDSAllocatedIn[*(checkDS.first)] = true ;
@@ -340,13 +338,13 @@ void NonSmoothDynamicalSystem::saveNSDSToXML()
     {
       if ((*it)->getType() == LNLDS)
         (static_cast<LagrangianDS*>((*it)))->saveDSToXML();
-      else if ((*it)->getType() == LTIDS)
+      else if ((*it)->getType() == LLTIDS)
         (static_cast<LagrangianLinearTIDS*>((*it)))->saveDSToXML();
-      else if ((*it)->getType() == LDS)
-        (static_cast<LinearDS*>((*it)))->saveDSToXML();
-      else if ((*it)->getType() == LITIDS)
-        (static_cast<LinearDS*>((*it)))->saveDSToXML();
-      else if ((*it)->getType() == NLDS)
+      else if ((*it)->getType() == FOLDS)
+        (static_cast<FirstOrderLinearDS*>((*it)))->saveDSToXML();
+      else if ((*it)->getType() == FOLTIDS)
+        (static_cast<FirstOrderLinearDS*>((*it)))->saveDSToXML();
+      else if ((*it)->getType() == FONLDS)
         (*it)->saveDSToXML();
       else RuntimeException::selfThrow("NonSmoothDynamicalSystem::saveToXML - bad kind of DynamicalSystem");
     }

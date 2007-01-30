@@ -430,7 +430,7 @@ void LagrangianLinearR::computeOutput(const double time, const unsigned int deri
     {
       // check dynamical system type
       type = (*it)->getType();
-      if (type != LTIDS && type != LNLDS)
+      if (type != LLTIDS && type != LNLDS)
         RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + type);
       lds = static_cast<LagrangianDS*>(*it);
       // Put q and velocity of each DS into a block
@@ -482,7 +482,7 @@ void LagrangianLinearR::computeFreeOutput(const double time, const unsigned int 
     {
       // check dynamical system type
       type = (*it)->getType();
-      if (type != LTIDS && type != LNLDS)
+      if (type != LLTIDS && type != LNLDS)
         RuntimeException::selfThrow("LagrangianLinearR::computeFreeOutput not yet implemented for dynamical system of type " + type);
 
       // convert current DS into a LagrangianDS
@@ -535,7 +535,7 @@ void LagrangianLinearR::computeInput(const double time, const unsigned int level
     {
       // check dynamical system type
       typeDS = (*it)->getType();
-      if (typeDS != LTIDS && typeDS != LNLDS)
+      if (typeDS != LLTIDS && typeDS != LNLDS)
         RuntimeException::selfThrow("LagrangianLinearR::computeInput not yet implemented for this type of dynamical system " + typeDS);
 
       // convert current DS into a LagrangianDS

@@ -32,11 +32,11 @@
 				<Velocity0  vectorSize='3'>
 					4.0 5.0 6.0
 				</Velocity0>
-				<M matrixRowSize='3' matrixColSize='3'>	
+				<Mass matrixRowSize='3' matrixColSize='3'>	
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 2.0 0.0</row>
 					<row>0.0 0.0 3.0</row>
-				</M>			
+				</Mass>			
 				<K matrixRowSize='3' matrixColSize='3'>	
 					<row>1.0 2.0 3.0</row>
 					<row>4.0 5.0 6.0</row>

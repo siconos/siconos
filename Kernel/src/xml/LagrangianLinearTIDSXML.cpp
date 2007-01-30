@@ -23,14 +23,17 @@ LagrangianLinearTIDSXML::LagrangianLinearTIDSXML():
   LagrangianDSXML(), KNode(NULL), CNode(NULL)
 {}
 
-LagrangianLinearTIDSXML::LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSNode, bool isBVP):
-  LagrangianDSXML(LagrangianLinearTIDSNode, isBVP), KNode(NULL), CNode(NULL)
+LagrangianLinearTIDSXML::LagrangianLinearTIDSXML(xmlNodePtr DSNode, bool isBVP):
+  LagrangianDSXML(DSNode, isBVP), KNode(NULL), CNode(NULL)
 {
-  xmlNode *node;
+  xmlNodePtr node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LTIDS_K)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LTIDS_K)) != NULL)
     KNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LTIDS_C)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LTIDS_C)) != NULL)
     CNode = node;
 }
+
+LagrangianLinearTIDSXML::~LagrangianLinearTIDSXML()
+{}

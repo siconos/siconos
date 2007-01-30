@@ -369,11 +369,11 @@ void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& centralBlo
     else if (osiType == "Lsodar") // Warning: LagrangianDS only at the time !!!
     {
       dsType = (*itDS)->getType();
-      if (dsType != LNLDS && dsType != LTIDS)
+      if (dsType != LNLDS && dsType != LLTIDS)
         RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Lsodar Integrator with dynamical system of type " + dsType);
 
       // get mass and inverse it ...
-      centralBlocks[*itDS] = (static_cast<LagrangianDS*>(*itDS))->getInverseOfMassPtr();
+      centralBlocks[*itDS] = (static_cast<LagrangianDS*>(*itDS))->getMassLUPtr();
     }
     else
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Integrator of type " + osiType);

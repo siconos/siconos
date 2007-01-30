@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "Relation.h"
+#include "FirstOrderNonLinearDS.h"
+
 using namespace std;
 
 void Relation::initParameter(const string id)
@@ -164,20 +166,16 @@ void Relation::computeOutput(const double time, const unsigned int)
 
   DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   BlockVector *xTmp = new BlockVector();
-  BlockVector *uTmp = new BlockVector();
   DSIterator it;
   for (it = vDS.begin(); it != vDS.end(); it++)
   {
     // Put x and u of each DS into a block
     // Warning: use copy constructors, no link between pointers
-    if (((*it)->getType() != LDS) && ((*it)->getType() != LITIDS))
+    if (((*it)->getType() != FOLDS) && ((*it)->getType() != FOLTIDS))
       RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented for DS type " + (*it)->getType());
 
     xTmp->add((*it)->getX());
-    if ((*it)->getUPtr() != NULL)
-      uTmp->add(*((*it)->getUPtr())) ;
   }
-  unsigned int sizeU = uTmp->size();
   unsigned int sizeX = xTmp->size();
 
   SiconosVector *y = interaction->getYPtr(0);
@@ -188,23 +186,19 @@ void Relation::computeOutput(const double time, const unsigned int)
 
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   SimpleVector * xTmp2 = new SimpleVector(*xTmp);
-  SimpleVector * uTmp2 = new SimpleVector(*uTmp);
-
   SimpleVector * yTmp = new SimpleVector(*y);
   SimpleVector * lambdaTmp = new SimpleVector(*lambda);
 
-  computeOutputPtr(sizeX, &(*xTmp2)(0), time, sizeY, &(*lambdaTmp)(0), sizeU,  &(*uTmp2)(0), &(*yTmp)(0), &(*param)(0));
+  computeOutputPtr(sizeX, &(*xTmp2)(0), time, sizeY, &(*lambdaTmp)(0), &(*yTmp)(0), &(*param)(0));
 
   // Rebuilt lambda/y from Tmp
   *lambda = *lambdaTmp;
   *y = *yTmp;
 
   delete xTmp2;
-  delete uTmp2;
   delete lambdaTmp;
   delete yTmp;
   delete xTmp;
-  delete uTmp;
 }
 
 void Relation::computeFreeOutput(const double time, const unsigned int)
@@ -220,53 +214,43 @@ void Relation::computeFreeOutput(const double time, const unsigned int)
 
   DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   BlockVector *xTmp = new BlockVector();
-  BlockVector *uTmp = new BlockVector();
   DSIterator it;
 
   for (it = vDS.begin(); it != vDS.end(); it++)
   {
     // Put xFree and u of each DS into a block
     // Warning: use copy constructors, no link between pointers
-    if (((*it)->getType() != LDS) && ((*it)->getType() != LITIDS))
+    if (((*it)->getType() != FOLDS) && ((*it)->getType() != FOLTIDS))
       RuntimeException::selfThrow("LinearTIR - computeFreeOutput: not yet implemented for DS type " + (*it)->getType());
 
-    xTmp->add((*it)->getXFree());
-    if ((*it)->getUPtr() != NULL)
-      uTmp->add(*((*it)->getUPtr())) ;
+    xTmp->add(static_cast<FirstOrderNonLinearDS*>(*it)->getXFree());
   }
 
   SiconosVector *yFree = interaction->getYPtr(0);
   // warning : yFree is saved in y !!
-  unsigned int sizeU = uTmp->size();
   unsigned int sizeX = xTmp->size();
 
   SiconosVector *lambda = interaction->getLambdaPtr(0);
   unsigned int sizeY = yFree->size();
   SiconosVector* param = parametersList["output"];
-  computeOutputPtr(sizeX, &(*xTmp)(0), time, sizeY, &(*lambda)(0), sizeU,  &(*uTmp)(0), &(*yFree)(0), &(*param)(0));
+  computeOutputPtr(sizeX, &(*xTmp)(0), time, sizeY, &(*lambda)(0), &(*yFree)(0), &(*param)(0));
   delete xTmp;
-  delete uTmp;
 
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
   SimpleVector * xTmp2 = new SimpleVector(*xTmp);
-  SimpleVector * uTmp2 = new SimpleVector(*uTmp);
-
   SimpleVector * yFreeTmp = new SimpleVector(*yFree);
   SimpleVector * lambdaTmp = new SimpleVector(*lambda);
 
-  computeOutputPtr(sizeX, &(*xTmp2)(0), time, sizeY, &(*lambdaTmp)(0), sizeU,  &(*uTmp2)(0), &(*yFreeTmp)(0), &(*param)(0));
+  computeOutputPtr(sizeX, &(*xTmp2)(0), time, sizeY, &(*lambdaTmp)(0), &(*yFreeTmp)(0), &(*param)(0));
 
   // Rebuilt lambda/y from Tmp
   *lambda = *lambdaTmp;
   *yFree = *yFreeTmp;
 
   delete xTmp2;
-  delete uTmp2;
   delete lambdaTmp;
   delete yFreeTmp;
   delete xTmp;
-  delete uTmp;
-
   // \todo update y, yDot ... depending on the relative degree.
 }
 
@@ -285,15 +269,15 @@ void Relation::computeInput(const double time, const unsigned int level)
   {
     // Put r of each DS into a block
     // Warning: use addPtr -> link between pointers
-    bool isComp = (*it)->getRPtr()->isBlock();
+    bool isComp = static_cast<FirstOrderNonLinearDS*>(*it)->getRPtr()->isBlock();
     if (isComp)
     {
-      BlockVector * tmp = static_cast<BlockVector*>((*it)->getRPtr());
+      BlockVector * tmp = static_cast<BlockVector*>(static_cast<FirstOrderNonLinearDS*>(*it)->getRPtr());
       r->addPtr(tmp->getVectorPtr(0));
       r->addPtr(tmp->getVectorPtr(1));
     }
     else
-      r->addPtr(static_cast<SimpleVector*>((*it)->getRPtr()));
+      r->addPtr(static_cast<SimpleVector*>(static_cast<FirstOrderNonLinearDS*>(*it)->getRPtr()));
   }
 
 

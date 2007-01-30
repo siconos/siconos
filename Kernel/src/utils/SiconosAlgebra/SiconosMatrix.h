@@ -27,7 +27,7 @@
 
 #include "SiconosAlgebra.h"
 
-/** Union of DenseMat pointer, TriangMat pointer BandedMat, SparseMat and SymMat pointer
+/** Union of DenseMat pointer, TriangMat pointer BandedMat, SparseMat, SymMat, Zero and Identity mat pointers.
  */
 union Mat
 {
@@ -36,6 +36,8 @@ union Mat
   SymMat *Sym;
   SparseMat *Sparse;
   BandedMat *Banded;
+  ZeroMat *Zero;
+  IdentityMat *Identity;
 };
 
 class SimpleVector;
@@ -135,6 +137,20 @@ public:
   */
   virtual const SparseMat getSparse(unsigned int = 0, unsigned int = 0) const = 0;
 
+  /** get ZeroMat matrix
+  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+  *  \return a ZeroMat
+  */
+  virtual const ZeroMat getZero(unsigned int = 0, unsigned int = 0) const = 0;
+
+  /** get  getIdentity matrix
+  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+  *  \return an IdentityMat
+  */
+  virtual const IdentityMat getIdentity(unsigned int = 0, unsigned int = 0) const = 0;
+
   /** get a pointer on DenseMat matrix
   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
@@ -169,6 +185,20 @@ public:
   *  \return a SparseMat*
   */
   virtual SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const = 0;
+
+  /** get a pointer on ZeroMat matrix
+  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+  *  \return a ZeroMat*
+  */
+  virtual ZeroMat* getZeroPtr(unsigned int = 0, unsigned int = 0) const = 0;
+
+  /** get a pointer on Identity matrix
+  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+  *  \return an IdentityMat*
+  */
+  virtual IdentityMat* getIdentityPtr(unsigned int = 0, unsigned int = 0) const = 0;
 
   /** return the adress of the array of double values of the matrix ( for block(i,j) if this is a block matrix)
   *  \param: row position for the required block
@@ -224,11 +254,11 @@ public:
   */
   virtual void setCol(unsigned int, const SimpleVector&) = 0;
 
-  /** get the number of rows of the matrix
-  *  \exception SiconosMatrixException
-  *  \param : unsigned int, 0 for rows, 1 for columns
-  *  \return the number of rows of the matrix
-  */
+  /** get the number of rows or columns of the matrix
+   *  \exception SiconosMatrixException
+   *  \param : unsigned int, 0 for rows, 1 for columns
+   *  \return an int
+   */
   virtual unsigned int size(unsigned int)const = 0;
 
   /** resize the matrix with nbrow rows and nbcol columns, upper and lower are only useful for BandedMatrix .

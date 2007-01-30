@@ -46,9 +46,9 @@ const std::string COMPUTE_OUTPUT_TAG = "computeOutput";
 // DynamicalSystem tags
 const std::string LAGRANGIAN_TIDS_TAG = "LagrangianLinearTIDS";
 const std::string LAGRANGIAN_NON_LINEARDS_TAG = "LagrangianDS";
-const std::string LINEAR_DS_TAG = "LinearDS";
-const std::string LINEAR_TIDS_TAG = "LinearTIDS";
-const std::string NON_LINEAR_DS_TAG = "NonLinearDS";
+const std::string LINEAR_DS_TAG = "FirstOrderLinearDS";
+const std::string LINEAR_TIDS_TAG = "FirstOrderLinearTIDS";
+const std::string NON_LINEAR_DS_TAG = "FirstOrderNonLinearDS";
 
 const std::string INTERACTION_TAG = "Interaction";
 const std::string INTERACTION_CONTENT_TAG = "Interaction_Content";

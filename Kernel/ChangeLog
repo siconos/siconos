@@ -29,6 +29,12 @@ Notes:
 
 Changes:
 	
+2007-01-30 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Add an abstract DynamicalSystem class, base of FirstOrder, Lagrangian ...
+	* Rename DynamicalSystem in FirstOrderDynamicalSystem, LinearDS in FirstOrderLinearDynamicalSystem
+	* Add a z, vector of parameters, ("discret" state) in DS
+	* Remove control (u,T) from DS. (future version: actuators/sensors to handle control, from outside, through z parameter)
+
 2007-01-23 Vincent  Acary <Vincent.Acary@inrialpes.fr>
 	* configure.ac, MakefilePluginSample.in, ... :
 	Change the name of the variable SICONOS_EXT_LDFLAGS into 

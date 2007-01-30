@@ -42,7 +42,7 @@ class SimpleMatrix: public SiconosMatrix
 private:
 
   /**  unsigned int num
-   * an unsigned int which make a correspondance with Boost Matrices: 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat, 4->SparseMat, 5->BandedMat
+   * an unsigned int which make a correspondance with Boost Matrices: 1 -> DenseMat, 2 -> TriangMat, 3 -> SymMat, 4->SparseMat, 5->BandedMat, 6->zeroMat, 7->IdentityMat
    */
   unsigned int num;
 
@@ -56,7 +56,7 @@ private:
    */
   SimpleMatrix(TYP = DENSE);
 
-  /** LaVectorLongInt* ipiv;
+  /** std::vector<int> ipiv;
    * The pivot indices obtained from DGETRF (PLUFactorizationInPlace)
    */
   std::vector<int> ipiv;
@@ -121,12 +121,21 @@ public:
    */
   SimpleMatrix(const SparseMat&);
 
+  /** constructor with a ZeroMat matrix (see SiconosMatrix.h for details)
+   *  \param a ZeroMat
+   */
+  SimpleMatrix(const ZeroMat&);
+
+  /** constructor with a IdentityMat matrix (see SiconosMatrix.h for details)
+   *  \param a IdentityMat
+   */
+  SimpleMatrix(const IdentityMat&);
 
   /** constructor with the type of the boost matrix, a vector of the values and the dimensions
    *  of the matrix, the integers upper and lower are useful only for BandedMat
    *  \param a TYP
    *  \param a std::vector<double>
-   *  \param 4 unsigned int
+   *  \param unsigned int
    */
   SimpleMatrix(const std::vector<double>& , unsigned int, unsigned int = 0, TYP = DENSE, unsigned int = 0, unsigned int = 0);
 
@@ -206,6 +215,20 @@ public:
    */
   const SparseMat getSparse(unsigned int = 0, unsigned int = 0) const;
 
+  /** get ZeroMat matrix
+  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+  *  \return a ZeroMat
+  */
+  const ZeroMat getZero(unsigned int = 0, unsigned int = 0) const;
+
+  /** get  getIdentity matrix
+  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+  *  \return an IdentityMat
+  */
+  const IdentityMat getIdentity(unsigned int = 0, unsigned int = 0) const;
+
   /** get a pointer on DenseMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
    *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
@@ -240,6 +263,20 @@ public:
    *  \return a SparseMat*
    */
   SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0) const;
+
+  /** get a pointer on ZeroMat matrix
+  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+  *  \return a ZeroMat*
+  */
+  ZeroMat* getZeroPtr(unsigned int = 0, unsigned int = 0) const;
+
+  /** get a pointer on Identity matrix
+  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+  *  \return an IdentityMat*
+  */
+  IdentityMat* getIdentityPtr(unsigned int = 0, unsigned int = 0) const;
 
   /** get BlocksMat matrix
    *  \useless for SimpleMatrix
@@ -543,5 +580,11 @@ public:
    *  \param input: the RHS matrix b - output: the result x
    */
   void PLUForwardBackwardInPlace(SiconosVector &B);
+
+  /** set to false all LU indicators. Useful in case of
+      assignment for example.
+  */
+  void resetLU();
+
 };
 #endif

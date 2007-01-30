@@ -264,7 +264,7 @@ void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, dou
   unsigned int i = 0;
   for (it = dsOfTheOsi.begin(); it != dsOfTheOsi.end(); ++it)
   {
-    SiconosMatrix * jacotmp = (*it)->getJacobianXFPtr(); // Pointer link !
+    SiconosMatrix * jacotmp = (*it)->getJacobianXRhsPtr(); // Pointer link !
     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j)
     {
       for (unsigned k = 0 ; k < (*it)->getDim() ; ++k)

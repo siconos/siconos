@@ -224,7 +224,7 @@ void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   MapOfDouble Theta;
   getOSIMaps(UR1, W, Theta);
 
-  SiconosMatrix* currentBlock = blocks[UR1][UR2];
+  SiconosMatrix* currentBlock = blocks[UR1][UR2], *work = NULL;
   currentBlock->zero();
   SiconosMatrix *leftBlock = NULL, *rightBlock = NULL;
   unsigned int sizeDS;
@@ -259,12 +259,17 @@ void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
         // a getRight call will fail.
         flagRightBlock = true;
       }
-
-      *currentBlock +=  *leftBlock * multTranspose(*(W[*itDS]), *rightBlock); // left = right = G or H
+      work = new SimpleMatrix(trans(*rightBlock));
+      // W contains a lu-factorized matrix and we solve
+      // W * X = rightBlock with PLU
+      // Work is a temporary matrix.
+      W[*itDS]->PLUForwardBackwardInPlace(*work);
+      *currentBlock +=  *leftBlock * *work; // left = right = G or H
+      delete work;
+      if (flagRightBlock) delete rightBlock;
     }
     else RuntimeException::selfThrow("FrictionContact::computeBlock not yet implemented for relation of type " + relationType1);
     delete leftBlock;
-    if (flagRightBlock) delete rightBlock;
   }
 }
 

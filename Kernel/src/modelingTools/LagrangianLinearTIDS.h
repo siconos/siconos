@@ -39,7 +39,7 @@ class LagrangianLinearTIDSXML;
  * Lagrangian Linear Time Invariant Dynamical System of the form :
  * where
  * \f[
- * M \ddot q + C \dot q + K q =  F_{Ext}(t) + p,
+ * M \ddot q + C \dot q + K q =  F_{Ext}(t,z) + p,
  * \f]
  * where
  *    - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
@@ -50,23 +50,7 @@ class LagrangianLinearTIDSXML;
  *    -  \f$ M \in  R^{ndof \times ndof} \f$ is Mass matrix stored in the SiconosMatrix mass.
  *    -  \f$ K \in  R^{ndof \times ndof} \f$ is the stiffness matrix stored in the SiconosMatrix K.
  *    -  \f$ C \in  R^{ndof \times ndof} \f$ is the viscosity matrix stored in the SiconosMatrix C.
- *
- *
- *
- *
- *    -  \f$ F_{Int}(\dot q , q , t)\f$ the internal forces stored in the SimpleVector fExt.
- *    -  \f$ F_{Ext}(t) \f$ the external forces stored in the SimpleVector fInt.
- *
- *
- * One word on the initial condition.
- *
- * One word on the bilateral constraint
- *
- *
- * The master Class LagrangianDS is specified as follows :
- *
- *    -  \f$ NNL(\dot q, q) = 0 \f$
- *    -  \f$ F_{Int}(\dot q , q , t) = C \dot q + K q \f$
+ *    -  \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
  *
  *
  *
@@ -77,16 +61,16 @@ class LagrangianLinearTIDSXML;
  *
  * The rhs is given by:
  * \f[
- * f(x,t) = \left[\begin{array}{c}
+ * rhs(x,t,z) = \left[\begin{array}{c}
  *  \dot q  \\
- * M^{-1}(q)\left[F_{Ext}( q , t) - C \dot q - K q   \right]\\
+ * \ddot q = M^{-1}(q)\left[F_{Ext}( q , t, z) - C \dot q - K q   \right]\\
  * \end{array}\right]
  * \f]
  * Its jacobian is:
  * \f[
- * \nabla_{x}f(x,t) = \left[\begin{array}{cc}
+ * \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
  *  0  & I \\
- * -M^{-1}K  -M^{-1}C) \\
+ * -M^{-1}K & -M^{-1}C) \\
  * \end{array}\right]
  * \f]
  *  The input due to the non smooth law is:
@@ -108,19 +92,8 @@ private:
   /** specific matrix for a LagrangianLinearTIDS */
   SiconosMatrix *C;
 
-  /** set links with DS members
-  */
-  void connectToDS();
-
-  /** set all allocation flags (isAllocated map)
-  *  \param bool: value for flags
-  */
-  void initAllocationFlags(const bool = true);
-
-  /** set all plug-in flags (isPlugin map) to val
-  *  \param a bool
-  */
-  void initPluginFlags(const bool);
+  /** Download of xml data specific to the present class. Called from XML constructor.*/
+  void loadSpecificXml();
 
 public:
 
@@ -140,7 +113,7 @@ public:
    *  \param SiconosMatrix : matrix C of this DynamicalSystem
    *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(const int, const SimpleVector&, const SimpleVector&, const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&);
+  LagrangianLinearTIDS(int, const SimpleVector&, const SimpleVector&, const SiconosMatrix&, const SiconosMatrix&, const SiconosMatrix&);
 
   /** constructor from a set of data
    *  \param int : the number for this DynamicalSystem
@@ -149,12 +122,12 @@ public:
    *  \param SiconosMatrix : mass of this DynamicalSystem
    *  \exception RuntimeException
    */
-  LagrangianLinearTIDS(const int, const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
+  LagrangianLinearTIDS(int, const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
 
   /** copy constructor
   *  \param a Dynamical system to copy
   */
-  LagrangianLinearTIDS(const DynamicalSystem &);
+  //LagrangianLinearTIDS(const DynamicalSystem & );
 
   // destructor
   ~LagrangianLinearTIDS();
@@ -164,17 +137,17 @@ public:
   */
   bool checkDynamicalSystem();
 
+  /** Initialization function for the rhs and its jacobian.
+   *  \param time of initialization
+   */
+  void initRhs(double) ;
+
   /** dynamical system initialization function: mainly set memory and compute value for initial state values.
   *  \param string: simulation type
   *  \param time of initialisation, default value = 0
   *  \param the size of the memory, default size = 1.
   */
   void initialize(const std::string&, double = 0, unsigned int = 1) ;
-
-  /** dynamical system update: mainly call compute for all time or state depending functions (mass, FInt ...).
-  *  \param current time
-  */
-  void update(const double);
 
   // --- GETTERS AND SETTERS ---
 
@@ -237,24 +210,23 @@ public:
   *  \param bool isDSup : flag to avoid recomputation of operators
   *  \exception RuntimeException
   */
-  void computeRhs(const double, const bool  = false);
+  void computeRhs(double, bool  = false);
 
   /** Default function to jacobian of the right-hand side term according to x
   *  \param double time : current time
   *  \param bool isDSup : flag to avoid recomputation of operators
   *  \exception RuntimeException
   */
-  void computeJacobianXRhs(const double, const bool  = false);
+  void computeJacobianXRhs(double, bool  = false);
 
   // --- Miscellaneous ---
 
-  /** copy the data of the DS to the XML tree
-  *  \exception RuntimeException
-  */
-  void saveDSToXML();
+  /** copy the data of the DS into the XML tree
+   */
+  void saveSpecificDataToXML();
 
   /** print the data onto the screen
-  */
+   */
   void display() const;
 
   static LagrangianLinearTIDS* convert(DynamicalSystem* ds);

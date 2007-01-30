@@ -158,8 +158,6 @@ void LagrangianDSTest::testBuildLagrangianDS2()
   M(2, 1) = 5;
   M(2, 2) = 8;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2M : ", ds->getJacobianFInt(0) == M, true);
-  ds->getJacobianFInt(0).display();
-  ds->getJacobianFInt(1).display();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2N : ", ds->getJacobianFInt(1) == M, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2O : ", ds->getJacobianNNL(0) == M, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS2P : ", ds->getJacobianNNL(1) == M, true);
@@ -268,96 +266,28 @@ void LagrangianDSTest::testBuildLagrangianDS5()
   cout << "--> Constructor 5 test ended with success." << endl;
 }
 
-// copy constructor
-void LagrangianDSTest::testBuildLagrangianDS6()
-{
-  cout << "--> Test: constructor 6." << endl;
-  DynamicalSystem * ds1 = new LagrangianDS(tmpxml2);
-  DynamicalSystem * ds2 = new LagrangianDS(*ds1);
-
-  LagrangianDS* ds = static_cast<LagrangianDS*>(ds2);
-
-  ds->setId("copyOfds2");
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6A : ", ds->getType() == LNLDS, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6B : ", ds->getNumber() == 0, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6C : ", ds->getId() == "copyOfds2", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6D : ", ds->getNdof() == 3, true);
-  double time = 1.5;
-  ds->initialize("TimeStepping", time);
-
-
-  SimpleVector * x01 = new SimpleVector(3);
-  (*x01)(0) = 0;
-  (*x01)(1) = 1;
-  (*x01)(2) = 2;
-  SimpleVector * x02 = new SimpleVector(3);
-  (*x02)(0) = 0;
-  (*x02)(1) = 1 * (*q0)(1);
-  (*x02)(2) = 2 * (*q0)(2);
-
-  SimpleMatrix M(3, 3);
-  M(0, 0) = 1;
-  M(1, 1) = 2;
-  M(2, 2) = 3;
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6I : ", ds->getFExt() == (time* *x01), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6J : ", ds->getFInt() == *x02, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6K : ", ds->getNNL() == *x02, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6L : ", ds->getMass() == M, true);
-  M(0, 0) = 0;
-  M(0, 1) = 3;
-  M(0, 2) = 6;
-  M(1, 0) = 1;
-  M(1, 1) = 4;
-  M(1, 2) = 7;
-  M(2, 0) = 2;
-  M(2, 1) = 5;
-  M(2, 2) = 8;
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6M : ", ds->getJacobianFInt(0) == M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6N : ", ds->getJacobianFInt(1) == M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6O : ", ds->getJacobianNNL(0) == M, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianDS6P : ", ds->getJacobianNNL(1) == M, true);
-
-  delete x01;
-  delete x02;
-
-
-  delete ds1;
-  delete ds2;
-  cout << "--> Constructor 6 test ended with success." << endl;
-}
-
 void LagrangianDSTest::testcomputeDS()
 {
   cout << "-->Test: computeDS." << endl;
   DynamicalSystem * ds = new LagrangianDS(tmpxml2);
   LagrangianDS * copy = static_cast<LagrangianDS*>(ds);
   double time = 1.5;
-  ds->initialize("TimeStepping", time);
+  ds->initialize("EventDriven", time);
   ds->computeRhs(time);
   ds->computeJacobianXRhs(time);
   SimpleMatrix M(3, 3);
   M(0, 0) = 1;
   M(1, 1) = 2;
   M(2, 2) = 3;
-  SimpleMatrix * zero = new SimpleMatrix(3, 3);
-  SiconosMatrix * jx = ds->getJacobianXFPtr();
+  SiconosMatrix * jx = ds->getJacobianXRhsPtr();
   SiconosVector * vf = ds->getRhsPtr();
-  SiconosVector * r = ds->getRPtr();
-
-
 
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSI : ", *(vf->getVectorPtr(0)) == *velocity0, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSJ : ", prod(M, *(vf->getVectorPtr(1))) == (copy->getFExt() - copy->getFInt() - copy->getNNL()) , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSK : ", *(jx->getBlockPtr(0, 0)) == *zero, true);
-  zero->eye();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSK : ", *(jx->getBlockPtr(0, 1)) == *zero, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->getBlockPtr(1, 0))) == (-1.0 * (copy->getJacobianFInt(0) + copy->getJacobianNNL(0))) , true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->getBlockPtr(1, 1))) == -1.0 * (copy->getJacobianFInt(1) + copy->getJacobianNNL(1)) , true);
 
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSM : ", copy->getP(2) == *(r->getVectorPtr(1)), true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->getBlockPtr(1, 0))) == (copy->getJacobianFL(0)) , true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testComputeDSL : ", prod(M, *(jx->getBlockPtr(1, 1))) == (copy->getJacobianFL(1)) , true);
+
   delete ds;
   cout << "--> computeDS test ended with success." << endl;
 

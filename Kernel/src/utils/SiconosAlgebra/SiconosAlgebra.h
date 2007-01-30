@@ -64,6 +64,14 @@ typedef ublas::banded_matrix<double, ublas::column_major, std::vector<double> > 
  */
 typedef ublas::compressed_matrix<double, ublas::column_major, 0, Index, std::vector<double> > SparseMat;
 
+/** ZeroMat is a typedef of boost::ublas::numeric::zero_matrix, ie null matrix.
+ */
+typedef ublas::zero_matrix<double> ZeroMat;
+
+/** IdentityMat is a typedef of boost::ublas::identity_matrix ie identity matrix.
+ */
+typedef ublas::identity_matrix<double> IdentityMat;
+
 /** Various vector types available in Siconos **/
 
 /** DenseVect is a typedef of boost::ublas::numeric::vector<double, std::vector<double> >
@@ -84,7 +92,7 @@ const double tolerance = 1e-14;
 
 /** TYP is an enumerated type of DENSE, TRIANGULAR, SYMMETRIC, SPARSE, BANDED. TYP is used to describe the type of matrix or vector we want to construct.
  */
-enum TYP {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED};
+enum TYP {DENSE = 1, TRIANGULAR, SYMMETRIC, SPARSE, BANDED, ZERO, IDENTITY};
 
 // Notes:
 // Vector definition in boost: vector<T,A> see http://www.boost.org/libs/numeric/ublas/doc/vector.htm

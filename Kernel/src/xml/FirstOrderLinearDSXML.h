@@ -17,7 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 
-/*! \file LinearDSXML.h
+/*! \file FirstOrderLinearDSXML.h
 
 */
 
@@ -25,13 +25,15 @@
 #ifndef __LINEARSYSTEMDSXML__
 #define __LINEARSYSTEMDSXML__
 
-#include "DynamicalSystemXML.h"
+#include "FirstOrderNonLinearDSXML.h"
+#include "SimpleMatrix.h"
 
 const std::string LDS_A = "A";
 const std::string LDS_B = "b";
 
 class SimpleMatrix;
-/** XML management for LinearDS
+
+/** XML management for FirstOrderLinearDS
  *
  *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.1.
@@ -39,53 +41,53 @@ class SimpleMatrix;
  *
  *
  *
- * LinearDSXML allows to manage data of a LinearDS DOM tree.
+ * FirstOrderLinearDSXML allows to manage data of a FirstOrderLinearDS DOM tree.
  */
-class LinearDSXML : public DynamicalSystemXML
+class FirstOrderLinearDSXML : public FirstOrderNonLinearDSXML
 {
 private:
 
   //Nodes
-  xmlNode * ANode; /**< A in \f$ M \dot x = Ax+b \f$ */
-  xmlNode * bNode; /**< b in \f$ M \dot x = Ax+b \f$ */
+  xmlNodePtr ANode; /**< A in \f$ M \dot x = Ax+b \f$ */
+  xmlNodePtr bNode; /**< b in \f$ M \dot x = Ax+b \f$ */
+
+  /** Default constructor
+   */
+  FirstOrderLinearDSXML();
 
 public:
 
-  /** Default constructor
-  */
-  LinearDSXML();
-
-  /** Build a LinearDSXML object from a DOM tree describing a DS
+  /** Build a FirstOrderLinearDSXML object from a DOM tree describing a DS
   *   \param xmlNode * linearSystemDSNode : the linearSystemDS DOM tree
   *   \param bool isBVP : if NonSmoothDynamicalSystem is BVP, linearSystemDS has boundary condition
   */
-  LinearDSXML(xmlNode * linearSystemDSNode, const bool& isBVP);
+  FirstOrderLinearDSXML(xmlNodePtr, bool);
 
   /** destructor
   */
-  ~LinearDSXML();
+  inline ~FirstOrderLinearDSXML() {};
 
-  /** return the A of the LinearDSXML
+  /** return the A of the FirstOrderLinearDSXML
   *   \return a SimpleMatrix
   */
   inline const SimpleMatrix getA() const
   {
     if (isAPlugin())
-      XMLException::selfThrow("LinearDSXML - getA: A is not given but calculated with a plugin");
+      XMLException::selfThrow("FirstOrderLinearDSXML - getA: A is not given but calculated with a plugin");
     return  SiconosDOMTreeTools::getSiconosMatrixValue(ANode);
   }
 
-  /** return the A plug-in name of the LinearDSXML
+  /** return the A plug-in name of the FirstOrderLinearDSXML
   *   \return a string
   */
   inline const std::string getAPlugin() const
   {
     if (!isAPlugin())
-      XMLException::selfThrow("LinearDSXML - getAPlugin : A is not loaded from a plugin");
+      XMLException::selfThrow("FirstOrderLinearDSXML - getAPlugin : A is not loaded from a plugin");
     return  SiconosDOMTreeTools::getStringAttributeValue(ANode, DS_MATRIXPLUGIN);
   }
 
-  /** to save the A of the LinearDSXML
+  /** to save the A of the FirstOrderLinearDSXML
   *   \param The A SiconosMatrix to save
   */
   void setA(const SiconosMatrix& m);
@@ -95,28 +97,28 @@ public:
   */
   void setAPlugin(const std::string& plugin);
 
-  /** Return the b plug-in name of the LinearDSXML
+  /** Return the b plug-in name of the FirstOrderLinearDSXML
   *   \return a string
   */
   inline const std::string getBPlugin() const
   {
     if (!isBPlugin())
-      XMLException::selfThrow("LinearDSXML - getUPlugin : b is not calculated from a plugin ; b vector is given");
+      XMLException::selfThrow("FirstOrderLinearDSXML - getUPlugin : b is not calculated from a plugin ; b vector is given");
     return  SiconosDOMTreeTools::getStringAttributeValue(bNode, DS_VECTORPLUGIN);
   }
 
-  /** Return b vector of the LinearDSXML
+  /** Return b vector of the FirstOrderLinearDSXML
   *   \return a SimpleVector
   */
   inline const SimpleVector getBVector() const
   {
     if (isBPlugin())
-      XMLException::selfThrow("LinearDSXML - getBVector : b vector is not given ; b is calculated from a plugin");
+      XMLException::selfThrow("FirstOrderLinearDSXML - getBVector : b vector is not given ; b is calculated from a plugin");
 
     return  SiconosDOMTreeTools::getSiconosVectorValue(bNode);
   }
 
-  /** to save the b vector of the LinearDSXML
+  /** to save the b vector of the FirstOrderLinearDSXML
   *   \param The b SimpleVector to save
   */
   void setB(const SiconosVector& v);
@@ -130,14 +132,14 @@ public:
   */
   inline bool isAPlugin() const
   {
-    return xmlHasProp((xmlNodePtr)ANode, (xmlChar *) DS_MATRIXPLUGIN.c_str());
+    return xmlHasProp(ANode, (xmlChar *) DS_MATRIXPLUGIN.c_str());
   }
 
   /** Return true if b is calculated from a plugin
   */
   inline bool isBPlugin() const
   {
-    return xmlHasProp((xmlNodePtr)bNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
+    return xmlHasProp(bNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
   }
 
   /** returns true if ANode is defined

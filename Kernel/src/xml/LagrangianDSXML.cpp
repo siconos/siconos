@@ -23,55 +23,56 @@ using namespace std;
 
 LagrangianDSXML::LagrangianDSXML() :
   DynamicalSystemXML(), qNode(NULL), q0Node(NULL), qMemoryNode(NULL), velocityNode(NULL),
-  velocity0Node(NULL), velocityMemoryNode(NULL),  MNode(NULL), NNLNode(NULL), FIntNode(NULL), FExtNode(NULL), qMemoryXML(NULL), velocityMemoryXML(NULL)
+  velocity0Node(NULL), velocityMemoryNode(NULL),  MassNode(NULL), NNLNode(NULL), FIntNode(NULL), FExtNode(NULL),
+  qMemoryXML(NULL), velocityMemoryXML(NULL)
 {}
 
-LagrangianDSXML::LagrangianDSXML(xmlNodePtr  LagrangianDSNode, const bool& isBVP)
-  : DynamicalSystemXML(LagrangianDSNode, isBVP), qNode(NULL), q0Node(NULL), qMemoryNode(NULL), velocityNode(NULL),
-    velocity0Node(NULL), velocityMemoryNode(NULL),  MNode(NULL), NNLNode(NULL), FIntNode(NULL), FExtNode(NULL), qMemoryXML(NULL), velocityMemoryXML(NULL)
+LagrangianDSXML::LagrangianDSXML(xmlNodePtr  DSNode, bool isBVP):
+  DynamicalSystemXML(DSNode, isBVP), qNode(NULL), q0Node(NULL), qMemoryNode(NULL), velocityNode(NULL),
+  velocity0Node(NULL), velocityMemoryNode(NULL),  MassNode(NULL), NNLNode(NULL), FIntNode(NULL), FExtNode(NULL), qMemoryXML(NULL), velocityMemoryXML(NULL)
 {
   xmlNodePtr node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_Q)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_Q)) != NULL)
     qNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_Q0)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_Q0)) != NULL)
     q0Node = node;
   else
     XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_Q0 + " not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_QMEMORY)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_QMEMORY)) != NULL)
   {
     qMemoryNode = node;
     qMemoryXML = new SiconosMemoryXML(qMemoryNode);
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_VELOCITY)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_VELOCITY)) != NULL)
     velocityNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_VELOCITY0)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_VELOCITY0)) != NULL)
     velocity0Node = node;
   else
     XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_VELOCITY0 + " not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_VELOCITYMEMORY)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_VELOCITYMEMORY)) != NULL)
   {
     velocityMemoryNode = node;
     velocityMemoryXML = new SiconosMemoryXML(velocityMemoryNode);
   }
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_M)) != NULL)
-    MNode = node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_Mass)) != NULL)
+    MassNode = node;
   else
-    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_M + " not found.");
+    XMLException::selfThrow("LagrangianDSXML - loadLagrangianDSProperties error : tag " + LNLDS_Mass + " not found.");
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_QNLINERTIA)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_QNLINERTIA)) != NULL)
     NNLNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_FINT)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_FINT)) != NULL)
     FIntNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LNLDS_FEXT)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LNLDS_FEXT)) != NULL)
     FExtNode = node;
 
   jacobianNNLNode.resize(2, NULL);
@@ -84,14 +85,14 @@ LagrangianDSXML::LagrangianDSXML(xmlNodePtr  LagrangianDSNode, const bool& isBVP
       name += "QFInt";
     else
       name += "VelocityFInt";
-    if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, name)) != NULL)
+    if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, name)) != NULL)
       jacobianFIntNode[i] = node;
     name = "Jacobian";
     if (i)
       name += "QNNL";
     else
       name += "VelocityNNL";
-    if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, name)) != NULL)
+    if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, name)) != NULL)
       jacobianNNLNode[i] = node;
   }
 }
@@ -108,7 +109,7 @@ void LagrangianDSXML::setQMemory(const SiconosMemory& smem)
 {
   if (!hasQMemory())
   {
-    qMemoryXML = new SiconosMemoryXML(NULL, rootDynamicalSystemXMLNode, LNLDS_QMEMORY);
+    qMemoryXML = new SiconosMemoryXML(NULL, rootNode, LNLDS_QMEMORY);
     qMemoryNode = qMemoryXML->getSiconosMemoryXMLNode();
     qMemoryXML->setSiconosMemorySize(smem.getMemorySize());
     qMemoryXML->setSiconosMemoryVector(smem.getVectorMemory());
@@ -123,7 +124,7 @@ void LagrangianDSXML::setVelocityMemory(const SiconosMemory& smem)
 {
   if (hasVelocityMemory() == false)
   {
-    velocityMemoryXML = new SiconosMemoryXML(NULL, rootDynamicalSystemXMLNode, LNLDS_VELOCITYMEMORY);
+    velocityMemoryXML = new SiconosMemoryXML(NULL, rootNode, LNLDS_VELOCITYMEMORY);
     velocityMemoryNode = velocityMemoryXML->getSiconosMemoryXMLNode();
 
     velocityMemoryXML->setSiconosMemorySize(smem.getMemorySize());

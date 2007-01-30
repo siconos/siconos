@@ -17,10 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "UnitaryRelationsSet.h"
-#include "LagrangianDS.h"
 #include "LagrangianLinearTIDS.h"
-#include "LinearDS.h"
-#include "LinearTIDS.h"
+#include "FirstOrderLinearTIDS.h"
 
 using namespace std;
 

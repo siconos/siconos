@@ -39,7 +39,6 @@ private:
   CPPUNIT_TEST(testBuildLagrangianDS3);
   CPPUNIT_TEST(testBuildLagrangianDS4);
   CPPUNIT_TEST(testBuildLagrangianDS5);
-  CPPUNIT_TEST(testBuildLagrangianDS6);
   CPPUNIT_TEST(testcomputeDS);
   CPPUNIT_TEST(End);
 
@@ -52,7 +51,6 @@ private:
   void testBuildLagrangianDS3();
   void testBuildLagrangianDS4();
   void testBuildLagrangianDS5();
-  void testBuildLagrangianDS6();
   void testcomputeDS();
   void End();
 

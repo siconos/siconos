@@ -604,7 +604,7 @@ void LagrangianR::computeH(const double time)
   {
     type = (*it)->getType();
     // check dynamical system type
-    if (type != LTIDS && type != LNLDS)
+    if (type != LLTIDS && type != LNLDS)
       RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
@@ -676,7 +676,7 @@ void LagrangianR::computeG(const double  time, const unsigned int  index)
   {
     type = (*it)->getType();
     // check dynamical system type
-    if (type != LTIDS && type != LNLDS)
+    if (type != LLTIDS && type != LNLDS)
       RuntimeException::selfThrow("LagrangianLinearR::computeG not yet implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
@@ -768,7 +768,7 @@ void LagrangianR::computeOutput(const double time, const unsigned int derivative
   {
     type = (*it)->getType();
     // check dynamical system type
-    if (type != LTIDS && type != LNLDS)
+    if (type != LLTIDS && type != LNLDS)
       RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
@@ -812,7 +812,7 @@ void LagrangianR::computeFreeOutput(const double time, const unsigned int deriva
   {
     type = (*it)->getType();
     // check dynamical system type
-    if (type != LTIDS && type != LNLDS)
+    if (type != LLTIDS && type != LNLDS)
       RuntimeException::selfThrow("LagrangianLinearR::computeOutput not yet implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS
@@ -1009,7 +1009,7 @@ void LagrangianR::computeInput(const double time, const unsigned int level)
   {
     type = (*it)->getType();
     // check dynamical system type
-    if (type != LTIDS && type != LNLDS)
+    if (type != LLTIDS && type != LNLDS)
       RuntimeException::selfThrow("LagrangianLinearR::computeInput not yet implemented for dynamical system of type: " + type);
 
     // convert vDS systems into LagrangianDS and put them in vLDS

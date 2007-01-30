@@ -16,61 +16,54 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "LinearDSXML.h"
+#include "FirstOrderLinearDSXML.h"
 using namespace std;
 
-LinearDSXML::LinearDSXML() :
-  DynamicalSystemXML(), ANode(NULL), bNode(NULL)
+FirstOrderLinearDSXML::FirstOrderLinearDSXML() :
+  FirstOrderNonLinearDSXML(), ANode(NULL), bNode(NULL)
 {}
 
-LinearDSXML::LinearDSXML(xmlNode * LinearDSNode, const bool& isBVP):
-  DynamicalSystemXML(LinearDSNode, isBVP), ANode(NULL), bNode(NULL)
+FirstOrderLinearDSXML::FirstOrderLinearDSXML(xmlNodePtr nodeDS, bool isBVP):
+  FirstOrderNonLinearDSXML(nodeDS, isBVP), ANode(NULL), bNode(NULL)
 {
-  xmlNode *node;
-  // The only required node is A
-  node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LDS_A);
+  xmlNodePtr node = SiconosDOMTreeTools::findNodeChild(rootNode, LDS_A);
   if (node != NULL)
     ANode = node;
-  else
-    XMLException::selfThrow("LinearDSXML - loadLinearDSProperties error : tag " + LDS_A + " not found.");
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootDynamicalSystemXMLNode, LDS_B)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, LDS_B)) != NULL)
     bNode = node;
 }
 
-LinearDSXML::~LinearDSXML()
-{}
-
-void LinearDSXML::setA(const SiconosMatrix& m)
+void FirstOrderLinearDSXML::setA(const SiconosMatrix& m)
 {
   if (ANode != NULL)
     SiconosDOMTreeTools::setSiconosMatrixNodeValue(ANode, m);
   else
-    ANode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, LDS_A, m);
+    ANode = SiconosDOMTreeTools::createMatrixNode(rootNode, LDS_A, m);
 }
 
-void LinearDSXML::setAPlugin(const std::string& plugin)
+void FirstOrderLinearDSXML::setAPlugin(const std::string& plugin)
 {
   if (ANode == NULL)
   {
-    ANode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, "A");
+    ANode = SiconosDOMTreeTools::createSingleNode(rootNode, "A");
     xmlNewProp(ANode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
   }
   else
     SiconosDOMTreeTools::setStringAttributeValue(ANode, "matrixPlugin", plugin);
 }
 
-void LinearDSXML::setB(const SiconosVector& v)
+void FirstOrderLinearDSXML::setB(const SiconosVector& v)
 {
   if (bNode != NULL)
     SiconosDOMTreeTools::setSiconosVectorNodeValue(bNode, v);
-  else bNode = SiconosDOMTreeTools::createVectorNode(rootDynamicalSystemXMLNode, LDS_B, v);
+  else bNode = SiconosDOMTreeTools::createVectorNode(rootNode, LDS_B, v);
 }
 
-void LinearDSXML::setBPlugin(const std::string& plugin)
+void FirstOrderLinearDSXML::setBPlugin(const std::string& plugin)
 {
   if (bNode == NULL)
   {
-    bNode = SiconosDOMTreeTools::createSingleNode(rootDynamicalSystemXMLNode, "b");
+    bNode = SiconosDOMTreeTools::createSingleNode(rootNode, "b");
     xmlNewProp(bNode, (xmlChar*)("vectorPlugin"), (xmlChar*)plugin.c_str());
   }
   else

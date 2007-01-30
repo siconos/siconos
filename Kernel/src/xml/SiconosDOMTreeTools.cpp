@@ -30,7 +30,9 @@ SimpleVector SiconosDOMTreeTools::getSiconosVectorValue(const xmlNodePtr vectorN
   if (vectorNode == NULL)
     XMLException::selfThrow("SiconosDOMTreeTools - getSiconosVectorValue, node == NULL ");
 
-  // \warning FP: v is defined two times ??? xml option should be either size or file
+  // 2 cases:
+  //   - read vector from a file
+  //   - read in the xml file
   if (xmlHasProp((xmlNodePtr)vectorNode, (xmlChar *)SDTT_VECTORFILE.c_str())) //vector is defined in a extern ascii file
   {
     SimpleVector v(getStringAttributeValue(vectorNode, SDTT_VECTORFILE), true);

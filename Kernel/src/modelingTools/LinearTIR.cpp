@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "LinearTIR.h"
+#include "FirstOrderNonLinearDS.h"
 using namespace std;
 
 
@@ -580,18 +581,15 @@ void LinearTIR::computeOutput(const double time, const unsigned int)
   {
     DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
     BlockVector *xTmp = new BlockVector();
-    BlockVector *uTmp = new BlockVector();
     DSIterator it;
     for (it = vDS.begin(); it != vDS.end(); it++)
     {
-      // Put x and u of each DS into a block
+      // Put x of each DS into a block
       // Warning: use copy constructors, no link between pointers
-      if (((*it)->getType() != LDS) && ((*it)->getType() != LITIDS))
+      if (((*it)->getType() != FOLDS) && ((*it)->getType() != FOLTIDS))
         RuntimeException::selfThrow("LinearTIR - computeOutput: not yet implemented for DS type " + (*it)->getType());
 
       xTmp->add((*it)->getX());
-      if ((*it)->getUPtr() != NULL)
-        uTmp->add(*((*it)->getUPtr())) ;
     }
 
     SiconosVector *y = interaction->getYPtr(0);
@@ -603,9 +601,6 @@ void LinearTIR::computeOutput(const double time, const unsigned int)
     if (D != NULL)
       *y += prod(*D, *lambda);
 
-    if (F != NULL)
-      *y += prod(*F, *uTmp);
-
     if (e != NULL)
       *y += *e;
 
@@ -613,7 +608,6 @@ void LinearTIR::computeOutput(const double time, const unsigned int)
 
     // free memory
     delete xTmp;
-    delete uTmp;
   }
   else
     Relation::computeOutput(time);
@@ -627,19 +621,16 @@ void LinearTIR::computeFreeOutput(const double time, const unsigned int)
   {
     DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
     BlockVector *xTmp = new BlockVector();
-    BlockVector *uTmp = new BlockVector();
     DSIterator it;
 
     for (it = vDS.begin(); it != vDS.end(); it++)
     {
       // Put xFree and u of each DS into a block
       // Warning: use copy constructors, no link between pointers
-      if (((*it)->getType() != LDS) && ((*it)->getType() != LITIDS))
+      if (((*it)->getType() != FOLDS) && ((*it)->getType() != FOLTIDS))
         RuntimeException::selfThrow("LinearTIR - computeFreeOutput: not yet implemented for DS type " + (*it)->getType());
 
-      xTmp->add((*it)->getXFree());
-      if ((*it)->getUPtr() != NULL)
-        uTmp->add(*((*it)->getUPtr())) ;
+      xTmp->add(static_cast<FirstOrderNonLinearDS*>(*it)->getXFree());
     }
 
     SiconosVector *yFree = interaction->getYPtr(0);
@@ -648,9 +639,6 @@ void LinearTIR::computeFreeOutput(const double time, const unsigned int)
     // compute yFree
     *yFree = prod(*C, *xTmp);
 
-    if (F != NULL)
-      *yFree += prod(*F, *uTmp);
-
     if (e != NULL)
       *yFree += *e;
 
@@ -658,7 +646,6 @@ void LinearTIR::computeFreeOutput(const double time, const unsigned int)
 
     // free memory
     delete xTmp;
-    delete uTmp;
   }
   else
     Relation::computeFreeOutput(time);
@@ -675,15 +662,15 @@ void LinearTIR::computeInput(const double time, const unsigned int level)
     {
       // Put r of each DS into a block
       // Warning: use addPtr -> link between pointers
-      bool isComp = (*it)->getRPtr()->isBlock();
+      bool isComp = static_cast<FirstOrderNonLinearDS*>(*it)->getRPtr()->isBlock();
       if (isComp)
       {
-        BlockVector * tmp = static_cast<BlockVector*>((*it)->getRPtr());
+        BlockVector * tmp = static_cast<BlockVector*>(static_cast<FirstOrderNonLinearDS*>(*it)->getRPtr());
         r->addPtr(tmp->getVectorPtr(0));
         r->addPtr(tmp->getVectorPtr(1));
       }
       else
-        r->addPtr(static_cast<SimpleVector*>((*it)->getRPtr()));
+        r->addPtr(static_cast<SimpleVector*>(static_cast<FirstOrderNonLinearDS*>(*it)->getRPtr()));
     }
 
     SiconosVector *lambda = interaction->getLambdaPtr(level);

@@ -24,7 +24,7 @@
 	<NSDS bvp='false'>
 	<!-- DSs defined in the problem -->
 		<DS_Definition>		
-			<LinearDS number='13'  Id="testDS1">
+			<FirstOrderLinearDS number='13'  Id="testDS1">
 	 			<StepsInMemory>2</StepsInMemory>				
 				<x0 vectorSize='3'>
 					1.0 2.0 3.0
@@ -37,26 +37,14 @@
 					<row>4.0 4.0 4.0</row>
 					<row>6.0 6.0 6.0</row>
 				</A>			
-                                <uSize> 2 </uSize>
-				<u vectorSize='2'>
-					4.0 5.0
-				</u>
-				<T matrixRowSize='3' matrixColSize='2'>	
-					<row>2.0 2.0 </row>
-					<row>4.0 4.0 </row>
-					<row>6.0 6.0 </row>
-				</T>			
-			</LinearDS>
-			<LinearDS number='2' Id="testDS2">
+			</FirstOrderLinearDS>
+			<FirstOrderLinearDS number='2' Id="testDS2">
 				<x0 vectorSize='3'>
 					2.0 4.0 6.0
 				</x0>
 				<b vectorPlugin="TestPlugin:computeB"/>
 				<A matrixPlugin="TestPlugin:computeA"/>	
-                                <uSize> 2 </uSize>
-				<u vectorPlugin="TestPlugin:computeU"/>
-				<T matrixPlugin="TestPlugin:computeT"/>	
-			</LinearDS>
+ 			</FirstOrderLinearDS>
 		</DS_Definition>
 	</NSDS>
 </SiconosModel>

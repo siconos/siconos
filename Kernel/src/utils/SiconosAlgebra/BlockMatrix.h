@@ -316,6 +316,20 @@ public:
   */
   const SparseMat getSparse(unsigned int = 0, unsigned int = 0)const;
 
+  /** get ZeroMat matrix
+  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+  *  \return a ZeroMat
+  */
+  const ZeroMat getZero(unsigned int = 0, unsigned int = 0) const;
+
+  /** get  getIdentity matrix
+  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+  *  \return an IdentityMat
+  */
+  const IdentityMat getIdentity(unsigned int = 0, unsigned int = 0) const;
+
   /** get a pointer on DenseMat matrix
   *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
   *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
@@ -350,6 +364,20 @@ public:
   *  \return a SparseMat*
   */
   SparseMat* getSparsePtr(unsigned int = 0, unsigned int = 0)const;
+
+  /** get a pointer on ZeroMat matrix
+  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+  *  \return a ZeroMat*
+  */
+  ZeroMat* getZeroPtr(unsigned int = 0, unsigned int = 0) const;
+
+  /** get a pointer on Identity matrix
+  *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
+  *  \param an unsigned int, position of the block (column) - Useless for SimpleMatrix
+  *  \return an IdentityMat*
+  */
+  IdentityMat* getIdentityPtr(unsigned int = 0, unsigned int = 0) const;
 
   /** get the objects that holds all the blocks.
   *  \return a BlocksMat

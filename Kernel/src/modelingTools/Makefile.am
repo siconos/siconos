@@ -27,21 +27,21 @@ SUBDIRS = test
 
 noinst_LTLIBRARIES = libModelingTools.la
 libModelingTools_la_SOURCES =  DynamicalSystemsSet.cpp InteractionsSet.cpp ComplementarityConditionNSL.cpp \
-		DynamicalSystem.cpp Interaction.cpp Topology.cpp \
+		DynamicalSystem.cpp FirstOrderNonLinearDS.cpp Interaction.cpp Topology.cpp \
 		LagrangianLinearR.cpp LagrangianDS.cpp LagrangianR.cpp \
-		LagrangianLinearTIDS.cpp LinearDS.cpp LinearTIDS.cpp\
+		LagrangianLinearTIDS.cpp FirstOrderLinearDS.cpp FirstOrderLinearTIDS.cpp\
 		LinearTIR.cpp NewtonImpactNSL.cpp NewtonImpactFrictionNSL.cpp NonSmoothLaw.cpp NonSmoothDynamicalSystem.cpp Relation.cpp RelayNSL.cpp \
-		UnitaryRelation.cpp UnitaryRelationsSet.cpp Control.cpp\
+		UnitaryRelation.cpp UnitaryRelationsSet.cpp \
 		DynamicalSystemsSet.h  InteractionsSet.h ComplementarityConditionNSL.h \
-		DynamicalSystem.h Interaction.h LagrangianLinearR.h LagrangianDS.h LagrangianR.h LagrangianLinearTIDS.h \
-		LinearDS.h LinearTIDS.h LinearTIR.h \
+		DynamicalSystem.h FirstOrderNonLinearDS.h Interaction.h LagrangianLinearR.h LagrangianDS.h LagrangianR.h LagrangianLinearTIDS.h \
+		FirstOrderLinearDS.h FirstOrderLinearTIDS.h LinearTIR.h \
 		NewtonImpactNSL.h NewtonImpactFrictionNSL.h NonSmoothLaw.h NonSmoothDynamicalSystem.h \
-		Relation.h RelayNSL.h UnitaryRelation.h UnitaryRelationsSet.h Control.h
+		Relation.h RelayNSL.h UnitaryRelation.h UnitaryRelationsSet.h 
 libModelingTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
 siconos_HEADERS = DynamicalSystemsSet.h InteractionsSet.h ComplementarityConditionNSL.h \
-		DynamicalSystem.h Interaction.h \
+		DynamicalSystem.h FirstOrderNonLinearDS.h Interaction.h \
 		Topology.h LagrangianLinearR.h LagrangianDS.h LagrangianR.h LagrangianLinearTIDS.h \
-		LinearDS.h LinearTIDS.h LinearTIR.h NewtonImpactNSL.h NewtonImpactFrictionNSL.h \
+		FirstOrderLinearDS.h FirstOrderLinearTIDS.h LinearTIR.h NewtonImpactNSL.h NewtonImpactFrictionNSL.h \
 		NonSmoothLaw.h NonSmoothDynamicalSystem.h Relation.h RelayNSL.h UnitaryRelation.h \
-		UnitaryRelationsSet.h Control.h
+		UnitaryRelationsSet.h 

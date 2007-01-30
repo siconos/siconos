@@ -44,6 +44,8 @@ private:
   CPPUNIT_TEST(testConstructor8);
   CPPUNIT_TEST(testConstructor9);
   CPPUNIT_TEST(testConstructor10);
+  CPPUNIT_TEST(testConstructor11);
+  CPPUNIT_TEST(testConstructor12);
   CPPUNIT_TEST(testGetSetRowCol);
   CPPUNIT_TEST(testZero);
   CPPUNIT_TEST(testEye);
@@ -83,6 +85,8 @@ private:
   void testConstructor8();
   void testConstructor9();
   void testConstructor10();
+  void testConstructor11();
+  void testConstructor12();
   void testGetSetRowCol();
   void testZero();
   void testEye();
@@ -119,6 +123,8 @@ private:
   SymMat *S, *S2;
   BandedMat *B, *B2;
   SparseMat *SP;
+  ZeroMat * Z, *Z2;
+  IdentityMat* I, *I2;
   double tol;
 
 public:

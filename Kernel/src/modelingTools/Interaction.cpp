@@ -511,11 +511,13 @@ DynamicalSystem* Interaction::getDynamicalSystemPtr(const int nb)
   return involvedDS.getDynamicalSystemPtr(number);
 }
 
-DynamicalSystem Interaction::getDynamicalSystem(const int nb)
+void Interaction::getDynamicalSystem(const int nb, DynamicalSystem& ds)
 {
+  // This function is useless in C++ but maybe required in Python? To be checked.
+  // DS is a parameter, since it can be returned, DynamicalSystem being an abstract class.
   if (! involvedDS.isDynamicalSystemIn(nb)) // if ds number nb is not in the set ...
     RuntimeException::selfThrow("Interaction::getDynamicalSystem(nb), DS number nb is not in the set.");
-  return *(involvedDS.getDynamicalSystemPtr(nb));
+  ds = *(involvedDS.getDynamicalSystemPtr(nb));
 }
 
 void Interaction::setRelationPtr(Relation* newRelation)

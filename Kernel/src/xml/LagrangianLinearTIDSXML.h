@@ -43,20 +43,23 @@ class LagrangianLinearTIDSXML : public LagrangianDSXML
 {
 private:
 
-  xmlNode * KNode;
-  xmlNode * CNode;
+  xmlNodePtr KNode;
+  xmlNodePtr CNode;
+
+  /** default constructor
+   */
+  LagrangianLinearTIDSXML();
 
 public:
 
-  /** default constructor
-  */
-  LagrangianLinearTIDSXML();
-
   /** Build a LagrangianLinearTIDSXML object from a DOM tree describing a LagrangianLinearTIDS
-  *   \param LagrangianLinearTIDSNode : the LagrangianLinearTIDS DOM tree
-  *   \param bool isBVP : if NonSmoothDynamicalSystem is BVP LagrangianLinearTIDS have boundary condition
-  */
+   *   \param LagrangianLinearTIDSNode : the LagrangianLinearTIDS DOM tree
+   *   \param bool isBVP : if NonSmoothDynamicalSystem is BVP LagrangianLinearTIDS have boundary condition
+   */
   LagrangianLinearTIDSXML(xmlNode * LagrangianLinearTIDSNode, bool isBVP);
+
+  /** Destructor */
+  ~LagrangianLinearTIDSXML();
 
   /** Return the K of the LagrangianLinearTIDSXML
   *   \return The K SimpleMatrix of the LagrangianLinearTIDSXML
@@ -73,7 +76,7 @@ public:
   {
     if (KNode == NULL)
     {
-      KNode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, LTIDS_K, m);
+      KNode = SiconosDOMTreeTools::createMatrixNode(rootNode, LTIDS_K, m);
     }
     else SiconosDOMTreeTools::setSiconosMatrixNodeValue(KNode, m);
   }
@@ -93,7 +96,7 @@ public:
   {
     if (CNode == NULL)
     {
-      CNode = SiconosDOMTreeTools::createMatrixNode(rootDynamicalSystemXMLNode, LTIDS_C, m);
+      CNode = SiconosDOMTreeTools::createMatrixNode(rootNode, LTIDS_C, m);
     }
     else SiconosDOMTreeTools::setSiconosMatrixNodeValue(CNode, m);
   }

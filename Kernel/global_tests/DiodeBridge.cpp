@@ -46,7 +46,7 @@
 //-----------------------------------------------------------------------
 
 #include "Model.h"
-#include "LinearDS.h"
+#include "FirstOrderLinearDS.h"
 #include "LinearTIR.h"
 #include "TimeStepping.h"
 #include "Moreau.h"
@@ -84,7 +84,7 @@ bool DiodeBridge()
     LS_A(0, 1) = -1.0 / Cvalue;
     LS_A(1, 0) = 1.0 / Lvalue;
 
-    LinearDS* LSDiodeBridge = new LinearDS(1, init_state, LS_A);
+    FirstOrderLinearDS* LSDiodeBridge = new FirstOrderLinearDS(1, init_state, LS_A);
 
     // --- Interaction between linear system and non smooth system ---
 

@@ -585,6 +585,26 @@ const BandedMat  BlockMatrix::getBanded(unsigned int row, unsigned int col)const
   return (*map(row, col)).getBanded();
 }
 
+// return the boost zero matrix of the block (i, j)
+const ZeroMat  BlockMatrix::getZero(unsigned int row, unsigned int col)const
+{
+
+  if ((*map(row, col)).getNum() != 5);
+  SiconosMatrixException::selfThrow("ZeroMat getZero(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Zero matrix");
+
+  return (*map(row, col)).getZero();
+}
+
+// return the boost identity matrix of the block (i, j)
+const IdentityMat  BlockMatrix::getIdentity(unsigned int row, unsigned int col)const
+{
+
+  if ((*map(row, col)).getNum() != 5);
+  SiconosMatrixException::selfThrow("IdentityMat getIdentity(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Identity matrix");
+
+  return (*map(row, col)).getIdentity();
+}
+
 // The following functions return the corresponding pointers
 DenseMat*  BlockMatrix::getDensePtr(unsigned int row, unsigned int col)const
 {
@@ -627,6 +647,24 @@ BandedMat*  BlockMatrix::getBandedPtr(unsigned int row, unsigned int col)const
   SiconosMatrixException::selfThrow("BandedMat* getBandedPtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Banded matrix");
 
   return (*map(row, col)).getBandedPtr();
+}
+
+ZeroMat*  BlockMatrix::getZeroPtr(unsigned int row, unsigned int col)const
+{
+
+  if ((*map(row, col)).getNum() != 5);
+  SiconosMatrixException::selfThrow("ZeroMat* getZeroPtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Zero matrix");
+
+  return (*map(row, col)).getZeroPtr();
+}
+
+IdentityMat*  BlockMatrix::getIdentityPtr(unsigned int row, unsigned int col)const
+{
+
+  if ((*map(row, col)).getNum() != 5);
+  SiconosMatrixException::selfThrow("IdentityMat* getIdentityPtr(unsigned int row, unsigned int col) : the matrix at (row, col) is not a Identity matrix");
+
+  return (*map(row, col)).getIdentityPtr();
 }
 
 // return the boost BlocksMat matrix of a block matrix

@@ -21,7 +21,7 @@
 #include "check.h"
 
 #include "LagrangianDS.h"
-#include "LinearDS.h"
+#include "FirstOrderLinearDS.h"
 
 #include "LagrangianLinearTIDS.h"
 #include "LagrangianR.h"

@@ -107,12 +107,10 @@ protected:
    *  @param time : current time
    *  @param sizeOfY : the size of the vectors y and lambda (ie of the interaction)
    *  @param lambda : the pointer to the first element of the vector lambda
-   *  @param sizeOfU : the size of the vector u
-   *  @param u : the pointer to the first element of the vector u
    *  @param[in,out]  y : the pointer to the first element of the vector y
    *  @param[in,out] param : a vector of user-defined parameters
    */
-  void (*computeOutputPtr)(unsigned int, const double*, double, unsigned int, const double*, unsigned int, const double*, double*, double*);
+  void (*computeOutputPtr)(unsigned int, const double*, const double, unsigned int, const double*, double*, double*);
 
   /** Relation plug-in to compute r(lambda,t) - id="input".
    *  @param sizeY : the size of the vector y and lambda (ie of the interaction)
@@ -121,7 +119,7 @@ protected:
    *  @param[in,out] r : the pointer to the first element of the vector y
    *  @param[in,out] param : a vector of user-defined parameters
    */
-  void (*computeInputPtr)(unsigned int, const double*, double, double*, double*);
+  void (*computeInputPtr)(unsigned int, const double*, const double, double*, double*);
 
   /** init parameter vector corresponding to id to a SimpleVector* of size 1
    *  \param a string, id of the plug-in

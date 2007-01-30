@@ -217,7 +217,10 @@ void UnitaryRelation::computeEquivalentY(const double time, const unsigned int l
   //   string simulationType = osns->getSimulationPtr()->getType();
   // unsigned int level = osns->getLevelMin(); // this corresponds to the derivative order (for y) used to compute yOut.
 
-  mainInteraction->getRelationPtr()->computeFreeOutput(time, level);
+  if (simulationType == "TimeStepping")
+    mainInteraction->getRelationPtr()->computeFreeOutput(time, level);
+  else  if (simulationType == "EventDriven")
+    mainInteraction->getRelationPtr()->computeOutput(time, level);
 
   (*yOut) = *(getYPtr(level)); // yOut = yFree
 

@@ -37,7 +37,6 @@ private:
   CPPUNIT_TEST(testBuildLagrangianLinearTIDS1);
   CPPUNIT_TEST(testBuildLagrangianLinearTIDS2);
   CPPUNIT_TEST(testBuildLagrangianLinearTIDS3);
-  CPPUNIT_TEST(testBuildLagrangianLinearTIDS4);
   CPPUNIT_TEST(testcomputeDS);
   CPPUNIT_TEST(End);
 
@@ -48,7 +47,6 @@ private:
   void testBuildLagrangianLinearTIDS1();
   void testBuildLagrangianLinearTIDS2();
   void testBuildLagrangianLinearTIDS3();
-  void testBuildLagrangianLinearTIDS4();
   void testcomputeDS();
   void End();
 

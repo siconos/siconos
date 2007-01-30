@@ -11,11 +11,11 @@
 					0.0 0.0 0.0
 				</Velocity0>
 				<FExt vectorPlugin="TestPlugin:computeFExt"/>
-				<M matrixRowSize='3' matrixColSize='3'>	
+				<Mass matrixRowSize='3' matrixColSize='3'>	
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 1.0</row>
-				</M>			
+				</Mass>			
 			</LagrangianLinearTIDS>
 			<LagrangianLinearTIDS number='4' Id="Ball2">
 	 			<StepsInMemory>1</StepsInMemory>				
@@ -26,11 +26,11 @@
 					0.0 0.0 0.0
 				</Velocity0>
 				<FExt vectorPlugin="TestPlugin:computeFExt"/>
-				<M matrixRowSize='3' matrixColSize='3'>	
+				<Mass matrixRowSize='3' matrixColSize='3'>	
 					<row>1.0 0.0 0.0</row>
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 1.0</row>
-				</M>			
+				</Mass>			
 			</LagrangianLinearTIDS>
 		</DS_Definition>
 		<Interaction_Definition>

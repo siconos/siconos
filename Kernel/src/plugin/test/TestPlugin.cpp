@@ -27,7 +27,7 @@
  *  @param[in,out] f : the pointer to the first element of the vector f(x,t)
  *  @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void computeF(unsigned int sizeOfX, double time, const double* x, double* f, double* param)
+extern "C" void computeF(unsigned int sizeOfX, double time, const double* x, double* f, double* z)
 {
   for (unsigned int i = 0; i < sizeOfX; i++)
     f[i] = time * x[i];
@@ -40,9 +40,10 @@ extern "C" void computeF(unsigned int sizeOfX, double time, const double* x, dou
  * @param[in,out] jacob : pointer to the first element of jacobianXF matrix
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void computeJacobianXF(unsigned int sizeOfX, double time, const double *x, double *jacob, double* param)
+extern "C" void computeJacobianXF(unsigned int sizeOfX, double time, const double *x, double *jacob, double* z)
 {
-  printf("Call of the function 'computeJacobianX' of the basic plugin.\nYou have to implement this function.\n");
+  for (unsigned int i = 0; i < sizeOfX * sizeOfX; i++)
+    jacob[i] = i + 1;
 }
 
 /** DynamicalSystem plug-in to compute u(x,t) - id = "u"
@@ -53,7 +54,7 @@ extern "C" void computeJacobianXF(unsigned int sizeOfX, double time, const doubl
  * @param[in,out] u : pointer to the first element of u vector
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void computeU(unsigned int sizeOfU, unsigned int sizeOfX, double time, const double* x, double* u, double* param)
+extern "C" void computeU(unsigned int sizeOfU, unsigned int sizeOfX, double time, const double* x, double* u, double* z)
 {
   for (unsigned int i = 0; i < sizeOfU; i++)
   {
@@ -71,7 +72,7 @@ extern "C" void computeU(unsigned int sizeOfU, unsigned int sizeOfX, double time
  * @param[in,out] T : pointer to the first element of T matrix
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void computeT(unsigned int sizeOfU, unsigned int  sizeOfX, const double* x, double* T, double* param)
+extern "C" void computeT(unsigned int sizeOfU, unsigned int  sizeOfX, const double* x, double* T, double* z)
 {
   for (unsigned int j = 0; j < sizeOfU; j++)
   {
@@ -91,7 +92,7 @@ extern "C" void computeT(unsigned int sizeOfU, unsigned int  sizeOfX, const doub
  * @param[in,out] mass : pointer to the first element of mass
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void computeMass(unsigned int sizeOfq, const double *q, double *mass, double* param)
+extern "C" void computeMass(unsigned int sizeOfq, const double *q, double *mass, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     mass[i] = 0;
@@ -147,7 +148,7 @@ extern "C" void computeNNL(unsigned int sizeOfq, const double *q, const double *
  * @param[in,out] jacob : pointer to the first element of the jacobian
  * @param[in,out] param  : a vector of user-defined parameters
  */
-extern "C" void computeJacobianQFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void computeJacobianQFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
@@ -161,7 +162,7 @@ extern "C" void computeJacobianQFInt(unsigned int sizeOfq, double time, const do
  * @param[in,out] jacob : pointer to the first element of the jacobian
  * @param[in,out] param  : a vector of user-defined parameters
  */
-extern "C" void computeJacobianVelocityFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void computeJacobianVelocityFInt(unsigned int sizeOfq, double time, const double *q, const double *velocity, double *jacob, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
@@ -174,7 +175,7 @@ extern "C" void computeJacobianVelocityFInt(unsigned int sizeOfq, double time, c
  * @param[in,out] jacob : pointer to the first element of the jacobian
  * @param[in,out] param  : a vector of user-defined parameters
  */
-extern "C" void computeJacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void computeJacobianQNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
@@ -187,7 +188,7 @@ extern "C" void computeJacobianQNNL(unsigned int sizeOfq, const double *q, const
  * @param[in,out] jacob : pointer to the first element of the jacobian
  * @param[in,out] param  : a vector of user-defined parameters
  */
-extern "C" void computeJacobianVelocityNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* param)
+extern "C" void computeJacobianVelocityNNL(unsigned int sizeOfq, const double *q, const double *velocity, double *jacob, double* z)
 {
   for (unsigned int i = 0; i < (sizeOfq * sizeOfq); ++i)
     jacob[i] = i * q[0];
@@ -240,7 +241,7 @@ extern "C" void computeA(unsigned int  sizeOfA, double time, double* A, double *
  *  @param[in,out] param : a vector of user-defined parameters
  */
 extern "C" void y(unsigned int sizeOfX, const double* x, double time, unsigned int sizeOfY, const double* lambda,
-                  unsigned int sizeOfU, const double* u, double* y, double* param)
+                  unsigned int sizeOfU, const double* u, double* y, double* z)
 {
   printf("Warning: call of the function 'computeOutput' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
@@ -252,7 +253,7 @@ extern "C" void y(unsigned int sizeOfX, const double* x, double time, unsigned i
  *  @param[in,out] r : the pointer to the first element of the vector y
  *  @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void R(unsigned int sizeY, const double* lambda, double time, double* r, double* param)
+extern "C" void R(unsigned int sizeY, const double* lambda, double time, double* r, double* z)
 {
   printf("Warning: call of the function 'computeInput' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
@@ -266,7 +267,7 @@ extern "C" void R(unsigned int sizeY, const double* lambda, double time, double*
  * @param[in,out] y : pointer to the first element of y
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void h0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* y, double* param)
+extern "C" void h0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* y, double* z)
 {
   printf("Call of the function 'h0' of the default plugin.\nYou have to implement this function.\n");
 }
@@ -278,7 +279,7 @@ extern "C" void h0(unsigned int sizeDS, const double* q, unsigned int sizeY, dou
  * @param[in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void G0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* G0, double* param)
+extern "C" void G0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* G0, double* z)
 {
   printf("Call of the function 'G0' of the default plugin.\nYou have to implement this function.\n");
 }
@@ -291,7 +292,7 @@ extern "C" void G0(unsigned int sizeDS, const double* q, unsigned int sizeY, dou
  * @param[in,out] y : pointer to the first element of y
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C"  void h1(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* y, double* param)
+extern "C"  void h1(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* y, double* z)
 {
   printf("Call of the function 'h1' of the default plugin.\nYou have to implement this function.\n");
 }
@@ -305,7 +306,7 @@ extern "C"  void h1(unsigned int sizeDS, const double* q, double time, unsigned 
  * @param[in,out] G10 : pointer to the first element of G10
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void G10(unsigned int sizeDS, const double* q, double time, unsigned int  sizeY, double* G10, double* param)
+extern "C" void G10(unsigned int sizeDS, const double* q, double time, unsigned int  sizeY, double* G10, double* z)
 {
   printf("Call of the function 'G10' of the default plugin.\nYou have to implement this function.\n");
 }
@@ -318,7 +319,7 @@ extern "C" void G10(unsigned int sizeDS, const double* q, double time, unsigned 
  * @param[in,out] G11 : pointer to the first element of G11
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void G11(unsigned int sizeDS, const double* q, double time, unsigned int  sizeY, double* G11, double* param)
+extern "C" void G11(unsigned int sizeDS, const double* q, double time, unsigned int  sizeY, double* G11, double* z)
 {
   printf("Call of the function 'G11' of the default plugin.\nYou have to implement this function.\n");
 }
@@ -331,7 +332,7 @@ extern "C" void G11(unsigned int sizeDS, const double* q, double time, unsigned 
  * @param[in,out] y : pointer to the first element of y
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void h2(unsigned int  sizeDS, const double* q, const double* lambda, unsigned int  sizeY, double* y, double* param)
+extern "C" void h2(unsigned int  sizeDS, const double* q, const double* lambda, unsigned int  sizeY, double* y, double* z)
 {
   printf("Call of the function 'h2' of the default plugin.\nYou have to implement this function.\n");
 }
@@ -344,7 +345,7 @@ extern "C" void h2(unsigned int  sizeDS, const double* q, const double* lambda, 
  * @param[in,out] G20 : pointer to the first element of G20
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void G20(unsigned int  sizeDS, const double* q, const double* lambda, unsigned int  sizeY, double* y, double* param)
+extern "C" void G20(unsigned int  sizeDS, const double* q, const double* lambda, unsigned int  sizeY, double* y, double* z)
 {
   printf("Call of the function 'G20' of the default plugin.\nYou have to implement this function.\n");
 }
@@ -357,7 +358,7 @@ extern "C" void G20(unsigned int  sizeDS, const double* q, const double* lambda,
  * @param[in,out] G21 : pointer to the first element of G21
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void G21(unsigned int  sizeDS, const double* q, const double* lambda, unsigned int  sizeY, double* y, double* param)
+extern "C" void G21(unsigned int  sizeDS, const double* q, const double* lambda, unsigned int  sizeY, double* y, double* z)
 {
   printf("Call of the function 'G21' of the default plugin.\nYou have to implement this function.\n");
 }

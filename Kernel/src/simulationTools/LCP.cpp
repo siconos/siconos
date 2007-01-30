@@ -367,7 +367,10 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     {
       rightBlock = new SimpleMatrix(sizeDS, nslawSize2);
       UR2->getRightBlockForDS(*itDS, rightBlock);
-      *currentBlock += h * Theta[*itDS]* *leftBlock * (*centralBlocks[*itDS] * *rightBlock); //left = C, right = B
+      // centralBlock contains a lu-factorized matrix and we solve
+      // centralBlock * X = rightBlock with PLU
+      centralBlocks[*itDS]->PLUForwardBackwardInPlace(*rightBlock);
+      *currentBlock += h * Theta[*itDS]* *leftBlock * (*rightBlock); //left = C, right = B
       delete rightBlock;
     }
     else if ((relationType1 == LAGRANGIANRELATION || relationType1 == LAGRANGIANLINEARRELATION) && (relationType2 == LAGRANGIANRELATION ||  relationType2 == LAGRANGIANLINEARRELATION))
@@ -382,12 +385,14 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
         // a getRight call will fail.
         flagRightBlock = true;
       }
-
-      *currentBlock +=  *leftBlock * multTranspose(*centralBlocks[*itDS], *rightBlock); // left = right = G or H
+      SiconosMatrix * work = new SimpleMatrix(trans(*rightBlock));
+      centralBlocks[*itDS]->PLUForwardBackwardInPlace(*work);
+      *currentBlock +=  *leftBlock ** work;
+      if (flagRightBlock) delete rightBlock;
+      delete work;
     }
     else RuntimeException::selfThrow("LCP::computeBlock not yet implemented for relation of type " + relationType1);
     delete leftBlock;
-    if (flagRightBlock) delete rightBlock;
   }
 }
 

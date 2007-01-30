@@ -18,7 +18,7 @@
  */
 
 /*! \file LagrangianDS.h
-  \brief LagrangianDS class
+  \brief LagrangianDS class - Second Order Non Linear Dynamical Systems.
 
 */
 
@@ -50,7 +50,7 @@ class LagrangianDSXML;
  * The class LagrangianDS  defines  and computes a generic ndof-dimensional
  * Lagrangian Non Linear Dynamical System of the form :
  * \f[
- * M(q) \ddot q + NNL(\dot q, q) + F_{Int}(\dot q , q , t) = F_{Ext}(t) + p
+ * M(q,z) \ddot q + NNL(\dot q, q, z) + F_{Int}(\dot q , q , t, z) = F_{Ext}(t, z) + p
  * \f]
  * where
  *    - \f$q \in R^{ndof} \f$ is the set of the generalized coordinates,
@@ -61,7 +61,12 @@ class LagrangianDSXML;
  *    -  \f$ NNL(\dot q, q)  \in R^{ndof}\f$ is the non linear inertia term saved in the SiconosVector NNL.
  *    -  \f$ F_{Int}(\dot q , q , t)  \in R^{ndof} \f$ are the internal forces saved in the SiconosVector fInt.
  *    -  \f$ F_{Ext}(t)  \in R^{ndof}  \f$ are the external forces saved in the SiconosVector fExt.
+ *    -  \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
  *
+ *  Or:
+  * \f[
+ * M(q,z) \ddot q = f_L(\dot q, q, t, z) + p
+ * \f]
  *
  * Links with first order DynamicalSystem top-class are:
  *
@@ -70,28 +75,22 @@ class LagrangianDSXML;
  *
  * The rhs is given by:
  * \f[
- * f(x,t) = \left[\begin{array}{c}
+ * \dot x = \left[\begin{array}{c}
  *  \dot q  \\
- * M^{-1}(q)\left[F_{Ext}( q , t) - F_{Int}(\dot q , q , t) - NNL(\dot q, q) \right]\\
+ * \ddot q = M^{-1}(q)\left[f_L(\dot q, q , t, z) + p \right]\\
  * \end{array}\right]
  * \f]
  * Its jacobian is:
  * \f[
- * \nabla_{x}f(x,t) = \left[\begin{array}{cc}
+ * \nabla_{x}rhs(x,t) = \left[\begin{array}{cc}
  *  0  & I \\
- * \nabla_{q}M^{-1}(q)\left[F_{Ext}( q , t) - F_{Int}(\dot q , q , t) - NNL(\dot q, q) \right]-M^{-1}(q)\left[\nabla_q(F_{Int}(\dot q , q , t)+NNL(\dot q, q))\right] & -M^{-1}(q)\left[\nabla_{\dot q}(F_{Int}(\dot q , q , t)+NNL(\dot q, q))\right] \\
+ * \nabla_{q}(M^{-1}(q)f_L(\dot q, q , t, z)) &  \nabla_{\dot q}(M^{-1}(q)f_L(\dot q, q , t, z)) \\
  * \end{array}\right]
  * \f]
  *  The input due to the non smooth law is:
  * \f[
  * r = \left[\begin{array}{c}0 \\ p \end{array}\right]
  * \f]
- *
- * The control part (NOT IMPLEMENTED) is given by:
- *
- *  \f$ u(x,t) = u_L(q,t) \f$
- *
- * \f$ T(x) = \left[\begin{array}{c} 0_{ndof} \\ T_L(q)\end{array}\right]\f$
  *
  *  Main functionalities to handle a LagrangianDS are:
  *
@@ -107,13 +106,13 @@ class LagrangianDSXML;
  *        => computeJacobianVelocityFInt  (setComputeJacobianVelocityFIntFunction)
  *        => computeJacobianQNNL          (setComputeJacobianQNNLFunction)
  *        => computeJacobianVelocityNNL   (setComputeJacobianVelocityNNLFunction)
- *        => computeRhs            (not set function)
- *        => computeJacobianXRhs   (not set function)
+ *        => computeRhs            (no set function)
+ *        => computeJacobianXRhs   (no set function)
  *
  * About notation:
  *    - q[i] is the derivative number i of q.
  * Thus: q[0]=\f$ q \f$, global coordinates, q[1]=\f$ \dot q\f$, velocity, q[2]=\f$ \ddot q \f$, acceleration.
- *    - qFree is the state of the system when no non-smooth effect is taken into account. qFree[i] corresponds to q[i]
+ *    - qFree is the state of the system when non-smooth effects are not taken into account. If required they are saved in workVector.
  *
  *
  */
@@ -134,9 +133,6 @@ protected:
 
   /** initial velocity of the system */
   SiconosVector* velocity0;
-
-  /** free state of the system */
-  VectorOfVectors qFree;
 
   /** memory of previous coordinates of the system */
   SiconosMemory *qMemory;
@@ -234,27 +230,27 @@ protected:
    */
   std::vector<FPtr5> computeJacobianNNLPtr;
 
-  /** Specific variables to handle links with DynamicalSystem class */
-  /** \var workMatrix
-   * a map of SiconosMatrix*, zero-matrix, Id-matrix, inverse of Mass or any tmp work matrix
-   * No get-set functions at the time. Only used as a protected member.*/
-  std::map<std::string, SiconosMatrix*> workMatrix;
+  /** Map that links operators names with a bool. If bool is true, the operator
+   is up to date, else not. Uselful to avoid re-computation of mass, fInt ... */
+  std::map<std::string, bool> isUp;
 
   /** set links with DS members
    */
-  virtual void connectToDS();
+  void connectToDS();
 
   /** set all allocation flags (isAllocated map)
    *  \param bool: = if true (default) set default configuration, else set all to false
    */
-  virtual void initAllocationFlags(const bool  = true);
+  virtual void initAllocationFlags(bool  = true);
 
   /** set all plug-in flags (isPlugin map) to val
    *  \param a bool
    */
-  virtual void initPluginFlags(const bool);
+  virtual void initPluginFlags(bool);
 
-  // -- DEFAULT CONSTRUCTOR --
+  /** Download of xml data specific to the present class. Called from XML constructor.*/
+  virtual void loadSpecificXml();
+
   /** Default constructor
    */
   LagrangianDS();
@@ -288,7 +284,7 @@ public:
   /** copy constructor
    *  \param a Dynamical system to copy
    */
-  LagrangianDS(const DynamicalSystem &);
+  //LagrangianDS(const DynamicalSystem & );
 
   /** destructor */
   virtual ~LagrangianDS();
@@ -301,12 +297,21 @@ public:
   /** initialization of qFree, vFree
    *  \param a string: the simulation type. For TimeStepping: memory allocation. For EventDriven: links (pointers) to q and velocity.
    */
-  void initFreeVectors(const std::string);
+  void initFreeVectors(const std::string&);
 
   /** allocate memory for p[...] vectors
    *  \param string: simulation type
    */
-  void initP(const std::string);
+  void initP(const std::string&);
+
+  /** allocate memory for fL and its jacobians, if required.
+   */
+  void initFL();
+
+  /** Initialization function for the rhs and its jacobian.
+   *  \param time of initialization
+   */
+  virtual void initRhs(double) ;
 
   /** dynamical system initialization function: mainly set memory and compute plug-in for initial state values.
    *  \param string: simulation type
@@ -314,11 +319,6 @@ public:
    *  \param the size of the memory, default size = 1.
    */
   virtual void initialize(const std::string&, double = 0, unsigned int = 1) ;
-
-  /** dynamical system update: mainly call compute for all time or state depending functions (mass, FInt ...).
-   *  \param current time
-   */
-  virtual void update(const double);
 
   // === GETTERS AND SETTERS ===
 
@@ -333,7 +333,7 @@ public:
   /** to set ndof
    *  \param unsigned int ndof : the value to set ndof
    */
-  inline void setNdof(const unsigned int newNdof)
+  inline void setNdof(unsigned int newNdof)
   {
     ndof = newNdof;
   };
@@ -341,7 +341,7 @@ public:
   /** return the dim. of the system (n for first order, ndof for Lagrangian). Usefull to avoid if(typeOfDS) when size is required.
    *  \return an unsigned int.
    */
-  inline const unsigned int getDim(void) const
+  inline const unsigned int getDim() const
   {
     return ndof;
   }
@@ -409,7 +409,7 @@ public:
    */
   inline const SimpleVector getQFree() const
   {
-    return *qFree[0];
+    return *workVector.find("qFree")->second;
   }
 
   /** get qFree[0]
@@ -417,7 +417,7 @@ public:
    */
   inline SiconosVector* getQFreePtr() const
   {
-    return qFree[0];
+    return workVector.find("qFree")->second;
   }
 
   /** set the value of qFree[0] to newValue
@@ -514,25 +514,25 @@ public:
    */
   void setVelocity0Ptr(SiconosVector *newPtr) ;
 
-  // -- qFree[1] --
+  // -- velocityFree --
 
-  /** get the value of qFree[1]
+  /** get the value of velocityFree
    *  \return SimpleVector
    */
   inline const SimpleVector getVelocityFree() const
   {
-    return *qFree[1];
+    return *workVector.find("velocityFree")->second;
   }
 
-  /** get qFree[1]
+  /** get velocityFree
    *  \return pointer on a SiconosVector
    */
   inline SiconosVector* getVelocityFreePtr() const
   {
-    return qFree[1];
+    return workVector.find("velocityFree")->second;
   }
 
-  /** set the value of qFree[1] to newValue
+  /** set the value of velocityFree to newValue
    *  \param SiconosVector newValue
    */
   void setVelocityFree(const SiconosVector&);
@@ -583,7 +583,7 @@ public:
    *  \param unsigned int, required level for p, default = 2
    *  \return SimpleVector
    */
-  inline const SimpleVector getP(const unsigned int level = 2) const
+  inline const SimpleVector getP(unsigned int level = 2) const
   {
     return *(p[level]);
   }
@@ -592,7 +592,7 @@ public:
    *  \param unsigned int, required level for p, default = 2
    *  \return pointer on a SiconosVector
    */
-  inline SiconosVector* getPPtr(const unsigned int level = 2) const
+  inline SiconosVector* getPPtr(unsigned int level = 2) const
   {
     return p[level];
   }
@@ -601,13 +601,13 @@ public:
    *  \param unsigned int, required level for p, default = 2
    *  \param SiconosVector newValue
    */
-  void setP(const SiconosVector&, const unsigned int level = 2);
+  void setP(const SiconosVector&, unsigned int level = 2);
 
   /** set P to pointer newPtr
    *  \param unsigned int, required level for p, default = 2
    *  \param SiconosVector * newPtr
    */
-  void setPPtr(SiconosVector *newPtr, const unsigned int level = 2);
+  void setPPtr(SiconosVector *newPtr, unsigned int level = 2);
 
   // -- Mass --
 
@@ -627,12 +627,6 @@ public:
     return mass;
   }
 
-  /** get inverse of Mass - Warning: in this function we do not checked that the matrix is up to date.
-   *  If M depends on q, it may require a recomputation before the get.
-   *  \return pointer to a SiconosMatrix
-   */
-  SiconosMatrix* getInverseOfMassPtr();
-
   /** set the value of Mass to newValue
    *  \param SiconosMatrix newValue
    */
@@ -642,6 +636,14 @@ public:
    *  \param SiconosMatrix * newPtr
    */
   void setMassPtr(SiconosMatrix *newPtr);
+
+  /** get MassLU: a copy of the mass matrix which is LU-factorized. Temporary function?
+   *  \return a pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getMassLUPtr() const
+  {
+    return (workMatrix.find("invMass"))->second;
+  }
 
   // -- FInt --
 
@@ -865,39 +867,39 @@ public:
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
-  void setComputeMassFunction(const std::string  pluginPath, const std::string  functionName);
+  void setComputeMassFunction(const std::string&  pluginPath, const std::string&  functionName);
 
   /** allow to set a specified function to compute Fint
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
-  void setComputeFIntFunction(const std::string  pluginPath, const std::string  functionName);
+  void setComputeFIntFunction(const std::string&  pluginPath, const std::string&  functionName);
 
   /** allow to set a specified function to compute Fext
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
-  void setComputeFExtFunction(const std::string  pluginPath, const std::string  functionName);
+  void setComputeFExtFunction(const std::string&  pluginPath, const std::string& functionName);
 
   /** allow to set a specified function to compute the inertia
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
-  void setComputeNNLFunction(const std::string  pluginPath, const std::string  functionName);
+  void setComputeNNLFunction(const std::string& pluginPath, const std::string&  functionName);
 
   /** allow to set a specified function to compute the gradient of the internal strength compared to the state
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
-  void setComputeJacobianFIntFunction(unsigned int, const std::string  pluginPath, const std::string  functionName);
+  void setComputeJacobianFIntFunction(unsigned int, const std::string&  pluginPath, const std::string&  functionName);
 
   /** allow to set a specified function to compute the gradient of the the external strength compared to the state
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param string : the complete path to the plugin
    *  \param string : the name of the function to use in this plugin
    */
-  void setComputeJacobianNNLFunction(unsigned int, const std::string  pluginPath, const std::string  functionName);
+  void setComputeJacobianNNLFunction(unsigned int, const std::string&  pluginPath, const std::string&  functionName);
 
   /** default function to compute the mass
    */
@@ -911,23 +913,25 @@ public:
   /** default function to compute the internal strengths
    *  \param double time : the current time
    */
-  void computeFInt(const double);
+  void computeFInt(double);
 
   /** function to compute the internal strengths
+   *  with some specific values for q and velocity (ie not those of the current state).
    *  \param double time : the current time, SiconosVector*: pointers on the state vectors q and velocity
    */
-  void computeFInt(const double , SiconosVector *, SiconosVector *);
+  void computeFInt(double , SiconosVector *, SiconosVector *);
 
   /** default function to compute the external strengths
    *  \param double time : the current time
    */
-  void computeFExt(const double);
+  void computeFExt(double);
 
   /** default function to compute the inertia
    */
   void computeNNL();
 
   /** function to compute the inertia
+   *  with some specific values for q and velocity (ie not those of the current state).
    *  \param SiconosVector*: pointers on the state vectors q and velocity
    */
   void computeNNL(SiconosVector *q, SiconosVector *velocity);
@@ -936,13 +940,13 @@ public:
    *  \param double time : the current time
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    */
-  void computeJacobianFInt(unsigned int, const double);
+  void computeJacobianFInt(unsigned int, double);
 
   /** function to compute the gradient of the internal strengths compared to state q
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
    *  \param double time : the current time, SiconosVector*: pointers on the state vectors q and velocity
    */
-  void computeJacobianFInt(unsigned int, const double , SiconosVector *q, SiconosVector *velocity);
+  void computeJacobianFInt(unsigned int, double , SiconosVector *q, SiconosVector *velocity);
 
   /** function to compute the gradient of the inertia strengths compared to the state q
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
@@ -955,26 +959,29 @@ public:
    */
   void computeJacobianNNL(unsigned int, SiconosVector *q, SiconosVector *velocity);
 
-  /** function to compute inverse of the mass matrix
-   */
-  void computeInverseOfMass();
-
   /** Default function to compute the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    */
-  virtual void computeRhs(const double, const bool  = false);
+  virtual void computeRhs(double, bool  = false);
 
   /** Default function to compute jacobian of the right-hand side term according to x
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
    */
-  virtual void computeJacobianXRhs(const double, const bool  = false);
+  virtual void computeJacobianXRhs(double, bool  = false);
 
   /** Default function to compute fL
    *  \param double, the current time
    */
   virtual void computeFL(double time);
+
+  /** function to compute fL with some specific values for q and velocity (ie not those of the current state).
+   *  \param double time : the current time
+   *  \param SiconosVector*: pointers on q
+   *  \param SiconosVector*: pointers on velocity
+   */
+  virtual void computeFL(double , SiconosVector *, SiconosVector *);
 
   /** Default function to compute the jacobian of fL
    *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
@@ -984,9 +991,9 @@ public:
 
   // --- miscellaneous ---
 
-  /** copy the data of the DS to the XML tree
+  /** copy the data of the DS into the XML tree
    */
-  virtual void saveDSToXML();
+  virtual void saveSpecificDataToXML();
 
   /** print the data to the screen
    */
@@ -995,7 +1002,7 @@ public:
   /** initialize the SiconosMemory objects with a positive size.
    *  \param the size of the SiconosMemory. must be >= 0
    */
-  void initMemory(const unsigned int steps);
+  void initMemory(unsigned int steps);
 
   /** push the current values of x, q and r in the stored previous values
    *  xMemory, qMemory, rMemory,
@@ -1019,11 +1026,17 @@ public:
    *  \param unsigned int: derivative number
    *  \param SiconosVector*: in-out parameter, qFree
    */
-  void computeQFree(const double, const unsigned int, SiconosVector*);
+  void computeQFree(double, unsigned int, SiconosVector*);
 
   /** set p[...] to zero
    */
   void resetNonSmoothPart();
+
+  /** Computes post-impact velocity, using pre-impact velocity and impulse (p) value.
+   * Used in EventDriven (Lsodar->updateState)
+   */
+  void computePostImpactVelocity();
+
 };
 
 #endif // LAGRANGIANNLDS_H

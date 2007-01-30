@@ -23,7 +23,7 @@
 // DS
 #include "LagrangianDSXML.h"
 #include "LagrangianLinearTIDSXML.h"
-#include "LinearDSXML.h"
+#include "FirstOrderLinearDSXML.h"
 
 using namespace std;
 
@@ -96,9 +96,9 @@ void NonSmoothDynamicalSystemXML::loadDynamicalSystemXML(xmlNodePtr  rootDSNode)
     else if (type == LAGRANGIAN_TIDS_TAG)
       DSXMLSet.insert(new LagrangianLinearTIDSXML(node, isbvp));
     else if (type == LINEAR_DS_TAG || type == LINEAR_TIDS_TAG)
-      DSXMLSet.insert(new LinearDSXML(node, isbvp));
+      DSXMLSet.insert(new FirstOrderLinearDSXML(node, isbvp));
     else if (type == NON_LINEAR_DS_TAG)
-      DSXMLSet.insert(new DynamicalSystemXML(node, isbvp));
+      DSXMLSet.insert(new FirstOrderNonLinearDSXML(node, isbvp));
     else
       XMLException::selfThrow("NonSmoothDynamicalSystemXML - loadDynamicalSystemXML error : undefined DS type: " + type);
     // go to next node ...

@@ -16,16 +16,16 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*! \file LinearDS.h
+/*! \file FirstOrderLinearDS.h
 
 */
 #ifndef LINEARDS_H
 #define LINEARDS_H
 
-#include "LinearDSXML.h"
-#include "DynamicalSystem.h"
+#include "FirstOrderLinearDSXML.h"
+#include "FirstOrderNonLinearDS.h"
 
-class LinearDSXML;
+class FirstOrderLinearDSXML;
 
 /** First order linear systems - Inherits from DynamicalSystems
  *
@@ -36,54 +36,40 @@ class LinearDSXML;
  *
  *  This class represents first order linear systems of the form:
  * \f[
- * M \dot x = A(t)x(t)+T u(t)+b(t)+r,
+ * M \dot x = A(t)x(t)+ b(t) + r,
  *  x(t_0)=x_0
  * \f]
  * where
  *    - \f$x \in R^{n} \f$ is the state,
  *    - \f$r \in R^{n} \f$  the input due to the Non Smooth Interaction.
- *    - \f$Mxdot \in R^{n\times n} \f$ is an optional constant invertible matrix
+ *    - \f$M \in R^{n\times n} \f$ is an optional constant invertible matrix
  *  The  right-hand side is described by
  *    - \f$A \in R^{n\times n} \f$
  *    - \f$b \in R^{n} \f$
- *    - \f$u \in R^{uSize} \f$
- *    - \f$T \in R^{n\times uSize} \f$
- *        warning: T and u are members of DynamicalSystem class.
  *
- * The "minimal" form is
- * \f[
- * \dot x = A(t)x(t),
- *  x(t_0)=x_0
- * \f]
- * and so A should always be specified.
+ * Specific members of this class are A and b.
  *
- * Links with DynamicalSystem are:
+ * f is not set for such system and thus calls to computeF or other related functions are forbidden.
  *
- * \f[
- *   f(x,t) = A(t)x(t) + b(t) \\
- *   jacobianXF = A(t)
- * \f]
+ *  Thus, the main steps for FirstOrderLinearDS handling consist in:
  *
- *  Thus, the main steps for LinearDS handling consist in:
- *
- *  - Construction: A is required and must be set as a matrix or a plug-in. b is optional, and can be given as a vector or a plug-in.
+ *  - Construction: A and b are optional, and can be given as a matrix/vector or a plug-in.
  *  - Initialization: compute values at time=t0 (rhs, jacobianXF, A ...), usually done when calling simulation->initialize.
  *  - Computation at time t, by calling "compute" functions
  *      => computeA
  *      => computeB
- *      => computeRhs, compute \f$ \dot x = M^{-1}(Ax + b + Tu + r) \f$
- *      => computeU and computeT (from DynamicalSystem class)
+ *      => computeRhs, compute \f$ \dot x = M^{-1}(Ax + b + r) \f$
  *
  * Any call to a plug-in requires that it has been set correctly before simulation using one of the following:
  *   => setComputeAFunction
  *   => setComputeBFunction
  *
  **/
-class LinearDS : public DynamicalSystem
+class FirstOrderLinearDS : public FirstOrderNonLinearDS
 {
 protected:
 
-  /** matrix specific to the LinearDS \f$ A \in R^{n \times n}  \f$*/
+  /** matrix specific to the FirstOrderLinearDS \f$ A \in R^{n \times n}  \f$*/
   SiconosMatrix *A;
 
   /** strength vector */
@@ -95,7 +81,7 @@ protected:
   /* the name of the plugin used to compute b */
   std::string  computeBFunctionName;
 
-  /** LinearDS plug-in to compute A(t), id = "A"
+  /** FirstOrderLinearDS plug-in to compute A(t), id = "A"
    * @param sizeOfA : size of square-matrix A
    * @param time : current time
    * @param[in,out] A : pointer to the first element of A
@@ -103,7 +89,7 @@ protected:
    */
   void (*APtr)(unsigned int, double, double*, double*);
 
-  /** LinearDS plug-in to compute b(t), id = "b"
+  /** FirstOrderLinearDS plug-in to compute b(t), id = "b"
    * @param sizeOfB : size of vector b
    * @param time : current time
    * @param[in,out] b : pointer to the first element of b
@@ -114,16 +100,16 @@ protected:
   /** set all allocation flags (isAllocated map)
   *  \param bool: = if true (default) set default configuration, else set all to false
   */
-  virtual void initAllocationFlags(const bool  = true);
+  void initAllocationFlags(bool  = true);
 
   /** set all plug-in flags (isPlugin map) to val
   *  \param a bool
   */
-  virtual void initPluginFlags(const bool);
+  void initPluginFlags(bool);
 
   /** default constructor
   */
-  LinearDS();
+  FirstOrderLinearDS();
 
 public:
 
@@ -134,7 +120,7 @@ public:
   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
   *  \exception RuntimeException
   */
-  LinearDS(DynamicalSystemXML *, NonSmoothDynamicalSystem* = NULL);
+  FirstOrderLinearDS(DynamicalSystemXML *, NonSmoothDynamicalSystem* = NULL);
 
   /** constructor from a set of data
   *  \param int : reference number of this DynamicalSystem
@@ -144,8 +130,8 @@ public:
   *  \param string: plugin for b (optional)
   *  \exception RuntimeException
   */
-  LinearDS(const int, const unsigned int, const SiconosVector&, const std::string = "DefaultPlugin:computeA",
-           const std::string = "DefaultPlugin:computeB");
+  FirstOrderLinearDS(int, unsigned int, const SiconosVector&, const std::string& = "DefaultPlugin:computeA",
+                     const std::string& = "DefaultPlugin:computeB");
 
   /** constructor from a set of data
    *  \param int : reference number of the DynamicalSystem
@@ -153,7 +139,7 @@ public:
    *  \param SiconosMatrix : matrix A
    *  \exception RuntimeException
    */
-  LinearDS(const int, const SiconosVector&, const SiconosMatrix&);
+  FirstOrderLinearDS(int, const SiconosVector&, const SiconosMatrix&);
 
   /** constructor from a set of data
    *  \param int : reference number of the DynamicalSystem
@@ -162,37 +148,20 @@ public:
    *  \param SiconosVector : b
    *  \exception RuntimeException
    */
-  LinearDS(const int, const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
-
-  /** copy constructor
-  *  \param a Dynamical system to copy
-  */
-  LinearDS(const LinearDS &);
-
-  /** copy constructor
-  *  \param a Dynamical system to copy
-  */
-  LinearDS(const DynamicalSystem &);
+  FirstOrderLinearDS(int, const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
 
   /** destructor */
-  virtual ~LinearDS();
+  virtual ~FirstOrderLinearDS();
 
   /** check that the system is complete (ie all required data are well set)
   * \return a bool
   */
-  virtual bool checkDynamicalSystem();
+  bool checkDynamicalSystem();
 
-  /** dynamical system initialization function: mainly set memory and compute value for initial state values.
-  *  \param string: simulation type
-  *  \param time of initialisation, default value = 0
-  *  \param the size of the memory, default size = 1.
-  */
-  void initialize(const std::string&, double = 0, unsigned int = 1) ;
-
-  /** dynamical system update: mainly call compute for all time or state depending functions
-  *  \param current time
-  */
-  void update(const double);
+  /** Initialization function for the rhs and its jacobian.
+   *  \param time of initialization.
+   */
+  virtual void initRhs(double) ;
 
   // --- getter and setter ---
 
@@ -222,16 +191,6 @@ public:
   *  \param SiconosMatrix * newPtr
   */
   void setAPtr(SiconosMatrix *);
-
-  /** set the value of JacobianXF to newValue
-  *  \param SiconosMatrix newValue
-  */
-  void setJacobianXF(const SiconosMatrix&);
-
-  /** set JacobianXF to pointer newPtr
-  *  \param SiconosMatrix * newPtr
-  */
-  void setJacobianXFPtr(SiconosMatrix *newPtr);
 
   // --- b ---
 
@@ -276,7 +235,7 @@ public:
   *  \param string : the function name to use in this plugin
   *  \exception SiconosSharedLibraryException
   */
-  virtual void setComputeAFunction(const std::string , const std::string);
+  void setComputeAFunction(const std::string , const std::string);
 
   /** get name of function that computes b (if b from plugin)
   *  \return a string
@@ -291,7 +250,7 @@ public:
   *  \param string : the function name to use in this plugin
   *  \exception SiconosSharedLibraryException
   */
-  virtual void setComputeBFunction(const std::string , const std::string);
+  void setComputeBFunction(const std::string , const std::string);
 
   /** default function to compute matrix A => same action as computeJacobianXF
   *  \exception RuntimeException
@@ -303,39 +262,92 @@ public:
   */
   void computeB(const double);
 
-  /** Default function to compute \f$ f: (x,t)\f$
-  * \param double time : current time
-  *  \exception RuntimeException
-  */
-  virtual void computeF(const double);
+  /** set the value of f to newValue
+   *  \param SiconosVector newValue
+   */
+  inline void setF(const SiconosVector&)
+  {
+    RuntimeException::selfThrow("FirstOrderLinearDS - setF: f is not available for FirstOrderLinearDS.");
+  };
 
-  /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$
-  *  \param double time : current time
-  *  \param bool isDSup : flag to avoid recomputation of operators
-  *  \exception RuntimeException
+  /** set f to pointer newPtr
+   *  \param SiconosVector * newPtr
+   */
+  inline void setFPtr(SiconosVector *)
+  {
+    RuntimeException::selfThrow("FirstOrderLinearDS - setFPtr: f is not available for FirstOrderLinearDS.");
+  };
+
+  /** set the value of JacobianXF to newValue: exception for LinearDS since f is not available.
+  *  \param SiconosMatrix newValue
   */
-  virtual void computeJacobianXF(const double, const bool  = false);
+  inline void setJacobianXF(const SiconosMatrix&)
+  {
+    RuntimeException::selfThrow("FirstOrderLinearDS - setJacobianXF: f is not available for FirstOrderLinearDS.");
+  };
+
+  /** set JacobianXF to pointer newPtr: exception for LinearDS since f is not available.
+  *  \param SiconosMatrix * newPtr
+  */
+  inline void setJacobianXFPtr(SiconosMatrix *newPtr)
+  {
+    RuntimeException::selfThrow("FirstOrderLinearDS - setJacobianXFPtr: f is not available for FirstOrderLinearDS.");
+  };
+
+  /** to set a specified function to compute f(x,t): exception for LinearDS since f is not available.
+   *  \param string pluginPath : the complete path to the plugin
+   *  \param string functionName : the function name to use in this library
+   */
+  inline void setComputeFFunction(const std::string&  pluginPath, const std::string& functionName)
+  {
+    RuntimeException::selfThrow("FirstOrderLinearDS - setComputeFFunction: f is not available for FirstOrderLinearDS.");
+  };
+
+  /** to set a specified function to compute jacobianXF: exception for LinearDS since f is not available.
+   *  \param string pluginPath : the complete path to the plugin
+   *  \param the string functionName : function name to use in this library
+   */
+  inline void setComputeJacobianXFFunction(const std::string&  pluginPath, const std::string&  functionName)
+  {
+    RuntimeException::selfThrow("FirstOrderLinearDS - setComputeJacobianXFFunction: f is not available for FirstOrderLinearDS.");
+  };
+
+  // --- compute plugin functions ---
+
+  /** Default function to compute \f$ f: (x,t)\f$: exception for LinearDS since f is not available.
+   * \param double time : current time
+   */
+  inline void computeF(double)
+  {
+    RuntimeException::selfThrow("FirstOrderLinearDS - computeF: f is not available for FirstOrderLinearDS.");
+  };
+
+  /** Default function to compute \f$ \nabla_x f: (x,t) \in R^{n} \times R  \mapsto  R^{n \times n} \f$: exception for LinearDS since f is not available.
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   */
+  inline void computeJacobianXF(double, bool  = false)
+  {
+    RuntimeException::selfThrow("FirstOrderLinearDS - computeJacobianXF: f is not available for FirstOrderLinearDS.");
+  };
 
   /** Default function to the right-hand side term
-  *  \param double time : current time
-  *  \param bool isDSup : flag to avoid recomputation of operators
-  *  \exception RuntimeException
-  */
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   */
   virtual void computeRhs(const double, const bool  = false);
 
   /** Default function to jacobian of the right-hand side term according to x
   *  \param double time : current time
   *  \param bool isDSup : flag to avoid recomputation of operators
-  *  \exception RuntimeException
   */
   virtual void computeJacobianXRhs(const double, const bool  = false);
 
   // --- xml related functions ---
 
-  /** copy the data of the DS into the XML tree
-  *  \exception RuntimeException
-  */
-  void saveDSToXML();
+  /** copy the data specific to each system into the XML tree
+   */
+  void saveSpecificDataToXML();
 
   /** data display on screen
   */
@@ -345,7 +357,7 @@ public:
   *  \param DynamicalSystem* : the system which must be converted
   * \return a pointer on the dynamical system if it is of the right type, NULL otherwise
   */
-  static LinearDS* convert(DynamicalSystem* ds);
+  static FirstOrderLinearDS* convert(DynamicalSystem* ds);
 
 };
 
