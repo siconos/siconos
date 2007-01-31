@@ -801,16 +801,6 @@ public:
     return fL;
   }
 
-  /** set the value of fL to newValue
-   *  \param SiconosVector newValue
-   */
-  void setFL(const SiconosVector&);
-
-  /** set FL to pointer newPtr
-   *  \param SiconosVector * newPtr
-   */
-  void setFLPtr(SiconosVector *newPtr);
-
   // -- Jacobian fL --
 
   /** get the value of JacobianFL
@@ -830,18 +820,6 @@ public:
   {
     return jacobianFL[i];
   }
-
-  /** set the value of JacobianFL to newValue
-   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
-   *  \param SiconosMatrix newValue
-   */
-  void setJacobianFL(unsigned int, const SiconosMatrix&);
-
-  /** set JacobianFL to pointer newPtr
-   *  \param index (0: \f$ \nabla_q \f$, 1: \f$ \nabla_{\dot q} \f$ )
-   *  \param SiconosMatrix * newPtr
-   */
-  void setJacobianFLPtr(unsigned int, SiconosMatrix *newPtr);
 
   // --- PLUGINS RELATED FUNCTIONS ---
 

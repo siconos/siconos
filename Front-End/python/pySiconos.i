@@ -58,9 +58,10 @@
 #include "ComplementarityConditionNSLXML.h"
 #include "InteractionXML.h"
 #include "DynamicalSystemXML.h"
+#include "FirstOrderNonLinearDSXML.h"
 #include "LagrangianDSXML.h"
 #include "LagrangianLinearTIDSXML.h"
-#include "LinearDSXML.h"
+#include "FirstOrderLinearDSXML.h"
 #include "NonSmoothDynamicalSystemXML.h"
 #include "TimeDiscretisationXML.h"
 #include "SolverXML.h"
@@ -82,8 +83,9 @@
 #include "NewtonImpactFrictionNSL.h"
 #include "RelayNSL.h"
 #include "DynamicalSystem.h"
-#include "LinearDS.h"
-#include "LinearTIDS.h"
+#include "FirstOrderNonLinearDS.h"
+#include "FirstOrderLinearDS.h"
+#include "FirstOrderLinearTIDS.h"
 #include "LagrangianDS.h"
 #include "LagrangianLinearTIDS.h"
 #include "Interaction.h"
@@ -184,9 +186,10 @@ $1 = string(PyString_AsString($input));
 %include "InteractionXML.h"
 // --- 
 %include "DynamicalSystemXML.h"
+%include "FirstOrderNonLinearDSXML.h"
 %include "LagrangianDSXML.h"
 %include "LagrangianLinearTIDSXML.h"
-%include "LinearDSXML.h"
+%include "FirstOrderLinearDSXML.h"
 // ---
 %include "NonSmoothDynamicalSystemXML.h"
 
@@ -225,8 +228,9 @@ $1 = string(PyString_AsString($input));
 %include "Interaction.h"
 // ---
 %include "DynamicalSystem.h"
-%include "LinearDS.h"
-%include "LinearTIDS.h"
+%include "FirstOrderNonLinearDS.h"
+%include "FirstOrderLinearDS.h"
+%include "FirstOrderLinearTIDS.h"
 %include "LagrangianDS.h"
 %include "LagrangianLinearTIDS.h"
 // ---
