@@ -29,12 +29,6 @@
 #include "BlockMatrix.h"
 #include<map>
 
-/** Map used to save the list of plug-in names. */
-typedef std::map<std::string, std::string> NamesList;
-
-/** Pointer to function for plug-in. For fInt and its jacobian. */
-typedef void (*FPtr6)(unsigned int, double, const double*, const double*, double*, double*);
-
 /** Pointer to function for plug-in. For NNL and its jacobian. */
 typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, double*);
 
@@ -166,10 +160,6 @@ protected:
 
   /** jacobian/coordinates, jacobianFL[0], and velocity, jacobianFL[1], of fL */
   VectorOfMatrices jacobianFL;
-
-  /* contains the names of the various plug-in. Example: pluginNames["mass"] is the function used to compute the mass.
-   Id are the names of the member (mass, fInt ...) */
-  NamesList pluginNames;
 
   /** class for manage plugin (open, close librairy...) */
   SiconosSharedLibrary cShared;
@@ -852,14 +842,6 @@ public:
    *  \param SiconosMatrix * newPtr
    */
   void setJacobianFLPtr(unsigned int, SiconosMatrix *newPtr);
-
-  /** get name of function that computes "name"
-   *  \return a string
-   */
-  inline const std::string getFunctionName(const std::string& name) const
-  {
-    return (pluginNames.find(name))->second;
-  }
 
   // --- PLUGINS RELATED FUNCTIONS ---
 

@@ -42,7 +42,7 @@ void FirstOrderNonLinearDS::initPluginFlags(bool val)
 
 // Default constructor (protected)
 FirstOrderNonLinearDS::FirstOrderNonLinearDS(const string& type):
-  DynamicalSystem(FONLDS), M(NULL), f(NULL), jacobianXF(NULL), computeFFunctionName("none"), computeJacobianXFFunctionName("none"),
+  DynamicalSystem(FONLDS), M(NULL), f(NULL), jacobianXF(NULL),
   computeFPtr(NULL), computeJacobianXFPtr(NULL), r(NULL), rMemory(NULL), invM(NULL)
 {
   initAllocationFlags(false);
@@ -51,7 +51,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(const string& type):
 
 // From XML file (warning: newNsds is optional, default = NULL)
 FirstOrderNonLinearDS::FirstOrderNonLinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
-  DynamicalSystem(dsXML, newNsds), M(NULL), f(NULL), jacobianXF(NULL), computeFFunctionName("none"), computeJacobianXFFunctionName("none"),
+  DynamicalSystem(dsXML, newNsds), M(NULL), f(NULL), jacobianXF(NULL),
   computeFPtr(NULL), computeJacobianXFPtr(NULL), r(NULL), rMemory(NULL), invM(NULL)
 {
   // -- FONLDS xml object --
@@ -141,7 +141,7 @@ FirstOrderNonLinearDS::FirstOrderNonLinearDS(DynamicalSystemXML * dsXML, NonSmoo
 
 // From a minimum set of data
 FirstOrderNonLinearDS::FirstOrderNonLinearDS(int newNumber, const SiconosVector& newX0, const string& fPlugin, const string& jacobianXFPlugin):
-  DynamicalSystem(FONLDS, newNumber, newX0.size()), M(NULL), f(NULL), jacobianXF(NULL), computeFFunctionName("none"), computeJacobianXFFunctionName("none"),
+  DynamicalSystem(FONLDS, newNumber, newX0.size()), M(NULL), f(NULL), jacobianXF(NULL),
   computeFPtr(NULL), computeJacobianXFPtr(NULL), r(NULL), rMemory(NULL), invM(NULL)
 {
   // === The dimension of the problem is given newX0.size() ===
@@ -480,7 +480,7 @@ void FirstOrderNonLinearDS::setComputeFFunction(const string& pluginPath, const 
   cShared.setFunction(&computeFPtr, pluginPath, functionName);
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  computeFFunctionName = plugin + ":" + functionName;
+  pluginNames["f"] = plugin + ":" + functionName;
   isPlugin["f"] = true;
 }
 
@@ -497,7 +497,7 @@ void FirstOrderNonLinearDS::setComputeJacobianXFFunction(const string& pluginPat
 
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  computeJacobianXFFunctionName = plugin + ":" + functionName;
+  pluginNames["jacobianXF"] = plugin + ":" + functionName;
   isPlugin["jacobianXF"] = true;
 }
 
@@ -585,11 +585,10 @@ void FirstOrderNonLinearDS::saveSpecificDataToXML()
   if (fonlds == NULL)
     RuntimeException::selfThrow("FirstOrderNonLinearDS::saveSpecificDataToXML - The DynamicalSystemXML object doesn't exists");
 
-  fonlds->setFPlugin(computeFFunctionName);
-  if (computeJacobianXFFunctionName != "")
-    fonlds->setJacobianXFPlugin(computeJacobianXFFunctionName);
-  else
-    fonlds->setJacobianXFPlugin("DefaultPlugin:jacobianXF");
+  if (isPlugin["f"])
+    fonlds->setFPlugin(pluginNames["f"]);
+  if (isPlugin["jacobianXF"])
+    fonlds->setJacobianXFPlugin(pluginNames["jacobianXF"]);
 }
 
 // ===== MISCELLANEOUS ====

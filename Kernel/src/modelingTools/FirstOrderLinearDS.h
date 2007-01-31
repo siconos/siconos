@@ -19,8 +19,8 @@
 /*! \file FirstOrderLinearDS.h
 
 */
-#ifndef LINEARDS_H
-#define LINEARDS_H
+#ifndef FOLINEARDS_H
+#define FOLINEARDS_H
 
 #include "FirstOrderLinearDSXML.h"
 #include "FirstOrderNonLinearDS.h"
@@ -361,4 +361,4 @@ public:
 
 };
 
-#endif // LINEARDS_H
+#endif // FOLINEARDS_H

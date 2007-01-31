@@ -66,23 +66,31 @@ typedef std::map<std::string , SiconosMatrix*> WorkMap2;
 /** A map to link string to bool (for plug-in flags)  */
 typedef std::map<std::string, bool> BoolMap;
 
-/**  General First Order Non Linear Dynamical Systems
+/** Map used to save the list of plug-in names. */
+typedef std::map<std::string, std::string> NamesList;
+
+/** Pointer to function for plug-in. */
+typedef void (*FPtr6)(unsigned int, double, const double*, const double*, double*, double*);
+
+/**  Abstract class to handle Dynamical Systems => interface for derived classes (First Order or Lagrangian systems)
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.1.
- *  \date (Creation) April 29, 2004
+ *  \date (Creation) January 15, 2007
  *
- * This class defines and computes a generic n-dimensional
- * dynamical system of the form :
+ * This class is used to describe dynamical systems of the form :
  * \f[
  * g(\dot x, x, t, z) = 0
  * \f]
  * where
- *    - \f$x \in R^{n} \f$ is the state.
+ *    - \f$ x \in R^{n} \f$ is the state.
  *    - \f$ z \in R^{zSize}\f$ is a vector of arbitrary algebraic variables, some sort of discret state.
  *  For example, z may be used to set some perturbation parameters, or to control the system (z will be set by some actuators) or anything else.
  *
  *  with \f$ g : R^{n} \times R  \mapsto  R^{n}   \f$ .
+ *
+ * g is computed thanks to computeG(t), and its jacobians with computeJacobianG(0,...) for jacobianXG[0] = \f$ \nabla_x g(t,\dot x,x,z) \f$,
+ * computeJacobianG(1,...) for jacobianXG[1] = \f$ \nabla_{\dot x} g(t,\dot x,x,z) \f$.
  *
  * By default, the DynamicalSystem is considered to be an Initial Value Problem (IVP)
  * and the initial conditions are given by
@@ -91,17 +99,18 @@ typedef std::map<std::string, bool> BoolMap;
  * \f]
  * To define a boundary Value Problem, the pointer on a BoundaryCondition must be set (not yet implemented).
  *
- * If \f[ \nabla_{\dot x} g \f] is invertible, the system can be written as:
+ * Under some specific conditions, the system can be written as:
  *
  * \f[
  * \dot x = rhs(x, t, z)
  * \f]
  *
+ * In that case, \f$ \nabla_{\dot x} g \f$ must be invertible.
  * Right-hand side (\f$ \dot x \f$) of the equation is computed thanks to computeRhs(t).
  *
  * And its Jacobian according to x, named jacobianXRhs, with computeJacobianXRhs(t).
  *
- * Those two functions are pure virtual and must then be implemented in all the derived classes.
+ * <b> Those two functions are pure virtual and must be implemented in all the derived classes. </b>
  *
  * Dynamical System types (followed by derived classes names):
  *  - First Order Non Linear Dynamical Systems (FirstOrderNonLinearDS)
@@ -110,8 +119,17 @@ typedef std::map<std::string, bool> BoolMap;
  *  - Lagrangian DS (LagrangianDS)
  *  - Lagrangian Linear and Time Invariant coefficients DS (LagrangianLinearTIDS)
  *
+ * About members:
+ *  - A DynamicalSystem is identified thanks to a number and an id.
+ *  - It handles a pointer to the owner NonSmoothDynamicalSystem and a pointer to a DynamicalSystemXML object for data i/o.
+ *  - A VectorOfVectors, x,  is used to saved the state: x[0]=\f$ x \f$ and x[1]=\f$ \dot x \f$ = right-hand side.
+ *
  * Remarks:
  *  - the copy constructor is declared as a private function => copy and pass-by-value of DS is forbidden.
+ *
+ * Warning:
+ *  - At the time, nothing is implemented in simulation to proceed with systems written as \f$ g(...) = 0 \f$. Then use only the form
+ *    \f$ \dot x = rhs(...) \f$.
  *
  */
 class DynamicalSystem
@@ -145,6 +163,36 @@ protected:
   /** Arbitrary algebraic values vector, z. Discret state of the system. */
   SiconosVector * z;
 
+  /** \f$ g(t,\dot x,x,z) \f$ */
+  SiconosVector *g;
+
+  /** jacobianXG[0] = \f$ \nabla_x g(t,\dot x,x,z) \f$, jacobianXG[1] = \f$ \nabla_{\dot x} g(t,\dot x,x,z) \f$  */
+  VectorOfMatrices jacobianG;
+
+  /* contains the names of the various plug-in. Example: pluginNames["mass"] is the function used to compute the mass.
+     Id are the names of the member (mass, fInt ...) */
+  NamesList pluginNames;
+
+  /** DynamicalSystem plug-in to compute \f$ g(t,\dot x,x,z) \f$
+   *  @param  : the size of the vector x
+   *  @param  : current time
+   *  @param  : the pointer to the first element of the vector x[0]=\f$ x \f$
+   *  @param  : the pointer to the first element of the vector x[1]=\f$ \dot x \f$
+   *  @param  : the pointer to the first element of the vector g(t, ...)
+   *  @param  : a vector of parameters, z
+   */
+  FPtr6 computeGPtr;
+
+  /** DynamicalSystem plug-in to compute jacobianG; computeJacobianGPtr[i] for jacobianG[i].
+   *  @param  : the size of the vector x
+   *  @param  : current time
+   *  @param  : the pointer to the first element of the vector x[0]=\f$ x \f$
+   *  @param  : the pointer to the first element of the vector x[1]=\f$ \dot x \f$
+   *  @param  : the pointer to the first element of the vector g(t, ...)
+   *  @param  : a vector of parameters, z
+   */
+  std::vector<FPtr6> computeJacobianGPtr;
+
   /** the  previous state vectors stored in memory*/
   SiconosMemory *xMemory;
 
@@ -174,10 +222,15 @@ protected:
   /** Flags to know if pointers have been allocated inside constructors or not */
   AllocationFlagsMap isAllocatedIn;
 
-  /** set all allocation flags (isAllocated map)
-   *  \param bool: = if true (default) set default configuration, else set all to false
+  /** set all allocation flags (isAllocated map) to true or false
+   *  \param a bool
    */
-  virtual void initAllocationFlags(bool  = true);
+  virtual void initAllocationFlags(bool);
+
+  /** set all plug-in flags (isPlugin map) to val
+   *  \param a bool
+   */
+  virtual void initPluginFlags(bool);
 
   // ===== CONSTRUCTORS =====
 
@@ -435,12 +488,12 @@ public:
   /** set the value of JacobianXRhs to newValue
    *  \param SiconosMatrix newValue
    */
-  virtual void setJacobianXRhs(const SiconosMatrix&);
+  void setJacobianXRhs(const SiconosMatrix&);
 
   /** set JacobianXRhs to pointer newPtr
    *  \param SiconosMatrix * newPtr
    */
-  virtual void setJacobianXRhsPtr(SiconosMatrix *newPtr);
+  void setJacobianXRhsPtr(SiconosMatrix *newPtr);
 
   // -- z --
 
@@ -470,6 +523,67 @@ public:
    *  \param SiconosVector * newPtr
    */
   void setZPtr(SiconosVector *);
+
+  // --- g ---
+
+  /** get the value of \f$ g \f$
+   *  \return SimpleVector
+   * \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   */
+  inline const SimpleVector getG() const
+  {
+    return *g;
+  }
+
+  /** get \f$ g \f$ (pointer)
+   *  \return pointer on a SiconosVector
+   */
+  inline SiconosVector* getGPtr() const
+  {
+    return g;
+  }
+
+  /** set the value of \f$ g \f$ to newValue
+   *  \param SiconosVector newValue
+   */
+  void setG(const SiconosVector&);
+
+  /** set \f$ g \f$ to pointer newPtr
+   *  \param SiconosVector * newPtr
+   */
+  void setGPtr(SiconosVector *);
+
+  // -- Jacobian g --
+
+  /** get the value of jacobianG
+   *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
+   *  \return SimpleMatrix
+   */
+  inline const SimpleMatrix getJacobianG(unsigned int i) const
+  {
+    return *jacobianG[i];
+  }
+
+  /** get JacobianG
+   *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
+   *  \return pointer on a SiconosMatrix
+   */
+  inline SiconosMatrix* getJacobianGPtr(unsigned int i) const
+  {
+    return jacobianG[i];
+  }
+
+  /** set the value of JacobianG to newValue
+   *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
+   *  \param SiconosMatrix newValue
+   */
+  void setJacobianG(unsigned int, const SiconosMatrix&);
+
+  /** set JacobianG to pointer newPtr
+   *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
+   *  \param SiconosMatrix * newPtr
+   */
+  void setJacobianGPtr(unsigned int, SiconosMatrix *newPtr);
 
   // X memory
 
@@ -515,6 +629,14 @@ public:
   inline void setStepsInMemory(int steps)
   {
     stepsInMemory = steps;
+  }
+
+  /** get name of function that computes "name"
+   *  \return a string
+   */
+  inline const std::string getFunctionName(const std::string& name) const
+  {
+    return (pluginNames.find(name))->second;
   }
 
   // --- dsxml ---
@@ -587,6 +709,16 @@ public:
     delete workVector[id];
   }
 
+  // --- get plugin functions names ---
+
+  /** get the list of plug-in names
+   *  \return a NamesList
+   */
+  inline NamesList getComputeFunctionNames() const
+  {
+    return pluginNames;
+  }
+
   /** Initialization function for the rhs and its jacobian (including memory allocation).
    *  \param time of initialization
    */
@@ -616,10 +748,33 @@ public:
    */
   virtual void swapInMemory() = 0;
 
+  /** to set a specified function to compute g
+   *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
+   *  \param string pluginPath : the complete path to the plugin
+   *  \param string functionName : the function name to use in this library
+   */
+  void setComputeGFunction(const std::string&  pluginPath, const std::string& functionName);
+
+  /** to set a specified function to compute jacobianG
+   *  \param string pluginPath : the complete path to the plugin
+   *  \param the string functionName : function name to use in this library
+   */
+  void setComputeJacobianGFunction(unsigned int, const std::string&  pluginPath, const std::string&  functionName);
+
+  /** Default function to compute g
+   *  \param double, the current time
+   */
+  void computeG(double time);
+
+  /** default function to compute the gradient of g
+   *  \param double time : the current time
+   *  \param index (0: \f$ \nabla_x \f$, 1: \f$ \nabla_{\dot x} \f$ )
+   */
+  void computeJacobianG(unsigned int, double);
+
   /** Default function to the right-hand side term
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
-   *  \exception RuntimeException
    */
   virtual void computeRhs(double, bool  = false) = 0;
 

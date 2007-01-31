@@ -88,12 +88,6 @@ protected:
   /** Gradient of \f$ f(x,t,z) \f$ with respect to \f$ x\f$*/
   SiconosMatrix *jacobianXF;
 
-  /* the name of the plugin used to compute f(x,t,z) */
-  std::string  computeFFunctionName;
-
-  /* the name of the plugin used to compute the jacobian of f according to x */
-  std::string  computeJacobianXFFunctionName;
-
   /** DynamicalSystem plug-in to compute f(x,t,z) - id="f".
    *  @param  : the size of the vector x
    *  @param  : current time
@@ -123,9 +117,9 @@ protected:
   SiconosMatrix *invM;
 
   /** set all allocation flags (isAllocated map)
-   *  \param bool: = if true (default) set default configuration, else set all to false
+   *  \param bool
    */
-  virtual void initAllocationFlags(bool  = true);
+  virtual void initAllocationFlags(bool);
 
   /** set all plug-in flags (isPlugin map) to val
    *  \param a bool
@@ -133,9 +127,9 @@ protected:
   virtual void initPluginFlags(bool);
 
   /** default constructor
-   * \param string: the type of the system, default=NLDS, non-linear first order system.
+   * \param string: the type of the system
    */
-  FirstOrderNonLinearDS(const std::string& = FONLDS);
+  FirstOrderNonLinearDS(const std::string&);
 
 public:
 
@@ -411,24 +405,6 @@ public:
   void swapInMemory();
 
   // ===== COMPUTE PLUGINS FUNCTIONS =====
-
-  // --- getters for plugin functions names ---
-
-  /** get name of function that computes f (if f from plugin)
-   *  \return a string
-   */
-  inline const std::string getComputeFFunctionName() const
-  {
-    return computeFFunctionName;
-  }
-
-  /** get name of function that computes computeJacobianXF (if computeJacobianXF from plugin)
-   *  \return a string
-   */
-  inline const std::string getComputeJacobianXFFunctionName() const
-  {
-    return computeJacobianXFFunctionName;
-  }
 
   // --- setters for functions to compute plugins ---
 

@@ -926,7 +926,7 @@ void LagrangianDS::setNNLPtr(SiconosVector *newPtr)
 void LagrangianDS::setJacobianFInt(unsigned int i, const SiconosMatrix& newValue)
 {
   if (newValue.size(0) != ndof || newValue.size(1) != ndof)
-    RuntimeException::selfThrow("LagrangianDS - setJacobianQFInt: inconsistent dimensions with problem size for input matrix JacobianQFInt");
+    RuntimeException::selfThrow("LagrangianDS - setJacobianFInt: inconsistent dimensions with problem size for input matrix JacobianQFInt");
 
   string name = "jacobianFInt" + toString<unsigned int>(i);
   if (jacobianFInt[i] == NULL)
@@ -942,7 +942,7 @@ void LagrangianDS::setJacobianFInt(unsigned int i, const SiconosMatrix& newValue
 void LagrangianDS::setJacobianFIntPtr(unsigned int i, SiconosMatrix *newPtr)
 {
   if (newPtr->size(0) != ndof || newPtr->size(1) != ndof)
-    RuntimeException::selfThrow("LagrangianDS - setJacobianQFIntPtr: inconsistent input matrix size ");
+    RuntimeException::selfThrow("LagrangianDS - setJacobianFIntPtr: inconsistent input matrix size ");
 
   string name = "jacobianFInt" + toString<unsigned int>(i);
   if (isAllocatedIn[name]) delete jacobianFInt[i];
@@ -954,7 +954,7 @@ void LagrangianDS::setJacobianFIntPtr(unsigned int i, SiconosMatrix *newPtr)
 void LagrangianDS::setJacobianNNL(unsigned int i, const SiconosMatrix& newValue)
 {
   if (newValue.size(0) != ndof || newValue.size(1) != ndof)
-    RuntimeException::selfThrow("LagrangianDS - setJacobianQNNL: inconsistent dimensions with problem size for input matrix JacobianQNNL");
+    RuntimeException::selfThrow("LagrangianDS - setJacobianNNL: inconsistent dimensions with problem size for input matrix JacobianQNNL");
 
   string name = "jacobianNNL" + toString<unsigned int>(i);
   if (jacobianNNL[i] == NULL)
@@ -970,7 +970,7 @@ void LagrangianDS::setJacobianNNL(unsigned int i, const SiconosMatrix& newValue)
 void LagrangianDS::setJacobianNNLPtr(unsigned int i, SiconosMatrix *newPtr)
 {
   if (newPtr->size(0) != ndof || newPtr->size(1) != ndof)
-    RuntimeException::selfThrow("LagrangianDS - setJacobianQNNLPtr: inconsistent input matrix size ");
+    RuntimeException::selfThrow("LagrangianDS - setJacobianNNLPtr: inconsistent input matrix size ");
 
   string name = "jacobianNNL" + toString<unsigned int>(i);
   if (isAllocatedIn[name]) delete jacobianNNL[i];
