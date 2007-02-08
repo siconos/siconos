@@ -25,4 +25,4 @@ Note that not all files from the current location are listed below, since some o
 #include "Sensor.h"
 #include "SensorPosition.h"
 #include "SensorEvent.h"
-
+#include "ControlManager.h"
