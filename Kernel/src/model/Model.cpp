@@ -94,15 +94,6 @@ Model::~Model()
   modelxml = NULL;
 }
 
-// --- SETTERS ---
-void Model::setT0(const double& newT0)
-{
-  if (strat != NULL && strat->getTimeDiscretisationPtr() != NULL)
-    RuntimeException::selfThrow("Model::setT0 - To set t0 value, use rather setT0 of the corresponding TimeDiscretisation.");
-  else
-    t0 = newT0;
-}
-
 void Model::setSimulationPtr(Simulation *newPtr)
 {
   // Warning: this function may be used carefully because of the links between Model and TimeDiscretisation
@@ -111,7 +102,6 @@ void Model::setSimulationPtr(Simulation *newPtr)
   strat = newPtr;
   isSimulationAllocatedIn = false;
 }
-
 
 void Model::setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem *newPtr)
 {
@@ -291,46 +281,5 @@ void Model::display() const
   cout << "| title = " << title << endl;
   cout << "| xmlSchema = " << xmlSchema << endl;
   cout << "============================" << endl;
-}
-
-//=======================================================
-//
-// function to create the platform from a C++ programm
-//
-//=======================================================
-
-Simulation* Model::createSimulation(std::string type)
-{
-  if (isSimulationAllocatedIn) delete strat;
-  isSimulationAllocatedIn = false;
-  strat = NULL;
-  if (type == "TimeStepping")
-  {
-    strat = new TimeStepping(NULL, this);
-    isSimulationAllocatedIn = true ;
-  }
-  else if (type == "EventDriven")
-  {
-    strat = new EventDriven(NULL, this);
-    isSimulationAllocatedIn = true ;
-  }
-  else RuntimeException::selfThrow("Model::create Simulation:wrong type of simulation:" + type);
-  return strat;
-}
-
-Simulation* Model::createTimeStepping()
-{
-  if (isSimulationAllocatedIn) delete strat;
-  strat = new TimeStepping(NULL, this);
-  isSimulationAllocatedIn = true ;
-  return strat;
-}
-
-Simulation* Model::createTimeEventDriven()
-{
-  if (isSimulationAllocatedIn) delete strat;
-  strat = new EventDriven(NULL, this);
-  isSimulationAllocatedIn = true ;
-  return strat;
 }
 

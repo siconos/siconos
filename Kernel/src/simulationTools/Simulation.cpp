@@ -32,33 +32,45 @@
 
 using namespace std;
 
-// Warning: neither time discretisation nor OSI or OSNS are given in the constructors.
-// The rule is that an object TimeDiscretisation/OSI/OSNS needs a Simulation to be constructed. Then, the right construction is:
+// Warning: neither OSI nor OSNS are given in the constructors.
+// The rule is that an object OSI/OSNS needs a Simulation to be constructed. Then, the right construction is:
 //   Simulation * s = new Simulation(...);
-//   TimeDiscretisation* t = new TimeDiscretisation(...,s,...);
 //   OneStepNSProblem  * osns = new OneStepNSProblem(...,s,...);
 //   OneStepIntegrator * osi = new OneStepIntegrator(...,s,...);
 
 // --- Default constructor (protected) ---
-Simulation::Simulation(const string type):
-  name("unnamed"), simulationType(type), timeDiscretisation(NULL), isTimeDiscretisationAllocatedIn(false),
+Simulation::Simulation(const string& type):
+  name("unnamed"), simulationType(type), timeDiscretisation(NULL), eventsManager(NULL),
   simulationxml(NULL), model(NULL), levelMin(0), levelMax(0)
-{}
-
-// --- constructor with a Model and an id ---
-Simulation::Simulation(Model * mainModel, const string id):
-  name("unnamed"), simulationType(id), timeDiscretisation(NULL), isTimeDiscretisationAllocatedIn(false),
-  simulationxml(NULL), model(mainModel), levelMin(0), levelMax(0)
 {
+  isAllocatedIn["eventsManager"] = false;
+  isAllocatedIn["timeDiscretisation"] = false;
+}
+
+// --- Constructor with a TimeDiscretisation (and thus a Model) and an id ---
+Simulation::Simulation(TimeDiscretisation* td, const string& id):
+  name("unnamed"), simulationType(id), timeDiscretisation(td), eventsManager(NULL),
+  simulationxml(NULL), model(td->getModelPtr()), levelMin(0), levelMax(0)
+{
+  if (timeDiscretisation == NULL)
+    RuntimeException::selfThrow("Simulation constructor - timeDiscretisation == NULL.");
+  isAllocatedIn["timeDiscretisation"] = false;
+
+  // Note that the link to the Model is done through the TimeDiscretisation object.
   if (model == NULL)
     RuntimeException::selfThrow("Simulation constructor - model == NULL.");
+
   model->setSimulationPtr(this);
   // === indexSets will be updated during initialize() call ===
+
+  // === Events manager creation ===
+  eventsManager = new EventsManager(this); //
+  isAllocatedIn["eventsManager"] = true;
 }
 
 // --- xml constructor ---
-Simulation::Simulation(SimulationXML* strxml, Model *newModel, const string id):
-  name("unnamed"), simulationType(id), timeDiscretisation(NULL), isTimeDiscretisationAllocatedIn(true),
+Simulation::Simulation(SimulationXML* strxml, Model *newModel, const string& id):
+  name("unnamed"), simulationType(id), timeDiscretisation(NULL), eventsManager(NULL),
   simulationxml(strxml), model(newModel), levelMin(0), levelMax(0)
 {
   if (simulationxml == NULL)
@@ -66,11 +78,12 @@ Simulation::Simulation(SimulationXML* strxml, Model *newModel, const string id):
 
   // === Model ===
   if (model == NULL)
-    RuntimeException::selfThrow("Simulation constructor - model = NULL.");
+    RuntimeException::selfThrow("Simulation:: xml constructor - model = NULL.");
   model->setSimulationPtr(this);
 
   // === Time discretisation ===
-  timeDiscretisation = new TimeDiscretisation(simulationxml->getTimeDiscretisationXMLPtr(), this);
+  timeDiscretisation = new TimeDiscretisation(simulationxml->getTimeDiscretisationXMLPtr(), model);
+  isAllocatedIn["timeDiscretisation"] = true;
 
   // === OneStepIntegrators ===
   SetOfOSIXML OSIXMLList = simulationxml->getOneStepIntegratorsXML();
@@ -96,13 +109,23 @@ Simulation::Simulation(SimulationXML* strxml, Model *newModel, const string id):
   // === indexSets : computed during initialization ===
 
   // === OneStepNSProblems  ===
-  // This depends on the type of strategy --> in derived class constructor
+  // This depends on the type of simulation --> in derived class constructor
+
+  // === Events manager creation ===
+  eventsManager = new EventsManager(this); //
+  isAllocatedIn["eventsManager"] = true;
 }
 
 // --- Destructor ---
 Simulation::~Simulation()
 {
-  if (isTimeDiscretisationAllocatedIn) delete timeDiscretisation;
+  // == EventsManager ==
+  if (isAllocatedIn["eventsManager"])
+    delete eventsManager;
+  eventsManager = NULL;
+
+  // == Time discretisation ==
+  if (isAllocatedIn["timeDiscretisation"]) delete timeDiscretisation;
   timeDiscretisation = NULL;
 
   // == delete OSI ==
@@ -135,9 +158,9 @@ void Simulation::setTimeDiscretisationPtr(TimeDiscretisation* td)
   // Warning: this function may be used carefully because of the links between Model and TimeDiscretisation
   // The simulation of the td input MUST be the current simulation.
   //
-  if (isTimeDiscretisationAllocatedIn) delete timeDiscretisation;
+  if (isAllocatedIn["timeDiscretisation"]) delete timeDiscretisation;
   timeDiscretisation = td;
-  isTimeDiscretisationAllocatedIn = false;
+  isAllocatedIn["timeDiscretisation"] = false;
 }
 
 void Simulation::setOneStepIntegrators(const OSISet& newVect)
@@ -158,7 +181,7 @@ void Simulation::setOneStepIntegrators(const OSISet& newVect)
     isOSIAllocatedIn[*it] = false;
 }
 
-OneStepIntegrator* Simulation::getIntegratorOfDSPtr(const int numberDS) const
+OneStepIntegrator* Simulation::getIntegratorOfDSPtr(int numberDS) const
 {
   ConstOSIIterator itOSI  = allOSI.begin();
 
@@ -231,14 +254,14 @@ const bool Simulation::hasCommonDSInIntegrators(OneStepIntegrator* osi) const
   return val;
 }
 
-const UnitaryRelationsSet Simulation::getIndexSet(const unsigned int i) const
+const UnitaryRelationsSet Simulation::getIndexSet(unsigned int i) const
 {
   if (i >= indexSets.size())
     RuntimeException::selfThrow("Simulation - getIndexSet(i) - index set(i) does not exist.");
   return indexSets[i];
 }
 
-OneStepNSProblem* Simulation::getOneStepNSProblemPtr(const std::string name)
+OneStepNSProblem* Simulation::getOneStepNSProblemPtr(const std::string& name)
 {
   if (!hasOneStepNSProblem(name))
     RuntimeException::selfThrow("Simulation - getOneStepNSProblemPtr(name) - The One Step NS Problem is not in the simulation.");
@@ -280,7 +303,7 @@ const bool Simulation::hasOneStepNSProblem(OneStepNSProblem* osns) const
   return val;
 }
 
-const bool Simulation::hasOneStepNSProblem(const string name) const
+const bool Simulation::hasOneStepNSProblem(const string& name) const
 {
   bool val = false;
   ConstOSNSIterator it;
@@ -318,35 +341,32 @@ void Simulation::initialize()
   if (model == NULL)
     RuntimeException::selfThrow("Simulation initialization - model = NULL.");
 
+  // Initialize the user time discretisation.
+  timeDiscretisation->initialize();
+
   // The number of indexSets is given by the maximum value of relative degrees of the unitary relations.
 
   // We first need to initialize the topology (computes UnitaryRelation sets, relative degrees ...)
   model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->initialize();
+
+  // === Events manager initialization ===
+  eventsManager->initialize();
 }
 
-void Simulation::computeFreeState()
+void Simulation::saveInMemory()
 {
+  // Save OSI state (DynamicalSystems) in Memory.
   OSIIterator it;
   for (it = allOSI.begin(); it != allOSI.end() ; ++it)
-    (*it)->computeFreeState();
-}
+    (*it)->saveInMemory();
 
-void Simulation::nextStep()
-{
-  // increment time step
-  timeDiscretisation->increment();
-  model->setCurrentT(model->getCurrentT() + timeDiscretisation->getH());
-
-  OSIIterator it;
-  for (it = allOSI.begin(); it != allOSI.end() ; ++it)
-    (*it)->nextStep();
-
+  // Save OSNS state (Interactions) in Memory.
   OSNSIterator itOsns;
   for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
-    (itOsns->second)->nextStep();
+    (itOsns->second)->saveInMemory();
 }
 
-void Simulation::computeOneStepNSProblem(const std::string name)
+void Simulation::computeOneStepNSProblem(const std::string& name)
 {
   if (!hasOneStepNSProblem(name))
     RuntimeException::selfThrow("Simulation - computeOneStepNSProblem, OneStepNSProblem does not exist in the simulation. Id:" + name);
@@ -356,7 +376,7 @@ void Simulation::computeOneStepNSProblem(const std::string name)
   allNSProblems[name]->compute(model->getCurrentT());
 }
 
-void Simulation::newtonSolve(const double criterion, const unsigned int maxStep)
+void Simulation::newtonSolve(double criterion, unsigned int maxStep)
 {
   // At the time, only for time stepping
   if (simulationType != "TimeStepping")
@@ -367,26 +387,19 @@ void Simulation::newtonSolve(const double criterion, const unsigned int maxStep)
   while ((!isNewtonConverge) && (nbNewtonStep <= maxStep))
   {
     nbNewtonStep++;
-    computeFreeState();
-    updateIndexSets();
-    computeOneStepNSProblem("timeStepping");
-    update(levelMin);
+    advanceToEvent();
+    eventsManager->processEvents();
     isNewtonConverge = newtonCheckConvergence(criterion);
   }
   if (!isNewtonConverge)
     cout << "Newton process stopped: reach max step number" << endl ;
-
-  // time step increment
-  model->setCurrentT(model->getCurrentT() + timeDiscretisation->getH());
 }
 
-bool Simulation::newtonCheckConvergence(const double criterion)
+bool Simulation::newtonCheckConvergence(double criterion)
 {
   bool checkConvergence = false;
-  // get the non smooth dynamical system
-  NonSmoothDynamicalSystem* nsds = model-> getNonSmoothDynamicalSystemPtr();
   // get the nsds indicator of convergence
-  double nsdsConverge = nsds -> nsdsConvergenceIndicator();
+  double nsdsConverge = model-> getNonSmoothDynamicalSystemPtr()->nsdsConvergenceIndicator();
   if (nsdsConverge < criterion) checkConvergence = true ;
 
   return(checkConvergence);
@@ -440,12 +453,12 @@ void Simulation::updateInput(int level)
   for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
     (*itOSI)->resetNonSmoothPart();
 
-  // We compute inpute using lambda(levelMin).
+  // We compute input using lambda(levelMin).
   for (it = allInter.begin(); it != allInter.end(); it++)
-    (*it)->getRelationPtr() -> computeInput(time, level);
+    (*it)->getRelationPtr()->computeInput(time, level);
 }
 
-void Simulation::updateOutput(const int level0, int level1)
+void Simulation::updateOutput(int level0, int level1)
 {
 
   if (level1 == -1)
@@ -462,4 +475,17 @@ void Simulation::updateOutput(const int level0, int level1)
   }
 }
 
+void Simulation::run()
+{
+  unsigned int count = 0; // events counter.
+  // do simulation while events remains in the "future events" list of events manager.
+  cout << " ==== Start of " << simulationType << " simulation - This may take a while ... ====" << endl;
+  while (eventsManager->hasNextEvent())
+  {
+    advanceToEvent();
+    eventsManager->processEvents();
+    count++;
+  }
+  cout << "===== End of " << simulationType << "simulation. " << count << " events have been processed. ==== " << endl;
+}
 

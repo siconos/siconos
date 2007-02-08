@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include "TimeDiscretisation.h"
 #include "RuntimeException.h"
 using namespace std;
@@ -24,185 +24,86 @@ using namespace std;
 
 // --- Default constructor ---
 TimeDiscretisation::TimeDiscretisation(): h(0.0), nSteps(0), tk(NULL), hMin(0.0), hMax(0.0), constant(0),
-  timeDiscretisationXML(NULL), k(0), simulation(NULL), isTkAllocatedIn(false), tdCase(0)
+  timeDiscretisationXML(NULL), model(NULL), isTkAllocatedIn(false), tdCase(0), isUpToDate(false)
 {}
 
-void TimeDiscretisation::checkCase(const bool hasTk, const bool hasH, const bool hasNSteps, const bool hasT)
+void TimeDiscretisation::setCase(bool hasTk, bool hasH, bool hasNSteps)
 {
-  if (hasTk && hasT) tdCase = 1;     // Case of constructor I
-  else if (hasTk && !hasT) tdCase = 2; // Case of constructor I
-  else if (hasH &&  hasNSteps &&  hasT) tdCase = 3; // Constructor II
-  else if (hasH &&  hasNSteps && !hasT) tdCase = 4; // Constructor II
-  else if (!hasH &&  hasNSteps &&  hasT) tdCase = 5; // Constructor III
-  else if (!hasH &&  hasNSteps && !hasT) tdCase = 6; // Constructor III
-  else if (hasH && !hasNSteps &&  hasT) tdCase = 7; // Constructor IV
-  else if (hasH && !hasNSteps && !hasT) tdCase = 8; // Constructor IV
+  if (hasTk) tdCase = 1; // Case of constructor I
+  else if (hasH &&  hasNSteps) tdCase = 2; // Constructor II
+  else if (!hasH &&  hasNSteps) tdCase = 3; // Constructor III
+  else if (hasH && !hasNSteps) tdCase = 4; // Constructor IV
   else tdCase = 0;
+  isUpToDate = false;
 }
-
-void TimeDiscretisation::compute(const int tdCase)
-{
-  // load time min value from the model
-  double t0 = getT0();
-  double T;
-  double tol = 1e-12;
-  switch (tdCase)
-  {
-  case 1: // Given: tk, T - Compute h, nSteps
-    // check tk(0) = t0
-    if (fabs((*tk)(0) - t0) > tol) RuntimeException::selfThrow("TimeDiscretisation::compute - t0 and tk(0) are different");
-    nSteps = tk->size() - 1;
-    // get final T from Model and check tk(nSteps) = T
-    T = getT();
-    if (fabs((*tk)(nSteps) - T) > tol) RuntimeException::selfThrow("TimeDiscretisation::compute - T and tk(N) are different");
-    // compute h
-    h = (*tk)(1) - (*tk)(0);
-    break;
-  case 2: // Given: tk - Compute h, nSteps and T
-    //assert((*tk)(0) == t0);
-    if (fabs((*tk)(0) - t0) > tol) RuntimeException::selfThrow("TimeDiscretisation::compute - t0 and tk(0) are different");
-    nSteps = tk->size() - 1;
-    // set T in the Model
-    setT((*tk)(nSteps));
-    // compute h
-    h = (*tk)(1) - (*tk)(0);
-    break;
-  case 3:// Given: h, nSteps, T => too many inputs
-    RuntimeException::selfThrow("TimeDiscretisation::compute - redundant input values. Only two are needed among T, h and nSteps.");
-  case 4: // Given: h, nSteps - Compute T, tk
-    tk = new SimpleVector(nSteps + 1);
-    isTkAllocatedIn = true;
-    // set T in the Model and in tk
-    setT(t0 + nSteps * h);
-    // compute tk
-    (*tk)(0) = t0;
-    for (unsigned int i = 1; i < nSteps; ++i)(*tk)(i) = t0 + i * h;
-    break;
-  case 5: // Given: nSteps, T - Compute h, tk
-    // get T from Model and compute h
-    T  = getT();
-    h = (T - t0) / nSteps;
-    // compute tk
-    tk = new SimpleVector(nSteps + 1);
-    isTkAllocatedIn = true;
-    (*tk)(0) = t0;
-    (*tk)(nSteps) = getT();
-    for (unsigned int i = 1; i < nSteps; ++i)(*tk)(i) = t0 + i * h;
-    break;
-  case 6: // Given: nSteps => T is missing
-    RuntimeException::selfThrow("TimeDiscretisation::compute - T is required in Model, since only nSteps is provided.");
-  case 7: // Given: h, T - Compute nSteps, tk
-    T  = getT();
-    nSteps = (unsigned int)ceil((T - t0) / h);
-    // Compute tk
-    tk = new SimpleVector(nSteps + 1);
-    isTkAllocatedIn = true;
-    (*tk)(0) = t0;
-    (*tk)(nSteps) = getT();
-    for (unsigned int i = 1; i < nSteps; i++)(*tk)(i) = t0 + i * h;
-    break;
-  case 8: // Given: h => T is missing
-    RuntimeException::selfThrow("TimeDiscretisation::constructor - T is required in Model, since only h is provided.");
-  default:
-    RuntimeException::selfThrow("TimeDiscretisation::compute - wrong scheme, wrong number of input data");
-  }
-
-  // compute hMin/hMax. hMin may differ from h when h and T are fixed and (T-t0)/nSteps is not an integer.
-  hMin = (*tk)(nSteps) - (*tk)(nSteps - 1);
-  hMax = h;
-}
-
-// PUBLIC METHODS
 
 // --- CONSTRUCTORS ---
 
 // IO Constructors -> XML
-TimeDiscretisation::TimeDiscretisation(TimeDiscretisationXML * tdXML, Simulation* simu):
+TimeDiscretisation::TimeDiscretisation(TimeDiscretisationXML * tdXML, Model* m):
   h(0.0), nSteps(0), tk(NULL), hMin(0.0), hMax(0.0), constant(0), timeDiscretisationXML(tdXML),
-  k(0), simulation(simu), isTkAllocatedIn(false), tdCase(0)
+  model(m), isTkAllocatedIn(false), tdCase(0), isUpToDate(false)
 {
-  if (simulation == NULL) RuntimeException::selfThrow("TimeDiscretisation::xml constructor - Simulation=NULL!");
-  simulation->setTimeDiscretisationPtr(this);
+  if (timeDiscretisationXML == NULL)
+    RuntimeException::selfThrow("TimeDiscretisation: xml constructor - TimeDiscretisationXML = NULL");
 
-  if (timeDiscretisationXML != NULL)
-  {
-    // --- Check what are the given data ---
-    bool hasNSteps = timeDiscretisationXML->hasN();
-    bool hasH = timeDiscretisationXML->hasH();
-    bool hasTk = timeDiscretisationXML->hasTk();
+  // --- Check what are the given data ---
+  bool hasNSteps = timeDiscretisationXML->hasN();
+  bool hasH = timeDiscretisationXML->hasH();
+  bool hasTk = timeDiscretisationXML->hasTk();
 
-    // Eliminate cases with too many inputs
-    if ((hasTk && hasH) || (hasTk && hasNSteps))
-      RuntimeException::selfThrow("TimeDiscretisation: xml constructor - Too many input data, some of them are useless.");
+  // Eliminate cases with too many inputs
+  if ((hasTk && hasH) || (hasTk && hasNSteps))
+    RuntimeException::selfThrow("TimeDiscretisation: xml constructor - Too many input data, some of them are useless.");
 
-    // --- Read the data ---
-    if (hasH) h = timeDiscretisationXML->getH();
-    if (hasNSteps) nSteps = timeDiscretisationXML->getN();
-    if (timeDiscretisationXML->hasHMin()) hMin = timeDiscretisationXML->getHMin();
-    if (timeDiscretisationXML->hasHMax()) hMax = timeDiscretisationXML->getHMax();
-    constant = timeDiscretisationXML->isConstant();
+  // --- Read the data ---
+  if (hasH) h = timeDiscretisationXML->getH();
+  if (hasNSteps) nSteps = timeDiscretisationXML->getN();
+  if (timeDiscretisationXML->hasHMin()) hMin = timeDiscretisationXML->getHMin();
+  if (timeDiscretisationXML->hasHMax()) hMax = timeDiscretisationXML->getHMax();
+  if (hasTk) setTk(timeDiscretisationXML->getTk());
 
-    // --- Check if given data are coherent and switch to the right case ---
-    checkCase(hasTk, hasH, hasNSteps, hasT());
-    // --- Compute the corresponding time discretisation scheme ---
-    if (tdCase == 1 || tdCase == 2)
-    {
-      tk = new SimpleVector(timeDiscretisationXML->getTk().size());
-      isTkAllocatedIn = true;
-      *tk = timeDiscretisationXML->getTk();
-    }
-    compute(tdCase);
-  }
-  else RuntimeException::selfThrow("TimeDiscretisation: xml constructor - TimeDiscretisationXML = NULL");
+  constant = timeDiscretisationXML->isConstant();
+
+  // --- set tdCase value.
+  setCase(hasTk, hasH, hasNSteps);
 }
 
 // --- Straightforward constructors ---
 
-// Provide tk and simulation (I)
-TimeDiscretisation::TimeDiscretisation(SiconosVector *newTk, Simulation* simu):
+// Provide tk and model (I)
+TimeDiscretisation::TimeDiscretisation(SiconosVector *newTk, Model* m):
   h(0), nSteps(0), tk(NULL), hMin(0), hMax(0), constant(1),
-  timeDiscretisationXML(NULL), k(0), simulation(simu), isTkAllocatedIn(true), tdCase(0)
+  timeDiscretisationXML(NULL), model(m), isTkAllocatedIn(true), tdCase(0), isUpToDate(false)
 {
-  if (simulation == NULL) RuntimeException::selfThrow("TimeDiscretisation:: data constructor - Simulation=NULL!");
-  simulation->setTimeDiscretisationPtr(this);
   // Allocate memory for tk and fill it
-  tk = new SimpleVector(newTk->size());
-  *tk = *newTk;
-  checkCase(1, 0, 0, hasT());
-  compute(tdCase);
+  tk = new SimpleVector(*newTk);
+
+  setCase(1, 0, 0);
 }
 
 // Provide h and nSteps, calculate tk (II)
-TimeDiscretisation::TimeDiscretisation(const double newH, const unsigned int newNSteps, Simulation* simu):
+TimeDiscretisation::TimeDiscretisation(double newH, unsigned int newNSteps, Model* m):
   h(newH), nSteps(newNSteps), tk(NULL), hMin(newH), hMax(newH), constant(1),
-  timeDiscretisationXML(NULL), k(0), simulation(simu), isTkAllocatedIn(false), tdCase(0)
+  timeDiscretisationXML(NULL), model(m), isTkAllocatedIn(false), tdCase(0), isUpToDate(false)
 {
-  if (simulation == NULL) RuntimeException::selfThrow("TimeDiscretisation::data constructor - Simulation=NULL!");
-  simulation->setTimeDiscretisationPtr(this);
-  checkCase(0, 1, 1, hasT());
-  compute(tdCase);
+  setCase(0, 1, 1);
 }
 
 // Provide nSteps, calculate h and tk (III)
-TimeDiscretisation::TimeDiscretisation(const unsigned int newNSteps, Simulation* simu):
+TimeDiscretisation::TimeDiscretisation(unsigned int newNSteps, Model* m):
   h(0), nSteps(newNSteps), tk(NULL), hMin(0), hMax(0), constant(1),
-  timeDiscretisationXML(NULL), k(0), simulation(simu), isTkAllocatedIn(false), tdCase(0)
+  timeDiscretisationXML(NULL), model(m), isTkAllocatedIn(false), tdCase(0), isUpToDate(false)
 {
-  if (simulation == NULL) RuntimeException::selfThrow("TimeDiscretisation::data constructor - Simulation=NULL!");
-  simulation->setTimeDiscretisationPtr(this);
-  checkCase(0, 0, 1, hasT());
-  compute(tdCase);
+  setCase(0, 0, 1);
 }
 
 // Provide h, calculate nSteps and tk (IV)
-TimeDiscretisation::TimeDiscretisation(const double newH, Simulation* simu):
+TimeDiscretisation::TimeDiscretisation(double newH, Model* m):
   h(newH), nSteps(0), tk(NULL), hMin(newH), hMax(newH), constant(1),
-  timeDiscretisationXML(NULL), k(0), simulation(simu), isTkAllocatedIn(false), tdCase(0)
+  timeDiscretisationXML(NULL), model(m), isTkAllocatedIn(false), tdCase(0), isUpToDate(false)
 {
-  if (simulation == NULL) RuntimeException::selfThrow("TimeDiscretisation::data constructor - Simulation=NULL!");
-  simulation->setTimeDiscretisationPtr(this);
-  checkCase(0, 1, 0, hasT());
-  compute(tdCase);
+  setCase(0, 1, 0);
 }
 
 // --- Destructor ---
@@ -212,112 +113,128 @@ TimeDiscretisation::~TimeDiscretisation()
   tk = NULL;
 }
 
-void TimeDiscretisation::setH(const double newH)
-{
-  h = newH;
-  // depending on initial way of construction, the whole time discretisation
-  // is re-built or not.
-  if (tdCase == 1 || tdCase == 2 || tdCase == 5 || tdCase == 6)
-    checkCase(0, 1, 0, hasT());
-  // else nothing, we keep the same tdCase value. This corresponds to the cases where h was an input.
-
-  compute(tdCase);
-}
-
-void TimeDiscretisation::setNSteps(const unsigned int newNSteps)
-{
-  nSteps = newNSteps;
-  // depending on initial way of construction, the whole time discretisation
-  // is re-built or not.
-  if (tdCase == 1 || tdCase == 2 || tdCase == 7 || tdCase == 8)
-    checkCase(0, 0, 1, hasT());
-  // else nothing, we keep the same tdCase value. This corresponds to the cases where nSteps was an input.
-
-  compute(tdCase);
-}
-
 void TimeDiscretisation::setTk(const SiconosVector& newValue)
 {
-  cout << " /!\\ TimeDiscretisation::setTk - Warning: you set a new tk vector, this will change nSteps and h values /!\\ " << endl;
-
-  if (tk->size() != newValue.size())
+  if (tk == NULL)
   {
-    if (isTkAllocatedIn) delete tk;
     tk = new SimpleVector(newValue);
     isTkAllocatedIn = true;
   }
   else
-    *tk = newValue;
+  {
+    if (tk->size() != newValue.size())
+    {
+      if (isTkAllocatedIn) delete tk;
+      tk = new SimpleVector(newValue);
+      isTkAllocatedIn = true;
+    }
+    else
+      *tk = newValue;
+  }
 
-  // Update other time discretisation values
-  checkCase(1, 0, 0, hasT());
-  compute(tdCase);
+  // Update tdCase
+  setCase(1, 0, 0);
 }
 
 void TimeDiscretisation::setTkPtr(SiconosVector *newPtr)
 {
-  cout << " /!\\ TimeDiscretisation::setTk - Warning: you set a new tk vector, this will change nSteps and h values /!\\ " << endl;
-
   if (isTkAllocatedIn) delete tk;
   tk = newPtr;
   isTkAllocatedIn = false;
-  // Update other time discretisation values
-  checkCase(1, 0, 0, hasT());
-  compute(tdCase);
-}
-
-// --- Functions to manage t0 and T (data of the model)
-const double TimeDiscretisation::getT0() const
-{
-  return simulation->getModelPtr()->getT0();
-}
-
-void TimeDiscretisation::setT0(const double newValue)
-{
-  if (simulation->getModelPtr() == NULL)
-    RuntimeException::selfThrow("TimeDiscretisation::setT0, no Model linked to this time discretisation");
-  (*tk)(0) = newValue;
-  simulation->getModelPtr()->t0 = newValue;
-  if (hasT() && newValue >= getT())
-    RuntimeException::selfThrow("TimeDiscretisation::setT0, input value for t0 greater than T (final time).");
-
-  // recompute time discretisation values with new t0.
-  compute(tdCase);
+  // Update tdCase
+  setCase(1, 0, 0);
 }
 
 const bool TimeDiscretisation::hasT() const
 {
   // When the model is filled, T is set to negative value if not given by user.
-  if (getT() < 0) return(0);
-  else return (1);
+  if (model->getFinalT() < 0) return false;
+  else return true;
 }
 
-const double TimeDiscretisation::getT() const
+void TimeDiscretisation::initialize()
 {
-  return simulation->getModelPtr()->getFinalT();
-}
 
-void TimeDiscretisation::setT(const double newValue)
-{
-  simulation->getModelPtr()->setFinalT(newValue);
-  (*tk)(nSteps) = newValue;
-}
+  if (model == NULL)
+    RuntimeException::selfThrow("TimeDiscretisation::initialize - Not linked to a valid Model (NULL pointer).");
 
+  if (!isUpToDate) // Initialization only if something as changed in the object (or at the first call ...)
+  {
+    // load time min value from the model
+    double t0 = model->getT0();
+    double T;
+    double tol = 1e-12;
+    switch (tdCase)
+    {
+    case 1: // Given: tk, possibly T - Compute h, nSteps
+      // check tk(0) = t0
+      if (fabs((*tk)(0) - t0) > tol) RuntimeException::selfThrow("TimeDiscretisation::initialize - t0 and tk(0) are different");
+      nSteps = tk->size() - 1;
+      if (hasT()) // T from Model, check tk(nSteps) == T.
+      {
+        T = model->getFinalT();
+        if (fabs((*tk)(nSteps) - T) > tol) RuntimeException::selfThrow("TimeDiscretisation::initialize - T and tk(N) are different");
+      }
+      else model->setFinalT((*tk)(nSteps)); // Set T in the Model with tk(nSteps).
+      // compute h
+      h = (*tk)(1) - (*tk)(0);
+      break;
+    case 2: // Given: h, nSteps - Compute T, tk
+      // Check if T is given in the Model, exception if yes.
+      if (hasT())
+        RuntimeException::selfThrow("TimeDiscretisation::initialize - redundant input values. Only two are needed among T, h and nSteps.");
+      // Build tk
+      if (isTkAllocatedIn) delete tk;
+      tk = new SimpleVector(nSteps + 1);
+      isTkAllocatedIn = true;
+      for (unsigned int i = 0; i < nSteps + 1; ++i)(*tk)(i) = t0 + i * h;
+      // set T in the Model
+      model->setFinalT((*tk)(nSteps));
+      break;
+    case 3: // Given: nSteps, T - Compute h, tk
+      // Check if T is given in the Model, exception if no.
+      if (!hasT())
+        RuntimeException::selfThrow("TimeDiscretisation::initialize - T is required in Model, since only nSteps is provided.");
+      // get T from Model and compute h
+      T  = model->getFinalT();
+      h = (T - t0) / nSteps;
+      // compute tk
+      if (isTkAllocatedIn) delete tk;
+      tk = new SimpleVector(nSteps + 1);
+      isTkAllocatedIn = true;
+      for (unsigned int i = 0; i < nSteps; ++i)(*tk)(i) = t0 + i * h;
+      (*tk)(nSteps) = T;
+      break;
+    case 4: // Given: h, T - Compute nSteps, tk
+      // Check if T is given in the Model, exception if no.
+      if (!hasT())
+        RuntimeException::selfThrow("TimeDiscretisation::initialize - T is required in Model, since only h is provided.");
+      T  = model->getFinalT();
+      nSteps = (unsigned int)ceil((T - t0) / h);
+      // Compute tk
+      if (isTkAllocatedIn) delete tk;
+      tk = new SimpleVector(nSteps + 1);
+      isTkAllocatedIn = true;
+      for (unsigned int i = 0; i < nSteps; i++)(*tk)(i) = t0 + i * h;
+      (*tk)(nSteps) = T;
+      break;
+    default:
+      RuntimeException::selfThrow("TimeDiscretisation::initialize - wrong scheme, wrong number of input data");
+    }
+
+    // compute hMin/hMax. hMin may differ from h when h and T are fixed and (T-t0)/nSteps is not an integer.
+    hMin = (*tk)(nSteps) - (*tk)(nSteps - 1);
+    hMax = h;
+    isUpToDate = true;
+  }
+}
 // --- Other functions ---
 
 void TimeDiscretisation::display() const
 {
-  cout << "-----------------------------------------------------" << endl;
-  cout << "____ data of the TimeDiscretisation " << endl;
-  cout << "| h : " << h << endl;
-  cout << "| nSteps : " << nSteps << endl;
-  cout << "| tk " << endl;
-  if (tk != NULL) tk->display();
-  else cout << "-> NULL" << endl;
-  cout << "| hMin : " << hMin << endl;
-  cout << "| hMax : " << hMax << endl;
-  cout << "| constant : " << constant << endl;
-  cout << "-----------------------------------------------------" << endl << endl;
+  cout << "====> Time Disretisation :" << endl;
+  cout << " time step size: " << h << ", number of time steps : " << nSteps << endl;
+  cout << "====" << endl;
 }
 
 // --- XML functions ---

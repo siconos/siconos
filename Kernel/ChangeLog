@@ -29,6 +29,13 @@ Notes:
 
 Changes:
 	
+2007-02-08 Franck Perignon <franck.perignon@inrialpes.fr>
+	* Add a module controlTools 
+	* Add Sensor, SensorFactory and SensorEvents in controlTools
+	* Add an EventsFactory
+	* Add EventsManager in Simulation (before: only present in EventDriven case) 
+	* Create a "main" header file for each XXXTools location + one "SiconosKernel.h"	
+
 2007-01-30 Franck Perignon <franck.perignon@inrialpes.fr>
 	* Add an abstract DynamicalSystem class, base of FirstOrder, Lagrangian ...
 	* Rename DynamicalSystem in FirstOrderDynamicalSystem, LinearDS in FirstOrderLinearDynamicalSystem

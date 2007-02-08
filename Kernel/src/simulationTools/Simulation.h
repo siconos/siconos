@@ -15,9 +15,10 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-/*! \file
-*/
+ */
+/*! \file Simulation.h
+Global interface for simulation process description (Base for TimeStepping or EventDriven).
+ */
 
 #ifndef SIMULATION_H
 #define SIMULATION_H
@@ -25,6 +26,7 @@
 #include "OneStepIntegrator.h"
 #include "OneStepNSProblem.h"
 #include "TimeDiscretisation.h"
+#include "EventsManager.h"
 #include "SiconosMatrix.h"
 #include "SiconosVector.h"
 #include "SimulationXML.h"
@@ -38,6 +40,7 @@
 #include <set>
 
 class Model;
+class EventsManager;
 class OneStepIntegrator;
 class OneStepNSProblem;
 class TimeDiscretisation;
@@ -61,8 +64,10 @@ typedef std::vector< UnitaryRelationsSet > VectorOfSetOfUnitaryRelations;
 /** map of OSNS */
 typedef std::map<std::string, OneStepNSProblem * > OneStepNSProblems;
 
-/** and its corresponding iterator */
+/** iterator through OneStepNSProblems */
 typedef OneStepNSProblems::iterator OSNSIterator;
+
+/** const iterator through OneStepNSProblems */
 typedef OneStepNSProblems::const_iterator ConstOSNSIterator;
 
 /** tolerance value used in indexSets updating */
@@ -71,7 +76,7 @@ const double TOLERANCE = 1e-8;
 /** default name for One Step NS Problem of the simulation */
 const std::string DEFAULT_OSNS_NAME = "unamed";
 
-/** Description of the simulation process (integrators, time discretisation,...)
+/** Description of the simulation process (integrators, time discretisation,...) - Base class for TimeStepping or EventDriven.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.1.
@@ -88,10 +93,6 @@ const std::string DEFAULT_OSNS_NAME = "unamed";
  *
  * Rules:
  *     - A Model* must be given to the constructor, else => exception.
- *     - Simulation must always be built before TimeDiscretisation, which
- *       means that a TimeDiscretisation constructor can not be called
- *       without a simulation as argument.
- *       Moreover, there is no simulation->setTimeDiscretisation() function
  */
 class Simulation
 {
@@ -100,14 +101,17 @@ protected:
   /** name or id of the Simulation */
   std::string name;
 
-  /** the type of the Simulation (TimeStepping, EventDriven ...) */
+  /** the type of the Simulation, ie the derived class type (TimeStepping, EventDriven ...) */
   std::string simulationType;
 
   /** the time discretisation scheme */
   TimeDiscretisation *timeDiscretisation;
 
-  /** Inside-class allocation flag for time discretisation */
-  bool isTimeDiscretisationAllocatedIn;
+  /** tool to manage all events */
+  EventsManager* eventsManager;
+
+  /** Inside-class allocation flags */
+  BoolMap isAllocatedIn;
 
   /** the dynamical systems integrators */
   OSISet allOSI;
@@ -137,265 +141,282 @@ protected:
   unsigned int levelMax;
 
   /** default constructor
-  */
-  Simulation(const std::string = "undefined");
+   */
+  Simulation(const std::string& = "undefined");
+
+  /** copy constructor. Private => no copy nor pass-by value.
+   */
+  Simulation(const Simulation&);
 
 public:
 
   /** default constructor
-  *  \param a pointer to the model that owns this simulation. NULL Model leads to exception
-  *  \param string: simulation type, default = undefined
-  */
-  Simulation(Model*, const std::string = "undefined");
+   *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
+   *  \param string: simulation type, default = undefined
+   */
+  Simulation(TimeDiscretisation*, const std::string& = "undefined");
 
   /** constructor with XML object of the Simulation
-  *  \param SimulationXML* : the XML object corresponding
-  *  \param the model which owns this simulation  (optional parameter)
-  *  \param string: simulation type, default = undefined
-  */
-  Simulation(SimulationXML*, Model*, const std::string = "undefined");
+   *  \param SimulationXML* : the XML object corresponding
+   *  \param the model which owns this simulation  (optional parameter)
+   *  \param string: simulation type, default = undefined
+   */
+  Simulation(SimulationXML*, Model*, const std::string& = "undefined");
 
   /** destructor
-  */
+   */
   virtual ~Simulation();
 
   // GETTERS/SETTERS
 
   /** get the name of the Simulation
-  *  \return string : the name of the Simulation
-  */
+   *  \return string : the name of the Simulation
+   */
   inline const std::string getName() const
   {
     return name;
   }
 
   /** set the name of the Simulation
-  */
-  inline void setName(const std::string newName)
+   */
+  inline void setName(const std::string& newName)
   {
     name = newName;
   }
 
   /** get the type of the Simulation
-  *  \return string : the type of the Simulation
-  */
+   *  \return string : the type of the Simulation
+   */
   inline const std::string getType() const
   {
     return simulationType;
   }
 
   /** set the type of the Simulation
-  */
-  inline void setType(const std::string newType)
+   */
+  inline void setType(const std::string& newType)
   {
     simulationType = newType;
   }
 
   /** get the TimeDiscretisation of the Simulation
-  *  \return the TimeDiscretisation
-  */
+   *  \return the TimeDiscretisation
+   */
   inline TimeDiscretisation* getTimeDiscretisationPtr() const
   {
     return timeDiscretisation;
   };
 
   /** set the TimeDiscretisation of the Simulation
-  *  \param the TimeDiscretisation
-  */
+   *  \param the TimeDiscretisation
+   */
   void setTimeDiscretisationPtr(TimeDiscretisation*);
 
+  /** get the EventsManager
+   *  \return a pointer to EventsManager
+   */
+  inline EventsManager* getEventsManagerPtr() const
+  {
+    return eventsManager;
+  }
+
   /** get all the Integrators of the Simulation
-  *  \return an OSISset
-  */
+   *  \return an OSISset
+   */
   inline const OSISet getOneStepIntegrators() const
   {
     return allOSI;
   };
 
   /** set the Integrators of the Simulation
-  *  \param an OSISset
-  */
+   *  \param an OSISset
+   */
   void setOneStepIntegrators(const OSISet&);
 
   /** searchs the integrator of the DS number "numberDS"
-  *
-  */
-  OneStepIntegrator* getIntegratorOfDSPtr(const int numberDS) const ;
+   * \param an int ("numberDS")
+   */
+  OneStepIntegrator* getIntegratorOfDSPtr(int) const ;
 
-  /** get the integrator of ds
-  * \param a pointer to DynamicalSystem
-  */
-  OneStepIntegrator* getIntegratorOfDSPtr(DynamicalSystem * ds) const ;
+  /** get the integrator of "ds"
+   * \param a pointer to DynamicalSystem ("ds")
+   */
+  OneStepIntegrator* getIntegratorOfDSPtr(DynamicalSystem *) const ;
 
   /** get the number of OSIs in the Simulation (ie the size of allOSI)
-  *  \return an unsigned int
-  */
+   *  \return an unsigned int
+   */
   inline const unsigned int getNumberOfOSI() const
   {
     return allOSI.size();
   }
 
   /** add an Integrator into allOSI (pointer link, no copy!)
-  *  \param a pointer to a OneStepIntegrator
-  */
+   *  \param a pointer to a OneStepIntegrator
+   */
   void addOneStepIntegratorPtr(OneStepIntegrator *);
 
-  /** check if a DynamicalSystem of osi is already present in another OSI of the simulation.
-  *  \return a bool
-  */
+  /** check if the new OSI (parameter of the function) has common DynamicalSystems with one of the existing OSI of the simulation.
+   * \param a OneStepIntegrator*
+   * \return a bool
+   */
   const bool hasCommonDSInIntegrators(OneStepIntegrator*) const ;
 
   /** get indexSets (the whole vector)
-  *  \return a VectorOfSetOfUnitaryRelations
-  */
+   *  \return a VectorOfSetOfUnitaryRelations
+   */
   inline const VectorOfSetOfUnitaryRelations getIndexSets() const
   {
     return indexSets;
   };
 
   /** get indexSets[i]
-  *  \return a UnitaryRelationsSet
-  */
-  const UnitaryRelationsSet getIndexSet(const unsigned int) const ;
+   *  \return a UnitaryRelationsSet
+   */
+  const UnitaryRelationsSet getIndexSet(unsigned int) const ;
 
   /** get allNSProblems
-  *  \return a OneStepNSProblems object (container of OneStepNSProblem*)
-  */
+   *  \return a OneStepNSProblems object (container of OneStepNSProblem*)
+   */
   inline const OneStepNSProblems getOneStepNSProblems() const
   {
     return allNSProblems;
   };
 
   /** get allNSProblems[name], a specific OneStepNSProblem
-  *  \param a string, the name of the osns, optional, default value = DEFAULT_OSNS_NAME
-  *  \return a pointer to OneStepNSProblem
-  */
-  OneStepNSProblem* getOneStepNSProblemPtr(const std::string = DEFAULT_OSNS_NAME);
+   *  \param a string, the name of the osns, optional, default value = DEFAULT_OSNS_NAME
+   *  \return a pointer to OneStepNSProblem
+   */
+  OneStepNSProblem* getOneStepNSProblemPtr(const std::string& = DEFAULT_OSNS_NAME);
 
   /** set allNSProblems map - Warning: no copy between OneStepNSProblem of each map, pointers links!
-  *  \param a OneStepNSProblems object (map of OneStepNSProblem*)
-  */
+   *  \param a OneStepNSProblems object (map of OneStepNSProblem*)
+   */
   void setOneStepNSProblems(const OneStepNSProblems&);
 
   /** remove all OneStepNSProblem of the Simulation
-  */
+   */
   void clearOneStepNSProblems();
 
   /** check if a OneStepNSProblem osns is already in the map
-  *  \param a pointer to OneStepNSProblem
-  *  \return a bool
-  */
+   *  \param a pointer to OneStepNSProblem
+   *  \return a bool
+   */
   const bool hasOneStepNSProblem(OneStepNSProblem*) const ;
 
   /** check if a OneStepNSProblem named id is already in the map
-  *  \param a string
-  *  \return a bool
-  */
-  const bool hasOneStepNSProblem(const std::string) const ;
+   *  \param a string ("id")
+   *  \return a bool
+   */
+  const bool hasOneStepNSProblem(const std::string&) const ;
 
-  /** add a OneStepNSProblem of the Simulation (if its not the first, it needs to have an id clearly defined)
-  *  \param a pointer to OneStepNSProblem
-  */
+  /** add a OneStepNSProblem in the Simulation (if its not the first, it needs to have an id clearly defined)
+   *  \param a pointer to OneStepNSProblem
+   */
   virtual void addOneStepNSProblemPtr(OneStepNSProblem*);
 
   /** get the SimulationXML* of the Simulation
-  *  \return a pointer on the SimulationXML of the Simulation
-  */
+   *  \return a pointer on the SimulationXML of the Simulation
+   */
   inline SimulationXML* getSimulationXMLPtr() const
   {
     return simulationxml;
   }
 
   /** set the SimulationXML of the Simulation
-  *  \param SimulationXML* : the pointer to set the SimulationXML
-  */
+   *  \param SimulationXML* : the pointer to set the SimulationXML
+   */
   inline void setSimulationXMLPtr(SimulationXML* strxml)
   {
     simulationxml = strxml;
   }
 
   /** get the Model which contains the Simulation
-  *  \return Model* : the Model which the Simulation
-  */
+   *  \return Model* : the Model which the Simulation
+   */
   inline Model* getModelPtr() const
   {
     return model;
   }
 
   /** set the Model which contains the Simulation
-  *  \param Model* : the Model to set
-  */
+   *  \param Model* : the Model to set
+   */
   inline void setModelPtr(Model* m)
   {
     model = m;
   }
 
   /** update all index sets of the topology, using current y and lambda values of Interactions.
-  */
+   */
   void updateIndexSets();
 
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
-  *  \param unsigned int: the number of the set to be updated
-  */
-  virtual void updateIndexSet(const unsigned int) = 0;
+   *  \param unsigned int: the number of the set to be updated
+   */
+  virtual void updateIndexSet(unsigned int) = 0;
 
-  /** executes the complete initialisation of Simulation (OneStepIntegrators, OneStepNSProblem, TImediscretisation) with the XML Object
-  */
+  /** Complete initialisation of the Simulation (OneStepIntegrators, OneStepNSProblem, TImediscretisation).
+   */
   virtual void initialize() = 0;
 
-  /** integrates all the DynamicalSystem taking not into account nslaw, reactions ...
-  */
-  virtual void computeFreeState();
+  /** save DynamicalSystems and Interactions states in Memories (through OSI and OSNS).
+   */
+  void saveInMemory();
 
-  /** increments all the Integrators to next step of the simulation
-  */
-  virtual void nextStep() = 0;
-
-  /** computes the one step NS problem
-  *  \param a string, the id of the OneStepNSProblem to be computed
-  */
-  virtual void computeOneStepNSProblem(const std::string = DEFAULT_OSNS_NAME);
+  /** computes a one step NS problem
+   *  \param a string, the id of the OneStepNSProblem to be computed
+   */
+  virtual void computeOneStepNSProblem(const std::string& = DEFAULT_OSNS_NAME);
 
   /** update input, state of each dynamical system and output
-  *  \param lambda order used to compute input
-  */
-  virtual void update(const unsigned int) = 0;
+   *  \param lambda order used to compute input
+   */
+  virtual void update(unsigned int) = 0;
 
   /** run the simulation, from t0 to T
-  */
-  virtual void run() = 0;
+   */
+  void run();
 
-  /** run one step of the simulation
-  */
-  virtual void computeOneStep() = 0;
+  /** step from current event to next event of EventsManager
+   */
+  virtual void advanceToEvent() = 0;
 
   /** newton algorithm
-  *  \param double criterion: convergence criterion, int maxStep: maximum number of Newton steps
-  */
-  void newtonSolve(const double, const unsigned int);
+   * \param double, convergence criterion
+   * \param unsigned int: maximum number of Newton steps
+   */
+  void newtonSolve(double, unsigned int);
 
-  /** check the convergence of Newton algorithm
-  */
-  bool newtonCheckConvergence(const double criterion);
+  /** check the convergence of Newton algorithm according to criterion
+   * \param double, convergence criterion
+   */
+  bool newtonCheckConvergence(double);
 
   // --- XML RELATED FUNCTIONS ---
 
   /** copys the data of the Simulation to the XML tree
-  *  \exception RuntimeException
-  */
+   *  \exception RuntimeException
+   */
   virtual void saveSimulationToXML();
 
   /** compute r thanks to lambda[level]
-  *  \param unsigned int: lambda order, default = levelMin
-  */
+   *  \param unsigned int: lambda order, default = levelMin
+   */
   void updateInput(int = -1);
 
   /** compute output for all the interactions
-  *  \param  int: y min order to be computed, default = 0
-  *  \param  int: y max order to be computed, default = levelMax
-  */
-  void updateOutput(const  int = 0, int = -1);
+   *  \param  int: y min order to be computed, default = 0
+   *  \param  int: y max order to be computed, default = levelMax
+   */
+  void updateOutput(int = 0, int = -1);
 
+  /** call eventsManager processEvents.
+   */
+  inline void processEvents()
+  {
+    eventsManager->processEvents();
+  };
 };
 
 #endif // SIMULATION_H

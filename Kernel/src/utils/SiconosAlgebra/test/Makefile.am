@@ -26,5 +26,5 @@ test1_SOURCES = SimpleVectorTest.cpp BlockVectorTest.cpp SimpleMatrixTest.cpp Bl
 		SimpleVectorTest.h BlockVectorTest.h SimpleMatrixTest.h BlockMatrixTest.h 
 siconos_HEADERS =SimpleVectorTest.h BlockVectorTest.h SimpleMatrixTest.h BlockMatrixTest.h  
 test1_INCLUDES = $(CPPUNIT_CFLAGS)
-test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
+test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LIBS)
 

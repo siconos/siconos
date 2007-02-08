@@ -29,4 +29,4 @@ siconos_HEADERS = BoundaryConditionXMLTest.h LagrangianDSXMLTest.h OneStepIntegr
 		DynamicalSystemXMLTest.h LinearDSXMLTest.h RelayNSLXMLTest.h InteractionXMLTest.h LinearTIRXMLTest.h \
 		SiconosDOMTreeToolsTest.h TimeDiscretisationXMLTest.h
 test1_INCLUDES = $(CPPUNIT_CFLAGS)
-test1_LDFLAGS = $(CPPUNIT_LIBS) $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
+test1_LDFLAGS = $(CPPUNIT_LIBS) $(SICONOS_LIBS) $(SICONOS_EXT_LIBS)

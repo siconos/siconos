@@ -18,13 +18,17 @@
  */
 
 #include "TimeStepping.h"
+#include "LCP.h"
 #include "FrictionContact2D.h"
 #include "FrictionContact3D.h"
 
 using namespace std;
 
 // --- Default constructor ---
-TimeStepping::TimeStepping(Model * newModel): Simulation(newModel, "TimeStepping")
+TimeStepping::TimeStepping(): Simulation("TimeStepping")
+{}
+
+TimeStepping::TimeStepping(TimeDiscretisation * td): Simulation(td, "TimeStepping")
 {}
 
 // --- XML constructor ---
@@ -63,7 +67,7 @@ TimeStepping::TimeStepping(SimulationXML* strxml, Model *newModel): Simulation(s
 TimeStepping::~TimeStepping()
 {}
 
-void TimeStepping::updateIndexSet(const unsigned int i)
+void TimeStepping::updateIndexSet(unsigned int i)
 {
   if (i > indexSets.size())
     RuntimeException::selfThrow("TimeStepping::updateIndexSet(i), indexSets[i] does not exist.");
@@ -187,97 +191,43 @@ void TimeStepping::initialize()
     // === update all index sets ===
     updateIndexSets();
   }
+
+  // == Call process functions of events (usefull to save initial values for example) ==
+  eventsManager->process();
 }
 
-void TimeStepping::update(const unsigned int levelInput)
+void TimeStepping::nextStep()
+{
+  // Increment model current time according to timeDiscretisation step.
+  double t = model->getCurrentT() + timeDiscretisation->getH();
+  model->setCurrentT(t);
+  // Save OSI and OSNS data into Memories.
+  saveInMemory();
+}
+
+
+void TimeStepping::update(unsigned int levelInput)
 {
   // compute input (lambda -> r)
   updateInput(levelInput);
 
   // compute state for each dynamical system
 
-  double time = model->getCurrentT();
-  OSIIterator it;
-  for (it = allOSI.begin(); it != allOSI.end() ; ++it)
-    (*it)->updateState(levelInput);
+  OSIIterator itOSI;
+  for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
+    (*itOSI)->updateState(levelInput);
 
   if (!allNSProblems.empty() && levelMin > 0)
   {
-    InteractionsIterator it;
-    InteractionsSet inter = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions();
-    for (it = inter.begin(); it != inter.end(); it++)
-    {
-      for (unsigned int i = 0; i <= levelMax; ++i)
-        (*it)->getRelationPtr()->computeOutput(time , i);
-    }
-
-    //   UnitaryRelationIterator itUR;
-
-    //   // We only need to updated relations for Unitary Relations that belongs to indexSets[0]-indexSets[level], since other y have
-    //   // been computed during OSNS compute call.
-
-    //   cout << "################################ IN UPDATE TIME STEPPING #########################" << endl;
-    //   // the case level == 1 corresponds to degree 0 or 1 systems, for which all the UR are active and thus
-    //   // already up to date.
-    //   if(levelMin>0)
-    //     {
-    //       for(itUR=indexSets[0].begin();itUR!=indexSets[0].end();++itUR)
-    //  {
-    //    for(unsigned int i = 0; i<levelMin; ++i)
-    //      {
-    //        cout << "First step ... of update" << i << endl;
-    //        (*itUR)->computeOutput(time,i);
-    //      }
-    //  }
-    //       UnitaryRelationsSet index = indexSets[0] - indexSets[levelMin];
-    //       // It is supposed to represent all the UR that have not been taken into account (ie "inactive") in the OSNS problem.
-    //       for(itUR=indexSets[0].begin();itUR!=indexSets[0].end();++itUR)
-    //  {
-    //    for(unsigned int i = levelMin; i<levelMax; ++i)
-    //      {
-    //        cout << "Second step ... of update" << i << endl;
-    //        (*itUR)->computeOutput(time,i);
-    //      }
-    //  }
-    //     }
-    //   cout << "################################ END UPDATE TIME STEPPING #########################" << endl;
-    // compute output (y, ydot)
-    //  for(itOsns=allNSProblems.begin();itOsns!=allNSProblems.end();++itOsns)
-    //(itOsns->second)->updateOutput();
+    updateOutput(0, levelMax);
   }
 }
 
-void TimeStepping::nextStep()
+void TimeStepping::computeFreeState()
 {
-  // increment time step
-  timeDiscretisation->increment();
-  model->setCurrentT(model->getCurrentT() + timeDiscretisation->getH());
-
   OSIIterator it;
   for (it = allOSI.begin(); it != allOSI.end() ; ++it)
-    (*it)->nextStep();
-
-  OSNSIterator itOsns;
-  for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
-    (itOsns->second)->nextStep();
-}
-
-void TimeStepping::run()
-{
-  // Current Step
-  unsigned int k = timeDiscretisation->getK();
-  // Number of time steps
-  unsigned int nSteps = timeDiscretisation->getNSteps();
-  while (k < nSteps)
-  {
-    // transfer of state i+1 into state i and time incrementation
-    nextStep();
-    // update current time step
-    k = timeDiscretisation->getK();
-
-    computeOneStep();
-
-  }
+    (*it)->computeFreeState();
 }
 
 // compute simulation between ti and ti+1, ti+1 being currentTime (?)
@@ -294,6 +244,11 @@ void TimeStepping::computeOneStep()
   }
   // update
   update(levelMin);
+}
+
+void TimeStepping::advanceToEvent()
+{
+  computeOneStep();
 }
 
 TimeStepping* TimeStepping::convert(Simulation *str)

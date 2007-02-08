@@ -38,7 +38,7 @@ libSiconosXml_la_SOURCES = SiconosDOMTreeTools.cpp SiconosMemoryXML.cpp SolverXM
 		ComplementarityConditionNSLXML.h RelationXML.h LinearTIRXML.h LagrangianRXML.h LagrangianLinearRXML.h\
 		InteractionXML.h NonSmoothDynamicalSystemXML.h SimulationXML.h TimeDiscretisationXML.h OneStepIntegratorXML.h \
 		LsodarXML.h MoreauXML.h OneStepNSProblemXML.h LCPXML.h FrictionContactXML.h QPXML.h RelayNSLXML.h \
-		SiconosModelXML.h 
+		SiconosModelXML.h XmlTools.h
 
 libSiconosXml_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 siconos_HEADERS = XMLTagsName.h SiconosDOMTreeTools.h SiconosMemoryXML.h SolverXML.h DynamicalSystemXML.h FirstOrderNonLinearDSXML.h FirstOrderLinearDSXML.h \
@@ -46,5 +46,5 @@ siconos_HEADERS = XMLTagsName.h SiconosDOMTreeTools.h SiconosMemoryXML.h SolverX
 		ComplementarityConditionNSLXML.h RelationXML.h LinearTIRXML.h LagrangianRXML.h LagrangianLinearRXML.h\
 		InteractionXML.h NonSmoothDynamicalSystemXML.h SimulationXML.h TimeDiscretisationXML.h OneStepIntegratorXML.h \
 		LsodarXML.h MoreauXML.h OneStepNSProblemXML.h LCPXML.h FrictionContactXML.h QPXML.h RelayNSLXML.h \
-		SiconosModelXML.h 
+		SiconosModelXML.h XmlTools.h
 

@@ -271,11 +271,6 @@ public:
    */
   LagrangianDS(int, const SiconosVector& , const SiconosVector&, const std::string& = "DefaultPlugin:computeMass");
 
-  /** copy constructor
-   *  \param a Dynamical system to copy
-   */
-  //LagrangianDS(const DynamicalSystem & );
-
   /** destructor */
   virtual ~LagrangianDS();
 

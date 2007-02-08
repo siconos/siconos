@@ -20,14 +20,12 @@
  Management of a Set (STL) of Events
 */
 
-
-//#include "EventsManagerXML.h"
 #ifndef EVENTSMANAGER_H
 #define EVENTSMANAGER_H
 
 #include "SiconosConst.h"
 #include "RuntimeException.h"
-#include "Simulation.h"
+#include "RuntimeCmp.h"
 #include<set>
 #include<deque>
 #include<string>
@@ -35,17 +33,18 @@
 
 class Simulation;
 class Event;
+class TimeDiscretisation;
 
 // tick default value
 const double DEFAULT_TICK = 1e-07;
 
 /** set of events, with a RuntimeCmp based on Event time value (unsigned int) to compare Events
- *  A stl container of type "set" is used at the time
- *  \Warning This may be not the best choice => review all possibilities */
-typedef std::set<Event*, RuntimeCmp<Event> > eventsContainer; // sort in a chronological way
+ *  A stl container of type "multiset" is used at the time
+ *  \Warning This may be not the best choice => review all possibi lities */
+typedef std::multiset<Event*, RuntimeCmp<Event> > EventsContainer; // sort in a chronological way
 
-/** return value for insert and erase in set -> checkEventSet.second is a bool */
-typedef std::pair<eventsContainer::iterator, bool> checkEventSet;
+/** Iterator through a set of Events */
+typedef EventsContainer::iterator EventsContainerIterator;
 
 /** Tools to handle a set of Events
  *
@@ -61,8 +60,6 @@ typedef std::pair<eventsContainer::iterator, bool> checkEventSet;
  *       scheduleEvent method.
  *     - Tick must be set at construction, and can not be change after.
  *
- *  Questions/Todo : link with simulation or TimeDiscretisation?
- *              depends on what Event->process will need.
  */
 class EventsManager
 {
@@ -71,7 +68,7 @@ protected:
   /** list of events already processed.
    *  At the end of the process, currentEvent is inserted in this set.
    */
-  eventsContainer pastEvents;
+  EventsContainer pastEvents;
 
   /** list of future, not processed, events.
    *  This list is not fixed and can be updated at any time
@@ -79,7 +76,7 @@ protected:
    *  The first event of this set is currentEvent, and the second is nextEvent.
    * ("first" and "second" defined according to event comparison operator)
    */
-  eventsContainer unProcessedEvents;
+  EventsContainer unProcessedEvents;
 
   /** Pointer to currentEvent, ie the simulation starting point.
     * It correponds to the first object in unProcessedEvents.
@@ -96,61 +93,62 @@ protected:
    *  See doubleToIntTime function for details. Note that max unsigned long int value is
    * given by constant ULONG_MAX, from limits.h.
    */
-  double tick;
+  static double tick;
 
   /* link to the simulation that owns this manager*/
   Simulation * simulation;
 
-  /** convert time from double to unsigned int according to tick.
-  */
-  const unsigned long int doubleToIntTime(const double) const;
-
-  /** convert time from unsigned int to double according to tick.
-  */
-  const double intToDoubleTime(const unsigned long int) const;
-
   /** add a new Event in the unProcessedEvents list
   *  \return false if Event already exists
   */
-  const bool insertEvent(const std::string, const double);
+  const bool insertEvent(const std::string&, double);
+
+  /** copy constructor => private: no copy nor pass-by-value.
+   *  \param the eventsManager to be copied
+   */
+  EventsManager(const EventsManager&);
 
 public:
 
-  /** copy constructor
-  *  \param the eventsManager to be copied
+  /** default constructor
+  *  \param the simulation that owns this manager
   */
-  EventsManager(const EventsManager&);
-
-  /** default constructor, with tick value as optional input
-  *  \param an unsigned int
-  *  \param a string
-  */
-  EventsManager(const double = DEFAULT_TICK, Simulation* = NULL);
-
-  /** constructor with XML object of the EventsManager
-  *  \param a pointer to EventsManagerXML
-  */
-  // EventsManager(EventsManagerXML*);
+  EventsManager(Simulation* = NULL);
 
   /** destructor
   */
   ~EventsManager();
 
-  /** manager initialization function
+  /** convert time from double to unsigned int according to tick.
   */
+  static const unsigned long int doubleToIntTime(double);
+
+  /** convert time from unsigned int to double according to tick.
+  */
+  static const double intToDoubleTime(unsigned long int);
+
+  /** manager initialization function
+   */
   void initialize();
 
   /** insert time discretisation into unProcessedEvents
-  *  this destroy any previous existing unProcessedEvents set.
-  */
-  void scheduleTimeDiscretisation(TimeDiscretisation*);
+   * \param a pointer to the TimeDiscretisation object to schedule.
+   * \param a string, the type of Event associated to this discretisation.
+   */
+  void scheduleTimeDiscretisation(TimeDiscretisation*, const std::string&);
+
+  /** add a set of Events into unProcessedEvents list
+   *  \param an EventsContainer
+   *  \return a bool, false if insertion failed.
+   */
+  const bool insertEvents(const EventsContainer&);
 
   // GETTERS/SETTERS
 
   /** get the list of past Events
   *  \return a set of Events*
   */
-  inline const eventsContainer getPastEvents() const
+  inline const EventsContainer getPastEvents() const
   {
     return pastEvents ;
   };
@@ -162,7 +160,7 @@ public:
   /** get the list of unProcessed Events
   *  \return a set of Events*
   */
-  inline const eventsContainer getUnProcessedEvents() const
+  inline const EventsContainer getUnProcessedEvents() const
   {
     return unProcessedEvents ;
   };
@@ -171,7 +169,7 @@ public:
   *  \param an unsigned long int
   *  \return a pointer to Event
   */
-  Event* getEventPtr(const unsigned long int inputTime) const;
+  Event* getEventPtr(unsigned long int inputTime) const;
 
   /** get the current event
   *  \return a pointer to Event
@@ -181,25 +179,25 @@ public:
     return currentEvent;
   };
 
-  /** set nextEvent to inputEvent
-  *  \param a pointer to Event
+  /** get the next event to be processed.
+  *  \return a pointer to Event
   */
-  inline void setNextEventPtr(Event* inputEvent)
+  inline Event* getNextEventPtr() const
   {
-    nextEvent = inputEvent;
+    return nextEvent;
   };
 
   /** get the event following inputEvent  ("following" defined with operator(s) comparison of events)
   *  \param a pointer to Event
   *  \return a pointer to Events
   */
-  Event* getNextEventPtr(Event*) const;
+  Event* getFollowingEventPtr(Event*) const;
 
   /** get the event that follows the event at time inputTime  ("following" defined with operator(s) comparison of events)
   *  \param an unsigned long int
   *  \return a pointer to Event
   */
-  Event* getNextEventPtr(const unsigned long int inputTime) const;
+  Event* getFollowingEventPtr(unsigned long int inputTime) const;
 
   /** get tick value
   *  \return a double
@@ -212,7 +210,7 @@ public:
   /** set tick value
   *  \param a double
   */
-  inline void setTick(const double  newTick)
+  inline void setTick(double newTick)
   {
     std::cout << "Warning: you change tick value for EventsManager -> a new initialization of the object is required. " << std::endl;
     tick = newTick;
@@ -271,15 +269,23 @@ public:
   /** add a new Event in the unProcessedEvents list and update nextEvent value
   *  \return false if Event already exists
   */
-  const bool scheduleEvent(const std::string, const double);
+  const bool scheduleEvent(const std::string&, double);
 
   /** remove an Event from the unProcessed events list
   */
   void removeEvent(Event*);
 
-  /** run process functions of current event
+  /** update current and next event positions and run process functions of current event
   */
   void processEvents();
+
+  /** run process functions of current event and all simultaneous events.
+  */
+  void process();
+
+  /** update current and next event positions.
+  */
+  void shiftEvents();
 };
 
 #endif // EventsManager_H

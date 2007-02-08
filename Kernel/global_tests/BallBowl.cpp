@@ -16,16 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "Model.h"
-
-#include "LagrangianLinearTIDS.h"
-
-#include "SimpleVector.h"
-#include "SimpleMatrix.h"
-#include "LCP.h"
-#include <sys/time.h>
-#include <iostream>
-#include <math.h>
+#include "SiconosKernel.h"
 
 using namespace std;
 
@@ -41,11 +32,11 @@ bool BallBowl()
     // --- Model loading from xml file ---
     Model bouncingBall("./BallBowl.xml");
     // --- Get and initialize the simulation ---
-    Simulation* s = bouncingBall.getSimulationPtr();
+    TimeStepping* s = static_cast<TimeStepping*>(bouncingBall.getSimulationPtr());
     s->initialize();
     // --- Get the time discretisation scheme ---
     TimeDiscretisation* t = s->getTimeDiscretisationPtr();
-    int k = t->getK(); // Current step
+    int k = 0; // Current step
     int N = t->getNSteps(); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -62,20 +53,12 @@ bool BallBowl()
     // --- Time loop  ---
     while (k < N)
     {
-      // transfer of state i+1 into state i and time incrementation
-      s->nextStep();
-      // get current time step
-      k = t->getK();
-      // solve ...
+      k++;
       s->computeOneStep();
-
-      // --- Get values to be plotted ---
-      //time
       dataPlot(k, 0) = k * t->getH();
-      // Ball: state q
       dataPlot(k, 1) = (ball->getQ())(0);
-      // Ball: velocity
       dataPlot(k, 2) = (ball->getVelocity())(0);
+      s->nextStep();
     }
     SiconosMatrix * dataRef = new SimpleMatrix("refBallBowl.dat", true);
     double tol = 1e-7;

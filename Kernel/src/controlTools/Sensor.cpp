@@ -1,0 +1,75 @@
+/* Siconos-Kernel version 2.0.1, Copyright INRIA 2005-2006.
+* Siconos is a program dedicated to modeling, simulation and control
+* of non smooth dynamical systems.
+* Siconos is a free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+* Siconos is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with Siconos; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+*
+* Contact: Vincent ACARY vincent.acary@inrialpes.fr
+*/
+
+#include "Sensor.h"
+#include "SensorEvent.h"
+#include "SimpleVector.h"
+#include "Model.h"
+#include "TimeDiscretisation.h"
+#include "EventFactory.h"
+#include <iostream>
+using namespace std;
+
+// RuntimeCmp object used to sort Events in the set of Events
+// !!! \todo Find a way to avoid global variable ... !!!
+RuntimeCmp<Event> compEvents(&Event::getTimeOfEvent);
+
+Sensor::Sensor(): type("generic"), id("none"), model(NULL), timeDiscretisation(NULL), eventsSet(compEvents)
+{}
+
+Sensor::Sensor(const std::string& name, TimeDiscretisation* t): type(name), id("none"), model(t->getModelPtr()), timeDiscretisation(t), eventsSet(compEvents)
+{}
+
+Sensor::~Sensor()
+{}
+
+void Sensor::initialize()
+{
+  // == Init. time discretisation data. ==
+  timeDiscretisation->initialize();
+  SiconosVector * tk = timeDiscretisation->getTkPtr();
+  unsigned int sizeTk = tk->size();
+
+  // == Create Events linked to the present Sensor. ==
+  // convert input double time to unsigned int
+  unsigned long int intTime;
+
+  EventsContainerIterator it; // to check if insertion succeed or not.
+  string type = "SensorEvent";
+
+  for (unsigned int i = 0; i < sizeTk; ++i)
+  {
+    intTime = EventsManager::doubleToIntTime((*tk)(i));
+    // Uses the events factory to insert the new event.
+    EventFactory::Registry& regEvent(EventFactory::Registry::get()) ;
+    it = eventsSet.insert(regEvent.instantiate(intTime, type));
+  }
+  // == Set Sensor object of all Events to this ==
+  for (it = eventsSet.begin(); it != eventsSet.end(); ++it)
+    static_cast<SensorEvent*>((*it))->setSensorPtr(this);
+}
+
+void Sensor::display() const
+{
+  cout << "Sensor of type " << type << ", named " << id << endl;
+  if (model != NULL)
+    cout << "and linked to model named: " << model->getTitle() << "." << endl;
+  else
+    cout << "and not linked to a model." << endl;
+}

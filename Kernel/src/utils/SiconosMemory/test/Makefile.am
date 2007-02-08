@@ -25,5 +25,5 @@ TESTS = $(check_PROGRAMS)
 test1_SOURCES = SiconosMemoryTest.cpp TestMain.cpp
 siconos_HEADERS = SiconosMemoryTest.h  
 test1_INCLUDES = $(CPPUNIT_CFLAGS) $(SICONOS_INCLUDES)
-test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
+test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LIBS)
 

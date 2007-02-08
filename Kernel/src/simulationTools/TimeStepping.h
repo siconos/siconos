@@ -23,8 +23,6 @@
 #define TIMESTEPPING_H
 
 #include "Simulation.h"
-#include "Moreau.h"
-#include "LCP.h"
 
 /** Time-Stepping scheme
  *
@@ -35,12 +33,17 @@
  */
 class TimeStepping : public Simulation
 {
+private:
+  /** Default Constructor
+   */
+  TimeStepping();
+
 public:
 
-  /** Default constructor
-  *  \param a pointer to the model that owns this simulation. NULL Model leads to exception
+  /** Constructor with the time-discretisation.
+  *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
   */
-  TimeStepping(Model* = NULL);
+  TimeStepping(TimeDiscretisation*);
 
   /** constructor with XML object for TimeStepping
   *  \param SimulationXML* : the XML object corresponding
@@ -48,6 +51,8 @@ public:
   */
   TimeStepping(SimulationXML*, Model*);
 
+  /** Destructor.
+   */
   ~TimeStepping();
 
   /** add a OneStepNSProblem of the Simulation (if its not the first, it needs to have an id clearly defined)
@@ -58,27 +63,31 @@ public:
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
   *  \param unsigned int: the number of the set to be updated
   */
-  void updateIndexSet(const unsigned int);
+  void updateIndexSet(unsigned int);
 
   /** executes the complete initialisation of Simulation (OneStepIntegrators, OneStepNSProblem, TImediscretisation) with the XML Object
   */
   void initialize();
 
-  /** increments all the Integrators to next step of the simulation
-  */
+  /** increment model current time according to User TimeDiscretisation and call SaveInMemory.
+   */
   void nextStep();
 
   /** update input, state of each dynamical system and output
-  *  \param lambda order used to compute input
-  */
-  void update(const unsigned int);
+   *  \param lambda order used to compute input
+   */
+  void update(unsigned int);
 
-  /** run the simulation, from t0 to T
-  */
-  void run();
+  /** integrates all the DynamicalSystems taking not into account nslaw, reactions (ie non-smooth part) ...
+   */
+  void computeFreeState();
+
+  /** step from current event to next event of EventsManager
+   */
+  void advanceToEvent();
 
   /** run one step of the simulation
-  */
+   */
   void computeOneStep();
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.

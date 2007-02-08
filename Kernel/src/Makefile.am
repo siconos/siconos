@@ -18,8 +18,10 @@
 #	
 # Makefile.am --- SICONOS - src
 
-SUBDIRS =  utils plugin modelingTools simulationTools model xml apiC
-EXTRA_DIST = 
+include $(top_srcdir)/config/Make-rules
+
+SUBDIRS =  utils plugin modelingTools simulationTools controlTools model xml apiC
+EXTRA_DIST = SiconosKernel.h
 
 libSiconosKernel_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
         $(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CCFLAGS) \
@@ -30,10 +32,14 @@ libSiconosKernel_la_SOURCES=
 libSiconosKernel_la_LIBADD= $(top_builddir)/src/model/libModel.la \
 	$(top_builddir)/src/simulationTools/libSimulationTools.la \
 	$(top_builddir)/src/modelingTools/libModelingTools.la \
+	$(top_builddir)/src/controlTools/libControlTools.la \
 	$(top_builddir)/src/xml/libSiconosXml.la \
 	$(top_builddir)/src/utils/SiconosMemory/libSiconosMemory.la \
 	$(top_builddir)/src/utils/SiconosAlgebra/libSiconosAlgebra.la  \
 	$(top_builddir)/src/utils/SiconosSharedLibrary/libSiconosSharedLibrary.la \
 	$(top_builddir)/src/utils/SiconosException/libSiconosException.la\
 	$(top_builddir)/src/apiC/libSiconosApiC.la
+
+siconos_HEADERS = SiconosKernel.h
+
 

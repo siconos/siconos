@@ -124,12 +124,7 @@ public:
    */
   LagrangianLinearTIDS(int, const SimpleVector&, const SimpleVector&, const SiconosMatrix&);
 
-  /** copy constructor
-  *  \param a Dynamical system to copy
-  */
-  //LagrangianLinearTIDS(const DynamicalSystem & );
-
-  // destructor
+  /** destructor */
   ~LagrangianLinearTIDS();
 
   /** check that the system is complete (ie all required data are well set)

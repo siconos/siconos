@@ -16,45 +16,66 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*! \file
-Time Discretisation Events
+/*! \file SensorEvent.h
+Sensor Events
 */
-#ifndef TIMEDISCREVENT_H
-#define TIMEDISCREVENT_H
+#ifndef SensorEvent_H
+#define SensorEvent_H
 
 #include "Event.h"
+#include "Sensor.h"
 
-/** Event that corresponds to user-defined time discretisation points
+/** Events when sensor data capture is done.
  *
  * \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.1.
- *  \date (Creation) February 21, 2006
+ *  \date (Creation) February 01, 2007
+ *
  *
  */
-class TimeDiscretisationEvent : public Event
+class SensorEvent : public Event
 {
 
 private:
 
+  /** The sensor linked to the present event */
+  Sensor* sensor;
+
   /** Default constructor */
-  TimeDiscretisationEvent();
+  SensorEvent();
 
 public:
 
   /** constructor with time value as a parameter
-  *  \param an unsigned long int
-  *  \param a string, type of Event
-  */
-  TimeDiscretisationEvent(unsigned long int, const std::string&);
+   *  \param an unsigned long int
+   *  \param a string, type of Event
+   */
+  SensorEvent(unsigned long int, const std::string&);
 
   /** destructor
   */
-  ~TimeDiscretisationEvent();
+  ~SensorEvent();
+
+  /** get the Sensor linked to this Event
+   *  \return a pointer to Sensor
+   */
+  inline Sensor* getSensorPtr() const
+  {
+    return sensor;
+  };
+
+  /** set the TimeDiscretisation linked to this Sensor
+   *  \param a pointer to TimeDiscretisation.
+   */
+  void setSensorPtr(Sensor * newSensor)
+  {
+    sensor = newSensor;
+  };
 
   /**
-  *  \param Simulation*, the simulation that owns this Event (through the EventsManager)
-  */
+   *  \param Simulation*, the simulation that owns this Event (through the EventsManager)
+   */
   void process(Simulation*);
 };
 
-#endif // TimeDiscretisationEvent_H
+#endif // SensorEvent_H

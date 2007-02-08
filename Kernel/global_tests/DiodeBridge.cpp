@@ -45,16 +45,7 @@
 //
 //-----------------------------------------------------------------------
 
-#include "Model.h"
-#include "FirstOrderLinearDS.h"
-#include "LinearTIR.h"
-#include "TimeStepping.h"
-#include "Moreau.h"
-#include "LCP.h"
-#include "ComplementarityConditionNSL.h"
-#include "ioMatrix.h"
-#include <math.h>
-#include <iostream>
+#include "SiconosKernel.h"
 
 using namespace std;
 bool DiodeBridge()
@@ -126,9 +117,9 @@ bool DiodeBridge()
 
     // --- Simulation specification---
 
-    TimeStepping* StratDiodeBridge = new TimeStepping(&DiodeBridge);
+    TimeDiscretisation* TiDiscRLCD = new TimeDiscretisation(h_step, &DiodeBridge);
 
-    TimeDiscretisation* TiDiscRLCD = new TimeDiscretisation(h_step, StratDiodeBridge);
+    TimeStepping* StratDiodeBridge = new TimeStepping(TiDiscRLCD);
 
     double theta = 0.5;
 
@@ -141,7 +132,7 @@ bool DiodeBridge()
     // Initialization
     StratDiodeBridge->initialize();
 
-    int k = TiDiscRLCD->getK(); // Current step
+    int k = 0; // Current step
     int N = TiDiscRLCD->getNSteps(); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -173,10 +164,8 @@ bool DiodeBridge()
     // --- Time loop  ---
     while (k < N)
     {
-      StratDiodeBridge->nextStep();
-
       // get current time step
-      k = TiDiscRLCD->getK();
+      k++;
 
       // solve ...
       StratDiodeBridge->computeOneStep();
@@ -202,6 +191,9 @@ bool DiodeBridge()
 
       // diode F1 current
       dataPlot(k, 6) = (InterDiodeBridge->getLambda(0))(2);
+
+      StratDiodeBridge->nextStep();
+
     }
 
     // dataPlot (ascii) output

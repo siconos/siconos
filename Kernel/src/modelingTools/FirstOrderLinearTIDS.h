@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /*! \file FirstOrderLinearTIDS.h
 
 */
@@ -64,7 +64,7 @@ class FirstOrderLinearTIDS : public FirstOrderLinearDS
 private:
 
   /** default constructor
-  */
+   */
   FirstOrderLinearTIDS();
 
 public:
@@ -72,27 +72,27 @@ public:
   /** === CONSTRUCTORS/DESTRUCTOR === */
 
   /** xml constructor
-  *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
-  *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
-  *  \exception RuntimeException
-  */
+   *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
+   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
+   *  \exception RuntimeException
+   */
   FirstOrderLinearTIDS(DynamicalSystemXML *, NonSmoothDynamicalSystem* = NULL);
 
   /** constructor from a set of data
-  *  \param int : reference number of this DynamicalSystem
-  *  \param SiconosVector : the initial state of this DynamicalSystem
-  *  \param SiconosMatrix: A
-  *  \exception RuntimeException
-  */
+   *  \param int : reference number of this DynamicalSystem
+   *  \param SiconosVector : the initial state of this DynamicalSystem
+   *  \param SiconosMatrix: A
+   *  \exception RuntimeException
+   */
   FirstOrderLinearTIDS(int, const SiconosVector&, const SiconosMatrix&);
 
   /** constructor from a set of data
-  *  \param int : reference number of this DynamicalSystem
-  *  \param SiconosVector : the initial state of this DynamicalSystem
-  *  \param SiconosMatrix: A
-  *  \param SiconosVector: b
-  *  \exception RuntimeException
-  */
+   *  \param int : reference number of this DynamicalSystem
+   *  \param SiconosVector : the initial state of this DynamicalSystem
+   *  \param SiconosMatrix: A
+   *  \param SiconosVector: b
+   *  \exception RuntimeException
+   */
   FirstOrderLinearTIDS(int, const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
 
   /** destructor */
@@ -111,20 +111,20 @@ public:
   void computeRhs(const double, const bool  = false);
 
   /** Default function to jacobian of the right-hand side term according to x
-  *  \param double time : current time
-  *  \param bool isDSup : flag to avoid recomputation of operators
-  *  \exception RuntimeException
-  */
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   *  \exception RuntimeException
+   */
   void computeJacobianXRhs(const double, const bool  = false);
 
   /** data display on screen
-  */
+   */
   void display() const;
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-  *  \param DynamicalSystem* : the system which must be converted
-  * \return a pointer on the dynamical system if it is of the right type, NULL otherwise
-  */
+   *  \param DynamicalSystem* : the system which must be converted
+   * \return a pointer on the dynamical system if it is of the right type, NULL otherwise
+   */
   static FirstOrderLinearTIDS* convert(DynamicalSystem* ds);
 
 };

@@ -215,12 +215,9 @@ public:
   */
   virtual void initialize() = 0;
 
-  /** prepares the DynamicalSystem for the next time step, push x in Memory
-  *  \param to be defined
-  *  \exception to be defined
-  *  \return void
-  */
-  void nextStep();
+  /** Save Dynamical Systems data into memory.
+   */
+  void saveInMemory();
 
   /** integrates the Dynamical System linked to this integrator without constraints
   */

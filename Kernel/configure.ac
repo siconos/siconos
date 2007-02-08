@@ -293,6 +293,7 @@ AC_CONFIG_FILES([Makefile
                  src/modelingTools/Makefile
 		 src/modelingTools/test/Makefile
 	         src/simulationTools/Makefile
+	         src/controlTools/Makefile
                  src/plugin/Makefile
 		 src/plugin/test/Makefile
                  src/utils/Makefile

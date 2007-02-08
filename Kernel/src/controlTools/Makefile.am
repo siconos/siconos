@@ -16,13 +16,16 @@
 #
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
 #	
-# Makefile.am --- SICONOS
+# Makefile.am --- SICONOS - controlTools
 
 include $(top_srcdir)/config/Make-rules
 
-SUBDIRS = SiconosTools SiconosException SiconosSharedLibrary SiconosAlgebra SiconosMemory contract boost
+.cpp.o:
+	$(CXXCOMPILE) -c $<
 
-EXTRA_DIST = utils.h
 
-siconos_HEADERS = utils.h
+noinst_LTLIBRARIES = libControlTools.la
+libControlTools_la_SOURCES = Sensor.cpp SensorEvent.cpp SensorPosition.cpp SensorFactory.cpp Sensor.h SensorEvent.h SensorPosition.h SensorFactory.h
+libControlTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
+siconos_HEADERS = Sensor.h SensorEvent.h SensorFactory.h SensorPosition.h ControlTools.h
 

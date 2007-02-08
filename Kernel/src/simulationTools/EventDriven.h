@@ -23,10 +23,6 @@
 #define EVENTDRIVEN_H
 
 #include "Simulation.h"
-#include "EventsManager.h"
-#include "LCP.h"
-
-class EventsManager;
 
 /** Simulation based on event driven method, ie events detection (see theoretical manual for more details).
  *
@@ -39,10 +35,7 @@ class EventsManager;
  */
 class EventDriven : public Simulation
 {
-
 private:
-  /** tool to manage events */
-  EventsManager* eventsManager;
 
   /** flag used in DLSODAR -
    *  As input: 1 if first call, else 2
@@ -56,12 +49,16 @@ private:
   /** current ending time for integration */
   double tend;
 
+  /** defaut constructor
+   */
+  EventDriven();
+
 public:
 
   /** defaut constructor
-  *  \param a pointer to the model that owns this simulation. NULL Model leads to exception
-  */
-  EventDriven(Model * = NULL);
+   *  \param a pointer to a timeDiscretisation (linked to the model that owns this simulation)
+   */
+  EventDriven(TimeDiscretisation*);
 
   /** constructor with XML object of the EventDriven
   *  \param SimulationXML* : the XML object corresponding
@@ -75,23 +72,10 @@ public:
 
   /* Getters and setters */
 
-  /** get the EventsManager
-  *  \return a pointer to EventsManager
-  */
-  inline EventsManager* getEventsManagerPtr() const
-  {
-    return eventsManager;
-  }
-
-  /** set the EventsManager of the OneStepNSProblem
-  *  \param: a pointer on EventsManager
-  */
-  void setEventsManagerPtr(EventsManager*);
-
   /** update indexSets[i] of the topology, using current y and lambda values of Interactions.
   *  \param unsigned int: the number of the set to be updated
   */
-  void updateIndexSet(const unsigned int);
+  void updateIndexSet(unsigned int);
 
   /** update indexSets[1] and [2] (using current y and lambda values of Interactions) with conditions on y[2] AND lambda[2].
   */
@@ -133,25 +117,13 @@ public:
   */
   void updateImpactState();
 
-  /** run the whole simulation
-  */
-  void run();
-
   /** update input, output and indexSets.
   *  \param lambda order used to compute input
   */
-  void update(const unsigned int);
-
-  /** run simulation from one Event to the next
-  */
-  void computeOneStep();
-
-  /** increments all the Integrators to next step of the simulation
-  */
-  void nextStep();
+  void update(unsigned int);
 
   /** run simulation from one Event to the next, according to events manager settings.
-  */
+   */
   void advanceToEvent();
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.

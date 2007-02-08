@@ -279,7 +279,7 @@ void OneStepNSProblem::initialize()
   }
 }
 
-void OneStepNSProblem::nextStep()
+void OneStepNSProblem::saveInMemory()
 {
   InteractionsIterator it;
   for (it = OSNSInteractions.begin(); it != OSNSInteractions.end(); it++)

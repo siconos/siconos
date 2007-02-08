@@ -146,42 +146,17 @@ extern "C" int  sicTimeGetN(int *N)
   return ret;
 }
 
-extern "C" int  sicTimeGetK(int *K)
+extern "C" int sicSTSaveInMemory()
 {
   int ret = SIC_OK;
 
   if (GLOB_SIMULATION != NULL)
-    *K = GLOB_SIMULATION->getTimeDiscretisationPtr()->getK();
+    GLOB_SIMULATION->saveInMemory();
   else
     ret = SIC_ERROR;
 
   return ret;
 }
-
-extern "C" int sicSTNextStep()
-{
-  int ret = SIC_OK;
-
-  if (GLOB_SIMULATION != NULL)
-    GLOB_SIMULATION->nextStep();
-  else
-    ret = SIC_ERROR;
-
-  return ret;
-}
-
-extern "C" int sicSTComputeFreeState()
-{
-  int ret = SIC_OK;
-
-  if (GLOB_SIMULATION != NULL)
-    GLOB_SIMULATION->computeFreeState();
-  else
-    ret = SIC_ERROR;
-
-  return ret;
-}
-
 
 extern "C" int sicSTComputePb()
 {
@@ -195,14 +170,14 @@ extern "C" int sicSTComputePb()
   return ret;
 }
 
-extern "C" int sicSTComputeOneStep()
+extern "C" int sicSTAdvanceToEvent()
 {
   int ret = SIC_OK;
 
   if (GLOB_SIMULATION != NULL)
   {
     printf("DEBUG Compute One Step\n");
-    GLOB_SIMULATION->computeOneStep();
+    GLOB_SIMULATION->advanceToEvent();
   }
   else
     ret = SIC_ERROR;
@@ -942,10 +917,10 @@ extern "C" int sicSimulationTimeStepping(double h)
   try
   {
 
-    GLOB_SIMULATION = new TimeStepping(GLOB_MODEL);
-
     // Time discretisation
-    GLOB_TIME = new  TimeDiscretisation(h, GLOB_SIMULATION);
+    GLOB_TIME = new  TimeDiscretisation(h, GLOB_MODEL);
+
+    GLOB_SIMULATION = new TimeStepping(GLOB_TIME);
 
     GLOB_SIMULATION->initialize();
 

@@ -20,11 +20,15 @@
 #include "EventDriven.h"
 #include "LagrangianLinearTIDS.h"
 #include "Lsodar.h"
+#include "LCP.h"
 
 using namespace std;
 
 // --- Default constructor ---
-EventDriven::EventDriven(Model* newModel): Simulation(newModel, "EventDriven"), istate(1), tinit(0), tend(0)
+EventDriven::EventDriven(): Simulation("EventDriven"), istate(1), tinit(0), tend(0)
+{}
+
+EventDriven::EventDriven(TimeDiscretisation * td): Simulation(td, "EventDriven"), istate(1), tinit(0), tend(0)
 {}
 
 // --- XML constructor ---
@@ -56,17 +60,9 @@ EventDriven::EventDriven(SimulationXML* strxml, Model *newModel): Simulation(str
 
 // --- Destructor ---
 EventDriven::~EventDriven()
-{
-  if (eventsManager != NULL) delete eventsManager;
-  eventsManager = NULL;
-}
+{}
 
-void EventDriven::setEventsManagerPtr(EventsManager*)
-{
-  // TODO IF NECESSARY?
-}
-
-void EventDriven::updateIndexSet(const unsigned int i)
+void EventDriven::updateIndexSet(unsigned int i)
 {
   if (i > indexSets.size())
     RuntimeException::selfThrow("Topology::updateIndexSet(i), indexSets[i] does not exist.");
@@ -157,9 +153,6 @@ void EventDriven::initialize()
   for (itOsi = allOSI.begin(); itOsi != allOSI.end(); ++itOsi)
     (*itOsi)->initialize();
 
-  // === Events manager creation and initialization ===
-  eventsManager = new EventsManager(DEFAULT_TICK, this); //
-  eventsManager->initialize();
   tinit = eventsManager->getCurrentTime();
   tend =  eventsManager->getNextTime();
 
@@ -172,7 +165,7 @@ void EventDriven::initialize()
 
     if (allNSProblems.find("impact") == allNSProblems.end()) // ie if the impact problem does not exist
       RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have an 'impact' non smooth problem.");
-    if (allNSProblems.find("acceleration") == allNSProblems.end()) // ie if the impact problem does not exist
+    if (allNSProblems.find("acceleration") == allNSProblems.end()) // ie if the acceleration-level problem does not exist
       RuntimeException::selfThrow("EventDriven::initialize, an EventDriven simulation must have an 'acceleration' non smooth problem.");
 
     // At the time, we consider that for all systems, levelMin is equal to the minimum value of the relative degree
@@ -192,6 +185,7 @@ void EventDriven::initialize()
     // === update all index sets ===
     updateIndexSets();
   }
+  saveInMemory();
 }
 
 void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
@@ -324,31 +318,11 @@ void EventDriven::updateImpactState()
     (*itOSI)->updateState(1);
 }
 
-// Run the whole simulation
-void EventDriven::run()
-{
-  unsigned int count = 0; // events counter.
-  // do simulation while events remains in the "future events" list of events manager.
-  cout << " ==== Start of Event Driven simulation - This may take a while ... ====" << endl;
-  while (eventsManager->hasNextEvent())
-  {
-    computeOneStep();
-    count++;
-  }
-  cout << "===== End of Event Driven simulation. " << count << " events have been processed. ==== " << endl;
-}
-
-void EventDriven::computeOneStep()
-{
-  advanceToEvent();
-  eventsManager->processEvents();
-}
-
-void EventDriven::update(const unsigned int levelInput)
+void EventDriven::update(unsigned int levelInput)
 {
   if (!allNSProblems.empty())
   {
-    // compute input
+    // compute input (lambda -> r)
     updateInput(levelInput);
 
     OSIIterator itOSI;
@@ -359,18 +333,6 @@ void EventDriven::update(const unsigned int levelInput)
 
     updateIndexSet(levelInput);
   }
-}
-
-void EventDriven::nextStep()
-{
-
-  OSIIterator it;
-  for (it = allOSI.begin(); it != allOSI.end() ; ++it)
-    (*it)->nextStep();
-
-  OSNSIterator itOsns;
-  for (itOsns = allNSProblems.begin(); itOsns != allNSProblems.end(); ++itOsns)
-    (itOsns->second)->nextStep();
 }
 
 void EventDriven::advanceToEvent()

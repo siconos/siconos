@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.0.1, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.3.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,28 +16,23 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "TimeDiscretisationEvent.h"
-#include "EventFactory.h"
-#include "Simulation.h"
-using namespace std;
-using namespace EventFactory;
+/*! \file SiconosKernel.h
+Include files related to modelingTools
+Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
+*/
 
-// Default constructor
-TimeDiscretisationEvent::TimeDiscretisationEvent(): Event(DEFAULT_EVENT_TIME, "TimeDiscretisationEvent")
-{}
+#include "ComplementarityConditionNSL.h"
+#include "RelayNSL.h"
+#include "NewtonImpactNSL.h"
+#include "NewtonImpactFrictionNSL.h"
 
-TimeDiscretisationEvent::TimeDiscretisationEvent(unsigned long int time, const std::string& name): Event(time, "TimeDiscretisationEvent")
-{}
+#include "Interaction.h"
+#include "Topology.h"
 
-TimeDiscretisationEvent::~TimeDiscretisationEvent()
-{}
+#include "LinearTIR.h"
+#include "LagrangianLinearR.h"
+#include "InteractionsSet.h"
 
-void TimeDiscretisationEvent::process(Simulation* simulation)
-{
-  // Update y[i] values in Interactions with new DS states.
-  simulation->updateOutput(0, 1);
-  // Save state(s) in Memories (DS and Interactions, through OSI and OSNS).
-  simulation->saveInMemory();
-}
+#include "LagrangianLinearTIDS.h"
+#include "FirstOrderLinearTIDS.h"
 
-AUTO_REGISTER_EVENT("TimeDiscretisationEvent", TimeDiscretisationEvent);

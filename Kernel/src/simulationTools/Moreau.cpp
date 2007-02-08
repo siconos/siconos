@@ -253,7 +253,7 @@ void Moreau::initialize()
 {
   OneStepIntegrator::initialize();
   // Get initial time
-  double t0 = simulationLink->getTimeDiscretisationPtr()->getT0();
+  double t0 = simulationLink->getModelPtr()->getT0();
   // Compute W(t0) for all ds
   DSIterator it;
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)

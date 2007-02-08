@@ -36,7 +36,7 @@ libModelingTools_la_SOURCES =  DynamicalSystemsSet.cpp InteractionsSet.cpp Compl
 		DynamicalSystem.h FirstOrderNonLinearDS.h Interaction.h LagrangianLinearR.h LagrangianDS.h LagrangianR.h LagrangianLinearTIDS.h \
 		FirstOrderLinearDS.h FirstOrderLinearTIDS.h LinearTIR.h \
 		NewtonImpactNSL.h NewtonImpactFrictionNSL.h NonSmoothLaw.h NonSmoothDynamicalSystem.h \
-		Relation.h RelayNSL.h UnitaryRelation.h UnitaryRelationsSet.h 
+		Relation.h RelayNSL.h UnitaryRelation.h UnitaryRelationsSet.h ModelingTools.h 
 libModelingTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
 siconos_HEADERS = DynamicalSystemsSet.h InteractionsSet.h ComplementarityConditionNSL.h \
@@ -44,4 +44,4 @@ siconos_HEADERS = DynamicalSystemsSet.h InteractionsSet.h ComplementarityConditi
 		Topology.h LagrangianLinearR.h LagrangianDS.h LagrangianR.h LagrangianLinearTIDS.h \
 		FirstOrderLinearDS.h FirstOrderLinearTIDS.h LinearTIR.h NewtonImpactNSL.h NewtonImpactFrictionNSL.h \
 		NonSmoothLaw.h NonSmoothDynamicalSystem.h Relation.h RelayNSL.h UnitaryRelation.h \
-		UnitaryRelationsSet.h 
+		UnitaryRelationsSet.h ModelingTools.h

@@ -372,10 +372,9 @@ public:
   */
   virtual void initialize();
 
-  /** prepares the problem for the next time step
-  *  \exception to be defined
+  /** save Interactions states in Memory
   */
-  void nextStep();
+  void saveInMemory();
 
   /** prepare data of the osns for solving
   *  param double : current time

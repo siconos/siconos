@@ -16,28 +16,24 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "TimeDiscretisationEvent.h"
+#include "SensorEvent.h"
 #include "EventFactory.h"
-#include "Simulation.h"
 using namespace std;
 using namespace EventFactory;
 
 // Default constructor
-TimeDiscretisationEvent::TimeDiscretisationEvent(): Event(DEFAULT_EVENT_TIME, "TimeDiscretisationEvent")
+SensorEvent::SensorEvent(): Event(DEFAULT_EVENT_TIME, "SensorEvent")
 {}
 
-TimeDiscretisationEvent::TimeDiscretisationEvent(unsigned long int time, const std::string& name): Event(time, "TimeDiscretisationEvent")
+SensorEvent::SensorEvent(unsigned long int time, const std::string& name): Event(time, name)
 {}
 
-TimeDiscretisationEvent::~TimeDiscretisationEvent()
+SensorEvent::~SensorEvent()
 {}
 
-void TimeDiscretisationEvent::process(Simulation* simulation)
+void SensorEvent::process(Simulation*)
 {
-  // Update y[i] values in Interactions with new DS states.
-  simulation->updateOutput(0, 1);
-  // Save state(s) in Memories (DS and Interactions, through OSI and OSNS).
-  simulation->saveInMemory();
+  sensor->capture();
 }
 
-AUTO_REGISTER_EVENT("TimeDiscretisationEvent", TimeDiscretisationEvent);
+AUTO_REGISTER_EVENT("SensorEvent", SensorEvent);

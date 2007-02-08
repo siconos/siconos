@@ -45,15 +45,11 @@ private:
 
 public:
 
-  /** copy constructor
-  *  \param the timeDiscrEvent to be copied
-  */
-  NonSmoothEvent(const NonSmoothEvent&);
-
   /** constructor with time value as a parameter
   *  \param an unsigned long int
+  *  \param a string, type of Event
   */
-  NonSmoothEvent(const unsigned long int&);
+  NonSmoothEvent(unsigned long int, const std::string&);
 
   /** destructor
   */

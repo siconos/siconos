@@ -7,7 +7,7 @@ MainTest_SOURCES = BouncingBall.cpp DiodeBridge.cpp BallBowl.cpp FunctionTest.cp
 		    MainTest.h BallBowl.h FunctionTest.h GlobalTests.h
 siconos_HEADERS = MainTest.h FunctionTest.h GlobalTests.h
 MainTest_INCLUDES = $(CPPUNIT_CFLAGS)
-MainTest_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
+MainTest_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LIBS)
 
 all : gTestPlugin.so
 

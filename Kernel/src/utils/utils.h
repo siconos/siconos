@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.0.1, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.3.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,24 +16,23 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "Event.h"
-using namespace std;
+/*! \file utils.h
+Include files related to utils directory
+*/
 
-// Default constructor (protected)
-Event::Event(): timeOfEvent(DEFAULT_EVENT_TIME), type(DEFAULT_EVENT_TYPE)
-{}
-
-Event::Event(unsigned long int time, const string& newType): timeOfEvent(time), type(newType)
-{}
-
-Event::~Event()
-{}
-
-void Event::display() const
-{
-  cout << "===== Event data display =====" << endl;
-  cout << " - Type: " << type << endl;
-  cout << " - time (unsigned int format): " << timeOfEvent << endl;
-  cout << "===== End of Event display =====" << endl;
-}
-
+#include "BlockMatrix.h"
+#include "BlockVector.h"
+#include "SimpleMatrix.h"
+#include "SimpleVector.h"
+#include "ioMatrix.h"
+#include "ioVector.h"
+#include "RuntimeException.h"
+#include "SiconosMatrixException.h"
+#include "SiconosSharedLibraryException.h"
+#include "XMLException.h"
+#include "SiconosMemoryException.h"
+#include "SiconosVectorException.h"
+#include "SiconosMemory.h"
+#include "SiconosSharedLibrary.h"
+#include "Tools.h"
+#include "RuntimeCmp.h"

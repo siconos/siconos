@@ -123,13 +123,13 @@ void OneStepIntegrator::setInteractions(const InteractionsSet& newSet)
 
 void OneStepIntegrator::initialize()
 {
-  double t0 = simulationLink->getTimeDiscretisationPtr()->getT0();
+  double t0 = simulationLink->getModelPtr()->getT0();
   DSIterator it;
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
     (*it)->initialize(simulationLink->getType(), t0, sizeMem);
 }
 
-void OneStepIntegrator::nextStep()
+void OneStepIntegrator::saveInMemory()
 {
   DSIterator it;
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)

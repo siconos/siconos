@@ -46,9 +46,8 @@ const std::string DEFAULT_EVENT_TYPE = "undefined";
  * Derived classes:
  * - TimeDiscretisationEvent: events that corresponds to user-defined time-discretisation points
  * - NonSmoothEvent: specific events, detected during simulation, when constraints are violated (thanks to roots-finding algorithm)
+ * - SensorEvent: event dedicated to data capture through user-defined sensors.
  *
- *
- *  \todo: define with more details what process is supposed to do in any case.
  */
 
 class Event
@@ -65,72 +64,45 @@ protected:
   /** Default constructor */
   Event();
 
-public:
-
-  /** copy constructor
-  *  \param the event to be copied
+  /** copy constructor ; private => no copy nor pass-by-value.
   */
   Event(const Event&);
+
+public:
 
   /** constructor with time value and type as input
   *  \param an unsigned int
   *  \param a string
   */
-  Event(const unsigned long int&, const std::string & = DEFAULT_EVENT_TYPE);
+  Event(unsigned long int, const std::string & = DEFAULT_EVENT_TYPE);
 
   /** destructor
-  */
+   */
   virtual ~Event();
 
-  // GETTERS/SETTERS
-
   /** get the time of the present event (unsigned int format)
-  *  \return an unsigned long int
-  */
+   *  \return an unsigned long int
+   */
   inline const unsigned long int getTimeOfEvent() const
   {
     return timeOfEvent ;
   };
 
-  /** set the timeOfEvent as a long int
-  *  \param an unsigned long int
-  */
-  //  inline void setIntTimeOfEvent(const unsigned long int newVal) {timeOfEvent = newVal;};
-
   /** get a type of the present event
-  *  \return an std::string
-  */
+   *  \return an std::string
+   */
   inline const std::string getType() const
   {
     return type ;
   };
 
-  /** set the type of this event
-  *  \param an std::string
-  */
-  //inline void setType(const std::string newVal) {type = newVal;};
-
-  /** get the time (double format) of present event
-  *  \return a double
-  */
-  //const double getTimeOfEvent() const;
-
-  /** set dateOfEvent using a double input for time
-  *  \param a double
-  */
-  //void setTimeOfEvent(const double& newVal);
-
-  /** copy the data of the Event into the XML tree
-  */
-  // void saveEventToXML();
-
   /** display Event data
-  */
+   */
   void display() const ;
 
   /** virtual function which actions depends on event type
-  * \param Simulation*, the simulation that owns this Event (through the EventsManager)
-  */
+   * \param Simulation*, the simulation that owns this Event (through the EventsManager)
+   */
   virtual void process(Simulation*) = 0;
 };
 

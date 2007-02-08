@@ -28,5 +28,5 @@ test1_SOURCES = RelationTest.cpp LinearTIRTest.cpp LagrangianRTest.cpp Lagrangia
 RelationTest.h LinearTIRTest.h LagrangianRTest.h LagrangianLinearRTest.h FirstOrderNonLinearDSTest.h FirstOrderLinearDSTest.h LagrangianDSTest.h LagrangianLinearTIDSTest.h
 siconos_HEADERS =RelationTest.h LinearTIRTest.h LagrangianRTest.h LagrangianLinearRTest.h FirstOrderNonLinearDSTest.h FirstOrderLinearDSTest.h LagrangianDSTest.h LagrangianLinearTIDSTest.h
 test1_INCLUDES = $(CPPUNIT_CFLAGS)
-test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LDFLAGS)
+test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LIBS)
 

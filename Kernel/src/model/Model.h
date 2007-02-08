@@ -79,6 +79,10 @@ private:
   */
   Model();
 
+  /** Copy constructor => private, no copy nor pass-by value for Model
+   */
+  Model(const Model&);
+
 public:
 
   /** create the Model from an xml file
@@ -133,7 +137,10 @@ public:
   /** set initial time of the time discretisation
   *  \param a double
   */
-  void setT0(const double&);
+  inline void setT0(const double& newT0)
+  {
+    t0 = newT0;
+  };
 
   /** get final time
   *  \return a double
@@ -309,52 +316,10 @@ public:
   */
   int xmlSchemaValidated(std::string  xmlFile, std::string  xmlSchema = "");
 
-  // --- OTHER FUNCTIONS ---
-
-  /** determines if there are enough data to formalise and solve the problem
-  *  \return tru if the Model is complete
-  */
-  //bool isModelComplete();
-
-  /** launches the simulation
-  */
-  //void runSimulation(void){};
-
-  /** makes the simulation go on in time
-  */
-  //void doOneStep(void);
-
   /** display the data of the Model
-  */
+   */
   void display() const ;
 
-  /** set t0 value in TimeDiscretisation and in Model
-  *  \param the double value of t0
-  */
-  friend class TimeDiscretisation;//::setT0(const double&);
-
-  /*******************************************************
-   *
-   * function to create the platform from a C++ programm
-   *
-   * \todo : interface methods of the Model
-   *
-   *//////////////////////////////////////////////////////
-
-  /** allows to create a Simulation (EventDriven or TimeStepping)
-  *  \return Simulation* : the Simulation created
-  */
-  Simulation* createSimulation(std::string  type);
-
-  /** allows to create a Simulation : TimeStepping
-  *  \return Simulation* : the Simulation created
-  */
-  Simulation* createTimeStepping();
-
-  /** allows to create a Simulation : EventDriven
-  *  \return Simulation* : the Simulation created
-  */
-  Simulation* createTimeEventDriven();
 };
 
 #endif // MODEL_H

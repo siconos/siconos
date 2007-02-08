@@ -26,15 +26,7 @@
 // ======================================================================================================
 
 #include "GlobalTests.h"
-#include "Model.h"
-#include "LagrangianLinearTIDS.h"
-#include "SimpleVector.h"
-#include "SimpleMatrix.h"
-#include "LCP.h"
-#include <sys/time.h>
-#include <iostream>
-#include <math.h>
-
+#include "SiconosKernel.h"
 using namespace std;
 
 bool BouncingBall()
@@ -49,11 +41,11 @@ bool BouncingBall()
     // --- Model loading from xml file ---
     Model bouncingBall("./Ball.xml");
     // --- Get and initialize the simulation ---
-    Simulation* s = bouncingBall.getSimulationPtr();
+    TimeStepping* s = static_cast<TimeStepping*>(bouncingBall.getSimulationPtr());
     s->initialize();
     // --- Get the time discretisation scheme ---
     TimeDiscretisation* t = s->getTimeDiscretisationPtr();
-    int k = t->getK(); // Current step
+    int k = 0; // Current step
     int N = t->getNSteps(); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
@@ -72,19 +64,13 @@ bool BouncingBall()
     // --- Time loop  ---
     while (k < N)
     {
-      // transfer of state i+1 into state i and time incrementation
-      s->nextStep();
-      // get current time step
-      k = t->getK();
-      //  cout << " Pas " << k;
-      // solve ...
+      k++;
       s->computeOneStep();
-
-      // --- Get values to be plotted ---
       dataPlot(k, 0) = k * t->getH();
       dataPlot(k, 1) = (ball->getQ())(0);
       dataPlot(k, 2) = (ball->getVelocity())(0);
       dataPlot(k, 3) = (bouncingBall.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+      s->nextStep();
     }
 
     SiconosMatrix * dataRef = new SimpleMatrix("refBouncingBall.dat", true);

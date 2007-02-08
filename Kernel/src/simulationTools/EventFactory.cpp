@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.0.1, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.2.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -15,29 +15,49 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-#include "TimeDiscretisationEvent.h"
+ */
+
 #include "EventFactory.h"
-#include "Simulation.h"
+#include <iostream>
+
 using namespace std;
-using namespace EventFactory;
 
-// Default constructor
-TimeDiscretisationEvent::TimeDiscretisationEvent(): Event(DEFAULT_EVENT_TIME, "TimeDiscretisationEvent")
-{}
-
-TimeDiscretisationEvent::TimeDiscretisationEvent(unsigned long int time, const std::string& name): Event(time, "TimeDiscretisationEvent")
-{}
-
-TimeDiscretisationEvent::~TimeDiscretisationEvent()
-{}
-
-void TimeDiscretisationEvent::process(Simulation* simulation)
+namespace EventFactory
 {
-  // Update y[i] values in Interactions with new DS states.
-  simulation->updateOutput(0, 1);
-  // Save state(s) in Memories (DS and Interactions, through OSI and OSNS).
-  simulation->saveInMemory();
+
+Registry& Registry::get()
+{
+  static Registry instance;
+  return instance;
 }
 
-AUTO_REGISTER_EVENT("TimeDiscretisationEvent", TimeDiscretisationEvent);
+void Registry::add(const string& name, object_creator creator)
+{
+  factory_map[name] = creator;
+}
+
+Event* Registry::instantiate(unsigned long int time, const std::string& name)
+{
+  MapFactoryIt it = factory_map.find(name) ;
+
+  if (it == factory_map.end())
+    RuntimeException::selfThrow("Registry::instantiate (EventFactory) failed, no class named: " + name);
+
+  return (it->second)(time, name) ; // run our factory
+}
+
+Registration::Registration(const string& name, object_creator creator)
+{
+  //cout << endl << "Registration of " << name << endl << endl ;
+  Registry::get().add(name, creator) ;
+}
+
+}
+
+
+
+
+
+
+
+

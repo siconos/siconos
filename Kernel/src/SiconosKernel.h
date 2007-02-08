@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.0.1, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.3.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,28 +16,17 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "TimeDiscretisationEvent.h"
-#include "EventFactory.h"
-#include "Simulation.h"
-using namespace std;
-using namespace EventFactory;
+/*! \file SiconosKernel.h
+Include files related to Siconos Kernel
+*/
 
-// Default constructor
-TimeDiscretisationEvent::TimeDiscretisationEvent(): Event(DEFAULT_EVENT_TIME, "TimeDiscretisationEvent")
-{}
+#include "Model.h"
+#include "SiconosConst.h"
+#include "utils.h"
+#include "ModelingTools.h"
+#include "SimulationTools.h"
+#include "ControlTools.h"
+#include "XmlTools.h"
+#include <sys/time.h>
 
-TimeDiscretisationEvent::TimeDiscretisationEvent(unsigned long int time, const std::string& name): Event(time, "TimeDiscretisationEvent")
-{}
 
-TimeDiscretisationEvent::~TimeDiscretisationEvent()
-{}
-
-void TimeDiscretisationEvent::process(Simulation* simulation)
-{
-  // Update y[i] values in Interactions with new DS states.
-  simulation->updateOutput(0, 1);
-  // Save state(s) in Memories (DS and Interactions, through OSI and OSNS).
-  simulation->saveInMemory();
-}
-
-AUTO_REGISTER_EVENT("TimeDiscretisationEvent", TimeDiscretisationEvent);

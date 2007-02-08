@@ -115,8 +115,7 @@ public:
 
   /** Return a SimpleMatrix computed from a siconos matrix node
   *   \param siconosMatrixNode : the matrix node you want to get in SimpleMatrix type
-  *   \return A Sicono   else cout<<"!!! /!\ the number of dynamical system of the interaction is uneven, a couple of dynamical system in interaction is not complete."<<endl;
-  sMatrix
+  *   \return A SiconosMatrix
   */
   static SimpleMatrix getSiconosMatrixValue(const xmlNodePtr  siconosMatrixNode);
 

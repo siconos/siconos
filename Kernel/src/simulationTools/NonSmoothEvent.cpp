@@ -17,28 +17,26 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "NonSmoothEvent.h"
+#include "EventFactory.h"
 #include "EventDriven.h"
 using namespace std;
+using namespace EventFactory;
 
 // Default constructor
 NonSmoothEvent::NonSmoothEvent(): Event(DEFAULT_EVENT_TIME, "NonSmoothEvent")
 {}
 
-// copy constructor
-NonSmoothEvent::NonSmoothEvent(const NonSmoothEvent& newNonSmoothEvent): Event(newNonSmoothEvent)
+NonSmoothEvent::NonSmoothEvent(unsigned long int time, const std::string& name): Event(time, "NonSmoothEvent")
 {}
-
-NonSmoothEvent::NonSmoothEvent(const unsigned long int& time): Event(time, "NonSmoothEvent")
-{}
-
-// NonSmoothEvent(NonSmoothEventXML*, const std::string& ):timeOfNonSmoothEvent(0), type("undefined from xml")
-//{}
 
 NonSmoothEvent::~NonSmoothEvent()
 {}
 
 void NonSmoothEvent::process(Simulation* simulation)
 {
+  if (simulation->getType() != "EventDriven")
+    RuntimeException::selfThrow("NonSmoothEvent::process failed; Simulation is not of EventDriven type.");
+
   if (!(simulation->getOneStepNSProblems().empty()))
   {
     EventDriven * eventDriven = static_cast<EventDriven*>(simulation);
@@ -53,7 +51,7 @@ void NonSmoothEvent::process(Simulation* simulation)
     // ---> solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
     if (!(indexSets[1] - indexSets[2]).isEmpty())
     {
-      simulation->nextStep();  // To save pre-impact values
+      simulation->saveInMemory();  // To save pre-impact values
       // solve the LCP-impact => y[1],lambda[1]
       eventDriven->computeOneStepNSProblem("impact"); // solveLCPImpact();
 
@@ -91,6 +89,8 @@ void NonSmoothEvent::process(Simulation* simulation)
       eventDriven->updateIndexSetsWithDoubleCondition();
     }
 
-    simulation->nextStep();
+    simulation->saveInMemory();
   }
 }
+
+AUTO_REGISTER_EVENT("NonSmoothEvent", NonSmoothEvent);

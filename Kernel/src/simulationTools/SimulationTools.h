@@ -1,4 +1,4 @@
-/* Siconos-Kernel version 2.0.1, Copyright INRIA 2005-2006.
+/* Siconos-Kernel version 1.3.0, Copyright INRIA 2005-2006.
  * Siconos is a program dedicated to modeling, simulation and control
  * of non smooth dynamical systems.
  * Siconos is a free software; you can redistribute it and/or modify
@@ -16,24 +16,21 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "Event.h"
-using namespace std;
+/*! \file SiconosKernel.h
+Include files related to simulationTools
+Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
+*/
 
-// Default constructor (protected)
-Event::Event(): timeOfEvent(DEFAULT_EVENT_TIME), type(DEFAULT_EVENT_TYPE)
-{}
-
-Event::Event(unsigned long int time, const string& newType): timeOfEvent(time), type(newType)
-{}
-
-Event::~Event()
-{}
-
-void Event::display() const
-{
-  cout << "===== Event data display =====" << endl;
-  cout << " - Type: " << type << endl;
-  cout << " - time (unsigned int format): " << timeOfEvent << endl;
-  cout << "===== End of Event display =====" << endl;
-}
+#include "EventDriven.h"
+#include "EventFactory.h"
+#include "TimeStepping.h"
+#include "LCP.h"
+#include "FrictionContact2D.h"
+#include "FrictionContact3D.h"
+#include "QP.h"
+#include "Lsodar.h"
+#include "Moreau.h"
+#include "Relay.h"
+#include "NonSmoothEvent.h"
+#include "TimeDiscretisationEvent.h"
 

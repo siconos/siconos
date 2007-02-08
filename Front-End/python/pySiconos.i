@@ -123,6 +123,11 @@
 
 #include "Model.h"
 #include "SiconosConst.h"
+
+#include "Sensor.h"
+#include "SensorPosition.h"
+#include "SensorEvent.h"
+
 %} 
 
 %typemap(in) string  {
@@ -249,6 +254,7 @@ $1 = string(PyString_AsString($input));
 %include "NonSmoothEvent.h"
 %include "TimeDiscretisationEvent.h"
 %include "EventsManager.h"
+
 // ---
 %include "OneStepNSProblem.h"
 %include "QP.h"
@@ -270,6 +276,10 @@ $1 = string(PyString_AsString($input));
 // --- Model ---
 %include "Model.h"
 %include "SiconosConst.h"
+
+%include "Sensor.h"
+%include "SensorPosition.h"
+%include "SensorEvent.h"
 
 namespace std {
   %template(intVector) vector<int>;
