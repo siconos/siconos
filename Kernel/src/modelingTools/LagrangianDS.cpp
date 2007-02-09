@@ -293,6 +293,8 @@ LagrangianDS::LagrangianDS(int newNumber, const SiconosVector& newQ0, const Sico
   jacobianFInt.resize(2, NULL);
   jacobianNNL.resize(2, NULL);
   p.resize(3, NULL);
+  computeJacobianFIntPtr.resize(2, NULL);
+  computeJacobianNNLPtr.resize(2, NULL);
 }
 
 // From a set of data - Mass loaded from a plugin
@@ -321,6 +323,8 @@ LagrangianDS::LagrangianDS(int newNumber, const SiconosVector& newQ0, const Sico
   jacobianFInt.resize(2, NULL);
   jacobianNNL.resize(2, NULL);
   p.resize(3, NULL);
+  computeJacobianFIntPtr.resize(2, NULL);
+  computeJacobianNNLPtr.resize(2, NULL);
 }
 
 // Destructor
@@ -1071,12 +1075,17 @@ void LagrangianDS::setComputeJacobianNNLFunction(unsigned int i, const string& p
     isAllocatedIn[name] = true;
   }
 
-  cShared.setFunction(&computeJacobianNNLPtr[i], pluginPath, functionName);
+  cShared.setFunction(& (computeJacobianNNLPtr[i]), pluginPath, functionName);
 
   string plugin;
   plugin = pluginPath.substr(0, pluginPath.length() - 3);
   pluginNames[name] = plugin + ":" + functionName;
   isPlugin[name] = true;
+}
+
+void LagrangianDS::setJacobianNNLFunction(unsigned int i, FPtr5 myF)
+{
+  computeJacobianNNLPtr[i] = myF;
 }
 
 void LagrangianDS::computeMass()

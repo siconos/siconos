@@ -855,6 +855,7 @@ public:
    *  \param string : the name of the function to use in this plugin
    */
   void setComputeJacobianNNLFunction(unsigned int, const std::string&  pluginPath, const std::string&  functionName);
+  void setJacobianNNLFunction(unsigned int, FPtr5);
 
   /** default function to compute the mass
    */
