@@ -16,17 +16,49 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*! \file SiconosKernel.h
-Include files related to controlTools
-Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
-*/
-
-#include "SensorFactory.h"
-#include "Sensor.h"
-#include "SensorPosition.h"
-#include "SensorEvent.h"
-#include "ActuatorFactory.h"
-#include "Actuator.h"
 #include "ExampleActuator.h"
-#include "ActuatorEvent.h"
-#include "ControlManager.h"
+# include "SimpleVector.h"
+# include "DynamicalSystem.h"
+# include "ActuatorFactory.h"
+# include "ioMatrix.h"
+using namespace std;
+using namespace ActuatorFactory;
+
+ExampleActuator::ExampleActuator(): Actuator()
+{}
+
+ExampleActuator::ExampleActuator(const std::string& name, TimeDiscretisation* t): Actuator(name, t)
+{}
+
+ExampleActuator::~ExampleActuator()
+{}
+
+void ExampleActuator::initialize()
+{
+  // Call initialize of base class
+  Actuator::initialize();
+}
+
+void ExampleActuator::actuate()
+{
+  cout << "Actuator action ... " << endl;
+  DSIterator itDS;
+  SiconosVector * myZ = new SimpleVector(3);
+  (*myZ)(0) = 12;
+  (*myZ)(1) = 132;
+  (*myZ)(2) = 212;
+
+  for (itDS = allDS.begin(); itDS != allDS.end(); ++itDS)
+    (*itDS)->setZPtr(myZ);
+
+}
+
+ExampleActuator* ExampleActuator::convert(Actuator* s)
+{
+  ExampleActuator* sp = dynamic_cast<ExampleActuator*>(s);
+  return sp;
+}
+
+AUTO_REGISTER_SENSOR("ExampleActuator", ExampleActuator);
+
+

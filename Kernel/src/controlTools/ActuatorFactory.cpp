@@ -17,11 +17,12 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 
-# include "SensorFactory.h"
+#include "ActuatorFactory.h"
+#include "RuntimeException.h"
 
 using namespace std;
 
-namespace SensorFactory
+namespace ActuatorFactory
 {
 
 Registry& Registry::get()
@@ -35,12 +36,12 @@ void Registry::add(const string& name, object_creator creator)
   factory_map[name] = creator;
 }
 
-Sensor* Registry::instantiate(const std::string& name, TimeDiscretisation* t)
+Actuator* Registry::instantiate(const std::string& name, TimeDiscretisation* t)
 {
   MapFactoryIt it = factory_map.find(name) ;
 
   if (it == factory_map.end())
-    RuntimeException::selfThrow("Registry::instantiate (SensorFactory) failed, no class named: " + name);
+    RuntimeException::selfThrow("Registry::instantiate (ActuatorFactory) failed, no class named: " + name);
 
   // cout << endl << "Factory instance for class" << name << endl ; // for test purposes only
   return (it->second)(name, t) ; // run our factory
@@ -49,7 +50,7 @@ Sensor* Registry::instantiate(const std::string& name, TimeDiscretisation* t)
 Registration::Registration(const string& name, object_creator creator)
 {
   //  cout << endl << "Registration of " << name << endl << endl ;
-  // Add creator into the factory of Sensors
+  // Add creator into the factory of Actuators
   Registry::get().add(name, creator) ;
 }
 

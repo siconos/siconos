@@ -24,6 +24,7 @@
 #ifndef ControlManager_H
 #define ControlManager_H
 
+#include "Actuator.h"
 #include <string>
 #include <set>
 
@@ -31,12 +32,14 @@ class Sensor;
 class Model;
 class TimeDiscretisation;
 
-/** A set of Sensors */
-typedef std::set<Sensor*> Sensors;
+/** A set of Actuators */
+typedef std::set<Actuator*> Actuators;
 
-/** An iterator through a set of Sensors */
-typedef Sensors::iterator SensorsIterator;
+/** An iterator through a set of Actuators */
+typedef Actuators::iterator ActuatorsIterator;
 
+/** Return-type for Actuators insertion. */
+typedef std::pair<ActuatorsIterator, bool> ActuatorsCheckInsert;
 
 /** ControlManager Class: tools to control a Model (Sensors, Actuators ...)
  *
@@ -53,6 +56,9 @@ protected:
 
   /** A list of Sensors */
   Sensors allSensors;
+
+  /** A list of Sensors */
+  Actuators allActuators;
 
   /** The model linked to this ControlManager */
   Model * model;
@@ -93,11 +99,27 @@ public:
     return allSensors ;
   };
 
+  /** get the list of Actuators associated to this manager.
+   *  \return a Actuators object.
+   */
+  inline const Actuators getActuators() const
+  {
+    return allActuators ;
+  };
+
   /** To build and add a new Sensor in the Manager
    * \param the type (class name) of the Sensor
    * \param the TimeDiscretisation of the Sensor
+   * \return a pointer to the added Sensor
    */
-  void addSensor(const std::string&, TimeDiscretisation*);
+  Sensor* addSensor(const std::string&, TimeDiscretisation*);
+
+  /** To build and add a new Actuator in the Manager
+   * \param the type (class name) of the Actuator
+   * \param the TimeDiscretisation of the Actuator
+   * \return a pointer to the added Actuator
+   */
+  Actuator* addActuator(const std::string&, TimeDiscretisation*);
 
   /** initialize sensor data.
    */

@@ -25,8 +25,9 @@ include $(top_srcdir)/config/Make-rules
 
 
 noinst_LTLIBRARIES = libControlTools.la
-libControlTools_la_SOURCES = Sensor.cpp SensorEvent.cpp SensorPosition.cpp SensorFactory.cpp \
-			     ControlManager.cpp Sensor.h SensorEvent.h SensorPosition.h SensorFactory.h ControlManager.h
+libControlTools_la_SOURCES = Sensor.cpp SensorEvent.cpp Actuator.cpp ActuatorEvent.cpp SensorPosition.cpp SensorFactory.cpp ActuatorFactory.cpp ExampleActuator.cpp \
+			     ControlManager.cpp Sensor.h SensorEvent.h Actuator.h ActuatorEvent.h SensorPosition.h SensorFactory.h ActuatorFactory.h \
+			     ExampleActuator.h ControlManager.h
 libControlTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
-siconos_HEADERS = Sensor.h SensorEvent.h SensorFactory.h SensorPosition.h ControlManager.h ControlTools.h
+siconos_HEADERS = Sensor.h SensorEvent.h  Actuator.h ActuatorEvent.h SensorFactory.h ActuatorFactory.h SensorPosition.h ControlManager.h ExampleActuator.h ControlTools.h
 
