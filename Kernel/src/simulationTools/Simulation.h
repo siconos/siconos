@@ -23,28 +23,20 @@ Global interface for simulation process description (Base for TimeStepping or Ev
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
-#include "OneStepIntegrator.h"
-#include "OneStepNSProblem.h"
-#include "TimeDiscretisation.h"
-#include "EventsManager.h"
-#include "SiconosMatrix.h"
-#include "SiconosVector.h"
-#include "SimulationXML.h"
 #include "SiconosConst.h"
-#include "Model.h"
-
-#include "check.h"
-#include <iostream>
+#include "Tools.h"
+#include "RuntimeException.h"
+#include "UnitaryRelationsSet.h"
 #include <vector>
-#include <deque>
-#include <set>
 
 class Model;
+class DynamicalSystem;
 class EventsManager;
 class OneStepIntegrator;
 class OneStepNSProblem;
 class TimeDiscretisation;
 class SimulationXML;
+class UnitaryRelationsSet;
 
 /** vector of OneStepIntegrator */
 typedef std::set<OneStepIntegrator*> OSISet;
@@ -72,9 +64,6 @@ typedef OneStepNSProblems::const_iterator ConstOSNSIterator;
 
 /** tolerance value used in indexSets updating */
 const double TOLERANCE = 1e-8;
-
-/** default name for One Step NS Problem of the simulation */
-const std::string DEFAULT_OSNS_NAME = "unamed";
 
 /** Description of the simulation process (integrators, time discretisation,...) - Base class for TimeStepping or EventDriven.
  *
@@ -284,10 +273,10 @@ public:
   };
 
   /** get allNSProblems[name], a specific OneStepNSProblem
-   *  \param a string, the name of the osns, optional, default value = DEFAULT_OSNS_NAME
+   *  \param a string, the name of the osns
    *  \return a pointer to OneStepNSProblem
    */
-  OneStepNSProblem* getOneStepNSProblemPtr(const std::string& = DEFAULT_OSNS_NAME);
+  OneStepNSProblem* getOneStepNSProblemPtr(const std::string&);
 
   /** set allNSProblems map - Warning: no copy between OneStepNSProblem of each map, pointers links!
    *  \param a OneStepNSProblems object (map of OneStepNSProblem*)
@@ -367,7 +356,7 @@ public:
   /** computes a one step NS problem
    *  \param a string, the id of the OneStepNSProblem to be computed
    */
-  virtual void computeOneStepNSProblem(const std::string& = DEFAULT_OSNS_NAME);
+  virtual void computeOneStepNSProblem(const std::string&);
 
   /** update input, state of each dynamical system and output
    *  \param lambda order used to compute input
@@ -413,10 +402,7 @@ public:
 
   /** call eventsManager processEvents.
    */
-  inline void processEvents()
-  {
-    eventsManager->processEvents();
-  };
+  void processEvents();
 };
 
 #endif // SIMULATION_H

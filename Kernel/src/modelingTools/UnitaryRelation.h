@@ -23,13 +23,12 @@
 #define UNITARYRELATION_H
 
 #include "SiconosConst.h"
-#include "SimpleVector.h"
-#include <vector>
+#include "Tools.h"
+#include "SiconosAlgebra.h"
 
 class Interaction;
 class DynamicalSystem;
 class DynamicalSystemsSet;
-class SimpleVector;
 
 /** Interface to single relations from Interactions
  *

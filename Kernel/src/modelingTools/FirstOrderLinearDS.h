@@ -22,10 +22,9 @@
 #ifndef FOLINEARDS_H
 #define FOLINEARDS_H
 
-#include "FirstOrderLinearDSXML.h"
 #include "FirstOrderNonLinearDS.h"
 
-class FirstOrderLinearDSXML;
+class FirstOrderNonLinearDS;
 
 /** First order linear systems - Inherits from DynamicalSystems
  *
@@ -118,7 +117,6 @@ public:
   /** xml constructor
   *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
-  *  \exception RuntimeException
   */
   FirstOrderLinearDS(DynamicalSystemXML *, NonSmoothDynamicalSystem* = NULL);
 
@@ -128,7 +126,6 @@ public:
   *  \param SiconosVector : the initial state of this DynamicalSystem
   *  \param string: plugin for A (optional)
   *  \param string: plugin for b (optional)
-  *  \exception RuntimeException
   */
   FirstOrderLinearDS(int, unsigned int, const SiconosVector&, const std::string& = "DefaultPlugin:computeA",
                      const std::string& = "DefaultPlugin:computeB");
@@ -137,7 +134,6 @@ public:
    *  \param int : reference number of the DynamicalSystem
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param SiconosMatrix : matrix A
-   *  \exception RuntimeException
    */
   FirstOrderLinearDS(int, const SiconosVector&, const SiconosMatrix&);
 
@@ -146,7 +142,6 @@ public:
    *  \param SiconosVector : the initial state of this DynamicalSystem
    *  \param SiconosMatrix : matrix A
    *  \param SiconosVector : b
-   *  \exception RuntimeException
    */
   FirstOrderLinearDS(int, const SiconosVector&, const SiconosMatrix&, const SiconosVector&);
 
@@ -253,12 +248,10 @@ public:
   void setComputeBFunction(const std::string , const std::string);
 
   /** default function to compute matrix A => same action as computeJacobianXF
-  *  \exception RuntimeException
   */
   void computeA(const double);
 
   /** default function to compute vector b
-  *  \exception RuntimeException
   */
   void computeB(const double);
 

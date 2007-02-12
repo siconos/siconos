@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "FirstOrderLinearTIDS.h"
+#include "FirstOrderLinearDSXML.h"
+
 using namespace std;
 
 // --- Constructors ---

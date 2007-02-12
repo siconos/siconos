@@ -53,8 +53,6 @@
 extern "C" {
 #endif
 
-#include <string>
-
   /*
    * EIFFEL_CHECK_LEVEL - this defines the various levels of checking.
    *

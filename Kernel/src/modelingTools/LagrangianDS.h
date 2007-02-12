@@ -24,15 +24,13 @@
 
 #ifndef LAGRANGIANNLDS_H
 #define LAGRANGIANNLDS_H
+
 #include "DynamicalSystem.h"
-#include "LagrangianDSXML.h"
-#include "BlockMatrix.h"
-#include<map>
 
 /** Pointer to function for plug-in. For NNL and its jacobian. */
 typedef void (*FPtr5)(unsigned int, const double*, const double*, double*, double*);
 
-class LagrangianDSXML;
+class DynamicalSystem;
 
 /** Lagrangian non linear dynamical systems - Derived from DynamicalSystem -
  *
@@ -222,7 +220,7 @@ protected:
 
   /** Map that links operators names with a bool. If bool is true, the operator
    is up to date, else not. Uselful to avoid re-computation of mass, fInt ... */
-  std::map<std::string, bool> isUp;
+  BoolMap isUp;
 
   /** set links with DS members
    */

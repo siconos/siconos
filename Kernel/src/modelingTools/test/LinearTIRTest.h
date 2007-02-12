@@ -20,7 +20,11 @@
 #define __LinearTIRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "RelationXML.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "NonSmoothDynamicalSystemXML.h"
 #include "LinearTIR.h"
+#include "LinearTIRXML.h"
 
 class LinearTIRTest : public CppUnit::TestFixture
 {

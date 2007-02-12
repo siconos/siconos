@@ -127,6 +127,10 @@
 #include "Sensor.h"
 #include "SensorPosition.h"
 #include "SensorEvent.h"
+#include "Actuator.h"
+#include "ExampleActuator.h"
+#include "ActuatorEvent.h"
+#include "ControlManager.h"
 
 %} 
 
@@ -280,6 +284,10 @@ $1 = string(PyString_AsString($input));
 %include "Sensor.h"
 %include "SensorPosition.h"
 %include "SensorEvent.h"
+%include "Actuator.h"
+%include "ExampleActuator.h"
+%include "ActuatorEvent.h"
+%include "ControlManager.h"
 
 namespace std {
   %template(intVector) vector<int>;

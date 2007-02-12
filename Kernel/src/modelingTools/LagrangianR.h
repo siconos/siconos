@@ -23,11 +23,9 @@
 #define LAGRANGIANRELATION_H
 
 #include "Relation.h"
-#include "LagrangianRXML.h"
-#include "LagrangianDS.h"
 
-
-class LagrangianRXML;
+class Relation;
+class DynamicalSystem;
 
 /** Lagrangian (Non Linear) Relation
  *

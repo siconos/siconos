@@ -21,25 +21,14 @@
 #ifndef NSDS_H
 #define NSDS_H
 
-#include "SiconosConst.h"
-
-#include "DynamicalSystem.h"
-#include "Interaction.h"
-#include "Topology.h"
-#include "NonSmoothDynamicalSystemXML.h"
-#include "DynamicalSystemsSet.h"
-#include "InteractionsSet.h"
-#include "check.h"
-#include <iostream>
-#include <map>
-#include <vector>
-#include <string>
-
 /** Available Dynamical Systems types*/
 enum dynamicalsystem {LAGRANGIANNLDS, LAGRANGIANTIDS, LINEARTIDS};
 
+#include "InteractionsSet.h"
+#include "DynamicalSystemsSet.h"
 
 class Interaction;
+class InteractionsSet;
 class DynamicalSystem;
 class Topology;
 class NonSmoothDynamicalSystemXML;
@@ -77,7 +66,6 @@ private:
   NonSmoothDynamicalSystemXML *nsdsxml;
 
   /** Flags to check whether pointers were allocated in class constructors or not */
-  std::deque<bool> isEcVectorAllocatedIn;
   bool isTopologyAllocatedIn;
 
   /** default constructor

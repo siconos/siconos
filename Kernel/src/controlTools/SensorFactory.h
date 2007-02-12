@@ -24,11 +24,10 @@
 #ifndef SensorFactory_H
 #define SensorFactory_H
 
-#include "TimeDiscretisation.h"
-# include <string>
-# include <map>
+#include<map>
 
 class Sensor;
+class TimeDiscretisation;
 
 /** Namespace for Sensor factory related objects. */
 namespace SensorFactory

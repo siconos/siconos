@@ -17,9 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "UnitaryRelationsSet.h"
-#include "LagrangianLinearTIDS.h"
-#include "FirstOrderLinearTIDS.h"
-
+#include "UnitaryRelation.h"
+#include "Interaction.h"
+#include "RuntimeException.h"
 using namespace std;
 
 //-- Default constructor --

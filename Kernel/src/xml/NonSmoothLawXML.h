@@ -26,12 +26,8 @@
 #define __NSLawXML__
 
 #include "SiconosDOMTreeTools.h"
-//#include "NonSmoothLaw.h"
-
 
 class NonSmoothLaw;
-
-//const string NSLAW_TYPE = "type";
 
 /** XML management for NonSmoothLaw
  *

@@ -23,15 +23,13 @@
 #define __INTERACTIONXML__
 
 #include "SiconosDOMTreeTools.h"
-
-#include "NonSmoothLawXML.h"
-#include "DynamicalSystem.h"
-#include "RelationXML.h"
+#include "SimpleVector.h"
 
 class DynamicalSystem;
 class Interaction;
 class NonSmoothLawXML;
 class RelationXML;
+class NonSmoothLawXML;
 
 /**  XML management for object Interaction
  *

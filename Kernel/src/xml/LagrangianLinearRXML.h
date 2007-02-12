@@ -24,8 +24,11 @@
 #define __LLRelationXML__
 
 #include "LagrangianRXML.h"
-#include "SimpleVector.h"
 #include "SimpleMatrix.h"
+#include "SimpleVector.h"
+
+class SimpleMatrix;
+class SimpleVector;
 
 const std::string  LLR_H = "H";
 const std::string  LLR_B = "b";
@@ -75,7 +78,7 @@ public:
   /** Return b vector of the LLRelationXML
   *   \return SimpleVector : b vector of the LLRelationXML
   */
-  inline /*SiconosVector*/SimpleVector getB()
+  inline SimpleVector getB()
   {
     return  SiconosDOMTreeTools::getSiconosVectorValue(bNode);
   }

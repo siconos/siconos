@@ -17,16 +17,15 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 /*! \file SiconosKernel.h
-Include files related to controlTools
+\brief Include files related to controlTools.
 Note that not all files from the current location are listed below, since some of them are already included inside the ones below.
 */
 
 #include "SensorFactory.h"
-#include "Sensor.h"
 #include "SensorPosition.h"
 #include "SensorEvent.h"
 #include "ActuatorFactory.h"
-#include "Actuator.h"
 #include "ExampleActuator.h"
 #include "ActuatorEvent.h"
 #include "ControlManager.h"
+

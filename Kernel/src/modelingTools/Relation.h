@@ -23,20 +23,27 @@
 #ifndef RELATION_H
 #define RELATION_H
 
-#include "SiconosConst.h"
-#include "Interaction.h"
-#include "RelationXML.h"
-#include "check.h"
-#include "SiconosSharedLibrary.h"
 #include "SimpleVector.h"
+#include "SimpleMatrix.h"
+#include "RuntimeException.h"
+#include "Tools.h"
+#include "SiconosSharedLibrary.h"
 
+/** General, First Order Relation name.*/
 const std::string RELATION = "Relation";
+
+/** Linear, Time Invariant coefficients and "First Order" Relations name.*/
 const std::string LINEARTIRELATION = "LinearTIR";
+
+/** Non linear, Lagrangian (second order) relations name.*/
 const std::string LAGRANGIANRELATION = "LagrangianR";
+
+/** Linear, Time Invariant Coefficients and Lagrangian (second order) relations name. */
 const std::string LAGRANGIANLINEARRELATION = "LagrangianLinearR";
 
 class Interaction;
 class RelationXML;
+class SimpleVector;
 
 /** General Non Linear Relation (Base class for Relations).
  *  \author SICONOS Development Team - copyright INRIA
@@ -94,12 +101,12 @@ protected:
   bool isInputPlugged;
 
   /** Flags to know if pointers have been allocated inside constructors or not */
-  std::map<std::string, bool> isAllocatedIn;
+  BoolMap isAllocatedIn;
 
   /** Parameters list, last argument of plug-in functions. What are those parameters depends on user´s choice.
    *  This a list of pointer to SimpleVector. Each one is identified thanks to a key which is the plug-in name.
    * A flag is also added in the isAllocatedIn map to check inside-class memory allocation for this object.*/
-  std::map<std::string, SimpleVector*> parametersList;
+  VectorMap parametersList;
 
   /** Relation plug-in to compute y(x,t) - id="output".
    *  @param sizeOfX : the size of the vector x
@@ -213,7 +220,7 @@ public:
   /** get the full map of parameters
    *  \return a map<string,SimpleVector*>
    */
-  inline std::map<std::string, SimpleVector*> getParameters() const
+  inline VectorMap getParameters() const
   {
     return parametersList;
   };
@@ -229,7 +236,7 @@ public:
   /** get the pointer to the vector of parameters corresponding to plug-in function named id
    *  \return a pointer on a SimpleVector
    */
-  inline SimpleVector* getParameterPtr(const std::string id)
+  inline SiconosVector* getParameterPtr(const std::string id)
   {
     return parametersList[id];
   };
@@ -237,7 +244,7 @@ public:
   /** set the map for parameters
    *  \param a map<string, SimpleVector*>
    */
-  void setParameters(const std::map<std::string, SimpleVector*>&);
+  void setParameters(const VectorMap&);
 
   /** set vector corresponding to plug-in function named id to newValue
    *  \param a SimpleVector

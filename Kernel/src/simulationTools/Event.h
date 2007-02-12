@@ -24,7 +24,6 @@
 #define EVENT_H
 
 #include "SiconosConst.h"
-#include "RuntimeException.h"
 #include<string>
 #include<iostream>
 

@@ -21,6 +21,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "FirstOrderLinearDS.h"
+#include "FirstOrderLinearDSXML.h"
 #include "RuntimeException.h"
 #include "XMLException.h"
 

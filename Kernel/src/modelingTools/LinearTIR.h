@@ -23,7 +23,9 @@
 #define LINEARTIRELATION_H
 
 #include "Relation.h"
-#include "LinearTIRXML.h"
+
+class Relation;
+class DynamicalSystem;
 
 /** Linear Time Invariant Relation, derived from class Relation
  *

@@ -23,8 +23,6 @@
 #ifndef SICONOSSHAREDLIBRARY_H
 #define SICONOSSHAREDLIBRARY_H
 
-#include "SiconosSharedLibraryException.h"
-#include <string>
 #include <iostream>
 #include <dlfcn.h>
 #include <vector>

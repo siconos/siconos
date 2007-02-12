@@ -18,6 +18,7 @@
 */
 
 #include "NonSmoothLaw.h"
+#include "NonSmoothLawXML.h"
 using namespace std;
 
 // Constructors

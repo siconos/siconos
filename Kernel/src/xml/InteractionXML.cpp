@@ -22,7 +22,6 @@
 // Relations
 #include "LinearTIRXML.h"
 #include "LagrangianLinearRXML.h"
-#include "LagrangianRXML.h"
 // Nslaw
 #include "ComplementarityConditionNSLXML.h"
 #include "RelayNSLXML.h"

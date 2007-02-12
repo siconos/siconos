@@ -19,11 +19,11 @@
 
 #include "Actuator.h"
 #include "ActuatorEvent.h"
-#include "SimpleVector.h"
 #include "Sensor.h"
 #include "Model.h"
 #include "TimeDiscretisation.h"
 #include "EventFactory.h"
+#include "DynamicalSystem.h"
 #include <iostream>
 using namespace std;
 

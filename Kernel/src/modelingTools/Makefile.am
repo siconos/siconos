@@ -26,22 +26,20 @@ include $(top_srcdir)/config/Make-rules
 SUBDIRS = test 
 
 noinst_LTLIBRARIES = libModelingTools.la
-libModelingTools_la_SOURCES =  DynamicalSystemsSet.cpp InteractionsSet.cpp ComplementarityConditionNSL.cpp \
-		DynamicalSystem.cpp FirstOrderNonLinearDS.cpp Interaction.cpp Topology.cpp \
-		LagrangianLinearR.cpp LagrangianDS.cpp LagrangianR.cpp \
-		LagrangianLinearTIDS.cpp FirstOrderLinearDS.cpp FirstOrderLinearTIDS.cpp\
-		LinearTIR.cpp NewtonImpactNSL.cpp NewtonImpactFrictionNSL.cpp NonSmoothLaw.cpp NonSmoothDynamicalSystem.cpp Relation.cpp RelayNSL.cpp \
-		UnitaryRelation.cpp UnitaryRelationsSet.cpp \
-		DynamicalSystemsSet.h  InteractionsSet.h ComplementarityConditionNSL.h \
-		DynamicalSystem.h FirstOrderNonLinearDS.h Interaction.h LagrangianLinearR.h LagrangianDS.h LagrangianR.h LagrangianLinearTIDS.h \
-		FirstOrderLinearDS.h FirstOrderLinearTIDS.h LinearTIR.h \
-		NewtonImpactNSL.h NewtonImpactFrictionNSL.h NonSmoothLaw.h NonSmoothDynamicalSystem.h \
-		Relation.h RelayNSL.h UnitaryRelation.h UnitaryRelationsSet.h ModelingTools.h 
+libModelingTools_la_SOURCES = DynamicalSystem.cpp FirstOrderNonLinearDS.cpp FirstOrderLinearDS.cpp FirstOrderLinearTIDS.cpp LagrangianDS.cpp \
+			      LagrangianLinearTIDS.cpp DynamicalSystemsSet.cpp Relation.cpp LagrangianR.cpp LagrangianLinearR.cpp LinearTIR.cpp \
+			      NonSmoothLaw.cpp NewtonImpactFrictionNSL.cpp NewtonImpactNSL.cpp RelayNSL.cpp ComplementarityConditionNSL.cpp \
+			      Interaction.cpp InteractionsSet.cpp UnitaryRelation.cpp UnitaryRelationsSet.cpp Topology.cpp NonSmoothDynamicalSystem.cpp \
+			      DynamicalSystem.h FirstOrderNonLinearDS.h FirstOrderLinearDS.h FirstOrderLinearTIDS.h LagrangianDS.h \
+			      LagrangianLinearTIDS.h DynamicalSystemsSet.h Relation.h LagrangianR.h LagrangianLinearR.h LinearTIR.h \
+			      NonSmoothLaw.h NewtonImpactFrictionNSL.h NewtonImpactNSL.h RelayNSL.h ComplementarityConditionNSL.h \
+			      Interaction.h InteractionsSet.h UnitaryRelation.h UnitaryRelationsSet.h Topology.h NonSmoothDynamicalSystem.h \
+			      ModelingTools.h 
 libModelingTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_REVISION):$(SICONOS_SO_AGE)
 
-siconos_HEADERS = DynamicalSystemsSet.h InteractionsSet.h ComplementarityConditionNSL.h \
-		DynamicalSystem.h FirstOrderNonLinearDS.h Interaction.h \
-		Topology.h LagrangianLinearR.h LagrangianDS.h LagrangianR.h LagrangianLinearTIDS.h \
-		FirstOrderLinearDS.h FirstOrderLinearTIDS.h LinearTIR.h NewtonImpactNSL.h NewtonImpactFrictionNSL.h \
-		NonSmoothLaw.h NonSmoothDynamicalSystem.h Relation.h RelayNSL.h UnitaryRelation.h \
-		UnitaryRelationsSet.h ModelingTools.h
+siconos_HEADERS = DynamicalSystem.h FirstOrderNonLinearDS.h FirstOrderLinearDS.h FirstOrderLinearTIDS.h LagrangianDS.h \
+		  LagrangianLinearTIDS.h DynamicalSystemsSet.h Relation.h LagrangianR.h LagrangianLinearR.h LinearTIR.h \
+		  NonSmoothLaw.h NewtonImpactFrictionNSL.h NewtonImpactNSL.h RelayNSL.h ComplementarityConditionNSL.h \
+		  Interaction.h InteractionsSet.h UnitaryRelation.h UnitaryRelationsSet.h Topology.h NonSmoothDynamicalSystem.h \
+		  ModelingTools.h
+

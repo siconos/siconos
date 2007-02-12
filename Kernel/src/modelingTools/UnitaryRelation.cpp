@@ -16,8 +16,10 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
+#include "DynamicalSystem.h"
 #include "DynamicalSystemsSet.h"
 #include "UnitaryRelation.h"
+#include "Interaction.h"
 #include "LinearTIR.h"
 #include "LagrangianR.h"
 #include "NewtonImpactNSL.h"

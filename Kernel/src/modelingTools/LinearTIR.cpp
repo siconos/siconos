@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "LinearTIR.h"
+#include "LinearTIRXML.h"
+#include "Interaction.h"
 #include "FirstOrderNonLinearDS.h"
 using namespace std;
 

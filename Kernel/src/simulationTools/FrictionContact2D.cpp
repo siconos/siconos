@@ -17,10 +17,11 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "FrictionContact2D.h"
+#include "Interaction.h"
+#include "Simulation.h"
+#include "Model.h"
+#include "NonSmoothDynamicalSystem.h"
 
-// includes to be deleted thanks to factories?
-#include "Moreau.h"
-#include "LagrangianLinearR.h"
 #include "NewtonImpactFrictionNSL.h"
 
 using namespace std;

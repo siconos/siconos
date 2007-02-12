@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "LagrangianLinearR.h"
+#include "LagrangianLinearRXML.h"
+#include "Interaction.h"
 //
 #include "LagrangianDS.h"
 

@@ -21,6 +21,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "Model.h"
+#include "SiconosModelXML.h"
 #include "TimeStepping.h"
 #include "EventDriven.h"
 

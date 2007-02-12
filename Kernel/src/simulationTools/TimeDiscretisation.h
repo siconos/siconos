@@ -21,17 +21,12 @@
 #ifndef TIMEDISCRETISATION_H
 #define TIMEDISCRETISATION_H
 
-#include "TimeDiscretisationXML.h"
-#include "check.h"
-#include "Simulation.h"
-#include <iostream>
-#include <vector>
+#include "SimpleVector.h"
 
 class Model;
 class TimeDiscretisationXML;
 class SiconosVector;
 class SimpleVector;
-
 
 /** A time discretisation scheme
  *

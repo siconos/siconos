@@ -16,41 +16,11 @@
 *
 * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include <iostream>
-#include "Model.h"
-#include "check.h"
 
-#include "LagrangianDS.h"
-#include "FirstOrderLinearDS.h"
-
-#include "LagrangianLinearTIDS.h"
-#include "LagrangianR.h"
-
-#include "LagrangianLinearR.h"
-#include "NewtonImpactNSL.h"
-
-#include "TimeStepping.h"
-#include "Moreau.h"
-#include "LCP.h"
-
-#include <libxml/parser.h>
-#include "SiconosVector.h"
-#include "SimpleVector.h"
-#include "SimpleMatrix.h"
-#include "SiconosDOMTreeTools.h"
-#include <math.h>
-#include <stdio.h>
-#include "LCP.h"
-
-#include <sys/time.h>
-
+#include "SiconosKernel.h"
 #include "SiconosApiC.h"
 
-
-
 using namespace std;
-
-
 
 //
 // TODO: add a structure with array and manage index

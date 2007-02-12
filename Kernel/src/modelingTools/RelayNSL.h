@@ -23,7 +23,8 @@
 #define RELAYNSLAW_H
 
 #include "NonSmoothLaw.h"
-#include "RelayNSLXML.h"
+
+class NonSmoothLaw;
 
 /** Relay Non Smooth Law
  *

@@ -18,30 +18,25 @@
  */
 
 /*! \file DynamicalSystem.h
-
-Abstract class - General interface for all Dynamical Systems.
+  \brief Abstract class - General interface for all Dynamical Systems.
 */
 
 #ifndef DYNAMICALSYSTEM_H
 #define DYNAMICALSYSTEM_H
 
-#include "SiconosConst.h"
-#include "RuntimeException.h"
-#include "SimpleMatrix.h"
-#include "SimpleVector.h"
-#include "SiconosMemory.h"
 #include "SiconosSharedLibrary.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "DynamicalSystemXML.h"
-#include <string>
-#include <vector>
-#include <iostream>
-#include <map>
+#include "RuntimeException.h"
+#include "Tools.h"
+#include "SimpleVector.h"
+#include "SimpleMatrix.h"
+#include "SiconosMemory.h"
 
 class NonSmoothDynamicalSystem;
 class DynamicalSystemXML;
 class SiconosVector;
+class SiconosMatrix;
 class SimpleMatrix;
+class SimpleVector;
 class SiconosMemory;
 class SiconosSharedLibrary;
 
@@ -62,12 +57,6 @@ typedef std::map<const std::string , SiconosVector*> WorkMap;
 
 /** A map to save temporary working matrices */
 typedef std::map<std::string , SiconosMatrix*> WorkMap2;
-
-/** A map to link string to bool (for plug-in flags)  */
-typedef std::map<std::string, bool> BoolMap;
-
-/** Map used to save the list of plug-in names. */
-typedef std::map<std::string, std::string> NamesList;
 
 /** Pointer to function for plug-in. */
 typedef void (*FPtr6)(unsigned int, double, const double*, const double*, double*, double*);
@@ -249,7 +238,6 @@ public:
   /** xml constructor
    *  \param DynamicalSystemXML* : the XML object for this DynamicalSystem
    *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
-   *  \exception RuntimeException
    */
   DynamicalSystem(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* = NULL);
 
@@ -781,7 +769,6 @@ public:
   /** Default function to jacobian of the right-hand side term according to x
    *  \param double time : current time
    *  \param bool isDSup : flag to avoid recomputation of operators
-   *  \exception RuntimeException
    */
   virtual void computeJacobianXRhs(double, bool  = false) = 0;
 

@@ -16,6 +16,9 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
+/*! \file SiconosConst.h
+\brief General constants for Siconos Kernel.
+*/
 #ifndef __SICONOSCONST__
 #define __SICONOSCONST__
 

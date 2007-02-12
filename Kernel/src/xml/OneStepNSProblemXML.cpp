@@ -18,6 +18,8 @@
  */
 
 #include "OneStepNSProblemXML.h"
+#include "SolverXML.h"
+
 using namespace std;
 
 

@@ -25,7 +25,6 @@
 
 #include "SiconosDOMTreeTools.h"
 #include "SimpleVector.h"
-#include "TimeDiscretisation.h"
 
 class TimeDiscretisation;
 

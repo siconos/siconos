@@ -21,6 +21,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "LagrangianDS.h"
+#include "LagrangianDSXML.h"
 #include "RuntimeException.h"
 #include "XMLException.h"
 

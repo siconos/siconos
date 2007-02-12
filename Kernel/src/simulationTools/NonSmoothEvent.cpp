@@ -19,6 +19,8 @@
 #include "NonSmoothEvent.h"
 #include "EventFactory.h"
 #include "EventDriven.h"
+#include "OneStepIntegrator.h"
+
 using namespace std;
 using namespace EventFactory;
 

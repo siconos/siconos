@@ -17,6 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "FirstOrderLinearDS.h"
+#include "FirstOrderLinearDSXML.h"
+
 using namespace std;
 
 void FirstOrderLinearDS::initAllocationFlags(bool in) // default in = true.

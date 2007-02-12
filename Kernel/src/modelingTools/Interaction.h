@@ -25,20 +25,9 @@
 #ifndef INTERACTION_H
 #define INTERACTION_H
 
-// for composition ...
-#include "NonSmoothLaw.h"
-#include "Relation.h"
-#include "NonSmoothDynamicalSystem.h"
-#include "DynamicalSystemsSet.h"
-#include "BlockVector.h"
-// IO (XML)
-#include "InteractionXML.h"
-
 // const
-#include "SiconosConst.h"
-
-// stl tools
-#include <vector>
+#include "BlockVector.h"
+#include "DynamicalSystemsSet.h"
 
 class DynamicalSystemsSet;
 class NonSmoothLaw;
@@ -46,6 +35,7 @@ class DynamicalSystem;
 class Relation;
 class NonSmoothDynamicalSystem;
 class InteractionXML;
+class BlockVector;
 
 /**  An Interaction describes the non-smooth interactions between a set of Dynamical Systems.
  *

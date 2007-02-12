@@ -26,13 +26,17 @@ Include files related to utils directory
 #include "SimpleVector.h"
 #include "ioMatrix.h"
 #include "ioVector.h"
+
 #include "RuntimeException.h"
 #include "SiconosMatrixException.h"
-#include "SiconosSharedLibraryException.h"
 #include "XMLException.h"
-#include "SiconosMemoryException.h"
 #include "SiconosVectorException.h"
+#include "SiconosSharedLibraryException.h"
+
 #include "SiconosMemory.h"
+
 #include "SiconosSharedLibrary.h"
+
 #include "Tools.h"
 #include "RuntimeCmp.h"
+#include "check.h"

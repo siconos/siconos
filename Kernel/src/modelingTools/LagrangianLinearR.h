@@ -23,10 +23,10 @@
 #define LAGRANGIANLINEARRELATION_H
 
 #include "LagrangianR.h"
-#include "LagrangianLinearRXML.h"
 
-#include "SimpleVector.h"
-#include "BlockVector.h"
+class SimpleVector;
+class LagrangianR;
+class LagrangianLinearRXML;
 
 /**  Lagrangian Linear Relation, derived from class LagrangianR
  *

@@ -17,6 +17,13 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "OneStepNSProblem.h"
+#include "OneStepNSProblemXML.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "UnitaryRelation.h"
+#include "Interaction.h"
+#include "Topology.h"
+#include "Simulation.h"
+#include "Model.h"
 #include "Moreau.h"
 #include "LagrangianDS.h"
 using namespace std;

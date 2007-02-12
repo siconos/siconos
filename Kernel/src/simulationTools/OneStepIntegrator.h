@@ -22,22 +22,13 @@
 #ifndef ONESTEPINTEGRATOR_H
 #define ONESTEPINTEGRATOR_H
 
-#include "RuntimeCmp.h"
-#include "TimeDiscretisation.h"
-#include "DynamicalSystem.h"
-#include "SiconosMatrix.h"
-#include "SiconosVector.h"
-#include "OneStepIntegratorXML.h"
-#include "Simulation.h"
 #include "SiconosConst.h"
-#include "SiconosNumerics.h"
 #include "DynamicalSystemsSet.h"
-#include "check.h"
-#include <iostream>
-#include <vector>
-#include <set>
+#include "InteractionsSet.h"
+#include "RuntimeException.h"
 
 class DynamicalSystem;
+class DynamicalSystemsSet;
 class TimeDiscretisation;
 class OneStepIntegratorXML;
 class Simulation;
@@ -96,7 +87,7 @@ protected:
 
   /** constructor from a minimum set of data
   *  \param string, integrator type/name
-  *  \param DynamicalSystem* : the DynamicalSystem to be integrated
+  *  \param DynamicalSystemsSet : a set of DynamicalSystem to be integrated
   *  \param Simulation * : the simulation that owns the osi
   */
   OneStepIntegrator(const std::string, const DynamicalSystemsSet&, Simulation*);
@@ -245,7 +236,6 @@ public:
   virtual void display() = 0;
 
   /** copy the data of the OneStepNSProblem to the XML tree
-  *  \exception RuntimeException
   */
   void saveIntegratorToXML();
 

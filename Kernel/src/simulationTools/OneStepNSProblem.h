@@ -22,25 +22,17 @@
 #ifndef ONESTEPNSPROBLEM_H
 #define ONESTEPNSPROBLEM_H
 
-#include "Simulation.h"
-/* #include "Interaction.h" */
-/* #include "EqualityConstraint.h" */
-#include "SiconosMatrix.h"
-#include "SimpleVector.h"
-#include "OneStepNSProblemXML.h"
-#include "Topology.h"
-#include "SiconosConst.h"
-#include "SiconosNumerics.h"
-#include "check.h"
+#include "InteractionsSet.h"
+#include "RuntimeException.h"
 #include "Solver.h"
-#include <iostream>
-#include <vector>
-#include <string>
 
 const std::string DEFAULT_OSNSPB = "LCP";
 
 class Simulation;
-class Interaction;
+class SiconosVector;
+class DynamicalSystem;
+class UnitaryRelation;
+class InteractionsSet;
 class EqualityConstraint;
 class SiconosMatrix;
 class OneStepNSProblemXML;
@@ -71,6 +63,9 @@ typedef std::map<DynamicalSystem*, SiconosMatrix*> MapOfMatrices;
 
 /** map of double; key = the related DS */
 typedef std::map<DynamicalSystem*, double> MapOfDouble;
+
+/** default name for One Step NS Problem of the simulation */
+const std::string DEFAULT_OSNS_NAME = "unamed";
 
 /** Non Smooth Problem Formalization and Simulation
  *

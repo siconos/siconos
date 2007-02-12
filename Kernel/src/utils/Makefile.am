@@ -22,7 +22,7 @@ include $(top_srcdir)/config/Make-rules
 
 SUBDIRS = SiconosTools SiconosException SiconosSharedLibrary SiconosAlgebra SiconosMemory contract boost
 
-EXTRA_DIST = utils.h
+EXTRA_DIST = Utils.h
 
-siconos_HEADERS = utils.h
+siconos_HEADERS = Utils.h
 

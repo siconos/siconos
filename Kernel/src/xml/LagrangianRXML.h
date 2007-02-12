@@ -25,8 +25,8 @@
 #define __LAGRANGIANRelationXML__
 
 #include "RelationXML.h"
-#include "SimpleMatrix.h"
-#include <vector>
+
+class SimpleMatrix;
 
 const std::string LAGRANGIANR_MATRIXPLUGIN = "matrixPlugin";
 

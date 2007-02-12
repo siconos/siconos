@@ -23,6 +23,8 @@
 #include "Sensor.h"
 #include "SensorFactory.h"
 #include "ActuatorFactory.h"
+#include "Simulation.h"
+#include "TimeDiscretisation.h"
 
 using namespace std;
 

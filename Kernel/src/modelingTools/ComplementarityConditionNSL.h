@@ -27,7 +27,8 @@
 #define COMPLEMENTARITYCONDITIONNSLAW_H
 
 #include "NonSmoothLaw.h"
-#include "ComplementarityConditionNSLXML.h"
+
+class NonSmoothLaw;
 
 /** Complementarity NonSmoothLaw
  *

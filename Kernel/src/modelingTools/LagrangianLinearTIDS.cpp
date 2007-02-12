@@ -17,6 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "LagrangianLinearTIDS.h"
+#include "LagrangianLinearTIDSXML.h"
+#include "BlockMatrix.h"
+
 using namespace std;
 
 // --- Default (private) constructor ---

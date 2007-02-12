@@ -18,8 +18,11 @@
  */
 
 #include "Model.h"
-
-// includes to be deleted thanks to factories ...
+#include "SiconosModelXML.h"
+#include "SimulationXML.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "NonSmoothDynamicalSystemXML.h"
+#include "TimeDiscretisation.h"
 #include "TimeStepping.h"
 #include "EventDriven.h"
 
@@ -36,47 +39,46 @@ Model::Model(): t(0.0), t0(0.0), T(0.0), strat(NULL), nsds(NULL),
 Model::Model(char *xmlFile):
   t(0.0), t0(0.0), T(-1.0), strat(NULL), nsds(NULL),
   modelxml(NULL), title("none"), author("nobody"), description("none"),
-  date("none"), xmlSchema(XML_SCHEMA),
-  isNsdsAllocatedIn(true), isSimulationAllocatedIn(false), isModelXmlAllocatedIn(true)
+  date("none"), xmlSchema(XML_SCHEMA)
 {
-  if (xmlFile != NULL)
+  if (xmlFile == NULL)
+    RuntimeException::selfThrow("Model: xml constructor, xmlfile = NULL");
+
+  // Built DOMtree
+  modelxml = new SiconosModelXML(xmlFile);
+  isAllocatedIn["ModelXml"] = true;
+
+  // Load data (default value for T is -1)
+  if (modelxml->hasT()) T = modelxml->getT();
+  t0 = modelxml->getT0();
+  if (modelxml->hasTCurrent()) t = modelxml->getTCurrent();
+  else t = t0;
+  title = modelxml->getTitle();
+  author = modelxml->getAuthor();
+  description = modelxml->getDescription();
+  date = modelxml->getDate();
+  if (modelxml->hasXMLSchema())
+    xmlSchema = modelxml->getXMLSchema();
+
+  // Memory allocation for nsds and simulation
+  nsds = new NonSmoothDynamicalSystem(modelxml->getNonSmoothDynamicalSystemXML());
+  isAllocatedIn["Nsds"] = true;
+  if (modelxml->hasSimulation())
   {
-    // Built DOMtree
-    modelxml = new SiconosModelXML(xmlFile);
-
-    // Load data (default value for T is -1)
-    if (modelxml->hasT()) T = modelxml->getT();
-    t0 = modelxml->getT0();
-    if (modelxml->hasTCurrent()) t = modelxml->getTCurrent();
-    else t = t0;
-    title = modelxml->getTitle();
-    author = modelxml->getAuthor();
-    description = modelxml->getDescription();
-    date = modelxml->getDate();
-    if (modelxml->hasXMLSchema())
-      xmlSchema = modelxml->getXMLSchema();
-
-    // Memory allocation for nsds and simulation
-    nsds = new NonSmoothDynamicalSystem(modelxml->getNonSmoothDynamicalSystemXML());
-    if (modelxml->hasSimulation())
-    {
-      isSimulationAllocatedIn = true;
-      if (modelxml->getSimulationXML()->getSimulationXMLType() == TIMESTEPPING_TAG)
-        strat = new TimeStepping(modelxml->getSimulationXML(), this);
-      else if (modelxml->getSimulationXML()->getSimulationXMLType() == EVENTDRIVEN_TAG)
-        strat = new EventDriven(modelxml->getSimulationXML(), this);
-      else RuntimeException::selfThrow("Model: xml constructor, wrong type of simulation" + (modelxml->getSimulationXML()->getSimulationXMLType()));
-    }
+    isAllocatedIn["Simulation"] = true;
+    if (modelxml->getSimulationXML()->getSimulationXMLType() == TIMESTEPPING_TAG)
+      strat = new TimeStepping(modelxml->getSimulationXML(), this);
+    else if (modelxml->getSimulationXML()->getSimulationXMLType() == EVENTDRIVEN_TAG)
+      strat = new EventDriven(modelxml->getSimulationXML(), this);
+    else RuntimeException::selfThrow("Model: xml constructor, wrong type of simulation" + (modelxml->getSimulationXML()->getSimulationXMLType()));
   }
-  else RuntimeException::selfThrow("Model: xml constructor, xmlfile = NULL");
 }
 
 // --- From a minimum set of data ---
 Model::Model(double newT0, double newT, const string& newTitle, const string& newAuthor,
              const string& newDescription, const string& newDate, const string& newSchema):
   t(newT0), t0(newT0), T(-1), strat(NULL), nsds(NULL), modelxml(NULL), title(newTitle),
-  author(newAuthor), description(newDescription), date(newDate), xmlSchema(newSchema),
-  isNsdsAllocatedIn(false), isSimulationAllocatedIn(false), isModelXmlAllocatedIn(false)
+  author(newAuthor), description(newDescription), date(newDate), xmlSchema(newSchema)
 {
   if (newT > t0) T = newT;
   else if (newT > 0 && newT <= t0)
@@ -86,11 +88,11 @@ Model::Model(double newT0, double newT, const string& newTitle, const string& ne
 
 Model::~Model()
 {
-  if (isNsdsAllocatedIn) delete nsds;
+  if (isAllocatedIn["Nsds"]) delete nsds;
   nsds = NULL;
-  if (isSimulationAllocatedIn) delete strat;
+  if (isAllocatedIn["Simulation"]) delete strat;
   strat = NULL;
-  if (isModelXmlAllocatedIn) delete modelxml;
+  if (isAllocatedIn["ModelXml"]) delete modelxml;
   modelxml = NULL;
 }
 
@@ -98,23 +100,23 @@ void Model::setSimulationPtr(Simulation *newPtr)
 {
   // Warning: this function may be used carefully because of the links between Model and TimeDiscretisation
   // The model of the simulation input MUST be the current model.
-  if (isSimulationAllocatedIn) delete strat;
+  if (isAllocatedIn["Simulation"]) delete strat;
   strat = newPtr;
-  isSimulationAllocatedIn = false;
+  isAllocatedIn["Simulation"] = false;
 }
 
 void Model::setNonSmoothDynamicalSystemPtr(NonSmoothDynamicalSystem *newPtr)
 {
-  if (isNsdsAllocatedIn) delete nsds;
+  if (isAllocatedIn["Nsds"]) delete nsds;
   nsds = newPtr;
-  isNsdsAllocatedIn = false;
+  isAllocatedIn["Nsds"] = false;
 }
 
 void Model::setSiconosModelXMLPtr(SiconosModelXML *newPtr)
 {
-  if (isModelXmlAllocatedIn) delete modelxml;
+  if (isAllocatedIn["ModelXml"]) delete modelxml;
   modelxml = newPtr;
-  isModelXmlAllocatedIn = false;
+  isAllocatedIn["ModelXml"] = false;
 }
 
 // --- OTHER FUNCTIONS ---
@@ -234,6 +236,7 @@ void Model::checkXMLPlatform()
     // to build all the XML objects, we must fold all the objects of the platform
 
     modelxml = new SiconosModelXML();
+    isAllocatedIn["ModelXml"] = true;
     modelxml->loadModel(this);
   }
 }

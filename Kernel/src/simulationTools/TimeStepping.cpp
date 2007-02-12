@@ -18,9 +18,19 @@
  */
 
 #include "TimeStepping.h"
+#include "SimulationXML.h"
+#include "OneStepNSProblemXML.h"
+#include "Topology.h"
 #include "LCP.h"
 #include "FrictionContact2D.h"
 #include "FrictionContact3D.h"
+#include "Model.h"
+#include "TimeDiscretisation.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "UnitaryRelation.h"
+#include "OneStepIntegrator.h"
+#include "Interaction.h"
+#include "EventsManager.h"
 
 using namespace std;
 

@@ -139,3 +139,13 @@ typedef std::vector<SiconosMatrix*> VectorOfMatrices;
 
 /** Iterator through vector of matrices */
 typedef VectorOfMatrices::iterator VectorOfMatricesIterator;
+
+/** A map that links a string to a pointer to SiconosVector. */
+typedef std::map<std::string, SiconosVector*> VectorMap;
+
+/** An iterator through a map that links a string to a pointer to SiconosVector. */
+typedef VectorMap::iterator VectorMapIterator;
+
+/** A const iterator through a map that links a string to a pointer to SiconosVector. */
+typedef VectorMap::const_iterator VectorMapConstIterator;
+

@@ -24,12 +24,9 @@
 #define EVENTSMANAGER_H
 
 #include "SiconosConst.h"
-#include "RuntimeException.h"
 #include "RuntimeCmp.h"
-#include<set>
-#include<deque>
-#include<string>
 #include<iostream>
+#include<set>
 
 class Simulation;
 class Event;

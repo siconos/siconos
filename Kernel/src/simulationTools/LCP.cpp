@@ -17,11 +17,15 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "LCP.h"
-#include <stdlib.h>
-
-// includes to be deleted thanks to factories?
-#include "LagrangianLinearR.h"
-#include "LinearTIR.h"
+#include "LCPXML.h"
+#include "Topology.h"
+#include "UnitaryRelation.h"
+#include "Simulation.h"
+#include "Model.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "Relation.h"
+#include "DynamicalSystem.h"
+#include "TimeDiscretisation.h"
 
 using namespace std;
 

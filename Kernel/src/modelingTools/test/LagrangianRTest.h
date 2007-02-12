@@ -21,6 +21,9 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "LagrangianR.h"
+#include "LagrangianRXML.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "NonSmoothDynamicalSystemXML.h"
 
 class LagrangianRTest : public CppUnit::TestFixture
 {

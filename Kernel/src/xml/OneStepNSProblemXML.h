@@ -23,11 +23,9 @@
 #define __OneStepNSProblemXML__
 
 #include "SiconosDOMTreeTools.h"
-#include "SolverXML.h"
-
-//Tags
 
 class OneStepNSProblem;
+class SolverXML;
 /** XML management for OneStepNSProblem
  *
  *  \author SICONOS Development Team - copyright INRIA

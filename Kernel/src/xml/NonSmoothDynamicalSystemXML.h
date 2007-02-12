@@ -25,11 +25,7 @@
 #define __NonSmoothDynamicalSystemXML__
 
 #include "SiconosDOMTreeTools.h"
-
-#include "InteractionXML.h"
-#include "DynamicalSystemXML.h"
 #include <set>
-#include <map>
 
 class NonSmoothDynamicalSystem;
 class InteractionXML;

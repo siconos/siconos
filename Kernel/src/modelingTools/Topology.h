@@ -23,14 +23,9 @@
 #ifndef TOPOLOGY_H
 #define TOPOLOGY_H
 
-// const
 #include "SiconosConst.h"
 #include "InteractionsSet.h"
 #include "UnitaryRelationsSet.h"
-#include <vector>
-#include <string>
-#include <map>
-#include <set>
 
 class NonSmoothDynamicalSystem;
 class InteractionsSet;

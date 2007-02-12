@@ -31,8 +31,10 @@ Note that not all files from the current location are listed below, since some o
 
 #include "LinearTIR.h"
 #include "LagrangianLinearR.h"
-#include "InteractionsSet.h"
 
 #include "LagrangianLinearTIDS.h"
 #include "FirstOrderLinearTIDS.h"
+
+#include "NonSmoothDynamicalSystem.h"
+#include "UnitaryRelation.h"
 

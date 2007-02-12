@@ -24,20 +24,17 @@
 #ifndef Sensor_H
 #define Sensor_H
 
+#include "Tools.h"
+#include "SiconosAlgebra.h"
 #include "EventsManager.h"
-#include <string>
-#include <map>
 
 class SiconosVector;
 class TimeDiscretisation;
 class Model;
 class Event;
 
-/** A map that links a string to a SiconosVector, used to store data and identify them thanks to the string.*/
-typedef std::map<std::string, SiconosVector*> Data;
-
 /** The object used to store data in the Sensor. To each Event corresponds a Data */
-typedef std::map<Event*, Data>  DataSet;
+typedef std::map<Event*, VectorMap>  DataSet;
 
 /** Sensor Base Class
  *

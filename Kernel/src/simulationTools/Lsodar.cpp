@@ -20,7 +20,11 @@
 #include "Lsodar.h"
 #include "EventDriven.h"
 #include "LagrangianLinearTIDS.h"
-#include "odepack.h"
+#include "TimeDiscretisation.h"
+#include "BlockVector.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "Model.h"
+#include "Topology.h"
 
 using namespace std;
 

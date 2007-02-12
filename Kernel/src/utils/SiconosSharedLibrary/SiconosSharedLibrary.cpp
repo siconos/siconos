@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "SiconosSharedLibrary.h"
+#include "SiconosSharedLibraryException.h"
 using namespace std;
 
 //*************************************************************************

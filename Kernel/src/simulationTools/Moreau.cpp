@@ -18,10 +18,12 @@
  */
 #include "Moreau.h"
 #include "MoreauXML.h"
+#include "Simulation.h"
+#include "Model.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "TimeDiscretisation.h"
 
 #include "LagrangianLinearTIDS.h"
-#include "LagrangianDS.h"
-#include "FirstOrderLinearDS.h"
 #include "FirstOrderLinearTIDS.h"
 
 using namespace std;

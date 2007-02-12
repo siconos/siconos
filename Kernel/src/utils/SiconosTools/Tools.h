@@ -18,15 +18,21 @@
  */
 
 /*! \file Tools.h
-  Various useful functions.
+  Various useful functions and typedef.
 */
 
 #ifndef TOOLS
 #define TOOLS
 
-#include<iostream>
 #include<string>
 #include <sstream>
+#include <map>
+
+/** A map to link string to bool (for plug-in flags)  */
+typedef std::map<std::string, bool> BoolMap;
+
+/** Map used to save the list of plug-in names. */
+typedef std::map<std::string, std::string> NamesList;
 
 /** A function to convert any type to string*/
 template <class T> std::string toString(const T& obj)

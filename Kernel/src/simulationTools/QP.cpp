@@ -18,8 +18,9 @@
 */
 
 #include "QP.h"
-using namespace std;
+#include "QPXML.h"
 
+using namespace std;
 
 QP::QP(OneStepNSProblemXML* osnspbxml, Simulation* newStrat):
   OneStepNSProblem("QP", osnspbxml, newStrat), Q(NULL), p(NULL),

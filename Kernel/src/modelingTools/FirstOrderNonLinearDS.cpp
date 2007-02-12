@@ -18,6 +18,7 @@
  */
 #include "FirstOrderNonLinearDS.h"
 #include "FirstOrderNonLinearDSXML.h"
+#include "BlockVector.h"
 
 using namespace std;
 

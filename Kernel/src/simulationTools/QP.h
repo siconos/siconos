@@ -15,14 +15,18 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /*! \file
  */
 #ifndef QP_H
 #define QP_H
 
 #include "OneStepNSProblem.h"
-#include "QPXML.h"
+#include "SimpleMatrix.h"
+#include "SimpleVector.h"
+
+class SimpleMatrix;
+class SimpleVector;
 
 /** Quadratic Problem
  *
@@ -38,43 +42,44 @@ class QP : public OneStepNSProblem
 public:
 
   /** xml constructor
-  *  \param OneStepNSProblemXML* : the XML linked-object
-  *  \param Simulation *: the simulation that owns the problem (optional)
-  */
+   *  \param OneStepNSProblemXML* : the XML linked-object
+   *  \param Simulation *: the simulation that owns the problem (optional)
+   */
   QP(OneStepNSProblemXML*, Simulation * = NULL);
 
+  /** Destructor */
   ~QP();
 
   // --- GETTERS/SETTERS ---
 
   // --- Q ---
   /** get the value of Q
-  *  \return SimpleMatrix
-  */
+   *  \return SimpleMatrix
+   */
   inline const SimpleMatrix getQ() const
   {
     return *Q;
   }
 
   /** get Q
-  *  \return pointer on a SiconosMatrix
-  */
+   *  \return pointer on a SiconosMatrix
+   */
   inline SiconosMatrix* getQPtr() const
   {
     return Q;
   }
 
   /** set the value of Q to newValue
-  *  \param SiconosMatrix newValue
-  */
+   *  \param SiconosMatrix newValue
+   */
   inline void setQ(const SiconosMatrix& newValue)
   {
     *Q = newValue;
   }
 
   /** set Q to pointer newPtr
-  *  \param SiconosMatrix * newPtr
-  */
+   *  \param SiconosMatrix * newPtr
+   */
   inline void setQPtr(SiconosMatrix *newPtr)
   {
     if (isQAllocatedIn) delete Q;
@@ -84,33 +89,33 @@ public:
 
   // --- P ---
   /** get the value of p, the initial state of the DynamicalSystem
-  *  \return SimpleVector
-  *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
-  */
+   *  \return SimpleVector
+   *  \warning: SiconosVector is an abstract class => can not be an lvalue => return SimpleVector
+   */
   inline const SimpleVector getP() const
   {
     return *p;
   }
 
   /** get p, the initial state of the DynamicalSystem
-  *  \return pointer on a SimpleVector
-  */
+   *  \return pointer on a SimpleVector
+   */
   inline SimpleVector* getPPtr() const
   {
     return p;
   }
 
   /** set the value of p to newValue
-  *  \param SimpleVector newValue
-  */
+   *  \param SimpleVector newValue
+   */
   inline void setP(const SimpleVector& newValue)
   {
     *p = newValue;
   }
 
   /** set p to pointer newPtr
-  *  \param SimpleVector * newPtr
-  */
+   *  \param SimpleVector * newPtr
+   */
   inline void setPPtr(SimpleVector* newPtr)
   {
     if (isPAllocatedIn) delete p;
@@ -121,37 +126,37 @@ public:
   // --- OTHER FUNCTIONS ---
 
   /** make the computation so solve the NS problem
-  */
+   */
   void compute(const double &);
 
   /** copy the data of the OneStepNSProblem to the XML tree
-  *  \exception RuntimeException
-  */
+   *  \exception RuntimeException
+   */
   void saveNSProblemToXML();
 
   /** copy the matrix Q of the OneStepNSProblem to the XML tree
-  *  \exception RuntimeException
-  */
+   *  \exception RuntimeException
+   */
   void saveQToXML();
 
   /** copy the vector p of the OneStepNSProblem to the XML tree
-  *  \exception RuntimeException
-  */
+   *  \exception RuntimeException
+   */
   void savePToXML();
 
   /** print the data to the screen
-  */
+   */
   void display() const;
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-  *  \param OneStepNSProblem* : the one step problem which must be converted
-  * \return a pointer on the problem if it is of the right type, NULL otherwise
-  */
+   *  \param OneStepNSProblem* : the one step problem which must be converted
+   * \return a pointer on the problem if it is of the right type, NULL otherwise
+   */
   static QP* convert(OneStepNSProblem* osnsp);
 
 private:
   /** default constructor
-  */
+   */
   QP();
 
   /** contains the Q matrix of a QP problem */

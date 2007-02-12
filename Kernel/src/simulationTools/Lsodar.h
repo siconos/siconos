@@ -24,8 +24,11 @@
 #ifndef Lsodar_H
 #define Lsodar_H
 
-#include "OneStepIntegrator.h"
-#include "LsodarXML.h"
+#include"OneStepIntegrator.h"
+#include"SiconosNumerics.h"
+#include<vector>
+
+class BlockVector;
 
 /** Lsodar solver (odepack)
  *

@@ -17,8 +17,10 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "NonSmoothDynamicalSystem.h"
-
-// includes to be deleted thanks to factories
+#include "NonSmoothDynamicalSystemXML.h"
+#include "DynamicalSystemXML.h"
+#include "Topology.h"
+#include "Interaction.h"
 #include "LagrangianLinearTIDS.h"
 #include "FirstOrderLinearTIDS.h"
 

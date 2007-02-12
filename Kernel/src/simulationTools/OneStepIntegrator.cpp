@@ -16,7 +16,14 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
+
+#include "OneStepIntegrator.h"
 #include "OneStepIntegratorXML.h"
+#include "Simulation.h"
+#include "Model.h"
+#include "DynamicalSystem.h"
+#include "NonSmoothDynamicalSystem.h"
+
 using namespace std;
 
 //-- Default constructor --

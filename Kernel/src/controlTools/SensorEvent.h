@@ -23,7 +23,8 @@ Sensor Events
 #define SensorEvent_H
 
 #include "Event.h"
-#include "Sensor.h"
+
+class Sensor;
 
 /** Events when sensor data capture is done.
  *

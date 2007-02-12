@@ -17,7 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "LagrangianDS.h"
-#include "Tools.h"
+#include "LagrangianDSXML.h"
+#include "BlockVector.h"
+#include "BlockMatrix.h"
 
 using namespace std;
 

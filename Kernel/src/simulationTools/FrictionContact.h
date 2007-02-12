@@ -23,7 +23,8 @@
 #define FrictionContact_H
 
 #include "OneStepNSProblem.h"
-#include "FrictionContactXML.h"
+#include "SimpleVector.h"
+#include "SimpleMatrix.h"
 
 /** Formalization and Resolution of a Friction-Contact Problem
  *

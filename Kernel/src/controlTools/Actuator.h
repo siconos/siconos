@@ -24,10 +24,9 @@
 #ifndef Actuator_H
 #define Actuator_H
 
-#include "DynamicalSystemsSet.h"
-#include "EventsManager.h"
-#include <string>
-#include <map>
+#include"DynamicalSystemsSet.h"
+#include"EventsManager.h"
+#include<string>
 
 class SiconosVector;
 class TimeDiscretisation;

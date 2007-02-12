@@ -18,6 +18,7 @@
  */
 
 #include "EventFactory.h"
+#include "RuntimeException.h"
 #include <iostream>
 
 using namespace std;

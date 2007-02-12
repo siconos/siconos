@@ -17,6 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "Interaction.h"
+#include "InteractionXML.h"
+#include "NonSmoothLawXML.h"
+#include "RelationXML.h"
 #include "LinearTIR.h"
 #include "LagrangianLinearR.h"
 #include "LagrangianR.h"
@@ -24,6 +27,8 @@
 #include "RelayNSL.h"
 #include "NewtonImpactNSL.h"
 #include "NewtonImpactFrictionNSL.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "DynamicalSystem.h"
 
 using namespace std;
 

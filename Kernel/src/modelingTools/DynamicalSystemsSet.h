@@ -23,8 +23,6 @@
 #define DSSET_H
 
 #include "RuntimeCmp.h"
-#include "check.h"
-#include <iostream>
 #include <set>
 #include <map>
 

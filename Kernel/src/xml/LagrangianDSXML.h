@@ -26,7 +26,6 @@
 #define __LAGRANGIANNLDSXML__
 
 #include "DynamicalSystemXML.h"
-#include "SiconosMemoryXML.h"
 #include "SiconosMemory.h"
 #include "SimpleMatrix.h"
 #include <vector>

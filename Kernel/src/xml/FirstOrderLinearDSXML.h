@@ -26,7 +26,6 @@
 #define __LINEARSYSTEMDSXML__
 
 #include "FirstOrderNonLinearDSXML.h"
-#include "SimpleMatrix.h"
 
 const std::string LDS_A = "A";
 const std::string LDS_B = "b";

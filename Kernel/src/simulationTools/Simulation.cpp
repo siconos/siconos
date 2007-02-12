@@ -17,7 +17,16 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "Simulation.h"
-// includes to be deleted thanks to factories:
+#include "SimulationXML.h"
+#include "DynamicalSystem.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "Topology.h"
+#include "Interaction.h"
+#include "Relation.h"
+#include "OneStepIntegratorXML.h"
+#include "TimeDiscretisation.h"
+#include "Model.h"
+#include "EventsManager.h"
 
 // One Step Integrators
 #include "Moreau.h"
@@ -489,3 +498,7 @@ void Simulation::run()
   cout << "===== End of " << simulationType << "simulation. " << count << " events have been processed. ==== " << endl;
 }
 
+void Simulation::processEvents()
+{
+  eventsManager->processEvents();
+}

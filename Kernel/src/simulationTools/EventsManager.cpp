@@ -19,6 +19,8 @@
 #include "EventsManager.h"
 #include "RuntimeCmp.h"
 #include "EventFactory.h"
+#include "TimeDiscretisation.h"
+#include "Model.h"
 #include "Simulation.h"
 #include <math.h>
 #include <limits> // for ULONG_MAX

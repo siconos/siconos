@@ -23,15 +23,10 @@
 #ifndef InteractionsSET_H
 #define InteractionsSET_H
 
-#include "RuntimeException.h"
-#include "RuntimeCmp.h"
-#include "check.h"
-#include <iostream>
 #include <set>
 #include <map>
 
 class Interaction;
-
 
 /** Structure used for Interactions sorting. The address is used to compare two Interactions. */
 struct compareInter

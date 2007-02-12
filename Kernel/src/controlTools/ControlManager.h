@@ -18,16 +18,15 @@
 */
 
 /*! \file ControlManager.h
-  Tools to control a Model: Sensors, Actuators ...
+  Tools to control a Model: Sensors and Actuators.
 */
 
 #ifndef ControlManager_H
 #define ControlManager_H
 
 #include "Actuator.h"
-#include <string>
-#include <set>
 
+class Actuator;
 class Sensor;
 class Model;
 class TimeDiscretisation;

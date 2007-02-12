@@ -20,6 +20,9 @@
 #define __RelationTest__
 
 #include <cppunit/extensions/HelperMacros.h>
+#include "RelationXML.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "NonSmoothDynamicalSystemXML.h"
 #include "Relation.h"
 
 class RelationTest : public CppUnit::TestFixture

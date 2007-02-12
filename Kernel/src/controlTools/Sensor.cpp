@@ -19,7 +19,6 @@
 
 #include "Sensor.h"
 #include "SensorEvent.h"
-#include "SimpleVector.h"
 #include "Model.h"
 #include "TimeDiscretisation.h"
 #include "EventFactory.h"

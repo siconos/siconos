@@ -23,7 +23,7 @@
 #define NEWTONIMPACTNSL_H
 
 #include "NonSmoothLaw.h"
-#include "NewtonImpactNSLXML.h"
+class NonSmoothLaw;
 
 /** Newton impact Non Smooth Law
  *
@@ -42,8 +42,6 @@
  * nsLawSize is equal to 1.
  *
  */
-
-
 class NewtonImpactNSL : public NonSmoothLaw
 {
 

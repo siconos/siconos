@@ -24,14 +24,14 @@
 #ifndef NSLAW_H
 #define NSLAW_H
 
-#include "NonSmoothLawXML.h"
-#include "Interaction.h"
 #include "SiconosConst.h"
+#include "RuntimeException.h"
 
 const std::string COMPLEMENTARITYCONDITIONNSLAW = "ComplementarityNSL";
 const std::string NEWTONIMPACTNSLAW = "NewtonImpactNSL";
 const std::string RELAYNSLAW = "RelayNSL";
 const std::string NEWTONIMPACTFRICTIONNSLAW = "NewtonImpactFrictionNSL";
+
 class Interaction;
 class NonSmoothLawXML;
 

@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "LagrangianRXML.h"
+#include "SimpleMatrix.h"
 
 using namespace std;
 

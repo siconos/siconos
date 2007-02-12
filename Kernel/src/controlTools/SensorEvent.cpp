@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "SensorEvent.h"
+#include "Sensor.h"
 #include "EventFactory.h"
 using namespace std;
 using namespace EventFactory;

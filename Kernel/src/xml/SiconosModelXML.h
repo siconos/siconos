@@ -22,12 +22,7 @@
 #ifndef __MODELXML__
 #define __MODELXML__
 
-#include "Model.h"
-
 #include "SiconosDOMTreeTools.h"
-
-#include "NonSmoothDynamicalSystemXML.h"
-#include "SimulationXML.h"
 
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>

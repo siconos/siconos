@@ -22,10 +22,9 @@
 #ifndef LINEARTIDS_H
 #define LINEARTIDS_H
 
-#include "FirstOrderLinearDSXML.h"
 #include "FirstOrderLinearDS.h"
 
-class FirstOrderLinearDSXML;
+class FirstOrderLinearDS;
 
 /** First order linear systems - Inherits from DynamicalSystems
  *

@@ -24,9 +24,11 @@
 #define MOREAU_H
 
 #include "OneStepIntegrator.h"
+#include "SimpleMatrix.h"
 
 class Simulation;
 class MoreauXML;
+class SiconosMatrix;
 
 const unsigned int MOREAUSTEPSINMEMORY = 1;
 /** map of SiconosMatrix; key = the related DS*/
@@ -43,7 +45,6 @@ typedef MapOfMatrices::iterator matIterator;
 
 /** iterator through a map of double */
 typedef MapOfDouble::iterator doubleIterator;
-
 
 /**  Moreau Time-Integrator for Dynamical Systems
  *

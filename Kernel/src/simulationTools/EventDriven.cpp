@@ -18,9 +18,18 @@
  */
 
 #include "EventDriven.h"
-#include "LagrangianLinearTIDS.h"
+#include "SimulationXML.h"
+#include "OneStepNSProblemXML.h"
+#include "SimulationXML.h"
+#include "UnitaryRelation.h"
 #include "Lsodar.h"
 #include "LCP.h"
+#include "Model.h"
+#include "Interaction.h"
+#include "EventsManager.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "Topology.h"
+#include "DynamicalSystem.h"
 
 using namespace std;
 

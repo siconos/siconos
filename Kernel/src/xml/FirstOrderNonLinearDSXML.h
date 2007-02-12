@@ -25,10 +25,8 @@
 #define __FirstOrderNonLinearDSXML__
 
 #include "DynamicalSystemXML.h"
-#include "SiconosDOMTreeTools.h"
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
-#include "SiconosMemoryXML.h"
 #include "SiconosMemory.h"
 
 //Tags

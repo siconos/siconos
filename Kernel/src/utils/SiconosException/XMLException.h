@@ -23,7 +23,6 @@
 #define __XMLException__
 
 #include "SiconosException.h"
-#include <iostream>
 
 /** Exceptions related to XML management
  *

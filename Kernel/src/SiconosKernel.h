@@ -21,8 +21,7 @@ Include files related to Siconos Kernel
 */
 
 #include "Model.h"
-#include "SiconosConst.h"
-#include "utils.h"
+#include "Utils.h"
 #include "ModelingTools.h"
 #include "SimulationTools.h"
 #include "ControlTools.h"

@@ -21,6 +21,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "LagrangianLinearTIDS.h"
+#include "LagrangianLinearTIDSXML.h"
 #include "RuntimeException.h"
 #include "XMLException.h"
 

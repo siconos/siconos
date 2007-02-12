@@ -17,6 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "Relation.h"
+#include "RelationXML.h"
+#include "Interaction.h"
+#include "DynamicalSystemsSet.h"
 #include "FirstOrderNonLinearDS.h"
 
 using namespace std;
@@ -106,7 +109,7 @@ Relation::Relation(const Relation& newRel):
 
 Relation::~Relation()
 {
-  std::map<string, SimpleVector*>::iterator it;
+  VectorMapIterator it;
   for (it = parametersList.begin(); it != parametersList.end(); ++it)
   {
     string alloc = "parameter_for_" + it->first;
@@ -126,11 +129,11 @@ void Relation::initialize()
     RuntimeException::selfThrow("Relation - initialize: inconsistent pointers links between the present relation and its interaction.");
 }
 
-void Relation::setParameters(const std::map<string, SimpleVector*>& newMap)
+void Relation::setParameters(const VectorMap& newMap)
 {
   // copy!!
 
-  map<string, SimpleVector*>::const_iterator it;
+  VectorMapConstIterator it;
   for (it = newMap.begin(); it != newMap.end(); ++it)
   {
     parametersList[it->first] = new SimpleVector(*(it->second));

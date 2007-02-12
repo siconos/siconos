@@ -22,6 +22,7 @@
 
 // DS
 #include "LagrangianDSXML.h"
+#include "InteractionXML.h"
 #include "LagrangianLinearTIDSXML.h"
 #include "FirstOrderLinearDSXML.h"
 

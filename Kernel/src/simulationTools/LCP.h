@@ -24,9 +24,12 @@ Linear Complementarity Problem
 #define LCP_H
 
 #include "OneStepNSProblem.h"
-#include "LCPXML.h"
+#include "SimpleVector.h"
+#include "SimpleMatrix.h"
 
 class OneStepNSProblem;
+class DynamicalSystemsSet;
+
 
 /** Formalization and Resolution of a Linear Complementarity Problem (LCP)
  *

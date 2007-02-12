@@ -23,6 +23,7 @@
 #define EVENTDRIVEN_H
 
 #include "Simulation.h"
+#include "SiconosNumerics.h"
 
 /** Simulation based on event driven method, ie events detection (see theoretical manual for more details).
  *

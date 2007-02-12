@@ -17,12 +17,16 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "FrictionContact.h"
-
-// includes to be deleted thanks to factories
-#include "Moreau.h"
-#include "LagrangianLinearR.h"
+#include "FrictionContactXML.h"
+#include "Topology.h"
+#include "Interaction.h"
+#include "Simulation.h"
+#include "UnitaryRelation.h"
+#include "Model.h"
+#include "NonSmoothDynamicalSystem.h"
+#include "DynamicalSystem.h"
+#include "Relation.h"
 #include "NewtonImpactFrictionNSL.h"
-#include "LinearTIR.h"
 
 using namespace std;
 
@@ -353,7 +357,7 @@ void FrictionContact::computeQ(const double time)
 
   unsigned int pos = 0;
   unsigned int nsLawSize;
-  UnitaryRelationIterator itCurrent, itLinked;
+  UnitaryRelationIterator itCurrent, itLiked;
   string simulationType = simulation->getType();
   for (itCurrent = indexSet.begin(); itCurrent !=  indexSet.end(); ++itCurrent)
   {

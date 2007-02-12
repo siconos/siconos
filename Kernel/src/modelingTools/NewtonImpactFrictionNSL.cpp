@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "NewtonImpactFrictionNSL.h"
+#include "NewtonImpactFrictionNSLXML.h"
 using namespace std;
 
 NewtonImpactFrictionNSL::NewtonImpactFrictionNSL(const unsigned int newSize):

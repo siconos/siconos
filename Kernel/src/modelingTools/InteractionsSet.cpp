@@ -17,6 +17,7 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "InteractionsSet.h"
+#include "RuntimeException.h"
 #include "Interaction.h"
 
 using namespace std;

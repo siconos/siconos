@@ -20,6 +20,10 @@
 // \todo : create a work vector for all tmp vectors used in computeG, computeH ...
 
 #include "LagrangianR.h"
+#include "LagrangianRXML.h"
+#include "Interaction.h"
+#include "LagrangianDS.h"
+
 using namespace std;
 
 // Default constructor

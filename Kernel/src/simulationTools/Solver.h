@@ -22,13 +22,7 @@
 #define SOLVER_H
 
 #include "SolverXML.h"
-
-
-#include "SiconosConst.h"
 #include "SiconosNumerics.h"
-#include "RuntimeException.h"
-#include<string>
-#include<iostream>
 
 // Default values for non smooth problem solver
 const std::string DEFAULT_SOLVER = "NLGS";

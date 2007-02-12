@@ -19,7 +19,6 @@
 #include "SiconosMemory.h"
 #include "BlockVector.h"
 #include "SimpleVector.h"
-#include "SiconosMemoryException.h"
 
 using namespace std;
 

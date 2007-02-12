@@ -22,15 +22,10 @@
 #ifndef UnitaryRelationsSET_H
 #define UnitaryRelationsSET_H
 
-#include "RuntimeCmp.h"
-#include "check.h"
-#include "UnitaryRelation.h"
-#include <iostream>
 #include <set>
 #include <map>
 
 class UnitaryRelation;
-
 
 /** Structure used for sorting in Unitary Relation set. UR* are sorted according to their address. */
 struct compareUR

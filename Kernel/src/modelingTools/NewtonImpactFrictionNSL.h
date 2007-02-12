@@ -15,17 +15,16 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
-/*! \file
-Newton-Impact Non-Smooth Law
  */
+/*! \file
+  Newton-Impact Non-Smooth Law
+*/
 
 #ifndef NEWTONIMPACTFRICTIONNSLAW_H
 #define NEWTONIMPACTFRICTIONNSLAW_H
 
 #include "NonSmoothLaw.h"
-#include "NewtonImpactFrictionNSLXML.h"
-
+class NonSmoothLaw;
 
 /** Newton Impact-Friction Non Smooth Law
  *
@@ -49,75 +48,76 @@ private:
 public:
 
   /** default constructor
-  *  \param unsigned int: size of the ns law, default = 2
-  */
+   *  \param unsigned int: size of the ns law, default = 2
+   */
   NewtonImpactFrictionNSL(const unsigned int = 2);
 
   /** constructor with XML object of the NewtonImpactFrictionNSL
-  *  \param NonSmoothLawXML* : the XML object corresponding
-  */
+   *  \param NonSmoothLawXML* : the XML object corresponding
+   */
   NewtonImpactFrictionNSL(NonSmoothLawXML*);
 
   /** constructor with the value of the NewtonImpactFrictionNSL attributes
-  *  \param double : normal e coefficient
-  *  \param double : tangent e coefficient
-  *  \param double : friction coefficient
-  *  \param unsigned int: size of the ns law, default = 2
-  */
+   *  \param double : normal e coefficient
+   *  \param double : tangent e coefficient
+   *  \param double : friction coefficient
+   *  \param unsigned int: size of the ns law, default = 2
+   */
   NewtonImpactFrictionNSL(const double, const double, const double, const unsigned int);
 
+  /** Destructor */
   ~NewtonImpactFrictionNSL();
 
   /** check the ns law to see if it is verified
-  *  \return a boolean value whioch determines if the NS Law is verified
-  */
+   *  \return a boolean value whioch determines if the NS Law is verified
+   */
   bool isVerified(void) const;
 
   // GETTERS/SETTERS
 
   /** getter of en
-  *  \return the value of en
-  */
+   *  \return the value of en
+   */
   inline const double getEn() const
   {
     return en;
   };
 
   /** setter of en
-  *  \param a double to set en
-  */
+   *  \param a double to set en
+   */
   inline void setEn(const double newVal)
   {
     en = newVal;
   };
 
   /** getter of et
-  *  \return the value of et
-  */
+   *  \return the value of et
+   */
   inline const double getEt() const
   {
     return et;
   };
 
   /** setter of et
-  *  \param a double to set et
-  */
+   *  \param a double to set et
+   */
   inline void setEt(const double newVal)
   {
     et = newVal;
   };
 
   /** getter of mu
-  *  \return the value of mu
-  */
+   *  \return the value of mu
+   */
   inline const double getMu() const
   {
     return mu;
   };
 
   /** setter of mu
-  *  \param a double to set mu
-  */
+   *  \param a double to set mu
+   */
   inline void setMu(const double newVal)
   {
     mu = newVal;
@@ -126,17 +126,17 @@ public:
   // OTHER FUNCTIONS
 
   /** copy the data of the NonSmoothLaw in the XML tree
-  */
+   */
   void saveNonSmoothLawToXML();
 
   /** print the data to the screen
-  */
+   */
   void display() const;
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-  *  \param NonSmoothLaw* : the law which must be converted
-  * \return a pointer on the law if it is of the right type, NULL otherwise
-  */
+   *  \param NonSmoothLaw* : the law which must be converted
+   * \return a pointer on the law if it is of the right type, NULL otherwise
+   */
   static NewtonImpactFrictionNSL* convert(NonSmoothLaw* nsl);
 
 };

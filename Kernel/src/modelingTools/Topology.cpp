@@ -17,9 +17,10 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
 #include "Topology.h"
+#include "NonSmoothLaw.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "Interaction.h"
-#include "InteractionsSet.h"
+#include "UnitaryRelation.h"
 
 using namespace std;
 

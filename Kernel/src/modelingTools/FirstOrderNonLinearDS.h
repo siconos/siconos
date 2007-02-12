@@ -27,6 +27,9 @@ First Order Non Linear Dynamical Systems
 #include "DynamicalSystem.h"
 #include "BlockMatrix.h"
 
+class DynamicalSystem;
+class BlockMatrix;
+
 /**  General First Order Non Linear Dynamical Systems
  *
  *  \author SICONOS Development Team - copyright INRIA

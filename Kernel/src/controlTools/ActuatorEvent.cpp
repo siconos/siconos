@@ -18,6 +18,8 @@
 */
 #include "ActuatorEvent.h"
 #include "EventFactory.h"
+#include "Actuator.h"
+
 using namespace std;
 using namespace EventFactory;
 

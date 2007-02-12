@@ -1,6 +1,10 @@
 #define SIC_OK    0
 #define SIC_ERROR -1
 
+/*! \file SiconosApiC.h
+\brief API C for Scilab Interface.
+*/
+
 extern
 #ifdef __cplusplus
 "C"

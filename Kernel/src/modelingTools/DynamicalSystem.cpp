@@ -17,7 +17,8 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "DynamicalSystem.h"
-#include "Tools.h"
+#include "DynamicalSystemXML.h"
+#include "BlockVector.h"
 
 using namespace std;
 

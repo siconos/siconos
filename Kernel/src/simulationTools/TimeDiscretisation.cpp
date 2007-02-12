@@ -17,7 +17,9 @@
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
 #include "TimeDiscretisation.h"
+#include "TimeDiscretisationXML.h"
 #include "RuntimeException.h"
+#include "Model.h"
 using namespace std;
 
 // PRIVATE METHODS
