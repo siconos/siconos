@@ -393,13 +393,22 @@ void Simulation::newtonSolve(double criterion, unsigned int maxStep)
 
   bool isNewtonConverge = false;
   unsigned int nbNewtonStep = 0; // number of Newton iterations
+
+  // Set Model current time
+  model->setCurrentT(eventsManager->getTimeOfEvent(eventsManager->getNextEventPtr()));
+
   while ((!isNewtonConverge) && (nbNewtonStep <= maxStep))
   {
     nbNewtonStep++;
     advanceToEvent();
-    eventsManager->processEvents();
+    // Process all events simultaneous to nextEvent.
+    eventsManager->process();
     isNewtonConverge = newtonCheckConvergence(criterion);
   }
+
+  // Shift current to next ...
+  eventsManager->shiftEvents();
+
   if (!isNewtonConverge)
     cout << "Newton process stopped: reach max step number" << endl ;
 }

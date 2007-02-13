@@ -75,7 +75,7 @@ case $CXX_VER in
      exit 1;
      ;;
      ( 4.1.*)
-     CXXFLAGS="-ffriend-injection";
+     CXXFLAGS="-ffriend-injection ";
      ;;   
 esac
 AC_MSG_RESULT([ok ($CXX_VER)])   

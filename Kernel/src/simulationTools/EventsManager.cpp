@@ -294,20 +294,19 @@ void EventsManager::removeEvent(Event* event)
 void EventsManager::processEvents()
 {
   // Set Model current time
-  double t = simulation->getModelPtr()->getCurrentT() + simulation->getTimeDiscretisationPtr()->getH();
-  simulation->getModelPtr()->setCurrentT(t);
+  simulation->getModelPtr()->setCurrentT(getTimeOfEvent(nextEvent));
+
+  // Process all events simultaneous to nextEvent.
+  process();
 
   // Shift current to next ...
   shiftEvents();
-
-  // Process all events simultaneous to currentEvent.
-  process();
 }
 
 void EventsManager::process()
 {
   // 4 - We get a range of all the Events at time tnext and process them.
-  pair<EventsContainerIterator, EventsContainerIterator> rangeNew = unProcessedEvents.equal_range(currentEvent);
+  pair<EventsContainerIterator, EventsContainerIterator> rangeNew = unProcessedEvents.equal_range(nextEvent);
   EventsContainerIterator it;
   for (it = rangeNew.first; it != rangeNew.second ; ++it)
     (*it)->process(simulation);

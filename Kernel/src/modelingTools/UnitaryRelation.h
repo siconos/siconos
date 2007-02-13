@@ -22,7 +22,6 @@
 #ifndef UNITARYRELATION_H
 #define UNITARYRELATION_H
 
-#include "SiconosConst.h"
 #include "Tools.h"
 #include "SiconosAlgebra.h"
 
