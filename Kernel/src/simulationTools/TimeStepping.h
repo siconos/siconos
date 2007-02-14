@@ -90,10 +90,28 @@ public:
    */
   void computeOneStep();
 
+  /** newton algorithm
+   * \param double, convergence criterion
+   * \param unsigned int: maximum number of Newton steps
+   */
+  void newtonSolve(double, unsigned int);
+
+  /** check the convergence of Newton algorithm according to criterion
+   * \param double, convergence criterion
+   */
+  bool newtonCheckConvergence(double);
+
+  /** run the simulation, from t0 to T
+   * \param: simulation option. Default = "linear", else "Newton", used a Newton algorithm.
+   * \param: convergence criterion for Newton. Default = 0.005.
+   * \param: maximum iteration number for Newton. Default = 500.
+   */
+  void run(const std::string& = "linear", double = 0.005, unsigned int = 500);
+
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-  *  \param Simulation* : the Simulation which must be converted
-  * \return a pointer on the Simulation if it is of the right type, NULL otherwise
-  */
+   *  \param Simulation* : the Simulation which must be converted
+   * \return a pointer on the Simulation if it is of the right type, NULL otherwise
+   */
   static TimeStepping* convert(Simulation* str);
 };
 

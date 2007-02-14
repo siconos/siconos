@@ -27,6 +27,7 @@ Global interface for simulation process description (Base for TimeStepping or Ev
 #include "Tools.h"
 #include "RuntimeException.h"
 #include "UnitaryRelationsSet.h"
+#include "EventsManager.h"
 #include <vector>
 
 class Model;
@@ -207,7 +208,39 @@ public:
   inline EventsManager* getEventsManagerPtr() const
   {
     return eventsManager;
-  }
+  };
+
+  /** get "current time" (ie starting point for current integration, time of currentEvent of eventsManager.)
+   *  \return a double.
+   */
+  inline const double getCurrentTime() const
+  {
+    return eventsManager->getCurrentTime();
+  };
+
+  /** get "next time" (ie ending point for current integration, time of nextEvent of eventsManager.)
+   *  \return a double.
+   */
+  inline const double getNextTime() const
+  {
+    return eventsManager->getNextTime();
+  };
+
+  /** get the current time step size ("next time"-"current time")
+   *  \return a double.
+   */
+  inline const double getTimeStep() const
+  {
+    return (eventsManager->getNextTime() - eventsManager->getCurrentTime());
+  };
+
+  /** check if a future event is to be treated or not (ie if some events remain in the eventsManager).
+   *  \return a bool.
+   */
+  inline const bool hasNextEvent() const
+  {
+    return eventsManager->hasNextEvent();
+  };
 
   /** get all the Integrators of the Simulation
    *  \return an OSISset
@@ -364,23 +397,15 @@ public:
   virtual void update(unsigned int) = 0;
 
   /** run the simulation, from t0 to T
+   * \param: simulation option. Used only for TimeStepping.
+   * \param: Used only for TimeStepping (Newton convergence criterion).
+   * \param: Used only for TimeStepping (Newton maximum number of iterations).
    */
-  void run();
+  virtual void run(const std::string& = "linear", double = 0.005, unsigned int = 500);
 
   /** step from current event to next event of EventsManager
    */
   virtual void advanceToEvent() = 0;
-
-  /** newton algorithm
-   * \param double, convergence criterion
-   * \param unsigned int: maximum number of Newton steps
-   */
-  void newtonSolve(double, unsigned int);
-
-  /** check the convergence of Newton algorithm according to criterion
-   * \param double, convergence criterion
-   */
-  bool newtonCheckConvergence(double);
 
   // --- XML RELATED FUNCTIONS ---
 

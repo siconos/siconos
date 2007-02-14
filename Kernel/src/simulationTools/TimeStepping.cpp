@@ -261,6 +261,66 @@ void TimeStepping::advanceToEvent()
   computeOneStep();
 }
 
+void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
+{
+  bool isNewtonConverge = false;
+  unsigned int nbNewtonStep = 0; // number of Newton iterations
+
+  // Set Model current time
+  model->setCurrentT(getNextTime());
+
+  while ((!isNewtonConverge) && (nbNewtonStep <= maxStep))
+  {
+    nbNewtonStep++;
+    advanceToEvent();
+    // Process all events simultaneous to nextEvent.
+    //  eventsManager->process();
+    isNewtonConverge = newtonCheckConvergence(criterion);
+  }
+
+  // Process NextEvent (Save OSI (DS) and OSNS (Interactions) states into Memory vectors ...)
+  eventsManager->process();
+
+  // Set Model current time (may have changed because of events insertion during the loop above).
+  model->setCurrentT(getNextTime());
+
+  // Shift current to next ...
+  eventsManager->shiftEvents();
+
+  if (!isNewtonConverge)
+    cout << "Newton process stopped: reach max step number" << endl ;
+}
+
+bool TimeStepping::newtonCheckConvergence(double criterion)
+{
+  bool checkConvergence = false;
+  // get the nsds indicator of convergence
+  double nsdsConverge = model-> getNonSmoothDynamicalSystemPtr()->nsdsConvergenceIndicator();
+  if (nsdsConverge < criterion) checkConvergence = true ;
+  return(checkConvergence);
+}
+
+void TimeStepping::run(const std::string& opt, double criterion, unsigned int maxIter)
+{
+  unsigned int count = 0; // events counter.
+  // do simulation while events remains in the "future events" list of events manager.
+  cout << " ==== Start of " << simulationType << " simulation - This may take a while ... ====" << endl;
+  while (eventsManager->hasNextEvent())
+  {
+    if (opt == "linear")
+    {
+      advanceToEvent();
+      eventsManager->processEvents();
+    }
+    else if (opt == "Newton")
+      newtonSolve(criterion, maxIter);
+    else
+      RuntimeException::selfThrow("TimeStepping::run(opt) failed. Unknow simulation option: " + opt);
+    count++;
+  }
+  cout << "===== End of " << simulationType << "simulation. " << count << " events have been processed. ==== " << endl;
+}
+
 TimeStepping* TimeStepping::convert(Simulation *str)
 {
   TimeStepping* ts = dynamic_cast<TimeStepping*>(str);

@@ -385,44 +385,6 @@ void Simulation::computeOneStepNSProblem(const std::string& name)
   allNSProblems[name]->compute(model->getCurrentT());
 }
 
-void Simulation::newtonSolve(double criterion, unsigned int maxStep)
-{
-  // At the time, only for time stepping
-  if (simulationType != "TimeStepping")
-    RuntimeException::selfThrow("Simulation::newtonSolve - Not yet implemented for simulation of type" + simulationType);
-
-  bool isNewtonConverge = false;
-  unsigned int nbNewtonStep = 0; // number of Newton iterations
-
-  // Set Model current time
-  model->setCurrentT(eventsManager->getTimeOfEvent(eventsManager->getNextEventPtr()));
-
-  while ((!isNewtonConverge) && (nbNewtonStep <= maxStep))
-  {
-    nbNewtonStep++;
-    advanceToEvent();
-    // Process all events simultaneous to nextEvent.
-    eventsManager->process();
-    isNewtonConverge = newtonCheckConvergence(criterion);
-  }
-
-  // Shift current to next ...
-  eventsManager->shiftEvents();
-
-  if (!isNewtonConverge)
-    cout << "Newton process stopped: reach max step number" << endl ;
-}
-
-bool Simulation::newtonCheckConvergence(double criterion)
-{
-  bool checkConvergence = false;
-  // get the nsds indicator of convergence
-  double nsdsConverge = model-> getNonSmoothDynamicalSystemPtr()->nsdsConvergenceIndicator();
-  if (nsdsConverge < criterion) checkConvergence = true ;
-
-  return(checkConvergence);
-}
-
 void Simulation::saveSimulationToXML()
 {
   if (simulationxml != NULL)
@@ -493,8 +455,10 @@ void Simulation::updateOutput(int level0, int level1)
   }
 }
 
-void Simulation::run()
+void Simulation::run(const std::string&, double, unsigned int)
 {
+  // Note that input arg. are useless in general case. Only useful for timeStepping.
+
   unsigned int count = 0; // events counter.
   // do simulation while events remains in the "future events" list of events manager.
   cout << " ==== Start of " << simulationType << " simulation - This may take a while ... ====" << endl;

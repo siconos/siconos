@@ -464,54 +464,54 @@ void LagrangianDS::initP(const string& simulationType)
 
 void LagrangianDS::initFL()
 {
-  unsigned int count = 0;
-  if (fInt != NULL)
-    ++count;
-  if (NNL != NULL)
-    ++count;
-  if (fExt != NULL)
-    ++count;
+  //   unsigned int count = 0;
+  //   if(fInt!=NULL)
+  //     ++count;
+  //   if(NNL!=NULL)
+  //     ++count;
+  //   if(fExt!=NULL)
+  //     ++count;
   // First case: fL is equal to a sum of members and needs memory allocation.
-  if (count > 1)
-  {
-    fL = new SimpleVector(ndof);
-    isAllocatedIn["fL"] = true;
-  }
-  else if (count == 1) // fL = fInt or fExt or NNL; no memory allocation, just a pointer link.
-  {
-    if (fInt != NULL)
-      fL = fInt;
-    else if (NNL != NULL)
-      fL = NNL;
-    else if (fExt != NULL)
-      fL = fExt;
-  }
+  //if (count > 1)
+  //{ TEMP : find a way to avoid copy when count == 1. Pb: fL = - NNL or FInt
+  fL = new SimpleVector(ndof);
+  isAllocatedIn["fL"] = true;
+  //}
+  //  else if (count == 1) // fL = fInt or fExt or NNL; no memory allocation, just a pointer link.
+  //{
+  //       if(fInt!=NULL)
+  //  fL=fInt;
+  //       else if(NNL!=NULL)
+  //  fL=NNL;
+  //       else if(fExt!=NULL)
+  //  fL=fExt;
+  //}
   // else nothing! (count = 0 and fL need not to be allocated).
 
   // === Now the jacobians ===
   jacobianFL.resize(2, NULL);
   for (unsigned int i = 0; i < jacobianFInt.size(); ++i)
   {
-    count = 0;
-    if (jacobianFInt[i] != NULL)
-      ++count;
-    if (jacobianNNL[i] != NULL)
-      ++count;
-    // First case: jacobianFL is equal to a sum of members and needs memory allocation.
-    if (count > 1)
-    {
-      string name = "jacobianFL" + toString<unsigned int>(i);
-      jacobianFL[i] = new SimpleMatrix(ndof, ndof);
-      isAllocatedIn[name] = true;
-    }
-    else if (count == 1)
-    {
-      if (jacobianFInt[i] != NULL)
-        jacobianFL[i] = jacobianFInt[i];
-      else if (jacobianNNL[i] != NULL)
-        jacobianFL[i] = jacobianNNL[i];
-    }
-    // else nothing!
+    //       count = 0;
+    //       if(jacobianFInt[i]!=NULL)
+    //  ++count;
+    //       if(jacobianNNL[i]!=NULL)
+    //  ++count;
+    //       // First case: jacobianFL is equal to a sum of members and needs memory allocation.
+    //       if (count > 1)
+    //  {
+    string name = "jacobianFL" + toString<unsigned int>(i);
+    jacobianFL[i] = new SimpleMatrix(ndof, ndof);
+    isAllocatedIn[name] = true;
+    //     }
+    //       else if (count == 1)
+    //  {
+    //    if(jacobianFInt[i]!=NULL)
+    //      jacobianFL[i] = jacobianFInt[i];
+    //    else if(jacobianNNL[i]!=NULL)
+    //      jacobianFL[i] = jacobianNNL[i];
+    //  }
+    //       // else nothing!
   }
 }
 
@@ -1149,7 +1149,6 @@ void LagrangianDS::computeNNL()
   {
     if (computeNNLPtr == NULL)
       RuntimeException::selfThrow("computeQ() is not linked to a plugin function");
-
     computeNNLPtr(ndof, &(*q[0])(0), &(*q[1])(0), &(*NNL)(0), &(*z)(0));
   }
 }
@@ -1495,10 +1494,10 @@ double LagrangianDS::dsConvergenceIndicator()
 {
   double dsCvgIndic;
   // Velocity is used to calculate the indicator.
-  SiconosVector *diff = new SimpleVector(q[1]->size());
+  SiconosVector *diff = new SimpleVector(q[0]->size());
   // Compute difference between present and previous Newton steps
   SiconosVector * valRef = workVector["LagNLDSMoreau"];
-  *diff =  *(getVelocityPtr()) - *valRef;
+  *diff =  *(q[0]) - *valRef;
   if (valRef->norm() != 0)
     dsCvgIndic = diff->norm() / (valRef->norm());
   else
@@ -1523,14 +1522,13 @@ void LagrangianDS::computeQFree(double time, unsigned int level, SiconosVector* 
 
   qFreeOut->zero();
   if (fInt != NULL)
-    *qFreeOut += *fInt;
+    *qFreeOut -= *fInt;
   if (fExt != NULL)
-    *qFreeOut -= *fExt;
+    *qFreeOut += *fExt;
   if (NNL != NULL)
-    *qFreeOut += *NNL;
+    *qFreeOut -= *NNL;
 
-  *qFreeOut = prod(*workMatrix["invMass"], *qFreeOut);
-
+  workMatrix["invMass"]->PLUForwardBackwardInPlace(*qFreeOut);
 }
 
 void LagrangianDS::resetNonSmoothPart()

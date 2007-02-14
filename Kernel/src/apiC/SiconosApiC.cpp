@@ -155,17 +155,17 @@ extern "C" int sicSTAdvanceToEvent()
   return ret;
 }
 
-extern "C" int sicSTnewtonSolve(double criterion, int maxIter)
-{
-  int ret = SIC_OK;
+// extern "C" int sicSTnewtonSolve(double criterion, int maxIter )
+// {
+//   int ret=SIC_OK;
 
-  if (GLOB_SIMULATION != NULL)
-    GLOB_SIMULATION->newtonSolve(criterion, maxIter);
-  else
-    ret = SIC_ERROR;
+//   if (GLOB_SIMULATION!=NULL)
+//     GLOB_SIMULATION->newtonSolve(criterion,maxIter);
+//   else
+//     ret=SIC_ERROR;
 
-  return ret;
-}
+//   return ret;
+// }
 
 extern "C" int sicSTupdateState()
 {

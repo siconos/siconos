@@ -271,7 +271,7 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
   if (ds == NULL)
     RuntimeException::selfThrow("Moreau::computeW(t,ds) - ds == NULL");
 
-  double h = simulationLink->getTimeDiscretisationPtr()->getH(); // time step
+  double h = simulationLink->getTimeStep();
 
   double theta = thetaMap[ds];
   // Check if W is allocated; if not, do allocation.
@@ -291,6 +291,11 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
     LagrangianDS* d = static_cast<LagrangianDS*>(ds);
     SiconosMatrix *K, *C, *Mass;
 
+    // Get Mass matrix
+    Mass = d->getMassPtr();
+    // Compute W
+    *W = *Mass ;
+
     if (dsType == LNLDS)
     {
       // === Lagrangian non-linear systems ===
@@ -299,25 +304,23 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
       // Compute and get Jacobian (if loaded from plugin)
       d->computeJacobianFL(0, t);
       d->computeJacobianFL(1, t);
-
       K = d->getJacobianFLPtr(0);
       C = d->getJacobianFLPtr(1);
+      if (C != NULL)
+        *W -= h * theta**C;
+      if (K != NULL)
+        *W -= h * h * theta * theta**K;
     }
     else // if dsType = LLTIDS, LagrangianLinearTIDS
     {
       // === Lagrangian linear time invariant system ===
       K = ((static_cast<LagrangianLinearTIDS*>(d))->getKPtr());
       C = ((static_cast<LagrangianLinearTIDS*>(d))->getCPtr());
+      if (C != NULL)
+        *W += h * theta**C;
+      if (K != NULL)
+        *W +=  h * h * theta * theta**K;
     }
-
-    // Get Mass matrix
-    Mass = d->getMassPtr();
-    // Compute W
-    *W = *Mass ;
-    if (C != NULL)
-      *W += h * theta**C;
-    if (K != NULL)
-      *W +=  h * h * theta * theta**K;
   }
 
   // === Linear dynamical system ===
@@ -350,15 +353,10 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
 
 void Moreau::computeFreeState()
 {
-  // get current time, theta and time step
-  double t = simulationLink->getModelPtr()->getCurrentT();
-  double h = simulationLink->getTimeDiscretisationPtr()->getH();
-  // Previous time step (i)
-  double told = t - h;
-  /*
-     \warning Access to previous values of source terms shall be provided
-     \warning thanks to a dedicated memory or to the accurate value of old time instants
-  */
+  // get current and next times, theta and time step
+  double t = simulationLink->getNextTime();
+  double told = simulationLink->getCurrentTime();
+  double h = t - told;
 
   DSIterator it;
   double theta;
@@ -367,19 +365,20 @@ void Moreau::computeFreeState()
   {
     DynamicalSystem* ds = *it;
     theta = thetaMap[ds];
+
+    string dsType = ds->getType();
+
     W = WMap[ds];
-    // Get the DS type
-    string dstyp = ds->getType();
 
     // === Lagrangian Systems ===
-    if ((dstyp == LNLDS) || (dstyp == LLTIDS))
+    if ((dsType == LNLDS) || (dsType == LLTIDS))
     {
       // -- Get the DS --
       LagrangianDS* d = static_cast<LagrangianDS*>(ds);
 
       // --- RESfree computation ---
       //
-      // Get state i (previous time step) -> var. indexed with "Old"
+      // Get state i (previous time step) from Memories -> var. indexed with "Old"
       SiconosVector* qold, *vold;
       qold = static_cast<SimpleVector*>(d->getQMemoryPtr()->getSiconosVector(0));
       vold = static_cast<SimpleVector*>(d->getVelocityMemoryPtr()->getSiconosVector(0));
@@ -387,22 +386,21 @@ void Moreau::computeFreeState()
       // Velocity free and residu.
       SiconosVector *vfree = d->getVelocityFreePtr();
       SiconosVector *RESfree = vfree;
-      RESfree->zero();
+      RESfree->zero(); // Note that RESfree and vFree are located at the same place in Memory.
       // --- Compute Velocity Free ---
       // For non-linear Lagrangian systems (LNLDS)
-      if (dstyp == LNLDS)
+      if (dsType == LNLDS)
       {
         // Get Mass (remark: M is computed for present state during computeW(t) )
         computeW(t, d);
         SiconosMatrix *M = d->getMassPtr();
         SiconosVector *v = d->getVelocityPtr();
 
-        // === Compute ResFree and vfree solution of Wk(v-vfree)=RESfree ===
+        // === Compute ResFree and vfree solution of Wk(v-vfree)= RESfree ===
         *RESfree = prod(*M, (*v - *vold));
 
-        // Compute Qint and Fint
-        // for state i, save it in XXX0 and then for state i+1 and save it in XXX1.
-        // warning: get values and not pointers
+        // Compute fL
+        // warning: get values and not pointers for "old" state.
 
         if (d->getFLPtr() != NULL)
         {
@@ -452,7 +450,7 @@ void Moreau::computeFreeState()
       SiconosVector *qfree = d->getQFreePtr();
       *qfree = (*qold) + h * (theta * (*vfree) + (1.0 - theta) * (*vold));
     }
-    else if (dstyp == FOLDS || dstyp == FOLTIDS)
+    else if (dsType == FOLDS || dsType == FOLTIDS)
     {
       FirstOrderLinearDS *d = static_cast<FirstOrderLinearDS*>(ds);
       SimpleVector *xfree = static_cast<SimpleVector*>(d->getXFreePtr());
@@ -486,7 +484,7 @@ void Moreau::computeFreeState()
 
       W->PLUForwardBackwardInPlace(*xfree);
     }
-    else RuntimeException::selfThrow("Moreau::computeFreeState - not yet implemented for Dynamical system type: " + dstyp);
+    else RuntimeException::selfThrow("Moreau::computeFreeState - not yet implemented for Dynamical system type: " + dsType);
   }
 }
 
@@ -559,7 +557,7 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
 
 void Moreau::updateState(const unsigned int level)
 {
-  double h = simulationLink->getTimeDiscretisationPtr()->getH();
+  double h = simulationLink->getTimeStep();
 
   DSIterator it;
   SiconosMatrix * W;
@@ -584,7 +582,7 @@ void Moreau::updateState(const unsigned int level)
       SiconosVector *q = d->getQPtr();
       // Save value of q and v in stateTmp for future convergence computation
       if (dsType == LNLDS)
-        ds->addWorkVector(v, "LagNLDSMoreau");
+        ds->addWorkVector(q, "LagNLDSMoreau");
       // Compute velocity
       *v = *p;
       W->PLUForwardBackwardInPlace(*v);
@@ -599,7 +597,7 @@ void Moreau::updateState(const unsigned int level)
       // --- Update W for general Lagrangian system
       if (dsType == LNLDS)
       {
-        double t = simulationLink->getModelPtr()->getCurrentT();
+        double t = simulationLink->getNextTime();
         computeW(t, ds);
       }
       // Remark: for Linear system, W is already saved in object member w
