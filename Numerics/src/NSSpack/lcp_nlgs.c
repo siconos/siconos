@@ -188,19 +188,48 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
     /* **** Criterium convergence **** */
 
-    incx =  1;
-    incy =  1;
+    /*     incx =  1; */
+    /*     incy =  1; */
 
-    a1 = 1.0;
-    b1 = 1.0;
+    /*     a1 = 1.0; */
+    /*     b1 = 1.0; */
 
-    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , (integer *)&incx , &b1 , w , (integer *)&incy);
+    /*     dgemv_( &NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , (integer *)&incx , &b1 , w , (integer *)&incy ); */
 
-    qs   = -1.0;
-    daxpy_((integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy);
+    /*     qs   = -1.0; */
+    /*     daxpy_( (integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy ); */
 
-    num = dnrm2_((integer *)&n, ww , (integer *)&incx);
-    err = num * den;
+    /*     num = dnrm2_( (integer *)&n, ww , (integer *)&incx ); */
+
+    /*     err = num*den; */
+
+    /* **** Criterium convergence compliant with filter_result_LCP **** */
+
+    incx = 1;
+    incy = 1;
+    dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+
+    a1 = 1.;
+    b1 = 1.;
+    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z ,
+           (integer *)&incx , &b1 , w , (integer *)&incy);
+
+    err = 0.;
+    for (i = 0 ; i < n ; i++)
+    {
+      if (z[i] < 0.0)
+      {
+        err += -z[i];
+        if (w[i] < 0.0) err += z[i] * w[i];
+      }
+      if (w[i] < 0.0) err += -w[i];
+      if ((z[i] > 0.0) && (w[i] > 0.0)) err += z[i] * w[i];
+    }
+
+
+    err = err * den;
+
+
 
     if (ispeak == 2)
     {
