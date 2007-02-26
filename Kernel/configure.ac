@@ -125,6 +125,7 @@ AC_CHECK_FUNCS([floor gettimeofday])
 
 AC_ARG_ENABLE(cppunit,[  --enable-cppunit              use cppunit to pass unitary tests, default=no ])
 AC_ARG_ENABLE(debug,  [  --enable-debug              compiling with debugging symbols (-g), default=no ])
+AC_ARG_ENABLE(profiling,  [  --enable-profiling             compiling with profiling symbols (-pg), default=no ])
 AC_ARG_ENABLE(optimisation,  [  --enable-optimisation              compiling with optimiation symbols (O2), default=no ])
 AC_ARG_ENABLE(warnings,[  --enable-warnings            enable compilation warnings, default=yes])
 AC_ARG_ENABLE(error-on-warning,[  --enable-erroronwarning     treat all compile warnings as errors, default=no])
@@ -207,11 +208,19 @@ if test "$enable_erroronwarning" = yes; then
 fi
 
 
+if test "$enable_profiling" = yes; then
+   AC_MSG_RESULT(option --enable-profiling selected : compiling with the -pg option)
+   CXXFLAGS="-pg -g -fbounds-check $CXXFLAGS"
+else
+   CXXFLAGS="-DNDEBUG  $CXXFLAGS"
+fi
+
+
 if test "$enable_debug" = yes; then
    AC_MSG_RESULT(option --enable-debug selected : compiling with the -g option)
    CXXFLAGS="-g -fbounds-check $CXXFLAGS"
 else
-   CXXFLAGS="-DNDEBUG -O2 $CXXFLAGS"
+   CXXFLAGS="-DNDEBUG  $CXXFLAGS"
 fi
 
 if test "$enable_optimisation" = yes; then
