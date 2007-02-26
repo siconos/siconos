@@ -160,7 +160,7 @@ case "$target" in
       ;;
     *-apple-darwin*)
       #ATLAS_LIBS="-L/usr/local/lib/atlas/ -latlas -lcblas -lf77blas -llapack -latlas"
-      ATLAS_LIBS="/usr/local/lib/atlas/libatlas.a /usr/local/lib/atlas/liblapack.a /usr/local/lib/atlas/libcblas.a /usr/local/lib/atlas/libcf77blas.a"
+      ATLAS_LIBS="/usr/local/lib/atlas/libatlas.a /usr/local/lib/atlas/liblapack.a /usr/local/lib/atlas/libcblas.a /usr/local/lib/atlas/libf77blas.a"
       ATLAS_INCLUDES="-I/usr/local/include/atlas"
       ;; 
     *)
