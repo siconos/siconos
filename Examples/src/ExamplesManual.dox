@@ -1,0 +1,161 @@
+/** \mainpage Siconos Examples Manual
+\anchor siconosExamplesManual
+\section EMIntro Foreword
+
+This documents is a collection of description of all the available samples in Siconos platform. \n
+For each documented example, it provides a detailed description of the physical problem and gives some comments on the corresponding
+implementation. \n
+
+Categories of examples are:
+- Electronics
+- Mechanics
+
+Each sample is also identified thanks to a list of keywords, given at the beginning of the example description. 
+
+Then, for each example, you get:
+- a page with a complete description of the problem, the way it is implemented and so on: see "Related pages" tab on top of page for a complete lists of all available samples. 
+- a link to the source code and a short reference file documentation, see the Files/file list tab on top of page.
+
+\section EMAbout About this documentation
+On top of this page, you get links to the Siconos Home Page and to some other documents. \n
+On the left, the summary with:
+- a list of all commented examples
+- a list of all the namespaces (if documented) used in Siconos Samples.
+- a list of all the documented files in Siconos Samples. It provides a short description of each sample and some links to the source code and to the detailed documentation page.
+- Directories: files hierarchy in Siconos Samples
+
+\section EMHowTo How to Write a new sample
+
+Each time a new example is developed and distributed with the Siconos platform, do:
+
+-# Create a new directory for your sample
+-# In this directory write either a .cpp, a .py or a .sci input file, depending on the process type you choose (C++, Python or Scilab). For details on how to write an input file, see \ref gettingStarted "Getting Started with Siconos". 
+-# Add the optional files ( plugin, xml ...)
+-# Write a result.gp file, to automate plots of some results of the simulation with gnuplot (see example in Mechanics/BouncingBall/ location). 
+-# Write a documentation file (.dox, see below)
+
+\subsection EMWriteDoc Writing your own documentation file
+
+The Manual is generated thanks to Doxygen. This results in html pages and/or latex files to build a pdf version of the documentation. \n
+
+First of all, read <a href="http://siconos.gforge.inria.fr/homePageAboutDoc.html">About this Documentation</a> page to learn how to use Doxygen with Siconos. 
+
+Then the process is:
+
+-# in the directory where your sample input files are located, create a mySample.dox file. It must looks like:
+\verbatim
+/** \page labelOfYourSample TitleOfYourSample
+
+\author author's name
+
+\b Keywords: a list of keywords. At least the dynamical systems, non-smooth law and 
+relations types, the simulation and the OneStepNSProblem types.
+
+\b Location: sample directory.
+
+\b Code: the cpp file(s) related to this sample.
+
+\date the date of creation ...
+
+\section labelSection1 section1Title
+A first section where you give a detailed description of the considered problem.
+
+\section labelSection2 section2Title
+A second section where you describe the implementation of your problem in Siconos
+
+\section labelSection3 section3Title
+The results of the simulation.
+*/
+\endverbatim
+See for example the dox file in Samples/Mechanics/CamFollower/ to have an overview of the main commands and \ref EMCamFollower to see the resulting page. \n
+For details on all the doxygen commands see http://www.stack.nl/~dimitri/doxygen/commands.html . 
+-# Save the figures you need in Samples/figures, possibly with some subdirectories. \n
+For example, to include a figure myFigure, saved in Samples/figures/mySample: 
+\verbatim
+\image html mySample/myFigure.png "caption" width=5cm
+\image latex mySample/myFigure.eps "caption" widht=5cm
+\endverbatim
+which means that each figure must be saved in png and eps format. The two commands are required: one to include the picture in html pages and another for latex/pdf. \n
+For the figure directory, please keep the same files tree as in Samples (i.e. if your sample is in Samples/Mechanics/MySample, save your figures in Samples/figures/Mechanics/MySample).
+-# Document .cpp input file with Doxygen. At least the GNU-license header and a brief description of the sample:
+\verbatim
+/* Siconos-Samples version 2.0.1, Copyright INRIA 2005-2006.
+ * Siconos is a program dedicated to modeling, simulation and control
+ * of non smooth dynamical systems.	
+ * Siconos is a free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * Siconos is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siconos; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ * Contact: Vincent ACARY vincent.acary@inrialpes.fr 
+*/
+/*! \file mySample.cpp 
+\brief \ref labelOfYourSample - Brief comments - Author(s).
+Some more comments if required.
+*/
+\endverbatim
+For example, the header in CamFollower.cpp is: 
+\verbatim
+/*!\file CamFollowerNoXML.cpp 
+\brief \ref EMCamFollower - C++ input file version - M. di Bernardo, G. Osorio, S. Santini.
+*/
+\endverbatim
+EMCamFollower being the label on top of CamFollower.dox file. 
+Then, in tab files/file list on top of page you will get:
+\image html filesList.png
+\image latex filesList.eps "" width=4cm
+From left to right:
+	- the name of the file, a link to the file.cpp file reference which provide the detailed (optional) description and a depency graph.
+	- [code] a link to the full source code 
+	- a link to the documentation (from .dox) named "Simulation of a Cam Follower System"
+	- comments and authors names.
+-# Add an entry in the Contents section of ExampleManual.dox, relative to you sample. 
+-# Generate the files as explained in the next section.
+
+\subsection EMGenDoc Generation of Examples Manual
+
+\b Warning: you need doxygen 1.5.1, doxywizard and maybe graphviz utilities to process with doxygen documentation.
+For details on doxygen and related tools download and install, see <a href="http://www.stack.nl/~dimitri/doxygen/install.html#install_bin_unix">Doxygen Installation Page</a>.\n
+
+First of all, if it does not exist, create the directory "Samples/../GeneratedDocs". 
+
+Then, to generate the documentation, from Samples directory, launch doxywizard, and follow the steps:
+-# load config/SiconosExamples.cfg 
+-# "start" generation. 
+
+Then you can open Samples/../GeneratedDocs/Samples/index.html with any web browser.
+
+To generate latex, from doxywizard:
+-# load config/SiconosExamples.cfg, choose Expert and in "LaTex" tab, tick GENERATE_LATEX.
+-# save in config/SiconosExamples.cfg
+-# start
+
+A latex directory is then created in Samples/../GeneratedDocs/Samples. From this location, type "make" to obtain refman.pdf, the pdf version of the Manual.
+
+If you do not want to use doxywizard, just run from config directory:
+\verbatim
+doxygen SiconosExamples.cfg
+\endverbatim
+
+\section EMtreeview Examples sources organisation
+
+\image html samplesTreeview.png
+\image latex samplesTreeview.eps "" width=5cm
+
+\section EMcontents Contents
+
+\subpage EMBouncingBall
+
+\subpage EMCamFollower
+
+\subpage EMDryFriction
+
+*/

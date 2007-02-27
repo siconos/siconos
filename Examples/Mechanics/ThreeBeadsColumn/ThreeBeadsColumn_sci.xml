@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Siconos-sample version 2.0.1, Copyright INRIA 2005-2006.-->
+<!-- Siconos is a program dedicated to modeling, simulation and control-->
+<!-- of non smooth dynamical systems.	-->
+<!-- Siconos is a free software; you can redistribute it and/or modify-->
+<!-- it under the terms of the GNU General Public License as published by-->
+<!-- the Free Software Foundation; either version 2 of the License, or-->
+<!-- (at your option) any later version.-->
+<!-- Siconos is distributed in the hope that it will be useful,-->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of-->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the-->
+<!-- GNU General Public License for more details.-->
+<!---->
+<!-- You should have received a copy of the GNU General Public License-->
+<!-- along with Siconos; if not, write to the Free Software-->
+<!-- Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA-->
+<!---->
+<!-- Contact: Vincent ACARY vincent.acary@inrialpes.fr -->
+<!--	-->
+
+<!-- SICONOS Model XML file -->
+
+<SiconosModel>
+	<Title>title</Title>
+	<Author>author</Author>
+	<Description>description</Description>
+	<Date>date</Date>
+	<Time>
+		<t0>0.0</t0>
+		<T>10.0</T>
+	</Time>
+	<NSDS>
+		<DS_Definition>		
+			<LagrangianLinearTIDS number='1'>
+				<Id> Bead1 </Id>				
+				<StepsInMemory>1</StepsInMemory>
+				<q0 vectorSize='3'>	1.5 0.0 0.0	</q0>
+				<Velocity0  vectorSize='3'>
+		                0.0 0.0 0.0 </Velocity0>
+				<FExt vectorPlugin="BeadsPlugin:beadsFExt"/>
+				<Mass matrixRowSize='3' matrixColSize='3'>	
+					<row>1.0 0.0 0.0</row>
+					<row>0.0 1.0 0.0</row>
+					<row>0.0 0.0 1.0</row>
+				</Mass>			
+				<K matrixRowSize='3' matrixColSize='3'>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+				</K>
+				<C matrixRowSize='3' matrixColSize='3'>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+				</C>
+			</LagrangianLinearTIDS>
+			<LagrangianLinearTIDS number='2'>
+				<Id> Bead2 </Id>				
+				<StepsInMemory>1</StepsInMemory>
+				<q0 vectorSize='3'>	2.50 0.0 0.0	</q0>
+				<Velocity0  vectorSize='3'>	0.0 0.0  0.0	</Velocity0>
+				<FExt vectorPlugin="BeadsPlugin:beadsFExt"/>
+				<Mass matrixRowSize='3' matrixColSize='3'>	
+					<row>1.0 0.0 0.0</row>
+					<row>0.0 1.0 0.0</row>
+					<row>0.0 0.0 1.0</row>
+				</Mass>			
+				<K matrixRowSize='3' matrixColSize='3'>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+				</K>
+				<C matrixRowSize='3' matrixColSize='3'>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+				</C>
+			</LagrangianLinearTIDS>
+			
+			<LagrangianLinearTIDS number='3'>
+				<Id> Bead3 </Id>				
+				<StepsInMemory>1</StepsInMemory>
+				<q0 vectorSize='3'>	3.50 0.0 0.0	</q0>
+				<Velocity0  vectorSize='3'>	0.0  0.0  0.0	</Velocity0>
+				<FExt vectorPlugin="BeadsPlugin:beadsFExt"/>
+				<Mass matrixRowSize='3' matrixColSize='3'>	
+					<row>1.0 0.0 0.0</row>
+					<row>0.0 1.0 0.0</row>
+					<row>0.0 0.0 1.0</row>
+				</Mass>			
+				<K matrixRowSize='3' matrixColSize='3'>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+				</K>
+				<C matrixRowSize='3' matrixColSize='3'>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+					<row>0.0 0.0 0.0</row>
+				</C>
+			</LagrangianLinearTIDS>
+			
+			<LagrangianLinearTIDS number='4'> 
+				<Id> Ground </Id>
+				<StepsInMemory>1</StepsInMemory>				
+				<q0 vectorSize='1'>	0.5	</q0>	
+				<Velocity0 vectorSize='1'>	0.0	</Velocity0>
+				<FExt vectorPlugin="BeadsPlugin:groundFExt"/>
+				<Mass matrixRowSize='1' matrixColSize='1'>	
+					<row>1000000.0 </row>
+				</Mass>			
+				<K matrixRowSize='1' matrixColSize='1'>
+					<row>0.0</row>
+				</K>
+				<C matrixRowSize='1' matrixColSize='1'>
+					<row>0.0</row>
+				</C>
+			</LagrangianLinearTIDS>
+			
+			<LagrangianLinearTIDS number='5'> 
+				<Id> Ceiling </Id>
+				<StepsInMemory>1</StepsInMemory>				
+				<q0 vectorSize='1'>	4.5	</q0>	
+				<Velocity0 vectorSize='1'>	0.0	</Velocity0>
+				<FExt vectorPlugin="BeadsPlugin:groundFExt"/>
+				<Mass matrixRowSize='1' matrixColSize='1'>	
+					<row>1000000.0 </row>
+				</Mass>			
+				<K matrixRowSize='1' matrixColSize='1'>
+					<row>0.0</row>
+				</K>
+				<C matrixRowSize='1' matrixColSize='1'>
+					<row>0.0</row>
+				</C>
+			</LagrangianLinearTIDS>
+		</DS_Definition>
+		<Interaction_Definition>
+            <Interaction number='1' Id='Bead1-Bead2'>
+                <size> 1 </size>
+               <DS_Concerned vectorSize='2'>1 2</DS_Concerned>
+               <Interaction_Content>
+                  <LagrangianLinearRelation>
+                     <H matrixRowSize='1' matrixColSize='6'>
+                     <row>-1.0  0.0  0.0  1.0  0.0  0.0</row>
+                      </H>
+                	<b vectorSize='1'>	-0.1	</b>
+                  </LagrangianLinearRelation>
+                  <NewtonImpactLaw>
+                  <e>0.9</e>
+                  </NewtonImpactLaw>
+               </Interaction_Content>
+            </Interaction>
+            <Interaction number='2' Id='Bead2-Bead3'>
+               <size> 1 </size>
+               <DS_Concerned vectorSize='2'>2 3</DS_Concerned>
+               <Interaction_Content>
+                  <LagrangianLinearRelation>
+                     <H matrixRowSize='1' matrixColSize='6'>
+                     <row>-1.0  0.0  0.0  1.0  0.0  0.0</row>
+                      </H>
+                    	<b vectorSize='1'>	-0.1	</b>
+                  </LagrangianLinearRelation>
+                  <NewtonImpactLaw>
+                  <e>0.9</e>
+                  </NewtonImpactLaw>
+               </Interaction_Content>
+            </Interaction>
+            <Interaction number='3' Id='Bead1-Ground'>
+               <size> 1 </size>
+               <DS_Concerned vectorSize='2'>1 4</DS_Concerned>
+               <Interaction_Content>
+                  <LagrangianLinearRelation>
+                     <H matrixRowSize='1' matrixColSize='4'>
+                     <row>1.0  0.0  0.0  -1.0</row>
+                      </H>
+                	<b vectorSize='1'>	-0.1	</b>
+                  </LagrangianLinearRelation>
+                  <NewtonImpactLaw>
+                  <e>0.9</e>
+                  </NewtonImpactLaw>
+               </Interaction_Content>
+            </Interaction>
+            <Interaction number='4' Id='Bead3-Ceiling'>
+                <size> 1 </size>
+               <DS_Concerned vectorSize='2'>3 5</DS_Concerned>
+               <Interaction_Content>
+                  <LagrangianLinearRelation>
+                     <H matrixRowSize='1' matrixColSize='4'>
+                     <row>-1.0  0.0  0.0  1.0</row>
+                      </H>
+	              <b vectorSize='1'>	-0.1	</b>
+                  </LagrangianLinearRelation>
+                  <NewtonImpactLaw>
+                  <e>0.9</e>
+                  </NewtonImpactLaw>
+               </Interaction_Content>
+            </Interaction>
+		</Interaction_Definition>		
+	</NSDS>
+	<Simulation type='TimeStepping'>
+
+		<TimeDiscretisation isConstant='true'>	
+			<h>0.001</h>
+		</TimeDiscretisation>				
+
+		<OneStepIntegrator_Definition>
+			<Moreau>
+				<DS_Concerned vectorSize='3'>1 2 3 4 5</DS_Concerned>		
+				<Theta vectorSize='3'>0.5 0.5 0.5 1.0 1.0</Theta>
+			</Moreau>					
+		</OneStepIntegrator_Definition>
+
+		<OneStepNSProblem>
+		 	<LCP>
+                        <Solver type="NSQP" maxIter="10" tolerance="0.0001"/>
+		 	</LCP>
+		 </OneStepNSProblem>
+	</Simulation>
+	
+</SiconosModel>

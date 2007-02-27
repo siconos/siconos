@@ -1,0 +1,50 @@
+Salut,
+
+
+Concernant les relations linéaires, nous avons en fait  besoin de plus simple que çà : des relations d'égalité entre ddl de DS différents.
+N'y a-t-il pas besoin de çà pour vos applications en robotique? A moins que vous n'utilisiez qu'un seul DS pour l'ensemble des bras du robot?
+
+Question subsidiaire, est-il possible de mettre des relations non régulières entre ddl d'un même DS? ( à priori çà devrait être possible, en tout cas il peut être écrit dans un xml à l'heure actuelle.)
+
+
+
+
+> >1) Comment dans le ".cpp" récupère-t-on le nombre de DS?
+> >
+> >
+> je ne comprends pas trop ta question?? En principe c'est toi qui fixe le
+> nbre de DS et qui en declare autant que tu as besoin.
+> Ou alors c'est la dimension du vectorDS de l'objet NSDS => fonction
+> getDSVectorSize() du nsds.
+> 
+
+On ne maitrise pas toute l'architecture en c++... Aussi, on travaille à partir d'un exemple (BouncingBall) qu'on modifie au fur et à mesure de nos besoins. 
+On a par exemple essayé:
+
+  n_ds = BouncingBall.getNonSmoothDynamicalSystemPtr()->getDSVectorSize(); 
+
+mais manifestement class model n'a pas de membre nommé getDSVectorSize. Pourrais-tu nous donner un exemple de bonne syntaxe, pour cet exemple?
+
+> >2) Pour chaque DS, comment récupérer la taille de q?
+> >
+> >
+> fonction getNdof()
+
+du coup, ici c'est la même question.
+
+> 
+> >3) Concernant le Plugin Fext: comment fait-on pour utiliser le paramètre
+> >"param"?
+> >   y a-t-il un tag supplémentaire à ajouter dans le xml qui contienne la
+> valeur
+> >de   param?
+> >
+> >
+> voir la doc html pour les plug-in, comme ca tu me diras si c'est
+> comprehensible ...
+> Par contre je n'ai pas encore implemente la partie xml pour ce
+> parametre. Il faut donc fixe ca directement ds le cpp.
+> 
+
+On aimerait bien récupérer le Fext dans le Plugin Fext mais il faut pouvoir récupérer le numéro de DS dans ce plugin, comment alors peut-on le récupérer?
+  

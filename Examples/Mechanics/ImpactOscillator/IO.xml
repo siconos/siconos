@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Siconos-sample version 2.0.1, Copyright INRIA 2005-2006.  -->
+<!-- Siconos is a program dedicated to modeling, simulation and control-->
+<!-- of non smooth dynamical systems.	-->
+<!-- Siconos is a free software; you can redistribute it and/or modify-->
+<!-- it under the terms of the GNU General Public License as published by-->
+<!-- the Free Software Foundation; either version 2 of the License, or-->
+<!-- (at your option) any later version.-->
+<!-- Siconos is distributed in the hope that it will be useful,-->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of-->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the-->
+<!-- GNU General Public License for more details.-->
+<!---->
+<!-- You should have received a copy of the GNU General Public License-->
+<!-- along with Siconos; if not, write to the Free Software-->
+<!-- Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA-->
+<!---->
+<!-- Contact: Vincent ACARY vincent.acary@inrialpes.fr -->
+<!--	-->
+
+<!-- SICONOS Model XML file -->
+
+<SiconosModel>
+	<Title>title</Title>
+  <Author>Petri Piiroinen</Author>
+  <Description>Impact oscillator</Description>
+  <Date>15/02/2006</Date>
+         <Time>
+		<t0>0.0 </t0>
+		<T>2.41660973353061</T>
+	</Time>
+
+	<NSDS bvp='false'>
+	
+		<!-- DSs defined in the problem -->
+		<DS_Definition>		
+			<LagrangianLinearTIDS number='1'>
+				<Id> Ball </Id>				
+				<StepsInMemory>1</StepsInMemory>				
+				<q0 vectorSize='2'>
+					0.3 1.0
+				</q0>
+				<Velocity0  vectorSize='2'>
+					0.0 0.0
+				</Velocity0>
+				<FExt vectorPlugin="IOPPlugin:IOFExt"/>
+				<Mass matrixRowSize='2' matrixColSize='2'>	
+					<row>1.0 0.0</row>
+					<row>0.0 0.0</row>
+				</Mass>			
+				<K matrixRowSize='2' matrixColSize='2'>
+					<row>1.0 0.0</row>
+					<row>0.0 0.0</row>
+				</K>
+				<C matrixRowSize='2' matrixColSize='2'>
+					<row>0.001 0.0</row>
+					<row>0.0 1.0</row>
+				</C>
+			</LagrangianLinearTIDS>
+			
+			<LagrangianLinearTIDS number='2'> 
+				<Id> Ground </Id>
+				<StepsInMemory>1</StepsInMemory>				
+				<q0 vectorSize='1'>
+					0.0
+				</q0>	
+				<Velocity0 vectorSize='1'>
+					0.0
+				</Velocity0>
+				<FExt vectorPlugin="IOPPlugin:groundFExt"/>
+				<M matrixRowSize='1' matrixColSize='1'>	
+					<row>1.0 </row>
+				</M>			
+				<K matrixRowSize='1' matrixColSize='1'>
+					<row>0.0</row>
+				</K>
+				<C matrixRowSize='1' matrixColSize='1'>
+					<row>0.0</row>
+				</C>			
+
+			</LagrangianLinearTIDS>	
+
+		</DS_Definition>
+
+
+		<!-- Interactions defined in the problem -->		
+		<Interaction_Definition>
+			<!-- A definition of a DS interaction, and list of couple of DSs who are concerned by it -->			
+			<Interaction number='1'>
+				<size> 1 </size>
+			        <DS_Concerned all='true'></DS_Concerned>								
+				<!-- Relation of this interaction -->				
+				<Interaction_Content>		
+					<LagrangianLinearRelation>
+						<H matrixRowSize='1' matrixColSize='3'>
+	                                        <row> 1.0  0.0  -0.0</row>
+						</H>
+					</LagrangianLinearRelation>			
+					<!-- NS Law of this interaction	-->
+					<NewtonImpactLaw>
+						<e>0.8</e>				
+					</NewtonImpactLaw>
+				</Interaction_Content>	
+		        </Interaction>				
+		</Interaction_Definition>		
+	</NSDS>
+	<Simulation type='TimeStepping'>
+		<TimeDiscretisation isConstant='false'>	
+			<h>0.00241660973353</h>
+                <!--     <h>0.00483321946706</h>-->
+     		</TimeDiscretisation>				
+		<OneStepIntegrator_Definition>
+			<Moreau>
+				<DS_Concerned vectorSize='2'>1 2</DS_Concerned>		
+				<Theta all='0.5'/>
+			</Moreau>					
+		</OneStepIntegrator_Definition>
+		<!-- One Step NS Problem of th Simulation-->
+		<OneStepNSProblem>
+		 	<LCP>
+	                  <Solver type="NSQP" maxIter="101" />
+		 	</LCP>
+		 </OneStepNSProblem>
+	</Simulation>	
+</SiconosModel>

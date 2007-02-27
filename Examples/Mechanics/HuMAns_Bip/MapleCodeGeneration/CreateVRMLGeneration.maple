@@ -1,0 +1,256 @@
+# Copyright (C) INRIA 1999-2005
+# 
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License version 2 as published
+# by the Free Software Foundation.
+# 
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+# Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License along
+# with this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# 
+# Author(s): Pierre-Brice Wieber
+# Affiliation(s): INRIA, team BIPOP
+# Email(s): Pierre-Brice.Wieber@inria.fr
+# 
+# Description: 
+
+
+printf("        -------------------------------------------\n");
+printf("                        HuMAnS-1.0\n");
+printf("               Maple C code generation for\n");
+printf("           A Scilab toolbox for Humanoid Motion\n");
+printf("                  Analysis and simulation\n");
+printf("               Copyright (C) INRIA 1999-2005\n");
+printf("        -------------------------------------------\n");
+
+with(linalg):
+with(codegen, C, makeproc):
+
+FrameMatrix := proc(k);
+
+	RETURN(matrix([[cos(theta_||(k)), -sin(theta_||(k)), 0, r_||(k)],
+			[cos(alpha_||(k))*sin(theta_||(k)), cos(alpha_||(k))*cos(theta_||(k)), -sin(alpha_||(k)), -sin(alpha_||(k))*lambda_||(k)],
+			[sin(alpha_||(k))*sin(theta_||(k)), sin(alpha_||(k))*cos(theta_||(k)), cos(alpha_||(k)), cos(alpha_||(k))*lambda_||(k)],
+			[0, 0, 0, 1]])):
+end:
+
+HAnimFrameMatrix := proc(k)
+local matrice, j, rot;
+
+	j := k:
+	matrice := FrameMatrix(j):
+	while ref_||(j) > 0 do
+		j := ref_||(j):
+		matrice := evalm(map(x->expand(subs({seq(q[i]=0, i=1..NDDL)},x)),FrameMatrix(j))&*matrice):
+	end:
+	rot := evalm(matrix([[0, 0, -1], [0, 1, 0], [1, 0, 0]])&*submatrix(matrice, 1..3, 1..3)):
+	RETURN(evalm(rot&*transpose(map(x->expand(subs({seq(q[i]=0, i=1..NDDL)},x)),rot)))):
+end:
+
+VRMLQuaternion := proc(M)
+local x, y, z, sinus, cosinus;
+
+	x := (M[3, 2] - M[2, 3])/2;
+	y := (M[1, 3] - M[3, 1])/2;
+	z := (M[2, 1] - M[1, 2])/2;
+	sinus := sqrt(x*x+y*y+z*z);
+	cosinus := (M[1, 1]+M[2, 2]+M[3, 3]-1)/2;
+	RETURN(matrix([[x, y, z, arctan(sinus, cosinus)]])):
+end:
+
+HAnimOrientationsMatrix := proc()
+local matrice_global, matrice_hip_r, matrice_foot_r, matrice_hip_l, matrice_foot_l, matrice_vl5;
+	
+	print(`HAnim Orientations Matrix`);
+	matrice_global	:= VRMLQuaternion(evalm(HAnimFrameMatrix(4)&*HAnimFrameMatrix(5)&*HAnimFrameMatrix(6))):
+	matrice_hip_r 	:= VRMLQuaternion(evalm(HAnimFrameMatrix(7)&*HAnimFrameMatrix(8)&*HAnimFrameMatrix(9))):
+	matrice_foot_r	:= VRMLQuaternion(evalm(HAnimFrameMatrix(11)&*HAnimFrameMatrix(12))):
+	matrice_hip_l		:= VRMLQuaternion(evalm(HAnimFrameMatrix(14)&*HAnimFrameMatrix(15)&*HAnimFrameMatrix(16))):
+	matrice_foot_l	:= VRMLQuaternion(evalm(HAnimFrameMatrix(18)&*HAnimFrameMatrix(19))):
+	matrice_vl5			:= VRMLQuaternion(evalm(HAnimFrameMatrix(21)&*HAnimFrameMatrix(22)&*HAnimFrameMatrix(23))):
+	
+	RETURN(stackmatrix(matrice_global, matrice_hip_r, VRMLQuaternion(evalm(HAnimFrameMatrix(10))), matrice_foot_r, matrice_hip_l, VRMLQuaternion(evalm(HAnimFrameMatrix(17))), matrice_foot_l, matrice_vl5)):
+
+end:
+
+
+HAnimPositionVector := proc()
+local matrice, trans;
+	print(`HAnim Position`);
+	matrice := FrameMatrix(1)&*FrameMatrix(2)&*FrameMatrix(3):
+	trans := convert(evalm(matrix([[0, 0, -1], [0, 1, 0], [1, 0, 0]])&*submatrix(matrice, 1..3, 4..4)), Vector):
+	trans[2] := trans[2] - 0.903;
+	RETURN(evalm(trans)):	
+end:
+
+
+TagPosition := proc(k) option remember;
+local j, matrice, trans, rot;
+
+	j := reftag_||(k):
+	matrice := FrameMatrix(j):
+	while ref_||(j) > 0 do
+		j := ref_||(j):
+		matrice := evalm(FrameMatrix(j)&*matrice):
+	end:
+	trans := subvector(matrice, 1..3, 4):
+	rot := submatrix(matrice, 1..3, 1..3):
+	RETURN(evalm(trans + rot &* tag_||(k))):
+end:
+
+HAnimCOP := proc(j)
+local ContactPoints, contact, Lambday, matrice;
+	
+	ContactPoints := [seq(points_contact[i], i=ContactSolids[j,1]..ContactSolids[j,2])]:
+	contact := matrix([seq(TagPosition(i), i=ContactPoints)]):
+	Lambday := Vector([seq(Lambda[i], i = (ContactSolids[j,1] + NCONT)..(ContactSolids[j,2] + NCONT))]):
+
+	matrice := convert(evalm(matrix([[0, 0, -1], [0, 1, 0],[1,0,0]])&*evalm(Lambday.contact)),Vector):
+	
+	RETURN(evalm(convert([matrice, add(Lambday[i], i=1..vectdim(Lambday))],Vector))):
+
+end:
+
+HAnimZMP := proc()
+local contact, Lambdax, Lambday, Lambdaz, ZMP, matrice;
+
+	contact := matrix([seq(TagPosition(i), i=points_contact)]):
+	Lambdax := Vector([seq(Lambda[i], i = 1..NCONT)]):
+	Lambday := Vector([seq(Lambda[i], i = (NCONT+1)..2*NCONT)]):
+	Lambdaz := Vector([seq(Lambda[i], i = (2*NCONT+1)..3*NCONT)]):
+	
+	ZMP := [evalm(col(contact,1).Lambday) - evalm(col(contact,2).Lambdax), 0 ,
+					evalm(col(contact,3).Lambday) - evalm(col(contact,2).Lambdaz)]: 
+	
+	matrice := evalm(matrix([[0, 0, -1], [0, 1, 0], [1, 0,0]])&*ZMP):
+	
+	RETURN(evalm(convert([matrice, add(Lambday[i], i=1..vectdim(Lambday))],Vector))):
+
+end:
+
+HAnimForceCOP := proc(j)
+local Lambdax, Lambday, Lambdaz, Force;
+	
+	Lambdax := Vector([seq(Lambda[i], i = ContactSolids[j,1]..ContactSolids[j,2])]):
+	Lambday := Vector([seq(Lambda[i], i = (ContactSolids[j,1] + NCONT)..(ContactSolids[j,2] + NCONT))]):
+	Lambdaz := Vector([seq(Lambda[i], i = (ContactSolids[j,1] + 2*NCONT)..(ContactSolids[j,2] + 2*NCONT))]):
+	
+	Force := evalm(matrix([[0, 0, -1], [0, 1, 0], [1, 0, 0]])&*[add(Lambdax[i], i = 1..vectdim(Lambdax)), add(Lambday[i], i =
+	1..vectdim(Lambday)), add(Lambdaz[i], i = 1..vectdim(Lambdaz))]):
+
+	RETURN(evalm(Force/100)):
+end:
+
+HAnimForceZMP := proc()
+local Lambdax, Lambday, Lambdaz, Force;
+	
+	Lambdax := Vector([seq(Lambda[i], i = 1..NCONT)]):
+	Lambday := Vector([seq(Lambda[i], i = (NCONT+1)..2*NCONT)]):
+	Lambdaz := Vector([seq(Lambda[i], i = (2*NCONT+1)..3*NCONT)]):
+
+	Force := evalm(matrix([[0, 0, -1], [0, 1, 0], [1, 0, 0]])&*[add(Lambdax[i], i = 1..vectdim(Lambdax)), add(Lambday[i], i =
+	1..vectdim(Lambday)), add(Lambdaz[i], i = 1..vectdim(Lambdaz))]):
+
+	RETURN(evalm(Force/100)):
+
+end:
+
+HAnimVPosMatrix := proc()
+
+	RETURN(matrix([seq(HAnimCOP(i), i=1..NCONTSOL), HAnimZMP()])):
+end:
+
+HAnimVScaleMatrix := proc()
+
+	RETURN(matrix([seq([0.5, norm(HAnimForceCOP(i),2), 0.5],i=1..NCONTSOL), [0.5,
+	norm(HAnimForceZMP(),2), 0.5]])):
+end:
+
+HAnimVRotVector := proc(j)
+local Force, CF, DF;
+
+	Force := HAnimForceCOP(j):
+	CF := crossprod(Force, [0, 1, 0]):
+	DF := dotprod(Force, [0, 1, 0]):
+
+	RETURN(matrix([[CF[1], CF[2], CF[3], -arctan(norm(CF,2), DF)]])):
+	
+end:
+
+HAnimVRotZMP := proc()
+local Force, CF, DF;
+
+	Force := HAnimForceZMP():
+
+	CF := crossprod(Force, [0, 1, 0]):
+	DF := dotprod(Force, [0, 1, 0]):
+	
+	RETURN(matrix([[CF[1], CF[2], CF[3], -arctan(norm(CF,2), DF)]])):
+
+end:
+
+HAnimVRotMatrix := proc()
+
+	RETURN(stackmatrix(seq(HAnimVRotVector(i), i=1..NCONTSOL), HAnimVRotZMP())):
+
+end:
+
+
+
+GenerateCreateVRML := proc()
+local  Or, HAnimOrientations, fd, Pos, HAnimPosition, VPOS,  HAnimVPos, VScale,
+HAnimVScale, VRot, HAnimVRot;
+global q, Lambda;
+	
+	Or := HAnimOrientationsMatrix():
+	print(`Writing file "HAnimOrientations.c"`):
+	Or := convert(transpose(Or), vector):
+	HAnimOrientations := makeproc(Or, [Or, q::array(1..vectdim(q))]):
+	fd := fopen("HAnimOrientations.c",WRITE);
+  fprintf(fd,"#include \"CreateVRML.h\"\n"):
+	fclose(fd):
+	C(HAnimOrientations, optimized, filename="HAnimOrientations.c"):
+	
+	Pos := HAnimPositionVector():
+	print(`Writing file "HAnimPosition.c"`):
+	HAnimPosition := makeproc(Pos, [Pos, q::array(1..vectdim(q))]):
+	fd := fopen("HAnimPosition.c",WRITE);
+  fprintf(fd,"#include \"CreateVRML.h\"\n"):
+	fclose(fd):
+	C(HAnimPosition, optimized, filename="HAnimPosition.c"):
+	
+	
+	VPOS := HAnimVPosMatrix():
+	print(`Writing file "HAnimVPos.c"`):
+	VPOS := convert(transpose(VPOS), vector):
+	HAnimVPos := makeproc(VPOS, [VPOS, Lambda::array(1..vectdim(Lambda)), q::array(1..vectdim(q))]):
+	fd := fopen("HAnimVPos.c",WRITE);
+  fprintf(fd,"#include \"CreateVRML.h\"\n"):
+	fclose(fd):
+	C(HAnimVPos, optimized, filename="HAnimVPos.c"):
+	
+	VScale := HAnimVScaleMatrix():
+	print(`Writing file "HAnimVScale.c"`):
+	VScale := convert(transpose(VScale), vector):
+	HAnimVScale := makeproc(VScale, [VScale, Lambda::array(1..vectdim(Lambda)), q::array(1..vectdim(q))]):
+	fd := fopen("HAnimVScale.c",WRITE);
+  fprintf(fd,"#include \"CreateVRML.h\"\n"):
+	fclose(fd):
+	C(HAnimVScale, optimized, filename="HAnimVScale.c"):
+	
+	VRot := HAnimVRotMatrix():
+	print(`Writing file "HAnimVRot.c"`):
+	VRot := convert(transpose(VRot), vector):
+	HAnimVRot := makeproc(VRot, [VRot, Lambda::array(1..vectdim(Lambda)), q::array(1..vectdim(q))]):
+	fd := fopen("HAnimVRot.c",WRITE);
+  fprintf(fd,"#include \"CreateVRML.h\"\n"):
+	fclose(fd):
+	C(HAnimVRot, optimized, filename="HAnimVRot.c"):
+	
+end:
+

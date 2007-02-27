@@ -1,0 +1,103 @@
+<!-- Siconos-sample version 2.0.1, Copyright INRIA 2005-2006.-->
+<!-- Siconos is a program dedicated to modeling, simulation and control-->
+<!-- of non smooth dynamical systems.	-->
+<!-- Siconos is a free software; you can redistribute it and/or modify-->
+<!-- it under the terms of the GNU General Public License as published by-->
+<!-- the Free Software Foundation; either version 2 of the License, or-->
+<!-- (at your option) any later version.-->
+<!-- Siconos is distributed in the hope that it will be useful,-->
+<!-- but WITHOUT ANY WARRANTY; without even the implied warranty of-->
+<!-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the-->
+<!-- GNU General Public License for more details.-->
+<!---->
+<!-- You should have received a copy of the GNU General Public License-->
+<!-- along with Siconos; if not, write to the Free Software-->
+<!-- Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA-->
+<!---->
+<!-- Contact: Vincent ACARY vincent.acary@inrialpes.fr -->
+<!--	-->
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- SICONOS Model XML file -->
+
+<SiconosModel>
+	<Title>title</Title>
+  <Author>author</Author>
+  <Description>description</Description>
+  <Date>date</Date>
+	<Time>
+		<t0>0.0</t0>
+		<T>1.0</T>
+	</Time>
+
+	<NSDS bvp='false'>
+	
+		<!-- DSs defined in the problem -->
+		<DS_Definition>		
+			<NonLinearDS number='1'>
+			
+				<!-- Commun at all DS -->
+				
+				<Id> Oscillator </Id>				
+				
+				<n>2</n>
+				
+				<x vectorSize='2'>
+					0 1
+				</x>
+				
+				<x0 vectorSize='2'>
+					0 1
+				</x0>		
+								
+				<StepsInMemory>1</StepsInMemory>				
+				
+				<vectorField plugin="OscillatorPlugin:vectorField"/>
+				<computeJacobianX plugin="OscillatorPlugin:computeJacobianX"/>		
+				
+				
+			</NonLinearDS>
+		</DS_Definition>
+
+
+		
+	
+	</NSDS>
+	
+	
+	<!-- Strategy to use in order to solve the problem -->	
+				
+	<Strategy type='TimeStepping'>
+
+		<TimeDiscretisation isConstant='true'>	
+		
+			<h>0.5</h>
+			<N>1</N>
+			<tk vectorSize='2'>0 0</tk>
+			<hMin>0</hMin>
+			<hMax>0</hMax>
+			
+		</TimeDiscretisation>				
+
+	
+		<!-- One Step Integrators -->				
+		
+		<OneStepIntegrator_Definition>
+			<!-- A definition of a OneStepIntegrator, and list of couple of DSs who are concerned by it -->			
+			
+			<LSODAR>
+				<DS_Concerned size = '1'> <!-- Scaling -->
+				
+					<DS number='1'/>
+					
+				</DS_Concerned>		
+				<r>1</r>
+			</LSODAR>					
+		</OneStepIntegrator_Definition>
+
+		
+		<!-- One Step NS Problem of th Strategy-->
+				
+	</Strategy>	
+
+</SiconosModel>

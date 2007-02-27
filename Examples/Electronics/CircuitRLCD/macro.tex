@@ -1,0 +1,141 @@
+
+
+
+\usepackage{a4wide}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{minitoc}
+%\usepackage{glosstex}
+\usepackage{colortbl}
+\usepackage{hhline}
+\usepackage{longtable}
+
+\def\glossaryname{Glossary of Notation}
+
+
+
+\usepackage{color}
+\usepackage{graphicx,epsfig}
+\graphicspath{{figure/}}
+\usepackage[T1]{fontenc}
+\usepackage{rotating}
+
+\usepackage{algorithmic}
+\usepackage{algorithm}
+%\usepackage{ntheorem}
+\usepackage{natbib}
+
+\renewcommand{\algorithmiccomment}[1]{//#1}
+
+%\renewcommand{\baselinestretch}{2.0}
+\setcounter{tocdepth}{2}     % Dans la table des matieres
+\setcounter{secnumdepth}{3}  % Avec un numero.
+
+
+
+%\newtheorem{definition}{Definition}
+%\newtheorem{lemma}{Lemma}
+%\newtheorem{claim}{Claim}
+%\newtheorem{remark}{Remark}
+%\newtheorem{assumption}{Assumption}
+%\newtheorem{example}{Example}
+%\newtheorem{conjecture}{Conjecture}
+%\newtheorem{corollary}{Corollary}
+%\newtheorem{OP}{OP}
+%\newtheorem{problem}{Problem}
+%\newtheorem{theorem}{Theorem}
+
+
+\newcommand{\CC}{\mbox{\rm $~\vrule height6.6pt width0.5pt depth0.25pt\!\!$C}}
+\newcommand{\ZZ}{\mbox{\rm \lower0.3pt\hbox{$\angle\!\!\!$}Z}}
+\newcommand{\RR}{\mbox{\rm $I\!\!R$}}
+\newcommand{\NN}{\mbox{\rm $I\!\!N$}}
+
+\newcommand{\Frac}[2]{\displaystyle \frac{#1}{#2}}
+
+\newcommand{\DP}[2]{\displaystyle \frac{\partial {#1}}{\partial {#2}}}
+
+
+\newcommand{\ie}{i.e.}
+\newcommand{\eg}{e.g.}
+\newcommand{\cf}{c.f.}
+\newcommand{\putidx}[1]{\index{#1}\textit{#1}}
+
+\def\Er{{\rm I\! R}}
+\def\En{{\rm I\! N}} 
+\def\Ec{{\rm I\! C}}
+ 
+
+
+
+
+
+
+%----------------------------------------------------------------------
+%                  Modification des subsubsections
+%----------------------------------------------------------------------
+\makeatletter
+\renewcommand\thesubsubsection{\thesubsection.\@alph\c@subsubsection}
+\makeatother
+
+%----------------------------------------------------------------------
+%             Redaction note environnement
+%----------------------------------------------------------------------
+\makeatletter
+%\theoremheaderfont{\scshape}
+%\theoremstyle{marginbreak}
+%\theorembodyfont{\upshape}
+%\newtheorem{rque}{\bf Remarque}[chapter]
+%\newtheorem{rque1}{\bf \fsc{Remarque}}[chapter] !!! \fsc est une commande french
+%\newtheorem{ndr1}{\textbf{\textsc{Redaction note}}}[section]
+
+\newenvironment{ndr}%
+{%
+\tt
+%\centerline{---oOo---}
+\noindent\begin{ndr1}%
+}%
+{%
+\begin{flushright}%
+%\vspace{-1.5em}\ding{111}
+\end{flushright}%
+\end{ndr1}%
+%\centerline{---oOo---}
+}
+
+\makeatother
+
+%----------------------------------------------------------------------
+%             Redaction note environnement V.ACARY
+%----------------------------------------------------------------------
+\makeatletter
+%\theoremheaderfont{\scshape}
+%\theoremstyle{marginbreak}
+%\theorembodyfont{\upshape}
+%\newtheorem{rque}{\bf Remarque}[chapter]
+%\newtheorem{rque1}{\bf \fsc{Remarque}}[chapter] !!! \fsc est une commande french
+%\newtheorem{ndr1va}{\textbf{\textsc{Redaction note V. ACARY}}}[section]
+
+\newenvironment{ndrva}%
+{%
+\tt
+%\centerline{---oOo---}
+\noindent\begin{ndr1va}%
+}%
+{%
+\begin{flushright}%
+%\vspace{-1.5em}\ding{111}
+\end{flushright}%
+\end{ndr1va}%
+%\centerline{---oOo---}
+}
+
+\makeatother
+
+
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "report"
+%%% End: 

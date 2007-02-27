@@ -1,0 +1,1 @@
+In this sample, a rigid 2D bar is subjected to the gravity in the x axis, to a rotation velocity and to a velocity in the y axis. There is no interaction (H := 0)

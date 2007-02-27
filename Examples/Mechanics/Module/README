@@ -1,0 +1,5 @@
+Test of an elementary module. The pre-treatment and the post-treatment are made
+with matlab.
+
+You can see results thanks to result.gp. You can also use the gmsh file in 
+this way: gmsh module.pos.

@@ -28,6 +28,10 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 Notes:
 
 Changes:
+
+2007-02-27 Franck Perignon <franck.perignon@inrialpes.fr>
+        * Review Relations organization: add/rename LinearTIR in FirstOrderLinearTIR, 
+	  add derived classes for LagrangianR.
 	
 2007-02-08 Franck Perignon <franck.perignon@inrialpes.fr>
 	* Add a module controlTools 
