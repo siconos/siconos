@@ -203,13 +203,13 @@ protected:
   /** class for plugin managing (open, close librairy...) */
   SiconosSharedLibrary cShared;
 
-  /** Flag to check if operators are plugged or not (and thus constant)
-   * For example isPlugin["jacobianXF"] = false, means that jacobianXF is constant,
-   * then computeJacobianXF does not change its value, and not plugged.*/
+  /** Flag to check if operators are plugged or not (and thus constant).
+   * For example isPlugin["jacobianXF"] = false, means that jacobianXF is constant, not plugged ,
+   * then computeJacobianXF does not change its value. */
   BoolMap isPlugin;
 
   /** Flags to know if pointers have been allocated inside constructors or not */
-  AllocationFlagsMap isAllocatedIn;
+  BoolMap isAllocatedIn;
 
   /** set all allocation flags (isAllocated map) to true or false
    *  \param a bool
@@ -228,8 +228,7 @@ protected:
    */
   DynamicalSystem(const std::string& = FONLDS);
 
-  /** copy constructor
-   *  \param a Dynamical system to copy
+  /** copy constructor => private, no copy nor pass-by-value.
    */
   DynamicalSystem(const DynamicalSystem &);
 
@@ -752,7 +751,7 @@ public:
   /** Default function to compute g
    *  \param double, the current time
    */
-  void computeG(double time);
+  void computeG(double);
 
   /** default function to compute the gradient of g
    *  \param double time : the current time

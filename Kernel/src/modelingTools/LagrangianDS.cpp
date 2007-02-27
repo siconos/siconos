@@ -163,11 +163,6 @@ LagrangianDS::LagrangianDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem*
 
   initPluginFlags(false);
 
-  loadSpecificXml();
-}
-void LagrangianDS::loadSpecificXml()
-{
-  LagrangianDSXML* lgptr = static_cast <LagrangianDSXML*>(dsxml);
   string plugin;
   // mass
   if (lgptr->isMassPlugin()) // if mass is plugged
@@ -440,6 +435,13 @@ void LagrangianDS::initFreeVectors(const string& type)
     workVector["velocityFree"] = new SimpleVector(ndof);
     isAllocatedIn["qFree"] = true;
     isAllocatedIn["velocityFree"] = true;
+  }
+  else
+  {
+    workVector["qFree"] = q[0];
+    workVector["velocityFree"] = q[1];
+    isAllocatedIn["qFree"] = false;
+    isAllocatedIn["velocityFree"] = false;
   }
 }
 

@@ -491,8 +491,7 @@ void Moreau::computeFreeState()
 
 void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
 {
-  double h = tend - tinit; //simulation->getTimeDiscretisationPtr()->getH();
-
+  double h = tend - tinit;
   tout = tend;
 
   DSIterator it;

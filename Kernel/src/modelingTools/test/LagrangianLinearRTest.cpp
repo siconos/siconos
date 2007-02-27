@@ -57,48 +57,22 @@ void LagrangianLinearRTest::setUp()
   xmlNode * node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "LagrangianLinearRelation");
   tmpxml1 = new LagrangianLinearRXML(node1);
 
-  // second file
-  // parse xml file:
-  xmlDocPtr doc2;
-  xmlNodePtr cur2;
-  doc2 = xmlParseFile("LagrangianLinearR_test2.xml");
-  if (doc2 == NULL)
-    XMLException::selfThrow("Document not parsed successfully");
-  cur2 = xmlDocGetRootElement(doc2);
-  if (cur2 == NULL)
-  {
-    XMLException::selfThrow("empty document");
-    xmlFreeDoc(doc2);
-  }
-
-  // get rootNode
-
-  if (xmlStrcmp(cur2->name, (const xmlChar *) "SiconosModel"))
-  {
-    XMLException::selfThrow("document of the wrong type, root node !=SiconosModel");
-    xmlFreeDoc(doc2);
-  }
-  // look for NSDS node
-  xmlNode * nodetmp2 = SiconosDOMTreeTools::findNodeChild(cur2, "NSDS");
-  nodetmp2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "Interaction");
-  nodetmp2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "Interaction_Content");
-  // get relation
-  xmlNode * node2 = SiconosDOMTreeTools::findNodeChild(nodetmp2, "LagrangianLinearRelation");
-  tmpxml2 = new LagrangianLinearRXML(node2);
   H = new SimpleMatrix("matH.dat", true);
   b = new SimpleVector(1);
   D = new SimpleMatrix(1, 1);
+  F = new SimpleMatrix(1, 1);
   (*b)(0) = 12;
   (*D)(0, 0) = 13;
+  (*F)(0, 0) = 8;
 }
 
 void LagrangianLinearRTest::tearDown()
 {
   delete tmpxml1;
-  delete tmpxml2;
   delete b;
   delete H;
   delete D;
+  delete F;
 }
 
 // xml constructor (1)
@@ -108,56 +82,66 @@ void LagrangianLinearRTest::testBuildLagrangianLinearR0()
   cout << "=== LagrangianLinearR tests start ...=== " << endl;
   cout << "========================================" << endl;
   LagrangianLinearR * llr = new LagrangianLinearR(tmpxml1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR0a : ", llr->getType() == "LagrangianLinearR", true);
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR0a : ", llr->getType() == "Lagrangian", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR0a : ", llr->getSubType() == "LinearR", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR0b : ", llr->getH() == *H, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR0c : ", llr->getB() == *b, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR0d : ", llr->getD() == *D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR0e : ", llr->getF() == *F, true);
+
   delete llr;
   cout << " xml Constructor LLR 1 ok" << endl;
 }
 
-// xml constructor, with plug-in (2)
+// data constructor (1)
 void LagrangianLinearRTest::testBuildLagrangianLinearR1()
 {
-  LagrangianLinearR * llr = new LagrangianLinearR(tmpxml2);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR1a : ", llr->getType() == "LagrangianLinearR", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearLagrangianR1b : ", llr->getHFunctionName() == "TestPlugin:h0", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearLagrangianR1c : ", llr->getGFunctionName() == "TestPlugin:G0", true);
+  LagrangianLinearR * llr = new LagrangianLinearR(*H);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR1a : ", llr->getType() == "Lagrangian", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR1b : ", llr->getSubType() == "LinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearLagrangianR1c : ", llr->getH() == *H, true);
   delete llr;
   cout << " xml Constructor LLR 2 ok" << endl;
 }
 
-// data constructor (1)
+// data constructor (2)
 void LagrangianLinearRTest::testBuildLagrangianLinearR2()
 {
   LagrangianLinearR * llr = new LagrangianLinearR(*H, *b);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR2a : ", llr->getType() == "LagrangianLinearR", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR2b : ", llr->getH() == *H, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR2c : ", llr->getB() == *b, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR2a : ", llr->getType() == "Lagrangian", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR2b : ", llr->getSubType() == "LinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearLagrangianR2c : ", llr->getH() == *H, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR2d : ", llr->getB() == *b, true);
   delete llr;
   cout << " Constructor LLR 2 ok" << endl;
 }
 
-// data constructor (2)
+// data constructor (3)
 void LagrangianLinearRTest::testBuildLagrangianLinearR3()
 {
-  LagrangianLinearR * llr = new LagrangianLinearR(*H);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR3a : ", llr->getType() == "LagrangianLinearR", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR3b : ", llr->getH() == *H, true);
+  LagrangianLinearR * llr = new LagrangianLinearR(*H, *b, *D);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR3a : ", llr->getType() == "Lagrangian", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR3b : ", llr->getSubType() == "LinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearLagrangianR3c : ", llr->getH() == *H, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR3d : ", llr->getB() == *b, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR3e : ", llr->getD() == *D, true);
   delete llr;
   cout << " Constructor LLR 3 ok" << endl;
 }
 
-// copy constructor
+// data constructor (4)
 void LagrangianLinearRTest::testBuildLagrangianLinearR4()
 {
-  Relation * rel = new LagrangianLinearR(tmpxml1);
-  LagrangianLinearR *llr = new LagrangianLinearR(*rel);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR4a : ", llr->getType() == "LagrangianLinearR", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR4b : ", llr->getH() == *H, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR4c : ", llr->getB() == *b, true);
-  delete rel;
+  LagrangianLinearR * llr = new LagrangianLinearR(*H, *b, *D, *F);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR4a : ", llr->getType() == "Lagrangian", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR4b : ", llr->getSubType() == "LinearR", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLinearLagrangianR4c : ", llr->getH() == *H, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR4d : ", llr->getB() == *b, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR4e : ", llr->getD() == *D, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianLinearR4f : ", llr->getF() == *F, true);
   delete llr;
-  cout << " Copy Constructor LLR  ok" << endl;
+  cout << " Constructor LLR 4 ok" << endl;
 }
 
 // set H

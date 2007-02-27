@@ -100,7 +100,7 @@ bool DiodeBridge()
     (*Int_B)(0, 2) = -1.0 / Cvalue ;
     (*Int_B)(0, 3) = 1.0 / Cvalue;
 
-    LinearTIR* LTIRDiodeBridge = new LinearTIR(*Int_C, *Int_B);
+    FirstOrderLinearTIR* LTIRDiodeBridge = new FirstOrderLinearTIR(*Int_C, *Int_B);
     LTIRDiodeBridge->setDPtr(Int_D);
 
     NonSmoothLaw * nslaw = new ComplementarityConditionNSL(4);
@@ -141,7 +141,7 @@ bool DiodeBridge()
     // For the initial time step:
 
     // time
-    dataPlot(k, 0) = k * h_step;
+    dataPlot(k, 0) = t0;
 
     // inductor voltage
     dataPlot(k, 1) = (LSDiodeBridge->getX())(0);
@@ -172,7 +172,7 @@ bool DiodeBridge()
 
       // --- Get values to be plotted ---
       // time
-      dataPlot(k, 0) = k * h_step;
+      dataPlot(k, 0) = DiodeBridge.getCurrentT();
 
       // inductor voltage
       dataPlot(k, 1) = (LSDiodeBridge->getX())(0);

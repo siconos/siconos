@@ -16,68 +16,67 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "LinearTIRXML.h"
+#include "FirstOrderLinearTIRXML.h"
 using namespace std;
 
-LinearTIRXML::LinearTIRXML():
-  RelationXML(), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
+FirstOrderLinearTIRXML::FirstOrderLinearTIRXML(): FirstOrderRXML(), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
 {}
 
-LinearTIRXML::LinearTIRXML(xmlNode * LTIRelationNode):
-  RelationXML(LTIRelationNode), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
+FirstOrderLinearTIRXML::FirstOrderLinearTIRXML(xmlNode * LTIRelationNode):
+  FirstOrderRXML(LTIRelationNode), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
 {
-  xmlNode *node;
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_C)) != NULL)
+  xmlNodePtr node;
+  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "C")) != NULL)
     CNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_D)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "D")) != NULL)
     DNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_F)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "F")) != NULL)
     FNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_E)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "e")) != NULL)
     eNode = node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, LTIR_B)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(LTIRelationNode, "B")) != NULL)
     BNode = node;
 }
 
-LinearTIRXML::~LinearTIRXML()
+FirstOrderLinearTIRXML::~FirstOrderLinearTIRXML()
 {}
 
-void LinearTIRXML::setC(const SiconosMatrix& matrix)
+void FirstOrderLinearTIRXML::setC(const SiconosMatrix& matrix)
 {
   if (CNode == NULL)
-    CNode = SiconosDOMTreeTools::createMatrixNode(rootRelationXMLNode, LTIR_C, matrix);
+    CNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "C", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(CNode, matrix);
 }
 
-void LinearTIRXML::setD(const SiconosMatrix& matrix)
+void FirstOrderLinearTIRXML::setD(const SiconosMatrix& matrix)
 {
   if (DNode == NULL)
-    DNode = SiconosDOMTreeTools::createMatrixNode(rootRelationXMLNode, LTIR_D, matrix);
+    DNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "D", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(DNode, matrix);
 }
 
-void LinearTIRXML::setF(const SiconosMatrix &matrix)
+void FirstOrderLinearTIRXML::setF(const SiconosMatrix &matrix)
 {
   if (FNode == NULL)
-    FNode = SiconosDOMTreeTools::createMatrixNode(rootRelationXMLNode, LTIR_F, matrix);
+    FNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "F", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(FNode, matrix);
 }
 
-void LinearTIRXML::setE(const SiconosVector& vec)
+void FirstOrderLinearTIRXML::setE(const SiconosVector& vec)
 {
   if (eNode == NULL)
-    eNode = SiconosDOMTreeTools::createVectorNode(rootRelationXMLNode, LTIR_E, vec);
+    eNode = SiconosDOMTreeTools::createVectorNode(rootNode, "e", vec);
   else SiconosDOMTreeTools::setSiconosVectorNodeValue(eNode, vec);
 }
 
-void LinearTIRXML::setB(const SiconosMatrix &matrix)
+void FirstOrderLinearTIRXML::setB(const SiconosMatrix &matrix)
 {
   if (BNode == NULL)
-    BNode = SiconosDOMTreeTools::createMatrixNode(rootRelationXMLNode, LTIR_B, matrix);
+    BNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "B", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(BNode, matrix);
 }
 

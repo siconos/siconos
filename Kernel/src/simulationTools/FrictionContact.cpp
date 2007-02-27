@@ -251,7 +251,7 @@ void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     relationType1 = UR1->getRelationType();
     relationType2 = UR2->getRelationType();
     // Computing depends on relation type -> move this in UnitaryRelation method?
-    if ((relationType1 == LAGRANGIANRELATION || relationType1 == LAGRANGIANLINEARRELATION) && (relationType2 == LAGRANGIANRELATION ||  relationType2 == LAGRANGIANLINEARRELATION))
+    if (relationType1 == "Lagrangian" || relationType2 == "Lagrangian")
     {
       if (UR1 == UR2)
         rightBlock = leftBlock ;

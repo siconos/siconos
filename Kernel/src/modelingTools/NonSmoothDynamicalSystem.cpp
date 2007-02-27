@@ -388,11 +388,12 @@ double NonSmoothDynamicalSystem::nsdsConvergenceIndicator()
 {
   // calculate the max value of all DS convergence indicators
   double convergenceIndicator = (* allDS.begin()) -> dsConvergenceIndicator();
+  double dsIndic ;
   DSIterator iter;
   for (iter = allDS.begin(); iter != allDS.end(); ++iter)
   {
-    double dsIndic = (*iter)->dsConvergenceIndicator();
-    if (convergenceIndicator > dsIndic) convergenceIndicator = dsIndic;
+    dsIndic = (*iter)->dsConvergenceIndicator();
+    if (dsIndic > convergenceIndicator) convergenceIndicator = dsIndic;
   }
   return(convergenceIndicator);
 }

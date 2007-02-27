@@ -34,34 +34,11 @@ LagrangianLinearTIDS::LagrangianLinearTIDS(): LagrangianDS(), K(NULL), C(NULL)
 LagrangianLinearTIDS::LagrangianLinearTIDS(DynamicalSystemXML * dsXML,  NonSmoothDynamicalSystem* newNsds):
   LagrangianDS(dsXML, newNsds), K(NULL), C(NULL)
 {
-  // Everything is done in LagrangianDS xml constructor and, for specific LLTIDS data, through loadSpecificXml.
-  loadSpecificXml();
-}
-
-void LagrangianLinearTIDS::loadSpecificXml()
-{
   LagrangianLinearTIDSXML* lltidsxml = static_cast <LagrangianLinearTIDSXML*>(dsxml);
 
-  // mass
-  if (!lltidsxml->hasMass())
-    RuntimeException::selfThrow("LagrangianLinearTIDS - xml constructor: required input for mass is missing in xml file.");
-
-  mass = new SimpleMatrix(lltidsxml->getMassMatrix());
-
-  // fExt
-  if (lltidsxml->hasFExt())  // if fExt is given
-  {
-    if (lltidsxml->isFExtPlugin())// if fExt is plugged
-    {
-      string plugin = lltidsxml->getFExtPlugin();
-      setComputeFExtFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
-    }
-    else
-    {
-      fExt = new SimpleVector(lltidsxml->getFExtVector());
-      isAllocatedIn["fExt"] = true;
-    }
-  }
+  // If Fint or NNL is given: ignored.
+  if (lltidsxml->hasFInt() ||  lltidsxml->hasNNL())
+    cout << "!!!!! Warning : LagrangianLinearTIDS: xml constructor, Fint or NNL input will be ignored in xml file." << endl;
 
   // K and C
   if (lltidsxml->hasK())

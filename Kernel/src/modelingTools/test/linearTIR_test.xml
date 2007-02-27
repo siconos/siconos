@@ -41,13 +41,13 @@
 				<!-- Relation of this interaction -->				
 					<DS_Concerned all='true'/>
 					<Interaction_Content>		
-					<LinearTimeInvariantRelation>
+					<FirstOrderLinearTimeInvariantRelation>
                                         <C matrixFile="matC.dat"/>
                                         <D matrixFile="matD.dat"/>
 	                                <B matrixFile="matB.dat"/>
   	                                <F matrixFile="matF.dat"/>
                                         <e vectorSize = '2'>0.1 0.1</e>
-                                       </LinearTimeInvariantRelation>			
+                                       </FirstOrderLinearTimeInvariantRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>
 						<e>0.9</e>				

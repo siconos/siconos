@@ -44,7 +44,7 @@ bool BallBowl()
 
     // For the initial time step:
     // time
-    dataPlot(k, 0) = k * t->getH();
+    dataPlot(k, 0) = bouncingBall.getT0();
     // state q for the first dynamical system (ball)
     LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
     dataPlot(k, 1) = (ball->getQ())(0);
@@ -55,7 +55,7 @@ bool BallBowl()
     {
       k++;
       s->computeOneStep();
-      dataPlot(k, 0) = k * t->getH();
+      dataPlot(k, 0) = bouncingBall.getCurrentT();
       dataPlot(k, 1) = (ball->getQ())(0);
       dataPlot(k, 2) = (ball->getVelocity())(0);
       s->nextStep();

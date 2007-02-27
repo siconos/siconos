@@ -128,17 +128,14 @@ typedef std::vector<SiconosVector*> VectorOfVectors;
 /** Iterator through vector of vectors */
 typedef VectorOfVectors::iterator VectorOfVectorsIterator;
 
-/** Type used for inside-class allocation checking */
-typedef std::map<std::string, bool> AllocationFlagsMap;
-
-/** Type used for inside-class allocation checking */
-typedef std::deque<bool>  AllocationFlags;
-
 /** Some containers for matrices - Used for example to handle the various jacobian in LagrangianDS. */
 typedef std::vector<SiconosMatrix*> VectorOfMatrices;
 
 /** Iterator through vector of matrices */
 typedef VectorOfMatrices::iterator VectorOfMatricesIterator;
+
+/** const Iterator through vector of matrices */
+typedef VectorOfMatrices::const_iterator VectorOfMatricesConstIterator;
 
 /** A map that links a string to a pointer to SiconosVector. */
 typedef std::map<std::string, SiconosVector*> VectorMap;

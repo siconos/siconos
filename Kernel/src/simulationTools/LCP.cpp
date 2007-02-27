@@ -349,7 +349,7 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   // left, right and extra depend on the relation type and the non smooth law.
   relationType1 = UR1->getRelationType();
   relationType2 = UR2->getRelationType();
-  if (UR1 == UR2 &&  relationType1 == LINEARTIRELATION)
+  if (UR1 == UR2 &&  relationType1 == "FirstOrder")
   {
     extraBlock = new SimpleMatrix(nslawSize1, nslawSize1);
     UR1->getExtraBlock(extraBlock);
@@ -367,7 +367,7 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
 
     UR1->getLeftBlockForDS(*itDS, leftBlock);
     // Computing depends on relation type -> move this in UnitaryRelation method?
-    if (relationType1 == LINEARTIRELATION && relationType2 == LINEARTIRELATION)
+    if (relationType1 == "FirstOrder" && relationType2 == "FirstOrder")
     {
       rightBlock = new SimpleMatrix(sizeDS, nslawSize2);
       UR2->getRightBlockForDS(*itDS, rightBlock);
@@ -377,7 +377,7 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
       *currentBlock += h * Theta[*itDS]* *leftBlock * (*rightBlock); //left = C, right = B
       delete rightBlock;
     }
-    else if ((relationType1 == LAGRANGIANRELATION || relationType1 == LAGRANGIANLINEARRELATION) && (relationType2 == LAGRANGIANRELATION ||  relationType2 == LAGRANGIANLINEARRELATION))
+    else if (relationType1 == "Lagrangian" || relationType2 == "Lagrangian")
     {
       if (UR1 == UR2)
         rightBlock = leftBlock ;

@@ -353,13 +353,53 @@ void Simulation::initialize()
   // Initialize the user time discretisation.
   timeDiscretisation->initialize();
 
-  // The number of indexSets is given by the maximum value of relative degrees of the unitary relations.
+  // === Events manager initialization ===
+  eventsManager->initialize();
 
   // We first need to initialize the topology (computes UnitaryRelation sets, relative degrees ...)
   model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->initialize();
 
-  // === Events manager initialization ===
-  eventsManager->initialize();
+  // initialization of the OneStepIntegrators
+  OSIIterator itOsi;
+  for (itOsi = allOSI.begin(); itOsi != allOSI.end(); ++itOsi)
+    (*itOsi)->initialize();
+  // The number of indexSets is given by the maximum value of relative degrees of the unitary relations.
+
+  InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractions();
+  double t0 = model->getT0();
+  if (!allInteractions.isEmpty()) // ie if some Interactions have been declared
+  {
+    initLevelMax();
+
+    InteractionsIterator it;
+    for (it = allInteractions.begin(); it != allInteractions.end(); ++it)
+      (*it)->initialize(t0, levelMax + 1);
+
+    indexSets.resize(levelMax + 1);
+    indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0();
+  }
+
+  // Initialize OneStepNSProblem: in derived classes specific function.
+  initOSNS();
+
+  // == Call process functions of events (usefull to save initial values for example) ==
+  eventsManager->process();
+  // Set Model current time (warning: current time of the model corresponds to the time of the next event to be treated).
+  model->setCurrentT(getNextTime());
+
+  // End of initialize:
+  //  - all OSI and OSNS (ie DS and Interactions) states are computed for time t0 and saved into memories.
+  //  - Sensors or related objects are updated for t=t0.
+  //  - current time of the model is equal to t1, time of the first event after t0.
+  //  - currentEvent of the simu. corresponds to t0 and nextEvent to t1.
+}
+
+void Simulation::reset()
+{
+  // r (or p) is set to zero in all DynamicalSystems.
+  OSIIterator itOSI;
+  for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
+    (*itOSI)->resetNonSmoothPart();
 }
 
 void Simulation::saveInMemory()
@@ -424,18 +464,16 @@ void Simulation::updateInput(int level)
   if (level == -1)
     level = levelMin; // We use this since it is impossible to set levelMin as defaultValue in OneStepNSProblem.h
 
+  //  double time = getNextTime();
   double time = model->getCurrentT();
   InteractionsSet allInter = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions();
   InteractionsIterator it;
 
-  // First, r (or p) is set to zero in all DynamicalSystems.
-  OSIIterator itOSI;
-  for (itOSI = allOSI.begin(); itOSI != allOSI.end() ; ++itOSI)
-    (*itOSI)->resetNonSmoothPart();
+  reset();
 
   // We compute input using lambda(levelMin).
   for (it = allInter.begin(); it != allInter.end(); it++)
-    (*it)->getRelationPtr()->computeInput(time, level);
+    (*it)->computeInput(time, level);
 }
 
 void Simulation::updateOutput(int level0, int level1)
@@ -451,7 +489,7 @@ void Simulation::updateOutput(int level0, int level1)
   for (it = allInter.begin(); it != allInter.end(); it++)
   {
     for (int i = level0; i <= level1; ++i)
-      (*it)->getRelationPtr()->computeOutput(time , i);
+      (*it)->computeOutput(time , i);
   }
 }
 

@@ -134,34 +134,8 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
   }
 }
 
-void EventDriven::initialize()
+void EventDriven::initOSNS()
 {
-  Simulation::initialize();
-
-  InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractions();
-
-  if (!allInteractions.isEmpty()) // ie if some Interactions have been declared
-  {
-    levelMax = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
-    // Interactions initialization (here, since level depends on the type of simulation)
-    // level corresponds to the number of Y and Lambda derivatives computed.
-
-    if (levelMax == 0)
-      levelMax++;
-
-    InteractionsIterator it;
-    for (it = allInteractions.begin(); it != allInteractions.end(); ++it)
-      (*it)->initializeMemory(levelMax + 1);
-
-    indexSets.resize(levelMax + 1);
-    indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0();
-  }
-
-  // initialization of the OneStepIntegrators
-  OSIIterator itOsi;
-  for (itOsi = allOSI.begin(); itOsi != allOSI.end(); ++itOsi)
-    (*itOsi)->initialize();
-
   tinit = eventsManager->getCurrentTime();
   tend =  eventsManager->getNextTime();
 
@@ -182,19 +156,24 @@ void EventDriven::initialize()
     if (levelMin == 0)
       levelMin++;
 
-    updateInput(levelMin);
-    updateOutput(0, levelMax);
+    // === update all index sets ===
+    updateIndexSets();
 
     // WARNING: only for Lagrangian systems - To be reviewed for other ones.
     allNSProblems["impact"]->setLevels(levelMin - 1, levelMax - 1);
     allNSProblems["impact"]->initialize();
     allNSProblems["acceleration"]->setLevels(levelMin, levelMax);
     allNSProblems["acceleration"]->initialize();
-
-    // === update all index sets ===
-    updateIndexSets();
   }
-  saveInMemory();
+}
+
+void EventDriven::initLevelMax()
+{
+  levelMax = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
+  // Interactions initialization (here, since level depends on the type of simulation)
+  // level corresponds to the number of Y and Lambda derivatives computed.
+  if (levelMax == 0)
+    levelMax++;
 }
 
 void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal * time, doublereal * x, doublereal * xdot)
@@ -346,7 +325,6 @@ void EventDriven::update(unsigned int levelInput)
 
 void EventDriven::advanceToEvent()
 {
-
   // WARNING: this is supposed to work for only one OSI, including all the DS.
   // To be reviewed for multiple OSI case (if it has sense?).
 
@@ -356,14 +334,8 @@ void EventDriven::advanceToEvent()
 
   // if istate == 1 => first call. It this case we suppose that tinit and tend have been initialized before.
 
-  if (istate == 2) // ie no root found at previous step
+  if (istate == 2 || istate == 3) // ie no root found at previous step
   {
-    tinit = eventsManager->getCurrentTime();
-    tend =  eventsManager->getNextTime();
-  }
-  else if (istate == 3) // ie a root has been found at previous step => no changes in tint/tend values (done by integrate)
-  {
-    //istate = 1;
     tinit = eventsManager->getCurrentTime();
     tend =  eventsManager->getNextTime();
   }

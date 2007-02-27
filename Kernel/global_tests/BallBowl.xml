@@ -28,7 +28,7 @@
   <SchemaXML>../config/xmlschema/SiconosModelSchema-V1.2.xsd</SchemaXML>
 	<Time>
 		<t0>0.0</t0>
-		<T>10.0</T>
+		<T>1.5</T>
 	</Time>
 	<NSDS bvp='false'>
 	
@@ -49,16 +49,6 @@
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 1.0</row>
 				</Mass>			
-				<K matrixRowSize='3' matrixColSize='3'>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-				</K>
-				<C matrixRowSize='3' matrixColSize='3'>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-				</C>
 			</LagrangianLinearTIDS>
 			<LagrangianLinearTIDS number='2'> 
 				<Id> Ground </Id>
@@ -73,13 +63,6 @@
 				<Mass matrixRowSize='1' matrixColSize='1'>	
 					<row>1.0 </row>
 				</Mass>			
-				<K matrixRowSize='1' matrixColSize='1'>
-					<row>0.0</row>
-				</K>
-				<C matrixRowSize='1' matrixColSize='1'>
-					<row>0.0</row>
-				</C>			
-
 			</LagrangianLinearTIDS>	
 		</DS_Definition>
 
@@ -93,7 +76,7 @@
 		                <DS_Concerned all='true'></DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
-					<LagrangianRelation>
+					<LagrangianRelation type="Scleronomous">
 					<h plugin="gTestPlugin:h0"/>
  					<G number="1">
                                       	<matrix matrixPlugin="gTestPlugin:G0"/>

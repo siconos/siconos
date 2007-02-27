@@ -19,60 +19,17 @@
 #include "RelationXML.h"
 using namespace std;
 
-RelationXML::RelationXML():
-  rootRelationXMLNode(NULL), computeInputNode(NULL), computeOutputNode(NULL)
+RelationXML::RelationXML(): rootNode(NULL)
 {}
 
-RelationXML::RelationXML(xmlNode *relationNode):
-  rootRelationXMLNode(relationNode), computeInputNode(NULL), computeOutputNode(NULL)
-{
-  xmlNode *node;
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootRelationXMLNode, COMPUTE_INPUT_TAG)) != NULL)
-    computeInputNode = node;
-
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootRelationXMLNode, COMPUTE_OUTPUT_TAG)) != NULL)
-    computeOutputNode = node;
-}
+RelationXML::RelationXML(xmlNodePtr node): rootNode(node)
+{}
 
 RelationXML::~RelationXML()
 {}
 
-
-void RelationXML::setComputeInputPlugin(const string&  plugin)
+void RelationXML::updateRelationXML(xmlNodePtr node, Relation* rel)
 {
-  if (computeInputNode == NULL)
-  {
-    computeInputNode = SiconosDOMTreeTools::createSingleNode(rootRelationXMLNode, COMPUTE_INPUT_TAG);
-    xmlNewProp(computeInputNode, (xmlChar*)(PLUGIN_ATTRIBUTE.c_str()), (xmlChar*)plugin.c_str());
-  }
-  else SiconosDOMTreeTools::setStringAttributeValue(computeInputNode, PLUGIN_ATTRIBUTE, plugin);
+  rootNode = node;
 }
 
-void RelationXML::setComputeOutputPlugin(const string&  plugin)
-{
-  if (computeOutputNode == NULL)
-  {
-    computeOutputNode = SiconosDOMTreeTools::createSingleNode(rootRelationXMLNode, COMPUTE_OUTPUT_TAG);
-    xmlNewProp(computeOutputNode, (xmlChar*)(PLUGIN_ATTRIBUTE.c_str()), (xmlChar*)plugin.c_str());
-  }
-  else SiconosDOMTreeTools::setStringAttributeValue(computeOutputNode, PLUGIN_ATTRIBUTE, plugin);
-}
-
-void RelationXML::updateRelationXML(xmlNode* node, Relation* rel)
-{
-  rootRelationXMLNode = node;
-}
-
-string RelationXML::getComputeInputPlugin() const
-{
-  if (!isComputeInputPlugin())
-    XMLException::selfThrow("RelationXML - getComputeInputPlugin : computeInput is not calculated from a plugin");
-  return  SiconosDOMTreeTools::getStringAttributeValue(computeInputNode, PLUGIN_ATTRIBUTE);
-}
-string RelationXML::getComputeOutputPlugin() const
-{
-  if (!isComputeOutputPlugin())
-    XMLException::selfThrow("RelationXML - getComputeOutputPlugin : computeOutput is not calculated from a plugin");
-  return  SiconosDOMTreeTools::getStringAttributeValue(computeOutputNode, PLUGIN_ATTRIBUTE);
-}

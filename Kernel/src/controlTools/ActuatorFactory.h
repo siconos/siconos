@@ -18,7 +18,7 @@
  */
 
 /*! \file ActuatorFactory.h
-  Factory to generate user-defined sensors
+\brief  Factory to generate user-defined sensors
 */
 
 #ifndef ActuatorFactory_H

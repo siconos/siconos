@@ -48,7 +48,7 @@
                                </DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
-					<LagrangianRelation type="scleronomic">
+					<LagrangianRelation type="scleronomous">
                                              <h plugin="TestPlugin:h0"/>
                                              <G number='1'>
                                               <matrix matrixPlugin="TestPlugin:G0"/>

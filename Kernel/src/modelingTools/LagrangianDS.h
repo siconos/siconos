@@ -236,9 +236,6 @@ protected:
    */
   virtual void initPluginFlags(bool);
 
-  /** Download of xml data specific to the present class. Called from XML constructor.*/
-  virtual void loadSpecificXml();
-
   /** Default constructor
    */
   LagrangianDS();

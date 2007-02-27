@@ -18,7 +18,7 @@
  */
 
 /*! \file EventFactory.h
-  Factory to generate user-defined Events
+\brief  Factory to generate user-defined Events
 */
 
 #ifndef EventFactory_H
@@ -30,6 +30,7 @@
 
 class Event;
 
+/** Namespace for Events factory related objects. */
 namespace EventFactory
 {
 

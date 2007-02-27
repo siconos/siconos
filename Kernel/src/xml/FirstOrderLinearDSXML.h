@@ -83,7 +83,7 @@ public:
   {
     if (!isAPlugin())
       XMLException::selfThrow("FirstOrderLinearDSXML - getAPlugin : A is not loaded from a plugin");
-    return  SiconosDOMTreeTools::getStringAttributeValue(ANode, DS_MATRIXPLUGIN);
+    return  SiconosDOMTreeTools::getStringAttributeValue(ANode, MATRIXPLUGIN);
   }
 
   /** to save the A of the FirstOrderLinearDSXML
@@ -103,7 +103,7 @@ public:
   {
     if (!isBPlugin())
       XMLException::selfThrow("FirstOrderLinearDSXML - getUPlugin : b is not calculated from a plugin ; b vector is given");
-    return  SiconosDOMTreeTools::getStringAttributeValue(bNode, DS_VECTORPLUGIN);
+    return  SiconosDOMTreeTools::getStringAttributeValue(bNode, VECTORPLUGIN);
   }
 
   /** Return b vector of the FirstOrderLinearDSXML
@@ -131,14 +131,14 @@ public:
   */
   inline bool isAPlugin() const
   {
-    return xmlHasProp(ANode, (xmlChar *) DS_MATRIXPLUGIN.c_str());
+    return xmlHasProp(ANode, (xmlChar *) MATRIXPLUGIN.c_str());
   }
 
   /** Return true if b is calculated from a plugin
   */
   inline bool isBPlugin() const
   {
-    return xmlHasProp(bNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
+    return xmlHasProp(bNode, (xmlChar *) VECTORPLUGIN.c_str());
   }
 
   /** returns true if ANode is defined

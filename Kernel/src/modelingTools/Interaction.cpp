@@ -20,9 +20,9 @@
 #include "InteractionXML.h"
 #include "NonSmoothLawXML.h"
 #include "RelationXML.h"
-#include "LinearTIR.h"
+#include "FirstOrderLinearTIR.h"
 #include "LagrangianLinearR.h"
-#include "LagrangianR.h"
+#include "LagrangianScleronomousR.h"
 #include "ComplementarityConditionNSL.h"
 #include "RelayNSL.h"
 #include "NewtonImpactNSL.h"
@@ -36,24 +36,13 @@ using namespace std;
 
 // Default (private) constructor
 Interaction::Interaction():
-  id("none"), number(0), interactionSize(0), sizeOfDS(0), nslaw(NULL), relation(NULL), interactionxml(NULL),
-  isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
+  id("none"), number(0), interactionSize(0), sizeOfDS(0), sizeZ(0), nslaw(NULL), relation(NULL), interactionxml(NULL)
 {}
-
-// Copy constructor
-Interaction::Interaction(const Interaction& newI):
-  id("interactionCopy"), number(-1), interactionSize(newI.getInteractionSize()),
-  numberOfRelations(newI.getNumberOfRelations()), sizeOfDS(newI.getSizeOfDS()), involvedDS(),
-  nslaw(NULL), relation(NULL), NSDS(newI.getNonSmoothDynamicalSystemPtr()), interactionxml(NULL), isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
-{
-  RuntimeException::selfThrow("Interaction:: call to copy constructor is forbidden.");
-}
 
 // --- XML constructor ---
 Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * nsds):
-  id("undefined"), number(0), interactionSize(0), numberOfRelations(0), sizeOfDS(0),
-  nslaw(NULL), relation(NULL), NSDS(nsds), interactionxml(interxml),
-  isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
+  id("undefined"), number(0), interactionSize(0), numberOfRelations(0), sizeOfDS(0), sizeZ(0),
+  nslaw(NULL), relation(NULL), NSDS(nsds), interactionxml(interxml)
 {
   if (interactionxml == NULL)
     RuntimeException::selfThrow("Interaction::xml constructor, xmlfile = NULL");
@@ -80,7 +69,7 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
   else if (NslawType == NEWTON_IMPACT_FRICTION_NSLAW_TAG)
     nslaw = new NewtonImpactFrictionNSL(interactionxml->getNonSmoothLawXML());
   else RuntimeException::selfThrow("Interaction::xml constructor, unknown NSLAW type :" + nslaw->getType());
-  isNsLawAllocatedIn = true;
+  isAllocatedIn["nsLaw"] = true;
 
   // --- Dynamical Systems ---
   unsigned int sizeDS ;
@@ -107,23 +96,28 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
 
   // --- Relation ---
   string relationType = interactionxml->getRelationXML()->getType();
-  // general relation
-  if (relationType == RELATION_TAG)
-    relation = new Relation(interactionxml->getRelationXML());
+
+  // First Order Non Linear Relation
+  if (relationType == "FirstOrderRelation")
+    relation = new FirstOrderR(interactionxml->getRelationXML());
 
   // Linear relation
-  else if (relationType == LINEAR_TIME_INVARIANT_RELATION_TAG)
-    relation = new LinearTIR(interactionxml->getRelationXML());
+  else if (relationType == "FirstOrderLinearTimeInvariantRelation")
+    relation = new FirstOrderLinearTIR(interactionxml->getRelationXML());
 
   // Lagrangian non-linear relation
-  else if (relationType == LAGRANGIAN_RELATION_TAG)
-    relation = new LagrangianR(interactionxml->getRelationXML());
-
+  else if (relationType == "LagrangianRelation")
+  {
+    string relationSubType = interactionxml->getRelationXML()->getSubType();
+    // \todo create a factory to avoid "if" list for Relation construction according to subType.
+    if (relationSubType == "Scleronomous")
+      relation = new LagrangianScleronomousR(interactionxml->getRelationXML());
+  }
   // Lagrangian linear relation
-  else if (relationType == LAGRANGIAN_LINEAR_RELATION_TAG)
+  else if (relationType == "LagrangianLinearRelation")
     relation = new LagrangianLinearR(interactionxml->getRelationXML());
   else RuntimeException::selfThrow("Interaction::xml constructor, unknown relation type " + relation->getType());
-  isRelationAllocatedIn = true;
+  isAllocatedIn["relation"] = true;
 
   // check coherence between interactionSize and nsLawSize
   if ((interactionSize % nslaw->getNsLawSize()) != 0)
@@ -133,19 +127,18 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
   // done in initialize function, called by simulation !!)
   if (interactionxml->hasY() ||  interactionxml->hasLambda())
     RuntimeException::selfThrow("Interaction::xml constructor, y or lambda download is forbidden.");
-  // *(y[0]) = interactionxml->getY();
-  // if( interactionxml->hasLambda() ) *(lambda[0]) = interactionxml->getLambda();
-
 }
 
 // --- Constructor from a set of data ---
 
 Interaction::Interaction(const string& newId, DynamicalSystemsSet& dsConcerned, int newNumber, int nInter, NonSmoothLaw* newNSL, Relation* newRel):
-  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), involvedDS(),
-  nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL), isRelationAllocatedIn(false), isNsLawAllocatedIn(false)
+  id(newId), number(newNumber), interactionSize(nInter), numberOfRelations(1), sizeOfDS(0), sizeZ(0), involvedDS(),
+  nslaw(newNSL), relation(newRel), NSDS(NULL), interactionxml(NULL)
 {
   // Memory allocation and initialization for y and lambda
   involvedDS = dsConcerned; // !! this keeps pointers link between DS in the set !!
+  isAllocatedIn["relation"] = false;
+  isAllocatedIn["nsLaw"] = false;
 }
 
 // --- DESTRUCTOR ---
@@ -167,19 +160,19 @@ Interaction::~Interaction()
   lambda.clear();
   lambdaOld.clear();
 
-  if (isRelationAllocatedIn) delete relation;
+  if (isAllocatedIn["relation"]) delete relation;
   relation = NULL;
-  if (isNsLawAllocatedIn) delete nslaw;
+  if (isAllocatedIn["nsLaw"]) delete nslaw;
   nslaw = NULL;
   NSDS = NULL;
 }
 
-void Interaction::initialize()
+void Interaction::initialize(double t0, unsigned int level)
 {
   if (relation == NULL)
-    RuntimeException::selfThrow("Interaction::initialize, relation == NULL");
+    RuntimeException::selfThrow("Interaction::initialize failed, relation == NULL");
   if (nslaw == NULL)
-    RuntimeException::selfThrow("Interaction::initialize, non smooth law == NULL");
+    RuntimeException::selfThrow("Interaction::initialize failed, non smooth law == NULL");
 
   computeSizeOfDS();
 
@@ -188,14 +181,24 @@ void Interaction::initialize()
 
   // compute number of relations.
   numberOfRelations = interactionSize / nslaw->getNsLawSize();
+
+  initializeMemory(level);
+
+  // Compute y values for t0
+  for (unsigned int i = 0; i < level; ++i)
+  {
+    computeOutput(t0, i);
+    //      computeInput(t0,i);
+  }
 }
 
-// Initialize and InitializeMemory are separated in to functions since we need to know the relative degree to know "numberOfDerivatives",
+// Initialize and InitializeMemory are separated in two functions since we need to know the relative degree to know "numberOfDerivatives",
 // while numberOfRelations and the size of the non smooth law are required inputs to compute the relative degree.
-void Interaction::initializeMemory(const unsigned int numberOfDerivatives)
+void Interaction::initializeMemory(unsigned int numberOfDerivatives)
 {
   // Warning: this function is called from Simulation initialize, since we need to know the relative degree and
   // the type of simulation to size Y and Lambda.
+
   // Memory allocation for y and lambda
 
   // Note that numberOfDerivatives depends on the type of simulation and on the relative degree.
@@ -228,10 +231,6 @@ void Interaction::initializeMemory(const unsigned int numberOfDerivatives)
   isYOldAllocatedIn.resize(numberOfDerivatives, true);
   isLambdaAllocatedIn.resize(numberOfDerivatives, true);
   isLambdaOldAllocatedIn.resize(numberOfDerivatives, true);
-
-  // Old values are initialized with current values (for y and lambda)
-  swapInMemory();
-
 }
 
 // --- GETTERS/SETTERS ---
@@ -509,14 +508,14 @@ void Interaction::setDynamicalSystems(const DynamicalSystemsSet& newSet)
   computeSizeOfDS();
 }
 
-DynamicalSystem* Interaction::getDynamicalSystemPtr(const int nb)
+DynamicalSystem* Interaction::getDynamicalSystemPtr(int nb)
 {
   if (! involvedDS.isDynamicalSystemIn(nb)) // if ds number nb is not in the set ...
     RuntimeException::selfThrow("Interaction::getDynamicalSystemPtr(nb), DS number nb is not in the set.");
   return involvedDS.getDynamicalSystemPtr(number);
 }
 
-void Interaction::getDynamicalSystem(const int nb, DynamicalSystem& ds)
+void Interaction::getDynamicalSystem(int nb, DynamicalSystem& ds)
 {
   // This function is useless in C++ but maybe required in Python? To be checked.
   // DS is a parameter, since it can be returned, DynamicalSystem being an abstract class.
@@ -527,16 +526,16 @@ void Interaction::getDynamicalSystem(const int nb, DynamicalSystem& ds)
 
 void Interaction::setRelationPtr(Relation* newRelation)
 {
-  if (isRelationAllocatedIn) delete relation;
+  if (isAllocatedIn["relation"]) delete relation;
   relation = newRelation;
-  isRelationAllocatedIn = false;
+  isAllocatedIn["relation"] = false;
 }
 
 void Interaction::setNonSmoothLawPtr(NonSmoothLaw* newNslaw)
 {
-  if (isNsLawAllocatedIn) delete nslaw;
+  if (isAllocatedIn["nsLaw"]) delete nslaw;
   nslaw = newNslaw;
-  isNsLawAllocatedIn = false;
+  isAllocatedIn["nsLaw"] = false;
 }
 
 // --- OTHER FUNCTIONS ---
@@ -544,9 +543,13 @@ void Interaction::setNonSmoothLawPtr(NonSmoothLaw* newNslaw)
 void Interaction::computeSizeOfDS()
 {
   sizeOfDS = 0;
+  sizeZ = 0;
   DSIterator it;
   for (it = involvedDS.begin(); it != involvedDS.end(); it++)
+  {
     sizeOfDS += (*it)->getDim();
+    sizeZ += (*it)->getZPtr()->size();
+  }
 }
 
 void Interaction::swapInMemory()
@@ -558,8 +561,8 @@ void Interaction::swapInMemory()
     {
       *(yOld[i]->getVectorPtr(j)) = *(y[i]->getVectorPtr(j)) ;
       *(lambdaOld[i]->getVectorPtr(j)) = *(lambda[i]->getVectorPtr(j));
-      lambda[i]->zero();
     }
+    lambda[i]->zero();
   }
 }
 
@@ -590,6 +593,21 @@ void Interaction::display() const
   cout << "===================================" << endl;
 }
 
+void Interaction::computeOutput(double time, unsigned int level)
+{
+  relation->computeOutput(time, level);
+}
+
+void Interaction::computeFreeOutput(double time, unsigned int level)
+{
+  relation->computeFreeOutput(time, level);
+}
+
+void Interaction::computeInput(double time, unsigned int level)
+{
+  relation->computeInput(time, level);
+}
+
 // --- XML RELATED FUNCTIONS ---
 
 void Interaction::saveInteractionToXML()
@@ -612,15 +630,30 @@ void Interaction::saveInteractionToXML()
   /*
    * save the data of the Relation
    */
-  if (relation->getType() == RELATION)
-    relation->saveRelationToXML();
-  else  if (relation->getType() == LINEARTIRELATION)
-    (static_cast<LinearTIR*>(relation))->saveRelationToXML();
-  else if (relation->getType() == LAGRANGIANLINEARRELATION)
-    (static_cast<LagrangianLinearR*>(relation))->saveRelationToXML();
-  else if (relation->getType() == LAGRANGIANRELATION)
-    (static_cast<LagrangianR*>(relation))->saveRelationToXML();
-  else RuntimeException::selfThrow("Interaction::saveInteractionToXML - bad kind of Relation :" + relation->getType());
+  // Main type of the relation: FirstOrder or Lagrangian
+  string type = relation->getType();
+  // Subtype of the relation
+  string subType = relation->getSubType();
+
+  if (type == "FirstOrderRelation")
+  {
+    if (subType == "NonLinearR")
+      relation->saveRelationToXML();
+    else if (subType == "LinearTIR")
+      (static_cast<FirstOrderLinearTIR*>(relation))->saveRelationToXML();
+    else
+      RuntimeException::selfThrow("Interaction::saveInteractionToXML - Unknown relation subtype: " + subType);
+  }
+  else if (type == "Lagrangian")
+  {
+    if (subType == "LinearR")
+      (static_cast<LagrangianLinearR*>(relation))->saveRelationToXML();
+    else
+      RuntimeException::selfThrow("Interaction::saveInteractionToXML - Not yet implemented for relation subtype " + subType);
+  }
+  else
+    RuntimeException::selfThrow("Interaction::saveInteractionToXML - Unknown relation type: " + type);
+
   /*
    * save the data of the NonSmoothLaw
    */

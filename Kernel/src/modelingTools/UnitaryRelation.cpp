@@ -20,8 +20,8 @@
 #include "DynamicalSystemsSet.h"
 #include "UnitaryRelation.h"
 #include "Interaction.h"
-#include "LinearTIR.h"
-#include "LagrangianR.h"
+#include "FirstOrderLinearTIR.h"
+#include "LagrangianLinearR.h"
 #include "NewtonImpactNSL.h"
 #include "NewtonImpactFrictionNSL.h"
 #include "RuntimeException.h"
@@ -127,6 +127,11 @@ const string UnitaryRelation::getRelationType() const
   return mainInteraction->getRelationPtr()->getType();
 }
 
+const string UnitaryRelation::getRelationSubType() const
+{
+  return mainInteraction->getRelationPtr()->getSubType();
+}
+
 DynamicalSystemsSet UnitaryRelation::getDynamicalSystems() const
 {
   return mainInteraction->getDynamicalSystems();
@@ -152,13 +157,25 @@ void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Blo
 
   SiconosMatrix * originalMatrix = NULL; // Complete matrix, Relation member.
   string relationType = getRelationType();
-  if (relationType == LINEARTIRELATION)
-    originalMatrix = (static_cast<LinearTIR*>(mainInteraction->getRelationPtr()))->getCPtr();
+  string relationSubType = getRelationSubType();
 
-  else if ((relationType == LAGRANGIANRELATION || relationType == LAGRANGIANLINEARRELATION))
-    originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
-
-  else RuntimeException::selfThrow("UnitaryRelation::getBlockForDS, not yet implemented for relation of type " + relationType);
+  if (relationType == "FirstOrder")
+  {
+    if (relationSubType == "LinearTIR")
+      originalMatrix = (static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr()))->getCPtr();
+    else
+      RuntimeException::selfThrow("UnitaryRelation::getBlockForDS, not yet implemented for first order relations of subtype " + relationSubType);
+  }
+  else if (relationType == "Lagrangian")
+  {
+    if (relationSubType == "LinearR")
+      originalMatrix = (static_cast<LagrangianLinearR*>(mainInteraction->getRelationPtr()))->getHPtr();
+    else
+      originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
+    //      else RuntimeException::selfThrow("UnitaryRelation::getBlockForDS, not yet implemented for Lagrangian relation of subtype "+relationSubType);
+  }
+  else
+    RuntimeException::selfThrow("UnitaryRelation::getBlockForDS, not yet implemented for relations of type " + relationType);
 
   // get block
   originalMatrix->getBlock(relativePosition, k, *Block);
@@ -184,9 +201,9 @@ void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Bl
     RuntimeException::selfThrow("UnitaryRelation::getRightBlockForDS(DS, Block, ...): inconsistent sizes between Block and DS");
 
   SiconosMatrix * originalMatrix = NULL; // Complete matrix, Relation member.
-  string relationType = getRelationType();
-  if (relationType == LINEARTIRELATION)
-    originalMatrix = (static_cast<LinearTIR*>(mainInteraction->getRelationPtr()))->getBPtr();
+  string relationType = getRelationType() + getRelationSubType();
+  if (relationType == "FirstOrderLinearTIR")
+    originalMatrix = (static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr()))->getBPtr();
 
   //else if( (relationType == LAGRANGIANRELATION || relationType == LAGRANGIANLINEARRELATION))
   // originalMatrix = (static_cast<LagrangianR*>(mainInteraction->getRelationPtr()))->getGPtr(index);
@@ -201,10 +218,10 @@ void UnitaryRelation::getExtraBlock(SiconosMatrix* Block) const
   // !!! Warning: we suppose that D is block diagonal, ie that there is no coupling between UnitaryRelation through D !!!
   // Any coupling between relations through D must be taken into account thanks to the nslaw (by "increasing" its dimension).
 
-  if (getRelationType() != LINEARTIRELATION)
-    RuntimeException::selfThrow("UnitaryRelation::getDPtr(), not yet implemented for relation of type " + getRelationType());
+  if (getRelationType() != "FirstOrder")
+    RuntimeException::selfThrow("UnitaryRelation::getExtraBlockPtr(), forbidden or not yet implemented for relation of type " + getRelationType());
 
-  SiconosMatrix * D = static_cast<LinearTIR*>(mainInteraction->getRelationPtr())->getDPtr();
+  SiconosMatrix * D = static_cast<FirstOrderLinearTIR*>(mainInteraction->getRelationPtr())->getDPtr();
   D->getBlock(relativePosition, relativePosition, *Block);
 }
 
@@ -220,13 +237,13 @@ void UnitaryRelation::computeEquivalentY(const double time, const unsigned int l
   // unsigned int level = osns->getLevelMin(); // this corresponds to the derivative order (for y) used to compute yOut.
 
   if (simulationType == "TimeStepping")
-    mainInteraction->getRelationPtr()->computeFreeOutput(time, level);
+    mainInteraction->computeFreeOutput(time, level);
   else  if (simulationType == "EventDriven")
-    mainInteraction->getRelationPtr()->computeOutput(time, level);
+    mainInteraction->computeOutput(time, level);
 
   (*yOut) = *(getYPtr(level)); // yOut = yFree
 
-  if ((relationType == LAGRANGIANLINEARRELATION || relationType == LAGRANGIANRELATION))
+  if (relationType == "Lagrangian")
   {
     double e;
 

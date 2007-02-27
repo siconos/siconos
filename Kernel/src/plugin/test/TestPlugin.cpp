@@ -46,41 +46,6 @@ extern "C" void computeJacobianXF(unsigned int sizeOfX, double time, const doubl
     jacob[i] = i + 1;
 }
 
-/** DynamicalSystem plug-in to compute u(x,t) - id = "u"
- * @param sizeOfU : size of vector u
- * @param sizeOfX : size of vector x
- * @param time : current time
- * @param x : pointer to the first element of x
- * @param[in,out] u : pointer to the first element of u vector
- * @param[in,out] param : a vector of user-defined parameters
- */
-extern "C" void computeU(unsigned int sizeOfU, unsigned int sizeOfX, double time, const double* x, double* u, double* z)
-{
-  for (unsigned int i = 0; i < sizeOfU; i++)
-  {
-    if (i < sizeOfX)
-      u[i] = time * x[i];
-    else
-      u[i] = 0;
-  }
-}
-
-/** DynamicalSystem plug-in to compute T(x) - id = "T"
- * @param sizeOfU : size of vector u
- * @param sizeOfX : size of vector X
- * @param x : pointer to the first element of X
- * @param[in,out] T : pointer to the first element of T matrix
- * @param[in,out] param : a vector of user-defined parameters
- */
-extern "C" void computeT(unsigned int sizeOfU, unsigned int  sizeOfX, const double* x, double* T, double* z)
-{
-  for (unsigned int j = 0; j < sizeOfU; j++)
-  {
-    for (unsigned int i = 0; i < sizeOfX; i++)
-      T[i + j * sizeOfX] =  x[i];
-  }
-}
-
 // ===== Lagrangian DS  =====
 
 // Plugins for Fext, Fint, NNL (vectors), Mass, JacobianQNNL, JacobianVelocityNNL,
@@ -241,7 +206,7 @@ extern "C" void computeA(unsigned int  sizeOfA, double time, double* A, double *
  *  @param[in,out] param : a vector of user-defined parameters
  */
 extern "C" void y(unsigned int sizeOfX, const double* x, double time, unsigned int sizeOfY, const double* lambda,
-                  unsigned int sizeOfU, const double* u, double* y, double* z)
+                  double* y, unsigned int sizeOfZ, double* z)
 {
   printf("Warning: call of the function 'computeOutput' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
@@ -253,7 +218,7 @@ extern "C" void y(unsigned int sizeOfX, const double* x, double time, unsigned i
  *  @param[in,out] r : the pointer to the first element of the vector y
  *  @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void R(unsigned int sizeY, const double* lambda, double time, double* r, double* z)
+extern "C" void R(unsigned int sizeY, const double* lambda, double time, double* r, unsigned int sizeZ, double* param)
 {
   printf("Warning: call of the function 'computeInput' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
@@ -267,7 +232,7 @@ extern "C" void R(unsigned int sizeY, const double* lambda, double time, double*
  * @param[in,out] y : pointer to the first element of y
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void h0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* y, double* z)
+extern "C" void h0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* y, unsigned int sizeZ, double* z)
 {
   printf("Call of the function 'h0' of the default plugin.\nYou have to implement this function.\n");
 }
@@ -279,7 +244,7 @@ extern "C" void h0(unsigned int sizeDS, const double* q, unsigned int sizeY, dou
  * @param[in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void G0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* G0, double* z)
+extern "C" void G0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* G0, unsigned int sizeZ, double* z)
 {
   printf("Call of the function 'G0' of the default plugin.\nYou have to implement this function.\n");
 }

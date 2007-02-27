@@ -91,9 +91,6 @@ private:
   /** specific matrix for a LagrangianLinearTIDS */
   SiconosMatrix *C;
 
-  /** Download of xml data specific to the present class. Called from XML constructor.*/
-  void loadSpecificXml();
-
 public:
 
   /** constructor from an xml file

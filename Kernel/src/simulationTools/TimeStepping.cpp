@@ -96,7 +96,7 @@ void TimeStepping::updateIndexSet(unsigned int i)
     double yDot;
     for (it = indexSets[0].begin(); it != indexSets[0].end(); ++it)
     {
-      double h = timeDiscretisation->getH();
+      double h = getTimeStep();
       // checks if current Unitary Relation (ie *it) is already in indexSets[1]
       // (if not itForFind will be equal to indexSets.end())
       itForFind = indexSets[1].find(*it);
@@ -146,34 +146,8 @@ void TimeStepping::addOneStepNSProblemPtr(OneStepNSProblem* osns)
   isNSProblemAllocatedIn[osns] = false;
 }
 
-void TimeStepping::initialize()
+void TimeStepping::initOSNS()
 {
-  Simulation::initialize();
-
-  InteractionsSet allInteractions = model->getNonSmoothDynamicalSystemPtr()->getInteractions();
-
-  if (!allInteractions.isEmpty()) // ie if some Interactions have been declared
-  {
-    levelMax = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
-    // Interactions initialization (here, since level depends on the type of simulation)
-    // level corresponds to the number of Y and Lambda derivatives computed.
-
-    if (levelMax != 0) // level max is equal to relative degree-1. But for relative degree 0 case, we keep 0 value for levelMax
-      levelMax--;
-
-    InteractionsIterator it;
-    for (it = allInteractions.begin(); it != allInteractions.end(); ++it)
-      (*it)->initializeMemory(levelMax + 1);
-
-    indexSets.resize(levelMax + 1);
-    indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0();
-  }
-
-  // initialization of the OneStepIntegrators
-  OSIIterator itOsi;
-  for (itOsi = allOSI.begin(); itOsi != allOSI.end(); ++itOsi)
-    (*itOsi)->initialize();
-
   if (!allNSProblems.empty()) // ie if some Interactions have been declared and a Non smooth problem built.
   {
     if (allNSProblems.size() > 1)
@@ -187,8 +161,8 @@ void TimeStepping::initialize()
     if (levelMin != 0)
       levelMin--;
 
-    updateInput(levelMin);
-    updateOutput(0, levelMax);
+    // === update all index sets ===
+    updateIndexSets();
 
     // initialization of  OneStepNonSmoothProblem
     OSNSIterator itOsns;
@@ -197,22 +171,22 @@ void TimeStepping::initialize()
       (itOsns->second)->setLevels(levelMin, levelMax);
       (itOsns->second)->initialize();
     }
-
-    // === update all index sets ===
-    updateIndexSets();
   }
+}
 
-  // == Call process functions of events (usefull to save initial values for example) ==
-  eventsManager->process();
+void TimeStepping::initLevelMax()
+{
+  levelMax = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getMaxRelativeDegree();
+  // Interactions initialization (here, since level depends on the type of simulation)
+  // level corresponds to the number of Y and Lambda derivatives computed.
+
+  if (levelMax != 0) // level max is equal to relative degree-1. But for relative degree 0 case, we keep 0 value for levelMax
+    levelMax--;
 }
 
 void TimeStepping::nextStep()
 {
-  // Increment model current time according to timeDiscretisation step.
-  double t = model->getCurrentT() + timeDiscretisation->getH();
-  model->setCurrentT(t);
-  // Save OSI and OSNS data into Memories.
-  saveInMemory();
+  eventsManager->processEvents();
 }
 
 
@@ -240,12 +214,13 @@ void TimeStepping::computeFreeState()
     (*it)->computeFreeState();
 }
 
-// compute simulation between ti and ti+1, ti+1 being currentTime (?)
-// Initial DS/interaction state is given by memory vectors (check that?)
+// compute simulation between current and next event.
+// Initial DS/interaction state is given by memory vectors
 // and final state is the one saved in DS/Interaction at the end of this function
 void TimeStepping::computeOneStep()
 {
   // solve ...
+
   computeFreeState();
   if (!allNSProblems.empty())
   {
@@ -266,9 +241,6 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   bool isNewtonConverge = false;
   unsigned int nbNewtonStep = 0; // number of Newton iterations
 
-  // Set Model current time
-  model->setCurrentT(getNextTime());
-
   while ((!isNewtonConverge) && (nbNewtonStep <= maxStep))
   {
     nbNewtonStep++;
@@ -279,13 +251,7 @@ void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)
   }
 
   // Process NextEvent (Save OSI (DS) and OSNS (Interactions) states into Memory vectors ...)
-  eventsManager->process();
-
-  // Set Model current time (may have changed because of events insertion during the loop above).
-  model->setCurrentT(getNextTime());
-
-  // Shift current to next ...
-  eventsManager->shiftEvents();
+  eventsManager->processEvents();
 
   if (!isNewtonConverge)
     cout << "Newton process stopped: reach max step number" << endl ;

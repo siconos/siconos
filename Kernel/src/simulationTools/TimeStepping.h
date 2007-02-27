@@ -38,6 +38,13 @@ private:
    */
   TimeStepping();
 
+  /** initialisation specific to TimeStepping for OneStepNSProblem.
+   */
+  void initOSNS();
+
+  /** compute LevelMax */
+  void initLevelMax();
+
 public:
 
   /** Constructor with the time-discretisation.
@@ -64,10 +71,6 @@ public:
   *  \param unsigned int: the number of the set to be updated
   */
   void updateIndexSet(unsigned int);
-
-  /** executes the complete initialisation of Simulation (OneStepIntegrators, OneStepNSProblem, TImediscretisation) with the XML Object
-  */
-  void initialize();
 
   /** increment model current time according to User TimeDiscretisation and call SaveInMemory.
    */

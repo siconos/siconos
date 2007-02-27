@@ -16,50 +16,68 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef __LagrangianRTest__
-#define __LagrangianRTest__
+#ifndef __FirstOrderLinearTIRTest__
+#define __FirstOrderLinearTIRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "LagrangianR.h"
-#include "LagrangianRXML.h"
+#include "RelationXML.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "NonSmoothDynamicalSystemXML.h"
+#include "FirstOrderLinearTIR.h"
+#include "FirstOrderLinearTIRXML.h"
 
-class LagrangianRTest : public CppUnit::TestFixture
+class FirstOrderLinearTIRTest : public CppUnit::TestFixture
 {
 
 private:
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(LagrangianRTest);
+  CPPUNIT_TEST_SUITE(FirstOrderLinearTIRTest);
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildLagrangianR0);
-  CPPUNIT_TEST(testBuildLagrangianR1);
-  CPPUNIT_TEST(testBuildLagrangianR4);
-  CPPUNIT_TEST(testBuildLagrangianR2);
-  CPPUNIT_TEST(testBuildLagrangianR3);
+  //CPPUNIT_TEST(testBuildFirstOrderLinearTIR);
+  CPPUNIT_TEST(testBuildFirstOrderLinearTIR0);
+  CPPUNIT_TEST(testBuildFirstOrderLinearTIR1);
+  CPPUNIT_TEST(testBuildFirstOrderLinearTIR2);
+  CPPUNIT_TEST(testSetC);
+  CPPUNIT_TEST(testSetCPtr);
+  CPPUNIT_TEST(testSetD);
+  CPPUNIT_TEST(testSetDPtr);
+  CPPUNIT_TEST(testSetF);
+  CPPUNIT_TEST(testSetFPtr);
+  CPPUNIT_TEST(testSetE);
+  CPPUNIT_TEST(testSetEPtr);
+  CPPUNIT_TEST(testSetB);
+  CPPUNIT_TEST(testSetBPtr);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildLagrangianR0();
-  void testBuildLagrangianR1();
-  void testBuildLagrangianR4();
-  void testBuildLagrangianR2();
-  void testBuildLagrangianR3();
+  void testBuildFirstOrderLinearTIR0();
+  void testBuildFirstOrderLinearTIR1();
+  void testBuildFirstOrderLinearTIR2();
+  void testSetC();
+  void testSetCPtr();
+  void testSetD();
+  void testSetDPtr();
+  void testSetF();
+  void testSetFPtr();
+  void testSetE();
+  void testSetEPtr();
+  void testSetB();
+  void testSetBPtr();
   void End();
 
   // Members
 
-  SiconosMatrix *G0, *G1;
-  NonSmoothDynamicalSystem * nsds ;
-  xmlNode * node;
-  LagrangianRXML* tmpxml1, * tmpxml2, *tmpxml3;
-  Interaction * interaction;
+  SiconosMatrix *C, *B, *F, *D;
+  SimpleVector *e;
+  xmlNode * node1;
+  RelationXML * tmpxml1;
+  NonSmoothDynamicalSystem * nsds;
 
 public:
   void setUp();

@@ -33,11 +33,10 @@ const std::string SIZE_ATTRIBUTE = "size";
 // usefull when a list of objects, identified thanks to numbers, is required;
 // for example a list of DS in an interaction:
 const std::string INDEX_LIST = "indexList";
-
-
-// common tags
-const std::string COMPUTE_INPUT_TAG = "computeInput";
-const std::string COMPUTE_OUTPUT_TAG = "computeOutput";
+//Tags
+const std::string STEPSINMEMORY = "StepsInMemory";
+const std::string MATRIXPLUGIN = "matrixPlugin";
+const std::string VECTORPLUGIN = "vectorPlugin";
 
 /*
  * the different node names we can encounter

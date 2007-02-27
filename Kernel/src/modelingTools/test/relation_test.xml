@@ -26,10 +26,10 @@
                                </DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
-					<Relation>
+					<FirstOrderRelation>
 					<computeInput plugin="TestPlugin:R"/>
 					<computeOutput plugin="TestPlugin:y"/>
-					</Relation>			
+					</FirstOrderRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>
 						<e>0.9</e>				

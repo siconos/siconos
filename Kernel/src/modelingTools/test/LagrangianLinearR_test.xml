@@ -51,6 +51,12 @@
                                          <H matrixRowSize='1' matrixColSize='4'>
 				         <row>1.0  0.0  0.0 4.0</row>
 					</H>
+                                         <D matrixRowSize='1' matrixColSize='1'>
+				         <row>13.0</row>
+					</D>
+                                         <F matrixRowSize='1' matrixColSize='1'>
+				         <row>8</row>
+					</F>
 					<b vectorSize='1'>12.0</b>
 					</LagrangianLinearRelation>			
 					<!-- NS Law of this interaction	-->

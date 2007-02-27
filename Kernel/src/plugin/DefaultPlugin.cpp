@@ -73,31 +73,6 @@ extern "C" void computeJacobianXF(unsigned int sizeOfX, double time, const doubl
   printf("Warning: call of the function 'jacobianXF' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
 
-/** DynamicalSystem plug-in to compute u(x,t) - id = "u"
- * @param sizeOfU : size of vector u
- * @param sizeOfX : size of vector x
- * @param time : current time
- * @param x : pointer to the first element of x
- * @param[in,out] u : pointer to the first element of u vector
- * @param[in,out] param : a vector of user-defined parameters
- */
-extern "C" void computeU(unsigned int sizeOfU, unsigned int sizeOfX, double time, const double* x, double* u, double* param)
-{
-  printf("Warning: call of the function 'computeU' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
-}
-
-/** DynamicalSystem plug-in to compute T(x) - id = "T"
- * @param sizeOfU : size of vector u
- * @param sizeOfX : size of vector X
- * @param x : pointer to the first element of X
- * @param[in,out] T : pointer to the first element of T matrix
- * @param[in,out] param : a vector of user-defined parameters
- */
-extern "C" void computeT(unsigned int sizeOfU, unsigned int  sizeOfX, const double* x, double* T, double* param)
-{
-  printf("Warning: call of the function 'computeT' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
-}
-
 /** LagrangianDS plug-in to compute mass(q,t) - id = "mass"
  * @param sizeOfq : size of vector q
  * @param q : pointer to the first element of q
@@ -218,54 +193,56 @@ extern "C" void computeB(unsigned int sizeOfB, double time, double* b, double *p
 }
 
 /** Relation plug-in to compute y(x,t) - id="output".
- *  @param sizeOfX : the size of the vector x
- *  @param x : the pointer to the first element of the vector x
- *  @param time : current time
- *  @param sizeOfY : the size of the vector y and lambda (ie of the interaction)
- *  @param lambda : the pointer to the first element of the vector lambda
- *  @param sizeOfU : the size of the vector u
- *  @param u : the pointer to the first element of the vector u
- *  @param[in,out]  y : the pointer to the first element of the vector y
- *  @param[in,out] param : a vector of user-defined parameters
- */
+   *  @param the size of the vector x.
+   *  @param x : the pointer to the first element of the vector x.
+   *  @param time : current time.
+   *  @param the size of the vectors y and lambda.
+   *  @param lambda : the pointer to the first element of the vector lambda.
+   *  @param[in,out]  y : the pointer to the first element of the vector y.
+   *  @param the size of the vectors z.
+   *  @param[in,out] z : a vector of user-defined parameters.
+   */
 extern "C" void computeOutput(unsigned int sizeOfX, const double* x, double time, unsigned int sizeOfY, const double* lambda,
-                              unsigned int sizeOfU, const double* u, double* y, double* param)
+                              double* y, unsigned int sizeOfZ, double* z)
 {
   printf("Warning: call of the function 'computeOutput' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
 
 /** Relation plug-in to compute r(lambda,t) - id="input".
- *  @param sizeY : the size of the vector y and lambda (ie of the interaction)
- *  @param lambda : the pointer to the first element of the vector lambda
- *  @param time : current time
- *  @param[in,out] r : the pointer to the first element of the vector y
- *  @param[in,out] param : a vector of user-defined parameters
+   *  @param sizeY : the size of the vector y and lambda.
+   *  @param lambda : the pointer to the first element of the vector lambda.
+   *  @param time : current time.
+   *  @param[in,out] r : the pointer to the first element of the vector r.
+   *  @param the size of the vectors z and lambda.
+   *  @param[in,out] z : a vector of user-defined parameters.
  */
-extern "C" void computeInput(unsigned int sizeY, const double* lambda, double time, double* r, double* param)
+extern "C" void computeInput(unsigned int sizeY, const double* lambda, double time, double* r, unsigned int sizeZ, double* param)
 {
   printf("Warning: call of the function 'computeInput' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
 }
 
 /** LagrangianR plug-in to compute h0(q) (scleronomic case) - id="h"
- * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
- * @param q : pointer to the first element of q
- * @param sizeY : size of vector y (ie of the interaction)
- * @param[in,out] y : pointer to the first element of y
- * @param[in,out] param : a vector of user-defined parameters
+   * @param sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction
+   * @param q : pointer to the first element of q
+   * @param sizeY : size of vector y (ie of the interaction)
+   * @param[in,out] y : pointer to the first element of y
+   * @param sizeZ : size of vector z
+   * @param[in,out] z: pointer to z vector(s) from DS.
  */
-extern "C" void h0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* y, double* param)
+extern "C" void h0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* y, unsigned int sizeZ, double* z)
 {
   printf("Call of the function 'h0' of the default plugin.\nYou have to implement this function.\n");
 }
 
 /** LagrangianR plug-in to compute G0(q), gradient of h0 according to q (scleronomic case) - id="G0"
- * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
- * @param q : pointer to the first element of q
- * @param sizeY : size of vector y (ie of the interaction)
- * @param[in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)
- * @param[in,out] param : a vector of user-defined parameters
+   * @param sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction
+   * @param q : pointer to the first element of q
+   * @param sizeY : size of vector y (ie of the intercation)
+   * @param[in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)
+   * @param sizeZ : size of vector z
+   * @param[in,out] z: pointer to z vector(s) from DS.
  */
-extern "C" void G0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* G0, double* param)
+extern "C" void G0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* G0, unsigned int sizeZ, double* z)
 {
   printf("Call of the function 'G0' of the default plugin.\nYou have to implement this function.\n");
 }

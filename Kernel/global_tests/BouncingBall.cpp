@@ -37,47 +37,51 @@ bool BouncingBall()
   {
     cout << " **************************************" << endl;
     cout << " ******** Start Bouncing Ball *********" << endl << endl << endl;
-
     // --- Model loading from xml file ---
-    Model bouncingBall("./Ball.xml");
+    Model * bouncingBall = new Model("./Ball.xml");
+    cout << "\n *** BallTS.xml file loaded ***" << endl;
+
     // --- Get and initialize the simulation ---
-    TimeStepping* s = static_cast<TimeStepping*>(bouncingBall.getSimulationPtr());
+    TimeStepping* s = static_cast<TimeStepping*>(bouncingBall->getSimulationPtr());
+    LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall->getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
     s->initialize();
+
     // --- Get the time discretisation scheme ---
     TimeDiscretisation* t = s->getTimeDiscretisationPtr();
-    int k = 0; // Current step
+
     int N = t->getNSteps(); // Number of time steps
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
     SimpleMatrix dataPlot(N + 1, 4);
     // For the initial time step:
     // time
-    dataPlot(k, 0) = k * t->getH();
+
+    int k = 0;
+    dataPlot(k, 0) = bouncingBall->getT0();
     // state q for the ball
-    LagrangianDS* ball = static_cast<LagrangianDS*>(bouncingBall.getNonSmoothDynamicalSystemPtr()->getDynamicalSystemPtr(0));
     dataPlot(k, 1) = (ball->getQ())(0);
     // velocity for the ball
     dataPlot(k, 2) = (ball->getVelocity())(0);
     // Reaction
-    dataPlot(k, 3) = (bouncingBall.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
-
+    dataPlot(k, 3) = (bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
     // --- Time loop  ---
-    while (k < N)
+    for (k = 1 ; k < N + 1 ; ++k)
     {
-      k++;
       s->computeOneStep();
-      dataPlot(k, 0) = k * t->getH();
-      dataPlot(k, 1) = (ball->getQ())(0);
-      dataPlot(k, 2) = (ball->getVelocity())(0);
-      dataPlot(k, 3) = (bouncingBall.getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+      // --- Get values to be plotted ---
+      dataPlot(k, 0) =  bouncingBall->getCurrentT();
+      dataPlot(k, 1) = ball->getQ()(0);
+      dataPlot(k, 2) = ball->getVelocity()(0);
+      dataPlot(k, 3) = (bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
       s->nextStep();
     }
 
     SiconosMatrix * dataRef = new SimpleMatrix("refBouncingBall.dat", true);
+    ioMatrix io("result.dat", "ascii");
+    io.write(dataPlot);
 
     double tol = 1e-9;
     double norm = (dataPlot - (*dataRef)).normInf() ;// diff->normInf();
-    cout << endl << endl;
     if (norm < tol)
     {
       cout << " ******** Bouncing Ball global test ended with success ********" << endl;

@@ -67,9 +67,9 @@ private:
 
   // Members
 
-  SiconosMatrix *H, *D;
+  SiconosMatrix *H, *D, *F;
   SimpleVector *b;
-  LagrangianRXML* tmpxml1, * tmpxml2;
+  LagrangianRXML* tmpxml1;
 
 public:
   void setUp();

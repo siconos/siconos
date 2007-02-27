@@ -23,10 +23,10 @@ TESTS_ENVIRONMENT = LD_LIBRARY_PATH=$(top_srcdir)/src/plugin/:$(top_builddir)/sr
 
 check_PROGRAMS = test1
 TESTS = $(check_PROGRAMS)
-test1_SOURCES = RelationTest.cpp LinearTIRTest.cpp LagrangianRTest.cpp LagrangianLinearRTest.cpp FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp \
+test1_SOURCES = FirstOrderRelationTest.cpp FirstOrderLinearTIRTest.cpp LagrangianScleronomousRTest.cpp LagrangianLinearRTest.cpp FirstOrderNonLinearDSTest.cpp FirstOrderLinearDSTest.cpp \
 	LagrangianDSTest.cpp LagrangianLinearTIDSTest.cpp TestMain.cpp \
-RelationTest.h LinearTIRTest.h LagrangianRTest.h LagrangianLinearRTest.h FirstOrderNonLinearDSTest.h FirstOrderLinearDSTest.h LagrangianDSTest.h LagrangianLinearTIDSTest.h
-siconos_HEADERS =RelationTest.h LinearTIRTest.h LagrangianRTest.h LagrangianLinearRTest.h FirstOrderNonLinearDSTest.h FirstOrderLinearDSTest.h LagrangianDSTest.h LagrangianLinearTIDSTest.h
+FirstOrderRelationTest.h FirstOrderLinearTIRTest.h LagrangianScleronomousRTest.h LagrangianLinearRTest.h FirstOrderNonLinearDSTest.h FirstOrderLinearDSTest.h LagrangianDSTest.h LagrangianLinearTIDSTest.h
+siconos_HEADERS =FirstOrderRelationTest.h FirstOrderLinearTIRTest.h LagrangianScleronomousRTest.h LagrangianLinearRTest.h FirstOrderNonLinearDSTest.h FirstOrderLinearDSTest.h LagrangianDSTest.h LagrangianLinearTIDSTest.h
 test1_INCLUDES = $(CPPUNIT_CFLAGS)
 test1_LDFLAGS =  $(CPPUNIT_LIBS)  $(SICONOS_LIBS) $(SICONOS_EXT_LIBS)
 

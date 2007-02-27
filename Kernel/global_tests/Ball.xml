@@ -49,16 +49,6 @@
 					<row>0.0 1.0 0.0</row>
 					<row>0.0 0.0 1.0</row>
 				</Mass>			
-				<K matrixRowSize='3' matrixColSize='3'>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-				</K>
-				<C matrixRowSize='3' matrixColSize='3'>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-					<row>0.0 0.0 0.0</row>
-				</C>
 			</LagrangianLinearTIDS>
 		</DS_Definition>
 		<!-- Interactions defined in the problem -->		

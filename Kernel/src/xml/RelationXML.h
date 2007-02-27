@@ -15,13 +15,14 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 /*! \file RelationXML.h
+  \brief XML data reading for Relation.
 */
 
-#ifndef __RelationXML__
-#define __RelationXML__
+#ifndef RelationXML_H
+#define RelationXML_H
 
 #include "SiconosDOMTreeTools.h"
 
@@ -29,110 +30,66 @@ class Relation;
 
 /** XML management for Relation
  *
- *
  *  \author SICONOS Development Team - copyright INRIA
  *   \version 2.0.1.
  *   \date 04/13/2004
  *
- * RelationXML allows to manage data of a Relation DOM tree.
  */
 class RelationXML
 {
+protected:
+
+  /** Relation node.*/
+  xmlNodePtr rootNode;
+
+  /**Default construcor. */
+  RelationXML();
+
+  /** Copy => private: no copy nor pass-by value. */
+  RelationXML(const RelationXML&);
+
+  /**Basic construcor.
+   \param a pointer to the relation xml node.
+  */
+  RelationXML(xmlNodePtr);
 
 public:
 
-  RelationXML();
-  RelationXML(xmlNode*);
+  /** Destructor */
   virtual ~RelationXML();
 
-  /** Return the computeInput Plugin name of the RelationXML
-  *   \return The computeInput Plugin name of the RelationXML
-  *  \exception XMLException
-  */
-  virtual std::string getComputeInputPlugin() const ;
-
-  /** Return the computeOutput Plugin name of the RelationXML
-  *   \return The computeOutput Plugin name of the RelationXML
-  *  \exception XMLException
-  */
-  virtual std::string getComputeOutputPlugin() const ;
-
-  /** sets the computeInput Plugin name of the RelationXML
-  *   \param string :  The computeInput Plugin name of the RelationXML
-  *  \exception XMLException
-  */
-  void setComputeInputPlugin(const std::string&  plugin);
-
-  /** sets the computeOutput Plugin name of the RelationXML
-  *   \param string :  The computeOutput Plugin name of the RelationXML
-  *  \exception XMLException
-  */
-  void setComputeOutputPlugin(const std::string&  plugin);
-
-  /** Return true if computeInput is calculated from a plugin
-  *   \return True if computeInput is calculated from plugin
-  */
-  inline bool isComputeInputPlugin() const
-  {
-    return xmlHasProp((xmlNodePtr)computeInputNode, (xmlChar *) PLUGIN_ATTRIBUTE.c_str());
-  }
-
-  /** Return true if computeOutput is calculated from a plugin
-  *   \return True if computOutput is calculated from plugin
-  */
-  inline bool isComputeOutputPlugin() const
-  {
-    return xmlHasProp((xmlNodePtr)computeOutputNode, (xmlChar *) PLUGIN_ATTRIBUTE.c_str());
-  }
-
-
-  /** return true if computeInputNode is defined
-  *  \return true if computeInputNode is defined
-  */
-  inline bool hasComputeInput() const
-  {
-    return (computeInputNode != NULL);
-  }
-
-  /** return true if computeOutputNode is defined
-  *  \return true if computeOutputNode is defined
-  */
-  inline bool hasComputeOutput() const
-  {
-    return (computeOutputNode != NULL);
-  }
-
-
-  /** Return the type of the RelationXML
-  *   \return The string type of the RelationXML
-  */
+  /** Returns the type of the RelationXML
+   *  \return a string.
+   */
   inline const std::string  getType() const
   {
-    //return SiconosDOMTreeTools::getStringAttributeValue(rootRelationXMLNode, RELATION_TYPE);
-    std::string type((char*)rootRelationXMLNode->name);
+    std::string type((char*)rootNode->name);
     return type;
   }
 
-  /** Return the node of the RelationXML
-  *   \return xmlNode* : the node of the RelationXML in the DOM tree
-  */
-  inline xmlNode* getNode()const
+  /** Returns the sub-type of the Relation
+   *  \return a string.
+   */
+  const std::string getSubType() const
   {
-    return rootRelationXMLNode;
+    if (SiconosDOMTreeTools::hasAttributeValue(rootNode, "type"))
+      return SiconosDOMTreeTools::getStringAttributeValue(rootNode, "type");
+    else return "Undefined";
   }
 
-  /** makes the operations to create the Relation of the Interaction
-  *   \param xmlNode* : the root node of the RelationXML
-  *   \param Relation* : the Relation of this RelationXML
-  */
-  void updateRelationXML(xmlNode* node, Relation* rel);
+  /** Returns the node of the RelationXML
+   *   \return an xmlNodePtr.
+   */
+  inline xmlNodePtr getRootNode()const
+  {
+    return rootNode;
+  }
 
-
-protected:
-  xmlNode * rootRelationXMLNode;
-  xmlNode * computeInputNode;
-  xmlNode * computeOutputNode;
+  /** To create the Relation of the Interaction. Useless?
+   *   \param xmlNodePtr : the root node of the RelationXML
+   *   \param Relation* : the Relation of this RelationXML
+   */
+  void updateRelationXML(xmlNodePtr, Relation*);
 };
-
 
 #endif

@@ -28,7 +28,7 @@ DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, bool):
 {
   xmlNodePtr node;
 
-  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, DS_STEPSINMEMORY)) != NULL)
+  if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "StepsInMemory")) != NULL)
     stepsInMemoryNode = node;
 
   if ((node = SiconosDOMTreeTools::findNodeChild(rootNode, "z")) != NULL)
@@ -38,7 +38,7 @@ DynamicalSystemXML::DynamicalSystemXML(xmlNodePtr DSNode, bool):
 void DynamicalSystemXML::setStepsInMemory(const unsigned int& nb)
 {
   if (!hasStepsInMemory())
-    stepsInMemoryNode = SiconosDOMTreeTools::createIntegerNode(rootNode, DS_STEPSINMEMORY, nb);
+    stepsInMemoryNode = SiconosDOMTreeTools::createIntegerNode(rootNode, "StepsInMemory", nb);
   else SiconosDOMTreeTools::setIntegerContentValue(stepsInMemoryNode, nb);
 }
 

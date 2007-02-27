@@ -20,17 +20,17 @@
 // \Warning these tests are not complete: add xml constructor.
 
 #include "Interaction.h"
-#include "RelationTest.h"
+#include "FirstOrderRelationTest.h"
 using namespace std;
 
 #define CPPUNIT_ASSERT_NOT_EQUAL(message, alpha, omega)      \
             if ((alpha) == (omega)) CPPUNIT_FAIL(message);
 
 // test suite registration
-CPPUNIT_TEST_SUITE_REGISTRATION(RelationTest);
+CPPUNIT_TEST_SUITE_REGISTRATION(FirstOrderRelationTest);
 
 
-void RelationTest::setUp()
+void FirstOrderRelationTest::setUp()
 {
   // parse xml file:
   xmlDocPtr doc;
@@ -63,64 +63,49 @@ void RelationTest::setUp()
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
 
   // get relation
-  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "Relation");
-  tmpxml1 = new RelationXML(node1);
+  node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "FirstOrderRelation");
+  tmpxml1 = new FirstOrderRXML(node1);
 }
 
-void RelationTest::tearDown()
+void FirstOrderRelationTest::tearDown()
 {
   delete nsds;
   delete tmpxml1;
 }
 
-// default constructor
-void RelationTest::testBuildRelation1()
+// data constructor
+void FirstOrderRelationTest::testBuildFirstOrderRelation1()
 {
-  cout << "================================" << endl;
-  cout << "=== Relation tests start ...=== " << endl;
-  cout << "================================" << endl;
-  Relation * R1 = new Relation();
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation1a : ", R1->getInteractionPtr() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation1b : ", R1->getType() == "Relation", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation1c : ", R1->getComputeOutputName() == "DefaultPlugin:computeOutput", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation1d : ", R1->getComputeInputName() == "DefaultPlugin:computeInput", true);
+  cout << "===================================" << endl;
+  cout << "=== FirstOrderR tests start ...=== " << endl;
+  cout << "===================================" << endl;
+  FirstOrderR * R1 = new FirstOrderR("TestPlugin:y", "TestPlugin:R");
+
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderR1a : ", R1->getInteractionPtr() == NULL, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderR1b : ", R1->getType() == "FirstOrder", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderR1c : ", R1->getSubType() == "R", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderR1d : ", R1->getFunctionName("output") == "TestPlugin:y", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderR1e : ", R1->getFunctionName("input") == "TestPlugin:R", true);
   delete R1;
   cout << "--> Default constructor test ended with success." << endl;
 }
 
 // xml constructor
-void RelationTest::testBuildRelation2()
+void FirstOrderRelationTest::testBuildFirstOrderRelation2()
 {
   cout << "--> Test: constructor xml ." << endl;
-  Relation * R1 = new Relation(tmpxml1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation2b : ", R1->getType() == "Relation", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation2c : ", R1->getComputeOutputName() == "TestPlugin:y", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation2d : ", R1->getComputeInputName() == "TestPlugin:R", true);
+  FirstOrderR * R1 = new FirstOrderR(tmpxml1);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderR2a : ", R1->getType() == "FirstOrder", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderR2b : ", R1->getSubType() == "R", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderR2c : ", R1->getFunctionName("output") == "TestPlugin:y", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderR2d : ", R1->getFunctionName("input") == "TestPlugin:R", true);
   delete R1;
   cout << "--> Constructor xml test ended with success." << endl;
 }
-// copy constructor
-void RelationTest::testBuildRelation3()
+
+void FirstOrderRelationTest::End()
 {
-  cout << "--> Test: copy constructor." << endl;
-  Relation * R1 = new Relation();
-  R1->setComputeInputFunction("TestPlugin.so", "R");
-  R1->setComputeOutputFunction("TestPlugin.so", "y");
-
-  Relation * R2 = new Relation(*R1);
-
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation3a : ", R2->getInteractionPtr() == NULL, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation3b : ", R2->getType() == "Relation", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation3c : ", R2->getComputeOutputName() == "TestPlugin:y", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildRelation3d : ", R2->getComputeInputName() == "TestPlugin:R", true);
-  delete R2;
-  delete R1;
-  cout << "--> Copy Constructor test ended with success." << endl;
-}
-
-void RelationTest::End()
-{
-  cout << "====================================" << endl;
-  cout << " ===== End of Relation Tests ===== " << endl;
-  cout << "====================================" << endl;
+  cout << "============================================" << endl;
+  cout << " ===== End of FirstOrderR Tests ===== " << endl;
+  cout << "=============================================" << endl;
 }

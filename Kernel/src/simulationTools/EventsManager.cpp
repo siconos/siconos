@@ -107,9 +107,8 @@ void EventsManager::initialize()
   // === Set current and nextEvent ===
   double t0 = td->getModelPtr()->getT0();
   currentEvent = getEventPtr(doubleToIntTime(t0));
-  if (hasNextEvent())
-    nextEvent = getFollowingEventPtr(doubleToIntTime(t0));
-  else
+  nextEvent = getFollowingEventPtr(doubleToIntTime(t0));
+  if (nextEvent == NULL)
     RuntimeException::selfThrow("EventsManager initialize, can not find next event since there is only one event in the set!");
 }
 
@@ -189,7 +188,7 @@ const bool EventsManager::hasEvent(Event* event) const
 
 const bool EventsManager::hasNextEvent() const
 {
-  return (!(unProcessedEvents.size() < 2)); // minimum size of unProcessedEvents is one, since it contains currentEvent.
+  return (nextEvent != NULL);
 }
 
 const double EventsManager::getTimeOfEvent(Event* event) const
@@ -202,7 +201,7 @@ const double EventsManager::getTimeOfEvent(Event* event) const
 const unsigned long int EventsManager::getIntTimeOfEvent(Event* event) const
 {
   if (!hasEvent(event))
-    RuntimeException::selfThrow("EventsManager getTimeOfEvent, Event not present in the set ");
+    RuntimeException::selfThrow("EventsManager getIntTimeOfEvent, Event not present in the set ");
   return event->getTimeOfEvent();
 }
 
@@ -293,14 +292,15 @@ void EventsManager::removeEvent(Event* event)
 
 void EventsManager::processEvents()
 {
-  // Set Model current time
-  simulation->getModelPtr()->setCurrentT(getTimeOfEvent(nextEvent));
-
   // Process all events simultaneous to nextEvent.
   process();
 
   // Shift current to next ...
   shiftEvents();
+
+  // Set Model current time
+  if (nextEvent != NULL)
+    simulation->getModelPtr()->setCurrentT(getTimeOfEvent(nextEvent));
 }
 
 void EventsManager::process()
@@ -322,23 +322,22 @@ void EventsManager::shiftEvents()
   // 1 - Get time of current event
   unsigned long int told = currentEvent->getTimeOfEvent();
 
-  // 2 - Save currentEvent into pastEvents
-  // Warning: do not directly insert or remove currentEvent. Mind the pointer links!!
-  check = pastEvents.insert(getEventPtr(told));
-  //if(!check.second) RuntimeException::selfThrow("EventsManager, processEvents, event insertion in pastEvents failed.");
-
-  // 4 - We get a range of all the Events at time told.
-  pair<EventsContainerIterator, EventsContainerIterator> rangeOld = unProcessedEvents.equal_range(currentEvent);
-
-  // 3 - Get new currentEvent. currentEvent is shifted to the next event in time.
+  // 2 - Get new currentEvent. currentEvent is shifted to the next event in time.
   currentEvent = getFollowingEventPtr(told);
 
-  // Remove events that occur at time told (ie old current event) from unProcessedEvents set
+  // 3 - Save Event(s) simultaneous to told into pastEvents
+  // Warning: do not directly insert or remove currentEvent. Mind the pointer links!!
+  // We get a range of all the Events at time told.
+  pair<EventsContainerIterator, EventsContainerIterator> rangeOld = unProcessedEvents.equal_range(getEventPtr(told));
   EventsContainerIterator it;
   for (it = rangeOld.first; it != rangeOld.second ; ++it)
-    unProcessedEvents.erase(*it);
+    pastEvents.insert(*it);
+
+  // Remove events that occur at time told (ie old current event) from unProcessedEvents set
+  unProcessedEvents.erase(rangeOld.first, rangeOld.second);
 
   // Get new nextEvent (return NULL if currentEvent is the last one)
   nextEvent = getFollowingEventPtr(currentEvent->getTimeOfEvent());
 }
+
 

@@ -138,6 +138,13 @@ protected:
    */
   Simulation(const Simulation&);
 
+  /** initialisation for OneStepNSProblem.
+   */
+  virtual void initOSNS() = 0;
+
+  /** compute LevelMax */
+  virtual void initLevelMax() = 0;
+
 public:
 
   /** default constructor
@@ -380,7 +387,11 @@ public:
 
   /** Complete initialisation of the Simulation (OneStepIntegrators, OneStepNSProblem, TImediscretisation).
    */
-  virtual void initialize() = 0;
+  void initialize();
+
+  /** Set OSI (DS) non-smooth part to zero.
+   */
+  void reset();
 
   /** save DynamicalSystems and Interactions states in Memories (through OSI and OSNS).
    */

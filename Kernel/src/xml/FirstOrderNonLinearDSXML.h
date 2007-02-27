@@ -257,7 +257,7 @@ public:
    */
   inline bool isFPlugin() const
   {
-    return xmlHasProp(fNode, (xmlChar *) DS_VECTORPLUGIN.c_str());
+    return xmlHasProp(fNode, (xmlChar *) VECTORPLUGIN.c_str());
   }
 
   /** Return true if jacobianXF is calculated from a plugin
@@ -265,7 +265,7 @@ public:
    */
   inline bool isJacobianXFPlugin() const
   {
-    return xmlHasProp(jacobianXFNode, (xmlChar *) DS_MATRIXPLUGIN.c_str());
+    return xmlHasProp(jacobianXFNode, (xmlChar *) MATRIXPLUGIN.c_str());
   }
 };
 

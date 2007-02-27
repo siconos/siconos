@@ -18,7 +18,7 @@
 */
 
 /*! \file Interaction.h
-  Interaction class and related typedef
+  \brief Interaction class and related typedef
 */
 
 
@@ -28,6 +28,7 @@
 // const
 #include "BlockVector.h"
 #include "DynamicalSystemsSet.h"
+#include "Tools.h"
 
 class DynamicalSystemsSet;
 class NonSmoothLaw;
@@ -37,7 +38,7 @@ class NonSmoothDynamicalSystem;
 class InteractionXML;
 class BlockVector;
 
-/**  An Interaction describes the non-smooth interactions between a set of Dynamical Systems.
+/**  An Interaction describes the non-smooth interactions between some Dynamical Systems.
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.1.
@@ -92,6 +93,9 @@ private:
   /** sum of all DS sizes, for DS involved in the interaction */
   unsigned int sizeOfDS;
 
+  /** sum of all z sizes, for DS involved in the interaction */
+  unsigned int sizeZ;
+
   /** relation between constrained variables and states variables
    * vector of output derivatives
    * y[0] is y, y[1] is yDot and so on
@@ -127,27 +131,29 @@ private:
    *  has been allocated inside the class.
    */
   AllocationFlags isYAllocatedIn;
+
+  /** Flags for yOld[i] inside class allocation */
   AllocationFlags isYOldAllocatedIn;
+
+  /** Flags for lambda[i] inside class allocation */
   AllocationFlags isLambdaAllocatedIn;
+
+  /** Flags for lambdaOld[i] inside class allocation */
   AllocationFlags isLambdaOldAllocatedIn;
-  bool isRelationAllocatedIn;
-  bool isNsLawAllocatedIn;
+
+  /** Flags for yOld[i] inside class allocation */
+  BoolMap isAllocatedIn;
 
   // === PRIVATE FUNCTIONS ===
 
   /** default constructor */
   Interaction();
 
-  // === PUBLIC FUNCTIONS ===
-
-public:
-
-  // === CONSTRUCTORS/DESTRUCTOR ===
-
-  /** copy constructor
-   *  \param Interaction* : the object to copy
+  /** copy constructor => private, no copy nor pass-by-value.
    */
   Interaction(const Interaction& inter);
+
+public:
 
   /** constructor with XML object of the Interaction
    *  \param InteractionXML* : the XML object corresponding
@@ -162,7 +168,6 @@ public:
   *  \param int : the value of interactionSize
   *  \param NonSmoothLaw* : a pointer to the non smooth law
   *  \param Relation* : a pointer to the Relation
-  *  \exception RuntimeException
   */
   Interaction(const std::string&, DynamicalSystemsSet&, int, int, NonSmoothLaw*, Relation*);
 
@@ -171,8 +176,10 @@ public:
   ~Interaction();
 
   /** allocate memory for y[i] and lambda[i] and set them to zero.
-  */
-  void initialize();
+   * \param time for initialization.
+   * \param the number of required derivatives for y.
+   */
+  void initialize(double, unsigned int);
 
   /** build Y and Lambda stl vectors.
   *   \param unsigned int: dim of Y and Lambda vector of Interactions (ie number of derivatives that
@@ -238,20 +245,20 @@ public:
     return numberOfRelations;
   }
 
-  /** set the number of relations
-  *  \param an unsigned int
-  */
-  inline void setNumberOfRelations(const unsigned int newVal)
-  {
-    numberOfRelations = newVal;
-  }
-
   /** get the sum of DS sizes, for DS involved in interaction
-  *  \return an unsigned int
-  */
+   *  \return an unsigned int
+   */
   inline const unsigned int getSizeOfDS() const
   {
     return sizeOfDS;
+  }
+
+  /** get the sum of z sizes, for DS involved in interaction
+   *  \return an unsigned int
+   */
+  inline const unsigned int getSizeZ() const
+  {
+    return sizeZ;
   }
 
   // -- y --
@@ -455,13 +462,13 @@ public:
   *  \param the identification number of the wanted DynamicalSystem
   *  \return a pointer on Dynamical System
   */
-  DynamicalSystem* getDynamicalSystemPtr(const int);
+  DynamicalSystem* getDynamicalSystemPtr(int);
 
   /** get a specific DynamicalSystem. Out of date function?
    *  \param the identification number of the wanted DynamicalSystem
    *  \param a Dynamical System: out-parameter
    */
-  void getDynamicalSystem(const int, DynamicalSystem&);
+  void getDynamicalSystem(int, DynamicalSystem&);
 
   /** get the Relation of this Interaction
   *  \return a pointer on this Relation
@@ -505,6 +512,40 @@ public:
     NSDS = newNsds;
   }
 
+  // --- OTHER FUNCTIONS ---
+
+  /** compute sum of all interaction-involved DS sizes
+  */
+  void computeSizeOfDS();
+
+  /**   put values of y into yOld, the same for lambda
+  */
+  void swapInMemory();
+
+  /** print the data to the screen
+  */
+  void display() const;
+
+  /** Computes output y; depends on the relation type.
+   *  \param double : current time
+   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+   */
+  void computeOutput(double, unsigned int = 0);
+
+  /** Computes yFree; depends on the relation type.
+   *  \param double : current time
+   *  \param unsigned int: number of the derivative to compute, optional, default = 0.
+   */
+  void computeFreeOutput(double, unsigned int = 0);
+
+  /** Compute input r of all Dynamical Systems involved in the present Interaction.
+   *  \param double : current time
+   *  \param unsigned int: order of lambda used to compute input.
+   */
+  void computeInput(double, unsigned int);
+
+  // --- XML RELATED FUNCTIONS ---
+
   /** get the InteractionXML* of the Interaction
   *  \return InteractionXML* : the pointer on the InteractionXML
   */
@@ -520,22 +561,6 @@ public:
   {
     interactionxml = interxml;
   }
-
-  // --- OTHER FUNCTIONS ---
-
-  /** compute sum of all interaction-involved DS sizes
-  */
-  void computeSizeOfDS();
-
-  /**   put values of y in yOld, the same for lambda
-  */
-  void swapInMemory();
-
-  /** print the data to the screen
-  */
-  void display() const;
-
-  // --- XML RELATED FUNCTIONS ---
 
   /** copy the data of the Interaction to the XML tree
   *  \exception RuntimeException

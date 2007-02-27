@@ -16,43 +16,33 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \file LinearTIR.h
+/*! \file FirstOrderLinearTIR.h
 
 */
-#ifndef LINEARTIRELATION_H
-#define LINEARTIRELATION_H
+#ifndef FirstOrderLinearTIR_H
+#define FirstOrderLinearTIR_H
 
-#include "Relation.h"
+#include "FirstOrderR.h"
 
-class Relation;
-class DynamicalSystem;
-
-/** Linear Time Invariant Relation, derived from class Relation
+/** Linear Time Invariant Relation, derived from class FirstOrderR
  *
  * \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.1.
  *  \date Apr 27, 2004
  *
- * This class defines and computes the Linear Time Invariant Relation defined by:
+ *  Linear Relation for First Order Dynamical Systems, with:
  *
  * \f[
- * y = h(x,t,\lambda,u,...) = C x + Fu + D \lambda + e \\
+ * y = C x + Fz + D \lambda + e \\
  *
- * R = g(\lambda,t) = B \lambda
+ * R = B \lambda
  * \f]
  *
- * Warning: For this class, h and g plug-in are not used but after all connected to default plug-in functions.
- * To use plug-in rather than C, F ... matrices, call setComputeOutput and/or setComputeInput functions.
- * This will connect h and g to the given plug-in and when calling computeOutput/Input functions, h and g will
- * be used rather than C, F ... This means that, in this case, C, F and other matrices or vectors may be useless.
- * It's up to user to be coherent and to provide good connections between plug-in and matrices if necessary.
  */
-class LinearTIR : public Relation
+class FirstOrderLinearTIR : public FirstOrderR
 {
 
 private:
-  /** Relation is given by: \f$ y= C x + D \lambda + Fu + e \f$*/
-  /** and \f$ r = B\lambda\f$ */
 
   /** \var C */
   SiconosMatrix* C;
@@ -61,35 +51,27 @@ private:
   /** \var F*/
   SiconosMatrix* F;
   /** \var e*/
-  SimpleVector* e;
+  SiconosVector* e;
   /** \var B*/
   SiconosMatrix* B;
 
-  /** \var isAllocatedIn
-   * Flags to know if pointers have been allocated in constructors or not*/
-  /* the order is the one of members list above (C,D,F,e,B)  */
-  std::vector<bool> isAllocatedIn;
-
-  /** the XML object linked to the LinearTIR to read XML data */
-  // LinearTIRXML * lTIRxml;
-
   /** Default (private) constructor
    */
-  LinearTIR();
+  FirstOrderLinearTIR();
 
 public:
 
   /** xml constructor
-   *  \param LinearTIRXML* : the XML object corresponding
+   *  \param FirstOrderLinearTIRXML* : the XML object corresponding
    */
-  LinearTIR(RelationXML*);
+  FirstOrderLinearTIR(RelationXML*);
 
   /** create the Relation from a set of data
    *  \param SiconosMatrix : the matrix C
    *  \param SiconosMatrix : the matrix B
    *  \exception RuntimeException
    */
-  LinearTIR(const SiconosMatrix& , const SiconosMatrix&);
+  FirstOrderLinearTIR(const SiconosMatrix& , const SiconosMatrix&);
 
   /** create the Relation from a set of data
    *  \param SiconosMatrix : C
@@ -99,19 +81,32 @@ public:
    *  \param SiconosMatrix : B
    *  \exception RuntimeException
    */
-  LinearTIR(const SiconosMatrix& , const SiconosMatrix& ,
-            const SiconosMatrix& , const SimpleVector& ,
-            const SiconosMatrix&);
+  FirstOrderLinearTIR(const SiconosMatrix& , const SiconosMatrix& ,
+                      const SiconosMatrix& , const SimpleVector& ,
+                      const SiconosMatrix&);
 
-  /** copy constructor
-   *  \param a relation to copy
-   *  warning: the interaction link is not copied, set a new one!
+  /** create the Relation from a set of data
+   *  \param pointer to SiconosMatrix : the matrix C
+   *  \param pointer to SiconosMatrix : the matrix B
+   *  \exception RuntimeException
    */
-  LinearTIR(const Relation &);
+  FirstOrderLinearTIR(SiconosMatrix* , SiconosMatrix*);
+
+  /** create the Relation from a set of data
+   *  \param pointer to SiconosMatrix : C
+   *  \param pointer to SiconosMatrix : D
+   *  \param pointer to SiconosMatrix : F
+   *  \param pointer to SimpleVector  : e
+   *  \param pointer to SiconosMatrix : B
+   *  \exception RuntimeException
+   */
+  FirstOrderLinearTIR(SiconosMatrix* , SiconosMatrix* ,
+                      SiconosMatrix* , SimpleVector* ,
+                      SiconosMatrix*);
 
   /** destructor
    */
-  ~LinearTIR();
+  ~FirstOrderLinearTIR();
 
   /** initialize the relation (check sizes, memory allocation ...)
    */
@@ -216,20 +211,20 @@ public:
   /** get e
    *  \return pointer on a SimpleVector
    */
-  inline SimpleVector* getEPtr() const
+  inline SiconosVector* getEPtr() const
   {
     return e;
   }
 
   /** set the value of e to newValue
-   *  \param SimpleVector newValue
+   *  \param SiconosVector newValue
    */
-  void setE(const SimpleVector&);
+  void setE(const SiconosVector&);
 
   /** set E to pointer newPtr
-   *  \param SimpleVector * newPtr
+   *  \param  SiconosVector* newPtr
    */
-  void setEPtr(SimpleVector *);
+  void setEPtr(SiconosVector*);
 
   // -- B --
 
@@ -259,45 +254,25 @@ public:
    */
   void setBPtr(SiconosMatrix *) ;
 
-  /** get block of C corresponding to ds
-   *  \param a pointer to dynamical system and a SiconosMatrix (in-out parameter)
-   */
-  void getCBlockDSPtr(DynamicalSystem*, SiconosMatrix&) const;
-
-  /** get block of C corresponding to DS number n
-   *  \param an int and a SiconosMatrix (in-out parameter)
-   */
-  void getCBlockDSPtr(const int , SiconosMatrix&) const;
-
-  /** get block of B corresponding to ds
-   *  \param a pointer to dynamical system and a SiconosMatrix (in-out parameter)
-   */
-  void getBBlockDSPtr(DynamicalSystem* , SiconosMatrix&) const;
-
-  /** get block of B corresponding to DS number n
-   *  \param an int and a SiconosMatrix (in-out parameter)
-   */
-  void getBBlockDSPtr(const int , SiconosMatrix&) const;
-
   // --- OTHER FUNCTIONS ---
 
-  /** computes y
+  /** Computes y
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  void computeOutput(const double, const unsigned int = 0);
+  void computeOutput(double, unsigned int = 0);
 
-  /** computes yFree AND save it into y
+  /** Computes yFree AND save it into y
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  void computeFreeOutput(const double = 0, const unsigned int = 0);
+  void computeFreeOutput(double = 0, unsigned int = 0);
 
-  /** default function to compute lambda
+  /** Computes lambda
    *  \param double : current time
    *  \param unsigned int: "derivative" order of lambda used to compute input
    */
-  void computeInput(const double, const unsigned int);
+  void computeInput(double, unsigned int);
 
   /** copy the data of the Relation to the XML tree
    */
@@ -311,7 +286,7 @@ public:
    *  \param Relation * : the relation which must be converted
    * \return a pointer on the relation if it is of the right type, NULL otherwise
    */
-  static LinearTIR* convert(Relation *r);
+  static FirstOrderLinearTIR* convert(Relation *r);
 };
 
-#endif // LINEARTIRELATION_H
+#endif

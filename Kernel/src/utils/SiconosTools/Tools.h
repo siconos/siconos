@@ -27,12 +27,22 @@
 #include<string>
 #include <sstream>
 #include <map>
+#include <deque>
 
 /** A map to link string to bool (for plug-in flags)  */
 typedef std::map<std::string, bool> BoolMap;
 
+/** Type used for inside-class allocation checking */
+typedef std::deque<bool> AllocationFlags;
+
 /** Map used to save the list of plug-in names. */
 typedef std::map<std::string, std::string> NamesList;
+
+/** Iterator through a list of names. */
+typedef NamesList::iterator NamesIterator;
+
+/** const Iterator through a list of names. */
+typedef NamesList::const_iterator NamesConstIterator;
 
 /** A function to convert any type to string*/
 template <class T> std::string toString(const T& obj)

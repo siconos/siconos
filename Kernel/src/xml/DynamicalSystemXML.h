@@ -27,10 +27,6 @@
 #include "SiconosDOMTreeTools.h"
 #include "SimpleVector.h"
 
-//Tags
-const std::string DS_STEPSINMEMORY = "StepsInMemory";
-const std::string DS_MATRIXPLUGIN = "matrixPlugin";
-const std::string DS_VECTORPLUGIN = "vectorPlugin";
 
 class SimpleVector;
 class SiconosVector;

@@ -735,44 +735,38 @@ extern "C" int sicLagrangianLinearR(int nIdInteraction, double *H, double *b)
   return nId;
 }
 
-extern "C" int sicLagrangianR(int nIdInteraction, char *relationType, char *funcH, char *funcG)
-{
-  int nId = SIC_OK;
+// Note Franck: to be reviewed with all Lagrangian Non Linear Relations possible cases ...
+// extern "C" int sicLagrangianR(int nIdInteraction, char *relationType, char *funcH, char *funcG)
+// {
+//   int nId=SIC_OK;
 
 
-  try
-  {
-    // Retrieve Interaction
-    int nSize = GLOB_SET_INTERACTION.size();
-    if ((nIdInteraction < 0) || (nIdInteraction > nSize))
-      RuntimeException::selfThrow("siconos/C:: sicLagrangianR failed");
+//   try {
+//     // Retrieve Interaction
+//     int nSize=GLOB_SET_INTERACTION.size();
+//     if ( (nIdInteraction<0) || (nIdInteraction>nSize) )
+//       RuntimeException::selfThrow("siconos/C:: sicLagrangianR failed");
 
-    Interaction *interaction = GLOB_SET_INTERACTION.getInteraction(nIdInteraction);
+//     Interaction *interaction = GLOB_SET_INTERACTION.getInteraction(nIdInteraction);
 
-    if (interaction == NULL)
-      RuntimeException::selfThrow("siconos/C:: sicLagrangianR failed");
+//     if ( interaction==NULL )
+//       RuntimeException::selfThrow("siconos/C:: sicLagrangianR failed");
 
-    // Why a vector ? See Franck or Vincent...
-    vector<string> vG;
-    vG.reserve(1);
-    vG.push_back(funcG);
+//     // Why a vector ? See Franck or Vincent...
+//     vector<string> vG;
+//     vG.reserve(1);
+//     vG.push_back(funcG);
 
-    Relation * relation = new LagrangianR(relationType, funcH, vG);
-    interaction->setRelationPtr(relation);
-  }
-  catch (SiconosException e)
-  {
-    cout << e.report() << endl;
-    nId = SIC_ERROR;
-  }
-  catch (...)
-  {
-    cout << "Exception caught in sicLagrangianLinearR" << endl;
-    nId = SIC_ERROR;
-  }
+//     Relation * relation = new LagrangianR(relationType, funcH,vG);
+//     interaction->setRelationPtr(relation);
+//   }
+//   catch(SiconosException e)
+//     {cout << e.report() << endl;nId=SIC_ERROR;}
+//   catch(...)
+//     {cout << "Exception caught in sicLagrangianLinearR" << endl;nId=SIC_ERROR;}
 
-  return nId;
-}
+//   return nId;
+// }
 
 
 extern "C" int sicNewtonImpactNSL(int nIdInteraction, double e)

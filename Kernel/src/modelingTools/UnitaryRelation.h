@@ -170,10 +170,15 @@ public:
   */
   const std::string getNonSmoothLawType() const;
 
-  /** returns the size of the embedded non smooth law
-  *  \return an unsigned int
+  /** returns the type of the embedded relation.
+  *  \return a string
   */
   const std::string getRelationType() const;
+
+  /** returns the subtype of the embedded relation.
+   *  \return a string
+   */
+  const std::string getRelationSubType() const;
 
   /** gets the DynamicalSystems of this Unitary
   *  \return a DynamicalSystemsSet

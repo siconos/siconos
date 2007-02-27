@@ -16,49 +16,41 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef __RelationTest__
-#define __RelationTest__
+#ifndef __FirstOrderRelationTest__
+#define __FirstOrderRelationTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "RelationXML.h"
+#include "FirstOrderRXML.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "NonSmoothDynamicalSystemXML.h"
-#include "Relation.h"
+#include "FirstOrderR.h"
 
-class RelationTest : public CppUnit::TestFixture
+class FirstOrderRelationTest : public CppUnit::TestFixture
 {
 
 private:
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(RelationTest);
+  CPPUNIT_TEST_SUITE(FirstOrderRelationTest);
 
   // tests to be done ...
 
-  //CPPUNIT_TEST(testBuildRelation);
-  CPPUNIT_TEST(testBuildRelation1);
-  CPPUNIT_TEST(testBuildRelation2);
-  CPPUNIT_TEST(testBuildRelation3);
-  /*CPPUNIT_TEST(testComputeOutput);
-    CPPUNIT_TEST(testComputeInput);   */
+  CPPUNIT_TEST(testBuildFirstOrderRelation1);
+  CPPUNIT_TEST(testBuildFirstOrderRelation2);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildRelation1();
-  void testBuildRelation2();
-  void testBuildRelation3();
-  /*
-  void testComputeOutput();
-  void testComputeInput();*/
+  void testBuildFirstOrderRelation1();
+  void testBuildFirstOrderRelation2();
   void End();
 
   // Members
 
-  xmlNode * node1;
-  RelationXML * tmpxml1;
+  xmlNodePtr node1;
+  FirstOrderRXML * tmpxml1;
   NonSmoothDynamicalSystem * nsds;
 
 public:

@@ -29,8 +29,10 @@ Note that not all files from the current location are listed below, since some o
 #include "Interaction.h"
 #include "Topology.h"
 
-#include "LinearTIR.h"
+#include "FirstOrderLinearTIR.h"
+
 #include "LagrangianLinearR.h"
+#include "LagrangianScleronomousR.h"
 
 #include "LagrangianLinearTIDS.h"
 #include "FirstOrderLinearTIDS.h"

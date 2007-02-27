@@ -20,7 +20,7 @@
 
 //---  Following includes to be suppressed thanks to factory (?) ---
 // Relations
-#include "LinearTIRXML.h"
+#include "FirstOrderLinearTIRXML.h"
 #include "LagrangianLinearRXML.h"
 // Nslaw
 #include "ComplementarityConditionNSLXML.h"
@@ -70,16 +70,16 @@ InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
       relationNode = node2;
       // get Relation type
       type = (char*)node2->name;
-      if (type == RELATION_TAG)
-        relationXML = new RelationXML(node2);
-      else if (type == LINEAR_TIME_INVARIANT_RELATION_TAG)
-        relationXML = new LinearTIRXML(node2);
-      else if (type == LAGRANGIAN_RELATION_TAG)
+      if (type == "FirstOrderRelation")
+        relationXML = new FirstOrderRXML(node2);
+      else if (type == "FirstOrderLinearTimeInvariantRelation")
+        relationXML = new FirstOrderLinearTIRXML(node2);
+      else if (type == "LagrangianRelation")
         relationXML = new LagrangianRXML(node2);
-      else if (type == LAGRANGIAN_LINEAR_RELATION_TAG)
+      else if (type == "LagrangianLinearRelation")
         relationXML = new LagrangianLinearRXML(node2);
       else
-        XMLException::selfThrow("InteractionXML : undefined Relation type : " + type + " (have you forgotten to verify the xml files with the Siconos Schema file or update it!?)");
+        XMLException::selfThrow("InteractionXML : undefined Relation type : " + type);
       isRelationXMLAllocatedIn = true;
     }
     else

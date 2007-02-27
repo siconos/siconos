@@ -18,6 +18,7 @@
  */
 
 /*! \file Relation.h
+\brief General interface for relations.
  */
 
 #ifndef RELATION_H
@@ -29,56 +30,53 @@
 #include "Tools.h"
 #include "SiconosSharedLibrary.h"
 
-/** General, First Order Relation name.*/
-const std::string RELATION = "Relation";
-
-/** Linear, Time Invariant coefficients and "First Order" Relations name.*/
-const std::string LINEARTIRELATION = "LinearTIR";
-
-/** Non linear, Lagrangian (second order) relations name.*/
-const std::string LAGRANGIANRELATION = "LagrangianR";
-
-/** Linear, Time Invariant Coefficients and Lagrangian (second order) relations name. */
-const std::string LAGRANGIANLINEARRELATION = "LagrangianLinearR";
-
 class Interaction;
 class RelationXML;
 class SimpleVector;
 
-/** General Non Linear Relation (Base class for Relations).
+/** General Non Linear Relation (Virtual Base class for Relations).
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.1.
  *  \date (Creation) Apr 27, 2004
  *
- *    This class provides tools to define and describe relations of the type:
- * \f[
- * y = h(x,t,\lambda,u,...)\\
- * R = g(\lambda,t)
- * \f]
- *  x, u, R are DynamicalSystem variables.
- *  x being the dof vector for all the DS involved in the interaction that owns the current relation.
- *  u is a control term (see DynamicalSystem class), R the input due to non-smooth behavior.
- *   \f$ y \ and \ \lambda \f$ are specific variables of the interaction (see this class for more details).
- * h and g are plugged on external functions, via plug-in mechanism (see SiconosSharedLibrary).
+ *  A relation is a link between global variables of the Dynamical Systems and
+ * some local ones, named y and lambda; belonging to one and only one Interaction.
  *
- * h <=> output
+ * The present class is an interface to all relations provides tools to define and describe them.
  *
- * g <=> input
+ * Each relation must have the two following functions:
  *
- * They MUST be plugged -> to default plug-in functions if nothing else specified.
+ *  - computeOutput(...) to compute y using DS global variables.
+ *  - computeInput(...) to compute non-smooth DS part (r or p) using lambda.
+ *
+ * Depending on the DS class and the link type, various relations (ie derived classes) are available:
+ *   - FirstOrder, for FirstOrderDynamicalSystem and derived classes.
+ *   - Lagrangian, for LagrangianDS and derived classes.
+ *
+ *  The specific type (Linear, Scleronomous ...) is then given by the "subTYpe". See Relation derived classes for details.
+ *
+ * The relation holds also:
+ *  - a pointer to the Interaction that owns the present relation.
+ *  - a pointer to an xml object
+ *  - a VectorMap to handle links to DS variables (no copy!!!). Filled in during initialize.
+ *
  */
 class Relation
 {
 
-private:
-
 protected:
 
-  /** type of the Relation */
+  /** type of the Relation: FirstOrder or Lagrangian */
   std::string  relationType;
 
-  /** the Interaction which contains this Relation */
-  Interaction *interaction;
+  /** sub-type of the Relation (exple: LinearTIR or ScleronomousR ...) */
+  std::string  subType;
+
+  /** The Interaction linked to this Relation */
+  Interaction * interaction;
+
+  /** A map of vectors, used to save links (pointers) to DS objects of the interaction */
+  VectorMap data;
 
   /** the object linked this Relation to read XML data */
   RelationXML *relationxml;
@@ -87,70 +85,33 @@ protected:
   SiconosSharedLibrary cShared;
 
   /* contains the name of the plugin used to compute g function */
-  std::string  computeInputName;
-  /* contains the name of the plugin used to compute h function */
-  std::string  computeOutputName;
+  /* contains the names of the various plug-in. Example: pluginNames["output"] is the function used to compute the output y.*/
+  NamesList pluginNames;
 
-  /* Boolean variables to check if h and g are plugged to external functions or not
-   *  - always true for general Relations
-   *  - false by default for LinearTIR, but may be set to true by user, using setComputeOutput/Input functions
-   *  - always false for Lagrangian ( "overloaded" with h(q,...) and G(q,...) )
-   *  Note that these variables are only useful for derived classes.
-   */
-  bool isOutputPlugged;
-  bool isInputPlugged;
+  /** Flag to check if operators are plugged or not .*/
+  BoolMap isPlugged;
 
   /** Flags to know if pointers have been allocated inside constructors or not */
   BoolMap isAllocatedIn;
 
-  /** Parameters list, last argument of plug-in functions. What are those parameters depends on user´s choice.
-   *  This a list of pointer to SimpleVector. Each one is identified thanks to a key which is the plug-in name.
-   * A flag is also added in the isAllocatedIn map to check inside-class memory allocation for this object.*/
-  VectorMap parametersList;
-
-  /** Relation plug-in to compute y(x,t) - id="output".
-   *  @param sizeOfX : the size of the vector x
-   *  @param x : the pointer to the first element of the vector x
-   *  @param time : current time
-   *  @param sizeOfY : the size of the vectors y and lambda (ie of the interaction)
-   *  @param lambda : the pointer to the first element of the vector lambda
-   *  @param[in,out]  y : the pointer to the first element of the vector y
-   *  @param[in,out] param : a vector of user-defined parameters
+  /** copy constructor => private, no copy nor pass-by-value.
    */
-  void (*computeOutputPtr)(unsigned int, const double*, const double, unsigned int, const double*, double*, double*);
-
-  /** Relation plug-in to compute r(lambda,t) - id="input".
-   *  @param sizeY : the size of the vector y and lambda (ie of the interaction)
-   *  @param lambda : the pointer to the first element of the vector lambda
-   *  @param time : current time
-   *  @param[in,out] r : the pointer to the first element of the vector y
-   *  @param[in,out] param : a vector of user-defined parameters
-   */
-  void (*computeInputPtr)(unsigned int, const double*, const double, double*, double*);
-
-  /** init parameter vector corresponding to id to a SimpleVector* of size 1
-   *  \param a string, id of the plug-in
-   */
-  void initParameter(const std::string);
-
-public:
+  Relation(const Relation&);
 
   /** default constructor
    *  \param a string that gives the type of the relation (optional)
+   *  \param a string that gives the subtype of the relation (optional)
    */
-  Relation(const std::string = "Relation");
+  Relation(const std::string& = "Undefined", const std::string& = "Undefined");
 
   /** xml constructor
    *  \param RelationXML* : the XML object corresponding
    *  \param a string that gives the type of the relation (optional)
+   *  \param a string that gives the subtype of the relation (optional)
    */
-  Relation(RelationXML*, const std::string = "Relation");
+  Relation(RelationXML*, const std::string& = "Undefined", const std::string& = "Undefined");
 
-  /** copy constructor
-   *  \param a relation to copy
-   *  warning: the interaction link is not copied, set a new one!
-   */
-  Relation(const Relation&);
+public:
 
   /** destructor
    */
@@ -158,9 +119,25 @@ public:
 
   /** initialize the relation (check sizes, memory allocation ...)
    */
-  virtual void initialize();
+  virtual void initialize() = 0;
 
-  /** allows to get the RelationXML* of the Relation
+  /** To get the pointer to the Interaction linked to the present Relation
+   *  \return a pointer to Interaction.
+   */
+  inline Interaction * getInteractionPtr()
+  {
+    return interaction;
+  }
+
+  /** To set the pointer to the Interaction linked to the present Relation
+   *  \param a pointer to Interaction.
+   */
+  inline void setInteractionPtr(Interaction * newInter)
+  {
+    interaction = newInter;
+  }
+
+  /** To get the RelationXML* of the Relation
    *  \return a pointer on the RelationXML of the Relation
    */
   inline RelationXML* getRelationXML()
@@ -168,7 +145,7 @@ public:
     return relationxml;
   }
 
-  /** allows to set the RelationXML* of the Relation
+  /** To set the RelationXML* of the Relation
    *  \param RelationXML* : the pointer to set
    */
   inline void setRelationXML(RelationXML *rxml)
@@ -176,22 +153,7 @@ public:
     relationxml = rxml;
   }
 
-  /** allows to get the Interaction which contains this Relation
-   *  \return a pointer on an Interaction
-   */
-  inline Interaction* getInteractionPtr() const
-  {
-    return interaction;
-  }
-
-  /** set the Interaction which contains this Relation
-   */
-  inline void setInteractionPtr(Interaction* i)
-  {
-    interaction = i;
-  }
-
-  /** allows to get the type of the Relation
+  /** To get the type of the Relation (FirstOrder or Lagrangian)
    *  \return string : the type of the Relation
    */
   inline const std::string  getType() const
@@ -199,97 +161,47 @@ public:
     return relationType;
   }
 
-  /** get the name of computeInput function
-   *  \return a string
+  /** To get the subType of the Relation
+   *  \return string : the sub-type of the Relation
    */
-  inline const std::string getComputeInputName() const
+  inline const std::string  getSubType() const
   {
-    return computeInputName;
+    return subType;
   }
 
-  /** get the name of computeOutput function
-   *  \return a string
+  /** get the list of plug-in names
+   *  \return a NamesList
    */
-  inline const std::string getComputeOutputName() const
+  inline NamesList getFunctionNames() const
   {
-    return computeOutputName;
+    return pluginNames;
   }
 
-  // -- parametersList --
-
-  /** get the full map of parameters
-   *  \return a map<string,SimpleVector*>
+  /** get name of function that computes "name"
+   *  \return a string
    */
-  inline VectorMap getParameters() const
+  inline const std::string getFunctionName(const std::string& name) const
   {
-    return parametersList;
-  };
-
-  /** get the vector of parameters corresponding to plug-in function named id
-   *  \return a SimpleVector
-   */
-  inline const SimpleVector getParameter(const std::string id)
-  {
-    return *(parametersList[id]);
-  };
-
-  /** get the pointer to the vector of parameters corresponding to plug-in function named id
-   *  \return a pointer on a SimpleVector
-   */
-  inline SiconosVector* getParameterPtr(const std::string id)
-  {
-    return parametersList[id];
-  };
-
-  /** set the map for parameters
-   *  \param a map<string, SimpleVector*>
-   */
-  void setParameters(const VectorMap&);
-
-  /** set vector corresponding to plug-in function named id to newValue
-   *  \param a SimpleVector
-   *  \param a string
-   */
-  void setParameter(const SimpleVector&, const std::string);
-
-  /** set vector corresponding to plug-in function named id to newPtr (!! pointer link !!)
-   *  \param a pointer to SimpleVector
-   *  \param a string
-   */
-  void setParameterPtr(SimpleVector *, const std::string);
+    return (pluginNames.find(name))->second;
+  }
 
   /** default function to compute y
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
-  virtual void computeOutput(const double, const unsigned int = 0);
+  virtual void computeOutput(double, unsigned int = 0) = 0;
 
   /** default function to compute y for the free state
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
-   *  \exception RuntimeException
    */
-  virtual void computeFreeOutput(const double, const unsigned int = 0);
+  virtual void computeFreeOutput(double, unsigned int = 0) = 0;
 
   /** default function to compute r
    *  \param double : current time
    *  \param unsigned int: "derivative" order of lambda used to compute input
    */
-  virtual void computeInput(const double, const unsigned int);
-
-  /** allow to set a specified function to compute output
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
-  virtual void setComputeOutputFunction(const std::string, const std::string);
-
-  /** allow to set a specified function to compute output
-   *  \param string : the complete path to the plugin
-   *  \param string : the function name to use in this plugin
-   *  \exception SiconosSharedLibraryException
-   */
-  virtual void setComputeInputFunction(const std::string, const std::string);
+  virtual void computeInput(double, unsigned int) = 0;
 
   /** main relation members display
    */

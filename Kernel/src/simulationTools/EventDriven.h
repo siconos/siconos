@@ -54,6 +54,13 @@ private:
    */
   EventDriven();
 
+  /** initialisation specific to EventDriven for OneStepNSProblem.
+   */
+  void initOSNS();
+
+  /** compute LevelMax */
+  void initLevelMax();
+
 public:
 
   /** defaut constructor
@@ -109,10 +116,6 @@ public:
   *  \param doublereal*, g (in-out parameter)
   */
   void computeG(OneStepIntegrator*, integer *, doublereal *, doublereal*, integer *, doublereal*);
-
-  /** initialisation of the simulation
-  */
-  void initialize();
 
   /** update input for impact case (ie compute p[1])
   */

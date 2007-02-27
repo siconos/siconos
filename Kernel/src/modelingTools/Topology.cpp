@@ -28,7 +28,9 @@ const bool Topology::addInteractionInIndexSet(Interaction * inter)
 {
   // Creates UnitaryRelations corresponding to inter and add them into indexSet0
 
-  unsigned int m = inter->getNumberOfRelations() ;
+  // get number of relations in the interaction. This corresponds to inter->getNumberOfRelations but since Interaction has not
+  // been initialized yet, this value is not set and we need to get interaction size and nsLaw size.
+  unsigned int m = inter->getInteractionSize() / inter->getNonSmoothLawPtr()->getNsLawSize() ;
   unsigned int nsLawSize = inter->getNonSmoothLawPtr()->getNsLawSize();
   unsigned int pos = 0; // relative position of the relation in the y vector of the Interaction
   CheckInsertUnitaryRelation checkUR;
@@ -133,12 +135,7 @@ void Topology::initialize()
   indexSet0.clear();
   InteractionsIterator it;
   for (it = allInteractions.begin()  ; it != allInteractions.end() ; ++it)
-  {
-    // Initializes the current interaction
-    (*it)->initialize();
-    // Adds its relation into indexSet0
     addInteractionInIndexSet(*it);
-  }
 
   //-- Fills RelativeDegreesMaps in --
   computeRelativeDegrees();

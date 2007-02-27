@@ -241,7 +241,7 @@ void Lsodar::initialize()
       xWork->addPtr((static_cast<LagrangianLinearTIDS*>(*it))->getVelocityPtr()) ;
     }
     else
-      xWork->addPtr(static_cast<SimpleVector*>((*it)->getXPtr()));
+      xWork->addPtr((*it)->getXPtr());
   }
 
   //   Integer parameters for LSODAR are saved in vector intParam.
@@ -249,6 +249,7 @@ void Lsodar::initialize()
   intData[0] = xWork->size();  // neq, number of equations, ie dim of x
   // ng, number of constraints:
   intData[1] =  simulationLink->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getNumberOfConstraints();
+
   intData[2] = 1; // itol, 1 if ATOL is a scalar, else 2 (ATOL array)
   intData[3] = 1; // itask, an index specifying the task to be performed. 1: normal computation.
   intData[4] = 1; // istate an index used for input and output to specify the the state of the calculation.
@@ -332,9 +333,7 @@ void Lsodar::integrate(double& tinit, double& tend, double& tout, int& istate)
   }
 
   intData[4] = istate;
-
-  F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*xtmp)(0), &tinit_DR, &tend_DR, &(intData[2]), doubleData[0], doubleData[1], &(intData[3]), &(intData[4]), &(intData[5]), doubleData[2],
-                   &(intData[6]), iwork, &(intData[7]), pointerToJacobianF, &(intData[8]), pointerToG, &(intData[1]), doubleData[3]);
+  F77NAME(dlsodar)(pointerToF, &(intData[0]), &(*xtmp)(0), &tinit_DR, &tend_DR, &(intData[2]), doubleData[0], doubleData[1], &(intData[3]), &(intData[4]), &(intData[5]), doubleData[2], &(intData[6]), iwork, &(intData[7]), pointerToJacobianF, &(intData[8]), pointerToG, &(intData[1]), doubleData[3]);
 
   // doubleData[2] = rwork
   // doubleData[3] = jroot, jroot[i] = 0 if g(i) has a root at t, else jroot[i] = 0.
@@ -393,10 +392,6 @@ void Lsodar::display()
 {
   OneStepIntegrator::display();
   cout << " --- > Lsodar specific values: " << endl;
-  //vector<integer>::iterator it;
-  //for(it=intData.begin();it!=intData.end();++it)
-  //cout << *it << " " ;
-  //cout << endl;
   cout << "Number of equations: " << intData[0] << endl;
   cout << "Number of constraints: " << intData[1] << endl;
   cout << "itol, itask, istate, iopt, lrw, liw, jt: (for details on what are these variables see opkdmain.f)" << endl;
