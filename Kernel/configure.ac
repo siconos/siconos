@@ -126,7 +126,7 @@ AC_CHECK_FUNCS([floor gettimeofday])
 AC_ARG_ENABLE(cppunit,[  --enable-cppunit              use cppunit to pass unitary tests, default=no ])
 AC_ARG_ENABLE(debug,  [  --enable-debug              compiling with debugging symbols (-g), default=no ])
 AC_ARG_ENABLE(profiling,  [  --enable-profiling             compiling with profiling symbols (-pg), default=no ])
-AC_ARG_ENABLE(optimisation,  [  --enable-optimisation              compiling with optimiation symbols (O2), default=no ])
+AC_ARG_ENABLE(optimisation,  [  --enable-optimisation              compiling with optimiation symbols (-O3), default=no ])
 AC_ARG_ENABLE(warnings,[  --enable-warnings            enable compilation warnings, default=yes])
 AC_ARG_ENABLE(error-on-warning,[  --enable-erroronwarning     treat all compile warnings as errors, default=no])
 
@@ -193,40 +193,37 @@ fi
 #################################
 ## COMPILE FLAGS CXXFLAGS
 #################################
-
 # Default Flag
 if test "$enable_warnings" = no; then
 CXXFLAGS="$CXXFLAGS"
 else
-CXXFLAGS="-Wall  $CXXFLAGS"
+CXXFLAGS="-Wall $CXXFLAGS"
 fi
 
 #Optional flag
+
 if test "$enable_erroronwarning" = yes; then
    AC_MSG_RESULT(option --enable-erroronwarning selected : compiling with the -Werror option)
    CXXFLAGS="-Werror $CXXFLAGS"
 fi
 
-
 if test "$enable_profiling" = yes; then
-   AC_MSG_RESULT(option --enable-profiling selected : compiling with the -pg option)
-   CXXFLAGS="-pg -g -fbounds-check $CXXFLAGS"
+	AC_MSG_RESULT(option --enable-profiling selected : compiling with the -pg option)
+	CXXFLAGS="-pg -g -fbounds-check $CXXFLAGS"
 else
-   CXXFLAGS="-DNDEBUG  $CXXFLAGS"
+	if  test "$enable_debug" = yes; then
+	    AC_MSG_RESULT(option --enable-debug selected : compiling with the -g option)
+	    CXXFLAGS="-g -fbounds-check $CXXFLAGS"
+	else
+		if test "$enable_optimisation" = yes; then
+		   AC_MSG_RESULT(option --enable-optimisation selected : compiling with the -03 option)
+		   CXXFLAGS="-DNDEBUG -O3 $CXXFLAGS"
+		else
+		CXXFLAGS="-DNDEBUG -O2 $CXXFLAGS"
+		fi
+	fi
 fi
 
-
-if test "$enable_debug" = yes; then
-   AC_MSG_RESULT(option --enable-debug selected : compiling with the -g option)
-   CXXFLAGS="-g -fbounds-check $CXXFLAGS"
-else
-   CXXFLAGS="-DNDEBUG  $CXXFLAGS"
-fi
-
-if test "$enable_optimisation" = yes; then
-   AC_MSG_RESULT(option --enable-optimisation selected : compiling with the -02 option)
-   CXXFLAGS="-O2 $CXXFLAGS"
-fi
 
 
 #Special Compiler flag for system type
