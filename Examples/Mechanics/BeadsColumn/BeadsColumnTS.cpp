@@ -25,11 +25,14 @@ Simulation with a Time-Stepping scheme.
 */
 
 #include "SiconosKernel.h"
-
+#include <boost/timer.hpp>
 using namespace std;
 
 int main(int argc, char* argv[])
 {
+
+  boost::timer t;
+  t.restart();
   // Exception handling
   try
   {
@@ -266,4 +269,5 @@ int main(int argc, char* argv[])
   {
     cout << "Exception caught in \'sample/MultiBeadsColumn\'" << endl;
   }
+  cout << "Computation Time " << t.elapsed()  << endl;
 }
