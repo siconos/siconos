@@ -45,7 +45,6 @@ class SimpleVector;
  *   - Sets the value of tdCase which determines how the timeDiscretisation will be initialized, depending on the input.
  *  Initialization takes place during initialize of the object that owns the timeDiscretisation (simulation, sensor ...)
  *
- * \todo add a vector Memory for the previous time tk which have to be stored.
  *
  */
 class TimeDiscretisation

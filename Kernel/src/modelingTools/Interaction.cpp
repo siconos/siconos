@@ -23,6 +23,8 @@
 #include "FirstOrderLinearTIR.h"
 #include "LagrangianLinearR.h"
 #include "LagrangianScleronomousR.h"
+#include "LagrangianRheonomousR.h"
+#include "LagrangianCompliantR.h"
 #include "ComplementarityConditionNSL.h"
 #include "RelayNSL.h"
 #include "NewtonImpactNSL.h"
@@ -112,6 +114,10 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
     // \todo create a factory to avoid "if" list for Relation construction according to subType.
     if (relationSubType == "Scleronomous")
       relation = new LagrangianScleronomousR(interactionxml->getRelationXML());
+    else if (relationSubType == "Rheonomous")
+      relation = new LagrangianRheonomousR(interactionxml->getRelationXML());
+    else if (relationSubType == "Compliant")
+      relation = new LagrangianCompliantR(interactionxml->getRelationXML());
   }
   // Lagrangian linear relation
   else if (relationType == "LagrangianLinearRelation")

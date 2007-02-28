@@ -356,15 +356,12 @@ void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& centralBlo
   // === OSI = LSODAR : gets M matrices of each DS concerned by the UnitaryRelation, Theta remains empty ===
 
   OneStepIntegrator * Osi;
-
-  // Get the set of DS for the current UnitaryRelation
-  DynamicalSystemsSet URDS = UR->getDynamicalSystems();
-  DSIterator itDS;
   string osiType; // type of the current one step integrator
   string dsType; // type of the current Dynamical System
-
+  DSIterator itDS = (UR->getDynamicalSystems()).begin();
   // For each DS, find the corresponding W through the OneStepIntegrator Interface
-  for (itDS = URDS.begin(); itDS != URDS.end(); itDS++)
+  while (itDS != (UR->getDynamicalSystems()).end())
+    //  for(itDS = (UR->getDynamicalSystems()).begin(); itDS!=URDS.end(); itDS++)
   {
     Osi = simulation->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
     osiType = Osi->getType();
@@ -379,10 +376,11 @@ void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& centralBlo
       if (dsType != LNLDS && dsType != LLTIDS)
         RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Lsodar Integrator with dynamical system of type " + dsType);
 
-      // get mass and inverse it ...
+      // get lu-factorized mass
       centralBlocks[*itDS] = (static_cast<LagrangianDS*>(*itDS))->getMassLUPtr();
     }
     else
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Integrator of type " + osiType);
+    ++itDS;
   }
 }

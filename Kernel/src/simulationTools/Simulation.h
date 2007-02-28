@@ -63,6 +63,15 @@ typedef OneStepNSProblems::iterator OSNSIterator;
 /** const iterator through OneStepNSProblems */
 typedef OneStepNSProblems::const_iterator ConstOSNSIterator;
 
+/** A map that links DynamicalSystems and their OneStepIntegrator. */
+typedef std::map<DynamicalSystem*, OneStepIntegrator*> DSOSIMap;
+
+/** Iterator through a DSOSIMap. */
+typedef DSOSIMap::iterator DSOSIIterator;
+
+/** Const Iterator through a DSOSIMap. */
+typedef DSOSIMap::const_iterator DSOSIConstIterator;
+
 /** tolerance value used in indexSets updating */
 const double TOLERANCE = 1e-8;
 
@@ -105,6 +114,9 @@ protected:
 
   /** the dynamical systems integrators */
   OSISet allOSI;
+
+  /** Map to link all DynamicalSystems and their OneStepIntegrator*/
+  DSOSIMap osiMap;
 
   /** inside-class allocation flags*/
   std::map<OneStepIntegrator*, bool> isOSIAllocatedIn;
@@ -284,6 +296,12 @@ public:
    *  \param a pointer to a OneStepIntegrator
    */
   void addOneStepIntegratorPtr(OneStepIntegrator *);
+
+  /** register a DS and its OSI into the osiMap.
+      \param a pointer to a DynamicalSystem.
+   *  \param a pointer to a OneStepIntegrator.
+   */
+  void addInOSIMap(DynamicalSystem*, OneStepIntegrator *);
 
   /** check if the new OSI (parameter of the function) has common DynamicalSystems with one of the existing OSI of the simulation.
    * \param a OneStepIntegrator*

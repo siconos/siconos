@@ -16,37 +16,37 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef __LagrangianScleronomousRTest__
-#define __LagrangianScleronomousRTest__
+#ifndef __LagrangianCompliantRTest__
+#define __LagrangianCompliantRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "LagrangianScleronomousR.h"
+#include "LagrangianCompliantR.h"
 #include "LagrangianRXML.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "NonSmoothDynamicalSystemXML.h"
 
-class LagrangianScleronomousRTest : public CppUnit::TestFixture
+class LagrangianCompliantRTest : public CppUnit::TestFixture
 {
 
 private:
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(LagrangianScleronomousRTest);
+  CPPUNIT_TEST_SUITE(LagrangianCompliantRTest);
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildLagrangianScleronomousR0);
-  CPPUNIT_TEST(testBuildLagrangianScleronomousR1);
-  CPPUNIT_TEST(testBuildLagrangianScleronomousR2);
+  CPPUNIT_TEST(testBuildLagrangianCompliantR0);
+  CPPUNIT_TEST(testBuildLagrangianCompliantR1);
+  CPPUNIT_TEST(testBuildLagrangianCompliantR2);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildLagrangianScleronomousR0();
-  void testBuildLagrangianScleronomousR1();
-  void testBuildLagrangianScleronomousR2();
+  void testBuildLagrangianCompliantR0();
+  void testBuildLagrangianCompliantR1();
+  void testBuildLagrangianCompliantR2();
   void End();
 
   // Members

@@ -28,11 +28,10 @@ CPPUNIT_TEST_SUITE_REGISTRATION(LagrangianScleronomousRTest);
 
 void LagrangianScleronomousRTest::setUp()
 {
-  G0 = new SimpleMatrix("matG0.dat", true);
   // parse xml file:
   xmlDocPtr doc;
   xmlNodePtr cur;
-  doc = xmlParseFile("LagrangianR_test.xml");
+  doc = xmlParseFile("LagrangianScleronomous_test.xml");
   if (doc == NULL)
     XMLException::selfThrow("Document not parsed successfully");
   cur = xmlDocGetRootElement(doc);
@@ -61,7 +60,6 @@ void LagrangianScleronomousRTest::setUp()
 
 void LagrangianScleronomousRTest::tearDown()
 {
-  delete G0;
   delete tmpxml1;
 }
 
@@ -74,8 +72,8 @@ void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR0()
   LagrangianScleronomousR * R1 = new LagrangianScleronomousR(tmpxml1);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1a : ", R1->getType() == "Lagrangian", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1b : ", R1->getSubType() == "ScleronomousR", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1c : ", R1->getFunctionName("h") == "TestPlugin:h0", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1d : ", R1->getFunctionName("G0") == "TestPlugin:G0", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1c : ", R1->getFunctionName("h") == "TestPlugin:hSclero", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR1d : ", R1->getFunctionName("G0") == "TestPlugin:G0Sclero", true);
   delete R1;
   cout << " xml Constructor (1) LagrangianScleronomousR ok" << endl;
 }
@@ -93,14 +91,11 @@ void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR1()
 // data constructor:
 void LagrangianScleronomousRTest::testBuildLagrangianScleronomousR2()
 {
-  vector<string> G;
-  G.reserve(1);
-  G.push_back("TestPlugin:G0");
-  LagrangianScleronomousR * R1 = new LagrangianScleronomousR("TestPlugin:h0", "TestPlugin:G0");
+  LagrangianScleronomousR * R1 = new LagrangianScleronomousR("TestPlugin:hSclero", "TestPlugin:G0Sclero");
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3a : ", R1->getType() == "Lagrangian", true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3b : ", R1->getSubType() == "ScleronomousR", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3c : ", R1->getFunctionName("h") == "TestPlugin:h0", true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3d : ", R1->getFunctionName("G0") == "TestPlugin:G0", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3c : ", R1->getFunctionName("h") == "TestPlugin:hSclero", true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildLagrangianScleronomousR3d : ", R1->getFunctionName("G0") == "TestPlugin:G0Sclero", true);
   delete R1;
   cout << " data Constructor LagrangianScleronomousR ok" << endl;
 }

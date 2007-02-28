@@ -409,8 +409,8 @@ void Moreau::computeFreeState()
           fLOld = new SimpleVector(*(d->getFLPtr()));
           d->computeFL(t);
           fLCurrent = d->getFLPtr();
-
           *RESfree -= h * ((1.0 - theta)**fLOld + theta**fLCurrent);
+
           delete fLOld;
           fLCurrent = NULL;
         }

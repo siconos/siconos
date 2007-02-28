@@ -16,85 +16,106 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
  */
-/*! \file LagrangianScleronomousR.h
+/*! \file LagrangianCompliantR.h
 
 */
-#ifndef LagrangianScleronomousR_H
-#define LagrangianScleronomousR_H
+#ifndef LagrangianCompliantR_H
+#define LagrangianCompliantR_H
 
 #include "LagrangianR.h"
 
-/** Lagrangian Non Linear Scleronomous and Holonomous Relation.
+class DynamicalSystem;
+
+/** Lagrangian (Non Linear) Compliant Relation: Scleronomous, Non-Holonomic (function of lambda).
  *
  * \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.1.
  *  \date Apr 27, 2004
  *
- * Relation with:
- *
  * \f[
- * Y[0] = y = h(q,z) \\
+ * Y[0] = y = h(q,\lambda[0],z)
  * \f]
  *
  * \f[
- * Y[1] = \dot y = G0(q,z)\dot q \\
+ * Y[1] = \dot y = G0(q,\lambda[0],z)\dot q + G1((q,\lambda[0],z)\lambda[1]
  * \f]
  *
  * \f[
- * p = G0^t(q,z)\lambda
+ * p = G^t(q,\lambda[0],z)\lambda[0]
  * \f]
  *
- * G0 and h are connected to plug-in functions.
+ * with
+ * \f[
+ * G0(q,\lambda[0],z) = \nabla_q h(q,\lambda[0],z)
+ * \f]
+ * \f[
+ * G1(q,\lambda[0],z) = \nabla_{\lambda[0]}h(q,\lambda[0],z)
+ * \f]
+ *
+ * h, G0 and G1 are connected to user-defined functions.
  *
  */
-class LagrangianScleronomousR : public LagrangianR
+class LagrangianCompliantR : public LagrangianR
 {
 
 protected:
-
-  /** LagrangianScleronomousR plug-in to compute h(q,z)
-   * @param sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction
+  /** LagrangianR plug-in to compute h(q,lambda,z)
+   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
    * @param q : pointer to the first element of q
-   * @param sizeY : size of vector y (ie of the interaction)
+   * @param sizeY : size of vector y (ie of lambda and of the interaction)
+   * @param lambda : pointer to lambda of the interaction
    * @param[in,out] y : pointer to the first element of y
-   * @param sizeZ : size of vector z
-   * @param[in,out] z: pointer to z vector(s) from DS.
+   * @param sizeZ : size of vector z.
+   * @param[in,out] z : a vector of user-defined parameters
    */
-  FPtr3 hPtr;
+  FPtr2 hPtr;
 
-  /** LagrangianScleronomousR plug-in to compute G0(q,z), gradient of h according to q
-   * @param sizeQ: size of q = sum of the sizes of all the DynamicalSystems involved in the interaction
+  /** LagrangianR plug-in to compute G0(q,lambda,z)
+   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
    * @param q : pointer to the first element of q
-   * @param sizeY : size of vector y (ie of the intercation)
-   * @param[in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)
-   * @param sizeZ : size of vector z
-   * @param[in,out] z: pointer to z vector(s) from DS.
+   * @param sizeY : size of vector y (ie of lambda and of the interaction)
+   * @param lambda : pointer to lambda of the interaction
+   * @param[in,out] G0 : pointer to the first element of G0
+   * @param sizeZ : size of vector z.
+   * @param[in,out] z : a vector of user-defined parameters
    */
-  FPtr3 G0Ptr;
+  FPtr2 G0Ptr;
+
+  /** LagrangianR plug-in to compute G1(q,lambda,z)
+   * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
+   * @param q : pointer to the first element of q
+   * @param sizeY : size of vector y (ie of lambda and of the interaction)
+   * @param lambda : pointer to lambda of the interaction
+   * @param[in,out] G1 : pointer to the first element of G1
+   * @param sizeZ : size of vector z.
+   * @param[in,out] z : a vector of user-defined parameters
+   */
+  FPtr2 G1Ptr;
 
 public:
 
   /** default constructor
    */
-  LagrangianScleronomousR();
+  LagrangianCompliantR();
 
   /** constructor from xml file
    *  \param relationXML
-   *  \exception RuntimeException
    */
-  LagrangianScleronomousR(RelationXML*);
+  LagrangianCompliantR(RelationXML*);
 
   /** constructor from a set of data
-   *  \param string : the type of relation (scleronomic ...)
-   *  \param string : the name of the plugin for computeH
-   *  \param vector<string> : a list of names for the plugin for computeG (depends on relation type)
-   *  \exception RuntimeException
+   *  \param string : the name of the plugin to computeH
+   *  \param vector<string> : a list of names for the plugin to computeG (depends on relation type)
    */
-  LagrangianScleronomousR(const std::string&, const std::string&);
+  LagrangianCompliantR(const std::string&, const std::vector<std::string>&);
 
   /** destructor
    */
-  ~LagrangianScleronomousR();
+  ~LagrangianCompliantR();
+
+  /** initialize G matrices or components specific to derived classes.
+   */
+  void initComponents();
 
   /** to set a specified function to compute function h(q,...)
    *  \param string : the complete path to the plugin
@@ -127,25 +148,28 @@ public:
    */
   void computeHFree(double);
 
-  /** to compute G using plug-in mechanism, with free DS states. Index shows which G is to be computed
+  /** to compute G using plug-in mechanism, with free DS states.. Index shows which G is to be computed
    * \param: double, current time
    * \param: unsigned int
    */
   void computeGFree(double, unsigned int = 0);
 
   /** to compute output
+   *  \param Interaction : the interaction that owns y
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
   void computeOutput(double, unsigned int = 0);
 
   /** to compute y for the free state
+   *  \param Interaction : the interaction that owns y
    *  \param double : current time
    *  \param unsigned int: number of the derivative to compute, optional, default = 0.
    */
   void computeFreeOutput(double, unsigned int = 0);
 
   /** to compute p
+   *  \param Interaction : the interaction that owns lambda
    *  \param double : current time
    *  \param unsigned int: "derivative" order of lambda used to compute input
    */
@@ -155,7 +179,7 @@ public:
    *  \param Relation* : the relation which must be converted
    * \return a pointer on the relation if it is of the right type, NULL otherwise
    */
-  static LagrangianScleronomousR* convert(Relation *r);
+  static LagrangianCompliantR* convert(Relation *r);
 };
 
-#endif // LAGRANGIANRELATION_H
+#endif

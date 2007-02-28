@@ -357,6 +357,13 @@ public:
   */
   friend SimpleVector operator * (int, const SimpleVector&);
 
+  /** Product of a vector with a double
+   * \param a SiconosVector
+   * \param a double
+   * \return a SimpleVector
+   */
+  friend SimpleVector multScal(const SiconosVector&, double);
+
   /** division of the vector by a double
   *  \param a SiconosVector
   *  \param a double

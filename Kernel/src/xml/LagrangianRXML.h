@@ -110,7 +110,7 @@ public:
    */
   inline const bool isHDotPlugin() const
   {
-    return xmlHasProp(hDotNode, (xmlChar*)"vectorPlugin");
+    return xmlHasProp(hDotNode, (xmlChar*)"plugin");
   };
 
   /** Return hDot plug-in name, if it exists

@@ -117,9 +117,9 @@ void LagrangianR::initComponents()
     G[0] = new SimpleMatrix(sizeY, sizeQ);
     isAllocatedIn["G0"] = true;
   }
-  // Check if dimension are consistents with interaction.
-  if (sizeY != G[0]->size(0) || sizeQ != G[0]->size(1))
-    RuntimeException::selfThrow("LagrangianR:: initComponents failed. Inconsistent sizes between Interaction and Relation matrices.");
+  else // Check if dimension are consistents with interaction.
+    if (sizeY != G[0]->size(0) || sizeQ != G[0]->size(1))
+      RuntimeException::selfThrow("LagrangianR:: initComponents failed. Inconsistent sizes between Interaction and Relation matrices.");
 }
 
 void LagrangianR::setGVector(const VectorOfMatrices& newVector)

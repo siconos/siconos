@@ -33,6 +33,8 @@ Note that not all files from the current location are listed below, since some o
 
 #include "LagrangianLinearR.h"
 #include "LagrangianScleronomousR.h"
+#include "LagrangianCompliantR.h"
+#include "LagrangianRheonomousR.h"
 
 #include "LagrangianLinearTIDS.h"
 #include "FirstOrderLinearTIDS.h"

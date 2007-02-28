@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 #include <stdio.h>
 
 // ==== Dynamical System ====
@@ -225,105 +225,120 @@ extern "C" void R(unsigned int sizeY, const double* lambda, double time, double*
 
 // === Lagrangian Relations ===
 
-/** LagrangianR plug-in to compute h0(q) (scleronomic case) - id="h"
+// Scleronomous
+
+/** LagrangianR plug-in to compute h(q,z)
  * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
  * @param q : pointer to the first element of q
  * @param sizeY : size of vector y (ie of the interaction)
  * @param[in,out] y : pointer to the first element of y
- * @param[in,out] param : a vector of user-defined parameters
+ * @param sizeZ : size of vector z
+ * @param[in,out] z : a vector of user-defined parameters
  */
-extern "C" void h0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* y, unsigned int sizeZ, double* z)
+extern "C" void hSclero(unsigned int sizeDS, const double* q, unsigned int sizeY, double* y, unsigned int sizeZ, double* z)
 {
-  printf("Call of the function 'h0' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'hSclero' of the default plugin.\nYou have to implement this function.\n");
 }
 
-/** LagrangianR plug-in to compute G0(q), gradient of h0 according to q (scleronomic case) - id="G0"
+/** LagrangianR plug-in to compute G0(q,z), gradient of h0 according to q
  * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
  * @param q : pointer to the first element of q
  * @param sizeY : size of vector y (ie of the interaction)
  * @param[in,out] G0 : pointer to the first element of G0 (sizeY X sizeDS matrix)
+ * @param sizeZ : size of vector z
  * @param[in,out] param : a vector of user-defined parameters
  */
-extern "C" void G0(unsigned int sizeDS, const double* q, unsigned int sizeY, double* G0, unsigned int sizeZ, double* z)
+extern "C" void G0Sclero(unsigned int sizeDS, const double* q, unsigned int sizeY, double* G0, unsigned int sizeZ, double* z)
 {
   printf("Call of the function 'G0' of the default plugin.\nYou have to implement this function.\n");
 }
 
-/** LagrangianR plug-in to compute h1(q,t) (non-scleronomic case) - id="h"
+// Rheonomous
+
+/** LagrangianRheonomousR plug-in to compute h(q,t,z).
  * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
  * @param q : pointer to the first element of q
  * @param time : current time
- * @param sizeY : size of vector y (ie of the interaction)
+ * @param sizeY : size of vector y (ie of the intercation)
  * @param[in,out] y : pointer to the first element of y
- * @param[in,out] param : a vector of user-defined parameters
+ * @param sizeZ : size of vector z
+ * @param[in,out] z : a vector of user-defined parameters
  */
-extern "C"  void h1(unsigned int sizeDS, const double* q, double time, unsigned int sizeY, double* y, double* z)
+extern "C" void hRheo(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)
 {
-  printf("Call of the function 'h1' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'hRheo' of the default plugin.\nYou have to implement this function.\n");
 }
 
-
-/** LagrangianR plug-in to compute G10(q,t), gradient of h1 accoring to q (non-scleronomic case) - id="G10"
+/** LagrangianRheonomousR plug-in to compute G0(q,t,z) gradient of h according to q
  * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
  * @param q : pointer to the first element of q
  * @param time : current time
- * @param sizeY : size of vector y (ie of the interaction)
- * @param[in,out] G10 : pointer to the first element of G10
- * @param[in,out] param : a vector of user-defined parameters
+ * @param sizeY : size of vector y (ie of the intercation)
+ * @param[in,out] pointer to the first element of G0
+ * @param sizeZ : size of vector z
+ * @param[in,out] z : a vector of user-defined parameters
  */
-extern "C" void G10(unsigned int sizeDS, const double* q, double time, unsigned int  sizeY, double* G10, double* z)
+extern "C" void G0Rheo(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)
 {
-  printf("Call of the function 'G10' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'G0Rheo' of the default plugin.\nYou have to implement this function.\n");
 }
 
-/** LagrangianR plug-in to compute G11(q,t), gradient of h1 according to time (non-scleronomic case) - id="G11"
+
+/** LagrangianRheonomousR plug-in to compute hDot(q,t,z)
  * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
  * @param q : pointer to the first element of q
  * @param time : current time
- * @param sizeY : size of vector y (ie of the interaction)
- * @param[in,out] G11 : pointer to the first element of G11
- * @param[in,out] param : a vector of user-defined parameters
+ * @param sizeY : size of vector y (ie of the intercation)
+ * @param[in,out] pointer to the first element of hDot
+ * @param sizeZ : size of vector z
+ * @param[in,out] z : a vector of user-defined parameters
  */
-extern "C" void G11(unsigned int sizeDS, const double* q, double time, unsigned int  sizeY, double* G11, double* z)
+extern "C" void hDot(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)
 {
-  printf("Call of the function 'G11' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'hDot' of the default plugin.\nYou have to implement this function.\n");
 }
 
-/** LagrangianR plug-in to compute h2(q,lambda) (scleronomic+lambda case) - id="h"
+// Compliant
+
+/** LagrangianR plug-in to compute h(q,lambda,z)
  * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
  * @param q : pointer to the first element of q
- * @param lambda : current time
- * @param sizeY : size of vector y (ie of the interaction)
+ * @param sizeY : size of vector y (ie of lambda and of the interaction)
+ * @param lambda : pointer to lambda of the interaction
  * @param[in,out] y : pointer to the first element of y
- * @param[in,out] param : a vector of user-defined parameters
+ * @param sizeZ : size of vector z.
+ * @param[in,out] z : a vector of user-defined parameters
  */
-extern "C" void h2(unsigned int  sizeDS, const double* q, const double* lambda, unsigned int  sizeY, double* y, double* z)
+extern "C" void hCompl(unsigned int, const double*, unsigned int, const double*, double*, unsigned int, double*)
 {
-  printf("Call of the function 'h2' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'hCompl' of the default plugin.\nYou have to implement this function.\n");
 }
 
-/** LagrangianR plug-in to compute G20(q,lambda), gradient of h2 according to q (scleronomic+lambda case) - id="G20"
+/** LagrangianR plug-in to compute G0(q,lambda,z), gradient of hCompl according to q.
  * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
  * @param q : pointer to the first element of q
- * @param lambda : current time
- * @param sizeY : size of vector y (ie of the interaction)
- * @param[in,out] G20 : pointer to the first element of G20
- * @param[in,out] param : a vector of user-defined parameters
+ * @param sizeY : size of vector y (ie of lambda and of the interaction)
+ * @param lambda : pointer to lambda of the interaction
+ * @param[in,out] G0 : pointer to the first element of G0
+ * @param sizeZ : size of vector z.
+ * @param[in,out] z : a vector of user-defined parameters
  */
-extern "C" void G20(unsigned int  sizeDS, const double* q, const double* lambda, unsigned int  sizeY, double* y, double* z)
+extern "C" void G0Compl(unsigned int, const double*, unsigned int, const double*, double*, unsigned int, double*)
 {
-  printf("Call of the function 'G20' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'G0Compl' of the default plugin.\nYou have to implement this function.\n");
 }
 
-/** LagrangianR plug-in to compute G21(q,lambda), gradient of h2 according to lambda (scleronomic+lambda case) - id="G21"
+/** LagrangianR plug-in to compute G1(q,lambda), gradient of hCompl according to lambda.
  * @param sizeDS : sum of the sizes of all the DynamicalSystems involved in the interaction
  * @param q : pointer to the first element of q
- * @param lambda : current time
- * @param sizeY : size of vector y (ie of the interaction)
- * @param[in,out] G21 : pointer to the first element of G21
- * @param[in,out] param : a vector of user-defined parameters
+ * @param sizeY : size of vector y (ie of lambda and of the interaction)
+ * @param lambda : pointer to lambda of the interaction
+ * @param[in,out] G1 : pointer to the first element of G1
+ * @param sizeZ : size of vector z.
+ * @param[in,out] z : a vector of user-defined parameters
  */
-extern "C" void G21(unsigned int  sizeDS, const double* q, const double* lambda, unsigned int  sizeY, double* y, double* z)
+extern "C" void G1Compl(unsigned int, const double*, unsigned int, const double*, double*, unsigned int, double*)
 {
-  printf("Call of the function 'G21' of the default plugin.\nYou have to implement this function.\n");
+  printf("Call of the function 'G1Compl' of the default plugin.\nYou have to implement this function.\n");
 }
+

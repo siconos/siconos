@@ -16,41 +16,40 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef __LagrangianScleronomousRTest__
-#define __LagrangianScleronomousRTest__
+#ifndef __LagrangianRheonomousRTest__
+#define __LagrangianRheonomousRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "LagrangianScleronomousR.h"
+#include "LagrangianRheonomousR.h"
 #include "LagrangianRXML.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "NonSmoothDynamicalSystemXML.h"
 
-class LagrangianScleronomousRTest : public CppUnit::TestFixture
+class LagrangianRheonomousRTest : public CppUnit::TestFixture
 {
 
 private:
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(LagrangianScleronomousRTest);
+  CPPUNIT_TEST_SUITE(LagrangianRheonomousRTest);
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildLagrangianScleronomousR0);
-  CPPUNIT_TEST(testBuildLagrangianScleronomousR1);
-  CPPUNIT_TEST(testBuildLagrangianScleronomousR2);
+  CPPUNIT_TEST(testBuildLagrangianRheonomousR0);
+  CPPUNIT_TEST(testBuildLagrangianRheonomousR1);
+  CPPUNIT_TEST(testBuildLagrangianRheonomousR2);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildLagrangianScleronomousR0();
-  void testBuildLagrangianScleronomousR1();
-  void testBuildLagrangianScleronomousR2();
+  void testBuildLagrangianRheonomousR0();
+  void testBuildLagrangianRheonomousR1();
+  void testBuildLagrangianRheonomousR2();
   void End();
 
   // Members
-
   xmlNode * node;
   LagrangianRXML* tmpxml1;
 

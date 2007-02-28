@@ -48,10 +48,11 @@
                                </DS_Concerned>									
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
-					<LagrangianRelation type="scleronomous">
-                                             <h plugin="TestPlugin:h0"/>
-                                             <G number='1'>
-                                              <matrix matrixPlugin="TestPlugin:G0"/>
+					<LagrangianRelation type="Compliant">
+                                             <h plugin="TestPlugin:hCompl"/>
+                                             <G number='2'>
+                                              <matrix matrixPlugin="TestPlugin:G0Compl"/>
+                                              <matrix matrixPlugin="TestPlugin:G1Compl"/>
                                              </G>
 					</LagrangianRelation>			
 					<!-- NS Law of this interaction	-->

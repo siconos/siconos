@@ -732,6 +732,22 @@ SimpleVector operator * (const SimpleVector &m, double d)
   }
 }
 
+SimpleVector multScal(const SiconosVector&m , double d)
+{
+  unsigned int num = m.getNum();
+  if (num == 1)
+  {
+    DenseVect p = d * m.getDense();
+    return p;
+  }
+  else // if(num==4)
+  {
+    SparseVect s = d * m.getSparse();
+    return s;
+  }
+}
+
+
 SimpleVector operator * (const SimpleVector &m, int d)
 {
   if (m.getNum() != 1 && m.getNum() != 4)

@@ -28,12 +28,12 @@ SUBDIRS = test
 noinst_LTLIBRARIES = libModelingTools.la
 libModelingTools_la_SOURCES = DynamicalSystem.cpp FirstOrderNonLinearDS.cpp FirstOrderLinearDS.cpp FirstOrderLinearTIDS.cpp LagrangianDS.cpp \
 			      LagrangianLinearTIDS.cpp DynamicalSystemsSet.cpp Relation.cpp FirstOrderR.cpp FirstOrderLinearTIR.cpp LagrangianR.cpp \
-			      LagrangianLinearR.cpp LagrangianScleronomousR.cpp\
+			      LagrangianLinearR.cpp LagrangianScleronomousR.cpp LagrangianRheonomousR.cpp LagrangianCompliantR.cpp \
 			      NonSmoothLaw.cpp NewtonImpactFrictionNSL.cpp NewtonImpactNSL.cpp RelayNSL.cpp ComplementarityConditionNSL.cpp \
 			      Interaction.cpp InteractionsSet.cpp UnitaryRelation.cpp UnitaryRelationsSet.cpp Topology.cpp NonSmoothDynamicalSystem.cpp \
 			      DynamicalSystem.h FirstOrderNonLinearDS.h FirstOrderLinearDS.h FirstOrderLinearTIDS.h LagrangianDS.h \
 			      LagrangianLinearTIDS.h DynamicalSystemsSet.h Relation.h FirstOrderR.h FirstOrderLinearTIR.h LagrangianR.h LagrangianLinearR.h \
-			      LagrangianScleronomousR.h \
+			      LagrangianScleronomousR.h LagrangianRheonomousR.h LagrangianCompliantR.h\
 			      NonSmoothLaw.h NewtonImpactFrictionNSL.h NewtonImpactNSL.h RelayNSL.h ComplementarityConditionNSL.h \
 			      Interaction.h InteractionsSet.h UnitaryRelation.h UnitaryRelationsSet.h Topology.h NonSmoothDynamicalSystem.h \
 			      ModelingTools.h 
@@ -41,7 +41,7 @@ libModelingTools_la_LDFLAGS= -version-info $(SICONOS_SO_CURRENT):$(SICONOS_SO_RE
 
 siconos_HEADERS = DynamicalSystem.h FirstOrderNonLinearDS.h FirstOrderLinearDS.h FirstOrderLinearTIDS.h LagrangianDS.h \
 		  LagrangianLinearTIDS.h DynamicalSystemsSet.h Relation.h FirstOrderR.h FirstOrderLinearTIR.h LagrangianR.h LagrangianLinearR.h \
-		  LagrangianScleronomousR.h\
+		  LagrangianScleronomousR.h LagrangianRheonomousR.h LagrangianCompliantR.h\
 		  NonSmoothLaw.h NewtonImpactFrictionNSL.h NewtonImpactNSL.h RelayNSL.h ComplementarityConditionNSL.h \
 		  Interaction.h InteractionsSet.h UnitaryRelation.h UnitaryRelationsSet.h Topology.h NonSmoothDynamicalSystem.h \
 		  ModelingTools.h

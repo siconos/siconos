@@ -133,7 +133,11 @@ void OneStepIntegrator::initialize()
   double t0 = simulationLink->getModelPtr()->getT0();
   DSIterator it;
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
+  {
     (*it)->initialize(simulationLink->getType(), t0, sizeMem);
+    // Register this DS and the OSI into OSIMap of the Simulation
+    simulationLink->addInOSIMap(*it, this);
+  }
 }
 
 void OneStepIntegrator::saveInMemory()

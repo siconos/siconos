@@ -48,9 +48,10 @@
 #include "SiconosDOMTreeTools.h"
 #include "SiconosMemoryXML.h"
 #include "RelationXML.h"
+#include "FirstOrderRXML.h"
+#include "FirstOrderLinearTIRXML.h"
 #include "LagrangianRXML.h"
 #include "LagrangianLinearRXML.h"
-#include "LinearTIRXML.h"
 #include "NonSmoothLawXML.h"
 #include "NewtonImpactNSLXML.h"
 #include "NewtonImpactFrictionNSLXML.h"
@@ -90,17 +91,19 @@
 #include "LagrangianLinearTIDS.h"
 #include "Interaction.h"
 #include "Relation.h"
+#include "FirstOrderR.h"
+#include "FirstOrderLinearTIR.h"
 #include "LagrangianR.h"
 #include "LagrangianLinearR.h"
-#include "LinearTIR.h"
+#include "LagrangianScleronomousR.h"
+#include "LagrangianRheonomousR.h"
+#include "LagrangianCompliantR.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "Topology.h"
 #include "DynamicalSystemsSet.h"
 #include "UnitaryRelation.h"
 #include "UnitaryRelationsSet.h"
 #include "InteractionsSet.h"
-
-
 #include "TimeDiscretisation.h"
 #include "Solver.h"
 #include "Event.h"
@@ -182,9 +185,10 @@ $1 = string(PyString_AsString($input));
 
 // Xml - formalisation
 %include "RelationXML.h"
+%include "FirstOrderRXML.h"
+%include "FirstOrderLinearTIRXML.h"
 %include "LagrangianRXML.h"
 %include "LagrangianLinearRXML.h"
-%include "LinearTIRXML.h"
 // ---
 %include "NonSmoothLawXML.h"
 %include "NewtonImpactNSLXML.h"
@@ -225,9 +229,13 @@ $1 = string(PyString_AsString($input));
 // --- ModelFormalisation ---
 
 %include "Relation.h"
+%include "FirstOrderR.h"
+%include "FirstOrderLinearTIR.h"
 %include "LagrangianR.h"
+%include "LagrangianScleronomousR.h"
+%include "LagrangianRheonomousR.h"
+%include "LagrangianCompliantR.h"
 %include "LagrangianLinearR.h"
-%include "LinearTIR.h"
 // ---
 %include "NonSmoothLaw.h"
 %include "RelayNSL.h"

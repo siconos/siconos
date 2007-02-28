@@ -192,49 +192,23 @@ void Simulation::setOneStepIntegrators(const OSISet& newVect)
 
 OneStepIntegrator* Simulation::getIntegratorOfDSPtr(int numberDS) const
 {
-  ConstOSIIterator itOSI  = allOSI.begin();
 
-  //  DSIterator itDS;
-  DynamicalSystemsSet dsList = (*itOSI)->getDynamicalSystems();
-  DSIterator itDS = dsList.begin();
+  DSOSIConstIterator it = osiMap.begin();
   bool found = false;
-  while (!found && itOSI != allOSI.end())
+
+  while (!found || it != osiMap.end())
   {
-    while ((*itDS)->getNumber() != numberDS && itDS != dsList.end())
-      itDS++;
-    if (itDS == dsList.end()) // if not found ...
-    {
-      itOSI++;
-      dsList = (*itOSI)->getDynamicalSystems();
-      itDS = dsList.begin();
-    }
-    else
+    if ((it->first)->getNumber() == numberDS)
       found = true;
+    else ++it;
   }
 
-  return (*itOSI);
+  return (it->second);
 }
 
 OneStepIntegrator* Simulation::getIntegratorOfDSPtr(DynamicalSystem * ds) const
 {
-
-  ConstOSIIterator itOSI  = allOSI.begin();
-
-  ConstDSIterator itDS = (*itOSI)->getDynamicalSystems().find(ds);
-
-  // while ds is not in the set of the current osi, scan next osi ...
-  while (itDS == (*itOSI)->getDynamicalSystems().end() && itOSI != allOSI.end())
-  {
-    itOSI++; // go to next osi in the list
-    // check if ds is present in its set
-    itDS = (*itOSI)->getDynamicalSystems().find(ds);
-  }
-
-  // if ds is not find in any of the osi of the vector -> exception
-  if (itOSI == allOSI.end())
-    RuntimeException::selfThrow("Simulation::getIntegratorOfDSPtr(ds), no integrator corresponds to this dynamical sytem");
-
-  return (*itOSI);
+  return (osiMap.find(ds))->second;
 }
 
 void Simulation::addOneStepIntegratorPtr(OneStepIntegrator *osi)
@@ -245,6 +219,11 @@ void Simulation::addOneStepIntegratorPtr(OneStepIntegrator *osi)
   allOSI.insert(osi);
   isOSIAllocatedIn[osi] = false;
   osi->setSimulationPtr(this);
+}
+
+void Simulation::addInOSIMap(DynamicalSystem * ds, OneStepIntegrator * osi)
+{
+  osiMap[ds] = osi;
 }
 
 const bool Simulation::hasCommonDSInIntegrators(OneStepIntegrator* osi) const

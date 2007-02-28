@@ -252,6 +252,5 @@ void LagrangianScleronomousR::computeInput(double time, unsigned int level)
 
 LagrangianScleronomousR* LagrangianScleronomousR::convert(Relation *r)
 {
-  LagrangianScleronomousR* lnlr = dynamic_cast<LagrangianScleronomousR*>(r);
-  return lnlr;
+  return dynamic_cast<LagrangianScleronomousR*>(r);
 }

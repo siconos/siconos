@@ -68,7 +68,6 @@ class BlockVector;
  *  => the number of relations is equal to interactionSize/nsLawSize. Thus a relation is not necessarily represented
  *     by a single equation.
  *
- * \todo save a number of derivatives of y depending on the relative degree (at the time, this number is set to 2)
  *
  */
 class Interaction
