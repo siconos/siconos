@@ -197,10 +197,10 @@ if test "$enable_debug" = yes; then
 fi
 
 if test "$enable_optimisation" = yes; then
-   AC_MSG_RESULT(option --enable-optimisation selected : compiling with the -02 option)
-   CXXFLAGS="-O2 $CXXFLAGS"
-   CFLAGS="-O2 $CFLAGS"
-   FFLAGS="-O2 $FFLAGS"
+   AC_MSG_RESULT(option --enable-optimisation selected : compiling with the -03 option)
+   CXXFLAGS="-O3 $CXXFLAGS"
+   CFLAGS="-O3 $CFLAGS"
+   FFLAGS="-O3 $FFLAGS"
 fi
 
 
