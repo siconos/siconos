@@ -71,7 +71,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   const char lcpkey1[10] = "Lemke", lcpkey2[10] = "PGS", lcpkey3[10] = "CPG";
   const char lcpkey4[10] = "Latin", lcpkey5[10] = "QP", lcpkey6[10] = "NSQP";
   const char lcpkey7[15] = "LexicoLemke", lcpkey8[15] = "NewtonMin";
-  const char lcpkey9[15] = "Latin_w", lcpkey10[15] = "NewtonFB", lcpkey11[15] = "SOR";
+  const char lcpkey9[15] = "Latin_w", lcpkey10[15] = "NewtonFB", lcpkey11[15] = "PSOR";
   const char lcpkey12[10] = "NLGS";
 
   // Remark: Lemke = LexicoLemke. Only one solver is called: lexicoLemke.
@@ -150,7 +150,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
 
   }
 
-  /* **** NLGS Solver **** */
+  /* **** PGS Solver **** */
 
   else if (strcmp(pt->lcp.name , lcpkey2) == 0)
   {
@@ -166,6 +166,8 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     pt->lcp.err  = dparamLCP[2];
 
   }
+  /* **** NLGS Solver **** */
+
   else if (strcmp(pt->lcp.name , lcpkey12) == 0)
   {
 
@@ -182,7 +184,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     dparamLCP[0] = pt->lcp.tol;
     dparamLCP[1] = pt->lcp.relax;
 
-    lcp_sor(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+    lcp_psor(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
 
     pt->lcp.iter = iparamLCP[2];
     pt->lcp.err  = dparamLCP[2];

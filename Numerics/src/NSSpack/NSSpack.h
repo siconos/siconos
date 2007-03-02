@@ -312,8 +312,8 @@ extern  "C" void lcp_cpg(int *nn , double *vec , double *q , double *z , double 
 extern  "C" void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                          int *iparamLCP , double *dparamLCP);
 
-extern  "C" void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *info ,
-                         int *iparamLCP , double *dparamLCP);
+extern  "C" void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                          int *iparamLCP , double *dparamLCP);
 
 extern  "C" void lcp_nsqp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                           int *iparamLCP , double *dparamLCP);
@@ -641,8 +641,8 @@ extern void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , 
 extern void lcp_nsqp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                      int *iparamLCP , double *dparamLCP);
 
-extern void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *info ,
-                    int *iparamLCP , double *dparamLCP);
+extern void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                     int *iparamLCP , double *dparamLCP);
 
 extern void lcp_latin(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                       int *iparamLCP , double *dparamLCP);

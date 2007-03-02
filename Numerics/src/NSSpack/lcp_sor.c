@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*!\file lcp_sor.c
+/*!\file lcp_psor.c
 
   This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
   Try \f$(z,w)\f$ such that:\n
@@ -31,9 +31,9 @@
 
   where M is an (\f$nn \times nn\f$)-matrix, q , w and z nn-vectors.
 */
-/*!\fn  void lcp_sor( int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP )
+/*!\fn  void lcp_psor( int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP )
 
-  lcp_sor Succesive over relaxation solver for LCP. See cottle, Pang Stone Chap 5
+  lcp_psor Projected Succesive over relaxation solver for LCP. See cottle, Pang Stone Chap 5
 
   \param nn      On enter, an integer which represents the dimension of the system.
   \param vec     On enter, a (\f$nn \times nn\f$)-vector of doubles which contains the components of the matrix with a fortran storage.
@@ -47,7 +47,7 @@
 
   \param iparamLCP  On enter/return a vector of integers:\n
                 - iparamLCP[0] = itermax On enter, the maximum number of iterations allowed.
-                - iparamLCP[1] = ispeak  On enter, the output log identifiant:\n
+                - iparamLCP[1] = verbose  On enter, the output log identifiant:\n
                         0 : no output\n
                         >0: active screen output\n
                 - iparamLCP[2] = initmethod On enter, the method of initialization
@@ -74,14 +74,14 @@ it_end  On enter, the number of iterations performed by the algorithm.
 #include <math.h>
 #include "blaslapack.h"
 
-void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
 
   int n;
   int incx = 1, incy = 1;
   int incxn;
   int i, iter;
-  int itermax, ispeak;
+  int itermax, verbose;
 
   double qs, err, num, den;
   double tol, omega;
@@ -95,7 +95,7 @@ void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *in
   /* Recup input */
 
   itermax = iparamLCP[0];
-  ispeak  = iparamLCP[1];
+  verbose  = iparamLCP[1];
 
   tol   = dparamLCP[0];
   omega = dparamLCP[1];
@@ -114,7 +114,7 @@ void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *in
 
   qs = dnrm2_((integer *)&n , q , (integer *)&incx);
 
-  if (ispeak > 0) printf("\n ||q||= %g \n", qs);
+  if (verbose > 0) printf("\n ||q||= %g \n", qs);
 
   if (qs > 1e-16) den = 1.0 / qs;
   else
@@ -152,7 +152,7 @@ void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *in
     if (fabs(vec[i * n + i]) < 1e-16)
     {
 
-      if (ispeak > 0)
+      if (verbose > 0)
       {
         printf(" Warning negative diagonal term \n");
         printf(" The local problem cannot be solved \n");
@@ -200,20 +200,7 @@ void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *in
 
     /* **** Criterium convergence **** */
 
-
-    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z , (integer *)&incx , &b1 , w , (integer *)&incy);
-
-    daxpy_((integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy);
-
-    num = dnrm2_((integer *)&n, ww , (integer *)&incx);
-    err = num * den;
-
-    /*     if( ispeak == 2 ){  */
-    /*       printf(" # i%d -- %g : ",iter,err); */
-    /*       for( i = 0 ; i < n ; ++i) printf(" %g",z[i]); */
-    /*       for( i = 0 ; i < n ; ++i) printf(" %g",w[i]); */
-    /*       printf("\n"); */
-    /*     } */
+    lcp_compute_error(n, vec, q, z, verbose, w, &err);
 
     /* **** ********************* **** */
   }
@@ -221,26 +208,23 @@ void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *in
   iparamLCP[2] = iter;
   dparamLCP[2] = err;
 
-  if (ispeak > 0)
+
+  if (err > tol)
   {
-    if (err > tol)
-    {
-      printf(" No convergence of SOR after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", err);
-      *info = 1;
-    }
-    else
-    {
-      printf(" Convergence of SOR after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", err);
-      *info = 0;
-    }
+    printf("Siconos/Numerics: lcp_psor: No convergence of PSOR after %d iterations\n" , iter);
+    printf("Siconos/Numerics: lcp_psor: The residue is : %g \n", err);
+    *info = 1;
   }
   else
   {
-    if (err > tol) *info = 1;
-    else *info = 0;
+    if (verbose > 0)
+    {
+      printf("Siconos/Numerics: lcp_psor: Convergence of PSOR after %d iterations\n" , iter);
+      printf("Siconos/Numerics: lcp_psor: The residue is : %g \n", err);
+    }
+    *info = 0;
   }
+
 
   free(ww);
   free(diag);
