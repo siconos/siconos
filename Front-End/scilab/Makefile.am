@@ -15,16 +15,16 @@
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #
 # Contact: Vincent ACARY vincent.acary@inrialpes.fr 
-#	
+#	 
 # Makefile.am --- SICONOS - src
 
 include ../config/Make-rules
 
-include $(SCIDIR)/Makefile.incl
+#include $(SCIDIR)/Makefile.incl
 
 
 
-all     :: Makelib
+all     : Makelib
 	make -f Makelib
 
 Makelib : builder.sce

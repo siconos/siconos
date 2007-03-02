@@ -13,8 +13,8 @@ extern void testThreeBeadsColumn();
 
 main()
 {
-  /* testThreeBeadsColumn();*/
-  testMultiBeadsColumn();
+  testThreeBeadsColumn();
+  /* testMultiBeadsColumn();*/
   /*testHuMAns_pa10();*/
   exit(0);
 }
