@@ -29,7 +29,9 @@ SUBDIRS = test
 
 ### LCP #####################################################
 
-LCP_SOURCES = lcp_solver.c lcp_solver_block_new.c $(LCP_SOLVERS)
+LCP_SOURCES = lcp_solver.c lcp_solver_block_new.c \
+	filter_result_LCP.c filter_result_LCP_block.c \
+	lcp_compute_error.c $(LCP_SOLVERS)
 
 LCP_SOLVERS = lcp_lexicolemke.c lcp_nlgs.c lcp_nsqp.c lcp_cpg.c \
 	lcp_qp.c lcp_latin.c lcp_latin_w.c lcp_newton_min.c \
@@ -82,7 +84,7 @@ libNSSpack_la_SOURCES = NSSpack.h \
 	$(SWITCH) \
 	$(PR_SOURCES) \
 	$(DR_SOURCES) \
-	ql0001.f sortsn.f diffns.c filter_result_LCP.c filter_result_LCP_block.c \
+	ql0001.f sortsn.f diffns.c  \
 	freeSpBlMat.c
 
 

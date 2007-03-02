@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*!\file filter_result_LCP.c
+/*!\file lcp_compute_error.c
  *
  * This function checks the validity of the vector z as a solution \n
  * of the LCP : \n
@@ -27,7 +27,7 @@
  * with \f$ x_{pos} = max(0,x) \f$ and \f$ xneg = max(0,-x)\f$. \n
  * This sum is divided by \f$ \|q\| \f$ and then compared to tol.\n
  * It changes the input vector w by storing \f$ Mz + q \f$ in it.\n
- * \author Pascal Denoyelle
+ * \author Vincent Acary form the routine  filter_result_LCP.c of Pascal Denoyelle
  */
 
 #include <stdio.h>
@@ -37,11 +37,12 @@
 #include "blaslapack.h"
 #include <math.h>
 
-int filter_result_LCP(int n, double *vec , double *q , double *z , double tol, int chat, double *w)
+int lcp_compute_error(int n, double *vec , double *q , double *z , int verbose, double *w, double *err)
 {
   double error, normq;
   double a1, b1;
   int i, incx, incy;
+  int param = 1;
 
   char NOTRANS = 'N';
 
@@ -51,8 +52,18 @@ int filter_result_LCP(int n, double *vec , double *q , double *z , double tol, i
 
   a1 = 1.;
   b1 = 1.;
-  dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z ,
-         (integer *)&incx , &b1 , w , (integer *)&incy);
+
+
+  // following int param, we recompute the product w = M*z+q
+  // The test is then more severe if we compute w because it checks that the linear equation is satisfied
+
+  if (param == 1)
+  {
+    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z ,
+           (integer *)&incx , &b1 , w , (integer *)&incy);
+  }
+
+
 
   error = 0.;
   for (i = 0 ; i < n ; i++)
@@ -69,13 +80,9 @@ int filter_result_LCP(int n, double *vec , double *q , double *z , double tol, i
   incx  = 1;
   normq = dnrm2_((integer *)&n , q , (integer *)&incx);
 
-  error = error / normq;
-  chat = 1;
-  if (error > tol)
-  {
-    if (chat > 0) printf(" Wrong LCP result , error = %g \n", error);
-    return 1;
-  }
-  else return 0;
+  *err = error / normq;
+
+  if (verbose > 0) printf("Siconos/Numerics: lcp_compute_error: Error evaluation = %g \n", *err);
+  return 0;
 
 }

@@ -28,6 +28,9 @@ Do not hesitate to use the emacs mode Change Log for editing this file
 Notes:
 
 Changes:
+2007-03-02 Vincent Acary <vincent,acary@inrialpes.fr>
+                                                                               
+	* lcp_solver : Modification of the convergence criteria
 	
 --------------------------------------------------------------------------------
   v2.0.1 - 14 Decembre 2006 (release 626)

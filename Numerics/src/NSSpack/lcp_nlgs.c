@@ -47,7 +47,7 @@
 
   \param iparamLCP  On enter/return a vector of integers:\n
                 - iparamLCP[0] = itermax On enter, the maximum number of iterations allowed.
-                - iparamLCP[1] = ispeak  On enter, the output log identifiant:\n
+                - iparamLCP[1] = verbose  On enter, the output log identifiant:\n
                         0 : no output\n
                         >0: active screen output\n
                 - iparamLCP[2] = it_end  On enter, the number of iterations performed by the algorithm.
@@ -67,13 +67,15 @@
 
 #include "blaslapack.h"
 #include <math.h>
+int lcp_compute_error(int n, double *vec , double *q , double *z , int chat, double *w, double *err);
 
 void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
 
+
   int n, incx, incy;
   int i, iter;
-  int itermax, ispeak;
+  int itermax, verbose;
   int incxn;
   double qs, err, num, den, zi;
   double tol, omega;
@@ -89,7 +91,7 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   /* Recup input */
 
   itermax = iparamLCP[0];
-  ispeak  = iparamLCP[1];
+  verbose  = iparamLCP[1];
 
   tol   = dparamLCP[0];
   omega = dparamLCP[1];
@@ -110,7 +112,7 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
   qs = dnrm2_((integer *)&n , q , (integer *)&incx);
 
-  if (ispeak > 0) printf("\n ||q||= %g \n", qs);
+  if (verbose > 0) printf("\n ||q||= %g \n", qs);
 
   den = 1.0 / qs;
 
@@ -133,7 +135,7 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
     if (fabs(vec[i * n + i]) < 1e-16)
     {
 
-      if (ispeak > 0)
+      if (verbose > 0)
       {
         printf(" Warning negative diagonal term \n");
         printf(" The local problem cannot be solved \n");
@@ -205,33 +207,15 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
     /* **** Criterium convergence compliant with filter_result_LCP **** */
 
-    incx = 1;
-    incy = 1;
-    dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
-
-    a1 = 1.;
-    b1 = 1.;
-    dgemv_(&NOTRANS , (integer *)&n , (integer *)&n , &a1 , vec , (integer *)&n , z ,
-           (integer *)&incx , &b1 , w , (integer *)&incy);
-
-    err = 0.;
-    for (i = 0 ; i < n ; i++)
-    {
-      if (z[i] < 0.0)
-      {
-        err += -z[i];
-        if (w[i] < 0.0) err += z[i] * w[i];
-      }
-      if (w[i] < 0.0) err += -w[i];
-      if ((z[i] > 0.0) && (w[i] > 0.0)) err += z[i] * w[i];
-    }
 
 
-    err = err * den;
+    lcp_compute_error(n, vec, q, z, verbose, w, &err);
+
+    //err = err ;
 
 
 
-    if (ispeak == 2)
+    if (verbose == 2)
     {
       printf(" # i%d -- %g : ", iter, err);
       for (i = 0 ; i < n ; ++i) printf(" %g", z[i]);
@@ -246,25 +230,20 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   iparamLCP[2] = iter;
   dparamLCP[2] = err;
 
-  if (ispeak > 0)
+  if (err > tol)
   {
-    if (err > tol)
-    {
-      printf(" No convergence of NLGS after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", err);
-      *info = 1;
-    }
-    else
-    {
-      printf(" Convergence of NLGS after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", err);
-      *info = 0;
-    }
+    printf("Siconos/Numerics: lcp_pgs: No convergence of NLGS after %d iterations\n" , iter);
+    printf("Siconos/Numerics: lcp_pgs: The residue is : %g \n", err);
+    *info = 1;
   }
   else
   {
-    if (err > tol) *info = 1;
-    else *info = 0;
+    if (verbose > 0)
+    {
+      printf("Siconos/Numerics: lcp_pgs: Convergence of NLGS after %d iterations\n" , iter);
+      printf("Siconos/Numerics: lcp_pgs: The residue is : %g \n", err);
+    }
+    *info = 0;
   }
 
   free(ww);

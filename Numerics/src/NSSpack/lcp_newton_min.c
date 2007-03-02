@@ -57,11 +57,11 @@
  \param info    On return, an integer which returns the termination value:\n
                 0 : convergence\n
                 1 : iter = itermax\n
-                2 : negative diagonal term\n
+                2 : Problem in resolution in DGESV\n
 
  \param iparamLCP On enter/return a vectr of integers:\n
                - iparamLCP[0] = itermax On enter, the maximum number of iterations allowed.
-               - iparamLCP[1] = ispeak  On enter, the output log identifiant:\n
+               - iparamLCP[1] = verbose  On enter, the output log identifiant:\n
                        0 : no output\n
                        >0 : active screen output\n
                - iparamLCP[2] = it_end  On return, the number of iterations performed by the algorithm.
@@ -89,7 +89,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
 
   int i, j, iter;
   int n = *nn, m, mm, k;
-  int itermax, ispeak;
+  int itermax, verbose;
 
   integer  incx, incy;
   char NOTRANS = 'N';
@@ -108,7 +108,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
   /*input*/
 
   itermax = iparamLCP[0];
-  ispeak  = iparamLCP[1];
+  verbose  = iparamLCP[1];
 
   tol   = dparamLCP[0];
 
@@ -207,7 +207,7 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
 
     if (infoDGESV)
     {
-      if (ispeak > 0)
+      if (verbose > 0)
       {
         printf("Problem in DGESV\n");
       }
@@ -246,33 +246,32 @@ void lcp_newton_min(int *nn , double *vec , double *q , double *z , double *w , 
 
     /* / Error Evaluation*/
 
-    err = dnrm2_((integer *)&m , H , &incx);
+    // err = dnrm2_( (integer *)&m , H , &incx ); // necessary ?
+    lcp_compute_error(n, vec, q, z, verbose, w, &err);
+
 
   }
 
   iparamLCP[2] = iter;
   dparamLCP[1] = err;
 
-  if (ispeak > 0)
+
+  if (err > tol)
   {
-    if (err > tol)
-    {
-      printf(" No convergence of NEWTON_MIN after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", err);
-      *info = 1;
-    }
-    else
-    {
-      printf(" Convergence of NEWTON_MIN after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", err);
-      *info = 0;
-    }
+    printf("Siconos/Numerics: lcp_newton_min: No convergence of NEWTON_MIN after %d iterations\n" , iter);
+    printf("Siconos/Numerics: lcp_newton_min: The residue is : %g \n", err);
+    *info = 1;
   }
   else
   {
-    if (err > tol) *info = 1;
-    else *info = 0;
+    if (verbose > 0)
+    {
+      printf("Siconos/Numerics: lcp_newton_min: Convergence of NEWTON_MIN after %d iterations\n" , iter);
+      printf("Siconos/Numerics: lcp_newton_min: The residue is : %g \n", err);
+    }
+    *info = 0;
   }
+
   free(H);
   free(A);
   free(JacH);

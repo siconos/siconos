@@ -337,6 +337,8 @@ extern  "C" void lcp_newton_FB(int *nn , double *vec , double *q , double *z , d
 
 extern  "C" int filter_result_LCP(int n, double *vec , double *q , double *z , double tol, int chat, double *w);
 
+extern  "C" int lcp_compute_error(int n, double *vec , double *q , double *z , int chat, double *w, double error);
+
 extern  "C" int filter_result_LCP_block(SparseBlockStructuredMatrix *blmat, double *q , double *z , double tol, int chat, double *w);
 
 extern  "C" void freeSpBlMat(SparseBlockStructuredMatrix *blmat);
