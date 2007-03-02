@@ -114,9 +114,9 @@ void (*local_solver)(int *nn , double *vec , double *q , double *z , double *w ,
 int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , int *db , method *pt , double *z , /* in  */ double *w , int *it_end , int *itt_end , double *res)                                                       /* out */
 {
 
-  const char mot1[15] = "LexicoLemke", mot2[10] = "NLGS", mot3[10] = "CPG";
+  const char mot1[15] = "LexicoLemke", mot2[10] = "PGS", mot3[10] = "CPG";
   const char mot4[10] = "QP"         , mot5[10] = "NSQP", mot6[10] = "NewtonMin";
-  const char mot7[10] = "Latin";
+  const char mot7[10] = "Latin", mot12[10] = "NLGS",;
 
   int info;
   int n, na, db2, db10;
@@ -159,12 +159,18 @@ int lcp_solver_block(int *inb , int *iid , double *vec , double *q , int *dn , i
   }
   else if (strcmp(pt->lcp.name , mot2) == 0)
   {
-    /* NLGS */
+    /* PGS */
     iparamLCP[0] = pt->lcp.itermax;
     iparamLCP[1] = pt->lcp.chat;
     dparamLCP[0] = pt->lcp.tol;
     dparamLCP[1] = pt->lcp.relax;
-    local_solver = &lcp_nlgs;
+    local_solver = &lcp_pgs;
+  }
+  else if (strcmp(pt->lcp.name , mot12) == 0)
+  {
+    /* NLGS */
+    printf("Warning: NLGS method is obsolete. Use PGS instead.\n");
+
   }
   else if (strcmp(pt->lcp.name , mot3) == 0)
   {

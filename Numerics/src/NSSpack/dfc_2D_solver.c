@@ -84,8 +84,8 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
   clock_t       t1, t2;
 
   const char    dfckey1[10] = "Cfd_latin", dfckey2[10] = "Lemke";
-  const char    dfckey3[10] = "NLGS",  dfckey4[10] = "CPG";
-
+  const char    dfckey3[10] = "PGS",  dfckey4[10] = "CPG";
+  const char    dfckey13[10] = "NLGS";
 
 
   info = -1;
@@ -226,7 +226,7 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     dparamLCP[0] = pt->dfc_2D.tol;
     dparamLCP[1] = 1.0;
 
-    lcp_nlgs(&dim_q , MM , q , z , w , &info , iparamLCP , dparamLCP);
+    lcp_pgs(&dim_q , MM , q , z , w , &info , iparamLCP , dparamLCP);
 
     it_end = iparamLCP[2];
     res    = dparamLCP[2];
@@ -243,6 +243,11 @@ int dfc_2D_solver(double *K1, double *F1, int *n, method *pt, double *U2 , doubl
     free(q);
     free(z);
     free(w);
+  }
+  else if (strcmp(pt->dfc_2D.name , dfckey13) == 0)
+  {
+    printf("Warning: NLGS method is obsolete. Use PGS instead.\n");
+
   }
   else if (strcmp(pt->dfc_2D.name , dfckey4) == 0)
   {

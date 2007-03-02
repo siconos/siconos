@@ -31,6 +31,7 @@ Changes:
 2007-03-02 Vincent Acary <vincent,acary@inrialpes.fr>
                                                                                
 	* lcp_solver : Modification of the convergence criteria
+	* lcp_solver : Renaming lcp_nlgs into lcp_pgs
 	
 --------------------------------------------------------------------------------
   v2.0.1 - 14 Decembre 2006 (release 626)

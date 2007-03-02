@@ -16,7 +16,7 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-/*!\file lcp_nlgs.c
+/*!\file lcp_pgs.c
 
   This subroutine allows the resolution of LCP (Linear Complementary Problem).\n
   Try \f$(z,w)\f$ such that:\n
@@ -31,9 +31,9 @@
 
   where M is an (\f$nn \times nn\f$)-matrix, q , w and z nn-vectors.
 */
-/*!\fn  void lcp_nlgs( int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP )
+/*!\fn  void lcp_pgs( int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP )
 
-  lcp_nlgs (Non Linear Gauss-Seidel) is a basic nlgs solver for LCP.\n
+  lcp_pgs (Projected Gauss-Seidel) is a basic Projected Gauss-Seidel solver for LCP.\n
 
   \param nn      On enter, an integer which represents the dimension of the system.
   \param vec     On enter, a (\f$nn \times nn\f$)-vector of doubles which contains the components of the matrix with a fortran storage.
@@ -69,7 +69,7 @@
 #include <math.h>
 int lcp_compute_error(int n, double *vec , double *q , double *z , int chat, double *w, double *err);
 
-void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
+void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *info , int *iparamLCP , double *dparamLCP)
 {
 
 
@@ -232,7 +232,7 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
 
   if (err > tol)
   {
-    printf("Siconos/Numerics: lcp_pgs: No convergence of NLGS after %d iterations\n" , iter);
+    printf("Siconos/Numerics: lcp_pgs: No convergence of PGS after %d iterations\n" , iter);
     printf("Siconos/Numerics: lcp_pgs: The residue is : %g \n", err);
     *info = 1;
   }
@@ -240,7 +240,7 @@ void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *i
   {
     if (verbose > 0)
     {
-      printf("Siconos/Numerics: lcp_pgs: Convergence of NLGS after %d iterations\n" , iter);
+      printf("Siconos/Numerics: lcp_pgs: Convergence of PGS after %d iterations\n" , iter);
       printf("Siconos/Numerics: lcp_pgs: The residue is : %g \n", err);
     }
     *info = 0;

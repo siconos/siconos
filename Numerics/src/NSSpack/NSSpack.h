@@ -309,8 +309,8 @@ extern  "C" void lcp_qp(int *nn , double *vec , double *q , double *z , double *
 extern  "C" void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                          int *iparamLCP , double *dparamLCP);
 
-extern  "C" void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
-                          int *iparamLCP , double *dparamLCP);
+extern  "C" void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                         int *iparamLCP , double *dparamLCP);
 
 extern  "C" void lcp_sor(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                          int *iparamLCP , double *dparamLCP);
@@ -448,7 +448,7 @@ The C routines that solve LCP:
 
 
 
-lcp_nlgs.c
+lcp_pgs.c
 
 lcp_latin.c
 
@@ -635,8 +635,8 @@ extern void lcp_qp(int *nn , double *vec , double *q , double *z , double *w , i
 extern void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                     int *iparamLCP , double *dparamLCP);
 
-extern void lcp_nlgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
-                     int *iparamLCP , double *dparamLCP);
+extern void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                    int *iparamLCP , double *dparamLCP);
 
 extern void lcp_nsqp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                      int *iparamLCP , double *dparamLCP);

@@ -51,7 +51,7 @@
 * list Keywords to call solvers:
 *
 *   - Lemke    for lcp_lexicolemke
-*   - NLGS     for lcp_nlgs
+*   - PGS      for lcp_pgs
 *   - CPG      for lcp_cpg
 *   - QP       for lcp_qp
 *   - NSQP     for lcp_nsqp
