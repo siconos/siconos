@@ -19,11 +19,11 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 21;           // degrees of freedom for robot
     double t0 = 0;                   // initial computation time
-    double T = 1.0;//0.005;                   // final computation time
+    double T = 1.3;//0.005;                   // final computation time
     double h = 0.001;                // time step
     double criterion = 0.5;
     unsigned int maxIter = 5000;
-    double e = 0.0;                  // nslaw
+    double en = 0.0, et = 0.0, mu = 0.1;      // nslaw
 
     // -> mind to set the initial conditions below.
 
@@ -50,10 +50,10 @@ int main(int argc, char* argv[])
     LagrangianDS * bip = new LagrangianDS(1, q0, v0);
 
     // external plug-in
-    bip->setComputeMassFunction("RobotPlugin.so", "mass");
-    bip->setComputeNNLFunction("RobotPlugin.so", "NNL");
-    bip->setComputeJacobianNNLFunction(0, "RobotPlugin.so", "jacobianQNNL");
-    bip->setComputeJacobianNNLFunction(1, "RobotPlugin.so", "jacobianVNNL");
+    bip->setComputeMassFunction("RobotFrotPlugin.so", "mass");
+    bip->setComputeNNLFunction("RobotFrotPlugin.so", "NNL");
+    bip->setComputeJacobianNNLFunction(0, "RobotFrotPlugin.so", "jacobianQNNL");
+    bip->setComputeJacobianNNLFunction(1, "RobotFrotPlugin.so", "jacobianVNNL");
 
     allDS.insert(bip);
 
@@ -70,79 +70,75 @@ int main(int argc, char* argv[])
 
     // -- relations --
 
-    NonSmoothLaw * nslaw = new NewtonImpactNSL(e);
-    string G = "RobotPlugin:G0";
-    Relation * relation = new LagrangianScleronomousR("RobotPlugin:h0", G);
-    Interaction * inter = new Interaction("floor-feet", allDS, 0, 23, nslaw, relation);
+    NonSmoothLaw * nslaw = new NewtonImpactFrictionNSL(en, et, mu, 3);
+    string G = "RobotFrotPlugin:G0";
+    Relation * relation = new LagrangianScleronomousR("RobotFrotPlugin:h0", G);
+    Interaction * inter = new Interaction("floor-feet", allDS, 0, 69, nslaw, relation);
 
     //The linear contraint corresponding to joints limits (hq+b>0)
-    SimpleMatrix H(30, 21);
-    SimpleVector b(30);
+    NonSmoothLaw * nslaw2 = new NewtonImpactFrictionNSL(en, et, 0, 3);
+    SimpleMatrix H(90, 21);
+    SimpleVector b(90);
     H.zero();
-    H(0, 0) = -1;
-    H(1, 0) = 1;
-    b(0) = 0.21;
-    b(1) = 0.21;
-    H(2, 1) = -1;
-    H(3, 1) = 1;
-    b(2) = 0.64;
-    b(3) = 0.64;
-    H(4, 2) = -1;
-    H(5, 2) = 1;
-    b(4) = 1.41;
-    b(5) = -0.11;
-    H(6, 3) = -1;
-    H(7, 3) = 1;
-    b(6) = 0.2;
-    b(7) = 1.17;
-    H(8, 4) = -1;
-    H(9, 4) = 1;
-    b(8) = 0.21;
-    b(9) = 0.21;
-    H(10, 5) = -1;
-    H(11, 5) = 1;
-    b(10) = 0.64;
-    b(11) = 0.64;
-    H(12, 6) = -1;
-    H(13, 6) = 1;
-    b(12) = 1.41;
-    b(13) = -0.11;
-    H(14, 7) = -1;
-    H(15, 7) = 1;
-    b(14) = 0.2;
-    b(15) = 1.17;
-    H(16, 8) = -1;
-    H(17, 8) = 1;
-    b(16) = 0.17;
-    b(17) = 0.17;
-    H(18, 9) = -1;
-    H(19, 9) = 1;
-    b(18) = 0.14;
-    b(19) = 0.14;
-    H(20, 10) = -1;
-    H(21, 10) = 1;
-    b(20) = 0.17;
-    b(21) = 0.17;
-    H(22, 11) = -1;
-    H(23, 11) = 1;
-    b(22) = 0.14;
-    b(23) = 0.14;
-    H(24, 12) = -1;
-    H(25, 12) = 1;
-    b(24) = 0.17;
-    b(25) = 0.17;
-    H(26, 13) = -1;
-    H(27, 13) = 1;
-    b(26) = 0.08;
-    b(27) = 0.08;
-    H(28, 14) = -1;
-    H(29, 14) = 1;
-    b(28) = 0.08;
-    b(29) = 0.21;
+    b.zero();
+    for (unsigned int i = 0; i < 15; ++i)
+    {
+      for (unsigned int j = 0; j < 3; ++j)
+      {
+        H(6 * i + j, i) = -1;
+        H(6 * i + j + 3, i) = 1;
+      }
+    }
+
+    unsigned int i = 0;
+    b(3 * i + 0) = 0.21;
+    b(3 * i + 1) = 0.21;
+    i++;
+    b(3 * i + 2) = 0.64;
+    b(3 * i + 3) = 0.64;
+    i++;
+    b(3 * i + 4) = 1.41;
+    b(3 * i + 5) = -0.11;
+    i++;
+    b(3 * i + 6) = 0.20;
+    b(3 * i + 7) = 1.17;
+    i++;
+    b(3 * i + 8) = 0.21;
+    b(3 * i + 9) = 0.21;
+    i++;
+    b(3 * i + 10) = 0.64;
+    b(3 * i + 11) = 0.64;
+    i++;
+    b(3 * i + 12) = 1.41;
+    b(3 * i + 13) = -0.11;
+    i++;
+    b(3 * i + 14) = 0.2;
+    b(3 * i + 15) = 1.17;
+    i++;
+    b(3 * i + 16) = 0.17;
+    b(3 * i + 17) = 0.17;
+    i++;
+    b(3 * i + 18) = 0.14;
+    b(3 * i + 19) = 0.14;
+    i++;
+    b(3 * i + 20) = 0.17;
+    b(3 * i + 21) = 0.17;
+    i++;
+    b(3 * i + 22) = 0.14;
+    b(3 * i + 23) = 0.14;
+    i++;
+    b(3 * i + 24) = 0.17;
+    b(3 * i + 25) = 0.17;
+    i++;
+    b(3 * i + 26) = 0.08;
+    b(3 * i + 27) = 0.08;
+    i++;
+    b(3 * i + 28) = 0.08;
+    b(3 * i + 29) = 0.21;
 
 
     Relation * relation2 = new LagrangianLinearR(H, b);
-    Interaction * inter2 =  new Interaction("joint-limits", allDS, 1, 30, nslaw, relation2);
+    Interaction * inter2 =  new Interaction("joint-limits", allDS, 1, 90, nslaw2, relation2);
 
 
     allInteractions.insert(inter);
@@ -176,8 +172,7 @@ int main(int argc, char* argv[])
     OneStepIntegrator * OSI =  new Moreau(bip, 0.500001, s);
 
     // -- OneStepNsProblem --
-    //OneStepNSProblem * osnspb = new LCP(s,"name","Lemke",2001, 0.0005);
-    LCP * osnspb = new LCP(s, "name", "PGS", 2001, 0.0005);
+    OneStepNSProblem * osnspb = new FrictionContact3D(s, "name", "NLGS", 2000, 0.0005);
 
     cout << "=== End of model loading === " << endl;
 
@@ -216,6 +211,7 @@ int main(int argc, char* argv[])
 
     EventsManager * eventsManager = s->getEventsManagerPtr();
 
+    //   em->display();
 
     // --- Time loop ---
     cout << "Start computation ... " << endl;
@@ -225,7 +221,6 @@ int main(int argc, char* argv[])
       k++;
       cout << k << endl;
       s->newtonSolve(criterion, maxIter);
-
       dataPlot(k, 0) = Robot->getCurrentT();
 
       for (unsigned int i = 1; i < 22; i++)

@@ -1,7 +1,8 @@
+#include "LagrangianModel.h"
 #include <math.h>
-void ContactJacobian(double *CJ, const double *q)
-//double CJ[1449];
-//double q[21];
+void ContactJacobian(CJ, q)
+double CJ[1449];
+double q[21];
 {
   double t1;
   double t10;
@@ -1277,7 +1278,7 @@ void ContactJacobian(double *CJ, const double *q)
     t21 = sin(t13);
     t22 = sin(t15);
     t23 = t21 * t22;
-    t25 = -t17 * t19 + t23 * t19;
+    t25 = -t19 * t17 + t23 * t19;
     t26 = t12 * t25;
     t27 = cos(t11);
     t28 = t21 * t16;
@@ -2478,7 +2479,7 @@ void ContactJacobian(double *CJ, const double *q)
     t976 = -t4 * t972 - t974 * t280;
     t977 = t2 * t976;
     t978 = t48 * t8;
-    t980 = t6 * t41;
+    t980 = t41 * t6;
     t982 = -t978 * t968 - t980 * t968;
     t983 = t63 * t982;
     t984 = -t96;
@@ -2911,7 +2912,7 @@ void ContactJacobian(double *CJ, const double *q)
     CJ[840] = 0.0;
     CJ[841] = 0.0;
     CJ[842] = 0.0;
-    t1324 = t6 * t4;
+    t1324 = t4 * t6;
     t1325 = q[12];
     t1326 = sin(t1325);
     t1327 = q[13];
@@ -2961,7 +2962,7 @@ void ContactJacobian(double *CJ, const double *q)
     CJ[863] = 0.0;
     CJ[864] = 0.0;
     CJ[865] = 0.0;
-    t1372 = t6 * t55;
+    t1372 = t55 * t6;
     t1374 = 0.11 * t1372 * t1329;
     t1377 = 0.11 * t4 * t1331 * t1328;
     CJ[866] = t1374 + t1377;
@@ -3494,7 +3495,7 @@ void ContactJacobian(double *CJ, const double *q)
     t1605 = 0.12 * t1600;
     CJ[1254] = -t1574 - t1578 - t1583 - t1587 - t1602 - t1603 + t1604 + t1605;
     CJ[1255] = -t1574 - t1578 - t1583 - t1587 + t1602 + t1603 + t1604 + t1605;
-    t1606 = t6 * t854;
+    t1606 = t854 * t6;
     t1607 = 0.128 * t1606;
     t1608 = 0.128 * t1337;
     CJ[1256] = t1607 + t1608;
@@ -3532,7 +3533,7 @@ void ContactJacobian(double *CJ, const double *q)
     CJ[1268] = t1631 + t1633 + t1638 - t1639;
     CJ[1269] = t1631;
     CJ[1270] = t55 * t1550;
-    t1641 = 0.11 * t48 * t55;
+    t1641 = 0.11 * t55 * t48;
     CJ[1271] = -t1641;
     CJ[1272] = t1641;
     CJ[1273] = t55 * t1563;
@@ -3897,7 +3898,7 @@ void ContactJacobian(double *CJ, const double *q)
     t1940 = 0.12 * t1779;
     CJ[1415] = -t1762 + t1763 - t1931 - t1932 - t1937 - t1938 + t1939 - t1940;
     CJ[1416] = -t1762 + t1763 - t1931 - t1932 + t1937 + t1938 + t1939 - t1940;
-    CJ[1417] = -0.128 * t48 * t4;
+    CJ[1417] = -0.128 * t4 * t48;
     t1943 = 0.11 * t1792;
     t1944 = 0.11 * t1793;
     CJ[1418] = CJ[1417] - t1943 + t1944;

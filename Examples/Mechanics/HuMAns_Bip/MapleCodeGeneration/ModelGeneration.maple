@@ -165,35 +165,31 @@ end:
 
 
 
-#JacobianNLEffectsMatrix := proc(k)
-#local nleffect, y;
+JacobianQNLEffectsMatrix := proc(NLE)
+local nleffect, y;
        
-#        print(`NLEffects Jacobian`);
-#        nleffects := NLEffectsVector():
-#        y := convert(nleffects, matrix):
-#	subq := convert(q, matrix);
-#        RETURN(jacobian(col(y,1), subvector(subq, k..k+3, 1))):
-#        RETURN(jacobian(col(y,1), q[k])):
-#end:
+        print(`NLEffects Jacobian`);
+        y := convert(NLE, matrix):
+        RETURN(jacobian(col(y,1), q)):
+end:
 
-JacobianVelocityNLEffectsMatrix := proc()
+JacobianVelocityNLEffectsMatrix := proc(NLE)
 local nleffects, y;
        
         print(`NLEffects Velocity Jacobian`);
-        nleffects := NLEffectsVector():
-        y := convert(nleffects, matrix):
+        y := convert(NLE, matrix):
         RETURN(jacobian(col(y,1), qdot)):
 end:
 
 
-GenerateNLEffectsVector := proc()
+GenerateNLEffectsVector := proc(NLE)
 global REGISTERING, RegisteredList;
 local fd, FileName, CodeList, CodeLine, i, N;
 
 	FileName := "NLEffects.c":
 	REGISTERING := true:
 	RegisteredList := []:
-	N := convert(evalm(NLEffectsVector()+blockmatrix(2, 1, [map(y->subs({seq(cos(q[i+1])=C||i, i=0..NDDL-1),
+	N := convert(evalm(NLE+blockmatrix(2, 1, [map(y->subs({seq(cos(q[i+1])=C||i, i=0..NDDL-1),
 		seq(sin(q[i+1])=S||i, i=0..NDDL-1)}, y), RotorNLEffectsVector()), vector(6, 0)])), vector):
 	print(`Optimizing...`);
 	OptimizeRegisteredList(N):
@@ -224,6 +220,85 @@ local fd, FileName, CodeList, CodeLine, i, N;
 	fclose(fd):
 	REGISTERING := false:
 end:
+
+
+GenerateJacobianQNLEffectsMatrix := proc(NLE)
+global REGISTERING, RegisteredList;
+local fd, FileName, CodeList, CodeLine, i, JN;
+
+	FileName := "JacobianQNLEffects.c":
+	REGISTERING := true:
+	RegisteredList := []:
+	JN := convert(evalm(JacobianQNLEffectsMatrix(NLE)), vector):
+	print(`Optimizing...`);
+	OptimizeRegisteredList(JN):
+	CodeList := [codegen[optimize](JN)]:
+	unassign(N):
+	print(`Generating "`||(FileName)||`"`);
+	fd := fopen(FileName, WRITE):
+	fprintf(fd, "#include <math.h>\n"):
+	fprintf(fd, "#include ""LagrangianModel.h""\n\n"):
+	fprintf(fd, "void JacobianQNLEffects(JN, q, qdot)\n"):
+	fprintf(fd, "double JN[%d];\n", NDDL*NDDL):
+	fprintf(fd, "double q[%d];\n", NDDL):
+	fprintf(fd, "double qdot[%d];\n", NDDL):
+	fprintf(fd, "{\n"):
+#	GenerateSC(fd):
+	PrintRegisteredList(fd):
+	for i from 1 to vectdim(CodeList) do
+		if i <= vectdim(CodeList)-NDDL*NDDL then
+			CodeLine := convert(CodeList[i], list):
+			fprintf(fd, "  double %s", CodeGeneration[C](CodeLine[2], resultname = CodeLine[1], output = string,
+				coercetypes = false, deducetypes = false)):
+		else
+			fprintf(fd, "  %s", CodeGeneration[C]([CodeList[i]], output = string,
+				coercetypes = false, deducetypes = false)):
+		end:
+	end do:
+	fprintf(fd, "}\n"):
+	fclose(fd):
+	REGISTERING := false:
+end:
+
+GenerateJacobianVNLEffectsMatrix := proc(NLE)
+global REGISTERING, RegisteredList;
+local fd, FileName, CodeList, CodeLine, i, JN;
+
+	FileName := "JacobianVNLEffects.c":
+	REGISTERING := true:
+	RegisteredList := []:
+	JN := convert(evalm(JacobianVelocityNLEffectsMatrix(NLE)), vector):
+	print(`Optimizing...`);
+	OptimizeRegisteredList(JN):
+	CodeList := [codegen[optimize](JN)]:
+	unassign(N):
+	print(`Generating "`||(FileName)||`"`);
+	fd := fopen(FileName, WRITE):
+	fprintf(fd, "#include <math.h>\n"):
+	fprintf(fd, "#include ""LagrangianModel.h""\n\n"):
+	fprintf(fd, "void JacobianVNLEffects(JN, q, qdot)\n"):
+	fprintf(fd, "double JN[%d];\n", NDDL*NDDL):
+	fprintf(fd, "double q[%d];\n", NDDL):
+	fprintf(fd, "double qdot[%d];\n", NDDL):
+	fprintf(fd, "{\n"):
+#	GenerateSC(fd):
+	PrintRegisteredList(fd):
+	for i from 1 to vectdim(CodeList) do
+		if i <= vectdim(CodeList)-NDDL*NDDL then
+			CodeLine := convert(CodeList[i], list):
+			fprintf(fd, "  double %s", CodeGeneration[C](CodeLine[2], resultname = CodeLine[1], output = string,
+				coercetypes = false, deducetypes = false)):
+		else
+			fprintf(fd, "  %s", CodeGeneration[C]([CodeList[i]], output = string,
+				coercetypes = false, deducetypes = false)):
+		end:
+	end do:
+	fprintf(fd, "}\n"):
+	fclose(fd):
+	REGISTERING := false:
+end:
+
+
 
 InertiaRecursion := proc(j)
 local FrameChange, R, P, RTRdot, RTPdot, JR, JP, m, mG, IO, F, M, Inertia, k, Result, mGx, FTJP, MTJR, Fadd, Madd, RmG, RmGx, RF, Px, PxRmGx;
@@ -465,62 +540,37 @@ local contact;
 end:
 
 GenerateModel := proc()
-local fd, T, Tags, M, Inertia, N, NLEffects, CC, Contact, CH, ContactHessian,
-	CJ, ContactJacobian, NJ, NVJ;
+local fd, T, Tags, M, Inertia, NLE, NLEffects, CC, Contact, CH, ContactHessian,
+	CJ, ContactJacobian, NJ, NVJ, JacobianVNLEffects;
 global q, qdot;
 
-#	T := TagMatrix():
-#	print(`Writing file "Tags.c"`):
-#	T := convert(transpose(T), vector):
-#	Tags := makeproc(T, [T, q::array(1..vectdim(q))]):
-#	fd := fopen("Tags.c",WRITE);
-#  fprintf(fd,"#include \"LagrangianModel.h\"\n"):
-#	fclose(fd):
-#	C(Tags, optimized, filename="Tags.c"):
+	T := TagMatrix():
+	print(`Writing file "Tags.c"`):
+	T := convert(transpose(T), vector):
+	Tags := makeproc(T, [T, q::array(1..vectdim(q))]):
+	fd := fopen("Tags.c",WRITE);
+  fprintf(fd,"#include \"../LagrangianModel.h\"\n"):
+	fclose(fd):
+	C(Tags, optimized, filename="Tags.c"):
 
-#	GenerateInertiaMatrix():
-#	M := evalm(InertiaMatrix()+blockmatrix(2, 2, [RotorInertiaMatrix(), matrix(15, 6, 0), matrix(6, 15, 0), matrix(6, 6, 0)])):
-#	print(`Writing file "Inertia.c"`):
-#	M := convert(transpose(M), vector):
-#	Inertia := makeproc(M, [M, q::array(1..vectdim(q))]):
-#	fd := fopen("Inertia.c",WRITE);
-#  fprintf(fd,"#include \"LagrangianModel.h\"\n"):
-#	fclose(fd):
-#	C(Inertia, optimized, filename="Inertia.c"):
+	GenerateInertiaMatrix():
 
-#	GenerateNLEffectsVector():
-#	N := convert(evalm(NLEffectsVector()+blockmatrix(2, 1, [RotorNLEffectsVector(), vector(6, 0)])), vector):
-#	print(`Writing file "NLEffects.c"`):
-#	NLEffects := makeproc(N, [N, q::array(1..vectdim(q)), qdot::array(1..vectdim(qdot))]):
-#	fd := fopen("NLEffects.c",WRITE);
-#  fprintf(fd,"#include \"LagrangianModel.h\"\n"):
-#	fclose(fd):
-#	C(NLEffects, optimized, filename="NLEffects.c"):
-#        print(`NLEffects Jacobian`);
-        nleffects := NLEffectsVector():
-        y := convert(nleffects, matrix):
-for k from 1 to 1 do:
-	print(`Writing file "JacobianQNLEffect.c"`):
-subq := convert(q, matrix);
-        NJ := jacobian(col(y,1), subvector(subq, 3*k-2..3*k, 1)):
-	NJ := convert(transpose(NJ), vector):
-	JacobianQNLEffects := makeproc(NJ, [NJ, q::array(1..vectdim(q)), qdot::array(1..vectdim(qdot))]):
-	C(JacobianQNLEffects, optimized, filename=cat("JacobianQNLEffects",k,".c")); od:
+	NLE := NLEffectsVector():
 
-#	NVJ := JacobianVelocityNLEffectsMatrix():
-#	print(`Writing file "JacobianVNLEffect.c"`):
-#	NVJ := convert(transpose(NVJ), vector):
-#	JacobianVNLEffects := makeproc(NVJ, [NVJ, q::array(1..vectdim(q)), qdot::array(1..vectdim(qdot))]):
-#	C(JacobianVNLEffects, optimized, filename="JacobianVNLEffects.c");
+	GenerateNLEffectsVector(NLE):
 
-#	CC := ContactVector():
-#	print(`Writing file "Contact.c"`):
-#	CC := convert(transpose(CC), vector):
-#	Contact := makeproc(CC, [CC, q::array(1..vectdim(q))]):
-#	fd := fopen("Contact.c",WRITE);
-#  fprintf(fd,"#include \"LagrangianModel.h\"\n"):
-#	fclose(fd):
-#	C(Contact, optimized, filename="Contact.c"):
+        GenerateJacobianQNLEffectsMatrix(NLE):
+
+        GenerateJacobianVNLEffectsMatrix(NLE):
+
+	CC := ContactVector():
+	print(`Writing file "Contact.c"`):
+	CC := convert(transpose(CC), vector):
+	Contact := makeproc(CC, [CC, q::array(1..vectdim(q))]):
+	fd := fopen("Contact.c",WRITE);
+  fprintf(fd,"#include \"LagrangianModel.h\"\n"):
+	fclose(fd):
+	C(Contact, optimized, filename="Contact.c"):
 
 #	CH := ContactHessianVector():
 #	print(`Writing file "ContactHessian.c"`):

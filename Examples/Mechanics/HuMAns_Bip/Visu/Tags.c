@@ -1,4 +1,4 @@
-//#include "LagrangianModel.h"
+#include "../LagrangianModel.h"
 #include <math.h>
 void Tags(T, q)
 double T[78];
@@ -572,7 +572,7 @@ double q[21];
     t429 = -t401 * t405 + t389 * t403;
     t432 = -t6 * t429 - t409 * t405;
     t436 = t413 * t405 + t380 * t403;
-    t438 = -t432 * t4 - t41 * t436;
+    t438 = -t4 * t432 - t41 * t436;
     t440 = 0.15 * t2 * t438;
     t443 = -t33 * t429 + t422 * t405;
     t445 = 0.15 * t47 * t443;

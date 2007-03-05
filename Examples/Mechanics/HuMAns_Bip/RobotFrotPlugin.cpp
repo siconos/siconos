@@ -61,9 +61,12 @@ extern "C" void h0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
 
   Contact(CC, q);
 
-  for (i = 0; i < sizeOfY; i++)
-    y[i] = CC[sizeOfY + i];
-
+  for (i = 0; i < sizeOfY / 3; i++)
+  {
+    y[i * 3] = CC[sizeOfY / 3 + i];
+    y[i * 3 + 1] = CC[i];
+    y[i * 3 + 2] = CC[2 * sizeOfY / 3 + i];
+  }
 }
 
 extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, double* G, double* param)
@@ -75,8 +78,12 @@ extern "C" void G0(unsigned int sizeOfq, const double* q, unsigned int sizeOfY, 
 
   for (i = 0; i < sizeOfq; i++)
   {
-    for (j = 0; j < sizeOfY; j++)
-      G[i * sizeOfY + j] = CJ[i * 3 * sizeOfY + j + sizeOfY];
+    for (j = 0; j < sizeOfY / 3; j++)
+    {
+      G[i * sizeOfY + 3 * j] = CJ[i * sizeOfY + j + sizeOfY / 3];
+      G[i * sizeOfY + 3 * j + 1] = CJ[i * sizeOfY + j];
+      G[i * sizeOfY + 3 * j + 2] = CJ[i * sizeOfY + j + 2 * sizeOfY / 3];
+    }
   }
 }
 
