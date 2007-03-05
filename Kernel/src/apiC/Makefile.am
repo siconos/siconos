@@ -26,6 +26,6 @@ include $(top_srcdir)/config/Make-rules
 
 
 noinst_LTLIBRARIES = libSiconosApiC.la
-libSiconosApiC_la_SOURCES = SiconosApiC.cpp SiconosApiC.h 
+libSiconosApiC_la_SOURCES = SiconosApiC.cpp SiconosApiC.h SiconosDataC.cpp SiconosDataC.h 
 siconos_HEADERS = SiconosApiC.h  
 

@@ -1,209 +1,78 @@
 #define SIC_OK    0
 #define SIC_ERROR -1
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+#else
+#define EXTERN extern
+#endif
+
 /*! \file SiconosApiC.h
 \brief API C for Scilab Interface.
 */
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicLoadModel(char ModelXmlFile[]);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicInitSimulation();
+EXTERN int sicLoadModel(char ModelXmlFile[]);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicTimeGetH(double *H);
+EXTERN int sicInitSimulation();
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicTimeGetN(int *N);
+EXTERN int sicTimeGetH(double *H);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicTimeGetK(int *K);
+EXTERN int sicTimeGetN(int *N);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSTNextStep();
+EXTERN int sicSTNextStep();
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSTComputeFreeState();
+EXTERN int sicSTAdvanceToEvent();
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSTComputePb();
+EXTERN int sicSTSaveInMemory();
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSTComputeOneStep();
+EXTERN int sicSTComputeOneStep();
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSTnewtonSolve(double criterion, int maxIter);
+EXTERN int sicSTnewtonSolve(double criterion, int maxIter);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSTupdateState();
+EXTERN int sicSTupdateState();
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicModelgetQ(double *value, int indexDS, int indexVector);
+EXTERN void sicDebug(int *ret);
 
+EXTERN int sicModelgetQ(double *value, int indexDS, int indexVector);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-void sicDebug(int *ret);
+EXTERN int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, double *Mass, double *K, double *C, char *libname, char * fctname);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicLagrangianLinearTIDS(int nDof, double *Q0, double *Vel0, double *Mass, double *K, double *C, char *libname, char * fctname);
+EXTERN int sicLagrangianDS(int nDof, double *Q0, double *Vel0);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicLagrangianDS(int nDof, double *Q0, double *Vel0);
+EXTERN int sicSetComputeMassFunction(int nIdDs, char *libname, char *func);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSetComputeMassFunction(int nIdDs, char *libname, char *func);
+EXTERN int sicSetComputeNNLFunction(int nIdDs, char *libname, char *func);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSetComputeNNLFunction(int nIdDs, char *libname, char *func);
+EXTERN int sicSetComputeJacobianQNNLFunction(int nIdDs, char *libname, char *func);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSetComputeJacobianQNNLFunction(int nIdDs, char *libname, char *func);
+EXTERN int sicSetComputeJacobianVelocityNNLFunction(int nIdDs, char *libname, char *func);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSetComputeJacobianVelocityNNLFunction(int nIdDs, char *libname, char *func);
+EXTERN int sicSetComputeFIntFunction(int nIdDs, char *libname, char *func);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSetComputeJacobianVelocityFIntFunction(int nIdDs, char *libname, char *func);
+EXTERN int sicSetComputeJacobianQFIntFunction(int nIdDs, char *libname, char *func);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSetComputeFIntFunction(int nIdDs, char *libname, char *func);
+EXTERN int sicSetComputeJacobianVelocityFIntFunction(int nIdDs, char *libname, char *func);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSetComputeJacobianQFIntFunction(int nIdDs, char *libname, char *func);
+EXTERN int sicSetComputeFExtFunction(int nIdDs, char *libname, char *func);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSetComputeFExtFunction(int nIdDs, char *libname, char *func);
+EXTERN int sicInteraction(char *name, int nbDS, int *DS, int nbRel);
 
+EXTERN int sicLagrangianLinearR(int nIdInteraction, double *H, double *b);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicInteraction(char *name, int nbDS, int *DS, int nbRel);
+// EXTERN int sicLagrangianR(int nIdInteraction, char *relationType, char *funcH, char *funcG);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicLagrangianLinearR(int nIdInteraction, double *H, double *b);
+EXTERN int sicNewtonImpactNSL(int nIdInteraction, double e);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicLagrangianR(int nIdInteraction, char *relationType, char *funcH, char *funcG);
+EXTERN int sicNonSmoothDynamicalSystem(int isBVP);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicNewtonImpactNSL(int nIdInteraction, double e);
+EXTERN int sicModel(double t0, double T);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicNonSmoothDynamicalSystem(int isBVP);
+EXTERN int sicSimulationTimeStepping(double h);
 
+EXTERN int sicOneStepIntegratorMoreau(double *theta);
 
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicModel(double t0, double T);
+EXTERN int sicOneStepNSProblemLCP(char* solverName, int maxiter, double tolerance);
 
-
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicSimulationTimeStepping(double h);
-
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicOneStepIntegratorMoreau(double *theta);
-
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicOneStepNSProblemLCP(char* solverName, int maxiter, double tolerance);
-
-extern
-#ifdef __cplusplus
-"C"
-#endif /* __cplusplus */
-int sicClean();
+EXTERN int sicClean();
 

@@ -40,8 +40,9 @@ sicLoadModel('./ThreeBeadsColumn_sci.xml');
 
 sicInitSimulation();
 
-k = sicTimeGetK();
+k = 1;
 N = sicTimeGetN();
+h = sicTimeGetH();
 
 winId=waitbar('Siconos Computation');
 
@@ -53,14 +54,10 @@ dixpc=0;
 
 while k < N do 
 
-  // transfer of state i+1 into state i and time incrementation
-  sicSTNextStep();
-
-  // get current time step
-  k = sicTimeGetK();
-  
   // solve ... 
   sicSTComputeOneStep();
+ // transfer of state i+1 into state i and time incrementation
+  sicSTNextStep();
 	
  // --- Get values to be plotted ---
 
@@ -79,7 +76,9 @@ while k < N do
    end
  end //for
  
- Time(k+1)=k*sicTimeGetH();
+ Time(k+1)=k*h;
+ 
+ k=k+1;
 
 end // while
 

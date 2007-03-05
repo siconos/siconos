@@ -81,7 +81,7 @@ void testHuMAns_pa10()
 
   DS[0] = 0.0;
   idInter = sicInteraction("floor-arm", 1, DS, 2);
-  sicLagrangianR(idInter, "scleronomic", "RobotPlugin:h2", "RobotPlugin:G2");
+  //sicLagrangianR(idInter,"scleronomic", "RobotPlugin:h2","RobotPlugin:G2");
   sicNewtonImpactNSL(idInter, e);
 
   H[0][0] = -1;
@@ -123,15 +123,14 @@ void testHuMAns_pa10()
   /* Simulation */
   sicInitSimulation();
 
-  sicTimeGetK(&k);
+  k = 0;
   sicTimeGetN(&N);
 
   while (k <= N)
   {
     /* transfer of state i+1 into state i and time incrementation*/
     status = sicSTNextStep();
-    /* get current time step */
-    status = sicTimeGetK(&k);
+
     /* solve ..*/
     sicSTnewtonSolve(criterion, maxIter);
     /* update */
@@ -144,6 +143,8 @@ void testHuMAns_pa10()
     status = sicModelgetQ(&plot[1], 0, 0);
     status = sicModelgetQ(&plot[2], 0, 1);
     status = sicModelgetQ(&plot[3], 0, 2);
+
+    k++;
 
     fprintf(fd, "%lf %lf %lf %lf\n", plot[0], plot[1], plot[2], plot[3]);
   }
@@ -253,7 +254,7 @@ void testMultiBeadsColumn()
   /* Simulation */
   sicInitSimulation();
 
-  sicTimeGetK(&k);
+  k = 0;
   sicTimeGetN(&N);
 
   while (k <= N)
@@ -262,10 +263,7 @@ void testMultiBeadsColumn()
 
     status = sicSTNextStep();
 
-    status = sicTimeGetK(&k);
-
     status = sicSTComputeOneStep();
-
 
     status = sicTimeGetH(&dH);
 
@@ -276,6 +274,7 @@ void testMultiBeadsColumn()
     status = sicModelgetQ(&plot[2], index, 0);
     index = 2;
     status = sicModelgetQ(&plot[3], index, 0);
+    k++;
 
     fprintf(fd, "%lf %lf %lf %lf \n", plot[0], plot[1], plot[2], plot[3]);
   }
@@ -306,7 +305,7 @@ void testThreeBeadsColumn()
 
   sicInitSimulation();
 
-  sicTimeGetK(&k);
+  k = 0;
   sicTimeGetN(&N);
 
   while (k <= N)
@@ -316,8 +315,6 @@ void testThreeBeadsColumn()
     printf("%d \n", k);
 
     status = sicSTNextStep();
-
-    status = sicTimeGetK(&k);
 
     status = sicSTComputeOneStep();
 
@@ -330,6 +327,8 @@ void testThreeBeadsColumn()
     status = sicModelgetQ(&plot[2], index, 0);
     index = 2;
     status = sicModelgetQ(&plot[3], index, 0);
+
+    k++;
 
     fprintf(fd, "%lf %lf %lf %lf \n", plot[0], plot[1], plot[2], plot[3]);
 

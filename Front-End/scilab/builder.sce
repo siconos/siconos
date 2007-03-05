@@ -18,13 +18,13 @@ libs  = [] 				// other libs needed for linking
 table =['sicLoadModel',	'sicLoadModelInterface';
         'sicInitSimulation', 'sicInitSimulationInterface';
 	'sicTimeGetH', 'sicTimeGetHInterface';
-	'sicTimeGetK','sicTimeGetKInterface';
 	'sicTimeGetN', 'sicTimeGetNInterface';
 	'sicSTNextStep','sicSTNextStepInterface';
-	'sicSTComputeFreeState','sicSTComputeFreeStateInterface';
-	'sicSTcomputePb','sicSTcomputePbInterface';
-	'sicSTupdateState', 'sicSTupdateStateInterface';
+	'sicSTAdvanceToEvent', 'sicSTAdvanceToEventInterface';
+	'sicSTSaveInMemory','sicSTSaveInMemoryInterface';
+	'sicSTComputeOneStep','sicSTComputeOneStepInterface';
 	'sicSTnewtonSolve','sicSTnewtonSolveInterface';
+	'sicSTupdateState', 'sicSTupdateStateInterface';
 	'sicModelgetQ','sicModelgetQInterface';
 	'sicLagrangianLinearTIDS','sicLagrangianLinearTIDSInterface';
 	'sicLagrangianDS','sicLagrangianDSInterface';
@@ -38,7 +38,7 @@ table =['sicLoadModel',	'sicLoadModelInterface';
 	'sicSetFExt','sicSetFExtInterface';
 	'sicInteraction', 'sicInteractionInterface';
 	'sicLagrangianLinearR','sicLagrangianLinearRInterface';
-	'sicLagrangianR','sicLagrangianRInterface';
+//	'sicLagrangianR','sicLagrangianRInterface';
 	'sicNewtonImpactLawNSL','sicNewtonImpactLawNSLInterface';
 	'sicNonSmoothDynamicalSystem','sicNonSmoothDynamicalSystemInterface';
 	'sicModel', 'sicModelInterface';
@@ -63,9 +63,9 @@ fflags ="";
 
 // do not modify below 
 // ----------------------------------------------
-ilib_build(ilib_name,table,files,libs,'Makelib',ldflags,cflags,fflags)
+ilib_build(ilib_name,table,files,libs,'Makelib',ldflags,cflags,fflags);
 
-
+quit;
 
 
 

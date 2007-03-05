@@ -34,8 +34,7 @@ link("/usr/lib/libdl.so");
 // xml
 link("/usr/lib/libxml2.so");
 // lapack++
-link("/usr/lib/liblapack.so");
-link("/usr/local/lib/liblapack++.so");
+link("//usr/lib/atlas/liblapack.so");
 // Numerics and Siconos
 link("@NUMERICS_PATH@/lib/libSiconosNumerics.so");
 link("@KERNEL_PATH@/lib/libSiconosKernel.so");

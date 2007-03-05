@@ -111,33 +111,6 @@ int sicTimeGetNInterface(char *fname)
   return 0;
 }
 
-int sicTimeGetKInterface(char *fname)
-{
-  static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 2;
-  static int dim1 = 1, dim2 = 1, K;
-  static int dimo1 = 1, dimo2 = 1, st;
-
-#ifdef _DEBUG
-  printf("sicTimeGetKInterface\n");
-#endif
-
-  /* Check number of inputs (rhs=1) and outputs (lhs=1) */
-  CheckRhs(minrhs, maxrhs) ;
-  CheckLhs(minlhs, maxlhs) ;
-
-
-  CreateVar(1, "i", &dim1, &dim2, &K);
-  CreateVar(2, "i", &dimo1, &dimo2, &st);
-  /* Call function */
-  *istk(st) = sicTimeGetK(istk(K));
-
-  /* Return variable*/
-  LhsVar(1) = 1;
-  LhsVar(2) = 2;
-
-  return 0;
-}
-
 int sicSTNextStepInterface(char *fname)
 {
   static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
@@ -161,13 +134,13 @@ int sicSTNextStepInterface(char *fname)
   return 0;
 }
 
-int sicSTComputeFreeStateInterface(char *fname)
+int sicSTAdvanceToEventInterface(char *fname)
 {
   static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
   static int dimo1 = 1, dimo2 = 1, st;
 
 #ifdef _DEBUG
-  printf("sicSTComputeFreeStateInterface\n");
+  printf("sicSTNextStepInterface\n");
 #endif
 
   /* Check number of inputs (rhs=1) and outputs (lhs=0) */
@@ -177,7 +150,7 @@ int sicSTComputeFreeStateInterface(char *fname)
 
   CreateVar(1, "i", &dimo1, &dimo2, &st);
   /* Call function */
-  *istk(st) = sicSTComputeFreeState();
+  *istk(st) = sicSTAdvanceToEvent();
   /*  Return variable  */
   LhsVar(1) = 1;
 
@@ -185,13 +158,14 @@ int sicSTComputeFreeStateInterface(char *fname)
 }
 
 
-int sicSTcomputePbInterface(char *fname)
+
+int sicSTSaveInMemoryInterface(char *fname)
 {
   static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
   static int dimo1 = 1, dimo2 = 1, st;
 
 #ifdef _DEBUG
-  printf("sicSTComputePbInterface\n");
+  printf("sicSTSaveInMemory\n");
 #endif
 
   /* Check number of inputs (rhs=1) and outputs (lhs=0) */
@@ -201,30 +175,7 @@ int sicSTcomputePbInterface(char *fname)
 
   CreateVar(1, "i", &dimo1, &dimo2, &st);
   /* Call function */
-  *istk(st) = sicSTComputePb();
-  /*  Return variable  */
-  LhsVar(1) = 1;
-
-  return 0;
-}
-
-int sicSTupdateStateInterface(char *fname)
-{
-  static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
-  static int dimo1 = 1, dimo2 = 1, st;
-
-#ifdef _DEBUG
-  printf("sicSTupdateStateInterface\n");
-#endif
-
-  /* Check number of inputs (rhs=1) and outputs (lhs=0) */
-  CheckRhs(minrhs, maxrhs) ;
-  CheckLhs(minlhs, maxlhs) ;
-
-
-  CreateVar(1, "i", &dimo1, &dimo2, &st);
-  /* Call function */
-  *istk(st) = sicSTupdateState();
+  *istk(st) = sicSTSaveInMemory();
   /*  Return variable  */
   LhsVar(1) = 1;
 
@@ -237,7 +188,7 @@ int sicSTComputeOneStepInterface(char *fname)
   static int dimo1 = 1, dimo2 = 1, st;
 
 #ifdef _DEBUG
-  printf("sicSTComputeOneStepInterface\n");
+  printf("sicSTAdvanceToEventInterface\n");
 #endif
 
   /* Check number of inputs (rhs=1) and outputs (lhs=0) */
@@ -299,6 +250,29 @@ int sicSTnewtonSolveInterface(char *fname)
   return 0;
 }
 
+
+int sicSTupdateStateInterface(char *fname)
+{
+  static int minrhs = 0, maxrhs = 0, minlhs = 1, maxlhs = 1;
+  static int dimo1 = 1, dimo2 = 1, st;
+
+#ifdef _DEBUG
+  printf("sicSTupdateStateInterface\n");
+#endif
+
+  /* Check number of inputs (rhs=1) and outputs (lhs=0) */
+  CheckRhs(minrhs, maxrhs) ;
+  CheckLhs(minlhs, maxlhs) ;
+
+
+  CreateVar(1, "i", &dimo1, &dimo2, &st);
+  /* Call function */
+  *istk(st) = sicSTupdateState();
+  /*  Return variable  */
+  LhsVar(1) = 1;
+
+  return 0;
+}
 
 int sicModelgetQInterface(char *fname)
 {
@@ -1039,7 +1013,8 @@ int sicLagrangianLinearRInterface(char *fname)
   CreateVar(4, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicLagrangianLinearR(*istk(nIdInteraction), stk(H), stk(b));
+  // OBSOLETE 2/3/07
+  // *istk(st)= sicLagrangianLinearR(*istk(nIdInteraction),stk(H),stk(b));
 
   /*  Return variable  */
   LhsVar(1) = 4;
@@ -1103,7 +1078,8 @@ int sicLagrangianRInterface(char *fname)
   CreateVar(5, "i", &dimo1, &dimo2, &st);
 
   /* Call function */
-  *istk(st) = sicLagrangianR(*istk(nId), cstk(relationType), cstk(funcH), cstk(funcG));
+  // OBSOLETE 2/3/07
+  //  *istk(st)= sicLagrangianR(*istk(nId),cstk(relationType),cstk(funcH),cstk(funcG));
 
   /*  Return variable  */
   LhsVar(1) = 5;
@@ -1111,7 +1087,7 @@ int sicLagrangianRInterface(char *fname)
   return 0;
 }
 
-int sicNewtonImpactNSLInterface(char *fname)
+int sicNewtonImpactLawNSLInterface(char *fname)
 {
   static int minrhs = 2, maxrhs = 2, minlhs = 1, maxlhs = 1;
   static int dim1, dim2;
