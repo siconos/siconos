@@ -444,6 +444,22 @@ public:
   */
   void setLambdaOldPtr(const unsigned int , SiconosVector *newPtr);
 
+  /** gets an iterator to the first element of the involvedDS set.
+   *  \return a DSIterator.
+   */
+  inline DSIterator DynamicalSystemsBegin() const
+  {
+    return involvedDS.begin();
+  };
+
+  /** gets an iterator equal to involvedDS.end().
+   *  \return a DSIterator.
+   */
+  inline DSIterator DynamicalSystemsEnd() const
+  {
+    return involvedDS.end();
+  };
+
   /** get the DynamicalSystems of this Interaction
   *  \return a DynamicalSystemsSet
   */

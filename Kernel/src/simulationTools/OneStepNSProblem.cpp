@@ -358,10 +358,12 @@ void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& centralBlo
   OneStepIntegrator * Osi;
   string osiType; // type of the current one step integrator
   string dsType; // type of the current Dynamical System
-  DSIterator itDS = (UR->getDynamicalSystems()).begin();
+  DSIterator itDS;// = (UR->getDynamicalSystems()).begin();
+  DynamicalSystemsSet URDS = UR->getDynamicalSystems();
   // For each DS, find the corresponding W through the OneStepIntegrator Interface
-  while (itDS != (UR->getDynamicalSystems()).end())
-    //  for(itDS = (UR->getDynamicalSystems()).begin(); itDS!=URDS.end(); itDS++)
+  //while(itDS != (UR->getDynamicalSystems()).end())
+  //for(itDS = (UR->getDynamicalSystems()).begin(); itDS!=URDS.end(); itDS++)
+  for (itDS = URDS.begin(); itDS != URDS.end(); ++itDS)
   {
     Osi = simulation->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
     osiType = Osi->getType();
@@ -381,6 +383,6 @@ void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& centralBlo
     }
     else
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Integrator of type " + osiType);
-    ++itDS;
+    //      itDS;
   }
 }

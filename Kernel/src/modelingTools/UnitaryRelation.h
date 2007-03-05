@@ -24,10 +24,8 @@
 
 #include "Tools.h"
 #include "SiconosAlgebra.h"
-
-class Interaction;
-class DynamicalSystem;
-class DynamicalSystemsSet;
+#include "DynamicalSystemsSet.h"
+#include "Interaction.h"
 
 /** Interface to single relations from Interactions
  *
@@ -180,9 +178,25 @@ public:
    */
   const std::string getRelationSubType() const;
 
-  /** gets the DynamicalSystems of this Unitary
-  *  \return a DynamicalSystemsSet
-  */
+  /** gets an iterator to the first element of the DynamicalSystems set.
+   *  \return a DSIterator.
+   */
+  inline DSIterator DynamicalSystemsBegin() const
+  {
+    return mainInteraction->DynamicalSystemsBegin();
+  };
+
+  /** gets an iterator equal to DynamicalSystems.end().
+   *  \return a DSIterator.
+   */
+  inline DSIterator DynamicalSystemsEnd() const
+  {
+    return mainInteraction->DynamicalSystemsEnd();
+  };
+
+  /** gets to the DynamicalSystemsSet
+   *  \return a DynamicalSystemsSet
+   */
   DynamicalSystemsSet getDynamicalSystems() const;
 
   /** gets the matrix used in block computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
