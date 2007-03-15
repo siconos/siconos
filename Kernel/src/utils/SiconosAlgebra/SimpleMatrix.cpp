@@ -581,10 +581,10 @@ void SimpleMatrix::matrixCopy(const SiconosMatrix &m, unsigned int i, unsigned i
   if (num != 1)
     SiconosMatrixException::selfThrow("SimpleMatrix::matrixCopy : the current matrix is not dense, a copy into its data may change its type.");
 
-  if (i >= size(0) || i < 0)
+  if (i >= dim[0] || i < 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::matrixCopy : row_min given is out of range");
 
-  if (j >= size(1) || j < 0)
+  if (j >= dim[1] || j < 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::matrixCopy : col_min given is out of range");
 
   unsigned int num2 = m.getNum();
@@ -630,9 +630,9 @@ void SimpleMatrix::matrixCopy(const SiconosMatrix &m, unsigned int i, unsigned i
   row_max += sizeM1;
   col_max += sizeM2;
 
-  if (row_max > size(0) || row_max < 0)
+  if (row_max > dim[0] || row_max < 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::matrixCopy : inconsistent sizes");
-  if (col_max > size(1) || col_max < 0)
+  if (col_max > dim[1] || col_max < 0)
     SiconosMatrixException::selfThrow("SimpleMatrix::matrixCopy : inconsistent sizes");
 
   if (num2 == 1)
@@ -657,19 +657,19 @@ void SimpleMatrix::getBlock(unsigned int row_min, unsigned int col_min, SiconosM
   if (m.getNum() != 1)
     SiconosMatrixException::selfThrow("getBlock(i,j,m) : m must be a dense matrix.");
 
-  if (row_min >= size(0) || row_min < 0)
+  if (row_min >= dim[0] || row_min < 0)
     SiconosMatrixException::selfThrow("getBlock : row_min given is out of range");
 
-  if (col_min >= size(1) || col_min < 0)
+  if (col_min >= dim[1] || col_min < 0)
     SiconosMatrixException::selfThrow("getBlock : col_min given is out of range");
   unsigned int row_max, col_max;
   row_max = m.getDensePtr()->size1() + row_min;
   col_max = m.getDensePtr()->size2() + col_min;
 
-  if (row_max > size(0) || row_max < 0)
+  if (row_max > dim[0] || row_max < 0)
     SiconosMatrixException::selfThrow("getBlock : inconsistent sizes");
 
-  if (col_max > size(1) || col_max < 0)
+  if (col_max > dim[1] || col_max < 0)
     SiconosMatrixException::selfThrow("getBlock : inconsistent sizes");
 
   DenseMat * q = m.getDensePtr();
@@ -699,10 +699,10 @@ const std::deque<bool> SimpleMatrix::getBlockAllocated(void)const
 void SimpleMatrix::getRow(unsigned int r, SimpleVector &vect) const
 {
 
-  if (r >= size(0) || r < 0)
+  if (r >= dim[0] || r < 0)
     SiconosMatrixException::selfThrow("getRow : row is out of range");
 
-  if (vect.size() != size(1))
+  if (vect.size() != dim[1])
     SiconosMatrixException::selfThrow("getRow : inconsistent sizes");
 
   if (num == 1)
@@ -738,10 +738,10 @@ void SimpleMatrix::getRow(unsigned int r, SimpleVector &vect) const
 void SimpleMatrix::setRow(unsigned int r, const SimpleVector &vect)
 {
   unsigned int numV = vect.getNum();
-  if (r >= size(0) || r < 0)
+  if (r >= dim[0] || r < 0)
     SiconosMatrixException::selfThrow("setRow : row is out of range");
 
-  if (vect.size() != size(1))
+  if (vect.size() != dim[1])
     SiconosMatrixException::selfThrow("setRow : inconsistent sizes");
 
   if (num == 1)
@@ -806,10 +806,10 @@ void SimpleMatrix::setRow(unsigned int r, const SimpleVector &vect)
 
 void SimpleMatrix::getCol(unsigned int r, SimpleVector &vect)const
 {
-  if (r >= size(1) || r < 0)
+  if (r >= dim[1] || r < 0)
     SiconosMatrixException::selfThrow("getCol : col is out of range");
 
-  if (vect.size() != size(0))
+  if (vect.size() != dim[0])
     SiconosMatrixException::selfThrow("getCol : inconsistent sizes");
 
   if (num == 1)
@@ -847,10 +847,10 @@ void SimpleMatrix::setCol(unsigned int r, const SimpleVector &vect)
 
   unsigned int numV = vect.getNum();
 
-  if (r >= size(1) || r < 0)
+  if (r >= dim[1] || r < 0)
     SiconosMatrixException::selfThrow("setCol : col is out of range");
 
-  if (vect.size() != size(0))
+  if (vect.size() != dim[0])
     SiconosMatrixException::selfThrow("setCol : inconsistent sizes");
 
   if (num == 1)
@@ -1107,7 +1107,7 @@ void SimpleMatrix::eye(void)
 
 double SimpleMatrix::getValue(unsigned int row, unsigned int col)
 {
-  if (row >= size(0) || col >= size(1))
+  if (row >= dim[0] || col >= dim[1])
     SiconosMatrixException::selfThrow("SimpleMatrix:getValue(index) : Index out of range");
 
   if (num == 1)
@@ -1128,7 +1128,7 @@ double SimpleMatrix::getValue(unsigned int row, unsigned int col)
 
 void SimpleMatrix::setValue(unsigned int row, unsigned int col, double value)
 {
-  if (row >= size(0) || col >= size(1))
+  if (row >= dim[0] || col >= dim[1])
     SiconosMatrixException::selfThrow("SimpleMatrix:setValue : Index out of range");
 
   if (num == 1)
@@ -1209,9 +1209,8 @@ SimpleMatrix& SimpleMatrix::operator = (const SimpleMatrix& m)
 {
   // Warning!!! If sizes are inconsistent between m and this, boost operator = results in resize of this to the dim of m !!!
   // Add an exception to prevent this???
-  //  if(dim[0]!=m.size(0) || dim[1] !=m.size(1))
-  //    SiconosMatrixException::selfThrow("SimpleMatrix operator = failed. Inconsistent sizes.");
-  // if exception, strange behavio in things like A = A*B ...
+  if (dim[0] != m.size(0) || dim[1] != m.size(1))
+    SiconosMatrixException::selfThrow("SimpleMatrix operator = failed. Inconsistent sizes.");
 
   unsigned int numM = m.getNum();
   switch (num)
@@ -1328,9 +1327,8 @@ SimpleMatrix& SimpleMatrix::operator = (const SiconosMatrix& m)
 
   // Warning!!! If sizes are inconsistent between m and this, boost operator = results in resize of this to the dim of m !!!
   // Add an exception to prevent this???
-  // if exception, strange behavio in things like A = A*B ...
-  //if(dim[0]!=m.size(0) || dim[1] !=m.size(1))
-  //    SiconosMatrixException::selfThrow("SimpleMatrix operator = failed. Inconsistent sizes.");
+  if (dim[0] != m.size(0) || dim[1] != m.size(1))
+    SiconosMatrixException::selfThrow("SimpleMatrix operator = failed. Inconsistent sizes.");
   unsigned int numM = m.getNum();
   switch (num)
   {
@@ -1794,7 +1792,7 @@ void SimpleMatrix::PLUFactorizationInPlace()
   if (num != 1)
     SiconosMatrixException::selfThrow(" SimpleMatrix::PLUFactorizationInPlace : only implemented for dense matrices.");
 
-  ipiv.resize(size(0));
+  ipiv.resize(dim[0]);
   int info = boost::numeric::bindings::atlas::getrf(*mat.Dense, ipiv);
   if (info != 0)
     std::cout << "SimpleMatrix::PLUFactorizationInPlace warning: the matrix is singular." << std::endl;
@@ -1819,7 +1817,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosMatrix &B)
   if (!isPLUFactorized) // call gesv => LU-factorize+solve
   {
     // solve system:
-    ipiv.resize(size(0));
+    ipiv.resize(dim[0]);
     info = boost::numeric::bindings::atlas::gesv(*mat.Dense, ipiv, *(B.getDensePtr()));
     isPLUFactorized = true;
     // B now contains solution:
@@ -1839,7 +1837,7 @@ void SimpleMatrix::PLUForwardBackwardInPlace(SiconosVector &B)
   if (!isPLUFactorized) // call gesv => LU-factorize+solve
   {
     // solve system:
-    ipiv.resize(size(0));
+    ipiv.resize(dim[0]);
     info = boost::numeric::bindings::atlas::gesv(*mat.Dense, ipiv, tmpB);
     isPLUFactorized = true;
     // B now contains solution:
@@ -2948,7 +2946,6 @@ void gemv(const CBLAS_TRANSPOSE transA, double a, const SiconosMatrix& A, const 
   unsigned int numA = A.getNum();
   unsigned int numX = x.getNum();
   unsigned int numY = y.getNum();
-  std::cout << "num...." << numA << " " << numX << " " << numY << std::endl;
   if (numA == numX && numX == numY && numX == 1) // if all are dense ...
     atlas::gemv(transA, a, *A.getDensePtr(), *x.getDensePtr(), b, *y.getDensePtr());
   else
@@ -2962,7 +2959,6 @@ void gemv(double a, const SiconosMatrix& A, const SiconosVector& x, double b, Si
   unsigned int numA = A.getNum();
   unsigned int numX = x.getNum();
   unsigned int numY = y.getNum();
-  std::cout << "num...." << numA << " " << numX << " " << numY << std::endl;
   if (numA == numX && numX == numY && numX == 1) // if all are dense ...
     atlas::gemv(a, *A.getDensePtr(), *x.getDensePtr(), b, *y.getDensePtr());
   else
@@ -2984,6 +2980,8 @@ void prod(const SiconosMatrix& A, const SiconosVector& x, SiconosVector& y)
 
 void gemm(const CBLAS_TRANSPOSE transA, const CBLAS_TRANSPOSE transB, double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
 {
+  if (A.isBlock() || B.isBlock() || C.isBlock())
+    SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block matrices.");
   unsigned int numA = A.getNum();
   unsigned int numB = B.getNum();
   unsigned int numC = C.getNum();
@@ -2995,6 +2993,8 @@ void gemm(const CBLAS_TRANSPOSE transA, const CBLAS_TRANSPOSE transB, double a, 
 
 void gemm(double a, const SiconosMatrix& A, const SiconosMatrix& B, double b, SiconosMatrix& C)
 {
+  if (A.isBlock() || B.isBlock() || C.isBlock())
+    SiconosMatrixException::selfThrow("gemv(...) not yet implemented for block matrices.");
   unsigned int numA = A.getNum();
   unsigned int numB = B.getNum();
   unsigned int numC = C.getNum();
@@ -3008,8 +3008,13 @@ void prod(const SiconosMatrix& A, const SiconosMatrix& B, SiconosMatrix& C)
   unsigned int numA = A.getNum();
   unsigned int numB = B.getNum();
   unsigned int numC = C.getNum();
-  if (numA == numB && numA == numC && numA == 1) // if all are dense ...
-    atlas::gemm(*A.getDensePtr(), *B.getDensePtr(), *C.getDensePtr());
-  else
+  if (A.isBlock() || B.isBlock() || C.isBlock())
     C = prod(A, B);
+  else
+  {
+    if (numA == numB && numA == numC && numA == 1) // if all are dense ...
+      atlas::gemm(*A.getDensePtr(), *B.getDensePtr(), *C.getDensePtr());
+    else
+      C = prod(A, B);
+  }
 }
