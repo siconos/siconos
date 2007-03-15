@@ -109,18 +109,34 @@ public:
     return setOfInteractions.empty();
   };
 
-  /** return iterator on the first element of setOfInteractions
+  /** iterator equal to the first element of setOfInteractions
   *  \return a InteractionsIterator
   */
-  inline InteractionsIterator begin() const
+  inline InteractionsIterator begin()
   {
     return setOfInteractions.begin();
   };
 
-  /** return iterator on setOfInteractions.end()
+  /** iterator equal to setOfInteractions.end()
   *  \return a InteractionsIterator
   */
-  inline InteractionsIterator end() const
+  inline InteractionsIterator end()
+  {
+    return setOfInteractions.end();
+  }
+
+  /** const iterator equal to the first element of setOfInteractions
+  *  \return a InteractionsIterator
+  */
+  inline ConstInteractionsIterator begin() const
+  {
+    return setOfInteractions.begin();
+  };
+
+  /** const iterator equal to setOfInteractions.end()
+  *  \return a InteractionsIterator
+  */
+  inline ConstInteractionsIterator end() const
   {
     return setOfInteractions.end();
   }

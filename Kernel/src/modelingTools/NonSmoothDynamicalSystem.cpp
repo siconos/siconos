@@ -87,37 +87,6 @@ NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(NonSmoothDynamicalSystemXML* 
   isTopologyAllocatedIn = true;
 }
 
-// copy constructor
-NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(const NonSmoothDynamicalSystem& nsds):
-  BVP(false), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)
-{
-  BVP = nsds.isBVP();
-
-  // === copy of DynamicalSystems ===
-  allDS = nsds.getDynamicalSystems(); // Warning!! This is a false copy, since pointers links remains between DS of each set
-  DSIterator it;
-  for (it = allDS.begin(); it != allDS.end(); ++it)
-    isDSAllocatedIn[*it] = false;
-
-  // === copy of Interactions ===
-  allInteractions = nsds.getInteractions(); // Warning!! This is a false copy, since pointers links remains between Interactions of each set
-  InteractionsIterator it2;
-  for (it2 = allInteractions.begin(); it2 != allInteractions.end(); ++it2)
-    isInteractionAllocatedIn[*it2] = false;
-
-  // === Checks that sets are not empty ===
-  if (allDS.isEmpty())
-    RuntimeException::selfThrow("NonSmoothDynamicalSystem:: constructor(xml, ...): the set of DS is empty.");
-
-  if (allInteractions.isEmpty())
-    cout << "Warning: NonSmoothDynamicalSystem:: constructor(xml, ...): the set of Interactions is empty." << endl;
-
-  topology = new Topology(this); // \todo use a copy constructor for topology?
-  isTopologyAllocatedIn = true;
-
-  // Warning: xml link is not copied.
-}
-
 // Constructor with one DS and one Interaction (optional, default = NULL).
 NonSmoothDynamicalSystem::NonSmoothDynamicalSystem(DynamicalSystem* newDS, Interaction* newInteraction, const bool& isBVP):
   BVP(isBVP), topology(NULL), nsdsxml(NULL), isTopologyAllocatedIn(false)

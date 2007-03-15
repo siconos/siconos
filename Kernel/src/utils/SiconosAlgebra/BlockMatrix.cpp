@@ -70,6 +70,8 @@ void BlockMatrix::makeTab(unsigned int row, unsigned int col)
         tabRow[dim - 1] += tabRow[dim - 2];
     }
   }
+  // Update matrix dim.
+  computeDim();
 }
 
 // Default (private)
@@ -263,12 +265,10 @@ BlockMatrix::~BlockMatrix(void)
 }
 
 // return the number of rows of blocks
-unsigned int BlockMatrix::size(unsigned int dim) const
+void BlockMatrix::computeDim()
 {
-  if (dim == 0)
-    return tabRow[ tabRow.size() - 1 ];
-  else
-    return tabCol[ tabCol.size() - 1 ];
+  dim[0] = tabRow[ tabRow.size() - 1 ];
+  dim[1] = tabCol[ tabCol.size() - 1 ];
 }
 
 void BlockMatrix::resize(unsigned int row, unsigned int col, unsigned int lower, unsigned int upper, bool preserve)
@@ -317,6 +317,16 @@ const double BlockMatrix::normInf(void)const
     sum = 0;
   }
   return norm;
+}
+
+void BlockMatrix::trans()
+{
+  SiconosMatrixException::selfThrow("BlockMatrix::trans(): not yet implemented.");
+}
+
+void BlockMatrix::trans(const SiconosMatrix &m)
+{
+  SiconosMatrixException::selfThrow("BlockMatrix::trans(M): not yet implemented.");
 }
 
 void BlockMatrix::zero(void)
@@ -385,6 +395,7 @@ void BlockMatrix::eye(void)
 
 void BlockMatrix::display(void)const
 {
+  std::cout << "==========> BlockMatrix (" << getNumberOfBlocks(0) << " blocks X " << getNumberOfBlocks(1) << " blocks): " << std::endl;
   if (STDMAP == 1)
   {
     //     BlocksMat::array_type Mmap = map.data ();
@@ -428,7 +439,7 @@ const std::deque<bool> BlockMatrix::getBlockAllocated(void)const
 unsigned int BlockMatrix::getNum(void)const
 {
   SiconosMatrixException::selfThrow("BlockMatrix::getNum of a block is forbidden.");
-  return 0;
+  return 1;
 }
 
 unsigned int BlockMatrix::getNumberOfBlocks(unsigned int dim) const

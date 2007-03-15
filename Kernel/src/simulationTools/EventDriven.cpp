@@ -89,11 +89,11 @@ void EventDriven::updateIndexSet(unsigned int i)
     borneInf = -TOLERANCE;
 
   double y;
-  for (it = indexSets[i - 1].begin(); it != indexSets[i - 1].end(); ++it)
+  for (it = indexSets[i - 1]->begin(); it != indexSets[i - 1]->end(); ++it)
   {
     // check if current Unitary Relation (ie *it) is in indexSets[i]
     // (if not itForFind will be equal to indexSets.end())
-    itForFind = indexSets[i].find(*it);
+    itForFind = indexSets[i]->find(*it);
 
     // Get y[i-1] double value
     y = (*it)->getYRef(i - 1);
@@ -105,10 +105,10 @@ void EventDriven::updateIndexSet(unsigned int i)
     //       else if( y > 0 && itForFind!=indexSets[i].end())
     //  indexSets[i].erase(*it);
 
-    if ((borneInf < y && y < TOLERANCE) &&  itForFind == indexSets[i].end())
-      indexSets[i].insert(*it);
-    else if ((-TOLERANCE > y || y > TOLERANCE) &&  itForFind != indexSets[i].end())
-      indexSets[i].erase(*it);
+    if ((borneInf < y && y < TOLERANCE) &&  itForFind == indexSets[i]->end())
+      indexSets[i]->insert(*it);
+    else if ((-TOLERANCE > y || y > TOLERANCE) &&  itForFind != indexSets[i]->end())
+      indexSets[i]->erase(*it);
 
     // Note if *it is already in the set, insert(*it) is supposed to have no effect. Same for erase when (*it) is not in the set.
     // => to be reviewed in UnitaryRelationsSet
@@ -122,13 +122,13 @@ void EventDriven::updateIndexSetsWithDoubleCondition()
   // for all Unitary Relations in indexSet[i-1], compute y[i-1] and update the indexSet[i]
   UnitaryRelationIterator it, itForFind;
 
-  for (it = indexSets[2].begin(); it != indexSets[2].end(); ++it)
+  for (it = indexSets[2]->begin(); it != indexSets[2]->end(); ++it)
   {
     double gamma = (*it)->getYRef(2);
     double F     = (*it)->getLambdaRef(2);
 
     if (gamma > 0 && F < TOLERANCE)
-      indexSets[2].erase(*it);
+      indexSets[2]->erase(*it);
     else if (gamma < TOLERANCE && F < TOLERANCE) // undetermined case
       RuntimeException::selfThrow("EventDriven::updateIndexSetsWithDoubleCondition(), undetermined case.");
   }
@@ -206,11 +206,10 @@ void EventDriven::computeF(OneStepIntegrator* osi, integer * sizeOfX, doublereal
   }
 
   // Get the required value, ie xdot for output.
-  DynamicalSystemsSet dsOfTheOsi = lsodar->getDynamicalSystems();
   SiconosVector * xtmp2; // The Right-Hand side
   DSIterator it;
   unsigned int i = 0;
-  for (it = dsOfTheOsi.begin(); it != dsOfTheOsi.end(); ++it)
+  for (it = lsodar->dynamicalSystemsBegin(); it != lsodar->dynamicalSystemsEnd(); ++it)
   {
     xtmp2 = (*it)->getRhsPtr(); // Pointer link !
     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j) // Warning: getN, not getDim !!!!
@@ -240,11 +239,10 @@ void EventDriven::computeJacobianF(OneStepIntegrator* osi, integer *sizeOfX, dou
   lsodar->computeJacobianRhs(t);
 
   //   // Save jacobianX values from dynamical system into current jacob (in-out parameter)
-  DynamicalSystemsSet dsOfTheOsi = lsodar->getDynamicalSystems();
 
   DSIterator it;
   unsigned int i = 0;
-  for (it = dsOfTheOsi.begin(); it != dsOfTheOsi.end(); ++it)
+  for (it = lsodar->dynamicalSystemsBegin(); it != lsodar->dynamicalSystemsEnd(); ++it)
   {
     SiconosMatrix * jacotmp = (*it)->getJacobianXRhsPtr(); // Pointer link !
     for (unsigned int j = 0 ; j < (*it)->getN() ; ++j)
@@ -276,10 +274,10 @@ void EventDriven::computeG(OneStepIntegrator* osi, integer * sizeOfX, doublereal
     updateOutput(0, 0);
 
   // If UR is in IndexSet2, g = lambda[2], else g = y[0]
-  for (itUR = indexSets[0].begin(); itUR != indexSets[0].end(); ++itUR)
+  for (itUR = indexSets[0]->begin(); itUR != indexSets[0]->end(); ++itUR)
   {
     nsLawSize = (*itUR)->getNonSmoothLawSize();
-    if (indexSets[2].find(*itUR) != indexSets[2].end()) // ie if the current Unitary Relation is in indexSets[2]
+    if (indexSets[2]->find(*itUR) != indexSets[2]->end()) // ie if the current Unitary Relation is in indexSets[2]
     {
       lambda = (*itUR)->getLambdaPtr(2);
       for (unsigned int i = 0; i < nsLawSize; i++)

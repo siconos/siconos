@@ -117,16 +117,13 @@ public:
   */
   ~BlockMatrix(void);
 
-  /** get the number of rows of the Block matrix
-  *  \exception SiconosMatrixException
-  *  \param : unsigned int, 0 for rows, 1 for columns
-  *  \return the number of rows of the Block matrix
-  */
-  unsigned int size(unsigned int) const;
+  /** Computes dim according to the matrix type.
+   */
+  void computeDim();
 
   /** get the number of blocks in a row
-  *  \return an unsigned int
-  */
+   *  \return an unsigned int
+   */
   inline const unsigned int numberOfBlockInARow(void) const
   {
     return tabRow.size();
@@ -200,6 +197,15 @@ public:
   *  \return a double
   */
   const double normInf(void)const;
+
+  /** transpose in place: x->trans() is x = transpose of x.
+   */
+  void trans();
+
+  /** transpose a matrix: x->trans(m) is x = transpose of m.
+   *  \param a SiconosMatrix: the matrix to be transposed.
+   */
+  void trans(const SiconosMatrix&);
 
   /** sets all the values of the matrix to 0.0
   */

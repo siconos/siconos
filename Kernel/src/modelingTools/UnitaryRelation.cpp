@@ -135,15 +135,19 @@ DynamicalSystemsSet UnitaryRelation::getDynamicalSystems() const
   return mainInteraction->getDynamicalSystems();
 }
 
+DynamicalSystemsSet * UnitaryRelation::getDynamicalSystemsPtr()
+{
+  return mainInteraction->getDynamicalSystemsPtr();
+}
+
 void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Block, const unsigned index) const
 {
   unsigned int k = 0;
-  DynamicalSystemsSet vDS = mainInteraction ->getDynamicalSystems();
   DSIterator itDS;
-  itDS = vDS.begin();
+  itDS = mainInteraction->dynamicalSystemsBegin();
 
   // look for ds and its position in G
-  while (*itDS != ds && itDS != vDS.end())
+  while (*itDS != ds && itDS != mainInteraction->dynamicalSystemsEnd())
   {
     k += (*itDS)->getDim();
     itDS++;
@@ -183,12 +187,11 @@ void UnitaryRelation::getLeftBlockForDS(DynamicalSystem * ds, SiconosMatrix* Blo
 void UnitaryRelation::getRightBlockForDS(DynamicalSystem * ds, SiconosMatrix* Block, const unsigned index) const
 {
   unsigned int k = 0;
-  DynamicalSystemsSet vDS = mainInteraction ->getDynamicalSystems();
   DSIterator itDS;
-  itDS = vDS.begin();
+  itDS = mainInteraction->dynamicalSystemsBegin();
 
   // look for ds and its position in G
-  while (*itDS != ds && itDS != vDS.end())
+  while (*itDS != ds && itDS != mainInteraction->dynamicalSystemsEnd())
   {
     k += (*itDS)->getDim();
     itDS++;
@@ -249,7 +252,7 @@ void UnitaryRelation::computeEquivalentY(const double time, const unsigned int l
     {
       e = (static_cast<NewtonImpactNSL*>(mainInteraction->getNonSmoothLawPtr()))->getE();
       if (simulationType == "TimeStepping")
-        *yOut += e**(static_cast<SimpleVector*>(getYOldPtr(level)));
+        axpy(e, *getYOldPtr(level), *yOut); // yOut = e*yOld + yOut
       else if (simulationType == "EventDriven")
         *yOut *= (1.0 + e);
       else
@@ -260,7 +263,7 @@ void UnitaryRelation::computeEquivalentY(const double time, const unsigned int l
       e = (static_cast<NewtonImpactFrictionNSL*>(mainInteraction->getNonSmoothLawPtr()))->getEn();
       // Only the normal part is multiplied by e
       if (simulationType == "TimeStepping")
-        (*yOut)(0) +=  e * (*(static_cast<SimpleVector*>(getYOldPtr(level))))(0);
+        (*yOut)(0) +=  e * (*getYOldPtr(level))(0);
       else RuntimeException::selfThrow("UnitaryRelation::computeEquivalentY not yet implemented for relation of type " + relationType + " and non smooth law of type " + nslawType + " for a simulaton of type " + simulationType);
 
     }

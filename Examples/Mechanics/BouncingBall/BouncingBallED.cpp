@@ -31,6 +31,8 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+  boost::timer t;
+  t.restart();
   try
   {
 
@@ -142,16 +144,6 @@ int main(int argc, char* argv[])
 
     // --- Time loop ---
     cout << " ==== Start of Event Driven simulation - This may take a while ... ====" << endl;
-    // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-
     EventsManager * eventsManager = s->getEventsManagerPtr();
     unsigned int numberOfEvent = 0 ;
     while (s->hasNextEvent())
@@ -176,12 +168,6 @@ int main(int argc, char* argv[])
 
       numberOfEvent++;
     }
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
     // --- Output files ---
     ioMatrix io("result.dat", "ascii");
     io.write(dataPlot, "noDim");
@@ -213,4 +199,5 @@ int main(int argc, char* argv[])
   {
     cout << "Exception caught in \'sample/MultiBeadsColumn\'" << endl;
   }
+  cout << "Computation Time " << t.elapsed()  << endl;
 }

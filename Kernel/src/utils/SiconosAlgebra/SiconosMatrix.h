@@ -58,6 +58,9 @@ protected:
    * bool to check the type of the current matrix; true if block else false. */
   bool isBlockMatrix;
 
+  /** Number of rows (index 0) and columns (index 1). (Warning: total number of scalar elements, not number of blocks) */
+  std::vector<size_t> dim;
+
   /** default constructor */
   SiconosMatrix(bool = false);
 
@@ -255,24 +258,39 @@ public:
   virtual void setCol(unsigned int, const SimpleVector&) = 0;
 
   /** get the number of rows or columns of the matrix
-   *  \exception SiconosMatrixException
    *  \param : unsigned int, 0 for rows, 1 for columns
    *  \return an int
    */
-  virtual unsigned int size(unsigned int)const = 0;
+  inline size_t size(unsigned int index) const
+  {
+    return dim[index];
+  };
+
+  /** Computes dim according to the matrix type.
+   */
+  virtual void computeDim() = 0;
 
   /** resize the matrix with nbrow rows and nbcol columns, upper and lower are only useful for BandedMatrix .
-  *   The existing elements of the matrix are preseved when specified.
-  *  \exception SiconosMatrixException
-  *  \param 2 unsigned int: number of rows and columns
-  *  \param 2 unsigned int: for banded matrices
-  */
+   *   The existing elements of the matrix are preseved when specified.
+   *  \exception SiconosMatrixException
+   *  \param 2 unsigned int: number of rows and columns
+   *  \param 2 unsigned int: for banded matrices
+   */
   virtual void resize(unsigned int, unsigned int, unsigned int lower = 0, unsigned int upper = 0, bool = true) = 0;
 
   /** compute the infinite norm of the matrix
   *  \return a double
   */
   virtual const double normInf(void) const = 0;
+
+  /** transpose in place: x->trans() is x = transpose of x.
+   */
+  virtual void trans() = 0;
+
+  /** transpose a matrix: x->trans(m) is x = transpose of m.
+   *  \param a SiconosMatrix: the matrix to be transposed.
+   */
+  virtual void trans(const SiconosMatrix&) = 0;
 
   /** display data on standard output
   */

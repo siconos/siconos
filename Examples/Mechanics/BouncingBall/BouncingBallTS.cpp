@@ -31,6 +31,8 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+  boost::timer t;
+  t.restart();
 
   try
   {
@@ -40,7 +42,7 @@ int main(int argc, char* argv[])
     // User-defined main parameters
     unsigned int nDof = 3;           // degrees of freedom for the ball
     double t0 = 0;                   // initial computation time
-    double T = 10;                   // final computation time
+    double T = 10.0;                   // final computation time
     double h = 0.005;                // time step
     double position_init = 1.0;      // initial position for lowest bead.
     double velocity_init = 0.0;      // initial velocity for lowest bead.
@@ -135,10 +137,15 @@ int main(int argc, char* argv[])
     // -> saved in a matrix dataPlot
     unsigned int outputSize = 4;
     SimpleMatrix dataPlot(N + 1, outputSize);
+
+    SiconosVector * q = ball->getQPtr();
+    SiconosVector * v = ball->getVelocityPtr();
+    SiconosVector * lambda = bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambdaPtr(1);
+
     dataPlot(0, 0) = bouncingBall->getT0();
-    dataPlot(0, 1) = ball->getQ()(0);
-    dataPlot(0, 2) = ball->getVelocity()(0);
-    dataPlot(0, 3) = (bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+    dataPlot(0, 1) = (*q)(0);
+    dataPlot(0, 2) = (*v)(0);
+    dataPlot(0, 3) = (*lambda)(0);
 
     // --- Time loop ---
     cout << "Start computation ... " << endl;
@@ -149,9 +156,9 @@ int main(int argc, char* argv[])
       s->computeOneStep();
       // --- Get values to be plotted ---
       dataPlot(k, 0) =  bouncingBall->getCurrentT();
-      dataPlot(k, 1) = ball->getQ()(0);
-      dataPlot(k, 2) = ball->getVelocity()(0);
-      dataPlot(k, 3) = (bouncingBall->getNonSmoothDynamicalSystemPtr()->getInteractionPtr(0)->getLambda(1))(0);
+      dataPlot(k, 1) = (*q)(0);
+      dataPlot(k, 2) = (*v)(0);
+      dataPlot(k, 3) = (*lambda)(0);
       s->nextStep();
     }
     cout << "End of computation - Number of iterations done: " << k - 1 << endl;
@@ -195,8 +202,9 @@ int main(int argc, char* argv[])
   }
   catch (...)
   {
-    cout << "Exception caught in \'sample/MultiBeadsColumn\'" << endl;
+    cout << "Exception caught in BouncingBallTS.cpp" << endl;
   }
+  cout << "Computation Time " << t.elapsed()  << endl;
 
 
 }

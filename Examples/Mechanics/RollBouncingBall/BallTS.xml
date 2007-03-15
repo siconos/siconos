@@ -105,7 +105,7 @@
 		<!-- One Step NS Problem of th Simulation-->
 		<OneStepNSProblem>
 		 	<LCP>
-		 	<Solver type="NLGS" maxIter="101" tolerance="0.0001"/> 
+		 	<Solver type="PGS" maxIter="101" tolerance="0.0001"/> 
 			 </LCP>
 		 </OneStepNSProblem>
 	</Simulation>	

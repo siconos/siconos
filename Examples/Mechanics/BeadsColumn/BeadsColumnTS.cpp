@@ -25,7 +25,7 @@ Simulation with a Time-Stepping scheme.
 */
 
 #include "SiconosKernel.h"
-#include <boost/timer.hpp>
+
 using namespace std;
 
 int main(int argc, char* argv[])

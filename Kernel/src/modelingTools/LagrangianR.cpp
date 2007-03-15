@@ -73,8 +73,6 @@ void LagrangianR::initialize()
   // Memory allocation for G[i], if required (depends on the chosen constructor).
   initComponents();
 
-  // Get the DS concerned by the interaction of this relation
-  DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   DSIterator it;
   data["q0"] = new BlockVector(); // displacement
   data["q1"] = new BlockVector(); // velocity
@@ -86,7 +84,7 @@ void LagrangianR::initialize()
   data["p2"] = new BlockVector();
   LagrangianDS* lds;
   string type;
-  for (it = vDS.begin(); it != vDS.end(); ++it)
+  for (it = interaction->dynamicalSystemsBegin(); it != interaction->dynamicalSystemsEnd(); ++it)
   {
     type = (*it)->getType();
     // check dynamical system type

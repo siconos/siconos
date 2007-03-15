@@ -52,7 +52,7 @@ typedef OSISet::const_iterator ConstOSIIterator;
 typedef std::pair<OSISet::iterator, bool> CheckInsertOSI;
 
 /** vector that contains a sequel of sets of UnitaryRelations*/
-typedef std::vector< UnitaryRelationsSet > VectorOfSetOfUnitaryRelations;
+typedef std::vector< UnitaryRelationsSet* > VectorOfSetOfUnitaryRelations;
 
 /** map of OSNS */
 typedef std::map<std::string, OneStepNSProblem * > OneStepNSProblems;
@@ -321,6 +321,11 @@ public:
    *  \return a UnitaryRelationsSet
    */
   const UnitaryRelationsSet getIndexSet(unsigned int) const ;
+
+  /** get a pointer to indexSets[i]
+   *  \return a UnitaryRelationsSet
+   */
+  UnitaryRelationsSet * getIndexSetPtr(unsigned int) ;
 
   /** get allNSProblems
    *  \return a OneStepNSProblems object (container of OneStepNSProblem*)

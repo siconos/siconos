@@ -323,7 +323,7 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     blocks[UR1][UR2] = new SimpleMatrix(nslawSize1, nslawSize2);
 
   // Get DS common between UR1 and UR2
-  DynamicalSystemsSet commonDS = intersection(UR1->getDynamicalSystems(), UR2->getDynamicalSystems());
+  DynamicalSystemsSet commonDS = intersection(*UR1->getDynamicalSystemsPtr(), *UR2->getDynamicalSystemsPtr());
   DSIterator itDS;
 
   // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
@@ -389,9 +389,11 @@ void LCP::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
         // a getRight call will fail.
         flagRightBlock = true;
       }
-      SiconosMatrix * work = new SimpleMatrix(trans(*rightBlock));
+      SimpleMatrix * work = new SimpleMatrix(*rightBlock);
+      work->trans();
       centralBlocks[*itDS]->PLUForwardBackwardInPlace(*work);
-      *currentBlock +=  *leftBlock ** work;
+      //*currentBlock +=  *leftBlock ** work;
+      gemm(CblasNoTrans, CblasNoTrans, 1.0, *leftBlock, *work, 1.0, *currentBlock);
       if (flagRightBlock) delete rightBlock;
       delete work;
     }
@@ -414,7 +416,7 @@ void LCP::assembleM() //
   // See updateBlocks function for more details.
 
   // Get index set 1 from Simulation
-  UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
+  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
   UnitaryRelationIterator itRow;
   unsigned int pos = 0, col = 0; // index position used for block copy into M, see below.
   UnitaryMatrixColumnIterator itCol;
@@ -426,7 +428,7 @@ void LCP::assembleM() //
     Mspbl = new SparseBlockStructuredMatrix();
     Mspbl->size = blocksPositions.size();
     Mspbl->blocksize = (int*) malloc(Mspbl->size * sizeof(int));
-    for (itRow = indexSet.begin(); itRow != indexSet.end(); ++itRow)
+    for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
       Mspbl->blocksize[blocksIndexes[*itRow]] = blocksPositions[*itRow];
     for (i = 0; i < Mspbl->size - 1; i++) Mspbl->blocksize[i] = Mspbl->blocksize[i + 1] - Mspbl->blocksize[i];
     Mspbl->blocksize[Mspbl->size - 1] = sizeOutput - Mspbl->blocksize[Mspbl->size - 1];
@@ -434,9 +436,9 @@ void LCP::assembleM() //
 
     // computation of the number of non-null blocks
     Mspbl->nbblocks = 0;
-    for (itRow = indexSet.begin(); itRow != indexSet.end(); ++itRow)
+    for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
       for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
-        if ((indexSet.find((*itCol).first)) != indexSet.end())(Mspbl->nbblocks)++;
+        if ((indexSet->find((*itCol).first)) != indexSet->end())(Mspbl->nbblocks)++;
 
     // allocation of Mspbl coordinates vectors and non null block pointers vector
     Mspbl->RowIndex = (int*)malloc(Mspbl->nbblocks * sizeof(int));
@@ -449,11 +451,11 @@ void LCP::assembleM() //
     int rowind, colind;
     bool isMoreFar;
 
-    for (itRow = indexSet.begin(); itRow != indexSet.end(); ++itRow)
+    for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
     {
       for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
       {
-        if ((indexSet.find((*itCol).first)) != indexSet.end())
+        if ((indexSet->find((*itCol).first)) != indexSet->end())
         {
           i = 0;
           isMoreFar = true;
@@ -508,14 +510,14 @@ void LCP::assembleM() //
     M->zero();
     // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
-    for (itRow = indexSet.begin(); itRow != indexSet.end(); ++itRow)
+    for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
     {
       for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
       {
         // *itRow and itCol are UnitaryRelation*.
 
         // Check that itCol is in Index set 1
-        if ((indexSet.find((*itCol).first)) != indexSet.end())
+        if ((indexSet->find((*itCol).first)) != indexSet->end())
         {
           pos = blocksPositions[*itRow];
           col = blocksPositions[(*itCol).first];
@@ -547,7 +549,7 @@ void LCP::computeQ(const double time)
   q->zero();
 
   // === Get index set from Simulation ===
-  UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
+  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
   SimpleVector * yOut;
 
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
@@ -556,7 +558,7 @@ void LCP::computeQ(const double time)
   unsigned int nsLawSize;
   UnitaryRelationIterator itCurrent, itLinked;
   string simulationType = simulation->getType();
-  for (itCurrent = indexSet.begin(); itCurrent !=  indexSet.end(); ++itCurrent)
+  for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
     // *itCurrent is a UnitaryRelation*.
 
@@ -603,7 +605,7 @@ void LCP::compute(const double time)
 void LCP::postCompute(SiconosVector* w, SiconosVector* z)
 {
   // === Get index set from Topology ===
-  UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
+  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
 
   // y and lambda vectors
   //  vector< SimpleVector* >  Y, Lambda;
@@ -615,7 +617,7 @@ void LCP::postCompute(SiconosVector* w, SiconosVector* z)
   unsigned int nsLawSize;
   UnitaryRelationIterator itCurrent, itLinked;
 
-  for (itCurrent = indexSet.begin(); itCurrent !=  indexSet.end(); ++itCurrent)
+  for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
     // *itCurrent is a UnitaryRelation*.
     // size if a block that corresponds to the current UnitaryRelation

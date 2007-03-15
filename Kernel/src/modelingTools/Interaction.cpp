@@ -80,7 +80,7 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
     // Get a list of DS concerned from xml
 
     if (interactionxml->hasAllDS())
-      involvedDS = nsds->getDynamicalSystems(); // this results in a call to the copy constructor. Do not understand why ??
+      involvedDS = nsds->getDynamicalSystems();
 
     else
     {

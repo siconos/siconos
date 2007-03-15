@@ -48,10 +48,11 @@ void NonSmoothEvent::process(Simulation* simulation)
 
     simulation->updateIndexSets();
 
-    VectorOfSetOfUnitaryRelations indexSets = eventDriven->getIndexSets();
+    UnitaryRelationsSet * indexSet1 = simulation->getIndexSetPtr(1);
+    UnitaryRelationsSet * indexSet2 = simulation->getIndexSetPtr(2);
 
     // ---> solve impact LCP if IndexSet[1]\IndexSet[2] is not empty.
-    if (!(indexSets[1] - indexSets[2]).isEmpty())
+    if (!(*indexSet1 - *indexSet2).isEmpty())
     {
       simulation->saveInMemory();  // To save pre-impact values
       // solve the LCP-impact => y[1],lambda[1]
@@ -68,13 +69,11 @@ void NonSmoothEvent::process(Simulation* simulation)
 
       // check that IndexSet[1]-IndexSet[2] is now empty
 
-      indexSets = eventDriven->getIndexSets();
-
-      //    if( !(indexSets[1]-indexSets[2]).isEmpty())
+      //    if( !(indexSet1-indexSet2).isEmpty())
       //RuntimeException::selfThrow("NonSmoothEvent::process, error after impact-LCP solving.");
     }
 
-    if (!((indexSets[2]).isEmpty()))
+    if (!((indexSet2)->isEmpty()))
     {
       cout << "SOLVE LCP ACCELERATION " << endl;
 

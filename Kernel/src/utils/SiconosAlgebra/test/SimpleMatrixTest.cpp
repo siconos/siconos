@@ -377,6 +377,7 @@ void SimpleMatrixTest::testGetBlock()
   cout << "--> Test: getBlock." << endl;
   SiconosMatrix * full = new SimpleMatrix(*SimM);
   full->resize(4, 5);
+
   SiconosMatrix * block = new SimpleMatrix(2, 2);
   full->getBlock(1, 1, *block);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testGetBlock: ", (*block)(0, 0) == 9 , true);
@@ -457,9 +458,9 @@ void SimpleMatrixTest::testTrans()
 {
   cout << "--> Test: trans." << endl;
   // Dense
-  SiconosMatrix * ref = new SimpleMatrix(*D);
-  SiconosMatrix * tRef = new SimpleMatrix(*ref);
-  *tRef = trans(*ref);
+  SimpleMatrix * ref = new SimpleMatrix(*D);
+  SimpleMatrix * tRef = new SimpleMatrix(*ref);
+  tRef->trans(*ref);
   for (unsigned int i = 0; i < ref->size(0); ++i)
     for (unsigned int j = 0 ; j < ref->size(1); ++j)
       if (i == j)
@@ -472,14 +473,14 @@ void SimpleMatrixTest::testTrans()
   // Sym
   ref = new SimpleMatrix(*S);
   tRef = new SimpleMatrix(*ref);
-  *tRef = trans(*ref);
+  tRef->trans(*ref);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testTrans: ", (*tRef) == (*ref) , true);
   delete tRef;
   delete ref;
   // Sparse
   ref = new SimpleMatrix(*SP);
   tRef = new SimpleMatrix(*ref);
-  *tRef = trans(*ref);
+  tRef->trans(*ref);
   //   for(unsigned int i = 0; i<ref->size(0); ++i)
   //     {
   //       for(unsigned int j = 0 ; j< ref->size(1); ++j)
@@ -516,34 +517,37 @@ void SimpleMatrixTest::testAssignment()
   delete ref;
 
   ref = new SimpleMatrix(*T);
-  *tRef = *ref;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef) == (*ref) , true);
+  SiconosMatrix * tRef3 = new SimpleMatrix(3, 3);
+  *tRef3 = *ref;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef3) == (*ref) , true);
   delete ref;
 
   ref = new SimpleMatrix(*S);
-  *tRef = *ref;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef) == (*ref) , true);
+  *tRef3 = *ref;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef3) == (*ref) , true);
   delete ref;
 
+  SiconosMatrix * tRef4 = new SimpleMatrix(4, 4);
   ref = new SimpleMatrix(*SP);
-  *tRef = *ref;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef) == (*ref) , true);
+  *tRef4 = *ref;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef4) == (*ref) , true);
   delete ref;
 
   ref = new SimpleMatrix(*B);
-  *tRef = *ref;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef) == (*ref) , true);
+  *tRef4 = *ref;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef4) == (*ref) , true);
   delete ref;
 
   ref = new SimpleMatrix(*Z);
-  *tRef = *ref;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef) == (*ref) , true);
+  *tRef3 = *ref;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef3) == (*ref) , true);
   delete ref;
 
   ref = new SimpleMatrix(*I);
-  *tRef = *ref;
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef) == (*ref) , true);
+  *tRef3 = *ref;
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef3) == (*ref) , true);
   delete ref;
+
   delete tRef;
   // Triang = Triang, Zero or Identity
   ref = new SimpleMatrix(*T);
@@ -586,6 +590,7 @@ void SimpleMatrixTest::testAssignment()
   tRef->zero();
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef) == (*ref) , true);
+
   delete ref;
   ref = new SimpleMatrix(*Z2);
   *tRef = *ref;
@@ -598,6 +603,7 @@ void SimpleMatrixTest::testAssignment()
   tRef->zero();
   *tRef = *ref;
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testAssignment: ", (*tRef) == (*ref) , true);
+
   delete ref;
   ref = new SimpleMatrix(*Z2);
   *tRef = *ref;
@@ -609,6 +615,8 @@ void SimpleMatrixTest::testAssignment()
   delete ref;
 
   delete tRef;
+  delete tRef3;
+  delete tRef4;
   cout << "-->  test assignment ended with success." << endl;
 }
 
@@ -1352,6 +1360,7 @@ void SimpleMatrixTest::testOperators7()
     for (unsigned int j = 0 ; j < i; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp4)(i, j) - (*tmp3)(j, i), true);
   }
+
   // ... Banded
   *res = sub(*tmp4, * tmp5);
   for (signed i = 0; i < signed(B->size1()); ++ i)
@@ -1388,6 +1397,7 @@ void SimpleMatrixTest::testOperators7()
     for (signed j = std::min(i + 2, signed(B->size2())); j < signed(B->size2()); ++j)
       if (j >= i) CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp2)(i, j), true);
   }
+
   // ...sym
   *res = add(*tmp5, * tmp3);
   for (signed i = 0; i < signed(B->size1()); ++ i)
@@ -1404,6 +1414,7 @@ void SimpleMatrixTest::testOperators7()
       if (j >= i) CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(i, j), true);
       else  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", (*res)(i, j) == (*tmp3)(j, i), true);
   }
+
   //... sparse
   *res = add(*tmp5, * tmp4);
   for (signed i = 0; i < signed(B->size1()); ++ i)
@@ -1722,62 +1733,6 @@ void SimpleMatrixTest::testOperators13()
   cout << "-->  test operators13 ended with success." << endl;
 }
 
-
-void SimpleMatrixTest::testMultTranspose()
-{
-  cout << "--> Test: multTranspose." << endl;
-  SiconosMatrix * tmp1 = new SimpleMatrix(*D);
-  tmp1->resize(4, 4);
-  SiconosMatrix * tmp2 = new SimpleMatrix(*T2);
-  SiconosMatrix * tmp3 = new SimpleMatrix(*S2);
-  SiconosMatrix * tmp4 = new SimpleMatrix(*SP);
-  SiconosMatrix * tmp5 = new SimpleMatrix(*B);
-
-  SiconosMatrix * res = new SimpleMatrix(4, 4);
-  //Dense * ...
-  *res = multTranspose(*tmp1, *tmp1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp1->getDense(), trans(tmp1->getDense()))) < tol, true);
-  *res = multTranspose(*tmp1, *tmp3);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp1->getDense(), tmp3->getSym())) < tol, true);
-  *res = multTranspose(*tmp1, *tmp4);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp1->getDense(), trans(tmp4->getSparse()))) < tol, true);
-  // Triang * ...
-  *res = multTranspose(*tmp2, *tmp1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp2->getTriang(), trans(tmp1->getDense()))) < tol, true);
-  *res = multTranspose(*tmp2, *tmp3);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp2->getTriang(), tmp3->getSym())) < tol, true);
-  *res = multTranspose(*tmp2, *tmp4);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp2->getTriang(), trans(tmp4->getSparse()))) < tol, true);
-  // Sym * ...
-  *res = multTranspose(*tmp3, *tmp1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp3->getSym(), trans(tmp1->getDense()))) < tol, true);
-  *res = multTranspose(*tmp3, *tmp3);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", *res == *tmp3 * *tmp3, true);
-  *res = multTranspose(*tmp3, *tmp4);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp3->getSym(), trans(tmp4->getSparse()))) == 0, true);
-  // Sparse* ...
-  *res = multTranspose(*tmp4, *tmp1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp4->getSparse(), trans(tmp1->getDense()))) == 0, true);
-  *res = multTranspose(*tmp4, *tmp3);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp4->getSparse(), tmp3->getSym())) == 0, true);
-  *res = multTranspose(*tmp4, *tmp4);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp4->getSparse(), trans(tmp4->getSparse()))) == 0, true);
-  // Banded * ...
-  *res = multTranspose(*tmp5, *tmp1);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), trans(tmp1->getDense()))) == 0, true);
-  *res = multTranspose(*tmp5, *tmp3);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), tmp3->getSym())) == 0, true);
-  *res = multTranspose(*tmp5, *tmp4);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_inf(res->getDense() - prod(tmp5->getBanded(), trans(tmp4->getSparse()))) == 0, true);
-
-  delete tmp1;
-  delete tmp2;
-  delete tmp3;
-  delete tmp4;
-  delete tmp5;
-  cout << "-->  test multTranspose ended with success." << endl;
-}
-
 void SimpleMatrixTest::testPow()
 {
   cout << "--> Test: pow." << endl;
@@ -1855,10 +1810,10 @@ void SimpleMatrixTest::testProd()
   *res = prod(*tmp1, *w);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_2(res->getDense() - prod(tmp1->getDense(), w->getSparse())) == 0, true);
   // Triang * ...
-  *res = prod(*tmp2, *v);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_2(res->getDense() - prod(tmp2->getTriang(), v->getDense())) == 0, true);
-  *res = prod(*tmp2, *w);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_2(res->getDense() - prod(tmp2->getTriang(), w->getSparse())) == 0, true);
+  *res2 = prod(*tmp2, *v);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_2(res2->getDense() - prod(tmp2->getTriang(), v->getDense())) == 0, true);
+  *res2 = prod(*tmp2, *w);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_2(res2->getDense() - prod(tmp2->getTriang(), w->getSparse())) == 0, true);
   //   Sym * ...
   *res2 = prod(*tmp3, *v);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators: ", norm_2(res2->getDense() - prod(tmp3->getSym(), v->getDense())) == 0, true);

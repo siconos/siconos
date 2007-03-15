@@ -359,7 +359,10 @@ void LagrangianRheonomousR::computeInput(double time, unsigned int level)
   string name = "p" + toString<unsigned int>(level);
   // get lambda of the concerned interaction
   SiconosVector *lambda = interaction->getLambdaPtr(level);
-  *data[name] += prod(trans(*(G[0])), *lambda);
+  SiconosMatrix * GT = new SimpleMatrix("transpose", *G[0]);
+  *data[name] += prod(*GT, *lambda);
+  delete GT;
+  //  gemv(CblasTrans, 1.0,*(G[0]), *lambda, 1.0, *data[name]);
 }
 
 LagrangianRheonomousR* LagrangianRheonomousR::convert(Relation *r)

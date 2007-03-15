@@ -88,7 +88,6 @@ void FirstOrderR::initialize()
     RuntimeException::selfThrow("FirstOrderR::initialize failed. No Interaction linked to the present relation.");
 
   // Get the DS concerned by the interaction of this relation
-  DynamicalSystemsSet vDS = interaction->getDynamicalSystems();
   DSIterator it;
   data["x"] = new BlockVector(); // displacements
   data["xFree"] = new BlockVector(); // free displacements
@@ -96,7 +95,7 @@ void FirstOrderR::initialize()
   data["r"] = new BlockVector();
 
   FirstOrderNonLinearDS* ds;
-  for (it = vDS.begin(); it != vDS.end(); ++it)
+  for (it = interaction->dynamicalSystemsBegin(); it != interaction->dynamicalSystemsEnd(); ++it)
   {
     // Put x/r ... of each DS into a block. (Pointers links, no copy!!)
     ds = static_cast<FirstOrderNonLinearDS*>(*it);

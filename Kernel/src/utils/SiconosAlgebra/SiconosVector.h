@@ -54,6 +54,9 @@ protected:
    */
   bool isBlockVector;
 
+  /** Size (ie total number of scalar elements, not number of blocks) */
+  unsigned int sizeV;
+
   /** default constructor */
   SiconosVector(bool = false);
 
@@ -117,11 +120,13 @@ public:
    */
   virtual void zero() = 0;
 
-  /** get the vector size, ie the total number of (double)
-   *  elements in the vector
+  /** get the vector size, ie the total number of (double) elements in the vector
    *  \return unsigned int
    */
-  virtual unsigned int size() const = 0;
+  inline unsigned int size() const
+  {
+    return sizeV;
+  };
 
   /** resize the vector with nbcol columns. The existing elements of the matrix are preseved when specified.
    *  \param: dim of the resized vector
@@ -138,7 +143,7 @@ public:
   /** return the Euclidian norm of the vector
    *  \return a double
    */
-  virtual const double norm() const = 0 ;
+  virtual const double norm2() const = 0 ;
 
   /** display data on standard output
    */
@@ -171,10 +176,10 @@ public:
    */
   virtual std::string toString() const = 0;
 
-  // Note: in the following functions, index is a general one;
-  // that means that for a SimpleVector v, v(i) is index i element but
-  // for a BlockVector w that contains 2 SiconosVector of size 3
-  // w(4) corresponds to the first element of the second vector.
+  /* Note: in the following functions, index is a general one;
+   that means that for a SimpleVector v, v(i) is index i element but
+   for a BlockVector w that contains 2 SiconosVector of size 3
+   w(4) corresponds to the first element of the second vector. */
 
   /** return the element vector[i]
    *  \param an unsigned int i
@@ -271,6 +276,31 @@ public:
    *  \param a pointer to SiconosVector*
    */
   virtual void addPtr(SiconosVector*) ;
+
+  /** computes this = x + y with atlas xpy .
+      \param a SiconosVector (x)
+      \param a SiconosVector (y)
+  */
+  virtual void xpy(const SiconosVector &, const SiconosVector &);
+
+  /** computes this = ax + by with atlas axpby .
+      \param a SiconosVector (x)
+      \param a SiconosVector (y)
+  */
+  virtual void axpby(double, const SiconosVector&, double, const SiconosVector&);
+
+  /** computes this = a*x with atlas scal.
+      \param a SiconosVector (x)
+      \param a SiconosVector (y)
+  */
+  virtual void scal(double, const SiconosVector&);
+
+  /** computes this = a*x + y with atlas axpy.
+      \param a SiconosVector (x)
+      \param a SiconosVector (y)
+  */
+  virtual void axpy(double, const SiconosVector&, const SiconosVector&);
+
 };
 
 #endif

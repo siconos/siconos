@@ -15,9 +15,9 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /*! \file UnitaryRelationsSet.h
-*/
+ */
 
 #ifndef UnitaryRelationsSET_H
 #define UnitaryRelationsSET_H
@@ -76,99 +76,115 @@ protected:
 public:
 
   /** default constructor
-  */
+   */
   UnitaryRelationsSet();
 
   /** copy constructor
-  *  \param a UnitaryRelationsSet to be copied
-  */
+   *  \param a UnitaryRelationsSet to be copied
+   */
   UnitaryRelationsSet(const UnitaryRelationsSet&);
 
   /** destructor
-  */
+   */
   ~UnitaryRelationsSet();
 
   /** assignment
-  */
+   */
   UnitaryRelationsSet& operator=(const UnitaryRelationsSet&);
 
   /** return the number of UnitaryRelations in the set
-  *  \return an unsigned int
-  */
+   *  \return an unsigned int
+   */
   inline const unsigned int size() const
   {
     return setOfUnitaryRelations.size();
   };
 
   /** return true if the set is empty, else false
-  *  \return a bool
-  */
+   *  \return a bool
+   */
   inline const bool isEmpty() const
   {
     return setOfUnitaryRelations.empty();
   };
 
-  /** return iterator on the first element of setOfUnitaryRelations
-  *  \return a UnitaryRelationIterator
-  */
-  inline UnitaryRelationIterator begin() const
+  /** iterator equal to the first element of setOfUnitaryRelations
+   *  \return a UnitaryRelationIterator
+   */
+  inline UnitaryRelationIterator begin()
   {
     return setOfUnitaryRelations.begin();
   };
 
-  /** return iterator on setOfUnitaryRelations.end()
-  *  \return a UnitaryRelationIterator
-  */
-  inline UnitaryRelationIterator end() const
+  /** iterator equal to setOfUnitaryRelations.end()
+   *  \return a UnitaryRelationIterator
+   */
+  inline UnitaryRelationIterator end()
+  {
+    return setOfUnitaryRelations.end();
+  }
+
+  /** const iterator equal to the first element of setOfUnitaryRelations
+   *  \return a UnitaryRelationIterator
+   */
+  inline ConstUnitaryRelationIterator begin() const
+  {
+    return setOfUnitaryRelations.begin();
+  };
+
+  /** const iterator equal to setOfUnitaryRelations.end()
+   *  \return a UnitaryRelationIterator
+   */
+  inline ConstUnitaryRelationIterator end() const
   {
     return setOfUnitaryRelations.end();
   }
 
   /** return setOfUnitaryRelations
-  *  \return a UnitaryRelationSet
-  */
+   *  \return a UnitaryRelationSet
+   */
   inline const URSet getSetOfUnitaryRelations() const
   {
     return setOfUnitaryRelations;
   }
 
   /** return true if ur is in the set
-  *  \param a pointer to UnitaryRelation
-  *  \return a bool
-  */
+   *  \param a pointer to UnitaryRelation
+   *  \return a bool
+   */
   const bool isUnitaryRelationIn(UnitaryRelation*) const;
 
   /** same as find function of stl set
-  *  \param a pointer to UnitaryRelation
-  *  \param a UnitaryRelationIterator
-  */
+   *  \param a pointer to UnitaryRelation
+   *  \param a UnitaryRelationIterator
+   */
   UnitaryRelationIterator find(UnitaryRelation*);
 
   /** insert Unitary Relation ur into the set
-  *  \param a pointer to UnitaryRelation
-  *  \return a CheckInsertUnitaryRelation ( boolean type information)
-  */
+   *  \param a pointer to UnitaryRelation
+   *  \return a CheckInsertUnitaryRelation ( boolean type information)
+   */
   CheckInsertUnitaryRelation insert(UnitaryRelation*);
 
   /** remove Unitary Relation ur from the set
-  *  \param a pointer to UnitaryRelation
-  */
+   *  \param a pointer to UnitaryRelation
+   */
   void erase(UnitaryRelation*);
 
   /** remove all Unitary Relations from the set
-  */
+   */
   void clear();
 
   /** screen-display of the numbers of the Unitary Relations present in the set.
-  */
+   */
   void display() const;
 
   /** return the intersection of s1 and s2 (-> set_intersection stl function)
-  */
+   */
   friend const UnitaryRelationsSet intersection(const UnitaryRelationsSet& s1, const UnitaryRelationsSet& s2);
 
   /** return the difference betwee s1 and s2 (-> set_difference stl function)
-  */
+   */
   friend const UnitaryRelationsSet operator-(const UnitaryRelationsSet& s1, const UnitaryRelationsSet& s2);
 };
 

@@ -168,13 +168,13 @@ void OneStepNSProblem::computeUnitaryRelationsPositions()
   // Move this function in topology? Or simulation?
 
   // Get index sets from Topology
-  UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
+  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
   UnitaryRelationIterator it;
   unsigned int pos = 0;
   unsigned int blIndex = 0;
 
   // For each Unitary Relation in indexSets[levelMin], the position is given by the sum of the dimensions of non smooth laws of all previous Unitary Relations.
-  for (it = indexSet.begin(); it != indexSet.end(); ++it)
+  for (it = indexSet->begin(); it != indexSet->end(); ++it)
   {
     blocksPositions[*it] = pos;
     blocksIndexes[*it] = blIndex;
@@ -186,13 +186,14 @@ void OneStepNSProblem::computeUnitaryRelationsPositions()
 void OneStepNSProblem::computeSizeOutput()
 {
   // Get required index sets from Simulation
-  VectorOfSetOfUnitaryRelations indexSets = simulation->getIndexSets();
+  UnitaryRelationsSet * indexSet;
   sizeOutput = 0;
   // For all UnitaryRelations in indexSets[levelMin...levelMax], we sum non smooth laws dimensions
   UnitaryRelationIterator it;
   for (unsigned int i = levelMin; i <= levelMax; ++i)
   {
-    for (it = indexSets[i].begin(); it != indexSets[i].end(); ++it)
+    indexSet = simulation->getIndexSetPtr(i);
+    for (it = indexSet->begin(); it != indexSet->end(); ++it)
       sizeOutput += (*it)->getNonSmoothLawSize();
   }
 }
@@ -215,19 +216,19 @@ void OneStepNSProblem::updateBlocks()
   //  - If 1 == true, 2 == false, 3 == true, it computes the block.
   //  - If 1==false, 2 is not checked, and the block is computed if 3==true.
   //
-  UnitaryRelationsSet indexSet;
+  UnitaryRelationsSet * indexSet;
   bool isTimeInvariant, isBlockRequired;
   UnitaryRelationIterator itUR1, itUR2;
 
   // Get index set from Simulation
 
-  indexSet = simulation->getIndexSet(levelMin);
+  indexSet = simulation->getIndexSetPtr(levelMin);
   isTimeInvariant = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->isTimeInvariant();
-  for (itUR1 = indexSet.begin(); itUR1 != indexSet.end(); ++itUR1)
+  for (itUR1 = indexSet->begin(); itUR1 != indexSet->end(); ++itUR1)
   {
-    for (itUR2 = indexSet.begin(); itUR2 != indexSet.end(); ++itUR2)
+    for (itUR2 = indexSet->begin(); itUR2 != indexSet->end(); ++itUR2)
     {
-      isBlockRequired = !(intersection((*itUR1)->getDynamicalSystems(), (*itUR2)->getDynamicalSystems())).isEmpty();
+      isBlockRequired = !(intersection(*(*itUR1)->getDynamicalSystemsPtr(), *(*itUR2)->getDynamicalSystemsPtr())).isEmpty();
 
       if (!isTimeInvariant && isBlockRequired)
         computeBlock(*itUR1, *itUR2);
@@ -249,17 +250,17 @@ void OneStepNSProblem::updateBlocks()
 
 void OneStepNSProblem::computeAllBlocks()
 {
-  UnitaryRelationsSet indexSet = simulation->getIndexSet(0);
+  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(0);
 
   UnitaryRelationIterator itUR1, itUR2;
 
   bool isBlockRequired;
 
-  for (itUR1 = indexSet.begin(); itUR1 != indexSet.end(); ++itUR1)
+  for (itUR1 = indexSet->begin(); itUR1 != indexSet->end(); ++itUR1)
   {
-    for (itUR2 = indexSet.begin(); itUR2 != indexSet.end(); ++itUR2)
+    for (itUR2 = indexSet->begin(); itUR2 != indexSet->end(); ++itUR2)
     {
-      isBlockRequired = !(intersection((*itUR1)->getDynamicalSystems(), (*itUR2)->getDynamicalSystems())).isEmpty();
+      isBlockRequired = !(intersection(*(*itUR1)->getDynamicalSystemsPtr(), *(*itUR2)->getDynamicalSystemsPtr())).isEmpty();
 
       if (isBlockRequired)
         computeBlock(*itUR1, *itUR2);
@@ -358,12 +359,8 @@ void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& centralBlo
   OneStepIntegrator * Osi;
   string osiType; // type of the current one step integrator
   string dsType; // type of the current Dynamical System
-  DSIterator itDS;// = (UR->getDynamicalSystems()).begin();
-  DynamicalSystemsSet URDS = UR->getDynamicalSystems();
-  // For each DS, find the corresponding W through the OneStepIntegrator Interface
-  //while(itDS != (UR->getDynamicalSystems()).end())
-  //for(itDS = (UR->getDynamicalSystems()).begin(); itDS!=URDS.end(); itDS++)
-  for (itDS = URDS.begin(); itDS != URDS.end(); ++itDS)
+  DSIterator itDS = UR->dynamicalSystemsBegin();
+  while (itDS != (UR->dynamicalSystemsEnd()))
   {
     Osi = simulation->getIntegratorOfDSPtr(*itDS); // get OneStepIntegrator of current dynamical system
     osiType = Osi->getType();
@@ -383,6 +380,6 @@ void OneStepNSProblem::getOSIMaps(UnitaryRelation* UR, MapOfMatrices& centralBlo
     }
     else
       RuntimeException::selfThrow("OneStepNSProblem::getOSIMaps not yet implemented for Integrator of type " + osiType);
-    //      itDS;
+    ++itDS;
   }
 }

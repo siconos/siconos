@@ -447,7 +447,7 @@ public:
   /** gets an iterator to the first element of the involvedDS set.
    *  \return a DSIterator.
    */
-  inline DSIterator DynamicalSystemsBegin() const
+  inline DSIterator dynamicalSystemsBegin()
   {
     return involvedDS.begin();
   };
@@ -455,7 +455,23 @@ public:
   /** gets an iterator equal to involvedDS.end().
    *  \return a DSIterator.
    */
-  inline DSIterator DynamicalSystemsEnd() const
+  inline DSIterator dynamicalSystemsEnd()
+  {
+    return involvedDS.end();
+  };
+
+  /** gets a const iterator to the first element of the involvedDS set.
+   *  \return a ConstDSIterator.
+   */
+  inline ConstDSIterator dynamicalSystemsBegin() const
+  {
+    return involvedDS.begin();
+  };
+
+  /** gets a const iterator equal to involvedDS.end().
+   *  \return a ConstDSIterator.
+   */
+  inline ConstDSIterator dynamicalSystemsEnd() const
   {
     return involvedDS.end();
   };
@@ -466,6 +482,14 @@ public:
   inline DynamicalSystemsSet getDynamicalSystems() const
   {
     return involvedDS;
+  }
+
+  /** get a pointer to the DynamicalSystems of this Interaction
+  *  \return a DynamicalSystemsSet*
+  */
+  inline DynamicalSystemsSet * getDynamicalSystemsPtr()
+  {
+    return &involvedDS;
   }
 
   /** set the involvedDS

@@ -47,7 +47,8 @@ typedef NamesList::const_iterator NamesConstIterator;
 /** A function to convert any type to string*/
 template <class T> std::string toString(const T& obj)
 {
-  std::ostringstream o;
+  static std::ostringstream o;
+  o.str("");
   o << obj ;
   return o.str();
 }

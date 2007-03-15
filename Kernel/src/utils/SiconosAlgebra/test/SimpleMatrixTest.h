@@ -68,7 +68,6 @@ private:
   CPPUNIT_TEST(testOperators11);
   CPPUNIT_TEST(testOperators12);
   CPPUNIT_TEST(testOperators13);
-  CPPUNIT_TEST(testMultTranspose);
   CPPUNIT_TEST(testPow);
   CPPUNIT_TEST(testProd);
   CPPUNIT_TEST(End);
@@ -109,7 +108,6 @@ private:
   void testOperators11();
   void testOperators12();
   void testOperators13();
-  void testMultTranspose();
   void testPow();
   void testProd();
   void End();

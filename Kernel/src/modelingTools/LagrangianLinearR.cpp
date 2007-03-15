@@ -281,7 +281,11 @@ void LagrangianLinearR::computeInput(double time, const unsigned int level)
 
   SiconosVector *lambda = interaction->getLambdaPtr(level);
   // compute p = Ht lambda
-  *data[name] += prod(trans(*H), *lambda);
+  SiconosMatrix * HT = new SimpleMatrix(*H);
+  HT->trans();
+  *data[name] += prod(*HT, *lambda);
+  delete HT;
+  //gemv(CblasTrans,1.0,*H,*lambda,1.0, *data[name]); => not yet implemented for BlockVectors.
 }
 
 void LagrangianLinearR::saveRelationToXML() const

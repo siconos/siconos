@@ -25,6 +25,9 @@
 
 #include "SiconosMatrix.h"
 
+/**Input parameter for copy and transpose constructor.*/
+const std::string transpose = "transpose";
+
 /**  Matrix (embedded various types of Boost matrices of double)
  *
  *  \author SICONOS Development Team - copyright INRIA
@@ -71,10 +74,6 @@ private:
    */
   bool isPLUInversed;
 
-  /** check that num has a valid value
-   */
-  void checkNum();
-
 public:
   /***************************** CONSTRUCTORS ****************************/
 
@@ -87,6 +86,12 @@ public:
    *  \param SiconosMatrix
    */
   SimpleMatrix(const SiconosMatrix&);
+
+  /** copy and transpose constructor
+   *  \param a string: "trans"
+   *  \param SiconosMatrix
+   */
+  SimpleMatrix(const std::string&, const SiconosMatrix&);
 
   /** constructor with the type and the dimension of the Boost matrix
    *  \param 2 unsigned int (number of rows and columns)
@@ -177,7 +182,10 @@ public:
   /** get the attribute num of current matrix, useless for Block Matrix
    * \return an unsigned int.
    */
-  unsigned int getNum(void) const;
+  inline unsigned int getNum(void) const
+  {
+    return num;
+  };
 
   /** get DenseMat matrix
    *  \param an unsigned int, position of the block (row) - Useless for SimpleMatrix
@@ -341,12 +349,9 @@ public:
    */
   void eye(void);
 
-  /** get the number of rows of the matrix
-   *  \exception SiconosMatrixException
-   *  \param : unsigned int, 0 for rows, 1 for columns
-   *  \return the number of rows or columns of the matrix
+  /** Computes dim according to the matrix type.
    */
-  unsigned int size(unsigned int) const;
+  void computeDim();
 
   /** resize the matrix with nbrow rows and nbcol columns The existing elements of the matrix are preseved when specified.
    *  \exception SiconosMatrixException
@@ -357,6 +362,15 @@ public:
    *  \return a double
    */
   const double normInf(void) const;
+
+  /** transpose in place: x->trans() is x = transpose of x.
+   */
+  void trans();
+
+  /** transpose a matrix: x->trans(m) is x = transpose of m.
+   *  \param a SiconosMatrix: the matrix to be transposed.
+   */
+  void trans(const SiconosMatrix&);
 
   /** display data on standard output
    */
@@ -441,6 +455,33 @@ public:
    */
   SimpleMatrix& operator *= (int);
 
+  /** computes an LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
+   *  The result is returned in this (InPlace). Based on Blas dgetrf function.
+   */
+  void PLUFactorizationInPlace(void);
+
+  /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
+   *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
+   */
+  void PLUInverseInPlace(void);
+
+  /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
+   *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
+   *  \param input: the RHS matrix b - output: the result x
+   */
+  void PLUForwardBackwardInPlace(SiconosMatrix &B);
+
+  /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
+   *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
+   *  \param input: the RHS matrix b - output: the result x
+   */
+  void PLUForwardBackwardInPlace(SiconosVector &B);
+
+  /** set to false all LU indicators. Useful in case of
+      assignment for example.
+  */
+  void resetLU();
+
   /**: A==B when (A-B).normInf()<tolerance
    * \param 2 SiconosMatrix
    * \return a boolean
@@ -516,12 +557,6 @@ public:
    */
   friend SimpleMatrix operator / (const SiconosMatrix&, int);
 
-  /** transpose the matrix m1
-   *  \param a SiconosMatrix
-   *  \return a SimpleMatrix
-   */
-  friend SimpleMatrix trans(const SiconosMatrix&);
-
   /** Addition of two matrices
    *  \param 2 SiconosMatrix
    *  \return a SimpleMatrix
@@ -542,12 +577,6 @@ public:
    */
   friend SimpleMatrix prod(const SiconosMatrix&, const SiconosMatrix&);
 
-  /** compute A*Bt
-   *  \param 2 SiconosMatrix
-   *  \return SimpleMatrix : the result of the multiplication
-   */
-  friend SimpleMatrix multTranspose(const SiconosMatrix&, const SiconosMatrix&);
-
   /** compute the power of the matrix (!)
    *  \return a SimpleMatrix
    *  \exception SiconosMatrixException, if the power < 0
@@ -559,32 +588,65 @@ public:
    */
   friend SimpleVector prod(const SiconosMatrix&, const SiconosVector&);
 
-  /** computes an LU factorization of a general M-by-N matrix using partial pivoting with row interchanges.
-   *  The result is returned in this (InPlace). Based on Blas dgetrf function.
-   */
-  void PLUFactorizationInPlace(void);
-
-  /**  compute inverse of this thanks to LU factorization with Partial pivoting. This method inverts U and then computes inv(A) by solving the system
-   *  inv(A)*L = inv(U) for inv(A). The result is returned in this (InPlace). Based on Blas dgetri function.
-   */
-  void PLUInverseInPlace(void);
-
-  /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
-   *   by PLUFactorizationInPlace. Based on Blas dgetrs function.
-   *  \param input: the RHS matrix b - output: the result x
-   */
-  void PLUForwardBackwardInPlace(SiconosMatrix &B);
-
-  /** solves a system of linear equations A * X = B  (A=this) with a general N-by-N matrix A using the LU factorization computed
-   *   by PLUFactorizationInPlace.  Based on Blas dgetrs function.
-   *  \param input: the RHS matrix b - output: the result x
-   */
-  void PLUForwardBackwardInPlace(SiconosVector &B);
-
-  /** set to false all LU indicators. Useful in case of
-      assignment for example.
+  /** gemv(transA, a, A, x, b, y) computes y = a*op(A)*x + b*y
+      with transX = CblasNoTrans (op(X) = X), CblasTrans (op(X) = transpose(X)), CblasConjTrans (op(X) = conj(X))
+      This function encapsulates atlas::gemv.
+      \param CBLAS_TRANSPOSE, op for A
+      \param a double, a (in)
+      \param a SiconosMatrix, A (in)
+      \param a SiconosVector, x (in)
+      \param a double, b (in)
+      \param a SiconosVector, y (in-out)
   */
-  void resetLU();
+  friend void gemv(CBLAS_TRANSPOSE, double, const SiconosMatrix&, const SiconosVector&, double, SiconosVector&);
+
+  /** gemv(a, A, x, b, y) computes y = a*A*x+ b*y
+      This function encapsulates atlas::gemm.
+      \param a double, a (in)
+      \param a SiconosMatrix, A (in)
+      \param a SiconosVector, x (in)
+      \param a double, b (in)
+      \param a SiconosVector, y (in-out)
+  */
+  friend void gemv(double, const SiconosMatrix&, const SiconosVector&, double, SiconosVector&);
+
+  /** prod(A, x, y) computes y = A*x
+      \param a SiconosMatrix, A (in)
+      \param a SiconosVector, x (in)
+      \param a SiconosVector, y (in-out)
+  */
+  friend void prod(const SiconosMatrix&, const SiconosVector&, SiconosVector&);
+
+  /** gemm(transA, transB, a, A, B, b, C) computes C = a*op(A)*op(B) + b*C
+      with transX = CblasNoTrans (op(X) = X), CblasTrans (op(X) = transpose(X)), CblasConjTrans (op(X) = conj(X))
+      This function encapsulates atlas::gemm.
+      \param CBLAS_TRANSPOSE, op for A
+      \param CBLAS_TRANSPOSE, op for B
+      \param a double, a (in)
+      \param a SiconosMatrix, A (in)
+      \param a SiconosMatrix, B (in)
+      \param a double, b (in)
+      \param a SiconosMatrix, C (in-out)
+  */
+  friend void gemm(const CBLAS_TRANSPOSE, const CBLAS_TRANSPOSE, double, const SiconosMatrix&, const SiconosMatrix&, double, SiconosMatrix&);
+
+  /** gemm(a, A, B, b, C) computes C = a*A*B+ b*C
+      This function encapsulates atlas::gemm.
+      \param a double, a (in)
+      \param a SiconosMatrix, A (in)
+      \param a SiconosMatrix, B (in)
+      \param a double, b (in)
+      \param a SiconosMatrix, C (in-out)
+  */
+  friend void gemm(double, const SiconosMatrix&, const SiconosMatrix&, double, SiconosMatrix&);
+
+  /** prod(A, B, C) computes C = A*B
+      This function encapsulates atlas::gemm
+      \param a SiconosMatrix, A (in)
+      \param a SiconosMatrix, B (in)
+      \param a SiconosMatrix, C (in-out)
+  */
+  friend void prod(const SiconosMatrix&, const SiconosMatrix&, SiconosMatrix&);
 
 };
 #endif

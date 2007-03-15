@@ -130,6 +130,38 @@ public:
 
   // === GETTERS/SETTERS ===
 
+  /** iterator equal to the first element of allInteractions
+  *  \return a InteractionsIterator
+  */
+  inline InteractionsIterator interactionsBegin()
+  {
+    return allInteractions.begin();
+  };
+
+  /** iterator equal to allInteractions.end()
+  *  \return a InteractionsIterator
+  */
+  inline InteractionsIterator interactionsEnd()
+  {
+    return allInteractions.end();
+  };
+
+  /** const iterator equal to the first element of allInteractions
+  *  \return a ConstInteractionsIterator
+  */
+  inline ConstInteractionsIterator interactionsBegin() const
+  {
+    return allInteractions.begin();
+  };
+
+  /** const iterator equal to allInteractions.end()
+  *  \return a ConstInteractionsIterator
+  */
+  inline ConstInteractionsIterator interactionsEnd() const
+  {
+    return allInteractions.end();
+  }
+
   /** get all the Interactions of the Topology problem (saved in a set)
   *  \return an InteractionsSet
   */
@@ -150,6 +182,14 @@ public:
   inline const UnitaryRelationsSet getIndexSet0() const
   {
     return indexSet0;
+  }
+
+  /** get a pointer to the index set of all Unitary Relations.
+  *  \return a UnitaryRelationsSet*
+  */
+  inline UnitaryRelationsSet* getIndexSet0Ptr()
+  {
+    return &indexSet0;
   }
 
   // --- relativeDegreesMap ---

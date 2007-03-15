@@ -193,15 +193,17 @@ const bool EventsManager::hasNextEvent() const
 
 const double EventsManager::getTimeOfEvent(Event* event) const
 {
-  if (!hasEvent(event))
-    RuntimeException::selfThrow("EventsManager getTimeOfEvent, Event not present in the set ");
+  //  if(!hasEvent(event))
+  if (event == NULL)
+    RuntimeException::selfThrow("EventsManager getTimeOfEvent, Event == NULL (not present in the set?) ");
   return intToDoubleTime(event->getTimeOfEvent());
 }
 
 const unsigned long int EventsManager::getIntTimeOfEvent(Event* event) const
 {
-  if (!hasEvent(event))
-    RuntimeException::selfThrow("EventsManager getIntTimeOfEvent, Event not present in the set ");
+  //  if(!hasEvent(event))
+  if (event == NULL)
+    RuntimeException::selfThrow("EventsManager getIntTimeOfEvent,  Event == NULL (not present in the set?) ");
   return event->getTimeOfEvent();
 }
 

@@ -34,6 +34,10 @@ class SimpleVector;
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.1.
  *
+ * A block vector is a stl vector that handles pointers to SiconosVector.
+ *
+ * Insertion of NULL SiconosVector* is not allowed.
+ *
  */
 class BlockVector : public SiconosVector
 {
@@ -44,7 +48,7 @@ private:
   /** Flags to check wheter pointers were allocated in class constructors or not */
   std::deque<bool> isBlockAllocatedIn;
 
-  // tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i].
+  /** tabindex[i] = tabindex[i-1] + ni, ni being the size of svref[i]. */
   Index tabIndex;
 
 public:
@@ -92,6 +96,38 @@ public:
    */
   ~BlockVector();
 
+  /** iterator equal to vect.begin
+      \param a BlocksVectIterator
+  */
+  inline BlockVectIterator begin()
+  {
+    return vect.begin();
+  };
+
+  /** iterator equal to vect.end
+      \param a BlocksVectIterator
+  */
+  inline BlockVectIterator end()
+  {
+    return vect.end();
+  };
+
+  /** const iterator equal to vect.begin
+      \param a BlocksVectIterator
+  */
+  inline ConstBlockVectIterator begin() const
+  {
+    return vect.begin();
+  };
+
+  /** const iterator equal to vect.end
+      \param a BlocksVectIterator
+  */
+  inline ConstBlockVectIterator end() const
+  {
+    return vect.end();
+  } ;
+
   /** get vect, ie all the vectors of the object
    * \return a BlocksVect
    */
@@ -129,11 +165,6 @@ public:
    */
   SparseVect* getSparsePtr(unsigned int = 0) const;
 
-  /** return false if one of the block is a null pointer
-   * \return a bool
-   */
-  bool check() const;
-
   /** return the array of double values of the vector
    *  \exception SiconosVectorException
    *  \param unsigned int: vector position (only for block vector)
@@ -151,15 +182,6 @@ public:
    *  \param unsigned int: position of the required vector (useless for SimpleVector, default = 0)
    */
   void zero();
-
-  /** get the vector size, ie the total number of (double)
-   *  elements in the vector
-   *  \return unsigned int
-   */
-  inline unsigned int size() const
-  {
-    return tabIndex[tabIndex.size() - 1];
-  };
 
   /** get the number of SimpleVector-Blocks
    *  \return unsigned int
@@ -182,7 +204,7 @@ public:
   /** return the Euclidian norm of the vector
    *  \return a double
    */
-  const double norm() const ;
+  const double norm2() const ;
 
   /** display data on standard output
    */

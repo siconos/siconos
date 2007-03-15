@@ -157,6 +157,9 @@ Simulation::~Simulation()
   allNSProblems.clear();
   isNSProblemAllocatedIn.clear();
 
+  // Delete indexSets ... (starting from 1 since Index0 is part of the Topology and not created in Simulation).
+  for (unsigned int i = 1; i < indexSets.size(); ++i)
+    if (indexSets[i] != NULL) delete indexSets[i];
   indexSets.clear();
 }
 
@@ -246,7 +249,14 @@ const UnitaryRelationsSet Simulation::getIndexSet(unsigned int i) const
 {
   if (i >= indexSets.size())
     RuntimeException::selfThrow("Simulation - getIndexSet(i) - index set(i) does not exist.");
-  return indexSets[i];
+  return *(indexSets[i]);
+}
+
+UnitaryRelationsSet * Simulation::getIndexSetPtr(unsigned int i)
+{
+  if (i >= indexSets.size())
+    RuntimeException::selfThrow("Simulation - getIndexSetPtr(i) - index set(i) does not exist.");
+  return (indexSets[i]);
 }
 
 OneStepNSProblem* Simulation::getOneStepNSProblemPtr(const std::string& name)
@@ -355,7 +365,10 @@ void Simulation::initialize()
       (*it)->initialize(t0, levelMax + 1);
 
     indexSets.resize(levelMax + 1);
-    indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0();
+    // Link with index0 of the Topology.
+    indexSets[0] = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getIndexSet0Ptr();
+    for (unsigned int i = 1; i < indexSets.size(); ++i)
+      indexSets[i] = new UnitaryRelationsSet();
   }
 
   // Initialize OneStepNSProblem: in derived classes specific function.
@@ -445,13 +458,13 @@ void Simulation::updateInput(int level)
 
   //  double time = getNextTime();
   double time = model->getCurrentT();
-  InteractionsSet allInter = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions();
+  Topology * topology = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   InteractionsIterator it;
 
   reset();
 
   // We compute input using lambda(levelMin).
-  for (it = allInter.begin(); it != allInter.end(); it++)
+  for (it = topology->interactionsBegin(); it != topology->interactionsEnd(); it++)
     (*it)->computeInput(time, level);
 }
 
@@ -462,10 +475,10 @@ void Simulation::updateOutput(int level0, int level1)
     level1 = levelMax;
 
   double time = model->getCurrentT();
-  InteractionsSet allInter = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr()->getInteractions();
+  Topology * topology = model->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
   InteractionsIterator it;
 
-  for (it = allInter.begin(); it != allInter.end(); it++)
+  for (it = topology->interactionsBegin(); it != topology->interactionsEnd(); it++)
   {
     for (int i = level0; i <= level1; ++i)
       (*it)->computeOutput(time , i);

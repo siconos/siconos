@@ -36,6 +36,7 @@
 #include <boost/numeric/ublas/triangular.hpp>
 #include <boost/numeric/ublas/symmetric.hpp>
 #include <boost/numeric/ublas/banded.hpp>
+#include <boost/numeric/bindings/atlas/cblas_enum.hpp>
 
 namespace ublas = boost::numeric::ublas;
 

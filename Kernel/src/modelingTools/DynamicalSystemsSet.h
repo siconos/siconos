@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /*! \file DynamicalSystemsSet.h
 
 */
@@ -68,116 +68,132 @@ protected:
 public:
 
   /** default constructor
-  */
+   */
   DynamicalSystemsSet();
 
   /** copy constructor
-  *  \param a DynamicalSystemsSet to be copied
-  */
+   *  \param a DynamicalSystemsSet to be copied
+   */
   DynamicalSystemsSet(const DynamicalSystemsSet&);
 
   /** destructor
-  */
+   */
   ~DynamicalSystemsSet();
 
   /** assignment
-  */
+   */
   DynamicalSystemsSet& operator=(const DynamicalSystemsSet&);
 
   /** return the number of DS in the set
-  *  \return an unsigned int
-  */
+   *  \return an unsigned int
+   */
   inline const unsigned int size() const
   {
     return setOfDS.size();
   };
 
-  /** return iterator on the first element of setOfDS
-  *  \return a DSIterator
-  */
-  inline DSIterator begin() const
+  /** iterator equal to the first element of setOfDS
+   *  \return a DSIterator
+   */
+  inline DSIterator begin()
   {
     return setOfDS.begin();
   };
 
-  /** return iterator on setOfDS.end()
-  *  \return a DSIterator
-  */
-  inline DSIterator end() const
+  /** iterator equal to setOfDS.end()
+   *  \return a DSIterator
+   */
+  inline DSIterator end()
+  {
+    return setOfDS.end();
+  }
+
+  /** const iterator equal to the first element of setOfDS
+   *  \return a ConstDSIterator
+   */
+  inline ConstDSIterator begin() const
+  {
+    return setOfDS.begin();
+  };
+
+  /** const iterator equal to setOfDS.end()
+   *  \return a ConstDSIterator
+   */
+  inline ConstDSIterator end() const
   {
     return setOfDS.end();
   }
 
   /** return setOfDS
-  *  \return a DSSet
-  */
+   *  \return a DSSet
+   */
   inline const DSSet getSetOfDS() const
   {
     return setOfDS;
   }
 
   /** get Dynamical System number num, if it is present in the set (else, exception)
-  *  \return a pointer to DynamicalSystem
-  */
+   *  \return a pointer to DynamicalSystem
+   */
   DynamicalSystem* getDynamicalSystemPtr(const int) const;
 
   /** return true if ds is in the set
-  *  \param a pointer to DynamicalSystem
-  *  \return a bool
-  */
+   *  \param a pointer to DynamicalSystem
+   *  \return a bool
+   */
   const bool isDynamicalSystemIn(DynamicalSystem*) const;
 
   /** return true if DynamicalSystem number num is in the set
-  *  \param an int
-  *  \return a bool
-  */
+   *  \param an int
+   *  \return a bool
+   */
   const bool isDynamicalSystemIn(const int) const;
 
   /** same as find function of stl set
-  *  \param a pointer to DynamicalSystem
-  *  \param a DSIterator
-  */
+   *  \param a pointer to DynamicalSystem
+   *  \param a DSIterator
+   */
   DSIterator find(DynamicalSystem*);
 
   /** same as find function of stl set
-  *  \param an int
-  *  \return a DSIterator
-  */
+   *  \param an int
+   *  \return a DSIterator
+   */
   DSIterator find(const int);
 
   /** insert Dynamical System ds into the set
-  *  \param a pointer to DynamicalSystem
-  *  \return a CheckInsertDS ( boolean type information)
-  */
+   *  \param a pointer to DynamicalSystem
+   *  \return a CheckInsertDS ( boolean type information)
+   */
   CheckInsertDS insert(DynamicalSystem*);
 
   /** true if the DS set is empty
-  *  \return a bool
-  */
+   *  \return a bool
+   */
   inline const bool isEmpty() const
   {
     return setOfDS.empty();
   };
 
   /** remove Dynamical System ds from the set
-  *  \param a pointer to DynamicalSystem
-  */
+   *  \param a pointer to DynamicalSystem
+   */
   void erase(DynamicalSystem*);
 
   /** remove all Dynamical Systems from the set
-  */
+   */
   void clear();
 
   /** screen-display of the numbers of the Dynamical Systems present in the set.
-  */
+   */
   void display() const;
 
   /** return the intersection of s1 and s2 (-> set_intersection stl function)
-  */
+   */
   friend const DynamicalSystemsSet intersection(const DynamicalSystemsSet& s1, const DynamicalSystemsSet& s2);
 
   /** return the difference betwee s1 and s2 (-> set_difference stl function)
-  */
+   */
   friend const DynamicalSystemsSet operator-(const DynamicalSystemsSet& s1, const DynamicalSystemsSet& s2);
 };
 

@@ -94,42 +94,42 @@ void TimeStepping::updateIndexSet(unsigned int i)
   {
     double yp;
     double yDot;
-    for (it = indexSets[0].begin(); it != indexSets[0].end(); ++it)
+    for (it = (indexSets[0])->begin(); it != (indexSets[0])->end(); ++it)
     {
       double h = getTimeStep();
       // checks if current Unitary Relation (ie *it) is already in indexSets[1]
       // (if not itForFind will be equal to indexSets.end())
-      itForFind = indexSets[1].find(*it);
+      itForFind = (indexSets[1])->find(*it);
       y = (*it)->getYRef(0);
       yDot = (*it)->getYRef(1);
       yp = y + 0.5 * h * yDot;
 
       // if yp <=0, then the unitary relation is added in indexSets[1] (if it was not already there)
       // else if yp > 0 and if the unitary relation was in the set, it is removed.
-      if (yp <= 0 && itForFind == indexSets[1].end())
-        indexSets[1].insert(*it);
+      if (yp <= 0 && itForFind == (indexSets[1])->end())
+        (indexSets[1])->insert(*it);
 
-      else if (yp > 0 && itForFind != indexSets[1].end())
-        indexSets[1].erase(*it);
+      else if (yp > 0 && itForFind != (indexSets[1])->end())
+        (indexSets[1])->erase(*it);
     }
   }
   else
   {
-    for (it = indexSets[i - 1].begin(); it != indexSets[i - 1].end(); ++it)
+    for (it = indexSets[i - 1]->begin(); it != indexSets[i - 1]->end(); ++it)
     {
       // check if current Unitary Relation (ie *it) is in indexSets[i]
       // (if not itForFind will be equal to indexSets.end())
-      itForFind = indexSets[i].find(*it);
+      itForFind = indexSets[i]->find(*it);
 
       // Get y[i-1] double value
       y = (*it)->getYRef(i - 1);
 
       // if y[i-1] <=0, then the unitary relation is added in indexSets[i] (if it was not already there)
       // else if y[i-1] > 0 and if the unitary relation was in the set, it is removed.
-      if (y <= 0 && itForFind == indexSets[i].end())
-        indexSets[i].insert(*it);
-      else if (y > 0 && itForFind != indexSets[i].end())
-        indexSets[i].erase(*it);
+      if (y <= 0 && itForFind == indexSets[i]->end())
+        indexSets[i]->insert(*it);
+      else if (y > 0 && itForFind != indexSets[i]->end())
+        indexSets[i]->erase(*it);
     }
   }
 }
@@ -219,6 +219,11 @@ void TimeStepping::computeFreeState()
 // and final state is the one saved in DS/Interaction at the end of this function
 void TimeStepping::computeOneStep()
 {
+  advanceToEvent();
+}
+
+void TimeStepping::advanceToEvent()
+{
   // solve ...
 
   computeFreeState();
@@ -229,11 +234,6 @@ void TimeStepping::computeOneStep()
   }
   // update
   update(levelMin);
-}
-
-void TimeStepping::advanceToEvent()
-{
-  computeOneStep();
 }
 
 void TimeStepping::newtonSolve(double criterion, unsigned int maxStep)

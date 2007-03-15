@@ -67,13 +67,9 @@ Moreau::Moreau(OneStepIntegratorXML * osiXML, Simulation* newS):
 
   if (osiXML->hasAllDS()) // if flag all=true is present -> get all ds from the nsds
   {
-    // In nsds DS are saved in a vector.
-    // Future version: saved them in a set? And then just call:
-    // OSIDynamicalSystems = nsds->getDynamicalSystems();
-    DynamicalSystemsSet tmpDS = nsds->getDynamicalSystems();
     DSIterator it;
     unsigned int i = 0;
-    for (it = tmpDS.begin(); it != tmpDS.end(); ++it)
+    for (it = nsds->dynamicalSystemsBegin(); it != nsds->dynamicalSystemsEnd(); ++it)
     {
       OSIDynamicalSystems.insert(*it);
       // get corresponding theta. In xml they must be sorted in an order that corresponds to growing DS-numbers order.
@@ -293,14 +289,14 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
 
     // Get Mass matrix
     Mass = d->getMassPtr();
-    // Compute W
-    *W = *Mass ;
 
+    // Compute W
     if (dsType == LNLDS)
     {
       // === Lagrangian non-linear systems ===
       // Compute Mass matrix (if loaded from plugin)
       d->computeMass();
+      *W = *Mass ;
       // Compute and get Jacobian (if loaded from plugin)
       d->computeJacobianFL(0, t);
       d->computeJacobianFL(1, t);
@@ -313,13 +309,14 @@ void Moreau::computeW(const double t, DynamicalSystem* ds)
     }
     else // if dsType = LLTIDS, LagrangianLinearTIDS
     {
+      *W = *Mass ;
       // === Lagrangian linear time invariant system ===
       K = ((static_cast<LagrangianLinearTIDS*>(d))->getKPtr());
       C = ((static_cast<LagrangianLinearTIDS*>(d))->getCPtr());
       if (C != NULL)
         *W += h * theta**C;
       if (K != NULL)
-        *W +=  h * h * theta * theta**K;
+        *W += h * h * theta * theta**K;
     }
   }
 
@@ -358,22 +355,22 @@ void Moreau::computeFreeState()
   double told = simulationLink->getCurrentTime();
   double h = t - told;
 
-  DSIterator it;
-  double theta;
-  SiconosMatrix * W;
+  DynamicalSystem* ds; // Current Dynamical System.
+  DSIterator it; // Iterator through the set of DS.
+  SiconosMatrix * W; // W Moreau matrix of the current DS.
+  string dsType ; // Type of the current DS.
+  double theta; // Theta parameter of the current ds.
   for (it = OSIDynamicalSystems.begin(); it != OSIDynamicalSystems.end(); ++it)
   {
-    DynamicalSystem* ds = *it;
+    ds = *it;
     theta = thetaMap[ds];
-
-    string dsType = ds->getType();
-
+    dsType = ds->getType();
     W = WMap[ds];
 
     // === Lagrangian Systems ===
     if ((dsType == LNLDS) || (dsType == LLTIDS))
     {
-      // -- Get the DS --
+      // -- Convert the DS into a Lagrangian one.
       LagrangianDS* d = static_cast<LagrangianDS*>(ds);
 
       // --- RESfree computation ---
@@ -383,10 +380,11 @@ void Moreau::computeFreeState()
       qold = static_cast<SimpleVector*>(d->getQMemoryPtr()->getSiconosVector(0));
       vold = static_cast<SimpleVector*>(d->getVelocityMemoryPtr()->getSiconosVector(0));
 
-      // Velocity free and residu.
+      // Velocity free and residu. vFree = RESfree (pointer equality !!).
       SiconosVector *vfree = d->getVelocityFreePtr();
       SiconosVector *RESfree = vfree;
-      RESfree->zero(); // Note that RESfree and vFree are located at the same place in Memory.
+      RESfree->zero();
+
       // --- Compute Velocity Free ---
       // For non-linear Lagrangian systems (LNLDS)
       if (dsType == LNLDS)
@@ -396,31 +394,49 @@ void Moreau::computeFreeState()
         SiconosMatrix *M = d->getMassPtr();
         SiconosVector *v = d->getVelocityPtr();
 
-        // === Compute ResFree and vfree solution of Wk(v-vfree)= RESfree ===
-        *RESfree = prod(*M, (*v - *vold));
-
-        // Compute fL
-        // warning: get values and not pointers for "old" state.
+        // ResFree = M(v-vold) - h*[theta*fL(t) + (1-theta)*fL(told)]
 
         if (d->getFLPtr() != NULL)
         {
-          SiconosVector *fLOld = NULL, *fLCurrent = NULL;
+          // fL value for told is computed and saved into RESfree.
           d->computeFL(told, qold, vold);
-          fLOld = new SimpleVector(*(d->getFLPtr()));
+          *RESfree = *(d->getFLPtr());
+          // Compute and get fL at t.
           d->computeFL(t);
-          fLCurrent = d->getFLPtr();
-          *RESfree -= h * ((1.0 - theta)**fLOld + theta**fLCurrent);
-
-          delete fLOld;
+          SiconosVector * fLCurrent = d->getFLPtr();
+          // Resfree = -h*(theta * flcurrent + (1-theta) Resfree).
+          axpby(-h * theta, *fLCurrent, h * (theta - 1.0), *RESfree);
           fLCurrent = NULL;
         }
-        // W(vFree-vOld) = RFree. Remind that vfree and RESfree are just two names for the same thing.
+
+        // === Compute ResFree and vfree solution of Wk(v-vfree)= RESfree ===
+        *RESfree += prod(*M, (*v - *vold));
+
+        // W(vFree-vOld) = RESFree. Solution saved in RESfre.
         W->PLUForwardBackwardInPlace(*RESfree);
-        *vfree =  *v - *RESfree;
+        // *vfree =  *v - *RESfree; Mind that Resfree = vfree (pointers).
+        axpby(1.0, *v, -1.0, *RESfree);
       }
       // --- For linear Lagrangian LLTIDS:
       else
       {
+        // Computation of the external forces
+        SiconosVector * FExtCurrent = NULL;
+        if (d->getFExtPtr() != NULL)
+        {
+          // Fext at told is computed and saved into RESfree.
+          d->computeFExt(told);
+          *RESfree = *(d->getFExtPtr());
+          // Compute and get FExt at t.
+          d->computeFExt(t);
+          FExtCurrent = d->getFExtPtr();
+          // we compute RESfree += h*(theta * FExtCurrent+(1.0-theta) * FExtOld);
+          //
+          // ResFree = h*((1-theta)*fextCurrent + theta * ResFree)
+          axpby(h * theta, *FExtCurrent, h * (1.0 - theta), *RESfree);
+          FExtCurrent = NULL;
+        }
+
         // get K and C pointers
         SiconosMatrix * K = static_cast<LagrangianLinearTIDS*>(d)->getKPtr();
         SiconosMatrix * C = static_cast<LagrangianLinearTIDS*>(d)->getCPtr();
@@ -429,26 +445,18 @@ void Moreau::computeFreeState()
           *RESfree -= h * (prod(*K, *qold) + h * theta * prod(*K, *vold));
         if (C != NULL)
           *RESfree -= h * prod(*C, *vold);
-        // Computation of the external forces
-        SiconosVector * FExtOld = NULL, *FExtCurrent = NULL;
-        if (d->getFExtPtr() != NULL)
-        {
-          d->computeFExt(told);
-          FExtOld = new SimpleVector(*(d->getFExtPtr()));
-          d->computeFExt(t);
-          FExtCurrent = d->getFExtPtr();
-          *RESfree += h * (theta**FExtCurrent + (1.0 - theta)**FExtOld);
-          delete FExtOld;
-          FExtCurrent = NULL;
-        }
 
         // W(vFree-vOld) = RFree.
         W->PLUForwardBackwardInPlace(*RESfree);
-        *vfree =  *vold + *RESfree;
+        // *vfree =  *vold + *RESfree; Mind that Resfree = vfree (pointers).
+        *vfree += *vold;
       }
-      // calculate qfree (whereas it is useless for future computation)
+      // calculate qfree (whereas it is useless for future computation?)
       SiconosVector *qfree = d->getQFreePtr();
-      *qfree = (*qold) + h * (theta * (*vfree) + (1.0 - theta) * (*vold));
+      // we compute *qfree = (*qold) + h * (theta * (*vfree) + (1.0 - theta) * (*vold));
+      *qfree = *vfree;
+      axpby(h * (1.0 - theta), *vold, h * theta, *qfree) ; // qfree = h*theta * qfree + h*(1.0 - theta) *vold
+      *qfree += *qold;
     }
     else if (dsType == FOLDS || dsType == FOLTIDS)
     {
@@ -534,16 +542,36 @@ void Moreau::integrate(double& tinit, double& tend, double& tout, int&)
       // or call the F77 function  MoreauLTIDS
       // Computation of the external forces
       d->computeFExt(tinit);
-      SimpleVector FExt0 = d->getFExt();
+      SimpleVector * FExt0 = new SimpleVector(*d->getFExtPtr());
       d->computeFExt(tend);
-      SimpleVector FExt1 = d->getFExt();
+      SiconosVector * FExt1 = d->getFExtPtr();
       // velocity computation
+      //*v = (h*(theta*FExt1+(1.0-theta)*FExt0-prod(*C,*vold)-prod(*K,*qold)-h*theta*prod(*K,*vold))+ *p);
+      v->zero();
+      if (C != NULL)
+        *v -= prod(*C, *vold);
+      if (K != NULL)
+      {
+        *v -= prod(*K, *qold);
+        *v -= h * theta * prod(*K, *vold);
+      }
+      if (FExt1 != NULL && FExt0 != NULL)
+      {
+        axpby(theta, *FExt1 , (1.0 - theta), *FExt0); //FExt0 = theta*FExt1+(1.0-theta)*FExt0
+        *v += *FExt0;
+      }
+      delete FExt0;
+      *v *= h;
+      *v += *p;
 
-      *v = (h * (theta * FExt1 + (1.0 - theta) * FExt0 - prod(*C, *vold) - prod(*K, *qold) - h * theta * prod(*K, *vold)) + *p);
       W->PLUForwardBackwardInPlace(*v);
       *v += *vold;
       // q computation
-      *q = (*qold) + h * ((theta * (*v)) + (1.0 - theta) * (*vold));
+      //*q = (*qold) + h * ((theta * (*v)) + (1.0 - theta) * (*vold));
+      *q = *vold;
+      axpby(h * theta, *v, h * (1.0 - theta), *q); // q = theta*v + (1-theta)*q
+      *q += *qold; // q = q +qold.
+
       // Right Way  : Fortran 77 version with BLAS call
       // F77NAME(MoreauLTIDS)(tinit,tend,theta
       //                      ndof, &qold(0),&vold(0),
@@ -590,7 +618,10 @@ void Moreau::updateState(const unsigned int level)
       //  -> get previous time step state
       SiconosVector *vold = d->getVelocityMemoryPtr()->getSiconosVector(0);
       SiconosVector *qold = d->getQMemoryPtr()->getSiconosVector(0);
-      *q = *qold + h * (theta * *v + (1.0 - theta)* *vold);
+      // *q = *qold + h*(theta * *v +(1.0 - theta)* *vold);
+      *q = *vold;
+      axpby(h * theta, *v, h * (1.0 - theta), *q); // q = theta*v+ (1-theta)* q
+      *q += *qold;
       // set reaction to zero
       p->zero();
       // --- Update W for general Lagrangian system

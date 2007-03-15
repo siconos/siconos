@@ -176,7 +176,6 @@ void BlockVectorTest::testConstructor5()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->isBlock(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*v)[0]->isBlock(), true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*v)[1]->isBlock(), true);
-
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", v->size() == 12, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*v)[0]->size() == 6, true);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testConstructor5 : ", (*v)[1]->size() == 6, true);
@@ -223,7 +222,7 @@ void BlockVectorTest::testNorm()
   SiconosVector * w = new SimpleVector(3, 2);
   SiconosVector * z = new SimpleVector(5, 3);
   BlockVector *v = new BlockVector(w, z);
-  double n2 = v->norm();
+  double n2 = v->norm2();
   v->addPtr(ref);
   double ni = v->normInf();
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", n2 == sqrt(57), true);

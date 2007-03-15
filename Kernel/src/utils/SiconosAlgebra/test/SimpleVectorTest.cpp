@@ -192,7 +192,7 @@ void SimpleVectorTest::testNorm()
   cout << "--> Test: norm." << endl;
   SiconosVector *v = new SimpleVector(*dv);
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", v->normInf() == norm_inf(*dv), true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", (v->norm() - norm_2(*dv)) < tol, true);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("testNorm : ", (v->norm2() - norm_2(*dv)) < tol, true);
   delete v;
   cout << "--> norm test ended with success." << endl;
 }
@@ -441,11 +441,13 @@ void SimpleVectorTest::testOperators7()
   v->resize(3);
   SiconosVector *w = new SimpleVector(vq);
   SiconosMatrix *res = new SimpleMatrix(3, 5);
+
   *res = outer_prod(*v, *w); // dense*dense
   for (unsigned int i = 0 ; i < 3; ++i)
     for (unsigned int j = 0; j < 5; ++j)
       CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", ((*res)(i, j) - (*v)(i) * (*w)(j)) < tol , true);
   delete w;
+
   res->zero();
   w = new SimpleVector(*sv);
   *res = outer_prod(*v, *w); // dense*sparse
@@ -455,21 +457,23 @@ void SimpleVectorTest::testOperators7()
   delete v;
   res->zero();
   v = new SimpleVector(*sv);
-  *res = outer_prod(*v, *w); // sparse*sparse
+  SiconosMatrix *res2 = new SimpleMatrix(5, 5);
+  *res2 = outer_prod(*v, *w); // sparse*sparse
   for (unsigned int i = 0 ; i < 3; ++i)
     for (unsigned int j = 0; j < 5; ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", ((*res)(i, j) - (v->getSparse())(i) * (w->getSparse())(j)) < tol , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", ((*res2)(i, j) - (v->getSparse())(i) * (w->getSparse())(j)) < tol , true);
   delete w;
   res->zero();
   w = new SimpleVector(vq);
-  *res = outer_prod(*v, *w); // sparse*dense
+  *res2 = outer_prod(*v, *w); // sparse*dense
   for (unsigned int i = 0 ; i < 3; ++i)
     for (unsigned int j = 0; j < 5; ++j)
-      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", ((*res)(i, j) - (v->getSparse())(i) * (*w)(j)) < tol , true);
+      CPPUNIT_ASSERT_EQUAL_MESSAGE("testOperators3 : ", ((*res2)(i, j) - (v->getSparse())(i) * (*w)(j)) < tol , true);
 
   delete w;
   delete v;
   delete res;
+  delete res2;
   cout << "--> operators7 test ended with success." << endl;
 }
 

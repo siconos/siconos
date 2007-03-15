@@ -220,7 +220,7 @@ void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
     blocks[UR1][UR2] = new SimpleMatrix(nslawSize1, nslawSize2);
 
   // Get DS common between UR1 and UR2
-  DynamicalSystemsSet commonDS = intersection(UR1->getDynamicalSystems(), UR2->getDynamicalSystems());
+  DynamicalSystemsSet commonDS = intersection(*UR1->getDynamicalSystemsPtr(), *UR2->getDynamicalSystemsPtr());
   DSIterator itDS;
 
   // Get the W and Theta maps of one of the Unitary Relation - Warning: in the current version, if OSI!=Moreau, this fails.
@@ -228,7 +228,8 @@ void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
   MapOfDouble Theta;
   getOSIMaps(UR1, W, Theta);
 
-  SiconosMatrix* currentBlock = blocks[UR1][UR2], *work = NULL;
+  SiconosMatrix* currentBlock = blocks[UR1][UR2];
+  SimpleMatrix *work = NULL;
   currentBlock->zero();
   SiconosMatrix *leftBlock = NULL, *rightBlock = NULL;
   unsigned int sizeDS;
@@ -263,12 +264,15 @@ void FrictionContact::computeBlock(UnitaryRelation* UR1, UnitaryRelation* UR2)
         // a getRight call will fail.
         flagRightBlock = true;
       }
-      work = new SimpleMatrix(trans(*rightBlock));
+
+      work = new SimpleMatrix(*rightBlock);
+      work->trans();
       // W contains a lu-factorized matrix and we solve
       // W * X = rightBlock with PLU
       // Work is a temporary matrix.
       W[*itDS]->PLUForwardBackwardInPlace(*work);
-      *currentBlock +=  *leftBlock * *work; // left = right = G or H
+      //*currentBlock +=  *leftBlock * *work; // left = right = G or H
+      gemm(CblasNoTrans, CblasNoTrans, 1.0, *leftBlock, *work, 1.0, *currentBlock);
       delete work;
       if (flagRightBlock) delete rightBlock;
     }
@@ -306,20 +310,20 @@ void FrictionContact::assembleM() //
   M->zero();
 
   // Get index set 1 from Simulation
-  UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
+  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
 
   unsigned int pos = 0, col = 0; // index position used for block copy into M, see below.
   UnitaryRelationIterator itRow;
   UnitaryMatrixColumnIterator itCol;
-  for (itRow = indexSet.begin(); itRow != indexSet.end(); ++itRow)
+  for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
   {
     for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
     {
       // *itRow and itCol are UnitaryRelation*.
 
       // Check that itCol is in Index set 1
-      if ((indexSet.find((*itCol).first)) != indexSet.end())
+      if ((indexSet->find((*itCol).first)) != indexSet->end())
       {
         pos = blocksPositions[*itRow];
         col = blocksPositions[(*itCol).first];
@@ -350,7 +354,7 @@ void FrictionContact::computeQ(const double time)
   q->zero();
 
   // === Get index set from Simulation ===
-  UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
+  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
   SimpleVector * yOut;
 
   // === Loop through "active" Unitary Relations (ie present in indexSets[level]) ===
@@ -359,7 +363,7 @@ void FrictionContact::computeQ(const double time)
   unsigned int nsLawSize;
   UnitaryRelationIterator itCurrent, itLiked;
   string simulationType = simulation->getType();
-  for (itCurrent = indexSet.begin(); itCurrent !=  indexSet.end(); ++itCurrent)
+  for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
     // *itCurrent is a UnitaryRelation*.
 
@@ -455,7 +459,7 @@ void FrictionContact::compute(const double time)
 void FrictionContact::postCompute(SiconosVector* w, SiconosVector* z)
 {
   // === Get index set from Topology ===
-  UnitaryRelationsSet indexSet = simulation->getIndexSet(levelMin);
+  UnitaryRelationsSet * indexSet = simulation->getIndexSetPtr(levelMin);
 
   // y and lambda vectors
   //  vector< SimpleVector* >  Y, Lambda;
@@ -467,7 +471,7 @@ void FrictionContact::postCompute(SiconosVector* w, SiconosVector* z)
   unsigned int nsLawSize;
   UnitaryRelationIterator itCurrent, itLinked;
 
-  for (itCurrent = indexSet.begin(); itCurrent !=  indexSet.end(); ++itCurrent)
+  for (itCurrent = indexSet->begin(); itCurrent !=  indexSet->end(); ++itCurrent)
   {
     // *itCurrent is a UnitaryRelation*.
     // size if a block that corresponds to the current UnitaryRelation

@@ -181,23 +181,44 @@ public:
   /** gets an iterator to the first element of the DynamicalSystems set.
    *  \return a DSIterator.
    */
-  inline DSIterator DynamicalSystemsBegin() const
+  inline DSIterator dynamicalSystemsBegin()
   {
-    return mainInteraction->DynamicalSystemsBegin();
+    return mainInteraction->dynamicalSystemsBegin();
   };
 
   /** gets an iterator equal to DynamicalSystems.end().
    *  \return a DSIterator.
    */
-  inline DSIterator DynamicalSystemsEnd() const
+  inline DSIterator dynamicalSystemsEnd()
   {
-    return mainInteraction->DynamicalSystemsEnd();
+    return mainInteraction->dynamicalSystemsEnd();
   };
 
-  /** gets to the DynamicalSystemsSet
+  /** gets a const iterator to the first element of the  DynamicalSystems set.
+   *  \return a ConstDSIterator.
+   */
+  inline ConstDSIterator dynamicalSystemsBegin() const
+  {
+    return mainInteraction->dynamicalSystemsBegin();
+  };
+
+  /** gets a const iterator equal to DynamicalSystems.end().
+   *  \return a ConstDSIterator.
+   */
+  inline ConstDSIterator dynamicalSystemsEnd() const
+  {
+    return mainInteraction->dynamicalSystemsEnd();
+  };
+
+  /** gets the DynamicalSystemsSet
    *  \return a DynamicalSystemsSet
    */
   DynamicalSystemsSet getDynamicalSystems() const;
+
+  /** gets a pointer to the DynamicalSystemsSet
+   *  \return a DynamicalSystemsSet*
+   */
+  DynamicalSystemsSet * getDynamicalSystemsPtr() ;
 
   /** gets the matrix used in block computation, (left * W * rigth), depends on the relation type (ex, LinearTIR, left = C, right = B).
    *         We get only the part corresponding to ds.

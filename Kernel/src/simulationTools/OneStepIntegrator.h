@@ -124,6 +124,38 @@ public:
     return OSIDynamicalSystems;
   };
 
+  /** gets an iterator to the first element of the OSIDynamicalSystems set.
+   *  \return a DSIterator.
+   */
+  inline DSIterator dynamicalSystemsBegin()
+  {
+    return OSIDynamicalSystems.begin();
+  };
+
+  /** gets an iterator equal to OSIDynamicalSystems.end().
+   *  \return a DSIterator.
+   */
+  inline DSIterator dynamicalSystemsEnd()
+  {
+    return OSIDynamicalSystems.end();
+  };
+
+  /** gets a const iterator to the first element of the OSIDynamicalSystems set.
+   *  \return a ConstDSIterator.
+   */
+  inline ConstDSIterator dynamicalSystemsBegin() const
+  {
+    return OSIDynamicalSystems.begin();
+  };
+
+  /** gets a const iterator equal to OSIDynamicalSystems.end().
+   *  \return a ConstDSIterator.
+   */
+  inline ConstDSIterator dynamicalSystemsEnd() const
+  {
+    return OSIDynamicalSystems.end();
+  };
+
   /** set the DynamicalSystem list of this Integrator
   *  \param a DynamicalSystemsSet
   */

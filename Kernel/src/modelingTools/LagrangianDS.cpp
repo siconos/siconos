@@ -1500,10 +1500,10 @@ double LagrangianDS::dsConvergenceIndicator()
   // Compute difference between present and previous Newton steps
   SiconosVector * valRef = workVector["LagNLDSMoreau"];
   *diff =  *(q[0]) - *valRef;
-  if (valRef->norm() != 0)
-    dsCvgIndic = diff->norm() / (valRef->norm());
+  if (valRef->norm2() != 0)
+    dsCvgIndic = diff->norm2() / (valRef->norm2());
   else
-    dsCvgIndic = diff->norm();
+    dsCvgIndic = diff->norm2();
   delete diff;
   return (dsCvgIndic);
 }
