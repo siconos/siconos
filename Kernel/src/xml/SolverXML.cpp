@@ -50,6 +50,13 @@ double SolverXML::getTolerance() const
   else return DEFAULT_TOL;
 }
 
+unsigned int SolverXML::getVerbose() const
+{
+  if (xmlHasProp(rootNode, (xmlChar *)"maxIter"))
+    return SiconosDOMTreeTools::getAttributeValue<int>(rootNode, "verbose");
+  else return DEFAULT_VERBOSE;
+}
+
 double SolverXML::getSearchDirection() const
 {
   if (xmlHasProp(rootNode, (xmlChar *)"searchDirection"))

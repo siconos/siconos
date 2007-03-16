@@ -62,7 +62,7 @@ public:
   *  \param double : SearchDirection (optional) -> for Latin
   */
   FrictionContact3D(Simulation * ,  const std::string, const std::string = DEFAULT_SOLVER, const unsigned int = DEFAULT_ITER, const double = DEFAULT_TOL,
-                    const std::string  = DEFAULT_NORMTYPE, const double  = DEFAULT_SEARCHDIR);
+                    const unsigned int = DEFAULT_VERBOSE, const std::string  = DEFAULT_NORMTYPE, const double  = DEFAULT_SEARCHDIR);
 
   /** constructor from data
   *  \param Solver* : pointer to object that contains solver algorithm and formulation

@@ -37,11 +37,11 @@ FrictionContact3D::FrictionContact3D(OneStepNSProblemXML* osNsPbXml, Simulation*
 
 // From data (the only required argument is the simulation)
 FrictionContact3D::FrictionContact3D(Simulation * newSimu, const string newId, const string newSolver, const unsigned int MaxIter,
-                                     const double  Tolerance, const string  NormType,
+                                     const double  Tolerance, const unsigned int Verbose,  const string  NormType,
                                      const double  SearchDirection): FrictionContact("FrictionContact3D", newSimu, newId)
 {
   // set solver:
-  solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, NormType, SearchDirection);
+  solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, Verbose, NormType, SearchDirection);
   isSolverAllocatedIn = true;
 }
 

@@ -82,6 +82,11 @@ public:
   */
   double getTolerance() const;
 
+  /** Return the verbose mode variable
+  *  \return unsigned int
+  */
+  unsigned int getVerbose() const;
+
   /** Return norm type of the algorithm
   *  \return a string
   */

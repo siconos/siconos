@@ -243,6 +243,7 @@
     		<xsd:attribute name="type" type="xsd:string" use="required"/>
     		<xsd:attribute name="maxIter" type="xsd:positiveInteger" use="optional"/>
 		<xsd:attribute name="tolerance" type="xsd:double" use="optional"/>
+    		<xsd:attribute name="verbose" type="xsd:positiveInteger" use="optional"/>
 		<xsd:attribute name="normType" type="NormTypeValues" use="optional"/>
 		<xsd:attribute name="searchDirection" type="xsd:double" use="optional"/>
 	</xsd:complexType>

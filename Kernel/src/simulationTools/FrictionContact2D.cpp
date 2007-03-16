@@ -37,11 +37,11 @@ FrictionContact2D::FrictionContact2D(OneStepNSProblemXML* osNsPbXml, Simulation*
 
 // Constructor from a set of data
 FrictionContact2D::FrictionContact2D(Simulation* newSimu, const string newId, const string solverName,
-                                     const unsigned int MaxIter, const double  Tolerance, const string  NormType,
+                                     const unsigned int MaxIter, const double  Tolerance, const unsigned int  Verbose, const string  NormType,
                                      const double  SearchDirection): FrictionContact("FrictionContact2D", newSimu, newId)
 {
   // set solver:
-  solver = new Solver(nspbType, solverName, MaxIter, Tolerance, NormType, SearchDirection);
+  solver = new Solver(nspbType, solverName, MaxIter, Tolerance, Verbose, NormType, SearchDirection);
   isSolverAllocatedIn = true;
 }
 

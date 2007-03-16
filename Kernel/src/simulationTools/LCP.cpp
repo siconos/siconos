@@ -69,13 +69,13 @@ LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Simulation* newSimu):
 
 // Constructor from a set of data (appart from Simulation and id, all arguments are optional)
 LCP::LCP(Simulation* newSimu, const string newId, const string newSolver, const unsigned int MaxIter,
-         const double  Tolerance, const string  NormType, const double  SearchDirection):
+         const double  Tolerance, const unsigned int Verbose,  const string  NormType, const double  SearchDirection):
   OneStepNSProblem("LCP", newSimu, newId), w(NULL), z(NULL), M(NULL), q(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false) ,
   isMSparseBlock(false) , Mspbl(NULL)
 {
   // set solver:
-  solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, NormType, SearchDirection);
+  solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, Verbose, NormType, SearchDirection);
   isSolverAllocatedIn = true;
 }
 

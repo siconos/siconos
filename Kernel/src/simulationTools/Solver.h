@@ -30,6 +30,7 @@ const double DEFAULT_TOL = 0.0001;
 const unsigned int DEFAULT_ITER = 101;
 const std::string DEFAULT_NORMTYPE = "max";
 const double DEFAULT_SEARCHDIR = 0.6;
+const unsigned int DEFAULT_VERBOSE = 0;
 
 class SolverXML;
 
@@ -86,6 +87,9 @@ protected:
   /** algorithm tolerance */
   double tolerance;
 
+  /** Verbose mode chat > 0*/
+  unsigned int verbose;
+
   /** */
   std::string normType;
 
@@ -111,7 +115,7 @@ public:
   *  \param double : SearchDirection (optional) -> for Latin
   */
   Solver(const std::string&, const std::string& = DEFAULT_SOLVER, const unsigned int & = DEFAULT_ITER,
-         const double & = DEFAULT_TOL, const std::string & = DEFAULT_NORMTYPE, const double & = DEFAULT_SEARCHDIR);
+         const double & = DEFAULT_TOL, const unsigned int & = DEFAULT_VERBOSE, const std::string & = DEFAULT_NORMTYPE, const double & = DEFAULT_SEARCHDIR);
 
   /** copy constructor
   *  \param a Solver to be copied
@@ -184,6 +188,22 @@ public:
   inline void setMaxIter(const unsigned int& newVal)
   {
     maxIter = newVal;
+  };
+
+  /** get the verbose mode variable
+  *  \return an unsigned int
+  */
+  inline const unsigned int getVerbose() const
+  {
+    return verbose;
+  };
+
+  /** set the verbose mode variable
+  *  \param an unsigned int
+  */
+  inline void setVerbose(const unsigned int& newVal)
+  {
+    verbose = newVal;
   };
 
   /** get tolerance
