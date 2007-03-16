@@ -640,8 +640,28 @@ void LCP::display() const
   cout << "======= LCP display ======" << endl;
   cout << "| sizeOutput : " << sizeOutput << endl;
   cout << "| LCP Matrix M  : " << endl;
-  if (M != NULL) M->display();
-  else cout << "-> NULL" << endl;
+  if (isMSparseBlock)
+  {
+    cout << "| The matrix is Sparse Block." << endl;
+    if (Mspbl != NULL)
+    {
+      cout << "| nbblocks (total number of non null blocks)            " << Mspbl->nbblocks << endl;
+      cout << "| size (number of blocks along a row (or column))       " << Mspbl->size << endl;
+      for (int i = 0; i < Mspbl->size; i++)
+        cout << "| size of the diagonal square block                     " << i << " = " <<  Mspbl->blocksize[i] << endl;
+      for (int i = 0; i < Mspbl->nbblocks; i++)
+      {
+        cout << "|  Row index of the  block                              " << i << " = " <<  Mspbl->RowIndex[i] << endl;
+        cout << "|  Column index of the  block                           " << i << " = " <<  Mspbl->ColumnIndex[i] << endl;
+      }
+    }
+    else cout << "-> NULL" << endl;
+  }
+  else
+  {
+    if (M != NULL) M->display();
+    else cout << "-> NULL" << endl;
+  }
   cout << "| LCP vector q : " << endl;
   if (q != NULL) q->display();
   else cout << "-> NULL" << endl;
