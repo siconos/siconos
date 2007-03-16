@@ -51,6 +51,7 @@ class DynamicalSystemsSet;
  *
  * \todo Correct the computation of M with a correct concatenation process
  * \todo : add "recover" function to start from old values of z and w.
+ * \todo Change the assembleM for a Sparse Block Matrix by a Boost Sparse Matrix of Dense Matrix. Creation of the Class of Sparse Block Matrix
  *
  */
 class LCP : public OneStepNSProblem
