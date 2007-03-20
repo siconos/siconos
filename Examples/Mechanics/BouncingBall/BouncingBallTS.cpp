@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
     OneStepIntegrator * OSI = new Moreau(ball, theta, s);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * osnspb = new LCP(s, "LCP", solverName, 101, 0.0001, "max", 0.6);
+    OneStepNSProblem * osnspb = new LCP(s, "LCP", solverName, 101, 0.0001);
 
     cout << "=== End of model loading === " << endl;
     // =========================== End of model definition ===========================
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
     dataPlot(0, 1) = (*q)(0);
     dataPlot(0, 2) = (*v)(0);
     dataPlot(0, 3) = (*lambda)(0);
-
+    cout << N << endl;
     // --- Time loop ---
     cout << "Start computation ... " << endl;
     // == Simulation, first possible writing ==

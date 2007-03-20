@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
   {
 
     // User-defined main parameters
-    unsigned int dsNumber = 10;      // the number of dynamical systems
+    unsigned int dsNumber = 2;      // the number of dynamical systems
     unsigned int nDof = 3;           // degrees of freedom for beads
     double increment_position = 1;   // initial position increment from one DS to the following
     double increment_velocity = 0;   // initial velocity increment from one DS to the following
@@ -177,8 +177,8 @@ int main(int argc, char* argv[])
     OneStepIntegrator * OSI = new Lsodar(allDS, s);
 
     // -- OneStepNsProblem --
-    OneStepNSProblem * impact = new LCP(s, "impact", solverName, 101, 0.0001, "max", 0.6);
-    OneStepNSProblem * acceleration = new LCP(s, "acceleration", solverName, 101, 0.0001, "max", 0.6);
+    OneStepNSProblem * impact = new LCP(s, "impact", solverName, 101, 0.0001);
+    OneStepNSProblem * acceleration = new LCP(s, "acceleration", solverName, 101, 0.0001);
 
     cout << "=== End of model loading === " << endl;
 

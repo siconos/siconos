@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
   double Rvalue = 1e3;    // resistance
   double Vinit = 10.0;    // initial voltage
   string Modeltitle = "DiodeBridge";
-  string solverName = "NSQP"; // non smooth problem solver algo name.
+  string solverName = "Lemke"; // non smooth problem solver algo name.
 
   try
   {
@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
     Moreau* OSI_RLCD = new Moreau(LSDiodeBridge, theta, StratDiodeBridge);
 
     // One Step non smooth problem
-    LCP* LCP_RLCD = new LCP(StratDiodeBridge, "LCP", solverName, 101, 0.0001, "max", 0.6);
+    LCP* LCP_RLCD = new LCP(StratDiodeBridge, "LCP", solverName, 1001, 0.0001);
 
     // Initialization
     StratDiodeBridge->initialize();
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    SimpleMatrix dataPlot(N + 1, 7);
+    SimpleMatrix dataPlot(N, 7);
 
     // For the initial time step:
     // time
@@ -169,11 +169,8 @@ int main(int argc, char* argv[])
     t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
 
     // --- Time loop  ---
-    while (k < N)
+    for (k = 1 ; k < N ; ++k)
     {
-      // get current time step
-      k++;
-
       // solve ...
       StratDiodeBridge->computeOneStep();
 

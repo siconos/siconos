@@ -50,7 +50,6 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-
   double t0 = 0.0;
   double T = 5e-3;        // Total simulation time
   double h_step = 10.0e-7;// Time step
@@ -100,7 +99,7 @@ int main(int argc, char* argv[])
     Interaction* InterCircuitRLCD = new Interaction("InterCircuitRLCD", Inter_DS, 1, 1, NSLaw, LTIRCircuitRLCD);
 
     // --- Model creation ---
-    Model CircuitRLCD(t0, T, Modeltitle);
+    Model * CircuitRLCD = new Model(t0, T, Modeltitle);
 
     // --- Non Smooth Dynamical system creation ---
 
@@ -108,11 +107,11 @@ int main(int argc, char* argv[])
     allInteractions.insert(InterCircuitRLCD);
 
     NonSmoothDynamicalSystem* NSDSCircuitRLCD = new NonSmoothDynamicalSystem(Inter_DS, allInteractions, false);
-    CircuitRLCD.setNonSmoothDynamicalSystemPtr(NSDSCircuitRLCD);
+    CircuitRLCD->setNonSmoothDynamicalSystemPtr(NSDSCircuitRLCD);
 
     // --- Simulation specification---
 
-    TimeDiscretisation* TiDiscRLCD = new TimeDiscretisation(h_step, &CircuitRLCD);
+    TimeDiscretisation* TiDiscRLCD = new TimeDiscretisation(h_step, CircuitRLCD);
 
     TimeStepping* StratCircuitRLCD = new TimeStepping(TiDiscRLCD);
 
@@ -120,22 +119,22 @@ int main(int argc, char* argv[])
     double theta = 1.0;
     Moreau* OSI_RLCD = new Moreau(LSCircuitRLCD, theta, StratCircuitRLCD);
 
-    LCP* LCP_RLCD = new LCP(StratCircuitRLCD, "LCP", solverName, 101, 1e-8, "max", 0.6);
+    LCP* LCP_RLCD = new LCP(StratCircuitRLCD, "LCP", solverName, 101, 1e-8);
 
     StratCircuitRLCD->initialize();
     cout << " -----> End of initialization." << endl;
 
-    int k = 0;
     int N = TiDiscRLCD->getNSteps(); // Number of time steps
+    int k = 0;
 
     // --- Get the values to be plotted ---
     // -> saved in a matrix dataPlot
-    SimpleMatrix dataPlot(N + 1, 6);
+    SimpleMatrix dataPlot(N, 6);
 
     // For the initial time step:
 
     // time
-    dataPlot(k, 0) = k * h_step;
+    dataPlot(k, 0) = CircuitRLCD->getCurrentT();
 
     // inductor voltage
     dataPlot(k, 1) = (LSCircuitRLCD->getX())(0);
@@ -151,28 +150,18 @@ int main(int argc, char* argv[])
 
     dataPlot(k, 5) = (LSCircuitRLCD->getR())(0);
 
-    // --- Compute elapsed time ---
-    double t1, t2, elapsed;
-    struct timeval tp;
-    int rtn;
-    clock_t start, end;
-    double elapsed2;
-    start = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t1 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
+    boost::timer t;
+    t.restart();
 
     // --- Time loop  ---
-    while (k < N)
+    for (k = 1 ; k < N ; ++k)
     {
-      // get current time step
-      k++;
-
       // solve ...
       StratCircuitRLCD->computeOneStep();
 
       // --- Get values to be plotted ---
       // time
-      dataPlot(k, 0) = k * h_step;
+      dataPlot(k, 0) = CircuitRLCD->getCurrentT();
 
       // inductor voltage
       dataPlot(k, 1) = (LSCircuitRLCD->getX())(0);
@@ -192,18 +181,9 @@ int main(int argc, char* argv[])
       StratCircuitRLCD->nextStep();
 
     }
-
-
-    // --- elapsed time computing ---
-    end = clock();
-    rtn = gettimeofday(&tp, NULL);
-    t2 = (double)tp.tv_sec + (1.e-6) * tp.tv_usec;
-    elapsed = t2 - t1;
-    elapsed2 = (end - start) / (double)CLOCKS_PER_SEC;
-    cout << "time = " << elapsed << " --- cpu time " << elapsed2 << endl;
-
     // Number of time iterations
-    cout << "Number of iterations done: " << k << endl;
+    cout << "Number of iterations done: " << k - 1 << endl;
+    cout << "Computation Time " << t.elapsed()  << endl;
 
     // dataPlot (ascii) output
     ioMatrix io("CircuitRLCD.dat", "ascii");
@@ -219,7 +199,7 @@ int main(int argc, char* argv[])
     delete Int_B ;
     delete LSCircuitRLCD;
     delete NSDSCircuitRLCD;
-
+    delete CircuitRLCD;
 
 
   }

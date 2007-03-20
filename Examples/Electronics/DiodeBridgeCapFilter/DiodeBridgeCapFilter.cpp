@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
     //Moreau* OSI_LS2DiodeBridgeCapFilter = new Moreau(LS2DiodeBridgeCapFilter,theta,StratDiodeBridgeCapFilter);
     Moreau* OSI_LS1DiodeBridgeCapFilter = new Moreau(Inter_DS, theta, StratDiodeBridgeCapFilter);
 
-    LCP* LCP_DiodeBridgeCapFilter = new LCP(StratDiodeBridgeCapFilter, "LCP", "NSQP", 100, 1e-8, "max", 0.6);
+    LCP* LCP_DiodeBridgeCapFilter = new LCP(StratDiodeBridgeCapFilter, "LCP", "PGS", 10000, 1e-7);
 
     cout << " -----  Model description ------" << endl;
     DiodeBridgeCapFilter.display();
