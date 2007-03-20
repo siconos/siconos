@@ -52,7 +52,7 @@ double SolverXML::getTolerance() const
 
 unsigned int SolverXML::getVerbose() const
 {
-  if (xmlHasProp(rootNode, (xmlChar *)"maxIter"))
+  if (xmlHasProp(rootNode, (xmlChar *)"verbose"))
     return SiconosDOMTreeTools::getAttributeValue<int>(rootNode, "verbose");
   else return DEFAULT_VERBOSE;
 }
