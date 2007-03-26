@@ -70,12 +70,12 @@ void test_lcp_series(int n , double *vec , double *q)
   int i, j;
   int nonsymmetric;
   int incx = 1, incy = 1;
-  int info1 = -1, info2 = -1, info3 = -1, info4 = -1, info5 = -1, info6 = -1, info7 = -1, info8 = -1;
+  int info1 = -1, info2 = -1, info3 = -1, info4 = -1, info5 = -1, info6 = -1, info7 = -1, info8 = -1, info9 = -1;
 
   double comp, diff, alpha, beta;
 
-  double *z1, *z2, *z3, *z4, *z5, *z6, *z7, *z8;
-  double *w1, *w2, *w3, *w4, *w5, *w6, *w7, *w8;
+  double *z1, *z2, *z3, *z4, *z5, *z6, *z7, *z8, *z9;
+  double *w1, *w2, *w3, *w4, *w5, *w6, *w7, *w8, *w9;
 
   char NT = 'N';
 
@@ -95,17 +95,20 @@ void test_lcp_series(int n , double *vec , double *q)
   w7 = malloc(n * sizeof(double));
   z8 = malloc(n * sizeof(double));
   w8 = malloc(n * sizeof(double));
+  z9 = malloc(n * sizeof(double));
+  w9 = malloc(n * sizeof(double));
 
   /* Method definition */
 
-  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp8 = { "Latin_w"    , 1000 , 1e-6 , 0.3 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp7 = { "NewtonMin",   10   , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-6 , 0.3 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp8 = { "Latin_w"    , 1000 , 1e-6 , 0.3 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp7 = { "NewtonMin",   10   , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp9 = { "RPGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
 
   nonsymmetric = 0;
 
@@ -225,6 +228,18 @@ void test_lcp_series(int n , double *vec , double *q)
 
   info8 = lcp_solver(vec , q , &n , &method_lcp8 , z8 , w8);
 
+  /* #9 RPGS TEST */
+#ifdef BAVARD
+  printf("**** RPGS TEST ****\n");
+#endif
+  for (i = 0 ; i < n ; ++i)
+  {
+    z9[i] = 0.0;
+    w9[i] = 0.0;
+  }
+
+  info9 = lcp_solver(vec , q , &n , &method_lcp9 , z9 , w9);
+
 
 #ifdef BAVARD
   /*  printf(" *** ************************************** ***\n"); */
@@ -239,11 +254,11 @@ void test_lcp_series(int n , double *vec , double *q)
 
   printf(" ****** z = ********************************\n");
   for (i = 0 ; i < n ; i++)
-    printf("\n QP: %14.7e     NSQP: %14.7e   Lemke: %14.7e    Newton: %14.7e \n", z4[i], z5[i], z6[i], z7[i]);
+    printf("QP: %14.7e     NSQP: %14.7e   Lemke: %14.7e    Newton: %14.7e    RPGS: %14.7e \n", z4[i], z5[i], z6[i], z7[i], z9[i]);
 
   printf(" ****** w = ********************************\n");
   for (i = 0 ; i < n ; i++)
-    printf("\n QP: %14.7e     NSQP: %14.7e   Lemke: %14.7e    Newton: %14.7e \n", w4[i], w5[i], w6[i], w7[i]);
+    printf("QP: %14.7e     NSQP: %14.7e   Lemke: %14.7e    Newton: %14.7e    RPGS: %14.7e \n", w4[i], w5[i], w6[i], w7[i], w9[i]);
 
   printf("\n\n");
   printf(" INFO RESULT\n");
@@ -311,7 +326,14 @@ void test_lcp_series(int n , double *vec , double *q)
   dgemv_(&NT , &n , &n , &beta , vec , &n , z7 , &incx , &alpha , w7 , &incy);
   diff = dnrm2_(&n , w7 , &incx);
 
-  printf("\n    Newton (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g | \n \n ", info7, method_lcp7.iter, method_lcp7.err, comp, diff);
+  printf("\n    Newton (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g |", info7, method_lcp7.iter, method_lcp7.err, comp, diff);
+
+  comp = ddot_(&n , z9 , &incx , w9 , &incy);
+  daxpy_(&n , &alpha , q , &incx , w9 , &incy);
+  dgemv_(&NT , &n , &n , &beta , vec , &n , z9 , &incx , &alpha , w9 , &incy);
+  diff = dnrm2_(&n , w9 , &incx);
+
+  printf("\n    RPGS   (LOG:%1d)|      %5d | %10.4g | %10.4g | %10.4g | \n \n ", info9, method_lcp9.iter, method_lcp9.err, comp, diff);
 
 #endif
   free(z1);
@@ -330,6 +352,8 @@ void test_lcp_series(int n , double *vec , double *q)
   free(w7);
   free(z8);
   free(w8);
+  free(z9);
+  free(w9);
 
 
 }
@@ -342,15 +366,15 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 
   int i, dim;
   int incx = 1, incy = 1;
-  int info1 = -1, info2 = -1, info3 = -1, info4 = -1, info5 = -1, info6 = -1, info7 = -1;
-  int iter1, iter2, iter3, iter4, iter5, iter6, iter7;
-  int titer1, titer2, titer3, titer4, titer5, titer6, titer7;
+  int info1 = -1, info2 = -1, info3 = -1, info4 = -1, info5 = -1, info6 = -1, info7 = -1, info8 = -1;
+  int iter1, iter2, iter3, iter4, iter5, iter6, iter7, iter8;
+  int titer1, titer2, titer3, titer4, titer5, titer6, titer7, titer8;
 
   double comp;
-  double err1, err2, err3, err4, err5, err6, err7;
+  double err1, err2, err3, err4, err5, err6, err7, err8;
 
-  double *z1, *z2, *z3, *z4, *z5, *z6, *z7;
-  double *w1, *w2, *w3, *w4, *w5, *w6, *w7;
+  double *z1, *z2, *z3, *z4, *z5, *z6, *z7, *z8;
+  double *w1, *w2, *w3, *w4, *w5, *w6, *w7, *w8;
 
   dim = 0;
   for (i = 0; i < blmat->size; i++) dim += blmat->blocksize[i];
@@ -369,16 +393,19 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
   w6 = malloc(dim * sizeof(double));
   z7 = malloc(dim * sizeof(double));
   w7 = malloc(dim * sizeof(double));
+  z8 = malloc(dim * sizeof(double));
+  w8 = malloc(dim * sizeof(double));
 
   /* Method definition */
 
-  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
-  static method_lcp method_lcp7 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp1 = { "NLGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp2 = { "CPG"        , 1000 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp3 = { "Latin"      , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp4 = { "QP"         , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp5 = { "NSQP"       , 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp6 = { "LexicoLemke", 1000 , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp7 = { "NewtonMin"  , 10   , 1e-8 , 0.7 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
+  static method_lcp method_lcp8 = { "RPGS"       , 1001 , 1e-8 , 0.6 , 1.0 , 1.0 , 1 , "N2" , 0 , 0.0 };
 
 
   /* #1 NLGS TEST */
@@ -430,7 +457,7 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 
   info6 = lcp_solver_block(blmat , q , &method_lcp6 , z6 , w6 , &iter6 , &titer6 , &err6);
 
-  /* #7 NEWTONMIN TEST */
+  /* #6 NEWTONMIN TEST */
 #ifdef BAVARD
   printf("**** Newton TEST **\n");
 #endif
@@ -438,13 +465,23 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
 
   info7 = lcp_solver_block(blmat , q , &method_lcp7 , z7 , w7 , &iter7 , &titer7 , &err7);
 
-  /* #8 LATIN TEST */
+  /* #7 LATIN TEST */
 #ifdef BAVARD
   printf("**** LATIN TEST ***\n");
 #endif
   for (i = 0 ; i < dim ; ++i) z3[i] = 0.0;
 
   info3 = lcp_solver_block(blmat , q , &method_lcp3 , z3 , w3 , &iter3 , &titer3 , &err3);
+
+  /* #8 RPGS TEST */
+#ifdef BAVARD
+  printf("**** RPGS TEST ****\n");
+#endif
+
+  for (i = 0 ; i < dim ; ++i) z8[i] = 0.0;
+
+  info8 = lcp_solver_block(blmat , q , &method_lcp8 , z8 , w8 , &iter8 , &titer8 , &err8);
+
 
 #ifdef BAVARD
   printf(" *** z ************************************** ***\n");
@@ -462,6 +499,8 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
   for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z7[i]);
   printf("\n  LATIN RESULT : ");
   for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z3[i]);
+  printf("\n   RPGS RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , z8[i]);
   printf("\n\n");
   printf(" *** w ************************************** ***\n");
   printf("\n   NLGS RESULT : ");
@@ -478,6 +517,8 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
   for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w7[i]);
   printf("\n  LATIN RESULT : ");
   for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w3[i]);
+  printf("\n   RPGS RESULT : ");
+  for (i = 0 ; i < dim ; ++i) printf(" %14.7e " , w8[i]);
   printf("\n\n");
   printf(" INFO RESULT\n");
 
@@ -515,6 +556,11 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
   comp = ddot_(&dim , z3 , &incx , w3 , &incy);
 
   printf("\n    LATIN  (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info3, iter3, titer3, err3, comp);
+
+  comp = ddot_(&dim , z8 , &incx , w8 , &incy);
+
+  printf("\n    RPGS   (LOG:%1d)|      %5d | %5d | %10.4g | %10.4g |", info8, iter8, titer8, err8, comp);
+
   printf("\n \n");
 
 #endif
@@ -533,6 +579,8 @@ void test_lcp_block_series(SparseBlockStructuredMatrix *blmat , double *q)
   free(w6);
   free(z7);
   free(w7);
+  free(z8);
+  free(w8);
 }
 /*
  ******************************************************************************
@@ -657,7 +705,7 @@ void test_matrix(void)
   iter  = 0;
   criteria = 0.0;
 
-  NBTEST = 9;
+  NBTEST = 10;
 
   /****************************************************************/
 #ifdef BAVARD
@@ -739,6 +787,14 @@ void test_matrix(void)
       if ((LCPfile = fopen("MATRIX/trivial3.dat", "r")) == NULL)
       {
         perror("fopen LCPfile: trivial3.dat");
+        exit(1);
+      }
+      break;
+    case 9:
+      printf("\n\n BUCKCONVERTERREGUL2 LCP ");
+      if ((LCPfile = fopen("MATRIX/buckconverterregul2.dat", "r")) == NULL)
+      {
+        perror("fopen LCPfile: buckconverterregul2.dat");
         exit(1);
       }
       break;

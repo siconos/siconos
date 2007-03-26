@@ -52,6 +52,7 @@
 *
 *   - Lemke    for lcp_lexicolemke
 *   - PGS      for lcp_pgs
+*   - RPGS     for lcp_rpgs
 *   - CPG      for lcp_cpg
 *   - QP       for lcp_qp
 *   - NSQP     for lcp_nsqp
@@ -114,10 +115,12 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
   double qs, err, num, den;
 
   double *adrcurbl, *adrbldiag;
-  double *ww, *rhs;
+  double *rhs;
+  /*  double *ww;*/
 
   char NOTRANS = 'N';
 
+  char savename[40];
 
   *it_end   = 0;
   *itt_end   = 0;
@@ -161,7 +164,7 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
     return 0;
   }
 
-  ww   = (double*)malloc(n * sizeof(double));
+  /*  ww   = ( double* )malloc(         n * sizeof( double ) );*/
   rhs  = (double*)malloc(blsizemax * sizeof(double));
 
   incx = 1;
@@ -170,11 +173,11 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
 
   /* Initialization of z and w */
 
-  for (i = 0 ; i < n ; i++) z[i] = 0.;
+  //   for( i = 0 ; i < n ; i++ ) z[i] = 0.;
 
   incx = 1;
   incy = 1;
-  dcopy_((integer *)&n , q , (integer *)&incx , w , (integer *)&incy);
+  //   dcopy_( (integer *)&n , q , (integer *)&incx , w , (integer *)&incy );
 
 
   /*   test on matrix structure : is there null blocks rows ? */
@@ -185,6 +188,7 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
     if (rowcurbl > rowprecbl + 1)
     {
       printf(" Null blocks row in LCP matrix !!!\n");
+      free(rhs);
       return 1;
     }
     rowprecbl = rowcurbl;
@@ -192,21 +196,22 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
   if (rowcurbl != nbblrow - 1)
   {
     printf(" Null blocks row in LCP matrix !!!\n");
+    free(rhs);
     return 1;
   }
 
   iter = 0;
   err  = 1.;
 
-  while ((iter < itermax) && (err > tol))
+  /*  while( ( iter < itermax ) && ( err > tol ) ){*/
+  while ((iter < itermax) && (info))
   {
 
     iter++;
 
-    incx = 1;
-    incy = 1;
-
-    dcopy_((integer *)&n , w , (integer *)&incx , ww , (integer *)&incy);
+    /*    incx = 1;
+        incy = 1;
+        dcopy_( (integer *)&n , w , (integer *)&incx , ww , (integer *)&incy );*/
 
     rowprecbl = -1;
     rowsize = 0;
@@ -228,13 +233,19 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
             totaliter += pt->lcp.iter;
             if (info1 > 0)
             {
-              printf(" Sub LCP solver failed at global iteration %d in lcp_solver_block !!!\n", iter);
+              if (pt->lcp.chat > 0)
+              {
+                printf(" Sub LCP solver failed at global iteration %d in lcp_solver_block", iter);
+                printf(" for block(%d,%d)\n", rowprecbl, rowprecbl);
+              }
+              free(rhs);
               return 1;
             }
           }
           else
           {
             printf("NULL diagonal block in LCP !!!\n");
+            free(rhs);
             return 1;
           }
         }
@@ -276,31 +287,44 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
     if (adrbldiag != NULL)
     {
       /* Local LCP resolution  */
+      strcpy(savename, pt->lcp.name);
+      strcpy(pt->lcp.name, "NLGS");
+
       pt->lcp.iter = 0;
       info1 = lcp_solver(adrbldiag , rhs , &rowsize , pt , &z[indicrow] , &w[indicrow]);
+
+      strcpy(pt->lcp.name, savename);
+
       totaliter += pt->lcp.iter;
       if (info1 > 0)
       {
-        printf(" Sub LCP solver failed at global iteration %d in lcp_solver_block !!!\n", iter);
+        if (pt->lcp.chat > 0)
+        {
+          printf(" Sub LCP solver failed at global iteration %d in lcp_solver_block", iter);
+          printf(" for block(%d,%d)\n", rowprecbl, rowprecbl);
+        }
+        free(rhs);
         return 1;
       }
     }
     else
     {
       printf("NULL diagonal block in LCP !!!\n");
+      free(rhs);
       return 1;
     }
 
     /* **** Criterium convergence **** */
 
-    qs   = -1;
-    incx =  1;
-    incy =  1;
+    info = filter_result_LCP_block(blmat, q, z, tol, pt->lcp.chat, w);
+    /*    qs   = -1;
+        incx =  1;
+        incy =  1;
 
-    daxpy_((integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy);
+        daxpy_( (integer *)&n , &qs , w , (integer *)&incx , ww , (integer *)&incy );
 
-    num = dnrm2_((integer *)&n, ww , (integer *)&incx);
-    err = num * den;
+        num = dnrm2_( (integer *)&n, ww , (integer *)&incx );
+        err = num*den;*/
     /* **** ********************* **** */
   }
 
@@ -308,30 +332,29 @@ int lcp_solver_block(SparseBlockStructuredMatrix *blmat, double *q, method *pt ,
   *itt_end = totaliter;
   *res     = err;
 
-  free(ww);
+  /*  free(ww);*/
   free(rhs);
-  /*  local_solver = NULL; */
 
   if (pt->lcp.chat > 0)
   {
-    if (err > tol)
+    /*    if( err > tol ){*/
+    /*      printf( " The residue is : %g \n", err );*/
+    /*      return 1;*/
+    if (info)
     {
       printf(" No convergence of lcp_solver_block after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", err);
-      return 1;
     }
     else
     {
       printf(" Convergence of lcp_solver_block after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", err);
+      /*      printf( " The residue is : %g \n", err );*/
     }
   }
-  else
-  {
-    if (err > tol) return 1;
-  }
+  /*  else{
+      if( err > tol ) return 1;
+    }*/
 
-  info = filter_result_LCP_block(blmat, q, z, tol, pt->lcp.chat, w);
+  /*  info = filter_result_LCP_block(blmat,q,z,tol,pt->lcp.chat,w);*/
 
   return info;
 

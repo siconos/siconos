@@ -73,6 +73,7 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
   const char lcpkey7[15] = "LexicoLemke", lcpkey8[15] = "NewtonMin";
   const char lcpkey9[15] = "Latin_w", lcpkey10[15] = "NewtonFB", lcpkey11[15] = "PSOR";
   const char lcpkey12[10] = "NLGS";
+  const char lcpkey13[10] = "RPGS";
 
   // Remark: Lemke = LexicoLemke. Only one solver is called: lexicoLemke.
 
@@ -268,11 +269,30 @@ int lcp_solver(double *vec, double *q , int *n , method *pt , double *z , double
     pt->lcp.err  = dparamLCP[1];
 
   }
+  /* **** RPGS (Regularized Projected Gauss-Seidel) Solver **** */
+
+  else if (strcmp(pt->lcp.name , lcpkey13) == 0)
+  {
+
+    iparamLCP[0] = pt->lcp.itermax;
+    iparamLCP[1] = pt->lcp.chat;
+    dparamLCP[0] = pt->lcp.tol;
+    dparamLCP[1] = pt->lcp.rho;
+    /* dparamLCP[2] = pt->lcp.relax;*/
+
+    lcp_rpgs(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    pt->lcp.iter = iparamLCP[2];
+    pt->lcp.err  = dparamLCP[3];
+
+  }
 
   else printf("Warning : Unknown solver : %s\n", pt->lcp.name);
 
   /* Checking validity of z found  */
-  if (info == 0) info = filter_result_LCP(*n, vec, q, z, pt->lcp.tol, pt->lcp.chat, w);
+  /*  if (info == 0) info = filter_result_LCP(*n,vec,q,z,pt->lcp.tol,pt->lcp.chat,w);*/
+  if ((strcmp(pt->lcp.name , lcpkey2) != 0) && (strcmp(pt->lcp.name , lcpkey13) != 0))
+    info = filter_result_LCP(*n, vec, q, z, pt->lcp.tol, pt->lcp.chat, w);
 
   return info;
 

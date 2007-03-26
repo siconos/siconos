@@ -105,6 +105,7 @@ typedef struct
   \param tol        convergence criteria value.
   \param k_latin    latin coefficient.
   \param relax      relaxation coefficient.
+  \param rho        regularization coefficient
   \param chat       output boolean ( 0 = no output log ).
   \param normType   name norm (not yet available).
 
@@ -120,6 +121,7 @@ typedef struct
   double tol;
   double k_latin;
   double relax;
+  double rho;
   int    chat;
   char   normType[64];
   int    iter;
@@ -312,6 +314,9 @@ extern  "C" void lcp_cpg(int *nn , double *vec , double *q , double *z , double 
 extern  "C" void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                          int *iparamLCP , double *dparamLCP);
 
+extern  "C" void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                          int *iparamLCP , double *dparamLCP);
+
 extern  "C" void lcp_psor(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                           int *iparamLCP , double *dparamLCP);
 
@@ -449,6 +454,8 @@ The C routines that solve LCP:
 
 
 lcp_pgs.c
+
+lcp_rpgs.c
 
 lcp_latin.c
 
@@ -637,6 +644,9 @@ extern void lcp_cpg(int *nn , double *vec , double *q , double *z , double *w , 
 
 extern void lcp_pgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                     int *iparamLCP , double *dparamLCP);
+
+extern void lcp_rpgs(int *nn , double *vec , double *q , double *z , double *w , int *info ,
+                     int *iparamLCP , double *dparamLCP);
 
 extern void lcp_nsqp(int *nn , double *vec , double *q , double *z , double *w , int *info ,
                      int *iparamLCP , double *dparamLCP);
