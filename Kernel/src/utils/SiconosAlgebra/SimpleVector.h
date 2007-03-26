@@ -211,6 +211,12 @@ public:
    */
   void setValue(unsigned int, double);
 
+  /** set the elements starting from position i with input vector
+   *  \param an unsigned int i
+   *  \param a SimpleVector
+   */
+  void setBlock(unsigned int, const SimpleVector&);
+
   /** get the element at position i in the vector
    *  \param an integer i
    *  \exception SiconosVectorException

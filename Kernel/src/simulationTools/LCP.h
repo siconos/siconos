@@ -26,6 +26,9 @@ Linear Complementarity Problem
 #include "OneStepNSProblem.h"
 #include "SimpleVector.h"
 #include "SimpleMatrix.h"
+#include <sys/time.h>
+
+using namespace std;
 
 class OneStepNSProblem;
 class DynamicalSystemsSet;
@@ -80,6 +83,18 @@ private:
   bool isMSparseBlock;
 
   SparseBlockStructuredMatrix *Mspbl;
+
+  clock_t LCP_CPUtime;
+  clock_t LCP_CPUtime_std;
+  clock_t LCP_CPUtime_bck;
+
+  int statnbsolve;
+  int statsolverstd;
+  int nbiterstd;
+  int nbiterbck;
+
+  Solver* solverBackup;
+
   /** default constructor
   */
   LCP();
@@ -100,9 +115,11 @@ public:
    *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
    *  \param string : NormType (optional) -> never used at the time
    *  \param double : SearchDirection (optional) -> for Latin
+   *  \param double : Rho (optional) -> for RPGS (regularization parameter)
    */
   LCP(Simulation *, const std::string,  const std::string = DEFAULT_SOLVER, const unsigned int = DEFAULT_ITER, const double = DEFAULT_TOL,
-      const unsigned int = DEFAULT_VERBOSE, const std::string = DEFAULT_NORMTYPE, const double = DEFAULT_SEARCHDIR);
+      const unsigned int = DEFAULT_VERBOSE, const std::string = DEFAULT_NORMTYPE, const double = DEFAULT_SEARCHDIR,
+      const double = DEFAULT_RHO);
 
   /** constructor from data
   *  \param Solver* : pointer to object that contains solver algorithm and formulation
@@ -298,6 +315,24 @@ public:
   * \return a pointer on the problem if it is of the right type, NULL otherwise
   */
   static LCP* convert(OneStepNSProblem* osnsp);
+
+  inline clock_t getCPUtime()
+  {
+    return LCP_CPUtime;
+  }
+
+  inline void resetStat()
+  {
+    statnbsolve = 0;
+    statsolverstd = 0;
+    LCP_CPUtime = 0;
+    LCP_CPUtime_std = 0;
+    LCP_CPUtime_bck = 0;
+    nbiterstd = 0;
+    nbiterbck = 0;
+  }
+
+  void printStat();
 
 };
 

@@ -61,7 +61,7 @@ OneStepNSProblem::OneStepNSProblem(const string pbType, OneStepNSProblemXML* osn
     solver = new Solver(onestepnspbxml->getSolverXMLPtr(), nspbType);
   else // solver = default one
   {
-    solver = new Solver(nspbType, DEFAULT_SOLVER, DEFAULT_ITER, DEFAULT_TOL, DEFAULT_VERBOSE, DEFAULT_NORMTYPE, DEFAULT_SEARCHDIR);
+    solver = new Solver(nspbType, DEFAULT_SOLVER, DEFAULT_ITER, DEFAULT_TOL, DEFAULT_VERBOSE, DEFAULT_NORMTYPE, DEFAULT_SEARCHDIR, DEFAULT_RHO);
     cout << " Warning, no solver defined in non-smooth problem - Default one is used" << endl;
     solver->display();
   }

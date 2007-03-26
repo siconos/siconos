@@ -96,6 +96,12 @@ public:
   *  \return double
   */
   double getSearchDirection() const;
+
+  /** Return the rho value for the algorithm
+  *  \return double
+  */
+  double getRho() const;
+
 };
 
 

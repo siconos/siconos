@@ -69,13 +69,14 @@ LCP::LCP(OneStepNSProblemXML* onestepnspbxml, Simulation* newSimu):
 
 // Constructor from a set of data (appart from Simulation and id, all arguments are optional)
 LCP::LCP(Simulation* newSimu, const string newId, const string newSolver, const unsigned int MaxIter,
-         const double  Tolerance, const unsigned int Verbose,  const string  NormType, const double  SearchDirection):
+         const double  Tolerance, const unsigned int Verbose,  const string  NormType, const double  SearchDirection, const double Rho):
   OneStepNSProblem("LCP", newSimu, newId), w(NULL), z(NULL), M(NULL), q(NULL),
   isWAllocatedIn(false), isZAllocatedIn(false), isMAllocatedIn(false), isQAllocatedIn(false) ,
   isMSparseBlock(false) , Mspbl(NULL)
 {
   // set solver:
-  solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, Verbose, NormType, SearchDirection);
+  solver = new Solver(nspbType, newSolver, MaxIter, Tolerance, Verbose, NormType, SearchDirection, Rho);
+  solverBackup = new Solver(nspbType, "LexicoLemke", MaxIter, Tolerance, Verbose, NormType, SearchDirection, Rho);
   isSolverAllocatedIn = true;
 }
 
@@ -213,6 +214,10 @@ void LCP::initialize()
   // This function performs all steps that are not time dependant
   // General initialize for OneStepNSProblem
   OneStepNSProblem::initialize();
+
+  // ensure a large number of pivots for LexicoLemke backup solver
+  if ((10 * sizeOutput) > solverBackup->getMaxIter()) solverBackup->setMaxIter(10 * sizeOutput);
+  solverBackup->setSolvingMethod();
 
   // get topology
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();
@@ -438,7 +443,10 @@ void LCP::assembleM() //
     Mspbl->nbblocks = 0;
     for (itRow = indexSet->begin(); itRow != indexSet->end(); ++itRow)
       for (itCol = blocks[*itRow].begin(); itCol != blocks[*itRow].end(); ++itCol)
-        if ((indexSet->find((*itCol).first)) != indexSet->end())(Mspbl->nbblocks)++;
+        if ((indexSet->find((*itCol).first)) != indexSet->end())
+        {
+          if (blocks[*itRow][(*itCol).first] != NULL)(Mspbl->nbblocks)++;
+        }
 
     // allocation of Mspbl coordinates vectors and non null block pointers vector
     Mspbl->RowIndex = (int*)malloc(Mspbl->nbblocks * sizeof(int));
@@ -457,35 +465,38 @@ void LCP::assembleM() //
       {
         if ((indexSet->find((*itCol).first)) != indexSet->end())
         {
-          i = 0;
-          isMoreFar = true;
-          rowind = blocksIndexes[*itRow];
-          colind = blocksIndexes[(*itCol).first];
-          while (i < nblins && isMoreFar)
+          if (blocks[*itRow][(*itCol).first] != NULL)
           {
-            isMoreFar = (rowind > Mspbl->RowIndex[i]) || (rowind == Mspbl->RowIndex[i] && colind > Mspbl->ColumnIndex[i]);
-            i++;
-          }
-
-          if (!isMoreFar)  // insert new block among existing blocks
-          {
-            for (int j = nblins ; j >= i ; j--)
+            i = 0;
+            isMoreFar = true;
+            rowind = blocksIndexes[*itRow];
+            colind = blocksIndexes[(*itCol).first];
+            while (i < nblins && isMoreFar)
             {
-              Mspbl->RowIndex[j] = Mspbl->RowIndex[j - 1];
-              Mspbl->ColumnIndex[j] = Mspbl->ColumnIndex[j - 1];
-              Mspbl->block[j] = Mspbl->block[j - 1];
+              isMoreFar = (rowind > Mspbl->RowIndex[i]) || (rowind == Mspbl->RowIndex[i] && colind > Mspbl->ColumnIndex[i]);
+              i++;
             }
-            Mspbl->RowIndex[i - 1] = rowind;
-            Mspbl->ColumnIndex[i - 1] = colind;
-            Mspbl->block[i - 1] = (blocks[*itRow][(*itCol).first])->getArray();
+
+            if (!isMoreFar)  // insert new block among existing blocks
+            {
+              for (int j = nblins ; j >= i ; j--)
+              {
+                Mspbl->RowIndex[j] = Mspbl->RowIndex[j - 1];
+                Mspbl->ColumnIndex[j] = Mspbl->ColumnIndex[j - 1];
+                Mspbl->block[j] = Mspbl->block[j - 1];
+              }
+              Mspbl->RowIndex[i - 1] = rowind;
+              Mspbl->ColumnIndex[i - 1] = colind;
+              Mspbl->block[i - 1] = (blocks[*itRow][(*itCol).first])->getArray();
+            }
+            else      // insert new block at the end of existing blocks (i == nblins)
+            {
+              Mspbl->RowIndex[i] = rowind;
+              Mspbl->ColumnIndex[i] = colind;
+              Mspbl->block[i] = (blocks[*itRow][(*itCol).first])->getArray();
+            }
+            nblins++;
           }
-          else      // insert new block at the end of existing blocks (i == nblins)
-          {
-            Mspbl->RowIndex[i] = rowind;
-            Mspbl->ColumnIndex[i] = colind;
-            Mspbl->block[i] = (blocks[*itRow][(*itCol).first])->getArray();
-          }
-          nblins++;
         }
       }
     }
@@ -578,6 +589,8 @@ void LCP::computeQ(const double time)
 
 void LCP::compute(const double time)
 {
+  clock_t startLCPsolve, startLCPuni, timeLCPuni;
+
   // --- Prepare data for LCP computing ---
   preCompute(time);
 
@@ -590,11 +603,91 @@ void LCP::compute(const double time)
     double err;
 
     method solvingMethod = *(solver->getSolvingMethodPtr());
-    if (isMSparseBlock)
-      info = lcp_solver_block(Mspbl , q->getArray() , &solvingMethod , z->getArray() , w->getArray() , &iter , &titer , &err);
-    else
-      info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
 
+    SimpleVector zprev(sizeOutput), wprev(sizeOutput);
+    zprev = *z;
+    wprev = *w;
+
+    if (isMSparseBlock)
+    {
+      startLCPsolve = clock();
+      startLCPuni = clock();
+      info = lcp_solver_block(Mspbl , q->getArray() , &solvingMethod , z->getArray() , w->getArray() , &iter , &titer , &err);
+      timeLCPuni = clock() - startLCPuni;
+
+      if (info != 0)
+      {
+        solvingMethod = *(solverBackup->getSolvingMethodPtr());
+        *z = zprev;
+        *w = wprev;
+
+        startLCPuni = clock();
+        info = lcp_solver_block(Mspbl , q->getArray() , &solvingMethod , z->getArray() , w->getArray() , &iter , &titer , &err);
+        timeLCPuni = clock() - startLCPuni;
+
+        LCP_CPUtime_bck += timeLCPuni;
+        nbiterbck += iter;
+      }
+      else
+      {
+        LCP_CPUtime_std += timeLCPuni;
+        nbiterstd += iter;
+        statsolverstd++;
+      }
+
+      LCP_CPUtime += (clock() - startLCPsolve);
+      statnbsolve++;
+
+    }
+    else
+    {
+
+      startLCPsolve = clock();
+      startLCPuni = clock();
+      info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
+      timeLCPuni = clock() - startLCPuni;
+
+      if (info != 0)
+      {
+        solvingMethod = *(solverBackup->getSolvingMethodPtr());
+        *z = zprev;
+        *w = wprev;
+
+        startLCPuni = clock();
+        info = lcp_solver(M->getArray(), q->getArray(), &Nlcp, &solvingMethod, z->getArray(), w->getArray());
+        timeLCPuni = clock() - startLCPuni;
+
+        LCP_CPUtime_bck += timeLCPuni;
+        nbiterbck += solvingMethod.lcp.iter;
+      }
+      else
+      {
+        LCP_CPUtime_std += timeLCPuni;
+        nbiterstd += solvingMethod.lcp.iter;
+        statsolverstd++;
+      }
+
+      LCP_CPUtime += (clock() - startLCPsolve);
+      statnbsolve++;
+
+    } // end if (isMSparseBlock)
+
+    if (info != 0)
+    {
+      cout << " Pb LCP !!! " << endl;
+
+      cout << "q = [ ";
+      for (unsigned int i = 0; i < sizeOutput - 1; i++) cout << (*q)(i) << " ; ";
+      cout << (*q)(sizeOutput - 1) << " ]" << endl;
+
+      cout << "z = [ ";
+      for (unsigned int i = 0; i < sizeOutput - 1; i++) cout << (*z)(i) << " ; ";
+      cout << (*z)(sizeOutput - 1) << " ]" << endl;
+
+      cout << "w = [ ";
+      for (unsigned int i = 0; i < sizeOutput - 1; i++) cout << (*w)(i) << " ; ";
+      cout << (*w)(sizeOutput - 1) << " ]" << endl;
+    }
     // \warning : info value and signification depends on solver type ...
     check_solver(info);
     // --- Recover the desired variables from LCP output ---
@@ -703,4 +796,22 @@ LCP* LCP::convert(OneStepNSProblem* osnsp)
   LCP* lcp = dynamic_cast<LCP*>(osnsp);
   return lcp;
 }
+
+void LCP::printStat()
+{
+  cout << " CPU time for LCP solving : " << LCP_CPUtime / (double)CLOCKS_PER_SEC << endl;
+  cout << " Percentage of LCP solved with standard solver ( " << solver->getSolverAlgorithmName() << " ) = ";
+  cout << (100.0 * statsolverstd) / (double)statnbsolve << endl;
+  if (statsolverstd)
+  {
+    cout << " CPU time per LCP standard solving : " << LCP_CPUtime_std / (statsolverstd * (double)CLOCKS_PER_SEC) << endl;
+    cout << " Iterations per LCP standard solving : " << (double)(nbiterstd) / (double)(statsolverstd) << endl;
+  }
+  if (statnbsolve - statsolverstd)
+  {
+    cout << " CPU time per LCP backup solving : " << LCP_CPUtime_bck / ((statnbsolve - statsolverstd) * (double)CLOCKS_PER_SEC) << endl;
+    cout << " Iterations per LCP backup solving : " << (double)(nbiterbck) / (double)(statnbsolve - statsolverstd) << endl;
+  }
+}
+
 

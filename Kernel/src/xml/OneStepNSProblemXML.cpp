@@ -116,7 +116,7 @@ void OneStepNSProblemXML::setSolverXMLPtr(SolverXML * solv)
 
 // \warning: following routine has to been checked and updated
 void OneStepNSProblemXML::setSolver(const string& name, const string& normType,
-                                    double tolerance, unsigned int maxIter, double searchDirection)
+                                    double tolerance, unsigned int maxIter, double searchDirection, double Rho)
 {
   XMLException::selfThrow("OneStepNSProblemXML::setSolver, not yet implemented.");
   //   char tmpChar[128];

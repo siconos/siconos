@@ -322,6 +322,14 @@ void SimpleVector::setValue(unsigned int row, double value)
     (*vect.Sparse)(row) = value;
 }
 
+void SimpleVector::setBlock(unsigned int index, const SimpleVector& m)
+{
+  if ((index + m.size()) > size()) SiconosVectorException::selfThrow("SimpleVector::setBlock : invalid ranges");
+  if ((num != 1) || (m.getNum() != 1)) SiconosVectorException::selfThrow("SimpleVector::setBlock : vectors should be dense");
+
+  ublas::subrange(*vect.Dense, index, index + m.size()) = m.getDense(0);
+}
+
 double& SimpleVector::operator()(unsigned int row)
 {
   if (num == 1)

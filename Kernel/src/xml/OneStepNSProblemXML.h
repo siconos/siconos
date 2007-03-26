@@ -158,8 +158,9 @@ public:
   *   \param double : the tolerance parameter used by the solver
   *   \param unsigned int : the maximum iteration parameter used by the solver
   *   \param double : the search direction parameter used by the solver
+  *   \param double : the regularization parameter
   */
-  void setSolver(const std::string&, const std::string&, double, unsigned int, double);
+  void setSolver(const std::string&, const std::string&, double, unsigned int, double, double);
 
   /** makes the operations to create a OneStepNSProblemXML to the SimulationXML
   *   \param xmlNode* : the root node of the OneStepNSProblemXML

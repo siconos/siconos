@@ -73,3 +73,14 @@ string SolverXML::getNormType() const
     return SiconosDOMTreeTools::getStringAttributeValue(rootNode, "normType");
   else return DEFAULT_NORMTYPE;
 }
+
+double SolverXML::getRho() const
+{
+  if (xmlHasProp(rootNode, (xmlChar *)"Rho"))
+  {
+    string type = SiconosDOMTreeTools::getStringAttributeValue(rootNode, "Rho");
+    return atof(type.c_str());
+  }
+  else return DEFAULT_RHO;
+}
+

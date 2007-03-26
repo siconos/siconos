@@ -31,6 +31,7 @@ const unsigned int DEFAULT_ITER = 101;
 const std::string DEFAULT_NORMTYPE = "max";
 const double DEFAULT_SEARCHDIR = 0.6;
 const unsigned int DEFAULT_VERBOSE = 0;
+const double DEFAULT_RHO = 1.0;
 
 class SolverXML;
 
@@ -96,9 +97,7 @@ protected:
   /**  */
   double searchDirection;
 
-  /** Function to fill structure solvingMethod fields
-  */
-  void setSolvingMethod();
+  double Rho;
 
   /** default constructor
   */
@@ -110,12 +109,13 @@ public:
   *  \param string: non smooth problem type (LCP ...)
   *  \param string: solver name (optional)
   *  \param unsigned int   : MaxIter (optional) required if a solver is given
-  *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin
+  *  \param double : Tolerance (optional) -> for NLGS, Gcp, Latin, RPGS
   *  \param string : NormType (optional) -> for NLGS, Gcp, Latin
   *  \param double : SearchDirection (optional) -> for Latin
+  *  \param double : Rho (optional) -> for RPGS
   */
   Solver(const std::string&, const std::string& = DEFAULT_SOLVER, const unsigned int & = DEFAULT_ITER,
-         const double & = DEFAULT_TOL, const unsigned int & = DEFAULT_VERBOSE, const std::string & = DEFAULT_NORMTYPE, const double & = DEFAULT_SEARCHDIR);
+         const double & = DEFAULT_TOL, const unsigned int & = DEFAULT_VERBOSE, const std::string & = DEFAULT_NORMTYPE, const double & = DEFAULT_SEARCHDIR, const double & = DEFAULT_RHO);
 
   /** copy constructor
   *  \param a Solver to be copied
@@ -253,6 +253,26 @@ public:
   {
     normType = newVal;
   };
+
+  /** get rho
+  *  \return a double
+  */
+  inline const double getRho() const
+  {
+    return Rho;
+  };
+
+  /** set rho
+  *  \param a double
+  */
+  inline void setRho(const double& newVal)
+  {
+    Rho = newVal;
+  };
+
+  /** Function to fill structure solvingMethod fields
+  */
+  void setSolvingMethod();
 
   /** copy the data of the Solver into the XML tree
   */
