@@ -1,0 +1,66 @@
+Sample of 3D display for 3D beads
+
+12/04/07
+---------
+
+Needs: 
+-----
+drawstuff/ (must be compiled)
+lib X11
+lib openGL
+lib glut
+ 
+Run the sample :
+---------------
+siconos draw_beads.cpp
+
+You must tune siconos and MakefilePluginSample to your environement
+
+SICONOSPATH
+CONFETIPATH
+SICONOS_SHAREPATH
+
+You can use the bellow inbdication to modify your MakefilePluginSample (Path depends in how did you use ./configure during the compilation of siconos)
+
+
+# to use confeti in compilation 
+
+CONFETIPATH=???/drawstuff/
+
+LIB_DRAW = -L$(CONFETIPATH) -lDrawstuff -L/usr/X11R6/lib -L/usr/X11/lib -L/usr/l
+ib/X11R6 -L/usr/lib/X11 -lX11 -lGL -lGLU
+#/ -L/usr/X11R6/lib/ -lDrawstuff -lX11 -lGL -lGLU
+
+SICONOSPATH=/usr/local
+CXX=g++
+CXXFLAGS=-g -fbounds-check -Wall
+CXX_DYNLIB=-shared
+
+
+SAMPLE_SOURCES = $(OBJ)
+SAMPLE_OBJ  = $(patsubst %.cpp,%.o,  $(SAMPLE_SOURCES))
+SAMPLE_EXE  = $(patsubst %.cpp,%.out,  $(SAMPLE_SOURCES))
+C_SOURCES = $(wildcard *.c)
+C_OBJ  = $(patsubst %.c,%.o,  $(C_SOURCES))
+
+sample:$(SAMPLE_OBJ) $(SAMPLE_EXE)
+
+.cpp.o:
+        $(CXX) -c $(CXXFLAGS) -fPIC -I/usr/local/include/Siconos  -I/usr/include/libxml2 -pthread -I/usr/local/include/boost-1_33_1  -I $(SICONOSPATH)/include -I $(CONFETIPATH)/inc $<
+
+$(SAMPLE_EXE):$(SAMPLE_OBJ)
+        $(CXX) $(CXXFLAGS) -o $@ $< -L/usr/local/lib  -lSiconosKernel   -L/usr/local/lib -lSiconosNumerics -L/usr/lib/atlas -lcblas -lf77blas -latlas -llapack  -L/usr/lib/gcc/i386-redhat-linux/4.0.2 -L/usr/lib/gcc/i386-redhat-linux/4.0.2/../../.. -lgfortranbegin -lgfortran -lm -lgcc_s -L/usr/lib/atlas -lcblas -lf77blas -latlas -L/usr/lib -lxml2 -lz -lpthread -lm -ldl $(LIB_DRAW)
+
+
+With this changes, siconos allows to compile with external 3D libraries : X11/opengl/glut/drawstuff
+
+
+In draw_beads.cpp you can find some examples of 3D frictional contact of beads.
+
+
+For any question, pleanse contact me: houari.khenous@inrialpes.fr
+
+
+
+
+
