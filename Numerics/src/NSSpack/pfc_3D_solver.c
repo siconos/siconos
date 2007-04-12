@@ -65,7 +65,7 @@
 int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , double *w)
 {
 
-  char pfckey1[10] = "NLGS", pfckey2[10] = "CPG";
+  char pfckey1[10] = "NLGS", pfckey2[10] = "CPG", pfckey3[15] = "NLGSNEWTON";
 
   int i, info;
 
@@ -110,6 +110,21 @@ int pfc_3D_solver(double *vec , double *q , int *n , method *pt , double *z , do
 
   }
   */
+  else if (strcmp(pt->pfc_3D.name , pfckey3) == 0)
+  {
+
+    iparamLCP[0] = pt->pfc_3D.itermax;
+    iparamLCP[1] = pt->pfc_3D.chat;
+    dparamLCP[0] = pt->pfc_3D.mu;
+    dparamLCP[1] = pt->pfc_3D.tol;
+
+    pfc_3D_nlgsnewton(n , vec , q , z , w , &info , iparamLCP , dparamLCP);
+
+    pt->pfc_3D.iter = iparamLCP[2];
+    pt->pfc_3D.err  = dparamLCP[2];
+
+  }
+
   else printf("Warning : Unknown solving method : %s\n", pt->pfc_3D.name);
 
   t2 = clock();

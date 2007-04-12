@@ -42,7 +42,7 @@ LCP_SOLVERS = lcp_lexicolemke.c lcp_pgs.c lcp_nsqp.c lcp_cpg.c \
 PFC_SOURCES = pfc_2D_solver.c pfc_3D_solver.c $(PFC_SOLVERS)
 
 PFC_SOLVERS = pfc_2D_cpg.c pfc_2D_latin.c pfc_2D_nlgs.c \
-	pfc_3D_cpg.c pfc_3D_nlgs.c \
+	pfc_3D_cpg.c pfc_3D_nlgs.c pfc_3D_nlgsnewton.c \
 	projc.c projf.c \
 	pfc_2D_projc.c pfc_2D_projf.c \
 	max_part.c min_part.c abs_part.c pos_part.c \

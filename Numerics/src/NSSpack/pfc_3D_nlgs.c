@@ -255,7 +255,7 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
     num = dnrm2_((integer *)&n, ww , &incx);
     err = num * den;
 
-    if (ispeak == 2) for (i = 0 ; i < n ; ++i) fprintf(f101, "%d  %d  %14.7e\n", iter - 1, i, z[i]);
+    if (ispeak == 2) for (i = 0 ; i < n ; ++i) fprintf(f101, "%i  %i  %14.7e\n", iter - 1, i, z[i]);
 
   }
 
@@ -266,8 +266,8 @@ void pfc_3D_nlgs(int *nn , double *vec , double *q , double *z , double *w , int
   {
     if (err > tol)
     {
-      printf(" No convergence of NLGS after %d iterations\n" , iter);
-      printf(" The residue is : %g \n", err);
+      printf(" No convergence of NLGS after %i iterations\n" , iter);
+      printf(" The residue is : %e \n", err);
       *info = 1;
     }
     else
