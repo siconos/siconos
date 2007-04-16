@@ -138,7 +138,6 @@ void LagrangianR::setGVector(const VectorOfMatrices& newVector)
   }
 
   G.clear();
-  G.resize(nG, NULL); // G size might have changed!
 
   for (unsigned int i = 0; i < nG; i++)
   {

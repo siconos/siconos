@@ -102,7 +102,7 @@ public:
   inline const std::string getBPlugin() const
   {
     if (!isBPlugin())
-      XMLException::selfThrow("FirstOrderLinearDSXML - getUPlugin : b is not calculated from a plugin ; b vector is given");
+      XMLException::selfThrow("FirstOrderLinearDSXML - getBPlugin : b is not calculated from a plugin ; b vector is given");
     return  SiconosDOMTreeTools::getStringAttributeValue(bNode, VECTORPLUGIN);
   }
 

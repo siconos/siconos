@@ -15,16 +15,17 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 
 /*! \file FirstOrderRXML.h
-\brief XML data reading for first order non linear relations.
+  \brief XML data reading for first order non linear relations.
 */
 
 #ifndef FirstOrderRXML_H
 #define FirstOrderRXML_H
 
 #include "RelationXML.h"
+#include "SimpleMatrix.h"
 
 class FirstOrderR;
 
@@ -40,11 +41,17 @@ class FirstOrderRXML : public RelationXML
 
 protected:
 
-  /** Plug-in name for input */
-  xmlNodePtr computeInputNode;
+  /** Plug-in name for input function g*/
+  xmlNodePtr gNode;
 
-  /** Plug-in name for output. */
-  xmlNodePtr computeOutputNode;
+  /** Plug-in name for output function h. */
+  xmlNodePtr hNode;
+
+  /** plug-in names for gradients of g.*/
+  std::vector<xmlNodePtr> jacobianGNode;
+
+  /** plug-in names for gradients of h.*/
+  std::vector<xmlNodePtr> jacobianHNode;
 
   /**Default construcor. */
   FirstOrderRXML();
@@ -52,62 +59,137 @@ protected:
 public:
 
   /** Basic data constructor
-   \param the node that points to the FirstOrderR data.
+      \param the node that points to the FirstOrderR data.
   */
   FirstOrderRXML(xmlNodePtr);
 
   /** Destructor */
   virtual ~FirstOrderRXML();
 
-  /** To get the name of the plug-in function used to compute input.
-   *   \return a string.
-   */
-  virtual std::string getComputeInputPlugin() const ;
+  // ================== g ==================
 
-  /** To get the name of the plug-in function used to compute output.
-   *   \return a string.
-   */
-  virtual std::string getComputeOutputPlugin() const ;
-
-  /** To set the name of the plug-in function used to compute input.
+  /** To set the name of the plug-in function used to compute g.
    *   \param a string.
    */
-  void setComputeInputPlugin(const std::string&);
+  void setGPlugin(const std::string&);
 
-  /** To set the name of the plug-in function used to compute outut.
-   *   \param a string.
+  /** To get the name of the plug-in function used to compute g.
+   *   \return a string.
    */
-  void setComputeOutputPlugin(const std::string&);
+  std::string getGPlugin() const ;
 
-  /** Return true if computeInput is calculated from a plugin
+  /** Return true if g is calculated from a plugin
    * \return a bool. */
-  inline bool isComputeInputPlugin() const
+  inline bool isGPlugin() const
   {
-    return xmlHasProp((xmlNodePtr)computeInputNode, (xmlChar *)"plugin");
+    return xmlHasProp((xmlNodePtr)gNode, (xmlChar *)"plugin");
   }
 
-  /** Return true if computeOutput is calculated from a plugin
-   * \return a bool. */
-  inline bool isComputeOutputPlugin() const
-  {
-    return xmlHasProp((xmlNodePtr)computeOutputNode, (xmlChar *)"plugin");
-  }
-
-  /** Tests if computeInputNode is defined.
+  /** Tests if gNode is defined.
    *  \return a bool.
    */
-  inline bool hasComputeInput() const
+  inline bool hasG() const
   {
-    return (computeInputNode != NULL);
+    return (gNode != NULL);
+  }
+  // ================== h ==================
+
+  /** To set the name of the plug-in function used to compute h.
+   *   \param a string.
+   */
+  void setHPlugin(const std::string&);
+
+  /** To get the name of the plug-in function used to compute h.
+   *   \return a string.
+   */
+  std::string getHPlugin() const ;
+
+  /** Return true if h is calculated from a plugin
+   * \return a bool. */
+  inline bool isHPlugin() const
+  {
+    return xmlHasProp((xmlNodePtr)hNode, (xmlChar *)"plugin");
   }
 
-  /** Tests if computeOutputNode is defined.
-  *  \return a bool.
-  */
-  inline bool hasComputeOutput() const
+  /** Tests if hNode is defined.
+   *  \return a bool.
+   */
+  inline bool hasH() const
   {
-    return (computeOutputNode != NULL);
+    return (hNode != NULL);
   }
+
+  // ================== jacobianG ==================
+
+  /** To set the name of the plug-in function used to compute jacobianG.
+   *   \param a string.
+   *   \param index of jacobian, default = 0
+   */
+  void setJacobianGPlugin(const std::string&, unsigned int = 0);
+
+  /** To get the name of the plug-in function used to compute jacobianG.
+   * \param index of jacobian, default = 0
+   *   \return a string.
+   */
+  std::string getJacobianGPlugin(unsigned int = 0) const ;
+
+  /** Return true if jacobianG is calculated from a plugin
+      \param index of jacobian, default = 0
+      * \return a bool. */
+  inline bool isJacobianGPlugin(unsigned int i = 0) const
+  {
+    return xmlHasProp((xmlNodePtr)(jacobianGNode[i]), (xmlChar *)"plugin");
+  }
+
+  /** Tests if gNode is defined.
+   *  \return a bool.
+   */
+  inline bool hasJacobianG() const
+  {
+    return (!jacobianGNode.empty());
+  }
+
+  /** Return the jacobianG[i] matrix.
+   * \param an int: the required index for jacobianG.
+   * \return a SimpleMatrix
+   */
+  SimpleMatrix getJacobianGMatrix(unsigned int = 0) const;
+
+  // ================== jacobianH ==================
+
+  /** To set the name of the plug-in function used to compute jacobianH.
+   *   \param a string.
+   * \param index of jacobian
+   */
+  void setJacobianHPlugin(const std::string&, unsigned int);
+
+  /** To get the name of the plug-in function used to compute jacobianH.
+      \param index of jacobian
+      *   \return a string.
+      */
+  std::string getJacobianHPlugin(unsigned int) const ;
+
+  /** Return true if jacobianH[i] is calculated from a plugin
+      \param index of jacobian
+      \return a bool. */
+  inline bool isJacobianHPlugin(unsigned int i) const
+  {
+    return xmlHasProp((xmlNodePtr)(jacobianHNode[i]), (xmlChar *)"plugin");
+  }
+
+  /** Tests if hNode is defined.
+   *  \return a bool.
+   */
+  inline bool hasJacobianH() const
+  {
+    return (!jacobianHNode.empty());
+  }
+
+  /** Return the jacobianH[i] matrix.
+   * \param an int: the required index for jacobianH.
+   * \return a SimpleMatrix
+   */
+  SimpleMatrix getJacobianHMatrix(unsigned int) const;
 
 };
 

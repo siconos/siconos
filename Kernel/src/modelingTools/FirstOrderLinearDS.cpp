@@ -37,7 +37,7 @@ void FirstOrderLinearDS::initPluginFlags(bool val)
 
 // Default constructor
 FirstOrderLinearDS::FirstOrderLinearDS():
-  FirstOrderNonLinearDS(FOLDS), A(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
+  FirstOrderNonLinearDS(FOLDS), A(NULL), b(NULL), APtr(NULL), bPtr(NULL)
 {
   initAllocationFlags(false);
   initPluginFlags(false);
@@ -45,7 +45,7 @@ FirstOrderLinearDS::FirstOrderLinearDS():
 
 // From xml file (newNsds is optional)
 FirstOrderLinearDS::FirstOrderLinearDS(DynamicalSystemXML * dsXML, NonSmoothDynamicalSystem* newNsds):
-  FirstOrderNonLinearDS(dsXML, newNsds), A(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
+  FirstOrderNonLinearDS(dsXML, newNsds), A(NULL), b(NULL), APtr(NULL), bPtr(NULL)
 {
   // pointer to xml
   FirstOrderLinearDSXML * foldsxml = (static_cast <FirstOrderLinearDSXML*>(dsxml));
@@ -94,7 +94,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(DynamicalSystemXML * dsXML, NonSmoothDyna
 FirstOrderLinearDS::FirstOrderLinearDS(int newNumber, unsigned int newN, const SiconosVector& newX0,
                                        const string& APlugin, const string& bPlugin):
   FirstOrderNonLinearDS(newNumber, newX0),
-  A(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
+  A(NULL), b(NULL), APtr(NULL), bPtr(NULL)
 {
   DSType = FOLDS;
   initAllocationFlags(false);
@@ -108,7 +108,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(int newNumber, unsigned int newN, const S
 // From a minimum set of data, A from a given matrix
 FirstOrderLinearDS::FirstOrderLinearDS(int newNumber, const SiconosVector& newX0, const SiconosMatrix& newA):
   FirstOrderNonLinearDS(newNumber, newX0),
-  A(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
+  A(NULL), b(NULL), APtr(NULL), bPtr(NULL)
 {
   DSType = FOLDS;
   if (newA.size(0) != n || newA.size(1) != n)
@@ -126,7 +126,7 @@ FirstOrderLinearDS::FirstOrderLinearDS(int newNumber, const SiconosVector& newX0
 // From a minimum set of data, A from a given matrix
 FirstOrderLinearDS::FirstOrderLinearDS(const int newNumber, const SiconosVector& newX0, const SiconosMatrix& newA, const SiconosVector& newB):
   FirstOrderNonLinearDS(newNumber, newX0),
-  A(NULL), b(NULL), computeAFunctionName("none"), computeBFunctionName("none"), APtr(NULL), bPtr(NULL)
+  A(NULL), b(NULL), APtr(NULL), bPtr(NULL)
 {
   DSType = FOLDS;
   if (newA.size(0) != n || newA.size(1) != n)
@@ -245,9 +245,8 @@ void FirstOrderLinearDS::setComputeAFunction(const string pluginPath, const stri
   APtr = NULL;
   cShared.setFunction(&APtr, pluginPath, functionName);
 
-  string plugin;
-  plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  computeAFunctionName = plugin + ":" + functionName;
+  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
+  pluginNames["A"] = plugin + ":" + functionName;
   isPlugin["A"] = true;
 }
 
@@ -260,9 +259,8 @@ void FirstOrderLinearDS::setComputeBFunction(const string pluginPath, const stri
   }
   cShared.setFunction(&bPtr, pluginPath, functionName);
 
-  string plugin;
-  plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  computeBFunctionName = plugin + ":" + functionName;
+  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
+  pluginNames["b"] = plugin + ":" + functionName;
   isPlugin["b"] = true;
 }
 
@@ -345,20 +343,10 @@ void FirstOrderLinearDS::computeJacobianXRhs(const double time, const bool)
 void FirstOrderLinearDS::display() const
 {
   cout << "=== Linear system display, " << number << ", id: " << id << ")." << endl;
-  cout << "- A " << endl;
-  if (A != NULL)
-  {
-    A->display();
-    cout << " plug-in function: " << computeAFunctionName << endl;
-  }
-  else cout << "-> NULL" << endl;
-  cout << "- b " << endl;
-  if (b != NULL)
-  {
-    b->display();
-    cout << " plug-in function: " << computeBFunctionName << endl;
-  }
-  else cout << "-> NULL" << endl;
+  NamesConstIterator it;
+  cout << "The following operators are linked to plug-in: " << endl;
+  for (it = pluginNames.begin(); it != pluginNames.end(); ++it)
+    cout << (*it).first << " plugged to:" << (*it).second << endl;
   cout << "=============================" << endl;
 }
 

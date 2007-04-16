@@ -20,7 +20,7 @@
 
 //---  Following includes to be suppressed thanks to factory (?) ---
 // Relations
-#include "FirstOrderLinearTIRXML.h"
+#include "FirstOrderLinearRXML.h"
 #include "LagrangianLinearRXML.h"
 // Nslaw
 #include "ComplementarityConditionNSLXML.h"
@@ -73,7 +73,7 @@ InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
       if (type == "FirstOrderRelation")
         relationXML = new FirstOrderRXML(node2);
       else if (type == "FirstOrderLinearTimeInvariantRelation")
-        relationXML = new FirstOrderLinearTIRXML(node2);
+        relationXML = new FirstOrderLinearRXML(node2);
       else if (type == "LagrangianRelation")
         relationXML = new LagrangianRXML(node2);
       else if (type == "LagrangianLinearRelation")

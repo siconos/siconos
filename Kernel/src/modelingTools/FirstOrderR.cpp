@@ -24,61 +24,108 @@
 
 using namespace std;
 
-// Default constructor
-FirstOrderR::FirstOrderR(const string& newType):
-  Relation("FirstOrder", newType), firstOrderType(newType), computeOutputPtr(NULL), computeInputPtr(NULL)
+void FirstOrderR::initAllocationFlags(bool in)
 {
-  setComputeOutputFunction("DefaultPlugin.so", "computeOutput");
-  isPlugged["output"] = false;
-  setComputeInputFunction("DefaultPlugin.so", "computeInput");
-  isPlugged["input"] = false;
+  isAllocatedIn["jacobianH0"] = in;
+  isAllocatedIn["jacobianH1"] = in;
+  isAllocatedIn["jacobianG0"] = in;
+}
+
+void FirstOrderR::initPluginFlags(bool in)
+{
+  isPlugged["h"] = in;
+  isPlugged["jacobianH0"] = in;
+  isPlugged["jacobianH1"] = in;
+  isPlugged["g"] = in;
+  isPlugged["jacobianG0"] = in ;
+}
+
+// Default constructor
+FirstOrderR::FirstOrderR(const string& newType): Relation("FirstOrder", newType), firstOrderType(newType)
+{
+  initAllocationFlags(false);
+  initPluginFlags(false);
+  jacobianH.resize(2, NULL);
+  jacobianG.resize(1, NULL);
 }
 
 // xml constructor
 FirstOrderR::FirstOrderR(RelationXML* relxml, const string& newType):
-  Relation(relxml, "FirstOrder", newType), firstOrderType(newType), computeOutputPtr(NULL), computeInputPtr(NULL)
+  Relation(relxml, "FirstOrder", newType), firstOrderType(newType)
 {
   FirstOrderRXML * FORxml = static_cast<FirstOrderRXML*>(relationxml);
-  string plugin;
 
-  // computeInput
-  if (FORxml->hasComputeInput())
+  initAllocationFlags(false);
+  initPluginFlags(false);
+  // Gradients
+  jacobianH.resize(2, NULL);
+  jacobianG.resize(1, NULL);
+  // input g
+  if (FORxml->hasG())
   {
-    plugin = (FORxml)->getComputeInputPlugin();
-    setComputeInputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
-  }
-  else
-  {
-    setComputeInputFunction("DefaultPlugin.so", "computeInput");
-    isPlugged["input"] = false; //
+    pluginNames["g"] = FORxml->getGPlugin();
+    setComputeGFunction(cShared.getPluginName(pluginNames["g"]), cShared.getPluginFunctionName(pluginNames["g"]));
+    // Gradients
+    if (!FORxml->hasJacobianG())
+      RuntimeException::selfThrow("FirstOrderR xml constructor failed. No input for gradient(s) of g function.");
+
+    if (FORxml->isJacobianGPlugin())
+    {
+      string name = pluginNames["jacobianG0"] = FORxml->getJacobianGPlugin();
+      setComputeJacobianGFunction(cShared.getPluginName(name), cShared.getPluginFunctionName(name));
+    }
+    else
+    {
+      jacobianG[0] = new SimpleMatrix(FORxml->getJacobianGMatrix());
+      isAllocatedIn["jacobianG0"] = true   ;
+    }
   }
 
-  // computeOutput
-  if (FORxml->hasComputeOutput())
+  // output h
+  if (FORxml->hasH())
   {
-    plugin = (FORxml)->getComputeOutputPlugin();
-    setComputeOutputFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
-  }
-  else
-  {
-    setComputeOutputFunction("DefaultPlugin.so", "computeOutput");
-    isPlugged["output"] = false; //
+    pluginNames["h"] = FORxml->getHPlugin();
+    setComputeHFunction(cShared.getPluginName(pluginNames["h"]), cShared.getPluginFunctionName(pluginNames["h"]));
+    // Gradients
+    if (!FORxml->hasJacobianH())
+      RuntimeException::selfThrow("FirstOrderR xml constructor failed. No input for gradients of h function.");
+    string name;
+    for (unsigned int i = 0; i < jacobianG.size(); ++i)
+    {
+      name = "jacobianH" + toString<unsigned int>(i);
+      if (FORxml->isJacobianHPlugin(i))
+      {
+        pluginNames[name] = FORxml->getJacobianHPlugin(i);
+        setComputeJacobianHFunction(cShared.getPluginName(pluginNames[name]), cShared.getPluginFunctionName(pluginNames[name]), i);
+      }
+      else
+      {
+        jacobianH[i] = new SimpleMatrix(FORxml->getJacobianHMatrix(i));
+        isAllocatedIn[name] = true   ;
+      }
+    }
   }
 }
 
 FirstOrderR::FirstOrderR(const string& computeOut, const string& computeIn):
-  Relation("FirstOrder", "R"), firstOrderType("R"), computeOutputPtr(NULL), computeInputPtr(NULL)
+  Relation("FirstOrder", "R"), firstOrderType("R")
 {
-  pluginNames["output"] = computeOut;
-  setComputeOutputFunction(cShared.getPluginName(pluginNames["output"]), cShared.getPluginFunctionName(pluginNames["output"]));
-  pluginNames["input"] = computeIn;
-  setComputeInputFunction(cShared.getPluginName(pluginNames["input"]), cShared.getPluginFunctionName(pluginNames["input"]));
+  // Size vector of pointers to functions.
+  input.resize(3, NULL);
+  output.resize(3, NULL);
+  // Connect input and output to plug-in
+  pluginNames["h"] = computeOut;
+  setComputeHFunction(cShared.getPluginName(pluginNames["h"]), cShared.getPluginFunctionName(pluginNames["h"]));
+  pluginNames["g"] = computeIn;
+  setComputeGFunction(cShared.getPluginName(pluginNames["g"]), cShared.getPluginFunctionName(pluginNames["g"]));
+
+  // Nothing for the jacobians => a set is required. Add a constructor?
 }
 
 FirstOrderR::~FirstOrderR()
 {
-  computeOutputPtr = NULL;
-  computeInputPtr = NULL;
+  input.clear();
+  output.clear();
 }
 
 void FirstOrderR::initialize()
@@ -107,22 +154,153 @@ void FirstOrderR::initialize()
 
 }
 
-void FirstOrderR::setComputeOutputFunction(const string& pluginPath, const string& functionName)
+void FirstOrderR::setJacobianHVector(const VectorOfMatrices& newVector)
 {
-  cShared.setFunction(&computeOutputPtr, pluginPath, functionName);
-  string plugin;
-  plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  pluginNames["output"] = plugin + ":" + functionName;
-  isPlugged["output"] = true;
+  unsigned int nJH = jacobianH.size();
+  if (newVector.size() != nJH)
+    RuntimeException::selfThrow("FirstOrderR::setJacobianHVector(newH) failed. Inconsistent sizes between newH and the problem type.");
+
+  // If jacobianH[i] has been allocated before => delete
+  string name;
+  for (unsigned int i = 0; i < nJH; i++)
+  {
+    name = "jacobianH" + toString<unsigned int>(i);
+    if (isAllocatedIn[name]) delete jacobianH[i];
+    jacobianH[i] = NULL;
+    isAllocatedIn[name] = false;
+    isPlugged[name] = false;
+  }
+
+  jacobianH.clear();
+
+  for (unsigned int i = 0; i < nJH; i++)
+  {
+    jacobianH[i] = newVector[i]; // Warning: links to pointers, no copy!!
+    name = "jacobianH" + toString<unsigned int>(i);
+    isAllocatedIn[name] = false;
+    isPlugged[name] = false;
+  }
 }
 
-void FirstOrderR::setComputeInputFunction(const string& pluginPath, const string& functionName)
+void FirstOrderR::setJacobianH(const SiconosMatrix& newValue, unsigned int index)
 {
-  cShared.setFunction(&computeInputPtr, pluginPath, functionName);
-  string plugin;
-  plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  pluginNames["input"] = plugin + ":" + functionName;
-  isPlugged["input"] = true;
+  if (index >= jacobianH.size())
+    RuntimeException::selfThrow("FirstOrderR:: setJacobianH(mat,index), index out of range.");
+
+  string name = "jacobianH" + toString<unsigned int>(index);
+  if (jacobianH[index] == NULL)
+  {
+    jacobianH[index] =  new SimpleMatrix(newValue);
+    isAllocatedIn[name] = true;
+  }
+  else
+    *(jacobianH[index]) = newValue;
+
+  isPlugged[name] = false;
+}
+
+void FirstOrderR::setJacobianHPtr(SiconosMatrix *newPtr, unsigned int  index)
+{
+  if (index >= jacobianH.size())
+    RuntimeException::selfThrow("FirstOrderR:: setJacobianH(mat,index), index out of range.");
+
+  string name = "jacobianH" + toString<unsigned int>(index);
+  if (isAllocatedIn[name]) delete jacobianH[index];
+  jacobianH[index] = newPtr;
+  isAllocatedIn[name] = false;
+  isPlugged[name] = false;
+}
+
+void FirstOrderR::setJacobianGVector(const VectorOfMatrices& newVector)
+{
+  unsigned int nJG = jacobianG.size();
+  if (newVector.size() != nJG)
+    RuntimeException::selfThrow("FirstOrderR::setJacobianGVector(newG) failed. Inconsistent sizes between newG and the problem type.");
+
+  // If jacobianG[i] has been allocated before => delete
+  string name;
+  for (unsigned int i = 0; i < nJG; i++)
+  {
+    name = "jacobianG" + toString<unsigned int>(i);
+    if (isAllocatedIn[name]) delete jacobianG[i];
+    jacobianG[i] = NULL;
+    isAllocatedIn[name] = false;
+    isPlugged[name] = false;
+  }
+
+  jacobianG.clear();
+
+  for (unsigned int i = 0; i < nJG; i++)
+  {
+    jacobianG[i] = newVector[i]; // Warning: links to pointers, no copy!!
+    name = "jacobianG" + toString<unsigned int>(i);
+    isAllocatedIn[name] = false;
+    isPlugged[name] = false;
+  }
+}
+
+void FirstOrderR::setJacobianG(const SiconosMatrix& newValue, unsigned int index)
+{
+  if (index >= jacobianG.size())
+    RuntimeException::selfThrow("FirstOrderR:: setJacobianG(mat,index), index out of range.");
+
+  string name = "jacobianG" + toString<unsigned int>(index);
+  if (jacobianG[index] == NULL)
+  {
+    jacobianG[index] =  new SimpleMatrix(newValue);
+    isAllocatedIn[name] = true;
+  }
+  else
+    *(jacobianG[index]) = newValue;
+
+  isPlugged[name] = false;
+}
+
+void FirstOrderR::setJacobianGPtr(SiconosMatrix *newPtr, unsigned int  index)
+{
+  if (index >= jacobianG.size())
+    RuntimeException::selfThrow("FirstOrderR:: setJacobianG(mat,index), index out of range.");
+
+  string name = "jacobianG" + toString<unsigned int>(index);
+  if (isAllocatedIn[name]) delete jacobianG[index];
+  jacobianG[index] = newPtr;
+  isAllocatedIn[name] = false;
+  isPlugged[name] = false;
+}
+
+void FirstOrderR::setComputeHFunction(const string& pluginPath, const string& functionName)
+{
+  cShared.setFunction(&(output[0]), pluginPath, functionName);
+  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
+  pluginNames["h"] = plugin + ":" + functionName;
+  isPlugged["h"] = true;
+}
+
+void FirstOrderR::setComputeJacobianHFunction(const string& pluginPath, const string& functionName, unsigned int index)
+{
+  // Warning: output[0] corresponds to h, thus use output[index+1]
+  cShared.setFunction(&(output[index + 1]), pluginPath, functionName);
+  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
+  string name = "jacobianH" + toString<unsigned int>(index);
+  pluginNames[name] = plugin + ":" + functionName;
+  isPlugged[name] = true;
+}
+
+void FirstOrderR::setComputeGFunction(const string& pluginPath, const string& functionName)
+{
+  cShared.setFunction(&(input[0]), pluginPath, functionName);
+  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
+  pluginNames["g"] = plugin + ":" + functionName;
+  isPlugged["g"] = true;
+}
+
+void FirstOrderR::setComputeJacobianGFunction(const string& pluginPath, const string& functionName, unsigned int index)
+{
+  cShared.setFunction(&(input[index + 1]), pluginPath, functionName);
+  string plugin = pluginPath.substr(0, pluginPath.length() - 3);
+  string name = "jacobianG" + toString<unsigned int>(index);
+  pluginNames[name] = plugin + ":" + functionName;
+  isPlugged[name] = true;
 }
 
 void FirstOrderR::computeOutput(double time, unsigned int)
@@ -130,8 +308,8 @@ void FirstOrderR::computeOutput(double time, unsigned int)
   // Note that the second argument remains unamed since it is not used: for first order systems, we always compute
   // y[0] (at the time).
 
-  if (computeOutputPtr == NULL)
-    RuntimeException::selfThrow("computeOutput() is not linked to a plugin function");
+  if (output[0] == NULL)
+    RuntimeException::selfThrow("FirstOrderR::computeOutput() is not linked to a plugin function");
 
   SiconosVector *y = interaction->getYPtr(0);
   SiconosVector *lambda = interaction->getLambdaPtr(0);
@@ -145,9 +323,9 @@ void FirstOrderR::computeOutput(double time, unsigned int)
   unsigned int sizeX = data["x"]->size();
   unsigned int sizeZ = data["z"]->size();
 
-  computeOutputPtr(sizeX, &(*xCopy)(0), time, sizeY, &(*lambdaCopy)(0), &(*yCopy)(0), sizeZ, &(*zCopy)(0));
+  (output[0])(sizeX, &(*xCopy)(0), time, sizeY, &(*lambdaCopy)(0), &(*yCopy)(0), sizeZ, &(*zCopy)(0));
 
-  // Rebuilt lambda/y from Tmp
+  // Rebuilt y/z from Tmp
   *y = *yCopy;
   *data["z"] = *zCopy;
 
@@ -162,8 +340,8 @@ void FirstOrderR::computeFreeOutput(double time, unsigned int)
   // Note that the second argument remains unamed since it is not used: for first order systems, we always compute
   // y[0] (at the time).
 
-  if (computeOutputPtr == NULL)
-    RuntimeException::selfThrow("computeOutput() is not linked to a plugin function");
+  if (output[0] == NULL)
+    RuntimeException::selfThrow("FirstOrderR::computeOutput() is not linked to a plugin function");
 
   SiconosVector *y = interaction->getYPtr(0);
   SiconosVector *lambda = interaction->getLambdaPtr(0);
@@ -177,9 +355,9 @@ void FirstOrderR::computeFreeOutput(double time, unsigned int)
   unsigned int sizeX = data["x"]->size();
   unsigned int sizeZ = data["z"]->size();
 
-  computeOutputPtr(sizeX, &(*xCopy)(0), time, sizeY, &(*lambdaCopy)(0), &(*yCopy)(0), sizeZ, &(*zCopy)(0));
+  (output[0])(sizeX, &(*xCopy)(0), time, sizeY, &(*lambdaCopy)(0), &(*yCopy)(0), sizeZ, &(*zCopy)(0));
 
-  // Rebuilt lambda/y from Tmp
+  // Rebuilt y/z from Tmp
   *y = *yCopy;
   *data["z"] = *zCopy;
 
@@ -191,8 +369,8 @@ void FirstOrderR::computeFreeOutput(double time, unsigned int)
 
 void FirstOrderR::computeInput(double time, unsigned int level)
 {
-  if (computeInputPtr == NULL)
-    RuntimeException::selfThrow("computeInput() is not linked to a plugin function");
+  if (input[0] == NULL)
+    RuntimeException::selfThrow("FirstOrderR::computeInput() is not linked to a plugin function");
 
   SiconosVector *lambda = interaction->getLambdaPtr(level);
   // Warning: temporary method to have contiguous values in memory, copy of block to simple.
@@ -202,13 +380,63 @@ void FirstOrderR::computeInput(double time, unsigned int level)
 
   unsigned int sizeY = lambda->size();
   unsigned int sizeZ = data["z"]->size();
+  unsigned int sizeR = rCopy->size();
 
-  computeInputPtr(sizeY, &(*lambdaCopy)(0), time, &(*rCopy)(0), sizeZ, &(*zCopy)(0));
+  (input[0])(sizeY, &(*lambdaCopy)(0), time, sizeR, &(*rCopy)(0), sizeZ, &(*zCopy)(0));
 
   *data["r"] = *rCopy;
   *data["z"] = *zCopy;
 
   delete rCopy;
+  delete zCopy;
+  delete lambdaCopy;
+}
+
+void FirstOrderR::computeJacobianH(double time, unsigned int i)
+{
+  if (output[i + 1] == NULL)
+    RuntimeException::selfThrow("FirstOrderR::computeJacobianH() failed; not linked to a plug-in function.");
+
+  SiconosVector *lambda = interaction->getLambdaPtr(0);
+  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  SimpleVector * xCopy = new SimpleVector(*data["x"]);
+  SimpleVector * zCopy = new SimpleVector(*data["z"]);
+  SimpleVector * lambdaCopy = new SimpleVector(*lambda);
+
+  unsigned int sizeY = lambda->size();
+  unsigned int sizeX = data["x"]->size();
+  unsigned int sizeZ = data["z"]->size();
+
+  (output[i + 1])(sizeX, &(*xCopy)(0), time, sizeY, &(*lambdaCopy)(0), &(*(jacobianH[i]))(0, 0), sizeZ, &(*zCopy)(0));
+
+  // Rebuilt z from Tmp
+  *data["z"] = *zCopy;
+
+  delete zCopy;
+  delete lambdaCopy;
+  delete xCopy;
+}
+
+void FirstOrderR::computeJacobianG(double time, unsigned int i)
+{
+  // At the time, second parameter is not use: only one possible jacobian => i = 0 is the default value.
+  if (input[i + 1] == NULL)
+    RuntimeException::selfThrow("FirstOrderR::computeJacobianH() failed; not linked to a plug-in function.");
+
+  SiconosVector *lambda = interaction->getLambdaPtr(0);
+  // Warning: temporary method to have contiguous values in memory, copy of block to simple.
+  SimpleVector * zCopy = new SimpleVector(*data["z"]);
+  SimpleVector * lambdaCopy = new SimpleVector(*lambda);
+
+  unsigned int sizeY = lambda->size();
+  unsigned int sizeX = data["x"]->size();
+  unsigned int sizeZ = data["z"]->size();
+
+  (input[i + 1])(sizeY, &(*lambdaCopy)(0), time, sizeX, &(*(jacobianG[i]))(0, 0), sizeZ, &(*zCopy)(0));
+
+  // Rebuilt z from Tmp
+  *data["z"] = *zCopy;
+
   delete zCopy;
   delete lambdaCopy;
 }

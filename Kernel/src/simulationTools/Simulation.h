@@ -79,7 +79,7 @@ const double TOLERANCE = 1e-8;
  *
  *  \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.1.
- *  \date (Crestion) Apr 26, 2004
+ *  \date (Creation) Apr 26, 2004
  *
  * !!! This is an abstract class !!!
  *

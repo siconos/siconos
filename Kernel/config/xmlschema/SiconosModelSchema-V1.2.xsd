@@ -47,6 +47,7 @@
 <xsd:simpleType name="PossibleRelationValues">
   	<xsd:restriction base="xsd:string">
 		<xsd:enumeration value="FirstOrderRelation"/>
+		<xsd:enumeration value="FirstOrderLinearRelation"/>
 		<xsd:enumeration value="FirstOrderLinearTimeInvariantRelation"/>
 		<xsd:enumeration value="LagrangianRelation"/>
 		<xsd:enumeration value="LagrangianLinearRelation"/>
@@ -472,20 +473,34 @@
 							<xsd:element name="FirstOrderRelation">
 								<xsd:complexType>
 									<xsd:all>
-										<xsd:element name="computeInput" type="pluginDef" minOccurs='0' maxOccurs='0'/>
-										<xsd:element name="computeOutput" type="pluginDef" minOccurs='0' maxOccurs='0'/>
+										<xsd:element name="h" type="pluginDef" minOccurs='0' maxOccurs='1'/>
+										<xsd:element name="g" type="pluginDef" minOccurs='0' maxOccurs='1'/>
+										<xsd:element name="jacobianG" type="listOfMatrices" minOccurs="0" maxOccurs="1"/>
+										<xsd:element name="jacobianH" type="listOfMatrices" minOccurs="0" maxOccurs="1"/>
 									</xsd:all>
 								      	<xsd:attribute name="type" type="xsd:string" use="optional" default="Undefined"/>
 								</xsd:complexType>
 							</xsd:element>
-							
+							<xsd:element name="FirstOrderLinearRelation">
+								<xsd:complexType>
+									<xsd:all>
+										<xsd:element name="C" type="matrix" minOccurs="0" maxOccurs="1"/>
+										<xsd:element name="D" type="matrix" minOccurs="0" maxOccurs="1"/>
+										<xsd:element name="F" type="matrix" minOccurs="0" maxOccurs="1"/>
+										<xsd:element name="e" type="vector" minOccurs="0" maxOccurs="1"/>
+										<xsd:element name="B" type="matrix" minOccurs="0" maxOccurs="1"/>
+									</xsd:all>
+							      	 	<xsd:attribute name="type" type="xsd:string" use="optional" default="Undefined"/>
+								</xsd:complexType>
+							</xsd:element>
 							<xsd:element name="FirstOrderLinearTimeInvariantRelation">
 								<xsd:complexType>
 									<xsd:all>
 										<xsd:element name="C" type="matrix" minOccurs="0" maxOccurs="1"/>
 										<xsd:element name="D" type="matrix" minOccurs="0" maxOccurs="1"/>
-										<xsd:element name="E" type="matrix" minOccurs="0" maxOccurs="1"/>
 										<xsd:element name="F" type="matrix" minOccurs="0" maxOccurs="1"/>
+										<xsd:element name="e" type="vector" minOccurs="0" maxOccurs="1"/>
+										<xsd:element name="B" type="matrix" minOccurs="0" maxOccurs="1"/>
 									</xsd:all>
 							      	 	<xsd:attribute name="type" type="xsd:string" use="optional" default="Undefined"/>
 								</xsd:complexType>

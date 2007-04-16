@@ -16,13 +16,13 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#include "FirstOrderLinearTIRXML.h"
+#include "FirstOrderLinearRXML.h"
 using namespace std;
 
-FirstOrderLinearTIRXML::FirstOrderLinearTIRXML(): FirstOrderRXML(), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
+FirstOrderLinearRXML::FirstOrderLinearRXML(): FirstOrderRXML(), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
 {}
 
-FirstOrderLinearTIRXML::FirstOrderLinearTIRXML(xmlNode * LTIRelationNode):
+FirstOrderLinearRXML::FirstOrderLinearRXML(xmlNode * LTIRelationNode):
   FirstOrderRXML(LTIRelationNode), CNode(NULL), DNode(NULL), FNode(NULL), eNode(NULL), BNode(NULL)
 {
   xmlNodePtr node;
@@ -42,41 +42,95 @@ FirstOrderLinearTIRXML::FirstOrderLinearTIRXML(xmlNode * LTIRelationNode):
     BNode = node;
 }
 
-FirstOrderLinearTIRXML::~FirstOrderLinearTIRXML()
+FirstOrderLinearRXML::~FirstOrderLinearRXML()
 {}
 
-void FirstOrderLinearTIRXML::setC(const SiconosMatrix& matrix)
+void FirstOrderLinearRXML::setC(const SiconosMatrix& matrix)
 {
   if (CNode == NULL)
     CNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "C", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(CNode, matrix);
 }
 
-void FirstOrderLinearTIRXML::setD(const SiconosMatrix& matrix)
+void FirstOrderLinearRXML::setD(const SiconosMatrix& matrix)
 {
   if (DNode == NULL)
     DNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "D", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(DNode, matrix);
 }
 
-void FirstOrderLinearTIRXML::setF(const SiconosMatrix &matrix)
+void FirstOrderLinearRXML::setF(const SiconosMatrix &matrix)
 {
   if (FNode == NULL)
     FNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "F", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(FNode, matrix);
 }
 
-void FirstOrderLinearTIRXML::setE(const SiconosVector& vec)
+void FirstOrderLinearRXML::setE(const SiconosVector& vec)
 {
   if (eNode == NULL)
     eNode = SiconosDOMTreeTools::createVectorNode(rootNode, "e", vec);
   else SiconosDOMTreeTools::setSiconosVectorNodeValue(eNode, vec);
 }
 
-void FirstOrderLinearTIRXML::setB(const SiconosMatrix &matrix)
+void FirstOrderLinearRXML::setB(const SiconosMatrix &matrix)
 {
   if (BNode == NULL)
     BNode = SiconosDOMTreeTools::createMatrixNode(rootNode, "B", matrix);
   else SiconosDOMTreeTools::setSiconosMatrixNodeValue(BNode, matrix);
 }
 
+void FirstOrderLinearRXML::setCPlugin(const std::string& plugin)
+{
+  if (CNode == NULL)
+  {
+    CNode = SiconosDOMTreeTools::createSingleNode(rootNode, "C");
+    xmlNewProp(CNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
+  }
+  else
+    SiconosDOMTreeTools::setStringAttributeValue(CNode, "matrixPlugin", plugin);
+}
+
+void FirstOrderLinearRXML::setDPlugin(const std::string& plugin)
+{
+  if (DNode == NULL)
+  {
+    DNode = SiconosDOMTreeTools::createSingleNode(rootNode, "D");
+    xmlNewProp(DNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
+  }
+  else
+    SiconosDOMTreeTools::setStringAttributeValue(DNode, "matrixPlugin", plugin);
+}
+
+void FirstOrderLinearRXML::setFPlugin(const std::string& plugin)
+{
+  if (FNode == NULL)
+  {
+    FNode = SiconosDOMTreeTools::createSingleNode(rootNode, "F");
+    xmlNewProp(FNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
+  }
+  else
+    SiconosDOMTreeTools::setStringAttributeValue(FNode, "matrixPlugin", plugin);
+}
+
+void FirstOrderLinearRXML::setEPlugin(const std::string& plugin)
+{
+  if (eNode == NULL)
+  {
+    eNode = SiconosDOMTreeTools::createSingleNode(rootNode, "e");
+    xmlNewProp(eNode, (xmlChar*)("vectorPlugin"), (xmlChar*)plugin.c_str());
+  }
+  else
+    SiconosDOMTreeTools::setStringAttributeValue(eNode, "vectorPlugin", plugin);
+}
+
+void FirstOrderLinearRXML::setBPlugin(const std::string& plugin)
+{
+  if (BNode == NULL)
+  {
+    BNode = SiconosDOMTreeTools::createSingleNode(rootNode, "B");
+    xmlNewProp(BNode, (xmlChar*)("matrixPlugin"), (xmlChar*)plugin.c_str());
+  }
+  else
+    SiconosDOMTreeTools::setStringAttributeValue(BNode, "matrixPlugin", plugin);
+}

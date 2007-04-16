@@ -22,7 +22,7 @@
 #ifndef FirstOrderLinearTIR_H
 #define FirstOrderLinearTIR_H
 
-#include "FirstOrderR.h"
+#include "FirstOrderLinearR.h"
 
 /** Linear Time Invariant Relation, derived from class FirstOrderR
  *
@@ -39,21 +39,10 @@
  * \f]
  *
  */
-class FirstOrderLinearTIR : public FirstOrderR
+class FirstOrderLinearTIR : public FirstOrderLinearR
 {
 
 private:
-
-  /** \var C */
-  SiconosMatrix* C;
-  /** \var D*/
-  SiconosMatrix* D;
-  /** \var F*/
-  SiconosMatrix* F;
-  /** \var e*/
-  SiconosVector* e;
-  /** \var B*/
-  SiconosMatrix* B;
 
   /** Default (private) constructor
    */
@@ -62,7 +51,7 @@ private:
 public:
 
   /** xml constructor
-   *  \param FirstOrderLinearTIRXML* : the XML object corresponding
+   *  \param RelationXML* : the XML object corresponding
    */
   FirstOrderLinearTIR(RelationXML*);
 
@@ -108,152 +97,6 @@ public:
    */
   ~FirstOrderLinearTIR();
 
-  /** initialize the relation (check sizes, memory allocation ...)
-   */
-  void initialize();
-
-  // GETTERS/SETTERS
-
-  // -- C --
-
-  /** get the value of C
-   *  \return SimpleMatrix
-   */
-  inline const SimpleMatrix getC() const
-  {
-    return *C;
-  }
-
-  /** get C
-   *  \return pointer on a SiconosMatrix
-   */
-  inline SiconosMatrix* getCPtr() const
-  {
-    return C;
-  }
-
-  /** set the value of C to newValue
-   *  \param SiconosMatrix newValue
-   */
-  void setC(const SiconosMatrix&);
-
-  /** set C to pointer newPtr
-   *  \param SiconosMatrix * newPtr
-   */
-  void setCPtr(SiconosMatrix *);
-
-  // -- D --
-
-  /** get the value of D
-   *  \return SimpleMatrix
-   */
-  inline const SimpleMatrix getD() const
-  {
-    return *D;
-  }
-
-  /** get D
-   *  \return pointer on a SiconosMatrix
-   */
-  inline SiconosMatrix* getDPtr() const
-  {
-    return D;
-  }
-
-  /** set the value of D to newValue
-   *  \param SiconosMatrix newValue
-   */
-  void setD(const SiconosMatrix&);
-
-  /** set D to pointer newPtr
-   *  \param SiconosMatrix * newPtr
-   */
-  void setDPtr(SiconosMatrix *);
-
-  // -- F --
-
-  /** get the value of F
-   *  \return SimpleMatrix
-   */
-  inline const SimpleMatrix getF() const
-  {
-    return *F;
-  }
-
-  /** get F
-   *  \return pointer on a SiconosMatrix
-   */
-  inline SiconosMatrix* getFPtr() const
-  {
-    return F;
-  }
-
-  /** set the value of F to newValue
-   *  \param SiconosMatrix newValue
-   */
-  void setF(const SiconosMatrix&);
-
-  /** set F to pointer newPtr
-   *  \param SiconosMatrix * newPtr
-   */
-  void setFPtr(SiconosMatrix *) ;
-
-  // -- e --
-
-  /** get the value of e
-   *  \return SimpleVector
-   */
-  inline const SimpleVector getE() const
-  {
-    return *e;
-  }
-
-  /** get e
-   *  \return pointer on a SimpleVector
-   */
-  inline SiconosVector* getEPtr() const
-  {
-    return e;
-  }
-
-  /** set the value of e to newValue
-   *  \param SiconosVector newValue
-   */
-  void setE(const SiconosVector&);
-
-  /** set E to pointer newPtr
-   *  \param  SiconosVector* newPtr
-   */
-  void setEPtr(SiconosVector*);
-
-  // -- B --
-
-  /** get the value of B
-   *  \return SimpleMatrix
-   */
-  inline const SimpleMatrix getB() const
-  {
-    return *B;
-  }
-
-  /** get B
-   *  \return pointer on a SiconosMatrix
-   */
-  inline SiconosMatrix* getBPtr() const
-  {
-    return B;
-  }
-
-  /** set the value of B to newValue
-   *  \param SiconosMatrix newValue
-   */
-  void setB(const SiconosMatrix&);
-
-  /** set B to pointer newPtr
-   *  \param SiconosMatrix * newPtr
-   */
-  void setBPtr(SiconosMatrix *) ;
-
   // --- OTHER FUNCTIONS ---
 
   /** Computes y
@@ -273,14 +116,6 @@ public:
    *  \param unsigned int: "derivative" order of lambda used to compute input
    */
   void computeInput(double, unsigned int);
-
-  /** copy the data of the Relation to the XML tree
-   */
-  void saveRelationToXML() const;
-
-  /** print the data to the screen
-   */
-  void display() const;
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
    *  \param Relation * : the relation which must be converted

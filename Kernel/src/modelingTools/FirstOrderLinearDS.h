@@ -15,7 +15,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
-*/
+ */
 /*! \file FirstOrderLinearDS.h
 
 */
@@ -74,13 +74,7 @@ protected:
   /** strength vector */
   SimpleVector *b;
 
-  /* the name of the plugin used to compute A */
-  std::string  computeAFunctionName;
-
-  /* the name of the plugin used to compute b */
-  std::string  computeBFunctionName;
-
-  /** FirstOrderLinearDS plug-in to compute A(t), id = "A"
+  /** FirstOrderLinearDS plug-in to compute A(t,z), id = "A"
    * @param sizeOfA : size of square-matrix A
    * @param time : current time
    * @param[in,out] A : pointer to the first element of A
@@ -88,7 +82,7 @@ protected:
    */
   void (*APtr)(unsigned int, double, double*, double*);
 
-  /** FirstOrderLinearDS plug-in to compute b(t), id = "b"
+  /** FirstOrderLinearDS plug-in to compute b(t,z), id = "b"
    * @param sizeOfB : size of vector b
    * @param time : current time
    * @param[in,out] b : pointer to the first element of b
@@ -97,17 +91,17 @@ protected:
   void (*bPtr)(unsigned int, double, double*, double*);
 
   /** set all allocation flags (isAllocated map)
-  *  \param bool: = if true (default) set default configuration, else set all to false
-  */
+   *  \param bool: = if true (default) set default configuration, else set all to false
+   */
   void initAllocationFlags(bool  = true);
 
   /** set all plug-in flags (isPlugin map) to val
-  *  \param a bool
-  */
+   *  \param a bool
+   */
   void initPluginFlags(bool);
 
   /** default constructor
-  */
+   */
   FirstOrderLinearDS();
 
 public:
@@ -115,18 +109,18 @@ public:
   /** === CONSTRUCTORS/DESTRUCTOR === */
 
   /** xml constructor
-  *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
-  *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
-  */
+   *  \param DynamicalSystemXML * : the XML object for this DynamicalSystem
+   *  \param NonSmoothDynamicalSystem* (optional): the NSDS that owns this ds
+   */
   FirstOrderLinearDS(DynamicalSystemXML *, NonSmoothDynamicalSystem* = NULL);
 
   /** constructor from a set of data
-  *  \param int : reference number of this DynamicalSystem
-  *  \param int : dimension of this DynamicalSystem
-  *  \param SiconosVector : the initial state of this DynamicalSystem
-  *  \param string: plugin for A (optional)
-  *  \param string: plugin for b (optional)
-  */
+   *  \param int : reference number of this DynamicalSystem
+   *  \param int : dimension of this DynamicalSystem
+   *  \param SiconosVector : the initial state of this DynamicalSystem
+   *  \param string: plugin for A (optional)
+   *  \param string: plugin for b (optional)
+   */
   FirstOrderLinearDS(int, unsigned int, const SiconosVector&, const std::string& = "DefaultPlugin:computeA",
                      const std::string& = "DefaultPlugin:computeB");
 
@@ -149,8 +143,8 @@ public:
   virtual ~FirstOrderLinearDS();
 
   /** check that the system is complete (ie all required data are well set)
-  * \return a bool
-  */
+   * \return a bool
+   */
   bool checkDynamicalSystem();
 
   /** Initialization function for the rhs and its jacobian.
@@ -162,97 +156,81 @@ public:
 
   // --- A ---
   /** get the value of A
-  *  \return SimpleMatrix
-  */
+   *  \return SimpleMatrix
+   */
   inline const SimpleMatrix getA() const
   {
     return *A;
   }
 
   /** get A
-  *  \return pointer on a SiconosMatrix
-  */
+   *  \return pointer on a SiconosMatrix
+   */
   inline SiconosMatrix* getAPtr() const
   {
     return A;
   }
 
   /** set the value of A to newValue
-  *  \param SiconosMatrix newValue
-  */
+   *  \param SiconosMatrix newValue
+   */
   void setA(const SiconosMatrix& newValue);
 
   /** set A to pointer newPtr
-  *  \param SiconosMatrix * newPtr
-  */
+   *  \param SiconosMatrix * newPtr
+   */
   void setAPtr(SiconosMatrix *);
 
   // --- b ---
 
   /** get the value of b
-  *  \return SimpleVector
-  */
+   *  \return SimpleVector
+   */
   inline const SimpleVector getB() const
   {
     return *b;
   }
 
   /** get b
-  *  \return pointer on a SimpleVector
-  */
+   *  \return pointer on a SimpleVector
+   */
   inline SimpleVector* getBPtr() const
   {
     return b;
   }
 
   /** set the value of b to newValue
-  *  \param SimpleVector newValue
-  */
+   *  \param SimpleVector newValue
+   */
   void setB(const SimpleVector&);
 
   /** set b to pointer newPtr
-  *  \param SimpleVector * newPtr
-  */
+   *  \param SimpleVector * newPtr
+   */
   void setBPtr(SimpleVector *);
 
   // --- plugins related functions
 
-  /** get name of function that computes A = jacobianXF
-  *  \return a string
-  */
-  inline const std::string getComputeAFunctionName() const
-  {
-    return computeAFunctionName;
-  }
-
   /** set a specified function to compute the matrix A => same action as setComputeJacobianXFFunction
-  *  \param string : the complete path to the plugin
-  *  \param string : the function name to use in this plugin
-  *  \exception SiconosSharedLibraryException
-  */
+   *  \param string : the complete path to the plugin
+   *  \param string : the function name to use in this plugin
+   *  \exception SiconosSharedLibraryException
+   */
   void setComputeAFunction(const std::string , const std::string);
 
-  /** get name of function that computes b (if b from plugin)
-  *  \return a string
-  */
-  inline const std::string getComputeBFunctionName() const
-  {
-    return computeBFunctionName;
-  }
-
   /** set a specified function to compute the vector b
-  *  \param string : the complete path to the plugin
-  *  \param string : the function name to use in this plugin
-  *  \exception SiconosSharedLibraryException
-  */
+   *  \param string : the complete path to the plugin
+   *  \param string : the function name to use in this plugin
+   *  \exception SiconosSharedLibraryException
+   */
   void setComputeBFunction(const std::string , const std::string);
 
   /** default function to compute matrix A => same action as computeJacobianXF
-  */
+   */
   void computeA(const double);
 
   /** default function to compute vector b
-  */
+   */
   void computeB(const double);
 
   /** set the value of f to newValue
@@ -272,16 +250,16 @@ public:
   };
 
   /** set the value of JacobianXF to newValue: exception for LinearDS since f is not available.
-  *  \param SiconosMatrix newValue
-  */
+   *  \param SiconosMatrix newValue
+   */
   inline void setJacobianXF(const SiconosMatrix&)
   {
     RuntimeException::selfThrow("FirstOrderLinearDS - setJacobianXF: f is not available for FirstOrderLinearDS.");
   };
 
   /** set JacobianXF to pointer newPtr: exception for LinearDS since f is not available.
-  *  \param SiconosMatrix * newPtr
-  */
+   *  \param SiconosMatrix * newPtr
+   */
   inline void setJacobianXFPtr(SiconosMatrix *newPtr)
   {
     RuntimeException::selfThrow("FirstOrderLinearDS - setJacobianXFPtr: f is not available for FirstOrderLinearDS.");
@@ -331,9 +309,9 @@ public:
   virtual void computeRhs(const double, const bool  = false);
 
   /** Default function to jacobian of the right-hand side term according to x
-  *  \param double time : current time
-  *  \param bool isDSup : flag to avoid recomputation of operators
-  */
+   *  \param double time : current time
+   *  \param bool isDSup : flag to avoid recomputation of operators
+   */
   virtual void computeJacobianXRhs(const double, const bool  = false);
 
   // --- xml related functions ---
@@ -343,13 +321,13 @@ public:
   void saveSpecificDataToXML();
 
   /** data display on screen
-  */
+   */
   virtual void display() const;
 
   /** encapsulates an operation of dynamic casting. Needed by Python interface.
-  *  \param DynamicalSystem* : the system which must be converted
-  * \return a pointer on the dynamical system if it is of the right type, NULL otherwise
-  */
+   *  \param DynamicalSystem* : the system which must be converted
+   * \return a pointer on the dynamical system if it is of the right type, NULL otherwise
+   */
   static FirstOrderLinearDS* convert(DynamicalSystem* ds);
 
 };

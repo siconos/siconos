@@ -22,19 +22,6 @@
 #ifndef SICONOS_DATAC_H
 #define SICONOS_DATAC_H
 
-/** Class to manage a global structure for siconos simulation
- *
- *  \author SICONOS Development Team - copyright INRIA
- *  \version 2.0.1.
- *  \date (Crestion) Apr 26, 2004
- *
- *  This class is dedicated to be declared in a global scope and to be use
- *  by the global API C to store informations about siconos simulation.
- *
- *  It allows to describe an API C interface with integer id and not object
- *   pointer.
- *
- */
 
 #include <math.h>
 #include <stdio.h>
@@ -47,6 +34,19 @@
 
 using namespace std;
 
+/** Class to manage a global structure for siconos simulation
+ *
+ *  \author SICONOS Development Team - copyright INRIA
+ *  \version 2.0.1.
+ *  \date (Creation) Apr 26, 2004
+ *
+ *  This class is dedicated to be declared in a global scope and to be use
+ *  by the global API C to store informations about siconos simulation.
+ *
+ *  It allows to describe an API C interface with integer id and not object
+ *   pointer.
+ *
+ */
 class DataC
 {
 
