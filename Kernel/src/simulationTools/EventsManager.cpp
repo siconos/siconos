@@ -81,7 +81,12 @@ const unsigned long int EventsManager::doubleToIntTime(double doubleTime)
 {
   double res = ceil(doubleTime / tick);
   if (res > ULONG_MAX) // check if res value can be converted to unsigned long int.
-    RuntimeException::selfThrow("EventsManager doubleToIntTime, conversion results in an overflow value > ULONG_MAX, max value for unsigned long int. Try to change tick value. ULONG_MAX=" + ULONG_MAX);
+  {
+    string report = "EventsManager doubleToIntTime, conversion results in an overflow value > ULONG_MAX, max value for unsigned long int. Try to change tick value. ULONG_MAX=";
+    std::ostringstream oss;
+    oss << report << ULONG_MAX;
+    RuntimeException::selfThrow(oss.str());
+  }
   return (unsigned long int)res;
 }
 
