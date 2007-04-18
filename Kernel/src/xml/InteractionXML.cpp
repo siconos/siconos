@@ -72,7 +72,7 @@ InteractionXML::InteractionXML(xmlNodePtr  interactionNode):
       type = (char*)node2->name;
       if (type == "FirstOrderRelation")
         relationXML = new FirstOrderRXML(node2);
-      else if (type == "FirstOrderLinearTimeInvariantRelation")
+      else if (type == "FirstOrderLinearRelation" || type == "FirstOrderLinearTimeInvariantRelation")
         relationXML = new FirstOrderLinearRXML(node2);
       else if (type == "LagrangianRelation")
         relationXML = new LagrangianRXML(node2);

@@ -223,7 +223,7 @@ public:
   /** get the dimension of the interaction (y and lambda size)
   *  \return an unsigned int
   */
-  inline const unsigned int getInteractionSize() const
+  inline const unsigned int getSizeOfY() const
   {
     return interactionSize;
   }

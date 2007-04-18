@@ -69,10 +69,7 @@ public:
   *  \param
   *  \param
   */
-  DataC()
-  {
-    cout  << "Constructeur" << endl;
-  };
+  DataC() {};
 
 
   /** destructor

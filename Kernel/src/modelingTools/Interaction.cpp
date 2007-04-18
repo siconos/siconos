@@ -104,6 +104,10 @@ Interaction::Interaction(InteractionXML* interxml, NonSmoothDynamicalSystem * ns
     relation = new FirstOrderR(interactionxml->getRelationXML());
 
   // Linear relation
+  else if (relationType == "FirstOrderLinearRelation")
+    relation = new FirstOrderLinearR(interactionxml->getRelationXML());
+
+  // Linear time-invariant coef. relation
   else if (relationType == "FirstOrderLinearTimeInvariantRelation")
     relation = new FirstOrderLinearTIR(interactionxml->getRelationXML());
 
@@ -645,6 +649,8 @@ void Interaction::saveInteractionToXML()
   {
     if (subType == "NonLinearR")
       relation->saveRelationToXML();
+    else if (subType == "LinearR")
+      (static_cast<FirstOrderLinearR*>(relation))->saveRelationToXML();
     else if (subType == "LinearTIR")
       (static_cast<FirstOrderLinearTIR*>(relation))->saveRelationToXML();
     else

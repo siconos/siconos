@@ -32,11 +32,11 @@
  *
  *  Linear Relation for First Order Dynamical Systems, with:
  *
- * \f[
- * y = C x + Fz + D \lambda + e \\
+ * \f{eqnarray}
+ * y &=& C x + Fz + D \lambda + e \\
  *
- * R = B \lambda
- * \f]
+ * R &=& B \lambda
+ * \f}
  *
  */
 class FirstOrderLinearTIR : public FirstOrderLinearR

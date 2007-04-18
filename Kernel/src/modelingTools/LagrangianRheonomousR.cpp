@@ -98,7 +98,7 @@ void LagrangianRheonomousR::initComponents()
 {
   LagrangianR::initComponents();
 
-  unsigned int sizeY = interaction->getInteractionSize();
+  unsigned int sizeY = interaction->getSizeOfY();
   // hDot
   if (hDot == NULL)
   {

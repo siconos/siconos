@@ -216,8 +216,13 @@ void LCP::initialize()
   OneStepNSProblem::initialize();
 
   // ensure a large number of pivots for LexicoLemke backup solver
-  if ((10 * sizeOutput) > solverBackup->getMaxIter()) solverBackup->setMaxIter(10 * sizeOutput);
-  solverBackup->setSolvingMethod();
+  // SolverBackup stuff: to be removed ...
+  bool Pascal = false;
+  if (Pascal)
+  {
+    if ((10 * sizeOutput) > solverBackup->getMaxIter()) solverBackup->setMaxIter(10 * sizeOutput);
+    solverBackup->setSolvingMethod();
+  }
 
   // get topology
   Topology * topology = simulation->getModelPtr()->getNonSmoothDynamicalSystemPtr()->getTopologyPtr();

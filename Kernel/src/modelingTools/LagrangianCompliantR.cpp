@@ -83,7 +83,7 @@ LagrangianCompliantR::~LagrangianCompliantR()
 void LagrangianCompliantR::initComponents()
 {
   LagrangianR::initComponents();
-  unsigned int sizeY = interaction->getInteractionSize();
+  unsigned int sizeY = interaction->getSizeOfY();
 
   if (G[1] == NULL)
   {

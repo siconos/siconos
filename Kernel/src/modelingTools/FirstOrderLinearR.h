@@ -33,20 +33,19 @@ typedef void (*FOMatPtr2)(double, unsigned int, double*, unsigned int, double*);
 /** Pointer to function used for plug-in for vector-type operators (e) */
 typedef void (*FOVecPtr)(double, unsigned int, double*, unsigned int, double*);
 
-
 /** Linear Time Invariant Relation, derived from class FirstOrderR
  *
  * \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.1.
- *  \date Apr 27, 2004
+ *  \date Apr 15, 2007
  *
  *  Linear Relation for First Order Dynamical Systems:
  *
- * \f[
- * y = C(t,z)x(t) + F(t,z)z + D(t,z)\lambda + e(t,z) \\
+ * \f{eqnarray}
+ * y &=& C(t,z)x(t) + F(t,z)z + D(t,z)\lambda + e(t,z) \\
  *
- * R = B(t,z) \lambda
- * \f]
+ * R &=& B(t,z) \lambda
+ * \f}
  *
  * All coefficients can be plugged or not. Use isPlugged[name] to check if name ( = "C", "F" etc) is plugged.
  *
@@ -137,24 +136,25 @@ public:
    */
   FirstOrderLinearR(RelationXML*);
 
-  /** create the Relation from a set of data
-   *  \param SiconosMatrix : the matrix C
-   *  \param SiconosMatrix : the matrix B
-   *  \exception RuntimeException
-   */
-  FirstOrderLinearR(const SiconosMatrix& , const SiconosMatrix&);
+  /** Constructor with C and B plug-in names
+      \param C plug-in name
+      \param B plug-in name
+  **/
+  FirstOrderLinearR(const std::string&, const std::string&);
 
-  /** create the Relation from a set of data
-   *  \param SiconosMatrix : C
-   *  \param SiconosMatrix : D
-   *  \param SiconosMatrix : F
-   *  \param SimpleVector  : e
-   *  \param SiconosMatrix : B
-   *  \exception RuntimeException
-   */
-  FirstOrderLinearR(const SiconosMatrix& , const SiconosMatrix& ,
-                    const SiconosMatrix& , const SimpleVector& ,
-                    const SiconosMatrix&);
+  /** Constructor with e plug-in name (other operators need a set!)
+      \param e plug-in name
+  **/
+  FirstOrderLinearR(const std::string&);
+
+  /** Constructor all plug-in names
+      \param C plug-in name
+      \param D plug-in name
+      \param F plug-in name
+      \param e plug-in name
+      \param B plug-in name
+  **/
+  FirstOrderLinearR(const std::string&, const std::string&, const std::string&, const std::string&, const std::string&);
 
   /** create the Relation from a set of data
    *  \param pointer to SiconosMatrix : the matrix C
@@ -172,7 +172,7 @@ public:
    *  \exception RuntimeException
    */
   FirstOrderLinearR(SiconosMatrix* , SiconosMatrix* ,
-                    SiconosMatrix* , SimpleVector* ,
+                    SiconosMatrix* , SiconosVector* ,
                     SiconosMatrix*);
 
   /** destructor

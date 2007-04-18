@@ -53,135 +53,131 @@ FirstOrderLinearR::FirstOrderLinearR(RelationXML* relxml):
   FirstOrderR(relxml, "LinearR"), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
   CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
 {
-  FirstOrderLinearRXML * lTIRxml = static_cast<FirstOrderLinearRXML *>(relationxml);
+  FirstOrderLinearRXML * folrXML = static_cast<FirstOrderLinearRXML *>(relationxml);
   // get matrices values. All are optional.
 
   initAllocationFlags(false);
   initPluginFlags(false);
 
   string plugin;
-  if (lTIRxml->hasC())
+  if (folrXML->hasC())
   {
-    if (lTIRxml->hasH())
+    if (folrXML->hasH())
       RuntimeException::selfThrow(" FirstOrderLinearR xml constructor failed. Too many inputs: you can not give C and h or its jacobian.");
 
-    if (lTIRxml->isCPlugin())
+    if (folrXML->isCPlugin())
     {
-      plugin = lTIRxml->getCPlugin();
+      plugin = folrXML->getCPlugin();
       setComputeCFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
     }
     else
     {
-      C = new SimpleMatrix(lTIRxml->getC());
+      C = new SimpleMatrix(folrXML->getC());
       isAllocatedIn["C"] = true;
     }
   }
 
-  if (lTIRxml->hasD())
+  if (folrXML->hasD())
   {
-    if (lTIRxml->hasH())
+    if (folrXML->hasH())
       RuntimeException::selfThrow(" FirstOrderLinearR xml constructor failed. Too many inputs: you can not give D and h or its jacobian.");
 
-    if (lTIRxml->isDPlugin())
+    if (folrXML->isDPlugin())
     {
-      plugin = lTIRxml->getDPlugin();
+      plugin = folrXML->getDPlugin();
       setComputeDFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
     }
     else
     {
-      D = new SimpleMatrix(lTIRxml->getD());
+      D = new SimpleMatrix(folrXML->getD());
       isAllocatedIn["D"] = true;
     }
   }
 
-  if (lTIRxml->hasF())
+  if (folrXML->hasF())
   {
-    if (lTIRxml->isFPlugin())
+    if (folrXML->isFPlugin())
     {
-      plugin = lTIRxml->getFPlugin();
+      plugin = folrXML->getFPlugin();
       setComputeFFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
     }
     else
     {
-      F = new SimpleMatrix(lTIRxml->getF());
+      F = new SimpleMatrix(folrXML->getF());
       isAllocatedIn["F"] = true;
     }
   }
 
-  if (lTIRxml->hasE())
+  if (folrXML->hasE())
   {
-    if (lTIRxml->isEPlugin())
+    if (folrXML->isEPlugin())
     {
-      plugin = lTIRxml->getEPlugin();
+      plugin = folrXML->getEPlugin();
       setComputeEFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
     }
     else
     {
-      e = new SimpleVector(lTIRxml->getE());
+      e = new SimpleVector(folrXML->getE());
       isAllocatedIn["e"] = true;
     }
   }
 
-  if (lTIRxml->hasB())
+  if (folrXML->hasB())
   {
-    if (lTIRxml->hasG())
+    if (folrXML->hasG())
       RuntimeException::selfThrow(" FirstOrderLinearR xml constructor failed. Too many inputs: you can not give B and g or its jacobian.");
 
-    if (lTIRxml->isBPlugin())
+    if (folrXML->isBPlugin())
     {
-      plugin = lTIRxml->getBPlugin();
+      plugin = folrXML->getBPlugin();
       setComputeBFunction(cShared.getPluginName(plugin), cShared.getPluginFunctionName(plugin));
     }
     else
     {
-      B = new SimpleMatrix(lTIRxml->getB());
+      B = new SimpleMatrix(folrXML->getB());
       isAllocatedIn["B"] = true;
     }
   }
 }
 
-// Minimum data (C, B) constructor
-FirstOrderLinearR::FirstOrderLinearR(const SiconosMatrix& newC, const SiconosMatrix& newB):
+// Constructor with C and B plug-in names
+FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& BName):
   FirstOrderR("LinearR"), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
   CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
 {
-  C = new SimpleMatrix(newC);
-  B = new SimpleMatrix(newB);
-  isAllocatedIn["C"] = true;
-  isAllocatedIn["B"] = true;
-  isAllocatedIn["D"] = false;
-  isAllocatedIn["F"] = false;
-  isAllocatedIn["e"] = false;
   initPluginFlags(false);
+  initAllocationFlags(false);
+  setComputeCFunction(cShared.getPluginName(CName), cShared.getPluginFunctionName(CName));
+  setComputeBFunction(cShared.getPluginName(BName), cShared.getPluginFunctionName(BName));
 }
 
-// Constructor from a complete set of data
-FirstOrderLinearR::FirstOrderLinearR(const SiconosMatrix& newC, const SiconosMatrix& newD,
-                                     const SiconosMatrix& newF, const SimpleVector& newE,
-                                     const SiconosMatrix& newB):
+// Constructor with e plug-in name
+FirstOrderLinearR::FirstOrderLinearR(const string& EName):
   FirstOrderR("LinearR"), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
   CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
 {
-  C = new SimpleMatrix(newC);
-  isAllocatedIn["C"] = true;
-
-  D = new SimpleMatrix(newD);
-  isAllocatedIn["D"] = true;
-
-  F = new SimpleMatrix(newF);
-  isAllocatedIn["F"] = true;
-
-  e = new SimpleVector(newE);
-  isAllocatedIn["e"] = true;
-
-  B = new SimpleMatrix(newB);
-  isAllocatedIn["B"] = true;
   initPluginFlags(false);
+  initAllocationFlags(false);
+  setComputeEFunction(cShared.getPluginName(EName), cShared.getPluginFunctionName(EName));
+}
+
+// Constructor from a complete set of data (plugin)
+FirstOrderLinearR::FirstOrderLinearR(const string& CName, const string& DName, const string& FName, const string& EName, const string& BName):
+  FirstOrderR("LinearR"), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
+  CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
+{
+  initPluginFlags(true);
+  initAllocationFlags(false);
+  setComputeCFunction(cShared.getPluginName(CName), cShared.getPluginFunctionName(CName));
+  setComputeDFunction(cShared.getPluginName(DName), cShared.getPluginFunctionName(DName));
+  setComputeFFunction(cShared.getPluginName(FName), cShared.getPluginFunctionName(FName));
+  setComputeEFunction(cShared.getPluginName(EName), cShared.getPluginFunctionName(EName));
+  setComputeBFunction(cShared.getPluginName(BName), cShared.getPluginFunctionName(BName));
 }
 
 // Minimum data (C, B as pointers) constructor
 FirstOrderLinearR::FirstOrderLinearR(SiconosMatrix * newC, SiconosMatrix * newB):
-  FirstOrderR("LinearR"), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
+  FirstOrderR("LinearR"), C(newC), D(NULL), F(NULL), e(NULL), B(newB),
   CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
 {
   initPluginFlags(false);
@@ -189,8 +185,8 @@ FirstOrderLinearR::FirstOrderLinearR(SiconosMatrix * newC, SiconosMatrix * newB)
 }
 
 // Constructor from a complete set of data
-FirstOrderLinearR::FirstOrderLinearR(SiconosMatrix* newC, SiconosMatrix* newD, SiconosMatrix* newF, SimpleVector* newE, SiconosMatrix* newB):
-  FirstOrderR("LinearR"), C(NULL), D(NULL), F(NULL), e(NULL), B(NULL),
+FirstOrderLinearR::FirstOrderLinearR(SiconosMatrix* newC, SiconosMatrix* newD, SiconosMatrix* newF, SiconosVector* newE, SiconosMatrix* newB):
+  FirstOrderR("LinearR"), C(newC), D(newD), F(newF), e(newE), B(newB),
   CPtr(NULL), DPtr(NULL), FPtr(NULL), ePtr(NULL), BPtr(NULL)
 {
   initPluginFlags(false);
@@ -209,16 +205,29 @@ FirstOrderLinearR::~FirstOrderLinearR()
   e = NULL;
   if (isAllocatedIn["B"]) delete B;
   B = NULL;
+  CPtr = NULL;
+  DPtr = NULL;
+  FPtr = NULL;
+  ePtr = NULL;
+  BPtr = NULL;
 }
 
 void FirstOrderLinearR::initialize()
 {
-  FirstOrderR::initialize();
+  // Note: do not call FirstOrderR::initialize to avoid jacobianH and jacobianG allocation.
+
+  // Check if an Interaction is connected to the Relation.
+  if (interaction == NULL)
+    RuntimeException::selfThrow("FirstOrderR::initialize failed. No Interaction linked to the present relation.");
+
+  // Update data member (links to DS variables)
+  initDSLinks();
 
   // Check if various operators sizes are consistent.
   // Reference: interaction.
-  unsigned int sizeY = interaction->getInteractionSize();
+  unsigned int sizeY = interaction->getSizeOfY();
   unsigned int sizeX = interaction->getSizeOfDS();
+  unsigned int sizeZ = interaction->getSizeZ();
 
   if (C != NULL)
   {
@@ -251,6 +260,37 @@ void FirstOrderLinearR::initialize()
 
   if (e != NULL && e->size() != sizeY)
     RuntimeException::selfThrow("FirstOrderLinearR::initialize , inconsistent size between C and e.");
+
+  // Memory allocation if required (ie if plugged and not allocated: must be done here since in constructors, interaction is not knonw).
+  if (C == NULL && isPlugged["C"])
+  {
+    C = new SimpleMatrix(sizeY, sizeX);
+    isAllocatedIn["C"] = true ;
+  }
+
+  if (D == NULL && isPlugged["D"])
+  {
+    D = new SimpleMatrix(sizeY, sizeY);
+    isAllocatedIn["D"] = true ;
+  }
+
+  if (F == NULL && isPlugged["F"])
+  {
+    F = new SimpleMatrix(sizeY, sizeZ);
+    isAllocatedIn["F"] = true ;
+  }
+
+  if (e == NULL && isPlugged["e"])
+  {
+    e = new SimpleVector(sizeY);
+    isAllocatedIn["e"] = true ;
+  }
+
+  if (B == NULL && isPlugged["B"])
+  {
+    B = new SimpleMatrix(sizeX, sizeY);
+    isAllocatedIn["B"] = true ;
+  }
 }
 
 // setters
@@ -284,14 +324,6 @@ void FirstOrderLinearR::setCPtr(SiconosMatrix *newPtr)
 
 void FirstOrderLinearR::setComputeCFunction(const string& pluginPath, const string& functionName)
 {
-  if (C == NULL)
-  {
-    unsigned int sizeY = interaction->getInteractionSize();
-    unsigned int sizeX = interaction->getSizeOfDS();
-    C = new SimpleMatrix(sizeY, sizeX);
-    isAllocatedIn["C"] = true ;
-  }
-
   CPtr = NULL;
   cShared.setFunction(&CPtr, pluginPath, functionName);
 
@@ -327,13 +359,6 @@ void FirstOrderLinearR::setDPtr(SiconosMatrix *newPtr)
 
 void FirstOrderLinearR::setComputeDFunction(const string& pluginPath, const string& functionName)
 {
-  if (D == NULL)
-  {
-    unsigned int sizeY = interaction->getInteractionSize();
-    D = new SimpleMatrix(sizeY, sizeY);
-    isAllocatedIn["D"] = true ;
-  }
-
   DPtr = NULL;
   cShared.setFunction(&DPtr, pluginPath, functionName);
 
@@ -369,14 +394,6 @@ void FirstOrderLinearR::setFPtr(SiconosMatrix *newPtr)
 
 void FirstOrderLinearR::setComputeFFunction(const string& pluginPath, const string& functionName)
 {
-  if (F == NULL)
-  {
-    unsigned int sizeY = interaction->getInteractionSize();
-    unsigned int sizeZ = interaction->getSizeZ();
-    F = new SimpleMatrix(sizeY, sizeZ);
-    isAllocatedIn["F"] = true ;
-  }
-
   FPtr = NULL;
   cShared.setFunction(&FPtr, pluginPath, functionName);
 
@@ -412,13 +429,6 @@ void FirstOrderLinearR::setEPtr(SiconosVector* newPtr)
 
 void FirstOrderLinearR::setComputeEFunction(const string& pluginPath, const string& functionName)
 {
-  if (e == NULL)
-  {
-    unsigned int sizeY = interaction->getInteractionSize();
-    e = new SimpleVector(sizeY);
-    isAllocatedIn["e"] = true ;
-  }
-
   ePtr = NULL;
   cShared.setFunction(&ePtr, pluginPath, functionName);
 
@@ -454,13 +464,6 @@ void FirstOrderLinearR::setBPtr(SiconosMatrix *newPtr)
 
 void FirstOrderLinearR::setComputeBFunction(const string& pluginPath, const string& functionName)
 {
-  if (B == NULL)
-  {
-    unsigned int sizeY = interaction->getInteractionSize();
-    unsigned int sizeX = interaction->getSizeOfDS();
-    B = new SimpleMatrix(sizeX, sizeY);
-    isAllocatedIn["B"] = true ;
-  }
 
   BPtr = NULL;
   cShared.setFunction(&BPtr, pluginPath, functionName);
@@ -544,7 +547,7 @@ void FirstOrderLinearR::computeC(const double time)
   {
     if (CPtr == NULL)
       RuntimeException::selfThrow("computeC() is not linked to a plugin function");
-    unsigned int sizeY = interaction->getInteractionSize();
+    unsigned int sizeY = interaction->getSizeOfY();
     unsigned int sizeX = interaction->getSizeOfDS();
     unsigned int sizeZ = interaction->getSizeZ();
     SimpleVector * zCopy = new SimpleVector(*data["z"]);
@@ -560,7 +563,7 @@ void FirstOrderLinearR::computeD(const double time)
   {
     if (DPtr == NULL)
       RuntimeException::selfThrow("computeD() is not linked to a plugin function");
-    unsigned int sizeY = interaction->getInteractionSize();
+    unsigned int sizeY = interaction->getSizeOfY();
     unsigned int sizeZ = interaction->getSizeZ();
     SimpleVector * zCopy = new SimpleVector(*data["z"]);
     DPtr(time, sizeY, &(*D)(0, 0), sizeZ, &(*zCopy)(0));
@@ -575,7 +578,7 @@ void FirstOrderLinearR::computeF(const double time)
   {
     if (FPtr == NULL)
       RuntimeException::selfThrow("computeF() is not linked to a plugin function");
-    unsigned int sizeY = interaction->getInteractionSize();
+    unsigned int sizeY = interaction->getSizeOfY();
     unsigned int sizeZ = interaction->getSizeZ();
     SimpleVector * zCopy = new SimpleVector(*data["z"]);
     FPtr(time, sizeY, &(*F)(0, 0), sizeZ, &(*zCopy)(0));
@@ -590,7 +593,7 @@ void FirstOrderLinearR::computeE(const double time)
   {
     if (ePtr == NULL)
       RuntimeException::selfThrow("computeE() is not linked to a plugin function");
-    unsigned int sizeY = interaction->getInteractionSize();
+    unsigned int sizeY = interaction->getSizeOfY();
     unsigned int sizeZ = interaction->getSizeZ();
     SimpleVector * zCopy = new SimpleVector(*data["z"]);
     ePtr(time, sizeY, &(*e)(0), sizeZ, &(*zCopy)(0));
@@ -605,7 +608,7 @@ void FirstOrderLinearR::computeB(const double time)
   {
     if (BPtr == NULL)
       RuntimeException::selfThrow("computeB() is not linked to a plugin function");
-    unsigned int sizeY = interaction->getInteractionSize();
+    unsigned int sizeY = interaction->getSizeOfY();
     unsigned int sizeX = interaction->getSizeOfDS();
     unsigned int sizeZ = interaction->getSizeZ();
     SimpleVector * zCopy = new SimpleVector(*data["z"]);
@@ -656,12 +659,12 @@ void FirstOrderLinearR::saveRelationToXML() const
   if (relationxml == NULL)
     RuntimeException::selfThrow("FirstOrderLinearR::saveRelationToXML, no xml object found.");
 
-  FirstOrderLinearRXML * lTIRxml = (static_cast<FirstOrderLinearRXML*>(relationxml));
-  lTIRxml->setC(*C);
-  lTIRxml->setD(*D);
-  lTIRxml->setF(*F);
-  lTIRxml->setE(*e);
-  lTIRxml->setB(*B);
+  FirstOrderLinearRXML * folrXML = (static_cast<FirstOrderLinearRXML*>(relationxml));
+  folrXML->setC(*C);
+  folrXML->setD(*D);
+  folrXML->setF(*F);
+  folrXML->setE(*e);
+  folrXML->setB(*B);
 }
 
 FirstOrderLinearR* FirstOrderLinearR::convert(Relation *r)

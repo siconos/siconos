@@ -826,7 +826,7 @@ extern "C" int sicLagrangianLinearR(int nIdInteraction, double *H, double *b)
 
     // Compute sum of DS size
     dimDS = interaction->getSizeOfDS();
-    nbRel = interaction->getInteractionSize();
+    nbRel = interaction->getSizeOfY();
 
     if ((dimDS <= 0) || (nbRel <= 0))
       RuntimeException::selfThrow("siconos/C:: sicLagrangianLinearR  failed");

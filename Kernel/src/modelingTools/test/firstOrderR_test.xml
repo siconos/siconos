@@ -27,8 +27,15 @@
 				<!-- Relation of this interaction -->				
 				<Interaction_Content>		
 					<FirstOrderRelation>
-					<computeInput plugin="TestPlugin:R"/>
-					<computeOutput plugin="TestPlugin:y"/>
+					<g plugin="TestPlugin:R"/>
+                                        <jacobianG number='1'>
+					    <matrix matrixPlugin="TestPlugin:Jg0"/>
+                                        </jacobianG>
+					<h plugin="TestPlugin:y"/>
+                                        <jacobianH number='2'>
+					    <matrix matrixPlugin="TestPlugin:Jh0"/>
+					    <matrix matrixPlugin="TestPlugin:Jh1"/>
+                                        </jacobianH>
 					</FirstOrderRelation>			
 					<!-- NS Law of this interaction	-->
 					<NewtonImpactLaw>

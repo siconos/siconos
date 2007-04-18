@@ -138,7 +138,7 @@ public:
       * \return a bool. */
   inline bool isJacobianGPlugin(unsigned int i = 0) const
   {
-    return xmlHasProp((xmlNodePtr)(jacobianGNode[i]), (xmlChar *)"plugin");
+    return xmlHasProp((xmlNodePtr)(jacobianGNode[i]), (xmlChar *)"matrixPlugin");
   }
 
   /** Tests if gNode is defined.
@@ -174,7 +174,7 @@ public:
       \return a bool. */
   inline bool isJacobianHPlugin(unsigned int i) const
   {
-    return xmlHasProp((xmlNodePtr)(jacobianHNode[i]), (xmlChar *)"plugin");
+    return xmlHasProp((xmlNodePtr)(jacobianHNode[i]), (xmlChar *)"matrixPlugin");
   }
 
   /** Tests if hNode is defined.

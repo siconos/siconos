@@ -50,10 +50,10 @@ class SimpleVector;
  *  - computeInput(...) to compute non-smooth DS part (r or p) using lambda.
  *
  * Depending on the DS class and the link type, various relations (ie derived classes) are available:
- *   - FirstOrder, for FirstOrderDynamicalSystem and derived classes.
+ *   - FirstOrder, for FirstOrderDS and derived classes.
  *   - Lagrangian, for LagrangianDS and derived classes.
  *
- *  The specific type (Linear, Scleronomous ...) is then given by the "subTYpe". See Relation derived classes for details.
+ *  The specific type (Linear, Scleronomous ...) is then given by the "subType". See Relation derived classes for details.
  *
  * The relation holds also:
  *  - a pointer to the Interaction that owns the present relation.

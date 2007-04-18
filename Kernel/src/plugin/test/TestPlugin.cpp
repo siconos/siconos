@@ -194,35 +194,6 @@ extern "C" void computeA(unsigned int  sizeOfA, double time, double* A, double *
 
 // ===== RELATIONS ====
 
-/** Relation plug-in to compute y(x,t) - id="output".
- *  @param sizeOfX : the size of the vector x
- *  @param x : the pointer to the first element of the vector x
- *  @param time : current time
- *  @param sizeOfY : the size of the vector y and lambda (ie of the interaction)
- *  @param lambda : the pointer to the first element of the vector lambda
- *  @param sizeOfU : the size of the vector u
- *  @param u : the pointer to the first element of the vector u
- *  @param[in,out]  y : the pointer to the first element of the vector y
- *  @param[in,out] param : a vector of user-defined parameters
- */
-extern "C" void y(unsigned int sizeOfX, const double* x, double time, unsigned int sizeOfY, const double* lambda,
-                  double* y, unsigned int sizeOfZ, double* z)
-{
-  printf("Warning: call of the function 'computeOutput' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
-}
-
-/** Relation plug-in to compute r(lambda,t) - id="input".
- *  @param sizeY : the size of the vector y and lambda (ie of the interaction)
- *  @param lambda : the pointer to the first element of the vector lambda
- *  @param time : current time
- *  @param[in,out] r : the pointer to the first element of the vector y
- *  @param[in,out] param : a vector of user-defined parameters
- */
-extern "C" void R(unsigned int sizeY, const double* lambda, double time, double* r, unsigned int sizeZ, double* param)
-{
-  printf("Warning: call of the function 'computeInput' of the default plugin, which is not implemented. Add it in yourPlugin.cpp.\n");
-}
-
 // === Lagrangian Relations ===
 
 // Scleronomous
@@ -342,3 +313,52 @@ extern "C" void G1Compl(unsigned int, const double*, unsigned int, const double*
   printf("Call of the function 'G1Compl' of the default plugin.\nYou have to implement this function.\n");
 }
 
+// ========== FirstOrderRelations ==========
+
+extern "C" void y(unsigned int, const double*, double, unsigned int, const double*, double*, unsigned int, double*)
+{
+  printf("Warning: call of the function 'y' of the test plugin.\n");
+}
+
+extern "C" void R(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)
+{
+  printf("Warning: call of the function 'R' of the test plugin.\n");
+}
+
+extern "C" void Jh0(unsigned int, const double*, double, unsigned int, const double*, double*, unsigned int, double*)
+{
+  printf("Warning: call of the function 'Jh0' of the test plugin.\n");
+}
+extern "C" void Jh1(unsigned int, const double*, double, unsigned int, const double*, double*, unsigned int, double*)
+{
+  printf("Warning: call of the function 'Jh1' of the test plugin.\n");
+}
+extern "C" void Jg0(unsigned int, const double*, double, unsigned int, double*, unsigned int, double*)
+{
+  printf("Warning: call of the function 'Jg0' of the test plugin.\n");
+}
+
+extern "C" void C(double, unsigned int, unsigned int, double*, unsigned int, double*)
+{
+  printf("Warning: call of the function 'C' of the test plugin.\n");
+}
+
+extern "C" void D(double, unsigned int, double*, unsigned int, double*)
+{
+  printf("Warning: call of the function 'D' of the test plugin.\n");
+}
+
+extern "C" void F(double, unsigned int, double*, unsigned int, double*)
+{
+  printf("Warning: call of the function 'F' of the test plugin.\n");
+}
+
+extern "C" void e(double, unsigned int, double*, unsigned int, double*)
+{
+  printf("Warning: call of the function 'e' of the test plugin.\n");
+}
+
+extern "C" void B(double, unsigned int, unsigned int, double*, unsigned int, double*)
+{
+  printf("Warning: call of the function 'B' of the test plugin.\n");
+}

@@ -86,7 +86,7 @@
 		</OneStepIntegrator_Definition>
 		<OneStepNSProblem>
 		 	<LCP>
-	                  <Solver type="QP" maxIter="101" />
+	                  <Solver type="Lemke" maxIter="101" />
 		 	</LCP>
 		 </OneStepNSProblem>
 	</Simulation>	

@@ -16,39 +16,65 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef __FirstOrderLinearTIRTest__
-#define __FirstOrderLinearTIRTest__
+#ifndef __FirstOrderLinearRTest__
+#define __FirstOrderLinearRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "RelationXML.h"
 #include "NonSmoothDynamicalSystem.h"
 #include "NonSmoothDynamicalSystemXML.h"
-#include "FirstOrderLinearTIR.h"
+#include "FirstOrderLinearR.h"
 #include "FirstOrderLinearRXML.h"
 
-class FirstOrderLinearTIRTest : public CppUnit::TestFixture
+class FirstOrderLinearRTest : public CppUnit::TestFixture
 {
 
 private:
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(FirstOrderLinearTIRTest);
+  CPPUNIT_TEST_SUITE(FirstOrderLinearRTest);
 
   // tests to be done ...
 
-  //CPPUNIT_TEST(testBuildFirstOrderLinearTIR);
-  CPPUNIT_TEST(testBuildFirstOrderLinearTIR0);
-  CPPUNIT_TEST(testBuildFirstOrderLinearTIR1);
-  CPPUNIT_TEST(testBuildFirstOrderLinearTIR2);
+  //CPPUNIT_TEST(testBuildFirstOrderLinearR);
+  CPPUNIT_TEST(testBuildFirstOrderLinearR0);
+  CPPUNIT_TEST(testBuildFirstOrderLinearR1);
+  CPPUNIT_TEST(testBuildFirstOrderLinearR2);
+  CPPUNIT_TEST(testBuildFirstOrderLinearR3);
+  CPPUNIT_TEST(testBuildFirstOrderLinearR4);
+  CPPUNIT_TEST(testBuildFirstOrderLinearR5);
+  CPPUNIT_TEST(testSetC);
+  CPPUNIT_TEST(testSetCPtr);
+  CPPUNIT_TEST(testSetD);
+  CPPUNIT_TEST(testSetDPtr);
+  CPPUNIT_TEST(testSetF);
+  CPPUNIT_TEST(testSetFPtr);
+  CPPUNIT_TEST(testSetE);
+  CPPUNIT_TEST(testSetEPtr);
+  CPPUNIT_TEST(testSetB);
+  CPPUNIT_TEST(testSetBPtr);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildFirstOrderLinearTIR0();
-  void testBuildFirstOrderLinearTIR1();
-  void testBuildFirstOrderLinearTIR2();
+  void testBuildFirstOrderLinearR0();
+  void testBuildFirstOrderLinearR1();
+  void testBuildFirstOrderLinearR2();
+  void testBuildFirstOrderLinearR3();
+  void testBuildFirstOrderLinearR4();
+  void testBuildFirstOrderLinearR5();
+  void testSetC();
+  void testSetCPtr();
+  void testSetD();
+  void testSetDPtr();
+  void testSetF();
+  void testSetFPtr();
+  void testSetE();
+  void testSetEPtr();
+  void testSetB();
+  void testSetBPtr();
   void End();
 
   // Members

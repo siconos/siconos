@@ -186,7 +186,7 @@ void LagrangianScleronomousR::computeGFree(double, unsigned int)
 
   if (isPlugged["G0"])
   {
-    unsigned int sizeY = interaction->getInteractionSize();
+    unsigned int sizeY = interaction->getSizeOfY();
     unsigned int sizeQ = interaction->getSizeOfDS();
 
     // Warning: temporary method to have contiguous values in memory, copy of block to simple.

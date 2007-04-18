@@ -38,7 +38,7 @@ void FirstOrderLinearTIRTest::setUp()
   // parse xml file:
   xmlDocPtr doc;
   xmlNodePtr cur;
-  doc = xmlParseFile("linearTIR_test.xml");
+  doc = xmlParseFile("firstOrderLinearTIR_test.xml");
   if (doc == NULL)
     XMLException::selfThrow("Document not parsed successfully");
   cur = xmlDocGetRootElement(doc);
@@ -66,7 +66,7 @@ void FirstOrderLinearTIRTest::setUp()
   nodetmp = SiconosDOMTreeTools::findNodeChild(nodetmp, "Interaction_Content");
   // get relation
   node1 = SiconosDOMTreeTools::findNodeChild(nodetmp, "FirstOrderLinearTimeInvariantRelation");
-  tmpxml1 = new FirstOrderLinearTIRXML(node1);
+  tmpxml1 = new FirstOrderLinearRXML(node1);
 }
 
 void FirstOrderLinearTIRTest::tearDown()
@@ -126,133 +126,6 @@ void FirstOrderLinearTIRTest::testBuildFirstOrderLinearTIR2()
   CPPUNIT_ASSERT_EQUAL_MESSAGE("testBuildFirstOrderLinearTIR2g : ", ltir->getSubType() == "LinearTIR", true);
   delete ltir;
   cout << "--> Constructor 2 test ended with success." << endl;
-}
-
-// set C
-void FirstOrderLinearTIRTest::testSetC()
-{
-  cout << "--> Test: setC." << endl;
-  SiconosMatrix * tmp = new SimpleMatrix(*C);
-  tmp->zero();
-  FirstOrderLinearTIR * ltir = new FirstOrderLinearTIR(*tmp, *B);
-  ltir->setC(*C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetC : ", ltir->getC() == *C, true);
-  delete ltir;
-  delete tmp;
-  cout << "--> setC test ended with success." << endl;
-}
-
-// setCPtr
-void FirstOrderLinearTIRTest::testSetCPtr()
-{
-  cout << "--> Test: setCPtr." << endl;
-  SiconosMatrix * tmp = new SimpleMatrix(*C);
-  tmp->zero();
-  FirstOrderLinearTIR * ltir = new FirstOrderLinearTIR(*tmp, *B);
-  ltir->setCPtr(C);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", ltir->getC() == *C, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetCPtr : ", ltir->getCPtr() == C, true);
-  delete ltir;
-  delete tmp;
-  cout << "--> setCPtr test ended with success." << endl;
-}
-
-// set D
-void FirstOrderLinearTIRTest::testSetD()
-{
-  cout << "--> Test: setD." << endl;
-  FirstOrderLinearTIR * ltir = new FirstOrderLinearTIR(*C, *B);
-  ltir->setD(*D);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetD: ", ltir->getD() == *D, true);
-  delete ltir;
-  cout << "--> setD test ended with success." << endl;
-}
-
-// setDPtr
-void FirstOrderLinearTIRTest::testSetDPtr()
-{
-  cout << "--> Test: setDPtr." << endl;
-  FirstOrderLinearTIR * ltir = new FirstOrderLinearTIR(*C, *B);
-  ltir->setDPtr(D);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr : ", ltir->getD() == *D, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetDPtr: ", ltir->getDPtr() == D, true);
-  delete ltir;
-  cout << "--> setDPtr test ended with success." << endl;
-}
-
-// set F
-void FirstOrderLinearTIRTest::testSetF()
-{
-  cout << "--> Test: setF." << endl;
-  FirstOrderLinearTIR * ltir = new FirstOrderLinearTIR(*C, *B);
-  ltir->setF(*F);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetF: ", ltir->getF() == *F, true);
-  delete ltir;
-  cout << "--> setF test ended with success." << endl;
-}
-
-// setFPtr
-void FirstOrderLinearTIRTest::testSetFPtr()
-{
-  cout << "--> Test: setFPtr." << endl;
-  FirstOrderLinearTIR * ltir = new FirstOrderLinearTIR(*C, *B);
-  ltir->setFPtr(F);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetFPtr : ", ltir->getF() == *F, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetFPtr: ", ltir->getFPtr() == F, true);
-  delete ltir;
-  cout << "--> setFPtr test ended with success." << endl;
-}
-
-// set E
-void FirstOrderLinearTIRTest::testSetE()
-{
-  cout << "--> Test: setE." << endl;
-  FirstOrderLinearTIR * ltir = new FirstOrderLinearTIR(*C, *B);
-  ltir->setE(*e);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetE: ", ltir->getE() == *e, true);
-  delete ltir;
-  cout << "--> setE test ended with success." << endl;
-}
-
-// setEPtr
-void FirstOrderLinearTIRTest::testSetEPtr()
-{
-  cout << "--> Test: setEPtr." << endl;
-  FirstOrderLinearTIR * ltir = new FirstOrderLinearTIR(*C, *B);
-  ltir->setEPtr(e);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetEPtr : ", ltir->getE() == *e, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetEPtr: ", ltir->getEPtr() == e, true);
-  delete ltir;
-  cout << "--> setEPtr test ended with success." << endl;
-}
-
-// set B
-void FirstOrderLinearTIRTest::testSetB()
-{
-  cout << "--> Test: setB." << endl;
-  SiconosMatrix * tmp = new SimpleMatrix(*B);
-  tmp->zero();
-  FirstOrderLinearTIR * ltir = new FirstOrderLinearTIR(*C, *tmp);
-  ltir->setB(*B);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetB: ", ltir->getB() == *B, true);
-  delete ltir;
-  delete tmp;
-  cout << "--> setB test ended with success." << endl;
-}
-
-// setBPtr
-void FirstOrderLinearTIRTest::testSetBPtr()
-{
-  cout << "--> Test: setBPtr." << endl;
-  SiconosMatrix * tmp = new SimpleMatrix(*B);
-  tmp->zero();
-  FirstOrderLinearTIR * ltir = new FirstOrderLinearTIR(*C, *tmp);
-  ltir->setBPtr(B);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBPtr : ", ltir->getB() == *B, true);
-  CPPUNIT_ASSERT_EQUAL_MESSAGE("testSetBPtr: ", ltir->getBPtr() == B, true);
-  delete ltir;
-  delete tmp;
-  cout << "--> setBPtr test ended with success." << endl;
 }
 
 void FirstOrderLinearTIRTest::End()

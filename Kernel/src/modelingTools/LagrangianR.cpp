@@ -53,8 +53,6 @@ void LagrangianR::readGInXML(LagrangianRXML * LRxml, unsigned int i)
 
 LagrangianR::~LagrangianR()
 {
-  VectorOfMatricesIterator it;
-
   string name;
   for (unsigned int i = 0; i < G.size(); ++i)
   {
@@ -107,7 +105,7 @@ void LagrangianR::initialize()
 
 void LagrangianR::initComponents()
 {
-  unsigned int sizeY = interaction->getInteractionSize();
+  unsigned int sizeY = interaction->getSizeOfY();
   unsigned int sizeQ = interaction->getSizeOfDS();
 
   if (G[0] == NULL)

@@ -36,18 +36,36 @@ FirstOrderLinearTIR::FirstOrderLinearTIR(RelationXML* relxml):
 
 // Minimum data (C, B) constructor
 FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newB):
-  FirstOrderLinearR(newC, newB)
+  FirstOrderLinearR()
 {
   subType = "LinearTIR";
+  C = new SimpleMatrix(newC);
+  isAllocatedIn["C"] = true;
+
+  B = new SimpleMatrix(newB);
+  isAllocatedIn["B"] = true;
 }
 
 // Constructor from a complete set of data
 FirstOrderLinearTIR::FirstOrderLinearTIR(const SiconosMatrix& newC, const SiconosMatrix& newD,
-    const SiconosMatrix& newF, const SimpleVector& newE,
-    const SiconosMatrix& newB):
-  FirstOrderLinearR(newC, newD, newF, newE, newB)
+    const SiconosMatrix& newF, const SimpleVector& newE, const SiconosMatrix& newB): FirstOrderLinearR()
 {
   subType = "LinearTIR";
+  C = new SimpleMatrix(newC);
+  isAllocatedIn["C"] = true;
+
+  D = new SimpleMatrix(newD);
+  isAllocatedIn["D"] = true;
+
+  F = new SimpleMatrix(newF);
+  isAllocatedIn["F"] = true;
+
+  e = new SimpleVector(newE);
+  isAllocatedIn["e"] = true;
+
+  B = new SimpleMatrix(newB);
+  isAllocatedIn["B"] = true;
+  initPluginFlags(false);
 }
 
 // Minimum data (C, B as pointers) constructor

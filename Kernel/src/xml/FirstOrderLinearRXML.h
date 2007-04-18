@@ -95,27 +95,27 @@ public:
   /** Return true if C is calculated from a plugin */
   inline bool isCPlugin() const
   {
-    return xmlHasProp(CNode, (xmlChar *) MATRIXPLUGIN.c_str());
+    return xmlHasProp(CNode, (xmlChar *)"matrixPlugin");
   }
   /** Return true if C is calculated from a plugin */
   inline bool isDPlugin() const
   {
-    return xmlHasProp(DNode, (xmlChar *) MATRIXPLUGIN.c_str());
+    return xmlHasProp(DNode, (xmlChar *)"matrixPlugin");
   }
   /** Return true if C is calculated from a plugin */
   inline bool isFPlugin() const
   {
-    return xmlHasProp(FNode, (xmlChar *) MATRIXPLUGIN.c_str());
+    return xmlHasProp(FNode, (xmlChar *)"matrixPlugin");
   }
   /** Return true if e is calculated from a plugin */
   inline bool isEPlugin() const
   {
-    return xmlHasProp(eNode, (xmlChar *) VECTORPLUGIN.c_str());
+    return xmlHasProp(eNode, (xmlChar *)"vectorPlugin");
   }
   /** Return true if C is calculated from a plugin */
   inline bool isBPlugin() const
   {
-    return xmlHasProp(BNode, (xmlChar *) MATRIXPLUGIN.c_str());
+    return xmlHasProp(BNode, (xmlChar *)"matrixPlugin");
   }
 
   /** Return matrix C
@@ -200,7 +200,7 @@ public:
   {
     if (!isCPlugin())
       XMLException::selfThrow("FirstOrderLinearRXML - getCPlugin : C is not loaded from a plugin");
-    return  SiconosDOMTreeTools::getStringAttributeValue(CNode, MATRIXPLUGIN);
+    return  SiconosDOMTreeTools::getStringAttributeValue(CNode, "matrixPlugin");
   }
 
   /** return the name of the plug-in used for D
@@ -210,7 +210,7 @@ public:
   {
     if (!isDPlugin())
       XMLException::selfThrow("FirstOrderLinearRXML - getDPlugin : D is not loaded from a plugin");
-    return  SiconosDOMTreeTools::getStringAttributeValue(DNode, MATRIXPLUGIN);
+    return  SiconosDOMTreeTools::getStringAttributeValue(DNode, "matrixPlugin");
   }
 
   /** return the name of the plug-in used for F
@@ -220,7 +220,7 @@ public:
   {
     if (!isFPlugin())
       XMLException::selfThrow("FirstOrderLinearRXML - getFPlugin : F is not loaded from a plugin");
-    return  SiconosDOMTreeTools::getStringAttributeValue(FNode, MATRIXPLUGIN);
+    return  SiconosDOMTreeTools::getStringAttributeValue(FNode, "matrixPlugin");
   }
 
   /** return the name of the plug-in used for e
@@ -230,7 +230,7 @@ public:
   {
     if (!isEPlugin())
       XMLException::selfThrow("FirstOrderLinearRXML - getEPlugin : e is not loaded from a plugin.");
-    return  SiconosDOMTreeTools::getStringAttributeValue(eNode, VECTORPLUGIN);
+    return  SiconosDOMTreeTools::getStringAttributeValue(eNode, "vectorPlugin");
   }
 
   /** return the name of the plug-in used for B
@@ -240,7 +240,7 @@ public:
   {
     if (!isBPlugin())
       XMLException::selfThrow("FirstOrderLinearRXML - getBPlugin : B is not loaded from a plugin");
-    return  SiconosDOMTreeTools::getStringAttributeValue(BNode, MATRIXPLUGIN);
+    return  SiconosDOMTreeTools::getStringAttributeValue(BNode, "matrixPlugin");
   }
 
   /** to save the plug-in for C.

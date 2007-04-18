@@ -24,7 +24,7 @@
 
 #include "LagrangianR.h"
 
-/** Lagrangian Non Linear Scleronomous and Holonomous Relation.
+/** Lagrangian (Non Linear) Relations, Scleronomous and Holonomic.
  *
  * \author SICONOS Development Team - copyright INRIA
  *  \version 2.0.1.

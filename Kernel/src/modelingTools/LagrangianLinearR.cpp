@@ -138,7 +138,7 @@ LagrangianLinearR::~LagrangianLinearR()
 
 void LagrangianLinearR::initComponents()
 {
-  unsigned int sizeY = interaction->getInteractionSize();
+  unsigned int sizeY = interaction->getSizeOfY();
   unsigned int sizeDS = interaction->getSizeOfDS();
 
   if (H->size(1) != sizeDS || H->size(0) != sizeY)

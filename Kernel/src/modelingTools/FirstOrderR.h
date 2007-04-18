@@ -44,6 +44,7 @@ typedef void (*InPtr)(unsigned int, const double*, double, unsigned int, double*
  * \f}
  *  X, Z, R corresponds to DynamicalSystem variables.
  *  If DS1 and DS2 are involved in the linked Interaction, then X =[x1 x2], Z=[z1 z2] ...
+ *
  *  \f$ y \ and \ \lambda \f$ are specific variables of the interaction (see this class for more details).
  *  h and g are plugged on external functions, via plug-in mechanism (see SiconosSharedLibrary).
  *
@@ -51,11 +52,11 @@ typedef void (*InPtr)(unsigned int, const double*, double, unsigned int, double*
  *
  * g <=> input
  *
- * Operator (and its corresponding plug-in):
+ * Operators (and their corresponding plug-in):
      - h: saved in Interaction as y (plug-in: output[0])
      - \f$ \nabla_x h \f$: jacobianH[0] ( output[1] )
      - \f$ \nabla_\lambda h \f$: jacobianH[1] ( output[2] )
-     - g: saved in DS as R ( input[0])
+     - g: saved in DS as r ( input[0])
      - \f$ \nabla_\lambda g \f$: jacobianG[0] ( input[1] )
 
 
@@ -115,6 +116,10 @@ protected:
    *  \param a string that gives the type of the relation (optional)
    */
   FirstOrderR(const std::string& = "R");
+
+  /** To initialize data member: links to DS variables.
+   */
+  void initDSLinks();
 
 public:
 

@@ -127,7 +127,7 @@ bool DiodeBridge()
     Moreau* OSI_RLCD = new Moreau(LSDiodeBridge, theta, StratDiodeBridge);
 
     // One Step non smooth problem
-    LCP* LCP_RLCD = new LCP(StratDiodeBridge, "LCP", solverName, 101, 0.0001, "max", 0.6);
+    LCP* LCP_RLCD = new LCP(StratDiodeBridge, "LCP", solverName, 101, 0.0001);
 
     // Initialization
     StratDiodeBridge->initialize();

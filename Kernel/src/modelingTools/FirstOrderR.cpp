@@ -40,13 +40,15 @@ void FirstOrderR::initPluginFlags(bool in)
   isPlugged["jacobianG0"] = in ;
 }
 
-// Default constructor
+// Default constructor (protected)
 FirstOrderR::FirstOrderR(const string& newType): Relation("FirstOrder", newType), firstOrderType(newType)
 {
   initAllocationFlags(false);
   initPluginFlags(false);
   jacobianH.resize(2, NULL);
   jacobianG.resize(1, NULL);
+  input.resize(3, NULL);
+  output.resize(3, NULL);
 }
 
 // xml constructor
@@ -57,6 +59,8 @@ FirstOrderR::FirstOrderR(RelationXML* relxml, const string& newType):
 
   initAllocationFlags(false);
   initPluginFlags(false);
+  input.resize(3, NULL);
+  output.resize(3, NULL);
   // Gradients
   jacobianH.resize(2, NULL);
   jacobianG.resize(1, NULL);
@@ -90,7 +94,7 @@ FirstOrderR::FirstOrderR(RelationXML* relxml, const string& newType):
     if (!FORxml->hasJacobianH())
       RuntimeException::selfThrow("FirstOrderR xml constructor failed. No input for gradients of h function.");
     string name;
-    for (unsigned int i = 0; i < jacobianG.size(); ++i)
+    for (unsigned int i = 0; i < jacobianH.size(); ++i)
     {
       name = "jacobianH" + toString<unsigned int>(i);
       if (FORxml->isJacobianHPlugin(i))
@@ -114,10 +118,8 @@ FirstOrderR::FirstOrderR(const string& computeOut, const string& computeIn):
   input.resize(3, NULL);
   output.resize(3, NULL);
   // Connect input and output to plug-in
-  pluginNames["h"] = computeOut;
-  setComputeHFunction(cShared.getPluginName(pluginNames["h"]), cShared.getPluginFunctionName(pluginNames["h"]));
-  pluginNames["g"] = computeIn;
-  setComputeGFunction(cShared.getPluginName(pluginNames["g"]), cShared.getPluginFunctionName(pluginNames["g"]));
+  setComputeHFunction(cShared.getPluginName(computeOut), cShared.getPluginFunctionName(computeOut));
+  setComputeGFunction(cShared.getPluginName(computeIn), cShared.getPluginFunctionName(computeIn));
 
   // Nothing for the jacobians => a set is required. Add a constructor?
 }
@@ -126,14 +128,24 @@ FirstOrderR::~FirstOrderR()
 {
   input.clear();
   output.clear();
+  string name;
+  for (unsigned int i = 0; i < jacobianH.size(); ++i)
+  {
+    name = "jacobianH" + toString<unsigned int>(i);
+    if (isAllocatedIn[name]) delete jacobianH[i];
+  }
+  jacobianH.clear();
+  for (unsigned int i = 0; i < jacobianG.size(); ++i)
+  {
+    name = "jacobianG" + toString<unsigned int>(i);
+    if (isAllocatedIn[name]) delete jacobianG[i];
+  }
+  jacobianG.clear();
+
 }
 
-void FirstOrderR::initialize()
+void FirstOrderR::initDSLinks()
 {
-  // Check if an Interaction is connected to the Relation.
-  if (interaction == NULL)
-    RuntimeException::selfThrow("FirstOrderR::initialize failed. No Interaction linked to the present relation.");
-
   // Get the DS concerned by the interaction of this relation
   DSIterator it;
   data["x"] = new BlockVector(); // displacements
@@ -151,7 +163,38 @@ void FirstOrderR::initialize()
     data["z"]->addPtr(ds->getZPtr());
     data["r"]->addPtr(ds->getRPtr());
   }
+}
 
+void FirstOrderR::initialize()
+{
+  // Check if an Interaction is connected to the Relation.
+  if (interaction == NULL)
+    RuntimeException::selfThrow("FirstOrderR::initialize failed. No Interaction linked to the present relation.");
+
+  // Check and allocate (if necessary) jacobianH and G. Can not be done in constructors interaction is not known.
+  string name;
+  for (unsigned int index = 0; index < jacobianH.size(); ++index)
+  {
+    name = "jacobianH" + toString<unsigned int>(index);
+    if (jacobianH[index] == NULL)
+    {
+      jacobianH[index] = new SimpleMatrix(interaction->getSizeOfY(), interaction->getSizeOfDS());
+      isAllocatedIn[name] = true;
+    }
+  }
+
+  for (unsigned int index = 0; index < jacobianG.size(); ++index)
+  {
+    name = "jacobianH" + toString<unsigned int>(index);
+    if (jacobianG[index] == NULL)
+    {
+      jacobianG[index] = new SimpleMatrix(interaction->getSizeOfDS(), interaction->getSizeOfY());
+      isAllocatedIn[name] = true;
+    }
+  }
+
+  // Update data member (links to DS variables)
+  initDSLinks();
 }
 
 void FirstOrderR::setJacobianHVector(const VectorOfMatrices& newVector)
@@ -278,10 +321,10 @@ void FirstOrderR::setComputeHFunction(const string& pluginPath, const string& fu
 
 void FirstOrderR::setComputeJacobianHFunction(const string& pluginPath, const string& functionName, unsigned int index)
 {
+  string name = "jacobianH" + toString<unsigned int>(index);
   // Warning: output[0] corresponds to h, thus use output[index+1]
   cShared.setFunction(&(output[index + 1]), pluginPath, functionName);
   string plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  string name = "jacobianH" + toString<unsigned int>(index);
   pluginNames[name] = plugin + ":" + functionName;
   isPlugged[name] = true;
 }
@@ -296,9 +339,9 @@ void FirstOrderR::setComputeGFunction(const string& pluginPath, const string& fu
 
 void FirstOrderR::setComputeJacobianGFunction(const string& pluginPath, const string& functionName, unsigned int index)
 {
+  string name = "jacobianG" + toString<unsigned int>(index);
   cShared.setFunction(&(input[index + 1]), pluginPath, functionName);
   string plugin = pluginPath.substr(0, pluginPath.length() - 3);
-  string name = "jacobianG" + toString<unsigned int>(index);
   pluginNames[name] = plugin + ":" + functionName;
   isPlugged[name] = true;
 }

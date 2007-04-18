@@ -58,12 +58,17 @@ FirstOrderRXML::FirstOrderRXML(xmlNodePtr relationNode): RelationXML(relationNod
       XMLException::selfThrow("FirstOrderRXML:: constructor failed. Some Gradients plug-in names are required (jacobianH).");
     jacobianHNode.resize(size, NULL);
     // get corresponding nodes
-    for (unsigned int i = 0; i < size; i++)
+    jacobianHNode[0] = SiconosDOMTreeTools::findNodeChild(node, "matrix")  ;
+    if (jacobianHNode[0] == NULL)
+      XMLException::selfThrow("FirstOrderRXML:: constructor, jacobianH0 is missing");
+
+    for (unsigned int i = 1; i < size; i++)
     {
       jacobianHNode[i] =  SiconosDOMTreeTools::findFollowNode(jacobianHNode[i - 1]);
       if (jacobianHNode[i] == NULL)
-        XMLException::selfThrow("FirstOrderRXML:: constructor, another G is required");
+        XMLException::selfThrow("FirstOrderRXML:: constructor, another gradient of H is required");
     }
+
   }
 }
 

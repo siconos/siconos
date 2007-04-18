@@ -30,7 +30,7 @@ const bool Topology::addInteractionInIndexSet(Interaction * inter)
 
   // get number of relations in the interaction. This corresponds to inter->getNumberOfRelations but since Interaction has not
   // been initialized yet, this value is not set and we need to get interaction size and nsLaw size.
-  unsigned int m = inter->getInteractionSize() / inter->getNonSmoothLawPtr()->getNsLawSize() ;
+  unsigned int m = inter->getSizeOfY() / inter->getNonSmoothLawPtr()->getNsLawSize() ;
   unsigned int nsLawSize = inter->getNonSmoothLawPtr()->getNsLawSize();
   unsigned int pos = 0; // relative position of the relation in the y vector of the Interaction
   CheckInsertUnitaryRelation checkUR;

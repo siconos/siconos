@@ -16,8 +16,8 @@
  *
  * Contact: Vincent ACARY vincent.acary@inrialpes.fr
 */
-#ifndef __FirstOrderRelationTest__
-#define __FirstOrderRelationTest__
+#ifndef __FirstOrderRTest__
+#define __FirstOrderRTest__
 
 #include <cppunit/extensions/HelperMacros.h>
 #include "FirstOrderRXML.h"
@@ -25,26 +25,26 @@
 #include "NonSmoothDynamicalSystemXML.h"
 #include "FirstOrderR.h"
 
-class FirstOrderRelationTest : public CppUnit::TestFixture
+class FirstOrderRTest : public CppUnit::TestFixture
 {
 
 private:
 
   // Name of the tests suite
-  CPPUNIT_TEST_SUITE(FirstOrderRelationTest);
+  CPPUNIT_TEST_SUITE(FirstOrderRTest);
 
   // tests to be done ...
 
-  CPPUNIT_TEST(testBuildFirstOrderRelation1);
-  CPPUNIT_TEST(testBuildFirstOrderRelation2);
+  CPPUNIT_TEST(testBuildFirstOrderR1);
+  CPPUNIT_TEST(testBuildFirstOrderR2);
   CPPUNIT_TEST(End);
 
   CPPUNIT_TEST_SUITE_END();
 
   // \todo exception test
 
-  void testBuildFirstOrderRelation1();
-  void testBuildFirstOrderRelation2();
+  void testBuildFirstOrderR1();
+  void testBuildFirstOrderR2();
   void End();
 
   // Members
